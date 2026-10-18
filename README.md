@@ -3,6 +3,7 @@
 ## iPhone-Test und Qualitätssicherung
 
 Die Anleitung für den mobilen Browser-Prototyp, Spielstände, Performance-Messungen und CI steht in [MOBIL-TEST.md](MOBIL-TEST.md).
+Lokaler iPhone-Test nach `cd render && npm ci` mit `npm run iphone` (WLAN-Vorschau, kein öffentliches Deployment).
 GitHub Actions prüft TypeScript, Engine-Tests, Browser-Build und den mobilen Chromium-Smoke-Test.
 Ein echter iPhone-Safari-Test und ein nativer iOS-Build stehen weiterhin aus.
 
