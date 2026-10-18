@@ -17,6 +17,7 @@
   .marke small { color: var(--leise); font-size: 11px; }
   .datum { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; text-align: right; flex: none; }
   .datum b { display: block; font-size: 14px; }
+  #stufe { display: block; color: var(--leise); font-size: 11px; }
   #phase { color: var(--rot); font-size: 11px; font-weight: 700; }
   #cockpit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: auto; }
   .kz { background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 6px 9px; min-width: 0; }
@@ -253,10 +254,11 @@
   .startintro { font-size: 13.5px; line-height: 1.45; color: #34414b; margin: 12px 2px 6px; }
   .startkarte .vtitel { margin: 12px 2px 6px; }
   .startkarte .ort.gross { margin-top: 0; }
-  .stufen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
-  .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 8px; min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; color: var(--text); }
+  .stufen { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 12px; min-height: 64px; display: grid; grid-template-columns: 74px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; color: var(--text); }
+  .stufe-karte .sterne-stufe { grid-row: 1; } .stufe-karte b { grid-row: 2; grid-column: 1; } .stufe-karte small { grid-row: 1 / span 2; grid-column: 2; }
   .stufe-karte b { font-size: 15px; } .stufe-karte small { font-size: 11px; color: var(--leise); line-height: 1.35; }
-  .stufe-karte.an { border: 2px solid var(--rot); padding: 9px 7px; background: #fff8f6; }
+  .stufe-karte.an { border: 2px solid var(--rot); padding: 9px 11px; background: #fff8f6; }
   .sterne-stufe { color: var(--rot); font-size: 11px; letter-spacing: 2px; }
   .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 11px; color: var(--leise); }
   .startseed input { width: 64px; font: inherit; font-size: 12px; border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
@@ -267,7 +269,7 @@
 <div class="oben">
   <div class="leiste">
     <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
-    <div class="datum"><b id="kw">KW 1</b><span id="phase"></span></div>
+    <div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
 </div>

@@ -425,7 +425,7 @@ async function buendeln() {
     await pruef('produkte', 'Neues Produkt');
     await oben();
     await bild('produkt-entwickeln.png');
-    await zu('.karte.steuerung');
+    await zu('.karte.vorschau');
     await bild('produkt-entwickeln-vorschau.png');
     const entwurf = await ev(() => ({ ...window.spiel.produkte.ui.neu, marke: window.spiel.produkte.ui.marke }));
     const vors = await ev((e) => window.spiel.E.produktVorschau(window.spiel.s, e), entwurf);
@@ -486,8 +486,8 @@ async function buendeln() {
     await q.selectOption('#startstadt', 'Karlsruhe');
     await q.tap('#startknopf');
     await q.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
-    const r = await q.evaluate(() => ({ ui: window.spiel.schwierigkeit, engine: window.spiel.s.schwierigkeit, stadt: document.getElementById('stadtname').textContent, cash: window.spiel.s.cash, unter: document.getElementById('markeunter').textContent, mittel: window.spiel.E.neuesSpiel(1, { schwierigkeit: 'mittel' }).cash }));
-    soll('Start schwer in Karlsruhe', r.ui === 'schwer' && (r.engine === undefined || r.engine === 'schwer') && r.stadt === 'Karlsruhe' && r.cash !== r.mittel, `${r.unter}, Engine ${r.engine}, Cash ${r.cash} statt ${r.mittel} bei mittel`);
+    const r = await q.evaluate(() => ({ ui: window.spiel.schwierigkeit, engine: window.spiel.s.schwierigkeit, stadt: document.getElementById('stadtname').textContent, cash: window.spiel.s.cash, unter: document.getElementById('stufe').textContent, mittel: window.spiel.E.neuesSpiel(1, { schwierigkeit: 'mittel' }).cash }));
+    soll('Start schwer in Karlsruhe', r.ui === 'schwer' && (r.engine === undefined || r.engine === 'schwer') && r.stadt === 'Karlsruhe' && r.cash !== r.mittel, `Anzeige ${r.unter}, Engine ${r.engine}, Cash ${r.cash} statt ${r.mittel} bei mittel`);
     await q.close();
     return erg;
   }

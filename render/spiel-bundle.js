@@ -36,6 +36,8 @@
     PRODUKT_PARAM: () => PRODUKT_PARAM,
     RESSORTS: () => RESSORTS,
     RESSORT_INFO: () => RESSORT_INFO,
+    SCHWIERIGKEIT: () => SCHWIERIGKEIT,
+    SCHWIERIGKEITEN: () => SCHWIERIGKEITEN,
     STANDARD_SZENARIO: () => STANDARD_SZENARIO,
     STARTKALENDER: () => STARTKALENDER,
     TREND_GRUPPEN: () => TREND_GRUPPEN,
@@ -78,6 +80,7 @@
     registriereDelegation: () => registriereDelegation,
     saisonId: () => saisonId,
     saisonName: () => saisonName,
+    schwierigkeit: () => schwierigkeit,
     segmentText: () => segmentText,
     sollFte: () => sollFte,
     trendFuer: () => trendFuer,
@@ -527,6 +530,45 @@
     return Math.sqrt(dx * dx + dy * dy) / 100;
   }
 
+  // ../engine/src/schwierigkeit.ts
+  var SCHWIERIGKEIT = {
+    leicht: {
+      name: "Leicht",
+      beschreibung: "Mehr Kasse und Kreditlinie, geduldige Lieferanten und Kreditversicherer, seltener Pech, Schlie\xDFungswellen kosten wenig Image.",
+      imageDaempfung: 0.9,
+      startCash: 1.15,
+      kreditlinie: 1.15,
+      lieferantenGeduld: 0.1,
+      kvZiel: 4,
+      ereignisse: 0.6,
+      versammlungSchwelle: -35e6
+    },
+    mittel: {
+      name: "Mittel",
+      beschreibung: "Die \xFCbliche Lage einer Warenhauskette in der Krise.",
+      imageDaempfung: 0.955,
+      startCash: 1,
+      kreditlinie: 1,
+      lieferantenGeduld: 0,
+      kvZiel: 0,
+      ereignisse: 1,
+      versammlungSchwelle: -25e6
+    },
+    schwer: {
+      name: "Schwer",
+      beschreibung: "Knappe Kasse, nerv\xF6se Lieferanten und Kreditversicherer, mehr Pech, jede Schlie\xDFung kostet voll Image, strenge Gl\xE4ubiger.",
+      imageDaempfung: 1,
+      startCash: 0.9,
+      kreditlinie: 0.9,
+      lieferantenGeduld: -0.1,
+      kvZiel: -4,
+      ereignisse: 1.4,
+      versammlungSchwelle: -15e6
+    }
+  };
+  var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
+  var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
+
   // ../engine/src/stakeholder.ts
   function freieLiquiditaet(s2) {
     return s2.cash + s2.kreditlinie;
@@ -554,7 +596,7 @@
     const inso = s2.phase === "insolvenz";
     const beraterBonus = s2.berater.filter((b) => b.ende > s2.woche - 26).length > 0 ? 6 : 0;
     const reporting = (hqControllingExzellenz(s2) ? 3 : 0) - hqVerwaltungMalus(s2);
-    const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0);
+    const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0) + schwierigkeit(s2).kvZiel;
     st.kreditversicherer = annaehern(st.kreditversicherer, kvZiel, 0.05);
     const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting;
     st.bank = annaehern(st.bank, bankZiel, 0.03);
@@ -7197,9 +7239,10 @@
       firma: { name: sz.firma, sportName: sz.sportName },
       phase: "regulaer",
       insolvenzenGesamt: 0,
-      cash: sz.startCash,
-      kreditlinie: sz.kreditlinie,
-      kreditlinieBasis: sz.kreditlinie,
+      schwierigkeit: sz.schwierigkeit ?? "mittel",
+      cash: Math.round(sz.startCash * SCHWIERIGKEIT[sz.schwierigkeit ?? "mittel"].startCash),
+      kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? "mittel"].kreditlinie),
+      kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? "mittel"].kreditlinie),
       haeuser,
       bestand,
       bestellungen: [],
@@ -7207,7 +7250,7 @@
       orderLevel: Object.fromEntries(Object.keys(basisUmsatz).map((g) => [g, 1])),
       basisUmsatz,
       vorkasseAkzeptieren: true,
-      lieferanten: LIEFERANTEN.map((l) => ({ ...l, gruppen: { ...l.gruppen }, aktiv: true, verspaetungen: 0 })),
+      lieferanten: LIEFERANTEN.map((l) => ({ ...l, geduld: clamp(l.geduld + SCHWIERIGKEIT[sz.schwierigkeit ?? "mittel"].lieferantenGeduld, 0, 1), gruppen: { ...l.gruppen }, aktiv: true, verspaetungen: 0 })),
       restLieferantenVertrauen: 55,
       stakeholder: { bank: 50, kreditversicherer: 58, vermieter: 50, betriebsrat: 50, image: 45, eigentuemer: 50 },
       kvLimitBasis: PARAM.kvLimitBasis,
@@ -7472,7 +7515,7 @@
     const sw = SCHLIESSUNGEN_WOCHE.get(s2);
     const k = sw && sw.woche === w ? sw.n : 0;
     SCHLIESSUNGEN_WOCHE.set(s2, { woche: w, n: k + 1 });
-    st.image = clamp(st.image - 1.5 * Math.pow(0.9, k), 0, 100);
+    st.image = clamp(st.image - 1.5 * Math.pow(schwierigkeit(s2).imageDaempfung, k), 0, 100);
     st.vermieter = clamp(st.vermieter - (h.miete.vermieter === "dritt" ? 2 : 0), 0, 100);
     if (h.lage === "1a" && h.format === "warenhaus") {
       const arvel = s2.lieferanten.find((l) => l.id === "arvel");
@@ -7576,7 +7619,7 @@
       planEbitda = 0;
       for (let i = 0; i < 52 && klon.phase === "regulaer"; i++) planEbitda += planWoche(klon);
     }
-    const planBonus = planEbitda > 0 ? 15 : planEbitda > -25e6 ? 5 : -10;
+    const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s2).versammlungSchwelle ? 5 : -10;
     const quoteBonus = 60 * (ins.quote - 0.1);
     const zahlung = ins.quote * ins.altVerbindlichkeiten;
     const st = s2.stakeholder;
@@ -7859,13 +7902,13 @@
   function lieferantenEreignisse(s2) {
     for (const l of s2.lieferanten) {
       if (!l.aktiv) continue;
-      if (l.id === "hallberg" && (l.verspaetungen > 1.5 || s2.phase === "insolvenz") && chance(s2, l.fragilitaet)) {
+      if (l.id === "hallberg" && (l.verspaetungen > 1.5 || s2.phase === "insolvenz") && chance(s2, l.fragilitaet * schwierigkeit(s2).ereignisse)) {
         l.aktiv = false;
         l.ausfallBis = s2.woche + 12;
         melde(s2, "presse", "Hallberg & S\xF6hne meldet Insolvenz an. \u201EEin gro\xDFer Kunde hat uns mitgerissen.\u201C");
         melde(s2, "warnung", "Herrenware von Hallberg f\xE4llt f\xFCr rund 12 Wochen aus, danach \xFCbernehmen andere Lieferanten.");
       }
-      if (l.id === "nordline" && !l.dtc && chance(s2, 3e-3)) {
+      if (l.id === "nordline" && !l.dtc && chance(s2, 3e-3 * schwierigkeit(s2).ereignisse)) {
         neueEntscheidung(s2, {
           typ: "nordline_dtc",
           frist: s2.woche + 4,
@@ -7876,7 +7919,7 @@
           daten: {}
         });
       }
-      if (l.id === "goldenthread" && chance(s2, 6e-3)) {
+      if (l.id === "goldenthread" && chance(s2, 6e-3 * schwierigkeit(s2).ereignisse)) {
         let verschoben = 0;
         const neu = [];
         for (const b of s2.bestellungen) {
@@ -7913,7 +7956,7 @@
       s2.makro.schockBis = void 0;
       s2.makro.schockStaerke = 0;
     }
-    if (s2.makro.schockBis === void 0 && chance(s2, 4e-3)) {
+    if (s2.makro.schockBis === void 0 && chance(s2, 4e-3 * schwierigkeit(s2).ereignisse)) {
       s2.makro.schockStaerke = zwischen(s2, 0.04, 0.08);
       s2.makro.schockBis = w + ganzZwischen(s2, 26, 52);
       melde(s2, "presse", waehle(s2, ["Energiepreise explodieren, Konsumklima bricht ein.", "Rezession: Verbraucher halten sich zur\xFCck.", "Zollstreit dr\xFCckt auf die Kauflaune."]));
@@ -7925,7 +7968,7 @@
     if (!s2.angebote.some((a) => a.status === "offen" && a.typ === "sportverkauf") && chance(s2, 6e-3)) sportVerkauf(s2);
     if (chance(s2, 0.02)) sonderposten(s2);
     for (const h of offeneHaeuser(s2)) {
-      if (chance(s2, 8e-4 * (1 + (100 - h.substanz) / 50))) instandhaltung(s2, h);
+      if (chance(s2, 8e-4 * (1 + (100 - h.substanz) / 50) * schwierigkeit(s2).ereignisse)) instandhaltung(s2, h);
       if (h.miete.bisWoche - 26 === w) mietende(s2, h);
       if (h.miete.keineVerlaengerung && h.miete.bisWoche - 10 === w) starteSchliessung(s2, h, { mietvertragEndetMit: true });
       if (h.miete.bisWoche === w && h.status === "offen") {
@@ -7941,7 +7984,7 @@
     lieferantenEreignisse(s2);
     const ausstieg = s2.tarifAusstiegSeit !== void 0 && w - s2.tarifAusstiegSeit < 26;
     const pStreik = (s2.stakeholder.betriebsrat < 25 ? 0.04 : 0) + (ausstieg ? 0.05 : 0);
-    if (pStreik > 0 && chance(s2, kw(w) >= 47 ? pStreik * 2 : pStreik)) {
+    if (pStreik > 0 && chance(s2, (kw(w) >= 47 ? pStreik * 2 : pStreik) * schwierigkeit(s2).ereignisse)) {
       const betroffen = offeneHaeuser(s2).filter(() => zufall(s2) < 0.3);
       const dauer = ganzZwischen(s2, 1, 2);
       for (const h of betroffen) h.streikBis = w + dauer;
@@ -8054,7 +8097,7 @@
 
   // ../engine/src/engine.ts
   function neuesSpiel(seed = 1, szenario = STANDARD_SZENARIO) {
-    return neueWelt(seed, szenario);
+    return neueWelt(seed, { ...STANDARD_SZENARIO, ...szenario });
   }
   var beendet = (s2) => s2.phase === "zerschlagen";
   function quartalsStart(s2) {
@@ -8347,7 +8390,7 @@
   var HQ_AUSBAU = { ...HQ_GUT, einkauf: 3, immobilien: 3 };
   var HQ_KAHLSCHLAG = { ...ALLE(0), verwaltung: 1 };
   if (false) {
-    const s2 = neuesSpiel2(Number(process.argv[2] ?? 1));
+    const s2 = neuesSpiel2(Number(process.argv[2] ?? 1), { schwierigkeit: process.argv.includes("--leicht") ? "leicht" : process.argv.includes("--schwer") ? "schwer" : "mittel" });
     const n = Number(process.argv[3] ?? 260);
     const b = process.argv.includes("--ek-nos") ? botEinkaufNos : process.argv.includes("--ek-em") ? botEinkaufEigenmarken : process.argv.includes("--ek-kahlschlag-frueh") ? (x, l) => botEinkaufKahlschlag(x, l, 3) : process.argv.includes("--ek-kahlschlag") ? botEinkaufKahlschlag : process.argv.includes("--hq") ? botHq : process.argv.includes("--hq-ausbau") ? botHqAusbau : process.argv.includes("--hq-kahlschlag") ? botHqKahlschlag : process.argv.includes("--hq-keine") ? botHqKeine : process.argv.includes("--regulaer") ? botRegulaer : process.argv.includes("--tief") ? botTief : process.argv.includes("--schirm") ? botSchutzschirm : botWoche;
     for (let i = 0; i < n && s2.phase !== "zerschlagen"; i++) {
@@ -88803,6 +88846,7 @@
     k.addEventListener("scroll", () => {
       clearTimeout(t);
       t = setTimeout(() => {
+        if (!k.isConnected) return;
         const i = Math.round(k.scrollLeft / breite());
         if (i !== idx) beiWechsel(i);
       }, 140);
@@ -88864,7 +88908,7 @@
       for (const d of r.delegationen) h += schalter(d.an, `data-a="delegation" data-v="${d.id}"`, esc(d.label), esc(d.beschreibung));
       h += "</div>";
       h += '<div class="karte steuerung"><div class="khead">Verg\xFCtung</div>';
-      h += regler("Jahresgehalt", stepper("gehalt", P2(`p:${id}:gehalt`, geld(p.gehalt)), P2(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? "+" : ""}${r.gehaltProzent} % zur Forderung von ${geld(p.gehaltsforderung)}`, "i")), `Schritt ${geld(r.gehaltsSchritt)}`);
+      h += regler("Jahresgehalt", stepper("gehalt", P2(`p:${id}:gehalt`, geld(p.gehalt)), P2(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p.gehaltsforderung)}`, "i")), `Schritt ${geld(r.gehaltsSchritt)}`);
       const halteAnteil = p.haltebonus > 0 ? Math.round(p.haltebonus / Math.max(1, p.gehalt) * 4) / 4 : 0;
       h += regler("Haltebonus \xFCber 52 Wochen", segment("haltebonus", halteAnteil, HALTE) + `<small class="rfuss">${p.haltebonus > 0 ? `${P2(`p:${id}:haltebonus`, geld(p.haltebonus), "i")} bis ${p.halteBis !== void 0 ? wocheText(st, p.halteBis) : "offen"}, senkt das Abwerberisiko` : "Anteil vom Jahresgehalt, in Raten ausgezahlt"}</small>`, "vom Jahresgehalt");
       h += regler("Erfolgsbonus bei Planerf\xFCllung", segment("erfolgsbonus", Math.round(p.erfolgsbonus * 10) / 10, ERFOLG), "vom Jahresgehalt je Jahr");
@@ -88900,7 +88944,7 @@
       if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
       const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st, L2.ressort, k.id, A.gehalt, hb, A.erfolg);
       h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc(k.name) + "</div>";
-      h += regler("Jahresgehalt", stepper("angebotGehalt", P2("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? "+" : ""}${Math.round((A.gehalt / k.gehaltsforderung - 1) * 100)} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
+      h += regler("Jahresgehalt", stepper("angebotGehalt", P2("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
       h += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb ? geld(hb) : "vom Jahresgehalt");
       h += regler("Erfolgsbonus", segment("angebotErfolg", A.erfolg, ERFOLG), "vom Jahresgehalt");
       h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P2("a:chance", pz3(ch))}</div><div class="balken"><span style="width:${(ch * 100).toFixed(0)}%;background:${ch >= 0.6 ? "var(--gruen)" : ch >= 0.35 ? "#e3a90d" : "var(--rot)"}"></span></div><small class="rfuss">h\xE4ngt von Angebot, Lage der Firma und Image ab</small></div>`;
@@ -88920,6 +88964,7 @@
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       if (ui.seite === "einstellen") karussellBinden("kandidaten", ui.k, (i) => {
+        if (!ui.aktiv) return;
         ui.k = i;
         zeigen(true);
       });
@@ -90144,7 +90189,7 @@
       h += regler("Material", segment("material", e.material, (T?.materialien ?? []).map((m) => [m, m])));
       h += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p) => [p.id, PREISLAGE[p.id] ?? p.id])));
       h += regler("Qualit\xE4t", segment("qualitaet", e.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, "\u2605".repeat(x)])));
-      h += regler("Entwicklungsdauer", segment("dauer", e.dauer, K3.dauer.map((d) => [d, d === 4 ? "4 Wochen" : String(d)])));
+      h += regler("Entwicklungsdauer", segment("dauer", e.dauer, K3.dauer.map((d) => [d, String(d)])), "Wochen");
       h += regler("Budget je Woche", stepper("budget", P2("n:budget", geld(e.budgetWoche))), `Schritt ${geld(K3.budgetSchritt)}`);
       h += "</div>";
       h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}</div><div class="pname">${P2("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc(v.saisonEinfuehrung)}</small></div>`;
@@ -90185,6 +90230,7 @@
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       if (ui.seite === "liste") karussellBinden("produkte", ui.k, (i) => {
+        if (!ui.aktiv) return;
         ui.k = i;
         ui.auslisten = null;
         zeigen(true);
@@ -90977,8 +91023,16 @@
     vb.textContent = v;
     vb.style.display = v ? "" : "none";
   }
-  function neuesSpiel3(seed = 1, stadt = "Essen") {
-    s = neuesSpiel(seed);
+  var SCHWIERIGKEITEN2 = Array.isArray(SCHWIERIGKEITEN) && SCHWIERIGKEITEN.length ? SCHWIERIGKEITEN : [
+    { id: "leicht", name: "Leicht", beschreibung: "Mehr Liquidit\xE4t, geduldige Banken und Lieferanten." },
+    { id: "mittel", name: "Mittel", beschreibung: "Die Ausgangslage wie kalibriert." },
+    { id: "schwer", name: "Schwer", beschreibung: "Knappe Kasse, nerv\xF6se Gl\xE4ubiger, wenig Zeit." }
+  ];
+  var schwierigkeitId = "mittel";
+  function neuesSpiel3(seed = 1, stadt = "Essen", schwierigkeit2 = schwierigkeitId) {
+    schwierigkeitId = SCHWIERIGKEITEN2.some((x) => x.id === schwierigkeit2) ? schwierigkeit2 : "mittel";
+    s = neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
+    $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
     EQ.freigaben(s);
     cockpitZeigen();
@@ -91106,12 +91160,43 @@
     },
     E: src_exports
   };
-  setTimeout(() => {
-    const stadt = param.get("stadt") ?? "Essen";
-    wahl.value = stadt;
-    neuesSpiel3(Number(param.get("seed") ?? 1), stadt);
+  var startWahl = { stadt: param.get("stadt") ?? "Essen", schwierigkeit: param.get("schwierigkeit") ?? "mittel", seed: Number(param.get("seed") ?? 1) };
+  function startZeigen() {
+    $("startstadt").innerHTML = STADTLISTE.map((q2) => `<option${q2.name === startWahl.stadt ? " selected" : ""}>${q2.name}</option>`).join("");
+    $("startstufen").innerHTML = SCHWIERIGKEITEN2.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? "an" : ""}" data-v="${x.id}"><span class="sterne-stufe">${"\u25CF".repeat(1 + SCHWIERIGKEITEN2.indexOf(x))}${"\u25CB".repeat(SCHWIERIGKEITEN2.length - 1 - SCHWIERIGKEITEN2.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join("");
+    $("startseed").value = startWahl.seed;
+    $("start").classList.add("an");
     $("lade").classList.remove("an");
-    window.bereit = true;
+  }
+  $("startstufen").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-v]");
+    if (!b) return;
+    startWahl.schwierigkeit = b.dataset.v;
+    startZeigen();
+  });
+  $("startstadt").addEventListener("change", (e) => {
+    startWahl.stadt = e.target.value;
+  });
+  $("startseed").addEventListener("change", (e) => {
+    startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1));
+  });
+  function spielStarten() {
+    $("start").classList.remove("an");
+    $("lade").classList.add("an");
+    setTimeout(() => {
+      wahl.value = startWahl.stadt;
+      neuesSpiel3(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit);
+      $("lade").classList.remove("an");
+      window.bereit = true;
+    }, 30);
+  }
+  $("startknopf").addEventListener("click", spielStarten);
+  window.spiel.startZeigen = startZeigen;
+  window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN2;
+  Object.defineProperty(window.spiel, "schwierigkeit", { get: () => schwierigkeitId });
+  setTimeout(() => {
+    if (param.has("stadt") || param.has("schwierigkeit") || param.has("seed")) spielStarten();
+    else startZeigen();
   }, 20);
 })();
 /*! Bundled license information:

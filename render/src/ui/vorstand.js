@@ -117,7 +117,7 @@ export function vorstandModul(ctx) {
     h += '</div>';
     // Gehalt und Boni
     h += '<div class="karte steuerung"><div class="khead">Vergütung</div>';
-    h += regler('Jahresgehalt', stepper('gehalt', P(`p:${id}:gehalt`, geld(p.gehalt)), P(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? '+' : ''}${r.gehaltProzent} % zur Forderung von ${geld(p.gehaltsforderung)}`, 'i')), `Schritt ${geld(r.gehaltsSchritt)}`);
+    h += regler('Jahresgehalt', stepper('gehalt', P(`p:${id}:gehalt`, geld(p.gehalt)), P(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? '+' : '−'}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p.gehaltsforderung)}`, 'i')), `Schritt ${geld(r.gehaltsSchritt)}`);
     const halteAnteil = p.haltebonus > 0 ? Math.round((p.haltebonus / Math.max(1, p.gehalt)) * 4) / 4 : 0;
     h += regler('Haltebonus über 52 Wochen', segment('haltebonus', halteAnteil, HALTE) + `<small class="rfuss">${p.haltebonus > 0 ? `${P(`p:${id}:haltebonus`, geld(p.haltebonus), 'i')} bis ${p.halteBis !== undefined ? wocheText(st, p.halteBis) : 'offen'}, senkt das Abwerberisiko` : 'Anteil vom Jahresgehalt, in Raten ausgezahlt'}</small>`, 'vom Jahresgehalt');
     h += regler('Erfolgsbonus bei Planerfüllung', segment('erfolgsbonus', Math.round(p.erfolgsbonus * 10) / 10, ERFOLG), 'vom Jahresgehalt je Jahr');
@@ -152,7 +152,7 @@ export function vorstandModul(ctx) {
     if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
     const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st, L.ressort, k.id, A.gehalt, hb, A.erfolg);
     h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc(k.name) + '</div>';
-    h += regler('Jahresgehalt', stepper('angebotGehalt', P('a:gehalt', geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? '+' : ''}${Math.round((A.gehalt / k.gehaltsforderung - 1) * 100)} % zur Forderung`), `Schritt ${geld(L.gehaltsSchritt)}`);
+    h += regler('Jahresgehalt', stepper('angebotGehalt', P('a:gehalt', geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? '+' : '−'}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L.gehaltsSchritt)}`);
     h += regler('Haltebonus', segment('angebotHalte', A.halte, HALTE), hb ? geld(hb) : 'vom Jahresgehalt');
     h += regler('Erfolgsbonus', segment('angebotErfolg', A.erfolg, ERFOLG), 'vom Jahresgehalt');
     h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P('a:chance', pz(ch))}</div><div class="balken"><span style="width:${(ch * 100).toFixed(0)}%;background:${ch >= 0.6 ? 'var(--gruen)' : ch >= 0.35 ? '#e3a90d' : 'var(--rot)'}"></span></div><small class="rfuss">hängt von Angebot, Lage der Firma und Image ab</small></div>`;

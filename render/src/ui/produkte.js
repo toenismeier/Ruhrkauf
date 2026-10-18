@@ -104,7 +104,7 @@ export function produkteModul(ctx) {
     h += regler('Material', segment('material', e.material, (T?.materialien ?? []).map((m) => [m, m])));
     h += regler('Preislage', segment('preislage', e.preislage, K.preislagen.map((p) => [p.id, PREISLAGE[p.id] ?? p.id])));
     h += regler('Qualität', segment('qualitaet', e.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, '★'.repeat(x)])));
-    h += regler('Entwicklungsdauer', segment('dauer', e.dauer, K.dauer.map((d) => [d, d === 4 ? '4 Wochen' : String(d)])));
+    h += regler('Entwicklungsdauer', segment('dauer', e.dauer, K.dauer.map((d) => [d, String(d)])), 'Wochen');
     h += regler('Budget je Woche', stepper('budget', P('n:budget', geld(e.budgetWoche))), `Schritt ${geld(K.budgetSchritt)}`);
     h += '</div>';
     h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}</div><div class="pname">${P('n:name', v.name ?? e.typ, 'b')}<small>${v.wgName ? `${esc(v.wgName)} · ` : ''}Einführung ${esc(v.saisonEinfuehrung)}</small></div>`;

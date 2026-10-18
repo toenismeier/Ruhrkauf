@@ -16,6 +16,8 @@ npx tsx scripts/kalibrierung.ts 1          # Jahres-GuV der Ausgangslage (Einkau
 npx tsx scripts/einkauf-vergleich.ts 1,2,3 5   # Einkaufsstrategien auf Basis Bot C, je Jahr
 npx tsx scripts/einkauf-beispiel.ts        # schreibt render/einkauf-beispiel.json (Woche 30, Seed 1, Bot C)
 npx tsx scripts/marketing-vergleich.ts 1,2,3 3  # Marketingstrategien auf Basis Bot C, je Jahr
+npx tsx scripts/schwierigkeit-vergleich.ts leicht,mittel,schwer 1,2,3 260  # Plan-EBITDA und Überleben je Stufe (Bot C, Bot A, ohne Eingriff)
+npx tsx scripts/bot.ts 1 260 --tief --schwer  # jeder Bot auch mit --leicht oder --schwer (Standard mittel)
 npx tsx scripts/marketing-beispiel.ts      # schreibt render/marketing-beispiel.json (Woche 30, Seed 1, Bot C)
 npx tsx scripts/bot.ts 1 260 --ek-nos      # weitere: --ek-em, --ek-kahlschlag, --ek-kahlschlag-frueh
 npx tsx scripts/vergleich.ts               # Jahr 2 je Strategie, Liquidität ausgeblendet
@@ -51,6 +53,40 @@ npx tsx scripts/vorstand-beispiel.ts       # schreibt render/vorstand-beispiel.j
 - Ohne Eingriff: Insolvenz und Zerschlagung bis Woche 60 (ohne Freigaben verfallen zusätzlich die Saisonorders).
 - Außergerichtliche Sanierung (Bots A und D): scheitert an Sozialplan- und Restmietkosten.
 - Schutzschirm mit tiefer Sanierung (Bot C): überlebt 5 Jahre auf allen drei Seeds.
+- Alle Tabellen in dieser Datei gelten für Schwierigkeit mittel.
+- Ergebnis nach 260 Wochen (mittel, `bot.ts`, Seeds 1 / 2 / 3): Bot A zerschlagen W47 / W46 / W46, Bot B (Schutzschirm) W23 / W23 / W23, Bot C und Bot C mit HQ-Strategie laufen 5 Jahre, Bot D zerschlagen W52 / W45 / W45, ohne Eingriff zerschlagen W58 / W58 / W61.
+
+### Schwierigkeit
+
+`neuesSpiel(seed, { schwierigkeit: 'leicht' | 'mittel' | 'schwer' })`, Standard mittel; Tabelle `SCHWIERIGKEIT` und Auswahl `SCHWIERIGKEITEN` (id, name, beschreibung) in `src/schwierigkeit.ts`. Mittel ist die Kalibrierung, `kalibrierung.ts 1` bleibt exakt.
+
+| Hebel | leicht | mittel | schwer |
+|---|---|---|---|
+| Image je Schließung in einer Schließungswelle (jede weitere in derselben Woche × Faktor) | 1,5 × 0,9^k | 1,5 × 0,955^k | 1,5, ungedämpft |
+| Startkasse und Kreditlinie | × 1,15 | 120 / 90 Mio. € | × 0,9 |
+| Geduld der Lieferanten | +0,1 | Start | -0,1 |
+| Zielwert Kreditversicherer | +4 | Start | -4 |
+| negative Zufallsereignisse (Lieferantenausfall, Konjunkturschock, Instandhaltung, Streik) | × 0,6 | × 1 | × 1,4 |
+| Schwelle Plan-EBITDA der Gläubigerversammlung | -35 Mio. € | -25 Mio. € | -15 Mio. € |
+
+Image Bot C nach der Schließungswelle in Woche 13: leicht 22, mittel 7, schwer 0,5. `schwierigkeit-vergleich.ts` (Plan-EBITDA der Gläubigerversammlung in Mio. €, Seeds 1 / 2 / 3, 5 Jahre):
+
+| Stufe | Bot C Plan-EBITDA | Bot C überlebt | Bot A | ohne Eingriff |
+|---|---|---|---|---|
+| leicht | 11,8 / -6,2 / 11,1 | 3/3 | 0/3 (zerschlagen W48 bis W50) | 0/3 (W58 bis W68) |
+| mittel | -2,5 / -6,4 / -7,4 | 3/3 | 0/3 (W46 bis W47) | 0/3 (W58 bis W61) |
+| schwer | -9,4 / -16,3 / -7,3 | 2/3 (Seed 2 scheitert W23) | 0/3 (W42 bis W43) | 0/3 (W43 bis W58) |
+
+Plan-EBITDA zur Gläubigerversammlung je Bot und Seed, vorher (alter Image-Abzug 1,5 je Schließung ohne Dämpfung) und nachher (mittel), Mio. € (Woche):
+
+| Bot | vorher Seed 1 / 2 / 3 | nachher Seed 1 / 2 / 3 |
+|---|---|---|
+| A (außergerichtlich) | -169,4 / -171,2 / -143,1 (W45 bis W46) | -170,2 / -175,4 / -143,2 (W45 bis W46) |
+| B (Schutzschirm) | -147,5 / -123,2 / -118,1 (W22) | -133,5 / -110,6 / -102,8 (W22) |
+| C (tiefe Sanierung) | -10,9 / -14,7 / -15,6 (W22) | -2,5 / -6,4 / -7,4 (W22) |
+| C mit HQ-Strategie | -1,8 / -5,8 / -6,6 (W22) | 6,6 / 2,5 / 1,7 (W22) |
+| D (außergerichtlich, konsequent) | -83,6 / -124,1 / -43,0 (W44 bis W50) | -83,5 / -124,8 / -43,3 (W44 bis W51) |
+| ohne Eingriff | -169,8 / -174,6 / -179,2 (W57 bis W60) | -169,8 / -174,6 / -179,2 (W57 bis W60) |
 
 ## Hauptverwaltung (HQ)
 
@@ -66,7 +102,7 @@ Die Zentrale ist kein Pauschalposten mehr (Vertrag: `../HQ-VERTRAG.md`). `s.hq` 
 - **Aktionen:** `hqMieten`, `hqEtageKuendigen`, `hqGebaeudeKuendigen`, `abteilungSetzen`, `abteilungStufe`. `zentrale` (Prozent) kürzt alle Abteilungen anteilig, `controlling` setzt die Stufe der Abteilung.
 - **Abfragen:** `hqUebersicht(s)` für die Oberfläche (inkl. Standortwerten von Sitz und Angeboten), `hqFuerGrafik(s)` als reines JSON für `render/src/kit/hq.js`.
 
-Stand Balancing HQ: `kalibrierung.ts` unverändert (Zentrale 112,8 Mio. €, 3,7 %). Bot C (`--tief`) und Bot C mit HQ-Strategie (`--hq`) überleben 5 Jahre auf Seeds 1 bis 3; ohne jede Zentralmaßnahme scheitert der Schutzschirm auf Seed 1 und 2. `hq-vergleich.ts` (gleiche Filialsanierung, Liquidität und Zufall ausgeblendet, Mittel Seeds 1 bis 3, Jahr 3 gegen "keine"): pauschal 30 % +27 Mio. € EBITDA, gute Strategie +31,5 Mio. € (Zentrale 25 % günstiger), Kahlschlag im ersten Jahr am stärksten, ab Jahr 2 schwächer (+20 Mio. €), Ausbau Einkauf und Immobilien auf Stufe 3 +36 Mio. €.
+Stand Balancing HQ: `kalibrierung.ts` unverändert (Zentrale 112,8 Mio. €, 3,7 %). Bot C (`--tief`) und Bot C mit HQ-Strategie (`--hq`) überleben 5 Jahre auf Seeds 1 bis 3; ohne jede Zentralmaßnahme scheitert der Schutzschirm auf Seed 1 und 2. `hq-vergleich.ts` (gleiche Filialsanierung, Liquidität und Zufall ausgeblendet, Mittel Seeds 1 bis 3, Jahr 3 gegen "keine"): pauschal 30 % +22 Mio. € EBITDA, gute Strategie +31 Mio. € (Zentrale 24 % günstiger), Kahlschlag im ersten Jahr +19 Mio. €, ab Jahr 2 kaum noch (+3 / 0 Mio. €, über drei Jahre mit Sondereffekten -23 Mio. €), Ausbau Einkauf und Immobilien auf Stufe 3 +41 Mio. €.
 
 ## Einkauf, Freigaben, Eigenmarken
 
@@ -85,10 +121,10 @@ Stand Balancing Einkauf (Seed 1, Jahr 1, vorher/nachher): Umsatz 3.082,8 / 3.084
 
 | Strategie | Umsatz | Rohertragsquote | Abschriften | EBITDA | Umschlag | Altware | NOS-Verfügbarkeit | Fehlmengen | Eigenmarken |
 |---|---|---|---|---|---|---|---|---|---|
-| Bot C (Standard) | 2.054 | 40,9 % | 21 | 15 | 3,9 | 2,9 % | 94,6 % | 80 | 7,8 % |
-| NOS-Pflege + Limitdisziplin | 2.085 | 40,7 % | 24 | 21 | 3,7 | 1,2 % | 96,6 % | 61 | 7,8 % |
-| Eigenmarken-Offensive | 2.095 | 41,8 % | 13 | 41 | 4,2 | 0,6 % | 95,5 % | 77 | 12,0 % |
-| Kahlschlag Limit ab Woche 26 | 1.974 | 41,0 % | 19 | -11 | 4,6 | 3,3 % | 90,2 % | 160 | 8,0 % |
+| Bot C (Standard) | 2.024 | 40,9 % | 21 | 2 | 3,9 | 3,1 % | 94,6 % | 78 | 7,9 % |
+| NOS-Pflege + Limitdisziplin | 2.055 | 40,7 % | 24 | 9 | 3,6 | 1,3 % | 96,6 % | 60 | 7,9 % |
+| Eigenmarken-Offensive | 2.062 | 41,8 % | 14 | 28 | 4,2 | 0,7 % | 95,5 % | 75 | 12,0 % |
+| Kahlschlag Limit ab Woche 26 | 1.946 | 41,0 % | 19 | -23 | 4,6 | 3,5 % | 90,2 % | 156 | 8,0 % |
 
 Kahlschlag Limit schon ab Woche 3 drückt das Plan-EBITDA der Gläubigerversammlung unter -25 Mio. €, der Insolvenzplan scheitert auf allen drei Seeds (Woche 23).
 
@@ -116,15 +152,15 @@ Stand Balancing Vorstand und Produkte: `kalibrierung.ts 1` unverändert (Umsatz 
 | Vorstand | ΔEBITDA J1 | ΔEBITDA J2 | ΔEBITDA J3 | Rohertragsquote J3 | Abgänge | überlebt |
 |---|---|---|---|---|---|---|
 | Start (gewachsen, nichts tun) | 0 | 0 | 0 | 40,9 % | 1,3 | 3/3 |
-| gut (starke Leute, Boni, Delegation, Projekte guter Leute) | -0,5 | +8,1 | +20,7 | 41,1 % | 0 | 3/3 |
-| schwach (schwache Leute, Gehalt gekürzt, alles delegiert) | -3,4 | -28,6 | -9,6 | 39,9 % | 2,0 | 3/3 |
-| unbesetzt (alle entlassen) | -3,7 | -9,6 | -0,8 | 40,8 % | 0 | 3/3 |
+| gut (starke Leute, Boni, Delegation, Projekte guter Leute) | -0,5 | +8,1 | +20,8 | 41,1 % | 0 | 3/3 |
+| schwach (schwache Leute, Gehalt gekürzt, alles delegiert) | -0,3 | -34,5 | +2,8 | 40,0 % | 3,3 | 3/3 |
+| unbesetzt (alle entlassen) | -3,8 | -9,7 | -0,9 | 40,8 % | 0 | 3/3 |
 
 | Produkte | ΔEBITDA J2 | ΔEBITDA J3 | Eigenmarken-Umsatz J3 | EM-Rohertragsquote | Sterne |
 |---|---|---|---|---|---|
-| keine (Startsortiment) | 0 | 0 | 159,1 | 55,0 % | 2,19 |
-| gut (Trend und Zielgruppe getroffen) | +2,3 | +5,1 | 178,3 | 53,7 % | 3,26 |
-| schlecht (am Ziel vorbei, billig entwickelt, Preise +30 %) | -5,6 | -1,9 | 146,3 | 60,6 % | 1,86 |
+| keine (Startsortiment) | 0 | 0 | 159,7 | 55,0 % | 2,19 |
+| gut (Trend und Zielgruppe getroffen) | +2,2 | +5,2 | 179,1 | 53,7 % | 3,26 |
+| schlecht (am Ziel vorbei, billig entwickelt, Preise +30 %) | -5,6 | -1,9 | 146,8 | 60,6 % | 1,86 |
 
 
 ## Marketing
@@ -140,14 +176,13 @@ Vertrag: `../VORSTAND-MARKETING-VERTRAG.md`, Abschnitt 2. `s.marketing.stand` h�
 - **Aktionen:** `kanalBudget`, `kundenkarteSetzen`, `appSetzen`, `crmKampagneAnlegen`, `crmKampagneStoppen`, `aktionPlanen`, `aktionAendern`, `aktionAbsagen`; kompatibel `marketingBudget` (skaliert alle Kanäle, trifft die Netto-Quote exakt), `aktion` (Rabatt auf alles mit Sonderwerbung), `kundenkarte` (Statusstufen, 2,5 Mio. €).
 - **CMO-Delegation** (über `registriereDelegation` in `vorstand.ts`): Aktionskalender (gut: Kontrollhäuser, keine Tiefstrabatte; schlecht: Sonderaktionen), CRM (gut: Verlustkampagnen stoppen, Reaktivierung; schlecht: Zusatzmailings), Kanalbudget (Höhe je Quartal und Umschichtung zum besten Grenznutzen; schlecht: falsche Richtung).
 
-Stand Balancing Marketing: `kalibrierung.ts 1` unverändert (3.084,1 / 1.262,4 / -122,2 Mio. €, Marketing 77,1 Mio. €). Bot C und Bot C mit HQ-Strategie überleben 5 Jahre auf Seeds 1 bis 3, Bots A und D sowie ohne Eingriff scheitern weiter. Schließungswelle (`prozesse.ts`): jede weitere Schließung in derselben Woche kostet 10 % weniger Image (höchstens rund 15 Punkte); vorher fiel das Image bei Bot C mit 50 Schließungen in Woche 13 von 36 auf 0,5, jetzt auf 22. Plan-EBITDA der Gläubigerversammlung Bot C: 16,3 / 12,4 / 11,1 Mio. € (Seeds 1 bis 3). `marketing-vergleich.ts` (Seeds 1 bis 3, Jahr 3, echte Liquidität, Mio. €):
+Stand Balancing Marketing: `kalibrierung.ts 1` unverändert (3.084,1 / 1.262,4 / -122,2 Mio. €, Marketing 77,1 Mio. €). Bot C und Bot C mit HQ-Strategie überleben 5 Jahre auf Seeds 1 bis 3, Bots A und D sowie ohne Eingriff scheitern. `marketing-vergleich.ts` (Seeds 1 bis 3, Jahr 3, echte Liquidität, Mio. €):
 
 | Strategie | Umsatz | Rohertragsquote | Bons (Mio.) | Image | EBITDA | Kartenanteil | Werbung netto | Gewöhnung |
 |---|---|---|---|---|---|---|---|---|
-| Standard (Bot C) | 2.040 | 40,8 % | 50 | 44,1 | 8 | 36,4 % | 37 | 0,030 |
-| Rabattschlacht ab Woche 26 | 2.016 | 38,7 % | 50 | 41,4 | -47 | 36,4 % | 41 | 0,099 |
-| Rabattschlacht ab Woche 4 | 2.012 | 38,7 % | 50 | 41,3 | -48 | 36,4 % | 40 | 0,104 |
-| CRM und Karte | 2.096 | 40,7 % | 51 | 44,0 | 17 | 48,2 % | 46 | 0,032 |
-| Markenaufbau | 2.066 | 41,3 % | 50 | 44,7 | 5 | 36,3 % | 58 | 0,013 |
+| Standard (Bot C) | 2.024 | 40,9 % | 49 | 40,5 | 2 | 36,4 % | 37 | 0,030 |
+| Rabattschlacht ab Woche 26 | 2.000 | 38,7 % | 50 | 37,8 | -52 | 36,4 % | 40 | 0,099 |
+| CRM und Karte | 2.080 | 40,7 % | 51 | 40,4 | 12 | 48,2 % | 46 | 0,032 |
+| Markenaufbau | 2.051 | 41,3 % | 50 | 41,1 | 0 | 36,3 % | 58 | 0,013 |
 
-Rabattschlacht bringt im ersten Jahr mehr Umsatz (2.439 statt 2.418) und Frequenz, kostet aber gut 2 Punkte Rohertragsquote und treibt die Gewöhnung; ab Jahr 2 liegt der Umsatz unter Standard, das EBITDA rund 55 Mio. € darunter. CRM und Karte hebt den Kartenanteil auf 48 % und liegt ab Jahr 1 vorn. Markenaufbau (Budget 2,5 % statt 1,8 %, TV, Plakat, Social, weniger Tiefstrabatte) hat die beste Rohertragsquote und das höchste Image, zahlt sich aber erst langsam aus.
+Rabattschlacht bringt im ersten Jahr mehr Umsatz (2.395 statt 2.375) und Frequenz, kostet aber gut 2 Punkte Rohertragsquote und treibt die Gewöhnung; ab Jahr 2 liegt der Umsatz unter Standard, das EBITDA rund 50 Mio. € darunter. Schon ab Woche 4 drückt sie das Plan-EBITDA unter die Schwelle, der Insolvenzplan scheitert auf allen drei Seeds (Woche 23). CRM und Karte hebt den Kartenanteil auf 48 % und liegt ab Jahr 1 vorn. Markenaufbau (Budget 2,5 % statt 1,8 %, TV, Plakat, Social, weniger Tiefstrabatte) hat die beste Rohertragsquote und das höchste Image, zahlt sich aber erst langsam aus.
