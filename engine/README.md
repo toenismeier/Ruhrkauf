@@ -116,8 +116,8 @@ Stand Balancing Vorstand und Produkte: `kalibrierung.ts 1` unverändert (Umsatz 
 | Vorstand | ΔEBITDA J1 | ΔEBITDA J2 | ΔEBITDA J3 | Rohertragsquote J3 | Abgänge | überlebt |
 |---|---|---|---|---|---|---|
 | Start (gewachsen, nichts tun) | 0 | 0 | 0 | 40,9 % | 1,3 | 3/3 |
-| gut (starke Leute, Boni, Delegation, Projekte guter Leute) | -0,6 | +7,7 | +20,6 | 41,1 % | 0 | 3/3 |
-| schwach (schwache Leute, Gehalt gekürzt, alles delegiert) | -2,5 | -23,0 | -3,0 | 39,9 % | 2,0 | 3/3 |
+| gut (starke Leute, Boni, Delegation, Projekte guter Leute) | -0,5 | +8,1 | +20,7 | 41,1 % | 0 | 3/3 |
+| schwach (schwache Leute, Gehalt gekürzt, alles delegiert) | -3,4 | -28,6 | -9,6 | 39,9 % | 2,0 | 3/3 |
 | unbesetzt (alle entlassen) | -3,7 | -9,6 | -0,8 | 40,8 % | 0 | 3/3 |
 
 | Produkte | ΔEBITDA J2 | ΔEBITDA J3 | Eigenmarken-Umsatz J3 | EM-Rohertragsquote | Sterne |

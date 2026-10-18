@@ -7,7 +7,7 @@ import type { Bestellung, Format, GameState, GruppeId, Kohorte } from './types';
 import { clamp, eur, melde, mio, normal, zwischen, type RngHalter } from './util';
 import type { HausRoh } from './wirtschaft';
 import { produktMargeDelta, produktNachfrageFaktor } from './produkte';
-import { marketingAltVerkauf, marketingAltwareFaktor } from './marketing';
+import { marketingAltVerkauf, marketingAltwareFaktor, marketingWgTilt } from './marketing';
 import {
   attraktivitaet, BESCHAFFUNG, eigenmarkeAnteil, eigenmarkeEinstellen, eigenmarkeGruenden, eigenmarkeNeupositionieren,
   eigenmarkeSetzen, istVerkaufsaktiv, mehrmarge, passungWg,
@@ -631,9 +631,14 @@ export function einkaufNachfrage(s: GameState, roh: HausRoh[]): EinkaufNachfrage
       const liste = WG_JE_BEREICH[g];
       if (!liste) continue;
       let F = 0;
+      // WG-Aktionen (src/marketing.ts): Nachfrage zur beworbenen WG verschieben, Bereichssumme bleibt (dort schon eingerechnet)
+      const tilt = marketingWgTilt(s, h.id, g);
+      const teile: [Record<string, number>, string, number][] | undefined = tilt ? [] : undefined;
+      let F0 = 0;
       for (const d of liste) {
         const st = s.einkauf.wgs[d.id];
-        const om = omega(d.id, w);
+        const tl = tilt?.[d.id] ?? 1;
+        const om = omega(d.id, w) * tl;
         const nAttr = nosAttraktivitaet(d, st);
         let rest = 1;
         const ziel = (vk[d.id] ??= {});
@@ -643,13 +648,18 @@ export function einkaufNachfrage(s: GameState, roh: HausRoh[]): EinkaufNachfrage
           if (A === undefined) { A = attraktivitaet(s, x.m, h); attrCache.set(key, A); }
           // Nachfragewirkung gedämpft: Wurzel aus Attraktivität und WG-Passung
           const t = (v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr) / st.norm;
-          ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t;
-          F += t;
+          if (teile) teile.push([ziel, x.m.id, t]); else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t;
+          F += t; F0 += t / tl;
           rest -= x.e;
         }
         const t = (v.brutto * om * Math.max(0, rest) * nAttr) / st.norm;
-        ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
-        F += t;
+        if (teile) teile.push([ziel, FREMD, t]); else ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
+        F += t; F0 += t / tl;
+      }
+      if (teile) {
+        const c = F > 0 ? F0 / F : 1;
+        for (const [z, k, t] of teile) z[k] = (z[k] ?? 0) + t * c;
+        F = F0;
       }
       const f = v.brutto > 0 ? F / v.brutto : 1;
       v.brutto *= f;
@@ -763,7 +773,7 @@ export function einkaufVerbrauch(s: GameState, n: EinkaufNachfrage): { verfuegba
     const r: VerbrauchWg & { ab: number } = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
     const red = EK_PARAM.abschrift[st.st.reduzierung];
     // Sale-Aktionen im Aktionskalender erlauben mehr Altware in der Saisonnachfrage (src/marketing.ts, Ausgangslage = 1)
-    const capM = Math.min(1, red.cap * marketingAltwareFaktor(s, d.bereich));
+    const capM = Math.min(1, red.cap * marketingAltwareFaktor(s, d.bereich, d.id));
     const sg = EK_PARAM.servicegrad[st.st.servicegrad];
     for (const art of ['nos', 'saison'] as Art[]) {
       const pools = Object.keys(p).sort((a, b) => (a === FREMD ? 1 : b === FREMD ? -1 : a.localeCompare(b))); // Marken zuerst, Fremdware zuletzt
@@ -790,7 +800,7 @@ export function einkaufVerbrauch(s: GameState, n: EinkaufNachfrage): { verfuegba
         let extraVk = 0;
         if (pool === FREMD && ausweichVk > 0) { extraVk = ausweichVk; ziel += ausweichVk * (1 - m) * quote; }
         const x = nimm(topf, ziel, ekBedarf * (art === 'saison' ? capM : 1), sAkt, st);
-        if (art === 'saison' && x.alt > 0) marketingAltVerkauf(s, d.bereich, x.alt);
+        if (art === 'saison' && x.alt > 0) marketingAltVerkauf(s, d.bereich, x.alt, d.id);
         const vkR = x.voll / Math.max(0.05, 1 - m);
         if (pool !== FREMD) {
           ausweichVk += Math.max(0, vkBedarf * quote - vkR) * EK_PARAM.substitution + vkBedarf * (1 - quote) * 0;

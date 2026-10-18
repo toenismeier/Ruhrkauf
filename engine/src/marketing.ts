@@ -163,9 +163,12 @@ export interface MarketingWocheArbeit {
   regionAnteil: Record<Region, number>;
   crm: { ist: WochenWert; plan: WochenWert };
   sigma: { ist: Record<string, number>; plan: Record<string, number> }; // Couponanteil je Aktion
-  alt: { ist: Partial<Record<GruppeId, number>>; plan: Partial<Record<GruppeId, number>> };
+  /** Altwaren-Boost je Bereich oder WG-Id. */
+  alt: { ist: Record<string, number>; plan: Record<string, number> };
+  /** Nachfrageverschiebung zwischen den WG eines Bereichs je Haus (`haus|bereich`), Ist zu Plan; nur bei WG-Aktionen. */
+  tilt: Record<string, Partial<Record<WgId, number>>>;
   druck: { ist: Druck; plan: Druck };
-  altVerkauf: Partial<Record<GruppeId, number>>;
+  altVerkauf: Record<string, number>; // je Bereich und je WG-Id
   crmKosten: { ist: number; plan: number };
   komm: { ist: number; plan: number };
 }
@@ -238,6 +241,8 @@ export const MK = {
   einloesungKanal: { mail: 1, push: 0.85, brief: 1.35 } as Record<CrmKanal, number>,
   abmeldung: { mail: 0.0004, push: 0.0008, brief: 0 } as Record<CrmKanal, number>,
   kannibalisierung: 0.15,
+  /** Anteil des WG-Mehrabsatzes, der den Nachbar-WG im selben Bereich fehlt. */
+  kannibalisierungWg: 0.35,
   vorzugAbbau: 0.75,
   gewoehnung: 0.033,
   /** Anteil der Aktionswirkung, der an der Kommunikation (Prospekt, Online, Fläche) hängt. */
@@ -340,7 +345,7 @@ function leererDruck(): Druck { return { basis: {}, u: {}, nu: {}, d: 0, dBasis:
 function leereArbeit(w: number): MarketingWocheArbeit {
   return {
     woche: w, uLetzt: 0, regionAnteil: { Nord: 0.2, Ost: 0.2, West: 0.2, Mitte: 0.2, Süd: 0.2 },
-    crm: { ist: { u: {}, d: {} }, plan: { u: {}, d: {} } }, sigma: { ist: {}, plan: {} }, alt: { ist: {}, plan: {} },
+    crm: { ist: { u: {}, d: {} }, plan: { u: {}, d: {} } }, sigma: { ist: {}, plan: {} }, alt: { ist: {}, plan: {} }, tilt: {},
     druck: { ist: leererDruck(), plan: leererDruck() }, altVerkauf: {}, crmKosten: { ist: 0, plan: 0 }, komm: { ist: 1, plan: 1 },
   };
 }
@@ -486,7 +491,7 @@ export function marketingHausFaktor(s: GameState, h: Haus): number {
   return (1 + MK.kanalAnteil * (q - 1)) * (1 + MK.hqAnteil * (hq - 1) * q) * (1 + (MK.markeNachfrage * (m.ist.marke - m.plan.marke)) / MK.markeStart);
 }
 
-interface PromoWert { u: number; d: number; nu: number; alt: number; bon: number; img: number; a: Aktion }
+interface PromoWert { u: number; d: number; nu: number; alt: number; bon: number; img: number; a: Aktion; uWg?: number }
 
 /** Wirkung einer Aktion auf eine Gruppe in einem Haus (ohne Kannibalisierung). */
 function promoWert(s: GameState, a: Aktion, h: Haus, g: GruppeId, sc: MarketingSzenario, sigma: number, komm: number): PromoWert | undefined {
@@ -500,8 +505,11 @@ function promoWert(s: GameState, a: Aktion, h: Haus, g: GruppeId, sc: MarketingS
     case 'rabatt_alles': v.d = 0.6 * r; v.u = uplift(r, gw, h) * kb; v.nu = 0.07; v.alt = 0.3 * r; v.img = r >= 0.3 ? -0.3 : 0; break;
     case 'rabatt_bereich': v.d = 0.85 * r; v.u = 1.1 * uplift(r, gw, h) * kb; v.nu = 0.07; v.alt = 0.4 * r; v.img = r >= 0.3 ? -0.15 : 0; break;
     case 'rabatt_wg': {
+      // Wirkung auf die WG selbst; im Bereich zählt ihr Anteil, abzüglich Kannibalisierung der Nachbar-WG
       const an = WG[a.wg as WgId]?.anteil ?? 0.2;
-      v.d = 0.85 * r * an; v.u = 0.65 * an * uplift(r, gw, h) * kb; v.nu = 0.06; v.alt = 0.4 * r * an; break;
+      v.uWg = 1.1 * uplift(r, gw, h) * kb;
+      v.u = an * v.uWg * (1 - MK.kannibalisierungWg);
+      v.d = 0.85 * r * Math.min(1, (an * (1 + v.uWg)) / (1 + v.u)); v.nu = 0.06; v.alt = 0; break;
     }
     case 'coupon': {
       v.d = sigma * r; v.u = sigma * (1 - 0.55) + sigma * 0.55 * 0.12; v.nu = 0.06; v.bon = sigma * Math.max(0, (a.mindestbon ?? 0) / MK.bon - 1) * 0.5; break;
@@ -584,6 +592,13 @@ export function marketingGruppen(s: GameState, h: Haus, basis: Partial<Record<Gr
     const nachfrage = ((1 + ei.u + kanniI + crmUI + ukI) / nennerU) * vz;
     const preis = (1 - ei.d - crmDI - dkI) / nennerD;
     out[g] = { nachfrage, preis };
+    // WG-Aktionen: Nachfrage innerhalb des Bereichs zur beworbenen WG verschieben (einkauf.ts normiert auf den Bereich)
+    if (ei.alle.some((v) => v.uWg !== undefined) || ep.alle.some((v) => v.uWg !== undefined)) {
+      const ti = wgTilt(g, ei.alle); const tp = wgTilt(g, ep.alle);
+      const r: Partial<Record<WgId, number>> = {};
+      for (const d of Object.keys(ti) as WgId[]) r[d] = (ti[d] ?? 1) / (tp[d] ?? 1);
+      A.tilt[`${h.id}|${g}`] = r;
+    }
     // Druck für Vorzug, Gewöhnung und Image (Kettenebene)
     for (const [D, e] of [[DI, ei], [DP, ep]] as [Druck, GruppenEffekt][]) {
       D.basis[g] = (D.basis[g] ?? 0) + b;
@@ -603,18 +618,41 @@ export function marketingGruppen(s: GameState, h: Haus, basis: Partial<Record<Gr
   return out;
 }
 
-/** Faktor auf die Altware, die die Saisonnachfrage decken darf (Sale baut Altware ab). */
-export function marketingAltwareFaktor(s: GameState, g: GruppeId): number {
-  const A = s.marketing.stand?.woche;
-  if (!A || A.woche !== s.woche) return 1;
-  return (1 + (A.alt.ist[g] ?? 0)) / (1 + (A.alt.plan[g] ?? 0));
+/** Relative Nachfrage je WG eines Bereichs aus den laufenden WG-Aktionen eines Szenarios (1 = ohne Aktion). */
+function wgTilt(g: GruppeId, ws: PromoWert[]): Partial<Record<WgId, number>> {
+  const liste = Object.values(WG).filter((d) => d.bereich === g);
+  const t: Partial<Record<WgId, number>> = Object.fromEntries(liste.map((d) => [d.id, 1]));
+  for (const v of ws) {
+    if (v.uWg === undefined || !v.a.wg) continue;
+    const an = WG[v.a.wg as WgId]?.anteil ?? 0.2;
+    const nachbar = an < 1 ? (MK.kannibalisierungWg * an * v.uWg) / (1 - an) : 0;
+    for (const d of liste) t[d.id] = (t[d.id] ?? 1) * (d.id === v.a.wg ? 1 + v.uWg : Math.max(0.2, 1 - nachbar));
+  }
+  return t;
 }
 
-/** Einkauf meldet die verkaufte Altware je Bereich (für die Auswertung des Altwarenabbaus). */
-export function marketingAltVerkauf(s: GameState, g: GruppeId, wert: number): void {
+/** Verschiebung der Nachfrage zwischen den WG eines Bereichs in einem Haus (undefined = keine WG-Aktion). */
+export function marketingWgTilt(s: GameState, hausId: string, g: GruppeId): Partial<Record<WgId, number>> | undefined {
+  const A = s.marketing.stand?.woche;
+  if (!A || A.woche !== s.woche) return undefined;
+  return A.tilt[`${hausId}|${g}`];
+}
+
+/** Faktor auf die Altware, die die Saisonnachfrage einer WG decken darf (Sale baut Altware ab, Bereich oder WG). */
+export function marketingAltwareFaktor(s: GameState, g: GruppeId, wg?: WgId): number {
+  const A = s.marketing.stand?.woche;
+  if (!A || A.woche !== s.woche) return 1;
+  const ist = Math.max(A.alt.ist[g] ?? 0, wg ? A.alt.ist[wg] ?? 0 : 0);
+  const plan = Math.max(A.alt.plan[g] ?? 0, wg ? A.alt.plan[wg] ?? 0 : 0);
+  return (1 + ist) / (1 + plan);
+}
+
+/** Einkauf meldet die verkaufte Altware je Bereich und WG (für die Auswertung des Altwarenabbaus). */
+export function marketingAltVerkauf(s: GameState, g: GruppeId, wert: number, wg?: WgId): void {
   const A = s.marketing.stand?.woche;
   if (!A || A.woche !== s.woche) return;
   A.altVerkauf[g] = (A.altVerkauf[g] ?? 0) + wert;
+  if (wg) A.altVerkauf[wg] = (A.altVerkauf[wg] ?? 0) + wert;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -830,7 +868,7 @@ export function marketingVorbereiten(s: GameState): void {
       const r = a.rabatt;
       const boost = mech(a) === 'reduzierung' ? 1.3 * (r / 0.3) : mech(a) === 'staffel' ? 0.3 : mech(a) === 'rabatt_bereich' || mech(a) === 'rabatt_wg' ? 0.4 * r : mech(a) === 'rabatt_alles' ? 0.3 * r : 0;
       if (boost <= 0) continue;
-      const gs = gruppenVon(a) ?? (Object.keys(s.basisUmsatz) as GruppeId[]);
+      const gs: string[] = a.wg && WG[a.wg as WgId] ? [a.wg] : gruppenVon(a) ?? Object.keys(s.basisUmsatz);
       for (const g of gs) A.alt[key][g] = Math.max(A.alt[key][g] ?? 0, boost * fl);
     }
   }
@@ -938,7 +976,7 @@ export function marketingAbschluss(s: GameState, umsatz: number, kosten: Marketi
     for (const a of lauf) {
       const wa = a._wahr!;
       const t = summeU > 0 ? Math.max(0, wa.umsatzMit) / summeU : 0;
-      const gs = gruppenVon(a) ?? (Object.keys(A.druck.ist.basis) as GruppeId[]);
+      const gs: string[] = a.wg && WG[a.wg as WgId] ? [a.wg] : gruppenVon(a) ?? Object.keys(A.druck.ist.basis);
       let alt = 0;
       for (const g of gs) { const f = (1 + (A.alt.ist[g] ?? 0)); if (f > 1) alt += (A.altVerkauf[g] ?? 0) * (1 - 1 / f); }
       wa.altware += alt * t;
