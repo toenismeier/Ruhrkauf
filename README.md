@@ -1,5 +1,11 @@
 # Ruhrkauf: Turnaround-Tycoon (Arbeitstitel, Kette im Spiel: Hartwig)
 
+## iPhone-Test und Qualitätssicherung
+
+Die Anleitung für den mobilen Browser-Prototyp, Spielstände, Performance-Messungen und CI steht in [MOBIL-TEST.md](MOBIL-TEST.md).
+GitHub Actions prüft TypeScript, Engine-Tests, Browser-Build und den mobilen Chromium-Smoke-Test.
+Ein echter iPhone-Safari-Test und ein nativer iOS-Build stehen weiterhin aus.
+
 ## Aufbau
 - `engine/`: Spiellogik in TypeScript (Häuser, Ware, Einkauf, Eigenmarken, Zentrale/HQ, Insolvenz). Befehle siehe engine/README.md.
 - `render/`: Grafik-Baukasten (three.js), Kataloge, Brücke Engine zu Grafik, Spiel-Prototyp (`render/spiel.html` + `render/spiel-bundle.js`).
