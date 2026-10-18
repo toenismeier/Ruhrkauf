@@ -66,16 +66,18 @@ npx tsx scripts/vorstand-beispiel.ts       # schreibt render/vorstand-beispiel.j
 | Startkasse und Kreditlinie | × 1,15 | 120 / 90 Mio. € | × 0,9 |
 | Geduld der Lieferanten | +0,1 | Start | -0,1 |
 | Zielwert Kreditversicherer | +4 | Start | -4 |
-| negative Zufallsereignisse (Lieferantenausfall, Konjunkturschock, Instandhaltung, Streik) | × 0,6 | × 1 | × 1,4 |
-| Schwelle Plan-EBITDA der Gläubigerversammlung | -35 Mio. € | -25 Mio. € | -15 Mio. € |
+| Schwere negativer Zufallsereignisse (Lieferantenausfall, Containerstau, Konjunkturschock, Instandhaltung, Streik); Eintreten und Zufallsfolge auf allen Stufen gleich | × 0,6 | × 1 | × 1,4 |
+| Schwelle Plan-EBITDA der Gläubigerversammlung | -35 Mio. € | -25 Mio. € | -17 Mio. € |
 
 Image Bot C nach der Schließungswelle in Woche 13: leicht 22, mittel 7, schwer 0,5. `schwierigkeit-vergleich.ts` (Plan-EBITDA der Gläubigerversammlung in Mio. €, Seeds 1 / 2 / 3, 5 Jahre):
 
 | Stufe | Bot C Plan-EBITDA | Bot C überlebt | Bot A | ohne Eingriff |
 |---|---|---|---|---|
-| leicht | 11,8 / -6,2 / 11,1 | 3/3 | 0/3 (zerschlagen W48 bis W50) | 0/3 (W58 bis W68) |
-| mittel | -2,5 / -6,4 / -7,4 | 3/3 | 0/3 (W46 bis W47) | 0/3 (W58 bis W61) |
-| schwer | -9,4 / -16,3 / -7,3 | 2/3 (Seed 2 scheitert W23) | 0/3 (W42 bis W43) | 0/3 (W43 bis W58) |
+| leicht | 17,3 / 14,3 / 14,2 | 3/3 | 0/3 (zerschlagen W50 / W48 / W49) | 0/3 (W58 / W58 / W68) |
+| mittel | -2,5 / -6,4 / -7,4 | 3/3 | 0/3 (W47 / W46 / W46) | 0/3 (W58 / W58 / W61) |
+| schwer | -13,6 / -15,5 / -18,7 | 2/3 (Seed 3 scheitert W23) | 0/3 (W43 / W42 / W42) | 0/3 (W58 / W54 / W57) |
+
+Auf jedem Seed gilt leicht ≥ mittel ≥ schwer (Plan-EBITDA Bot C, Überlebensdauer Bot A und ohne Eingriff).
 
 Plan-EBITDA zur Gläubigerversammlung je Bot und Seed, vorher (alter Image-Abzug 1,5 je Schließung ohne Dämpfung) und nachher (mittel), Mio. € (Woche):
 
