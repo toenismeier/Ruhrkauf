@@ -68,6 +68,7 @@ const server = http.createServer((req, res) => {
     const diag = status.diag;
     assert.ok(diag.fps > 0 && Number.isFinite(diag.frameP95Ms), 'Performance-Messung liefert echte Frames');
     assert.ok(diag.drawCalls > 0, 'Die Stadt wurde tatsaechlich gerendert');
+    assert.equal(diag.grafikprofil, 'sparsam', 'Mobiles Geraet verwendet das sparsame Grafikprofil');
     assert.deepEqual(errors, [], 'Keine JavaScript-Laufzeitfehler');
     fs.mkdirSync(path.join(root, 'out'), { recursive: true });
     await page.screenshot({ path: path.join(root, 'out', 'mobil-smoke.png') });
