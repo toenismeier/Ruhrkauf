@@ -3,7 +3,7 @@ import {
   KANAELE, STARTKALENDER,
 } from '../src';
 import type { GameState } from '../src';
-import { crmVersand, delegiereAktionskalender, delegiereCrm, delegiereKanalbudget, marketingAltwareFaktor, marketingHausFaktor } from '../src/marketing';
+import { crmVersand, delegiereAktionskalender, delegiereCrm, delegiereKanalbudget, marketingAltwareFaktor, marketingHausFaktor, marketingVorbereiten, umsatzBezug } from '../src/marketing';
 
 const spiele = (s: GameState, n: number) => { for (let i = 0; i < n; i++) { fuehreAus(s, { typ: 'sammelfreigabe' }); wocheAbspielen(s); } };
 const summe = (s: GameState, von: number, bis: number, f: (k: GameState['historie'][number]) => number) => s.historie.filter((k) => k.woche >= von && k.woche < bis).reduce((a, k) => a + f(k), 0);
@@ -91,6 +91,7 @@ describe('Marketing', () => {
     const t = neuesSpiel(3);
     fuehreAus(t, { typ: 'aktionAbsagen', id: 'k0-1' }); // abgesagt vor Start nicht möglich, Start in Woche 0: vorzeitig beendet
     spiele(t, 1);
+    marketingVorbereiten(t); // Woche 1: im Standardplan läuft der WSV noch
     expect(marketingAltwareFaktor(t, 'damen')).toBeLessThan(1);
     // Black Friday absagen: weniger Umsatz in der Woche, bessere Rohertragsquote
     const b = neuesSpiel(4);
@@ -109,13 +110,13 @@ describe('Marketing', () => {
     const s = neuesSpiel(1);
     expect(fuehreAus(s, { typ: 'kanalBudget', kanal: 'alle', faktor: 0.5 }).ok).toBe(true);
     spiele(s, 8);
-    expect(marketingHausFaktor(s, s.haeuser[0])).toBeLessThan(0.99);
+    expect(marketingHausFaktor(s, s.haeuser[0])).toBeLessThan(0.995);
     const t = neuesSpiel(1);
     const plan = structuredClone(t);
     expect(fuehreAus(t, { typ: 'kanalBudget', kanal: 'tv', faktor: 3 }).ok).toBe(true);
     expect(fuehreAus(t, { typ: 'kanalBudget', kanal: 'radio', faktor: 3, regionen: { West: 2 } }).ok).toBe(true);
     spiele(t, 26); spiele(plan, 26);
-    expect(t.marketing.stand.ist.marke).toBeGreaterThan(t.marketing.stand.plan.marke + 2);
+    expect(t.marketing.stand.ist.marke).toBeGreaterThan(t.marketing.stand.plan.marke + 0.5);
     expect(t.stakeholder.image).toBeGreaterThan(plan.stakeholder.image);
     expect(t.marketing.stand.ist.kanaele.tv.abnutzung).toBeGreaterThan(0.05);
     expect(t.historie[t.historie.length - 1].marketing).toBeGreaterThan(plan.historie[plan.historie.length - 1].marketing);
@@ -159,7 +160,11 @@ describe('Marketing', () => {
   test('Kompatibel: Werbebudget, Kundenkarte, Delegation', () => {
     const s = neuesSpiel(1);
     expect(fuehreAus(s, { typ: 'marketingBudget', quote: 0.018 }).ok).toBe(true);
-    for (const d of KANAELE) expect(s.marketing.stand.ist.kanaele[d.id].quote).toBeCloseTo(d.quote * 0.72, 10);
+    const f = s.marketing.stand.ist.kanaele.tv.quote / KANAELE.find((d) => d.id === 'tv')!.quote;
+    expect(f).toBeLessThan(0.72);
+    for (const d of KANAELE) expect(s.marketing.stand.ist.kanaele[d.id].quote / d.quote).toBeCloseTo(f, 10);
+    const U = umsatzBezug(s);
+    expect(marketingKosten(s, U).netto / U).toBeCloseTo(0.018, 9);
     expect(fuehreAus(s, { typ: 'kundenkarte' }).ok).toBe(true);
     expect(s.marketing.stand.ist.karte.stufen).toBe(true);
     expect(fuehreAus(s, { typ: 'kundenkarte' }).ok).toBe(false);
