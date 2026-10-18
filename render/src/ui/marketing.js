@@ -17,7 +17,9 @@ const KANAL = [['mail', 'Mail'], ['push', 'Push'], ['brief', 'Brief']];
 function kurve(titel, werte, fmtW, p, P, farbe) {
   const W = 340, H = 56, n = werte.length;
   if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P(p, n ? fmtW(werte[0]) : 'noch keine Daten')}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-  const min = Math.min(...werte), max = Math.max(...werte), lo = min - (max - min) * 0.1, hi = max + (max - min) * 0.1 || max + 1;
+  let min = Math.min(...werte), max = Math.max(...werte);
+  const flach = max - min < 1e-9 * Math.max(1, Math.abs(max));
+  const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
   const X = (i) => 4 + (i / (n - 1)) * (W - 8), Y = (v) => H - 4 - ((v - lo) / (hi - lo || 1)) * (H - 10);
   const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
   return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P(p, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} · max ${fmtW(max)}</span><span>jetzt</span></div></div>`;

@@ -80,7 +80,7 @@ export function produkteModul(ctx) {
     const k = M.kategorien.find((x) => x.id === ui.kategorie);
     const voll = k && k.belegt >= k.kapazitaet;
     h += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
-    if (voll) h += `<div class="olief warnung">Kapazität in ${esc(k.name)} erreicht: für ein neues Produkt erst eines auslisten.</div>`;
+    if (voll && !M.hinweis) h += `<div class="olief warnung">Kapazität in ${esc(k.name)} erreicht: für ein neues Produkt erst eines auslisten.</div>`;
     return { titel: 'Produktentwicklung', unter: `${esc(M.name)} · ${esc(M.zielgruppe)} · ${M.inEntwicklung} in Entwicklung · KW ${kwVon(st.woche)}`, html: h };
   }
 
@@ -88,8 +88,9 @@ export function produkteModul(ctx) {
   function neu(P) {
     const st = s(), K = E.produktKatalog(st), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
     const markeKats = new Set(M.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
-    const typen = K.typen.filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15);
-    if (!typen.some((t) => t.typ === e.typ)) { e.typ = typen[0]?.typ; }
+    const voll = new Set(M.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+    const typen = K.typen.filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15).sort((a, b) => voll.has(a.kategorie) - voll.has(b.kategorie));
+    if (!typen.some((t) => t.typ === e.typ)) { e.typ = (typen.find((t) => !voll.has(t.kategorie)) ?? typen[0])?.typ; }
     const T = K.typen.find((t) => t.typ === e.typ);
     if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
     let h = `<button class="zurueck" data-a="liste">‹ ${esc(M.name)}</button>`;
@@ -97,7 +98,7 @@ export function produkteModul(ctx) {
     const v = E.produktVorschau(st, { marke: M.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
     if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazität erreicht: in dieser Kategorie ist bei ${esc(M.name)} kein Platz mehr. Für Neues bitte erst ein Produkt auslisten.</div>`;
     h += '<div class="vtitel">Artikeltyp</div><div class="typkacheln">';
-    for (const t of typen) h += `<button class="${t.typ === e.typ ? 'an' : ''}" data-a="typ" data-v="${esc(t.typ)}">${kachel(t.typ, 64)}<span>${esc(t.typ)}</span></button>`;
+    for (const t of typen) h += `<button class="${t.typ === e.typ ? 'an' : ''} ${voll.has(t.kategorie) ? 'voll' : ''}" data-a="typ" data-v="${esc(t.typ)}">${kachel(t.typ, 64)}<span>${esc(t.typ)}</span>${voll.has(t.kategorie) ? '<small>Kapazität erreicht</small>' : ''}</button>`;
     h += '</div><div class="karte steuerung">';
     h += regler('Farbe', `<div class="farben klein">${K.farben.map((f) => `<button class="${f.name === e.farbe ? 'an' : ''}" style="background:${f.hex}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}"></button>`).join('')}</div>`, esc(e.farbe));
     h += regler('Material', segment('material', e.material, (T?.materialien ?? []).map((m) => [m, m])));
@@ -157,7 +158,9 @@ export function produkteModul(ctx) {
   const neuerEntwurf = () => {
     const st = s(), T = E.trendbericht(st), L = E.produkte(st), M = aktuelleMarke(L);
     const g = T.naechste.gruppen[M?.trendGruppe] ?? T.aktuell.gruppen[M?.trendGruppe];
-    return { typ: g?.artikel?.[0], farbe: g?.farben?.[0] ?? 'marine', material: g?.materialien?.[0] ?? 'Baumwolle', preislage: 'mitte', qualitaet: 3, dauer: 12, budgetWoche: 20000 };
+    const K = E.produktKatalog(st), voll = new Set((M?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+    const frei = (typ) => { const t = K.typen.find((x) => x.typ === typ); return t && !voll.has(t.kategorie) && M.kategorien.some((k) => k.id === t.kategorie && k.kapazitaet > 0); };
+    return { typ: g?.artikel?.find(frei) ?? g?.artikel?.[0], farbe: g?.farben?.[0] ?? 'marine', material: g?.materialien?.[0] ?? 'Baumwolle', preislage: 'mitte', qualitaet: 3, dauer: 12, budgetWoche: 20000 };
   };
   function klick(el) {
     const a = el.dataset.a, v = el.dataset.v, st = s();

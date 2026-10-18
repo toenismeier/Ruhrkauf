@@ -1,4 +1,4 @@
-// Aufruf: node spiel-render.js [--bundle] [--nur-einkauf] [--stadt Karlsruhe] [--seed 1]
+// Aufruf: node spiel-render.js [--bundle] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
 // Bündelt src/spiel.js (Engine-TS direkt aus /home/claude/turnaround/src) nach spiel-bundle.js. Mit --bundle nur bündeln.
 // Sonst headless im Hochformat 390 × 844: Woche 0, 26 und 52 mit Bot-Strategie C, dazu ein Bild mit offenem Hauspanel
 // (out/spiel-w00.png, out/spiel-w26.png, out/spiel-w52.png, out/spiel-haus.png, out/spiel-hq-w00.png, out/spiel-hq.png, out/spiel-essen.png, out/spiel-essen-hq.png, out/spiel-hq-abteilungen.png), Messwerte nach out/spiel-messung.json.
@@ -6,6 +6,12 @@
 // Engine-Abfragen und Aktionen (Freigabe, Kürzen, Ablehnen, Sammelfreigabe, Regler, Marke gründen) samt Wirkung in der
 // Folgewoche: out/einkauf-uebersicht.png, einkauf-wg.png, einkauf-freigaben.png, eigenmarken.png, eigenmarke-gruenden.png,
 // haus-eigenmarke.png, Ergebnis nach out/einkauf-pruefung.json. --nur-einkauf überspringt den Rest.
+// Vorstand, Marketing, Produkte (VORSTAND-MARKETING-VERTRAG.md 5): Menü, Panels per Antippen, Abgleich jedes data-p-Werts gegen
+// frische Abfragen, Klicktests (Delegation, Gehalt, Bonus, Einstellen, Kanalbudget, Kartenrabatt, CRM, Aktion planen und absagen,
+// Preis, Sortiment, Produkt entwickeln) mit Folgewoche: out/menue.png, vorstand.png, vorstand-profil.png, vorstand-einstellen.png,
+// marketing.png, marketing-crm.png, marketing-kalender.png, produkte.png, produkt-entwickeln.png, out/panels-pruefung.json.
+// Karte: weitester Zoom, vier Ränder, Randpixel (Hintergrund magenta), Ecken erreichbar, Gesten (Wischen mit Trägheit, Pinch,
+// Mausrad): out/karte-zoom-min.png, karte-rand-links/rechts/oben/unten.png, out/karte-pruefung.json.
 const { chromium } = require('playwright');
 const esbuild = require('esbuild');
 const fs = require('fs');
@@ -407,7 +413,7 @@ async function buendeln() {
     await oben();
     await bild('produkte.png');
     await tippe('[data-a=neu]');
-    await tippe('.typkacheln button:nth-child(2)');
+    await tippe('.typkacheln button:not(.voll):not(.an)');
     await tippe('[data-a=dauer][data-v="8"]');
     await tippe('[data-a=budget][data-v="1"]');
     await pruef('produkte', 'Neues Produkt');
@@ -425,7 +431,7 @@ async function buendeln() {
     await pruef('produkte', 'Trendbericht');
     // ── Folgewoche: Wirkung und Anzeige nach Woche weiter
     await tippe('.zurueck');
-    const fw0 = await ev(() => { const s = window.spiel.s, E = window.spiel.E; const neu = E.produkte(s).marken.flatMap((m) => m.produkte).filter((x) => x.status === 'entwicklung').pop(); return { woche: s.woche, neu: neu && { id: neu.id, f: neu.fortschritt } }; });
+    const fw0 = await ev(() => { const s = window.spiel.s, E = window.spiel.E; const neu = E.produkte(s).marken.flatMap((m) => m.produkte).filter((x) => x.status === 'entwicklung').sort((a, b) => a.start - b.start).pop(); return { woche: s.woche, neu: neu && { id: neu.id, f: neu.fortschritt } }; });
     await ev(() => window.spiel.woche(false));
     await pruef('produkte', 'Folgewoche');
     const fw = await ev(({ id }) => {
@@ -512,6 +518,8 @@ async function buendeln() {
     await p.evaluate(() => window.spiel.schliessePanel());
   }
   const ek = await einkaufPruefen();
+  const pn = await panelsPruefen();
+  const kt = await kartePruefen();
   const messung = await p.evaluate(() => window.spiel.messung);
   const teile = await p.evaluate(() => window.spiel.teileStand());
   const engine = wochen.map((m) => m.engineMs), neu = wochen.filter((m) => m.neu.length).map((m) => m.neuBauMs);
@@ -520,6 +528,8 @@ async function buendeln() {
   const zusammen = { stadt: messung.stadtMs, teileEssenNachFuellen: teile, kachelMittelMs: mittel(km), kachelMaxMs: km.length ? Math.max(...km) : 0, wocheEngineMittelMs: mittel(engine), wocheEngineMaxMs: Math.max(...engine), neuBauMittelMs: mittel(neu), neuBauMaxMs: neu.length ? Math.max(...neu) : 0, wochenMitNeubau: neu.length, renderMittelMs: mittel(messung.renderMs), angetippt: !!(tipp && offen) };
   zusammen.anzeigeFehler = pruefung.reduce((a, q) => a + q.fehler.length, 0);
   zusammen.einkaufAbweichungen = ek.abweichungen; zusammen.einkaufAktionenOk = `${ek.aktionen.filter((x) => x.ok).length}/${ek.aktionen.length}`;
+  zusammen.panelsWerte = pn.werte; zusammen.panelsAbweichungen = pn.abweichungen; zusammen.panelsAktionenOk = `${pn.aktionen.filter((x) => x.ok).length}/${pn.aktionen.length}`;
+  zusammen.karte = kt.staedte.map((x) => ({ stadt: x.stadt, maxHalb: x.max, bildbreiteM: x.bildbreiteM, anteilBreite: x.anteilBreite, randPixel: x.randPixelMitte + Object.values(x.raender).reduce((a, q) => a + q.randPixel, 0), ecken: x.eckenErreicht })); zusammen.karteGestenOk = `${kt.gesten.filter((x) => x.ok).length}/${kt.gesten.length}`;
   fs.writeFileSync(path.join(__dirname, 'out', 'spiel-messung.json'), JSON.stringify({ ...zusammen, pruefung, wochen }, null, 1));
   console.log(JSON.stringify(zusammen));
   await b.close();

@@ -32,7 +32,7 @@ export function vergleiche(W) {
   return { werte: n, fehler };
 }
 export const schalter = (an, attr, text, unter = '') => `<button class="schalter ${an ? 'an' : ''}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text}${unter ? `<small>${unter}</small>` : ''}</span></button>`;
-export const segment = (act, wert, optionen, extra = '') => `<div class="seg umbruch">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? 'an' : ''}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join('')}</div>`;
+export const segment = (act, wert, optionen, extra = '') => `<div class="seg${optionen.length > 5 || optionen.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? ' umbruch' : ''}">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? 'an' : ''}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join('')}</div>`;
 export const regler = (titel, inhalt, hilfe = '') => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ''}</div>${inhalt}</div>`;
 export const stepper = (act, wertHtml, unter = '', extra = '') => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">−</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ''}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
 /** Fähigkeitsbalken wie Coffee Inc: fünf Felder, grüne Füllung, Zahl rechts. */
@@ -71,7 +71,7 @@ export function vorstandModul(ctx) {
     let h = `<div class="raster">${kz('Vorstand besetzt', P('u:besetzt', `${u.besetzt} von ${u.ressorts.length}`))}${kz('Gehälter im Jahr', P('u:kostenJahr', geld(u.kostenJahr)))}${kz('Kosten je Woche', P('u:kostenWoche', geld(u.kostenWoche)))}${kz('Nächste Sitzung', P('u:sitzung', wocheText(st, u.naechsteSitzung)))}</div>`;
     for (const e of u.offeneEntscheidungen) {
       const roh = st.entscheidungen.find((x) => x.id === e.id);
-      h += `<div class="karte entscheid"><div class="ohead"><b>${esc(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc(roh?.text ?? '')}</div><div class="oknoepfe">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? 'gruen' : ''}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join('')}</div></div>`;
+      h += `<div class="karte order entscheid"><div class="ohead"><b>${esc(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc(roh?.text ?? '')}</div><div class="oknoepfe">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? 'gruen' : ''}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join('')}</div></div>`;
     }
     h += '<div class="vgitter">';
     for (const r of u.ressorts) {
@@ -142,7 +142,7 @@ export function vorstandModul(ctx) {
       return { titel: `${L.kurz} einstellen`, unter: esc(L.titel), html: h };
     }
     ui.k = Math.min(ui.k, L.kandidaten.length - 1);
-    const karten = L.kandidaten.map((k) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild">${portraet(k.portraet, 92)}</span><div><b class="vname">${P(`k:${k.id}:name`, k.name, 'span')}</b><div class="vtitel">Aktuelle Position</div><small>${esc(k.aktuellePosition)}<br>${esc(k.aktuelleFirma)}</small></div></div>
+    const karten = L.kandidaten.map((k) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild mittel">${portraet(k.portraet, 92)}</span><div><b class="vname">${P(`k:${k.id}:name`, k.name, 'span')}</b><div class="vtitel">Aktuelle Position</div><small>${esc(k.aktuellePosition)}<br>${esc(k.aktuelleFirma)}</small></div></div>
       <div class="faehigkeiten">${faehigkeit('Führung', k.fuehrung, P(`k:${k.id}:fuehrung`, String(k.fuehrung)))}${faehigkeit('Fachwissen', k.fachwissen, P(`k:${k.id}:fachwissen`, String(k.fachwissen)))}${faehigkeit('Loyalität', k.loyalitaet, P(`k:${k.id}:loyalitaet`, String(k.loyalitaet)))}</div>
       <div class="owerte"><div><span>Aktuelles Gehalt</span>${P(`k:${k.id}:gehalt`, geld(k.aktuellesGehalt))}</div><div><span>Forderung</span>${P(`k:${k.id}:forderung`, geld(k.gehaltsforderung))}</div><div><span>Chance bei Forderung</span>${P(`k:${k.id}:chance`, pz(k.chanceBeiForderung))}</div></div>
       <div class="olief">${esc(k.vorgeschichte)}</div></div>`);

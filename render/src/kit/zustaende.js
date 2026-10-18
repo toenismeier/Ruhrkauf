@@ -1275,6 +1275,7 @@ function aktionStil(a, st, pr) {
 /** Kartengrafik (Hartwig Karte) als flache Platte in der Fassadenebene: rot, weißes Band, goldener Chip. */
 function karteGrafik(Z, s, u, y, t, b) {
   const h = b * 0.63;
+  s.q(u - b / 2 - 0.05, u + b / 2 + 0.05, y - h / 2 - 0.05, y + h / 2 + 0.05, t - 0.01, t + 0.02, '#ffffff');
   s.q(u - b / 2, u + b / 2, y - h / 2, y + h / 2, t, t + 0.04, ROT);
   s.q(u - b / 2, u + b / 2, y - h * 0.18, y - h * 0.02, t + 0.04, t + 0.05, '#ffffff');
   s.q(u - b * 0.38, u - b * 0.2, y + h * 0.08, y + h * 0.3, t + 0.04, t + 0.055, '#d4a017');
@@ -1298,11 +1299,23 @@ function hausMarketing(Z, st, seiten, he, fensterEG, rest) {
       karteGrafik(Z, sf, (f.a + f.b) / 2, f.y0 + 0.5 + b * 0.32 + 0.35, f.t + 0.1, b);
       plakat(Z, sf, 'Jetzt anmelden', (f.a + f.b) / 2, f.y0 + 0.42, f.t + 0.12, 0.3, '#ffffff', ROT, b);
     }
+    // Aufsteller mit Karte vor den Schaufenstern neben dem Eingang (vor dem Vordach, damit sie im Bild sichtbar bleiben)
+    const besetzt = [he.u - bE - 2.8, he.u - bE - 1.4, he.u + bE + 1.9, he.u + bE + 5.2, he.u];
+    for (const f of nahe) {
+      const sf = seiten[f.seite], um = (f.a + f.b) / 2, t = f.t + 3.2;
+      const u = [um, um + (f.b - f.a) * 0.3, um - (f.b - f.a) * 0.3, um + 1.6, um - 1.6].find((q) => q > 1 && q < Z.nutz(sf) - 1 && !besetzt.some((p) => Math.abs(p - q) < 1.5));
+      if (u == null) continue;
+      besetzt.push(u);
+      for (const du of [-0.6, 0.6]) { sf.q(u + du - 0.04, u + du + 0.04, 0.3, 1.95, t - 0.06, t, '#3a3f44'); sf.q(u + du - 0.04, u + du + 0.04, 0.3, 1.7, t - 0.5, t - 0.44, '#3a3f44'); }
+      sf.q(u - 0.58, u + 0.58, 0.45, 1.9, t, t + 0.06, ROT);
+      karteGrafik(Z, sf, u, 1.38, t + 0.06, 0.95);
+      plakat(Z, sf, 'Jetzt anmelden', u, 0.72, t + 0.08, 0.24, '#ffffff', ROT, 1.05);
+    }
     // Glastür am Haupteingang: Karte als Aufkleber auf Augenhöhe
     if (he.breite) karteGrafik(Z, s, he.u - bE * 0.5, 1.45, tE + 0.08, Math.min(0.9, bE * 0.7));
     // Kundenstopper mit Karte links vom Eingang
     const u = Math.max(1.2, he.u - bE - 2.8), t = tE + 2.2;
-    s.q(u - 0.55, u - 0.48, 0.3, 1.6, t - 0.3, t + 0.3, '#3a3f44'); s.q(u + 0.48, u + 0.55, 0.3, 1.6, t - 0.3, t + 0.3, '#3a3f44');
+    for (const du of [-0.52, 0.52]) { s.q(u + du - 0.04, u + du + 0.04, 0.3, 1.65, t - 0.06, t, '#3a3f44'); s.q(u + du - 0.04, u + du + 0.04, 0.3, 1.45, t - 0.45, t - 0.39, '#3a3f44'); }
     s.q(u - 0.5, u + 0.5, 0.4, 1.6, t, t + 0.06, '#ffffff');
     karteGrafik(Z, s, u, 1.15, t + 0.06, 0.8);
     plakat(Z, s, 'Karte', u, 0.62, t + 0.08, 0.26, ROT, '#ffffff', 0.9);

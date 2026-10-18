@@ -46344,6 +46344,7 @@
   }
   function karteGrafik(Z2, s2, u, y, t, b) {
     const h = b * 0.63;
+    s2.q(u - b / 2 - 0.05, u + b / 2 + 0.05, y - h / 2 - 0.05, y + h / 2 + 0.05, t - 0.01, t + 0.02, "#ffffff");
     s2.q(u - b / 2, u + b / 2, y - h / 2, y + h / 2, t, t + 0.04, ROT);
     s2.q(u - b / 2, u + b / 2, y - h * 0.18, y - h * 0.02, t + 0.04, t + 0.05, "#ffffff");
     s2.q(u - b * 0.38, u - b * 0.2, y + h * 0.08, y + h * 0.3, t + 0.04, t + 0.055, "#d4a017");
@@ -46364,10 +46365,26 @@
         karteGrafik(Z2, sf, (f.a + f.b) / 2, f.y0 + 0.5 + b * 0.32 + 0.35, f.t + 0.1, b);
         plakat(Z2, sf, "Jetzt anmelden", (f.a + f.b) / 2, f.y0 + 0.42, f.t + 0.12, 0.3, "#ffffff", ROT, b);
       }
+      const besetzt = [he.u - bE - 2.8, he.u - bE - 1.4, he.u + bE + 1.9, he.u + bE + 5.2, he.u];
+      for (const f of nahe) {
+        const sf = seiten4[f.seite], um = (f.a + f.b) / 2, t2 = f.t + 3.2;
+        const u2 = [um, um + (f.b - f.a) * 0.3, um - (f.b - f.a) * 0.3, um + 1.6, um - 1.6].find((q2) => q2 > 1 && q2 < Z2.nutz(sf) - 1 && !besetzt.some((p) => Math.abs(p - q2) < 1.5));
+        if (u2 == null) continue;
+        besetzt.push(u2);
+        for (const du of [-0.6, 0.6]) {
+          sf.q(u2 + du - 0.04, u2 + du + 0.04, 0.3, 1.95, t2 - 0.06, t2, "#3a3f44");
+          sf.q(u2 + du - 0.04, u2 + du + 0.04, 0.3, 1.7, t2 - 0.5, t2 - 0.44, "#3a3f44");
+        }
+        sf.q(u2 - 0.58, u2 + 0.58, 0.45, 1.9, t2, t2 + 0.06, ROT);
+        karteGrafik(Z2, sf, u2, 1.38, t2 + 0.06, 0.95);
+        plakat(Z2, sf, "Jetzt anmelden", u2, 0.72, t2 + 0.08, 0.24, "#ffffff", ROT, 1.05);
+      }
       if (he.breite) karteGrafik(Z2, s2, he.u - bE * 0.5, 1.45, tE + 0.08, Math.min(0.9, bE * 0.7));
       const u = Math.max(1.2, he.u - bE - 2.8), t = tE + 2.2;
-      s2.q(u - 0.55, u - 0.48, 0.3, 1.6, t - 0.3, t + 0.3, "#3a3f44");
-      s2.q(u + 0.48, u + 0.55, 0.3, 1.6, t - 0.3, t + 0.3, "#3a3f44");
+      for (const du of [-0.52, 0.52]) {
+        s2.q(u + du - 0.04, u + du + 0.04, 0.3, 1.65, t - 0.06, t, "#3a3f44");
+        s2.q(u + du - 0.04, u + du + 0.04, 0.3, 1.45, t - 0.45, t - 0.39, "#3a3f44");
+      }
       s2.q(u - 0.5, u + 0.5, 0.4, 1.6, t, t + 0.06, "#ffffff");
       karteGrafik(Z2, s2, u, 1.15, t + 0.06, 0.8);
       plakat(Z2, s2, "Karte", u, 0.62, t + 0.08, 0.26, ROT, "#ffffff", 0.9);
@@ -88710,7 +88727,7 @@
     return { werte: n, fehler: fehler5 };
   }
   var schalter = (an, attr, text2, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text2}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
-  var segment = (act, wert, optionen, extra = "") => `<div class="seg umbruch">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
+  var segment = (act, wert, optionen, extra = "") => `<div class="seg${optionen.length > 5 || optionen.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? " umbruch" : ""}">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
   var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
   var stepper = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
   var faehigkeit = (name2, wert, p) => `<div class="faehig"><span>${name2}</span><span class="fbalken"><span style="width:${Math.max(0, Math.min(100, wert))}%"></span><i></i><i></i><i></i><i></i></span>${p}</div>`;
@@ -88744,7 +88761,7 @@
       let h = `<div class="raster">${kz("Vorstand besetzt", P2("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`))}${kz("Geh\xE4lter im Jahr", P2("u:kostenJahr", geld(u.kostenJahr)))}${kz("Kosten je Woche", P2("u:kostenWoche", geld(u.kostenWoche)))}${kz("N\xE4chste Sitzung", P2("u:sitzung", wocheText(st, u.naechsteSitzung)))}</div>`;
       for (const e of u.offeneEntscheidungen) {
         const roh = st.entscheidungen.find((x) => x.id === e.id);
-        h += `<div class="karte entscheid"><div class="ohead"><b>${esc(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc(roh?.text ?? "")}</div><div class="oknoepfe">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join("")}</div></div>`;
+        h += `<div class="karte order entscheid"><div class="ohead"><b>${esc(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc(roh?.text ?? "")}</div><div class="oknoepfe">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join("")}</div></div>`;
       }
       h += '<div class="vgitter">';
       for (const r of u.ressorts) {
@@ -88815,7 +88832,7 @@
         return { titel: `${L2.kurz} einstellen`, unter: esc(L2.titel), html: h };
       }
       ui.k = Math.min(ui.k, L2.kandidaten.length - 1);
-      const karten = L2.kandidaten.map((k2) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild">${portraet(k2.portraet, 92)}</span><div><b class="vname">${P2(`k:${k2.id}:name`, k2.name, "span")}</b><div class="vtitel">Aktuelle Position</div><small>${esc(k2.aktuellePosition)}<br>${esc(k2.aktuelleFirma)}</small></div></div>
+      const karten = L2.kandidaten.map((k2) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild mittel">${portraet(k2.portraet, 92)}</span><div><b class="vname">${P2(`k:${k2.id}:name`, k2.name, "span")}</b><div class="vtitel">Aktuelle Position</div><small>${esc(k2.aktuellePosition)}<br>${esc(k2.aktuelleFirma)}</small></div></div>
       <div class="faehigkeiten">${faehigkeit("F\xFChrung", k2.fuehrung, P2(`k:${k2.id}:fuehrung`, String(k2.fuehrung)))}${faehigkeit("Fachwissen", k2.fachwissen, P2(`k:${k2.id}:fachwissen`, String(k2.fachwissen)))}${faehigkeit("Loyalit\xE4t", k2.loyalitaet, P2(`k:${k2.id}:loyalitaet`, String(k2.loyalitaet)))}</div>
       <div class="owerte"><div><span>Aktuelles Gehalt</span>${P2(`k:${k2.id}:gehalt`, geld(k2.aktuellesGehalt))}</div><div><span>Forderung</span>${P2(`k:${k2.id}:forderung`, geld(k2.gehaltsforderung))}</div><div><span>Chance bei Forderung</span>${P2(`k:${k2.id}:chance`, pz3(k2.chanceBeiForderung))}</div></div>
       <div class="olief">${esc(k2.vorgeschichte)}</div></div>`);
@@ -88971,7 +88988,9 @@
   function kurve2(titel, werte, fmtW, p, P2, farbe) {
     const W3 = 340, H = 56, n = werte.length;
     if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, n ? fmtW(werte[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-    const min = Math.min(...werte), max = Math.max(...werte), lo = min - (max - min) * 0.1, hi = max + (max - min) * 0.1 || max + 1;
+    let min = Math.min(...werte), max = Math.max(...werte);
+    const flach = max - min < 1e-9 * Math.max(1, Math.abs(max));
+    const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
     const X = (i) => 4 + i / (n - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
     const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
     return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
@@ -90042,15 +90061,16 @@
       const k = M2.kategorien.find((x) => x.id === ui.kategorie);
       const voll2 = k && k.belegt >= k.kapazitaet;
       h += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
-      if (voll2) h += `<div class="olief warnung">Kapazit\xE4t in ${esc(k.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
+      if (voll2 && !M2.hinweis) h += `<div class="olief warnung">Kapazit\xE4t in ${esc(k.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
       return { titel: "Produktentwicklung", unter: `${esc(M2.name)} \xB7 ${esc(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st.woche)}`, html: h };
     }
     function neu(P2) {
       const st = s2(), K3 = E.produktKatalog(st), L2 = E.produkte(st), M2 = aktuelleMarke(L2), e = ui.neu;
       const markeKats = new Set(M2.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
-      const typen = K3.typen.filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M2.trendGruppe] ?? 0) > 0.15);
+      const voll2 = new Set(M2.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+      const typen = K3.typen.filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M2.trendGruppe] ?? 0) > 0.15).sort((a, b) => voll2.has(a.kategorie) - voll2.has(b.kategorie));
       if (!typen.some((t) => t.typ === e.typ)) {
-        e.typ = typen[0]?.typ;
+        e.typ = (typen.find((t) => !voll2.has(t.kategorie)) ?? typen[0])?.typ;
       }
       const T = K3.typen.find((t) => t.typ === e.typ);
       if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
@@ -90059,7 +90079,7 @@
       const v = E.produktVorschau(st, { marke: M2.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
       if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc(M2.name)} kein Platz mehr. F\xFCr Neues bitte erst ein Produkt auslisten.</div>`;
       h += '<div class="vtitel">Artikeltyp</div><div class="typkacheln">';
-      for (const t of typen) h += `<button class="${t.typ === e.typ ? "an" : ""}" data-a="typ" data-v="${esc(t.typ)}">${kachel(t.typ, 64)}<span>${esc(t.typ)}</span></button>`;
+      for (const t of typen) h += `<button class="${t.typ === e.typ ? "an" : ""} ${voll2.has(t.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc(t.typ)}">${kachel(t.typ, 64)}<span>${esc(t.typ)}</span>${voll2.has(t.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
       h += '</div><div class="karte steuerung">';
       h += regler("Farbe", `<div class="farben klein">${K3.farben.map((f) => `<button class="${f.name === e.farbe ? "an" : ""}" style="background:${f.hex}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}"></button>`).join("")}</div>`, esc(e.farbe));
       h += regler("Material", segment("material", e.material, (T?.materialien ?? []).map((m) => [m, m])));
@@ -90120,7 +90140,12 @@
     const neuerEntwurf3 = () => {
       const st = s2(), T = E.trendbericht(st), L2 = E.produkte(st), M2 = aktuelleMarke(L2);
       const g = T.naechste.gruppen[M2?.trendGruppe] ?? T.aktuell.gruppen[M2?.trendGruppe];
-      return { typ: g?.artikel?.[0], farbe: g?.farben?.[0] ?? "marine", material: g?.materialien?.[0] ?? "Baumwolle", preislage: "mitte", qualitaet: 3, dauer: 12, budgetWoche: 2e4 };
+      const K3 = E.produktKatalog(st), voll2 = new Set((M2?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+      const frei6 = (typ) => {
+        const t = K3.typen.find((x) => x.typ === typ);
+        return t && !voll2.has(t.kategorie) && M2.kategorien.some((k) => k.id === t.kategorie && k.kapazitaet > 0);
+      };
+      return { typ: g?.artikel?.find(frei6) ?? g?.artikel?.[0], farbe: g?.farben?.[0] ?? "marine", material: g?.materialien?.[0] ?? "Baumwolle", preislage: "mitte", qualitaet: 3, dauer: 12, budgetWoche: 2e4 };
     };
     function klick(el) {
       const a = el.dataset.a, v = el.dataset.v, st = s2();
