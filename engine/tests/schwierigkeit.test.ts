@@ -1,4 +1,4 @@
-import { neuesSpiel, SCHWIERIGKEIT, SCHWIERIGKEITEN } from '../src';
+import { neuesSpiel, SCHWIERIGKEIT, SCHWIERIGKEITEN, wocheAbspielen } from '../src';
 import type { SchwierigkeitId } from '../src';
 import { schliesseEndgueltig } from '../src/prozesse';
 
@@ -27,6 +27,21 @@ describe('Schwierigkeit', () => {
     expect(SCHWIERIGKEIT.schwer.ereignisse).toBeGreaterThan(1);
     expect(SCHWIERIGKEIT.leicht.versammlungSchwelle).toBeLessThan(SCHWIERIGKEIT.mittel.versammlungSchwelle);
     expect(SCHWIERIGKEIT.schwer.versammlungSchwelle).toBeGreaterThan(SCHWIERIGKEIT.mittel.versammlungSchwelle);
+  });
+
+  test('Ereignisse: gleiche Zufallsfolge auf allen Stufen, nur die Schwere skaliert', () => {
+    const lauf = (st: SchwierigkeitId) => {
+      const s = neuesSpiel(4, { schwierigkeit: st });
+      s.cash = 5e9; s.stakeholder.betriebsrat = 10; // Streiks möglich
+      for (let i = 0; i < 40; i++) wocheAbspielen(s);
+      return s;
+    };
+    const l = lauf('leicht'); const m = lauf('mittel'); const h = lauf('schwer');
+    const ereignisse = (s: ReturnType<typeof lauf>) => s.meldungen.filter((x) => /Streik|Konsumklima|Rezession|Zollstreit|Containerstau|Hallberg/.test(x.text)).map((x) => x.woche);
+    expect(ereignisse(l)).toEqual(ereignisse(m));
+    expect(ereignisse(h)).toEqual(ereignisse(m));
+    expect(l.makro.schockStaerke).toBeLessThanOrEqual(m.makro.schockStaerke);
+    expect(h.makro.schockStaerke).toBeGreaterThanOrEqual(m.makro.schockStaerke);
   });
 
   test('Schließungswelle: Imageverlust leicht < mittel < schwer, schwer ohne Dämpfung', () => {

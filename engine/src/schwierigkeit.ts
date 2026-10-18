@@ -15,7 +15,7 @@ export interface SchwierigkeitParam {
   lieferantenGeduld: number;
   /** Zuschlag auf den Zielwert des Kreditversicherers (Punkte). */
   kvZiel: number;
-  /** Faktor auf die Wahrscheinlichkeit negativer Zufallsereignisse (Lieferantenausfall, Konjunkturschock, Instandhaltung, Streik). */
+  /** Faktor auf die Schwere negativer Zufallsereignisse (Lieferantenausfall, Containerstau, Konjunkturschock, Instandhaltung, Streik). Eintreten und Zufallsfolge sind auf allen Stufen gleich. */
   ereignisse: number;
   /** Plan-EBITDA, ab dem die Gläubigerversammlung den Plan als tragfähig wertet (€, 52 Wochen). */
   versammlungSchwelle: number;
@@ -32,7 +32,7 @@ export const SCHWIERIGKEIT: Record<SchwierigkeitId, SchwierigkeitParam> = {
   },
   schwer: {
     name: 'Schwer', beschreibung: 'Knappe Kasse, nervöse Lieferanten und Kreditversicherer, mehr Pech, jede Schließung kostet voll Image, strenge Gläubiger.',
-    imageDaempfung: 1, startCash: 0.9, kreditlinie: 0.9, lieferantenGeduld: -0.1, kvZiel: -4, ereignisse: 1.4, versammlungSchwelle: -15_000_000,
+    imageDaempfung: 1, startCash: 0.9, kreditlinie: 0.9, lieferantenGeduld: -0.1, kvZiel: -4, ereignisse: 1.4, versammlungSchwelle: -17_000_000,
   },
 };
 
