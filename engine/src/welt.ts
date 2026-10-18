@@ -10,6 +10,7 @@ import { erzeugeEigenmarken } from './eigenmarken';
 import { erzeugeVorstand, vorstandKostenWoche } from './vorstand';
 import { erzeugeProdukte } from './produkte';
 import { erzeugeMarketing, initialisiereMarketing } from './marketing';
+import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -19,6 +20,8 @@ export interface Szenario {
   firma: string;
   sportName: string;
   startJahr: number;
+  /** Schwierigkeit (Standard mittel = Kalibrierung). */
+  schwierigkeit?: SchwierigkeitId;
 }
 
 export const STANDARD_SZENARIO: Szenario = {
@@ -270,9 +273,10 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     firma: { name: sz.firma, sportName: sz.sportName },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
-    cash: sz.startCash,
-    kreditlinie: sz.kreditlinie,
-    kreditlinieBasis: sz.kreditlinie,
+    schwierigkeit: sz.schwierigkeit ?? 'mittel',
+    cash: Math.round(sz.startCash * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].startCash),
+    kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
+    kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
     bestand,
     bestellungen: [],
@@ -280,7 +284,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     orderLevel: Object.fromEntries(Object.keys(basisUmsatz).map((g) => [g, 1])),
     basisUmsatz,
     vorkasseAkzeptieren: true,
-    lieferanten: LIEFERANTEN.map((l) => ({ ...l, gruppen: { ...l.gruppen }, aktiv: true, verspaetungen: 0 })),
+    lieferanten: LIEFERANTEN.map((l) => ({ ...l, geduld: clamp(l.geduld + SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].lieferantenGeduld, 0, 1), gruppen: { ...l.gruppen }, aktiv: true, verspaetungen: 0 })),
     restLieferantenVertrauen: 55,
     stakeholder: { bank: 50, kreditversicherer: 58, vermieter: 50, betriebsrat: 50, image: 45, eigentuemer: 50 },
     kvLimitBasis: PARAM.kvLimitBasis,

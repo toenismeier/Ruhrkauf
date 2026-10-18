@@ -5,6 +5,7 @@ import { einmalKosten, starteSchliessung } from './prozesse';
 import { bestandWert } from './ware';
 import { loeseVorstandEntscheidung } from './vorstand';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
+import { schwierigkeit } from './schwierigkeit';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
   return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
@@ -172,13 +173,13 @@ function jahresgespraech(s: GameState): void {
 function lieferantenEreignisse(s: GameState): void {
   for (const l of s.lieferanten) {
     if (!l.aktiv) continue;
-    if (l.id === 'hallberg' && (l.verspaetungen > 1.5 || s.phase === 'insolvenz') && chance(s, l.fragilitaet)) {
+    if (l.id === 'hallberg' && (l.verspaetungen > 1.5 || s.phase === 'insolvenz') && chance(s, l.fragilitaet * schwierigkeit(s).ereignisse)) {
       l.aktiv = false;
       l.ausfallBis = s.woche + 12;
       melde(s, 'presse', 'Hallberg & Söhne meldet Insolvenz an. „Ein großer Kunde hat uns mitgerissen.“');
       melde(s, 'warnung', 'Herrenware von Hallberg fällt für rund 12 Wochen aus, danach übernehmen andere Lieferanten.');
     }
-    if (l.id === 'nordline' && !l.dtc && chance(s, 0.003)) {
+    if (l.id === 'nordline' && !l.dtc && chance(s, 0.003 * schwierigkeit(s).ereignisse)) {
       neueEntscheidung(s, {
         typ: 'nordline_dtc', frist: s.woche + 4, titel: 'Nordline stellt auf Direktvertrieb um',
         text: 'Nordline kürzt die Zuteilung für den Handel. Gegen eine Investition in Markenflächen bleibst du A-Partner.',
@@ -186,7 +187,7 @@ function lieferantenEreignisse(s: GameState): void {
         standard: 'akzeptieren', daten: {},
       });
     }
-    if (l.id === 'goldenthread' && chance(s, 0.006)) {
+    if (l.id === 'goldenthread' && chance(s, 0.006 * schwierigkeit(s).ereignisse)) {
       let verschoben = 0;
       const neu = [];
       for (const b of s.bestellungen) {
@@ -223,7 +224,7 @@ export function ereignisse(s: GameState): void {
   // Makro
   const zyklus = 0.035 * Math.sin((2 * Math.PI * w) / 260 + s.makro.phase);
   if (s.makro.schockBis !== undefined && s.makro.schockBis <= w) { s.makro.schockBis = undefined; s.makro.schockStaerke = 0; }
-  if (s.makro.schockBis === undefined && chance(s, 0.004)) {
+  if (s.makro.schockBis === undefined && chance(s, 0.004 * schwierigkeit(s).ereignisse)) {
     s.makro.schockStaerke = zwischen(s, 0.04, 0.08);
     s.makro.schockBis = w + ganzZwischen(s, 26, 52);
     melde(s, 'presse', waehle(s, ['Energiepreise explodieren, Konsumklima bricht ein.', 'Rezession: Verbraucher halten sich zurück.', 'Zollstreit drückt auf die Kauflaune.']));
@@ -237,7 +238,7 @@ export function ereignisse(s: GameState): void {
   if (chance(s, 0.02)) sonderposten(s);
 
   for (const h of offeneHaeuser(s)) {
-    if (chance(s, 0.0008 * (1 + (100 - h.substanz) / 50))) instandhaltung(s, h);
+    if (chance(s, 0.0008 * (1 + (100 - h.substanz) / 50) * schwierigkeit(s).ereignisse)) instandhaltung(s, h);
     if (h.miete.bisWoche - 26 === w) mietende(s, h);
     if (h.miete.keineVerlaengerung && h.miete.bisWoche - 10 === w) starteSchliessung(s, h, { mietvertragEndetMit: true });
     if (h.miete.bisWoche === w && h.status === 'offen') {
@@ -257,7 +258,7 @@ export function ereignisse(s: GameState): void {
   // Streiks
   const ausstieg = s.tarifAusstiegSeit !== undefined && w - s.tarifAusstiegSeit < 26;
   const pStreik = (s.stakeholder.betriebsrat < 25 ? 0.04 : 0) + (ausstieg ? 0.05 : 0);
-  if (pStreik > 0 && chance(s, kw(w) >= 47 ? pStreik * 2 : pStreik)) {
+  if (pStreik > 0 && chance(s, (kw(w) >= 47 ? pStreik * 2 : pStreik) * schwierigkeit(s).ereignisse)) {
     const betroffen = offeneHaeuser(s).filter(() => zufall(s) < 0.3);
     const dauer = ganzZwischen(s, 1, 2);
     for (const h of betroffen) h.streikBis = w + dauer;

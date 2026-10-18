@@ -14,8 +14,9 @@ import { vorstandWoche } from './vorstand';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 
-export function neuesSpiel(seed = 1, szenario: Szenario = STANDARD_SZENARIO): GameState {
-  return neueWelt(seed, szenario);
+/** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
+export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
+  return neueWelt(seed, { ...STANDARD_SZENARIO, ...szenario });
 }
 
 const beendet = (s: GameState): boolean => s.phase === 'zerschlagen';

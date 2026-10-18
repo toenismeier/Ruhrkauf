@@ -1,6 +1,7 @@
 import type { GameState } from './types';
 import { clamp, melde } from './util';
 import { hqBetriebsratZiel, hqControllingExzellenz, hqVerwaltungMalus } from './hq';
+import { schwierigkeit } from './schwierigkeit';
 
 /** Freie Liquidität: Kasse plus ungenutzte Kreditlinie. */
 export function freieLiquiditaet(s: GameState): number {
@@ -37,7 +38,7 @@ export function aktualisiereStakeholder(s: GameState): void {
   // Zentrale: exzellentes Controlling schafft Vertrauen, eine unterbesetzte Verwaltung kostet es
   const reporting = (hqControllingExzellenz(s) ? 3 : 0) - hqVerwaltungMalus(s);
 
-  const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s) ? 3 : 0);
+  const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s) ? 3 : 0) + schwierigkeit(s).kvZiel;
   st.kreditversicherer = annaehern(st.kreditversicherer, kvZiel, 0.05);
 
   const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting;

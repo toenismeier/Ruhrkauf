@@ -280,7 +280,7 @@ export function botEinkaufKahlschlag(s: GameState, log = false, ab = 26): void {
 }
 
 if (require.main === module) {
-  const s = neuesSpiel(Number(process.argv[2] ?? 1));
+  const s = neuesSpiel(Number(process.argv[2] ?? 1), { schwierigkeit: process.argv.includes('--leicht') ? 'leicht' : process.argv.includes('--schwer') ? 'schwer' : 'mittel' });
   const n = Number(process.argv[3] ?? 260);
   const b = process.argv.includes('--ek-nos') ? botEinkaufNos : process.argv.includes('--ek-em') ? botEinkaufEigenmarken : process.argv.includes('--ek-kahlschlag-frueh') ? (x: GameState, l?: boolean) => botEinkaufKahlschlag(x, l, 3) : process.argv.includes('--ek-kahlschlag') ? botEinkaufKahlschlag : process.argv.includes('--hq') ? botHq : process.argv.includes('--hq-ausbau') ? botHqAusbau : process.argv.includes('--hq-kahlschlag') ? botHqKahlschlag : process.argv.includes('--hq-keine') ? botHqKeine : process.argv.includes('--regulaer') ? botRegulaer : process.argv.includes('--tief') ? botTief : process.argv.includes('--schirm') ? botSchutzschirm : botWoche;
   for (let i = 0; i < n && s.phase !== 'zerschlagen'; i++) {

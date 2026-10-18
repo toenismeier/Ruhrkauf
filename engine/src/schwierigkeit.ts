@@ -28,7 +28,7 @@ export const SCHWIERIGKEIT: Record<SchwierigkeitId, SchwierigkeitParam> = {
   },
   mittel: {
     name: 'Mittel', beschreibung: 'Die übliche Lage einer Warenhauskette in der Krise.',
-    imageDaempfung: 0.94, startCash: 1, kreditlinie: 1, lieferantenGeduld: 0, kvZiel: 0, ereignisse: 1, versammlungSchwelle: -25_000_000,
+    imageDaempfung: 0.955, startCash: 1, kreditlinie: 1, lieferantenGeduld: 0, kvZiel: 0, ereignisse: 1, versammlungSchwelle: -25_000_000,
   },
   schwer: {
     name: 'Schwer', beschreibung: 'Knappe Kasse, nervöse Lieferanten und Kreditversicherer, mehr Pech, jede Schließung kostet voll Image, strenge Gläubiger.',

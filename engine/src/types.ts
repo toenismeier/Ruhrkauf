@@ -4,6 +4,7 @@ import type { EigenmarkenStand } from './eigenmarken';
 import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
+import type { SchwierigkeitId } from './schwierigkeit';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -342,6 +343,8 @@ export interface Quartal {
 
 export interface GameState {
   version: 1;
+  /** Schwierigkeit beim Spielstart (src/schwierigkeit.ts), fehlt = mittel. */
+  schwierigkeit?: SchwierigkeitId;
   seed: number;
   rng: number;
   woche: number; // 0-basiert, Woche 0 = KW 1 im Startjahr

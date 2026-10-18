@@ -4,6 +4,7 @@ import { PARAM } from './welt';
 import { lohnKosten } from './wirtschaft';
 import { runwayWochen } from './stakeholder';
 import { hqMoralZiel, hqRechtFaktor } from './hq';
+import { schwierigkeit } from './schwierigkeit';
 
 /** Schließungen je Spielstand in der laufenden Woche (für die abnehmende Imagewirkung einer Schließungswelle). */
 const SCHLIESSUNGEN_WOCHE = new WeakMap<GameState, { woche: number; n: number }>();
@@ -62,11 +63,11 @@ export function schliesseEndgueltig(s: GameState, h: Haus): void {
   for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
   const st = s.stakeholder;
   st.betriebsrat = clamp(st.betriebsrat - (s.phase === 'insolvenz' ? 15 : 30) * (fte / Math.max(1, gesamtFte(s) + fte)), 0, 100);
-  // Image: jede Schließung kostet, eine Schließungswelle in derselben Woche aber abnehmend (höchstens rund 15 Punkte)
+  // Image: jede Schließung kostet, eine Schließungswelle in derselben Woche je nach Schwierigkeit abnehmend
   const sw = SCHLIESSUNGEN_WOCHE.get(s);
   const k = sw && sw.woche === w ? sw.n : 0;
   SCHLIESSUNGEN_WOCHE.set(s, { woche: w, n: k + 1 });
-  st.image = clamp(st.image - 1.5 * Math.pow(0.9, k), 0, 100);
+  st.image = clamp(st.image - 1.5 * Math.pow(schwierigkeit(s).imageDaempfung, k), 0, 100);
   st.vermieter = clamp(st.vermieter - (h.miete.vermieter === 'dritt' ? 2 : 0), 0, 100);
   if (h.lage === '1a' && h.format === 'warenhaus') {
     const arvel = s.lieferanten.find((l) => l.id === 'arvel');
@@ -181,7 +182,7 @@ export function glaeubigerversammlung(s: GameState): void {
     planEbitda = 0;
     for (let i = 0; i < 52 && klon.phase === 'regulaer'; i++) planEbitda += planWoche(klon);
   }
-  const planBonus = planEbitda > 0 ? 15 : planEbitda > -25_000_000 ? 5 : -10;
+  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s).versammlungSchwelle ? 5 : -10;
   const quoteBonus = 60 * (ins.quote - 0.1);
   const zahlung = ins.quote * ins.altVerbindlichkeiten;
   const st = s.stakeholder;

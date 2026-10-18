@@ -38,3 +38,4 @@ export {
   type CrmFrequenz, type CrmKampagne, type CrmErgebnis, type Mechanik, type Anlass, type AktionEntwurf, type MarketingAktion, type MarketingStand, type MarketingSzenario,
   type MarketingUebersicht, type MarketingVerlauf, type MarketingKosten, type KanalZeile, type KalenderVorlage,
 } from './marketing';
+export { SCHWIERIGKEIT, SCHWIERIGKEITEN, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
