@@ -147,7 +147,7 @@ export function produkteModul(ctx) {
     ctx.panel(r.titel, r.unter, r.html, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
-    if (ui.seite === 'liste') karussellBinden('produkte', ui.k, (i) => { ui.k = i; ui.auslisten = null; zeigen(true); });
+    if (ui.seite === 'liste') karussellBinden('produkte', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; ui.auslisten = null; zeigen(true); });
   }
   function tun(aktion) {
     const r = E.fuehreAus(s(), aktion);

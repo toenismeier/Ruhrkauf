@@ -51,7 +51,8 @@ export function karussellBinden(id, idx, beiWechsel) {
   let t = null;
   k.addEventListener('scroll', () => {
     clearTimeout(t);
-    t = setTimeout(() => { const i = Math.round(k.scrollLeft / breite()); if (i !== idx) beiWechsel(i); }, 140);
+    // nur, solange dieses Karussell noch angezeigt wird (sonst öffnete ein später Scroll-Abschluss das alte Panel wieder)
+    t = setTimeout(() => { if (!k.isConnected) return; const i = Math.round(k.scrollLeft / breite()); if (i !== idx) beiWechsel(i); }, 140);
   }, { passive: true });
 }
 
@@ -171,7 +172,7 @@ export function vorstandModul(ctx) {
     ctx.panel(r.titel, r.unter, r.html, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
-    if (ui.seite === 'einstellen') karussellBinden('kandidaten', ui.k, (i) => { ui.k = i; zeigen(true); });
+    if (ui.seite === 'einstellen') karussellBinden('kandidaten', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; zeigen(true); });
   }
   function tun(aktion) {
     const r = E.fuehreAus(s(), aktion);

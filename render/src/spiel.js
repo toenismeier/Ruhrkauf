@@ -1,8 +1,10 @@
 // Browser-Prototyp: Engine (TypeScript aus /home/claude/turnaround/src, von esbuild gebündelt) + Grafik-Baukasten.
 // Eine Stadt, Woche weiter, Cockpit, Hausdetail mit Innenansicht (Eigenmarken-Shops), Zentrale (HQ) mit Aktionen und
-// Etagenschnitt, Einkauf-Panel (ui/einkauf.js, ui/eigenmarken.js), Kacheln mit Detailstufen.
+// Etagenschnitt, Einkauf-Panel (ui/einkauf.js, ui/eigenmarken.js), Vorstand, Marketing und Produktentwicklung (ui/vorstand.js,
+// ui/marketing.js, ui/produkte.js) über den Menüknopf, Karte wie Coffee Inc (ui/karte.js), Kacheln mit Detailstufen.
 // Steuerung für Prüfskripte: window.spiel = { s, neuesSpiel, stadt, woche, bot, oeffneHaus, oeffneHq, schliessePanel, kamera,
-//   fokusHaeuser, tippPunkt, teileStand, kachelnRuhig, messung, oeffneEinkauf, einkauf, pruefeEinkauf, hausEtage, innenbild }
+//   fokusHaeuser, tippPunkt, teileStand, kachelnRuhig, kachelnPause, messung, oeffneEinkauf, einkauf, pruefeEinkauf, hausEtage, innenbild,
+//   vorstand, marketing, produkte (je .pruefe()), oeffneVorstand, oeffneMarketing, oeffneProdukte, karte { messen, randPixel, info } }
 import * as E from '../../engine/src/index';
 import { botTief } from '../../engine/scripts/bot';
 import { THREE, Sammler, KompaktSammler, setzeLod, entferneKleineSchilder, neueSzene, isoKamera, kameraFuer, sonneAuf, rng, waehle, FARBEN, dachProfil, dunkler } from './kit/basis.js';
