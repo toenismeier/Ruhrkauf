@@ -1,0 +1,212 @@
+{
+ "id": "W009",
+ "name": "Hartwig München City-Center",
+ "stadt": "München",
+ "region": "Süd",
+ "cluster": "metropole",
+ "lage": "center",
+ "format": "warenhaus",
+ "einzug": {
+  "kaufkraft": 1.283459453266114,
+  "alter": 0.9589043130801292,
+  "wettbewerb": 0.2704214433208108
+ },
+ "etagen": [
+  -1,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "grundflaecheQm": 3200,
+ "baujahr": 1975,
+ "fassade": 4,
+ "flaechen": [
+  {
+   "id": "W009-f1",
+   "etage": -1,
+   "qm": 1554,
+   "konzept": "eigen",
+   "gruppe": "food"
+  },
+  {
+   "id": "W009-f2",
+   "etage": -1,
+   "qm": 1417,
+   "konzept": "eigen",
+   "gruppe": "wohnen"
+  },
+  {
+   "id": "W009-f3",
+   "etage": 0,
+   "qm": 900,
+   "konzept": "eigen",
+   "gruppe": "beauty"
+  },
+  {
+   "id": "W009-f4",
+   "etage": 0,
+   "qm": 2072,
+   "konzept": "eigen",
+   "gruppe": "accessoires"
+  },
+  {
+   "id": "W009-f5",
+   "etage": 1,
+   "qm": 357,
+   "konzept": "eigen",
+   "gruppe": "accessoires"
+  },
+  {
+   "id": "W009-f6",
+   "etage": 1,
+   "qm": 2615,
+   "konzept": "eigen",
+   "gruppe": "damen"
+  },
+  {
+   "id": "W009-f7",
+   "etage": 2,
+   "qm": 1298,
+   "konzept": "eigen",
+   "gruppe": "damen"
+  },
+  {
+   "id": "W009-f8",
+   "etage": 2,
+   "qm": 1387,
+   "konzept": "eigen",
+   "gruppe": "waesche"
+  },
+  {
+   "id": "W009-f9",
+   "etage": 2,
+   "qm": 286,
+   "konzept": "eigen",
+   "gruppe": "herren"
+  },
+  {
+   "id": "W009-f10",
+   "etage": 3,
+   "qm": 2609,
+   "konzept": "eigen",
+   "gruppe": "herren"
+  },
+  {
+   "id": "W009-f11",
+   "etage": 3,
+   "qm": 362,
+   "konzept": "eigen",
+   "gruppe": "kinder"
+  },
+  {
+   "id": "W009-f12",
+   "etage": 4,
+   "qm": 1033,
+   "konzept": "eigen",
+   "gruppe": "kinder"
+  },
+  {
+   "id": "W009-f13",
+   "etage": 4,
+   "qm": 1938,
+   "konzept": "eigen",
+   "gruppe": "sport"
+  },
+  {
+   "id": "W009-f14",
+   "etage": 5,
+   "qm": 313,
+   "konzept": "eigen",
+   "gruppe": "sport"
+  },
+  {
+   "id": "W009-f15",
+   "etage": 5,
+   "qm": 886,
+   "konzept": "eigen",
+   "gruppe": "spielwaren"
+  },
+  {
+   "id": "W009-f16",
+   "etage": 5,
+   "qm": 1773,
+   "konzept": "eigen",
+   "gruppe": "wohnen"
+  }
+ ],
+ "miete": {
+  "mieteWoche": 58277,
+  "bisWoche": 252,
+  "netTyp": "triple",
+  "vermieter": "eigentuemer",
+  "vermieterName": "Brehm Immobilien GmbH & Co. KG",
+  "nebenkostenQmWoche": 1.1921510566025972
+ },
+ "personal": {
+  "vollzeit": 87.96954887137368,
+  "teilzeit": 53.37505942144715,
+  "aushilfen": 16.481431998252187,
+  "filialleiter": {
+   "name": "Birgit Peters",
+   "skill": 0.5974035926163197,
+   "moral": 49.4937880635442
+  }
+ },
+ "substanz": 87.85000000000001,
+ "substanzStart": 88,
+ "status": "offen",
+ "potenzial": {
+  "damen": 278418.24366589665,
+  "herren": 177631.52086640144,
+  "kinder": 52568.658224466424,
+  "beauty": 194325.08169419123,
+  "accessoires": 251845.61401353567,
+  "waesche": 78585.84345456537,
+  "wohnen": 100515.25124869497,
+  "spielwaren": 28404.334795749317,
+  "food": 108491.6388597012,
+  "sport": 58205.9952695724
+ },
+ "saettigungQm": {
+  "damen": 4117.848629408132,
+  "herren": 2554.954093881883,
+  "kinder": 1248.919570092112,
+  "beauty": 968.2719691330568,
+  "accessoires": 2079.0817239453786,
+  "waesche": 1297.2263367201203,
+  "wohnen": 2516.870507169515,
+  "spielwaren": 514.005840377789,
+  "food": 802.4997891576262,
+  "sport": 1606.8032024775982
+ },
+ "transferBonus": 0,
+ "kpi": {
+  "woche": 2,
+  "umsatz": 739691,
+  "rohertrag": 315077,
+  "konzessionserloes": 0,
+  "untermiete": 0,
+  "personal": 155098,
+  "miete": 58277,
+  "nebenkosten": 24797,
+  "sonstige": 39687,
+  "db": 37218,
+  "fteBedarf": 132.149140647059,
+  "fteIst": 157.826040291073,
+  "umsatzJeGruppe": {
+   "food": 77619,
+   "wohnen": 60127,
+   "beauty": 95634,
+   "accessoires": 143632,
+   "damen": 141332,
+   "waesche": 42712,
+   "herren": 99668,
+   "kinder": 28544,
+   "sport": 36304,
+   "spielwaren": 14120
+  }
+ }
+}

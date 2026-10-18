@@ -1,0 +1,301 @@
+{
+  "sitz": "Essen",
+  "gebaeude": [
+    {
+      "id": "hqg19",
+      "name": "Verwaltungsbau am Hafen",
+      "stadt": "Essen",
+      "typ": "nachkrieg",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "einkauf",
+              "fte": 82,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 1,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "einkauf",
+              "fte": 48,
+              "stufe": 1
+            },
+            {
+              "id": "verwaltung",
+              "fte": 34,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 2,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "verwaltung",
+              "fte": 81,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 3,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "ecommerce",
+              "fte": 82,
+              "stufe": 2
+            }
+          ]
+        },
+        {
+          "nr": 4,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "marketing",
+              "fte": 73,
+              "stufe": 1
+            },
+            {
+              "id": "ecommerce",
+              "fte": 9,
+              "stufe": 2
+            }
+          ]
+        },
+        {
+          "nr": 5,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "marketing",
+              "fte": 15,
+              "stufe": 1
+            },
+            {
+              "id": "vm",
+              "fte": 67,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 6,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "personal",
+              "fte": 66,
+              "stufe": 1
+            },
+            {
+              "id": "vm",
+              "fte": 17,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 7,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "personal",
+              "fte": 10,
+              "stufe": 1
+            },
+            {
+              "id": "logistik",
+              "fte": 72,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 8,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "controlling",
+              "fte": 72,
+              "stufe": 2
+            },
+            {
+              "id": "logistik",
+              "fte": 4,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 9,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "immobilien",
+              "fte": 34,
+              "stufe": 1
+            },
+            {
+              "id": "recht",
+              "fte": 27,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 10,
+          "qm": 1150,
+          "gemietet": true,
+          "abteilungen": []
+        }
+      ]
+    }
+  ],
+  "angebote": [
+    {
+      "id": "hqa28",
+      "stadt": "Halle",
+      "typ": "campus",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 1650
+        },
+        {
+          "nr": 1,
+          "qm": 1650
+        },
+        {
+          "nr": 2,
+          "qm": 1650
+        },
+        {
+          "nr": 3,
+          "qm": 1650
+        },
+        {
+          "nr": 4,
+          "qm": 1650
+        }
+      ]
+    },
+    {
+      "id": "hqa30",
+      "stadt": "Hannover",
+      "typ": "altbau",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 600
+        },
+        {
+          "nr": 1,
+          "qm": 600
+        },
+        {
+          "nr": 2,
+          "qm": 600
+        }
+      ]
+    },
+    {
+      "id": "hqa32",
+      "stadt": "Mannheim",
+      "typ": "glas",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 950
+        },
+        {
+          "nr": 1,
+          "qm": 950
+        },
+        {
+          "nr": 2,
+          "qm": 950
+        },
+        {
+          "nr": 3,
+          "qm": 950
+        },
+        {
+          "nr": 4,
+          "qm": 950
+        },
+        {
+          "nr": 5,
+          "qm": 950
+        },
+        {
+          "nr": 6,
+          "qm": 950
+        },
+        {
+          "nr": 7,
+          "qm": 950
+        },
+        {
+          "nr": 8,
+          "qm": 950
+        },
+        {
+          "nr": 9,
+          "qm": 950
+        },
+        {
+          "nr": 10,
+          "qm": 950
+        },
+        {
+          "nr": 11,
+          "qm": 950
+        },
+        {
+          "nr": 12,
+          "qm": 950
+        },
+        {
+          "nr": 13,
+          "qm": 950
+        },
+        {
+          "nr": 14,
+          "qm": 950
+        },
+        {
+          "nr": 15,
+          "qm": 950
+        },
+        {
+          "nr": 16,
+          "qm": 950
+        },
+        {
+          "nr": 17,
+          "qm": 950
+        }
+      ]
+    }
+  ]
+}

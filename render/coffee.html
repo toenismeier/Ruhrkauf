@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box}
+body{margin:0;background:#11161b;font-family:"DejaVu Sans",Arial,sans-serif;display:flex;gap:40px;padding:40px;width:1680px}
+.phone{position:relative;width:780px;height:1688px;border-radius:70px;overflow:hidden;background:#1d262e;box-shadow:0 0 0 14px #050608}
+canvas{display:block}
+.pill{position:absolute;background:rgba(28,36,43,.82);color:#fff;border-radius:22px;padding:14px 22px;font-size:24px;display:flex;align-items:center;gap:14px}
+.pill small{display:block;color:#9fb0bd;font-size:19px}
+.logo{width:46px;height:46px;border-radius:50%;background:#d23c32;color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:26px}
+.kopf{background:#1d262e;color:#fff;padding:62px 34px 18px;text-align:center;position:relative}
+.kopf b{font-size:30px}.kopf div{color:#8fa1ae;font-size:21px;margin-top:4px}
+.kopf .x{position:absolute;right:34px;top:66px;font-size:34px;color:#cdd6dc}
+.dialog{background:#161d23;color:#e9edf0;display:flex;align-items:center;gap:18px;padding:16px 30px;font-size:21px;line-height:1.35}
+.ava{flex:none;width:62px;height:62px;border-radius:50%;background:#e8c1a0;border:4px solid #c8963e;position:relative;overflow:hidden}
+.ava:after{content:"";position:absolute;left:8px;right:8px;bottom:-14px;height:34px;border-radius:50% 50% 0 0;background:#1f2328}
+.panel{background:#1d262e;color:#fff;padding:24px 30px}
+.titel{color:#8fa1ae;font-size:19px;letter-spacing:2px;margin:6px 0 16px}
+.kacheln{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.k{background:#141b21;border-radius:18px;padding:18px 20px}
+.k span{color:#8fa1ae;font-size:18px}.k b{display:block;font-size:34px;margin-top:6px}.k i{font-style:normal;font-size:18px;color:#7fc58a}.k i.neg{color:#e07a6e}
+.etagen{display:flex;gap:10px;margin:22px 0 6px}
+.etagen div{flex:1;text-align:center;padding:14px 0;border-radius:14px;background:#141b21;color:#9fb0bd;font-size:21px}
+.etagen .an{background:#c8963e;color:#1d262e;font-weight:bold}
+.tabs{position:absolute;bottom:0;left:0;right:0;height:150px;background:#161d23;display:flex;justify-content:space-around;padding-top:22px;color:#9fb0bd;font-size:18px}
+.tabs div{text-align:center}.tabs .ic{width:54px;height:54px;margin:0 auto 8px;border-radius:14px;background:#26323b;display:flex;align-items:center;justify-content:center;font-size:28px;color:#c8963e}
+.tabs .an{color:#fff}
+</style></head><body>
+<div class="phone">
+  <canvas id="stadt" width="780" height="1688"></canvas>
+  <div class="pill" style="left:30px;top:70px"><div class="logo">H</div><div>Hartwig &amp; Brehm<small>Kasse 120,0 Mio. €</small></div></div>
+  <div class="pill" style="right:30px;top:70px"><div>KW 3 · 2027<small>Q1 · Woche 3 von 13</small></div></div>
+  <div class="pill" style="left:50%;transform:translateX(-50%);bottom:60px;font-size:26px">München</div>
+  <div class="pill" style="right:30px;bottom:56px;font-size:30px;padding:14px 20px">☰</div>
+</div>
+<div class="phone">
+  <div class="kopf"><b>Hartwig München</b><div>Kaufingerstraße 12 · Erdgeschoss</div><span class="x">✕</span></div>
+  <div class="dialog"><div class="ava"></div><div><b>Birgit Peters, Filialleiterin:</b> Chef, Beauty läuft. Aber im 3. OG verlieren wir jeden Monat Geld.</div></div>
+  <canvas id="innen" width="780" height="760"></canvas>
+  <div class="panel">
+    <div class="etagen"><div>UG</div><div class="an">EG</div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div>
+    <div class="titel">DIESE WOCHE</div>
+    <div class="kacheln">
+      <div class="k"><span>Umsatz</span><b>739.691 €</b><i>Rohertrag 315.077 €</i></div>
+      <div class="k"><span>Deckungsbeitrag</span><b>37.218 €</b><i>5,0 % vom Umsatz</i></div>
+      <div class="k"><span>Personal</span><b>158 FTE</b><i class="neg">Bedarf 132 FTE</i></div>
+      <div class="k"><span>Miete</span><b>7,9 %</b><i>vom Umsatz</i></div>
+    </div>
+  </div>
+  <div class="tabs"><div class="an"><div class="ic">▦</div>Flächen</div><div><div class="ic">◈</div>Sortiment</div><div><div class="ic">☺</div>Personal</div><div><div class="ic">✦</div>Marketing</div><div><div class="ic">€</div>Finanzen</div></div>
+</div>
+<script src="coffee-bundle.js"></script></body></html>

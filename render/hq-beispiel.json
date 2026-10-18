@@ -1,0 +1,361 @@
+{
+  "sitz": "Essen",
+  "gebaeude": [
+    {
+      "id": "hq-essen",
+      "name": "Hartwig-Hochhaus Brehmstraße",
+      "stadt": "Essen",
+      "typ": "nachkrieg",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "einkauf",
+              "fte": 38,
+              "stufe": 1
+            },
+            {
+              "id": "recht",
+              "fte": 33,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 1,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "einkauf",
+              "fte": 71,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 2,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "einkauf",
+              "fte": 56,
+              "stufe": 1
+            },
+            {
+              "id": "marketing",
+              "fte": 15,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 3,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "marketing",
+              "fte": 71,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 4,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "marketing",
+              "fte": 47,
+              "stufe": 1
+            },
+            {
+              "id": "vm",
+              "fte": 24,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 5,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "vm",
+              "fte": 71,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 6,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "ecommerce",
+              "fte": 3,
+              "stufe": 1
+            },
+            {
+              "id": "vm",
+              "fte": 68,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 7,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "ecommerce",
+              "fte": 71,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 8,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "logistik",
+              "fte": 58,
+              "stufe": 1
+            },
+            {
+              "id": "ecommerce",
+              "fte": 14,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 9,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "controlling",
+              "fte": 31,
+              "stufe": 1
+            },
+            {
+              "id": "logistik",
+              "fte": 40,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 10,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "controlling",
+              "fte": 39,
+              "stufe": 1
+            },
+            {
+              "id": "immobilien",
+              "fte": 33,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 11,
+          "qm": 1250,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "immobilien",
+              "fte": 9,
+              "stufe": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hq-essen-scheibe",
+      "name": "Hartwig-Verwaltungsscheibe Brehmstraße",
+      "stadt": "Essen",
+      "typ": "nachkrieg",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 1300,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "verwaltung",
+              "fte": 74,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 1,
+          "qm": 1300,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "verwaltung",
+              "fte": 74,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 2,
+          "qm": 1300,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "verwaltung",
+              "fte": 74,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 3,
+          "qm": 1300,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "personal",
+              "fte": 74,
+              "stufe": 1
+            },
+            {
+              "id": "verwaltung",
+              "fte": 0,
+              "stufe": 1
+            }
+          ]
+        },
+        {
+          "nr": 4,
+          "qm": 1300,
+          "gemietet": true,
+          "abteilungen": [
+            {
+              "id": "personal",
+              "fte": 47,
+              "stufe": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "angebote": [
+    {
+      "id": "hqa2",
+      "stadt": "Jena",
+      "typ": "altbau",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 750
+        },
+        {
+          "nr": 1,
+          "qm": 750
+        },
+        {
+          "nr": 2,
+          "qm": 750
+        },
+        {
+          "nr": 3,
+          "qm": 750
+        }
+      ]
+    },
+    {
+      "id": "hqa4",
+      "stadt": "Gelsenkirchen",
+      "typ": "glas",
+      "etagen": [
+        {
+          "nr": 0,
+          "qm": 1050
+        },
+        {
+          "nr": 1,
+          "qm": 1050
+        },
+        {
+          "nr": 2,
+          "qm": 1050
+        },
+        {
+          "nr": 3,
+          "qm": 1050
+        },
+        {
+          "nr": 4,
+          "qm": 1050
+        },
+        {
+          "nr": 5,
+          "qm": 1050
+        },
+        {
+          "nr": 6,
+          "qm": 1050
+        },
+        {
+          "nr": 7,
+          "qm": 1050
+        },
+        {
+          "nr": 8,
+          "qm": 1050
+        },
+        {
+          "nr": 9,
+          "qm": 1050
+        },
+        {
+          "nr": 10,
+          "qm": 1050
+        },
+        {
+          "nr": 11,
+          "qm": 1050
+        },
+        {
+          "nr": 12,
+          "qm": 1050
+        },
+        {
+          "nr": 13,
+          "qm": 1050
+        },
+        {
+          "nr": 14,
+          "qm": 1050
+        },
+        {
+          "nr": 15,
+          "qm": 1050
+        }
+      ]
+    }
+  ]
+}

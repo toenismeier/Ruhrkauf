@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Hartwig Turnaround</title>
+<style>
+  :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #4fb6c2; font-family: -apple-system, "SF Pro Text", "DejaVu Sans", Arial, sans-serif; color: var(--text); }
+  #karte { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
+  .oben { position: fixed; left: 10px; right: 10px; top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .leiste { display: flex; gap: 8px; align-items: center; }
+  .marke { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
+  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 17px; flex: none; }
+  .marke b { display: block; font-size: 14px; }
+  .marke small { color: var(--leise); font-size: 11px; }
+  .datum { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; text-align: right; flex: none; }
+  .datum b { display: block; font-size: 14px; }
+  #phase { color: var(--rot); font-size: 11px; font-weight: 700; }
+  #cockpit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: auto; }
+  .kz { background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 6px 9px; min-width: 0; }
+  .kz span { display: block; color: var(--leise); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kz b { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
+  .unten { position: fixed; left: 10px; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 0 12px; height: 46px; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; position: relative; }
+  .chipstadt span { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chipstadt i { color: var(--leise); font-style: normal; font-size: 12px; }
+  .chipstadt select { position: absolute; inset: 0; opacity: 0; font-size: 16px; }
+  button { font: inherit; border: 0; cursor: pointer; }
+  .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: 14px; color: var(--text); }
+  #weiter { background: var(--rot); color: #fff; }
+  #weiter:disabled { opacity: 0.6; }
+  .botwahl { position: fixed; right: 12px; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: 11px; color: var(--leise); display: flex; gap: 5px; align-items: center; }
+  #panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; background: var(--grund); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); transform: translateY(105%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
+  #panel.offen { transform: none; }
+  .pkopf { padding: 8px 16px 10px; background: var(--karte); border-radius: 22px 22px 0 0; border-bottom: 1px solid var(--linie); position: relative; }
+  .griff { width: 38px; height: 5px; border-radius: 3px; background: #d6d2ca; margin: 0 auto 8px; }
+  #ptitel { font-size: 17px; font-weight: 800; }
+  #punter { color: var(--leise); font-size: 12px; margin-top: 2px; }
+  #pzu { position: absolute; right: 12px; top: 16px; width: 30px; height: 30px; border-radius: 15px; background: #eeebe5; font-size: 17px; color: var(--leise); }
+  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 12px calc(18px + env(safe-area-inset-bottom)); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chip { background: #e4f2ea; color: var(--gruen); border-radius: 10px; padding: 4px 9px; font-size: 12px; font-weight: 700; }
+  .chip.warn { background: #fbe3e1; color: var(--rot); } .chip.grau { background: #ebe8e2; color: var(--leise); }
+  .raster { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .raster .kz { box-shadow: none; border: 1px solid var(--linie); padding: 9px 11px; }
+  .raster .kz b { font-size: 16px; }
+  .karte { background: var(--karte); border-radius: 14px; border: 1px solid var(--linie); margin-bottom: 8px; overflow: hidden; }
+  .khead { font-weight: 800; font-size: 13px; padding: 8px 12px; border-bottom: 1px solid var(--linie); }
+  .khead small { color: var(--leise); font-weight: 400; margin-left: 6px; }
+  .zeile { display: flex; align-items: center; gap: 8px; padding: 7px 12px; font-size: 13px; border-top: 1px solid #f2efea; }
+  .zeile:first-of-type { border-top: 0; }
+  .zeile.grau { color: var(--leise); }
+  .was { flex: 1; min-width: 0; }
+  .was i { color: var(--leise); font-style: normal; font-size: 11px; margin-left: 4px; }
+  .was em { display: block; color: #c27b0e; font-style: normal; font-size: 11px; }
+  .qm { color: var(--leise); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .uq { width: 64px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .dot { width: 9px; height: 9px; border-radius: 5px; flex: none; background: var(--rot); }
+  .k-kommission, .k-konzession { background: #2f63b5; } .k-untermiete { background: #e8751a; } .k-offprice { background: #f5b400; } .k-leer { background: #c9c4bb; }
+  body.panel-offen #cockpit, body.panel-offen .botwahl { display: none; }
+  .mini { background: #eeebe5; color: var(--text); border-radius: 9px; padding: 5px 10px; font-size: 12px; font-weight: 700; flex: none; }
+  .mini.rot { background: #fbe3e1; color: var(--rot); } .mini.gruen { background: var(--gruen); color: #fff; }
+  .khead .mini { float: right; margin-top: -2px; }
+  .stufe { display: flex; align-items: center; gap: 6px; flex: none; } .stufe b { width: 14px; text-align: center; }
+  .abt { border-top: 1px solid #f2efea; } .abt:first-of-type { border-top: 0; } .abt .zeile { border-top: 0; }
+  .zeile.unter { padding-top: 0; padding-left: 29px; }
+  .ort { font: inherit; font-size: 12px; width: 100%; border: 1px solid var(--linie); border-radius: 9px; padding: 5px 8px; background: #faf9f6; color: var(--text); }
+  .wirk { color: var(--leise) !important; }
+  .klickbar { cursor: pointer; } .zeile.gewaehlt { background: #fdf3e6; }
+  .schnitt img { display: block; width: 100%; background: #26313a; }
+  #meldung { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: 13px; box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
+  #meldung.an { opacity: 1; transform: none; } #meldung.rot { background: var(--rot); }
+  #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: 16px; }
+  #lade.an { display: grid; }
+  /* Einkauf und Eigenmarken */
+  #panel.gross { max-height: 87vh; }
+  .knopf.mitbadge { position: relative; }
+  #ekbadge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  .tabs { position: sticky; top: -12px; z-index: 2; display: flex; gap: 4px; background: #e6e2da; border-radius: 14px; padding: 4px; margin: -2px 0 10px; box-shadow: 0 6px 8px -6px rgba(20,30,40,.18); }
+  .tab { flex: 1; min-height: 40px; border-radius: 11px; background: transparent; font-size: 13.5px; font-weight: 700; color: var(--leise); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .tab.an { background: var(--karte); color: var(--text); box-shadow: 0 1px 4px rgba(20,30,40,.12); }
+  .tab .zahl { background: var(--rot); color: #fff; border-radius: 9px; font-size: 11px; padding: 1px 6px; }
+  .seg { display: flex; gap: 3px; background: #e9e5de; border-radius: 12px; padding: 3px; margin-bottom: 10px; }
+  .seg button { flex: 1; min-height: 40px; border-radius: 10px; background: transparent; font-size: 13px; font-weight: 700; color: var(--leise); padding: 0 6px; }
+  .seg button.an { background: var(--karte); color: var(--text); box-shadow: 0 1px 3px rgba(20,30,40,.12); }
+  .seg.umbruch { flex-wrap: wrap; } .seg.umbruch button { flex: 1 0 30%; }
+  .kz b i { font-style: normal; }
+  .kz .ampel { display: inline-block; }
+  .ampel { display: inline-block; width: 8px; height: 8px; border-radius: 4px; margin-left: 5px; vertical-align: 1px; flex: none; background: #c9c4bb; }
+  .ampel.ohne { background: transparent; }
+  .a-gruen { background: var(--gruen); } .a-gelb { background: #e3a90d; } .a-rot { background: var(--rot); }
+  .spaltenwahl { display: flex; gap: 6px; overflow-x: auto; margin: 0 -12px 10px; padding: 0 12px 2px; align-items: center; scrollbar-width: none; }
+  .spaltenwahl::-webkit-scrollbar { display: none; }
+  .spaltenwahl > span { font-size: 11px; color: var(--leise); flex: none; }
+  .chipk { flex: none; height: 38px; border-radius: 19px; padding: 0 13px; background: var(--karte); border: 1px solid var(--linie); font-size: 12.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .chipk.an { background: var(--text); color: #fff; border-color: var(--text); }
+  .chipk b { width: 18px; height: 18px; border-radius: 9px; background: #fff; color: var(--text); font-size: 11px; display: grid; place-items: center; }
+  .liste .lkopf { display: flex; align-items: center; padding: 0 8px 0 12px; border-bottom: 1px solid var(--linie); background: #faf9f6; }
+  .lkopf button { background: transparent; min-height: 40px; font-size: 11.5px; font-weight: 700; color: var(--leise); }
+  .lkopf button.an { color: var(--text); }
+  .lname { flex: 1; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lname i { color: var(--leise); font-style: normal; font-size: 11px; font-weight: 400; }
+  .lwert { width: 98px; text-align: right; flex: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .lwert i { font-style: normal; }
+  .lzeile { display: flex; align-items: center; min-height: 46px; padding: 0 8px 0 12px; border-top: 1px solid #f2efea; font-size: 13px; cursor: pointer; }
+  .lzeile:first-of-type { border-top: 0; }
+  .lzeile.bereich { font-weight: 700; background: #fdfcfa; }
+  .lzeile.wgz { padding-left: 30px; color: #34414b; }
+  .lzeile:active { background: #fdf3e6; }
+  .pfeil { display: inline-block; width: 16px; color: var(--leise); }
+  .legende { font-size: 11px; color: var(--leise); text-align: center; margin: 4px 0 6px; line-height: 1.6; }
+  .legende .ampel { margin: 0 3px 0 8px; }
+  .kurve .kkopf { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px 2px; }
+  .kurve .kkopf span { font-size: 12px; color: var(--leise); }
+  .kurve .kkopf b { font-size: 14px; font-variant-numeric: tabular-nums; }
+  .kurve .kkopf small { margin-left: auto; font-size: 11.5px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .kurve svg { display: block; width: calc(100% - 16px); height: 64px; margin: 0 8px; touch-action: pan-y; }
+  .kfuss { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--leise); padding: 2px 12px 8px; }
+  .regler { padding: 10px 12px; border-top: 1px solid #f2efea; }
+  .khead + .regler, .steuerung > .regler:first-child { border-top: 0; }
+  .rkopf { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+  .rkopf b { font-size: 13px; } .rkopf small { font-size: 11px; color: var(--leise); text-align: right; }
+  .regler .seg { margin-bottom: 0; }
+  .stepper { display: flex; align-items: center; gap: 10px; }
+  .stepper button { width: 48px; height: 44px; border-radius: 12px; background: #eeebe5; font-size: 21px; font-weight: 700; color: var(--text); flex: none; }
+  .stepper span { flex: 1; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .stepper span i { font-style: normal; color: var(--leise); }
+  .balken { height: 6px; background: #eeebe5; border-radius: 3px; margin: 9px 0 4px; overflow: hidden; } .balken span { display: block; height: 100%; background: #2f63b5; border-radius: 3px; }
+  .rfuss { font-size: 11px; color: var(--leise); } .rfuss i { font-style: normal; }
+  .schieber { display: flex; align-items: center; gap: 10px; }
+  .schieber input { flex: 1; height: 44px; accent-color: #2f63b5; margin: 0; }
+  .schieber output { width: 46px; text-align: right; font-weight: 800; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .zweier { display: flex; align-items: center; gap: 8px; margin-top: 6px; } .zweier > span { width: 52px; font-size: 12px; color: var(--leise); } .zweier .seg { flex: 1; }
+  .emzeile { display: flex; align-items: center; gap: 8px; } .emfarbe { width: 12px; height: 12px; border-radius: 4px; flex: none; } .emname { width: 92px; font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .emzeile .schieber { flex: 1; }
+  .ort.gross { font-size: 16px; min-height: 44px; border-radius: 12px; padding: 8px 12px; margin-top: 6px; }
+  .zurueck { background: transparent; color: #2f63b5; font-size: 14px; font-weight: 700; min-height: 40px; padding: 0 2px; margin-bottom: 4px; }
+  .breit { display: block; width: 100%; min-height: 50px; border-radius: 14px; background: var(--karte); border: 1px solid var(--linie); font-size: 14.5px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+  .breit.gruen { background: var(--gruen); color: #fff; border-color: var(--gruen); }
+  .filter { margin-bottom: 4px; } .filter .ort.gross { margin: 0 0 8px; } .filter .seg { margin-bottom: 8px; }
+  .order .ohead { padding: 10px 12px 6px; } .order .ohead b { font-size: 14.5px; display: block; } .order .ohead i { font-style: normal; color: var(--leise); font-size: 11.5px; }
+  .ochips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 8px; } .chip.blau { background: #e3ecf8; color: #2f63b5; }
+  .owerte { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 2px 12px 8px; }
+  .owerte span { display: block; font-size: 10.5px; color: var(--leise); } .owerte b { font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .olief { font-size: 11.5px; color: var(--leise); padding: 0 12px 8px; line-height: 1.45; }
+  .oknoepfe { display: flex; gap: 6px; padding: 6px 12px 12px; flex-wrap: wrap; }
+  .oknoepfe button { flex: 1; min-height: 44px; border-radius: 12px; background: #eeebe5; font-size: 13px; font-weight: 800; color: var(--text); padding: 0 8px; }
+  .oknoepfe button.gruen { background: var(--gruen); color: #fff; } .oknoepfe button.rot { background: #fbe3e1; color: var(--rot); } .oknoepfe button.leise { color: var(--leise); }
+  .oknoepfe.unten2 { padding: 2px 0 8px; } .oknoepfe.unten2 button { min-height: 50px; font-size: 15px; }
+  button:disabled { opacity: 0.45; }
+  .emkarte .mkopf, .vorschau .mkopf { padding: 12px 14px; color: #fff; } .mkopf b { font-size: 17px; display: block; } .mkopf small { font-size: 12px; opacity: 0.88; }
+  .emkarte .ochips { padding-top: 10px; } .emkarte.aus { opacity: 0.6; }
+  .mzeile { display: flex; align-items: center; gap: 8px; padding: 3px 12px; } .mzeile span:first-child { width: 112px; font-size: 12px; color: var(--leise); flex: none; } .mzeile b { width: 28px; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .mbalken { flex: 1; height: 8px; background: #eeebe5; border-radius: 4px; overflow: hidden; } .mbalken span { display: block; height: 100%; border-radius: 4px; }
+  .passung { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 2px 12px 10px; }
+  .passung div { display: flex; flex-direction: column; align-items: center; gap: 2px; } .passung b { font-size: 12px; font-variant-numeric: tabular-nums; } .passung i { font-style: normal; font-size: 10.5px; color: var(--leise); }
+  .psaeule { width: 22px; height: 38px; background: #eeebe5; border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; } .psaeule span { width: 100%; background: #2f63b5; border-radius: 6px 6px 0 0; }
+  .schritte { display: flex; gap: 4px; margin-bottom: 10px; }
+  .schritte button { flex: 1; min-width: 0; min-height: 54px; border-radius: 12px; background: var(--karte); border: 1px solid var(--linie); font-size: 10.5px; font-weight: 700; color: var(--leise); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 2px; }
+  .schritte button b { width: 22px; height: 22px; border-radius: 11px; background: #eeebe5; color: var(--leise); display: grid; place-items: center; font-size: 12px; }
+  .schritte button.an { border-color: #2f63b5; color: var(--text); } .schritte button.an b { background: #2f63b5; color: #fff; }
+  .schritte button.fertig b { background: var(--gruen); color: #fff; }
+  .wgliste { display: flex; flex-direction: column; gap: 6px; }
+  .wgwahl { display: flex; justify-content: space-between; align-items: center; min-height: 46px; padding: 0 12px; border-radius: 12px; background: #faf9f6; border: 1px solid var(--linie); font-size: 13.5px; font-weight: 700; color: var(--text); text-align: left; }
+  .wgwahl i { font-style: normal; font-weight: 400; color: var(--leise); font-size: 11.5px; } .wgwahl b { font-variant-numeric: tabular-nums; color: var(--leise); }
+  .wgwahl.an { background: #e4f2ea; border-color: var(--gruen); } .wgwahl.an b { color: var(--gruen); }
+  .wahlkarten { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wahlkarten button { text-align: left; padding: 10px 11px; border-radius: 12px; border: 1px solid var(--linie); background: #faf9f6; min-height: 72px; color: var(--text); }
+  .wahlkarten button b { display: block; font-size: 14px; } .wahlkarten button small { font-size: 11px; color: var(--leise); line-height: 1.35; }
+  .wahlkarten button.an { border: 2px solid #2f63b5; background: #eef3fb; padding: 9px 10px; }
+  .farben { display: flex; flex-wrap: wrap; gap: 10px; } .farben button { width: 44px; height: 44px; border-radius: 22px; } .farben button.an { outline: 3px solid var(--text); outline-offset: 2px; }
+  .leise { color: var(--leise); font-size: 12px; padding: 4px 0; } .mitte { text-align: center; }
+  .olief.warnung { color: #c27b0e; }
+  .emname i { display: block; font-style: normal; font-weight: 400; font-size: 10.5px; color: var(--leise); }
+  .lname i.em { font-size: 9.5px; font-weight: 800; color: #8c5a7a; background: #f3e8ef; border-radius: 5px; padding: 1px 4px; margin: 0 5px 0 0; vertical-align: 1px; }
+  .vorschau .owerte { padding-top: 8px; }
+  .haus3d img { display: block; width: 100%; background: #26313a; }
+</style>
+</head>
+<body>
+<canvas id="karte"></canvas>
+<div class="oben">
+  <div class="leiste">
+    <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small>Warenhaus und Hartwig Sport</small></div></div>
+    <div class="datum"><b id="kw">KW 1</b><span id="phase"></span></div>
+  </div>
+  <div id="cockpit"></div>
+</div>
+<label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
+<div class="unten">
+  <div class="chipstadt"><span id="stadtname">Essen</span><i>▾</i><select id="stadtwahl" aria-label="Stadt wählen"></select></div>
+  <button class="knopf" id="hq">HQ</button>
+  <button class="knopf mitbadge" id="einkauf">Einkauf<span id="ekbadge" style="display:none">0</span></button>
+  <button class="knopf" id="weiter">Woche weiter</button>
+</div>
+<div id="panel">
+  <div class="pkopf"><div class="griff"></div><div id="ptitel"></div><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
+  <div id="pinhalt"></div>
+</div>
+<div id="meldung"></div>
+<div id="lade" class="an">Stadt wird gebaut …</div>
+<script src="spiel-bundle.js"></script>
+</body>
+</html>
