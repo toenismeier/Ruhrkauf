@@ -269,6 +269,7 @@ export function figur(S, x, z, r, sk = 1.1, oben = null) {
 function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
   if (Z.leute === false) return;
   const r = Z.r;
+  anzahl = Math.round(anzahl * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1)));
   const tMin = o.tMin ?? 1.0, tMax = o.tMax ?? 5.2, uMin = o.uMin ?? -2, uMax = o.uMax ?? s.L + 3;
   const pos = [];
   for (let i = 0, v = 0; i < anzahl && v < anzahl * 8; v++) {
@@ -278,7 +279,7 @@ function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
     if (pos.some(([pu, pt]) => Math.hypot(pu - uu, pt - tt) < 0.62)) continue;
     pos.push([uu, tt]); i++;
     const [x, z] = s.welt(uu, tt);
-    figur(Z.S, x, z, r, 1.1, o.farben ? waehle(r, o.farben) : null);
+    figur(Z.S, x, z, r, 1.1, (o.farben ?? Z.sportPalette) ? waehle(r, o.farben ?? Z.sportPalette) : null);
   }
 }
 /** Schlange entlang der Fassade. */
@@ -1231,7 +1232,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       const s = seiten[e.seite];
       menge(Z, s, e.u, (e.t ?? 0) + 2.3, e.haupt ? 7 : 4, 3.5, 1.6, { tMin: (e.t ?? 0) + 0.8 });
     }
-    for (const s of [sz, sx]) for (let i = 0; i < 4; i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r); }
+    for (const s of [sz, sx]) for (let i = 0; i < Math.round(4 * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1))); i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r, 1.1, Z.sportPalette ? waehle(r, Z.sportPalette) : null); }
   }
   return { hoehe: Z.top, teile: S.anzahl - start };
 }
