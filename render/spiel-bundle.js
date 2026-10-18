@@ -1073,12 +1073,12 @@
     Baumwolle: { preis: 1, kosten: 1, wertig: 0.45 },
     "Bio-Baumwolle": { preis: 1.12, kosten: 1.14, wertig: 0.6 },
     Leinen: { preis: 1.2, kosten: 1.2, wertig: 0.6 },
-    Kaschmir: { preis: 2.3, kosten: 2.45, wertig: 1 },
-    Merino: { preis: 1.5, kosten: 1.55, wertig: 0.8 },
+    Kaschmir: { preis: 2.3, kosten: 2.36, wertig: 1 },
+    Merino: { preis: 1.5, kosten: 1.52, wertig: 0.8 },
     Denim: { preis: 1, kosten: 1, wertig: 0.45 },
-    Leder: { preis: 1.6, kosten: 1.65, wertig: 0.8 },
+    Leder: { preis: 1.6, kosten: 1.62, wertig: 0.8 },
     Polyester: { preis: 0.75, kosten: 0.68, wertig: 0.1 },
-    Seide: { preis: 1.9, kosten: 2, wertig: 0.95 },
+    Seide: { preis: 1.9, kosten: 1.94, wertig: 0.95 },
     Viskose: { preis: 0.9, kosten: 0.86, wertig: 0.3 }
   };
   var MATERIALLISTE = Object.keys(MATERIALIEN);
@@ -1218,7 +1218,7 @@
   }
   var r2 = (x) => Math.round(x * 100) / 100;
   function scoreAus(t) {
-    return 0.3 * t.zielgruppe + 0.25 * t.trend + 0.15 * t.preisQualitaet + 0.15 * t.entwicklung + 0.15 * t.team;
+    return 0.28 * t.zielgruppe + 0.25 * t.trend + 0.15 * t.preisQualitaet + 0.2 * t.entwicklung + 0.12 * t.team;
   }
   var halbe = (x) => clamp(Math.round(x * 2) / 2, 0.5, 5);
   var sterneAus = (score) => halbe(0.5 + 4.5 * score);
@@ -1735,13 +1735,13 @@
   };
   var MK = {
     /** Anteil der Nachfrage, der an der Kanalwirkung hängt. */
-    kanalAnteil: 0.05,
+    kanalAnteil: 0.03,
     /** Wirkung der Marketingabteilung (HQ), wie bisher 3 % der Nachfrage. */
     hqAnteil: 0.03,
     markeStart: 60,
-    markeTempo: 0.015,
-    markeNachfrage: 0.05,
-    markeImage: 4e-3,
+    markeTempo: 8e-3,
+    markeNachfrage: 0.03,
+    markeImage: 2e-3,
     bon: 41,
     // Ø Kassenbon in €
     karteMitglieder: 41e5,
@@ -1770,7 +1770,9 @@
     abmeldung: { mail: 4e-4, push: 8e-4, brief: 0 },
     kannibalisierung: 0.15,
     vorzugAbbau: 0.75,
-    gewoehnung: 0.033
+    gewoehnung: 0.033,
+    /** Anteil der Aktionswirkung, der an der Kommunikation (Prospekt, Online, Fläche) hängt. */
+    kommAnteil: 0.25
   };
   var SEG = {
     alle: { oeffnung: 1, einl: 1, mitnahme: 0.55, bon: 48 },
@@ -2016,7 +2018,7 @@
       a += def.aktion * Math.sqrt(Math.max(0, kanalRel(sc, def.id)));
       b += def.aktion;
     }
-    return 0.55 + 0.45 * (a / b);
+    return 1 - MK.kommAnteil + MK.kommAnteil * (a / b);
   }
   var uplift = (r, g, h) => 1.6 * Math.pow(Math.max(0, r), 0.85) * (1 - g) * Math.sqrt(clamp(2 - h.einzug.kaufkraft, 0.5, 1.5));
   function marketingHausFaktor(s2, h) {
@@ -2651,7 +2653,14 @@
     const q2 = clamp(quote, 0, 0.06);
     s2.marketing.budgetQuote = q2;
     const m = s2.marketing.stand;
-    if (m) for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote * (q2 / PARAM.marketingQuote);
+    if (m) {
+      for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote;
+      const U = umsatzBezug(s2);
+      const k = marketingKosten(s2, U);
+      const rest = k.netto - k.sonderwerbung - k.kanaeleSumme + k.beteiligung;
+      const f = k.kanaeleSumme - k.beteiligung > 0 ? Math.max(0, (q2 * U - rest) / (k.kanaeleSumme - k.beteiligung)) : q2 / PARAM.marketingQuote;
+      for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote * f;
+    }
     return ok2(`Marketingbudget auf ${(q2 * 100).toFixed(1)} % vom Umsatz gesetzt.`);
   }
   function kundenkarteKompatibel(s2, einmalKosten2) {
@@ -88281,6 +88290,7 @@
     const { canvas: canvas2, K: K3 } = o;
     const zeiger = /* @__PURE__ */ new Map();
     let start = null, pinch = null, bewegt = 0, spur = [], lauf = null;
+    const info = { los: null, schwung: 0 };
     const stopp = () => {
       if (lauf) cancelAnimationFrame(lauf.id);
       lauf = null;
@@ -88335,8 +88345,9 @@
       if (zeiger.size === 0) {
         if (bewegt < 6 && start) o.tippen(e);
         else if (spur.length >= 2) {
-          const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t);
-          if (performance.now() - b.t < 150) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
+          const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = performance.now() - b.t;
+          info.los = { dt: Math.round(dt), alter: Math.round(alter), v: Math.hypot(b.x - a.x, b.z - a.z) / dt, proben: spur.length };
+          if (alter < 200) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
         }
         start = null;
       } else {
@@ -88349,6 +88360,7 @@
       stopp();
       if (Math.hypot(vx, vz) * 16 < K3.halb * 2e-3) return;
       lauf = { vx, vz, t: performance.now(), id: 0 };
+      info.schwung++;
       const schritt = (t) => {
         if (!lauf) return;
         const dt = Math.min(40, t - lauf.t);
@@ -88381,7 +88393,7 @@
       festhalten(p, e.clientX, e.clientY);
       o.setzen();
     }, { passive: false });
-    return { stopp, schwung, get laeuft() {
+    return { stopp, schwung, info, get laeuft() {
       return !!lauf;
     } };
   }
@@ -91027,6 +91039,9 @@
       },
       get laeuft() {
         return steuerung.laeuft;
+      },
+      get info() {
+        return steuerung.info;
       }
     },
     kamera: (o) => {

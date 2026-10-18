@@ -49,12 +49,12 @@ export const MATERIALIEN: Record<Material, { preis: number; kosten: number; wert
   Baumwolle: { preis: 1, kosten: 1, wertig: 0.45 },
   'Bio-Baumwolle': { preis: 1.12, kosten: 1.14, wertig: 0.6 },
   Leinen: { preis: 1.2, kosten: 1.2, wertig: 0.6 },
-  Kaschmir: { preis: 2.3, kosten: 2.45, wertig: 1 },
-  Merino: { preis: 1.5, kosten: 1.55, wertig: 0.8 },
+  Kaschmir: { preis: 2.3, kosten: 2.36, wertig: 1 },
+  Merino: { preis: 1.5, kosten: 1.52, wertig: 0.8 },
   Denim: { preis: 1, kosten: 1, wertig: 0.45 },
-  Leder: { preis: 1.6, kosten: 1.65, wertig: 0.8 },
+  Leder: { preis: 1.6, kosten: 1.62, wertig: 0.8 },
   Polyester: { preis: 0.75, kosten: 0.68, wertig: 0.1 },
-  Seide: { preis: 1.9, kosten: 2, wertig: 0.95 },
+  Seide: { preis: 1.9, kosten: 1.94, wertig: 0.95 },
   Viskose: { preis: 0.9, kosten: 0.86, wertig: 0.3 },
 };
 const MATERIALLISTE = Object.keys(MATERIALIEN) as Material[];

@@ -325,6 +325,8 @@ async function buendeln() {
     await pruef('vorstand', 'Profil CPO nach Aktionen');
     await oben();
     await bild('vorstand-profil.png');
+    await zu('.karte.steuerung');
+    await bild('vorstand-verguetung.png');
     // Einstellen CRO: Karussell, Angebot, Annahmechance
     await tippe('.zurueck');
     await tippe('.vkarte[data-v=cro]');
@@ -420,6 +422,8 @@ async function buendeln() {
     await pruef('produkte', 'Neues Produkt');
     await oben();
     await bild('produkt-entwickeln.png');
+    await zu('.karte.steuerung');
+    await bild('produkt-entwickeln-vorschau.png');
     const entwurf = await ev(() => ({ ...window.spiel.produkte.ui.neu, marke: window.spiel.produkte.ui.marke }));
     const vors = await ev((e) => window.spiel.E.produktVorschau(window.spiel.s, e), entwurf);
     const n0 = await ev(() => window.spiel.E.produkte(window.spiel.s).marken.reduce((a, m) => a + m.inEntwicklung, 0));

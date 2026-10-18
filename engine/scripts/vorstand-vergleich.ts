@@ -77,7 +77,7 @@ function bestesProdukt(s: GameState, marke: string, gut: boolean): ProduktEntwur
     const t = ARTIKELTYPEN.find((x) => x.typ === typ)!;
     for (const material of t.materialien) for (const farbe of FARBLISTE) {
       const e: ProduktEntwurf = gut
-        ? { marke, typ: typ as ArtikelTyp, farbe, material, dauer: 12, budgetWoche: 30_000 }
+        ? { marke, typ: typ as ArtikelTyp, farbe, material, dauer: 12, budgetWoche: 15_000 }
         : { marke, typ: typ as ArtikelTyp, farbe, material, dauer: 4, budgetWoche: 5_000 };
       const v = produktVorschau(s, e);
       if (!v.ok) continue;
