@@ -594,7 +594,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
 // ─────────────────────────────────────────── Einkauf und Eigenmarken (ui/einkauf.js, ui/eigenmarken.js)
 const EQ = quelle(E);
 let ek = null;
-ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => cockpitZeigen() });
+ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); } });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
