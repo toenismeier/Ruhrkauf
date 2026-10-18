@@ -65,10 +65,14 @@ const STATUS_HAUS = { offen: 'Offen', schliessung_verhandlung: 'Schließung in V
 
 // ─────────────────────────────────────────── Szene und Kamera
 const canvas = $('karte');
-const ren = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
-ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+// Sparsames Profil fuer kleine Touch-Geraete: weniger Framebuffer-Pixel, kein teurer Schattenpass.
+// Fuer A/B-Vergleiche kann ?grafik=hoch bzw. ?grafik=sparsam gesetzt werden.
+const touchMobil = (navigator.maxTouchPoints > 0 && window.innerWidth <= 650) || /iPhone|iPod|Android/i.test(navigator.userAgent);
+const sparsam = param.get('grafik') === 'sparsam' || (touchMobil && param.get('grafik') !== 'hoch');
+const ren = new THREE.WebGLRenderer({ canvas, antialias: !sparsam, preserveDrawingBuffer: true });
+ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, sparsam ? 1.25 : 2));
 ren.outputColorSpace = THREE.SRGBColorSpace;
-ren.shadowMap.enabled = true;
+ren.shadowMap.enabled = !sparsam;
 ren.shadowMap.type = THREE.PCFShadowMap;
 
 const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
@@ -479,8 +483,8 @@ let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
 function schnittBild(baue, w = 720, h = 420) {
   if (!hqRen) {
-    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: true, preserveDrawingBuffer: true });
-    hqRen.setPixelRatio(1); hqRen.outputColorSpace = THREE.SRGBColorSpace; hqRen.shadowMap.enabled = true; hqRen.shadowMap.type = THREE.PCFShadowMap;
+    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: !sparsam, preserveDrawingBuffer: true });
+    hqRen.setPixelRatio(1); hqRen.outputColorSpace = THREE.SRGBColorSpace; hqRen.shadowMap.enabled = !sparsam; hqRen.shadowMap.type = THREE.PCFShadowMap;
   }
   hqRen.setSize(w, h, false);
   const sc = neueSzene('#26313a');
@@ -629,7 +633,7 @@ async function diagnoseZeigen() {
   KA.pause = true;
   try {
     const d = await performanceMessen({ renderer: ren, scene: () => scene, camera: () => cam,
-      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height }) });
+      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) });
     const zeile = (name, wert) => `<div class="zeile"><span class="was">${name}</span><b>${wert}</b></div>`;
     const html = '<div class="karte"><div class="khead">' + d.frames + ' gerenderte Frames auf diesem Gerät</div>' +
       zeile('Geschätzte Bildrate', d.fps + ' FPS') +
@@ -642,6 +646,7 @@ async function diagnoseZeigen() {
       zeile('Teile der Stadt', fmt.format(d.teile)) +
       zeile('Canvas', d.bild) +
       zeile('Pixelratio', d.pixelRatio) +
+      zeile('Grafikprofil', d.grafikprofil) +
       '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
     panel('Performance', d.stadt + ' · KW ' + (d.woche + 1), html, 'gross');
     window.spiel.letzteDiagnose = d;
