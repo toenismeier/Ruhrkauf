@@ -75,8 +75,8 @@ function kontext(c, material, typ) {
   K.defs.push(`<linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0.32"/><stop offset="0.42" stop-color="#fff" stop-opacity="0"/><stop offset="0.66" stop-color="#fff" stop-opacity="0.16"/><stop offset="0.76" stop-color="#fff" stop-opacity="0"/></linearGradient>`);
   const dl = hl > 0.55 ? '#000' : '#fff';
   if (K.strick) K.defs.push(`<pattern id="${id}m" width="${m === 'kaschmir' ? 2.4 : 3}" height="${m === 'kaschmir' ? 2.2 : 2.7}" patternUnits="userSpaceOnUse"><path d="M0 0 L${m === 'kaschmir' ? 1.2 : 1.5} ${m === 'kaschmir' ? 1.5 : 1.9} L${m === 'kaschmir' ? 2.4 : 3} 0" stroke="#000" stroke-opacity="0.2" stroke-width="0.45" fill="none"/></pattern>`);
-  else if (K.denim) K.defs.push(`<pattern id="${id}m" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(38)"><path d="M0 0 V1.6" stroke="#fff" stroke-opacity="0.2" stroke-width="0.55"/><circle cx="1.1" cy="0.5" r="0.18" fill="#fff" fill-opacity="0.18"/></pattern>`);
-  else if (K.leinen) K.defs.push(`<pattern id="${id}m" width="3.2" height="2.6" patternUnits="userSpaceOnUse"><path d="M0 0.6 H3.2" stroke="#000" stroke-opacity="0.08" stroke-width="0.4"/><path d="M1.8 0 V2.6" stroke="#fff" stroke-opacity="0.12" stroke-width="0.35"/><path d="M0 1.9 H1.2" stroke="${dl}" stroke-opacity="0.1" stroke-width="0.5"/></pattern>`);
+  else if (K.denim) K.defs.push(`<pattern id="${id}m" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(38)"><path d="M0 0 V1.6" stroke="#fff" stroke-opacity="0.3" stroke-width="0.6"/><circle cx="1.1" cy="0.5" r="0.2" fill="#fff" fill-opacity="0.25"/></pattern>`);
+  else if (K.leinen) K.defs.push(`<pattern id="${id}m" width="3.2" height="2.6" patternUnits="userSpaceOnUse"><path d="M0 0.6 H3.2" stroke="#000" stroke-opacity="0.12" stroke-width="0.45"/><path d="M1.8 0 V2.6" stroke="#fff" stroke-opacity="0.15" stroke-width="0.4"/><path d="M0 1.9 H1.4" stroke="${dl}" stroke-opacity="0.14" stroke-width="0.6"/></pattern>`);
   else if (typ === 'Handtuch') K.defs.push(`<pattern id="${id}m" width="1.6" height="1.6" patternUnits="userSpaceOnUse"><circle cx="0.8" cy="0.8" r="0.45" fill="#000" fill-opacity="0.12"/></pattern>`);
   else if (typ === 'Plüschtier') K.defs.push(`<pattern id="${id}m" width="2.4" height="2.4" patternUnits="userSpaceOnUse"><path d="M0.4 0.4 l0.8 0.9 M1.6 1.4 l0.6 0.8" stroke="#000" stroke-opacity="0.14" stroke-width="0.4"/></pattern>`);
   else K.defs.push(`<pattern id="${id}m" width="1.8" height="1.8" patternUnits="userSpaceOnUse"><circle cx="0.9" cy="0.9" r="0.22" fill="#000" fill-opacity="0.06"/></pattern>`);
@@ -149,15 +149,14 @@ Z.Kaschmirpullover = (K) => {
   pulloverGrund(K);
   K.flaeche('M38 15 C42 20.6 58 20.6 62 15 C58 13 42 13 38 15 Z', K.cK);
   K.form('M35 15.4 C40 26 60 26 65 15.4 L62 15 C58 21 42 21 38 15 Z', { farbe: K.cD });
-  if (String(K.material).toLowerCase() === 'kaschmir') K.strich('M30 30 C40 28 46 34 44 46', '#fff', 1.4, ' opacity="0.12"');
 };
 Z.Strickjacke = (K) => {
   pulloverGrund(K);
   K.flaeche('M39 15.6 L50 50 L61 15.6 C57 13.6 43 13.6 39 15.6 Z', K.cK);
   K.strich('M38.4 15.4 L50 52 L50 89.6', K.cL, 2.6); K.strich('M61.6 15.4 L51.6 48', K.cD, 2.2);
   for (const y of [56, 64, 72, 80]) K.kreis(52.6, y, 1.2, K.cK);
-  K.form('M31 64 L43 64 L43 75 L31 75 Z', { farbe: K.c }); K.rippen(31, 43, 64, 67, 8, K.cK); K.strich('M31 67 L43 67', K.cD, 0.4);
-  K.form('M57 64 L69 64 L69 75 L57 75 Z', { farbe: K.c }); K.rippen(57, 69, 64, 67, 8, K.cK); K.strich('M57 67 L69 67', K.cD, 0.4);
+  K.strich('M31 64 L31 75 L43 75 L43 64', K.cD, 0.5); K.flaeche('M31 63.4 L43 63.4 L43 66.6 L31 66.6 Z', K.cD); K.rippen(31, 43, 63.6, 66.4, 8, K.cK);
+  K.strich('M57 64 L57 75 L69 75 L69 64', K.cD, 0.5); K.flaeche('M57 63.4 L69 63.4 L69 66.6 L57 66.6 Z', K.cD); K.rippen(57, 69, 63.6, 66.4, 8, K.cK);
 };
 Z.Kleid = (K) => {
   K.form('M39 12 L44 12 C45.4 18 54.6 18 56 12 L61 12 L63 22 C66 24 66.6 30 64 36 L63.4 43 L79 86 C62 91.4 38 91.4 21 86 L36.6 43 L36 36 C33.4 30 34 24 37 22 Z');
@@ -248,11 +247,11 @@ Z.Sneaker = (K) => {
   if (!K.leder) K.naht('M14 64 C30 62 60 62 85 61');
 };
 Z.Pumps = (K) => {
-  K.form('M78 55 L84.4 55 L82.6 86 L79 86 Z', { farbe: K.cD });
-  K.form('M10 70 C10 64 16 60.6 26 60.4 C40 60 52 56 60 50 C66 46 72 44 78 45.6 L84.6 48 L84.6 56 C78.6 56 74.6 58.4 72 64 L68 72 L14 74.4 C11 74.4 10 72.4 10 70 Z');
-  K.flaeche('M30 60.4 C42 58.4 54 54.4 62 48.6 C68 46 74 46 80.6 48.2 C72.6 50.2 64 54.4 56 58.4 C46 62.2 38 62 30 60.4 Z', K.cK);
-  K.strich('M14 74.4 L68 72', '#1d1d1d', 1);
-  K.strich('M18 66 C30 64 44 62 52 58', '#fff', 1.2, ' opacity="0.35"');
+  K.form('M73.6 53 L82.4 53 L81.2 88 L78.4 88 C78.2 74 77 62 73.6 53 Z', { farbe: K.cD });
+  K.form('M8 76 C8 70.4 14 67.4 24 66.4 C34 65.4 42 62 50 57 C58 52 66 46.4 74 44.6 L82 44 C84.4 46 84.4 52 82.4 56 C76.4 56 72 58.4 66 62.4 C58 68 48 74 36 77 C26 79.4 12 80 8 76 Z');
+  K.flaeche('M33 65 C43 62.6 51 57.6 59 52.6 C65 48.6 72 46.4 80.4 46.4 C74 50 66 55 58 60 C50 64.6 42 66.6 33 65 Z', K.cK);
+  K.strich('M8.6 76.6 C14 80 26 79.4 36 77 C48 74 58 68 66 62.4 C72 58.4 76.4 56 82.4 56', '#1d1d1d', 1);
+  K.strich('M14 71 C24 69 34 68 44 64', '#fff', 1.2, ' opacity="0.4"');
 };
 Z.Stiefel = (K) => {
   K.form('M44 10 L72 10 L73.6 54 C74 60 76 64 80 66 C86 68 90 72 90 78 L90 82 L18 82 C16 76 20 70 30 68 C38 66 42 62 43.6 56 Z');

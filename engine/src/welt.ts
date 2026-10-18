@@ -7,6 +7,9 @@ import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } fr
 import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
 import { erzeugeEigenmarken } from './eigenmarken';
+import { erzeugeVorstand, vorstandKostenWoche } from './vorstand';
+import { erzeugeProdukte } from './produkte';
+import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -283,7 +286,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     kvLimitBasis: PARAM.kvLimitBasis,
     tarif: 'flaeche',
     zentrale: { kostenWoche: zentrale, kostenStart: zentrale, fte: Math.round(zentrale / 1500) },
-    marketing: { budgetQuote: PARAM.marketingQuote, gewoehnung: 0.15, kundenkarte: false, aktionen: [] },
+    marketing: { budgetQuote: PARAM.marketingQuote, gewoehnung: 0.15, kundenkarte: false, aktionen: [], stand: undefined as unknown as GameState['marketing']['stand'] },
     controllingStufe: 1,
     berater: [],
     beraterQualitaet,
@@ -300,9 +303,14 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     hq: undefined as unknown as GameState['hq'],
     einkauf: undefined as unknown as GameState['einkauf'],
     eigenmarken: erzeugeEigenmarken(),
+    vorstand: undefined as unknown as GameState['vorstand'],
+    produkte: undefined as unknown as GameState['produkte'],
   };
   // Hauptverwaltung: alte, zu große Zentrale in Essen, kalibriert auf die bisherige Zentralkostenquote
   s.hq = erzeugeHq(s, zentrale);
+  // Vorstand: Gehälter sind Teil der bisherigen Zentralkosten (Sachkosten je FTE entsprechend niedriger)
+  s.vorstand = erzeugeVorstand(s);
+  s.hq.sachJeFte -= vorstandKostenWoche(s) / s.hq.abteilungen.reduce((a, x) => a + x.fte, 0);
   hqAktualisiere(s);
   s.zentrale.fte = Math.round(s.hq.abteilungen.reduce((a, x) => a + x.fte, 0));
   neueHqAngebote(s);
@@ -310,6 +318,11 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // Einkauf: Warengruppen, Eigenmarken, Bestand und Pipeline je WG (ersetzt die Bereichskohorten)
   s.einkauf = erzeugeEinkauf(s);
   initialisiereEinkauf(s);
+  // Produktentwicklung: Startsortiment der Eigenmarken (Basis für Nachfrage und Marge)
+  s.produkte = erzeugeProdukte(s);
+  // Marketing: Kanäle, Hartwig Karte und App, CRM, Startkalender (Standardplan = Ausgangslage)
+  s.marketing.stand = erzeugeMarketing(s);
+  initialisiereMarketing(s);
   return s;
 }
 

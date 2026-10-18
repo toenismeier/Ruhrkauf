@@ -6,13 +6,15 @@ import type { Cluster, GameState, Haus, Region } from './types';
 import { STAEDTE } from './daten';
 import { abstand100, BALLUNGSRAUM, KNOTEN } from './standorte';
 import { clamp, eur, ganzZwischen, melde, mio, waehle, zwischen, type RngHalter } from './util';
+import { vorstandFuerGrafik, vorstandKostenWoche, vorstandWirkung } from './vorstand';
+import { produktKostenWoche } from './produkte';
 
 // ---------------------------------------------------------------------------------------------
 // Datenmodell (Vertrag)
 // ---------------------------------------------------------------------------------------------
 
 export type AbteilungId = 'controlling' | 'einkauf' | 'marketing' | 'personal' | 'immobilien'
-  | 'logistik' | 'ecommerce' | 'recht' | 'vm' | 'verwaltung';
+  | 'logistik' | 'ecommerce' | 'recht' | 'vm' | 'verwaltung' | 'produkt';
 
 export type HqTyp = 'altbau' | 'nachkrieg' | 'buero70' | 'glas' | 'loft' | 'campus';
 export type Stufe = 0 | 1 | 2 | 3;
@@ -71,11 +73,11 @@ export interface Hq {
 // Parameter
 // ---------------------------------------------------------------------------------------------
 
-export const ABTEILUNGEN: AbteilungId[] = ['controlling', 'einkauf', 'marketing', 'personal', 'immobilien', 'logistik', 'ecommerce', 'recht', 'vm', 'verwaltung'];
+export const ABTEILUNGEN: AbteilungId[] = ['controlling', 'einkauf', 'marketing', 'personal', 'immobilien', 'logistik', 'ecommerce', 'recht', 'vm', 'verwaltung', 'produkt'];
 
 export const ABTEILUNG_NAME: Record<AbteilungId, string> = {
   controlling: 'Controlling', einkauf: 'Einkauf', marketing: 'Marketing', personal: 'Personal', immobilien: 'Immobilien',
-  logistik: 'Logistik', ecommerce: 'E-Commerce', recht: 'Recht', vm: 'Visual Merchandising', verwaltung: 'Verwaltung',
+  logistik: 'Logistik', ecommerce: 'E-Commerce', recht: 'Recht', vm: 'Visual Merchandising', verwaltung: 'Verwaltung', produkt: 'Produktentwicklung',
 };
 
 export const HQ_PARAM = {
@@ -85,16 +87,17 @@ export const HQ_PARAM = {
   /** Personalkosten je FTE und Woche inkl. Nebenkosten. */
   lohn: {
     controlling: 1_500, einkauf: 1_450, marketing: 1_400, personal: 1_300, immobilien: 1_550,
-    logistik: 1_300, ecommerce: 1_450, recht: 1_700, vm: 1_150, verwaltung: 1_100,
+    logistik: 1_300, ecommerce: 1_450, recht: 1_700, vm: 1_150, verwaltung: 1_100, produkt: 1_400,
   } as Record<AbteilungId, number>,
   /** Rohwerte Soll-FTE bei Stufe 1 (werden auf die Startkosten skaliert) und Überbesetzung zum Start. */
   normRoh: {
-    controlling: 75, einkauf: 170, marketing: 115, personal: 100, immobilien: 45,
-    logistik: 100, ecommerce: 95, recht: 35, vm: 110, verwaltung: 150,
+    // Produktentwicklung (Designer, Technik, Musterung) ist aus dem Einkauf herausgelöst: 145 + 25 = bisher 170
+    controlling: 75, einkauf: 145, marketing: 115, personal: 100, immobilien: 45,
+    logistik: 100, ecommerce: 95, recht: 35, vm: 110, verwaltung: 150, produkt: 25,
   } as Record<AbteilungId, number>,
   ueberbesetzungStart: {
     controlling: 1.0, einkauf: 1.05, marketing: 1.25, personal: 1.3, immobilien: 1.0,
-    logistik: 1.05, ecommerce: 1.0, recht: 1.0, vm: 1.6, verwaltung: 1.6,
+    logistik: 1.05, ecommerce: 1.0, recht: 1.0, vm: 1.6, verwaltung: 1.6, produkt: 1.05,
   } as Record<AbteilungId, number>,
   sachJeFteRichtwert: 520,
   abfindungRegulaer: 45_000,
@@ -365,7 +368,7 @@ export function verteilungsFaktor(s: GameState): number {
   return Math.max(HQ_PARAM.verteilungMin, 1 - HQ_PARAM.verteilungJeStadt * Math.max(0, n - 1));
 }
 
-export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; gesamt: number }
+export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; gesamt: number }
 
 export function hqKosten(s: GameState): HqKosten {
   const hq = s.hq;
@@ -390,7 +393,9 @@ export function hqKosten(s: GameState): HqKosten {
   }
   const Lv = hq.wirkung.verwaltung;
   const strafen = Math.max(0, 1 - Lv) * HQ_PARAM.verwaltungStrafe * s.zentrale.kostenStart;
-  return { personal, sach, reise, miete, nebenkosten, strafen, gesamt: personal + sach + reise + miete + nebenkosten + strafen };
+  const vorstand = vorstandKostenWoche(s);
+  const entwicklung = produktKostenWoche(s);
+  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung };
 }
 
 /** Rechnet wirksame Stufen, Zentralkosten und Controllingstufe neu. Nach jeder HQ-Änderung aufrufen. */
@@ -398,7 +403,8 @@ export function hqAktualisiere(s: GameState): void {
   const hq = s.hq;
   syncEtagen(s);
   const v = verteilungsFaktor(s);
-  for (const a of hq.abteilungen) hq.wirkung[a.id] = wirksameStufe(s, a, v);
+  // Vorstand: Führung des Ressorts verstärkt oder schwächt die Abteilungen (Start = 1)
+  for (const a of hq.abteilungen) hq.wirkung[a.id] = Math.min(3, wirksameStufe(s, a, v) * vorstandWirkung(s, a.id));
   const k = hqKosten(s);
   s.zentrale.kostenWoche = eur(k.gesamt);
   s.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0));
@@ -468,7 +474,7 @@ export function erzeugeHq(s: GameState, zielKostenWoche: number): Hq {
     vermieter: 'Rheinruhr Büroimmobilien GmbH',
   };
   // Belegen: jede Etage nur zu gut drei Vierteln, oben im Hochhaus bleibt Leerstand (die Zentrale ist zu groß)
-  const reihenfolge: AbteilungId[] = ['verwaltung', 'personal', 'recht', 'einkauf', 'marketing', 'vm', 'ecommerce', 'logistik', 'controlling', 'immobilien'];
+  const reihenfolge: AbteilungId[] = ['verwaltung', 'personal', 'recht', 'einkauf', 'produkt', 'marketing', 'vm', 'ecommerce', 'logistik', 'controlling', 'immobilien'];
   const haeuser = [scheibe, hoch];
   const fuellen = (quote: number): boolean => {
     const frei = new Map<HqEtage, number>();
@@ -823,6 +829,7 @@ function wirkungText(s: GameState, id: AbteilungId): string {
     case 'ecommerce': return teile(['Umsatz über Online und Click and Collect', pz(kurve(Lx, W.ecommerce))]);
     case 'recht': return teile(['Sozialplan, Abfindungen und Restmieten', pz(kurve(Lx, W.recht), 0)]);
     case 'vm': return teile(['Flächenproduktivität', pz(kurve(Lx, W.vm))]);
+    case 'produkt': return Lx < 0.95 ? 'Wenig Kapazität und schwächere Produkte bei den Eigenmarken' : Lx > 1.5 ? 'Mehr Sortimentsplätze und bessere Produkte bei den Eigenmarken' : 'Marktstandard, Ausbau bringt mehr Sortimentsplätze und bessere Produkte';
     case 'verwaltung': {
       const st = Math.max(0, 1 - Lx);
       return st > 0.005 ? `Unter Mindeststufe: Strafen und Säumnisse ${mio(st * HQ_PARAM.verwaltungStrafe * s.zentrale.kostenStart * 52)} im Jahr, Bankvertrauen sinkt` : 'Pflichtaufgaben erfüllt (Buchhaltung, Zahlungsverkehr, Meldungen)';
@@ -868,7 +875,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
     kostenWoche: s.zentrale.kostenWoche,
     kostenStart: s.zentrale.kostenStart,
     standort: standort(s, hq.sitz),
-    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), gesamt: eur(kosten.gesamt) },
+    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), gesamt: eur(kosten.gesamt) },
     restmieteWoche: eur(hqRestmieteWoche(s)),
     fte: s.zentrale.fte,
     gebaeude: hq.gebaeude.map((g) => {
@@ -910,6 +917,8 @@ export interface HqGrafik {
   sitz: string;
   gebaeude: { id: string; name: string; stadt: string; typ: HqTyp; etagen: { nr: number; qm: number; gemietet: boolean; abteilungen: { id: AbteilungId; fte: number; stufe: Stufe }[] }[] }[];
   angebote: { id: string; stadt: string; typ: HqTyp; etagen: { nr: number; qm: number }[] }[];
+  /** Vorstandsetage (oberste gemietete Etage am Sitz) mit Namensschildern je Ressort. */
+  vorstand?: { etage?: { gebaeudeId: string; nr: number }; ressorts: ReturnType<typeof vorstandFuerGrafik> };
 }
 
 /** Reines JSON für die Grafik (render/src/kit/hq.js). */
@@ -926,5 +935,12 @@ export function hqFuerGrafik(s: GameState): HqGrafik {
       })),
     })),
     angebote: hq.angebote.map((an) => ({ id: an.id, stadt: an.gebaeude.stadt, typ: an.gebaeude.typ, etagen: an.gebaeude.etagen.map((e) => ({ nr: e.nr, qm: e.qm })) })),
+    vorstand: { etage: vorstandEtage(s), ressorts: vorstandFuerGrafik(s) },
   };
+}
+
+function vorstandEtage(s: GameState): { gebaeudeId: string; nr: number } | undefined {
+  const g = s.hq.gebaeude.find((x) => x.stadt === s.hq.sitz && x.etagen.some((e) => e.gemietet)) ?? s.hq.gebaeude.find((x) => x.etagen.some((e) => e.gemietet));
+  const e = g ? [...g.etagen].reverse().find((x) => x.gemietet) : undefined;
+  return g && e ? { gebaeudeId: g.id, nr: e.nr } : undefined;
 }

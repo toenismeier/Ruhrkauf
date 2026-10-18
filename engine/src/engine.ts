@@ -10,6 +10,9 @@ import { eigenmarkenWoche, istVerkaufsaktiv } from './eigenmarken';
 import { neueWelt, PARAM, STANDARD_SZENARIO, type Szenario } from './welt';
 import { hqControllingExzellenz, hqEinkaufKonditionen, hqRestmieteWoche, hqWkzFaktor, hqWoche } from './hq';
 import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './wirtschaft';
+import { vorstandWoche } from './vorstand';
+import { produkteBuchen, produkteWoche } from './produkte';
+import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 
 export function neuesSpiel(seed = 1, szenario: Szenario = STANDARD_SZENARIO): GameState {
   return neueWelt(seed, szenario);
@@ -30,6 +33,11 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   prozesse(s);
   hqWoche(s);
   quartalsStart(s);
+  // Vorstand (Loyalität, Abwerbung, Sitzung, Ressort-KI) und Produktentwicklung (Einführungen)
+  vorstandWoche(s);
+  produkteWoche(s);
+  // Marketing: Kanäle, Karte, CRM-Versand, laufende Aktionen der Woche (vor der Nachfrage)
+  marketingVorbereiten(s);
 
   const lohn = lohnSumme(s);
   einkaufFristen(s);
@@ -130,11 +138,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     if (h.status === 'offen' || h.status === 'schliessung_verhandlung' || h.status === 'raeumung') k.offeneHaeuser += 1;
     if (!insolvenzgeld) personalCash += kpi.personal;
 
-    // Aktionsmessung (verdeckt)
-    if (r.aktion) {
-      r.aktion._mehrumsatzWahr += kpi.umsatz - r.ohneAktion;
-      r.aktion._rohertragseffektWahr += kpi.rohertrag - r.ohneAktionRohertrag;
-    }
+    // Aktionsmessung (verdeckt, je Aktion und Gruppe, nach Warenverfügbarkeit)
+    messeAktionen(s, r.aktionsMessung, verfuegbar, PARAM.kommissionsMarge);
   }
 
   // Werbekostenzuschüsse auf Einkaufsvolumen
@@ -154,19 +159,22 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // 5. Zentrale Kosten (aus der Hauptverwaltung, inkl. Controlling) und Restmieten gekündigter Büros
   k.zentrale = s.zentrale.kostenWoche;
   restmieten += hqRestmieteWoche(s);
-  const aktionsWerbung = s.marketing.aktionen.filter((a) => w >= a.start && w < a.ende).reduce((x, a) => x + a.kosten / (a.ende - a.start), 0);
   const markenBudget = s.eigenmarken.marken.reduce((x, m) => x + (istVerkaufsaktiv(m) || m.status === 'aufbau' ? m.budgetWoche : 0), 0);
-  k.marketing = s.marketing.budgetQuote * k.umsatz + aktionsWerbung + (s.marketing.kundenkarte ? 0.001 * k.umsatz : 0) + markenBudget;
+  // Werbung netto (Kanäle, Karte, App, CRM, Sonderwerbung abzüglich Lieferantenbeteiligung) plus Markenbudgets der Eigenmarken
+  const mk = marketingKosten(s, k.umsatz);
+  k.marketing = mk.netto + markenBudget;
   k.beratung = s.berater.filter((b) => w >= b.start && w < b.ende).reduce((x, b) => x + b.wochenSatz, 0);
 
   // 6. Abschriften und Gewöhnung
   k.abschriften = einkaufAltern(s);
   k.rohertrag -= k.abschriften;
   eigenmarkenWoche(s, einkaufBuchen(s, umsatzEigenJe));
+  produkteBuchen(s);
   s.marketing.gewoehnung = Math.max(0, s.marketing.gewoehnung * 0.99);
 
   k.ebitda = k.rohertrag + k.konzession + k.untermiete + k.wkz - k.personal - k.miete - k.nebenkosten - k.sonstige - k.logistik - k.zentrale - k.marketing - k.beratung;
   k.sondereffekte = s.einmalErloeseWoche - s.einmalkostenWoche - restmieten;
+  marketingAbschluss(s, k.umsatz, mk);
 
   // 7. Disposition: NOS, Nachorder, Vororder, Freigabe-Eingang
   einkaufDispo(s);
@@ -233,6 +241,7 @@ function lieferantenZahlungen(s: GameState): void {
 
 function werteAktionenAus(s: GameState): void {
   if (s.prognose) return;
+  const r = marketingRng(s); // eigener Zufallsstrom, damit der Aktionskalender die übrige Simulation nicht verschiebt
   const breite = hqControllingExzellenz(s) ? 0.08 : [0.45, 0.25, 0.12][s.controllingStufe];
   const bias = [0.15, 0.03, 0][s.controllingStufe];
   for (const a of s.marketing.aktionen) {
@@ -240,11 +249,11 @@ function werteAktionenAus(s: GameState): void {
     const m = a._mehrumsatzWahr;
     const kontrolle = a.kontrollHaeuser.length >= 5;
     const b = breite * (kontrolle ? 0.5 : 1);
-    const stoer = zwischen(s, 0, 1) < 0.25;
-    const zentrum = m * (1 + bias * (kontrolle ? 0.3 : 1) + normal(s) * b * 0.35) + (stoer ? Math.abs(m) * zwischen(s, -0.15, 0.15) : 0);
+    const stoer = zwischen(r, 0, 1) < 0.25;
+    const zentrum = m * (1 + bias * (kontrolle ? 0.3 : 1) + normal(r) * b * 0.35) + (stoer ? Math.abs(m) * zwischen(r, -0.15, 0.15) : 0);
     const halb = Math.abs(m) * b * (stoer ? 1.3 : 1);
     a.ausgewertet = {
-      marketingBericht: eur(Math.abs(m) * zwischen(s, 1.3, 1.9)),
+      marketingBericht: eur(Math.abs(m) * zwischen(r, 1.3, 1.9)),
       schaetzungVon: eur(zentrum - halb),
       schaetzungBis: eur(zentrum + halb),
       hinweis: stoer ? 'Störfaktoren in der Messung (Wetter, Ferienverschiebung, Nachbarschließung).' : kontrolle ? 'Gemessen gegen Kontrollhäuser.' : 'Gemessen gegen Vorjahr und Trend.',

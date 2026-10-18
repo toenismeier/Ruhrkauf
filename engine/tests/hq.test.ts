@@ -72,7 +72,7 @@ describe('HQ Kosten', () => {
       expect(Math.abs(s.zentrale.kostenWoche - basis * PARAM.zentraleQuote)).toBeLessThanOrEqual(1);
       expect(s.zentrale.kostenWoche).toBe(s.zentrale.kostenStart);
       const k = hqKosten(s);
-      expect(Math.round(k.personal + k.sach + k.reise + k.miete + k.nebenkosten + k.strafen)).toBe(Math.round(k.gesamt));
+      expect(Math.round(k.personal + k.sach + k.reise + k.miete + k.nebenkosten + k.strafen + k.vorstand + k.entwicklung)).toBe(Math.round(k.gesamt));
       expect(k.reise).toBeGreaterThan(0);
       expect(k.miete).toBeGreaterThan(0);
       expect(k.nebenkosten).toBeGreaterThan(0);
@@ -235,7 +235,7 @@ describe('HQ Kompatibilität und Wirkungen', () => {
     const s = neuesSpiel(1);
     const j = hqFuerGrafik(s);
     expect(JSON.parse(JSON.stringify(j))).toEqual(j);
-    expect(Object.keys(j).sort()).toEqual(['angebote', 'gebaeude', 'sitz']);
+    expect(Object.keys(j).sort()).toEqual(['angebote', 'gebaeude', 'sitz', 'vorstand']);
     for (const g of j.gebaeude) {
       expect(Object.keys(g).sort()).toEqual(['etagen', 'id', 'name', 'stadt', 'typ']);
       for (const e of g.etagen) {

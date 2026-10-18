@@ -18,7 +18,8 @@
 //   hqMasse(g)                      Grundfläche und Höhen: { w, d, eg, gh, n, H }.
 //   hqEinplanen(plan, hq, stadt)    setzt HQ-Gebäude und Angebote nachträglich in einen fertigen Stadtplan (Plan sonst
 //                                   unverändert), Ensemble gleicher Adresse mit Brücke. angebotMarker() Schlüssel-Pin.
-//   ABTEILUNGEN                     Name und Farbe je Abteilung.
+//   ABTEILUNGEN                     Name und Farbe je Abteilung (inkl. 'produkt' Produktentwicklung).
+//   hqEtage opt.vorstand            Vorstandsetage, siehe Ergänzung am Dateiende.
 // Slot-Bauer 'slot:hq' wird über registriereSlots (bauer.js) angemeldet: p.standort.hq = Gebäude bzw. Angebot.
 import { THREE, rng, waehle, zw, FARBEN, heller, dunkler, gesims, dachProfil, schild, textMaterial } from './basis.js';
 import { lokal, vorbereiten, boden, rueckwand, stuetze, treppenhaus, aufzug, figur, wandschild, haengeschild, GLAS, puppe, PAL } from './innen.js';
@@ -1352,25 +1353,34 @@ export function hqEtage(S, scene, g, nr, opt = {}) {
   else if (miet) teekueche(S, scene, K, tt, T, stufeMax, r, G);
 
   // Zonen: Breite je Abteilung aus FTE × 14 m², Rest Leerfläche (gemietet) bzw. roh (frei)
-  const x0 = K + 0.3, nutz = B - x0;
+  const vs = opt.vorstand;
+  const vorstandHier = !!vs && miet && (vs.immer || (vs.etage && vs.etage.gebaeudeId === g.id && vs.etage.nr === nr));
+  let x0 = K + 0.3, nutz = B - x0, vorstandB = 0;
+  if (vorstandHier) {
+    const abtB = abt.reduce((q, a) => q + Math.max(5, (a.fte * 14) / T), 0);
+    vorstandB = Math.max(Math.min(22, nutz), Math.min(26, nutz - abtB));
+    x0 += vorstandB; nutz -= vorstandB;
+  }
   let breiten = abt.map((a) => (a.fte * 14) / T);
   const summe = breiten.reduce((a, b) => a + b, 0);
   if (summe > nutz) breiten = breiten.map((b) => (b * nutz) / summe);
   breiten = breiten.map((b) => Math.max(5, Math.round(b * 2) / 2));
   const zonen = [];
+  if (vorstandHier) zonen.push({ art: 'vorstand', x0: K + 0.3, x1: x0 });
   let xa = x0;
   abt.forEach((a, i) => { const xb = i === abt.length - 1 && nutz - (xa - x0) - breiten[i] < 3 ? B : Math.min(B, xa + breiten[i]); zonen.push({ art: 'abt', a, x0: xa, x1: xb }); xa = xb; });
   if (B - xa >= 0.5) zonen.push({ art: miet ? 'leer' : 'frei', x0: xa, x1: B });
   for (const [k, Z] of zonen.entries()) {
     if (k > 0) trennwand(S, Z.x0, T);
-    if (Z.art === 'abt') abteilungsZone(S, scene, Z, T, G, r, figuren, g);
+    if (Z.art === 'vorstand') vorstandZone(S, scene, Z, T, G, r, figuren, vs.ressorts ?? []);
+    else if (Z.art === 'abt') abteilungsZone(S, scene, Z, T, G, r, figuren, g);
     else if (Z.art === 'leer') leerZone(S, scene, Z, T, r);
     else rohZone(S, scene, Z, T, r);
   }
   if (!miet) { boden(S, 0, tt, K, T - tt, 0, BELAG_ROH, 1); if (scene) wandschild(S, scene, 'ZU VERMIETEN', 'z', tt + (T - tt) / 2 + 0.3, 1.9, 0.3, { farbe: ROT, hoehe: 0.55 }); }
   let box = new THREE.Box3(new THREE.Vector3(-0.6, -1.8, -0.6), new THREE.Vector3(B + 0.4, WH, T + 0.4));
   // Ausschnitt auf eine Abteilung (opt.zone = Abteilungs-Id oder true für die erste)
-  const zz = opt.zone && zonen.find((q) => q.art === 'abt' && (opt.zone === true || q.a.id === opt.zone));
+  const zz = opt.zone && zonen.find((q) => (opt.zone === 'vorstand' ? q.art === 'vorstand' : q.art === 'abt' && (opt.zone === true || q.a.id === opt.zone)));
   if (zz) box = new THREE.Box3(new THREE.Vector3(zz.x0 - 1, -1.8, -0.6), new THREE.Vector3(zz.x1 + 0.4, WH, T + 0.4));
   return { box, anzahl: S.anzahl - n0, figuren: figuren.n, zonen: zonen.map((z) => ({ art: z.art, id: z.a?.id, breite: z.x1 - z.x0 })), breite: B, tiefe: T };
 }
@@ -1470,10 +1480,12 @@ function abteilungsZone(S, scene, Z, T, G, r, figuren, g) {
   let belegtR = 0;
   for (let runde = 0, fehl = 0; fehl < nTypen && belegtR < flR * 0.85 && runde < 40; runde++) {
     const s2 = pool[runde % nTypen];
+    if (s2.einmal && s2._zone === Z) { fehl++; continue; }
     const pos = G.suche(R, s2.w, s2.d, 0.5);
     if (!pos) { fehl++; continue; }
     fehl = 0; belegtR += s2.w * s2.d;
     s2.bau(S, scene, pos.x, pos.z, s2.w, s2.d, st, r, farbe);
+    if (s2.einmal) s2._zone = Z;
   }
   G.setze(R.x0 - 0.4, R.z0 - 0.4, R.x1, R.z1);
   const liste = [];
@@ -1682,3 +1694,234 @@ const SIGNATUR = {
     } },
   ],
 };
+
+// ====================================================================================
+// Ergänzung Vorstand und Produktentwicklung
+// ====================================================================================
+// Vorstandsetage: hqEtage(S, scene, g, nr, { vorstand }) mit vorstand = hqFuerGrafik().vorstand
+//   ({ etage: { gebaeudeId, nr }, ressorts: [{ id, kurz, titel, name?, portraet? }] }). Liegt die Vorstandsetage auf dieser
+//   Etage (oder vorstand.immer), belegt eine Vorstandszone den Bereich direkt hinter dem Kern: Büros mit Namensschild je
+//   Ressort (unbesetzt: leeres Büro), Büro CEO, Sitzungssaal, Empfang Vorstand mit Wartebereich. Die Abteilungen der Etage
+//   rücken dahinter. Kleidungsfarbe der Figur aus den Porträt-Merkmalen.
+// Produktentwicklung (Abteilung 'produkt'): Designstudio mit Schneiderpuppen, Stoffmusterwand, Farbkarten,
+//   Musterkollektion an Stangen, Zuschnitttischen und Anprobe.
+// Marketing: CRM-Leitstand (Videowand mit Kundenkarte, Segmenten, Kampagnen) als erstes Signaturmöbel.
+ABTEILUNGEN.produkt = { name: 'Produktentwicklung', farbe: '#b0568f' };
+const VORSTAND_FARBE = '#24344d';
+const RESSORTS_STANDARD = [
+  { id: 'cfo', kurz: 'CFO' }, { id: 'coo', kurz: 'COO' }, { id: 'cso', kurz: 'CSO' }, { id: 'cpo', kurz: 'CPO' },
+  { id: 'cmo', kurz: 'CMO' }, { id: 'chro', kurz: 'CHRO' }, { id: 'cro', kurz: 'CRO' }, { id: 'cdo', kurz: 'CDO' },
+];
+const KLEID_HEX = {
+  marine: '#2a3558', anthrazit: '#3c4148', grau: '#8a9097', schwarz: '#22252a', bordeaux: '#7a2836', petrol: '#1f6470',
+  olive: '#6d7442', camel: '#b98a52', beige: '#d9c8aa', hellblau: '#b9d3ec', 'weiß': '#eef4f8', senf: '#c9a13a',
+  rosa: '#f4c9e6', 'mintgrün': '#a8dcc4', 'grün': '#6fae6a', rot: '#b8423a',
+};
+const kleidFarbe = (p) => KLEID_HEX[p?.kleidungFarbe] ?? (/^#/.test(String(p?.kleidungFarbe ?? '')) ? p.kleidungFarbe : '#2a3558');
+
+/** Schild auf der Glasfront, Breite begrenzt (Schrift wird kleiner statt breiter). */
+function namensschild(scene, t, x, y, z, maxB, hg, fg = '#ffffff', hMax = 0.4) {
+  if (!scene) return;
+  const { mat, seitenverhaeltnis } = textMaterial(t, fg, { groesse: 100, hintergrund: hg, versatz: -2 });
+  const h = Math.min(hMax, maxB / seitenverhaeltnis);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(h * seitenverhaeltnis, h), mat);
+  m.position.set(x, y, z); scene.add(m);
+}
+const nachname = (n) => String(n ?? '').trim().split(/\s+/).slice(-1)[0];
+
+function vorstandsBuero(S, sc, x, z, w, d, r, R, ceo = false) {
+  const besetzt = ceo || !!R.name;
+  const rahmen = '#2a3442';
+  glasraum(S, sc, x, z, w, d, rahmen, (L) => {
+    // Teppich, Schreibtisch aus Holz, Ledersessel, Sideboard, Bild, Pflanze
+    L.box(w - 0.5, 0.02, d - 0.6, 0, 0, 0, besetzt ? '#b9a58c' : '#a7a49d');
+    L.box(1.9, 0.06, 0.85, 0, 0.72, -0.35, '#6b4a32'); L.box(1.9, 0.6, 0.06, 0, 0.12, 0.05, '#5a3b26');
+    for (const s of [-1, 1]) L.box(0.06, 0.72, 0.8, s * 0.9, 0, -0.35, '#5a3b26');
+    L.box(w - 0.8, 0.7, 0.42, 0, 0, -d / 2 + 0.3, '#3a2a20');
+    L.box(1.0, 0.7, 0.04, -0.4, 1.4, -d / 2 + 0.12, '#f4f0e6'); L.box(0.9, 0.6, 0.02, -0.4, 1.45, -d / 2 + 0.15, waehle(r, ['#3f7d9a', '#c9853f', '#6d8f5a', '#8a3f5a']));
+    pflanze(L, w / 2 - 0.45, -d / 2 + 0.5, r, true);
+    for (const s of [-0.5, 0.5]) buerostuhl(L, s, 0.55, PI, 1, '#5a3b26');
+    if (besetzt) {
+      monitor(L.sub(0.55, -0.45, PI), 0, 0, 1, r);
+      L.box(0.32, 0.03, 0.24, -0.5, 0.78, -0.3, '#f4f2ee'); L.box(0.07, 0.12, 0.07, -0.75, 0.78, -0.45, '#d8d2c0');
+      buerostuhl(L, 0, -1.15, 0, 3, '#2a2d31');
+      figur(S, x + w / 2, z + d / 2 - 1.15, hashText(R.name ?? R.kurz) % 100000, 'fremd', { pose: 'sitzen', ry: 0, farbe: kleidFarbe(R.portraet) });
+    } else {
+      buerostuhl(L, 0, -1.0, 0, 2, '#2a2d31');
+      L.box(0.6, 0.42, 0.45, w / 2 - 0.6, 0, 0.6, '#c9a26b'); L.box(0.6, 0.02, 0.45, w / 2 - 0.6, 0.42, 0.6, '#b8925e');
+    }
+  }, {});
+  const titel = ceo ? 'CEO · Vorstandsvorsitz' : besetzt ? `${R.kurz} · ${nachname(R.name)}` : `${R.kurz} · unbesetzt`;
+  namensschild(sc, titel, x + w / 2, 2.35, z + d + 0.05, w - 0.5, besetzt ? VORSTAND_FARBE : '#7b838b');
+}
+
+function sitzungssaal(S, sc, x, z, w, d, r, n) {
+  glasraum(S, sc, x, z, w, d, '#2a3442', (L) => {
+    L.box(w - 0.6, 0.02, d - 0.6, 0, 0, 0, '#9c8a76');
+    const lang = Math.min(w - 2.4, 0.95 * Math.ceil(n / 2) + 0.6);
+    L.box(lang, 0.07, 1.5, 0, 0.72, 0.2, '#5a3b26'); for (const s of [-1, 1]) L.box(0.3, 0.72, 0.9, s * (lang / 2 - 0.6), 0, 0.2, '#3a2a20');
+    const proSeite = Math.ceil(n / 2);
+    for (const s of [-1, 1]) for (let k = 0; k < proSeite; k++) {
+      const u = (k - (proSeite - 1) / 2) * 0.95;
+      buerostuhl(L, u, 0.2 + s * 1.05, s > 0 ? PI : 0, 3, '#2a2d31');
+      L.box(0.3, 0.02, 0.22, u, 0.79, 0.2 + s * 0.45, '#f4f2ee');
+    }
+    buerostuhl(L, lang / 2 + 0.55, 0.2, -PI / 2, 3, VORSTAND_FARBE);
+    L.box(2.6, 1.5, 0.08, 0, 0.9, -d / 2 + 0.15, '#22272c'); L.box(2.4, 1.3, 0.02, 0, 1.0, -d / 2 + 0.2, '#f4f6f8');
+    balken(L, -0.6, 1.15, -d / 2 + 0.22, 1.0, 0.9, r); linie(L, 0.6, 1.15, -d / 2 + 0.22, 1.0, 0.9, r);
+    text(L, 'Vorstandssitzung', 0, 2.05, -d / 2 + 0.23, 0.2, '#ffffff', VORSTAND_FARBE);
+    for (const s of [-1, 1]) pflanze(L, s * (w / 2 - 0.5), -d / 2 + 0.5, r, true);
+    for (let k = 0; k < Math.min(4, n); k++) {
+      const u = (k - 1.5) * 0.95 * (proSeite > 2 ? 1 : 0.6);
+      figur(S, x + w / 2 + u, z + d / 2 + 0.2 + (k % 2 ? 1.05 : -1.05), 7100 + k, 'leitung', { pose: 'sitzen', ry: k % 2 ? PI : 0 });
+    }
+  }, {});
+  namensschild(sc, 'Sitzungssaal', x + w * 0.3, 2.35, z + d + 0.05, 3, VORSTAND_FARBE);
+}
+
+function vorstandEmpfang(S, sc, x, z, w, d, r) {
+  const L = lokal(S, x + w / 2, 0.06, z + d / 2, 0);
+  L.box(w - 0.2, 0.02, d - 0.2, 0, 0, 0, '#d9cdb8');
+  // Empfangstresen mit Logo-Band, Assistenz, Wartesofa, Pflanze
+  L.box(2.8, 1.1, 0.7, 0, 0, -0.6, '#f4f2ee'); L.box(2.9, 0.06, 0.8, 0, 1.1, -0.6, '#3a2a20'); L.box(2.8, 0.22, 0.04, 0, 0.8, -0.23, VORSTAND_FARBE);
+  text(L, 'Vorstand', 0, 0.42, -0.22, 0.24, '#3a4048');
+  monitor(L.sub(-0.6, -0.75, PI), 0, 0, 2, r);
+  figur(S, x + w / 2 - 0.2, z + d / 2 - 1.35, 7201, 'info', { pose: 'stehen', ry: 0 });
+  L.box(2.0, 0.42, 0.8, 0, 0, d / 2 - 0.7, '#5f6f7c'); L.box(2.0, 0.4, 0.22, 0, 0.42, d / 2 - 0.35, '#4f5d68');
+  L.box(0.7, 0.38, 0.5, 1.6, 0, d / 2 - 0.9, '#d8bf98');
+  figur(S, x + w / 2 + 0.4, z + d - 0.75, 7202, 'kunde', { pose: 'sitzen', ry: PI });
+  pflanze(L, -w / 2 + 0.5, d / 2 - 0.6, r, true);
+}
+
+/** Vorstandszone ab x0 (Breite W): Büroreihen hinten, Sitzungssaal und Empfang vorn. */
+function vorstandZone(S, scene, Z, T, G, r, figuren, ressorts) {
+  const W = Z.x1 - Z.x0;
+  boden(S, Z.x0, 0, W, T, 0, BELAG[3], 1);
+  S.box(W - 1.0, 0.02, 1.8, Z.x0 + W / 2, 0.08, T - 1.4, '#7f6a58');
+  S.box(W - 0.4, 0.35, 0.06, Z.x0 + W / 2, WH - 0.55, 0.28, VORSTAND_FARBE);
+  if (scene) {
+    wandschild(S, scene, 'Vorstand', 'x', Z.x0 + W / 2, WH - 0.55, 0.31, { schrift: '#ffffff', hoehe: 0.32 });
+    haengeschild(S, scene, 'Vorstandsetage', Z.x0 + W / 2, WH - 0.8, T * 0.62, { farbe: VORSTAND_FARBE, hoehe: 0.75 });
+  }
+  const liste = ressorts.length ? ressorts : RESSORTS_STANDARD;
+  const ceoW = 5.4, od = 4.2;
+  const proReihe = Math.max(3, Math.min(liste.length, Math.floor((W - ceoW - 0.8) / 3.6)));
+  const reihen = Math.ceil(liste.length / proReihe);
+  const ow = (W - ceoW - 0.8) / proReihe;
+  liste.forEach((R, i) => {
+    const reihe = Math.floor(i / proReihe), k = i % proReihe;
+    vorstandsBuero(S, scene, Z.x0 + 0.4 + k * ow, 0.6 + reihe * (od + 1.6), ow - 0.15, od, r, R);
+    if (R.name) figuren.n++;
+  });
+  vorstandsBuero(S, scene, Z.x1 - ceoW - 0.2, 0.6, ceoW, od + 1.2, r, { kurz: 'CEO' }, true);
+  figuren.n++;
+  if (reihen > 1 && T - (0.6 + od + 1.6) > od + 7) lounge(S, scene, Z.x1 - ceoW - 0.2, 0.6 + od + 2.4, ceoW, od - 0.6, 2, r, VORSTAND_FARBE);
+  const zv = 0.6 + reihen * (od + 1.6);
+  const rest = T - zv - 1.0;
+  const sw = Math.min(W - 9, 12), sd = Math.max(4.4, Math.min(6.2, rest));
+  if (rest >= 4.4) sitzungssaal(S, scene, Z.x0 + W - sw - 0.4, zv, sw, sd, r, liste.length + 1);
+  const ew = Math.min(7, W - sw - 1.2);
+  if (ew >= 4.5 && rest >= 3.6) vorstandEmpfang(S, scene, Z.x0 + 0.4, zv + 0.4, ew, Math.min(rest, 5), r);
+  figuren.n += 2;
+  G.setze(Z.x0, 0, Z.x1, T);
+}
+
+// ------------------------------------------------------------------ Produktentwicklung
+function schneiderpuppe(L, lx, lz, r, stoff, ry = 0) {
+  const P = L.sub(lx, lz, ry);
+  P.zyl(0.22, 0.26, 0.04, 0, 0, 0, '#3a2a20', 10); P.zyl(0.025, 0.025, 0.9, 0, 0.04, 0, '#8f6f2a', 6);
+  P.zyl(0.17, 0.2, 0.32, 0, 0.94, 0, '#e8dcc4', 12); P.zyl(0.14, 0.17, 0.12, 0, 1.26, 0, '#e8dcc4', 12);
+  P.zyl(0.2, 0.14, 0.26, 0, 1.38, 0, '#e8dcc4', 12); P.zyl(0.05, 0.05, 0.1, 0, 1.64, 0, '#8f6f2a', 6); P.kugel(0.05, 0, 1.76, 0, '#3a2a20');
+  if (stoff) { P.geo(new THREE.CylinderGeometry(0.205, 0.3, 0.55, 12, 1, true, -0.6, PI * 1.3), 0, 0.68, 0, stoff); P.box(0.04, 0.5, 0.02, 0.16, 1.1, 0.12, dunkler(stoff, 0.15)); }
+  P.box(0.3, 0.03, 0.02, 0, 1.3, 0.17, '#e9c46a');
+}
+const STOFFE = ['#a8dcc4', '#26355e', '#76263a', '#d8c39c', '#cc9f2e', '#ec7a6a', '#9fb393', '#c4b0dc', '#b8864e', '#4a6f9e', '#f3f2ee', '#2c5a40'];
+SPEZIAL.produkt = [
+  { art: 'wand', w: 4.8, d: 0.4, bau(S, sc, x, z, w, d, st, r) {
+    // Stoffmusterwand: Pinnwand mit Stoffproben im Raster
+    const L = lokal(S, x + w / 2, 0.06, z + 0.12, 0);
+    L.box(w, 1.9, 0.06, 0, 0.55, 0, '#d8c6a4');
+    for (let i = 0; i < 9; i++) for (let j = 0; j < 4; j++) L.box(0.42, 0.34, 0.02, -w / 2 + 0.38 + i * 0.5, 0.68 + j * 0.42, 0.04, waehle(r, STOFFE));
+    text(L, 'Stoffmuster', 0, 2.6, 0.05, 0.24, '#ffffff', ABTEILUNGEN.produkt.farbe);
+  } },
+  { art: 'frei', w: 3.8, d: 2.4, bau(S, sc, x, z, w, d, st, r, farbe) {
+    // Zuschnitttisch: Schneidematte, ausgerollter Stoff mit Ballen, Schnittmuster aus Papier, Schere, Hocker
+    const L = lokal(S, x + w / 2, 0.06, z + d / 2 - 0.2, 0);
+    L.box(3.4, 0.06, 1.4, 0, 0.88, 0, '#e9e6df'); for (const s of [-1.55, 1.55]) L.box(0.1, 0.88, 1.2, s, 0, 0, '#5a636b');
+    L.box(3.2, 0.01, 1.25, 0, 0.94, 0, '#3f7a5a');
+    const stoff = waehle(r, STOFFE);
+    L.box(2.0, 0.015, 1.0, -0.3, 0.95, 0, stoff);
+    L.geo(new THREE.CylinderGeometry(0.1, 0.1, 1.1, 10).rotateX(PI / 2), 0.85, 1.05, 0, dunkler(stoff, 0.1));
+    for (let k = 0; k < 3; k++) L.geo(new THREE.BoxGeometry(0.5, 0.008, 0.36).rotateY(zw(r, -0.4, 0.4)), -0.9 + k * 0.45, 0.965, zw(r, -0.25, 0.25), '#fbf8ef');
+    L.box(0.22, 0.02, 0.06, 1.25, 0.95, 0.4, '#9aa3aa'); L.box(0.08, 0.02, 0.08, 1.38, 0.95, 0.42, '#d23c32');
+    L.box(1.2, 0.01, 0.04, -0.3, 0.955, -0.55, '#e9c46a');
+    L.zyl(0.2, 0.2, 0.05, -0.8, 0.62, 1.05, farbe, 10); L.zyl(0.03, 0.03, 0.62, -0.8, 0, 1.05, '#5a636b', 6);
+    figur(S, x + w / 2 + 0.2, z + d / 2 + 0.75, Math.floor(r() * 1e4), 'kunde', { ry: PI, pose: 'schauen' });
+  } },
+  { art: 'raum', w: 4.6, d: 3.8, bau(S, sc, x, z, w, d, st, r, farbe) {
+    // Anprobe: Schneiderpuppen in Prototypen, Spiegel, Stange mit Mustern
+    glasraum(S, sc, x, z, w, d, '#3a4048', (L) => {
+      L.box(w - 0.6, 0.02, d - 0.6, 0, 0, 0, '#e6dccb');
+      for (let k = 0; k < 3; k++) schneiderpuppe(L, -1.3 + k * 1.1, -0.2, r, waehle(r, STOFFE), 0.2);
+      L.box(0.9, 1.9, 0.06, w / 2 - 0.7, 0.1, -d / 2 + 0.35, '#c9d9e0'); L.box(1.0, 2.0, 0.04, w / 2 - 0.7, 0.05, -d / 2 + 0.3, '#3a2a20');
+      L.box(2.6, 0.04, 0.04, -0.4, 1.7, -d / 2 + 0.45, '#9aa3aa');
+      for (let u = -1.6; u < 0.8; u += 0.16) L.box(0.05, zw(r, 0.6, 0.95), 0.36, u, 1.66 - 0.8, -d / 2 + 0.45, waehle(r, STOFFE));
+      figur(S, x + w / 2 + 0.8, z + d / 2 + 0.8, Math.floor(r() * 1e4), 'kunde', { ry: PI + 0.4, pose: 'schauen' });
+    }, { name: 'Anprobe', farbe });
+  } },
+  { art: 'wand', w: 3.6, d: 0.4, bau(S, sc, x, z, w, d, st, r) {
+    // Farbkarten der Saison: Spalten von hell nach dunkel
+    const L = lokal(S, x + w / 2, 0.06, z + 0.12, 0);
+    L.box(w, 1.8, 0.05, 0, 0.6, 0, '#f6f4ef');
+    const basis = ['#a8dcc4', '#26355e', '#76263a', '#d8c39c', '#cc9f2e', '#ec7a6a', '#c4b0dc'];
+    basis.forEach((c, i) => { for (let j = 0; j < 6; j++) L.box(0.4, 0.22, 0.02, -w / 2 + 0.35 + i * 0.49, 0.72 + j * 0.27, 0.035, j < 3 ? heller(c, (3 - j) * 0.12) : dunkler(c, (j - 3) * 0.12)); });
+    text(L, 'Farbkarten Saison', 0, 2.55, 0.05, 0.22, '#ffffff', ABTEILUNGEN.produkt.farbe);
+  } },
+];
+SIGNATUR.produkt = [
+  { w: 3.2, d: 1.6, bau(S, sc, x, z, w, d, st, r) {
+    // Schneiderpuppen mit Prototypen, eine Figur steckt ab
+    const L = lokal(S, x + w / 2, 0.06, z + d / 2, 0);
+    for (let k = 0; k < 3; k++) schneiderpuppe(L, -1.0 + k * 1.0, (k % 2) * 0.25, r, k === 1 ? null : waehle(r, STOFFE), -0.3);
+    figur(S, x + w / 2 + 0.5, z + d / 2 + 0.6, Math.floor(r() * 1e4), 'kunde', { ry: PI + 0.5, pose: 'schauen' });
+  } },
+  { w: 4.4, d: 1.6, bau(S, sc, x, z, w, d, st, r, farbe) {
+    // Musterkollektion an zwei Rollstangen mit Anhängern
+    const L = lokal(S, x + w / 2, 0.06, z + d / 2, 0);
+    for (const s of [-1, 1]) {
+      const P = L.sub(s * 1.1, 0);
+      for (const t of [-1, 1]) { P.box(0.05, 1.75, 0.05, t * 0.95, 0.08, 0, '#c9ced3'); P.box(0.5, 0.04, 0.05, t * 0.95, 0.06, 0, '#5a636b'); P.zyl(0.05, 0.05, 0.06, t * 0.95, 0, 0.2, '#2a2d31', 6); }
+      P.box(2.0, 0.04, 0.04, 0, 1.8, 0, '#c9ced3');
+      for (let u = -0.85; u < 0.85; u += 0.13) { const f = waehle(r, STOFFE); P.box(0.05, zw(r, 0.7, 1.05), 0.44, u, 1.76 - 0.95, 0, f); if (r() < 0.4) P.box(0.02, 0.1, 0.07, u + 0.04, 1.55, 0.24, '#ffffff'); }
+    }
+    text(L, 'Musterkollektion', 0, 2.15, 0.03, 0.2, '#ffffff', farbe);
+  } },
+  { w: 3.2, d: 2.4, bau(S, sc, x, z, w, d, st, r, farbe) {
+    // Farbkartentisch: Farbfächer, Stoffproben, zwei Stühle
+    const L = lokal(S, x + w / 2, 0.06, z + d / 2, 0);
+    L.box(2.6, 0.05, 1.2, 0, 0.74, 0, '#f2f0ea'); for (const s of [-1.2, 1.2]) L.box(0.06, 0.74, 1.0, s, 0, 0, '#2a2d31');
+    for (let k = 0; k < 7; k++) L.geo(new THREE.BoxGeometry(0.42, 0.01, 0.08).translate(0.2, 0, 0).rotateY(-0.9 + k * 0.3), -0.6, 0.8 + k * 0.004, 0.1, STOFFE[k]);
+    for (let k = 0; k < 6; k++) L.box(0.22, 0.012, 0.22, 0.2 + (k % 3) * 0.3, 0.8, -0.25 + Math.floor(k / 3) * 0.32, waehle(r, STOFFE), zw(r, -0.3, 0.3));
+    for (const s of [-1, 1]) buerostuhl(L, s * 0.6, 0.95, PI, Math.max(1, st), farbe);
+    figur(S, x + w / 2 - 0.6, z + d / 2 + 0.95, Math.floor(r() * 1e4), 'kunde', { pose: 'sitzen', ry: PI });
+  } },
+];
+// CRM-Leitstand im Marketing: Videowand mit Kennzahlen der Hartwig Karte, Pult mit drei Plätzen
+SIGNATUR.marketing.unshift({ w: 5.0, d: 2.8, einmal: true, bau(S, sc, x, z, w, d, st, r, farbe) {
+  const L = lokal(S, x + w / 2, 0.06, z + 0.4, 0);
+  L.box(4.8, 0.08, 0.3, 0, 0, 0, '#2a2d31');
+  const kacheln = [['Hartwig Karte', '#d23c32'], ['Öffnungen', '#2f6fb3'], ['Einlösungen', '#3ab27a'], ['Segmente', '#e9b44c'], ['App aktiv', '#7a4fc0'], ['Push', '#d0457a']];
+  kacheln.forEach(([t, f], i) => {
+    const u = -1.6 + (i % 3) * 1.6, y = 0.95 + Math.floor(i / 3) * 0.95;
+    L.box(1.55, 0.9, 0.08, u, y, 0, '#1b2026'); L.box(1.45, 0.8, 0.01, u, y + 0.05, 0.045, '#10161c');
+    text(L, t, u, y + 0.72, 0.056, 0.13, '#ffffff', f);
+    if (i === 3) { for (let k = 0; k < 5; k++) L.box(0.22, 0.22, 0.01, u - 0.5 + k * 0.25, y + 0.25, 0.055, waehle(r, ['#e9b44c', '#d65a6f', '#5bc0eb', '#9bc53d', '#f2f2f2'])); }
+    else if (i % 2) balken(L, u, y + 0.1, 0.055, 1.2, 0.45, r, [f, '#f2f2f2']);
+    else linie(L, u, y + 0.12, 0.055, 1.2, 0.45, r, f);
+  });
+  L.box(0.3, 2.9, 0.3, -2.45, 0, 0, '#2a2d31'); L.box(0.3, 2.9, 0.3, 2.45, 0, 0, '#2a2d31');
+  const T2 = L.sub(0, 1.5); T2.box(4.0, 0.05, 0.8, 0, 0.72, 0, '#2a2d31'); T2.box(3.8, 0.72, 0.05, 0, 0, -0.35, '#3a3f45');
+  for (let k = -1; k <= 1; k++) { monitor(T2.sub(k * 1.25, -0.15), 0, 0, 2, r, '#f2c6d2'); buerostuhl(T2, k * 1.25, 0.7, PI, Math.max(1, st), farbe); }
+  for (let k = -1; k <= 1; k += 2) figur(S, x + w / 2 + k * 1.25, z + 0.4 + 1.5 + 0.7, Math.floor(r() * 1e4), 'kunde', { pose: 'sitzen', ry: PI });
+  if (sc) haengeschild(S, sc, 'CRM-Leitstand', x + w / 2, WH - 0.7, z + 1.2, { farbe, hoehe: 0.5 });
+} });

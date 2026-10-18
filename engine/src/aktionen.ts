@@ -13,6 +13,9 @@ import {
   type AbteilungId, type Stufe,
 } from './hq';
 import { EINKAUF_AKTIONEN, einkaufAktion, type EinkaufAktion } from './einkauf';
+import { VORSTAND_AKTIONEN, vorstandAktion, type VorstandAktion } from './vorstand';
+import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte';
+import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -47,7 +50,12 @@ export type SpielerAktion =
   | { typ: 'abteilungSetzen'; abteilung: AbteilungId; gebaeude: string; etage: number }
   | { typ: 'abteilungStufe'; abteilung: AbteilungId; stufe: Stufe }
   // Einkauf, Freigaben, Eigenmarken (src/einkauf.ts)
-  | EinkaufAktion;
+  | EinkaufAktion
+  // Vorstand (src/vorstand.ts) und Produktentwicklung (src/produkte.ts)
+  | VorstandAktion
+  // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
+  | MarketingAktion
+  | ProduktAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -109,6 +117,9 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
+  if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
+  if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
+  if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
   switch (a.typ) {
     case 'schliessen': {
       const h = haus(s, a.haus);
@@ -281,32 +292,12 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     case 'abteilungSetzen': return abteilungSetzen(s, a.abteilung, a.gebaeude, a.etage);
     case 'abteilungStufe': return abteilungStufe(s, a.abteilung, a.stufe);
 
-    case 'marketingBudget':
-      s.marketing.budgetQuote = clamp(a.quote, 0, 0.06);
-      return ok(`Marketingbudget auf ${(s.marketing.budgetQuote * 100).toFixed(1)} % vom Umsatz gesetzt.`);
+    case 'marketingBudget': return marketingBudgetKompatibel(s, a.quote);
 
-    case 'aktion': {
-      const rabatt = clamp(a.rabatt, 0.1, 0.5);
-      const wochen = clamp(Math.round(a.wochen), 1, 6);
-      const start = Math.max(w, a.start ?? w);
-      const hs = scopeHaeuser(s, a.scope).filter((h) => !(a.kontrollHaeuser ?? []).includes(h.id));
-      if (!hs.length) return fehler('Die Aktion trifft kein offenes Haus.');
-      const anteil = hs.length / Math.max(1, offeneHaeuser(s).length);
-      const kosten = eur(letzterUmsatz(s) * 0.004 * wochen * anteil);
-      s.marketing.aktionen.push({
-        id: neueId(s, 'm'), name: a.name ?? `${Math.round(rabatt * 100)} % auf alles`, rabatt, start, ende: start + wochen,
-        scope: a.scope, kontrollHaeuser: a.kontrollHaeuser ?? [], kosten, _mehrumsatzWahr: 0, _rohertragseffektWahr: 0,
-      });
-      s.marketing.gewoehnung = clamp(s.marketing.gewoehnung + rabatt * wochen * 0.02 * anteil, 0, 0.6);
-      if (rabatt >= 0.3) s.stakeholder.image = clamp(s.stakeholder.image - 0.3 * wochen, 0, 100);
-      return ok(`Aktion geplant: ${Math.round(rabatt * 100)} % in ${hs.length} Häusern, ${wochen} Wochen ab KW ${(start % 52) + 1}, Werbung ${mio(kosten)}.`);
-    }
+    // bisherige Rabattaktion: jetzt ein Eintrag im Aktionskalender (Rabatt auf alles mit Sonderwerbung)
+    case 'aktion': return aktionKompatibel(s, a);
 
-    case 'kundenkarte':
-      if (s.marketing.kundenkarte) return fehler('Die Kundenkarte gibt es schon.');
-      einmalKosten(s, 2_500_000);
-      s.marketing.kundenkarte = true;
-      return ok('Kundenkarte eingeführt: Coupons gehen gezielter raus, Aktionen kosten weniger Marge.');
+    case 'kundenkarte': return kundenkarteKompatibel(s, (x) => einmalKosten(s, x));
 
     case 'orderLevel': {
       const lv = clamp(a.level, 0, 1.5);

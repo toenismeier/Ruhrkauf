@@ -6,6 +6,7 @@ import { GRUPPEN, LIEFERANTEN, saisonFaktor } from './daten';
 import type { Bestellung, Format, GameState, GruppeId, Kohorte } from './types';
 import { clamp, eur, melde, mio, normal, zwischen, type RngHalter } from './util';
 import type { HausRoh } from './wirtschaft';
+import { produktMargeDelta, produktNachfrageFaktor } from './produkte';
 import {
   attraktivitaet, BESCHAFFUNG, eigenmarkeAnteil, eigenmarkeEinstellen, eigenmarkeGruenden, eigenmarkeNeupositionieren,
   eigenmarkeSetzen, istVerkaufsaktiv, mehrmarge, passungWg,
@@ -361,7 +362,8 @@ export function margeVon(s: GameState, wg: WgStand, art: Art, pool: string): num
   const m = art === 'nos' ? wg.margeNos : wg.margeSaison;
   if (pool === FREMD) return m;
   const mk = s.eigenmarken.marken.find((x) => x.id === pool);
-  return mk ? m + mehrmarge(mk) : m;
+  // Produkte der Marke in der WG (Preis, Material, Qualität) verschieben die Marge gegenüber dem Start
+  return mk ? m + mehrmarge(mk) + produktMargeDelta(s, pool, wg.id) : m;
 }
 
 function vorlaufPool(s: GameState, d: WgDef, art: Art, typ: OrderTyp, pool: string): number {
@@ -619,7 +621,7 @@ export function einkaufNachfrage(s: GameState, roh: HausRoh[]): EinkaufNachfrage
   const markenJeWg: Record<WgId, { m: Eigenmarke; e: number; fit: number }[]> = {};
   for (const d of WG_DEF) {
     markenJeWg[d.id] = s.eigenmarken.marken.filter((m) => istVerkaufsaktiv(m) && (m.wgIst[d.id] ?? 0) > 0)
-      .map((m) => ({ m, e: m.wgIst[d.id] ?? 0, fit: passungWg(m, d.id) }));
+      .map((m) => ({ m, e: m.wgIst[d.id] ?? 0, fit: passungWg(m, d.id) * produktNachfrageFaktor(s, m.id, d.id) }));
   }
   const attrCache = new Map<string, number>();
   for (const r of roh) {

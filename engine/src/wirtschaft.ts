@@ -3,6 +3,7 @@ import type { Aktion, GameState, GruppeId, Haus, HausKpi } from './types';
 import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
+import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -17,6 +18,8 @@ export interface HausRoh {
   aktion?: Aktion;
   ohneAktion: number; // Umsatz ohne Aktion (für Messung)
   ohneAktionRohertrag: number;
+  /** Messdatensätze der laufenden Aktionen (src/marketing.ts). */
+  aktionsMessung?: AktionsMessung[];
 }
 
 export function istAktiv(h: Haus): boolean {
@@ -25,23 +28,6 @@ export function istAktiv(h: Haus): boolean {
 
 export function aktiveFlaeche(h: Haus, w: number) {
   return h.flaechen.filter((f) => f.umbauBis === undefined || f.umbauBis <= w);
-}
-
-function aktionFuer(s: GameState, h: Haus): Aktion | undefined {
-  let best: Aktion | undefined;
-  for (const a of s.marketing.aktionen) {
-    if (s.woche < a.start || s.woche >= a.ende) continue;
-    if (a.kontrollHaeuser.includes(h.id)) continue;
-    const sc = a.scope;
-    const trifft =
-      sc.typ === 'alle' ||
-      (sc.typ === 'format' && sc.format === h.format) ||
-      (sc.typ === 'region' && sc.region === h.region) ||
-      (sc.typ === 'cluster' && sc.cluster === h.cluster) ||
-      (sc.typ === 'haeuser' && sc.ids.includes(h.id));
-    if (trifft && (!best || a.rabatt > best.rabatt)) best = a;
-  }
-  return best;
 }
 
 /** Echter Mengeneffekt einer Rabattaktion. */
@@ -69,10 +55,8 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const w = s.woche;
   const makro = s.makro.konjunktur * Math.pow(1 - TREND_LAGE[h.lage], w / 52);
   const image = (0.9 + 0.002 * s.stakeholder.image) / (0.9 + 0.002 * 45);
-  const q = s.marketing.budgetQuote;
-  // Die Marketingabteilung der Zentrale bestimmt, wie viel das Budget bewirkt
-  const mkt = 0.97 + 0.03 * Math.sqrt(clamp(q / PARAM.marketingQuote, 0, 2.5)) * hqMarketingFaktor(s);
-  const karte = s.marketing.kundenkarte ? 1.01 : 1;
+  // Kanäle, Markenstärke und Marketingabteilung der Zentrale (src/marketing.ts, Ausgangslage = 1)
+  const mkt = marketingHausFaktor(s, h);
   const substanz = (0.85 + 0.0015 * h.substanz) / (0.85 + 0.0015 * h.substanzStart);
   let mieterBonus = 0;
   let umbau = false;
@@ -90,7 +74,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * karte * substanz * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale;
+  return makro * image * mkt * substanz * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale;
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -104,8 +88,6 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   const hf = hausFaktor(s, h);
   const fl = aktiveFlaeche(h, w);
   const raeumung = h.status === 'raeumung';
-  const aktion = raeumung ? undefined : aktionFuer(s, h);
-  roh.aktion = aktion;
 
   const qmEigen: Partial<Record<GruppeId, number>> = {};
   const qmKomm: Partial<Record<GruppeId, number>> = {};
@@ -147,24 +129,30 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   const besetzung = roh.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh.fteBedarf / hqBesetzungsNorm(s), 0, 1), 0.5) : 1;
   const ahQuote = fteIst > 0 ? p.aushilfen / fteIst : 0;
 
-  const rabatt = raeumung ? 0.35 : aktion ? aktion.rabatt : 0;
-  const anteil = raeumung ? 1 : s.marketing.kundenkarte ? 0.35 : 0.6;
+  // Aktionskalender, Hartwig Karte und CRM je Gruppe (src/marketing.ts); Räumung wie bisher 35 % auf alles
+  const basisJe: Partial<Record<GruppeId, number>> = {};
+  const tEJe: Partial<Record<GruppeId, number>> = {};
   for (const g of alleGruppen) {
     const d = GRUPPEN[g];
     const qualitaet = besetzung * (1 - d.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
-    const basis = (bruttoBasis[g] ?? 0) * qualitaet;
-    const u = aktion ? aktionsUplift(s, h, aktion.rabatt) : 0;
-    const brutto = basis * (1 + u);
-    const umsatz = brutto * (1 - anteil * rabatt);
+    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet;
     const qe = qmEigen[g] ?? 0;
     const qk = qmKomm[g] ?? 0;
-    const tE = qe + qk > 0 ? qe / (qe + qk) : 0;
+    tEJe[g] = qe + qk > 0 ? qe / (qe + qk) : 0;
+  }
+  const mess: AktionsMessung[] = [];
+  const mw = raeumung ? undefined : marketingGruppen(s, h, basisJe, tEJe, mess);
+  if (mess.length) roh.aktionsMessung = mess;
+  for (const g of alleGruppen) {
+    const basis = basisJe[g] ?? 0;
+    const e = mw?.[g];
+    const brutto = basis * (e ? e.nachfrage : 1);
+    const umsatz = raeumung ? brutto * (1 - 0.35) : brutto * (e ? e.preis : 1);
+    const qe = qmEigen[g] ?? 0;
+    const qk = qmKomm[g] ?? 0;
+    const tE = tEJe[g] ?? 0;
     if (qe > 0) roh.eigen[g] = { brutto: brutto * tE, umsatz: umsatz * tE };
     if (qk > 0) roh.kommission[g] = umsatz * (1 - tE);
-    if (aktion) {
-      roh.ohneAktion += basis;
-      roh.ohneAktionRohertrag += basis * tE * d.marge + basis * (1 - tE) * PARAM.kommissionsMarge;
-    }
   }
   roh.offprice = offBasis * besetzung;
 

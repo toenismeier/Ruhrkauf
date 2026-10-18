@@ -1,6 +1,9 @@
 import type { Hq } from './hq';
 import type { Art, Einkauf, WgId } from './einkauf';
 import type { EigenmarkenStand } from './eigenmarken';
+import type { VorstandStand } from './vorstand';
+import type { ProdukteStand } from './produkte';
+import type { AktionWahr, MarketingStand } from './marketing';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -199,6 +202,17 @@ export interface Aktion {
   _mehrumsatzWahr: Eur; // verdeckt: echter Mehrumsatz
   _rohertragseffektWahr: Eur; // verdeckt
   ausgewertet?: AktionsAuswertung;
+  // Marketing-Deep-Dive (src/marketing.ts): Anlass, Mechanik, Geltungsbereich, Status, verdeckte Effekte
+  anlass?: string;
+  mechanik?: string;
+  bereiche?: GruppeId[];
+  wg?: string;
+  mindestbon?: number;
+  punkteFaktor?: number;
+  auflage?: number;
+  status?: 'geplant' | 'abgesagt';
+  standard?: boolean;
+  _wahr?: AktionWahr;
 }
 
 export interface AktionsAuswertung {
@@ -363,7 +377,12 @@ export interface GameState {
   einkauf: Einkauf;
   /** Eigenmarken. */
   eigenmarken: EigenmarkenStand;
-  marketing: { budgetQuote: number; gewoehnung: number; kundenkarte: boolean; aktionen: Aktion[] };
+  /** Vorstand (C-Level): Ressorts, Personen, Delegation, Kandidaten, Sitzungen. */
+  vorstand: VorstandStand;
+  /** Produktentwicklung der Eigenmarken. */
+  produkte: ProdukteStand;
+  /** Marketing: Werbequote netto (kompatibel), Gewöhnung, Aktionskalender; `stand` = Kanäle, Karte, App, CRM (src/marketing.ts). */
+  marketing: { budgetQuote: number; gewoehnung: number; kundenkarte: boolean; aktionen: Aktion[]; stand: MarketingStand };
   controllingStufe: 0 | 1 | 2;
   berater: BeraterMandat[];
   beraterQualitaet: Record<string, number>; // verdeckt, je Beratungshaus

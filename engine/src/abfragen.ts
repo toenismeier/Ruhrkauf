@@ -115,3 +115,9 @@ export { hqUebersicht, hqFuerGrafik } from './hq';
 export { einkaufUebersicht, wgDetail, freigaben } from './einkauf';
 /** Eigenmarken: Markenkarten, Shop-Anteile je Bereich, Vorschau für den Gründungsassistenten. */
 export { eigenmarkenUebersicht, eigenmarkeVorschau } from './eigenmarken';
+/** Vorstand: Ressortkarten, Profil, Kandidatenkarussell. */
+export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance } from './vorstand';
+/** Produktentwicklung: Produktkarten je Marke, Katalog, Trendbericht, Vorschau für den Assistenten. */
+export { produkte, produktKatalog, trendbericht, produktVorschau } from './produkte';
+/** Marketing: Übersicht, Kanäle, Hartwig Karte und App, CRM-Kampagnen, Aktionskalender, Aktionsauswertung. */
+export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalender, aktionsAuswertung } from './marketing';

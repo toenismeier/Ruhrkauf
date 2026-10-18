@@ -105,7 +105,7 @@ export function karteSteuerung(o) {
     o.setzen();
     const t = performance.now();
     spur.push({ t, x: K.x, z: K.z, dx: K.x - x0, dz: K.z - z0 });
-    while (spur.length && t - spur[0].t > 90) spur.shift();
+    while (spur.length > 2 && t - spur[0].t > 100) spur.shift();
   });
   const loslassen = (e) => {
     if (!zeiger.has(e.pointerId)) return;
@@ -115,7 +115,7 @@ export function karteSteuerung(o) {
       if (bewegt < 6 && start) o.tippen(e);
       else if (spur.length >= 2) {
         const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t);
-        if (performance.now() - b.t < 60) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
+        if (performance.now() - b.t < 150) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
       }
       start = null;
     } else { const [a] = [...zeiger.values()]; start = { p: o.aufBoden(a.x, a.y), x: a.x, y: a.y }; spur = []; }

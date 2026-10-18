@@ -235,7 +235,7 @@ async function buendeln() {
     await touch('touchStart', [[300, 500]]);
     for (let i = 1; i <= 8; i++) { await touch('touchMove', [[300 - i * 25, 500]]); await p.waitForTimeout(12); }
     await touch('touchEnd', []);
-    const k1 = await K();
+    let k1 = await K();
     await p.waitForTimeout(700);
     const k2 = await K();
     const zug = Math.hypot(k1.x - k0.x, k1.z - k0.z), nach = Math.hypot(k2.x - k1.x, k2.z - k1.z);

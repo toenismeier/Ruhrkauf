@@ -3,6 +3,7 @@ import type { Angebot, Entscheidung, GameState, GruppeId, Haus } from './types';
 import { chance, clamp, eur, ganzZwischen, kw, melde, mio, neueId, waehle, zufall, zwischen } from './util';
 import { einmalKosten, starteSchliessung } from './prozesse';
 import { bestandWert } from './ware';
+import { loeseVorstandEntscheidung } from './vorstand';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
@@ -307,6 +308,7 @@ export function loeseEntscheidung(s: GameState, id: string, option: string): str
   if (!e) return 'Entscheidung nicht gefunden.';
   if (!e.optionen.some((o) => o.id === option)) return 'Unbekannte Option.';
   s.entscheidungen = s.entscheidungen.filter((x) => x.id !== id);
+  if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
   const d = e.daten;
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
   switch (e.typ) {
