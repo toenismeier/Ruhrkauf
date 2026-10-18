@@ -104,7 +104,7 @@ export function karteSteuerung(o) {
     const x0 = K.x, z0 = K.z;
     festhalten(start.p, e.clientX, e.clientY);
     o.setzen();
-    const t = performance.now();
+    const t = e.timeStamp;
     spur.push({ t, x: K.x, z: K.z, dx: K.x - x0, dz: K.z - z0 });
     while (spur.length > 2 && t - spur[0].t > 100) spur.shift();
   });
@@ -115,14 +115,14 @@ export function karteSteuerung(o) {
     if (zeiger.size === 0) {
       if (bewegt < 6 && start) o.tippen(e);
       else if (spur.length >= 2) {
-        const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = performance.now() - b.t;
+        const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = e.timeStamp - b.t;
         info.los = { dt: Math.round(dt), alter: Math.round(alter), v: Math.hypot(b.x - a.x, b.z - a.z) / dt, proben: spur.length };
         if (alter < 200) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
       }
       start = null;
     } else { const [a] = [...zeiger.values()]; start = { p: o.aufBoden(a.x, a.y), x: a.x, y: a.y }; spur = []; }
   };
-  /** Trägheit: Geschwindigkeit in Weltmetern je ms, Reibung mit Halbwertszeit 180 ms. */
+  /** Trägheit: Geschwindigkeit in Weltmetern je ms (aus den Zeitstempeln der Eingaben), Reibung mit Halbwertszeit 180 ms. */
   function schwung(vx, vz) {
     stopp();
     if (Math.hypot(vx, vz) * 16 < K.halb * 0.002) return;

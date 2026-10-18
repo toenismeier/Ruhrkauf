@@ -5,6 +5,9 @@ import { lohnKosten } from './wirtschaft';
 import { runwayWochen } from './stakeholder';
 import { hqMoralZiel, hqRechtFaktor } from './hq';
 
+/** Schließungen je Spielstand in der laufenden Woche (für die abnehmende Imagewirkung einer Schließungswelle). */
+const SCHLIESSUNGEN_WOCHE = new WeakMap<GameState, { woche: number; n: number }>();
+
 export const abfindungJeFte = (s: GameState): number => (s.phase === 'insolvenz' ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer);
 
 export function einmalKosten(s: GameState, betrag: number): void {
@@ -59,7 +62,11 @@ export function schliesseEndgueltig(s: GameState, h: Haus): void {
   for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
   const st = s.stakeholder;
   st.betriebsrat = clamp(st.betriebsrat - (s.phase === 'insolvenz' ? 15 : 30) * (fte / Math.max(1, gesamtFte(s) + fte)), 0, 100);
-  st.image = clamp(st.image - 1.5, 0, 100);
+  // Image: jede Schließung kostet, eine Schließungswelle in derselben Woche aber abnehmend (höchstens rund 15 Punkte)
+  const sw = SCHLIESSUNGEN_WOCHE.get(s);
+  const k = sw && sw.woche === w ? sw.n : 0;
+  SCHLIESSUNGEN_WOCHE.set(s, { woche: w, n: k + 1 });
+  st.image = clamp(st.image - 1.5 * Math.pow(0.9, k), 0, 100);
   st.vermieter = clamp(st.vermieter - (h.miete.vermieter === 'dritt' ? 2 : 0), 0, 100);
   if (h.lage === '1a' && h.format === 'warenhaus') {
     const arvel = s.lieferanten.find((l) => l.id === 'arvel');

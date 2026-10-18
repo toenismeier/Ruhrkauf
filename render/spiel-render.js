@@ -197,7 +197,7 @@ async function buendeln() {
     const ok = (name, bed, info) => { erg.gesten.push({ name, ok: bed, info }); console.log(`${bed ? 'OK ' : 'FEHLER'} ${name}: ${info}`); if (!bed) erg.fehler.push(name); };
     const sichtbarEcke = (m, p, a) => { const x = p.x - m.mitte.x, z = p.z - m.mitte.z, r = (x - z) / Math.SQRT2, v = -(x + z) / (2 * Math.SQRT2); return Math.abs(r) <= m.halb * a + 0.5 && Math.abs(v) <= m.halb + 0.5; };
     const a = 390 / 844;
-    for (const st of ['Essen', 'Karlsruhe', 'Berlin', 'Gelsenkirchen']) {
+    for (const st of process.argv.includes('--nur-gesten') ? [] : ['Essen', 'Karlsruhe', 'Berlin', 'Gelsenkirchen']) {
       const da = await p.evaluate((st) => { try { window.spiel.stadt(st); window.spiel.schliessePanel(); return true; } catch (e) { return false; } }, st);
       if (!da) continue;
       await p.evaluate((an) => window.spiel.kachelnPause(an), st !== 'Essen');
@@ -235,7 +235,9 @@ async function buendeln() {
     // Gesten in Essen über CDP-Touch (erzeugt echte Pointer-Events)
     await p.evaluate(() => { window.spiel.kachelnPause(true); window.spiel.stadt('Essen'); window.spiel.schliessePanel(); });
     const cdp = await p.context().newCDPSession(p);
-    const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i })) });
+    let uhr = Date.now() / 1000;
+    // Zeitstempel der Eingaben im Abstand von 12 ms (wie ein Finger auf dem iPhone), unabhängig von der Renderzeit im Prüfbrowser
+    const touch = (type, pts) => { uhr += 0.012; return cdp.send('Input.dispatchTouchEvent', { type, timestamp: uhr, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i })) }); };
     const K = () => p.evaluate(() => ({ x: window.spiel.K.x, z: window.spiel.K.z, halb: window.spiel.K.halb }));
     await p.evaluate(() => window.spiel.kamera({ halb: 120 }));
     // Wischen nach links mit Schwung
@@ -245,7 +247,7 @@ async function buendeln() {
     await touch('touchEnd', []);
     let k1 = await K();
     console.log('Loslassen:', JSON.stringify(await p.evaluate(() => window.spiel.karte.info)));
-    await p.waitForTimeout(700);
+    await p.waitForFunction('!window.spiel.karte.laeuft', null, { timeout: 120000, polling: 200 });
     const k2 = await K();
     const zug = Math.hypot(k1.x - k0.x, k1.z - k0.z), nach = Math.hypot(k2.x - k1.x, k2.z - k1.z);
     ok('Wischen verschiebt die Karte', zug > 50, `${zug.toFixed(0)} m beim Ziehen über 200 px`);
@@ -468,7 +470,7 @@ async function buendeln() {
     return erg;
   }
   if (process.argv.includes('--nur-panels')) { await panelsPruefen(); await b.close(); return; }
-  if (process.argv.includes('--nur-karte')) { await kartePruefen(); await b.close(); return; }
+  if (process.argv.includes('--nur-karte') || process.argv.includes('--nur-gesten')) { await kartePruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-einkauf')) { await einkaufPruefen(); await b.close(); return; }
   // Kamera auf die Hartwig-Häuser der Stadt
   const fokus = () => p.evaluate(() => window.spiel.fokusHaeuser());
