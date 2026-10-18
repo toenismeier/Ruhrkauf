@@ -106,6 +106,26 @@ describe('Marketing', () => {
     expect(summe(c, w, w + 1, (k) => k.rohertrag) / summe(c, w, w + 1, (k) => k.umsatz)).toBeGreaterThan(summe(b, w, w + 1, (k) => k.rohertrag) / summe(b, w, w + 1, (k) => k.umsatz));
   });
 
+  test('WG-Aktion wirkt gezielt: beworbene WG zieht an, Nachbar-WG verlieren, Altware je WG', () => {
+    const s = neuesSpiel(1);
+    spiele(s, 5);
+    const o = structuredClone(s);
+    const r = fuehreAus(s, { typ: 'aktionPlanen', name: 'Parfüm Days', mechanik: 'rabatt_wg', wg: 'beauty.parfuem', rabatt: 0.2, wochen: 1 });
+    expect(r.ok).toBe(true);
+    spiele(s, 1); spiele(o, 1);
+    const w = (x: GameState, id: string) => (x.einkauf.wgs as Record<string, { basisVK: number }>)[id].basisVK;
+    expect(w(s, 'beauty.parfuem')).toBeGreaterThan(w(o, 'beauty.parfuem') * 1.03);
+    expect(w(s, 'beauty.pflege')).toBeLessThan(w(o, 'beauty.pflege'));
+    expect(w(s, 'beauty.drogerie')).toBeLessThan(w(o, 'beauty.drogerie'));
+    expect(w(s, 'damen.kleider')).toBeCloseTo(w(o, 'damen.kleider'), -4);
+    expect(s.historie[s.historie.length - 1].umsatz).toBeGreaterThan(o.historie[o.historie.length - 1].umsatz);
+    const t = structuredClone(s);
+    fuehreAus(t, { typ: 'aktionPlanen', mechanik: 'rabatt_wg', wg: 'waesche.tag', rabatt: 0.3, wochen: 1, start: t.woche });
+    marketingVorbereiten(t);
+    expect(marketingAltwareFaktor(t, 'waesche', 'waesche.tag')).toBeGreaterThan(1);
+    expect(marketingAltwareFaktor(t, 'waesche', 'waesche.nacht')).toBe(1);
+  });
+
   test('Kanäle: Kürzung senkt die Nachfrage, TV baut Marke und Image auf, Dauerbeschallung nutzt ab', () => {
     const s = neuesSpiel(1);
     expect(fuehreAus(s, { typ: 'kanalBudget', kanal: 'alle', faktor: 0.5 }).ok).toBe(true);

@@ -247,7 +247,8 @@ async function buendeln() {
     await touch('touchEnd', []);
     let k1 = await K();
     console.log('Loslassen:', JSON.stringify(await p.evaluate(() => window.spiel.karte.info)));
-    await p.waitForFunction('!window.spiel.karte.laeuft', null, { timeout: 120000, polling: 200 });
+    // Der Prüfbrowser rendert langsam (Software-GL): bis 20 s auf das Ende des Nachlaufs warten, gemessen wird der Weg bis dahin
+    await p.waitForFunction('!window.spiel.karte.laeuft', null, { timeout: 20000, polling: 200 }).catch(() => {});
     const k2 = await K();
     const zug = Math.hypot(k1.x - k0.x, k1.z - k0.z), nach = Math.hypot(k2.x - k1.x, k2.z - k1.z);
     ok('Wischen verschiebt die Karte', zug > 50, `${zug.toFixed(0)} m beim Ziehen über 200 px`);

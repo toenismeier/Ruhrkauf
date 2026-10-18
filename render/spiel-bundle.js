@@ -1769,6 +1769,8 @@
     einloesungKanal: { mail: 1, push: 0.85, brief: 1.35 },
     abmeldung: { mail: 4e-4, push: 8e-4, brief: 0 },
     kannibalisierung: 0.15,
+    /** Anteil des WG-Mehrabsatzes, der den Nachbar-WG im selben Bereich fehlt. */
+    kannibalisierungWg: 0.25,
     vorzugAbbau: 0.75,
     gewoehnung: 0.033,
     /** Anteil der Aktionswirkung, der an der Kommunikation (Prospekt, Online, Fläche) hängt. */
@@ -1881,6 +1883,7 @@
       crm: { ist: { u: {}, d: {} }, plan: { u: {}, d: {} } },
       sigma: { ist: {}, plan: {} },
       alt: { ist: {}, plan: {} },
+      tilt: {},
       druck: { ist: leererDruck(), plan: leererDruck() },
       altVerkauf: {},
       crmKosten: { ist: 0, plan: 0 },
@@ -2052,10 +2055,11 @@
         break;
       case "rabatt_wg": {
         const an = WG[a.wg]?.anteil ?? 0.2;
-        v.d = 0.85 * r * an;
-        v.u = 0.65 * an * uplift(r, gw, h) * kb;
+        v.uWg = 1.3 * uplift(r, gw, h) * kb;
+        v.u = an * v.uWg * (1 - MK.kannibalisierungWg);
+        v.d = 0.85 * r * Math.min(1, an * (1 + v.uWg) / (1 + v.u));
         v.nu = 0.06;
-        v.alt = 0.4 * r * an;
+        v.alt = 0;
         break;
       }
       case "coupon": {
@@ -2179,6 +2183,13 @@
       const nachfrage = (1 + ei.u + kanniI + crmUI + ukI) / nennerU * vz;
       const preis = (1 - ei.d - crmDI - dkI) / nennerD;
       out[g] = { nachfrage, preis };
+      if (ei.alle.some((v) => v.uWg !== void 0) || ep.alle.some((v) => v.uWg !== void 0)) {
+        const ti = wgTilt(g, ei.alle);
+        const tp = wgTilt(g, ep.alle);
+        const r = {};
+        for (const d of Object.keys(ti)) r[d] = (ti[d] ?? 1) / (tp[d] ?? 1);
+        A.tilt[`${h.id}|${g}`] = r;
+      }
       for (const [D, e] of [[DI, ei], [DP, ep]]) {
         D.basis[g] = (D.basis[g] ?? 0) + b;
         D.u[g] = (D.u[g] ?? 0) + b * e.u;
@@ -2199,15 +2210,34 @@
     }
     return out;
   }
-  function marketingAltwareFaktor(s2, g) {
+  function wgTilt(g, ws) {
+    const liste = Object.values(WG).filter((d) => d.bereich === g);
+    const t = Object.fromEntries(liste.map((d) => [d.id, 1]));
+    for (const v of ws) {
+      if (v.uWg === void 0 || !v.a.wg) continue;
+      const an = WG[v.a.wg]?.anteil ?? 0.2;
+      const nachbar = an < 1 ? MK.kannibalisierungWg * an * v.uWg / (1 - an) : 0;
+      for (const d of liste) t[d.id] = (t[d.id] ?? 1) * (d.id === v.a.wg ? 1 + v.uWg : Math.max(0.2, 1 - nachbar));
+    }
+    return t;
+  }
+  function marketingWgTilt(s2, hausId, g) {
+    const A = s2.marketing.stand?.woche;
+    if (!A || A.woche !== s2.woche) return void 0;
+    return A.tilt[`${hausId}|${g}`];
+  }
+  function marketingAltwareFaktor(s2, g, wg) {
     const A = s2.marketing.stand?.woche;
     if (!A || A.woche !== s2.woche) return 1;
-    return (1 + (A.alt.ist[g] ?? 0)) / (1 + (A.alt.plan[g] ?? 0));
+    const ist = Math.max(A.alt.ist[g] ?? 0, wg ? A.alt.ist[wg] ?? 0 : 0);
+    const plan2 = Math.max(A.alt.plan[g] ?? 0, wg ? A.alt.plan[wg] ?? 0 : 0);
+    return (1 + ist) / (1 + plan2);
   }
-  function marketingAltVerkauf(s2, g, wert) {
+  function marketingAltVerkauf(s2, g, wert, wg) {
     const A = s2.marketing.stand?.woche;
     if (!A || A.woche !== s2.woche) return;
     A.altVerkauf[g] = (A.altVerkauf[g] ?? 0) + wert;
+    if (wg) A.altVerkauf[wg] = (A.altVerkauf[wg] ?? 0) + wert;
   }
   function kartenWoche(s2, k, netzRatio, netzRel) {
     const w = s2.woche;
@@ -2424,7 +2454,7 @@
         const r = a.rabatt;
         const boost = mech(a) === "reduzierung" ? 1.3 * (r / 0.3) : mech(a) === "staffel" ? 0.3 : mech(a) === "rabatt_bereich" || mech(a) === "rabatt_wg" ? 0.4 * r : mech(a) === "rabatt_alles" ? 0.3 * r : 0;
         if (boost <= 0) continue;
-        const gs = gruppenVon(a) ?? Object.keys(s2.basisUmsatz);
+        const gs = a.wg && WG[a.wg] ? [a.wg] : gruppenVon(a) ?? Object.keys(s2.basisUmsatz);
         for (const g of gs) A.alt[key][g] = Math.max(A.alt[key][g] ?? 0, boost * fl);
       }
     }
@@ -2525,7 +2555,7 @@
       for (const a of lauf) {
         const wa = a._wahr;
         const t = summeU > 0 ? Math.max(0, wa.umsatzMit) / summeU : 0;
-        const gs = gruppenVon(a) ?? Object.keys(A.druck.ist.basis);
+        const gs = a.wg && WG[a.wg] ? [a.wg] : gruppenVon(a) ?? Object.keys(A.druck.ist.basis);
         let alt = 0;
         for (const g of gs) {
           const f = 1 + (A.alt.ist[g] ?? 0);
@@ -3670,9 +3700,13 @@
         const liste = WG_JE_BEREICH[g];
         if (!liste) continue;
         let F2 = 0;
+        const tilt = marketingWgTilt(s2, h.id, g);
+        const teile = tilt ? [] : void 0;
+        let F0 = 0;
         for (const d of liste) {
           const st = s2.einkauf.wgs[d.id];
-          const om = omega(d.id, w);
+          const tl = tilt?.[d.id] ?? 1;
+          const om = omega(d.id, w) * tl;
           const nAttr = nosAttraktivitaet(d, st);
           let rest = 1;
           const ziel = vk[_a2 = d.id] ?? (vk[_a2] = {});
@@ -3684,13 +3718,22 @@
               attrCache.set(key, A);
             }
             const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr / st.norm;
-            ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t2;
+            if (teile) teile.push([ziel, x.m.id, t2]);
+            else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t2;
             F2 += t2;
+            F0 += t2 / tl;
             rest -= x.e;
           }
           const t = v.brutto * om * Math.max(0, rest) * nAttr / st.norm;
-          ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
+          if (teile) teile.push([ziel, FREMD, t]);
+          else ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
           F2 += t;
+          F0 += t / tl;
+        }
+        if (teile) {
+          const c = F2 > 0 ? F0 / F2 : 1;
+          for (const [z, k, t] of teile) z[k] = (z[k] ?? 0) + t * c;
+          F2 = F0;
         }
         const f = v.brutto > 0 ? F2 / v.brutto : 1;
         v.brutto *= f;
@@ -3795,7 +3838,7 @@
       const p = n.vk[d.id] ?? {};
       const r = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
       const red = EK_PARAM.abschrift[st.st.reduzierung];
-      const capM = Math.min(1, red.cap * marketingAltwareFaktor(s2, d.bereich));
+      const capM = Math.min(1, red.cap * marketingAltwareFaktor(s2, d.bereich, d.id));
       const sg = EK_PARAM.servicegrad[st.st.servicegrad];
       for (const art of ["nos", "saison"]) {
         const pools = Object.keys(p).sort((a, b) => a === FREMD ? 1 : b === FREMD ? -1 : a.localeCompare(b));
@@ -3825,7 +3868,7 @@
             ziel += ausweichVk * (1 - m) * quote;
           }
           const x = nimm(topf, ziel, ekBedarf * (art === "saison" ? capM : 1), sAkt, st);
-          if (art === "saison" && x.alt > 0) marketingAltVerkauf(s2, d.bereich, x.alt);
+          if (art === "saison" && x.alt > 0) marketingAltVerkauf(s2, d.bereich, x.alt, d.id);
           const vkR = x.voll / Math.max(0.05, 1 - m);
           if (pool !== FREMD) {
             ausweichVk += Math.max(0, vkBedarf * quote - vkR) * EK_PARAM.substitution + vkBedarf * (1 - quote) * 0;
@@ -7379,6 +7422,7 @@
   }
 
   // ../engine/src/prozesse.ts
+  var SCHLIESSUNGEN_WOCHE = /* @__PURE__ */ new WeakMap();
   var abfindungJeFte2 = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
   function einmalKosten(s2, betrag) {
     s2.cash -= eur(betrag);
@@ -7425,7 +7469,10 @@
     for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
     const st = s2.stakeholder;
     st.betriebsrat = clamp(st.betriebsrat - (s2.phase === "insolvenz" ? 15 : 30) * (fte / Math.max(1, gesamtFte(s2) + fte)), 0, 100);
-    st.image = clamp(st.image - 1.5, 0, 100);
+    const sw = SCHLIESSUNGEN_WOCHE.get(s2);
+    const k = sw && sw.woche === w ? sw.n : 0;
+    SCHLIESSUNGEN_WOCHE.set(s2, { woche: w, n: k + 1 });
+    st.image = clamp(st.image - 1.5 * Math.pow(0.9, k), 0, 100);
     st.vermieter = clamp(st.vermieter - (h.miete.vermieter === "dritt" ? 2 : 0), 0, 100);
     if (h.lage === "1a" && h.format === "warenhaus") {
       const arvel = s2.lieferanten.find((l) => l.id === "arvel");
@@ -88334,7 +88381,7 @@
       const x0 = K3.x, z0 = K3.z;
       festhalten(start.p, e.clientX, e.clientY);
       o.setzen();
-      const t = performance.now();
+      const t = e.timeStamp;
       spur.push({ t, x: K3.x, z: K3.z, dx: K3.x - x0, dz: K3.z - z0 });
       while (spur.length > 2 && t - spur[0].t > 100) spur.shift();
     });
@@ -88345,7 +88392,7 @@
       if (zeiger.size === 0) {
         if (bewegt < 6 && start) o.tippen(e);
         else if (spur.length >= 2) {
-          const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = performance.now() - b.t;
+          const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = e.timeStamp - b.t;
           info.los = { dt: Math.round(dt), alter: Math.round(alter), v: Math.hypot(b.x - a.x, b.z - a.z) / dt, proben: spur.length };
           if (alter < 200) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
         }

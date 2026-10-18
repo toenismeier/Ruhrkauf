@@ -242,7 +242,7 @@ export const MK = {
   abmeldung: { mail: 0.0004, push: 0.0008, brief: 0 } as Record<CrmKanal, number>,
   kannibalisierung: 0.15,
   /** Anteil des WG-Mehrabsatzes, der den Nachbar-WG im selben Bereich fehlt. */
-  kannibalisierungWg: 0.35,
+  kannibalisierungWg: 0.25,
   vorzugAbbau: 0.75,
   gewoehnung: 0.033,
   /** Anteil der Aktionswirkung, der an der Kommunikation (Prospekt, Online, Fläche) hängt. */
@@ -507,7 +507,7 @@ function promoWert(s: GameState, a: Aktion, h: Haus, g: GruppeId, sc: MarketingS
     case 'rabatt_wg': {
       // Wirkung auf die WG selbst; im Bereich zählt ihr Anteil, abzüglich Kannibalisierung der Nachbar-WG
       const an = WG[a.wg as WgId]?.anteil ?? 0.2;
-      v.uWg = 1.1 * uplift(r, gw, h) * kb;
+      v.uWg = 1.3 * uplift(r, gw, h) * kb;
       v.u = an * v.uWg * (1 - MK.kannibalisierungWg);
       v.d = 0.85 * r * Math.min(1, (an * (1 + v.uWg)) / (1 + v.u)); v.nu = 0.06; v.alt = 0; break;
     }
