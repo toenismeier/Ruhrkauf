@@ -1673,7 +1673,7 @@
         marke: m.id,
         name: m.name,
         farbe: m.farbe,
-        zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht}`,
+        zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`,
         trendGruppe: trendGruppe(m),
         kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s2, m.id, k) })),
         produkte: liste.map((p) => produktKarte(s2, p)),

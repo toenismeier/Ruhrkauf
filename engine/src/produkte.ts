@@ -690,7 +690,7 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
     const ent = liste.filter((p) => p.status === 'entwicklung').length;
     const voll = kats.filter((k) => belegt(s, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
     return {
-      marke: m.id, name: m.name, farbe: m.farbe, zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht}`, trendGruppe: trendGruppe(m),
+      marke: m.id, name: m.name, farbe: m.farbe, zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`, trendGruppe: trendGruppe(m),
       kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s, m.id, k) })),
       produkte: liste.map((p) => produktKarte(s, p)), inEntwicklung: ent,
       hinweis: ent ? `Wir entwickeln gerade ${ent === 1 ? 'ein neues Produkt' : `${ent} neue Produkte`}.` : voll.length ? `Kapazität erreicht bei ${voll.join(', ')}. Für Neues bitte erst auslisten.` : 'Wir entwickeln gerade keine neuen Produkte. Zeit zu investieren.',
