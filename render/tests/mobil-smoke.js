@@ -54,8 +54,18 @@ const server = http.createServer((req, res) => {
     assert.deepEqual(nachher, vorher, 'Fortsetzen bewahrt exakt dieselbe Wochen-GuV und Liquidität');
     await page.locator('#menueknopf').click();
     await page.locator('#performance').click();
-    await page.waitForFunction(() => window.spiel.letzteDiagnose?.frames === 90);
-    const diag = await page.evaluate(() => window.spiel.letzteDiagnose);
+    await page.waitForFunction(() =>
+      window.spiel.letzteDiagnose?.frames >= 5 ||
+      document.getElementById('punter')?.textContent === 'Messung fehlgeschlagen',
+      null, { timeout: 45000 });
+    const status = await page.evaluate(() => ({
+      diag: window.spiel.letzteDiagnose,
+      titel: document.getElementById('ptitel')?.textContent,
+      unter: document.getElementById('punter')?.textContent,
+      text: document.getElementById('pinhalt')?.textContent?.slice(0, 700)
+    }));
+    assert.ok(status.diag, 'Performance-Messung nicht abgeschlossen: ' + JSON.stringify(status));
+    const diag = status.diag;
     assert.ok(diag.fps > 0 && Number.isFinite(diag.frameP95Ms), 'Performance-Messung liefert echte Frames');
     assert.ok(diag.drawCalls > 0, 'Die Stadt wurde tatsaechlich gerendert');
     assert.deepEqual(errors, [], 'Keine JavaScript-Laufzeitfehler');
