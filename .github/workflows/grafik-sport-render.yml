@@ -1,4 +1,4 @@
-name: Hartwig Sport - Grafikkataloge (Nachrendern)
+name: Hartwig Sport - Grafikprüfung (Innenräume)
 on:
   push:
     branches: [feat/grafik-sport]
@@ -35,6 +35,8 @@ jobs:
             timeout 900 node render-katalog.js "$katalog"
             test -s "out/katalog-$katalog.png"
           done
+          timeout 900 node render-katalog.js sport-diagnose
+          test -s out/katalog-sport-diagnose.png
       - name: PNGs im Repository ablegen
         run: |
           cp render/out/katalog-sporthaeuser.png bilder/katalog-sporthaeuser.png
