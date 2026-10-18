@@ -1,0 +1,2189 @@
+{
+ "seed": 1,
+ "woche": 30,
+ "bot": "C (Schutzschirm, tiefe Sanierung)",
+ "phase": "regulaer",
+ "marketingUebersicht": {
+  "kw": 31,
+  "jahr": 2027,
+  "werbequoteBrutto": 0.023480035224004655,
+  "werbequoteNetto": 0.018949769862721302,
+  "wocheBrutto": 924840,
+  "wocheBeteiligung": 178440,
+  "wocheNetto": 746400,
+  "wocheSonderwerbung": 0,
+  "bloecke": {
+   "kanaele": 791233,
+   "karte": 103607,
+   "app": 30000,
+   "crm": 0
+  },
+  "jahrBrutto": 32877104,
+  "jahrNetto": 26406734,
+  "markenstaerke": 57.72203330336378,
+  "image": 13.346639563161936,
+  "gewoehnung": 0.11095505600824203,
+  "frequenzWoche": 1011487,
+  "bon": 38.82,
+  "kartenanteil": 0.35577980718878455,
+  "mitglieder": 3356769,
+  "appAktive": 162852,
+  "rabattquote13": 0.04148804221030196,
+  "crmMehrumsatz13": 2672240,
+  "laufend": [],
+  "naechste": [
+   {
+    "id": "k0-9",
+    "name": "Schulanfang",
+    "anlass": "schulanfang",
+    "mechanik": "rabatt_bereich",
+    "mechanikText": "Rabatt auf Bereiche",
+    "rabatt": 0.15,
+    "bereiche": [
+     "kinder",
+     "spielwaren",
+     "teamsport"
+    ],
+    "bereicheText": [
+     "Kinder",
+     "Spielwaren",
+     "Teamsport"
+    ],
+    "start": 31,
+    "ende": 33,
+    "startKw": 32,
+    "endeKw": 33,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-10",
+    "name": "Wäsche Days",
+    "anlass": "waesche",
+    "mechanik": "staffel",
+    "mechanikText": "Staffel (3 für 2)",
+    "rabatt": 0,
+    "bereiche": [
+     "waesche"
+    ],
+    "bereicheText": [
+     "Wäsche"
+    ],
+    "start": 34,
+    "ende": 35,
+    "startKw": 35,
+    "endeKw": 35,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-11",
+    "name": "Hartwig Jubiläumswochen",
+    "anlass": "jubilaeum",
+    "mechanik": "coupon",
+    "mechanikText": "Coupon ab Mindestbon",
+    "rabatt": 0.15,
+    "bereicheText": [],
+    "mindestbon": 50,
+    "start": 38,
+    "ende": 40,
+    "startKw": 39,
+    "endeKw": 40,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-12",
+    "name": "Mehrwertsteuer-Aktion",
+    "anlass": "mwst",
+    "mechanik": "rabatt_alles",
+    "mechanikText": "Rabatt auf alles",
+    "rabatt": 0.16,
+    "bereicheText": [],
+    "start": 42,
+    "ende": 43,
+    "startKw": 43,
+    "endeKw": 43,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-13",
+    "name": "Personalkauf Winter",
+    "anlass": "personalkauf",
+    "mechanik": "personalkauf",
+    "mechanikText": "Personalkauf",
+    "rabatt": 0.2,
+    "bereicheText": [],
+    "start": 44,
+    "ende": 45,
+    "startKw": 45,
+    "endeKw": 45,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   }
+  ],
+  "kampagnenAktiv": 3,
+  "verlauf": [
+   {
+    "woche": 17,
+    "umsatz": 39460483,
+    "brutto": 933871,
+    "beteiligung": 184050,
+    "netto": 749822,
+    "sonderwerbung": 0,
+    "kunden": 962451,
+    "bon": 41,
+    "kartenanteil": 0.35506003321071916,
+    "rabattquote": 0,
+    "marke": 58.72545756047114,
+    "image": 1.95224489044998,
+    "gewoehnung": 0.12517706421751312,
+    "crmMehrumsatz": 184694,
+    "aktionen": 0
+   },
+   {
+    "woche": 18,
+    "umsatz": 39470506,
+    "brutto": 934095,
+    "beteiligung": 184087,
+    "netto": 750008,
+    "sonderwerbung": 0,
+    "kunden": 963666,
+    "bon": 40.96,
+    "kartenanteil": 0.35513876071807,
+    "rabattquote": 0.0020145919164837717,
+    "marke": 58.63591024749523,
+    "image": 2.427266082535461,
+    "gewoehnung": 0.12392529357533799,
+    "crmMehrumsatz": 184601,
+    "aktionen": 1
+   },
+   {
+    "woche": 19,
+    "umsatz": 39719505,
+    "brutto": 1033423,
+    "beteiligung": 252522,
+    "netto": 780902,
+    "sonderwerbung": 0,
+    "kunden": 968768,
+    "bon": 41,
+    "kartenanteil": 0.3552129355336681,
+    "rabattquote": 0,
+    "marke": 58.54735629216358,
+    "image": 2.897182846878761,
+    "gewoehnung": 0.1226860406395846,
+    "crmMehrumsatz": 466185,
+    "aktionen": 0
+   },
+   {
+    "woche": 20,
+    "umsatz": 39566242,
+    "brutto": 936175,
+    "beteiligung": 184399,
+    "netto": 751775,
+    "sonderwerbung": 0,
+    "kunden": 965030,
+    "bon": 41,
+    "kartenanteil": 0.35528279236910076,
+    "rabattquote": 0,
+    "marke": 58.45984039705148,
+    "image": 3.362050379998179,
+    "gewoehnung": 0.12145918023318876,
+    "crmMehrumsatz": 184374,
+    "aktionen": 0
+   },
+   {
+    "woche": 21,
+    "umsatz": 39836957,
+    "brutto": 942027,
+    "beteiligung": 185263,
+    "netto": 756764,
+    "sonderwerbung": 0,
+    "kunden": 992970,
+    "bon": 40.12,
+    "kartenanteil": 0.35534855691376716,
+    "rabattquote": 0.04297540062304647,
+    "marke": 58.373395711806246,
+    "image": 3.8219234590454225,
+    "gewoehnung": 0.12024458843085688,
+    "crmMehrumsatz": 184244,
+    "aktionen": 1
+   },
+   {
+    "woche": 22,
+    "umsatz": 39271623,
+    "brutto": 929821,
+    "beteiligung": 183471,
+    "netto": 746350,
+    "sonderwerbung": 0,
+    "kunden": 978919,
+    "bon": 40.12,
+    "kartenanteil": 0.3554104461489563,
+    "rabattquote": 0.0430576867612541,
+    "marke": 58.288046177356634,
+    "image": 4.276856409164395,
+    "gewoehnung": 0.11904214254654831,
+    "crmMehrumsatz": 184105,
+    "aktionen": 1
+   },
+   {
+    "woche": 23,
+    "umsatz": 39046475,
+    "brutto": 924962,
+    "beteiligung": 182758,
+    "netto": 742204,
+    "sonderwerbung": 0,
+    "kunden": 964408,
+    "bon": 40.49,
+    "kartenanteil": 0.35546866865132837,
+    "rabattquote": 0.025000000000000046,
+    "marke": 58.20380835670586,
+    "image": 10.726903078499573,
+    "gewoehnung": 0.11785172112108283,
+    "crmMehrumsatz": 183959,
+    "aktionen": 1
+   },
+   {
+    "woche": 24,
+    "umsatz": 38681577,
+    "brutto": 917084,
+    "beteiligung": 181602,
+    "netto": 735482,
+    "sonderwerbung": 0,
+    "kunden": 943453,
+    "bon": 41,
+    "kartenanteil": 0.3555234248861598,
+    "rabattquote": 0,
+    "marke": 58.120692876183966,
+    "image": 11.112116819219313,
+    "gewoehnung": 0.116673203909872,
+    "crmMehrumsatz": 183807,
+    "aktionen": 0
+   },
+   {
+    "woche": 25,
+    "umsatz": 39218798,
+    "brutto": 928683,
+    "beteiligung": 183305,
+    "netto": 745378,
+    "sonderwerbung": 0,
+    "kunden": 956556,
+    "bon": 41,
+    "kartenanteil": 0.35560232608246484,
+    "rabattquote": 0,
+    "marke": 58.03870556836244,
+    "image": 11.49315047330057,
+    "gewoehnung": 0.11550647187077327,
+    "crmMehrumsatz": 183584,
+    "aktionen": 0
+   },
+   {
+    "woche": 26,
+    "umsatz": 39058526,
+    "brutto": 925223,
+    "beteiligung": 182798,
+    "netto": 742426,
+    "sonderwerbung": 0,
+    "kunden": 1006230,
+    "bon": 38.82,
+    "kartenanteil": 0.35565091161571205,
+    "rabattquote": 0.10650329800771693,
+    "marke": 57.95784838448398,
+    "image": 11.8700503621055,
+    "gewoehnung": 0.11435140715206554,
+    "crmMehrumsatz": 183422,
+    "aktionen": 1
+   },
+   {
+    "woche": 27,
+    "umsatz": 39589918,
+    "brutto": 936703,
+    "beteiligung": 184487,
+    "netto": 752216,
+    "sonderwerbung": 0,
+    "kunden": 1019839,
+    "bon": 38.82,
+    "kartenanteil": 0.3556965739503685,
+    "rabattquote": 0.10635270884689153,
+    "marke": 57.8781201273729,
+    "image": 12.242862338993937,
+    "gewoehnung": 0.11320789308054488,
+    "crmMehrumsatz": 183257,
+    "aktionen": 1
+   },
+   {
+    "woche": 28,
+    "umsatz": 39863601,
+    "brutto": 942616,
+    "beteiligung": 185357,
+    "netto": 757259,
+    "sonderwerbung": 0,
+    "kunden": 1026848,
+    "bon": 38.82,
+    "kartenanteil": 0.35573948432854524,
+    "rabattquote": 0.10627670443501627,
+    "marke": 57.79951704344926,
+    "image": 12.611631783777794,
+    "gewoehnung": 0.11207581414973943,
+    "crmMehrumsatz": 183089,
+    "aktionen": 1
+   },
+   {
+    "woche": 29,
+    "umsatz": 39264393,
+    "brutto": 929674,
+    "beteiligung": 183454,
+    "netto": 746220,
+    "sonderwerbung": 0,
+    "kunden": 1011487,
+    "bon": 38.82,
+    "kartenanteil": 0.35577980718878455,
+    "rabattquote": 0.10641529165862924,
+    "marke": 57.72203330336378,
+    "image": 12.976403599153471,
+    "gewoehnung": 0.11095505600824203,
+    "crmMehrumsatz": 182919,
+    "aktionen": 1
+   }
+  ],
+  "hinweise": []
+ },
+ "kanaele": {
+  "kanaele": [
+   {
+    "id": "prospekt",
+    "name": "Prospekt und Beilage",
+    "text": "Wochenprospekt als Beilage und Haushaltsverteilung, größter Block, trägt die Aktionen.",
+    "budgetWoche": 367824,
+    "budgetJahr": 19126859,
+    "quote": 0.009338399999999998,
+    "startBudgetWoche": 510867,
+    "anteil": 0.4648745519713262,
+    "wirkung": 0.8347047271623256,
+    "adstock": 0.720000000000137,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.18,
+     "mitte": 0.4,
+     "aelter": 0.62,
+     "senioren": 0.75
+    },
+    "marke": 0.1,
+    "aktion": 0.5,
+    "regional": true,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "anzeigen",
+    "name": "Anzeigen",
+    "text": "Tageszeitung und Magazine.",
+    "budgetWoche": 45943,
+    "budgetJahr": 2389014,
+    "quote": 0.0011663999999999997,
+    "startBudgetWoche": 63809,
+    "anteil": 0.05806451612903226,
+    "wirkung": 0.8625804749543802,
+    "adstock": 0.7200000000050439,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.05,
+     "mitte": 0.18,
+     "aelter": 0.42,
+     "senioren": 0.6
+    },
+    "marke": 0.2,
+    "aktion": 0.1,
+    "regional": true,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "plakat",
+    "name": "Plakat",
+    "text": "Großflächen und City-Light-Poster in den Innenstädten.",
+    "budgetWoche": 55301,
+    "budgetJahr": 2875665,
+    "quote": 0.0014039999999999996,
+    "startBudgetWoche": 76807,
+    "anteil": 0.06989247311827958,
+    "wirkung": 0.8485979764262115,
+    "adstock": 0.7201185255946609,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.5,
+     "mitte": 0.5,
+     "aelter": 0.45,
+     "senioren": 0.4
+    },
+    "marke": 0.6,
+    "aktion": 0.1,
+    "regional": true,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "radio",
+    "name": "Radio",
+    "text": "Regionale Sender, Spots zu Aktionen.",
+    "budgetWoche": 36867,
+    "budgetJahr": 1917110,
+    "quote": 0.0009359999999999998,
+    "startBudgetWoche": 51205,
+    "anteil": 0.04659498207885305,
+    "wirkung": 0.8485283062911356,
+    "adstock": 0.7200002865773032,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.3,
+     "mitte": 0.55,
+     "aelter": 0.6,
+     "senioren": 0.5
+    },
+    "marke": 0.4,
+    "aktion": 0.15,
+    "regional": true,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "tv",
+    "name": "TV",
+    "text": "Bundesweite Spots, vor allem zu Weihnachten und Jubiläum.",
+    "budgetWoche": 45943,
+    "budgetJahr": 2389014,
+    "quote": 0.0011663999999999997,
+    "startBudgetWoche": 63809,
+    "anteil": 0.05806451612903226,
+    "wirkung": 0.8505757561399818,
+    "adstock": 0.7234791169331017,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.35,
+     "mitte": 0.5,
+     "aelter": 0.7,
+     "senioren": 0.82
+    },
+    "marke": 1,
+    "aktion": 0.05,
+    "regional": false,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "online",
+    "name": "Online (Suche, Display)",
+    "text": "Suchmaschinenwerbung, Display, Preisportale.",
+    "budgetWoche": 101244,
+    "budgetJahr": 5264679,
+    "quote": 0.0025703999999999996,
+    "startBudgetWoche": 140616,
+    "anteil": 0.12795698924731183,
+    "wirkung": 0.821106514702358,
+    "adstock": 0.72,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.75,
+     "mitte": 0.7,
+     "aelter": 0.5,
+     "senioren": 0.25
+    },
+    "marke": 0.2,
+    "aktion": 0.2,
+    "regional": false,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "social",
+    "name": "Social und Influencer",
+    "text": "Social-Media-Kampagnen und Kooperationen mit Influencern.",
+    "budgetWoche": 36867,
+    "budgetJahr": 1917110,
+    "quote": 0.0009359999999999998,
+    "startBudgetWoche": 51205,
+    "anteil": 0.04659498207885305,
+    "wirkung": 0.8347047284924206,
+    "adstock": 0.7200000020861624,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.85,
+     "mitte": 0.55,
+     "aelter": 0.22,
+     "senioren": 0.06
+    },
+    "marke": 0.6,
+    "aktion": 0.15,
+    "regional": false,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "schaufenster",
+    "name": "Schaufenster und Fläche",
+    "text": "Schaufenster, Aktionsflächen, Deko und Beschilderung im Haus.",
+    "budgetWoche": 64376,
+    "budgetJahr": 3347569,
+    "quote": 0.0016343999999999996,
+    "startBudgetWoche": 89412,
+    "anteil": 0.08136200716845879,
+    "wirkung": 0.8485389793412331,
+    "adstock": 0.7200183994614616,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.5,
+     "mitte": 0.5,
+     "aelter": 0.5,
+     "senioren": 0.5
+    },
+    "marke": 0.5,
+    "aktion": 0.25,
+    "regional": true,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   },
+   {
+    "id": "crm",
+    "name": "CRM (Mail, Push, Brief)",
+    "text": "Grundbetrieb CRM: Werkzeuge, Agentur, Kontaktstrategie. Versandkosten der Kampagnen kommen dazu.",
+    "budgetWoche": 36867,
+    "budgetJahr": 1917110,
+    "quote": 0.0009359999999999998,
+    "startBudgetWoche": 51205,
+    "anteil": 0.04659498207885305,
+    "wirkung": 0.8485281374268292,
+    "adstock": 0.7200000000050439,
+    "abnutzung": 0,
+    "reichweite": {
+     "jung": 0.15,
+     "mitte": 0.3,
+     "aelter": 0.6,
+     "senioren": 0.7
+    },
+    "marke": 0.1,
+    "aktion": 0.1,
+    "regional": false,
+    "regionen": {
+     "Nord": 1,
+     "Ost": 1,
+     "West": 1,
+     "Mitte": 1,
+     "Süd": 1
+    }
+   }
+  ],
+  "summeWoche": 791233,
+  "quote": 0.020087999999999995,
+  "beteiligungWoche": 178440,
+  "bezugUmsatzWoche": 39388354
+ },
+ "kundenkarte": {
+  "name": "Hartwig Karte",
+  "mitglieder": 3356769,
+  "aktiveMitglieder": 1282940,
+  "aktivQuote": 0.38219471932624705,
+  "umsatzAnteil": 0.35577980718878455,
+  "kartenumsatzWoche": 14013581,
+  "punkteSatz": 0.005,
+  "punkteText": "1 Punkt je 2 € (1 Punkt = 1 Cent)",
+  "stufen": false,
+  "kartenrabatt": 0,
+  "anmeldepraemie": 0,
+  "neuWoche": 7026,
+  "abgaengeWoche": 7386,
+  "datenqualitaet": 0.4514419424050647,
+  "datenBudgetWoche": 15000,
+  "mailEinwilligung": 1367106,
+  "mailQuote": 0.40726824939302914,
+  "adressQuote": 0.93,
+  "kostenWoche": {
+   "punkte": 59558,
+   "stufen": 0,
+   "betrieb": 29049,
+   "daten": 15000,
+   "anmeldung": 0,
+   "summe": 103607
+  },
+  "app": {
+   "name": "Hartwig App",
+   "downloads": 592678,
+   "aktiveNutzer": 162852,
+   "pushEinwilligung": 55370,
+   "pushQuote": 0.34,
+   "qualitaet": 0.35,
+   "budgetWoche": 30000,
+   "appCoupons": false,
+   "kostenWoche": 30000
+  }
+ },
+ "crmKampagnen": {
+  "kampagnen": [
+   {
+    "id": "crm-newsletter",
+    "name": "Hartwig Newsletter",
+    "segment": {
+     "typ": "alle"
+    },
+    "segmentText": "Alle Mitglieder",
+    "kanal": "mail",
+    "kanalText": "Mail",
+    "angebot": {
+     "typ": "info"
+    },
+    "angebotText": "Information ohne Angebot",
+    "frequenz": "woechentlich",
+    "frequenzText": "wöchentlich",
+    "start": 0,
+    "status": "aktiv",
+    "standard": true,
+    "kontrollgruppe": true,
+    "naechsterVersand": 30,
+    "summe": {
+     "sendungen": 30,
+     "versendet": 41166440,
+     "geoeffnet": 7429517,
+     "eingeloest": 222885,
+     "oeffnungsrate": 0.18047508182864258,
+     "einloesequote": 0.005414252454859277,
+     "umsatzEingeloest": 11233429,
+     "rabattkosten": 0,
+     "versandkosten": 157333,
+     "abmeldungen": 66116
+    },
+    "letzte": {
+     "woche": 29,
+     "sendungen": 1,
+     "versendet": 1232176,
+     "geoeffnet": 225922,
+     "eingeloest": 6778,
+     "oeffnungsrate": 0.1833519464150236,
+     "einloesequote": 0.005500558392450707,
+     "umsatzEingeloest": 341594,
+     "rabattkosten": 0,
+     "versandkosten": 4964,
+     "abmeldungen": 1941
+    },
+    "auswertung": {
+     "mehrumsatzVon": 4340913,
+     "mehrumsatzBis": 5506587,
+     "mitnahme": 7710206,
+     "ergebnis": 1812167,
+     "hinweis": "Gemessen gegen Kontrollgruppe (10 % ohne Versand)."
+    }
+   },
+   {
+    "id": "crm-geburtstag",
+    "name": "Geburtstagsgruß",
+    "segment": {
+     "typ": "geburtstag"
+    },
+    "segmentText": "Geburtstagskinder",
+    "kanal": "mail",
+    "kanalText": "Mail",
+    "angebot": {
+     "typ": "coupon",
+     "prozent": 0.1,
+     "mindestbon": 0
+    },
+    "angebotText": "10 % Coupon",
+    "frequenz": "woechentlich",
+    "frequenzText": "wöchentlich",
+    "start": 0,
+    "status": "aktiv",
+    "standard": true,
+    "kontrollgruppe": true,
+    "naechsterVersand": 30,
+    "summe": {
+     "sendungen": 30,
+     "versendet": 790518,
+     "geoeffnet": 235404,
+     "eingeloest": 35265,
+     "oeffnungsrate": 0.2977840635585943,
+     "einloesequote": 0.04460969264466498,
+     "umsatzEingeloest": 2290799,
+     "rabattkosten": 229080,
+     "versandkosten": 76581,
+     "abmeldungen": 1270
+    },
+    "letzte": {
+     "woche": 29,
+     "sendungen": 1,
+     "versendet": 23662,
+     "geoeffnet": 7159,
+     "eingeloest": 1062,
+     "oeffnungsrate": 0.302530711584789,
+     "einloesequote": 0.04489423980201071,
+     "umsatzEingeloest": 69006,
+     "rabattkosten": 6901,
+     "versandkosten": 2547,
+     "abmeldungen": 37
+    },
+    "auswertung": {
+     "mehrumsatzVon": 1198337,
+     "mehrumsatzBis": 1539122,
+     "mitnahme": 1035048,
+     "ergebnis": 241831,
+     "hinweis": "Gemessen gegen Kontrollgruppe (10 % ohne Versand)."
+    }
+   },
+   {
+    "id": "crm-topbrief",
+    "name": "Kundenbrief Saisonstart",
+    "segment": {
+     "typ": "top"
+    },
+    "segmentText": "Top-Kunden",
+    "kanal": "brief",
+    "kanalText": "Brief",
+    "angebot": {
+     "typ": "coupon",
+     "prozent": 0.15,
+     "mindestbon": 100
+    },
+    "angebotText": "15 % Coupon ab 100 €",
+    "frequenz": "quartal",
+    "frequenzText": "jedes Quartal",
+    "start": 6,
+    "status": "aktiv",
+    "standard": true,
+    "kontrollgruppe": true,
+    "naechsterVersand": 32,
+    "summe": {
+     "sendungen": 2,
+     "versendet": 312263,
+     "geoeffnet": 240575,
+     "eingeloest": 17788,
+     "oeffnungsrate": 0.7704244298364973,
+     "einloesequote": 0.05696627448536637,
+     "umsatzEingeloest": 1921151,
+     "rabattkosten": 288173,
+     "versandkosten": 207971,
+     "abmeldungen": 0
+    },
+    "letzte": {
+     "woche": 19,
+     "sendungen": 1,
+     "versendet": 140683,
+     "geoeffnet": 108582,
+     "eingeloest": 8022,
+     "oeffnungsrate": 0.7718177182324484,
+     "einloesequote": 0.05702187045339905,
+     "umsatzEingeloest": 866379,
+     "rabattkosten": 129957,
+     "versandkosten": 93944,
+     "abmeldungen": 0
+    },
+    "auswertung": {
+     "mehrumsatzVon": 588167,
+     "mehrumsatzBis": 744290,
+     "mitnahme": 1537157,
+     "ergebnis": -229652,
+     "hinweis": "Gemessen gegen Kontrollgruppe (10 % ohne Versand)."
+    }
+   }
+  ],
+  "pools": {
+   "mail": 1367106,
+   "push": 55370,
+   "brief": 3121795
+  },
+  "ermuedung": {
+   "mail": 0.3672365250479705,
+   "push": 0,
+   "brief": 0.0006721371196414945
+  },
+  "datenqualitaet": 0.4514419424050647,
+  "segmente": [
+   {
+    "segment": {
+     "typ": "alle"
+    },
+    "text": "Alle Mitglieder",
+    "groesse": 3356769
+   },
+   {
+    "segment": {
+     "typ": "alter",
+     "alter": "jung"
+    },
+    "text": "Alter unter 30",
+    "groesse": 402812
+   },
+   {
+    "segment": {
+     "typ": "alter",
+     "alter": "mitte"
+    },
+    "text": "Alter 30 bis 49",
+    "groesse": 939895
+   },
+   {
+    "segment": {
+     "typ": "alter",
+     "alter": "aelter"
+    },
+    "text": "Alter 50 bis 64",
+    "groesse": 1141302
+   },
+   {
+    "segment": {
+     "typ": "alter",
+     "alter": "senioren"
+    },
+    "text": "Alter 65 plus",
+    "groesse": 872760
+   },
+   {
+    "segment": {
+     "typ": "kaufkraft",
+     "kaufkraft": "hoch"
+    },
+    "text": "Kaufkraft hoch",
+    "groesse": 839192
+   },
+   {
+    "segment": {
+     "typ": "kaufkraft",
+     "kaufkraft": "mittel"
+    },
+    "text": "Kaufkraft mittel",
+    "groesse": 1678385
+   },
+   {
+    "segment": {
+     "typ": "kaufkraft",
+     "kaufkraft": "niedrig"
+    },
+    "text": "Kaufkraft niedrig",
+    "groesse": 839192
+   },
+   {
+    "segment": {
+     "typ": "inaktive"
+    },
+    "text": "Inaktive Mitglieder",
+    "groesse": 2073830
+   },
+   {
+    "segment": {
+     "typ": "top"
+    },
+    "text": "Top-Kunden",
+    "groesse": 167838
+   },
+   {
+    "segment": {
+     "typ": "geburtstag"
+    },
+    "text": "Geburtstagskinder",
+    "groesse": 64553
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "damen"
+    },
+    "text": "Käufer Damen",
+    "groesse": 1268627
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "herren"
+    },
+    "text": "Käufer Herren",
+    "groesse": 682988
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "kinder"
+    },
+    "text": "Käufer Kinder",
+    "groesse": 371619
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "beauty"
+    },
+    "text": "Käufer Beauty",
+    "groesse": 1156906
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "accessoires"
+    },
+    "text": "Käufer Schuhe & Accessoires",
+    "groesse": 1101847
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "waesche"
+    },
+    "text": "Käufer Wäsche",
+    "groesse": 519367
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "wohnen"
+    },
+    "text": "Käufer Wohnen & Haushalt",
+    "groesse": 717915
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "spielwaren"
+    },
+    "text": "Käufer Spielwaren",
+    "groesse": 291156
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "food"
+    },
+    "text": "Käufer Feinkost",
+    "groesse": 699185
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "sport"
+    },
+    "text": "Käufer Sport",
+    "groesse": 423059
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "sportschuhe"
+    },
+    "text": "Käufer Sportschuhe",
+    "groesse": 410651
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "sporttextil"
+    },
+    "text": "Käufer Sporttextil",
+    "groesse": 298822
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "outdoor"
+    },
+    "text": "Käufer Outdoor",
+    "groesse": 213327
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "rad"
+    },
+    "text": "Käufer Rad",
+    "groesse": 100703
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "wintersport"
+    },
+    "text": "Käufer Wintersport",
+    "groesse": 100703
+   },
+   {
+    "segment": {
+     "typ": "affinitaet",
+     "gruppe": "teamsport"
+    },
+    "text": "Käufer Teamsport",
+    "groesse": 100703
+   }
+  ]
+ },
+ "aktionskalender": {
+  "jahr": 2027,
+  "woche": 30,
+  "kw": 31,
+  "eintraege": [
+   {
+    "id": "k0-1",
+    "name": "Winterschlussverkauf",
+    "anlass": "wsv",
+    "mechanik": "reduzierung",
+    "mechanikText": "Preisreduzierung (Sale)",
+    "rabatt": 0.4,
+    "bereiche": [
+     "damen",
+     "herren",
+     "kinder",
+     "accessoires",
+     "waesche",
+     "sporttextil",
+     "outdoor",
+     "wintersport",
+     "sportschuhe"
+    ],
+    "bereicheText": [
+     "Damen",
+     "Herren",
+     "Kinder",
+     "Schuhe & Accessoires",
+     "Wäsche",
+     "Sporttextil",
+     "Outdoor",
+     "Wintersport",
+     "Sportschuhe"
+    ],
+    "start": 0,
+    "ende": 4,
+    "startKw": 1,
+    "endeKw": 4,
+    "jahr": 2027,
+    "wochen": 4,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-2",
+    "name": "Friends and Family",
+    "anlass": "friends",
+    "mechanik": "coupon",
+    "mechanikText": "Coupon ab Mindestbon",
+    "rabatt": 0.2,
+    "bereicheText": [],
+    "mindestbon": 0,
+    "start": 9,
+    "ende": 10,
+    "startKw": 10,
+    "endeKw": 10,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-3",
+    "name": "Ostern",
+    "anlass": "ostern",
+    "mechanik": "rabatt_bereich",
+    "mechanikText": "Rabatt auf Bereiche",
+    "rabatt": 0.15,
+    "bereiche": [
+     "spielwaren",
+     "food",
+     "kinder"
+    ],
+    "bereicheText": [
+     "Spielwaren",
+     "Feinkost",
+     "Kinder"
+    ],
+    "start": 12,
+    "ende": 14,
+    "startKw": 13,
+    "endeKw": 14,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-4",
+    "name": "Beauty Days",
+    "anlass": "beauty",
+    "mechanik": "rabatt_bereich",
+    "mechanikText": "Rabatt auf Bereiche",
+    "rabatt": 0.2,
+    "bereiche": [
+     "beauty"
+    ],
+    "bereicheText": [
+     "Beauty"
+    ],
+    "start": 15,
+    "ende": 17,
+    "startKw": 16,
+    "endeKw": 17,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-5",
+    "name": "Muttertag",
+    "anlass": "muttertag",
+    "mechanik": "punkte",
+    "mechanikText": "Mehrfachpunkte",
+    "rabatt": 0,
+    "bereiche": [
+     "beauty",
+     "accessoires",
+     "waesche"
+    ],
+    "bereicheText": [
+     "Beauty",
+     "Schuhe & Accessoires",
+     "Wäsche"
+    ],
+    "punkteFaktor": 5,
+    "start": 18,
+    "ende": 19,
+    "startKw": 19,
+    "endeKw": 19,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-6",
+    "name": "Mid Season Sale",
+    "anlass": "midseason",
+    "mechanik": "reduzierung",
+    "mechanikText": "Preisreduzierung (Sale)",
+    "rabatt": 0.3,
+    "bereiche": [
+     "damen",
+     "herren",
+     "kinder",
+     "sporttextil"
+    ],
+    "bereicheText": [
+     "Damen",
+     "Herren",
+     "Kinder",
+     "Sporttextil"
+    ],
+    "start": 21,
+    "ende": 23,
+    "startKw": 22,
+    "endeKw": 23,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-7",
+    "name": "Personalkauf Sommer",
+    "anlass": "personalkauf",
+    "mechanik": "personalkauf",
+    "mechanikText": "Personalkauf",
+    "rabatt": 0.2,
+    "bereicheText": [],
+    "start": 23,
+    "ende": 24,
+    "startKw": 24,
+    "endeKw": 24,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-8",
+    "name": "Sommerschlussverkauf",
+    "anlass": "ssv",
+    "mechanik": "reduzierung",
+    "mechanikText": "Preisreduzierung (Sale)",
+    "rabatt": 0.4,
+    "bereiche": [
+     "damen",
+     "herren",
+     "kinder",
+     "accessoires",
+     "waesche",
+     "sporttextil",
+     "outdoor",
+     "wintersport",
+     "sportschuhe"
+    ],
+    "bereicheText": [
+     "Damen",
+     "Herren",
+     "Kinder",
+     "Schuhe & Accessoires",
+     "Wäsche",
+     "Sporttextil",
+     "Outdoor",
+     "Wintersport",
+     "Sportschuhe"
+    ],
+    "start": 26,
+    "ende": 30,
+    "startKw": 27,
+    "endeKw": 30,
+    "jahr": 2027,
+    "wochen": 4,
+    "status": "beendet",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": true
+   },
+   {
+    "id": "k0-9",
+    "name": "Schulanfang",
+    "anlass": "schulanfang",
+    "mechanik": "rabatt_bereich",
+    "mechanikText": "Rabatt auf Bereiche",
+    "rabatt": 0.15,
+    "bereiche": [
+     "kinder",
+     "spielwaren",
+     "teamsport"
+    ],
+    "bereicheText": [
+     "Kinder",
+     "Spielwaren",
+     "Teamsport"
+    ],
+    "start": 31,
+    "ende": 33,
+    "startKw": 32,
+    "endeKw": 33,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-10",
+    "name": "Wäsche Days",
+    "anlass": "waesche",
+    "mechanik": "staffel",
+    "mechanikText": "Staffel (3 für 2)",
+    "rabatt": 0,
+    "bereiche": [
+     "waesche"
+    ],
+    "bereicheText": [
+     "Wäsche"
+    ],
+    "start": 34,
+    "ende": 35,
+    "startKw": 35,
+    "endeKw": 35,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-11",
+    "name": "Hartwig Jubiläumswochen",
+    "anlass": "jubilaeum",
+    "mechanik": "coupon",
+    "mechanikText": "Coupon ab Mindestbon",
+    "rabatt": 0.15,
+    "bereicheText": [],
+    "mindestbon": 50,
+    "start": 38,
+    "ende": 40,
+    "startKw": 39,
+    "endeKw": 40,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-12",
+    "name": "Mehrwertsteuer-Aktion",
+    "anlass": "mwst",
+    "mechanik": "rabatt_alles",
+    "mechanikText": "Rabatt auf alles",
+    "rabatt": 0.16,
+    "bereicheText": [],
+    "start": 42,
+    "ende": 43,
+    "startKw": 43,
+    "endeKw": 43,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-13",
+    "name": "Personalkauf Winter",
+    "anlass": "personalkauf",
+    "mechanik": "personalkauf",
+    "mechanikText": "Personalkauf",
+    "rabatt": 0.2,
+    "bereicheText": [],
+    "start": 44,
+    "ende": 45,
+    "startKw": 45,
+    "endeKw": 45,
+    "jahr": 2027,
+    "wochen": 1,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-14",
+    "name": "Black Friday und Cyber Week",
+    "anlass": "blackfriday",
+    "mechanik": "rabatt_alles",
+    "mechanikText": "Rabatt auf alles",
+    "rabatt": 0.2,
+    "bereicheText": [],
+    "start": 46,
+    "ende": 48,
+    "startKw": 47,
+    "endeKw": 48,
+    "jahr": 2027,
+    "wochen": 2,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   },
+   {
+    "id": "k0-15",
+    "name": "Weihnachtspunkte",
+    "anlass": "weihnachten",
+    "mechanik": "punkte",
+    "mechanikText": "Mehrfachpunkte",
+    "rabatt": 0,
+    "bereicheText": [],
+    "punkteFaktor": 5,
+    "start": 48,
+    "ende": 51,
+    "startKw": 49,
+    "endeKw": 51,
+    "jahr": 2027,
+    "wochen": 3,
+    "status": "geplant",
+    "standard": true,
+    "scope": {
+     "typ": "alle"
+    },
+    "scopeText": "alle Häuser",
+    "kontrollHaeuser": 0,
+    "sonderwerbung": 0,
+    "ausgewertet": false
+   }
+  ],
+  "raeumungen": [],
+  "anlaesse": [
+   {
+    "id": "wsv",
+    "name": "Winterschlussverkauf",
+    "kw": 1,
+    "wochen": 4,
+    "mechanik": "reduzierung",
+    "rabatt": 0.4,
+    "bereiche": [
+     "damen",
+     "herren",
+     "kinder",
+     "accessoires",
+     "waesche",
+     "sporttextil",
+     "outdoor",
+     "wintersport",
+     "sportschuhe"
+    ],
+    "mechanikText": "Preisreduzierung (Sale)"
+   },
+   {
+    "id": "ssv",
+    "name": "Sommerschlussverkauf",
+    "kw": 27,
+    "wochen": 4,
+    "mechanik": "reduzierung",
+    "rabatt": 0.4,
+    "bereiche": [
+     "damen",
+     "herren",
+     "kinder",
+     "accessoires",
+     "waesche",
+     "sporttextil",
+     "outdoor",
+     "wintersport",
+     "sportschuhe"
+    ],
+    "mechanikText": "Preisreduzierung (Sale)"
+   },
+   {
+    "id": "midseason",
+    "name": "Mid Season Sale",
+    "kw": 22,
+    "wochen": 2,
+    "mechanik": "reduzierung",
+    "rabatt": 0.3,
+    "bereiche": [
+     "damen",
+     "herren",
+     "kinder",
+     "sporttextil"
+    ],
+    "mechanikText": "Preisreduzierung (Sale)"
+   },
+   {
+    "id": "blackfriday",
+    "name": "Black Friday und Cyber Week",
+    "kw": 47,
+    "wochen": 2,
+    "mechanik": "rabatt_alles",
+    "rabatt": 0.2,
+    "mechanikText": "Rabatt auf alles"
+   },
+   {
+    "id": "weihnachten",
+    "name": "Weihnachten",
+    "kw": 49,
+    "wochen": 3,
+    "mechanik": "punkte",
+    "rabatt": 0,
+    "mechanikText": "Mehrfachpunkte"
+   },
+   {
+    "id": "ostern",
+    "name": "Ostern",
+    "kw": 13,
+    "wochen": 2,
+    "mechanik": "rabatt_bereich",
+    "rabatt": 0.15,
+    "bereiche": [
+     "spielwaren",
+     "food",
+     "kinder"
+    ],
+    "mechanikText": "Rabatt auf Bereiche"
+   },
+   {
+    "id": "muttertag",
+    "name": "Muttertag",
+    "kw": 19,
+    "wochen": 1,
+    "mechanik": "punkte",
+    "rabatt": 0,
+    "bereiche": [
+     "beauty",
+     "accessoires",
+     "waesche"
+    ],
+    "mechanikText": "Mehrfachpunkte"
+   },
+   {
+    "id": "beauty",
+    "name": "Beauty Days",
+    "kw": 16,
+    "wochen": 2,
+    "mechanik": "rabatt_bereich",
+    "rabatt": 0.2,
+    "bereiche": [
+     "beauty"
+    ],
+    "mechanikText": "Rabatt auf Bereiche"
+   },
+   {
+    "id": "waesche",
+    "name": "Wäsche Days",
+    "kw": 35,
+    "wochen": 1,
+    "mechanik": "staffel",
+    "rabatt": 0.33,
+    "bereiche": [
+     "waesche"
+    ],
+    "mechanikText": "Staffel (3 für 2)"
+   },
+   {
+    "id": "schulanfang",
+    "name": "Schulanfang",
+    "kw": 32,
+    "wochen": 2,
+    "mechanik": "rabatt_bereich",
+    "rabatt": 0.15,
+    "bereiche": [
+     "kinder",
+     "spielwaren",
+     "teamsport"
+    ],
+    "mechanikText": "Rabatt auf Bereiche"
+   },
+   {
+    "id": "jubilaeum",
+    "name": "Jubiläumswochen",
+    "kw": 39,
+    "wochen": 2,
+    "mechanik": "coupon",
+    "rabatt": 0.15,
+    "mechanikText": "Coupon ab Mindestbon"
+   },
+   {
+    "id": "mwst",
+    "name": "Mehrwertsteuer-Aktion",
+    "kw": 43,
+    "wochen": 1,
+    "mechanik": "rabatt_alles",
+    "rabatt": 0.16,
+    "mechanikText": "Rabatt auf alles"
+   },
+   {
+    "id": "friends",
+    "name": "Friends and Family",
+    "kw": 10,
+    "wochen": 1,
+    "mechanik": "coupon",
+    "rabatt": 0.2,
+    "mechanikText": "Coupon ab Mindestbon"
+   },
+   {
+    "id": "personalkauf",
+    "name": "Personalkauf",
+    "kw": 24,
+    "wochen": 1,
+    "mechanik": "personalkauf",
+    "rabatt": 0.2,
+    "mechanikText": "Personalkauf"
+   },
+   {
+    "id": "raeumung",
+    "name": "Räumungsverkauf",
+    "kw": 1,
+    "wochen": 4,
+    "mechanik": "reduzierung",
+    "rabatt": 0.4,
+    "mechanikText": "Preisreduzierung (Sale)"
+   },
+   {
+    "id": "sonder",
+    "name": "Sonderaktion",
+    "kw": 1,
+    "wochen": 1,
+    "mechanik": "rabatt_alles",
+    "rabatt": 0.2,
+    "mechanikText": "Rabatt auf alles"
+   }
+  ],
+  "mechaniken": [
+   {
+    "id": "rabatt_alles",
+    "text": "Rabatt auf alles"
+   },
+   {
+    "id": "rabatt_bereich",
+    "text": "Rabatt auf Bereiche"
+   },
+   {
+    "id": "rabatt_wg",
+    "text": "Rabatt auf eine Warengruppe"
+   },
+   {
+    "id": "coupon",
+    "text": "Coupon ab Mindestbon"
+   },
+   {
+    "id": "punkte",
+    "text": "Mehrfachpunkte"
+   },
+   {
+    "id": "staffel",
+    "text": "Staffel (3 für 2)"
+   },
+   {
+    "id": "reduzierung",
+    "text": "Preisreduzierung (Sale)"
+   },
+   {
+    "id": "personalkauf",
+    "text": "Personalkauf"
+   }
+  ],
+  "geplant": true
+ },
+ "aktionsAuswertung": {
+  "k0-1": {
+   "id": "k0-1",
+   "name": "Winterschlussverkauf",
+   "anlass": "wsv",
+   "mechanik": "reduzierung",
+   "mechanikText": "Preisreduzierung (Sale)",
+   "rabatt": 0.4,
+   "bereiche": [
+    "damen",
+    "herren",
+    "kinder",
+    "accessoires",
+    "waesche",
+    "sporttextil",
+    "outdoor",
+    "wintersport",
+    "sportschuhe"
+   ],
+   "bereicheText": [
+    "Damen",
+    "Herren",
+    "Kinder",
+    "Schuhe & Accessoires",
+    "Wäsche",
+    "Sporttextil",
+    "Outdoor",
+    "Wintersport",
+    "Sportschuhe"
+   ],
+   "start": 0,
+   "ende": 4,
+   "startKw": 1,
+   "endeKw": 4,
+   "jahr": 2027,
+   "wochen": 4,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 26496578,
+   "mehrumsatzVon": 14490446,
+   "mehrumsatzBis": 24113317,
+   "hinweis": "Gemessen gegen Vorjahr und Trend.",
+   "rohertragseffektVon": -2471283,
+   "rohertragseffektBis": -1518058,
+   "rabattkosten": 0,
+   "mitnahme": 21532327,
+   "vorzieheffekt": 6581463,
+   "kannibalisierung": -4204039,
+   "altwarenabbau": 7710385,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -4627256,
+   "genauigkeit": "mittel"
+  },
+  "k0-2": {
+   "id": "k0-2",
+   "name": "Friends and Family",
+   "anlass": "friends",
+   "mechanik": "coupon",
+   "mechanikText": "Coupon ab Mindestbon",
+   "rabatt": 0.2,
+   "bereicheText": [],
+   "mindestbon": 0,
+   "start": 9,
+   "ende": 10,
+   "startKw": 10,
+   "endeKw": 10,
+   "jahr": 2027,
+   "wochen": 1,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 686277,
+   "mehrumsatzVon": 452925,
+   "mehrumsatzBis": 707591,
+   "hinweis": "Gemessen gegen Vorjahr und Trend.",
+   "rohertragseffektVon": 8728,
+   "rohertragseffektBis": 14171,
+   "rabattkosten": 0,
+   "mitnahme": 370800,
+   "vorzieheffekt": 117013,
+   "kannibalisierung": 0,
+   "altwarenabbau": 0,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -35356,
+   "genauigkeit": "mittel"
+  },
+  "k0-3": {
+   "id": "k0-3",
+   "name": "Ostern",
+   "anlass": "ostern",
+   "mechanik": "rabatt_bereich",
+   "mechanikText": "Rabatt auf Bereiche",
+   "rabatt": 0.15,
+   "bereiche": [
+    "spielwaren",
+    "food",
+    "kinder"
+   ],
+   "bereicheText": [
+    "Spielwaren",
+    "Feinkost",
+    "Kinder"
+   ],
+   "start": 12,
+   "ende": 14,
+   "startKw": 13,
+   "endeKw": 14,
+   "jahr": 2027,
+   "wochen": 2,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 987601,
+   "mehrumsatzVon": 619696,
+   "mehrumsatzBis": 997638,
+   "hinweis": "Gemessen gegen Vorjahr und Trend.",
+   "rohertragseffektVon": -999067,
+   "rohertragseffektBis": -616905,
+   "rabattkosten": 0,
+   "mitnahme": 1502493,
+   "vorzieheffekt": 204148,
+   "kannibalisierung": -434316,
+   "altwarenabbau": 9712,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -889645,
+   "genauigkeit": "mittel"
+  },
+  "k0-4": {
+   "id": "k0-4",
+   "name": "Beauty Days",
+   "anlass": "beauty",
+   "mechanik": "rabatt_bereich",
+   "mechanikText": "Rabatt auf Bereiche",
+   "rabatt": 0.2,
+   "bereiche": [
+    "beauty"
+   ],
+   "bereicheText": [
+    "Beauty"
+   ],
+   "start": 15,
+   "ende": 17,
+   "startKw": 16,
+   "endeKw": 17,
+   "jahr": 2027,
+   "wochen": 2,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 764542,
+   "mehrumsatzVon": 382792,
+   "mehrumsatzBis": 751499,
+   "hinweis": "Störfaktoren in der Messung (Wetter, Ferienverschiebung, Nachbarschließung).",
+   "rohertragseffektVon": -1006387,
+   "rohertragseffektBis": -623016,
+   "rabattkosten": 0,
+   "mitnahme": 1646581,
+   "vorzieheffekt": 154363,
+   "kannibalisierung": -479342,
+   "altwarenabbau": 2172,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -876446,
+   "genauigkeit": "mittel"
+  },
+  "k0-5": {
+   "id": "k0-5",
+   "name": "Muttertag",
+   "anlass": "muttertag",
+   "mechanik": "punkte",
+   "mechanikText": "Mehrfachpunkte",
+   "rabatt": 0,
+   "bereiche": [
+    "beauty",
+    "accessoires",
+    "waesche"
+   ],
+   "bereicheText": [
+    "Beauty",
+    "Schuhe & Accessoires",
+    "Wäsche"
+   ],
+   "punkteFaktor": 5,
+   "start": 18,
+   "ende": 19,
+   "startKw": 19,
+   "endeKw": 19,
+   "jahr": 2027,
+   "wochen": 1,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 386633,
+   "mehrumsatzVon": 190231,
+   "mehrumsatzBis": 322183,
+   "hinweis": "Gemessen gegen Vorjahr und Trend.",
+   "rohertragseffektVon": 55645,
+   "rohertragseffektBis": 89659,
+   "rabattkosten": 0,
+   "mitnahme": 82862,
+   "vorzieheffekt": 51683,
+   "kannibalisierung": -38339,
+   "altwarenabbau": 0,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": 51979,
+   "genauigkeit": "mittel"
+  },
+  "k0-6": {
+   "id": "k0-6",
+   "name": "Mid Season Sale",
+   "anlass": "midseason",
+   "mechanik": "reduzierung",
+   "mechanikText": "Preisreduzierung (Sale)",
+   "rabatt": 0.3,
+   "bereiche": [
+    "damen",
+    "herren",
+    "kinder",
+    "sporttextil"
+   ],
+   "bereicheText": [
+    "Damen",
+    "Herren",
+    "Kinder",
+    "Sporttextil"
+   ],
+   "start": 21,
+   "ende": 23,
+   "startKw": 22,
+   "endeKw": 23,
+   "jahr": 2027,
+   "wochen": 2,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 4878582,
+   "mehrumsatzVon": 1977314,
+   "mehrumsatzBis": 3727848,
+   "hinweis": "Störfaktoren in der Messung (Wetter, Ferienverschiebung, Nachbarschließung).",
+   "rohertragseffektVon": -323036,
+   "rohertragseffektBis": -200988,
+   "rabattkosten": 0,
+   "mitnahme": 3103549,
+   "vorzieheffekt": 956472,
+   "kannibalisierung": -1004449,
+   "altwarenabbau": 687908,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -644601,
+   "genauigkeit": "mittel"
+  },
+  "k0-7": {
+   "id": "k0-7",
+   "name": "Personalkauf Sommer",
+   "anlass": "personalkauf",
+   "mechanik": "personalkauf",
+   "mechanikText": "Personalkauf",
+   "rabatt": 0.2,
+   "bereicheText": [],
+   "start": 23,
+   "ende": 24,
+   "startKw": 24,
+   "endeKw": 24,
+   "jahr": 2027,
+   "wochen": 1,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 430520,
+   "mehrumsatzVon": 242431,
+   "mehrumsatzBis": 389635,
+   "hinweis": "Gemessen gegen Vorjahr und Trend.",
+   "rohertragseffektVon": -628202,
+   "rohertragseffektBis": -391827,
+   "rabattkosten": 0,
+   "mitnahme": 1047327,
+   "vorzieheffekt": 23408,
+   "kannibalisierung": 0,
+   "altwarenabbau": 0,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -519378,
+   "genauigkeit": "mittel"
+  },
+  "k0-8": {
+   "id": "k0-8",
+   "name": "Sommerschlussverkauf",
+   "anlass": "ssv",
+   "mechanik": "reduzierung",
+   "mechanikText": "Preisreduzierung (Sale)",
+   "rabatt": 0.4,
+   "bereiche": [
+    "damen",
+    "herren",
+    "kinder",
+    "accessoires",
+    "waesche",
+    "sporttextil",
+    "outdoor",
+    "wintersport",
+    "sportschuhe"
+   ],
+   "bereicheText": [
+    "Damen",
+    "Herren",
+    "Kinder",
+    "Schuhe & Accessoires",
+    "Wäsche",
+    "Sporttextil",
+    "Outdoor",
+    "Wintersport",
+    "Sportschuhe"
+   ],
+   "start": 26,
+   "ende": 30,
+   "startKw": 27,
+   "endeKw": 30,
+   "jahr": 2027,
+   "wochen": 4,
+   "status": "beendet",
+   "standard": true,
+   "scope": {
+    "typ": "alle"
+   },
+   "scopeText": "alle Häuser",
+   "kontrollHaeuser": 0,
+   "sonderwerbung": 0,
+   "ausgewertet": true,
+   "gemessen": true,
+   "marketingBericht": 19573742,
+   "mehrumsatzVon": 9165653,
+   "mehrumsatzBis": 15283443,
+   "hinweis": "Gemessen gegen Vorjahr und Trend.",
+   "rohertragseffektVon": -2302611,
+   "rohertragseffektBis": -1439725,
+   "rabattkosten": 0,
+   "mitnahme": 15226683,
+   "vorzieheffekt": 4410018,
+   "kannibalisierung": -2920323,
+   "altwarenabbau": 4960368,
+   "gewoehnung": 0,
+   "image": 0,
+   "ergebnis": -3635175,
+   "genauigkeit": "mittel"
+  }
+ }
+}

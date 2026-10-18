@@ -11,11 +11,12 @@ const tu = (s: GameState, a: SpielerAktion) => fuehreAus(s, a);
 /** Kommende Aktionen des laufenden und des nächsten Jahres. */
 const kommend = (s: GameState) => s.marketing.aktionen.filter((a) => a.start > s.woche && a.status !== 'abgesagt');
 
-/** Rabattschlacht: zusätzliche Rabattwochen, tiefere Sales, längerer Black Friday. */
-export function botRabattschlacht(s: GameState): void {
+/** Rabattschlacht: zusätzliche Rabattwochen, tiefere Sales, längerer Black Friday (ab Woche `ab`, Standard nach der Gläubigerversammlung). */
+export function botRabattschlacht(s: GameState, ab = 26): void {
   botTief(s);
   const w = s.woche;
-  if (w === 4 || w % 52 === 40) {
+  if (w < ab) return;
+  if (w === ab || w % 52 === 40) {
     for (const a of kommend(s)) {
       if (!a.standard || (a as { _rs?: boolean })._rs) continue;
       (a as { _rs?: boolean })._rs = true;
@@ -25,7 +26,7 @@ export function botRabattschlacht(s: GameState): void {
     }
   }
   // jede sechste Woche ein Wochenende "20 % auf alles", wenn nichts anderes läuft
-  if (w >= 6 && w % 6 === 0) {
+  if (w % 6 === 0) {
     const frei = !s.marketing.aktionen.some((a) => a.status !== 'abgesagt' && a.start <= w + 1 && a.ende > w + 1 && (a.mechanik === 'rabatt_alles' || a.mechanik === 'reduzierung'));
     if (frei) tu(s, { typ: 'aktionPlanen', name: 'Rabattwochenende 20 % auf alles', mechanik: 'rabatt_alles', rabatt: 0.2, wochen: 1, start: w + 1, sonderwerbung: 600_000 });
   }
@@ -72,7 +73,8 @@ export function botMarkenaufbau(s: GameState): void {
 
 export const MARKETING_STRATEGIEN: [string, (s: GameState) => void][] = [
   ['Standard (Bot C)', botTief],
-  ['Rabattschlacht', botRabattschlacht],
+  ['Rabattschlacht (ab Woche 26)', (s) => botRabattschlacht(s)],
+  ['Rabattschlacht (ab Woche 4)', (s) => botRabattschlacht(s, 4)],
   ['CRM und Karte', botCrmKarte],
   ['Markenaufbau', botMarkenaufbau],
 ];

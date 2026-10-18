@@ -9,6 +9,8 @@ import { sterneWirksam } from '../src/produkte';
 import { botTief } from './bot';
 
 const seeds = (process.argv[2] ?? '1,2,3').split(',').map(Number);
+/** Alle Strategien starten nach der Gläubigerversammlung (Woche 22), damit der Insolvenzplan überall gleich ausgeht. */
+const AB = Number(process.env.AB ?? 24);
 const jahre = Number(process.argv[3] ?? 3);
 type Bot = (s: GameState) => void;
 
@@ -24,10 +26,10 @@ function besetze(s: GameState, r: RessortId, bester: boolean, aufschlag: number,
 
 const vorstandGut: Bot = (s) => {
   const w = s.woche;
-  if (w === 1) for (const r of ['cmo', 'cpo'] as RessortId[]) fuehreAus(s, { typ: 'vorstandEntlassen', ressort: r });
+  if (w === AB) for (const r of ['cmo', 'cpo'] as RessortId[]) fuehreAus(s, { typ: 'vorstandEntlassen', ressort: r });
   // Offene Ressorts mit den Besten besetzen, bis jemand zusagt
-  for (const r of RESSORTS) if (!s.vorstand.ressorts[r].person && w >= 1) besetze(s, r, true, 1.15, 0.4, 0.3);
-  if (w === 3) for (const r of RESSORTS) {
+  for (const r of RESSORTS) if (!s.vorstand.ressorts[r].person && w >= AB) besetze(s, r, true, 1.15, 0.4, 0.3);
+  if (w === AB + 1) for (const r of RESSORTS) {
     const p = s.vorstand.ressorts[r].person;
     if (p && p.gewachsen) fuehreAus(s, { typ: 'vorstandBonus', ressort: r, haltebonus: Math.round(p.gehalt * 0.4), halteWochen: 78, erfolgsbonus: 0.3 });
   }
@@ -50,9 +52,9 @@ const vorstandGut: Bot = (s) => {
 
 const vorstandSchwach: Bot = (s) => {
   const w = s.woche;
-  if (w === 1) for (const r of RESSORTS) if (s.vorstand.ressorts[r].person) fuehreAus(s, { typ: 'vorstandEntlassen', ressort: r });
-  for (const r of RESSORTS) if (!s.vorstand.ressorts[r].person && w >= 1) besetze(s, r, false, 1.0, 0, 0);
-  if (w === 20) for (const r of RESSORTS) { const p = s.vorstand.ressorts[r].person; if (p) fuehreAus(s, { typ: 'vorstandGehalt', ressort: r, gehalt: Math.round(p.gehalt * 0.85) }); }
+  if (w === AB) for (const r of RESSORTS) if (s.vorstand.ressorts[r].person) fuehreAus(s, { typ: 'vorstandEntlassen', ressort: r });
+  for (const r of RESSORTS) if (!s.vorstand.ressorts[r].person && w >= AB) besetze(s, r, false, 1.0, 0, 0);
+  if (w === AB + 20) for (const r of RESSORTS) { const p = s.vorstand.ressorts[r].person; if (p) fuehreAus(s, { typ: 'vorstandGehalt', ressort: r, gehalt: Math.round(p.gehalt * 0.85) }); }
   for (const r of RESSORTS) {
     const res = s.vorstand.ressorts[r];
     if (!res.person) continue;
@@ -62,7 +64,7 @@ const vorstandSchwach: Bot = (s) => {
 };
 
 const vorstandUnbesetzt: Bot = (s) => {
-  if (s.woche === 1) for (const r of RESSORTS) if (s.vorstand.ressorts[r].person) fuehreAus(s, { typ: 'vorstandEntlassen', ressort: r });
+  if (s.woche === AB) for (const r of RESSORTS) if (s.vorstand.ressorts[r].person) fuehreAus(s, { typ: 'vorstandEntlassen', ressort: r });
 };
 
 // ------------------------------------------------------------------ Produkte
@@ -103,7 +105,7 @@ function produktStrategie(gut: boolean): Bot {
         fuehreAus(s, { typ: 'produktEntwickeln', entwurf: e });
       }
     }
-    if (!gut && s.woche === 9) for (const p of s.produkte.liste.filter((x) => x.status === 'sortiment')) fuehreAus(s, { typ: 'produktPreis', produkt: p.id, preis: p.preis * 1.3 });
+    if (!gut && s.woche === AB + 5) for (const p of s.produkte.liste.filter((x) => x.status === 'sortiment')) fuehreAus(s, { typ: 'produktPreis', produkt: p.id, preis: p.preis * 1.3 });
   };
 }
 
@@ -115,7 +117,7 @@ function lauf(seed: number, extra: Bot): Kz[] {
   let abg = 0;
   for (let i = 0; i < jahre * 52 && s.phase !== 'zerschlagen'; i++) {
     botTief(s);
-    extra(s);
+    if (s.woche >= AB) extra(s);
     const vorher = RESSORTS.filter((r) => s.vorstand.ressorts[r].person).length;
     wocheAbspielen(s);
     abg += Math.max(0, vorher - RESSORTS.filter((r) => s.vorstand.ressorts[r].person).length);

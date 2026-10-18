@@ -281,7 +281,7 @@ export function bewerte(s: GameState, m: Eigenmarke, e: { typ: ArtikelTyp; farbe
 const r2 = (x: number): number => Math.round(x * 100) / 100;
 
 export function scoreAus(t: SterneTeile): number {
-  return 0.3 * t.zielgruppe + 0.25 * t.trend + 0.15 * t.preisQualitaet + 0.15 * t.entwicklung + 0.15 * t.team;
+  return 0.28 * t.zielgruppe + 0.25 * t.trend + 0.15 * t.preisQualitaet + 0.2 * t.entwicklung + 0.12 * t.team;
 }
 
 const halbe = (x: number): number => clamp(Math.round(x * 2) / 2, 0.5, 5);

@@ -1,5 +1,7 @@
 import { fuehreAus, neuesSpiel, produkte, produktKatalog, produktVorschau, trendbericht, wocheAbspielen, produktNachfrageFaktor, produktMargeDelta } from '../src';
 import type { GameState, ProduktEntwurf } from '../src';
+import { bewerte, TYP, trendFuer } from '../src/produkte';
+import { saisonId } from '../src/einkauf';
 
 const spiele = (s: GameState, n: number) => { for (let i = 0; i < n; i++) { fuehreAus(s, { typ: 'sammelfreigabe' }); wocheAbspielen(s); } };
 const GEDANKENSTRICH = /[–—]/;
@@ -34,14 +36,24 @@ describe('Produktentwicklung', () => {
     // Lisannes Oberteile sind zum Start voll: erst eine alte Bluse auslisten
     expect(produktVorschau(s, { marke: 'em1', typ: 'Bluse', farbe: 'marine', material: 'Seide', dauer: 12, budgetWoche: 20_000 }).fehler).toMatch(/Kapazität/);
     fuehreAus(s, { typ: 'produktAuslisten', produkt: s.produkte.liste.find((x) => x.marke === 'em1' && x.typ === 'Bluse')!.id });
-    const t = trendbericht(s).aktuell.gruppen.reif;
-    const gut: ProduktEntwurf = { marke: 'em1', typ: 'Kaschmirpullover', farbe: t.farben[0], material: 'Kaschmir', dauer: 12, budgetWoche: 30_000 };
-    const schlecht: ProduktEntwurf = { marke: 'em1', typ: 'Jeans-Shorts', farbe: t.out[0], material: 'Denim', dauer: 4, budgetWoche: 5_000 };
+    // Trend der Einführungssaison (12 Wochen Entwicklung) für 50 plus
+    const t = trendFuer(s, saisonId(s.woche + 12)).gruppen.reif;
+    const typ = t.artikel.find((x) => produktVorschau(s, { marke: 'em1', typ: x, farbe: t.farben[0], material: TYP[x].materialien[0], dauer: 12, budgetWoche: 30_000 }).ok)!;
+    expect(typ).toBeDefined();
+    const material = TYP[typ].materialien.find((m) => t.materialien.includes(m)) ?? TYP[typ].materialien[0];
+    const gut: ProduktEntwurf = { marke: 'em1', typ, farbe: t.farben[0], material, dauer: 12, budgetWoche: 30_000 };
+    const schlecht: ProduktEntwurf = { marke: 'em1', typ: 'Jeans-Shorts', farbe: t.out[0], material: 'Denim', dauer: 12, budgetWoche: 30_000 };
     const vg = produktVorschau(s, gut); const vs = produktVorschau(s, schlecht);
     expect(vg.ok).toBe(true);
     expect(vs.ok).toBe(true);
     expect(vg.sterneErwartet).toBeGreaterThan(vs.sterneErwartet + 1);
-    expect(produktVorschau(s, { ...gut, dauer: 4, budgetWoche: 5_000 }).sterneErwartet).toBeLessThan(vg.sterneErwartet);
+    // Gleiche Saison, kleines Budget: deutlich schwächer
+    expect(produktVorschau(s, { ...gut, budgetWoche: 3_000 }).sterneErwartet).toBeLessThanOrEqual(vg.sterneErwartet - 0.5);
+    // Gleiches Gesamtbudget in 4 statt 12 Wochen: weniger effizient (Teilbewertung Entwicklung, Trend herausgerechnet)
+    const m = s.eigenmarken.marken[0];
+    const lang = bewerte(s, m, { ...gut, preislage: m.preislage, qualitaet: m.qualitaet }, 0.5, undefined);
+    const kurz = bewerte(s, m, { ...gut, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 4, budgetWoche: 30_000 * 3 }, 0.5, undefined);
+    expect(kurz.entwicklung).toBeLessThan(lang.entwicklung);
     expect(produktVorschau(s, { ...gut, typ: 'Lippenstift' }).ok).toBe(false); // Lisanne führt keine Beauty
     expect(produktVorschau(s, { ...gut, material: 'Denim' }).ok).toBe(false);
   });
