@@ -5,7 +5,7 @@ import { warenhaus } from '../kit/warenhaus.js';
 import { sporthaus } from '../kit/sporthaus.js';
 import { STATUS_TITEL } from '../kit/zustaende.js';
 import { zustandAusHaus } from '../kit/bruecke.js';
-import { neuesSpiel } from '../../../turnaround/src/index';
+import { neuesSpiel } from '../../../engine/src/index';
 
 const START = neuesSpiel(1);
 const klon = () => JSON.parse(JSON.stringify(START));

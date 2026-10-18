@@ -5,7 +5,7 @@
       __defProp(target, name2, { get: all[name2], enumerable: true });
   };
 
-  // ../turnaround/src/index.ts
+  // ../engine/src/index.ts
   var src_exports = {};
   __export(src_exports, {
     ABTEILUNGEN: () => ABTEILUNGEN,
@@ -48,7 +48,7 @@
     wocheAbspielen: () => wocheAbspielen
   });
 
-  // ../turnaround/src/daten.ts
+  // ../engine/src/daten.ts
   var WH = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
   function mit(basis, over) {
     return basis.map((x, i) => over[i] !== void 0 ? over[i] : x);
@@ -253,7 +253,7 @@
   ];
   var PROJEKTNAMEN = ["Ph\xF6nix", "Aufbruch", "Zukunft 2030", "Fokus", "Leuchtturm", "Neustart", "Kompass", "Horizont", "Wende", "Herzschlag", "Fundament", "Evolution"];
 
-  // ../turnaround/src/util.ts
+  // ../engine/src/util.ts
   function zufall(h) {
     let t = h.rng = h.rng + 1831565813 >>> 0;
     t = Math.imul(t ^ t >>> 15, t | 1);
@@ -288,7 +288,7 @@
     return `${(x / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Mio. \u20AC`;
   }
 
-  // ../turnaround/src/standorte.ts
+  // ../engine/src/standorte.ts
   var KOORDINATEN = {
     Berlin: [52.52, 13.4],
     Hamburg: [53.55, 10],
@@ -483,7 +483,7 @@
     return Math.sqrt(dx * dx + dy * dy) / 100;
   }
 
-  // ../turnaround/src/hq.ts
+  // ../engine/src/hq.ts
   var ABTEILUNGEN = ["controlling", "einkauf", "marketing", "personal", "immobilien", "logistik", "ecommerce", "recht", "vm", "verwaltung"];
   var ABTEILUNG_NAME = {
     controlling: "Controlling",
@@ -1352,7 +1352,7 @@
     };
   }
 
-  // ../turnaround/src/eigenmarken.ts
+  // ../engine/src/eigenmarken.ts
   var BESCHAFFUNG = {
     fernost: { name: "Fernost", vorlauf: 22, mindestabnahme: 15e4, mehrmarge: 0.14, produzent: "Golden Thread" },
     nahost: { name: "Nahost und Osteuropa", vorlauf: 10, mindestabnahme: 6e4, mehrmarge: 0.105, produzent: "Adria Konfektion" },
@@ -1799,7 +1799,7 @@
     };
   }
 
-  // ../turnaround/src/einkauf.ts
+  // ../engine/src/einkauf.ts
   var JACKE = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
   var STRICK = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
   var ROH2 = {
@@ -3172,7 +3172,7 @@
     };
   }
 
-  // ../turnaround/src/welt.ts
+  // ../engine/src/welt.ts
   var STANDARD_SZENARIO = {
     warenhaeuser: 130,
     sporthaeuser: 50,
@@ -3472,7 +3472,7 @@
     }
   }
 
-  // ../turnaround/src/wirtschaft.ts
+  // ../engine/src/wirtschaft.ts
   function istAktiv(h) {
     return h.status === "offen" || h.status === "schliessung_verhandlung" || h.status === "raeumung";
   }
@@ -3649,7 +3649,7 @@
     return r;
   }
 
-  // ../turnaround/src/stakeholder.ts
+  // ../engine/src/stakeholder.ts
   function freieLiquiditaet(s2) {
     return s2.cash + s2.kreditlinie;
   }
@@ -3700,7 +3700,7 @@
     }
   }
 
-  // ../turnaround/src/prozesse.ts
+  // ../engine/src/prozesse.ts
   var abfindungJeFte2 = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
   function einmalKosten(s2, betrag) {
     s2.cash -= eur(betrag);
@@ -3945,7 +3945,7 @@
     return s2.haeuser.reduce((a, h) => a + (h.status === "geschlossen" ? 0 : lohnKosten(s2, h)), 0);
   }
 
-  // ../turnaround/src/ware.ts
+  // ../engine/src/ware.ts
   function bestandWert(s2, g) {
     let x = 0;
     for (const k of s2.bestand) if (!g || k.gruppe === g) x += k.wert;
@@ -4027,7 +4027,7 @@
     return gebucht;
   }
 
-  // ../turnaround/src/ereignisse.ts
+  // ../engine/src/ereignisse.ts
   function offeneHaeuser(s2, format) {
     return s2.haeuser.filter((h) => h.status === "offen" && (!format || h.format === format));
   }
@@ -4405,7 +4405,7 @@
     }
   }
 
-  // ../turnaround/src/engine.ts
+  // ../engine/src/engine.ts
   function neuesSpiel(seed = 1, szenario = STANDARD_SZENARIO) {
     return neueWelt(seed, szenario);
   }
@@ -4641,7 +4641,7 @@
     return out;
   }
 
-  // ../turnaround/src/aktionen.ts
+  // ../engine/src/aktionen.ts
   var ok3 = (text2) => ({ ok: true, text: text2 });
   var fehler3 = (text2) => ({ ok: false, text: text2 });
   function haus(s2, id) {
@@ -5098,7 +5098,7 @@
     return fehler3("Unbekannte Aktion.");
   }
 
-  // ../turnaround/src/abfragen.ts
+  // ../engine/src/abfragen.ts
   function cockpit(s2) {
     const letzte = s2.historie[s2.historie.length - 1];
     const h13 = s2.historie.slice(-13);
@@ -5175,7 +5175,7 @@
     return { limit: eur(kvLimit(s2)), genutzt: eur(offeneWarenverbindlichkeiten(s2)) };
   }
 
-  // ../turnaround/scripts/bot.ts
+  // ../engine/scripts/bot.ts
   function einkaufStandard(s2) {
     if (!s2.einkauf.freigaben.length) return;
     let offen = 0;
@@ -5243,7 +5243,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // ../../render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -35884,7 +35884,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // ../../render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -74784,7 +74784,7 @@
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // ../../render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -75380,7 +75380,7 @@
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // ../../render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
