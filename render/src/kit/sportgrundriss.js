@@ -18,7 +18,7 @@ import {
 import * as I from './innen.js';
 import { flaeche, fremdflaeche, abteilungsArt } from './abteilung.js';
 import * as SA from './sportabteilung.js';
-import { familieSport, masseSport, HS_ROT, HS_BLAU } from './sporthaus.js';
+import { familieSport, masseSport, sportGefuehl, HS_ROT, HS_BLAU } from './sporthaus.js';
 import { westAuto } from './westbauten.js';
 
 const R = RASTER, WH = WANDHOEHE, PI = Math.PI;
@@ -36,9 +36,28 @@ const STIL = {
 };
 const NAME_ETAGE = (e) => (e === 0 ? 'EG' : `${e}. OG`);
 
+/** Reserviert in großen 1a-Häusern eine sichtbare Erlebniszone, ohne Wege zu blockieren. */
+function rasterGefuehl(ra, haus, e, o = {}) {
+  const g = sportGefuehl(haus, o.zustand ?? o);
+  ra.abverkauf = e > 0 && e === g.obereEtage && g.abverkauf;
+  ra.erlebnis = e === 0 ? g.erlebnis : null;
+  if (!ra.erlebnis || ra.nx < 5 || ra.nz < 3) return ra;
+  const gueltig = new Set([null, 'lauf', 'aktion']);
+  const kandidaten = [];
+  for (let i = 1; i < ra.nx - 2; i++)
+    if (gueltig.has(ra.typ[i][ra.nz - 1]) && gueltig.has(ra.typ[i + 1][ra.nz - 1])) kandidaten.push(i);
+  if (!kandidaten.length) { ra.erlebnis = null; return ra; }
+  const ziel = ra.gx + (ra.gx < ra.nx / 2 ? 3 : -4);
+  const i = kandidaten.sort((a, b) => Math.abs(a - ziel) - Math.abs(b - ziel))[0];
+  ra.typ[i][ra.nz - 1] = 'erlebnis';
+  ra.typ[i + 1][ra.nz - 1] = 'erlebnis';
+  ra.erlebnisZelle = [i, ra.nz - 1];
+  return ra;
+}
+
 // ================================================================ Raster
 /** Grundriss: Belegung im 5-m-Raster mit Gängen, Sonderzonen und Nebenräumen, dazu Blöcke für die Abteilungen. */
-export function sportRaster(haus, e) {
+export function sportRaster(haus, e, o = {}) {
   const fam = familieSport(haus);
   const m = masseSport(haus, fam);
   const B = m.bw, T = m.bd, nx = B / R, nz = T / R;
@@ -79,7 +98,7 @@ export function sportRaster(haus, e) {
     if (nz - 1 > j0 - 1) bereiche.push([nz - 1, nz]);
     ra.bloecke = [];
     for (const [a, b] of bereiche.reverse()) { ra.bloecke.push([gx, nx, a, b, 1]); ra.bloecke.push([0, gx, a, b, -1]); }
-    return ra;
+    return rasterGefuehl(ra, haus, e, o);
   }
   // ---- offene Grundrisse
   const gx = fam === 4 ? Math.max(1, Math.min(nx - 2, Math.round(nx * 0.42))) : fam === 1 ? Math.max(1, Math.min(nx - 3, Math.round(nx * 0.6))) : Math.max(1, Math.min(nx - 3, Math.round(nx * 0.52)));
@@ -121,7 +140,7 @@ export function sportRaster(haus, e) {
     const k = Math.round(w / 4.5);
     for (let q = 1; q < k; q++) { const i = a + Math.round((q * w) / k); for (let j = c; j < d; j++) setz(i, j, 'neben'); }
   }
-  return ra;
+  return rasterGefuehl(ra, haus, e, o);
 }
 
 /** Abteilungen als Spurenbündel im Umlauf ab dem Eingang, Größe nach m² (wie Warenhaus). */
@@ -176,7 +195,7 @@ export function sportZonen(haus, e, ra) {
  */
 export function sportEtage(S, scene, haus, etageNr, o = {}) {
   vorbereiten(S, scene);
-  const ra = sportRaster(haus, etageNr);
+  const ra = sportRaster(haus, etageNr, o);
   const zn = sportZonen(haus, etageNr, ra);
   const { B, T, nx, nz } = ra;
   let ax0 = 0, az0 = 0, ax1 = B, az1 = T;
@@ -194,7 +213,7 @@ export function sportEtage(S, scene, haus, etageNr, o = {}) {
   const k = haus.kpi ?? {};
   const zellenImBild = zn.reduce((s, z) => s + z.zellen.filter((c) => drin(c.i, c.j)).length, 0);
   const jeZelle = Math.max(0.4, Math.min(1.6, (k.umsatz ?? 60000) / 700 / Math.max(1, zn.reduce((s, z) => s + z.zellen.length, 0))));
-  let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 3) * (etageNr === 0 ? 1.15 : 1));
+  let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 3) * (etageNr === 0 ? 0.75 : 0.65));
   let d = o.dichte ?? 1;
   let tmp, gruppe, versuch = 0, kk;
   for (;;) {
@@ -245,7 +264,7 @@ function bauen(S, scene, haus, e, ra, zn, k) {
     if (ni < 0 || nj < 0) return 'wand';
     if (ni >= nx || nj >= nz) return 'front';
     const t = typ[ni][nj];
-    const offen = ['gang', 'neben', 'lauf', 'luft', 'buehne', 'szene', 'turm', 'rt', 'rt2', 'treppe_offen', 'treppe_offen2', 'treppe_holz', 'treppe_holz2', 'kasse', 'wagen', 'eingang', 'aktion', 'radbuehne', 'radbuehne2'];
+    const offen = ['gang', 'neben', 'lauf', 'erlebnis', 'luft', 'buehne', 'szene', 'turm', 'rt', 'rt2', 'treppe_offen', 'treppe_offen2', 'treppe_holz', 'treppe_holz2', 'kasse', 'wagen', 'eingang', 'aktion', 'radbuehne', 'radbuehne2'];
     if (offen.includes(t)) return (di < 0 || dj < 0) && !drin(ni, nj) ? 'wand' : 'gang';
     if (t) return 'wand';
     if ((di < 0 || dj < 0) && !drin(ni, nj)) return 'wand';
@@ -258,6 +277,18 @@ function bauen(S, scene, haus, e, ra, zn, k) {
     const Z = { alle: z.zellen.filter((c) => drin(c.i, c.j)), kante, sicht, y: 0, bereich: [ax0, az0, ax1, az1] };
     const opt = { seed: hid % 1000 + zi * 37 + e * 11 + 1, dichte: d, eg: egFront, basis: f.gruppe };
     let res;
+    if (ra.abverkauf && !['leer', 'umbau', 'konzession', 'untermiete'].includes(art)) {
+      // Im obersten OG tritt Abverkaufsware an die Stelle der Markeninszenierung.
+      const zellen = z.zellen.filter((c) => drin(c.i, c.j));
+      zellen.forEach(({ i, j }, k0) => {
+        const L = lokal(S, i * R + R / 2, 0, j * R + R / 2, 0);
+        SA.sportAbverkauf(L, r, d, i + j + k0);
+        if (scene && k0 % 5 === 0) haengeschild(S, scene, 'REDUZIERT', i * R + R / 2, 3.5, j * R + R / 2, { farbe: '#c52f35', hoehe: 0.55 });
+        if (k0 % 2 === 0) frei.push([i * R + 0.65, j * R + 4.3]);
+        belegt.push([i * R + 0.9, j * R + 0.8, i * R + 4.1, j * R + 3.6]);
+      });
+      return;
+    }
     if (art === 'konzession' || art === 'untermiete') res = fremdflaeche(S, scene, art, Z, { ...opt, mieter: f.mieter ?? 'fitness', marke: I.MARKEN[2], seed: hid + zi });
     else if (ra.box && GASSE[art]) res = gassen(S, scene, art, Z, { ...opt, ra });
     else res = flaeche(S, scene, art, Z, opt);
@@ -284,6 +315,15 @@ function bauen(S, scene, haus, e, ra, zn, k) {
       case 'radbuehne': if (drin(i + 1, j)) radbuehne(S, scene, x, z, d, rr, frei, ctx); zu(x, z, x + 2 * R, z + R); break;
       case 'radbuehne2': if (!drin(i - 1, j)) boden(S, x, z, R, R, 0, stil.gang, d); break;
       case 'lauf': teststrecke(S, scene, i, j, ra, d, rr, frei); break;
+      case 'erlebnis': {
+        boden(S, x, z, R, R, 0, stil.gang, d);
+        if (ra.erlebnisZelle?.[0] === i && ra.erlebnisZelle?.[1] === j) {
+          const L = lokal(S, x + R / 2, 0.06, z + R / 2, 0);
+          SA.sportErlebnis(L, rr, d, ra.erlebnis, { S, scene, r: rr, d, basisSeed: hid % 7, zaehler: { wand: 0, insel: 0 } });
+        }
+        zu(x + 0.5, z + 0.5, x + R - 0.5, z + R - 0.5);
+        break;
+      }
       case 'buehne': break;
       case 'szene': break;
       case 'turm': kletterturm(S, scene, x, z, ra, d, rr, frei); zu(x, z, x + R, z + R); break;
@@ -693,7 +733,7 @@ function kassenZelle(S, scene, x, z, d, r, frei, schild) {
     L.box(2.6, 0.85, 0.75, 0, 0, 0, '#2a2d31'); L.box(2.0, 0.05, 0.55, 0.2, 0.85, 0, '#1f1f1f'); L.box(2.66, 0.04, 0.8, 0, 0.85, 0, '#c9d2d8');
     L.box(0.3, 0.3, 0.05, -0.9, 1.0, -0.3, '#2b3640'); L.box(0.05, 1.4, 0.05, -1.25, 0.85, -0.35, '#9aa3aa'); L.box(0.4, 0.3, 0.05, -1.25, 2.25, -0.35, HS_ROT);
     figur(S, ...L.P(-0.8, -0.8), (r() * 1e9) | 0, 'kasse', { y: 0.06, ry: L.rot + PI });
-    for (let q = 0; q < 2; q++) if (r() < 0.8) figur(S, ...L.P(0.6 + q * 0.9, 0.85), (r() * 1e9) | 0, 'kunde', { y: 0.06, ry: L.rot - PI / 2, pose: 'tragen' });
+    if (r() < 0.3) figur(S, ...L.P(1.2, 0.85), (r() * 1e9) | 0, 'kunde', { y: 0.06, ry: L.rot - PI / 2, pose: 'tragen' });
     if (r() < 0.6) SA.einkaufswagen(L, 1.9, 0.9, PI);
   }
   if (schild && scene) haengeschild(S, scene, 'Kasse', x + 2.5, 3.6, z + 2.5, { farbe: HS_ROT, hoehe: 0.6 });
@@ -1039,7 +1079,7 @@ function strasse(S, ax0, az0, ax1, az1, ra, r, d) {
   westAuto(S, ax0 + (ax1 - ax0) * 0.35, az1 + gw + 2.6, 0, 'pkw', null, -0.25);
   if (ax1 - ax0 > 25) westAuto(S, ax0 + (ax1 - ax0) * 0.75, az1 + gw + 6.3, PI, 'kombi', null, -0.25);
   westAuto(S, ax1 + gw + 6.3, az0 + (az1 - az0) * 0.4, PI / 2, 'kompakt', null, -0.25);
-  const n = Math.round(((ax1 - ax0) + (az1 - az0)) / 4);
+  const n = Math.round(0.7 * ((ax1 - ax0) + (az1 - az0)) / 4);
   for (let q = 0; q < n; q++) {
     const vorne = r() < (ax1 - ax0) / ((ax1 - ax0) + (az1 - az0));
     if (vorne) figur(S, zw(r, ax0 + 1, ax1 + gw - 1), az1 + zw(r, 0.8, gw - 1.6), q + 500, 'kunde', { y: yg + 0.15, ry: r() < 0.5 ? PI / 2 : -PI / 2, pose: r() < 0.7 ? 'gehen' : 'tasche' });
@@ -1073,9 +1113,9 @@ function parkplatz(S, scene, ax0, az0, ax1, az1, ra, r, d) {
   { const L = lokal(S, ra.gx * R + 9, 0.0, az1 + gw + P / 2 + 1.2, 0); L.box(3.6, 0.04, 1.4, 0, -0.15, 0, '#bdb8ae'); L.box(3.6, 2.2, 0.06, 0, -0.15, -0.65, '#9aa3aa'); L.box(3.8, 0.1, 1.6, 0, 2.05, 0, HS_BLAU); for (let q = 0; q < (d < 0.5 ? 3 : 7); q++) SA.einkaufswagen(L.hoch(-0.15), -1.4 + q * 0.42, 0, 0); }
   // Lieferzone an +x
   for (let k = 0; k < 4; k++) S.box(1.2, 0.02, 0.4, ax1 + gw + 4, -0.24, az0 + 3 + k * 1.6, '#f2c14e');
-  const n = Math.round((ax1 - ax0) / 5);
+  const n = Math.round(0.7 * (ax1 - ax0) / 5);
   for (let q = 0; q < n; q++) figur(S, zw(r, ax0 + 1, ax1 - 1), az1 + zw(r, 0.6, gw - 0.6), q + 500, 'kunde', { y: yg + 0.15, ry: r() < 0.5 ? PI / 2 : -PI / 2, pose: r() < 0.5 ? 'gehen' : 'tragen' });
-  for (let q = 0; q < 3; q++) { const L = lokal(S, ra.gx * R + zw(r, -4, 6), -0.24, az1 + gw + zw(r, 6, 9), zw(r, 0, 6)); SA.einkaufswagen(L, 0, 0, 0); figur(S, ...L.P(-0.9, 0), q + 590, 'kunde', { y: -0.24, ry: L.rot + PI / 2, pose: 'gehen' }); }
+  for (let q = 0; q < 2; q++) { const L = lokal(S, ra.gx * R + zw(r, -4, 6), -0.24, az1 + gw + zw(r, 6, 9), zw(r, 0, 6)); SA.einkaufswagen(L, 0, 0, 0); figur(S, ...L.P(-0.9, 0), q + 590, 'kunde', { y: -0.24, ry: L.rot + PI / 2, pose: 'gehen' }); }
 }
 /** Mall-Passage (EG) bzw. Galerie mit Luftraum (OG) vor beiden Fronten, Nachbarläden angedeutet, Bänke und Pflanzen. */
 function passage(S, scene, ax0, az0, ax1, az1, ra, r, d, og) {
@@ -1146,7 +1186,7 @@ function passage(S, scene, ax0, az0, ax1, az1, ra, r, d, og) {
   if (!og && ax0 === 0) { flaecheP(-7, az1, 0, az1 + P); S.box(7, 0.06, 0.3, -3.5, 0.06, az1 + P - 0.15, '#c9bba5'); lad(-7, az1, 7, 'z', 1 + ra.v); }
   if (!og && az0 === 0) { flaecheP(ax1, -7, ax1 + P, 0); S.box(0.3, 0.06, 7, ax1 + P - 0.15, 0.06, -3.5, '#c9bba5'); lad(ax1, -7, 7, 'x', 3 + ra.v); }
   // Passanten
-  const n = Math.round(((ax1 - ax0) + (az1 - az0)) / (og ? 5 : 3.5));
+  const n = Math.round(0.7 * ((ax1 - ax0) + (az1 - az0)) / (og ? 5 : 3.5));
   const tiefe = og ? 3.2 : P - 0.8;
   for (let q = 0; q < n; q++) {
     const vorne = r() < (ax1 - ax0) / ((ax1 - ax0) + (az1 - az0));
