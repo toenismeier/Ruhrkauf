@@ -6,7 +6,11 @@ export async function messen({ renderer, scene, camera, info }) {
   if (!scene || !camera) throw new Error('Bitte zuerst ein Spiel starten.');
   const renderMs = [], frameMs = [];
   let vorher = 0;
+  const startGesamt = performance.now();
   for (let i = 0; i < 90; i++) {
+    // SwiftShader in CI oder aeltere iPhones koennen extrem langsam sein.
+    // Mindestens 5 Frames, maximal ca. 8 Sekunden Gesamtmessung.
+    if (i >= 5 && performance.now() - startGesamt > 8000) break;
     const zeit = await new Promise((resolve) => requestAnimationFrame(resolve));
     if (vorher) frameMs.push(zeit - vorher);
     vorher = zeit;
