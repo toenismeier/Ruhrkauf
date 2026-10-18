@@ -207,13 +207,13 @@ export interface MarketingStand {
 
 export const MK = {
   /** Anteil der Nachfrage, der an der Kanalwirkung hängt. */
-  kanalAnteil: 0.05,
+  kanalAnteil: 0.03,
   /** Wirkung der Marketingabteilung (HQ), wie bisher 3 % der Nachfrage. */
   hqAnteil: 0.03,
   markeStart: 60,
-  markeTempo: 0.015,
-  markeNachfrage: 0.05,
-  markeImage: 0.004,
+  markeTempo: 0.008,
+  markeNachfrage: 0.03,
+  markeImage: 0.002,
   bon: 41, // Ø Kassenbon in €
   karteMitglieder: 4_100_000,
   karteAktiv: 0.38,
@@ -240,6 +240,8 @@ export const MK = {
   kannibalisierung: 0.15,
   vorzugAbbau: 0.75,
   gewoehnung: 0.033,
+  /** Anteil der Aktionswirkung, der an der Kommunikation (Prospekt, Online, Fläche) hängt. */
+  kommAnteil: 0.25,
 };
 
 const SEG: Record<SegmentTyp, { oeffnung: number; einl: number; mitnahme: number; bon: number }> = {
@@ -465,7 +467,7 @@ function markenZiel(sc: MarketingSzenario): number {
 function kommunikation(sc: MarketingSzenario): number {
   let a = 0; let b = 0;
   for (const def of KANAELE) { a += def.aktion * Math.sqrt(Math.max(0, kanalRel(sc, def.id))); b += def.aktion; }
-  return 0.55 + 0.45 * (a / b);
+  return 1 - MK.kommAnteil + MK.kommAnteil * (a / b);
 }
 
 /** Mengeneffekt eines Preisvorteils: Aktionselastizität rund 2 (kommunizierter Rabatt), gedämpft durch Gewöhnung und Kaufkraft. */
@@ -1083,7 +1085,15 @@ export function marketingBudgetKompatibel(s: GameState, quote: number): Erg {
   const q = clamp(quote, 0, 0.06);
   s.marketing.budgetQuote = q;
   const m = s.marketing.stand;
-  if (m) for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote * (q / PARAM.marketingQuote);
+  if (m) {
+    // Kanäle so skalieren, dass die Netto-Werbequote (nach Lieferantenbeteiligung, mit Karte, App und CRM) q trifft
+    for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote;
+    const U = umsatzBezug(s);
+    const k = marketingKosten(s, U);
+    const rest = k.netto - k.sonderwerbung - k.kanaeleSumme + k.beteiligung; // Karte, App, CRM
+    const f = k.kanaeleSumme - k.beteiligung > 0 ? Math.max(0, (q * U - rest) / (k.kanaeleSumme - k.beteiligung)) : q / PARAM.marketingQuote;
+    for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote * f;
+  }
   return ok(`Marketingbudget auf ${(q * 100).toFixed(1)} % vom Umsatz gesetzt.`);
 }
 

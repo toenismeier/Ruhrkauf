@@ -69,7 +69,7 @@ describe('Marketing', () => {
     expect(a._rohertragseffektWahr).toBeLessThan(0);
     expect(summe(s, 6, 8, (k) => k.umsatz)).toBeGreaterThan(summe(ohne, 6, 8, (k) => k.umsatz));
     expect(s.marketing.gewoehnung).toBeGreaterThan(ohne.marketing.gewoehnung);
-    const e = aktionsAuswertung(s, id) as Record<string, number | string | boolean>;
+    const e = aktionsAuswertung(s, id) as unknown as Record<string, number | string | boolean>;
     expect(e.gemessen).toBe(true);
     expect(e.hinweis).toBeDefined();
     expect(Number(e.mitnahme)).toBeGreaterThan(0);

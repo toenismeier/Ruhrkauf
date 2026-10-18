@@ -73,6 +73,7 @@ export function karteSteuerung(o) {
   const { canvas, K } = o;
   const zeiger = new Map();
   let start = null, pinch = null, bewegt = 0, spur = [], lauf = null;
+  const info = { los: null, schwung: 0 };
   const stopp = () => { if (lauf) cancelAnimationFrame(lauf.id); lauf = null; };
   const mitte = () => { const [a, b] = [...zeiger.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) }; };
   /** Bodenpunkt p unter den Bildschirmpunkt (px, py) legen. */
@@ -114,8 +115,9 @@ export function karteSteuerung(o) {
     if (zeiger.size === 0) {
       if (bewegt < 6 && start) o.tippen(e);
       else if (spur.length >= 2) {
-        const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t);
-        if (performance.now() - b.t < 150) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
+        const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = performance.now() - b.t;
+        info.los = { dt: Math.round(dt), alter: Math.round(alter), v: Math.hypot(b.x - a.x, b.z - a.z) / dt, proben: spur.length };
+        if (alter < 200) schwung((b.x - a.x) / dt, (b.z - a.z) / dt);
       }
       start = null;
     } else { const [a] = [...zeiger.values()]; start = { p: o.aufBoden(a.x, a.y), x: a.x, y: a.y }; spur = []; }
@@ -125,6 +127,7 @@ export function karteSteuerung(o) {
     stopp();
     if (Math.hypot(vx, vz) * 16 < K.halb * 0.002) return;
     lauf = { vx, vz, t: performance.now(), id: 0 };
+    info.schwung++;
     const schritt = (t) => {
       if (!lauf) return;
       const dt = Math.min(40, t - lauf.t); lauf.t = t;
@@ -151,5 +154,5 @@ export function karteSteuerung(o) {
     festhalten(p, e.clientX, e.clientY);
     o.setzen();
   }, { passive: false });
-  return { stopp, schwung, get laeuft() { return !!lauf; } };
+  return { stopp, schwung, info, get laeuft() { return !!lauf; } };
 }

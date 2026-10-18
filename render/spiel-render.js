@@ -241,9 +241,10 @@ async function buendeln() {
     // Wischen nach links mit Schwung
     let k0 = await K();
     await touch('touchStart', [[300, 500]]);
-    for (let i = 1; i <= 8; i++) { await touch('touchMove', [[300 - i * 25, 500]]); await p.waitForTimeout(12); }
+    for (let i = 1; i <= 8; i++) await touch('touchMove', [[300 - i * 25, 500]]);
     await touch('touchEnd', []);
     let k1 = await K();
+    console.log('Loslassen:', JSON.stringify(await p.evaluate(() => window.spiel.karte.info)));
     await p.waitForTimeout(700);
     const k2 = await K();
     const zug = Math.hypot(k1.x - k0.x, k1.z - k0.z), nach = Math.hypot(k2.x - k1.x, k2.z - k1.z);

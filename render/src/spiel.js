@@ -640,7 +640,7 @@ window.spiel = { neuesSpiel, oeffneEinkauf, vorstand: vs, marketing: mk, produkt
       scene.background = alt; ren.render(scene, cam);
       return { randPixel: n, pixel: c.width * c.height };
     },
-    get laeuft() { return steuerung.laeuft; },
+    get laeuft() { return steuerung.laeuft; }, get info() { return steuerung.info; },
   },
   kamera: (o) => { Object.assign(K, o); kameraSetzen(); }, tippPunkt, fokusHaeuser, THREE, get K() { return K; }, get sb() { return sb; }, E };
 setTimeout(() => {
