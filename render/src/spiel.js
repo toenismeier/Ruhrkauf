@@ -624,18 +624,18 @@ $('spiel-speichern').addEventListener('click', async () => {
 async function diagnoseZeigen() {
   if (!s || !scene) return;
   menueZu();
-  panel('Performance', 'Messung direkt auf diesem Gerät', '<div class="karte"><div class="zeile">90 Frames werden aktiv gerendert …</div></div>', 'gross');
+  panel('Performance', 'Messung direkt auf diesem Gerät', '<div class="karte"><div class="zeile">Bis zu 90 Frames werden aktiv gerendert …</div></div>', 'gross');
   const vorher = KA.pause;
   KA.pause = true;
   try {
     const d = await performanceMessen({ renderer: ren, scene: () => scene, camera: () => cam,
       info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height }) });
     const zeile = (name, wert) => `<div class="zeile"><span class="was">${name}</span><b>${wert}</b></div>`;
-    const html = '<div class="karte"><div class="khead">90 gerenderte Frames auf diesem Gerät</div>' +
+    const html = '<div class="karte"><div class="khead">' + d.frames + ' gerenderte Frames auf diesem Gerät</div>' +
       zeile('Geschätzte Bildrate', d.fps + ' FPS') +
       zeile('Framezeit, 95. Perzentil', d.frameP95Ms + ' ms') +
       zeile('Renderaufruf, 95. Perzentil', d.renderP95Ms + ' ms') +
-      zeile('Frames über 33 ms', d.frameUeber33ms + ' / 89') +
+      zeile('Frames über 33 ms', d.frameUeber33ms + ' / ' + (d.frames - 1)) +
       zeile('Draw Calls', d.drawCalls) +
       zeile('Dreiecke', fmt.format(d.dreiecke)) +
       zeile('Geometrien / Texturen', d.geometrien + ' / ' + d.texturen) +
