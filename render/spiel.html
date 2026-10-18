@@ -244,13 +244,29 @@
   .typkacheln button.voll { opacity: 0.55; } .typkacheln button small { font-size: 9.5px; color: var(--rot); font-weight: 700; }
   .farben.klein { gap: 8px; } .farben.klein button { width: 34px; height: 34px; border-radius: 17px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
   .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: 13px; } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: 11.5px; margin-right: 6px; } .trend .olief { padding: 0; }
+  /* Startbildschirm */
+  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
+  #start.an { display: grid; place-items: center; }
+  .startkarte { width: 100%; max-width: 420px; background: var(--grund); border-radius: 22px; box-shadow: 0 8px 32px rgba(20, 30, 40, 0.3); padding: 18px 16px 14px; }
+  .startkopf { display: flex; align-items: center; gap: 12px; } .startkopf b { display: block; font-size: 24px; font-weight: 800; } .startkopf small { color: var(--leise); font-size: 12px; }
+  .logo.gross { width: 54px; height: 54px; border-radius: 15px; font-size: 30px; }
+  .startintro { font-size: 13.5px; line-height: 1.45; color: #34414b; margin: 12px 2px 6px; }
+  .startkarte .vtitel { margin: 12px 2px 6px; }
+  .startkarte .ort.gross { margin-top: 0; }
+  .stufen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 8px; min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; color: var(--text); }
+  .stufe-karte b { font-size: 15px; } .stufe-karte small { font-size: 11px; color: var(--leise); line-height: 1.35; }
+  .stufe-karte.an { border: 2px solid var(--rot); padding: 9px 7px; background: #fff8f6; }
+  .sterne-stufe { color: var(--rot); font-size: 11px; letter-spacing: 2px; }
+  .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 11px; color: var(--leise); }
+  .startseed input { width: 64px; font: inherit; font-size: 12px; border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
 </style>
 </head>
 <body>
 <canvas id="karte"></canvas>
 <div class="oben">
   <div class="leiste">
-    <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small>Warenhaus und Hartwig Sport</small></div></div>
+    <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
     <div class="datum"><b id="kw">KW 1</b><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
@@ -279,6 +295,18 @@
 </div>
 <div id="meldung"></div>
 <div id="lade" class="an">Stadt wird gebaut …</div>
+<div id="start">
+  <div class="startkarte">
+    <div class="startkopf"><div class="logo gross">H</div><div><b>Hartwig</b><small>Warenhaus und Hartwig Sport · Turnaround</small></div></div>
+    <p class="startintro">Die Kette steht mit dem Rücken zur Wand. Du übernimmst als CEO: Häuser, Zentrale, Einkauf, Vorstand und Marketing liegen jetzt bei dir.</p>
+    <div class="vtitel">Startstadt</div>
+    <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
+    <div class="vtitel">Schwierigkeit</div>
+    <div id="startstufen" class="stufen"></div>
+    <button id="startknopf" class="breit gruen">Starten</button>
+    <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
+  </div>
+</div>
 <script src="spiel-bundle.js"></script>
 </body>
 </html>

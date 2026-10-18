@@ -470,7 +470,29 @@ async function buendeln() {
     console.log(`Panels: ${erg.werte} Werte geprüft, ${erg.abweichungen} Abweichungen, ${erg.aktionen.filter((x) => x.ok).length}/${erg.aktionen.length} Aktionen ok`);
     return erg;
   }
-  if (process.argv.includes('--nur-panels')) { await panelsPruefen(); await b.close(); return; }
+  // ─────────────────────────────────────────── Startbildschirm: ohne URL-Parameter, Schwierigkeit schwer wählen, starten
+  async function startPruefen() {
+    const erg = { aktionen: [] };
+    const soll = (name, ok, info) => { erg.aktionen.push({ name, ok, info }); console.log(`${ok ? 'OK ' : 'FEHLER'} ${name}: ${info}`); };
+    const q = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+    q.on('pageerror', (e) => console.log('FEHLER', e.message));
+    await q.goto('file://' + path.join(__dirname, 'spiel.html'), { waitUntil: 'load', timeout: 0 });
+    await q.waitForSelector('#start.an', { timeout: 60000 });
+    const karten = await q.evaluate(() => [...document.querySelectorAll('.stufe-karte')].map((k) => k.querySelector('b').textContent));
+    soll('Startbildschirm mit drei Schwierigkeiten', karten.length === 3, karten.join(', '));
+    await q.screenshot({ path: path.join(__dirname, 'out', 'start.png') });
+    console.log('gespeichert:', path.join(__dirname, 'out', 'start.png'));
+    await q.tap('.stufe-karte[data-v=schwer]');
+    await q.selectOption('#startstadt', 'Karlsruhe');
+    await q.tap('#startknopf');
+    await q.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
+    const r = await q.evaluate(() => ({ ui: window.spiel.schwierigkeit, engine: window.spiel.s.schwierigkeit, stadt: document.getElementById('stadtname').textContent, cash: window.spiel.s.cash, unter: document.getElementById('markeunter').textContent, mittel: window.spiel.E.neuesSpiel(1, { schwierigkeit: 'mittel' }).cash }));
+    soll('Start schwer in Karlsruhe', r.ui === 'schwer' && (r.engine === undefined || r.engine === 'schwer') && r.stadt === 'Karlsruhe' && r.cash !== r.mittel, `${r.unter}, Engine ${r.engine}, Cash ${r.cash} statt ${r.mittel} bei mittel`);
+    await q.close();
+    return erg;
+  }
+  if (process.argv.includes('--nur-start')) { await startPruefen(); await b.close(); return; }
+  if (process.argv.includes('--nur-panels')) { await startPruefen(); await panelsPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-karte') || process.argv.includes('--nur-gesten')) { await kartePruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-einkauf')) { await einkaufPruefen(); await b.close(); return; }
   // Kamera auf die Hartwig-Häuser der Stadt
@@ -526,6 +548,7 @@ async function buendeln() {
     await p.evaluate(() => window.spiel.schliessePanel());
   }
   const ek = await einkaufPruefen();
+  const sp = await startPruefen();
   const pn = await panelsPruefen();
   const kt = await kartePruefen();
   const messung = await p.evaluate(() => window.spiel.messung);
@@ -536,6 +559,7 @@ async function buendeln() {
   const zusammen = { stadt: messung.stadtMs, teileEssenNachFuellen: teile, kachelMittelMs: mittel(km), kachelMaxMs: km.length ? Math.max(...km) : 0, wocheEngineMittelMs: mittel(engine), wocheEngineMaxMs: Math.max(...engine), neuBauMittelMs: mittel(neu), neuBauMaxMs: neu.length ? Math.max(...neu) : 0, wochenMitNeubau: neu.length, renderMittelMs: mittel(messung.renderMs), angetippt: !!(tipp && offen) };
   zusammen.anzeigeFehler = pruefung.reduce((a, q) => a + q.fehler.length, 0);
   zusammen.einkaufAbweichungen = ek.abweichungen; zusammen.einkaufAktionenOk = `${ek.aktionen.filter((x) => x.ok).length}/${ek.aktionen.length}`;
+  zusammen.startOk = `${sp.aktionen.filter((x) => x.ok).length}/${sp.aktionen.length}`;
   zusammen.panelsWerte = pn.werte; zusammen.panelsAbweichungen = pn.abweichungen; zusammen.panelsAktionenOk = `${pn.aktionen.filter((x) => x.ok).length}/${pn.aktionen.length}`;
   zusammen.karte = kt.staedte.map((x) => ({ stadt: x.stadt, maxHalb: x.max, bildbreiteM: x.bildbreiteM, anteilBreite: x.anteilBreite, randPixel: x.randPixelMitte + Object.values(x.raender).reduce((a, q) => a + q.randPixel, 0), ecken: x.eckenErreicht })); zusammen.karteGestenOk = `${kt.gesten.filter((x) => x.ok).length}/${kt.gesten.length}`;
   fs.writeFileSync(path.join(__dirname, 'out', 'spiel-messung.json'), JSON.stringify({ ...zusammen, pruefung, wochen }, null, 1));

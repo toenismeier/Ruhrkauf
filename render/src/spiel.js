@@ -587,8 +587,17 @@ function menueBadge() {
 }
 
 // ─────────────────────────────────────────── Start
-function neuesSpiel(seed = 1, stadt = 'Essen') {
-  s = E.neuesSpiel(seed);
+// Schwierigkeit: Engine-Konstante SCHWIERIGKEITEN, sonst Ersatz mit denselben Ids
+const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.length ? E.SCHWIERIGKEITEN : [
+  { id: 'leicht', name: 'Leicht', beschreibung: 'Mehr Liquidität, geduldige Banken und Lieferanten.' },
+  { id: 'mittel', name: 'Mittel', beschreibung: 'Die Ausgangslage wie kalibriert.' },
+  { id: 'schwer', name: 'Schwer', beschreibung: 'Knappe Kasse, nervöse Gläubiger, wenig Zeit.' },
+];
+let schwierigkeitId = 'mittel';
+function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
+  schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
+  s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
+  $('markeunter').textContent = `Warenhaus und Hartwig Sport · ${SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId}`;
   MERK.clear();
   EQ.freigaben(s);
   cockpitZeigen();
@@ -645,10 +654,33 @@ window.spiel = { neuesSpiel, oeffneEinkauf, vorstand: vs, marketing: mk, produkt
     get laeuft() { return steuerung.laeuft; }, get info() { return steuerung.info; },
   },
   kamera: (o) => { Object.assign(K, o); kameraSetzen(); }, tippPunkt, fokusHaeuser, THREE, get K() { return K; }, get sb() { return sb; }, E };
-setTimeout(() => {
-  const stadt = param.get('stadt') ?? 'Essen';
-  wahl.value = stadt;
-  neuesSpiel(Number(param.get('seed') ?? 1), stadt);
+// ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
+const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', seed: Number(param.get('seed') ?? 1) };
+function startZeigen() {
+  $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
+  $('startstufen').innerHTML = SCHWIERIGKEITEN.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(1 + SCHWIERIGKEITEN.indexOf(x))}${'○'.repeat(SCHWIERIGKEITEN.length - 1 - SCHWIERIGKEITEN.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join('');
+  $('startseed').value = startWahl.seed;
+  $('start').classList.add('an');
   $('lade').classList.remove('an');
-  window.bereit = true;
+}
+$('startstufen').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; startWahl.schwierigkeit = b.dataset.v; startZeigen(); });
+$('startstadt').addEventListener('change', (e) => { startWahl.stadt = e.target.value; });
+$('startseed').addEventListener('change', (e) => { startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1)); });
+function spielStarten() {
+  $('start').classList.remove('an');
+  $('lade').classList.add('an');
+  setTimeout(() => {
+    wahl.value = startWahl.stadt;
+    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit);
+    $('lade').classList.remove('an');
+    window.bereit = true;
+  }, 30);
+}
+$('startknopf').addEventListener('click', spielStarten);
+window.spiel.startZeigen = startZeigen;
+window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN;
+Object.defineProperty(window.spiel, 'schwierigkeit', { get: () => schwierigkeitId });
+setTimeout(() => {
+  if (param.has('stadt') || param.has('schwierigkeit') || param.has('seed')) spielStarten();
+  else startZeigen();
 }, 20);
