@@ -1,4 +1,4 @@
-name: Hartwig Sport - Grafikkataloge (temporär)
+name: Hartwig Sport - Grafikkataloge (Nachrendern)
 on:
   push:
     branches: [feat/grafik-sport]
