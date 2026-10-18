@@ -43,8 +43,11 @@ async function buendeln() {
   await buendeln();
   console.log('gebündelt:', path.join(__dirname, 'spiel-bundle.js'), `${Date.now() - t0} ms`);
   if (process.argv.includes('--bundle')) return;
+  fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });
   const stadt = arg('--stadt', 'Karlsruhe'), seed = arg('--seed', '1');
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', headless: true, args: ['--headless=new', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--js-flags=--max-old-space-size=6144'] });
+  const browserOptionen = { headless: true, args: ['--headless=new', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist',  '--js-flags=--max-old-space-size=6144'] };
+  if (process.env.CHROMIUM_PATH) browserOptionen.executablePath = process.env.CHROMIUM_PATH;
+  const b = await chromium.launch(browserOptionen);
   const p = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
   p.on('pageerror', (e) => console.log('FEHLER', e.message));
   p.on('console', (m) => { if (m.type() === 'error') console.log('KONSOLE', m.text()); });
@@ -491,7 +494,13 @@ async function buendeln() {
     await q.close();
     return erg;
   }
-  if (process.argv.includes('--nur-start')) { await startPruefen(); await b.close(); return; }
+  if (process.argv.includes('--nur-start')) {
+    const ergebnis = await startPruefen();
+    await b.close();
+    const fehler = ergebnis.aktionen.filter((x) => !x.ok);
+    if (fehler.length) throw new Error(`Browser-Smoke-Test: ${fehler.length} Fehler: ${fehler.map((x) => x.name).join(', ')}`);
+    return;
+  }
   if (process.argv.includes('--nur-panels')) { await startPruefen(); await panelsPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-karte') || process.argv.includes('--nur-gesten')) { await kartePruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-einkauf')) { await einkaufPruefen(); await b.close(); return; }

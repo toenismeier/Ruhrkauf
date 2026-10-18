@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node spiel-render.js --bundle",
+    "test": "node spiel-render.js --bundle && node tests/mobil-smoke.js",
+    "smoke:panels": "node spiel-render.js --nur-panels",
+    "smoke:karte": "node spiel-render.js --nur-karte",
+    "smoke:voll": "node spiel-render.js",
+    "smoke:start": "node spiel-render.js --nur-start",
+    "iphone": "node spiel-render.js --bundle && node dev-server.js"
   },
   "keywords": [],
   "author": "",

@@ -24,10 +24,39 @@ import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
+import { laden, speichern } from './ui/speicher.js';
+import { messen as performanceMessen } from './ui/diagnose.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
+let speicherTimer = null;
+let speicherWarnung = false;
+function speicherFehler(e) {
+  console.error('Spielstand konnte nicht gespeichert werden:', e);
+  if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
+  speicherWarnung = true;
+}
+function automatischSpeichern() {
+  if (!s) return;
+  clearTimeout(speicherTimer);
+  speicherTimer = setTimeout(() => {
+    speichern(s, stadtName).then(() => { speicherWarnung = false; }).catch(speicherFehler);
+  }, 350);
+}
+async function sofortSpeichern() {
+  if (!s) throw new Error('Noch kein Spiel gestartet.');
+  clearTimeout(speicherTimer);
+  await speichern(s, stadtName);
+  speicherWarnung = false;
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && s) {
+    // iOS kann Hintergrund-Tabs beenden: ausstehende Aenderungen sofort schreiben.
+    clearTimeout(speicherTimer);
+    speichern(s, stadtName).catch((e) => console.error('Autosave bei App-Wechsel:', e));
+  }
+});
 
 // ─────────────────────────────────────────── Zahlen
 const etageName = (e) => (e === -1 ? 'Untergeschoss' : e === 0 ? 'Erdgeschoss' : `${e}. Obergeschoss`);
@@ -36,10 +65,14 @@ const STATUS_HAUS = { offen: 'Offen', schliessung_verhandlung: 'Schließung in V
 
 // ─────────────────────────────────────────── Szene und Kamera
 const canvas = $('karte');
-const ren = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
-ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+// Sparsames Profil fuer kleine Touch-Geraete: weniger Framebuffer-Pixel, kein teurer Schattenpass.
+// Fuer A/B-Vergleiche kann ?grafik=hoch bzw. ?grafik=sparsam gesetzt werden.
+const touchMobil = (navigator.maxTouchPoints > 0 && window.innerWidth <= 650) || /iPhone|iPod|Android/i.test(navigator.userAgent);
+const sparsam = param.get('grafik') === 'sparsam' || (touchMobil && param.get('grafik') !== 'hoch');
+const ren = new THREE.WebGLRenderer({ canvas, antialias: !sparsam, preserveDrawingBuffer: true });
+ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, sparsam ? 1.25 : 2));
 ren.outputColorSpace = THREE.SRGBColorSpace;
-ren.shadowMap.enabled = true;
+ren.shadowMap.enabled = !sparsam;
 ren.shadowMap.type = THREE.PCFShadowMap;
 
 const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
@@ -354,6 +387,7 @@ function woche(mitBot = false) {
   zeichnen();
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
+  automatischSpeichern();
   return m;
 }
 
@@ -449,8 +483,8 @@ let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
 function schnittBild(baue, w = 720, h = 420) {
   if (!hqRen) {
-    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: true, preserveDrawingBuffer: true });
-    hqRen.setPixelRatio(1); hqRen.outputColorSpace = THREE.SRGBColorSpace; hqRen.shadowMap.enabled = true; hqRen.shadowMap.type = THREE.PCFShadowMap;
+    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: !sparsam, preserveDrawingBuffer: true });
+    hqRen.setPixelRatio(1); hqRen.outputColorSpace = THREE.SRGBColorSpace; hqRen.shadowMap.enabled = !sparsam; hqRen.shadowMap.type = THREE.PCFShadowMap;
   }
   hqRen.setSize(w, h, false);
   const sc = neueSzene('#26313a');
@@ -490,6 +524,7 @@ function hqTun(aktion) {
   meldung(r.text, r.ok);
   grafikNachziehen();
   cockpitZeigen();
+  automatischSpeichern();
   oeffneHq(offenesHq === true ? undefined : offenesHq, true);
 }
 let meldungTimer = null;
@@ -563,12 +598,12 @@ function oeffneHq(gebaeudeId, bleiben = false) {
 // ─────────────────────────────────────────── Einkauf und Eigenmarken (ui/einkauf.js, ui/eigenmarken.js)
 const EQ = quelle(E);
 let ek = null;
-ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => cockpitZeigen() });
+ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); } });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); };
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -585,6 +620,44 @@ function menueBadge() {
   b.textContent = n + v; b.style.display = n + v ? '' : 'none';
   const vb = $('vsbadge'); vb.textContent = v; vb.style.display = v ? '' : 'none';
 }
+$('spiel-speichern').addEventListener('click', async () => {
+  menueZu();
+  try { await sofortSpeichern(); meldung('Spielstand auf diesem Gerät gespeichert.'); }
+  catch (e) { speicherFehler(e); }
+});
+async function diagnoseZeigen() {
+  if (!s || !scene) return;
+  menueZu();
+  panel('Performance', 'Messung direkt auf diesem Gerät', '<div class="karte"><div class="zeile">Bis zu 90 Frames werden aktiv gerendert …</div></div>', 'gross');
+  const vorher = KA.pause;
+  KA.pause = true;
+  try {
+    const d = await performanceMessen({ renderer: ren, scene: () => scene, camera: () => cam,
+      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) });
+    const zeile = (name, wert) => `<div class="zeile"><span class="was">${name}</span><b>${wert}</b></div>`;
+    const html = '<div class="karte"><div class="khead">' + d.frames + ' gerenderte Frames auf diesem Gerät</div>' +
+      zeile('Geschätzte Bildrate', d.fps + ' FPS') +
+      zeile('Framezeit, 95. Perzentil', d.frameP95Ms + ' ms') +
+      zeile('Renderaufruf, 95. Perzentil', d.renderP95Ms + ' ms') +
+      zeile('Frames über 33 ms', d.frameUeber33ms + ' / ' + (d.frames - 1)) +
+      zeile('Draw Calls', d.drawCalls) +
+      zeile('Dreiecke', fmt.format(d.dreiecke)) +
+      zeile('Geometrien / Texturen', d.geometrien + ' / ' + d.texturen) +
+      zeile('Teile der Stadt', fmt.format(d.teile)) +
+      zeile('Canvas', d.bild) +
+      zeile('Pixelratio', d.pixelRatio) +
+      zeile('Grafikprofil', d.grafikprofil) +
+      '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
+    panel('Performance', d.stadt + ' · KW ' + (d.woche + 1), html, 'gross');
+    window.spiel.letzteDiagnose = d;
+  } catch (e) {
+    panel('Performance', 'Messung fehlgeschlagen', '<div class="karte"><div class="zeile">' + e.message + '</div></div>', 'gross');
+  } finally {
+    KA.pause = vorher;
+    if (!KA.pause) kachelnPlanen();
+  }
+}
+$('performance').addEventListener('click', diagnoseZeigen);
 
 // ─────────────────────────────────────────── Start
 // Schwierigkeit: Engine-Konstante SCHWIERIGKEITEN, sonst Ersatz mit denselben Ids
@@ -604,16 +677,17 @@ function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) 
   baueStadtAusSpiel(stadt);
   ek.badge(); menueBadge();
   window.spiel.s = s;
+  automatischSpeichern();
   return s;
 }
 
 const wahl = $('stadtwahl');
 wahl.innerHTML = STADTLISTE.map((q) => `<option${q.name === 'Essen' ? ' selected' : ''}>${q.name}</option>`).join('');
-wahl.addEventListener('change', () => { schliessePanel(); $('lade').classList.add('an'); setTimeout(() => { baueStadtAusSpiel(wahl.value); $('lade').classList.remove('an'); }, 30); });
+wahl.addEventListener('change', () => { schliessePanel(); $('lade').classList.add('an'); setTimeout(() => { baueStadtAusSpiel(wahl.value); automatischSpeichern(); $('lade').classList.remove('an'); }, 30); });
 $('weiter').addEventListener('click', () => { $('weiter').disabled = true; setTimeout(() => { woche($('bot').checked); $('weiter').disabled = false; }, 10); });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
@@ -662,6 +736,12 @@ function startZeigen() {
   $('startseed').value = startWahl.seed;
   $('start').classList.add('an');
   $('lade').classList.remove('an');
+  laden().then((datensatz) => {
+    const b = $('fortsetzen');
+    b.hidden = !datensatz;
+    if (datensatz) b.textContent = `Fortsetzen · KW ${datensatz.spiel.woche % 52 + 1} / ${datensatz.spiel.startJahr + Math.floor(datensatz.spiel.woche / 52)}`;
+    $('speicherhinweis').textContent = '';
+  }).catch((e) => { $('fortsetzen').hidden = true; $('speicherhinweis').textContent = e.message; });
 }
 $('startstufen').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; startWahl.schwierigkeit = b.dataset.v; startZeigen(); });
 $('startstadt').addEventListener('change', (e) => { startWahl.stadt = e.target.value; });
@@ -677,6 +757,40 @@ function spielStarten() {
   }, 30);
 }
 $('startknopf').addEventListener('click', spielStarten);
+async function spielFortsetzen() {
+  const b = $('fortsetzen');
+  b.disabled = true;
+  try {
+    const d = await laden();
+    if (!d) throw new Error('Kein Spielstand vorhanden.');
+    clearTimeout(speicherTimer);
+    s = d.spiel;
+    schwierigkeitId = s.schwierigkeit ?? 'mittel';
+    $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+    MERK.clear();
+    schliessePanel();
+    wahl.value = STADTLISTE.some((x) => x.name === d.stadt) ? d.stadt : 'Essen';
+    $('start').classList.remove('an');
+    $('lade').classList.add('an');
+    // Kartenaufbau erst nach dem Zeichnen des Ladebildschirms.
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    cockpitZeigen();
+    baueStadtAusSpiel(wahl.value);
+    ek.badge(); menueBadge();
+    window.spiel.s = s;
+    window.bereit = true;
+    $('lade').classList.remove('an');
+    meldung('Spielstand fortgesetzt.');
+  } catch (e) {
+    $('lade').classList.remove('an');
+    $('start').classList.add('an');
+    $('speicherhinweis').textContent = e.message;
+  } finally {
+    b.disabled = false;
+  }
+}
+$('fortsetzen').addEventListener('click', spielFortsetzen);
+window.spiel.fortsetzen = spielFortsetzen;
 window.spiel.startZeigen = startZeigen;
 window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN;
 Object.defineProperty(window.spiel, 'schwierigkeit', { get: () => schwierigkeitId });

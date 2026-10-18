@@ -1,0 +1,54 @@
+name: Ruhrkauf Qualität
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    name: Engine und TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: engine/package-lock.json
+      - run: npm ci
+        working-directory: engine
+      - run: npm run typecheck
+        working-directory: engine
+      - run: npm test -- --runInBand --silent
+        working-directory: engine
+
+  browser:
+    name: Mobiler Browser-Smoketest
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: render/package-lock.json
+      - run: npm ci
+        working-directory: render
+      - run: npx playwright install --with-deps chromium
+        working-directory: render
+      - run: npm run build
+        working-directory: render
+      - run: npm test
+        working-directory: render
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-smoke
+          path: render/out/
+          if-no-files-found: ignore

@@ -1,0 +1,20 @@
+{
+  "name": "Hartwig – Turnaround-Tycoon",
+  "short_name": "Hartwig",
+  "description": "Warenhaus-Turnaround auf dem iPhone",
+  "lang": "de",
+  "start_url": "./spiel.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4fb6c2",
+  "theme_color": "#d23c32",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
