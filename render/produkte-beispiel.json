@@ -1,0 +1,2769 @@
+{
+ "seed": 1,
+ "woche": 30,
+ "bot": "C (Schutzschirm, tiefe Sanierung)",
+ "phase": "regulaer",
+ "produkte": {
+  "woche": 30,
+  "kapazitaet": 3,
+  "stufe": 0.87,
+  "team": 0.47,
+  "kostenWoche": 0,
+  "marken": [
+   {
+    "marke": "em1",
+    "name": "Lisanne",
+    "farbe": "#8c5a7a",
+    "zielgruppe": "50 plus, damen",
+    "trendGruppe": "reif",
+    "kategorien": [
+     {
+      "id": "oberteile",
+      "name": "Oberteile",
+      "kapazitaet": 3,
+      "belegt": 5
+     },
+     {
+      "id": "unterteile",
+      "name": "Hosen, Röcke, Kleider",
+      "kapazitaet": 3,
+      "belegt": 3
+     },
+     {
+      "id": "jacken",
+      "name": "Jacken und Mäntel",
+      "kapazitaet": 3,
+      "belegt": 1
+     }
+    ],
+    "produkte": [
+     {
+      "id": "pr1",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Bluse",
+      "name": "Bluse beige aus Polyester",
+      "farbe": "beige",
+      "farbeHex": "#cdb894",
+      "material": "Polyester",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.blusen",
+      "wgName": "Blusen und Shirts",
+      "bereich": "damen",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 33.99,
+      "preis": 33.99,
+      "ekStueck": 12.1,
+      "marge": 0.644,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.74,
+       "trend": 0.1,
+       "preisQualitaet": 0.75,
+       "entwicklung": 0.14,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 4464,
+      "verkaufVorwoche": 4611,
+      "veraenderung": -147,
+      "veraenderungProzent": -0.032,
+      "umsatzLetzteWoche": 151748,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr2",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Bluse",
+      "name": "Bluse flieder",
+      "farbe": "flieder",
+      "farbeHex": "#c4b0d8",
+      "material": "Viskose",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.blusen",
+      "wgName": "Blusen und Shirts",
+      "bereich": "damen",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 40.99,
+      "preis": 40.99,
+      "ekStueck": 15.38,
+      "marge": 0.625,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.62,
+       "trend": 0.1,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.14,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 3702,
+      "verkaufVorwoche": 3823,
+      "veraenderung": -121,
+      "veraenderungProzent": -0.032,
+      "umsatzLetzteWoche": 151748,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr3",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Strickjacke",
+      "name": "Strickjacke altrosa aus Polyester",
+      "farbe": "altrosa",
+      "farbeHex": "#c99a9a",
+      "material": "Polyester",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.strick",
+      "wgName": "Strick",
+      "bereich": "damen",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 40.99,
+      "preis": 40.99,
+      "ekStueck": 14.59,
+      "marge": 0.644,
+      "sterne": 1.5,
+      "sterneEinfuehrung": 2,
+      "sterneTeile": {
+       "zielgruppe": 0.6,
+       "trend": 0.1,
+       "preisQualitaet": 0.75,
+       "entwicklung": 0.14,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 1528,
+      "verkaufVorwoche": 1347,
+      "veraenderung": 181,
+      "veraenderungProzent": 0.134,
+      "umsatzLetzteWoche": 62636,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr4",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Strickjacke",
+      "name": "Strickjacke grau aus Viskose",
+      "farbe": "grau",
+      "farbeHex": "#9a9a9a",
+      "material": "Viskose",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.strick",
+      "wgName": "Strick",
+      "bereich": "damen",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 49.99,
+      "preis": 49.99,
+      "ekStueck": 18.75,
+      "marge": 0.625,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.81,
+       "trend": 0.1,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.18,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 1481,
+      "verkaufVorwoche": 1305,
+      "veraenderung": 176,
+      "veraenderungProzent": 0.135,
+      "umsatzLetzteWoche": 74025,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 1000,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr5",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Rock",
+      "name": "Rock marine aus Polyester",
+      "farbe": "marine",
+      "farbeHex": "#1f2f4f",
+      "material": "Polyester",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.hosen",
+      "wgName": "Hosen und Röcke",
+      "bereich": "damen",
+      "kategorie": "unterteile",
+      "kategorieName": "Hosen, Röcke, Kleider",
+      "status": "sortiment",
+      "normpreis": 33.99,
+      "preis": 33.99,
+      "ekStueck": 12.41,
+      "marge": 0.635,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.66,
+       "trend": 0.1,
+       "preisQualitaet": 0.75,
+       "entwicklung": 0.14,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 3544,
+      "verkaufVorwoche": 3633,
+      "veraenderung": -89,
+      "veraenderungProzent": -0.024,
+      "umsatzLetzteWoche": 120459,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr6",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Chino",
+      "name": "Chino beige",
+      "farbe": "beige",
+      "farbeHex": "#cdb894",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.hosen",
+      "wgName": "Hosen und Röcke",
+      "bereich": "damen",
+      "kategorie": "unterteile",
+      "kategorieName": "Hosen, Röcke, Kleider",
+      "status": "sortiment",
+      "normpreis": 54.99,
+      "preis": 54.99,
+      "ekStueck": 22.14,
+      "marge": 0.597,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.81,
+       "trend": 0.1,
+       "preisQualitaet": 0.92,
+       "entwicklung": 0.14,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 2191,
+      "verkaufVorwoche": 2245,
+      "veraenderung": -54,
+      "veraenderungProzent": -0.024,
+      "umsatzLetzteWoche": 120459,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr7",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Bluse",
+      "name": "Bluse altrosa aus Polyester",
+      "farbe": "altrosa",
+      "farbeHex": "#c99a9a",
+      "material": "Polyester",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.gg",
+      "wgName": "Große Größen",
+      "bereich": "damen",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 33.99,
+      "preis": 33.99,
+      "ekStueck": 12.1,
+      "marge": 0.644,
+      "sterne": 1.5,
+      "sterneEinfuehrung": 2,
+      "sterneTeile": {
+       "zielgruppe": 0.58,
+       "trend": 0.1,
+       "preisQualitaet": 0.75,
+       "entwicklung": 0.1,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 8718,
+      "verkaufVorwoche": 9002,
+      "veraenderung": -284,
+      "veraenderungProzent": -0.032,
+      "umsatzLetzteWoche": 296336,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr8",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Mantel",
+      "name": "Mantel camel aus Polyester",
+      "farbe": "camel",
+      "farbeHex": "#b98a53",
+      "material": "Polyester",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.jacken",
+      "wgName": "Jacken und Mäntel",
+      "bereich": "damen",
+      "kategorie": "jacken",
+      "kategorieName": "Jacken und Mäntel",
+      "status": "sortiment",
+      "normpreis": 111.99,
+      "preis": 111.99,
+      "ekStueck": 38.84,
+      "marge": 0.653,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.79,
+       "trend": 0.1,
+       "preisQualitaet": 0.75,
+       "entwicklung": 0.22,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 838,
+      "verkaufVorwoche": 817,
+      "veraenderung": 21,
+      "veraenderungProzent": 0.026,
+      "umsatzLetzteWoche": 93821,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 3750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr9",
+      "marke": "em1",
+      "markeName": "Lisanne",
+      "typ": "Kleid",
+      "name": "Kleid bordeaux",
+      "farbe": "bordeaux",
+      "farbeHex": "#6e1f2e",
+      "material": "Viskose",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "damen.kleider",
+      "wgName": "Kleider",
+      "bereich": "damen",
+      "kategorie": "unterteile",
+      "kategorieName": "Hosen, Röcke, Kleider",
+      "status": "sortiment",
+      "normpreis": 52.99,
+      "preis": 52.99,
+      "ekStueck": 18.86,
+      "marge": 0.644,
+      "sterne": 2,
+      "sterneEinfuehrung": 2.5,
+      "sterneTeile": {
+       "zielgruppe": 0.64,
+       "trend": 0.1,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.14,
+       "team": 0.35
+      },
+      "verkaufLetzteWoche": 3115,
+      "verkaufVorwoche": 3343,
+      "veraenderung": -228,
+      "veraenderungProzent": -0.068,
+      "umsatzLetzteWoche": 165075,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 1500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     }
+    ],
+    "inEntwicklung": 0,
+    "hinweis": "Kapazität erreicht bei Oberteile, Hosen, Röcke, Kleider. Für Neues bitte erst auslisten."
+   },
+   {
+    "marke": "em2",
+    "name": "Brehm & Sohn",
+    "farbe": "#2f4a6b",
+    "zielgruppe": "50 plus, herren",
+    "trendGruppe": "reif",
+    "kategorien": [
+     {
+      "id": "oberteile",
+      "name": "Oberteile",
+      "kapazitaet": 3,
+      "belegt": 4
+     },
+     {
+      "id": "jacken",
+      "name": "Jacken und Mäntel",
+      "kapazitaet": 3,
+      "belegt": 1
+     },
+     {
+      "id": "unterteile",
+      "name": "Hosen, Röcke, Kleider",
+      "kapazitaet": 3,
+      "belegt": 1
+     }
+    ],
+    "produkte": [
+     {
+      "id": "pr10",
+      "marke": "em2",
+      "markeName": "Brehm & Sohn",
+      "typ": "Hemd",
+      "name": "Hemd hellblau",
+      "farbe": "hellblau",
+      "farbeHex": "#a9c8e6",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "herren.hemden",
+      "wgName": "Hemden",
+      "bereich": "herren",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 44.99,
+      "preis": 44.99,
+      "ekStueck": 19.59,
+      "marge": 0.565,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.65,
+       "trend": 0.4,
+       "preisQualitaet": 0.92,
+       "entwicklung": 0.42,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 3058,
+      "verkaufVorwoche": 3155,
+      "veraenderung": -97,
+      "veraenderungProzent": -0.031,
+      "umsatzLetzteWoche": 137581,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr11",
+      "marke": "em2",
+      "markeName": "Brehm & Sohn",
+      "typ": "Hemd",
+      "name": "Hemd weiß",
+      "farbe": "weiß",
+      "farbeHex": "#f7f5f0",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "herren.hemden",
+      "wgName": "Hemden",
+      "bereich": "herren",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 44.99,
+      "preis": 44.99,
+      "ekStueck": 19.59,
+      "marge": 0.565,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.65,
+       "trend": 0.4,
+       "preisQualitaet": 0.92,
+       "entwicklung": 0.39,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 3058,
+      "verkaufVorwoche": 3155,
+      "veraenderung": -97,
+      "veraenderungProzent": -0.031,
+      "umsatzLetzteWoche": 137581,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr12",
+      "marke": "em2",
+      "markeName": "Brehm & Sohn",
+      "typ": "Blazer",
+      "name": "Blazer marine",
+      "farbe": "marine",
+      "farbeHex": "#1f2f4f",
+      "material": "Merino",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "herren.business",
+      "wgName": "Business und Anzüge",
+      "bereich": "herren",
+      "kategorie": "jacken",
+      "kategorieName": "Jacken und Mäntel",
+      "status": "sortiment",
+      "normpreis": 148.99,
+      "preis": 148.99,
+      "ekStueck": 61.2,
+      "marge": 0.589,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.85,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.42,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 1618,
+      "verkaufVorwoche": 1673,
+      "veraenderung": -55,
+      "veraenderungProzent": -0.033,
+      "umsatzLetzteWoche": 241018,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 5500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr13",
+      "marke": "em2",
+      "markeName": "Brehm & Sohn",
+      "typ": "Chino",
+      "name": "Chino sand",
+      "farbe": "sand",
+      "farbeHex": "#d8c6a3",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "herren.hosen",
+      "wgName": "Hosen",
+      "bereich": "herren",
+      "kategorie": "unterteile",
+      "kategorieName": "Hosen, Röcke, Kleider",
+      "status": "sortiment",
+      "normpreis": 54.99,
+      "preis": 54.99,
+      "ekStueck": 23.94,
+      "marge": 0.565,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.81,
+       "trend": 0.4,
+       "preisQualitaet": 0.92,
+       "entwicklung": 0.39,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 3171,
+      "verkaufVorwoche": 3307,
+      "veraenderung": -136,
+      "veraenderungProzent": -0.041,
+      "umsatzLetzteWoche": 174385,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr14",
+      "marke": "em2",
+      "markeName": "Brehm & Sohn",
+      "typ": "Strickjacke",
+      "name": "Strickjacke anthrazit",
+      "farbe": "anthrazit",
+      "farbeHex": "#3f4247",
+      "material": "Merino",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "herren.strick",
+      "wgName": "Strick und Sweat",
+      "bereich": "herren",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 82.99,
+      "preis": 82.99,
+      "ekStueck": 35.77,
+      "marge": 0.569,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 0.91,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.39,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 874,
+      "verkaufVorwoche": 785,
+      "veraenderung": 89,
+      "veraenderungProzent": 0.113,
+      "umsatzLetzteWoche": 72559,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr15",
+      "marke": "em2",
+      "markeName": "Brehm & Sohn",
+      "typ": "Poloshirt",
+      "name": "Poloshirt marine",
+      "farbe": "marine",
+      "farbeHex": "#1f2f4f",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "mitte",
+      "qualitaet": 3,
+      "wg": "herren.casual",
+      "wgName": "Casual",
+      "bereich": "herren",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 34.99,
+      "preis": 34.99,
+      "ekStueck": 14.88,
+      "marge": 0.575,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.81,
+       "trend": 0.4,
+       "preisQualitaet": 0.92,
+       "entwicklung": 0.36,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 3587,
+      "verkaufVorwoche": 3750,
+      "veraenderung": -163,
+      "veraenderungProzent": -0.043,
+      "umsatzLetzteWoche": 125501,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2250,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     }
+    ],
+    "inEntwicklung": 0,
+    "hinweis": "Kapazität erreicht bei Oberteile. Für Neues bitte erst auslisten."
+   },
+   {
+    "marke": "em3",
+    "name": "Casa Linde",
+    "farbe": "#6f8f4e",
+    "zielgruppe": "30 bis 49, unisex",
+    "trendGruppe": "mitte",
+    "kategorien": [
+     {
+      "id": "home",
+      "name": "Home",
+      "kapazitaet": 3,
+      "belegt": 6
+     }
+    ],
+    "produkte": [
+     {
+      "id": "pr16",
+      "marke": "em3",
+      "markeName": "Casa Linde",
+      "typ": "Kissen",
+      "name": "Kissen salbei aus Leinen",
+      "farbe": "salbei",
+      "farbeHex": "#9cae8f",
+      "material": "Leinen",
+      "stil": "modern",
+      "preislage": "einstieg",
+      "qualitaet": 3,
+      "wg": "wohnen.heimtextil",
+      "wgName": "Heimtextilien",
+      "bereich": "wohnen",
+      "kategorie": "home",
+      "kategorieName": "Home",
+      "status": "sortiment",
+      "normpreis": 19.99,
+      "preis": 19.99,
+      "ekStueck": 8.45,
+      "marge": 0.577,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 0.87,
+       "trend": 0.4,
+       "preisQualitaet": 0.77,
+       "entwicklung": 0.52,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 6814,
+      "verkaufVorwoche": 6967,
+      "veraenderung": -153,
+      "veraenderungProzent": -0.022,
+      "umsatzLetzteWoche": 136219,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 3000,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr17",
+      "marke": "em3",
+      "markeName": "Casa Linde",
+      "typ": "Handtuch",
+      "name": "Handtuch weiß",
+      "farbe": "weiß",
+      "farbeHex": "#f7f5f0",
+      "material": "Baumwolle",
+      "stil": "modern",
+      "preislage": "einstieg",
+      "qualitaet": 3,
+      "wg": "wohnen.heimtextil",
+      "wgName": "Heimtextilien",
+      "bereich": "wohnen",
+      "kategorie": "home",
+      "kategorieName": "Home",
+      "status": "sortiment",
+      "normpreis": 9.99,
+      "preis": 9.99,
+      "ekStueck": 4.22,
+      "marge": 0.578,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 0.85,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.49,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 13636,
+      "verkaufVorwoche": 13942,
+      "veraenderung": -306,
+      "veraenderungProzent": -0.022,
+      "umsatzLetzteWoche": 136219,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr18",
+      "marke": "em3",
+      "markeName": "Casa Linde",
+      "typ": "Bettwäsche",
+      "name": "Bettwäsche grau",
+      "farbe": "grau",
+      "farbeHex": "#9a9a9a",
+      "material": "Baumwolle",
+      "stil": "modern",
+      "preislage": "einstieg",
+      "qualitaet": 3,
+      "wg": "wohnen.bett",
+      "wgName": "Bettwaren",
+      "bereich": "wohnen",
+      "kategorie": "home",
+      "kategorieName": "Home",
+      "status": "sortiment",
+      "normpreis": 31.99,
+      "preis": 31.99,
+      "ekStueck": 13.84,
+      "marge": 0.567,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 0.88,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.49,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 4054,
+      "verkaufVorwoche": 4103,
+      "veraenderung": -49,
+      "veraenderungProzent": -0.012,
+      "umsatzLetzteWoche": 129690,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2750,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr19",
+      "marke": "em3",
+      "markeName": "Casa Linde",
+      "typ": "Bettwäsche",
+      "name": "Bettwäsche creme aus Bio-Baumwolle",
+      "farbe": "creme",
+      "farbeHex": "#efe6d2",
+      "material": "Bio-Baumwolle",
+      "stil": "modern",
+      "preislage": "einstieg",
+      "qualitaet": 3,
+      "wg": "wohnen.bett",
+      "wgName": "Bettwaren",
+      "bereich": "wohnen",
+      "kategorie": "home",
+      "kategorieName": "Home",
+      "status": "sortiment",
+      "normpreis": 35.99,
+      "preis": 35.99,
+      "ekStueck": 15.84,
+      "marge": 0.56,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.73,
+       "trend": 0.4,
+       "preisQualitaet": 0.77,
+       "entwicklung": 0.52,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 3180,
+      "verkaufVorwoche": 3218,
+      "veraenderung": -38,
+      "veraenderungProzent": -0.012,
+      "umsatzLetzteWoche": 114433,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 3000,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr20",
+      "marke": "em3",
+      "markeName": "Casa Linde",
+      "typ": "Tasse",
+      "name": "Tasse olive",
+      "farbe": "olive",
+      "farbeHex": "#6f7040",
+      "material": "Polyester",
+      "stil": "modern",
+      "preislage": "einstieg",
+      "qualitaet": 3,
+      "wg": "wohnen.tisch",
+      "wgName": "Tisch und Küche",
+      "bereich": "wohnen",
+      "kategorie": "home",
+      "kategorieName": "Home",
+      "status": "sortiment",
+      "normpreis": 3.99,
+      "preis": 3.99,
+      "ekStueck": 1.6,
+      "marge": 0.599,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.78,
+       "trend": 0.4,
+       "preisQualitaet": 0.82,
+       "entwicklung": 0.46,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 54272,
+      "verkaufVorwoche": 55636,
+      "veraenderung": -1364,
+      "veraenderungProzent": -0.025,
+      "umsatzLetzteWoche": 216544,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr21",
+      "marke": "em3",
+      "markeName": "Casa Linde",
+      "typ": "Vase",
+      "name": "Vase sand",
+      "farbe": "sand",
+      "farbeHex": "#d8c6a3",
+      "material": "Polyester",
+      "stil": "modern",
+      "preislage": "einstieg",
+      "qualitaet": 3,
+      "wg": "wohnen.deko",
+      "wgName": "Leuchten und Deko",
+      "bereich": "wohnen",
+      "kategorie": "home",
+      "kategorieName": "Home",
+      "status": "sortiment",
+      "normpreis": 13.99,
+      "preis": 13.99,
+      "ekStueck": 5.23,
+      "marge": 0.626,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.81,
+       "trend": 0.4,
+       "preisQualitaet": 0.82,
+       "entwicklung": 0.46,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 8474,
+      "verkaufVorwoche": 8630,
+      "veraenderung": -156,
+      "veraenderungProzent": -0.018,
+      "umsatzLetzteWoche": 118556,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2500,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     }
+    ],
+    "inEntwicklung": 0,
+    "hinweis": "Kapazität erreicht bei Home. Für Neues bitte erst auslisten."
+   },
+   {
+    "marke": "em4",
+    "name": "Pünktchen",
+    "farbe": "#d9822b",
+    "zielgruppe": "30 bis 49, kinder",
+    "trendGruppe": "kinder",
+    "kategorien": [
+     {
+      "id": "kinder",
+      "name": "Baby und Kind",
+      "kapazitaet": 3,
+      "belegt": 3
+     },
+     {
+      "id": "oberteile",
+      "name": "Oberteile",
+      "kapazitaet": 3,
+      "belegt": 2
+     },
+     {
+      "id": "unterteile",
+      "name": "Hosen, Röcke, Kleider",
+      "kapazitaet": 3,
+      "belegt": 1
+     }
+    ],
+    "produkte": [
+     {
+      "id": "pr22",
+      "marke": "em4",
+      "markeName": "Pünktchen",
+      "typ": "Kinderbody",
+      "name": "Kinderbody weiß",
+      "farbe": "weiß",
+      "farbeHex": "#f7f5f0",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "einstieg",
+      "qualitaet": 2,
+      "wg": "kinder.baby",
+      "wgName": "Baby",
+      "bereich": "kinder",
+      "kategorie": "kinder",
+      "kategorieName": "Baby und Kind",
+      "status": "sortiment",
+      "normpreis": 6.99,
+      "preis": 6.99,
+      "ekStueck": 2.92,
+      "marge": 0.582,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 1,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.43,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 12304,
+      "verkaufVorwoche": 12135,
+      "veraenderung": 169,
+      "veraenderungProzent": 0.014,
+      "umsatzLetzteWoche": 86007,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2250,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr23",
+      "marke": "em4",
+      "markeName": "Pünktchen",
+      "typ": "Plüschtier",
+      "name": "Plüschtier braun",
+      "farbe": "braun",
+      "farbeHex": "#6b4a32",
+      "material": "Polyester",
+      "stil": "klassisch",
+      "preislage": "einstieg",
+      "qualitaet": 2,
+      "wg": "kinder.baby",
+      "wgName": "Baby",
+      "bereich": "kinder",
+      "kategorie": "kinder",
+      "kategorieName": "Baby und Kind",
+      "status": "sortiment",
+      "normpreis": 8.99,
+      "preis": 8.99,
+      "ekStueck": 3.4,
+      "marge": 0.622,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.72,
+       "trend": 0.4,
+       "preisQualitaet": 0.82,
+       "entwicklung": 0.39,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 8441,
+      "verkaufVorwoche": 8325,
+      "veraenderung": 116,
+      "veraenderungProzent": 0.014,
+      "umsatzLetzteWoche": 75889,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2000,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr24",
+      "marke": "em4",
+      "markeName": "Pünktchen",
+      "typ": "Kinderkleid",
+      "name": "Kinderkleid rosa",
+      "farbe": "rosa",
+      "farbeHex": "#f2b8c6",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "einstieg",
+      "qualitaet": 2,
+      "wg": "kinder.maedchen",
+      "wgName": "Mädchen",
+      "bereich": "kinder",
+      "kategorie": "kinder",
+      "kategorieName": "Baby und Kind",
+      "status": "sortiment",
+      "normpreis": 14.99,
+      "preis": 14.99,
+      "ekStueck": 6.4,
+      "marge": 0.573,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 1,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.43,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 4927,
+      "verkaufVorwoche": 4862,
+      "veraenderung": 65,
+      "veraenderungProzent": 0.013,
+      "umsatzLetzteWoche": 73860,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2250,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr25",
+      "marke": "em4",
+      "markeName": "Pünktchen",
+      "typ": "T-Shirt",
+      "name": "T-Shirt gelb",
+      "farbe": "gelb",
+      "farbeHex": "#f0d04a",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "einstieg",
+      "qualitaet": 2,
+      "wg": "kinder.jungen",
+      "wgName": "Jungen",
+      "bereich": "kinder",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 11.99,
+      "preis": 11.99,
+      "ekStueck": 5.12,
+      "marge": 0.573,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 0.97,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.43,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 5815,
+      "verkaufVorwoche": 5741,
+      "veraenderung": 74,
+      "veraenderungProzent": 0.013,
+      "umsatzLetzteWoche": 69717,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2250,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr26",
+      "marke": "em4",
+      "markeName": "Pünktchen",
+      "typ": "Jeans",
+      "name": "Jeans jeansblau",
+      "farbe": "jeansblau",
+      "farbeHex": "#4f6f9a",
+      "material": "Denim",
+      "stil": "klassisch",
+      "preislage": "einstieg",
+      "qualitaet": 2,
+      "wg": "kinder.jungen",
+      "wgName": "Jungen",
+      "bereich": "kinder",
+      "kategorie": "unterteile",
+      "kategorieName": "Hosen, Röcke, Kleider",
+      "status": "sortiment",
+      "normpreis": 35.99,
+      "preis": 35.99,
+      "ekStueck": 15.36,
+      "marge": 0.573,
+      "sterne": 2.5,
+      "sterneEinfuehrung": 3,
+      "sterneTeile": {
+       "zielgruppe": 0.8,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.39,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 1709,
+      "verkaufVorwoche": 1687,
+      "veraenderung": 22,
+      "veraenderungProzent": 0.013,
+      "umsatzLetzteWoche": 61515,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 4000,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     },
+     {
+      "id": "pr27",
+      "marke": "em4",
+      "markeName": "Pünktchen",
+      "typ": "T-Shirt",
+      "name": "T-Shirt rosa",
+      "farbe": "rosa",
+      "farbeHex": "#f2b8c6",
+      "material": "Baumwolle",
+      "stil": "klassisch",
+      "preislage": "einstieg",
+      "qualitaet": 2,
+      "wg": "kinder.maedchen",
+      "wgName": "Mädchen",
+      "bereich": "kinder",
+      "kategorie": "oberteile",
+      "kategorieName": "Oberteile",
+      "status": "sortiment",
+      "normpreis": 11.99,
+      "preis": 11.99,
+      "ekStueck": 5.12,
+      "marge": 0.573,
+      "sterne": 3,
+      "sterneEinfuehrung": 3.5,
+      "sterneTeile": {
+       "zielgruppe": 0.97,
+       "trend": 0.4,
+       "preisQualitaet": 0.84,
+       "entwicklung": 0.39,
+       "team": 0.5
+      },
+      "verkaufLetzteWoche": 6160,
+      "verkaufVorwoche": 6079,
+      "veraenderung": 81,
+      "veraenderungProzent": 0.013,
+      "umsatzLetzteWoche": 73860,
+      "start": -300,
+      "fertigWoche": -288,
+      "dauer": 12,
+      "budgetWoche": 2000,
+      "fortschritt": 1,
+      "seit": -260,
+      "basis": false
+     }
+    ],
+    "inEntwicklung": 0,
+    "hinweis": "Kapazität erreicht bei Baby und Kind. Für Neues bitte erst auslisten."
+   }
+  ]
+ },
+ "produktKatalog": {
+  "kategorien": [
+   {
+    "id": "oberteile",
+    "name": "Oberteile"
+   },
+   {
+    "id": "unterteile",
+    "name": "Hosen, Röcke, Kleider"
+   },
+   {
+    "id": "jacken",
+    "name": "Jacken und Mäntel"
+   },
+   {
+    "id": "schuhe",
+    "name": "Schuhe"
+   },
+   {
+    "id": "waesche",
+    "name": "Wäsche und Nacht"
+   },
+   {
+    "id": "accessoires",
+    "name": "Accessoires"
+   },
+   {
+    "id": "home",
+    "name": "Home"
+   },
+   {
+    "id": "beauty",
+    "name": "Beauty"
+   },
+   {
+    "id": "kinder",
+    "name": "Baby und Kind"
+   }
+  ],
+  "typen": [
+   {
+    "typ": "Jeans-Shorts",
+    "kategorie": "unterteile",
+    "wgs": [
+     "damen.denim",
+     "damen.young",
+     "herren.casual",
+     "kinder.maedchen",
+     "kinder.jungen",
+     "sporttextil.freizeit"
+    ],
+    "saison": "sommer",
+    "preisMitte": 35,
+    "materialien": [
+     "Denim",
+     "Bio-Baumwolle",
+     "Baumwolle"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.9,
+     "jung": 0.95,
+     "mitte": 0.55,
+     "reif": 0.15
+    }
+   },
+   {
+    "typ": "Kaschmirpullover",
+    "kategorie": "oberteile",
+    "wgs": [
+     "damen.strick",
+     "herren.strick",
+     "damen.gg"
+    ],
+    "saison": "winter",
+    "preisMitte": 79,
+    "materialien": [
+     "Kaschmir"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.1,
+     "jung": 0.45,
+     "mitte": 0.8,
+     "reif": 0.95
+    }
+   },
+   {
+    "typ": "Strickjacke",
+    "kategorie": "oberteile",
+    "wgs": [
+     "damen.strick",
+     "herren.strick",
+     "damen.gg",
+     "kinder.maedchen",
+     "kinder.jungen"
+    ],
+    "saison": "winter",
+    "preisMitte": 55,
+    "materialien": [
+     "Merino",
+     "Baumwolle",
+     "Kaschmir",
+     "Viskose",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.6,
+     "jung": 0.4,
+     "mitte": 0.7,
+     "reif": 0.9
+    }
+   },
+   {
+    "typ": "Bluse",
+    "kategorie": "oberteile",
+    "wgs": [
+     "damen.blusen",
+     "damen.gg",
+     "damen.young"
+    ],
+    "saison": "ganz",
+    "preisMitte": 45,
+    "materialien": [
+     "Viskose",
+     "Seide",
+     "Baumwolle",
+     "Leinen",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.1,
+     "jung": 0.55,
+     "mitte": 0.85,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "Hemd",
+    "kategorie": "oberteile",
+    "wgs": [
+     "herren.hemden",
+     "herren.business",
+     "herren.casual"
+    ],
+    "saison": "ganz",
+    "preisMitte": 45,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Leinen",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.2,
+     "jung": 0.55,
+     "mitte": 0.9,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "T-Shirt",
+    "kategorie": "oberteile",
+    "wgs": [
+     "damen.blusen",
+     "herren.casual",
+     "damen.young",
+     "kinder.jungen",
+     "kinder.maedchen",
+     "sporttextil.freizeit",
+     "sport.bekleidung"
+    ],
+    "saison": "sommer",
+    "preisMitte": 19,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Viskose",
+     "Polyester",
+     "Leinen"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.95,
+     "jung": 0.95,
+     "mitte": 0.7,
+     "reif": 0.45
+    }
+   },
+   {
+    "typ": "Poloshirt",
+    "kategorie": "oberteile",
+    "wgs": [
+     "herren.casual",
+     "herren.hemden",
+     "damen.blusen",
+     "sport.bekleidung"
+    ],
+    "saison": "sommer",
+    "preisMitte": 35,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.5,
+     "jung": 0.45,
+     "mitte": 0.8,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "Kleid",
+    "kategorie": "unterteile",
+    "wgs": [
+     "damen.kleider",
+     "damen.young",
+     "damen.gg"
+    ],
+    "saison": "sommer",
+    "preisMitte": 59,
+    "materialien": [
+     "Viskose",
+     "Baumwolle",
+     "Leinen",
+     "Seide",
+     "Polyester"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.2,
+     "jung": 0.9,
+     "mitte": 0.85,
+     "reif": 0.6
+    }
+   },
+   {
+    "typ": "Rock",
+    "kategorie": "unterteile",
+    "wgs": [
+     "damen.hosen",
+     "damen.gg",
+     "damen.young"
+    ],
+    "saison": "ganz",
+    "preisMitte": 45,
+    "materialien": [
+     "Viskose",
+     "Baumwolle",
+     "Denim",
+     "Leder",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.2,
+     "jung": 0.6,
+     "mitte": 0.75,
+     "reif": 0.7
+    }
+   },
+   {
+    "typ": "Chino",
+    "kategorie": "unterteile",
+    "wgs": [
+     "herren.hosen",
+     "damen.hosen",
+     "herren.casual"
+    ],
+    "saison": "ganz",
+    "preisMitte": 55,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Leinen"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.3,
+     "jung": 0.6,
+     "mitte": 0.9,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "Jeans",
+    "kategorie": "unterteile",
+    "wgs": [
+     "damen.denim",
+     "herren.casual",
+     "herren.hosen",
+     "kinder.jungen",
+     "kinder.maedchen",
+     "damen.young"
+    ],
+    "saison": "ganz",
+    "preisMitte": 59,
+    "materialien": [
+     "Denim",
+     "Bio-Baumwolle"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.85,
+     "jung": 0.95,
+     "mitte": 0.85,
+     "reif": 0.55
+    }
+   },
+   {
+    "typ": "Mantel",
+    "kategorie": "jacken",
+    "wgs": [
+     "damen.jacken",
+     "herren.jacken"
+    ],
+    "saison": "winter",
+    "preisMitte": 149,
+    "materialien": [
+     "Merino",
+     "Kaschmir",
+     "Polyester",
+     "Baumwolle",
+     "Leder"
+    ],
+    "aufwand": 3,
+    "gruppe": {
+     "kinder": 0.2,
+     "jung": 0.5,
+     "mitte": 0.8,
+     "reif": 0.95
+    }
+   },
+   {
+    "typ": "Steppjacke",
+    "kategorie": "jacken",
+    "wgs": [
+     "damen.jacken",
+     "herren.jacken",
+     "outdoor.bekleidung",
+     "kinder.jungen",
+     "kinder.maedchen"
+    ],
+    "saison": "winter",
+    "preisMitte": 99,
+    "materialien": [
+     "Polyester",
+     "Baumwolle"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.9,
+     "jung": 0.85,
+     "mitte": 0.8,
+     "reif": 0.6
+    }
+   },
+   {
+    "typ": "Blazer",
+    "kategorie": "jacken",
+    "wgs": [
+     "damen.jacken",
+     "herren.business",
+     "damen.blusen"
+    ],
+    "saison": "ganz",
+    "preisMitte": 99,
+    "materialien": [
+     "Merino",
+     "Leinen",
+     "Viskose",
+     "Polyester",
+     "Baumwolle"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.05,
+     "jung": 0.55,
+     "mitte": 0.9,
+     "reif": 0.8
+    }
+   },
+   {
+    "typ": "Sneaker",
+    "kategorie": "schuhe",
+    "wgs": [
+     "accessoires.damenschuhe",
+     "accessoires.herrenschuhe",
+     "kinder.schuhe"
+    ],
+    "saison": "ganz",
+    "preisMitte": 69,
+    "materialien": [
+     "Leder",
+     "Baumwolle",
+     "Polyester"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.9,
+     "jung": 0.95,
+     "mitte": 0.8,
+     "reif": 0.55
+    }
+   },
+   {
+    "typ": "Pumps",
+    "kategorie": "schuhe",
+    "wgs": [
+     "accessoires.damenschuhe"
+    ],
+    "saison": "ganz",
+    "preisMitte": 79,
+    "materialien": [
+     "Leder",
+     "Polyester"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0,
+     "jung": 0.55,
+     "mitte": 0.8,
+     "reif": 0.5
+    }
+   },
+   {
+    "typ": "Stiefel",
+    "kategorie": "schuhe",
+    "wgs": [
+     "accessoires.damenschuhe",
+     "accessoires.herrenschuhe",
+     "kinder.schuhe"
+    ],
+    "saison": "winter",
+    "preisMitte": 119,
+    "materialien": [
+     "Leder",
+     "Polyester"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.6,
+     "jung": 0.7,
+     "mitte": 0.8,
+     "reif": 0.75
+    }
+   },
+   {
+    "typ": "Pyjama",
+    "kategorie": "waesche",
+    "wgs": [
+     "waesche.nacht"
+    ],
+    "saison": "ganz",
+    "preisMitte": 39,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Seide",
+     "Viskose",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.8,
+     "jung": 0.5,
+     "mitte": 0.75,
+     "reif": 0.9
+    }
+   },
+   {
+    "typ": "Unterwäsche",
+    "kategorie": "waesche",
+    "wgs": [
+     "waesche.tag",
+     "waesche.herren"
+    ],
+    "saison": "ganz",
+    "preisMitte": 19,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Viskose",
+     "Polyester",
+     "Seide"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.6,
+     "jung": 0.8,
+     "mitte": 0.85,
+     "reif": 0.8
+    }
+   },
+   {
+    "typ": "BH",
+    "kategorie": "waesche",
+    "wgs": [
+     "waesche.tag"
+    ],
+    "saison": "ganz",
+    "preisMitte": 35,
+    "materialien": [
+     "Polyester",
+     "Baumwolle",
+     "Seide",
+     "Viskose"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0,
+     "jung": 0.8,
+     "mitte": 0.85,
+     "reif": 0.75
+    }
+   },
+   {
+    "typ": "Socken",
+    "kategorie": "waesche",
+    "wgs": [
+     "waesche.struempfe"
+    ],
+    "saison": "ganz",
+    "preisMitte": 9,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Merino",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.8,
+     "jung": 0.75,
+     "mitte": 0.8,
+     "reif": 0.8
+    }
+   },
+   {
+    "typ": "Schal",
+    "kategorie": "accessoires",
+    "wgs": [
+     "accessoires.lederwaren"
+    ],
+    "saison": "winter",
+    "preisMitte": 29,
+    "materialien": [
+     "Kaschmir",
+     "Merino",
+     "Viskose",
+     "Seide",
+     "Polyester",
+     "Baumwolle"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.3,
+     "jung": 0.6,
+     "mitte": 0.8,
+     "reif": 0.9
+    }
+   },
+   {
+    "typ": "Mütze",
+    "kategorie": "accessoires",
+    "wgs": [
+     "accessoires.lederwaren",
+     "kinder.baby"
+    ],
+    "saison": "winter",
+    "preisMitte": 19,
+    "materialien": [
+     "Merino",
+     "Baumwolle",
+     "Kaschmir",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.85,
+     "jung": 0.8,
+     "mitte": 0.6,
+     "reif": 0.6
+    }
+   },
+   {
+    "typ": "Handtasche",
+    "kategorie": "accessoires",
+    "wgs": [
+     "accessoires.lederwaren"
+    ],
+    "saison": "ganz",
+    "preisMitte": 89,
+    "materialien": [
+     "Leder",
+     "Polyester",
+     "Baumwolle"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0,
+     "jung": 0.7,
+     "mitte": 0.85,
+     "reif": 0.8
+    }
+   },
+   {
+    "typ": "Gürtel",
+    "kategorie": "accessoires",
+    "wgs": [
+     "accessoires.lederwaren"
+    ],
+    "saison": "ganz",
+    "preisMitte": 29,
+    "materialien": [
+     "Leder",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.2,
+     "jung": 0.6,
+     "mitte": 0.8,
+     "reif": 0.8
+    }
+   },
+   {
+    "typ": "Bettwäsche",
+    "kategorie": "home",
+    "wgs": [
+     "wohnen.bett"
+    ],
+    "saison": "ganz",
+    "preisMitte": 49,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Leinen",
+     "Seide",
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.6,
+     "jung": 0.6,
+     "mitte": 0.9,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "Handtuch",
+    "kategorie": "home",
+    "wgs": [
+     "wohnen.heimtextil"
+    ],
+    "saison": "ganz",
+    "preisMitte": 15,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Leinen"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.5,
+     "jung": 0.6,
+     "mitte": 0.85,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "Kissen",
+    "kategorie": "home",
+    "wgs": [
+     "wohnen.heimtextil",
+     "wohnen.deko"
+    ],
+    "saison": "ganz",
+    "preisMitte": 25,
+    "materialien": [
+     "Baumwolle",
+     "Leinen",
+     "Viskose",
+     "Polyester",
+     "Seide"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.5,
+     "jung": 0.75,
+     "mitte": 0.85,
+     "reif": 0.75
+    }
+   },
+   {
+    "typ": "Tasse",
+    "kategorie": "home",
+    "wgs": [
+     "wohnen.tisch"
+    ],
+    "saison": "ganz",
+    "preisMitte": 9,
+    "materialien": [
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.5,
+     "jung": 0.8,
+     "mitte": 0.8,
+     "reif": 0.7
+    }
+   },
+   {
+    "typ": "Vase",
+    "kategorie": "home",
+    "wgs": [
+     "wohnen.deko"
+    ],
+    "saison": "ganz",
+    "preisMitte": 29,
+    "materialien": [
+     "Polyester"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 0.1,
+     "jung": 0.6,
+     "mitte": 0.85,
+     "reif": 0.85
+    }
+   },
+   {
+    "typ": "Lippenstift",
+    "kategorie": "beauty",
+    "wgs": [
+     "beauty.pflege"
+    ],
+    "saison": "ganz",
+    "preisMitte": 15,
+    "materialien": [
+     "Polyester"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0,
+     "jung": 0.9,
+     "mitte": 0.8,
+     "reif": 0.6
+    }
+   },
+   {
+    "typ": "Creme",
+    "kategorie": "beauty",
+    "wgs": [
+     "beauty.pflege",
+     "beauty.drogerie"
+    ],
+    "saison": "ganz",
+    "preisMitte": 19,
+    "materialien": [
+     "Polyester"
+    ],
+    "aufwand": 2,
+    "gruppe": {
+     "kinder": 0.3,
+     "jung": 0.7,
+     "mitte": 0.85,
+     "reif": 0.9
+    }
+   },
+   {
+    "typ": "Parfum",
+    "kategorie": "beauty",
+    "wgs": [
+     "beauty.pflege"
+    ],
+    "saison": "ganz",
+    "preisMitte": 45,
+    "materialien": [
+     "Polyester"
+    ],
+    "aufwand": 3,
+    "gruppe": {
+     "kinder": 0,
+     "jung": 0.85,
+     "mitte": 0.85,
+     "reif": 0.75
+    }
+   },
+   {
+    "typ": "Kinderbody",
+    "kategorie": "kinder",
+    "wgs": [
+     "kinder.baby"
+    ],
+    "saison": "ganz",
+    "preisMitte": 12,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Merino"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 1,
+     "jung": 0,
+     "mitte": 0,
+     "reif": 0
+    }
+   },
+   {
+    "typ": "Kinderkleid",
+    "kategorie": "kinder",
+    "wgs": [
+     "kinder.maedchen",
+     "kinder.baby"
+    ],
+    "saison": "sommer",
+    "preisMitte": 25,
+    "materialien": [
+     "Baumwolle",
+     "Bio-Baumwolle",
+     "Viskose",
+     "Leinen"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 1,
+     "jung": 0,
+     "mitte": 0,
+     "reif": 0
+    }
+   },
+   {
+    "typ": "Plüschtier",
+    "kategorie": "kinder",
+    "wgs": [
+     "kinder.baby"
+    ],
+    "saison": "ganz",
+    "preisMitte": 19,
+    "materialien": [
+     "Polyester",
+     "Bio-Baumwolle",
+     "Baumwolle"
+    ],
+    "aufwand": 1,
+    "gruppe": {
+     "kinder": 1,
+     "jung": 0,
+     "mitte": 0,
+     "reif": 0
+    }
+   }
+  ],
+  "farben": [
+   {
+    "name": "weiß",
+    "hex": "#f7f5f0"
+   },
+   {
+    "name": "creme",
+    "hex": "#efe6d2"
+   },
+   {
+    "name": "sand",
+    "hex": "#d8c6a3"
+   },
+   {
+    "name": "beige",
+    "hex": "#cdb894"
+   },
+   {
+    "name": "camel",
+    "hex": "#b98a53"
+   },
+   {
+    "name": "cognac",
+    "hex": "#9a5a2c"
+   },
+   {
+    "name": "braun",
+    "hex": "#6b4a32"
+   },
+   {
+    "name": "grau",
+    "hex": "#9a9a9a"
+   },
+   {
+    "name": "anthrazit",
+    "hex": "#3f4247"
+   },
+   {
+    "name": "schwarz",
+    "hex": "#1f1f22"
+   },
+   {
+    "name": "marine",
+    "hex": "#1f2f4f"
+   },
+   {
+    "name": "hellblau",
+    "hex": "#a9c8e6"
+   },
+   {
+    "name": "jeansblau",
+    "hex": "#4f6f9a"
+   },
+   {
+    "name": "petrol",
+    "hex": "#1f5f68"
+   },
+   {
+    "name": "mintgrün",
+    "hex": "#a8dcc4"
+   },
+   {
+    "name": "salbei",
+    "hex": "#9cae8f"
+   },
+   {
+    "name": "olive",
+    "hex": "#6f7040"
+   },
+   {
+    "name": "flaschengrün",
+    "hex": "#1f4a35"
+   },
+   {
+    "name": "senf",
+    "hex": "#c9a13a"
+   },
+   {
+    "name": "gelb",
+    "hex": "#f0d04a"
+   },
+   {
+    "name": "orange",
+    "hex": "#e8843a"
+   },
+   {
+    "name": "koralle",
+    "hex": "#ec7d6a"
+   },
+   {
+    "name": "rot",
+    "hex": "#c8323a"
+   },
+   {
+    "name": "bordeaux",
+    "hex": "#6e1f2e"
+   },
+   {
+    "name": "rosa",
+    "hex": "#f2b8c6"
+   },
+   {
+    "name": "altrosa",
+    "hex": "#c99a9a"
+   },
+   {
+    "name": "flieder",
+    "hex": "#c4b0d8"
+   },
+   {
+    "name": "lila",
+    "hex": "#7a4f9a"
+   }
+  ],
+  "materialien": [
+   {
+    "name": "Baumwolle",
+    "preis": 1,
+    "kosten": 1,
+    "wertig": 0.45
+   },
+   {
+    "name": "Bio-Baumwolle",
+    "preis": 1.12,
+    "kosten": 1.14,
+    "wertig": 0.6
+   },
+   {
+    "name": "Leinen",
+    "preis": 1.2,
+    "kosten": 1.2,
+    "wertig": 0.6
+   },
+   {
+    "name": "Kaschmir",
+    "preis": 2.3,
+    "kosten": 2.36,
+    "wertig": 1
+   },
+   {
+    "name": "Merino",
+    "preis": 1.5,
+    "kosten": 1.52,
+    "wertig": 0.8
+   },
+   {
+    "name": "Denim",
+    "preis": 1,
+    "kosten": 1,
+    "wertig": 0.45
+   },
+   {
+    "name": "Leder",
+    "preis": 1.6,
+    "kosten": 1.62,
+    "wertig": 0.8
+   },
+   {
+    "name": "Polyester",
+    "preis": 0.75,
+    "kosten": 0.68,
+    "wertig": 0.1
+   },
+   {
+    "name": "Seide",
+    "preis": 1.9,
+    "kosten": 1.94,
+    "wertig": 0.95
+   },
+   {
+    "name": "Viskose",
+    "preis": 0.9,
+    "kosten": 0.86,
+    "wertig": 0.3
+   }
+  ],
+  "preislagen": [
+   {
+    "id": "einstieg",
+    "faktor": 0.65
+   },
+   {
+    "id": "mitte",
+    "faktor": 1
+   },
+   {
+    "id": "gehoben",
+    "faktor": 1.7
+   }
+  ],
+  "dauer": [
+   4,
+   8,
+   12,
+   24,
+   48
+  ],
+  "budgetSchritt": 5000
+ },
+ "trendbericht": {
+  "woche": 30,
+  "aktuell": {
+   "saison": 0,
+   "name": "Frühjahr/Sommer 2027",
+   "gruppen": {
+    "kinder": {
+     "farben": [
+      "mintgrün",
+      "koralle",
+      "schwarz",
+      "senf"
+     ],
+     "artikel": [
+      "T-Shirt",
+      "Handtuch",
+      "Tasse",
+      "Bettwäsche",
+      "Kinderkleid"
+     ],
+     "materialien": [
+      "Seide",
+      "Viskose",
+      "Denim"
+     ],
+     "out": [
+      "gelb",
+      "marine",
+      "altrosa"
+     ]
+    },
+    "jung": {
+     "farben": [
+      "koralle",
+      "weiß",
+      "marine",
+      "braun"
+     ],
+     "artikel": [
+      "Chino",
+      "Kissen",
+      "T-Shirt",
+      "Sneaker",
+      "Bettwäsche"
+     ],
+     "materialien": [
+      "Seide",
+      "Bio-Baumwolle",
+      "Viskose"
+     ],
+     "out": [
+      "schwarz",
+      "sand",
+      "jeansblau"
+     ]
+    },
+    "mitte": {
+     "farben": [
+      "grau",
+      "schwarz",
+      "beige",
+      "bordeaux"
+     ],
+     "artikel": [
+      "Gürtel",
+      "Vase",
+      "Lippenstift",
+      "Bettwäsche",
+      "Poloshirt"
+     ],
+     "materialien": [
+      "Leder",
+      "Baumwolle",
+      "Denim"
+     ],
+     "out": [
+      "camel",
+      "jeansblau",
+      "cognac"
+     ]
+    },
+    "reif": {
+     "farben": [
+      "bordeaux",
+      "grau",
+      "koralle",
+      "schwarz"
+     ],
+     "artikel": [
+      "Bluse",
+      "Pumps",
+      "Kleid",
+      "Chino",
+      "Lippenstift"
+     ],
+     "materialien": [
+      "Merino",
+      "Viskose",
+      "Leder"
+     ],
+     "out": [
+      "olive",
+      "sand",
+      "altrosa"
+     ]
+    }
+   }
+  },
+  "naechste": {
+   "saison": 1,
+   "name": "Herbst/Winter 2027/28",
+   "gruppen": {
+    "kinder": {
+     "farben": [
+      "weiß",
+      "jeansblau",
+      "sand",
+      "braun"
+     ],
+     "artikel": [
+      "Pyjama",
+      "Kissen",
+      "Handtuch",
+      "Plüschtier",
+      "Mütze"
+     ],
+     "materialien": [
+      "Kaschmir",
+      "Seide",
+      "Polyester"
+     ],
+     "out": [
+      "anthrazit",
+      "camel",
+      "mintgrün"
+     ]
+    },
+    "jung": {
+     "farben": [
+      "schwarz",
+      "koralle",
+      "anthrazit",
+      "bordeaux"
+     ],
+     "artikel": [
+      "Steppjacke",
+      "BH",
+      "Lippenstift",
+      "Pyjama",
+      "Unterwäsche"
+     ],
+     "materialien": [
+      "Viskose",
+      "Leder",
+      "Seide"
+     ],
+     "out": [
+      "beige",
+      "salbei",
+      "olive"
+     ]
+    },
+    "mitte": {
+     "farben": [
+      "sand",
+      "petrol",
+      "camel",
+      "anthrazit"
+     ],
+     "artikel": [
+      "Schal",
+      "Kaschmirpullover",
+      "Blazer",
+      "Bettwäsche",
+      "Bluse"
+     ],
+     "materialien": [
+      "Bio-Baumwolle",
+      "Kaschmir",
+      "Leinen"
+     ],
+     "out": [
+      "bordeaux",
+      "rosa",
+      "salbei"
+     ]
+    },
+    "reif": {
+     "farben": [
+      "bordeaux",
+      "grau",
+      "altrosa",
+      "koralle"
+     ],
+     "artikel": [
+      "Creme",
+      "Mantel",
+      "Unterwäsche",
+      "Tasse",
+      "Rock"
+     ],
+     "materialien": [
+      "Merino",
+      "Leder",
+      "Viskose"
+     ],
+     "out": [
+      "jeansblau",
+      "petrol",
+      "gelb"
+     ]
+    }
+   }
+  },
+  "zielgruppen": [
+   {
+    "id": "kinder",
+    "name": "Kinder",
+    "grundfarben": [
+     "gelb",
+     "rot",
+     "hellblau",
+     "rosa",
+     "mintgrün",
+     "orange",
+     "jeansblau",
+     "weiß",
+     "koralle"
+    ]
+   },
+   {
+    "id": "jung",
+    "name": "Junge Kundschaft bis 29",
+    "grundfarben": [
+     "schwarz",
+     "weiß",
+     "jeansblau",
+     "rosa",
+     "lila",
+     "olive",
+     "grau",
+     "koralle"
+    ]
+   },
+   {
+    "id": "mitte",
+    "name": "30 bis 49",
+    "grundfarben": [
+     "marine",
+     "weiß",
+     "olive",
+     "salbei",
+     "schwarz",
+     "cognac",
+     "sand",
+     "petrol",
+     "grau"
+    ]
+   },
+   {
+    "id": "reif",
+    "name": "50 plus und 70 plus",
+    "grundfarben": [
+     "marine",
+     "camel",
+     "grau",
+     "bordeaux",
+     "creme",
+     "sand",
+     "anthrazit",
+     "flaschengrün",
+     "beige"
+    ]
+   }
+  ],
+  "hinweis": "Was zur Einführung angesagt ist, zählt. Lange Entwicklungen landen in der nächsten Saison."
+ },
+ "produktVorschau": [
+  {
+   "entwurf": {
+    "marke": "em1",
+    "typ": "Kaschmirpullover",
+    "farbe": "bordeaux",
+    "material": "Kaschmir",
+    "dauer": 12,
+    "budgetWoche": 30000
+   },
+   "ergebnis": {
+    "ok": false,
+    "fehler": "Kapazität für Oberteile bei Lisanne erreicht. Bitte erst Produkte auslisten.",
+    "wg": "damen.strick",
+    "wgName": "Strick",
+    "kategorie": "oberteile",
+    "name": "Kaschmirpullover bordeaux",
+    "normpreis": 181.99,
+    "ekStueck": 73.31,
+    "marge": 0.597,
+    "kosten": 360000,
+    "fertigWoche": 42,
+    "saisonEinfuehrung": "Herbst/Winter 2027/28",
+    "sterneErwartet": 4,
+    "sterneVon": 4,
+    "sterneBis": 4.5,
+    "teile": {
+     "zielgruppe": 0.97,
+     "trend": 0.45,
+     "preisQualitaet": 0.75,
+     "entwicklung": 0.95,
+     "team": 0.47
+    },
+    "trendBekannt": true,
+    "kapazitaetFrei": -2,
+    "hinweise": []
+   }
+  },
+  {
+   "entwurf": {
+    "marke": "em1",
+    "typ": "Jeans-Shorts",
+    "farbe": "jeansblau",
+    "material": "Denim",
+    "dauer": 4,
+    "budgetWoche": 5000
+   },
+   "ergebnis": {
+    "ok": false,
+    "fehler": "Kapazität für Hosen, Röcke, Kleider bei Lisanne erreicht. Bitte erst Produkte auslisten.",
+    "wg": "damen.denim",
+    "wgName": "Denim",
+    "kategorie": "unterteile",
+    "name": "Jeans-Shorts jeansblau",
+    "normpreis": 34.99,
+    "ekStueck": 14.44,
+    "marge": 0.587,
+    "kosten": 20000,
+    "fertigWoche": 34,
+    "saisonEinfuehrung": "Herbst/Winter 2027/28",
+    "sterneErwartet": 2,
+    "sterneVon": 2,
+    "sterneBis": 2.5,
+    "teile": {
+     "zielgruppe": 0.26,
+     "trend": 0,
+     "preisQualitaet": 0.92,
+     "entwicklung": 0.2,
+     "team": 0.47
+    },
+    "trendBekannt": true,
+    "kapazitaetFrei": 0,
+    "hinweise": [
+     "Trifft den Trend der Einführungssaison kaum",
+     "Passt wenig zur Zielgruppe von Lisanne",
+     "Budget oder Dauer knapp für diesen Artikel",
+     "Lisanne bekommt dafür einen Anteil von 10 % in Denim"
+    ]
+   }
+  },
+  {
+   "entwurf": {
+    "marke": "em4",
+    "typ": "Jeans-Shorts",
+    "farbe": "weiß",
+    "material": "Denim",
+    "dauer": 12,
+    "budgetWoche": 20000
+   },
+   "ergebnis": {
+    "ok": true,
+    "wg": "kinder.maedchen",
+    "wgName": "Mädchen",
+    "kategorie": "unterteile",
+    "name": "Jeans-Shorts weiß",
+    "normpreis": 21.99,
+    "ekStueck": 9.39,
+    "marge": 0.573,
+    "kosten": 240000,
+    "fertigWoche": 42,
+    "saisonEinfuehrung": "Herbst/Winter 2027/28",
+    "sterneErwartet": 3.5,
+    "sterneVon": 3.5,
+    "sterneBis": 4,
+    "teile": {
+     "zielgruppe": 0.83,
+     "trend": 0.3,
+     "preisQualitaet": 0.84,
+     "entwicklung": 0.99,
+     "team": 0.47
+    },
+    "trendBekannt": true,
+    "kapazitaetFrei": 2,
+    "hinweise": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,1799 @@
+{
+ "seed": 1,
+ "woche": 30,
+ "bot": "C (Schutzschirm, tiefe Sanierung)",
+ "phase": "regulaer",
+ "vorstandUebersicht": {
+  "woche": 30,
+  "ressorts": [
+   {
+    "id": "cfo",
+    "kurz": "CFO",
+    "titel": "Finanzvorstand",
+    "zustaendig": "Finanzen, Controlling, Bank und Kreditversicherer",
+    "besetzt": true,
+    "person": {
+     "id": "vp1",
+     "name": "Renate Kolbeck",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "bob",
+      "haarfarbe": "grau",
+      "brille": "eckig",
+      "kleidungFarbe": "anthrazit",
+      "hautton": 1,
+      "alter": 59,
+      "kleidung": "kostuem",
+      "bart": "keiner"
+     },
+     "fuehrung": 48,
+     "fachwissen": 58,
+     "loyalitaet": 59,
+     "gehalt": 495000,
+     "gehaltsforderung": 535000,
+     "haltebonus": 0,
+     "erfolgsbonus": 0,
+     "seitWoche": -572,
+     "gewachsen": true
+    },
+    "wert": 52,
+    "abteilungen": [
+     {
+      "id": "controlling",
+      "name": "Controlling",
+      "faktor": 1
+     },
+     {
+      "id": "verwaltung",
+      "name": "Verwaltung",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "zahlungsplanung",
+      "label": "Zahlungsplanung delegieren",
+      "beschreibung": "Orderniveau nach Liquidität steuern",
+      "an": false
+     },
+     {
+      "id": "bank",
+      "label": "Bank und Kreditversicherer delegieren",
+      "beschreibung": "Quartalsplan einreichen, Bankgespräche führen",
+      "an": false
+     }
+    ],
+    "risiko": 0.06,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "coo",
+    "kurz": "COO",
+    "titel": "Vorstand Operations",
+    "zustaendig": "Filialbetrieb, Logistik",
+    "besetzt": true,
+    "person": {
+     "id": "vp2",
+     "name": "Dieter Hambrock",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "halbglatze",
+      "haarfarbe": "weiß",
+      "brille": "keine",
+      "kleidungFarbe": "marine",
+      "hautton": 0,
+      "alter": 63,
+      "kleidung": "anzug",
+      "bart": "schnauz"
+     },
+     "fuehrung": 52,
+     "fachwissen": 47,
+     "loyalitaet": 61,
+     "gehalt": 430000,
+     "gehaltsforderung": 450000,
+     "haltebonus": 0,
+     "erfolgsbonus": 0,
+     "seitWoche": -988,
+     "gewachsen": true
+    },
+    "wert": 50,
+    "abteilungen": [
+     {
+      "id": "logistik",
+      "name": "Logistik",
+      "faktor": 1
+     },
+     {
+      "id": "personal",
+      "name": "Personal",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "filialpersonal",
+      "label": "Filialpersonal delegieren",
+      "beschreibung": "Aushilfenquote nach Saison",
+      "an": false
+     },
+     {
+      "id": "personalbedarf",
+      "label": "Personalbedarf delegieren",
+      "beschreibung": "Überbesetzung in den Häusern abbauen",
+      "an": false
+     }
+    ],
+    "risiko": 0.05,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "cso",
+    "kurz": "CSO",
+    "titel": "Vertriebsvorstand",
+    "zustaendig": "Regionen, Filialleitungen, Flächen",
+    "besetzt": true,
+    "person": {
+     "id": "vp3",
+     "name": "Murat Demirel",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "schwarz",
+      "brille": "keine",
+      "kleidungFarbe": "petrol",
+      "hautton": 3,
+      "alter": 49,
+      "kleidung": "blazer",
+      "bart": "drei"
+     },
+     "fuehrung": 56,
+     "fachwissen": 50,
+     "loyalitaet": 55,
+     "gehalt": 410000,
+     "gehaltsforderung": 430000,
+     "haltebonus": 0,
+     "erfolgsbonus": 0,
+     "seitWoche": -208,
+     "gewachsen": true
+    },
+    "wert": 54,
+    "abteilungen": [
+     {
+      "id": "vm",
+      "name": "Visual Merchandising",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "filialbesetzung",
+      "label": "Filialbesetzung delegieren",
+      "beschreibung": "Halteprämien für wacklige Filialleitungen",
+      "an": false
+     },
+     {
+      "id": "flaechenvermietung",
+      "label": "Flächenvermietung delegieren",
+      "beschreibung": "Untermietangebote prüfen und annehmen",
+      "an": false
+     }
+    ],
+    "risiko": 0.07,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "cpo",
+    "kurz": "CPO",
+    "titel": "Einkaufsvorstand",
+    "zustaendig": "Einkauf, Eigenmarken, Produktentwicklung, Freigaben",
+    "besetzt": true,
+    "person": {
+     "id": "vp4",
+     "name": "Gisela Wernicke",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "dutt",
+      "haarfarbe": "hellbraun",
+      "brille": "horn",
+      "kleidungFarbe": "bordeaux",
+      "hautton": 1,
+      "alter": 57,
+      "kleidung": "blazer",
+      "bart": "keiner"
+     },
+     "fuehrung": 47,
+     "fachwissen": 52,
+     "loyalitaet": 58,
+     "gehalt": 465000,
+     "gehaltsforderung": 480000,
+     "haltebonus": 0,
+     "erfolgsbonus": 0,
+     "seitWoche": -728,
+     "gewachsen": true
+    },
+    "wert": 49,
+    "abteilungen": [
+     {
+      "id": "einkauf",
+      "name": "Einkauf",
+      "faktor": 1
+     },
+     {
+      "id": "produkt",
+      "name": "Produktentwicklung",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "freigaben",
+      "label": "Freigaben bis Grenze delegieren",
+      "beschreibung": "Freigabe-Eingang abarbeiten",
+      "an": false
+     },
+     {
+      "id": "dispo",
+      "label": "Dispo und Limits delegieren",
+      "beschreibung": "Open to Buy und Servicegrad je Saison setzen",
+      "an": false
+     },
+     {
+      "id": "produktentwicklung",
+      "label": "Eigenmarken-Produktentwicklung delegieren",
+      "beschreibung": "Neue Produkte entwickeln, schwache auslisten",
+      "an": false
+     }
+    ],
+    "risiko": 0.06,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "cmo",
+    "kurz": "CMO",
+    "titel": "Marketingvorstand",
+    "zustaendig": "Marketing, CRM, Kundenkarte, E-Commerce",
+    "besetzt": true,
+    "person": {
+     "id": "vp5",
+     "name": "Jens Opitz",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "seitenscheitel",
+      "haarfarbe": "blond",
+      "brille": "rund",
+      "kleidungFarbe": "hellblau",
+      "hautton": 0,
+      "alter": 52,
+      "kleidung": "hemd",
+      "bart": "keiner"
+     },
+     "fuehrung": 50,
+     "fachwissen": 46,
+     "loyalitaet": 58,
+     "gehalt": 420000,
+     "gehaltsforderung": 420000,
+     "haltebonus": 0,
+     "erfolgsbonus": 0,
+     "seitWoche": -312,
+     "gewachsen": true
+    },
+    "wert": 49,
+    "abteilungen": [
+     {
+      "id": "marketing",
+      "name": "Marketing",
+      "faktor": 1
+     },
+     {
+      "id": "ecommerce",
+      "name": "E-Commerce",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "aktionskalender",
+      "label": "Aktionskalender delegieren",
+      "beschreibung": "Aktionen planen und auswerten",
+      "an": false
+     },
+     {
+      "id": "crm",
+      "label": "CRM-Kampagnen delegieren",
+      "beschreibung": "Kampagnen für Kartenkunden steuern",
+      "an": false
+     },
+     {
+      "id": "kanalbudget",
+      "label": "Kanalbudget delegieren",
+      "beschreibung": "Werbebudget nach Lage setzen",
+      "an": false
+     }
+    ],
+    "risiko": 0.06,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "chro",
+    "kurz": "CHRO",
+    "titel": "Personalvorstand",
+    "zustaendig": "Personal, Betriebsrat",
+    "besetzt": true,
+    "person": {
+     "id": "vp6",
+     "name": "Sabine Lückemeyer",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "halblang",
+      "haarfarbe": "dunkelbraun",
+      "brille": "keine",
+      "kleidungFarbe": "camel",
+      "hautton": 2,
+      "alter": 54,
+      "kleidung": "strick",
+      "bart": "keiner"
+     },
+     "fuehrung": 51,
+     "fachwissen": 55,
+     "loyalitaet": 60,
+     "gehalt": 370000,
+     "gehaltsforderung": 390000,
+     "haltebonus": 0,
+     "erfolgsbonus": 0,
+     "seitWoche": -468,
+     "gewachsen": true
+    },
+    "wert": 52,
+    "abteilungen": [
+     {
+      "id": "personal",
+      "name": "Personal",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "betriebsrat",
+      "label": "Betriebsratsverhandlungen delegieren",
+      "beschreibung": "Sanierungstarif verhandeln",
+      "an": false
+     },
+     {
+      "id": "personalplanung",
+      "label": "Personalplanung delegieren",
+      "beschreibung": "Abteilungen der Zentrale auf Soll bringen",
+      "an": false
+     }
+    ],
+    "risiko": 0.05,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "cro",
+    "kurz": "CRO",
+    "titel": "Restrukturierungsvorstand",
+    "zustaendig": "Sanierung, Insolvenzverfahren, Recht, Immobilien",
+    "besetzt": false,
+    "wert": 20,
+    "abteilungen": [
+     {
+      "id": "immobilien",
+      "name": "Immobilien",
+      "faktor": 1
+     },
+     {
+      "id": "recht",
+      "name": "Recht",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "schliessungen",
+      "label": "Schließungsprozesse delegieren",
+      "beschreibung": "Dauerhaft defizitäre Häuser schließen",
+      "an": false
+     },
+     {
+      "id": "mietverhandlungen",
+      "label": "Mietverhandlungen delegieren",
+      "beschreibung": "Teure Mieten nachverhandeln",
+      "an": false
+     }
+    ],
+    "risiko": 0,
+    "risikoAmpel": "gruen"
+   },
+   {
+    "id": "cdo",
+    "kurz": "CDO",
+    "titel": "Digitalvorstand",
+    "zustaendig": "IT, Daten, Online",
+    "besetzt": false,
+    "wert": 20,
+    "abteilungen": [
+     {
+      "id": "ecommerce",
+      "name": "E-Commerce",
+      "faktor": 1
+     }
+    ],
+    "delegationen": [
+     {
+      "id": "onlinesortiment",
+      "label": "Online-Sortiment delegieren",
+      "beschreibung": "Sortiment und Pflege des Onlineshops",
+      "an": false
+     }
+    ],
+    "risiko": 0,
+    "risikoAmpel": "gruen"
+   }
+  ],
+  "besetzt": 6,
+  "kostenWoche": 49808,
+  "kostenJahr": 2590000,
+  "naechsteSitzung": 32,
+  "letzteSitzung": {
+   "woche": 19,
+   "berichte": [
+    {
+     "ressort": "cfo",
+     "name": "Renate Kolbeck",
+     "text": "Reichweite der Liquidität rund 33 Wochen, EBITDA der letzten 13 Wochen -49,0 Mio. €."
+    },
+    {
+     "ressort": "coo",
+     "name": "Dieter Hambrock",
+     "text": "Logistikkosten 14,3 Mio. € im Quartal, 130 Häuser im Betrieb."
+    },
+    {
+     "ressort": "cso",
+     "name": "Murat Demirel",
+     "text": "Moral der Filialleitungen im Schnitt 42, 0 Häuser in Schließung."
+    },
+    {
+     "ressort": "cpo",
+     "name": "Gisela Wernicke",
+     "text": "0 offene Freigaben, 0 Produkte in Entwicklung, Abschriften 5,9 Mio. € im Quartal."
+    },
+    {
+     "ressort": "cmo",
+     "name": "Jens Opitz",
+     "text": "Marketing 10,4 Mio. € im Quartal, Image 2."
+    },
+    {
+     "ressort": "chro",
+     "name": "Sabine Lückemeyer",
+     "text": "Betriebsrat 10 Punkte, Zentrale 798 FTE."
+    },
+    {
+     "ressort": "cro",
+     "text": "Ressort unbesetzt, der CEO berichtet selbst."
+    },
+    {
+     "ressort": "cdo",
+     "text": "Ressort unbesetzt, der CEO berichtet selbst."
+    }
+   ],
+   "thema": {
+    "id": "filialleitung",
+    "ressort": "cso",
+    "titel": "Programm für Filialleitungen",
+    "entscheidungId": "ve108",
+    "ergebnis": "vertagt"
+   }
+  },
+  "offeneEntscheidungen": [],
+  "boosts": []
+ },
+ "vorstandProfil": {
+  "cfo": {
+   "id": "cfo",
+   "kurz": "CFO",
+   "titel": "Finanzvorstand",
+   "zustaendig": "Finanzen, Controlling, Bank und Kreditversicherer",
+   "besetzt": true,
+   "person": {
+    "id": "vp1",
+    "name": "Renate Kolbeck",
+    "portraet": {
+     "geschlecht": "w",
+     "haar": "bob",
+     "haarfarbe": "grau",
+     "brille": "eckig",
+     "kleidungFarbe": "anthrazit",
+     "hautton": 1,
+     "alter": 59,
+     "kleidung": "kostuem",
+     "bart": "keiner"
+    },
+    "fuehrung": 48,
+    "fachwissen": 58,
+    "loyalitaet": 59,
+    "gehalt": 495000,
+    "gehaltsforderung": 535000,
+    "haltebonus": 0,
+    "erfolgsbonus": 0,
+    "seitWoche": -572,
+    "gewachsen": true
+   },
+   "wert": 52,
+   "abteilungen": [
+    {
+     "id": "controlling",
+     "name": "Controlling",
+     "faktor": 1
+    },
+    {
+     "id": "verwaltung",
+     "name": "Verwaltung",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "zahlungsplanung",
+     "label": "Zahlungsplanung delegieren",
+     "beschreibung": "Orderniveau nach Liquidität steuern",
+     "an": false
+    },
+    {
+     "id": "bank",
+     "label": "Bank und Kreditversicherer delegieren",
+     "beschreibung": "Quartalsplan einreichen, Bankgespräche führen",
+     "an": false
+    }
+   ],
+   "risiko": 0.06,
+   "risikoAmpel": "gruen",
+   "vorgeschichte": "Seit 2015 im Haus, vorher Konzerncontrolling. Kennt jede Kostenstelle, scheut aber Konflikte mit den Banken.",
+   "abfindung": 495000,
+   "gehaltsSchritt": 10000,
+   "gehaltProzent": -7,
+   "protokoll": [],
+   "kandidatenAnzahl": 3
+  },
+  "coo": {
+   "id": "coo",
+   "kurz": "COO",
+   "titel": "Vorstand Operations",
+   "zustaendig": "Filialbetrieb, Logistik",
+   "besetzt": true,
+   "person": {
+    "id": "vp2",
+    "name": "Dieter Hambrock",
+    "portraet": {
+     "geschlecht": "m",
+     "haar": "halbglatze",
+     "haarfarbe": "weiß",
+     "brille": "keine",
+     "kleidungFarbe": "marine",
+     "hautton": 0,
+     "alter": 63,
+     "kleidung": "anzug",
+     "bart": "schnauz"
+    },
+    "fuehrung": 52,
+    "fachwissen": 47,
+    "loyalitaet": 61,
+    "gehalt": 430000,
+    "gehaltsforderung": 450000,
+    "haltebonus": 0,
+    "erfolgsbonus": 0,
+    "seitWoche": -988,
+    "gewachsen": true
+   },
+   "wert": 50,
+   "abteilungen": [
+    {
+     "id": "logistik",
+     "name": "Logistik",
+     "faktor": 1
+    },
+    {
+     "id": "personal",
+     "name": "Personal",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "filialpersonal",
+     "label": "Filialpersonal delegieren",
+     "beschreibung": "Aushilfenquote nach Saison",
+     "an": false
+    },
+    {
+     "id": "personalbedarf",
+     "label": "Personalbedarf delegieren",
+     "beschreibung": "Überbesetzung in den Häusern abbauen",
+     "an": false
+    }
+   ],
+   "risiko": 0.05,
+   "risikoAmpel": "gruen",
+   "vorgeschichte": "Hat als Lehrling im Haus Essen angefangen. Verlässlich im Tagesgeschäft, Logistik denkt er noch in Lagern statt in Flüssen.",
+   "abfindung": 430000,
+   "gehaltsSchritt": 10000,
+   "gehaltProzent": -4,
+   "protokoll": [],
+   "kandidatenAnzahl": 5
+  },
+  "cso": {
+   "id": "cso",
+   "kurz": "CSO",
+   "titel": "Vertriebsvorstand",
+   "zustaendig": "Regionen, Filialleitungen, Flächen",
+   "besetzt": true,
+   "person": {
+    "id": "vp3",
+    "name": "Murat Demirel",
+    "portraet": {
+     "geschlecht": "m",
+     "haar": "kurz",
+     "haarfarbe": "schwarz",
+     "brille": "keine",
+     "kleidungFarbe": "petrol",
+     "hautton": 3,
+     "alter": 49,
+     "kleidung": "blazer",
+     "bart": "drei"
+    },
+    "fuehrung": 56,
+    "fachwissen": 50,
+    "loyalitaet": 55,
+    "gehalt": 410000,
+    "gehaltsforderung": 430000,
+    "haltebonus": 0,
+    "erfolgsbonus": 0,
+    "seitWoche": -208,
+    "gewachsen": true
+   },
+   "wert": 54,
+   "abteilungen": [
+    {
+     "id": "vm",
+     "name": "Visual Merchandising",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "filialbesetzung",
+     "label": "Filialbesetzung delegieren",
+     "beschreibung": "Halteprämien für wacklige Filialleitungen",
+     "an": false
+    },
+    {
+     "id": "flaechenvermietung",
+     "label": "Flächenvermietung delegieren",
+     "beschreibung": "Untermietangebote prüfen und annehmen",
+     "an": false
+    }
+   ],
+   "risiko": 0.07,
+   "risikoAmpel": "gruen",
+   "vorgeschichte": "Früher Regionalleiter West, die Filialleitungen mögen ihn. Für Flächenkonzepte fehlt ihm der Blick von außen.",
+   "abfindung": 410000,
+   "gehaltsSchritt": 10000,
+   "gehaltProzent": -5,
+   "protokoll": [],
+   "kandidatenAnzahl": 5
+  },
+  "cpo": {
+   "id": "cpo",
+   "kurz": "CPO",
+   "titel": "Einkaufsvorstand",
+   "zustaendig": "Einkauf, Eigenmarken, Produktentwicklung, Freigaben",
+   "besetzt": true,
+   "person": {
+    "id": "vp4",
+    "name": "Gisela Wernicke",
+    "portraet": {
+     "geschlecht": "w",
+     "haar": "dutt",
+     "haarfarbe": "hellbraun",
+     "brille": "horn",
+     "kleidungFarbe": "bordeaux",
+     "hautton": 1,
+     "alter": 57,
+     "kleidung": "blazer",
+     "bart": "keiner"
+    },
+    "fuehrung": 47,
+    "fachwissen": 52,
+    "loyalitaet": 58,
+    "gehalt": 465000,
+    "gehaltsforderung": 480000,
+    "haltebonus": 0,
+    "erfolgsbonus": 0,
+    "seitWoche": -728,
+    "gewachsen": true
+   },
+   "wert": 49,
+   "abteilungen": [
+    {
+     "id": "einkauf",
+     "name": "Einkauf",
+     "faktor": 1
+    },
+    {
+     "id": "produkt",
+     "name": "Produktentwicklung",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "freigaben",
+     "label": "Freigaben bis Grenze delegieren",
+     "beschreibung": "Freigabe-Eingang abarbeiten",
+     "an": false
+    },
+    {
+     "id": "dispo",
+     "label": "Dispo und Limits delegieren",
+     "beschreibung": "Open to Buy und Servicegrad je Saison setzen",
+     "an": false
+    },
+    {
+     "id": "produktentwicklung",
+     "label": "Eigenmarken-Produktentwicklung delegieren",
+     "beschreibung": "Neue Produkte entwickeln, schwache auslisten",
+     "an": false
+    }
+   ],
+   "risiko": 0.06,
+   "risikoAmpel": "gruen",
+   "vorgeschichte": "Hat Lisanne einst groß gemacht und hängt an der Marke. Kennt die Lieferanten in Fernost, Trends erreichen sie spät.",
+   "abfindung": 465000,
+   "gehaltsSchritt": 10000,
+   "gehaltProzent": -3,
+   "protokoll": [],
+   "kandidatenAnzahl": 3
+  },
+  "cmo": {
+   "id": "cmo",
+   "kurz": "CMO",
+   "titel": "Marketingvorstand",
+   "zustaendig": "Marketing, CRM, Kundenkarte, E-Commerce",
+   "besetzt": true,
+   "person": {
+    "id": "vp5",
+    "name": "Jens Opitz",
+    "portraet": {
+     "geschlecht": "m",
+     "haar": "seitenscheitel",
+     "haarfarbe": "blond",
+     "brille": "rund",
+     "kleidungFarbe": "hellblau",
+     "hautton": 0,
+     "alter": 52,
+     "kleidung": "hemd",
+     "bart": "keiner"
+    },
+    "fuehrung": 50,
+    "fachwissen": 46,
+    "loyalitaet": 58,
+    "gehalt": 420000,
+    "gehaltsforderung": 420000,
+    "haltebonus": 0,
+    "erfolgsbonus": 0,
+    "seitWoche": -312,
+    "gewachsen": true
+   },
+   "wert": 49,
+   "abteilungen": [
+    {
+     "id": "marketing",
+     "name": "Marketing",
+     "faktor": 1
+    },
+    {
+     "id": "ecommerce",
+     "name": "E-Commerce",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "aktionskalender",
+     "label": "Aktionskalender delegieren",
+     "beschreibung": "Aktionen planen und auswerten",
+     "an": false
+    },
+    {
+     "id": "crm",
+     "label": "CRM-Kampagnen delegieren",
+     "beschreibung": "Kampagnen für Kartenkunden steuern",
+     "an": false
+    },
+    {
+     "id": "kanalbudget",
+     "label": "Kanalbudget delegieren",
+     "beschreibung": "Werbebudget nach Lage setzen",
+     "an": false
+    }
+   ],
+   "risiko": 0.06,
+   "risikoAmpel": "gruen",
+   "vorgeschichte": "Kommt aus der Prospektwerbung. Liebt Beilagen und Rabattwochen, CRM ist für ihn Neuland.",
+   "abfindung": 420000,
+   "gehaltsSchritt": 10000,
+   "gehaltProzent": 0,
+   "protokoll": [],
+   "kandidatenAnzahl": 4
+  },
+  "chro": {
+   "id": "chro",
+   "kurz": "CHRO",
+   "titel": "Personalvorstand",
+   "zustaendig": "Personal, Betriebsrat",
+   "besetzt": true,
+   "person": {
+    "id": "vp6",
+    "name": "Sabine Lückemeyer",
+    "portraet": {
+     "geschlecht": "w",
+     "haar": "halblang",
+     "haarfarbe": "dunkelbraun",
+     "brille": "keine",
+     "kleidungFarbe": "camel",
+     "hautton": 2,
+     "alter": 54,
+     "kleidung": "strick",
+     "bart": "keiner"
+    },
+    "fuehrung": 51,
+    "fachwissen": 55,
+    "loyalitaet": 60,
+    "gehalt": 370000,
+    "gehaltsforderung": 390000,
+    "haltebonus": 0,
+    "erfolgsbonus": 0,
+    "seitWoche": -468,
+    "gewachsen": true
+   },
+   "wert": 52,
+   "abteilungen": [
+    {
+     "id": "personal",
+     "name": "Personal",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "betriebsrat",
+     "label": "Betriebsratsverhandlungen delegieren",
+     "beschreibung": "Sanierungstarif verhandeln",
+     "an": false
+    },
+    {
+     "id": "personalplanung",
+     "label": "Personalplanung delegieren",
+     "beschreibung": "Abteilungen der Zentrale auf Soll bringen",
+     "an": false
+    }
+   ],
+   "risiko": 0.05,
+   "risikoAmpel": "gruen",
+   "vorgeschichte": "Gutes Verhältnis zum Gesamtbetriebsrat, hat zwei Sanierungstarife mitverhandelt. Wenig Erfahrung mit Zentralabbau.",
+   "abfindung": 370000,
+   "gehaltsSchritt": 10000,
+   "gehaltProzent": -5,
+   "protokoll": [],
+   "kandidatenAnzahl": 4
+  },
+  "cro": {
+   "id": "cro",
+   "kurz": "CRO",
+   "titel": "Restrukturierungsvorstand",
+   "zustaendig": "Sanierung, Insolvenzverfahren, Recht, Immobilien",
+   "besetzt": false,
+   "wert": 20,
+   "abteilungen": [
+    {
+     "id": "immobilien",
+     "name": "Immobilien",
+     "faktor": 1
+    },
+    {
+     "id": "recht",
+     "name": "Recht",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "schliessungen",
+     "label": "Schließungsprozesse delegieren",
+     "beschreibung": "Dauerhaft defizitäre Häuser schließen",
+     "an": false
+    },
+    {
+     "id": "mietverhandlungen",
+     "label": "Mietverhandlungen delegieren",
+     "beschreibung": "Teure Mieten nachverhandeln",
+     "an": false
+    }
+   ],
+   "risiko": 0,
+   "risikoAmpel": "gruen",
+   "gehaltsSchritt": 10000,
+   "protokoll": [],
+   "kandidatenAnzahl": 3
+  },
+  "cdo": {
+   "id": "cdo",
+   "kurz": "CDO",
+   "titel": "Digitalvorstand",
+   "zustaendig": "IT, Daten, Online",
+   "besetzt": false,
+   "wert": 20,
+   "abteilungen": [
+    {
+     "id": "ecommerce",
+     "name": "E-Commerce",
+     "faktor": 1
+    }
+   ],
+   "delegationen": [
+    {
+     "id": "onlinesortiment",
+     "label": "Online-Sortiment delegieren",
+     "beschreibung": "Sortiment und Pflege des Onlineshops",
+     "an": false
+    }
+   ],
+   "risiko": 0,
+   "risikoAmpel": "gruen",
+   "gehaltsSchritt": 10000,
+   "protokoll": [],
+   "kandidatenAnzahl": 5
+  }
+ },
+ "kandidaten": {
+  "cfo": {
+   "ressort": "cfo",
+   "kurz": "CFO",
+   "titel": "Finanzvorstand",
+   "besetzt": true,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk109",
+     "name": "Andrea Reinholz",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "dutt",
+      "haarfarbe": "dunkelbraun",
+      "brille": "eckig",
+      "kleidungFarbe": "camel",
+      "hautton": 1,
+      "alter": 52,
+      "kleidung": "strick",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Partner Restrukturierung",
+     "aktuelleFirma": "Mittelland Moden GmbH",
+     "fuehrung": 42,
+     "fachwissen": 59,
+     "loyalitaet": 74,
+     "aktuellesGehalt": 470000,
+     "gehaltsforderung": 520000,
+     "chanceBeiForderung": 0.42,
+     "vorgeschichte": "Partner Restrukturierung bei Mittelland Moden GmbH, 6 Jahre im Amt."
+    },
+    {
+     "id": "vk110",
+     "name": "Oliver Hollmann",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "halbglatze",
+      "haarfarbe": "hellbraun",
+      "brille": "eckig",
+      "kleidungFarbe": "hellblau",
+      "hautton": 2,
+      "alter": 47,
+      "kleidung": "blazer",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "CFO",
+     "aktuelleFirma": "Lindner und Voss Warenhaus AG",
+     "fuehrung": 85,
+     "fachwissen": 51,
+     "loyalitaet": 77,
+     "aktuellesGehalt": 510000,
+     "gehaltsforderung": 605000,
+     "chanceBeiForderung": 0.28,
+     "vorgeschichte": "CFO bei Lindner und Voss Warenhaus AG, 8 Jahre im Amt."
+    },
+    {
+     "id": "vk111",
+     "name": "Volker Ilgner",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "grau",
+      "brille": "keine",
+      "kleidungFarbe": "bordeaux",
+      "hautton": 4,
+      "alter": 59,
+      "kleidung": "rollkragen",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "CFO",
+     "aktuelleFirma": "Feldmann Handel KG",
+     "fuehrung": 48,
+     "fachwissen": 88,
+     "loyalitaet": 37,
+     "aktuellesGehalt": 565000,
+     "gehaltsforderung": 605000,
+     "chanceBeiForderung": 0.39,
+     "vorgeschichte": "CFO bei Feldmann Handel KG, 6 Jahre im Amt."
+    }
+   ]
+  },
+  "coo": {
+   "ressort": "coo",
+   "kurz": "COO",
+   "titel": "Vorstand Operations",
+   "besetzt": true,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk112",
+     "name": "Gregor Sommerfeld",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "seitenscheitel",
+      "haarfarbe": "rot",
+      "brille": "keine",
+      "kleidungFarbe": "petrol",
+      "hautton": 4,
+      "alter": 55,
+      "kleidung": "anzug",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Geschäftsführer Logistik",
+     "aktuelleFirma": "Feldmann Handel KG",
+     "fuehrung": 58,
+     "fachwissen": 89,
+     "loyalitaet": 38,
+     "aktuellesGehalt": 520000,
+     "gehaltsforderung": 545000,
+     "chanceBeiForderung": 0.24,
+     "vorgeschichte": "Geschäftsführer Logistik bei Feldmann Handel KG, 4 Jahre im Amt."
+    },
+    {
+     "id": "vk113",
+     "name": "Emre Lindqvist",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "seitenscheitel",
+      "haarfarbe": "dunkelbraun",
+      "brille": "keine",
+      "kleidungFarbe": "grau",
+      "hautton": 5,
+      "alter": 45,
+      "kleidung": "rollkragen",
+      "bart": "schnauz"
+     },
+     "aktuellePosition": "Bereichsleiterin Operations",
+     "aktuelleFirma": "Hanse Textil AG",
+     "fuehrung": 90,
+     "fachwissen": 60,
+     "loyalitaet": 31,
+     "aktuellesGehalt": 515000,
+     "gehaltsforderung": 550000,
+     "chanceBeiForderung": 0.32,
+     "vorgeschichte": "Bereichsleiterin Operations bei Hanse Textil AG, 4 Jahre im Amt."
+    },
+    {
+     "id": "vk114",
+     "name": "Tarek Reinholz",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "braun",
+      "brille": "keine",
+      "kleidungFarbe": "schwarz",
+      "hautton": 3,
+      "alter": 44,
+      "kleidung": "pullover",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "COO",
+     "aktuelleFirma": "Lindner und Voss Warenhaus AG",
+     "fuehrung": 43,
+     "fachwissen": 63,
+     "loyalitaet": 53,
+     "aktuellesGehalt": 370000,
+     "gehaltsforderung": 460000,
+     "chanceBeiForderung": 0.4,
+     "vorgeschichte": "COO bei Lindner und Voss Warenhaus AG, 5 Jahre im Amt."
+    },
+    {
+     "id": "vk115",
+     "name": "Ulrike Jankowski",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "pony",
+      "haarfarbe": "grau",
+      "brille": "rund",
+      "kleidungFarbe": "petrol",
+      "hautton": 0,
+      "alter": 57,
+      "kleidung": "strick",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Leiter Filialbetrieb",
+     "aktuelleFirma": "Hanse Textil AG",
+     "fuehrung": 64,
+     "fachwissen": 67,
+     "loyalitaet": 42,
+     "aktuellesGehalt": 415000,
+     "gehaltsforderung": 515000,
+     "chanceBeiForderung": 0.22,
+     "vorgeschichte": "Leiter Filialbetrieb bei Hanse Textil AG, 5 Jahre im Amt."
+    },
+    {
+     "id": "vk116",
+     "name": "Lars Quast",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "halblang",
+      "haarfarbe": "dunkelbraun",
+      "brille": "keine",
+      "kleidungFarbe": "weiß",
+      "hautton": 3,
+      "alter": 58,
+      "kleidung": "pullover",
+      "bart": "drei"
+     },
+     "aktuellePosition": "Leiter Filialbetrieb",
+     "aktuelleFirma": "Sternhaus Gruppe",
+     "fuehrung": 82,
+     "fachwissen": 84,
+     "loyalitaet": 63,
+     "aktuellesGehalt": 500000,
+     "gehaltsforderung": 585000,
+     "chanceBeiForderung": 0.22,
+     "vorgeschichte": "Leiter Filialbetrieb bei Sternhaus Gruppe, 4 Jahre im Amt."
+    }
+   ]
+  },
+  "cso": {
+   "ressort": "cso",
+   "kurz": "CSO",
+   "titel": "Vertriebsvorstand",
+   "besetzt": true,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk117",
+     "name": "Ingo Overbeck",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "glatze",
+      "haarfarbe": "dunkelbraun",
+      "brille": "keine",
+      "kleidungFarbe": "grau",
+      "hautton": 4,
+      "alter": 39,
+      "kleidung": "hemd",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Geschäftsführer Vertrieb",
+     "aktuelleFirma": "Nordmode AG",
+     "fuehrung": 67,
+     "fachwissen": 71,
+     "loyalitaet": 81,
+     "aktuellesGehalt": 445000,
+     "gehaltsforderung": 490000,
+     "chanceBeiForderung": 0.43,
+     "vorgeschichte": "Geschäftsführer Vertrieb bei Nordmode AG, 9 Jahre im Amt."
+    },
+    {
+     "id": "vk118",
+     "name": "Kai Nowak",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "halbglatze",
+      "haarfarbe": "grau",
+      "brille": "rund",
+      "kleidungFarbe": "petrol",
+      "hautton": 1,
+      "alter": 54,
+      "kleidung": "anzug",
+      "bart": "schnauz"
+     },
+     "aktuellePosition": "Geschäftsführer Vertrieb",
+     "aktuelleFirma": "Brandauer Sport AG",
+     "fuehrung": 42,
+     "fachwissen": 58,
+     "loyalitaet": 81,
+     "aktuellesGehalt": 355000,
+     "gehaltsforderung": 420000,
+     "chanceBeiForderung": 0.3,
+     "vorgeschichte": "Geschäftsführer Vertrieb bei Brandauer Sport AG, 11 Jahre im Amt."
+    },
+    {
+     "id": "vk119",
+     "name": "Emre Fuchsberger",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "glatze",
+      "haarfarbe": "grau",
+      "brille": "keine",
+      "kleidungFarbe": "weiß",
+      "hautton": 0,
+      "alter": 56,
+      "kleidung": "blazer",
+      "bart": "voll"
+     },
+     "aktuellePosition": "Vertriebsdirektor",
+     "aktuelleFirma": "Kessler Logistik SE",
+     "fuehrung": 89,
+     "fachwissen": 84,
+     "loyalitaet": 70,
+     "aktuellesGehalt": 520000,
+     "gehaltsforderung": 560000,
+     "chanceBeiForderung": 0.2,
+     "vorgeschichte": "Vertriebsdirektor bei Kessler Logistik SE, 12 Jahre im Amt."
+    },
+    {
+     "id": "vk120",
+     "name": "Tobias Wolters",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "seitenscheitel",
+      "haarfarbe": "hellbraun",
+      "brille": "eckig",
+      "kleidungFarbe": "beige",
+      "hautton": 0,
+      "alter": 54,
+      "kleidung": "anzug",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Head of Stores",
+     "aktuelleFirma": "Brandauer Sport AG",
+     "fuehrung": 90,
+     "fachwissen": 87,
+     "loyalitaet": 83,
+     "aktuellesGehalt": 485000,
+     "gehaltsforderung": 565000,
+     "chanceBeiForderung": 0.36,
+     "vorgeschichte": "Head of Stores bei Brandauer Sport AG, 5 Jahre im Amt."
+    },
+    {
+     "id": "vk121",
+     "name": "Konstantin Wendland",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "grau",
+      "brille": "keine",
+      "kleidungFarbe": "bordeaux",
+      "hautton": 2,
+      "alter": 51,
+      "kleidung": "blazer",
+      "bart": "drei"
+     },
+     "aktuellePosition": "Leiterin Region West",
+     "aktuelleFirma": "Weserland Discount GmbH",
+     "fuehrung": 40,
+     "fachwissen": 83,
+     "loyalitaet": 47,
+     "aktuellesGehalt": 420000,
+     "gehaltsforderung": 465000,
+     "chanceBeiForderung": 0.27,
+     "vorgeschichte": "Leiterin Region West bei Weserland Discount GmbH, 5 Jahre im Amt."
+    }
+   ]
+  },
+  "cpo": {
+   "ressort": "cpo",
+   "kurz": "CPO",
+   "titel": "Einkaufsvorstand",
+   "besetzt": true,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk122",
+     "name": "Nils Mertens",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "glatze",
+      "haarfarbe": "braun",
+      "brille": "rund",
+      "kleidungFarbe": "camel",
+      "hautton": 1,
+      "alter": 47,
+      "kleidung": "hemd",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Bereichsleiter Einkauf",
+     "aktuelleFirma": "Pfalzgraf Lebensmittel SE",
+     "fuehrung": 52,
+     "fachwissen": 68,
+     "loyalitaet": 56,
+     "aktuellesGehalt": 470000,
+     "gehaltsforderung": 525000,
+     "chanceBeiForderung": 0.32,
+     "vorgeschichte": "Bereichsleiter Einkauf bei Pfalzgraf Lebensmittel SE, 8 Jahre im Amt."
+    },
+    {
+     "id": "vk123",
+     "name": "Yasemin Wendland",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "zopf",
+      "haarfarbe": "grau",
+      "brille": "rund",
+      "kleidungFarbe": "schwarz",
+      "hautton": 3,
+      "alter": 56,
+      "kleidung": "bluse",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Leiter Eigenmarken",
+     "aktuelleFirma": "Odenwald Möbel KG",
+     "fuehrung": 44,
+     "fachwissen": 86,
+     "loyalitaet": 79,
+     "aktuellesGehalt": 520000,
+     "gehaltsforderung": 545000,
+     "chanceBeiForderung": 0.25,
+     "vorgeschichte": "Leiter Eigenmarken bei Odenwald Möbel KG, 8 Jahre im Amt."
+    },
+    {
+     "id": "vk124",
+     "name": "Konstantin Lindqvist",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "seitenscheitel",
+      "haarfarbe": "hellbraun",
+      "brille": "keine",
+      "kleidungFarbe": "schwarz",
+      "hautton": 4,
+      "alter": 48,
+      "kleidung": "pullover",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Einkaufsdirektorin",
+     "aktuelleFirma": "Brandauer Sport AG",
+     "fuehrung": 45,
+     "fachwissen": 75,
+     "loyalitaet": 46,
+     "aktuellesGehalt": 465000,
+     "gehaltsforderung": 525000,
+     "chanceBeiForderung": 0.21,
+     "vorgeschichte": "Einkaufsdirektorin bei Brandauer Sport AG, 7 Jahre im Amt."
+    }
+   ]
+  },
+  "cmo": {
+   "ressort": "cmo",
+   "kurz": "CMO",
+   "titel": "Marketingvorstand",
+   "besetzt": true,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk125",
+     "name": "Birgit Sommerfeld",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "bob",
+      "haarfarbe": "rot",
+      "brille": "keine",
+      "kleidungFarbe": "petrol",
+      "hautton": 1,
+      "alter": 61,
+      "kleidung": "blazer",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Leiterin Marketing",
+     "aktuelleFirma": "Weserland Discount GmbH",
+     "fuehrung": 53,
+     "fachwissen": 71,
+     "loyalitaet": 56,
+     "aktuellesGehalt": 380000,
+     "gehaltsforderung": 475000,
+     "chanceBeiForderung": 0.27,
+     "vorgeschichte": "Leiterin Marketing bei Weserland Discount GmbH, 10 Jahre im Amt."
+    },
+    {
+     "id": "vk126",
+     "name": "Wiebke Wolters",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "halblang",
+      "haarfarbe": "dunkelbraun",
+      "brille": "keine",
+      "kleidungFarbe": "anthrazit",
+      "hautton": 3,
+      "alter": 38,
+      "kleidung": "strick",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Head of CRM",
+     "aktuelleFirma": "Falkenhain Consulting",
+     "fuehrung": 93,
+     "fachwissen": 82,
+     "loyalitaet": 36,
+     "aktuellesGehalt": 555000,
+     "gehaltsforderung": 575000,
+     "chanceBeiForderung": 0.4,
+     "vorgeschichte": "Head of CRM bei Falkenhain Consulting, 10 Jahre im Amt."
+    },
+    {
+     "id": "vk127",
+     "name": "Stefan Voss",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "halbglatze",
+      "haarfarbe": "weiß",
+      "brille": "eckig",
+      "kleidungFarbe": "marine",
+      "hautton": 0,
+      "alter": 56,
+      "kleidung": "anzug",
+      "bart": "voll"
+     },
+     "aktuellePosition": "Leiterin Marketing",
+     "aktuelleFirma": "Hanse Textil AG",
+     "fuehrung": 61,
+     "fachwissen": 67,
+     "loyalitaet": 80,
+     "aktuellesGehalt": 435000,
+     "gehaltsforderung": 485000,
+     "chanceBeiForderung": 0.41,
+     "vorgeschichte": "Leiterin Marketing bei Hanse Textil AG, 5 Jahre im Amt."
+    },
+    {
+     "id": "vk128",
+     "name": "Birgit Cetin",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "zopf",
+      "haarfarbe": "rot",
+      "brille": "keine",
+      "kleidungFarbe": "bordeaux",
+      "hautton": 3,
+      "alter": 47,
+      "kleidung": "blazer",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Geschäftsführer Agentur",
+     "aktuelleFirma": "Lindner und Voss Warenhaus AG",
+     "fuehrung": 57,
+     "fachwissen": 51,
+     "loyalitaet": 46,
+     "aktuellesGehalt": 425000,
+     "gehaltsforderung": 445000,
+     "chanceBeiForderung": 0.37,
+     "vorgeschichte": "Geschäftsführer Agentur bei Lindner und Voss Warenhaus AG, 4 Jahre im Amt."
+    }
+   ]
+  },
+  "chro": {
+   "ressort": "chro",
+   "kurz": "CHRO",
+   "titel": "Personalvorstand",
+   "besetzt": true,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk129",
+     "name": "Petra Mertens",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "bob",
+      "haarfarbe": "rot",
+      "brille": "rund",
+      "kleidungFarbe": "olive",
+      "hautton": 3,
+      "alter": 59,
+      "kleidung": "rollkragen",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Leiter Personal",
+     "aktuelleFirma": "Mittelland Moden GmbH",
+     "fuehrung": 70,
+     "fachwissen": 55,
+     "loyalitaet": 47,
+     "aktuellesGehalt": 385000,
+     "gehaltsforderung": 425000,
+     "chanceBeiForderung": 0.27,
+     "vorgeschichte": "Leiter Personal bei Mittelland Moden GmbH, 7 Jahre im Amt."
+    },
+    {
+     "id": "vk130",
+     "name": "Lars Lindqvist",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "locken",
+      "haarfarbe": "schwarz",
+      "brille": "keine",
+      "kleidungFarbe": "marine",
+      "hautton": 2,
+      "alter": 56,
+      "kleidung": "blazer",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Head of People",
+     "aktuelleFirma": "Kranich Beauty AG",
+     "fuehrung": 56,
+     "fachwissen": 70,
+     "loyalitaet": 44,
+     "aktuellesGehalt": 375000,
+     "gehaltsforderung": 425000,
+     "chanceBeiForderung": 0.27,
+     "vorgeschichte": "Head of People bei Kranich Beauty AG, 7 Jahre im Amt."
+    },
+    {
+     "id": "vk131",
+     "name": "Mareike Dahlmann",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "lang",
+      "haarfarbe": "hellbraun",
+      "brille": "keine",
+      "kleidungFarbe": "camel",
+      "hautton": 1,
+      "alter": 43,
+      "kleidung": "kostuem",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Arbeitsdirektor",
+     "aktuelleFirma": "Weserland Discount GmbH",
+     "fuehrung": 58,
+     "fachwissen": 90,
+     "loyalitaet": 80,
+     "aktuellesGehalt": 410000,
+     "gehaltsforderung": 460000,
+     "chanceBeiForderung": 0.39,
+     "vorgeschichte": "Arbeitsdirektor bei Weserland Discount GmbH, 4 Jahre im Amt."
+    },
+    {
+     "id": "vk132",
+     "name": "Wladimir Nowak",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "grau",
+      "brille": "keine",
+      "kleidungFarbe": "grau",
+      "hautton": 1,
+      "alter": 55,
+      "kleidung": "rollkragen",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Personaldirektorin",
+     "aktuelleFirma": "Kessler Logistik SE",
+     "fuehrung": 53,
+     "fachwissen": 63,
+     "loyalitaet": 55,
+     "aktuellesGehalt": 350000,
+     "gehaltsforderung": 405000,
+     "chanceBeiForderung": 0.35,
+     "vorgeschichte": "Personaldirektorin bei Kessler Logistik SE, 6 Jahre im Amt."
+    }
+   ]
+  },
+  "cro": {
+   "ressort": "cro",
+   "kurz": "CRO",
+   "titel": "Restrukturierungsvorstand",
+   "besetzt": false,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk133",
+     "name": "Ingo Brockmann",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "blond",
+      "brille": "horn",
+      "kleidungFarbe": "senf",
+      "hautton": 3,
+      "alter": 42,
+      "kleidung": "anzug",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Sanierungsgeschäftsführerin",
+     "aktuelleFirma": "Falkenhain Consulting",
+     "fuehrung": 61,
+     "fachwissen": 65,
+     "loyalitaet": 87,
+     "aktuellesGehalt": 565000,
+     "gehaltsforderung": 625000,
+     "chanceBeiForderung": 0.24,
+     "vorgeschichte": "Sanierungsgeschäftsführerin bei Falkenhain Consulting, 12 Jahre im Amt."
+    },
+    {
+     "id": "vk134",
+     "name": "Vanessa Tillmanns",
+     "portraet": {
+      "geschlecht": "w",
+      "haar": "lang",
+      "haarfarbe": "braun",
+      "brille": "keine",
+      "kleidungFarbe": "beige",
+      "hautton": 5,
+      "alter": 54,
+      "kleidung": "bluse",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Partner Restrukturierung",
+     "aktuelleFirma": "Odenwald Möbel KG",
+     "fuehrung": 39,
+     "fachwissen": 48,
+     "loyalitaet": 53,
+     "aktuellesGehalt": 435000,
+     "gehaltsforderung": 525000,
+     "chanceBeiForderung": 0.37,
+     "vorgeschichte": "Partner Restrukturierung bei Odenwald Möbel KG, 10 Jahre im Amt."
+    },
+    {
+     "id": "vk135",
+     "name": "Kai Tillmanns",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "glatze",
+      "haarfarbe": "hellbraun",
+      "brille": "eckig",
+      "kleidungFarbe": "beige",
+      "hautton": 1,
+      "alter": 43,
+      "kleidung": "anzug",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Partner Restrukturierung",
+     "aktuelleFirma": "Kranich Beauty AG",
+     "fuehrung": 74,
+     "fachwissen": 51,
+     "loyalitaet": 68,
+     "aktuellesGehalt": 575000,
+     "gehaltsforderung": 625000,
+     "chanceBeiForderung": 0.39,
+     "vorgeschichte": "Partner Restrukturierung bei Kranich Beauty AG, 6 Jahre im Amt."
+    }
+   ]
+  },
+  "cdo": {
+   "ressort": "cdo",
+   "kurz": "CDO",
+   "titel": "Digitalvorstand",
+   "besetzt": false,
+   "gehaltsSchritt": 10000,
+   "kandidaten": [
+    {
+     "id": "vk136",
+     "name": "Matthias Ilgner",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "schwarz",
+      "brille": "rund",
+      "kleidungFarbe": "beige",
+      "hautton": 5,
+      "alter": 40,
+      "kleidung": "hemd",
+      "bart": "voll"
+     },
+     "aktuellePosition": "Leiterin Digital",
+     "aktuelleFirma": "Sternhaus Gruppe",
+     "fuehrung": 83,
+     "fachwissen": 60,
+     "loyalitaet": 62,
+     "aktuellesGehalt": 515000,
+     "gehaltsforderung": 535000,
+     "chanceBeiForderung": 0.33,
+     "vorgeschichte": "Leiterin Digital bei Sternhaus Gruppe, 4 Jahre im Amt."
+    },
+    {
+     "id": "vk137",
+     "name": "Uwe Quast",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "kurz",
+      "haarfarbe": "weiß",
+      "brille": "horn",
+      "kleidungFarbe": "petrol",
+      "hautton": 0,
+      "alter": 56,
+      "kleidung": "anzug",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "CDO",
+     "aktuelleFirma": "Kessler Logistik SE",
+     "fuehrung": 68,
+     "fachwissen": 75,
+     "loyalitaet": 36,
+     "aktuellesGehalt": 495000,
+     "gehaltsforderung": 535000,
+     "chanceBeiForderung": 0.27,
+     "vorgeschichte": "CDO bei Kessler Logistik SE, 4 Jahre im Amt."
+    },
+    {
+     "id": "vk138",
+     "name": "Tarek Petersen",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "afro",
+      "haarfarbe": "weiß",
+      "brille": "keine",
+      "kleidungFarbe": "marine",
+      "hautton": 4,
+      "alter": 54,
+      "kleidung": "pullover",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "Leiterin Digital",
+     "aktuelleFirma": "Rheinwerk Versand GmbH",
+     "fuehrung": 90,
+     "fachwissen": 59,
+     "loyalitaet": 43,
+     "aktuellesGehalt": 470000,
+     "gehaltsforderung": 550000,
+     "chanceBeiForderung": 0.23,
+     "vorgeschichte": "Leiterin Digital bei Rheinwerk Versand GmbH, 8 Jahre im Amt."
+    },
+    {
+     "id": "vk139",
+     "name": "Malte Lewandowski",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "halbglatze",
+      "haarfarbe": "grau",
+      "brille": "keine",
+      "kleidungFarbe": "petrol",
+      "hautton": 2,
+      "alter": 49,
+      "kleidung": "hemd",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "CDO",
+     "aktuelleFirma": "Feldmann Handel KG",
+     "fuehrung": 57,
+     "fachwissen": 51,
+     "loyalitaet": 65,
+     "aktuellesGehalt": 430000,
+     "gehaltsforderung": 465000,
+     "chanceBeiForderung": 0.29,
+     "vorgeschichte": "CDO bei Feldmann Handel KG, 10 Jahre im Amt."
+    },
+    {
+     "id": "vk140",
+     "name": "Ralf Ilgner",
+     "portraet": {
+      "geschlecht": "m",
+      "haar": "seitenscheitel",
+      "haarfarbe": "schwarz",
+      "brille": "keine",
+      "kleidungFarbe": "bordeaux",
+      "hautton": 0,
+      "alter": 52,
+      "kleidung": "anzug",
+      "bart": "keiner"
+     },
+     "aktuellePosition": "CDO",
+     "aktuelleFirma": "Mittelland Moden GmbH",
+     "fuehrung": 50,
+     "fachwissen": 48,
+     "loyalitaet": 76,
+     "aktuellesGehalt": 400000,
+     "gehaltsforderung": 445000,
+     "chanceBeiForderung": 0.21,
+     "vorgeschichte": "CDO bei Mittelland Moden GmbH, 4 Jahre im Amt."
+    }
+   ]
+  }
+ }
+}
