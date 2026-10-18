@@ -82,6 +82,14 @@ Als Nächstes: HQ-Logik (Punkt 2) und Engine anbinden (Punkt 4). Während der Ar
 - Prototyp: Knopf "Einkauf" mit Übersicht, WG-Detail, Freigaben, Eigenmarken, Assistent "Marke gründen"; Eigenmarken-Shops im Innenraum. Prüfung 655 Werte, 0 Abweichungen, 12/12 Aktionen.
 - Vertrag: EINKAUF-VERTRAG.md im Baukasten.
 
+## Neu am 18.10.2026 abends: Vorstand, Marketing, Produktentwicklung, Karte, Schwierigkeit
+- Vorstand (engine/src/vorstand.ts): 8 Ressorts (CFO, COO, CSO, CPO, CMO, CHRO, CRO, CDO), Porträts, Führung/Fachwissen/Loyalität, Gehalt, Halte- und Erfolgsbonus, 17 Delegationsbereiche mit Ressort-KI, Kandidatenkarussell, Abwerbung, Vorstandssitzung je Quartal. Start: 6 von 8 besetzt.
+- Marketing (engine/src/marketing.ts): Kanäle mit Budget, Hartwig Karte und App, CRM-Kampagnen, Aktionskalender mit 15 Standardaktionen (WSV, SSV, Mid Season, Black Friday, Weihnachten, Beauty/Wäsche Days, Friends and Family, Personalkauf, MwSt-Aktion ...), Mitnahme, Vorzieheffekt, Kannibalisierung, Rabattgewöhnung, WG-gezielte Aktionen.
+- Produktentwicklung (engine/src/produkte.ts): 36 Artikeltypen, 28 Farben, 10 Materialien, Trendbericht, Sterne, Kapazität je Marke; neue HQ-Abteilung Produktentwicklung (Designstudio).
+- Schwierigkeit (engine/src/schwierigkeit.ts): leicht/mittel/schwer beim Spielstart; mittel = bisherige Kalibrierung exakt.
+- Grafik: Porträts (render/src/kit/portraet.js), Produktbilder (render/src/kit/produktbild.js), HQ-Etagen Vorstand/Designstudio/CRM-Leitstand, Marketing am Haus.
+- Prototyp: Startbildschirm, Karte wie Coffee Inc (Zoom-Grenze, Wischen mit Trägheit, Pinch), Panels Vorstand, Marketing, Produktentwicklung. Prüfung: alle Anzeigen gleich Engine, alle Klicktests grün. 82 Engine-Tests grün.
+
 ## Als Nächstes
 1. Prototyp auf dem iPhone (Expo/React Native mit three.js oder WebView), echte Bildrate messen.
 2. Wettbewerber in Engine und Stadt.

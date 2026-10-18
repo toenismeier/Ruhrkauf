@@ -1,3 +1,26 @@
+# Ruhrkauf: Turnaround-Tycoon (Arbeitstitel, Kette im Spiel: Hartwig)
+
+## Aufbau
+- `engine/`: Spiellogik in TypeScript (Häuser, Ware, Einkauf, Eigenmarken, Zentrale/HQ, Insolvenz). Befehle siehe engine/README.md.
+- `render/`: Grafik-Baukasten (three.js), Kataloge, Brücke Engine zu Grafik, Spiel-Prototyp (`render/spiel.html` + `render/spiel-bundle.js`).
+- `bilder/`: aktuelle Bildschirm- und Katalogbilder.
+- `HQ-VERTRAG.md`, `EINKAUF-VERTRAG.md`: verbindliche Spezifikationen.
+
+## Starten (Ubuntu/WSL)
+1. Engine installieren und testen:
+```
+cd engine && npm install && npm test
+```
+2. Grafik installieren:
+```
+cd render && npm install
+```
+3. Prototyp neu bündeln und prüfen:
+```
+cd render && node spiel-render.js --bundle && node spiel-render.js
+```
+4. Prototyp öffnen: `render/spiel.html` im Browser (Hochformat 390 × 844).
+
 # Hartwig Tycoon: Stand Grafik, HQ und Engine (18.10.2026)
 
 ## Worum es geht
@@ -58,6 +81,14 @@ Als Nächstes: HQ-Logik (Punkt 2) und Engine anbinden (Punkt 4). Während der Ar
 - Strategievergleich Jahr 3 (EBITDA): Bot C 15 Mio. €, NOS-Pflege 21 Mio. €, Eigenmarken-Offensive 41 Mio. €, Kahlschlag Limit -11 Mio. €. Kalibrierung Ausgangslage innerhalb 0,2 %. 55 Tests grün.
 - Prototyp: Knopf "Einkauf" mit Übersicht, WG-Detail, Freigaben, Eigenmarken, Assistent "Marke gründen"; Eigenmarken-Shops im Innenraum. Prüfung 655 Werte, 0 Abweichungen, 12/12 Aktionen.
 - Vertrag: EINKAUF-VERTRAG.md im Baukasten.
+
+## Neu am 18.10.2026 abends: Vorstand, Marketing, Produktentwicklung, Karte, Schwierigkeit
+- Vorstand (engine/src/vorstand.ts): 8 Ressorts (CFO, COO, CSO, CPO, CMO, CHRO, CRO, CDO), Porträts, Führung/Fachwissen/Loyalität, Gehalt, Halte- und Erfolgsbonus, 17 Delegationsbereiche mit Ressort-KI, Kandidatenkarussell, Abwerbung, Vorstandssitzung je Quartal. Start: 6 von 8 besetzt.
+- Marketing (engine/src/marketing.ts): Kanäle mit Budget, Hartwig Karte und App, CRM-Kampagnen, Aktionskalender mit 15 Standardaktionen (WSV, SSV, Mid Season, Black Friday, Weihnachten, Beauty/Wäsche Days, Friends and Family, Personalkauf, MwSt-Aktion ...), Mitnahme, Vorzieheffekt, Kannibalisierung, Rabattgewöhnung, WG-gezielte Aktionen.
+- Produktentwicklung (engine/src/produkte.ts): 36 Artikeltypen, 28 Farben, 10 Materialien, Trendbericht, Sterne, Kapazität je Marke; neue HQ-Abteilung Produktentwicklung (Designstudio).
+- Schwierigkeit (engine/src/schwierigkeit.ts): leicht/mittel/schwer beim Spielstart; mittel = bisherige Kalibrierung exakt.
+- Grafik: Porträts (render/src/kit/portraet.js), Produktbilder (render/src/kit/produktbild.js), HQ-Etagen Vorstand/Designstudio/CRM-Leitstand, Marketing am Haus.
+- Prototyp: Startbildschirm, Karte wie Coffee Inc (Zoom-Grenze, Wischen mit Trägheit, Pinch), Panels Vorstand, Marketing, Produktentwicklung. Prüfung: alle Anzeigen gleich Engine, alle Klicktests grün. 82 Engine-Tests grün.
 
 ## Als Nächstes
 1. Prototyp auf dem iPhone (Expo/React Native mit three.js oder WebView), echte Bildrate messen.

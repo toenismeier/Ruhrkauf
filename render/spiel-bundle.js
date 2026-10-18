@@ -563,7 +563,7 @@
       lieferantenGeduld: -0.1,
       kvZiel: -4,
       ereignisse: 1.4,
-      versammlungSchwelle: -15e6
+      versammlungSchwelle: -17e6
     }
   };
   var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
@@ -7848,7 +7848,7 @@
   }
   function instandhaltung(s2, h) {
     const art = waehle(s2, [["Rolltreppen", 3e5, 7e5], ["Dachsanierung", 7e5, 16e5], ["Brandschutz", 5e5, 12e5], ["Klimaanlage", 4e5, 9e5]]);
-    const kosten = eur(zwischen(s2, art[1], art[2]));
+    const kosten = eur(zwischen(s2, art[1], art[2]) * schwierigkeit(s2).ereignisse);
     if (h.miete.netTyp === "triple") {
       neueEntscheidung(s2, {
         typ: "instandhaltung",
@@ -7902,13 +7902,13 @@
   function lieferantenEreignisse(s2) {
     for (const l of s2.lieferanten) {
       if (!l.aktiv) continue;
-      if (l.id === "hallberg" && (l.verspaetungen > 1.5 || s2.phase === "insolvenz") && chance(s2, l.fragilitaet * schwierigkeit(s2).ereignisse)) {
+      if (l.id === "hallberg" && (l.verspaetungen > 1.5 || s2.phase === "insolvenz") && chance(s2, l.fragilitaet)) {
         l.aktiv = false;
-        l.ausfallBis = s2.woche + 12;
+        l.ausfallBis = s2.woche + Math.max(4, Math.round(12 * schwierigkeit(s2).ereignisse));
         melde(s2, "presse", "Hallberg & S\xF6hne meldet Insolvenz an. \u201EEin gro\xDFer Kunde hat uns mitgerissen.\u201C");
         melde(s2, "warnung", "Herrenware von Hallberg f\xE4llt f\xFCr rund 12 Wochen aus, danach \xFCbernehmen andere Lieferanten.");
       }
-      if (l.id === "nordline" && !l.dtc && chance(s2, 3e-3 * schwierigkeit(s2).ereignisse)) {
+      if (l.id === "nordline" && !l.dtc && chance(s2, 3e-3)) {
         neueEntscheidung(s2, {
           typ: "nordline_dtc",
           frist: s2.woche + 4,
@@ -7919,12 +7919,12 @@
           daten: {}
         });
       }
-      if (l.id === "goldenthread" && chance(s2, 6e-3 * schwierigkeit(s2).ereignisse)) {
+      if (l.id === "goldenthread" && chance(s2, 6e-3)) {
         let verschoben = 0;
         const neu = [];
         for (const b of s2.bestellungen) {
           if ((b.gruppe === "damen" || b.gruppe === "kinder") && b.ankunft <= s2.woche + 6) {
-            const teil6 = eur(b.wert * 0.3);
+            const teil6 = eur(b.wert * Math.min(0.6, 0.3 * schwierigkeit(s2).ereignisse));
             b.wert -= teil6;
             verschoben += teil6;
             neu.push({ ...b, id: neueId(s2, "b"), wert: teil6, ankunft: b.ankunft + 6 });
@@ -7956,8 +7956,8 @@
       s2.makro.schockBis = void 0;
       s2.makro.schockStaerke = 0;
     }
-    if (s2.makro.schockBis === void 0 && chance(s2, 4e-3 * schwierigkeit(s2).ereignisse)) {
-      s2.makro.schockStaerke = zwischen(s2, 0.04, 0.08);
+    if (s2.makro.schockBis === void 0 && chance(s2, 4e-3)) {
+      s2.makro.schockStaerke = zwischen(s2, 0.04, 0.08) * schwierigkeit(s2).ereignisse;
       s2.makro.schockBis = w + ganzZwischen(s2, 26, 52);
       melde(s2, "presse", waehle(s2, ["Energiepreise explodieren, Konsumklima bricht ein.", "Rezession: Verbraucher halten sich zur\xFCck.", "Zollstreit dr\xFCckt auf die Kauflaune."]));
     }
@@ -7968,7 +7968,7 @@
     if (!s2.angebote.some((a) => a.status === "offen" && a.typ === "sportverkauf") && chance(s2, 6e-3)) sportVerkauf(s2);
     if (chance(s2, 0.02)) sonderposten(s2);
     for (const h of offeneHaeuser(s2)) {
-      if (chance(s2, 8e-4 * (1 + (100 - h.substanz) / 50) * schwierigkeit(s2).ereignisse)) instandhaltung(s2, h);
+      if (chance(s2, 8e-4 * (1 + (100 - h.substanz) / 50))) instandhaltung(s2, h);
       if (h.miete.bisWoche - 26 === w) mietende(s2, h);
       if (h.miete.keineVerlaengerung && h.miete.bisWoche - 10 === w) starteSchliessung(s2, h, { mietvertragEndetMit: true });
       if (h.miete.bisWoche === w && h.status === "offen") {
@@ -7984,11 +7984,11 @@
     lieferantenEreignisse(s2);
     const ausstieg = s2.tarifAusstiegSeit !== void 0 && w - s2.tarifAusstiegSeit < 26;
     const pStreik = (s2.stakeholder.betriebsrat < 25 ? 0.04 : 0) + (ausstieg ? 0.05 : 0);
-    if (pStreik > 0 && chance(s2, (kw(w) >= 47 ? pStreik * 2 : pStreik) * schwierigkeit(s2).ereignisse)) {
-      const betroffen = offeneHaeuser(s2).filter(() => zufall(s2) < 0.3);
+    if (pStreik > 0 && chance(s2, kw(w) >= 47 ? pStreik * 2 : pStreik)) {
+      const betroffen = offeneHaeuser(s2).filter(() => zufall(s2) < 0.3 * schwierigkeit(s2).ereignisse);
       const dauer = ganzZwischen(s2, 1, 2);
       for (const h of betroffen) h.streikBis = w + dauer;
-      s2.stakeholder.image = clamp(s2.stakeholder.image - 1, 0, 100);
+      s2.stakeholder.image = clamp(s2.stakeholder.image - schwierigkeit(s2).ereignisse, 0, 100);
       melde(s2, "presse", `Verdi ruft zum Streik auf: ${betroffen.length} H\xE4user betroffen.`);
     }
     if (chance(s2, 0.04)) melde(s2, "presse", waehle(s2, SATIRE));
