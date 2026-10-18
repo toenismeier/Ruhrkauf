@@ -18,6 +18,7 @@ import { STATUS_TITEL } from './kit/zustaende.js';
 import { geld, fmt } from './ui/format.js';
 import { quelle } from './ui/quelle.js';
 import { einkaufModul } from './ui/einkauf.js';
+import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -43,10 +44,8 @@ let offenesHaus = null, offenesHq = null;
 function groesse() { return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight]; }
 function kameraSetzen() {
   if (!scene) return;
-  const G = K.G;
-  if (G) { K.x = Math.min(Math.max(K.x, G.x0), G.x1); K.z = Math.min(Math.max(K.z, G.z0), G.z1); }
-  K.halb = Math.min(Math.max(K.halb, K.min), K.max);
   const [w, h] = groesse();
+  klemmen(K, w / h);
   ren.setSize(w, h, false);
   cam = isoKamera(w, h, K.halb, new THREE.Vector3(K.x, 0, K.z));
   cam.updateMatrixWorld();
@@ -120,44 +119,8 @@ function tippPunkt(id) {
   return null;
 }
 
-// Verschieben (ein Finger/Maus), Zoomen (zwei Finger, Mausrad), Antippen
-const zeiger = new Map();
-let start = null, pinch = null, bewegt = 0;
-canvas.addEventListener('pointerdown', (e) => {
-  canvas.setPointerCapture(e.pointerId);
-  zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  bewegt = zeiger.size > 1 ? 99 : 0;
-  if (zeiger.size === 1) start = { p: aufBoden(e.clientX, e.clientY), x: e.clientX, y: e.clientY };
-  if (zeiger.size === 2) { const [a, b] = [...zeiger.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), halb: K.halb }; }
-});
-canvas.addEventListener('pointermove', (e) => {
-  if (!zeiger.has(e.pointerId)) return;
-  zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (zeiger.size === 2 && pinch) {
-    const [a, b] = [...zeiger.values()];
-    K.halb = pinch.halb * pinch.d / Math.max(10, Math.hypot(a.x - b.x, a.y - b.y));
-    kameraSetzen();
-    return;
-  }
-  if (!start?.p) return;
-  bewegt = Math.max(bewegt, Math.hypot(e.clientX - start.x, e.clientY - start.y));
-  const p = aufBoden(e.clientX, e.clientY);
-  if (!p) return;
-  K.x += start.p.x - p.x; K.z += start.p.z - p.z;
-  kameraSetzen();
-});
-const loslassen = (e) => {
-  if (!zeiger.has(e.pointerId)) return;
-  zeiger.delete(e.pointerId);
-  if (zeiger.size < 2) pinch = null;
-  if (zeiger.size === 0) {
-    if (bewegt < 6 && start) { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id) oeffneHaus(id); }
-    start = null;
-  } else { const [a] = [...zeiger.values()]; start = { p: aufBoden(a.x, a.y), x: a.x, y: a.y }; }
-};
-canvas.addEventListener('pointerup', loslassen);
-canvas.addEventListener('pointercancel', loslassen);
-canvas.addEventListener('wheel', (e) => { e.preventDefault(); K.halb *= Math.exp(e.deltaY * 0.0015); kameraSetzen(); }, { passive: false });
+// Verschieben, Wischen mit Trägheit, Pinch-Zoom, Mausrad, Antippen (ui/karte.js)
+const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id) oeffneHaus(id); } });
 window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
@@ -213,7 +176,7 @@ function baueStadtAusSpiel(name) {
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
   const nm = nahMitte(plan, 'einkauf', 62);
   K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
-  K.max = Math.max(120, Math.min(plan.breite, plan.tiefe) * 0.45);
+  K._G = null;
   kameraSetzen();
   kachelnSichtbarBauen();
   const ms = Math.round(performance.now() - t0);
@@ -633,6 +596,28 @@ window.spiel = { neuesSpiel, oeffneEinkauf, hausEtage: (id, nr) => window.hausKl
     return { woche: s.woche, kw: c.kw, jahr: c.jahr, cockpit: c, hq: typeof E.hqUebersicht === 'function' ? { kostenWoche: E.hqUebersicht(s).kostenWoche, fte: E.hqUebersicht(s).fte } : null, fehler };
   },
   teileStand: () => teileStand(), kachelInfo: () => KA.liste.filter((k) => k.stufe !== 'voll' && sichtbar(k, 1.0)).map((k) => `${k.key}:${k.parz.length}`).join(' '), kachelnRuhig: () => !KA.laeuft,
+  karte: {
+    /** Messwerte der Kartengrenze: Zoomgrenzen, Bildbreite, Anteil an der Stadtbreite, Bildecken gegen G plus Gürtel. */
+    messen: () => {
+      const [w, h] = groesse(), a = w / h, G = K.G, E = erweitert(G), ecken = bildecken(K, a);
+      const drin = ecken.every((p) => p.x >= E.x0 - 0.01 && p.x <= E.x1 + 0.01 && p.z >= E.z0 - 0.01 && p.z <= E.z1 + 0.01);
+      const bildbreite = 2 * K.halb * a;
+      return { stadt: stadtName, G, E, halb: K.halb, min: K.min, max: K.max, zoom: K.zoom, mitte: { x: K.x, z: K.z }, mitteInG: K.x >= G.x0 && K.x <= G.x1 && K.z >= G.z0 && K.z <= G.z1, bildbreite, anteilBreite: bildbreite / (G.x1 - G.x0), anteilProjiziert: bildbreite / ((G.x1 - G.x0 + G.z1 - G.z0) / Math.SQRT2), ecken, eckenInE: drin };
+    },
+    /** Hintergrund magenta, rendern, Pixel zählen, die kein Boden decken (Kartenrand sichtbar). */
+    randPixel: () => {
+      const alt = scene.background; scene.background = new THREE.Color('#ff00ff');
+      ren.render(scene, cam);
+      const c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height;
+      const g = c.getContext('2d'); g.drawImage(canvas, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i] > 235 && d[i + 1] < 25 && d[i + 2] > 235) n++;
+      scene.background = alt; ren.render(scene, cam);
+      return { randPixel: n, pixel: c.width * c.height };
+    },
+    get laeuft() { return steuerung.laeuft; },
+  },
   kamera: (o) => { Object.assign(K, o); kameraSetzen(); }, tippPunkt, fokusHaeuser, THREE, get K() { return K; }, get sb() { return sb; }, E };
 setTimeout(() => {
   const stadt = param.get('stadt') ?? 'Essen';

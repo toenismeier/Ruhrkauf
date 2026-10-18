@@ -12,10 +12,21 @@ const fs = require('fs');
 const path = require('path');
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : d; };
 
+// Porträts und Produktbilder (src/kit/portraet.js, src/kit/produktbild.js) baut ein anderer Agent; solange eine Datei fehlt,
+// bündeln wir einen leeren Ersatz, die Oberfläche zeigt dann Platzhalter (typeof-Prüfung in den Panels).
+const ERSATZ = { 'portraet.js': 'export const ERSATZ = true;', 'produktbild.js': 'export const ERSATZ = true;' };
+const ersatzPlugin = { name: 'kit-ersatz', setup(b) {
+  b.onResolve({ filter: /kit\/(portraet|produktbild)\.js$/ }, (a) => {
+    const f = path.resolve(a.resolveDir, a.path);
+    return fs.existsSync(f) ? { path: f } : { path: path.basename(f), namespace: 'ersatz' };
+  });
+  b.onLoad({ filter: /.*/, namespace: 'ersatz' }, (a) => ({ contents: ERSATZ[a.path], loader: 'js' }));
+} };
+
 async function buendeln() {
   await esbuild.build({
     entryPoints: [path.join(__dirname, 'src', 'spiel.js')], bundle: true, outfile: path.join(__dirname, 'spiel-bundle.js'),
-    loader: { '.json': 'json' }, logLevel: 'error', format: 'iife', target: 'es2020',
+    loader: { '.json': 'json' }, logLevel: 'error', format: 'iife', target: 'es2020', plugins: [ersatzPlugin],
     // scripts/bot.ts prüft require.main === module (nur für den Aufruf in Node)
     define: { 'require.main': 'null', module: 'undefined' },
   });
@@ -173,6 +184,95 @@ async function buendeln() {
     console.log(`Einkauf: ${erg.pruefungen.reduce((x, q) => x + q.werte, 0)} Werte geprüft, ${erg.abweichungen} Abweichungen, ${erg.aktionen.filter((x) => x.ok).length}/${erg.aktionen.length} Aktionen ok`);
     return erg;
   }
+  // ─────────────────────────────────────────── Karte: Zoomgrenze, Ränder, Gesten
+  async function kartePruefen() {
+    const erg = { staedte: [], gesten: [], fehler: [] };
+    const ok = (name, bed, info) => { erg.gesten.push({ name, ok: bed, info }); console.log(`${bed ? 'OK ' : 'FEHLER'} ${name}: ${info}`); if (!bed) erg.fehler.push(name); };
+    const sichtbarEcke = (m, p, a) => { const x = p.x - m.mitte.x, z = p.z - m.mitte.z, r = (x - z) / Math.SQRT2, v = -(x + z) / (2 * Math.SQRT2); return Math.abs(r) <= m.halb * a + 0.5 && Math.abs(v) <= m.halb + 0.5; };
+    const a = 390 / 844;
+    for (const st of ['Essen', 'Karlsruhe', 'Berlin', 'Gelsenkirchen']) {
+      const da = await p.evaluate((st) => { try { window.spiel.stadt(st); window.spiel.schliessePanel(); return true; } catch (e) { return false; } }, st);
+      if (!da) continue;
+      const G = (await p.evaluate(() => window.spiel.karte.messen())).G;
+      const eintrag = { stadt: st, raender: {} };
+      // ganz herausgezoomt in der Mitte
+      await p.evaluate(({ G }) => window.spiel.kamera({ halb: 1e5, x: (G.x0 + G.x1) / 2, z: (G.z0 + G.z1) / 2 }), { G });
+      const m0 = await p.evaluate(() => window.spiel.karte.messen());
+      const r0 = await p.evaluate(() => window.spiel.karte.randPixel());
+      Object.assign(eintrag, { max: Math.round(m0.max), halb3: Math.round(m0.zoom.halb3), halbReich: Math.round(m0.zoom.halbReich), bindend: m0.zoom.bindend, bildbreiteM: Math.round(m0.bildbreite), planbreiteM: G.x1 - G.x0, anteilBreite: +m0.anteilBreite.toFixed(3), anteilProjiziert: +m0.anteilProjiziert.toFixed(3), randPixelMitte: r0.randPixel });
+      if (st === 'Essen') await bild('karte-zoom-min.png');
+      // vier Ränder: ganz heraus und so weit wie möglich nach links, rechts, oben, unten schieben
+      const RICHTUNG = { links: [-1, 1], rechts: [1, -1], oben: [-1, -1], unten: [1, 1] };
+      const ecken = [{ x: G.x0, z: G.z0, n: 'x0z0' }, { x: G.x1, z: G.z0, n: 'x1z0' }, { x: G.x0, z: G.z1, n: 'x0z1' }, { x: G.x1, z: G.z1, n: 'x1z1' }];
+      const gesehen = new Set();
+      for (const [rand, [dx, dz]] of Object.entries(RICHTUNG)) {
+        await p.evaluate(({ dx, dz }) => window.spiel.kamera({ halb: 1e5, x: dx * 1e5, z: dz * 1e5 }), { dx, dz });
+        const m = await p.evaluate(() => window.spiel.karte.messen());
+        const r = await p.evaluate(() => window.spiel.karte.randPixel());
+        for (const e of ecken) if (sichtbarEcke(m, e, a)) gesehen.add(e.n);
+        eintrag.raender[rand] = { mitte: { x: Math.round(m.mitte.x), z: Math.round(m.mitte.z) }, mitteInG: m.mitteInG, eckenInE: m.eckenInE, randPixel: r.randPixel };
+        if (st === 'Essen') await bild(`karte-rand-${rand}.png`);
+      }
+      // Ecken der Stadt bei weitestem Zoom: in jede Ecke schieben
+      for (const e of ecken) {
+        await p.evaluate((e) => window.spiel.kamera({ halb: 1e5, x: e.x, z: e.z }), e);
+        const m = await p.evaluate(() => window.spiel.karte.messen());
+        if (sichtbarEcke(m, e, a)) gesehen.add(e.n);
+      }
+      eintrag.eckenErreicht = `${gesehen.size}/4`;
+      erg.staedte.push(eintrag);
+      const rp = Object.values(eintrag.raender).reduce((x, q) => x + q.randPixel, 0) + eintrag.randPixelMitte;
+      ok(`${st} Grenze`, rp === 0 && Object.values(eintrag.raender).every((q) => q.eckenInE && q.mitteInG) && gesehen.size === 4, `max halb ${eintrag.max} (${eintrag.bindend}), Bildbreite ${eintrag.bildbreiteM} m = ${(eintrag.anteilBreite * 100).toFixed(1)} % der Stadtbreite ${eintrag.planbreiteM} m, Randpixel ${rp}, Ecken ${eintrag.eckenErreicht}`);
+    }
+    // Gesten in Essen über CDP-Touch (erzeugt echte Pointer-Events)
+    await p.evaluate(() => { window.spiel.stadt('Essen'); window.spiel.schliessePanel(); });
+    const cdp = await p.context().newCDPSession(p);
+    const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i })) });
+    const K = () => p.evaluate(() => ({ x: window.spiel.K.x, z: window.spiel.K.z, halb: window.spiel.K.halb }));
+    await p.evaluate(() => window.spiel.kamera({ halb: 120 }));
+    // Wischen nach links mit Schwung
+    let k0 = await K();
+    await touch('touchStart', [[300, 500]]);
+    for (let i = 1; i <= 8; i++) { await touch('touchMove', [[300 - i * 25, 500]]); await p.waitForTimeout(12); }
+    await touch('touchEnd', []);
+    const k1 = await K();
+    await p.waitForTimeout(700);
+    const k2 = await K();
+    const zug = Math.hypot(k1.x - k0.x, k1.z - k0.z), nach = Math.hypot(k2.x - k1.x, k2.z - k1.z);
+    ok('Wischen verschiebt die Karte', zug > 50, `${zug.toFixed(0)} m beim Ziehen über 200 px`);
+    ok('Trägheit nach dem Loslassen', nach > 10, `${nach.toFixed(0)} m Nachlauf`);
+    ok('Wischen nach links bewegt die Mitte nach rechts im Bild', (k1.x - k0.x) - (k1.z - k0.z) > 0, `dx ${(k1.x - k0.x).toFixed(0)}, dz ${(k1.z - k0.z).toFixed(0)}`);
+    // Pinch auseinander: hineinzoomen
+    k0 = await K();
+    await touch('touchStart', [[150, 420], [240, 420]]);
+    for (let i = 1; i <= 6; i++) { await touch('touchMove', [[150 - i * 15, 420], [240 + i * 15, 420]]); await p.waitForTimeout(12); }
+    await touch('touchEnd', []);
+    k1 = await K();
+    ok('Pinch zoomt hinein', k1.halb < k0.halb * 0.6, `halb ${k0.halb.toFixed(0)} → ${k1.halb.toFixed(0)}`);
+    // Pinch zusammen bis zur Grenze
+    for (let n = 0; n < 4; n++) {
+      await touch('touchStart', [[60, 420], [330, 420]]);
+      for (let i = 1; i <= 6; i++) { await touch('touchMove', [[60 + i * 20, 420], [330 - i * 20, 420]]); await p.waitForTimeout(10); }
+      await touch('touchEnd', []);
+    }
+    const mz = await p.evaluate(() => window.spiel.karte.messen());
+    ok('Pinch zusammen endet am weitesten Zoom', Math.abs(mz.halb - mz.max) < 0.01 && mz.eckenInE, `halb ${mz.halb.toFixed(0)} = max ${mz.max.toFixed(0)}`);
+    // Mausrad
+    k0 = await K();
+    await p.mouse.move(195, 420);
+    await p.mouse.wheel(0, -400);
+    await p.waitForTimeout(100);
+    k1 = await K();
+    ok('Mausrad zoomt', k1.halb < k0.halb, `halb ${k0.halb.toFixed(0)} → ${k1.halb.toFixed(0)}`);
+    await p.evaluate(() => window.spiel.kamera({ halb: 1 }));
+    const mn = await p.evaluate(() => window.spiel.karte.messen());
+    ok('Zoom nach innen begrenzt', mn.halb === mn.min, `min halb ${mn.min}`);
+    await cdp.detach();
+    fs.writeFileSync(path.join(__dirname, 'out', 'karte-pruefung.json'), JSON.stringify(erg, null, 1));
+    console.log('Karte:', JSON.stringify(erg.staedte));
+    return erg;
+  }
+  if (process.argv.includes('--nur-karte')) { await kartePruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-einkauf')) { await einkaufPruefen(); await b.close(); return; }
   // Kamera auf die Hartwig-Häuser der Stadt
   const fokus = () => p.evaluate(() => window.spiel.fokusHaeuser());
