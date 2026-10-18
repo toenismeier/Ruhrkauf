@@ -14,14 +14,13 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
-  // Bei Updates online bleiben; nur offline auf den letzten geladenen Stand zurueckfallen.
-  const netzZuerst = url.pathname.endsWith('/spiel.html') || url.pathname.endsWith('/');
-  if (netzZuerst) {
-    event.respondWith(fetch(event.request).then((antwort) => {
-      if (antwort.ok) { const kopie = antwort.clone(); caches.open(CACHE).then((cache) => cache.put(event.request, kopie)); }
-      return antwort;
-    }).catch(() => caches.match(event.request)));
-  } else {
-    event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
-  }
+  // Alle Shell-Dateien bei Netzverbindung aktualisieren, offline aus Cache laden.
+  // Das vermeidet veraltete Bundles bei gleichem Service-Worker-Cache-Namen.
+  event.respondWith(fetch(event.request).then((antwort) => {
+    if (antwort.ok) {
+      const kopie = antwort.clone();
+      caches.open(CACHE).then((cache) => cache.put(event.request, kopie));
+    }
+    return antwort;
+  }).catch(() => caches.match(event.request)));
 });
