@@ -1496,7 +1496,7 @@ function abteilungsZone(S, scene, Z, T, G, r, figuren, g) {
   for (const s of sp.filter((q) => q.art !== 'frei').slice(0, Math.max(1, n - 1))) liste.push(s);
   if (st === 3) { liste.push({ art: 'frei', w: 2.6, d: 1.3, bau: telefonboxen }); liste.push({ art: 'frei', w: 4.2, d: 3.0, bau: lounge }); }
   const rang = { raum: 0, wand: 1, frei: 2 };
-  liste.sort((p, q) => rang[p.art] - rang[q.art]);
+  liste.sort((p, q) => rang[p.art] - rang[q.art] || (q.vorrang ? 1 : 0) - (p.vorrang ? 1 : 0));
   for (const s of liste) {
     const pos = G.suche(B, s.w, s.d, s.art === 'wand' ? 0.3 : 0.6, { nurHinten: s.art === 'wand' });
     if (!pos) continue;
@@ -1858,23 +1858,23 @@ SPEZIAL.produkt = [
     L.zyl(0.2, 0.2, 0.05, -0.8, 0.62, 1.05, farbe, 10); L.zyl(0.03, 0.03, 0.62, -0.8, 0, 1.05, '#5a636b', 6);
     figur(S, x + w / 2 + 0.2, z + d / 2 + 0.75, Math.floor(r() * 1e4), 'kunde', { ry: PI, pose: 'schauen' });
   } },
-  { art: 'raum', w: 4.6, d: 3.8, bau(S, sc, x, z, w, d, st, r, farbe) {
+  { art: 'raum', w: 4.2, d: 3.4, vorrang: true, bau(S, sc, x, z, w, d, st, r, farbe) {
     // Anprobe: Schneiderpuppen in Prototypen, Spiegel, Stange mit Mustern
     glasraum(S, sc, x, z, w, d, '#3a4048', (L) => {
       L.box(w - 0.6, 0.02, d - 0.6, 0, 0, 0, '#e6dccb');
-      for (let k = 0; k < 3; k++) schneiderpuppe(L, -1.3 + k * 1.1, -0.2, r, waehle(r, STOFFE), 0.2);
+      for (let k = 0; k < 3; k++) schneiderpuppe(L, -1.2 + k * 0.95, -0.2, r, waehle(r, STOFFE), 0.2);
       L.box(0.9, 1.9, 0.06, w / 2 - 0.7, 0.1, -d / 2 + 0.35, '#c9d9e0'); L.box(1.0, 2.0, 0.04, w / 2 - 0.7, 0.05, -d / 2 + 0.3, '#3a2a20');
-      L.box(2.6, 0.04, 0.04, -0.4, 1.7, -d / 2 + 0.45, '#9aa3aa');
-      for (let u = -1.6; u < 0.8; u += 0.16) L.box(0.05, zw(r, 0.6, 0.95), 0.36, u, 1.66 - 0.8, -d / 2 + 0.45, waehle(r, STOFFE));
+      L.box(2.4, 0.04, 0.04, -0.4, 1.7, -d / 2 + 0.45, '#9aa3aa');
+      for (let u = -1.5; u < 0.7; u += 0.16) L.box(0.05, zw(r, 0.6, 0.95), 0.36, u, 1.66 - 0.8, -d / 2 + 0.45, waehle(r, STOFFE));
       figur(S, x + w / 2 + 0.8, z + d / 2 + 0.8, Math.floor(r() * 1e4), 'kunde', { ry: PI + 0.4, pose: 'schauen' });
     }, { name: 'Anprobe', farbe });
   } },
-  { art: 'wand', w: 3.6, d: 0.4, bau(S, sc, x, z, w, d, st, r) {
+  { art: 'wand', w: 3.0, d: 0.4, vorrang: true, bau(S, sc, x, z, w, d, st, r) {
     // Farbkarten der Saison: Spalten von hell nach dunkel
     const L = lokal(S, x + w / 2, 0.06, z + 0.12, 0);
     L.box(w, 1.8, 0.05, 0, 0.6, 0, '#f6f4ef');
     const basis = ['#a8dcc4', '#26355e', '#76263a', '#d8c39c', '#cc9f2e', '#ec7a6a', '#c4b0dc'];
-    basis.forEach((c, i) => { for (let j = 0; j < 6; j++) L.box(0.4, 0.22, 0.02, -w / 2 + 0.35 + i * 0.49, 0.72 + j * 0.27, 0.035, j < 3 ? heller(c, (3 - j) * 0.12) : dunkler(c, (j - 3) * 0.12)); });
+    basis.forEach((c, i) => { for (let j = 0; j < 6; j++) L.box(0.34, 0.22, 0.02, -w / 2 + 0.3 + i * 0.4, 0.72 + j * 0.27, 0.035, j < 3 ? heller(c, (3 - j) * 0.12) : dunkler(c, (j - 3) * 0.12)); });
     text(L, 'Farbkarten Saison', 0, 2.55, 0.05, 0.22, '#ffffff', ABTEILUNGEN.produkt.farbe);
   } },
 ];
@@ -1923,5 +1923,5 @@ SIGNATUR.marketing.unshift({ w: 5.0, d: 2.8, einmal: true, bau(S, sc, x, z, w, d
   const T2 = L.sub(0, 1.5); T2.box(4.0, 0.05, 0.8, 0, 0.72, 0, '#2a2d31'); T2.box(3.8, 0.72, 0.05, 0, 0, -0.35, '#3a3f45');
   for (let k = -1; k <= 1; k++) { monitor(T2.sub(k * 1.25, -0.15), 0, 0, 2, r, '#f2c6d2'); buerostuhl(T2, k * 1.25, 0.7, PI, Math.max(1, st), farbe); }
   for (let k = -1; k <= 1; k += 2) figur(S, x + w / 2 + k * 1.25, z + 0.4 + 1.5 + 0.7, Math.floor(r() * 1e4), 'kunde', { pose: 'sitzen', ry: PI });
-  if (sc) haengeschild(S, sc, 'CRM-Leitstand', x + w / 2, WH - 0.7, z + 1.2, { farbe, hoehe: 0.5 });
+  L.box(4.6, 0.36, 0.08, 0, 2.86, 0, farbe); text(L, 'CRM-Leitstand', 0, 2.88, 0.05, 0.26, '#ffffff', farbe);
 } });

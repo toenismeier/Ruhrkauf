@@ -75,6 +75,7 @@ async function buendeln() {
     const badge = await ev(() => ({ text: document.getElementById('ekbadge').textContent, sichtbar: document.getElementById('ekbadge').style.display !== 'none', soll: window.spiel.E.freigaben(window.spiel.s).anzahl }));
     pruefSoll('Badge am Knopf Einkauf', badge.sichtbar && Number(badge.text) === badge.soll, `${badge.text} offene Freigaben`);
     // Übersicht: Knopf antippen, Bereich Damen ist offen, Spalte Reichweite wählen, nach Reichweite sortieren
+    await tippe('#menueknopf');
     await tippe('#einkauf');
     await tippe('.chipk', 'Reichweite');
     await tippe('.lkopf button', 'Reichweite');
@@ -193,6 +194,7 @@ async function buendeln() {
     for (const st of ['Essen', 'Karlsruhe', 'Berlin', 'Gelsenkirchen']) {
       const da = await p.evaluate((st) => { try { window.spiel.stadt(st); window.spiel.schliessePanel(); return true; } catch (e) { return false; } }, st);
       if (!da) continue;
+      await p.evaluate((an) => window.spiel.kachelnPause(an), st !== 'Essen');
       const G = (await p.evaluate(() => window.spiel.karte.messen())).G;
       const eintrag = { stadt: st, raender: {} };
       // ganz herausgezoomt in der Mitte
@@ -225,7 +227,7 @@ async function buendeln() {
       ok(`${st} Grenze`, rp === 0 && Object.values(eintrag.raender).every((q) => q.eckenInE && q.mitteInG) && gesehen.size === 4, `max halb ${eintrag.max} (${eintrag.bindend}), Bildbreite ${eintrag.bildbreiteM} m = ${(eintrag.anteilBreite * 100).toFixed(1)} % der Stadtbreite ${eintrag.planbreiteM} m, Randpixel ${rp}, Ecken ${eintrag.eckenErreicht}`);
     }
     // Gesten in Essen über CDP-Touch (erzeugt echte Pointer-Events)
-    await p.evaluate(() => { window.spiel.stadt('Essen'); window.spiel.schliessePanel(); });
+    await p.evaluate(() => { window.spiel.kachelnPause(true); window.spiel.stadt('Essen'); window.spiel.schliessePanel(); });
     const cdp = await p.context().newCDPSession(p);
     const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i })) });
     const K = () => p.evaluate(() => ({ x: window.spiel.K.x, z: window.spiel.K.z, halb: window.spiel.K.halb }));
@@ -268,10 +270,193 @@ async function buendeln() {
     const mn = await p.evaluate(() => window.spiel.karte.messen());
     ok('Zoom nach innen begrenzt', mn.halb === mn.min, `min halb ${mn.min}`);
     await cdp.detach();
+    await p.evaluate(() => window.spiel.kachelnPause(false));
     fs.writeFileSync(path.join(__dirname, 'out', 'karte-pruefung.json'), JSON.stringify(erg, null, 1));
     console.log('Karte:', JSON.stringify(erg.staedte));
     return erg;
   }
+  // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung
+  async function panelsPruefen() {
+    const erg = { pruefungen: [], aktionen: [], fehler: [] };
+    const ev = (f, a) => p.evaluate(f, a);
+    const tippe = async (sel, text) => {
+      const h = await p.evaluateHandle(({ sel, text }) => [...document.querySelectorAll(sel)].find((e) => !e.disabled && (!text || e.textContent.trim().startsWith(text))) ?? null, { sel, text });
+      const el = h.asElement();
+      if (!el) { erg.fehler.push(`nicht gefunden: ${sel} ${text ?? ''}`); console.log(`FEHLER nicht gefunden: ${sel} ${text ?? ''}`); return false; }
+      await el.scrollIntoViewIfNeeded();
+      await el.tap();
+      await p.waitForTimeout(120);
+      return true;
+    };
+    const pruef = async (modul, wann) => { const r = await ev((m) => window.spiel[m].pruefe(), modul); erg.pruefungen.push({ modul, wann, ...r }); console.log(`${modul} ${wann}: ${r.werte} Werte, ${r.fehler.length ? 'FEHLER ' + r.fehler.slice(0, 4).join('; ') : '0 Abweichungen'}`); };
+    const soll = (name, ok, info) => { erg.aktionen.push({ name, ok, info }); console.log(`${ok ? 'OK ' : 'FEHLER'} ${name}: ${info}`); if (!ok) erg.fehler.push(name); };
+    const oben = () => ev(() => { document.getElementById('pinhalt').scrollTop = 0; document.getElementById('meldung').className = ''; });
+    const zu = async (sel) => { await ev((sel) => { const k = document.querySelector(sel), pi = document.getElementById('pinhalt'); if (k) pi.scrollTop += k.getBoundingClientRect().top - pi.getBoundingClientRect().top - 8; document.getElementById('meldung').className = ''; }, sel); };
+    const meld = () => ev(() => document.getElementById('meldung').textContent);
+    await ev(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); for (let i = 0; i < 8; i++) window.spiel.woche(false); window.spiel.fokusHaeuser(); });
+    // Menü
+    await tippe('#menueknopf');
+    await bild('menue.png');
+    // ── Vorstand: Übersicht
+    await tippe('#vorstand');
+    await pruef('vorstand', 'Übersicht');
+    await oben();
+    await bild('vorstand.png');
+    const besetzt = await ev(() => window.spiel.E.vorstandUebersicht(window.spiel.s).ressorts.map((r) => ({ id: r.id, besetzt: r.besetzt })));
+    soll('Vorstand: Start mit unbesetztem CRO und CDO', besetzt.filter((r) => !r.besetzt).map((r) => r.id).sort().join(',') === 'cdo,cro', besetzt.filter((r) => !r.besetzt).map((r) => r.id).join(', '));
+    // Profil CPO: Delegation, Gehalt, Erfolgsbonus
+    await tippe('.vkarte[data-v=cpo]');
+    await pruef('vorstand', 'Profil CPO');
+    const vor = await ev(() => window.spiel.E.vorstandProfil(window.spiel.s, 'cpo'));
+    await tippe('.schalter[data-v=produktentwicklung]');
+    await tippe('[data-a=gehalt][data-v="1"]');
+    await tippe('[data-a=erfolgsbonus][data-v="0.2"]');
+    const nach = await ev(() => window.spiel.E.vorstandProfil(window.spiel.s, 'cpo'));
+    soll('Delegation Produktentwicklung umschalten', nach.delegationen.find((d) => d.id === 'produktentwicklung').an !== vor.delegationen.find((d) => d.id === 'produktentwicklung').an, `an: ${nach.delegationen.find((d) => d.id === 'produktentwicklung').an}`);
+    soll('Gehalt +', nach.person.gehalt === vor.person.gehalt + vor.gehaltsSchritt, `${vor.person.gehalt} → ${nach.person.gehalt}`);
+    soll('Erfolgsbonus 20 %', nach.person.erfolgsbonus === 0.2, `${nach.person.erfolgsbonus}`);
+    await pruef('vorstand', 'Profil CPO nach Aktionen');
+    await oben();
+    await bild('vorstand-profil.png');
+    // Einstellen CRO: Karussell, Angebot, Annahmechance
+    await tippe('.zurueck');
+    await tippe('.vkarte[data-v=cro]');
+    await tippe('[data-a=einstellen]');
+    await tippe('.punkte button[data-v="1"]');
+    await tippe('[data-a=angebotGehalt][data-v="1"]');
+    await tippe('[data-a=angebotGehalt][data-v="1"]');
+    await tippe('[data-a=angebotHalte][data-v="0.25"]');
+    await pruef('vorstand', 'Einstellen CRO');
+    const ang = await ev(() => { const v = window.spiel.vorstand.ui, A = v.angebot, L = window.spiel.E.kandidaten(window.spiel.s, 'cro'), k = L.kandidaten.find((x) => x.id === A.id); return { A, k: { name: k.name, forderung: k.gehaltsforderung }, idx: v.k, chance: window.spiel.E.angebotsChance(window.spiel.s, 'cro', A.id, A.gehalt, Math.round(A.gehalt * A.halte), A.erfolg), angezeigt: document.querySelector('[data-p="a:chance"]').textContent, karussell: Math.round(document.querySelector('.karussell').scrollLeft) }; });
+    soll('Karussell auf Kandidat 2', ang.idx === 1 && ang.karussell > 100, `Index ${ang.idx}, scrollLeft ${ang.karussell}`);
+    soll('Angebot über Forderung', ang.A.gehalt === ang.k.forderung + 20000, `${ang.k.name}: ${ang.A.gehalt} bei Forderung ${ang.k.forderung}, Chance ${ang.angezeigt}`);
+    await ev(() => { const k = document.querySelector('.karussell'), pi = document.getElementById('pinhalt'); pi.scrollTop += k.getBoundingClientRect().top - pi.getBoundingClientRect().top - 60; document.getElementById('meldung').className = ''; });
+    await bild('vorstand-einstellen.png');
+    await tippe('[data-a=anbieten]');
+    const nachAngebot = await ev((name) => { const r = window.spiel.E.vorstandUebersicht(window.spiel.s).ressorts.find((x) => x.id === 'cro'); return { besetzt: r.besetzt, name: r.person?.name, meldung: document.getElementById('meldung').textContent, gehalt: r.person?.gehalt }; }, ang.k.name);
+    soll('Angebot entschieden', nachAngebot.besetzt ? nachAngebot.name === ang.k.name && nachAngebot.gehalt === ang.A.gehalt : /lehnt ab/.test(nachAngebot.meldung), `${nachAngebot.meldung}`);
+    await pruef('vorstand', 'nach Angebot');
+    // ── Marketing
+    await ev(() => window.spiel.schliessePanel());
+    await tippe('#menueknopf');
+    await tippe('#marketing');
+    await pruef('marketing', 'Übersicht');
+    await oben();
+    await bild('marketing.png');
+    await tippe('.tab', 'Kanäle');
+    const kb0 = await ev(() => window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche);
+    await tippe('[data-a=kanalBudget][data-k=online][data-v="1"]');
+    const kb1 = await ev(() => window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche);
+    soll('Kanal Online +10 %', Math.abs(kb1 / kb0 - 1.1) < 0.01, `${kb0} → ${kb1} € je Woche`);
+    await pruef('marketing', 'Kanäle');
+    await tippe('.tab', 'Karte');
+    await tippe('[data-a=kartenrabatt][data-v="0.02"]');
+    const kr = await ev(() => window.spiel.E.kundenkarte(window.spiel.s).kartenrabatt);
+    soll('Kartenrabatt 2 %', kr === 0.02, `${kr}`);
+    await pruef('marketing', 'Karte und App');
+    await tippe('.tab', 'CRM');
+    const crm0 = await ev(() => window.spiel.E.crmKampagnen(window.spiel.s).kampagnen.length);
+    await ev(() => { const s = document.querySelector('[data-a=crmSeg]'); const i = window.spiel.E.crmKampagnen(window.spiel.s).segmente.findIndex((x) => x.segment.typ === 'inaktive'); s.value = String(i); s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await p.waitForTimeout(100);
+    await tippe('[data-a=crmProzent][data-v="0.2"]');
+    await tippe('[data-a=crmFrequenz][data-v=zweiwoechentlich]');
+    await pruef('marketing', 'CRM-Baukasten');
+    await oben();
+    await bild('marketing-crm.png');
+    await tippe('[data-a=crmStart]');
+    const crm1 = await ev(() => { const l = window.spiel.E.crmKampagnen(window.spiel.s).kampagnen; return { n: l.length, neu: l[l.length - 1] }; });
+    soll('CRM-Kampagne anlegen', crm1.n === crm0 + 1 && crm1.neu.segment.typ === 'inaktive' && crm1.neu.angebot.prozent === 0.2, `${crm1.neu.name}: ${crm1.neu.segmentText}, ${crm1.neu.angebotText}, ${crm1.neu.frequenzText}, ${crm1.neu.status}`);
+    await pruef('marketing', 'CRM nach Anlegen');
+    await tippe('.tab', 'Kalender');
+    const kal0 = await ev(() => window.spiel.E.aktionskalender(window.spiel.s).eintraege.length);
+    await tippe('[data-a=planen]');
+    await ev(() => { const s = document.querySelector('[data-a=planAnlass]'); s.value = 'jubilaeum'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await p.waitForTimeout(100);
+    await tippe('[data-a=planKw][data-v="-1"]');
+    await tippe('[data-a=planRabatt][data-v="0.2"]');
+    await tippe('[data-a=planFertig]');
+    const kal1 = await ev(() => { const K = window.spiel.E.aktionskalender(window.spiel.s); return { n: K.eintraege.length, neu: K.eintraege.filter((a) => !a.standard).pop(), m: document.getElementById('meldung').textContent }; });
+    soll('Aktion planen', kal1.n === kal0 + 1 && kal1.neu && kal1.neu.startKw === 38, `${kal1.neu?.name} KW ${kal1.neu?.startKw}, ${kal1.neu?.mechanikText} ${kal1.neu?.rabatt}, ${kal1.neu?.scopeText}: ${kal1.m}`);
+    const abs = await ev(() => window.spiel.E.aktionskalender(window.spiel.s).eintraege.find((a) => a.status === 'geplant' && a.standard)?.id);
+    if (abs) { await tippe(`.zeile[data-a=aktion][data-v="${abs}"]`); await tippe('[data-a=aktionAbsagen]'); }
+    const absSt = await ev((id) => window.spiel.E.aktionskalender(window.spiel.s).eintraege.find((a) => a.id === id)?.status, abs);
+    soll('Aktion absagen', absSt === 'abgesagt', `${abs}: ${absSt}`);
+    await pruef('marketing', 'Auswertung abgesagt');
+    await tippe('.zurueck');
+    await pruef('marketing', 'Kalender');
+    await oben();
+    await bild('marketing-kalender.png');
+    // ── Produkte
+    await ev(() => window.spiel.schliessePanel());
+    await tippe('#menueknopf');
+    await tippe('#produkte');
+    await pruef('produkte', 'Liste');
+    const pk = await ev(() => { const u = window.spiel.produkte.ui, L = window.spiel.E.produkte(window.spiel.s), M = L.marken.find((m) => m.marke === u.marke); const l = M.produkte.filter((x) => x.kategorie === u.kategorie && x.status !== 'ausgelistet'); return l[u.k]; });
+    if (pk && pk.status !== 'entwicklung') {
+      await tippe(`[data-a=preis][data-v="1"][data-p2="${pk.id}"]`);
+      const pk1 = await ev((id) => window.spiel.E.produkte(window.spiel.s).marken.flatMap((m) => m.produkte).find((x) => x.id === id), pk.id);
+      soll('Preis +', pk1.preis > pk.preis, `${pk.name}: ${pk.preis} → ${pk1.preis} €`);
+      await tippe(`.schalter[data-v="${pk.id}"]`);
+      const st1 = await ev((id) => window.spiel.E.produkte(window.spiel.s).marken.flatMap((m) => m.produkte).find((x) => x.id === id).status, pk.id);
+      await tippe(`.schalter[data-v="${pk.id}"]`);
+      const st2 = await ev((id) => window.spiel.E.produkte(window.spiel.s).marken.flatMap((m) => m.produkte).find((x) => x.id === id).status, pk.id);
+      soll('Sortiment aus und wieder an', st1 !== 'sortiment' && st2 === 'sortiment', `${pk.status} → ${st1} → ${st2}`);
+    } else soll('Produktkarte vorhanden', false, 'keine Produktkarte im Sortiment');
+    await tippe('.punkte button[data-v="1"]');
+    await pruef('produkte', 'Liste Karte 2');
+    await oben();
+    await bild('produkte.png');
+    await tippe('[data-a=neu]');
+    await tippe('.typkacheln button:nth-child(2)');
+    await tippe('[data-a=dauer][data-v="8"]');
+    await tippe('[data-a=budget][data-v="1"]');
+    await pruef('produkte', 'Neues Produkt');
+    await oben();
+    await bild('produkt-entwickeln.png');
+    const entwurf = await ev(() => ({ ...window.spiel.produkte.ui.neu, marke: window.spiel.produkte.ui.marke }));
+    const vors = await ev((e) => window.spiel.E.produktVorschau(window.spiel.s, e), entwurf);
+    const n0 = await ev(() => window.spiel.E.produkte(window.spiel.s).marken.reduce((a, m) => a + m.inEntwicklung, 0));
+    if (vors.ok) await tippe('[data-a=entwickeln]');
+    else { await ev(() => { document.querySelector('[data-a=entwickeln]').disabled = false; }); }
+    const n1 = await ev(() => window.spiel.E.produkte(window.spiel.s).marken.reduce((a, m) => a + m.inEntwicklung, 0));
+    soll('Entwicklung starten', vors.ok && n1 === n0 + 1, `${entwurf.typ} ${entwurf.farbe} ${entwurf.material}, ${entwurf.dauer} Wochen, ${entwurf.budgetWoche} € je Woche, Vorschau ${vors.sterneVon} bis ${vors.sterneBis} Sterne${vors.fehler ? ', ' + vors.fehler : ''}: ${await meld()}`);
+    await pruef('produkte', 'Liste nach Start');
+    await tippe('[data-a=trend]');
+    await pruef('produkte', 'Trendbericht');
+    // ── Folgewoche: Wirkung und Anzeige nach Woche weiter
+    await tippe('.zurueck');
+    const fw0 = await ev(() => { const s = window.spiel.s, E = window.spiel.E; const neu = E.produkte(s).marken.flatMap((m) => m.produkte).filter((x) => x.status === 'entwicklung').pop(); return { woche: s.woche, neu: neu && { id: neu.id, f: neu.fortschritt } }; });
+    await ev(() => window.spiel.woche(false));
+    await pruef('produkte', 'Folgewoche');
+    const fw = await ev(({ id }) => {
+      const s = window.spiel.s, E = window.spiel.E, cpo = E.vorstandProfil(s, 'cpo');
+      const c = E.crmKampagnen(s).kampagnen; const k = c[c.length - 1];
+      return { woche: s.woche, neu: E.produkte(s).marken.flatMap((m) => m.produkte).find((x) => x.id === id), cpo: { gehalt: cpo.person?.gehalt, bonus: cpo.person?.erfolgsbonus, del: cpo.delegationen.find((d) => d.id === 'produktentwicklung').an }, crm: { status: k.status, sendungen: k.summe.sendungen }, rabatt: E.kundenkarte(s).kartenrabatt, online: E.kanaele(s).kanaele.find((x) => x.id === 'online').quote };
+    }, { id: fw0.neu?.id });
+    soll('Folgewoche: Produkt entwickelt sich weiter', !!fw.neu && fw.neu.fortschritt > fw0.neu.f, `Woche ${fw0.woche} → ${fw.woche}, Fortschritt ${fw0.neu?.f} → ${fw.neu?.fortschritt}`);
+    soll('Folgewoche: Vorstand behält Gehalt, Bonus, Delegation', fw.cpo.gehalt === nach.person.gehalt && fw.cpo.bonus === 0.2 && fw.cpo.del === nach.delegationen.find((d) => d.id === 'produktentwicklung').an, JSON.stringify(fw.cpo));
+    soll('Folgewoche: CRM-Kampagne läuft', ['aktiv', 'geplant'].includes(fw.crm.status), `${fw.crm.status}, ${fw.crm.sendungen} Sendungen`);
+    soll('Folgewoche: Kartenrabatt bleibt', fw.rabatt === 0.02, String(fw.rabatt));
+    await ev(() => window.spiel.oeffneMarketing('crm'));
+    await pruef('marketing', 'CRM Folgewoche');
+    await ev(() => window.spiel.oeffneVorstand('uebersicht'));
+    await pruef('vorstand', 'Folgewoche');
+    // Mehr Wochen: Vorstandssitzung und Aktionsauswertung
+    await ev(() => { for (let i = 0; i < 14; i++) window.spiel.woche(false); });
+    await pruef('vorstand', 'nach Sitzung');
+    const sitz = await ev(() => { const u = window.spiel.E.vorstandUebersicht(window.spiel.s); return { letzte: u.letzteSitzung?.woche, offen: u.offeneEntscheidungen.length }; });
+    soll('Vorstandssitzung im Quartal', sitz.letzte !== undefined, `letzte Sitzung Woche ${sitz.letzte}, offene Entscheidungen ${sitz.offen}`);
+    if (sitz.offen) { await tippe('.entscheid [data-a=entscheiden]'); const o2 = await ev(() => window.spiel.E.vorstandUebersicht(window.spiel.s).offeneEntscheidungen.length); soll('Entscheidung der Sitzung', o2 === sitz.offen - 1, `${sitz.offen} → ${o2}: ${await meld()}`); await pruef('vorstand', 'nach Entscheidung'); }
+    const ausw = await ev(() => window.spiel.E.aktionskalender(window.spiel.s).eintraege.find((a) => a.ausgewertet)?.id);
+    if (ausw) { await ev((id) => window.spiel.oeffneMarketing('aktion', id), ausw); await pruef('marketing', 'Auswertung'); }
+    await ev(() => window.spiel.schliessePanel());
+    erg.abweichungen = erg.pruefungen.reduce((x, q) => x + q.fehler.length, 0);
+    erg.werte = erg.pruefungen.reduce((x, q) => x + q.werte, 0);
+    fs.writeFileSync(path.join(__dirname, 'out', 'panels-pruefung.json'), JSON.stringify(erg, null, 1));
+    console.log(`Panels: ${erg.werte} Werte geprüft, ${erg.abweichungen} Abweichungen, ${erg.aktionen.filter((x) => x.ok).length}/${erg.aktionen.length} Aktionen ok`);
+    return erg;
+  }
+  if (process.argv.includes('--nur-panels')) { await panelsPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-karte')) { await kartePruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-einkauf')) { await einkaufPruefen(); await b.close(); return; }
   // Kamera auf die Hartwig-Häuser der Stadt

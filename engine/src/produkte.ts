@@ -125,13 +125,13 @@ export const DAUER_STUFEN = [4, 8, 12, 24, 48] as const;
 
 export const PRODUKT_PARAM = {
   /** Kapazität je Marke und Produktkategorie nach wirksamer Stufe der Produktentwicklung 0..3. */
-  kapazitaet: [3, 4, 5, 6] as const,
+  kapazitaet: [3, 5, 6, 8] as const,
   /** Entwicklungsbudget, das ein Artikel je Aufwandspunkt bei Preislage mitte braucht (Sättigung). */
-  budgetBedarf: 90_000,
+  budgetBedarf: 60_000,
   /** Sterne verlieren nach einem Jahr im Sortiment bis zu 0,75 (über zwei weitere Jahre). */
   alterung: 0.75,
-  /** Nachfragegewicht eines Produkts: 0,7 + 0,12 × Sterne (2,5 Sterne = 1). */
-  gewichtBasis: 0.7, gewichtJeStern: 0.12,
+  /** Nachfragegewicht eines Produkts: 0,375 + 0,25 × Sterne (2,5 Sterne = 1, 5 Sterne = 1,6). */
+  gewichtBasis: 0.375, gewichtJeStern: 0.25,
   /** Preiselastizität des Umsatzes gegen den Normpreis. */
   preisElastizitaet: 1.1,
   /** Faktor auf die Markennachfrage je WG, begrenzt. */

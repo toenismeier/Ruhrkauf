@@ -149,7 +149,7 @@ export const VORSTAND_PARAM = {
   einarbeitungWochen: 12,
   loyalitaetTempo: 0.04,
   /** Basis-Wahrscheinlichkeit je Woche für ein Abwerbeangebot bei Loyalität 50. */
-  abwerbung: 0.004,
+  abwerbung: 0.002,
   kuendigungsfrist: 4,
   abfindungRegulaer: 1.0, // Jahresgehälter
   abfindungInsolvenz: 0.25,
@@ -210,9 +210,9 @@ function neueVid(s: GameState, p: string): string {
 const skill = (p: { fuehrung: number; fachwissen: number }): number => (p.fuehrung + p.fachwissen) / 200;
 
 /** Gehaltsforderung aus Fähigkeiten und Markt (in der Insolvenz mit Risikoaufschlag). */
-export function gehaltsforderung(s: GameState, r: RessortId, p: { fuehrung: number; fachwissen: number }): number {
+export function gehaltsforderung(s: GameState, r: RessortId, p: { fuehrung: number; fachwissen: number }, ohneRisiko = false): number {
   const f = 0.55 + 0.9 * skill(p);
-  const inso = s.phase === 'insolvenz' ? 1.1 : 1;
+  const inso = s.phase === 'insolvenz' && !ohneRisiko ? 1.1 : 1;
   return Math.round((RESSORT_INFO[r].markt * f * inso) / 5000) * 5000;
 }
 
@@ -350,7 +350,8 @@ function protokolliere(s: GameState, r: RessortId, text: string): void {
 }
 
 function loyalitaetsZiel(s: GameState, r: RessortId, p: VorstandPerson): number {
-  const ford = gehaltsforderung(s, r, p);
+  // Amtierende vergleichen mit dem Marktgehalt ohne Insolvenzaufschlag (der gilt nur für Neue)
+  const ford = gehaltsforderung(s, r, p, true);
   let z = 58 + 45 * (p.gehalt / ford - 1) + (p.gewachsen ? 12 : 0) + (s.stakeholder.image - 45) / 4 + 8 * Math.min(1, p.erfolgsbonus);
   if (p.halteBis !== undefined && p.halteBis > s.woche && p.haltebonus > 0) z += 10 + 10 * Math.min(1, p.haltebonus / p.gehalt);
   if (s.phase === 'insolvenz') z -= 12;
@@ -405,6 +406,7 @@ function vakant(s: GameState, r: RessortId): void {
   res.vakantSeit = s.woche;
   for (const k of Object.keys(res.delegation)) res.delegation[k] = false;
   erneuereKandidaten(s, r);
+  hqAktualisiere(s);
 }
 
 function abwerbung(s: GameState, r: RessortId, p: VorstandPerson): void {

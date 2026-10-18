@@ -177,6 +177,71 @@
   .lname i.em { font-size: 9.5px; font-weight: 800; color: #8c5a7a; background: #f3e8ef; border-radius: 5px; padding: 1px 4px; margin: 0 5px 0 0; vertical-align: 1px; }
   .vorschau .owerte { padding-top: 8px; }
   .haus3d img { display: block; width: 100%; background: #26313a; }
+  /* Menü wie Coffee Inc */
+  .knopf.rund { width: 46px; padding: 0; display: grid; place-items: center; flex: none; }
+  .knopf.rund.an { background: var(--text); color: #fff; }
+  .burger { display: flex; flex-direction: column; gap: 4px; } .burger i { display: block; width: 20px; height: 2.5px; border-radius: 2px; background: currentColor; }
+  .badge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  #menue { position: fixed; inset: 0; background: rgba(20, 30, 40, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 4; }
+  #menue.offen { opacity: 1; pointer-events: auto; }
+  .menuekarte { position: absolute; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; transform: translateY(12px); transition: transform 0.18s; }
+  #menue.offen .menuekarte { transform: none; }
+  .menuetitel { font-weight: 800; font-size: 15px; margin: 2px 4px 10px; }
+  .kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .mkachel { position: relative; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; min-height: 104px; padding: 10px 6px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text); text-align: center; }
+  .mkachel svg { color: var(--rot); margin-bottom: 2px; } .mkachel b { font-size: 13.5px; } .mkachel small { font-size: 10.5px; color: var(--leise); line-height: 1.25; }
+  .mkachel:active { background: #fdf3e6; }
+  .mkachel .badge { top: 6px; right: 6px; }
+  body.panel-offen .unten { display: none; }
+  /* Vorstand */
+  .vgitter { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .vkarte { position: relative; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 8px 8px 9px; display: grid; grid-template-columns: 56px 1fr; gap: 2px 8px; text-align: left; color: var(--text); min-height: 96px; align-items: start; }
+  .vkarte.leer { background: #faf9f6; border-style: dashed; }
+  .vbild { display: block; width: 56px; height: 64px; border-radius: 10px; overflow: hidden; background: #e9eef1; grid-row: span 2; }
+  .vbild svg { width: 100%; height: 100%; display: block; }
+  .vbild.gross { width: 112px; height: 124px; border-radius: 14px; flex: none; }
+  .vtext b { display: block; font-size: 14px; } .vtext small { display: block; font-size: 10.5px; color: var(--leise); line-height: 1.25; }
+  .vtext em { display: block; font-style: normal; font-size: 12.5px; font-weight: 700; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .vtext em.frei { color: var(--rot); }
+  .vmini { display: flex; flex-direction: column; gap: 3px; align-self: end; } .vmini span { display: block; height: 4px; background: #eeebe5; border-radius: 2px; overflow: hidden; } .vmini i { display: block; height: 100%; background: #5cb85c; }
+  .vkarte > .ampel { position: absolute; right: 8px; top: 9px; } .vkarte > .chip { align-self: end; justify-self: start; font-size: 11px; }
+  .vprofil .vkopf, .kandidat .vkopf { display: flex; gap: 14px; padding: 14px 14px 6px; align-items: flex-start; }
+  .vname { display: block; font-size: 19px; font-weight: 800; line-height: 1.2; } .vkopf small { display: block; color: var(--leise); font-size: 12px; margin-top: 2px; line-height: 1.35; }
+  .vseit { margin: 10px 0 6px; } .vseit span, .vtitel { display: block; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--leise); margin-top: 6px; } .vseit b { font-size: 14px; }
+  .faehigkeiten { padding: 4px 14px 8px; } .faehig { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: 12.5px; }
+  .faehig > span:first-child { width: 78px; color: var(--leise); text-align: right; } .faehig b { width: 26px; text-align: right; font-variant-numeric: tabular-nums; }
+  .fbalken { position: relative; flex: 1; height: 14px; background: #1f2a33; border-radius: 7px; overflow: hidden; } .fbalken > span { display: block; height: 100%; background: #5cb85c; border-radius: 7px; }
+  .fbalken i { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.18); } .fbalken i:nth-of-type(1) { left: 20%; } .fbalken i:nth-of-type(2) { left: 40%; } .fbalken i:nth-of-type(3) { left: 60%; } .fbalken i:nth-of-type(4) { left: 80%; }
+  .schalter { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px; background: transparent; border-top: 1px solid #f2efea; text-align: left; color: var(--text); }
+  .khead + .schalter { border-top: 0; }
+  .knebel { position: relative; width: 52px; height: 30px; border-radius: 15px; background: #d6d2ca; flex: none; transition: background 0.15s; } .knebel::after { content: ''; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: left 0.15s; }
+  .schalter.an .knebel { background: var(--gruen); } .schalter.an .knebel::after { left: 25px; }
+  .stext { font-size: 13.5px; font-weight: 700; } .stext small { display: block; font-weight: 400; font-size: 11.5px; color: var(--leise); }
+  .stepper span b { font-size: 15px; } .stepper span i { font-size: 11px; }
+  .karussell { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -12px; padding: 0 12px 4px; scrollbar-width: none; } .karussell::-webkit-scrollbar { display: none; }
+  .kslot { flex: none; width: calc(100% - 30px); scroll-snap-align: center; } .kslot > .karte { margin-bottom: 0; height: 100%; }
+  .punkte { display: flex; justify-content: center; gap: 4px; margin: 8px 0 10px; flex-wrap: wrap; } .punkte button { width: 22px; height: 22px; border-radius: 11px; background: transparent; position: relative; } .punkte button::after { content: ''; position: absolute; left: 7px; top: 7px; width: 8px; height: 8px; border-radius: 4px; background: #cfc9bf; } .punkte button.an::after { background: var(--text); }
+  .entscheid { border-color: #e3a90d; } .entscheid .oknoepfe button { font-size: 12px; }
+  .owerte .rotwert, .rotwert { color: var(--rot); }
+  .breitwert { width: auto !important; min-width: 70px; }
+  /* Marketing */
+  .tabs .tab { font-size: 12.5px; min-width: 0; padding: 0 2px; }
+  .kanal .ohead i { display: block; } .kanal .regler { padding-top: 4px; }
+  .zeitleiste { display: block; padding: 6px 6px 0; } .zeitleiste text { font-family: inherit; }
+  /* Produkte */
+  .produkt { position: relative; padding-bottom: 10px; } .pbild { display: flex; justify-content: center; padding: 10px 0 0; } .pbild svg { display: block; }
+  .papierkorb { position: absolute; right: 8px; top: 8px; width: 42px; height: 42px; border-radius: 21px; background: rgba(255,255,255,0.85); color: var(--leise); display: grid; place-items: center; }
+  .pname { text-align: center; padding: 6px 12px 2px; } .pname b { font-size: 17px; display: block; } .pname small { font-size: 11.5px; color: var(--leise); }
+  .sterne { display: inline-flex; gap: 1px; vertical-align: middle; } .sternzahl { font-size: 12px; color: var(--leise); margin-left: 6px; vertical-align: middle; font-variant-numeric: tabular-nums; }
+  .pmitte { display: flex; align-items: center; gap: 8px; padding: 6px 12px 0; } .pmitte .schalter { width: auto; flex: 1; border: 0; padding: 0; min-height: 44px; }
+  .verkauf { text-align: right; } .verkauf small, .preis small { display: block; font-size: 10.5px; color: var(--leise); letter-spacing: 0.04em; text-transform: uppercase; } .verkauf b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; } .verkauf i { font-style: normal; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .donut { position: relative; width: 84px; height: 84px; flex: none; } .donut span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; } .donut small { font-size: 10px; color: #b5651d; } .donut b { font-size: 14px; color: #b5651d; }
+  .preis { flex: 1; } .preis small.rotwert { text-transform: none; letter-spacing: 0; color: #d2603a; margin-bottom: 4px; } .preis .stepper button { width: 42px; height: 40px; }
+  .kats button { font-size: 12px; } .kats button i { font-style: normal; color: var(--leise); font-weight: 400; font-size: 11px; }
+  .typkacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 10px; }
+  .typkacheln button { background: #e4ecf0; border: 1px solid #d3dee4; border-radius: 14px; padding: 8px 4px 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text); min-height: 100px; }
+  .typkacheln button span { font-size: 11.5px; font-weight: 700; line-height: 1.2; } .typkacheln button.an { border: 2px solid #2f63b5; background: #eef3fb; padding: 7px 3px 6px; }
+  .farben.klein { gap: 8px; } .farben.klein button { width: 34px; height: 34px; border-radius: 17px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+  .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: 13px; } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: 11.5px; margin-right: 6px; } .trend .olief { padding: 0; }
 </style>
 </head>
 <body>
@@ -191,9 +256,20 @@
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
 <div class="unten">
   <div class="chipstadt"><span id="stadtname">Essen</span><i>▾</i><select id="stadtwahl" aria-label="Stadt wählen"></select></div>
-  <button class="knopf" id="hq">HQ</button>
-  <button class="knopf mitbadge" id="einkauf">Einkauf<span id="ekbadge" style="display:none">0</span></button>
   <button class="knopf" id="weiter">Woche weiter</button>
+  <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>
+</div>
+<div id="menue">
+  <div class="menuekarte">
+    <div class="menuetitel">Hartwig steuern</div>
+    <div class="kacheln">
+      <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
+      <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
+      <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
+      <button class="mkachel" id="marketing"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l7 4V6L6 10zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg><b>Marketing</b><small>Kanäle, Karte, CRM, Aktionen</small></button>
+      <button class="mkachel" id="produkte"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c-1 0-2 .8-2 2v.5L3 17h18l-9-6.5"/></svg><b>Produkte</b><small>Eigenmarken entwickeln</small></button>
+    </div>
+  </div>
 </div>
 <div id="panel">
   <div class="pkopf"><div class="griff"></div><div id="ptitel"></div><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>

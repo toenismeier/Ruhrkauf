@@ -15,6 +15,7 @@ import { clamp, eur, kw as kwVon, melde, mio, neueId, zwischen, type RngHalter }
 import { hqMarketingFaktor } from './hq';
 import { WG, type WgId } from './einkauf';
 import { PARAM } from './welt';
+import { registriereDelegation } from './vorstand';
 
 // ---------------------------------------------------------------------------------------------
 // Typen
@@ -235,7 +236,7 @@ export const MK = {
   versandPauschale: 2_500,
   oeffnung: { mail: 0.33, push: 0.11, brief: 0.6 } as Record<CrmKanal, number>,
   einloesungKanal: { mail: 1, push: 0.85, brief: 1.35 } as Record<CrmKanal, number>,
-  abmeldung: { mail: 0.0012, push: 0.002, brief: 0 } as Record<CrmKanal, number>,
+  abmeldung: { mail: 0.0004, push: 0.0008, brief: 0 } as Record<CrmKanal, number>,
   kannibalisierung: 0.15,
   vorzugAbbau: 0.75,
   gewoehnung: 0.033,
@@ -389,6 +390,14 @@ export function initialisiereMarketing(s: GameState): void {
   const m = s.marketing.stand;
   m.netzStart = m.netzLetzt = netz(s);
   kalenderJahr(s, Math.floor(s.woche / 52));
+  registriereMarketingKi();
+}
+
+/** CMO-Delegation in vorstand.ts einhängen (erst zur Laufzeit, wegen der Importreihenfolge). */
+export function registriereMarketingKi(): void {
+  registriereDelegation('cmo', 'aktionskalender', delegiereAktionskalender);
+  registriereDelegation('cmo', 'crm', delegiereCrm);
+  registriereDelegation('cmo', 'kanalbudget', delegiereKanalbudget);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -459,7 +468,8 @@ function kommunikation(sc: MarketingSzenario): number {
   return 0.55 + 0.45 * (a / b);
 }
 
-const uplift = (r: number, g: number, h: Haus): number => 0.9 * Math.pow(Math.max(0, r), 0.9) * (1 - g) * Math.sqrt(clamp(2 - h.einzug.kaufkraft, 0.5, 1.5));
+/** Mengeneffekt eines Preisvorteils: Aktionselastizität rund 2 (kommunizierter Rabatt), gedämpft durch Gewöhnung und Kaufkraft. */
+const uplift = (r: number, g: number, h: Haus): number => 1.6 * Math.pow(Math.max(0, r), 0.85) * (1 - g) * Math.sqrt(clamp(2 - h.einzug.kaufkraft, 0.5, 1.5));
 
 // ---------------------------------------------------------------------------------------------
 // Wirkung je Haus (aus wirtschaft.ts)
@@ -501,7 +511,7 @@ function promoWert(s: GameState, a: Aktion, h: Haus, g: GruppeId, sc: MarketingS
     }
     case 'staffel': v.d = 0.3 * 0.333; v.u = uplift(0.2, gw, h) * kb; v.nu = 0.08; v.alt = 0.3; v.bon = 0.12; break;
     case 'reduzierung': v.d = 0.45 * r; v.u = 0.8 * uplift(r, gw, h) * kb; v.nu = 0.09; v.alt = 1.3 * (r / 0.3); v.img = r >= 0.5 ? -0.25 : r >= 0.3 ? -0.05 : 0; break;
-    case 'personalkauf': v.d = 0.025 * (r / 0.2); v.u = 0.015 * (r / 0.2); v.nu = 0.02; break;
+    case 'personalkauf': v.d = 0.025 * (r / 0.2); v.u = 0.035 * (r / 0.2); v.nu = 0.02; break;
   }
   return v;
 }
@@ -1251,8 +1261,17 @@ export function delegiereCrm(s: GameState, guete: number, rng: RngHalter): void 
 
 /** CMO verteilt das Kanalbudget: gut = 5 % vom schwächsten zum stärksten Kanal je Euro; schlecht = zufällige Verschiebung. */
 export function delegiereKanalbudget(s: GameState, guete: number, rng: RngHalter): void {
-  if (s.woche % 13 !== 0) return;
+  if (s.woche % 13 !== 1) return;
   const I = s.marketing.stand.ist;
+  // Budgethöhe: in der Insolvenz knapper; schlechte Entscheidungen schießen nach oben oder unten
+  const gut = zwischen(rng, 0, 1) < 0.3 + 0.65 * guete;
+  const ziel = gut ? (s.phase === 'insolvenz' ? 0.02 : 0.024) : zwischen(rng, 0, 1) < 0.5 ? 0.013 : 0.032;
+  const U = umsatzBezug(s);
+  const k = marketingKosten(s, U);
+  const rest = k.netto - k.sonderwerbung - k.kanaeleSumme; // Karte, App, CRM abzüglich Beteiligung
+  const f = k.kanaeleSumme > 0 ? clamp((ziel * U - rest) / k.kanaeleSumme, 0.3, 2) : 1;
+  for (const d of KANAELE) I.kanaele[d.id].quote = clamp(I.kanaele[d.id].quote * f, 0, d.quote * 4);
+  s.marketing.budgetQuote = ziel;
   const grenz = KANAELE.filter((d) => d.id !== 'crm').map((d) => ({ d, x: (d.e * Math.pow(Math.max(0.05, kanalRel(I, d.id)), d.e - 1) * (1 + d.marke * 0.3)) * (1 - I.kanaele[d.id].abnutzung) }));
   grenz.sort((a, b) => a.x - b.x);
   const fehlerQ = (1 - guete) * 0.6;

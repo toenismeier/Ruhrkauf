@@ -7,6 +7,7 @@ import type { Bestellung, Format, GameState, GruppeId, Kohorte } from './types';
 import { clamp, eur, melde, mio, normal, zwischen, type RngHalter } from './util';
 import type { HausRoh } from './wirtschaft';
 import { produktMargeDelta, produktNachfrageFaktor } from './produkte';
+import { marketingAltVerkauf, marketingAltwareFaktor } from './marketing';
 import {
   attraktivitaet, BESCHAFFUNG, eigenmarkeAnteil, eigenmarkeEinstellen, eigenmarkeGruenden, eigenmarkeNeupositionieren,
   eigenmarkeSetzen, istVerkaufsaktiv, mehrmarge, passungWg,
@@ -716,23 +717,23 @@ export function saisonTally(st: WgStand, sid: number): { eingang: number; abverk
   return x;
 }
 
-function nimm(topf: Topf | undefined, menge: number, altMax: number, saisonAkt: number, st: WgStand | undefined): { voll: number; gebucht: number } {
-  let voll = 0; let gebucht = 0;
-  if (!topf || menge <= 0) return { voll, gebucht };
+function nimm(topf: Topf | undefined, menge: number, altMax: number, saisonAkt: number, st: WgStand | undefined): { voll: number; gebucht: number; alt: number } {
+  let voll = 0; let gebucht = 0; let altG = 0;
+  if (!topf || menge <= 0) return { voll, gebucht, alt: 0 };
   let altRest = altMax;
   for (const k of topf) {
     if (voll >= menge) break;
     if (k.ladenhueter || k.wert <= 0) continue;
     const alt = istAlt(k);
     let x = Math.min(k.wert, menge - voll);
-    if (alt) { x = Math.min(x, altRest); altRest -= x; }
+    if (alt) { x = Math.min(x, altRest); altRest -= x; altG += Math.max(0, x); }
     if (x <= 0) continue;
     k.wert -= x;
     voll += x;
     gebucht += x * k.kostenFaktor;
     if (st && k.art === 'saison' && k.saisonId !== undefined && k.saisonId >= saisonAkt) saisonTally(st, k.saisonId).abverkauf += x;
   }
-  return { voll, gebucht };
+  return { voll, gebucht, alt: altG };
 }
 
 function verfuegbar(topf: Topf | undefined): { frisch: number; alt: number } {
@@ -761,6 +762,8 @@ export function einkaufVerbrauch(s: GameState, n: EinkaufNachfrage): { verfuegba
     const p = n.vk[d.id] ?? {};
     const r: VerbrauchWg & { ab: number } = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
     const red = EK_PARAM.abschrift[st.st.reduzierung];
+    // Sale-Aktionen im Aktionskalender erlauben mehr Altware in der Saisonnachfrage (src/marketing.ts, Ausgangslage = 1)
+    const capM = Math.min(1, red.cap * marketingAltwareFaktor(s, d.bereich));
     const sg = EK_PARAM.servicegrad[st.st.servicegrad];
     for (const art of ['nos', 'saison'] as Art[]) {
       const pools = Object.keys(p).sort((a, b) => (a === FREMD ? 1 : b === FREMD ? -1 : a.localeCompare(b))); // Marken zuerst, Fremdware zuletzt
@@ -779,14 +782,15 @@ export function einkaufVerbrauch(s: GameState, n: EinkaufNachfrage): { verfuegba
           const rausch = s.prognose ? 0 : zwischen(rngHalter(s), -0.01, 0.01);
           quote = clamp((sg.basis + bonus + rausch) * g, 0, 1);
         } else {
-          const nutzbar = v.frisch + Math.min(v.alt, ekBedarf * red.cap);
+          const nutzbar = v.frisch + Math.min(v.alt, ekBedarf * capM);
           const rw = nutzbar / Math.max(1, bezugsBedarf(s, st, art, pool, w));
           quote = Math.min(1, Math.sqrt(clamp(rw / EK_PARAM.praesentation, 0, 1)));
         }
         let ziel = ekBedarf * quote;
         let extraVk = 0;
         if (pool === FREMD && ausweichVk > 0) { extraVk = ausweichVk; ziel += ausweichVk * (1 - m) * quote; }
-        const x = nimm(topf, ziel, ekBedarf * (art === 'saison' ? red.cap : 1), sAkt, st);
+        const x = nimm(topf, ziel, ekBedarf * (art === 'saison' ? capM : 1), sAkt, st);
+        if (art === 'saison' && x.alt > 0) marketingAltVerkauf(s, d.bereich, x.alt);
         const vkR = x.voll / Math.max(0.05, 1 - m);
         if (pool !== FREMD) {
           ausweichVk += Math.max(0, vkBedarf * quote - vkR) * EK_PARAM.substitution + vkBedarf * (1 - quote) * 0;

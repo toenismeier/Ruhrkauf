@@ -3,7 +3,7 @@
 // Gehalt gekürzt, alles delegiert), unbesetzt (alle entlassen). Produkte: keine (Startsortiment), gut (Trend und Zielgruppe
 // getroffen), schlecht (am Trend und an der Zielgruppe vorbei, zu billig entwickelt, gute Produkte ausgelistet).
 // Aufruf: npx tsx scripts/vorstand-vergleich.ts [seeds, z. B. 1,2,3] [jahre, Standard 3]
-import { fuehreAus, neuesSpiel, produktVorschau, wocheAbspielen, kandidaten, ARTIKELTYPEN, FARBEN, RESSORTS, gehaltsforderung } from '../src';
+import { fuehreAus, neuesSpiel, produktVorschau, wocheAbspielen, kandidaten, ARTIKELTYPEN, FARBEN, RESSORTS } from '../src';
 import type { ArtikelTyp, Farbe, GameState, ProduktEntwurf, RessortId } from '../src';
 import { sterneWirksam } from '../src/produkte';
 import { botTief } from './bot';
@@ -37,6 +37,8 @@ const vorstandGut: Bot = (s) => {
     if (!res.person) continue;
     const an = res.person.fachwissen >= 65;
     for (const b of ['produktentwicklung', 'bank', 'mietverhandlungen', 'onlinesortiment'] as const) if (b in res.delegation && res.delegation[b] !== an) fuehreAus(s, { typ: 'vorstandDelegation', ressort: r, bereich: b, an });
+    // Tarifverhandlungen und Freigaben laufen bei soliden Leuten immer über das Ressort
+    for (const b of ['betriebsrat', 'freigaben'] as const) if (b in res.delegation && !res.delegation[b] && res.person.fachwissen >= 50) fuehreAus(s, { typ: 'vorstandDelegation', ressort: r, bereich: b, an: true });
   }
   // Vorstandssitzung: Projekte guter Leute umsetzen
   for (const e of s.entscheidungen.filter((x) => x.typ === 'vorstand_sitzung')) {
@@ -156,7 +158,9 @@ function tabelle(titel: string, strategien: [string, Bot][]): void {
 }
 
 const nichts: Bot = () => undefined;
-const nur = process.argv[4];
-if (!nur || nur === 'vorstand') tabelle('Vorstand', [['Start', nichts], ['gut', vorstandGut], ['schwach', vorstandSchwach], ['unbesetzt', vorstandUnbesetzt]]);
-if (!nur || nur === 'produkte') tabelle('Produktstrategie', [['keine', nichts], ['gut', produktStrategie(true)], ['schlecht', produktStrategie(false)]]);
-void gehaltsforderung;
+export { vorstandGut, vorstandSchwach, vorstandUnbesetzt, produktStrategie };
+if (require.main === module) {
+  const nur = process.argv[4];
+  if (!nur || nur === 'vorstand') tabelle('Vorstand', [['Start', nichts], ['gut', vorstandGut], ['schwach', vorstandSchwach], ['unbesetzt', vorstandUnbesetzt]]);
+  if (!nur || nur === 'produkte') tabelle('Produktstrategie', [['keine', nichts], ['gut', produktStrategie(true)], ['schlecht', produktStrategie(false)]]);
+}

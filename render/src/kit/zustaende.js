@@ -48,7 +48,15 @@
 import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
 
 export const STATI = ['offen', 'aktion', 'untermiete', 'offprice', 'teilschliessung', 'umbau', 'raeumung', 'geschlossen', 'leer', 'verfall', 'neueroeffnung', 'abriss'];
-export const AKTIONEN = ['sale', 'jubilaeum', 'weihnachten', 'blackfriday'];
+export const AKTIONEN = ['sale', 'jubilaeum', 'weihnachten', 'blackfriday',
+  // Anlässe des Aktionskalenders der Engine (marketing.ts Anlass)
+  'wsv', 'ssv', 'midseason', 'ostern', 'muttertag', 'beauty', 'waesche', 'schulanfang', 'mwst', 'friends', 'personalkauf', 'raeumung', 'sonder'];
+export const AKTION_TITEL = {
+  sale: 'Sale', jubilaeum: 'Jubiläum', weihnachten: 'Weihnachten', blackfriday: 'Black Friday', wsv: 'Winterschlussverkauf', ssv: 'Sommerschlussverkauf',
+  midseason: 'Mid Season Sale', ostern: 'Ostern', muttertag: 'Muttertag', beauty: 'Beauty Days', waesche: 'Wäsche Days', schulanfang: 'Schulanfang',
+  mwst: 'Mehrwertsteuer-Aktion', friends: 'Friends and Family', personalkauf: 'Personalkauf', raeumung: 'Räumung', sonder: 'Sonderaktion',
+};
+const AKTION_ALIAS = { cyberweek: 'blackfriday', black_friday: 'blackfriday', mid_season: 'midseason', beautydays: 'beauty', waeschedays: 'waesche', jubilaeumswochen: 'jubilaeum', mehrwertsteuer: 'mwst', friendsandfamily: 'friends' };
 export const STATUS_TITEL = {
   offen: 'Offen', aktion: 'Aktion', untermiete: 'Untermiete', offprice: 'Outlet', teilschliessung: 'Teilschließung', umbau: 'Umbau',
   raeumung: 'Räumungsverkauf', geschlossen: 'Geschlossen', leer: 'Leerstand', verfall: 'Verfall', neueroeffnung: 'Neueröffnung', abriss: 'Abriss',
@@ -114,12 +122,15 @@ export function zustandNormal(opt = {}, quelle = {}) {
     const r = rng(`${opt.seed ?? 'z'}/mieter`);
     unter = [mieterInfo({ typ: waehle(r, ['discounter', 'drogerie']), etage: 0 }), mieterInfo({ typ: waehle(r, ['aerztehaus', 'behoerde']), etage: 2 }), mieterInfo({ typ: 'fitness', etage: 3 })];
   }
-  let aktion = opt.aktion ?? null;
+  let aktion = AKTION_ALIAS[opt.aktion] ?? opt.aktion ?? null;
   if (aktion && !AKTIONEN.includes(aktion)) aktion = 'sale';
   if (!aktion && hat('aktion')) aktion = 'sale';
   if (aktion && !hat('aktion')) zusatz.push('aktion');
   const rabatt = Number.isFinite(opt.rabatt) && opt.rabatt > 0 ? Math.round(opt.rabatt * 100) : null;   // Prozent der Engine-Aktion
-  return { __zustand: true, status, zusatz, aktion, rabatt, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
+  const mk = opt.marketing ?? {};
+  const marketing = { karte: !!(mk.karte ?? opt.karte), app: !!(mk.app ?? opt.app), prospekt: !!(mk.prospekt ?? opt.prospekt) };
+  const mechanik = opt.mechanik ?? null, punkteFaktor = Number.isFinite(opt.punkteFaktor) ? opt.punkteFaktor : null;
+  return { __zustand: true, status, zusatz, aktion, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
 }
 
 export function zustandFlags(Z) {
@@ -1169,7 +1180,10 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       jubilaeum: { bg: '#1f3f6b', fg: '#e8c25a', z: [{ text: k.baujahr ? `${jahr - k.baujahr} JAHRE HARTWIG` : 'JUBILÄUM', h: 2.2, fg: '#e8c25a' }, { text: 'Danke für Ihre Treue', h: 0.9, fg: '#ffffff' }], x: [{ text: 'JUBILÄUM', h: 1.9, fg: '#e8c25a' }, { text: k.baujahr ? `seit ${k.baujahr}` : 'seit jeher', h: 0.9, fg: '#ffffff' }], wimpel: ['#e8c25a', '#1f3f6b', ROT], ballon: ['#e8c25a', ROT, '#1f3f6b'], fenster: ['JUBILÄUM', pr(20)], stopper: 'Jubelpreise', bahn: 'JUBILÄUM' },
       weihnachten: { bg: '#1f5a3a', fg: '#ffffff', z: [{ text: 'WEIHNACHTSZAUBER', h: 2.0, fg: '#ffffff' }, { text: 'Geschenke für alle', h: 0.9, fg: '#f2d27a' }], x: [{ text: 'FROHES FEST', h: 1.8, fg: '#f2d27a' }], wimpel: ['#c8102e', '#f2d27a', '#1f5a3a'], ballon: null, fenster: ['GESCHENKE', '★'], stopper: 'Geschenkideen' },
       blackfriday: { bg: '#121212', fg: '#ffd400', z: [{ text: 'BLACK FRIDAY', h: 2.8, fg: '#ffffff' }, { text: rb ? `jetzt ${pr(60)}` : 'bis zu -60 %', h: 1.1, fg: '#ffd400' }], x: [{ text: pr(60), h: 3.0, fg: '#ffd400' }], wimpel: ['#121212', '#ffd400'], ballon: ['#121212', '#ffd400'], fenster: [pr(60), 'BLACK FRIDAY'], stopper: pr(60), bahn: 'BLACK FRIDAY' },
-    }[a];
+    }[a] ?? aktionStil(a, st, pr);
+    if (st.mechanik === 'punkte' && st.punkteFaktor && P.z[1]) P.z[1] = { ...P.z[1], text: `${st.punkteFaktor}-fach Punkte mit der Karte` };
+    if (st.mechanik === 'staffel' && P.z[1]) P.z[1] = { ...P.z[1], text: '3 für 2 auf ausgewählte Artikel' };
+    if (st.mechanik === 'coupon' && P.z[1] && rb) P.z[1] = { ...P.z[1], text: `Coupon ${pr(10)} ab Mindestbon` };
     fassadenBanner(Z, sz, P.z, P.bg, { anteil: 0.8, zielH: GROSS * 0.85, rahmen: '#ffffff' });
     fassadenBanner(Z, sx, P.x, P.bg, { anteil: 0.5, zielH: GROSS * 0.75, rahmen: '#ffffff' });
     if (P.bahn) for (const s2 of [sz, sx]) { const L = Z.nutz(s2); bahnen(Z, s2, [Math.min(2.2, L * 0.04) + 0.5, L - Math.min(2.2, L * 0.04) - 0.5], P.bahn, P.bg === '#121212' ? '#ffd400' : '#ffffff', P.bg); }
@@ -1206,6 +1220,10 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     if (a === 'blackfriday') menge(Z, s, he.u, 3.0, 24, 6, 2.6, { tMin: (he.t ?? 0) + 0.8 });
   }
 
+  // ---------- Marketing am Haus: Kundenkarte, App-Plakat, Prospektständer (nur im laufenden Betrieb)
+  const imBetrieb = !hat('geschlossen') && !hat('leer') && !hat('verfall') && !hat('abriss');
+  if (imBetrieb && (st.marketing.karte || st.marketing.app || st.marketing.prospekt)) hausMarketing(Z, st, seiten, haupt(), fensterEG, rest);
+
   // ---------- Passanten im Normalbetrieb
   const belebt = !hat('geschlossen') && !hat('leer') && !hat('verfall') && !hat('abriss') && !hat('raeumung');
   if (belebt && Z.leute) {
@@ -1216,4 +1234,104 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     for (const s of [sz, sx]) for (let i = 0; i < 4; i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r); }
   }
   return { hoehe: Z.top, teile: S.anzahl - start };
+}
+
+// ─────────────────────────────────────────────────────────────── Ergänzung: Aktionstypen und Marketing am Haus
+// zustandNormal({ aktion: Anlass der Engine ('wsv','ssv','midseason','ostern','muttertag','beauty','waesche','schulanfang','mwst',
+//   'friends','personalkauf','raeumung','sonder' sowie 'sale','jubilaeum','weihnachten','blackfriday'), rabatt, mechanik?, punkteFaktor?,
+//   marketing: { karte?, app?, prospekt? } })
+//   karte:    Banner "Hartwig Karte" an der +x-Seite, Kartenaufkleber im Schaufenster, Kundenstopper am Eingang
+//   app:      City-Light-Plakat mit Smartphone und "Hartwig App" vor der +z-Seite
+//   prospekt: Prospektständer mit dem Wochenprospekt neben dem Haupteingang
+function aktionStil(a, st, pr) {
+  const rb = st.rabatt;
+  const bis = (x) => (rb ? `jetzt ${pr(x)}` : `bis zu -${x} %`);
+  const D = {
+    wsv: ['#1f4f8a', 'WINTERSCHLUSSVERKAUF', bis(50), '#bfe3ff', ['#1f4f8a', '#ffffff', '#bfe3ff'], 'WSV', 'WSV %'],
+    ssv: ['#e8762a', 'SOMMERSCHLUSSVERKAUF', bis(50), '#fff2a8', ['#e8762a', '#ffffff', '#f6d32d'], 'SSV', 'SSV %'],
+    midseason: ['#b0225e', 'MID SEASON SALE', bis(30), '#ffd3e4', ['#b0225e', '#ffffff'], 'MID SEASON', 'SALE'],
+    ostern: ['#6aa33a', 'FROHE OSTERN', 'Frühlingsfrische Angebote', '#fff59d', ['#fff59d', '#f4b6c8', '#9fd9bf', '#6aa33a'], 'OSTERN', null],
+    muttertag: ['#d9668c', 'MUTTERTAG', 'Danke, Mama', '#ffffff', ['#d9668c', '#ffffff', '#f4c9d6'], 'Für Mama', null],
+    beauty: ['#141414', 'BEAUTY DAYS', rb ? `${pr(20)} auf Beauty` : '-20 % auf Beauty', '#f4c2d0', ['#141414', '#f4c2d0', '#d4a017'], 'BEAUTY', 'BEAUTY DAYS'],
+    waesche: ['#5b4fb8', 'WÄSCHE DAYS', rb ? `${pr(20)} auf Wäsche` : '-20 % auf Wäsche', '#e2dcff', ['#5b4fb8', '#ffffff', '#e2dcff'], 'WÄSCHE', 'WÄSCHE DAYS'],
+    schulanfang: ['#f2c14e', 'SCHULANFANG', 'Alles für den Schulstart', '#1d3557', ['#f2c14e', '#e04b3a', '#3a7bd5', '#4caf50'], 'Schulstart', null],
+    mwst: ['#0b7a75', 'MEHRWERTSTEUER GESCHENKT', rb ? `${pr(19)} auf fast alles` : '-19 % auf fast alles', '#d6fff8', ['#0b7a75', '#ffffff'], '-19 %', 'MWST GESCHENKT'],
+    friends: ['#2c2f6b', 'FRIENDS AND FAMILY', rb ? `${pr(20)} mit Coupon` : '-20 % mit Coupon', '#f2d27a', ['#2c2f6b', '#f2d27a', '#ffffff'], 'Coupon', null],
+    personalkauf: ['#4a525a', 'PERSONALKAUF', 'Für unsere Mitarbeitenden', '#e9edf0', ['#4a525a', '#ffffff'], 'Personalkauf', null],
+    raeumung: ['#c8102e', 'RÄUMUNG', bis(50), '#f6d32d', ['#c8102e', '#f6d32d'], 'RÄUMUNG', 'RÄUMUNG'],
+    sonder: [ROT, 'AKTION', rb ? `jetzt ${pr(20)}` : 'Nur für kurze Zeit', '#ffffff', [ROT, '#ffffff'], 'AKTION', null],
+  }[a] ?? [ROT, 'AKTION', 'Nur für kurze Zeit', '#ffffff', [ROT, '#ffffff'], 'AKTION', null];
+  const [bg, titel, unter, akzent, wimpel, stopper, bahn] = D;
+  const fg = a === 'schulanfang' ? '#1d3557' : '#ffffff';
+  const kurz = rb ? pr(20) : stopper;
+  return {
+    bg, fg, z: [{ text: titel, h: titel.length > 16 ? 2.0 : 2.8, fg }, { text: unter, h: 1.0, fg: akzent }],
+    x: [{ text: rb ? kurz : stopper, h: 2.6, fg: a === 'schulanfang' ? '#1d3557' : akzent }],
+    wimpel, ballon: ['ostern', 'muttertag', 'schulanfang', 'midseason'].includes(a) ? wimpel.slice(0, 3) : null,
+    fenster: rb ? [kurz, stopper] : [stopper, titel.split(' ')[0]], stopper, bahn,
+  };
+}
+
+/** Kartengrafik (Hartwig Karte) als flache Platte in der Fassadenebene: rot, weißes Band, goldener Chip. */
+function karteGrafik(Z, s, u, y, t, b) {
+  const h = b * 0.63;
+  s.q(u - b / 2, u + b / 2, y - h / 2, y + h / 2, t, t + 0.04, ROT);
+  s.q(u - b / 2, u + b / 2, y - h * 0.18, y - h * 0.02, t + 0.04, t + 0.05, '#ffffff');
+  s.q(u - b * 0.38, u - b * 0.2, y + h * 0.08, y + h * 0.3, t + 0.04, t + 0.055, '#d4a017');
+  plakat(Z, s, 'HARTWIG', u + b * 0.12, y + h * 0.22, t + 0.06, h * 0.2, '#ffffff', ROT, b * 0.5);
+}
+
+function hausMarketing(Z, st, seiten, he, fensterEG, rest) {
+  const { k, S, r } = Z, sz = seiten['+z'], sx = seiten['+x'];
+  const s = seiten[he.seite] ?? sz, bE = (he.breite ?? 4) / 2, tE = he.t ?? 0;
+  const L = Z.nutz(s);
+  // Kundenkarte
+  if (st.marketing.karte) {
+    const sB = rest['+x'] ? sx : sz;
+    fassadenBanner(Z, sB, [{ text: 'HARTWIG KARTE', h: 1.9, fg: '#ffffff' }, { text: 'Punkte sammeln, Vorteile sichern', h: 0.75, fg: '#ffe2dc' }], ROT, { anteil: 0.5, zielH: Math.min(7, (k.hoehe - k.egHoehe) * 0.7), rahmen: '#ffffff', minSchrift: 0.55, u: Z.nutz(sB) * 0.7, modus: 'mitte' });
+    // Aufkleber im unteren Fensterdrittel (unter Vordächern sichtbar): die zwei Schaufenster neben dem Haupteingang und eins auf der anderen Seite
+    const fe = fensterEG.filter((f) => f.b - f.a > 1.8);
+    const nahe = fe.filter((f) => f.seite === he.seite).sort((p, q) => Math.abs((p.a + p.b) / 2 - he.u) - Math.abs((q.a + q.b) / 2 - he.u)).slice(0, 2);
+    const andere = fe.filter((f) => f.seite !== he.seite).slice(1, 2);
+    for (const f of [...nahe, ...andere]) {
+      const sf = seiten[f.seite], b = Math.min(1.5, f.b - f.a - 0.4);
+      karteGrafik(Z, sf, (f.a + f.b) / 2, f.y0 + 0.5 + b * 0.32 + 0.35, f.t + 0.1, b);
+      plakat(Z, sf, 'Jetzt anmelden', (f.a + f.b) / 2, f.y0 + 0.42, f.t + 0.12, 0.3, '#ffffff', ROT, b);
+    }
+    // Glastür am Haupteingang: Karte als Aufkleber auf Augenhöhe
+    if (he.breite) karteGrafik(Z, s, he.u - bE * 0.5, 1.45, tE + 0.08, Math.min(0.9, bE * 0.7));
+    // Kundenstopper mit Karte links vom Eingang
+    const u = Math.max(1.2, he.u - bE - 2.8), t = tE + 2.2;
+    s.q(u - 0.55, u - 0.48, 0.3, 1.6, t - 0.3, t + 0.3, '#3a3f44'); s.q(u + 0.48, u + 0.55, 0.3, 1.6, t - 0.3, t + 0.3, '#3a3f44');
+    s.q(u - 0.5, u + 0.5, 0.4, 1.6, t, t + 0.06, '#ffffff');
+    karteGrafik(Z, s, u, 1.15, t + 0.06, 0.8);
+    plakat(Z, s, 'Karte', u, 0.62, t + 0.08, 0.26, ROT, '#ffffff', 0.9);
+  }
+  // App-Plakat (City-Light-Vitrine)
+  if (st.marketing.app) {
+    const sA = s, u = Math.min(L - 1.5, he.u + bE + 5.2), t = tE + 3.4;
+    sA.q(u - 0.1, u + 0.1, 0.3, 0.7, t - 0.1, t + 0.1, '#3a3f44');
+    sA.q(u - 0.75, u + 0.75, 0.7, 3.1, t - 0.16, t + 0.16, '#2b3035');
+    sA.q(u - 0.66, u + 0.66, 0.8, 3.0, t + 0.16, t + 0.18, ROT);
+    sA.q(u - 0.34, u + 0.34, 1.1, 2.45, t + 0.18, t + 0.22, '#1d1f23');
+    sA.q(u - 0.29, u + 0.29, 1.2, 2.35, t + 0.22, t + 0.23, '#ffffff');
+    sA.q(u - 0.29, u + 0.29, 2.1, 2.35, t + 0.23, t + 0.235, ROT);
+    for (let i = 0; i < 3; i++) sA.q(u - 0.24, u + 0.24, 1.32 + i * 0.25, 1.5 + i * 0.25, t + 0.23, t + 0.235, waehle(r, ['#f2c6d2', '#bcd3df', '#e9c46a', '#cfe3d4']));
+    plakat(Z, sA, 'HARTWIG APP', u, 2.75, t + 0.19, 0.26, '#ffffff', ROT, 1.2);
+    plakat(Z, sA, 'Jetzt laden', u, 0.95, t + 0.19, 0.2, '#ffffff', ROT, 1.1);
+    Z.top = Math.max(Z.top, 3.2);
+  }
+  // Prospektständer rechts vom Eingang
+  if (st.marketing.prospekt) {
+    const u = Math.min(L - 1, he.u + bE + 1.9), t = tE + 1.5;
+    for (const du of [-0.5, 0.5]) s.q(u + du - 0.04, u + du + 0.04, 0.3, 1.9, t - 0.2, t - 0.12, '#8f989f');
+    s.q(u - 0.55, u + 0.55, 0.3, 0.36, t - 0.35, t + 0.35, '#5f676e');
+    for (let e = 0; e < 3; e++) {
+      const y = 0.55 + e * 0.45;
+      s.q(u - 0.5, u + 0.5, y - 0.04, y, t - 0.2, t + 0.18, '#8f989f');
+      for (let c = 0; c < 2; c++) s.kipp(0.42, 0.42, 0.03, u - 0.24 + c * 0.48, y + 0.2, t + 0.06, waehle(r, [ROT, '#ffffff', '#f6d32d', ROT]), 0, -0.35);
+    }
+    s.q(u - 0.55, u + 0.55, 1.9, 2.3, t - 0.18, t - 0.12, ROT);
+    plakat(Z, s, 'Prospekt der Woche', u, 2.1, t - 0.11, 0.2, '#ffffff', ROT, 1.05);
+  }
 }

@@ -19,6 +19,9 @@ import { geld, fmt } from './ui/format.js';
 import { quelle } from './ui/quelle.js';
 import { einkaufModul } from './ui/einkauf.js';
 import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
+import { vorstandModul } from './ui/vorstand.js';
+import { marketingModul } from './ui/marketing.js';
+import { produkteModul } from './ui/produkte.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -189,7 +192,7 @@ function baueStadtAusSpiel(name) {
 // wie bisher), alle anderen als Klötzchen (Baukörper mit Dach in Fassaden- und Dachfarbe). Im Leerlauf werden Kacheln nahe
 // der Kamera nachgebaut, bis BUDGET Teile erreicht sind; ferne volle Kacheln fallen dann auf Klötzchen zurück.
 // Ganze Blöcke je Kachel und ein frischer Bauer je Kachel: Traufhöhe und Reihenstil je Block bleiben wie beim Bau der ganzen Stadt.
-const KACHEL = 110, BUDGET = 112000, VOLL_MAX_ZOOM = 160;
+const KACHEL = 110, BUDGET = 112000, VOLL_MAX_ZOOM = 340;
 const KA = { liste: [], teileGrund: 0, laeuft: false };
 const HAUSTYPEN = new Set(['stadthaus', 'eck', 'hofhaus']);
 const IMMER_GRUND = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber', 'slot:hq', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus', 'slot:nord_speicher', 'slot:nord_hafen', 'slot:center_passage']);
@@ -282,7 +285,7 @@ function kachelnSichtbarBauen() {
 }
 /** Im Leerlauf weiterbauen: je Schritt eine Kachel, dann neu zeichnen. */
 function kachelnPlanen() {
-  if (KA.laeuft || !KA.liste.length) return;
+  if (KA.laeuft || KA.pause || !KA.liste.length) return;
   KA.laeuft = true;
   const schritt = () => {
     const k = naechsteKachel();
@@ -344,8 +347,8 @@ function woche(mitBot = false) {
   cockpitZeigen();
   if (offenesHaus) oeffneHaus(offenesHaus);
   else if (offenesHq) oeffneHq(offenesHq === true ? undefined : offenesHq);
-  else if (ek.aktiv()) ek.neuZeichnen();
-  ek.badge();
+  else for (const m of module()) if (m.aktiv()) m.neuZeichnen();
+  ek.badge(); menueBadge();
   zeichnen();
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
@@ -360,8 +363,10 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
+const module = () => [ek, vs, mk, pr].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
-  ek?.zu();
+  for (const m of module()) m.zu();
+  menueZu();
   $('panel').classList.toggle('gross', klasse === 'gross');
   $('ptitel').textContent = titel;
   $('punter').textContent = unter;
@@ -369,7 +374,7 @@ function panel(titel, unter, html, klasse = '') {
   $('panel').classList.add('offen');
   document.body.classList.add('panel-offen');
 }
-function schliessePanel() { ek?.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; }
+function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; }
 /** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
 function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
@@ -559,6 +564,25 @@ let ek = null;
 ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => cockpitZeigen() });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
+// ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
+let vs = null, mk = null, pr = null;
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); };
+vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
+mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
+pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
+const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
+$('vorstand').addEventListener('click', () => oeffneModul(vs));
+$('marketing').addEventListener('click', () => oeffneModul(mk));
+$('produkte').addEventListener('click', () => oeffneModul(pr));
+// Menü wie Coffee Inc: Knopf unten rechts öffnet die Kacheln Zentrale, Einkauf, Vorstand, Marketing, Produkte
+function menueZu() { $('menue').classList.remove('offen'); $('menueknopf').classList.remove('an'); }
+$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menueknopf').classList.toggle('an', o); });
+$('menue').addEventListener('click', (e) => { if (e.target === $('menue')) menueZu(); });
+function menueBadge() {
+  const n = (s ? E.freigaben(s).anzahl : 0), v = vs?.badge() ?? 0, b = $('menuebadge');
+  b.textContent = n + v; b.style.display = n + v ? '' : 'none';
+  const vb = $('vsbadge'); vb.textContent = v; vb.style.display = v ? '' : 'none';
+}
 
 // ─────────────────────────────────────────── Start
 function neuesSpiel(seed = 1, stadt = 'Essen') {
@@ -567,7 +591,7 @@ function neuesSpiel(seed = 1, stadt = 'Essen') {
   EQ.freigaben(s);
   cockpitZeigen();
   baueStadtAusSpiel(stadt);
-  ek.badge();
+  ek.badge(); menueBadge();
   window.spiel.s = s;
   return s;
 }
@@ -578,7 +602,7 @@ wahl.addEventListener('change', () => { schliessePanel(); $('lade').classList.ad
 $('weiter').addEventListener('click', () => { $('weiter').disabled = true; setTimeout(() => { woche($('bot').checked); $('weiter').disabled = false; }, 10); });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, oeffneEinkauf, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+window.spiel = { neuesSpiel, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
