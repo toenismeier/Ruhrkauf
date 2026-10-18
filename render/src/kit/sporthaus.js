@@ -268,13 +268,17 @@ function hsLogo(K, s, u, y, t, h, o = {}) {
   }
   const [b0, b1] = mn(uq, ue);
   s.q(b0, b1, y - h / 2, y + h / 2, t, t + 0.25, o.band ?? HS_BLAU);
-  if (K.matt) s.q(Math.min(b0, b1) + (b1 - b0) * 0.72, b1, y - h / 2, y + h / 2, t + 0.25, t + 0.27, '#59616b'); // abgeschalteter Teil des Leuchtbands
+  const lichtAus = K.matt && !K.leuchtbandAbgeschaltet;
+  if (lichtAus) {
+    s.q(Math.min(b0, b1) + (b1 - b0) * 0.72, b1, y - h / 2, y + h / 2, t + 0.25, t + 0.27, '#59616b');
+    K.leuchtbandAbgeschaltet = true;
+  } // nur ein abgeschaltetes Leuchtband
   const [c0, c1] = mn(ua, uq);
   s.q(c0, c1, y - q / 2, y + q / 2, t, t + 0.4, HS_ROT);
   const qm = (ua + uq) / 2;
   plakat(K.scene, s, 'H', qm, y + q * 0.06, t + 0.42, q * 0.82, '#ffffff');
   s.kipp(q * 0.62, q * 0.07, 0.04, qm, y - q * 0.36, t + 0.42, '#ffffff', s.lese * 0.12);
-  plakat(K.scene, s, text, (uq + ue) / 2, y, t + 0.27, ph, K.matt ? '#d1d3d1' : (o.schrift ?? '#ffffff'));
+  plakat(K.scene, s, text, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? '#d1d3d1' : (o.schrift ?? '#ffffff'));
   return total;
 }
 /** Senkrechtes Logo (für Eckfinne oder Pylon): Quadrat oben, Schriftzug darunter senkrecht. */
@@ -1177,7 +1181,7 @@ export function sporthaus(S, scene, haus, opt = {}) {
     S, scene, haus, fam, v: ((haus.fassade ?? 0) % 8 + 8) % 8, r: rng(`${haus.id}:${haus.fassade}:sport${fam}`),
     n: m.n, w: m.bw, d: m.bd, x0: x + M, z0: z, M, Z,
     alt: F.alt, matt: gefuehl.matt, erlebnis: gefuehl.erlebnis, erlebnisSeite: gefuehl.erlebnisSeite,
-    erlebnisGezeigt: false, abverkauf: gefuehl.abverkauf, abverkaufFenster: 0,
+    erlebnisGezeigt: false, leuchtbandAbgeschaltet: false, abverkauf: gefuehl.abverkauf, abverkaufFenster: 0,
     status: F.eg, zu: F.zu, ohneLogo: F.ohneLogo, leute: opt.passanten !== false,
     glas: [], logos: [],
   };
@@ -1196,6 +1200,13 @@ export function sporthaus(S, scene, haus, opt = {}) {
     .map((q) => (q.seite === '+x' && fam === 4 ? { ...q, u0: q.u0 + 4.5, u1: q.u1 + 4.5 } : q));
   const bauer = { 1: familie1, 2: familie2, 3: familie3, 4: familie4, 5: familie5, 6: familie6 }[fam];
   let hoehe = bauer(K);
+  // Einige Familien haben nur auf einer Sichtseite freie Glasbuchten; das Erlebnis
+  // wird dann deterministisch auf der tatsächlich vorhandenen Glasfront ergänzt.
+  if (K.erlebnis && !K.erlebnisGezeigt && !K.zu) {
+    const fenster = K.glas.filter((g) => g.eg && !g.tuer && !g.mieter && g.b - g.a >= 3.4);
+    const g = fenster.find((g) => g.s.seite === K.erlebnisSeite) ?? fenster[0];
+    if (g) { erlebnisHinterGlas(K, g.s, g.a, g.b, g.y0, g.t, 2.2); K.erlebnisGezeigt = true; }
+  }
   hoehe = Math.max(hoehe, K.hoeheDach ?? 0);
   K.Hw = K.Hw ?? (m.n === 1 ? 7 : EG_S + (m.n - 1) * OG_S);
   const mieterEG = mieterFronten(K);
@@ -1222,7 +1233,13 @@ export function sporthaus(S, scene, haus, opt = {}) {
     marke, seed: `${haus.id}:${Z.status}`, planeText: 'DAS NEUE HARTWIG SPORT',
   };
   if (!koerper.eingaenge.some((e) => e.haupt) && koerper.eingaenge.length) koerper.eingaenge[0].haupt = true;
-  const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor: 0.7, sportPalette: ['#203e61', '#e24739', '#26a0af', '#e0ae33', '#f2f3f0', '#272d36'], abrissSeite: opt.abrissSeite, logosAbdecken: true });
+  // Aktionsplakate beim Abverkauf ausschließlich im obersten OG. Normales EG
+  // bleibt auch bei aktiver rabattierter Engine-Aktion frei von SALE-Bannern.
+  const dekZustand = K.abverkauf && (Z.aktion || Z.status === 'aktion')
+    ? zustandNormal({ ...Z, __zustand: false, status: Z.status === 'aktion' ? 'offen' : Z.status,
+        zusatz: Z.zusatz.filter((s) => s !== 'aktion'), aktion: null, rabatt: null })
+    : Z;
+  const dek = zustandsDekor(S, scene, koerper, dekZustand, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor: 0.7, sportPalette: ['#203e61', '#e24739', '#26a0af', '#e0ae33', '#f2f3f0', '#272d36'], abrissSeite: opt.abrissSeite, logosAbdecken: true });
   hoehe = Math.max(hoehe, dek.hoehe);
   return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status };
 }
