@@ -20,6 +20,26 @@ const PARK = 17;          // Parkplatztiefe vor der Fachmarkt-Box
 const BODEN = '#ddd5c6', INNEN = '#d5dadb';
 const SLOGANS = ['LAUF LOS.', 'RAUS. JETZT.', 'NEUE SAISON', 'BERG RUFT.', 'DEIN SPIEL.', 'WINTER KOMMT', 'AB AUFS RAD'];
 
+/** Einheitliche, rein grafische Ableitung für Außenhaus und aufgeschnittene Etage.
+ * Aktionsdaten kommen ausschließlich aus zustandAusHaus() (über opt bzw. o.zustand).
+ * Fehlende Engine-Aktion wird niemals aus einem Kalender oder KPI erfunden.
+ */
+export function sportGefuehl(haus, zustand = {}) {
+  const n = (haus.etagen ?? [0]).filter((e) => e >= 0).length;
+  const erlebnis = haus.lage === '1a' && (haus.grundflaecheQm ?? 0) >= 2000
+    ? (rng(String(haus.id) + '/erlebnisart')() < 0.5 ? 'laufanalyse' : 'fitness') : null;
+  const rabatt = Number(zustand.rabatt ?? 0);
+  const aktiv = !!zustand.aktion || zustand.status === 'aktion' || (zustand.zusatz ?? []).includes('aktion');
+  const offen = !['geschlossen', 'leer', 'verfall', 'abriss', 'raeumung'].includes(zustand.status ?? haus.status);
+  return {
+    erlebnis,
+    erlebnisSeite: rng(String(haus.id) + '/erlebnisseite')() < 0.5 ? '+z' : '+x',
+    abverkauf: n > 1 && offen && ((aktiv && rabatt > 0) || (haus.substanz ?? 100) < 40),
+    obereEtage: Math.max(0, ...(haus.etagen ?? [0]).filter((e) => e >= 0)),
+    matt: (haus.substanz ?? 100) < 40 && offen,
+  };
+}
+
 // ---------------------------------------------------------------- Daten → Form
 export function familieSport(haus) {
   const r = rng(String(haus.id) + '/familie');
@@ -121,6 +141,47 @@ function ware(K, s, a, b, y, tb, tm, gruppe) {
  * Schaufenster/Verkaufsraum hinter Glas: Boden, Rückwand, Lichtband, Ware nach Gruppe. Wird in K.glas registriert,
  * damit die Statusstelle die Fläche zukleben oder vergittern kann.
  */
+/** Kleine, klar lesbare Erlebniszone direkt hinter einer der beiden sichtbaren Glasfronten. */
+function erlebnisHinterGlas(K, s, a, b, y0, tF, tiefe) {
+  const u = (a + b) / 2, t = tF - Math.min(1.65, tiefe * 0.60), f = K.erlebnis;
+  s.q(u - 1.85, u + 1.85, y0 + 0.12, y0 + 0.15, t - 0.75, t + 0.8, f === 'fitness' ? '#5e79a4' : '#c4553e');
+  if (f === 'laufanalyse') {
+    s.q(u - 1.15, u + 1.1, y0 + 0.24, y0 + 0.46, t - 0.42, t + 0.35, '#272d34');
+    s.q(u - 0.95, u + 0.85, y0 + 0.47, y0 + 0.50, t - 0.34, t + 0.26, '#141b22');
+    for (const du of [-0.9, 0.9]) s.q(u + du - 0.04, u + du + 0.04, y0 + 0.48, y0 + 1.55, t + 0.23, t + 0.30, '#d0d9df');
+    s.q(u - 0.42, u + 0.42, y0 + 1.35, y0 + 1.92, t + 0.27, t + 0.36, '#242e38');
+    s.q(u - 0.31, u + 0.31, y0 + 1.47, y0 + 1.78, t + 0.37, t + 0.39, '#46bdd6');
+    // Sitzbank und Auswertungsmonitor
+    s.q(u + 1.2, u + 1.8, y0 + 0.50, y0 + 0.60, t - 0.45, t + 0.18, '#e6e9ea');
+    s.q(u - 1.55, u - 0.7, y0 + 1.6, y0 + 2.4, t - 0.9, t - 0.80, '#263e52');
+  } else {
+    // Trainingsmatten, Hantelbank, Gerätewand
+    s.q(u - 1.25, u + 1.25, y0 + 0.20, y0 + 0.26, t - 0.25, t + 0.28, '#27343d');
+    for (let i = 0; i < 3; i++) {
+      s.q(u - 1.25 + i * 0.43, u - 0.95 + i * 0.43, y0 + 0.55, y0 + 0.75, t - 0.35, t - 0.20, i % 2 ? '#f0ac38' : '#52c1cf');
+      s.q(u - 1.20 + i * 0.43, u - 1.0 + i * 0.43, y0 + 0.42, y0 + 0.55, t - 0.35, t - 0.20, '#1f2730');
+    }
+    s.q(u + 0.3, u + 1.6, y0 + 0.62, y0 + 0.78, t - 0.40, t + 0.26, '#d7e0e5');
+    s.q(u + 1.43, u + 1.5, y0 + 0.25, y0 + 1.22, t + 0.10, t + 0.16, '#536575');
+    s.q(u - 1.65, u - 0.55, y0 + 1.48, y0 + 2.25, t - 0.85, t - 0.75, '#487ca0');
+  }
+}
+/** Nur oberstes Obergeschoss: Wühltisch, Schuhkartons und Rabattplakat. */
+function abverkaufHinterGlas(K, s, a, b, y0, y1, tF, tiefe) {
+  const u = (a + b) / 2, t = tF - Math.min(1.2, tiefe * 0.55);
+  s.q(u - 1.3, u + 1.3, y0 + 0.72, y0 + 0.86, t - 0.30, t + 0.42, '#b8b2a8');
+  for (const dx of [-1.0, 1.0]) s.q(u + dx - 0.06, u + dx + 0.06, y0 + 0.2, y0 + 0.72, t - 0.16, t - 0.08, '#777e82');
+  for (let i = 0; i < 6; i++) {
+    const xx = u - 1.1 + (i % 3) * 0.75, yy = y0 + 0.86 + Math.floor(i / 3) * 0.23;
+    s.q(xx, xx + 0.59, yy, yy + 0.20, t - 0.23, t + 0.27, i % 2 ? '#e4e6e6' : '#c7b28b');
+  }
+  if (b - a > 3.1 && y1 - y0 > 2.8) {
+    const ph = Math.min(0.95, (y1 - y0) * 0.25);
+    s.q(u - 1.1, u + 1.1, y1 - 1.3, y1 - 0.2, tF + 0.08, tF + 0.10, '#c72e31');
+    plakat(K.scene, s, 'SALE', u, y1 - 0.73, tF + 0.13, ph * 0.65, '#ffffff', '#c72e31');
+  }
+  K.abverkaufFenster++;
+}
 function vitrine(K, s, a, b, y0, y1, tF, tiefe, gruppe, o = {}) {
   const tb = tF - tiefe;
   const mz = y0 < 1 && (K.mieterZonen ?? []).find((m) => m.seite === s.seite && (a + b) / 2 > m.u0 && (a + b) / 2 < m.u1);
@@ -136,7 +197,11 @@ function vitrine(K, s, a, b, y0, y1, tF, tiefe, gruppe, o = {}) {
   s.q(a, b, y0, y0 + 0.12, tb, tF, o.boden ?? BODEN);
   s.q(a, b, y0, y1, tb - 0.1, tb, o.rueck ?? INNEN);
   s.q(a, b, y1 - 0.32, y1 - 0.18, tb, tb + 0.08, LICHT);
-  if (!K.zu && b - a > 1.6) ware(K, s, a, b, y0 + 0.12, tb, tb + tiefe * 0.55, gruppe);
+  const oben = K.abverkauf && K.n > 1 && y0 >= EG_S + (K.n - 2) * OG_S - 0.5 && y0 > 1;
+  const erlebnis = !K.erlebnisGezeigt && K.erlebnis && y0 < 1 && s.seite === K.erlebnisSeite && b - a >= 3.4;
+  if (!K.zu && oben && b - a > 2.2) abverkaufHinterGlas(K, s, a, b, y0, y1, tF, tiefe);
+  else if (!K.zu && erlebnis) { erlebnisHinterGlas(K, s, a, b, y0, tF, tiefe); K.erlebnisGezeigt = true; }
+  else if (!K.zu && b - a > 1.6) ware(K, s, a, b, y0 + 0.12, tb, tb + tiefe * 0.55, gruppe);
   K.glas.push({ s, a, b, y0, y1, t: tF, eg: y0 < 1 });
 }
 
@@ -203,12 +268,13 @@ function hsLogo(K, s, u, y, t, h, o = {}) {
   }
   const [b0, b1] = mn(uq, ue);
   s.q(b0, b1, y - h / 2, y + h / 2, t, t + 0.25, o.band ?? HS_BLAU);
+  if (K.matt) s.q(Math.min(b0, b1) + (b1 - b0) * 0.72, b1, y - h / 2, y + h / 2, t + 0.25, t + 0.27, '#59616b'); // abgeschalteter Teil des Leuchtbands
   const [c0, c1] = mn(ua, uq);
   s.q(c0, c1, y - q / 2, y + q / 2, t, t + 0.4, HS_ROT);
   const qm = (ua + uq) / 2;
   plakat(K.scene, s, 'H', qm, y + q * 0.06, t + 0.42, q * 0.82, '#ffffff');
   s.kipp(q * 0.62, q * 0.07, 0.04, qm, y - q * 0.36, t + 0.42, '#ffffff', s.lese * 0.12);
-  plakat(K.scene, s, text, (uq + ue) / 2, y, t + 0.27, ph, o.schrift ?? '#ffffff');
+  plakat(K.scene, s, text, (uq + ue) / 2, y, t + 0.27, ph, K.matt ? '#d1d3d1' : (o.schrift ?? '#ffffff'));
   return total;
 }
 /** Senkrechtes Logo (für Eckfinne oder Pylon): Quadrat oben, Schriftzug darunter senkrecht. */
@@ -526,7 +592,7 @@ function familie3(K) {
   parkreihe(S, r, x0 + 1, x0 + w - 6, zp + 10.2, 5, y + 0.03, K.zu ? 0.1 : 0.65);
   for (let x = x0 + 4; x < x0 + w - 6; x += 6) S.box(2.2, 0.03, 0.15, x, y + 0.05, zp + 6.8, '#f2f1ec');
   for (let i = 0; i < 4; i++) S.box(0.5, 0.03, 2.4, x0 + pu - 2 + i * 1.0, y + 0.05, zp + 6.8, '#f2f1ec');
-  if (!K.zu && K.leute) for (let i = 0; i < 4; i++) mensch(S, r, x0 + pu + zw(r, -4, 4), y, zp + zw(r, 1.5, 9));
+  if (!K.zu && K.leute) for (let i = 0; i < 3; i++) mensch(S, r, x0 + pu + zw(r, -4, 4), y, zp + zw(r, 1.5, 9));
   // Pylon an der Ecke
   {
     const px = x0 + w - 2.6, pz = zp + PARK - 3.2, ph = Math.max(H + 4, 11);
@@ -881,7 +947,7 @@ function familie5(K) {
     if (!K.zu) {
       const t1 = new THREE.ConeGeometry(1.5, 1.8, 4); t1.rotateY(Math.PI / 4); t1.translate(zx - 2, yb + 0.9, zz); S.add(t1, '#f2c14e');
       S.box(1.8, 0.4, 0.8, zx + 2, yb + 0.2, zz - 0.6, '#3f7d56'); S.box(1.8, 0.4, 0.8, zx + 2, yb + 0.2, zz + 0.8, '#e36b2c');
-      if (K.leute) { mensch(S, r, tx0 + 0.8, yb, zz + 1); mensch(S, r, zx + 3.5, yb, tz1 - 0.8); mensch(S, r, tx1 - 0.8, yb, zz - 1); }
+      if (K.leute) { mensch(S, r, tx0 + 0.8, yb, zz + 1); mensch(S, r, tx1 - 0.8, yb, zz - 1); }
     }
     for (let x = tx0; x < tx1; x += 3.5) kuebelbaum(S, r, x, yb, tz0 - 1.2, 0.55);
   }
@@ -1031,6 +1097,15 @@ export function statusSport(K) {
     }
     return;
   }
+  if (K.matt && !K.zu) { // Nur ein bis zwei matte Scheiben, kein Verfall
+    const auswahl = K.glas.filter((g) => !g.tuer && !g.mieter && g.b - g.a > 1.7);
+    const r = rng(String(K.haus.id) + '/blindglas');
+    const beginn = auswahl.length ? Math.floor(r() * auswahl.length) : 0;
+    for (let i = 0; i < Math.min(2, auswahl.length); i++) {
+      const g = auswahl[(beginn + i * Math.max(1, Math.floor(auswahl.length / 2))) % auswahl.length];
+      g.s.q(g.a + 0.18, g.b - 0.18, g.y0 + 0.20, g.y1 - 0.22, g.t + 0.025, g.t + 0.045, '#88999d');
+    }
+  }
   if (st.status === 'geschlossen') for (const g of K.glas) if (!g.eg) { // Obergeschosse: Rollos unten
     g.s.q(g.a, g.b, g.y0 + 0.2, g.y1 - 0.2, g.t + 0.02, g.t + 0.06, '#4a5057');
     for (let y = g.y0 + 0.5; y < g.y1 - 0.3; y += 0.45) g.s.q(g.a, g.b, y, y + 0.06, g.t + 0.06, g.t + 0.09, '#363b40');
@@ -1058,6 +1133,21 @@ function mieterFronten(K) {
   return aus;
 }
 
+/** Fallback für Familien mit geschlossenen OG-Fenstern (2, 3, 6): Abverkauf ist nur oben markiert. */
+function abverkaufFassade(K) {
+  if (!K.abverkauf || K.n < 2 || K.abverkaufFenster > 0) return;
+  const y0 = EG_S + (K.n - 2) * OG_S, r = rng(String(K.haus.id) + '/verkaufsfenster');
+  for (const s of K.seiten) {
+    const uE = s.L - (K.fam === 1 ? 3.5 : K.fam === 6 ? 7 : 1);
+    const kandidaten = [uE * 0.19, uE * 0.78];
+    const u = kandidaten.find((u) => !K.logos.some((lg) => lg.s === s && u > lg.u0 - 2.0 && u < lg.u1 + 2.0 && y0 + 2.1 > lg.y0 - 1.0 && y0 + 2.1 < lg.y1 + 1.0));
+    if (u == null || u < 2 || u > uE - 2) continue;
+    const t = K.tRelief ?? 0.5, farbe = r() < 0.5 ? '#be3034' : '#cf3538';
+    s.q(u - 1.35, u + 1.35, y0 + 1.5, y0 + 2.7, t + 0.1, t + 0.13, farbe);
+    plakat(K.scene, s, 'SALE', u, y0 + 2.1, t + 0.16, 0.71, '#ffffff', farbe);
+  }
+}
+
 // ---------------------------------------------------------------- Hauptfunktion
 /**
  * Baut ein Sporthaus aus haeuser.json (format 'sport').
@@ -1081,11 +1171,14 @@ export function sporthaus(S, scene, haus, opt = {}) {
   const ausDaten = flaechen.filter((f) => f.konzept === 'untermiete').map((f) => mieterInfo({ name: namen[Math.floor(rM() * namen.length)], etage: f.etage }));
   const Z = zustandNormal({ ...opt, status, seed: haus.id }, { untermieter: ausDaten });
   const F = zustandFlags(Z);
+  const gefuehl = sportGefuehl(haus, Z);
   const M = fam === 4 ? m.w - m.bw : 0;
   const K = {
     S, scene, haus, fam, v: ((haus.fassade ?? 0) % 8 + 8) % 8, r: rng(`${haus.id}:${haus.fassade}:sport${fam}`),
     n: m.n, w: m.bw, d: m.bd, x0: x + M, z0: z, M, Z,
-    alt: (haus.substanz ?? 100) < 40 || F.alt, status: F.eg, zu: F.zu, ohneLogo: F.ohneLogo, leute: opt.passanten !== false,
+    alt: F.alt, matt: gefuehl.matt, erlebnis: gefuehl.erlebnis, erlebnisSeite: gefuehl.erlebnisSeite,
+    erlebnisGezeigt: false, abverkauf: gefuehl.abverkauf, abverkaufFenster: 0,
+    status: F.eg, zu: F.zu, ohneLogo: F.ohneLogo, leute: opt.passanten !== false,
     glas: [], logos: [],
   };
   K.c = (c) => (F.verblichen ? '#' + new THREE.Color(c).offsetHSL(0, -0.2, -0.07).getHexString() : K.alt ? '#' + new THREE.Color(c).offsetHSL(0, -0.06, -0.06).getHexString() : c);
@@ -1106,6 +1199,7 @@ export function sporthaus(S, scene, haus, opt = {}) {
   hoehe = Math.max(hoehe, K.hoeheDach ?? 0);
   K.Hw = K.Hw ?? (m.n === 1 ? 7 : EG_S + (m.n - 1) * OG_S);
   const mieterEG = mieterFronten(K);
+  abverkaufFassade(K);
   statusSport(K);
   // Körperbeschreibung für zustandsDekor
   const seite = (s) => {
@@ -1128,7 +1222,7 @@ export function sporthaus(S, scene, haus, opt = {}) {
     marke, seed: `${haus.id}:${Z.status}`, planeText: 'DAS NEUE HARTWIG SPORT',
   };
   if (!koerper.eingaenge.some((e) => e.haupt) && koerper.eingaenge.length) koerper.eingaenge[0].haupt = true;
-  const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite, logosAbdecken: true });
+  const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor: 0.7, sportPalette: ['#203e61', '#e24739', '#26a0af', '#e0ae33', '#f2f3f0', '#272d36'], abrissSeite: opt.abrissSeite, logosAbdecken: true });
   hoehe = Math.max(hoehe, dek.hoehe);
   return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status };
 }
