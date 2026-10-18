@@ -28,7 +28,7 @@ Das Spiel ist sofort im mobilen Browser testbar. Eine signierte iOS-App oder ein
 ## 3. Spielstand und Messung
 
 - Im Spiel über **Menü → Speichern** den Spielstand ablegen. Nach einem Neuladen im Startbildschirm **Fortsetzen** wählen. Nach Entscheidungen und jeder Spielwoche wird automatisch gespeichert.
-- Im Menü **Performance** öffnen. Der 90-Frame-Test misst auf dem tatsächlich verwendeten iPhone Framerate, 95. Perzentil der Framezeit und Draw Calls.
+- Im Menü **Performance** öffnen. Der auf 90 Frames beziehungsweise rund 8 Sekunden begrenzte Test misst auf dem tatsächlich verwendeten iPhone Framerate, 95. Perzentil der Framezeit und Draw Calls.
 - Eine Testsequenz durchspielen: neues Spiel starten, 52 Wochen simulieren, Einkauf/HQ/Marketing verändern, speichern, Safari schließen, wieder öffnen, fortsetzen und weitere 52 Wochen simulieren.
 - Auf einem echten Gerät insbesondere Ruckler beim Zoomen, Wärmentwicklung, Speichern nach einem App-Wechsel und die Ladezeit einer neuen Stadt kontrollieren.
 
