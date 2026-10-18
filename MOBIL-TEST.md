@@ -12,15 +12,16 @@ Der Build erzeugt `render/spiel-bundle.js`. Die Engine wird direkt eingebuendelt
 
 ## 2. Im selben WLAN auf dem iPhone öffnen
 
-Im Ordner `render` einen HTTP-Server starten:
+Im Ordner `render` den Prototyp bauen und fuer das private WLAN bereitstellen:
 
 ```bash
-python3 -m http.server 4173 --bind 0.0.0.0
+npm run iphone
 ```
 
-Die lokale IPv4-Adresse des Rechners ermitteln (`ipconfig` unter Windows, `hostname -I` unter Linux).
+Der Startbefehl zeigt die erkannten lokalen IP-Adressen und die zugehoerigen URLs an.
 Auf dem iPhone im selben WLAN in Safari **http://RECHNER-IP:4173/spiel.html** öffnen.
 Im Windows-Firewall-Dialog ggf. das *private Netzwerk* erlauben. Server nur in einem vertrauenswürdigen WLAN verwenden.
+Bei WSL2 mit NAT kann die angezeigte WSL-Adresse vom iPhone aus unerreichbar sein. Dann den Server ueber Node unter Windows oder WSL im Mirrored-Network-Modus starten.
 
 Das Spiel ist sofort im mobilen Browser testbar. Eine signierte iOS-App oder ein App-Store-Release entsteht dabei noch nicht.
 
