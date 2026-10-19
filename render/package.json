@@ -10,7 +10,9 @@
     "smoke:karte": "node spiel-render.js --nur-karte",
     "smoke:voll": "node spiel-render.js",
     "smoke:start": "node spiel-render.js --nur-start",
-    "iphone": "node spiel-render.js --bundle && node dev-server.js"
+    "iphone": "node spiel-render.js --bundle && node dev-server.js",
+    "moebel:pruefen": "node pruef-moebel.js",
+    "moebel:kataloge": "node render-katalog.js moebel-sport && node render-katalog.js moebel-outlet && node render-katalog.js moebel-allgemein && node render-katalog.js moebel-reihen"
   },
   "keywords": [],
   "author": "",
