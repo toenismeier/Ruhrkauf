@@ -6,7 +6,7 @@ Branch `feat/engine-formate`. Erst nach Merge von `feat/grafik-schwesterkette` u
 - `Format = 'warenhaus' | 'sport'` (`engine/src/types.ts`). 130 Warenhäuser und 50 Sporthäuser entstehen in `welt.ts neueWelt`/`bauHaus`.
 - Die Grafik kennt nach den Grafik-Aufträgen zwei weitere Formate, rein grafisch und ohne Engine:
   - Schwesterkette „Kaufhaus Wendt“: `render/haeuser-schwester.json`, 24 Häuser `K001` bis `K024`, `format: 'schwester'`, Nachkriegsbauten, Lage 1a oder b, Mittel- und Großstädte, Schwerpunkt NRW, Name als Konstante `NAME_SCHWESTER` in `render/src/kit/schwesterhaus.js`.
-  - Outlet „Hartwig Outlet“: `render/haeuser-outlet.json`, 20 Häuser `O001` bis `O020`, `format: 'outlet'`, Lage `rand`, Konstante `NAME_OUTLET` in `render/src/kit/outlet.js`.
+  - Off-Price-Kette (TK-Maxx-Prinzip, eigene Marke, Arbeitsname „MARKENWERT“): `render/haeuser-outlet.json`, 20 Häuser `O001` bis `O020`, `format: 'outlet'`, 14 × Lage `rand` (Retail Park), 6 × Lage `b` (Innenstadt), Konstante `NAME_OUTLET` in `render/src/kit/outlet.js`. Format-Kennung im Code bleibt `outlet`.
 - Offprice läuft heute je Format über Flächen mit Konzept `offprice` und `einkauf.ts verbraucheAltwareWg(s, format, wert)`, das Altware (`istAlt`) des Formats verbraucht. In `engine.ts` stehen `Record<Format, …>`-Objekte mit festen Schlüsseln `warenhaus` und `sport`.
 
 Vorbild Ruhrkauf: Die Schwesterkette ist „der vergessene Zwilling“: eigener Rechtsträger, eigene Regionalführung und eigenes Warenwirtschaftssystem, nur die Jahresrechnung läuft in die Zentrale. Sie ist härter, früher und standardisierter abzuwickeln, Volumen ohne Profil und kapitalintensiv. Das Outlet ist die Abverkaufsschiene des Konzerns: Was in Warenhaus und Sport nicht verkauft wird, geht dorthin.
@@ -24,19 +24,21 @@ Vorbild Ruhrkauf: Die Schwesterkette ist „der vergessene Zwilling“: eigener 
   - Personal: dünnere Führung (Filialleiter-Skill 0,3 bis 0,6), eigene Regionalleitung als Zentralkosten-Block `schwesterZentrale` (fixe Kosten je Woche, kalibriert unten).
   - Eigene, weniger flexible Mietverträge (öfter Altverträge mit hoher Mietquote).
 - **Outlet** (`bauHaus` mit Format `outlet`):
-  - Alle Flächen Konzept `offprice`, 1.500 bis 5.000 qm, ein bis zwei Etagen, Miete niedrig (Lage `rand`, Mietquote 4 bis 6 %).
-  - Umsatz entsteht nur aus Altware, die dorthin gelenkt wird (siehe 3).
+  - Off-Price-Markenladen: Abteilungen Damen, Herren, Kinder, Schuhe, Accessoires, Home, Beauty (Warenhausgruppen ohne food und spielwaren), alle Flächen Konzept `offprice`, 2.000 bis 4.500 qm, ein bis drei Etagen. Miete niedrig in Randlage (Mietquote 4 bis 6 %), mittel in b-Lage (7 bis 9 %).
+  - Ware aus zwei Quellen (siehe 3): Konzern-Altware und zugekaufte Markenposten. Hohe Frequenz, niedriger Bon, schneller Umschlag.
 
 ## 3. Warenfluss Altware
 - Neue Steuerung `s.einkauf.altwareOutlet` (0..1, Start 0,5): Anteil der wöchentlich alt werdenden Ware (Warenhaus, Schwester, Sport), der ins Outlet geht statt in die Offprice-Flächen der Häuser bzw. in die Abschrift.
 - Neue Funktion `outletVersorgung(s)` in `einkauf.ts`: verschiebt Altware-Kohorten in einen Outlet-Pool (Kohorte bekommt `pool: 'outlet'` oder ein Feld `imOutlet: true`), mit Logistikkosten 3 % vom Einstand. Im Outlet verkauft sich Altware zu 35 bis 55 % des Ursprungspreises, abhängig von Alter und Saison. Ladenhüter (`ladenhueter`) verkaufen sich nur im Outlet, dort aber langsam (6 % je Woche).
+- **Zukauf Markenposten:** Neben der Konzern-Altware kauft das Format laufend Markenposten zu (Steuerung `s.einkauf.offpriceZukauf` als Wochenbudget in €, Start so kalibriert, dass Altware rund 35 % und Zukauf rund 65 % des Wareneinsatzes ausmachen). Zukauf zu 30 bis 40 % des ursprünglichen Verkaufspreises, Abverkauf zu 50 bis 70 % davon; Marge damit klar besser als bei Konzern-Altware. Qualität der Posten hängt von der HQ-Einkaufsstufe ab.
 - Nachfrage im Outlet: je Haus abhängig von Einzugsgebiet (Kaufkraft niedrig ist kein Nachteil, Faktor `2 - kaufkraft` gekappt 0,8..1,2), Wettbewerb `offprice` in der Stadt, Marketing-Budget.
 - Ist zu wenig Ware im Pool, sinkt der Outlet-Umsatz sichtbar (leere Flächen), ist zu viel da, steigen die Abschriften.
 
 ## 4. Spieleraktionen (`aktionen.ts`, `SpielerAktion`)
 - `{ typ: 'altwareOutlet'; quote: number }`.
+- `{ typ: 'offpriceZukauf'; budget: number }`.
 - `{ typ: 'schwesterUmflaggen'; haus: string }`: Schwesterhaus wird Hartwig. Umbau 20 bis 30 Wochen (Status über vorhandene Umbaulogik, Fläche teilweise gesperrt), Kosten 180 € je qm Verkaufsfläche, danach `format: 'warenhaus'`, Flächenproduktivität ×0,9 eines Hartwig-Hauses (Kundschaft muss erst kommen, über 52 Wochen auf ×1,0). Nur mit HQ-Abteilung Immobilien Stufe 1 oder höher.
-- `{ typ: 'outletEroeffnen'; stadt: string }`: nur in Städten aus einer Kandidatenliste (`outletKandidaten(s)`: Stadtrandflächen mit Miete, Größe, erwarteter Umsatz), Vorlauf 12 Wochen, Investition 120 € je qm.
+- `{ typ: 'outletEroeffnen'; stadt: string }`: nur in Städten aus einer Kandidatenliste (`outletKandidaten(s)`: Retail-Park- und b-Lagen-Flächen mit Miete, Größe, erwarteter Umsatz), Vorlauf 12 Wochen, Investition 120 € je qm.
 - Schließen läuft über die vorhandene Aktion `schliessen` (Sozialplan, Restmiete). Für die Schwesterkette gilt der Ruhrkauf-Grundsatz „härter, früher, standardisierter“: Schließungskosten je FTE ×0,85, Betriebsrat-Reaktion schwächer, Image-Verlust je Schließung halb so hoch wie bei Hartwig.
 - Scope `format` in Aktionen und Marketing akzeptiert die neuen Formate.
 

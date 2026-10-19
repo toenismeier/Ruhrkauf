@@ -37,7 +37,7 @@ Ziel: ein einheitlicher, katalogisierter Möbelbestand mit gleichem Aufruf, glei
    - Inseln 2,5 × 2,5 oder 5 × 2,5 m, höchstens 1,5 m hoch.
 3. **Bestand aufbauen**, vorhandene Funktionen übernehmen und vereinheitlichen, fehlende neu bauen. Mindestens:
    - Sport (≥ 60 Stück): Schuhwand in 3 Varianten (Marken, Laufschuh, Kinder), Kartonwand, Textilwand (Hängung, Falt, Mix), Trikotwand, Jackenwand, Outdoorschuhwand, Rucksackwand, Schlafsack-, Isomatten-, Zeltzubehörwand, Radwand, Helmwand, Zubehörwand, Skiwand, Boardwand, Skijackenwand, Ballwand, Stollenwand, Fitnesszubehörwand; Gondeln für Schuhe, Textil gefaltet, Bälle, Trinkflaschen und Riegel, Socken und Zubehör, Fitnesskleingeräte; Inseln: Neuheitenpodest, Puppengruppe (3 Haltungen, 4 Sportarten), Laufanalyse (Laufband, Bildschirm, Bank), Fitness (2 bis 3 Geräte, Spiegel, Matte), Zelt aufgebaut, Kanu auf Ständer, E-Bike-Podest, Radreihe, Skischuh-Anprobe, Torinsel, Beflockung; Service: Radwerkstatt, Skiservice, Kassentresen klein und groß, Info, Umkleide (2 und 4 Kabinen), Sitzbank Anprobe; Deko: Kletterwand-Segment, Bildwand mit Motiv, Pflanzkübel, Saisonbanner.
-   - Outlet (≥ 40 Stück): Wühltisch (3 Größen), Gitterbox, Palette mit Kartons, Palettenregal (2 und 3 Ebenen), Kleiderstange lang (5 m, einfach und doppelt), Rundständer Restposten, Schuhkarton-Regal, Schütte, Aktionsaufsteller, Deckenhänger mit Prozent, Kassenzeile (2, 4, 6 Kassen), Einkaufswagen-Station, Korbstapel, Sicherheitsschranke Eingang, Umkleide einfach, Lager-Hochregal, Rolltor, Hubwagen, Restposten nach Herkunft (Warenhaus-Mode, Sport, Wohnen, Spielwaren als Ware auf denselben Trägern).
+   - Off-Price-Format (TK-Maxx-Prinzip, siehe `grafik-outlet.md`), bewusst wenige Typen, dafür gut und dicht bestückt (rund 12 Stück): Doppel-Kleiderstange 5 m mit Größenschild darüber (XS bis XL), Kleiderstange einfach an der Wand, Rundständer, Gondel Home und Accessoires, Gondel Beauty, Schuhregal mit Kartons nach Größen, Taschenwand, Wandregal Home, Kassenzeile mit Schlangenführung (Absperrbänder, Impulsware-Gondeln am Weg), Einkaufswagen- und Korbstation, Umkleide-Reihe, Nachräum-Rollwagen. Keine Wühltische, Gitterboxen, Paletten oder Lagerregale. Ware ist Markenmode, dicht gehängt, bunt gemischt.
    - Allgemein (≥ 20 Stück, für Schwesterkette und Warenhaus mitnutzbar): Wandregal Kaufhaus alt (Holz, dunkler), Kassentisch alt, Vitrine alt, Treppe zentral offen, Rasterleuchten-Decke (nur als Deckenband am Schnitt), Stütze mit Spiegel, Fahrstuhl alt.
 4. **Deterministisch** über `rng(seed)`; Farben der Ware über Paletten je Sportart bzw. Herkunft; Schrift nur über `basis.js`.
 5. **Budget** je Möbel im Objekt festgehalten und geprüft (`S.anzahl` vor und nach dem Bau): Wand 5 m höchstens 220 Teile, Gondel höchstens 120, Insel höchstens 260, Deko höchstens 80. Fernstufe (`setzeLod('fern')`) baut nur Korpus und Farbe.
@@ -76,7 +76,7 @@ Neue Datei `render/LADENBAU.md`, verbindlich wie `GESTALTUNG.md`, mit messbaren 
 7. **Dichte:** Möbelfläche 35 bis 50 % der Verkaufsfläche, größte Leerfläche höchstens 6 m (wie heute gemessen).
 8. **Format-Profile:**
    - Hartwig Sport: hell, modern, Markenwände, eine Inszenierung je Abteilung, Schild-Farbe je Sportart nur im Schildband.
-   - Outlet: Halle, Palettenregale an der Wand, Wühltisch- und Stangenreihen, Kassenzeile, keine Inszenierung, ein Boden plus Gangmarkierung.
+   - Off-Price-Format: großer heller Laden, breiter Hauptgang, lange parallele Stangenreihen je Abteilung mit Größenschildern, Wandbänder mit Hängeware und Schuhen, zentrale Kassenzeile mit Schlangenführung, keine Inszenierung, ein heller Boden plus Gang.
    - Schwesterkette: Kaufhaus alt, Holzregale dunkler, Treppe zentral, keine Rolltreppe, Rasterleuchten.
 
 Grenzwerte als Konstanten in `render/src/kit/ladenbau-regeln.js`, damit Planer und Prüfung dieselben Zahlen nutzen.
@@ -113,13 +113,13 @@ Grenzwerte als Konstanten in `render/src/kit/ladenbau-regeln.js`, damit Planer u
 3. Kataloge `sport-etagen`, `sport-abteilungen`, `sport-feeling`, `sport-feeling-nah` neu rendern und neben den alten Stand legen (Vorher/Nachher-Katalog `sport-etagen-vergleich.js`).
 4. Abnahme: `pruef-ladenbau` 0 Verstöße über alle Sporthäuser, Teile je Etage nicht höher als vorher, `spiel-render.js` 0 Abweichungen, Sichtprüfung: ruhige Fläche, klare Gänge, Wandband geschlossen.
 
-## Phase 5: Outlet innen (1 bis 2 Chats)
-1. Innenraum des Outlets mit `ladenplan` und Profil Outlet für alle drei Bauformen aus `grafik-outlet.md` (Industriehalle, umgebauter Supermarkt, Fachmarkt-Box mit Lagerannex).
-2. Ware nach Herkunft (Warenhaus, Sport, Wohnen) in Zonen. Ist die Engine mit Formaten fertig (`engine-formate.md`), Zonen nach Pool-Inhalt, sonst nach festem Schlüssel.
+## Phase 5: Off-Price-Format innen (1 bis 2 Chats)
+1. Innenraum mit `ladenplan` und Profil Off-Price für alle drei Bauformen aus `grafik-outlet.md`: Fachmarkt-Box eingeschossig, Fachmarkt-Box zweigeschossig, Innenstadt-Geschäftshaus.
+2. Abteilungen: Damen (größte), Herren, Kinder, Schuhe, Taschen und Accessoires, Home, Beauty-Ecke. Kassenzeile zentral am Ausgang.
 3. Zustände innen:
-   - normal (gefüllt),
-   - leer gelaufen (Regale halb leer, Gitterboxen leer),
-   - überfüllt (Paletten im Gang am Rand, Kartons gestapelt),
+   - normal: Stangen dicht gehängt,
+   - schwach bestückt: Stangen mit Lücken, Größenschilder über leeren Abschnitten,
+   - Ansturm: Schlange bis in den Gang, Rollwagen mit Nachschub,
    - Räumung.
 4. Katalog `outlet-innen.js` (ersetzt den gleichnamigen Katalog aus `grafik-outlet.md`, falls schon vorhanden) und `outlet-innen-zustaende.js`. `pruef-ladenbau` 0 Verstöße.
 

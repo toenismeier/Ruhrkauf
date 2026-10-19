@@ -10,7 +10,7 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `grafik-sport.md` + `nachbesserung-sport.md` | `feat/grafik-sport` | | allem |
 | `grafik-outlet.md` | `feat/grafik-outlet` | Merge Schwesterkette | Posteingang, Wettbewerber-Engine |
 | `grafik-premium.md` | `feat/grafik-premium` | Merge Schwesterkette | Posteingang, Wettbewerber-Engine |
-| `engine-wettbewerber.md` | `feat/engine-wettbewerber` | | Grafik-Aufträgen, Posteingang |
+| `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | | Grafik-Aufträgen, Posteingang |
 | `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | Merge Wettbewerber-Engine | Premium, Outlet |
 | `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet | Posteingang |
 | `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`) | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | Phase 4 nach Merge Sport, Phase 5 nach Merge Outlet-Außenbau, Phase 6 nach Merge Schwesterkette | Engine-Aufträgen, Posteingang |
