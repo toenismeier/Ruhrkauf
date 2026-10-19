@@ -43,7 +43,7 @@ export function zeigeKatalog(eintraege, opts = {}) {
       if (!box) box = new THREE.Box3().setFromObject(scene);
       const mitte = box.getCenter(new THREE.Vector3());
       sonneAuf(scene, mitte, box.getSize(new THREE.Vector3()).length() * 0.8 + 10);
-      const cam = kameraFuer(kw, kh, box, opts.rand ?? e.rand ?? 1.1);
+      const cam = typeof e.kamera === 'function' ? e.kamera({ breite: kw, hoehe: kh, box, mitte, THREE }) : kameraFuer(kw, kh, box, opts.rand ?? e.rand ?? 1.1);
       r.render(scene, cam);
       g.drawImage(r.domElement, x, y, kw, kh);
       raeume(scene);
