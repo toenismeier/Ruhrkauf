@@ -41,7 +41,7 @@ esbuild.buildSync({
 });
 const {sportLadenEingabe}=require(sportAus);
 const haeuser=JSON.parse(fs.readFileSync(path.join(__dirname,'..','haeuser.json'),'utf8'));
-const sport=haeuser.filter(h=>h.format==='sport'||/^S\\d/.test(h.id));
+const sport=haeuser.filter(h=>h.format==='sport'||/^S\d/.test(h.id));
 let etagen=0;
 for(const haus of sport)for(const etage of haus.etagen.filter(e=>e>=0)){
  const eingabe=sportLadenEingabe(haus,etage);
