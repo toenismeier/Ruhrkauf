@@ -1,0 +1,106 @@
+name: Hartwig Sport Nachbesserung – Runde 3
+on:
+  push:
+    branches: [feat/grafik-sport]
+    paths:
+      - .github/workflows/sport-nachbesserung.yml
+permissions:
+  contents: write
+jobs:
+  bilder-und-pruefungen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: render/package-lock.json
+      - name: Installation
+        working-directory: render
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          BROWSER=$(node -e "process.stdout.write(require('playwright').chromium.executablePath())")
+          sudo mkdir -p /opt/pw-browsers/chromium-1194/chrome-linux
+          sudo ln -sf "$BROWSER" /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+      - name: Rendern der fünf Kataloge
+        shell: bash
+        working-directory: render
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          sed -i "s/m.text().startsWith('LEER')/m.text().startsWith('LEER') || m.text().startsWith('SPORT')/" render-katalog.js
+          for katalog in sport-feeling sporthaeuser sport-etagen sport-zustaende sport-feeling-nah; do
+            echo "Katalog: $katalog"
+            timeout 1200 node render-katalog.js "$katalog" | tee "out/.log-$katalog"
+            test -s "out/katalog-$katalog.png"
+            if grep -q 'Fehler in Einträgen:' "out/.log-$katalog"; then exit 1; fi
+          done
+      - name: Teilezahl-Abnahme je Haus
+        shell: bash
+        working-directory: render
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const line=fs.readFileSync('out/.log-sport-feeling-nah','utf8').split('\n').find(s=>s.startsWith('SPORTNAH_STAT '));
+          if(!line)throw Error('Statistik der Nahansichten fehlt');
+          const stats=JSON.parse(line.slice(14));
+          if(stats.length!==28)throw Error('Erwartet 28 Varianten, erhalten: '+stats.length);
+          for(const s of stats)if(s.teile>8000)throw Error('Über 8000 Teile: '+JSON.stringify(s));
+          const s=stats.filter(x=>x.id==='S003 · Referenz');
+          if(s.length!==4)throw Error('S003: 4 Vergleichszustände fehlen');
+          for(let q=0;q<stats.length;q+=4){
+            if(stats[q+1].teile<stats[q].teile)throw Error('Abverkauf hat weniger Teile: '+JSON.stringify(stats.slice(q,q+2)));
+          }
+          const hline=fs.readFileSync('out/.log-sporthaeuser','utf8').split('\n').find(s=>s.startsWith('SPORTHAEUSER_STAT '));
+          if(!hline)throw Error('Teileprotokoll aller 56 Sporthaus-Szenarien fehlt');
+          const alle=JSON.parse(hline.slice('SPORTHAEUSER_STAT '.length));
+          if(alle.length!==56)throw Error('56 Sporthäuser erwartet, erhalten: '+alle.length);
+          for(const h of alle)if(h.teile>8000)throw Error('Über 8000 Teile im Basiskatalog: '+JSON.stringify(h));
+          console.log('Abnahme: 56 Hausansichten und 28 Zustandsvarianten unter 8000 Teilen; S003',s[0].teile,'→',s[1].teile);
+          NODE
+      - name: Bilder im Repository aktualisieren
+        shell: bash
+        run: |
+          set -euo pipefail
+          for katalog in sport-feeling sporthaeuser sport-etagen sport-zustaende sport-feeling-nah; do
+            cp "render/out/katalog-$katalog.png" "bilder/katalog-$katalog.png"
+          done
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bilder/katalog-sport*.png
+          git commit -m "Sportgrafik-Nachbesserung: fünf aktuelle Renderkataloge" || exit 0
+          git push origin HEAD:feat/grafik-sport
+      - name: Stadt- und Gestaltungsabnahme aller Standorte
+        shell: bash
+        working-directory: render
+        run: |
+          set -euo pipefail
+          timeout 1200 node pruef-staedte.js | tee out/sport-staedte.log
+          grep -q 'Fehler: 0' out/sport-staedte.log
+          npx esbuild src/kit/staedte.js --bundle --platform=node --format=esm --loader:.json=json --outfile=out/.staedte-alle.mjs
+          NAMEN=$(node -e "(async()=>{const m=await import('./out/.staedte-alle.mjs'); process.stdout.write(m.STADTLISTE.map(s=>s.name).join(','))})()")
+          echo "Städte insgesamt: $(echo "$NAMEN" | tr ',' '\n' | wc -l)"
+          timeout 1800 node pruef-gestaltung.js "$NAMEN" | tee out/sport-gestaltung-alle.log
+          if grep -Ei 'Verstöße.*[1-9]' out/sport-gestaltung-alle.log; then echo "Gestaltungsverstöße!"; exit 1; fi
+      - name: Spiel- und Panelrendering
+        shell: bash
+        working-directory: render
+        run: |
+          set -euo pipefail
+          timeout 1500 node spiel-render.js | tee out/sport-spiel.log
+          if grep -Ei 'anzeigeFehler":[1-9]|Abweichungen":[1-9]' out/sport-spiel.log; then exit 1; fi
+      - name: Bild- und Prüfprotokolle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sport-nachbesserung-bilder
+          path: |
+            render/out/katalog-sport*.png
+            render/out/.log-sport*
+            render/out/sport-*.log
+          if-no-files-found: ignore

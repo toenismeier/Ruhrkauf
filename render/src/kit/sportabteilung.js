@@ -515,3 +515,41 @@ Object.assign(ABT, {
 for (const g of SPORT_ARTEN) ABT[g].kante = ABT[g].kante ?? KANTE;
 export const SPORT_NAMEN = Object.fromEntries(SPORT_ARTEN.map((g) => [g, ABT[g].name]));
 export { kanu, radWerkstatt, skiService, kuppelzelt, torGross, paar, schuh, laufband, helm, fels, pflanze, bank, karton, bildschirm, VEREINE, WINTER, OUT, SCHUH, RADF };
+
+/** Die A-Haus-Erlebnisfläche benutzt dieselben Geräte wie die regulären Sportabteilungen. */
+export function sportErlebnis(L, r, d, art, ctx) {
+  if (art === 'laufanalyse') laufanalyse(L, r, d, ctx);
+  else fitnessInsel(L, r, d, ctx);
+}
+
+/** Schlichte Aktionsware statt Markeninszenierung: Wühltisch, Gitterkörbe und Schuhpaletten.
+ * Ein 5 × 5-m-Rasterfeld. index variiert die Möblierung ohne zusätzlichen Zufallsgenerator.
+ */
+export function sportAbverkauf(L, r, d, index = 0) {
+  const f = '#c9c7c1', metall = '#697179', holz = '#b99469';
+  L.box(4.8, 0.03, 4.8, 0, 0, 0, '#e5e2dc');
+  if (index % 3 === 0) {
+    // Gitterkörbe: niedrige Umrandung, sichtbar unsortierte Ware.
+    for (const x of [-1.05, 1.05]) {
+      L.box(1.75, 0.13, 1.25, x, 0.28, -0.4, '#e6e8e9');
+      for (const z of [-1.05, 0.25]) L.box(1.75, 0.45, 0.045, x, 0.25, z, metall);
+      for (const dx of [-0.88, 0.88]) L.box(0.045, 0.45, 1.3, x + dx, 0.25, -0.4, metall);
+      for (let j = 0; j < (d < 0.5 ? 3 : 6); j++) L.box(0.35, 0.18, 0.32, x + zw(r, -0.55, 0.55), 0.35, -0.4 + zw(r, -0.4, 0.4), j % 3 === 0 ? '#d23c32' : f);
+    }
+  } else {
+    // Zwei Wühltische mit unregelmäßig gestapelten Schuh- und Textilkartons.
+    for (const z of [-1.0, 1.0]) {
+      L.box(2.95, 0.15, 1.2, 0, 0.73, z, f);
+      for (const x of [-1.18, 1.18]) L.box(0.10, 0.73, 0.10, x, 0.0, z, metall);
+      for (let i = 0; i < (d < 0.5 ? 4 : 8); i++) {
+        const x = -1.2 + (i % 4) * 0.75, zz = z - 0.4 + Math.floor(i / 4) * 0.55;
+        karton(L, x, 0.89, zz, i % 3 ? '#e8e7e2' : '#caab80', 0.48, 0.2);
+      }
+    }
+  }
+  // Palettenstapel mit den Kartons der vorigen Saison an der Rückkante.
+  if (index % 2 === 0) {
+    L.box(1.25, 0.14, 0.85, 1.6, 0.02, 1.75, holz);
+    for (let k = 0; k < 4; k++) karton(L, 1.15 + (k % 2) * 0.6, 0.16 + Math.floor(k / 2) * 0.26, 1.7, k % 2 ? '#ffffff' : '#c7bba7', 0.58, 0.22);
+  }
+}

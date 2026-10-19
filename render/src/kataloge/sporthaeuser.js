@@ -33,5 +33,6 @@ const eintraege = liste.map(([h, opt, titel]) => ({
 }));
 setTimeout(() => {
   zeigeKatalog(eintraege, { titel: 'Hartwig Sport: alle 50 Sporthäuser', spalten: 6, kachel: [440, 400] });
-  console.log('STATJSON ' + JSON.stringify(stat));
+  const melde = () => window.fertig ? console.log('SPORTHAEUSER_STAT '+JSON.stringify(stat)) : setTimeout(melde,300);
+  melde();
 }, 50);

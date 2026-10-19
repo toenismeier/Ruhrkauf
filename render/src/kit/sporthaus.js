@@ -20,6 +20,29 @@ const PARK = 17;          // Parkplatztiefe vor der Fachmarkt-Box
 const BODEN = '#ddd5c6', INNEN = '#d5dadb';
 const SLOGANS = ['LAUF LOS.', 'RAUS. JETZT.', 'NEUE SAISON', 'BERG RUFT.', 'DEIN SPIEL.', 'WINTER KOMMT', 'AB AUFS RAD'];
 
+/** Einheitliche, rein grafische Ableitung für Außenhaus und aufgeschnittene Etage.
+ * Aktionsdaten kommen ausschließlich aus zustandAusHaus() (über opt bzw. o.zustand).
+ * Fehlende Engine-Aktion wird niemals aus einem Kalender oder KPI erfunden.
+ */
+export function sportGefuehl(haus, zustand = {}) {
+  const n = (haus.etagen ?? [0]).filter((e) => e >= 0).length;
+  const erlebnis = haus.lage === '1a' && (haus.grundflaecheQm ?? 0) >= 2000
+    ? (rng(String(haus.id) + '/erlebnisart')() < 0.5 ? 'laufanalyse' : 'fitness') : null;
+  // Rohoptionen liefern 0..1, zustandNormal() liefert bereits 0..100. Nie doppelt multiplizieren.
+  const rohRabatt = Number(zustand.rabatt ?? 0);
+  const rabatt = rohRabatt > 1 ? rohRabatt : rohRabatt * 100;
+  const aktiv = !!zustand.aktion || zustand.status === 'aktion' || (zustand.zusatz ?? []).includes('aktion');
+  const offen = !['geschlossen', 'leer', 'verfall', 'abriss', 'raeumung'].includes(zustand.status ?? haus.status);
+  return {
+    erlebnis,
+    erlebnisSeite: '+z', // Hauptseite zum Kunden, identisch für Vorbau und normale Glasfront
+    abverkauf: n > 1 && offen && aktiv && rabatt > 0,
+    rabatt: aktiv && rabatt > 0 ? Math.round(rabatt) : null,
+    obereEtage: Math.max(0, ...(haus.etagen ?? [0]).filter((e) => e >= 0)),
+    matt: (haus.substanz ?? 100) < 40 && offen,
+  };
+}
+
 // ---------------------------------------------------------------- Daten → Form
 export function familieSport(haus) {
   const r = rng(String(haus.id) + '/familie');
@@ -121,6 +144,92 @@ function ware(K, s, a, b, y, tb, tm, gruppe) {
  * Schaufenster/Verkaufsraum hinter Glas: Boden, Rückwand, Lichtband, Ware nach Gruppe. Wird in K.glas registriert,
  * damit die Statusstelle die Fläche zukleben oder vergittern kann.
  */
+/** Kleine, klar lesbare Erlebniszone direkt hinter einer der beiden sichtbaren Glasfronten. */
+function erlebnisHinterGlas(K, s, a, b, y0, tF, tiefe) {
+  const u = (a+b)/2, r=K.r, y=y0+0.12;
+  const vorne = tF+0.14, hinten = tF-Math.max(1.45,tiefe*0.65);
+  const breite = Math.min(6.0,b-a-0.3), left=u-breite/2, right=u+breite/2;
+  // Kontrastreiches, helles Studio mit Tiefenwirkung, bleibt im EG ohne Marketingrabatt.
+  s.q(left,right,y,y+0.10,hinten-0.55,vorne,'#f6f4e9');
+  s.q(left,right,y+0.08,y+3.75,hinten-0.56,hinten-0.45,'#d5e6ee');
+  s.q(left,right,y+3.38,y+3.55,hinten-0.4,vorne,'#fff7da');
+  s.q(left,left+0.12,y,y+3.45,hinten,vorne,'#455e73');
+  s.q(right-0.12,right,y,y+3.45,hinten,vorne,'#455e73');
+  const t=vorne-0.63, label=K.erlebnis==='fitness'?'FITNESS':'LAUFANALYSE';
+  s.q(left+0.25,right-0.25,y+2.85,y+3.35,vorne+0.10,vorne+0.18,'#204c65');
+  plakat(K.scene,s,label,u,y+3.08,vorne+0.21,passend(label,breite-0.65,0.43),'#ffffff');
+  if(K.erlebnis==='laufanalyse'){
+    // Großes Laufband mit Lauffigur, Haltegriff, Monitorwand und Sitzbank.
+    s.q(u-1.62,u+1.1,y+0.20,y+0.43,t-0.25,t+0.60,'#252e37');
+    s.q(u-1.47,u+0.8,y+0.44,y+0.49,t-0.16,t+0.46,'#111821');
+    for (const du of [-1.1,0.8]) s.q(u+du,u+du+0.07,y+0.46,y+1.45,t+0.42,t+0.53,'#dce5e9');
+    s.q(u-1.12,u+0.87,y+1.40,y+1.47,t+0.43,t+0.55,'#a2b0b9');
+    s.q(u-0.65,u+0.10,y+1.46,y+2.15,t+0.47,t+0.55,'#223647');
+    s.q(u-0.54,u-0.01,y+1.61,y+2.03,t+0.56,t+0.60,'#45cbe0');
+    s.q(left+0.28,left+1.55,y+1.0,y+2.45,hinten-0.38,hinten-0.28,'#1f3449');
+    s.q(left+0.39,left+1.44,y+1.25,y+2.27,hinten-0.26,hinten-0.20,'#4bcce0');
+    s.q(right-1.55,right-0.3,y+0.52,y+0.66,t-0.15,t+0.65,'#d9a86c');
+    for(const du of [-1.22,-0.4]) s.q(u+du,u+du+0.13,y+0.25,y+0.60,t-0.14,t-0.02,'#b8c5cd');
+    const [fx,fz]=s.welt(u-0.31,t+0.05);
+    if(K.leute) mensch(K.S,r,fx,y+0.5,fz);
+  }else{
+    // Sichtbare Fitnessgeräte, Gewichte, Spiegelwand und Trainingsmatten.
+    s.q(left+0.2,right-0.2,y+0.6,y+2.7,hinten-0.40,hinten-0.32,'#9cc2d0');
+    for (let i=0;i<3;i++) {
+      const cx=left+1.1+i*1.6;
+      s.q(cx-0.6,cx+0.6,y+0.12,y+0.18,t-0.32,t+0.65,['#d7ba42','#369bc0','#75a76c'][i]);
+      s.q(cx-0.45,cx-0.34,y+0.20,y+2.0,t+0.23,t+0.32,'#344b60');
+      s.q(cx+0.36,cx+0.47,y+0.20,y+2.0,t+0.23,t+0.32,'#344b60');
+      s.q(cx-0.58,cx+0.58,y+1.76,y+1.85,t+0.17,t+0.43,'#344b60');
+      s.q(cx-0.47,cx+0.47,y+0.67,y+0.85,t-0.05,t+0.35,'#aab9bd');
+      for(let k=0;k<3;k++)s.q(cx-0.38+k*0.31,cx-0.25+k*0.31,y+1.06,y+1.24,t-0.13,t+0.02,k%2?'#e7ad32':'#333a42');
+    }
+    if(K.leute){const [fx,fz]=s.welt(u+0.2,t+0.05);mensch(K.S,r,fx,y+0.15,fz);}
+  }
+  // Bei F2/F4/F6 macht ein verglaster Vorbau das Studio im Spielzoom sichtbar.
+  if([2,4,6].includes(K.fam)){
+    // Keine geschlossene Scheibe aus opakem GLAS_HELL: die Geräte sollen durch die Front erkennbar bleiben.
+    for(const edge of [left-0.2,right+0.2])s.q(edge-0.07,edge+0.07,y,y+3.48,vorne,vorne+0.92,'#cedce2');
+    s.q(left-0.2,right+0.2,y+3.37,y+3.48,vorne,vorne+0.92,'#d6e3e8');
+    s.q(left-0.2,right+0.2,y+0.06,y+0.16,vorne,vorne+0.92,'#d6e3e8');
+  }
+  K.erlebnisGezeigt=true;
+}
+
+/** Dichte Sale-Ware ersetzt Puppen: viele einzeln lesbare Schuhkartons, Körbe und Preisschilder.
+ * Materialmenge bewusst mindestens so hoch wie die vorherige Sortimentdarstellung.
+ */
+function abverkaufHinterGlas(K,s,a,b,y0,y1,tF,tiefe){
+  const br=b-a, mitte=(a+b)/2, tb=tF-Math.max(1.2,tiefe);
+  s.q(a+0.12,b-0.12,y0+0.13,y0+0.20,tb,tF,'#e9e3d4');
+  // Regalturm: fünf Böden und mehrere Paletten nebeneinander, 35-70 Teile je Bucht.
+  const cols=Math.max(3,Math.min(8,Math.floor(br/0.68)));
+  const step=(br-0.75)/cols;
+  for(let row=0;row<5;row++){
+    const yy=y0+0.47+row*0.56;
+    s.q(a+0.3,b-0.3,yy,yy+0.08,tb+0.10,tb+0.70,'#777d83');
+    for(let k=0;k<cols;k++){
+      const xx=a+0.42+k*step;
+      s.q(xx,xx+step*0.82,yy+0.09,yy+0.32,tb+0.2,tb+0.64,
+        ['#f2ecdc','#d5be92','#e7e6e1','#d93b32','#e7d7ba'][(row+k)%5]);
+      s.q(xx+0.07,xx+0.15,yy+0.15,yy+0.18,tb+0.65,tb+0.68,'#24282d');
+    }
+  }
+  for(let k=0;k<Math.max(2,Math.floor(br/1.5));k++){
+    const x=a+0.6+k*1.42;
+    if(x+1.22>b-0.2)break;
+    s.q(x,x+1.20,y0+0.78,y0+0.92,tF-0.63,tF-0.12,'#b9bdbe');
+    for(let p=0;p<5;p++){
+      s.q(x+0.12+(p%3)*0.31,x+0.36+(p%3)*0.31,y0+0.95+Math.floor(p/3)*0.2,y0+1.1+Math.floor(p/3)*0.2,tF-0.55,tF-0.20,p%2?'#d8a64a':'#f0efe8');
+    }
+    s.q(x+0.30,x+0.86,y0+1.19,y0+1.50,tF-0.1,tF-0.055,'#e0b221');
+  }
+  if(br>2.2){
+    s.q(mitte-1.25,mitte+1.25,y1-1.24,y1-0.31,tF+0.08,tF+0.12,'#c62132');
+    plakat(K.scene,s,'REDUZIERT',mitte,y1-0.79,tF+0.18,passend('REDUZIERT',2.15,0.63),'#ffffff');
+  }
+  K.abverkaufFenster++;
+}
 function vitrine(K, s, a, b, y0, y1, tF, tiefe, gruppe, o = {}) {
   const tb = tF - tiefe;
   const mz = y0 < 1 && (K.mieterZonen ?? []).find((m) => m.seite === s.seite && (a + b) / 2 > m.u0 && (a + b) / 2 < m.u1);
@@ -136,7 +245,11 @@ function vitrine(K, s, a, b, y0, y1, tF, tiefe, gruppe, o = {}) {
   s.q(a, b, y0, y0 + 0.12, tb, tF, o.boden ?? BODEN);
   s.q(a, b, y0, y1, tb - 0.1, tb, o.rueck ?? INNEN);
   s.q(a, b, y1 - 0.32, y1 - 0.18, tb, tb + 0.08, LICHT);
-  if (!K.zu && b - a > 1.6) ware(K, s, a, b, y0 + 0.12, tb, tb + tiefe * 0.55, gruppe);
+  const oben = K.abverkauf && K.n > 1 && y0 >= EG_S + (K.n - 2) * OG_S - 0.5 && y0 > 1;
+  const erlebnis = !K.erlebnisGezeigt && K.erlebnis && y0 < 1 && s.seite === K.erlebnisSeite && b - a >= 3.4;
+  if (!K.zu && oben && b - a > 2.2) abverkaufHinterGlas(K, s, a, b, y0, y1, tF, tiefe);
+  else if (!K.zu && erlebnis) { erlebnisHinterGlas(K, s, a, b, y0, tF, tiefe); K.erlebnisGezeigt = true; }
+  else if (!K.zu && b - a > 1.6) ware(K, s, a, b, y0 + 0.12, tb, tb + tiefe * 0.55, gruppe);
   K.glas.push({ s, a, b, y0, y1, t: tF, eg: y0 < 1 });
 }
 
@@ -202,13 +315,18 @@ function hsLogo(K, s, u, y, t, h, o = {}) {
     return total;
   }
   const [b0, b1] = mn(uq, ue);
-  s.q(b0, b1, y - h / 2, y + h / 2, t, t + 0.25, o.band ?? HS_BLAU);
+  s.q(b0, b1, y - h / 2, y + h / 2, t, t + 0.25, K.matt && !K.leuchtbandAbgeschaltet ? '#2b3035' : (o.band ?? HS_BLAU));
+  const lichtAus = K.matt && !K.leuchtbandAbgeschaltet;
+  if (lichtAus) {
+    s.q(b0, b1, y - h / 2, y + h / 2, t + 0.25, t + 0.29, '#252a2e');
+    K.leuchtbandAbgeschaltet = true;
+  } // nur ein abgeschaltetes Leuchtband
   const [c0, c1] = mn(ua, uq);
   s.q(c0, c1, y - q / 2, y + q / 2, t, t + 0.4, HS_ROT);
   const qm = (ua + uq) / 2;
   plakat(K.scene, s, 'H', qm, y + q * 0.06, t + 0.42, q * 0.82, '#ffffff');
   s.kipp(q * 0.62, q * 0.07, 0.04, qm, y - q * 0.36, t + 0.42, '#ffffff', s.lese * 0.12);
-  plakat(K.scene, s, text, (uq + ue) / 2, y, t + 0.27, ph, o.schrift ?? '#ffffff');
+  plakat(K.scene, s, text, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? '#d1d3d1' : (o.schrift ?? '#ffffff'));
   return total;
 }
 /** Senkrechtes Logo (für Eckfinne oder Pylon): Quadrat oben, Schriftzug darunter senkrecht. */
@@ -526,7 +644,7 @@ function familie3(K) {
   parkreihe(S, r, x0 + 1, x0 + w - 6, zp + 10.2, 5, y + 0.03, K.zu ? 0.1 : 0.65);
   for (let x = x0 + 4; x < x0 + w - 6; x += 6) S.box(2.2, 0.03, 0.15, x, y + 0.05, zp + 6.8, '#f2f1ec');
   for (let i = 0; i < 4; i++) S.box(0.5, 0.03, 2.4, x0 + pu - 2 + i * 1.0, y + 0.05, zp + 6.8, '#f2f1ec');
-  if (!K.zu && K.leute) for (let i = 0; i < 4; i++) mensch(S, r, x0 + pu + zw(r, -4, 4), y, zp + zw(r, 1.5, 9));
+  if (!K.zu && K.leute) for (let i = 0; i < 3; i++) mensch(S, r, x0 + pu + zw(r, -4, 4), y, zp + zw(r, 1.5, 9));
   // Pylon an der Ecke
   {
     const px = x0 + w - 2.6, pz = zp + PARK - 3.2, ph = Math.max(H + 4, 11);
@@ -881,7 +999,7 @@ function familie5(K) {
     if (!K.zu) {
       const t1 = new THREE.ConeGeometry(1.5, 1.8, 4); t1.rotateY(Math.PI / 4); t1.translate(zx - 2, yb + 0.9, zz); S.add(t1, '#f2c14e');
       S.box(1.8, 0.4, 0.8, zx + 2, yb + 0.2, zz - 0.6, '#3f7d56'); S.box(1.8, 0.4, 0.8, zx + 2, yb + 0.2, zz + 0.8, '#e36b2c');
-      if (K.leute) { mensch(S, r, tx0 + 0.8, yb, zz + 1); mensch(S, r, zx + 3.5, yb, tz1 - 0.8); mensch(S, r, tx1 - 0.8, yb, zz - 1); }
+      if (K.leute) { mensch(S, r, tx0 + 0.8, yb, zz + 1); mensch(S, r, tx1 - 0.8, yb, zz - 1); }
     }
     for (let x = tx0; x < tx1; x += 3.5) kuebelbaum(S, r, x, yb, tz0 - 1.2, 0.55);
   }
@@ -1031,6 +1149,20 @@ export function statusSport(K) {
     }
     return;
   }
+  if (K.matt && !K.zu) {
+    const front=K.glas.filter(g=>g.s===K.seiten[0]&&g.eg&&!g.tuer&&!g.mieter&&g.b-g.a>1.7);
+    const weitere=K.glas.filter(g=>!front.includes(g)&&!g.tuer&&!g.mieter&&g.b-g.a>1.7);
+    const auswahl=[...front,...weitere];
+    const r=rng(String(K.haus.id)+'/blindglas');
+    const start=auswahl.length?Math.floor(r()*auswahl.length):0;
+    const zahl=Math.min(4,auswahl.length);
+    for(let i=0;i<zahl;i++){
+      const g=auswahl[(start+i*Math.max(1,Math.floor(auswahl.length/zahl)))%auswahl.length];
+      const front=g.t+0.10;
+      g.s.q(g.a+0.10,g.b-0.10,g.y0+0.12,g.y1-0.13,front,front+0.10,i%2?'#d1d0b3':'#b8c5b8');
+      g.s.q(g.a+0.13,g.b-0.13,g.y1-0.35,g.y1-0.25,front+0.08,front+0.10,'#737c79');
+    }
+  }
   if (st.status === 'geschlossen') for (const g of K.glas) if (!g.eg) { // Obergeschosse: Rollos unten
     g.s.q(g.a, g.b, g.y0 + 0.2, g.y1 - 0.2, g.t + 0.02, g.t + 0.06, '#4a5057');
     for (let y = g.y0 + 0.5; y < g.y1 - 0.3; y += 0.45) g.s.q(g.a, g.b, y, y + 0.06, g.t + 0.06, g.t + 0.09, '#363b40');
@@ -1058,6 +1190,144 @@ function mieterFronten(K) {
   return aus;
 }
 
+/** Das gesamte oberste OG wird zur klar lesbaren Abverkaufszone: großes Hauptbanner
+ * und mindestens die Hälfte der Glasfelder mit roten Streifen. Andere Geschosse unberührt.
+ */
+function abverkaufFassade(K){
+ if(!K.abverkauf||K.n<2)return;
+ const y0=EG_S+(K.n-2)*OG_S, s=K.seiten[0], max=s.L-(K.fam===1?3.5:K.fam===6?7:1);
+ const li=0.06*max,re=0.92*max,t= Math.max(1.2,K.tRelief??0.5)+0.72;
+ const hh=K.n>=2?OG_S:3.4;
+ // Dominantes, über den größten Teil der Hauptfront reichendes Schild.
+ s.q(li,re,y0+hh*0.50,y0+hh*0.94,t,t+0.24,'#bc1e30');
+ s.q(li,re,y0+hh*0.47,y0+hh*0.51,t+0.2,t+0.27,'#f3c530');
+ const name=K.rabatt?('SALE  -'+K.rabatt+'%'):'SAISON-ABVERKAUF';
+ plakat(K.scene,s,name,(li+re)/2,y0+hh*0.72,t+0.31,passend(name,re-li-1,hh*0.32),'#ffffff');
+ const glass=K.glas.filter(g=>!g.eg&&!g.tuer&&!g.mieter&&g.y0>y0-0.65&&g.s===s);
+ if(glass.length){
+  glass.forEach((g,i)=>{
+   if(i%2)return;
+   const t1=Math.max(t,g.t+0.2);
+   g.s.q(g.a+0.03,g.b-0.03,y0+0.58,y0+1.35,t1,t1+0.05,'#d12a37');
+   g.s.q(g.a+0.03,g.b-0.03,y0+1.35,y0+1.43,t1,t1+0.06,'#f4c52f');
+  });
+ }else{
+  // Geschäftshaus und Fachmarkt besitzen teils keine eingetragenen OG-Fenster.
+  // Sichtbare neue Sale-Schaufenster samt Lagerware schaffen statt winziger Plakate.
+  const n=Math.max(4,Math.min(10,Math.floor((re-li)/5)));
+  const step=(re-li)/n;
+  for(let i=0;i<n;i++){
+   const a=li+i*step+0.18,b=li+(i+1)*step-0.18;
+   s.q(a,b,y0+0.25,y0+hh*0.46,t-0.09,t-0.04,GLAS_HELL);
+   s.q(a,b,y0+0.23,y0+0.36,t+0.05,t+0.10,'#455563');
+   if(i%2===0)s.q(a,b,y0+0.55,y0+1.26,t+0.12,t+0.18,'#cd2639');
+   else abverkaufHinterGlas(K,s,a,b,y0+0.07,y0+hh*0.46,t+0.01,1.15);
+   K.glas.push({s,a,b,y0:y0+0.25,y1:y0+hh*0.46,t,eg:false});
+  }
+ }
+ // Ergänzend seitliches rotes Verkaufsband, aus beiden Spielperspektiven erkennbar.
+ const se=K.seiten[1],breite=Math.max(4,se.L*0.72);
+ se.q(1.0,1.0+breite,y0+hh*0.62,y0+hh*0.92,Math.max(0.75,K.tRelief??0.5)+0.45,Math.max(0.75,K.tRelief??0.5)+0.65,'#c82533');
+}
+
+/** Bei Substanz unter 40: milchiges Glas, schiefes Altbanner, graue Attikafugen.
+ * Diese Details werden unabhängig vom Abverkauf gerendert und sind kein Verfall.
+ */
+function substanzAkzente(K){
+ if(!K.matt||K.zu)return;
+ const s=K.seiten[0], t=(K.tRelief??0.5)+0.85;
+ const u=s.L*0.5, y=EG_S-0.85;
+ const wb=Math.min(s.L*0.78,s.L-2.0);
+ // Ausgebleichtes, schief hängendes Tuch auf halber Fassadenbreite,
+ // sichtbar bereits bei fester Spielkamera und nicht als Schließung interpretiert.
+ s.kipp(wb,1.85,0.15,u,y,t+0.58,'#858b82',-0.032);
+ s.kipp(wb-0.45,1.55,0.18,u,y-0.08,t+0.69,'#c2c1b0',-0.032);
+ s.q(u-wb*0.46,u+wb*0.46,y-0.88,y-0.76,t+0.84,t+0.91,'#9d9f93');
+ plakat(K.scene,s,'LETZTE SAISON',u,y,t+0.94,passend('LETZTE SAISON',wb-1.3,1.0),'#595d5b',null,{rz:-0.032});
+ // Grauer, noch intakter Rahmen ersetzt hier frische Werbetechnik; kein Verfallszustand.
+ for(let i=0;i<4;i++){
+   const xx=u-wb*0.43+i*wb*0.26;
+   s.q(xx,xx+0.08,y-0.84,y+0.72,t+0.80,t+0.93,'#7a817f');
+ }
+ for(let k=0;k<4;k++){
+   const sx=1.0+k*(s.L-2.0)/4;
+   s.q(sx,sx+Math.min(3.1,s.L-sx),K.Hw-0.62,K.Hw-0.35,t-0.19,t+0.15,k%2?'#9fa299':'#8e9995');
+ }
+ for(const face of K.seiten){
+   const tt=(K.tRelief??0.5)+0.40;
+   for(let p=0.8;p<face.L-0.8;p+=3.8){
+     face.q(p,p+Math.min(2.0,face.L-p-0.4),K.Hw-0.17,K.Hw+0.12,tt,tt+0.11,'#767c77');
+     face.q(p+0.12,p+0.28,K.Hw-0.74,K.Hw-0.17,tt,tt+0.07,'#a8aaa2');
+   }
+ }
+ const glass=K.glas.filter(g=>!g.tuer&&!g.mieter);
+ if(glass.length<4){
+   // Bei wenigen vorhandenen Fenstern vier milchige sichtbare Flächen ergänzen.
+   for(let i=0;i<4;i++){
+     const a=1.0+i*Math.max(2.8,(s.L-3)/5);
+     s.q(a,a+2.2,0.85,3.85,t,t+0.08,'#b6c2bc');
+     s.q(a,a+2.2,3.70,3.85,t+0.07,t+0.12,'#6a7778');
+   }
+ }
+}
+/** Präsentationsfläche an der Hauptseite: großes lesbares Studio statt kleiner Warenfenster.
+ * Ein offenes Glasrahmensystem, damit Geräte, Monitor und Figur nicht hinter opakem GLAS verschwinden.
+ */
+function erlebnisPortal(K){
+ if(!K.erlebnis||K.zu)return;
+ const s=K.seiten[0], kandidaten=K.glas.filter(g=>g.s===s&&g.eg&&!g.tuer&&!g.mieter&&g.b-g.a>2.1);
+ const g=kandidaten[0];
+ const center=g?(g.a+g.b)/2:Math.max(7,s.L*0.31);
+ const maxW=Math.min(13,s.L-2.0);
+ const a=clamp(center-maxW/2,0.7,s.L-maxW-0.7),b=a+maxW;
+ const tt=Math.max(0.35,(g?.t??0)+1.55);
+ const color=K.erlebnis==='laufanalyse'?'#21628b':'#277a6f';
+ // Über dem Glasvorbau lesbare Kennzeichnung und heller, eigener Boden.
+ s.q(a,b,0.15,0.31,tt-2.05,tt+0.6,'#efdcb1');
+ s.q(a,b,3.15,4.17,tt-2.05,tt+0.55,color);
+ s.q(a,b,4.06,4.22,tt+0.36,tt+0.58,'#c4dce3');
+ s.q(a,b,3.09,3.21,tt+0.40,tt+0.61,'#f4c247');
+ for(const du of [a,b]){
+  s.q(du-0.14,du+0.14,0.18,4.20,tt-1.9,tt+0.58,'#d9e5eb');
+  s.q(du-0.16,du+0.16,0.23,0.39,tt-1.9,tt+0.58,'#465e6e');
+ }
+ const titel=K.erlebnis==='laufanalyse'?'LAUFANALYSE':'FITNESS';
+ plakat(K.scene,s,titel,(a+b)/2,3.69,tt+0.63,passend(titel,b-a-1.0,0.80),'#ffffff');
+ if(K.erlebnis==='laufanalyse'){
+   // Drei verkaufsfertige Lauftests, der mittlere mit laufendem Menschen.
+   for(let i=0;i<3;i++){
+     const cx=a+1.75+i*2.65, t=tt-0.42;
+     s.q(cx-0.95,cx+0.92,0.42,0.64,t-0.6,t+0.50,'#25313b');
+     s.q(cx-0.85,cx+0.80,0.65,0.68,t-0.50,t+0.35,'#111a22');
+     for(const du of [-0.75,0.72])s.q(cx+du,cx+du+0.07,0.70,1.75,t+0.36,t+0.44,'#cbdde4');
+     s.q(cx-0.35,cx+0.45,1.52,2.15,t+0.42,t+0.51,'#2a394a');
+     s.q(cx-0.25,cx+0.35,1.65,2.01,t+0.52,t+0.57,'#38bbcf');
+     if(i===1&&K.leute){
+       // Echte Laufpose statt einer reglos stehenden Standardfigur.
+       s.q(cx-0.23,cx+0.22,1.32,2.00,t-0.12,t+0.12,'#e34a3d');
+       s.q(cx-0.12,cx+0.12,2.02,2.28,t-0.12,t+0.12,'#e5c6a8');
+       s.kipp(0.19,0.86,0.20,cx-0.26,0.94,t,'#203047',-0.48);
+       s.kipp(0.19,0.86,0.20,cx+0.20,0.93,t,'#203047',0.58);
+       s.kipp(0.13,0.65,0.20,cx-0.36,1.55,t,'#e34a3d',0.65);
+       s.kipp(0.13,0.65,0.20,cx+0.35,1.54,t,'#e34a3d',-0.65);
+     }
+   }
+   s.q(a+0.36,a+1.35,1.1,2.65,tt-1.58,tt-1.50,'#234564');
+   s.q(a+0.48,a+1.23,1.22,2.47,tt-1.49,tt-1.45,'#7ee3ee');
+ }else{
+   for(let i=0;i<3;i++){
+     const cx=a+1.65+i*2.65;
+     s.q(cx-0.73,cx+0.73,0.32,0.42,tt-0.8,tt+0.54,'#3c5a68');
+     for(const dd of [-0.52,0.52])s.q(cx+dd,cx+dd+0.08,0.43,2.60,tt+0.15,tt+0.22,'#e1e6e9');
+     s.q(cx-0.60,cx+0.60,2.43,2.52,tt+0.14,tt+0.25,'#56666e');
+     s.q(cx-0.45,cx+0.45,0.79,1.01,tt-0.55,tt+0.15,'#df9c39');
+     for(let k=0;k<4;k++)s.q(cx-0.46+k*0.24,cx-0.36+k*0.24,1.30,1.55,tt-0.72,tt-0.50,k%2?'#222b32':'#d5a043');
+   }
+   if(K.leute){const [x,z]=s.welt((a+b)/2,tt-0.6);mensch(K.S,K.r,x,0.2,z);}
+   s.q(a+0.4,b-0.4,0.55,3.25,tt-1.85,tt-1.79,'#a2c8d3');
+ }
+}
+
 // ---------------------------------------------------------------- Hauptfunktion
 /**
  * Baut ein Sporthaus aus haeuser.json (format 'sport').
@@ -1081,11 +1351,14 @@ export function sporthaus(S, scene, haus, opt = {}) {
   const ausDaten = flaechen.filter((f) => f.konzept === 'untermiete').map((f) => mieterInfo({ name: namen[Math.floor(rM() * namen.length)], etage: f.etage }));
   const Z = zustandNormal({ ...opt, status, seed: haus.id }, { untermieter: ausDaten });
   const F = zustandFlags(Z);
+  const gefuehl = sportGefuehl(haus, Z);
   const M = fam === 4 ? m.w - m.bw : 0;
   const K = {
     S, scene, haus, fam, v: ((haus.fassade ?? 0) % 8 + 8) % 8, r: rng(`${haus.id}:${haus.fassade}:sport${fam}`),
     n: m.n, w: m.bw, d: m.bd, x0: x + M, z0: z, M, Z,
-    alt: (haus.substanz ?? 100) < 40 || F.alt, status: F.eg, zu: F.zu, ohneLogo: F.ohneLogo, leute: opt.passanten !== false,
+    alt: F.alt, matt: gefuehl.matt, erlebnis: gefuehl.erlebnis, erlebnisSeite: gefuehl.erlebnisSeite,
+    erlebnisGezeigt: false, leuchtbandAbgeschaltet: false, abverkauf: gefuehl.abverkauf, rabatt: gefuehl.rabatt, abverkaufFenster: 0,
+    status: F.eg, zu: F.zu, ohneLogo: F.ohneLogo, leute: opt.passanten !== false,
     glas: [], logos: [],
   };
   K.c = (c) => (F.verblichen ? '#' + new THREE.Color(c).offsetHSL(0, -0.2, -0.07).getHexString() : K.alt ? '#' + new THREE.Color(c).offsetHSL(0, -0.06, -0.06).getHexString() : c);
@@ -1103,10 +1376,20 @@ export function sporthaus(S, scene, haus, opt = {}) {
     .map((q) => (q.seite === '+x' && fam === 4 ? { ...q, u0: q.u0 + 4.5, u1: q.u1 + 4.5 } : q));
   const bauer = { 1: familie1, 2: familie2, 3: familie3, 4: familie4, 5: familie5, 6: familie6 }[fam];
   let hoehe = bauer(K);
+  // Einige Familien haben nur auf einer Sichtseite freie Glasbuchten; das Erlebnis
+  // wird dann deterministisch auf der tatsächlich vorhandenen Glasfront ergänzt.
+  if (K.erlebnis && !K.erlebnisGezeigt && !K.zu) {
+    const fenster = K.glas.filter((g) => g.eg && !g.tuer && !g.mieter && g.b - g.a >= 3.4);
+    const g = fenster.find((g) => g.s.seite === K.erlebnisSeite) ?? fenster[0];
+    if (g) { erlebnisHinterGlas(K, g.s, g.a, g.b, g.y0, g.t, 2.2); K.erlebnisGezeigt = true; }
+  }
   hoehe = Math.max(hoehe, K.hoeheDach ?? 0);
   K.Hw = K.Hw ?? (m.n === 1 ? 7 : EG_S + (m.n - 1) * OG_S);
   const mieterEG = mieterFronten(K);
+  erlebnisPortal(K);
+  abverkaufFassade(K);
   statusSport(K);
+  substanzAkzente(K);
   // Körperbeschreibung für zustandsDekor
   const seite = (s) => {
     const lg = K.logos.filter((l) => l.s === s);
@@ -1128,7 +1411,14 @@ export function sporthaus(S, scene, haus, opt = {}) {
     marke, seed: `${haus.id}:${Z.status}`, planeText: 'DAS NEUE HARTWIG SPORT',
   };
   if (!koerper.eingaenge.some((e) => e.haupt) && koerper.eingaenge.length) koerper.eingaenge[0].haupt = true;
-  const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite, logosAbdecken: true });
+  // Aktionsplakate beim Abverkauf ausschließlich im obersten OG. Normales EG
+  // bleibt auch bei aktiver rabattierter Engine-Aktion frei von SALE-Bannern.
+  const dekZustand = K.abverkauf && (Z.aktion || Z.status === 'aktion')
+    ? zustandNormal({ ...Z, __zustand: false, status: Z.status === 'aktion' ? 'offen' : Z.status,
+        zusatz: Z.zusatz.filter((s) => s !== 'aktion'), aktion: null, rabatt: null })
+    : Z;
+  const passantenFaktor = K.matt ? 0.5 : K.abverkauf ? 0.8 : 0.7;
+  const dek = zustandsDekor(S, scene, koerper, dekZustand, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor, sportPalette: ['#203e61', '#e24739', '#26a0af', '#e0ae33', '#f2f3f0', '#272d36'], abrissSeite: opt.abrissSeite, logosAbdecken: true });
   hoehe = Math.max(hoehe, dek.hoehe);
   return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status };
 }
