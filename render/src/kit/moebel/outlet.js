@@ -38,6 +38,7 @@ function rundstaender(L,r,d,ctx) {
 }
 function kassenWeg(L,r,d,art) {
   L.box(5,0.10,2.5,0,0,1.25,'#e8e6e1');
+  if(LOD.stufe==='fern'){L.box(4.5,0.95,0.7,0,0.12,1,'#5b6570');return;}
   if(art==='kasse') {
     L.box(4.8,0.96,0.73,0,0.1,0.48,'#49515a');
     L.box(4.8,0.10,0.87,0,1.06,0.48,'#c7c6c2');
@@ -57,6 +58,7 @@ function kassenWeg(L,r,d,art) {
   }
 }
 function wagen(L,r,d,art) {
+  if(LOD.stufe==='fern'){L.box(2.0,0.60,1.5,0,0,1.25,'#9dabb5');return;}
   const n=art==='wagen'?3:5;
   for(let i=0;i<n;i++){
     const x = n===3?(i-1)*0.67:(i-2)*0.42;
@@ -66,6 +68,7 @@ function wagen(L,r,d,art) {
   }
 }
 function rollwagen(L,r,d) {
+  if(LOD.stufe==='fern'){L.box(2.2,1.3,0.9,0,0.2,1.25,'#9da7b0');return;}
   L.box(2.2,0.12,0.9,0,0.30,1.25,'#9da7b0');
   for (const x of [-0.95,0.95]) for(const z of [0.92,1.58]) L.zyl(0.12,0.12,0.05,x,0.10,z,'#40464c',8);
   L.box(0.07,1.05,0.08,-1.0,0.42,1.25,'#9da7b0');
