@@ -494,6 +494,63 @@ async function buendeln() {
     await q.close();
     return erg;
   }
+
+  // Posteingang: Seed 1, Bot C, Woche 30, 390 × 844 Pixel.
+  async function posteingangPruefen() {
+    const bilder = path.join(__dirname, 'bilder');
+    fs.mkdirSync(bilder, { recursive: true });
+    await p.evaluate(() => {
+      window.spiel.neuesSpiel(1, 'Essen');
+      for (let i = 0; i < 30; i++) window.spiel.woche(true);
+    });
+    await p.screenshot({ path: path.join(bilder, 'posteingang-wochenstreifen.png') });
+    await p.evaluate(() => window.spiel.oeffnePosteingang('handeln'));
+    const info = await p.evaluate(() => ({ ...window.spiel.posteingang.pruefe(), aufgaben: window.spiel.E.posteingang(window.spiel.s).handeln.length }));
+    if (info.soll !== info.badge || info.soll !== info.karten || info.soll !== info.aufgaben) {
+      throw new Error('Posteingang weicht von Engine ab: ' + JSON.stringify(info));
+    }
+    await p.screenshot({ path: path.join(bilder, 'posteingang.png') });
+    await p.evaluate(() => window.spiel.oeffnePosteingang('meldungen'));
+    await p.screenshot({ path: path.join(bilder, 'posteingang-meldungen.png') });
+    await p.evaluate(() => {
+      const E = window.spiel.E, s = window.spiel.s, haus = s.haeuser[0];
+      s.entscheidungen.push({
+        id: 'e-pruef-post', typ: 'instandhaltung', woche: s.woche, frist: s.woche + 2,
+        titel: 'Instandhaltung prüfen', text: 'Automatisierter Klicktest.',
+        optionen: [{ id: 'zahlen', label: 'Zahlen' }, { id: 'verschieben', label: 'Verschieben' }],
+        standard: 'zahlen', daten: { haus: haus.id, kosten: 300000 },
+      });
+      const klon = structuredClone(s);
+      E.fuehreAus(klon, { typ: 'entscheiden', id: 'e-pruef-post', option: 'verschieben' });
+      window.__postSoll = JSON.stringify(klon);
+      window.spiel.oeffnePosteingang('handeln');
+    });
+    await p.locator('[data-post-id="e-pruef-post"] [data-v="verschieben"]').tap();
+    const entscheidungKorrekt = await p.evaluate(() => JSON.stringify(window.spiel.s) === window.__postSoll);
+    if (!entscheidungKorrekt) throw new Error('Entscheidungsbutton verändert Spielstand anders als fuehreAus.');
+
+    for (const modus of ['ablehnen', 'annehmen']) {
+      const kandidat = await p.evaluate((modus) => {
+        const E = window.spiel.E, s = window.spiel.s;
+        let a = s.angebote.find((x) => x.status === 'offen');
+        if (!a) {
+          a = { id: 'a-test-' + modus, typ: 'sonderposten', titel: 'Testposten', text: 'Integrationstest',
+            woche: s.woche, frist: s.woche + 3, wert: 500000, gruppe: 'damen', _passt: true, status: 'offen' };
+          s.angebote.push(a);
+        }
+        const klon = structuredClone(s);
+        E.fuehreAus(klon, { typ: modus === 'ablehnen' ? 'angebotAblehnen' : 'angebotAnnehmen', angebot: a.id });
+        window.__postSoll = JSON.stringify(klon);
+        window.spiel.oeffnePosteingang('handeln');
+        return a.id;
+      }, modus);
+      await p.locator('[data-post-id="' + kandidat + '"] [data-v="' + modus + '"]').tap();
+      const gleich = await p.evaluate(() => JSON.stringify(window.spiel.s) === window.__postSoll);
+      if (!gleich) throw new Error('Angebot ' + modus + ': UI weicht von fuehreAus ab.');
+    }
+    console.log('Posteingang: Karten, Zähler, Entscheidung, Annehmen, Ablehnen = 0 Abweichungen; Bilder: ' + bilder);
+  }
+  if (process.argv.includes('--nur-posteingang')) { await posteingangPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-start')) {
     const ergebnis = await startPruefen();
     await b.close();
@@ -559,6 +616,7 @@ async function buendeln() {
   const ek = await einkaufPruefen();
   const sp = await startPruefen();
   const pn = await panelsPruefen();
+  await posteingangPruefen();
   const kt = await kartePruefen();
   const messung = await p.evaluate(() => window.spiel.messung);
   const teile = await p.evaluate(() => window.spiel.teileStand());
