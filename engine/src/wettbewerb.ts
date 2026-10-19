@@ -298,7 +298,7 @@ export function wettbewerbFuerGrafik(s: GameState, stadt: string) {
 }
 
 /** Übernahme einer Wettbewerbsfläche: eigenes Outlet oder Erweiterungsfläche. */
-export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet' | 'erweiterung'): string | null {
+export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet' | 'erweiterung', mieteQmMonat = 11): string | null {
   const wb = s.wettbewerber.find((w) => w.id === id);
   if (!wb || wb.status === 'geschlossen') return 'Wettbewerber-Standort nicht verfügbar.';
   const basis = s.haeuser.find((h) => h.stadt === wb.stadt && h.format === 'warenhaus' && h.status === 'offen');
@@ -313,14 +313,14 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
     const idF = basis.id + '-wb-' + wb.id;
     basis.flaechen.push({ id: idF, etage: 0, qm, konzept: 'eigen', gruppe: g, umbauBis: s.woche + 8 });
     basis.potenzial[g] = (basis.potenzial[g] ?? 0) + qm * GRUPPEN[g].qmUmsatz;
-    basis.miete.mieteWoche += eur(qm * 12 * 12 / 52);
+    basis.miete.mieteWoche += eur(qm * mieteQmMonat * 12 / 52);
   } else {
     const neu: Haus = structuredClone(basis);
     neu.id = 'O' + wb.id; neu.name = 'Hartwig Outlet ' + wb.stadt; neu.etagen = [0]; neu.grundflaecheQm = qm;
     neu.flaechen = [{ id: neu.id + '-f1', etage: 0, qm, konzept: 'offprice', umbauBis: s.woche + 8 }];
     neu.potenzial = {}; neu.saettigungQm = {};
     neu.personal.vollzeit = qm / 600; neu.personal.teilzeit = qm / 1000; neu.personal.aushilfen = qm / 3000;
-    neu.miete = { mieteWoche: eur(qm * 11 * 12 / 52), bisWoche: s.woche + 260, netTyp: 'double', vermieter: 'dritt', vermieterName: wb.name, nebenkostenQmWoche: 1.2 };
+    neu.miete = { mieteWoche: eur(qm * mieteQmMonat * 12 / 52), bisWoche: s.woche + 260, netTyp: 'double', vermieter: 'dritt', vermieterName: wb.name, nebenkostenQmWoche: 1.2 };
     neu.kpi = undefined; neu.status = 'offen'; neu.statusBis = undefined; neu.transferBonus = 0;
     neu.wettbewerbStart = basis.einzug.wettbewerb;
     neu.wettbewerbRohStart = roh(s, neu);
