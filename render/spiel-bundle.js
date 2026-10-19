@@ -5104,6 +5104,9 @@
       staerke: w.staerke,
       status: w.status,
       preisdruck: w.preisdruck,
+      seit: w.seit,
+      inHartwigGebaeude: w.inHartwigGebaeude,
+      rabatt: (w.aktionVon ?? Infinity) <= s2.woche && (w.aktionBis ?? -1) > s2.woche ? w.preisdruck : 0,
       wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w.art]).map((g) => {
         const h = s2.haeuser.find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g));
         const faktor = h ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w, g, s2) * lageFaktor(h, w) / (1 - 0.25 * h.wettbewerbStart) : 0;
@@ -5121,6 +5124,7 @@
       grundflaecheQm: w.grundflaecheQm,
       status: w.status,
       inHartwigGebaeude: w.inHartwigGebaeude,
+      seit: w.seit,
       rabatt: (w.aktionVon ?? Infinity) <= s2.woche && (w.aktionBis ?? -1) > s2.woche ? w.preisdruck : 0
     }));
   }
@@ -5685,13 +5689,14 @@
       const ids = m.bezug?.hausId ? [m.bezug.hausId] : [];
       const gefunden = ids.length ? ids : s2.haeuser.filter((h) => m.text.includes(h.name)).map((h) => h.id).slice(0, 8);
       const bezug = hausBezug(s2, gefunden, m.bezug?.modul);
+      const konkurrenz2 = s2.wettbewerber.find((w) => m.text.includes(w.name));
       return {
         id: m.id ?? `alt-${m.woche}-${i}`,
         woche: m.woche,
         typ: m.typ,
         text: m.text,
-        kategorie: meldungKategorie(m.typ, m.text),
-        bezug: { ...bezug, ...m.bezug?.stadt ? { stadt: m.bezug.stadt } : {} }
+        kategorie: konkurrenz2 ? "Konkurrenz" : meldungKategorie(m.typ, m.text),
+        bezug: { ...bezug, ...m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}, ...konkurrenz2 ? { stadt: konkurrenz2.stadt, wettbewerberId: konkurrenz2.id } : {} }
       };
     });
     const erledigt = [
@@ -9626,9 +9631,9 @@
       const listeners = this._listeners;
       const listenerArray = listeners[type];
       if (listenerArray !== void 0) {
-        const index = listenerArray.indexOf(listener);
-        if (index !== -1) {
-          listenerArray.splice(index, 1);
+        const index2 = listenerArray.indexOf(listener);
+        if (index2 !== -1) {
+          listenerArray.splice(index2, 1);
         }
       }
     }
@@ -9862,8 +9867,8 @@
       this.y = y;
       return this;
     }
-    setComponent(index, value) {
-      switch (index) {
+    setComponent(index2, value) {
+      switch (index2) {
         case 0:
           this.x = value;
           break;
@@ -9871,18 +9876,18 @@
           this.y = value;
           break;
         default:
-          throw new Error("index is out of range: " + index);
+          throw new Error("index is out of range: " + index2);
       }
       return this;
     }
-    getComponent(index) {
-      switch (index) {
+    getComponent(index2) {
+      switch (index2) {
         case 0:
           return this.x;
         case 1:
           return this.y;
         default:
-          throw new Error("index is out of range: " + index);
+          throw new Error("index is out of range: " + index2);
       }
     }
     clone() {
@@ -10066,9 +10071,9 @@
       array[offset + 1] = this.y;
       return array;
     }
-    fromBufferAttribute(attribute, index) {
-      this.x = attribute.getX(index);
-      this.y = attribute.getY(index);
+    fromBufferAttribute(attribute, index2) {
+      this.x = attribute.getX(index2);
+      this.y = attribute.getY(index2);
       return this;
     }
     rotateAround(center, angle) {
@@ -10864,8 +10869,8 @@
       this.w = w;
       return this;
     }
-    setComponent(index, value) {
-      switch (index) {
+    setComponent(index2, value) {
+      switch (index2) {
         case 0:
           this.x = value;
           break;
@@ -10879,12 +10884,12 @@
           this.w = value;
           break;
         default:
-          throw new Error("index is out of range: " + index);
+          throw new Error("index is out of range: " + index2);
       }
       return this;
     }
-    getComponent(index) {
-      switch (index) {
+    getComponent(index2) {
+      switch (index2) {
         case 0:
           return this.x;
         case 1:
@@ -10894,7 +10899,7 @@
         case 3:
           return this.w;
         default:
-          throw new Error("index is out of range: " + index);
+          throw new Error("index is out of range: " + index2);
       }
     }
     clone() {
@@ -11169,11 +11174,11 @@
       array[offset + 3] = this.w;
       return array;
     }
-    fromBufferAttribute(attribute, index) {
-      this.x = attribute.getX(index);
-      this.y = attribute.getY(index);
-      this.z = attribute.getZ(index);
-      this.w = attribute.getW(index);
+    fromBufferAttribute(attribute, index2) {
+      this.x = attribute.getX(index2);
+      this.y = attribute.getY(index2);
+      this.z = attribute.getZ(index2);
+      this.w = attribute.getW(index2);
       return this;
     }
     random() {
@@ -11724,11 +11729,11 @@
       array[offset + 3] = this._w;
       return array;
     }
-    fromBufferAttribute(attribute, index) {
-      this._x = attribute.getX(index);
-      this._y = attribute.getY(index);
-      this._z = attribute.getZ(index);
-      this._w = attribute.getW(index);
+    fromBufferAttribute(attribute, index2) {
+      this._x = attribute.getX(index2);
+      this._y = attribute.getY(index2);
+      this._z = attribute.getZ(index2);
+      this._w = attribute.getW(index2);
       this._onChangeCallback();
       return this;
     }
@@ -11780,8 +11785,8 @@
       this.z = z2;
       return this;
     }
-    setComponent(index, value) {
-      switch (index) {
+    setComponent(index2, value) {
+      switch (index2) {
         case 0:
           this.x = value;
           break;
@@ -11792,12 +11797,12 @@
           this.z = value;
           break;
         default:
-          throw new Error("index is out of range: " + index);
+          throw new Error("index is out of range: " + index2);
       }
       return this;
     }
-    getComponent(index) {
-      switch (index) {
+    getComponent(index2) {
+      switch (index2) {
         case 0:
           return this.x;
         case 1:
@@ -11805,7 +11810,7 @@
         case 2:
           return this.z;
         default:
-          throw new Error("index is out of range: " + index);
+          throw new Error("index is out of range: " + index2);
       }
     }
     clone() {
@@ -12101,11 +12106,11 @@
       this.z = sz;
       return this;
     }
-    setFromMatrixColumn(m, index) {
-      return this.fromArray(m.elements, index * 4);
+    setFromMatrixColumn(m, index2) {
+      return this.fromArray(m.elements, index2 * 4);
     }
-    setFromMatrix3Column(m, index) {
-      return this.fromArray(m.elements, index * 3);
+    setFromMatrix3Column(m, index2) {
+      return this.fromArray(m.elements, index2 * 3);
     }
     setFromEuler(e) {
       this.x = e._x;
@@ -12134,10 +12139,10 @@
       array[offset + 2] = this.z;
       return array;
     }
-    fromBufferAttribute(attribute, index) {
-      this.x = attribute.getX(index);
-      this.y = attribute.getY(index);
-      this.z = attribute.getZ(index);
+    fromBufferAttribute(attribute, index2) {
+      this.x = attribute.getX(index2);
+      this.y = attribute.getY(index2);
+      this.z = attribute.getZ(index2);
       return this;
     }
     random() {
@@ -13997,10 +14002,10 @@
         }
         return this;
       }
-      const index = this.children.indexOf(object);
-      if (index !== -1) {
+      const index2 = this.children.indexOf(object);
+      if (index2 !== -1) {
         object.parent = null;
-        this.children.splice(index, 1);
+        this.children.splice(index2, 1);
         object.dispatchEvent(_removedEvent);
       }
       return this;
@@ -15004,10 +15009,10 @@
       array[offset + 2] = this.b;
       return array;
     }
-    fromBufferAttribute(attribute, index) {
-      this.r = attribute.getX(index);
-      this.g = attribute.getY(index);
-      this.b = attribute.getZ(index);
+    fromBufferAttribute(attribute, index2) {
+      this.r = attribute.getX(index2);
+      this.g = attribute.getY(index2);
+      this.b = attribute.getZ(index2);
       return this;
     }
     toJSON() {
@@ -15594,90 +15599,90 @@
       this.array.set(value, offset);
       return this;
     }
-    getComponent(index, component) {
-      let value = this.array[index * this.itemSize + component];
+    getComponent(index2, component) {
+      let value = this.array[index2 * this.itemSize + component];
       if (this.normalized) value = denormalize(value, this.array);
       return value;
     }
-    setComponent(index, component, value) {
+    setComponent(index2, component, value) {
       if (this.normalized) value = normalize(value, this.array);
-      this.array[index * this.itemSize + component] = value;
+      this.array[index2 * this.itemSize + component] = value;
       return this;
     }
-    getX(index) {
-      let x = this.array[index * this.itemSize];
+    getX(index2) {
+      let x = this.array[index2 * this.itemSize];
       if (this.normalized) x = denormalize(x, this.array);
       return x;
     }
-    setX(index, x) {
+    setX(index2, x) {
       if (this.normalized) x = normalize(x, this.array);
-      this.array[index * this.itemSize] = x;
+      this.array[index2 * this.itemSize] = x;
       return this;
     }
-    getY(index) {
-      let y = this.array[index * this.itemSize + 1];
+    getY(index2) {
+      let y = this.array[index2 * this.itemSize + 1];
       if (this.normalized) y = denormalize(y, this.array);
       return y;
     }
-    setY(index, y) {
+    setY(index2, y) {
       if (this.normalized) y = normalize(y, this.array);
-      this.array[index * this.itemSize + 1] = y;
+      this.array[index2 * this.itemSize + 1] = y;
       return this;
     }
-    getZ(index) {
-      let z2 = this.array[index * this.itemSize + 2];
+    getZ(index2) {
+      let z2 = this.array[index2 * this.itemSize + 2];
       if (this.normalized) z2 = denormalize(z2, this.array);
       return z2;
     }
-    setZ(index, z2) {
+    setZ(index2, z2) {
       if (this.normalized) z2 = normalize(z2, this.array);
-      this.array[index * this.itemSize + 2] = z2;
+      this.array[index2 * this.itemSize + 2] = z2;
       return this;
     }
-    getW(index) {
-      let w = this.array[index * this.itemSize + 3];
+    getW(index2) {
+      let w = this.array[index2 * this.itemSize + 3];
       if (this.normalized) w = denormalize(w, this.array);
       return w;
     }
-    setW(index, w) {
+    setW(index2, w) {
       if (this.normalized) w = normalize(w, this.array);
-      this.array[index * this.itemSize + 3] = w;
+      this.array[index2 * this.itemSize + 3] = w;
       return this;
     }
-    setXY(index, x, y) {
-      index *= this.itemSize;
+    setXY(index2, x, y) {
+      index2 *= this.itemSize;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
       }
-      this.array[index + 0] = x;
-      this.array[index + 1] = y;
+      this.array[index2 + 0] = x;
+      this.array[index2 + 1] = y;
       return this;
     }
-    setXYZ(index, x, y, z2) {
-      index *= this.itemSize;
+    setXYZ(index2, x, y, z2) {
+      index2 *= this.itemSize;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
         z2 = normalize(z2, this.array);
       }
-      this.array[index + 0] = x;
-      this.array[index + 1] = y;
-      this.array[index + 2] = z2;
+      this.array[index2 + 0] = x;
+      this.array[index2 + 1] = y;
+      this.array[index2 + 2] = z2;
       return this;
     }
-    setXYZW(index, x, y, z2, w) {
-      index *= this.itemSize;
+    setXYZW(index2, x, y, z2, w) {
+      index2 *= this.itemSize;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
         z2 = normalize(z2, this.array);
         w = normalize(w, this.array);
       }
-      this.array[index + 0] = x;
-      this.array[index + 1] = y;
-      this.array[index + 2] = z2;
-      this.array[index + 3] = w;
+      this.array[index2 + 0] = x;
+      this.array[index2 + 1] = y;
+      this.array[index2 + 2] = z2;
+      this.array[index2 + 3] = w;
       return this;
     }
     onUpload(callback) {
@@ -15739,80 +15744,80 @@
       super(new Uint16Array(array), itemSize, normalized);
       this.isFloat16BufferAttribute = true;
     }
-    getX(index) {
-      let x = fromHalfFloat(this.array[index * this.itemSize]);
+    getX(index2) {
+      let x = fromHalfFloat(this.array[index2 * this.itemSize]);
       if (this.normalized) x = denormalize(x, this.array);
       return x;
     }
-    setX(index, x) {
+    setX(index2, x) {
       if (this.normalized) x = normalize(x, this.array);
-      this.array[index * this.itemSize] = toHalfFloat(x);
+      this.array[index2 * this.itemSize] = toHalfFloat(x);
       return this;
     }
-    getY(index) {
-      let y = fromHalfFloat(this.array[index * this.itemSize + 1]);
+    getY(index2) {
+      let y = fromHalfFloat(this.array[index2 * this.itemSize + 1]);
       if (this.normalized) y = denormalize(y, this.array);
       return y;
     }
-    setY(index, y) {
+    setY(index2, y) {
       if (this.normalized) y = normalize(y, this.array);
-      this.array[index * this.itemSize + 1] = toHalfFloat(y);
+      this.array[index2 * this.itemSize + 1] = toHalfFloat(y);
       return this;
     }
-    getZ(index) {
-      let z2 = fromHalfFloat(this.array[index * this.itemSize + 2]);
+    getZ(index2) {
+      let z2 = fromHalfFloat(this.array[index2 * this.itemSize + 2]);
       if (this.normalized) z2 = denormalize(z2, this.array);
       return z2;
     }
-    setZ(index, z2) {
+    setZ(index2, z2) {
       if (this.normalized) z2 = normalize(z2, this.array);
-      this.array[index * this.itemSize + 2] = toHalfFloat(z2);
+      this.array[index2 * this.itemSize + 2] = toHalfFloat(z2);
       return this;
     }
-    getW(index) {
-      let w = fromHalfFloat(this.array[index * this.itemSize + 3]);
+    getW(index2) {
+      let w = fromHalfFloat(this.array[index2 * this.itemSize + 3]);
       if (this.normalized) w = denormalize(w, this.array);
       return w;
     }
-    setW(index, w) {
+    setW(index2, w) {
       if (this.normalized) w = normalize(w, this.array);
-      this.array[index * this.itemSize + 3] = toHalfFloat(w);
+      this.array[index2 * this.itemSize + 3] = toHalfFloat(w);
       return this;
     }
-    setXY(index, x, y) {
-      index *= this.itemSize;
+    setXY(index2, x, y) {
+      index2 *= this.itemSize;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
       }
-      this.array[index + 0] = toHalfFloat(x);
-      this.array[index + 1] = toHalfFloat(y);
+      this.array[index2 + 0] = toHalfFloat(x);
+      this.array[index2 + 1] = toHalfFloat(y);
       return this;
     }
-    setXYZ(index, x, y, z2) {
-      index *= this.itemSize;
+    setXYZ(index2, x, y, z2) {
+      index2 *= this.itemSize;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
         z2 = normalize(z2, this.array);
       }
-      this.array[index + 0] = toHalfFloat(x);
-      this.array[index + 1] = toHalfFloat(y);
-      this.array[index + 2] = toHalfFloat(z2);
+      this.array[index2 + 0] = toHalfFloat(x);
+      this.array[index2 + 1] = toHalfFloat(y);
+      this.array[index2 + 2] = toHalfFloat(z2);
       return this;
     }
-    setXYZW(index, x, y, z2, w) {
-      index *= this.itemSize;
+    setXYZW(index2, x, y, z2, w) {
+      index2 *= this.itemSize;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
         z2 = normalize(z2, this.array);
         w = normalize(w, this.array);
       }
-      this.array[index + 0] = toHalfFloat(x);
-      this.array[index + 1] = toHalfFloat(y);
-      this.array[index + 2] = toHalfFloat(z2);
-      this.array[index + 3] = toHalfFloat(w);
+      this.array[index2 + 0] = toHalfFloat(x);
+      this.array[index2 + 1] = toHalfFloat(y);
+      this.array[index2 + 2] = toHalfFloat(z2);
+      this.array[index2 + 3] = toHalfFloat(w);
       return this;
     }
   };
@@ -15854,11 +15859,11 @@
     getIndex() {
       return this.index;
     }
-    setIndex(index) {
-      if (Array.isArray(index)) {
-        this.index = new (arrayNeedsUint32(index) ? Uint32BufferAttribute : Uint16BufferAttribute)(index, 1);
+    setIndex(index2) {
+      if (Array.isArray(index2)) {
+        this.index = new (arrayNeedsUint32(index2) ? Uint32BufferAttribute : Uint16BufferAttribute)(index2, 1);
       } else {
-        this.index = index;
+        this.index = index2;
       }
       return this;
     }
@@ -16060,13 +16065,13 @@
       }
     }
     computeTangents() {
-      const index = this.index;
+      const index2 = this.index;
       const attributes = this.attributes;
-      if (index === null || attributes.position === void 0 || attributes.normal === void 0 || attributes.uv === void 0) {
+      if (index2 === null || attributes.position === void 0 || attributes.normal === void 0 || attributes.uv === void 0) {
         console.error("THREE.BufferGeometry: .computeTangents() failed. Missing required attributes (index, position, normal or uv)");
         return;
       }
-      const indices = index.array;
+      const indices = index2.array;
       const positions = attributes.position.array;
       const normals = attributes.normal.array;
       const uvs = attributes.uv.array;
@@ -16150,7 +16155,7 @@
       }
     }
     computeVertexNormals() {
-      const index = this.index;
+      const index2 = this.index;
       const positionAttribute = this.getAttribute("position");
       if (positionAttribute !== void 0) {
         let normalAttribute = this.getAttribute("normal");
@@ -16165,11 +16170,11 @@
         const pA = new Vector3(), pB = new Vector3(), pC = new Vector3();
         const nA = new Vector3(), nB = new Vector3(), nC = new Vector3();
         const cb = new Vector3(), ab = new Vector3();
-        if (index) {
-          for (let i = 0, il = index.count; i < il; i += 3) {
-            const vA = index.getX(i + 0);
-            const vB = index.getX(i + 1);
-            const vC = index.getX(i + 2);
+        if (index2) {
+          for (let i = 0, il = index2.count; i < il; i += 3) {
+            const vA = index2.getX(i + 0);
+            const vB = index2.getX(i + 1);
+            const vC = index2.getX(i + 2);
             pA.fromBufferAttribute(positionAttribute, vA);
             pB.fromBufferAttribute(positionAttribute, vB);
             pC.fromBufferAttribute(positionAttribute, vC);
@@ -16217,15 +16222,15 @@
         const itemSize = attribute.itemSize;
         const normalized = attribute.normalized;
         const array2 = new array.constructor(indices2.length * itemSize);
-        let index = 0, index2 = 0;
+        let index2 = 0, index22 = 0;
         for (let i = 0, l = indices2.length; i < l; i++) {
           if (attribute.isInterleavedBufferAttribute) {
-            index = indices2[i] * attribute.data.stride + attribute.offset;
+            index2 = indices2[i] * attribute.data.stride + attribute.offset;
           } else {
-            index = indices2[i] * itemSize;
+            index2 = indices2[i] * itemSize;
           }
           for (let j = 0; j < itemSize; j++) {
-            array2[index2++] = array[index++];
+            array2[index22++] = array[index2++];
           }
         }
         return new BufferAttribute(array2, itemSize, normalized);
@@ -16281,11 +16286,11 @@
         return data;
       }
       data.data = { attributes: {} };
-      const index = this.index;
-      if (index !== null) {
+      const index2 = this.index;
+      if (index2 !== null) {
         data.data.index = {
-          type: index.array.constructor.name,
-          array: Array.prototype.slice.call(index.array)
+          type: index2.array.constructor.name,
+          array: Array.prototype.slice.call(index2.array)
         };
       }
       const attributes = this.attributes;
@@ -16336,9 +16341,9 @@
       this.boundingSphere = null;
       const data = {};
       this.name = source.name;
-      const index = source.index;
-      if (index !== null) {
-        this.setIndex(index.clone(data));
+      const index2 = source.index;
+      if (index2 !== null) {
+        this.setIndex(index2.clone(data));
       }
       const attributes = source.attributes;
       for (const name2 in attributes) {
@@ -16432,12 +16437,12 @@
         }
       }
     }
-    getVertexPosition(index, target) {
+    getVertexPosition(index2, target) {
       const geometry = this.geometry;
       const position = geometry.attributes.position;
       const morphPosition = geometry.morphAttributes.position;
       const morphTargetsRelative = geometry.morphTargetsRelative;
-      target.fromBufferAttribute(position, index);
+      target.fromBufferAttribute(position, index2);
       const morphInfluences = this.morphTargetInfluences;
       if (morphPosition && morphInfluences) {
         _morphA.set(0, 0, 0);
@@ -16445,7 +16450,7 @@
           const influence = morphInfluences[i];
           const morphAttribute = morphPosition[i];
           if (influence === 0) continue;
-          _tempA.fromBufferAttribute(morphAttribute, index);
+          _tempA.fromBufferAttribute(morphAttribute, index2);
           if (morphTargetsRelative) {
             _morphA.addScaledVector(_tempA, influence);
           } else {
@@ -16480,24 +16485,24 @@
       let intersection;
       const geometry = this.geometry;
       const material2 = this.material;
-      const index = geometry.index;
+      const index2 = geometry.index;
       const position = geometry.attributes.position;
       const uv = geometry.attributes.uv;
       const uv1 = geometry.attributes.uv1;
       const normal2 = geometry.attributes.normal;
       const groups = geometry.groups;
       const drawRange = geometry.drawRange;
-      if (index !== null) {
+      if (index2 !== null) {
         if (Array.isArray(material2)) {
           for (let i = 0, il = groups.length; i < il; i++) {
             const group = groups[i];
             const groupMaterial = material2[group.materialIndex];
             const start = Math.max(group.start, drawRange.start);
-            const end = Math.min(index.count, Math.min(group.start + group.count, drawRange.start + drawRange.count));
+            const end = Math.min(index2.count, Math.min(group.start + group.count, drawRange.start + drawRange.count));
             for (let j = start, jl = end; j < jl; j += 3) {
-              const a = index.getX(j);
-              const b = index.getX(j + 1);
-              const c = index.getX(j + 2);
+              const a = index2.getX(j);
+              const b = index2.getX(j + 1);
+              const c = index2.getX(j + 2);
               intersection = checkGeometryIntersection(this, groupMaterial, raycaster, rayLocalSpace, uv, uv1, normal2, a, b, c);
               if (intersection) {
                 intersection.faceIndex = Math.floor(j / 3);
@@ -16508,11 +16513,11 @@
           }
         } else {
           const start = Math.max(0, drawRange.start);
-          const end = Math.min(index.count, drawRange.start + drawRange.count);
+          const end = Math.min(index2.count, drawRange.start + drawRange.count);
           for (let i = start, il = end; i < il; i += 3) {
-            const a = index.getX(i);
-            const b = index.getX(i + 1);
-            const c = index.getX(i + 2);
+            const a = index2.getX(i);
+            const b = index2.getX(i + 1);
+            const c = index2.getX(i + 2);
             intersection = checkGeometryIntersection(this, material2, raycaster, rayLocalSpace, uv, uv1, normal2, a, b, c);
             if (intersection) {
               intersection.faceIndex = Math.floor(i / 3);
@@ -18550,7 +18555,7 @@
     const defaultState = createBindingState(null);
     let currentState = defaultState;
     let forceUpdate = false;
-    function setup(object, material2, program, geometry, index) {
+    function setup(object, material2, program, geometry, index2) {
       let updateBuffers = false;
       if (vaoAvailable) {
         const state = getBindingState(geometry, program, material2);
@@ -18558,8 +18563,8 @@
           currentState = state;
           bindVertexArrayObject(currentState.object);
         }
-        updateBuffers = needsUpdate(object, geometry, program, index);
-        if (updateBuffers) saveCache(object, geometry, program, index);
+        updateBuffers = needsUpdate(object, geometry, program, index2);
+        if (updateBuffers) saveCache(object, geometry, program, index2);
       } else {
         const wireframe = material2.wireframe === true;
         if (currentState.geometry !== geometry.id || currentState.program !== program.id || currentState.wireframe !== wireframe) {
@@ -18569,14 +18574,14 @@
           updateBuffers = true;
         }
       }
-      if (index !== null) {
-        attributes.update(index, gl.ELEMENT_ARRAY_BUFFER);
+      if (index2 !== null) {
+        attributes.update(index2, gl.ELEMENT_ARRAY_BUFFER);
       }
       if (updateBuffers || forceUpdate) {
         forceUpdate = false;
         setupVertexAttributes(object, material2, program, geometry);
-        if (index !== null) {
-          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, attributes.get(index).buffer);
+        if (index2 !== null) {
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, attributes.get(index2).buffer);
         }
       }
     }
@@ -18633,7 +18638,7 @@
         index: null
       };
     }
-    function needsUpdate(object, geometry, program, index) {
+    function needsUpdate(object, geometry, program, index2) {
       const cachedAttributes = currentState.attributes;
       const geometryAttributes = geometry.attributes;
       let attributesNum = 0;
@@ -18654,10 +18659,10 @@
         }
       }
       if (currentState.attributesNum !== attributesNum) return true;
-      if (currentState.index !== index) return true;
+      if (currentState.index !== index2) return true;
       return false;
     }
-    function saveCache(object, geometry, program, index) {
+    function saveCache(object, geometry, program, index2) {
       const cache2 = {};
       const attributes2 = geometry.attributes;
       let attributesNum = 0;
@@ -18681,7 +18686,7 @@
       }
       currentState.attributes = cache2;
       currentState.attributesNum = attributesNum;
-      currentState.index = index;
+      currentState.index = index2;
     }
     function initAttributes() {
       const newAttributes = currentState.newAttributes;
@@ -18717,11 +18722,11 @@
         }
       }
     }
-    function vertexAttribPointer(index, size, type, normalized, stride, offset, integer) {
+    function vertexAttribPointer(index2, size, type, normalized, stride, offset, integer) {
       if (integer === true) {
-        gl.vertexAttribIPointer(index, size, type, stride, offset);
+        gl.vertexAttribIPointer(index2, size, type, stride, offset);
       } else {
-        gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
+        gl.vertexAttribPointer(index2, size, type, normalized, stride, offset);
       }
     }
     function setupVertexAttributes(object, material2, program, geometry) {
@@ -20308,14 +20313,14 @@
         let morphInfluencesSum = 0;
         for (let i = 0; i < 8; i++) {
           const influence = workInfluences[i];
-          const index = influence[0];
+          const index2 = influence[0];
           const value = influence[1];
-          if (index !== Number.MAX_SAFE_INTEGER && value) {
-            if (morphTargets && geometry.getAttribute("morphTarget" + i) !== morphTargets[index]) {
-              geometry.setAttribute("morphTarget" + i, morphTargets[index]);
+          if (index2 !== Number.MAX_SAFE_INTEGER && value) {
+            if (morphTargets && geometry.getAttribute("morphTarget" + i) !== morphTargets[index2]) {
+              geometry.setAttribute("morphTarget" + i, morphTargets[index2]);
             }
-            if (morphNormals && geometry.getAttribute("morphNormal" + i) !== morphNormals[index]) {
-              geometry.setAttribute("morphNormal" + i, morphNormals[index]);
+            if (morphNormals && geometry.getAttribute("morphNormal" + i) !== morphNormals[index2]) {
+              geometry.setAttribute("morphNormal" + i, morphNormals[index2]);
             }
             morphInfluences[i] = value;
             morphInfluencesSum += value;
@@ -25301,27 +25306,27 @@
       this.cameraAutoUpdate = true;
       this.enabled = false;
       this.isPresenting = false;
-      this.getController = function(index) {
-        let controller = controllers[index];
+      this.getController = function(index2) {
+        let controller = controllers[index2];
         if (controller === void 0) {
           controller = new WebXRController();
-          controllers[index] = controller;
+          controllers[index2] = controller;
         }
         return controller.getTargetRaySpace();
       };
-      this.getControllerGrip = function(index) {
-        let controller = controllers[index];
+      this.getControllerGrip = function(index2) {
+        let controller = controllers[index2];
         if (controller === void 0) {
           controller = new WebXRController();
-          controllers[index] = controller;
+          controllers[index2] = controller;
         }
         return controller.getGripSpace();
       };
-      this.getHand = function(index) {
-        let controller = controllers[index];
+      this.getHand = function(index2) {
+        let controller = controllers[index2];
         if (controller === void 0) {
           controller = new WebXRController();
-          controllers[index] = controller;
+          controllers[index2] = controller;
         }
         return controller.getHandSpace();
       };
@@ -25486,10 +25491,10 @@
       function onInputSourcesChange(event) {
         for (let i = 0; i < event.removed.length; i++) {
           const inputSource = event.removed[i];
-          const index = controllerInputSources.indexOf(inputSource);
-          if (index >= 0) {
-            controllerInputSources[index] = null;
-            controllers[index].disconnect(inputSource);
+          const index2 = controllerInputSources.indexOf(inputSource);
+          if (index2 >= 0) {
+            controllerInputSources[index2] = null;
+            controllers[index2].disconnect(inputSource);
           }
         }
         for (let i = 0; i < event.added.length; i++) {
@@ -26077,9 +26082,9 @@
       }
       gl.bindBuffer(gl.UNIFORM_BUFFER, null);
     }
-    function hasUniformChanged(uniform, index, indexArray, cache2) {
+    function hasUniformChanged(uniform, index2, indexArray, cache2) {
       const value = uniform.value;
-      const indexString = index + "_" + indexArray;
+      const indexString = index2 + "_" + indexArray;
       if (cache2[indexString] === void 0) {
         if (typeof value === "number" || typeof value === "boolean") {
           cache2[indexString] = value;
@@ -26166,8 +26171,8 @@
     function onUniformsGroupsDispose(event) {
       const uniformsGroup = event.target;
       uniformsGroup.removeEventListener("dispose", onUniformsGroupsDispose);
-      const index = allocatedBindingPoints.indexOf(uniformsGroup.__bindingPointIndex);
-      allocatedBindingPoints.splice(index, 1);
+      const index2 = allocatedBindingPoints.indexOf(uniformsGroup.__bindingPointIndex);
+      allocatedBindingPoints.splice(index2, 1);
       gl.deleteBuffer(buffers[uniformsGroup.id]);
       delete buffers[uniformsGroup.id];
       delete updateList[uniformsGroup.id];
@@ -26580,11 +26585,11 @@
         const frontFaceCW = object.isMesh && object.matrixWorld.determinant() < 0;
         const program = setProgram(camera, scene2, geometry, material2, object);
         state.setMaterial(material2, frontFaceCW);
-        let index = geometry.index;
+        let index2 = geometry.index;
         let rangeFactor = 1;
         if (material2.wireframe === true) {
-          index = geometries.getWireframeAttribute(geometry);
-          if (index === void 0) return;
+          index2 = geometries.getWireframeAttribute(geometry);
+          if (index2 === void 0) return;
           rangeFactor = 2;
         }
         const drawRange = geometry.drawRange;
@@ -26595,20 +26600,20 @@
           drawStart = Math.max(drawStart, group.start * rangeFactor);
           drawEnd = Math.min(drawEnd, (group.start + group.count) * rangeFactor);
         }
-        if (index !== null) {
+        if (index2 !== null) {
           drawStart = Math.max(drawStart, 0);
-          drawEnd = Math.min(drawEnd, index.count);
+          drawEnd = Math.min(drawEnd, index2.count);
         } else if (position !== void 0 && position !== null) {
           drawStart = Math.max(drawStart, 0);
           drawEnd = Math.min(drawEnd, position.count);
         }
         const drawCount = drawEnd - drawStart;
         if (drawCount < 0 || drawCount === Infinity) return;
-        bindingStates.setup(object, material2, program, geometry, index);
+        bindingStates.setup(object, material2, program, geometry, index2);
         let attribute;
         let renderer = bufferRenderer;
-        if (index !== null) {
-          attribute = attributes.get(index);
+        if (index2 !== null) {
+          attribute = attributes.get(index2);
           renderer = indexedBufferRenderer;
           renderer.setIndex(attribute);
         }
@@ -27725,80 +27730,80 @@
       }
       return this;
     }
-    setX(index, x) {
+    setX(index2, x) {
       if (this.normalized) x = normalize(x, this.array);
-      this.data.array[index * this.data.stride + this.offset] = x;
+      this.data.array[index2 * this.data.stride + this.offset] = x;
       return this;
     }
-    setY(index, y) {
+    setY(index2, y) {
       if (this.normalized) y = normalize(y, this.array);
-      this.data.array[index * this.data.stride + this.offset + 1] = y;
+      this.data.array[index2 * this.data.stride + this.offset + 1] = y;
       return this;
     }
-    setZ(index, z2) {
+    setZ(index2, z2) {
       if (this.normalized) z2 = normalize(z2, this.array);
-      this.data.array[index * this.data.stride + this.offset + 2] = z2;
+      this.data.array[index2 * this.data.stride + this.offset + 2] = z2;
       return this;
     }
-    setW(index, w) {
+    setW(index2, w) {
       if (this.normalized) w = normalize(w, this.array);
-      this.data.array[index * this.data.stride + this.offset + 3] = w;
+      this.data.array[index2 * this.data.stride + this.offset + 3] = w;
       return this;
     }
-    getX(index) {
-      let x = this.data.array[index * this.data.stride + this.offset];
+    getX(index2) {
+      let x = this.data.array[index2 * this.data.stride + this.offset];
       if (this.normalized) x = denormalize(x, this.array);
       return x;
     }
-    getY(index) {
-      let y = this.data.array[index * this.data.stride + this.offset + 1];
+    getY(index2) {
+      let y = this.data.array[index2 * this.data.stride + this.offset + 1];
       if (this.normalized) y = denormalize(y, this.array);
       return y;
     }
-    getZ(index) {
-      let z2 = this.data.array[index * this.data.stride + this.offset + 2];
+    getZ(index2) {
+      let z2 = this.data.array[index2 * this.data.stride + this.offset + 2];
       if (this.normalized) z2 = denormalize(z2, this.array);
       return z2;
     }
-    getW(index) {
-      let w = this.data.array[index * this.data.stride + this.offset + 3];
+    getW(index2) {
+      let w = this.data.array[index2 * this.data.stride + this.offset + 3];
       if (this.normalized) w = denormalize(w, this.array);
       return w;
     }
-    setXY(index, x, y) {
-      index = index * this.data.stride + this.offset;
+    setXY(index2, x, y) {
+      index2 = index2 * this.data.stride + this.offset;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
       }
-      this.data.array[index + 0] = x;
-      this.data.array[index + 1] = y;
+      this.data.array[index2 + 0] = x;
+      this.data.array[index2 + 1] = y;
       return this;
     }
-    setXYZ(index, x, y, z2) {
-      index = index * this.data.stride + this.offset;
+    setXYZ(index2, x, y, z2) {
+      index2 = index2 * this.data.stride + this.offset;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
         z2 = normalize(z2, this.array);
       }
-      this.data.array[index + 0] = x;
-      this.data.array[index + 1] = y;
-      this.data.array[index + 2] = z2;
+      this.data.array[index2 + 0] = x;
+      this.data.array[index2 + 1] = y;
+      this.data.array[index2 + 2] = z2;
       return this;
     }
-    setXYZW(index, x, y, z2, w) {
-      index = index * this.data.stride + this.offset;
+    setXYZW(index2, x, y, z2, w) {
+      index2 = index2 * this.data.stride + this.offset;
       if (this.normalized) {
         x = normalize(x, this.array);
         y = normalize(y, this.array);
         z2 = normalize(z2, this.array);
         w = normalize(w, this.array);
       }
-      this.data.array[index + 0] = x;
-      this.data.array[index + 1] = y;
-      this.data.array[index + 2] = z2;
-      this.data.array[index + 3] = w;
+      this.data.array[index2 + 0] = x;
+      this.data.array[index2 + 1] = y;
+      this.data.array[index2 + 2] = z2;
+      this.data.array[index2 + 3] = w;
       return this;
     }
     clone(data) {
@@ -27806,9 +27811,9 @@
         console.log("THREE.InterleavedBufferAttribute.clone(): Cloning an interleaved buffer attribute will de-interleave buffer data.");
         const array = [];
         for (let i = 0; i < this.count; i++) {
-          const index = i * this.data.stride + this.offset;
+          const index2 = i * this.data.stride + this.offset;
           for (let j = 0; j < this.itemSize; j++) {
-            array.push(this.data.array[index + j]);
+            array.push(this.data.array[index2 + j]);
           }
         }
         return new BufferAttribute(new this.array.constructor(array), this.itemSize, this.normalized);
@@ -27827,9 +27832,9 @@
         console.log("THREE.InterleavedBufferAttribute.toJSON(): Serializing an interleaved buffer attribute will de-interleave buffer data.");
         const array = [];
         for (let i = 0; i < this.count; i++) {
-          const index = i * this.data.stride + this.offset;
+          const index2 = i * this.data.stride + this.offset;
           for (let j = 0; j < this.itemSize; j++) {
-            array.push(this.data.array[index + j]);
+            array.push(this.data.array[index2 + j]);
           }
         }
         return {
@@ -28174,9 +28179,9 @@
       }
       this._computeIntersections(raycaster, intersects2, _ray$2);
     }
-    getVertexPosition(index, target) {
-      super.getVertexPosition(index, target);
-      this.applyBoneTransform(index, target);
+    getVertexPosition(index2, target) {
+      super.getVertexPosition(index2, target);
+      this.applyBoneTransform(index2, target);
       return target;
     }
     bind(skeleton, bindMatrix) {
@@ -28216,11 +28221,11 @@
         console.warn("THREE.SkinnedMesh: Unrecognized bindMode: " + this.bindMode);
       }
     }
-    applyBoneTransform(index, vector) {
+    applyBoneTransform(index2, vector) {
       const skeleton = this.skeleton;
       const geometry = this.geometry;
-      _skinIndex.fromBufferAttribute(geometry.attributes.skinIndex, index);
-      _skinWeight.fromBufferAttribute(geometry.attributes.skinWeight, index);
+      _skinIndex.fromBufferAttribute(geometry.attributes.skinIndex, index2);
+      _skinWeight.fromBufferAttribute(geometry.attributes.skinWeight, index2);
       _basePosition.copy(vector).applyMatrix4(this.bindMatrix);
       vector.set(0, 0, 0);
       for (let i = 0; i < 4; i++) {
@@ -28233,9 +28238,9 @@
       }
       return vector.applyMatrix4(this.bindMatrixInverse);
     }
-    boneTransform(index, vector) {
+    boneTransform(index2, vector) {
       console.warn("THREE.SkinnedMesh: .boneTransform() was renamed to .applyBoneTransform() in r151.");
-      return this.applyBoneTransform(index, vector);
+      return this.applyBoneTransform(index2, vector);
     }
   };
   var Bone = class extends Object3D {
@@ -28472,11 +28477,11 @@
       if (source.boundingSphere !== null) this.boundingSphere = source.boundingSphere.clone();
       return this;
     }
-    getColorAt(index, color) {
-      color.fromArray(this.instanceColor.array, index * 3);
+    getColorAt(index2, color) {
+      color.fromArray(this.instanceColor.array, index2 * 3);
     }
-    getMatrixAt(index, matrix) {
-      matrix.fromArray(this.instanceMatrix.array, index * 16);
+    getMatrixAt(index2, matrix) {
+      matrix.fromArray(this.instanceMatrix.array, index2 * 16);
     }
     raycast(raycaster, intersects2) {
       const matrixWorld = this.matrixWorld;
@@ -28502,14 +28507,14 @@
         _instanceIntersects.length = 0;
       }
     }
-    setColorAt(index, color) {
+    setColorAt(index2, color) {
       if (this.instanceColor === null) {
         this.instanceColor = new InstancedBufferAttribute(new Float32Array(this.instanceMatrix.count * 3), 3);
       }
-      color.toArray(this.instanceColor.array, index * 3);
+      color.toArray(this.instanceColor.array, index2 * 3);
     }
-    setMatrixAt(index, matrix) {
-      matrix.toArray(this.instanceMatrix.array, index * 16);
+    setMatrixAt(index2, matrix) {
+      matrix.toArray(this.instanceMatrix.array, index2 * 16);
     }
     updateMorphTargets() {
     }
@@ -28723,11 +28728,11 @@
       } else {
         reservedRange.vertexStart = lastRange.vertexStart + lastRange.vertexCount;
       }
-      const index = geometry.getIndex();
-      const hasIndex = index !== null;
+      const index2 = geometry.getIndex();
+      const hasIndex = index2 !== null;
       if (hasIndex) {
         if (indexCount === -1) {
-          reservedRange.indexCount = index.count;
+          reservedRange.indexCount = index2.count;
         } else {
           reservedRange.indexCount = indexCount;
         }
@@ -28793,9 +28798,9 @@
         copyAttributeData(srcAttribute, dstAttribute, vertexStart);
         const itemSize = srcAttribute.itemSize;
         for (let i = srcAttribute.count, l = vertexCount; i < l; i++) {
-          const index = vertexStart + i;
+          const index2 = vertexStart + i;
           for (let c = 0; c < itemSize; c++) {
-            dstAttribute.setComponent(index, c, 0);
+            dstAttribute.setComponent(index2, c, 0);
           }
         }
         dstAttribute.needsUpdate = true;
@@ -28849,13 +28854,13 @@
       const geometry = this.geometry;
       if (bound.boxInitialized === false) {
         box.makeEmpty();
-        const index = geometry.index;
+        const index2 = geometry.index;
         const position = geometry.attributes.position;
         const drawRange = this._drawRanges[id];
         for (let i = drawRange.start, l = drawRange.start + drawRange.count; i < l; i++) {
           let iv = i;
-          if (index) {
-            iv = index.getX(iv);
+          if (index2) {
+            iv = index2.getX(iv);
           }
           box.expandByPoint(_vector$5.fromBufferAttribute(position, iv));
         }
@@ -28877,14 +28882,14 @@
         sphere.makeEmpty();
         this.getBoundingBoxAt(id, _box$1);
         _box$1.getCenter(sphere.center);
-        const index = geometry.index;
+        const index2 = geometry.index;
         const position = geometry.attributes.position;
         const drawRange = this._drawRanges[id];
         let maxRadiusSq = 0;
         for (let i = drawRange.start, l = drawRange.start + drawRange.count; i < l; i++) {
           let iv = i;
-          if (index) {
-            iv = index.getX(iv);
+          if (index2) {
+            iv = index2.getX(iv);
           }
           _vector$5.fromBufferAttribute(position, iv);
           maxRadiusSq = Math.max(maxRadiusSq, sphere.center.distanceToSquared(_vector$5));
@@ -29013,8 +29018,8 @@
       if (!this._visibilityChanged && !this.perObjectFrustumCulled && !this.sortObjects) {
         return;
       }
-      const index = geometry.getIndex();
-      const bytesPerElement = index === null ? 1 : index.array.BYTES_PER_ELEMENT;
+      const index2 = geometry.getIndex();
+      const bytesPerElement = index2 === null ? 1 : index2.array.BYTES_PER_ELEMENT;
       const visibility = this._visibility;
       const multiDrawStarts = this._multiDrawStarts;
       const multiDrawCounts = this._multiDrawCounts;
@@ -29164,15 +29169,15 @@
       const interSegment = new Vector3();
       const interRay = new Vector3();
       const step = this.isLineSegments ? 2 : 1;
-      const index = geometry.index;
+      const index2 = geometry.index;
       const attributes = geometry.attributes;
       const positionAttribute = attributes.position;
-      if (index !== null) {
+      if (index2 !== null) {
         const start = Math.max(0, drawRange.start);
-        const end = Math.min(index.count, drawRange.start + drawRange.count);
+        const end = Math.min(index2.count, drawRange.start + drawRange.count);
         for (let i = start, l = end - 1; i < l; i += step) {
-          const a = index.getX(i);
-          const b = index.getX(i + 1);
+          const a = index2.getX(i);
+          const b = index2.getX(i + 1);
           vStart.fromBufferAttribute(positionAttribute, a);
           vEnd.fromBufferAttribute(positionAttribute, b);
           const distSq = _ray$1.distanceSqToSegment(vStart, vEnd, interRay, interSegment);
@@ -29323,14 +29328,14 @@
       _ray.copy(raycaster.ray).applyMatrix4(_inverseMatrix);
       const localThreshold = threshold / ((this.scale.x + this.scale.y + this.scale.z) / 3);
       const localThresholdSq = localThreshold * localThreshold;
-      const index = geometry.index;
+      const index2 = geometry.index;
       const attributes = geometry.attributes;
       const positionAttribute = attributes.position;
-      if (index !== null) {
+      if (index2 !== null) {
         const start = Math.max(0, drawRange.start);
-        const end = Math.min(index.count, drawRange.start + drawRange.count);
+        const end = Math.min(index2.count, drawRange.start + drawRange.count);
         for (let i = start, il = end; i < il; i++) {
-          const a = index.getX(i);
+          const a = index2.getX(i);
           _position$2.fromBufferAttribute(positionAttribute, a);
           testPoint(_position$2, a, localThresholdSq, matrixWorld, raycaster, intersects2, this);
         }
@@ -29361,7 +29366,7 @@
       }
     }
   };
-  function testPoint(point, index, localThresholdSq, matrixWorld, raycaster, intersects2, object) {
+  function testPoint(point, index2, localThresholdSq, matrixWorld, raycaster, intersects2, object) {
     const rayPointDistanceSq = _ray.distanceSqToPoint(point);
     if (rayPointDistanceSq < localThresholdSq) {
       const intersectPoint = new Vector3();
@@ -29373,7 +29378,7 @@
         distance,
         distanceToRay: Math.sqrt(rayPointDistanceSq),
         point: intersectPoint,
-        index,
+        index: index2,
         face: null,
         object
       });
@@ -30653,7 +30658,7 @@
       const vertices = [];
       const normals = [];
       const uvs = [];
-      let index = 0;
+      let index2 = 0;
       const indexArray = [];
       const halfHeight = height / 2;
       let groupStart = 0;
@@ -30687,7 +30692,7 @@
             normal2.set(sinTheta, slope, cosTheta).normalize();
             normals.push(normal2.x, normal2.y, normal2.z);
             uvs.push(u, 1 - v);
-            indexRow.push(index++);
+            indexRow.push(index2++);
           }
           indexArray.push(indexRow);
         }
@@ -30706,7 +30711,7 @@
         groupStart += groupCount;
       }
       function generateCap(top) {
-        const centerIndexStart = index;
+        const centerIndexStart = index2;
         const uv = new Vector2();
         const vertex2 = new Vector3();
         let groupCount = 0;
@@ -30716,9 +30721,9 @@
           vertices.push(0, halfHeight * sign2, 0);
           normals.push(0, sign2, 0);
           uvs.push(0.5, 0.5);
-          index++;
+          index2++;
         }
-        const centerIndexEnd = index;
+        const centerIndexEnd = index2;
         for (let x = 0; x <= radialSegments; x++) {
           const u = x / radialSegments;
           const theta = u * thetaLength + thetaStart;
@@ -30732,7 +30737,7 @@
           uv.x = cosTheta * 0.5 + 0.5;
           uv.y = sinTheta * 0.5 * sign2 + 0.5;
           uvs.push(uv.x, uv.y);
-          index++;
+          index2++;
         }
         for (let x = 0; x < radialSegments; x++) {
           const c = centerIndexStart + x;
@@ -30882,8 +30887,8 @@
       function pushVertex(vertex2) {
         vertexBuffer.push(vertex2.x, vertex2.y, vertex2.z);
       }
-      function getVertexByIndex(index, vertex2) {
-        const stride = index * 3;
+      function getVertexByIndex(index2, vertex2) {
+        const stride = index2 * 3;
         vertex2.x = vertices[stride + 0];
         vertex2.y = vertices[stride + 1];
         vertex2.z = vertices[stride + 2];
@@ -31991,10 +31996,10 @@
           addUV(uvs[2]);
           addUV(uvs[3]);
         }
-        function addVertex(index) {
-          verticesArray.push(placeholder[index * 3 + 0]);
-          verticesArray.push(placeholder[index * 3 + 1]);
-          verticesArray.push(placeholder[index * 3 + 2]);
+        function addVertex(index2) {
+          verticesArray.push(placeholder[index2 * 3 + 0]);
+          verticesArray.push(placeholder[index2 * 3 + 1]);
+          verticesArray.push(placeholder[index2 * 3 + 2]);
         }
         function addUV(vector2) {
           uvArray.push(vector2.x);
@@ -32428,7 +32433,7 @@
       widthSegments = Math.max(3, Math.floor(widthSegments));
       heightSegments = Math.max(2, Math.floor(heightSegments));
       const thetaEnd = Math.min(thetaStart + thetaLength, Math.PI);
-      let index = 0;
+      let index2 = 0;
       const grid = [];
       const vertex2 = new Vector3();
       const normal2 = new Vector3();
@@ -32454,7 +32459,7 @@
           normal2.copy(vertex2).normalize();
           normals.push(normal2.x, normal2.y, normal2.z);
           uvs.push(u + uOffset, 1 - v);
-          verticesRow.push(index++);
+          verticesRow.push(index2++);
         }
         grid.push(verticesRow);
       }
@@ -33653,8 +33658,8 @@
     getSettings_() {
       return this.settings || this.DefaultSettings_;
     }
-    copySampleValue_(index) {
-      const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, offset = index * stride;
+    copySampleValue_(index2) {
+      const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, offset = index2 * stride;
       for (let i = 0; i !== stride; ++i) {
         result[i] = values[offset + i];
       }
@@ -34348,9 +34353,9 @@
         return this;
       };
       this.removeHandler = function(regex) {
-        const index = handlers.indexOf(regex);
-        if (index !== -1) {
-          handlers.splice(index, 2);
+        const index2 = handlers.indexOf(regex);
+        if (index2 !== -1) {
+          handlers.splice(index2, 2);
         }
         return this;
       };
@@ -35552,9 +35557,9 @@
       }
     }
     static extractUrlBase(url) {
-      const index = url.lastIndexOf("/");
-      if (index === -1) return "./";
-      return url.slice(0, index + 1);
+      const index2 = url.lastIndexOf("/");
+      if (index2 === -1) return "./";
+      return url.slice(0, index2 + 1);
     }
     static resolveURL(url, path) {
       if (typeof url !== "string" || url === "") return "";
@@ -35632,9 +35637,9 @@
         return ab;
       }
       const geometry = json.isInstancedBufferGeometry ? new InstancedBufferGeometry() : new BufferGeometry();
-      const index = json.data.index;
-      if (index !== void 0) {
-        const typedArray = getTypedArray(index.type, index.array);
+      const index2 = json.data.index;
+      if (index2 !== void 0) {
+        const typedArray = getTypedArray(index2.type, index2.array);
         geometry.setIndex(new BufferAttribute(typedArray, 1));
       }
       const attributes = json.data.attributes;
@@ -37446,31 +37451,31 @@
       let knownObject = void 0, nObjects = objects.length, nCachedObjects = this.nCachedObjects_;
       for (let i = 0, n = arguments.length; i !== n; ++i) {
         const object = arguments[i], uuid = object.uuid;
-        let index = indicesByUUID[uuid];
-        if (index === void 0) {
-          index = nObjects++;
-          indicesByUUID[uuid] = index;
+        let index2 = indicesByUUID[uuid];
+        if (index2 === void 0) {
+          index2 = nObjects++;
+          indicesByUUID[uuid] = index2;
           objects.push(object);
           for (let j = 0, m = nBindings; j !== m; ++j) {
             bindings[j].push(new PropertyBinding(object, paths[j], parsedPaths[j]));
           }
-        } else if (index < nCachedObjects) {
-          knownObject = objects[index];
+        } else if (index2 < nCachedObjects) {
+          knownObject = objects[index2];
           const firstActiveIndex = --nCachedObjects, lastCachedObject = objects[firstActiveIndex];
-          indicesByUUID[lastCachedObject.uuid] = index;
-          objects[index] = lastCachedObject;
+          indicesByUUID[lastCachedObject.uuid] = index2;
+          objects[index2] = lastCachedObject;
           indicesByUUID[uuid] = firstActiveIndex;
           objects[firstActiveIndex] = object;
           for (let j = 0, m = nBindings; j !== m; ++j) {
             const bindingsForPath = bindings[j], lastCached = bindingsForPath[firstActiveIndex];
-            let binding = bindingsForPath[index];
-            bindingsForPath[index] = lastCached;
+            let binding = bindingsForPath[index2];
+            bindingsForPath[index2] = lastCached;
             if (binding === void 0) {
               binding = new PropertyBinding(object, paths[j], parsedPaths[j]);
             }
             bindingsForPath[firstActiveIndex] = binding;
           }
-        } else if (objects[index] !== knownObject) {
+        } else if (objects[index2] !== knownObject) {
           console.error("THREE.AnimationObjectGroup: Different objects with the same UUID detected. Clean the caches or recreate your infrastructure when reloading scenes.");
         }
       }
@@ -37480,16 +37485,16 @@
       const objects = this._objects, indicesByUUID = this._indicesByUUID, bindings = this._bindings, nBindings = bindings.length;
       let nCachedObjects = this.nCachedObjects_;
       for (let i = 0, n = arguments.length; i !== n; ++i) {
-        const object = arguments[i], uuid = object.uuid, index = indicesByUUID[uuid];
-        if (index !== void 0 && index >= nCachedObjects) {
+        const object = arguments[i], uuid = object.uuid, index2 = indicesByUUID[uuid];
+        if (index2 !== void 0 && index2 >= nCachedObjects) {
           const lastCachedIndex = nCachedObjects++, firstActiveObject = objects[lastCachedIndex];
-          indicesByUUID[firstActiveObject.uuid] = index;
-          objects[index] = firstActiveObject;
+          indicesByUUID[firstActiveObject.uuid] = index2;
+          objects[index2] = firstActiveObject;
           indicesByUUID[uuid] = lastCachedIndex;
           objects[lastCachedIndex] = object;
           for (let j = 0, m = nBindings; j !== m; ++j) {
-            const bindingsForPath = bindings[j], firstActive = bindingsForPath[lastCachedIndex], binding = bindingsForPath[index];
-            bindingsForPath[index] = firstActive;
+            const bindingsForPath = bindings[j], firstActive = bindingsForPath[lastCachedIndex], binding = bindingsForPath[index2];
+            bindingsForPath[index2] = firstActive;
             bindingsForPath[lastCachedIndex] = binding;
           }
         }
@@ -37501,32 +37506,32 @@
       const objects = this._objects, indicesByUUID = this._indicesByUUID, bindings = this._bindings, nBindings = bindings.length;
       let nCachedObjects = this.nCachedObjects_, nObjects = objects.length;
       for (let i = 0, n = arguments.length; i !== n; ++i) {
-        const object = arguments[i], uuid = object.uuid, index = indicesByUUID[uuid];
-        if (index !== void 0) {
+        const object = arguments[i], uuid = object.uuid, index2 = indicesByUUID[uuid];
+        if (index2 !== void 0) {
           delete indicesByUUID[uuid];
-          if (index < nCachedObjects) {
+          if (index2 < nCachedObjects) {
             const firstActiveIndex = --nCachedObjects, lastCachedObject = objects[firstActiveIndex], lastIndex = --nObjects, lastObject = objects[lastIndex];
-            indicesByUUID[lastCachedObject.uuid] = index;
-            objects[index] = lastCachedObject;
+            indicesByUUID[lastCachedObject.uuid] = index2;
+            objects[index2] = lastCachedObject;
             indicesByUUID[lastObject.uuid] = firstActiveIndex;
             objects[firstActiveIndex] = lastObject;
             objects.pop();
             for (let j = 0, m = nBindings; j !== m; ++j) {
               const bindingsForPath = bindings[j], lastCached = bindingsForPath[firstActiveIndex], last = bindingsForPath[lastIndex];
-              bindingsForPath[index] = lastCached;
+              bindingsForPath[index2] = lastCached;
               bindingsForPath[firstActiveIndex] = last;
               bindingsForPath.pop();
             }
           } else {
             const lastIndex = --nObjects, lastObject = objects[lastIndex];
             if (lastIndex > 0) {
-              indicesByUUID[lastObject.uuid] = index;
+              indicesByUUID[lastObject.uuid] = index2;
             }
-            objects[index] = lastObject;
+            objects[index2] = lastObject;
             objects.pop();
             for (let j = 0, m = nBindings; j !== m; ++j) {
               const bindingsForPath = bindings[j];
-              bindingsForPath[index] = bindingsForPath[lastIndex];
+              bindingsForPath[index2] = bindingsForPath[lastIndex];
               bindingsForPath.pop();
             }
           }
@@ -37537,12 +37542,12 @@
     // Internal interface used by befriended PropertyBinding.Composite:
     subscribe_(path, parsedPath) {
       const indicesByPath = this._bindingsIndicesByPath;
-      let index = indicesByPath[path];
+      let index2 = indicesByPath[path];
       const bindings = this._bindings;
-      if (index !== void 0) return bindings[index];
+      if (index2 !== void 0) return bindings[index2];
       const paths = this._paths, parsedPaths = this._parsedPaths, objects = this._objects, nObjects = objects.length, nCachedObjects = this.nCachedObjects_, bindingsForPath = new Array(nObjects);
-      index = bindings.length;
-      indicesByPath[path] = index;
+      index2 = bindings.length;
+      indicesByPath[path] = index2;
       paths.push(path);
       parsedPaths.push(parsedPath);
       bindings.push(bindingsForPath);
@@ -37553,15 +37558,15 @@
       return bindingsForPath;
     }
     unsubscribe_(path) {
-      const indicesByPath = this._bindingsIndicesByPath, index = indicesByPath[path];
-      if (index !== void 0) {
+      const indicesByPath = this._bindingsIndicesByPath, index2 = indicesByPath[path];
+      if (index2 !== void 0) {
         const paths = this._paths, parsedPaths = this._parsedPaths, bindings = this._bindings, lastBindingsIndex = bindings.length - 1, lastBindings = bindings[lastBindingsIndex], lastBindingsPath = path[lastBindingsIndex];
-        indicesByPath[lastBindingsPath] = index;
-        bindings[index] = lastBindings;
+        indicesByPath[lastBindingsPath] = index2;
+        bindings[index2] = lastBindings;
         bindings.pop();
-        parsedPaths[index] = parsedPaths[lastBindingsIndex];
+        parsedPaths[index2] = parsedPaths[lastBindingsIndex];
         parsedPaths.pop();
-        paths[index] = paths[lastBindingsIndex];
+        paths[index2] = paths[lastBindingsIndex];
         paths.pop();
       }
     }
@@ -38045,8 +38050,8 @@
     }
     // Memory management for AnimationAction objects
     _isActiveAction(action) {
-      const index = action._cacheIndex;
-      return index !== null && index < this._nActiveActions;
+      const index2 = action._cacheIndex;
+      return index2 !== null && index2 < this._nActiveActions;
     }
     _addInactiveAction(action, clipUuid, rootUuid) {
       const actions = this._actions, actionsByClip = this._actionsByClip;
@@ -38310,8 +38315,8 @@
       return this;
     }
     remove(uniform) {
-      const index = this.uniforms.indexOf(uniform);
-      if (index !== -1) this.uniforms.splice(index, 1);
+      const index2 = this.uniforms.indexOf(uniform);
+      if (index2 !== -1) this.uniforms.splice(index2, 1);
       return this;
     }
     setName(name2) {
@@ -39685,9 +39690,9 @@
       let indexOffset = 0;
       const mergedIndex = [];
       for (let i = 0; i < geometries.length; ++i) {
-        const index = geometries[i].index;
-        for (let j = 0; j < index.count; ++j) {
-          mergedIndex.push(index.getX(j) + indexOffset);
+        const index2 = geometries[i].index;
+        for (let j = 0; j < index2.count; ++j) {
+          mergedIndex.push(index2.getX(j) + indexOffset);
         }
         indexOffset += geometries[i].attributes.position.count;
       }
@@ -40078,13 +40083,13 @@
     }
     return { mat: m, seitenverhaeltnis: tt.seitenverhaeltnis, t: tt.t };
   }
-  function schild(scene2, text2, seite, u, y, fassade2, hoehe, farbe, hintergrund = null) {
+  function schild(scene2, text2, seite, u, y, fassade3, hoehe, farbe, hintergrund = null) {
     const { mat: m0, seitenverhaeltnis } = textMaterial(text2, farbe, { groesse: 140, hintergrund });
     const m = new Mesh(new PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), m0);
-    if (seite === "+z") m.position.set(u, y, fassade2 + 0.35);
+    if (seite === "+z") m.position.set(u, y, fassade3 + 0.35);
     else {
       m.rotation.y = Math.PI / 2;
-      m.position.set(fassade2 + 0.35, y, u);
+      m.position.set(fassade3 + 0.35, y, u);
     }
     scene2.add(m);
     return m;
@@ -40928,7 +40933,7 @@
       return;
     }
     const tf = -a * hb / hu + 0.04, tbk = -a * (hb + hd) / hu - 0.6;
-    const wand2 = o.wand ?? ORN, dach2 = o.dach ?? "#7c848c";
+    const wand2 = o.wand ?? ORN, dach3 = o.dach ?? "#7c848c";
     F2.box(u - bw / 2, u + bw / 2, y + hb, y + hb + hd, tbk, tf, wand2);
     F2.box(u - bw / 2 + 0.22, u + bw / 2 - 0.22, y + hb + 0.25, y + hb + hd - 0.2, tf - 0.05, tf + 0.03, o.glas ?? FARBEN3.fenster);
     F2.box(u - 0.03, u + 0.03, y + hb + 0.25, y + hb + hd - 0.2, tf, tf + 0.05, RAHMEN);
@@ -40937,7 +40942,7 @@
       const g = new three_module_exports.BoxGeometry(bw + 0.3, 0.14, tf - tbk + 0.4);
       g.rotateX(0.22);
       g.translate(u, y + hb + hd + 0.1, (tf + tbk) / 2);
-      F2.geo(g, dach2);
+      F2.geo(g, dach3);
       F2.box(u + 0.02, u + bw / 2 - 0.22, y + hb + 0.25, y + hb + hd - 0.2, tf - 0.05, tf + 0.03, o.glas ?? FARBEN3.fenster);
       return;
     }
@@ -40957,10 +40962,10 @@
       s2.lineTo(0, 0.75);
       s2.closePath();
     }
-    F2.profil(s2, u, y + hb + hd, tbk, tf + 0.1, dach2);
+    F2.profil(s2, u, y + hb + hd, tbk, tf + 0.1, dach3);
   }
   function satteldach(ctx, x0, z0, x1, z1, y, h, achse, o = {}) {
-    const S = ctx.S, ov = o.ueberstand ?? 0.45, ovG = o.ortgang ?? 0.3, th = 0.22, dach2 = o.dach, wand2 = o.wand;
+    const S = ctx.S, ov = o.ueberstand ?? 0.45, ovG = o.ortgang ?? 0.3, th = 0.22, dach3 = o.dach, wand2 = o.wand;
     const poly = rechteck(x0, z0, x1, z1);
     if (achse === "z") {
       const a = (x1 - x0) / 2;
@@ -40972,9 +40977,9 @@
         const g = new three_module_exports.BoxGeometry(s2, th, lz);
         g.rotateZ(sg * al);
         g.translate(mx - sg * Math.sin(al) * th / 2, my + Math.cos(al) * th / 2, zc);
-        S.add(g, dach2);
+        S.add(g, dach3);
       }
-      S.box(0.3, 0.2, lz, x0 + a, y + h + 0.12, zc, o.first ?? dunkler(dach2, 0.05));
+      S.box(0.3, 0.2, lz, x0 + a, y + h + 0.12, zc, o.first ?? dunkler(dach3, 0.05));
     } else {
       const a = (z1 - z0) / 2;
       if (wand2) S.add(prismoid(poly, y, h, [a - 1e-3, 0, a - 1e-3, 0]), wand2);
@@ -40985,9 +40990,9 @@
         const g = new three_module_exports.BoxGeometry(lx, th, s2);
         g.rotateX(sg * al);
         g.translate(xc, my + Math.cos(al) * th / 2, mz + sg * Math.sin(al) * th / 2);
-        S.add(g, dach2);
+        S.add(g, dach3);
       }
-      S.box(lx, 0.2, 0.3, xc, y + h + 0.12, z0 + a, o.first ?? dunkler(dach2, 0.05));
+      S.box(lx, 0.2, 0.3, xc, y + h + 0.12, z0 + a, o.first ?? dunkler(dach3, 0.05));
     }
     return y + h;
   }
@@ -41392,14 +41397,14 @@
     }
   }
   function zwerchhaus(ctx, F2, uc, B2, H, o) {
-    const hz = o.hz ?? 2.9, tief2 = o.tiefe ?? 2.5, wand2 = o.wand, dach2 = o.dach, orn = o.orn ?? ORN;
+    const hz = o.hz ?? 2.9, tief2 = o.tiefe ?? 2.5, wand2 = o.wand, dach3 = o.dach, orn = o.orn ?? ORN;
     F2.box(uc - B2 / 2, uc + B2 / 2, H, H + hz, -tief2, 0.02, wand2);
     const nf = B2 > 4.2 ? 2 : 1;
     if (hz > 1.8) for (let i = 0; i < nf; i++) fenster(F2, uc + (i - (nf - 1) / 2) * (B2 / 2), H + 0.7, Math.min(1.2, B2 / nf - 0.8), hz - 1.4, { ...o.fo ?? {}, verd: null, t: 0.02 });
     F2.box(uc - B2 / 2 - 0.1, uc + B2 / 2 + 0.1, H + hz - 0.1, H + hz + 0.12, -tief2, 0.25, orn);
     const y = H + hz + 0.12;
     if (o.form === "volute" || o.form === "geschwungen") {
-      zwerchgiebel(ctx, F2, uc, B2, y, Math.min(B2 * 0.85, 4.5), { wand: wand2, orn }, dach2, o.form);
+      zwerchgiebel(ctx, F2, uc, B2, y, Math.min(B2 * 0.85, 4.5), { wand: wand2, orn }, dach3, o.form);
       return y + B2 * 0.85;
     }
     if (o.form === "stufen") {
@@ -41410,7 +41415,7 @@
         F2.box(uc - w2 - 0.05, uc + w2 + 0.05, y + (i + 1) * G2 / k, y + (i + 1) * G2 / k + 0.12, -0.55, 0.08, orn);
       }
       const pr2 = [F2.welt(uc - B2 / 2, -0.4), F2.welt(uc + B2 / 2, -0.4), F2.welt(uc + B2 / 2, -tief2), F2.welt(uc - B2 / 2, -tief2)];
-      ctx.S.add(prismoid(pr2, y - 0.1, G2 * 0.85, [0, B2 / 2 - 0.01, 0, B2 / 2 - 0.01]), dach2);
+      ctx.S.add(prismoid(pr2, y - 0.1, G2 * 0.85, [0, B2 / 2 - 0.01, 0, B2 / 2 - 0.01]), dach3);
       return y + G2;
     }
     const hg = o.form === "rund" ? B2 / 2 : B2 * 0.48;
@@ -41437,7 +41442,7 @@
       s22.lineTo(0, hg * (B22 / (B2 / 2)));
       s22.closePath();
     }
-    F2.profil(s22, uc, y - 0.12 - 0.25 * (hg / (B2 / 2)) + 0.12, -tief2 - 0.6, -0.08, dach2, 12);
+    F2.profil(s22, uc, y - 0.12 - 0.25 * (hg / (B2 / 2)) + 0.12, -tief2 - 0.6, -0.08, dach3, 12);
     F2.box(uc - B2 / 2 - 0.15, uc + B2 / 2 + 0.15, y - 0.06, y + 0.06, -0.1, 0.18, orn);
     if (hg > 1.6) fenster(F2, uc, y + 0.35, 0.6, Math.min(0.9, hg * 0.4), { kreuz: false, verd: o.form === "rund" ? "rund" : null, t: 0.02 });
     return y + hg;
@@ -44159,7 +44164,7 @@
     const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
     return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
   }
-  var SLOT_ROLLE = { warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber" };
+  var SLOT_ROLLE = { warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester" };
   function einkaufslage(E, standorte) {
     const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? "1a", rolle: st.rolle ?? "warenhaus" }));
     const innen = liste.filter((e) => e.lage === "1a" || e.lage === "b");
@@ -45821,7 +45826,7 @@
     const zu = eg === "leer" || eg === "geschlossen";
     return { eg, zu, ohneLogo: zu || Z2.ohneMarke, geistHell: Z2.status === "geschlossen", alt: h("leer") || h("verfall") || h("abriss"), verblichen: h("verfall") };
   }
-  function eigeneMieterflaechen(Z2, L2, reihe = ["+z", "+x"]) {
+  function eigeneMieterflaechen(Z2, L2, reihe = ["+z", "+x"], offpriceName = "HARTWIG OUTLET") {
     const aus = [];
     const belegt2 = { "+z": 0, "+x": 0 };
     const platz = (m, anteil2, min, max) => {
@@ -45832,7 +45837,7 @@
       belegt2[seite] = u1;
       aus.push({ ...m, seite, u0, u1: Math.min(u1, l - 4), ua: u0 - 0.5, ub: Math.min(u1, l - 4) + 0.5 });
     };
-    if (Z2.hat("offprice") && Z2.offpriceEtage === 0) platz(mieterInfo({ name: "HARTWIG OUTLET", etage: 0 }), 0.8, 12, 60);
+    if (Z2.hat("offprice") && Z2.offpriceEtage === 0) platz(mieterInfo({ name: offpriceName, etage: 0 }), 0.8, 12, 60);
     for (const m of Z2.untermieter) if (m.etage === 0 && m.typ !== "gastro") platz(m, 0.45, 12, 30);
     return aus;
   }
@@ -46310,22 +46315,22 @@
     for (let i = 0; i < n; i++) s2.q(u0 + i * du, u0 + (i + 1) * du, y - h / 2, y + h / 2, t, t + 0.06, i % 2 ? "#ffffff" : "#c8102e");
   }
   function fassadenBanner(Z2, s2, zeilen, bg, o = {}) {
-    const k = Z2.k, sd = k.seiten?.[s2.seite] ?? {}, L2 = Z2.nutz(s2), EG3 = k.egHoehe;
+    const k = Z2.k, sd = k.seiten?.[s2.seite] ?? {}, L2 = Z2.nutz(s2), EG4 = k.egHoehe;
     const logo2 = sd.logo && !sd.logo.dach ? sd.logo : null;
     const maxB0 = Math.min(o.maxB ?? L2 * (o.anteil ?? 0.8), L2 - 0.6);
     const t = (k.tBanner ?? tFront(k)) + 0.25;
     const natur = zeilen.reduce((a, z2) => a + z2.h, 0);
     const breit2 = Math.max(...zeilen.map((z2) => breiteVon2(z2.text, z2.h)));
-    const dach2 = k.n <= 1 || o.dach;
+    const dach3 = k.n <= 1 || o.dach;
     const rand = o.streifen ? 0.55 : 0;
-    const lo = dach2 ? k.hoehe + 0.8 : Math.max(o.lo ?? EG3 + 0.6, EG3 + 0.3) + rand;
-    const hi = dach2 ? k.hoehe + 0.8 + Math.min(o.zielH ?? 4, 4.2) * 2.5 : Math.min(o.hi ?? k.hoehe - 0.5, k.hoehe - 0.3) - rand;
+    const lo = dach3 ? k.hoehe + 0.8 : Math.max(o.lo ?? EG4 + 0.6, EG4 + 0.3) + rand;
+    const hi = dach3 ? k.hoehe + 0.8 + Math.min(o.zielH ?? 4, 4.2) * 2.5 : Math.min(o.hi ?? k.hoehe - 0.5, k.hoehe - 0.3) - rand;
     const frei6 = hi - lo;
     if (frei6 < 1.8 || maxB0 < 3.5) return null;
-    const zielH = Math.min(o.zielH ?? natur + 0.7, dach2 ? 4.2 : frei6);
+    const zielH = Math.min(o.zielH ?? natur + 0.7, dach3 ? 4.2 : frei6);
     const skala = (H, W3) => Math.min((H - 0.7) / natur, (W3 - 0.7) / breit2);
     const uPref = o.u ?? (o.modus === "mitte" || !logo2 ? L2 / 2 : logo2.u);
-    const yPref = o.y ?? (dach2 ? lo + zielH / 2 : (lo + hi) / 2 + (frei6 > zielH + 2 ? (frei6 - zielH) * 0.2 : 0));
+    const yPref = o.y ?? (dach3 ? lo + zielH / 2 : (lo + hi) / 2 + (frei6 > zielH + 2 ? (frei6 - zielH) * 0.2 : 0));
     let best = null;
     for (const H of [zielH, zielH * 0.8, zielH * 0.62]) {
       if (H < 1.8 || H > frei6 + 1e-6) continue;
@@ -46347,7 +46352,7 @@
     const f = best.f * 0.98;
     const zz = zeilen.map((z2) => ({ ...z2, h: z2.h * f }));
     const erg = tafel(Z2, s2, zz, best.u, best.y, t, bg, { maxB: best.W, rahmen: o.rahmen, B: o.fuellen ? best.W : 0, H: o.fuellen ? best.H : 0 });
-    if (dach2) for (const du of [-erg.b * 0.35, erg.b * 0.35]) s2.q(best.u + du - 0.1, best.u + du + 0.1, k.hoehe, best.y - erg.h / 2, t - 0.5, t - 0.3, "#5f676e");
+    if (dach3) for (const du of [-erg.b * 0.35, erg.b * 0.35]) s2.q(best.u + du - 0.1, best.u + du + 0.1, k.hoehe, best.y - erg.h / 2, t - 0.5, t - 0.3, "#5f676e");
     if (o.streifen) for (const yy of [best.y + erg.h / 2 + 0.3, best.y - erg.h / 2 - 0.3]) streifenband(Z2, s2, best.u - erg.b / 2, best.u + erg.b / 2, yy, 0.4, t - 0.08);
     sperre(Z2, s2, best.u - erg.b / 2 - 0.9, best.u + erg.b / 2 + 0.9, best.y - erg.h / 2 - 1.4 - rand, best.y + erg.h / 2 + 1.4 + rand, "banner");
     Z2.top = Math.max(Z2.top, best.y + erg.h / 2 + rand);
@@ -46428,8 +46433,8 @@
     }
   }
   function mieterBand(Z2, s2, mi, e, u0, u1) {
-    const k = Z2.k, r = Z2.r, GH2 = k.geschossHoehe;
-    const y0 = etagenY(k, e) + 0.25, y1 = etagenY(k, e) + GH2 - 0.25, t = tFront(k) + 0.05;
+    const k = Z2.k, r = Z2.r, GH3 = k.geschossHoehe;
+    const y0 = etagenY(k, e) + 0.25, y1 = etagenY(k, e) + GH3 - 0.25, t = tFront(k) + 0.05;
     const rahmen2 = mi.bg === "#ffffff" || mi.bg === "#f4f1ea" ? mi.fg : mi.bg;
     const hellBg = mi.bg === "#ffffff" || mi.bg === "#f4f1ea";
     s2.q(u0, u1, y0, y1, t, t + 0.1, hellBg ? "#" + new three_module_exports.Color(mi.fg).lerp(new three_module_exports.Color("#ffffff"), 0.72).getHexString() : mi.bg);
@@ -46529,6 +46534,8 @@
     return y + 6.6;
   }
   function zustandsDekor(S, scene2, k, Zin, opt = {}) {
+    const ROT4 = k.kettenFarbe ?? "#d23c32";
+    const ROT_KAMPAGNE = k.kettenFarbe ?? "#c8102e";
     const Z2 = { S, scene: scene2, k, r: rng2(`${k.seed ?? "z"}/zustand`), ...opt, leute: opt.passanten !== false, belegt: { "+z": [], "+x": [] }, top: k.hoehe };
     const st = zustandNormal(Zin);
     const hat = st.hat;
@@ -46536,11 +46543,11 @@
     const seiten4 = { "+z": new Seite(S, k.x, k.z, k.w, k.d, "+z"), "+x": new Seite(S, k.x, k.z, k.w, k.d, "+x") };
     const sz = seiten4["+z"], sx = seiten4["+x"];
     Z2.nutz = (s2) => k.seiten?.[s2.seite]?.u1 ?? s2.L;
-    const n = k.n, GH2 = k.geschossHoehe, EG3 = k.egHoehe;
+    const n = k.n, GH3 = k.geschossHoehe, EG4 = k.egHoehe;
     const jahr2 = k.jahr ?? 2026;
     let mieterEG = k.mieterEG ?? [];
     const r = Z2.r;
-    const GROSS = Math.min(10, Math.max(3.5, (k.hoehe - EG3) * 0.55));
+    const GROSS = Math.min(10, Math.max(3.5, (k.hoehe - EG4) * 0.55));
     for (const s2 of [sz, sx]) {
       const sd = k.seiten?.[s2.seite] ?? {};
       const lg = sd.logo;
@@ -46583,14 +46590,14 @@
             fs.q(ua + 0.1, ub - 0.1, y - 0.45, y, 0, len, BETON);
             if (r() < 0.6) for (let q2 = 0; q2 < 3; q2++) fs.q(ua + 0.6 + q2 * du * 0.3, ua + 0.64 + q2 * du * 0.3, y - 0.3 + q2 * 0.1, y - 0.27 + q2 * 0.1, len, len + 0.8, "#5a4a3f");
             if (e < n) {
-              const yH = e === 0 ? EG3 : etagenY(k, e + 1) - 0.45;
+              const yH = e === 0 ? EG4 : etagenY(k, e + 1) - 0.45;
               fs.q(ua + 0.15, ub - 0.15, y, yH, 0, 0.06, waehle2(r, ["#5d5a55", "#6b6762", "#c9b18a", "#9fb3a8", "#d8cfc0", "#b78f7a"]));
             }
           }
-          if (e > 0) for (let j = 0; j <= seg; j++) fs.q(j * du - 0.3, j * du + 0.3, y, y + (e < n ? GH2 - 0.45 : 0.6), 0, 0.6, BETON_D);
+          if (e > 0) for (let j = 0; j <= seg; j++) fs.q(j * du - 0.3, j * du + 0.3, y, y + (e < n ? GH3 - 0.45 : 0.6), 0, 0.6, BETON_D);
         }
       }
-      const hMax = EG3 + GH2;
+      const hMax = EG4 + GH3;
       const abstand2 = (x, z2) => Math.min(art === "+z" ? Infinity : x - R9.x0, art === "+x" ? Infinity : z2 - R9.z0);
       const tief2 = Math.max(k.w - (R9.x0 - k.x), k.d - (Math.max(k.z, R9.z0) - k.z));
       for (let x = R9.x0; x < k.x + k.w - 2; x += zw(r, 2.5, 4.5)) {
@@ -46648,7 +46655,7 @@
         for (let e = 1; e < n; e++) {
           if (belegt2.has(`${s2.seite}${e}`)) continue;
           const ya = etagenY(k, e);
-          for (const [a, b] of freieStuecke(Z2, s2, L2 * 0.04, L2 - 0.4, ya + 0.15, ya + GH2 - 0.15, 0.4)) {
+          for (const [a, b] of freieStuecke(Z2, s2, L2 * 0.04, L2 - 0.4, ya + 0.15, ya + GH3 - 0.15, 0.4)) {
             const w = Math.min(b - a, L2 * (s2 === sz ? 0.62 : 0.72));
             if (w < Math.max(8, Math.min(14, L2 * 0.3))) continue;
             const wert = w / L2 * 10 - 3 * Math.abs(e - Math.max(1, Math.min(mi.etage, n - 1))) - 1.5 * anz3 + (s2 === sx ? 0.3 : 0);
@@ -46659,12 +46666,12 @@
       if (!best) continue;
       belegt2.set(`${best.s.seite}${best.e}`, mi);
       mieterBand(Z2, best.s, mi, best.e, best.b0, best.b1);
-      sperre(Z2, best.s, best.b0, best.b1, etagenY(k, best.e), etagenY(k, best.e) + GH2, "mieter");
+      sperre(Z2, best.s, best.b0, best.b1, etagenY(k, best.e), etagenY(k, best.e) + GH3, "mieter");
     }
     if (hat("offprice") && st.offpriceEtage > 0 && n >= 2) {
       const e = Math.min(st.offpriceEtage, n - 1), L2 = Z2.nutz(sz);
-      const out = mieterInfo({ name: "HARTWIG OUTLET", etage: e });
-      const y0 = etagenY(k, e) + 0.2, y1 = y0 + GH2 - 0.4, t = tFront(k) + 0.05;
+      const out = mieterInfo({ name: k.kettenName ? k.kettenName + " Restposten" : "HARTWIG OUTLET", etage: e });
+      const y0 = etagenY(k, e) + 0.2, y1 = y0 + GH3 - 0.4, t = tFront(k) + 0.05;
       sz.q(L2 * 0.04, L2 * 0.8, y0, y1, t, t + 0.1, "#f5b400");
       sz.q(L2 * 0.32, L2 * 0.78, y0 + 0.5, y1 - 0.4, t + 0.1, t + 0.14, "#8fa8b5");
       for (let u = L2 * 0.34; u < L2 * 0.76; u += 2.6) {
@@ -46683,12 +46690,12 @@
     for (const m of mieterEG) {
       const s2 = seiten4[m.seite];
       if (m.typ !== "offprice" && m.ub - m.ua > 6) {
-        const t = tFront(k) + 0.14, y0 = EG3 - 1.45, y1 = EG3 - 0.1;
+        const t = tFront(k) + 0.14, y0 = EG4 - 1.45, y1 = EG4 - 0.1;
         s2.q(m.ua, m.ub, y0, y1, t, t + 0.2, m.bg);
         s2.q(m.ua, m.ub, y0 - 0.12, y0, t, t + 0.24, m.fg);
         plakat(Z2, s2, m.name, (m.ua + m.ub) / 2, (y0 + y1) / 2, t + 0.22, 1, m.fg, m.bg, (m.ub - m.ua) * 0.9);
         sperre(Z2, s2, m.ua, m.ub, y0, y1, "mieter");
-        if (n >= 2) fassadenBanner(Z2, s2, [{ text: m.name, h: 1.6, fg: m.fg }], m.bg, { u: (m.ua + m.ub) / 2, maxB: (m.ub - m.ua) * 0.95, zielH: Math.min(GH2 * 0.9, 3.4), lo: EG3 + 0.3, y: EG3 + 0.3 + Math.min(GH2 * 0.9, 3.4) / 2, rahmen: m.fg, minSchrift: 0.6 });
+        if (n >= 2) fassadenBanner(Z2, s2, [{ text: m.name, h: 1.6, fg: m.fg }], m.bg, { u: (m.ua + m.ub) / 2, maxB: (m.ub - m.ua) * 0.95, zielH: Math.min(GH3 * 0.9, 3.4), lo: EG4 + 0.3, y: EG4 + 0.3 + Math.min(GH3 * 0.9, 3.4) / 2, rahmen: m.fg, minSchrift: 0.6 });
       }
       if (m.typ === "discounter") for (let i = 0; i < 4; i++) {
         const [x, zz] = s2.welt(m.ua + 1.2 + i * 0.55, 2);
@@ -46704,9 +46711,9 @@
       }
       if (m.typ === "offprice") {
         aufsteller(Z2, s2, m.ua + 2, 2.6, "ALLES -50 %", "#1d1d1d", "#f5b400");
-        const hO = Math.min(GH2 * 1.15, Math.max(3, k.hoehe - EG3 - 1));
-        fassadenBanner(Z2, s2, [{ text: "HARTWIG OUTLET", h: 2.6, fg: "#1d1d1d" }, { text: "Marken bis -70 %", h: 1.1, fg: "#c8102e" }], "#f5b400", { u: (m.ua + m.ub) / 2, maxB: (m.ub - m.ua) * 0.98, zielH: hO, y: n <= 1 ? void 0 : EG3 + 0.35 + hO / 2, rahmen: "#1d1d1d", fuellen: true });
-        if (n >= 2) bahnen(Z2, s2, [m.ua + 1.6, m.ub - 1.6], "OUTLET", "#1d1d1d", "#f5b400", { y0: EG3 + 0.6 });
+        const hO = Math.min(GH3 * 1.15, Math.max(3, k.hoehe - EG4 - 1));
+        fassadenBanner(Z2, s2, [{ text: k.kettenName ? k.kettenName.toUpperCase() + " RESTPOSTEN" : "HARTWIG OUTLET", h: 2.6, fg: "#1d1d1d" }, { text: "Marken bis -70 %", h: 1.1, fg: ROT_KAMPAGNE }], "#f5b400", { u: (m.ua + m.ub) / 2, maxB: (m.ub - m.ua) * 0.98, zielH: hO, y: n <= 1 ? void 0 : EG4 + 0.35 + hO / 2, rahmen: "#1d1d1d", fuellen: true });
+        if (n >= 2) bahnen(Z2, s2, [m.ua + 1.6, m.ub - 1.6], "OUTLET", "#1d1d1d", "#f5b400", { y0: EG4 + 0.6 });
         for (let i = 0; i < 3; i++) {
           const [x, zz] = s2.welt(m.ua + 3 + i * 3, 3);
           S.box(1.8, 0.8, 0.9, x, 0.7, zz, "#f5b400");
@@ -46717,12 +46724,12 @@
     if (hat("umbau")) {
       const Lz = Z2.nutz(sz), Lx = Z2.nutz(sx);
       const a = Lz * 0.04, b = a + Math.max(14, Lz * 0.55);
-      const yA = k.hoehe + 0.5, yB = k.hoehe - GH2 * Math.min(1, n - 1) + 0.5;
+      const yA = k.hoehe + 0.5, yB = k.hoehe - GH3 * Math.min(1, n - 1) + 0.5;
       if (opt.logosAbdecken) for (const s3 of [sz, sx]) for (const q2 of Z2.belegt[s3.seite].filter((p) => p.art === "logo")) {
         const t = (k.tLogo ?? tFront(k)) + 0.5;
         s3.q(q2.u0 - 0.2, q2.u1 + 0.2, q2.y0 - 0.2, q2.y1 + 0.2, t, t + 0.06, "#d8e3dc");
         for (const f of [0.25, 0.75]) s3.q(q2.u0 + (q2.u1 - q2.u0) * f - 0.12, q2.u0 + (q2.u1 - q2.u0) * f + 0.12, q2.y0 - 0.25, q2.y1 + 0.25, t + 0.06, t + 0.1, "#5f676e");
-        if (q2.u1 - q2.u0 > 4 && q2.y1 - q2.y0 > 1.2) plakat(Z2, s3, "BALD NEU", (q2.u0 + q2.u1) / 2, (q2.y0 + q2.y1) / 2, t + 0.12, Math.min(1.2, (q2.y1 - q2.y0) * 0.5), ROT, null, (q2.u1 - q2.u0) * 0.4);
+        if (q2.u1 - q2.u0 > 4 && q2.y1 - q2.y0 > 1.2) plakat(Z2, s3, "BALD NEU", (q2.u0 + q2.u1) / 2, (q2.y0 + q2.y1) / 2, t + 0.12, Math.min(1.2, (q2.y1 - q2.y0) * 0.5), ROT4, null, (q2.u1 - q2.u0) * 0.4);
       }
       const lage = (s3, a0, b0, yTop, L2) => {
         const lg = Z2.belegt[s3.seite].filter((q2) => q2.art === "logo" && q2.y0 < yTop + 3 && q2.u1 > a0 - 2 && q2.u0 < b0);
@@ -46734,11 +46741,11 @@
         return [Math.max(0.6, Math.min(a0, u0 - 0.6)), Math.min(L2 - 0.6, Math.max(b0, u1 + 0.6))];
       };
       const [ga, gb] = lage(sz, a, b, yA, Lz), [xa, xb] = lage(sx, Lx * 0.5, Lx * 0.92, yB, Lx);
-      geruest(Z2, sz, ga, gb, yA, { oben: "HIER ENTSTEHT", text: k.planeText ?? "DAS NEUE HARTWIG", bg: ROT, fg: "#ffffff", fg2: "#ffe2dc" });
+      geruest(Z2, sz, ga, gb, yA, { oben: "HIER ENTSTEHT", text: k.planeText ?? "DAS NEUE HARTWIG", bg: ROT4, fg: "#ffffff", fg2: "#ffe2dc" });
       sperre(Z2, sz, ga - 0.3, gb + 0.3, 0, yA + 1.2, "geruest");
       geruest(Z2, sx, xa, xb, yB);
       sperre(Z2, sx, xa - 0.3, xb + 0.3, 0, yB + 1.2, "geruest");
-      bauzaun(Z2, sz, ga, gb, 4.2, { text: "Wir haben ge\xF6ffnet", fg: "#ffffff", bg: ROT });
+      bauzaun(Z2, sz, ga, gb, 4.2, { text: "Wir haben ge\xF6ffnet", fg: "#ffffff", bg: ROT4 });
       const [cx, cz] = sx.welt(Lx * 0.2, 3.3);
       container(Z2, cx, cz, Math.PI / 2, "#2f6f8f");
       container(Z2, cx, cz, Math.PI / 2, "#e8e4dc", 2.9);
@@ -46751,20 +46758,20 @@
       aufsteller(Z2, s2, he.u + (he.breite ?? 4) / 2 + 1, 2.2, "Ge\xF6ffnet", "#ffffff", "#3f7d56");
     }
     if (hat("raeumung")) {
-      fassadenBanner(Z2, sz, [{ text: "ALLES MUSS RAUS", h: 2.4, fg: "#c8102e" }, { text: "R\xC4UMUNGSVERKAUF", h: 1, fg: "#1d1d1d" }], "#f6d32d", { anteil: 0.8, rahmen: "#c8102e", zielH: GROSS, modus: "mitte", fuellen: true });
-      fassadenBanner(Z2, sx, [{ text: "-70 %", h: 3.2, fg: "#ffffff" }, { text: "LETZTE TAGE", h: 0.9, fg: "#f6d32d" }], "#c8102e", { anteil: 0.5, zielH: GROSS * 0.9, modus: "mitte" });
+      fassadenBanner(Z2, sz, [{ text: "ALLES MUSS RAUS", h: 2.4, fg: ROT_KAMPAGNE }, { text: "R\xC4UMUNGSVERKAUF", h: 1, fg: "#1d1d1d" }], "#f6d32d", { anteil: 0.8, rahmen: ROT_KAMPAGNE, zielH: GROSS, modus: "mitte", fuellen: true });
+      fassadenBanner(Z2, sx, [{ text: "-70 %", h: 3.2, fg: "#ffffff" }, { text: "LETZTE TAGE", h: 0.9, fg: "#f6d32d" }], ROT_KAMPAGNE, { anteil: 0.5, zielH: GROSS * 0.9, modus: "mitte" });
       const Lz = Z2.nutz(sz), Lx = Z2.nutz(sx);
-      bahnen(Z2, sz, [Lz * 0.06, Lz * 0.94], "R\xC4UMUNG", ["#c8102e", "#1d1d1d"], ["#f6d32d", "#c8102e"], { y1: k.hoehe - 0.8 });
-      bahnen(Z2, sx, [Lx * 0.12, Lx * 0.88], "ALLES -70 %", ["#ffffff", "#c8102e"], ["#c8102e", "#f6d32d"]);
+      bahnen(Z2, sz, [Lz * 0.06, Lz * 0.94], "R\xC4UMUNG", [ROT_KAMPAGNE, "#1d1d1d"], ["#f6d32d", ROT_KAMPAGNE], { y1: k.hoehe - 0.8 });
+      bahnen(Z2, sx, [Lx * 0.12, Lx * 0.88], "ALLES -70 %", ["#ffffff", ROT_KAMPAGNE], [ROT_KAMPAGNE, "#f6d32d"]);
       for (const f of fensterEG) {
         const s3 = seiten4[f.seite], m = (f.a + f.b) / 2;
         const txt = waehle2(r, ["-70 %", "-50 %", "ALLES MUSS RAUS", "-60 %"]);
-        plakat(Z2, s3, txt, m, (f.y0 + f.y1) / 2 + 0.3, f.t + 0.12, 1.1, txt.startsWith("A") ? "#c8102e" : "#ffffff", txt.startsWith("A") ? "#f6d32d" : "#c8102e", f.b - f.a - 0.3);
+        plakat(Z2, s3, txt, m, (f.y0 + f.y1) / 2 + 0.3, f.t + 0.12, 1.1, txt.startsWith("A") ? ROT_KAMPAGNE : "#ffffff", txt.startsWith("A") ? "#f6d32d" : ROT_KAMPAGNE, f.b - f.a - 0.3);
       }
       const he = haupt(), s2 = seiten4[he.seite];
       menge(Z2, s2, he.u, 3.2, 34, 7, 3, { tMin: (he.t ?? 0) + 0.8 });
       schlange(Z2, s2, he.u + 4, Math.min(s2.L - 1, he.u + 18), 1.6);
-      aufsteller(Z2, s2, he.u - 5, 3.8, "-70 %", "#ffffff", "#c8102e");
+      aufsteller(Z2, s2, he.u - 5, 3.8, "-70 %", "#ffffff", ROT_KAMPAGNE);
     }
     if (geschl) {
       for (const f of fensterEG) {
@@ -46778,18 +46785,18 @@
         s2.q(e.u - b, e.u + b, 0.3, 3.9, t, t + 0.04, "#3e444a");
         for (let y = 0.5; y < 3.8; y += 0.34) s2.q(e.u - b, e.u + b, y, y + 0.06, t + 0.04, t + 0.07, "#2b3035");
         s2.q(e.u - 0.6, e.u + 0.6, 1.4, 2.6, t + 0.07, t + 0.1, "#ffffff");
-        plakat(Z2, s2, "GESCHLOSSEN", e.u, 2, t + 0.12, 0.35, "#c8102e", "#ffffff", 1.1);
-        bauzaun(Z2, s2, e.u - b - 1.5, e.u + b + 1.5, (e.t ?? 0) + 2.6, { text: "GESCHLOSSEN", fg: "#ffffff", bg: "#c8102e" });
+        plakat(Z2, s2, "GESCHLOSSEN", e.u, 2, t + 0.12, 0.35, ROT_KAMPAGNE, "#ffffff", 1.1);
+        bauzaun(Z2, s2, e.u - b - 1.5, e.u + b + 1.5, (e.t ?? 0) + 2.6, { text: "GESCHLOSSEN", fg: "#ffffff", bg: ROT_KAMPAGNE });
       }
       const jahre = k.baujahr ? jahr2 - k.baujahr : null;
       const kand = ["+z", "+x"].map((q2) => k.seiten?.[q2]?.abbau ? { s: seiten4[q2], ...k.seiten[q2].abbau } : null).filter(Boolean);
-      const ab = kand[0] ?? { s: rest["+z"] ? sz : sx, u: Z2.nutz(rest["+z"] ? sz : sx) * 0.6, y: Math.max(EG3 + 2, k.hoehe - 2), t: tFront(k) };
+      const ab = kand[0] ?? { s: rest["+z"] ? sz : sx, u: Z2.nutz(rest["+z"] ? sz : sx) * 0.6, y: Math.max(EG4 + 2, k.hoehe - 2), t: tFront(k) };
       const mitBuehne = ab.u > 7 && ab.u < ab.s.L - 3;
       if (mitBuehne) sperre(Z2, ab.s, ab.u - 5.5, ab.u + 2, 0, ab.y + 1.5, "hebebuehne");
       for (const s2 of [sz, sx]) {
         if (!rest[s2.seite]) continue;
-        if (s2 === sz || !rest["+z"]) fassadenBanner(Z2, s2, [{ text: "GESCHLOSSEN", h: 2.6, fg: "#ffffff" }, { text: "Diese Filiale ist dauerhaft geschlossen", h: 0.7, fg: "#ffb3a8" }], "#1d2125", { anteil: 0.86, zielH: GROSS, rahmen: "#c8102e", modus: "mitte", fuellen: true, streifen: true, minSchrift: 0.6 });
-        else fassadenBanner(Z2, s2, [{ text: jahre ? `DANKE F\xDCR ${jahre} JAHRE` : "DANKE F\xDCR ALLES", h: 1.5, fg: "#1d2125" }, { text: "Ihr Hartwig-Team", h: 0.7, fg: "#5c6670" }], "#ffffff", { anteil: 0.8, zielH: GROSS * 0.8, rahmen: "#1d2125", modus: "mitte", fuellen: true, minSchrift: 0.6 });
+        if (s2 === sz || !rest["+z"]) fassadenBanner(Z2, s2, [{ text: "GESCHLOSSEN", h: 2.6, fg: "#ffffff" }, { text: k.kettenName ? k.kettenName + " schlie\xDFt" : "Diese Filiale ist dauerhaft geschlossen", h: 0.7, fg: "#ffb3a8" }], "#1d2125", { anteil: 0.86, zielH: GROSS, rahmen: ROT_KAMPAGNE, modus: "mitte", fuellen: true, streifen: true, minSchrift: 0.6 });
+        else fassadenBanner(Z2, s2, [{ text: jahre ? `DANKE F\xDCR ${jahre} JAHRE${k.kettenName ? " " + k.kettenName.toUpperCase() : ""}` : "DANKE F\xDCR ALLES", h: 1.5, fg: "#1d2125" }, { text: k.kettenName ? "Ihr " + k.kettenName + "-Team" : "Ihr Hartwig-Team", h: 0.7, fg: "#5c6670" }], "#ffffff", { anteil: 0.8, zielH: GROSS * 0.8, rahmen: "#1d2125", modus: "mitte", fuellen: true, minSchrift: 0.6 });
       }
       if (mitBuehne) hebebuehne(Z2, ab.s, ab.u, ab.y, ab.t ?? tFront(k));
     }
@@ -46854,30 +46861,30 @@
     }
     if (hat("neueroeffnung")) {
       const he = haupt(), s2 = seiten4[he.seite], u = he.u, t0 = (he.t ?? 0) + 0.2;
-      s2.q(u - 1.3, u + 1.3, 0.3, 0.34, t0, 5.4, "#c8102e");
+      s2.q(u - 1.3, u + 1.3, 0.3, 0.34, t0, 5.4, ROT_KAMPAGNE);
       for (let t = t0 + 0.8; t < 5.2; t += 1.4) for (const du of [-1.7, 1.7]) {
         const [x, zz] = s2.welt(u + du, t);
         zyl(S, x, 0.3, zz, 0.07, 1, "#d4a017", 6);
       }
-      for (const du of [-1.7, 1.7]) s2.q(u + du - 0.03, u + du + 0.03, 1.15, 1.22, t0 + 0.8, 5, "#c8102e");
-      ballonbogen(Z2, s2, u, Math.min(5, t0 + 3.2), 7, 5.2, [ROT, "#ffffff", "#d4a017"]);
+      for (const du of [-1.7, 1.7]) s2.q(u + du - 0.03, u + du + 0.03, 1.15, 1.22, t0 + 0.8, 5, ROT_KAMPAGNE);
+      ballonbogen(Z2, s2, u, Math.min(5, t0 + 3.2), 7, 5.2, [ROT4, "#ffffff", "#d4a017"]);
       for (let i = -3; i <= 3; i++) {
         if (i === 0) continue;
         const [x, zz] = s2.welt(u + i * 3.2, 4.6);
-        fahne(Z2, x, zz, i % 2 ? ROT : "#ffffff", 8.5, i % 2 ? "#ffffff" : ROT);
+        fahne(Z2, x, zz, i % 2 ? ROT4 : "#ffffff", 8.5, i % 2 ? "#ffffff" : ROT4);
       }
       schlange(Z2, s2, u - 2.5, Math.max(1, u - 22), 1.7);
       schlange(Z2, s2, u + 3, Math.min(s2.L - 1, u + 10), 1.7);
-      fassadenBanner(Z2, sz, [{ text: "NEUER\xD6FFNUNG", h: 2.4, fg: ROT }, { text: "Wir sind wieder da!", h: 1, fg: "#2b3a4a" }], "#ffffff", { anteil: 0.75, rahmen: "#d4a017", zielH: GROSS });
-      fassadenBanner(Z2, sx, [{ text: "NEU", h: 2.6, fg: "#ffffff" }, { text: "ab heute ge\xF6ffnet", h: 0.9, fg: "#ffffff" }], ROT, { anteil: 0.45, rahmen: "#d4a017", zielH: GROSS * 0.75 });
+      fassadenBanner(Z2, sz, [{ text: "NEUER\xD6FFNUNG", h: 2.4, fg: ROT4 }, { text: "Wir sind wieder da!", h: 1, fg: "#2b3a4a" }], "#ffffff", { anteil: 0.75, rahmen: "#d4a017", zielH: GROSS });
+      fassadenBanner(Z2, sx, [{ text: "NEU", h: 2.6, fg: "#ffffff" }, { text: "ab heute ge\xF6ffnet", h: 0.9, fg: "#ffffff" }], ROT4, { anteil: 0.45, rahmen: "#d4a017", zielH: GROSS * 0.75 });
       for (const s22 of [sz, sx]) {
         const L2 = Z2.nutz(s22);
-        bahnen(Z2, s22, [L2 * 0.04 + 1.2, L2 * 0.96 - 1.2], "NEU", ["#ffffff", ROT], [ROT, "#ffffff"]);
+        bahnen(Z2, s22, [L2 * 0.04 + 1.2, L2 * 0.96 - 1.2], "NEU", ["#ffffff", ROT4], [ROT4, "#ffffff"]);
       }
       const [bx, bz] = s2.welt(u - 3, 3.6);
-      ballons(Z2, bx, bz, 4, [ROT, "#ffffff", "#d4a017"], 6);
+      ballons(Z2, bx, bz, 4, [ROT4, "#ffffff", "#d4a017"], 6);
       const [bx2, bz2] = s2.welt(u + 3, 3.6);
-      ballons(Z2, bx2, bz2, 4, [ROT, "#ffffff", "#d4a017"], 6);
+      ballons(Z2, bx2, bz2, 4, [ROT4, "#ffffff", "#d4a017"], 6);
     }
     if (hat("teilschliessung")) {
       const he = haupt(), s0 = seiten4[he.seite];
@@ -46892,19 +46899,19 @@
           sperre(Z2, s2, 0.2, L2 - 0.2, yG - 0.3, yG + 0.4, "band");
         }
         const txt = n >= 3 ? "Ab sofort nur noch EG und 1. OG" : "Ab sofort nur noch im EG";
-        const zH = Math.min(GH2 * 1.4, 6.2, k.hoehe - yG - 1);
-        fassadenBanner(Z2, sz, [{ text: "TEILSCHLIESSUNG", h: 1.7, fg: "#ffffff" }, { text: txt, h: 0.8, fg: "#ffd0c8" }], "#2b3035", { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.75, zielH: zH, rahmen: "#c8102e", minSchrift: 0.55 });
-        fassadenBanner(Z2, sx, [{ text: "OBERE ETAGEN GESCHLOSSEN", h: 1.4, fg: "#ffffff" }, { text: txt, h: 0.8, fg: "#ffd0c8" }], "#2b3035", { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.8, zielH: zH, rahmen: "#c8102e", minSchrift: 0.55 });
+        const zH = Math.min(GH3 * 1.4, 6.2, k.hoehe - yG - 1);
+        fassadenBanner(Z2, sz, [{ text: "TEILSCHLIESSUNG", h: 1.7, fg: "#ffffff" }, { text: txt, h: 0.8, fg: "#ffd0c8" }], "#2b3035", { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.75, zielH: zH, rahmen: ROT_KAMPAGNE, minSchrift: 0.55 });
+        fassadenBanner(Z2, sx, [{ text: "OBERE ETAGEN GESCHLOSSEN", h: 1.4, fg: "#ffffff" }, { text: txt, h: 0.8, fg: "#ffd0c8" }], "#2b3035", { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.8, zielH: zH, rahmen: ROT_KAMPAGNE, minSchrift: 0.55 });
       } else {
         for (const f of fensterEG) {
           const s2 = seiten4[f.seite];
           if (!(f.seite === "+x" ? (f.a + f.b) / 2 < Z2.nutz(s2) * 0.6 : (f.a + f.b) / 2 < Z2.nutz(s2) * 0.5)) continue;
           const m = (f.a + f.b) / 2, ym = (f.y0 + f.y1) / 2, l = Math.hypot(f.b - f.a, f.y1 - f.y0) * 0.92, w = Math.atan2(f.y1 - f.y0, f.b - f.a);
           s2.q(f.a, f.b, f.y0, f.y1, f.t + 0.1, f.t + 0.14, "#f2f0ea");
-          s2.kipp(l, 0.35, 0.03, m, ym, f.t + 0.16, "#c8102e", w);
-          s2.kipp(l, 0.35, 0.03, m, ym, f.t + 0.19, "#c8102e", -w);
+          s2.kipp(l, 0.35, 0.03, m, ym, f.t + 0.16, ROT_KAMPAGNE, w);
+          s2.kipp(l, 0.35, 0.03, m, ym, f.t + 0.19, ROT_KAMPAGNE, -w);
         }
-        fassadenBanner(Z2, sx, [{ text: "TEILFL\xC4CHE GESCHLOSSEN", h: 1.1, fg: "#ffffff" }], "#3b4248", { anteil: 0.6, zielH: 2.4, rahmen: "#c8102e", minSchrift: 0.5 });
+        fassadenBanner(Z2, sx, [{ text: "TEILFL\xC4CHE GESCHLOSSEN", h: 1.1, fg: "#ffffff" }], "#3b4248", { anteil: 0.6, zielH: 2.4, rahmen: ROT_KAMPAGNE, minSchrift: 0.5 });
       }
     }
     if (st.aktion) {
@@ -46912,8 +46919,8 @@
       const rb = st.rabatt, pr2 = (x) => `-${rb ?? x} %`;
       const P2 = {
         sale: { bg: "#d8102e", fg: "#ffffff", z: [{ text: "SALE", h: 3.4, fg: "#ffffff" }, { text: rb ? `jetzt ${pr2(50)}` : "bis zu -50 %", h: 1.1, fg: "#ffe066" }], x: [{ text: pr2(50), h: 3, fg: "#ffffff" }], wimpel: ["#d8102e", "#ffffff"], ballon: ["#d8102e", "#ffffff"], fenster: rb ? [pr2(50), "SALE"] : ["-30 %", "-50 %", "SALE"], stopper: "SALE", bahn: "SALE %" },
-        jubilaeum: { bg: "#1f3f6b", fg: "#e8c25a", z: [{ text: k.baujahr ? `${jahr2 - k.baujahr} JAHRE HARTWIG` : "JUBIL\xC4UM", h: 2.2, fg: "#e8c25a" }, { text: "Danke f\xFCr Ihre Treue", h: 0.9, fg: "#ffffff" }], x: [{ text: "JUBIL\xC4UM", h: 1.9, fg: "#e8c25a" }, { text: k.baujahr ? `seit ${k.baujahr}` : "seit jeher", h: 0.9, fg: "#ffffff" }], wimpel: ["#e8c25a", "#1f3f6b", ROT], ballon: ["#e8c25a", ROT, "#1f3f6b"], fenster: ["JUBIL\xC4UM", pr2(20)], stopper: "Jubelpreise", bahn: "JUBIL\xC4UM" },
-        weihnachten: { bg: "#1f5a3a", fg: "#ffffff", z: [{ text: "WEIHNACHTSZAUBER", h: 2, fg: "#ffffff" }, { text: "Geschenke f\xFCr alle", h: 0.9, fg: "#f2d27a" }], x: [{ text: "FROHES FEST", h: 1.8, fg: "#f2d27a" }], wimpel: ["#c8102e", "#f2d27a", "#1f5a3a"], ballon: null, fenster: ["GESCHENKE", "\u2605"], stopper: "Geschenkideen" },
+        jubilaeum: { bg: "#1f3f6b", fg: "#e8c25a", z: [{ text: k.baujahr ? `${jahr2 - k.baujahr} JAHRE ${k.kettenName ? k.kettenName.toUpperCase() : "HARTWIG"}` : "JUBIL\xC4UM", h: 2.2, fg: "#e8c25a" }, { text: "Danke f\xFCr Ihre Treue", h: 0.9, fg: "#ffffff" }], x: [{ text: "JUBIL\xC4UM", h: 1.9, fg: "#e8c25a" }, { text: k.baujahr ? `seit ${k.baujahr}` : "seit jeher", h: 0.9, fg: "#ffffff" }], wimpel: ["#e8c25a", "#1f3f6b", ROT4], ballon: ["#e8c25a", ROT4, "#1f3f6b"], fenster: ["JUBIL\xC4UM", pr2(20)], stopper: "Jubelpreise", bahn: "JUBIL\xC4UM" },
+        weihnachten: { bg: "#1f5a3a", fg: "#ffffff", z: [{ text: "WEIHNACHTSZAUBER", h: 2, fg: "#ffffff" }, { text: "Geschenke f\xFCr alle", h: 0.9, fg: "#f2d27a" }], x: [{ text: "FROHES FEST", h: 1.8, fg: "#f2d27a" }], wimpel: [ROT_KAMPAGNE, "#f2d27a", "#1f5a3a"], ballon: null, fenster: ["GESCHENKE", "\u2605"], stopper: "Geschenkideen" },
         blackfriday: { bg: "#121212", fg: "#ffd400", z: [{ text: "BLACK FRIDAY", h: 2.8, fg: "#ffffff" }, { text: rb ? `jetzt ${pr2(60)}` : "bis zu -60 %", h: 1.1, fg: "#ffd400" }], x: [{ text: pr2(60), h: 3, fg: "#ffd400" }], wimpel: ["#121212", "#ffd400"], ballon: ["#121212", "#ffd400"], fenster: [pr2(60), "BLACK FRIDAY"], stopper: pr2(60), bahn: "BLACK FRIDAY" }
       }[a] ?? aktionStil(a, st, pr2);
       if (st.mechanik === "punkte" && st.punkteFaktor && P2.z[1]) P2.z[1] = { ...P2.z[1], text: `${st.punkteFaktor}-fach Punkte mit der Karte` };
@@ -46928,9 +46935,9 @@
       for (const s3 of [sz, sx]) {
         if (!rest[s3.seite]) continue;
         const L2 = Z2.nutz(s3), t = tFront(k) + 0.6;
-        const yW = Math.min(k.hoehe - 0.4, EG3 + (n >= 2 ? GH2 * 0.9 : 1.2));
+        const yW = Math.min(k.hoehe - 0.4, EG4 + (n >= 2 ? GH3 * 0.9 : 1.2));
         const st2 = Math.max(2, Math.round(L2 / 11));
-        for (let i = 0; i < st2; i++) wimpel(Z2, s3, L2 * i / st2, L2 * (i + 1) / st2, EG3 + 0.2, t + 0.6, P2.wimpel, 0.9);
+        for (let i = 0; i < st2; i++) wimpel(Z2, s3, L2 * i / st2, L2 * (i + 1) / st2, EG4 + 0.2, t + 0.6, P2.wimpel, 0.9);
         if (n >= 2) for (let i = 0; i < st2; i++) {
           const ua = L2 * i / st2, ub = L2 * (i + 1) / st2;
           if (freieStuecke(Z2, s3, ua, ub, yW - 1.5, yW).some(([p, q2]) => q2 - p > ub - ua - 0.1)) wimpel(Z2, s3, ua, ub, yW, t, P2.wimpel, 1.4);
@@ -46963,7 +46970,7 @@
           S.add(g, "#2f7a45");
         }
         kugel(S, x, 6.8, zz, 0.45, "#f2d27a");
-        for (let i = 0; i < 10; i++) kugel(S, x + zw(r, -1.6, 1.6) * (1 - i / 14), 1.4 + i * 0.5, zz + zw(r, -1.6, 1.6) * (1 - i / 14), 0.18, i % 2 ? "#c8102e" : "#f2d27a");
+        for (let i = 0; i < 10; i++) kugel(S, x + zw(r, -1.6, 1.6) * (1 - i / 14), 1.4 + i * 0.5, zz + zw(r, -1.6, 1.6) * (1 - i / 14), 0.18, i % 2 ? ROT_KAMPAGNE : "#f2d27a");
         for (const s22 of [sz, sx]) {
           const L2 = Z2.nutz(s22);
           for (let u = 0.5; u < L2; u += 1) s22.q(u - 0.1, u + 0.1, k.hoehe - 0.3 - 0.35 * Math.sin(u * 0.7) ** 2, k.hoehe - 0.1 - 0.35 * Math.sin(u * 0.7) ** 2, tFront(k) + 0.1, tFront(k) + 0.3, "#ffe58a");
@@ -46971,7 +46978,7 @@
         for (let i = 0; i < 4; i++) {
           const [gx, gz2] = s2.welt(he.u - (he.breite ?? 4) / 2 - 2.6 - i * 1.1, 1.6);
           const g = 0.6 + r() * 0.4;
-          S.box(g, g, g, gx, 0.3 + g / 2, gz2, i % 2 ? "#c8102e" : "#f2d27a");
+          S.box(g, g, g, gx, 0.3 + g / 2, gz2, i % 2 ? ROT_KAMPAGNE : "#f2d27a");
         }
       }
       if (a === "blackfriday") menge(Z2, s2, he.u, 3, 24, 6, 2.6, { tMin: (he.t ?? 0) + 0.8 });
@@ -47098,67 +47105,17 @@
     }
   }
 
-  // src/kit/warenhaus.js
-  var ROT2 = "#d23c32";
-  var EG = 5.5;
-  var GH = 4.5;
-  var DDR_STAEDTE = ["Berlin", "Dresden", "Leipzig", "Magdeburg", "Erfurt", "Chemnitz", "Halle", "Potsdam", "Cottbus", "Jena", "Zwickau", "G\xF6rlitz", "Dessau", "Gera", "Weimar", "Rostock", "Stralsund", "Schwerin"];
-  var anteil = (id, salz) => rng2(`${id}/${salz}`)();
-  function istOstHaus(haus2) {
-    if (!haus2 || haus2.format === "sport" || haus2.lage === "center") return false;
-    if (!DDR_STAEDTE.includes(haus2.stadt)) return false;
-    if (haus2.stadt === "Berlin" && anteil(haus2.id, "berlin-ost") >= 0.5) return false;
-    const j = haus2.baujahr ?? 0;
-    if (j >= 1960 && j <= 1989) return true;
-    return anteil(haus2.id, "ost") < 0.5;
-  }
-  function ostFamilie(haus2) {
-    const j = haus2.baujahr ?? 1975, r = anteil(haus2.id, "ostfamilieg");
-    if (j >= 1950 && j <= 1963) return r < 0.7 ? 11 : 9;
-    if (j < 1950) return r < 0.45 ? 11 : r < 0.75 ? 8 : 10;
-    if (j <= 1974) return r < 0.55 ? 8 : 9;
-    if (j <= 1989) return r < 0.4 ? 10 : r < 0.75 ? 9 : 8;
-    return [8, 9, 10][Math.floor(r * 3)];
-  }
+  // src/kit/sporthelfer.js
   var GLAS = "#4d6677";
-  var GLAS_TUER = "#2f3d48";
+  var GLAS_D = "#2f3d48";
   var GLAS_HELL = "#7d9fb2";
   var LICHT2 = "#f7e9c8";
   var RAHMEN2 = "#3a4148";
-  var STAHL = "#8f989f";
   var KIES2 = "#bab8b2";
-  var KIES_D = "#a9a7a1";
-  var TOT = "#7c3d36";
   var KLEID2 = ["#d04a3f", "#2f63b5", "#e8e4dc", "#e0b23c", "#5b8f5a", "#8d5fbf", "#ef8b4c", "#2b2b2b", "#f2c6d2", "#7d97b8", "#1f3f6b"];
   var AUTO = ["#d04a3f", "#2f63b5", "#f1f1ee", "#2a2d31", "#e0b23c", "#8c9aa6", "#5b8f5a", "#f1f1ee", "#9aa4ad"];
-  var MALLS = ["LINDENGALERIE", "MARKTQUARTIER", "K\xD6NIGSPASSAGE", "STADTCARR\xC9", "WALLARKADEN", "BR\xDCCKENHOF"];
-  var SLOGANS = ["LAUF LOS.", "RAUS. JETZT.", "NEUE SAISON", "BERG RUFT.", "DEIN SPIEL.", "WINTER KOMMT"];
+  var BUNT = ["#e04b3a", "#f2c14e", "#3a7bd5", "#4caf50", "#ff8c42", "#8d5fbf", "#ffffff"];
   var clamp4 = (v, a, b) => Math.max(a, Math.min(b, v));
-  function familieVon(haus2) {
-    if (haus2.format === "sport") return 7;
-    if (haus2.lage === "center") return 6;
-    if (istOstHaus(haus2)) return ostFamilie(haus2);
-    const j = haus2.baujahr;
-    if (j <= 1919) return 1;
-    if (j <= 1939) return 2;
-    if (j <= 1964) return 3;
-    if (j <= 1980) return 4;
-    return 5;
-  }
-  function masse(haus2) {
-    const A = Math.max(300, haus2.grundflaecheQm || 2e3);
-    const r = rng2(String(haus2.id) + "/masse");
-    const ziel = 1.25 + r() * 0.5;
-    let best = null;
-    for (let w = 15; w <= 170; w += 5) for (let d = 10; d <= w; d += 5) {
-      const q2 = w / d;
-      if (q2 < 1.2 || q2 > 1.8) continue;
-      const s2 = Math.abs(w * d - A) / A + 0.12 * Math.abs(q2 - ziel);
-      if (!best || s2 < best.s) best = { w, d, s: s2 };
-    }
-    const n = Math.max(1, (haus2.etagen || [0]).filter((e) => e >= 0).length);
-    return { w: best.w, d: best.d, n, H: EG + (n - 1) * GH };
-  }
   function spiegeln2(g) {
     for (const n of ["position", "normal"]) {
       const a = g.attributes[n]?.array;
@@ -47191,11 +47148,1018 @@
     welt(u, t) {
       return this.seite === "+z" ? [this.basis + u, this.ebene + t] : [this.ebene + t, this.basis + u];
     }
-    /** Geometrie im lokalen Rahmen (x = u, y, z = t) einsetzen. */
     geo(g, f) {
       g = g.index ? g.toNonIndexed() : g;
       for (const a of Object.keys(g.attributes)) if (a !== "position" && a !== "normal") g.deleteAttribute(a);
       if (this.seite === "+x") spiegeln2(g);
+      const [x, z2] = this.welt(0, 0);
+      g.translate(x, 0, z2);
+      this.S.add(g, f);
+    }
+    kipp(bu, by, bt, u, y, t, f, rz = 0, rx = 0) {
+      const g = new three_module_exports.BoxGeometry(bu, by, bt);
+      if (rx) g.rotateX(rx);
+      if (rz) g.rotateZ(rz);
+      g.translate(u, y, t);
+      this.geo(g, f);
+    }
+    flaeche(mesh, u, y, t, rz = 0) {
+      if (this.seite === "+z") {
+        mesh.position.set(this.basis + u, y, this.ebene + t);
+        mesh.rotation.set(0, 0, rz);
+      } else {
+        mesh.position.set(this.ebene + t, y, this.basis + u);
+        mesh.rotation.set(0, Math.PI / 2, rz);
+      }
+    }
+  };
+  var seitenVon = (S, x0, z0, w, d) => [new Seite2(S, x0, z0, w, d, "+z"), new Seite2(S, x0, z0, w, d, "+x")];
+  function zyl2(S, x, y0, z2, rad2, h, f, seg = 12, oben = rad2) {
+    const g = new three_module_exports.CylinderGeometry(oben, rad2, h, seg);
+    g.translate(x, y0 + h / 2, z2);
+    S.add(g, f);
+  }
+  function viertelzylinder(S, cx, cz, rad2, y0, y1, f, seg = 12) {
+    const g = new three_module_exports.CylinderGeometry(rad2, rad2, y1 - y0, seg, 1, false, 0, Math.PI / 2);
+    g.translate(cx, (y0 + y1) / 2, cz);
+    S.add(g, f);
+  }
+  function prismaX(S, x0, x1, pts, y, f) {
+    const sh = new three_module_exports.Shape();
+    sh.moveTo(pts[0][0], pts[0][1]);
+    for (const p of pts.slice(1)) sh.lineTo(p[0], p[1]);
+    sh.closePath();
+    let g = new three_module_exports.ExtrudeGeometry(sh, { depth: x1 - x0, bevelEnabled: false });
+    g = g.toNonIndexed();
+    for (const a of Object.keys(g.attributes)) if (a !== "position" && a !== "normal") g.deleteAttribute(a);
+    spiegeln2(g);
+    g.translate(x0, y, 0);
+    S.add(g, f);
+  }
+  function tex2(text2, farbe, bg = null, schrift2) {
+    return schrift2 ? textTextur(text2, farbe, 120, bg, schrift2, !schrift2.includes("Serif")) : textTextur(text2, farbe, 120, bg);
+  }
+  function texMat2(text2, farbe, bg, schrift2, lit) {
+    return textMaterial(text2, farbe, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45, lit: !!lit, ...schrift2 ? { schrift: schrift2, fett: !schrift2.includes("Serif") } : {} }).mat;
+  }
+  var plakatBreite = (text2, ph, schrift2) => tex2(text2, "#000", "#fff", schrift2).seitenverhaeltnis * ph;
+  function plakat2(scene2, s2, text2, u, y, t, ph, farbe, bg = null, o = {}) {
+    const sv = tex2(text2, farbe, bg, o.schrift).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat2(text2, farbe, bg, o.schrift, !!o.lit));
+    s2.flaeche(m, u, y, t, o.rz ?? 0);
+    scene2.add(m);
+    return sv * ph;
+  }
+  function passend(text2, maxB, maxH, schrift2) {
+    return Math.min(maxH, maxB / tex2(text2, "#000", null, schrift2).seitenverhaeltnis);
+  }
+  function bodenText(scene2, text2, x, y, z2, h, farbe, drehung = 0) {
+    const sv = tex2(text2, farbe).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * h, h), texMat2(text2, farbe, null, void 0, false));
+    m.rotation.set(-Math.PI / 2, 0, drehung);
+    m.position.set(x, y, z2);
+    scene2.add(m);
+  }
+  function puppe(s2, u, y, t, oben, unten, sk = 1) {
+    s2.q(u - 0.17 * sk, u + 0.17 * sk, y, y + 0.95 * sk, t - 0.1, t + 0.1, unten);
+    s2.q(u - 0.26 * sk, u + 0.26 * sk, y + 0.95 * sk, y + 1.62 * sk, t - 0.13, t + 0.13, oben);
+    s2.q(u - 0.11 * sk, u + 0.11 * sk, y + 1.64 * sk, y + 1.92 * sk, t - 0.11, t + 0.11, "#f1ece4");
+  }
+  function mensch(S, r, x, y, z2) {
+    const c = waehle2(r, KLEID2);
+    S.box(0.42, 0.85, 0.3, x, y + 0.42, z2, waehle2(r, ["#2b3a55", "#3a3a3a", "#6b5a48", "#20304a"]));
+    S.box(0.5, 0.7, 0.34, x, y + 1.2, z2, c);
+    S.box(0.24, 0.26, 0.24, x, y + 1.68, z2, "#e8cfb4");
+  }
+  function rad(s2, u, y, t, farbe) {
+    for (const du of [-0.6, 0.6]) {
+      const g = new three_module_exports.TorusGeometry(0.4, 0.05, 4, 12);
+      g.translate(u + du, y + 0.42, t);
+      s2.geo(g, "#2b2b2b");
+    }
+    s2.kipp(1.3, 0.09, 0.09, u, y + 0.72, t, farbe, 0.32);
+    s2.q(u - 0.08, u + 0.08, y + 0.42, y + 1, t - 0.04, t + 0.04, "#555555");
+  }
+  function auto(S, r, x, z2, y = 0.3, quer2 = false) {
+    const c = waehle2(r, AUTO);
+    if (quer2) {
+      S.box(4.3, 0.9, 1.85, x, y + 0.5, z2, c);
+      S.box(2.2, 0.65, 1.65, x - 0.15, y + 1.27, z2, "#9bb7c7");
+    } else {
+      S.box(1.85, 0.9, 4.3, x, y + 0.5, z2, c);
+      S.box(1.65, 0.65, 2.2, x, y + 1.27, z2 - 0.15, "#9bb7c7");
+    }
+  }
+  function busch(S, r, x, y, z2, s2 = 1) {
+    const g = new three_module_exports.IcosahedronGeometry(0.9 * s2 * (0.8 + r() * 0.4), 0);
+    g.scale(1, 0.75, 1);
+    g.translate(x, y + 0.6 * s2, z2);
+    S.add(g, waehle2(r, ["#6fa860", "#5f9a56", "#7cb369"]));
+  }
+  function kuebelbaum(S, r, x, y, z2, s2 = 1) {
+    S.box(1.1 * s2, 0.7 * s2, 1.1 * s2, x, y + 0.35 * s2, z2, "#8b8f93");
+    S.box(0.18 * s2, 1.4 * s2, 0.18 * s2, x, y + 1.3 * s2, z2, "#7a5d43");
+    const g = new three_module_exports.IcosahedronGeometry(1.1 * s2 * (0.85 + r() * 0.3), 0);
+    g.translate(x, y + 2.5 * s2, z2);
+    S.add(g, waehle2(r, ["#6fa860", "#5f9a56", "#7cb369"]));
+  }
+  function attika2(S, x0, z0, w, d, y, h, f, dick = 0.45) {
+    S.quader(x0, y, z0, x0 + w, y + 0.15, z0 + d, KIES2);
+    S.quader(x0, y, z0 + d - dick, x0 + w, y + h, z0 + d, f);
+    S.quader(x0 + w - dick, y, z0, x0 + w, y + h, z0 + d, f);
+    S.quader(x0, y, z0, x0 + w, y + h, z0 + dick, f);
+    S.quader(x0, y, z0, x0 + dick, y + h, z0 + d, f);
+    S.quader(x0 - 0.08, y + h, z0 + d - dick - 0.08, x0 + w + 0.08, y + h + 0.1, z0 + d + 0.08, heller(f, 0.04));
+    S.quader(x0 + w - dick - 0.08, y + h, z0 - 0.08, x0 + w + 0.08, y + h + 0.1, z0 + d + 0.08, heller(f, 0.04));
+  }
+  function lichtkuppeln(S, x0, z0, x1, z1, y, ax = 6, az = 7, f = "#e8eef0") {
+    if (x1 - x0 < 5 || z1 - z0 < 5) return;
+    const nx = Math.max(1, Math.floor((x1 - x0 - 1) / ax)), nz = Math.max(1, Math.floor((z1 - z0 - 1) / az));
+    const ox = x0 + (x1 - x0 - (nx - 1) * ax) / 2, oz = z0 + (z1 - z0 - (nz - 1) * az) / 2;
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      S.box(1.8, 0.3, 1.8, ox + i * ax, y + 0.15, oz + j * az, "#d3d0c9");
+      S.box(1.35, 0.32, 1.35, ox + i * ax, y + 0.45, oz + j * az, f);
+    }
+  }
+  function technik(S, r, x0, z0, x1, z1, y, o = {}) {
+    if (x1 - x0 < 5 || z1 - z0 < 5) return;
+    const fl = (x1 - x0) * (z1 - z0);
+    const anz3 = Math.min(o.max ?? 6, Math.max(1, Math.round(fl / 260)));
+    const belegt2 = [];
+    const f = o.farbe ?? "#c9c6bf";
+    for (let v = 0; v < anz3 * 6 && belegt2.length < anz3; v++) {
+      const typ = belegt2.length === 0 ? "lueftung" : waehle2(r, ["lueftung", "kuehler", "kuehler", "rohr", "kasten"]);
+      const [bw, bd, bh] = { lueftung: [zw(r, 4, 8), zw(r, 2.5, 4.5), zw(r, 1.8, 2.8)], kuehler: [zw(r, 3.5, 5.5), 2, 1.2], rohr: [zw(r, 5, 8), 0.7, 0.7], kasten: [zw(r, 1.8, 3), zw(r, 1.8, 3), zw(r, 1.2, 2)] }[typ];
+      if (bw > x1 - x0 - 1.5 || bd > z1 - z0 - 1.5) continue;
+      const cx = zw(r, x0 + bw / 2 + 0.7, x1 - bw / 2 - 0.7), cz = zw(r, z0 + bd / 2 + 0.7, z1 - bd / 2 - 0.7);
+      if (belegt2.some((b) => Math.abs(b[0] - cx) < (b[2] + bw) / 2 + 0.7 && Math.abs(b[1] - cz) < (b[3] + bd) / 2 + 0.7)) continue;
+      belegt2.push([cx, cz, bw, bd]);
+      if (typ === "rohr") {
+        const g = new three_module_exports.CylinderGeometry(0.35, 0.35, bw, 8);
+        g.rotateZ(Math.PI / 2);
+        g.translate(cx, y + 0.8, cz);
+        S.add(g, "#d6d8da");
+        S.box(0.3, 0.55, 0.3, cx - bw / 3, y + 0.28, cz, "#9aa0a5");
+        S.box(0.3, 0.55, 0.3, cx + bw / 3, y + 0.28, cz, "#9aa0a5");
+        continue;
+      }
+      S.box(bw, bh, bd, cx, y + bh / 2, cz, f);
+      S.box(bw + 0.2, 0.14, bd + 0.2, cx, y + bh + 0.07, cz, heller(f, 0.05));
+      if (typ === "lueftung") for (let k = 0; k < 3; k++) {
+        const yy = y + 0.45 + k * (bh - 0.8) / 2;
+        S.box(bw * 0.8, 0.12, 0.08, cx, yy, cz + bd / 2 + 0.04, dunkler(f, 0.14));
+        S.box(0.08, 0.12, bd * 0.75, cx + bw / 2 + 0.04, yy, cz, dunkler(f, 0.14));
+      }
+      if (typ === "kuehler") for (let k = 0; k < Math.floor(bw / 1.7); k++) zyl2(S, cx - bw / 2 + 0.85 + k * 1.7, y + bh, cz, 0.65, 0.16, "#5d646a", 10);
+    }
+  }
+  function solar(S, x0, z0, x1, z1, y) {
+    for (let z2 = z0 + 0.5; z2 + 2 < z1; z2 += 3) for (let x = x0 + 0.5; x + 4 < x1; x += 4.5) {
+      const g = new three_module_exports.BoxGeometry(4.1, 0.08, 1.8);
+      g.rotateX(-0.3);
+      g.translate(x + 2.05, y + 0.55, z2 + 0.95);
+      S.add(g, "#2c4a73");
+    }
+  }
+  function parkreihe(S, r, x0, x1, z0, tiefe, y, quote = 0.6) {
+    for (let x = x0; x + 2.5 <= x1; x += 2.6) {
+      S.box(0.12, 0.03, tiefe, x, y + 0.02, z0 + tiefe / 2, "#f2f1ec");
+      if (r() < quote) auto(S, r, x + 1.3, z0 + tiefe / 2, y);
+    }
+  }
+  function buchten(u0, u1, raster4, pb = 0.3) {
+    const len = u1 - u0;
+    if (len < 1.5) return [];
+    const nb = Math.max(1, Math.round(len / raster4)), bw = len / nb;
+    return Array.from({ length: nb }, (_, i) => [u0 + i * bw + pb / 2, u0 + (i + 1) * bw - pb / 2]);
+  }
+  function wand(s2, u0, u1, y0, y1, t0, t1, oeff, f) {
+    const o = oeff.filter((g) => g.b > u0 && g.a < u1).sort((p, q2) => p.a - q2.a);
+    let c = u0;
+    for (const g of o) {
+      if (g.a > c) s2.q(c, g.a, y0, y1, t0, t1, f);
+      if (g.y0 > y0) s2.q(Math.max(g.a, u0), Math.min(g.b, u1), y0, Math.min(g.y0, y1), t0, t1, f);
+      if (g.y1 < y1) s2.q(Math.max(g.a, u0), Math.min(g.b, u1), Math.max(g.y1, y0), y1, t0, t1, f);
+      c = Math.max(c, g.b);
+    }
+    if (c < u1) s2.q(c, u1, y0, y1, t0, t1, f);
+  }
+
+  // src/kit/wettbewerber.js
+  var ARTEN2 = ["modehaus", "offprice", "textildiscounter", "elektronik", "premium", "fastfashion", "leer_ehemals"];
+  var NAMEN = {
+    // je Art sechs Namen; die ersten drei sind die Zufallsauswahl ohne Vorgabe, staedte.js rotiert durch alle sechs
+    modehaus: ["Brandhoff Mode", "Lindner & S\xF6hne", "Haus Weidenau", "Modehaus Kersting", "Gebr. Hallmann", "Haus Rosenau"],
+    offprice: ["KAUFKISTE", "W\xDCHLWERK", "RESTEPARADIES", "SCHN\xC4PPCHENHOF", "PREISSPRUNG", "POSTENPALAST"],
+    textildiscounter: ["SPARMODE", "KLEIDKAUF", "TEXTILECK", "MODEPREIS", "STOFFSPAR", "KLEIDERKISTE"],
+    elektronik: ["VOLTWERK", "KABELK\xD6NIG", "GER\xC4TEHALLE", "STROMHAUS", "DIGIMARKT", "SCHALTWERK"],
+    premium: ["Haus Ahlert", "Feldmann & Cie.", "Kaufhaus Morgenroth", "Haus Bellmann", "Wagner & Thiel", "Kaufhaus Lindenhof"],
+    fastfashion: ["NOVA", "TRENDWERK", "WIRBEL", "STYLO", "KOLLEKT", "PULS"],
+    leer_ehemals: ["KAUFHAUS STRAUB", "B\xD6LLING", "WESTKAUF", "HAUS MERTENS", "WARENHAUS ELSNER", "KAUFHAUS DREWS"]
+  };
+  var SERIF = '"DejaVu Serif", Georgia, serif';
+  var MESSING = "#b8955a";
+  var BRONZE = "#6b5a45";
+  var EG = 5;
+  var OG = 4;
+  var REGION = {
+    nord: { stein: ["#a8664f", "#b4705a", "#9e5c47", "#b9785e"], hell: "#ece4d4", dach: "#7a4436", wand: "#a96a52", akzent: "#ece4d4" },
+    sued: { stein: ["#ecd9b0", "#e8cfa4", "#f0e2c4", "#e2c9a0"], hell: "#f6efe0", dach: "#b4583f", wand: "#efe3c8", akzent: "#c9a36a" },
+    ost: { stein: ["#d4d2ca", "#cfccc2", "#d9d6cc", "#c9c8c0"], hell: "#e6e4de", dach: "#5f6b70", wand: "#d2d0c8", akzent: "#e07a3a" }
+  };
+  function regionVon(p) {
+    const t = String(p ?? "").toLowerCase().replace("\xFC", "ue");
+    return t === "nord" || t === "sued" || t === "ost" ? t : null;
+  }
+  function regionHaut(K3, s2, u0, u1, y0, y1, t, f) {
+    const R9 = K3.reg;
+    if (R9 === "nord") for (let y = y0 + 0.5; y < y1; y += 0.5) s2.q(u0, u1, y - 0.025, y + 0.025, t, t + 0.02, dunkler(f, 0.06));
+    if (R9 === "ost") {
+      for (let y = y0 + 2.9; y < y1 - 0.2; y += 2.9) s2.q(u0, u1, y - 0.04, y + 0.04, t, t + 0.03, dunkler(f, 0.1));
+      for (let u = u0 + 3.6; u < u1 - 0.2; u += 3.6) s2.q(u - 0.04, u + 0.04, y0, y1, t, t + 0.03, dunkler(f, 0.1));
+    }
+  }
+  function ware(K3, s2, a, b, y, tb, art) {
+    const r = K3.r, m = (a + b) / 2, br = b - a, tm = tb + 0.7;
+    if (K3.leer) return;
+    switch (art) {
+      case "offprice":
+      case "textildiscounter": {
+        for (const u of [a + br * 0.3, a + br * 0.72]) {
+          s2.q(u - 0.8, u + 0.8, y, y + 0.8, tm - 0.4, tm + 0.4, "#d9d2c4");
+          for (let k = 0; k < 4; k++) s2.q(u - 0.7 + k * 0.35, u - 0.4 + k * 0.35, y + 0.8, y + 0.95 + r() * 0.25, tm - 0.3, tm + 0.3, waehle2(r, KLEID2));
+        }
+        if (art === "offprice") s2.q(m - 0.5, m + 0.5, y + 1.6, y + 2.4, tb + 0.05, tb + 0.1, waehle2(r, ["#f6d32d", "#e8336d", "#ffffff"]));
+        else puppe(s2, b - 0.6, y, tm, waehle2(r, KLEID2), "#2b3a55");
+        break;
+      }
+      case "elektronik": {
+        for (let i = 0; i < Math.floor(br / 1.3); i++) {
+          const u = a + 0.75 + i * 1.3;
+          s2.q(u - 0.55, u + 0.55, y + 1.5, y + 2.2, tb, tb + 0.12, "#1f2328");
+          s2.q(u - 0.48, u + 0.48, y + 1.56, y + 2.14, tb + 0.12, tb + 0.15, waehle2(r, ["#3a7bd5", "#4fb6c2", "#7cb342", "#e36b2c"]));
+        }
+        s2.q(a + 0.4, a + 1.2, y, y + 0.9, tm - 0.35, tm + 0.35, "#f1f1ee");
+        s2.q(a + 1.4, a + 2.2, y, y + 0.9, tm - 0.35, tm + 0.35, "#f1f1ee");
+        const g = new three_module_exports.CylinderGeometry(0.25, 0.25, 0.05, 10);
+        g.rotateX(Math.PI / 2);
+        g.translate(a + 0.8, y + 0.5, tm + 0.38);
+        s2.geo(g, "#5d646a");
+        break;
+      }
+      case "premium": {
+        s2.q(m - 0.6, m + 0.6, y, y + 0.8, tm - 0.4, tm + 0.4, "#f1ece2");
+        s2.q(m - 0.25, m + 0.25, y + 0.8, y + 1.15, tm - 0.12, tm + 0.12, waehle2(r, ["#7a2b2b", "#1f1f1f", "#b8955a"]));
+        puppe(s2, a + 0.7, y, tm, waehle2(r, ["#1f1f1f", "#e8e4dc", "#7a2b2b", "#2b3a55"]), "#1f1f1f");
+        s2.q(a, b, y + 2.9, y + 3, tb + 0.1, tb + 0.5, "#f7e9c8");
+        break;
+      }
+      default: {
+        const nP = br > 3.5 ? 3 : 2;
+        s2.q(a + 0.3, b - 0.3, y, y + 0.2, tm - 0.35, tm + 0.35, "#e9e4da");
+        for (let i = 0; i < nP; i++) puppe(s2, a + br * (i + 0.5) / nP, y + 0.2, tm, waehle2(r, art === "fastfashion" ? ["#e8336d", "#f6d32d", "#1f1f1f", "#ffffff", "#4fb6c2"] : KLEID2), waehle2(r, ["#2b3a55", "#3a3a3a", "#e8e4dc"]));
+      }
+    }
+  }
+  function ladenzone2(K3, s2, o) {
+    const u0 = o.u0 ?? 0, u1 = o.u1 ?? s2.L, D = o.D ?? 1.6, gTop = o.gTop ?? 4, h = o.h ?? EG, pb = o.pb ?? 0.6;
+    const ax = buchten(u0, u1, o.raster ?? 5, pb);
+    const ein = o.eingaenge ?? /* @__PURE__ */ new Set([Math.floor(ax.length * (s2.seite === "+z" ? 0.55 : 0.4))]);
+    const res = [];
+    ax.forEach(([a, b], i) => {
+      s2.q(a - pb, a, 0, h, -D, 0.12, o.pfeiler);
+      if (i === ax.length - 1) s2.q(b, b + pb, 0, h, -D, 0.12, o.pfeiler);
+      s2.q(a, b, gTop, h, -D, 0.04, o.sturz ?? o.pfeiler);
+      const istEin = ein.has(i);
+      res.push({ a, b, ein: istEin });
+      if (istEin) {
+        s2.q(a, b, 0.3, gTop, -D - 0.1, -D, K3.leer ? "#7c6a55" : GLAS_D);
+        s2.q(a, b, 0.3, 0.4, -D, 0.1, "#d6d0c4");
+        if (!K3.leer) for (let k = 1; k < 3; k++) s2.q(a + (b - a) * k / 3 - 0.05, a + (b - a) * k / 3 + 0.05, 0.3, gTop, -D, -D + 0.06, RAHMEN2);
+        if (K3.leer) brett(K3, s2, a, b, 0.3, gTop, -D * 0.4);
+        return;
+      }
+      s2.q(a, b, 0, 0.5, -D, 0.06, o.sockel ?? dunkler(o.pfeiler, 0.12));
+      s2.q(a, b, 0.5, gTop, -D - 0.1, -D, o.glas ?? GLAS);
+      s2.q(a, b, 0.5, 0.6, -D, 0, "#d6d0c4");
+      if (K3.leer) {
+        brett(K3, s2, a, b, 0.5, gTop, -0.2);
+        return;
+      }
+      s2.q(a, b, gTop - 0.3, gTop - 0.16, -D, -D + 0.06, LICHT2);
+      ware(K3, s2, a, b, 0.6, -D, o.art);
+    });
+    return res;
+  }
+  function brett(K3, s2, a, b, y0, y1, t) {
+    const r = K3.r, nb = Math.max(1, Math.round((b - a) / 1.25));
+    for (let i = 0; i < nb; i++) {
+      const p = a + i * (b - a) / nb, q2 = a + (i + 1) * (b - a) / nb;
+      s2.q(p + 0.02, q2 - 0.02, y0, y1, t, t + 0.05, i % 2 ? "#c9a77a" : "#bf9c6e");
+    }
+    if (r() < 0.6) s2.kipp((b - a) * 0.7, 0.35, 0.03, (a + b) / 2, y0 + zw(r, 0.6, 1.4), t + 0.08, waehle2(r, ["#e8336d", "#3a7bd5", "#2b2b2b", "#4caf50"]), zw(r, -0.15, 0.15));
+  }
+  function kastenBreite(text2, hb) {
+    const z2 = [...text2];
+    return z2.reduce((a, c) => a + (c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62), 0) + hb * 0.12 * (z2.length - 1);
+  }
+  function kastenSchrift(K3, s2, text2, um, y, t, hb, fg, bg) {
+    const z2 = [...text2];
+    const br = z2.map((c) => c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62);
+    const gap = hb * 0.12;
+    const total = br.reduce((a, b) => a + b, 0) + gap * (z2.length - 1);
+    let acc = 0;
+    z2.forEach((c, i) => {
+      const uc = um + s2.lese * (-total / 2 + acc + br[i] / 2);
+      acc += br[i] + gap;
+      if (c === " ") return;
+      s2.q(uc - br[i] / 2, uc + br[i] / 2, y - hb * 0.55, y + hb * 0.55, t, t + 0.45, bg);
+      plakat2(K3.scene, s2, c, uc, y, t + 0.47, hb * 1.05, fg);
+    });
+    return total;
+  }
+  function flachdach(K3, x0, z0, w, d, y, o = {}) {
+    const { S, r } = K3;
+    S.quader(x0, y, z0, x0 + w, y + 0.2, z0 + d, KIES2);
+    if (o.kuppeln !== false) lichtkuppeln(S, x0 + 1.5, z0 + 1.5, x0 + w * 0.45, z0 + d - 1.5, y + 0.2, 6, 6.5);
+    if (o.solar) solar(S, x0 + w * 0.47, z0 + 1, x0 + w * 0.72, z0 + d - 1.5, y + 0.2);
+    technik(S, r, x0 + (o.solar ? w * 0.74 : w * 0.48), z0 + 1, x0 + w - 1, z0 + d - 1, y + 0.2, { max: o.max ?? 5, farbe: o.farbe });
+  }
+  function stumpf(w, d, h, ein) {
+    const a = [[-w / 2, 0, -d / 2], [w / 2, 0, -d / 2], [w / 2, 0, d / 2], [-w / 2, 0, d / 2]];
+    const b = a.map(([x, , z2]) => [x - Math.sign(x) * ein, h, z2 - Math.sign(z2) * ein]);
+    const p = [];
+    const quad = (A, B2, C2, D) => p.push(...A, ...B2, ...C2, ...A, ...C2, ...D);
+    for (let i = 0; i < 4; i++) {
+      const j = (i + 1) % 4;
+      quad(a[i], b[i], b[j], a[j]);
+    }
+    quad(b[0], b[3], b[2], b[1]);
+    const g = new three_module_exports.BufferGeometry();
+    g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p, 3));
+    g.computeVertexNormals();
+    return g;
+  }
+  var geschosse = (K3, min, max, faktor = 1) => clamp4(Math.round(Math.sqrt(K3.w * K3.d) / 13 * faktor) + min - 1, min, max);
+  function modehaus(K3) {
+    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
+    const n = geschosse(K3, 3, 5);
+    const H = EG + (n - 1) * OG, D = 1.6;
+    const RG = REGION[K3.reg];
+    const stein = (RG?.stein ?? ["#dccaa8", "#e5dccb", "#d6c3a0", "#e2d5bd"])[v % 4], hell4 = RG?.hell ?? heller(stein, 0.05), dunk = dunkler(stein, 0.08);
+    S.quader(x0, 0, z0, x0 + w - D, EG, z0 + d - D, "#5d5248");
+    S.quader(x0, EG, z0, x0 + w, H, z0 + d, stein);
+    for (const s2 of K3.seiten) {
+      ladenzone2(K3, s2, { raster: 5.5, pb: 1, D, pfeiler: hell4, sturz: stein, sockel: dunk, glas: "#4f5d62", art: "mode", gTop: 4.2 });
+      s2.q(0, s2.L, 4.25, 4.45, 0.12, 1.4, BRONZE);
+      const nb = Math.max(1, Math.round(s2.L / 5.5)), bw = s2.L / nb;
+      s2.q(0, s2.L, EG - 0.1, EG + 0.45, 0, 0.4, hell4);
+      for (let i = 0; i <= nb; i++) s2.q(i * bw - 0.55, i * bw + 0.55, EG + 0.45, H - 1, 0, 0.35, hell4);
+      for (let i = 0; i < nb; i++) {
+        const a = i * bw + 0.55, b = (i + 1) * bw - 0.55;
+        s2.q(a + 0.2, b - 0.2, EG + 0.9, H - 1.6, -0.05, 0.02, GLAS);
+        for (let k = 1; k < n - 1; k++) s2.q(a + 0.2, b - 0.2, EG + k * OG - 0.5, EG + k * OG + 0.3, -0.03, 0.08, BRONZE);
+        s2.q((a + b) / 2 - 0.05, (a + b) / 2 + 0.05, EG + 0.9, H - 1.6, 0, 0.1, BRONZE);
+        s2.q(a, b, EG + 0.75, EG + 0.9, 0, 0.3, hell4);
+      }
+      s2.q(0, s2.L, H - 1, H - 0.2, 0, 0.3, stein);
+      s2.q(0, s2.L, H - 0.2, H + 0.4, -0.1, 0.6, hell4);
+      if (K3.reg === "ost") s2.q(0, s2.L, EG + 0.45, EG + 0.95, 0, 0.42, RG.akzent);
+      if (K3.reg === "nord") for (let y = EG + 1.5; y < H - 1.2; y += 0.5) for (let i = 0; i < nb; i++) {
+        s2.q(i * bw + 0.55, i * bw + 0.75, y - 0.02, y + 0.02, 0, 0.03, dunkler(stein, 0.06));
+        s2.q((i + 1) * bw - 0.75, (i + 1) * bw - 0.55, y - 0.02, y + 0.02, 0, 0.03, dunkler(stein, 0.06));
+      }
+      const ph2 = passend(K3.name, s2.L * 0.55, 1, SERIF);
+      const br = plakatBreite(K3.name, ph2, SERIF);
+      s2.q(s2.L * 0.5 - br / 2 - 0.4, s2.L * 0.5 + br / 2 + 0.4, EG - 1.2, EG + 0.1, 0.4, 0.46, BRONZE);
+      plakat2(scene2, s2, K3.name, s2.L * 0.5, EG - 0.55, 0.48, ph2, "#ecd39b", null, { schrift: SERIF });
+    }
+    const sw = w - 3, sd = d - 3;
+    S.quader(x0, H + 0.4, z0, x0 + sw, H + 3.6, z0 + sd, "#c9c4ba");
+    for (const s2 of seitenVon(S, x0, z0, sw, sd)) {
+      for (let u = 1.2; u < s2.L - 0.6; u += 2.4) s2.q(u - 0.9, u + 0.9, H + 1, H + 3.1, -0.03, 0.03, GLAS_HELL);
+    }
+    S.quader(x0 - 0.3, H + 3.6, z0 - 0.3, x0 + sw + 0.6, H + 3.95, z0 + sd + 0.6, "#6f7378");
+    const sz = new Seite2(S, x0, z0, w, d, "+z");
+    const ph = passend(K3.name, sw * 0.6, 1.8, SERIF);
+    const brA = plakatBreite(K3.name, ph, SERIF);
+    sz.q(sw * 0.5 - brA / 2 - 0.4, sw * 0.5 + brA / 2 + 0.4, H + 1, H + 3.4, -2.95, -2.85, BRONZE);
+    plakat2(scene2, sz, K3.name, sw * 0.5, H + 2.2, -2.83, ph, "#ecd39b", null, { schrift: SERIF });
+    flachdach(K3, x0, z0, sw, sd, H + 3.95, { max: 3 });
+    return H + 6;
+  }
+  function offprice(K3) {
+    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
+    const n = geschosse(K3, 1, 2, 0.6);
+    const H = n === 1 ? 8.6 : EG + OG + 1.6, D = 1.5;
+    const [haupt, akzent] = [["#e8336d", "#f6d32d"], ["#f28c1c", "#1f4fa0"], ["#8bc34a", "#6a2c91"], ["#f6d32d", "#e03b2f"]][v % 4];
+    S.quader(x0, 0, z0, x0 + w - D, EG, z0 + d - D, "#4a4f55");
+    S.quader(x0, EG, z0, x0 + w, H, z0 + d, "#eeece6");
+    for (const s2 of K3.seiten) {
+      ladenzone2(K3, s2, { raster: 4.5, pb: 0.5, D, pfeiler: akzent, sturz: "#eeece6", art: "offprice", gTop: 3.8 });
+      for (let u = 0.5; u < s2.L - 0.5; u += 1) s2.kipp(1, 0.12, 1.6, u + 0.5, 4.25, 0.75, Math.round(u) % 2 ? "#ffffff" : haupt, 0, 0.42);
+      s2.q(0, s2.L, EG, H, 0, 0.2, haupt);
+      s2.q(0, s2.L, EG, EG + 0.35, 0.2, 0.3, akzent);
+      const hb = passend(K3.name, s2.L * 0.62, (H - EG) * 0.78);
+      plakat2(scene2, s2, K3.name, s2.L * 0.42, EG + (H - EG) * 0.55, 0.22, hb, "#ffffff");
+      const su = s2.L * 0.86, sy = EG + (H - EG) * 0.5, sr = Math.min(1.8, (H - EG) * 0.4);
+      for (let k = 0; k < 3; k++) s2.kipp(sr * 1.6, sr * 1.6, 0.12, su, sy, 0.3 + k * 0.01, akzent, k * Math.PI / 6);
+      s2.q(su - sr * 0.62, su + sr * 0.62, sy - sr * 0.3, sy + sr * 0.3, 0.42, 0.44, "#ffffff");
+      plakat2(scene2, s2, "-70 %", su, sy, 0.46, sr * 0.5, "#c8102e");
+    }
+    for (const s2 of K3.seiten) if (!K3.leer) {
+      const t = waehle2(r, ["MARKEN BIS -70 %", "NEUE WARE JEDEN TAG", "SCHN\xC4PPCHEN!"]);
+      plakat2(scene2, s2, t, s2.L * 0.3, 2.9, 0.15, passend(t, 5, 0.5), akzent === "#f6d32d" ? "#1f1f1f" : "#ffffff", akzent);
+    }
+    const sx = K3.seiten[1];
+    sx.q(sx.L * 0.15, sx.L * 0.15 + 5, 2.4, 2.55, 0.8, 3.2, "#d9dcde");
+    for (const u of [sx.L * 0.15 + 0.2, sx.L * 0.15 + 4.8]) sx.q(u - 0.07, u + 0.07, 0.3, 2.4, 3, 3.14, "#7c848b");
+    for (let i = 0; i < 6; i++) sx.q(sx.L * 0.15 + 0.6 + i * 0.7, sx.L * 0.15 + 1.1 + i * 0.7, 0.4, 1.3, 1.2, 2.7, "#a9b0b5");
+    attika2(S, x0, z0, w, d, H, 0.5, REGION[K3.reg]?.wand ?? akzent, 0.3);
+    flachdach(K3, x0 + 0.3, z0 + 0.3, w - 0.6, d - 0.6, H, { max: 4 });
+    return H + 2;
+  }
+  function textildiscounter(K3) {
+    const { S, scene: scene2, x0, z0, d, r, v } = K3;
+    const w = K3.w;
+    const park = d >= 34 ? 13 : 0, db = d - park;
+    const H = 5.6, D = 1.3;
+    const band = ["#1f63b5", "#d92b2b", "#ef7d00", "#2e8b57"][v % 4];
+    S.quader(x0, 0, z0, x0 + w - D, H - 1.2, z0 + db - D, "#5a5f64");
+    const wandF = REGION[K3.reg]?.wand ?? "#e4e3df";
+    S.quader(x0, H - 1.2, z0, x0 + w, H, z0 + db, wandF);
+    const seiten4 = seitenVon(S, x0, z0, w, db);
+    for (const s2 of seiten4) {
+      const ax2 = buchten(1, s2.L - 1, 6, 0.5);
+      const oe = [];
+      ax2.forEach(([a, b], i) => {
+        const ein = s2.seite === "+z" && i === Math.floor(ax2.length * 0.7);
+        const y1 = ein ? 3.3 : 2.9, y0 = ein ? 0.3 : 0.7;
+        oe.push({ a, b, y0, y1 });
+        s2.q(a, b, y0, y1, -D - 0.1, -D, ein ? GLAS_D : GLAS);
+        s2.q(a, b, y0, y0 + 0.08, -D, 0, "#d6d0c4");
+        if (K3.leer) brett(K3, s2, a, b, y0, y1, -0.2);
+        else if (!ein) {
+          const t = waehle2(r, ["T-SHIRTS 2,99 \u20AC", "JEANS 9,99 \u20AC", "ALLES F\xDCR KIDS", "SOCKEN 5 PAAR"]);
+          plakat2(scene2, s2, t, (a + b) / 2, (y0 + y1) / 2, -D + 0.02, passend(t, b - a - 0.6, 0.6), "#ffffff", band);
+        }
+      });
+      wand(s2, 0, s2.L, 0, H - 1.2, -D, 0, oe, wandF);
+      if (K3.reg === "nord") for (let y = 0.85; y < H - 1.7; y += 0.5) for (const [a, b] of [[0, oe[0]?.a ?? s2.L], ...oe.map((g, i) => [g.b, oe[i + 1]?.a ?? s2.L])]) s2.q(a, b, y - 0.02, y + 0.02, 0, 0.02, dunkler(wandF, 0.06));
+      s2.q(0, s2.L, 0, 0.35, 0, 0.12, "#8a8f93");
+      s2.q(0, s2.L, H - 1.6, H + 1.4, 0, 0.3, band);
+      const yb0 = s2.seite === "+z" && K3.vorbauH ? Math.max(H - 1.6, K3.vorbauH) : H - 1.6, yb1 = H + 1.4;
+      if (yb1 - yb0 >= 1.6) plakat2(scene2, s2, K3.name, s2.L * 0.4, (yb0 + yb1) / 2, 0.32, passend(K3.name, s2.L * 0.55, Math.min(2.2, yb1 - yb0 - 0.4)), "#ffffff");
+      if (yb1 - yb0 >= 1.6) {
+        s2.q(s2.L * 0.82 - 1.2, s2.L * 0.82 + 1.2, H - 1.5, H + 1.3, 0.3, 0.4, "#f6d32d");
+        plakat2(scene2, s2, "%", s2.L * 0.82, H - 0.1, 0.42, 2.2, band);
+      }
+    }
+    const sz = seiten4[0];
+    if (!K3.reg) for (const s2 of seiten4) for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.04, u + 0.04, 0.35, H - 1.6, 0, 0.05, "#d3d2cd");
+    const ax = buchten(1, sz.L - 1, 6, 0.5), e = ax[Math.floor(ax.length * 0.7)];
+    if (e) {
+      sz.q(e[0], e[1], 0.3, 3.3, 0, 2, GLAS_HELL);
+      sz.q(e[0] + 0.15, e[1] - 0.15, 0.3, 2.6, 2, 2.06, K3.leer ? "#8a8f93" : GLAS_D);
+      sz.q(e[0] - 0.6, e[1] + 0.6, 3.3, 3.6, -0.2, 2.6, band);
+      if (!K3.leer) {
+        for (const du of [-2.2, e[1] - e[0] + 2.2]) {
+          const u = e[0] + du;
+          sz.q(u - 0.9, u + 0.9, 1.7, 1.76, 1.6, 1.66, "#7c848b");
+          sz.q(u - 0.9, u - 0.84, 0.3, 1.76, 1.6, 1.66, "#7c848b");
+          sz.q(u + 0.84, u + 0.9, 0.3, 1.76, 1.6, 1.66, "#7c848b");
+          for (let k = 0; k < 5; k++) sz.q(u - 0.75 + k * 0.32, u - 0.5 + k * 0.32, 0.9, 1.68, 1.4, 1.86, waehle2(r, KLEID2));
+        }
+        sz.kipp(0.8, 1.1, 0.06, e[1] + 4.2, 0.85, 3, band, 0, 0.2);
+        if (K3.leute) for (let i = 0; i < 3; i++) mensch(S, r, x0 + zw(r, e[0] - 3, e[1] + 3), 0.3, z0 + db + zw(r, 1, 2.6));
+      }
+    }
+    for (const s2 of seiten4) for (let u = 3; u < s2.L - 2; u += 9) {
+      s2.q(u - 0.05, u + 0.05, H - 1.6, H - 1.5, 0.3, 1.6, "#5f676e");
+      s2.q(u - 0.03, u + 0.03, H - 4, H - 1.6, 1, 1.55, K3.leer ? "#cfcac0" : "#f6d32d");
+    }
+    S.quader(x0, H, z0, x0 + w, H + 0.15, z0 + db, KIES2);
+    technik(S, r, x0 + 2, z0 + 2, x0 + w - 2, z0 + db - 2, H + 0.15, { max: 3 });
+    if (park) {
+      const zp = z0 + db;
+      S.quader(x0, 0.28, zp + 2.5, x0 + w, 0.33, z0 + d, "#868c93");
+      parkreihe(S, r, x0 + 1, x0 + w - 1, zp + 7.5, 5, 0.33, K3.leer ? 0.05 : 0.5);
+      for (let x = x0 + 3; x < x0 + w - 1; x += 6) busch(S, r, x, 0.33, z0 + d - 0.6, 0.7);
+      const px2 = x0 + w - 2, pz4 = z0 + d - 2, ph = 8;
+      S.box(1.6, ph, 0.7, px2, ph / 2, pz4, band);
+      const sp = new Seite2(S, px2 - 0.8, pz4 - 0.35, 1.6, 0.7, "+z");
+      if (!K3.leer) {
+        const pn = passend(K3.name, 1.4, 0.5);
+        plakat2(scene2, sp, K3.name, 0.8, ph - 0.7, 0.03, pn, "#ffffff");
+        sp.q(0.1, 1.5, ph - 3.6, ph - 1.4, 0, 0.04, "#f6d32d");
+        plakat2(scene2, sp, "%", 0.8, ph - 2.5, 0.06, 1.6, band);
+      }
+    }
+    return H + 1;
+  }
+  function elektronik(K3) {
+    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
+    const n = geschosse(K3, 1, 2, 0.7);
+    const H = n === 1 ? 8 : EG + OG + 2, D = 1.5;
+    const [korpus2, letter, lbg] = [["#2b2f35", "#ffffff", "#d92b2b"], ["#d92b2b", "#ffffff", "#1f1f1f"], ["#1e3a5f", "#f6d32d", "#1e3a5f"], ["#e9ebec", "#ffffff", "#ef7d00"]][v % 4];
+    S.quader(x0, 0, z0, x0 + w - D, 4.4, z0 + d - D, "#3d4248");
+    S.quader(x0, 4.4, z0, x0 + w, H, z0 + d, korpus2);
+    const [sz, sx] = K3.seiten;
+    for (const s2 of K3.seiten) {
+      const oe = [];
+      const ax = buchten(1, s2.L - 1, 5, 0.3);
+      ax.forEach(([a, b], i) => {
+        const ein = s2 === sz && i === Math.floor(ax.length * 0.5);
+        oe.push({ a, b, y0: 0.3, y1: 4.2 });
+        if (K3.leer) {
+          s2.q(a, b, 0.3, 4.2, -D - 0.1, -D, "#8a8f93");
+          brett(K3, s2, a, b, 0.3, 4.2, -0.2);
+          return;
+        }
+        s2.q(a, b, 0.3, 4.2, -D - 0.1, -D, ein ? GLAS_D : "#3c4a55");
+        s2.q(a, b, 0.3, 0.42, -D, 0, "#d6d0c4");
+        if (!ein) ware(K3, s2, a, b, 0.42, -D, "elektronik");
+        s2.q(a - 0.15, a, 0.3, 4.2, -D, 0.1, "#5f676e");
+      });
+      wand(s2, 0, s2.L, 0, 4.4, -D, 0, oe, REGION[K3.reg]?.wand ?? korpus2);
+      if (K3.reg) regionHaut(K3, s2, 0, s2.L, 0.3, 4.2, 0, REGION[K3.reg].wand);
+      for (let u = 1; u < s2.L; u += 2) s2.q(u - 0.05, u + 0.05, 4.4, H, 0, 0.08, dunkler(korpus2, 0.05));
+      s2.q(0, s2.L, 4.2, 4.5, 0, 0.6, lbg);
+      const wandAus = s2 === sx && !K3.leer && s2.L >= 30 ? s2.L * 0.12 + Math.min(12, s2.L * 0.35) + 0.8 : 0;
+      const frei6 = s2.L - wandAus - (K3.ecke ?? 0);
+      const hb = Math.min((H - 4.5) * 0.55, frei6 * 0.85 / kastenBreite(K3.name, 1));
+      kastenSchrift(K3, s2, K3.name, wandAus + frei6 * 0.5, 4.5 + (H - 4.5) * 0.5, 0.1, hb, letter, lbg);
+    }
+    if (!K3.leer && sx.L >= 30) {
+      const u0 = sx.L * 0.12, u1 = u0 + Math.min(12, sx.L * 0.35), y0 = 4.9, y1 = H - 0.6;
+      sx.q(u0 - 0.3, u1 + 0.3, y0 - 0.3, y1 + 0.3, 0.1, 0.5, "#1f2328");
+      const farben = ["#1f63b5", "#2f7fd0", "#4fb6c2", "#7cc4e4"];
+      for (let k = 0; k < 4; k++) sx.q(u0, u1, y0 + k * (y1 - y0) / 4, y0 + (k + 1) * (y1 - y0) / 4, 0.5, 0.55, farben[k]);
+      const t = "TV-WOCHEN";
+      plakat2(scene2, sx, t, (u0 + u1) / 2, (y0 + y1) / 2, 0.57, passend(t, (u1 - u0) * 0.8, (y1 - y0) * 0.4), "#ffffff");
+    }
+    flachdach(K3, x0, z0, w, d, H, { max: 4, solar: w * d > 1500 });
+    attika2(S, x0, z0, w, d, H, 0.4, dunkler(korpus2, 0.05), 0.3);
+    for (let i = 0; i < 3; i++) {
+      const px2 = x0 + 3 + i * 3.5, pz4 = z0 + d - 4;
+      zyl2(S, px2, H + 0.2, pz4, 0.08, 1.4, "#8a9096", 5);
+      const g = new three_module_exports.SphereGeometry(0.9, 10, 6, 0, Math.PI * 2, 0, Math.PI / 3);
+      g.rotateX(-1);
+      g.translate(px2, H + 1.8, pz4 + 0.2);
+      S.add(g, "#e8eaeb");
+    }
+    if (d >= 36 && !K3.leer && K3.leute) for (let i = 0; i < 3; i++) mensch(S, r, x0 + w * zw(r, 0.3, 0.7), 0.3, z0 + d + 1.5);
+    return H + 3;
+  }
+  function premium(K3) {
+    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
+    const n = geschosse(K3, 4, 5, 1.1);
+    const H = EG + (n - 1) * OG, D = 1.6;
+    const RG = REGION[K3.reg];
+    const stein = (RG?.stein ?? ["#efe7d6", "#e9e1d1", "#f1ebe0", "#e6dccb"])[v % 4], hell4 = RG?.hell ?? heller(stein, 0.04), dunk = dunkler(stein, 0.09);
+    const mark = ["#1f4a3a", "#5a1f2b", "#1f2f4f", "#2a2a2a"][v % 4];
+    const dachF = RG?.dach ?? (v % 2 ? "#5f6b70" : "#6f9a83");
+    S.quader(x0, 0, z0, x0 + w - D, EG, z0 + d - D, "#4d4740");
+    S.quader(x0, EG, z0, x0 + w, H, z0 + d, stein);
+    for (const s2 of K3.seiten) {
+      const ax = ladenzone2(K3, s2, { raster: 5, pb: 1, D, pfeiler: hell4, sturz: stein, sockel: dunk, glas: "#44514f", art: "premium", gTop: 3.9 });
+      for (const a of ax) {
+        if (a.ein) {
+          s2.q(a.a - 0.5, a.b + 0.5, 4, 4.35, 0, 3.4, mark);
+          s2.q(a.a - 0.5, a.b + 0.5, 4.35, 4.45, 0, 3.5, MESSING);
+          for (const u of [a.a - 0.3, a.b + 0.3]) {
+            const [x, z2] = s2.welt(u, 3.2);
+            zyl2(S, x, 0.3, z2, 0.07, 3.7, MESSING, 6);
+          }
+          if (!K3.leer && K3.leute) puppe(s2, a.b + 0.9, 0.3, 1.4, mark, "#1f1f1f");
+          const ph = passend(K3.name, a.b - a.a + 0.8, 0.32, SERIF);
+          plakat2(scene2, s2, K3.name, (a.a + a.b) / 2, 4.2, 3.42, ph, MESSING, null, { schrift: SERIF });
+          continue;
+        }
+        if (K3.leer) continue;
+        s2.kipp(a.b - a.a, 0.1, 1.5, (a.a + a.b) / 2, 4.15, 0.75, mark, 0, 0.45);
+        s2.q(a.a, a.b, 3.55, 3.8, 1.38, 1.46, mark);
+      }
+      s2.q(0, s2.L, EG - 0.15, EG + 0.4, 0, 0.45, hell4);
+      if (K3.reg === "ost") s2.q(0, s2.L, EG + 0.4, EG + 0.6, 0, 0.45, RG.akzent);
+      const nb = Math.max(1, Math.round(s2.L / 3.4)), bw = s2.L / nb;
+      for (let k = 0; k < n - 1; k++) {
+        const y0 = EG + k * OG;
+        for (let i = 0; i < nb; i++) {
+          const m = (i + 0.5) * bw;
+          s2.q(m - 0.75, m + 0.75, y0 + 0.6, y0 + 3.2, -0.04, 0.02, GLAS);
+          s2.q(m - 0.04, m + 0.04, y0 + 0.6, y0 + 3.2, 0, 0.08, "#f4f1ea");
+          s2.q(m - 0.95, m + 0.95, y0 + 3.2, y0 + 3.45, 0, 0.25, hell4);
+          if (k === 0 || k % 2 === 1) {
+            s2.q(m - 0.9, m + 0.9, y0 + 0.55, y0 + 0.65, 0, 0.5, dunk);
+            s2.q(m - 0.9, m + 0.9, y0 + 1.25, y0 + 1.3, 0.42, 0.5, "#2b2b2b");
+            for (let u = m - 0.8; u <= m + 0.81; u += 0.32) s2.q(u - 0.02, u + 0.02, y0 + 0.65, y0 + 1.25, 0.44, 0.48, "#2b2b2b");
+          }
+        }
+        if (k > 0) s2.q(0, s2.L, y0 - 0.08, y0 + 0.08, 0, 0.12, dunk);
+      }
+      for (let i = 0; i <= nb; i++) s2.q(i * bw - 0.12, i * bw + 0.12, EG + 0.4, H, 0, 0.1, hell4);
+      s2.q(0, s2.L, H - 0.2, H + 0.5, -0.1, 0.65, hell4);
+      for (let i = 0; i < nb; i++) {
+        const m = (i + 0.5) * bw;
+        s2.q(m - 0.8, m + 0.8, H + 0.9, H + 2.6, -2.6, -0.9, hell4);
+        s2.q(m - 0.5, m + 0.5, H + 1.1, H + 2.3, -0.9, -0.86, GLAS);
+        s2.q(m - 0.95, m + 0.95, H + 2.6, H + 2.85, -2.7, -0.75, dachF);
+      }
+    }
+    const md = stumpf(w + 0.4, d + 0.4, 3.6, 2.8);
+    md.translate(x0 + w / 2, H + 0.5, z0 + d / 2);
+    S.add(md, dachF);
+    S.quader(x0 + 2.6, H + 4.1, z0 + 2.6, x0 + w - 2.6, H + 4.15, z0 + d - 2.6, KIES2);
+    for (const [fx, fz, bw, bd] of [[0.3, 0.35, Math.min(6, w * 0.2), 3], [0.62, 0.55, 3, 2.4]]) if (w > 16 && d > 14) {
+      S.box(bw, 1.2, bd, x0 + w * fx, H + 4.75, z0 + d * fz, "#c9c6bf");
+      S.box(bw + 0.2, 0.12, bd + 0.2, x0 + w * fx, H + 5.4, z0 + d * fz, "#d6d3cc");
+    }
+    for (let i = 0; i < 3; i++) {
+      const fx = x0 + w * (0.25 + i * 0.25), fz = z0 + d - 3;
+      zyl2(S, fx, H + 4.1, fz, 0.07, 2.6, "#e8eaeb", 6);
+      S.box(1.4, 0.8, 0.05, fx + 0.75, H + 6.2, fz, K3.leer ? "#cfcac0" : mark);
+    }
+    for (const s2 of K3.seiten) {
+      const ph = passend(K3.name, s2.L * 0.4, 0.55, SERIF);
+      plakat2(scene2, s2, K3.name, s2.L * 0.5, H - 0.6, 0.12, ph, MESSING, null, { schrift: SERIF });
+    }
+    return H + 7;
+  }
+  function fastfashion(K3) {
+    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
+    const n = geschosse(K3, 3, 4, 0.9);
+    const H = EG + (n - 1) * OG + 0.5, D = 1.8;
+    const bild2 = [["#e8336d", "#f6d32d"], ["#1f1f1f", "#e8e4dc"], ["#4fb6c2", "#ffffff"], ["#f28c1c", "#1f1f1f"]][v % 4];
+    S.quader(x0, 0, z0, x0 + w - D, H, z0 + d - D, "#3a4148");
+    const [sz, sx] = K3.seiten;
+    for (const s2 of K3.seiten) {
+      for (let e = 0; e < n; e++) {
+        const y0 = e === 0 ? 0.3 : EG + (e - 1) * OG, y1 = e === 0 ? EG : EG + e * OG;
+        s2.q(0, s2.L, y0, y0 + 0.12, -D, 0, "#e3e0d9");
+        s2.q(0, s2.L, y0, y1, -D - 0.1, -D, e === 0 ? "#d9d4ca" : "#ece8e0");
+        if (e > 0) s2.q(0, s2.L, y1 - 0.5, y1 - 0.42, -0.05, 0.05, "#cfd6da");
+        s2.q(0, s2.L, y1 - 0.3, y1 - 0.18, -D, -D + 0.06, LICHT2);
+        if (!K3.leer) {
+          for (const [a, b] of buchten(0.5, s2.L - 0.5, 4.2, 0.2)) if (r() < (e === 0 ? 1 : 0.6)) ware(K3, s2, a, b, y0 + 0.12, -D, "fastfashion");
+        }
+        if (e > 0) s2.q(0, s2.L, y0 - 0.2, y0 + 0.25, -0.1, 0.1, "#f4f4f2");
+      }
+      for (let u = 0; u <= s2.L + 0.01; u += s2.L / Math.max(1, Math.round(s2.L / 3.2))) s2.q(u - 0.09, u + 0.09, 0.3, H, -0.2, 0.5, "#f4f4f2");
+      s2.q(0, s2.L, H, H + 1, -0.2, 0.5, REGION[K3.reg]?.hell ?? "#f4f4f2");
+      if (K3.leer) for (const [a, b] of buchten(0.5, s2.L - 0.5, 4.2, 0.3)) brett(K3, s2, a, b, 0.4, 4, 0.3);
+    }
+    {
+      const s2 = sz, u0 = s2.L * 0.08, u1 = Math.min(s2.L * 0.08 + Math.max(10, s2.L * 0.45), s2.L - 4), y0 = EG + 0.3, y1 = H + 0.8;
+      s2.q(u0 - 0.2, u1 + 0.2, y0 - 0.2, y1 + 0.2, 0.5, 0.7, "#d9dcde");
+      s2.q(u0, u1, y0, y1, 0.7, 0.8, K3.leer ? "#cfcac0" : bild2[0]);
+      if (!K3.leer) {
+        const fu = u0 + (u1 - u0) * 0.7, hh = y1 - y0, sk = hh / 6.5;
+        s2.q(fu - 0.5 * sk, fu + 0.5 * sk, y0 + 0.2, y0 + 3 * sk, 0.82, 0.86, "#1f1f1f");
+        s2.q(fu - 0.9 * sk, fu + 0.9 * sk, y0 + 3 * sk, y0 + 5 * sk, 0.82, 0.86, bild2[1]);
+        s2.q(fu - 0.35 * sk, fu + 0.35 * sk, y0 + 5.05 * sk, y0 + 5.9 * sk, 0.82, 0.86, "#e8cfb4");
+        s2.q(fu - 0.45 * sk, fu + 0.45 * sk, y0 + 5.6 * sk, y0 + 6.2 * sk, 0.86, 0.88, "#3a2a20");
+        const t = "JETZT NEU", ta = u0 + 0.5, tb = fu - 0.9 * sk - 0.6, tm = (ta + tb) / 2, tw = Math.max(1, tb - ta);
+        plakat2(scene2, s2, t, tm, y0 + hh * 0.55, 0.88, passend(t, tw * 0.92, hh * 0.25), bild2[1] === "#1f1f1f" ? "#ffffff" : bild2[1]);
+        plakat2(scene2, s2, K3.name, tm, y0 + hh * 0.3, 0.88, passend(K3.name, tw * 0.8, hh * 0.14), "#ffffff");
+      }
+    }
+    for (const s2 of K3.seiten) {
+      const uu = s2 === sz ? K3.ecke ? (s2.L - K3.ecke) * 0.7 : s2.L * 0.8 : K3.ecke ? (s2.L - K3.ecke) * 0.5 : s2.L * 0.5;
+      const ph = passend(K3.name, K3.ecke ? Math.min(s2.L * 0.4, (s2.L - K3.ecke) * 0.5) : s2.L * 0.4, 1.9);
+      const br = plakatBreite(K3.name, ph);
+      s2.q(uu - br / 2 - 0.3, uu + br / 2 + 0.3, H - 0.4, H + 2, 0.5, 0.62, K3.leer ? "#e2e0d8" : "#1f1f1f");
+      if (!K3.leer) plakat2(scene2, s2, K3.name, uu, H + 0.8, 0.64, ph * 0.85, "#ffffff");
+    }
+    flachdach(K3, x0, z0, w - D, d - D, H, { max: 4, kuppeln: false });
+    S.quader(x0 + w - D, H + 0.9, z0, x0 + w + 0.5, H + 1, z0 + d + 0.5, "#f4f4f2");
+    S.quader(x0, H + 0.9, z0 + d - D, x0 + w + 0.5, H + 1, z0 + d + 0.5, "#f4f4f2");
+    return H + 2;
+  }
+  function leer_ehemals(K3) {
+    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
+    K3.leer = true;
+    const n = geschosse(K3, 3, 5);
+    const H = EG + (n - 1) * OG, D = 1.6;
+    const kachel2 = (REGION[K3.reg]?.stein ?? ["#d9d1bf", "#cfc7b6", "#d4cfc4", "#c9bfab"])[v % 4];
+    const schmutz = dunkler(kachel2, 0.08);
+    S.quader(x0, 0, z0, x0 + w - D, EG, z0 + d - D, "#4a4540");
+    S.quader(x0, EG, z0, x0 + w, H, z0 + d, kachel2);
+    for (const s2 of K3.seiten) {
+      ladenzone2(K3, s2, { raster: 5, pb: 0.8, D, pfeiler: dunkler(kachel2, 0.05), sturz: kachel2, art: "mode", gTop: 4 });
+      s2.q(0, s2.L, 4.2, 4.6, 0, 2.4, "#8f8a82");
+      s2.q(0, s2.L, 4.6, 4.75, 2.3, 2.4, "#7a2b2b");
+      if (K3.reg) regionHaut(K3, s2, 0, s2.L, EG, H, 0, kachel2);
+      if (!K3.reg || K3.reg === "sued") {
+        for (let u = 1.2; u < s2.L; u += 1.2) s2.q(u - 0.03, u + 0.03, EG, H, 0, 0.05, schmutz);
+        for (let y = EG + 1.2; y < H; y += 1.2) s2.q(0, s2.L, y - 0.03, y + 0.03, 0, 0.05, schmutz);
+      }
+      for (let i = 0; i < 9; i++) {
+        const u = zw(r, 0, s2.L - 1);
+        s2.q(u, u + zw(r, 0.3, 1), Math.max(EG, H - zw(r, 3, 10)), H, 0.05, 0.07, dunkler(kachel2, zw(r, 0.1, 0.18)));
+      }
+      if (n >= 3) {
+        const y0 = EG + OG * 0.4;
+        for (const [a, b] of buchten(1, s2.L - 1, 2.4, 0.4)) s2.q(a, b, y0, y0 + 1.6, -0.05, 0.03, r() < 0.2 ? "#1c2228" : r() < 0.5 ? "#6a767e" : GLAS);
+      }
+      s2.q(0, s2.L, H - 0.1, H + 0.6, 0, 0.3, dunkler(kachel2, 0.04));
+      const yL = EG + (H - EG) * (n >= 3 ? 0.68 : 0.5);
+      const ph = passend(K3.name, s2.L * 0.7, Math.min(3.2, (H - EG) * 0.4));
+      plakat2(scene2, s2, K3.name, s2.L * 0.5, yL, 0.07, ph, dunkler(kachel2, 0.2), null, { lit: true });
+      for (let k = 0; k < 6; k++) s2.q(s2.L * 0.5 - plakatBreite(K3.name, ph) * 0.42 + k * plakatBreite(K3.name, ph) * 0.17, s2.L * 0.5 - plakatBreite(K3.name, ph) * 0.42 + k * plakatBreite(K3.name, ph) * 0.17 + 0.12, yL - ph * 0.3, yL - ph * 0.2, 0.05, 0.25, "#6c6c6c");
+    }
+    {
+      const s2 = K3.seiten[1], t = "ZU VERMIETEN";
+      const ph = passend(t, s2.L * 0.5, 1.6);
+      const br = plakat2(scene2, s2, t, s2.L * 0.5, EG + 1.4, 0.5, ph, "#3b4248", "#ffffff");
+      s2.q(s2.L * 0.5 - br / 2 - 0.1, s2.L * 0.5 + br / 2 + 0.1, EG + 1.4 - ph / 2 - 0.1, EG + 1.4 + ph / 2 + 0.1, 0.35, 0.45, "#cfd3d6");
+      const t2 = "0800 / 12 34 56";
+      plakat2(scene2, s2, t2, s2.L * 0.5, EG + 1.4 - ph * 0.85, 0.5, ph * 0.4, "#3b4248", "#ffffff");
+    }
+    for (const s2 of K3.seiten) for (let u = 1; u < s2.L; u += zw(r, 3, 7)) {
+      const [x, z2] = s2.welt(u, 0.4);
+      busch(S, r, x, 0.3, z2, 0.35);
+    }
+    S.quader(x0, H, z0, x0 + w, H + 0.2, z0 + d, "#a9a69e");
+    technik(S, r, x0 + 2, z0 + 2, x0 + w - 2, z0 + d - 2, H + 0.2, { max: 3, farbe: "#b8b4ac" });
+    for (let i = 0; i < 5; i++) busch(S, r, x0 + zw(r, 2, w - 2), H + 0.2, z0 + zw(r, 2, d - 2), 0.4);
+    return H + 3;
+  }
+  var BAU2 = { modehaus, offprice, textildiscounter, elektronik, premium, fastfashion, leer_ehemals };
+  var WETTBEWERBER_FARBEN = {
+    modehaus: "#795846",
+    fastfashion: "#292b39",
+    premium: "#9e773e",
+    offprice: "#d62867",
+    textildiscounter: "#2565b5",
+    elektronik: "#d34532",
+    leer_ehemals: "#777d80"
+  };
+  function dekorZustand(S, scene2, p, art, hoehe) {
+    const z2 = p.zustand ?? {}, status = z2.status ?? p.status ?? "offen";
+    const rabatt = Math.max(0, Math.min(1, z2.rabatt ?? p.rabatt ?? 0));
+    if (status === "offen" && !rabatt) return hoehe;
+    const w = Math.max(16, Math.min(90, p.w ?? 40)), d = Math.max(16, Math.min(70, p.d ?? 30));
+    const x = p.x ?? 0, zz = p.z ?? 0;
+    const farbe = WETTBEWERBER_FARBEN[art] ?? "#51677a";
+    const seiten4 = seitenVon(S, x, zz, w, d);
+    const banner = (s2, t, y, breite = 0.75, h = 1.4, bg = farbe) => {
+      s2.q(s2.L * (1 - breite) / 2, s2.L * (1 + breite) / 2, y - h * 0.65, y + h * 0.65, 0.6, 0.86, bg);
+      plakat2(scene2, s2, t, s2.L / 2, y, 1.02, passend(t, s2.L * breite * 0.88, h), "#ffffff");
+    };
+    if (status === "eroeffnung") {
+      banner(seiten4[0], "NEUER\xD6FFNUNG", EG + 2, 0.78, 1.65);
+      S.quader(x + w * 0.37, 0.02, zz + d, x + w * 0.63, 0.09, zz + d + 4.5, "#b5292c");
+      const r = rng2("eroeffnung:" + (p.seed ?? 0));
+      for (let i = 0; i < 10; i++) {
+        const xx = x + 2 + i * (w - 4) / 9;
+        const farb = i % 3 === 0 ? "#f1c84a" : i % 2 ? farbe : "#f0f0e7";
+        S.box(0.05, 1.9, 0.05, xx, EG + 4.1, zz + d + 0.8, "#f1f0e8");
+        zyl2(S, xx, EG + 5, zz + d + 0.8, 0.38, 0.6, farb, 8);
+      }
+      for (let i = 0; i < 16; i++) mensch(S, r, x + w * (0.39 + r() * 0.22), 0.15, zz + d + 1 + i * 0.32);
+      for (let i = 0; i < 12; i++) mensch(S, r, x + r() * w, 0.15, zz + d + 1 + r() * 5);
+      hoehe = Math.max(hoehe, EG + 6);
+    }
+    if (rabatt && status !== "raeumung" && status !== "geschlossen") {
+      const t = Math.round(rabatt * 100) + " %";
+      for (const s2 of seiten4) banner(s2, t, EG + 1.9, 0.28, 1.6);
+      if (art === "offprice") {
+        S.box(4, 2, 0.3, x + 4, 1.2, zz + d + 2.3, farbe);
+        banner(seiten4[0], "AKTION", EG + 4.3, 0.38, 1);
+      }
+    }
+    if (status === "raeumung") {
+      for (const s2 of seiten4) {
+        banner(s2, "ALLES MUSS RAUS", EG + 2, 0.87, 1.6, "#bf302c");
+        banner(s2, "WIR SCHLIESSEN", EG + 4.3, 0.6, 1.05, "#7c2525");
+        banner(s2, "BIS 70 %", EG + 0.55, 0.37, 0.9, "#bf302c");
+        for (let i = 0; i < 4; i++) s2.q(1 + i * (s2.L - 2) / 4, 1.7 + i * (s2.L - 2) / 4, 0.5, 3.4, 0.1, 0.2, "#a9adb0");
+      }
+    }
+    if (status === "geschlossen" || art === "leer_ehemals") {
+      for (const s2 of seiten4) {
+        banner(s2, "ZU VERMIETEN", EG + 1.7, 0.72, 1.35, "#596066");
+        if (p.name) plakat2(scene2, s2, p.name, s2.L / 2, Math.min(hoehe - 2, EG + 5), 0.35, passend(p.name, s2.L * 0.5, 1), "#a3a3a3");
+      }
+    }
+    return hoehe;
+  }
+  function wettbewerber(S, scene2, p) {
+    const start = S.anzahl;
+    const r0 = rng2(`wb:${p.seed ?? 1}:${p.region ?? ""}`);
+    const artOriginal = BAU2[p.art] ? p.art : ARTEN2[Math.floor(r0() * ARTEN2.length)];
+    const art = p.zustand?.status === "geschlossen" ? "leer_ehemals" : artOriginal;
+    const name2 = p.name ?? NAMEN[art][Math.floor(r0() * 3)];
+    const w = clamp4(p.w ?? 40, 16, 90), d = clamp4(p.d ?? 30, 16, 70);
+    const K3 = {
+      S,
+      scene: scene2,
+      art,
+      name: name2,
+      r: rng2(`wb:${p.seed}:${art}`),
+      v: Math.floor(r0() * 8),
+      x0: p.x ?? 0,
+      z0: p.z ?? 0,
+      w,
+      d,
+      leer: art === "leer_ehemals",
+      reg: regionVon(p.region),
+      leute: p.passanten !== false
+    };
+    let form = Number.isInteger(p.form) ? (p.form % 5 + 5) % 5 : Math.floor(r0() * 3);
+    if (form === 2 && (Math.imul((p.seed ?? 1) >>> 0, 2654435761) >>> 0) % 4 !== 0) form = [0, 1, 3][(p.seed ?? 1) % 3];
+    let hoehe;
+    if (form === 3 && w >= 30) {
+      const w2 = Math.round(w * 0.34);
+      const K1 = { ...K3, x0: K3.x0 + w2, w: w - w2 };
+      K1.seiten = seitenVon(S, K1.x0, K3.z0, K1.w, d);
+      const h1 = BAU2[art](K1);
+      hoehe = kopfturm(K3, K3.x0, K3.z0, w2, d, h1);
+    } else if (form === 4 && w >= 30 && d >= 26) {
+      const w1 = Math.round(w * 0.7), d1 = Math.round(d * 0.76);
+      const K1 = { ...K3, w: w1, d: d1, vorbauH: EG + 0.85 };
+      K1.seiten = seitenVon(S, K3.x0, K3.z0, w1, d1);
+      const h1 = BAU2[art](K1);
+      const ht = kopfturm(K3, K3.x0 + w1, K3.z0, w - w1, d1, h1);
+      hoehe = Math.max(ht, rotunde(K3, d1, h1, false));
+    } else if (form === 1 && w >= 30) {
+      const w1 = Math.round(w * 0.66);
+      const K1 = { ...K3, w: w1 };
+      K1.seiten = seitenVon(S, K3.x0, K3.z0, w1, d);
+      const h1 = BAU2[art](K1);
+      hoehe = kopfturm(K3, K3.x0 + w1, K3.z0, w - w1, d, h1);
+    } else if (form === 2 && d >= 26) {
+      const d1 = Math.round(d * 0.76);
+      const K1 = { ...K3, d: d1, vorbauH: EG + 0.85, ecke: d - d1 + 1.5 * clamp4(Math.min(w, d) * 0.2, 4, 9) + 1.5 };
+      K1.seiten = seitenVon(S, K3.x0, K3.z0, w, d1);
+      const h1 = BAU2[art](K1);
+      hoehe = rotunde(K3, d1, h1);
+    } else {
+      K3.seiten = seitenVon(S, K3.x0, K3.z0, w, d);
+      hoehe = BAU2[art](K3);
+    }
+    hoehe = dekorZustand(S, scene2, p, art, hoehe);
+    return { hoehe, art, name: name2, form, teile: S.anzahl - start };
+  }
+  var FORM_FARBEN = {
+    modehaus: ["#d8cbb0", BRONZE, GLAS],
+    premium: ["#e9e1d2", MESSING, GLAS],
+    offprice: ["#eeece6", "#e8336d", GLAS_HELL],
+    textildiscounter: ["#e4e3df", "#1f63b5", GLAS_HELL],
+    elektronik: ["#3a3f45", "#e03b2f", GLAS_D],
+    fastfashion: ["#f2f1ee", "#1f1f1f", GLAS_D],
+    leer_ehemals: ["#c9c6bf", "#8a8f94", GLAS_D]
+  };
+  function kopfturm(K3, x, z2, w, d, h1) {
+    const { S, scene: scene2, art, name: name2, r } = K3;
+    const [wand2, akzent, glas2] = FORM_FARBEN[art] ?? FORM_FARBEN.modehaus;
+    const H = clamp4(h1 + 7, 14, 30);
+    S.quader(x, 0, z2, x + w, EG, z2 + d, "#4f565c");
+    S.quader(x, EG, z2, x + w, H, z2 + d, wand2);
+    for (const s2 of seitenVon(S, x, z2, w, d)) {
+      s2.q(0.3, s2.L - 0.3, 0.3, EG - 0.6, -0.02, 0.05, glas2);
+      for (let y = EG + 0.9; y < H - 2.4; y += OG) for (let u = 1.2; u < s2.L - 1; u += 2.4) s2.q(u, u + 1.4, y, y + 2.2, -0.02, 0.06, glas2);
+      s2.q(0, s2.L, EG - 0.3, EG + 0.15, 0, 0.5, akzent);
+      s2.q(s2.L - 0.8, s2.L, EG, H, 0, 0.25, akzent);
+      s2.q(0, s2.L, H - 0.3, H + 0.3, -0.1, 0.35, dunkler(wand2, 0.12));
+    }
+    const sz = new Seite2(S, x, z2, w, d, "+z");
+    const ph = passend(name2, w * 0.8, 2.2);
+    const metall = akzent === BRONZE || akzent === MESSING;
+    sz.q(w / 2 - plakatBreite(name2, ph) / 2 - 0.5, w / 2 + plakatBreite(name2, ph) / 2 + 0.5, H - 2.9 - ph / 2, H - 2.9 + ph / 2 + 0.3, 0.06, 0.12, metall ? "#3b3226" : akzent);
+    plakat2(scene2, sz, name2, w / 2, H - 2.75, 0.14, ph, metall ? "#ecd39b" : "#ffffff");
+    S.quader(x + 0.4, H, z2 + 0.4, x + w - 0.4, H + 0.2, z2 + d - 0.4, KIES2);
+    technik(S, r, x + 1, z2 + 1, x + w - 1, z2 + d - 1, H + 0.2, { max: 2 });
+    return Math.max(h1, H + 2);
+  }
+  function rotunde(K3, d1, h1, mitRotunde = true) {
+    const { S, scene: scene2, art, name: name2, x0, z0, w, d } = K3;
+    const [wand2, akzent, glas2] = FORM_FARBEN[art] ?? FORM_FARBEN.modehaus;
+    const tv = d - d1, Hv = EG + 0.6;
+    S.quader(x0, 0, z0 + d1, x0 + w, Hv, z0 + d, "#5a6168");
+    const sv = new Seite2(S, x0, z0 + d1, w, tv, "+z");
+    sv.q(0.3, w - 0.3, 0.3, Hv - 1.6, -0.02, 0.06, glas2);
+    for (let u = 2; u < w - 1; u += 3) sv.q(u - 0.1, u + 0.1, 0.3, Hv - 1.6, 0, 0.12, "#d9dcde");
+    sv.q(-0.2, w + 0.2, Hv - 1.6, Hv + 0.2, 0, 0.9, akzent);
+    S.quader(x0 + 0.3, Hv, z0 + d1, x0 + w - 0.3, Hv + 0.15, z0 + d - 0.3, KIES2);
+    const ph = passend(name2, (mitRotunde ? w - (d - d1) - 2 * clamp4(Math.min(w, d) * 0.2, 4, 9) : w) * 0.6, 1.3);
+    plakat2(scene2, sv, name2, (mitRotunde ? w - (d - d1) - 2 * clamp4(Math.min(w, d) * 0.2, 4, 9) : w) * 0.45, Hv - 0.7, 0.92, ph, akzent === BRONZE || akzent === MESSING ? "#3b3226" : "#ffffff");
+    if (!mitRotunde) return Math.max(h1, Hv + 0.2);
+    const R9 = clamp4(Math.min(w, d) * 0.2, 4, 9), H = clamp4(h1 + 3, 10, 28);
+    const cx = x0 + w - R9 + 0.6, cz = z0 + d - R9 + 0.6;
+    const zylinder = (rad2, y0, y1, f) => {
+      const g = new three_module_exports.CylinderGeometry(rad2, rad2, y1 - y0, 24);
+      g.translate(cx, (y0 + y1) / 2, cz);
+      S.add(g, f);
+    };
+    zylinder(R9, 0, H, wand2);
+    for (let y = EG; y < H - 2; y += OG) zylinder(R9 + 0.05, y + 0.8, y + 3, glas2);
+    zylinder(R9 + 0.25, H - 0.2, H + 0.4, akzent);
+    zylinder(R9 + 0.05, H - 0.15, H + 0.3, KIES2);
+    zylinder(R9 * 0.6, H + 0.4, H + 1.6, "#c9cbcc");
+    zylinder(R9 * 0.62, H + 1.6, H + 1.75, "#9ea2a5");
+    return Math.max(h1, H + 1.6);
+  }
+
+  // src/kit/warenhaus.js
+  var ROT2 = "#d23c32";
+  var EG2 = 5.5;
+  var GH = 4.5;
+  var DDR_STAEDTE = ["Berlin", "Dresden", "Leipzig", "Magdeburg", "Erfurt", "Chemnitz", "Halle", "Potsdam", "Cottbus", "Jena", "Zwickau", "G\xF6rlitz", "Dessau", "Gera", "Weimar", "Rostock", "Stralsund", "Schwerin"];
+  var anteil = (id, salz) => rng2(`${id}/${salz}`)();
+  function istOstHaus(haus2) {
+    if (!haus2 || haus2.format === "sport" || haus2.lage === "center") return false;
+    if (!DDR_STAEDTE.includes(haus2.stadt)) return false;
+    if (haus2.stadt === "Berlin" && anteil(haus2.id, "berlin-ost") >= 0.5) return false;
+    const j = haus2.baujahr ?? 0;
+    if (j >= 1960 && j <= 1989) return true;
+    return anteil(haus2.id, "ost") < 0.5;
+  }
+  function ostFamilie(haus2) {
+    const j = haus2.baujahr ?? 1975, r = anteil(haus2.id, "ostfamilieg");
+    if (j >= 1950 && j <= 1963) return r < 0.7 ? 11 : 9;
+    if (j < 1950) return r < 0.45 ? 11 : r < 0.75 ? 8 : 10;
+    if (j <= 1974) return r < 0.55 ? 8 : 9;
+    if (j <= 1989) return r < 0.4 ? 10 : r < 0.75 ? 9 : 8;
+    return [8, 9, 10][Math.floor(r * 3)];
+  }
+  var GLAS2 = "#4d6677";
+  var GLAS_TUER = "#2f3d48";
+  var GLAS_HELL2 = "#7d9fb2";
+  var LICHT3 = "#f7e9c8";
+  var RAHMEN3 = "#3a4148";
+  var STAHL = "#8f989f";
+  var KIES3 = "#bab8b2";
+  var KIES_D = "#a9a7a1";
+  var TOT = "#7c3d36";
+  var KLEID3 = ["#d04a3f", "#2f63b5", "#e8e4dc", "#e0b23c", "#5b8f5a", "#8d5fbf", "#ef8b4c", "#2b2b2b", "#f2c6d2", "#7d97b8", "#1f3f6b"];
+  var AUTO2 = ["#d04a3f", "#2f63b5", "#f1f1ee", "#2a2d31", "#e0b23c", "#8c9aa6", "#5b8f5a", "#f1f1ee", "#9aa4ad"];
+  var MALLS = ["LINDENGALERIE", "MARKTQUARTIER", "K\xD6NIGSPASSAGE", "STADTCARR\xC9", "WALLARKADEN", "BR\xDCCKENHOF"];
+  var SLOGANS = ["LAUF LOS.", "RAUS. JETZT.", "NEUE SAISON", "BERG RUFT.", "DEIN SPIEL.", "WINTER KOMMT"];
+  var clamp5 = (v, a, b) => Math.max(a, Math.min(b, v));
+  function familieVon(haus2) {
+    if (haus2.format === "sport") return 7;
+    if (haus2.lage === "center") return 6;
+    if (istOstHaus(haus2)) return ostFamilie(haus2);
+    const j = haus2.baujahr;
+    if (j <= 1919) return 1;
+    if (j <= 1939) return 2;
+    if (j <= 1964) return 3;
+    if (j <= 1980) return 4;
+    return 5;
+  }
+  function masse(haus2) {
+    const A = Math.max(300, haus2.grundflaecheQm || 2e3);
+    const r = rng2(String(haus2.id) + "/masse");
+    const ziel = 1.25 + r() * 0.5;
+    let best = null;
+    for (let w = 15; w <= 170; w += 5) for (let d = 10; d <= w; d += 5) {
+      const q2 = w / d;
+      if (q2 < 1.2 || q2 > 1.8) continue;
+      const s2 = Math.abs(w * d - A) / A + 0.12 * Math.abs(q2 - ziel);
+      if (!best || s2 < best.s) best = { w, d, s: s2 };
+    }
+    const n = Math.max(1, (haus2.etagen || [0]).filter((e) => e >= 0).length);
+    return { w: best.w, d: best.d, n, H: EG2 + (n - 1) * GH };
+  }
+  function spiegeln3(g) {
+    for (const n of ["position", "normal"]) {
+      const a = g.attributes[n]?.array;
+      if (!a) continue;
+      for (let i = 0; i < a.length; i += 3) {
+        const t = a[i];
+        a[i] = a[i + 2];
+        a[i + 2] = t;
+      }
+      for (let i = 0; i < a.length; i += 9) for (let k = 0; k < 3; k++) {
+        const t = a[i + 3 + k];
+        a[i + 3 + k] = a[i + 6 + k];
+        a[i + 6 + k] = t;
+      }
+    }
+  }
+  var Seite3 = class {
+    constructor(S, x0, z0, w, d, seite) {
+      Object.assign(this, { S, x0, z0, w, d, seite });
+      this.L = seite === "+z" ? w : d;
+      this.ebene = seite === "+z" ? z0 + d : x0 + w;
+      this.basis = seite === "+z" ? x0 : z0;
+      this.lese = seite === "+z" ? 1 : -1;
+    }
+    q(u0, u1, y0, y1, t0, t1, f) {
+      if (Math.abs(u1 - u0) < 1e-3 || Math.abs(y1 - y0) < 1e-3 || Math.abs(t1 - t0) < 1e-3) return;
+      if (this.seite === "+z") this.S.quader(this.basis + u0, y0, this.ebene + t0, this.basis + u1, y1, this.ebene + t1, f);
+      else this.S.quader(this.ebene + t0, y0, this.basis + u0, this.ebene + t1, y1, this.basis + u1, f);
+    }
+    welt(u, t) {
+      return this.seite === "+z" ? [this.basis + u, this.ebene + t] : [this.ebene + t, this.basis + u];
+    }
+    /** Geometrie im lokalen Rahmen (x = u, y, z = t) einsetzen. */
+    geo(g, f) {
+      g = g.index ? g.toNonIndexed() : g;
+      for (const a of Object.keys(g.attributes)) if (a !== "position" && a !== "normal") g.deleteAttribute(a);
+      if (this.seite === "+x") spiegeln3(g);
       const [x, z2] = this.welt(0, 0);
       g.translate(x, 0, z2);
       this.S.add(g, f);
@@ -47219,8 +48183,8 @@
       }
     }
   };
-  var seitenVon = (S, x0, z0, w, d) => [new Seite2(S, x0, z0, w, d, "+z"), new Seite2(S, x0, z0, w, d, "+x")];
-  function stumpf(w, d, h, ein, einZ = ein) {
+  var seitenVon2 = (S, x0, z0, w, d) => [new Seite3(S, x0, z0, w, d, "+z"), new Seite3(S, x0, z0, w, d, "+x")];
+  function stumpf2(w, d, h, ein, einZ = ein) {
     const a = [[-w / 2, 0, -d / 2], [w / 2, 0, -d / 2], [w / 2, 0, d / 2], [-w / 2, 0, d / 2]];
     const b = [[-w / 2 + ein, h, -d / 2 + einZ], [w / 2 - ein, h, -d / 2 + einZ], [w / 2 - ein, h, d / 2 - einZ], [-w / 2 + ein, h, d / 2 - einZ]];
     const p = [];
@@ -47251,21 +48215,21 @@
     g.translate(u, y, t + dicke / 2);
     s2.geo(g, f);
   }
-  function viertelzylinder(S, cx, cz, rad2, y0, y1, f, seg = 12) {
+  function viertelzylinder2(S, cx, cz, rad2, y0, y1, f, seg = 12) {
     const g = new three_module_exports.CylinderGeometry(rad2, rad2, y1 - y0, seg, 1, false, 0, Math.PI / 2);
     g.translate(cx, (y0 + y1) / 2, cz);
     S.add(g, f);
   }
-  function zyl2(S, x, y0, z2, rad2, h, f, seg = 12, oben = rad2) {
+  function zyl3(S, x, y0, z2, rad2, h, f, seg = 12, oben = rad2) {
     const g = new three_module_exports.CylinderGeometry(oben, rad2, h, seg);
     g.translate(x, y0 + h / 2, z2);
     S.add(g, f);
   }
-  var tex2 = (text2, farbe, bg = null) => textTextur(text2, farbe, 120, bg);
-  var texMat2 = (text2, farbe, bg = null, lit = false) => textMaterial(text2, farbe, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
+  var tex3 = (text2, farbe, bg = null) => textTextur(text2, farbe, 120, bg);
+  var texMat3 = (text2, farbe, bg = null, lit = false) => textMaterial(text2, farbe, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
   var PH = 2.05;
   function buchstabenBreite(c, hb) {
-    return c === " " ? hb * 0.45 : (tex2(c, "#000").seitenverhaeltnis * 180 - 96) / 180 * hb * PH;
+    return c === " " ? hb * 0.45 : (tex3(c, "#000").seitenverhaeltnis * 180 - 96) / 180 * hb * PH;
   }
   function schriftBreite(text2, hb) {
     const z2 = [...text2];
@@ -47311,22 +48275,22 @@
         return;
       }
       const f = o.geist ?? (df === "tot" ? TOT : farbe);
-      const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(tex2(c, f).seitenverhaeltnis * hb * PH, hb * PH), texMat2(c, f, null, !!o.geist));
+      const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(tex3(c, f).seitenverhaeltnis * hb * PH, hb * PH), texMat3(c, f, null, !!o.geist));
       const rz = df === "schief" ? (r() < 0.5 ? -1 : 1) * zw(r, 0.18, 0.4) : 0;
       s2.flaeche(m, uc, y - (df === "schief" ? hb * 0.15 : 0), t, rz);
       K3.scene.add(m);
     });
     return total;
   }
-  function plakat2(K3, s2, text2, u, y, t, ph, farbe, bg, lit = false) {
-    const sv = tex2(text2, farbe, bg).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat2(text2, farbe, bg, lit));
+  function plakat3(K3, s2, text2, u, y, t, ph, farbe, bg, lit = false) {
+    const sv = tex3(text2, farbe, bg).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat3(text2, farbe, bg, lit));
     s2.flaeche(m, u, y, t);
     K3.scene.add(m);
     return sv * ph;
   }
-  var plakatBreite = (text2, ph) => tex2(text2, "#000", "#fff").seitenverhaeltnis * ph;
-  function puppe(s2, u, y, t, oben, unten, sk = 1) {
+  var plakatBreite2 = (text2, ph) => tex3(text2, "#000", "#fff").seitenverhaeltnis * ph;
+  function puppe2(s2, u, y, t, oben, unten, sk = 1) {
     s2.q(u - 0.28 * sk, u + 0.28 * sk, y, y + 0.08, t - 0.22, t + 0.22, "#d9d4cc");
     s2.q(u - 0.17 * sk, u + 0.17 * sk, y + 0.08, y + 0.95 * sk, t - 0.1, t + 0.1, unten);
     s2.q(u - 0.26 * sk, u + 0.26 * sk, y + 0.95 * sk, y + 1.62 * sk, t - 0.13, t + 0.13, oben);
@@ -47378,7 +48342,7 @@
         }
         s2.kipp(1.4, 0.08, 0.08, u, y + 0.75, t, waehle2(r, ["#e04b3a", "#1f6fb5", "#f2c14e"]), 0.35);
         s2.q(u - 0.1, u + 0.1, y + 0.45, y + 1.05, t - 0.04, t + 0.04, "#555555");
-        if (gruppe2 === "sport") puppe(s2, a + 0.6, y, t, waehle2(r, KLEID2), "#2b2b2b");
+        if (gruppe2 === "sport") puppe2(s2, a + 0.6, y, t, waehle2(r, KLEID3), "#2b2b2b");
         break;
       }
       case "outdoor": {
@@ -47386,31 +48350,31 @@
         g.rotateY(Math.PI / 4);
         g.translate(m - 0.4, y + 0.7, t);
         s2.geo(g, waehle2(r, ["#e36b2c", "#3f7d56", "#f2c14e"]));
-        puppe(s2, b - 0.7, y, t, waehle2(r, ["#c0392b", "#2e7d32", "#1f3f6b"]), "#3a3a3a");
+        puppe2(s2, b - 0.7, y, t, waehle2(r, ["#c0392b", "#2e7d32", "#1f3f6b"]), "#3a3a3a");
         break;
       }
       case "wintersport":
         for (let i = 0; i < 4; i++) s2.q(a + 0.6 + i * 0.35, a + 0.75 + i * 0.35, y, y + 1.9, t - 0.03, t + 0.03, waehle2(r, ["#e04b3a", "#1f6fb5", "#f2c14e", "#ffffff"]));
-        puppe(s2, b - 0.8, y, t, waehle2(r, ["#e04b3a", "#1f6fb5", "#ffffff"]), "#2b2b2b");
+        puppe2(s2, b - 0.8, y, t, waehle2(r, ["#e04b3a", "#1f6fb5", "#ffffff"]), "#2b2b2b");
         break;
       default: {
         const sk = gruppe2 === "kinder" ? 0.72 : 1;
         s2.q(a + 0.3, b - 0.3, y, y + 0.22, t - 0.32, t + 0.32, "#e9e4da");
-        reihe((u, i) => puppe(s2, u, y + 0.22, t, gruppe2 === "waesche" ? waehle2(r, ["#ffffff", "#f2c6d2", "#e8e4dc"]) : waehle2(r, KLEID2), gruppe2 === "waesche" ? "#f1ece4" : waehle2(r, ["#2b3a55", "#3a3a3a", "#6b5a48", "#20304a", "#e8e4dc"]), sk));
+        reihe((u, i) => puppe2(s2, u, y + 0.22, t, gruppe2 === "waesche" ? waehle2(r, ["#ffffff", "#f2c6d2", "#e8e4dc"]) : waehle2(r, KLEID3), gruppe2 === "waesche" ? "#f1ece4" : waehle2(r, ["#2b3a55", "#3a3a3a", "#6b5a48", "#20304a", "#e8e4dc"]), sk));
       }
     }
   }
   function erdgeschoss(K3, s2, o = {}) {
     const u0 = o.u0 ?? 0, u1 = o.u1 ?? s2.L, tF = o.tF ?? 0, rueck = o.rueck ?? 0.7, pb = o.pb ?? 0.8;
-    const sockH = 0.55, gTop = o.glasTop ?? 4.3, hE = o.h ?? EG;
-    const pf = o.pfeiler, sockF = o.sockel ?? dunkler(pf, 0.12), sturz = o.sturz ?? pf, glas2 = o.glas ?? GLAS;
+    const sockH = 0.55, gTop = o.glasTop ?? 4.3, hE = o.h ?? EG2;
+    const pf = o.pfeiler, sockF = o.sockel ?? dunkler(pf, 0.12), sturz = o.sturz ?? pf, glas2 = o.glas ?? GLAS2;
     const len = u1 - u0;
     if (len < 2.5) return [];
     const nb = Math.max(1, Math.round(len / (o.raster ?? 5)));
     const bw = len / nb;
     let ein = o.eingaenge;
     if (!ein) ein = s2.seite === "+z" ? nb >= 4 ? [Math.round(nb * 0.4), nb - 1] : [Math.floor(nb / 2)] : nb >= 3 ? [Math.round(nb * 0.55)] : [];
-    ein = new Set(ein.map((i) => clamp4(i, 0, nb - 1)));
+    ein = new Set(ein.map((i) => clamp5(i, 0, nb - 1)));
     const tG = tF - rueck;
     for (let i = 0; i <= nb; i++) {
       const ub = u0 + i * bw;
@@ -47442,8 +48406,8 @@
       if (ein.has(i)) {
         K3.eingaenge.push({ seite: s2.seite, u: m, breite: b - a, t: tG });
         s2.q(a, b, 0.3, gTop, tG - 0.1, tG, GLAS_TUER);
-        for (let k = 1; k < 4; k++) s2.q(a + (b - a) * k / 4 - 0.05, a + (b - a) * k / 4 + 0.05, 0.3, gTop, tG, tG + 0.06, RAHMEN2);
-        s2.q(a, b, 2.7, 2.85, tG, tG + 0.06, RAHMEN2);
+        for (let k = 1; k < 4; k++) s2.q(a + (b - a) * k / 4 - 0.05, a + (b - a) * k / 4 + 0.05, 0.3, gTop, tG, tG + 0.06, RAHMEN3);
+        s2.q(a, b, 2.7, 2.85, tG, tG + 0.06, RAHMEN3);
         s2.q(a, a + 0.22, 0.3, gTop + 0.1, tG, tF + 0.18, ROT2);
         s2.q(b - 0.22, b, 0.3, gTop + 0.1, tG, tF + 0.18, ROT2);
         s2.q(a, b, gTop - 0.1, gTop + 0.15, tG, tF + 0.18, ROT2);
@@ -47456,7 +48420,7 @@
           s2.geo(g, "#6a8796");
           const d2 = new three_module_exports.CylinderGeometry(1.3, 1.3, 0.25, 12);
           d2.translate(m, 2.9, tG + 0.2);
-          s2.geo(d2, RAHMEN2);
+          s2.geo(d2, RAHMEN3);
         }
         continue;
       }
@@ -47472,8 +48436,8 @@
         for (let y = sockH + 0.3; y < gTop; y += 0.38) s2.q(a, b, y, y + 0.07, tG + 0.06, tG + 0.1, "#7a8085");
         continue;
       }
-      s2.q(a, b, gTop - 0.32, gTop - 0.12, tG, tG + 0.03, LICHT2);
-      s2.q(a, b, gTop - 1, gTop - 0.9, tG, tG + 0.05, RAHMEN2);
+      s2.q(a, b, gTop - 0.32, gTop - 0.12, tG, tG + 0.03, LICHT3);
+      s2.q(a, b, gTop - 1, gTop - 0.9, tG, tG + 0.05, RAHMEN3);
       auslage(K3, s2, a, b, sockH + 0.02, tG + rueck * 0.45, gr[(i + (s2.seite === "+x" ? 3 : 0)) % gr.length]);
     }
     for (const mi of K3.mieterEG.filter((x) => x.seite === s2.seite)) {
@@ -47484,8 +48448,8 @@
       mi.ub = ub;
       s2.q(ua, ub, gTop + 0.1, hE - 0.05, tF + 0.04, tF + 0.3, mi.bg);
       s2.q(ua, ub, gTop + 0.02, gTop + 0.12, tF + 0.04, tF + 0.36, dunkler(mi.bg, 0.15));
-      const ph = Math.min(1.2, (ub - ua) * 0.85 / tex2(mi.name, mi.fg, mi.bg).seitenverhaeltnis);
-      plakat2(K3, s2, mi.name, (ua + ub) / 2, (gTop + hE) / 2 + 0.05, tF + 0.32, ph, mi.fg, mi.bg);
+      const ph = Math.min(1.2, (ub - ua) * 0.85 / tex3(mi.name, mi.fg, mi.bg).seitenverhaeltnis);
+      plakat3(K3, s2, mi.name, (ua + ub) / 2, (gTop + hE) / 2 + 0.05, tF + 0.32, ph, mi.fg, mi.bg);
       s2.kipp(ub - ua - 0.4, 0.12, 1.3, (ua + ub) / 2, gTop - 0.2, tF + 0.6, mi.bg === "#ffffff" ? mi.fg : mi.bg, 0, 0.35);
     }
     return achsen7;
@@ -47540,7 +48504,7 @@
       if (stil === "duenn") s2.q(a, b, y + dick, y + dick + 0.08, tF + tief2 - 0.12, tF + tief2, heller(farbe, 0.05));
       for (const u of o.stuetzen ?? []) if (u > a && u < b) {
         const [x, z2] = s2.welt(u, tF + tief2 - 0.35);
-        zyl2(K3.S, x, 0.3, z2, 0.11, y - 0.3, "#5f676e", 8);
+        zyl3(K3.S, x, 0.3, z2, 0.11, y - 0.3, "#5f676e", 8);
       }
     }
   }
@@ -47554,13 +48518,13 @@
   function fahnenmasten(K3, s2, us, y, t) {
     for (const u of us) {
       const [x, z2] = s2.welt(u, t);
-      zyl2(K3.S, x, y, z2, 0.07, 6, "#d9dcde", 6);
+      zyl3(K3.S, x, y, z2, 0.07, 6, "#d9dcde", 6);
       s2.q(u + 0.07 * s2.lese, u + 1.6 * s2.lese, y + 4.8, y + 5.9, t - 0.03, t + 0.03, K3.zu ? "#cfcac0" : ROT2);
     }
   }
-  function attika2(K3, x0, z0, w, d, y, h, f, dick = 0.5) {
+  function attika3(K3, x0, z0, w, d, y, h, f, dick = 0.5) {
     const S = K3.S;
-    S.quader(x0, y, z0, x0 + w, y + 0.15, z0 + d, KIES2);
+    S.quader(x0, y, z0, x0 + w, y + 0.15, z0 + d, KIES3);
     S.quader(x0, y, z0 + d - dick, x0 + w, y + h, z0 + d, f);
     S.quader(x0 + w - dick, y, z0, x0 + w, y + h, z0 + d, f);
     S.quader(x0, y, z0, x0 + w, y + h, z0 + dick, f);
@@ -47579,7 +48543,7 @@
     const t = K3.terrasse;
     return !!t && x + rad2 > t.x0 - 0.5 && x - rad2 < t.x1 + 0.5 && z2 + rad2 > t.z0 - 0.5 && z2 - rad2 < t.z1 + 0.5;
   }
-  function lichtkuppeln(K3, x0, z0, x1, z1, y, ax = 6.5, az = 9) {
+  function lichtkuppeln2(K3, x0, z0, x1, z1, y, ax = 6.5, az = 9) {
     const S = K3.S;
     if (x1 - x0 < 8 || z1 - z0 < 8) return;
     const nx = Math.floor((x1 - x0 - 2) / ax), nz = Math.floor((z1 - z0 - 2) / az);
@@ -47590,7 +48554,7 @@
       S.box(1.5, 0.35, 1.5, ox + i * ax, y + 0.45, oz + j * az, K3.alt ? "#c9cfd1" : "#e8eef0");
     }
   }
-  function technik(K3, x0, z0, x1, z1, y, o = {}) {
+  function technik2(K3, x0, z0, x1, z1, y, o = {}) {
     const S = K3.S, r = K3.r;
     const fl = (x1 - x0) * (z1 - z0);
     if (x1 - x0 < 6 || z1 - z0 < 6) return;
@@ -47623,10 +48587,10 @@
           S.box(0.08, 0.12, bd * 0.75, cx + bw / 2 + 0.04, yy, cz, dunkler(f, 0.14));
         }
       }
-      if (typ === "kuehler") for (let k = 0; k < Math.floor(bw / 1.8); k++) zyl2(S, cx - bw / 2 + 0.9 + k * 1.8, y + bh, cz, 0.7, 0.18, "#5d646a", 10);
+      if (typ === "kuehler") for (let k = 0; k < Math.floor(bw / 1.8); k++) zyl3(S, cx - bw / 2 + 0.9 + k * 1.8, y + bh, cz, 0.7, 0.18, "#5d646a", 10);
     }
     if (o.antenne !== false && r() < 0.6) {
-      zyl2(S, x0 + 2.5, y, z0 + 2.5, 0.08, 7, "#8a9096", 5);
+      zyl3(S, x0 + 2.5, y, z0 + 2.5, 0.08, 7, "#8a9096", 5);
       S.box(1.6, 0.08, 0.08, x0 + 2.5, y + 6, z0 + 2.5, "#8a9096");
     }
   }
@@ -47640,7 +48604,7 @@
       for (let x = x0 + 2; x + 2.5 <= x1 - 2; x += 2.6) {
         S.box(0.12, 0.04, 5, x, y + 0.22, zz + 2.5, "#f2f1ec");
         if (!K3.zu && r() < 0.55 && !reserviert(K3, x + 1.3, zz + 2.5, 2.5)) {
-          const c = waehle2(r, AUTO), cx = x + 1.3, cz = zz + 2.5;
+          const c = waehle2(r, AUTO2), cx = x + 1.3, cz = zz + 2.5;
           S.box(1.85, 0.9, 4.3, cx, y + 0.65, cz, c);
           S.box(1.65, 0.65, 2.2, cx, y + 1.42, cz - 0.15, "#9bb7c7");
         }
@@ -47652,9 +48616,9 @@
     S.box(4.6, 0.25, 4.6, x0 + 3, y + 3.5, z0 + 3, "#a9a49a");
     if (mitSchild) {
       S.box(0.2, 5.5, 0.2, x1 - 2.5, y + 2.75, z1 - 2.5, "#5f676e");
-      const s2 = new Seite2(S, x1 - 4, z1 - 4, 1.5, 1.5, "+z");
+      const s2 = new Seite3(S, x1 - 4, z1 - 4, 1.5, 1.5, "+z");
       S.box(2.1, 2.1, 0.25, x1 - 2.5, y + 6.2, z1 - 2.45, "#1f63b5");
-      plakat2(K3, s2, "P", 1.5, y + 6.2, 0.2, 1.9, "#ffffff", "#1f63b5");
+      plakat3(K3, s2, "P", 1.5, y + 6.2, 0.2, 1.9, "#ffffff", "#1f63b5");
     }
   }
   function flecken(K3, s2, u0, u1, y0, y1, t, base, anz3) {
@@ -47686,7 +48650,7 @@
       if (!z2) continue;
       const text2 = z2.text ?? "HARTWIG";
       if (K3.fam !== 1 && !z2.sport && !z2.dach && !z2.wand && (K3.n === 1 || Math.min(z2.hb, z2.max / schriftBreite(text2, 1)) < Math.max(2.4, s2.L * 0.035))) {
-        const hbD = Math.min(clamp4(s2.L * 0.06, 2.2, 3.6), s2.L * 0.6 / schriftBreite(text2, 1));
+        const hbD = Math.min(clamp5(s2.L * 0.06, 2.2, 3.6), s2.L * 0.6 / schriftBreite(text2, 1));
         const br = schriftBreite(text2, hbD), yB = K3.Hw + 0.6;
         for (let k = 0; k <= 4; k++) {
           const uu = z2.u - br / 2 + k * br / 4;
@@ -47724,11 +48688,11 @@
     const kupfer = K3.c("#6f9a7d");
     const eck = ["kuppel", "spitz", "kuppel", "zelt", "kuppel", "spitz", "zelt", "kuppel"][v];
     const raster4 = [6, 6.5, 5.5, 6, 7, 6, 5.5, 6.5][v];
-    const tw = clamp4(Math.min(w, d) * 0.24, 7, 12), p = 0.9, rueck = 0.7;
+    const tw = clamp5(Math.min(w, d) * 0.24, 7, 12), p = 0.9, rueck = 0.7;
     const Ht = Hw + (n >= 2 ? GH * 1.6 : 4);
     K3.tRelief = 0.5;
-    S.quader(x0, 0, z0, x0 + w - rueck - 0.1, EG, z0 + d - rueck - 0.1, dunk);
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, stein);
+    S.quader(x0, 0, z0, x0 + w - rueck - 0.1, EG2, z0 + d - rueck - 0.1, dunk);
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, stein);
     const tx0 = x0 + w - tw, tz0 = z0 + d - tw;
     S.quader(tx0, 0, tz0, x0 + w + p, Ht, z0 + d + p, hell4);
     const risalit = v % 2 === 0 && n >= 2;
@@ -47739,38 +48703,38 @@
       const uEnd = s2.L - tw;
       K3.nutz[s2.seite] = uEnd;
       const ax = erdgeschoss(K3, s2, { u1: uEnd, raster: raster4, pfeiler: hell4, sockel: dunk, sturz: stein, pb: 1.1, tuer: "dreh" });
-      for (const a of ax) for (let y = 0.9; y < EG - 0.3; y += 0.75) s2.q(a.a - 1.1, a.a - 0.02, y, y + 0.06, 0.12, 0.16, dunk);
+      for (const a of ax) for (let y = 0.9; y < EG2 - 0.3; y += 0.75) s2.q(a.a - 1.1, a.a - 0.02, y, y + 0.06, 0.12, 0.16, dunk);
       vordach(K3, s2, { stil: v % 4 === 1 || v % 4 === 3 ? "markisen" : "duenn", achsen: ax, u1: uEnd, ecke: false, tiefe: 2, farbe: "#4a4f55", y: 4.6, markise: v % 4 === 3 ? "#3f7d56" : ROT2 });
-      s2.q(0, uEnd, EG - 0.1, EG + 0.55, 0, 0.45, hell4);
-      s2.q(0, uEnd, EG + 0.55, EG + 0.75, 0, 0.28, dunk);
+      s2.q(0, uEnd, EG2 - 0.1, EG2 + 0.55, 0, 0.45, hell4);
+      s2.q(0, uEnd, EG2 + 0.55, EG2 + 0.75, 0, 0.28, dunk);
       const nb = Math.max(1, Math.round(uEnd / raster4)), bw = uEnd / nb;
       const rA = risalit && s2.seite === "+z" ? Math.floor(nb / 2) - 1 : -9, rB = rA + 1;
       if (n >= 2) {
         if (rA >= 0) {
           (K3.vorspruenge ?? (K3.vorspruenge = [])).push({ seite: s2.seite, u0: rA * bw - 0.6, u1: (rB + 1) * bw + 0.6, t: 0.8 });
-          s2.q(rA * bw, (rB + 1) * bw, EG + 0.75, Hw + 1.4, 0, 0.8, hell4);
+          s2.q(rA * bw, (rB + 1) * bw, EG2 + 0.75, Hw + 1.4, 0, 0.8, hell4);
           giebel(s2, (rA * bw + (rB + 1) * bw) / 2, Hw + 1.4, 0.4, (rB + 1 - rA) * bw + 0.8, 4.5, 0.8, hell4);
           giebel(s2, (rA * bw + (rB + 1) * bw) / 2, Hw + 1.4, 0.85, (rB + 1 - rA) * bw - 1, 3.4, 0.1, stein);
         }
         for (let i = 0; i <= nb; i++) {
           const u = i * bw, tb = i >= rA && i <= rB + 1 && rA >= 0 ? 0.8 : 0;
-          s2.q(u - 0.6, u + 0.6, EG + 0.75, Hw - 1.3, tb, tb + 0.45, hell4);
+          s2.q(u - 0.6, u + 0.6, EG2 + 0.75, Hw - 1.3, tb, tb + 0.45, hell4);
           s2.q(u - 0.75, u + 0.75, Hw - 1.75, Hw - 1.3, tb, tb + 0.55, hell4);
         }
         for (let i = 0; i < nb; i++) {
           const tb = i >= rA && i <= rB && rA >= 0 ? 0.8 : 0;
           const a = i * bw + 0.6, b = (i + 1) * bw - 0.6, m = (a + b) / 2, rad2 = (b - a) / 2 - 0.35;
           const yTop = Hw - 2.1 - rad2;
-          s2.q(a + 0.35, b - 0.35, EG + 1.2, yTop, tb, tb + 0.05, GLAS);
-          bogen(s2, m, yTop, tb, rad2, 0.05, GLAS);
+          s2.q(a + 0.35, b - 0.35, EG2 + 1.2, yTop, tb, tb + 0.05, GLAS2);
+          bogen(s2, m, yTop, tb, rad2, 0.05, GLAS2);
           s2.q(m - 0.3, m + 0.3, yTop + rad2 - 0.3, yTop + rad2 + 0.35, tb, tb + 0.3, hell4);
           for (let k = 1; k < n - 1; k++) {
-            const y = EG + k * GH;
+            const y = EG2 + k * GH;
             s2.q(a + 0.35, b - 0.35, y - 0.6, y + 0.25, tb, tb + 0.2, dunk);
             s2.q(a + 0.35, b - 0.35, y - 0.6, y - 0.5, tb, tb + 0.3, hell4);
           }
-          s2.q(m - 0.06, m + 0.06, EG + 1.2, yTop + rad2 - 0.1, tb, tb + 0.12, RAHMEN2);
-          s2.q(a + 0.35, b - 0.35, EG + 1.2, EG + 1.35, tb, tb + 0.35, hell4);
+          s2.q(m - 0.06, m + 0.06, EG2 + 1.2, yTop + rad2 - 0.1, tb, tb + 0.12, RAHMEN3);
+          s2.q(a + 0.35, b - 0.35, EG2 + 1.2, EG2 + 1.35, tb, tb + 0.35, hell4);
         }
       }
       s2.q(0, uEnd, Hw - 1.3, Hw - 0.45, 0, 0.3, dunk);
@@ -47790,10 +48754,10 @@
         if (i >= rA && i <= rB && rA >= 0) continue;
         const u = (i + 0.5) * bw;
         s2.q(u - 0.95, u + 0.95, yb + 0.7, yb + 2.9, -3.2, -0.75, hell4);
-        s2.q(u - 0.55, u + 0.55, yb + 1, yb + 2.5, -0.75, -0.7, GLAS);
+        s2.q(u - 0.55, u + 0.55, yb + 1, yb + 2.5, -0.75, -0.7, GLAS2);
         giebel(s2, u, yb + 2.9, -1.9, 2.3, 0.9, 2.6, dachF);
       }
-      flecken(K3, s2, 0, uEnd, EG + 0.8, Hw - 1.3, 0.46, stein, 10);
+      flecken(K3, s2, 0, uEnd, EG2 + 0.8, Hw - 1.3, 0.46, stein, 10);
       const tu0 = s2.L - tw, tu1 = s2.L + p, tm = (tu0 + tu1) / 2;
       s2.q(tu0, tu1, 0, 0.55, p, p + 0.08, dunk);
       s2.q(tm - 2.2, tm + 2.2, 0.3, 4.4, p, p + 0.05, GLAS_TUER);
@@ -47811,14 +48775,14 @@
         s2.geo(g, "#6a8796");
       }
       s2.q(tu0 - 0.4, tu1 + 0.4, 4.85, 5.2, p, p + 1.8, "#4a4f55");
-      s2.q(tu0, tu1, EG - 0.1, EG + 0.55, p, p + 0.45, hell4);
-      for (const uu of [tu0, tu1 - 0.8]) s2.q(uu, uu + 0.8, EG, Ht, p, p + 0.2, dunk);
-      for (let y = EG + 0.6; y < Ht; y += 1.1) for (const uu of [tu0, tu1 - 1.1]) s2.q(uu, uu + 1.1, y, y + 0.5, p, p + 0.25, hell4);
+      s2.q(tu0, tu1, EG2 - 0.1, EG2 + 0.55, p, p + 0.45, hell4);
+      for (const uu of [tu0, tu1 - 0.8]) s2.q(uu, uu + 0.8, EG2, Ht, p, p + 0.2, dunk);
+      for (let y = EG2 + 0.6; y < Ht; y += 1.1) for (const uu of [tu0, tu1 - 1.1]) s2.q(uu, uu + 1.1, y, y + 0.5, p, p + 0.25, hell4);
       if (n >= 2) {
         const rad2 = 1.4, yTop = Ht - 4.2;
-        s2.q(tm - rad2, tm + rad2, EG + 1.2, yTop, p, p + 0.05, GLAS);
-        bogen(s2, tm, yTop, p, rad2, 0.05, GLAS);
-        for (let k = 1; k < n - 1; k++) s2.q(tm - rad2, tm + rad2, EG + k * GH - 0.6, EG + k * GH + 0.2, p, p + 0.2, dunk);
+        s2.q(tm - rad2, tm + rad2, EG2 + 1.2, yTop, p, p + 0.05, GLAS2);
+        bogen(s2, tm, yTop, p, rad2, 0.05, GLAS2);
+        for (let k = 1; k < n - 1; k++) s2.q(tm - rad2, tm + rad2, EG2 + k * GH - 0.6, EG2 + k * GH + 0.2, p, p + 0.2, dunk);
       }
       if (s2.seite === "+x" || v % 2) {
         const g = new three_module_exports.CylinderGeometry(1.3, 1.3, 0.2, 16);
@@ -47830,24 +48794,24 @@
       }
     }
     S.quader(x0 - 0.7, Hw - 0.25, z0 - 0.7, x0 + w + 0.7, Hw + 0.45, z0 + d + 0.7, hell4);
-    const md = stumpf(w - 0.4, d - 0.4, 4.4, 2.6);
+    const md = stumpf2(w - 0.4, d - 0.4, 4.4, 2.6);
     md.translate(x0 + w / 2, Hw + 0.45, z0 + d / 2);
     S.add(md, dachF);
-    const md2 = stumpf(w - 5.6, d - 5.6, 1.2, Math.min(4, (w - 6) / 2.2), Math.min(4, (d - 6) / 2.2));
+    const md2 = stumpf2(w - 5.6, d - 5.6, 1.2, Math.min(4, (w - 6) / 2.2), Math.min(4, (d - 6) / 2.2));
     md2.translate(x0 + w / 2, Hw + 4.85, z0 + d / 2);
     S.add(md2, dunkler(dachF, 0.05));
     const fx0 = x0 + w / 2 - (w - 5.6) / 2 + Math.min(4, (w - 6) / 2.2), fz0 = z0 + d / 2 - (d - 5.6) / 2 + Math.min(4, (d - 6) / 2.2);
-    S.quader(fx0, Hw + 6.04, fz0, 2 * (x0 + w / 2) - fx0, Hw + 6.1, 2 * (z0 + d / 2) - fz0, KIES2);
+    S.quader(fx0, Hw + 6.04, fz0, 2 * (x0 + w / 2) - fx0, Hw + 6.1, 2 * (z0 + d / 2) - fz0, KIES3);
     setzeDach(K3, fx0, fz0, 2 * (x0 + w / 2) - fx0 - tw * 0.8, 2 * (z0 + d / 2) - fz0, Hw + 6.1);
-    lichtkuppeln(K3, fx0, fz0, 2 * (x0 + w / 2) - fx0 - tw * 0.4, 2 * (z0 + d / 2) - fz0 - tw * 0.4, Hw + 6.1);
-    technik(K3, fx0, fz0, x0 + w - 6 - tw, z0 + d - 6 - tw * 0.5, Hw + 6.1, { max: 3, antenne: false });
+    lichtkuppeln2(K3, fx0, fz0, 2 * (x0 + w / 2) - fx0 - tw * 0.4, 2 * (z0 + d / 2) - fz0 - tw * 0.4, Hw + 6.1);
+    technik2(K3, fx0, fz0, x0 + w - 6 - tw, z0 + d - 6 - tw * 0.5, Hw + 6.1, { max: 3, antenne: false });
     const tc = tw + p, cx = x0 + w - tw + tc / 2, cz = z0 + d - tw + tc / 2;
     S.box(tc + 1, 0.7, tc + 1, cx, Ht + 0.35, cz, hell4);
     if (eck === "kuppel") {
-      zyl2(S, cx, Ht + 0.7, cz, tc * 0.42, 2.4, hell4, 16);
+      zyl3(S, cx, Ht + 0.7, cz, tc * 0.42, 2.4, hell4, 16);
       for (let k = 0; k < 8; k++) {
         const a = (k + 0.5) * Math.PI / 4;
-        S.box(0.5, 1.2, 0.5, cx + Math.sin(a) * tc * 0.43, Ht + 1.9, cz + Math.cos(a) * tc * 0.43, GLAS);
+        S.box(0.5, 1.2, 0.5, cx + Math.sin(a) * tc * 0.43, Ht + 1.9, cz + Math.cos(a) * tc * 0.43, GLAS2);
       }
       const g = new three_module_exports.SphereGeometry(tc * 0.43, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
       g.scale(1, 1.35, 1);
@@ -47861,24 +48825,24 @@
         gr.translate(cx, Ht + 3.1, cz);
         S.add(gr, heller(kupfer, 0.08));
       }
-      zyl2(S, cx, Ht + 3 + tc * 0.58, cz, 0.9, 2, hell4, 8);
-      zyl2(S, cx, Ht + 5 + tc * 0.58, cz, 1.1, 1.4, kupfer, 8, 0.05);
-      zyl2(S, cx, Ht + 6.4 + tc * 0.58, cz, 0.08, 2.4, "#4a4f55", 4);
+      zyl3(S, cx, Ht + 3 + tc * 0.58, cz, 0.9, 2, hell4, 8);
+      zyl3(S, cx, Ht + 5 + tc * 0.58, cz, 1.1, 1.4, kupfer, 8, 0.05);
+      zyl3(S, cx, Ht + 6.4 + tc * 0.58, cz, 0.08, 2.4, "#4a4f55", 4);
     } else if (eck === "spitz") {
       const g = new three_module_exports.ConeGeometry(tc * 0.5 * Math.SQRT2, tc * 1.5, 4);
       g.rotateY(Math.PI / 4);
       g.translate(cx, Ht + 0.7 + tc * 0.75, cz);
       S.add(g, dachF);
       for (const [dx, dz] of [[tc * 0.32, 0], [0, tc * 0.32]]) S.box(dz ? 1.4 : 1.8, 2, dz ? 1.8 : 1.4, cx + dx, Ht + 2.2, cz + dz, hell4);
-      zyl2(S, cx, Ht + 0.7 + tc * 1.5, cz, 0.08, 2.5, "#4a4f55", 4);
+      zyl3(S, cx, Ht + 0.7 + tc * 1.5, cz, 0.08, 2.5, "#4a4f55", 4);
     } else {
       const g = new three_module_exports.ConeGeometry(tc * 0.5 * Math.SQRT2, 3.2, 4);
       g.rotateY(Math.PI / 4);
       g.translate(cx, Ht + 2.3, cz);
       S.add(g, kupfer);
       S.box(2.4, 2.4, 2.4, cx, Ht + 4.4, cz, hell4);
-      S.box(1.8, 1.6, 2.5, cx, Ht + 4.3, cz, GLAS);
-      S.box(2.5, 1.6, 1.8, cx, Ht + 4.3, cz, GLAS);
+      S.box(1.8, 1.6, 2.5, cx, Ht + 4.3, cz, GLAS2);
+      S.box(2.5, 1.6, 1.8, cx, Ht + 4.3, cz, GLAS2);
       const g2 = new three_module_exports.ConeGeometry(1.9, 2.4, 4);
       g2.rotateY(Math.PI / 4);
       g2.translate(cx, Ht + 6.8, cz);
@@ -47889,10 +48853,10 @@
       if (n >= 2) {
         const nb = Math.max(1, Math.round(uEnd / raster4)), rStart = (Math.floor(nb / 2) - 1) * (uEnd / nb);
         const mitR = s2.seite === "+z" && risalit && rStart > 6;
-        K3.zonen[s2.seite] = { u: mitR ? rStart / 2 : uEnd / 2, y: Hw - 3.6, t: 0.75, hb: clamp4(uEnd * 0.08, 2.4, 4.4), max: mitR ? rStart - 2 : uEnd * 0.75, grund: stein };
-      } else K3.zonen[s2.seite] = { u: uEnd / 2, y: EG + 1.3, t: 0.55, hb: 1.5, max: uEnd * 0.8, grund: stein };
+        K3.zonen[s2.seite] = { u: mitR ? rStart / 2 : uEnd / 2, y: Hw - 3.6, t: 0.75, hb: clamp5(uEnd * 0.08, 2.4, 4.4), max: mitR ? rStart - 2 : uEnd * 0.75, grund: stein };
+      } else K3.zonen[s2.seite] = { u: uEnd / 2, y: EG2 + 1.3, t: 0.55, hb: 1.5, max: uEnd * 0.8, grund: stein };
     }
-    if (n >= 4) haengefahnen(K3, K3.seiten[0], [K3.seiten[0].L * 0.1, K3.seiten[0].L * 0.62], EG + GH * 1.7, 0.45);
+    if (n >= 4) haengefahnen(K3, K3.seiten[0], [K3.seiten[0].L * 0.1, K3.seiten[0].L * 0.62], EG2 + GH * 1.7, 0.45);
     return Ht + tc;
   }
   function familie2(K3) {
@@ -47900,7 +48864,7 @@
     const putz2 = K3.c(["#f2eee5", "#ece3cb", "#f0ebe0", "#e9e4d8", "#efe8d4", "#f3efe6", "#e6dfcf", "#f1ece2"][v]);
     const klinker = v === 3 || v === 6;
     const brF = klinker ? K3.c("#9b5a45") : putz2;
-    const R9 = clamp4(Math.min(w, d) * 0.22, 5, 11), rueck = 0.7;
+    const R9 = clamp5(Math.min(w, d) * 0.22, 5, 11), rueck = 0.7;
     const staffel2 = n >= 3 && (v === 1 || v === 4 || v === 7);
     const turm4 = v === 0 || v === 5 || v === 2;
     const Hb = staffel2 ? Hw - GH : Hw;
@@ -47908,13 +48872,13 @@
     const cx = x0 + w - R9, cz = z0 + d - R9;
     K3.tRelief = 0.3;
     const ei = rueck + 0.1;
-    S.quader(x0, 0, z0, cx, EG, z0 + d - ei, dunkler(putz2, 0.1));
-    S.quader(cx - 0.01, 0, z0, x0 + w - ei, EG, cz, dunkler(putz2, 0.1));
-    viertelzylinder(S, cx, cz, R9 - ei, 0, EG, dunkler(putz2, 0.1));
-    S.quader(x0, EG, z0, cx, Hb, z0 + d, putz2);
-    S.quader(cx - 0.01, EG, z0, x0 + w, Hb, cz, putz2);
-    viertelzylinder(S, cx, cz, R9, EG, Hb, putz2, 16);
-    const nOG = Math.floor((Hb - EG + 0.1) / GH);
+    S.quader(x0, 0, z0, cx, EG2, z0 + d - ei, dunkler(putz2, 0.1));
+    S.quader(cx - 0.01, 0, z0, x0 + w - ei, EG2, cz, dunkler(putz2, 0.1));
+    viertelzylinder2(S, cx, cz, R9 - ei, 0, EG2, dunkler(putz2, 0.1));
+    S.quader(x0, EG2, z0, cx, Hb, z0 + d, putz2);
+    S.quader(cx - 0.01, EG2, z0, x0 + w, Hb, cz, putz2);
+    viertelzylinder2(S, cx, cz, R9, EG2, Hb, putz2, 16);
+    const nOG = Math.floor((Hb - EG2 + 0.1) / GH);
     K3.raster = 2.8;
     K3.fensterBand = [1.9, 4.2];
     for (const s2 of K3.seiten) {
@@ -47923,42 +48887,42 @@
       const ax = erdgeschoss(K3, s2, { u1: uEnd, raster: 4.5, pfeiler: "#3e464d", pb: 0.35, sockel: "#3b3f44", sturz: putz2 });
       vordach(K3, s2, { stil: "duenn", u1: uEnd, ecke: false, tiefe: 2.4, y: 4.6, farbe: "#f4f1ea" });
       for (let k = 0; k < nOG; k++) {
-        const y0 = EG + k * GH;
+        const y0 = EG2 + k * GH;
         s2.q(0, uEnd, y0, y0 + 1.75, 0, 0.22, brF);
         s2.q(0, uEnd, y0 + 1.75, y0 + 1.9, 0, 0.32, heller(putz2, 0.03));
-        s2.q(0, uEnd, y0 + 1.9, y0 + GH - 0.3, 0, 0.05, GLAS);
+        s2.q(0, uEnd, y0 + 1.9, y0 + GH - 0.3, 0, 0.05, GLAS2);
         s2.q(0, uEnd, y0 + GH - 0.3, y0 + GH, 0, 0.1, brF);
         for (let u = 0.7; u < uEnd; u += 1.4) s2.q(u - 0.05, u + 0.05, y0 + 1.9, y0 + GH - 0.3, 0, 0.1, "#e9eef0");
         if (klinker) for (let y = y0 + 0.35; y < y0 + 1.7; y += 0.35) s2.q(0, uEnd, y, y + 0.05, 0.22, 0.25, dunkler(brF, 0.07));
       }
       s2.q(0, uEnd, Hb, Hb + 1, 0, 0.12, brF);
       s2.q(0, uEnd, Hb + 1, Hb + 1.15, -0.1, 0.25, heller(putz2, 0.04));
-      flecken(K3, s2, 0, uEnd, EG, Hb, 0.24, brF, 8);
+      flecken(K3, s2, 0, uEnd, EG2, Hb, 0.24, brF, 8);
       if (turm4 && s2.seite === "+z") {
         const u = uEnd * 0.32;
         (K3.vorspruenge ?? (K3.vorspruenge = [])).push({ seite: s2.seite, u0: u - 2.6, u1: u + 2.6, t: 1.6, voll: true });
-        s2.q(u - 2.2, u + 2.2, EG, Hb + 3, 0, 1.4, putz2);
-        s2.q(u - 1.7, u + 1.7, EG + 0.4, Hb + 2.4, 1.4, 1.46, GLAS_HELL);
-        for (let y = EG + 1.2; y < Hb + 2.4; y += 1.1) s2.q(u - 1.7, u + 1.7, y, y + 0.08, 1.4, 1.52, "#e9eef0");
-        s2.q(u - 0.05, u + 0.05, EG + 0.4, Hb + 2.4, 1.4, 1.52, "#e9eef0");
+        s2.q(u - 2.2, u + 2.2, EG2, Hb + 3, 0, 1.4, putz2);
+        s2.q(u - 1.7, u + 1.7, EG2 + 0.4, Hb + 2.4, 1.4, 1.46, GLAS_HELL2);
+        for (let y = EG2 + 1.2; y < Hb + 2.4; y += 1.1) s2.q(u - 1.7, u + 1.7, y, y + 0.08, 1.4, 1.52, "#e9eef0");
+        s2.q(u - 0.05, u + 0.05, EG2 + 0.4, Hb + 2.4, 1.4, 1.52, "#e9eef0");
         s2.q(u - 2.4, u + 2.4, Hb + 3, Hb + 3.3, -0.2, 1.6, heller(putz2, 0.04));
       }
     }
-    const ring = (rad2, y0, y1, f) => viertelzylinder(S, cx, cz, rad2, y0, y1, f, 16);
+    const ring = (rad2, y0, y1, f) => viertelzylinder2(S, cx, cz, rad2, y0, y1, f, 16);
     ring(R9 - rueck, 0.55, 4.3, GLAS_TUER);
     ring(R9 + 0.06, 0, 0.55, "#3b3f44");
-    ring(R9 + 0.04, 4.3, EG, putz2);
+    ring(R9 + 0.04, 4.3, EG2, putz2);
     for (let k = 0; k <= 5; k++) {
       const a = k / 5 * Math.PI / 2;
-      S.box(0.12, 3.8, 0.12, cx + Math.sin(a) * (R9 - rueck + 0.06), 2.4, cz + Math.cos(a) * (R9 - rueck + 0.06), RAHMEN2);
+      S.box(0.12, 3.8, 0.12, cx + Math.sin(a) * (R9 - rueck + 0.06), 2.4, cz + Math.cos(a) * (R9 - rueck + 0.06), RAHMEN3);
     }
     ring(R9 + 2.4, 4.6, 4.84, "#f4f1ea");
     ring(R9 + 2.44, 4.67, 4.77, ROT2);
     for (let k = 0; k < nOG; k++) {
-      const y0 = EG + k * GH;
+      const y0 = EG2 + k * GH;
       ring(R9 + 0.22, y0, y0 + 1.75, brF);
       ring(R9 + 0.32, y0 + 1.75, y0 + 1.9, heller(putz2, 0.03));
-      ring(R9 + 0.05, y0 + 1.9, y0 + GH - 0.3, GLAS);
+      ring(R9 + 0.05, y0 + 1.9, y0 + GH - 0.3, GLAS2);
       ring(R9 + 0.1, y0 + GH - 0.3, y0 + GH, brF);
       for (let j = 1; j < 8; j++) {
         const a = j / 8 * Math.PI / 2;
@@ -47967,28 +48931,28 @@
     }
     ring(R9 + 0.12, Hb, Hb + 1, brF);
     ring(R9 + 0.25, Hb + 1, Hb + 1.15, heller(putz2, 0.04));
-    ring(R9 - 0.25, Hb + 0.9, Hb + 1.17, KIES2);
-    S.quader(x0, Hb, z0, x0 + w - 0.3, Hb + 0.9, z0 + d - 0.3, KIES2);
+    ring(R9 - 0.25, Hb + 0.9, Hb + 1.17, KIES3);
+    S.quader(x0, Hb, z0, x0 + w - 0.3, Hb + 0.9, z0 + d - 0.3, KIES3);
     if (staffel2) {
       const sw = w - Math.max(6, w * 0.18), sd = d - Math.max(6, d * 0.2);
       setzeDach(K3, x0 + 2, z0 + 2, x0 + sw - 2, z0 + sd - 2, Hw + 0.4);
       S.quader(x0, Hb, z0, x0 + sw, Hw, z0 + sd, putz2);
-      for (const s2 of seitenVon(S, x0, z0, sw, sd)) {
-        s2.q(0, s2.L, Hb + 1.2, Hw - 0.6, 0, 0.05, GLAS);
+      for (const s2 of seitenVon2(S, x0, z0, sw, sd)) {
+        s2.q(0, s2.L, Hb + 1.2, Hw - 0.6, 0, 0.05, GLAS2);
         for (let u = 1; u < s2.L; u += 2.5) s2.q(u - 0.08, u + 0.08, Hb + 1.2, Hw - 0.6, 0, 0.12, putz2);
       }
       S.quader(x0 - 0.5, Hw, z0 - 0.5, x0 + sw + 1.2, Hw + 0.35, z0 + sd + 1.2, heller(putz2, 0.04));
-      S.quader(x0, Hw + 0.35, z0, x0 + sw + 0.7, Hw + 0.4, z0 + sd + 0.7, KIES2);
-      lichtkuppeln(K3, x0 + 2, z0 + 2, x0 + sw - 2, z0 + sd - 2, Hw + 0.4, 7, 9);
-      technik(K3, x0 + 3, z0 + 3, x0 + sw - 3, z0 + sd - 3, Hw + 0.4, { max: 4 });
+      S.quader(x0, Hw + 0.35, z0, x0 + sw + 0.7, Hw + 0.4, z0 + sd + 0.7, KIES3);
+      lichtkuppeln2(K3, x0 + 2, z0 + 2, x0 + sw - 2, z0 + sd - 2, Hw + 0.4, 7, 9);
+      technik2(K3, x0 + 3, z0 + 3, x0 + sw - 3, z0 + sd - 3, Hw + 0.4, { max: 4 });
     } else {
       setzeDach(K3, x0 + 2, z0 + 2, x0 + w - R9, z0 + d - 5, Hb + 0.9);
-      lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - 6, z0 + d - 6, Hb + 0.9);
-      technik(K3, x0 + 3, z0 + 3, x0 + w - 6, z0 + d - 6, Hb + 0.9, { max: 6 });
+      lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - 6, z0 + d - 6, Hb + 0.9);
+      technik2(K3, x0 + 3, z0 + 3, x0 + w - 6, z0 + d - 6, Hb + 0.9, { max: 6 });
     }
     for (const s2 of K3.seiten) {
       const uEnd = s2.L - R9;
-      const hb = clamp4(uEnd * 0.07, 2.2, 4.2);
+      const hb = clamp5(uEnd * 0.07, 2.2, 4.2);
       const u = uEnd * 0.55, br = Math.min(schriftBreite("HARTWIG", hb), uEnd * 0.8);
       const hbIst = Math.min(hb, uEnd * 0.8 / schriftBreite("HARTWIG", 1));
       const yB = (staffel2 ? Hb + 1.15 : Hb + 1.15) + 0.3, y = yB + hbIst * 0.7;
@@ -48024,9 +48988,9 @@
     const wand2 = v % 4 === 0 || v % 4 === 3;
     const rueck = 0.7, ei = rueck + 0.1;
     K3.tRelief = 0.45;
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, dunkler(stein, 0.1));
-    S.quader(x0, EG, z0, x0 + w, Hb, z0 + d, stein);
-    const nOG = Math.floor((Hb - EG + 0.1) / GH);
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(stein, 0.1));
+    S.quader(x0, EG2, z0, x0 + w, Hb, z0 + d, stein);
+    const nOG = Math.floor((Hb - EG2 + 0.1) / GH);
     K3.raster = c * 2;
     K3.fensterBand = [1.5, 4.4];
     for (const s2 of K3.seiten) {
@@ -48035,9 +48999,9 @@
       vordach(K3, s2, { stil: "duenn", tiefe: 3, y: 4.7, farbe: "#f6f4ef", stuetzen: st });
       const wu0 = 0, wu1 = wand2 && (s2.seite === "+z" || v % 4 === 0) ? Math.min(s2.L * 0.34, 26) : 0;
       if (wu1 > 0 && nOG > 0) {
-        s2.q(wu0, wu1, EG, Hb, 0, 0.3, heller(stein, 0.03));
+        s2.q(wu0, wu1, EG2, Hb, 0, 0.3, heller(stein, 0.03));
         let k = 0;
-        for (let y = EG + 1; y < Hb - 0.2; y += 1, k++) {
+        for (let y = EG2 + 1; y < Hb - 0.2; y += 1, k++) {
           s2.q(wu0, wu1, y - 0.03, y + 0.03, 0.3, 0.32, dunkler(stein, 0.06));
           for (let u = wu0 + (k % 2 ? 0.8 : 1.6); u < wu1 - 0.3; u += 1.6) s2.q(u - 0.03, u + 0.03, y - 1, y, 0.3, 0.32, dunkler(stein, 0.05));
         }
@@ -48045,47 +49009,47 @@
       const ru0 = wu1 > 0 ? wu1 + 0.3 : 0, len = s2.L - ru0;
       const nc = Math.max(1, Math.round(len / c)), cw = len / nc;
       for (let k = 0; k < nOG; k++) {
-        const y0 = EG + k * GH;
+        const y0 = EG2 + k * GH;
         for (let i = 0; i < nc; i++) {
           const a = ru0 + i * cw, b = a + cw;
           s2.q(a, b, y0 + 0.3, y0 + 1.5, 0, 0.08, mosaik3[(i * 7 + k * 3 + i % 3) % 3 === 0 ? 2 : (i + k) % 2]);
-          s2.q(a, b, y0 + 1.5, y0 + GH, 0, 0.04, GLAS);
-          s2.q(a + cw * 0.5 - 0.04, a + cw * 0.5 + 0.04, y0 + 1.5, y0 + GH, 0, 0.1, RAHMEN2);
+          s2.q(a, b, y0 + 1.5, y0 + GH, 0, 0.04, GLAS2);
+          s2.q(a + cw * 0.5 - 0.04, a + cw * 0.5 + 0.04, y0 + 1.5, y0 + GH, 0, 0.1, RAHMEN3);
         }
         s2.q(ru0, s2.L, y0, y0 + 0.32, 0, 0.42, rahmenF);
       }
       s2.q(ru0, s2.L, Hb - 0.05, Hb + 0.5, 0, 0.45, rahmenF);
       if (nOG > 0) for (let i = 0; i <= nc; i++) {
         const u = ru0 + i * cw;
-        s2.q(u - 0.12, u + 0.12, EG, Hb, 0, 0.4, rahmenF);
+        s2.q(u - 0.12, u + 0.12, EG2, Hb, 0, 0.4, rahmenF);
       }
-      flecken(K3, s2, 0, s2.L, EG, Hb, 0.43, stein, 8);
-      if (wu1 > 0 && nOG > 0) K3.zonen[s2.seite] = { u: wu1 / 2, y: EG + (Hb - EG) * 0.55, t: 0.5, hb: clamp4(wu1 * 0.11, 1.8, 3.6), max: wu1 * 0.85, grund: stein, wand: true };
+      flecken(K3, s2, 0, s2.L, EG2, Hb, 0.43, stein, 8);
+      if (wu1 > 0 && nOG > 0) K3.zonen[s2.seite] = { u: wu1 / 2, y: EG2 + (Hb - EG2) * 0.55, t: 0.5, hb: clamp5(wu1 * 0.11, 1.8, 3.6), max: wu1 * 0.85, grund: stein, wand: true };
     }
-    S.quader(x0, Hb, z0, x0 + w, Hb + 0.15, z0 + d, KIES2);
+    S.quader(x0, Hb, z0, x0 + w, Hb + 0.15, z0 + d, KIES3);
     S.quader(x0, Hb + 0.15, z0 + d - 0.4, x0 + w, Hb + 0.9, z0 + d, rahmenF);
     S.quader(x0 + w - 0.4, Hb + 0.15, z0, x0 + w, Hb + 0.9, z0 + d, rahmenF);
     if (staffel2) {
       const sw = w - Math.max(6, w * 0.2), sd = d - Math.max(6, d * 0.22);
       setzeDach(K3, x0 + 2, z0 + 2, x0 + sw - 2, z0 + sd - 2, Hw + 0.3);
       S.quader(x0, Hb, z0, x0 + sw, Hw - 0.1, z0 + sd, heller(stein, 0.02));
-      lichtkuppeln(K3, x0 + sw + 1, z0 + 2, x0 + w - 1, z0 + d - 1, Hb + 0.15, 6.5, 8);
-      lichtkuppeln(K3, x0 + 2, z0 + sd + 1, x0 + sw, z0 + d - 1, Hb + 0.15, 6.5, 8);
-      for (const s2 of seitenVon(S, x0, z0, sw, sd)) {
-        s2.q(0, s2.L, Hb + 0.8, Hw - 0.6, 0, 0.05, GLAS);
+      lichtkuppeln2(K3, x0 + sw + 1, z0 + 2, x0 + w - 1, z0 + d - 1, Hb + 0.15, 6.5, 8);
+      lichtkuppeln2(K3, x0 + 2, z0 + sd + 1, x0 + sw, z0 + d - 1, Hb + 0.15, 6.5, 8);
+      for (const s2 of seitenVon2(S, x0, z0, sw, sd)) {
+        s2.q(0, s2.L, Hb + 0.8, Hw - 0.6, 0, 0.05, GLAS2);
         for (let u = 1; u < s2.L; u += 2) s2.q(u - 0.06, u + 0.06, Hb + 0.8, Hw - 0.6, 0, 0.12, "#f4f1ea");
       }
       S.quader(x0 - 0.3, Hw - 0.1, z0 - 0.3, x0 + sw + 2.6, Hw + 0.25, z0 + sd + 2.6, "#f6f4ef");
-      S.quader(x0, Hw + 0.25, z0, x0 + sw + 2, Hw + 0.3, z0 + sd + 2, KIES2);
-      technik(K3, x0 + 3, z0 + 3, x0 + sw - 3, z0 + sd - 3, Hw + 0.3, { max: 4 });
+      S.quader(x0, Hw + 0.25, z0, x0 + sw + 2, Hw + 0.3, z0 + sd + 2, KIES3);
+      technik2(K3, x0 + 3, z0 + 3, x0 + sw - 3, z0 + sd - 3, Hw + 0.3, { max: 4 });
     } else {
       setzeDach(K3, x0 + 2, z0 + 2, x0 + w - 2, z0 + d - 4, Hb + 0.15);
-      lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - 4, z0 + d - 4, Hb + 0.15);
-      technik(K3, x0 + 3, z0 + 3, x0 + w - 4, z0 + d - 4, Hb + 0.15, { max: 7 });
+      lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - 4, z0 + d - 4, Hb + 0.15);
+      technik2(K3, x0 + 3, z0 + 3, x0 + w - 4, z0 + d - 4, Hb + 0.15, { max: 7 });
     }
     for (const s2 of K3.seiten) {
       if (K3.zonen[s2.seite]) continue;
-      const hb = clamp4(s2.L * 0.065, 2, 3.8), hbIst = Math.min(hb, s2.L * 0.7 / schriftBreite("HARTWIG", 1));
+      const hb = clamp5(s2.L * 0.065, 2, 3.8), hbIst = Math.min(hb, s2.L * 0.7 / schriftBreite("HARTWIG", 1));
       const u = s2.L * 0.5, br = schriftBreite("HARTWIG", hbIst), yB = staffel2 ? Hw + 0.25 : Hb + 0.9;
       const tf = staffel2 ? -2.4 : -0.8;
       for (let k = 0; k <= 5; k++) {
@@ -48096,7 +49060,7 @@
       K3.zonen[s2.seite] = { u, y: yB + 0.4 + hbIst * 0.75, t: tf, hb, max: s2.L * 0.7, grund: stein, dach: true };
     }
     if (v % 3 === 1 && n >= 2) {
-      const s2 = K3.seiten[1], u = s2.L - 2.5, y = EG + GH * 0.6;
+      const s2 = K3.seiten[1], u = s2.L - 2.5, y = EG2 + GH * 0.6;
       s2.q(u - 0.1, u + 0.1, y - 0.1, y + 0.1, 0, 1.5, "#4a4f55");
       const g = new three_module_exports.CylinderGeometry(1, 1, 0.3, 16);
       g.rotateX(Math.PI / 2);
@@ -48109,7 +49073,7 @@
       g2.translate(u, y, 2.2);
       s2.geo(g2, ROT2);
     }
-    if (n >= 3) haengefahnen(K3, K3.seiten[1], [K3.seiten[1].L * 0.15, K3.seiten[1].L * 0.45], EG + GH * 1.5, 0.42);
+    if (n >= 3) haengefahnen(K3, K3.seiten[1], [K3.seiten[1].L * 0.15, K3.seiten[1].L * 0.45], EG2 + GH * 1.5, 0.42);
     return Hw + 5;
   }
   function familie4(K3) {
@@ -48122,25 +49086,25 @@
     const waschbeton = K3.c("#b3aa98");
     const rueck = 0.7, ei = kr + rueck + 0.1;
     K3.tRelief = 0.4;
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, dunkler(waschbeton, 0.08));
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, fuge);
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(waschbeton, 0.08));
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, fuge);
     const schlitz = (v === 2 || v === 5 || v === 7) && n >= 3;
-    const flaeche5 = (w + d) * (Hw - EG);
-    const k = clamp4(Math.sqrt(flaeche5 * 2 / 3400), 1.35, 2.6);
+    const flaeche5 = (w + d) * (Hw - EG2);
+    const k = clamp5(Math.sqrt(flaeche5 * 2 / 3400), 1.35, 2.6);
     K3.raster = 3.2;
     K3.fensterBand = [0.9, 3.6];
     for (const s2 of K3.seiten) {
       const ax = erdgeschoss(K3, s2, { tF: -kr, raster: 5.5, pfeiler: waschbeton, sockel: dunkler(waschbeton, 0.1), sturz: dunkler(kF, 0.05), pb: 1.2, tuer: "schiebe" });
-      for (const a of ax) for (let y = 0.9; y < EG; y += 0.9) s2.q(a.a - 1.2, a.a, y, y + 0.05, -kr + 0.12, -kr + 0.15, dunkler(waschbeton, 0.1));
+      for (const a of ax) for (let y = 0.9; y < EG2; y += 0.9) s2.q(a.a - 1.2, a.a, y, y + 0.05, -kr + 0.12, -kr + 0.15, dunkler(waschbeton, 0.1));
       vordach(K3, s2, { tF: -kr, tiefe: kr + 1.4, y: 4.75, dicke: 0.5, farbe: "#d9d6cf", stil: "platte" });
       if (n < 2) continue;
-      const y0 = EG + 0.35, y1 = Hw - 0.75;
+      const y0 = EG2 + 0.35, y1 = Hw - 0.75;
       const sy0 = Hw - 2.6, sy1 = Hw - 1.6;
       const rows = Math.floor((y1 - y0) / k), cols = Math.floor(s2.L / k);
       const ou = (s2.L - cols * k) / 2;
       if (muster === "lamellen") {
         for (let u = 0.45; u < s2.L; u += 0.9) s2.q(u - 0.09, u + 0.09, y0, y1, 0, 0.45, kF);
-        for (let y = EG + GH; y < y1; y += GH) s2.q(0, s2.L, y - 0.15, y + 0.15, 0, 0.5, heller(kF, 0.03));
+        for (let y = EG2 + GH; y < y1; y += GH) s2.q(0, s2.L, y - 0.15, y + 0.15, 0, 0.5, heller(kF, 0.03));
         s2.q(0, s2.L, y0, y1, 0, 0.02, dunkler(kF, 0.08));
       } else for (let j = 0; j < rows; j++) {
         const yc = y0 + (j + 0.5) * k;
@@ -48165,41 +49129,41 @@
         }
       }
       if (schlitz) {
-        s2.q(0, s2.L, sy0, sy1, 0, 0.3, GLAS);
+        s2.q(0, s2.L, sy0, sy1, 0, 0.3, GLAS2);
         for (let u = 1.2; u < s2.L; u += 2.4) s2.q(u - 0.05, u + 0.05, sy0, sy1, 0.3, 0.36, "#c9ced2");
         s2.q(0, s2.L, sy0 - 0.15, sy0, 0, 0.42, "#c9ced2");
       }
       s2.q(0, s2.L, Hw - 0.75, Hw + 0.35, 0, 0.42, "#c9ced2");
-      s2.q(0, s2.L, EG, EG + 0.35, 0, 0.42, "#c9ced2");
+      s2.q(0, s2.L, EG2, EG2 + 0.35, 0, 0.42, "#c9ced2");
       for (let i = 0; i < 2 + (s2.L > 50 ? 1 : 0); i++) {
         const u = s2.L * (0.18 + i * 0.3), [x, z2] = s2.welt(u, 2.6);
-        zyl2(S, x, 0.3, z2, 0.95, 0.75, waschbeton, 6);
+        zyl3(S, x, 0.3, z2, 0.95, 0.75, waschbeton, 6);
         const g = new three_module_exports.IcosahedronGeometry(0.9, 0);
         g.translate(x, 1.6, z2);
         S.add(g, "#6fa860");
       }
     }
     if (n < 2) {
-      for (const s2 of K3.seiten) for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.5, u + 0.5, EG + 0.3, Hw - 0.3, 0, 0.25, kF);
+      for (const s2 of K3.seiten) for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.5, u + 0.5, EG2 + 0.3, Hw - 0.3, 0, 0.25, kF);
     }
     if (parkdeckJa && w >= 30) {
-      attika2(K3, x0, z0, w, d, Hw + 0.35, 0.2, "#c9ced2", 0.4);
+      attika3(K3, x0, z0, w, d, Hw + 0.35, 0.2, "#c9ced2", 0.4);
       setzeDach(K3, x0 + 1, z0 + 1, x0 + w - 1, z0 + d - 1, Hw + 0.6);
       parkdeck(K3, x0 + 0.5, z0 + 0.5, x0 + w - 0.5, z0 + d - 0.5, Hw + 0.4);
     } else {
-      attika2(K3, x0, z0, w, d, Hw + 0.35, 0.3, "#c9ced2", 0.4);
+      attika3(K3, x0, z0, w, d, Hw + 0.35, 0.3, "#c9ced2", 0.4);
       const tw = Math.min(w * 0.45, 30), td = Math.min(d * 0.5, 18);
       S.quader(x0 + 4, Hw + 0.5, z0 + 4, x0 + 4 + tw, Hw + 4.5, z0 + 4 + td, fuge);
-      for (const s2 of seitenVon(S, x0 + 4, z0 + 4, tw, td)) for (let u = 0.4; u < s2.L; u += 0.8) s2.q(u - 0.1, u + 0.1, Hw + 0.6, Hw + 4.4, 0, 0.3, kF);
+      for (const s2 of seitenVon2(S, x0 + 4, z0 + 4, tw, td)) for (let u = 0.4; u < s2.L; u += 0.8) s2.q(u - 0.1, u + 0.1, Hw + 0.6, Hw + 4.4, 0, 0.3, kF);
       S.quader(x0 + 3.8, Hw + 4.5, z0 + 3.8, x0 + 4.2 + tw, Hw + 4.8, z0 + 4.2 + td, "#c9ced2");
       setzeDach(K3, x0 + 6 + tw, z0 + 2, x0 + w - 2, z0 + d - 2, Hw + 0.5);
-      lichtkuppeln(K3, x0 + 6 + tw, z0 + 3, x0 + w - 3, z0 + d - 3, Hw + 0.5);
-      technik(K3, x0 + 6 + tw, z0 + 3, x0 + w - 3, z0 + d - 3, Hw + 0.5, { max: 4 });
+      lichtkuppeln2(K3, x0 + 6 + tw, z0 + 3, x0 + w - 3, z0 + d - 3, Hw + 0.5);
+      technik2(K3, x0 + 6 + tw, z0 + 3, x0 + w - 3, z0 + d - 3, Hw + 0.5, { max: 4 });
     }
     for (const s2 of K3.seiten) {
-      const hb = clamp4(s2.L * 0.075, 2.4, 5.5);
-      if (n >= 2) K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG + (Hw - EG) * (schlitz ? 0.42 : 0.55), t: 0.6, hb: Math.min(hb, (Hw - EG) * 0.32), max: s2.L * 0.72, grund: kF };
-      else K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG + 1.2, t: 0.45, hb: 1.5, max: s2.L * 0.7, grund: kF };
+      const hb = clamp5(s2.L * 0.075, 2.4, 5.5);
+      if (n >= 2) K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG2 + (Hw - EG2) * (schlitz ? 0.42 : 0.55), t: 0.6, hb: Math.min(hb, (Hw - EG2) * 0.32), max: s2.L * 0.72, grund: kF };
+      else K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG2 + 1.2, t: 0.45, hb: 1.5, max: s2.L * 0.7, grund: kF };
     }
     return Hw + 7;
   }
@@ -48209,11 +49173,11 @@
     const basisF = K3.c({ pomo: ["#eadfce", "#e6dccf", "#efe4d2"][v % 3], stein: "#dcd9d2", glas: "#d5dcdf" }[stil]);
     const akzent = K3.c(["#3f8f8e", "#c46a55", "#2f6f8f", "#7a5aa0"][v % 4]);
     const band = K3.c(["#d9a48f", "#c7b8a3", "#a9bfc9"][v % 3]);
-    const A = clamp4(Math.min(w, d) * 0.32, 8, 18);
+    const A = clamp5(Math.min(w, d) * 0.32, 8, 18);
     const rueck = 0.7, ei = rueck + 0.1;
     K3.tRelief = 0.35;
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, dunkler(basisF, 0.1));
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, basisF);
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(basisF, 0.1));
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, basisF);
     const nOG = n - 1 + (n === 1 ? 0 : 0);
     const Ha = Hw + (n >= 2 ? 3 : 1.5);
     S.quader(x0 + w - A, 0, z0 + d - A, x0 + w, Ha, z0 + d, "#c5d3da");
@@ -48225,7 +49189,7 @@
       erdgeschoss(K3, s2, { u1: uE, raster: 5, pfeiler: "#59636b", pb: 0.4, sockel: "#6b7177", sturz: stil === "pomo" ? band : dunkler(basisF, 0.04), glas: "#557286", tuer: "schiebe" });
       vordach(K3, s2, { stil: "glas", tiefe: 2.6, y: 4.6, u1: uE + 0.5, ecke: false });
       s2.q(uE, s2.L, 0.3, Ha - 0.3, 0, 0.05, "#6f93a6");
-      for (let y = EG; y < Hw; y += GH) s2.q(uE + 0.2, s2.L - 0.2, y - 0.3, y + 0.1, 0.05, 0.08, "#e1e6e8");
+      for (let y = EG2; y < Hw; y += GH) s2.q(uE + 0.2, s2.L - 0.2, y - 0.3, y + 0.1, 0.05, 0.08, "#e1e6e8");
       for (let u = uE; u <= s2.L + 0.01; u += A / Math.round(A / 1.5)) s2.q(u - 0.07, u + 0.07, 0.3, Ha, 0.05, 0.2, "#e6eaec");
       for (let y = 0.3; y < Ha; y += 1.5) s2.q(uE, s2.L, y - 0.05, y + 0.05, 0.05, 0.16, "#e6eaec");
       s2.q(uE - 0.2, uE + 0.2, 0, Ha + 0.2, 0, 0.35, "#59636b");
@@ -48241,11 +49205,11 @@
       if (n < 2) continue;
       if (stil === "pomo") {
         for (let k = 0; k < nOG; k++) {
-          const y0 = EG + k * GH;
+          const y0 = EG2 + k * GH;
           s2.q(0, uE, y0, y0 + 1, 0, 0.12, band);
           for (let u = 1.6; u < uE - 1; u += 3.2) {
             s2.q(u - 0.95, u + 0.95, y0 + 1.6, y0 + 3.5, 0, 0.18, akzent);
-            s2.q(u - 0.75, u + 0.75, y0 + 1.8, y0 + 3.3, 0.18, 0.22, GLAS);
+            s2.q(u - 0.75, u + 0.75, y0 + 1.8, y0 + 3.3, 0.18, 0.22, GLAS2);
             s2.q(u - 0.05, u + 0.05, y0 + 1.8, y0 + 3.3, 0.18, 0.25, akzent);
           }
         }
@@ -48257,44 +49221,44 @@
         }
         for (const uu of [uE * 0.3 - 4.5, uE * 0.3 + 4.5]) if (s2.seite === "+z") {
           const [x, z2] = s2.welt(uu, 1.2);
-          zyl2(S, x, 0.3, z2, 0.45, EG - 0.3, akzent, 12);
+          zyl3(S, x, 0.3, z2, 0.45, EG2 - 0.3, akzent, 12);
         }
       } else if (stil === "stein") {
         for (let k = 0; k < nOG; k++) {
-          const y0 = EG + k * GH;
-          s2.q(0, uE, y0 + 1.4, y0 + 3.4, 0, 0.05, GLAS);
+          const y0 = EG2 + k * GH;
+          s2.q(0, uE, y0 + 1.4, y0 + 3.4, 0, 0.05, GLAS2);
           for (let u = 0.75; u < uE; u += 1.5) s2.q(u - 0.06, u + 0.06, y0 + 1.4, y0 + 3.4, 0, 0.14, "#8d969c");
           s2.q(0, uE, y0 + 1.3, y0 + 1.42, 0, 0.3, heller(basisF, 0.05));
           for (let u = 3; u < uE; u += 3) s2.q(u - 0.02, u + 0.02, y0, y0 + 1.3, 0, 0.02, dunkler(basisF, 0.06));
         }
         s2.q(0, uE, Hw - 0.3, Hw + 0.5, 0, 0.3, heller(basisF, 0.04));
       } else {
-        s2.q(0, uE, EG, Hw, 0, 0.05, "#6a8a9c");
-        for (let u = 0; u <= uE; u += 1.5) s2.q(u - 0.05, u + 0.05, EG, Hw, 0.05, 0.15, "#dfe4e6");
+        s2.q(0, uE, EG2, Hw, 0, 0.05, "#6a8a9c");
+        for (let u = 0; u <= uE; u += 1.5) s2.q(u - 0.05, u + 0.05, EG2, Hw, 0.05, 0.15, "#dfe4e6");
         for (let k = 0; k < nOG; k++) {
-          const y0 = EG + k * GH;
+          const y0 = EG2 + k * GH;
           s2.q(0, uE, y0 - 0.2, y0 + 0.4, 0.05, 0.18, "#dfe4e6");
           for (let j = 0; j < 3; j++) s2.q(0, uE, y0 + 3 + j * 0.35, y0 + 3.1 + j * 0.35, 0.2, 0.8, "#c9ced2");
         }
         s2.q(0, uE, Hw - 0.2, Hw + 0.6, 0, 0.3, "#c9ced2");
       }
-      flecken(K3, s2, 0, uE, EG, Hw, 0.25, basisF, 8);
+      flecken(K3, s2, 0, uE, EG2, Hw, 0.25, basisF, 8);
     }
     const g = new three_module_exports.ConeGeometry(A * 0.5 * Math.SQRT2 * 0.92, A * 0.4, 4);
     g.rotateY(Math.PI / 4);
     g.translate(x0 + w - A / 2, Ha + A * 0.2, z0 + d - A / 2);
     S.add(g, "#9fbccb");
     S.quader(x0 + w - A - 0.2, Ha - 0.2, z0 + d - A - 0.2, x0 + w + 0.2, Ha + 0.1, z0 + d + 0.2, "#59636b");
-    attika2(K3, x0, z0, w - A, d, Hw + 0.4, 0.4, heller(basisF, 0.03), 0.4);
-    S.quader(x0 + w - A, Hw + 0.4, z0, x0 + w, Hw + 0.55, z0 + d - A, KIES2);
+    attika3(K3, x0, z0, w - A, d, Hw + 0.4, 0.4, heller(basisF, 0.03), 0.4);
+    S.quader(x0 + w - A, Hw + 0.4, z0, x0 + w, Hw + 0.55, z0 + d - A, KIES3);
     setzeDach(K3, x0 + 2, z0 + 2, x0 + w - A - 1, z0 + d - 2, Hw + 0.55);
-    lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - A - 2, z0 + d - 3, Hw + 0.55);
-    technik(K3, x0 + 3, z0 + 3, x0 + w - A - 2, z0 + d - 3, Hw + 0.55, { max: 6 });
+    lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - A - 2, z0 + d - 3, Hw + 0.55);
+    technik2(K3, x0 + 3, z0 + 3, x0 + w - A - 2, z0 + d - 3, Hw + 0.55, { max: 6 });
     fahnenmasten(K3, K3.seiten[0], [3, 6, 9], Hw + 0.8, -0.6);
     for (const s2 of K3.seiten) {
       const uE = s2.L - A;
-      if (n >= 2) K3.zonen[s2.seite] = { u: stil === "pomo" && s2.seite === "+z" ? uE * 0.68 : uE * 0.5, y: EG + (Hw - EG) * 0.58, t: 0.6, hb: clamp4(uE * 0.075, 2, Math.min(4.5, (Hw - EG) * 0.3)), max: stil === "pomo" && s2.seite === "+z" ? uE * 0.5 : uE * 0.78, grund: basisF };
-      else K3.zonen[s2.seite] = { u: uE * 0.5, y: EG + 1.2, t: 0.45, hb: 1.5, max: uE * 0.75, grund: basisF };
+      if (n >= 2) K3.zonen[s2.seite] = { u: stil === "pomo" && s2.seite === "+z" ? uE * 0.68 : uE * 0.5, y: EG2 + (Hw - EG2) * 0.58, t: 0.6, hb: clamp5(uE * 0.075, 2, Math.min(4.5, (Hw - EG2) * 0.3)), max: stil === "pomo" && s2.seite === "+z" ? uE * 0.5 : uE * 0.78, grund: basisF };
+      else K3.zonen[s2.seite] = { u: uE * 0.5, y: EG2 + 1.2, t: 0.45, hb: 1.5, max: uE * 0.75, grund: basisF };
     }
     return Ha + A * 0.4;
   }
@@ -48303,25 +49267,25 @@
     const zm = z0 + d - dm;
     const f = K3.c(["#e6e2da", "#ddd8ce", "#e9e5dd"][K3.v % 3]);
     S.quader(xm, 0, zm, xm + M2, hm, zm + dm - 0.8, dunkler(f, 0.06));
-    S.quader(xm, EG, zm, xm + M2, hm, zm + dm, f);
-    const s2 = new Seite2(S, xm, zm, M2, dm, "+z");
+    S.quader(xm, EG2, zm, xm + M2, hm, zm + dm, f);
+    const s2 = new Seite3(S, xm, zm, M2, dm, "+z");
     const name2 = MALLS[Math.floor(r() * MALLS.length)];
     const portalU = M2 - 9;
     const laeden = ["Caf\xE9", "Optik", "B\xE4ckerei", "Schuhe", "Mode", "Handy", "Apotheke", "Eis"];
     const nb = Math.max(1, Math.floor((portalU - 6) / 7));
-    for (let i = 0; i <= nb; i++) s2.q(i * 7 - 0.3, i * 7 + 0.3, 0, EG, -0.9, 0.1, "#bfc5c9");
+    for (let i = 0; i <= nb; i++) s2.q(i * 7 - 0.3, i * 7 + 0.3, 0, EG2, -0.9, 0.1, "#bfc5c9");
     for (let i = 0; i < nb; i++) {
       const a = i * 7 + 0.3, b = (i + 1) * 7 - 0.3;
       s2.q(a, b, 0.4, 3.6, -0.9, -0.8, "#5e7c8e");
-      s2.q(a, b, 3.6, EG, -0.8, 0.05, "#cfd3d6");
+      s2.q(a, b, 3.6, EG2, -0.8, 0.05, "#cfd3d6");
       const t = laeden[(i + Math.floor(r() * 3)) % laeden.length];
       const c = waehle2(r, ["#2f6f8f", "#3f7d56", "#8c3b3b", "#d39a2b", "#6b4f8f", "#2b2b2b"]);
       s2.q(a + 0.6, b - 0.6, 3.85, 5, 0.05, 0.2, c);
-      plakat2(K3, s2, t, (a + b) / 2, 4.42, 0.22, 0.8, "#ffffff", c);
-      if (!K3.zu) puppe(s2, a + 1.5, 0.4, -0.45, waehle2(r, KLEID2), "#2b2b2b");
+      plakat3(K3, s2, t, (a + b) / 2, 4.42, 0.22, 0.8, "#ffffff", c);
+      if (!K3.zu) puppe2(s2, a + 1.5, 0.4, -0.45, waehle2(r, KLEID3), "#2b2b2b");
     }
-    for (let y = EG; y < hm - 1; y += GH) {
-      s2.q(0, portalU - 3, y + 1.2, y + 3.4, 0, 0.05, GLAS);
+    for (let y = EG2; y < hm - 1; y += GH) {
+      s2.q(0, portalU - 3, y + 1.2, y + 3.4, 0, 0.05, GLAS2);
       for (let u = 1.5; u < portalU - 3; u += 3) s2.q(u - 0.06, u + 0.06, y + 1.2, y + 3.4, 0, 0.12, "#bfc5c9");
     }
     s2.q(0, M2, hm - 0.2, hm + 0.6, 0, 0.3, "#cfd3d6");
@@ -48332,13 +49296,13 @@
     for (let y = 3.2; y < ph - 2.5; y += 1.6) s2.q(pu0 + 0.6, pu1 - 0.6, y - 0.05, y + 0.05, 2.2, 2.3, "#eef1f2");
     s2.q(pu0 + 2, pu1 - 2, 0.3, 3, 2.2, 2.35, GLAS_TUER);
     s2.q(pu0 - 1, pu1 + 1, 3.3, 3.7, 0, 5, "#eef1f2");
-    const br = Math.min(pu1 - pu0 - 0.6, plakatBreite(name2, 1.3));
-    plakat2(K3, s2, name2, (pu0 + pu1) / 2, ph - 1.2, 2.3, Math.min(1.3, br / tex2(name2, "#2b3a4a", "#ffffff").seitenverhaeltnis), "#2b3a4a", "#ffffff");
+    const br = Math.min(pu1 - pu0 - 0.6, plakatBreite2(name2, 1.3));
+    plakat3(K3, s2, name2, (pu0 + pu1) / 2, ph - 1.2, 2.3, Math.min(1.3, br / tex3(name2, "#2b3a4a", "#ffffff").seitenverhaeltnis), "#2b3a4a", "#ffffff");
     s2.q(pu0, pu1, ph, ph + 0.3, -0.2, 2.4, "#bfc5c9");
     const [px2, pz4] = s2.welt(pu0 - 5, 4.5);
     S.box(2.2, 11, 1, px2, 5.8, pz4, "#2b3a4a");
-    const sp = new Seite2(S, px2 - 1.1, pz4 - 0.5, 2.2, 1, "+z");
-    plakat2(K3, sp, "EINKAUFEN", 1.1, 9.8, 0.04, 0.32, "#ffffff", "#2b3a4a");
+    const sp = new Seite3(S, px2 - 1.1, pz4 - 0.5, 2.2, 1, "+z");
+    plakat3(K3, sp, "EINKAUFEN", 1.1, 9.8, 0.04, 0.32, "#ffffff", "#2b3a4a");
     const g = new three_module_exports.CylinderGeometry(3.2, 3.2, M2 - 4, 10, 1, false, -Math.PI / 2, Math.PI);
     g.rotateZ(Math.PI / 2);
     g.translate(xm + M2 / 2, hm + 0.4, zm + dm * 0.72);
@@ -48351,17 +49315,17 @@
     }
     S.quader(xm, hm, zm, xm + M2, hm + 0.4, zm + dm, KIES_D);
     if (dm * 0.72 - 4 > 10) parkdeck(K3, xm + 1, zm + 1, xm + M2 - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
-    if (K3.alt) flecken(K3, s2, 0, M2, EG, hm, 0.06, f, 6);
+    if (K3.alt) flecken(K3, s2, 0, M2, EG2, hm, 0.06, f, 6);
   }
   function familie6(K3) {
     const { S, v, x0, z0, w, d, n, Hw } = K3;
     const verkl = K3.c(["#d6d9db", "#e3dccf", "#cfd4d6", "#e6e0d4", "#d9d5cc", "#dfe2e3", "#d2cdc2", "#e2e4e4"][v]);
     const rueck = 0.7, ei = rueck + 0.1;
     K3.tRelief = 0.3;
-    mallFluegel(K3, K3.xm, K3.M, Math.min(d, Math.max(26, d * 0.8)), Math.min(Hw, EG + GH * (n >= 3 ? 1 : 0) + 1.5));
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, dunkler(verkl, 0.1));
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, verkl);
-    const V = clamp4(Math.min(w, d) * 0.18, 5, 9);
+    mallFluegel(K3, K3.xm, K3.M, Math.min(d, Math.max(26, d * 0.8)), Math.min(Hw, EG2 + GH * (n >= 3 ? 1 : 0) + 1.5));
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(verkl, 0.1));
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, verkl);
+    const V = clamp5(Math.min(w, d) * 0.18, 5, 9);
     K3.raster = 4;
     K3.fensterBand = [0.9, 3.6];
     for (const s2 of K3.seiten) {
@@ -48369,26 +49333,26 @@
       erdgeschoss(K3, s2, { raster: 5, pfeiler: "#59636b", pb: 0.4, sockel: "#6b7177", sturz: "#cfd3d6", glas: "#557286", tuer: "schiebe", eingaenge: s2.seite === "+z" ? [1] : void 0 });
       vordach(K3, s2, { stil: "platte", tiefe: 2.4, y: 4.6, farbe: "#eef0f0", dicke: 0.6 });
       if (n < 2) continue;
-      for (let y = EG + 1.2; y < Hw - 0.5; y += 1.2) s2.q(0, s2.L - V, y - 0.04, y + 0.04, 0, 0.06, dunkler(verkl, 0.07));
-      for (let u = 4; u < s2.L - V; u += 4) s2.q(u - 0.03, u + 0.03, EG, Hw, 0, 0.06, dunkler(verkl, 0.05));
-      s2.q(s2.L - V, s2.L, EG, Hw + 1.5, 0, 0.08, "#6f93a6");
-      for (let y = EG; y < Hw + 1.5; y += 1.5) s2.q(s2.L - V, s2.L, y - 0.05, y + 0.05, 0.08, 0.16, "#e6eaec");
-      for (let u = s2.L - V; u <= s2.L + 0.01; u += V / 4) s2.q(u - 0.06, u + 0.06, EG, Hw + 1.5, 0.08, 0.2, "#e6eaec");
+      for (let y = EG2 + 1.2; y < Hw - 0.5; y += 1.2) s2.q(0, s2.L - V, y - 0.04, y + 0.04, 0, 0.06, dunkler(verkl, 0.07));
+      for (let u = 4; u < s2.L - V; u += 4) s2.q(u - 0.03, u + 0.03, EG2, Hw, 0, 0.06, dunkler(verkl, 0.05));
+      s2.q(s2.L - V, s2.L, EG2, Hw + 1.5, 0, 0.08, "#6f93a6");
+      for (let y = EG2; y < Hw + 1.5; y += 1.5) s2.q(s2.L - V, s2.L, y - 0.05, y + 0.05, 0.08, 0.16, "#e6eaec");
+      for (let u = s2.L - V; u <= s2.L + 0.01; u += V / 4) s2.q(u - 0.06, u + 0.06, EG2, Hw + 1.5, 0.08, 0.2, "#e6eaec");
       if (v % 2) {
-        s2.q(2, s2.L - V - 2, Hw - 2.6, Hw - 1.4, 0, 0.08, GLAS);
+        s2.q(2, s2.L - V - 2, Hw - 2.6, Hw - 1.4, 0, 0.08, GLAS2);
       }
       s2.q(0, s2.L - V, Hw - 0.3, Hw + 0.6, 0, 0.3, "#cfd3d6");
-      flecken(K3, s2, 0, s2.L - V, EG, Hw, 0.1, verkl, 8);
-      K3.zonen[s2.seite] = { u: (s2.L - V) * 0.5, y: EG + (Hw - EG) * (v % 2 ? 0.42 : 0.55), t: 0.4, hb: clamp4((s2.L - V) * 0.08, 2, Math.min(5, (Hw - EG) * 0.32)), max: (s2.L - V) * 0.8, grund: verkl };
+      flecken(K3, s2, 0, s2.L - V, EG2, Hw, 0.1, verkl, 8);
+      K3.zonen[s2.seite] = { u: (s2.L - V) * 0.5, y: EG2 + (Hw - EG2) * (v % 2 ? 0.42 : 0.55), t: 0.4, hb: clamp5((s2.L - V) * 0.08, 2, Math.min(5, (Hw - EG2) * 0.32)), max: (s2.L - V) * 0.8, grund: verkl };
     }
-    if (n < 2) for (const s2 of K3.seiten) K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG + 1.2, t: 0.4, hb: 1.5, max: s2.L * 0.75, grund: verkl };
-    attika2(K3, x0, z0, w, d, Hw + 0.6, 0.3, "#cfd3d6", 0.4);
+    if (n < 2) for (const s2 of K3.seiten) K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG2 + 1.2, t: 0.4, hb: 1.5, max: s2.L * 0.75, grund: verkl };
+    attika3(K3, x0, z0, w, d, Hw + 0.6, 0.3, "#cfd3d6", 0.4);
     setzeDach(K3, x0 + 2, z0 + 2, x0 + w - V - 1, z0 + d - V - 1, Hw + 0.75);
-    lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - V - 2, z0 + d - V - 2, Hw + 0.75);
-    technik(K3, x0 + 3, z0 + 3, x0 + w - V - 2, z0 + d - V - 2, Hw + 0.75, { max: 6 });
+    lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - V - 2, z0 + d - V - 2, Hw + 0.75);
+    technik2(K3, x0 + 3, z0 + 3, x0 + w - V - 2, z0 + d - V - 2, Hw + 0.75, { max: 6 });
     const hc = Math.min(V, 5);
     S.box(hc, hc, hc, x0 + w - V / 2, Hw + 1.5 + hc / 2, z0 + d - V / 2, ROT2);
-    for (const s2 of K3.seiten) plakat2(K3, s2, "H", s2.L - V / 2, Hw + 1.5 + hc / 2, -V / 2 + hc / 2 + 0.03, hc * 0.95, "#ffffff", ROT2);
+    for (const s2 of K3.seiten) plakat3(K3, s2, "H", s2.L - V / 2, Hw + 1.5 + hc / 2, -V / 2 + hc / 2 + 0.03, hc * 0.95, "#ffffff", ROT2);
     return Hw + 3 + hc;
   }
   function familie7(K3) {
@@ -48397,34 +49361,34 @@
     const verkl = K3.c({ dunkel: "#3d4349", weiss: "#eef0f0", holz: "#b9875a", netz: "#9aa2a8" }[stil]);
     const rueck = 0.6, ei = rueck + 0.1;
     K3.tRelief = 0.35;
-    if (K3.haus.lage === "center") mallFluegel(K3, K3.xm, K3.M, Math.min(d, Math.max(24, d * 0.8)), EG + 1.5);
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, "#3a4148");
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, verkl);
+    if (K3.haus.lage === "center") mallFluegel(K3, K3.xm, K3.M, Math.min(d, Math.max(24, d * 0.8)), EG2 + 1.5);
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, "#3a4148");
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, verkl);
     const gruppen = K3.gruppenEG;
     const [sz, sx] = K3.seiten;
     for (const s2 of K3.seiten) {
       erdgeschoss(K3, s2, { raster: 4.2, pfeiler: "#2b3036", pb: 0.3, sockel: "#2b3036", sturz: "#2b3036", glas: "#506d80", tuer: "schiebe", rueck, glasTop: 4.6 });
       vordach(K3, s2, { stil: "platte", tiefe: 1.6, y: 4.7, dicke: 0.8, farbe: stil === "weiss" ? ROT2 : "#2b3036", streifen: stil !== "weiss" });
-      const y0 = EG + 0.8, y1 = Hw;
+      const y0 = EG2 + 0.8, y1 = Hw;
       if (stil === "dunkel") for (let u = 1.2; u < s2.L; u += 1.2) s2.q(u - 0.025, u + 0.025, y0 - 0.8, y1, 0, 0.05, heller(verkl, 0.06));
-      if (stil === "holz") for (let u = 0.25; u < s2.L; u += 0.5) s2.q(u - 0.11, u + 0.11, EG, y1, 0, 0.18, K3.r() < 0.5 ? verkl : dunkler(verkl, 0.05));
+      if (stil === "holz") for (let u = 0.25; u < s2.L; u += 0.5) s2.q(u - 0.11, u + 0.11, EG2, y1, 0, 0.18, K3.r() < 0.5 ? verkl : dunkler(verkl, 0.05));
       if (stil === "netz") {
-        for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.04, u + 0.04, EG, y1, 0.25, 0.3, "#c4cacf");
-        for (let y = EG + 0.6; y < y1; y += 1.2) s2.q(0, s2.L, y - 0.04, y + 0.04, 0.25, 0.3, "#c4cacf");
+        for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.04, u + 0.04, EG2, y1, 0.25, 0.3, "#c4cacf");
+        for (let y = EG2 + 0.6; y < y1; y += 1.2) s2.q(0, s2.L, y - 0.04, y + 0.04, 0.25, 0.3, "#c4cacf");
       }
       if (stil === "weiss") {
-        s2.q(0, s2.L, EG, EG + 0.8, 0, 0.1, ROT2);
+        s2.q(0, s2.L, EG2, EG2 + 0.8, 0, 0.1, ROT2);
       }
       s2.q(0, s2.L, Hw - 0.1, Hw + 0.5, 0, 0.12, stil === "weiss" ? "#dfe2e3" : dunkler(verkl, 0.05));
       if (n >= 2 && s2 === sx) {
-        s2.q(1.5, s2.L * 0.45, EG + 1.6, EG + 3.6, 0, 0.3, "#5a7a8c");
-        for (let u = 2.5; u < s2.L * 0.45; u += 1.6) s2.q(u - 0.05, u + 0.05, EG + 1.6, EG + 3.6, 0.3, 0.36, "#2b3036");
+        s2.q(1.5, s2.L * 0.45, EG2 + 1.6, EG2 + 3.6, 0, 0.3, "#5a7a8c");
+        for (let u = 2.5; u < s2.L * 0.45; u += 1.6) s2.q(u - 0.05, u + 0.05, EG2 + 1.6, EG2 + 3.6, 0.3, 0.36, "#2b3036");
       }
-      flecken(K3, s2, 0, s2.L, EG, Hw, 0.36, verkl, 6);
+      flecken(K3, s2, 0, s2.L, EG2, Hw, 0.36, verkl, 6);
     }
-    const wb = Math.min(sz.L * 0.5, 34), wh = Math.min(Hw - EG - 1.2, 11);
+    const wb = Math.min(sz.L * 0.5, 34), wh = Math.min(Hw - EG2 - 1.2, 11);
     if (wh > 2) {
-      const wu = sz.L * 0.32, wy = EG + 0.6 + wh / 2;
+      const wu = sz.L * 0.32, wy = EG2 + 0.6 + wh / 2;
       K3.werbung = { seite: "+z", u0: wu - wb / 2, u1: wu + wb / 2 };
       const bg = ["#1f6fb5", "#f2b705", "#2f8f5b", "#e8562a", "#6b3fa0", "#1f6fb5", "#2b2b2b", "#2f8f5b"][v];
       sz.q(wu - wb / 2 - 0.25, wu + wb / 2 + 0.25, wy - wh / 2 - 0.25, wy + wh / 2 + 0.25, 0.3, 0.45, "#d9dcde");
@@ -48442,22 +49406,22 @@
       sz.kipp(fs * 0.5, fs * 2.4, 0.05, fu + fs * 0.9, fy - fs * 0.4, 0.62, "#ffffff", 0.6);
       sz.kipp(fs * 0.4, fs * 1.9, 0.05, fu + fs * 0.9, fy + fs * 1.9, 0.62, "#ffffff", 1.2);
       const slogan = SLOGANS[(v + Math.floor(r() * 2)) % SLOGANS.length];
-      const sv = tex2(slogan, "#ffffff").seitenverhaeltnis;
+      const sv = tex3(slogan, "#ffffff").seitenverhaeltnis;
       const sph = Math.min(wh * 0.7, wb * 0.62 / sv);
-      plakat2(K3, sz, slogan, wu - wb * 0.17, wy, 0.6, sph, "#ffffff", null);
+      plakat3(K3, sz, slogan, wu - wb * 0.17, wy, 0.6, sph, "#ffffff", null);
     }
     if (stil === "holz" && n >= 2) {
       const u0 = sx.L * 0.55, u1 = Math.min(sx.L - 2, u0 + 9);
-      sx.q(u0, u1, EG - 0.5, Hw - 0.2, 0.2, 0.4, "#8f979c");
+      sx.q(u0, u1, EG2 - 0.5, Hw - 0.2, 0.2, 0.4, "#8f979c");
       for (let i = 0; i < 34; i++) sx.q(...(() => {
-        const u = zw(r, u0 + 0.3, u1 - 0.6), y = zw(r, EG, Hw - 0.8);
+        const u = zw(r, u0 + 0.3, u1 - 0.6), y = zw(r, EG2, Hw - 0.8);
         return [u, u + 0.35, y, y + 0.3];
       })(), 0.4, 0.55, waehle2(r, ["#e04b3a", "#f2c14e", "#3a7bd5", "#4caf50", "#ff8c42", "#8d5fbf"]));
     }
-    const hbS = clamp4(sx.L * 0.05, 1.3, Math.min(2.6, (Hw - EG) * 0.22 + 0.8));
-    K3.zonen["+x"] = { text: "HARTWIG SPORT", sport: true, u: stil === "holz" && n >= 2 ? sx.L * 0.28 : sx.L * 0.5, y: n >= 2 ? Hw - hbS * 1.6 : EG + 2, t: 0.6, hb: n >= 2 ? hbS : 1.1, max: sx.L * 0.48, grund: verkl };
-    K3.zonen["+z"] = { text: "HARTWIG SPORT", sport: true, u: wh > 2 ? Math.min(sz.L * 0.32 + wb / 2 + (sz.L - (sz.L * 0.32 + wb / 2)) / 2, sz.L - 6) : sz.L * 0.5, y: n >= 2 ? Hw - hbS * 1.6 : EG + 2, t: 0.6, hb: n >= 2 ? hbS : 1.1, max: wh > 2 ? (sz.L - sz.L * 0.32 - wb / 2) * 0.8 : sz.L * 0.6, grund: verkl };
-    attika2(K3, x0, z0, w, d, Hw + 0.5, 0.25, stil === "weiss" ? "#dfe2e3" : "#4a5056", 0.35);
+    const hbS = clamp5(sx.L * 0.05, 1.3, Math.min(2.6, (Hw - EG2) * 0.22 + 0.8));
+    K3.zonen["+x"] = { text: "HARTWIG SPORT", sport: true, u: stil === "holz" && n >= 2 ? sx.L * 0.28 : sx.L * 0.5, y: n >= 2 ? Hw - hbS * 1.6 : EG2 + 2, t: 0.6, hb: n >= 2 ? hbS : 1.1, max: sx.L * 0.48, grund: verkl };
+    K3.zonen["+z"] = { text: "HARTWIG SPORT", sport: true, u: wh > 2 ? Math.min(sz.L * 0.32 + wb / 2 + (sz.L - (sz.L * 0.32 + wb / 2)) / 2, sz.L - 6) : sz.L * 0.5, y: n >= 2 ? Hw - hbS * 1.6 : EG2 + 2, t: 0.6, hb: n >= 2 ? hbS : 1.1, max: wh > 2 ? (sz.L - sz.L * 0.32 - wb / 2) * 0.8 : sz.L * 0.6, grund: verkl };
+    attika3(K3, x0, z0, w, d, Hw + 0.5, 0.25, stil === "weiss" ? "#dfe2e3" : "#4a5056", 0.35);
     const yD = Hw + 0.65;
     K3.raster = 3.2;
     K3.fensterBand = [1.6, 3.6];
@@ -48488,7 +49452,7 @@
         S.quader(cx0, y, cz0 + cd - 0.02, cx0 + cw, y + 0.03, cz0 + cd + 0.02, "#8a9196");
         S.quader(cx0 + cw - 0.02, y, cz0, cx0 + cw + 0.02, y + 0.03, cz0 + cd, "#8a9196");
       }
-      technik(K3, x0 + 2, z0 + 2, cx0 - 1, z0 + d - 2, yD, { max: 3 });
+      technik2(K3, x0 + 2, z0 + 2, cx0 - 1, z0 + d - 2, yD, { max: 3 });
     } else {
       for (let z2 = z0 + 3; z2 + 2 < z0 + d - 3; z2 += 3.2) for (let x = x0 + 3; x + 4 < x0 + w * 0.65; x += 4.6) {
         const g = new three_module_exports.BoxGeometry(4.2, 0.08, 1.9);
@@ -48498,7 +49462,7 @@
         S.box(0.1, 0.6, 0.1, x + 0.3, yD + 0.3, z2 + 1.6, "#8a9196");
         S.box(0.1, 0.6, 0.1, x + 3.9, yD + 0.3, z2 + 1.6, "#8a9196");
       }
-      technik(K3, x0 + w * 0.67, z0 + 2, x0 + w - 2, z0 + d - 2, yD, { max: 4 });
+      technik2(K3, x0 + w * 0.67, z0 + 2, x0 + w - 2, z0 + d - 2, yD, { max: 4 });
     }
     return Hw + 5;
   }
@@ -48544,7 +49508,7 @@
     const cx = x0 + w - R9, cz = z0 + d - R9;
     S.quader(x0, y0, z0, cx, y1, z0 + d + aus - ein, f);
     S.quader(cx - 0.01, y0, z0, x0 + w + aus - ein, y1, cz, f);
-    viertelzylinder(S, cx, cz, R9 + aus - ein, y0, y1, f, 16);
+    viertelzylinder2(S, cx, cz, R9 + aus - ein, y0, y1, f, 16);
   }
   function schriftGeruest(K3, s2, u, br, yFuss, yB, hb, t) {
     const st = "#4f565c", yT = yB + hb * 1.55;
@@ -48563,8 +49527,8 @@
     const { S, v, x0, z0, w, d, n, Hw } = K3;
     const san = K3.saniert;
     const rund = v % 2 === 0;
-    const R9 = rund ? clamp4(Math.min(w, d) * 0.2, 5, 10) : 0;
-    const Gk = !rund && san && n >= 2 ? clamp4(Math.min(w, d) * 0.16, 5, 8) : 0;
+    const R9 = rund ? clamp5(Math.min(w, d) * 0.2, 5, 10) : 0;
+    const Gk = !rund && san && n >= 2 ? clamp5(Math.min(w, d) * 0.16, 5, 8) : 0;
     const alu = san ? ["#d3d9dd", "#cdd4d9", "#d8dcdf", "#d0d6da"][v % 4] : K3.p(["#bfc4c4", "#b9bebf", "#c4c6c3", "#bcc1c2"][v % 4]);
     const fuge = dunkler(alu, 0.24);
     const egRahmen = san ? "#3e454c" : K3.p("#7d6748");
@@ -48574,67 +49538,67 @@
     K3.tRelief = 0.55;
     const egF = dunkler(fuge, 0.06);
     if (rund) {
-      rundKoerper(S, x0, z0, w, d, R9, 0, EG, egF, 0, ei);
-      rundKoerper(S, x0, z0, w, d, R9, EG, Hw, fuge);
+      rundKoerper(S, x0, z0, w, d, R9, 0, EG2, egF, 0, ei);
+      rundKoerper(S, x0, z0, w, d, R9, EG2, Hw, fuge);
     } else {
-      S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, egF);
-      S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, fuge);
+      S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, egF);
+      S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, fuge);
     }
     const gy0 = n >= 2 ? Hw - 1.1 : Hw - 0.5, gy1 = Hw + 0.8, ov = 1.3;
-    const yA = EG + 0.45;
+    const yA = EG2 + 0.45;
     const Ltot = w + d, Hf = Math.max(1, gy0 - yA);
-    const a = clamp4(Math.sqrt(Ltot * Hf / 6e3), 0.75, 1.6), b = a * 1.12, h = a * 0.5;
+    const a = clamp5(Math.sqrt(Ltot * Hf / 6e3), 0.75, 1.6), b = a * 1.12, h = a * 0.5;
     const r = K3.r;
     const fleck = () => !san && r() < 0.1 ? dunkler(alu, zw(r, 0.03, 0.08)) : alu;
-    const band = san && n >= 3 ? [EG + 0.9, EG + GH - 0.5] : null;
+    const band = san && n >= 3 ? [EG2 + 0.9, EG2 + GH - 0.5] : null;
     K3.raster = 2 * a;
     K3.fensterBand = false;
     for (const s2 of K3.seiten) {
       const uEnd = s2.L - R9, uN = uEnd - Gk;
       K3.nutz[s2.seite] = uN;
-      erdgeschoss(K3, s2, { u1: uEnd, raster: 6, pfeiler: egRahmen, pb: 0.4, sockel: "#3b3f44", sturz: dunkler(alu, 0.12), glas: san ? "#557286" : GLAS, tuer: "schiebe" });
+      erdgeschoss(K3, s2, { u1: uEnd, raster: 6, pfeiler: egRahmen, pb: 0.4, sockel: "#3b3f44", sturz: dunkler(alu, 0.12), glas: san ? "#557286" : GLAS2, tuer: "schiebe" });
       vordach(K3, s2, { stil: san ? "glas" : "duenn", u1: uEnd, ecke: !rund, tiefe: 2.3, y: 4.65, farbe: san ? "#eef0f0" : K3.p("#d9dbd8") });
-      s2.q(0, uEnd, EG, yA, 0, 0.08, "#2e3338");
+      s2.q(0, uEnd, EG2, yA, 0, 0.08, "#2e3338");
       const bandU1 = uN * 0.78;
       rautenFeld(s2, 0, uN, yA, gy0, a, b, h, alu, {
         farbe: () => fleck(),
         skip: band ? (u, y) => u < bandU1 + a && y + b > band[0] && y - b < band[1] : null
       });
       if (band) {
-        s2.q(0, bandU1, band[0], band[1], 0, 0.1, GLAS_HELL);
+        s2.q(0, bandU1, band[0], band[1], 0, 0.1, GLAS_HELL2);
         for (let u = 0; u <= bandU1; u += 1.6) s2.q(u - 0.06, u + 0.06, band[0], band[1], 0.1, 0.2, "#e3e7e9");
         s2.q(0, bandU1, band[0] - 0.15, band[0], 0, 0.45, "#e3e7e9");
         s2.q(0, bandU1, band[1], band[1] + 0.15, 0, 0.45, "#e3e7e9");
       }
       if (Gk) {
-        s2.q(uN, s2.L, EG, gy0, 0, 0.1, "#6f93a6");
-        for (let u = uN; u <= s2.L + 0.01; u += Gk / 4) s2.q(u - 0.06, u + 0.06, EG, gy0, 0.1, 0.22, "#e6eaec");
-        for (let y = EG + GH; y < gy0; y += GH) s2.q(uN, s2.L, y - 0.2, y + 0.05, 0.1, 0.2, "#e6eaec");
+        s2.q(uN, s2.L, EG2, gy0, 0, 0.1, "#6f93a6");
+        for (let u = uN; u <= s2.L + 0.01; u += Gk / 4) s2.q(u - 0.06, u + 0.06, EG2, gy0, 0.1, 0.22, "#e6eaec");
+        for (let y = EG2 + GH; y < gy0; y += GH) s2.q(uN, s2.L, y - 0.2, y + 0.05, 0.1, 0.2, "#e6eaec");
       }
-      s2.q(-0.05, 0.3, EG, gy0, 0, h + 0.05, dunkler(alu, 0.1));
-      if (!rund && !Gk) s2.q(s2.L - 0.3, s2.L + 0.05, EG, gy0, 0, h + 0.05, dunkler(alu, 0.1));
-      flecken(K3, s2, 0, uN, EG + 1, gy0, h + 0.05, alu, 6);
+      s2.q(-0.05, 0.3, EG2, gy0, 0, h + 0.05, dunkler(alu, 0.1));
+      if (!rund && !Gk) s2.q(s2.L - 0.3, s2.L + 0.05, EG2, gy0, 0, h + 0.05, dunkler(alu, 0.1));
+      flecken(K3, s2, 0, uN, EG2 + 1, gy0, h + 0.05, alu, 6);
       s2.q(0, uEnd, gy0 - 0.2, gy0, 0, 0.6, "#3a3f44");
     }
     if (rund) {
-      const ring = (rad2, y0, y1, f) => viertelzylinder(S, cx, cz, rad2, y0, y1, f, 16);
+      const ring = (rad2, y0, y1, f) => viertelzylinder2(S, cx, cz, rad2, y0, y1, f, 16);
       ring(R9 - rueck, 0.55, 4.3, GLAS_TUER);
       ring(R9 + 0.06, 0, 0.55, "#3b3f44");
-      ring(R9 + 0.04, 4.3, EG, egRahmen);
+      ring(R9 + 0.04, 4.3, EG2, egRahmen);
       for (let k = 0; k <= 6; k++) {
         const t = k / 6 * Math.PI / 2;
         S.box(0.12, 3.8, 0.12, cx + Math.sin(t) * (R9 - rueck + 0.06), 2.4, cz + Math.cos(t) * (R9 - rueck + 0.06), egRahmen);
       }
       ring(R9 + 2.3, 4.65, 4.89, san ? "#a9c6d3" : K3.p("#d9dbd8"));
       ring(R9 + 2.34, 4.72, 4.82, ROT2);
-      ring(R9 + 0.08, EG, yA, "#2e3338");
+      ring(R9 + 0.08, EG2, yA, "#2e3338");
       if (san) {
         ring(R9 + 0.1, yA, gy0, "#6f93a6");
         for (let k = 0; k <= 8; k++) {
           const t = k / 8 * Math.PI / 2;
           S.box(0.12, gy0 - yA, 0.12, cx + Math.sin(t) * (R9 + 0.16), (yA + gy0) / 2, cz + Math.cos(t) * (R9 + 0.16), "#e6eaec");
         }
-        for (let y = EG + GH; y < gy0; y += GH) ring(R9 + 0.22, y - 0.2, y + 0.05, "#e6eaec");
+        for (let y = EG2 + GH; y < gy0; y += GH) ring(R9 + 0.22, y - 0.2, y + 0.05, "#e6eaec");
       } else rautenBogen(K3, cx, cz, R9, yA, gy0, a, b, h, fleck);
       ring(R9 + 0.6, gy0 - 0.2, gy0, "#3a3f44");
     }
@@ -48644,16 +49608,16 @@
     if (rund) rundKoerper(S, x0, z0, w, d, R9, gy1, gy1 + 0.18, lip, ov - 0.15);
     else S.quader(x0, gy1, z0, x0 + w + ov - 0.15, gy1 + 0.18, z0 + d + ov - 0.15, lip);
     const yD = gy1 + 0.18;
-    if (rund) rundKoerper(S, x0, z0, w, d, R9, yD, yD + 0.06, KIES2, -0.4);
-    else S.quader(x0, yD, z0, x0 + w + ov - 0.6, yD + 0.06, z0 + d + ov - 0.6, KIES2);
+    if (rund) rundKoerper(S, x0, z0, w, d, R9, yD, yD + 0.06, KIES3, -0.4);
+    else S.quader(x0, yD, z0, x0 + w + ov - 0.6, yD + 0.06, z0 + d + ov - 0.6, KIES3);
     const dx1 = x0 + w - 2 - R9 * 0.5, dz1 = z0 + d - 2 - R9 * 0.5;
     setzeDach(K3, x0 + 2, z0 + 2, dx1, dz1, yD + 0.06);
-    lichtkuppeln(K3, x0 + 3, z0 + 3, dx1 - 1, dz1 - 1, yD + 0.06, 7, 9);
-    technik(K3, x0 + 3, z0 + 3, dx1 - 1, dz1 - 1, yD + 0.06, { max: 5, farbe: "#c4c6c4" });
+    lichtkuppeln2(K3, x0 + 3, z0 + 3, dx1 - 1, dz1 - 1, yD + 0.06, 7, 9);
+    technik2(K3, x0 + 3, z0 + 3, dx1 - 1, dz1 - 1, yD + 0.06, { max: 5, farbe: "#c4c6c4" });
     for (const s2 of K3.seiten) {
       const uN = K3.nutz[s2.seite];
       const yL = band ? (band[1] + gy0) / 2 + 0.2 : yA + (gy0 - yA) * 0.55;
-      K3.zonen[s2.seite] = n >= 2 ? { u: uN * 0.5, y: yL, t: h + 0.18, hb: clamp4(uN * 0.075, 2, Math.min(4.5, (band ? gy0 - band[1] : gy0 - yA) * 0.34)), max: uN * 0.72, grund: alu, wand: true } : { u: uN * 0.5, y: (yA + gy0) / 2, t: h + 0.18, hb: Math.min(1.3, (gy0 - yA) * 0.45), max: uN * 0.7, grund: alu, wand: true };
+      K3.zonen[s2.seite] = n >= 2 ? { u: uN * 0.5, y: yL, t: h + 0.18, hb: clamp5(uN * 0.075, 2, Math.min(4.5, (band ? gy0 - band[1] : gy0 - yA) * 0.34)), max: uN * 0.72, grund: alu, wand: true } : { u: uN * 0.5, y: (yA + gy0) / 2, t: h + 0.18, hb: Math.min(1.3, (gy0 - yA) * 0.45), max: uN * 0.7, grund: alu, wand: true };
     }
     return gy1 + 6;
   }
@@ -48676,8 +49640,8 @@
     const kopf = (v % 4 === 1 || v % 4 === 2) && n >= 3;
     const rueck = 0.7, ei = rueck + 0.1;
     K3.tRelief = 0.35;
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, dunkler(beton, 0.12));
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, beton);
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(beton, 0.12));
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, beton);
     const nOG = n - 1, HA = 0.9;
     const farbe = (i, k) => {
       if (muster === "diagonal") return PAL4[(i + k) % 3];
@@ -48686,20 +49650,20 @@
       const m = (i + k * 2) % 6;
       return PAL4[m < 2 ? 0 : m < 4 ? 1 : 2];
     };
-    const glas2 = san ? "#6f8fa2" : GLAS, sprosse = san ? "#3e454c" : "#d4d8d9";
+    const glas2 = san ? "#6f8fa2" : GLAS2, sprosse = san ? "#3e454c" : "#d4d8d9";
     const neu = "#d8dbdb";
     K3.raster = 2.5;
     K3.fensterBand = [1.55, GH - 0.3];
     for (const s2 of K3.seiten) {
-      const Kz = kopf ? clamp4(s2.L * 0.16, 6, 11) : 0;
+      const Kz = kopf ? clamp5(s2.L * 0.16, 6, 11) : 0;
       const uK = s2.L - Kz;
       K3.nutz[s2.seite] = uK;
-      erdgeschoss(K3, s2, { raster: 5, pfeiler: beton, pb: 0.7, sockel: "#55595e", sturz: beton, glas: san ? "#557286" : GLAS, tuer: "schiebe" });
+      erdgeschoss(K3, s2, { raster: 5, pfeiler: beton, pb: 0.7, sockel: "#55595e", sturz: beton, glas: san ? "#557286" : GLAS2, tuer: "schiebe" });
       vordach(K3, s2, { stil: san ? "glas" : "platte", tiefe: 2.6, y: 4.65, farbe: "#efede7" });
       const nc = Math.max(1, Math.round(uK / 1.25)), cw = uK / nc;
       if (n >= 2) {
         for (let k = 0; k < nOG; k++) {
-          const y0 = EG + k * GH;
+          const y0 = EG2 + k * GH;
           if (san) {
             s2.q(0, uK, y0 + 0.05, y0 + 1.5, 0, 0.14, neu);
             for (let u = 3; u < uK; u += 3) s2.q(u - 0.03, u + 0.03, y0 + 0.05, y0 + 1.5, 0.14, 0.16, dunkler(neu, 0.08));
@@ -48711,34 +49675,34 @@
           s2.q(0, uK, y0 + GH - 0.3, y0 + GH, 0, 0.2, beton);
         }
         if (Kz) {
-          const nk = Math.max(2, Math.round(Kz / 1.25)), kw2 = Kz / nk, nr = Math.floor((Hw - EG) / 1.5);
-          const kh = (Hw - EG) / nr;
+          const nk = Math.max(2, Math.round(Kz / 1.25)), kw2 = Kz / nk, nr = Math.floor((Hw - EG2) / 1.5);
+          const kh = (Hw - EG2) / nr;
           if (san) {
-            s2.q(uK, s2.L, EG, Hw, 0, 0.16, neu);
-            for (let y = EG + 3; y < Hw; y += 3) s2.q(uK, s2.L, y - 0.03, y + 0.03, 0.16, 0.18, dunkler(neu, 0.08));
-            s2.q(uK + 0.6, uK + 1, EG, Hw, 0.16, 0.2, PAL4[0]);
-          } else for (let j = 0; j < nr; j++) for (let i = 0; i < nk; i++) s2.q(uK + i * kw2 + 0.05, uK + (i + 1) * kw2 - 0.05, EG + j * kh + 0.05, EG + (j + 1) * kh - 0.05, 0, 0.16, farbe(i + j, j + 1));
-          s2.q(uK - 0.3, uK + 0.05, EG, Hw + HA, 0, 0.34, beton);
+            s2.q(uK, s2.L, EG2, Hw, 0, 0.16, neu);
+            for (let y = EG2 + 3; y < Hw; y += 3) s2.q(uK, s2.L, y - 0.03, y + 0.03, 0.16, 0.18, dunkler(neu, 0.08));
+            s2.q(uK + 0.6, uK + 1, EG2, Hw, 0.16, 0.2, PAL4[0]);
+          } else for (let j = 0; j < nr; j++) for (let i = 0; i < nk; i++) s2.q(uK + i * kw2 + 0.05, uK + (i + 1) * kw2 - 0.05, EG2 + j * kh + 0.05, EG2 + (j + 1) * kh - 0.05, 0, 0.16, farbe(i + j, j + 1));
+          s2.q(uK - 0.3, uK + 0.05, EG2, Hw + HA, 0, 0.34, beton);
         }
-        if (lisenen) for (let i = 0; i <= nc; i += 4) s2.q(i * cw - 0.18, i * cw + 0.18, EG, Hw + HA, 0, 0.32, beton);
+        if (lisenen) for (let i = 0; i <= nc; i += 4) s2.q(i * cw - 0.18, i * cw + 0.18, EG2, Hw + HA, 0, 0.32, beton);
       } else {
-        const nr = Math.max(1, Math.floor((Hw - EG - 0.2) / 1.2));
-        for (let j = 0; j < nr; j++) for (let i = 0; i < nc; i++) s2.q(i * cw + 0.05, (i + 1) * cw - 0.05, EG + 0.15 + j * 1.2, EG + 0.15 + (j + 1) * 1.2 - 0.1, 0, 0.14, san ? neu : farbe(i, j));
+        const nr = Math.max(1, Math.floor((Hw - EG2 - 0.2) / 1.2));
+        for (let j = 0; j < nr; j++) for (let i = 0; i < nc; i++) s2.q(i * cw + 0.05, (i + 1) * cw - 0.05, EG2 + 0.15 + j * 1.2, EG2 + 0.15 + (j + 1) * 1.2 - 0.1, 0, 0.14, san ? neu : farbe(i, j));
       }
       s2.q(0, s2.L, Hw, Hw + HA, 0, 0.26, beton);
       s2.q(0, s2.L, Hw + HA, Hw + HA + 0.12, -0.05, 0.36, heller(beton, 0.04));
-      flecken(K3, s2, 0, s2.L, EG, Hw, 0.25, beton, 8);
+      flecken(K3, s2, 0, s2.L, EG2, Hw, 0.25, beton, 8);
     }
-    S.quader(x0, Hw, z0, x0 + w - 0.3, Hw + 0.15, z0 + d - 0.3, KIES2);
+    S.quader(x0, Hw, z0, x0 + w - 0.3, Hw + 0.15, z0 + d - 0.3, KIES3);
     S.quader(x0, Hw, z0, x0 + w, Hw + HA, z0 + 0.3, beton);
     S.quader(x0, Hw, z0, x0 + 0.3, Hw + HA, z0 + d, beton);
     const yD = Hw + 0.15;
     setzeDach(K3, x0 + 2, z0 + 2, x0 + w - 4, z0 + d - 5, yD);
-    lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - 5, z0 + d - 6, yD, 7, 8);
-    technik(K3, x0 + 3, z0 + 3, x0 + w - 5, z0 + d - 6, yD, { max: 4, farbe: "#cfccc4" });
+    lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - 5, z0 + d - 6, yD, 7, 8);
+    technik2(K3, x0 + 3, z0 + 3, x0 + w - 5, z0 + d - 6, yD, { max: 4, farbe: "#cfccc4" });
     for (const s2 of K3.seiten) {
       const L2 = K3.nutz[s2.seite];
-      const hbS = clamp4(L2 * 0.07, 2, 4), hb = Math.min(hbS, L2 * 0.62 / schriftBreite("HARTWIG", 1));
+      const hbS = clamp5(L2 * 0.07, 2, 4), hb = Math.min(hbS, L2 * 0.62 / schriftBreite("HARTWIG", 1));
       const br = schriftBreite("HARTWIG", hb), u = L2 * 0.5, t = -1.4, yB = Hw + HA + 0.35;
       schriftGeruest(K3, s2, u, br, yD, yB, hb, t);
       K3.zonen[s2.seite] = { u, y: yB + 0.1 + hb * 0.78, t: t + 0.05, hb, max: L2 * 0.62, grund: beton, dach: true };
@@ -48822,7 +49786,7 @@
     };
     const P2 = Object.fromEntries(Object.entries(P0).map(([k, c]) => [k, san ? c : K3.p("#" + new three_module_exports.Color(c).offsetHSL(0, -0.08, 0.02).getHexString())]));
     const W3 = u1 - u0, H = y1 - y0;
-    const m = clamp4(Math.min(W3 / 24, H / 18), 0.55, 1);
+    const m = clamp5(Math.min(W3 / 24, H / 18), 0.55, 1);
     const nc = Math.floor(W3 / m), nr = Math.floor(H / m), mu = W3 / nc, my = H / nr;
     const f = mosaikMotiv(motiv, W3, H, P2);
     for (let j = 0; j < nr; j++) {
@@ -48866,7 +49830,7 @@
       const L1 = P2(0, N, 0), L2 = P2(N, 0, 0);
       for (const q2 of [L1, L2]) {
         const [x, z2] = s2.welt(q2[0], q2[2]);
-        zyl2(K3.S, x, 0.3, z2, 0.22, q2[1] - 0.3, "#8d9196", 8, 0.12);
+        zyl3(K3.S, x, 0.3, z2, 0.22, q2[1] - 0.3, "#8d9196", 8, 0.12);
       }
       return yM + c;
     }
@@ -48876,7 +49840,7 @@
       s2.q(um - B2 / 2, um + B2 / 2, y2 - 0.25, y2 - 0.08, t0 + T - 0.1, t0 + T + 0.05, ROT2);
       for (const du of [-B2 * 0.3, B2 * 0.3]) {
         const [x, z2] = s2.welt(um + du, t0 + T - 1.2);
-        zyl2(K3.S, x, 0.3, z2, 0.16, y2 - 0.4, "#8d9196", 8);
+        zyl3(K3.S, x, 0.3, z2, 0.16, y2 - 0.4, "#8d9196", 8);
       }
       return y2 + 1;
     }
@@ -48885,10 +49849,10 @@
     s2.q(um - B2 / 2, um + B2 / 2, y + 0.35, y + 1, t0 + T - 0.3, t0 + T, f);
     for (const uu of [um - B2 / 2, um + B2 / 2 - 0.3]) s2.q(uu, uu + 0.3, y + 0.35, y + 1, t0 + 1.5, t0 + T, f);
     s2.q(um - B2 / 2 - 0.02, um + B2 / 2 + 0.02, y + 0.35, y + 0.5, t0 + T, t0 + T + 0.03, ROT2);
-    for (let u = um - B2 / 2 + 1.5; u < um + B2 / 2; u += 2.2) s2.q(u - 0.3, u + 0.3, y - 0.05, y, t0 + 1, t0 + T - 1, LICHT2);
+    for (let u = um - B2 / 2 + 1.5; u < um + B2 / 2; u += 2.2) s2.q(u - 0.3, u + 0.3, y - 0.05, y, t0 + 1, t0 + T - 1, LICHT3);
     for (const du of [-B2 * 0.36, -B2 * 0.12, B2 * 0.12, B2 * 0.36]) {
       const [x, z2] = s2.welt(um + du, t0 + T - 1);
-      zyl2(K3.S, x, 0.3, z2, 0.12, y - 0.3, "#8d9196", 8);
+      zyl3(K3.S, x, 0.3, z2, 0.12, y - 0.3, "#8d9196", 8);
     }
     return y + 1;
   }
@@ -48907,16 +49871,16 @@
     const rueck = 0.7, ei = rueck + 0.1;
     const HB = n >= 3 ? 4.2 : n === 2 ? 3.2 : 2.2;
     K3.tRelief = 0.3;
-    S.quader(x0, 0, z0, x0 + w - ei, EG, z0 + d - ei, dunkler(brue, 0.05));
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, dunkler(brue, 0.04));
+    S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(brue, 0.05));
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, dunkler(brue, 0.04));
     K3.raster = 3;
     K3.fensterBand = [1.4, GH - 0.1];
     let hoch = Hw + HB;
     for (const s2 of K3.seiten) {
       const mos = s2.seite === mosSeite && n >= 2;
-      const Wm = mos ? clamp4(s2.L * 0.36, 10, 24) : 0, uC = s2.L - Wm;
+      const Wm = mos ? clamp5(s2.L * 0.36, 10, 24) : 0, uC = s2.L - Wm;
       K3.nutz[s2.seite] = uC;
-      const ax = erdgeschoss(K3, s2, { raster: 5, pfeiler: prof, pb: 0.35, sockel: "#3b3f44", sturz: brue, glas: san ? "#557286" : GLAS, tuer: "schiebe" });
+      const ax = erdgeschoss(K3, s2, { raster: 5, pfeiler: prof, pb: 0.35, sockel: "#3b3f44", sturz: brue, glas: san ? "#557286" : GLAS2, tuer: "schiebe" });
       let fd = null;
       if (s2.seite === "+z") {
         const e = ax.filter((x) => x.eingang);
@@ -48930,32 +49894,32 @@
       } else vordach(K3, s2, { stil: "duenn", tiefe: 2, y: 4.6, farbe: "#ecebe6" });
       if (n >= 2) {
         for (let k = 0; k < n - 1; k++) {
-          const y0 = EG + k * GH;
+          const y0 = EG2 + k * GH;
           s2.q(0, uC, y0, y0 + 0.25, 0, 0.22, prof);
           s2.q(0, uC, y0 + 0.25, y0 + 1.3, 0, 0.06, brue);
           s2.q(0, uC, y0 + 1.3, y0 + 1.4, 0, 0.16, prof);
           s2.q(0, uC, y0 + 1.4, y0 + GH, 0, 0.04, glas2);
           if (!san) for (let u = 0.75; u < uC; u += 6) s2.q(u, u + 1.5, y0 + 1.6, y0 + GH - 0.2, 0.04, 0.06, K3.p("#d8cfb5"));
         }
-        for (let u = 0; u <= uC + 0.01; u += uC / Math.max(1, Math.round(uC / 1.5))) s2.q(u - 0.06, u + 0.06, EG, Hw, 0, 0.2, prof);
+        for (let u = 0; u <= uC + 0.01; u += uC / Math.max(1, Math.round(uC / 1.5))) s2.q(u - 0.06, u + 0.06, EG2, Hw, 0, 0.2, prof);
         if (mos) {
-          s2.q(uC, s2.L, EG, Hw, 0, 0.2, blende);
-          s2.q(uC - 0.3, uC, EG, Hw, 0, 0.32, prof);
-          mosaik(K3, s2, uC + 0.5, s2.L - 0.5, EG + 0.5, Hw - 0.4, motiv, 0.2);
-          s2.q(uC, s2.L, EG, EG + 0.3, 0, 0.5, heller(blende, 0.03));
+          s2.q(uC, s2.L, EG2, Hw, 0, 0.2, blende);
+          s2.q(uC - 0.3, uC, EG2, Hw, 0, 0.32, prof);
+          mosaik(K3, s2, uC + 0.5, s2.L - 0.5, EG2 + 0.5, Hw - 0.4, motiv, 0.2);
+          s2.q(uC, s2.L, EG2, EG2 + 0.3, 0, 0.5, heller(blende, 0.03));
         }
       }
       for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.06, u + 0.06, Hw, Hw + HB - 0.2, 0, 0.08, dunkler(blende, 0.07));
       s2.q(0, s2.L, Hw + HB - 0.2, Hw + HB, -0.05, 0.14, heller(blende, 0.04));
       s2.q(0, s2.L, Hw - 0.1, Hw + 0.05, 0, 0.3, prof);
       if (san) s2.q(0, s2.L, Hw + 0.05, Hw + 0.3, 0, 0.1, ROT2);
-      flecken(K3, s2, 0, uC, EG, Hw + HB, 0.2, blende, 6);
+      flecken(K3, s2, 0, uC, EG2, Hw + HB, 0.2, blende, 6);
     }
-    attika2(K3, x0, z0, w, d, Hw, HB, blende, 0.35);
+    attika3(K3, x0, z0, w, d, Hw, HB, blende, 0.35);
     const yD = Hw + 0.15;
     setzeDach(K3, x0 + 2, z0 + 2, x0 + w - 2, z0 + d - 2, yD);
-    lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - 3, z0 + d - 3, yD, 7, 9);
-    technik(K3, x0 + 3, z0 + 3, x0 + w - 3, z0 + d - 3, yD, { max: 5 });
+    lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - 3, z0 + d - 3, yD, 7, 9);
+    technik2(K3, x0 + 3, z0 + 3, x0 + w - 3, z0 + d - 3, yD, { max: 5 });
     for (const s2 of K3.seiten) {
       const uC = K3.nutz[s2.seite];
       K3.zonen[s2.seite] = { u: uC * 0.5, y: Hw + HB * 0.5, t: 0.32, hb: HB * 0.66, max: uC * 0.66, grund: blende, wand: true };
@@ -48973,28 +49937,28 @@
     const A = 3.4, turm4 = v % 2 === 0 && n >= 3;
     const rueck = 0.7;
     K3.tRelief = 0.45;
-    S.quader(x0, 0, z0, x0 + w - A - rueck - 0.1, EG, z0 + d - A - rueck - 0.1, dunkler(fliese, 0.15));
-    S.quader(x0, EG, z0, x0 + w, Hw, z0 + d, fliese);
-    S.quader(x0, EG - 0.05, z0, x0 + w, EG, z0 + d, dunkler(stein, 0.18));
+    S.quader(x0, 0, z0, x0 + w - A - rueck - 0.1, EG2, z0 + d - A - rueck - 0.1, dunkler(fliese, 0.15));
+    S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, fliese);
+    S.quader(x0, EG2 - 0.05, z0, x0 + w, EG2, z0 + d, dunkler(stein, 0.18));
     const FR2 = n >= 2 ? 3.3 : 1.7;
     K3.raster = 3.2;
     K3.fensterBand = [1.6, 3.9];
     for (const s2 of K3.seiten) {
       const raster4 = 5;
-      erdgeschoss(K3, s2, { tF: -A, raster: raster4, pfeiler: stein, pb: 0.5, sockel: dunk, sturz: stein, glas: san ? "#557286" : GLAS, tuer: "dreh" });
+      erdgeschoss(K3, s2, { tF: -A, raster: raster4, pfeiler: stein, pb: 0.5, sockel: dunk, sturz: stein, glas: san ? "#557286" : GLAS2, tuer: "dreh" });
       const nb = Math.max(1, Math.round(s2.L / raster4)), bw = s2.L / nb;
       for (let i = 0; i <= nb; i++) {
         const u = i === nb ? s2.L - 0.6 : Math.max(0.6, i * bw);
-        s2.q(u - 0.55, u + 0.55, 0.3, EG, -0.95, 0.15, stein);
+        s2.q(u - 0.55, u + 0.55, 0.3, EG2, -0.95, 0.15, stein);
         s2.q(u - 0.72, u + 0.72, 0.3, 1, -1.1, 0.3, dunk);
-        s2.q(u - 0.75, u + 0.75, EG - 0.55, EG - 0.05, -1.1, 0.3, hell4);
-        if (!K3.zu && i < nb && san) s2.q(u + bw / 2 - 0.4, u + bw / 2 + 0.4, EG - 0.12, EG - 0.05, -2, -1.4, LICHT2);
+        s2.q(u - 0.75, u + 0.75, EG2 - 0.55, EG2 - 0.05, -1.1, 0.3, hell4);
+        if (!K3.zu && i < nb && san) s2.q(u + bw / 2 - 0.4, u + bw / 2 + 0.4, EG2 - 0.12, EG2 - 0.05, -2, -1.4, LICHT3);
       }
-      s2.q(0, s2.L, EG, EG + FR2, 0, 0.3, stein);
-      s2.q(0, s2.L, EG + FR2, EG + FR2 + 0.2, 0, 0.5, hell4);
+      s2.q(0, s2.L, EG2, EG2 + FR2, 0, 0.3, stein);
+      s2.q(0, s2.L, EG2 + FR2, EG2 + FR2 + 0.2, 0, 0.5, hell4);
       if (san) {
         const nk = Math.max(2, Math.round(s2.L / 5)), kw2 = s2.L / nk;
-        for (let i = 0; i < nk; i++) s2.q(i * kw2 + 0.5, (i + 1) * kw2 - 0.5, EG + 0.45, EG + FR2 - 0.45, 0.3, 0.36, heller(stein, 0.1));
+        for (let i = 0; i < nk; i++) s2.q(i * kw2 + 0.5, (i + 1) * kw2 - 0.5, EG2 + 0.45, EG2 + FR2 - 0.45, 0.3, 0.36, heller(stein, 0.1));
         for (let i = 0; i <= nb; i++) {
           const u = i === nb ? s2.L - 0.6 : Math.max(0.6, i * bw);
           s2.q(u - 0.18, u + 0.18, 2.6, 3.1, 0.15, 0.32, "#f6ecc8");
@@ -49003,10 +49967,10 @@
         const rr = rng2(`f11alt:${K3.haus?.id ?? ""}:${s2.seite}`);
         for (let i = 0; i < Math.round(s2.L / 3); i++) {
           const u = zw(rr, 0.5, s2.L - 1.5), bh = zw(rr, 1.2, FR2 - 0.2);
-          s2.q(u, u + zw(rr, 0.25, 0.6), EG + FR2 - bh, EG + FR2, 0.3, 0.33, dunkler(stein, zw(rr, 0.12, 0.22)));
+          s2.q(u, u + zw(rr, 0.25, 0.6), EG2 + FR2 - bh, EG2 + FR2, 0.3, 0.33, dunkler(stein, zw(rr, 0.12, 0.22)));
         }
         for (let i = 0; i < Math.round(s2.L / 6); i++) {
-          const u = zw(rr, 0.5, s2.L - 3), y = zw(rr, EG + 0.3, EG + FR2 - 1.4);
+          const u = zw(rr, 0.5, s2.L - 3), y = zw(rr, EG2 + 0.3, EG2 + FR2 - 1.4);
           s2.q(u, u + zw(rr, 1.2, 2.6), y, y + zw(rr, 0.6, 1.1), 0.3, 0.32, dunkler(stein, 0.1));
         }
       }
@@ -49014,15 +49978,15 @@
       const nw = Math.max(1, Math.round(s2.L / 3.2)), aw = s2.L / nw;
       const mitte = Math.floor(nw / 2);
       for (let k = 1; k < n; k++) {
-        const y0 = EG + (k - 1) * GH;
+        const y0 = EG2 + (k - 1) * GH;
         for (let i = 0; i < nw; i++) {
           const um = (i + 0.5) * aw;
           if (k === 1) {
-            if (FR2 < 3) s2.q(um - 0.75, um + 0.75, y0 + FR2 + 0.45, y0 + 3.9, 0, 0.05, GLAS);
+            if (FR2 < 3) s2.q(um - 0.75, um + 0.75, y0 + FR2 + 0.45, y0 + 3.9, 0, 0.05, GLAS2);
             s2.q(um - 0.95, um + 0.95, y0 + 3.9, y0 + 4.15, 0, 0.22, stein);
             continue;
           }
-          s2.q(um - 0.75, um + 0.75, y0 + 1.6, y0 + 3.9, 0, 0.05, GLAS);
+          s2.q(um - 0.75, um + 0.75, y0 + 1.6, y0 + 3.9, 0, 0.05, GLAS2);
           s2.q(um - 0.05, um + 0.05, y0 + 1.6, y0 + 3.9, 0.05, 0.1, kreuz3);
           s2.q(um - 0.75, um + 0.75, y0 + 3.05, y0 + 3.13, 0.05, 0.1, kreuz3);
           s2.q(um - 0.95, um + 0.95, y0 + 3.9, y0 + 4.15, 0, 0.22, stein);
@@ -49034,7 +49998,7 @@
           }
         }
       }
-      for (let i = 0; i <= nw; i += 2) s2.q(i * aw - 0.28, i * aw + 0.28, EG + FR2 + 0.2, Hw - 1.4, 0, 0.18, heller(fliese, 0.03));
+      for (let i = 0; i <= nw; i += 2) s2.q(i * aw - 0.28, i * aw + 0.28, EG2 + FR2 + 0.2, Hw - 1.4, 0, 0.18, heller(fliese, 0.03));
       s2.q(0, s2.L, Hw - 1.4, Hw - 0.6, 0, 0.2, ornF);
       for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.25, u + 0.25, Hw - 1.25, Hw - 0.75, 0.2, 0.28, fliese);
       s2.q(0, s2.L, Hw - 0.6, Hw - 0.35, 0, 0.6, hell4);
@@ -49043,25 +50007,25 @@
       s2.q(0, s2.L, Hw + 0.3, Hw + 0.5, 0.1, 0.5, stein);
       for (let u = 0.4; u < s2.L; u += 0.8) s2.q(u - 0.1, u + 0.1, Hw + 0.5, Hw + 1.2, 0.2, 0.4, hell4);
       s2.q(0, s2.L, Hw + 1.2, Hw + 1.4, 0.1, 0.5, stein);
-      flecken(K3, s2, 0, s2.L, EG + FR2, Hw - 1.4, 0.2, fliese, 10);
+      flecken(K3, s2, 0, s2.L, EG2 + FR2, Hw - 1.4, 0.2, fliese, 10);
     }
     if (n < 2) for (const s2 of K3.seiten) s2.q(0, s2.L, Hw - 0.3, Hw + 0.2, 0, 0.6, hell4);
-    S.quader(x0, Hw, z0, x0 + w - 0.2, Hw + 0.15, z0 + d - 0.2, KIES2);
+    S.quader(x0, Hw, z0, x0 + w - 0.2, Hw + 0.15, z0 + d - 0.2, KIES3);
     S.quader(x0, Hw, z0, x0 + w, Hw + 1.2, z0 + 0.3, stein);
     S.quader(x0, Hw, z0, x0 + 0.3, Hw + 1.2, z0 + d, stein);
-    const tw = turm4 ? clamp4(Math.min(w, d) * 0.28, 8, 12) : 0;
+    const tw = turm4 ? clamp5(Math.min(w, d) * 0.28, 8, 12) : 0;
     setzeDach(K3, x0 + 2, z0 + 2, x0 + w - 2 - tw, z0 + d - 2, Hw + 0.15);
-    lichtkuppeln(K3, x0 + 3, z0 + 3, x0 + w - 3 - tw, z0 + d - 3, Hw + 0.15, 7, 9);
-    technik(K3, x0 + 3, z0 + 3, x0 + w - 3 - tw * 1.2, z0 + d - 3 - tw * 0.8, Hw + 0.15, { max: 3, antenne: false });
+    lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w - 3 - tw, z0 + d - 3, Hw + 0.15, 7, 9);
+    technik2(K3, x0 + 3, z0 + 3, x0 + w - 3 - tw * 1.2, z0 + d - 3 - tw * 0.8, Hw + 0.15, { max: 3, antenne: false });
     let hoch = Hw + 1.4;
     if (turm4) {
       const tx0 = x0 + w - tw, tz0 = z0 + d - tw, h1 = GH * 1.4;
       S.quader(tx0, Hw, tz0, x0 + w, Hw + h1, z0 + d, fliese);
-      for (const s2 of seitenVon(S, tx0, tz0, tw, tw)) {
+      for (const s2 of seitenVon2(S, tx0, tz0, tw, tw)) {
         const nf = 3, fw = tw / nf;
         for (let i = 0; i < nf; i++) {
           const um = (i + 0.5) * fw;
-          s2.q(um - 0.6, um + 0.6, Hw + 1.4, Hw + h1 - 1.2, 0, 0.05, GLAS);
+          s2.q(um - 0.6, um + 0.6, Hw + 1.4, Hw + h1 - 1.2, 0, 0.05, GLAS2);
           s2.q(um - 0.05, um + 0.05, Hw + 1.4, Hw + h1 - 1.2, 0.05, 0.1, kreuz3);
           s2.q(um - 0.8, um + 0.8, Hw + h1 - 1.2, Hw + h1 - 0.95, 0, 0.2, stein);
         }
@@ -49071,29 +50035,29 @@
       S.quader(tx0 - 0.4, Hw + h1 - 0.2, tz0 - 0.4, x0 + w + 0.5, Hw + h1 + 0.25, z0 + d + 0.5, hell4);
       const lw = tw * 0.55, lx = x0 + w - tw / 2, lz = z0 + d - tw / 2, yl = Hw + h1 + 0.25;
       S.box(lw, 0.4, lw, lx, yl + 0.2, lz, stein);
-      for (const [dx, dz] of [[-1, -1], [-1, 1], [1, -1], [1, 1], [0, 1], [1, 0]]) zyl2(S, lx + dx * lw * 0.42, yl + 0.4, lz + dz * lw * 0.42, 0.22, 3.2, hell4, 8);
+      for (const [dx, dz] of [[-1, -1], [-1, 1], [1, -1], [1, 1], [0, 1], [1, 0]]) zyl3(S, lx + dx * lw * 0.42, yl + 0.4, lz + dz * lw * 0.42, 0.22, 3.2, hell4, 8);
       S.box(lw * 0.7, 3.2, lw * 0.7, lx, yl + 2, lz, dunkler(fliese, 0.05));
       S.box(lw + 0.4, 0.4, lw + 0.4, lx, yl + 3.8, lz, hell4);
       const g = new three_module_exports.ConeGeometry(lw * 0.45, 2.2, 4);
       g.rotateY(Math.PI / 4);
       g.translate(lx, yl + 5.1, lz);
       S.add(g, K3.p("#6f9a7d"));
-      zyl2(S, lx, yl + 6.2, lz, 0.07, 4, "#d9dcde", 6);
+      zyl3(S, lx, yl + 6.2, lz, 0.07, 4, "#d9dcde", 6);
       S.box(0.04, 1, 1.6, lx, yl + 9.6, lz + 0.85, K3.zu ? "#cfcac0" : ROT2);
       hoch = yl + 10.5;
     }
     for (const s2 of K3.seiten) {
       const uE = s2.L - (turm4 ? tw : 2);
-      K3.zonen[s2.seite] = { u: uE * 0.5, y: EG + FR2 * 0.5, t: 0.6, hb: Math.min(FR2 * 0.82, 2.7), max: uE * 0.72, grund: stein, wand: true };
+      K3.zonen[s2.seite] = { u: uE * 0.5, y: EG2 + FR2 * 0.5, t: 0.6, hb: Math.min(FR2 * 0.82, 2.7), max: uE * 0.72, grund: stein, wand: true };
     }
     if (n >= 2) {
       const s2 = K3.seiten[1], L2 = s2.L - tw - 1;
-      const hb = Math.min(clamp4(L2 * 0.08, 2, 3.6), L2 * 0.7 / schriftBreite("HARTWIG", 1)), br = schriftBreite("HARTWIG", hb);
+      const hb = Math.min(clamp5(L2 * 0.08, 2, 3.6), L2 * 0.7 / schriftBreite("HARTWIG", 1)), br = schriftBreite("HARTWIG", hb);
       const t = -1.6, yB = Hw + 1.6;
       schriftGeruest(K3, s2, L2 * 0.5, br, Hw + 0.15, yB, hb, t);
       K3.zonen["+x"] = { u: L2 * 0.5, y: yB + 0.1 + hb * 0.78, t: t + 0.05, hb, max: L2 * 0.7, grund: stein, dach: true };
     }
-    if (n >= 3) haengefahnen(K3, K3.seiten[1], [K3.seiten[1].L * 0.2, K3.seiten[1].L * 0.5], EG + GH * 1.9, 0.6);
+    if (n >= 3) haengefahnen(K3, K3.seiten[1], [K3.seiten[1].L * 0.2, K3.seiten[1].L * 0.5], EG2 + GH * 1.9, 0.6);
     return hoch + 3;
   }
   var VORPLATZ_STATUS = /* @__PURE__ */ new Set(["offen", "aktion", "untermiete", "offprice", "teilschliessung", "umbau", "raeumung", "neueroeffnung"]);
@@ -49146,6 +50110,24 @@
       kuebel(x + w + T - 1, z2 + d * f + 2.2);
     }
   }
+  function nachnutzung(S, scene2, haus2, wettbewerber2, opt = {}) {
+    const start = S.anzahl;
+    const basis = warenhaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, vorplatz: false, passanten: false });
+    const farbe = WETTBEWERBER_FARBEN[wettbewerber2.art] ?? "#526477";
+    const m = masse(haus2), breite = basis.w, tiefe = basis.d;
+    const x = opt.x ?? 0, z2 = opt.z ?? 0;
+    for (const seite of seitenVon(S, x, z2, breite, tiefe)) {
+      seite.q(0.5, seite.L - 0.5, 0.6, 4.1, 0.4, 0.5, "#779bab");
+      seite.q(0.4, seite.L - 0.4, 4.1, 5.2, 0.45, 0.8, farbe);
+      const ph = passend(wettbewerber2.name, seite.L * 0.77, 1.25);
+      plakat2(scene2, seite, wettbewerber2.name, seite.L / 2, 4.65, 0.94, ph, "#ffffff");
+      if (m.n > 2) for (let i = 0; i < 3; i++) {
+        const a = 1 + i * (seite.L - 2) / 3;
+        seite.q(a, a + (seite.L - 3) / 3, 5.7, Math.min(m.H - 0.6, 9), 0.25, 0.33, "#78848a");
+      }
+    }
+    return { ...basis, teile: S.anzahl - start, nachnutzung: wettbewerber2.id };
+  }
   function warenhaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
     const marke3 = merke(S, scene2);
@@ -49195,11 +50177,11 @@
     K3.c = (c) => K3.verblichen ? verblasst(c) : K3.alt ? patinaFarbe(c) : c;
     K3.saniert = opt.saniert ?? haus2.saniert ?? ((haus2.baujahr ?? 0) >= 1990 || (haus2.substanz ?? 100) >= 65);
     K3.p = (c) => K3.c(K3.saniert ? c : "#" + new three_module_exports.Color(c).offsetHSL(0, -0.04, -0.035).getHexString());
-    K3.seiten = seitenVon(S, K3.x0, K3.z0, K3.w, K3.d);
+    K3.seiten = seitenVon2(S, K3.x0, K3.z0, K3.w, K3.d);
     const egG = flaechen.filter((f) => f.etage === 0 && f.konzept !== "leer").sort((a, b) => b.qm - a.qm).map((f) => f.gruppe);
     K3.gruppenEG = egG.length ? egG : fam === 7 ? ["sporttextil", "sportschuhe", "rad", "outdoor"] : ["damen", "beauty", "accessoires", "herren"];
-    const eck = { 1: clamp4(Math.min(K3.w, K3.d) * 0.24, 7, 12), 2: clamp4(Math.min(K3.w, K3.d) * 0.22, 5, 11), 5: clamp4(Math.min(K3.w, K3.d) * 0.32, 8, 18), 6: clamp4(Math.min(K3.w, K3.d) * 0.18, 5, 9) }[fam] ?? 0;
-    const eck8 = fam === 8 && K3.v % 2 === 0 ? clamp4(Math.min(K3.w, K3.d) * 0.2, 5, 10) : 0;
+    const eck = { 1: clamp5(Math.min(K3.w, K3.d) * 0.24, 7, 12), 2: clamp5(Math.min(K3.w, K3.d) * 0.22, 5, 11), 5: clamp5(Math.min(K3.w, K3.d) * 0.32, 8, 18), 6: clamp5(Math.min(K3.w, K3.d) * 0.18, 5, 9) }[fam] ?? 0;
+    const eck8 = fam === 8 && K3.v % 2 === 0 ? clamp5(Math.min(K3.w, K3.d) * 0.2, 5, 10) : 0;
     K3.mieterEG = eigeneMieterflaechen(Z2, { "+z": K3.w - eck - eck8, "+x": K3.d - eck - eck8 });
     const bauer = { 1: familie1, 2: familie2, 3: familie3, 4: familie4, 5: familie5, 6: familie6, 7: familie7, 8: familie8, 9: familie9, 10: familie10, 11: familie11 }[fam];
     let hoehe = bauer(K3);
@@ -49207,7 +50189,7 @@
     if (laut && K3.n >= 3) for (const s2 of K3.seiten) {
       const z3 = K3.zonen[s2.seite];
       if (!z3 || z3.dach || z3.sport || z3.wand) continue;
-      const hb = Math.min(z3.hb, Math.max(2.2, (K3.Hw - EG) * 0.2));
+      const hb = Math.min(z3.hb, Math.max(2.2, (K3.Hw - EG2) * 0.2));
       const y = Math.max(z3.y, K3.Hw - 0.7 - hb * 0.95);
       if (y + hb * 0.95 <= K3.Hw + 0.3) Object.assign(z3, { hb, y });
     }
@@ -49231,7 +50213,7 @@
       d: K3.d,
       hoehe: K3.Hw,
       traufe: K3.traufe ?? K3.Hw,
-      egHoehe: EG,
+      egHoehe: EG2,
       geschossHoehe: GH,
       n: K3.n,
       tRelief: K3.tRelief,
@@ -49261,7 +50243,7 @@
 
   // src/kit/sonderbauten.js
   var PI = Math.PI;
-  function zyl3(S, rO, rU, h, x, y0, z2, farbe, seg = 16, offen = false) {
+  function zyl4(S, rO, rU, h, x, y0, z2, farbe, seg = 16, offen = false) {
     const g = new three_module_exports.CylinderGeometry(rO, rU, h, seg, 1, offen);
     g.translate(x, y0 + h / 2, z2);
     S.add(g, farbe);
@@ -49394,7 +50376,7 @@
     S.add(aufSeite(new three_module_exports.CylinderGeometry(rad2 * 0.3, rad2 * 0.3, 0.3, 14).rotateX(PI / 2).translate(0, 0, 0.32), seite, u, y, f), stein);
   }
   function saeule(S, x, y0, z2, h, rad2, farbe) {
-    zyl3(S, rad2, rad2 * 1.08, h - 0.8, x, y0 + 0.4, z2, farbe, 10);
+    zyl4(S, rad2, rad2 * 1.08, h - 0.8, x, y0 + 0.4, z2, farbe, 10);
     S.box(rad2 * 2.6, 0.4, rad2 * 2.6, x, y0 + 0.2, z2, farbe);
     S.box(rad2 * 2.8, 0.42, rad2 * 2.8, x, y0 + h - 0.21, z2, farbe);
   }
@@ -49409,7 +50391,7 @@
     return schild(scene2, text2, seite, u, y, f, h, farbe, bg);
   }
   var AUTOFARBEN = ["#f4f3ef", "#2b2f33", "#a3abb2", "#c84a3c", "#2f5f8f", "#d9cfb4", "#3d6b4f", "#e3b23c", "#f4f3ef", "#6b7680"];
-  function auto(S, x, z2, ry, farbe, y0 = 0.3) {
+  function auto2(S, x, z2, ry, farbe, y0 = 0.3) {
     const c = Math.cos(ry), s2 = Math.sin(ry);
     S.box(4.3, 0.75, 1.8, x, y0 + 0.62, z2, farbe, ry);
     S.box(2.3, 0.62, 1.6, x - 0.25 * c, y0 + 1.3, z2 + 0.25 * s2, "#3c4852", ry);
@@ -49442,7 +50424,7 @@
       for (let i = 0; i <= n; i++) S.box(0.14, 0.03, tiefe * 0.85, x0 + off + i * br, yt + 0.015, rz + tiefe / 2, FARBEN3.markierung);
       for (let i = 0; i < n; i++) {
         if (o.baeume && (i === 0 || i === n - 1) && ri % 2 === 0) continue;
-        if (r() < (o.dichte ?? 0.6)) auto(S, x0 + off + (i + 0.5) * br, rz + tiefe / 2 + (r() - 0.5) * 0.3, PI / 2, waehle2(r, AUTOFARBEN), yt);
+        if (r() < (o.dichte ?? 0.6)) auto2(S, x0 + off + (i + 0.5) * br, rz + tiefe / 2 + (r() - 0.5) * 0.3, PI / 2, waehle2(r, AUTOFARBEN), yt);
       }
       if (o.baeume && ri % 2 === 0) {
         for (const i of [0, n - 1]) {
@@ -49539,9 +50521,9 @@
     }
     if (variante === "rotunde") {
       const cx = x + w - R9 + 1.5, cz = z2 + d - R9 + 1.5;
-      zyl3(S, R9, R9, H + 2, cx, 0, cz, glas2, 28);
-      for (let k = 1; k <= G2; k++) zyl3(S, R9 + 0.25, R9 + 0.25, 0.45, cx, eg + (k - 1) * gh - 0.4, cz, "#f4f2ee", 28);
-      zyl3(S, R9 + 1.6, R9 + 1.6, 1.2, cx, H + 2, cz, akzent, 28);
+      zyl4(S, R9, R9, H + 2, cx, 0, cz, glas2, 28);
+      for (let k = 1; k <= G2; k++) zyl4(S, R9 + 0.25, R9 + 0.25, 0.45, cx, eg + (k - 1) * gh - 0.4, cz, "#f4f2ee", 28);
+      zyl4(S, R9 + 1.6, R9 + 1.6, 1.2, cx, H + 2, cz, akzent, 28);
       haube(S, R9 - 0.5, cx, H + 3.2, cz, glas2, 0.55, 20);
       for (let i = 0; i < 6; i++) {
         const a = i / 6 * PI;
@@ -49551,7 +50533,7 @@
         g.translate(cx, H + 3.2, cz);
         S.add(g, "#f4f4f2");
       }
-      zyl3(S, R9 + 3.5, R9 + 3.5, 0.45, cx, eg - 0.6, cz, "#f4f2ee", 28);
+      zyl4(S, R9 + 3.5, R9 + 3.5, 0.45, cx, eg - 0.6, cz, "#f4f2ee", 28);
       schildPasst(scene2, name2, "+z", x + (w - ecke) / 2, H - 0.9, z2 + d - 0.05, 2, w - ecke - 6, "#ffffff", null);
       schildPasst(scene2, name2, "+x", z2 + (d - ecke) / 2, H - 0.9, x + w - 0.05, 2, d - ecke - 6, "#ffffff", null);
     } else {
@@ -49592,8 +50574,8 @@
       }
       for (let u = x + 0.3; u < mx1; u += 7.5) S.box(0.5, gh - 0.4, 0.5, u + 0.25, yb + (gh - 0.4) / 2, z2 + d - 0.25, beton);
       for (let u = z2 + 0.3; u < z2 + d; u += 7.5) S.box(0.5, gh - 0.4, 0.5, mx1 - 0.25, yb + (gh - 0.4) / 2, u + 0.25, beton);
-      for (let u = x + 1.8; u < mx1 - 6; u += 2.6) if (r() < 0.62) auto(S, u, z2 + d - 3.1, PI / 2, waehle2(r, AUTOFARBEN), yb + 0.05);
-      for (let u = z2 + 1.8; u < z2 + d - 6; u += 2.6) if (r() < 0.62) auto(S, mx1 - 3.1, u, 0, waehle2(r, AUTOFARBEN), yb + 0.05);
+      for (let u = x + 1.8; u < mx1 - 6; u += 2.6) if (r() < 0.62) auto2(S, u, z2 + d - 3.1, PI / 2, waehle2(r, AUTOFARBEN), yb + 0.05);
+      for (let u = z2 + 1.8; u < z2 + d - 6; u += 2.6) if (r() < 0.62) auto2(S, mx1 - 3.1, u, 0, waehle2(r, AUTOFARBEN), yb + 0.05);
     }
     const yd = H;
     S.quader(x, yd, z2 + d - 0.3, mx1, yd + 1.1, z2 + d, brF);
@@ -49622,8 +50604,8 @@
     schildPasst(scene2, "Einfahrt", "+x", ez, 3.3, mx1 + (variante === "lamellen" ? 0.6 : 0), 0.9, 7, "#ffffff", "#2a62b8");
     if (variante === "spirale") {
       const cx = x + w - 7.5, cz = z2 + d - 7.5;
-      zyl3(S, 2.2, 2.2, H + 1.5, cx, 0, cz, beton, 14);
-      zyl3(S, 6.7, 6.7, H, cx, 0, cz, "#5d666e", 24);
+      zyl4(S, 2.2, 2.2, H + 1.5, cx, 0, cz, beton, 14);
+      zyl4(S, 6.7, 6.7, H, cx, 0, cz, "#5d666e", 24);
       const n = G2 * 2;
       for (let i = 1; i <= n; i++) {
         const y = i * H / n;
@@ -49639,14 +50621,14 @@
         S.add(b, brF);
       }
       schild(scene2, "P", "+z", cx, H + 4, cz + 2.2, 3, "#ffffff", "#2a62b8");
-      zyl3(S, 0.3, 0.3, 4, cx, H + 1.5, cz, "#59636b", 6);
+      zyl4(S, 0.3, 0.3, 4, cx, H + 1.5, cz, "#59636b", 6);
       S.quader(x + w - 9, 0, z2 + 4, x + w - 4, 3, z2 + 8, "#e9e6df");
       baum(S, x + w - 6, z2 + 14, r, 0.9);
       baum(S, x + w - 4, z2 + 20, r, 0.8);
     }
     return { hoehe: H + 8.6, teile: S.anzahl };
   }
-  var clamp5 = (v, a, b) => Math.max(a, Math.min(b, v));
+  var clamp6 = (v, a, b) => Math.max(a, Math.min(b, v));
   function sbox(S, seite, u0, u1, y0, y1, f0, f1, farbe) {
     if (seite === "+z") S.quader(u0, y0, f0, u1, y1, f1, farbe);
     else S.quader(f0, y0, u0, f1, y1, u1, farbe);
@@ -49705,14 +50687,14 @@
     switch (art) {
       case "zwiebel":
         drehform(S, [[0, 0], [a * 1.05, 0], [a * 1.05, 0.6], [a * 1.15, 1.6], [a * 1, 3.2], [a * 0.55, 4.6], [a * 0.26, 5.4], [a * 0.22, 5.8], [0, 5.8]], cx, y, cz, farbe, 12);
-        zyl3(S, a * 0.32, a * 0.32, 2.4, cx, y + 5.8, cz, stein, 8);
+        zyl4(S, a * 0.32, a * 0.32, 2.4, cx, y + 5.8, cz, stein, 8);
         drehform(S, [[0, 0], [a * 0.42, 0], [a * 0.48, 0.6], [a * 0.3, 1.5], [a * 0.06, 2.2], [0, 2.4]], cx, y + 8.2, cz, farbe, 10);
         spitze(S, 0.18, 2.2, cx, y + 10.5, cz, farbe, 6);
         kreuzOderKugel(S, cx, y + 12.3, cz, 0.8);
         return y + 14;
       case "welsch":
         drehform(S, [[0, 0], [a * 1.1, 0], [a * 1.05, 0.9], [a * 0.62, 2.8], [a * 0.3, 3.7], [0, 3.8]], cx, y, cz, farbe, 12);
-        zyl3(S, a * 0.34, a * 0.34, 2.8, cx, y + 3.6, cz, stein, 8);
+        zyl4(S, a * 0.34, a * 0.34, 2.8, cx, y + 3.6, cz, stein, 8);
         drehform(S, [[0, 0], [a * 0.5, 0], [a * 0.42, 0.9], [a * 0.15, 1.9], [0, 2.1]], cx, y + 6.4, cz, farbe, 10);
         spitze(S, 0.15, 2.4, cx, y + 8.4, cz, farbe, 6);
         kreuzOderKugel(S, cx, y + 10.6, cz, 0.7);
@@ -49740,9 +50722,9 @@
         return y + h + 1.5;
       }
       case "kuppel":
-        zyl3(S, a * 0.85, a * 0.85, a * 0.8, cx, y, cz, stein, 12);
+        zyl4(S, a * 0.85, a * 0.85, a * 0.8, cx, y, cz, stein, 12);
         haube(S, a * 0.9, cx, y + a * 0.8, cz, farbe, 1, 14);
-        zyl3(S, a * 0.22, a * 0.22, 1.6, cx, y + a * 1.65, cz, stein, 8);
+        zyl4(S, a * 0.22, a * 0.22, 1.6, cx, y + a * 1.65, cz, stein, 8);
         kreuzOderKugel(S, cx, y + a * 1.65 + 1.6, cz, 0.6);
         return y + a * 1.65 + 3.8;
       case "flach":
@@ -49816,10 +50798,10 @@
   }
   function langhausKirche(S, scene2, p, c) {
     const { x, z: z2 } = p, w = p.w, d = p.d;
-    const st = c.stein, sH = c.hell, glas2 = c.glas ?? "#435666", dach2 = c.dach, bog = c.bogen;
+    const st = c.stein, sH = c.hell, glas2 = c.glas ?? "#435666", dach3 = c.dach, bog = c.bogen;
     let tB = 0;
-    if (c.turm === "west" || c.turm === "seitlich") tB = clamp5(d * 0.45, 5, c.turmMax ?? 11);
-    if (c.turm === "doppel") tB = clamp5(d * 0.32, 4.5, 10);
+    if (c.turm === "west" || c.turm === "seitlich") tB = clamp6(d * 0.45, 5, c.turmMax ?? 11);
+    if (c.turm === "doppel") tB = clamp6(d * 0.32, 4.5, 10);
     const tT = c.turm === "west" || c.turm === "doppel" ? tB : 0;
     let zA = z2 + 0.8, zB = z2 + d - 0.8;
     if (c.turm === "seitlich") zB = z2 + d - tB * 0.6;
@@ -49837,7 +50819,7 @@
     const inQ = (u) => quer2 && u > qx0 - 1.2 && u < qx1 + 1.2;
     const nJ = Math.max(2, Math.round(L2 / (c.joch ?? 5.6))), jb = L2 / nJ;
     const fw = Math.min(c.fensterB ?? 2.4, jb * 0.45);
-    const fenster6 = (y0, y1) => {
+    const fenster7 = (y0, y1) => {
       const lo = [];
       if (y1 - y0 < fw * 1.2) return lo;
       for (let i = 0; i < nJ; i++) {
@@ -49848,7 +50830,7 @@
       return lo;
     };
     S.quader(nx0, 0, az0, nx1, Hs, az1 - 0.3, "#46525d");
-    lochwand(S, "+z", nx0, nx1, -0.3, Hs, az1, 0.6, st, fenster6(Hs * (c.fu ?? 0.22), Hs - (c.fo ?? Math.max(1.6, Hs * 0.14))));
+    lochwand(S, "+z", nx0, nx1, -0.3, Hs, az1, 0.6, st, fenster7(Hs * (c.fu ?? 0.22), Hs - (c.fo ?? Math.max(1.6, Hs * 0.14))));
     gesims(S, nx0, az0, L2, az1 - az0, Hs, 0.45, 0.3, sH);
     for (let i = 0; i <= nJ; i++) {
       const u = nx0 + i * jb;
@@ -49864,10 +50846,10 @@
         const g = new three_module_exports.BoxGeometry(L2, 0.45, hyp);
         g.rotateX(ang * s2);
         g.translate(nx0 + L2 / 2, Hs + (c.pult ?? 3.5) / 2 + 0.2, cz + s2 * (nb / 2 + sb2 / 2));
-        S.add(g, dach2);
+        S.add(g, dach3);
       }
       S.quader(nx0, Hs, nz0, nx1, Hn, nz1 - 0.3, "#46525d");
-      lochwand(S, "+z", nx0, nx1, Hs, Hn, nz1, 0.5, st, fenster6(Hs + (c.pult ?? 3.5) + 0.8, Hn - 1.2));
+      lochwand(S, "+z", nx0, nx1, Hs, Hn, nz1, 0.5, st, fenster7(Hs + (c.pult ?? 3.5) + 0.8, Hn - 1.2));
       gesims(S, nx0, nz0, L2, nb, Hn, 0.5, 0.35, sH);
       if (c.strebe) for (let i = 0; i <= nJ; i++) {
         const u = nx0 + i * jb;
@@ -49878,7 +50860,7 @@
         S.add(g, sH);
       }
     }
-    satteldach2(S, nx0 - 0.3, nz0 - 0.8, L2 + (tT ? 0 : 0.6), nb + 1.6, Hn, dachH, dach2, "x", 0.2);
+    satteldach2(S, nx0 - 0.3, nz0 - 0.8, L2 + (tT ? 0 : 0.6), nb + 1.6, Hn, dachH, dach3, "x", 0.2);
     S.quader(nx1 - 0.6, 0, az0, nx1 + 0.06, Hs, az1, st);
     if (c.schiff === "basilika") S.quader(nx1 - 0.6, Hs, nz0, nx1 + 0.06, Hn, nz1, st);
     if (c.turm === "doppel") {
@@ -49903,10 +50885,10 @@
     if (c.chor !== "gerade") {
       const seg = c.chor === "rund" ? 14 : 6, hc = (c.schiff === "basilika" ? Hn : Hn) * 0.9;
       halbrund(S, nx0, cz, rc, hc, st, seg);
-      halbkegel(S, nx0, cz, rc + 0.5, dachH * 0.72, hc, dach2, seg);
+      halbkegel(S, nx0, cz, rc + 0.5, dachH * 0.72, hc, dach3, seg);
       if (c.schiff === "basilika" && c.umgang) {
         halbrund(S, nx0, cz, rc + sb2 * 0.8, Hs, st, seg);
-        halbkegel(S, nx0, cz, rc + sb2 * 0.8 + 0.5, 3, Hs, dach2, seg);
+        halbkegel(S, nx0, cz, rc + sb2 * 0.8 + 0.5, 3, Hs, dach3, seg);
       }
     }
     let top = Hn + dachH;
@@ -49915,7 +50897,7 @@
       S.quader(qx0, 0, qz0, qx1, Hn, qz1, st);
       gesims(S, qx0, qz0, qb, qz1 - qz0, Hn, 0.5, 0.3, sH);
       const hq = dachH * (qb + 0.8) / (nb + 1.6);
-      satteldach2(S, qx0 - 0.4, qz0 - 0.3, qb + 0.8, qz1 - qz0 + 0.6, Hn, hq, dach2, "z", 0.2);
+      satteldach2(S, qx0 - 0.4, qz0 - 0.3, qb + 0.8, qz1 - qz0 + 0.6, Hn, hq, dach3, "z", 0.2);
       giebel2(S, "+z", qx0 - 0.1, qx1 + 0.1, Hn, c.giebel === "volute" ? qb * 0.75 : hq, qz1 + 0.35, st, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
       const qm = (qx0 + qx1) / 2;
       if (c.rose) rosette(S, "+z", qm, Hn * 0.62, qz1, Math.min(qb * 0.3, Hn * 0.2), sH, glas2);
@@ -49923,13 +50905,13 @@
       platte(S, "+z", qm - 1.4, 0.3, qm + 1.4, Math.min(5.5, Hn * 0.3), qz1, "#4a3a2e", bog, 0.25);
       if (c.vierung) {
         const rv = Math.min(qb, nb) * 0.38, hv = dachH + Hn * 0.3;
-        zyl3(S, rv, rv, hv, qm, Hn, cz, st, 8);
+        zyl4(S, rv, rv, hv, qm, Hn, cz, st, 8);
         for (let i = 0; i < 8; i++) {
           const a = i / 8 * 2 * PI + PI / 8;
           if (Math.cos(a) < -0.3 || Math.sin(a) < -0.3) continue;
           S.box(0.8, hv * 0.22, 0.3, qm + Math.cos(a) * (rv * 0.93), Hn + hv * 0.8, cz + Math.sin(a) * (rv * 0.93), "#3f4c58", -a - PI / 2);
         }
-        zyl3(S, rv + 0.35, rv + 0.35, 0.4, qm, Hn + hv, cz, sH, 8);
+        zyl4(S, rv + 0.35, rv + 0.35, 0.4, qm, Hn + hv, cz, sH, 8);
         if (c.vierungHelm === "spitz") {
           spitze(S, rv + 0.2, rv * 3, qm, Hn + hv + 0.4, cz, c.helmF, 8);
           top = Math.max(top, Hn + hv + rv * 3);
@@ -49942,7 +50924,7 @@
       platte(S, "+z", nx0 + L2 * 0.5 - 1.3, 0.3, nx0 + L2 * 0.5 + 1.3, Math.min(4.8, Hs * 0.6), az1, "#4a3a2e", bog, 0.25);
     }
     if (c.turm === "dachreiter" || c.dachreiter) {
-      const ux = quer2 ? (qx0 + qx1) / 2 : nx0 + L2 * 0.72, b = clamp5(nb * 0.2, 1.6, 2.8), y0 = Hn + dachH * 0.55, y1 = Hn + dachH + 3;
+      const ux = quer2 ? (qx0 + qx1) / 2 : nx0 + L2 * 0.72, b = clamp6(nb * 0.2, 1.6, 2.8), y0 = Hn + dachH * 0.55, y1 = Hn + dachH + 3;
       S.box(b, y1 - y0, b, ux, (y0 + y1) / 2, cz, c.dachreiterF ?? sH);
       platte(S, "+z", ux - b * 0.25, y1 - 2.4, ux + b * 0.25, y1 - 0.5, cz + b / 2, "#3f4c58", bog, 0.06);
       platte(S, "+x", cz - b * 0.25, y1 - 2.4, cz + b * 0.25, y1 - 0.5, ux + b / 2, "#3f4c58", bog, 0.06);
@@ -49973,57 +50955,57 @@
   }
   function klassizistischeKirche(S, scene2, p, c) {
     const { x, z: z2, w, d } = p, r = c.r, st = c.stein, sH = c.hell, kup = c.helmF;
-    const pt = clamp5(d * 0.2, 3, 5.5), bz1 = z2 + d - pt;
+    const pt = clamp6(d * 0.2, 3, 5.5), bz1 = z2 + d - pt;
     let top;
     if (c.form === "rotunde") {
       const R9 = Math.min((bz1 - z2) / 2 - 0.3, w * 0.3), cx = x + w / 2, cz = z2 + (bz1 - z2) / 2 + 0.3;
-      const H = clamp5(R9 * 1.05, 9, 16);
-      zyl3(S, R9, R9, H, cx, 0, cz, st, 28);
+      const H = clamp6(R9 * 1.05, 9, 16);
+      zyl4(S, R9, R9, H, cx, 0, cz, st, 28);
       for (let i = 0; i < 16; i++) {
         const a = i / 16 * 2 * PI;
         if (Math.cos(a) < -0.25 && Math.sin(a) < -0.25) continue;
         S.box(1.3, H * 0.42, 0.3, cx + Math.cos(a) * (R9 + 0.05), H * 0.5, cz + Math.sin(a) * (R9 + 0.05), "#46525d", -a - PI / 2);
       }
-      zyl3(S, R9 + 0.5, R9 + 0.5, 0.9, cx, H, cz, sH, 28);
+      zyl4(S, R9 + 0.5, R9 + 0.5, 0.9, cx, H, cz, sH, 28);
       drehform(S, [[R9 + 0.3, 0], [R9 * 0.66, R9 * 0.22], [0, R9 * 0.22]], cx, H + 0.9, cz, c.dach, 28);
       const Rt = R9 * 0.62, Ht = R9 * 0.4, y0 = H + 0.9 + R9 * 0.18;
-      zyl3(S, Rt, Rt, Ht, cx, y0, cz, st, 20);
+      zyl4(S, Rt, Rt, Ht, cx, y0, cz, st, 20);
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * 2 * PI;
         if (Math.cos(a) < -0.25 && Math.sin(a) < -0.25) continue;
         S.box(0.9, Ht * 0.55, 0.3, cx + Math.cos(a) * (Rt + 0.05), y0 + Ht * 0.5, cz + Math.sin(a) * (Rt + 0.05), "#46525d", -a - PI / 2);
       }
-      zyl3(S, Rt + 0.4, Rt + 0.4, 0.5, cx, y0 + Ht, cz, sH, 20);
+      zyl4(S, Rt + 0.4, Rt + 0.4, 0.5, cx, y0 + Ht, cz, sH, 20);
       haube(S, Rt + 0.1, cx, y0 + Ht + 0.5, cz, kup, c.kuppelHoch ? 1.15 : 0.85, 20);
       const yl = y0 + Ht + 0.5 + (Rt + 0.1) * (c.kuppelHoch ? 1.15 : 0.85);
-      zyl3(S, 1, 1, 2.2, cx, yl - 0.3, cz, sH, 8);
+      zyl4(S, 1, 1, 2.2, cx, yl - 0.3, cz, sH, 8);
       haube(S, 1.2, cx, yl + 1.9, cz, kup, 1.1, 8);
       kreuz(S, cx, yl + 3.2, cz, 0.7);
       top = yl + 5.5;
       portikus(S, scene2, cx - R9 * 0.62, cx + R9 * 0.62, cz + R9 - 1.2, H, pt - 1.4, st, c.saeulen ?? 6, { dach: c.dach });
     } else {
-      const bx0 = x + 0.8, bx1 = x + w - 0.8, H = clamp5(d * 0.62, 10, 15), cx = (bx0 + bx1) / 2, cz = (z2 + 1 + bz1) / 2;
+      const bx0 = x + 0.8, bx1 = x + w - 0.8, H = clamp6(d * 0.62, 10, 15), cx = (bx0 + bx1) / 2, cz = (z2 + 1 + bz1) / 2;
       lochBlock(S, bx0, z2 + 1, bx1 - bx0, bz1 - z2 - 1, 0, H, st, { y0: 1.2, geschosse: 1, gh: H - 1.2, raster: 5, fw: 2, fh: H * 0.5, bruestung: H * 0.2, bogen: true, tiefe: 0.6 });
       for (let u = bx0 + 0.2; u <= bx1; u += (bx1 - bx0) / 6) S.box(0.8, H, 0.3, u, H / 2, bz1 + 0.15, sH);
       gesims(S, bx0, z2 + 1, bx1 - bx0, bz1 - z2 - 1, H, 1, 0.5, sH);
       S.quader(bx0 + 0.2, H + 0.5, z2 + 1.2, bx1 - 0.2, H + 1.6, bz1 - 0.2, sH);
       satteldach2(S, bx0 + 0.6, z2 + 1.6, bx1 - bx0 - 1.2, bz1 - z2 - 2.2, H + 1.6, 2.4, c.dach, "x", (bz1 - z2) * 0.3);
-      const R9 = clamp5(Math.min(d * 0.3, w * 0.17), 4, 9), y0 = H + 1.6;
-      zyl3(S, R9, R9, R9 * 0.7, cx, y0, cz, st, 20);
+      const R9 = clamp6(Math.min(d * 0.3, w * 0.17), 4, 9), y0 = H + 1.6;
+      zyl4(S, R9, R9, R9 * 0.7, cx, y0, cz, st, 20);
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * 2 * PI;
         if (Math.cos(a) < -0.25 && Math.sin(a) < -0.25) continue;
         S.box(0.9, R9 * 0.38, 0.3, cx + Math.cos(a) * (R9 + 0.05), y0 + R9 * 0.35, cz + Math.sin(a) * (R9 + 0.05), "#46525d", -a - PI / 2);
       }
-      zyl3(S, R9 + 0.4, R9 + 0.4, 0.5, cx, y0 + R9 * 0.7, cz, sH, 20);
+      zyl4(S, R9 + 0.4, R9 + 0.4, 0.5, cx, y0 + R9 * 0.7, cz, sH, 20);
       const kh = c.kuppelHoch ? 1.15 : 0.9;
       haube(S, R9 + 0.1, cx, y0 + R9 * 0.7 + 0.5, cz, kup, kh, 20);
       const yl = y0 + R9 * 0.7 + 0.5 + (R9 + 0.1) * kh;
-      zyl3(S, 0.9, 0.9, 2, cx, yl - 0.3, cz, sH, 8);
+      zyl4(S, 0.9, 0.9, 2, cx, yl - 0.3, cz, sH, 8);
       haube(S, 1.1, cx, yl + 1.7, cz, kup, 1.1, 8);
       kreuz(S, cx, yl + 2.9, cz, 0.7);
       top = yl + 5;
-      const pb = clamp5(w * 0.42, 9, 22);
+      const pb = clamp6(w * 0.42, 9, 22);
       portikus(S, scene2, cx - pb / 2, cx + pb / 2, bz1, H, pt - 2.6, st, pb > 15 ? 6 : 4, { dach: c.dach });
       if (c.tuerme) for (const tz of [z2 + 1.2]) {
         const t = 4.5, tx0 = bx1 - t;
@@ -50040,7 +51022,7 @@
   }
   function nachkriegsKirche(S, scene2, p, c) {
     const { x, z: z2, w, d } = p, r = c.r, st = c.stein, bunt4 = c.glasBunt;
-    const ct = clamp5(d * 0.18, 2.8, 4.2), Hc = clamp5(w * 0.62, 18, 34);
+    const ct = clamp6(d * 0.18, 2.8, 4.2), Hc = clamp6(w * 0.62, 18, 34);
     const bx0 = x + 0.5, bx1 = x + w - ct - 3.5, bz0 = z2 + 0.8, bz1 = z2 + d - 0.8, bw = bx1 - bx0, bd = bz1 - bz0;
     let top;
     if (c.form === "zelt") {
@@ -50055,7 +51037,7 @@
       kreuz(S, (bx0 + bx1) / 2, 3.6 + hz - 0.4, (bz0 + bz1) / 2, 1.3, "#e9e7e2");
       top = 3.6 + hz + 3;
     } else if (c.form === "falt") {
-      const H = clamp5(d * 0.45, 7, 10);
+      const H = clamp6(d * 0.45, 7, 10);
       S.quader(bx0, 0, bz0, bx1 - 0.3, H, bz1 - 0.3, bunt4);
       const lo = [];
       for (let u = bx0 + 1.2; u < bx1 - 1; u += 1.5) lo.push({ u0: u, u1: u + 0.55, v0: 1.2, v1: H - 1 });
@@ -50069,7 +51051,7 @@
       }
       top = H + 2.6;
     } else {
-      const H = clamp5(d * 0.6, 9, 14);
+      const H = clamp6(d * 0.6, 9, 14);
       S.quader(bx0, 0, bz0, bx1, H, bz1, st);
       S.quader(bx0 - 0.2, H, bz0 - 0.2, bx1 + 0.2, H + 0.6, bz1 + 0.2, heller(st, 0.04));
       const mz = (bz0 + bz1) / 2;
@@ -50157,7 +51139,7 @@
       spitze(S, 1, 5, u, Hn + 2, z2 + d - 0.2, sH, 4);
     }
     if (c.vierungsturm !== false) {
-      zyl3(S, 5.2, 5.6, 8, (qx0 + qx1) / 2, Hn + 8, cz, stein, 8);
+      zyl4(S, 5.2, 5.6, 8, (qx0 + qx1) / 2, Hn + 8, cz, stein, 8);
       spitze(S, 5.4, c.vierungH ?? 16, (qx0 + qx1) / 2, Hn + 16, cz, helmF === stein ? dachF : helmF, 8);
     } else {
       S.box(2.4, 6, 2.4, (qx0 + qx1) / 2, Hn + 12, cz, sH);
@@ -50187,7 +51169,7 @@
     uhr(S, "+x", cz, Hn + 7.8, x + w - 1, 2.2);
     for (const zz of [fz0 + t / 2, fz1 - t / 2]) {
       const cx = ax1 + t / 2;
-      zyl3(S, t * 0.46, t * 0.5, 7, cx, Ht, zz, stein, 8);
+      zyl4(S, t * 0.46, t * 0.5, 7, cx, Ht, zz, stein, 8);
       for (let i = 0; i < 8; i++) {
         const a = i / 8 * 2 * PI + PI / 8;
         spitze(S, 0.5, 3, cx + Math.cos(a) * t * 0.5, Ht + 7, zz + Math.sin(a) * t * 0.5, sH, 4);
@@ -50236,7 +51218,7 @@
   var ZIEGEL = ["#b4583f", "#a24e38", "#c06548"];
   var KUPFER = ["#6f9a7d", "#7aa68a", "#5f8c72"];
   function kirchenKonfig(stil, r, p) {
-    const k = clamp5(p.d / 22, 0.62, 1.3);
+    const k = clamp6(p.d / 22, 0.62, 1.3);
     const c = { r };
     switch (stil) {
       case "romanisch":
@@ -50504,28 +51486,28 @@
     let top;
     if (back) {
       for (const [dx, dz] of [[0, 0], [t, 0], [0, t], [t, t]]) {
-        zyl3(S, 0.9, 0.9, 4, tu0 + dx, Ht, tz0 + dz, wand2, 8);
+        zyl4(S, 0.9, 0.9, 4, tu0 + dx, Ht, tz0 + dz, wand2, 8);
         spitze(S, 1.1, 4, tu0 + dx, Ht + 4, tz0 + dz, dachF, 8);
       }
       spitze(S, t * 0.62, t * 2.2, tu0 + t / 2, Ht, tz0 + t / 2, dachF, 8);
       top = Ht + t * 2.2;
     } else {
       pyramide(S, t + 1, t + 1, 2.4, tu0 + t / 2, Ht + 0.4, tz0 + t / 2, helmF);
-      zyl3(S, t * 0.3, t * 0.3, 4, tu0 + t / 2, Ht + 2.6, tz0 + t / 2, hell4, 8);
+      zyl4(S, t * 0.3, t * 0.3, 4, tu0 + t / 2, Ht + 2.6, tz0 + t / 2, hell4, 8);
       top = turmHelm(S, r() < 0.5 ? "zwiebel" : "welsch", tu0 + t / 2, Ht + 6.4, tz0 + t / 2, t * 0.7, helmF, hell4, "kugel");
     }
     schildPasst(scene2, "Rathaus", "+z", tu0 + t / 2, eg + 0.6, tz0 + t, 1, t - 1, back ? "#ffffff" : "#3a2e24");
     belag(S, x - 5, z2 + d + 0.5, x + w + 5, z2 + d + 5.5, "#e2ddd2");
     return { hoehe: top, teile: S.anzahl };
   }
-  function tonnenHalle(S, x0, x1, cz, rad2, hv, y0, dach2, glas2) {
+  function tonnenHalle(S, x0, x1, cz, rad2, hv, y0, dach3, glas2) {
     const len = x1 - x0, cx = (x0 + x1) / 2, sy = hv / rad2;
     {
       const g = new three_module_exports.CylinderGeometry(rad2, rad2, len, 30, 1, true, 0, PI);
       g.rotateZ(PI / 2);
       g.scale(1, sy, 1);
       g.translate(cx, y0, cz);
-      S.add(g, dach2);
+      S.add(g, dach3);
     }
     {
       const g = new three_module_exports.CylinderGeometry(rad2 + 0.1, rad2 + 0.1, len - 1, 10, 1, true, PI / 2 - 0.36, 0.72);
@@ -50679,13 +51661,13 @@
     }
     gesims(S, ux0, uz0, ut, ut, Hu, 0.9, 0.6, hell4);
     pyramide(S, ut + 1.2, ut + 1.2, 3, ux0 + ut / 2, Hu + 0.45, uz0 + ut / 2, kupfer);
-    zyl3(S, 2.2, 2.2, 3.4, ux0 + ut / 2, Hu + 3, uz0 + ut / 2, hell4, 8);
+    zyl4(S, 2.2, 2.2, 3.4, ux0 + ut / 2, Hu + 3, uz0 + ut / 2, hell4, 8);
     haube(S, 2.6, ux0 + ut / 2, Hu + 6.4, uz0 + ut / 2, kupfer, 1.3, 10);
     spitze(S, 0.2, 3.5, ux0 + ut / 2, Hu + 9.6, uz0 + ut / 2, "#d8b45a", 6);
     if (nur) return { hoehe: Hu + 13, teile: S.anzahl };
     belag(S, x, zf, hx1 + 4, z2 + d - 0.5, "#e6e1d6");
     for (let u = x + 4; u < hx1; u += 6) S.quader(u, 0.36, zf + 1, u + 0.15, 0.38, z2 + d - 1.5, "#d6d0c3");
-    for (let i = 0; i < 5; i++) auto(S, bx0 + pav + 6 + i * 5, zf + 9, 0, "#efe3b0", 0.36);
+    for (let i = 0; i < 5; i++) auto2(S, bx0 + pav + 6 + i * 5, zf + 9, 0, "#efe3b0", 0.36);
     bus(S, mx1 + 22, zf + 15, 0, waehle2(r, ["#e3b23c", "#2f6f8f", "#3f7d56"]), 0.36);
     for (let u = x + 8; u < hx1 - 2; u += 13) baum(S, u, z2 + d - 3.5, r, 0.9);
     const uu = mx0 - 6, uz = zf + 12;
@@ -50724,7 +51706,7 @@
         satteldach2(S, tx0, tz0, tw, td, Ht, 7, glasF, "z", 0);
         top = Ht + 7;
       } else if (krone === "spitze") {
-        zyl3(S, 0.35, 0.6, 16, tx0 + tw / 2, Ht + 3, tz0 + td / 2, "#d5dfe5", 6);
+        zyl4(S, 0.35, 0.6, 16, tx0 + tw / 2, Ht + 3, tz0 + td / 2, "#d5dfe5", 6);
         top = Ht + 19;
       } else top = Ht + 3;
     } else if (variante === "raster") {
@@ -50742,14 +51724,14 @@
       top = Ht + 4.5;
     } else if (variante === "rund") {
       const R9 = Math.min(tw, td) / 2 + 0.6, cx = tx0 + tw / 2, cz = tz0 + td / 2;
-      zyl3(S, R9, R9, G2 * gh, cx, H0, cz, glasF, 32);
-      for (let k = 0; k <= G2; k++) zyl3(S, R9 + 0.12, R9 + 0.12, 0.3, cx, H0 + k * gh - 0.15, cz, pfosten, 32);
+      zyl4(S, R9, R9, G2 * gh, cx, H0, cz, glasF, 32);
+      for (let k = 0; k <= G2; k++) zyl4(S, R9 + 0.12, R9 + 0.12, 0.3, cx, H0 + k * gh - 0.15, cz, pfosten, 32);
       for (let i = 0; i < 16; i++) {
         const a = i / 16 * 2 * PI;
         S.box(0.14, G2 * gh, 0.14, cx + Math.cos(a) * (R9 + 0.05), H0 + G2 * gh / 2, cz + Math.sin(a) * (R9 + 0.05), pfosten);
       }
-      zyl3(S, R9 - 1.5, R9 - 1.2, 3.5, cx, Ht, cz, "#c9d1d6", 24);
-      zyl3(S, R9 + 0.4, R9 + 0.4, 0.6, cx, Ht, cz, pfosten, 32);
+      zyl4(S, R9 - 1.5, R9 - 1.2, 3.5, cx, Ht, cz, "#c9d1d6", 24);
+      zyl4(S, R9 + 0.4, R9 + 0.4, 0.6, cx, Ht, cz, pfosten, 32);
       top = Ht + 3.5;
       sx0 = cx - R9 * 0.7;
       sz0 = cz - R9 * 0.7;
@@ -50765,7 +51747,7 @@
       S.quader(tx0 + 2.5, y3 - 0.1, tz0 + 2.5, tx0 + tw - 2.5, y3 + 0.4, tz0 + td - 2.5, stein);
       glasTurm(tx0 + 5, tz0 + 5, tw - 10, td - 10, y3 + 0.4, Math.max(1, n3));
       top = y3 + 0.4 + Math.max(1, n3) * gh;
-      zyl3(S, 0.3, 0.5, 12, tx0 + tw / 2, top, tz0 + td / 2, "#d5dfe5", 6);
+      zyl4(S, 0.3, 0.5, 12, tx0 + tw / 2, top, tz0 + td / 2, "#d5dfe5", 6);
       sx0 = tx0 + 5;
       sz0 = tz0 + 5;
       sw = tw - 10;
@@ -50925,14 +51907,14 @@
         S.quader(u - 0.55, H2 + 1.1, z2 + d2 - 1.2, u + 0.55, H2 + 3, z2 + d2 - 1.1, "#56636e");
       }
       const cx = x + w2 - 3.2, cz = z2 + d2 - 3.2, Rt = 4.2;
-      zyl3(S, Rt, Rt, H2 + 3, cx, 0, cz, stein, 16);
-      for (let k = 0; k < G2; k++) zyl3(S, Rt + 0.05, Rt + 0.05, 2.6, cx, eg + k * gh + 0.9, cz, "#55636f", 16);
-      for (let k = 0; k <= G2; k++) zyl3(S, Rt + 0.25, Rt + 0.25, 0.4, cx, eg + k * gh, cz, hell4, 16);
-      zyl3(S, Rt + 0.4, Rt + 0.4, 0.6, cx, H2 + 3, cz, hell4, 16);
+      zyl4(S, Rt, Rt, H2 + 3, cx, 0, cz, stein, 16);
+      for (let k = 0; k < G2; k++) zyl4(S, Rt + 0.05, Rt + 0.05, 2.6, cx, eg + k * gh + 0.9, cz, "#55636f", 16);
+      for (let k = 0; k <= G2; k++) zyl4(S, Rt + 0.25, Rt + 0.25, 0.4, cx, eg + k * gh, cz, hell4, 16);
+      zyl4(S, Rt + 0.4, Rt + 0.4, 0.6, cx, H2 + 3, cz, hell4, 16);
       drehform(S, [[0, 0], [Rt + 0.2, 0], [Rt, 1.8], [Rt * 0.7, 4.2], [Rt * 0.25, 5.6], [0.4, 6.2], [0, 6.2]], cx, H2 + 3.6, cz, FARBEN3.kupfer[0], 16);
       spitze(S, 0.2, 3, cx, H2 + 9.8, cz, "#d8b45a", 6);
-      zyl3(S, Rt + 0.1, Rt + 0.1, 6.1, cx, -0.1, cz, "#56636e", 16);
-      zyl3(S, Rt + 0.3, Rt + 0.3, 1.4, cx, eg - 1.2, cz, m.farbe, 16);
+      zyl4(S, Rt + 0.1, Rt + 0.1, 6.1, cx, -0.1, cz, "#56636e", 16);
+      zyl4(S, Rt + 0.3, Rt + 0.3, 1.4, cx, eg - 1.2, cz, m.farbe, 16);
       return { hoehe: H2 + 13, teile: S.anzahl };
     }
     const w = p.w ?? 34, d = p.d ?? 26, H = p.hoehe ?? 21;
@@ -51013,14 +51995,14 @@
       const pu0 = x + w2 / 2 - 12, pu1 = x + w2 / 2 + 12;
       const top = portikus(S, scene2, pu0, pu1, z2 + d2 - 5, H2 + 1.8, 3.8, stein, 8, { name: name3, dach: dachF });
       const cx2 = x + w2 / 2, cz2 = z2 + (d2 - 5) / 2;
-      zyl3(S, 8, 8, 6, cx2, H2 + 1.8, cz2, stein, 20);
+      zyl4(S, 8, 8, 6, cx2, H2 + 1.8, cz2, stein, 20);
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * 2 * PI;
         S.box(1, 3.2, 1, cx2 + Math.cos(a) * 8, H2 + 4.6, cz2 + Math.sin(a) * 8, "#55636f", -a);
       }
-      zyl3(S, 8.5, 8.5, 0.7, cx2, H2 + 7.8, cz2, hell4, 20);
+      zyl4(S, 8.5, 8.5, 0.7, cx2, H2 + 7.8, cz2, hell4, 20);
       haube(S, 8, cx2, H2 + 8.5, cz2, kupfer, 0.85, 20);
-      zyl3(S, 1.4, 1.4, 2.6, cx2, H2 + 15, cz2, hell4, 8);
+      zyl4(S, 1.4, 1.4, 2.6, cx2, H2 + 15, cz2, hell4, 8);
       haube(S, 1.6, cx2, H2 + 17.6, cz2, kupfer, 1, 8);
       belag(S, x - 5, z2 + d2 - 1, x + w2 + 5, z2 + d2 + 6, "#e2ddd2");
       return { hoehe: Math.max(top, H2 + 19.5), teile: S.anzahl };
@@ -51069,9 +52051,9 @@
       S.box(0.7, 2.2, 0.7, u, H + 3.5, lf + 5.6, hell4);
     }
     const cx = x + w / 2, cz = z2 + (d - 8) * 0.55;
-    zyl3(S, 15, 15, 4, cx, H + 1.8, cz, stein, 24);
+    zyl4(S, 15, 15, 4, cx, H + 1.8, cz, stein, 24);
     haube(S, 15.4, cx, H + 5.8, cz, kupfer, 0.42, 24);
-    zyl3(S, 1.8, 1.8, 2.2, cx, H + 12, cz, hell4, 8);
+    zyl4(S, 1.8, 1.8, 2.2, cx, H + 12, cz, hell4, 8);
     haube(S, 2, cx, H + 14.2, cz, kupfer, 1, 8);
     S.quader(x + 12, H, z2 + 1, x + w - 12, H + 18, z2 + 12, stein);
     gesims(S, x + 12, z2 + 1, w - 24, 11, H + 18, 0.8, 0.4, hell4);
@@ -51181,8 +52163,8 @@
         S.box(0.95, 0.4, 1.35, ix, 2.2, iz + dz, m.farbe);
       }
       S.box(0.45, Hc - 0.3, 0.45, ix, Hc / 2 + 0.15, iz, "#c9cdd0");
-      if (r() < 0.75) auto(S, ix + 2.7, iz + (r() - 0.5) * 3, PI / 2, waehle2(r, AUTOFARBEN), 0.36);
-      if (r() < 0.5) auto(S, ix - 2.7, iz + (r() - 0.5) * 3, PI / 2, waehle2(r, AUTOFARBEN), 0.36);
+      if (r() < 0.75) auto2(S, ix + 2.7, iz + (r() - 0.5) * 3, PI / 2, waehle2(r, AUTOFARBEN), 0.36);
+      if (r() < 0.5) auto2(S, ix - 2.7, iz + (r() - 0.5) * 3, PI / 2, waehle2(r, AUTOFARBEN), 0.36);
     }
     const wx0 = x + w - 9, wx1 = x + w - 1.5;
     S.quader(wx0, 0, z2 + 2, wx1, 4.5, z2 + 16, "#e8ecee");
@@ -51382,8 +52364,8 @@
     const eu = x + w * waehle2(r, [0.36, 0.5, 0.2]);
     if (r() < 0.75) erker2(S, eu, eg + 0.9, H - 0.3, z2 + d, 1.7, wand2, glas2, dachF);
     if (r() < 0.5) erker2(S, z2 + d * 0.7, eg + 0.9, H - 0.3, x + w, 1.5, wand2, glas2, dachF, "+x");
-    zyl3(S, 1.7, 1.7, H - eg + 0.6, x + w + 0.2, eg + 0.8, z2 + d + 0.2, wand2, 10);
-    for (let k = 0; k < G2; k++) zyl3(S, 1.74, 1.74, 1.9, x + w + 0.2, eg + 1.6 + k * gh, z2 + d + 0.2, glas2, 10);
+    zyl4(S, 1.7, 1.7, H - eg + 0.6, x + w + 0.2, eg + 0.8, z2 + d + 0.2, wand2, 10);
+    for (let k = 0; k < G2; k++) zyl4(S, 1.74, 1.74, 1.9, x + w + 0.2, eg + 1.6 + k * gh, z2 + d + 0.2, glas2, 10);
     spitze(S, 2, 4.2, x + w + 0.2, H + 1.4, z2 + d + 0.2, dachF, 10);
     {
       const g = new three_module_exports.ConeGeometry(1.7, 1.8, 10);
@@ -51392,7 +52374,7 @@
       S.add(g, wand2);
     }
     const mitTurm = r() < 0.7, tz = z2 + d * 0.45, tx = x + w - 2.6;
-    if (mitTurm) zyl3(S, 2.6, 2.6, H + 6, tx, 0, tz, wand2, 8);
+    if (mitTurm) zyl4(S, 2.6, 2.6, H + 6, tx, 0, tz, wand2, 8);
     if (mitTurm) for (let k = 0; k < 4; k++) S.box(0.3, 1.6, 0.8, tx + 2.55, 3 + k * 4.2, tz, glas2);
     if (mitTurm) gesims(S, tx - 2.6, tz - 2.6, 5.2, 5.2, H + 6, 0.5, 0.2, hell4);
     const top = !mitTurm ? H + hr : turmHelm(S, "welsch", tx, H + 6.3, tz, 5.4, waehle2(r, ["#6f9a7d", "#56636c"]), hell4, "kugel");
@@ -51430,8 +52412,8 @@
       for (const s2 of [-1, 1]) spitze(S, 0.5, 3, u + s2 * 3.5, H + 1, z2 + d - 0.3, hell4, 4);
       spitze(S, 0.4, 2.2, u, H + 7.6, z2 + d - 0.3, hell4, 4);
     }
-    const t = clamp5(w * 0.22, 7, 10), tx0 = x + waehle2(r, [w / 2 - t / 2, w / 2 - t / 2, w - t - 6, w * 0.22]), tz0 = z2 + d - t + 0.8;
-    const Ht = p.turmHoehe ?? H + clamp5(w * 0.75, 22, 36);
+    const t = clamp6(w * 0.22, 7, 10), tx0 = x + waehle2(r, [w / 2 - t / 2, w / 2 - t / 2, w - t - 6, w * 0.22]), tz0 = z2 + d - t + 0.8;
+    const Ht = p.turmHoehe ?? H + clamp6(w * 0.75, 22, 36);
     S.quader(tx0, 0, tz0, tx0 + t, Ht, tz0 + t, stein);
     for (const yy of [H, Ht - 9]) gesims(S, tx0, tz0, t, t, yy, 0.6, 0.35, hell4);
     S.quader(tx0 - 0.8, Ht - 9.4, tz0 - 0.8, tx0 + t + 0.8, Ht - 9, tz0 + t + 0.8, hell4);
@@ -51455,7 +52437,7 @@
     const { x, z: z2, w, d } = p, r = rng2(`rb:${p.seed}`);
     const wand2 = waehle2(r, ["#f1e6c8", "#efe0d6", "#e9dcc1", "#f2d9b6", "#e3e8dc"]), hell4 = "#f7f4ee", dachF = waehle2(r, ["#56636c", "#b4583f", "#4f5a62"]), glas2 = "#55636f";
     const eg = 5, gh = 4.8, G2 = waehle2(r, [2, 2, 3]), H = eg + G2 * gh, rv = 1.2;
-    const rw = clamp5(w * 0.34, 9, 15), cx = x + w / 2;
+    const rw = clamp6(w * 0.34, 9, 15), cx = x + w / 2;
     const loE = { y0: 0, geschosse: 1, gh: eg, raster: 3.6, fw: 1.6, fh: 2.8, bruestung: 1, bogen: true, tiefe: 0.6 };
     const ob = { y0: eg, geschosse: G2, gh, raster: 3.6, fw: 1.6, fh: 3, tiefe: 0.6, bogen: (k) => k === 0 };
     lochBlock(S, x, z2, w, d - rv, 0, eg, wand2, loE);
@@ -51494,7 +52476,7 @@
     schildPasst(scene2, "Rathaus", "+z", cx, eg - 0.55, z2 + d + 0.1, 0.8, rw * 0.5, "#3a2e24");
     const dz = z2 + (d - rv) / 2;
     S.box(3, 3.2, 3, cx, H + 5.2 + 1.2, dz, hell4);
-    zyl3(S, 1.5, 1.5, 3, cx, H + 7.8, dz, hell4, 8);
+    zyl4(S, 1.5, 1.5, 3, cx, H + 7.8, dz, hell4, 8);
     for (let i = 0; i < 4; i++) {
       const a = i / 4 * 2 * PI;
       S.box(0.6, 1.6, 0.3, cx + Math.cos(a) * 1.5, H + 9.3, dz + Math.sin(a) * 1.5, glas2, -a - PI / 2);
@@ -51506,7 +52488,7 @@
     const { x, z: z2, w, d } = p, r = rng2(`rh:${p.seed}`);
     const beton = waehle2(r, ["#d4d1ca", "#c9c6be", "#dcd6c8", "#b9785e"]), alu = waehle2(r, ["#c9d1d6", "#d8b45a", "#3a3f44"]), glas2 = waehle2(r, ["#56707f", "#4f6676", "#6a7f8c"]);
     const G2 = Math.round(zw(r, 9, 14)), gh = 3.4;
-    const tw = clamp5(w * zw(r, 0.38, 0.55), 12, 24), td = clamp5(d * 0.42, 10, 14), tx0 = r() < 0.5 ? x + 1 : x + w - tw - 1, tz0 = z2 + 0.5, Ht = 4 + G2 * gh;
+    const tw = clamp6(w * zw(r, 0.38, 0.55), 12, 24), td = clamp6(d * 0.42, 10, 14), tx0 = r() < 0.5 ? x + 1 : x + w - tw - 1, tz0 = z2 + 0.5, Ht = 4 + G2 * gh;
     lochBlock(S, tx0, tz0, tw, td, 0, Ht, beton, { y0: 4, geschosse: G2, gh, raster: 1.8, fw: 1.2, fh: 1.9, tiefe: 0.4, innen: glas2 });
     for (let u = tx0 + 0.9; u < tx0 + tw; u += 3.6) S.box(0.25, Ht - 4, 0.6, u, 4 + (Ht - 4) / 2, tz0 + td + 0.3, alu);
     for (let u = tz0 + 0.9; u < tz0 + td; u += 3.6) S.box(0.6, Ht - 4, 0.25, tx0 + tw + 0.3, 4 + (Ht - 4) / 2, u, alu);
@@ -51544,7 +52526,7 @@
     const wand2 = waehle2(r, ["#ecd9a0", "#f1ece2", "#e9cfc3", "#e3d3bd", "#e6e2c8"]), hell4 = "#f7f4ee", dachF = waehle2(r, ["#56636c", "#6f9a7d", "#4f5a62"]);
     const mitte = p.mitte ?? waehle2(r, ["kuppel", "giebel", "turm"]);
     const G2 = 3, gh = 4.6, H = 1.2 + G2 * gh, cd = 16, ww = 14;
-    const wl = clamp5(d * zw(r, 0.25, 0.4), 16, 40);
+    const wl = clamp6(d * zw(r, 0.25, 0.4), 16, 40);
     const ob = { y0: 1.2, geschosse: G2, gh, raster: 3.4, fw: 1.5, fh: 2.8, tiefe: 0.6, bogen: (k) => k === 1 };
     const bloecke = [[x + 3, z2 + 2, w - 6, cd, "x"], [x + 3, z2 + 2 + cd, ww, wl, "z"], [x + w - 3 - ww, z2 + 2 + cd, ww, wl, "z"]];
     for (const [bx, bz, bw, bd, achse] of bloecke) {
@@ -51560,7 +52542,7 @@
       gesims(S, bx, bz, bw, bd, H, 0.9, 0.5, hell4);
       satteldach2(S, bx, bz, bw, bd, H + 0.45, 5.5, dachF, achse, (achse === "x" ? bd : bw) * 0.5);
     }
-    const cx = x + w / 2, rw = clamp5(w * 0.2, 14, 26), rz = z2 + 2 + cd;
+    const cx = x + w / 2, rw = clamp6(w * 0.2, 14, 26), rz = z2 + 2 + cd;
     S.quader(cx - rw / 2, 0, rz - 1, cx + rw / 2, H + 2, rz + 2, wand2);
     for (let i = 0; i < 6; i++) {
       const u = cx - rw / 2 + 1 + i * (rw - 2) / 5;
@@ -51582,9 +52564,9 @@
       top = H + 2 + rw * 0.24 + 2;
     } else if (mitte === "kuppel") {
       pyramide(S, rw, cd + 2, 3, cx, H + 2, z2 + 2 + cd / 2 + 1, dachF);
-      zyl3(S, rw * 0.3, rw * 0.3, 3.5, cx, H + 3, z2 + 2 + cd / 2 + 1, wand2, 16);
+      zyl4(S, rw * 0.3, rw * 0.3, 3.5, cx, H + 3, z2 + 2 + cd / 2 + 1, wand2, 16);
       haube(S, rw * 0.32, cx, H + 6.5, z2 + 2 + cd / 2 + 1, "#6f9a7d", 1, 16);
-      zyl3(S, 0.9, 0.9, 2.2, cx, H + 6.5 + rw * 0.32, z2 + 2 + cd / 2 + 1, hell4, 8);
+      zyl4(S, 0.9, 0.9, 2.2, cx, H + 6.5 + rw * 0.32, z2 + 2 + cd / 2 + 1, hell4, 8);
       haube(S, 1.1, cx, H + 8.7 + rw * 0.32, z2 + 2 + cd / 2 + 1, "#6f9a7d", 1.2, 8);
       top = H + 10 + rw * 0.32;
     } else {
@@ -51598,9 +52580,9 @@
     const hz0 = rz + 3.5, hz1 = z2 + 2 + cd + wl;
     belag(S, x + 3 + ww, hz0, x + w - 3 - ww, hz1, "#e6dcc6");
     const mz = (hz0 + hz1) / 2;
-    zyl3(S, 3.2, 3.2, 0.7, cx, 0.36, mz, "#d6cdb9", 16);
-    zyl3(S, 2.8, 2.8, 0.1, cx, 1, mz, FARBEN3.wasser, 16);
-    zyl3(S, 0.3, 0.2, 2.2, cx, 1, mz, "#d6cdb9", 6);
+    zyl4(S, 3.2, 3.2, 0.7, cx, 0.36, mz, "#d6cdb9", 16);
+    zyl4(S, 2.8, 2.8, 0.1, cx, 1, mz, FARBEN3.wasser, 16);
+    zyl4(S, 0.3, 0.2, 2.2, cx, 1, mz, "#d6cdb9", 6);
     for (let u = x + 3 + ww; u < x + w - 3 - ww; u += 1.2) if (Math.abs(u - cx) > 3) S.box(0.08, 2.2, 0.08, u, 1.4, hz1 + 0.3, "#2f3b44");
     S.quader(x + 3 + ww, 2.4, hz1 + 0.25, x + w - 3 - ww, 2.5, hz1 + 0.35, "#2f3b44");
     for (const u of [cx - 3, cx + 3]) {
@@ -51621,9 +52603,9 @@
         S.quader(px2 + pw * 0.3, 0.36, pz4 + pd * 0.3, px2 + pw * 0.7, 0.9, pz4 + pd * 0.7, "#5f9a56");
         for (const [a, b] of [[px2, pz4], [px2 + pw, pz4], [px2, pz4 + pd], [px2 + pw, pz4 + pd]]) spitze(S, 0.7, 2.6, a, 0.4, b, "#3f7d46", 6);
       }
-      zyl3(S, 4.5, 4.5, 0.6, cx, 0.36, (gz0 + gz1) / 2, "#d6cdb9", 18);
-      zyl3(S, 4, 4, 0.1, cx, 0.9, (gz0 + gz1) / 2, FARBEN3.wasser, 18);
-      zyl3(S, 0.25, 0.15, 3.5, cx, 0.9, (gz0 + gz1) / 2, "#e8f4f6", 6);
+      zyl4(S, 4.5, 4.5, 0.6, cx, 0.36, (gz0 + gz1) / 2, "#d6cdb9", 18);
+      zyl4(S, 4, 4, 0.1, cx, 0.9, (gz0 + gz1) / 2, FARBEN3.wasser, 18);
+      zyl4(S, 0.25, 0.15, 3.5, cx, 0.9, (gz0 + gz1) / 2, "#e8f4f6", 6);
       for (let u = gx0 + 2; u < gx1; u += 7) {
         baum(S, u, gz1 - 0.5, r, 0.85);
       }
@@ -51641,7 +52623,7 @@
     const stein = p.stein ?? (back ? waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]) : waehle2(r, ["#cfc6b4", "#c9bfae", "#d9c4a8", "#bfae96"]));
     const hell4 = back ? "#e3d6c0" : heller(stein, 0.05), dachF = waehle2(r, ["#56636c", "#b4583f", "#6f9a7d"]), dunkel3 = "#3a3f44";
     if (art === "barock") {
-      const st = waehle2(r, ["#e3d3bd", "#ece5d7", "#d9c4a8"]), hl = heller(st, 0.05), H2 = clamp5(w * 0.75, 12, 18);
+      const st = waehle2(r, ["#e3d3bd", "#ece5d7", "#d9c4a8"]), hl = heller(st, 0.05), H2 = clamp6(w * 0.75, 12, 18);
       const lo = [{ u0: x + w / 2 - w * 0.17, u1: x + w / 2 + w * 0.17, v0: 0.31, v1: H2 * 0.66, bogen: true }];
       for (const s2 of [-1, 1]) lo.push({ u0: x + w / 2 + s2 * w * 0.33 - w * 0.08, u1: x + w / 2 + s2 * w * 0.33 + w * 0.08, v0: 0.31, v1: H2 * 0.42, bogen: true });
       const sh = rechteck2(x, -0.3, x + w, H2);
@@ -51662,10 +52644,10 @@
     }
     const mz0 = z2 + d * 0.3, mz1 = z2 + d * 0.7, mh = 8;
     if (art === "doppel") {
-      const R9 = clamp5(d * 0.32, 3, 5), cz = z2 + d / 2, H2 = clamp5(w * 1, 14, 22), mb = w - 4 * R9;
+      const R9 = clamp6(d * 0.32, 3, 5), cz = z2 + d / 2, H2 = clamp6(w * 1, 14, 22), mb = w - 4 * R9;
       for (const u of [x + R9, x + w - R9]) {
-        zyl3(S, R9, R9, H2, u, 0, cz, stein, 16);
-        zyl3(S, R9 + 0.4, R9 + 0.4, 0.6, u, H2, cz, hell4, 16);
+        zyl4(S, R9, R9, H2, u, 0, cz, stein, 16);
+        zyl4(S, R9 + 0.4, R9 + 0.4, 0.6, u, H2, cz, hell4, 16);
         spitze(S, R9 + 0.6, R9 * 2.2, u, H2 + 0.6, cz, dachF, 16);
         for (let k = 1; k < 4; k++) S.box(0.5, 1.4, 0.3, u, k * H2 * 0.22, cz + R9, dunkel3);
       }
@@ -51677,7 +52659,7 @@
       satteldach2(S, bx0, cz - R9 * 0.9, bx1 - bx0, R9 * 1.8, Hm, (bx1 - bx0) * 0.8 - 0.4, dachF, "z", 0);
       return { hoehe: H2 + R9 * 2.8, teile: S.anzahl };
     }
-    const t = clamp5(Math.min(w * 0.5, d), 7, 10), tx0 = x + w / 2 - t / 2, tz0 = z2 + (d - t) / 2, H = clamp5(t * 2.6, 18, 26);
+    const t = clamp6(Math.min(w * 0.5, d), 7, 10), tx0 = x + w / 2 - t / 2, tz0 = z2 + (d - t) / 2, H = clamp6(t * 2.6, 18, 26);
     for (const [a, b] of [[x, tx0], [tx0 + t, x + w]]) {
       if (b - a < 1) continue;
       S.quader(a, 0, mz0, b, mh, mz1, stein);
@@ -51709,7 +52691,7 @@
     S.quader(x, 0, mz0, x + w, mh, mz1, stein);
     zinnen(S, "+z", x, x + w, mh, mz1, stein);
     S.quader(x, mh - 1.2, mz0 - 1.6, x + w, mh - 0.9, mz0, "#7d6a52");
-    const cx = x + w / 2, R9 = clamp5(d * 0.42, 3, 5), cz = mz1 + R9 - 1, H = zw(r, 14, 20);
+    const cx = x + w / 2, R9 = clamp6(d * 0.42, 3, 5), cz = mz1 + R9 - 1, H = zw(r, 14, 20);
     if (art === "eckig") {
       const t = R9 * 1.8;
       S.quader(cx - t / 2, 0, cz - t / 2, cx + t / 2, H, cz + t / 2, stein);
@@ -51731,13 +52713,13 @@
       for (const k of [0.35, 0.65]) S.box(0.35, 1.3, 0.2, cx, H * k, mz1 + R9, dunkel3);
       return { hoehe: H + 1, teile: S.anzahl };
     }
-    zyl3(S, R9, R9 * 1.06, H, cx, 0, cz, stein, 18);
+    zyl4(S, R9, R9 * 1.06, H, cx, 0, cz, stein, 18);
     for (const k of [0.3, 0.55, 0.8]) {
       S.box(0.35, 1.3, 0.2, cx, H * k, cz + R9, dunkel3);
       S.box(0.2, 1.3, 0.35, cx + R9, H * k - 1.5, cz, dunkel3);
     }
     if (r() < 0.5) {
-      zyl3(S, R9 + 0.6, R9 + 0.4, 1.4, cx, H, cz, stein, 18);
+      zyl4(S, R9 + 0.6, R9 + 0.4, 1.4, cx, H, cz, stein, 18);
       for (let i = 0; i < 10; i++) {
         const a = i / 10 * 2 * PI;
         S.box(0.9, 1, 0.9, cx + Math.cos(a) * (R9 + 0.2), H + 1.9, cz + Math.sin(a) * (R9 + 0.2), stein);
@@ -51753,15 +52735,15 @@
     const art = p.art ?? waehle2(r, ["saeule", "reiter", "obelisk"]);
     const w = p.w ?? 16, d = p.d ?? 16, cx = x + w / 2, cz = z2 + d / 2;
     const stein = waehle2(r, ["#d6cdb9", "#c9c4b8", "#b9b0a2"]), bronze = waehle2(r, ["#5f8a78", "#6b8f7f", "#7a6a4f"]), gold = "#d8b45a";
-    const s2 = clamp5(Math.min(w, d) / 16, 0.6, 1.4);
+    const s2 = clamp6(Math.min(w, d) / 16, 0.6, 1.4);
     for (let i = 0; i < 3; i++) S.box(w - 2 - i * 1.6, 0.35, d - 2 - i * 1.6, cx, 0.3 + i * 0.35 + 0.175, cz, i % 2 ? heller(stein, 0.04) : stein);
     const y0 = 1.35;
     if (art === "saeule") {
       S.box(3.4 * s2, 4 * s2, 3.4 * s2, cx, y0 + 2 * s2, cz, stein);
       S.box(3.8 * s2, 0.5 * s2, 3.8 * s2, cx, y0 + 4.2 * s2, cz, heller(stein, 0.05));
       const h = 18 * s2;
-      zyl3(S, 0.9 * s2, 1 * s2, h, cx, y0 + 4.4 * s2, cz, heller(stein, 0.03), 12);
-      for (let k = 1; k < 5; k++) zyl3(S, 1.05 * s2, 1.05 * s2, 0.25, cx, y0 + 4.4 * s2 + k * h / 5, cz, stein, 12);
+      zyl4(S, 0.9 * s2, 1 * s2, h, cx, y0 + 4.4 * s2, cz, heller(stein, 0.03), 12);
+      for (let k = 1; k < 5; k++) zyl4(S, 1.05 * s2, 1.05 * s2, 0.25, cx, y0 + 4.4 * s2 + k * h / 5, cz, stein, 12);
       S.box(2.4 * s2, 0.6 * s2, 2.4 * s2, cx, y0 + 4.4 * s2 + h + 0.3 * s2, cz, stein);
       const fy = y0 + 4.4 * s2 + h + 0.6 * s2, fc = r() < 0.5 ? gold : bronze;
       S.box(0.9 * s2, 2.2 * s2, 0.7 * s2, cx, fy + 1.1 * s2, cz, fc);
@@ -51830,37 +52812,37 @@
     const { x, z: z2, seed = 1 } = p, r = rng2(`wasser:${seed}`);
     const art = p.art ?? waehle2(r, ["backstein", "pilz", "stein"]);
     const w = p.w ?? 18, d = p.d ?? 18, cx = x + w / 2, cz = z2 + d / 2;
-    const R9 = clamp5(Math.min(w, d) * 0.3, 3.5, 6.5);
+    const R9 = clamp6(Math.min(w, d) * 0.3, 3.5, 6.5);
     if (art === "pilz") {
       const b = waehle2(r, ["#e2e0da", "#d6d3cc"]), H2 = zw(r, 26, 34);
-      zyl3(S, R9 * 0.38, R9 * 0.45, H2, cx, 0, cz, b, 14);
+      zyl4(S, R9 * 0.38, R9 * 0.45, H2, cx, 0, cz, b, 14);
       {
         const g = new three_module_exports.CylinderGeometry(R9 * 1.45, R9 * 0.4, R9 * 1.1, 24);
         g.translate(cx, H2 + R9 * 0.55, cz);
         S.add(g, b);
       }
-      zyl3(S, R9 * 1.47, R9 * 1.47, R9 * 0.55, cx, H2 + R9 * 1.1, cz, waehle2(r, ["#56707f", "#3f6fae"]), 24);
-      zyl3(S, R9 * 1.5, R9 * 1.5, 0.5, cx, H2 + R9 * 1.65, cz, b, 24);
-      zyl3(S, R9 * 0.3, R9 * 0.3, 2.2, cx, H2 + R9 * 1.65 + 0.5, cz, b, 8);
+      zyl4(S, R9 * 1.47, R9 * 1.47, R9 * 0.55, cx, H2 + R9 * 1.1, cz, waehle2(r, ["#56707f", "#3f6fae"]), 24);
+      zyl4(S, R9 * 1.5, R9 * 1.5, 0.5, cx, H2 + R9 * 1.65, cz, b, 24);
+      zyl4(S, R9 * 0.3, R9 * 0.3, 2.2, cx, H2 + R9 * 1.65 + 0.5, cz, b, 8);
       S.quader(cx - 2, 0, cz + R9 * 0.3, cx + 2, 3, cz + R9 * 0.3 + 2.4, b);
       return { hoehe: H2 + R9 * 1.65 + 2.7, teile: S.anzahl };
     }
     if (art === "stein") {
       const st = waehle2(r, ["#cfc6b4", "#d9c4a8", "#c9bfae"]), H2 = zw(r, 22, 28);
-      zyl3(S, R9 * 0.95, R9 * 1.1, H2, cx, 0, cz, st, 16);
+      zyl4(S, R9 * 0.95, R9 * 1.1, H2, cx, 0, cz, st, 16);
       for (const k of [0.25, 0.5, 0.75]) {
         S.box(0.9, 2, 0.3, cx, H2 * k, cz + R9, "#3f4c58");
-        zyl3(S, R9 * 1.06 - k * 0.15 + 0.15, R9 * 1.06 - k * 0.15 + 0.15, 0.4, cx, H2 * k - 1.6, cz, heller(st, 0.05), 16);
+        zyl4(S, R9 * 1.06 - k * 0.15 + 0.15, R9 * 1.06 - k * 0.15 + 0.15, 0.4, cx, H2 * k - 1.6, cz, heller(st, 0.05), 16);
       }
-      zyl3(S, R9 * 1.5, R9 * 1, 2.5, cx, H2, cz, heller(st, 0.05), 16);
-      zyl3(S, R9 * 1.5, R9 * 1.5, 6, cx, H2 + 2.5, cz, "#f1ece2", 16);
+      zyl4(S, R9 * 1.5, R9 * 1, 2.5, cx, H2, cz, heller(st, 0.05), 16);
+      zyl4(S, R9 * 1.5, R9 * 1.5, 6, cx, H2 + 2.5, cz, "#f1ece2", 16);
       for (let i = 0; i < 10; i++) {
         const a = i / 10 * 2 * PI;
         if (Math.cos(a) < -0.3 && Math.sin(a) < -0.3) continue;
         S.box(0.8, 2.2, 0.3, cx + Math.cos(a) * R9 * 1.52, H2 + 5.5, cz + Math.sin(a) * R9 * 1.52, "#3f4c58", -a - PI / 2);
       }
       haube(S, R9 * 1.55, cx, H2 + 8.5, cz, "#6f9a7d", 0.75, 18);
-      zyl3(S, 0.8, 0.8, 2.5, cx, H2 + 8.5 + R9 * 1.15, cz, "#f1ece2", 8);
+      zyl4(S, 0.8, 0.8, 2.5, cx, H2 + 8.5 + R9 * 1.15, cz, "#f1ece2", 8);
       haube(S, 1, cx, H2 + 11 + R9 * 1.15, cz, "#6f9a7d", 1.2, 8);
       return { hoehe: H2 + 12.5 + R9 * 1.15, teile: S.anzahl };
     }
@@ -51902,7 +52884,7 @@
       g.translate(cx, H + 8.7 + R9 * 0.8, cz);
       S.add(g, dachF);
     }
-    zyl3(S, 0.9, 0.9, 2.4, cx, H + 8.7 + R9 * 1.5, cz, "#e9e2d0", 8);
+    zyl4(S, 0.9, 0.9, 2.4, cx, H + 8.7 + R9 * 1.5, cz, "#e9e2d0", 8);
     spitze(S, 1.1, 2.6, cx, H + 11.1 + R9 * 1.5, cz, dachF, 8);
     return { hoehe: H + 13.7 + R9 * 1.5, teile: S.anzahl };
   }
@@ -52206,246 +53188,6 @@
     return hauptbahnhof(S, scene2, { ...p, nurEmpfang: true, w: p.w ?? 96, d: p.d ?? 24 });
   }
 
-  // src/kit/sporthelfer.js
-  var GLAS2 = "#4d6677";
-  var GLAS_D = "#2f3d48";
-  var GLAS_HELL2 = "#7d9fb2";
-  var LICHT3 = "#f7e9c8";
-  var RAHMEN3 = "#3a4148";
-  var KIES3 = "#bab8b2";
-  var KLEID3 = ["#d04a3f", "#2f63b5", "#e8e4dc", "#e0b23c", "#5b8f5a", "#8d5fbf", "#ef8b4c", "#2b2b2b", "#f2c6d2", "#7d97b8", "#1f3f6b"];
-  var AUTO2 = ["#d04a3f", "#2f63b5", "#f1f1ee", "#2a2d31", "#e0b23c", "#8c9aa6", "#5b8f5a", "#f1f1ee", "#9aa4ad"];
-  var BUNT = ["#e04b3a", "#f2c14e", "#3a7bd5", "#4caf50", "#ff8c42", "#8d5fbf", "#ffffff"];
-  var clamp6 = (v, a, b) => Math.max(a, Math.min(b, v));
-  function spiegeln3(g) {
-    for (const n of ["position", "normal"]) {
-      const a = g.attributes[n]?.array;
-      if (!a) continue;
-      for (let i = 0; i < a.length; i += 3) {
-        const t = a[i];
-        a[i] = a[i + 2];
-        a[i + 2] = t;
-      }
-      for (let i = 0; i < a.length; i += 9) for (let k = 0; k < 3; k++) {
-        const t = a[i + 3 + k];
-        a[i + 3 + k] = a[i + 6 + k];
-        a[i + 6 + k] = t;
-      }
-    }
-  }
-  var Seite3 = class {
-    constructor(S, x0, z0, w, d, seite) {
-      Object.assign(this, { S, x0, z0, w, d, seite });
-      this.L = seite === "+z" ? w : d;
-      this.ebene = seite === "+z" ? z0 + d : x0 + w;
-      this.basis = seite === "+z" ? x0 : z0;
-      this.lese = seite === "+z" ? 1 : -1;
-    }
-    q(u0, u1, y0, y1, t0, t1, f) {
-      if (Math.abs(u1 - u0) < 1e-3 || Math.abs(y1 - y0) < 1e-3 || Math.abs(t1 - t0) < 1e-3) return;
-      if (this.seite === "+z") this.S.quader(this.basis + u0, y0, this.ebene + t0, this.basis + u1, y1, this.ebene + t1, f);
-      else this.S.quader(this.ebene + t0, y0, this.basis + u0, this.ebene + t1, y1, this.basis + u1, f);
-    }
-    welt(u, t) {
-      return this.seite === "+z" ? [this.basis + u, this.ebene + t] : [this.ebene + t, this.basis + u];
-    }
-    geo(g, f) {
-      g = g.index ? g.toNonIndexed() : g;
-      for (const a of Object.keys(g.attributes)) if (a !== "position" && a !== "normal") g.deleteAttribute(a);
-      if (this.seite === "+x") spiegeln3(g);
-      const [x, z2] = this.welt(0, 0);
-      g.translate(x, 0, z2);
-      this.S.add(g, f);
-    }
-    kipp(bu, by, bt, u, y, t, f, rz = 0, rx = 0) {
-      const g = new three_module_exports.BoxGeometry(bu, by, bt);
-      if (rx) g.rotateX(rx);
-      if (rz) g.rotateZ(rz);
-      g.translate(u, y, t);
-      this.geo(g, f);
-    }
-    flaeche(mesh, u, y, t, rz = 0) {
-      if (this.seite === "+z") {
-        mesh.position.set(this.basis + u, y, this.ebene + t);
-        mesh.rotation.set(0, 0, rz);
-      } else {
-        mesh.position.set(this.ebene + t, y, this.basis + u);
-        mesh.rotation.set(0, Math.PI / 2, rz);
-      }
-    }
-  };
-  var seitenVon2 = (S, x0, z0, w, d) => [new Seite3(S, x0, z0, w, d, "+z"), new Seite3(S, x0, z0, w, d, "+x")];
-  function zyl4(S, x, y0, z2, rad2, h, f, seg = 12, oben = rad2) {
-    const g = new three_module_exports.CylinderGeometry(oben, rad2, h, seg);
-    g.translate(x, y0 + h / 2, z2);
-    S.add(g, f);
-  }
-  function viertelzylinder2(S, cx, cz, rad2, y0, y1, f, seg = 12) {
-    const g = new three_module_exports.CylinderGeometry(rad2, rad2, y1 - y0, seg, 1, false, 0, Math.PI / 2);
-    g.translate(cx, (y0 + y1) / 2, cz);
-    S.add(g, f);
-  }
-  function prismaX(S, x0, x1, pts, y, f) {
-    const sh = new three_module_exports.Shape();
-    sh.moveTo(pts[0][0], pts[0][1]);
-    for (const p of pts.slice(1)) sh.lineTo(p[0], p[1]);
-    sh.closePath();
-    let g = new three_module_exports.ExtrudeGeometry(sh, { depth: x1 - x0, bevelEnabled: false });
-    g = g.toNonIndexed();
-    for (const a of Object.keys(g.attributes)) if (a !== "position" && a !== "normal") g.deleteAttribute(a);
-    spiegeln3(g);
-    g.translate(x0, y, 0);
-    S.add(g, f);
-  }
-  function tex3(text2, farbe, bg = null, schrift2) {
-    return schrift2 ? textTextur(text2, farbe, 120, bg, schrift2, !schrift2.includes("Serif")) : textTextur(text2, farbe, 120, bg);
-  }
-  function texMat3(text2, farbe, bg, schrift2, lit) {
-    return textMaterial(text2, farbe, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45, lit: !!lit, ...schrift2 ? { schrift: schrift2, fett: !schrift2.includes("Serif") } : {} }).mat;
-  }
-  var plakatBreite2 = (text2, ph, schrift2) => tex3(text2, "#000", "#fff", schrift2).seitenverhaeltnis * ph;
-  function plakat3(scene2, s2, text2, u, y, t, ph, farbe, bg = null, o = {}) {
-    const sv = tex3(text2, farbe, bg, o.schrift).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat3(text2, farbe, bg, o.schrift, !!o.lit));
-    s2.flaeche(m, u, y, t, o.rz ?? 0);
-    scene2.add(m);
-    return sv * ph;
-  }
-  function passend(text2, maxB, maxH, schrift2) {
-    return Math.min(maxH, maxB / tex3(text2, "#000", null, schrift2).seitenverhaeltnis);
-  }
-  function bodenText(scene2, text2, x, y, z2, h, farbe, drehung = 0) {
-    const sv = tex3(text2, farbe).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * h, h), texMat3(text2, farbe, null, void 0, false));
-    m.rotation.set(-Math.PI / 2, 0, drehung);
-    m.position.set(x, y, z2);
-    scene2.add(m);
-  }
-  function puppe2(s2, u, y, t, oben, unten, sk = 1) {
-    s2.q(u - 0.17 * sk, u + 0.17 * sk, y, y + 0.95 * sk, t - 0.1, t + 0.1, unten);
-    s2.q(u - 0.26 * sk, u + 0.26 * sk, y + 0.95 * sk, y + 1.62 * sk, t - 0.13, t + 0.13, oben);
-    s2.q(u - 0.11 * sk, u + 0.11 * sk, y + 1.64 * sk, y + 1.92 * sk, t - 0.11, t + 0.11, "#f1ece4");
-  }
-  function mensch(S, r, x, y, z2) {
-    const c = waehle2(r, KLEID3);
-    S.box(0.42, 0.85, 0.3, x, y + 0.42, z2, waehle2(r, ["#2b3a55", "#3a3a3a", "#6b5a48", "#20304a"]));
-    S.box(0.5, 0.7, 0.34, x, y + 1.2, z2, c);
-    S.box(0.24, 0.26, 0.24, x, y + 1.68, z2, "#e8cfb4");
-  }
-  function rad(s2, u, y, t, farbe) {
-    for (const du of [-0.6, 0.6]) {
-      const g = new three_module_exports.TorusGeometry(0.4, 0.05, 4, 12);
-      g.translate(u + du, y + 0.42, t);
-      s2.geo(g, "#2b2b2b");
-    }
-    s2.kipp(1.3, 0.09, 0.09, u, y + 0.72, t, farbe, 0.32);
-    s2.q(u - 0.08, u + 0.08, y + 0.42, y + 1, t - 0.04, t + 0.04, "#555555");
-  }
-  function auto2(S, r, x, z2, y = 0.3, quer2 = false) {
-    const c = waehle2(r, AUTO2);
-    if (quer2) {
-      S.box(4.3, 0.9, 1.85, x, y + 0.5, z2, c);
-      S.box(2.2, 0.65, 1.65, x - 0.15, y + 1.27, z2, "#9bb7c7");
-    } else {
-      S.box(1.85, 0.9, 4.3, x, y + 0.5, z2, c);
-      S.box(1.65, 0.65, 2.2, x, y + 1.27, z2 - 0.15, "#9bb7c7");
-    }
-  }
-  function busch(S, r, x, y, z2, s2 = 1) {
-    const g = new three_module_exports.IcosahedronGeometry(0.9 * s2 * (0.8 + r() * 0.4), 0);
-    g.scale(1, 0.75, 1);
-    g.translate(x, y + 0.6 * s2, z2);
-    S.add(g, waehle2(r, ["#6fa860", "#5f9a56", "#7cb369"]));
-  }
-  function kuebelbaum(S, r, x, y, z2, s2 = 1) {
-    S.box(1.1 * s2, 0.7 * s2, 1.1 * s2, x, y + 0.35 * s2, z2, "#8b8f93");
-    S.box(0.18 * s2, 1.4 * s2, 0.18 * s2, x, y + 1.3 * s2, z2, "#7a5d43");
-    const g = new three_module_exports.IcosahedronGeometry(1.1 * s2 * (0.85 + r() * 0.3), 0);
-    g.translate(x, y + 2.5 * s2, z2);
-    S.add(g, waehle2(r, ["#6fa860", "#5f9a56", "#7cb369"]));
-  }
-  function attika3(S, x0, z0, w, d, y, h, f, dick = 0.45) {
-    S.quader(x0, y, z0, x0 + w, y + 0.15, z0 + d, KIES3);
-    S.quader(x0, y, z0 + d - dick, x0 + w, y + h, z0 + d, f);
-    S.quader(x0 + w - dick, y, z0, x0 + w, y + h, z0 + d, f);
-    S.quader(x0, y, z0, x0 + w, y + h, z0 + dick, f);
-    S.quader(x0, y, z0, x0 + dick, y + h, z0 + d, f);
-    S.quader(x0 - 0.08, y + h, z0 + d - dick - 0.08, x0 + w + 0.08, y + h + 0.1, z0 + d + 0.08, heller(f, 0.04));
-    S.quader(x0 + w - dick - 0.08, y + h, z0 - 0.08, x0 + w + 0.08, y + h + 0.1, z0 + d + 0.08, heller(f, 0.04));
-  }
-  function lichtkuppeln2(S, x0, z0, x1, z1, y, ax = 6, az = 7, f = "#e8eef0") {
-    if (x1 - x0 < 5 || z1 - z0 < 5) return;
-    const nx = Math.max(1, Math.floor((x1 - x0 - 1) / ax)), nz = Math.max(1, Math.floor((z1 - z0 - 1) / az));
-    const ox = x0 + (x1 - x0 - (nx - 1) * ax) / 2, oz = z0 + (z1 - z0 - (nz - 1) * az) / 2;
-    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-      S.box(1.8, 0.3, 1.8, ox + i * ax, y + 0.15, oz + j * az, "#d3d0c9");
-      S.box(1.35, 0.32, 1.35, ox + i * ax, y + 0.45, oz + j * az, f);
-    }
-  }
-  function technik2(S, r, x0, z0, x1, z1, y, o = {}) {
-    if (x1 - x0 < 5 || z1 - z0 < 5) return;
-    const fl = (x1 - x0) * (z1 - z0);
-    const anz3 = Math.min(o.max ?? 6, Math.max(1, Math.round(fl / 260)));
-    const belegt2 = [];
-    const f = o.farbe ?? "#c9c6bf";
-    for (let v = 0; v < anz3 * 6 && belegt2.length < anz3; v++) {
-      const typ = belegt2.length === 0 ? "lueftung" : waehle2(r, ["lueftung", "kuehler", "kuehler", "rohr", "kasten"]);
-      const [bw, bd, bh] = { lueftung: [zw(r, 4, 8), zw(r, 2.5, 4.5), zw(r, 1.8, 2.8)], kuehler: [zw(r, 3.5, 5.5), 2, 1.2], rohr: [zw(r, 5, 8), 0.7, 0.7], kasten: [zw(r, 1.8, 3), zw(r, 1.8, 3), zw(r, 1.2, 2)] }[typ];
-      if (bw > x1 - x0 - 1.5 || bd > z1 - z0 - 1.5) continue;
-      const cx = zw(r, x0 + bw / 2 + 0.7, x1 - bw / 2 - 0.7), cz = zw(r, z0 + bd / 2 + 0.7, z1 - bd / 2 - 0.7);
-      if (belegt2.some((b) => Math.abs(b[0] - cx) < (b[2] + bw) / 2 + 0.7 && Math.abs(b[1] - cz) < (b[3] + bd) / 2 + 0.7)) continue;
-      belegt2.push([cx, cz, bw, bd]);
-      if (typ === "rohr") {
-        const g = new three_module_exports.CylinderGeometry(0.35, 0.35, bw, 8);
-        g.rotateZ(Math.PI / 2);
-        g.translate(cx, y + 0.8, cz);
-        S.add(g, "#d6d8da");
-        S.box(0.3, 0.55, 0.3, cx - bw / 3, y + 0.28, cz, "#9aa0a5");
-        S.box(0.3, 0.55, 0.3, cx + bw / 3, y + 0.28, cz, "#9aa0a5");
-        continue;
-      }
-      S.box(bw, bh, bd, cx, y + bh / 2, cz, f);
-      S.box(bw + 0.2, 0.14, bd + 0.2, cx, y + bh + 0.07, cz, heller(f, 0.05));
-      if (typ === "lueftung") for (let k = 0; k < 3; k++) {
-        const yy = y + 0.45 + k * (bh - 0.8) / 2;
-        S.box(bw * 0.8, 0.12, 0.08, cx, yy, cz + bd / 2 + 0.04, dunkler(f, 0.14));
-        S.box(0.08, 0.12, bd * 0.75, cx + bw / 2 + 0.04, yy, cz, dunkler(f, 0.14));
-      }
-      if (typ === "kuehler") for (let k = 0; k < Math.floor(bw / 1.7); k++) zyl4(S, cx - bw / 2 + 0.85 + k * 1.7, y + bh, cz, 0.65, 0.16, "#5d646a", 10);
-    }
-  }
-  function solar(S, x0, z0, x1, z1, y) {
-    for (let z2 = z0 + 0.5; z2 + 2 < z1; z2 += 3) for (let x = x0 + 0.5; x + 4 < x1; x += 4.5) {
-      const g = new three_module_exports.BoxGeometry(4.1, 0.08, 1.8);
-      g.rotateX(-0.3);
-      g.translate(x + 2.05, y + 0.55, z2 + 0.95);
-      S.add(g, "#2c4a73");
-    }
-  }
-  function parkreihe(S, r, x0, x1, z0, tiefe, y, quote = 0.6) {
-    for (let x = x0; x + 2.5 <= x1; x += 2.6) {
-      S.box(0.12, 0.03, tiefe, x, y + 0.02, z0 + tiefe / 2, "#f2f1ec");
-      if (r() < quote) auto2(S, r, x + 1.3, z0 + tiefe / 2, y);
-    }
-  }
-  function buchten(u0, u1, raster4, pb = 0.3) {
-    const len = u1 - u0;
-    if (len < 1.5) return [];
-    const nb = Math.max(1, Math.round(len / raster4)), bw = len / nb;
-    return Array.from({ length: nb }, (_, i) => [u0 + i * bw + pb / 2, u0 + (i + 1) * bw - pb / 2]);
-  }
-  function wand(s2, u0, u1, y0, y1, t0, t1, oeff, f) {
-    const o = oeff.filter((g) => g.b > u0 && g.a < u1).sort((p, q2) => p.a - q2.a);
-    let c = u0;
-    for (const g of o) {
-      if (g.a > c) s2.q(c, g.a, y0, y1, t0, t1, f);
-      if (g.y0 > y0) s2.q(Math.max(g.a, u0), Math.min(g.b, u1), y0, Math.min(g.y0, y1), t0, t1, f);
-      if (g.y1 < y1) s2.q(Math.max(g.a, u0), Math.min(g.b, u1), Math.max(g.y1, y0), y1, t0, t1, f);
-      c = Math.max(c, g.b);
-    }
-    if (c < u1) s2.q(c, u1, y0, y1, t0, t1, f);
-  }
-
   // src/kit/sporthaus.js
   var HS_ROT = "#d23c32";
   var HS_BLAU = "#1d2f4f";
@@ -52494,7 +53236,7 @@
     }
   }
   function koerper(haus2) {
-    const A = clamp6(haus2.grundflaecheQm || 2e3, 400, 6500);
+    const A = clamp4(haus2.grundflaecheQm || 2e3, 400, 6500);
     const r = rng2(String(haus2.id) + "/masse");
     const ziel = 1.15 + r() * 0.45;
     let best = null;
@@ -52504,7 +53246,7 @@
       const s2 = Math.abs(w * d - A) / A + 0.12 * Math.abs(q2 - ziel);
       if (!best || s2 < best.s) best = { w, d, s: s2 };
     }
-    const n = clamp6((haus2.etagen || [0]).filter((e) => e >= 0).length, 1, 3);
+    const n = clamp4((haus2.etagen || [0]).filter((e) => e >= 0).length, 1, 3);
     return { bw: best.w, bd: best.d, n };
   }
   var mallBreite = (bw) => Math.max(25, Math.round(bw * 0.8 / 5) * 5);
@@ -52516,7 +53258,7 @@
     const d = fam === 3 ? bd + PARK : bd;
     return { w, d, n, H, familie: fam, bw, bd };
   }
-  function ware(K3, s2, a, b, y, tb, tm, gruppe2) {
+  function ware2(K3, s2, a, b, y, tb, tm, gruppe2) {
     const r = K3.r, m = (a + b) / 2, br = b - a;
     switch (gruppe2) {
       case "sportschuhe": {
@@ -52535,9 +53277,9 @@
         const nK = Math.max(2, Math.floor((br - 1.2) / 0.38));
         for (let i = 0; i < nK; i++) {
           const u = a + 0.75 + i * 0.38;
-          s2.q(u - 0.15, u + 0.15, y + 0.85, y + 1.72, tm - 0.25, tm + 0.25, waehle2(r, KLEID3));
+          s2.q(u - 0.15, u + 0.15, y + 0.85, y + 1.72, tm - 0.25, tm + 0.25, waehle2(r, KLEID2));
         }
-        puppe2(s2, b - 0.7, y, tb + 0.6, waehle2(r, KLEID3), waehle2(r, ["#2b3a55", "#2b2b2b", "#e8e4dc"]));
+        puppe(s2, b - 0.7, y, tb + 0.6, waehle2(r, KLEID2), waehle2(r, ["#2b3a55", "#2b2b2b", "#e8e4dc"]));
         break;
       }
       case "outdoor": {
@@ -52545,7 +53287,7 @@
         g.rotateY(Math.PI / 4);
         g.translate(m - 0.5, y + 0.65, tm);
         s2.geo(g, waehle2(r, ["#e36b2c", "#3f7d56", "#f2c14e"]));
-        puppe2(s2, b - 0.6, y, tm, waehle2(r, ["#c0392b", "#2e7d32", "#1f3f6b"]), "#3a3a3a");
+        puppe(s2, b - 0.6, y, tm, waehle2(r, ["#c0392b", "#2e7d32", "#1f3f6b"]), "#3a3a3a");
         s2.q(a + 0.3, a + 0.8, y, y + 0.75, tb + 0.1, tb + 0.45, waehle2(r, ["#e0b23c", "#c0392b", "#2f6f8f"]));
         s2.q(a + 0.3, b - 0.3, y + 2.2, y + 2.5, tb, tb + 0.25, "#7a5d43");
         break;
@@ -52558,7 +53300,7 @@
       case "wintersport": {
         for (let i = 0; i < 4; i++) s2.q(a + 0.5 + i * 0.32, a + 0.64 + i * 0.32, y, y + 1.85, tb + 0.15, tb + 0.22, waehle2(r, ["#e04b3a", "#1f6fb5", "#f2c14e", "#ffffff"]));
         s2.kipp(0.35, 1.5, 0.06, b - 1.4, y + 0.95, tb + 0.2, "#2b2b2b", 0.15);
-        puppe2(s2, b - 0.6, y, tm, waehle2(r, ["#e04b3a", "#1f6fb5", "#ffffff"]), "#2b2b2b");
+        puppe(s2, b - 0.6, y, tm, waehle2(r, ["#e04b3a", "#1f6fb5", "#ffffff"]), "#2b2b2b");
         break;
       }
       case "teamsport": {
@@ -52575,7 +53317,7 @@
         break;
       }
       default:
-        puppe2(s2, m, y, tm, waehle2(r, KLEID3), "#2b2b2b");
+        puppe(s2, m, y, tm, waehle2(r, KLEID2), "#2b2b2b");
     }
   }
   function erlebnisHinterGlas(K3, s2, a, b, y0, tF, tiefe) {
@@ -52589,7 +53331,7 @@
     s2.q(right - 0.12, right, y, y + 3.45, hinten, vorne, "#455e73");
     const t = vorne - 0.63, label = K3.erlebnis === "fitness" ? "FITNESS" : "LAUFANALYSE";
     s2.q(left + 0.25, right - 0.25, y + 2.85, y + 3.35, vorne + 0.1, vorne + 0.18, "#204c65");
-    plakat3(K3.scene, s2, label, u, y + 3.08, vorne + 0.21, passend(label, breite - 0.65, 0.43), "#ffffff");
+    plakat2(K3.scene, s2, label, u, y + 3.08, vorne + 0.21, passend(label, breite - 0.65, 0.43), "#ffffff");
     if (K3.erlebnis === "laufanalyse") {
       s2.q(u - 1.62, u + 1.1, y + 0.2, y + 0.43, t - 0.25, t + 0.6, "#252e37");
       s2.q(u - 1.47, u + 0.8, y + 0.44, y + 0.49, t - 0.16, t + 0.46, "#111821");
@@ -52659,7 +53401,7 @@
     }
     if (br > 2.2) {
       s2.q(mitte - 1.25, mitte + 1.25, y1 - 1.24, y1 - 0.31, tF + 0.08, tF + 0.12, "#c62132");
-      plakat3(K3.scene, s2, "REDUZIERT", mitte, y1 - 0.79, tF + 0.18, passend("REDUZIERT", 2.15, 0.63), "#ffffff");
+      plakat2(K3.scene, s2, "REDUZIERT", mitte, y1 - 0.79, tF + 0.18, passend("REDUZIERT", 2.15, 0.63), "#ffffff");
     }
     K3.abverkaufFenster++;
   }
@@ -52677,14 +53419,14 @@
     }
     s2.q(a, b, y0, y0 + 0.12, tb, tF, o.boden ?? BODEN);
     s2.q(a, b, y0, y1, tb - 0.1, tb, o.rueck ?? INNEN);
-    s2.q(a, b, y1 - 0.32, y1 - 0.18, tb, tb + 0.08, LICHT3);
+    s2.q(a, b, y1 - 0.32, y1 - 0.18, tb, tb + 0.08, LICHT2);
     const oben = K3.abverkauf && K3.n > 1 && y0 >= EG_S + (K3.n - 2) * OG_S - 0.5 && y0 > 1;
     const erlebnis = !K3.erlebnisGezeigt && K3.erlebnis && y0 < 1 && s2.seite === K3.erlebnisSeite && b - a >= 3.4;
     if (!K3.zu && oben && b - a > 2.2) abverkaufHinterGlas(K3, s2, a, b, y0, y1, tF, tiefe);
     else if (!K3.zu && erlebnis) {
       erlebnisHinterGlas(K3, s2, a, b, y0, tF, tiefe);
       K3.erlebnisGezeigt = true;
-    } else if (!K3.zu && b - a > 1.6) ware(K3, s2, a, b, y0 + 0.12, tb, tb + tiefe * 0.55, gruppe2);
+    } else if (!K3.zu && b - a > 1.6) ware2(K3, s2, a, b, y0 + 0.12, tb, tb + tiefe * 0.55, gruppe2);
     K3.glas.push({ s: s2, a, b, y0, y1, t: tF, eg: y0 < 1 });
   }
   var oeffnungen = (K3, s2) => K3.glas.filter((g) => g.s === s2);
@@ -52695,7 +53437,7 @@
     if (x1 - x0 < 6 || z1 - z0 < 6) return;
     const gross2 = fl > 1200;
     const xm = x0 + (x1 - x0) * (o.teilung ?? 0.45);
-    const q2 = clamp6(Math.min(x1 - x0, z1 - z0) * 0.22, 4, 8), cx = x0 + (x1 - x0) * 0.62, cz = z0 + (z1 - z0) * 0.62;
+    const q2 = clamp4(Math.min(x1 - x0, z1 - z0) * 0.22, 4, 8), cx = x0 + (x1 - x0) * 0.62, cz = z0 + (z1 - z0) * 0.62;
     const zt1 = o.h ? Math.max(z0 + 6, cz - q2 / 2 - 0.8) : z1 - 1;
     if (o.kuppeln !== false) {
       if (gross2 && o.sheds !== false && K3.v % 3 !== 1) {
@@ -52704,7 +53446,7 @@
           S.quader(x0 + 1.3, y + 0.15, zs + 3.6, xm - 1.1, y + 1.4, zs + 3.66, K3.zu ? "#9aa3a8" : "#a9c6d3");
           for (let x = x0 + 3; x < xm - 1; x += 3) S.quader(x - 0.04, y + 0.15, zs + 3.6, x + 0.04, y + 1.45, zs + 3.7, "#eef1f2");
         }
-      } else lichtkuppeln2(S, x0 + 1, z0 + 1, xm - 1, z1 - 1, y, 6, 6.5);
+      } else lichtkuppeln(S, x0 + 1, z0 + 1, xm - 1, z1 - 1, y, 6, 6.5);
     }
     let xt = xm;
     if (o.solar ?? (gross2 || fl > 900 && r() < 0.65)) {
@@ -52712,22 +53454,22 @@
       solar(S, xm + 0.5, z0 + 1, xs, zt1, y);
       xt = xs;
     }
-    technik2(S, r, xt + 0.5, z0 + 1, x1 - 1, zt1, y, { max: Math.max(3, Math.round(fl / 220)), farbe: o.farbe ?? "#cfccc5" });
+    technik(S, r, xt + 0.5, z0 + 1, x1 - 1, zt1, y, { max: Math.max(3, Math.round(fl / 220)), farbe: o.farbe ?? "#cfccc5" });
     if (gross2 && o.werbung !== false && x1 - x0 > 30) {
       const bw = Math.min(16, (x1 - x0) * 0.32), bx = x0 + (x1 - x0) * 0.72, bz = z0 + 1.4, bh = 4.2, yb = y + 2.6;
       for (const dx of [-bw * 0.35, bw * 0.35]) {
         S.box(0.25, yb + bh - y, 0.25, bx + dx, (y + yb + bh) / 2, bz - 0.3, "#5f676e");
         S.box(0.15, 0.15, 2.2, bx + dx, y + 1.3, bz - 1.2, "#5f676e");
       }
-      const sw = new Seite3(S, bx - bw / 2, bz - 0.4, bw, 0.4, "+z");
+      const sw = new Seite2(S, bx - bw / 2, bz - 0.4, bw, 0.4, "+z");
       sw.q(-0.2, bw + 0.2, yb - 0.2, yb + bh + 0.2, -0.1, 0, "#d9dcde");
       const bg = K3.zu ? "#8e9499" : ["#1f6fb5", "#2f8f5b", "#e8562a", HS_BLAU][K3.v % 4];
       sw.q(0, bw, yb, yb + bh, 0, 0.06, bg);
       if (!K3.zu) {
         sw.q(0, bw * 0.28, yb, yb + bh, 0.06, 0.08, HS_ROT);
-        plakat3(K3.scene, sw, "H", bw * 0.14, yb + bh / 2, 0.1, bh * 0.7, "#ffffff");
+        plakat2(K3.scene, sw, "H", bw * 0.14, yb + bh / 2, 0.1, bh * 0.7, "#ffffff");
         const sl = SLOGANS2[(K3.v + 2) % SLOGANS2.length];
-        plakat3(K3.scene, sw, sl, bw * 0.64, yb + bh / 2, 0.1, passend(sl, bw * 0.62, bh * 0.45), "#ffffff");
+        plakat2(K3.scene, sw, sl, bw * 0.64, yb + bh / 2, 0.1, passend(sl, bw * 0.62, bh * 0.45), "#ffffff");
       }
       K3.hoeheDach = Math.max(K3.hoeheDach ?? 0, yb + bh + 0.3);
     }
@@ -52739,7 +53481,7 @@
   function hsLogo(K3, s2, u, y, t, h, o = {}) {
     const text2 = o.text ?? "HARTWIG SPORT";
     const q2 = h * 1.3, ph = h * 0.58;
-    const tw = plakatBreite2(text2, ph) * 0.92;
+    const tw = plakatBreite(text2, ph) * 0.92;
     const total = q2 + tw + h * 0.35;
     const P2 = (k) => u + s2.lese * k;
     const ua = P2(-total / 2), uq = P2(-total / 2 + q2), ue = P2(total / 2);
@@ -52762,9 +53504,9 @@
     const [c0, c1] = mn(ua, uq);
     s2.q(c0, c1, y - q2 / 2, y + q2 / 2, t, t + 0.4, HS_ROT);
     const qm = (ua + uq) / 2;
-    plakat3(K3.scene, s2, "H", qm, y + q2 * 0.06, t + 0.42, q2 * 0.82, "#ffffff");
+    plakat2(K3.scene, s2, "H", qm, y + q2 * 0.06, t + 0.42, q2 * 0.82, "#ffffff");
     s2.kipp(q2 * 0.62, q2 * 0.07, 0.04, qm, y - q2 * 0.36, t + 0.42, "#ffffff", s2.lese * 0.12);
-    plakat3(K3.scene, s2, text2, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? "#d1d3d1" : o.schrift ?? "#ffffff");
+    plakat2(K3.scene, s2, text2, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? "#d1d3d1" : o.schrift ?? "#ffffff");
     return total;
   }
   function hsLogoSenkrecht(K3, s2, u, yOben, t, breite, laenge) {
@@ -52775,9 +53517,9 @@
       return;
     }
     s2.q(u - q2 / 2, u + q2 / 2, yOben - q2, yOben, t, t + 0.3, "#ffffff");
-    plakat3(K3.scene, s2, "H", u, yOben - q2 * 0.45, t + 0.32, q2 * 0.8, HS_ROT);
-    const ph = Math.min(q2 * 0.55, (laenge - q2 - 0.6) / (plakatBreite2("HARTWIG SPORT", 1) * 0.92));
-    plakat3(K3.scene, s2, "HARTWIG SPORT", u, yOben - q2 - 0.3 - plakatBreite2("HARTWIG SPORT", ph) * 0.92 / 2, t + 0.05, ph, "#ffffff", null, { rz: s2.lese * Math.PI / 2 });
+    plakat2(K3.scene, s2, "H", u, yOben - q2 * 0.45, t + 0.32, q2 * 0.8, HS_ROT);
+    const ph = Math.min(q2 * 0.55, (laenge - q2 - 0.6) / (plakatBreite("HARTWIG SPORT", 1) * 0.92));
+    plakat2(K3.scene, s2, "HARTWIG SPORT", u, yOben - q2 - 0.3 - plakatBreite("HARTWIG SPORT", ph) * 0.92 / 2, t + 0.05, ph, "#ffffff", null, { rz: s2.lese * Math.PI / 2 });
   }
   function kampagne(K3, s2, u0, u1, y0, y1, t, bg) {
     const wb = u1 - u0, wh = y1 - y0, wu = (u0 + u1) / 2, wy = (y0 + y1) / 2;
@@ -52793,7 +53535,7 @@
     s2.kipp(wb * 0.9, wh * 0.06, 0.04, wu, y0 + wh * 0.18, t + 0.24, HS_ROT, 0.08 * s2.lese);
     const slogan = SLOGANS2[Math.floor(K3.r() * SLOGANS2.length)];
     const ph = passend(slogan, wb * 0.5, wh * 0.28);
-    plakat3(K3.scene, s2, slogan, wu - s2.lese * wb * 0.2, wy + wh * 0.08, t + 0.27, ph, "#ffffff");
+    plakat2(K3.scene, s2, slogan, wu - s2.lese * wb * 0.2, wy + wh * 0.08, t + 0.27, ph, "#ffffff");
   }
   function radstaender(K3, s2, u0, anz3, t) {
     for (let i = 0; i < anz3; i++) {
@@ -52825,7 +53567,7 @@
       const uE = s2.L - F2;
       if (atrium && atrium.s === s2) {
         atrium.u0 = Math.max(1.2, uE * 0.12);
-        atrium.u1 = Math.min(uE - 4, atrium.u0 + clamp6(uE * 0.28, 6, 10));
+        atrium.u1 = Math.min(uE - 4, atrium.u0 + clamp4(uE * 0.28, 6, 10));
       }
       const ein2 = s2 === sz ? uE * 0.62 : -99;
       ebenen.forEach(([y0, y1], e) => {
@@ -52839,7 +53581,7 @@
           if (e === 0 && a < ein2 + 2.5 && b > ein2 - 2.5) {
             s2.q(a, b, 0.3, y1, -T - 0.1, -T, GLAS_D);
             s2.q(a, b, 0.3, 0.42, -T, 0, BODEN);
-            s2.q((a + b) / 2 - 0.05, (a + b) / 2 + 0.05, 0.3, 3.2, -1.2, -1.1, RAHMEN3);
+            s2.q((a + b) / 2 - 0.05, (a + b) / 2 + 0.05, 0.3, 3.2, -1.2, -1.1, RAHMEN2);
             s2.q(a + 0.3, b - 0.3, 0.3, 3.2, -1.2, -1.15, K3.zu ? "#8e9499" : "#6f93a6");
             K3.glas.push({ s: s2, a, b, y0: 0.3, y1: 3.2, t: -1.1, eg: true, tuer: true });
             return;
@@ -52865,7 +53607,7 @@
         s2.q(u - 0.25, u + 0.25, H * (0.3 + k * 0.17), H * (0.3 + k * 0.17) + 0.8, -T + 0.35, -T + 0.65, waehle2(r, ["#e04b3a", "#f2c14e", "#1f6fb5"]));
         s2.q(u - 0.02, u + 0.02, H * (0.3 + k * 0.17) + 0.8, H - 0.3, -T + 0.4, -T + 0.44, "#f2f1ec");
       }
-      s2.q(u0, u1, H - 0.5, H - 0.3, -T, 0, LICHT3);
+      s2.q(u0, u1, H - 0.5, H - 0.3, -T, 0, LICHT2);
       K3.glas.push({ s: s2, a: u0, b: u1, y0: 0.3, y1: H, t: 0, eg: true });
     } else {
       const s2 = sx, uE = s2.L - F2, u0 = Math.max(1, uE * 0.15), u1 = Math.min(uE - 1, u0 + 8);
@@ -52884,7 +53626,7 @@
     } else {
       const uE = sz.L - F2;
       kampagne(K3, sz, 1.5, Math.min(uE * 0.45, 22), 4.4, H - 0.3, 0.25, ["#1f6fb5", "#2f8f5b", "#2b2b2b", "#e8562a"][v % 4]);
-      const lu = uE * 0.7, lh = 2.3, lb = plakatBreite2("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
+      const lu = uE * 0.7, lh = 2.3, lb = plakatBreite("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
       hsLogo(K3, sz, lu, H + 3.8, -1.4, lh, { grund: kern });
       for (let k = 0; k <= 4; k++) {
         const u = lu - lb / 2 + k * lb / 4;
@@ -52898,12 +53640,12 @@
       S.quader(x0 + 1, yF, z0 + 1, x0 + w + ue, yF + 0.5, z0 + d + ue, "#d9dad6");
       S.quader(x0 + 1, yF + 0.12, z0 + d + ue, x0 + w + ue, yF + 0.32, z0 + d + ue + 0.05, HS_ROT);
       S.quader(x0 + w + ue, yF + 0.12, z0 + 1, x0 + w + ue + 0.05, yF + 0.32, z0 + d + ue, HS_ROT);
-      for (let x = x0 + 4; x < x0 + w - F2; x += 8) zyl4(S, x, 0.3, z0 + d + ue - 0.4, 0.12, yF - 0.3, "#d9dcde", 8);
-      for (let z2 = z0 + 4; z2 < z0 + d - F2; z2 += 8) zyl4(S, x0 + w + ue - 0.4, 0.3, z2, 0.12, yF - 0.3, "#d9dcde", 8);
+      for (let x = x0 + 4; x < x0 + w - F2; x += 8) zyl2(S, x, 0.3, z0 + d + ue - 0.4, 0.12, yF - 0.3, "#d9dcde", 8);
+      for (let z2 = z0 + 4; z2 < z0 + d - F2; z2 += 8) zyl2(S, x0 + w + ue - 0.4, 0.3, z2, 0.12, yF - 0.3, "#d9dcde", 8);
     }
     K3.Hw = H;
     K3.tRelief = 0.3;
-    attika3(S, x0, z0, w, d, H + 0.15, 0.95, rahmenF, 0.3);
+    attika2(S, x0, z0, w, d, H + 0.15, 0.95, rahmenF, 0.3);
     if (n === 1) dachfeld(K3, x0 + 2, z0 + 2, x0 + w + 1.5, z0 + d + 1.5, H + 1.6, { h: true, farbe: "#cfd2d4" });
     else dachfeld(K3, x0 + 1, z0 + 1, x0 + w - 1.5, z0 + d - 1.5, H + 0.3, { h: true, farbe: "#cfd2d4" });
     return H + 3.2;
@@ -52933,7 +53675,7 @@
           return;
         }
         s2.q(a, b, 0, 0.55, -kr - 0.1, -kr + 0.05, "#2b3036");
-        vitrine(K3, s2, a, b, 0.55, 4.2, -kr, 1.6, grp[i % grp.length], { rueck: GLAS2 });
+        vitrine(K3, s2, a, b, 0.55, 4.2, -kr, 1.6, grp[i % grp.length], { rueck: GLAS });
         s2.q(a, b, 4.2, EG_S, -kr - 0.1, -kr + 0.05, HS_BLAU);
       });
       if (ax.length) s2.q(ax[ax.length - 1][1] + 0.25, s2.L, 0, EG_S, -kr - 0.3, -kr + 0.15, HS_BLAU);
@@ -52943,7 +53685,7 @@
         const y0 = EG_S + k * OG_S;
         s2.q(uW, s2.L, y0, y0 + 1.35, 0, 0.25, brF);
         for (let u = uW + 1.25; u < s2.L; u += 1.25) s2.q(u - 0.025, u + 0.025, y0 + 0.05, y0 + 1.3, 0.25, 0.28, dunkler(brF, 0.08));
-        s2.q(uW, s2.L, y0 + 1.35, y0 + OG_S - 0.35, -0.12, -0.02, GLAS2);
+        s2.q(uW, s2.L, y0 + 1.35, y0 + OG_S - 0.35, -0.12, -0.02, GLAS);
         for (let u = uW + 0.8; u < s2.L; u += 1.6) s2.q(u - 0.06, u + 0.06, y0 + 1.35, y0 + OG_S - 0.35, -0.05, 0.05, rF);
         s2.q(uW, s2.L, y0 + OG_S - 0.35, y0 + OG_S, 0, 0.12, rF);
         for (let u = uW + 0.8; u < s2.L - 1.6; u += 1.6) if (r() < 0.35) s2.q(u + 0.08, u + 1.52, y0 + OG_S - 0.35 - zw(r, 0.5, 1.6), y0 + OG_S - 0.35, -0.04, 0, "#d8d4c8");
@@ -52967,7 +53709,7 @@
       if (hb < 1.6) {
         const ph = passend("SPORT", panelU - 1, (yo - y0 - 1) * 0.6);
         if (K3.ohneLogo) s2.q(0.5, panelU - 0.5, (y0 + yo) / 2 - ph * 0.4, (y0 + yo) / 2 + ph * 0.4, 0.45, 0.48, "#e2e0d8");
-        else plakat3(K3.scene, s2, "SPORT", panelU / 2, (y0 + 0.4 + yo) / 2, 0.5, ph, K3.alt ? dunkler(HS_ROT, 0.15) : HS_ROT);
+        else plakat2(K3.scene, s2, "SPORT", panelU / 2, (y0 + 0.4 + yo) / 2, 0.5, ph, K3.alt ? dunkler(HS_ROT, 0.15) : HS_ROT);
       } else buch.forEach((c, i) => {
         const yy = y1 + (n >= 3 ? 0 : 1.5) - 0.6 - hb * (i + 0.5);
         if (K3.ohneLogo) {
@@ -52975,24 +53717,24 @@
           return;
         }
         const kaputt = K3.alt && i === 3;
-        plakat3(K3.scene, s2, c, panelU / 2, yy - (kaputt ? hb * 0.08 : 0), 0.5, hb * 1.2, kaputt ? dunkler(HS_ROT, 0.28) : HS_ROT, null, { rz: kaputt ? 0.18 : 0 });
+        plakat2(K3.scene, s2, c, panelU / 2, yy - (kaputt ? hb * 0.08 : 0), 0.5, hb * 1.2, kaputt ? dunkler(HS_ROT, 0.28) : HS_ROT, null, { rz: kaputt ? 0.18 : 0 });
       });
     }
     if (n >= 3 && v % 2 === 0) {
       const u = sz.L * 0.22;
       sz.q(u - 1.8, u + 1.8, EG_S, H + 2.2, 0, 0.6, K3.c(pal[0]));
-      sz.q(u - 1.3, u + 1.3, EG_S + 0.4, H + 1.8, 0.6, 0.66, GLAS_HELL2);
+      sz.q(u - 1.3, u + 1.3, EG_S + 0.4, H + 1.8, 0.6, 0.66, GLAS_HELL);
       for (let y = EG_S + 1.1; y < H + 1.8; y += 1.1) sz.q(u - 1.3, u + 1.3, y, y + 0.08, 0.6, 0.72, rF);
       sz.q(u - 1.9, u + 1.9, H + 2.2, H + 2.45, -3.5, 0.75, rF);
     }
     K3.Hw = H;
     K3.tRelief = 0.3;
-    S.quader(x0, H, z0, x0 + w, H + 0.4, z0 + d, KIES3);
+    S.quader(x0, H, z0, x0 + w, H + 0.4, z0 + d, KIES2);
     S.quader(x0, H + 0.4, z0 + d - 0.3, x0 + w, H + 0.7, z0 + d, rF);
     S.quader(x0 + w - 0.3, H + 0.4, z0, x0 + w, H + 0.7, z0 + d, rF);
     dachfeld(K3, x0 + 1, z0 + 1, x0 + w - 2, z0 + d - 6, H + 0.4, { kuppeln: w * d > 1200, solar: false });
     {
-      const lh = clamp6(sz.L * 0.065, 2, 3), lu = sz.L * 0.6, lb = plakatBreite2("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
+      const lh = clamp4(sz.L * 0.065, 2, 3), lu = sz.L * 0.6, lb = plakatBreite("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
       for (let k = 0; k <= 4; k++) {
         const u = lu - lb / 2 + k * lb / 4;
         sz.q(u - 0.07, u + 0.07, H + 0.4, H + 1.3 + lh * 1.3, -1.6, -1.45, "#4a4f55");
@@ -53002,7 +53744,7 @@
       hsLogo(K3, sz, lu, H + 1.4 + lh * 0.65, -1.4, lh, { grund: brF });
     }
     if (r() < 0.7) {
-      zyl4(S, x0 + 2.5, H + 0.4, z0 + 2.5, 0.08, 6, "#8a9096", 5);
+      zyl2(S, x0 + 2.5, H + 0.4, z0 + 2.5, 0.08, 6, "#8a9096", 5);
       S.box(1.6, 0.08, 0.08, x0 + 2.5, H + 5.6, z0 + 2.5, "#8a9096");
       S.box(0.08, 0.08, 1.2, x0 + 2.5, H + 4.8, z0 + 2.5, "#8a9096");
     }
@@ -53031,7 +53773,7 @@
     let ii = 0;
     for (const [u0, u1] of fensterSeg) for (const [a, b] of buchten(u0, u1, 4.2, 0.25)) {
       sz.q(a - 0.13, a, 0.6, 3.9, -0.05, 0.15, "#59636b");
-      vitrine(K3, sz, a, b, 0.6, 3.9, 0, 1.4, grp[ii++ % grp.length], { rueck: GLAS2 });
+      vitrine(K3, sz, a, b, 0.6, 3.9, 0, 1.4, grp[ii++ % grp.length], { rueck: GLAS });
       sz.q(b, b + 0.13, 0.6, 3.9, -0.05, 0.15, "#59636b");
     }
     {
@@ -53042,20 +53784,20 @@
       s2.q(u0 - 1.2, u1 + 1.2, 5.4, 5.6, 0, 2.2, "#5f676e");
       for (let k = 0; k < 4; k++) s2.kipp(1.2, 0.02, 0.4, u1 + 3 + k * 1.6, 0.32, 3.2, "#f2c14e", 0, 0);
       const a = s2.L * 0.45, b = Math.min(s2.L - 2, a + 10);
-      if (b - a > 4) for (const [aa, bb] of buchten(a, b, 4.5, 0.25)) vitrine(K3, s2, aa, bb, 0.6, 3.9, 0, 1.4, "rad", { rueck: GLAS2 });
+      if (b - a > 4) for (const [aa, bb] of buchten(a, b, 4.5, 0.25)) vitrine(K3, s2, aa, bb, 0.6, 3.9, 0, 1.4, "rad", { rueck: GLAS });
       hsLogo(K3, s2, s2.L * 0.55, H - 0.75, 0.32, 1.85, { grund: HS_BLAU, band: HS_BLAU });
     }
     {
       const s2 = sz, a = pu - pw / 2, b = pu + pw / 2;
       s2.q(a, b, 0, H + 2.2, -0.2, 0.9, HS_ROT);
-      s2.q(a + 1, b - 1, 0.3, 5, 0.9, 3.4, GLAS_HELL2);
+      s2.q(a + 1, b - 1, 0.3, 5, 0.9, 3.4, GLAS_HELL);
       s2.q(a + 1, b - 1, 5, 5.3, 0.9, 3.6, "#f4f3ef");
       for (let u = a + 1; u <= b - 0.99; u += (pw - 2) / 4) s2.q(u - 0.06, u + 0.06, 0.3, 5, 3.4, 3.48, "#eef1f2");
       s2.q(pu - 1.4, pu + 1.4, 0.3, 2.9, 3.4, 3.5, K3.zu ? "#8e9499" : GLAS_D);
       K3.glas.push({ s: s2, a: pu - 1.4, b: pu + 1.4, y0: 0.3, y1: 2.9, t: 3.5, eg: true, tuer: true });
       s2.q(a + 0.8, b - 0.8, 5.6, H + 1.6, 0.9, 0.95, "#ffffff");
       if (!K3.ohneLogo) {
-        plakat3(scene2, s2, "H", pu, (5.6 + H + 1.6) / 2 + 0.2, 0.97, Math.min(pw - 2.5, H - 3), HS_ROT);
+        plakat2(scene2, s2, "H", pu, (5.6 + H + 1.6) / 2 + 0.2, 0.97, Math.min(pw - 2.5, H - 3), HS_ROT);
       }
       K3.logos.push({ s: s2, u0: a + 0.8, u1: b - 0.8, y0: 5.6, y1: H + 1.6, t: 0.95, grund: "#ffffff" });
     }
@@ -53066,7 +53808,7 @@
         s2.q(u0, u1, y2 + 0.1, y2 + 0.3, tief2, tief2 + 0.05, HS_ROT);
         for (let u = u0 + 3; u < Math.min(u1, s2.L) - 1; u += 7) {
           const [x, z2] = s2.welt(u, tief2 - 0.4);
-          zyl4(S, x, 0.3, z2, 0.12, y2 - 0.3, "#5f676e", 8);
+          zyl2(S, x, 0.3, z2, 0.12, y2 - 0.3, "#5f676e", 8);
         }
       }
       radstaender(K3, s2, pu + pw / 2 + 2, 6, 1.9);
@@ -53084,20 +53826,20 @@
       const px2 = x0 + w - 2.6, pz4 = zp + PARK - 3.2, ph = Math.max(H + 4, 11);
       S.box(2.6, ph, 0.9, px2, ph / 2, pz4, HS_BLAU);
       S.box(3, 0.4, 1.2, px2, 0.5, pz4, "#5f676e");
-      const sp = new Seite3(S, px2 - 1.3, pz4 - 0.45, 2.6, 0.9, "+z");
+      const sp = new Seite2(S, px2 - 1.3, pz4 - 0.45, 2.6, 0.9, "+z");
       hsLogoSenkrecht(K3, sp, 1.3, ph - 0.3, 0, 2.1, ph - 1.2);
       S.box(0.95, ph - 1.2, 2.2, px2 + 1.3 - 0.02, (ph - 1.2) / 2 + 0.3, pz4, HS_BLAU);
-      const sp2 = new Seite3(S, px2 - 1.3, pz4 - 0.45, 2.6, 0.9, "+x");
+      const sp2 = new Seite2(S, px2 - 1.3, pz4 - 0.45, 2.6, 0.9, "+x");
       if (!K3.ohneLogo) for (const [i, t] of ["RAD", "LAUF", "BERG"].entries()) {
         sp2.q(-0.45 + 0.1 + 0, 0.45, ph - 3 - i * 1.6, ph - 1.8 - i * 1.6, 0.03, 0.08, ["#e04b3a", "#f2c14e", "#4caf50"][i]);
-        plakat3(scene2, sp2, t, 0, ph - 2.4 - i * 1.6, 0.1, 0.6, "#ffffff");
+        plakat2(scene2, sp2, t, 0, ph - 2.4 - i * 1.6, 0.1, 0.6, "#ffffff");
       }
     }
     for (const s2 of K3.seiten) wand(s2, 0, s2.L, 0, 4.3, -D, 0, oeffnungen(K3, s2), dunkler(blech, 0.05));
     for (const s2 of K3.seiten) s2.q(0, s2.L, 4.2, 4.35, 0, 0.2, "#7c838a");
     K3.Hw = H;
     K3.tRelief = 0.36;
-    attika3(S, x0, z0, w, d, H + 0.4, 0.3, HS_BLAU, 0.3);
+    attika2(S, x0, z0, w, d, H + 0.4, 0.3, HS_BLAU, 0.3);
     if (w * d > 1400 && rng2(String(K3.haus.id) + "/parkdeck")() < 0.5) parkdeckSport(K3, x0 + 0.6, z0 + 0.6, x0 + w - 0.6, z0 + d - 0.6, H + 0.55);
     else dachfeld(K3, x0 + 1, z0 + 1, x0 + w - 1, z0 + d - 1, H + 0.55, { h: true, solar: w * d > 1500 });
     return Math.max(H + 4, 11);
@@ -53112,9 +53854,9 @@
     galerie: ["#e9eef0", "#e2e8ea", "#eef0ee"]
   };
   function spindel(S, x, z2, y0, y1, R9) {
-    zyl4(S, x, y0, z2, R9, y1 - y0, "#bdb7aa", 16);
-    for (let y = y0 + 1.2; y < y1; y += 1.6) zyl4(S, x, y, z2, R9 + 0.25, 0.35, "#d9d4c8", 16);
-    zyl4(S, x, y0, z2, R9 * 0.35, y1 - y0 + 1.2, "#9e988c", 10);
+    zyl2(S, x, y0, z2, R9, y1 - y0, "#bdb7aa", 16);
+    for (let y = y0 + 1.2; y < y1; y += 1.6) zyl2(S, x, y, z2, R9 + 0.25, 0.35, "#d9d4c8", 16);
+    zyl2(S, x, y0, z2, R9 * 0.35, y1 - y0 + 1.2, "#9e988c", 10);
   }
   function familie42(K3) {
     const { S, scene: scene2, x0, z0, w, d, n, r, v } = K3;
@@ -53136,7 +53878,7 @@
     S.quader(x0, Hs + 0.2, z0 + d - 2.8, x0 + w - 0.5, Hb, z0 + d - 0.5, mallF);
     const uMall = Math.min(4, d * 0.15);
     S.quader(x0, 0, z0, x0 + w - 0.5, Hb, z0 + uMall - 0.5, mallF);
-    const sMall = new Seite3(S, xm, z0, M2, d, "+z");
+    const sMall = new Seite2(S, xm, z0, M2, d, "+z");
     const name2 = MALLS2[(nr + Math.floor(r() * 3)) % MALLS2.length];
     const laeden = ["Caf\xE9", "Optik", "B\xE4ckerei", "Schuhe", "Mode", "Handy", "Apotheke", "Eis", "B\xFCcher", "Blumen"];
     const portalU = Math.max(9, M2 * ({ galerie: 0.6, waschbeton: 0.3 }[typ] ?? 0.42));
@@ -53153,18 +53895,18 @@
       const t = laeden[Math.floor(r() * laeden.length)];
       if (typ === "galerie") {
         sMall.q((a + b) / 2 - 1.6, (a + b) / 2 + 1.6, 4.9, 5.8, 0.3, 0.42, c);
-        plakat3(scene2, sMall, t, (a + b) / 2, 5.35, 0.44, passend(t, 2.9, 0.6), "#ffffff");
+        plakat2(scene2, sMall, t, (a + b) / 2, 5.35, 0.44, passend(t, 2.9, 0.6), "#ffffff");
       } else {
         sMall.q(a, b, 3.6, 5.2, -0.5, 0.3, c);
-        plakat3(scene2, sMall, t, (a + b) / 2, 4.4, 0.32, passend(t, b - a - 1, 0.8), "#ffffff");
+        plakat2(scene2, sMall, t, (a + b) / 2, 4.4, 0.32, passend(t, b - a - 1, 0.8), "#ffffff");
       }
-      if (!K3.zu) puppe2(sMall, a + 1.3, 0.4, -0.5, waehle2(r, KLEID3), "#2b2b2b");
+      if (!K3.zu) puppe(sMall, a + 1.3, 0.4, -0.5, waehle2(r, KLEID2), "#2b2b2b");
     }
     sMall.q(M2 - 1, M2 + 0.6, 0, Hb + 0.5, -0.6, 1.05, typ === "klinker" ? "#9b5a45" : dunkler(mallF, 0.1));
     if (typ === "klinker") {
       for (let y = 5.6; y < Hb - 1; y += 0.5) sMall.q(0, M2 - 1, y, y + 0.04, 0, 0.04, mallD);
       for (let y = 7.5; y < Hb - 1; y += 3.5) sMall.q(0, M2 - 1, y, y + 0.35, 0, 0.18, "#e6dccb");
-      for (let u = 2.5; u < M2 - 2; u += 4) sMall.q(u - 0.4, u + 0.4, 5.8, Hb - 1.2, -0.04, 0.03, GLAS2);
+      for (let u = 2.5; u < M2 - 2; u += 4) sMall.q(u - 0.4, u + 0.4, 5.8, Hb - 1.2, -0.04, 0.03, GLAS);
     } else if (typ === "medien" && M2 >= 22) {
       for (let u = 3; u < M2 - 0.5; u += 3) sMall.q(u - 0.03, u + 0.03, 5.2, Hb - 0.4, 0, 0.06, heller(mallF, 0.06));
       const a = 1.5, b = Math.min(M2 - 12, 16, portalU - 6);
@@ -53174,14 +53916,14 @@
         sMall.q(a, b, 5.85, Hb - 1.05, 0.3, 0.36, K3.zu ? "#2b2f33" : bg);
         if (!K3.zu) {
           const t = waehle2(r, ["SALE", "NEU HIER", "WOCHENENDE"]);
-          plakat3(scene2, sMall, t, (a + b) / 2, (5.85 + Hb - 1.05) / 2, 0.38, passend(t, (b - a) * 0.75, (Hb - 7) * 0.5), "#ffffff");
+          plakat2(scene2, sMall, t, (a + b) / 2, (5.85 + Hb - 1.05) / 2, 0.38, passend(t, (b - a) * 0.75, (Hb - 7) * 0.5), "#ffffff");
         }
       }
     } else if (arkade2) {
       sMall.q(0, M2 - 1, 4.4, 5.3, 0, 3.2, "#a39a87");
       for (let u = 2; u < M2 - 1.5; u += 5.5) {
         const [x, z2] = sMall.welt(u, 2.7);
-        zyl4(S, x, 0.3, z2, 0.35, 4.1, "#c9c1ae", 10);
+        zyl2(S, x, 0.3, z2, 0.35, 4.1, "#c9c1ae", 10);
       }
       for (let y = 5.3; y < Hb - 1; y += 3) {
         sMall.q(0, M2 - 1, y, y + 1.6, 0, 0.5, mallF);
@@ -53208,11 +53950,11 @@
       for (let y = 3.2; y < ph - 2; y += 1.6) sMall.q(pu0 + 0.6, pu1 - 0.6, y - 0.05, y + 0.05, 2, 2.1, "#eef1f2");
       sMall.q(pu0 + 2, pu1 - 2, 0.3, 3, 2, 2.16, GLAS_D);
       sMall.q(pu0 - 1, pu1 + 1, 3.3, 3.7, 0, 4.4, "#eef1f2");
-      plakat3(scene2, sMall, name2, portalU, ph - 1, 2.1, passend(name2, pu1 - pu0 - 0.8, 1.2), typ === "medien" ? "#ffffff" : "#2b3a4a", typ === "medien" ? "#2b3036" : "#ffffff");
+      plakat2(scene2, sMall, name2, portalU, ph - 1, 2.1, passend(name2, pu1 - pu0 - 0.8, 1.2), typ === "medien" ? "#ffffff" : "#2b3a4a", typ === "medien" ? "#2b3036" : "#ffffff");
       sMall.q(pu0, pu1, ph, ph + 0.3, -0.2, 2.2, "#bfc5c9");
       if (arkade2) {
         const hb = passend(name2, M2 * 0.55, 2.4);
-        plakat3(scene2, sMall, name2, M2 * 0.35, Hb + 0.5 + hb * 0.55, -0.3, hb, "#c8102e");
+        plakat2(scene2, sMall, name2, M2 * 0.35, Hb + 0.5 + hb * 0.55, -0.3, hb, "#c8102e");
         for (const du of [-M2 * 0.2, 0, M2 * 0.2]) sMall.q(M2 * 0.35 + du - 0.06, M2 * 0.35 + du + 0.06, Hb + 0.4, Hb + 0.6 + hb * 0.4, -0.6, -0.45, "#4a4f55");
       }
     }
@@ -53257,7 +53999,7 @@
           const pa = tuer[0] - 0.8, pb = tuer[1] + 0.8;
           s2.q(pa, pb, 0, bandY1 + 2.2, 0, 1.4, HS_ROT);
           s2.q(pa + 0.6, pb - 0.6, 0.3, 3.6, 1.4, 1.46, GLAS_D);
-          if (!K3.ohneLogo) plakat3(scene2, s2, "H", (pa + pb) / 2, (3.8 + bandY1 + 2.2) / 2, 1.48, Math.min(pb - pa - 1.2, bandY1 - 1.8), "#ffffff");
+          if (!K3.ohneLogo) plakat2(scene2, s2, "H", (pa + pb) / 2, (3.8 + bandY1 + 2.2) / 2, 1.48, Math.min(pb - pa - 1.2, bandY1 - 1.8), "#ffffff");
           K3.logos.push({ s: s2, u0: pa, u1: pb, y0: 3.6, y1: bandY1 + 2.2, t: 1.4, grund: HS_ROT, sichtbar: !K3.ohneLogo });
           if (pb + 2 < u1 - 6) lu0 = pb + 0.5;
         }
@@ -53272,13 +54014,13 @@
         for (let u = u0 - 0.3; u <= u1 - 0.2; u += 1.3) s2.q(u - 0.12, u + 0.12, 0.3, bandY1, 0, 0.9, "#f4f3ef");
         s2.q(u0 - 0.5, u1, bandY1 - 0.6, bandY1 + 0.2, -0.5, 1, "#f4f3ef");
         s2.q(u0 - 0.5, u1, bandY0 - 0.1, bandY0 + 0.2, -0.5, 1, "#f4f3ef");
-        const lu = (u0 + u1) / 2, lb = plakatBreite2("HARTWIG SPORT", lhMax * 0.58) + lhMax * 1.8;
+        const lu = (u0 + u1) / 2, lb = plakatBreite("HARTWIG SPORT", lhMax * 0.58) + lhMax * 1.8;
         s2.q(lu - lb / 2 - 0.5, lu + lb / 2 + 0.5, (bandY0 + bandY1) / 2 - lhMax * 0.85, (bandY0 + bandY1) / 2 + lhMax * 0.85, 0.9, 1, "#f4f3ef");
         hsLogo(K3, s2, lu, (bandY0 + bandY1) / 2, 1, lhMax, { grund: "#f4f3ef" });
       }
       if (s2.seite === "+x" && u0 > 0.5) for (let y = 1.4; y < Hb; y += 1.4) s2.q(0, u0 - 0.5, y, y + 0.06, -0.5, -0.44, mallD);
     }
-    S.quader(xm, Hb, z0, x0 + w - 0.5, Hb + 0.3, z0 + d - 0.5, KIES3);
+    S.quader(xm, Hb, z0, x0 + w - 0.5, Hb + 0.3, z0 + d - 0.5, KIES2);
     if (typ === "glastonne") {
       const g = new three_module_exports.CylinderGeometry(3, 3, M2 - 5, 10, 1, false, -Math.PI / 2, Math.PI);
       g.rotateZ(Math.PI / 2);
@@ -53302,16 +54044,16 @@
       pg.translate(xm + M2 * 0.5, Hb + 0.6 + ps * 0.225, z0 + d * 0.45);
       S.add(pg, "#a9c6d3");
       S.box(ps + 0.6, 0.3, ps + 0.6, xm + M2 * 0.5, Hb + 0.45, z0 + d * 0.45, "#e6dccb");
-      technik2(S, r, xm + 1, z0 + 1, xm + M2 * 0.5 - ps / 2 - 1, z0 + d - 2, Hb + 0.3, { max: 3 });
+      technik(S, r, xm + 1, z0 + 1, xm + M2 * 0.5 - ps / 2 - 1, z0 + d - 2, Hb + 0.3, { max: 3 });
     } else if (typ === "medien") solar(S, xm + 1, z0 + 1, xm + M2 - 2, z0 + d * 0.7, Hb + 0.3);
     else if (typ === "waschbeton") {
       S.quader(xm + 0.5, Hb + 0.3, z0 + 0.5, xm + M2 - 0.5, Hb + 0.45, z0 + d - 1, "#7e858c");
       for (let z2 = z0 + 1.5; z2 + 5 <= z0 + d - 3; z2 += 12) parkreihe(S, r, xm + 9, xm + M2 - 2, z2, 5, Hb + 0.45, K3.zu ? 0.1 : 0.6);
       S.quader(xm + 0.5, Hb + 0.45, z0 + d - 1.2, xm + M2 - 0.5, Hb + 1.5, z0 + d - 1, "#c0b8a6");
       spindel(S, xm + 4.2, z0 + d * 0.45, 0.3, Hb + 1.5, 3.4);
-      const ps = new Seite3(S, xm + 4.2 - 1, z0 + d * 0.45 + 3.6, 2, 0.4, "+z");
+      const ps = new Seite2(S, xm + 4.2 - 1, z0 + d * 0.45 + 3.6, 2, 0.4, "+z");
       ps.q(-0.2, 2.2, Hb + 2, Hb + 4.2, 0, 0.08, "#1f63b5");
-      plakat3(scene2, ps, "P", 1, Hb + 3.1, 0.1, 1.9, "#ffffff");
+      plakat2(scene2, ps, "P", 1, Hb + 3.1, 0.1, 1.9, "#ffffff");
     } else {
       S.quader(xm + 0.6, Hb + 0.3, z0 + 0.6, xm + M2 - 0.6, Hb + 0.5, z0 + d - 1, "#8fbf7a");
       prismaX(S, xm + 2, xm + M2 - 2, [[z0 + d * 0.5 - 2, 0], [z0 + d * 0.5 + 2, 0], [z0 + d * 0.5, 1.8]], Hb + 0.5, "#a9c6d3");
@@ -53320,10 +54062,10 @@
     dachfeld(K3, x0 + 1, z0 + 1, x0 + w - 1.5, z0 + d - 1.5, Hb + 0.3, { h: true, solar: typ !== "medien" });
     const [px2, pz4] = sMall.welt(Math.max(2, portalU - 7.5), 3.6);
     S.box(1.8, Hb + 3, 0.9, px2, (Hb + 3) / 2, pz4, "#2b3a4a");
-    const sp = new Seite3(S, px2 - 0.9, pz4 - 0.45, 1.8, 0.9, "+z");
-    plakat3(scene2, sp, "EINKAUFEN", 0.9, Hb + 1.6, 0.04, 0.3, "#ffffff", "#2b3a4a");
+    const sp = new Seite2(S, px2 - 0.9, pz4 - 0.45, 1.8, 0.9, "+z");
+    plakat2(scene2, sp, "EINKAUFEN", 0.9, Hb + 1.6, 0.04, 0.3, "#ffffff", "#2b3a4a");
     sp.q(0.25, 1.55, Hb - 2.5, Hb - 0.4, 0, 0.05, HS_ROT);
-    if (!K3.ohneLogo) plakat3(scene2, sp, "H", 0.9, Hb - 1.45, 0.07, 1.6, "#ffffff");
+    if (!K3.ohneLogo) plakat2(scene2, sp, "H", 0.9, Hb - 1.45, 0.07, 1.6, "#ffffff");
     return Hb + 4.5;
   }
   function familie52(K3) {
@@ -53352,14 +54094,14 @@
       let i = 0;
       for (const [u0, u1] of segs) for (const [a, b] of buchten(u0, u1, 4.8, 0.7)) {
         const top = Math.min(steinH - 0.6, 3.9);
-        vitrine(K3, s2, a, b, 0.6, top, 0.35, 1.5, grp[i++ % grp.length], { rueck: GLAS2, boden: "#c9b08a" });
+        vitrine(K3, s2, a, b, 0.6, top, 0.35, 1.5, grp[i++ % grp.length], { rueck: GLAS, boden: "#c9b08a" });
         s2.q(a - 0.1, b + 0.1, top, top + 0.25, 0.35, 0.6, heller(stein, 0.06));
       }
       if (n >= 2) for (let e = 1; e < n; e++) {
         const y0 = EG_S + (e - 1) * OG_S + 0.9;
         for (const [a, b] of buchten(1, s2.L - 1, 3.6, 1)) {
           if (s2 === sz && b > fu && a < fu + fb6) continue;
-          s2.q(a, b, y0, y0 + 2.2, -0.05, 0.22, GLAS2);
+          s2.q(a, b, y0, y0 + 2.2, -0.05, 0.22, GLAS);
           s2.q(a - 0.1, b + 0.1, y0 - 0.15, y0, -0.05, 0.35, "#3b3f44");
         }
       }
@@ -53372,16 +54114,16 @@
       s2.q(a, b, 0.3, top, -3.3, -3.2, "#d8d2c4");
       s2.q(a, b, 0.3, 0.45, -3.2, 0.6, "#c9b08a");
       if (n >= 2) s2.q(a, a + fb6 * 0.45, EG_S, EG_S + 0.3, -3.2, 0.2, "#c9b08a");
-      s2.q(a, b, top - 0.35, top - 0.2, -3.2, -3.1, LICHT3);
+      s2.q(a, b, top - 0.35, top - 0.2, -3.2, -3.1, LICHT2);
       if (!K3.zu) {
         const t1 = new three_module_exports.ConeGeometry(2.1, 2.4, 4);
         t1.rotateY(Math.PI / 4);
         t1.translate(a + fb6 * 0.62, 1.65, -1.6);
         s2.geo(t1, waehle2(r, ["#e36b2c", "#f2c14e", "#3f7d56"]));
-        puppe2(s2, a + fb6 * 0.3, 0.45, -1.2, "#c0392b", "#3a3a3a", 1.1);
-        puppe2(s2, a + fb6 * 0.85, 0.45, -1, "#2e7d32", "#3a3a3a", 1.1);
+        puppe(s2, a + fb6 * 0.3, 0.45, -1.2, "#c0392b", "#3a3a3a", 1.1);
+        puppe(s2, a + fb6 * 0.85, 0.45, -1, "#2e7d32", "#3a3a3a", 1.1);
         if (n >= 2) {
-          puppe2(s2, a + fb6 * 0.12, EG_S + 0.3, -1.5, "#1f3f6b", "#3a3a3a");
+          puppe(s2, a + fb6 * 0.12, EG_S + 0.3, -1.5, "#1f3f6b", "#3a3a3a");
           s2.q(a + fb6 * 0.25, a + fb6 * 0.4, EG_S + 0.3, EG_S + 1.2, -1.6, -1, "#e0b23c");
         }
         s2.q(a + fb6 * 0.2, a + fb6 * 0.8, top - 2.2, top - 1.75, -2.2, -1.4, "#d04a3f");
@@ -53415,18 +54157,18 @@
     }
     hsLogo(K3, sz, fu + fb6 + (sz.L - fu - fb6) / 2, steinH + (n === 1 ? (H - steinH) / 2 : OG_S * 0.55), 0.25, n === 1 ? 1.5 : 1.7, { grund: holz });
     hsLogo(K3, sx, sx.L * 0.5, n === 1 ? steinH + (H - steinH) / 2 : EG_S + OG_S * 0.55, 0.25, n === 1 ? 1.5 : 1.9, { grund: holz });
-    if (!K3.zu) plakat3(scene2, sz, "BERG RUFT.", fu + fb6 / 2, H - 0.25 - 0.45, 0.62, passend("BERG RUFT.", fb6 * 0.6, 0.7), "#ffffff", "#3b3f44");
+    if (!K3.zu) plakat2(scene2, sz, "BERG RUFT.", fu + fb6 / 2, H - 0.25 - 0.45, 0.62, passend("BERG RUFT.", fb6 * 0.6, 0.7), "#ffffff", "#3b3f44");
     K3.Hw = H;
     K3.tRelief = 0.55;
     const zT = z0 + d * 0.42, xT = x0 + w * 0.32;
     K3.dach = { x0: xT, z0: zT, x1: x0 + w - 5, z1: z0 + d, y: H + 0.3 };
-    S.quader(x0, H, z0, x0 + w, H + 0.2, z0 + d, KIES3);
+    S.quader(x0, H, z0, x0 + w, H + 0.2, z0 + d, KIES2);
     for (let zs = z0 + 0.5; zs + 4.4 <= zT - 0.5; zs += 4.8) {
       prismaX(S, x0 + 0.5, x0 + w - 0.5, [[zs, 0], [zs + 4.4, 0], [zs + 4.4, 2]], H + 0.2, dachF);
-      S.quader(x0 + 0.6, H + 0.35, zs + 4.4, x0 + w - 0.6, H + 2.05, zs + 4.46, GLAS_HELL2);
+      S.quader(x0 + 0.6, H + 0.35, zs + 4.4, x0 + w - 0.6, H + 2.05, zs + 4.46, GLAS_HELL);
       for (let x = x0 + 3; x < x0 + w - 1; x += 3) S.quader(x - 0.05, H + 0.35, zs + 4.4, x + 0.05, H + 2.05, zs + 4.52, "#3b3f44");
     }
-    technik2(S, r, x0 + 1, zT + 1, xT - 1.5, z0 + d - 1, H + 0.2, { max: 3 });
+    technik(S, r, x0 + 1, zT + 1, xT - 1.5, z0 + d - 1, H + 0.2, { max: 3 });
     S.quader(xT, H, zT, x0 + w, H + 0.3, z0 + d, "#b79e78");
     for (let x = xT + 0.6; x < x0 + w; x += 1.2) S.quader(x, H + 0.3, zT, x + 0.05, H + 0.32, z0 + d, "#a58c66");
     S.quader(xT, H + 0.3, z0 + d - 0.12, x0 + w, H + 1.4, z0 + d, "#a9c6d3");
@@ -53463,7 +54205,7 @@
     {
       const kw2 = 3.6, kx = x0 + w - kw2 - 0.4, kz2 = z0 + d - kw2 - 0.4, kh = H + 11;
       S.quader(kx, 0.3, kz2, kx + kw2, kh, kz2 + kw2, "#8f979c");
-      for (const s2 of seitenVon2(S, kx, kz2, kw2, kw2)) {
+      for (const s2 of seitenVon(S, kx, kz2, kw2, kw2)) {
         for (let i = 0; i < 42; i++) {
           const u = zw(r, 0.2, kw2 - 0.5), y = zw(r, H + 0.8, kh - 0.6);
           s2.q(u, u + 0.3, y, y + 0.25, 0, 0.18, waehle2(r, BUNT));
@@ -53474,11 +54216,11 @@
       S.quader(kx - 0.3, kh + 0.25, kz2 + kw2 + 0.2, kx + kw2 + 0.3, kh + 1.3, kz2 + kw2 + 0.3, "#d9dcde");
       S.quader(kx + kw2 + 0.2, kh + 0.25, kz2 - 0.3, kx + kw2 + 0.3, kh + 1.3, kz2 + kw2 + 0.3, "#d9dcde");
       if (!K3.zu) {
-        const sx2 = new Seite3(S, kx, kz2, kw2, kw2, "+z");
+        const sx2 = new Seite2(S, kx, kz2, kw2, kw2, "+z");
         sx2.q(1.5, 2, kh - 3.5, kh - 2.6, 0.2, 0.5, "#e04b3a");
         sx2.q(1.73, 1.77, kh - 2.6, kh, 0.3, 0.34, "#f2f1ec");
       }
-      zyl4(S, kx + kw2 / 2, kh + 0.25, kz2 + kw2 / 2, 0.08, 5, "#d9dcde", 6);
+      zyl2(S, kx + kw2 / 2, kh + 0.25, kz2 + kw2 / 2, 0.08, 5, "#d9dcde", 6);
       if (!K3.ohneLogo) {
         S.box(2, 1.2, 0.05, kx + kw2 / 2 + 1.05, kh + 4.4, kz2 + kw2 / 2, HS_ROT);
       }
@@ -53491,29 +54233,29 @@
     const putz2 = K3.c(["#efe8dc", "#e8ddd0", "#ece3cf", "#e3e6e2", "#f0e4d8", "#e6dfd1", "#eae7df", "#efe2cc"][v]);
     const akzent = ["#2f7f86", HS_ROT, "#2f6f8f", "#5c8f6a", "#2f7f86", "#8c5a8f", "#2f6f8f", "#c9883a"][v];
     const sockelF = K3.c("#b8ab98");
-    const R9 = clamp6(Math.min(w, d) * 0.2, 4, 7);
+    const R9 = clamp4(Math.min(w, d) * 0.2, 4, 7);
     const cx = x0 + w - R9, cz = z0 + d - R9;
     const D = 1.7;
     S.quader(x0, 0, z0, cx, EG_S, z0 + d - D, "#5a5f64");
     S.quader(cx - 0.01, 0, z0, x0 + w - D, EG_S, cz, "#5a5f64");
     S.quader(x0, EG_S, z0, cx, H, z0 + d, putz2);
     S.quader(cx - 0.01, EG_S, z0, x0 + w, H, cz, putz2);
-    viertelzylinder2(S, cx, cz, R9 - 0.3, 0.3, H + 3.5, GLAS_HELL2, 14);
+    viertelzylinder(S, cx, cz, R9 - 0.3, 0.3, H + 3.5, GLAS_HELL, 14);
     for (let k = 0; k <= 6; k++) {
       const a = k / 6 * Math.PI / 2;
       S.box(0.12, H + 3.2, 0.12, cx + Math.sin(a) * (R9 - 0.25), (H + 3.5 + 0.3) / 2, cz + Math.cos(a) * (R9 - 0.25), "#eef1f2");
     }
-    for (let y = EG_S; y < H + 3.4; y += n === 1 ? 2.4 : OG_S) viertelzylinder2(S, cx, cz, R9 - 0.15, y - 0.12, y + 0.12, "#eef1f2", 14);
+    for (let y = EG_S; y < H + 3.4; y += n === 1 ? 2.4 : OG_S) viertelzylinder(S, cx, cz, R9 - 0.15, y - 0.12, y + 0.12, "#eef1f2", 14);
     const kegel2 = new three_module_exports.ConeGeometry(R9 + 0.4, 3, 16, 1, false, 0, Math.PI / 2);
     kegel2.translate(cx, H + 3.5 + 1.5, cz);
     S.add(kegel2, akzent);
-    viertelzylinder2(S, cx, cz, R9 + 0.4, H + 3.3, H + 3.6, "#eef1f2", 14);
-    zyl4(S, cx + 0.3, H + 6.4, cz + 0.3, 0.06, 2, "#4a4f55", 4);
+    viertelzylinder(S, cx, cz, R9 + 0.4, H + 3.3, H + 3.6, "#eef1f2", 14);
+    zyl2(S, cx + 0.3, H + 6.4, cz + 0.3, 0.06, 2, "#4a4f55", 4);
     if (!K3.zu) for (let i = 0; i < 3; i++) {
       const a = 0.3 + i * 0.5;
-      puppe2(new Seite3(S, cx, cz, 0.01, 0.01, "+z"), Math.sin(a) * (R9 - 1.6), EG_S + 0.15, Math.cos(a) * (R9 - 1.6) - 0.01, waehle2(r, KLEID3), "#2b2b2b");
+      puppe(new Seite2(S, cx, cz, 0.01, 0.01, "+z"), Math.sin(a) * (R9 - 1.6), EG_S + 0.15, Math.cos(a) * (R9 - 1.6) - 0.01, waehle2(r, KLEID2), "#2b2b2b");
     }
-    if (n >= 2) viertelzylinder2(S, cx, cz, R9 - 0.6, EG_S, EG_S + 0.15, BODEN, 14);
+    if (n >= 2) viertelzylinder(S, cx, cz, R9 - 0.6, EG_S, EG_S + 0.15, BODEN, 14);
     const grp = K3.gruppen(0);
     for (const s2 of K3.seiten) {
       const uE = s2.L - R9;
@@ -53539,7 +54281,7 @@
           const c = new three_module_exports.CylinderGeometry(0.55, 0.55, 0.1, 14);
           c.rotateX(Math.PI / 2);
           c.translate(m, (n >= 2 ? H + 0.6 : EG_S + 0.2) + 1, 0.72);
-          s2.geo(c, GLAS2);
+          s2.geo(c, GLAS);
           const c2 = new three_module_exports.TorusGeometry(0.6, 0.08, 4, 14);
           c2.translate(m, (n >= 2 ? H + 0.6 : EG_S + 0.2) + 1, 0.75);
           s2.geo(c2, akzent);
@@ -53547,18 +54289,18 @@
           s2.q(a - 0.6, b + 0.6, 4.25, 4.4, 0, 2.3, "#eef1f2");
           if (n >= 2) {
             s2.q(a - 0.4, b + 0.4, EG_S, H + 0.6, 0, 0.4, heller(putz2, 0.03));
-            for (let y = EG_S + 0.8; y < H; y += 1.2) s2.q(m - 0.9, m + 0.9, y, y + 0.7, 0.4, 0.45, GLAS2);
+            for (let y = EG_S + 0.8; y < H; y += 1.2) s2.q(m - 0.9, m + 0.9, y, y + 0.7, 0.4, 0.45, GLAS);
           }
           return;
         }
-        vitrine(K3, s2, a, b, 0.6, 4, 0, 1.5, grp[i % grp.length], { rueck: GLAS2 });
+        vitrine(K3, s2, a, b, 0.6, 4, 0, 1.5, grp[i % grp.length], { rueck: GLAS });
         s2.q(a, b, 4, 4.3, 0, 0.2, akzent);
       });
       wand(s2, 0, uE, 0, EG_S - 0.15, -D, 0, oeffnungen(K3, s2), putz2);
       s2.q(0, uE, EG_S - 0.15, EG_S + 0.2, 0, 0.5, heller(putz2, 0.04));
       if (n === 1) for (const [a, b] of buchten(0.6, uE - 0.6, 2.6, 1.4)) {
         const m = (a + b) / 2;
-        s2.q(m - 0.6, m + 0.6, EG_S + 0.5, H - 0.7, -0.05, 0.05, GLAS2);
+        s2.q(m - 0.6, m + 0.6, EG_S + 0.5, H - 0.7, -0.05, 0.05, GLAS);
         s2.q(m - 0.75, m + 0.75, EG_S + 0.35, EG_S + 0.5, 0, 0.22, akzent);
       }
       for (let e = 1; e < n; e++) {
@@ -53567,7 +54309,7 @@
         for (const [a, b] of buchten(0.6, uE - 0.6, 3, 1)) {
           const m = (a + b) / 2;
           if (s2.seite === "+z" && Math.abs(m - (ax[Math.floor(ax.length * 0.5)]?.[0] + ax[Math.floor(ax.length * 0.5)]?.[1]) / 2) < 3.4) continue;
-          s2.q(m - 0.85, m + 0.85, y0 + 0.9, y0 + 2.9, -0.05, 0.05, GLAS2);
+          s2.q(m - 0.85, m + 0.85, y0 + 0.9, y0 + 2.9, -0.05, 0.05, GLAS);
           s2.q(m - 0.05, m + 0.05, y0 + 0.9, y0 + 2.9, 0, 0.1, "#eef1f2");
           s2.q(m - 1, m + 1, y0 + 0.75, y0 + 0.9, 0, 0.25, akzent);
           s2.q(m - 1, m + 1, y0 + 2.9, y0 + 3.05, 0, 0.15, akzent);
@@ -53576,7 +54318,7 @@
       s2.q(0, uE, H - 0.3, H + 0.6, 0, 0.35, heller(putz2, 0.04));
       s2.q(0, uE, H + 0.6, H + 0.8, -0.1, 0.45, akzent);
       const lh = n >= 2 ? 1.6 : 1.45, ly = n >= 2 ? H - OG_S * 0.45 : (EG_S + H) / 2 + 0.25;
-      const lu = uE * (s2.seite === "+z" ? 0.27 : 0.5), lb = plakatBreite2("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
+      const lu = uE * (s2.seite === "+z" ? 0.27 : 0.5), lb = plakatBreite("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
       s2.q(lu - lb / 2 - 0.4, lu + lb / 2 + 0.4, ly - lh * 0.85, ly + lh * 0.85, 0, 0.3, heller(putz2, 0.03));
       hsLogo(K3, s2, lu, ly, 0.36, lh, { grund: putz2 });
       if (K3.alt) for (let i = 0; i < 5; i++) {
@@ -53586,8 +54328,8 @@
     }
     K3.Hw = H;
     K3.tRelief = 0.45;
-    S.quader(x0, H, z0, x0 + w - R9, H + 0.6, z0 + d, KIES3);
-    S.quader(x0, H, z0, x0 + w, H + 0.6, z0 + d - R9, KIES3);
+    S.quader(x0, H, z0, x0 + w - R9, H + 0.6, z0 + d, KIES2);
+    S.quader(x0, H, z0, x0 + w, H + 0.6, z0 + d - R9, KIES2);
     const ow = Math.min(w * 0.5, 18), od = 3.2;
     prismaX(S, x0 + 3, x0 + 3 + ow, [[z0 + d * 0.5 - od / 2, 0], [z0 + d * 0.5 + od / 2, 0], [z0 + d * 0.5, 1.6]], H + 0.6, "#a9c6d3");
     dachfeld(K3, x0 + 3 + ow + 1, z0 + 1.5, x0 + w - R9 - 1, z0 + d - 1.5, H + 0.6, { kuppeln: true, teilung: 0.4 });
@@ -53609,10 +54351,10 @@
     S.box(4.6, 0.3, 4.6, x1 - 3.4, y + 3.7, z0 + 3.4, HS_BLAU);
     S.quader(x0, y + 0.2, z1 - 0.15, x1, y + 1.2, z1, "#d9dcde");
     S.quader(x1 - 0.15, y + 0.2, z0, x1, y + 1.2, z1, "#d9dcde");
-    const sp = new Seite3(S, x1 - 4, z1 - 4, 1.5, 1.5, "+z");
+    const sp = new Seite2(S, x1 - 4, z1 - 4, 1.5, 1.5, "+z");
     S.box(0.2, 5.5, 0.2, x1 - 2.5, y + 2.75, z1 - 2.5, "#5f676e");
     S.box(2.1, 2.1, 0.25, x1 - 2.5, y + 6.2, z1 - 2.45, "#1f63b5");
-    plakat3(K3.scene, sp, "P", 1.5, y + 6.2, 0.2, 1.9, "#ffffff");
+    plakat2(K3.scene, sp, "P", 1.5, y + 6.2, 0.2, 1.9, "#ffffff");
     K3.hoeheDach = Math.max(K3.hoeheDach ?? 0, y + 7.3);
   }
   function statusSport(K3) {
@@ -53665,7 +54407,7 @@
       const yT = Math.min(...bs.map((b) => b.y1)), yS = Math.min(yT - 0.2, 4.4);
       s2.q(ua - 0.15, ub + 0.15, yS - 1, yS + 0.05, t + 0.15, t + 0.4, mz.bg);
       s2.q(ua - 0.15, ub + 0.15, yS - 1.12, yS - 1, t + 0.15, t + 0.46, dunkler(mz.bg, 0.15));
-      plakat3(K3.scene, s2, mz.name, (ua + ub) / 2, yS - 0.48, t + 0.42, passend(mz.name, ub - ua - 0.6, 0.75), mz.fg, mz.bg);
+      plakat2(K3.scene, s2, mz.name, (ua + ub) / 2, yS - 0.48, t + 0.42, passend(mz.name, ub - ua - 0.6, 0.75), mz.fg, mz.bg);
       const tb = bs[Math.floor(bs.length / 2)];
       s2.q(tb.a + 0.3, tb.b - 0.3, 0.3, Math.min(3.2, yS - 1.2), t + 0.02, t + 0.08, K3.zu ? "#8e9499" : GLAS_D);
       s2.q(tb.a + 0.15, tb.a + 0.3, 0.3, Math.min(3.3, yS - 1.1), t, t + 0.12, mz.bg === "#ffffff" ? mz.fg : mz.bg);
@@ -53683,7 +54425,7 @@
     s2.q(li, re, y0 + hh * 0.5, y0 + hh * 0.94, t, t + 0.24, "#bc1e30");
     s2.q(li, re, y0 + hh * 0.47, y0 + hh * 0.51, t + 0.2, t + 0.27, "#f3c530");
     const name2 = K3.rabatt ? "SALE  -" + K3.rabatt + "%" : "SAISON-ABVERKAUF";
-    plakat3(K3.scene, s2, name2, (li + re) / 2, y0 + hh * 0.72, t + 0.31, passend(name2, re - li - 1, hh * 0.32), "#ffffff");
+    plakat2(K3.scene, s2, name2, (li + re) / 2, y0 + hh * 0.72, t + 0.31, passend(name2, re - li - 1, hh * 0.32), "#ffffff");
     const glass = K3.glas.filter((g) => !g.eg && !g.tuer && !g.mieter && g.y0 > y0 - 0.65 && g.s === s2);
     if (glass.length) {
       glass.forEach((g, i) => {
@@ -53697,7 +54439,7 @@
       const step = (re - li) / n;
       for (let i = 0; i < n; i++) {
         const a = li + i * step + 0.18, b = li + (i + 1) * step - 0.18;
-        s2.q(a, b, y0 + 0.25, y0 + hh * 0.46, t - 0.09, t - 0.04, GLAS_HELL2);
+        s2.q(a, b, y0 + 0.25, y0 + hh * 0.46, t - 0.09, t - 0.04, GLAS_HELL);
         s2.q(a, b, y0 + 0.23, y0 + 0.36, t + 0.05, t + 0.1, "#455563");
         if (i % 2 === 0) s2.q(a, b, y0 + 0.55, y0 + 1.26, t + 0.12, t + 0.18, "#cd2639");
         else abverkaufHinterGlas(K3, s2, a, b, y0 + 0.07, y0 + hh * 0.46, t + 0.01, 1.15);
@@ -53715,7 +54457,7 @@
     s2.kipp(wb, 1.85, 0.15, u, y, t + 0.58, "#858b82", -0.032);
     s2.kipp(wb - 0.45, 1.55, 0.18, u, y - 0.08, t + 0.69, "#c2c1b0", -0.032);
     s2.q(u - wb * 0.46, u + wb * 0.46, y - 0.88, y - 0.76, t + 0.84, t + 0.91, "#9d9f93");
-    plakat3(K3.scene, s2, "LETZTE SAISON", u, y, t + 0.94, passend("LETZTE SAISON", wb - 1.3, 1), "#595d5b", null, { rz: -0.032 });
+    plakat2(K3.scene, s2, "LETZTE SAISON", u, y, t + 0.94, passend("LETZTE SAISON", wb - 1.3, 1), "#595d5b", null, { rz: -0.032 });
     for (let i = 0; i < 4; i++) {
       const xx = u - wb * 0.43 + i * wb * 0.26;
       s2.q(xx, xx + 0.08, y - 0.84, y + 0.72, t + 0.8, t + 0.93, "#7a817f");
@@ -53746,7 +54488,7 @@
     const g = kandidaten2[0];
     const center = g ? (g.a + g.b) / 2 : Math.max(7, s2.L * 0.31);
     const maxW = Math.min(13, s2.L - 2);
-    const a = clamp6(center - maxW / 2, 0.7, s2.L - maxW - 0.7), b = a + maxW;
+    const a = clamp4(center - maxW / 2, 0.7, s2.L - maxW - 0.7), b = a + maxW;
     const tt = Math.max(0.35, (g?.t ?? 0) + 1.55);
     const color = K3.erlebnis === "laufanalyse" ? "#21628b" : "#277a6f";
     s2.q(a, b, 0.15, 0.31, tt - 2.05, tt + 0.6, "#efdcb1");
@@ -53758,7 +54500,7 @@
       s2.q(du - 0.16, du + 0.16, 0.23, 0.39, tt - 1.9, tt + 0.58, "#465e6e");
     }
     const titel = K3.erlebnis === "laufanalyse" ? "LAUFANALYSE" : "FITNESS";
-    plakat3(K3.scene, s2, titel, (a + b) / 2, 3.69, tt + 0.63, passend(titel, b - a - 1, 0.8), "#ffffff");
+    plakat2(K3.scene, s2, titel, (a + b) / 2, 3.69, tt + 0.63, passend(titel, b - a - 1, 0.8), "#ffffff");
     if (K3.erlebnis === "laufanalyse") {
       for (let i = 0; i < 3; i++) {
         const cx = a + 1.75 + i * 2.65, t = tt - 0.42;
@@ -53793,6 +54535,17 @@
       }
       s2.q(a + 0.4, b - 0.4, 0.55, 3.25, tt - 1.85, tt - 1.79, "#a2c8d3");
     }
+  }
+  function nachnutzungSport(S, scene2, haus2, w, opt = {}) {
+    const start = S.anzahl;
+    const b = sporthaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, passanten: false });
+    const x = opt.x ?? 0, z2 = opt.z ?? 0, farbe = WETTBEWERBER_FARBEN[w.art] ?? "#596c76";
+    for (const seite of seitenVon(S, x, z2, b.w, b.d)) {
+      seite.q(1, seite.L - 1, 0.8, 3.9, 0.55, 0.68, "#698999");
+      seite.q(1, seite.L - 1, 4, 5.4, 0.62, 0.82, farbe);
+      plakat2(scene2, seite, w.name, seite.L / 2, 4.7, 0.93, passend(w.name, seite.L * 0.75, 1.3), "#ffffff");
+    }
+    return { ...b, teile: S.anzahl - start, nachnutzung: w.id };
   }
   function sporthaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
@@ -53843,7 +54596,7 @@
       logos: []
     };
     K3.c = (c) => F2.verblichen ? "#" + new three_module_exports.Color(c).offsetHSL(0, -0.2, -0.07).getHexString() : K3.alt ? "#" + new three_module_exports.Color(c).offsetHSL(0, -0.06, -0.06).getHexString() : c;
-    K3.seiten = seitenVon2(S, K3.x0, K3.z0, K3.w, K3.d);
+    K3.seiten = seitenVon(S, K3.x0, K3.z0, K3.w, K3.d);
     const std = ["sporttextil", "sportschuhe", "outdoor", "rad", "teamsport", "wintersport"];
     K3.gruppen = (e) => {
       const g = flaechen.filter((f) => f.etage === e && f.konzept !== "leer").sort((a, b) => b.qm - a.qm).map((f) => f.gruppe);
@@ -53851,13 +54604,13 @@
       const g0 = flaechen.filter((f) => f.etage === 0).map((f) => f.gruppe);
       return e === 0 && g0.length ? g0 : std.slice(e % 3).concat(std.slice(0, e % 3));
     };
-    const eck = { 1: 3.6, 6: clamp6(Math.min(K3.w, K3.d) * 0.2, 4, 7) }[fam] ?? 0;
+    const eck = { 1: 3.6, 6: clamp4(Math.min(K3.w, K3.d) * 0.2, 4, 7) }[fam] ?? 0;
     K3.mieterZonen = eigeneMieterflaechen(Z2, { "+z": K3.w - eck - (fam === 3 ? 12 : 0), "+x": K3.d - eck - 1 }, ["+x", "+z"]).map((q2) => q2.seite === "+x" && fam === 4 ? { ...q2, u0: q2.u0 + 4.5, u1: q2.u1 + 4.5 } : q2);
     const bauer = { 1: familie12, 2: familie22, 3: familie32, 4: familie42, 5: familie52, 6: familie62 }[fam];
     let hoehe = bauer(K3);
     if (K3.erlebnis && !K3.erlebnisGezeigt && !K3.zu) {
-      const fenster6 = K3.glas.filter((g2) => g2.eg && !g2.tuer && !g2.mieter && g2.b - g2.a >= 3.4);
-      const g = fenster6.find((g2) => g2.s.seite === K3.erlebnisSeite) ?? fenster6[0];
+      const fenster7 = K3.glas.filter((g2) => g2.eg && !g2.tuer && !g2.mieter && g2.b - g2.a >= 3.4);
+      const g = fenster7.find((g2) => g2.s.seite === K3.erlebnisSeite) ?? fenster7[0];
       if (g) {
         erlebnisHinterGlas(K3, g.s, g.a, g.b, g.y0, g.t, 2.2);
         K3.erlebnisGezeigt = true;
@@ -53921,661 +54674,2529 @@
     return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/wettbewerber.js
-  var ARTEN2 = ["modehaus", "offprice", "textildiscounter", "elektronik", "premium", "fastfashion", "leer_ehemals"];
-  var NAMEN = {
-    // je Art sechs Namen; die ersten drei sind die Zufallsauswahl ohne Vorgabe, staedte.js rotiert durch alle sechs
-    modehaus: ["Brandhoff Mode", "Lindner & S\xF6hne", "Haus Weidenau", "Modehaus Kersting", "Gebr. Hallmann", "Haus Rosenau"],
-    offprice: ["KAUFKISTE", "W\xDCHLWERK", "RESTEPARADIES", "SCHN\xC4PPCHENHOF", "PREISSPRUNG", "POSTENPALAST"],
-    textildiscounter: ["SPARMODE", "KLEIDKAUF", "TEXTILECK", "MODEPREIS", "STOFFSPAR", "KLEIDERKISTE"],
-    elektronik: ["VOLTWERK", "KABELK\xD6NIG", "GER\xC4TEHALLE", "STROMHAUS", "DIGIMARKT", "SCHALTWERK"],
-    premium: ["Haus Ahlert", "Feldmann & Cie.", "Kaufhaus Morgenroth", "Haus Bellmann", "Wagner & Thiel", "Kaufhaus Lindenhof"],
-    fastfashion: ["NOVA", "TRENDWERK", "WIRBEL", "STYLO", "KOLLEKT", "PULS"],
-    leer_ehemals: ["KAUFHAUS STRAUB", "B\xD6LLING", "WESTKAUF", "HAUS MERTENS", "WARENHAUS ELSNER", "KAUFHAUS DREWS"]
-  };
-  var SERIF = '"DejaVu Serif", Georgia, serif';
-  var MESSING = "#b8955a";
-  var BRONZE = "#6b5a45";
-  var EG2 = 5;
-  var OG = 4;
-  var REGION = {
-    nord: { stein: ["#a8664f", "#b4705a", "#9e5c47", "#b9785e"], hell: "#ece4d4", dach: "#7a4436", wand: "#a96a52", akzent: "#ece4d4" },
-    sued: { stein: ["#ecd9b0", "#e8cfa4", "#f0e2c4", "#e2c9a0"], hell: "#f6efe0", dach: "#b4583f", wand: "#efe3c8", akzent: "#c9a36a" },
-    ost: { stein: ["#d4d2ca", "#cfccc2", "#d9d6cc", "#c9c8c0"], hell: "#e6e4de", dach: "#5f6b70", wand: "#d2d0c8", akzent: "#e07a3a" }
-  };
-  function regionVon(p) {
-    const t = String(p ?? "").toLowerCase().replace("\xFC", "ue");
-    return t === "nord" || t === "sued" || t === "ost" ? t : null;
+  // src/kit/schwesterhaus.js
+  var NAME_SCHWESTER = "Volkskauf";
+  var FARBE_SCHWESTER = "#2f6f73";
+  var EG3 = 4.9;
+  var GH2 = 3.65;
+  var GLAS3 = "#647078";
+  var BLIND = "#42494e";
+  var PALETTEN = [
+    ["#d5c3a9", "#c7b396", "#bca58b", "#ded0bb"],
+    ["#b7b6b0", "#c2c1b9", "#a9ada9", "#c8c7c1"],
+    ["#d0cfc7", "#bbbcb6", "#c6c6bd", "#d9d6cb"]
+  ];
+  var index = (haus2) => Math.max(0, (parseInt(String(haus2.id ?? "K001").replace(/\D/g, ""), 10) || 1) - 1);
+  function familieSchwester(haus2) {
+    return haus2.familie ?? index(haus2) % 3 + 1;
   }
-  function regionHaut(K3, s2, u0, u1, y0, y1, t, f) {
-    const R9 = K3.reg;
-    if (R9 === "nord") for (let y = y0 + 0.5; y < y1; y += 0.5) s2.q(u0, u1, y - 0.025, y + 0.025, t, t + 0.02, dunkler(f, 0.06));
-    if (R9 === "ost") {
-      for (let y = y0 + 2.9; y < y1 - 0.2; y += 2.9) s2.q(u0, u1, y - 0.04, y + 0.04, t, t + 0.03, dunkler(f, 0.1));
-      for (let u = u0 + 3.6; u < u1 - 0.2; u += 3.6) s2.q(u - 0.04, u + 0.04, y0, y1, t, t + 0.03, dunkler(f, 0.1));
-    }
+  function architekturSchwester(haus2, familie = familieSchwester(haus2)) {
+    const i = index(haus2), v = (haus2.fassade ?? Math.floor(i / 3)) % 8;
+    const n = Math.max(4, Math.min(5, (haus2.etagen ?? [0, 1, 2, 3]).filter((e) => e >= 0).length));
+    return {
+      familie,
+      n,
+      variante: v,
+      achsenBreite: +(3.15 + familie * 0.13 + i % 8 * 0.23).toFixed(2),
+      ecke: ["scharf", "gefast", "gerundet"][(i + Math.floor(i / 4)) % 3],
+      treppe: (i * 5 + v) % 4,
+      sockel: (i + familie) % 4,
+      dachLayout: (i + Math.floor(i / 3) * 2) % 11
+    };
   }
-  function ware2(K3, s2, a, b, y, tb, art) {
-    const r = K3.r, m = (a + b) / 2, br = b - a, tm = tb + 0.7;
-    if (K3.leer) return;
-    switch (art) {
-      case "offprice":
-      case "textildiscounter": {
-        for (const u of [a + br * 0.3, a + br * 0.72]) {
-          s2.q(u - 0.8, u + 0.8, y, y + 0.8, tm - 0.4, tm + 0.4, "#d9d2c4");
-          for (let k = 0; k < 4; k++) s2.q(u - 0.7 + k * 0.35, u - 0.4 + k * 0.35, y + 0.8, y + 0.95 + r() * 0.25, tm - 0.3, tm + 0.3, waehle2(r, KLEID3));
-        }
-        if (art === "offprice") s2.q(m - 0.5, m + 0.5, y + 1.6, y + 2.4, tb + 0.05, tb + 0.1, waehle2(r, ["#f6d32d", "#e8336d", "#ffffff"]));
-        else puppe2(s2, b - 0.6, y, tm, waehle2(r, KLEID3), "#2b3a55");
-        break;
-      }
-      case "elektronik": {
-        for (let i = 0; i < Math.floor(br / 1.3); i++) {
-          const u = a + 0.75 + i * 1.3;
-          s2.q(u - 0.55, u + 0.55, y + 1.5, y + 2.2, tb, tb + 0.12, "#1f2328");
-          s2.q(u - 0.48, u + 0.48, y + 1.56, y + 2.14, tb + 0.12, tb + 0.15, waehle2(r, ["#3a7bd5", "#4fb6c2", "#7cb342", "#e36b2c"]));
-        }
-        s2.q(a + 0.4, a + 1.2, y, y + 0.9, tm - 0.35, tm + 0.35, "#f1f1ee");
-        s2.q(a + 1.4, a + 2.2, y, y + 0.9, tm - 0.35, tm + 0.35, "#f1f1ee");
-        const g = new three_module_exports.CylinderGeometry(0.25, 0.25, 0.05, 10);
-        g.rotateX(Math.PI / 2);
-        g.translate(a + 0.8, y + 0.5, tm + 0.38);
-        s2.geo(g, "#5d646a");
-        break;
-      }
-      case "premium": {
-        s2.q(m - 0.6, m + 0.6, y, y + 0.8, tm - 0.4, tm + 0.4, "#f1ece2");
-        s2.q(m - 0.25, m + 0.25, y + 0.8, y + 1.15, tm - 0.12, tm + 0.12, waehle2(r, ["#7a2b2b", "#1f1f1f", "#b8955a"]));
-        puppe2(s2, a + 0.7, y, tm, waehle2(r, ["#1f1f1f", "#e8e4dc", "#7a2b2b", "#2b3a55"]), "#1f1f1f");
-        s2.q(a, b, y + 2.9, y + 3, tb + 0.1, tb + 0.5, "#f7e9c8");
-        break;
-      }
-      default: {
-        const nP = br > 3.5 ? 3 : 2;
-        s2.q(a + 0.3, b - 0.3, y, y + 0.2, tm - 0.35, tm + 0.35, "#e9e4da");
-        for (let i = 0; i < nP; i++) puppe2(s2, a + br * (i + 0.5) / nP, y + 0.2, tm, waehle2(r, art === "fastfashion" ? ["#e8336d", "#f6d32d", "#1f1f1f", "#ffffff", "#4fb6c2"] : KLEID3), waehle2(r, ["#2b3a55", "#3a3a3a", "#e8e4dc"]));
-      }
+  function masseSchwester(haus2) {
+    const r = rng2(String(haus2.id) + "/masse");
+    const A = Math.min(2600, Math.max(650, haus2.grundflaecheQm ?? 1400));
+    const seitenfaktor = 1.25 + r() * 0.3;
+    const w = Math.max(30, Math.round(Math.sqrt(A * seitenfaktor) / 5) * 5);
+    const d = Math.max(20, Math.round(A / w / 5) * 5);
+    const n = Math.max(4, Math.min(5, (haus2.etagen ?? [0, 1, 2, 3]).filter((e) => e >= 0).length));
+    return { w, d, n, H: EG3 + (n - 1) * GH2, familie: familieSchwester(haus2) };
+  }
+  function fenster2(S, s2, a, b, y0, y1, f, rahmen2, blind) {
+    s2.q(a - 0.1, b + 0.1, y0 - 0.1, y1 + 0.1, 0.13, 0.29, rahmen2);
+    s2.q(a, b, y0, y1, 0.3, 0.38, blind ? BLIND : f);
+    if (!blind && b - a > 1.5 && LOD2.stufe !== "fern") {
+      s2.q((a + b) / 2 - 0.065, (a + b) / 2 + 0.065, y0, y1, 0.39, 0.45, rahmen2);
     }
   }
-  function ladenzone2(K3, s2, o) {
-    const u0 = o.u0 ?? 0, u1 = o.u1 ?? s2.L, D = o.D ?? 1.6, gTop = o.gTop ?? 4, h = o.h ?? EG2, pb = o.pb ?? 0.6;
-    const ax = buchten(u0, u1, o.raster ?? 5, pb);
-    const ein = o.eingaenge ?? /* @__PURE__ */ new Set([Math.floor(ax.length * (s2.seite === "+z" ? 0.55 : 0.4))]);
-    const res = [];
-    ax.forEach(([a, b], i) => {
-      s2.q(a - pb, a, 0, h, -D, 0.12, o.pfeiler);
-      if (i === ax.length - 1) s2.q(b, b + pb, 0, h, -D, 0.12, o.pfeiler);
-      s2.q(a, b, gTop, h, -D, 0.04, o.sturz ?? o.pfeiler);
-      const istEin = ein.has(i);
-      res.push({ a, b, ein: istEin });
-      if (istEin) {
-        s2.q(a, b, 0.3, gTop, -D - 0.1, -D, K3.leer ? "#7c6a55" : GLAS_D);
-        s2.q(a, b, 0.3, 0.4, -D, 0.1, "#d6d0c4");
-        if (!K3.leer) for (let k = 1; k < 3; k++) s2.q(a + (b - a) * k / 3 - 0.05, a + (b - a) * k / 3 + 0.05, 0.3, gTop, -D, -D + 0.06, RAHMEN3);
-        if (K3.leer) brett(K3, s2, a, b, 0.3, gTop, -D * 0.4);
-        return;
-      }
-      s2.q(a, b, 0, 0.5, -D, 0.06, o.sockel ?? dunkler(o.pfeiler, 0.12));
-      s2.q(a, b, 0.5, gTop, -D - 0.1, -D, o.glas ?? GLAS2);
-      s2.q(a, b, 0.5, 0.6, -D, 0, "#d6d0c4");
-      if (K3.leer) {
-        brett(K3, s2, a, b, 0.5, gTop, -0.2);
-        return;
-      }
-      s2.q(a, b, gTop - 0.3, gTop - 0.16, -D, -D + 0.06, LICHT3);
-      ware2(K3, s2, a, b, 0.6, -D, o.art);
-    });
-    return res;
-  }
-  function brett(K3, s2, a, b, y0, y1, t) {
-    const r = K3.r, nb = Math.max(1, Math.round((b - a) / 1.25));
-    for (let i = 0; i < nb; i++) {
-      const p = a + i * (b - a) / nb, q2 = a + (i + 1) * (b - a) / nb;
-      s2.q(p + 0.02, q2 - 0.02, y0, y1, t, t + 0.05, i % 2 ? "#c9a77a" : "#bf9c6e");
-    }
-    if (r() < 0.6) s2.kipp((b - a) * 0.7, 0.35, 0.03, (a + b) / 2, y0 + zw(r, 0.6, 1.4), t + 0.08, waehle2(r, ["#e8336d", "#3a7bd5", "#2b2b2b", "#4caf50"]), zw(r, -0.15, 0.15));
-  }
-  function kastenBreite(text2, hb) {
-    const z2 = [...text2];
-    return z2.reduce((a, c) => a + (c === " " ? hb * 0.4 : plakatBreite2(c, hb) * 0.62), 0) + hb * 0.12 * (z2.length - 1);
-  }
-  function kastenSchrift(K3, s2, text2, um, y, t, hb, fg, bg) {
-    const z2 = [...text2];
-    const br = z2.map((c) => c === " " ? hb * 0.4 : plakatBreite2(c, hb) * 0.62);
-    const gap = hb * 0.12;
-    const total = br.reduce((a, b) => a + b, 0) + gap * (z2.length - 1);
-    let acc = 0;
-    z2.forEach((c, i) => {
-      const uc = um + s2.lese * (-total / 2 + acc + br[i] / 2);
-      acc += br[i] + gap;
-      if (c === " ") return;
-      s2.q(uc - br[i] / 2, uc + br[i] / 2, y - hb * 0.55, y + hb * 0.55, t, t + 0.45, bg);
-      plakat3(K3.scene, s2, c, uc, y, t + 0.47, hb * 1.05, fg);
-    });
-    return total;
-  }
-  function flachdach(K3, x0, z0, w, d, y, o = {}) {
-    const { S, r } = K3;
-    S.quader(x0, y, z0, x0 + w, y + 0.2, z0 + d, KIES3);
-    if (o.kuppeln !== false) lichtkuppeln2(S, x0 + 1.5, z0 + 1.5, x0 + w * 0.45, z0 + d - 1.5, y + 0.2, 6, 6.5);
-    if (o.solar) solar(S, x0 + w * 0.47, z0 + 1, x0 + w * 0.72, z0 + d - 1.5, y + 0.2);
-    technik2(S, r, x0 + (o.solar ? w * 0.74 : w * 0.48), z0 + 1, x0 + w - 1, z0 + d - 1, y + 0.2, { max: o.max ?? 5, farbe: o.farbe });
-  }
-  function stumpf2(w, d, h, ein) {
-    const a = [[-w / 2, 0, -d / 2], [w / 2, 0, -d / 2], [w / 2, 0, d / 2], [-w / 2, 0, d / 2]];
-    const b = a.map(([x, , z2]) => [x - Math.sign(x) * ein, h, z2 - Math.sign(z2) * ein]);
-    const p = [];
-    const quad = (A, B2, C2, D) => p.push(...A, ...B2, ...C2, ...A, ...C2, ...D);
-    for (let i = 0; i < 4; i++) {
-      const j = (i + 1) % 4;
-      quad(a[i], b[i], b[j], a[j]);
-    }
-    quad(b[0], b[3], b[2], b[1]);
-    const g = new three_module_exports.BufferGeometry();
-    g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p, 3));
-    g.computeVertexNormals();
-    return g;
-  }
-  var geschosse = (K3, min, max, faktor = 1) => clamp6(Math.round(Math.sqrt(K3.w * K3.d) / 13 * faktor) + min - 1, min, max);
-  function modehaus(K3) {
-    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
-    const n = geschosse(K3, 3, 5);
-    const H = EG2 + (n - 1) * OG, D = 1.6;
-    const RG = REGION[K3.reg];
-    const stein = (RG?.stein ?? ["#dccaa8", "#e5dccb", "#d6c3a0", "#e2d5bd"])[v % 4], hell4 = RG?.hell ?? heller(stein, 0.05), dunk = dunkler(stein, 0.08);
-    S.quader(x0, 0, z0, x0 + w - D, EG2, z0 + d - D, "#5d5248");
-    S.quader(x0, EG2, z0, x0 + w, H, z0 + d, stein);
-    for (const s2 of K3.seiten) {
-      ladenzone2(K3, s2, { raster: 5.5, pb: 1, D, pfeiler: hell4, sturz: stein, sockel: dunk, glas: "#4f5d62", art: "mode", gTop: 4.2 });
-      s2.q(0, s2.L, 4.25, 4.45, 0.12, 1.4, BRONZE);
-      const nb = Math.max(1, Math.round(s2.L / 5.5)), bw = s2.L / nb;
-      s2.q(0, s2.L, EG2 - 0.1, EG2 + 0.45, 0, 0.4, hell4);
-      for (let i = 0; i <= nb; i++) s2.q(i * bw - 0.55, i * bw + 0.55, EG2 + 0.45, H - 1, 0, 0.35, hell4);
-      for (let i = 0; i < nb; i++) {
-        const a = i * bw + 0.55, b = (i + 1) * bw - 0.55;
-        s2.q(a + 0.2, b - 0.2, EG2 + 0.9, H - 1.6, -0.05, 0.02, GLAS2);
-        for (let k = 1; k < n - 1; k++) s2.q(a + 0.2, b - 0.2, EG2 + k * OG - 0.5, EG2 + k * OG + 0.3, -0.03, 0.08, BRONZE);
-        s2.q((a + b) / 2 - 0.05, (a + b) / 2 + 0.05, EG2 + 0.9, H - 1.6, 0, 0.1, BRONZE);
-        s2.q(a, b, EG2 + 0.75, EG2 + 0.9, 0, 0.3, hell4);
-      }
-      s2.q(0, s2.L, H - 1, H - 0.2, 0, 0.3, stein);
-      s2.q(0, s2.L, H - 0.2, H + 0.4, -0.1, 0.6, hell4);
-      if (K3.reg === "ost") s2.q(0, s2.L, EG2 + 0.45, EG2 + 0.95, 0, 0.42, RG.akzent);
-      if (K3.reg === "nord") for (let y = EG2 + 1.5; y < H - 1.2; y += 0.5) for (let i = 0; i < nb; i++) {
-        s2.q(i * bw + 0.55, i * bw + 0.75, y - 0.02, y + 0.02, 0, 0.03, dunkler(stein, 0.06));
-        s2.q((i + 1) * bw - 0.75, (i + 1) * bw - 0.55, y - 0.02, y + 0.02, 0, 0.03, dunkler(stein, 0.06));
-      }
-      const ph2 = passend(K3.name, s2.L * 0.55, 1, SERIF);
-      const br = plakatBreite2(K3.name, ph2, SERIF);
-      s2.q(s2.L * 0.5 - br / 2 - 0.4, s2.L * 0.5 + br / 2 + 0.4, EG2 - 1.2, EG2 + 0.1, 0.4, 0.46, BRONZE);
-      plakat3(scene2, s2, K3.name, s2.L * 0.5, EG2 - 0.55, 0.48, ph2, "#ecd39b", null, { schrift: SERIF });
-    }
-    const sw = w - 3, sd = d - 3;
-    S.quader(x0, H + 0.4, z0, x0 + sw, H + 3.6, z0 + sd, "#c9c4ba");
-    for (const s2 of seitenVon2(S, x0, z0, sw, sd)) {
-      for (let u = 1.2; u < s2.L - 0.6; u += 2.4) s2.q(u - 0.9, u + 0.9, H + 1, H + 3.1, -0.03, 0.03, GLAS_HELL2);
-    }
-    S.quader(x0 - 0.3, H + 3.6, z0 - 0.3, x0 + sw + 0.6, H + 3.95, z0 + sd + 0.6, "#6f7378");
-    const sz = new Seite3(S, x0, z0, w, d, "+z");
-    const ph = passend(K3.name, sw * 0.6, 1.8, SERIF);
-    const brA = plakatBreite2(K3.name, ph, SERIF);
-    sz.q(sw * 0.5 - brA / 2 - 0.4, sw * 0.5 + brA / 2 + 0.4, H + 1, H + 3.4, -2.95, -2.85, BRONZE);
-    plakat3(scene2, sz, K3.name, sw * 0.5, H + 2.2, -2.83, ph, "#ecd39b", null, { schrift: SERIF });
-    flachdach(K3, x0, z0, sw, sd, H + 3.95, { max: 3 });
-    return H + 6;
-  }
-  function offprice(K3) {
-    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
-    const n = geschosse(K3, 1, 2, 0.6);
-    const H = n === 1 ? 8.6 : EG2 + OG + 1.6, D = 1.5;
-    const [haupt, akzent] = [["#e8336d", "#f6d32d"], ["#f28c1c", "#1f4fa0"], ["#8bc34a", "#6a2c91"], ["#f6d32d", "#e03b2f"]][v % 4];
-    S.quader(x0, 0, z0, x0 + w - D, EG2, z0 + d - D, "#4a4f55");
-    S.quader(x0, EG2, z0, x0 + w, H, z0 + d, "#eeece6");
-    for (const s2 of K3.seiten) {
-      ladenzone2(K3, s2, { raster: 4.5, pb: 0.5, D, pfeiler: akzent, sturz: "#eeece6", art: "offprice", gTop: 3.8 });
-      for (let u = 0.5; u < s2.L - 0.5; u += 1) s2.kipp(1, 0.12, 1.6, u + 0.5, 4.25, 0.75, Math.round(u) % 2 ? "#ffffff" : haupt, 0, 0.42);
-      s2.q(0, s2.L, EG2, H, 0, 0.2, haupt);
-      s2.q(0, s2.L, EG2, EG2 + 0.35, 0.2, 0.3, akzent);
-      const hb = passend(K3.name, s2.L * 0.62, (H - EG2) * 0.78);
-      plakat3(scene2, s2, K3.name, s2.L * 0.42, EG2 + (H - EG2) * 0.55, 0.22, hb, "#ffffff");
-      const su = s2.L * 0.86, sy = EG2 + (H - EG2) * 0.5, sr = Math.min(1.8, (H - EG2) * 0.4);
-      for (let k = 0; k < 3; k++) s2.kipp(sr * 1.6, sr * 1.6, 0.12, su, sy, 0.3 + k * 0.01, akzent, k * Math.PI / 6);
-      s2.q(su - sr * 0.62, su + sr * 0.62, sy - sr * 0.3, sy + sr * 0.3, 0.42, 0.44, "#ffffff");
-      plakat3(scene2, s2, "-70 %", su, sy, 0.46, sr * 0.5, "#c8102e");
-    }
-    for (const s2 of K3.seiten) if (!K3.leer) {
-      const t = waehle2(r, ["MARKEN BIS -70 %", "NEUE WARE JEDEN TAG", "SCHN\xC4PPCHEN!"]);
-      plakat3(scene2, s2, t, s2.L * 0.3, 2.9, 0.15, passend(t, 5, 0.5), akzent === "#f6d32d" ? "#1f1f1f" : "#ffffff", akzent);
-    }
-    const sx = K3.seiten[1];
-    sx.q(sx.L * 0.15, sx.L * 0.15 + 5, 2.4, 2.55, 0.8, 3.2, "#d9dcde");
-    for (const u of [sx.L * 0.15 + 0.2, sx.L * 0.15 + 4.8]) sx.q(u - 0.07, u + 0.07, 0.3, 2.4, 3, 3.14, "#7c848b");
-    for (let i = 0; i < 6; i++) sx.q(sx.L * 0.15 + 0.6 + i * 0.7, sx.L * 0.15 + 1.1 + i * 0.7, 0.4, 1.3, 1.2, 2.7, "#a9b0b5");
-    attika3(S, x0, z0, w, d, H, 0.5, REGION[K3.reg]?.wand ?? akzent, 0.3);
-    flachdach(K3, x0 + 0.3, z0 + 0.3, w - 0.6, d - 0.6, H, { max: 4 });
-    return H + 2;
-  }
-  function textildiscounter(K3) {
-    const { S, scene: scene2, x0, z0, d, r, v } = K3;
-    const w = K3.w;
-    const park = d >= 34 ? 13 : 0, db = d - park;
-    const H = 5.6, D = 1.3;
-    const band = ["#1f63b5", "#d92b2b", "#ef7d00", "#2e8b57"][v % 4];
-    S.quader(x0, 0, z0, x0 + w - D, H - 1.2, z0 + db - D, "#5a5f64");
-    const wandF = REGION[K3.reg]?.wand ?? "#e4e3df";
-    S.quader(x0, H - 1.2, z0, x0 + w, H, z0 + db, wandF);
-    const seiten4 = seitenVon2(S, x0, z0, w, db);
-    for (const s2 of seiten4) {
-      const ax2 = buchten(1, s2.L - 1, 6, 0.5);
-      const oe = [];
-      ax2.forEach(([a, b], i) => {
-        const ein = s2.seite === "+z" && i === Math.floor(ax2.length * 0.7);
-        const y1 = ein ? 3.3 : 2.9, y0 = ein ? 0.3 : 0.7;
-        oe.push({ a, b, y0, y1 });
-        s2.q(a, b, y0, y1, -D - 0.1, -D, ein ? GLAS_D : GLAS2);
-        s2.q(a, b, y0, y0 + 0.08, -D, 0, "#d6d0c4");
-        if (K3.leer) brett(K3, s2, a, b, y0, y1, -0.2);
-        else if (!ein) {
-          const t = waehle2(r, ["T-SHIRTS 2,99 \u20AC", "JEANS 9,99 \u20AC", "ALLES F\xDCR KIDS", "SOCKEN 5 PAAR"]);
-          plakat3(scene2, s2, t, (a + b) / 2, (y0 + y1) / 2, -D + 0.02, passend(t, b - a - 0.6, 0.6), "#ffffff", band);
-        }
-      });
-      wand(s2, 0, s2.L, 0, H - 1.2, -D, 0, oe, wandF);
-      if (K3.reg === "nord") for (let y = 0.85; y < H - 1.7; y += 0.5) for (const [a, b] of [[0, oe[0]?.a ?? s2.L], ...oe.map((g, i) => [g.b, oe[i + 1]?.a ?? s2.L])]) s2.q(a, b, y - 0.02, y + 0.02, 0, 0.02, dunkler(wandF, 0.06));
-      s2.q(0, s2.L, 0, 0.35, 0, 0.12, "#8a8f93");
-      s2.q(0, s2.L, H - 1.6, H + 1.4, 0, 0.3, band);
-      const yb0 = s2.seite === "+z" && K3.vorbauH ? Math.max(H - 1.6, K3.vorbauH) : H - 1.6, yb1 = H + 1.4;
-      if (yb1 - yb0 >= 1.6) plakat3(scene2, s2, K3.name, s2.L * 0.4, (yb0 + yb1) / 2, 0.32, passend(K3.name, s2.L * 0.55, Math.min(2.2, yb1 - yb0 - 0.4)), "#ffffff");
-      if (yb1 - yb0 >= 1.6) {
-        s2.q(s2.L * 0.82 - 1.2, s2.L * 0.82 + 1.2, H - 1.5, H + 1.3, 0.3, 0.4, "#f6d32d");
-        plakat3(scene2, s2, "%", s2.L * 0.82, H - 0.1, 0.42, 2.2, band);
-      }
-    }
-    const sz = seiten4[0];
-    if (!K3.reg) for (const s2 of seiten4) for (let u = 0.6; u < s2.L; u += 1.2) s2.q(u - 0.04, u + 0.04, 0.35, H - 1.6, 0, 0.05, "#d3d2cd");
-    const ax = buchten(1, sz.L - 1, 6, 0.5), e = ax[Math.floor(ax.length * 0.7)];
-    if (e) {
-      sz.q(e[0], e[1], 0.3, 3.3, 0, 2, GLAS_HELL2);
-      sz.q(e[0] + 0.15, e[1] - 0.15, 0.3, 2.6, 2, 2.06, K3.leer ? "#8a8f93" : GLAS_D);
-      sz.q(e[0] - 0.6, e[1] + 0.6, 3.3, 3.6, -0.2, 2.6, band);
-      if (!K3.leer) {
-        for (const du of [-2.2, e[1] - e[0] + 2.2]) {
-          const u = e[0] + du;
-          sz.q(u - 0.9, u + 0.9, 1.7, 1.76, 1.6, 1.66, "#7c848b");
-          sz.q(u - 0.9, u - 0.84, 0.3, 1.76, 1.6, 1.66, "#7c848b");
-          sz.q(u + 0.84, u + 0.9, 0.3, 1.76, 1.6, 1.66, "#7c848b");
-          for (let k = 0; k < 5; k++) sz.q(u - 0.75 + k * 0.32, u - 0.5 + k * 0.32, 0.9, 1.68, 1.4, 1.86, waehle2(r, KLEID3));
-        }
-        sz.kipp(0.8, 1.1, 0.06, e[1] + 4.2, 0.85, 3, band, 0, 0.2);
-        if (K3.leute) for (let i = 0; i < 3; i++) mensch(S, r, x0 + zw(r, e[0] - 3, e[1] + 3), 0.3, z0 + db + zw(r, 1, 2.6));
-      }
-    }
-    for (const s2 of seiten4) for (let u = 3; u < s2.L - 2; u += 9) {
-      s2.q(u - 0.05, u + 0.05, H - 1.6, H - 1.5, 0.3, 1.6, "#5f676e");
-      s2.q(u - 0.03, u + 0.03, H - 4, H - 1.6, 1, 1.55, K3.leer ? "#cfcac0" : "#f6d32d");
-    }
-    S.quader(x0, H, z0, x0 + w, H + 0.15, z0 + db, KIES3);
-    technik2(S, r, x0 + 2, z0 + 2, x0 + w - 2, z0 + db - 2, H + 0.15, { max: 3 });
-    if (park) {
-      const zp = z0 + db;
-      S.quader(x0, 0.28, zp + 2.5, x0 + w, 0.33, z0 + d, "#868c93");
-      parkreihe(S, r, x0 + 1, x0 + w - 1, zp + 7.5, 5, 0.33, K3.leer ? 0.05 : 0.5);
-      for (let x = x0 + 3; x < x0 + w - 1; x += 6) busch(S, r, x, 0.33, z0 + d - 0.6, 0.7);
-      const px2 = x0 + w - 2, pz4 = z0 + d - 2, ph = 8;
-      S.box(1.6, ph, 0.7, px2, ph / 2, pz4, band);
-      const sp = new Seite3(S, px2 - 0.8, pz4 - 0.35, 1.6, 0.7, "+z");
-      if (!K3.leer) {
-        const pn = passend(K3.name, 1.4, 0.5);
-        plakat3(scene2, sp, K3.name, 0.8, ph - 0.7, 0.03, pn, "#ffffff");
-        sp.q(0.1, 1.5, ph - 3.6, ph - 1.4, 0, 0.04, "#f6d32d");
-        plakat3(scene2, sp, "%", 0.8, ph - 2.5, 0.06, 1.6, band);
-      }
-    }
-    return H + 1;
-  }
-  function elektronik(K3) {
-    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
-    const n = geschosse(K3, 1, 2, 0.7);
-    const H = n === 1 ? 8 : EG2 + OG + 2, D = 1.5;
-    const [korpus2, letter, lbg] = [["#2b2f35", "#ffffff", "#d92b2b"], ["#d92b2b", "#ffffff", "#1f1f1f"], ["#1e3a5f", "#f6d32d", "#1e3a5f"], ["#e9ebec", "#ffffff", "#ef7d00"]][v % 4];
-    S.quader(x0, 0, z0, x0 + w - D, 4.4, z0 + d - D, "#3d4248");
-    S.quader(x0, 4.4, z0, x0 + w, H, z0 + d, korpus2);
-    const [sz, sx] = K3.seiten;
-    for (const s2 of K3.seiten) {
-      const oe = [];
-      const ax = buchten(1, s2.L - 1, 5, 0.3);
-      ax.forEach(([a, b], i) => {
-        const ein = s2 === sz && i === Math.floor(ax.length * 0.5);
-        oe.push({ a, b, y0: 0.3, y1: 4.2 });
-        if (K3.leer) {
-          s2.q(a, b, 0.3, 4.2, -D - 0.1, -D, "#8a8f93");
-          brett(K3, s2, a, b, 0.3, 4.2, -0.2);
-          return;
-        }
-        s2.q(a, b, 0.3, 4.2, -D - 0.1, -D, ein ? GLAS_D : "#3c4a55");
-        s2.q(a, b, 0.3, 0.42, -D, 0, "#d6d0c4");
-        if (!ein) ware2(K3, s2, a, b, 0.42, -D, "elektronik");
-        s2.q(a - 0.15, a, 0.3, 4.2, -D, 0.1, "#5f676e");
-      });
-      wand(s2, 0, s2.L, 0, 4.4, -D, 0, oe, REGION[K3.reg]?.wand ?? korpus2);
-      if (K3.reg) regionHaut(K3, s2, 0, s2.L, 0.3, 4.2, 0, REGION[K3.reg].wand);
-      for (let u = 1; u < s2.L; u += 2) s2.q(u - 0.05, u + 0.05, 4.4, H, 0, 0.08, dunkler(korpus2, 0.05));
-      s2.q(0, s2.L, 4.2, 4.5, 0, 0.6, lbg);
-      const wandAus = s2 === sx && !K3.leer && s2.L >= 30 ? s2.L * 0.12 + Math.min(12, s2.L * 0.35) + 0.8 : 0;
-      const frei6 = s2.L - wandAus - (K3.ecke ?? 0);
-      const hb = Math.min((H - 4.5) * 0.55, frei6 * 0.85 / kastenBreite(K3.name, 1));
-      kastenSchrift(K3, s2, K3.name, wandAus + frei6 * 0.5, 4.5 + (H - 4.5) * 0.5, 0.1, hb, letter, lbg);
-    }
-    if (!K3.leer && sx.L >= 30) {
-      const u0 = sx.L * 0.12, u1 = u0 + Math.min(12, sx.L * 0.35), y0 = 4.9, y1 = H - 0.6;
-      sx.q(u0 - 0.3, u1 + 0.3, y0 - 0.3, y1 + 0.3, 0.1, 0.5, "#1f2328");
-      const farben = ["#1f63b5", "#2f7fd0", "#4fb6c2", "#7cc4e4"];
-      for (let k = 0; k < 4; k++) sx.q(u0, u1, y0 + k * (y1 - y0) / 4, y0 + (k + 1) * (y1 - y0) / 4, 0.5, 0.55, farben[k]);
-      const t = "TV-WOCHEN";
-      plakat3(scene2, sx, t, (u0 + u1) / 2, (y0 + y1) / 2, 0.57, passend(t, (u1 - u0) * 0.8, (y1 - y0) * 0.4), "#ffffff");
-    }
-    flachdach(K3, x0, z0, w, d, H, { max: 4, solar: w * d > 1500 });
-    attika3(S, x0, z0, w, d, H, 0.4, dunkler(korpus2, 0.05), 0.3);
-    for (let i = 0; i < 3; i++) {
-      const px2 = x0 + 3 + i * 3.5, pz4 = z0 + d - 4;
-      zyl4(S, px2, H + 0.2, pz4, 0.08, 1.4, "#8a9096", 5);
-      const g = new three_module_exports.SphereGeometry(0.9, 10, 6, 0, Math.PI * 2, 0, Math.PI / 3);
-      g.rotateX(-1);
-      g.translate(px2, H + 1.8, pz4 + 0.2);
-      S.add(g, "#e8eaeb");
-    }
-    if (d >= 36 && !K3.leer && K3.leute) for (let i = 0; i < 3; i++) mensch(S, r, x0 + w * zw(r, 0.3, 0.7), 0.3, z0 + d + 1.5);
-    return H + 3;
-  }
-  function premium(K3) {
-    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
-    const n = geschosse(K3, 4, 5, 1.1);
-    const H = EG2 + (n - 1) * OG, D = 1.6;
-    const RG = REGION[K3.reg];
-    const stein = (RG?.stein ?? ["#efe7d6", "#e9e1d1", "#f1ebe0", "#e6dccb"])[v % 4], hell4 = RG?.hell ?? heller(stein, 0.04), dunk = dunkler(stein, 0.09);
-    const mark = ["#1f4a3a", "#5a1f2b", "#1f2f4f", "#2a2a2a"][v % 4];
-    const dachF = RG?.dach ?? (v % 2 ? "#5f6b70" : "#6f9a83");
-    S.quader(x0, 0, z0, x0 + w - D, EG2, z0 + d - D, "#4d4740");
-    S.quader(x0, EG2, z0, x0 + w, H, z0 + d, stein);
-    for (const s2 of K3.seiten) {
-      const ax = ladenzone2(K3, s2, { raster: 5, pb: 1, D, pfeiler: hell4, sturz: stein, sockel: dunk, glas: "#44514f", art: "premium", gTop: 3.9 });
-      for (const a of ax) {
-        if (a.ein) {
-          s2.q(a.a - 0.5, a.b + 0.5, 4, 4.35, 0, 3.4, mark);
-          s2.q(a.a - 0.5, a.b + 0.5, 4.35, 4.45, 0, 3.5, MESSING);
-          for (const u of [a.a - 0.3, a.b + 0.3]) {
-            const [x, z2] = s2.welt(u, 3.2);
-            zyl4(S, x, 0.3, z2, 0.07, 3.7, MESSING, 6);
-          }
-          if (!K3.leer && K3.leute) puppe2(s2, a.b + 0.9, 0.3, 1.4, mark, "#1f1f1f");
-          const ph = passend(K3.name, a.b - a.a + 0.8, 0.32, SERIF);
-          plakat3(scene2, s2, K3.name, (a.a + a.b) / 2, 4.2, 3.42, ph, MESSING, null, { schrift: SERIF });
-          continue;
-        }
-        if (K3.leer) continue;
-        s2.kipp(a.b - a.a, 0.1, 1.5, (a.a + a.b) / 2, 4.15, 0.75, mark, 0, 0.45);
-        s2.q(a.a, a.b, 3.55, 3.8, 1.38, 1.46, mark);
-      }
-      s2.q(0, s2.L, EG2 - 0.15, EG2 + 0.4, 0, 0.45, hell4);
-      if (K3.reg === "ost") s2.q(0, s2.L, EG2 + 0.4, EG2 + 0.6, 0, 0.45, RG.akzent);
-      const nb = Math.max(1, Math.round(s2.L / 3.4)), bw = s2.L / nb;
+  function fassade(S, s2, K3) {
+    const { fam, n, H, alt, r, arch } = K3;
+    const L2 = s2.L;
+    const v = K3.variante;
+    const achsen7 = Math.max(4, Math.floor((L2 - 2.8) / arch.achsenBreite));
+    const ab = (L2 - 2) / achsen7;
+    if (fam === 1) {
       for (let k = 0; k < n - 1; k++) {
-        const y0 = EG2 + k * OG;
-        for (let i = 0; i < nb; i++) {
-          const m = (i + 0.5) * bw;
-          s2.q(m - 0.75, m + 0.75, y0 + 0.6, y0 + 3.2, -0.04, 0.02, GLAS2);
-          s2.q(m - 0.04, m + 0.04, y0 + 0.6, y0 + 3.2, 0, 0.08, "#f4f1ea");
-          s2.q(m - 0.95, m + 0.95, y0 + 3.2, y0 + 3.45, 0, 0.25, hell4);
-          if (k === 0 || k % 2 === 1) {
-            s2.q(m - 0.9, m + 0.9, y0 + 0.55, y0 + 0.65, 0, 0.5, dunk);
-            s2.q(m - 0.9, m + 0.9, y0 + 1.25, y0 + 1.3, 0.42, 0.5, "#2b2b2b");
-            for (let u = m - 0.8; u <= m + 0.81; u += 0.32) s2.q(u - 0.02, u + 0.02, y0 + 0.65, y0 + 1.25, 0.44, 0.48, "#2b2b2b");
-          }
+        const y = EG3 + k * GH2 + 0.75;
+        for (let j = 0; j < achsen7; j++) {
+          const u = 1 + (j + 0.5) * ab;
+          fenster2(S, s2, u - 0.74, u + 0.74, y, y + 1.75, j % 11 === v ? "#667079" : GLAS3, K3.rahmen, alt && (j + 3 * k + v) % 6 === 0);
+          if (LOD2.stufe !== "fern") s2.q(u - 1.02, u + 1.02, y - 0.18, y - 0.08, 0.25, 0.53, K3.gesims);
         }
-        if (k > 0) s2.q(0, s2.L, y0 - 0.08, y0 + 0.08, 0, 0.12, dunk);
       }
-      for (let i = 0; i <= nb; i++) s2.q(i * bw - 0.12, i * bw + 0.12, EG2 + 0.4, H, 0, 0.1, hell4);
-      s2.q(0, s2.L, H - 0.2, H + 0.5, -0.1, 0.65, hell4);
-      for (let i = 0; i < nb; i++) {
-        const m = (i + 0.5) * bw;
-        s2.q(m - 0.8, m + 0.8, H + 0.9, H + 2.6, -2.6, -0.9, hell4);
-        s2.q(m - 0.5, m + 0.5, H + 1.1, H + 2.3, -0.9, -0.86, GLAS2);
-        s2.q(m - 0.95, m + 0.95, H + 2.6, H + 2.85, -2.7, -0.75, dachF);
-      }
-    }
-    const md = stumpf2(w + 0.4, d + 0.4, 3.6, 2.8);
-    md.translate(x0 + w / 2, H + 0.5, z0 + d / 2);
-    S.add(md, dachF);
-    S.quader(x0 + 2.6, H + 4.1, z0 + 2.6, x0 + w - 2.6, H + 4.15, z0 + d - 2.6, KIES3);
-    for (const [fx, fz, bw, bd] of [[0.3, 0.35, Math.min(6, w * 0.2), 3], [0.62, 0.55, 3, 2.4]]) if (w > 16 && d > 14) {
-      S.box(bw, 1.2, bd, x0 + w * fx, H + 4.75, z0 + d * fz, "#c9c6bf");
-      S.box(bw + 0.2, 0.12, bd + 0.2, x0 + w * fx, H + 5.4, z0 + d * fz, "#d6d3cc");
-    }
-    for (let i = 0; i < 3; i++) {
-      const fx = x0 + w * (0.25 + i * 0.25), fz = z0 + d - 3;
-      zyl4(S, fx, H + 4.1, fz, 0.07, 2.6, "#e8eaeb", 6);
-      S.box(1.4, 0.8, 0.05, fx + 0.75, H + 6.2, fz, K3.leer ? "#cfcac0" : mark);
-    }
-    for (const s2 of K3.seiten) {
-      const ph = passend(K3.name, s2.L * 0.4, 0.55, SERIF);
-      plakat3(scene2, s2, K3.name, s2.L * 0.5, H - 0.6, 0.12, ph, MESSING, null, { schrift: SERIF });
-    }
-    return H + 7;
-  }
-  function fastfashion(K3) {
-    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
-    const n = geschosse(K3, 3, 4, 0.9);
-    const H = EG2 + (n - 1) * OG + 0.5, D = 1.8;
-    const bild2 = [["#e8336d", "#f6d32d"], ["#1f1f1f", "#e8e4dc"], ["#4fb6c2", "#ffffff"], ["#f28c1c", "#1f1f1f"]][v % 4];
-    S.quader(x0, 0, z0, x0 + w - D, H, z0 + d - D, "#3a4148");
-    const [sz, sx] = K3.seiten;
-    for (const s2 of K3.seiten) {
-      for (let e = 0; e < n; e++) {
-        const y0 = e === 0 ? 0.3 : EG2 + (e - 1) * OG, y1 = e === 0 ? EG2 : EG2 + e * OG;
-        s2.q(0, s2.L, y0, y0 + 0.12, -D, 0, "#e3e0d9");
-        s2.q(0, s2.L, y0, y1, -D - 0.1, -D, e === 0 ? "#d9d4ca" : "#ece8e0");
-        if (e > 0) s2.q(0, s2.L, y1 - 0.5, y1 - 0.42, -0.05, 0.05, "#cfd6da");
-        s2.q(0, s2.L, y1 - 0.3, y1 - 0.18, -D, -D + 0.06, LICHT3);
-        if (!K3.leer) {
-          for (const [a, b] of buchten(0.5, s2.L - 0.5, 4.2, 0.2)) if (r() < (e === 0 ? 1 : 0.6)) ware2(K3, s2, a, b, y0 + 0.12, -D, "fastfashion");
+      s2.q(0, L2, EG3 + 0.1, EG3 + 0.34, 0.16, 0.48, K3.gesims);
+    } else if (fam === 2) {
+      for (let k = 0; k < n - 1; k++) {
+        const y = EG3 + k * GH2 + 0.85;
+        s2.q(0.4, L2 - 0.4, y - 0.25, y + 0.2, 0.15, 0.53, K3.gesims);
+        for (let j = 0; j < achsen7; j++) {
+          const ua = 1 + j * ab, ub = ua + ab - 0.18;
+          s2.q(ua, ua + 0.42, y, y + GH2 - 0.28, 0.19, 0.56, K3.gesims);
+          s2.q(ub - 0.42, ub, y, y + GH2 - 0.28, 0.19, 0.56, K3.gesims);
+          fenster2(S, s2, ua + 0.59, ub - 0.58, y + 0.58, y + 2.25, GLAS3, K3.rahmen, alt && (k * 5 + j + v) % 7 === 0);
+          s2.q(ua + 0.56, ub - 0.5, y + 0.17, y + 0.53, 0.26, 0.52, (j + k) % 2 ? K3.gesims : K3.fleck);
         }
-        if (e > 0) s2.q(0, s2.L, y0 - 0.2, y0 + 0.25, -0.1, 0.1, "#f4f4f2");
       }
-      for (let u = 0; u <= s2.L + 0.01; u += s2.L / Math.max(1, Math.round(s2.L / 3.2))) s2.q(u - 0.09, u + 0.09, 0.3, H, -0.2, 0.5, "#f4f4f2");
-      s2.q(0, s2.L, H, H + 1, -0.2, 0.5, REGION[K3.reg]?.hell ?? "#f4f4f2");
-      if (K3.leer) for (const [a, b] of buchten(0.5, s2.L - 0.5, 4.2, 0.3)) brett(K3, s2, a, b, 0.4, 4, 0.3);
-    }
-    {
-      const s2 = sz, u0 = s2.L * 0.08, u1 = Math.min(s2.L * 0.08 + Math.max(10, s2.L * 0.45), s2.L - 4), y0 = EG2 + 0.3, y1 = H + 0.8;
-      s2.q(u0 - 0.2, u1 + 0.2, y0 - 0.2, y1 + 0.2, 0.5, 0.7, "#d9dcde");
-      s2.q(u0, u1, y0, y1, 0.7, 0.8, K3.leer ? "#cfcac0" : bild2[0]);
-      if (!K3.leer) {
-        const fu = u0 + (u1 - u0) * 0.7, hh = y1 - y0, sk = hh / 6.5;
-        s2.q(fu - 0.5 * sk, fu + 0.5 * sk, y0 + 0.2, y0 + 3 * sk, 0.82, 0.86, "#1f1f1f");
-        s2.q(fu - 0.9 * sk, fu + 0.9 * sk, y0 + 3 * sk, y0 + 5 * sk, 0.82, 0.86, bild2[1]);
-        s2.q(fu - 0.35 * sk, fu + 0.35 * sk, y0 + 5.05 * sk, y0 + 5.9 * sk, 0.82, 0.86, "#e8cfb4");
-        s2.q(fu - 0.45 * sk, fu + 0.45 * sk, y0 + 5.6 * sk, y0 + 6.2 * sk, 0.86, 0.88, "#3a2a20");
-        const t = "JETZT NEU", ta = u0 + 0.5, tb = fu - 0.9 * sk - 0.6, tm = (ta + tb) / 2, tw = Math.max(1, tb - ta);
-        plakat3(scene2, s2, t, tm, y0 + hh * 0.55, 0.88, passend(t, tw * 0.92, hh * 0.25), bild2[1] === "#1f1f1f" ? "#ffffff" : bild2[1]);
-        plakat3(scene2, s2, K3.name, tm, y0 + hh * 0.3, 0.88, passend(K3.name, tw * 0.8, hh * 0.14), "#ffffff");
+    } else {
+      for (let k = 0; k < n - 1; k++) {
+        const y = EG3 + k * GH2;
+        s2.q(0.65, L2 - 0.65, y + 0.65, y + 2.5, 0.15, 0.4, K3.rahmen);
+        for (let j = 0; j < achsen7; j++) {
+          const ua = 0.85 + j * ((L2 - 1.7) / achsen7), ub = 0.85 + (j + 1) * ((L2 - 1.7) / achsen7) - 0.1;
+          s2.q(ua, ub, y + 0.82, y + 2.33, 0.41, 0.5, alt && (j + k * 2 + v) % 7 === 0 ? BLIND : GLAS3);
+          s2.q(ub - 0.1, ub, y + 0.72, y + 2.42, 0.5, 0.61, K3.gesims);
+          s2.q(ua, ub + 0.1, y + 2.52, y + 2.7, 0.22, 0.53, K3.fleck);
+        }
+        s2.q(0.4, L2 - 0.4, y + 0.12, y + 0.66, 0.19, 0.43, (k + v) % 2 ? K3.gesims : K3.fleck);
       }
     }
-    for (const s2 of K3.seiten) {
-      const uu = s2 === sz ? K3.ecke ? (s2.L - K3.ecke) * 0.7 : s2.L * 0.8 : K3.ecke ? (s2.L - K3.ecke) * 0.5 : s2.L * 0.5;
-      const ph = passend(K3.name, K3.ecke ? Math.min(s2.L * 0.4, (s2.L - K3.ecke) * 0.5) : s2.L * 0.4, 1.9);
-      const br = plakatBreite2(K3.name, ph);
-      s2.q(uu - br / 2 - 0.3, uu + br / 2 + 0.3, H - 0.4, H + 2, 0.5, 0.62, K3.leer ? "#e2e0d8" : "#1f1f1f");
-      if (!K3.leer) plakat3(scene2, s2, K3.name, uu, H + 0.8, 0.64, ph * 0.85, "#ffffff");
+    const attikaH = fam === 2 ? 1.6 : fam === 1 ? 0.8 : 1;
+    s2.q(0, L2, H - 0.12, H + attikaH, 0.16, 0.75, K3.gesims);
+    const versatz = L2 / 6;
+    for (let j = 0; j < 6; j++) {
+      if ((j + v) % 3 !== 2) s2.q(j * versatz, (j + 1) * versatz - 0.05, H + attikaH - 0.32, H + attikaH - 0.07, 0.75, 0.82, K3.fleck);
     }
-    flachdach(K3, x0, z0, w - D, d - D, H, { max: 4, kuppeln: false });
-    S.quader(x0 + w - D, H + 0.9, z0, x0 + w + 0.5, H + 1, z0 + d + 0.5, "#f4f4f2");
-    S.quader(x0, H + 0.9, z0 + d - D, x0 + w + 0.5, H + 1, z0 + d + 0.5, "#f4f4f2");
-    return H + 2;
+    if (alt && LOD2.stufe !== "fern") {
+      const felder = Math.max(2, Math.floor(L2 / 12));
+      const pflege = fam === 1 ? "#a99681" : fam === 2 ? "#969994" : "#adafa6";
+      for (let j = 0; j < felder; j++) {
+        const u = 1.1 + (j + 0.35) * (L2 - 2.2) / felder;
+        const oben = H - 1 - j % 3 * 0.6;
+        s2.q(u, u + (j % 2 ? 0.28 : 0.48), EG3 + 0.3, oben, 0.1, 0.16, pflege);
+        if ((j + v) % 2 === 0) {
+          s2.q(
+            Math.max(0.4, u - 0.6),
+            Math.min(L2 - 0.4, u + 2),
+            H - 0.24,
+            H + 0.11,
+            0.78,
+            0.91,
+            K3.fleck
+          );
+        }
+      }
+      if (L2 > 28) for (let q2 = 0; q2 < 2; q2++) {
+        const u = L2 * (q2 ? 0.82 : 0.18);
+        s2.q(u, u + 2.8, EG3 + (q2 ? 1.1 : 0.2), EG3 + (q2 ? 3.1 : 1.8), 0.08, 0.12, K3.fleck);
+      }
+    }
+    const tu2 = 2.5 + arch.treppe / 3 * Math.max(0, L2 - 7);
+    if (s2.seite === (arch.treppe % 2 === 0 ? "+z" : "+x")) {
+      s2.q(tu2 - 0.8, tu2 + 0.8, EG3 + 0.55, H - 0.55, 0.58, 0.77, K3.gesims);
+      for (let e = 0; e < n - 1; e++) {
+        const y = EG3 + e * GH2 + 1.12;
+        s2.q(tu2 - 0.49, tu2 + 0.49, y, y + 1.48, 0.78, 0.88, "#8ca3a7");
+        s2.q(tu2 - 0.04, tu2 + 0.04, y, y + 1.48, 0.88, 0.94, K3.rahmen);
+      }
+    }
+    const sockel = ["#7e796f", "#8a8e87", "#a89f8e", "#687a7b"][arch.sockel];
+    const eintritt = [Math.floor(achsen7 / 2) - 1, Math.floor(achsen7 / 2)];
+    const buchten2 = [];
+    const lochH = 3.92;
+    s2.q(0, L2, 0.1, 0.49, 0.3, 0.89, sockel);
+    for (let i = 0; i <= achsen7; i++) {
+      const u = 0.85 + i * ((L2 - 1.7) / achsen7);
+      s2.q(u - 0.28, u + 0.28, 0.45, 4.06, 0.24, 0.89, K3.gesims);
+    }
+    for (let i = 0; i < achsen7; i++) {
+      const a = 0.85 + i * ((L2 - 1.7) / achsen7) + 0.29;
+      const b = 0.85 + (i + 1) * ((L2 - 1.7) / achsen7) - 0.29;
+      const m = (a + b) / 2;
+      const eingang = s2.seite === "+z" && eintritt.includes(i);
+      const innenHell = "#e1d9c6", rahmen2 = "#a4aba8";
+      s2.q(a, b, 0.52, lochH, 0.26, 0.34, eingang ? "#87a8a9" : innenHell);
+      s2.q(a, b, lochH - 0.23, lochH - 0.1, 0.36, 0.69, "#f4f0db");
+      s2.q(a, b, 0.48, 0.6, 0.34, 0.95, rahmen2);
+      s2.q(a, b, lochH - 0.04, 4.12, 0.34, 0.96, K3.gesims);
+      if (eingang) {
+        s2.q(a, b, 0.25, 3.62, 0.34, 0.53, "#698b91");
+        s2.q(m - 0.055, m + 0.055, 0.28, 3.61, 0.53, 0.67, "#ced8d5");
+        for (const u of [a + 0.14, b - 0.14]) s2.q(u - 0.055, u + 0.055, 0.28, 3.62, 0.52, 0.72, FARBE_SCHWESTER);
+        s2.q(a, b, 3.53, 3.68, 0.5, 0.68, "#bbc5c1");
+        s2.q(m - 0.43, m - 0.37, 1.26, 1.8, 0.68, 0.75, "#d8e1dc");
+        s2.q(m + 0.37, m + 0.43, 1.26, 1.8, 0.68, 0.75, "#d8e1dc");
+        s2.q(a - 0.14, b + 0.14, 3.78, 4.08, 0.76, 2.2, K3.gesims);
+        s2.q(a + 0.08, b - 0.08, 0.26, 0.29, 0.86, 2.75, "#5b5c56");
+        K3.eingaenge.push({ seite: s2.seite, u: m, breite: b - a, t: 0.61, haupt: i === eintritt[1] });
+        if (i === eintritt[1] && LOD2.stufe !== "fern") {
+          const u = Math.min(L2 - 2, m + (b - a) / 2 + 0.8);
+          s2.q(u - 0.48, u + 0.48, 0.2, 1.36, 1.35, 1.45, FARBE_SCHWESTER);
+          s2.q(u - 0.43, u + 0.43, 0.84, 1.18, 1.45, 1.5, "#e4e5db");
+          s2.q(u - 0.04, u + 0.04, 0.28, 0.84, 1.41, 1.53, "#c0c0b7");
+        }
+      } else {
+        s2.q(a, b, 0.63, 3.8, 0.34, 0.4, "#c9e2e3");
+        ladenInhalt(
+          s2,
+          a + 0.12,
+          b - 0.12,
+          0.74,
+          0.45,
+          0.91,
+          (i + v) % 3 === 0 ? "drogerie" : "laden",
+          r
+        );
+        if ((i + v) % 2 === 0) {
+          puppe(s2, m - 0.45, 0.93, 0.96, "#a65a5d", "#323d51", 1.06);
+          if (b - a > 3.1) puppe(s2, m + 0.56, 0.93, 0.96, "#536f8f", "#d3b7a0", 0.95);
+        }
+        for (const u of [a + 0.08, b - 0.08]) s2.q(u - 0.055, u + 0.055, 0.56, 3.85, 0.96, 1.02, rahmen2);
+        s2.q(a, b, 2.36, 2.44, 0.96, 1.02, "#c8d3d0");
+        s2.q(a, b, 3.83, 3.9, 0.95, 1.03, "#f4ecd9");
+        K3.fensterEG.push({ seite: s2.seite, a, b, y0: 0.55, y1: 3.84, t: 1.03 });
+      }
+      buchten2.push({ a, b, m, eingang, i });
+    }
+    if (s2.seite === "+z") {
+      const bm = L2 / 2, bw = Math.min(4.4, L2 / achsen7 * 1.1);
+      s2.q(bm - bw, bm + bw, 3.76, 4.12, 0.82, 2.4, K3.gesims);
+      s2.q(bm - bw + 0.3, bm + bw - 0.3, 3.79, 3.96, 2.36, 2.49, FARBE_SCHWESTER);
+      const [eingangX] = s2.welt(bm, 0);
+      if (!K3.zu) schild(K3.scene, "EINGANG", "+z", eingangX, 3.87, s2.ebene + 2.53, 0.94, "#f0eee4");
+    }
+    s2.q(0, L2, 4.06, 5.49, 0.43, 0.77, K3.zu ? "#596b6b" : FARBE_SCHWESTER);
+    s2.q(0, L2, 5.48, 5.7, 0.4, 1.36, K3.gesims);
+    s2.q(0, L2, 5.69, 5.77, 0.42, 1.46, K3.rahmen);
+    const ySchrift = 4.75, hSchrift = L2 < 33 ? 2.02 : L2 < 47 ? 2.24 : 2.45;
+    if (LOD2.stufe !== "fern" && !K3.zu) for (const q2 of buchten2) {
+      if (q2.eingang || q2.i % 2 === v % 2) continue;
+      if (alt && q2.i % 5 === 1) continue;
+      const roll = alt && q2.i % 7 === 3;
+      const t = roll ? 1 : 1.58;
+      s2.q(q2.a, q2.b, roll ? 3.86 : 3.64, roll ? 3.98 : 3.8, 1, t, roll ? "#638588" : "#5b8788");
+      if (!roll) s2.q(q2.a, q2.b, 3.6, 3.67, 1.55, 1.68, "#759b9b");
+    }
+    if (s2.seite === "+z" && arch.ecke !== "scharf") {
+      if (arch.ecke === "gefast") {
+        s2.q(L2 - 1.8, L2 - 0.4, EG3 + 0.1, H - 0.2, 0.68, 0.97, K3.gesims);
+        s2.q(L2 - 1.25, L2 - 0.65, EG3 + 1, H - 1, 0.97, 1.04, K3.rahmen);
+      } else {
+        const g = new three_module_exports.CylinderGeometry(0.9, 0.9, H - EG3 - 0.6, 12);
+        g.translate(L2 - 0.9, EG3 + (H - EG3) / 2, 0.35);
+        s2.geo(g, K3.rahmen);
+      }
+    }
+    if (s2.seite === "+z" && fam === 1) {
+      const u = L2 - 2.4, y = H - 2.25;
+      s2.q(u - 1.1, u + 1.1, y - 1.1, y + 1.1, 0.82, 1.04, FARBE_SCHWESTER);
+      s2.q(u - 0.84, u + 0.84, y - 0.85, y + 0.85, 1.05, 1.16, "#e4e0ce");
+      s2.q(u - 0.07, u + 0.07, y + 0.06, y + 0.7, 1.16, 1.22, "#303f41");
+      s2.kipp(0.1, 0.58, 0.1, u + 0.15, y - 0.2, 1.23, "#303f41", -0.85);
+    }
+    if (s2.seite === "+z" && fam === 2) {
+      const a = 1.3, b = Math.min(L2 - 1, 17.5), oben = H - 1;
+      s2.q(a, b, oben - 4.05, oben, 0.73, 0.93, "#9a9b95");
+      const [wx] = s2.welt((a + b) / 2, 0);
+      if (!K3.zu) schild(
+        K3.scene,
+        NAME_SCHWESTER.toUpperCase(),
+        "+z",
+        wx,
+        oben - 2.1,
+        s2.ebene + 0.98,
+        1.22,
+        "#ecece7"
+      );
+    }
+    if (fam === 3 && s2.seite === "+x") {
+      const ua = Math.max(1, L2 - (5.8 + v % 3)), ub = L2 - 0.8;
+      s2.q(ua, ub, EG3 + 0.3, H + 0.45, 0.63, 1.32, K3.gesims);
+      for (let j = 0; j < n - 1; j++) {
+        const y = EG3 + j * GH2 + 1.1;
+        s2.q(ua + 0.55, ub - 0.55, y, y + 1.9, 1.32, 1.47, "#658b93");
+      }
+      s2.q(ua - 0.15, ub + 0.15, H + 0.38, H + 0.63, 0.6, 1.62, K3.rahmen);
+    }
+    return { ySchrift, hSchrift, L: L2 };
   }
-  function leer_ehemals(K3) {
-    const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
-    K3.leer = true;
-    const n = geschosse(K3, 3, 5);
-    const H = EG2 + (n - 1) * OG, D = 1.6;
-    const kachel2 = (REGION[K3.reg]?.stein ?? ["#d9d1bf", "#cfc7b6", "#d4cfc4", "#c9bfab"])[v % 4];
-    const schmutz = dunkler(kachel2, 0.08);
-    S.quader(x0, 0, z0, x0 + w - D, EG2, z0 + d - D, "#4a4540");
-    S.quader(x0, EG2, z0, x0 + w, H, z0 + d, kachel2);
-    for (const s2 of K3.seiten) {
-      ladenzone2(K3, s2, { raster: 5, pb: 0.8, D, pfeiler: dunkler(kachel2, 0.05), sturz: kachel2, art: "mode", gTop: 4 });
-      s2.q(0, s2.L, 4.2, 4.6, 0, 2.4, "#8f8a82");
-      s2.q(0, s2.L, 4.6, 4.75, 2.3, 2.4, "#7a2b2b");
-      if (K3.reg) regionHaut(K3, s2, 0, s2.L, EG2, H, 0, kachel2);
-      if (!K3.reg || K3.reg === "sued") {
-        for (let u = 1.2; u < s2.L; u += 1.2) s2.q(u - 0.03, u + 0.03, EG2, H, 0, 0.05, schmutz);
-        for (let y = EG2 + 1.2; y < H; y += 1.2) s2.q(0, s2.L, y - 0.03, y + 0.03, 0, 0.05, schmutz);
-      }
-      for (let i = 0; i < 9; i++) {
-        const u = zw(r, 0, s2.L - 1);
-        s2.q(u, u + zw(r, 0.3, 1), Math.max(EG2, H - zw(r, 3, 10)), H, 0.05, 0.07, dunkler(kachel2, zw(r, 0.1, 0.18)));
-      }
-      if (n >= 3) {
-        const y0 = EG2 + OG * 0.4;
-        for (const [a, b] of buchten(1, s2.L - 1, 2.4, 0.4)) s2.q(a, b, y0, y0 + 1.6, -0.05, 0.03, r() < 0.2 ? "#1c2228" : r() < 0.5 ? "#6a767e" : GLAS2);
-      }
-      s2.q(0, s2.L, H - 0.1, H + 0.6, 0, 0.3, dunkler(kachel2, 0.04));
-      const yL = EG2 + (H - EG2) * (n >= 3 ? 0.68 : 0.5);
-      const ph = passend(K3.name, s2.L * 0.7, Math.min(3.2, (H - EG2) * 0.4));
-      plakat3(scene2, s2, K3.name, s2.L * 0.5, yL, 0.07, ph, dunkler(kachel2, 0.2), null, { lit: true });
-      for (let k = 0; k < 6; k++) s2.q(s2.L * 0.5 - plakatBreite2(K3.name, ph) * 0.42 + k * plakatBreite2(K3.name, ph) * 0.17, s2.L * 0.5 - plakatBreite2(K3.name, ph) * 0.42 + k * plakatBreite2(K3.name, ph) * 0.17 + 0.12, yL - ph * 0.3, yL - ph * 0.2, 0.05, 0.25, "#6c6c6c");
-    }
-    {
-      const s2 = K3.seiten[1], t = "ZU VERMIETEN";
-      const ph = passend(t, s2.L * 0.5, 1.6);
-      const br = plakat3(scene2, s2, t, s2.L * 0.5, EG2 + 1.4, 0.5, ph, "#3b4248", "#ffffff");
-      s2.q(s2.L * 0.5 - br / 2 - 0.1, s2.L * 0.5 + br / 2 + 0.1, EG2 + 1.4 - ph / 2 - 0.1, EG2 + 1.4 + ph / 2 + 0.1, 0.35, 0.45, "#cfd3d6");
-      const t2 = "0800 / 12 34 56";
-      plakat3(scene2, s2, t2, s2.L * 0.5, EG2 + 1.4 - ph * 0.85, 0.5, ph * 0.4, "#3b4248", "#ffffff");
-    }
-    for (const s2 of K3.seiten) for (let u = 1; u < s2.L; u += zw(r, 3, 7)) {
-      const [x, z2] = s2.welt(u, 0.4);
-      busch(S, r, x, 0.3, z2, 0.35);
-    }
-    S.quader(x0, H, z0, x0 + w, H + 0.2, z0 + d, "#a9a69e");
-    technik2(S, r, x0 + 2, z0 + 2, x0 + w - 2, z0 + d - 2, H + 0.2, { max: 3, farbe: "#b8b4ac" });
-    for (let i = 0; i < 5; i++) busch(S, r, x0 + zw(r, 2, w - 2), H + 0.2, z0 + zw(r, 2, d - 2), 0.4);
-    return H + 3;
+  function beschriftung(scene2, s2, K3, y, hb) {
+    if (K3.zu) return;
+    const text2 = (K3.haus.substanz ?? 50) < 30 ? NAME_SCHWESTER.toUpperCase().replace("KAUF", " AUF") : NAME_SCHWESTER.toUpperCase();
+    const u = s2.L / 2, [wx, wz2] = s2.welt(u, 0);
+    const weltU = s2.seite === "+z" ? wx : wz2;
+    schild(scene2, text2, s2.seite, weltU + 0.1, y - 0.07, s2.ebene + 0.87, hb, "#1d4c50");
+    schild(scene2, text2, s2.seite, weltU, y, s2.ebene + 1.02, hb, "#e4e5db");
   }
-  var BAU2 = { modehaus, offprice, textildiscounter, elektronik, premium, fastfashion, leer_ehemals };
-  function wettbewerber(S, scene2, p) {
+  function dach2(S, K3) {
+    const { x, z: z2, w, d, H, arch } = K3;
+    const r = rng2(String(K3.haus.id) + "/" + K3.fam + "/dach/" + arch.dachLayout);
+    const y = H + 0.28;
+    S.quader(x + 0.5, H, z2 + 0.5, x + w - 0.5, y, z2 + d - 0.5, "#777c78");
+    const n = 2 + Math.floor(r() * 4);
+    const platz = [];
+    for (let j = 0; j < n; j++) {
+      const ww = 2 + r() * 3.2, dd = 2 + r() * 3.6, hh = 1.2 + r() * 2.3;
+      let px2 = 0, pz4 = 0;
+      for (let versuch = 0; versuch < 20; versuch++) {
+        const nx = x + 3 + ww / 2 + r() * (w - ww - 6);
+        const nz = z2 + 3 + dd / 2 + r() * (d - dd - 6);
+        px2 = nx;
+        pz4 = nz;
+        if (!platz.some((p) => Math.abs(p.x - px2) < (p.w + ww) / 2 + 1.2 && Math.abs(p.z - pz4) < (p.d + dd) / 2 + 1.2)) break;
+      }
+      platz.push({ x: px2, z: pz4, w: ww, d: dd });
+      const farbe = waehle2(r, ["#a5a7a0", "#b3b0a8", "#959992", "#8d9493"]);
+      S.box(ww, hh, dd, px2, y + hh / 2, pz4, farbe);
+      S.box(ww + 0.2, 0.13, dd + 0.2, px2, y + hh + 0.06, pz4, "#747a76");
+      if (j % 2 === 0) for (let q2 = 0; q2 < 3; q2++) S.box(0.13, hh * 0.65, 0.12, px2 + ww / 2 + 0.1, y + hh * 0.5, pz4 + (q2 - 1) * dd * 0.23, "#5a6869");
+    }
+    const liftX = x + w * (arch.treppe % 2 ? 0.28 : 0.72);
+    const liftZ = z2 + d * (arch.treppe < 2 ? 0.27 : 0.72);
+    S.box(3.3, 3.5, 3.5, liftX, y + 1.75, liftZ, "#b6b7ae");
+    S.box(3.6, 0.22, 3.8, liftX, y + 3.62, liftZ, "#777b77");
+    const tx = x + w * (0.18 + arch.treppe * 0.14), tz = z2 + d * 0.81;
+    S.box(5.2, 2.45, 4.3, tx, y + 1.22, tz, "#969b96");
+    S.box(5.5, 0.17, 4.5, tx, y + 2.52, tz, "#737975");
+    for (let i = 0; i < 3 + arch.dachLayout % 5; i++) {
+      const px2 = x + 3 + r() * (w - 6), pz4 = z2 + 3 + r() * (d - 6);
+      const h = 0.65 + r() * 1.15;
+      const g = new three_module_exports.CylinderGeometry(0.2 + r() * 0.16, 0.25, h, 7);
+      g.translate(px2, y + h / 2, pz4);
+      S.add(g, "#989e99");
+      S.box(0.65, 0.12, 0.68, px2, y + h + 0.07, pz4, "#687473");
+    }
+    if (arch.dachLayout % 4 === 1 && !K3.zu) {
+      const s2 = new Seite(S, x, z2, w, d, "+z"), u = w * 0.68;
+      s2.q(u - 4.3, u + 4.3, H + 0.8, H + 3.7, 0, 0.3, FARBE_SCHWESTER);
+      for (const q2 of [u - 3.4, u + 3.4]) s2.q(q2 - 0.13, q2 + 0.13, H + 0.2, H + 1, 0, 0.23, "#767975");
+      schild(K3.scene, NAME_SCHWESTER.toUpperCase(), "+z", x + u, H + 2.24, z2 + d + 0.38, 0.88, "#e4e5db");
+    }
+    return H + 3.8;
+  }
+  function mildePatina(S, K3) {
+    const r = rng2(String(K3.haus.id) + "/patina");
+    const y = K3.H + 0.32;
+    for (let q2 = 0; q2 < 9; q2++) {
+      const px2 = K3.x + 2 + r() * (K3.w - 4), pz4 = K3.z + 2 + r() * (K3.d - 4);
+      S.box(
+        0.8 + r() * 2.2,
+        0.025,
+        0.5 + r() * 1.6,
+        px2,
+        y,
+        pz4,
+        waehle2(r, ["#78876b", "#849176", "#7a856d"])
+      );
+    }
+    const s2 = new Seite(S, K3.x, K3.z, K3.w, K3.d, "+z");
+    const u = K3.w - 1.15;
+    for (let h = 0; h < Math.min(K3.H * 0.55, 9); h += 0.65) {
+      s2.q(
+        u - 0.1 + r() * 0.22,
+        u + 0.04 + r() * 0.15,
+        0.7 + h,
+        1.5 + h,
+        0.86,
+        0.99,
+        waehle2(r, ["#66805b", "#73895d", "#86916a"])
+      );
+    }
+  }
+  function moebel(S, K3) {
+    if (LOD2.stufe === "fern") return;
+    const px2 = K3.x + K3.w * 0.18, zz = K3.z + K3.d + 2;
+    for (let i = 0; i < 2; i++) {
+      const u = px2 + i * 1;
+      const ring = new three_module_exports.TorusGeometry(0.52, 0.07, 5, 9, Math.PI);
+      ring.rotateY(Math.PI / 2);
+      ring.translate(u, 0.65, zz);
+      S.add(ring, "#767e7d");
+    }
+    if (K3.variante % 2 === 0) {
+      const bx = K3.x + K3.w * 0.68, bz = zz + 0.3;
+      S.box(2.6, 0.2, 0.65, bx, 0.7, bz, "#8b877f");
+      S.box(0.12, 0.75, 0.12, bx - 0.9, 0.35, bz, "#6f7474");
+      S.box(0.12, 0.75, 0.12, bx + 0.9, 0.35, bz, "#6f7474");
+    }
+    if (K3.leute) {
+      const pr2 = rng2(String(K3.haus.id) + "/passanten");
+      const anzahl = Math.max(2, Math.round((K3.w + K3.d) / 12 * 0.6));
+      for (let i = 0; i < anzahl; i++) {
+        const anFront = i % 3 !== 2;
+        const px3 = anFront ? K3.x + 2.5 + pr2() * (K3.w - 5) : K3.x + K3.w + 2.8;
+        const pz4 = anFront ? K3.z + K3.d + 2 + pr2() * 1.5 : K3.z + 3 + pr2() * (K3.d - 6);
+        mensch(S, pr2, px3, 0.3, pz4);
+      }
+    }
+  }
+  function schwesterhaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
-    const r0 = rng2(`wb:${p.seed ?? 1}:${p.region ?? ""}`);
-    const art = BAU2[p.art] ? p.art : ARTEN2[Math.floor(r0() * ARTEN2.length)];
-    const name2 = p.name ?? NAMEN[art][Math.floor(r0() * 3)];
-    const w = clamp6(p.w ?? 40, 16, 90), d = clamp6(p.d ?? 30, 16, 70);
+    const marke3 = merke(S, scene2);
+    const m = masseSchwester(haus2);
+    const x = opt.x ?? 0, z2 = opt.z ?? 0;
+    const fam = opt.familie ?? m.familie;
+    const variant = ((haus2.fassade ?? Math.floor(index(haus2) / 3)) % 8 + 8) % 8;
+    const r = rng2(String(haus2.id) + "/" + fam + "/" + variant);
+    const status = opt.status ?? haus2.status ?? "offen";
+    const dekorStatus = status === "verfall" ? "offen" : status;
+    const Z2 = zustandNormal({ ...opt, status: dekorStatus, seed: haus2.id }, { untermieter: haus2.flaechen?.filter((f) => f.konzept === "untermiete").map((f) => ({ name: "Mieter", etage: f.etage })) });
+    const flags = zustandFlags(Z2);
     const K3 = {
       S,
       scene: scene2,
-      art,
-      name: name2,
-      r: rng2(`wb:${p.seed}:${art}`),
-      v: Math.floor(r0() * 8),
-      x0: p.x ?? 0,
-      z0: p.z ?? 0,
-      w,
-      d,
-      leer: art === "leer_ehemals",
-      reg: regionVon(p.region),
-      leute: p.passanten !== false
+      haus: haus2,
+      x,
+      z: z2,
+      w: m.w,
+      d: m.d,
+      n: m.n,
+      H: m.H,
+      fam,
+      variante: variant,
+      r,
+      leute: opt.passanten !== false,
+      arch: architekturSchwester(haus2, fam),
+      Z: Z2,
+      zu: flags.zu,
+      alt: (haus2.substanz ?? 50) < 46 || flags.alt,
+      eingaenge: [],
+      fensterEG: [],
+      farbe: "",
+      rahmen: "",
+      gesims: "",
+      fleck: ""
     };
-    let form = Number.isInteger(p.form) ? (p.form % 5 + 5) % 5 : Math.floor(r0() * 3);
-    if (form === 2 && (Math.imul((p.seed ?? 1) >>> 0, 2654435761) >>> 0) % 4 !== 0) form = [0, 1, 3][(p.seed ?? 1) % 3];
-    let hoehe;
-    if (form === 3 && w >= 30) {
-      const w2 = Math.round(w * 0.34);
-      const K1 = { ...K3, x0: K3.x0 + w2, w: w - w2 };
-      K1.seiten = seitenVon2(S, K1.x0, K3.z0, K1.w, d);
-      const h1 = BAU2[art](K1);
-      hoehe = kopfturm(K3, K3.x0, K3.z0, w2, d, h1);
-    } else if (form === 4 && w >= 30 && d >= 26) {
-      const w1 = Math.round(w * 0.7), d1 = Math.round(d * 0.76);
-      const K1 = { ...K3, w: w1, d: d1, vorbauH: EG2 + 0.85 };
-      K1.seiten = seitenVon2(S, K3.x0, K3.z0, w1, d1);
-      const h1 = BAU2[art](K1);
-      const ht = kopfturm(K3, K3.x0 + w1, K3.z0, w - w1, d1, h1);
-      hoehe = Math.max(ht, rotunde(K3, d1, h1, false));
-    } else if (form === 1 && w >= 30) {
-      const w1 = Math.round(w * 0.66);
-      const K1 = { ...K3, w: w1 };
-      K1.seiten = seitenVon2(S, K3.x0, K3.z0, w1, d);
-      const h1 = BAU2[art](K1);
-      hoehe = kopfturm(K3, K3.x0 + w1, K3.z0, w - w1, d, h1);
-    } else if (form === 2 && d >= 26) {
-      const d1 = Math.round(d * 0.76);
-      const K1 = { ...K3, d: d1, vorbauH: EG2 + 0.85, ecke: d - d1 + 1.5 * clamp6(Math.min(w, d) * 0.2, 4, 9) + 1.5 };
-      K1.seiten = seitenVon2(S, K3.x0, K3.z0, w, d1);
-      const h1 = BAU2[art](K1);
-      hoehe = rotunde(K3, d1, h1);
-    } else {
-      K3.seiten = seitenVon2(S, K3.x0, K3.z0, w, d);
-      hoehe = BAU2[art](K3);
+    const c = PALETTEN[fam - 1][variant % 4];
+    K3.farbe = c;
+    K3.rahmen = heller(c, 0.11);
+    K3.gesims = dunkler(c, fam === 2 ? 0.1 : 0.07);
+    K3.fleck = (variant + fam) % 2 ? heller(c, 0.035) : dunkler(c, 0.045);
+    S.quader(x, 0, z2, x + m.w, m.H, z2 + m.d, K3.farbe);
+    const ss = [new Seite(S, x, z2, m.w, m.d, "+z"), new Seite(S, x, z2, m.w, m.d, "+x")];
+    for (const s2 of ss) {
+      const t = fassade(S, s2, K3);
+      beschriftung(scene2, s2, K3, t.ySchrift, t.hSchrift);
     }
-    return { hoehe, art, name: name2, form, teile: S.anzahl - start };
-  }
-  var FORM_FARBEN = {
-    modehaus: ["#d8cbb0", BRONZE, GLAS2],
-    premium: ["#e9e1d2", MESSING, GLAS2],
-    offprice: ["#eeece6", "#e8336d", GLAS_HELL2],
-    textildiscounter: ["#e4e3df", "#1f63b5", GLAS_HELL2],
-    elektronik: ["#3a3f45", "#e03b2f", GLAS_D],
-    fastfashion: ["#f2f1ee", "#1f1f1f", GLAS_D],
-    leer_ehemals: ["#c9c6bf", "#8a8f94", GLAS_D]
-  };
-  function kopfturm(K3, x, z2, w, d, h1) {
-    const { S, scene: scene2, art, name: name2, r } = K3;
-    const [wand2, akzent, glas2] = FORM_FARBEN[art] ?? FORM_FARBEN.modehaus;
-    const H = clamp6(h1 + 7, 14, 30);
-    S.quader(x, 0, z2, x + w, EG2, z2 + d, "#4f565c");
-    S.quader(x, EG2, z2, x + w, H, z2 + d, wand2);
-    for (const s2 of seitenVon2(S, x, z2, w, d)) {
-      s2.q(0.3, s2.L - 0.3, 0.3, EG2 - 0.6, -0.02, 0.05, glas2);
-      for (let y = EG2 + 0.9; y < H - 2.4; y += OG) for (let u = 1.2; u < s2.L - 1; u += 2.4) s2.q(u, u + 1.4, y, y + 2.2, -0.02, 0.06, glas2);
-      s2.q(0, s2.L, EG2 - 0.3, EG2 + 0.15, 0, 0.5, akzent);
-      s2.q(s2.L - 0.8, s2.L, EG2, H, 0, 0.25, akzent);
-      s2.q(0, s2.L, H - 0.3, H + 0.3, -0.1, 0.35, dunkler(wand2, 0.12));
-    }
-    const sz = new Seite3(S, x, z2, w, d, "+z");
-    const ph = passend(name2, w * 0.8, 2.2);
-    const metall = akzent === BRONZE || akzent === MESSING;
-    sz.q(w / 2 - plakatBreite2(name2, ph) / 2 - 0.5, w / 2 + plakatBreite2(name2, ph) / 2 + 0.5, H - 2.9 - ph / 2, H - 2.9 + ph / 2 + 0.3, 0.06, 0.12, metall ? "#3b3226" : akzent);
-    plakat3(scene2, sz, name2, w / 2, H - 2.75, 0.14, ph, metall ? "#ecd39b" : "#ffffff");
-    S.quader(x + 0.4, H, z2 + 0.4, x + w - 0.4, H + 0.2, z2 + d - 0.4, KIES3);
-    technik2(S, r, x + 1, z2 + 1, x + w - 1, z2 + d - 1, H + 0.2, { max: 2 });
-    return Math.max(h1, H + 2);
-  }
-  function rotunde(K3, d1, h1, mitRotunde = true) {
-    const { S, scene: scene2, art, name: name2, x0, z0, w, d } = K3;
-    const [wand2, akzent, glas2] = FORM_FARBEN[art] ?? FORM_FARBEN.modehaus;
-    const tv = d - d1, Hv = EG2 + 0.6;
-    S.quader(x0, 0, z0 + d1, x0 + w, Hv, z0 + d, "#5a6168");
-    const sv = new Seite3(S, x0, z0 + d1, w, tv, "+z");
-    sv.q(0.3, w - 0.3, 0.3, Hv - 1.6, -0.02, 0.06, glas2);
-    for (let u = 2; u < w - 1; u += 3) sv.q(u - 0.1, u + 0.1, 0.3, Hv - 1.6, 0, 0.12, "#d9dcde");
-    sv.q(-0.2, w + 0.2, Hv - 1.6, Hv + 0.2, 0, 0.9, akzent);
-    S.quader(x0 + 0.3, Hv, z0 + d1, x0 + w - 0.3, Hv + 0.15, z0 + d - 0.3, KIES3);
-    const ph = passend(name2, (mitRotunde ? w - (d - d1) - 2 * clamp6(Math.min(w, d) * 0.2, 4, 9) : w) * 0.6, 1.3);
-    plakat3(scene2, sv, name2, (mitRotunde ? w - (d - d1) - 2 * clamp6(Math.min(w, d) * 0.2, 4, 9) : w) * 0.45, Hv - 0.7, 0.92, ph, akzent === BRONZE || akzent === MESSING ? "#3b3226" : "#ffffff");
-    if (!mitRotunde) return Math.max(h1, Hv + 0.2);
-    const R9 = clamp6(Math.min(w, d) * 0.2, 4, 9), H = clamp6(h1 + 3, 10, 28);
-    const cx = x0 + w - R9 + 0.6, cz = z0 + d - R9 + 0.6;
-    const zylinder = (rad2, y0, y1, f) => {
-      const g = new three_module_exports.CylinderGeometry(rad2, rad2, y1 - y0, 24);
-      g.translate(cx, (y0 + y1) / 2, cz);
-      S.add(g, f);
+    dach2(S, K3);
+    if (status === "verfall") mildePatina(S, K3);
+    moebel(S, K3);
+    const ueber = eigeneMieterflaechen(Z2, { "+z": K3.w, "+x": K3.d }, ["+x", "+z"], NAME_SCHWESTER + " Restposten").map((q2) => ({ ...q2, ua: q2.u0, ub: q2.u1 }));
+    const k = {
+      x,
+      z: z2,
+      w: K3.w,
+      d: K3.d,
+      hoehe: K3.H,
+      egHoehe: EG3,
+      geschossHoehe: GH2,
+      n: K3.n,
+      tRelief: 0.45,
+      tLogo: 0.56,
+      raster: fam === 3 ? 4.2 : 3.8,
+      fensterBand: [0.6, GH2 - 0.45],
+      seiten: Object.fromEntries(ss.map((s2) => [s2.seite, {
+        u1: s2.L,
+        logo: { u: s2.L / 2, y: 4.75, hb: s2.L < 33 ? 2.02 : s2.L < 47 ? 2.24 : 2.45, breite: Math.min(s2.L * 0.7, 19) }
+      }])),
+      eingaenge: K3.eingaenge,
+      fensterEG: K3.fensterEG,
+      mieterEG: ueber,
+      dach: { x0: x + 1, z0: z2 + 1, x1: x + K3.w - 1, z1: z2 + K3.d - 1, y: K3.H + 0.2 },
+      farbe: K3.farbe,
+      baujahr: haus2.baujahr,
+      flaecheQm: (haus2.grundflaecheQm || K3.w * K3.d) * K3.n,
+      marke: marke3,
+      seed: haus2.id + ":" + Z2.status,
+      planeText: NAME_SCHWESTER.toUpperCase() + " WIRD MODERNISIERT",
+      kettenFarbe: FARBE_SCHWESTER,
+      kettenName: NAME_SCHWESTER
     };
-    zylinder(R9, 0, H, wand2);
-    for (let y = EG2; y < H - 2; y += OG) zylinder(R9 + 0.05, y + 0.8, y + 3, glas2);
-    zylinder(R9 + 0.25, H - 0.2, H + 0.4, akzent);
-    zylinder(R9 + 0.05, H - 0.15, H + 0.3, KIES3);
-    zylinder(R9 * 0.6, H + 0.4, H + 1.6, "#c9cbcc");
-    zylinder(R9 * 0.62, H + 1.6, H + 1.75, "#9ea2a5");
-    return Math.max(h1, H + 1.6);
+    const dek = zustandsDekor(S, scene2, k, Z2, { passanten: opt.passanten === false ? false : void 0, logosAbdecken: true, pylon: false });
+    const teile = S.anzahl - start;
+    if (teile > 8e3) throw new Error("Schwesterhaus " + haus2.id + ": Teilebudget " + teile + " > 8000");
+    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile, status };
   }
+
+  // haeuser-schwester.json
+  var haeuser_schwester_default = [
+    {
+      id: "K001",
+      name: "Essen Nebenlage",
+      stadt: "Essen",
+      format: "schwester",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1955,
+      fassade: 0,
+      substanz: 15,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K001-f1",
+          etage: 0,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K001-f2",
+          etage: 0,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K001-f3",
+          etage: 1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K001-f4",
+          etage: 1,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K001-f5",
+          etage: 2,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K001-f6",
+          etage: 2,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K001-f7",
+          etage: 3,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K001-f8",
+          etage: 3,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K002",
+      name: "Dortmund Nebenlage",
+      stadt: "Dortmund",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1030,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1962,
+      fassade: 0,
+      substanz: 26,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K002-f1",
+          etage: 0,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K002-f2",
+          etage: 0,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K002-f3",
+          etage: 1,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K002-f4",
+          etage: 1,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K002-f5",
+          etage: 2,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K002-f6",
+          etage: 2,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K002-f7",
+          etage: 3,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K002-f8",
+          etage: 3,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K002-f9",
+          etage: 4,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K002-f10",
+          etage: 4,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K003",
+      name: "Duisburg Nebenlage",
+      stadt: "Duisburg",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1160,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1969,
+      fassade: 0,
+      substanz: 37,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K003-f1",
+          etage: 0,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K003-f2",
+          etage: 0,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K003-f3",
+          etage: 1,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K003-f4",
+          etage: 1,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K003-f5",
+          etage: 2,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K003-f6",
+          etage: 2,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K003-f7",
+          etage: 3,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K003-f8",
+          etage: 3,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K004",
+      name: "Bochum Nebenlage",
+      stadt: "Bochum",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1976,
+      fassade: 1,
+      substanz: 48,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K004-f1",
+          etage: 0,
+          qm: 696,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K004-f2",
+          etage: 0,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K004-f3",
+          etage: 1,
+          qm: 696,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K004-f4",
+          etage: 1,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K004-f5",
+          etage: 2,
+          qm: 696,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K004-f6",
+          etage: 2,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K004-f7",
+          etage: 3,
+          qm: 696,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K004-f8",
+          etage: 3,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K004-f9",
+          etage: 4,
+          qm: 696,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K004-f10",
+          etage: 4,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K005",
+      name: "Wuppertal Nebenlage",
+      stadt: "Wuppertal",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1420,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1958,
+      fassade: 1,
+      substanz: 59,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K005-f1",
+          etage: 0,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K005-f2",
+          etage: 0,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K005-f3",
+          etage: 1,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K005-f4",
+          etage: 1,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K005-f5",
+          etage: 2,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K005-f6",
+          etage: 2,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K005-f7",
+          etage: 3,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K005-f8",
+          etage: 3,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K006",
+      name: "Gelsenkirchen Nebenlage",
+      stadt: "Gelsenkirchen",
+      format: "schwester",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1965,
+      fassade: 1,
+      substanz: 24,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K006-f1",
+          etage: 0,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K006-f2",
+          etage: 0,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K006-f3",
+          etage: 1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K006-f4",
+          etage: 1,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K006-f5",
+          etage: 2,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K006-f6",
+          etage: 2,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K006-f7",
+          etage: 3,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K006-f8",
+          etage: 3,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K006-f9",
+          etage: 4,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K006-f10",
+          etage: 4,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K007",
+      name: "M\xFClheim Nebenlage",
+      stadt: "M\xFClheim",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1030,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1972,
+      fassade: 2,
+      substanz: 35,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K007-f1",
+          etage: 0,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K007-f2",
+          etage: 0,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K007-f3",
+          etage: 1,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K007-f4",
+          etage: 1,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K007-f5",
+          etage: 2,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K007-f6",
+          etage: 2,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K007-f7",
+          etage: 3,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K007-f8",
+          etage: 3,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K008",
+      name: "Bottrop Nebenlage",
+      stadt: "Bottrop",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1050,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1979,
+      fassade: 2,
+      substanz: 46,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K008-f1",
+          etage: 0,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K008-f2",
+          etage: 0,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K008-f3",
+          etage: 1,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K008-f4",
+          etage: 1,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K008-f5",
+          etage: 2,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K008-f6",
+          etage: 2,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K008-f7",
+          etage: 3,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K008-f8",
+          etage: 3,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K008-f9",
+          etage: 4,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K008-f10",
+          etage: 4,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K009",
+      name: "D\xFCren Nebenlage",
+      stadt: "D\xFCren",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1290,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1961,
+      fassade: 2,
+      substanz: 57,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K009-f1",
+          etage: 0,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K009-f2",
+          etage: 0,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K009-f3",
+          etage: 1,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K009-f4",
+          etage: 1,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K009-f5",
+          etage: 2,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K009-f6",
+          etage: 2,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K009-f7",
+          etage: 3,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K009-f8",
+          etage: 3,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K010",
+      name: "Wesel Nebenlage",
+      stadt: "Wesel",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1300,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1968,
+      fassade: 3,
+      substanz: 22,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K010-f1",
+          etage: 0,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K010-f2",
+          etage: 0,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K010-f3",
+          etage: 1,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K010-f4",
+          etage: 1,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K010-f5",
+          etage: 2,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K010-f6",
+          etage: 2,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K010-f7",
+          etage: 3,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K010-f8",
+          etage: 3,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K010-f9",
+          etage: 4,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K010-f10",
+          etage: 4,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K011",
+      name: "Neuss Nebenlage",
+      stadt: "Neuss",
+      format: "schwester",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1975,
+      fassade: 3,
+      substanz: 33,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K011-f1",
+          etage: 0,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K011-f2",
+          etage: 0,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K011-f3",
+          etage: 1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K011-f4",
+          etage: 1,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K011-f5",
+          etage: 2,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K011-f6",
+          etage: 2,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K011-f7",
+          etage: 3,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K011-f8",
+          etage: 3,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K012",
+      name: "Krefeld Nebenlage",
+      stadt: "Krefeld",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1030,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1957,
+      fassade: 3,
+      substanz: 44,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K012-f1",
+          etage: 0,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K012-f2",
+          etage: 0,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K012-f3",
+          etage: 1,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K012-f4",
+          etage: 1,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K012-f5",
+          etage: 2,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K012-f6",
+          etage: 2,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K012-f7",
+          etage: 3,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K012-f8",
+          etage: 3,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K012-f9",
+          etage: 4,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K012-f10",
+          etage: 4,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K013",
+      name: "G\xFCtersloh Nebenlage",
+      stadt: "G\xFCtersloh",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1160,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1964,
+      fassade: 4,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K013-f1",
+          etage: 0,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K013-f2",
+          etage: 0,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K013-f3",
+          etage: 1,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K013-f4",
+          etage: 1,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K013-f5",
+          etage: 2,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K013-f6",
+          etage: 2,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K013-f7",
+          etage: 3,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K013-f8",
+          etage: 3,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K014",
+      name: "Recklinghausen Nebenlage",
+      stadt: "Recklinghausen",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1290,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1971,
+      fassade: 4,
+      substanz: 20,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K014-f1",
+          etage: 0,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K014-f2",
+          etage: 0,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K014-f3",
+          etage: 1,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K014-f4",
+          etage: 1,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K014-f5",
+          etage: 2,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K014-f6",
+          etage: 2,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K014-f7",
+          etage: 3,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K014-f8",
+          etage: 3,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K014-f9",
+          etage: 4,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K014-f10",
+          etage: 4,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K015",
+      name: "Oberhausen Nebenlage",
+      stadt: "Oberhausen",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1300,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1978,
+      fassade: 4,
+      substanz: 31,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K015-f1",
+          etage: 0,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K015-f2",
+          etage: 0,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K015-f3",
+          etage: 1,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K015-f4",
+          etage: 1,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K015-f5",
+          etage: 2,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K015-f6",
+          etage: 2,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K015-f7",
+          etage: 3,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K015-f8",
+          etage: 3,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K016",
+      name: "Hamm Nebenlage",
+      stadt: "Hamm",
+      format: "schwester",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1960,
+      fassade: 5,
+      substanz: 42,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K016-f1",
+          etage: 0,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K016-f2",
+          etage: 0,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K016-f3",
+          etage: 1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K016-f4",
+          etage: 1,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K016-f5",
+          etage: 2,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K016-f6",
+          etage: 2,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K016-f7",
+          etage: 3,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K016-f8",
+          etage: 3,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K016-f9",
+          etage: 4,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K016-f10",
+          etage: 4,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K017",
+      name: "Iserlohn Nebenlage",
+      stadt: "Iserlohn",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1030,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1967,
+      fassade: 5,
+      substanz: 53,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K017-f1",
+          etage: 0,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K017-f2",
+          etage: 0,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K017-f3",
+          etage: 1,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K017-f4",
+          etage: 1,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K017-f5",
+          etage: 2,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K017-f6",
+          etage: 2,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K017-f7",
+          etage: 3,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K017-f8",
+          etage: 3,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K018",
+      name: "L\xFCdenscheid Nebenlage",
+      stadt: "L\xFCdenscheid",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1160,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1974,
+      fassade: 5,
+      substanz: 18,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K018-f1",
+          etage: 0,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K018-f2",
+          etage: 0,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K018-f3",
+          etage: 1,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K018-f4",
+          etage: 1,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K018-f5",
+          etage: 2,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K018-f6",
+          etage: 2,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K018-f7",
+          etage: 3,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K018-f8",
+          etage: 3,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K018-f9",
+          etage: 4,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K018-f10",
+          etage: 4,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K019",
+      name: "Witten Nebenlage",
+      stadt: "Witten",
+      format: "schwester",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1290,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1956,
+      fassade: 6,
+      substanz: 29,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K019-f1",
+          etage: 0,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K019-f2",
+          etage: 0,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K019-f3",
+          etage: 1,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K019-f4",
+          etage: 1,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K019-f5",
+          etage: 2,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K019-f6",
+          etage: 2,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K019-f7",
+          etage: 3,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K019-f8",
+          etage: 3,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K020",
+      name: "Solingen Nebenlage",
+      stadt: "Solingen",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1420,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1963,
+      fassade: 6,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K020-f1",
+          etage: 0,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K020-f2",
+          etage: 0,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K020-f3",
+          etage: 1,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K020-f4",
+          etage: 1,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K020-f5",
+          etage: 2,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K020-f6",
+          etage: 2,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K020-f7",
+          etage: 3,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K020-f8",
+          etage: 3,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K020-f9",
+          etage: 4,
+          qm: 824,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K020-f10",
+          etage: 4,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K021",
+      name: "Leverkusen Nebenlage",
+      stadt: "Leverkusen",
+      format: "schwester",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1970,
+      fassade: 6,
+      substanz: 51,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K021-f1",
+          etage: 0,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K021-f2",
+          etage: 0,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K021-f3",
+          etage: 1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K021-f4",
+          etage: 1,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K021-f5",
+          etage: 2,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K021-f6",
+          etage: 2,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K021-f7",
+          etage: 3,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K021-f8",
+          etage: 3,
+          qm: 378,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K022",
+      name: "Paderborn Nebenlage",
+      stadt: "Paderborn",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1030,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1977,
+      fassade: 7,
+      substanz: 16,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K022-f1",
+          etage: 0,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K022-f2",
+          etage: 0,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K022-f3",
+          etage: 1,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K022-f4",
+          etage: 1,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K022-f5",
+          etage: 2,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K022-f6",
+          etage: 2,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K022-f7",
+          etage: 3,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K022-f8",
+          etage: 3,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K022-f9",
+          etage: 4,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K022-f10",
+          etage: 4,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K023",
+      name: "Aachen Nebenlage",
+      stadt: "Aachen",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1160,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1959,
+      fassade: 7,
+      substanz: 27,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K023-f1",
+          etage: 0,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K023-f2",
+          etage: 0,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K023-f3",
+          etage: 1,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K023-f4",
+          etage: 1,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K023-f5",
+          etage: 2,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K023-f6",
+          etage: 2,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K023-f7",
+          etage: 3,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K023-f8",
+          etage: 3,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kette: "schwester"
+    },
+    {
+      id: "K024",
+      name: "Bielefeld Nebenlage",
+      stadt: "Bielefeld",
+      format: "schwester",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1290,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1966,
+      fassade: 7,
+      substanz: 38,
+      status: "offen",
+      flaechen: [
+        {
+          id: "K024-f1",
+          etage: 0,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "K024-f2",
+          etage: 0,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "K024-f3",
+          etage: 1,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K024-f4",
+          etage: 1,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "K024-f5",
+          etage: 2,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "K024-f6",
+          etage: 2,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "K024-f7",
+          etage: 3,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "K024-f8",
+          etage: 3,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "K024-f9",
+          etage: 4,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "K024-f10",
+          etage: 4,
+          qm: 542,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kette: "schwester"
+    }
+  ];
 
   // haeuser.json
   var haeuser_default = [{ id: "W001", name: "Hartwig Berlin", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1932, fassade: 4, substanz: 65, status: "offen", flaechen: [{ id: "W001-f1", etage: 0, qm: 816, konzept: "eigen", gruppe: "food" }, { id: "W001-f2", etage: 0, qm: 827, konzept: "eigen", gruppe: "beauty" }, { id: "W001-f3", etage: 0, qm: 690, konzept: "eigen", gruppe: "accessoires" }, { id: "W001-f4", etage: 1, qm: 712, konzept: "eigen", gruppe: "accessoires" }, { id: "W001-f5", etage: 1, qm: 1621, konzept: "eigen", gruppe: "damen" }, { id: "W001-f6", etage: 2, qm: 1510, konzept: "eigen", gruppe: "damen" }, { id: "W001-f7", etage: 2, qm: 809, konzept: "eigen", gruppe: "waesche" }, { id: "W001-f8", etage: 2, qm: 15, konzept: "eigen", gruppe: "herren" }, { id: "W001-f9", etage: 3, qm: 1614, konzept: "eigen", gruppe: "herren" }, { id: "W001-f10", etage: 3, qm: 719, konzept: "eigen", gruppe: "kinder" }, { id: "W001-f11", etage: 4, qm: 512, konzept: "eigen", gruppe: "kinder" }, { id: "W001-f12", etage: 4, qm: 1402, konzept: "eigen", gruppe: "sport" }, { id: "W001-f13", etage: 4, qm: 419, konzept: "eigen", gruppe: "spielwaren" }, { id: "W001-f14", etage: 5, qm: 320, konzept: "eigen", gruppe: "spielwaren" }, { id: "W001-f15", etage: 5, qm: 2013, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 459926, rohertrag: 194319, konzessionserloes: 0, untermiete: 0, personal: 95905, miete: 62501, nebenkosten: 0, sonstige: 25157, db: 10756, fteBedarf: 84.40254506016997, fteIst: 98.82583318279478, umsatzJeGruppe: { food: 37385, beauty: 75986, accessoires: 79466, damen: 80130, waesche: 23873, herren: 49876, kinder: 28367, sport: 31525, spielwaren: 11849, wohnen: 41468 } } }, { id: "W002", name: "Hartwig Berlin Marktplatz", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3900, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1983, fassade: 1, substanz: 69, status: "offen", flaechen: [{ id: "W002-f1", etage: -1, qm: 1599, konzept: "eigen", gruppe: "food" }, { id: "W002-f2", etage: -1, qm: 2301, konzept: "eigen", gruppe: "wohnen" }, { id: "W002-f3", etage: 0, qm: 1476, konzept: "eigen", gruppe: "beauty" }, { id: "W002-f4", etage: 0, qm: 2424, konzept: "eigen", gruppe: "accessoires" }, { id: "W002-f5", etage: 1, qm: 839, konzept: "eigen", gruppe: "accessoires" }, { id: "W002-f6", etage: 1, qm: 3061, konzept: "eigen", gruppe: "damen" }, { id: "W002-f7", etage: 2, qm: 1365, konzept: "eigen", gruppe: "damen" }, { id: "W002-f8", etage: 2, qm: 1928, konzept: "eigen", gruppe: "waesche" }, { id: "W002-f9", etage: 2, qm: 606, konzept: "eigen", gruppe: "herren" }, { id: "W002-f10", etage: 3, qm: 1925, konzept: "eigen", gruppe: "herren" }, { id: "W002-f11", etage: 3, qm: 1975, konzept: "eigen", gruppe: "kinder" }, { id: "W002-f12", etage: 4, qm: 298, konzept: "eigen", gruppe: "kinder" }, { id: "W002-f13", etage: 4, qm: 2983, konzept: "eigen", gruppe: "sport" }, { id: "W002-f14", etage: 4, qm: 619, konzept: "eigen", gruppe: "spielwaren" }, { id: "W002-f15", etage: 5, qm: 1194, konzept: "eigen", gruppe: "spielwaren" }, { id: "W002-f16", etage: 5, qm: 2706, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 852216, rohertrag: 361304, konzessionserloes: 0, untermiete: 0, personal: 175041, miete: 146077, nebenkosten: 40835, sonstige: 47225, db: -47874, fteBedarf: 159.1439244982958, fteIst: 179.8138710299985, umsatzJeGruppe: { food: 65845, wohnen: 110516, beauty: 120255, accessoires: 161460, damen: 139119, waesche: 61707, herren: 75383, kinder: 46997, sport: 45468, spielwaren: 25465 } } }, { id: "W003", name: "Hartwig Berlin Am Markt", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 5600, etagen: [0, 1, 2, 3, 4], baujahr: 1997, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W003-f1", etage: 0, qm: 1688, konzept: "eigen", gruppe: "food" }, { id: "W003-f2", etage: 0, qm: 1393, konzept: "eigen", gruppe: "beauty" }, { id: "W003-f3", etage: 0, qm: 2154, konzept: "eigen", gruppe: "accessoires" }, { id: "W003-f4", etage: 0, qm: 325, konzept: "eigen", gruppe: "damen" }, { id: "W003-f5", etage: 1, qm: 5560, konzept: "eigen", gruppe: "damen" }, { id: "W003-f6", etage: 2, qm: 509, konzept: "eigen", gruppe: "damen" }, { id: "W003-f7", etage: 2, qm: 1557, konzept: "eigen", gruppe: "waesche" }, { id: "W003-f8", etage: 2, qm: 3494, konzept: "eigen", gruppe: "herren" }, { id: "W003-f9", etage: 3, qm: 222, konzept: "eigen", gruppe: "herren" }, { id: "W003-f10", etage: 3, qm: 2164, konzept: "eigen", gruppe: "kinder" }, { id: "W003-f11", etage: 3, qm: 3173, konzept: "eigen", gruppe: "sport" }, { id: "W003-f12", etage: 4, qm: 44, konzept: "eigen", gruppe: "sport" }, { id: "W003-f13", etage: 4, qm: 1653, konzept: "eigen", gruppe: "spielwaren" }, { id: "W003-f14", etage: 4, qm: 3863, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 979603, rohertrag: 415245, konzessionserloes: 0, untermiete: 0, personal: 208278, miete: 154580, nebenkosten: 36778, sonstige: 52673, db: -37064, fteBedarf: 175.8039877202085, fteIst: 210.91327047161073, umsatzJeGruppe: { food: 94423, beauty: 140977, accessoires: 111199, damen: 199727, waesche: 63883, herren: 130601, kinder: 68480, sport: 65416, spielwaren: 29282, wohnen: 75616 } } }, { id: "W004", name: "Hartwig Berlin Marktplatz", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1967, fassade: 1, substanz: 33, status: "offen", flaechen: [{ id: "W004-f1", etage: -1, qm: 1430, konzept: "eigen", gruppe: "food" }, { id: "W004-f2", etage: -1, qm: 1737, konzept: "eigen", gruppe: "wohnen" }, { id: "W004-f3", etage: 0, qm: 898, konzept: "eigen", gruppe: "beauty" }, { id: "W004-f4", etage: 0, qm: 2207, konzept: "eigen", gruppe: "accessoires" }, { id: "W004-f5", etage: 0, qm: 61, konzept: "eigen", gruppe: "damen" }, { id: "W004-f6", etage: 1, qm: 3167, konzept: "eigen", gruppe: "damen" }, { id: "W004-f7", etage: 2, qm: 716, konzept: "eigen", gruppe: "damen" }, { id: "W004-f8", etage: 2, qm: 1096, konzept: "eigen", gruppe: "waesche" }, { id: "W004-f9", etage: 2, qm: 1355, konzept: "eigen", gruppe: "herren" }, { id: "W004-f10", etage: 3, qm: 1097, konzept: "eigen", gruppe: "herren" }, { id: "W004-f11", etage: 3, qm: 1084, konzept: "eigen", gruppe: "kinder" }, { id: "W004-f12", etage: 3, qm: 985, konzept: "eigen", gruppe: "sport" }, { id: "W004-f13", etage: 4, qm: 725, konzept: "eigen", gruppe: "sport" }, { id: "W004-f14", etage: 4, qm: 1016, konzept: "eigen", gruppe: "spielwaren" }, { id: "W004-f15", etage: 4, qm: 1425, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 585065, rohertrag: 247893, konzessionserloes: 0, untermiete: 0, personal: 145415, miete: 55456, nebenkosten: 19182, sonstige: 32537, db: -4696, fteBedarf: 109.66479703142903, fteIst: 148.2748420327744, umsatzJeGruppe: { food: 57737, wohnen: 82827, beauty: 65046, accessoires: 102715, damen: 114541, waesche: 35235, herren: 57287, kinder: 23377, sport: 31891, spielwaren: 14410 } } }, { id: "S001", name: "Hartwig Sport Berlin Einkaufszentrum", stadt: "Berlin", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2400, etagen: [0, 1], baujahr: 2007, fassade: 7, substanz: 41, status: "offen", flaechen: [{ id: "S001-f1", etage: 0, qm: 1137, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S001-f2", etage: 0, qm: 1213, konzept: "eigen", gruppe: "sporttextil" }, { id: "S001-f3", etage: 1, qm: 267, konzept: "eigen", gruppe: "sporttextil" }, { id: "S001-f4", etage: 1, qm: 667, konzept: "eigen", gruppe: "outdoor" }, { id: "S001-f5", etage: 1, qm: 451, konzept: "eigen", gruppe: "teamsport" }, { id: "S001-f6", etage: 1, qm: 609, konzept: "eigen", gruppe: "rad" }, { id: "S001-f7", etage: 1, qm: 357, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 179903, rohertrag: 75386, konzessionserloes: 0, untermiete: 0, personal: 38549, miete: 21292, nebenkosten: 6841, sonstige: 9491, db: -788, fteBedarf: 30.239009917290254, fteIst: 38.696345666978516, umsatzJeGruppe: { sportschuhe: 65271, sporttextil: 47575, outdoor: 26034, teamsport: 10307, rad: 7255, wintersport: 23461 } } }, { id: "S002", name: "Hartwig Sport Berlin Altstadt", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2300, etagen: [0], baujahr: 2006, fassade: 5, substanz: 77, status: "offen", flaechen: [{ id: "S002-f1", etage: 0, qm: 544, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S002-f2", etage: 0, qm: 690, konzept: "eigen", gruppe: "sporttextil" }, { id: "S002-f3", etage: 0, qm: 391, konzept: "eigen", gruppe: "outdoor" }, { id: "S002-f4", etage: 0, qm: 209, konzept: "eigen", gruppe: "teamsport" }, { id: "S002-f5", etage: 0, qm: 234, konzept: "eigen", gruppe: "rad" }, { id: "S002-f6", etage: 0, qm: 232, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 108474, rohertrag: 45890, konzessionserloes: 0, untermiete: 0, personal: 18775, miete: 10820, nebenkosten: 3327, sonstige: 5482, db: 7486, fteBedarf: 17.019141900564524, fteIst: 19.161316769992233, umsatzJeGruppe: { sportschuhe: 34264, sporttextil: 29933, outdoor: 19753, teamsport: 6942, rad: 2798, wintersport: 14784 } } }, { id: "S003", name: "Hartwig Sport Berlin Hauptstra\xDFe", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 2e3, fassade: 4, substanz: 66, status: "offen", flaechen: [{ id: "S003-f1", etage: 0, qm: 323, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S003-f2", etage: 0, qm: 327, konzept: "eigen", gruppe: "sporttextil" }, { id: "S003-f3", etage: 1, qm: 295, konzept: "eigen", gruppe: "sporttextil" }, { id: "S003-f4", etage: 1, qm: 355, konzept: "eigen", gruppe: "outdoor" }, { id: "S003-f5", etage: 2, qm: 89, konzept: "eigen", gruppe: "outdoor" }, { id: "S003-f6", etage: 2, qm: 218, konzept: "eigen", gruppe: "teamsport" }, { id: "S003-f7", etage: 2, qm: 201, konzept: "eigen", gruppe: "rad" }, { id: "S003-f8", etage: 2, qm: 142, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 82058, rohertrag: 35014, konzessionserloes: 0, untermiete: 0, personal: 15293, miete: 10457, nebenkosten: 0, sonstige: 4242, db: 5022, fteBedarf: 13.390945213639425, fteIst: 15.77817675309605, umsatzJeGruppe: { sportschuhe: 18870, sporttextil: 22575, outdoor: 22976, teamsport: 6380, rad: 2597, wintersport: 8659 } } }, { id: "W005", name: "Hartwig Hamburg", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3500, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1976, fassade: 0, substanz: 67, status: "offen", flaechen: [{ id: "W005-f1", etage: 0, qm: 1496, konzept: "eigen", gruppe: "food" }, { id: "W005-f2", etage: 0, qm: 1318, konzept: "eigen", gruppe: "beauty" }, { id: "W005-f3", etage: 0, qm: 686, konzept: "eigen", gruppe: "accessoires" }, { id: "W005-f4", etage: 1, qm: 1332, konzept: "eigen", gruppe: "accessoires" }, { id: "W005-f5", etage: 1, qm: 2168, konzept: "eigen", gruppe: "damen" }, { id: "W005-f6", etage: 2, qm: 1977, konzept: "eigen", gruppe: "damen" }, { id: "W005-f7", etage: 2, qm: 1523, konzept: "eigen", gruppe: "waesche" }, { id: "W005-f8", etage: 3, qm: 333, konzept: "eigen", gruppe: "waesche" }, { id: "W005-f9", etage: 3, qm: 2181, konzept: "eigen", gruppe: "herren" }, { id: "W005-f10", etage: 3, qm: 986, konzept: "eigen", gruppe: "kinder" }, { id: "W005-f11", etage: 4, qm: 563, konzept: "eigen", gruppe: "kinder" }, { id: "W005-f12", etage: 4, qm: 1659, konzept: "eigen", gruppe: "sport" }, { id: "W005-f13", etage: 4, qm: 1278, konzept: "eigen", gruppe: "spielwaren" }, { id: "W005-f14", etage: 5, qm: 24, konzept: "eigen", gruppe: "spielwaren" }, { id: "W005-f15", etage: 5, qm: 3476, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 680628, rohertrag: 286925, konzessionserloes: 0, untermiete: 0, personal: 149721, miete: 77503, nebenkosten: 0, sonstige: 37356, db: 22345, fteBedarf: 125.4791372076569, fteIst: 151.3347673572255, umsatzJeGruppe: { food: 63679, beauty: 124070, accessoires: 90919, damen: 119082, waesche: 59093, herren: 61736, kinder: 36364, sport: 29704, spielwaren: 18269, wohnen: 77713 } } }, { id: "W006", name: "Hartwig Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1974, fassade: 4, substanz: 48, status: "offen", flaechen: [{ id: "W006-f1", etage: -1, qm: 2198, konzept: "eigen", gruppe: "food" }, { id: "W006-f2", etage: -1, qm: 1773, konzept: "eigen", gruppe: "wohnen" }, { id: "W006-f3", etage: 0, qm: 1498, konzept: "eigen", gruppe: "beauty" }, { id: "W006-f4", etage: 0, qm: 2473, konzept: "eigen", gruppe: "accessoires" }, { id: "W006-f5", etage: 1, qm: 689, konzept: "eigen", gruppe: "accessoires" }, { id: "W006-f6", etage: 1, qm: 3282, konzept: "eigen", gruppe: "damen" }, { id: "W006-f7", etage: 2, qm: 1473, konzept: "eigen", gruppe: "damen" }, { id: "W006-f8", etage: 2, qm: 2234, konzept: "eigen", gruppe: "waesche" }, { id: "W006-f9", etage: 2, qm: 264, konzept: "eigen", gruppe: "herren" }, { id: "W006-f10", etage: 3, qm: 3676, konzept: "eigen", gruppe: "herren" }, { id: "W006-f11", etage: 3, qm: 295, konzept: "eigen", gruppe: "kinder" }, { id: "W006-f12", etage: 4, qm: 1171, konzept: "eigen", gruppe: "kinder" }, { id: "W006-f13", etage: 4, qm: 2800, konzept: "eigen", gruppe: "sport" }, { id: "W006-f14", etage: 5, qm: 72, konzept: "eigen", gruppe: "sport" }, { id: "W006-f15", etage: 5, qm: 1830, konzept: "eigen", gruppe: "spielwaren" }, { id: "W006-f16", etage: 5, qm: 2069, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 1178083, rohertrag: 495107, konzessionserloes: 0, untermiete: 0, personal: 238157, miete: 99040, nebenkosten: 37651, sonstige: 60810, db: 59449, fteBedarf: 200.11818584531616, fteIst: 239.41977394155487, umsatzJeGruppe: { food: 133383, wohnen: 111208, beauty: 179962, accessoires: 219673, damen: 162609, waesche: 102807, herren: 125207, kinder: 43506, sport: 63011, spielwaren: 36717 } } }, { id: "W007", name: "Hartwig Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 2600, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1994, fassade: 0, substanz: 55, status: "offen", flaechen: [{ id: "W007-f1", etage: -1, qm: 867, konzept: "eigen", gruppe: "food" }, { id: "W007-f2", etage: -1, qm: 1700, konzept: "eigen", gruppe: "wohnen" }, { id: "W007-f3", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W007-f4", etage: 0, qm: 1456, konzept: "eigen", gruppe: "accessoires" }, { id: "W007-f5", etage: 0, qm: 346, konzept: "eigen", gruppe: "damen" }, { id: "W007-f6", etage: 1, qm: 2567, konzept: "eigen", gruppe: "damen" }, { id: "W007-f7", etage: 2, qm: 608, konzept: "eigen", gruppe: "damen" }, { id: "W007-f8", etage: 2, qm: 999, konzept: "eigen", gruppe: "waesche" }, { id: "W007-f9", etage: 2, qm: 960, konzept: "eigen", gruppe: "herren" }, { id: "W007-f10", etage: 3, qm: 1351, konzept: "eigen", gruppe: "herren" }, { id: "W007-f11", etage: 3, qm: 1216, konzept: "eigen", gruppe: "kinder" }, { id: "W007-f12", etage: 4, qm: 38, konzept: "eigen", gruppe: "kinder" }, { id: "W007-f13", etage: 4, qm: 1254, konzept: "eigen", gruppe: "sport" }, { id: "W007-f14", etage: 4, qm: 972, konzept: "eigen", gruppe: "spielwaren" }, { id: "W007-f15", etage: 4, qm: 303, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 548568, rohertrag: 234303, konzessionserloes: 0, untermiete: 0, personal: 128534, miete: 89059, nebenkosten: 21860, sonstige: 29422, db: -34572, fteBedarf: 98.09131739332074, fteIst: 130.37834865459325, umsatzJeGruppe: { food: 42747, wohnen: 46575, beauty: 82472, accessoires: 95294, damen: 108453, waesche: 34915, herren: 65480, kinder: 29978, sport: 27247, spielwaren: 15408 } } }, { id: "S004", name: "Hartwig Sport Hamburg City-Center", stadt: "Hamburg", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 1700, etagen: [0], baujahr: 1978, fassade: 1, substanz: 63, status: "offen", flaechen: [{ id: "S004-f1", etage: 0, qm: 458, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S004-f2", etage: 0, qm: 414, konzept: "eigen", gruppe: "sporttextil" }, { id: "S004-f3", etage: 0, qm: 328, konzept: "eigen", gruppe: "outdoor" }, { id: "S004-f4", etage: 0, qm: 190, konzept: "eigen", gruppe: "teamsport" }, { id: "S004-f5", etage: 0, qm: 161, konzept: "eigen", gruppe: "rad" }, { id: "S004-f6", etage: 0, qm: 148, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 71451, rohertrag: 29891, konzessionserloes: 0, untermiete: 0, personal: 13130, miete: 10970, nebenkosten: 1816, sonstige: 3694, db: 281, fteBedarf: 11.600725058482464, fteIst: 13.178316073396308, umsatzJeGruppe: { sportschuhe: 29938, sporttextil: 12697, outdoor: 13057, teamsport: 4484, rad: 1691, wintersport: 9585 } } }, { id: "S005", name: "Hartwig Sport Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2900, etagen: [0], baujahr: 2004, fassade: 7, substanz: 72, status: "offen", flaechen: [{ id: "S005-f1", etage: 0, qm: 555, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S005-f2", etage: 0, qm: 934, konzept: "eigen", gruppe: "sporttextil" }, { id: "S005-f3", etage: 0, qm: 599, konzept: "eigen", gruppe: "outdoor" }, { id: "S005-f4", etage: 0, qm: 227, konzept: "eigen", gruppe: "teamsport" }, { id: "S005-f5", etage: 0, qm: 306, konzept: "eigen", gruppe: "rad" }, { id: "S005-f6", etage: 0, qm: 279, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 105833, rohertrag: 45107, konzessionserloes: 0, untermiete: 0, personal: 19463, miete: 7685, nebenkosten: 2932, sonstige: 5644, db: 9382, fteBedarf: 17.82897189599727, fteIst: 20.084530607437635, umsatzJeGruppe: { sportschuhe: 26258, sporttextil: 31012, outdoor: 24526, teamsport: 4568, rad: 3267, wintersport: 16202 } } }, { id: "W008", name: "Hartwig M\xFCnchen", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3100, etagen: [-1, 0, 1, 2, 3], baujahr: 1962, fassade: 3, substanz: 81, status: "offen", flaechen: [{ id: "W008-f1", etage: -1, qm: 1304, konzept: "eigen", gruppe: "food" }, { id: "W008-f2", etage: -1, qm: 1836, konzept: "eigen", gruppe: "wohnen" }, { id: "W008-f3", etage: 0, qm: 1084, konzept: "eigen", gruppe: "beauty" }, { id: "W008-f4", etage: 0, qm: 1913, konzept: "eigen", gruppe: "accessoires" }, { id: "W008-f5", etage: 0, qm: 143, konzept: "eigen", gruppe: "damen" }, { id: "W008-f6", etage: 1, qm: 2487, konzept: "eigen", gruppe: "damen" }, { id: "W008-f7", etage: 1, qm: 653, konzept: "eigen", gruppe: "waesche" }, { id: "W008-f8", etage: 2, qm: 490, konzept: "eigen", gruppe: "waesche" }, { id: "W008-f9", etage: 2, qm: 1625, konzept: "eigen", gruppe: "herren" }, { id: "W008-f10", etage: 2, qm: 1024, konzept: "eigen", gruppe: "kinder" }, { id: "W008-f11", etage: 3, qm: 1297, konzept: "eigen", gruppe: "sport" }, { id: "W008-f12", etage: 3, qm: 1235, konzept: "eigen", gruppe: "spielwaren" }, { id: "W008-f13", etage: 3, qm: 608, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 634710, rohertrag: 264730, konzessionserloes: 0, untermiete: 0, personal: 141836, miete: 67430, nebenkosten: 19695, sonstige: 33088, db: 2681, fteBedarf: 109.37454007714577, fteIst: 142.05388052311054, umsatzJeGruppe: { food: 76793, wohnen: 56825, beauty: 107775, accessoires: 124104, damen: 105929, waesche: 38824, herren: 47022, kinder: 27713, sport: 25323, spielwaren: 24403 } } }, { id: "W009", name: "Hartwig M\xFCnchen Marktplatz", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4700, etagen: [0, 1, 2, 3, 4], baujahr: 1945, fassade: 2, substanz: 32, status: "offen", flaechen: [{ id: "W009-f1", etage: 0, qm: 1302, konzept: "eigen", gruppe: "food" }, { id: "W009-f2", etage: 0, qm: 1456, konzept: "eigen", gruppe: "beauty" }, { id: "W009-f3", etage: 0, qm: 1962, konzept: "eigen", gruppe: "accessoires" }, { id: "W009-f4", etage: 1, qm: 218, konzept: "eigen", gruppe: "accessoires" }, { id: "W009-f5", etage: 1, qm: 4502, konzept: "eigen", gruppe: "damen" }, { id: "W009-f6", etage: 2, qm: 829, konzept: "eigen", gruppe: "damen" }, { id: "W009-f7", etage: 2, qm: 1915, konzept: "eigen", gruppe: "waesche" }, { id: "W009-f8", etage: 2, qm: 1976, konzept: "eigen", gruppe: "herren" }, { id: "W009-f9", etage: 3, qm: 910, konzept: "eigen", gruppe: "herren" }, { id: "W009-f10", etage: 3, qm: 1191, konzept: "eigen", gruppe: "kinder" }, { id: "W009-f11", etage: 3, qm: 2495, konzept: "eigen", gruppe: "sport" }, { id: "W009-f12", etage: 3, qm: 123, konzept: "eigen", gruppe: "spielwaren" }, { id: "W009-f13", etage: 4, qm: 1293, konzept: "eigen", gruppe: "spielwaren" }, { id: "W009-f14", etage: 4, qm: 3427, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 720317, rohertrag: 305682, konzessionserloes: 0, untermiete: 0, personal: 152859, miete: 89731, nebenkosten: 24126, sonstige: 40153, db: -1188, fteBedarf: 135.57209511125842, fteIst: 156.51258713771043, umsatzJeGruppe: { food: 61885, beauty: 124020, accessoires: 101640, damen: 147043, waesche: 55782, herren: 74935, kinder: 23748, sport: 41749, spielwaren: 21705, wohnen: 67810 } } }, { id: "W010", name: "Hartwig M\xFCnchen Am Markt", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1931, fassade: 2, substanz: 37, status: "offen", flaechen: [{ id: "W010-f1", etage: -1, qm: 2019, konzept: "eigen", gruppe: "food" }, { id: "W010-f2", etage: -1, qm: 1152, konzept: "eigen", gruppe: "wohnen" }, { id: "W010-f3", etage: 0, qm: 1271, konzept: "eigen", gruppe: "beauty" }, { id: "W010-f4", etage: 0, qm: 1901, konzept: "eigen", gruppe: "accessoires" }, { id: "W010-f5", etage: 1, qm: 147, konzept: "eigen", gruppe: "accessoires" }, { id: "W010-f6", etage: 1, qm: 3025, konzept: "eigen", gruppe: "damen" }, { id: "W010-f7", etage: 2, qm: 2194, konzept: "eigen", gruppe: "damen" }, { id: "W010-f8", etage: 2, qm: 977, konzept: "eigen", gruppe: "waesche" }, { id: "W010-f9", etage: 3, qm: 773, konzept: "eigen", gruppe: "waesche" }, { id: "W010-f10", etage: 3, qm: 2399, konzept: "eigen", gruppe: "herren" }, { id: "W010-f11", etage: 4, qm: 17, konzept: "eigen", gruppe: "herren" }, { id: "W010-f12", etage: 4, qm: 1422, konzept: "eigen", gruppe: "kinder" }, { id: "W010-f13", etage: 4, qm: 1733, konzept: "eigen", gruppe: "sport" }, { id: "W010-f14", etage: 5, qm: 502, konzept: "eigen", gruppe: "sport" }, { id: "W010-f15", etage: 5, qm: 1216, konzept: "eigen", gruppe: "spielwaren" }, { id: "W010-f16", etage: 5, qm: 1453, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 806829, rohertrag: 339765, konzessionserloes: 0, untermiete: 0, personal: 153763, miete: 68917, nebenkosten: 30518, sonstige: 43070, db: 43496, fteBedarf: 143.31180767469192, fteIst: 157.84199784570941, umsatzJeGruppe: { food: 87138, wohnen: 60440, beauty: 143798, accessoires: 122653, damen: 157112, waesche: 57139, herren: 77158, kinder: 35745, sport: 45807, spielwaren: 19840 } } }, { id: "S006", name: "Hartwig Sport M\xFCnchen", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1986, fassade: 3, substanz: 71, status: "offen", flaechen: [{ id: "S006-f1", etage: 0, qm: 1098, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S006-f2", etage: 0, qm: 1577, konzept: "eigen", gruppe: "sporttextil" }, { id: "S006-f3", etage: 1, qm: 21, konzept: "eigen", gruppe: "sporttextil" }, { id: "S006-f4", etage: 1, qm: 1072, konzept: "eigen", gruppe: "outdoor" }, { id: "S006-f5", etage: 1, qm: 449, konzept: "eigen", gruppe: "teamsport" }, { id: "S006-f6", etage: 1, qm: 664, konzept: "eigen", gruppe: "rad" }, { id: "S006-f7", etage: 1, qm: 469, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 231121, rohertrag: 97740, konzessionserloes: 0, untermiete: 0, personal: 40916, miete: 22361, nebenkosten: 6540, sonstige: 11883, db: 16040, fteBedarf: 37.16834450392001, fteIst: 41.18710472301602, umsatzJeGruppe: { sportschuhe: 67499, sporttextil: 66855, outdoor: 42458, teamsport: 11189, rad: 8634, wintersport: 34486 } } }, { id: "S007", name: "Hartwig Sport M\xFCnchen Am Wall", stadt: "M\xFCnchen", format: "sport", lage: "b", cluster: "metropole", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 1975, fassade: 7, substanz: 38, status: "offen", flaechen: [{ id: "S007-f1", etage: 0, qm: 474, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S007-f2", etage: 0, qm: 259, konzept: "eigen", gruppe: "sporttextil" }, { id: "S007-f3", etage: 1, qm: 283, konzept: "eigen", gruppe: "sporttextil" }, { id: "S007-f4", etage: 1, qm: 444, konzept: "eigen", gruppe: "outdoor" }, { id: "S007-f5", etage: 1, qm: 6, konzept: "eigen", gruppe: "teamsport" }, { id: "S007-f6", etage: 2, qm: 198, konzept: "eigen", gruppe: "teamsport" }, { id: "S007-f7", etage: 2, qm: 331, konzept: "eigen", gruppe: "rad" }, { id: "S007-f8", etage: 2, qm: 204, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 80683, rohertrag: 33793, konzessionserloes: 0, untermiete: 0, personal: 14890, miete: 9125, nebenkosten: 2845, sonstige: 4298, db: 2635, fteBedarf: 13.668988032611951, fteIst: 15.396758071949431, umsatzJeGruppe: { sportschuhe: 26124, sporttextil: 16787, outdoor: 16323, teamsport: 4204, rad: 4006, wintersport: 13239 } } }, { id: "S008", name: "Hartwig Sport M\xFCnchen Altstadt", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1500, etagen: [0, 1, 2], baujahr: 2012, fassade: 4, substanz: 60, status: "offen", flaechen: [{ id: "S008-f1", etage: 0, qm: 1156, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S008-f2", etage: 0, qm: 311, konzept: "eigen", gruppe: "sporttextil" }, { id: "S008-f3", etage: 1, qm: 789, konzept: "eigen", gruppe: "sporttextil" }, { id: "S008-f4", etage: 1, qm: 678, konzept: "eigen", gruppe: "outdoor" }, { id: "S008-f5", etage: 2, qm: 107, konzept: "eigen", gruppe: "outdoor" }, { id: "S008-f6", etage: 2, qm: 472, konzept: "eigen", gruppe: "teamsport" }, { id: "S008-f7", etage: 2, qm: 491, konzept: "eigen", gruppe: "rad" }, { id: "S008-f8", etage: 2, qm: 396, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 204261, rohertrag: 85772, konzessionserloes: 0, untermiete: 0, personal: 35739, miete: 24774, nebenkosten: 5223, sonstige: 10355, db: 9682, fteBedarf: 32.2807452085907, fteIst: 36.230434659385594, umsatzJeGruppe: { sportschuhe: 79692, sporttextil: 49890, outdoor: 32164, teamsport: 9822, rad: 5738, wintersport: 26955 } } }, { id: "W011", name: "Hartwig K\xF6ln City-Center", stadt: "K\xF6ln", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 3700, etagen: [0, 1, 2, 3, 4], baujahr: 1974, fassade: 3, substanz: 54, status: "offen", flaechen: [{ id: "W011-f1", etage: 0, qm: 1289, konzept: "eigen", gruppe: "food" }, { id: "W011-f2", etage: 0, qm: 1367, konzept: "eigen", gruppe: "beauty" }, { id: "W011-f3", etage: 0, qm: 1024, konzept: "eigen", gruppe: "accessoires" }, { id: "W011-f4", etage: 1, qm: 362, konzept: "eigen", gruppe: "accessoires" }, { id: "W011-f5", etage: 1, qm: 3318, konzept: "eigen", gruppe: "damen" }, { id: "W011-f6", etage: 2, qm: 1066, konzept: "eigen", gruppe: "damen" }, { id: "W011-f7", etage: 2, qm: 1438, konzept: "eigen", gruppe: "waesche" }, { id: "W011-f8", etage: 2, qm: 1176, konzept: "eigen", gruppe: "herren" }, { id: "W011-f9", etage: 3, qm: 1364, konzept: "eigen", gruppe: "herren" }, { id: "W011-f10", etage: 3, qm: 1391, konzept: "eigen", gruppe: "kinder" }, { id: "W011-f11", etage: 3, qm: 925, konzept: "eigen", gruppe: "sport" }, { id: "W011-f12", etage: 4, qm: 665, konzept: "eigen", gruppe: "sport" }, { id: "W011-f13", etage: 4, qm: 914, konzept: "eigen", gruppe: "spielwaren" }, { id: "W011-f14", etage: 4, qm: 2101, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 470422, rohertrag: 199054, konzessionserloes: 0, untermiete: 0, personal: 118997, miete: 70819, nebenkosten: 26008, sonstige: 27567, db: -44337, fteBedarf: 94.52113235739775, fteIst: 121.51666383366833, umsatzJeGruppe: { food: 39701, beauty: 95717, accessoires: 55926, damen: 100455, waesche: 29755, herren: 51254, kinder: 24955, sport: 24217, spielwaren: 12823, wohnen: 35620 } } }, { id: "W012", name: "Hartwig K\xF6ln Arkaden", stadt: "K\xF6ln", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 4500, etagen: [-1, 0, 1, 2, 3], baujahr: 1924, fassade: 1, substanz: 37, status: "offen", flaechen: [{ id: "W012-f1", etage: -1, qm: 1611, konzept: "eigen", gruppe: "food" }, { id: "W012-f2", etage: -1, qm: 2909, konzept: "eigen", gruppe: "wohnen" }, { id: "W012-f3", etage: 0, qm: 1617, konzept: "eigen", gruppe: "beauty" }, { id: "W012-f4", etage: 0, qm: 2083, konzept: "eigen", gruppe: "accessoires" }, { id: "W012-f5", etage: 0, qm: 820, konzept: "eigen", gruppe: "damen" }, { id: "W012-f6", etage: 1, qm: 4202, konzept: "eigen", gruppe: "damen" }, { id: "W012-f7", etage: 1, qm: 318, konzept: "eigen", gruppe: "waesche" }, { id: "W012-f8", etage: 2, qm: 1232, konzept: "eigen", gruppe: "waesche" }, { id: "W012-f9", etage: 2, qm: 2675, konzept: "eigen", gruppe: "herren" }, { id: "W012-f10", etage: 2, qm: 613, konzept: "eigen", gruppe: "kinder" }, { id: "W012-f11", etage: 3, qm: 1015, konzept: "eigen", gruppe: "kinder" }, { id: "W012-f12", etage: 3, qm: 2267, konzept: "eigen", gruppe: "sport" }, { id: "W012-f13", etage: 3, qm: 1298, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 651290, rohertrag: 273778, konzessionserloes: 0, untermiete: 0, personal: 138764, miete: 56433, nebenkosten: 31429, sonstige: 36900, db: 10253, fteBedarf: 125.30892118053129, fteIst: 141.94311506493966, umsatzJeGruppe: { food: 59767, wohnen: 43604, beauty: 137372, accessoires: 101936, damen: 115606, waesche: 43876, herren: 62814, kinder: 30657, sport: 34197, spielwaren: 21460 } } }, { id: "S009", name: "Hartwig Sport K\xF6ln Galerie am Fluss", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 900, etagen: [0, 1, 2], baujahr: 2007, fassade: 6, substanz: 79, status: "offen", flaechen: [{ id: "S009-f1", etage: 0, qm: 585, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S009-f2", etage: 0, qm: 349, konzept: "eigen", gruppe: "sporttextil" }, { id: "S009-f3", etage: 1, qm: 491, konzept: "eigen", gruppe: "sporttextil" }, { id: "S009-f4", etage: 1, qm: 442, konzept: "eigen", gruppe: "outdoor" }, { id: "S009-f5", etage: 2, qm: 150, konzept: "eigen", gruppe: "outdoor" }, { id: "S009-f6", etage: 2, qm: 250, konzept: "eigen", gruppe: "teamsport" }, { id: "S009-f7", etage: 2, qm: 342, konzept: "eigen", gruppe: "rad" }, { id: "S009-f8", etage: 2, qm: 191, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 105889, rohertrag: 44857, konzessionserloes: 0, untermiete: 0, personal: 19904, miete: 11623, nebenkosten: 4145, sonstige: 5601, db: 3584, fteBedarf: 17.942361818663294, fteIst: 20.210898954929757, umsatzJeGruppe: { sportschuhe: 36485, sporttextil: 32969, outdoor: 19833, teamsport: 4540, rad: 3167, wintersport: 8896 } } }, { id: "S010", name: "Hartwig Sport K\xF6ln Arkaden", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 600, etagen: [0, 1, 2], baujahr: 1994, fassade: 0, substanz: 67, status: "offen", flaechen: [{ id: "S010-f1", etage: 0, qm: 339, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S010-f2", etage: 0, qm: 211, konzept: "eigen", gruppe: "sporttextil" }, { id: "S010-f3", etage: 1, qm: 196, konzept: "eigen", gruppe: "sporttextil" }, { id: "S010-f4", etage: 1, qm: 354, konzept: "eigen", gruppe: "outdoor" }, { id: "S010-f5", etage: 2, qm: 24, konzept: "eigen", gruppe: "outdoor" }, { id: "S010-f6", etage: 2, qm: 141, konzept: "eigen", gruppe: "teamsport" }, { id: "S010-f7", etage: 2, qm: 241, konzept: "eigen", gruppe: "rad" }, { id: "S010-f8", etage: 2, qm: 144, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 49425, rohertrag: 20827, konzessionserloes: 0, untermiete: 0, personal: 10455, miete: 9964, nebenkosten: 2257, sonstige: 2769, db: -4619, fteBedarf: 9.003018787165358, fteIst: 10.5564706810127, umsatzJeGruppe: { sportschuhe: 15321, sporttextil: 10691, outdoor: 12072, teamsport: 2432, rad: 2164, wintersport: 6745 } } }, { id: "W013", name: "Hartwig Frankfurt", stadt: "Frankfurt", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3900, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1984, fassade: 1, substanz: 32, status: "offen", flaechen: [{ id: "W013-f1", etage: -1, qm: 1937, konzept: "eigen", gruppe: "food" }, { id: "W013-f2", etage: -1, qm: 1948, konzept: "eigen", gruppe: "wohnen" }, { id: "W013-f3", etage: 0, qm: 1610, konzept: "eigen", gruppe: "beauty" }, { id: "W013-f4", etage: 0, qm: 2276, konzept: "eigen", gruppe: "accessoires" }, { id: "W013-f5", etage: 1, qm: 214, konzept: "eigen", gruppe: "accessoires" }, { id: "W013-f6", etage: 1, qm: 3672, konzept: "eigen", gruppe: "damen" }, { id: "W013-f7", etage: 2, qm: 2280, konzept: "eigen", gruppe: "damen" }, { id: "W013-f8", etage: 2, qm: 1605, konzept: "eigen", gruppe: "waesche" }, { id: "W013-f9", etage: 3, qm: 123, konzept: "eigen", gruppe: "waesche" }, { id: "W013-f10", etage: 3, qm: 3252, konzept: "eigen", gruppe: "herren" }, { id: "W013-f11", etage: 3, qm: 511, konzept: "eigen", gruppe: "kinder" }, { id: "W013-f12", etage: 4, qm: 1471, konzept: "eigen", gruppe: "kinder" }, { id: "W013-f13", etage: 4, qm: 2415, konzept: "eigen", gruppe: "sport" }, { id: "W013-f14", etage: 5, qm: 35, konzept: "eigen", gruppe: "sport" }, { id: "W013-f15", etage: 5, qm: 1449, konzept: "eigen", gruppe: "spielwaren" }, { id: "W013-f16", etage: 5, qm: 2402, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 776164, rohertrag: 326020, konzessionserloes: 0, untermiete: 0, personal: 179406, miete: 83657, nebenkosten: 37419, sonstige: 44063, db: -18524, fteBedarf: 149.61121766248164, fteIst: 183.57388462592328, umsatzJeGruppe: { food: 79441, wohnen: 63469, beauty: 147742, accessoires: 99784, damen: 147390, waesche: 46343, herren: 84336, kinder: 47607, sport: 39539, spielwaren: 20513 } } }, { id: "W014", name: "Hartwig Frankfurt Hauptstra\xDFe", stadt: "Frankfurt", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1981, fassade: 7, substanz: 56, status: "offen", flaechen: [{ id: "W014-f1", etage: -1, qm: 1472, konzept: "eigen", gruppe: "food" }, { id: "W014-f2", etage: -1, qm: 1799, konzept: "eigen", gruppe: "wohnen" }, { id: "W014-f3", etage: 0, qm: 1283, konzept: "eigen", gruppe: "beauty" }, { id: "W014-f4", etage: 0, qm: 1988, konzept: "eigen", gruppe: "accessoires" }, { id: "W014-f5", etage: 1, qm: 9, konzept: "eigen", gruppe: "accessoires" }, { id: "W014-f6", etage: 1, qm: 3262, konzept: "eigen", gruppe: "damen" }, { id: "W014-f7", etage: 2, qm: 1102, konzept: "eigen", gruppe: "damen" }, { id: "W014-f8", etage: 2, qm: 1310, konzept: "eigen", gruppe: "waesche" }, { id: "W014-f9", etage: 2, qm: 859, konzept: "eigen", gruppe: "herren" }, { id: "W014-f10", etage: 3, qm: 1406, konzept: "eigen", gruppe: "herren" }, { id: "W014-f11", etage: 3, qm: 1596, konzept: "eigen", gruppe: "kinder" }, { id: "W014-f12", etage: 3, qm: 270, konzept: "eigen", gruppe: "sport" }, { id: "W014-f13", etage: 4, qm: 2508, konzept: "eigen", gruppe: "sport" }, { id: "W014-f14", etage: 4, qm: 764, konzept: "eigen", gruppe: "spielwaren" }, { id: "W014-f15", etage: 5, qm: 905, konzept: "eigen", gruppe: "spielwaren" }, { id: "W014-f16", etage: 5, qm: 2366, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 841120, rohertrag: 352675, konzessionserloes: 0, untermiete: 0, personal: 185385, miete: 63203, nebenkosten: 26921, sonstige: 44790, db: 32376, fteBedarf: 149.26307186005968, fteIst: 189.37930208572513, umsatzJeGruppe: { food: 66645, wohnen: 83922, beauty: 149843, accessoires: 122577, damen: 147543, waesche: 41271, herren: 82452, kinder: 52063, sport: 58557, spielwaren: 36246 } } }, { id: "S011", name: "Hartwig Sport Frankfurt", stadt: "Frankfurt", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2e3, etagen: [0, 1], baujahr: 2011, fassade: 2, substanz: 56, status: "offen", flaechen: [{ id: "S011-f1", etage: 0, qm: 1116, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S011-f2", etage: 0, qm: 884, konzept: "eigen", gruppe: "sporttextil" }, { id: "S011-f3", etage: 1, qm: 144, konzept: "eigen", gruppe: "sporttextil" }, { id: "S011-f4", etage: 1, qm: 678, konzept: "eigen", gruppe: "outdoor" }, { id: "S011-f5", etage: 1, qm: 481, konzept: "eigen", gruppe: "teamsport" }, { id: "S011-f6", etage: 1, qm: 413, konzept: "eigen", gruppe: "rad" }, { id: "S011-f7", etage: 1, qm: 283, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 204272, rohertrag: 85965, konzessionserloes: 0, untermiete: 0, personal: 38043, miete: 14902, nebenkosten: 4291, sonstige: 10175, db: 18554, fteBedarf: 31.55101315478689, fteIst: 38.59533266697779, umsatzJeGruppe: { sportschuhe: 74193, sporttextil: 53406, outdoor: 32356, teamsport: 14173, rad: 5289, wintersport: 24855 } } }, { id: "S012", name: "Hartwig Sport Frankfurt Am Markt", stadt: "Frankfurt", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 3500, etagen: [0], baujahr: 1995, fassade: 5, substanz: 60, status: "offen", flaechen: [{ id: "S012-f1", etage: 0, qm: 835, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S012-f2", etage: 0, qm: 863, konzept: "eigen", gruppe: "sporttextil" }, { id: "S012-f3", etage: 0, qm: 754, konzept: "eigen", gruppe: "outdoor" }, { id: "S012-f4", etage: 0, qm: 346, konzept: "eigen", gruppe: "teamsport" }, { id: "S012-f5", etage: 0, qm: 407, konzept: "eigen", gruppe: "rad" }, { id: "S012-f6", etage: 0, qm: 295, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 160296, rohertrag: 67764, konzessionserloes: 0, untermiete: 0, personal: 31372, miete: 23987, nebenkosten: 3708, sonstige: 8147, db: 550, fteBedarf: 25.499037707470766, fteIst: 31.851320333159077, umsatzJeGruppe: { sportschuhe: 47350, sporttextil: 38706, outdoor: 38331, teamsport: 9307, rad: 6155, wintersport: 20446 } } }, { id: "W015", name: "Hartwig D\xFCsseldorf City-Center", stadt: "D\xFCsseldorf", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 4100, etagen: [-1, 0, 1, 2, 3], baujahr: 1978, fassade: 5, substanz: 44, status: "offen", flaechen: [{ id: "W015-f1", etage: -1, qm: 1397, konzept: "eigen", gruppe: "food" }, { id: "W015-f2", etage: -1, qm: 2723, konzept: "eigen", gruppe: "wohnen" }, { id: "W015-f3", etage: 0, qm: 1047, konzept: "eigen", gruppe: "beauty" }, { id: "W015-f4", etage: 0, qm: 1851, konzept: "eigen", gruppe: "accessoires" }, { id: "W015-f5", etage: 0, qm: 1222, konzept: "eigen", gruppe: "damen" }, { id: "W015-f6", etage: 1, qm: 2653, konzept: "eigen", gruppe: "damen" }, { id: "W015-f7", etage: 1, qm: 1457, konzept: "eigen", gruppe: "waesche" }, { id: "W015-f8", etage: 1, qm: 11, konzept: "eigen", gruppe: "herren" }, { id: "W015-f9", etage: 2, qm: 2058, konzept: "eigen", gruppe: "herren" }, { id: "W015-f10", etage: 2, qm: 1548, konzept: "eigen", gruppe: "kinder" }, { id: "W015-f11", etage: 2, qm: 514, konzept: "eigen", gruppe: "sport" }, { id: "W015-f12", etage: 3, qm: 1792, konzept: "eigen", gruppe: "sport" }, { id: "W015-f13", etage: 3, qm: 1321, konzept: "eigen", gruppe: "spielwaren" }, { id: "W015-f14", etage: 3, qm: 1007, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 681687, rohertrag: 286212, konzessionserloes: 0, untermiete: 0, personal: 154921, miete: 97006, nebenkosten: 0, sonstige: 37220, db: -2935, fteBedarf: 124.86729317467515, fteIst: 157.28323075819483, umsatzJeGruppe: { food: 66200, wohnen: 81001, beauty: 113343, accessoires: 93807, damen: 113845, waesche: 51182, herren: 65435, kinder: 37839, sport: 37424, spielwaren: 21611 } } }, { id: "W016", name: "Hartwig D\xFCsseldorf Hauptstra\xDFe", stadt: "D\xFCsseldorf", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1975, fassade: 4, substanz: 36, status: "offen", flaechen: [{ id: "W016-f1", etage: -1, qm: 1548, konzept: "eigen", gruppe: "food" }, { id: "W016-f2", etage: -1, qm: 2486, konzept: "eigen", gruppe: "wohnen" }, { id: "W016-f3", etage: 0, qm: 1563, konzept: "eigen", gruppe: "beauty" }, { id: "W016-f4", etage: 0, qm: 2170, konzept: "eigen", gruppe: "accessoires" }, { id: "W016-f5", etage: 0, qm: 301, konzept: "eigen", gruppe: "damen" }, { id: "W016-f6", etage: 1, qm: 4033, konzept: "eigen", gruppe: "damen" }, { id: "W016-f7", etage: 2, qm: 533, konzept: "eigen", gruppe: "damen" }, { id: "W016-f8", etage: 2, qm: 1943, konzept: "eigen", gruppe: "waesche" }, { id: "W016-f9", etage: 2, qm: 1558, konzept: "eigen", gruppe: "herren" }, { id: "W016-f10", etage: 3, qm: 1816, konzept: "eigen", gruppe: "herren" }, { id: "W016-f11", etage: 3, qm: 1734, konzept: "eigen", gruppe: "kinder" }, { id: "W016-f12", etage: 3, qm: 484, konzept: "eigen", gruppe: "sport" }, { id: "W016-f13", etage: 4, qm: 1904, konzept: "eigen", gruppe: "sport" }, { id: "W016-f14", etage: 4, qm: 1290, konzept: "eigen", gruppe: "spielwaren" }, { id: "W016-f15", etage: 4, qm: 840, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 989132, rohertrag: 419154, konzessionserloes: 0, untermiete: 0, personal: 211005, miete: 79198, nebenkosten: 27906, sonstige: 51446, db: 49599, fteBedarf: 169.60885016905962, fteIst: 219.54370796368428, umsatzJeGruppe: { food: 96531, wohnen: 70471, beauty: 183498, accessoires: 138198, damen: 186702, waesche: 74598, herren: 125288, kinder: 41422, sport: 51355, spielwaren: 21068 } } }, { id: "S013", name: "Hartwig Sport D\xFCsseldorf Einkaufszentrum", stadt: "D\xFCsseldorf", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 2015, fassade: 1, substanz: 35, status: "offen", flaechen: [{ id: "S013-f1", etage: 0, qm: 1032, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S013-f2", etage: 0, qm: 1093, konzept: "eigen", gruppe: "sporttextil" }, { id: "S013-f3", etage: 1, qm: 143, konzept: "eigen", gruppe: "sporttextil" }, { id: "S013-f4", etage: 1, qm: 841, konzept: "eigen", gruppe: "outdoor" }, { id: "S013-f5", etage: 1, qm: 297, konzept: "eigen", gruppe: "teamsport" }, { id: "S013-f6", etage: 1, qm: 493, konzept: "eigen", gruppe: "rad" }, { id: "S013-f7", etage: 1, qm: 351, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 141487, rohertrag: 59654, konzessionserloes: 0, untermiete: 0, personal: 27950, miete: 13866, nebenkosten: 5805, sonstige: 7713, db: 4319, fteBedarf: 24.701643702090895, fteIst: 28.54927540580955, umsatzJeGruppe: { sportschuhe: 44774, sporttextil: 39674, outdoor: 23638, teamsport: 6333, rad: 5398, wintersport: 21670 } } }, { id: "S014", name: "Hartwig Sport D\xFCsseldorf Galerie am Fluss", stadt: "D\xFCsseldorf", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2200, etagen: [0], baujahr: 1981, fassade: 2, substanz: 64, status: "offen", flaechen: [{ id: "S014-f1", etage: 0, qm: 584, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S014-f2", etage: 0, qm: 531, konzept: "eigen", gruppe: "sporttextil" }, { id: "S014-f3", etage: 0, qm: 458, konzept: "eigen", gruppe: "outdoor" }, { id: "S014-f4", etage: 0, qm: 186, konzept: "eigen", gruppe: "teamsport" }, { id: "S014-f5", etage: 0, qm: 237, konzept: "eigen", gruppe: "rad" }, { id: "S014-f6", etage: 0, qm: 204, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 92903, rohertrag: 38898, konzessionserloes: 0, untermiete: 0, personal: 17743, miete: 13086, nebenkosten: 2692, sonstige: 4799, db: 578, fteBedarf: 15.099560843823076, fteIst: 18.383528103935355, umsatzJeGruppe: { sportschuhe: 37227, sporttextil: 19399, outdoor: 16025, teamsport: 5155, rad: 2804, wintersport: 12293 } } }, { id: "W017", name: "Hartwig Stuttgart", stadt: "Stuttgart", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3e3, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1973, fassade: 4, substanz: 86, status: "offen", flaechen: [{ id: "W017-f1", etage: -1, qm: 1135, konzept: "eigen", gruppe: "food" }, { id: "W017-f2", etage: -1, qm: 1815, konzept: "eigen", gruppe: "wohnen" }, { id: "W017-f3", etage: 0, qm: 921, konzept: "eigen", gruppe: "beauty" }, { id: "W017-f4", etage: 0, qm: 1471, konzept: "eigen", gruppe: "accessoires" }, { id: "W017-f5", etage: 0, qm: 558, konzept: "eigen", gruppe: "damen" }, { id: "W017-f6", etage: 1, qm: 2779, konzept: "eigen", gruppe: "damen" }, { id: "W017-f7", etage: 1, qm: 171, konzept: "eigen", gruppe: "waesche" }, { id: "W017-f8", etage: 2, qm: 1357, konzept: "eigen", gruppe: "waesche" }, { id: "W017-f9", etage: 2, qm: 1593, konzept: "eigen", gruppe: "herren" }, { id: "W017-f10", etage: 3, qm: 897, konzept: "eigen", gruppe: "herren" }, { id: "W017-f11", etage: 3, qm: 1513, konzept: "eigen", gruppe: "kinder" }, { id: "W017-f12", etage: 3, qm: 540, konzept: "eigen", gruppe: "sport" }, { id: "W017-f13", etage: 4, qm: 1271, konzept: "eigen", gruppe: "sport" }, { id: "W017-f14", etage: 4, qm: 861, konzept: "eigen", gruppe: "spielwaren" }, { id: "W017-f15", etage: 4, qm: 818, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 795476, rohertrag: 338444, konzessionserloes: 0, untermiete: 0, personal: 139952, miete: 106668, nebenkosten: 18061, sonstige: 40580, db: 33183, fteBedarf: 132.95607663611813, fteIst: 144.1291221195617, umsatzJeGruppe: { food: 76105, wohnen: 58379, beauty: 125048, accessoires: 95350, damen: 155112, waesche: 68833, herren: 102773, kinder: 50330, sport: 42703, spielwaren: 20843 } } }, { id: "W018", name: "Hartwig Stuttgart Arkaden", stadt: "Stuttgart", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4, 5, 6], baujahr: 1935, fassade: 2, substanz: 78, status: "offen", flaechen: [{ id: "W018-f1", etage: 0, qm: 904, konzept: "eigen", gruppe: "food" }, { id: "W018-f2", etage: 0, qm: 765, konzept: "eigen", gruppe: "beauty" }, { id: "W018-f3", etage: 0, qm: 531, konzept: "eigen", gruppe: "accessoires" }, { id: "W018-f4", etage: 1, qm: 926, konzept: "eigen", gruppe: "accessoires" }, { id: "W018-f5", etage: 1, qm: 1274, konzept: "eigen", gruppe: "damen" }, { id: "W018-f6", etage: 2, qm: 2198, konzept: "eigen", gruppe: "damen" }, { id: "W018-f7", etage: 2, qm: 2, konzept: "eigen", gruppe: "waesche" }, { id: "W018-f8", etage: 3, qm: 1203, konzept: "eigen", gruppe: "waesche" }, { id: "W018-f9", etage: 3, qm: 997, konzept: "eigen", gruppe: "herren" }, { id: "W018-f10", etage: 4, qm: 910, konzept: "eigen", gruppe: "herren" }, { id: "W018-f11", etage: 4, qm: 1153, konzept: "eigen", gruppe: "kinder" }, { id: "W018-f12", etage: 4, qm: 137, konzept: "eigen", gruppe: "sport" }, { id: "W018-f13", etage: 5, qm: 1276, konzept: "eigen", gruppe: "sport" }, { id: "W018-f14", etage: 5, qm: 801, konzept: "eigen", gruppe: "spielwaren" }, { id: "W018-f15", etage: 5, qm: 123, konzept: "eigen", gruppe: "wohnen" }, { id: "W018-f16", etage: 6, qm: 2200, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 438669, rohertrag: 186053, konzessionserloes: 0, untermiete: 0, personal: 99460, miete: 100316, nebenkosten: 19697, sonstige: 24915, db: -58336, fteBedarf: 84.61337809168313, fteIst: 101.37414919327071, umsatzJeGruppe: { food: 38633, beauty: 72609, accessoires: 56318, damen: 85133, waesche: 33529, herren: 51791, kinder: 19557, sport: 22764, spielwaren: 12806, wohnen: 45529 } } }, { id: "S015", name: "Hartwig Sport Stuttgart City-Center", stadt: "Stuttgart", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2900, etagen: [0], baujahr: 1988, fassade: 1, substanz: 34, status: "offen", flaechen: [{ id: "S015-f1", etage: 0, qm: 534, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S015-f2", etage: 0, qm: 821, konzept: "eigen", gruppe: "sporttextil" }, { id: "S015-f3", etage: 0, qm: 674, konzept: "eigen", gruppe: "outdoor" }, { id: "S015-f4", etage: 0, qm: 291, konzept: "eigen", gruppe: "teamsport" }, { id: "S015-f5", etage: 0, qm: 293, konzept: "eigen", gruppe: "rad" }, { id: "S015-f6", etage: 0, qm: 237, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 118007, rohertrag: 49797, konzessionserloes: 0, untermiete: 0, personal: 22713, miete: 15088, nebenkosten: 2858, sonstige: 6121, db: 3017, fteBedarf: 19.209130891754945, fteIst: 23.462436092808183, umsatzJeGruppe: { sportschuhe: 38479, sporttextil: 31215, outdoor: 21413, teamsport: 5938, rad: 3804, wintersport: 17157 } } }, { id: "S016", name: "Hartwig Sport Stuttgart Am Markt", stadt: "Stuttgart", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1992, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "S016-f1", etage: 0, qm: 913, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S016-f2", etage: 0, qm: 387, konzept: "eigen", gruppe: "sporttextil" }, { id: "S016-f3", etage: 1, qm: 888, konzept: "eigen", gruppe: "sporttextil" }, { id: "S016-f4", etage: 1, qm: 412, konzept: "eigen", gruppe: "outdoor" }, { id: "S016-f5", etage: 2, qm: 263, konzept: "eigen", gruppe: "outdoor" }, { id: "S016-f6", etage: 2, qm: 377, konzept: "eigen", gruppe: "teamsport" }, { id: "S016-f7", etage: 2, qm: 434, konzept: "eigen", gruppe: "rad" }, { id: "S016-f8", etage: 2, qm: 226, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 187941, rohertrag: 79919, konzessionserloes: 0, untermiete: 0, personal: 33215, miete: 28226, nebenkosten: 0, sonstige: 9461, db: 9017, fteBedarf: 29.657375862347894, fteIst: 33.668931300002356, umsatzJeGruppe: { sportschuhe: 58606, sporttextil: 65164, outdoor: 33445, teamsport: 9593, rad: 5086, wintersport: 16047 } } }, { id: "W019", name: "Hartwig Essen", stadt: "Essen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1916, fassade: 1, substanz: 44, status: "offen", flaechen: [{ id: "W019-f1", etage: -1, qm: 588, konzept: "eigen", gruppe: "food" }, { id: "W019-f2", etage: -1, qm: 1262, konzept: "eigen", gruppe: "wohnen" }, { id: "W019-f3", etage: 0, qm: 807, konzept: "eigen", gruppe: "beauty" }, { id: "W019-f4", etage: 0, qm: 854, konzept: "eigen", gruppe: "accessoires" }, { id: "W019-f5", etage: 0, qm: 189, konzept: "eigen", gruppe: "damen" }, { id: "W019-f6", etage: 1, qm: 1850, konzept: "eigen", gruppe: "damen" }, { id: "W019-f7", etage: 2, qm: 47, konzept: "eigen", gruppe: "damen" }, { id: "W019-f8", etage: 2, qm: 908, konzept: "eigen", gruppe: "waesche" }, { id: "W019-f9", etage: 2, qm: 895, konzept: "eigen", gruppe: "herren" }, { id: "W019-f10", etage: 3, qm: 644, konzept: "eigen", gruppe: "herren" }, { id: "W019-f11", etage: 3, qm: 672, konzept: "eigen", gruppe: "kinder" }, { id: "W019-f12", etage: 3, qm: 534, konzept: "eigen", gruppe: "sport" }, { id: "W019-f13", etage: 4, qm: 804, konzept: "eigen", gruppe: "sport" }, { id: "W019-f14", etage: 4, qm: 553, konzept: "eigen", gruppe: "spielwaren" }, { id: "W019-f15", etage: 4, qm: 493, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 361363, rohertrag: 152958, konzessionserloes: 0, untermiete: 0, personal: 78812, miete: 59149, nebenkosten: 11715, sonstige: 19811, db: -16529, fteBedarf: 66.52777079567127, fteIst: 79.68751270938957, umsatzJeGruppe: { food: 27681, wohnen: 33716, beauty: 65262, accessoires: 49358, damen: 53796, waesche: 28774, herren: 48521, kinder: 20384, sport: 24219, spielwaren: 9650 } } }, { id: "W020", name: "Hartwig Essen Ring", stadt: "Essen", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2], baujahr: 1958, fassade: 2, substanz: 54, status: "offen", flaechen: [{ id: "W020-f1", etage: -1, qm: 828, konzept: "eigen", gruppe: "food" }, { id: "W020-f2", etage: -1, qm: 1847, konzept: "eigen", gruppe: "wohnen" }, { id: "W020-f3", etage: 0, qm: 516, konzept: "eigen", gruppe: "beauty" }, { id: "W020-f4", etage: 0, qm: 1107, konzept: "eigen", gruppe: "accessoires" }, { id: "W020-f5", etage: 0, qm: 1052, konzept: "eigen", gruppe: "damen" }, { id: "W020-f6", etage: 1, qm: 1070, konzept: "eigen", gruppe: "damen" }, { id: "W020-f7", etage: 1, qm: 711, konzept: "eigen", gruppe: "waesche" }, { id: "W020-f8", etage: 1, qm: 894, konzept: "eigen", gruppe: "herren" }, { id: "W020-f9", etage: 2, qm: 338, konzept: "eigen", gruppe: "herren" }, { id: "W020-f10", etage: 2, qm: 668, konzept: "eigen", gruppe: "kinder" }, { id: "W020-f11", etage: 2, qm: 1351, konzept: "eigen", gruppe: "sport" }, { id: "W020-f12", etage: 2, qm: 818, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 244289, rohertrag: 101830, konzessionserloes: 0, untermiete: 0, personal: 57783, miete: 35624, nebenkosten: 0, sonstige: 15056, db: -6633, fteBedarf: 52.42723191788461, fteIst: 58.52095393627797, umsatzJeGruppe: { food: 27382, wohnen: 23518, beauty: 36048, accessoires: 35462, damen: 41552, waesche: 14093, herren: 25691, kinder: 9826, sport: 20267, spielwaren: 10450 } } }, { id: "S017", name: "Hartwig Sport Essen", stadt: "Essen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 5100, etagen: [0], baujahr: 2010, fassade: 2, substanz: 50, status: "offen", flaechen: [{ id: "S017-f1", etage: 0, qm: 827, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S017-f2", etage: 0, qm: 1647, konzept: "eigen", gruppe: "sporttextil" }, { id: "S017-f3", etage: 0, qm: 1189, konzept: "eigen", gruppe: "outdoor" }, { id: "S017-f4", etage: 0, qm: 503, konzept: "eigen", gruppe: "teamsport" }, { id: "S017-f5", etage: 0, qm: 598, konzept: "eigen", gruppe: "rad" }, { id: "S017-f6", etage: 0, qm: 336, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 203026, rohertrag: 86622, konzessionserloes: 0, untermiete: 0, personal: 42337, miete: 37024, nebenkosten: 5990, sonstige: 10619, db: -9348, fteBedarf: 33.82178552279264, fteIst: 43.13466579059574, umsatzJeGruppe: { sportschuhe: 52408, sporttextil: 65762, outdoor: 48625, teamsport: 11735, rad: 6651, wintersport: 17845 } } }, { id: "W021", name: "Hartwig Dortmund", stadt: "Dortmund", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1956, fassade: 1, substanz: 53, status: "offen", flaechen: [{ id: "W021-f1", etage: -1, qm: 1352, konzept: "eigen", gruppe: "food" }, { id: "W021-f2", etage: -1, qm: 1431, konzept: "eigen", gruppe: "wohnen" }, { id: "W021-f3", etage: 0, qm: 981, konzept: "eigen", gruppe: "beauty" }, { id: "W021-f4", etage: 0, qm: 1482, konzept: "eigen", gruppe: "accessoires" }, { id: "W021-f5", etage: 0, qm: 320, konzept: "eigen", gruppe: "damen" }, { id: "W021-f6", etage: 1, qm: 2783, konzept: "eigen", gruppe: "damen" }, { id: "W021-f7", etage: 2, qm: 656, konzept: "eigen", gruppe: "damen" }, { id: "W021-f8", etage: 2, qm: 1257, konzept: "eigen", gruppe: "waesche" }, { id: "W021-f9", etage: 2, qm: 870, konzept: "eigen", gruppe: "herren" }, { id: "W021-f10", etage: 3, qm: 959, konzept: "eigen", gruppe: "herren" }, { id: "W021-f11", etage: 3, qm: 1242, konzept: "eigen", gruppe: "kinder" }, { id: "W021-f12", etage: 3, qm: 583, konzept: "eigen", gruppe: "sport" }, { id: "W021-f13", etage: 4, qm: 1340, konzept: "eigen", gruppe: "sport" }, { id: "W021-f14", etage: 4, qm: 858, konzept: "eigen", gruppe: "spielwaren" }, { id: "W021-f15", etage: 4, qm: 585, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 464194, rohertrag: 194944, konzessionserloes: 0, untermiete: 0, personal: 99075, miete: 45771, nebenkosten: 19012, sonstige: 26546, db: 4538, fteBedarf: 90.30579582824927, fteIst: 101.98513821558086, umsatzJeGruppe: { food: 52001, wohnen: 31836, beauty: 81123, accessoires: 60128, damen: 100750, waesche: 33269, herren: 34529, kinder: 25651, sport: 33689, spielwaren: 11218 } } }, { id: "W022", name: "Hartwig Dortmund Neustadt", stadt: "Dortmund", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3, 4], baujahr: 2002, fassade: 4, substanz: 42, status: "offen", flaechen: [{ id: "W022-f1", etage: 0, qm: 682, konzept: "eigen", gruppe: "food" }, { id: "W022-f2", etage: 0, qm: 414, konzept: "eigen", gruppe: "beauty" }, { id: "W022-f3", etage: 0, qm: 784, konzept: "eigen", gruppe: "accessoires" }, { id: "W022-f4", etage: 1, qm: 255, konzept: "eigen", gruppe: "accessoires" }, { id: "W022-f5", etage: 1, qm: 1625, konzept: "eigen", gruppe: "damen" }, { id: "W022-f6", etage: 2, qm: 485, konzept: "eigen", gruppe: "damen" }, { id: "W022-f7", etage: 2, qm: 711, konzept: "eigen", gruppe: "waesche" }, { id: "W022-f8", etage: 2, qm: 684, konzept: "eigen", gruppe: "herren" }, { id: "W022-f9", etage: 3, qm: 209, konzept: "eigen", gruppe: "herren" }, { id: "W022-f10", etage: 3, qm: 620, konzept: "eigen", gruppe: "kinder" }, { id: "W022-f11", etage: 3, qm: 942, konzept: "eigen", gruppe: "sport" }, { id: "W022-f12", etage: 3, qm: 109, konzept: "eigen", gruppe: "spielwaren" }, { id: "W022-f13", etage: 4, qm: 379, konzept: "eigen", gruppe: "spielwaren" }, { id: "W022-f14", etage: 4, qm: 1501, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 230370, rohertrag: 98399, konzessionserloes: 0, untermiete: 0, personal: 51442, miete: 18361, nebenkosten: 12578, sonstige: 13675, db: 2344, fteBedarf: 47.05700663771704, fteIst: 51.770796778870405, umsatzJeGruppe: { food: 21219, beauty: 23767, accessoires: 41835, damen: 46772, waesche: 20717, herren: 19395, kinder: 10178, sport: 12422, spielwaren: 7393, wohnen: 26673 } } }, { id: "S018", name: "Hartwig Sport Dortmund", stadt: "Dortmund", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1978, fassade: 2, substanz: 36, status: "offen", flaechen: [{ id: "S018-f1", etage: 0, qm: 718, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S018-f2", etage: 0, qm: 757, konzept: "eigen", gruppe: "sporttextil" }, { id: "S018-f3", etage: 1, qm: 152, konzept: "eigen", gruppe: "sporttextil" }, { id: "S018-f4", etage: 1, qm: 515, konzept: "eigen", gruppe: "outdoor" }, { id: "S018-f5", etage: 1, qm: 258, konzept: "eigen", gruppe: "teamsport" }, { id: "S018-f6", etage: 1, qm: 264, konzept: "eigen", gruppe: "rad" }, { id: "S018-f7", etage: 1, qm: 286, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 130598, rohertrag: 54884, konzessionserloes: 0, untermiete: 0, personal: 23701, miete: 29278, nebenkosten: 4225, sonstige: 6682, db: -9002, fteBedarf: 20.899984269574617, fteIst: 24.323003700029545, umsatzJeGruppe: { sportschuhe: 50764, sporttextil: 31443, outdoor: 21584, teamsport: 6129, rad: 3500, wintersport: 17179 } } }, { id: "W023", name: "Hartwig Bremen", stadt: "Bremen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1933, fassade: 5, substanz: 30, status: "offen", flaechen: [{ id: "W023-f1", etage: -1, qm: 594, konzept: "eigen", gruppe: "food" }, { id: "W023-f2", etage: -1, qm: 1506, konzept: "eigen", gruppe: "wohnen" }, { id: "W023-f3", etage: 0, qm: 665, konzept: "eigen", gruppe: "beauty" }, { id: "W023-f4", etage: 0, qm: 1012, konzept: "eigen", gruppe: "accessoires" }, { id: "W023-f5", etage: 0, qm: 423, konzept: "eigen", gruppe: "damen" }, { id: "W023-f6", etage: 1, qm: 1966, konzept: "eigen", gruppe: "damen" }, { id: "W023-f7", etage: 1, qm: 134, konzept: "eigen", gruppe: "waesche" }, { id: "W023-f8", etage: 2, qm: 574, konzept: "eigen", gruppe: "waesche" }, { id: "W023-f9", etage: 2, qm: 1254, konzept: "eigen", gruppe: "herren" }, { id: "W023-f10", etage: 2, qm: 272, konzept: "eigen", gruppe: "kinder" }, { id: "W023-f11", etage: 3, qm: 607, konzept: "eigen", gruppe: "kinder" }, { id: "W023-f12", etage: 3, qm: 1237, konzept: "eigen", gruppe: "sport" }, { id: "W023-f13", etage: 3, qm: 582, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 371271, rohertrag: 158160, konzessionserloes: 0, untermiete: 0, personal: 81087, miete: 66364, nebenkosten: 16102, sonstige: 20094, db: -25486, fteBedarf: 67.16796810504911, fteIst: 83.66840168021653, umsatzJeGruppe: { food: 28898, wohnen: 31631, beauty: 57253, accessoires: 59594, damen: 71063, waesche: 28359, herren: 37604, kinder: 23921, sport: 24096, spielwaren: 8851 } } }, { id: "W024", name: "Hartwig Bremen Altstadt", stadt: "Bremen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1, 2, 3, 4, 5], baujahr: 2002, fassade: 1, substanz: 36, status: "offen", flaechen: [{ id: "W024-f1", etage: 0, qm: 1021, konzept: "eigen", gruppe: "food" }, { id: "W024-f2", etage: 0, qm: 1113, konzept: "eigen", gruppe: "beauty" }, { id: "W024-f3", etage: 0, qm: 500, konzept: "eigen", gruppe: "accessoires" }, { id: "W024-f4", etage: 1, qm: 927, konzept: "eigen", gruppe: "accessoires" }, { id: "W024-f5", etage: 1, qm: 1707, konzept: "eigen", gruppe: "damen" }, { id: "W024-f6", etage: 2, qm: 1262, konzept: "eigen", gruppe: "damen" }, { id: "W024-f7", etage: 2, qm: 1196, konzept: "eigen", gruppe: "waesche" }, { id: "W024-f8", etage: 2, qm: 175, konzept: "eigen", gruppe: "herren" }, { id: "W024-f9", etage: 3, qm: 1488, konzept: "eigen", gruppe: "herren" }, { id: "W024-f10", etage: 3, qm: 944, konzept: "eigen", gruppe: "kinder" }, { id: "W024-f11", etage: 3, qm: 201, konzept: "eigen", gruppe: "sport" }, { id: "W024-f12", etage: 4, qm: 1748, konzept: "eigen", gruppe: "sport" }, { id: "W024-f13", etage: 4, qm: 757, konzept: "eigen", gruppe: "spielwaren" }, { id: "W024-f14", etage: 4, qm: 128, konzept: "eigen", gruppe: "wohnen" }, { id: "W024-f15", etage: 5, qm: 2633, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 480978, rohertrag: 202465, konzessionserloes: 0, untermiete: 0, personal: 114937, miete: 41851, nebenkosten: 22948, sonstige: 26830, db: -4101, fteBedarf: 90.58082781498368, fteIst: 115.57645553816583, umsatzJeGruppe: { food: 44595, beauty: 82375, accessoires: 72179, damen: 86215, waesche: 40058, herren: 37388, kinder: 19548, sport: 34418, spielwaren: 13025, wohnen: 51177 } } }, { id: "S019", name: "Hartwig Sport Bremen", stadt: "Bremen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [0, 1], baujahr: 2001, fassade: 1, substanz: 52, status: "offen", flaechen: [{ id: "S019-f1", etage: 0, qm: 709, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S019-f2", etage: 0, qm: 946, konzept: "eigen", gruppe: "sporttextil" }, { id: "S019-f3", etage: 0, qm: 95, konzept: "eigen", gruppe: "outdoor" }, { id: "S019-f4", etage: 1, qm: 608, konzept: "eigen", gruppe: "outdoor" }, { id: "S019-f5", etage: 1, qm: 353, konzept: "eigen", gruppe: "teamsport" }, { id: "S019-f6", etage: 1, qm: 448, konzept: "eigen", gruppe: "rad" }, { id: "S019-f7", etage: 1, qm: 340, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 117691, rohertrag: 49420, konzessionserloes: 0, untermiete: 0, personal: 26819, miete: 9556, nebenkosten: 5078, sonstige: 6400, db: 1567, fteBedarf: 20.593128359090677, fteIst: 26.97408982811513, umsatzJeGruppe: { sportschuhe: 36860, sporttextil: 29101, outdoor: 21584, teamsport: 8042, rad: 5270, wintersport: 16833 } } }, { id: "W025", name: "Hartwig Leipzig", stadt: "Leipzig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3400, etagen: [-1, 0, 1, 2, 3], baujahr: 1997, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "W025-f1", etage: -1, qm: 1061, konzept: "eigen", gruppe: "food" }, { id: "W025-f2", etage: -1, qm: 2299, konzept: "eigen", gruppe: "wohnen" }, { id: "W025-f3", etage: 0, qm: 1082, konzept: "eigen", gruppe: "beauty" }, { id: "W025-f4", etage: 0, qm: 2090, konzept: "eigen", gruppe: "accessoires" }, { id: "W025-f5", etage: 0, qm: 188, konzept: "eigen", gruppe: "damen" }, { id: "W025-f6", etage: 1, qm: 2856, konzept: "eigen", gruppe: "damen" }, { id: "W025-f7", etage: 1, qm: 504, konzept: "eigen", gruppe: "waesche" }, { id: "W025-f8", etage: 2, qm: 719, konzept: "eigen", gruppe: "waesche" }, { id: "W025-f9", etage: 2, qm: 1710, konzept: "eigen", gruppe: "herren" }, { id: "W025-f10", etage: 2, qm: 931, konzept: "eigen", gruppe: "kinder" }, { id: "W025-f11", etage: 3, qm: 313, konzept: "eigen", gruppe: "kinder" }, { id: "W025-f12", etage: 3, qm: 1687, konzept: "eigen", gruppe: "sport" }, { id: "W025-f13", etage: 3, qm: 869, konzept: "eigen", gruppe: "spielwaren" }, { id: "W025-f14", etage: 3, qm: 491, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 527405, rohertrag: 221405, konzessionserloes: 0, untermiete: 0, personal: 114080, miete: 64037, nebenkosten: 0, sonstige: 29184, db: 14104, fteBedarf: 98.32372246832225, fteIst: 117.92613794454667, umsatzJeGruppe: { food: 44142, wohnen: 66748, beauty: 95868, accessoires: 99545, damen: 81810, waesche: 34268, herren: 37777, kinder: 25268, sport: 25825, spielwaren: 16155 } } }, { id: "W026", name: "Hartwig Leipzig K\xF6nigstra\xDFe", stadt: "Leipzig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3400, etagen: [-1, 0, 1, 2], baujahr: 1937, fassade: 7, substanz: 43, status: "offen", flaechen: [{ id: "W026-f1", etage: -1, qm: 1052, konzept: "eigen", gruppe: "food" }, { id: "W026-f2", etage: -1, qm: 2323, konzept: "eigen", gruppe: "wohnen" }, { id: "W026-f3", etage: 0, qm: 625, konzept: "eigen", gruppe: "beauty" }, { id: "W026-f4", etage: 0, qm: 1419, konzept: "eigen", gruppe: "accessoires" }, { id: "W026-f5", etage: 0, qm: 1331, konzept: "eigen", gruppe: "damen" }, { id: "W026-f6", etage: 1, qm: 1354, konzept: "eigen", gruppe: "damen" }, { id: "W026-f7", etage: 1, qm: 1045, konzept: "eigen", gruppe: "waesche" }, { id: "W026-f8", etage: 1, qm: 975, konzept: "eigen", gruppe: "herren" }, { id: "W026-f9", etage: 2, qm: 555, konzept: "eigen", gruppe: "herren" }, { id: "W026-f10", etage: 2, qm: 1159, konzept: "eigen", gruppe: "kinder" }, { id: "W026-f11", etage: 2, qm: 1338, konzept: "eigen", gruppe: "sport" }, { id: "W026-f12", etage: 2, qm: 820, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 423322, rohertrag: 178779, konzessionserloes: 0, untermiete: 0, personal: 104783, miete: 46719, nebenkosten: 18036, sonstige: 23654, db: -14414, fteBedarf: 79.95537714608625, fteIst: 106.9272495788456, umsatzJeGruppe: { food: 39939, wohnen: 44292, beauty: 55588, accessoires: 72472, damen: 66508, waesche: 33160, herren: 43220, kinder: 26473, sport: 27456, spielwaren: 14214 } } }, { id: "S020", name: "Hartwig Sport Leipzig Galerie am Fluss", stadt: "Leipzig", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [0], baujahr: 1999, fassade: 1, substanz: 54, status: "offen", flaechen: [{ id: "S020-f1", etage: 0, qm: 632, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S020-f2", etage: 0, qm: 842, konzept: "eigen", gruppe: "sporttextil" }, { id: "S020-f3", etage: 0, qm: 684, konzept: "eigen", gruppe: "outdoor" }, { id: "S020-f4", etage: 0, qm: 313, konzept: "eigen", gruppe: "teamsport" }, { id: "S020-f5", etage: 0, qm: 469, konzept: "eigen", gruppe: "rad" }, { id: "S020-f6", etage: 0, qm: 309, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 108355, rohertrag: 45708, konzessionserloes: 0, untermiete: 0, personal: 24165, miete: 13070, nebenkosten: 3271, sonstige: 5905, db: -704, fteBedarf: 18.98898544290149, fteIst: 24.601704377963856, umsatzJeGruppe: { sportschuhe: 30768, sporttextil: 31632, outdoor: 19148, teamsport: 6327, rad: 4859, wintersport: 15623 } } }, { id: "W027", name: "Hartwig Dresden Einkaufszentrum", stadt: "Dresden", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4], baujahr: 1997, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W027-f1", etage: 0, qm: 533, konzept: "eigen", gruppe: "food" }, { id: "W027-f2", etage: 0, qm: 503, konzept: "eigen", gruppe: "beauty" }, { id: "W027-f3", etage: 0, qm: 704, konzept: "eigen", gruppe: "accessoires" }, { id: "W027-f4", etage: 1, qm: 115, konzept: "eigen", gruppe: "accessoires" }, { id: "W027-f5", etage: 1, qm: 1625, konzept: "eigen", gruppe: "damen" }, { id: "W027-f6", etage: 2, qm: 287, konzept: "eigen", gruppe: "damen" }, { id: "W027-f7", etage: 2, qm: 735, konzept: "eigen", gruppe: "waesche" }, { id: "W027-f8", etage: 2, qm: 718, konzept: "eigen", gruppe: "herren" }, { id: "W027-f9", etage: 3, qm: 544, konzept: "eigen", gruppe: "herren" }, { id: "W027-f10", etage: 3, qm: 523, konzept: "eigen", gruppe: "kinder" }, { id: "W027-f11", etage: 3, qm: 673, konzept: "eigen", gruppe: "sport" }, { id: "W027-f12", etage: 4, qm: 13, konzept: "eigen", gruppe: "sport" }, { id: "W027-f13", etage: 4, qm: 450, konzept: "eigen", gruppe: "spielwaren" }, { id: "W027-f14", etage: 4, qm: 1277, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 258403, rohertrag: 110539, konzessionserloes: 0, untermiete: 0, personal: 63506, miete: 31490, nebenkosten: 10557, sonstige: 14510, db: -9524, fteBedarf: 49.098192250090236, fteIst: 64.17475409089238, umsatzJeGruppe: { food: 23600, beauty: 36727, accessoires: 40697, damen: 50300, waesche: 26482, herren: 27994, kinder: 9768, sport: 9633, spielwaren: 7933, wohnen: 25269 } } }, { id: "W028", name: "Hartwig Dresden K\xF6nigstra\xDFe", stadt: "Dresden", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3100, etagen: [0, 1, 2, 3, 4], baujahr: 1989, fassade: 1, substanz: 72, status: "offen", flaechen: [{ id: "W028-f1", etage: 0, qm: 937, konzept: "eigen", gruppe: "food" }, { id: "W028-f2", etage: 0, qm: 1131, konzept: "eigen", gruppe: "beauty" }, { id: "W028-f3", etage: 0, qm: 1071, konzept: "eigen", gruppe: "accessoires" }, { id: "W028-f4", etage: 1, qm: 628, konzept: "eigen", gruppe: "accessoires" }, { id: "W028-f5", etage: 1, qm: 2512, konzept: "eigen", gruppe: "damen" }, { id: "W028-f6", etage: 2, qm: 207, konzept: "eigen", gruppe: "damen" }, { id: "W028-f7", etage: 2, qm: 1092, konzept: "eigen", gruppe: "waesche" }, { id: "W028-f8", etage: 2, qm: 1841, konzept: "eigen", gruppe: "herren" }, { id: "W028-f9", etage: 3, qm: 228, konzept: "eigen", gruppe: "herren" }, { id: "W028-f10", etage: 3, qm: 863, konzept: "eigen", gruppe: "kinder" }, { id: "W028-f11", etage: 3, qm: 1409, konzept: "eigen", gruppe: "sport" }, { id: "W028-f12", etage: 3, qm: 641, konzept: "eigen", gruppe: "spielwaren" }, { id: "W028-f13", etage: 4, qm: 350, konzept: "eigen", gruppe: "spielwaren" }, { id: "W028-f14", etage: 4, qm: 2790, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 554426, rohertrag: 232498, konzessionserloes: 0, untermiete: 0, personal: 118577, miete: 52017, nebenkosten: 18147, sonstige: 29796, db: 13960, fteBedarf: 99.46032703433085, fteIst: 121.49490900491055, umsatzJeGruppe: { food: 48963, beauty: 107719, accessoires: 95944, damen: 74307, waesche: 40348, herren: 59003, kinder: 19117, sport: 30385, spielwaren: 18075, wohnen: 60566 } } }, { id: "S021", name: "Hartwig Sport Dresden Galerie am Fluss", stadt: "Dresden", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [0, 1], baujahr: 1983, fassade: 7, substanz: 36, status: "offen", flaechen: [{ id: "S021-f1", etage: 0, qm: 1097, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S021-f2", etage: 0, qm: 1391, konzept: "eigen", gruppe: "sporttextil" }, { id: "S021-f3", etage: 0, qm: 12, konzept: "eigen", gruppe: "outdoor" }, { id: "S021-f4", etage: 1, qm: 1019, konzept: "eigen", gruppe: "outdoor" }, { id: "S021-f5", etage: 1, qm: 555, konzept: "eigen", gruppe: "teamsport" }, { id: "S021-f6", etage: 1, qm: 529, konzept: "eigen", gruppe: "rad" }, { id: "S021-f7", etage: 1, qm: 397, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 161780, rohertrag: 68472, konzessionserloes: 0, untermiete: 0, personal: 29711, miete: 19214, nebenkosten: 0, sonstige: 8883, db: 10664, fteBedarf: 28.691107359331617, fteIst: 30.29475567515675, umsatzJeGruppe: { sportschuhe: 51295, sporttextil: 47712, outdoor: 29187, teamsport: 10903, rad: 4490, wintersport: 18193 } } }, { id: "W029", name: "Hartwig Hannover Lindenstra\xDFe", stadt: "Hannover", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2, 3], baujahr: 1957, fassade: 4, substanz: 62, status: "offen", flaechen: [{ id: "W029-f1", etage: -1, qm: 971, konzept: "eigen", gruppe: "food" }, { id: "W029-f2", etage: -1, qm: 2329, konzept: "eigen", gruppe: "wohnen" }, { id: "W029-f3", etage: 0, qm: 897, konzept: "eigen", gruppe: "beauty" }, { id: "W029-f4", etage: 0, qm: 1595, konzept: "eigen", gruppe: "accessoires" }, { id: "W029-f5", etage: 0, qm: 807, konzept: "eigen", gruppe: "damen" }, { id: "W029-f6", etage: 1, qm: 2833, konzept: "eigen", gruppe: "damen" }, { id: "W029-f7", etage: 1, qm: 467, konzept: "eigen", gruppe: "waesche" }, { id: "W029-f8", etage: 2, qm: 743, konzept: "eigen", gruppe: "waesche" }, { id: "W029-f9", etage: 2, qm: 1748, konzept: "eigen", gruppe: "herren" }, { id: "W029-f10", etage: 2, qm: 809, konzept: "eigen", gruppe: "kinder" }, { id: "W029-f11", etage: 3, qm: 501, konzept: "eigen", gruppe: "kinder" }, { id: "W029-f12", etage: 3, qm: 1791, konzept: "eigen", gruppe: "sport" }, { id: "W029-f13", etage: 3, qm: 739, konzept: "eigen", gruppe: "spielwaren" }, { id: "W029-f14", etage: 3, qm: 269, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 369570, rohertrag: 157042, konzessionserloes: 0, untermiete: 0, personal: 90487, miete: 44129, nebenkosten: 19243, sonstige: 22577, db: -19393, fteBedarf: 78.32268793198118, fteIst: 91.26172466077023, umsatzJeGruppe: { food: 32053, wohnen: 31655, beauty: 59254, accessoires: 52502, damen: 73809, waesche: 29597, herren: 36315, kinder: 23737, sport: 21014, spielwaren: 9634 } } }, { id: "W030", name: "Hartwig Hannover Neustadt", stadt: "Hannover", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1979, fassade: 7, substanz: 80, status: "offen", flaechen: [{ id: "W030-f1", etage: 0, qm: 837, konzept: "eigen", gruppe: "food" }, { id: "W030-f2", etage: 0, qm: 774, konzept: "eigen", gruppe: "beauty" }, { id: "W030-f3", etage: 0, qm: 855, konzept: "eigen", gruppe: "accessoires" }, { id: "W030-f4", etage: 1, qm: 449, konzept: "eigen", gruppe: "accessoires" }, { id: "W030-f5", etage: 1, qm: 2018, konzept: "eigen", gruppe: "damen" }, { id: "W030-f6", etage: 2, qm: 968, konzept: "eigen", gruppe: "damen" }, { id: "W030-f7", etage: 2, qm: 1275, konzept: "eigen", gruppe: "waesche" }, { id: "W030-f8", etage: 2, qm: 223, konzept: "eigen", gruppe: "herren" }, { id: "W030-f9", etage: 3, qm: 1797, konzept: "eigen", gruppe: "herren" }, { id: "W030-f10", etage: 3, qm: 670, konzept: "eigen", gruppe: "kinder" }, { id: "W030-f11", etage: 4, qm: 622, konzept: "eigen", gruppe: "kinder" }, { id: "W030-f12", etage: 4, qm: 1451, konzept: "eigen", gruppe: "sport" }, { id: "W030-f13", etage: 4, qm: 393, konzept: "eigen", gruppe: "spielwaren" }, { id: "W030-f14", etage: 5, qm: 382, konzept: "eigen", gruppe: "spielwaren" }, { id: "W030-f15", etage: 5, qm: 2084, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 323160, rohertrag: 137747, konzessionserloes: 0, untermiete: 0, personal: 83859, miete: 55671, nebenkosten: 0, sonstige: 19909, db: -21691, fteBedarf: 69.25963413621675, fteIst: 84.3049846266934, umsatzJeGruppe: { food: 23364, beauty: 53748, accessoires: 50694, damen: 53748, waesche: 27061, herren: 40934, kinder: 17539, sport: 18316, spielwaren: 9917, wohnen: 27837 } } }, { id: "S022", name: "Hartwig Sport Hannover", stadt: "Hannover", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1], baujahr: 2006, fassade: 5, substanz: 34, status: "offen", flaechen: [{ id: "S022-f1", etage: 0, qm: 1072, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S022-f2", etage: 0, qm: 1203, konzept: "eigen", gruppe: "sporttextil" }, { id: "S022-f3", etage: 1, qm: 82, konzept: "eigen", gruppe: "sporttextil" }, { id: "S022-f4", etage: 1, qm: 948, konzept: "eigen", gruppe: "outdoor" }, { id: "S022-f5", etage: 1, qm: 405, konzept: "eigen", gruppe: "teamsport" }, { id: "S022-f6", etage: 1, qm: 457, konzept: "eigen", gruppe: "rad" }, { id: "S022-f7", etage: 1, qm: 383, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 172534, rohertrag: 72813, konzessionserloes: 0, untermiete: 0, personal: 31274, miete: 20649, nebenkosten: 0, sonstige: 9121, db: 11769, fteBedarf: 28.991555686271752, fteIst: 32.10267404781496, umsatzJeGruppe: { sportschuhe: 61329, sporttextil: 46840, outdoor: 29943, teamsport: 9867, rad: 4422, wintersport: 20133 } } }, { id: "W031", name: "Hartwig N\xFCrnberg", stadt: "N\xFCrnberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [0, 1, 2, 3], baujahr: 1957, fassade: 7, substanz: 34, status: "offen", flaechen: [{ id: "W031-f1", etage: 0, qm: 1216, konzept: "eigen", gruppe: "food" }, { id: "W031-f2", etage: 0, qm: 689, konzept: "eigen", gruppe: "beauty" }, { id: "W031-f3", etage: 0, qm: 1370, konzept: "eigen", gruppe: "accessoires" }, { id: "W031-f4", etage: 1, qm: 18, konzept: "eigen", gruppe: "accessoires" }, { id: "W031-f5", etage: 1, qm: 2388, konzept: "eigen", gruppe: "damen" }, { id: "W031-f6", etage: 1, qm: 869, konzept: "eigen", gruppe: "waesche" }, { id: "W031-f7", etage: 2, qm: 351, konzept: "eigen", gruppe: "waesche" }, { id: "W031-f8", etage: 2, qm: 1509, konzept: "eigen", gruppe: "herren" }, { id: "W031-f9", etage: 2, qm: 841, konzept: "eigen", gruppe: "kinder" }, { id: "W031-f10", etage: 2, qm: 574, konzept: "eigen", gruppe: "sport" }, { id: "W031-f11", etage: 3, qm: 525, konzept: "eigen", gruppe: "sport" }, { id: "W031-f12", etage: 3, qm: 1034, konzept: "eigen", gruppe: "spielwaren" }, { id: "W031-f13", etage: 3, qm: 1715, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 435944, rohertrag: 182826, konzessionserloes: 0, untermiete: 0, personal: 91474, miete: 109262, nebenkosten: 17956, sonstige: 23768, db: -59634, fteBedarf: 79.68273664668298, fteIst: 92.0915964104501, umsatzJeGruppe: { food: 63392, beauty: 56162, accessoires: 73656, damen: 75393, waesche: 35381, herren: 46948, kinder: 20629, sport: 16286, spielwaren: 14287, wohnen: 33810 } } }, { id: "W032", name: "Hartwig N\xFCrnberg K\xF6nigstra\xDFe", stadt: "N\xFCrnberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [0, 1, 2, 3, 4], baujahr: 1937, fassade: 4, substanz: 50, status: "offen", flaechen: [{ id: "W032-f1", etage: 0, qm: 602, konzept: "eigen", gruppe: "food" }, { id: "W032-f2", etage: 0, qm: 682, konzept: "eigen", gruppe: "beauty" }, { id: "W032-f3", etage: 0, qm: 716, konzept: "eigen", gruppe: "accessoires" }, { id: "W032-f4", etage: 1, qm: 214, konzept: "eigen", gruppe: "accessoires" }, { id: "W032-f5", etage: 1, qm: 1786, konzept: "eigen", gruppe: "damen" }, { id: "W032-f6", etage: 2, qm: 164, konzept: "eigen", gruppe: "damen" }, { id: "W032-f7", etage: 2, qm: 748, konzept: "eigen", gruppe: "waesche" }, { id: "W032-f8", etage: 2, qm: 1088, konzept: "eigen", gruppe: "herren" }, { id: "W032-f9", etage: 3, qm: 249, konzept: "eigen", gruppe: "herren" }, { id: "W032-f10", etage: 3, qm: 750, konzept: "eigen", gruppe: "kinder" }, { id: "W032-f11", etage: 3, qm: 1001, konzept: "eigen", gruppe: "sport" }, { id: "W032-f12", etage: 4, qm: 49, konzept: "eigen", gruppe: "sport" }, { id: "W032-f13", etage: 4, qm: 702, konzept: "eigen", gruppe: "spielwaren" }, { id: "W032-f14", etage: 4, qm: 1249, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 352181, rohertrag: 148496, konzessionserloes: 0, untermiete: 0, personal: 68125, miete: 34966, nebenkosten: 11106, sonstige: 18939, db: 15360, fteBedarf: 63.25510820727785, fteIst: 70.41773503920322, umsatzJeGruppe: { food: 29253, beauty: 70306, accessoires: 51913, damen: 57769, waesche: 22868, herren: 44079, kinder: 18244, sport: 20676, spielwaren: 11710, wohnen: 25361 } } }, { id: "S023", name: "Hartwig Sport N\xFCrnberg", stadt: "N\xFCrnberg", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1400, etagen: [0, 1], baujahr: 1993, fassade: 6, substanz: 80, status: "offen", flaechen: [{ id: "S023-f1", etage: 0, qm: 517, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S023-f2", etage: 0, qm: 740, konzept: "eigen", gruppe: "sporttextil" }, { id: "S023-f3", etage: 0, qm: 119, konzept: "eigen", gruppe: "outdoor" }, { id: "S023-f4", etage: 1, qm: 526, konzept: "eigen", gruppe: "outdoor" }, { id: "S023-f5", etage: 1, qm: 303, konzept: "eigen", gruppe: "teamsport" }, { id: "S023-f6", etage: 1, qm: 359, konzept: "eigen", gruppe: "rad" }, { id: "S023-f7", etage: 1, qm: 187, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 111693, rohertrag: 47444, konzessionserloes: 0, untermiete: 0, personal: 19631, miete: 16446, nebenkosten: 0, sonstige: 5817, db: 5549, fteBedarf: 18.421358816515944, fteIst: 20.263031981652187, umsatzJeGruppe: { sportschuhe: 27803, sporttextil: 30053, outdoor: 29382, teamsport: 6152, rad: 4759, wintersport: 13544 } } }, { id: "W033", name: "Hartwig Duisburg Am Wall", stadt: "Duisburg", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2], baujahr: 1949, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W033-f1", etage: -1, qm: 1115, konzept: "eigen", gruppe: "food" }, { id: "W033-f2", etage: -1, qm: 2160, konzept: "eigen", gruppe: "wohnen" }, { id: "W033-f3", etage: 0, qm: 915, konzept: "eigen", gruppe: "beauty" }, { id: "W033-f4", etage: 0, qm: 1434, konzept: "eigen", gruppe: "accessoires" }, { id: "W033-f5", etage: 0, qm: 926, konzept: "eigen", gruppe: "damen" }, { id: "W033-f6", etage: 1, qm: 1570, konzept: "eigen", gruppe: "damen" }, { id: "W033-f7", etage: 1, qm: 1044, konzept: "eigen", gruppe: "waesche" }, { id: "W033-f8", etage: 1, qm: 661, konzept: "eigen", gruppe: "herren" }, { id: "W033-f9", etage: 2, qm: 1002, konzept: "eigen", gruppe: "herren" }, { id: "W033-f10", etage: 2, qm: 733, konzept: "eigen", gruppe: "kinder" }, { id: "W033-f11", etage: 2, qm: 1142, konzept: "eigen", gruppe: "sport" }, { id: "W033-f12", etage: 2, qm: 919, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 260360, rohertrag: 108688, konzessionserloes: 0, untermiete: 0, personal: 70962, miete: 60988, nebenkosten: 15429, sonstige: 16804, db: -55495, fteBedarf: 59.22994531188261, fteIst: 71.18333910064324, umsatzJeGruppe: { food: 29415, wohnen: 25276, beauty: 43881, accessoires: 38796, damen: 44268, waesche: 16772, herren: 24941, kinder: 12470, sport: 14541, spielwaren: 10001 } } }, { id: "S024", name: "Hartwig Sport Duisburg Galerie am Fluss", stadt: "Duisburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 4700, etagen: [0], baujahr: 1979, fassade: 2, substanz: 51, status: "offen", flaechen: [{ id: "S024-f1", etage: 0, qm: 1146, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S024-f2", etage: 0, qm: 1471, konzept: "eigen", gruppe: "sporttextil" }, { id: "S024-f3", etage: 0, qm: 785, konzept: "eigen", gruppe: "outdoor" }, { id: "S024-f4", etage: 0, qm: 449, konzept: "eigen", gruppe: "teamsport" }, { id: "S024-f5", etage: 0, qm: 399, konzept: "eigen", gruppe: "rad" }, { id: "S024-f6", etage: 0, qm: 399, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 155916, rohertrag: 65775, konzessionserloes: 0, untermiete: 0, personal: 31941, miete: 16397, nebenkosten: 6745, sonstige: 8485, db: 2207, fteBedarf: 27.191699657864234, fteIst: 33.09545457497372, umsatzJeGruppe: { sportschuhe: 52579, sporttextil: 45956, outdoor: 22157, teamsport: 10065, rad: 4172, wintersport: 20988 } } }, { id: "W034", name: "Hartwig Bochum", stadt: "Bochum", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1961, fassade: 6, substanz: 57, status: "offen", flaechen: [{ id: "W034-f1", etage: 0, qm: 643, konzept: "eigen", gruppe: "food" }, { id: "W034-f2", etage: 0, qm: 744, konzept: "eigen", gruppe: "beauty" }, { id: "W034-f3", etage: 0, qm: 330, konzept: "eigen", gruppe: "accessoires" }, { id: "W034-f4", etage: 1, qm: 609, konzept: "eigen", gruppe: "accessoires" }, { id: "W034-f5", etage: 1, qm: 1108, konzept: "eigen", gruppe: "damen" }, { id: "W034-f6", etage: 2, qm: 972, konzept: "eigen", gruppe: "damen" }, { id: "W034-f7", etage: 2, qm: 744, konzept: "eigen", gruppe: "waesche" }, { id: "W034-f8", etage: 3, qm: 46, konzept: "eigen", gruppe: "waesche" }, { id: "W034-f9", etage: 3, qm: 1005, konzept: "eigen", gruppe: "herren" }, { id: "W034-f10", etage: 3, qm: 666, konzept: "eigen", gruppe: "kinder" }, { id: "W034-f11", etage: 4, qm: 56, konzept: "eigen", gruppe: "kinder" }, { id: "W034-f12", etage: 4, qm: 1081, konzept: "eigen", gruppe: "sport" }, { id: "W034-f13", etage: 4, qm: 492, konzept: "eigen", gruppe: "spielwaren" }, { id: "W034-f14", etage: 4, qm: 88, konzept: "eigen", gruppe: "wohnen" }, { id: "W034-f15", etage: 5, qm: 1717, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 280054, rohertrag: 118599, konzessionserloes: 0, untermiete: 0, personal: 67076, miete: 40524, nebenkosten: 11647, sonstige: 16118, db: -16766, fteBedarf: 54.95014665336467, fteIst: 68.55277813391183, umsatzJeGruppe: { food: 23935, beauty: 48206, accessoires: 39572, damen: 48731, waesche: 26512, herren: 26531, kinder: 12544, sport: 15721, spielwaren: 7729, wohnen: 30573 } } }, { id: "S025", name: "Hartwig Sport Bochum", stadt: "Bochum", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1], baujahr: 2002, fassade: 5, substanz: 62, status: "offen", flaechen: [{ id: "S025-f1", etage: 0, qm: 1027, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S025-f2", etage: 0, qm: 1542, konzept: "eigen", gruppe: "sporttextil" }, { id: "S025-f3", etage: 0, qm: 56, konzept: "eigen", gruppe: "outdoor" }, { id: "S025-f4", etage: 1, qm: 1150, konzept: "eigen", gruppe: "outdoor" }, { id: "S025-f5", etage: 1, qm: 487, konzept: "eigen", gruppe: "teamsport" }, { id: "S025-f6", etage: 1, qm: 482, konzept: "eigen", gruppe: "rad" }, { id: "S025-f7", etage: 1, qm: 505, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 195484, rohertrag: 82616, konzessionserloes: 0, untermiete: 0, personal: 40749, miete: 33704, nebenkosten: 7790, sonstige: 10377, db: -10003, fteBedarf: 33.05019124380917, fteIst: 41.85979119116115, umsatzJeGruppe: { sportschuhe: 64501, sporttextil: 49001, outdoor: 41618, teamsport: 11806, rad: 5661, wintersport: 22897 } } }, { id: "W035", name: "Hartwig Wuppertal", stadt: "Wuppertal", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2400, etagen: [0, 1, 2, 3, 4], baujahr: 2007, fassade: 6, substanz: 85, status: "offen", flaechen: [{ id: "W035-f1", etage: 0, qm: 1037, konzept: "eigen", gruppe: "food" }, { id: "W035-f2", etage: 0, qm: 677, konzept: "eigen", gruppe: "beauty" }, { id: "W035-f3", etage: 0, qm: 646, konzept: "eigen", gruppe: "accessoires" }, { id: "W035-f4", etage: 1, qm: 395, konzept: "eigen", gruppe: "accessoires" }, { id: "W035-f5", etage: 1, qm: 1965, konzept: "eigen", gruppe: "damen" }, { id: "W035-f6", etage: 2, qm: 635, konzept: "eigen", gruppe: "damen" }, { id: "W035-f7", etage: 2, qm: 941, konzept: "eigen", gruppe: "waesche" }, { id: "W035-f8", etage: 2, qm: 784, konzept: "eigen", gruppe: "herren" }, { id: "W035-f9", etage: 3, qm: 343, konzept: "eigen", gruppe: "herren" }, { id: "W035-f10", etage: 3, qm: 1058, konzept: "eigen", gruppe: "kinder" }, { id: "W035-f11", etage: 3, qm: 960, konzept: "eigen", gruppe: "sport" }, { id: "W035-f12", etage: 4, qm: 132, konzept: "eigen", gruppe: "sport" }, { id: "W035-f13", etage: 4, qm: 682, konzept: "eigen", gruppe: "spielwaren" }, { id: "W035-f14", etage: 4, qm: 1546, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 411442, rohertrag: 172760, konzessionserloes: 0, untermiete: 0, personal: 95075, miete: 54936, nebenkosten: 12128, sonstige: 22180, db: -11557, fteBedarf: 74.08847483876315, fteIst: 97.59371172510765, umsatzJeGruppe: { food: 51835, beauty: 53890, accessoires: 57549, damen: 82794, waesche: 30963, herren: 33006, kinder: 31866, sport: 23295, spielwaren: 12686, wohnen: 33557 } } }, { id: "S026", name: "Hartwig Sport Wuppertal", stadt: "Wuppertal", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0], baujahr: 2009, fassade: 3, substanz: 48, status: "offen", flaechen: [{ id: "S026-f1", etage: 0, qm: 433, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S026-f2", etage: 0, qm: 688, konzept: "eigen", gruppe: "sporttextil" }, { id: "S026-f3", etage: 0, qm: 300, konzept: "eigen", gruppe: "outdoor" }, { id: "S026-f4", etage: 0, qm: 227, konzept: "eigen", gruppe: "teamsport" }, { id: "S026-f5", etage: 0, qm: 259, konzept: "eigen", gruppe: "rad" }, { id: "S026-f6", etage: 0, qm: 193, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 85293, rohertrag: 35867, konzessionserloes: 0, untermiete: 0, personal: 17078, miete: 7723, nebenkosten: 2891, sonstige: 4442, db: 3732, fteBedarf: 14.034670714758327, fteIst: 17.212563034533623, umsatzJeGruppe: { sportschuhe: 28872, sporttextil: 24396, outdoor: 11683, teamsport: 6121, rad: 2825, wintersport: 11396 } } }, { id: "W036", name: "Hartwig Bielefeld", stadt: "Bielefeld", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1926, fassade: 4, substanz: 54, status: "offen", flaechen: [{ id: "W036-f1", etage: -1, qm: 1106, konzept: "eigen", gruppe: "food" }, { id: "W036-f2", etage: -1, qm: 1661, konzept: "eigen", gruppe: "wohnen" }, { id: "W036-f3", etage: 0, qm: 1171, konzept: "eigen", gruppe: "beauty" }, { id: "W036-f4", etage: 0, qm: 1596, konzept: "eigen", gruppe: "accessoires" }, { id: "W036-f5", etage: 1, qm: 195, konzept: "eigen", gruppe: "accessoires" }, { id: "W036-f6", etage: 1, qm: 2572, konzept: "eigen", gruppe: "damen" }, { id: "W036-f7", etage: 2, qm: 681, konzept: "eigen", gruppe: "damen" }, { id: "W036-f8", etage: 2, qm: 913, konzept: "eigen", gruppe: "waesche" }, { id: "W036-f9", etage: 2, qm: 1173, konzept: "eigen", gruppe: "herren" }, { id: "W036-f10", etage: 3, qm: 382, konzept: "eigen", gruppe: "herren" }, { id: "W036-f11", etage: 3, qm: 1121, konzept: "eigen", gruppe: "kinder" }, { id: "W036-f12", etage: 3, qm: 1264, konzept: "eigen", gruppe: "sport" }, { id: "W036-f13", etage: 4, qm: 532, konzept: "eigen", gruppe: "sport" }, { id: "W036-f14", etage: 4, qm: 985, konzept: "eigen", gruppe: "spielwaren" }, { id: "W036-f15", etage: 4, qm: 1250, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 511698, rohertrag: 214081, konzessionserloes: 0, untermiete: 0, personal: 101773, miete: 47862, nebenkosten: 23231, sonstige: 28451, db: 12764, fteBedarf: 95.98759390249725, fteIst: 104.27841530887343, umsatzJeGruppe: { food: 42130, wohnen: 56668, beauty: 105207, accessoires: 78563, damen: 91392, waesche: 24475, herren: 39429, kinder: 29167, sport: 30742, spielwaren: 13924 } } }, { id: "S027", name: "Hartwig Sport Bielefeld Einkaufszentrum", stadt: "Bielefeld", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 2014, fassade: 6, substanz: 33, status: "offen", flaechen: [{ id: "S027-f1", etage: 0, qm: 549, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S027-f2", etage: 0, qm: 184, konzept: "eigen", gruppe: "sporttextil" }, { id: "S027-f3", etage: 1, qm: 477, konzept: "eigen", gruppe: "sporttextil" }, { id: "S027-f4", etage: 1, qm: 256, konzept: "eigen", gruppe: "outdoor" }, { id: "S027-f5", etage: 2, qm: 85, konzept: "eigen", gruppe: "outdoor" }, { id: "S027-f6", etage: 2, qm: 233, konzept: "eigen", gruppe: "teamsport" }, { id: "S027-f7", etage: 2, qm: 283, konzept: "eigen", gruppe: "rad" }, { id: "S027-f8", etage: 2, qm: 133, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 70660, rohertrag: 29738, konzessionserloes: 0, untermiete: 0, personal: 14396, miete: 7922, nebenkosten: 2709, sonstige: 3887, db: 824, fteBedarf: 12.669226029267431, fteIst: 14.781855370757716, umsatzJeGruppe: { sportschuhe: 27156, sporttextil: 20210, outdoor: 11431, teamsport: 3773, rad: 2247, wintersport: 5843 } } }, { id: "W037", name: "Hartwig Bonn Bahnhofstra\xDFe", stadt: "Bonn", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1927, fassade: 3, substanz: 61, status: "offen", flaechen: [{ id: "W037-f1", etage: -1, qm: 570, konzept: "eigen", gruppe: "food" }, { id: "W037-f2", etage: -1, qm: 930, konzept: "eigen", gruppe: "wohnen" }, { id: "W037-f3", etage: 0, qm: 660, konzept: "eigen", gruppe: "beauty" }, { id: "W037-f4", etage: 0, qm: 840, konzept: "eigen", gruppe: "accessoires" }, { id: "W037-f5", etage: 1, qm: 53, konzept: "eigen", gruppe: "accessoires" }, { id: "W037-f6", etage: 1, qm: 1447, konzept: "eigen", gruppe: "damen" }, { id: "W037-f7", etage: 2, qm: 297, konzept: "eigen", gruppe: "damen" }, { id: "W037-f8", etage: 2, qm: 612, konzept: "eigen", gruppe: "waesche" }, { id: "W037-f9", etage: 2, qm: 590, konzept: "eigen", gruppe: "herren" }, { id: "W037-f10", etage: 3, qm: 694, konzept: "eigen", gruppe: "herren" }, { id: "W037-f11", etage: 3, qm: 499, konzept: "eigen", gruppe: "kinder" }, { id: "W037-f12", etage: 3, qm: 307, konzept: "eigen", gruppe: "sport" }, { id: "W037-f13", etage: 4, qm: 829, konzept: "eigen", gruppe: "sport" }, { id: "W037-f14", etage: 4, qm: 464, konzept: "eigen", gruppe: "spielwaren" }, { id: "W037-f15", etage: 4, qm: 207, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 272634, rohertrag: 115282, konzessionserloes: 0, untermiete: 0, personal: 53430, miete: 34520, nebenkosten: 12728, sonstige: 15228, db: -625, fteBedarf: 51.408625112435445, fteIst: 54.780311309823475, umsatzJeGruppe: { food: 25094, wohnen: 23726, beauty: 48708, accessoires: 41629, damen: 50370, waesche: 20050, herren: 30078, kinder: 8496, sport: 18156, spielwaren: 6327 } } }, { id: "S028", name: "Hartwig Sport Bonn", stadt: "Bonn", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 2010, fassade: 7, substanz: 55, status: "offen", flaechen: [{ id: "S028-f1", etage: 0, qm: 1107, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S028-f2", etage: 0, qm: 993, konzept: "eigen", gruppe: "sporttextil" }, { id: "S028-f3", etage: 1, qm: 75, konzept: "eigen", gruppe: "sporttextil" }, { id: "S028-f4", etage: 1, qm: 979, konzept: "eigen", gruppe: "outdoor" }, { id: "S028-f5", etage: 1, qm: 331, konzept: "eigen", gruppe: "teamsport" }, { id: "S028-f6", etage: 1, qm: 386, konzept: "eigen", gruppe: "rad" }, { id: "S028-f7", etage: 1, qm: 329, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 164552, rohertrag: 69733, konzessionserloes: 0, untermiete: 0, personal: 31754, miete: 12148, nebenkosten: 4898, sonstige: 8637, db: 12296, fteBedarf: 27.3400796208445, fteIst: 32.412390244375956, umsatzJeGruppe: { sportschuhe: 58665, sporttextil: 38878, outdoor: 39343, teamsport: 6627, rad: 3498, wintersport: 17541 } } }, { id: "W038", name: "Hartwig M\xFCnster", stadt: "M\xFCnster", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1990, fassade: 1, substanz: 49, status: "offen", flaechen: [{ id: "W038-f1", etage: 0, qm: 1041, konzept: "eigen", gruppe: "food" }, { id: "W038-f2", etage: 0, qm: 616, konzept: "eigen", gruppe: "beauty" }, { id: "W038-f3", etage: 0, qm: 493, konzept: "eigen", gruppe: "accessoires" }, { id: "W038-f4", etage: 1, qm: 643, konzept: "eigen", gruppe: "accessoires" }, { id: "W038-f5", etage: 1, qm: 1507, konzept: "eigen", gruppe: "damen" }, { id: "W038-f6", etage: 2, qm: 1363, konzept: "eigen", gruppe: "damen" }, { id: "W038-f7", etage: 2, qm: 787, konzept: "eigen", gruppe: "waesche" }, { id: "W038-f8", etage: 3, qm: 89, konzept: "eigen", gruppe: "waesche" }, { id: "W038-f9", etage: 3, qm: 1507, konzept: "eigen", gruppe: "herren" }, { id: "W038-f10", etage: 3, qm: 554, konzept: "eigen", gruppe: "kinder" }, { id: "W038-f11", etage: 4, qm: 357, konzept: "eigen", gruppe: "kinder" }, { id: "W038-f12", etage: 4, qm: 1491, konzept: "eigen", gruppe: "sport" }, { id: "W038-f13", etage: 4, qm: 301, konzept: "eigen", gruppe: "spielwaren" }, { id: "W038-f14", etage: 5, qm: 495, konzept: "eigen", gruppe: "spielwaren" }, { id: "W038-f15", etage: 5, qm: 1655, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 445823, rohertrag: 188618, konzessionserloes: 0, untermiete: 0, personal: 87151, miete: 34095, nebenkosten: 14541, sonstige: 24083, db: 28748, fteBedarf: 80.5172683086623, fteIst: 88.62350484133029, umsatzJeGruppe: { food: 44886, beauty: 66206, accessoires: 65666, damen: 99971, waesche: 27742, herren: 41196, kinder: 23383, sport: 29087, spielwaren: 14457, wohnen: 33230 } } }, { id: "S029", name: "Hartwig Sport M\xFCnster", stadt: "M\xFCnster", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 1982, fassade: 2, substanz: 34, status: "offen", flaechen: [{ id: "S029-f1", etage: 0, qm: 1115, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S029-f2", etage: 0, qm: 502, konzept: "eigen", gruppe: "sporttextil" }, { id: "S029-f3", etage: 1, qm: 865, konzept: "eigen", gruppe: "sporttextil" }, { id: "S029-f4", etage: 1, qm: 752, konzept: "eigen", gruppe: "outdoor" }, { id: "S029-f5", etage: 2, qm: 180, konzept: "eigen", gruppe: "outdoor" }, { id: "S029-f6", etage: 2, qm: 463, konzept: "eigen", gruppe: "teamsport" }, { id: "S029-f7", etage: 2, qm: 614, konzept: "eigen", gruppe: "rad" }, { id: "S029-f8", etage: 2, qm: 360, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 174153, rohertrag: 73555, konzessionserloes: 0, untermiete: 0, personal: 32956, miete: 18835, nebenkosten: 0, sonstige: 9323, db: 12440, fteBedarf: 29.938185954086208, fteIst: 33.37451432170405, umsatzJeGruppe: { sportschuhe: 52261, sporttextil: 43572, outdoor: 41505, teamsport: 9303, rad: 7588, wintersport: 19925 } } }, { id: "W039", name: "Hartwig Mannheim", stadt: "Mannheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2, 3], baujahr: 1939, fassade: 0, substanz: 62, status: "offen", flaechen: [{ id: "W039-f1", etage: -1, qm: 755, konzept: "eigen", gruppe: "food" }, { id: "W039-f2", etage: -1, qm: 1265, konzept: "eigen", gruppe: "wohnen" }, { id: "W039-f3", etage: 0, qm: 514, konzept: "eigen", gruppe: "beauty" }, { id: "W039-f4", etage: 0, qm: 785, konzept: "eigen", gruppe: "accessoires" }, { id: "W039-f5", etage: 0, qm: 721, konzept: "eigen", gruppe: "damen" }, { id: "W039-f6", etage: 1, qm: 1207, konzept: "eigen", gruppe: "damen" }, { id: "W039-f7", etage: 1, qm: 738, konzept: "eigen", gruppe: "waesche" }, { id: "W039-f8", etage: 1, qm: 75, konzept: "eigen", gruppe: "herren" }, { id: "W039-f9", etage: 2, qm: 1196, konzept: "eigen", gruppe: "herren" }, { id: "W039-f10", etage: 2, qm: 807, konzept: "eigen", gruppe: "kinder" }, { id: "W039-f11", etage: 2, qm: 18, konzept: "eigen", gruppe: "sport" }, { id: "W039-f12", etage: 3, qm: 951, konzept: "eigen", gruppe: "sport" }, { id: "W039-f13", etage: 3, qm: 692, konzept: "eigen", gruppe: "spielwaren" }, { id: "W039-f14", etage: 3, qm: 377, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 282958, rohertrag: 118014, konzessionserloes: 0, untermiete: 0, personal: 71787, miete: 61779, nebenkosten: 0, sonstige: 16147, db: -31699, fteBedarf: 54.95752546154688, fteIst: 72.87446584447383, umsatzJeGruppe: { food: 34766, wohnen: 30446, beauty: 40104, accessoires: 28698, damen: 50241, waesche: 18093, herren: 33957, kinder: 18023, sport: 17987, spielwaren: 10643 } } }, { id: "S030", name: "Hartwig Sport Mannheim Galerie am Fluss", stadt: "Mannheim", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 4800, etagen: [0], baujahr: 1993, fassade: 1, substanz: 60, status: "offen", flaechen: [{ id: "S030-f1", etage: 0, qm: 1147, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S030-f2", etage: 0, qm: 1092, konzept: "eigen", gruppe: "sporttextil" }, { id: "S030-f3", etage: 0, qm: 1064, konzept: "eigen", gruppe: "outdoor" }, { id: "S030-f4", etage: 0, qm: 567, konzept: "eigen", gruppe: "teamsport" }, { id: "S030-f5", etage: 0, qm: 515, konzept: "eigen", gruppe: "rad" }, { id: "S030-f6", etage: 0, qm: 364, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 144810, rohertrag: 60744, konzessionserloes: 0, untermiete: 0, personal: 27770, miete: 14047, nebenkosten: 5251, sonstige: 8074, db: 5602, fteBedarf: 26.272606857762057, fteIst: 28.554078733226028, umsatzJeGruppe: { sportschuhe: 54964, sporttextil: 29333, outdoor: 28422, teamsport: 11814, rad: 3942, wintersport: 16335 } } }, { id: "W040", name: "Hartwig Karlsruhe", stadt: "Karlsruhe", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1983, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "W040-f1", etage: -1, qm: 856, konzept: "eigen", gruppe: "food" }, { id: "W040-f2", etage: -1, qm: 1860, konzept: "eigen", gruppe: "wohnen" }, { id: "W040-f3", etage: 0, qm: 810, konzept: "eigen", gruppe: "beauty" }, { id: "W040-f4", etage: 0, qm: 1263, konzept: "eigen", gruppe: "accessoires" }, { id: "W040-f5", etage: 0, qm: 643, konzept: "eigen", gruppe: "damen" }, { id: "W040-f6", etage: 1, qm: 2717, konzept: "eigen", gruppe: "damen" }, { id: "W040-f7", etage: 2, qm: 261, konzept: "eigen", gruppe: "damen" }, { id: "W040-f8", etage: 2, qm: 1095, konzept: "eigen", gruppe: "waesche" }, { id: "W040-f9", etage: 2, qm: 1360, konzept: "eigen", gruppe: "herren" }, { id: "W040-f10", etage: 3, qm: 911, konzept: "eigen", gruppe: "herren" }, { id: "W040-f11", etage: 3, qm: 1246, konzept: "eigen", gruppe: "kinder" }, { id: "W040-f12", etage: 3, qm: 560, konzept: "eigen", gruppe: "sport" }, { id: "W040-f13", etage: 4, qm: 750, konzept: "eigen", gruppe: "sport" }, { id: "W040-f14", etage: 4, qm: 932, konzept: "eigen", gruppe: "spielwaren" }, { id: "W040-f15", etage: 4, qm: 1035, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 517585, rohertrag: 220251, konzessionserloes: 0, untermiete: 0, personal: 106474, miete: 73744, nebenkosten: 20465, sonstige: 28556, db: -8987, fteBedarf: 96.14209753147138, fteIst: 107.95207219423338, umsatzJeGruppe: { food: 37358, wohnen: 64894, beauty: 83511, accessoires: 55371, damen: 110861, waesche: 35058, herren: 62261, kinder: 25237, sport: 25611, spielwaren: 17422 } } }, { id: "S031", name: "Hartwig Sport Karlsruhe", stadt: "Karlsruhe", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1988, fassade: 2, substanz: 61, status: "offen", flaechen: [{ id: "S031-f1", etage: 0, qm: 930, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S031-f2", etage: 0, qm: 320, konzept: "eigen", gruppe: "sporttextil" }, { id: "S031-f3", etage: 1, qm: 711, konzept: "eigen", gruppe: "sporttextil" }, { id: "S031-f4", etage: 1, qm: 539, konzept: "eigen", gruppe: "outdoor" }, { id: "S031-f5", etage: 2, qm: 332, konzept: "eigen", gruppe: "outdoor" }, { id: "S031-f6", etage: 2, qm: 292, konzept: "eigen", gruppe: "teamsport" }, { id: "S031-f7", etage: 2, qm: 351, konzept: "eigen", gruppe: "rad" }, { id: "S031-f8", etage: 2, qm: 276, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 151911, rohertrag: 64148, konzessionserloes: 0, untermiete: 0, personal: 28413, miete: 34324, nebenkosten: 0, sonstige: 7916, db: -6506, fteBedarf: 24.908923516066512, fteIst: 29.329654828011094, umsatzJeGruppe: { sportschuhe: 49687, sporttextil: 33500, outdoor: 35371, teamsport: 7412, rad: 4826, wintersport: 21115 } } }, { id: "W041", name: "Hartwig Augsburg", stadt: "Augsburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2], baujahr: 1960, fassade: 0, substanz: 73, status: "offen", flaechen: [{ id: "W041-f1", etage: -1, qm: 585, konzept: "eigen", gruppe: "food" }, { id: "W041-f2", etage: -1, qm: 2165, konzept: "eigen", gruppe: "wohnen" }, { id: "W041-f3", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W041-f4", etage: 0, qm: 1315, konzept: "eigen", gruppe: "accessoires" }, { id: "W041-f5", etage: 0, qm: 670, konzept: "eigen", gruppe: "damen" }, { id: "W041-f6", etage: 1, qm: 1551, konzept: "eigen", gruppe: "damen" }, { id: "W041-f7", etage: 1, qm: 846, konzept: "eigen", gruppe: "waesche" }, { id: "W041-f8", etage: 1, qm: 353, konzept: "eigen", gruppe: "herren" }, { id: "W041-f9", etage: 2, qm: 1159, konzept: "eigen", gruppe: "herren" }, { id: "W041-f10", etage: 2, qm: 613, konzept: "eigen", gruppe: "kinder" }, { id: "W041-f11", etage: 2, qm: 899, konzept: "eigen", gruppe: "sport" }, { id: "W041-f12", etage: 2, qm: 518, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 397194, rohertrag: 168492, konzessionserloes: 0, untermiete: 0, personal: 79380, miete: 83738, nebenkosten: 12194, sonstige: 21432, db: -28253, fteBedarf: 71.58712868852105, fteIst: 79.97857104541941, umsatzJeGruppe: { food: 27883, wohnen: 50055, beauty: 69970, accessoires: 67508, damen: 64413, waesche: 25802, herren: 46682, kinder: 16132, sport: 18008, spielwaren: 10741 } } }, { id: "S032", name: "Hartwig Sport Augsburg City-Center", stadt: "Augsburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1994, fassade: 7, substanz: 90, status: "offen", flaechen: [{ id: "S032-f1", etage: 0, qm: 522, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S032-f2", etage: 0, qm: 1003, konzept: "eigen", gruppe: "sporttextil" }, { id: "S032-f3", etage: 1, qm: 41, konzept: "eigen", gruppe: "sporttextil" }, { id: "S032-f4", etage: 1, qm: 541, konzept: "eigen", gruppe: "outdoor" }, { id: "S032-f5", etage: 1, qm: 324, konzept: "eigen", gruppe: "teamsport" }, { id: "S032-f6", etage: 1, qm: 422, konzept: "eigen", gruppe: "rad" }, { id: "S032-f7", etage: 1, qm: 198, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 96253, rohertrag: 41037, konzessionserloes: 0, untermiete: 0, personal: 20839, miete: 23516, nebenkosten: 4333, sonstige: 5319, db: -12970, fteBedarf: 17.317565258921988, fteIst: 21.10772516462578, umsatzJeGruppe: { sportschuhe: 21677, sporttextil: 36559, outdoor: 18014, teamsport: 6787, rad: 3807, wintersport: 9409 } } }, { id: "W042", name: "Hartwig Wiesbaden Bahnhofstra\xDFe", stadt: "Wiesbaden", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [-1, 0, 1, 2], baujahr: 1975, fassade: 7, substanz: 34, status: "offen", flaechen: [{ id: "W042-f1", etage: -1, qm: 833, konzept: "eigen", gruppe: "food" }, { id: "W042-f2", etage: -1, qm: 1792, konzept: "eigen", gruppe: "wohnen" }, { id: "W042-f3", etage: 0, qm: 596, konzept: "eigen", gruppe: "beauty" }, { id: "W042-f4", etage: 0, qm: 1049, konzept: "eigen", gruppe: "accessoires" }, { id: "W042-f5", etage: 0, qm: 981, konzept: "eigen", gruppe: "damen" }, { id: "W042-f6", etage: 1, qm: 916, konzept: "eigen", gruppe: "damen" }, { id: "W042-f7", etage: 1, qm: 608, konzept: "eigen", gruppe: "waesche" }, { id: "W042-f8", etage: 1, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W042-f9", etage: 2, qm: 281, konzept: "eigen", gruppe: "herren" }, { id: "W042-f10", etage: 2, qm: 656, konzept: "eigen", gruppe: "kinder" }, { id: "W042-f11", etage: 2, qm: 1194, konzept: "eigen", gruppe: "sport" }, { id: "W042-f12", etage: 2, qm: 557, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 270011, rohertrag: 112707, konzessionserloes: 0, untermiete: 0, personal: 61330, miete: 29751, nebenkosten: 0, sonstige: 15824, db: 5801, fteBedarf: 54.22578098147522, fteIst: 61.63350767894528, umsatzJeGruppe: { food: 33886, wohnen: 23691, beauty: 44655, accessoires: 39980, damen: 47374, waesche: 15858, herren: 30110, kinder: 10033, sport: 17406, spielwaren: 7019 } } }, { id: "S033", name: "Hartwig Sport Wiesbaden City-Center", stadt: "Wiesbaden", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1986, fassade: 6, substanz: 63, status: "offen", flaechen: [{ id: "S033-f1", etage: 0, qm: 1376, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S033-f2", etage: 0, qm: 1274, konzept: "eigen", gruppe: "sporttextil" }, { id: "S033-f3", etage: 1, qm: 356, konzept: "eigen", gruppe: "sporttextil" }, { id: "S033-f4", etage: 1, qm: 783, konzept: "eigen", gruppe: "outdoor" }, { id: "S033-f5", etage: 1, qm: 460, konzept: "eigen", gruppe: "teamsport" }, { id: "S033-f6", etage: 1, qm: 669, konzept: "eigen", gruppe: "rad" }, { id: "S033-f7", etage: 1, qm: 382, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 179688, rohertrag: 75303, konzessionserloes: 0, untermiete: 0, personal: 34796, miete: 39708, nebenkosten: 0, sonstige: 9752, db: -8953, fteBedarf: 31.47617613749901, fteIst: 35.28392768198496, umsatzJeGruppe: { sportschuhe: 67828, sporttextil: 50838, outdoor: 23196, teamsport: 9365, rad: 7029, wintersport: 21432 } } }, { id: "W043", name: "Hartwig M\xF6nchengladbach", stadt: "M\xF6nchengladbach", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1959, fassade: 0, substanz: 72, status: "offen", flaechen: [{ id: "W043-f1", etage: 0, qm: 654, konzept: "eigen", gruppe: "food" }, { id: "W043-f2", etage: 0, qm: 667, konzept: "eigen", gruppe: "beauty" }, { id: "W043-f3", etage: 0, qm: 412, konzept: "eigen", gruppe: "accessoires" }, { id: "W043-f4", etage: 1, qm: 858, konzept: "eigen", gruppe: "accessoires" }, { id: "W043-f5", etage: 1, qm: 875, konzept: "eigen", gruppe: "damen" }, { id: "W043-f6", etage: 2, qm: 1281, konzept: "eigen", gruppe: "damen" }, { id: "W043-f7", etage: 2, qm: 452, konzept: "eigen", gruppe: "waesche" }, { id: "W043-f8", etage: 3, qm: 307, konzept: "eigen", gruppe: "waesche" }, { id: "W043-f9", etage: 3, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W043-f10", etage: 3, qm: 326, konzept: "eigen", gruppe: "kinder" }, { id: "W043-f11", etage: 4, qm: 439, konzept: "eigen", gruppe: "kinder" }, { id: "W043-f12", etage: 4, qm: 956, konzept: "eigen", gruppe: "sport" }, { id: "W043-f13", etage: 4, qm: 339, konzept: "eigen", gruppe: "spielwaren" }, { id: "W043-f14", etage: 5, qm: 266, konzept: "eigen", gruppe: "spielwaren" }, { id: "W043-f15", etage: 5, qm: 1467, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 346337, rohertrag: 146719, konzessionserloes: 0, untermiete: 0, personal: 72901, miete: 69278, nebenkosten: 14693, sonstige: 18880, db: -29033, fteBedarf: 63.30560755819009, fteIst: 73.93711858209177, umsatzJeGruppe: { food: 27014, beauty: 62637, accessoires: 65467, damen: 58495, waesche: 27448, herren: 27374, kinder: 20173, sport: 18549, spielwaren: 10171, wohnen: 29010 } } }, { id: "W044", name: "Hartwig Gelsenkirchen", stadt: "Gelsenkirchen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1, 2], baujahr: 2005, fassade: 5, substanz: 74, status: "offen", flaechen: [{ id: "W044-f1", etage: -1, qm: 1010, konzept: "eigen", gruppe: "food" }, { id: "W044-f2", etage: -1, qm: 1965, konzept: "eigen", gruppe: "wohnen" }, { id: "W044-f3", etage: 0, qm: 663, konzept: "eigen", gruppe: "beauty" }, { id: "W044-f4", etage: 0, qm: 1087, konzept: "eigen", gruppe: "accessoires" }, { id: "W044-f5", etage: 0, qm: 1225, konzept: "eigen", gruppe: "damen" }, { id: "W044-f6", etage: 1, qm: 908, konzept: "eigen", gruppe: "damen" }, { id: "W044-f7", etage: 1, qm: 959, konzept: "eigen", gruppe: "waesche" }, { id: "W044-f8", etage: 1, qm: 1108, konzept: "eigen", gruppe: "herren" }, { id: "W044-f9", etage: 2, qm: 512, konzept: "eigen", gruppe: "herren" }, { id: "W044-f10", etage: 2, qm: 669, konzept: "eigen", gruppe: "kinder" }, { id: "W044-f11", etage: 2, qm: 1275, konzept: "eigen", gruppe: "sport" }, { id: "W044-f12", etage: 2, qm: 722, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 434384, rohertrag: 181455, konzessionserloes: 0, untermiete: 0, personal: 91555, miete: 78802, nebenkosten: 12824, sonstige: 23256, db: -24982, fteBedarf: 77.49945946670631, fteIst: 92.5254157643862, umsatzJeGruppe: { food: 54490, wohnen: 41144, beauty: 65404, accessoires: 63330, damen: 67806, waesche: 32312, herren: 51481, kinder: 15525, sport: 28898, spielwaren: 13995 } } }, { id: "W045", name: "Hartwig Aachen", stadt: "Aachen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 2006, fassade: 6, substanz: 49, status: "offen", flaechen: [{ id: "W045-f1", etage: -1, qm: 1025, konzept: "eigen", gruppe: "food" }, { id: "W045-f2", etage: -1, qm: 1425, konzept: "eigen", gruppe: "wohnen" }, { id: "W045-f3", etage: 0, qm: 758, konzept: "eigen", gruppe: "beauty" }, { id: "W045-f4", etage: 0, qm: 1102, konzept: "eigen", gruppe: "accessoires" }, { id: "W045-f5", etage: 0, qm: 590, konzept: "eigen", gruppe: "damen" }, { id: "W045-f6", etage: 1, qm: 2325, konzept: "eigen", gruppe: "damen" }, { id: "W045-f7", etage: 1, qm: 125, konzept: "eigen", gruppe: "waesche" }, { id: "W045-f8", etage: 2, qm: 1091, konzept: "eigen", gruppe: "waesche" }, { id: "W045-f9", etage: 2, qm: 1359, konzept: "eigen", gruppe: "herren" }, { id: "W045-f10", etage: 3, qm: 427, konzept: "eigen", gruppe: "herren" }, { id: "W045-f11", etage: 3, qm: 1210, konzept: "eigen", gruppe: "kinder" }, { id: "W045-f12", etage: 3, qm: 813, konzept: "eigen", gruppe: "sport" }, { id: "W045-f13", etage: 4, qm: 931, konzept: "eigen", gruppe: "sport" }, { id: "W045-f14", etage: 4, qm: 1070, konzept: "eigen", gruppe: "spielwaren" }, { id: "W045-f15", etage: 4, qm: 449, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 427240, rohertrag: 180211, konzessionserloes: 0, untermiete: 0, personal: 102341, miete: 62686, nebenkosten: 17005, sonstige: 24132, db: -25953, fteBedarf: 81.9113128034242, fteIst: 102.91160433753704, umsatzJeGruppe: { food: 42660, wohnen: 41798, beauty: 57778, accessoires: 51041, damen: 69680, waesche: 41522, herren: 46903, kinder: 30239, sport: 28363, spielwaren: 17256 } } }, { id: "S034", name: "Hartwig Sport Aachen", stadt: "Aachen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [0], baujahr: 2013, fassade: 4, substanz: 60, status: "offen", flaechen: [{ id: "S034-f1", etage: 0, qm: 615, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S034-f2", etage: 0, qm: 901, konzept: "eigen", gruppe: "sporttextil" }, { id: "S034-f3", etage: 0, qm: 443, konzept: "eigen", gruppe: "outdoor" }, { id: "S034-f4", etage: 0, qm: 339, konzept: "eigen", gruppe: "teamsport" }, { id: "S034-f5", etage: 0, qm: 408, konzept: "eigen", gruppe: "rad" }, { id: "S034-f6", etage: 0, qm: 245, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 92764, rohertrag: 39024, konzessionserloes: 0, untermiete: 0, personal: 20778, miete: 12968, nebenkosten: 4114, sonstige: 5131, db: -3968, fteBedarf: 16.570085352990063, fteIst: 21.12856542377301, umsatzJeGruppe: { sportschuhe: 28305, sporttextil: 26279, outdoor: 13511, teamsport: 7487, rad: 3458, wintersport: 13723 } } }, { id: "W046", name: "Hartwig Braunschweig", stadt: "Braunschweig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4], baujahr: 1972, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W046-f1", etage: 0, qm: 996, konzept: "eigen", gruppe: "food" }, { id: "W046-f2", etage: 0, qm: 643, konzept: "eigen", gruppe: "beauty" }, { id: "W046-f3", etage: 0, qm: 681, konzept: "eigen", gruppe: "accessoires" }, { id: "W046-f4", etage: 1, qm: 711, konzept: "eigen", gruppe: "accessoires" }, { id: "W046-f5", etage: 1, qm: 1609, konzept: "eigen", gruppe: "damen" }, { id: "W046-f6", etage: 2, qm: 294, konzept: "eigen", gruppe: "damen" }, { id: "W046-f7", etage: 2, qm: 840, konzept: "eigen", gruppe: "waesche" }, { id: "W046-f8", etage: 2, qm: 1186, konzept: "eigen", gruppe: "herren" }, { id: "W046-f9", etage: 3, qm: 291, konzept: "eigen", gruppe: "herren" }, { id: "W046-f10", etage: 3, qm: 695, konzept: "eigen", gruppe: "kinder" }, { id: "W046-f11", etage: 3, qm: 1334, konzept: "eigen", gruppe: "sport" }, { id: "W046-f12", etage: 4, qm: 12, konzept: "eigen", gruppe: "sport" }, { id: "W046-f13", etage: 4, qm: 703, konzept: "eigen", gruppe: "spielwaren" }, { id: "W046-f14", etage: 4, qm: 1605, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 393643, rohertrag: 163648, konzessionserloes: 0, untermiete: 0, personal: 80571, miete: 52073, nebenkosten: 14530, sonstige: 21359, db: -4886, fteBedarf: 71.54075862173269, fteIst: 82.92838601566278, umsatzJeGruppe: { food: 50322, beauty: 52905, accessoires: 76824, damen: 55127, waesche: 24222, herren: 35633, kinder: 20486, sport: 27974, spielwaren: 14747, wohnen: 35403 } } }, { id: "S035", name: "Hartwig Sport Braunschweig", stadt: "Braunschweig", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1100, etagen: [0, 1, 2], baujahr: 1992, fassade: 2, substanz: 62, status: "offen", flaechen: [{ id: "S035-f1", etage: 0, qm: 797, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S035-f2", etage: 0, qm: 253, konzept: "eigen", gruppe: "sporttextil" }, { id: "S035-f3", etage: 1, qm: 612, konzept: "eigen", gruppe: "sporttextil" }, { id: "S035-f4", etage: 1, qm: 438, konzept: "eigen", gruppe: "outdoor" }, { id: "S035-f5", etage: 2, qm: 223, konzept: "eigen", gruppe: "outdoor" }, { id: "S035-f6", etage: 2, qm: 265, konzept: "eigen", gruppe: "teamsport" }, { id: "S035-f7", etage: 2, qm: 278, konzept: "eigen", gruppe: "rad" }, { id: "S035-f8", etage: 2, qm: 284, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 114523, rohertrag: 48221, konzessionserloes: 0, untermiete: 0, personal: 22348, miete: 9147, nebenkosten: 4262, sonstige: 6113, db: 6352, fteBedarf: 19.464251966026293, fteIst: 23.10104433546691, umsatzJeGruppe: { sportschuhe: 43495, sporttextil: 22867, outdoor: 25612, teamsport: 5399, rad: 2960, wintersport: 14191 } } }, { id: "W047", name: "Hartwig Kiel Einkaufszentrum", stadt: "Kiel", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1981, fassade: 4, substanz: 40, status: "offen", flaechen: [{ id: "W047-f1", etage: -1, qm: 717, konzept: "eigen", gruppe: "food" }, { id: "W047-f2", etage: -1, qm: 1433, konzept: "eigen", gruppe: "wohnen" }, { id: "W047-f3", etage: 0, qm: 795, konzept: "eigen", gruppe: "beauty" }, { id: "W047-f4", etage: 0, qm: 1355, konzept: "eigen", gruppe: "accessoires" }, { id: "W047-f5", etage: 1, qm: 134, konzept: "eigen", gruppe: "accessoires" }, { id: "W047-f6", etage: 1, qm: 2016, konzept: "eigen", gruppe: "damen" }, { id: "W047-f7", etage: 2, qm: 684, konzept: "eigen", gruppe: "damen" }, { id: "W047-f8", etage: 2, qm: 708, konzept: "eigen", gruppe: "waesche" }, { id: "W047-f9", etage: 2, qm: 758, konzept: "eigen", gruppe: "herren" }, { id: "W047-f10", etage: 3, qm: 1193, konzept: "eigen", gruppe: "herren" }, { id: "W047-f11", etage: 3, qm: 782, konzept: "eigen", gruppe: "kinder" }, { id: "W047-f12", etage: 3, qm: 174, konzept: "eigen", gruppe: "sport" }, { id: "W047-f13", etage: 4, qm: 1248, konzept: "eigen", gruppe: "sport" }, { id: "W047-f14", etage: 4, qm: 839, konzept: "eigen", gruppe: "spielwaren" }, { id: "W047-f15", etage: 4, qm: 63, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 377293, rohertrag: 160119, konzessionserloes: 0, untermiete: 0, personal: 82325, miete: 54279, nebenkosten: 0, sonstige: 21274, db: 2241, fteBedarf: 72.08823264454394, fteIst: 84.64631588618568, umsatzJeGruppe: { food: 31206, wohnen: 34042, beauty: 61623, accessoires: 68778, damen: 64873, waesche: 24613, herren: 44899, kinder: 15173, sport: 20759, spielwaren: 11327 } } }, { id: "S036", name: "Hartwig Sport Kiel", stadt: "Kiel", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1100, etagen: [0, 1, 2], baujahr: 2013, fassade: 5, substanz: 72, status: "offen", flaechen: [{ id: "S036-f1", etage: 0, qm: 763, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S036-f2", etage: 0, qm: 321, konzept: "eigen", gruppe: "sporttextil" }, { id: "S036-f3", etage: 1, qm: 564, konzept: "eigen", gruppe: "sporttextil" }, { id: "S036-f4", etage: 1, qm: 519, konzept: "eigen", gruppe: "outdoor" }, { id: "S036-f5", etage: 2, qm: 208, konzept: "eigen", gruppe: "outdoor" }, { id: "S036-f6", etage: 2, qm: 251, konzept: "eigen", gruppe: "teamsport" }, { id: "S036-f7", etage: 2, qm: 334, konzept: "eigen", gruppe: "rad" }, { id: "S036-f8", etage: 2, qm: 290, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 129498, rohertrag: 54750, konzessionserloes: 0, untermiete: 0, personal: 25364, miete: 17566, nebenkosten: 3961, sonstige: 6772, db: 1088, fteBedarf: 21.368605856959235, fteIst: 26.147810965136394, umsatzJeGruppe: { sportschuhe: 46401, sporttextil: 31962, outdoor: 27382, teamsport: 4567, rad: 3337, wintersport: 15850 } } }, { id: "W048", name: "Hartwig Chemnitz Neustadt", stadt: "Chemnitz", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3600, etagen: [-1, 0, 1, 2], baujahr: 2e3, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W048-f1", etage: -1, qm: 1164, konzept: "eigen", gruppe: "food" }, { id: "W048-f2", etage: -1, qm: 2461, konzept: "eigen", gruppe: "wohnen" }, { id: "W048-f3", etage: 0, qm: 701, konzept: "eigen", gruppe: "beauty" }, { id: "W048-f4", etage: 0, qm: 1169, konzept: "eigen", gruppe: "accessoires" }, { id: "W048-f5", etage: 0, qm: 1755, konzept: "eigen", gruppe: "damen" }, { id: "W048-f6", etage: 1, qm: 1144, konzept: "eigen", gruppe: "damen" }, { id: "W048-f7", etage: 1, qm: 1155, konzept: "eigen", gruppe: "waesche" }, { id: "W048-f8", etage: 1, qm: 1325, konzept: "eigen", gruppe: "herren" }, { id: "W048-f9", etage: 2, qm: 190, konzept: "eigen", gruppe: "herren" }, { id: "W048-f10", etage: 2, qm: 1188, konzept: "eigen", gruppe: "kinder" }, { id: "W048-f11", etage: 2, qm: 1565, konzept: "eigen", gruppe: "sport" }, { id: "W048-f12", etage: 2, qm: 769, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 346429, rohertrag: 145267, konzessionserloes: 0, untermiete: 0, personal: 84148, miete: 30786, nebenkosten: 17619, sonstige: 20767, db: -8053, fteBedarf: 71.67318065692153, fteIst: 86.63676289336188, umsatzJeGruppe: { food: 42584, wohnen: 41395, beauty: 40046, accessoires: 46025, damen: 60997, waesche: 26580, herren: 34917, kinder: 22089, sport: 20660, spielwaren: 11136 } } }, { id: "S037", name: "Hartwig Sport Chemnitz", stadt: "Chemnitz", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1], baujahr: 1985, fassade: 5, substanz: 61, status: "offen", flaechen: [{ id: "S037-f1", etage: 0, qm: 561, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S037-f2", etage: 0, qm: 714, konzept: "eigen", gruppe: "sporttextil" }, { id: "S037-f3", etage: 1, qm: 54, konzept: "eigen", gruppe: "sporttextil" }, { id: "S037-f4", etage: 1, qm: 485, konzept: "eigen", gruppe: "outdoor" }, { id: "S037-f5", etage: 1, qm: 242, konzept: "eigen", gruppe: "teamsport" }, { id: "S037-f6", etage: 1, qm: 297, konzept: "eigen", gruppe: "rad" }, { id: "S037-f7", etage: 1, qm: 197, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 89813, rohertrag: 37961, konzessionserloes: 0, untermiete: 0, personal: 19107, miete: 14358, nebenkosten: 0, sonstige: 4830, db: -334, fteBedarf: 15.549604821386373, fteIst: 19.379036831414552, umsatzJeGruppe: { sportschuhe: 30681, sporttextil: 27203, outdoor: 15645, teamsport: 4937, rad: 2784, wintersport: 8563 } } }, { id: "W049", name: "Hartwig Halle Am Wall", stadt: "Halle", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1990, fassade: 5, substanz: 70, status: "offen", flaechen: [{ id: "W049-f1", etage: 0, qm: 1090, konzept: "eigen", gruppe: "food" }, { id: "W049-f2", etage: 0, qm: 889, konzept: "eigen", gruppe: "beauty" }, { id: "W049-f3", etage: 0, qm: 587, konzept: "eigen", gruppe: "accessoires" }, { id: "W049-f4", etage: 1, qm: 661, konzept: "eigen", gruppe: "accessoires" }, { id: "W049-f5", etage: 1, qm: 1906, konzept: "eigen", gruppe: "damen" }, { id: "W049-f6", etage: 2, qm: 1760, konzept: "eigen", gruppe: "damen" }, { id: "W049-f7", etage: 2, qm: 807, konzept: "eigen", gruppe: "waesche" }, { id: "W049-f8", etage: 3, qm: 439, konzept: "eigen", gruppe: "waesche" }, { id: "W049-f9", etage: 3, qm: 1532, konzept: "eigen", gruppe: "herren" }, { id: "W049-f10", etage: 3, qm: 596, konzept: "eigen", gruppe: "kinder" }, { id: "W049-f11", etage: 4, qm: 507, konzept: "eigen", gruppe: "kinder" }, { id: "W049-f12", etage: 4, qm: 1407, konzept: "eigen", gruppe: "sport" }, { id: "W049-f13", etage: 4, qm: 652, konzept: "eigen", gruppe: "spielwaren" }, { id: "W049-f14", etage: 5, qm: 188, konzept: "eigen", gruppe: "spielwaren" }, { id: "W049-f15", etage: 5, qm: 2379, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 444572, rohertrag: 188076, konzessionserloes: 0, untermiete: 0, personal: 102455, miete: 62638, nebenkosten: 16204, sonstige: 25157, db: -18378, fteBedarf: 85.32397064138165, fteIst: 104.26081803912479, umsatzJeGruppe: { food: 49229, beauty: 62532, accessoires: 55077, damen: 90964, waesche: 42649, herren: 38283, kinder: 26289, sport: 22302, spielwaren: 12692, wohnen: 44555 } } }, { id: "W050", name: "Hartwig Magdeburg Arkaden", stadt: "Magdeburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1983, fassade: 1, substanz: 42, status: "offen", flaechen: [{ id: "W050-f1", etage: -1, qm: 652, konzept: "eigen", gruppe: "food" }, { id: "W050-f2", etage: -1, qm: 848, konzept: "eigen", gruppe: "wohnen" }, { id: "W050-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W050-f4", etage: 0, qm: 763, konzept: "eigen", gruppe: "accessoires" }, { id: "W050-f5", etage: 0, qm: 306, konzept: "eigen", gruppe: "damen" }, { id: "W050-f6", etage: 1, qm: 1500, konzept: "eigen", gruppe: "damen" }, { id: "W050-f7", etage: 2, qm: 153, konzept: "eigen", gruppe: "damen" }, { id: "W050-f8", etage: 2, qm: 692, konzept: "eigen", gruppe: "waesche" }, { id: "W050-f9", etage: 2, qm: 655, konzept: "eigen", gruppe: "herren" }, { id: "W050-f10", etage: 3, qm: 531, konzept: "eigen", gruppe: "herren" }, { id: "W050-f11", etage: 3, qm: 725, konzept: "eigen", gruppe: "kinder" }, { id: "W050-f12", etage: 3, qm: 244, konzept: "eigen", gruppe: "sport" }, { id: "W050-f13", etage: 4, qm: 565, konzept: "eigen", gruppe: "sport" }, { id: "W050-f14", etage: 4, qm: 625, konzept: "eigen", gruppe: "spielwaren" }, { id: "W050-f15", etage: 4, qm: 309, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 199260, rohertrag: 84120, konzessionserloes: 0, untermiete: 0, personal: 49234, miete: 22754, nebenkosten: 10455, sonstige: 12219, db: -10542, fteBedarf: 42.51892501333179, fteIst: 49.59452388162267, umsatzJeGruppe: { food: 19029, wohnen: 16290, beauty: 28474, accessoires: 25067, damen: 39770, waesche: 15323, herren: 18874, kinder: 15166, sport: 11997, spielwaren: 9272 } } }, { id: "S038", name: "Hartwig Sport Magdeburg Galerie am Fluss", stadt: "Magdeburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 800, etagen: [0, 1], baujahr: 1989, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "S038-f1", etage: 0, qm: 296, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S038-f2", etage: 0, qm: 479, konzept: "eigen", gruppe: "sporttextil" }, { id: "S038-f3", etage: 1, qm: 63, konzept: "eigen", gruppe: "sporttextil" }, { id: "S038-f4", etage: 1, qm: 298, konzept: "eigen", gruppe: "outdoor" }, { id: "S038-f5", etage: 1, qm: 121, konzept: "eigen", gruppe: "teamsport" }, { id: "S038-f6", etage: 1, qm: 175, konzept: "eigen", gruppe: "rad" }, { id: "S038-f7", etage: 1, qm: 117, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 54142, rohertrag: 23024, konzessionserloes: 0, untermiete: 0, personal: 11487, miete: 7880, nebenkosten: 1646, sonstige: 2917, db: -906, fteBedarf: 9.323675282137211, fteIst: 11.735136837466078, umsatzJeGruppe: { sportschuhe: 15363, sporttextil: 19120, outdoor: 8832, teamsport: 2494, rad: 1646, wintersport: 6688 } } }, { id: "W051", name: "Hartwig Freiburg", stadt: "Freiburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1923, fassade: 4, substanz: 68, status: "offen", flaechen: [{ id: "W051-f1", etage: -1, qm: 522, konzept: "eigen", gruppe: "food" }, { id: "W051-f2", etage: -1, qm: 1318, konzept: "eigen", gruppe: "wohnen" }, { id: "W051-f3", etage: 0, qm: 524, konzept: "eigen", gruppe: "beauty" }, { id: "W051-f4", etage: 0, qm: 1090, konzept: "eigen", gruppe: "accessoires" }, { id: "W051-f5", etage: 0, qm: 226, konzept: "eigen", gruppe: "damen" }, { id: "W051-f6", etage: 1, qm: 1533, konzept: "eigen", gruppe: "damen" }, { id: "W051-f7", etage: 1, qm: 307, konzept: "eigen", gruppe: "waesche" }, { id: "W051-f8", etage: 2, qm: 193, konzept: "eigen", gruppe: "waesche" }, { id: "W051-f9", etage: 2, qm: 1147, konzept: "eigen", gruppe: "herren" }, { id: "W051-f10", etage: 2, qm: 499, konzept: "eigen", gruppe: "kinder" }, { id: "W051-f11", etage: 3, qm: 90, konzept: "eigen", gruppe: "kinder" }, { id: "W051-f12", etage: 3, qm: 971, konzept: "eigen", gruppe: "sport" }, { id: "W051-f13", etage: 3, qm: 634, konzept: "eigen", gruppe: "spielwaren" }, { id: "W051-f14", etage: 3, qm: 144, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 294645, rohertrag: 124365, konzessionserloes: 0, untermiete: 0, personal: 59586, miete: 28162, nebenkosten: 12373, sonstige: 16220, db: 8025, fteBedarf: 54.57246764348757, fteIst: 59.836159162032736, umsatzJeGruppe: { food: 23905, wohnen: 27778, beauty: 50119, accessoires: 56791, damen: 51327, waesche: 15705, herren: 28345, kinder: 12797, sport: 17924, spielwaren: 9952 } } }, { id: "S039", name: "Hartwig Sport Freiburg", stadt: "Freiburg", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 600, etagen: [0, 1, 2], baujahr: 2012, fassade: 5, substanz: 85, status: "offen", flaechen: [{ id: "S039-f1", etage: 0, qm: 304, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S039-f2", etage: 0, qm: 212, konzept: "eigen", gruppe: "sporttextil" }, { id: "S039-f3", etage: 1, qm: 279, konzept: "eigen", gruppe: "sporttextil" }, { id: "S039-f4", etage: 1, qm: 238, konzept: "eigen", gruppe: "outdoor" }, { id: "S039-f5", etage: 2, qm: 51, konzept: "eigen", gruppe: "outdoor" }, { id: "S039-f6", etage: 2, qm: 171, konzept: "eigen", gruppe: "teamsport" }, { id: "S039-f7", etage: 2, qm: 197, konzept: "eigen", gruppe: "rad" }, { id: "S039-f8", etage: 2, qm: 98, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 52523, rohertrag: 22315, konzessionserloes: 0, untermiete: 0, personal: 10185, miete: 6087, nebenkosten: 2062, sonstige: 2851, db: 1130, fteBedarf: 9.243032444303095, fteIst: 10.234731895337532, umsatzJeGruppe: { sportschuhe: 15678, sporttextil: 17787, outdoor: 10228, teamsport: 2923, rad: 1777, wintersport: 4131 } } }, { id: "W052", name: "Hartwig Krefeld Bahnhofstra\xDFe", stadt: "Krefeld", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1982, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W052-f1", etage: -1, qm: 745, konzept: "eigen", gruppe: "food" }, { id: "W052-f2", etage: -1, qm: 638, konzept: "eigen", gruppe: "wohnen" }, { id: "W052-f3", etage: 0, qm: 580, konzept: "eigen", gruppe: "beauty" }, { id: "W052-f4", etage: 0, qm: 804, konzept: "eigen", gruppe: "accessoires" }, { id: "W052-f5", etage: 1, qm: 127, konzept: "eigen", gruppe: "accessoires" }, { id: "W052-f6", etage: 1, qm: 1256, konzept: "eigen", gruppe: "damen" }, { id: "W052-f7", etage: 2, qm: 194, konzept: "eigen", gruppe: "damen" }, { id: "W052-f8", etage: 2, qm: 550, konzept: "eigen", gruppe: "waesche" }, { id: "W052-f9", etage: 2, qm: 640, konzept: "eigen", gruppe: "herren" }, { id: "W052-f10", etage: 3, qm: 198, konzept: "eigen", gruppe: "herren" }, { id: "W052-f11", etage: 3, qm: 638, konzept: "eigen", gruppe: "kinder" }, { id: "W052-f12", etage: 3, qm: 547, konzept: "eigen", gruppe: "sport" }, { id: "W052-f13", etage: 4, qm: 365, konzept: "eigen", gruppe: "sport" }, { id: "W052-f14", etage: 4, qm: 400, konzept: "eigen", gruppe: "spielwaren" }, { id: "W052-f15", etage: 4, qm: 618, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 208175, rohertrag: 86112, konzessionserloes: 0, untermiete: 0, personal: 52990, miete: 29555, nebenkosten: 8948, sonstige: 12270, db: -17651, fteBedarf: 42.138195499237554, fteIst: 53.14615030069136, umsatzJeGruppe: { food: 26893, wohnen: 18138, beauty: 39983, accessoires: 31398, damen: 29728, waesche: 14123, herren: 17024, kinder: 14144, sport: 11098, spielwaren: 5645 } } }, { id: "W053", name: "Hartwig Mainz", stadt: "Mainz", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [-1, 0, 1, 2], baujahr: 2004, fassade: 2, substanz: 50, status: "offen", flaechen: [{ id: "W053-f1", etage: -1, qm: 1201, konzept: "eigen", gruppe: "food" }, { id: "W053-f2", etage: -1, qm: 2449, konzept: "eigen", gruppe: "wohnen" }, { id: "W053-f3", etage: 0, qm: 777, konzept: "eigen", gruppe: "beauty" }, { id: "W053-f4", etage: 0, qm: 1264, konzept: "eigen", gruppe: "accessoires" }, { id: "W053-f5", etage: 0, qm: 1609, konzept: "eigen", gruppe: "damen" }, { id: "W053-f6", etage: 1, qm: 748, konzept: "eigen", gruppe: "damen" }, { id: "W053-f7", etage: 1, qm: 861, konzept: "eigen", gruppe: "waesche" }, { id: "W053-f8", etage: 1, qm: 2041, konzept: "eigen", gruppe: "herren" }, { id: "W053-f9", etage: 2, qm: 136, konzept: "eigen", gruppe: "herren" }, { id: "W053-f10", etage: 2, qm: 1234, konzept: "eigen", gruppe: "kinder" }, { id: "W053-f11", etage: 2, qm: 1258, konzept: "eigen", gruppe: "sport" }, { id: "W053-f12", etage: 2, qm: 900, konzept: "eigen", gruppe: "spielwaren" }, { id: "W053-f13", etage: 2, qm: 122, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 493354, rohertrag: 205888, konzessionserloes: 0, untermiete: 0, personal: 111195, miete: 54943, nebenkosten: 18190, sonstige: 26798, db: -5237, fteBedarf: 89.75461299441628, fteIst: 112.49641862829989, umsatzJeGruppe: { food: 61907, wohnen: 55365, beauty: 69458, accessoires: 64774, damen: 64335, waesche: 34368, herren: 73631, kinder: 26208, sport: 26377, spielwaren: 16933 } } }, { id: "S040", name: "Hartwig Sport Mainz Lindenstra\xDFe", stadt: "Mainz", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1992, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "S040-f1", etage: 0, qm: 922, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S040-f2", etage: 0, qm: 328, konzept: "eigen", gruppe: "sporttextil" }, { id: "S040-f3", etage: 1, qm: 459, konzept: "eigen", gruppe: "sporttextil" }, { id: "S040-f4", etage: 1, qm: 791, konzept: "eigen", gruppe: "outdoor" }, { id: "S040-f5", etage: 2, qm: 138, konzept: "eigen", gruppe: "outdoor" }, { id: "S040-f6", etage: 2, qm: 321, konzept: "eigen", gruppe: "teamsport" }, { id: "S040-f7", etage: 2, qm: 487, konzept: "eigen", gruppe: "rad" }, { id: "S040-f8", etage: 2, qm: 304, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 119753, rohertrag: 50286, konzessionserloes: 0, untermiete: 0, personal: 22058, miete: 17436, nebenkosten: 5553, sonstige: 6597, db: -1359, fteBedarf: 21.344614123859888, fteIst: 22.89930007547081, umsatzJeGruppe: { sportschuhe: 42329, sporttextil: 22203, outdoor: 29362, teamsport: 5186, rad: 5058, wintersport: 15614 } } }, { id: "W054", name: "Hartwig L\xFCbeck", stadt: "L\xFCbeck", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2], baujahr: 1992, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W054-f1", etage: -1, qm: 1044, konzept: "eigen", gruppe: "food" }, { id: "W054-f2", etage: -1, qm: 2981, konzept: "eigen", gruppe: "wohnen" }, { id: "W054-f3", etage: 0, qm: 1021, konzept: "eigen", gruppe: "beauty" }, { id: "W054-f4", etage: 0, qm: 1868, konzept: "eigen", gruppe: "accessoires" }, { id: "W054-f5", etage: 0, qm: 1136, konzept: "eigen", gruppe: "damen" }, { id: "W054-f6", etage: 1, qm: 2345, konzept: "eigen", gruppe: "damen" }, { id: "W054-f7", etage: 1, qm: 1204, konzept: "eigen", gruppe: "waesche" }, { id: "W054-f8", etage: 1, qm: 476, konzept: "eigen", gruppe: "herren" }, { id: "W054-f9", etage: 2, qm: 1627, konzept: "eigen", gruppe: "herren" }, { id: "W054-f10", etage: 2, qm: 947, konzept: "eigen", gruppe: "kinder" }, { id: "W054-f11", etage: 2, qm: 2272, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 552353, rohertrag: 234883, konzessionserloes: 0, untermiete: 0, personal: 112295, miete: 105490, nebenkosten: 18393, sonstige: 30261, db: -31556, fteBedarf: 101.25734101968146, fteIst: 113.80977676792214, umsatzJeGruppe: { food: 53714, wohnen: 54849, beauty: 87579, accessoires: 104260, damen: 100771, waesche: 38380, herren: 59319, kinder: 21725, sport: 31756 } } }, { id: "S041", name: "Hartwig Sport L\xFCbeck Ring", stadt: "L\xFCbeck", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 1998, fassade: 3, substanz: 69, status: "offen", flaechen: [{ id: "S041-f1", etage: 0, qm: 921, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S041-f2", etage: 0, qm: 1161, konzept: "eigen", gruppe: "sporttextil" }, { id: "S041-f3", etage: 0, qm: 42, konzept: "eigen", gruppe: "outdoor" }, { id: "S041-f4", etage: 1, qm: 953, konzept: "eigen", gruppe: "outdoor" }, { id: "S041-f5", etage: 1, qm: 352, konzept: "eigen", gruppe: "teamsport" }, { id: "S041-f6", etage: 1, qm: 390, konzept: "eigen", gruppe: "rad" }, { id: "S041-f7", etage: 1, qm: 429, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 133301, rohertrag: 56536, konzessionserloes: 0, untermiete: 0, personal: 27340, miete: 10430, nebenkosten: 4806, sonstige: 7377, db: 6582, fteBedarf: 23.852386020383413, fteIst: 27.735516106171353, umsatzJeGruppe: { sportschuhe: 41943, sporttextil: 36381, outdoor: 29217, teamsport: 6733, rad: 3704, wintersport: 15323 } } }, { id: "W055", name: "Hartwig Erfurt", stadt: "Erfurt", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3], baujahr: 1957, fassade: 7, substanz: 78, status: "offen", flaechen: [{ id: "W055-f1", etage: -1, qm: 973, konzept: "eigen", gruppe: "food" }, { id: "W055-f2", etage: -1, qm: 1527, konzept: "eigen", gruppe: "wohnen" }, { id: "W055-f3", etage: 0, qm: 739, konzept: "eigen", gruppe: "beauty" }, { id: "W055-f4", etage: 0, qm: 998, konzept: "eigen", gruppe: "accessoires" }, { id: "W055-f5", etage: 0, qm: 763, konzept: "eigen", gruppe: "damen" }, { id: "W055-f6", etage: 1, qm: 1322, konzept: "eigen", gruppe: "damen" }, { id: "W055-f7", etage: 1, qm: 691, konzept: "eigen", gruppe: "waesche" }, { id: "W055-f8", etage: 1, qm: 488, konzept: "eigen", gruppe: "herren" }, { id: "W055-f9", etage: 2, qm: 1184, konzept: "eigen", gruppe: "herren" }, { id: "W055-f10", etage: 2, qm: 935, konzept: "eigen", gruppe: "kinder" }, { id: "W055-f11", etage: 2, qm: 381, konzept: "eigen", gruppe: "sport" }, { id: "W055-f12", etage: 3, qm: 1190, konzept: "eigen", gruppe: "sport" }, { id: "W055-f13", etage: 3, qm: 639, konzept: "eigen", gruppe: "spielwaren" }, { id: "W055-f14", etage: 3, qm: 671, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 339183, rohertrag: 140078, konzessionserloes: 0, untermiete: 0, personal: 80693, miete: 33011, nebenkosten: 14914, sonstige: 19532, db: -8072, fteBedarf: 66.61228005145064, fteIst: 83.79886769625847, umsatzJeGruppe: { food: 41467, wohnen: 45347, beauty: 54443, accessoires: 36596, damen: 49086, waesche: 18827, herren: 35346, kinder: 24602, sport: 23599, spielwaren: 9870 } } }, { id: "S042", name: "Hartwig Sport Erfurt Einkaufszentrum", stadt: "Erfurt", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 2010, fassade: 4, substanz: 58, status: "offen", flaechen: [{ id: "S042-f1", etage: 0, qm: 1039, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S042-f2", etage: 0, qm: 528, konzept: "eigen", gruppe: "sporttextil" }, { id: "S042-f3", etage: 1, qm: 669, konzept: "eigen", gruppe: "sporttextil" }, { id: "S042-f4", etage: 1, qm: 898, konzept: "eigen", gruppe: "outdoor" }, { id: "S042-f5", etage: 2, qm: 171, konzept: "eigen", gruppe: "outdoor" }, { id: "S042-f6", etage: 2, qm: 471, konzept: "eigen", gruppe: "teamsport" }, { id: "S042-f7", etage: 2, qm: 639, konzept: "eigen", gruppe: "rad" }, { id: "S042-f8", etage: 2, qm: 286, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 131311, rohertrag: 55369, konzessionserloes: 0, untermiete: 0, personal: 26013, miete: 29563, nebenkosten: 0, sonstige: 7499, db: -7706, fteBedarf: 24.774700318339345, fteIst: 26.161759234308235, umsatzJeGruppe: { sportschuhe: 47461, sporttextil: 31715, outdoor: 29748, teamsport: 7459, rad: 4391, wintersport: 10536 } } }, { id: "W056", name: "Hartwig Oberhausen", stadt: "Oberhausen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1933, fassade: 3, substanz: 48, status: "offen", flaechen: [{ id: "W056-f1", etage: -1, qm: 513, konzept: "eigen", gruppe: "food" }, { id: "W056-f2", etage: -1, qm: 1267, konzept: "eigen", gruppe: "wohnen" }, { id: "W056-f3", etage: 0, qm: 611, konzept: "eigen", gruppe: "beauty" }, { id: "W056-f4", etage: 0, qm: 950, konzept: "eigen", gruppe: "accessoires" }, { id: "W056-f5", etage: 0, qm: 219, konzept: "eigen", gruppe: "damen" }, { id: "W056-f6", etage: 1, qm: 1703, konzept: "eigen", gruppe: "damen" }, { id: "W056-f7", etage: 1, qm: 77, konzept: "eigen", gruppe: "waesche" }, { id: "W056-f8", etage: 2, qm: 539, konzept: "eigen", gruppe: "waesche" }, { id: "W056-f9", etage: 2, qm: 916, konzept: "eigen", gruppe: "herren" }, { id: "W056-f10", etage: 2, qm: 325, konzept: "eigen", gruppe: "kinder" }, { id: "W056-f11", etage: 3, qm: 156, konzept: "eigen", gruppe: "kinder" }, { id: "W056-f12", etage: 3, qm: 984, konzept: "eigen", gruppe: "sport" }, { id: "W056-f13", etage: 3, qm: 490, konzept: "eigen", gruppe: "spielwaren" }, { id: "W056-f14", etage: 3, qm: 149, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 311485, rohertrag: 131374, konzessionserloes: 0, untermiete: 0, personal: 60336, miete: 40751, nebenkosten: 13339, sonstige: 16775, db: 172, fteBedarf: 56.005128184916984, fteIst: 61.12087493713988, umsatzJeGruppe: { food: 27299, wohnen: 28440, beauty: 52832, accessoires: 50478, damen: 52532, waesche: 23588, herren: 29183, kinder: 15969, sport: 22564, spielwaren: 8601 } } }, { id: "S043", name: "Hartwig Sport Oberhausen Galerie am Fluss", stadt: "Oberhausen", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 5200, etagen: [0], baujahr: 1986, fassade: 5, substanz: 44, status: "offen", flaechen: [{ id: "S043-f1", etage: 0, qm: 1314, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S043-f2", etage: 0, qm: 1204, konzept: "eigen", gruppe: "sporttextil" }, { id: "S043-f3", etage: 0, qm: 1137, konzept: "eigen", gruppe: "outdoor" }, { id: "S043-f4", etage: 0, qm: 432, konzept: "eigen", gruppe: "teamsport" }, { id: "S043-f5", etage: 0, qm: 684, konzept: "eigen", gruppe: "rad" }, { id: "S043-f6", etage: 0, qm: 380, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 164828, rohertrag: 69491, konzessionserloes: 0, untermiete: 0, personal: 36435, miete: 18056, nebenkosten: 0, sonstige: 9076, db: 5924, fteBedarf: 29.558171121462824, fteIst: 37.600396150871944, umsatzJeGruppe: { sportschuhe: 56638, sporttextil: 39022, outdoor: 38675, teamsport: 8923, rad: 6306, wintersport: 15263 } } }, { id: "W057", name: "Hartwig Rostock Am Wall", stadt: "Rostock", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1962, fassade: 6, substanz: 81, status: "offen", flaechen: [{ id: "W057-f1", etage: -1, qm: 999, konzept: "eigen", gruppe: "food" }, { id: "W057-f2", etage: -1, qm: 1485, konzept: "eigen", gruppe: "wohnen" }, { id: "W057-f3", etage: 0, qm: 1149, konzept: "eigen", gruppe: "beauty" }, { id: "W057-f4", etage: 0, qm: 1335, konzept: "eigen", gruppe: "accessoires" }, { id: "W057-f5", etage: 1, qm: 138, konzept: "eigen", gruppe: "accessoires" }, { id: "W057-f6", etage: 1, qm: 2345, konzept: "eigen", gruppe: "damen" }, { id: "W057-f7", etage: 2, qm: 560, konzept: "eigen", gruppe: "damen" }, { id: "W057-f8", etage: 2, qm: 1009, konzept: "eigen", gruppe: "waesche" }, { id: "W057-f9", etage: 2, qm: 914, konzept: "eigen", gruppe: "herren" }, { id: "W057-f10", etage: 3, qm: 998, konzept: "eigen", gruppe: "herren" }, { id: "W057-f11", etage: 3, qm: 963, konzept: "eigen", gruppe: "kinder" }, { id: "W057-f12", etage: 3, qm: 523, konzept: "eigen", gruppe: "sport" }, { id: "W057-f13", etage: 4, qm: 979, konzept: "eigen", gruppe: "sport" }, { id: "W057-f14", etage: 4, qm: 1014, konzept: "eigen", gruppe: "spielwaren" }, { id: "W057-f15", etage: 4, qm: 491, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 428406, rohertrag: 179742, konzessionserloes: 0, untermiete: 0, personal: 86931, miete: 37333, nebenkosten: 15692, sonstige: 24271, db: 15515, fteBedarf: 82.39433344045942, fteIst: 90.0649736045208, umsatzJeGruppe: { food: 39782, wohnen: 35604, beauty: 86417, accessoires: 64067, damen: 68579, waesche: 30122, herren: 44060, kinder: 22213, sport: 24452, spielwaren: 13109 } } }, { id: "S044", name: "Hartwig Sport Rostock", stadt: "Rostock", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1999, fassade: 7, substanz: 63, status: "offen", flaechen: [{ id: "S044-f1", etage: 0, qm: 1391, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S044-f2", etage: 0, qm: 1138, konzept: "eigen", gruppe: "sporttextil" }, { id: "S044-f3", etage: 0, qm: 122, konzept: "eigen", gruppe: "outdoor" }, { id: "S044-f4", etage: 1, qm: 1146, konzept: "eigen", gruppe: "outdoor" }, { id: "S044-f5", etage: 1, qm: 453, konzept: "eigen", gruppe: "teamsport" }, { id: "S044-f6", etage: 1, qm: 656, konzept: "eigen", gruppe: "rad" }, { id: "S044-f7", etage: 1, qm: 395, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 220780, rohertrag: 92105, konzessionserloes: 0, untermiete: 0, personal: 43059, miete: 20994, nebenkosten: 7122, sonstige: 11437, db: 9493, fteBedarf: 36.289872381666, fteIst: 44.29044951899844, umsatzJeGruppe: { sportschuhe: 94682, sporttextil: 38819, outdoor: 42367, teamsport: 13077, rad: 7524, wintersport: 24310 } } }, { id: "W058", name: "Hartwig Kassel", stadt: "Kassel", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4], baujahr: 2001, fassade: 5, substanz: 38, status: "offen", flaechen: [{ id: "W058-f1", etage: 0, qm: 619, konzept: "eigen", gruppe: "food" }, { id: "W058-f2", etage: 0, qm: 706, konzept: "eigen", gruppe: "beauty" }, { id: "W058-f3", etage: 0, qm: 975, konzept: "eigen", gruppe: "accessoires" }, { id: "W058-f4", etage: 1, qm: 311, konzept: "eigen", gruppe: "accessoires" }, { id: "W058-f5", etage: 1, qm: 1989, konzept: "eigen", gruppe: "damen" }, { id: "W058-f6", etage: 2, qm: 607, konzept: "eigen", gruppe: "damen" }, { id: "W058-f7", etage: 2, qm: 666, konzept: "eigen", gruppe: "waesche" }, { id: "W058-f8", etage: 2, qm: 1027, konzept: "eigen", gruppe: "herren" }, { id: "W058-f9", etage: 3, qm: 601, konzept: "eigen", gruppe: "herren" }, { id: "W058-f10", etage: 3, qm: 808, konzept: "eigen", gruppe: "kinder" }, { id: "W058-f11", etage: 3, qm: 891, konzept: "eigen", gruppe: "sport" }, { id: "W058-f12", etage: 4, qm: 158, konzept: "eigen", gruppe: "sport" }, { id: "W058-f13", etage: 4, qm: 675, konzept: "eigen", gruppe: "spielwaren" }, { id: "W058-f14", etage: 4, qm: 1466, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 386018, rohertrag: 163456, konzessionserloes: 0, untermiete: 0, personal: 84931, miete: 49209, nebenkosten: 11727, sonstige: 21001, db: -3413, fteBedarf: 70.38013826468638, fteIst: 87.73621738146602, umsatzJeGruppe: { food: 32939, beauty: 70716, accessoires: 59318, damen: 79825, waesche: 21863, herren: 39463, kinder: 21758, sport: 19741, spielwaren: 11681, wohnen: 28714 } } }, { id: "S045", name: "Hartwig Sport Kassel Galerie am Fluss", stadt: "Kassel", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [0, 1, 2], baujahr: 2005, fassade: 4, substanz: 64, status: "offen", flaechen: [{ id: "S045-f1", etage: 0, qm: 1114, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S045-f2", etage: 0, qm: 653, konzept: "eigen", gruppe: "sporttextil" }, { id: "S045-f3", etage: 1, qm: 744, konzept: "eigen", gruppe: "sporttextil" }, { id: "S045-f4", etage: 1, qm: 1022, konzept: "eigen", gruppe: "outdoor" }, { id: "S045-f5", etage: 2, qm: 112, konzept: "eigen", gruppe: "outdoor" }, { id: "S045-f6", etage: 2, qm: 463, konzept: "eigen", gruppe: "teamsport" }, { id: "S045-f7", etage: 2, qm: 708, konzept: "eigen", gruppe: "rad" }, { id: "S045-f8", etage: 2, qm: 483, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 156368, rohertrag: 65804, konzessionserloes: 0, untermiete: 0, personal: 29140, miete: 15580, nebenkosten: 0, sonstige: 8796, db: 12289, fteBedarf: 28.48920296329611, fteIst: 29.50626515089279, umsatzJeGruppe: { sportschuhe: 51739, sporttextil: 38488, outdoor: 28692, teamsport: 7157, rad: 5901, wintersport: 24391 } } }, { id: "W059", name: "Hartwig Hagen Arkaden", stadt: "Hagen", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2400, etagen: [-1, 0, 1, 2], baujahr: 1928, fassade: 4, substanz: 71, status: "offen", flaechen: [{ id: "W059-f1", etage: -1, qm: 730, konzept: "eigen", gruppe: "food" }, { id: "W059-f2", etage: -1, qm: 1695, konzept: "eigen", gruppe: "wohnen" }, { id: "W059-f3", etage: 0, qm: 663, konzept: "eigen", gruppe: "beauty" }, { id: "W059-f4", etage: 0, qm: 973, konzept: "eigen", gruppe: "accessoires" }, { id: "W059-f5", etage: 0, qm: 789, konzept: "eigen", gruppe: "damen" }, { id: "W059-f6", etage: 1, qm: 1393, konzept: "eigen", gruppe: "damen" }, { id: "W059-f7", etage: 1, qm: 613, konzept: "eigen", gruppe: "waesche" }, { id: "W059-f8", etage: 1, qm: 419, konzept: "eigen", gruppe: "herren" }, { id: "W059-f9", etage: 2, qm: 483, konzept: "eigen", gruppe: "herren" }, { id: "W059-f10", etage: 2, qm: 682, konzept: "eigen", gruppe: "kinder" }, { id: "W059-f11", etage: 2, qm: 848, konzept: "eigen", gruppe: "sport" }, { id: "W059-f12", etage: 2, qm: 674, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 223223, rohertrag: 93248, konzessionserloes: 0, untermiete: 0, personal: 49926, miete: 29860, nebenkosten: 12726, sonstige: 13635, db: -12899, fteBedarf: 47.34049843643294, fteIst: 51.097237782158786, umsatzJeGruppe: { food: 23368, wohnen: 24387, beauty: 38725, accessoires: 36377, damen: 40151, waesche: 13964, herren: 15368, kinder: 10677, sport: 12120, spielwaren: 8086 } } }, { id: "W060", name: "Hartwig Potsdam Bahnhofstra\xDFe", stadt: "Potsdam", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4], baujahr: 1987, fassade: 4, substanz: 78, status: "offen", flaechen: [{ id: "W060-f1", etage: 0, qm: 563, konzept: "eigen", gruppe: "food" }, { id: "W060-f2", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W060-f3", etage: 0, qm: 893, konzept: "eigen", gruppe: "accessoires" }, { id: "W060-f4", etage: 1, qm: 82, konzept: "eigen", gruppe: "accessoires" }, { id: "W060-f5", etage: 1, qm: 2138, konzept: "eigen", gruppe: "damen" }, { id: "W060-f6", etage: 2, qm: 414, konzept: "eigen", gruppe: "damen" }, { id: "W060-f7", etage: 2, qm: 640, konzept: "eigen", gruppe: "waesche" }, { id: "W060-f8", etage: 2, qm: 1166, konzept: "eigen", gruppe: "herren" }, { id: "W060-f9", etage: 3, qm: 268, konzept: "eigen", gruppe: "herren" }, { id: "W060-f10", etage: 3, qm: 583, konzept: "eigen", gruppe: "kinder" }, { id: "W060-f11", etage: 3, qm: 1012, konzept: "eigen", gruppe: "sport" }, { id: "W060-f12", etage: 3, qm: 357, konzept: "eigen", gruppe: "spielwaren" }, { id: "W060-f13", etage: 4, qm: 340, konzept: "eigen", gruppe: "spielwaren" }, { id: "W060-f14", etage: 4, qm: 1880, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 293259, rohertrag: 124668, konzessionserloes: 0, untermiete: 0, personal: 63524, miete: 47938, nebenkosten: 0, sonstige: 17019, db: -3812, fteBedarf: 58.21452959194201, fteIst: 65.62847515777923, umsatzJeGruppe: { food: 21236, beauty: 57168, accessoires: 40026, damen: 64249, waesche: 16313, herren: 34031, kinder: 11014, sport: 12251, spielwaren: 9963, wohnen: 27007 } } }, { id: "W061", name: "Hartwig Saarbr\xFCcken Galerie am Fluss", stadt: "Saarbr\xFCcken", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1971, fassade: 2, substanz: 65, status: "offen", flaechen: [{ id: "W061-f1", etage: 0, qm: 578, konzept: "eigen", gruppe: "food" }, { id: "W061-f2", etage: 0, qm: 636, konzept: "eigen", gruppe: "beauty" }, { id: "W061-f3", etage: 0, qm: 453, konzept: "eigen", gruppe: "accessoires" }, { id: "W061-f4", etage: 1, qm: 623, konzept: "eigen", gruppe: "accessoires" }, { id: "W061-f5", etage: 1, qm: 1043, konzept: "eigen", gruppe: "damen" }, { id: "W061-f6", etage: 2, qm: 913, konzept: "eigen", gruppe: "damen" }, { id: "W061-f7", etage: 2, qm: 753, konzept: "eigen", gruppe: "waesche" }, { id: "W061-f8", etage: 3, qm: 63, konzept: "eigen", gruppe: "waesche" }, { id: "W061-f9", etage: 3, qm: 1236, konzept: "eigen", gruppe: "herren" }, { id: "W061-f10", etage: 3, qm: 368, konzept: "eigen", gruppe: "kinder" }, { id: "W061-f11", etage: 4, qm: 266, konzept: "eigen", gruppe: "kinder" }, { id: "W061-f12", etage: 4, qm: 993, konzept: "eigen", gruppe: "sport" }, { id: "W061-f13", etage: 4, qm: 408, konzept: "eigen", gruppe: "spielwaren" }, { id: "W061-f14", etage: 5, qm: 193, konzept: "eigen", gruppe: "spielwaren" }, { id: "W061-f15", etage: 5, qm: 1474, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 247117, rohertrag: 104077, konzessionserloes: 0, untermiete: 0, personal: 57268, miete: 44221, nebenkosten: 0, sonstige: 14632, db: -12044, fteBedarf: 50.34145186039213, fteIst: 57.73996380669992, umsatzJeGruppe: { food: 20684, beauty: 47345, accessoires: 38208, damen: 37480, waesche: 17642, herren: 28132, kinder: 13054, sport: 13050, spielwaren: 7943, wohnen: 23579 } } }, { id: "S046", name: "Hartwig Sport Saarbr\xFCcken Bahnhofstra\xDFe", stadt: "Saarbr\xFCcken", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1989, fassade: 0, substanz: 54, status: "offen", flaechen: [{ id: "S046-f1", etage: 0, qm: 557, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S046-f2", etage: 0, qm: 918, konzept: "eigen", gruppe: "sporttextil" }, { id: "S046-f3", etage: 1, qm: 18, konzept: "eigen", gruppe: "sporttextil" }, { id: "S046-f4", etage: 1, qm: 555, konzept: "eigen", gruppe: "outdoor" }, { id: "S046-f5", etage: 1, qm: 279, konzept: "eigen", gruppe: "teamsport" }, { id: "S046-f6", etage: 1, qm: 354, konzept: "eigen", gruppe: "rad" }, { id: "S046-f7", etage: 1, qm: 268, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 84061, rohertrag: 35415, konzessionserloes: 0, untermiete: 0, personal: 18913, miete: 11269, nebenkosten: 0, sonstige: 4774, db: 460, fteBedarf: 15.58681695248675, fteIst: 19.278873529770344, umsatzJeGruppe: { sportschuhe: 27685, sporttextil: 22107, outdoor: 15199, teamsport: 4968, rad: 2971, wintersport: 11132 } } }, { id: "W062", name: "Hartwig Hamm Am Wall", stadt: "Hamm", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2], baujahr: 1994, fassade: 1, substanz: 87, status: "offen", flaechen: [{ id: "W062-f1", etage: -1, qm: 976, konzept: "eigen", gruppe: "food" }, { id: "W062-f2", etage: -1, qm: 2199, konzept: "eigen", gruppe: "wohnen" }, { id: "W062-f3", etage: 0, qm: 735, konzept: "eigen", gruppe: "beauty" }, { id: "W062-f4", etage: 0, qm: 1265, konzept: "eigen", gruppe: "accessoires" }, { id: "W062-f5", etage: 0, qm: 1175, konzept: "eigen", gruppe: "damen" }, { id: "W062-f6", etage: 1, qm: 1551, konzept: "eigen", gruppe: "damen" }, { id: "W062-f7", etage: 1, qm: 841, konzept: "eigen", gruppe: "waesche" }, { id: "W062-f8", etage: 1, qm: 783, konzept: "eigen", gruppe: "herren" }, { id: "W062-f9", etage: 2, qm: 669, konzept: "eigen", gruppe: "herren" }, { id: "W062-f10", etage: 2, qm: 982, konzept: "eigen", gruppe: "kinder" }, { id: "W062-f11", etage: 2, qm: 1243, konzept: "eigen", gruppe: "sport" }, { id: "W062-f12", etage: 2, qm: 581, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 284883, rohertrag: 120260, konzessionserloes: 0, untermiete: 0, personal: 71571, miete: 41062, nebenkosten: 15693, sonstige: 17530, db: -25597, fteBedarf: 60.91138640509787, fteIst: 72.01398634010162, umsatzJeGruppe: { food: 30366, wohnen: 28274, beauty: 38282, accessoires: 45102, damen: 57705, waesche: 16188, herren: 26283, kinder: 20729, sport: 15397, spielwaren: 6557 } } }, { id: "W063", name: "Hartwig Ludwigshafen", stadt: "Ludwigshafen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1950, fassade: 0, substanz: 53, status: "offen", flaechen: [{ id: "W063-f1", etage: -1, qm: 754, konzept: "eigen", gruppe: "food" }, { id: "W063-f2", etage: -1, qm: 1313, konzept: "eigen", gruppe: "wohnen" }, { id: "W063-f3", etage: 0, qm: 924, konzept: "eigen", gruppe: "beauty" }, { id: "W063-f4", etage: 0, qm: 1143, konzept: "eigen", gruppe: "accessoires" }, { id: "W063-f5", etage: 1, qm: 230, konzept: "eigen", gruppe: "accessoires" }, { id: "W063-f6", etage: 1, qm: 1836, konzept: "eigen", gruppe: "damen" }, { id: "W063-f7", etage: 2, qm: 848, konzept: "eigen", gruppe: "damen" }, { id: "W063-f8", etage: 2, qm: 974, konzept: "eigen", gruppe: "waesche" }, { id: "W063-f9", etage: 2, qm: 245, konzept: "eigen", gruppe: "herren" }, { id: "W063-f10", etage: 3, qm: 1037, konzept: "eigen", gruppe: "herren" }, { id: "W063-f11", etage: 3, qm: 692, konzept: "eigen", gruppe: "kinder" }, { id: "W063-f12", etage: 3, qm: 338, konzept: "eigen", gruppe: "sport" }, { id: "W063-f13", etage: 4, qm: 1066, konzept: "eigen", gruppe: "sport" }, { id: "W063-f14", etage: 4, qm: 837, konzept: "eigen", gruppe: "spielwaren" }, { id: "W063-f15", etage: 4, qm: 164, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 429755, rohertrag: 180621, konzessionserloes: 0, untermiete: 0, personal: 87780, miete: 37935, nebenkosten: 18442, sonstige: 23200, db: 13264, fteBedarf: 77.54743115596361, fteIst: 91.16634127729695, umsatzJeGruppe: { food: 41883, wohnen: 37748, beauty: 80829, accessoires: 61286, damen: 76363, waesche: 39585, herren: 33505, kinder: 15590, sport: 29430, spielwaren: 13537 } } }, { id: "W064", name: "Hartwig Oldenburg Neustadt", stadt: "Oldenburg", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1896, fassade: 2, substanz: 35, status: "offen", flaechen: [{ id: "W064-f1", etage: 0, qm: 868, konzept: "eigen", gruppe: "food" }, { id: "W064-f2", etage: 0, qm: 677, konzept: "eigen", gruppe: "beauty" }, { id: "W064-f3", etage: 0, qm: 772, konzept: "eigen", gruppe: "accessoires" }, { id: "W064-f4", etage: 1, qm: 860, konzept: "eigen", gruppe: "accessoires" }, { id: "W064-f5", etage: 1, qm: 1457, konzept: "eigen", gruppe: "damen" }, { id: "W064-f6", etage: 2, qm: 882, konzept: "eigen", gruppe: "damen" }, { id: "W064-f7", etage: 2, qm: 801, konzept: "eigen", gruppe: "waesche" }, { id: "W064-f8", etage: 2, qm: 634, konzept: "eigen", gruppe: "herren" }, { id: "W064-f9", etage: 3, qm: 717, konzept: "eigen", gruppe: "herren" }, { id: "W064-f10", etage: 3, qm: 1096, konzept: "eigen", gruppe: "kinder" }, { id: "W064-f11", etage: 3, qm: 504, konzept: "eigen", gruppe: "sport" }, { id: "W064-f12", etage: 4, qm: 1163, konzept: "eigen", gruppe: "sport" }, { id: "W064-f13", etage: 4, qm: 861, konzept: "eigen", gruppe: "spielwaren" }, { id: "W064-f14", etage: 4, qm: 292, konzept: "eigen", gruppe: "wohnen" }, { id: "W064-f15", etage: 5, qm: 2317, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 356155, rohertrag: 149968, konzessionserloes: 0, untermiete: 0, personal: 82294, miete: 55149, nebenkosten: 15587, sonstige: 20858, db: -23921, fteBedarf: 71.52217944618246, fteIst: 84.80035505442447, umsatzJeGruppe: { food: 27680, beauty: 47875, accessoires: 68908, damen: 55230, waesche: 19569, herren: 29868, kinder: 23068, sport: 27371, spielwaren: 11881, wohnen: 44705 } } }, { id: "W065", name: "Hartwig M\xFClheim", stadt: "M\xFClheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1918, fassade: 5, substanz: 40, status: "offen", flaechen: [{ id: "W065-f1", etage: -1, qm: 739, konzept: "eigen", gruppe: "food" }, { id: "W065-f2", etage: -1, qm: 1341, konzept: "eigen", gruppe: "wohnen" }, { id: "W065-f3", etage: 0, qm: 606, konzept: "eigen", gruppe: "beauty" }, { id: "W065-f4", etage: 0, qm: 1209, konzept: "eigen", gruppe: "accessoires" }, { id: "W065-f5", etage: 0, qm: 265, konzept: "eigen", gruppe: "damen" }, { id: "W065-f6", etage: 1, qm: 1965, konzept: "eigen", gruppe: "damen" }, { id: "W065-f7", etage: 1, qm: 115, konzept: "eigen", gruppe: "waesche" }, { id: "W065-f8", etage: 2, qm: 465, konzept: "eigen", gruppe: "waesche" }, { id: "W065-f9", etage: 2, qm: 1345, konzept: "eigen", gruppe: "herren" }, { id: "W065-f10", etage: 2, qm: 269, konzept: "eigen", gruppe: "kinder" }, { id: "W065-f11", etage: 3, qm: 423, konzept: "eigen", gruppe: "kinder" }, { id: "W065-f12", etage: 3, qm: 1073, konzept: "eigen", gruppe: "sport" }, { id: "W065-f13", etage: 3, qm: 597, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 316375, rohertrag: 134279, konzessionserloes: 0, untermiete: 0, personal: 67142, miete: 54606, nebenkosten: 13807, sonstige: 17657, db: -18934, fteBedarf: 59.64358699227566, fteIst: 67.85518485173044, umsatzJeGruppe: { food: 27951, wohnen: 28104, beauty: 44505, accessoires: 60498, damen: 61490, waesche: 19179, herren: 30825, kinder: 14238, sport: 19617, spielwaren: 9969 } } }, { id: "W066", name: "Hartwig Osnabr\xFCck", stadt: "Osnabr\xFCck", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [-1, 0, 1, 2], baujahr: 1977, fassade: 2, substanz: 72, status: "offen", flaechen: [{ id: "W066-f1", etage: -1, qm: 874, konzept: "eigen", gruppe: "food" }, { id: "W066-f2", etage: -1, qm: 2851, konzept: "eigen", gruppe: "wohnen" }, { id: "W066-f3", etage: 0, qm: 722, konzept: "eigen", gruppe: "beauty" }, { id: "W066-f4", etage: 0, qm: 1601, konzept: "eigen", gruppe: "accessoires" }, { id: "W066-f5", etage: 0, qm: 1402, konzept: "eigen", gruppe: "damen" }, { id: "W066-f6", etage: 1, qm: 1183, konzept: "eigen", gruppe: "damen" }, { id: "W066-f7", etage: 1, qm: 973, konzept: "eigen", gruppe: "waesche" }, { id: "W066-f8", etage: 1, qm: 1569, konzept: "eigen", gruppe: "herren" }, { id: "W066-f9", etage: 2, qm: 277, konzept: "eigen", gruppe: "herren" }, { id: "W066-f10", etage: 2, qm: 952, konzept: "eigen", gruppe: "kinder" }, { id: "W066-f11", etage: 2, qm: 1777, konzept: "eigen", gruppe: "sport" }, { id: "W066-f12", etage: 2, qm: 1060, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 452760, rohertrag: 190236, konzessionserloes: 0, untermiete: 0, personal: 110866, miete: 58880, nebenkosten: 18043, sonstige: 25422, db: -22974, fteBedarf: 86.07514731670713, fteIst: 111.88550443860093, umsatzJeGruppe: { food: 41026, wohnen: 57852, beauty: 57020, accessoires: 80125, damen: 65399, waesche: 29617, herren: 45570, kinder: 25091, sport: 34565, spielwaren: 16494 } } }, { id: "W067", name: "Hartwig Leverkusen Bahnhofstra\xDFe", stadt: "Leverkusen", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1, 2], baujahr: 1964, fassade: 4, substanz: 68, status: "offen", flaechen: [{ id: "W067-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W067-f2", etage: -1, qm: 1680, konzept: "eigen", gruppe: "wohnen" }, { id: "W067-f3", etage: 0, qm: 461, konzept: "eigen", gruppe: "beauty" }, { id: "W067-f4", etage: 0, qm: 1007, konzept: "eigen", gruppe: "accessoires" }, { id: "W067-f5", etage: 0, qm: 731, konzept: "eigen", gruppe: "damen" }, { id: "W067-f6", etage: 1, qm: 1124, konzept: "eigen", gruppe: "damen" }, { id: "W067-f7", etage: 1, qm: 688, konzept: "eigen", gruppe: "waesche" }, { id: "W067-f8", etage: 1, qm: 388, konzept: "eigen", gruppe: "herren" }, { id: "W067-f9", etage: 2, qm: 501, konzept: "eigen", gruppe: "herren" }, { id: "W067-f10", etage: 2, qm: 488, konzept: "eigen", gruppe: "kinder" }, { id: "W067-f11", etage: 2, qm: 1101, konzept: "eigen", gruppe: "sport" }, { id: "W067-f12", etage: 2, qm: 454, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 224449, rohertrag: 95642, konzessionserloes: 0, untermiete: 0, personal: 49163, miete: 23070, nebenkosten: 10523, sonstige: 13317, db: -431, fteBedarf: 45.781792677381304, fteIst: 50.48617987985613, umsatzJeGruppe: { food: 19010, wohnen: 26605, beauty: 28815, accessoires: 39303, damen: 43722, waesche: 20339, herren: 16897, kinder: 10255, sport: 14350, spielwaren: 5154 } } }, { id: "W068", name: "Hartwig Darmstadt Bahnhofstra\xDFe", stadt: "Darmstadt", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 2004, fassade: 6, substanz: 39, status: "offen", flaechen: [{ id: "W068-f1", etage: -1, qm: 995, konzept: "eigen", gruppe: "food" }, { id: "W068-f2", etage: -1, qm: 1088, konzept: "eigen", gruppe: "wohnen" }, { id: "W068-f3", etage: 0, qm: 888, konzept: "eigen", gruppe: "beauty" }, { id: "W068-f4", etage: 0, qm: 1195, konzept: "eigen", gruppe: "accessoires" }, { id: "W068-f5", etage: 1, qm: 218, konzept: "eigen", gruppe: "accessoires" }, { id: "W068-f6", etage: 1, qm: 1865, konzept: "eigen", gruppe: "damen" }, { id: "W068-f7", etage: 2, qm: 674, konzept: "eigen", gruppe: "damen" }, { id: "W068-f8", etage: 2, qm: 722, konzept: "eigen", gruppe: "waesche" }, { id: "W068-f9", etage: 2, qm: 687, konzept: "eigen", gruppe: "herren" }, { id: "W068-f10", etage: 3, qm: 925, konzept: "eigen", gruppe: "herren" }, { id: "W068-f11", etage: 3, qm: 994, konzept: "eigen", gruppe: "kinder" }, { id: "W068-f12", etage: 3, qm: 165, konzept: "eigen", gruppe: "sport" }, { id: "W068-f13", etage: 4, qm: 838, konzept: "eigen", gruppe: "sport" }, { id: "W068-f14", etage: 4, qm: 762, konzept: "eigen", gruppe: "spielwaren" }, { id: "W068-f15", etage: 4, qm: 483, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 348945, rohertrag: 147547, konzessionserloes: 0, untermiete: 0, personal: 72635, miete: 74721, nebenkosten: 0, sonstige: 19931, db: -19740, fteBedarf: 67.7948143550212, fteIst: 74.05785589868562, umsatzJeGruppe: { food: 33914, wohnen: 23045, beauty: 60922, accessoires: 64821, damen: 60287, waesche: 20902, herren: 40183, kinder: 19575, sport: 16183, spielwaren: 9114 } } }, { id: "W069", name: "Hartwig Heidelberg", stadt: "Heidelberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 4200, etagen: [-1, 0, 1, 2], baujahr: 1901, fassade: 3, substanz: 58, status: "offen", flaechen: [{ id: "W069-f1", etage: -1, qm: 1297, konzept: "eigen", gruppe: "food" }, { id: "W069-f2", etage: -1, qm: 2853, konzept: "eigen", gruppe: "wohnen" }, { id: "W069-f3", etage: 0, qm: 914, konzept: "eigen", gruppe: "beauty" }, { id: "W069-f4", etage: 0, qm: 1727, konzept: "eigen", gruppe: "accessoires" }, { id: "W069-f5", etage: 0, qm: 1509, konzept: "eigen", gruppe: "damen" }, { id: "W069-f6", etage: 1, qm: 1118, konzept: "eigen", gruppe: "damen" }, { id: "W069-f7", etage: 1, qm: 1169, konzept: "eigen", gruppe: "waesche" }, { id: "W069-f8", etage: 1, qm: 1863, konzept: "eigen", gruppe: "herren" }, { id: "W069-f9", etage: 2, qm: 132, konzept: "eigen", gruppe: "herren" }, { id: "W069-f10", etage: 2, qm: 1401, konzept: "eigen", gruppe: "kinder" }, { id: "W069-f11", etage: 2, qm: 1725, konzept: "eigen", gruppe: "sport" }, { id: "W069-f12", etage: 2, qm: 949, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 489213, rohertrag: 203933, konzessionserloes: 0, untermiete: 0, personal: 116365, miete: 47545, nebenkosten: 19745, sonstige: 27553, db: -7275, fteBedarf: 93.33639216198918, fteIst: 116.9917581155009, umsatzJeGruppe: { food: 62227, wohnen: 51711, beauty: 73859, accessoires: 66061, damen: 81319, waesche: 36801, herren: 44298, kinder: 31624, sport: 26390, spielwaren: 14923 } } }, { id: "W070", name: "Hartwig Solingen", stadt: "Solingen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2900, etagen: [-1, 0, 1, 2], baujahr: 2002, fassade: 1, substanz: 47, status: "offen", flaechen: [{ id: "W070-f1", etage: -1, qm: 697, konzept: "eigen", gruppe: "food" }, { id: "W070-f2", etage: -1, qm: 2228, konzept: "eigen", gruppe: "wohnen" }, { id: "W070-f3", etage: 0, qm: 863, konzept: "eigen", gruppe: "beauty" }, { id: "W070-f4", etage: 0, qm: 1203, konzept: "eigen", gruppe: "accessoires" }, { id: "W070-f5", etage: 0, qm: 859, konzept: "eigen", gruppe: "damen" }, { id: "W070-f6", etage: 1, qm: 1617, konzept: "eigen", gruppe: "damen" }, { id: "W070-f7", etage: 1, qm: 725, konzept: "eigen", gruppe: "waesche" }, { id: "W070-f8", etage: 1, qm: 584, konzept: "eigen", gruppe: "herren" }, { id: "W070-f9", etage: 2, qm: 854, konzept: "eigen", gruppe: "herren" }, { id: "W070-f10", etage: 2, qm: 624, konzept: "eigen", gruppe: "kinder" }, { id: "W070-f11", etage: 2, qm: 1442, konzept: "eigen", gruppe: "sport" }, { id: "W070-f12", etage: 2, qm: 591, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 423994, rohertrag: 178474, konzessionserloes: 0, untermiete: 0, personal: 88030, miete: 54382, nebenkosten: 15780, sonstige: 22913, db: -2631, fteBedarf: 76.50796448447498, fteIst: 90.63549154864674, umsatzJeGruppe: { food: 31403, wohnen: 52470, beauty: 84324, accessoires: 64934, damen: 72150, waesche: 21564, herren: 45840, kinder: 14711, sport: 28503, spielwaren: 8094 } } }, { id: "W071", name: "Hartwig Regensburg Einkaufszentrum", stadt: "Regensburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1951, fassade: 6, substanz: 51, status: "offen", flaechen: [{ id: "W071-f1", etage: -1, qm: 1099, konzept: "eigen", gruppe: "food" }, { id: "W071-f2", etage: -1, qm: 1385, konzept: "eigen", gruppe: "wohnen" }, { id: "W071-f3", etage: 0, qm: 821, konzept: "eigen", gruppe: "beauty" }, { id: "W071-f4", etage: 0, qm: 1636, konzept: "eigen", gruppe: "accessoires" }, { id: "W071-f5", etage: 0, qm: 26, konzept: "eigen", gruppe: "damen" }, { id: "W071-f6", etage: 1, qm: 2483, konzept: "eigen", gruppe: "damen" }, { id: "W071-f7", etage: 2, qm: 292, konzept: "eigen", gruppe: "damen" }, { id: "W071-f8", etage: 2, qm: 958, konzept: "eigen", gruppe: "waesche" }, { id: "W071-f9", etage: 2, qm: 1233, konzept: "eigen", gruppe: "herren" }, { id: "W071-f10", etage: 3, qm: 624, konzept: "eigen", gruppe: "herren" }, { id: "W071-f11", etage: 3, qm: 908, konzept: "eigen", gruppe: "kinder" }, { id: "W071-f12", etage: 3, qm: 951, konzept: "eigen", gruppe: "sport" }, { id: "W071-f13", etage: 4, qm: 876, konzept: "eigen", gruppe: "sport" }, { id: "W071-f14", etage: 4, qm: 852, konzept: "eigen", gruppe: "spielwaren" }, { id: "W071-f15", etage: 4, qm: 755, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 408117, rohertrag: 171541, konzessionserloes: 0, untermiete: 0, personal: 92220, miete: 67021, nebenkosten: 15793, sonstige: 23437, db: -26930, fteBedarf: 79.91215555938443, fteIst: 93.53863691089289, umsatzJeGruppe: { food: 36513, wohnen: 31591, beauty: 72069, accessoires: 70223, damen: 71295, waesche: 24339, herren: 37018, kinder: 21424, sport: 30023, spielwaren: 13621 } } }, { id: "W072", name: "Hartwig Paderborn", stadt: "Paderborn", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2, 3], baujahr: 1955, fassade: 0, substanz: 43, status: "offen", flaechen: [{ id: "W072-f1", etage: -1, qm: 664, konzept: "eigen", gruppe: "food" }, { id: "W072-f2", etage: -1, qm: 1296, konzept: "eigen", gruppe: "wohnen" }, { id: "W072-f3", etage: 0, qm: 579, konzept: "eigen", gruppe: "beauty" }, { id: "W072-f4", etage: 0, qm: 819, konzept: "eigen", gruppe: "accessoires" }, { id: "W072-f5", etage: 0, qm: 562, konzept: "eigen", gruppe: "damen" }, { id: "W072-f6", etage: 1, qm: 1845, konzept: "eigen", gruppe: "damen" }, { id: "W072-f7", etage: 1, qm: 115, konzept: "eigen", gruppe: "waesche" }, { id: "W072-f8", etage: 2, qm: 467, konzept: "eigen", gruppe: "waesche" }, { id: "W072-f9", etage: 2, qm: 1070, konzept: "eigen", gruppe: "herren" }, { id: "W072-f10", etage: 2, qm: 424, konzept: "eigen", gruppe: "kinder" }, { id: "W072-f11", etage: 3, qm: 433, konzept: "eigen", gruppe: "kinder" }, { id: "W072-f12", etage: 3, qm: 814, konzept: "eigen", gruppe: "sport" }, { id: "W072-f13", etage: 3, qm: 677, konzept: "eigen", gruppe: "spielwaren" }, { id: "W072-f14", etage: 3, qm: 35, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 281185, rohertrag: 118448, konzessionserloes: 0, untermiete: 0, personal: 66941, miete: 40041, nebenkosten: 12390, sonstige: 15939, db: -16863, fteBedarf: 54.1175509102335, fteIst: 67.31589840966596, umsatzJeGruppe: { food: 28931, wohnen: 26886, beauty: 46607, accessoires: 38166, damen: 62745, waesche: 15865, herren: 22942, kinder: 18242, sport: 11806, spielwaren: 8995 } } }, { id: "W073", name: "Hartwig Ingolstadt", stadt: "Ingolstadt", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1927, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W073-f1", etage: -1, qm: 506, konzept: "eigen", gruppe: "food" }, { id: "W073-f2", etage: -1, qm: 1028, konzept: "eigen", gruppe: "wohnen" }, { id: "W073-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W073-f4", etage: 0, qm: 1102, konzept: "eigen", gruppe: "accessoires" }, { id: "W073-f5", etage: 1, qm: 48, konzept: "eigen", gruppe: "accessoires" }, { id: "W073-f6", etage: 1, qm: 1486, konzept: "eigen", gruppe: "damen" }, { id: "W073-f7", etage: 2, qm: 492, konzept: "eigen", gruppe: "damen" }, { id: "W073-f8", etage: 2, qm: 569, konzept: "eigen", gruppe: "waesche" }, { id: "W073-f9", etage: 2, qm: 473, konzept: "eigen", gruppe: "herren" }, { id: "W073-f10", etage: 3, qm: 536, konzept: "eigen", gruppe: "herren" }, { id: "W073-f11", etage: 3, qm: 652, konzept: "eigen", gruppe: "kinder" }, { id: "W073-f12", etage: 3, qm: 345, konzept: "eigen", gruppe: "sport" }, { id: "W073-f13", etage: 4, qm: 739, konzept: "eigen", gruppe: "sport" }, { id: "W073-f14", etage: 4, qm: 597, konzept: "eigen", gruppe: "spielwaren" }, { id: "W073-f15", etage: 4, qm: 198, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 278999, rohertrag: 119002, konzessionserloes: 0, untermiete: 0, personal: 59699, miete: 40530, nebenkosten: 10068, sonstige: 15580, db: -6874, fteBedarf: 52.62232814910955, fteIst: 60.036515679849245, umsatzJeGruppe: { food: 21256, wohnen: 27519, beauty: 37271, accessoires: 55365, damen: 59546, waesche: 16506, herren: 22860, kinder: 12681, sport: 17894, spielwaren: 8100 } } }, { id: "W074", name: "Hartwig W\xFCrzburg", stadt: "W\xFCrzburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2], baujahr: 1973, fassade: 2, substanz: 33, status: "offen", flaechen: [{ id: "W074-f1", etage: -1, qm: 771, konzept: "eigen", gruppe: "food" }, { id: "W074-f2", etage: -1, qm: 2054, konzept: "eigen", gruppe: "wohnen" }, { id: "W074-f3", etage: 0, qm: 536, konzept: "eigen", gruppe: "beauty" }, { id: "W074-f4", etage: 0, qm: 1383, konzept: "eigen", gruppe: "accessoires" }, { id: "W074-f5", etage: 0, qm: 906, konzept: "eigen", gruppe: "damen" }, { id: "W074-f6", etage: 1, qm: 920, konzept: "eigen", gruppe: "damen" }, { id: "W074-f7", etage: 1, qm: 782, konzept: "eigen", gruppe: "waesche" }, { id: "W074-f8", etage: 1, qm: 1123, konzept: "eigen", gruppe: "herren" }, { id: "W074-f9", etage: 2, qm: 600, konzept: "eigen", gruppe: "herren" }, { id: "W074-f10", etage: 2, qm: 649, konzept: "eigen", gruppe: "kinder" }, { id: "W074-f11", etage: 2, qm: 939, konzept: "eigen", gruppe: "sport" }, { id: "W074-f12", etage: 2, qm: 625, konzept: "eigen", gruppe: "spielwaren" }, { id: "W074-f13", etage: 2, qm: 12, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 398689, rohertrag: 167046, konzessionserloes: 0, untermiete: 0, personal: 93523, miete: 53333, nebenkosten: 14173, sonstige: 21431, db: -15414, fteBedarf: 71.46526933716856, fteIst: 96.58136190461292, umsatzJeGruppe: { food: 46650, wohnen: 57506, beauty: 51054, accessoires: 73003, damen: 51051, waesche: 26957, herren: 47584, kinder: 18034, sport: 15927, spielwaren: 10923 } } }, { id: "W075", name: "Hartwig Ulm", stadt: "Ulm", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [0, 1, 2, 3], baujahr: 1952, fassade: 0, substanz: 85, status: "offen", flaechen: [{ id: "W075-f1", etage: 0, qm: 753, konzept: "eigen", gruppe: "food" }, { id: "W075-f2", etage: 0, qm: 802, konzept: "eigen", gruppe: "beauty" }, { id: "W075-f3", etage: 0, qm: 1022, konzept: "eigen", gruppe: "accessoires" }, { id: "W075-f4", etage: 0, qm: 198, konzept: "eigen", gruppe: "damen" }, { id: "W075-f5", etage: 1, qm: 2367, konzept: "eigen", gruppe: "damen" }, { id: "W075-f6", etage: 1, qm: 408, konzept: "eigen", gruppe: "waesche" }, { id: "W075-f7", etage: 2, qm: 356, konzept: "eigen", gruppe: "waesche" }, { id: "W075-f8", etage: 2, qm: 1210, konzept: "eigen", gruppe: "herren" }, { id: "W075-f9", etage: 2, qm: 717, konzept: "eigen", gruppe: "kinder" }, { id: "W075-f10", etage: 2, qm: 492, konzept: "eigen", gruppe: "sport" }, { id: "W075-f11", etage: 3, qm: 706, konzept: "eigen", gruppe: "sport" }, { id: "W075-f12", etage: 3, qm: 642, konzept: "eigen", gruppe: "spielwaren" }, { id: "W075-f13", etage: 3, qm: 1427, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 455098, rohertrag: 189230, konzessionserloes: 0, untermiete: 0, personal: 91561, miete: 61925, nebenkosten: 12620, sonstige: 23654, db: -530, fteBedarf: 78.05033022258182, fteIst: 92.93549910869459, umsatzJeGruppe: { food: 50651, beauty: 104436, accessoires: 58055, damen: 79877, waesche: 28632, herren: 41437, kinder: 21212, sport: 24775, spielwaren: 12803, wohnen: 33220 } } }, { id: "W076", name: "Hartwig Wolfsburg Galerie am Fluss", stadt: "Wolfsburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2], baujahr: 1989, fassade: 3, substanz: 72, status: "offen", flaechen: [{ id: "W076-f1", etage: -1, qm: 875, konzept: "eigen", gruppe: "food" }, { id: "W076-f2", etage: -1, qm: 3100, konzept: "eigen", gruppe: "wohnen" }, { id: "W076-f3", etage: 0, qm: 976, konzept: "eigen", gruppe: "beauty" }, { id: "W076-f4", etage: 0, qm: 1563, konzept: "eigen", gruppe: "accessoires" }, { id: "W076-f5", etage: 0, qm: 1436, konzept: "eigen", gruppe: "damen" }, { id: "W076-f6", etage: 1, qm: 1480, konzept: "eigen", gruppe: "damen" }, { id: "W076-f7", etage: 1, qm: 1227, konzept: "eigen", gruppe: "waesche" }, { id: "W076-f8", etage: 1, qm: 1269, konzept: "eigen", gruppe: "herren" }, { id: "W076-f9", etage: 2, qm: 371, konzept: "eigen", gruppe: "herren" }, { id: "W076-f10", etage: 2, qm: 1278, konzept: "eigen", gruppe: "kinder" }, { id: "W076-f11", etage: 2, qm: 1992, konzept: "eigen", gruppe: "sport" }, { id: "W076-f12", etage: 2, qm: 1193, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 500430, rohertrag: 210142, konzessionserloes: 0, untermiete: 0, personal: 112735, miete: 113290, nebenkosten: 0, sonstige: 28060, db: -43942, fteBedarf: 94.97014585477983, fteIst: 116.22600399086899, umsatzJeGruppe: { food: 38263, wohnen: 62165, beauty: 85447, accessoires: 67165, damen: 84024, waesche: 32809, herren: 46465, kinder: 27122, sport: 39927, spielwaren: 17042 } } }, { id: "W077", name: "Hartwig G\xF6ttingen", stadt: "G\xF6ttingen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1921, fassade: 3, substanz: 76, status: "offen", flaechen: [{ id: "W077-f1", etage: -1, qm: 599, konzept: "eigen", gruppe: "food" }, { id: "W077-f2", etage: -1, qm: 1181, konzept: "eigen", gruppe: "wohnen" }, { id: "W077-f3", etage: 0, qm: 626, konzept: "eigen", gruppe: "beauty" }, { id: "W077-f4", etage: 0, qm: 671, konzept: "eigen", gruppe: "accessoires" }, { id: "W077-f5", etage: 0, qm: 484, konzept: "eigen", gruppe: "damen" }, { id: "W077-f6", etage: 1, qm: 1669, konzept: "eigen", gruppe: "damen" }, { id: "W077-f7", etage: 1, qm: 111, konzept: "eigen", gruppe: "waesche" }, { id: "W077-f8", etage: 2, qm: 622, konzept: "eigen", gruppe: "waesche" }, { id: "W077-f9", etage: 2, qm: 1004, konzept: "eigen", gruppe: "herren" }, { id: "W077-f10", etage: 2, qm: 154, konzept: "eigen", gruppe: "kinder" }, { id: "W077-f11", etage: 3, qm: 349, konzept: "eigen", gruppe: "kinder" }, { id: "W077-f12", etage: 3, qm: 908, konzept: "eigen", gruppe: "sport" }, { id: "W077-f13", etage: 3, qm: 638, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 285471, rohertrag: 120762, konzessionserloes: 0, untermiete: 0, personal: 61588, miete: 27672, nebenkosten: 13224, sonstige: 15762, db: 2516, fteBedarf: 53.1335837797041, fteIst: 61.905744077275685, umsatzJeGruppe: { food: 23655, wohnen: 21458, beauty: 56779, accessoires: 32804, damen: 57099, waesche: 24209, herren: 28817, kinder: 14630, sport: 14564, spielwaren: 11456 } } }, { id: "W078", name: "Hartwig Pforzheim Bahnhofstra\xDFe", stadt: "Pforzheim", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [0, 1, 2, 3, 4], baujahr: 1937, fassade: 5, substanz: 55, status: "offen", flaechen: [{ id: "W078-f1", etage: 0, qm: 1249, konzept: "eigen", gruppe: "food" }, { id: "W078-f2", etage: 0, qm: 937, konzept: "eigen", gruppe: "beauty" }, { id: "W078-f3", etage: 0, qm: 814, konzept: "eigen", gruppe: "accessoires" }, { id: "W078-f4", etage: 1, qm: 770, konzept: "eigen", gruppe: "accessoires" }, { id: "W078-f5", etage: 1, qm: 2230, konzept: "eigen", gruppe: "damen" }, { id: "W078-f6", etage: 2, qm: 395, konzept: "eigen", gruppe: "damen" }, { id: "W078-f7", etage: 2, qm: 1213, konzept: "eigen", gruppe: "waesche" }, { id: "W078-f8", etage: 2, qm: 1392, konzept: "eigen", gruppe: "herren" }, { id: "W078-f9", etage: 3, qm: 390, konzept: "eigen", gruppe: "herren" }, { id: "W078-f10", etage: 3, qm: 1097, konzept: "eigen", gruppe: "kinder" }, { id: "W078-f11", etage: 3, qm: 1379, konzept: "eigen", gruppe: "sport" }, { id: "W078-f12", etage: 3, qm: 134, konzept: "eigen", gruppe: "spielwaren" }, { id: "W078-f13", etage: 4, qm: 683, konzept: "eigen", gruppe: "spielwaren" }, { id: "W078-f14", etage: 4, qm: 2317, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 372646, rohertrag: 156116, konzessionserloes: 0, untermiete: 0, personal: 96991, miete: 33109, nebenkosten: 20184, sonstige: 22028, db: -16197, fteBedarf: 75.67169598181093, fteIst: 99.54701479934208, umsatzJeGruppe: { food: 45996, beauty: 56948, accessoires: 55192, damen: 55630, waesche: 34948, herren: 37144, kinder: 16910, sport: 18595, spielwaren: 9502, wohnen: 41782 } } }, { id: "W079", name: "Hartwig Offenbach", stadt: "Offenbach", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2, 3], baujahr: 1913, fassade: 0, substanz: 44, status: "offen", flaechen: [{ id: "W079-f1", etage: -1, qm: 944, konzept: "eigen", gruppe: "food" }, { id: "W079-f2", etage: -1, qm: 1756, konzept: "eigen", gruppe: "wohnen" }, { id: "W079-f3", etage: 0, qm: 768, konzept: "eigen", gruppe: "beauty" }, { id: "W079-f4", etage: 0, qm: 1349, konzept: "eigen", gruppe: "accessoires" }, { id: "W079-f5", etage: 0, qm: 583, konzept: "eigen", gruppe: "damen" }, { id: "W079-f6", etage: 1, qm: 2058, konzept: "eigen", gruppe: "damen" }, { id: "W079-f7", etage: 1, qm: 642, konzept: "eigen", gruppe: "waesche" }, { id: "W079-f8", etage: 2, qm: 420, konzept: "eigen", gruppe: "waesche" }, { id: "W079-f9", etage: 2, qm: 1670, konzept: "eigen", gruppe: "herren" }, { id: "W079-f10", etage: 2, qm: 609, konzept: "eigen", gruppe: "kinder" }, { id: "W079-f11", etage: 3, qm: 161, konzept: "eigen", gruppe: "kinder" }, { id: "W079-f12", etage: 3, qm: 1228, konzept: "eigen", gruppe: "sport" }, { id: "W079-f13", etage: 3, qm: 749, konzept: "eigen", gruppe: "spielwaren" }, { id: "W079-f14", etage: 3, qm: 561, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 419800, rohertrag: 177495, konzessionserloes: 0, untermiete: 0, personal: 93625, miete: 53294, nebenkosten: 19738, sonstige: 23286, db: -12448, fteBedarf: 78.44626198751102, fteIst: 96.0801887770173, umsatzJeGruppe: { food: 42524, wohnen: 45556, beauty: 63123, accessoires: 69221, damen: 71773, waesche: 34081, herren: 44802, kinder: 15911, sport: 22153, spielwaren: 10656 } } }, { id: "W080", name: "Hartwig Heilbronn", stadt: "Heilbronn", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1914, fassade: 0, substanz: 41, status: "offen", flaechen: [{ id: "W080-f1", etage: -1, qm: 966, konzept: "eigen", gruppe: "food" }, { id: "W080-f2", etage: -1, qm: 1368, konzept: "eigen", gruppe: "wohnen" }, { id: "W080-f3", etage: 0, qm: 767, konzept: "eigen", gruppe: "beauty" }, { id: "W080-f4", etage: 0, qm: 1425, konzept: "eigen", gruppe: "accessoires" }, { id: "W080-f5", etage: 0, qm: 142, konzept: "eigen", gruppe: "damen" }, { id: "W080-f6", etage: 1, qm: 2333, konzept: "eigen", gruppe: "damen" }, { id: "W080-f7", etage: 2, qm: 711, konzept: "eigen", gruppe: "damen" }, { id: "W080-f8", etage: 2, qm: 1006, konzept: "eigen", gruppe: "waesche" }, { id: "W080-f9", etage: 2, qm: 617, konzept: "eigen", gruppe: "herren" }, { id: "W080-f10", etage: 3, qm: 756, konzept: "eigen", gruppe: "herren" }, { id: "W080-f11", etage: 3, qm: 1124, konzept: "eigen", gruppe: "kinder" }, { id: "W080-f12", etage: 3, qm: 454, konzept: "eigen", gruppe: "sport" }, { id: "W080-f13", etage: 4, qm: 788, konzept: "eigen", gruppe: "sport" }, { id: "W080-f14", etage: 4, qm: 788, konzept: "eigen", gruppe: "spielwaren" }, { id: "W080-f15", etage: 4, qm: 757, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 433089, rohertrag: 182690, konzessionserloes: 0, untermiete: 0, personal: 103956, miete: 42353, nebenkosten: 18088, sonstige: 24058, db: -5765, fteBedarf: 81.0949679501219, fteIst: 106.9578032767022, umsatzJeGruppe: { food: 45379, wohnen: 47137, beauty: 70071, accessoires: 59859, damen: 94847, waesche: 30915, herren: 31432, kinder: 22918, sport: 19648, spielwaren: 10882 } } }, { id: "W081", name: "Hartwig Bremerhaven", stadt: "Bremerhaven", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2900, etagen: [0, 1, 2, 3, 4], baujahr: 1984, fassade: 1, substanz: 39, status: "offen", flaechen: [{ id: "W081-f1", etage: 0, qm: 1100, konzept: "eigen", gruppe: "food" }, { id: "W081-f2", etage: 0, qm: 867, konzept: "eigen", gruppe: "beauty" }, { id: "W081-f3", etage: 0, qm: 913, konzept: "eigen", gruppe: "accessoires" }, { id: "W081-f4", etage: 1, qm: 461, konzept: "eigen", gruppe: "accessoires" }, { id: "W081-f5", etage: 1, qm: 2419, konzept: "eigen", gruppe: "damen" }, { id: "W081-f6", etage: 2, qm: 630, konzept: "eigen", gruppe: "damen" }, { id: "W081-f7", etage: 2, qm: 893, konzept: "eigen", gruppe: "waesche" }, { id: "W081-f8", etage: 2, qm: 1357, konzept: "eigen", gruppe: "herren" }, { id: "W081-f9", etage: 3, qm: 332, konzept: "eigen", gruppe: "herren" }, { id: "W081-f10", etage: 3, qm: 892, konzept: "eigen", gruppe: "kinder" }, { id: "W081-f11", etage: 3, qm: 1406, konzept: "eigen", gruppe: "sport" }, { id: "W081-f12", etage: 3, qm: 250, konzept: "eigen", gruppe: "spielwaren" }, { id: "W081-f13", etage: 4, qm: 590, konzept: "eigen", gruppe: "spielwaren" }, { id: "W081-f14", etage: 4, qm: 2290, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 364211, rohertrag: 152969, konzessionserloes: 0, untermiete: 0, personal: 85323, miete: 37193, nebenkosten: 19313, sonstige: 21413, db: -10272, fteBedarf: 73.47684547615721, fteIst: 86.1167648364924, umsatzJeGruppe: { food: 40885, beauty: 49273, accessoires: 43350, damen: 76049, waesche: 25636, herren: 32417, kinder: 15573, sport: 22949, spielwaren: 11556, wohnen: 46521 } } }, { id: "W082", name: "Hartwig Trier", stadt: "Trier", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1994, fassade: 6, substanz: 61, status: "offen", flaechen: [{ id: "W082-f1", etage: -1, qm: 584, konzept: "eigen", gruppe: "food" }, { id: "W082-f2", etage: -1, qm: 983, konzept: "eigen", gruppe: "wohnen" }, { id: "W082-f3", etage: 0, qm: 531, konzept: "eigen", gruppe: "beauty" }, { id: "W082-f4", etage: 0, qm: 833, konzept: "eigen", gruppe: "accessoires" }, { id: "W082-f5", etage: 0, qm: 203, konzept: "eigen", gruppe: "damen" }, { id: "W082-f6", etage: 1, qm: 1526, konzept: "eigen", gruppe: "damen" }, { id: "W082-f7", etage: 1, qm: 41, konzept: "eigen", gruppe: "waesche" }, { id: "W082-f8", etage: 2, qm: 654, konzept: "eigen", gruppe: "waesche" }, { id: "W082-f9", etage: 2, qm: 913, konzept: "eigen", gruppe: "herren" }, { id: "W082-f10", etage: 3, qm: 406, konzept: "eigen", gruppe: "herren" }, { id: "W082-f11", etage: 3, qm: 671, konzept: "eigen", gruppe: "kinder" }, { id: "W082-f12", etage: 3, qm: 490, konzept: "eigen", gruppe: "sport" }, { id: "W082-f13", etage: 4, qm: 610, konzept: "eigen", gruppe: "sport" }, { id: "W082-f14", etage: 4, qm: 615, konzept: "eigen", gruppe: "spielwaren" }, { id: "W082-f15", etage: 4, qm: 342, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 296021, rohertrag: 125326, konzessionserloes: 0, untermiete: 0, personal: 65086, miete: 46347, nebenkosten: 12142, sonstige: 16368, db: -14618, fteBedarf: 55.139067866867336, fteIst: 66.78537801156742, umsatzJeGruppe: { food: 24957, wohnen: 25470, beauty: 44139, accessoires: 40878, damen: 49387, waesche: 20987, herren: 40429, kinder: 16345, sport: 23884, spielwaren: 9546 } } }, { id: "W083", name: "Hartwig Koblenz Arkaden", stadt: "Koblenz", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 4100, etagen: [0, 1, 2, 3], baujahr: 1931, fassade: 2, substanz: 87, status: "offen", flaechen: [{ id: "W083-f1", etage: 0, qm: 1175, konzept: "eigen", gruppe: "food" }, { id: "W083-f2", etage: 0, qm: 1163, konzept: "eigen", gruppe: "beauty" }, { id: "W083-f3", etage: 0, qm: 1364, konzept: "eigen", gruppe: "accessoires" }, { id: "W083-f4", etage: 0, qm: 348, konzept: "eigen", gruppe: "damen" }, { id: "W083-f5", etage: 1, qm: 2606, konzept: "eigen", gruppe: "damen" }, { id: "W083-f6", etage: 1, qm: 1444, konzept: "eigen", gruppe: "waesche" }, { id: "W083-f7", etage: 2, qm: 90, konzept: "eigen", gruppe: "waesche" }, { id: "W083-f8", etage: 2, qm: 1740, konzept: "eigen", gruppe: "herren" }, { id: "W083-f9", etage: 2, qm: 1007, konzept: "eigen", gruppe: "kinder" }, { id: "W083-f10", etage: 2, qm: 1212, konzept: "eigen", gruppe: "sport" }, { id: "W083-f11", etage: 3, qm: 308, konzept: "eigen", gruppe: "sport" }, { id: "W083-f12", etage: 3, qm: 1197, konzept: "eigen", gruppe: "spielwaren" }, { id: "W083-f13", etage: 3, qm: 2545, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 421035, rohertrag: 176174, konzessionserloes: 0, untermiete: 0, personal: 89750, miete: 54354, nebenkosten: 22496, sonstige: 24552, db: -14977, fteBedarf: 84.15255396038125, fteIst: 90.7486162454476, umsatzJeGruppe: { food: 42371, beauty: 78329, accessoires: 53733, damen: 67432, waesche: 37867, herren: 36625, kinder: 20950, sport: 22065, spielwaren: 16905, wohnen: 44757 } } }, { id: "W084", name: "Hartwig Jena", stadt: "Jena", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [0, 1, 2, 3], baujahr: 1977, fassade: 5, substanz: 40, status: "offen", flaechen: [{ id: "W084-f1", etage: 0, qm: 1066, konzept: "eigen", gruppe: "food" }, { id: "W084-f2", etage: 0, qm: 849, konzept: "eigen", gruppe: "beauty" }, { id: "W084-f3", etage: 0, qm: 1341, konzept: "eigen", gruppe: "accessoires" }, { id: "W084-f4", etage: 0, qm: 444, konzept: "eigen", gruppe: "damen" }, { id: "W084-f5", etage: 1, qm: 2418, konzept: "eigen", gruppe: "damen" }, { id: "W084-f6", etage: 1, qm: 1080, konzept: "eigen", gruppe: "waesche" }, { id: "W084-f7", etage: 1, qm: 202, konzept: "eigen", gruppe: "herren" }, { id: "W084-f8", etage: 2, qm: 1620, konzept: "eigen", gruppe: "herren" }, { id: "W084-f9", etage: 2, qm: 833, konzept: "eigen", gruppe: "kinder" }, { id: "W084-f10", etage: 2, qm: 1247, konzept: "eigen", gruppe: "sport" }, { id: "W084-f11", etage: 3, qm: 580, konzept: "eigen", gruppe: "sport" }, { id: "W084-f12", etage: 3, qm: 880, konzept: "eigen", gruppe: "spielwaren" }, { id: "W084-f13", etage: 3, qm: 2240, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 418729, rohertrag: 175387, konzessionserloes: 0, untermiete: 0, personal: 104315, miete: 62750, nebenkosten: 21111, sonstige: 23828, db: -36617, fteBedarf: 80.99693141011863, fteIst: 104.49131323756708, umsatzJeGruppe: { food: 43526, beauty: 63348, accessoires: 54755, damen: 71303, waesche: 31802, herren: 40826, kinder: 21322, sport: 34673, spielwaren: 13968, wohnen: 43207 } } }, { id: "W085", name: "Hartwig Siegen", stadt: "Siegen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1927, fassade: 4, substanz: 55, status: "offen", flaechen: [{ id: "W085-f1", etage: -1, qm: 675, konzept: "eigen", gruppe: "food" }, { id: "W085-f2", etage: -1, qm: 1385, konzept: "eigen", gruppe: "wohnen" }, { id: "W085-f3", etage: 0, qm: 613, konzept: "eigen", gruppe: "beauty" }, { id: "W085-f4", etage: 0, qm: 1088, konzept: "eigen", gruppe: "accessoires" }, { id: "W085-f5", etage: 0, qm: 359, konzept: "eigen", gruppe: "damen" }, { id: "W085-f6", etage: 1, qm: 1511, konzept: "eigen", gruppe: "damen" }, { id: "W085-f7", etage: 1, qm: 549, konzept: "eigen", gruppe: "waesche" }, { id: "W085-f8", etage: 2, qm: 227, konzept: "eigen", gruppe: "waesche" }, { id: "W085-f9", etage: 2, qm: 1321, konzept: "eigen", gruppe: "herren" }, { id: "W085-f10", etage: 2, qm: 512, konzept: "eigen", gruppe: "kinder" }, { id: "W085-f11", etage: 3, qm: 56, konzept: "eigen", gruppe: "kinder" }, { id: "W085-f12", etage: 3, qm: 1107, konzept: "eigen", gruppe: "sport" }, { id: "W085-f13", etage: 3, qm: 553, konzept: "eigen", gruppe: "spielwaren" }, { id: "W085-f14", etage: 3, qm: 345, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 328902, rohertrag: 138900, konzessionserloes: 0, untermiete: 0, personal: 70885, miete: 25961, nebenkosten: 13307, sonstige: 18120, db: 10626, fteBedarf: 60.97082378608198, fteIst: 72.54402763085625, umsatzJeGruppe: { food: 24956, wohnen: 32419, beauty: 59712, accessoires: 52275, damen: 59393, waesche: 21314, herren: 30981, kinder: 15624, sport: 22106, spielwaren: 10122 } } }, { id: "W086", name: "Hartwig Hildesheim", stadt: "Hildesheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1915, fassade: 0, substanz: 66, status: "offen", flaechen: [{ id: "W086-f1", etage: -1, qm: 726, konzept: "eigen", gruppe: "food" }, { id: "W086-f2", etage: -1, qm: 740, konzept: "eigen", gruppe: "wohnen" }, { id: "W086-f3", etage: 0, qm: 496, konzept: "eigen", gruppe: "beauty" }, { id: "W086-f4", etage: 0, qm: 971, konzept: "eigen", gruppe: "accessoires" }, { id: "W086-f5", etage: 1, qm: 25, konzept: "eigen", gruppe: "accessoires" }, { id: "W086-f6", etage: 1, qm: 1441, konzept: "eigen", gruppe: "damen" }, { id: "W086-f7", etage: 2, qm: 129, konzept: "eigen", gruppe: "damen" }, { id: "W086-f8", etage: 2, qm: 634, konzept: "eigen", gruppe: "waesche" }, { id: "W086-f9", etage: 2, qm: 704, konzept: "eigen", gruppe: "herren" }, { id: "W086-f10", etage: 3, qm: 562, konzept: "eigen", gruppe: "herren" }, { id: "W086-f11", etage: 3, qm: 507, konzept: "eigen", gruppe: "kinder" }, { id: "W086-f12", etage: 3, qm: 398, konzept: "eigen", gruppe: "sport" }, { id: "W086-f13", etage: 4, qm: 298, konzept: "eigen", gruppe: "sport" }, { id: "W086-f14", etage: 4, qm: 593, konzept: "eigen", gruppe: "spielwaren" }, { id: "W086-f15", etage: 4, qm: 575, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 258981, rohertrag: 109383, konzessionserloes: 0, untermiete: 0, personal: 52326, miete: 27654, nebenkosten: 9449, sonstige: 14578, db: 5376, fteBedarf: 49.39765951548749, fteIst: 54.17215499352276, umsatzJeGruppe: { food: 28225, wohnen: 26267, beauty: 35041, accessoires: 41065, damen: 43253, waesche: 17866, herren: 35669, kinder: 10911, sport: 11096, spielwaren: 9588 } } }, { id: "W087", name: "Hartwig Cottbus Arkaden", stadt: "Cottbus", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1988, fassade: 5, substanz: 78, status: "offen", flaechen: [{ id: "W087-f1", etage: -1, qm: 782, konzept: "eigen", gruppe: "food" }, { id: "W087-f2", etage: -1, qm: 1085, konzept: "eigen", gruppe: "wohnen" }, { id: "W087-f3", etage: 0, qm: 823, konzept: "eigen", gruppe: "beauty" }, { id: "W087-f4", etage: 0, qm: 980, konzept: "eigen", gruppe: "accessoires" }, { id: "W087-f5", etage: 0, qm: 64, konzept: "eigen", gruppe: "damen" }, { id: "W087-f6", etage: 1, qm: 1867, konzept: "eigen", gruppe: "damen" }, { id: "W087-f7", etage: 2, qm: 225, konzept: "eigen", gruppe: "damen" }, { id: "W087-f8", etage: 2, qm: 883, konzept: "eigen", gruppe: "waesche" }, { id: "W087-f9", etage: 2, qm: 759, konzept: "eigen", gruppe: "herren" }, { id: "W087-f10", etage: 3, qm: 654, konzept: "eigen", gruppe: "herren" }, { id: "W087-f11", etage: 3, qm: 647, konzept: "eigen", gruppe: "kinder" }, { id: "W087-f12", etage: 3, qm: 565, konzept: "eigen", gruppe: "sport" }, { id: "W087-f13", etage: 4, qm: 658, konzept: "eigen", gruppe: "sport" }, { id: "W087-f14", etage: 4, qm: 840, konzept: "eigen", gruppe: "spielwaren" }, { id: "W087-f15", etage: 4, qm: 369, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 292077, rohertrag: 121734, konzessionserloes: 0, untermiete: 0, personal: 63346, miete: 34167, nebenkosten: 12408, sonstige: 17016, db: -5202, fteBedarf: 58.30877635131459, fteIst: 63.996752599812204, umsatzJeGruppe: { food: 29834, wohnen: 23616, beauty: 65222, accessoires: 33631, damen: 43836, waesche: 22175, herren: 35370, kinder: 10584, sport: 16282, spielwaren: 11528 } } }, { id: "W088", name: "Hartwig G\xFCtersloh Am Wall", stadt: "G\xFCtersloh", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1], baujahr: 1993, fassade: 0, substanz: 56, status: "offen", flaechen: [{ id: "W088-f1", etage: -1, qm: 322, konzept: "eigen", gruppe: "food" }, { id: "W088-f2", etage: -1, qm: 1611, konzept: "eigen", gruppe: "wohnen" }, { id: "W088-f3", etage: 0, qm: 392, konzept: "eigen", gruppe: "beauty" }, { id: "W088-f4", etage: 0, qm: 695, konzept: "eigen", gruppe: "accessoires" }, { id: "W088-f5", etage: 0, qm: 846, konzept: "eigen", gruppe: "damen" }, { id: "W088-f6", etage: 1, qm: 269, konzept: "eigen", gruppe: "damen" }, { id: "W088-f7", etage: 1, qm: 374, konzept: "eigen", gruppe: "waesche" }, { id: "W088-f8", etage: 1, qm: 842, konzept: "eigen", gruppe: "herren" }, { id: "W088-f9", etage: 1, qm: 351, konzept: "eigen", gruppe: "kinder" }, { id: "W088-f10", etage: 1, qm: 904, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 124671, rohertrag: 52928, konzessionserloes: 0, untermiete: 0, personal: 29053, miete: 18298, nebenkosten: 9018, sonstige: 8084, db: -11525, fteBedarf: 28.428846813084405, fteIst: 29.48714567675355, umsatzJeGruppe: { food: 7495, wohnen: 21073, beauty: 20934, accessoires: 18818, damen: 19281, waesche: 7905, herren: 14991, kinder: 4697, sport: 9477 } } }, { id: "W089", name: "Hartwig Recklinghausen Bahnhofstra\xDFe", stadt: "Recklinghausen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2], baujahr: 1996, fassade: 7, substanz: 39, status: "offen", flaechen: [{ id: "W089-f1", etage: -1, qm: 494, konzept: "eigen", gruppe: "food" }, { id: "W089-f2", etage: -1, qm: 1456, konzept: "eigen", gruppe: "wohnen" }, { id: "W089-f3", etage: 0, qm: 606, konzept: "eigen", gruppe: "beauty" }, { id: "W089-f4", etage: 0, qm: 727, konzept: "eigen", gruppe: "accessoires" }, { id: "W089-f5", etage: 0, qm: 617, konzept: "eigen", gruppe: "damen" }, { id: "W089-f6", etage: 1, qm: 1068, konzept: "eigen", gruppe: "damen" }, { id: "W089-f7", etage: 1, qm: 483, konzept: "eigen", gruppe: "waesche" }, { id: "W089-f8", etage: 1, qm: 399, konzept: "eigen", gruppe: "herren" }, { id: "W089-f9", etage: 2, qm: 361, konzept: "eigen", gruppe: "herren" }, { id: "W089-f10", etage: 2, qm: 566, konzept: "eigen", gruppe: "kinder" }, { id: "W089-f11", etage: 2, qm: 1004, konzept: "eigen", gruppe: "sport" }, { id: "W089-f12", etage: 2, qm: 515, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 203447, rohertrag: 85087, konzessionserloes: 0, untermiete: 0, personal: 43783, miete: 49672, nebenkosten: 0, sonstige: 12075, db: -20443, fteBedarf: 41.56703944462395, fteIst: 45.29348812867737, umsatzJeGruppe: { food: 17434, wohnen: 24610, beauty: 36363, accessoires: 30622, damen: 35222, waesche: 12592, herren: 14835, kinder: 9197, sport: 15897, spielwaren: 6676 } } }, { id: "W090", name: "Hartwig Bottrop", stadt: "Bottrop", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1962, fassade: 4, substanz: 45, status: "offen", flaechen: [{ id: "W090-f1", etage: 0, qm: 455, konzept: "eigen", gruppe: "food" }, { id: "W090-f2", etage: 0, qm: 366, konzept: "eigen", gruppe: "beauty" }, { id: "W090-f3", etage: 0, qm: 300, konzept: "eigen", gruppe: "accessoires" }, { id: "W090-f4", etage: 1, qm: 133, konzept: "eigen", gruppe: "accessoires" }, { id: "W090-f5", etage: 1, qm: 985, konzept: "eigen", gruppe: "damen" }, { id: "W090-f6", etage: 1, qm: 2, konzept: "eigen", gruppe: "waesche" }, { id: "W090-f7", etage: 2, qm: 464, konzept: "eigen", gruppe: "waesche" }, { id: "W090-f8", etage: 2, qm: 509, konzept: "eigen", gruppe: "herren" }, { id: "W090-f9", etage: 2, qm: 147, konzept: "eigen", gruppe: "kinder" }, { id: "W090-f10", etage: 3, qm: 324, konzept: "eigen", gruppe: "kinder" }, { id: "W090-f11", etage: 3, qm: 639, konzept: "eigen", gruppe: "sport" }, { id: "W090-f12", etage: 3, qm: 158, konzept: "eigen", gruppe: "spielwaren" }, { id: "W090-f13", etage: 4, qm: 103, konzept: "eigen", gruppe: "spielwaren" }, { id: "W090-f14", etage: 4, qm: 1017, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 138992, rohertrag: 57510, konzessionserloes: 0, untermiete: 0, personal: 34268, miete: 22132, nebenkosten: 6819, sonstige: 8220, db: -13928, fteBedarf: 28.257745128797616, fteIst: 34.92298984870858, umsatzJeGruppe: { food: 15425, beauty: 27777, accessoires: 17366, damen: 19928, waesche: 10777, herren: 9110, kinder: 10219, sport: 9114, spielwaren: 3768, wohnen: 15506 } } }, { id: "W091", name: "Hartwig Reutlingen", stadt: "Reutlingen", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2], baujahr: 1961, fassade: 4, substanz: 70, status: "offen", flaechen: [{ id: "W091-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W091-f2", etage: -1, qm: 1305, konzept: "eigen", gruppe: "wohnen" }, { id: "W091-f3", etage: 0, qm: 346, konzept: "eigen", gruppe: "beauty" }, { id: "W091-f4", etage: 0, qm: 658, konzept: "eigen", gruppe: "accessoires" }, { id: "W091-f5", etage: 0, qm: 821, konzept: "eigen", gruppe: "damen" }, { id: "W091-f6", etage: 1, qm: 812, konzept: "eigen", gruppe: "damen" }, { id: "W091-f7", etage: 1, qm: 548, konzept: "eigen", gruppe: "waesche" }, { id: "W091-f8", etage: 1, qm: 465, konzept: "eigen", gruppe: "herren" }, { id: "W091-f9", etage: 2, qm: 217, konzept: "eigen", gruppe: "herren" }, { id: "W091-f10", etage: 2, qm: 595, konzept: "eigen", gruppe: "kinder" }, { id: "W091-f11", etage: 2, qm: 638, konzept: "eigen", gruppe: "sport" }, { id: "W091-f12", etage: 2, qm: 438, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 184099, rohertrag: 77623, konzessionserloes: 0, untermiete: 0, personal: 45978, miete: 15699, nebenkosten: 9841, sonstige: 10861, db: -4756, fteBedarf: 37.29137562435482, fteIst: 47.13499948950924, umsatzJeGruppe: { food: 21031, wohnen: 20202, beauty: 25356, accessoires: 26480, damen: 36289, waesche: 15953, herren: 14126, kinder: 10446, sport: 9486, spielwaren: 4730 } } }, { id: "W092", name: "Hartwig Erlangen Am Wall", stadt: "Erlangen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1], baujahr: 2001, fassade: 0, substanz: 60, status: "offen", flaechen: [{ id: "W092-f1", etage: -1, qm: 432, konzept: "eigen", gruppe: "food" }, { id: "W092-f2", etage: -1, qm: 2102, konzept: "eigen", gruppe: "wohnen" }, { id: "W092-f3", etage: 0, qm: 366, konzept: "eigen", gruppe: "beauty" }, { id: "W092-f4", etage: 0, qm: 851, konzept: "eigen", gruppe: "accessoires" }, { id: "W092-f5", etage: 0, qm: 1316, konzept: "eigen", gruppe: "damen" }, { id: "W092-f6", etage: 1, qm: 507, konzept: "eigen", gruppe: "damen" }, { id: "W092-f7", etage: 1, qm: 392, konzept: "eigen", gruppe: "waesche" }, { id: "W092-f8", etage: 1, qm: 1113, konzept: "eigen", gruppe: "herren" }, { id: "W092-f9", etage: 1, qm: 1617, konzept: "eigen", gruppe: "kinder" }], kpi: { woche: 2, umsatz: 176118, rohertrag: 75385, konzessionserloes: 0, untermiete: 0, personal: 45543, miete: 18490, nebenkosten: 10572, sonstige: 11134, db: -10354, fteBedarf: 38.91110942200965, fteIst: 46.02220199007599, umsatzJeGruppe: { food: 12785, wohnen: 26662, beauty: 22441, accessoires: 27921, damen: 33587, waesche: 7411, herren: 18684, kinder: 26626 } } }, { id: "W093", name: "Hartwig F\xFCrth Fachmarktzentrum", stadt: "F\xFCrth", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [-1, 0, 1, 2], baujahr: 1900, fassade: 1, substanz: 53, status: "offen", flaechen: [{ id: "W093-f1", etage: -1, qm: 495, konzept: "eigen", gruppe: "food" }, { id: "W093-f2", etage: -1, qm: 1130, konzept: "eigen", gruppe: "wohnen" }, { id: "W093-f3", etage: 0, qm: 430, konzept: "eigen", gruppe: "beauty" }, { id: "W093-f4", etage: 0, qm: 537, konzept: "eigen", gruppe: "accessoires" }, { id: "W093-f5", etage: 0, qm: 659, konzept: "eigen", gruppe: "damen" }, { id: "W093-f6", etage: 1, qm: 359, konzept: "eigen", gruppe: "damen" }, { id: "W093-f7", etage: 1, qm: 405, konzept: "eigen", gruppe: "waesche" }, { id: "W093-f8", etage: 1, qm: 861, konzept: "eigen", gruppe: "herren" }, { id: "W093-f9", etage: 2, qm: 88, konzept: "eigen", gruppe: "herren" }, { id: "W093-f10", etage: 2, qm: 539, konzept: "eigen", gruppe: "kinder" }, { id: "W093-f11", etage: 2, qm: 822, konzept: "eigen", gruppe: "sport" }, { id: "W093-f12", etage: 2, qm: 381, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 115943, rohertrag: 48298, konzessionserloes: 0, untermiete: 0, personal: 34094, miete: 21965, nebenkosten: 0, sonstige: 7771, db: -15532, fteBedarf: 27.641040197921114, fteIst: 34.87133638586731, umsatzJeGruppe: { food: 12466, wohnen: 12492, beauty: 19041, accessoires: 15480, damen: 16212, waesche: 8012, herren: 12194, kinder: 8236, sport: 8286, spielwaren: 3523 } } }, { id: "W094", name: "Hartwig Bamberg", stadt: "Bamberg", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1920, fassade: 1, substanz: 85, status: "offen", flaechen: [{ id: "W094-f1", etage: 0, qm: 568, konzept: "eigen", gruppe: "food" }, { id: "W094-f2", etage: 0, qm: 443, konzept: "eigen", gruppe: "beauty" }, { id: "W094-f3", etage: 0, qm: 628, konzept: "eigen", gruppe: "accessoires" }, { id: "W094-f4", etage: 1, qm: 400, konzept: "eigen", gruppe: "accessoires" }, { id: "W094-f5", etage: 1, qm: 1240, konzept: "eigen", gruppe: "damen" }, { id: "W094-f6", etage: 2, qm: 291, konzept: "eigen", gruppe: "damen" }, { id: "W094-f7", etage: 2, qm: 529, konzept: "eigen", gruppe: "waesche" }, { id: "W094-f8", etage: 2, qm: 820, konzept: "eigen", gruppe: "herren" }, { id: "W094-f9", etage: 3, qm: 128, konzept: "eigen", gruppe: "herren" }, { id: "W094-f10", etage: 3, qm: 537, konzept: "eigen", gruppe: "kinder" }, { id: "W094-f11", etage: 3, qm: 731, konzept: "eigen", gruppe: "sport" }, { id: "W094-f12", etage: 3, qm: 244, konzept: "eigen", gruppe: "spielwaren" }, { id: "W094-f13", etage: 4, qm: 177, konzept: "eigen", gruppe: "spielwaren" }, { id: "W094-f14", etage: 4, qm: 1463, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 268299, rohertrag: 112783, konzessionserloes: 0, untermiete: 0, personal: 52968, miete: 16609, nebenkosten: 8892, sonstige: 14690, db: 19625, fteBedarf: 49.296812978589855, fteIst: 54.445077070060776, umsatzJeGruppe: { food: 24438, beauty: 44625, accessoires: 47129, damen: 39335, waesche: 20350, herren: 23296, kinder: 13532, sport: 14160, spielwaren: 7136, wohnen: 34299 } } }, { id: "W095", name: "Hartwig Bayreuth Gewerbepark", stadt: "Bayreuth", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1956, fassade: 1, substanz: 79, status: "offen", flaechen: [{ id: "W095-f1", etage: 0, qm: 640, konzept: "eigen", gruppe: "food" }, { id: "W095-f2", etage: 0, qm: 439, konzept: "eigen", gruppe: "beauty" }, { id: "W095-f3", etage: 0, qm: 604, konzept: "eigen", gruppe: "accessoires" }, { id: "W095-f4", etage: 0, qm: 166, konzept: "eigen", gruppe: "damen" }, { id: "W095-f5", etage: 1, qm: 1425, konzept: "eigen", gruppe: "damen" }, { id: "W095-f6", etage: 1, qm: 425, konzept: "eigen", gruppe: "waesche" }, { id: "W095-f7", etage: 2, qm: 209, konzept: "eigen", gruppe: "waesche" }, { id: "W095-f8", etage: 2, qm: 881, konzept: "eigen", gruppe: "herren" }, { id: "W095-f9", etage: 2, qm: 640, konzept: "eigen", gruppe: "kinder" }, { id: "W095-f10", etage: 2, qm: 120, konzept: "eigen", gruppe: "sport" }, { id: "W095-f11", etage: 3, qm: 481, konzept: "eigen", gruppe: "sport" }, { id: "W095-f12", etage: 3, qm: 422, konzept: "eigen", gruppe: "spielwaren" }, { id: "W095-f13", etage: 3, qm: 947, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 150166, rohertrag: 62717, konzessionserloes: 0, untermiete: 0, personal: 36268, miete: 15556, nebenkosten: 0, sonstige: 9486, db: 1407, fteBedarf: 33.20495126750215, fteIst: 36.81777817173233, umsatzJeGruppe: { food: 20323, beauty: 22858, accessoires: 19239, damen: 25232, waesche: 12923, herren: 14402, kinder: 9990, sport: 7719, spielwaren: 3720, wohnen: 13761 } } }, { id: "W096", name: "Hartwig Landshut Am Wall", stadt: "Landshut", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2], baujahr: 1995, fassade: 5, substanz: 35, status: "offen", flaechen: [{ id: "W096-f1", etage: -1, qm: 405, konzept: "eigen", gruppe: "food" }, { id: "W096-f2", etage: -1, qm: 1070, konzept: "eigen", gruppe: "wohnen" }, { id: "W096-f3", etage: 0, qm: 426, konzept: "eigen", gruppe: "beauty" }, { id: "W096-f4", etage: 0, qm: 673, konzept: "eigen", gruppe: "accessoires" }, { id: "W096-f5", etage: 0, qm: 376, konzept: "eigen", gruppe: "damen" }, { id: "W096-f6", etage: 1, qm: 768, konzept: "eigen", gruppe: "damen" }, { id: "W096-f7", etage: 1, qm: 339, konzept: "eigen", gruppe: "waesche" }, { id: "W096-f8", etage: 1, qm: 368, konzept: "eigen", gruppe: "herren" }, { id: "W096-f9", etage: 2, qm: 471, konzept: "eigen", gruppe: "herren" }, { id: "W096-f10", etage: 2, qm: 452, konzept: "eigen", gruppe: "kinder" }, { id: "W096-f11", etage: 2, qm: 908, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 135608, rohertrag: 57181, konzessionserloes: 0, untermiete: 0, personal: 35675, miete: 16341, nebenkosten: 7692, sonstige: 8375, db: -10902, fteBedarf: 29.070348033675355, fteIst: 36.679922151243574, umsatzJeGruppe: { food: 12259, wohnen: 12068, beauty: 25503, accessoires: 22572, damen: 22486, waesche: 7059, herren: 16129, kinder: 6548, sport: 10984 } } }, { id: "W097", name: "Hartwig Rosenheim Bahnhofstra\xDFe", stadt: "Rosenheim", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [0, 1, 2, 3], baujahr: 1964, fassade: 1, substanz: 56, status: "offen", flaechen: [{ id: "W097-f1", etage: 0, qm: 458, konzept: "eigen", gruppe: "food" }, { id: "W097-f2", etage: 0, qm: 599, konzept: "eigen", gruppe: "beauty" }, { id: "W097-f3", etage: 0, qm: 745, konzept: "eigen", gruppe: "accessoires" }, { id: "W097-f4", etage: 0, qm: 249, konzept: "eigen", gruppe: "damen" }, { id: "W097-f5", etage: 1, qm: 1369, konzept: "eigen", gruppe: "damen" }, { id: "W097-f6", etage: 1, qm: 498, konzept: "eigen", gruppe: "waesche" }, { id: "W097-f7", etage: 1, qm: 183, konzept: "eigen", gruppe: "herren" }, { id: "W097-f8", etage: 2, qm: 1010, konzept: "eigen", gruppe: "herren" }, { id: "W097-f9", etage: 2, qm: 651, konzept: "eigen", gruppe: "kinder" }, { id: "W097-f10", etage: 2, qm: 390, konzept: "eigen", gruppe: "sport" }, { id: "W097-f11", etage: 3, qm: 413, konzept: "eigen", gruppe: "sport" }, { id: "W097-f12", etage: 3, qm: 536, konzept: "eigen", gruppe: "spielwaren" }, { id: "W097-f13", etage: 3, qm: 1100, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 172862, rohertrag: 72518, konzessionserloes: 0, untermiete: 0, personal: 42004, miete: 25166, nebenkosten: 0, sonstige: 10778, db: -5429, fteBedarf: 37.627392734685365, fteIst: 43.04955422287533, umsatzJeGruppe: { food: 12442, beauty: 40203, accessoires: 20760, damen: 27829, waesche: 10676, herren: 19312, kinder: 9360, sport: 9508, spielwaren: 5179, wohnen: 17593 } } }, { id: "W098", name: "Hartwig Kempten Am Stadtrand", stadt: "Kempten", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1966, fassade: 7, substanz: 32, status: "offen", flaechen: [{ id: "W098-f1", etage: 0, qm: 477, konzept: "eigen", gruppe: "food" }, { id: "W098-f2", etage: 0, qm: 441, konzept: "eigen", gruppe: "beauty" }, { id: "W098-f3", etage: 0, qm: 702, konzept: "eigen", gruppe: "accessoires" }, { id: "W098-f4", etage: 1, qm: 100, konzept: "eigen", gruppe: "accessoires" }, { id: "W098-f5", etage: 1, qm: 1520, konzept: "eigen", gruppe: "damen" }, { id: "W098-f6", etage: 2, qm: 313, konzept: "eigen", gruppe: "damen" }, { id: "W098-f7", etage: 2, qm: 641, konzept: "eigen", gruppe: "waesche" }, { id: "W098-f8", etage: 2, qm: 666, konzept: "eigen", gruppe: "herren" }, { id: "W098-f9", etage: 3, qm: 309, konzept: "eigen", gruppe: "herren" }, { id: "W098-f10", etage: 3, qm: 580, konzept: "eigen", gruppe: "kinder" }, { id: "W098-f11", etage: 3, qm: 635, konzept: "eigen", gruppe: "sport" }, { id: "W098-f12", etage: 3, qm: 97, konzept: "eigen", gruppe: "spielwaren" }, { id: "W098-f13", etage: 4, qm: 340, konzept: "eigen", gruppe: "spielwaren" }, { id: "W098-f14", etage: 4, qm: 1280, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 151465, rohertrag: 64572, konzessionserloes: 0, untermiete: 0, personal: 39328, miete: 23412, nebenkosten: 11264, sonstige: 9856, db: -19288, fteBedarf: 34.75651464344672, fteIst: 39.397004033886304, umsatzJeGruppe: { food: 13541, beauty: 24116, accessoires: 21104, damen: 32554, waesche: 11366, herren: 16363, kinder: 7130, sport: 5118, spielwaren: 3195, wohnen: 16979 } } }, { id: "W099", name: "Hartwig Passau", stadt: "Passau", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3], baujahr: 1983, fassade: 0, substanz: 75, status: "offen", flaechen: [{ id: "W099-f1", etage: 0, qm: 436, konzept: "eigen", gruppe: "food" }, { id: "W099-f2", etage: 0, qm: 364, konzept: "eigen", gruppe: "beauty" }, { id: "W099-f3", etage: 0, qm: 619, konzept: "eigen", gruppe: "accessoires" }, { id: "W099-f4", etage: 0, qm: 306, konzept: "eigen", gruppe: "damen" }, { id: "W099-f5", etage: 1, qm: 1222, konzept: "eigen", gruppe: "damen" }, { id: "W099-f6", etage: 1, qm: 482, konzept: "eigen", gruppe: "waesche" }, { id: "W099-f7", etage: 1, qm: 20, konzept: "eigen", gruppe: "herren" }, { id: "W099-f8", etage: 2, qm: 1049, konzept: "eigen", gruppe: "herren" }, { id: "W099-f9", etage: 2, qm: 531, konzept: "eigen", gruppe: "kinder" }, { id: "W099-f10", etage: 2, qm: 145, konzept: "eigen", gruppe: "sport" }, { id: "W099-f11", etage: 3, qm: 476, konzept: "eigen", gruppe: "sport" }, { id: "W099-f12", etage: 3, qm: 406, konzept: "eigen", gruppe: "spielwaren" }, { id: "W099-f13", etage: 3, qm: 843, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 168057, rohertrag: 71352, konzessionserloes: 0, untermiete: 0, personal: 38638, miete: 20763, nebenkosten: 7255, sonstige: 9995, db: -5300, fteBedarf: 34.41694374425633, fteIst: 39.66429120620631, umsatzJeGruppe: { food: 16196, beauty: 25378, accessoires: 23952, damen: 32460, waesche: 13067, herren: 19659, kinder: 10357, sport: 9127, spielwaren: 4915, wohnen: 12947 } } }, { id: "W100", name: "Hartwig Konstanz Neustadt", stadt: "Konstanz", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1908, fassade: 4, substanz: 51, status: "offen", flaechen: [{ id: "W100-f1", etage: 0, qm: 460, konzept: "eigen", gruppe: "food" }, { id: "W100-f2", etage: 0, qm: 385, konzept: "eigen", gruppe: "beauty" }, { id: "W100-f3", etage: 0, qm: 622, konzept: "eigen", gruppe: "accessoires" }, { id: "W100-f4", etage: 0, qm: 432, konzept: "eigen", gruppe: "damen" }, { id: "W100-f5", etage: 1, qm: 1254, konzept: "eigen", gruppe: "damen" }, { id: "W100-f6", etage: 1, qm: 520, konzept: "eigen", gruppe: "waesche" }, { id: "W100-f7", etage: 1, qm: 126, konzept: "eigen", gruppe: "herren" }, { id: "W100-f8", etage: 2, qm: 708, konzept: "eigen", gruppe: "herren" }, { id: "W100-f9", etage: 2, qm: 584, konzept: "eigen", gruppe: "kinder" }, { id: "W100-f10", etage: 2, qm: 607, konzept: "eigen", gruppe: "sport" }, { id: "W100-f11", etage: 3, qm: 82, konzept: "eigen", gruppe: "sport" }, { id: "W100-f12", etage: 3, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W100-f13", etage: 3, qm: 1393, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 171450, rohertrag: 72427, konzessionserloes: 0, untermiete: 0, personal: 43520, miete: 24528, nebenkosten: 9868, sonstige: 10449, db: -15938, fteBedarf: 36.25351399451973, fteIst: 45.03906490261539, umsatzJeGruppe: { food: 13776, beauty: 30009, accessoires: 19457, damen: 34149, waesche: 11361, herren: 18758, kinder: 9128, sport: 10612, spielwaren: 5991, wohnen: 18209 } } }, { id: "W101", name: "Hartwig Esslingen", stadt: "Esslingen", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1], baujahr: 1966, fassade: 6, substanz: 66, status: "offen", flaechen: [{ id: "W101-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W101-f2", etage: -1, qm: 2513, konzept: "eigen", gruppe: "wohnen" }, { id: "W101-f3", etage: 0, qm: 626, konzept: "eigen", gruppe: "beauty" }, { id: "W101-f4", etage: 0, qm: 1087, konzept: "eigen", gruppe: "accessoires" }, { id: "W101-f5", etage: 0, qm: 1320, konzept: "eigen", gruppe: "damen" }, { id: "W101-f6", etage: 1, qm: 444, konzept: "eigen", gruppe: "damen" }, { id: "W101-f7", etage: 1, qm: 769, konzept: "eigen", gruppe: "waesche" }, { id: "W101-f8", etage: 1, qm: 874, konzept: "eigen", gruppe: "herren" }, { id: "W101-f9", etage: 1, qm: 789, konzept: "eigen", gruppe: "kinder" }, { id: "W101-f10", etage: 1, qm: 1251, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 268700, rohertrag: 113360, konzessionserloes: 0, untermiete: 0, personal: 60361, miete: 28560, nebenkosten: 11774, sonstige: 15604, db: -2938, fteBedarf: 53.19083552355613, fteIst: 61.93458171953874, umsatzJeGruppe: { food: 19027, wohnen: 45331, beauty: 48759, accessoires: 46243, damen: 36138, waesche: 21425, herren: 20922, kinder: 14119, sport: 16737 } } }, { id: "W102", name: "Hartwig Ludwigsburg Bahnhofstra\xDFe", stadt: "Ludwigsburg", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1992, fassade: 6, substanz: 81, status: "offen", flaechen: [{ id: "W102-f1", etage: 0, qm: 511, konzept: "eigen", gruppe: "food" }, { id: "W102-f2", etage: 0, qm: 486, konzept: "eigen", gruppe: "beauty" }, { id: "W102-f3", etage: 0, qm: 423, konzept: "eigen", gruppe: "accessoires" }, { id: "W102-f4", etage: 1, qm: 301, konzept: "eigen", gruppe: "accessoires" }, { id: "W102-f5", etage: 1, qm: 1119, konzept: "eigen", gruppe: "damen" }, { id: "W102-f6", etage: 2, qm: 206, konzept: "eigen", gruppe: "damen" }, { id: "W102-f7", etage: 2, qm: 419, konzept: "eigen", gruppe: "waesche" }, { id: "W102-f8", etage: 2, qm: 795, konzept: "eigen", gruppe: "herren" }, { id: "W102-f9", etage: 3, qm: 127, konzept: "eigen", gruppe: "herren" }, { id: "W102-f10", etage: 3, qm: 484, konzept: "eigen", gruppe: "kinder" }, { id: "W102-f11", etage: 3, qm: 616, konzept: "eigen", gruppe: "sport" }, { id: "W102-f12", etage: 3, qm: 192, konzept: "eigen", gruppe: "spielwaren" }, { id: "W102-f13", etage: 4, qm: 187, konzept: "eigen", gruppe: "spielwaren" }, { id: "W102-f14", etage: 4, qm: 1233, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 142135, rohertrag: 59992, konzessionserloes: 0, untermiete: 0, personal: 39428, miete: 16603, nebenkosten: 9144, sonstige: 9022, db: -14205, fteBedarf: 31.62373885682738, fteIst: 40.51818469564541, umsatzJeGruppe: { food: 13624, beauty: 25358, accessoires: 19871, damen: 25542, waesche: 8860, herren: 17460, kinder: 7348, sport: 5467, spielwaren: 3507, wohnen: 15100 } } }, { id: "W103", name: "Hartwig T\xFCbingen Gewerbepark", stadt: "T\xFCbingen", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1], baujahr: 1985, fassade: 7, substanz: 42, status: "offen", flaechen: [{ id: "W103-f1", etage: -1, qm: 459, konzept: "eigen", gruppe: "food" }, { id: "W103-f2", etage: -1, qm: 1374, konzept: "eigen", gruppe: "wohnen" }, { id: "W103-f3", etage: 0, qm: 329, konzept: "eigen", gruppe: "beauty" }, { id: "W103-f4", etage: 0, qm: 616, konzept: "eigen", gruppe: "accessoires" }, { id: "W103-f5", etage: 0, qm: 888, konzept: "eigen", gruppe: "damen" }, { id: "W103-f6", etage: 1, qm: 477, konzept: "eigen", gruppe: "damen" }, { id: "W103-f7", etage: 1, qm: 393, konzept: "eigen", gruppe: "waesche" }, { id: "W103-f8", etage: 1, qm: 589, konzept: "eigen", gruppe: "herren" }, { id: "W103-f9", etage: 1, qm: 325, konzept: "eigen", gruppe: "kinder" }, { id: "W103-f10", etage: 1, qm: 778, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 132568, rohertrag: 55834, konzessionserloes: 0, untermiete: 0, personal: 32193, miete: 16625, nebenkosten: 7770, sonstige: 8238, db: -8993, fteBedarf: 28.63271004794145, fteIst: 33.015858727339364, umsatzJeGruppe: { food: 12932, wohnen: 21452, beauty: 21428, accessoires: 19338, damen: 23366, waesche: 10401, herren: 10385, kinder: 4764, sport: 8500 } } }, { id: "W104", name: "Hartwig Gie\xDFen Am Wall", stadt: "Gie\xDFen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2], baujahr: 2003, fassade: 6, substanz: 55, status: "offen", flaechen: [{ id: "W104-f1", etage: -1, qm: 358, konzept: "eigen", gruppe: "food" }, { id: "W104-f2", etage: -1, qm: 917, konzept: "eigen", gruppe: "wohnen" }, { id: "W104-f3", etage: 0, qm: 359, konzept: "eigen", gruppe: "beauty" }, { id: "W104-f4", etage: 0, qm: 493, konzept: "eigen", gruppe: "accessoires" }, { id: "W104-f5", etage: 0, qm: 423, konzept: "eigen", gruppe: "damen" }, { id: "W104-f6", etage: 1, qm: 476, konzept: "eigen", gruppe: "damen" }, { id: "W104-f7", etage: 1, qm: 374, konzept: "eigen", gruppe: "waesche" }, { id: "W104-f8", etage: 1, qm: 425, konzept: "eigen", gruppe: "herren" }, { id: "W104-f9", etage: 2, qm: 171, konzept: "eigen", gruppe: "herren" }, { id: "W104-f10", etage: 2, qm: 361, konzept: "eigen", gruppe: "kinder" }, { id: "W104-f11", etage: 2, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W104-f12", etage: 2, qm: 357, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 113296, rohertrag: 47363, konzessionserloes: 0, untermiete: 0, personal: 26641, miete: 25935, nebenkosten: 0, sonstige: 7061, db: -12274, fteBedarf: 24.638005707066768, fteIst: 27.111889263397853, umsatzJeGruppe: { food: 10242, wohnen: 14637, beauty: 18883, accessoires: 16279, damen: 17994, waesche: 7895, herren: 8934, kinder: 6255, sport: 8739, spielwaren: 3439 } } }, { id: "W105", name: "Hartwig Marburg Bahnhofstra\xDFe", stadt: "Marburg", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1], baujahr: 1993, fassade: 1, substanz: 69, status: "offen", flaechen: [{ id: "W105-f1", etage: -1, qm: 811, konzept: "eigen", gruppe: "food" }, { id: "W105-f2", etage: -1, qm: 2189, konzept: "eigen", gruppe: "wohnen" }, { id: "W105-f3", etage: 0, qm: 653, konzept: "eigen", gruppe: "beauty" }, { id: "W105-f4", etage: 0, qm: 970, konzept: "eigen", gruppe: "accessoires" }, { id: "W105-f5", etage: 0, qm: 1377, konzept: "eigen", gruppe: "damen" }, { id: "W105-f6", etage: 1, qm: 256, konzept: "eigen", gruppe: "damen" }, { id: "W105-f7", etage: 1, qm: 497, konzept: "eigen", gruppe: "waesche" }, { id: "W105-f8", etage: 1, qm: 1277, konzept: "eigen", gruppe: "herren" }, { id: "W105-f9", etage: 1, qm: 697, konzept: "eigen", gruppe: "kinder" }, { id: "W105-f10", etage: 1, qm: 1385, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 232639, rohertrag: 96259, konzessionserloes: 0, untermiete: 0, personal: 54606, miete: 42301, nebenkosten: 13243, sonstige: 14089, db: -27980, fteBedarf: 48.61394990938224, fteIst: 55.60839542009545, umsatzJeGruppe: { food: 30929, wohnen: 33251, beauty: 35676, accessoires: 32234, damen: 34786, waesche: 11022, herren: 23098, kinder: 13222, sport: 18419 } } }, { id: "W106", name: "Hartwig Fulda Lindenstra\xDFe", stadt: "Fulda", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [0, 1, 2], baujahr: 1963, fassade: 0, substanz: 55, status: "offen", flaechen: [{ id: "W106-f1", etage: 0, qm: 584, konzept: "eigen", gruppe: "food" }, { id: "W106-f2", etage: 0, qm: 458, konzept: "eigen", gruppe: "beauty" }, { id: "W106-f3", etage: 0, qm: 776, konzept: "eigen", gruppe: "accessoires" }, { id: "W106-f4", etage: 0, qm: 715, konzept: "eigen", gruppe: "damen" }, { id: "W106-f5", etage: 1, qm: 696, konzept: "eigen", gruppe: "damen" }, { id: "W106-f6", etage: 1, qm: 546, konzept: "eigen", gruppe: "waesche" }, { id: "W106-f7", etage: 1, qm: 968, konzept: "eigen", gruppe: "herren" }, { id: "W106-f8", etage: 1, qm: 323, konzept: "eigen", gruppe: "kinder" }, { id: "W106-f9", etage: 2, qm: 301, konzept: "eigen", gruppe: "kinder" }, { id: "W106-f10", etage: 2, qm: 670, konzept: "eigen", gruppe: "sport" }, { id: "W106-f11", etage: 2, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W106-f12", etage: 2, qm: 1138, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 161788, rohertrag: 67372, konzessionserloes: 0, untermiete: 0, personal: 37421, miete: 20102, nebenkosten: 9683, sonstige: 10053, db: -9887, fteBedarf: 35.03601353250928, fteIst: 38.30472747897493, umsatzJeGruppe: { food: 20050, beauty: 26395, accessoires: 24546, damen: 23090, waesche: 11676, herren: 16069, kinder: 9006, sport: 7148, spielwaren: 4286, wohnen: 19522 } } }, { id: "W107", name: "Hartwig Hanau Am Wall", stadt: "Hanau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2], baujahr: 1986, fassade: 3, substanz: 85, status: "offen", flaechen: [{ id: "W107-f1", etage: 0, qm: 311, konzept: "eigen", gruppe: "food" }, { id: "W107-f2", etage: 0, qm: 371, konzept: "eigen", gruppe: "beauty" }, { id: "W107-f3", etage: 0, qm: 529, konzept: "eigen", gruppe: "accessoires" }, { id: "W107-f4", etage: 0, qm: 689, konzept: "eigen", gruppe: "damen" }, { id: "W107-f5", etage: 1, qm: 410, konzept: "eigen", gruppe: "damen" }, { id: "W107-f6", etage: 1, qm: 472, konzept: "eigen", gruppe: "waesche" }, { id: "W107-f7", etage: 1, qm: 686, konzept: "eigen", gruppe: "herren" }, { id: "W107-f8", etage: 1, qm: 331, konzept: "eigen", gruppe: "kinder" }, { id: "W107-f9", etage: 2, qm: 28, konzept: "eigen", gruppe: "kinder" }, { id: "W107-f10", etage: 2, qm: 591, konzept: "eigen", gruppe: "sport" }, { id: "W107-f11", etage: 2, qm: 273, konzept: "eigen", gruppe: "spielwaren" }, { id: "W107-f12", etage: 2, qm: 1007, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 130679, rohertrag: 55327, konzessionserloes: 0, untermiete: 0, personal: 32301, miete: 19071, nebenkosten: 8230, sonstige: 7922, db: -12196, fteBedarf: 27.404696713077392, fteIst: 33.009344199434615, umsatzJeGruppe: { food: 12470, beauty: 23904, accessoires: 16921, damen: 25485, waesche: 12274, herren: 11806, kinder: 5151, sport: 6282, spielwaren: 2702, wohnen: 13684 } } }, { id: "W108", name: "Hartwig Wetzlar Neustadt", stadt: "Wetzlar", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1929, fassade: 2, substanz: 89, status: "offen", flaechen: [{ id: "W108-f1", etage: -1, qm: 432, konzept: "eigen", gruppe: "food" }, { id: "W108-f2", etage: -1, qm: 808, konzept: "eigen", gruppe: "wohnen" }, { id: "W108-f3", etage: 0, qm: 303, konzept: "eigen", gruppe: "beauty" }, { id: "W108-f4", etage: 0, qm: 714, konzept: "eigen", gruppe: "accessoires" }, { id: "W108-f5", etage: 0, qm: 223, konzept: "eigen", gruppe: "damen" }, { id: "W108-f6", etage: 1, qm: 832, konzept: "eigen", gruppe: "damen" }, { id: "W108-f7", etage: 1, qm: 371, konzept: "eigen", gruppe: "waesche" }, { id: "W108-f8", etage: 1, qm: 37, konzept: "eigen", gruppe: "herren" }, { id: "W108-f9", etage: 2, qm: 843, konzept: "eigen", gruppe: "herren" }, { id: "W108-f10", etage: 2, qm: 397, konzept: "eigen", gruppe: "kinder" }, { id: "W108-f11", etage: 3, qm: 103, konzept: "eigen", gruppe: "kinder" }, { id: "W108-f12", etage: 3, qm: 809, konzept: "eigen", gruppe: "sport" }, { id: "W108-f13", etage: 3, qm: 298, konzept: "eigen", gruppe: "spielwaren" }, { id: "W108-f14", etage: 3, qm: 29, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 138196, rohertrag: 58235, konzessionserloes: 0, untermiete: 0, personal: 36626, miete: 9469, nebenkosten: 8240, sonstige: 8456, db: -4557, fteBedarf: 29.324977527408173, fteIst: 37.26392954841004, umsatzJeGruppe: { food: 15379, wohnen: 12081, beauty: 17155, accessoires: 28179, damen: 18571, waesche: 10009, herren: 16322, kinder: 7504, sport: 9968, spielwaren: 3028 } } }, { id: "W109", name: "Hartwig L\xFCneburg City-Center", stadt: "L\xFCneburg", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1], baujahr: 1910, fassade: 2, substanz: 85, status: "offen", flaechen: [{ id: "W109-f1", etage: -1, qm: 512, konzept: "eigen", gruppe: "food" }, { id: "W109-f2", etage: -1, qm: 1722, konzept: "eigen", gruppe: "wohnen" }, { id: "W109-f3", etage: 0, qm: 357, konzept: "eigen", gruppe: "beauty" }, { id: "W109-f4", etage: 0, qm: 712, konzept: "eigen", gruppe: "accessoires" }, { id: "W109-f5", etage: 0, qm: 1165, konzept: "eigen", gruppe: "damen" }, { id: "W109-f6", etage: 1, qm: 205, konzept: "eigen", gruppe: "damen" }, { id: "W109-f7", etage: 1, qm: 589, konzept: "eigen", gruppe: "waesche" }, { id: "W109-f8", etage: 1, qm: 773, konzept: "eigen", gruppe: "herren" }, { id: "W109-f9", etage: 1, qm: 454, konzept: "eigen", gruppe: "kinder" }, { id: "W109-f10", etage: 1, qm: 1146, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 170160, rohertrag: 71429, konzessionserloes: 0, untermiete: 0, personal: 44227, miete: 32689, nebenkosten: 0, sonstige: 10412, db: -15900, fteBedarf: 36.03153607851873, fteIst: 45.667466054187166, umsatzJeGruppe: { food: 18596, wohnen: 25781, beauty: 23257, accessoires: 25451, damen: 25213, waesche: 16003, herren: 13352, kinder: 7878, sport: 14630 } } }, { id: "W110", name: "Hartwig Celle", stadt: "Celle", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 2001, fassade: 7, substanz: 59, status: "offen", flaechen: [{ id: "W110-f1", etage: 0, qm: 477, konzept: "eigen", gruppe: "food" }, { id: "W110-f2", etage: 0, qm: 445, konzept: "eigen", gruppe: "beauty" }, { id: "W110-f3", etage: 0, qm: 518, konzept: "eigen", gruppe: "accessoires" }, { id: "W110-f4", etage: 1, qm: 320, konzept: "eigen", gruppe: "accessoires" }, { id: "W110-f5", etage: 1, qm: 1120, konzept: "eigen", gruppe: "damen" }, { id: "W110-f6", etage: 2, qm: 421, konzept: "eigen", gruppe: "damen" }, { id: "W110-f7", etage: 2, qm: 559, konzept: "eigen", gruppe: "waesche" }, { id: "W110-f8", etage: 2, qm: 460, konzept: "eigen", gruppe: "herren" }, { id: "W110-f9", etage: 3, qm: 182, konzept: "eigen", gruppe: "herren" }, { id: "W110-f10", etage: 3, qm: 579, konzept: "eigen", gruppe: "kinder" }, { id: "W110-f11", etage: 3, qm: 661, konzept: "eigen", gruppe: "sport" }, { id: "W110-f12", etage: 3, qm: 18, konzept: "eigen", gruppe: "spielwaren" }, { id: "W110-f13", etage: 4, qm: 319, konzept: "eigen", gruppe: "spielwaren" }, { id: "W110-f14", etage: 4, qm: 1121, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 182052, rohertrag: 77144, konzessionserloes: 0, untermiete: 0, personal: 46445, miete: 27904, nebenkosten: 10692, sonstige: 10704, db: -18602, fteBedarf: 36.712401339758976, fteIst: 48.04042953192403, umsatzJeGruppe: { food: 15054, beauty: 32807, accessoires: 28184, damen: 34544, waesche: 14e3, herren: 14883, kinder: 11038, sport: 7664, spielwaren: 3945, wohnen: 19932 } } }, { id: "W111", name: "Hartwig Flensburg", stadt: "Flensburg", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [0, 1, 2], baujahr: 1918, fassade: 6, substanz: 86, status: "offen", flaechen: [{ id: "W111-f1", etage: 0, qm: 431, konzept: "eigen", gruppe: "food" }, { id: "W111-f2", etage: 0, qm: 476, konzept: "eigen", gruppe: "beauty" }, { id: "W111-f3", etage: 0, qm: 684, konzept: "eigen", gruppe: "accessoires" }, { id: "W111-f4", etage: 0, qm: 909, konzept: "eigen", gruppe: "damen" }, { id: "W111-f5", etage: 1, qm: 709, konzept: "eigen", gruppe: "damen" }, { id: "W111-f6", etage: 1, qm: 442, konzept: "eigen", gruppe: "waesche" }, { id: "W111-f7", etage: 1, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W111-f8", etage: 1, qm: 249, konzept: "eigen", gruppe: "kinder" }, { id: "W111-f9", etage: 2, qm: 296, konzept: "eigen", gruppe: "kinder" }, { id: "W111-f10", etage: 2, qm: 631, konzept: "eigen", gruppe: "sport" }, { id: "W111-f11", etage: 2, qm: 480, konzept: "eigen", gruppe: "spielwaren" }, { id: "W111-f12", etage: 2, qm: 1093, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 220657, rohertrag: 93663, konzessionserloes: 0, untermiete: 0, personal: 50720, miete: 26179, nebenkosten: 10981, sonstige: 12422, db: -6639, fteBedarf: 42.090746407091515, fteIst: 50.91814237491502, umsatzJeGruppe: { food: 19106, beauty: 39593, accessoires: 32186, damen: 42335, waesche: 14837, herren: 28404, kinder: 9050, sport: 9281, spielwaren: 7214, wohnen: 18652 } } }, { id: "W112", name: "Hartwig Neum\xFCnster Ring", stadt: "Neum\xFCnster", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1959, fassade: 7, substanz: 52, status: "offen", flaechen: [{ id: "W112-f1", etage: -1, qm: 522, konzept: "eigen", gruppe: "food" }, { id: "W112-f2", etage: -1, qm: 1018, konzept: "eigen", gruppe: "wohnen" }, { id: "W112-f3", etage: 0, qm: 445, konzept: "eigen", gruppe: "beauty" }, { id: "W112-f4", etage: 0, qm: 654, konzept: "eigen", gruppe: "accessoires" }, { id: "W112-f5", etage: 0, qm: 441, konzept: "eigen", gruppe: "damen" }, { id: "W112-f6", etage: 1, qm: 1330, konzept: "eigen", gruppe: "damen" }, { id: "W112-f7", etage: 1, qm: 210, konzept: "eigen", gruppe: "waesche" }, { id: "W112-f8", etage: 2, qm: 433, konzept: "eigen", gruppe: "waesche" }, { id: "W112-f9", etage: 2, qm: 759, konzept: "eigen", gruppe: "herren" }, { id: "W112-f10", etage: 2, qm: 348, konzept: "eigen", gruppe: "kinder" }, { id: "W112-f11", etage: 3, qm: 286, konzept: "eigen", gruppe: "kinder" }, { id: "W112-f12", etage: 3, qm: 917, konzept: "eigen", gruppe: "sport" }, { id: "W112-f13", etage: 3, qm: 447, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 134600, rohertrag: 57144, konzessionserloes: 0, untermiete: 0, personal: 38224, miete: 20427, nebenkosten: 9839, sonstige: 9033, db: -20378, fteBedarf: 32.150787234537454, fteIst: 38.7976552495561, umsatzJeGruppe: { food: 11377, wohnen: 12998, beauty: 19827, accessoires: 16697, damen: 29307, waesche: 12496, herren: 9154, kinder: 9116, sport: 8923, spielwaren: 4705 } } }, { id: "W113", name: "Hartwig Stralsund", stadt: "Stralsund", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1957, fassade: 5, substanz: 89, status: "offen", flaechen: [{ id: "W113-f1", etage: 0, qm: 451, konzept: "eigen", gruppe: "food" }, { id: "W113-f2", etage: 0, qm: 301, konzept: "eigen", gruppe: "beauty" }, { id: "W113-f3", etage: 0, qm: 447, konzept: "eigen", gruppe: "accessoires" }, { id: "W113-f4", etage: 1, qm: 227, konzept: "eigen", gruppe: "accessoires" }, { id: "W113-f5", etage: 1, qm: 973, konzept: "eigen", gruppe: "damen" }, { id: "W113-f6", etage: 2, qm: 238, konzept: "eigen", gruppe: "damen" }, { id: "W113-f7", etage: 2, qm: 504, konzept: "eigen", gruppe: "waesche" }, { id: "W113-f8", etage: 2, qm: 458, konzept: "eigen", gruppe: "herren" }, { id: "W113-f9", etage: 3, qm: 206, konzept: "eigen", gruppe: "herren" }, { id: "W113-f10", etage: 3, qm: 495, konzept: "eigen", gruppe: "kinder" }, { id: "W113-f11", etage: 3, qm: 499, konzept: "eigen", gruppe: "sport" }, { id: "W113-f12", etage: 4, qm: 163, konzept: "eigen", gruppe: "sport" }, { id: "W113-f13", etage: 4, qm: 296, konzept: "eigen", gruppe: "spielwaren" }, { id: "W113-f14", etage: 4, qm: 741, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 163894, rohertrag: 69621, konzessionserloes: 0, untermiete: 0, personal: 40625, miete: 16371, nebenkosten: 6019, sonstige: 9419, db: -2813, fteBedarf: 32.07715791461758, fteIst: 40.82268437451354, umsatzJeGruppe: { food: 16665, beauty: 21002, accessoires: 29219, damen: 32240, waesche: 13882, herren: 13477, kinder: 8825, sport: 10603, spielwaren: 3730, wohnen: 14251 } } }, { id: "W114", name: "Hartwig Schwerin", stadt: "Schwerin", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1983, fassade: 4, substanz: 70, status: "offen", flaechen: [{ id: "W114-f1", etage: 0, qm: 543, konzept: "eigen", gruppe: "food" }, { id: "W114-f2", etage: 0, qm: 602, konzept: "eigen", gruppe: "beauty" }, { id: "W114-f3", etage: 0, qm: 495, konzept: "eigen", gruppe: "accessoires" }, { id: "W114-f4", etage: 1, qm: 471, konzept: "eigen", gruppe: "accessoires" }, { id: "W114-f5", etage: 1, qm: 1169, konzept: "eigen", gruppe: "damen" }, { id: "W114-f6", etage: 2, qm: 112, konzept: "eigen", gruppe: "damen" }, { id: "W114-f7", etage: 2, qm: 514, konzept: "eigen", gruppe: "waesche" }, { id: "W114-f8", etage: 2, qm: 823, konzept: "eigen", gruppe: "herren" }, { id: "W114-f9", etage: 2, qm: 192, konzept: "eigen", gruppe: "kinder" }, { id: "W114-f10", etage: 3, qm: 462, konzept: "eigen", gruppe: "kinder" }, { id: "W114-f11", etage: 3, qm: 788, konzept: "eigen", gruppe: "sport" }, { id: "W114-f12", etage: 3, qm: 389, konzept: "eigen", gruppe: "spielwaren" }, { id: "W114-f13", etage: 4, qm: 86, konzept: "eigen", gruppe: "spielwaren" }, { id: "W114-f14", etage: 4, qm: 1554, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 242307, rohertrag: 101995, konzessionserloes: 0, untermiete: 0, personal: 54044, miete: 20752, nebenkosten: 9732, sonstige: 13625, db: 3842, fteBedarf: 46.12401705766281, fteIst: 54.68752297695232, umsatzJeGruppe: { food: 20071, beauty: 42312, accessoires: 39948, damen: 36396, waesche: 18056, herren: 21326, kinder: 13867, sport: 11010, spielwaren: 6784, wohnen: 32538 } } }, { id: "W115", name: "Hartwig Zwickau Neustadt", stadt: "Zwickau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1918, fassade: 5, substanz: 42, status: "offen", flaechen: [{ id: "W115-f1", etage: 0, qm: 461, konzept: "eigen", gruppe: "food" }, { id: "W115-f2", etage: 0, qm: 371, konzept: "eigen", gruppe: "beauty" }, { id: "W115-f3", etage: 0, qm: 668, konzept: "eigen", gruppe: "accessoires" }, { id: "W115-f4", etage: 1, qm: 96, konzept: "eigen", gruppe: "accessoires" }, { id: "W115-f5", etage: 1, qm: 1404, konzept: "eigen", gruppe: "damen" }, { id: "W115-f6", etage: 2, qm: 140, konzept: "eigen", gruppe: "damen" }, { id: "W115-f7", etage: 2, qm: 435, konzept: "eigen", gruppe: "waesche" }, { id: "W115-f8", etage: 2, qm: 925, konzept: "eigen", gruppe: "herren" }, { id: "W115-f9", etage: 3, qm: 88, konzept: "eigen", gruppe: "herren" }, { id: "W115-f10", etage: 3, qm: 701, konzept: "eigen", gruppe: "kinder" }, { id: "W115-f11", etage: 3, qm: 710, konzept: "eigen", gruppe: "sport" }, { id: "W115-f12", etage: 4, qm: 181, konzept: "eigen", gruppe: "sport" }, { id: "W115-f13", etage: 4, qm: 391, konzept: "eigen", gruppe: "spielwaren" }, { id: "W115-f14", etage: 4, qm: 928, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 135987, rohertrag: 57321, konzessionserloes: 0, untermiete: 0, personal: 39126, miete: 25960, nebenkosten: 8991, sonstige: 8950, db: -25706, fteBedarf: 31.69334209857719, fteIst: 40.26825628480668, umsatzJeGruppe: { food: 12e3, beauty: 20004, accessoires: 21152, damen: 21948, waesche: 8453, herren: 15178, kinder: 10264, sport: 8932, spielwaren: 4423, wohnen: 13631 } } }, { id: "W116", name: "Hartwig G\xF6rlitz Neustadt", stadt: "G\xF6rlitz", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1962, fassade: 7, substanz: 32, status: "offen", flaechen: [{ id: "W116-f1", etage: 0, qm: 439, konzept: "eigen", gruppe: "food" }, { id: "W116-f2", etage: 0, qm: 324, konzept: "eigen", gruppe: "beauty" }, { id: "W116-f3", etage: 0, qm: 517, konzept: "eigen", gruppe: "accessoires" }, { id: "W116-f4", etage: 1, qm: 27, konzept: "eigen", gruppe: "accessoires" }, { id: "W116-f5", etage: 1, qm: 1253, konzept: "eigen", gruppe: "damen" }, { id: "W116-f6", etage: 2, qm: 545, konzept: "eigen", gruppe: "waesche" }, { id: "W116-f7", etage: 2, qm: 735, konzept: "eigen", gruppe: "herren" }, { id: "W116-f8", etage: 3, qm: 48, konzept: "eigen", gruppe: "herren" }, { id: "W116-f9", etage: 3, qm: 543, konzept: "eigen", gruppe: "kinder" }, { id: "W116-f10", etage: 3, qm: 625, konzept: "eigen", gruppe: "sport" }, { id: "W116-f11", etage: 3, qm: 63, konzept: "eigen", gruppe: "spielwaren" }, { id: "W116-f12", etage: 4, qm: 373, konzept: "eigen", gruppe: "spielwaren" }, { id: "W116-f13", etage: 4, qm: 907, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 111334, rohertrag: 46987, konzessionserloes: 0, untermiete: 0, personal: 29518, miete: 13145, nebenkosten: 9244, sonstige: 7444, db: -12364, fteBedarf: 26.476304085586563, fteIst: 29.653068201935838, umsatzJeGruppe: { food: 11123, beauty: 14615, accessoires: 14563, damen: 19915, waesche: 8447, herren: 12787, kinder: 7226, sport: 6562, spielwaren: 4319, wohnen: 11778 } } }, { id: "W117", name: "Hartwig Dessau Ring", stadt: "Dessau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1993, fassade: 7, substanz: 53, status: "offen", flaechen: [{ id: "W117-f1", etage: 0, qm: 383, konzept: "eigen", gruppe: "food" }, { id: "W117-f2", etage: 0, qm: 390, konzept: "eigen", gruppe: "beauty" }, { id: "W117-f3", etage: 0, qm: 467, konzept: "eigen", gruppe: "accessoires" }, { id: "W117-f4", etage: 1, qm: 94, konzept: "eigen", gruppe: "accessoires" }, { id: "W117-f5", etage: 1, qm: 1146, konzept: "eigen", gruppe: "damen" }, { id: "W117-f6", etage: 2, qm: 275, konzept: "eigen", gruppe: "damen" }, { id: "W117-f7", etage: 2, qm: 327, konzept: "eigen", gruppe: "waesche" }, { id: "W117-f8", etage: 2, qm: 638, konzept: "eigen", gruppe: "herren" }, { id: "W117-f9", etage: 3, qm: 166, konzept: "eigen", gruppe: "herren" }, { id: "W117-f10", etage: 3, qm: 502, konzept: "eigen", gruppe: "kinder" }, { id: "W117-f11", etage: 3, qm: 572, konzept: "eigen", gruppe: "sport" }, { id: "W117-f12", etage: 4, qm: 73, konzept: "eigen", gruppe: "sport" }, { id: "W117-f13", etage: 4, qm: 401, konzept: "eigen", gruppe: "spielwaren" }, { id: "W117-f14", etage: 4, qm: 766, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 124090, rohertrag: 52439, konzessionserloes: 0, untermiete: 0, personal: 34531, miete: 15509, nebenkosten: 7810, sonstige: 7878, db: -13288, fteBedarf: 27.63489178230885, fteIst: 35.41967988039547, umsatzJeGruppe: { food: 11276, beauty: 21149, accessoires: 15289, damen: 27505, waesche: 6286, herren: 13045, kinder: 8891, sport: 6826, spielwaren: 3889, wohnen: 9934 } } }, { id: "W118", name: "Hartwig Gera Bahnhofstra\xDFe", stadt: "Gera", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1700, etagen: [-1, 0, 1, 2], baujahr: 1959, fassade: 1, substanz: 80, status: "offen", flaechen: [{ id: "W118-f1", etage: -1, qm: 467, konzept: "eigen", gruppe: "food" }, { id: "W118-f2", etage: -1, qm: 1208, konzept: "eigen", gruppe: "wohnen" }, { id: "W118-f3", etage: 0, qm: 464, konzept: "eigen", gruppe: "beauty" }, { id: "W118-f4", etage: 0, qm: 740, konzept: "eigen", gruppe: "accessoires" }, { id: "W118-f5", etage: 0, qm: 470, konzept: "eigen", gruppe: "damen" }, { id: "W118-f6", etage: 1, qm: 638, konzept: "eigen", gruppe: "damen" }, { id: "W118-f7", etage: 1, qm: 487, konzept: "eigen", gruppe: "waesche" }, { id: "W118-f8", etage: 1, qm: 550, konzept: "eigen", gruppe: "herren" }, { id: "W118-f9", etage: 2, qm: 281, konzept: "eigen", gruppe: "herren" }, { id: "W118-f10", etage: 2, qm: 556, konzept: "eigen", gruppe: "kinder" }, { id: "W118-f11", etage: 2, qm: 780, konzept: "eigen", gruppe: "sport" }, { id: "W118-f12", etage: 2, qm: 421, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 127654, rohertrag: 53638, konzessionserloes: 0, untermiete: 0, personal: 32715, miete: 17690, nebenkosten: 8815, sonstige: 8412, db: -13993, fteBedarf: 29.78830284208975, fteIst: 33.84594612605813, umsatzJeGruppe: { food: 11876, wohnen: 15828, beauty: 19681, accessoires: 19148, damen: 17799, waesche: 10501, herren: 13650, kinder: 6855, sport: 8321, spielwaren: 3994 } } }, { id: "W119", name: "Hartwig Weimar Lindenstra\xDFe", stadt: "Weimar", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1918, fassade: 0, substanz: 32, status: "offen", flaechen: [{ id: "W119-f1", etage: 0, qm: 368, konzept: "eigen", gruppe: "food" }, { id: "W119-f2", etage: 0, qm: 465, konzept: "eigen", gruppe: "beauty" }, { id: "W119-f3", etage: 0, qm: 775, konzept: "eigen", gruppe: "accessoires" }, { id: "W119-f4", etage: 0, qm: 243, konzept: "eigen", gruppe: "damen" }, { id: "W119-f5", etage: 1, qm: 1442, konzept: "eigen", gruppe: "damen" }, { id: "W119-f6", etage: 1, qm: 408, konzept: "eigen", gruppe: "waesche" }, { id: "W119-f7", etage: 2, qm: 179, konzept: "eigen", gruppe: "waesche" }, { id: "W119-f8", etage: 2, qm: 972, konzept: "eigen", gruppe: "herren" }, { id: "W119-f9", etage: 2, qm: 401, konzept: "eigen", gruppe: "kinder" }, { id: "W119-f10", etage: 2, qm: 298, konzept: "eigen", gruppe: "sport" }, { id: "W119-f11", etage: 3, qm: 367, konzept: "eigen", gruppe: "sport" }, { id: "W119-f12", etage: 3, qm: 402, konzept: "eigen", gruppe: "spielwaren" }, { id: "W119-f13", etage: 3, qm: 1080, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 159937, rohertrag: 68613, konzessionserloes: 0, untermiete: 0, personal: 43028, miete: 19780, nebenkosten: 9941, sonstige: 9887, db: -14024, fteBedarf: 34.442610275942585, fteIst: 44.425974740154246, umsatzJeGruppe: { food: 9868, beauty: 26194, accessoires: 25713, damen: 34500, waesche: 11744, herren: 17739, kinder: 6921, sport: 8548, spielwaren: 5600, wohnen: 13110 } } }, { id: "W120", name: "Hartwig Neuss", stadt: "Neuss", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2600, etagen: [0, 1, 2], baujahr: 1958, fassade: 6, substanz: 69, status: "offen", flaechen: [{ id: "W120-f1", etage: 0, qm: 667, konzept: "eigen", gruppe: "food" }, { id: "W120-f2", etage: 0, qm: 422, konzept: "eigen", gruppe: "beauty" }, { id: "W120-f3", etage: 0, qm: 900, konzept: "eigen", gruppe: "accessoires" }, { id: "W120-f4", etage: 0, qm: 579, konzept: "eigen", gruppe: "damen" }, { id: "W120-f5", etage: 1, qm: 674, konzept: "eigen", gruppe: "damen" }, { id: "W120-f6", etage: 1, qm: 653, konzept: "eigen", gruppe: "waesche" }, { id: "W120-f7", etage: 1, qm: 1109, konzept: "eigen", gruppe: "herren" }, { id: "W120-f8", etage: 1, qm: 131, konzept: "eigen", gruppe: "kinder" }, { id: "W120-f9", etage: 2, qm: 486, konzept: "eigen", gruppe: "kinder" }, { id: "W120-f10", etage: 2, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W120-f11", etage: 2, qm: 528, konzept: "eigen", gruppe: "spielwaren" }, { id: "W120-f12", etage: 2, qm: 899, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 199121, rohertrag: 83647, konzessionserloes: 0, untermiete: 0, personal: 41494, miete: 31831, nebenkosten: 11208, sonstige: 11630, db: -12516, fteBedarf: 39.832093686319794, fteIst: 43.054497310622246, umsatzJeGruppe: { food: 22440, beauty: 30852, accessoires: 32326, damen: 25986, waesche: 19152, herren: 21098, kinder: 12952, sport: 9904, spielwaren: 5782, wohnen: 18628 } } }, { id: "W121", name: "Hartwig D\xFCren Lindenstra\xDFe", stadt: "D\xFCren", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2400, etagen: [0, 1, 2], baujahr: 1978, fassade: 7, substanz: 57, status: "offen", flaechen: [{ id: "W121-f1", etage: 0, qm: 488, konzept: "eigen", gruppe: "food" }, { id: "W121-f2", etage: 0, qm: 361, konzept: "eigen", gruppe: "beauty" }, { id: "W121-f3", etage: 0, qm: 741, konzept: "eigen", gruppe: "accessoires" }, { id: "W121-f4", etage: 0, qm: 810, konzept: "eigen", gruppe: "damen" }, { id: "W121-f5", etage: 1, qm: 688, konzept: "eigen", gruppe: "damen" }, { id: "W121-f6", etage: 1, qm: 537, konzept: "eigen", gruppe: "waesche" }, { id: "W121-f7", etage: 1, qm: 773, konzept: "eigen", gruppe: "herren" }, { id: "W121-f8", etage: 1, qm: 401, konzept: "eigen", gruppe: "kinder" }, { id: "W121-f9", etage: 2, qm: 112, konzept: "eigen", gruppe: "kinder" }, { id: "W121-f10", etage: 2, qm: 628, konzept: "eigen", gruppe: "sport" }, { id: "W121-f11", etage: 2, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W121-f12", etage: 2, qm: 1235, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 157044, rohertrag: 66834, konzessionserloes: 0, untermiete: 0, personal: 40858, miete: 41287, nebenkosten: 0, sonstige: 9678, db: -24989, fteBedarf: 33.676305073393294, fteIst: 41.63853731486583, umsatzJeGruppe: { food: 13443, beauty: 19925, accessoires: 25252, damen: 31051, waesche: 14105, herren: 12621, kinder: 7108, sport: 7179, spielwaren: 5596, wohnen: 20764 } } }, { id: "W122", name: "Hartwig Wesel", stadt: "Wesel", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [0, 1, 2], baujahr: 1960, fassade: 2, substanz: 79, status: "offen", flaechen: [{ id: "W122-f1", etage: 0, qm: 411, konzept: "eigen", gruppe: "food" }, { id: "W122-f2", etage: 0, qm: 283, konzept: "eigen", gruppe: "beauty" }, { id: "W122-f3", etage: 0, qm: 420, konzept: "eigen", gruppe: "accessoires" }, { id: "W122-f4", etage: 0, qm: 719, konzept: "eigen", gruppe: "damen" }, { id: "W122-f5", etage: 1, qm: 485, konzept: "eigen", gruppe: "damen" }, { id: "W122-f6", etage: 1, qm: 286, konzept: "eigen", gruppe: "waesche" }, { id: "W122-f7", etage: 1, qm: 761, konzept: "eigen", gruppe: "herren" }, { id: "W122-f8", etage: 1, qm: 302, konzept: "eigen", gruppe: "kinder" }, { id: "W122-f9", etage: 2, qm: 61, konzept: "eigen", gruppe: "kinder" }, { id: "W122-f10", etage: 2, qm: 666, konzept: "eigen", gruppe: "sport" }, { id: "W122-f11", etage: 2, qm: 349, konzept: "eigen", gruppe: "spielwaren" }, { id: "W122-f12", etage: 2, qm: 757, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 137008, rohertrag: 56920, konzessionserloes: 0, untermiete: 0, personal: 33717, miete: 16290, nebenkosten: 7134, sonstige: 8092, db: -8313, fteBedarf: 27.82440931157522, fteIst: 34.81144363920361, umsatzJeGruppe: { food: 17327, beauty: 21948, accessoires: 18380, damen: 24407, waesche: 7359, herren: 14163, kinder: 6876, sport: 10096, spielwaren: 4917, wohnen: 11534 } } }, { id: "W123", name: "Hartwig Iserlohn", stadt: "Iserlohn", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1989, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W123-f1", etage: -1, qm: 355, konzept: "eigen", gruppe: "food" }, { id: "W123-f2", etage: -1, qm: 825, konzept: "eigen", gruppe: "wohnen" }, { id: "W123-f3", etage: 0, qm: 367, konzept: "eigen", gruppe: "beauty" }, { id: "W123-f4", etage: 0, qm: 600, konzept: "eigen", gruppe: "accessoires" }, { id: "W123-f5", etage: 0, qm: 214, konzept: "eigen", gruppe: "damen" }, { id: "W123-f6", etage: 1, qm: 852, konzept: "eigen", gruppe: "damen" }, { id: "W123-f7", etage: 1, qm: 328, konzept: "eigen", gruppe: "waesche" }, { id: "W123-f8", etage: 2, qm: 65, konzept: "eigen", gruppe: "waesche" }, { id: "W123-f9", etage: 2, qm: 839, konzept: "eigen", gruppe: "herren" }, { id: "W123-f10", etage: 2, qm: 276, konzept: "eigen", gruppe: "kinder" }, { id: "W123-f11", etage: 3, qm: 150, konzept: "eigen", gruppe: "kinder" }, { id: "W123-f12", etage: 3, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W123-f13", etage: 3, qm: 278, konzept: "eigen", gruppe: "spielwaren" }, { id: "W123-f14", etage: 3, qm: 98, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 190165, rohertrag: 80440, konzessionserloes: 0, untermiete: 0, personal: 43231, miete: 51396, nebenkosten: 0, sonstige: 10452, db: -24640, fteBedarf: 35.111149363542914, fteIst: 44.22610112222914, umsatzJeGruppe: { food: 16970, wohnen: 17543, beauty: 30471, accessoires: 33297, damen: 29663, waesche: 12254, herren: 23973, kinder: 9861, sport: 11596, spielwaren: 4538 } } }, { id: "W124", name: "Hartwig L\xFCdenscheid", stadt: "L\xFCdenscheid", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2], baujahr: 2e3, fassade: 2, substanz: 52, status: "offen", flaechen: [{ id: "W124-f1", etage: -1, qm: 558, konzept: "eigen", gruppe: "food" }, { id: "W124-f2", etage: -1, qm: 1492, konzept: "eigen", gruppe: "wohnen" }, { id: "W124-f3", etage: 0, qm: 590, konzept: "eigen", gruppe: "beauty" }, { id: "W124-f4", etage: 0, qm: 916, konzept: "eigen", gruppe: "accessoires" }, { id: "W124-f5", etage: 0, qm: 544, konzept: "eigen", gruppe: "damen" }, { id: "W124-f6", etage: 1, qm: 1106, konzept: "eigen", gruppe: "damen" }, { id: "W124-f7", etage: 1, qm: 488, konzept: "eigen", gruppe: "waesche" }, { id: "W124-f8", etage: 1, qm: 457, konzept: "eigen", gruppe: "herren" }, { id: "W124-f9", etage: 2, qm: 467, konzept: "eigen", gruppe: "herren" }, { id: "W124-f10", etage: 2, qm: 481, konzept: "eigen", gruppe: "kinder" }, { id: "W124-f11", etage: 2, qm: 883, konzept: "eigen", gruppe: "sport" }, { id: "W124-f12", etage: 2, qm: 532, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 248141, rohertrag: 103588, konzessionserloes: 0, untermiete: 0, personal: 53257, miete: 23557, nebenkosten: 9506, sonstige: 14005, db: 3263, fteBedarf: 47.48653790856885, fteIst: 54.8025435906923, umsatzJeGruppe: { food: 21718, wohnen: 33491, beauty: 47380, accessoires: 41780, damen: 36313, waesche: 14103, herren: 21645, kinder: 10138, sport: 13585, spielwaren: 7987 } } }, { id: "W125", name: "Hartwig Witten", stadt: "Witten", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2400, etagen: [-1, 0, 1], baujahr: 1965, fassade: 5, substanz: 50, status: "offen", flaechen: [{ id: "W125-f1", etage: -1, qm: 379, konzept: "eigen", gruppe: "food" }, { id: "W125-f2", etage: -1, qm: 1988, konzept: "eigen", gruppe: "wohnen" }, { id: "W125-f3", etage: 0, qm: 341, konzept: "eigen", gruppe: "beauty" }, { id: "W125-f4", etage: 0, qm: 697, konzept: "eigen", gruppe: "accessoires" }, { id: "W125-f5", etage: 0, qm: 1329, konzept: "eigen", gruppe: "damen" }, { id: "W125-f6", etage: 1, qm: 90, konzept: "eigen", gruppe: "damen" }, { id: "W125-f7", etage: 1, qm: 503, konzept: "eigen", gruppe: "waesche" }, { id: "W125-f8", etage: 1, qm: 926, konzept: "eigen", gruppe: "herren" }, { id: "W125-f9", etage: 1, qm: 479, konzept: "eigen", gruppe: "kinder" }, { id: "W125-f10", etage: 1, qm: 1178, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 207897, rohertrag: 88137, konzessionserloes: 0, untermiete: 0, personal: 42822, miete: 23077, nebenkosten: 11283, sonstige: 12083, db: -1128, fteBedarf: 41.178571941445384, fteIst: 43.482234344412205, umsatzJeGruppe: { food: 17058, wohnen: 41192, beauty: 22815, accessoires: 30698, damen: 39444, waesche: 13545, herren: 17832, kinder: 8832, sport: 16482 } } }, { id: "W126", name: "Hartwig Marl Arkaden", stadt: "Marl", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1], baujahr: 1991, fassade: 6, substanz: 49, status: "offen", flaechen: [{ id: "W126-f1", etage: -1, qm: 557, konzept: "eigen", gruppe: "food" }, { id: "W126-f2", etage: -1, qm: 2209, konzept: "eigen", gruppe: "wohnen" }, { id: "W126-f3", etage: 0, qm: 503, konzept: "eigen", gruppe: "beauty" }, { id: "W126-f4", etage: 0, qm: 814, konzept: "eigen", gruppe: "accessoires" }, { id: "W126-f5", etage: 0, qm: 1449, konzept: "eigen", gruppe: "damen" }, { id: "W126-f6", etage: 1, qm: 333, konzept: "eigen", gruppe: "damen" }, { id: "W126-f7", etage: 1, qm: 499, konzept: "eigen", gruppe: "waesche" }, { id: "W126-f8", etage: 1, qm: 1159, konzept: "eigen", gruppe: "herren" }, { id: "W126-f9", etage: 1, qm: 609, konzept: "eigen", gruppe: "kinder" }, { id: "W126-f10", etage: 1, qm: 1390, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 200125, rohertrag: 84686, konzessionserloes: 0, untermiete: 0, personal: 50420, miete: 24264, nebenkosten: 13558, sonstige: 12490, db: -16046, fteBedarf: 43.46300279849733, fteIst: 51.07734507627857, umsatzJeGruppe: { food: 17253, wohnen: 30489, beauty: 25610, accessoires: 27266, damen: 34223, waesche: 13139, herren: 23512, kinder: 9647, sport: 18985 } } }, { id: "W127", name: "Hartwig Moers City-Center", stadt: "Moers", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [0, 1, 2, 3], baujahr: 2002, fassade: 1, substanz: 39, status: "offen", flaechen: [{ id: "W127-f1", etage: 0, qm: 486, konzept: "eigen", gruppe: "food" }, { id: "W127-f2", etage: 0, qm: 640, konzept: "eigen", gruppe: "beauty" }, { id: "W127-f3", etage: 0, qm: 949, konzept: "eigen", gruppe: "accessoires" }, { id: "W127-f4", etage: 1, qm: 118, konzept: "eigen", gruppe: "accessoires" }, { id: "W127-f5", etage: 1, qm: 1329, konzept: "eigen", gruppe: "damen" }, { id: "W127-f6", etage: 1, qm: 628, konzept: "eigen", gruppe: "waesche" }, { id: "W127-f7", etage: 2, qm: 37, konzept: "eigen", gruppe: "waesche" }, { id: "W127-f8", etage: 2, qm: 877, konzept: "eigen", gruppe: "herren" }, { id: "W127-f9", etage: 2, qm: 704, konzept: "eigen", gruppe: "kinder" }, { id: "W127-f10", etage: 2, qm: 458, konzept: "eigen", gruppe: "sport" }, { id: "W127-f11", etage: 3, qm: 539, konzept: "eigen", gruppe: "sport" }, { id: "W127-f12", etage: 3, qm: 401, konzept: "eigen", gruppe: "spielwaren" }, { id: "W127-f13", etage: 3, qm: 1135, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 190560, rohertrag: 80211, konzessionserloes: 0, untermiete: 0, personal: 46830, miete: 27102, nebenkosten: 0, sonstige: 11548, db: -5270, fteBedarf: 39.96069300195375, fteIst: 47.16919069182678, umsatzJeGruppe: { food: 13937, beauty: 38615, accessoires: 36760, damen: 22481, waesche: 15427, herren: 17476, kinder: 10852, sport: 13278, spielwaren: 4023, wohnen: 17709 } } }, { id: "W128", name: "Hartwig Kaiserslautern Neustadt", stadt: "Kaiserslautern", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1971, fassade: 0, substanz: 81, status: "offen", flaechen: [{ id: "W128-f1", etage: -1, qm: 644, konzept: "eigen", gruppe: "food" }, { id: "W128-f2", etage: -1, qm: 896, konzept: "eigen", gruppe: "wohnen" }, { id: "W128-f3", etage: 0, qm: 506, konzept: "eigen", gruppe: "beauty" }, { id: "W128-f4", etage: 0, qm: 668, konzept: "eigen", gruppe: "accessoires" }, { id: "W128-f5", etage: 0, qm: 365, konzept: "eigen", gruppe: "damen" }, { id: "W128-f6", etage: 1, qm: 1138, konzept: "eigen", gruppe: "damen" }, { id: "W128-f7", etage: 1, qm: 402, konzept: "eigen", gruppe: "waesche" }, { id: "W128-f8", etage: 2, qm: 51, konzept: "eigen", gruppe: "waesche" }, { id: "W128-f9", etage: 2, qm: 1079, konzept: "eigen", gruppe: "herren" }, { id: "W128-f10", etage: 2, qm: 410, konzept: "eigen", gruppe: "kinder" }, { id: "W128-f11", etage: 3, qm: 58, konzept: "eigen", gruppe: "kinder" }, { id: "W128-f12", etage: 3, qm: 695, konzept: "eigen", gruppe: "sport" }, { id: "W128-f13", etage: 3, qm: 478, konzept: "eigen", gruppe: "spielwaren" }, { id: "W128-f14", etage: 3, qm: 309, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 159536, rohertrag: 66721, konzessionserloes: 0, untermiete: 0, personal: 38665, miete: 29785, nebenkosten: 0, sonstige: 10006, db: -11735, fteBedarf: 34.98472410817196, fteIst: 39.94232786450628, umsatzJeGruppe: { food: 18573, wohnen: 15270, beauty: 28326, accessoires: 22532, damen: 29331, waesche: 9381, herren: 17218, kinder: 6428, sport: 6990, spielwaren: 5485 } } }, { id: "W129", name: "Hartwig Worms Neustadt", stadt: "Worms", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1], baujahr: 1919, fassade: 4, substanz: 31, status: "offen", flaechen: [{ id: "W129-f1", etage: -1, qm: 478, konzept: "eigen", gruppe: "food" }, { id: "W129-f2", etage: -1, qm: 2255, konzept: "eigen", gruppe: "wohnen" }, { id: "W129-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W129-f4", etage: 0, qm: 798, konzept: "eigen", gruppe: "accessoires" }, { id: "W129-f5", etage: 0, qm: 1505, konzept: "eigen", gruppe: "damen" }, { id: "W129-f6", etage: 1, qm: 50, konzept: "eigen", gruppe: "damen" }, { id: "W129-f7", etage: 1, qm: 503, konzept: "eigen", gruppe: "waesche" }, { id: "W129-f8", etage: 1, qm: 1175, konzept: "eigen", gruppe: "herren" }, { id: "W129-f9", etage: 1, qm: 652, konzept: "eigen", gruppe: "kinder" }, { id: "W129-f10", etage: 1, qm: 1128, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 179713, rohertrag: 75668, konzessionserloes: 0, untermiete: 0, personal: 46503, miete: 21992, nebenkosten: 10631, sonstige: 11407, db: -14865, fteBedarf: 39.88357256127091, fteIst: 47.20129659805884, umsatzJeGruppe: { food: 13033, wohnen: 37324, beauty: 27586, accessoires: 23784, damen: 25896, waesche: 11236, herren: 18495, kinder: 10138, sport: 12221 } } }, { id: "W130", name: "Hartwig Speyer", stadt: "Speyer", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2800, etagen: [0, 1, 2], baujahr: 1910, fassade: 4, substanz: 74, status: "offen", flaechen: [{ id: "W130-f1", etage: 0, qm: 597, konzept: "eigen", gruppe: "food" }, { id: "W130-f2", etage: 0, qm: 505, konzept: "eigen", gruppe: "beauty" }, { id: "W130-f3", etage: 0, qm: 862, konzept: "eigen", gruppe: "accessoires" }, { id: "W130-f4", etage: 0, qm: 837, konzept: "eigen", gruppe: "damen" }, { id: "W130-f5", etage: 1, qm: 1152, konzept: "eigen", gruppe: "damen" }, { id: "W130-f6", etage: 1, qm: 604, konzept: "eigen", gruppe: "waesche" }, { id: "W130-f7", etage: 1, qm: 912, konzept: "eigen", gruppe: "herren" }, { id: "W130-f8", etage: 1, qm: 131, konzept: "eigen", gruppe: "kinder" }, { id: "W130-f9", etage: 2, qm: 405, konzept: "eigen", gruppe: "kinder" }, { id: "W130-f10", etage: 2, qm: 826, konzept: "eigen", gruppe: "sport" }, { id: "W130-f11", etage: 2, qm: 602, konzept: "eigen", gruppe: "spielwaren" }, { id: "W130-f12", etage: 2, qm: 967, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 263398, rohertrag: 111518, konzessionserloes: 0, untermiete: 0, personal: 57092, miete: 27771, nebenkosten: 11762, sonstige: 14579, db: 313, fteBedarf: 49.13564139890457, fteIst: 57.834649496069126, umsatzJeGruppe: { food: 27849, beauty: 40839, accessoires: 42141, damen: 48508, waesche: 23018, herren: 27824, kinder: 11101, sport: 12354, spielwaren: 9041, wohnen: 20723 } } }, { id: "S047", name: "Hartwig Sport Berlin Am Markt", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2100, etagen: [0], baujahr: 2012, fassade: 1, substanz: 68, status: "offen", flaechen: [{ id: "S047-f1", etage: 0, qm: 446, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S047-f2", etage: 0, qm: 549, konzept: "eigen", gruppe: "sporttextil" }, { id: "S047-f3", etage: 0, qm: 467, konzept: "eigen", gruppe: "outdoor" }, { id: "S047-f4", etage: 0, qm: 223, konzept: "eigen", gruppe: "teamsport" }, { id: "S047-f5", etage: 0, qm: 202, konzept: "eigen", gruppe: "rad" }, { id: "S047-f6", etage: 0, qm: 163, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 81535, rohertrag: 34571, konzessionserloes: 0, untermiete: 0, personal: 16540, miete: 6703, nebenkosten: 2333, sonstige: 4265, db: 4729, fteBedarf: 13.467695526262736, fteIst: 16.73675352368738, umsatzJeGruppe: { sportschuhe: 23993, sporttextil: 20420, outdoor: 19364, teamsport: 5069, rad: 2385, wintersport: 10304 } } }, { id: "S048", name: "Hartwig Sport Hamburg Galerie am Fluss", stadt: "Hamburg", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2600, etagen: [0, 1], baujahr: 1986, fassade: 7, substanz: 55, status: "offen", flaechen: [{ id: "S048-f1", etage: 0, qm: 1345, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S048-f2", etage: 0, qm: 1139, konzept: "eigen", gruppe: "sporttextil" }, { id: "S048-f3", etage: 0, qm: 66, konzept: "eigen", gruppe: "outdoor" }, { id: "S048-f4", etage: 1, qm: 884, konzept: "eigen", gruppe: "outdoor" }, { id: "S048-f5", etage: 1, qm: 443, konzept: "eigen", gruppe: "teamsport" }, { id: "S048-f6", etage: 1, qm: 765, konzept: "eigen", gruppe: "rad" }, { id: "S048-f7", etage: 1, qm: 457, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 244892, rohertrag: 102350, konzessionserloes: 0, untermiete: 0, personal: 45741, miete: 29218, nebenkosten: 7145, sonstige: 12335, db: 7911, fteBedarf: 38.55786679293943, fteIst: 46.992706440506666, umsatzJeGruppe: { sportschuhe: 96681, sporttextil: 51925, outdoor: 43637, teamsport: 10221, rad: 10277, wintersport: 32151 } } }, { id: "S049", name: "Hartwig Sport M\xFCnchen Am Markt", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 1997, fassade: 0, substanz: 38, status: "offen", flaechen: [{ id: "S049-f1", etage: 0, qm: 1012, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S049-f2", etage: 0, qm: 555, konzept: "eigen", gruppe: "sporttextil" }, { id: "S049-f3", etage: 1, qm: 984, konzept: "eigen", gruppe: "sporttextil" }, { id: "S049-f4", etage: 1, qm: 583, konzept: "eigen", gruppe: "outdoor" }, { id: "S049-f5", etage: 2, qm: 216, konzept: "eigen", gruppe: "outdoor" }, { id: "S049-f6", etage: 2, qm: 528, konzept: "eigen", gruppe: "teamsport" }, { id: "S049-f7", etage: 2, qm: 446, konzept: "eigen", gruppe: "rad" }, { id: "S049-f8", etage: 2, qm: 377, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 239768, rohertrag: 101653, konzessionserloes: 0, untermiete: 0, personal: 40472, miete: 30764, nebenkosten: 6681, sonstige: 11946, db: 11790, fteBedarf: 37.16889344552324, fteIst: 41.33673937946676, umsatzJeGruppe: { sportschuhe: 71817, sporttextil: 78570, outdoor: 40188, teamsport: 16449, rad: 7060, wintersport: 25685 } } }, { id: "S050", name: "Hartwig Sport K\xF6ln City-Center", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2100, etagen: [0], baujahr: 1992, fassade: 6, substanz: 90, status: "offen", flaechen: [{ id: "S050-f1", etage: 0, qm: 375, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S050-f2", etage: 0, qm: 673, konzept: "eigen", gruppe: "sporttextil" }, { id: "S050-f3", etage: 0, qm: 333, konzept: "eigen", gruppe: "outdoor" }, { id: "S050-f4", etage: 0, qm: 217, konzept: "eigen", gruppe: "teamsport" }, { id: "S050-f5", etage: 0, qm: 285, konzept: "eigen", gruppe: "rad" }, { id: "S050-f6", etage: 0, qm: 167, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 78252, rohertrag: 33027, konzessionserloes: 0, untermiete: 0, personal: 16086, miete: 9263, nebenkosten: 0, sonstige: 4131, db: 3548, fteBedarf: 13.159530268777383, fteIst: 16.35596187631147, umsatzJeGruppe: { sportschuhe: 24276, sporttextil: 25834, outdoor: 10617, teamsport: 5070, rad: 2874, wintersport: 9581 } } }];
@@ -54585,7 +57206,12 @@
   var regionVon2 = (p) => REGION2[p.region] ?? p.region ?? "Mitte";
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
   var HAUS = new Map(haeuser_default.map((h) => [h.id, h]));
+  var SCHWESTER = new Map(haeuser_schwester_default.map((h) => [h.id, h]));
   function fussabdruck(haus2, familie = null) {
+    if (haus2.format === "schwester") {
+      const m2 = masseSchwester(haus2);
+      return { w: m2.w, d: m2.d, mall: 0 };
+    }
     if (haus2.format === "sport" && familie !== 7) {
       const ms = masseSport(haus2);
       return { w: ms.w, d: ms.d, mall: 0 };
@@ -54620,7 +57246,14 @@
     const { x, z: z2 } = imSlot(p, W3, D);
     return wettbewerber(S, scene2, { x, z: z2, w: W3, d: D, seed: p.seed, art: p.standort?.art, name: p.standort?.name, form: p.standort?.form, region: p.region });
   }
-  var ERSATZ = { sport: sportEcht, wettbewerber: wettbewerberEcht };
+  function schwesterEcht(S, scene2, p) {
+    const h = SCHWESTER.get(p.standort?.id);
+    if (!h) return { hoehe: 0 };
+    const m = masseSchwester(h), pos = imSlot(p, m.w, m.d);
+    p.haus = h;
+    return schwesterhaus(S, scene2, h, { ...pos, passanten: true });
+  }
+  var ERSATZ = { sport: sportEcht, wettbewerber: wettbewerberEcht, schwester: schwesterEcht };
   var SLOT_PLUGINS = /* @__PURE__ */ new Map();
   var STILPROFILE = /* @__PURE__ */ new Map();
   function registriereSlots(map) {
@@ -54734,7 +57367,8 @@
         p.haus = h;
         return sport(S, scene2, { ...p, zustand: zustandFuer(h) }, h);
       },
-      "slot:wettbewerber": (S, scene2, p) => wettbewerber2(S, scene2, p)
+      "slot:wettbewerber": (S, scene2, p) => wettbewerber2(S, scene2, p),
+      "slot:schwester": (S, scene2, p) => ERSATZ.schwester(S, scene2, p)
     };
   }
 
@@ -54742,7 +57376,7 @@
   var innen_exports = {};
   __export(innen_exports, {
     BODEN: () => BODEN2,
-    GLAS: () => GLAS3,
+    GLAS: () => GLAS4,
     HOLZ: () => HOLZ,
     KONZEPTE: () => KONZEPTE,
     MARKEN: () => MARKEN2,
@@ -54849,11 +57483,11 @@
   });
   var RASTER = 5;
   var WANDHOEHE = 4.6;
-  var GLAS3 = "#cfe8f1";
+  var GLAS4 = "#cfe8f1";
   var PI2 = Math.PI;
   function vorbereiten(S, scene2) {
     S.szene = scene2;
-    const g = mat(GLAS3);
+    const g = mat(GLAS4);
     g.transparent = true;
     g.opacity = 0.3;
     g.depthWrite = false;
@@ -55203,7 +57837,7 @@
     L2.box(w, h, t, lx, 0, lz, sockel);
     L2.box(w + 0.04, 0.04, t + 0.04, lx, h, lz, "#e8e4dc");
     inhalt(L2, lx, h + 0.04, lz, w - 0.2, t - 0.14, r, d);
-    L2.box(w, 0.42, t, lx, h + 0.04, lz, GLAS3);
+    L2.box(w, 0.42, t, lx, h + 0.04, lz, GLAS4);
     L2.box(w + 0.04, 0.03, t + 0.04, lx, h + 0.46, lz, HOLZ.chrom);
   }
   var MODUL = {
@@ -55594,7 +58228,7 @@
       L2.box(ww, 0.92, dd, lx + dx, 0, lz + dz, marke3);
       L2.box(ww + 0.04, 0.04, dd + 0.04, lx + dx, 0.92, lz + dz, "#d8b25a");
       flakonFlaeche(L2, lx + dx, 0.96, lz + dz, ww - 0.15, dd - 0.15, r, d);
-      L2.box(ww, 0.3, dd, lx + dx, 0.96, lz + dz, GLAS3);
+      L2.box(ww, 0.3, dd, lx + dx, 0.96, lz + dz, GLAS4);
     }
     L2.box(1.4, 1.9, 0.12, lx, 0, lz - 1.55, marke3 === "#1f1f1f" ? "#2b2b2b" : "#e9e4dc");
     L2.box(0.8, 0.8, 0.03, lx, 1, lz - 1.48, "#e3edf1");
@@ -55782,7 +58416,7 @@
     L2.box(w, 0.06, 0.6, 0, 1.45, -0.35, "#c9d2d8");
     const g = new three_module_exports.BoxGeometry(w, 0.55, 0.04);
     g.rotateX(-0.45);
-    L2.geo(g, 0, 1.2, 0.12, GLAS3);
+    L2.geo(g, 0, 1.2, 0.12, GLAS4);
     L2.box(w, 0.04, 0.04, 0, 1.44, 0, "#c9d2d8");
     L2.box(w, 2, 0.5, 0, 0, -1.55, "#e9e4dc");
     for (let j = 0; j < 3; j++) for (let k = 0; k < (d < 0.5 ? 4 : 9); k++) L2.box(0.25, 0.25, 0.25, -w / 2 + 0.3 + k * 0.33, 0.6 + j * 0.45, -1.28, bunt(r, waren));
@@ -56456,7 +59090,7 @@
       S.box(lang / stufen * 0.5, 0.04, breit2 - 0.15, x0 - t * laenge, y + t * hub - 0.02, z2, "#c3cbd1");
     }
     for (const s2 of [-1, 1]) {
-      schraeg(lang, 0.9, 0.04, 0.5, s2 * (breit2 / 2 + 0.02), GLAS3);
+      schraeg(lang, 0.9, 0.04, 0.5, s2 * (breit2 / 2 + 0.02), GLAS4);
       schraeg(lang, 0.1, 0.12, 0.98, s2 * (breit2 / 2 + 0.02), "#1f2328");
       schraeg(lang, 0.35, 0.16, -0.05, s2 * (breit2 / 2 + 0.06), "#d5dbdf");
     }
@@ -56487,7 +59121,7 @@
       S.box(0.25, 0.5, lz1 - lz0, lx1, y - 0.25, (lz0 + lz1) / 2, "#d5dbdf");
       for (const zz of [lz0 + 0.85, lz1 - 0.85]) rolltreppe(S, lx0 + 0.15 + lang, zz, lang, hub, y - hub + 0.06, d, 1 - (tief2 - 0.2) / hub);
       const gl = (w, t, cx, cz) => {
-        S.box(w, 1.05, t, cx, y + 0.6, cz, GLAS3);
+        S.box(w, 1.05, t, cx, y + 0.6, cz, GLAS4);
         S.box(w + 0.04, 0.07, t + 0.08, cx, y + 1.15, cz, "#c9d2d8");
         S.box(w + 0.04, 0.08, t + 0.08, cx, y + 0.1, cz, "#c9d2d8");
       };
@@ -56639,10 +59273,10 @@
       for (const c of [a + l / 2, b - l / 2]) {
         if (achse === "x") {
           S.box(l, niedrig, 0.15, c, y + niedrig / 2, pos, farbe);
-          if (o.glas) S.box(l, h - niedrig - 0.4, 0.04, c, y + niedrig + (h - niedrig - 0.4) / 2, pos, GLAS3);
+          if (o.glas) S.box(l, h - niedrig - 0.4, 0.04, c, y + niedrig + (h - niedrig - 0.4) / 2, pos, GLAS4);
         } else {
           S.box(0.15, niedrig, l, pos, y + niedrig / 2, c, farbe);
-          if (o.glas) S.box(0.04, h - niedrig - 0.4, l, pos, y + niedrig + (h - niedrig - 0.4) / 2, c, GLAS3);
+          if (o.glas) S.box(0.04, h - niedrig - 0.4, l, pos, y + niedrig + (h - niedrig - 0.4) / 2, c, GLAS4);
         }
       }
       if (o.glas) {
@@ -56892,7 +59526,7 @@
       L2.box(ww, 0.9, dd, dx, 0, dz, korpus2);
       L2.box(ww + 0.04, 0.05, dd + 0.04, dx, 0.9, dz, akz);
       flakonFlaeche(L2, dx, 0.95, dz, ww - 0.15, dd - 0.15, r, d);
-      L2.box(ww, 0.28, dd, dx, 0.95, dz, GLAS3);
+      L2.box(ww, 0.28, dd, dx, 0.95, dz, GLAS4);
       L2.box(ww - 0.1, 0.06, 0.04, dx, 0.25, dz + dd / 2 + 0.01, akz);
     }
     L2.box(2.6, 2.5, 0.16, 0, 0, -1.55, korpus2);
@@ -57302,7 +59936,7 @@
       L2.box(ww, 0.92, dd, dx, 0, dz, "#1f2a3a");
       L2.box(ww + 0.04, 0.04, dd + 0.04, dx, 0.92, dz, "#d8b25a");
       inhalt(L2, dx, 0.96, dz, ww - 0.2, dd - 0.2, r);
-      L2.box(ww, 0.3, dd, dx, 0.96, dz, GLAS3);
+      L2.box(ww, 0.3, dd, dx, 0.96, dz, GLAS4);
     }
     stehFigur(ctx, L2, 0, -0.35, 0, "beauty");
   }
@@ -57323,7 +59957,7 @@
       for (const y of [1, 1.7]) {
         L2.box(0.8, 0.5, 0.25, u, y, 0.2, "#fdf6e6");
         for (let k = 0; k < 3; k++) L2.zyl(0.06, 0.06, 0.03, u - 0.22 + k * 0.22, y + 0.2, 0.25, bunt2(r, ["#d8b25a", "#c9d2d8", "#2b2b2b"]), 8);
-        L2.box(0.8, 0.5, 0.02, u, y, 0.33, GLAS3);
+        L2.box(0.8, 0.5, 0.02, u, y, 0.33, GLAS4);
       }
     }
     L2.box(w - 0.2, 0.85, 0.5, 0, 0, 0.35, "#141c28");
@@ -57461,7 +60095,7 @@
     for (const x of [-0.6, 0, 0.6]) for (const s2 of [-1, 1]) {
       stuhl(L2, x, s2 * 0.75, s2 > 0 ? PI3 : 0, "#3a4a5a");
       L2.zyl(0.13, 0.13, 0.02, x, 0.77, s2 * 0.3, "#ffffff", 10);
-      L2.zyl(0.03, 0.03, 0.14, x + 0.15, 0.77, s2 * 0.32, GLAS3, 6);
+      L2.zyl(0.03, 0.03, 0.14, x + 0.15, 0.77, s2 * 0.32, GLAS4, 6);
     }
     L2.zyl(0.05, 0.05, 0.25, 0, 0.77, 0, "#f6e8b0", 6);
   }
@@ -57667,7 +60301,7 @@
     }
     const g = new three_module_exports.BoxGeometry(w, 0.5, 0.04);
     g.rotateX(-0.45);
-    L2.geo(g, 0, 1.2, 2.08, GLAS3);
+    L2.geo(g, 0, 1.2, 2.08, GLAS4);
     L2.box(w, 0.04, 0.5, 0, 1.42, 1.6, "#c9d2d8");
     for (let k = 0; k < Math.max(1, Math.round(w / 2.4)); k++) stehFigur(ctx, L2, -w / 2 + (k + 0.5) * (w / Math.max(1, Math.round(w / 2.4))), 0.85, 0, "theke");
     L2.box(w, 0.06, 0.08, 0, 1.44, 2.1, "#e8edf0");
@@ -57680,7 +60314,7 @@
     for (let i = 0; i < n; i++) {
       const u = -w / 2 + (i + 0.5) * (w / n);
       for (let j = 0; j < 4; j++) for (let k = 0; k < (d < 0.5 ? 2 : 3); k++) L2.box(0.18, 0.28, 0.06, u - 0.22 + k * 0.22, 0.25 + j * 0.48, 0.74, bunt2(r, ["#ffffff", "#3c8dd9", "#f2c14e", "#e8403a", "#9bc53d", "#f4e1c0"]));
-      L2.box(0.74, 2, 0.03, u, 0.15, 0.78, GLAS3);
+      L2.box(0.74, 2, 0.03, u, 0.15, 0.78, GLAS4);
       L2.box(0.03, 2, 0.05, u + 0.38, 0.15, 0.78, "#9aa3aa");
     }
     L2.box(w, 0.3, 0.8, 0, 2.3, 0.4, "#2f5d3a");
@@ -57764,7 +60398,7 @@
     for (let k = 0; k < 6; k++) L2.box(0.45, 0.03, 0.34, 1.75, 0.9 + k * 0.04, 0.45, k % 2 ? "#d23c32" : "#5a636b");
     const g = new three_module_exports.BoxGeometry(3, 0.45, 0.03);
     g.rotateX(-0.35);
-    L2.geo(g, 0, 1.15, 0.12, GLAS3);
+    L2.geo(g, 0, 1.15, 0.12, GLAS4);
     L2.box(0.04, 0.55, 0.04, -1.45, 0.9, -0.5, "#9aa3aa");
     L2.box(0.04, 0.55, 0.04, 1.45, 0.9, -0.5, "#9aa3aa");
     stehFigur(ctx, L2, zw(ctx.r, -0.8, 0.8), -1, 0, "theke");
@@ -58368,7 +61002,7 @@
     }
     if (art === "truhe") {
       L2.box(w, 0.85, 0.9, 0, 0, 0.45, "#f4f4f2");
-      L2.box(w - 0.1, 0.05, 0.8, 0, 0.85, 0.45, GLAS3);
+      L2.box(w - 0.1, 0.05, 0.8, 0, 0.85, 0.45, GLAS4);
       const n = Math.floor(w / (d < 0.5 ? 0.6 : 0.32));
       for (let k = 0; k < n; k++) L2.box(0.26, 0.12, 0.6, -w / 2 + 0.3 + k * ((w - 0.4) / n), 0.72, 0.45, bunt2(r, ["#ffffff", "#3c8dd9", "#e8403a", "#f2c14e", "#9bc6d8"]));
       return;
@@ -58452,7 +61086,7 @@
     const komp = komponenten(alle);
     if (komp.length > 1) {
       komp.forEach((t, k) => {
-        const rr = flaeche2(S, scene2, art, { ...Z2, alle: t }, { ...o, teil: true, kasse: (o.kasse ?? true) && k === 0, seed: (o.seed ?? 1) + k * 53, schild: o.schild });
+        const rr = flaeche2(S, scene2, art, { ...Z2, alle: t }, { ...o, teil: true, kasse: (o.kasse ?? true) && k === 0, seed: (o.seed ?? 1) + k * 53, schild: o.schildEinmal ? k === 0 && o.schild !== false : o.schild });
         res.frei.push(...rr.frei);
         res.belegt.push(...rr.belegt);
       });
@@ -58907,13 +61541,13 @@
           if (dj !== 0) {
             S.box(lenS, h0, 0.15, mid, y + h0 / 2, pos, farbe);
             if (vorne) {
-              S.box(lenS, hoch - 1.4, 0.04, mid, y + 1 + (hoch - 1.4) / 2, pos, GLAS3);
+              S.box(lenS, hoch - 1.4, 0.04, mid, y + 1 + (hoch - 1.4) / 2, pos, GLAS4);
               S.box(lenS, 0.4, 0.18, mid, y + hoch - 0.2, pos, farbe);
             }
           } else {
             S.box(0.15, h0, lenS, pos, y + h0 / 2, mid, farbe);
             if (vorne) {
-              S.box(0.04, hoch - 1.4, lenS, pos, y + 1 + (hoch - 1.4) / 2, mid, GLAS3);
+              S.box(0.04, hoch - 1.4, lenS, pos, y + 1 + (hoch - 1.4) / 2, mid, GLAS4);
               S.box(0.18, 0.4, lenS, pos, y + hoch - 0.2, mid, farbe);
             }
           }
@@ -59428,7 +62062,7 @@
     for (let k = 0; k < Math.min(3, Math.floor(w / 1.6)); k++) radMontage(L2, -w / 2 + 1 + k * 1.6, 1.7, r);
     for (let k = 0; k < 4; k++) L2.geo(new three_module_exports.TorusGeometry(0.32, 0.04, 4, 12), -w / 2 + 0.5 + k * 0.7, 2.55, 0.12, "#1f1f1f");
     steh(ctx, L2, -w / 4, 1.2, PI4, "handwerker");
-    L2.box(w, 1.1, 0.04, 0, 0, 2.4, GLAS3);
+    L2.box(w, 1.1, 0.04, 0, 0, 2.4, GLAS4);
     L2.box(w, 0.06, 0.08, 0, 1.1, 2.4, "#9aa3aa");
     kopfband2(ctx, L2, w, "Radservice", "#e8403a", "#ffffff");
   }
@@ -59506,7 +62140,7 @@
     L2.box(0.3, 0.2, 0.2, 0.9, 0.96, 0.25, "#ffcc00");
     for (let k = 0; k < Math.floor((w - 3.6) / 0.25); k++) L2.box(0.1, 1.7, 0.03, w / 2 - 0.4 - k * 0.25, 0.05, 0.18, bunt3(r, WINTER));
     steh(ctx, L2, 0.4, 1.2, PI4, "handwerker");
-    L2.box(w, 1.1, 0.04, 0, 0, 2.2, GLAS3);
+    L2.box(w, 1.1, 0.04, 0, 0, 2.2, GLAS4);
     L2.box(w, 0.06, 0.08, 0, 1.1, 2.2, "#9aa3aa");
     kopfband2(ctx, L2, w, "Skiservice", "#20b5c9", "#ffffff");
   }
@@ -59723,10 +62357,10 @@
     if (art === "laufanalyse") laufanalyse(L2, r, d, ctx);
     else fitnessInsel(L2, r, d, ctx);
   }
-  function sportAbverkauf(L2, r, d, index = 0) {
+  function sportAbverkauf(L2, r, d, index2 = 0) {
     const f = "#c9c7c1", metall = "#697179", holz = "#b99469";
     L2.box(4.8, 0.03, 4.8, 0, 0, 0, "#e5e2dc");
-    if (index % 3 === 0) {
+    if (index2 % 3 === 0) {
       for (const x of [-1.05, 1.05]) {
         L2.box(1.75, 0.13, 1.25, x, 0.28, -0.4, "#e6e8e9");
         for (const z2 of [-1.05, 0.25]) L2.box(1.75, 0.45, 0.045, x, 0.25, z2, metall);
@@ -59743,7 +62377,7 @@
         }
       }
     }
-    if (index % 2 === 0) {
+    if (index2 % 2 === 0) {
       L2.box(1.25, 0.14, 0.85, 1.6, 0.02, 1.75, holz);
       for (let k = 0; k < 4; k++) karton(L2, 1.15 + k % 2 * 0.6, 0.16 + Math.floor(k / 2) * 0.26, 1.7, k % 2 ? "#ffffff" : "#c7bba7", 0.58, 0.22);
     }
@@ -59879,7 +62513,7 @@
   var PFLASTER = "#cbc5b8";
   var ASPHALT = "#8d939a";
   var SCHOTTER = "#aaa498";
-  var GLAS4 = "#4e5c67";
+  var GLAS5 = "#4e5c67";
   var BACKSTEIN2 = ["#9b4f3a", "#a35a43", "#8f4a37", "#a8604a"];
   var KLINKER = ["#6e3b30", "#7a4234", "#5f3a34", "#71433a"];
   var SCHIEFER2 = ["#55616a", "#5c6870", "#4d5860"];
@@ -60175,10 +62809,10 @@
       box((L2 - 15) / 2 - 1.6, 0.8, B2 - 1.4, u0 + (L2 - 15) / 4, 1.6, "#2a2a2c");
     }
   }
-  function fenster2(S, F2, u, y, b, h, o = {}) {
+  function fenster3(S, F2, u, y, b, h, o = {}) {
     const art = o.art ?? null, t = o.t ?? 0;
     if (o.laibung) fform(S, F2, bogenForm(u - b / 2 - 0.22, y - 0.12, u + b / 2 + 0.22, y + h + (art ? 0.22 : 0.18), art), t - 0.02, t + 0.07, o.laibung);
-    fform(S, F2, bogenForm(u - b / 2, y, u + b / 2, y + h, art), t, t + 0.1, o.glas ?? GLAS4);
+    fform(S, F2, bogenForm(u - b / 2, y, u + b / 2, y + h, art), t, t + 0.1, o.glas ?? GLAS5);
     if (o.sims) fb(S, F2, u - b / 2 - 0.3, u + b / 2 + 0.3, y - 0.2, y - 0.04, t - 0.02, t + 0.2, o.sims);
     const [nu, nv] = o.sprossen ?? [0, 0];
     const sc = o.rahmen ?? "#e9e4d8";
@@ -60226,12 +62860,12 @@
         const u = off + (i + 0.5) * fo.raster;
         for (let k = 0; k < (fo.zeilen ?? 1); k++) {
           const y = fo.y + k * (fo.h + 1.2);
-          let glas2 = o.glas ?? GLAS4;
+          let glas2 = o.glas ?? GLAS5;
           if (o.zustand === "stillgelegt") {
             const q2 = r();
             glas2 = q2 < 0.25 ? "#2a2f33" : q2 < 0.4 ? "#8a7356" : glas2;
           }
-          fenster2(S, F2, u, y, fo.b, fo.h, { art: fo.art, glas: glas2, laibung: orn, sprossen: fo.b > 1.6 ? [2, Math.max(1, Math.round(fo.h / 1.6))] : [1, 2], rahmen: o.sprosse ?? "#d9d4c8" });
+          fenster3(S, F2, u, y, fo.b, fo.h, { art: fo.art, glas: glas2, laibung: orn, sprossen: fo.b > 1.6 ? [2, Math.max(1, Math.round(fo.h / 1.6))] : [1, 2], rahmen: o.sprosse ?? "#d9d4c8" });
         }
       }
       if (o.lichtband) fb(S, F2, -0.1, F2.L + 0.1, H - 0.38, H - 0.3, 0.22, 0.32, o.lichtband);
@@ -60423,7 +63057,7 @@
         for (const u of [2.8, F2.L / 2, F2.L - 2.8]) for (let k = 0; k < 4; k++) {
           let glas2 = c.glas;
           if (p.zustand === "stillgelegt" && hashR(k, Math.round(u), 3) < 0.35) glas2 = "#2a2f33";
-          fenster2(S, F2, u, 3 + k * 6.4, 1.6, 3.6, { art: "rund", glas: glas2, laibung: orn, sprossen: [1, 2] });
+          fenster3(S, F2, u, 3 + k * 6.4, 1.6, 3.6, { art: "rund", glas: glas2, laibung: orn, sprossen: [1, 2] });
         }
         for (let k = 1; k < 5; k++) fb(S, F2, -0.05, F2.L + 0.05, k * 6.4 + 0.6, k * 6.4 + 0.9, 0, 0.18, orn);
         for (let u = 0.6; u < F2.L - 0.4; u += 1) fb(S, F2, u, u + 0.5, H - 1.6, H - 1.2, 0, 0.2, orn);
@@ -60611,7 +63245,7 @@
       const F2 = seitenRahmen(4, lz0, lw, 12)["+z"];
       fb(S, F2, lw / 2 - 3, lw / 2 + 3, 0, 11.5, 0, 0.6, c.ziegel);
       fpoly(S, F2, [[lw / 2 - 3, 11.5], [lw / 2 + 3, 11.5], [lw / 2, 14]], 0, 0.6, c.ziegel);
-      fenster2(S, F2, lw / 2, 0.3, 2.2, 3.4, { art: "rund", glas: "#4a3a30", laibung: c.orn, t: 0.6 });
+      fenster3(S, F2, lw / 2, 0.3, 2.2, 3.4, { art: "rund", glas: "#4a3a30", laibung: c.orn, t: 0.6 });
       ftext(scene2, F2, name2, lw / 2, 8.4, 0.62, 0.8, 5.6, "#f4f0e4");
       if (Z2 === "museum") {
         ftext(scene2, F2, "Industriemuseum", lw / 2, 5.4, 0.65, 0.55, 5.4, "#ffffff", "#a8392c");
@@ -60700,7 +63334,7 @@
           fb(S, F2, 0, F2.L, 5.85, 5.95, 1.7, 1.8, "#5a6168");
         } else {
           fb(S, F2, 0.5, F2.L - 0.5, 0.3, Hb, 0, 0.4, c.ziegel);
-          for (let k = 0; k < 2; k++) fenster2(S, F2, F2.L / 2, 2 + k * 3.5, 1.6, 2.2, { art: "segment", glas: c.glas, t: 0.4 });
+          for (let k = 0; k < 2; k++) fenster3(S, F2, F2.L / 2, 2 + k * 3.5, 1.6, 2.2, { art: "segment", glas: c.glas, t: 0.4 });
         }
       }
       for (let x = bx0 + 1; x < bx1 - 0.5; x += 2.9) {
@@ -61034,11 +63668,11 @@
     g([u1 - b * 0.18, y], [u1 - b * 0.36, ym]);
     g([u0, y], [um, y + h]);
     g([u1, y], [um, y + h]);
-    fb(S, F2, um - 0.45, um + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS4);
+    fb(S, F2, um - 0.45, um + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS5);
   }
   function siedlFenster(S, F2, u, y, fw, fh, o = {}) {
     fb(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y - 0.12, y + fh + 0.12, 0, 0.05, o.rahmen ?? "#f4f2ec");
-    fb(S, F2, u - fw / 2, u + fw / 2, y, y + fh, 0, 0.08, o.glas ?? GLAS4);
+    fb(S, F2, u - fw / 2, u + fw / 2, y, y + fh, 0, 0.08, o.glas ?? GLAS5);
     fb(S, F2, u - 0.04, u + 0.04, y, y + fh, 0, 0.11, o.rahmen ?? "#f4f2ec");
     fb(S, F2, u - fw / 2, u + fw / 2, y + fh * 0.62, y + fh * 0.62 + 0.07, 0, 0.11, o.rahmen ?? "#f4f2ec");
     fb(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y - 0.2, y - 0.08, 0, 0.18, o.bank ?? "#cfc8b8");
@@ -61098,7 +63732,7 @@
       for (let e = 0; e < n; e++) {
         const gx = x0 + w * (e + 0.5) / n, gz2 = z0 + d - d / 2 * 0.45, gh = o.dachH * 0.45;
         S.quader(gx - 1.1, H + gh * 0.3, gz2 - 1.2, gx + 1.1, H + gh * 1.25, gz2 + 0.3, o.oben ?? o.wand);
-        S.quader(gx - 0.7, H + gh * 0.45, gz2 + 0.3, gx + 0.7, H + gh * 1.1, gz2 + 0.34, GLAS4);
+        S.quader(gx - 0.7, H + gh * 0.45, gz2 + 0.3, gx + 0.7, H + gh * 1.1, gz2 + 0.34, GLAS5);
         const gd = dachProfil(1.8, 2.6, 0.7, 0.1, "z");
         gd.translate(gx, H + gh * 1.25, gz2 - 0.4);
         S.add(gd, o.dach);
@@ -61106,12 +63740,12 @@
     }
     return H + o.dachH;
   }
-  function stall(S, x0, z0, w, d, c, dach2, tauben) {
+  function stall(S, x0, z0, w, d, c, dach3, tauben) {
     S.quader(x0, 0.3, z0, x0 + w, 2.6, z0 + d, c);
     const g = new three_module_exports.BoxGeometry(w + 0.4, 0.15, d + 0.5);
     g.rotateX(-0.18);
     g.translate(x0 + w / 2, 2.9, z0 + d / 2);
-    S.add(g, dach2);
+    S.add(g, dach3);
     S.quader(x0 + w * 0.3, 0.3, z0 + d - 0.02, x0 + w * 0.3 + 0.9, 2.1, z0 + d + 0.04, "#6b4a32");
     if (tauben) {
       S.quader(x0 + 0.4, 3, z0 + 0.4, x0 + 2.4, 4.4, z0 + 2.2, "#efe9dc");
@@ -61697,7 +64331,7 @@
         }
         for (let i = 0; i < na; i++) for (let k = 0; k < n; k++) {
           const u = off + (i + 0.5) * ra, y = y0 + k * gh;
-          fb(S, F2, u - 0.75, u + 0.75, y + 0.9, y + gh - 0.4, -0.05, 0.05, GLAS4);
+          fb(S, F2, u - 0.75, u + 0.75, y + 0.9, y + gh - 0.4, -0.05, 0.05, GLAS5);
           fb(S, F2, u - 0.05, u + 0.05, y + 0.9, y + gh - 0.4, 0, 0.1, "#e9e4d8");
           fpoly(S, F2, [[u - 0.75, y + 0.2], [u, y + 0.75], [u + 0.75, y + 0.2]], 0, 0.2, kl2);
         }
@@ -61922,7 +64556,7 @@
           const na = Math.max(1, Math.floor(F2.L / 3.2)), off = (F2.L - na * 3.2) / 2;
           for (let i = 0; i < na; i++) {
             const u = off + (i + 0.5) * 3.2;
-            fb(S, F2, u - 0.65, u + 0.65, yy + 0.8, yy + 2.3, -0.05, 0.05, GLAS4);
+            fb(S, F2, u - 0.65, u + 0.65, yy + 0.8, yy + 2.3, -0.05, 0.05, GLAS5);
             fb(S, F2, u - 0.75, u + 0.75, yy + 0.7, yy + 0.8, 0, 0.18, "#f4f2ec");
             if (traufe && F2.s === "+z" && (i + k) % 3 === 1) {
               fb(S, F2, u - 1.3, u + 1.3, yy, yy + 0.15, 0, 1.2, "#cfccc6");
@@ -62049,7 +64683,7 @@
           achse: "x",
           r,
           fenster: { art: "segment", b: 1.4, h: 2, y: 1.8, raster: 3.4, zeilen: 3 },
-          glas: GLAS4
+          glas: GLAS5
         });
         for (const F2 of sichtbar2(p, 3, sz0, sw, sz1 - sz0)) if (F2.L > 20) ftext(scene2, F2, "Lagerhaus 3", F2.L / 2, 12.6, 0.3, 1.2, F2.L * 0.4, "#f4f0e4");
         const six = 3 + sw + 4, siw = Math.min(16, W3 - six - 12);
@@ -62058,7 +64692,7 @@
           for (let i = 0; i < sn; i++) for (let k = 0; k < 2; k++) zyl5(S, sr, sr, 30, six + sr + i * 2 * sr, 0.3, sz0 + sr + k * 2 * sr, "#d6d1c6", 14);
           S.quader(six, 30.3, sz0, six + siw, 36, sz0 + 4 * sr, "#cfcac0");
           for (const F2 of sichtbar2(p, six, sz0, siw, 4 * sr)) {
-            fb(S, F2, 1, F2.L - 1, 33, 35, 0, 0.1, GLAS4);
+            fb(S, F2, 1, F2.L - 1, 33, 35, 0, 0.1, GLAS5);
             ftext(scene2, F2, "Silo", F2.L / 2, 31.4, 0.12, 1.1, F2.L * 0.5, "#5a6168");
           }
           H = 37;
@@ -62095,7 +64729,7 @@
       }
       const hx = ox1 - 2, Ht = 18;
       for (const zz of [z0 - 2.5, z0 + kb + mm / 2, zB - 6 + 2.5 - 1]) S.quader(hx - 2, 0.6, zz - 1.6, hx + 2, Ht, zz + 1.6, "#e2ddd2");
-      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS4);
+      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS5);
       S.quader(hx - 2.2, Ht, z0 - 4.3, hx + 2.2, Ht + 1, zB - 6 + 2.5 + 0.8, "#c9c4b8");
       S.quader(hx - 0.8, 7.5, z0 + 0.2, hx + 0.8, 11.5, z0 + kb - 0.2, "#2f5f8f");
       S.quader(hx - 0.8, 6.5, z0 + kb + mm + 0.2, hx + 0.8, 10, z0 + kb + mm + kb2 - 0.2, "#2f5f8f");
@@ -62363,8 +64997,8 @@
         for (let y = 2.8; y < H; y += 2.6) fb(S, F2, 0, F2.L, y - 0.05, y + 0.05, 0, 0.12, "#f4f2ec");
       }
       for (const F2 of sichtbar2(p, ex, ez0, ew, ed)) for (let u = 1.5; u < F2.L * 0.25 - 0.5; u += 2.4) for (const y of [1.5, 4.8]) {
-        fb(S, F2, u - 0.7, u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS4);
-        fb(S, F2, F2.L - u - 0.7, F2.L - u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS4);
+        fb(S, F2, u - 0.7, u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS5);
+        fb(S, F2, F2.L - u - 0.7, F2.L - u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS5);
       }
       const g = new three_module_exports.BoxGeometry(ew * 0.6, 0.35, ed + 4);
       g.rotateX(-0.06);
@@ -62389,7 +65023,7 @@
         fscheibeW(S, F2, 3, 25.5, 0, 0.15, 1.8, "#f4f0e4");
         fscheibeW(S, F2, 3, 25.5, 0.15, 0.25, 0.25, "#2f3438");
         fb(S, F2, -0.2, 6.2, 22.8, 23.3, 0, 0.3, stein);
-        fb(S, F2, 2.2, 3.8, 5, 18, 0, 0.06, GLAS4);
+        fb(S, F2, 2.2, 3.8, 5, 18, 0, 0.06, GLAS5);
       }
       const hm = walmdach(6.8, 6.8, 6);
       hm.translate(tx + 3, 30, tz + 3);
@@ -62676,13 +65310,13 @@
       for (let q2 = u - fw / 2 - 0.5; q2 <= u + fw / 2 + 0.55; q2 += 0.25) fb(S, F2, q2 - 0.02, q2 + 0.02, y - 0.12, y + 0.7, 0.95, 0.99, "#2f3438");
     }
   }
-  function mansarde2(S, p, x0, z0, w, d, H, dach2, c, gauben2, r) {
+  function mansarde2(S, p, x0, z0, w, d, H, dach3, c, gauben2, r) {
     const unten = dachProfil(w, d + 0.5, 3.4, d - 3.2, "x");
     unten.translate(x0 + w / 2, H, z0 + d / 2);
-    S.add(unten, dach2);
+    S.add(unten, dach3);
     const oben = dachProfil(w, d - 3.2, 1.4, 0.4, "x");
     oben.translate(x0 + w / 2, H + 3.4, z0 + d / 2);
-    S.add(oben, dunkler(dach2, 0.04));
+    S.add(oben, dunkler(dach3, 0.04));
     if (gauben2) {
       for (const F2 of sichtbar2(p, x0, z0, w, d)) if (F2.s[1] === "z") {
         const n = Math.max(1, Math.round(w / 3.4));
@@ -62690,7 +65324,7 @@
           const u = w * (i + 0.5) / n;
           fb(S, F2, u - 0.75, u + 0.75, H + 0.6, H + 2.6, -1.2, 0, c.orn);
           fform(S, F2, bogenForm(u - 0.5, H + 0.8, u + 0.5, H + 2.4, "rund"), 0, 0.06, c.glas);
-          fform(S, F2, bogenForm(u - 0.85, H + 2.5, u + 0.85, H + 3.1, "segment"), -1.2, 0.08, dach2);
+          fform(S, F2, bogenForm(u - 0.85, H + 2.5, u + 0.85, H + 3.1, "segment"), -1.2, 0.08, dach3);
         }
       }
     }
@@ -62698,7 +65332,7 @@
   }
   function gruenderzeitHaus(S, scene2, p, r, o) {
     const { x0, z0, w, d, n } = o, egH = o.egH ?? 4.2, gh = o.gh ?? 3.5, H = egH + n * gh;
-    const c = { wand: o.wand, orn: o.orn ?? heller(o.wand, 0.04), glas: GLAS4, sockel: o.sockel ?? dunkler(o.wand, 0.1) };
+    const c = { wand: o.wand, orn: o.orn ?? heller(o.wand, 0.04), glas: GLAS5, sockel: o.sockel ?? dunkler(o.wand, 0.1) };
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, c.wand);
     const achsen7 = Math.max(2, Math.round(w / 2.6));
     for (const F2 of sichtbar2(p, x0, z0, w, d)) {
@@ -62823,7 +65457,7 @@
           const g = new three_module_exports.BoxGeometry(0.1, 2, 0.9);
           g.rotateY(-ang);
           g.translate(tx + Math.cos(ang) * tr, 5.2 + k * 3.5, tz + Math.sin(ang) * tr);
-          S.add(g, GLAS4);
+          S.add(g, GLAS5);
         }
         const helm3 = new three_module_exports.ConeGeometry(tr + 0.4, 7, 8);
         helm3.translate(tx, tH + 3.5, tz);
@@ -63202,7 +65836,7 @@
             const y = egH + k * gh + 0.8;
             for (let a = 0; a < na; a++) {
               const u = F2.L * (a + 0.5) / na;
-              stuckFenster(S, F2, u, y, 1.1, 2, { orn, glas: GLAS4 }, k, r, { verdachung: k === 0 ? "gerade" : null });
+              stuckFenster(S, F2, u, y, 1.1, 2, { orn, glas: GLAS5 }, k, r, { verdachung: k === 0 ? "gerade" : null });
             }
             fb(S, F2, -0.02, F2.L + 0.02, egH + (k + 1) * gh - 0.15, egH + (k + 1) * gh + 0.05, 0, 0.22, orn);
           }
@@ -63212,7 +65846,7 @@
             fb(S, F2, F2.L / 2 - bb / 2, F2.L / 2 + bb / 2, yy - 0.1, yy + 0.06, 0.25, 0.4, orn);
             for (let a = 0; a < m; a++) {
               const u = F2.L / 2 + (a - (m - 1) / 2) * (bb / Math.max(1, m)) * 0.9;
-              if (yy + 2 < Hh + G2) fb(S, F2, u - 0.45, u + 0.45, yy + 0.4, yy + 1.9, 0.25, 0.33, GLAS4);
+              if (yy + 2 < Hh + G2) fb(S, F2, u - 0.45, u + 0.45, yy + 0.4, yy + 1.9, 0.25, 0.33, GLAS5);
             }
           }
           if (art !== "schlicht") kugel2(S, ...(() => {
@@ -63228,12 +65862,12 @@
               fb(S, F2, u - 0.6, u + 0.6, 0.3, 2.5, 0, 0.1, "#5a3a2a");
               continue;
             }
-            fb(S, F2, u - 0.55, u + 0.55, y, y + 1.8, 0, 0.1, GLAS4);
+            fb(S, F2, u - 0.55, u + 0.55, y, y + 1.8, 0, 0.1, GLAS5);
             fb(S, F2, u - 0.65, u + 0.65, y - 0.15, y, 0, 0.2, orn);
           }
           for (let k = 1; k <= n; k++) fb(S, F2, -0.02, F2.L + 0.02, egH + (k - 1) * gh - 0.1, egH + (k - 1) * gh + 0.05, 0, 0.15, orn);
           fform(S, F2, giebelForm(0, F2.L, Hh, G2 * 0.66, "schlicht"), -0.2, 0.1, rw, 4);
-          fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, Hh + 1, Hh + 2.5, 0.1, 0.16, GLAS4);
+          fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, Hh + 1, Hh + 2.5, 0.1, 0.16, GLAS5);
           if (hz > 6 && i % 2 === 0) {
             const [ax, az] = wp(F2, F2.L * 0.7, 0);
             S.quader(ax - 1.8, 0.3, az - 3.5, ax + 1.8, 3.2, az, waehle2(r, SANDSTEIN));
@@ -63535,11 +66169,11 @@
           } else ladenFront2(S, scene2, teil(F2, 0, F2.L), 0.3, F2.L - 0.3, egH - 0.1, { name: waehle2(r, RHEIN_LADEN), blende: holz, vordach: false, auslage: r, tief: -0.05 });
           for (let k = 0; k < n; k++) {
             const y = egH + k * gh + 0.75, na = F2.L > 7 ? 3 : 2;
-            for (let a = 0; a < na; a++) stuckFenster(S, F2, F2.L * (a + 0.5) / na, y, 1, 1.9, { orn, glas: GLAS4 }, k, r, { verdachung: k === 0 ? "gerade" : null });
+            for (let a = 0; a < na; a++) stuckFenster(S, F2, F2.L * (a + 0.5) / na, y, 1, 1.9, { orn, glas: GLAS5 }, k, r, { verdachung: k === 0 ? "gerade" : null });
             fb(S, F2, -0.02, F2.L + 0.02, egH + (k + 1) * gh - 0.12, egH + (k + 1) * gh + 0.05, 0, 0.18, orn);
           }
           fform(S, F2, giebelForm(0, F2.L, Hh, G2, art), -0.2, 0.2, putz2, 6);
-          fb(S, F2, F2.L / 2 - 0.45, F2.L / 2 + 0.45, Hh + 0.9, Hh + 2.3, 0.2, 0.28, GLAS4);
+          fb(S, F2, F2.L / 2 - 0.45, F2.L / 2 + 0.45, Hh + 0.9, Hh + 2.3, 0.2, 0.28, GLAS5);
         } else if (F2.s === "+x" || F2.s === "-x") fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.06));
         else fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.04));
       }
@@ -63653,21 +66287,21 @@
     const r = rng2(`pfalz:${p.seed}`);
     const { w: W3, d: D } = p;
     boden2(S, 0, 0, W3, D, "#ddd3c1", 0.3, 0.06);
-    const stein = "#a9a79f", stein2 = "#bdb7a8", dach2 = "#4f5a62", gold = "#c9a24a";
+    const stein = "#a9a79f", stein2 = "#bdb7a8", dach3 = "#4f5a62", gold = "#c9a24a";
     const cz = D / 2;
     const tx = 3, tw = 10, tH = 46;
     S.quader(tx, 0.3, cz - 5, tx + tw, tH, cz + 5, stein2);
-    for (const F2 of sichtbar2(p, tx, cz - 5, tw, 10)) for (let k = 0; k < 4; k++) fenster2(S, F2, F2.L / 2, 8 + k * 9, 1.6, 4.2, { art: "spitz", glas: GLAS4, laibung: heller(stein2, 0.05) });
+    for (const F2 of sichtbar2(p, tx, cz - 5, tw, 10)) for (let k = 0; k < 4; k++) fenster3(S, F2, F2.L / 2, 8 + k * 9, 1.6, 4.2, { art: "spitz", glas: GLAS5, laibung: heller(stein2, 0.05) });
     const sp = new three_module_exports.ConeGeometry(4.2, 12, 4);
     sp.rotateY(PI5 / 4);
     sp.translate(tx + tw / 2, tH + 6, cz);
-    S.add(sp, dach2);
+    S.add(sp, dach3);
     zyl5(S, 0.1, 0.1, 3, tx + tw / 2, tH + 12, cz, gold, 4);
     const ox = tx + tw + 12, rO = 11, hO = 22;
     zyl5(S, rO + 4.5, rO + 4.5, 12, ox, 0.3, cz, stein, 16);
     const ug = new three_module_exports.ConeGeometry(rO + 5, 3.2, 16);
     ug.translate(ox, 12.3 + 1.6, cz);
-    S.add(ug, dach2);
+    S.add(ug, dach3);
     zyl5(S, rO, rO, hO, ox, 0.3, cz, stein2, 8);
     for (let k = 0; k < 8; k++) {
       const a = k / 8 * 2 * PI5 + PI5 / 8, wx = ox + Math.cos(a) * (rO - 0.2), wz2 = cz + Math.sin(a) * (rO - 0.2);
@@ -63675,15 +66309,15 @@
       const g = new three_module_exports.BoxGeometry(0.3, 5.5, 2.4);
       g.rotateY(-a);
       g.translate(wx, 17, wz2);
-      S.add(g, GLAS4);
+      S.add(g, GLAS5);
     }
     const ku = new three_module_exports.ConeGeometry(rO + 0.6, 9, 8);
     ku.translate(ox, hO + 4.5 + 0.3, cz);
-    S.add(ku, dach2);
+    S.add(ku, dach3);
     zyl5(S, 1.6, 1.8, 3.4, ox, hO + 9, cz, "#e6dfcf", 8);
     const kk = new three_module_exports.ConeGeometry(2.2, 3.6, 8);
     kk.translate(ox, hO + 14.2, cz);
-    S.add(kk, dach2);
+    S.add(kk, dach3);
     zyl5(S, 0.12, 0.12, 2.6, ox, hO + 16, cz, gold, 4);
     const cx0 = ox + rO - 1, cL = W3 - cx0 - 4, cd = 14, hC = 30;
     S.quader(cx0, 0.3, cz - cd / 2, cx0 + cL, hC, cz + cd / 2, stein2);
@@ -63699,13 +66333,13 @@
     }
     const cdach = dachProfil(cL + 0.4, cd + 0.8, 12, 0.2, "x");
     cdach.translate(cx0 + cL / 2, hC, cz);
-    S.add(cdach, dach2);
+    S.add(cdach, dach3);
     S.box(0.3, 3.2, 0.3, cx0 + cL - 3, hC + 13.5, cz, gold);
     S.box(0.3, 0.3, 1.6, cx0 + cL - 3, hC + 14.4, cz, gold);
     S.quader(ox - 6, 0.3, cz + rO + 3, ox + 6, 9, cz + rO + 8, stein);
     const kd = dachProfil(12.4, 5.4, 3, 0.2, "x");
     kd.translate(ox, 9, cz + rO + 5.5);
-    S.add(kd, dach2);
+    S.add(kd, dach3);
     figuren(S, r, 2, D - 5, W3 - 2, D - 1, Math.round(W3 / 3), 0.36);
     return { hoehe: hO + 18 };
   }
@@ -63754,7 +66388,7 @@
         achse: "x",
         r,
         fenster: { art: "rund", b: 1.6, h: 2.6, y: 2, raster: 3.6, zeilen: 2 },
-        glas: GLAS4
+        glas: GLAS5
       });
       for (const F2 of sichtbar2(p, 2, 2, hw, hd)) if (F2.s === "+z" && F2.L > 16) ftext(scene2, F2, "Westfalia-Br\xE4u", F2.L / 2, 11.2, 0.3, 1.3, F2.L * 0.7, "#f4f0e4");
     }
@@ -64553,7 +67187,7 @@
       const g2 = new three_module_exports.BoxGeometry(Math.hypot(lauf, hoch), 0.9, 0.04);
       g2.rotateZ(Math.atan2(hoch, lauf));
       g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74);
-      S.add(g2, GLAS3);
+      S.add(g2, GLAS4);
     };
     if (ab) {
       const tief2 = 1.8;
@@ -64565,7 +67199,7 @@
       if (treppe) treppeLauf((lz0 + lz1) / 2, -HUB, Math.min(lang, 8.2), HUB, 0);
       else rolltreppe(S, lx0 + 0.15 + lang, (lz0 + lz1) / 2, lang, HUB, -HUB + 0.06, d, 1 - (tief2 - 0.2) / HUB);
       const gl = (w, tt, cx, cz) => {
-        S.box(w, 1.05, tt, cx, 0.6, cz, GLAS3);
+        S.box(w, 1.05, tt, cx, 0.6, cz, GLAS4);
         S.box(w + 0.04, 0.07, tt + 0.08, cx, 1.15, cz, "#c9d2d8");
       };
       gl(lx1 - lx0 - 1.4, 0.04, (lx0 + lx1) / 2 + 0.7, lz0);
@@ -64624,7 +67258,7 @@
     }
     for (let q2 = 0; q2 < 2; q2++) figur2(S, x + 2.3 + q2 * 3.1, z2 + 3.4, 950 + q2, "kunde", { y: mattenY + 0.31 + (unten ? 0 : 0.06), ry: PI6, pose: "schauen" });
     const gl = (w, t, cx, cz) => {
-      S.box(w, 1.05, t, cx, 0.6, cz, GLAS3);
+      S.box(w, 1.05, t, cx, 0.6, cz, GLAS4);
       S.box(w + 0.04, 0.07, t + 0.08, cx, 1.15, cz, "#c9d2d8");
     };
     if (unten) {
@@ -65030,7 +67664,7 @@
     if (fam === 1) {
       const F2 = 3.4, ende = b > (achse === "z" ? ra.B : ra.T) - F2 - 0.01 ? b - F2 : b;
       box(ende - a, 0.3, 0.3, (a + ende) / 2, 0.15, "#59636b");
-      box(ende - a, WH2 - 0.35, 0.04, (a + ende) / 2, 0.3 + (WH2 - 0.35) / 2, GLAS3);
+      box(ende - a, WH2 - 0.35, 0.04, (a + ende) / 2, 0.3 + (WH2 - 0.35) / 2, GLAS4);
       box(ende - a, 0.32, 0.36, (a + ende) / 2, WH2 - 0.16, "#e3e8ea");
       for (let u = a; u <= ende + 0.01; u += 1.55) if (!istTuer(u)) box(0.1, WH2, 0.14, u, WH2 / 2, "#e6ebed");
       if (ende < b) {
@@ -65043,7 +67677,7 @@
         Lv.box(6.4, 0.12, 0.06, 0, 4, 1.52, HS_ROT);
       }
       if (!eg) {
-        box(ende - a, 1.05, 0.04, (a + ende) / 2, 0.6, GLAS3);
+        box(ende - a, 1.05, 0.04, (a + ende) / 2, 0.6, GLAS4);
         box(ende - a, 0.06, 0.1, (a + ende) / 2, 1.12, "#c9d2d8");
       }
       return;
@@ -65063,16 +67697,16 @@
           box(0.6, WH2 + 0.6, 0.6, u + R3, (WH2 + 0.6) / 2, HS_ROT);
           box(R3 + 0.6, 0.6, 0.6, m, WH2 + 0.3, HS_ROT);
           const Lw = L2(m, -1.6);
-          Lw.box(4.2, 3, 0.06, 0, 0, 1.6, GLAS3);
-          Lw.box(0.06, 3, 3.2, -2.1, 0, 0, GLAS3);
-          Lw.box(0.06, 3, 3.2, 2.1, 0, 0, GLAS3);
+          Lw.box(4.2, 3, 0.06, 0, 0, 1.6, GLAS4);
+          Lw.box(0.06, 3, 3.2, -2.1, 0, 0, GLAS4);
+          Lw.box(0.06, 3, 3.2, 2.1, 0, 0, GLAS4);
           Lw.box(4.4, 0.3, 3.4, 0, 3, 0, "#f4f3ef");
           Lw.box(1.8, 2.6, 0.04, 0, 0, 1.64, "#2f3d48");
           continue;
         }
         box(0.2, WH2, 0.4, u, WH2 / 2, "#59636b");
         box(R3, 0.6, 0.3, m, 0.3, "#7c838a");
-        box(R3 - 0.2, 3.3, 0.04, m, 2.25, GLAS3);
+        box(R3 - 0.2, 3.3, 0.04, m, 2.25, GLAS4);
         box(R3, WH2 - 3.9, 0.3, m, 3.9 + (WH2 - 3.9) / 2, blech);
         box(R3, 0.12, 0.36, m, 3.95, HS_ROT);
       }
@@ -65083,7 +67717,7 @@
       if (!eg) {
         box(b - a, 1.35, 0.3, (a + b) / 2, 0.675, brF);
         for (let u = a + 1.25; u < b; u += 1.25) box(0.05, 1.3, 0.34, u, 0.67, dunkler(brF, 0.08));
-        box(b - a, 2.5, 0.04, (a + b) / 2, 1.35 + 1.25, GLAS3);
+        box(b - a, 2.5, 0.04, (a + b) / 2, 1.35 + 1.25, GLAS4);
         for (let u = a + 0.8; u < b; u += 1.6) box(0.1, 2.5, 0.1, u, 2.6, rF);
         for (let u = a + 0.8; u < b - 1.6; u += 1.6) if (r() < 0.35) {
           const hh = zw(r, 0.5, 1.6);
@@ -65102,7 +67736,7 @@
         }
         box(R3 - 0.4, 0.55, 1.7, m, 0.275, "#2b3036");
         box(R3 - 0.4, 0.04, 1.6, m, 0.57, "#e9e3d8");
-        box(R3 - 0.4, 3.1, 0.04, m, 0.55 + 1.55, GLAS3);
+        box(R3 - 0.4, 3.1, 0.04, m, 0.55 + 1.55, GLAS4);
         deko2(m, artAn(m), 0.85);
       }
       box(0.4, WH2, 0.5, b, WH2 / 2, HS_BLAU);
@@ -65113,7 +67747,7 @@
       if (!eg) {
         for (let u = a + 0.2; u < b; u += 0.42) box(0.26, 1.1, 0.12, u, 0.55, r() < 0.5 ? holz : dunkler(holz, 0.05));
         box(b - a, 0.12, 0.3, (a + b) / 2, 1.16, "#3b3f44");
-        box(b - a, 2.2, 0.04, (a + b) / 2, 2.3, GLAS3);
+        box(b - a, 2.2, 0.04, (a + b) / 2, 2.3, GLAS4);
         box(b - a, WH2 - 3.4, 0.3, (a + b) / 2, 3.4 + (WH2 - 3.4) / 2, holz);
         return;
       }
@@ -65123,7 +67757,7 @@
         const m = u + R3 / 2;
         if (portal && m > portal[0] && m < portal[1]) {
           box(R3, 0.45, 0.2, m, 0.22, "#c9b08a");
-          box(R3, WH2 - 0.5, 0.04, m, 0.45 + (WH2 - 0.5) / 2, GLAS3);
+          box(R3, WH2 - 0.5, 0.04, m, 0.45 + (WH2 - 0.5) / 2, GLAS4);
           box(0.18, WH2, 0.18, u, WH2 / 2, "#3b3f44");
           box(R3, 0.3, 0.3, m, WH2 - 0.15, "#3b3f44");
           continue;
@@ -65141,7 +67775,7 @@
         box(R3 - 1.1, 0.12, 0.7, m + 0.55, 0.62, heller(stein, 0.06));
         box(R3 - 1.1, WH2 - 3.9, 0.6, m + 0.55, 3.9 + (WH2 - 3.9) / 2, stein);
         box(R3 - 1.1, 0.04, 0.62, m + 0.55, 4.2, dunkler(stein, 0.08));
-        box(R3 - 1.1, 3.2, 0.04, m + 0.55, 0.68 + 1.6, GLAS3);
+        box(R3 - 1.1, 3.2, 0.04, m + 0.55, 0.68 + 1.6, GLAS4);
         box(0.08, 3.2, 0.1, m + 0.55, 2.28, "#3b3f44");
         box(R3 - 1.1, 0.5, 1.4, m + 0.55, 0.25, "#c9b08a");
         deko2(m + 0.55, artAn(m), 0.75);
@@ -65153,7 +67787,7 @@
       if (!eg) {
         box(b2 - a, 0.9, 0.3, (a + b2) / 2, 0.45, putz2);
         for (let u = a + 1.5; u < b2 - 0.5; u += 3) {
-          box(1.7, 2, 0.04, u, 1.9, GLAS3);
+          box(1.7, 2, 0.04, u, 1.9, GLAS4);
           box(2, 0.15, 0.34, u, 0.83, akz);
           box(2, 0.15, 0.34, u, 2.97, akz);
           box(0.1, 2, 0.08, u, 1.9, "#eef1f2");
@@ -65169,14 +67803,14 @@
           eingangTuer(m, akz);
           continue;
         }
-        box(uE - u - 0.45, 3.4, 0.04, (u + uE) / 2, 0.6 + 1.7, GLAS3);
+        box(uE - u - 0.45, 3.4, 0.04, (u + uE) / 2, 0.6 + 1.7, GLAS4);
         if (uE - u > 3) deko2((u + uE) / 2, artAn(m), 0.75);
       }
       if (achse === "z" && b2 < b && ra.zylR) {
         const Rz = ra.zylR, cx = ra.B - Rz, cz = ra.T - Rz;
         const g = new three_module_exports.CylinderGeometry(Rz - 0.05, Rz - 0.05, WH2 - 0.3, 16, 1, true, 0, PI6 / 2);
         g.translate(cx, 0.3 + (WH2 - 0.3) / 2, cz);
-        S.add(g, GLAS3);
+        S.add(g, GLAS4);
         const sockel = new three_module_exports.CylinderGeometry(Rz, Rz, 0.3, 16, 1, false, 0, PI6 / 2);
         sockel.translate(cx, 0.15, cz);
         S.add(sockel, "#b8ab98");
@@ -65215,7 +67849,7 @@
         continue;
       }
       box(R3 - 0.35, 0.3, 0.3, m, 0.15, "#3a4148");
-      box(R3 - 0.35, 3.3, 0.04, m, 0.3 + 1.65, GLAS3);
+      box(R3 - 0.35, 3.3, 0.04, m, 0.3 + 1.65, GLAS4);
       if ((u / R3 | 0) % 2 === 0) {
         box(R3 - 0.6, 0.35, 1.2, m, 0.32, "#ffffff");
         deko2(m, artAn(m), 0.6);
@@ -65374,9 +68008,9 @@
       const G2 = 4;
       flaecheP(ax0, az1, ax1 + G2, az1 + G2);
       flaecheP(ax1, az0, ax1 + G2, az1);
-      S.box(ax1 - ax0 + G2, 1.05, 0.05, (ax0 + ax1 + G2) / 2, 0.58, az1 + G2 - 0.1, GLAS3);
+      S.box(ax1 - ax0 + G2, 1.05, 0.05, (ax0 + ax1 + G2) / 2, 0.58, az1 + G2 - 0.1, GLAS4);
       S.box(ax1 - ax0 + G2, 0.07, 0.12, (ax0 + ax1 + G2) / 2, 1.12, az1 + G2 - 0.1, "#c9d2d8");
-      S.box(0.05, 1.05, az1 - az0 + G2, ax1 + G2 - 0.1, 0.58, (az0 + az1 + G2) / 2, GLAS3);
+      S.box(0.05, 1.05, az1 - az0 + G2, ax1 + G2 - 0.1, 0.58, (az0 + az1 + G2) / 2, GLAS4);
       S.box(0.12, 0.07, az1 - az0 + G2, ax1 + G2 - 0.1, 1.12, (az0 + az1 + G2) / 2, "#c9d2d8");
       S.box(ax1 - ax0 + G2, 0.6, 0.2, (ax0 + ax1 + G2) / 2, -0.3, az1 + G2 + 0, "#e9e4dc");
       S.box(0.2, 0.6, az1 - az0 + G2, ax1 + G2, -0.3, (az0 + az1 + G2) / 2, "#e9e4dc");
@@ -65409,7 +68043,7 @@
       L2.box(wl, WH2, 0.3, 0, 0, -t, "#ece8e1");
       L2.box(0.3, WH2, t, achse === "z" ? -wl / 2 + 0.15 : wl / 2 - 0.15, 0, -t / 2, "#e6e2da");
       L2.box(wl, WH2 - 3.4, 0.4, 0, 3.4, -0.2, f);
-      L2.box(wl - 0.4, 3.1, 0.04, 0, 0.3, -0.2, GLAS3);
+      L2.box(wl - 0.4, 3.1, 0.04, 0, 0.3, -0.2, GLAS4);
       L2.box(wl, 0.3, 0.3, 0, 0, -0.2, "#3a4148");
       for (let q2 = 0; q2 < 2; q2++) L2.box(1.4, 1.7, 0.5, -1.6 + q2 * 3, 0, -t + 0.5, waehle2(r, ["#c9d2d8", "#e8dcc6", "#b98d61"]));
       L2.box(1.6, 0.9, 0.8, 0, 0, -3.5, "#ffffff");
@@ -65443,6 +68077,7 @@
   var FASSADE = ["#efe4c9", "#e3d3bd", "#ece5d7", "#d3d9de", "#b9785e", "#e8dfcf", "#c9b8a0", "#dde1e4"];
   var GANG = { a: "#f2f1ee", b: "#dedcd7", m: "fliese" };
   var HALLE = { a: "#e8e1d4", b: "#d6cdbd", c: "#c4b8a4", m: "platten" };
+  var SCHWESTER_BODEN = { a: "#cfc6b4", b: "#c5bba9", m: "fliese" };
   function masse2(haus2) {
     const gf = haus2.grundflaecheQm;
     const B2 = Math.max(15, Math.round(Math.sqrt(gf * 1.5) / 5) * 5);
@@ -65457,7 +68092,7 @@
     };
     const kx = Math.max(1, Math.min(nx - 3, Math.floor(nx / 2) - 1)), kz2 = Math.max(1, Math.min(nz - 2, Math.floor(nz / 2) - 1));
     for (let i = kx; i < kx + 2; i++) for (let j = kz2; j < kz2 + 2; j++) typ[i][j] = "kern";
-    const ring = nx >= 8 && nz >= 7;
+    const ring = haus2.kette !== "schwester" && nx >= 8 && nz >= 7;
     if (ring) for (let i = kx - 1; i <= kx + 2; i++) for (let j = kz2 - 1; j <= kz2 + 1; j++) setz(i, j, "halle");
     const gz2 = Math.min(nz - 1, kz2 + 2), gx = kx;
     if (gz2 > kz2 + 1) for (let i = 0; i < nx; i++) setz(i, gz2, "gang");
@@ -65485,7 +68120,7 @@
         for (let j = c; j < e; j++) setz(i, j, "neben");
       }
     }
-    return { B: B2, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring };
+    return { B: B2, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring, schwester: haus2.kette === "schwester" };
   }
   function unterteilen(fl, etageNr) {
     const out = [];
@@ -65572,7 +68207,26 @@
     const gesQm = haus2.flaechen.reduce((s2, f) => s2 + f.qm, 0) || 1;
     return (k.umsatz ?? 0) * fl.qm / gesQm;
   }
+  function lagerSchwester(S, scene2, haus2) {
+    const { B: B2, T } = masse2(haus2);
+    S.box(B2, 0.4, T, B2 / 2, -0.2, T / 2, "#999185");
+    S.box(B2, 3.6, 0.45, B2 / 2, 1.7, 0, "#aaa69d");
+    S.box(0.45, 3.6, T, 0, 1.7, T / 2, "#b2ada2");
+    let regale = 0;
+    for (let x = 3; x < B2 - 3; x += 7) for (let z2 = 3; z2 < T - 3; z2 += 5) {
+      if (Math.abs(x - B2 / 2) < 5 && Math.abs(z2 - T / 2) < 6) continue;
+      S.box(3.7, 2.4, 0.9, x, 1.2, z2, "#77796f");
+      S.box(3.5, 0.15, 0.95, x, 0.6, z2, "#b3a99a");
+      S.box(3.5, 0.15, 0.95, x, 1.45, z2, "#b3a99a");
+      regale++;
+    }
+    const stufen = 7, steigung = 0.25;
+    for (let j = 0; j < stufen; j++) S.box(3.2, 0.22, 0.55, B2 / 2, 0.25 + j * steigung, T / 2 - 2.3 + j * 0.5, "#a4a39b");
+    S.box(3, 2.4, 0.24, B2 - 4.5, 1.2, T - 0.35, FARBE_SCHWESTER);
+    return { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.6, -0.6), new three_module_exports.Vector3(B2 + 0.6, 4, T + 0.6)), breite: B2, tiefe: T, zonen: [], anzahl: S.anzahl, dichte: 0, kunden: 0, regale };
+  }
   function etage(S, scene2, haus2, etageNr, o = {}) {
+    if (haus2.kette === "schwester" && etageNr < 0) return lagerSchwester(S, scene2, haus2);
     if (haus2.format === "sport") return sportEtage(S, scene2, haus2, etageNr, o);
     vorbereiten(S, scene2);
     const ra = raster(haus2, etageNr);
@@ -65598,7 +68252,7 @@
     const jeZelle = Math.max(0.35, Math.min(1.9, umsatz / 850 / verkaufsZellen));
     const anteil2 = (ax1 - ax0) * (az1 - az0) / (B2 * T);
     const zellenImBild = zn.reduce((s2, z2) => s2 + z2.zellen.filter((c) => drin(c.i, c.j)).length, 0);
-    let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil2) * (etageNr === 0 ? 1.15 : 1));
+    let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil2) * (etageNr === 0 ? 1.15 : 1) * (haus2.kette === "schwester" ? 0.6 : 1));
     let d = o.dichte ?? 1;
     let tmp2, gruppe2, versuch = 0;
     for (; ; ) {
@@ -65618,8 +68272,9 @@
       });
     }
     for (const [k, gs] of tmp2.teile) {
-      if (!S.teile.has(k)) S.teile.set(k, []);
-      S.teile.get(k).push(...gs);
+      const farbe = haus2.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k) ? FARBE_SCHWESTER : k;
+      if (!S.teile.has(farbe)) S.teile.set(farbe, []);
+      S.teile.get(farbe).push(...gs);
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe2.children.length) scene2.add(gruppe2.children[0]);
@@ -65634,7 +68289,7 @@
     const r = rng2(hid + etageNr * 101);
     const eg = etageNr === 0;
     const sport = haus2.format === "sport";
-    const fassade2 = FASSADE[(haus2.fassade ?? 0) % FASSADE.length];
+    const fassade3 = FASSADE[(haus2.fassade ?? 0) % FASSADE.length];
     const hatOben = haus2.etagen.includes(etageNr + 1), hatUnten = haus2.etagen.includes(etageNr - 1);
     const zoneVon = Array.from({ length: nx }, () => Array(nz).fill(-1));
     zn.forEach((z2, zi) => z2.zellen.forEach((c) => zoneVon[c.i][c.j] = zi));
@@ -65652,17 +68307,17 @@
     };
     const kz0 = kz2 * R4 + 5.5, kz1 = kz2 * R4 + 8.7, kx0 = kx * R4 + 0.9, kx1 = kx * R4 + 9.3;
     const kernDrin = drin(kx, kz2) && drin(kx + 1, kz2 + 1);
-    if (hatUnten && kernDrin) {
+    if (hatUnten && kernDrin && !ra.schwester) {
       platte4(ax0, az0, ax1, kz0);
       platte4(ax0, kz1, ax1, az1);
       platte4(ax0, kz0, kx0, kz1);
       platte4(kx1, kz0, ax1, kz1);
     } else platte4(ax0, az0, ax1, az1);
     if (!eg) {
-      S.box(ax1 - ax0 + 0.3, 1.7, 0.3, (ax0 + ax1) / 2, -1.35, az1 + 0.15, fassade2);
-      S.box(0.3, 1.7, az1 - az0 + 0.3, ax1 + 0.15, -1.35, (az0 + az1) / 2, dunkler(fassade2, 0.04));
-      S.box(ax1 - ax0 + 0.6, 0.25, 0.5, (ax0 + ax1) / 2, -0.4, az1 + 0.2, heller(fassade2, 0.04));
-      S.box(0.5, 0.25, az1 - az0 + 0.6, ax1 + 0.2, -0.4, (az0 + az1) / 2, heller(fassade2, 0.03));
+      S.box(ax1 - ax0 + 0.3, 1.7, 0.3, (ax0 + ax1) / 2, -1.35, az1 + 0.15, fassade3);
+      S.box(0.3, 1.7, az1 - az0 + 0.3, ax1 + 0.15, -1.35, (az0 + az1) / 2, dunkler(fassade3, 0.04));
+      S.box(ax1 - ax0 + 0.6, 0.25, 0.5, (ax0 + ax1) / 2, -0.4, az1 + 0.2, heller(fassade3, 0.04));
+      S.box(0.5, 0.25, az1 - az0 + 0.6, ax1 + 0.2, -0.4, (az0 + az1) / 2, heller(fassade3, 0.03));
       if (etageNr > 0) {
         for (let x = ax0 + 1.25; x < ax1; x += 2.5) S.box(1.4, 1, 0.1, x, -1.2, az1 + 0.31, "#55636f");
         for (let z2 = az0 + 1.25; z2 < az1; z2 += 2.5) S.box(0.1, 1, 1.4, ax1 + 0.31, -1.2, z2, "#55636f");
@@ -65682,7 +68337,7 @@
       if (!z2.zellen.some((c) => drin(c.i, c.j))) return;
       const f = z2.flaeche, art = z2.art;
       const Z2 = { alle: z2.zellen.filter((c) => drin(c.i, c.j)), kante, sicht: sicht3, y: 0, bereich: [ax0, az0, ax1, az1] };
-      const opt = { seed: hid % 1e3 + zi * 37 + etageNr * 11 + 1, dichte: d, eg, basis: f.gruppe, mieter: f.mieter, marke: f.marke, name: f.name };
+      const opt = { seed: hid % 1e3 + zi * 37 + etageNr * 11 + 1, dichte: ra.schwester ? Math.min(d, 0.48) : d, eg, basis: f.gruppe, mieter: f.mieter, marke: ra.schwester ? void 0 : f.marke, name: f.name, ...ra.schwester ? { teil: true, schildEinmal: true } : {} };
       const res = art === "konzession" || art === "untermiete" ? fremdflaeche(S, scene2, art, Z2, { ...opt, mieter: f.mieter ?? ["discounter", "gastro", "fitness", "arzt"][(zi + etageNr) % 4], marke: MARKEN2.find((m) => m.gruppe === f.gruppe) ?? MARKEN2[((hid >> 3) + zi) % MARKEN2.length], seed: (hid >> 3) + zi }) : flaeche2(S, scene2, art, Z2, opt);
       if (!["leer", "umbau"].includes(art)) freiZone.push(...res.frei);
       belegt2.push(...res.belegt);
@@ -65727,7 +68382,7 @@
         continue;
       }
     }
-    if (kernDrin) {
+    if (kernDrin && !ra.schwester) {
       rolltreppenKern(S, kx * R4, kz2 * R4, { auf: hatOben, ab: hatUnten, dichte: d });
       if (!hatUnten) {
         const L2 = lokal2(S, kx * R4 + 5, 0.06, kz2 * R4 + 7.3, 0);
@@ -65747,7 +68402,23 @@
         }
         belegt2.push([kx * R4 + 2.5, kz2 * R4 + 5.2, kx * R4 + 7.5, kz2 * R4 + 9.5]);
       }
-    } else for (let i = kx; i < kx + 2; i++) for (let j = kz2; j < kz2 + 2; j++) if (drin(i, j)) gangZelle2(S, scene2, "halle", i, j, ra, eg, d, freiGang, rng2(i + j));
+    } else if (!ra.schwester) {
+      for (let i = kx; i < kx + 2; i++) for (let j = kz2; j < kz2 + 2; j++) if (drin(i, j)) gangZelle2(S, scene2, "halle", i, j, ra, eg, d, freiGang, rng2(i + j));
+    }
+    if (kernDrin && ra.schwester) {
+      const x0 = kx * R4, z0 = kz2 * R4;
+      const stufen = 12, schritt = 3 / stufen;
+      S.box(9.5, 0.16, 9.5, x0 + 5, 0.08, z0 + 5, SCHWESTER_BODEN.a);
+      for (let j = 0; j < stufen; j++) {
+        S.box(2.6, 0.2, 0.55, x0 + 3.3, 0.25 + j * schritt, z0 + 1.6 + j * 0.51, "#b0aca3");
+        S.box(2.6, 0.2, 0.55, x0 + 6.7, 3.2 - j * schritt, z0 + 1.6 + j * 0.51, "#bab6ad");
+      }
+      S.box(0.22, 2.8, 8, x0 + 1.8, 1.45, z0 + 5, "#96968e");
+      S.box(0.22, 2.8, 8, x0 + 8.2, 1.45, z0 + 5, "#9c9a91");
+      S.box(1.3, 0.7, 0.55, x0 + 5, 0.45, z0 + 8.8, "#a79e90");
+      S.box(1.18, 0.08, 0.62, x0 + 5, 0.85, z0 + 8.8, FARBE_SCHWESTER);
+      belegt2.push([x0 + 0.5, z0 + 0.5, x0 + 9.5, z0 + 9.5]);
+    }
     for (let i = 2; i < nx; i += 2) for (let j = 2; j < nz; j += 2) {
       const x = i * R4, z2 = j * R4;
       if (x < ax0 + 1 || x > ax1 - 1 || z2 < az0 + 1 || z2 > az1 - 1) continue;
@@ -65760,11 +68431,11 @@
     rueckwand(S, "z", az0, az1, ax0, 0, WANDHOEHE, { pilasterVersatz: 0, putz: "#f1e9dd" });
     if (scene2 && az0 === 0 && ax1 - ax0 > 14) {
       const lx = Math.min(ax1 - 6, Math.max(ax0 + 6, (kx + 1) * R4));
-      if (!(lx > (nx - 2) * R4 - 3)) wandschild(S, scene2, sport ? "HARTWIG SPORT" : "HARTWIG", "x", lx, 4.05, 0.25, { schrift: "#d23c32", hoehe: 0.7 });
+      if (!(lx > (nx - 2) * R4 - 3)) wandschild(S, scene2, haus2.kette === "schwester" ? NAME_SCHWESTER.toUpperCase() : sport ? "HARTWIG SPORT" : "HARTWIG", "x", lx, 4.05, 0.25, { schrift: haus2.kette === "schwester" ? FARBE_SCHWESTER : "#d23c32", hoehe: haus2.kette === "schwester" ? 0.48 : 0.7 });
     }
     const artAn = ra.artAn;
-    frontKante(S, scene2, "z", ax0, ax1, az1, eg, fassade2, ra, r, artAn, d);
-    frontKante(S, scene2, "x", az0, az1, ax1, eg, fassade2, ra, r, artAn, d);
+    frontKante(S, scene2, "z", ax0, ax1, az1, eg, fassade3, ra, r, artAn, d);
+    frontKante(S, scene2, "x", az0, az1, ax1, eg, fassade3, ra, r, artAn, d);
     if (eg) strasse2(S, ax0, az0, ax1, az1, r, d);
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       const t = typ[i][j], zi = zoneVon[i][j];
@@ -65792,6 +68463,17 @@
         }
       }
       k.leer = { m: best * q2, wo };
+    }
+    if (ra.schwester) {
+      for (let ix = ax0 + 5; ix < ax1 - 2; ix += 8) for (let iz = az0 + 5; iz < az1 - 2; iz += 8) {
+        S.box(1.8, 0.1, 0.7, ix, WANDHOEHE - 0.12, iz, "#e1dfd4");
+        S.box(1.45, 0.045, 0.5, ix, WANDHOEHE - 0.18, iz, "#f2eee0");
+      }
+      const kx2 = ax1 - 5, kz3 = az1 - 5.2;
+      S.box(2.6, 0.88, 0.85, kx2, 0.52, kz3, "#968f83");
+      S.box(2.8, 0.12, 0.92, kx2, 1.02, kz3, "#b6ada0");
+      S.box(0.8, 0.25, 0.42, kx2 - 0.6, 1.19, kz3, "#48565b");
+      S.box(0.3, 0.18, 0.35, kx2 + 0.55, 1.2, kz3, "#d9d0bd");
     }
     const pool = freiZone.concat(freiGang);
     const n = Math.min(k.kunden, pool.length);
@@ -65860,7 +68542,7 @@
     const { nx, nz, kx, kz: kz2, gx, gz: gz2, ring } = ra;
     const typ = (a, b) => ra.typ[a]?.[b];
     const x = i * R4, z2 = j * R4;
-    boden(S, x, z2, R4, R4, 0, t === "halle" ? HALLE : GANG, d);
+    boden(S, x, z2, R4, R4, 0, ra.schwester ? SCHWESTER_BODEN : t === "halle" ? HALLE : GANG, d);
     const fr = (fx, fz) => frei6.push([x + fx, z2 + fz]);
     for (let q2 = 0; q2 < 5; q2++) fr(zw(r, 0.6, 4.4), zw(r, 0.6, 4.4));
     const [ax0, az0] = ra.ausschnitt;
@@ -66054,7 +68736,7 @@
     L2.box(2, 0.2, 0.02, 0, 0.9, -0.36, "#ffffff");
   }
   var PAL_D = ["#d65a6f", "#f2c6d2", "#e8dcc6", "#2b2b2b", "#7d97b8", "#c9483e", "#f4f0ea", "#e9b44c"];
-  function frontKante(S, scene2, achse, a, b, pos, eg, fassade2, ra, r, artAn, d) {
+  function frontKante(S, scene2, achse, a, b, pos, eg, fassade3, ra, r, artAn, d) {
     const { gz: gz2, gx, nx, nz } = ra;
     const eingang = achse === "z" ? [gx * R4, gx * R4 + R4] : [gz2 * R4, gz2 * R4 + R4];
     const echteFront = achse === "z" ? pos === ra.T : pos === ra.B;
@@ -66063,7 +68745,7 @@
       for (let u = a; u < b - 0.01; u += R4) {
         const m = u + R4 / 2;
         const tuer = m > eingang[0] && m < eingang[1];
-        box(0.4, WANDHOEHE, 0.5, u, WANDHOEHE / 2, fassade2);
+        box(0.4, WANDHOEHE, 0.5, u, WANDHOEHE / 2, fassade3);
         box(R4, 0.28, 0.5, m, WANDHOEHE - 0.14, "#d23c32");
         if (tuer) {
           const L3 = achse === "z" ? lokal2(S, m, 0.065, pos - 1.3, 0) : lokal2(S, pos - 1.3, 0.065, m, Math.PI / 2);
@@ -66076,22 +68758,22 @@
         const tief2 = 1.7;
         box(R4 - 0.4, 0.5, tief2, m, 0.25, "#3f4a53");
         box(R4 - 0.4, 0.04, tief2 - 0.1, m, 0.52, "#e9e3d8");
-        if (achse === "z") S.box(R4 - 0.4, 1.5, 0.12, m, 1.25, pos - tief2, dunkler(fassade2, 0.06));
-        else S.box(0.12, 1.5, R4 - 0.4, pos - tief2, 1.25, m, dunkler(fassade2, 0.06));
-        box(R4 - 0.4, 2.6, 0.04, m, 1.85, GLAS3);
+        if (achse === "z") S.box(R4 - 0.4, 1.5, 0.12, m, 1.25, pos - tief2, dunkler(fassade3, 0.06));
+        else S.box(0.12, 1.5, R4 - 0.4, pos - tief2, 1.25, m, dunkler(fassade3, 0.06));
+        box(R4 - 0.4, 2.6, 0.04, m, 1.85, GLAS4);
         box(R4 - 0.4, 0.08, 0.1, m, 3.15, "#c9d2d8");
         const i = achse === "z" ? Math.floor(m / R4) : nx - 1, j = achse === "z" ? nz - 1 : Math.floor(m / R4);
         const L2 = achse === "z" ? lokal2(S, m, 0.56, pos - tief2 / 2, 0) : lokal2(S, pos - tief2 / 2, 0.56, m, Math.PI / 2);
         if (d > 0.3) deko(L2, artAn(i, j), r);
       }
-      box(0.4, WANDHOEHE, 0.5, b, WANDHOEHE / 2, fassade2);
+      box(0.4, WANDHOEHE, 0.5, b, WANDHOEHE / 2, fassade3);
     } else if (ra.ug && echteFront) {
-      box(b - a, 1.25, 0.3, (a + b) / 2, 0.62, dunkler(fassade2, 0.04));
-      box(b - a + 0.1, 0.07, 0.36, (a + b) / 2, 1.27, heller(fassade2, 0.03));
+      box(b - a, 1.25, 0.3, (a + b) / 2, 0.62, dunkler(fassade3, 0.04));
+      box(b - a + 0.1, 0.07, 0.36, (a + b) / 2, 1.27, heller(fassade3, 0.03));
     } else if (!eg && echteFront) {
-      box(b - a, 0.9, 0.25, (a + b) / 2, 0.45, fassade2);
-      box(b - a + 0.1, 0.06, 0.32, (a + b) / 2, 0.93, heller(fassade2, 0.05));
-      box(b - a, 0.7, 0.04, (a + b) / 2, 1.3, GLAS3);
+      box(b - a, 0.9, 0.25, (a + b) / 2, 0.45, fassade3);
+      box(b - a + 0.1, 0.06, 0.32, (a + b) / 2, 0.93, heller(fassade3, 0.05));
+      box(b - a, 0.7, 0.04, (a + b) / 2, 1.3, GLAS4);
       box(b - a, 0.05, 0.08, (a + b) / 2, 1.67, "#c9d2d8");
     } else {
       box(b - a, 0.08, 0.5, (a + b) / 2, 0.04, "#59626a");
@@ -66216,7 +68898,7 @@
     if (m.sockel && k >= m.sockel) return { w: m.turm.w, d: m.turm.d, turm: true };
     return { w: m.w, d: m.d, turm: false };
   }
-  function fassade(S, scene2, x, z2, w, d, seite) {
+  function fassade2(S, scene2, x, z2, w, d, seite) {
     const pz4 = seite === "+z";
     const len = pz4 ? w : d;
     const L2 = pz4 ? lokal2(S, x + w / 2, 0, z2 + d, 0) : lokal2(S, x + w, 0, z2 + d / 2, PI7 / 2);
@@ -66309,7 +68991,7 @@
       turm: turm4,
       y0: S2.y0 ?? 0,
       eingangU: Math.round(w0 * 0.14 / 2.5) * 2.5,
-      F: [fassade(S2, scene2, x0, z0, w0, d0, "+z"), fassade(S2, scene2, x0, z0, w0, d0, "+x")]
+      F: [fassade2(S2, scene2, x0, z0, w0, d0, "+z"), fassade2(S2, scene2, x0, z0, w0, d0, "+x")]
     });
     let unten, oben, resU, resO, hoehe;
     if (!m.sockel) {
@@ -66621,7 +69303,7 @@
     if (staffel2) {
       const e = E[E.length - 1];
       S.quader(x, e.y, z2, x + w - 2.6, H, z2 + d - 2.6, beton);
-      const Fs = [fassade(S, c.scene, x, z2, w - 2.6, d - 2.6, "+z"), fassade(S, c.scene, x, z2, w - 2.6, d - 2.6, "+x")];
+      const Fs = [fassade2(S, c.scene, x, z2, w - 2.6, d - 2.6, "+z"), fassade2(S, c.scene, x, z2, w - 2.6, d - 2.6, "+x")];
       for (const F2 of Fs) {
         q(F2, -F2.len / 2, F2.len / 2, e.y + 0.4, e.y + e.h - 0.5, 0, 0.06, glasVon(e, r, bronze));
         for (const u2 of achsen2(-F2.len / 2, F2.len / 2, 1.8)) q(F2, u2 - 0.06, u2 + 0.06, e.y + 0.4, e.y + e.h - 0.5, 0.06, 0.14, rahmen2);
@@ -66760,7 +69442,7 @@
     for (const T of teile) {
       const tw = T.x1 - T.x0, td = T.z1 - z2;
       S.quader(T.x0, 0, z2, T.x1, H, T.z1, "#d9dcdc");
-      const Fs = [fassade(S, c.scene, T.x0, z2, tw, td, "+z"), fassade(S, c.scene, T.x0, z2, tw, td, "+x")];
+      const Fs = [fassade2(S, c.scene, T.x0, z2, tw, td, "+z"), fassade2(S, c.scene, T.x0, z2, tw, td, "+x")];
       for (const F2 of Fs) {
         const L2 = F2.len / 2;
         for (const e of E) {
@@ -67024,8 +69706,8 @@
       const teile = tuer ? [[0, L2 * 0.55], [L2 * 0.55 + 1, L2]] : [[0, L2]];
       for (const [a, b] of teile) {
         if (b - a < 0.2) continue;
-        if (langX) S.box(b - a, h - 0.1, 0.05, x0 + (a + b) / 2, 0.06 + (h - 0.1) / 2, z0, GLAS3);
-        else S.box(0.05, h - 0.1, b - a, x0, 0.06 + (h - 0.1) / 2, z0 + (a + b) / 2, GLAS3);
+        if (langX) S.box(b - a, h - 0.1, 0.05, x0 + (a + b) / 2, 0.06 + (h - 0.1) / 2, z0, GLAS4);
+        else S.box(0.05, h - 0.1, b - a, x0, 0.06 + (h - 0.1) / 2, z0 + (a + b) / 2, GLAS4);
       }
       if (langX) S.box(lx, 0.1, 0.1, x0 + lx / 2, h, z0, rahmen2);
       else S.box(0.1, 0.1, lz, x0, h, z0 + lz / 2, rahmen2);
@@ -67340,7 +70022,7 @@
           const mitte = i === 1 && j === 1;
           L2.box(0.32, mitte ? 0.32 : zw(r, 0.12, 0.42), 0.28, -0.75 + i * 0.5, 0.88, -0.42 + j * 0.42, mitte ? "#d23c32" : "#ffffff");
         }
-        L2.box(2.15, 0.6, 1.45, 0, 0.88, 0, GLAS3);
+        L2.box(2.15, 0.6, 1.45, 0, 0.88, 0, GLAS4);
         figur2(S, x + w / 2 + 0.9, z2 + d / 2 + 1.1, 501, "leitung", { ry: PI7 + 0.5, pose: "schauen" });
       } },
       { art: "frei", w: 2.2, d: 1.3, bau(S, sc, x, z2, w, d, st, r) {
@@ -67593,7 +70275,7 @@
       L2.box(1.2, 2.3, 0.08, 0, 0, -0.55, farbe);
       for (const s2 of [-1, 1]) L2.box(0.08, 2.3, 1.1, s2 * 0.56, 0, 0, dunkler(farbe, 0.08));
       L2.box(1.2, 0.1, 1.2, 0, 2.3, 0, dunkler(farbe, 0.1));
-      L2.box(1.04, 2.2, 0.04, 0, 0.05, 0.56, GLAS3);
+      L2.box(1.04, 2.2, 0.04, 0, 0.05, 0.56, GLAS4);
       L2.box(0.9, 0.45, 0.45, 0, 0, -0.25, "#e9e4da");
       L2.box(0.5, 0.04, 0.3, 0, 0.75, 0.15, "#f2f0ea");
     }
@@ -67636,7 +70318,7 @@
     for (let u = 1.25; u < T; u += 2.5) S.box(0.05, 0.8, 1.6, B2 + 0.31, -1, u, SCHEIBE);
     rueckwand(S, "x", 0, B2, 0, 0, WH3, { putz: wand2.putz, pilaster: wand2.pilaster, pilasterAbstand: 7.5, pilasterVersatz: 0 });
     rueckwand(S, "z", 0, T, 0, 0, WH3, { putz: dunkler(wand2.putz, 0.02), pilaster: wand2.pilaster, pilasterAbstand: 7.5, pilasterVersatz: 0 });
-    const fenster6 = (achse, a, b) => {
+    const fenster7 = (achse, a, b) => {
       for (let u = a + 1.25; u < b - 0.6; u += 2.5) {
         const voll2 = wand2.fenster === "glas", hoch = wand2.fenster === "hoch", stahl = wand2.fenster === "stahl";
         const y0 = voll2 ? 0.15 : hoch ? 0.75 : stahl ? 0.6 : 1, y1 = voll2 ? WH3 - 0.25 : hoch ? WH3 - 0.35 : stahl ? WH3 - 0.3 : WH3 - 0.5, fw = voll2 ? 2.3 : hoch ? 1.3 : stahl ? 2.1 : 2.2;
@@ -67649,8 +70331,8 @@
       }
     };
     const K3 = 8, tt = Math.min(10, T - 6);
-    fenster6("x", K3, B2);
-    fenster6("z", tt, T);
+    fenster7("x", K3, B2);
+    fenster7("z", tt, T);
     treppenhaus(S, 0, 0, 5, tt, 0, WH3, {});
     aufzug(S, 5.2, 0.3, 0, WH3);
     S.box(2.6, WH3, 0.15, 6.5, WH3 / 2, 3.4, "#e6e0d6");
@@ -67703,7 +70385,7 @@
   }
   function trennwand(S, x, T) {
     const tuer0 = T * 0.62, tuer1 = tuer0 + 1.6;
-    for (const [a, b] of [[0.6, tuer0], [tuer1, T - 0.2]]) S.box(0.05, WH3 - 0.5, b - a, x, 0.06 + (WH3 - 0.5) / 2, (a + b) / 2, GLAS3);
+    for (const [a, b] of [[0.6, tuer0], [tuer1, T - 0.2]]) S.box(0.05, WH3 - 0.5, b - a, x, 0.06 + (WH3 - 0.5) / 2, (a + b) / 2, GLAS4);
     S.box(0.1, 0.12, T - 0.8, x, WH3 - 0.4, T / 2 + 0.2, "#3a4048");
     for (const z2 of [0.6, tuer0, tuer1, T - 0.2]) S.box(0.1, WH3 - 0.4, 0.1, x, (WH3 - 0.4) / 2, z2, "#3a4048");
   }
@@ -68629,7 +71311,7 @@
   var PFLASTER2 = "#cbc5b8";
   var ASPHALT2 = "#8d939a";
   var TRAMPEL = "#cbb88e";
-  var GLAS5 = "#4e5c67";
+  var GLAS6 = "#4e5c67";
   var GLAS_HELL3 = "#6f8696";
   var GLAS_GRUEN = "#5d8c8f";
   var STAHL3 = "#5a6168";
@@ -69061,7 +71743,7 @@
   function qBlock(S, F2, T, o) {
     const { fa, r, n } = o, L2 = F2.L, gh = 2.85, y0 = 0.9, H = y0 + n * gh;
     const wand2 = o.wand, fuge = dunkler(wand2, 0.09);
-    fb2(S, F2, 0, L2, 0, H, o.rueck ? -T + 0.35 : -T, -0.35, GLAS5);
+    fb2(S, F2, 0, L2, 0, H, o.rueck ? -T + 0.35 : -T, -0.35, GLAS6);
     if (o.rueck) {
       const FR2 = rueckseite(F2, T), raster5 = 3, na2 = Math.max(3, Math.round(L2 / raster5)), rb2 = L2 / na2, Lr = [];
       for (let i = 0; i < na2; i++) for (let k = 0; k < n; k++) {
@@ -69137,10 +71819,10 @@
       fpoly2(S, G2, [[-0.1, H + 0.25], [T + 0.1, H + 0.25], [T / 2, H + 0.25 + dh * 0.95]], -0.2, 0.05, wand2);
       for (let k = 0; k < n; k++) {
         const y = y0 + k * gh;
-        fb2(S, G2, T / 2 - 0.5, T / 2 + 0.5, y + 1.2, y + 2.2, 0, 0.06, GLAS5);
+        fb2(S, G2, T / 2 - 0.5, T / 2 + 0.5, y + 1.2, y + 2.2, 0, 0.06, GLAS6);
         fb2(S, G2, T / 2 - 0.6, T / 2 + 0.6, y + 1.1, y + 1.2, 0, 0.14, "#e9e5da");
       }
-      fb2(S, G2, T / 2 - 0.4, T / 2 + 0.4, H + 1, H + 1.8, 0, 0.08, GLAS5);
+      fb2(S, G2, T / 2 - 0.4, T / 2 + 0.4, H + 1, H + 1.8, 0, 0.08, GLAS6);
       fb2(S, G2, 0, T, 0, y0, -0.3, 0.12, fa.sockel);
     }
     for (let i = 0; i < Math.round(L2 / 9); i++) {
@@ -69447,7 +72129,7 @@
   function magTurm(S, scene2, xa, za, tw, c, r, o) {
     const { egH, gh, orn, wand: wand2 } = c;
     const H = o.H, Ht = H + o.extra * gh;
-    S.quader(xa + 0.4, egH, za + 0.4, xa + tw - 0.4, Ht, za + tw - 0.4, GLAS5);
+    S.quader(xa + 0.4, egH, za + 0.4, xa + tw - 0.4, Ht, za + tw - 0.4, GLAS6);
     for (const F2 of [RZ(xa, za, tw, tw), RX(xa, za, tw, tw)]) {
       const ax = achsen3(0, tw, tw / 3, 0.9);
       const L2 = [];
@@ -69466,7 +72148,7 @@
     }
     S.quader(xa - 0.7, Ht, za - 0.7, xa + tw + 0.7, Ht + 0.8, za + tw + 0.7, orn);
     const t2 = tw * 0.64, xb = xa + (tw - t2) / 2, zb = za + (tw - t2) / 2, h2 = 4.6, y2 = Ht + 0.8;
-    S.quader(xb + 1, y2, zb + 1, xb + t2 - 1, y2 + h2, zb + t2 - 1, GLAS5);
+    S.quader(xb + 1, y2, zb + 1, xb + t2 - 1, y2 + h2, zb + t2 - 1, GLAS6);
     for (let i = 0; i <= 3; i++) {
       const s2 = i / 3 * (t2 - 0.7) + 0.35;
       S.box(0.7, h2, 0.7, xb + s2, y2 + h2 / 2, zb + t2 - 0.35, orn);
@@ -69513,7 +72195,7 @@
       const hh = h * (f === 0 ? 0.62 : 0.42);
       fb2(S, F2, m + f * b - 0.32, m + f * b + 0.32, y + 0.6, y + 0.6 + hh, 0.15, 0.2, orn);
     }
-    fscheibe(S, F2, m, y + h * 0.78, 0.15, 0.22, 0.45, GLAS5, 12);
+    fscheibe(S, F2, m, y + h * 0.78, 0.15, 0.22, 0.45, GLAS6, 12);
     for (let s2 = 0; s2 <= stufen; s2++) {
       fb2(S, F2, u1 - s2 * dx - 0.4, u1 - s2 * dx + 0.05, y + (s2 + 1) * st, y + (s2 + 1) * st + 0.15, -0.5, 0.25, orn);
       fb2(S, F2, u0 + s2 * dx - 0.05, u0 + s2 * dx + 0.4, y + (s2 + 1) * st, y + (s2 + 1) * st + 0.15, -0.5, 0.25, orn);
@@ -69524,7 +72206,7 @@
     for (const u of achsen3(u0, u1, ra * 2, 1.5)) {
       const tf = -1.4, yb = H + -tf * neig;
       fb2(S, F2, u - 0.85, u + 0.85, H, yb + 1.7, -3.8, tf, c.wand);
-      fb2(S, F2, u - 0.45, u + 0.45, yb + 0.25, yb + 1.35, tf, tf + 0.05, GLAS5);
+      fb2(S, F2, u - 0.45, u + 0.45, yb + 0.25, yb + 1.35, tf, tf + 0.05, GLAS6);
       fb2(S, F2, u - 1.05, u + 1.05, yb + 1.7, yb + 1.92, -3.9, tf + 0.25, c.dach);
     }
   }
@@ -69589,15 +72271,15 @@
     const H = c.egH + c.n * c.gh;
     const A = 3.4;
     const kz0 = sk.hinten ? zA + 0.4 : zA, kx0 = sk.links ? x0 + 0.4 : x0;
-    S.quader(sk.links ? x0 + A : x0, 0, kz0, x0 + w - A, c.egH, z0 + d - A, GLAS5);
-    S.quader(kx0, c.egH, kz0, x0 + w - 0.4, H, z0 + d - 0.4, GLAS5);
+    S.quader(sk.links ? x0 + A : x0, 0, kz0, x0 + w - A, c.egH, z0 + d - A, GLAS6);
+    S.quader(kx0, c.egH, kz0, x0 + w - 0.4, H, z0 + d - 0.4, GLAS6);
     S.quader(x0, H - 0.05, zA, x0 + w - 0.4, H + 0.1, z0 + d - 0.4, c.dach);
     if (gedrehtGebaut && d > T + 3) hofGruen(S, r, x0, z0, x0 + w, zA - 0.5, { maxBaeume: 6, weg: false });
     const FR2 = sk.hinten ? R5(x0 + w - 0.4, zA, -1, 0, w - 0.4) : null, FL = sk.links ? R5(x0, zA, 0, 1, T - 0.4) : null;
     if (FR2) magHof(S, scene2, FR2, c, r, { schild: r() < 0.5 ? waehle2(r, ["Hausgemeinschaft", "W\xE4scherei", "Hof 2"]) : null });
     if (fluegel2) {
-      S.quader(x0 + w - T, 0, z0, x0 + w - A, c.egH, zA, GLAS5);
-      S.quader(x0 + w - T, c.egH, z0, x0 + w - 0.4, H, zA, GLAS5);
+      S.quader(x0 + w - T, 0, z0, x0 + w - A, c.egH, zA, GLAS6);
+      S.quader(x0 + w - T, c.egH, z0, x0 + w - 0.4, H, zA, GLAS6);
       S.quader(x0 + w - T, H - 0.05, z0, x0 + w - 0.4, H + 0.1, zA, c.dach);
       hofGruen(S, r, x0, z0, x0 + w - T, zA, { spiel: false, waesche: false, maxBaeume: 6 });
     }
@@ -69661,7 +72343,7 @@
       if (FL) fb2(S, FL, -0.3, FL.L + 0.3, H, H + 0.7, -0.6, 0.6, c.orn);
       if (!sk.vorn) return { hoehe: H + 8 };
       const rb = c.ra * 5, ur0 = w * 0.42 - rb / 2, ur1 = ur0 + rb, FRis = teil2(FZ, ur0, ur1, 0.9);
-      fb2(S, FZ, ur0, ur1, c.egH + 0.3, H, 0, 0.5, GLAS5);
+      fb2(S, FZ, ur0, ur1, c.egH + 0.3, H, 0, 0.5, GLAS6);
       const ax = achsen3(0, rb, c.ra, 0.4), L2 = [];
       for (let k = 0; k < c.n; k++) for (const u of ax) L2.push({ u0: u - 0.7, u1: u + 0.7, v0: c.egH + k * c.gh + 0.9, v1: c.egH + k * c.gh + 2.6, bogen: k === 0 });
       fwand(S, FRis, 0, rb, c.egH + 0.3, H, -0.4, 0, c.wand, L2);
@@ -69676,7 +72358,7 @@
       fb2(S, FRis, -0.4, rb + 0.4, H, H + 0.7, -1, 0.6, c.orn);
       fpoly2(S, FRis, [[-0.3, H + 0.7], [rb + 0.3, H + 0.7], [rb / 2, H + 4.4]], -3, 0.2, c.wand);
       fpoly2(S, FRis, [[-0.6, H + 0.6], [rb + 0.6, H + 0.6], [rb / 2, H + 4.75], [rb / 2, H + 4.45], [rb - 0.2, H + 0.95], [0.2, H + 0.95], [rb / 2, H + 4.45], [rb / 2, H + 4.75]], -0.2, 0.45, c.orn);
-      fscheibe(S, FRis, rb / 2, H + 2.2, 0.2, 0.3, 0.7, GLAS5, 14);
+      fscheibe(S, FRis, rb / 2, H + 2.2, 0.2, 0.3, 0.7, GLAS6, 14);
       top = H + 8;
     }
     return { hoehe: top };
@@ -69688,7 +72370,7 @@
   var magistrale = gedreht(magistraleLokal);
   function bandFassade(S, F2, o) {
     const { n, gh, y0 } = o, L2 = F2.L, H = y0 + n * gh;
-    fb2(S, F2, 0, L2, y0, H, -1, -0.1, o.glas ?? GLAS5);
+    fb2(S, F2, 0, L2, y0, H, -1, -0.1, o.glas ?? GLAS6);
     for (let k = 0; k < n; k++) {
       const y = y0 + k * gh;
       fb2(S, F2, -0.05, L2 + 0.05, y, y + (o.bru ?? 1), -0.3, 0.2, k % 2 && o.bruest2 ? o.bruest2 : o.bruest);
@@ -69910,12 +72592,12 @@
       parkreiheZ(S, r, z0 + 3, z0 + d - 4, x0 + w - 2.5, { dichte: 0.6 });
       return { hoehe: Hh + 3.2 };
     }
-    const putz2 = waehle2(r, ["#efe0b8", "#ead8b4", "#e6dcc4"]), orn = "#f8f2e2", dach2 = waehle2(r, ["#9a5444", "#7d8a8f"]);
+    const putz2 = waehle2(r, ["#efe0b8", "#ead8b4", "#e6dcc4"]), orn = "#f8f2e2", dach3 = waehle2(r, ["#9a5444", "#7d8a8f"]);
     const mb = 22, md = 20, fw = Math.min((w - mb - 8) / 2, 22), fd = 13, cx = x0 + w / 2, zf = z0 + d - 9;
     const H1 = 9.6, Hm = 13.5;
     for (const s2 of [-1, 1]) {
       const fx0 = s2 < 0 ? cx - mb / 2 - fw : cx + mb / 2, fz0 = zf - fd - 2;
-      S.quader(fx0, 0, fz0, fx0 + fw - (s2 > 0 ? 0.4 : 0), H1, fz0 + fd - 0.4, GLAS5);
+      S.quader(fx0, 0, fz0, fx0 + fw - (s2 > 0 ? 0.4 : 0), H1, fz0 + fd - 0.4, GLAS6);
       S.quader(fx0, H1 - 0.05, fz0, fx0 + fw - 0.2, H1 + 0.1, fz0 + fd - 0.2, "#a9a59c");
       const F2 = RZ(fx0, fz0, fw, fd), L2 = [];
       for (const u of achsen3(0, fw, 3.2, 0.8)) for (let k2 = 0; k2 < 2; k2++) L2.push({ u0: u - 0.75, u1: u + 0.75, v0: 1.2 + k2 * 4.2, v1: 3.5 + k2 * 4.2, bogen: k2 === 0 });
@@ -69932,12 +72614,12 @@
       }
       const g = walmdach(fw + 1.2, fd + 1.2, 4);
       g.translate(fx0 + fw / 2, H1 + 0.6, fz0 + fd / 2);
-      S.add(g, dach2);
+      S.add(g, dach3);
     }
     const mx0 = cx - mb / 2, mz0 = zf - md;
     S.quader(mx0, 0, mz0, mx0 + mb, Hm, zf, putz2);
     const FM = RZ(mx0, mz0, mb, md);
-    fb2(S, FM, 1.5, mb - 1.5, 0.3, Hm - 2.4, -0.2, 0.05, GLAS5);
+    fb2(S, FM, 1.5, mb - 1.5, 0.3, Hm - 2.4, -0.2, 0.05, GLAS6);
     for (const u of achsen3(1.5, mb - 1.5, 3.4, 0.2)) fb2(S, FM, u - 0.12, u + 0.12, 0.3, Hm - 2.4, -0.2, 0.15, orn);
     const pt = 6.5, pl = 1.6;
     S.quader(mx0 - 0.5, 0, zf, mx0 + mb + 0.5, pl, zf + pt + 2, "#d9d2c2");
@@ -69956,7 +72638,7 @@
     ftext2(scene2, FG, p.name ?? "Haus der Kultur", (mb + 0.8) / 2, Hm - 0.8, 0.05, 0.75, mb * 0.8, "#7a5a2e");
     const gd = dachProfil(md + pt - 1, mb + 0.8, 4.2, 0.2, "z");
     gd.translate(cx, Hm, mz0 + (md + pt - 1) / 2);
-    S.add(gd, dach2);
+    S.add(gd, dach3);
     const dy = Hm + 4.2;
     S.quader(cx - 2, dy - 1.5, mz0 + 6, cx + 2, dy + 3.5, mz0 + 10, putz2);
     for (const [sx, sz] of [[-1.6, 2], [1.6, 2], [-1.6, -2], [1.6, -2]]) S.box(0.4, 3, 0.4, cx + sx, dy + 5, mz0 + 8 + sz, orn);
@@ -70122,7 +72804,7 @@
     const FG = endeRechts(FS, st);
     fb2(S, FG, -0.3, st, Hp + 0.6, Hs + 0.8, -0.3, 0.25, "#ded6c2");
     for (let u = 1.2; u < st - 0.5; u += 1.6) fb2(S, FG, u - 0.3, u + 0.3, Hp + 0.6, Hs + 0.8, 0.25, 0.4, "#e9e2cf");
-    for (let k = 0; k < n; k++) fb2(S, FG, st / 2 - 0.8, st / 2 + 0.8, Hp + 0.6 + k * gh + 1.1, Hp + 0.6 + k * gh + 2.3, 0.25, 0.45, GLAS5);
+    for (let k = 0; k < n; k++) fb2(S, FG, st / 2 - 0.8, st / 2 + 0.8, Hp + 0.6 + k * gh + 1.1, Hp + 0.6 + k * gh + 2.3, 0.25, 0.45, GLAS6);
     S.quader(sxx, Hs + 0.8, szz, sxx + sw, Hs + 0.95, szz + st, "#9a9893");
     S.quader(sxx + sw * 0.84, Hs + 0.8, szz + 3, sxx + sw * 0.97, Hs + 4, szz + st - 3, "#e6dfcf");
     const FT = teil2(FS, 0, sw, -1.4);
@@ -70198,8 +72880,8 @@
       };
       wand2([xi0, zi1], [xi1, zi1], GLAS_HELL3);
       wand2([xi1, zi1], [xi1, zi0], GLAS_HELL3);
-      wand2([xi1, zi0], [xi0, zi0], GLAS5);
-      wand2([xi0, zi0], [xi0, zi1], GLAS5);
+      wand2([xi1, zi0], [xi0, zi0], GLAS6);
+      wand2([xi0, zi0], [xi0, zi1], GLAS6);
       for (let i = 0; i < 4; i++) schirm(S, x0 + 4 + i * 4, z0 + d - 3.2, 1.5, ["#c8463c", "#f4efe2", "#2f6fa8", "#e8c547"][i % 4]);
       const FS = R5(xb - 12, z0 + d - 1.2, 1, 0, 11);
       fb2(S, FS, 0, 11, 0.3, 1.5, -0.4, 0, "#d8d3c6");
@@ -70544,7 +73226,7 @@
     const G2 = endeRechts(F2, T);
     if (o.giebel !== false) {
       fb2(S, G2, -0.3, T, 0, H + 0.6, -0.2, 0.15, "#d6d0c2");
-      for (let k = 0; k < n; k++) fb2(S, G2, T / 2 - 0.6, T / 2 + 0.6, y0 + k * gh + 1.2, y0 + k * gh + 2.6, 0.15, 0.2, GLAS5);
+      for (let k = 0; k < n; k++) fb2(S, G2, T / 2 - 0.6, T / 2 + 0.6, y0 + k * gh + 1.2, y0 + k * gh + 2.6, 0.15, 0.2, GLAS6);
       mosaik2(S, G2, 1.5, T * 0.4, y0 + 1.5, H - 1.5, 0.15, r, { motiv: "figur", nu: 4 });
     }
     const tu2 = L2 * (o.treppe ?? 0.3);
@@ -70663,14 +73345,14 @@
         fb2(S, F2, 0, F2.L, y0, H2, -0.1, 0.02, glas2);
         for (let u = 0; u <= F2.L + 0.01; u += 1.5) fb2(S, F2, u - 0.06, u + 0.06, y0, H2, 0, 0.15, alu);
         for (let k = 0; k <= n2; k++) fb2(S, F2, 0, F2.L, y0 + k * gh2 - 0.08, y0 + k * gh2 + 0.08, 0, 0.15, alu);
-        fb2(S, F2, 0.6, F2.L - 0.6, 0.6, y0 - 0.6, 0.15, 0.2, GLAS5);
+        fb2(S, F2, 0.6, F2.L - 0.6, 0.6, y0 - 0.6, 0.15, 0.2, GLAS6);
       }
       zyl6(S, rr + 0.05, rr + 0.05, H2 - y0, bx2 + bw2 - rr, y0, bz2 + bd2 - rr, glas2, 20);
       for (let k = 0; k <= n2; k++) zyl6(S, rr + 0.15, rr + 0.15, 0.16, bx2 + bw2 - rr, y0 + k * gh2 - 0.08, bz2 + bd2 - rr, alu, 20, true);
       zyl6(S, rr + 0.1, rr + 0.1, y0 - 0.3, bx2 + bw2 - rr, 0.3, bz2 + bd2 - rr, granit, 20);
       const tu2 = FZ2.L * 0.28;
       fb2(S, FZ2, tu2 - 2.2, tu2 + 2.2, 0, H2 + 2.4, -0.2, 1.4, "#e9e4dc");
-      for (let k = 0; k < n2 + 1; k++) fscheibe(S, FZ2, tu2, y0 + k * gh2 - 1.2, 1.35, 1.5, 0.75, GLAS5, 16);
+      for (let k = 0; k < n2 + 1; k++) fscheibe(S, FZ2, tu2, y0 + k * gh2 - 1.2, 1.35, 1.5, 0.75, GLAS6, 16);
       for (let k = 0; k < n2 + 1; k++) fscheibe(S, FZ2, tu2, y0 + k * gh2 - 1.2, 1.3, 1.45, 0.95, alu, 16);
       const g = walmdach(12, 10, 5);
       g.translate(bx2 + bw2 * 0.45, H2, bz2 + bd2 * 0.45);
@@ -70690,7 +73372,7 @@
     if (v === "passage") {
       const bw2 = Math.min(w - 4, 54), bd2 = Math.min(d - 4, 32), bx2 = x0 + 2, bz2 = z0 + 2, n2 = 2, gh2 = 3.8, eg2 = 4.6, H2 = eg2 + n2 * gh2;
       const stein2 = waehle2(r, ["#d9b9a4", "#e3cfb6", "#cfb4a2"]), orn = "#f3ece0";
-      S.quader(bx2, 0, bz2, bx2 + bw2 - 0.3, H2, bz2 + bd2 - 0.3, GLAS5);
+      S.quader(bx2, 0, bz2, bx2 + bw2 - 0.3, H2, bz2 + bd2 - 0.3, GLAS6);
       S.quader(bx2 + 0.2, H2, bz2 + 0.2, bx2 + bw2 - 0.2, H2 + 0.25, bz2 + bd2 - 0.2, "#a9a59c");
       const mitte = bw2 * 0.5, pb = 9;
       for (const F2 of [RZ(bx2, bz2, bw2, bd2), RX(bx2, bz2, bw2, bd2)]) {
@@ -70735,8 +73417,8 @@
     }
     const bw = Math.min(w - 4, 32), bd = Math.min(d - 4, 22), bx = x0 + 2, bz = z0 + 2, n = 3, gh = 3.5, eg = 4.4, H = eg + n * gh;
     const stein = waehle2(r, ["#e6dccb", "#d9cbb5"]), rot = "#2f6a5a";
-    S.quader(bx, 0, bz, bx + bw - 0.6, eg, bz + bd - 0.6, GLAS5);
-    S.quader(bx, eg, bz, bx + bw - 0.3, H, bz + bd - 0.3, GLAS5);
+    S.quader(bx, 0, bz, bx + bw - 0.6, eg, bz + bd - 0.6, GLAS6);
+    S.quader(bx, eg, bz, bx + bw - 0.3, H, bz + bd - 0.3, GLAS6);
     S.quader(bx + 0.2, H, bz + 0.2, bx + bw - 0.2, H + 0.3, bz + bd - 0.2, "#a9a59c");
     for (const F2 of [RZ(bx, bz, bw, bd), RX(bx, bz, bw, bd)]) {
       const L2 = [];
@@ -70866,19 +73548,19 @@
     const wand2 = zustand === "saniert" ? waehle2(r, ["#e9c46a", "#e6b8a2", "#c9d6b5", "#b9cbd8", "#f1e2c0", "#d9a68e", "#efd8c0"]) : zustand === "leer" ? waehle2(r, ["#8f8a81", "#99938a"]) : waehle2(r, ["#a39e94", "#9d978c", "#aaa498", "#a49d8e"]);
     const c = { n, eg, gh, wand: wand2, orn: zustand === "saniert" ? "#fbf7ee" : heller(wand2, 0.05), sockel: zustand === "saniert" ? dunkler(wand2, 0.15) : dunkler(wand2, 0.1), zustand, ra: 3.1, bogen: r() < 0.5 };
     const zb = z0 + d - T;
-    S.quader(x0, 0, zb, x0 + w - 0.45, H, z0 + d - 0.45, GLAS5);
+    S.quader(x0, 0, zb, x0 + w - 0.45, H, z0 + d - 0.45, GLAS6);
     const FZ = RZ(x0, z0, w, d), FX = R5(x0 + w, z0 + d, 0, -1, T);
     altFassade(S, scene2, FZ, c, r, { haupt: true, salz: 1 });
     if (eck) altFassade(S, scene2, FX, c, r, { haupt: false, salz: 2 });
     else brandwand2(S, scene2, FX, H + 2, r, { wand: zustand === "saniert" ? dunkler(wand2, 0.03) : dunkler(wand2, 0.03), reklame: zustand !== "saniert" || r() < 0.3 });
-    const dh = 4.2, dach2 = zustand === "saniert" ? "#b4583f" : zustand === "leer" ? "#575a5d" : "#64676a";
+    const dh = 4.2, dach3 = zustand === "saniert" ? "#b4583f" : zustand === "leer" ? "#575a5d" : "#64676a";
     const g = dachProfil(w, T + 0.6, dh, 0.4, "x");
     g.translate(x0 + w / 2, H + 0.6, zb + T / 2);
-    S.add(g, dach2);
+    S.add(g, dach3);
     if (eck) {
       const pyr = walmdach(T + 0.6, T + 0.6, dh);
       pyr.translate(x0 + w - T / 2, H + 0.6, zb + T / 2);
-      S.add(pyr, dach2);
+      S.add(pyr, dach3);
     } else fpoly2(S, endeRechts(FZ, T), [[-0.3, H + 0.6], [T + 0.3, H + 0.6], [T / 2, H + 0.6 + dh]], -0.4, 0.02, dunkler(wand2, 0.03));
     const neig = Math.atan2(dh, T / 2);
     const aufDach = (u, s2, bb, tt, farbe) => {
@@ -70892,8 +73574,8 @@
     for (let i = 0; i < ng; i++) {
       const u = (i + 0.5) * w / ng, s2 = 0.35, yb = H + 0.6 + s2 * dh, zf = z0 + d - s2 * T / 2;
       S.quader(x0 + u - 0.8, H + 0.6, zf - 2, x0 + u + 0.8, yb + 1.5, zf, zustand === "saniert" ? "#efe9dc" : "#7d7f80");
-      S.box(1, 1, 0.1, x0 + u, yb + 0.7, zf + 0.02, zustand === "leer" ? "#262b30" : GLAS5);
-      S.quader(x0 + u - 1, yb + 1.5, zf - 2.2, x0 + u + 1, yb + 1.7, zf + 0.2, dach2);
+      S.box(1, 1, 0.1, x0 + u, yb + 0.7, zf + 0.02, zustand === "leer" ? "#262b30" : GLAS6);
+      S.quader(x0 + u - 1, yb + 1.5, zf - 2.2, x0 + u + 1, yb + 1.7, zf + 0.2, dach3);
     }
     for (const u of [w * 0.25, w * 0.7]) S.quader(x0 + u - 0.5, H + 2, zb + T * 0.45, x0 + u + 0.5, H + dh + 2, zb + T * 0.45 + 1, zustand === "saniert" ? "#b9654e" : "#7a6a60");
     if (zustand === "unsaniert") for (let i = 0; i < 3; i++) antenne2(S, x0 + zw(r, 2, w - 2), H + dh, zb + T / 2, r);
@@ -71023,7 +73705,7 @@
     const { n, gh, eg, stein, orn, pfeiler } = c, L2 = F2.L, H = eg + n * gh;
     const ra = c.ra, na = Math.max(2, Math.round(L2 / ra)), rb = L2 / na;
     const pmitte = o.passage ? Math.floor(na / 2) : -1;
-    fb2(S, F2, 0, L2, eg, H, -0.6, -0.45, GLAS5);
+    fb2(S, F2, 0, L2, eg, H, -0.6, -0.45, GLAS6);
     for (let i = 0; i < na; i++) {
       const u0 = i * rb, u1 = (i + 1) * rb;
       for (let k = 0; k < n; k++) {
@@ -71075,7 +73757,7 @@
     };
     const H = c.eg + c.n * c.gh, T = Math.min(d, 22);
     const zb = z0 + d - T;
-    S.quader(x0, 0, zb, x0 + w - 0.6, H, z0 + d - 0.6, GLAS5);
+    S.quader(x0, 0, zb, x0 + w - 0.6, H, z0 + d - 0.6, GLAS6);
     const FZ = RZ(x0, z0, w, d), FX = R5(x0 + w, z0 + d, 0, -1, T);
     messeFassade(S, scene2, FZ, c, r, { passage: w >= 18, salz: 1 });
     const eck = p.ecke ? p.ecke.includes("+x") : p.variante === "eck";
@@ -71083,13 +73765,13 @@
     else {
       fb2(S, FX, 0, T, 0, H, -0.6, -0.1, dunkler(stein, 0.04));
       for (let k = 0; k <= c.n; k++) fb2(S, FX, 0, T, c.eg + k * c.gh - 0.12, c.eg + k * c.gh + 0.1, -0.1, 0.05, dunkler(stein, 0.1));
-      for (const u of achsen3(0, T, 3.4, 1.2)) for (let k = c.n - 2; k < c.n; k++) fb2(S, FX, u - 0.6, u + 0.6, c.eg + k * c.gh + 0.9, c.eg + k * c.gh + 2.6, -0.1, 0.02, GLAS5);
+      for (const u of achsen3(0, T, 3.4, 1.2)) for (let k = c.n - 2; k < c.n; k++) fb2(S, FX, u - 0.6, u + 0.6, c.eg + k * c.gh + 0.9, c.eg + k * c.gh + 2.6, -0.1, 0.02, GLAS6);
     }
     const dh = 5.2, flach = r() < 0.4;
     if (flach) {
       S.quader(x0, H + 0.5, zb, x0 + w - 0.6, H + 0.75, z0 + d - 0.6, "#9a9893");
       S.quader(x0 + 1.5, H + 0.5, zb + 1, x0 + w - 2.4, H + 4.2, z0 + d - 3, c.orn);
-      for (const u of achsen3(2, w - 3, 2.6, 0.6)) S.box(1.6, 1.8, 0.1, x0 + u, H + 2.4, z0 + d - 2.95, GLAS5);
+      for (const u of achsen3(2, w - 3, 2.6, 0.6)) S.box(1.6, 1.8, 0.1, x0 + u, H + 2.4, z0 + d - 2.95, GLAS6);
       S.quader(x0 + 1.2, H + 4.2, zb + 0.7, x0 + w - 2.1, H + 4.6, z0 + d - 2.7, heller(c.orn, 0.04));
       return { hoehe: H + 4.6 };
     }
@@ -71099,7 +73781,7 @@
     for (const u of achsen3(1, w - 2, c.ra * 2, 1)) {
       const zf = z0 + d - 1.8;
       S.quader(x0 + u - 1, H + 0.5, zf - 2.2, x0 + u + 1, H + 3.3, zf, c.orn);
-      S.box(1.2, 1.5, 0.1, x0 + u, H + 1.9, zf + 0.02, GLAS5);
+      S.box(1.2, 1.5, 0.1, x0 + u, H + 1.9, zf + 0.02, GLAS6);
     }
     let top = H + dh + 0.5;
     if (eck && w >= 24) {
@@ -72317,7 +74999,7 @@
     for (const l of oeff) {
       if (l.typ === "offen") continue;
       const tief2 = l.tief ?? (l.typ === "nische" ? 0.2 : 0.26);
-      const c = l.fuell ?? (l.typ === "nische" ? o.nische ?? dunkler(farbe, 0.08) : l.typ === "tuer" ? o.tuer ?? "#3a4a3c" : o.glas ?? GLAS6);
+      const c = l.fuell ?? (l.typ === "nische" ? o.nische ?? dunkler(farbe, 0.08) : l.typ === "tuer" ? o.tuer ?? "#3a4a3c" : o.glas ?? GLAS7);
       add(c, tief2, pfad(new three_module_exports.Shape(), l, 0.07));
       const rahmen2 = l.rahmen ?? o.rahmen;
       if ((l.typ === "fenster" || l.typ === "laden") && rahmen2 && LOD2.stufe !== "fern") {
@@ -72354,8 +75036,8 @@
   function platten(S, F2, liste, t0, t1, c) {
     formen(S, F2, liste.map((q2) => q2.length === 4 && typeof q2[0] === "number" ? rform(...q2) : umrissForm(q2)), t0, t1, c);
   }
-  var fenster3 = (u, v, b, h, art = null, x = {}) => ({ u0: u - b / 2, u1: u + b / 2, v0: v, v1: v + h, art, typ: "fenster", ...x });
-  var GLAS6 = "#4b5a66";
+  var fenster4 = (u, v, b, h, art = null, x = {}) => ({ u0: u - b / 2, u1: u + b / 2, v0: v, v1: v + h, art, typ: "fenster", ...x });
+  var GLAS7 = "#4b5a66";
   var GLAS_HELL4 = "#6d8595";
   var WEISS = "#f7f5ef";
   var YW = -1.1;
@@ -72542,7 +75224,7 @@
     return pk.filter((q2, i) => i === 0 || Math.hypot(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
   }
   function giebelHaus(S, scene2, p, r, o) {
-    const { a, b, T, D, typ, wand: wand2, orn, dach: dach2, n, eg, gh } = o;
+    const { a, b, T, D, typ, wand: wand2, orn, dach: dach3, n, eg, gh } = o;
     const bw = b - a, H = eg + n * gh, c = bw / 2;
     const putz2 = o.putz;
     const FF = R6(a, D, 1, 0, bw);
@@ -72568,9 +75250,9 @@
       if (i === ut) return;
       if (i === tAx) oe.push({ u0: u - 0.8, u1: u + 0.8, v0: 0.3, v1: 3.2, art: putz2 ? "rund" : "spitz", typ: "tuer", fuell: o.tuer });
       else if (o.laden) oe.push({ u0: u - Math.min(1.2, bw / na / 2 - 0.2), u1: u + Math.min(1.2, bw / na / 2 - 0.2), v0: 0.7, v1: eg - 0.9, typ: "laden", fuell: GLAS_HELL4 });
-      else oe.push(fenster3(u, 1, fb_, eg - 1.8, art));
+      else oe.push(fenster4(u, 1, fb_, eg - 1.8, art));
     });
-    for (let k = 0; k < n; k++) for (const u of ax) oe.push(fenster3(u, eg + k * gh + 0.65, fb_, fh, art));
+    for (let k = 0; k < n; k++) for (const u of ax) oe.push(fenster4(u, eg + k * gh + 0.65, fb_, fh, art));
     const nischen = [];
     if (typ === "treppe" || typ === "fialen" || typ === "rund") {
       const nc = 2 * m + 1, cw = bw / nc, st = G2 / (m + 1);
@@ -72582,7 +75264,7 @@
         const zentral = Math.abs(j - m) <= (m >= 3 ? 1 : 0) && u1 - u0 > 0.7;
         if (zentral) for (let k = 0; k < 2 && y + 2 < top - 0.8; k++) {
           const fwj = Math.min(fb_, u1 - u0 - 0.1);
-          oe.push(fenster3((u0 + u1) / 2, y + 0.1, fwj, 1.6, null));
+          oe.push(fenster4((u0 + u1) / 2, y + 0.1, fwj, 1.6, null));
           y += 2.6;
         }
         if (j === m && top - y > 3.2) {
@@ -72594,21 +75276,21 @@
       for (const q2 of nischen) if (q2.v1 - q2.v0 > 1) oe.push({ ...q2, art: o.nischenArt, typ: "nische", fuell: o.nischenFarbe });
     } else if (typ === "volute") {
       const y1 = H + G2 * 0.42, y2 = H + G2 * 0.74;
-      oe.push(fenster3(c, H + 0.7, 1.05, 1.7, "rund"));
+      oe.push(fenster4(c, H + 0.7, 1.05, 1.7, "rund"));
       if (bw > 6.5) {
-        oe.push(fenster3(c - bw * 0.22, H + 0.7, 0.9, 1.5));
-        oe.push(fenster3(c + bw * 0.22, H + 0.7, 0.9, 1.5));
+        oe.push(fenster4(c - bw * 0.22, H + 0.7, 0.9, 1.5));
+        oe.push(fenster4(c + bw * 0.22, H + 0.7, 0.9, 1.5));
       }
-      if (y2 - y1 > 2.2) oe.push(fenster3(c, y1 + 0.9, 0.9, 1.4, "rund"));
+      if (y2 - y1 > 2.2) oe.push(fenster4(c, y1 + 0.9, 0.9, 1.4, "rund"));
       oe.push({ kreis: [c, y2 + 0.4 + (H + G2 - y2 - 0.4) * 0.28, 0.42], typ: "fenster" });
     } else if (typ === "dreieck") {
-      oe.push(fenster3(c, H + 0.6, 1, 1.6));
+      oe.push(fenster4(c, H + 0.6, 1, 1.6));
       if (bw > 7) {
-        oe.push(fenster3(c - 2, H + 0.6, 0.85, 1.3));
-        oe.push(fenster3(c + 2, H + 0.6, 0.85, 1.3));
+        oe.push(fenster4(c - 2, H + 0.6, 0.85, 1.3));
+        oe.push(fenster4(c + 2, H + 0.6, 0.85, 1.3));
       }
       if (G2 > 4.2) oe.push({ kreis: [c, H + G2 * 0.68, 0.4], typ: "fenster" });
-    } else if (traufe) oe.push(fenster3(c, H + 0.55, Math.min(1.6, o.zwerch - 1.2), 1.6));
+    } else if (traufe) oe.push(fenster4(c, H + 0.55, Math.min(1.6, o.zwerch - 1.2), 1.6));
     lochwand3(S, FF, umr, oe, wand2, { rahmen: WEISS, bank: putz2 ? orn : null, nische: o.nischenFarbe, tuer: o.tuer });
     if (putz2) {
       platten(S, FF, [[-0.05, 0, 0.35, H + 0.1], [bw - 0.35, 0, bw + 0.05, H + 0.1], [-0.12, eg - 0.2, bw + 0.12, eg + 0.1], [-0.2, H - 0.15, bw + 0.2, H + 0.3]], 0, 0.14, orn);
@@ -72677,8 +75359,8 @@
       })(), wand2);
       const uo = [];
       for (let y = 1; y + 1.9 < hU; y += eg - 0.3) {
-        uo.push(fenster3(0.7, y, 0.8, Math.min(1.9, hU - y - 0.5), null));
-        uo.push(fenster3(1.9, y, 0.8, Math.min(1.9, hU - y - 0.5), null));
+        uo.push(fenster4(0.7, y, 0.8, Math.min(1.9, hU - y - 0.5), null));
+        uo.push(fenster4(1.9, y, 0.8, Math.min(1.9, hU - y - 0.5), null));
       }
       lochwand3(S, FU, [0, 0, 2.6, hU], uo, putz2 ? wand2 : wand2, { rahmen: WEISS, tw: 0.3 });
       for (const s2 of [0, 1]) {
@@ -72689,43 +75371,43 @@
       const gg = new three_module_exports.BoxGeometry(2.9, 0.1, 1.2);
       gg.rotateX(0.5);
       gg.translate(ax[ut], hU + 0.6, tU * 0.45);
-      fgeo3(S, FF, gg, dach2);
+      fgeo3(S, FF, gg, dach3);
       fb3(S, FF, u0 + 0.1, u1 - 0.1, 0, 0.6, 0, tU + 0.05, GRANIT_D);
     }
     if (o.laden) ftext3(scene2, FF, o.ladenName, c, eg - 0.48, 0.06, 0.42, bw - 1.2, putz2 ? "#2a3a4a" : "#f4ead2");
     if (traufe) {
       const dh = T * 0.42, g = dachProfil(bw + 0.02, T + 0.5, dh, 0.25, "x");
       g.translate(a + c, H, zR + T / 2 - 0.2);
-      S.add(g, dach2);
+      S.add(g, dach3);
       const zb = o.zwerch, gz2 = dachProfil(3.2, zb + 0.5, 1.75, 0.12, "z");
       gz2.translate(a + c, H + 2.7, D - 1.75);
-      S.add(gz2, dach2);
+      S.add(gz2, dach3);
       for (const [F2, uu] of [[R6(a, zR, 0, 1, T), 0], [R6(b, D, 0, -1, T), 0]]) {
         fpolyR(S, F2, [[0.1, H], [T - 0.1, H], [T / 2, H + dh - 0.35]], -0.45, -0.05, wand2);
       }
       const FRt = R6(b, zR, -1, 0, bw);
       if (sieht(p, FRt)) {
         const ro = [];
-        for (let k = 0; k < n; k++) for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster3(u, eg + k * gh + 0.7, 1, 1.7));
-        for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster3(u, 1.1, 1, 1.9));
+        for (let k = 0; k < n; k++) for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7));
+        for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, 1.1, 1, 1.9));
         lochwand3(S, FRt, [0, 0, bw, H], ro, dunkler(wand2, 0.02), { rahmen: WEISS });
       }
       if (bw > 7) for (const s2 of [-1, 1]) {
         const ug = c + s2 * bw * 0.3, yb = H + 0.9, zg = D - 0.4 - 0.9 / Math.tan(Math.atan2(dh, T / 2 + 0.25)) - 0.4;
         S.quader(a + ug - 0.6, yb - 0.6, zg - 1.4, a + ug + 0.6, yb + 1.4, zg, WEISS);
-        S.box(0.8, 1, 0.08, a + ug, yb + 0.5, zg + 0.02, GLAS6);
-        S.quader(a + ug - 0.8, yb + 1.4, zg - 1.6, a + ug + 0.8, yb + 1.6, zg + 0.2, dach2);
+        S.box(0.8, 1, 0.08, a + ug, yb + 0.5, zg + 0.02, GLAS7);
+        S.quader(a + ug - 0.8, yb + 1.4, zg - 1.6, a + ug + 0.8, yb + 1.6, zg + 0.2, dach3);
       }
     } else {
       const L2 = D - 0.35 - (zR - 0.25), g = dachProfil(L2, bw + 0.12, Gr, 0.12, "z");
       g.translate(a + c, H, (D - 0.35 + zR - 0.25) / 2);
-      S.add(g, dach2);
+      S.add(g, dach3);
       const FR2 = R6(b, zR, -1, 0, bw);
       if (sieht(p, FR2)) {
         const ro = [];
-        for (let k = 0; k < n; k++) for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster3(u, eg + k * gh + 0.7, 1, 1.7));
-        for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster3(u, 1.1, 1, 1.9));
-        ro.push(fenster3(c, H + 0.6, 0.9, 1.4));
+        for (let k = 0; k < n; k++) for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7));
+        for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, 1.1, 1, 1.9));
+        ro.push(fenster4(c, H + 0.6, 0.9, 1.4));
         lochwand3(S, FR2, [[0, 0], [bw, 0], [bw, H], [c, H + Gr + 0.1], [0, H]], ro, dunkler(wand2, 0.02), { rahmen: WEISS });
       }
     }
@@ -72752,8 +75434,8 @@
       if (!an) continue;
       const so = [];
       const hS = traufe ? [[0, 0], [T, 0], [T, H], [T / 2, H + T * 0.42 - 0.2], [0, H]] : [0, 0, T, H];
-      for (let k = 0; k < n; k++) for (const u of achsen4(1, T - 1, 3.2, 0.3)) if (hash2(k, Math.round(u * 10), o.salz) % 3 !== 0) so.push(fenster3(u, eg + k * gh + 0.7, 1, 1.7, art));
-      if (traufe) so.push(fenster3(T / 2, H + 0.6, 0.9, 1.5));
+      for (let k = 0; k < n; k++) for (const u of achsen4(1, T - 1, 3.2, 0.3)) if (hash2(k, Math.round(u * 10), o.salz) % 3 !== 0) so.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7, art));
+      if (traufe) so.push(fenster4(T / 2, H + 0.6, 0.9, 1.5));
       lochwand3(S, F2, hS, so, dunkler(wand2, 0.03), { rahmen: WEISS, bank: putz2 ? orn : null });
       if (!putz2) platten(S, F2, [[0, 0, T, 0.55]], 0, 0.05, o.band);
     }
@@ -72848,7 +75530,7 @@
       let y = H + 0.6;
       if (b - a < 0.35 || top - y < 1.2) continue;
       if (mitFenster && j === m && top - y > 3.5) {
-        oe.push(fenster3((a + b) / 2, y, Math.min(1, b - a - 0.1), 1.6));
+        oe.push(fenster4((a + b) / 2, y, Math.min(1, b - a - 0.1), 1.6));
         y += 2.2;
       }
       if (top - y > 1) oe.push({ u0: a, u1: b, v0: y, v1: top, art, typ: "nische", fuell });
@@ -72865,7 +75547,7 @@
   }
   function raster2(u0, u1, ra, y0, n, gh, b, h, art = null, rand = 0.5, sockel = 0.75, x = {}) {
     const oe = [];
-    for (let k = 0; k < n; k++) for (const u of achsen4(u0, u1, ra, rand)) oe.push(fenster3(u, y0 + k * gh + sockel, b, h, art, x));
+    for (let k = 0; k < n; k++) for (const u of achsen4(u0, u1, ra, rand)) oe.push(fenster4(u, y0 + k * gh + sockel, b, h, art, x));
     return oe;
   }
   function koerper2(S, p, x0, z0, x1, z1, y0, y1, kern, fass, tw = 0.4) {
@@ -72920,10 +75602,10 @@
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.25, y0 + 1, farbe ?? "#2d3338");
       rumpf(S, F2, L3 - 0.6, B3 - 0.5, y0 + 1, y0 + 1.06, "#a07a52");
       fb3(S, F2, -4.6, 2.4, y0 + 1, y0 + 2.1, -1.25, 1.25, "#efe9dc");
-      fb3(S, F2, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS6);
+      fb3(S, F2, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS7);
       fb3(S, F2, -4.9, 2.7, y0 + 2.1, y0 + 2.25, -1.5, 1.5, "#a05a3a");
       fb3(S, F2, 2.4, 3.6, y0 + 1, y0 + 2.6, -0.7, 0.7, "#efe9dc");
-      fb3(S, F2, 2.45, 3.55, y0 + 1.9, y0 + 2.4, -0.75, 0.75, GLAS6);
+      fb3(S, F2, 2.45, 3.55, y0 + 1.9, y0 + 2.4, -0.75, 0.75, GLAS7);
       fb3(S, F2, -6.2, -5.2, y0 + 1, y0 + 2.2, -0.04, 0.04, "#2b2f33");
       fb3(S, F2, -6.25, -5.25, y0 + 1.6, y0 + 2.2, 0.04, 0.9, waehle2(rng2(Math.round(x * 7 + z2)), ["#d23c32", "#2f6f8f", "#f2f1ec"]));
       return;
@@ -72934,7 +75616,7 @@
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.3, y0 + 1.6, c2, 0.3);
       rumpf(S, F2, L3 - 0.5, B3 - 0.5, y0 + 1.6, y0 + 1.66, "#9a8d78", 0.3);
       fb3(S, F2, -6, -2.6, y0 + 1.6, y0 + 4, -1.3, 1.3, "#f2efe6");
-      fb3(S, F2, -5.95, -2.65, y0 + 3, y0 + 3.7, -1.35, 1.35, GLAS6);
+      fb3(S, F2, -5.95, -2.65, y0 + 3, y0 + 3.7, -1.35, 1.35, GLAS7);
       fb3(S, F2, -6.2, -2.4, y0 + 4, y0 + 4.2, -1.5, 1.5, c2);
       stab3(S, P3(F2, 1.5, y0 + 1.6, 0), P3(F2, 1.5, y0 + 9, 0), 0.12, "#e8e6e0");
       stab3(S, P3(F2, 1.5, y0 + 4, 0), P3(F2, 6.5, y0 + 2.4, 0), 0.08, "#e8e6e0");
@@ -72949,14 +75631,14 @@
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.5, y0 + 2.1, "#f6f4ee", 0.22, 0.9);
       rumpf(S, F2, L3 - 0.6, B3 - 0.5, y0 + 2.1, y0 + 2.16, "#b08a62", 0.22, 0.9);
       fb3(S, F2, -13, 7.5, y0 + 2.16, y0 + 4.5, -2.9, 2.9, "#f6f4ee");
-      fb3(S, F2, -12.8, 7.3, y0 + 3, y0 + 4.1, -2.95, 2.95, GLAS6);
+      fb3(S, F2, -12.8, 7.3, y0 + 3, y0 + 4.1, -2.95, 2.95, GLAS7);
       fb3(S, F2, -13.4, 8, y0 + 4.5, y0 + 4.7, -3.3, 3.3, "#e9e6de");
       fb3(S, F2, -13.4, 8, y0 + 4.7, y0 + 5.6, 3.2, 3.3, "#e9e6de");
       fb3(S, F2, -13.4, 8, y0 + 4.7, y0 + 5.6, -3.3, -3.2, "#e9e6de");
       fb3(S, F2, -6, 4.5, y0 + 4.7, y0 + 6.6, -2.2, 2.2, "#f6f4ee");
-      fb3(S, F2, -5.8, 4.3, y0 + 5.3, y0 + 6.2, -2.25, 2.25, GLAS6);
+      fb3(S, F2, -5.8, 4.3, y0 + 5.3, y0 + 6.2, -2.25, 2.25, GLAS7);
       fb3(S, F2, 4.5, 7, y0 + 4.7, y0 + 7.4, -1.6, 1.6, "#f6f4ee");
-      fb3(S, F2, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS6);
+      fb3(S, F2, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS7);
       fb3(S, F2, -6.2, 4.7, y0 + 6.6, y0 + 6.8, -2.6, 2.6, "#e9e6de");
       const [fx2, fz2] = wp3(F2, -1, 0);
       zyl7(S, 0.9, 1, 3.2, fx2, y0 + 6.8, fz2, farbe ?? "#d23c32", 12);
@@ -72977,7 +75659,7 @@
     rumpf(S, F2, L2 + 0.1, B2 + 0.1, y0 + 1.2, y0 + 5.2, c, 0.16, 0.95);
     rumpf(S, F2, L2 - 1, B2 - 0.8, y0 + 5.2, y0 + 5.3, "#7d6a58", 0.16, 0.95);
     fb3(S, F2, -28, -17, y0 + 5.3, y0 + 13.5, -4.6, 4.6, "#f2efe6");
-    fb3(S, F2, -27.8, -17.2, y0 + 12.2, y0 + 13.2, -4.65, 4.65, GLAS6);
+    fb3(S, F2, -27.8, -17.2, y0 + 12.2, y0 + 13.2, -4.65, 4.65, GLAS7);
     for (let k = 0; k < 2; k++) fb3(S, F2, -27.8, -17.2, y0 + 7.3 + k * 2.2, y0 + 8 + k * 2.2, -4.65, 4.65, GLAS_HELL4);
     fb3(S, F2, -18.5, -17, y0 + 13.5, y0 + 13.7, -5.6, 5.6, "#f2efe6");
     const [fx, fz] = wp3(F2, -24, 0);
@@ -72993,8 +75675,8 @@
     for (const tt of [-3.2, 1.2]) fbalken(S, F2, -2.7, yK + 1.5, 2.7, yK + 5.5, 0.25, tt - 0.1, tt + 0.1, farbe);
     fb3(S, F2, -3.1, 3.1, yK + 6, yK + 6.6, -3.6, 1.6, farbe);
     fb3(S, F2, -1.9, 1.9, yK + 6.6, yK + 10, -3.4, 0.9, farbe);
-    fb3(S, F2, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS6);
-    fb3(S, F2, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS6);
+    fb3(S, F2, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS7);
+    fb3(S, F2, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS7);
     fb3(S, F2, -2, 2, yK + 10, yK + 10.3, -3.6, 1.1, dunkler(farbe, 0.12));
     fb3(S, F2, -1.2, 1.2, yK + 8.6, yK + 10.8, -5.2, -3.4, "#3a3f44");
     const tipY = yK + 8.4 + Math.sin(winkel) * ausleger, tipT = 0.6 + Math.cos(winkel) * ausleger;
@@ -73145,7 +75827,7 @@
       for (let y = eg + gh; y < yK - 1; y += gh) prisma2(S, keil, y - 0.15, y + 0.1, gold);
       const pl = einruecken(poly, st * 2.4 + 3), cx = pl.reduce((a, q2) => a + q2[0], 0) / pl.length, cz = pl.reduce((a, q2) => a + q2[1], 0) / pl.length;
       S.quader(cx - 3, yTop, cz - 2.5, cx + 3, yTop + 3.2, cz + 2.5, o.pfeiler);
-      for (let i = 0; i < 4; i++) S.box(0.9, 1.8, 0.1, cx - 2.2 + i * 1.45, yTop + 1.8, cz + 2.52, GLAS6);
+      for (let i = 0; i < 4; i++) S.box(0.9, 1.8, 0.1, cx - 2.2 + i * 1.45, yTop + 1.8, cz + 2.52, GLAS7);
       const g = walmdach(7, 6, 2.6);
       g.translate(cx, yTop + 3.2, cz);
       S.add(g, kupf);
@@ -73212,7 +75894,7 @@
     const W3 = p.w, D = p.d, Wc = Math.min(14, Math.max(8, D * 0.3)), zF = D - Wc, T = Math.min(zF, 22), zB = zF - T;
     const stein = v === "giebel" ? waehle2(r, NF.backstein) : waehle2(r, [...NF.backstein, ...NF.dunkel]);
     const kupf = waehle2(r, NF.kupfer), holz = um ? "#3f4a52" : waehle2(r, ["#2f5243", "#3d4f45", "#5a3a2c"]);
-    const glas2 = um ? GLAS_HELL4 : GLAS6, rahm = um ? "#3a3f44" : "#ece6da";
+    const glas2 = um ? GLAS_HELL4 : GLAS7, rahm = um ? "#3a3f44" : "#ece6da";
     becken(S, 0, zF, W3, D - 1.8, W3, D, 0, r);
     S.quader(0, YW - 0.6, D - 1.8, W3, 0.3, D, GRANIT);
     boden4(S, 0, D - 1.8, W3, D, "#c9c3b6", 0.3, 0.05);
@@ -73228,14 +75910,14 @@
     const nl = Math.max(1, Math.round(W3 / 17)), luken = Array.from({ length: nl }, (_, i) => (i + 0.5) * W3 / nl);
     const nahLuke = (u) => luken.some((l) => Math.abs(l - u) < 1.6);
     const fensterArt = v === "schlicht" ? "segment" : "rund";
-    const fassade2 = (F2, L2, lad, giebel3 = []) => {
+    const fassade3 = (F2, L2, lad, giebel3 = []) => {
       const oe = [];
-      for (let k = 0; k < n; k++) for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster3(u, sock + k * gh + 0.8, um ? 1.3 : 1.05, 1.6, fensterArt));
+      for (let k = 0; k < n; k++) for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, sock + k * gh + 0.8, um ? 1.3 : 1.05, 1.6, fensterArt));
       if (lad) for (const u of luken) for (let k = 0; k < n; k++) oe.push({ u0: u - 0.75, u1: u + 0.75, v0: sock + k * gh + 0.3, v1: sock + k * gh + 2.5, typ: um ? "fenster" : "tuer", fuell: um ? GLAS_HELL4 : holz, art: "segment", sprosse: false });
-      for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster3(u, 1, 0.9, 0.9, null));
+      for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, 1, 0.9, 0.9, null));
       if (lad) for (const u of luken) oe.push({ u0: u - 0.9, u1: u + 0.9, v0: 0.36, v1: sock - 0.2, typ: "tuer", fuell: holz });
       for (const g of giebel3) if (g.typ !== "dreieck") oe.push(...giebelNischen(g.u0, g.u1 - g.u0, H, g.G, g.m, "spitz", dunkler(stein, 0.12), true));
-      else oe.push(fenster3((g.u0 + g.u1) / 2, H + 0.6, 0.9, 1.5, "rund"));
+      else oe.push(fenster4((g.u0 + g.u1) / 2, H + 0.6, 0.9, 1.5, "rund"));
       lochwand3(S, F2, giebel3.length ? frontUmriss(L2, H, giebel3) : [0, 0, L2, H], oe, stein, { rahmen: rahm, glas: glas2, tuer: holz });
       platten(S, F2, [[0, 0.3, L2, sock]], 0, 0.18, GRANIT);
       const bd = [];
@@ -73251,7 +75933,7 @@
       for (let i = 0; i < k; i++) luken.push((i + 0.5) * gw);
       const G2 = gw * zw(r, 0.75, 0.95), typ = r() < 0.5 ? "treppe" : "dreieck", m = gw < 9.6 ? 3 : 4;
       const gl = luken.map((u) => ({ u0: u - gw / 2 + 0.02, u1: u + gw / 2 - 0.02, typ, G: G2, m }));
-      if (vis.f) fassade2(FF, W3, true, gl);
+      if (vis.f) fassade3(FF, W3, true, gl);
       for (const u of luken) {
         const Gr = typ === "treppe" ? dachUnterGiebel(G2, m) : G2;
         const g = dachProfil(T - 0.2, gw + 0.1, Gr, 0.12, "z");
@@ -73261,7 +75943,7 @@
       }
       top = H + G2 + 1;
     } else if (v === "schlicht") {
-      if (vis.f) fassade2(FF, W3, true);
+      if (vis.f) fassade3(FF, W3, true);
       S.quader(0.4, H, zB + 0.4, W3 - 0.4, H + 0.15, zF - 0.4, "#6f7479");
       if (vis.f) {
         platten(S, FF, [[0, H, W3, H + 1.1]], -0.4, 0, stein);
@@ -73274,7 +75956,7 @@
     } else {
       const G2 = 7.2, m = 2;
       const gl = luken.map((u) => ({ u0: u - 4, u1: u + 4, typ: "fialen", G: G2, m }));
-      if (vis.f) fassade2(FF, W3, true, gl);
+      if (vis.f) fassade3(FF, W3, true, gl);
       const dh = T * 0.36, g = dachProfil(W3 - 0.4, T + 0.6, dh, 0.3, "x");
       g.translate(W3 / 2, H, zB + T / 2 - 0.1);
       S.add(g, kupf);
@@ -73406,12 +76088,12 @@
     koerper2(S, p, 0, z0, W3, D, 0, H, dunkler(klinker, 0.08), (F2, s2) => {
       const front2 = s2 === "+z";
       if (laden4 && (front2 || r() < 0)) ladenEG(S, scene2, F2, { eg, wand: rast, raster: rast, akzent, schrift: v === "geschaeft" ? "#c9483e" : "#1f3a5f", salz: p.seed * 3 });
-      else if (laden4) lochwand3(S, F2, [0, 0, F2.L, eg], achsen4(0, F2.L, 3.1, 0.6).map((u) => fenster3(u, 1.2, 1.8, 2.2)), klinker, { rahmen: WEISS });
+      else if (laden4) lochwand3(S, F2, [0, 0, F2.L, eg], achsen4(0, F2.L, 3.1, 0.6).map((u) => fenster4(u, 1.2, 1.8, 2.2)), klinker, { rahmen: WEISS });
       if (v === "laubengang" && (front2 || s2 === "-z")) {
         const oe = [];
         for (let k = 0; k < n; k++) for (const [j, u] of achsen4(0, F2.L, 3.6, 0.5).entries()) {
           const y = eg + k * gh;
-          oe.push(j % 2 ? fenster3(u, y + 1, 1.6, 1.4) : { u0: u - 0.5, u1: u + 0.5, v0: y + 0.05, v1: y + 2.2, typ: "tuer", fuell: waehle2(rng2(k * 31 + j), ["#c9483e", "#2f6f8f", "#e2b83b", "#3f7d56"]) });
+          oe.push(j % 2 ? fenster4(u, y + 1, 1.6, 1.4) : { u0: u - 0.5, u1: u + 0.5, v0: y + 0.05, v1: y + 2.2, typ: "tuer", fuell: waehle2(rng2(k * 31 + j), ["#c9483e", "#2f6f8f", "#e2b83b", "#3f7d56"]) });
         }
         lochwand3(S, F2, [0, 0, F2.L, H + 0.3], oe, klinker, { rahmen: WEISS });
         for (let k = 1; k <= n; k++) {
@@ -73495,13 +76177,13 @@
           if (front2 && i % 5 === 2 && k < n - (flach ? 0 : 0)) {
             oe.push({ u0: u - 1.1, u1: u + 1.1, v0: y + 0.25, v1: y + 2.35, typ: "nische", fuell: dunkler(stein, 0.16), tief: 1.1 });
             logg.push([u, y]);
-          } else oe.push(fenster3(u, y + 0.75, 1.15, 1.5));
+          } else oe.push(fenster4(u, y + 0.75, 1.15, 1.5));
         }
-        oe.push(fenster3(u, 0.45, 0.8, 0.45, null, { sprosse: false }));
+        oe.push(fenster4(u, 0.45, 0.8, 0.45, null, { sprosse: false }));
       });
       if (front2 && s2 === "+z") for (const e of eing) {
         oe.push({ u0: e - 0.75, u1: e + 0.75, v0: 0.3, v1: 3, art: "rund", typ: "tuer", fuell: waehle2(r, NF.tuer) });
-        for (let k = 0; k < n; k++) oe.push(fenster3(e, sock + k * gh + 2, 0.6, 1.6, null, { sprosse: false }));
+        for (let k = 0; k < n; k++) oe.push(fenster4(e, sock + k * gh + 2, 0.6, 1.6, null, { sprosse: false }));
       }
       lochwand3(S, F2, flach ? [0, 0, L2, H + 0.9] : [0, 0, L2, H], oe, stein, { rahmen: WEISS, bank: band });
       const bd = [[0, 0, L2, 0.35]];
@@ -73529,7 +76211,7 @@
       walm(S, -0.4, z0 - 0.4, W3 + 0.4, zv + 0.4, H, dh, waehle2(r, NF.ziegel), { achse: "x", kv: T / 2 + 0.4, kh: T / 2 + 0.4 });
       for (let x = 4; x < W3 - 3; x += 5.4) {
         S.quader(x - 0.7, H + 0.4, zv - 2.6, x + 0.7, H + 2.1, zv - 1.2, "#efe9dc");
-        S.box(0.9, 0.9, 0.06, x, H + 1.3, zv - 1.18, GLAS6);
+        S.box(0.9, 0.9, 0.06, x, H + 1.3, zv - 1.18, GLAS7);
         S.quader(x - 0.85, H + 2.1, zv - 2.8, x + 0.85, H + 2.25, zv - 1, "#8c3b2b");
       }
       for (let x = 8; x < W3 - 4; x += 16) S.quader(x, H + dh * 0.5, z0 + T / 2 - 0.5, x + 0.9, H + dh + 0.8, z0 + T / 2 + 0.4, band);
@@ -73567,11 +76249,11 @@
       S.quader(x + (visL ? 0.4 : 0), 0, z0 + (visB ? 0.4 : 0), x + b - (visR ? 0.4 : 0), Ha, zv - 0.4, dunkler(wand2, 0.1));
       const oe = [];
       ax.forEach((u, j) => {
-        if (j !== tA) oe.push(fenster3(u, 0.55, 0.9, 0.75, null, { sprosse: false }));
+        if (j !== tA) oe.push(fenster4(u, 0.55, 0.9, 0.75, null, { sprosse: false }));
         if (j === tA) oe.push({ u0: u - 0.6, u1: u + 0.6, v0: sout, v1: sout + 3, art: "rund", typ: "tuer", fuell: waehle2(r, NF.tuer) });
-        else if (j !== eA) oe.push(fenster3(u, sout + 0.7, 1.05, 2.1, "segment"));
-        for (let k = 1; k < n; k++) if (j !== eA) oe.push(fenster3(u, sout + eg + (k - 1) * gh + 0.6, 1, 1.9, "segment"));
-        oe.push(fenster3(u, H + 0.35, 0.8, 0.65, null, { sprosse: false }));
+        else if (j !== eA) oe.push(fenster4(u, sout + 0.7, 1.05, 2.1, "segment"));
+        for (let k = 1; k < n; k++) if (j !== eA) oe.push(fenster4(u, sout + eg + (k - 1) * gh + 0.6, 1, 1.9, "segment"));
+        oe.push(fenster4(u, H + 0.35, 0.8, 0.65, null, { sprosse: false }));
       });
       lochwand3(S, FF, [0, 0, b, Ha], oe, wand2, { rahmen: WEISS, bank: orn });
       const z2 = [[0, 0, b, sout - 0.1], [-0.05, sout + eg - 0.25, b + 0.05, sout + eg], [-0.25, H, b + 0.25, H + 0.25], [-0.35, Ha - 0.05, b + 0.35, Ha + 0.25]];
@@ -73585,8 +76267,8 @@
         const [ax0, az0] = wp3(FF, ue - 0.95, 0), [ax1, az1] = wp3(FF, ue + 0.95, 0.75);
         return [Math.min(ax0, ax1), sout - 0.3, Math.min(az0, az1), Math.max(ax0, ax1), hE, Math.max(az0, az1)];
       })(), wand2);
-      const eo = [fenster3(1.05, sout + 0.6, 1.3, 2)];
-      if (n > 1) eo.push(fenster3(1.05, sout + eg + 0.5, 1.3, 1.8));
+      const eo = [fenster4(1.05, sout + 0.6, 1.3, 2)];
+      if (n > 1) eo.push(fenster4(1.05, sout + eg + 0.5, 1.3, 1.8));
       lochwand3(S, FE, [0, sout - 0.3, 2.1, hE], eo, wand2, { rahmen: WEISS, tw: 0.3 });
       fb3(S, FF, ue - 1.2, ue + 1.2, hE, hE + 0.2, 0, 1.05, orn);
       fb3(S, FF, ue - 1.15, ue + 1.15, hE + 0.2, hE + 1, 0.95, 1.03, "#2b2f33");
@@ -73603,7 +76285,7 @@
       S.add(g, waehle2(r, NF.schiefer));
       if (r() < 0.5) {
         fpolyF(S, FF, [[ue - 1.2, Ha + 0.25], [ue + 1.2, Ha + 0.25], [ue, Ha + 2.4]], -1.5, 0.1, wand2);
-        fb3(S, FF, ue - 0.4, ue + 0.4, Ha + 0.6, Ha + 1.5, 0.1, 0.14, GLAS6);
+        fb3(S, FF, ue - 0.4, ue + 0.4, Ha + 0.6, Ha + 1.5, 0.1, 0.14, GLAS7);
       }
       S.quader(x + b * 0.7, Ha + 1, z0 + T * 0.4, x + b * 0.7 + 0.7, Ha + 4.2, z0 + T * 0.4 + 0.7, dunkler(wand2, 0.25));
       if (visL || visR) {
@@ -73628,18 +76310,18 @@
   function siedlungRoh2(S, scene2, p, r) {
     const W3 = p.w, D = p.d, vor = Math.min(4.5, D * 0.35), zv = D - vor, T = Math.min(zv, 9.5), z0 = zv - T;
     const stein = waehle2(r, [...NF.rotklinker, ...NF.backstein]), nh = Math.max(1, Math.round(W3 / 6.2)), b = W3 / nh, H = 0.4 + 2 * 2.8, dh = 4.8;
-    const dach2 = waehle2(r, NF.ziegel);
+    const dach3 = waehle2(r, NF.ziegel);
     koerper2(S, p, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), (F2, s2) => {
       const oe = [], L2 = F2.L;
       if (s2 === "+z") for (let i = 0; i < nh; i++) {
         const u0 = i * b, sp = i % 2, ut = u0 + (sp ? b - 1.3 : 1.3), uf = u0 + (sp ? 2 : b - 2);
         oe.push({ u0: ut - 0.55, u1: ut + 0.55, v0: 0.3, v1: 2.5, typ: "tuer", fuell: waehle2(rng2(i + p.seed), NF.tuer) });
-        oe.push(fenster3(uf, 0.95, 1.5, 1.3));
-        oe.push(fenster3(ut, 3.6, 0.9, 1.2));
-        oe.push(fenster3(uf, 3.5, 1.3, 1.3));
+        oe.push(fenster4(uf, 0.95, 1.5, 1.3));
+        oe.push(fenster4(ut, 3.6, 0.9, 1.2));
+        oe.push(fenster4(uf, 3.5, 1.3, 1.3));
       }
       else if (s2 === "-z") oe.push(...raster2(0, L2, 3.1, 0.4, 2, 2.8, 1.2, 1.3));
-      else oe.push(fenster3(L2 / 2, 3.5, 0.9, 1.2));
+      else oe.push(fenster4(L2 / 2, 3.5, 0.9, 1.2));
       lochwand3(S, F2, s2[1] === "x" ? [[0, 0], [L2, 0], [L2, H], [L2 / 2, H + dh - 0.3], [0, H]] : [0, 0, L2, H], oe, stein, { rahmen: WEISS, bank: dunkler(stein, 0.1) });
       platten(S, F2, [[0, 0, L2, 0.4], [0, 2.95, L2, 3.08]], 0, 0.08, dunkler(stein, 0.1));
       if (s2 === "+z") for (let i = 0; i < nh; i++) {
@@ -73650,16 +76332,16 @@
     });
     const g = dachProfil(W3 + 0.4, T + 1, dh, 0.15, "x");
     g.translate(W3 / 2, H, z0 + T / 2);
-    S.add(g, dach2);
+    S.add(g, dach3);
     const neig = Math.atan2(dh, T / 2 + 0.5);
     for (let i = 0; i < nh; i++) {
       const xc = (i + 0.5) * b, zf = zv - 2.6;
       S.quader(xc - 1.5, H + 2.4, zf - 1.8, xc + 1.5, H + 4, zf, "#efe9dc");
-      S.box(2.4, 0.8, 0.06, xc, H + 3.4, zf + 0.03, GLAS6);
+      S.box(2.4, 0.8, 0.06, xc, H + 3.4, zf + 0.03, GLAS7);
       const gg = new three_module_exports.BoxGeometry(3.4, 0.12, 2.4);
       gg.rotateX(neig * 0.35);
       gg.translate(xc, H + 4.1, zf - 0.9);
-      S.add(gg, dach2);
+      S.add(gg, dach3);
       if (i % 2 === 0) S.quader(xc + b / 2 - 0.4, H + dh * 0.6, z0 + T / 2 - 0.3, xc + b / 2 + 0.4, H + dh + 0.7, z0 + T / 2 + 0.5, dunkler(stein, 0.1));
       boden4(S, i * b, zv, (i + 1) * b, D, i % 2 ? RASEN4 : RASEN23, 0.3, 0.05);
       const ut = i * b + (i % 2 ? b - 1.3 : 1.3);
@@ -73768,7 +76450,7 @@
     const v = ruine ? "hallen" : ["marien", "hallen", "doppelturm", "dorf"].includes(p.variante) ? p.variante : waehle2(r, ["marien", "hallen", "doppelturm", "dorf"]);
     const W3 = p.w, D = p.d, dorf = v === "dorf", basilika = v === "marien" || v === "doppelturm";
     const stein = waehle2(r, [...NF.backstein, ...NF.dunkel]), putz2 = "#ece6da", kupfer = waehle2(r, NF.kupfer);
-    const dach2 = v === "marien" ? kupfer : waehle2(r, NF.ziegel), sockel = dorf ? "#9d978c" : GRANIT_D;
+    const dach3 = v === "marien" ? kupfer : waehle2(r, NF.ziegel), sockel = dorf ? "#9d978c" : GRANIT_D;
     const o = { stein, putz: putz2, sockel, joch: dorf ? 5 : 6.5, fu: dorf ? 2.2 : 3.2, fo: dorf ? 1.6 : 2.6, glas: ruine ? "#2c3034" : void 0 };
     const cx = W3 / 2, Wn = dorf ? Math.min(W3 * 0.55, 11) : W3 * 0.86, x0 = cx - Wn / 2, x1 = cx + Wn / 2;
     const Wm = basilika ? Wn * 0.42 : Wn, Hn = dorf ? 7.5 : basilika ? 13 : 19, Hm = basilika ? v === "marien" ? 30 : 27 : Hn;
@@ -73782,7 +76464,7 @@
         const F2 = sx > 0 ? R6(x1, zT, 0, -1, zT - zC) : R6(x0, zC, 0, 1, zT - zC);
         if (sieht(p, F2)) kirchWand(S, F2, F2.L, Hn, o);
         const yA = Hn + 4.2, hi = sx > 0 ? [xm1, x1 + 0.4] : [x0 - 0.4, xm0];
-        huelle(S, [[[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zC], [hi[1], sx > 0 ? Hn : yA, zT]], [[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zT], [hi[0], sx > 0 ? yA : Hn, zT]]], [cx, 0, (zC + zT) / 2], dach2 === kupfer ? dunkler(kupfer, 0.02) : dach2);
+        huelle(S, [[[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zC], [hi[1], sx > 0 ? Hn : yA, zT]], [[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zT], [hi[0], sx > 0 ? yA : Hn, zT]]], [cx, 0, (zC + zT) / 2], dach3 === kupfer ? dunkler(kupfer, 0.02) : dach3);
         if (sieht(p, F2)) for (let i = 1; i < Math.round(F2.L / o.joch); i++) {
           const z2 = sx > 0 ? zT - i * (F2.L / Math.round(F2.L / o.joch)) : zC + i * (F2.L / Math.round(F2.L / o.joch));
           balken4(S, [sx > 0 ? x1 - 0.2 : x0 + 0.2, Hn + 1.5, z2], [sx > 0 ? xm1 + 0.2 : xm0 - 0.2, Hm - 4, z2], 0.7, 0.8, stein);
@@ -73803,7 +76485,7 @@
     if (!ruine) {
       const g = dachProfil(Lsch, Wm + 0.8, hR, 0.2, "z");
       g.translate(cx, Hm, zC + Lsch / 2);
-      S.add(g, dach2);
+      S.add(g, dach3);
     }
     const ra = Wm / 2, chor = [];
     for (let k = 0; k <= 4; k++) {
@@ -73832,7 +76514,7 @@
       const a = k * PI9 / 4;
       if (k > 0) S.box(1.8, Hm * 0.7, 1.1, cx + (ra + 0.6) * Math.cos(a), Hm * 0.35, zC - (ra + 0.6) * Math.sin(a), stein, a);
     }
-    if (!ruine) huelle(S, tris, [cx, Hm - 1, zC], dach2);
+    if (!ruine) huelle(S, tris, [cx, Hm - 1, zC], dach3);
     const FW = R6(x0, zT + 0.4, 1, 0, Wn);
     if (sieht(p, FW) && !basilika) {
       const m = 4, G2 = hR / ((2 * m + 1) / (2 * m + 2) * 0.93) + 0.3;
@@ -73853,7 +76535,7 @@
     }
     let top = Hm + hR;
     if (v === "doppelturm") {
-      for (const xt of [x0 - 0.5, x1 + 0.5 - tw]) top = Math.max(top, turm2(S, scene2, p, xt, zT, tw, Hm + 16, { ...o, kupfer, dach: dach2, helm: "nadel", hs: 24, wimperg: 3.5, portal: true, uhr: xt > cx }));
+      for (const xt of [x0 - 0.5, x1 + 0.5 - tw]) top = Math.max(top, turm2(S, scene2, p, xt, zT, tw, Hm + 16, { ...o, kupfer, dach: dach3, helm: "nadel", hs: 24, wimperg: 3.5, portal: true, uhr: xt > cx }));
       const FM = R6(x0 - 0.5 + tw, D - 0.6, 1, 0, x1 + 0.5 - tw - (x0 - 0.5 + tw));
       S.quader(FM.ox, 0, zT + 0.4, FM.ox + FM.L, Hm + 2, D - 1, dunkler(stein, 0.06));
       if (sieht(p, FM)) {
@@ -73862,7 +76544,7 @@
       }
     } else {
       const Ht = dorf ? 14 : ruine ? Hm + 12 : v === "marien" ? Hm + 20 : Hm + 22;
-      top = Math.max(top, turm2(S, scene2, p, cx - tw / 2, zT, tw, Ht, { ...o, kupfer, dach: dach2, helm: ruine ? "ruine" : dorf ? r() < 0.5 ? "sattel" : "walm" : "nadel", hs: dorf ? 6 : v === "marien" ? 42 : 34, wimperg: dorf || ruine ? 0 : 4.5, portal: true, uhr: !ruine }));
+      top = Math.max(top, turm2(S, scene2, p, cx - tw / 2, zT, tw, Ht, { ...o, kupfer, dach: dach3, helm: ruine ? "ruine" : dorf ? r() < 0.5 ? "sattel" : "walm" : "nadel", hs: dorf ? 6 : v === "marien" ? 42 : 34, wimperg: dorf || ruine ? 0 : 4.5, portal: true, uhr: !ruine }));
     }
     if (dorf) {
       const FZ = R6(0, D - 0.2, 1, 0, W3), FX = R6(W3 - 0.2, D, 0, -1, D);
@@ -73892,7 +76574,7 @@
     const r = rng2(`nrt:${p.seed}`);
     const v = ["schauwand", "laube", "renaissance"].includes(p.variante) ? p.variante : waehle2(r, ["schauwand", "laube", "renaissance"]);
     const W3 = p.w, D = p.d, T = Math.min(D - 2, 18), z0 = D - T;
-    const stein = waehle2(r, [...NF.backstein, ...NF.dunkel]), putz2 = "#ece6da", kupfer = waehle2(r, NF.kupfer), dach2 = waehle2(r, [...NF.ziegel, NF.dunkelziegel[0]]);
+    const stein = waehle2(r, [...NF.backstein, ...NF.dunkel]), putz2 = "#ece6da", kupfer = waehle2(r, NF.kupfer), dach3 = waehle2(r, [...NF.ziegel, NF.dunkelziegel[0]]);
     const FF = R6(0, D, 1, 0, W3), FX = R6(W3, D, 0, -1, T), FXm = R6(0, z0, 0, 1, T), FR2 = R6(W3, z0, -1, 0, W3);
     const vis = { f: sieht(p, FF), x: sieht(p, FX), xm: sieht(p, FXm), r: sieht(p, FR2) };
     const eg = 6.2, H = v === "laube" ? 11 : 12.5, dh = T * 0.55, m = 3, Gend = dh / ((2 * m + 1) / (2 * m + 2) * 0.93) + 0.3;
@@ -73900,7 +76582,7 @@
     S.quader(vis.xm ? 0.4 : 0, 0, rueckLaube ? z0 + 3.4 : vis.r ? z0 + 0.4 : z0, W3 - (vis.x ? 0.4 : 0), H, D - (v === "laube" ? 3.4 : 0.4), dunkler(stein, 0.06));
     const g = dachProfil(W3 - 0.6, T + 0.6, dh, 0.25, "x");
     g.translate(W3 / 2, H, z0 + T / 2);
-    S.add(g, dach2);
+    S.add(g, dach3);
     let top = H + dh;
     const na = Math.max(3, Math.round(W3 / 4.6)), ja = W3 / na, glas2 = "#536676";
     const laube = [], obere = [];
@@ -73952,13 +76634,13 @@
         for (let i = 0; i < na; i++) {
           const u = (i + 0.5) * ja;
           if (i === Math.floor(na / 2)) oe.push({ u0: u - 1, u1: u + 1, v0: 0.3, v1: 4.2, art: "rund", typ: "tuer", fuell: "#4a3326" });
-          else oe.push(fenster3(u, 1.4, 1.5, 3.2));
+          else oe.push(fenster4(u, 1.4, 1.5, 3.2));
         }
       }
       for (const q2 of gl) {
         const c = (q2.u0 + q2.u1) / 2;
         if (q2.typ === "volute") {
-          oe.push(fenster3(c, H + 0.8, 1.3, 2));
+          oe.push(fenster4(c, H + 0.8, 1.3, 2));
           oe.push({ kreis: [c, H + q2.G * 0.82, 0.45], typ: "fenster" });
         } else oe.push(...giebelNischen(q2.u0, gb, H, q2.G, 2, "spitz", putz2, true));
       }
@@ -73976,7 +76658,7 @@
         const c = (q2.u0 + q2.u1) / 2, Gr = q2.typ === "volute" ? q2.G * 0.66 : dachUnterGiebel(q2.G, 2);
         const gz2 = dachProfil(T * 0.45, gb + 0.2, Gr, 0.1, "z");
         gz2.translate(c, H, D - 0.4 - T * 0.225);
-        S.add(gz2, dach2);
+        S.add(gz2, dach3);
         if (q2.typ === "fialen") {
           giebelDeckel(S, FF, q2.u0, gb, H, q2.G, 2, "#d9d3c8");
           const nc = 5, cw = gb / nc, st = q2.G / 3;
@@ -73997,12 +76679,12 @@
       if (v === "renaissance") {
         const u0 = Math.max(1, ja * 0.6), u1 = u0 + 4, FU2 = teil3(FF, u0, u1, 1.3);
         fb3(S, FF, u0, u1, 0, H - 0.6, 0, 1, dunkler(SANDSTEIN2, 0.15));
-        lochwand3(S, FU2, [0, 0, 4, H - 0.6], [fenster3(2, 1.4, 2.6, 3), fenster3(2, eg + 0.6, 2.6, 3.4)], SANDSTEIN2, { rahmen: WEISS, tw: 0.3 });
+        lochwand3(S, FU2, [0, 0, 4, H - 0.6], [fenster4(2, 1.4, 2.6, 3), fenster4(2, eg + 0.6, 2.6, 3.4)], SANDSTEIN2, { rahmen: WEISS, tw: 0.3 });
         fb3(S, FF, u0 - 0.3, u1 + 0.3, H - 0.6, H - 0.2, 0, 1.6, SANDSTEIN2);
         fb3(S, FF, u0 - 0.2, u1 + 0.2, H - 0.2, H + 0.7, 1.35, 1.5, SANDSTEIN2);
         const [tx, tz] = wp3(FF, W3 - 2.6, -0.6);
         zyl7(S, 2.4, 2.4, H + 7, tx, 0, tz, stein, 8);
-        for (let y = 2.5; y < H + 6; y += 3.2) S.box(0.7, 1.3, 0.2, tx + 1.75, y, tz + 1.75, GLAS6, PI9 / 4);
+        for (let y = 2.5; y < H + 6; y += 3.2) S.box(0.7, 1.3, 0.2, tx + 1.75, y, tz + 1.75, GLAS7, PI9 / 4);
         for (let y = 1.6; y < H + 6; y += 1.6) zyl7(S, 2.46, 2.46, 0.3, tx, y, tz, SANDSTEIN2, 8);
         kegel(S, 2.9, 3, tx, H + 7, tz, kupfer, 8);
         zyl7(S, 0.9, 0.9, 1.6, tx, H + 10, tz, kupfer, 8);
@@ -74173,7 +76855,7 @@
       const ax0 = W3 * 0.12, ax1 = W3 * 0.88, az1 = zK - 6, az0 = Math.max(1.5, az1 - 9), stn = "#e3d6bb";
       koerper2(S, p, ax0, az0, ax1, az1, yK, yK + 7, dunkler(stn, 0.12), (F2, s2) => {
         const oe = [];
-        for (const u of achsen4(0, F2.L, 4.2, 0.6)) oe.push({ u0: u - 1.5, u1: u + 1.5, v0: yK + 0.05, v1: yK + 4.6, art: "rund", typ: s2 === "+z" ? "nische" : "fenster", fuell: "#6b5a4a", tief: 1.8 }, fenster3(u, yK + 5.2, 1.6, 1.2, "rund"));
+        for (const u of achsen4(0, F2.L, 4.2, 0.6)) oe.push({ u0: u - 1.5, u1: u + 1.5, v0: yK + 0.05, v1: yK + 4.6, art: "rund", typ: s2 === "+z" ? "nische" : "fenster", fuell: "#6b5a4a", tief: 1.8 }, fenster4(u, yK + 5.2, 1.6, 1.2, "rund"));
         lochwand3(S, F2, [0, yK, F2.L, yK + 7.6], oe, stn, { rahmen: WEISS });
         platten(S, F2, [[0, yK, F2.L, yK + 0.5], [-0.1, yK + 4.9, F2.L + 0.1, yK + 5.1], [-0.2, yK + 7.3, F2.L + 0.2, yK + 7.7]], 0, 0.16, dunkler(stn, 0.08));
         if (s2 === "+z") ftext3(scene2, F2, "Landungsbr\xFCcken", F2.L / 2, yK + 6.4, 0.2, 0.7, F2.L * 0.4, "#5a4a3a");
@@ -74183,7 +76865,7 @@
         const th = kk === 2 ? 15 : 11;
         S.quader(tx - 2.6, yK, az1 - 5.4, tx + 2.6, yK + th, az1 + 0.2, stn);
         for (const F2 of seitenListe(p, tx - 2.6, az1 - 5.4, tx + 2.6, az1 + 0.2)) {
-          lochwand3(S, F2.F, [0, yK + 7.7, 5.2, yK + th], [fenster3(2.6, yK + th - 3.4, 1.2, 2.2, "rund")], stn, { rahmen: WEISS });
+          lochwand3(S, F2.F, [0, yK + 7.7, 5.2, yK + th], [fenster4(2.6, yK + th - 3.4, 1.2, 2.2, "rund")], stn, { rahmen: WEISS });
           if (kk === 2) fscheibe2(S, F2.F, 2.6, yK + 9.6, 0, 0.15, 1, "#f2efe6", 16);
         }
         const g = new three_module_exports.SphereGeometry(2.7, 12, 6, 0, 2 * PI9, 0, PI9 / 2);
@@ -74218,7 +76900,7 @@
         koerper2(S, p, hx, hz0, hx + hw, hz1, yK, yK + 3, dunkler(wf, 0.1), (F2, s2) => {
           const st = [];
           for (let u = 0.15; u < F2.L; u += 0.3) st.push([u - 0.03, yK + 0.1, u + 0.03, yK + 2.9]);
-          lochwand3(S, F2, s2[1] === "z" ? [[0, yK], [F2.L, yK], [F2.L, yK + 3], [F2.L / 2, yK + 5.2], [0, yK + 3]] : [0, yK, F2.L, yK + 3], [s2 === "+z" ? { u0: F2.L / 2 - 0.6, u1: F2.L / 2 + 0.6, v0: yK + 0.05, v1: yK + 2.2, typ: "tuer", fuell: "#3a3f44" } : fenster3(F2.L / 2, yK + 1, 0.9, 0.9)], wf, { rahmen: WEISS });
+          lochwand3(S, F2, s2[1] === "z" ? [[0, yK], [F2.L, yK], [F2.L, yK + 3], [F2.L / 2, yK + 5.2], [0, yK + 3]] : [0, yK, F2.L, yK + 3], [s2 === "+z" ? { u0: F2.L / 2 - 0.6, u1: F2.L / 2 + 0.6, v0: yK + 0.05, v1: yK + 2.2, typ: "tuer", fuell: "#3a3f44" } : fenster4(F2.L / 2, yK + 1, 0.9, 0.9)], wf, { rahmen: WEISS });
           platten(S, F2, st, 0, 0.04, dunkler(wf, 0.06));
         });
         const g = dachProfil(hz1 - hz0 + 0.6, hw + 0.6, 2.2, 0.1, "z");
@@ -74302,7 +76984,7 @@
         for (let i = 0; i < 8; i++) {
           const a = i / 8 * 2 * PI9 + PI9 / 8;
           if (Math.cos(a) + Math.sin(a) < 0.2) continue;
-          S.box(0.2, 1.3, 0.9, cx + Math.cos(a) * 5.15, i % 2 ? 4.8 : 2, cz + Math.sin(a) * 5.15, i % 3 ? GLAS6 : "#2f5243", -a);
+          S.box(0.2, 1.3, 0.9, cx + Math.cos(a) * 5.15, i % 2 ? 4.8 : 2, cz + Math.sin(a) * 5.15, i % 3 ? GLAS7 : "#2f5243", -a);
         }
         zyl7(S, 7.2, 7.2, 0.3, cx, 7.2, cz, "#7a5d43", 16);
         zyl7(S, 7.1, 7.1, 1, cx, 7.5, cz, "#5a4532", 16, true);
@@ -74340,7 +77022,7 @@
       const g = dachProfil(10.4, 7.8, 3.6, 0.15, "x");
       g.translate(mx + 5, 3.4, 5.5);
       S.add(g, waehle2(r, NF.ziegel));
-      for (const s2 of seitenListe(p, mx, 2, mx + 10, 9)) lochwand3(S, s2.F, [0, 0, s2.F.L, 3.4], achsen4(0, s2.F.L, 2.6, 0.6).map((u, i) => i === 1 && s2.k === "+z" ? { u0: u - 0.5, u1: u + 0.5, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f5243" } : fenster3(u, 1, 0.9, 1.2)), waehle2(r, NF.backstein), { rahmen: WEISS });
+      for (const s2 of seitenListe(p, mx, 2, mx + 10, 9)) lochwand3(S, s2.F, [0, 0, s2.F.L, 3.4], achsen4(0, s2.F.L, 2.6, 0.6).map((u, i) => i === 1 && s2.k === "+z" ? { u0: u - 0.5, u1: u + 0.5, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f5243" } : fenster4(u, 1, 0.9, 1.2)), waehle2(r, NF.backstein), { rahmen: WEISS });
     }
     boden4(S, cx - 1.1, cz, cx + 1.1, D, "#cbb88e", 0.3, 0.08);
     for (const F2 of [R6(0.3, D - 0.3, 1, 0, W3 - 0.6), R6(W3 - 0.3, D - 0.3, 0, -1, D - 0.6)]) if (sieht(p, F2)) for (let u = 0.5; u < F2.L; u += 2.5) {
@@ -74386,14 +77068,14 @@
       const L2 = Math.min(W3 - 4, 24), B2 = Math.min(D - 6, 9), x0 = (W3 - L2) / 2, z1 = D - 4, z0 = z1 - B2, hw = 3, dh = B2 * 0.85, wand2 = "#f2eee5";
       koerper2(S, p, x0, z0, x0 + L2, z1, 0, hw, dunkler(wand2, 0.1), (F2, s2) => {
         const oe = [];
-        for (const [i, u] of achsen4(0, F2.L, 2.4, 0.8).entries()) oe.push(s2 === "+z" && i === Math.floor(F2.L / 2.4 / 2) ? { u0: u - 0.6, u1: u + 0.6, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f6f8f" } : fenster3(u, 0.9, 1.1, 1.3, null, { rahmen: WEISS }));
+        for (const [i, u] of achsen4(0, F2.L, 2.4, 0.8).entries()) oe.push(s2 === "+z" && i === Math.floor(F2.L / 2.4 / 2) ? { u0: u - 0.6, u1: u + 0.6, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f6f8f" } : fenster4(u, 0.9, 1.1, 1.3, null, { rahmen: WEISS }));
         lochwand3(S, F2, [0, 0, F2.L, hw], oe, wand2, { rahmen: "#3f7d56", bank: WEISS });
         platten(S, F2, [[0, 0, F2.L, 0.4]], 0, 0.06, "#a6a197");
       });
       walm(S, x0 - 0.7, z0 - 0.7, x0 + L2 + 0.7, z1 + 0.7, hw - 0.3, dh, reet, { achse: "x", kv: B2 / 2 + 0.7, kh: B2 / 2 + 0.7 });
       const FF = R6(x0, z1, 1, 0, L2);
       const uc = achsen4(0, L2, 2.4, 0.8)[Math.floor(L2 / 2.4 / 2)], gb = 3.4;
-      lochwand3(S, teil3(FF, uc - gb / 2, uc + gb / 2, 0.3), [[0, 0], [gb, 0], [gb, hw + 1], [gb / 2, hw + 4.2], [0, hw + 1]], [fenster3(gb / 2, hw + 0.9, 0.9, 1.1, null, { rahmen: WEISS })], wand2, { rahmen: "#3f7d56", tw: 0.7 });
+      lochwand3(S, teil3(FF, uc - gb / 2, uc + gb / 2, 0.3), [[0, 0], [gb, 0], [gb, hw + 1], [gb / 2, hw + 4.2], [0, hw + 1]], [fenster4(gb / 2, hw + 0.9, 0.9, 1.1, null, { rahmen: WEISS })], wand2, { rahmen: "#3f7d56", tw: 0.7 });
       const gz2 = dachProfil(3.4, gb + 0.6, 3.3, 0.1, "z");
       gz2.translate(x0 + uc, hw + 1, z1 - 1.3);
       S.add(gz2, reet);
@@ -74417,7 +77099,7 @@
       const uk = (B2 / 2 + 0.7) * kw2 - 0.7;
       const gum = [[0, 0], [B2, 0], [B2, ys(B2)], [B2 - uk, yk], [uk, yk], [0, ys(0)]];
       const door = { u0: B2 / 2 - 1.8, u1: B2 / 2 + 1.8, v0: 0.3, v1: 4.4, art: "segment", typ: "tuer", fuell: waehle2(r, ["#3c5a46", "#7a4a2e", "#3f4f5a"]) };
-      lochwand3(S, FF, gum, [door, fenster3(B2 / 2 - 3.6, 1, 1, 1.2), fenster3(B2 / 2 + 3.6, 1, 1, 1.2), { u0: B2 / 2 - 0.5, u1: B2 / 2 + 0.5, v0: yk - 1.4, v1: yk - 0.3, typ: "tuer", fuell: "#2b2f33" }], fach ? fuell : stein, { rahmen: WEISS, tw: 0.3 });
+      lochwand3(S, FF, gum, [door, fenster4(B2 / 2 - 3.6, 1, 1, 1.2), fenster4(B2 / 2 + 3.6, 1, 1, 1.2), { u0: B2 / 2 - 0.5, u1: B2 / 2 + 0.5, v0: yk - 1.4, v1: yk - 0.3, typ: "tuer", fuell: "#2b2f33" }], fach ? fuell : stein, { rahmen: WEISS, tw: 0.3 });
       if (fach || true) {
         const FG = teil3(FF, 0, B2, 0.02), bal = [];
         for (const u of [0.15, B2 / 2 - 2.05, B2 / 2 + 2.05, B2 - 0.15]) bal.push([u - 0.15, 0.3, u + 0.15, Math.min(ys(u), yk)]);
@@ -74442,8 +77124,8 @@
         if (!sieht(p, F2)) continue;
         const L2 = F2.L, oe = [];
         if (k !== "-z") {
-          for (const [i, u] of achsen4(0.5, L2 - 0.5, 2.5, 0.3).entries()) oe.push(i === 3 ? { u0: u - 0.7, u1: u + 0.7, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#3c5a46" } : u < L2 * 0.45 ? fenster3(u, 1, 0.9, 1.1) : fenster3(u, 1.4, 0.7, 0.6, null, { sprosse: false }));
-        } else for (const u of achsen4(0, L2, 2.6, 0.8)) oe.push(fenster3(u, 0.9, 1, 1.3));
+          for (const [i, u] of achsen4(0.5, L2 - 0.5, 2.5, 0.3).entries()) oe.push(i === 3 ? { u0: u - 0.7, u1: u + 0.7, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#3c5a46" } : u < L2 * 0.45 ? fenster4(u, 1, 0.9, 1.1) : fenster4(u, 1.4, 0.7, 0.6, null, { sprosse: false }));
+        } else for (const u of achsen4(0, L2, 2.6, 0.8)) oe.push(fenster4(u, 0.9, 1, 1.3));
         lochwand3(S, F2, [0, 0, L2, hw], oe, fuell, { rahmen: WEISS, tw: 0.3 });
         if (fach) fachwerk2(S, teil3(F2, 0, L2, 0.02), L2, 0.3, hw, holz, { riegel: [1.6], streben: k !== "-z" });
         else platten(S, F2, [[0, 0, L2, 0.5]], 0, 0.06, dunkler(stein, 0.1));
@@ -74524,10 +77206,10 @@
     }
   }
   function villa(S, scene2, p, r, x0, z0, x1, z1, o) {
-    const wand2 = o.wand, n = o.n, eg = 0.9, gh = 3.2, H = eg + n * gh, holz = o.holz, dach2 = o.dach, L2 = x1 - x0, T = z1 - z0;
+    const wand2 = o.wand, n = o.n, eg = 0.9, gh = 3.2, H = eg + n * gh, holz = o.holz, dach3 = o.dach, L2 = x1 - x0, T = z1 - z0;
     const vis = koerper2(S, p, x0, z0, x1, z1, 0, H, dunkler(wand2, 0.08), (F2, s2) => {
       const oe = [], front2 = s2 === "+z";
-      for (let k = 0; k < n; k++) for (const [i, u] of achsen4(0, F2.L, 2.4, 0.6).entries()) oe.push(front2 && k === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL4, art: "segment" } : fenster3(u, eg + k * gh + 0.55, 1.1, 2, "segment"));
+      for (let k = 0; k < n; k++) for (const [i, u] of achsen4(0, F2.L, 2.4, 0.6).entries()) oe.push(front2 && k === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL4, art: "segment" } : fenster4(u, eg + k * gh + 0.55, 1.1, 2, "segment"));
       lochwand3(S, F2, [0, 0, F2.L, H], oe, wand2, { rahmen: WEISS, bank: WEISS });
       const bd = [[0, 0, F2.L, eg]];
       for (let k = 1; k < n; k++) bd.push([-0.05, eg + k * gh - 0.1, F2.L + 0.05, eg + k * gh + 0.08]);
@@ -74536,33 +77218,33 @@
       for (let u = 0.3; u < F2.L; u += 0.6) fb3(S, F2, u - 0.08, u + 0.08, H - 0.55, H - 0.3, 0, 0.3, WEISS);
       if (front2) {
         const vb = Math.min(F2.L * 0.62, F2.L - 2), u0 = (F2.L - vb) / 2 + (o.turm ? -F2.L * 0.12 : 0);
-        veranda(S, F2, Math.max(0.3, u0), Math.max(0.3, u0) + vb, eg, n, gh, 2, holz, { dach: dach2 });
+        veranda(S, F2, Math.max(0.3, u0), Math.max(0.3, u0) + vb, eg, n, gh, 2, holz, { dach: dach3 });
         fb3(S, F2, Math.max(0.3, u0), Math.max(0.3, u0) + vb, 0, eg, 0, 2, WEISS);
         for (let s22 = 0; s22 < 3; s22++) fb3(S, F2, F2.L / 2 - 1, F2.L / 2 + 1, 0.3, 0.3 + (s22 + 1) * 0.2, 2, 2 + (3 - s22) * 0.35, GRANIT);
         ftext3(scene2, F2, o.name, F2.L / 2, H - 0.75, 0.32, 0.42, F2.L * 0.6, "#2f5f8f");
       }
     });
     const dh = Math.min(L2, T) * 0.42;
-    walm(S, x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5, H, dh, dach2, { achse: "x", kv: T / 2 + 0.5, kh: T / 2 + 0.5 });
+    walm(S, x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5, H, dh, dach3, { achse: "x", kv: T / 2 + 0.5, kh: T / 2 + 0.5 });
     const FF = R6(x0, z1, 1, 0, L2);
     if (vis.vis["+z"]) {
       const gb = Math.min(5, L2 * 0.4), uc = L2 / 2 + (o.turm ? L2 * 0.15 : 0);
       fpolyF(S, teil3(FF, uc - gb / 2, uc + gb / 2, 0), [[0, H], [gb, H], [gb / 2, H + gb * 0.7]], -2.5, 0.1, wand2);
-      fb3(S, FF, uc - 0.6, uc + 0.6, H + 0.4, H + 1.8, 0.1, 0.14, GLAS6);
+      fb3(S, FF, uc - 0.6, uc + 0.6, H + 0.4, H + 1.8, 0.1, 0.14, GLAS7);
       fbalken(S, FF, uc - gb / 2 - 0.3, H - 0.1, uc, H + gb * 0.7 + 0.2, 0.25, 0.1, 0.3, holz);
       fbalken(S, FF, uc + gb / 2 + 0.3, H - 0.1, uc, H + gb * 0.7 + 0.2, 0.25, 0.1, 0.3, holz);
       fb3(S, FF, uc - 0.08, uc + 0.08, H + gb * 0.45, H + gb * 0.7 + 1, 0.12, 0.3, holz);
       const gz2 = dachProfil(3, gb + 0.6, gb * 0.7, 0.1, "z");
       gz2.translate(x0 + uc, H, z1 - 1.4);
-      S.add(gz2, dach2);
+      S.add(gz2, dach3);
     }
     let top = H + dh;
     if (o.turm) {
       const tx = x1 - 1.6, tz = z1 - 1;
       zyl7(S, 2, 2, H + 3.2, tx, 0, tz, wand2, 8);
-      for (let k = 0; k < n + 1; k++) S.box(0.8, 1.6, 0.15, tx + 1.45, eg + k * gh + 1.4, tz + 1.45, GLAS6, -PI9 / 4);
+      for (let k = 0; k < n + 1; k++) S.box(0.8, 1.6, 0.15, tx + 1.45, eg + k * gh + 1.4, tz + 1.45, GLAS7, -PI9 / 4);
       zyl7(S, 2.15, 2.15, 0.25, tx, H, tz, WEISS, 8);
-      kegel(S, 2.4, 4.5, tx, H + 3.2, tz, dach2, 8);
+      kegel(S, 2.4, 4.5, tx, H + 3.2, tz, dach3, 8);
       zyl7(S, 0.04, 0.1, 1.2, tx, H + 7.7, tz, "#c9a24a", 6);
       top = Math.max(top, H + 8.9);
     }
@@ -75375,7 +78057,7 @@
     fform3(S, F2, s2, t0, t1, c);
   }
   function lochwand4(S, F2, u0, u1, y0, y1, farbe, loecher, o = {}) {
-    fb4(S, F2, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o.glasT ?? 0.04, o.glas ?? GLAS7);
+    fb4(S, F2, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o.glasT ?? 0.04, o.glas ?? GLAS8);
     fwand2(S, F2, u0, u1, y0, y1, 0, o.dick ?? 0.35, farbe, loecher);
   }
   function fpoly3(S, F2, pkt, t0, t1, c) {
@@ -75511,7 +78193,7 @@
   var RASEN5 = "#9dc283";
   var RASEN24 = "#a9cb8c";
   var KIES4 = "#d8cfb8";
-  var GLAS7 = "#4e5c67";
+  var GLAS8 = "#4e5c67";
   var GLAS_HELL5 = "#6f8696";
   var DUNKEL = "#3e474f";
   var METALL = "#9aa1a7";
@@ -75564,10 +78246,10 @@
     S.box(quer2 ? 0.6 : 1.8, 0.12, quer2 ? 1.8 : 0.6, x, 0.8, z2, "#8a6a4a");
     S.box(quer2 ? 0.5 : 1.6, 0.45, quer2 ? 1.6 : 0.5, x, 0.55, z2, "#4a4f55");
   }
-  function fenster4(S, F2, u, y, fw, fh, o = {}) {
+  function fenster5(S, F2, u, y, fw, fh, o = {}) {
     const t = o.t ?? 0;
     if (o.rahmen !== null) fb4(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y - 0.12, y + fh + 0.12, t, t + 0.05, o.rahmen ?? WEISS2);
-    fb4(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t, t + 0.07, o.glas ?? GLAS7);
+    fb4(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t, t + 0.07, o.glas ?? GLAS8);
     if (o.kreuz) {
       fb4(S, F2, u - 0.04, u + 0.04, y, y + fh, t, t + 0.1, o.rahmen ?? WEISS2);
       fb4(S, F2, u - fw / 2, u + fw / 2, y + fh * 0.62, y + fh * 0.62 + 0.08, t, t + 0.1, o.rahmen ?? WEISS2);
@@ -75767,7 +78449,7 @@
     if (o.podium !== false) podium(S, scene2, p, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8, pod - 1, { stein });
     S.quader(kx0, 0, kz0, kx0 + kb, Hk, kz0 + kd, stein);
     for (const [k, F2] of seiten2(p, kx0, kz0, kb, kd)) {
-      for (const u of achsen5(0, F2.L, 2.4, 0.8)) fb4(S, F2, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS7);
+      for (const u of achsen5(0, F2.L, 2.4, 0.8)) fb4(S, F2, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS8);
       for (let y = pod + 2 * gh; y < Hk - 3; y += 2 * gh) fb4(S, F2, 0, F2.L, y - 0.3, y, 0, 0.12, heller(stein, 0.05));
       fb4(S, F2, -0.1, F2.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
     }
@@ -75844,7 +78526,7 @@
         fstrebe(S, F2, a, ya, m, yc, 0.1, 0, T, holz);
         fstrebe(S, F2, m, yc, b, ya, 0.1, 0, T, holz);
       }
-      fenster4(S, F2, u, yb, fw, fh, { kreuz: true, laeden: o.laeden, rahmen: WEISS2, t: 0.02 });
+      fenster5(S, F2, u, yb, fw, fh, { kreuz: true, laeden: o.laeden, rahmen: WEISS2, t: 0.02 });
     });
     for (let i = 0; i < posten.length - 1; i++) {
       const a = posten[i] + 0.1, b = posten[i + 1] - 0.1;
@@ -75873,8 +78555,8 @@
         fb4(S, F2, m - b, m + b, yy, yy + 0.05, 0.1, 0.13, SCHIEFER22);
       }
       const us2 = L2 > 7 ? [m - 1.2, m + 1.2] : [m];
-      for (const u of us2) fenster4(S, F2, u, y + 0.7, 0.75, 1.15, { kreuz: true, laeden: o.laeden, t: 0.1 });
-      fenster4(S, F2, m, y + hg * 0.52, 0.55, 0.8, { t: 0.1 });
+      for (const u of us2) fenster5(S, F2, u, y + 0.7, 0.75, 1.15, { kreuz: true, laeden: o.laeden, t: 0.1 });
+      fenster5(S, F2, m, y + hg * 0.52, 0.55, 0.8, { t: 0.1 });
       fb4(S, F2, -0.2, L2 + 0.2, y - 0.12, y + 0.06, 0, 0.16, WEISS2);
       return;
     }
@@ -75890,10 +78572,10 @@
     fstrebe(S, F2, 0.25, y + 0.15, m, y + hg - 0.25, 0.18, 0, T * 1.2, holz);
     fstrebe(S, F2, L2 - 0.25, y + 0.15, m, y + hg - 0.25, 0.18, 0, T * 1.2, holz);
     const us = L2 > 7 ? [m - L2 * 0.32, m + L2 * 0.32] : [];
-    for (const u of us) if (breite(y + 1.6) > Math.abs(u - m) + 0.6) fenster4(S, F2, u, y + 0.5, 0.7, 1, { kreuz: true, t: 0.02 });
-    fenster4(S, F2, m - 0.55, y + 0.5, 0.6, 1, { t: 0.02 });
-    fenster4(S, F2, m + 0.55, y + 0.5, 0.6, 1, { t: 0.02 });
-    if (hg > 4) fenster4(S, F2, m, y2 + 0.5, 0.5, 0.75, { t: 0.02 });
+    for (const u of us) if (breite(y + 1.6) > Math.abs(u - m) + 0.6) fenster5(S, F2, u, y + 0.5, 0.7, 1, { kreuz: true, t: 0.02 });
+    fenster5(S, F2, m - 0.55, y + 0.5, 0.6, 1, { t: 0.02 });
+    fenster5(S, F2, m + 0.55, y + 0.5, 0.6, 1, { t: 0.02 });
+    if (hg > 4) fenster5(S, F2, m, y2 + 0.5, 0.5, 0.75, { t: 0.02 });
   }
   function egZone(S, scene2, F2, eg, o, r) {
     const L2 = F2.L;
@@ -75911,7 +78593,7 @@
         fgeo4(S, F2, g, o.markise);
       }
     } else {
-      fenster4(S, F2, L2 * 0.28, 1, 0.9, 1.3, { kreuz: true, sims: dunkler(o.stein, 0.06) });
+      fenster5(S, F2, L2 * 0.28, 1, 0.9, 1.3, { kreuz: true, sims: dunkler(o.stein, 0.06) });
       fb4(S, F2, L2 * 0.68 - 0.6, L2 * 0.68 + 0.6, 0.3, 2.5, 0, 0.08, waehle2(r, ["#6b4c36", "#3f5a4a", "#5a3a2e"]));
       fwand2(S, F2, L2 * 0.68 - 0.9, L2 * 0.68 + 0.9, 0.3, 2.9, 0, 0.14, dunkler(o.stein, 0.05), [{ u0: L2 * 0.68 - 0.6, u1: L2 * 0.68 + 0.6, v0: 0.29, v1: 2.75, bogen: true }]);
     }
@@ -75939,7 +78621,7 @@
         }
         if (ganz2) {
           for (let yy = y + 0.4; yy < y + gh; yy += 0.55) fb4(S, F2, 0, F2.L, yy, yy + 0.05, 0, 0.04, SCHIEFER22);
-          for (const u of achsen5(0, F2.L, 2.3, 0.9)) fenster4(S, F2, u, y + 0.8, 0.9, 1.25, { kreuz: true, laeden, t: 0.04 });
+          for (const u of achsen5(0, F2.L, 2.3, 0.9)) fenster5(S, F2, u, y + 0.8, 0.9, 1.25, { kreuz: true, laeden, t: 0.04 });
           fb4(S, F2, -0.05, F2.L + 0.05, y + gh - 0.15, y + gh, 0, 0.12, WEISS2);
         } else fwGeschoss(S, F2, y, gh, { holz, art, laeden, k });
       }
@@ -75971,7 +78653,7 @@
         fpoly3(S, FZ, [[0, H + gh], [zb2, H + gh], [zb2 / 2, H + gh + hz]], -3.2, 0, wand2);
         fstrebe(S, FZ, -0.3, H + gh - 0.2, zb2 / 2, H + gh + hz + 0.1, 0.25, -3.4, 0.25, dachF);
         fstrebe(S, FZ, zb2 + 0.3, H + gh - 0.2, zb2 / 2, H + gh + hz + 0.1, 0.25, -3.4, 0.25, dachF);
-        fenster4(S, FZ, zb2 / 2, H + gh + 0.3, 0.5, 0.8, { t: 0.02 });
+        fenster5(S, FZ, zb2 / 2, H + gh + 0.3, 0.5, 0.8, { t: 0.02 });
       }
     }
     S.quader(x0 + b * 0.7, H + hg * 0.5, z0 + t / 2 - 0.4, x0 + b * 0.7 + 0.8, H + hg + 1, z0 + t / 2 + 0.4, "#a46a52");
@@ -76011,7 +78693,7 @@
     const hg = b * 0.95;
     satteldach4(S, x0 + 0.2, z0 + 0.3, x0 + b - 0.2, z0 + t - 0.3, H, hg * 0.92, "z", SCHIEFER3, wand2, 0.2);
     for (const [k, F2] of seiten2(p, x0, z0, b, t, ["+x", "-x"])) if (o.frei?.includes(k)) {
-      for (const u of achsen5(0, F2.L, 2.4, 0.8)) for (let k2 = 0; k2 < n; k2++) fenster4(S, F2, u, eg + 0.9 + k2 * gh, 1, 1.8, { kreuz: true });
+      for (const u of achsen5(0, F2.L, 2.4, 0.8)) for (let k2 = 0; k2 < n; k2++) fenster5(S, F2, u, eg + 0.9 + k2 * gh, 1, 1.8, { kreuz: true });
     }
     return H + hg;
   }
@@ -76045,7 +78727,7 @@
           S.box(0.18, gh * 2 + 0.5, 0.18, ex + Math.cos(w) * rr, eg + 0.2 + gh + 0.25, ez + Math.sin(w) * rr, holz);
         }
       }
-      for (let k = 0; k < 2; k++) zyl8(S, rr + 0.06, rr + 0.06, 0.2, ex, eg + 0.2 + k * gh + gh * 0.4, ez, GLAS7, 8);
+      for (let k = 0; k < 2; k++) zyl8(S, rr + 0.06, rr + 0.06, 0.2, ex, eg + 0.2 + k * gh + gh * 0.4, ez, GLAS8, 8);
       const g2 = new three_module_exports.ConeGeometry(rr + 0.4, 5.5, 8);
       g2.translate(ex, eg + 0.7 + gh * 2 + 2.75, ez);
       S.add(g2, SCHIEFER3);
@@ -76280,7 +78962,7 @@
       }
     }
     const FA = vierSeiten(xw, z0, 2.5, t)[seite === "+x" ? "-x" : "+x"];
-    if (sichtF(p, FA)) for (const u of achsen5(0, t, 3.6, 0.5)) fenster4(S, FA, u, 2.2, 1.2, 2.4, { rahmen: orn });
+    if (sichtF(p, FA)) for (const u of achsen5(0, t, 3.6, 0.5)) fenster5(S, FA, u, 2.2, 1.2, 2.4, { rahmen: orn });
     for (const [k, F2] of seiten2(p, x0, z0, b, t, ["+z", "-z"])) fb4(S, F2, 0, F2.L, H, H + 1.2, 0.3, 0.45, orn);
   }
   function blumenbeet(S, r, x0, z0, x1, z1) {
@@ -76307,7 +78989,7 @@
   }
   function villa2(S, scene2, p, r, x0, z0, b, t, o = {}) {
     const wand2 = o.wand ?? waehle2(r, ["#f1e6cf", "#ead7c0", "#e9e2d4", "#f0dcc8", "#e2d9c3", "#dfe3e0"]), orn = o.orn ?? WEISS2, stein = waehle2(r, ["#c9b292", "#d4c1a3", "#b9a283"]);
-    const gh = 3.8, n = 2, H = 1.2 + n * gh, dach2 = waehle2(r, [SCHIEFER3, "#5d646b"]);
+    const gh = 3.8, n = 2, H = 1.2 + n * gh, dach3 = waehle2(r, [SCHIEFER3, "#5d646b"]);
     S.quader(x0, 0, z0, x0 + b, 1.2, z0 + t, stein);
     S.quader(x0 + 0.1, 1.2, z0 + 0.1, x0 + b - 0.1, H, z0 + t - 0.1, wand2);
     const risB = Math.min(5.5, b * 0.35), risU = waehle2(r, [b * 0.62, b * 0.38]);
@@ -76315,7 +78997,7 @@
       for (let kk = 0; kk < n; kk++) for (const u of achsen5(0, F2.L, 2.8, 0.9)) {
         if (k === "+z" && Math.abs(u - risU) < risB / 2 + 0.6) continue;
         const y = 1.2 + kk * gh + 0.9;
-        fenster4(S, F2, u, y, 1.05, 2.1, { kreuz: true, rahmen: orn, sims: orn });
+        fenster5(S, F2, u, y, 1.05, 2.1, { kreuz: true, rahmen: orn, sims: orn });
         if (kk === 0) dreiecksgiebel(S, F2, u - 0.8, u + 0.8, y + 2.35, 0.5, 0, 0.14, orn, orn);
         else fb4(S, F2, u - 0.75, u + 0.75, y + 2.3, y + 2.55, 0, 0.2, orn);
       }
@@ -76323,27 +79005,27 @@
       fb4(S, F2, -0.3, F2.L + 0.3, H - 0.5, H, 0, 0.55, orn);
       for (let y = 1.4; y < H - 0.6; y += 0.9) for (const u of [0.35, F2.L - 0.35]) fb4(S, F2, u - (y % 1.8 < 0.9 ? 0.55 : 0.35), u + (y % 1.8 < 0.9 ? 0.55 : 0.35), y, y + 0.6, 0, 0.12, stein);
     }
-    walm2(S, x0 - 0.3, z0 - 0.3, x0 + b + 0.3, z0 + t + 0.3, H, Math.min(b, t) * 0.38, dach2);
+    walm2(S, x0 - 0.3, z0 - 0.3, x0 + b + 0.3, z0 + t + 0.3, H, Math.min(b, t) * 0.38, dach3);
     const rx0 = x0 + risU - risB / 2;
     S.quader(rx0, 1.2, z0 + t - 1, rx0 + risB, H + 0.5, z0 + t + 1.2, wand2);
     for (const [k, F2] of seiten2(p, rx0, z0 + t - 1, risB, 2.2, ["+z"])) {
-      fenster4(S, F2, risB / 2, 2, 1.6, 2.4, { kreuz: true, rahmen: orn });
+      fenster5(S, F2, risB / 2, 2, 1.6, 2.4, { kreuz: true, rahmen: orn });
       fb4(S, F2, 0.4, risB - 0.4, 1.2 + gh - 0.1, 1.2 + gh + 0.25, 0, 1.1, orn);
       for (let u = 0.6; u < risB - 0.5; u += 0.35) fb4(S, F2, u - 0.05, u + 0.05, 1.2 + gh + 0.25, 1.2 + gh + 1.1, 0.95, 1.05, "#3b3f44");
       fb4(S, F2, 0.4, risB - 0.4, 1.2 + gh + 1.05, 1.2 + gh + 1.15, 0.9, 1.1, "#3b3f44");
-      fenster4(S, F2, risB / 2, 1.2 + gh + 0.9, 1.2, 2.1, { kreuz: true, rahmen: orn });
+      fenster5(S, F2, risB / 2, 1.2 + gh + 0.9, 1.2, 2.1, { kreuz: true, rahmen: orn });
       dreiecksgiebel(S, F2, -0.2, risB + 0.2, H + 0.5, 2.6, -1.5, 0.12, wand2, orn);
-      fscheibe3(S, F2, risB / 2, H + 1.5, 0.12, 0.2, 0.5, GLAS7);
+      fscheibe3(S, F2, risB / 2, H + 1.5, 0.12, 0.2, 0.5, GLAS8);
     }
     const gd = dachProfil(3, risB + 0.4, 2.6, 0.05, "z");
     gd.translate(rx0 + risB / 2, H + 0.5, z0 + t - 0.6);
-    S.add(gd, dach2);
+    S.add(gd, dach3);
     const ts = 4.2, tx0 = o.turmLinks ? x0 - 1.2 : x0 + b - ts + 1.2, tz0 = z0 + t - ts + 1.2, Ht = H + 4.2;
     S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, wand2);
     for (const [k, F2] of seiten2(p, tx0, tz0, ts, ts)) {
-      for (let kk = 0; kk < n; kk++) fenster4(S, F2, ts / 2, 1.2 + kk * gh + 0.9, 1, 2.1, { kreuz: true, rahmen: orn, sims: orn });
+      for (let kk = 0; kk < n; kk++) fenster5(S, F2, ts / 2, 1.2 + kk * gh + 0.9, 1, 2.1, { kreuz: true, rahmen: orn, sims: orn });
       fwand2(S, F2, 0, ts, H, Ht - 0.6, 0, 0.1, wand2, [{ u0: ts / 2 - 0.9, u1: ts / 2 - 0.15, v0: H + 0.6, v1: Ht - 1, bogen: true }, { u0: ts / 2 + 0.15, u1: ts / 2 + 0.9, v0: H + 0.6, v1: Ht - 1, bogen: true }]);
-      fb4(S, F2, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS7);
+      fb4(S, F2, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS8);
       fb4(S, F2, -0.3, ts + 0.3, Ht - 0.6, Ht, 0, 0.4, orn);
     }
     const helm3 = waehle2(r, ["spitz", "zwiebel", "pyramide"]);
@@ -76359,7 +79041,7 @@
       const g = new three_module_exports.ConeGeometry(ts * 0.75, helm3 === "spitz" ? 7 : 3.6, 4);
       g.rotateY(PI10 / 4);
       g.translate(tx0 + ts / 2, Ht + (helm3 === "spitz" ? 3.5 : 1.8), tz0 + ts / 2);
-      S.add(g, dach2);
+      S.add(g, dach3);
     }
     zyl8(S, 0.04, 0.1, 1.6, tx0 + ts / 2, Ht + (helm3 === "spitz" ? 7 : 5.5), tz0 + ts / 2, "#d8b45a", 4);
     const vx0 = o.turmLinks ? x0 + b : x0 - 3.6;
@@ -76552,7 +79234,7 @@
     fb4(S, F2, u0 - 0.2, u1 + 0.2, y1 - 0.05, y1 + 0.35, 0, 0.75, heller(c, 0.06));
   }
   function romTurm(S, p, cx, cz, a, H, o) {
-    const c = o.stein, hell4 = heller(c, 0.06), dach2 = o.dach;
+    const c = o.stein, hell4 = heller(c, 0.06), dach3 = o.dach;
     const x0 = cx - a / 2, z0 = cz - a / 2;
     if (o.rund) {
       zyl8(S, a / 2, a / 2, H, cx, 0, cz, c, 16);
@@ -76563,7 +79245,7 @@
       }
       const g2 = new three_module_exports.ConeGeometry(a / 2 + 0.4, a * 1.8, 16);
       g2.translate(cx, H + a * 0.9, cz);
-      S.add(g2, dach2);
+      S.add(g2, dach3);
       zyl8(S, 0.04, 0.1, 1.6, cx, H + a * 1.8, cz, "#d8b45a", 4);
       return H + a * 1.8 + 1.6;
     }
@@ -76580,7 +79262,7 @@
       const g2 = new three_module_exports.ConeGeometry(a / 2 + 0.5, o.helmH ?? a * 0.9, 8);
       g2.rotateY(PI10 / 8);
       g2.translate(cx, H + (o.helmH ?? a * 0.9) / 2, cz);
-      S.add(g2, dach2);
+      S.add(g2, dach3);
       zyl8(S, 0.05, 0.12, 2, cx, H + (o.helmH ?? a * 0.9), cz, "#d8b45a", 4);
       return H + (o.helmH ?? a * 0.9) + 2;
     }
@@ -76609,7 +79291,7 @@
       for (const [k, F2] of seiten2(p, x0, z0, a, a)) fpoly3(S, F2, [[0, H], [a, H], [a / 2, H + a * 0.6]], -0.3, 0, c);
       const g2 = new three_module_exports.ConeGeometry(a * 0.72, a * 1.6, 4);
       g2.translate(cx, H + a * 0.8, cz);
-      S.add(g2, dach2);
+      S.add(g2, dach3);
       zyl8(S, 0.05, 0.12, 2, cx, H + a * 1.6, cz, "#d8b45a", 4);
       return H + a * 1.6 + 2;
     }
@@ -76620,22 +79302,22 @@
       const g2 = new three_module_exports.SphereGeometry(a * 0.38, 8, 6, 0, 2 * PI10, 0, PI10 / 2);
       g2.scale(1, 0.8, 1);
       g2.translate(cx, H + 13.6, cz);
-      S.add(g2, dach2);
+      S.add(g2, dach3);
       zyl8(S, a * 0.14, a * 0.14, 3, cx, H + 13.6 + a * 0.28, cz, hell4, 8);
       const k = new three_module_exports.ConeGeometry(a * 0.2, a * 1, 8);
       k.translate(cx, H + 16.6 + a * 0.28 + a * 0.5, cz);
-      S.add(k, dach2);
+      S.add(k, dach3);
       zyl8(S, 0.05, 0.12, 2, cx, H + 16.6 + a * 1.28, cz, "#d8b45a", 4);
       return H + 18.6 + a * 1.28;
     }
     const g = new three_module_exports.ConeGeometry(a * 0.72, a * (helm3 === "kegel" ? 2.2 : 1.3), 4);
     g.rotateY(PI10 / 4);
     g.translate(cx, H + a * (helm3 === "kegel" ? 1.1 : 0.65), cz);
-    S.add(g, dach2);
+    S.add(g, dach3);
     zyl8(S, 0.05, 0.12, 2, cx, H + a * (helm3 === "kegel" ? 2.2 : 1.3), cz, "#d8b45a", 4);
     return H + a * 1.3 + 2;
   }
-  function apsis(S, p, x, cz, rad2, H, s2, c, dach2) {
+  function apsis(S, p, x, cz, rad2, H, s2, c, dach3) {
     const t0 = s2 > 0 ? 0 : PI10;
     const g = new three_module_exports.CylinderGeometry(rad2, rad2, H, 12, 1, false, t0, PI10);
     g.translate(x, H / 2, cz);
@@ -76655,13 +79337,13 @@
     }
     const k = new three_module_exports.ConeGeometry(rad2 + 0.4, rad2 * 0.7, 12, 1, false, t0, PI10);
     k.translate(x, H + rad2 * 0.35, cz);
-    S.add(k, dach2);
+    S.add(k, dach3);
     const deckel = new three_module_exports.BoxGeometry(0.4, rad2 * 0.7, 2 * rad2 + 0.8);
     deckel.translate(x, H + rad2 * 0.35, cz);
   }
   function domRoh(S, scene2, p) {
     const r = rng2(`dom:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
-    const c = waehle2(r, ROTSTEIN), hell4 = heller(c, 0.06), dach2 = waehle2(r, [SCHIEFER3, "#5d646b", KUPFER2]);
+    const c = waehle2(r, ROTSTEIN), hell4 = heller(c, 0.06), dach3 = waehle2(r, [SCHIEFER3, "#5d646b", KUPFER2]);
     boden5(S, x0, z0, x0 + w, z0 + d, PLATZ, 0.3, 0.07);
     const cz = z0 + d / 2 - 3, ms = 14, sb2 = 7, Hm = 26, Hs = 13;
     const ex = v === "kaiserdom" ? 16 : 18;
@@ -76672,7 +79354,7 @@
       if (v === "kaiserdom") zwerggalerie(S, F2, 0, F2.L, Hm - 2.4, 2.4, c);
       else fb4(S, F2, -0.2, F2.L + 0.2, Hm - 2.4, Hm, 0, 0.3, c);
     }
-    satteldach4(S, lx0, cz - ms / 2 - 0.4, lx1, cz + ms / 2 + 0.4, Hm, 7.5, "x", dach2, c, 0.3);
+    satteldach4(S, lx0, cz - ms / 2 - 0.4, lx1, cz + ms / 2 + 0.4, Hm, 7.5, "x", dach3, c, 0.3);
     for (const s2 of [-1, 1]) {
       const zA = s2 > 0 ? cz + ms / 2 : cz - ms / 2 - sb2;
       S.quader(lx0 + 1, 0, zA, lx1 - 1, Hs, zA + sb2, c);
@@ -76690,7 +79372,7 @@
       const g = new three_module_exports.BoxGeometry(lx1 - lx0 - 1.4, 0.3, sb2 + 1.2);
       g.rotateX(s2 * 0.32);
       g.translate((lx0 + lx1) / 2, Hs + 1.1, zA + sb2 / 2 + s2 * 0.4);
-      S.add(g, dach2);
+      S.add(g, dach3);
     }
     const qx0 = lx1 - 16, qb = 16, qz0 = cz - ms / 2 - sb2 - 4, qd = ms + 2 * sb2 + 8;
     let hmax = Hm + 8;
@@ -76704,19 +79386,19 @@
           bogenfries(S, teil4(F2, 0, F2.L, 0.4), 0, F2.L, Hm - 0.5, hell4);
         } else romWand(S, F2, 0, F2.L, Hs + 1, Hm - 0.5, c, { ra: 5, fw: 0.8, fy: 2.5 });
       }
-      satteldach4(S, qx0 - 0.3, qz0, qx0 + qb + 0.3, qz0 + qd, Hm - 0.5, 7, "z", dach2, c, 0.3);
-      hmax = Math.max(hmax, romTurm(S, p, qx0 + qb / 2, cz, 13, Hm + 9, { stein: c, dach: dach2, acht: true, helmH: v === "kaiserdom" ? 10 : 9, y0: Hm + 2 }));
+      satteldach4(S, qx0 - 0.3, qz0, qx0 + qb + 0.3, qz0 + qd, Hm - 0.5, 7, "z", dach3, c, 0.3);
+      hmax = Math.max(hmax, romTurm(S, p, qx0 + qb / 2, cz, 13, Hm + 9, { stein: c, dach: dach3, acht: true, helmH: v === "kaiserdom" ? 10 : 9, y0: Hm + 2 }));
     }
     const ende = (s2, art) => {
       const xe = s2 > 0 ? lx1 : lx0;
       if (art === "apsis" || art === "doppel") {
         S.quader(s2 > 0 ? xe : xe - 6, 0, cz - ms / 2, s2 > 0 ? xe + 6 : xe, Hm - 1, cz + ms / 2, c);
         for (const [k, F2] of seiten2(p, s2 > 0 ? xe : xe - 6, cz - ms / 2, 6, ms, ["+z", "-z"])) romWand(S, F2, 0, F2.L, 6, Hm - 1, c, { ra: 4, fw: 0.8, fy: 4 });
-        satteldach4(S, s2 > 0 ? xe : xe - 6, cz - ms / 2 - 0.3, s2 > 0 ? xe + 6 : xe, cz + ms / 2 + 0.3, Hm - 1, 7, "x", dach2, c, 0.3);
-        apsis(S, p, xe + s2 * 6, cz, ms / 2 - 0.5, Hm - 6, s2, c, dach2);
+        satteldach4(S, s2 > 0 ? xe : xe - 6, cz - ms / 2 - 0.3, s2 > 0 ? xe + 6 : xe, cz + ms / 2 + 0.3, Hm - 1, 7, "x", dach3, c, 0.3);
+        apsis(S, p, xe + s2 * 6, cz, ms / 2 - 0.5, Hm - 6, s2, c, dach3);
         const ta = art === "doppel" ? 6.5 : 8.5, th = art === "doppel" ? 36 : 44;
-        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p, xe + s2 * 1.5, cz + sz * (ms / 2 + ta / 2 + 0.3), ta, th, { stein: c, dach: dach2, rund: art === "doppel", helm: "raute", geschosse: 6 }));
-        if (art === "doppel") hmax = Math.max(hmax, romTurm(S, p, xe - s2 * 6, cz, 12, Hm + 8, { stein: c, dach: dach2, acht: true, helmH: 12, y0: Hm + 1 }));
+        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p, xe + s2 * 1.5, cz + sz * (ms / 2 + ta / 2 + 0.3), ta, th, { stein: c, dach: dach3, rund: art === "doppel", helm: "raute", geschosse: 6 }));
+        if (art === "doppel") hmax = Math.max(hmax, romTurm(S, p, xe - s2 * 6, cz, 12, Hm + 8, { stein: c, dach: dach3, acht: true, helmH: 12, y0: Hm + 1 }));
       } else if (art === "westbau") {
         const wb = 14, wx0 = s2 > 0 ? xe : xe - wb;
         S.quader(wx0, 0, cz - ms / 2 - sb2, wx0 + wb, Hm + 4, cz + ms / 2 + sb2, c);
@@ -76731,8 +79413,8 @@
           }
         }
         S.quader(wx0 - 0.2, Hm + 4, cz - ms / 2 - sb2 - 0.2, wx0 + wb + 0.2, Hm + 4.6, cz + ms / 2 + sb2 + 0.2, hell4);
-        hmax = Math.max(hmax, romTurm(S, p, wx0 + wb / 2, cz, 12, Hm + 22, { stein: c, dach: dach2, helm: v === "westturm" ? "stufen" : "raute", geschosse: 7 }));
-        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p, wx0 + wb / 2 + s2 * 3, cz + sz * (ms / 2 + sb2 + 2.6), 5, Hm + 12, { stein: c, dach: dach2, rund: true }));
+        hmax = Math.max(hmax, romTurm(S, p, wx0 + wb / 2, cz, 12, Hm + 22, { stein: c, dach: dach3, helm: v === "westturm" ? "stufen" : "raute", geschosse: 7 }));
+        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p, wx0 + wb / 2 + s2 * 3, cz + sz * (ms / 2 + sb2 + 2.6), 5, Hm + 12, { stein: c, dach: dach3, rund: true }));
       }
     };
     if (v === "kaiserdom") {
@@ -76770,11 +79452,11 @@
         if (name2) ftext4(scene2, F2, name2, F2.L / 2, y0 + eg - 0.05, 0.12, 0.6, F2.L * 0.75, "#2a3036");
       } else {
         fb4(S, F2, 0, F2.L, y0, y0 + eg, 0, 0.05, dunkler(putz2, 0.05));
-        for (const u of achsen5(0, F2.L, 3.2, 0.8)) fenster4(S, F2, u, y0 + 1.4, 1.6, 1.8, { rahmen: WEISS2 });
+        for (const u of achsen5(0, F2.L, 3.2, 0.8)) fenster5(S, F2, u, y0 + 1.4, 1.6, 1.8, { rahmen: WEISS2 });
       }
       const yo = y0 + eg;
       if (art === "raster") {
-        fb4(S, F2, 0.1, F2.L - 0.1, yo, H + y0 - 0.4, 0, 0.04, GLAS7);
+        fb4(S, F2, 0.1, F2.L - 0.1, yo, H + y0 - 0.4, 0, 0.04, GLAS8);
         const ax = achsen5(0, F2.L, 2, 0);
         for (let i = 0; i < n; i++) {
           const y = yo + i * gh;
@@ -76785,12 +79467,12 @@
       } else if (art === "band") {
         for (let i = 0; i < n; i++) {
           const y = yo + i * gh;
-          fb4(S, F2, 0.3, F2.L - 0.3, y + 1, y + 2.4, 0, 0.05, GLAS7);
+          fb4(S, F2, 0.3, F2.L - 0.3, y + 1, y + 2.4, 0, 0.05, GLAS8);
           for (const u of achsen5(0.3, F2.L - 0.3, 1.4, 0)) fb4(S, F2, u - 0.05, u + 0.05, y + 1, y + 2.4, 0, 0.09, WEISS2);
           fb4(S, F2, -0.05, F2.L + 0.05, y + 0.9, y + 1, 0, 0.2, raster4);
         }
       } else {
-        for (let i = 0; i < n; i++) for (const u of achsen5(0, F2.L, 2.6, 0.7)) fenster4(S, F2, u, yo + i * gh + 0.9, 1.3, 1.6, { rahmen: raster4, sims: null });
+        for (let i = 0; i < n; i++) for (const u of achsen5(0, F2.L, 2.6, 0.7)) fenster5(S, F2, u, yo + i * gh + 0.9, 1.3, 1.6, { rahmen: raster4, sims: null });
         if (F2.L > 10 && o.mosaik !== false && r() < 0.5) {
           const u = F2.L * 0.82;
           fb4(S, F2, u - 1.2, u + 1.2, yo + 0.5, yo + n * gh - 0.5, 0, 0.12, kachel2);
@@ -76802,7 +79484,7 @@
     S.quader(x0 + 0.5, y0 + H, z0 + 0.5, x0 + b - 0.5, y0 + H + 0.1, z0 + t - 0.5, "#a9a59c");
     if (o.staffel) {
       S.quader(x0 + 1.5, y0 + H, z0 + 1.5, x0 + b - 1.5, y0 + H + 2.8, z0 + t - 2.5, raster4);
-      for (const [k, F2] of seiten2(p, x0 + 1.5, z0 + 1.5, b - 3, t - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS7);
+      for (const [k, F2] of seiten2(p, x0 + 1.5, z0 + 1.5, b - 3, t - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS8);
       S.quader(x0 + 1, y0 + H + 2.8, z0 + 1, x0 + b - 1, y0 + H + 3.1, z0 + t - 2, "#f4f2ec");
     }
     return y0 + H + (o.staffel ? 3.1 : 0);
@@ -76871,7 +79553,7 @@
         fb4(S, F2, 0, F2.L, 0.3, eg - 0.4, -2.2, -2.15, GLAS_HELL5);
         for (const u of achsen5(0, F2.L, 3.4, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, eg, -2.2, 0, raster4);
         fb4(S, F2, 0, F2.L, eg - 0.6, eg, -2.2, 0.05, raster4);
-        fb4(S, F2, 0.1, F2.L - 0.1, eg, H - 0.4, 0, 0.04, GLAS7);
+        fb4(S, F2, 0.1, F2.L - 0.1, eg, H - 0.4, 0, 0.04, GLAS8);
         const ax = achsen5(0, F2.L, 1.8, 0);
         for (let i = 0; i < n; i++) {
           const y = eg + i * gh;
@@ -76885,12 +79567,12 @@
         fb4(S, F2, 0, F2.L, 0, eg, 0, 0.05, dunkler(putz2, 0.06));
         for (const u of achsen5(0, F2.L, 3.4, 1)) {
           fb4(S, F2, u - 1.2, u + 1.2, 0.3, 3, 0, 0.08, GLAS_HELL5);
-          for (let i = 0; i < n; i++) fenster4(S, F2, u, eg + i * gh + 0.9, 1.6, 1.6, { rahmen: raster4 });
+          for (let i = 0; i < n; i++) fenster5(S, F2, u, eg + i * gh + 0.9, 1.6, 1.6, { rahmen: raster4 });
         }
         for (let i = 1; i <= n; i++) fb4(S, F2, -0.05, F2.L + 0.05, eg + i * gh - 0.15, eg + i * gh, 0, 0.15, raster4);
       }
       for (let i = 0; i < n; i++) {
-        zyl8(S, rr + 0.05, rr + 0.05, 1.5, gx0 + b - rr, eg + i * gh + 1, gz0 + t2 - rr, GLAS7, 20);
+        zyl8(S, rr + 0.05, rr + 0.05, 1.5, gx0 + b - rr, eg + i * gh + 1, gz0 + t2 - rr, GLAS8, 20);
         zyl8(S, rr + 0.25, rr + 0.25, 0.25, gx0 + b - rr, eg + i * gh, gz0 + t2 - rr, raster4, 20);
       }
       zyl8(S, rr - 2.2, rr - 2.2, eg - 0.4, gx0 + b - rr, 0.3, gz0 + t2 - rr, GLAS_HELL5, 16);
@@ -76902,7 +79584,7 @@
       S.quader(gx0 - 0.6, H - 0.4, gz0 - 0.6, gx0 + b - rr, H, gz0 + t2 + 0.6, raster4);
       S.quader(gx0 + b - rr, H - 0.4, gz0 - 0.6, gx0 + b + 0.6, H, gz0 + t2 - rr, raster4);
       S.quader(gx0 + 2, H, gz0 + 2, gx0 + b - 8, H + 3, gz0 + t2 - 3, raster4);
-      for (const [k, F2] of seiten2(p, gx0 + 2, gz0 + 2, b - 10, t2 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS7);
+      for (const [k, F2] of seiten2(p, gx0 + 2, gz0 + 2, b - 10, t2 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS8);
       const g4 = new three_module_exports.BoxGeometry(b - 6, 0.25, t2 - 2);
       g4.rotateX(-0.08);
       g4.translate(gx0 + b / 2 - 3, H + 3.4, gz0 + t2 / 2 - 0.5);
@@ -76968,11 +79650,11 @@
     const r = rng2(`uni:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
     boden5(S, x0, z0, x0 + w, z0 + d, PFLASTER4, 0.3, 0.07);
     if (v === "alte_uni") {
-      const c = waehle2(r, ["#b5735e", "#c9b89a", "#bf8a6e"]), hell4 = heller(c, 0.07), dach2 = SCHIEFER3;
+      const c = waehle2(r, ["#b5735e", "#c9b89a", "#bf8a6e"]), hell4 = heller(c, 0.07), dach3 = SCHIEFER3;
       const mx0 = x0 + 3, mz0 = z0 + 4, mb = w - 24, mt = 14, H2 = 15;
       S.quader(mx0, 0, mz0, mx0 + mb, H2, mz0 + mt, c);
       for (const [k, F3] of seiten2(p, mx0, mz0, mb, mt, ["+z", "-z", "-x"])) gotWand(S, F3, 0, F3.L, 0.3, H2, c, { ra: 3.4, fialen: true });
-      satteldach4(S, mx0, mz0 - 0.3, mx0 + mb, mz0 + mt + 0.3, H2, 8, "x", dach2, c, 0.3);
+      satteldach4(S, mx0, mz0 - 0.3, mx0 + mb, mz0 + mt + 0.3, H2, 8, "x", dach3, c, 0.3);
       for (const [k, F3] of seiten2(p, mx0, mz0, mb, mt, ["+z", "-z"])) for (const u of achsen5(0, F3.L, 11, 3)) {
         fb4(S, F3, u - 2.6, u + 2.6, H2 - 0.4, H2 + 3.4, -3, 0.35, c);
         fpoly3(S, F3, [[u - 2.6, H2 + 3.4], [u + 2.6, H2 + 3.4], [u, H2 + 7.2]], -3, 0.35, c);
@@ -77007,7 +79689,7 @@
           S.add(g3, hell4);
         }
       }
-      satteldach4(S, ax02 - 0.3, az02, ax02 + ab2 + 0.3, az02 + at2, Ha, 10, "z", dach2, c, 0.3);
+      satteldach4(S, ax02 - 0.3, az02, ax02 + ab2 + 0.3, az02 + at2, Ha, 10, "z", dach3, c, 0.3);
       const ts = 7.5, tx0 = ax02 - ts - 1, tz0 = mz0 + mt - 2, Ht = 34;
       S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, c);
       for (const [k, F3] of seiten2(p, tx0, tz0, ts, ts)) {
@@ -77024,7 +79706,7 @@
       const g2 = new three_module_exports.ConeGeometry(ts * 0.62, 16, 8);
       g2.rotateY(PI10 / 8);
       g2.translate(tx0 + ts / 2, Ht + 8, tz0 + ts / 2);
-      S.add(g2, dach2);
+      S.add(g2, dach3);
       zyl8(S, 0.05, 0.14, 2.4, tx0 + ts / 2, Ht + 16, tz0 + ts / 2, "#d8b45a", 4);
       S.quader(x0 + 8, 0.3, mz0 + mt, ax02 - ts - 2, 0.9, mz0 + mt + 3, "#cfc6b4");
       boden5(S, x0 + 3, mz0 + mt + 6, ax02 - ts - 3, z0 + d - 3, RASEN5, 0.3, 0.08);
@@ -77038,14 +79720,14 @@
           if (zw2.some((q2) => Math.abs(q2 - u) < 4.2)) continue;
           fb4(S, F3, u - 0.7, u + 0.7, H2 + 0.9, H2 + 2.7, -3, -1, c);
           fb4(S, F3, u - 0.4, u + 0.4, H2 + 1.1, H2 + 2.4, -1.05, -0.95, "#3e4650");
-          fpoly3(S, teil4(F3, u - 0.85, u + 0.85, -1), [[0, H2 + 2.7], [1.7, H2 + 2.7], [0.85, H2 + 3.6]], -2.4, 0.1, dach2);
+          fpoly3(S, teil4(F3, u - 0.85, u + 0.85, -1), [[0, H2 + 2.7], [1.7, H2 + 2.7], [0.85, H2 + 3.6]], -2.4, 0.1, dach3);
         }
       }
       const fx = mx0 + mb * 0.3;
       S.quader(fx - 0.9, H2 + 7.4, mz0 + mt / 2 - 0.9, fx + 0.9, H2 + 10, mz0 + mt / 2 + 0.9, hell4);
       const fl = new three_module_exports.ConeGeometry(1.2, 5, 8);
       fl.translate(fx, H2 + 12.5, mz0 + mt / 2);
-      S.add(fl, dach2);
+      S.add(fl, dach3);
       fahrradReihe(S, r, x0 + 6, x0 + 20, mz0 + mt + 4.5, true);
       fahrradReihe(S, r, x0 + 22, ax02 - ts - 4, mz0 + mt + 4.5, true);
       for (let i = 0; i < 4; i++) laterne5(S, x0 + 5 + i * 9, z0 + d - 1.8);
@@ -77091,7 +79773,7 @@
       zyl8(S, ra * 0.55, ra * 0.7, 2.5, cx, 10, cz, hell4, 8);
       ftext4(scene2, R7(cx - 4, cz + ra * 0.93 + 0.1, 1, 0, 8), "H\xF6rsaalzentrum", 4, 8.4, 0.5, 0.7, 7.5, "#2a3036");
       S.quader(hx0 + hb - 2, 7, hz0 + ht, hx0 + hb + 2, 10, tz0, be);
-      for (const [k, F3] of seiten2(p, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS7);
+      for (const [k, F3] of seiten2(p, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS8);
       for (const z2 of [hz0 + ht + 3, tz0 - 3]) S.box(0.8, 7, 0.8, hx0 + hb, 3.65, z2, be);
       for (let i = 0; i < 5; i++) pflanzkuebel2(S, r, x0 + 6 + i * 3.2, z0 + d - 4, 0.3, i % 2 === 0);
       for (let i = 0; i < 10; i++) {
@@ -77164,7 +79846,7 @@
       if (bb < 5) continue;
       S.quader(bx0, 0, az0 + 2, bx0 + bb, 8, az0 + at - 2, putz2);
       for (const [k, F22] of seiten2(p, bx0, az0 + 2, bb, at - 4)) {
-        for (let kk = 0; kk < 2; kk++) for (const u of achsen5(0, F22.L, 3, 0.8)) fenster4(S, F22, u, 1.2 + kk * 3.6, 1.1, 1.9, { kreuz: true, rahmen: orn, sims: orn });
+        for (let kk = 0; kk < 2; kk++) for (const u of achsen5(0, F22.L, 3, 0.8)) fenster5(S, F22, u, 1.2 + kk * 3.6, 1.1, 1.9, { kreuz: true, rahmen: orn, sims: orn });
         fb4(S, F22, -0.2, F22.L + 0.2, 7.5, 8, 0, 0.4, orn);
       }
       walm2(S, bx0 - 0.2, az0 + 1.8, bx0 + bb + 0.2, az0 + at - 1.8, 8, 3.4, SCHIEFER3);
@@ -77418,7 +80100,7 @@
       const pw = 18, px0 = x0 + 3, pz0 = z0 + 6, pt = Math.min(48, d - 14), Hp = 15, rosa = waehle2(r, ["#e6aca2", "#e9b8a8", "#e3a596"]);
       S.quader(px0, 0, pz0, px0 + pw, Hp, pz0 + pt, rosa);
       for (const [k, F3] of seiten2(p, px0, pz0, pw, pt)) {
-        for (let kk = 0; kk < 3; kk++) for (const u of achsen5(0, F3.L, 3, 1.2)) fenster4(S, F3, u, 1.2 + kk * 4.5, 1.2, kk === 1 ? 2.8 : 2.2, { kreuz: true, rahmen: WEISS2, sims: WEISS2 });
+        for (let kk = 0; kk < 3; kk++) for (const u of achsen5(0, F3.L, 3, 1.2)) fenster5(S, F3, u, 1.2 + kk * 4.5, 1.2, kk === 1 ? 2.8 : 2.2, { kreuz: true, rahmen: WEISS2, sims: WEISS2 });
         for (const u of achsen5(0, F3.L, 9, 0)) fb4(S, F3, u - 0.4, u + 0.4, 0.3, Hp - 0.8, 0, 0.3, WEISS2);
         fb4(S, F3, -0.2, F3.L + 0.2, Hp - 0.8, Hp, 0, 0.5, WEISS2);
         if (k === "+x") {
@@ -77443,7 +80125,7 @@
       infotafel(S, bx0 + bb + 2, bz0 + bt + 6, PI10 / 2);
       for (const [k, F3] of seiten2(p, px0, pz0, pw, pt, ["+x", "-x"])) for (const u of achsen5(0, F3.L, 6, 2)) {
         fb4(S, F3, u - 0.6, u + 0.6, Hp + 0.4, Hp + 2.2, -2.4, -0.6, rosa);
-        fb4(S, F3, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS7);
+        fb4(S, F3, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS8);
         fpoly3(S, teil4(F3, u - 0.75, u + 0.75, -0.6), [[0, Hp + 2.2], [1.5, Hp + 2.2], [0.75, Hp + 2.9]], -1.8, 0.1, "#5d646b");
       }
       return { hoehe: H + 4.5 };
@@ -77597,7 +80279,7 @@
     S.quader(x + L2 - 0.1, 0.05, z2 - 3.5, x + L2 + 4, 2.6, z2 + 3.5, farbe);
     S.quader(x, 2.6, z2 - 5, x + L2, 2.9, z2 + 5, "#c8463c");
     S.quader(x + 1, 2.9, z2 - 4, x + 9, 9, z2 + 4, "#f2efe6");
-    S.quader(x + 1.5, 7.2, z2 - 4.05, x + 8.5, 8, z2 + 4.05, GLAS7);
+    S.quader(x + 1.5, 7.2, z2 - 4.05, x + 8.5, 8, z2 + 4.05, GLAS8);
     S.box(1.2, 4, 1.2, x + 6, 11, z2, "#e3c35e");
     for (let i = 0; i < 4; i++) S.quader(x + 12 + i * (L2 - 14) / 4, 2.9, z2 - 2.5, x + 11 + (i + 1) * (L2 - 14) / 4, 3.6, z2 + 2.5, "#5d656c");
     stab4(S, [x + 11, 4, z2], [x + L2 - 1, 4, z2], 0.3, "#9aa1a7");
@@ -77695,7 +80377,7 @@
         const vx0 = x0 + w * 0.58, vz0 = ufer - 28, vb = 30, vt = 12;
         S.quader(vx0, 0, vz0, vx0 + vb, 14, vz0 + vt, "#e9e3d6");
         for (const [k, F2] of seiten2(p, vx0, vz0, vb, vt)) {
-          for (let i = 0; i < 3; i++) fb4(S, F2, 0.5, F2.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS7);
+          for (let i = 0; i < 3; i++) fb4(S, F2, 0.5, F2.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS8);
           fb4(S, F2, -0.1, F2.L + 0.1, 13.4, 14, 0, 0.3, "#c9c3b6");
           if (k === "+z") {
             const tb = Math.min(F2.L - 3, 26), u0 = (F2.L - tb) / 2;
@@ -77724,7 +80406,7 @@
       for (let x = x0 + 6; x < x0 + w * 0.76 - 2; x += 6) S.quader(x, 0.39, z0 + 49.15, x + 3, 0.41, z0 + 49.35, "#f2f1ec");
       autoReihe(S, r, x0 + w * 0.58, x0 + w * 0.8, ufer - 13.5, 0, 0.75);
       S.quader(x0 + w - 26, 0.3, ufer - 24, x0 + w - 18, 3.6, ufer - 18, "#e9e3d6");
-      for (const [k, F2] of seiten2(p, x0 + w - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS7);
+      for (const [k, F2] of seiten2(p, x0 + w - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS8);
       S.quader(x0 + w - 26.5, 3.6, ufer - 24.5, x0 + w - 17.5, 3.9, ufer - 17.5, "#c8463c");
       S.box(6, 0.15, 0.15, x0 + w - 21, 1.3, ufer - 15.5, "#c8463c");
       const ux0 = x0 + w - 14, uz0 = ufer - 30;
@@ -77882,8 +80564,8 @@
         if (i === 0 && k === "+z") {
           fwand2(S, F2, u - 1.1, u + 1.1, 0.3, 2.8, 0, 0.18, stein, [{ u0: u - 0.8, u1: u + 0.8, v0: 0.29, v1: 2.5, bogen: true }]);
           fb4(S, F2, u - 0.8, u + 0.8, 0.3, 2, 0.02, 0.08, "#5a3a2e");
-        } else fenster4(S, F2, u, 1.1, 0.9, 1.3, { kreuz: true, laeden, sims: stein });
-        for (let kk = 0; kk < n; kk++) fenster4(S, F2, u, eg + kk * gh + 0.75, 0.9, 1.35, { kreuz: true, laeden, sims: WEISS2 });
+        } else fenster5(S, F2, u, 1.1, 0.9, 1.3, { kreuz: true, laeden, sims: stein });
+        for (let kk = 0; kk < n; kk++) fenster5(S, F2, u, eg + kk * gh + 0.75, 0.9, 1.35, { kreuz: true, laeden, sims: WEISS2 });
       });
       fb4(S, F2, -0.1, F2.L + 0.1, H - 0.25, H, 0, 0.3, WEISS2);
       if (k === "+z" && o.schild) {
@@ -77897,13 +80579,13 @@
     for (const [k, F2] of seiten2(p, x0, z0, b, t, ["+x", "-x"])) {
       if (o.frei?.includes(k)) {
         fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
-        fenster4(S, F2, F2.L / 2, H + 0.6, 0.7, 1, { t: 0.05 });
+        fenster5(S, F2, F2.L / 2, H + 0.6, 0.7, 1, { t: 0.05 });
       } else fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
     }
     for (const [k, F2] of seiten2(p, x0, z0 - 0.2, b, t + 0.4, ["+z", "-z"])) for (const u of achsen5(0, F2.L, 3.6, 1.6)) {
       const ys = H + 0.9;
       fb4(S, F2, u - 0.7, u + 0.7, ys - 0.5, ys + 1.2, -2.4, -0.7, wand2);
-      fb4(S, F2, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS7);
+      fb4(S, F2, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS8);
       const g = new three_module_exports.BoxGeometry(1.7, 0.12, 2.2);
       g.rotateX(0.35);
       g.translate(u, ys + 1.45, -1.5);
@@ -77924,7 +80606,7 @@
     for (const [k, F2] of seiten2(p, tx0, tz0, ts, ts)) {
       lochwand4(S, F2, 0, ts, Ht - 4, Ht, wand2, [{ u0: ts / 2 - 0.6, u1: ts / 2 + 0.6, v0: Ht - 3.5, v1: Ht - 0.6, bogen: "spitz" }], { dick: 0.15 });
       fscheibe3(S, F2, ts / 2, Ht - 5.2, 0, 0.12, 0.7, "#2b3036");
-      fb4(S, F2, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS7);
+      fb4(S, F2, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS8);
     }
     const g = new three_module_exports.ConeGeometry(ts * 0.72, 13, 8);
     g.rotateY(PI10 / 8);
@@ -78137,7 +80819,7 @@
     S.add(g, art === "fern" ? "#f2f1ec" : "#c8463c");
   }
   function empfangAlt(S, scene2, p, r, x0, z0, b, t, H, o) {
-    const st = o.stein, orn = o.orn, dach2 = o.dach, cx = x0 + b / 2;
+    const st = o.stein, orn = o.orn, dach3 = o.dach, cx = x0 + b / 2;
     S.quader(x0, 0, z0, x0 + b, H, z0 + t, st);
     for (const [k, F2] of seiten2(p, x0, z0, b, t)) {
       const L2 = [];
@@ -78151,7 +80833,7 @@
       fb4(S, F2, -0.4, F2.L + 0.4, H - 1.4, H - 0.5, 0, 0.7, orn);
       for (const u of achsen5(0, F2.L, 4.2, 1)) fb4(S, F2, u + 1.8, u + 2.4, 1.2, H - 1.4, 0, 0.45, orn);
     }
-    S.add(dachProfil(b, t, 3.5, t * 0.45, "x").translate(cx, H, z0 + t / 2), dach2);
+    S.add(dachProfil(b, t, 3.5, t * 0.45, "x").translate(cx, H, z0 + t / 2), dach3);
     const mb = 30, mz1 = z0 + t + 2, Hm = H + 9;
     S.quader(cx - mb / 2, 0, z0 - 2, cx + mb / 2, Hm, mz1, st);
     for (const [k, F2] of seiten2(p, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
@@ -78184,8 +80866,8 @@
         for (const u of [0.6, F2.L - 0.6]) fb4(S, F2, u - 0.6, u + 0.6, 0, H + 3, 0, 0.6, orn);
         fb4(S, F2, -0.3, F2.L + 0.3, H + 3, H + 4, 0, 0.7, orn);
       }
-      walm2(S, px0 - 0.2, z0 - 1.2, px0 + pw + 0.2, z0 + t + 1.7, H + 4, 5, dach2);
-      zyl8(S, 0.5, 0.8, 2.5, px0 + pw / 2, H + 8.5, z0 + t / 2, dach2, 8);
+      walm2(S, px0 - 0.2, z0 - 1.2, px0 + pw + 0.2, z0 + t + 1.7, H + 4, 5, dach3);
+      zyl8(S, 0.5, 0.8, 2.5, px0 + pw / 2, H + 8.5, z0 + t / 2, dach3, 8);
     }
     return Hm + 13;
   }
@@ -78203,7 +80885,7 @@
     for (const s2 of [-1, 1]) {
       const fx0 = s2 < 0 ? x0 - 14 : x0 + b, fb22 = 14;
       S.quader(fx0, 0, z0 + 1, fx0 + fb22, H + 3, z0 + t - 1, "#d9d2c2");
-      for (const [k, F2] of seiten2(p, fx0, z0 + 1, fb22, t - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS7);
+      for (const [k, F2] of seiten2(p, fx0, z0 + 1, fb22, t - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS8);
       S.quader(fx0 - 0.4, H + 3, z0 + 0.6, fx0 + fb22 + 0.4, H + 3.4, z0 + t - 0.6, be);
     }
     const ux = x0 + b + 4;
@@ -78370,40 +81052,40 @@
     stab4(S, [x - c * 3, 2.6, z2 + sn * 3], [x + c * 1.4, 2.6, z2 - sn * 1.4], 1.1, "#e6e8e8", 10);
   }
   function hangSchloss(S, p, r, x0, z0, b, t, y) {
-    const putz2 = "#ece4d3", stein = "#c9b9a0", dach2 = SCHIEFER3;
+    const putz2 = "#ece4d3", stein = "#c9b9a0", dach3 = SCHIEFER3;
     const pb = Math.min(58, b * 0.72), pt = 13, px2 = x0 + (b - pb) / 2 - 4, pz4 = z0 + 3, H = 15;
     S.quader(px2, y, pz4, px2 + pb, y + H, pz4 + pt, putz2);
     S.quader(px2 - 0.2, y, pz4 - 0.2, px2 + pb + 0.2, y + 2.2, pz4 + pt + 0.2, stein);
     for (const [k, F2] of seiten2(p, px2, pz4, pb, pt)) {
       for (const u of achsen5(0, F2.L, 3.4, 1.2)) {
-        fenster4(S, F2, u, y + 4.2, 1.2, 2.4, { kreuz: true, rahmen: stein });
-        fenster4(S, F2, u, y + 9.4, 1.2, 2.4, { kreuz: true, rahmen: stein });
+        fenster5(S, F2, u, y + 4.2, 1.2, 2.4, { kreuz: true, rahmen: stein });
+        fenster5(S, F2, u, y + 9.4, 1.2, 2.4, { kreuz: true, rahmen: stein });
       }
       fb4(S, F2, -0.1, F2.L + 0.1, y + 7.6, y + 7.9, 0, 0.2, stein);
       for (const u of [0.3, F2.L - 0.3]) fb4(S, F2, u - 0.5, u + 0.5, y, y + H, 0, 0.1, stein);
     }
-    satteldach4(S, px2, pz4, px2 + pb, pz4 + pt, y + H, 10, "x", dach2, putz2, 0.4);
+    satteldach4(S, px2, pz4, px2 + pb, pz4 + pt, y + H, 10, "x", dach3, putz2, 0.4);
     for (const u of [pb * 0.25, pb * 0.6]) {
       const zx = px2 + u, F2 = R7(zx - 3, pz4 + pt, 1, 0, 6);
       S.quader(zx - 3, y + H, pz4 + pt - 3, zx + 3, y + H + 4.5, pz4 + pt, putz2);
       fpoly3(S, F2, [[0, y + H + 4.5], [6, y + H + 4.5], [5, y + H + 6], [4, y + H + 6], [4, y + H + 7.4], [2, y + H + 7.4], [2, y + H + 6], [1, y + H + 6]], -3, 0, putz2);
-      fenster4(S, F2, 3, y + H + 1.4, 1.1, 2, { kreuz: true, rahmen: stein });
+      fenster5(S, F2, 3, y + H + 1.4, 1.1, 2, { kreuz: true, rahmen: stein });
     }
     const kx = px2 + pb, kb = 12, kt = Math.min(t - 6, 26);
     S.quader(kx, y, pz4, kx + kb, y + H + 2, pz4 + kt, stein);
-    for (const [k, F2] of seiten2(p, kx, pz4, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y + 4, y + H - 1, 0, 0.06, GLAS7);
-    satteldach4(S, kx, pz4, kx + kb, pz4 + kt, y + H + 2, 8, "z", dach2, stein, 0.4);
-    S.box(1.2, 6, 1.2, kx + kb / 2, y + H + 13, pz4 + kt * 0.5, dach2);
+    for (const [k, F2] of seiten2(p, kx, pz4, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y + 4, y + H - 1, 0, 0.06, GLAS8);
+    satteldach4(S, kx, pz4, kx + kb, pz4 + kt, y + H + 2, 8, "z", dach3, stein, 0.4);
+    S.box(1.2, 6, 1.2, kx + kb / 2, y + H + 13, pz4 + kt * 0.5, dach3);
     zyl8(S, 0, 0.9, 4, kx + kb / 2, y + H + 16, pz4 + kt * 0.5, KUPFER2, 8);
     const tx = px2 - 2, tz = pz4 + pt - 1;
     zyl8(S, 3.6, 3.8, H + 12, tx, y, tz, stein, 16);
-    zyl8(S, 0, 4.4, 9, tx, y + H + 12, tz, dach2, 16);
+    zyl8(S, 0, 4.4, 9, tx, y + H + 12, tz, dach3, 16);
     S.quader(px2 + pb * 0.42 - 3, y, pz4 + pt, px2 + pb * 0.42 + 3, y + H + 8, pz4 + pt + 6, putz2);
     for (const [k, F2] of seiten2(p, px2 + pb * 0.42 - 3, pz4 + pt, 6, 6)) {
       fb4(S, F2, 1.8, 4.2, y, y + 4.2, 0, 0.08, "#4a3b33");
-      fenster4(S, F2, 3, y + H + 2, 1, 2.2, { rahmen: stein });
+      fenster5(S, F2, 3, y + H + 2, 1, 2.2, { rahmen: stein });
     }
-    walm2(S, px2 + pb * 0.42 - 3.3, pz4 + pt - 0.3, px2 + pb * 0.42 + 3.3, pz4 + pt + 6.3, y + H + 8, 8, dach2);
+    walm2(S, px2 + pb * 0.42 - 3.3, pz4 + pt - 0.3, px2 + pb * 0.42 + 3.3, pz4 + pt + 6.3, y + H + 8, 8, dach3);
     S.box(0.1, 3.4, 0.1, tx, y + H + 22.5, tz, "#3b3f44");
     S.box(0.05, 1, 1.7, tx, y + H + 23.4, tz + 0.85, "#c8463c");
     for (let i = 0; i < 4; i++) baumAuf(S, x0 + 4 + i * 6, y, z0 + t - 4, r, 0.8);
@@ -79492,16 +82174,16 @@
       const min = extremes.min;
       const max = extremes.max;
       let maxDistance = 0;
-      let index = 0;
+      let index2 = 0;
       for (let i = 0; i < 3; i++) {
         const distance = max[i].point.getComponent(i) - min[i].point.getComponent(i);
         if (distance > maxDistance) {
           maxDistance = distance;
-          index = i;
+          index2 = i;
         }
       }
-      const v0 = min[index];
-      const v1 = max[index];
+      const v0 = min[index2];
+      const v1 = max[index2];
       let v2;
       let v3;
       maxDistance = 0;
@@ -80170,7 +82852,7 @@
   var WEISS3 = "#f4f1ea";
   var ORN2 = "#fbf8f0";
   var GOLD = "#d8b45a";
-  var GLAS8 = "#4f5f6b";
+  var GLAS9 = "#4f5f6b";
   var GLAS_LADEN2 = "#5f7787";
   var GLAS_DUNKEL = "#3c4852";
   var LADENRAHMEN2 = ["#3f4a53", "#2f5d4a", "#6b2e35", "#5a4636", "#1f3a5f", "#e9e4da", "#7a2f2f", "#2e4f6b"];
@@ -80260,11 +82942,11 @@
     out.push(rest);
     return out;
   }
-  function fenster5(S, F2, u, y, fw, fh, o = {}) {
+  function fenster6(S, F2, u, y, fw, fh, o = {}) {
     const t = o.t ?? 0, rah = o.rahmen ?? ORN2;
     if (o.fasche) fb5(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y - 0.22, y + fh + 0.22, t, t + 0.03, o.fasche);
-    if (o.bogen) fbogen(S, F2, u, y, fw, fh, t - 0.12, t + 0.04, o.glas ?? GLAS8);
-    else fb5(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t - 0.12, t + 0.04, o.glas ?? GLAS8);
+    if (o.bogen) fbogen(S, F2, u, y, fw, fh, t - 0.12, t + 0.04, o.glas ?? GLAS9);
+    else fb5(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t - 0.12, t + 0.04, o.glas ?? GLAS9);
     if (o.kreuz !== false && fw > 0.75) {
       fb5(S, F2, u - 0.045, u + 0.045, y, y + fh * (o.bogen ? 0.8 : 1), t, t + 0.07, rah);
       if (!o.bogen) fb5(S, F2, u - fw / 2, u + fw / 2, y + fh * 0.66 - 0.04, y + fh * 0.66 + 0.04, t, t + 0.07, rah);
@@ -80295,7 +82977,7 @@
   function lochfassade(S, F2, u0, u1, y0, n, gh, o = {}) {
     const ra = o.ra ?? 3, fw = o.fw ?? 1.25, fh = o.fh ?? Math.min(1.9, gh * 0.58), br = o.br ?? 0.85;
     const us = o.achsen ?? achsen6(u0, u1, ra, o.rand ?? 0.5);
-    for (let k = 0; k < n; k++) for (const u of us) fenster5(S, F2, u, y0 + k * gh + br, fw, fh, typeof o.fen === "function" ? o.fen(k, u) : o);
+    for (let k = 0; k < n; k++) for (const u of us) fenster6(S, F2, u, y0 + k * gh + br, fw, fh, typeof o.fen === "function" ? o.fen(k, u) : o);
     return us;
   }
   function laden(S, scene2, F2, u0, u1, h, r, o = {}) {
@@ -80549,9 +83231,9 @@
       }
     }
   }
-  function dachluke(S, F2, u, H, s2, dach2, a = 2.5, b = 1.1, rahmen2 = "#e9e4d8") {
+  function dachluke(S, F2, u, H, s2, dach3, a = 2.5, b = 1.1, rahmen2 = "#e9e4d8") {
     const y = H + s2 * a;
-    fpoly4(S, F2, [[u - b / 2, y - 0.1], [u + b / 2, y - 0.1], [u, y + b * 0.8]], -a - 1.6, -a, dach2);
+    fpoly4(S, F2, [[u - b / 2, y - 0.1], [u + b / 2, y - 0.1], [u, y + b * 0.8]], -a - 1.6, -a, dach3);
     fpoly4(S, F2, [[u - b * 0.4, y], [u + b * 0.4, y], [u, y + b * 0.62]], -a + 0.01, -a + 0.04, rahmen2);
     fpoly4(S, F2, [[u - b * 0.26, y + 0.1], [u + b * 0.26, y + 0.1], [u, y + b * 0.46]], -a + 0.04, -a + 0.07, GLAS_DUNKEL);
   }
@@ -80605,7 +83287,7 @@
     const laedenF = r() < 0.35 ? waehle2(r, ["#3f6b4a", "#6b3a2e", "#3f5a7a"]) : null;
     const fen = {
       rahmen: orn,
-      glas: GLAS8,
+      glas: GLAS9,
       fasche: v === "passau" ? null : r() < 0.6 ? orn : dunkler(wand2, 0.08),
       laeden: v === "wasserburg" ? laedenF : null,
       simsF: orn,
@@ -80635,7 +83317,7 @@
         const y = eg + k * gh + 0.85;
         for (const u of us) {
           if (erker3 && Math.abs(u - b / 2) < 1.8 && k < n) continue;
-          fenster5(S, Fv, u, y, 1.15, Math.min(1.8, gh * 0.56), { ...fen, verdachung: v === "passau" ? k === 0 ? "dreieck" : "gerade" : null });
+          fenster6(S, Fv, u, y, 1.15, Math.min(1.8, gh * 0.56), { ...fen, verdachung: v === "passau" ? k === 0 ? "dreieck" : "gerade" : null });
         }
       }
       if (v === "passau") {
@@ -80646,7 +83328,7 @@
         const e0 = b / 2 - 1.7, e1 = b / 2 + 1.7, te = 0.95, ye0 = eg + 0.7, ye1 = H - (v === "passau" ? 0.5 : 0.2);
         fb5(S, Fv, e0, e1, ye0, ye1, 0, te, wand2);
         fpoly4(S, teil5(Fv, 0, b, 0), [[e0 + 0.4, ye0], [e1 - 0.4, ye0], [b / 2, ye0 - 1.1]], 0, te * 0.8, orn);
-        for (let k = 0; k < n; k++) fenster5(S, Fv, b / 2, eg + k * gh + 0.9, 1.6, Math.min(1.75, gh * 0.55), { ...fen, t: te, laeden: null });
+        for (let k = 0; k < n; k++) fenster6(S, Fv, b / 2, eg + k * gh + 0.9, 1.6, Math.min(1.75, gh * 0.55), { ...fen, t: te, laeden: null });
         fb5(S, Fv, e0 - 0.15, e1 + 0.15, ye1, ye1 + 0.25, -0.1, te + 0.2, orn);
         fb5(S, Fv, e0, e1, ye1 + 0.25, ye1 + 0.55, -0.1, te + 0.05, dachF);
       }
@@ -80655,14 +83337,14 @@
     if (sichtF2(p, F2.h)) {
       lochfassade(S, F2.h, 0, b, eg, n, gh, { ...nebenFen, ra: 3, fw: 1, fh: 1.5 });
       haustuer2(S, F2.h, b * 0.3, 0.3, 1.1, 2.3, waehle2(r, HOLZ5), orn);
-      fenster5(S, F2.h, b * 0.7, 1.4, 1, 1.3, nebenFen);
+      fenster6(S, F2.h, b * 0.7, 1.4, 1, 1.3, nebenFen);
     }
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
       if (!ok5 || !sichtF2(p, F2[k])) continue;
       lochfassade(S, F2[k], 0.5, T - 0.5, eg, n, gh, { ...nebenFen, ra: 3.3, fw: 1, fh: 1.5 });
       fb5(S, F2[k], 0, T - tA, 0.3, 0.8, 0, 0.1, sockelF);
       if (arkade2) fwand3(S, F2[k], 0, tA, 0.3, eg, -0.5, 0, wand2, [{ u0: 0.5, u1: tA - 0.4, v0: 0.3, v1: eg - 0.45, bogen: true }]);
-      for (const u of [T * 0.35, T * 0.7]) fenster5(S, F2[k], u, 1.3, 1, 1.6, { ...nebenFen, laeden: "#5a6168", kreuz: false });
+      for (const u of [T * 0.35, T * 0.7]) fenster6(S, F2[k], u, 1.3, 1, 1.6, { ...nebenFen, laeden: "#5a6168", kreuz: false });
     }
     if (v === "landshut") {
       const hg = b * zw(r, 0.75, 0.95), art2 = waehle2(r, ["geschweift", "treppe", "spitz", "geschweift", "aufsatz"]);
@@ -80675,9 +83357,9 @@
       }
       fb5(S, F2.v, -0.05, b + 0.05, H - 0.15, H + 0.12, 0, 0.22, orn);
       if (sichtF2(p, F2.v)) {
-        for (const u of [b * 0.3, b * 0.7]) fenster5(S, F2.v, u, H + 0.9, 0.95, 1.4, { ...fen, laeden: null, blumen: null });
-        fenster5(S, F2.v, b / 2, H + hg * 0.52, 0.8, 1.1, { ...fen, laeden: null, blumen: null, kreuz: false });
-        if (hg > 7) fscheibe4(S, F2.v, b / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS8);
+        for (const u of [b * 0.3, b * 0.7]) fenster6(S, F2.v, u, H + 0.9, 0.95, 1.4, { ...fen, laeden: null, blumen: null });
+        fenster6(S, F2.v, b / 2, H + hg * 0.52, 0.8, 1.1, { ...fen, laeden: null, blumen: null, kreuz: false });
+        if (hg > 7) fscheibe4(S, F2.v, b / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS9);
       }
       if (sichtF2(p, F2.h)) fpoly4(S, F2.h, giebelUmriss2(0, b, H, hg * 0.9, "spitz"), -0.3, 0, dunkler(wand2, 0.03));
       return { top: H + hg, H };
@@ -80697,7 +83379,7 @@
         const [a0, a1] = umriss[i], [b0, b1] = umriss[i + 1];
         if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2 && a1 > H + 0.5) fb5(S, F2.v, Math.min(a0, b0) - 0.08, Math.max(a0, b0) + 0.08, a1 - 0.02, a1 + 0.16, -0.65, 0.1, orn);
       }
-      if (art === "aufsatz" && sichtF2(p, F2.v)) fscheibe4(S, F2.v, b / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS8);
+      if (art === "aufsatz" && sichtF2(p, F2.v)) fscheibe4(S, F2.v, b / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS9);
     }
     const fm = dunkler(wand2, 0.04);
     S.quader(x0, H, z0, x0 + 0.45, top - 0.35, z0 + T - 0.3, fm);
@@ -80759,9 +83441,9 @@
     const us = achsen6(0, b, ra, 0.6);
     const fbreite = stil === "wiederaufbau" ? 1.15 : 1.35, fhoehe = stil === "wiederaufbau" ? 1.55 : 2.05;
     const fenF = (k) => {
-      if (stil === "wiederaufbau") return { rahmen: "#f6f4ee", glas: GLAS8, sims: true, simsF: "#c9c3b6", kreuz: r() < 0.3 };
-      if (stil === "neorenaissance") return { rahmen: orn, glas: GLAS8, fasche: orn, verdachung: k === 0 ? r() < 0.5 ? "dreieck" : "segment" : k === 1 ? "gerade" : null, ornF: orn };
-      return { rahmen: orn, glas: GLAS8, fasche: k < 2 ? orn : null, verdachung: k === 0 ? "segment" : null, ornF: orn };
+      if (stil === "wiederaufbau") return { rahmen: "#f6f4ee", glas: GLAS9, sims: true, simsF: "#c9c3b6", kreuz: r() < 0.3 };
+      if (stil === "neorenaissance") return { rahmen: orn, glas: GLAS9, fasche: orn, verdachung: k === 0 ? r() < 0.5 ? "dreieck" : "segment" : k === 1 ? "gerade" : null, ornF: orn };
+      return { rahmen: orn, glas: GLAS9, fasche: k < 2 ? orn : null, verdachung: k === 0 ? "segment" : null, ornF: orn };
     };
     const ladenFront3 = (Fk, L2) => {
       if (stil === "wiederaufbau") {
@@ -80784,7 +83466,7 @@
       const ua = achsen6(0, L2, ra, 0.6);
       for (let k = 0; k < n; k++) {
         const y = eg + k * gh + (stil === "wiederaufbau" ? 0.9 : 0.8);
-        for (const u of ua) fenster5(S, Fk, u, y, fbreite, Math.min(fhoehe, gh * 0.6), fenF(k));
+        for (const u of ua) fenster6(S, Fk, u, y, fbreite, Math.min(fhoehe, gh * 0.6), fenF(k));
         if (stil !== "wiederaufbau" && k < n - 1) fb5(S, Fk, -0.05, L2 + 0.05, eg + (k + 1) * gh - 0.1, eg + (k + 1) * gh + 0.08, 0, 0.14, orn);
       }
       if (stil === "neubarock" && mitte && L2 > 10) {
@@ -80809,18 +83491,18 @@
       if (erker3) {
         const e0 = b * 0.18, e1 = e0 + 3.2;
         fb5(S, F2.v, e0, e1, eg + 0.4, eg + 2 * gh, 0, 1, wand2);
-        for (let k = 0; k < 2; k++) fenster5(S, F2.v, (e0 + e1) / 2, eg + k * gh + 0.8, 1.6, 2, { rahmen: orn, glas: GLAS8, t: 1 });
+        for (let k = 0; k < 2; k++) fenster6(S, F2.v, (e0 + e1) / 2, eg + k * gh + 0.8, 1.6, 2, { rahmen: orn, glas: GLAS9, t: 1 });
         fb5(S, F2.v, e0 - 0.2, e1 + 0.2, eg + 2 * gh, eg + 2 * gh + 0.3, 0, 1.3, orn);
         fb5(S, F2.v, e0 + 0.3, e1 - 0.3, eg + 2 * gh + 0.3, eg + 2 * gh + 1.2, 0.6, 1.2, "#3b4046");
       }
     }
-    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS8, simsF: "#cfc9bd" });
+    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS9, simsF: "#cfc9bd" });
     if (sichtF2(p, F2.h)) fb5(S, F2.h, 0, b, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
       if (!ok5 || !sichtF2(p, F2[k])) continue;
       if (stil === "wiederaufbau") {
         ladenFront3(teil5(F2[k], 0, 7), 7);
-        lochfassade(S, F2[k], 0, T, eg, n, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS8, simsF: "#c9c3b6" });
+        lochfassade(S, F2[k], 0, T, eg, n, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS9, simsF: "#c9c3b6" });
         fb5(S, F2[k], -0.1, T + 0.1, H - 0.2, H + 0.05, 0, 0.35, "#e8e3d8");
       } else {
         ladenFront3(teil5(F2[k], 0, 8.4), 8.4);
@@ -80836,15 +83518,15 @@
       top = H + h1 + 1.6;
       if (sichtF2(p, F2.v)) for (const u of achsen6(0, b, ra, 0.6)) {
         fb5(S, F2.v, u - 0.7, u + 0.7, H + 0.4, H + 2.6, -1.4, -0.5, orn);
-        fb5(S, F2.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS8);
+        fb5(S, F2.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS9);
         fbogen(S, F2.v, u, H + 2.4, 1.6, 0.8, -1.5, -0.45, dachF);
       }
       if (b > 10) {
         const gb = Math.min(7.5, b * 0.5), g0 = b / 2 - gb / 2;
         fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, 5.2, "geschweift"), -0.5, 0, wand2);
         if (sichtF2(p, F2.v)) {
-          fenster5(S, F2.v, b / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS8, fasche: orn });
-          fscheibe4(S, F2.v, b / 2, H + 3.9, 0, 0.06, 0.45, GLAS8);
+          fenster6(S, F2.v, b / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS9, fasche: orn });
+          fscheibe4(S, F2.v, b / 2, H + 3.9, 0, 0.06, 0.45, GLAS9);
         }
         fb5(S, F2.v, g0 - 0.2, g0 + gb + 0.2, H - 0.05, H + 0.15, 0, 0.6, orn);
         top = Math.max(top, H + 5.2);
@@ -80859,14 +83541,14 @@
           const gb = 5.6, g0 = b / 2 - gb / 2, hg = 6.2;
           fb5(S, F2.v, g0, g0 + gb, H, H + hg * 0.55, -2.2, 0, wand2);
           fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, hg, "geschweift"), -2.2, 0.08, wand2);
-          fenster5(S, F2.v, b / 2 - 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS8, fasche: orn });
-          fenster5(S, F2.v, b / 2 + 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS8, fasche: orn });
-          fscheibe4(S, F2.v, b / 2, H + hg * 0.68, 0.08, 0.14, 0.4, GLAS8);
-          for (const u of [g0 + 0.8, b - g0 - 0.8]) gaube2(S, F2.v, u < b / 2 ? Math.max(1.3, g0 - 1.6) : Math.min(b - 1.3, b - g0 + 1.6), H, s2, 1.5, wand2, dachF, GLAS8);
+          fenster6(S, F2.v, b / 2 - 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS9, fasche: orn });
+          fenster6(S, F2.v, b / 2 + 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS9, fasche: orn });
+          fscheibe4(S, F2.v, b / 2, H + hg * 0.68, 0.08, 0.14, 0.4, GLAS9);
+          for (const u of [g0 + 0.8, b - g0 - 0.8]) gaube2(S, F2.v, u < b / 2 ? Math.max(1.3, g0 - 1.6) : Math.min(b - 1.3, b - g0 + 1.6), H, s2, 1.5, wand2, dachF, GLAS9);
           top = Math.max(top, H + hg);
         } else {
           const ng = stil === "wiederaufbau" ? Math.max(1, Math.round(b / 3.4)) : Math.max(1, Math.round(b / 4.2));
-          for (let i = 0; i < ng; i++) gaube2(S, F2.v, (i + 0.5) * b / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS8, 1);
+          for (let i = 0; i < ng; i++) gaube2(S, F2.v, (i + 0.5) * b / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS9, 1);
         }
       }
       if (letzter && stil === "neorenaissance" && sichtF2(p, F2.r) && r() < 0.7) {
@@ -81247,7 +83929,7 @@
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     boden6(S, 0, 0, w, zf, PFLASTER22, 0.3, 0.05);
     if (v === "brauerei") {
-      const klinker = waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]), putz2 = "#efe6d2", dach2 = waehle2(r, SCHIEFER4), kup = waehle2(r, KUPFER3);
+      const klinker = waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]), putz2 = "#efe6d2", dach3 = waehle2(r, SCHIEFER4), kup = waehle2(r, KUPFER3);
       const sx = 4, sb2 = 16, st = 14, sH = 17, sz = zf - st;
       S.quader(sx, 0, sz, sx + sb2, sH, zf, klinker);
       const Fs = seiten3(sx, sz, sb2, st);
@@ -81255,15 +83937,15 @@
         if (!sichtF2(p, Fs[k])) continue;
         const L2 = Fs[k].L;
         for (const u of achsen6(0, L2, 3.6, 0.8)) {
-          fbogen(S, Fs[k], u, 1.6, 2, 5.4, -0.1, 0.06, GLAS8);
+          fbogen(S, Fs[k], u, 1.6, 2, 5.4, -0.1, 0.06, GLAS9);
           fbogen(S, Fs[k], u, 1.6, 2.4, 5.6, 0, 0.04, putz2);
-          fbogen(S, Fs[k], u, 9, 2, 5.6, -0.1, 0.06, GLAS8);
+          fbogen(S, Fs[k], u, 9, 2, 5.6, -0.1, 0.06, GLAS9);
           fbogen(S, Fs[k], u, 9, 2.4, 5.8, 0, 0.04, putz2);
         }
         fb5(S, Fs[k], -0.1, L2 + 0.1, 7.8, 8.2, 0, 0.2, putz2);
         fb5(S, Fs[k], -0.1, L2 + 0.1, sH - 0.6, sH, 0, 0.3, putz2);
       }
-      dachTrauf(S, Fs.v, 0, sb2, st, sH, 5.2, dach2, klinker, { ue: 0.4, us: 0.4 });
+      dachTrauf(S, Fs.v, 0, sb2, st, sH, 5.2, dach3, klinker, { ue: 0.4, us: 0.4 });
       zyl9(S, 2, 2.4, 3.2, sx + sb2 / 2, sH + 2.2, sz + st / 2, kup, 8);
       zwiebel(S, sx + sb2 / 2, sH + 5.4, sz + st / 2, 1.9, 3.6, kup, 10);
       if (sichtF2(p, Fs.v)) ftext5(scene2, Fs.v, waehle2(r, ["Brauerei Wei\xDFbr\xE4u", "Brauerei Moosbr\xE4u", "Brauerei Hollerer", "Klosterbrauerei"]), sb2 / 2, 13.6, 0.1, 1, sb2 * 0.86, "#f4efe2");
@@ -81283,7 +83965,7 @@
         S.quader(lx, 0, lz, lx + lb, 7, zf, putz2);
         const Fl = seiten3(lx, lz, lb, lt);
         for (const k of ["v", "r"]) if (sichtF2(p, Fl[k])) {
-          lochfassade(S, Fl[k], 0, Fl[k].L, 1.5, 1, 4.5, { ra: 3.2, fw: 1.4, fh: 1.4, rahmen: ORN2, glas: GLAS8, simsF: "#d8cfbd" });
+          lochfassade(S, Fl[k], 0, Fl[k].L, 1.5, 1, 4.5, { ra: 3.2, fw: 1.4, fh: 1.4, rahmen: ORN2, glas: GLAS9, simsF: "#d8cfbd" });
         }
         if (sichtF2(p, Fl.v)) {
           fbogen(S, Fl.v, lb - 3, 0.3, 3.2, 4.2, -0.1, 0.06, "#5a4636");
@@ -81329,9 +84011,9 @@
           haustuer2(S, Fk, u, 0.3, 1.6, 2.7, waehle2(r, HOLZ5), "#e8dcc0", true);
           return;
         }
-        fenster5(S, Fk, u, 1.2, 1.2, brau ? 2.4 : 1.6, { rahmen: ORN2, glas: GLAS8, laeden: brau ? null : laedenF, bogen: brau, fasche: "#e8dcc0", simsF: "#e8dcc0" });
+        fenster6(S, Fk, u, 1.2, 1.2, brau ? 2.4 : 1.6, { rahmen: ORN2, glas: GLAS9, laeden: brau ? null : laedenF, bogen: brau, fasche: "#e8dcc0", simsF: "#e8dcc0" });
       });
-      for (let kk = 0; kk < n; kk++) for (const u of us) fenster5(S, Fk, u, eg + kk * gh + 0.8, 1.15, 1.6, { rahmen: ORN2, glas: GLAS8, laeden: laedenF, fasche: brau ? null : "#e8dcc0", blumen: !brau && kk === 0 && r() < 0.8 ? "#d0453a" : null, simsF: "#e8dcc0" });
+      for (let kk = 0; kk < n; kk++) for (const u of us) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.15, 1.6, { rahmen: ORN2, glas: GLAS9, laeden: laedenF, fasche: brau ? null : "#e8dcc0", blumen: !brau && kk === 0 && r() < 0.8 ? "#d0453a" : null, simsF: "#e8dcc0" });
       fb5(S, Fk, -0.05, L2 + 0.05, eg - 0.1, eg + 0.12, 0, 0.12, "#e8dcc0");
       if (front2) {
         ftext5(scene2, Fk, name2, L2 / 2, eg + n * gh - 0.25 - (brau ? 0 : 0) + 0, 0.08, brau ? 1 : 0.62, L2 * 0.6, "#5a3a2a");
@@ -81343,7 +84025,7 @@
     }
     if (brau) {
       dachTrauf(S, F2.v, 0, hb, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
-      if (sichtF2(p, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS8);
+      if (sichtF2(p, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS9);
       S.quader(0.5 + hb * 0.4, H + 4, hz + ht / 2 - 0.5, 0.5 + hb * 0.4 + 1, H + ht * 0.52 + 1, hz + ht / 2 + 0.5, "#b9a89a");
     } else if (r() < 0.5) {
       walm3(S, 0.5, hz, 0.5 + hb, zf, H, ht * 0.4, dachF, 0.7);
@@ -81500,7 +84182,7 @@
       fb5(S, F2, u + fw / 2 + 0.04, u + fw / 2 + 0.26, y + bh, y + gh - bh, t, t1, holz);
       fb5(S, F2, u - fw / 2 - 0.1, u + fw / 2 + 0.1, ys - 0.1, ys + 0.06, t, t1, holz);
       fb5(S, F2, u - fw / 2 - 0.1, u + fw / 2 + 0.1, ys + fh, ys + fh + 0.16, t, t1, holz);
-      fenster5(S, F2, u, ys + 0.06, fw, fh - 0.06, { ...fen, t, sims: false });
+      fenster6(S, F2, u, ys + 0.06, fw, fh - 0.06, { ...fen, t, sims: false });
       if (art === "franken") {
         fdiag(S, F2, u - fw / 2, y + bh, u + fw / 2, ys - 0.1, 0.16, t, t1, holz);
         fdiag(S, F2, u - fw / 2, ys - 0.1, u + fw / 2, y + bh, 0.16, t, t1, holz);
@@ -81534,7 +84216,7 @@
       for (let j = 0; j < nf; j++) {
         const u = um - ((nf - 1) / 2 - j) * Math.min(2.6, bb / (nf + 0.5));
         if (Math.abs(u - um) + 0.6 > bb * (1 - hh / (hg * k)) / 2) continue;
-        fenster5(S, F2, u, yy + 0.6, 0.8, Math.min(1.2, hh * 0.55), { ...fen, t, sims: false, laeden: null });
+        fenster6(S, F2, u, yy + 0.6, 0.8, Math.min(1.2, hh * 0.55), { ...fen, t, sims: false, laeden: null });
         fb5(S, F2, u - 0.55, u - 0.37, yy + 0.2, yy + hh - 0.1, t, t + 0.08, holz);
         fb5(S, F2, u + 0.37, u + 0.55, yy + 0.2, yy + hh - 0.1, t, t + 0.08, holz);
       }
@@ -81547,7 +84229,7 @@
     const F2 = seiten3(x0, z0, b, T), leer2 = p.zustand === "leerstand";
     const { n, eg, gh } = o, kr = o.kr ?? 0.3;
     const H = eg + n * gh + kr * 0;
-    const fen = { rahmen: ORN2, glas: GLAS8, laeden: o.laedenF, blumen: o.blumen };
+    const fen = { rahmen: ORN2, glas: GLAS9, laeden: o.laedenF, blumen: o.blumen };
     S.quader(x0, 0, z0, x0 + b, eg, z0 + T, o.steinEG ? o.stein : o.wand);
     for (let k = 0; k < n; k++) S.quader(x0, eg + k * gh, z0, x0 + b, eg + (k + 1) * gh, z0 + T + kr * (k + 1), o.steinOG && k === 0 ? o.stein : o.wand);
     const tTop = kr * n;
@@ -81563,7 +84245,7 @@
           fb5(S, Fk, L2 - 0.3, L2, 0.3, eg, 0, 0.1, o.holz);
         }
       } else {
-        for (const u of achsen6(0, L2, 3, 0.6)) fenster5(S, Fk, u, 1.3, 1, 1.4, { ...fen, laeden: o.steinEG ? null : fen.laeden, rahmen: o.steinEG ? heller(o.stein, 0.08) : ORN2 });
+        for (const u of achsen6(0, L2, 3, 0.6)) fenster6(S, Fk, u, 1.3, 1, 1.4, { ...fen, laeden: o.steinEG ? null : fen.laeden, rahmen: o.steinEG ? heller(o.stein, 0.08) : ORN2 });
         if (!front2) haustuer2(S, Fk, L2 * 0.5, 0.3, 1, 2.2, waehle2(r, HOLZ5), o.holz);
       }
       if (o.steinEG) {
@@ -81574,7 +84256,7 @@
       for (let k = 0; k < n; k++) {
         const y = eg + k * gh, t = front2 ? kr * (k + 1) : 0;
         if (istStein(k)) {
-          for (const u of ua) fenster5(S, Fk, u, y + 0.85, 1.15, Math.min(1.7, gh * 0.55), { ...fen, t, rahmen: heller(o.stein, 0.1), fasche: heller(o.stein, 0.05), simsF: heller(o.stein, 0.08) });
+          for (const u of ua) fenster6(S, Fk, u, y + 0.85, 1.15, Math.min(1.7, gh * 0.55), { ...fen, t, rahmen: heller(o.stein, 0.1), fasche: heller(o.stein, 0.05), simsF: heller(o.stein, 0.08) });
           fb5(S, Fk, -0.03, L2 + 0.03, y + gh - 0.2, y + gh, t, t + 0.15, heller(o.stein, 0.06));
         } else fwGeschoss2(S, Fk, front2 ? 0 : kVersatz ? kr * (k + 1) : 0, L2, y, gh, t, o.holz, ua, 1, Math.min(1.5, gh * 0.5), o.art, fen);
       }
@@ -81600,7 +84282,7 @@
       else fpoly4(S, F2.h, [[0, H], [b, H], [b / 2, H + hg - 0.2]], -0.4, 0, o.wand);
       for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) {
         const s2 = 2 * hg / b;
-        for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k], u, H, s2, 1.6, o.wand, o.dach, GLAS8, 1);
+        for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k], u, H, s2, 1.6, o.wand, o.dach, GLAS9, 1);
       }
       S.quader(x0 + b * 0.5 - 0.4, H + hg * 0.5, z0 + T * 0.3, x0 + b * 0.5 + 0.4, H + hg + 0.6, z0 + T * 0.3 + 0.8, "#a8988a");
       top = H + hg;
@@ -81619,13 +84301,13 @@
           dachGiebel(S, Fd, z0u, z0u + zb, -3.4, 0, H + hz * 0.85, zb * 0.75, o.dach, null, { ue: 0.25, uf: 0.5, ub: 0 });
           fb5(S, Fd, b / 2 - 0.12, b / 2 + 0.12, H + hz * 0.85 + zb * 0.5, H + hz * 0.85 + zb * 0.5 + 0.24, 0, 1.6, o.holz);
           top = Math.max(top, H + hz * 0.85 + zb * 0.75);
-          for (const u of [z0u - 2, z0u + zb + 2]) if (u > 1 && u < b - 1) gaube2(S, Fd, u, H, s2, 1.3, o.wand, o.dach, GLAS8, 0.9);
-        } else for (const u of achsen6(0, b, 3.6, 0.8)) gaube2(S, Fd, u, H, s2, 1.4, o.wand, o.dach, GLAS8, 0.9);
+          for (const u of [z0u - 2, z0u + zb + 2]) if (u > 1 && u < b - 1) gaube2(S, Fd, u, H, s2, 1.3, o.wand, o.dach, GLAS9, 0.9);
+        } else for (const u of achsen6(0, b, 3.6, 0.8)) gaube2(S, Fd, u, H, s2, 1.4, o.wand, o.dach, GLAS9, 0.9);
         if (o.choerlein) {
           const cu = us[Math.floor(us.length / 2)], y0 = eg + 0.3, t0 = kr;
           fb5(S, F2.v, cu - 1.1, cu + 1.1, y0 + 0.9, y0 + gh * 0.95, t0, t0 + 0.9, o.choerleinF ?? o.stein);
           fpoly4(S, F2.v, [[cu - 1, y0 + 0.9], [cu + 1, y0 + 0.9], [cu, y0 - 0.5]], t0, t0 + 0.75, o.choerleinF ?? o.stein);
-          fenster5(S, F2.v, cu, y0 + 1.5, 1.4, 1.3, { ...fen, t: t0 + 0.9, laeden: null, sims: false });
+          fenster6(S, F2.v, cu, y0 + 1.5, 1.4, 1.3, { ...fen, t: t0 + 0.9, laeden: null, sims: false });
           fb5(S, F2.v, cu - 1.2, cu + 1.2, y0 + gh * 0.95, y0 + gh * 0.95 + 0.2, t0 - 0.1, t0 + 1.05, heller(o.stein, 0.08));
           const g = new three_module_exports.ConeGeometry(1.3, 1.6, 4);
           g.rotateY(PI11 / 4);
@@ -81686,16 +84368,16 @@
     const F2 = seiten3(x0, z0, b, T), leer2 = p.zustand === "leerstand";
     const H = o.eg + o.n * o.gh, st = o.stein, hst = heller(st, 0.08);
     S.quader(x0, 0, z0, x0 + b, H, z0 + T, st);
-    const fen = { rahmen: ORN2, glas: GLAS8, fasche: hst, simsF: hst };
+    const fen = { rahmen: ORN2, glas: GLAS9, fasche: hst, simsF: hst };
     for (const [k, ok5] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
       if (!ok5 || !sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       if (k === "v") {
         laden(S, scene2, Fk, 0.5, L2 - 2.2, o.eg - 0.3, r, { leer: leer2, rahmen: waehle2(r, ["#3f4a53", "#5a4636"]) });
         haustuer2(S, Fk, L2 - 1.3, 0.3, 1.1, 2.6, waehle2(r, HOLZ5), hst, true);
-      } else for (const u of achsen6(0, L2, 3.2, 0.6)) fenster5(S, Fk, u, 1.4, 0.9, 1.3, fen);
+      } else for (const u of achsen6(0, L2, 3.2, 0.6)) fenster6(S, Fk, u, 1.4, 0.9, 1.3, fen);
       for (let kk = 0; kk < o.n; kk++) {
-        for (const u of achsen6(0, L2, 2.6, 0.5)) fenster5(S, Fk, u, o.eg + kk * o.gh + 0.8, 1.05, 1.6, fen);
+        for (const u of achsen6(0, L2, 2.6, 0.5)) fenster6(S, Fk, u, o.eg + kk * o.gh + 0.8, 1.05, 1.6, fen);
         fb5(S, Fk, -0.03, L2 + 0.03, o.eg + kk * o.gh - 0.2, o.eg + kk * o.gh, 0, 0.14, hst);
       }
       for (let i = 0; i < 6; i++) fb5(S, Fk, 0, L2, 0.3 + i * 0.6, 0.34 + i * 0.6, 0, 0.03, dunkler(st, 0.06));
@@ -81711,14 +84393,14 @@
       fb5(S, F2.v, b / 2 - 0.65, b / 2 + 0.65, H + 0.5, H + 2.6, -0.1, 0.04, "#5a4636");
       fb5(S, F2.v, b / 2 - 0.12, b / 2 + 0.12, H + hz + 1.4, H + hz + 1.65, 0, 1.4, HOLZ5[0]);
       dachGiebel(S, F2.v, zu + 0.2, zu + zb - 0.2, -3.6, -0.2, H + hz, 3, o.dach, null, { ue: 0, uf: 0, ub: 0 });
-      for (const u of [b * 0.15, b * 0.85]) if (b > 9) gaube2(S, F2.v, u, H, s2, 1.1, st, o.dach, GLAS8, 0.9);
-      for (const u of [b * 0.35, b * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st, o.dach, GLAS8, 3.3);
+      for (const u of [b * 0.15, b * 0.85]) if (b > 9) gaube2(S, F2.v, u, H, s2, 1.1, st, o.dach, GLAS9, 0.9);
+      for (const u of [b * 0.35, b * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st, o.dach, GLAS9, 3.3);
       top = Math.max(top, H + hz + 3.4);
       if (o.choerlein) {
         const cu = b * 0.3, y0 = o.eg + 0.4;
         fb5(S, F2.v, cu - 1, cu + 1, y0 + 0.8, y0 + o.gh * 0.95, 0, 0.9, hst);
         fpoly4(S, F2.v, [[cu - 0.95, y0 + 0.8], [cu + 0.95, y0 + 0.8], [cu, y0 - 0.6]], 0, 0.8, hst);
-        fenster5(S, F2.v, cu, y0 + 1.4, 1.3, 1.3, { ...fen, t: 0.9, sims: false });
+        fenster6(S, F2.v, cu, y0 + 1.4, 1.3, 1.3, { ...fen, t: 0.9, sims: false });
         const g = new three_module_exports.ConeGeometry(1.25, 1.8, 4);
         g.rotateY(PI11 / 4);
         g.translate(cu, y0 + o.gh * 0.95 + 0.9, 0.45);
@@ -81728,7 +84410,7 @@
     return { top };
   }
   function stadtmauerRoh(S, scene2, p, r) {
-    const { w, d } = p, stein = waehle2(r, ROT_SANDSTEIN), st2 = dunkler(stein, 0.05), dach2 = waehle2(r, BIBER);
+    const { w, d } = p, stein = waehle2(r, ROT_SANDSTEIN), st2 = dunkler(stein, 0.05), dach3 = waehle2(r, BIBER);
     const zg = d - 9, zm = zg - 2.2, Hm = 8.5;
     S.quader(0, 0, zg, w, 0.2, d - 1.2, "#93b97a");
     for (let x = 4; x < w; x += 9) baumRund2(S, x + zw(r, -1, 1), zg + 3.8, r, 0.8, LAUB, 0.2);
@@ -81742,7 +84424,7 @@
     S.quader(0, Hm, zm - 0.2, w, Hm + 1.2, zm + 0.7, stein);
     for (let x = 1; x < w; x += 2.4) S.box(0.24, 2.2, 0.24, x, Hm + 2.1, zm - 1.6, HOLZ5[0]);
     S.quader(0, Hm, zm - 2.6, w, Hm + 0.25, zm - 0.2, HOLZ5[1]);
-    dachTrauf(S, R8(0, zm + 0.7, 1, 0, w), 0, w, 3.6, Hm + 3, 0.9, dach2, null, { ue: 0.3, us: 0 });
+    dachTrauf(S, R8(0, zm + 0.7, 1, 0, w), 0, w, 3.6, Hm + 3, 0.9, dach3, null, { ue: 0.3, us: 0 });
     const nT = Math.max(2, Math.round(w / 26));
     let top = 0;
     for (let i = 0; i < nT; i++) {
@@ -81764,12 +84446,12 @@
             fscheibe4(S, Ft[k], L2 / 2, Ht - 2.6, 0.1, 0.13, 1, "#2f4f6f");
           }
         }
-        walm3(S, x0, z0, x0 + tb, z0 + tb + 1, Ht, 9, dach2, 0.4, 2);
+        walm3(S, x0, z0, x0 + tb, z0 + tb + 1, Ht, 9, dach3, 0.4, 2);
         for (const [cx, cz] of [[x0, z0 + tb + 1], [x0 + tb, z0 + tb + 1]]) {
           zyl9(S, 1, 0.6, 3, cx, Ht - 3, cz, stein, 8);
           const g = new three_module_exports.ConeGeometry(1.2, 3.4, 8);
           g.translate(cx, Ht + 1.7, cz);
-          S.add(g, dach2);
+          S.add(g, dach3);
         }
         top = Math.max(top, Ht + 9);
         boden6(S, x0 + 2, zg, x0 + tb - 2, d, PFLASTER5, 0.22, 0.12);
@@ -81783,7 +84465,7 @@
         }
         const g = new three_module_exports.ConeGeometry(rr + 0.5, 8.5, 14);
         g.translate(tx, Ht + 4.25, cz);
-        S.add(g, dach2);
+        S.add(g, dach3);
         S.add(new three_module_exports.SphereGeometry(0.3, 6, 5).translate(tx, Ht + 8.6, cz), GOLD);
         top = Math.max(top, Ht + 8.8);
       } else {
@@ -81794,7 +84476,7 @@
           for (const y of [7, 11.5]) fb5(S, Ft[k], tb / 2 - 0.15, tb / 2 + 0.15, y, y + 1.4, -0.1, 0.03, GLAS_DUNKEL);
           fb5(S, Ft[k], -0.08, tb + 0.08, Ht - 0.5, Ht, 0, 0.25, heller(stein, 0.06));
         }
-        walm3(S, x0, z0, x0 + tb, z0 + tb, Ht, 7.5, dach2, 0.35);
+        walm3(S, x0, z0, x0 + tb, z0 + tb, Ht, 7.5, dach3, 0.35);
         top = Math.max(top, Ht + 7.5);
       }
     }
@@ -81881,7 +84563,7 @@
     S.quader(x0, 0, z0, x0 + b, eg, z0 + T, putz2);
     S.quader(x0, eg, z0, x0 + b, H, z0 + T, holzOG ? holz : putz2);
     const blume = waehle2(r, ["#d0453a", "#e05a7a", "#d0453a"]);
-    const fen = { rahmen: ORN2, glas: GLAS8, laeden: laedenF, simsF: "#efe9dc" };
+    const fen = { rahmen: ORN2, glas: GLAS9, laeden: laedenF, simsF: "#efe9dc" };
     const lfarben = ["#d8a64a", "#b85a4a", "#5f8f6a", "#5a7fa8"];
     const lf = waehle2(r, lfarben);
     for (const k of ["v", "r", "h", "l"]) {
@@ -81894,11 +84576,11 @@
           haustuer2(S, Fk, u, 0.3, 1.1, 2.3, holz, malerei ? lf : "#e9e1cf");
           return;
         }
-        fenster5(S, Fk, u, 1, 1.05, 1.3, { ...fen, fasche: malerei ? lf : null });
+        fenster6(S, Fk, u, 1, 1.05, 1.3, { ...fen, fasche: malerei ? lf : null });
         if (malerei) fpoly4(S, Fk, [[u - 0.9, 2.55], [u + 0.9, 2.55], [u, 2.95]], 0, 0.04, lf);
       });
       for (let kk = 0; kk < (o.n ?? 1); kk++) for (const u of us) {
-        fenster5(S, Fk, u, eg + kk * og + 0.6, 1, 1.25, { ...fen, fasche: malerei ? lf : null, blumen: blume });
+        fenster6(S, Fk, u, eg + kk * og + 0.6, 1, 1.25, { ...fen, fasche: malerei ? lf : null, blumen: blume });
         if (malerei) fpoly4(S, Fk, [[u - 0.85, eg + kk * og + 2.1], [u + 0.85, eg + kk * og + 2.1], [u, eg + kk * og + 2.5]], 0, 0.04, lf);
       }
       if (malerei && front2 && us.length >= 2) {
@@ -81928,7 +84610,7 @@
         const yy = H + Math.min(u, b - u) * (2 * hg / b) - 0.25;
         if (yy > H + 0.1) fb5(S, Fk, u, u + 0.45, H, yy, 0, 0.04, dunkler(holz, 0.04));
       }
-      fenster5(S, Fk, b / 2, H + 0.4, 1.1, 1.2, { ...fen, laeden: laedenF });
+      fenster6(S, Fk, b / 2, H + 0.4, 1.1, 1.2, { ...fen, laeden: laedenF });
       if (k === "v") {
         const ybg = H + 0.1;
         fb5(S, Fk, b * 0.2, b * 0.8, ybg - 0.12, ybg, 0, 1, holz);
@@ -82118,7 +84800,7 @@
     const wand2 = o.wand ?? waehle2(r, ["#efe6d2", "#e8dcc8", "#f1e2c4", "#e3e6dc", "#f0d8c4", "#dfe3e6", "#f3ede0"]);
     const dachF = o.dach ?? waehle2(r, BIBER);
     S.quader(x0, 0, z0, x0 + b, H, z0 + T, wand2);
-    const fen = { rahmen: ORN2, glas: GLAS8, laeden: o.laeden ?? (r() < 0.5 ? waehle2(r, ["#3f6b4a", "#5a6168", "#2f5d7a"]) : null), simsF: "#e9e3d6" };
+    const fen = { rahmen: ORN2, glas: GLAS9, laeden: o.laeden ?? (r() < 0.5 ? waehle2(r, ["#3f6b4a", "#5a6168", "#2f5d7a"]) : null), simsF: "#e9e3d6" };
     for (const k of ["v", "r", "h", "l"]) {
       if (!sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
@@ -82142,7 +84824,7 @@
       dachTrauf(S, F2.v, 0, b, T, H, T * 0.45, dachF, wand2, { ue: 0.6, us: 0.5 });
       top = H + T * 0.45;
     }
-    if (sichtF2(p, F2.v) && b > 8) gaube2(S, F2.v, b / 2, H, 0.9, 1.6, wand2, dachF, GLAS8, 1.4);
+    if (sichtF2(p, F2.v) && b > 8) gaube2(S, F2.v, b / 2, H, 0.9, 1.6, wand2, dachF, GLAS9, 1.4);
     S.quader(x0 + b * 0.3, H + 1, z0 + T * 0.5, x0 + b * 0.3 + 0.7, top + 0.4, z0 + T * 0.5 + 0.7, "#b9a89a");
     return { top };
   }
@@ -82192,7 +84874,7 @@
       } else if (typ === "band") {
         for (let k = 0; k < n; k++) {
           const y = eg + k * gh;
-          fb5(S, Fk, 0.4, L2 - 0.4, y + 0.95, y + gh - 0.5, -0.1, 0.03, GLAS8);
+          fb5(S, Fk, 0.4, L2 - 0.4, y + 0.95, y + gh - 0.5, -0.1, 0.03, GLAS9);
           for (let u = 1.4; u < L2 - 0.6; u += 1.4) fb5(S, Fk, u - 0.04, u + 0.04, y + 0.95, y + gh - 0.5, 0, 0.06, "#f4f3ef");
           fb5(S, Fk, 0, L2, y + 0.85, y + 0.95, 0, 0.25, "#f4f3ef");
         }
@@ -82201,7 +84883,7 @@
         for (let k = 0; k < n; k++) for (const u of achsen6(0, L2, 2.3, 0.6)) {
           const y = eg + k * gh + 0.8;
           fb5(S, Fk, u - 0.8, u + 0.8, y - 0.12, y + 1.62, 0, 0.12, "#f7f6f2");
-          fb5(S, Fk, u - 0.66, u + 0.66, y, y + 1.5, -0.1, 0.13, GLAS8);
+          fb5(S, Fk, u - 0.66, u + 0.66, y, y + 1.5, -0.1, 0.13, GLAS9);
         }
         if (haupt && L2 > 10) for (let k = 1; k < n; k++) {
           const y = eg + k * gh;
@@ -82212,7 +84894,7 @@
       if (haupt) ftext5(scene2, Fk, waehle2(r, ["Kaufhaus W\xF6rner", "Modehaus Bleyle", "Schuh-Haug", "Radio Fischer", "M\xF6bel Kienzle", "Sport-Scheck"]), L2 / 2, H - 0.9, 0.4, 0.9, L2 * 0.7, akz);
     };
     if (sichtF2(p, F2.v)) front2(F2.v, b, true);
-    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS8, sims: false });
+    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS9, sims: false });
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) front2(F2[k], T, false);
     const sb2 = Math.max(6, b * 0.62), st0 = x0 + (b - sb2) * (typ === "band" ? 0.2 : 0.6), sT = T - 5.5;
     S.quader(st0, H, z0 + 2, st0 + sb2, H + 2.9, z0 + 2 + sT, "#e2e6e8");
@@ -82234,15 +84916,15 @@
     const wand2 = waehle2(r, ["#f1e6c8", "#efe0d6", "#e6eadf", "#f2efe6", "#e9d9c3"]), orn = ORN2, dachF = waehle2(r, [...BIBER, ...SCHIEFER4]);
     const eg = 3.8, og = 3.4, H = eg + og;
     S.quader(x0, 0, z0, x0 + b, H, z0 + T, wand2);
-    const fen = { rahmen: orn, glas: GLAS8, fasche: orn, laeden: waehle2(r, ["#3f6b4a", "#5a6168"]) };
+    const fen = { rahmen: orn, glas: GLAS9, fasche: orn, laeden: waehle2(r, ["#3f6b4a", "#5a6168"]) };
     for (const k of ["v", "r", "h", "l"]) {
       if (!sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0, 1, -0.05, 0.12, dunkler(wand2, 0.15));
       const us = achsen6(0, L2, 3.1, 0.8);
       for (const u of us) {
-        fenster5(S, Fk, u, 1.4, 1.25, 1.9, { ...fen, verdachung: "gerade" });
-        fenster5(S, Fk, u, eg + 0.8, 1.2, 1.7, fen);
+        fenster6(S, Fk, u, 1.4, 1.25, 1.9, { ...fen, verdachung: "gerade" });
+        fenster6(S, Fk, u, eg + 0.8, 1.2, 1.7, fen);
       }
       fb5(S, Fk, -0.05, L2 + 0.05, eg - 0.1, eg + 0.15, 0, 0.18, orn);
       fb5(S, Fk, -0.2, L2 + 0.2, H - 0.3, H, 0, 0.4, orn);
@@ -82254,13 +84936,13 @@
         fb5(S, Fk, u0, u0 + 4.6, eg + 0.15, eg + 1.05, 2.5, 2.6, "#3b4046");
         const e0 = L2 * 0.62;
         fb5(S, Fk, e0, e0 + 3.4, 1, H + 1.5, 0, 1.2, wand2);
-        fenster5(S, Fk, e0 + 1.7, 1.5, 1.8, 1.9, { ...fen, t: 1.2, laeden: null });
-        fenster5(S, Fk, e0 + 1.7, eg + 0.8, 1.8, 1.7, { ...fen, t: 1.2, laeden: null });
+        fenster6(S, Fk, e0 + 1.7, 1.5, 1.8, 1.9, { ...fen, t: 1.2, laeden: null });
+        fenster6(S, Fk, e0 + 1.7, eg + 0.8, 1.8, 1.7, { ...fen, t: 1.2, laeden: null });
         dachGiebel(S, teil5(Fk, e0, e0 + 3.4, 1.2), 0, 3.4, -3, 0, H + 1.5, 2.6, dachF, wand2, { ue: 0.3, uf: 0.3, ub: 0 });
       }
     }
     walm3(S, x0, z0, x0 + b, z0 + T, H, Math.min(b, T) * 0.45, dachF, 0.7, 2);
-    if (sichtF2(p, F2.v)) gaube2(S, F2.v, b * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS8, 1.5);
+    if (sichtF2(p, F2.v)) gaube2(S, F2.v, b * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS9, 1.5);
     S.quader(x0 + b * 0.4, H + 2, z0 + T * 0.5, x0 + b * 0.4 + 0.8, H + Math.min(b, T) * 0.45 + 1, z0 + T * 0.5 + 0.8, "#b9a89a");
     return { top: H + Math.min(b, T) * 0.45 + 1 };
   }
@@ -82361,8 +85043,8 @@
       for (let i = 1; i < 4; i++) fb5(S, Fk, 0, L2, 0.3 + i * (eg / 4), 0.36 + i * (eg / 4), 0.1, 0.14, dunkler(c.rust, 0.08));
       const us = achsen6(0, L2, o.ra ?? 3.4, 0.9);
       for (const u of us) {
-        fenster5(S, Fk, u, 1.3, 1.3, 2.4, { rahmen: c.orn, glas: GLAS8, bogen: true, sims: false, t: 0.1 });
-        for (let kk = 0; kk < n; kk++) fenster5(S, Fk, u, eg + kk * gh + 0.8, 1.35, kk === 0 ? 2.5 : 2, { rahmen: c.orn, glas: GLAS8, fasche: c.orn, verdachung: kk === 0 ? o.risalit === k2 && Math.abs(u - L2 / 2) < 6 ? "dreieck" : "segment" : null, ornF: c.orn });
+        fenster6(S, Fk, u, 1.3, 1.3, 2.4, { rahmen: c.orn, glas: GLAS9, bogen: true, sims: false, t: 0.1 });
+        for (let kk = 0; kk < n; kk++) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.35, kk === 0 ? 2.5 : 2, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, verdachung: kk === 0 ? o.risalit === k2 && Math.abs(u - L2 / 2) < 6 ? "dreieck" : "segment" : null, ornF: c.orn });
       }
       fb5(S, Fk, -0.1, L2 + 0.1, eg - 0.1, eg + 0.2, 0, 0.3, c.orn);
       fb5(S, Fk, -0.2, L2 + 0.2, H - 0.5, H, 0, 0.6, c.orn);
@@ -82374,8 +85056,8 @@
         const rb = Math.min(14, L2 * 0.36), u0 = L2 / 2 - rb / 2;
         fb5(S, Fk, u0, u0 + rb, 0.3, H, 0, 1, c.wand);
         for (const u of achsen6(u0, u0 + rb, 3.4, 0.5)) {
-          fenster5(S, Fk, u, 1.3, 1.6, 3, { rahmen: c.orn, glas: GLAS8, bogen: true, sims: false, t: 1 });
-          for (let kk = 0; kk < n; kk++) fenster5(S, Fk, u, eg + kk * gh + 0.8, 1.4, kk === 0 ? 2.6 : 2, { rahmen: c.orn, glas: GLAS8, fasche: c.orn, t: 1, verdachung: kk === 0 ? "dreieck" : null });
+          fenster6(S, Fk, u, 1.3, 1.6, 3, { rahmen: c.orn, glas: GLAS9, bogen: true, sims: false, t: 1 });
+          for (let kk = 0; kk < n; kk++) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.4, kk === 0 ? 2.6 : 2, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, t: 1, verdachung: kk === 0 ? "dreieck" : null });
         }
         for (const u of achsen6(u0, u0 + rb, 1.7, 0.2)) fb5(S, Fk, u - 0.3, u + 0.3, eg + 0.2, H - 0.5, 1, 1.25, c.lis);
         fb5(S, Fk, u0 - 0.2, u0 + rb + 0.2, H - 0.6, H, 0.9, 1.6, c.orn);
@@ -82393,7 +85075,7 @@
       if (!sichtF2(p, F2[kk])) continue;
       for (const u of achsen6(0, F2[kk].L, (o.ra ?? 3.4) * 2, 1.2)) {
         fb5(S, F2[kk], u - 0.6, u + 0.6, H + 0.3, H + 2.4, -1.6, -0.5, c.orn);
-        fb5(S, F2[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS8);
+        fb5(S, F2[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS9);
         fbogen(S, F2[kk], u, H + 2.2, 1.5, 0.75, -1.7, -0.4, c.dach);
       }
     }
@@ -82440,7 +85122,7 @@
       zyl9(S, 4.9, 4.9, 0.5, tx, Hb + 12, tz, c.orn, 8);
       for (const { F: Fo, nx, nz, kante } of oktoRahmen(tx, tz, 4.6 * Math.cos(PI11 / 8))) {
         if (!sicht2(p, nx, nz)) continue;
-        fbogen(S, Fo, kante / 2, Hb + 3, 1.3, 4.5, -0.1, 0.08, GLAS8);
+        fbogen(S, Fo, kante / 2, Hb + 3, 1.3, 4.5, -0.1, 0.08, GLAS9);
         fscheibe4(S, Fo, kante / 2, Hb + 9.5, 0, 0.1, 0.9, "#f4efe0");
         fb5(S, Fo, -0.05, 0.4, Hb, Hb + 12, 0, 0.15, c.lis);
       }
@@ -82484,8 +85166,8 @@
         if (!sicht2(p, nx, nz)) continue;
         const px2 = cx + Math.sin(a) * rr, pz4 = cz + Math.cos(a) * rr * 0.75, L2 = Math.hypot(nx, nz);
         const Fo = R8(px2 - nz / L2 * 1.2, pz4 + nx / L2 * 1.2, nz / L2, -nx / L2, 2.4);
-        fbogen(S, Fo, 1.2, 1, 1.6, 4, -0.2, 0.1, GLAS8);
-        fenster5(S, Fo, 1.2, 6.6, 1.4, 2.4, { rahmen: c.orn, glas: GLAS8, fasche: c.orn, sims: false });
+        fbogen(S, Fo, 1.2, 1, 1.6, 4, -0.2, 0.1, GLAS9);
+        fenster6(S, Fo, 1.2, 6.6, 1.4, 2.4, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, sims: false });
       }
       top = Math.max(top, Hs + 7);
       parterre(S, r, x0, z0 + T2 + 9, x0 + b, d - 4, { nx: 4, nz: 2 });
@@ -82513,21 +85195,21 @@
         if (sichtF2(p, F2)) {
           fb5(S, F2, 0, Ls, 0.3, eg2, 0, 0.08, c.rust);
           for (const u of achsen6(0, Ls, 3, 0.4)) {
-            fenster5(S, F2, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS8, bogen: true, sims: false, t: 0.08 });
-            for (let k = 0; k < n2; k++) fenster5(S, F2, u, eg2 + k * gh2 + 0.8, 1.25, 1.9, { rahmen: c.orn, glas: GLAS8, fasche: c.orn, verdachung: k === 0 ? "gerade" : null });
+            fenster6(S, F2, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS9, bogen: true, sims: false, t: 0.08 });
+            for (let k = 0; k < n2; k++) fenster6(S, F2, u, eg2 + k * gh2 + 0.8, 1.25, 1.9, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, verdachung: k === 0 ? "gerade" : null });
           }
           fb5(S, F2, -ext, Ls + ext, eg2 - 0.1, eg2 + 0.15, 0, 0.25, c.orn);
           fb5(S, F2, -ext, Ls + ext, H2 - 0.4, H2, 0, 0.5, c.orn);
           fb5(S, F2, 0, 0.6, eg2, H2 - 0.4, 0, 0.15, c.lis);
         }
         const Fr = R8(...wp5(F2, Ls, -T2), -F2.dx, -F2.dz, Ls);
-        if (sichtF2(p, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n2, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS8 });
+        if (sichtF2(p, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n2, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS9 });
         const Q = quer(F2, T2);
         fpoly4(S, Q, [[-0.4, H2], [T2 + 0.4, H2], [T2 - 1.4, H2 + 3.6], [1.4, H2 + 3.6]], -ext, Ls + ext, c.dach);
         fpoly4(S, Q, [[1.4, H2 + 3.6], [T2 - 1.4, H2 + 3.6], [T2 / 2, H2 + 5]], -ext, Ls + ext, c.dach2);
         if (sichtF2(p, F2)) for (const u of achsen6(0, Ls, 4.5, 0.6)) {
           fb5(S, F2, u - 0.55, u + 0.55, H2 + 0.3, H2 + 2.3, -1.5, -0.5, c.orn);
-          fb5(S, F2, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS8);
+          fb5(S, F2, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS9);
         }
         top = H2 + 5;
         const [bx, bz] = wp5(F2, Ls / 2, 4);
@@ -82558,8 +85240,8 @@
             laden(S, scene2, Fk, 0.5, b - 0.5, eg - 0.4, r, { leer: p.zustand === "leerstand", namen: LAEDEN_BW });
             fb5(S, Fk, -0.03, b + 0.03, eg - 0.1, eg + 0.15, 0, 0.2, ORN2);
           }
-          for (let k = 0; k < n; k++) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster5(S, Fk, uu, eg + k * gh + 0.8, 1.2, 1.9, { rahmen: ORN2, glas: GLAS8, fasche: haupt ? ORN2 : null, verdachung: haupt && k === 0 ? "gerade" : null });
-          if (!haupt) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster5(S, Fk, uu, 1.4, 1.1, 1.6, { rahmen: ORN2, glas: GLAS8 });
+          for (let k = 0; k < n; k++) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster6(S, Fk, uu, eg + k * gh + 0.8, 1.2, 1.9, { rahmen: ORN2, glas: GLAS9, fasche: haupt ? ORN2 : null, verdachung: haupt && k === 0 ? "gerade" : null });
+          if (!haupt) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster6(S, Fk, uu, 1.4, 1.1, 1.6, { rahmen: ORN2, glas: GLAS9 });
           fb5(S, Fk, -0.03, b + 0.03, H - 0.35, H, 0, haupt ? 0.45 : 0.2, ORN2);
         }
         const Q = quer(Fh, T);
@@ -82567,7 +85249,7 @@
         fpoly4(S, Q, [[1.3, H + 3.4], [T - 1.3, H + 3.4], [T / 2, H + 4.6]], 0, b, c.dach2);
         if (sichtF2(p, Fh)) for (const uu of achsen6(0, b, 4.4, 0.8)) {
           fb5(S, Fh, uu - 0.55, uu + 0.55, H + 0.3, H + 2.2, -1.4, -0.5, ORN2);
-          fb5(S, Fh, uu - 0.35, uu + 0.35, H + 0.6, H + 1.8, -0.55, -0.46, GLAS8);
+          fb5(S, Fh, uu - 0.35, uu + 0.35, H + 0.6, H + 1.8, -0.55, -0.46, GLAS9);
         }
         u += b;
       });
@@ -82623,7 +85305,7 @@
     const v = p.variante ?? waehle2(r, MUENSTER_V);
     const { w, d } = p, xm = w / 2;
     const st = v === "ulm" ? "#c48e78" : v === "freiburg" ? "#a9584a" : "#b5634f", st2 = dunkler(st, 0.07), hst = heller(st, 0.07);
-    const dach2 = v === "freiburg" ? "#6b5a52" : v === "ulm" ? "#5d6a72" : waehle2(r, BIBER), dunkel3 = "#3c3434";
+    const dach3 = v === "freiburg" ? "#6b5a52" : v === "ulm" ? "#5d6a72" : waehle2(r, BIBER), dunkel3 = "#3c3434";
     boden6(S, 0, 0, w, d, PFLASTER5, 0.3, 0.06);
     const halle2 = v === "stadtkirche";
     const tb = v === "ulm" ? 12 : v === "freiburg" ? 13 : 10, zf = d - 6;
@@ -82670,22 +85352,22 @@
       }
       const Fd = sg > 0 ? R8(xm + Bn / 2, zn1, 0, -1, L2) : R8(xm - Bn / 2, zn0, 0, 1, L2);
       if (!halle2) for (let i = 0; i < nj; i++) {
-        dachluke(S, Fd, (i + 0.5) * jl, Hn, 1.9, dach2, 2.4, 1.2);
-        if (i % 2 === 0) dachluke(S, Fd, (i + 0.5) * jl, Hn, 1.9, dach2, 5, 0.9);
+        dachluke(S, Fd, (i + 0.5) * jl, Hn, 1.9, dach3, 2.4, 1.2);
+        if (i % 2 === 0) dachluke(S, Fd, (i + 0.5) * jl, Hn, 1.9, dach3, 5, 0.9);
       }
       else {
         const Fh = sg > 0 ? R8(xg0 + Bg, zn1, 0, -1, L2) : R8(xg0, zn0, 0, 1, L2);
         for (let i = 0; i < nj; i++) {
-          dachluke(S, Fh, (i + 0.5) * jl, Ha, 1.5, dach2, 3, 1.2);
-          dachluke(S, Fh, (i + 0.5) * jl, Ha, 1.5, dach2, 7.5, 1);
+          dachluke(S, Fh, (i + 0.5) * jl, Ha, 1.5, dach3, 3, 1.2);
+          dachluke(S, Fh, (i + 0.5) * jl, Ha, 1.5, dach3, 7.5, 1);
         }
       }
     }
-    if (halle2) dachGiebel(S, Fv, 0, Bg, -L2, 0, Ha, Bg * 0.75, dach2, st, { ue: 0.4, uf: 0, ub: 0 });
+    if (halle2) dachGiebel(S, Fv, 0, Bg, -L2, 0, Ha, Bg * 0.75, dach3, st, { ue: 0.4, uf: 0, ub: 0 });
     else {
-      fdiag(S, Fv, Bg / 2 - Bn / 2 + 0.1, Ha + 3.4, -0.6, Ha - 0.3, 0.3, -L2, 0, dach2);
-      fdiag(S, Fv, Bg / 2 + Bn / 2 - 0.1, Ha + 3.4, Bg + 0.6, Ha - 0.3, 0.3, -L2, 0, dach2);
-      dachGiebel(S, Fv, Bg / 2 - Bn / 2, Bg / 2 + Bn / 2, -L2, 0, Hn, Bn * 0.95, dach2, st, { ue: 0.4, uf: 0, ub: 0 });
+      fdiag(S, Fv, Bg / 2 - Bn / 2 + 0.1, Ha + 3.4, -0.6, Ha - 0.3, 0.3, -L2, 0, dach3);
+      fdiag(S, Fv, Bg / 2 + Bn / 2 - 0.1, Ha + 3.4, Bg + 0.6, Ha - 0.3, 0.3, -L2, 0, dach3);
+      dachGiebel(S, Fv, Bg / 2 - Bn / 2, Bg / 2 + Bn / 2, -L2, 0, Hn, Bn * 0.95, dach3, st, { ue: 0.4, uf: 0, ub: 0 });
       if (v === "freiburg") {
         const u0 = Bg / 2 - Bn / 2 - 0.4, um = Bg / 2, hh = Bn * 0.95, y0 = Hn - 0.4 * (2 * hh / Bn);
         for (const [a, b2, f] of [[0.3, 0.36, "#b98a4a"], [0.58, 0.64, "#56705a"]]) {
@@ -82727,17 +85409,17 @@
           fiale(S, px2, Hn + 1, pz4, 6, st2);
         }
       }
-      dachTrauf(S, R8(xg0 - qb, qz1, 1, 0, Bg + 2 * qb), 0, Bg + 2 * qb, 11, Hn, 9, dach2, null, { ue: 0.4, us: 0.2 });
+      dachTrauf(S, R8(xg0 - qb, qz1, 1, 0, Bg + 2 * qb), 0, Bg + 2 * qb, 11, Hn, 9, dach3, null, { ue: 0.4, us: 0.2 });
       const g = new three_module_exports.ConeGeometry(1.6, 9, 8);
       g.rotateY(PI11 / 8);
       g.translate(xm, Hn + 9 + 4.5, (qz0 + qz1) / 2);
-      S.add(g, dach2);
+      S.add(g, dach3);
     }
     const zc = zn0;
     S.quader(xg0, 0, zc - 8, xg0 + Bg, Ha, zc, st);
     const umd = new three_module_exports.ConeGeometry(Bg / 2 + 0.4, 4, 10, 1, false, PI11 / 2, PI11);
     umd.translate(xm, Ha + 2, zc - 8);
-    S.add(umd, dach2);
+    S.add(umd, dach3);
     const um2 = new three_module_exports.CylinderGeometry(Bg / 2, Bg / 2, Ha, 10, 1, false, PI11 / 2, PI11);
     um2.translate(xm, Ha / 2, zc - 8);
     S.add(um2, st);
@@ -82749,8 +85431,8 @@
       S.add(ch, st);
       const chd = new three_module_exports.ConeGeometry(Bc / 2 + 0.4, Bc * 0.8, 8, 1, false, PI11 / 2, PI11);
       chd.translate(xm, Hc + Bc * 0.4, zc - 8);
-      S.add(chd, dach2);
-      dachGiebel(S, R8(xm - Bc / 2, zc, 1, 0, Bc), 0, Bc, -8, 0, Hc, Bc * 0.8, dach2, null, { ue: 0.3, uf: 0, ub: 0 });
+      S.add(chd, dach3);
+      dachGiebel(S, R8(xm - Bc / 2, zc, 1, 0, Bc), 0, Bc, -8, 0, Hc, Bc * 0.8, dach3, null, { ue: 0.3, uf: 0, ub: 0 });
       for (let i = 0; i < 5; i++) {
         const a = PI11 + (i + 0.5) * (PI11 / 5), nx = Math.cos(a), nz = Math.sin(a);
         if (!sicht2(p, nx, nz)) continue;
@@ -82771,10 +85453,10 @@
         S.add(new three_module_exports.OctahedronGeometry(0.6, 0).translate(cx, Hn + 24.6, cz), st);
       }
     } else {
-      dachGiebel(S, R8(xg0, zc, 1, 0, Bg), 0, Bg, -8, 0, Ha, Bg * 0.75, dach2, null, { ue: 0.4, uf: 0, ub: 0 });
+      dachGiebel(S, R8(xg0, zc, 1, 0, Bg), 0, Bg, -8, 0, Ha, Bg * 0.75, dach3, null, { ue: 0.4, uf: 0, ub: 0 });
       const chd = new three_module_exports.ConeGeometry(Bg / 2 + 0.4, Bg * 0.75, 10, 1, false, PI11 / 2, PI11);
       chd.translate(xm, Ha + Bg * 0.375, zc - 8);
-      S.add(chd, dach2);
+      S.add(chd, dach3);
     }
     const Ht = v === "ulm" ? 104 : v === "freiburg" ? 84 : 62;
     const Hq = Ht * (v === "ulm" ? 0.5 : 0.44), Ho = Hq + Ht * (v === "stadtkirche" ? 0.14 : 0.18);
@@ -83012,7 +85694,7 @@
       for (const k of ["v", "h", "r", "l"]) if (sichtF2(p, Ft[k])) {
         const L2 = Ft[k].L;
         if (k === "v" || k === "h") fbogen(S, Ft[k], L2 / 2, Y + 4, bb + 0.4, 3.2, -0.1, 0.12, heller(stein, 0.06));
-        for (const u of achsen6(0, L2, 3.6, 1)) fenster5(S, Ft[k], u, Y + 9.5, 1, 1.6, { rahmen: heller(stein, 0.08), glas: GLAS8, sims: false });
+        for (const u of achsen6(0, L2, 3.6, 1)) fenster6(S, Ft[k], u, Y + 9.5, 1, 1.6, { rahmen: heller(stein, 0.08), glas: GLAS9, sims: false });
         if (k === "v") {
           fscheibe4(S, Ft[k], L2 / 2, Ht - 3.5, 0, 0.1, 1.3, "#f4efe0");
           fscheibe4(S, Ft[k], L2 / 2, Ht - 3.5, 0.1, 0.13, 1.1, "#2f4f6f");
@@ -83069,7 +85751,7 @@
     const Fk = R8(kx - 1.5, kz2 + 3.5, 1, 0, 3);
     if (sichtF2(p, Fk)) {
       fbogen(S, Fk, 1.5, Y, 1.4, 2.4, -0.2, 0.1, "#5a4636");
-      fenster5(S, Fk, 1.5, Y + 4, 0.8, 1, { rahmen: ORN2, glas: GLAS8, sims: false });
+      fenster6(S, Fk, 1.5, Y + 4, 0.8, 1, { rahmen: ORN2, glas: GLAS9, sims: false });
     }
     for (let x = 4; x < w - 2; x += 8) if (Math.abs(x - kx) > 6) kastanie(S, x, zq - 3.2, r, 0.75, Y);
     for (let x = 8; x < w - 4; x += 16) if (Math.abs(x - kx) > 6) bank5(S, x, zq - 1.2, 0, Y);
@@ -83266,7 +85948,7 @@
     for (let x = x0 + 0.6; x < x1 - 0.3; x += 1.6) S.box(0.8, 0.9, 0.9, x, y + 0.45, z1 - 0.45, c);
     for (let z2 = z0 + 0.6; z2 < z1 - 0.3; z2 += 1.6) S.box(0.9, 0.9, 0.8, x1 - 0.45, y + 0.45, z2, c);
   }
-  function rundturm(S, x, y, z2, rad2, h, wand2, dach2, o = {}) {
+  function rundturm(S, x, y, z2, rad2, h, wand2, dach3, o = {}) {
     const g = new three_module_exports.CylinderGeometry(rad2, rad2 * 1.05, h, 14);
     g.translate(x, y + h / 2, z2);
     S.add(g, wand2);
@@ -83279,12 +85961,12 @@
     if (o.kuppel) {
       const k2 = new three_module_exports.SphereGeometry(rad2 + 0.2, 12, 6, 0, 2 * PI12, 0, PI12 / 2);
       k2.translate(x, y + h, z2);
-      S.add(k2, dach2);
+      S.add(k2, dach3);
       return y + h + rad2;
     }
     const kh = o.helm ?? rad2 * 2.4, k = new three_module_exports.ConeGeometry(rad2 + 0.6, kh, 14);
     k.translate(x, y + h + kh / 2, z2);
-    S.add(k, dach2);
+    S.add(k, dach3);
     for (let a = 0.2; a < PI12 / 2; a += 0.55) S.box(0.5, 1.4, 0.5, x + Math.cos(a) * rad2, y + h * 0.7, z2 + Math.sin(a) * rad2, "#3f4850");
     return y + h + kh;
   }
@@ -83306,7 +85988,7 @@
     });
     const y = P2.y, X0 = P2.x0 + 2, Z0 = P2.z0 + 2, X1 = P2.x1 - 1, Z1 = P2.z1 - 1, W3 = X1 - X0, D = Z1 - Z0;
     let top = y;
-    const dach2 = waehle2(r, DACHROT), glas2 = "#3f4850";
+    const dach3 = waehle2(r, DACHROT), glas2 = "#3f4850";
     if (v === "kaiserburg") {
       S.quader(X0, y, Z1 - 1.2, X1, y + 6, Z1, stein);
       S.quader(X1 - 1.2, y, Z0, X1, y + 6, Z1, stein);
@@ -83315,16 +85997,16 @@
       const pz1 = Z0 + Math.min(14, D * 0.4);
       S.quader(X0 + 2, y, Z0, X0 + W3 * 0.66, y + 13, pz1, stein);
       fensterReihe(S, X0 + 2, Z0, X0 + W3 * 0.66, pz1, y + 3, y + 11, "+z", 3.2, 1.3, 2.2, glas2, true);
-      satteldach5(S, X0 + 2, Z0, X0 + W3 * 0.66, pz1, y + 13, 8, dach2, "x");
-      for (let k = 1; k < 4; k++) S.box(1.4, 1.6, 1.4, X0 + 2 + (W3 * 0.64 - 2) * k / 4, y + 16, (Z0 + pz1) / 2 + 1.6, dach2);
+      satteldach5(S, X0 + 2, Z0, X0 + W3 * 0.66, pz1, y + 13, 8, dach3, "x");
+      for (let k = 1; k < 4; k++) S.box(1.4, 1.6, 1.4, X0 + 2 + (W3 * 0.64 - 2) * k / 4, y + 16, (Z0 + pz1) / 2 + 1.6, dach3);
       S.quader(X0, y, pz1 + 3, X0 + Math.min(12, W3 * 0.3), y + 10, Z1 - 3, stein);
       fensterReihe(S, X0, pz1 + 3, X0 + Math.min(12, W3 * 0.3), Z1 - 3, y + 2, y + 9, "+x", 2.8, 0.9, 1.4, glas2);
-      satteldach5(S, X0, pz1 + 3, X0 + Math.min(12, W3 * 0.3), Z1 - 3, y + 10, 9, dach2, "z");
+      satteldach5(S, X0, pz1 + 3, X0 + Math.min(12, W3 * 0.3), Z1 - 3, y + 10, 9, dach3, "z");
       top = Math.max(top, rundturm(S, X0 + W3 * 0.78, y, Z0 + D * 0.32, 4.2, 24, stein, "#5d4a40", { helm: 9 }));
       S.quader(X1 - 9, y, Z1 - 9, X1 - 1, y + 19, Z1 - 1, stein);
       fensterReihe(S, X1 - 9, Z1 - 9, X1 - 1, Z1 - 1, y + 8, y + 17, "+z", 2.6, 0.7, 1.4, glas2);
       fensterReihe(S, X1 - 9, Z1 - 9, X1 - 1, Z1 - 1, y + 8, y + 17, "+x", 2.6, 0.7, 1.4, glas2);
-      S.add(new three_module_exports.ConeGeometry(6.2, 7, 4).rotateY(PI12 / 4).translate(X1 - 5, y + 22.5, Z1 - 5), dach2);
+      S.add(new three_module_exports.ConeGeometry(6.2, 7, 4).rotateY(PI12 / 4).translate(X1 - 5, y + 22.5, Z1 - 5), dach3);
       top = Math.max(top, y + 26);
       S.quader(X0 + W3 * 0.36, y, Z0 + D * 0.45, X0 + W3 * 0.6, y + 0.12, Z1 - 2, "#d9cdb4");
       for (let q2 = 0; q2 < 3; q2++) laubbaum(S, X0 + W3 * zw(r, 0.4, 0.6), y, Z0 + D * zw(r, 0.5, 0.8), r, 0.9);
@@ -83340,7 +86022,7 @@
         S.quader(a0, y, b0, a1, y + Hs, b1, wand2);
         if (ach === "x") fensterReihe(S, a0, b0, a1, b1, y + 2, y + Hs - 1.5, "+z", 3, 1.1, 1.8, glas2);
         else fensterReihe(S, a0, b0, a1, b1, y + 2, y + Hs - 1.5, "+x", 3, 1.1, 1.8, glas2);
-        satteldach5(S, a0, b0, a1, b1, y + Hs, 6, dach2, ach);
+        satteldach5(S, a0, b0, a1, b1, y + Hs, 6, dach3, ach);
       }
       S.quader(sx0 + fl, y, sz0 + fl, sx1 - fl, y + 0.12, sz1 - fl, "#d9cdb4");
       top = Math.max(top, rundturm(S, (sx0 + sx1) / 2 - 2, y, (sz0 + sz1) / 2 - 1, 4.4, 26, wand2, waehle2(r, ["#6f9a7d", "#5d4a40"]), { kuppel: r() < 0.5 }));
@@ -87008,13 +89690,13 @@
       for (let u = 0.8; u < lang - 0.4; u += 2.2) I.setze("busch", ax ? x0 + u : (x0 + x1) / 2, y, ax ? (z0 + z1) / 2 : z0 + u, 0, [0.55, 0.55, 0.55], ["#5f9a56"]);
     }
     const klinker = r() < 0.3;
-    let wand2 = waehle2(r, klinker ? VORORT_KLINKER : VORORT_WAND), dach2 = waehle2(r, VORORT_DACH);
+    let wand2 = waehle2(r, klinker ? VORORT_KLINKER : VORORT_WAND), dach3 = waehle2(r, VORORT_DACH);
     for (const q2 of b.bauten ?? []) {
       let f;
       if (q2.art === "reihenhaus") {
         if (r() < 0.3) wand2 = waehle2(r, klinker ? VORORT_KLINKER : VORORT_WAND);
-        f = [wand2, dach2];
-      } else if (q2.art === "zeile") f = [waehle2(r, ZEILE_WAND), dach2];
+        f = [wand2, dach3];
+      } else if (q2.art === "zeile") f = [waehle2(r, ZEILE_WAND), dach3];
       else if (q2.art === "halle") f = [waehle2(r, ["#d9dcdf", "#cfd3d6", "#e4e1da", "#b9bec2", "#d8cdb8"]), waehle2(r, ["#2f6f8f", "#c8322b", "#3f7d56", "#e0b23c", "#5d646b", "#2b3a55"])];
       else if (q2.art === "scheune") f = [waehle2(r, ["#8a5a45", "#a8664f", "#7a6a58", "#c9bfae"]), waehle2(r, ["#6f6a64", "#9a4e3a", "#5d6268"])];
       else if (q2.art === "garage") f = [waehle2(r, ["#e2ddd2", "#d6d0c4", "#cfc9bd"])];
@@ -88158,6 +90840,21 @@
       const f = fussabdruck(h);
       return { id: h.id, name: h.name, rolle: h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
     });
+    const schwester = haeuser_schwester_default.find((h) => h.stadt === name2);
+    if (schwester) {
+      const f = masseSchwester(schwester);
+      standorte.push({
+        id: schwester.id,
+        name: NAME_SCHWESTER,
+        rolle: "schwester",
+        lage: schwester.lage,
+        grundflaecheQm: schwester.grundflaecheQm,
+        w: f.w,
+        d: f.d,
+        familie: familieSchwester(schwester),
+        variante: schwester.fassade
+      });
+    }
     const [a, b] = WETTBEWERBER[typ];
     const n = Math.min(b, a + Math.floor(r() * (b - a + 1)));
     const ARTEN_1A = ["modehaus", "fastfashion", "premium", "leer_ehemals", "modehaus", "fastfashion"];
@@ -88416,7 +91113,17 @@
       const f = fussabdruck(h);
       return { id: h.id, name: h.name, rolle: h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
     });
-    return { ...d, standorte: [...eigene, ...d.standorte.filter((q2) => q2.rolle === "wettbewerber")] };
+    const alt = d.standorte.filter((q2) => q2.rolle === "wettbewerber" || q2.rolle === "schwester");
+    const reserve = Array.from({ length: 2 }, (_, i) => ({
+      id: "KR-" + name2 + "-" + (i + 1),
+      name: "",
+      rolle: "wettbewerber_reserve",
+      lage: i === 0 ? "1a" : "b",
+      grundflaecheQm: 1800,
+      w: 48,
+      d: 36
+    }));
+    return { ...d, standorte: [...eigene, ...alt, ...reserve] };
   }
   function imSlot2(p, W3, D) {
     const ecke = p.ecke ?? "+x+z";
@@ -88429,34 +91136,50 @@
     const famBenutzt = /* @__PURE__ */ new Set();
     const wahl3 = /* @__PURE__ */ new Map();
     const haeuser = /* @__PURE__ */ new Map();
+    const wettbewerber2 = /* @__PURE__ */ new Map();
+    const wbSlots = /* @__PURE__ */ new Map();
+    let wbCache = null;
+    const wbDaten = () => wbCache ?? (wbCache = o.stadt ? wettbewerbFuerGrafik(s2, o.stadt) : []);
+    const wbVon = (id) => wbDaten().find((w) => w.id === id);
+    const wbSchluessel = (wb) => wb ? JSON.stringify([wb.id, wb.art, wb.form, wb.name, wb.status, wb.rabatt, wb.seit]) : "stadthaus";
+    const nachnutzer = (h) => wbDaten().find((w) => w.inHartwigGebaeude === h.id && w.status !== "geschlossen");
+    const wbOffen = (w) => w.status !== "geschlossen";
     const hausVon = (id) => s2.haeuser.find((h) => h.id === id);
     const zust = /* @__PURE__ */ new Map();
     const zustand = (h) => {
-      if (!zust.has(h.id)) zust.set(h.id, zustandAusHaus(h, s2, merk2));
+      if (!zust.has(h.id)) {
+        const z2 = zustandAusHaus(h, s2, merk2);
+        const w = nachnutzer(h);
+        if (w) z2.schluessel += "|nachnutzung:" + wbSchluessel(w);
+        zust.set(h.id, z2);
+      }
       return zust.get(h.id);
     };
     const baueWarenhaus = (S, scene2, p, h) => {
       const f = fussabdruck(h);
       const { x, z: z2 } = imSlot2(p, f.w, f.d);
       if (!wahl3.has(h.id)) {
-        let fam2 = familieVon(h), fassade3 = h.fassade;
+        let fam2 = familieVon(h), fassade4 = h.fassade;
         if (famBenutzt.has(fam2)) {
           const alt = fam2 <= 5 ? [fam2 + 1, fam2 - 1, fam2 + 2, fam2 - 2].find((q2) => q2 >= 1 && q2 <= 5 && !famBenutzt.has(q2)) : null;
           if (alt) fam2 = alt;
-          else fassade3 = ((h.fassade ?? 0) + 3) % 8;
+          else fassade4 = ((h.fassade ?? 0) + 3) % 8;
         }
         famBenutzt.add(fam2);
-        wahl3.set(h.id, { fam: fam2, fassade: fassade3 });
+        wahl3.set(h.id, { fam: fam2, fassade: fassade4 });
       }
-      const { fam, fassade: fassade2 } = wahl3.get(h.id);
+      const { fam, fassade: fassade3 } = wahl3.get(h.id);
       p.haus = h;
-      return warenhaus(S, scene2, fassade2 === h.fassade ? h : { ...h, fassade: fassade2 }, { x, z: z2, familie: fam, ...bauZustand(zustand(h)) });
+      const roh2 = fassade3 === h.fassade ? h : { ...h, fassade: fassade3 };
+      const nutzer = nachnutzer(h);
+      return nutzer ? nachnutzung(S, scene2, roh2, nutzer, { x, z: z2, familie: fam }) : warenhaus(S, scene2, roh2, { x, z: z2, familie: fam, ...bauZustand(zustand(h)) });
     };
     const baueSport = (S, scene2, p, h) => {
       const f = fussabdruck(h);
       const { x, z: z2 } = imSlot2(p, f.w, f.d);
       p.haus = h;
-      return sporthaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+      const nutzer = nachnutzer(h);
+      return nutzer ? nachnutzungSport(S, scene2, h, nutzer, { x, z: z2 }) : sporthaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
     };
     const bau2 = (S, scene2, p, h) => (h.format === "sport" ? baueSport : baueWarenhaus)(S, scene2, p, h);
     const getrennt = (p, h) => {
@@ -88509,6 +91232,77 @@
       return e;
     };
     const hqs = /* @__PURE__ */ new Map();
+    function neuVerteilen() {
+      const daten = wbDaten().filter((w) => !w.inHartwigGebaeude);
+      const belegt2 = new Set([...wbSlots.values()].map((x) => x.wbId).filter(Boolean));
+      for (const w of daten) {
+        if (belegt2.has(w.id)) continue;
+        let frei6 = [...wbSlots.values()].find((x) => !x.wbId);
+        if (!frei6 && wbOffen(w)) frei6 = [...wbSlots.values()].find((x) => {
+          const alt = wbVon(x.wbId);
+          return !alt || !wbOffen(alt);
+        });
+        if (frei6) {
+          wettbewerber2.delete(frei6.wbId);
+          frei6.wbId = w.id;
+          wettbewerber2.set(w.id, frei6);
+          belegt2.add(w.id);
+        }
+      }
+    }
+    const wbBau = (S, scene2, p, w) => {
+      if (!w) return basis.stadthaus(S, scene2, { ...p, typ: "stadthaus", standort: void 0 });
+      const breite = Math.max(20, Math.round(Math.sqrt(Math.max(400, w.grundflaecheQm) * 1.5) / 5) * 5);
+      const tiefe = Math.max(16, Math.round(w.grundflaecheQm / breite / 5) * 5);
+      const W3 = Math.min(p.w - 1, breite);
+      const D = Math.min(p.d - 1, tiefe);
+      const pos = imSlot2(p, W3, D);
+      return wettbewerber(S, scene2, {
+        ...pos,
+        w: W3,
+        d: D,
+        seed: p.seed,
+        art: w.art,
+        name: w.name,
+        form: w.form,
+        region: p.region,
+        zustand: { status: w.status, rabatt: w.rabatt }
+      });
+    };
+    function baueWbGruppe(x) {
+      const gruppe2 = new three_module_exports.Group(), S = new Sammler(), alt = LOD2.stufe;
+      if (x.wbId) gruppe2.userData.wbId = x.wbId;
+      setzeLod(o.hausLod ?? "nah");
+      let e;
+      try {
+        e = wbBau(S, gruppe2, x.p, wbVon(x.wbId));
+        S.bauen(gruppe2);
+      } finally {
+        setzeLod(alt);
+      }
+      if (x.wbId) gruppe2.traverse((m) => {
+        m.userData.wbId = x.wbId;
+      });
+      o.wurzel?.add(gruppe2);
+      Object.assign(x, { gruppe: gruppe2, e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+      if (x.wbId) wettbewerber2.set(x.wbId, x);
+      return e;
+    }
+    const wbSlot = (S, scene2, p) => {
+      const id = p.standort?.id ?? p.id;
+      let x = wbSlots.get(id);
+      if (!x) {
+        const gebraucht = new Set([...wbSlots.values()].map((q2) => q2.wbId).filter(Boolean));
+        const erste = wbDaten().filter((w) => !w.inHartwigGebaeude).sort((a, b) => Number(a.status === "geschlossen") - Number(b.status === "geschlossen") || b.seit - a.seit).find((w) => !gebraucht.has(w.id));
+        x = { p, wbId: erste?.id ?? null, gruppe: null, schluessel: null };
+        wbSlots.set(id, x);
+      }
+      if (o.getrennt) return baueWbGruppe(x);
+      const e = wbBau(S, scene2, p, wbVon(x.wbId));
+      Object.assign(x, { e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+      if (x.wbId) wettbewerber2.set(x.wbId, x);
+      return e;
+    };
     const hqSlot = (S, scene2, p) => {
       if (!basis["slot:hq"] || !p.standort) return { hoehe: 0 };
       if (o.getrennt) return baueHq(p);
@@ -88523,10 +91317,23 @@
       haeuser.set(h.id, { p, gruppe: null, e, schluessel: zustand(h).schluessel });
       return e;
     };
-    const bauer = { ...basis, "slot:warenhaus": slot4("slot:warenhaus"), "slot:sport": slot4("slot:sport"), "slot:hq": hqSlot };
+    const bauer = {
+      ...basis,
+      "slot:warenhaus": slot4("slot:warenhaus"),
+      "slot:sport": slot4("slot:sport"),
+      "slot:schwester": slot4("slot:schwester"),
+      "slot:hq": hqSlot,
+      "slot:wettbewerber": wbSlot,
+      "slot:wettbewerber_reserve": wbSlot
+    };
     function aktualisiere() {
+      wbCache = null;
       zust.clear();
+      neuVerteilen();
       const geaendert = [];
+      for (const x of wbSlots.values()) if (x.schluessel !== wbSchluessel(wbVon(x.wbId))) {
+        geaendert.push("wb:" + (x.wbId ?? x.p.standort?.id));
+      }
       for (const [id, x] of haeuser) {
         const h = hausVon(id);
         if (h && zustand(h).schluessel !== x.schluessel) geaendert.push(id);
@@ -88535,6 +91342,16 @@
       return geaendert;
     }
     function neuBauen(id) {
+      if (id.startsWith("wb:")) {
+        const wbId = id.slice(3);
+        const x2 = wettbewerber2.get(wbId) ?? [...wbSlots.values()].find((y) => y.p.standort?.id === wbId);
+        if (!x2) return null;
+        x2.gruppe?.parent?.remove(x2.gruppe);
+        x2.gruppe?.traverse((m) => {
+          if (m.geometry) m.geometry.dispose();
+        });
+        return baueWbGruppe(x2);
+      }
       if (id.startsWith("hq:")) {
         const x2 = hqs.get(id.slice(3));
         if (!x2) return null;
@@ -88556,7 +91373,7 @@
       if (vater && !o.wurzel) vater.add(neu.gruppe);
       return e;
     }
-    return { bauer, haeuser, hqs, aktualisiere, neuBauen, zustand: (id) => {
+    return { bauer, haeuser, hqs, wettbewerber: wettbewerber2, wbSlots, aktualisiere, neuBauen, zustand: (id) => {
       const h = hausVon(id);
       return h ? zustand(h) : null;
     } };
@@ -91632,7 +94449,29 @@
   var stadtName = null;
   var offenesHaus = null;
   var offenesHq = null;
+  var offenerWettbewerber = null;
   var angebotPins = [];
+  var wettbewerbPins = [];
+  var wettbewerbPinTimer = null;
+  var WB_FARBEN = {
+    modehaus: "#795846",
+    fastfashion: "#292b39",
+    premium: "#9e773e",
+    offprice: "#d62867",
+    textildiscounter: "#2565b5",
+    elektronik: "#d34532",
+    leer_ehemals: "#777d80"
+  };
+  var WB_ART = {
+    modehaus: "Modehaus",
+    fastfashion: "Fast Fashion",
+    premium: "Premium",
+    offprice: "Offprice",
+    textildiscounter: "Textildiscounter",
+    elektronik: "Elektronik",
+    leer_ehemals: "Leerstehendes Kaufhaus"
+  };
+  var WB_STATUS = { offen: "Ge\xF6ffnet", eroeffnung: "Neuer\xF6ffnung", raeumung: "R\xE4umungsverkauf", geschlossen: "Geschlossen" };
   function groesse() {
     return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight];
   }
@@ -91678,11 +94517,13 @@
   function hausUnter(px2, py2) {
     const r = canvas.getBoundingClientRect();
     ray.setFromCamera(new three_module_exports.Vector2((px2 - r.left) / r.width * 2 - 1, -((py2 - r.top) / r.height) * 2 + 1), cam);
+    const wp6 = wettbewerbPins.length ? ray.intersectObjects(wettbewerbPins, false)[0] : null;
+    if (wp6?.object.userData.wbId) return "wb:" + wp6.object.userData.wbId;
     const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
     if (ap?.object.userData.angebotId) return "angebot:" + ap.object.userData.angebotId;
     const t = ray.intersectObject(wurzel, true)[0];
     const u = t?.object.userData;
-    return u?.hausId ?? (u?.hqId ? "hq:" + u.hqId : null);
+    return u?.hausId ?? (u?.wbId ? "wb:" + u.wbId : u?.hqId ? "hq:" + u.hqId : null);
   }
   function fokusHaeuser() {
     const b = new three_module_exports.Box3();
@@ -91728,12 +94569,21 @@
     const id = hausUnter(e.clientX, e.clientY);
     if (id?.startsWith("angebot:")) oeffneModul(po, "handeln", id.slice(8));
     else if (id?.startsWith("hq:")) oeffneHq(id.slice(3));
+    else if (id?.startsWith("wb:")) oeffneWettbewerber(id.slice(3));
     else if (id) oeffneHaus(id);
   } });
   window.addEventListener("resize", kameraSetzen);
   function raeumeSzene() {
     if (!scene) return;
     angebotPins = [];
+    clearInterval(wettbewerbPinTimer);
+    wettbewerbPinTimer = null;
+    for (const p of wettbewerbPins) {
+      scene.remove(p);
+      p.material?.map?.dispose();
+      p.material?.dispose();
+    }
+    wettbewerbPins = [];
     const texs = /* @__PURE__ */ new Set();
     scene.traverse((o) => {
       if (o.geometry) o.geometry.dispose();
@@ -91766,6 +94616,73 @@
       }
     }
   }
+  function wettbewerbPinsAktualisieren() {
+    if (!scene || !sb || !s) return;
+    clearInterval(wettbewerbPinTimer);
+    wettbewerbPinTimer = null;
+    for (const p of wettbewerbPins) {
+      scene.remove(p);
+      p.material?.map?.dispose();
+      p.material?.dispose();
+    }
+    wettbewerbPins = [];
+    const liste = wettbewerbFuerGrafik(s, stadtName);
+    for (const w of liste) {
+      let x = sb.wettbewerber.get(w.id);
+      if (!x && w.inHartwigGebaeude && w.status !== "geschlossen") x = sb.haeuser.get(w.inHartwigGebaeude);
+      if (!x?.p) continue;
+      const p = x.p;
+      const c = document.createElement("canvas");
+      c.width = 96;
+      c.height = 96;
+      const g = c.getContext("2d"), farbe = WB_FARBEN[w.art] ?? "#67717b";
+      g.beginPath();
+      g.arc(48, 48, 34, 0, Math.PI * 2);
+      g.fillStyle = "#ffffff";
+      g.fill();
+      g.beginPath();
+      g.arc(48, 48, 29, 0, Math.PI * 2);
+      g.fillStyle = farbe;
+      g.fill();
+      if (w.rabatt > 0) {
+        g.fillStyle = "#fff";
+        g.font = "bold 38px sans-serif";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText("%", 48, 49);
+      } else {
+        g.fillStyle = "#fff";
+        g.beginPath();
+        g.arc(48, 48, 8, 0, Math.PI * 2);
+        g.fill();
+      }
+      const neu = w.status === "eroeffnung" && s.woche - (w.seit ?? 0) < 4;
+      if (neu) {
+        g.strokeStyle = "#f3c951";
+        g.lineWidth = 6;
+        g.beginPath();
+        g.arc(48, 48, 40, 0, Math.PI * 2);
+        g.stroke();
+      }
+      const pin = new three_module_exports.Sprite(new three_module_exports.SpriteMaterial({ map: new three_module_exports.CanvasTexture(c), transparent: true, depthTest: false }));
+      pin.position.set(p.x + p.w / 2, Math.max(20, (x.e?.hoehe ?? 28) + 5), p.z + p.d / 2);
+      pin.scale.set(10.5, 10.5, 1);
+      pin.userData.wbId = w.id;
+      pin.userData.puls = neu;
+      pin.renderOrder = 30;
+      scene.add(pin);
+      wettbewerbPins.push(pin);
+    }
+    const puls = wettbewerbPins.filter((p) => p.userData.puls);
+    if (puls.length) wettbewerbPinTimer = setInterval(() => {
+      const t = performance.now() * 7e-3;
+      for (const p of puls) {
+        const k = 10.5 + 2 * (1 + Math.sin(t));
+        p.scale.set(k, k, 1);
+      }
+      zeichnen();
+    }, 260);
+  }
   function baueStadtAusSpiel(name2) {
     const t0 = performance.now();
     raeumeSzene();
@@ -91778,7 +94695,7 @@
     scene = neueSzene("#4fb6c2");
     scene.userData.sonne.shadow.mapSize.set(2048, 2048);
     wurzel = new three_module_exports.Group();
-    sb = spielBauer(s, { getrennt: true, wurzel, merk: merk(), hausLod: "nah", hq: hqGrafik });
+    sb = spielBauer(s, { getrennt: true, wurzel, stadt: name2, merk: merk(), hausLod: "nah", hq: hqGrafik });
     const T = new KompaktSammler();
     const offen = [];
     const zahl2 = /* @__PURE__ */ new Map();
@@ -91804,13 +94721,14 @@
     scene.add(wurzel);
     KA.teileGrund = T.anzahl;
     kachelnAnlegen(offen);
-    const pins = { warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber", hq: "hartwig" };
-    setzeMarker(scene, plan, e, plan.standorte.filter((q2) => !q2.angebot).map((q2) => ({ parzelle: q2.parzelle, art: pins[q2.rolle] ?? "hartwig", groesse: q2.rolle === "wettbewerber" ? 7.2 : 9 })));
+    const pins = { warenhaus: "hartwig", sport: "hartwigSport", hq: "hartwig" };
+    setzeMarker(scene, plan, e, plan.standorte.filter((q2) => !q2.angebot && pins[q2.rolle]).map((q2) => ({ parzelle: q2.parzelle, art: pins[q2.rolle], groesse: 9 })));
     for (const q2 of plan.standorte.filter((x) => x.angebot)) {
       const pz4 = plan.parzellen.find((x) => x.id === q2.parzelle);
       if (pz4) angebotMarker(scene, pz4.x + pz4.w / 2, (e.hoehen.get(pz4.id) ?? 30) + 2, pz4.z + pz4.d / 2, 9);
     }
     angebotsPinsAktualisieren();
+    wettbewerbPinsAktualisieren();
     K2.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
     const nm = nahMitte(plan, "einkauf", 62);
     K2.x = nm.x;
@@ -91972,6 +94890,7 @@
     }
     const geaendert = sb.aktualisiere();
     for (const id of geaendert) sb.neuBauen(id);
+    wettbewerbPinsAktualisieren();
     if (geaendert.length) zeichnen();
     return geaendert;
   }
@@ -92005,6 +94924,7 @@
     const t2 = performance.now();
     cockpitZeigen();
     if (offenesHaus) oeffneHaus(offenesHaus);
+    else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
     else if (offenesHq) oeffneHq(offenesHq === true ? void 0 : offenesHq);
     else for (const m2 of module2()) if (m2.aktiv()) m2.neuZeichnen();
     ek.badge();
@@ -92047,6 +94967,7 @@
     document.body.classList.remove("panel-offen");
     offenesHaus = null;
     offenesHq = null;
+    offenerWettbewerber = null;
   }
   function hausZeigen(id) {
     const x = sb?.haeuser.get(id);
@@ -92088,6 +95009,7 @@
     const neu = offenesHaus !== id;
     offenesHaus = id;
     offenesHq = null;
+    offenerWettbewerber = null;
     const h = d.haus, k = h.kpi;
     const z2 = sb.zustand(id);
     const bild2 = z2 ? [z2.status, ...z2.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z2.aktion ? `Aktion ${AKTION_NAME[z2.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
@@ -92115,9 +95037,43 @@
       }
       html += "</div>";
     }
+    html += '<div class="karte"><div class="khead">Konkurrenz in der Stadt</div>';
+    if (!d.wettbewerber?.length) html += '<div class="zeile">Keine Wettbewerber in dieser Stadt</div>';
+    for (const w of d.wettbewerber ?? []) {
+      const wirkung = Object.entries(w.wirkung ?? {}).filter(([, v]) => v < 0).sort((a, b) => a[1] - b[1]).slice(0, 3).map(([g, v]) => esc(GRUPPEN[g]?.name ?? g) + " " + v.toFixed(2) + " %").join(" \xB7 ");
+      html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' + esc(w.name) + "</b> <i>" + esc(WB_ART[w.art] ?? w.art) + " \xB7 " + esc(WB_STATUS[w.status] ?? w.status) + "</i>" + (wirkung ? "<small>" + wirkung + "</small>" : "") + "</span><span>\u2192</span></button>";
+    }
+    html += "</div>";
     panel(h.name, `${h.stadt} \xB7 ${h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
     if (neu) hausZeigen(id);
   }
+  function oeffneWettbewerber(id) {
+    const w = wettbewerbFuerGrafik(s, stadtName).find((q2) => q2.id === id);
+    const u = wettbewerbUebersicht(s, stadtName).find((q2) => q2.id === id);
+    if (!w || !u) return;
+    const neu = offenerWettbewerber !== id;
+    offenerWettbewerber = id;
+    offenesHaus = null;
+    offenesHq = null;
+    const start = w.seit === 0 ? "Seit Spielbeginn" : "Seit KW " + (w.seit % 52 + 1) + " / Jahr " + (Math.floor(w.seit / 52) + 1);
+    const wirkung = Object.entries(u.wirkung ?? {}).sort((a, b) => a[1] - b[1]);
+    let html = '<div class="chips"><span class="chip">' + esc(WB_ART[w.art] ?? w.art) + '</span><span class="chip">' + esc(WB_STATUS[w.status] ?? w.status) + "</span></div>";
+    html += '<div class="karte"><div class="zeile"><span>Standort</span><b>' + esc(stadtName) + '</b></div><div class="zeile"><span>Status seit</span><b>' + esc(start) + '</b></div><div class="zeile"><span>Grundfl\xE4che</span><b>' + fmt.format(w.grundflaecheQm) + ' m\xB2</b></div><div class="zeile"><span>Wettbewerbsst\xE4rke</span><b>' + Math.round(u.staerke * 100) + ' / 100</b></div><div class="zeile"><span>Aktuelle Aktion</span><b>' + (w.status === "raeumung" ? "R\xE4umungsverkauf bis 70 %" : w.rabatt ? Math.round(w.rabatt * 100) + " % Rabatt" : w.status === "eroeffnung" ? "Neuer\xF6ffnung" : "Keine") + "</b></div>" + (w.inHartwigGebaeude ? '<div class="zeile">Nachnutzung eines ehemaligen Hartwig-Standorts</div>' : "") + "</div>";
+    html += '<div class="karte"><div class="khead">Wirkung auf Hartwig nach Warengruppe</div>' + wirkung.map(([g, v]) => '<div class="zeile"><span>' + esc(GRUPPEN[g]?.name ?? g) + "</span><b>" + Number(v).toFixed(2) + " %</b></div>").join("") + "</div>";
+    panel(w.name, esc(stadtName) + " \xB7 " + esc(WB_ART[w.art] ?? w.art), html);
+    if (neu) {
+      const x = sb.wettbewerber.get(id) ?? (w.inHartwigGebaeude ? sb.haeuser.get(w.inHartwigGebaeude) : null);
+      if (x?.p) {
+        K2.x = x.p.x + x.p.w / 2;
+        K2.z = x.p.z + x.p.d / 2;
+        kameraSetzen();
+      }
+    }
+  }
+  $("pinhalt").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-wb-id]");
+    if (el) oeffneWettbewerber(el.dataset.wbId);
+  });
   var STUFE_FARBE = ["#c9c4bb", "#e0b23c", "#2f8f5b", "#2f63b5"];
   var hqEtageWahl = null;
   var hqRen = null;
@@ -92302,7 +95258,8 @@
         baueStadtAusSpiel(bezug.stadt);
       }
       const hausId = bezug.hausIds?.find((id) => sb?.haeuser.has(id));
-      if (hausId) oeffneHaus(hausId);
+      if (bezug.wettbewerberId) oeffneWettbewerber(bezug.wettbewerberId);
+      else if (hausId) oeffneHaus(hausId);
       else if (bezug.modul === "einkauf") oeffneEinkauf();
       else if (bezug.modul === "vorstand") oeffneModul(vs);
       else if (bezug.modul === "marketing") oeffneModul(mk);
@@ -92463,6 +95420,15 @@
     },
     EQ,
     pruefeEinkauf: () => ek.pruefe(),
+    oeffneWettbewerber,
+    pruefeWettbewerber: () => {
+      const soll = wettbewerbFuerGrafik(s, stadtName);
+      const gezeigt = /* @__PURE__ */ new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== "geschlossen" && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
+      const pinIds = new Set(wettbewerbPins.map((p) => p.userData.wbId));
+      const fehler5 = soll.filter((w) => w.status !== "geschlossen" && !gezeigt.has(w.id)).map((w) => "Fehlt: " + w.id);
+      for (const id of gezeigt) if (!pinIds.has(id)) fehler5.push("Pin fehlt: " + id);
+      return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler: fehler5 };
+    },
     stadt: (n) => {
       wahl2.value = n;
       return baueStadtAusSpiel(n);

@@ -297,7 +297,8 @@ export function wettbewerbWoche(s: GameState): void {
 export function wettbewerbUebersicht(s: GameState, stadt?: string) {
   return s.wettbewerber.filter((w) => !stadt || w.stadt === stadt).map((w) => ({
     id: w.id, name: w.name, kette: w.kette, art: w.art, stadt: w.stadt, lage: w.lage, staerke: w.staerke,
-    status: w.status, preisdruck: w.preisdruck,
+    status: w.status, preisdruck: w.preisdruck, seit: w.seit, inHartwigGebaeude: w.inHartwigGebaeude,
+    rabatt: (w.aktionVon ?? Infinity) <= s.woche && (w.aktionBis ?? -1) > s.woche ? w.preisdruck : 0,
     wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w.art]).map((g) => {
       const h = s.haeuser.find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g as GruppeId));
       const faktor = h ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w, g as GruppeId, s) * lageFaktor(h, w) / (1 - 0.25 * h.wettbewerbStart) : 0;
@@ -308,7 +309,7 @@ export function wettbewerbUebersicht(s: GameState, stadt?: string) {
 export function wettbewerbFuerGrafik(s: GameState, stadt: string) {
   return s.wettbewerber.filter((w) => w.stadt === stadt).map((w) => ({
     id: w.id, name: w.name, art: w.art, form: w.form, lage: w.lage, grundflaecheQm: w.grundflaecheQm,
-    status: w.status, inHartwigGebaeude: w.inHartwigGebaeude,
+    status: w.status, inHartwigGebaeude: w.inHartwigGebaeude, seit: w.seit,
     rabatt: (w.aktionVon ?? Infinity) <= s.woche && (w.aktionBis ?? -1) > s.woche ? w.preisdruck : 0,
   }));
 }

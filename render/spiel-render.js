@@ -556,6 +556,62 @@ async function buendeln() {
     }
     console.log('Posteingang: Karten, Zähler, Entscheidung, Annehmen, Ablehnen = 0 Abweichungen; Bilder: ' + bilder);
   }
+  // Eigenständiger End-to-End-Lauf: 112 Städte, zwei Bot-Verläufe und
+  // Abgleich zwischen Engine, sichtbaren Gruppen und Pins; keine CI-Aktivierung.
+  async function wettbewerberPruefen() {
+    const bilder = path.join(__dirname, 'bilder');
+    fs.mkdirSync(bilder, { recursive: true });
+    const report = { standorte: [], verlaeufe: [], fehler: [], leistungswerte: [] };
+    const staedte = await p.evaluate(() => [...new Set(window.spiel.s.haeuser.map((h) => h.stadt))]);
+    for (const name of staedte) {
+      const r = await p.evaluate((name) => {
+        window.spiel.stadt(name);
+        return window.spiel.pruefeWettbewerber();
+      }, name);
+      report.standorte.push(r);
+      if (r.fehler.length) report.fehler.push(name + ': ' + r.fehler.join(', '));
+    }
+    for (const stadtName of ['Essen', 'Berlin']) {
+      await p.evaluate((stadtName) => window.spiel.neuesSpiel(1, stadtName), stadtName);
+      const screenshots = [0, 30, 104];
+      const folge = [];
+      for (let i = 0; i <= 260; i++) {
+        if (screenshots.includes(i)) {
+          const pruefung = await p.evaluate(() => window.spiel.pruefeWettbewerber());
+          folge.push({ ...pruefung, testwoche: i });
+          if (pruefung.fehler.length) report.fehler.push(stadtName + ' Woche ' + i + ': ' + pruefung.fehler.join(', '));
+          await p.screenshot({ path: path.join(bilder, 'wettbewerb-' + stadtName.toLowerCase() + '-w' + i + '.png') });
+          if (i === 30) {
+            const info = await p.evaluate(() => {
+              const w = window.spiel.E.wettbewerbFuerGrafik(window.spiel.s, document.getElementById('stadtname').textContent).find((w) => w.status !== 'geschlossen');
+              if (w) window.spiel.oeffneWettbewerber(w.id);
+              return w?.id ?? null;
+            });
+            if (info) await p.screenshot({ path: path.join(bilder, 'wettbewerb-detail-' + stadtName.toLowerCase() + '.png') });
+            await p.evaluate(() => window.spiel.schliessePanel());
+          }
+        }
+        if (i === 260) break;
+        const m = await p.evaluate(() => window.spiel.woche(true));
+        if (!m) { report.fehler.push(stadtName + ': Spiel beendet vor Testwoche 260 (' + i + ')'); break; }
+        if (m.neu?.some((id) => id.startsWith('wb:'))) report.leistungswerte.push({ stadt: stadtName, woche: m.woche, ms: m.neuBauMs, orte: m.neu.filter((id) => id.startsWith('wb:')) });
+      }
+      report.verlaeufe.push({ stadt: stadtName, folgen: folge });
+    }
+    const l = report.leistungswerte.map((x) => x.ms);
+    report.leistung = { anzahl: l.length, mittelMs: l.length ? l.reduce((a, v) => a + v, 0) / l.length : 0, maxMs: l.length ? Math.max(...l) : 0 };
+    if (l.length && report.leistung.mittelMs >= 80) report.fehler.push('Neubau-Mittel ' + report.leistung.mittelMs.toFixed(1) + ' ms (Ziel < 80)');
+    if (l.length && report.leistung.maxMs >= 200) report.fehler.push('Neubau-Maximum ' + report.leistung.maxMs.toFixed(1) + ' ms (Ziel < 200)');
+    fs.writeFileSync(path.join(__dirname, 'out', 'wettbewerb-spiel-pruefung.json'), JSON.stringify(report, null, 2));
+    console.log('Wettbewerber: ' + report.standorte.length + ' Städte, ' +
+      report.leistungswerte.length + ' Neubauten, ' + report.fehler.length + ' Abweichungen');
+    if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
+    return report;
+  }
+  if (process.argv.includes('--nur-wettbewerber')) {
+    try { await wettbewerberPruefen(); } finally { await b.close(); }
+    return;
+  }
   if (process.argv.includes('--nur-posteingang')) { await posteingangPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-start')) {
     const ergebnis = await startPruefen();

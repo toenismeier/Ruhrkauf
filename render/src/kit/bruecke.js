@@ -19,9 +19,11 @@
 //   'slot:hq' aus hq.js (eigene Gruppe, Map hqs; aktualisiere() meldet 'hq:<id>', wenn sich Etagen ändern).
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
-import { warenhaus, familieVon } from './warenhaus.js';
-import { sporthaus } from './sporthaus.js';
+import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
+import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { stadtDaten } from './staedte.js';
+import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
+import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
 import './hq.js';   // meldet 'slot:hq' an
 
 const kwVon = (woche) => (woche % 52) + 1;
@@ -121,7 +123,15 @@ export function stadtEintragAusSpiel(s, name) {
     const f = fussabdruck(h);
     return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
-  return { ...d, standorte: [...eigene, ...d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester')] };
+  // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
+  // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
+  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester');
+  const reserve = Array.from({ length: 2 }, (_, i) => ({
+    id: 'KR-' + name + '-' + (i + 1), name: '', rolle: 'wettbewerber_reserve',
+    lage: i === 0 ? '1a' : 'b', grundflaecheQm: 1800,
+    w: 48, d: 36,
+  }));
+  return { ...d, standorte: [...eigene, ...alt, ...reserve] };
 }
 
 /** Ursprung eines Baus W × D im Slot (wie bauer.js imSlot). */
@@ -137,9 +147,26 @@ export function spielBauer(s, o = {}) {
   const famBenutzt = new Set();
   const wahl = new Map();      // hausId → { fam, fassade } (bleibt beim Neubau gleich)
   const haeuser = new Map();   // hausId → { p, gruppe, e, schluessel }
+  const wettbewerber = new Map(); // Wettbewerber-Id → eigene Gruppe
+  const wbSlots = new Map();      // Parzellen-Id → { p, wbId, gruppe, ... }
+  let wbCache = null;
+  const wbDaten = () => wbCache ?? (wbCache = o.stadt ? wettbewerbFuerGrafik(s, o.stadt) : []);
+  const wbVon = (id) => wbDaten().find((w) => w.id === id);
+  const wbSchluessel = (wb) => wb ? JSON.stringify([wb.id, wb.art, wb.form, wb.name, wb.status, wb.rabatt, wb.seit]) : 'stadthaus';
+  const nachnutzer = (h) => wbDaten().find((w) => w.inHartwigGebaeude === h.id && w.status !== 'geschlossen');
+  const wbOffen = (w) => w.status !== 'geschlossen';
+
   const hausVon = (id) => s.haeuser.find((h) => h.id === id);
   const zust = new Map();
-  const zustand = (h) => { if (!zust.has(h.id)) zust.set(h.id, zustandAusHaus(h, s, merk)); return zust.get(h.id); };
+  const zustand = (h) => {
+    if (!zust.has(h.id)) {
+      const z = zustandAusHaus(h, s, merk);
+      const w = nachnutzer(h);
+      if (w) z.schluessel += '|nachnutzung:' + wbSchluessel(w);
+      zust.set(h.id, z);
+    }
+    return zust.get(h.id);
+  };
 
   const baueWarenhaus = (S, scene, p, h) => {
     const f = fussabdruck(h);
@@ -156,13 +183,18 @@ export function spielBauer(s, o = {}) {
     }
     const { fam, fassade } = wahl.get(h.id);
     p.haus = h;
-    return warenhaus(S, scene, fassade === h.fassade ? h : { ...h, fassade }, { x, z, familie: fam, ...bauZustand(zustand(h)) });
+    const roh = fassade === h.fassade ? h : { ...h, fassade };
+    const nutzer = nachnutzer(h);
+    return nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
+      : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
   };
   const baueSport = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
-    return sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+    const nutzer = nachnutzer(h);
+    return nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
+      : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
   };
   const bau = (S, scene, p, h) => (h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 
@@ -200,6 +232,70 @@ export function spielBauer(s, o = {}) {
     return e;
   };
   const hqs = new Map();
+  // Historische, geschlossene Standorte bleiben bis zur Nachbelegung als leeres
+  // Kaufhaus sichtbar. Bei voller Belegung wird zuerst ein geschlossener ersetzt.
+  function neuVerteilen() {
+    const daten = wbDaten().filter((w) => !w.inHartwigGebaeude);
+    const belegt = new Set([...wbSlots.values()].map((x) => x.wbId).filter(Boolean));
+    for (const w of daten) {
+      if (belegt.has(w.id)) continue;
+      let frei = [...wbSlots.values()].find((x) => !x.wbId);
+      if (!frei && wbOffen(w)) frei = [...wbSlots.values()].find((x) => {
+        const alt = wbVon(x.wbId);
+        return !alt || !wbOffen(alt);
+      });
+      if (frei) {
+        wettbewerber.delete(frei.wbId);
+        frei.wbId = w.id;
+        wettbewerber.set(w.id, frei);
+        belegt.add(w.id);
+      }
+    }
+  }
+  const wbBau = (S, scene, p, w) => {
+    if (!w) return basis.stadthaus(S, scene, { ...p, typ: 'stadthaus', standort: undefined });
+    // Grundfläche und Bauform aus der Engine; der im Stadtplan feste Slot ist das Maximum.
+    const breite = Math.max(20, Math.round(Math.sqrt(Math.max(400, w.grundflaecheQm) * 1.5) / 5) * 5);
+    const tiefe = Math.max(16, Math.round(w.grundflaecheQm / breite / 5) * 5);
+    const W = Math.min(p.w - 1, breite);
+    const D = Math.min(p.d - 1, tiefe);
+    const pos = imSlot(p, W, D);
+    return baueWettbewerber(S, scene, {
+      ...pos, w: W, d: D, seed: p.seed, art: w.art, name: w.name,
+      form: w.form, region: p.region, zustand: { status: w.status, rabatt: w.rabatt },
+    });
+  };
+  function baueWbGruppe(x) {
+    const gruppe = new THREE.Group(), S = new Sammler(), alt = LOD.stufe;
+    if (x.wbId) gruppe.userData.wbId = x.wbId;
+    setzeLod(o.hausLod ?? 'nah');
+    let e;
+    try { e = wbBau(S, gruppe, x.p, wbVon(x.wbId)); S.bauen(gruppe); }
+    finally { setzeLod(alt); }
+    if (x.wbId) gruppe.traverse((m) => { m.userData.wbId = x.wbId; });
+    o.wurzel?.add(gruppe);
+    Object.assign(x, { gruppe, e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+    if (x.wbId) wettbewerber.set(x.wbId, x);
+    return e;
+  }
+  const wbSlot = (S, scene, p) => {
+    const id = p.standort?.id ?? p.id;
+    let x = wbSlots.get(id);
+    if (!x) {
+      const gebraucht = new Set([...wbSlots.values()].map((q) => q.wbId).filter(Boolean));
+      // Beim Laden fortgeschrittener Spielstände zunächst aktive Betriebe belegen.
+      const erste = wbDaten().filter((w) => !w.inHartwigGebaeude)
+        .sort((a, b) => Number(a.status === 'geschlossen') - Number(b.status === 'geschlossen') || b.seit - a.seit)
+        .find((w) => !gebraucht.has(w.id));
+      x = { p, wbId: erste?.id ?? null, gruppe: null, schluessel: null };
+      wbSlots.set(id, x);
+    }
+    if (o.getrennt) return baueWbGruppe(x);
+    const e = wbBau(S, scene, p, wbVon(x.wbId));
+    Object.assign(x, { e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+    if (x.wbId) wettbewerber.set(x.wbId, x);
+    return e;
+  };
   const hqSlot = (S, scene, p) => {
     if (!basis['slot:hq'] || !p.standort) return { hoehe: 0 };
     if (o.getrennt) return baueHq(p);
@@ -214,18 +310,35 @@ export function spielBauer(s, o = {}) {
     haeuser.set(h.id, { p, gruppe: null, e, schluessel: zustand(h).schluessel });
     return e;
   };
-  const bauer = { ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'), 'slot:schwester': slot('slot:schwester'), 'slot:hq': hqSlot };
+  const bauer = {
+    ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
+    'slot:schwester': slot('slot:schwester'),
+    'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
+  };
 
   /** Zustände neu lesen (nach wocheAbspielen); gibt die Ids der Häuser zurück, deren Bild sich ändert. */
   function aktualisiere() {
+    wbCache = null;
     zust.clear();
+    neuVerteilen();
     const geaendert = [];
+    for (const x of wbSlots.values()) if (x.schluessel !== wbSchluessel(wbVon(x.wbId))) {
+      geaendert.push('wb:' + (x.wbId ?? x.p.standort?.id));
+    }
     for (const [id, x] of haeuser) { const h = hausVon(id); if (h && zustand(h).schluessel !== x.schluessel) geaendert.push(id); }
     for (const [id, x] of hqs) if (hqSchluessel(x.p) !== x.schluessel) geaendert.push('hq:' + id);
     return geaendert;
   }
   /** Ein Haus (getrennt gebaut) mit dem aktuellen Zustand neu bauen. */
   function neuBauen(id) {
+    if (id.startsWith('wb:')) {
+      const wbId = id.slice(3);
+      const x = wettbewerber.get(wbId) ?? [...wbSlots.values()].find((y) => y.p.standort?.id === wbId);
+      if (!x) return null;
+      x.gruppe?.parent?.remove(x.gruppe);
+      x.gruppe?.traverse((m) => { if (m.geometry) m.geometry.dispose(); });
+      return baueWbGruppe(x);
+    }
     if (id.startsWith('hq:')) {
       const x = hqs.get(id.slice(3));
       if (!x) return null;
@@ -244,5 +357,5 @@ export function spielBauer(s, o = {}) {
     if (vater && !o.wurzel) vater.add(neu.gruppe);
     return e;
   }
-  return { bauer, haeuser, hqs, aktualisiere, neuBauen, zustand: (id) => { const h = hausVon(id); return h ? zustand(h) : null; } };
+  return { bauer, haeuser, hqs, wettbewerber, wbSlots, aktualisiere, neuBauen, zustand: (id) => { const h = hausVon(id); return h ? zustand(h) : null; } };
 }

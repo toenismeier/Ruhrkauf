@@ -306,6 +306,12 @@
   #panel, #panel.gross { max-height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
   .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 11px; color: var(--leise); }
   .startseed input { width: 64px; font: inherit; font-size: 12px; border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
+  .wbdirekt { display: flex; width: 100%; align-items: center; justify-content: space-between;
+    font: inherit; color: inherit; text-align: left; background: transparent; border: 0;
+    border-top: 1px solid var(--linie); cursor: pointer; padding: 11px 8px; }
+  .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
+  .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
 </style>
 </head>
 <body>

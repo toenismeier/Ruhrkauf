@@ -6,6 +6,8 @@
 // export familieVon(haus), masse(haus), FAMILIEN, EG, GH
 import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
+import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
+import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
 
 export const ROT = '#d23c32';
 export const EG = 5.5, GH = 4.5;
@@ -1887,6 +1889,27 @@ function hartwigVorplatz(S, k, Z, r) {
   const kuebel = (kx, kz) => { S.quader(kx - 0.55, y, kz - 0.55, kx + 0.55, y + 0.7, kz + 0.55, '#6b7177'); S.quader(kx - 0.45, y + 0.7, kz - 0.45, kx + 0.45, y + 1.15, kz + 0.45, waehle(r, ['#d96a8a', ROT, '#7cb369'])); };
   for (const f of [0.12, 0.28]) { bank(x + w * f, z + d + T - 1.0, false); kuebel(x + w * f + 2.2, z + d + T - 1.0); }
   for (const f of [0.15, 0.32]) { bank(x + w + T - 1.0, z + d * f, true); kuebel(x + w + T - 1.0, z + d * f + 2.2); }
+}
+
+/** Historischen Hartwig-Baukörper behalten, nur Ladenzone und Markenauftritt auf Nachnutzer umstellen. */
+export function nachnutzung(S, scene, haus, wettbewerber, opt = {}) {
+  const start = S.anzahl;
+  const basis = warenhaus(S, scene, haus, { ...opt, status: 'offen', hartwig: false, vorplatz: false, passanten: false });
+  const farbe = WETTBEWERBER_FARBEN[wettbewerber.art] ?? '#526477';
+  const m = masse(haus), breite = basis.w, tiefe = basis.d;
+  const x = opt.x ?? 0, z = opt.z ?? 0;
+  for (const seite of seitenFremd(S, x, z, breite, tiefe)) {
+    // Neues Glas und Fremdmarkenband; Hartwig-Schrift und das rote Band sind nicht mehr sichtbar.
+    seite.q(0.5, seite.L - 0.5, 0.6, 4.1, 0.4, 0.5, '#779bab');
+    seite.q(0.4, seite.L - 0.4, 4.1, 5.2, 0.45, 0.8, farbe);
+    const ph = passendFremd(wettbewerber.name, seite.L * 0.77, 1.25);
+    plakatFremd(scene, seite, wettbewerber.name, seite.L / 2, 4.65, 0.94, ph, '#ffffff');
+    if (m.n > 2) for (let i = 0; i < 3; i++) {
+      const a = 1 + i * (seite.L - 2) / 3;
+      seite.q(a, a + (seite.L - 3) / 3, 5.7, Math.min(m.H - 0.6, 9), 0.25, 0.33, '#78848a');
+    }
+  }
+  return { ...basis, teile: S.anzahl - start, nachnutzung: wettbewerber.id };
 }
 
 export function warenhaus(S, scene, haus, opt = {}) {

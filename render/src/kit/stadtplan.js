@@ -624,7 +624,7 @@ export function standortMasse(st) {
   const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
   return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
 }
-export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', schwester: 'slot:schwester' };
+export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester' };
 
 /**
  * Sucht ein Kreuz aus zwei Haupteinkaufsstraßen (z-Linie kF, x-Linie lF) nahe dem Zentrum und verteilt die

@@ -560,6 +560,64 @@ function leer_ehemals(K) {
 }
 
 const BAU = { modehaus, offprice, textildiscounter, elektronik, premium, fastfashion, leer_ehemals };
+/** Einheitliche Zustandsüberlagerung: alle Bauformen behalten ihren eigenen Körper. */
+export const WETTBEWERBER_FARBEN = {
+  modehaus: '#795846', fastfashion: '#292b39', premium: '#9e773e',
+  offprice: '#d62867', textildiscounter: '#2565b5', elektronik: '#d34532',
+  leer_ehemals: '#777d80',
+};
+function dekorZustand(S, scene, p, art, hoehe) {
+  const z = p.zustand ?? {}, status = z.status ?? p.status ?? 'offen';
+  const rabatt = Math.max(0, Math.min(1, z.rabatt ?? p.rabatt ?? 0));
+  if (status === 'offen' && !rabatt) return hoehe;
+  const w = Math.max(16, Math.min(90, p.w ?? 40)), d = Math.max(16, Math.min(70, p.d ?? 30));
+  const x = p.x ?? 0, zz = p.z ?? 0;
+  const farbe = WETTBEWERBER_FARBEN[art] ?? '#51677a';
+  const seiten = seitenVon(S, x, zz, w, d);
+  const banner = (s, t, y, breite = 0.75, h = 1.4, bg = farbe) => {
+    s.q(s.L * (1 - breite) / 2, s.L * (1 + breite) / 2, y - h * 0.65, y + h * 0.65, 0.6, 0.86, bg);
+    plakat(scene, s, t, s.L / 2, y, 1.02, passend(t, s.L * breite * 0.88, h), '#ffffff');
+  };
+  if (status === 'eroeffnung') {
+    banner(seiten[0], 'NEUERÖFFNUNG', EG + 2.0, 0.78, 1.65);
+    S.quader(x + w * 0.37, 0.02, zz + d, x + w * 0.63, 0.09, zz + d + 4.5, '#b5292c');
+    const r = rng('eroeffnung:' + (p.seed ?? 0));
+    for (let i = 0; i < 10; i++) {
+      const xx = x + 2 + i * (w - 4) / 9;
+      const farb = i % 3 === 0 ? '#f1c84a' : i % 2 ? farbe : '#f0f0e7';
+      S.box(0.05, 1.9, 0.05, xx, EG + 4.1, zz + d + 0.8, '#f1f0e8');
+      zyl(S, xx, EG + 5.0, zz + d + 0.8, 0.38, 0.6, farb, 8);
+    }
+    // Warteschlange auf dem Vorplatz und doppelte Passantenfrequenz.
+    for (let i = 0; i < 16; i++) mensch(S, r, x + w * (0.39 + r() * 0.22), 0.15, zz + d + 1 + i * 0.32);
+    for (let i = 0; i < 12; i++) mensch(S, r, x + r() * w, 0.15, zz + d + 1 + r() * 5);
+    hoehe = Math.max(hoehe, EG + 6);
+  }
+  if (rabatt && status !== 'raeumung' && status !== 'geschlossen') {
+    const t = Math.round(rabatt * 100) + ' %';
+    for (const s of seiten) banner(s, t, EG + 1.9, 0.28, 1.6);
+    if (art === 'offprice') {
+      S.box(4.0, 2.0, 0.3, x + 4, 1.2, zz + d + 2.3, farbe);
+      banner(seiten[0], 'AKTION', EG + 4.3, 0.38, 1.0);
+    }
+  }
+  if (status === 'raeumung') {
+    for (const s of seiten) {
+      banner(s, 'ALLES MUSS RAUS', EG + 2, 0.87, 1.6, '#bf302c');
+      banner(s, 'WIR SCHLIESSEN', EG + 4.3, 0.60, 1.05, '#7c2525');
+      banner(s, 'BIS 70 %', EG + 0.55, 0.37, 0.9, '#bf302c');
+      for (let i = 0; i < 4; i++) s.q(1 + i * (s.L - 2) / 4, 1.7 + i * (s.L - 2) / 4, 0.5, 3.4, 0.1, 0.2, '#a9adb0');
+    }
+  }
+  if (status === 'geschlossen' || art === 'leer_ehemals') {
+    for (const s of seiten) {
+      banner(s, 'ZU VERMIETEN', EG + 1.7, 0.72, 1.35, '#596066');
+      if (p.name) plakat(scene, s, p.name, s.L / 2, Math.min(hoehe - 2, EG + 5), 0.35, passend(p.name, s.L * 0.5, 1.0), '#a3a3a3');
+    }
+  }
+  return hoehe;
+}
+
 
 /**
  * Baut einen Wettbewerber auf [x, x+w] × [z, z+d].
@@ -568,7 +626,8 @@ const BAU = { modehaus, offprice, textildiscounter, elektronik, premium, fastfas
 export function wettbewerber(S, scene, p) {
   const start = S.anzahl;
   const r0 = rng(`wb:${p.seed ?? 1}:${p.region ?? ''}`);
-  const art = BAU[p.art] ? p.art : ARTEN[Math.floor(r0() * ARTEN.length)];
+  const artOriginal = BAU[p.art] ? p.art : ARTEN[Math.floor(r0() * ARTEN.length)];
+  const art = p.zustand?.status === 'geschlossen' ? 'leer_ehemals' : artOriginal;
   const name = p.name ?? NAMEN[art][Math.floor(r0() * 3)];
   const w = clamp(p.w ?? 40, 16, 90), d = clamp(p.d ?? 30, 16, 70);
   const K = {
@@ -609,6 +668,7 @@ export function wettbewerber(S, scene, p) {
     K.seiten = seitenVon(S, K.x0, K.z0, w, d);
     hoehe = BAU[art](K);
   }
+  hoehe = dekorZustand(S, scene, p, art, hoehe);
   return { hoehe, art, name, form, teile: S.anzahl - start };
 }
 

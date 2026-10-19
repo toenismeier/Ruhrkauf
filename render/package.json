@@ -10,6 +10,8 @@
     "smoke:karte": "node spiel-render.js --nur-karte",
     "smoke:voll": "node spiel-render.js",
     "smoke:start": "node spiel-render.js --nur-start",
+    "smoke:wettbewerber": "node spiel-render.js --nur-wettbewerber",
+    "wettbewerb:beispiel": "node -e \"require('esbuild').buildSync({entryPoints:['../engine/scripts/wettbewerb-beispiel.ts'],bundle:true,platform:'node',outfile:'out/wettbewerb-beispiel.cjs'});require('./out/wettbewerb-beispiel.cjs')\"",
     "iphone": "node spiel-render.js --bundle && node dev-server.js"
   },
   "keywords": [],
