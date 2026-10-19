@@ -22,6 +22,7 @@ import { quelle } from './ui/quelle.js';
 import { einkaufModul } from './ui/einkauf.js';
 import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
+import { posteingangModul } from './ui/posteingang.js';
 import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
 import { laden, speichern } from './ui/speicher.js';
@@ -32,6 +33,9 @@ const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
 let speicherWarnung = false;
+const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', warnen: true });
+let postUi = neuerPostUi();
+let streifenTimer = null;
 function speicherFehler(e) {
   console.error('Spielstand konnte nicht gespeichert werden:', e);
   if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
@@ -41,20 +45,20 @@ function automatischSpeichern() {
   if (!s) return;
   clearTimeout(speicherTimer);
   speicherTimer = setTimeout(() => {
-    speichern(s, stadtName).then(() => { speicherWarnung = false; }).catch(speicherFehler);
+    speichern(s, stadtName, postUi).then(() => { speicherWarnung = false; }).catch(speicherFehler);
   }, 350);
 }
 async function sofortSpeichern() {
   if (!s) throw new Error('Noch kein Spiel gestartet.');
   clearTimeout(speicherTimer);
-  await speichern(s, stadtName);
+  await speichern(s, stadtName, postUi);
   speicherWarnung = false;
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && s) {
     // iOS kann Hintergrund-Tabs beenden: ausstehende Aenderungen sofort schreiben.
     clearTimeout(speicherTimer);
-    speichern(s, stadtName).catch((e) => console.error('Autosave bei App-Wechsel:', e));
+    speichern(s, stadtName, postUi).catch((e) => console.error('Autosave bei App-Wechsel:', e));
   }
 });
 
@@ -78,6 +82,7 @@ ren.shadowMap.type = THREE.PCFShadowMap;
 const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
 let scene = null, cam = null, wurzel = null, plan = null, sb = null, s = null, stadtName = null;
 let offenesHaus = null, offenesHq = null;
+let angebotPins = [];
 
 function groesse() { return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight]; }
 function kameraSetzen() {
@@ -114,6 +119,8 @@ function aufBoden(px, py) {
 function hausUnter(px, py) {
   const r = canvas.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2(((px - r.left) / r.width) * 2 - 1, -((py - r.top) / r.height) * 2 + 1), cam);
+  const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
+  if (ap?.object.userData.angebotId) return 'angebot:' + ap.object.userData.angebotId;
   const t = ray.intersectObject(wurzel, true)[0];
   const u = t?.object.userData;
   return u?.hausId ?? (u?.hqId ? 'hq:' + u.hqId : null);
@@ -158,12 +165,13 @@ function tippPunkt(id) {
 }
 
 // Verschieben, Wischen mit Trägheit, Pinch-Zoom, Mausrad, Antippen (ui/karte.js)
-const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id) oeffneHaus(id); } });
+const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id) oeffneHaus(id); } });
 window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
 function raeumeSzene() {
   if (!scene) return;
+  angebotPins = [];
   const texs = new Set();
   scene.traverse((o) => {
     if (o.geometry) o.geometry.dispose();
@@ -176,6 +184,21 @@ function raeumeSzene() {
   ren.renderLists.dispose();
 }
 
+function angebotsPinsAktualisieren() {
+  if (!scene || !sb || !s) return;
+  for (const p of angebotPins) { scene.remove(p); p.material?.dispose(); }
+  angebotPins = [];
+  for (const a of E.posteingang(s).handeln.filter((x) => x.art === 'angebot')) {
+    for (const id of a.bezug?.hausIds ?? []) {
+      const h = sb.haeuser.get(id);
+      if (!h?.p) continue;
+      const p = h.p;
+      const pin = angebotMarker(scene, p.x + p.w / 2, Math.max(20, (h.e?.hoehe ?? 30) + 3), p.z + p.d / 2, 8);
+      pin.userData.angebotId = a.id;
+      angebotPins.push(pin);
+    }
+  }
+}
 function baueStadtAusSpiel(name) {
   const t0 = performance.now();
   raeumeSzene();
@@ -211,6 +234,7 @@ function baueStadtAusSpiel(name) {
   const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', hq: 'hartwig' };
   setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle] ?? 'hartwig', groesse: q.rolle === 'wettbewerber' ? 7.2 : 9 })));
   for (const q of plan.standorte.filter((x) => x.angebot)) { const pz = plan.parzellen.find((x) => x.id === q.parzelle); if (pz) angebotMarker(scene, pz.x + pz.w / 2, (e.hoehen.get(pz.id) ?? 30) + 2, pz.z + pz.d / 2, 9); }
+  angebotsPinsAktualisieren();
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
   const nm = nahMitte(plan, 'einkauf', 62);
   K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
@@ -373,6 +397,7 @@ function cockpitZeigen() {
 // ─────────────────────────────────────────── Woche weiter
 function woche(mitBot = false) {
   if (s.phase === 'zerschlagen') return null;
+  const davor = E.posteingang(s);
   const t0 = performance.now();
   if (mitBot) botSchritt(s);
   E.wocheAbspielen(s);
@@ -384,6 +409,16 @@ function woche(mitBot = false) {
   else if (offenesHq) oeffneHq(offenesHq === true ? undefined : offenesHq);
   else for (const m of module()) if (m.aktiv()) m.neuZeichnen();
   ek.badge(); menueBadge();
+  angebotsPinsAktualisieren();
+  const danach = E.posteingang(s), alte = new Set(davor.handeln.map((x) => x.id)), meldungenVorher = new Set(davor.meldungen.map((x) => x.id));
+  const neu = danach.handeln.filter((x) => !alte.has(x.id));
+  const neueMeldungen = danach.meldungen.filter((x) => !meldungenVorher.has(x.id)).length;
+  const text = 'KW ' + ((s.woche % 52) + 1) + ': ' +
+    neu.filter((x) => x.art === 'angebot').length + ' neue Angebote, ' +
+    neu.filter((x) => x.art === 'entscheidung').length + ' Entscheidungen, ' + neueMeldungen + ' Meldungen';
+  const streifen = $('wochenstreifen');
+  streifen.textContent = text; streifen.classList.add('an');
+  clearTimeout(streifenTimer); streifenTimer = setTimeout(() => streifen.classList.remove('an'), 6000);
   zeichnen();
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
@@ -399,7 +434,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -602,22 +637,47 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); };
+let vs = null, mk = null, pr = null, po = null;
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
+po = posteingangModul({
+  E, s: () => s, panel, meldung, nachAktion, zustand: () => postUi, nachZustand: automatischSpeichern,
+  springe: (bezug) => {
+    if (bezug.modul && !bezug.hausIds?.length && !bezug.stadt) {
+      if (bezug.modul === 'einkauf') return oeffneEinkauf();
+      if (bezug.modul === 'vorstand') return oeffneModul(vs);
+      if (bezug.modul === 'marketing') return oeffneModul(mk);
+      if (bezug.modul === 'produkte') return oeffneModul(pr);
+      if (bezug.modul === 'zentrale') return oeffneHq();
+    }
+    if (bezug.stadt && bezug.stadt !== stadtName) {
+      wahl.value = bezug.stadt;
+      baueStadtAusSpiel(bezug.stadt);
+    }
+    const hausId = bezug.hausIds?.find((id) => sb?.haeuser.has(id));
+    if (hausId) oeffneHaus(hausId);
+    else if (bezug.modul === 'einkauf') oeffneEinkauf();
+    else schliessePanel();
+  },
+});
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
+$('posteingang').addEventListener('click', () => oeffneModul(po));
+$('postdirekt').addEventListener('click', () => oeffneModul(po));
+$('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
+$('postwarnung').addEventListener('change', (e) => { postUi.warnen = e.target.checked; automatischSpeichern(); });
 // Menü wie Coffee Inc: Knopf unten rechts öffnet die Kacheln Zentrale, Einkauf, Vorstand, Marketing, Produkte
 function menueZu() { $('menue').classList.remove('offen'); $('menueknopf').classList.remove('an'); }
 $('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menueknopf').classList.toggle('an', o); });
 $('menue').addEventListener('click', (e) => { if (e.target === $('menue')) menueZu(); });
 function menueBadge() {
   const n = (s ? E.freigaben(s).anzahl : 0), v = vs?.badge() ?? 0, b = $('menuebadge');
-  b.textContent = n + v; b.style.display = n + v ? '' : 'none';
+  const p = po?.badge() ?? 0;
+  b.textContent = n + p; b.style.display = n + p ? '' : 'none';
   const vb = $('vsbadge'); vb.textContent = v; vb.style.display = v ? '' : 'none';
 }
 $('spiel-speichern').addEventListener('click', async () => {
@@ -670,6 +730,7 @@ let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
+  postUi = neuerPostUi(); $('postwarnung').checked = true;
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
   EQ.freigaben(s);
@@ -684,10 +745,18 @@ function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) 
 const wahl = $('stadtwahl');
 wahl.innerHTML = STADTLISTE.map((q) => `<option${q.name === 'Essen' ? ' selected' : ''}>${q.name}</option>`).join('');
 wahl.addEventListener('change', () => { schliessePanel(); $('lade').classList.add('an'); setTimeout(() => { baueStadtAusSpiel(wahl.value); automatischSpeichern(); $('lade').classList.remove('an'); }, 30); });
-$('weiter').addEventListener('click', () => { $('weiter').disabled = true; setTimeout(() => { woche($('bot').checked); $('weiter').disabled = false; }, 10); });
+$('weiter').addEventListener('click', () => {
+  const bot = $('bot').checked;
+  if (!bot && postUi.warnen) {
+    const ablauf = E.posteingang(s).handeln.filter((x) => x.restWochen === 0);
+    if (ablauf.length && !window.confirm(ablauf.length + ' Vorgang/Vorgänge laufen ab: Standard wird gewählt bzw. Angebot verfällt. Trotzdem weiter?')) return;
+  }
+  $('weiter').disabled = true;
+  setTimeout(() => { try { woche(bot); } finally { $('weiter').disabled = false; } }, 10);
+});
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
@@ -765,6 +834,9 @@ async function spielFortsetzen() {
     if (!d) throw new Error('Kein Spielstand vorhanden.');
     clearTimeout(speicherTimer);
     s = d.spiel;
+    postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
+    if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
+    $('postwarnung').checked = postUi.warnen;
     schwierigkeitId = s.schwierigkeit ?? 'mittel';
     $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
