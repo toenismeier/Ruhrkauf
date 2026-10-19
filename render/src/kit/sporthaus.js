@@ -1295,7 +1295,15 @@ function erlebnisPortal(K){
      for(const du of [-0.75,0.72])s.q(cx+du,cx+du+0.07,0.70,1.75,t+0.36,t+0.44,'#cbdde4');
      s.q(cx-0.35,cx+0.45,1.52,2.15,t+0.42,t+0.51,'#2a394a');
      s.q(cx-0.25,cx+0.35,1.65,2.01,t+0.52,t+0.57,'#38bbcf');
-     if(i===1&&K.leute){const [x,z]=s.welt(cx,t-0.12);mensch(K.S,K.r,x,0.55,z);}
+     if(i===1&&K.leute){
+       // Echte Laufpose statt einer reglos stehenden Standardfigur.
+       s.q(cx-0.23,cx+0.22,1.32,2.00,t-0.12,t+0.12,'#e34a3d');
+       s.q(cx-0.12,cx+0.12,2.02,2.28,t-0.12,t+0.12,'#e5c6a8');
+       s.kipp(0.19,0.86,0.20,cx-0.26,0.94,t,'#203047',-0.48);
+       s.kipp(0.19,0.86,0.20,cx+0.20,0.93,t,'#203047',0.58);
+       s.kipp(0.13,0.65,0.20,cx-0.36,1.55,t,'#e34a3d',0.65);
+       s.kipp(0.13,0.65,0.20,cx+0.35,1.54,t,'#e34a3d',-0.65);
+     }
    }
    s.q(a+0.36,a+1.35,1.1,2.65,tt-1.58,tt-1.50,'#234564');
    s.q(a+0.48,a+1.23,1.22,2.47,tt-1.49,tt-1.45,'#7ee3ee');
