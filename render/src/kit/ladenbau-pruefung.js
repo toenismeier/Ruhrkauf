@@ -68,16 +68,29 @@ function groessteLeere(g) {
   return max*S;
 }
 function wanddeckung(plan) {
-  const o=plan.hindernisse.filter(h=>['treppe','lager','umkleide','service','aufzug'].some(t=>String(h.typ).startsWith(t)));
-  const exemptWest=o.filter(h=>h.x<=S).map(h=>[h.z,h.z+h.d]);
-  const exemptBack=o.filter(h=>h.z<=S).map(h=>[h.x,h.x+h.w]);
-  const west=plan.moebel.filter(m=>m.typ==='wand'&&m.band==='west').map(m=>[m.z,m.z+m.d]);
-  const back=plan.moebel.filter(m=>m.typ==='wand'&&m.band==='rueck').map(m=>[m.x,m.x+m.w]);
-  const real=Math.max(0,unionLength(west,plan.tiefe)-unionLength(exemptWest,plan.tiefe))+
-             Math.max(0,unionLength(back,plan.breite)-unionLength(exemptBack,plan.breite));
-  const soll=plan.tiefe+plan.breite-unionLength(exemptWest,plan.tiefe)-unionLength(exemptBack,plan.breite);
-  return soll>EPS?Math.min(1,real/soll):1;
+  // Nur wirklich gesperrte Wandabschnitte aus dem Nenner entfernen.
+  // Die frühere Subtraktion der *gesamten* Ausnahmen vom belegten Band
+  // hat dort Belegung als Null gezählt, wo ein Lager das Wandmodul ersetzte.
+  const exempt=plan.hindernisse.filter(h=>/^(treppe|lager|umkleide|service|aufzug|wc|werkstatt|luft|turm)/.test(String(h.typ)));
+  const intervalle=(typ,max)=>({
+    ausnahmen:exempt.filter(h=>typ==='west'?h.x<=S:h.z<=S).map(h=>typ==='west'?[h.z,h.z+h.d]:[h.x,h.x+h.w]),
+    band:plan.moebel.filter(m=>m.typ==='wand'&&m.band===typ).map(m=>typ==='west'?[m.z,m.z+m.d]:[m.x,m.x+m.w]),
+    max
+  });
+  let deckung=0,laenge=0;
+  for(const t of [intervalle('west',plan.tiefe),intervalle('rueck',plan.breite)]) {
+    const grenzen=[0,t.max,...t.band.flat(),...t.ausnahmen.flat()]
+      .map(v=>Math.max(0,Math.min(t.max,v))).sort((a,b)=>a-b);
+    for(let i=1;i<grenzen.length;i++){
+      const a=grenzen[i-1],b=grenzen[i],m=(a+b)/2;
+      if(b<=a+EPS||t.ausnahmen.some(v=>v[0]<=m&&v[1]>=m))continue;
+      laenge+=b-a;
+      if(t.band.some(v=>v[0]<=m&&v[1]>=m))deckung+=b-a;
+    }
+  }
+  return laenge>EPS?deckung/laenge:1;
 }
+
 /** Rückgabe mit Messwerten, kein globaler Zustand und kein stilles Herausfiltern roter Fälle. */
 export function pruefeLadenplan(plan,{teile=null}={}) {
   const fehler=[],warnungen=[],add=(art,text)=>fehler.push(art+': '+text);
