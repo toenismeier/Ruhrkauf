@@ -747,6 +747,7 @@ export function angebotMarker(scene, x, y, z, groesse = 10) {
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: _schluessel, depthTest: false }));
   sp.center.set(0.5, 0); sp.scale.set(groesse * 0.8, groesse, 1); sp.position.set(x, y, z); sp.renderOrder = 20;
   scene.add(sp);
+  return sp; // Referenz für klickbare Angebotsmarker im Posteingang
 }
 
 // ====================================================================================
