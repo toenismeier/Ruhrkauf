@@ -365,7 +365,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     case 'angebotAblehnen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden.');
-      an.status = 'abgelehnt';
+      an.status = 'abgelehnt'; an.erledigtWoche = w;
       return ok(`${an.titel}: abgelehnt.`);
     }
 
@@ -402,7 +402,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
           erfolgreich++;
         }
         einmalKosten(s, kostenGesamt);
-        an.status = erfolgreich ? 'angenommen' : 'abgelehnt';
+        an.status = erfolgreich ? 'angenommen' : 'abgelehnt'; an.erledigtWoche = w;
         if (!erfolgreich) return fehler(`Kein Standort umsetzbar. ${ergebnisse.join('; ')}`);
         melde(s, 'presse', `${an.mieterName} zieht in ${erfolgreich} Häuser von ${s.firma.name} ein.`);
         return ok(`${an.mieterName} in ${erfolgreich} Häusern, Umbau ${mio(kostenGesamt)}. ${ergebnisse.join('; ')}`);
@@ -415,7 +415,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
         s.cash += an.einmalzahlung ?? 0;
         s.einmalErloeseWoche += an.einmalzahlung ?? 0;
         s.stakeholder.image = clamp(s.stakeholder.image + 3, 0, 100);
-        an.status = 'angenommen';
+        an.status = 'angenommen'; an.erledigtWoche = w;
         melde(s, 'presse', `Neues Leben für ${h.name}: Die Stadt übernimmt das Haus.`);
         return ok(`Die Stadt übernimmt ${h.name}. Keine Restmiete, Ablöse ${mio(an.einmalzahlung ?? 0)}.`);
       }
@@ -432,7 +432,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
         for (const g of sportGruppen) { delete s.basisUmsatz[g]; delete s.orderLevel[g]; }
         s.cash += preis;
         s.einmalErloeseWoche += preis;
-        an.status = 'angenommen';
+        an.status = 'angenommen'; an.erledigtWoche = w;
         melde(s, 'presse', `${s.firma.sportName} geht für ${mio(preis)} an einen Finanzinvestor.`);
         return ok(`Sportkette verkauft: ${mio(preis)} fließen zu.`);
       }
@@ -442,7 +442,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
         s.cash -= wert;
         const g = an.gruppe as GruppeId;
         s.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });
-        an.status = 'angenommen';
+        an.status = 'angenommen'; an.erledigtWoche = w;
         return ok(`Sonderposten ${GRUPPEN[g].name} für ${mio(wert)} gekauft.`);
       }
       return fehler('Unbekannter Angebotstyp.');
