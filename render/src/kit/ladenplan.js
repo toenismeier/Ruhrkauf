@@ -103,23 +103,30 @@ function passeIn(m,raum) {
   return m.x>=raum.x-1e-8&&m.z>=raum.z-1e-8&&m.x+m.w<=raum.x+raum.w+1e-8&&m.z+m.d<=raum.z+raum.d+1e-8;
 }
 function wandband(plan,profil) {
-  const moebel=plan.moebel, rand=plan.hindernisse;
+  const ziel=plan.moebel,verbote=plan.hindernisse;
   const halb=profil.id==='sport'?'sport_schuh_halb':profil.id==='schwester'?'alt_holz_wand_halb':null;
-  // Rückwand: 5-m-Module, wenn möglich ein letztes 2,5-m-Stück.
-  for(let x=0;x+2.5<=plan.breite-1e-8;) {
-    const rest=plan.breite-x, id=rest>=5?profil.wand:halb;
-    if(!id){x+=2.5;continue;}
-    const m=item(id,x,0,0,null,{band:'rueck',schildband:true});
-    if(passe(m,plan,rand)) moebel.push(m);
-    x+=m.w;
+  const module=[profil.wand,halb].filter(Boolean);
+  // Erst Fünfmetersegmente versuchen, bei Kollision auf 2,5 m teilen:
+  // insbesondere Treppen-/Lagerraster dürfen nicht ganze freie Bänder löschen.
+  for(let x=0;x+2.5<=plan.breite+1e-8;) {
+    let gesetzt=false;
+    for(const id of module) {
+      const m=item(id,x,0,0,null,{band:'rueck',schildband:true});
+      if(x+m.w<=plan.breite+1e-8&&passe(m,plan,verbote)) {
+        ziel.push(m);x+=m.w;gesetzt=true;break;
+      }
+    }
+    if(!gesetzt)x+=2.5;
   }
-  // Westwand: 90°; am gemeinsamen Winkel bleibt ein Abstand von 1,25 m.
-  for(let z=U;z+2.5<=plan.tiefe-1e-8;) {
-    const rest=plan.tiefe-z,id=rest>=5?profil.wand:halb;
-    if(!id){z+=2.5;continue;}
-    const m=item(id,0,z,90,null,{band:'west',schildband:true});
-    if(passe(m,plan,rand)&&!moebel.some(w=>schneidet(w,m)))moebel.push(m);
-    z+=m.d;
+  for(let z=U;z+2.5<=plan.tiefe+1e-8;) {
+    let gesetzt=false;
+    for(const id of module) {
+      const m=item(id,0,z,90,null,{band:'west',schildband:true});
+      if(z+m.d<=plan.tiefe+1e-8&&passe(m,plan,verbote)&&!ziel.some(w=>schneidet(w,m))) {
+        ziel.push(m);z+=m.d;gesetzt=true;break;
+      }
+    }
+    if(!gesetzt)z+=2.5;
   }
 }
 function warenReihen(plan,profil,raum) {
@@ -214,7 +221,10 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
     const rs=plan.abteilungen.filter(x=>x.x===zone.x);
     for(let j=0;j<rs.length-1;j++) {
       const x=rs[j],z=x.z+x.d;
-      if(rs[j+1].z>z+1e-8)plan.gaenge.push({...quadrat(zone.x,z,zone.w,rs[j+1].z-z),typ:'neben'});
+      if(rs[j+1].z>z+1e-8) {
+        const quer={...quadrat(zone.x,z,zone.w,rs[j+1].z-z),typ:'neben'};
+        if(!plan.hindernisse.some(h=>schneidet(h,quer)))plan.gaenge.push(quer);
+      }
     }
   }
   for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
