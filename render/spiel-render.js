@@ -503,6 +503,11 @@ async function buendeln() {
       window.spiel.neuesSpiel(1, 'Essen');
       for (let i = 0; i < 30; i++) window.spiel.woche(true);
     });
+    await p.evaluate(() => {
+      const streifen = document.getElementById('wochenstreifen');
+      if (!streifen.textContent.startsWith('KW 31:')) throw new Error('Wochenstreifen enthält nicht die aktuelle Kalenderwoche.');
+      streifen.classList.add('an'); // Screenshot unabhängig von der 6-Sekunden-Ausblendung
+    });
     await p.screenshot({ path: path.join(bilder, 'posteingang-wochenstreifen.png') });
     await p.evaluate(() => window.spiel.oeffnePosteingang('handeln'));
     const info = await p.evaluate(() => ({ ...window.spiel.posteingang.pruefe(), aufgaben: window.spiel.E.posteingang(window.spiel.s).handeln.length }));
