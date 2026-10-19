@@ -113,7 +113,7 @@ export function posteingang(s: GameState): Posteingang {
   const erledigt: PostErledigt[] = [
     ...s.angebote.filter((a) => a.status !== 'offen' && a.woche >= grenze).map((a) => ({
       id: a.id, art: 'angebot' as const, titel: a.titel, woche: a.erledigtWoche ?? a.woche,
-      ergebnis: { angenommen: 'Angenommen', abgelehnt: 'Abgelehnt', verfallen: 'Frist abgelaufen' }[a.status] ?? a.status,
+      ergebnis: a.status === 'angenommen' ? 'Angenommen' : a.status === 'abgelehnt' ? 'Abgelehnt' : 'Frist abgelaufen',
       standard: a.status === 'verfallen', bezug: hausBezug(s, a.wunschHaeuser ?? []),
     })),
     ...(s.entscheidungsprotokoll ?? []).filter((p) => p.woche >= grenze).map((p) => ({
