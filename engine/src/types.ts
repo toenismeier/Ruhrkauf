@@ -131,6 +131,10 @@ export interface Haus {
   format: Format;
   einzug: Einzugsgebiet;
   wettbewerbStart: number;
+  /** Unveränderliche historische Nachfragebasis je Warengruppe. */
+  wettbewerbGruppeStart?: Partial<Record<GruppeId, number>>;
+  /** Startbasis für die Nachfrage auf Offprice-Flächen. */
+  wettbewerbOffpriceStart?: number;
   /** Additive Kalibrierung, weil der historische Startwert je Haus eigenständig gezogen wurde. */
   wettbewerbRohStart?: number;
   wettbewerbRohGruppenStart?: Partial<Record<GruppeId, number>>;
@@ -398,6 +402,8 @@ export interface GameState {
   wettbewerbGeseheneSchliessungen: string[];
   /** Testschalter: reproduziert die alte Simulation ohne Wettbewerbsdynamik. */
   wettbewerbDeaktiviert?: boolean;
+  /** Testschalter: nur autonome Ereignisse unterdrücken, der Startbestand bleibt aktiv. */
+  wettbewerbEreignisseDeaktiviert?: boolean;
   wettbewerbNaechsteId: number;
   wettbewerbStadtUmsatz: Record<string, number[]>;
   bestand: Kohorte[];

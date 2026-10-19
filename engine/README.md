@@ -204,3 +204,12 @@ Auftrag: `../auftraege/engine-wettbewerber.md`. Der Spielstand enthält die Wett
 **Abfragen:** `wettbewerbUebersicht(s, stadt?)` liefert Akteure und Nachfragerückgang je Gruppe, `wettbewerbFuerGrafik(s, stadt)` die für die spätere Visualisierung benötigten JSON-Felder einschließlich Aktionsrabatt. `hausDetail` enthält die Wettbewerber derselben Stadt. Das Beispielskript exportiert vollständige Stadtsnapshots für Wochen 0, 30 und 104 unter Seed 1/Bot C.
 
 **Abnahme:** `npm run typecheck`, `npm test -- --runInBand`; die neuen Wettbewerbstests prüfen Startkalibrierung, Namensabstände, Determinismus über 260 Wochen, eigenen Zufallsstrom, Nachnutzung, Konter, Fristen, Standortübernahmen und die 1-%-Jahreskalibrierung. Balancing-Ergebnisse sind erst nach erfolgreichen CI-Läufen als bestätigt zu behandeln.
+
+## Nachbesserung Wettbewerber-Engine (19.10.2026)
+
+- Nachfrage: Vergleich je Haus/Warengruppe und Offprice mit eingefrorenem Startwert; unveränderter Bestand ergibt einen Wettbewerbsfaktor von 1,0.
+- Keine zusätzliche Flächengewichtung. Attraktivität bei Angeboten relativ zur historischen Startbasis. Wirkungsintensität der Wettbewerbsänderungen: 0,05 (zuvor 0,18).
+- Regressionstest für Seeds 1 bis 3, Wochen 0 bis 12: vollständige Identität der `historie` bei aktiver Bestandsrechnung ohne neue Wettbewerbsereignisse gegenüber ausgeschaltetem Modul.
+- Abnahmetest: Umsatz und EBITDA im ersten Jahr maximal ±0,2 % zum Altmodell; Bot C auf Seeds 1 bis 3 über 260 Wochen. CI von PR #5 maßgeblich.
+
+Lokale Abnahme: `npm run typecheck && npm test`, `npx tsx scripts/kalibrierung.ts 1`, sowie `npx tsx scripts/bot.ts <seed> 260 --tief` (Seeds 1, 2, 3).

@@ -6,7 +6,8 @@ import { clamp, eur, kw, melde } from './util';
 import { neueEntscheidung, neuesAngebot } from './ereignisse';
 import { schwierigkeit } from './schwierigkeit';
 
-const WIRKUNGSFAKTOR = 0.18;
+// Relative Wettbewerbsänderungen wirken lokal; die Intensität schützt die Basiskalibrierung.
+const WIRKUNGSFAKTOR = 0.05;
 const ARTEN: WettbewerberArt[] = ['modehaus', 'fastfashion', 'premium', 'offprice', 'textildiscounter', 'elektronik', 'leer_ehemals'];
 const START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
 const START_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
@@ -47,8 +48,8 @@ function wertJeGruppe(w: Wettbewerber, g: GruppeId | 'offprice', s: GameState): 
   const aktion = (w.aktionVon ?? Infinity) <= s.woche && (w.aktionBis ?? -1) > s.woche;
   const druck = w.status === 'raeumung' ? 0.6 : aktion ? w.preisdruck : 0;
   const abwehr = (w.abwehrBis ?? 0) > s.woche ? (w.abwehrFaktor ?? 1) : 1;
-  const flaeche = clamp(Math.sqrt(w.grundflaecheQm / 3000), 0.7, 1.3);
-  return w.staerke * flaeche * (w.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
+  // Keine zusätzliche Nachfrageminderung proportional zur Verkaufsfläche.
+  return w.staerke * (w.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
 }
 function roh(s: GameState, h: Haus, g?: GruppeId | 'offprice'): number {
   let sum = 0;
@@ -78,18 +79,21 @@ export function wettbewerbAus(s: GameState, h: Haus): number {
   return clamp(h.wettbewerbStart + roh(s, h) - (h.wettbewerbRohStart ?? roh(s, h)), 0, 1);
 }
 export function wettbewerbAusGruppe(s: GameState, h: Haus, g: GruppeId): number {
-  if (s.wettbewerbDeaktiviert) return h.wettbewerbStart;
-  return clamp(h.wettbewerbStart + roh(s, h, g) - (h.wettbewerbRohGruppenStart?.[g] ?? roh(s, h, g)), 0, 1);
+  const start = h.wettbewerbGruppeStart?.[g] ?? h.wettbewerbStart;
+  if (s.wettbewerbDeaktiviert) return start;
+  return clamp(start + roh(s, h, g) - (h.wettbewerbRohGruppenStart?.[g] ?? roh(s, h, g)), 0, 1);
 }
 export function wettbewerbNachfrageFaktor(s: GameState, h: Haus, g: GruppeId): number {
-  const vor = 1 - 0.25 * h.wettbewerbStart;
-  return (1 - 0.25 * wettbewerbAusGruppe(s, h, g)) / vor;
+  const start = h.wettbewerbGruppeStart?.[g] ?? h.wettbewerbStart;
+  // Unveränderter Bestand: jetzt === start, Faktor exakt 1.
+  return (1 - 0.25 * wettbewerbAusGruppe(s, h, g)) / (1 - 0.25 * start);
 }
-/** Offprice-Flächen überschneiden sich mit konkurrierendem Offprice vollständig. */
+/** Offprice-Flächen werden ebenfalls nur gegen den Startwert gerechnet. */
 export function wettbewerbOffpriceFaktor(s: GameState, h: Haus): number {
   if (s.wettbewerbDeaktiviert) return 1;
-  const neu = clamp(h.wettbewerbStart + roh(s, h, 'offprice') - (h.wettbewerbRohOffpriceStart ?? roh(s, h, 'offprice')), 0, 1);
-  return (1 - 0.25 * neu) / (1 - 0.25 * h.wettbewerbStart);
+  const start = h.wettbewerbOffpriceStart ?? h.wettbewerbStart;
+  const neu = clamp(start + roh(s, h, 'offprice') - (h.wettbewerbRohOffpriceStart ?? roh(s, h, 'offprice')), 0, 1);
+  return (1 - 0.25 * neu) / (1 - 0.25 * start);
 }
 export function wettbewerbFrequenzFaktor(s: GameState, h: Haus): number {
   if (s.wettbewerbDeaktiviert) return 1;
@@ -136,6 +140,10 @@ export function initialisiereWettbewerb(s: GameState): void {
     }
   }
   for (const h of s.haeuser) {
+    // Historische Nachfragebasen je Haus und Gruppe einfrieren.
+    // Rohwerte der Konkurrenten liefern später ausschließlich die Differenz zum Start.
+    h.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, h.wettbewerbStart]));
+    h.wettbewerbOffpriceStart = h.wettbewerbStart;
     h.wettbewerbRohStart = roh(s, h);
     h.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, roh(s, h, g)]));
     h.wettbewerbLeerStart = leerzahl(s, h.stadt);
@@ -233,7 +241,7 @@ export function wettbewerbWoche(s: GameState): void {
       wb.konterVon = undefined; wb.konterBis = undefined; wb.konterDruck = undefined;
     }
   }
-  if (!s.prognose) {
+  if (!s.prognose && !s.wettbewerbEreignisseDeaktiviert) {
     for (const h of s.haeuser.filter((h) => h.status === 'geschlossen' && !s.wettbewerbGeseheneSchliessungen.includes(h.id))) {
       s.wettbewerbGeseheneSchliessungen.push(h.id);
       h.wettbewerbSchliessungWoche = w;

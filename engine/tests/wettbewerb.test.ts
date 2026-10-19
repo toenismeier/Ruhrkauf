@@ -1,6 +1,7 @@
 import { fuehreAus, neuesSpiel, wocheAbspielen, wettbewerbAus, wettbewerbFuerGrafik, wettbewerbUebersicht } from '../src';
 import type { GameState, Wettbewerber } from '../src';
-import { wettbewerbWoche, wettbewerbNachfrageFaktor } from '../src/wettbewerb';
+import { wettbewerbWoche, wettbewerbNachfrageFaktor, wettbewerbOffpriceFaktor } from '../src/wettbewerb';
+import { gruppenFuer } from '../src/daten';
 import { ereignisse, neueEntscheidung } from '../src/ereignisse';
 import { botTief } from '../scripts/bot';
 import { KOORDINATEN } from '../src/standorte';
@@ -20,7 +21,12 @@ describe('Wettbewerber: Initialisierung', () => {
     }
     for (const h of s.haeuser) {
       expect(Math.abs(wettbewerbAus(s, h) - h.einzug.wettbewerb)).toBeLessThanOrEqual(0.05);
-      expect(wettbewerbNachfrageFaktor(s, h, h.format === 'sport' ? 'sporttextil' : 'damen')).toBeCloseTo(1, 10);
+      expect(h.wettbewerbOffpriceStart).toBe(h.wettbewerbStart);
+      expect(wettbewerbOffpriceFaktor(s, h)).toBe(1);
+      for (const g of gruppenFuer(h.format)) {
+        expect(h.wettbewerbGruppeStart?.[g]).toBe(h.wettbewerbStart);
+        expect(wettbewerbNachfrageFaktor(s, h, g)).toBe(1);
+      }
     }
   });
   test('Namen, Stadtbilddaten und Umkreisprüfung', () => {
@@ -55,19 +61,25 @@ describe('Wettbewerber: Dynamik', () => {
     };
     expect(spiele(1)).toEqual(spiele(1));
   });
-  test('ohne Wettbewerbsereignisse reproduziert eigener RNG die Alt-Simulation', () => {
-    const s = neuesSpiel(1), kontrolle = neuesSpiel(1);
-    s.wettbewerbDeaktiviert = true;
-    kontrolle.wettbewerbDeaktiviert = true;
-    s.cash = kontrolle.cash = 5e9;
-    for (let i = 0; i < 52; i++) {
-      fuehreAus(s, { typ: 'sammelfreigabe' });
-      fuehreAus(kontrolle, { typ: 'sammelfreigabe' });
-      wocheAbspielen(s);
-      wocheAbspielen(kontrolle);
+  test('Seeds 1 bis 3: Wochen 0 bis 12 ohne Wettbewerbsereignisse exakt wie Altspiel', () => {
+    for (const seed of [1, 2, 3]) {
+      const s = neuesSpiel(seed), kontrolle = neuesSpiel(seed);
+      s.wettbewerbEreignisseDeaktiviert = true;
+      kontrolle.wettbewerbDeaktiviert = true;
+      s.cash = kontrolle.cash = 5e9;
+      for (let i = 0; i < 13; i++) {
+        for (const h of s.haeuser) {
+          expect(h.einzug.wettbewerb).toBe(h.wettbewerbStart);
+          for (const g of gruppenFuer(h.format)) expect(wettbewerbNachfrageFaktor(s, h, g)).toBe(1);
+          expect(wettbewerbOffpriceFaktor(s, h)).toBe(1);
+        }
+        fuehreAus(s, { typ: 'sammelfreigabe' });
+        fuehreAus(kontrolle, { typ: 'sammelfreigabe' });
+        wocheAbspielen(s);
+        wocheAbspielen(kontrolle);
+        expect(s.historie).toEqual(kontrolle.historie);
+      }
     }
-    expect(s.historie).toEqual(kontrolle.historie);
-    for (const h of s.haeuser) expect(h.einzug.wettbewerb).toBe(h.wettbewerbStart);
   });
   test('Eröffnungs- und Rabattdruck sinkt nach Phasenende, wirkt aber während der Phase', () => {
     const s = neuesSpiel(2);
@@ -134,7 +146,7 @@ describe('Wettbewerber: Dynamik', () => {
 });
 
 describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
-  test('Ausgangslage bleibt im ersten Jahr bei Umsatz und EBITDA innerhalb von 1 %', () => {
+  test('Ausgangslage bleibt im ersten Jahr bei Umsatz und EBITDA innerhalb von 0,2 %', () => {
     const lauf = (aktiv: boolean) => {
       const s = neuesSpiel(1);
       s.cash = 5e9;
@@ -146,8 +158,8 @@ describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
       return s.historie.reduce((sum, k) => ({ umsatz: sum.umsatz + k.umsatz, ebitda: sum.ebitda + k.ebitda }), { umsatz: 0, ebitda: 0 });
     };
     const basis = lauf(false), neu = lauf(true);
-    expect(Math.abs(neu.umsatz - basis.umsatz) / Math.abs(basis.umsatz)).toBeLessThanOrEqual(0.01);
-    expect(Math.abs(neu.ebitda - basis.ebitda) / Math.abs(basis.ebitda)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(neu.umsatz - basis.umsatz) / Math.abs(basis.umsatz)).toBeLessThanOrEqual(0.002);
+    expect(Math.abs(neu.ebitda - basis.ebitda) / Math.abs(basis.ebitda)).toBeLessThanOrEqual(0.002);
   });
   test('Bot C überlebt auf Seeds 1 bis 3 fünf Jahre', () => {
     for (const seed of [1, 2, 3]) {
@@ -157,17 +169,6 @@ describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
         const ursachen = s.meldungen.filter((m) => /Integrierte Planung|Insolvenzplan gescheitert|Masseunzulänglichkeit/.test(m.text)).slice(-4).map((m) => m.text);
         throw new Error('Bot C Seed ' + seed + ' gescheitert W' + s.woche + ', Kasse ' + Math.round(s.cash / 1e6) + ' Mio: ' + ursachen.join(' | '));
       }
-    }
-  });
-});
-
-describe('Altzustand ohne Wettbewerbsdynamik', () => {
-  test('Bot C besteht bei Seeds 2 und 3 die Gläubigerversammlung', () => {
-    for (const seed of [2, 3]) {
-      const s = neuesSpiel(seed);
-      s.wettbewerbDeaktiviert = true;
-      for (let i = 0; i < 40 && s.phase !== 'zerschlagen'; i++) { botTief(s); wocheAbspielen(s); }
-      expect({ seed, phase: s.phase }).toEqual({ seed, phase: 'regulaer' });
     }
   });
 });

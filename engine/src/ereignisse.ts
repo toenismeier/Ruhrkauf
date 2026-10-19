@@ -33,7 +33,9 @@ export function basisUmsatzHaus(h: Haus): number {
 }
 
 function attraktivitaet(h: Haus): number {
-  return h.einzug.kaufkraft * LAGE_FAKTOR[h.lage] * CLUSTER_FAKTOR[h.cluster] * (1 - 0.2 * h.einzug.wettbewerb);
+  const basis = 1 - 0.2 * h.wettbewerbStart;
+  const relativ = (1 - 0.2 * h.einzug.wettbewerb) / basis;
+  return h.einzug.kaufkraft * LAGE_FAKTOR[h.lage] * CLUSTER_FAKTOR[h.cluster] * basis * relativ;
 }
 export const hausAttraktivitaet = attraktivitaet;
 
@@ -255,7 +257,7 @@ export function ereignisse(s: GameState): void {
       // Der Interim-Skill wurde früher immer gezogen, sobald der Abgangstest positiv war.
       // RNG-Draw auch ohne lokale Konkurrenz verbrauchen, damit alle übrigen Ereignisse identisch bleiben.
       const interimSkill = zwischen(s, 0.3, 0.65);
-      if (!s.wettbewerbDeaktiviert && !kandidaten.length) continue;
+      if (!s.wettbewerbDeaktiviert && !s.wettbewerbEreignisseDeaktiviert && !kandidaten.length) continue;
       const ziel = kandidaten[0]?.name;
       melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht ${ziel ? 'zu ' + ziel : 'zur Konkurrenz'}.`);
       h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: interimSkill, moral: 50, interimBis: w + 4 };
