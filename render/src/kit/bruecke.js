@@ -254,8 +254,11 @@ export function spielBauer(s, o = {}) {
   }
   const wbBau = (S, scene, p, w) => {
     if (!w) return basis.stadthaus(S, scene, { ...p, typ: 'stadthaus', standort: undefined });
-    const W = Math.min(p.w, Math.max(20, (p.standort?.w ?? p.w) - 1));
-    const D = Math.min(p.d, Math.max(18, (p.standort?.d ?? p.d) - 1));
+    // Grundfläche und Bauform aus der Engine; der im Stadtplan feste Slot ist das Maximum.
+    const breite = Math.max(20, Math.round(Math.sqrt(Math.max(400, w.grundflaecheQm) * 1.5) / 5) * 5);
+    const tiefe = Math.max(16, Math.round(w.grundflaecheQm / breite / 5) * 5);
+    const W = Math.min(p.w - 1, breite);
+    const D = Math.min(p.d - 1, tiefe);
     const pos = imSlot(p, W, D);
     return baueWettbewerber(S, scene, {
       ...pos, w: W, d: D, seed: p.seed, art: w.art, name: w.name,
