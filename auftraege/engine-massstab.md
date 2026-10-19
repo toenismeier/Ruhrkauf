@@ -26,7 +26,7 @@ Die EBITDA-Quote der Ausgangslage bleibt die heutige Spielkalibrierung (rund −
 ## Phase 1: Standortnetz (1 Chat, zuerst)
 1. **Städte:** `engine/src/daten.ts STAEDTE` (heute 112 Einträge `[name, region, cluster, kaufkraft, nWarenhaus, nSport]`) auf rund 180 Städte ausbauen, höchstens 220. Echte deutsche Städte, `KOORDINATEN` in `engine/src/standorte.ts` ergänzen (viele sind schon da). Neuer Cluster nur, wenn nötig; sonst `mittelstadt` für alles unter 100.000 Einwohner.
 2. **Format des Eintrags erweitern:** `[name, region, cluster, kaufkraft, { hartwig, premium, volkskauf, sport, fundus }]`.
-3. **Mischung je Stadt, harte Obergrenzen:**
+3. **Mischung je Stadt, harte Obergrenzen** (ersetzt durch die Tabelle in `nachbesserung-massstab.md`, dort gelten genau 7 Metropolen):
 
    | Cluster | alle Häuser zusammen | davon Hartwig | Volkskauf | Sport | FUNDUS | Premium |
    |---|---:|---:|---:|---:|---:|---:|
