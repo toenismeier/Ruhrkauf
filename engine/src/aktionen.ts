@@ -16,6 +16,7 @@ import { EINKAUF_AKTIONEN, einkaufAktion, type EinkaufAktion } from './einkauf';
 import { VORSTAND_AKTIONEN, vorstandAktion, type VorstandAktion } from './vorstand';
 import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte';
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
+import { uebernehmeWettbewerber } from './wettbewerb';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -36,6 +37,7 @@ export type SpielerAktion =
   | { typ: 'mieteVerhandeln'; haus: string; reduktion: number; tripleNet?: boolean }
   | { typ: 'angebotVerhandeln'; angebot: string; haeuser: string[] }
   | { typ: 'angebotAnnehmen'; angebot: string }
+  | { typ: 'angebotUebernehmen'; angebot: string; modus: 'outlet' | 'erweiterung' }
   | { typ: 'angebotAblehnen'; angebot: string }
   | { typ: 'berater'; beraterTyp: BeraterTyp }
   | { typ: 'controlling'; stufe: 0 | 1 | 2 }
@@ -362,6 +364,15 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       return ok(`${an.mieterName}: „Das sind nicht die Standorte, über die wir gesprochen haben.“ Die Wunschliste gilt weiter.`);
     }
 
+    case 'angebotUebernehmen': {
+      const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen' && x.typ === 'uebernahme');
+      if (!an || !an.wettbewerberId) return fehler('Kein offenes Übernahmeangebot gefunden.');
+      const grund = uebernehmeWettbewerber(s, an.wettbewerberId, a.modus, an.mieteQmMonat);
+      if (grund) return fehler(grund);
+      an.status = 'angenommen';
+      return ok('Wettbewerberstandort übernommen als ' + (a.modus === 'outlet' ? 'Outlet.' : 'Erweiterung.'));
+    }
+
     case 'angebotAblehnen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden.');
@@ -372,6 +383,13 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     case 'angebotAnnehmen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
+      if (an.typ === 'uebernahme') {
+        if (!an.wettbewerberId) return fehler('Wettbewerber fehlt.');
+        const grund = uebernehmeWettbewerber(s, an.wettbewerberId, 'outlet', an.mieteQmMonat);
+        if (grund) return fehler(grund);
+        an.status = 'angenommen';
+        return ok('Konkurrenzfläche als eigenes Outlet übernommen.');
+      }
       if (an.typ === 'untermiete' || an.typ === 'paket') {
         const def = MIETER.find((m) => m.typ === an.mieterTyp);
         const ids = an.vorschlagHaeuser ?? [];

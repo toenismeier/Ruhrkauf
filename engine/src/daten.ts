@@ -1,4 +1,4 @@
-import type { Cluster, Format, GruppeId, Lage, MieterTyp, Region, BeraterTyp } from './types';
+import type { Cluster, Format, GruppeId, Lage, MieterTyp, Region, BeraterTyp, WettbewerberArt } from './types';
 
 export interface GruppeDef {
   id: GruppeId;
@@ -207,3 +207,26 @@ export const BERATER: BeraterDef[] = [
 ];
 
 export const PROJEKTNAMEN = ['Phönix', 'Aufbruch', 'Zukunft 2030', 'Fokus', 'Leuchtturm', 'Neustart', 'Kompass', 'Horizont', 'Wende', 'Herzschlag', 'Fundament', 'Evolution'];
+
+/** Identische Namensliste zur Stadtgrafik render/src/kit/wettbewerber.js. */
+export const WETTBEWERBER_NAMEN: Record<WettbewerberArt, readonly string[]> = {
+  modehaus: ['Brandhoff Mode', 'Lindner & Söhne', 'Haus Weidenau', 'Modehaus Kersting', 'Gebr. Hallmann', 'Haus Rosenau'],
+  offprice: ['KAUFKISTE', 'WÜHLWERK', 'RESTEPARADIES', 'SCHNÄPPCHENHOF', 'PREISSPRUNG', 'POSTENPALAST'],
+  textildiscounter: ['SPARMODE', 'KLEIDKAUF', 'TEXTILECK', 'MODEPREIS', 'STOFFSPAR', 'KLEIDERKISTE'],
+  elektronik: ['VOLTWERK', 'KABELKÖNIG', 'GERÄTEHALLE', 'STROMHAUS', 'DIGIMARKT', 'SCHALTWERK'],
+  premium: ['Haus Ahlert', 'Feldmann & Cie.', 'Kaufhaus Morgenroth', 'Haus Bellmann', 'Wagner & Thiel', 'Kaufhaus Lindenhof'],
+  fastfashion: ['NOVA', 'TRENDWERK', 'WIRBEL', 'STYLO', 'KOLLEKT', 'PULS'],
+  leer_ehemals: ['KAUFHAUS STRAUB', 'BÖLLING', 'WESTKAUF', 'HAUS MERTENS', 'WARENHAUS ELSNER', 'KAUFHAUS DREWS'],
+};
+
+/** Nachfrageüberschneidung je Konkurrenzart und Hartwig-Gruppe (0..1). */
+export const WETTBEWERB_UEBERSCHNEIDUNG: Record<WettbewerberArt, Partial<Record<GruppeId, number>>> = {
+  modehaus: { damen: 1, herren: 1, waesche: 0.6, accessoires: 0.6, kinder: 0.3 },
+  fastfashion: { damen: 1, herren: 0.8, accessoires: 0.5, kinder: 0.3, sporttextil: 0.4 },
+  textildiscounter: { kinder: 1, waesche: 0.8, damen: 0.6, herren: 0.6 },
+  offprice: { damen: 0.4, herren: 0.4, kinder: 0.4, beauty: 0.4, accessoires: 0.4, waesche: 0.4, wohnen: 0.4, spielwaren: 0.4, food: 0.4, sport: 0.4,
+    sportschuhe: 0.3, sporttextil: 0.3, outdoor: 0.3, rad: 0.3, wintersport: 0.3, teamsport: 0.3 },
+  elektronik: { wohnen: 0.5, spielwaren: 0.3 },
+  premium: { beauty: 1, accessoires: 1, damen: 0.6, food: 0.5 },
+  leer_ehemals: {},
+};

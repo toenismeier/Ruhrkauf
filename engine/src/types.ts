@@ -10,6 +10,31 @@ import type { SchwierigkeitId } from './schwierigkeit';
 export type Eur = number;
 
 export type Format = 'warenhaus' | 'sport';
+export type WettbewerberArt = 'modehaus' | 'offprice' | 'textildiscounter' | 'elektronik' | 'premium' | 'fastfashion' | 'leer_ehemals';
+
+export interface Wettbewerber {
+  id: string;
+  name: string;
+  art: WettbewerberArt;
+  kette: string;
+  stadt: string;
+  lage: Lage;
+  grundflaecheQm: number;
+  staerke: number;
+  preisdruck: number;
+  status: 'offen' | 'eroeffnung' | 'raeumung' | 'geschlossen';
+  seit: number;
+  bis?: number;
+  inHartwigGebaeude?: string;
+  form: number;
+  aktionVon?: number;
+  aktionBis?: number;
+  konterVon?: number;
+  konterBis?: number;
+  konterDruck?: number;
+  abwehrBis?: number;
+  abwehrFaktor?: number;
+}
 export type Lage = '1a' | 'b' | 'center' | 'rand';
 export type Cluster = 'metropole' | 'grossstadt' | 'mittelstadt';
 export type Region = 'Nord' | 'Ost' | 'West' | 'Mitte' | 'Süd';
@@ -105,6 +130,17 @@ export interface Haus {
   lage: Lage;
   format: Format;
   einzug: Einzugsgebiet;
+  wettbewerbStart: number;
+  /** Unveränderliche historische Nachfragebasis je Warengruppe. */
+  wettbewerbGruppeStart?: Partial<Record<GruppeId, number>>;
+  /** Startbasis für die Nachfrage auf Offprice-Flächen. */
+  wettbewerbOffpriceStart?: number;
+  /** Additive Kalibrierung, weil der historische Startwert je Haus eigenständig gezogen wurde. */
+  wettbewerbRohStart?: number;
+  wettbewerbRohGruppenStart?: Partial<Record<GruppeId, number>>;
+  wettbewerbLeerStart?: number;
+  wettbewerbRohOffpriceStart?: number;
+  wettbewerbSchliessungWoche?: number;
   etagen: number[];
   grundflaecheQm: number;
   baujahr: number;
@@ -237,7 +273,7 @@ export interface BeraterMandat {
   ergebnis?: { empfohleneSchliessungen: string[]; folien: number; fazit: string };
 }
 
-export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten';
+export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme';
 
 export interface Angebot {
   id: string;
@@ -259,6 +295,8 @@ export interface Angebot {
   minHaeuser?: number;
   flexibilitaet?: number; // verdeckt 0..1
   einmalzahlung?: Eur;
+  /** Angebot zur Übernahme eines aufgegebenen Konkurrenzstandorts. */
+  wettbewerberId?: string;
   // sportverkauf
   kaufpreis?: Eur;
   // sonderposten
@@ -372,6 +410,16 @@ export interface GameState {
   kreditlinieBasis: Eur;
   zahlungsstockungSeit?: number;
   haeuser: Haus[];
+  wettbewerber: Wettbewerber[];
+  wettbewerbRng: number;
+  wettbewerbNachnutzungen: { haus: string; woche: number }[];
+  wettbewerbGeseheneSchliessungen: string[];
+  /** Testschalter: reproduziert die alte Simulation ohne Wettbewerbsdynamik. */
+  wettbewerbDeaktiviert?: boolean;
+  /** Testschalter: nur autonome Ereignisse unterdrücken, der Startbestand bleibt aktiv. */
+  wettbewerbEreignisseDeaktiviert?: boolean;
+  wettbewerbNaechsteId: number;
+  wettbewerbStadtUmsatz: Record<string, number[]>;
   bestand: Kohorte[];
   bestellungen: Bestellung[];
   verbindlichkeiten: Verbindlichkeit[];

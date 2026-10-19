@@ -3,6 +3,7 @@ import { runwayWochen } from './stakeholder';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
+import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
 
 /** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */
@@ -212,7 +213,7 @@ export function hausDetail(s: GameState, id: string) {
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),
   }));
-  return { haus: h, etagen };
+  return { haus: h, etagen, wettbewerber: wettbewerbUebersicht(s, h.stadt) };
 }
 
 export function warenwirtschaft(s: GameState) {
@@ -241,3 +242,6 @@ export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance } from '
 export { produkte, produktKatalog, trendbericht, produktVorschau } from './produkte';
 /** Marketing: Übersicht, Kanäle, Hartwig Karte und App, CRM-Kampagnen, Aktionskalender, Aktionsauswertung. */
 export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalender, aktionsAuswertung } from './marketing';
+
+/** Wettbewerbsübersicht und Übergabeobjekte für das spätere Stadtbild. */
+export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';

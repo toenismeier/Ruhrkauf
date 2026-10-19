@@ -4,6 +4,7 @@ import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
+import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -74,7 +75,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale;
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale;
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -112,12 +113,12 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     const Q = h.saettigungQm[g] ?? 1;
     const qm = (qmEigen[g] ?? 0) + (qmKomm[g] ?? 0);
     const sf = saisonFaktor(g, w);
-    const b = P * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s, h, g);
+    const b = P * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g);
     bruttoBasis[g] = b;
     summeBasis += b;
     summeBedarf += (b / Math.max(0.05, sf)) * Math.sqrt(sf);
   }
-  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w);
+  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbOffpriceFaktor(s, h);
   summeBasis += offBasis;
   summeBedarf += offBasis;
 
@@ -159,7 +160,7 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   for (const [g, qm] of Object.entries(qmKonz) as [GruppeId, number][]) {
     const P = h.potenzial[g] ?? 0;
     const Q = h.saettigungQm[g] ?? 1;
-    roh.konzessionUmsatz += P * saettigung(qm, Q) * saisonFaktor(g, w) * hf * lieferantenFaktor(s, h, g);
+    roh.konzessionUmsatz += P * saettigung(qm, Q) * saisonFaktor(g, w) * hf * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g);
   }
   return roh;
 }

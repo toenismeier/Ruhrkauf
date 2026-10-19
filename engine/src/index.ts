@@ -41,3 +41,5 @@ export {
 export { SCHWIERIGKEIT, SCHWIERIGKEITEN, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
 
 export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, PostKategorie } from './abfragen';
+export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
+export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
