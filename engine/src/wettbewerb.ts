@@ -47,7 +47,8 @@ function wertJeGruppe(w: Wettbewerber, g: GruppeId | 'offprice', s: GameState): 
   const aktion = (w.aktionVon ?? Infinity) <= s.woche && (w.aktionBis ?? -1) > s.woche;
   const druck = w.status === 'raeumung' ? 0.6 : aktion ? w.preisdruck : 0;
   const abwehr = (w.abwehrBis ?? 0) > s.woche ? (w.abwehrFaktor ?? 1) : 1;
-  return w.staerke * (w.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
+  const flaeche = clamp(Math.sqrt(w.grundflaecheQm / 3000), 0.7, 1.3);
+  return w.staerke * flaeche * (w.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
 }
 function roh(s: GameState, h: Haus, g?: GruppeId | 'offprice'): number {
   let sum = 0;
