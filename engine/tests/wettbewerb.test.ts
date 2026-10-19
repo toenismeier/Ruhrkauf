@@ -153,7 +153,10 @@ describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
     for (const seed of [1, 2, 3]) {
       const s = neuesSpiel(seed);
       for (let i = 0; i < 260 && s.phase !== 'zerschlagen'; i++) { botTief(s); wocheAbspielen(s); }
-      expect({ seed, phase: s.phase, woche: s.woche }).toEqual({ seed, phase: 'regulaer', woche: 260 });
+      if (s.phase !== 'regulaer' || s.woche !== 260) {
+        const ursachen = s.meldungen.filter((m) => /Integrierte Planung|Insolvenzplan gescheitert|Masseunzulänglichkeit/.test(m.text)).slice(-4).map((m) => m.text);
+        throw new Error('Bot C Seed ' + seed + ' gescheitert W' + s.woche + ', Kasse ' + Math.round(s.cash / 1e6) + ' Mio: ' + ursachen.join(' | '));
+      }
     }
   });
 });
