@@ -4,7 +4,7 @@ import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
-import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor } from './wettbewerb';
+import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -118,7 +118,7 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     summeBasis += b;
     summeBedarf += (b / Math.max(0.05, sf)) * Math.sqrt(sf);
   }
-  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbNachfrageFaktor(s, h, h.format === 'sport' ? 'sporttextil' : 'damen');
+  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbOffpriceFaktor(s, h);
   summeBasis += offBasis;
   summeBedarf += offBasis;
 
