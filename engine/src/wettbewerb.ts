@@ -61,7 +61,9 @@ function roh(s: GameState, h: Haus, g?: GruppeId | 'offprice'): number {
       sum += lage * (gewicht ? summe / gewicht : 0);
     }
   }
-  return sum * 0.65;
+  // Sensitivität bewusst gedämpft: Wettbewerbsaktionen bleiben lokal sichtbar,
+  // die bestehende EBITDA-Kalibrierung und der Insolvenzplan bleiben stabil.
+  return sum * 0.18;
 }
 function leerzahl(s: GameState, stadt: string): number {
   return s.wettbewerber.filter((w) => w.stadt === stadt && w.art === 'leer_ehemals' && w.status !== 'geschlossen').length;
