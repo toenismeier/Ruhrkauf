@@ -510,6 +510,7 @@ async function buendeln() {
     });
     await p.screenshot({ path: path.join(bilder, 'posteingang-wochenstreifen.png') });
     await p.evaluate(() => window.spiel.oeffnePosteingang('handeln'));
+    await p.waitForTimeout(350); // Slide-up-Animation abschließen lassen
     const info = await p.evaluate(() => ({ ...window.spiel.posteingang.pruefe(), aufgaben: window.spiel.E.posteingang(window.spiel.s).handeln.length }));
     if (info.soll !== info.badge || info.soll !== info.karten || info.soll !== info.aufgaben) {
       throw new Error('Posteingang weicht von Engine ab: ' + JSON.stringify(info));
