@@ -367,7 +367,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     case 'angebotUebernehmen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen' && x.typ === 'uebernahme');
       if (!an || !an.wettbewerberId) return fehler('Kein offenes Übernahmeangebot gefunden.');
-      const grund = uebernehmeWettbewerber(s, an.wettbewerberId, a.modus);
+      const grund = uebernehmeWettbewerber(s, an.wettbewerberId, a.modus, an.mieteQmMonat);
       if (grund) return fehler(grund);
       an.status = 'angenommen';
       return ok('Wettbewerberstandort übernommen als ' + (a.modus === 'outlet' ? 'Outlet.' : 'Erweiterung.'));
@@ -385,7 +385,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
       if (an.typ === 'uebernahme') {
         if (!an.wettbewerberId) return fehler('Wettbewerber fehlt.');
-        const grund = uebernehmeWettbewerber(s, an.wettbewerberId, 'outlet');
+        const grund = uebernehmeWettbewerber(s, an.wettbewerberId, 'outlet', an.mieteQmMonat);
         if (grund) return fehler(grund);
         an.status = 'angenommen';
         return ok('Konkurrenzfläche als eigenes Outlet übernommen.');
