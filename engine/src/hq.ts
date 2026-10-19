@@ -590,10 +590,10 @@ export function hqWoche(s: GameState): void {
   }
   hq.restmieten = hq.restmieten.filter((r) => r.bis > w);
   for (const g of hq.gebaeude) {
-    if (g.bisWoche - 13 === w) melde(s, 'warnung', `Der Mietvertrag für ${g.name} (${g.stadt}) endet in 13 Wochen. Ohne Kündigung verlängert er sich um 5 Jahre.`);
+    if (g.bisWoche - 13 === w) melde(s, 'warnung', `Der Mietvertrag für ${g.name} (${g.stadt}) endet in 13 Wochen. Ohne Kündigung verlängert er sich um 5 Jahre.`, { stadt: g.stadt, modul: 'zentrale' });
     if (g.bisWoche === w) {
       g.bisWoche = w + 260;
-      melde(s, 'info', `Der Mietvertrag für ${g.name} hat sich um 5 Jahre verlängert.`);
+      melde(s, 'info', `Der Mietvertrag für ${g.name} hat sich um 5 Jahre verlängert.`, { stadt: g.stadt, modul: 'zentrale' });
     }
   }
   hqAktualisiere(s);
@@ -668,7 +668,7 @@ export function hqMieten(s: GameState, angebotId: string, etagen: number[]): HqE
     g.bisWoche = s.woche + an.laufzeitJahre * 52;
     hq.gebaeude.push(g);
     hq.angebote = hq.angebote.filter((a) => a !== an);
-    melde(s, 'presse', `Die Zentrale von ${s.firma.name} mietet ${qm.toLocaleString('de-DE')} qm im ${g.name} in ${g.stadt}.`);
+    melde(s, 'presse', `Die Zentrale von ${s.firma.name} mietet ${qm.toLocaleString('de-DE')} qm im ${g.name} in ${g.stadt}.`, { stadt: g.stadt, modul: 'zentrale' });
   }
   hqAktualisiere(s);
   const jahr = wochenMiete(qm, g.mieteQmMonat + g.nebenkostenQmMonat) * 52;
