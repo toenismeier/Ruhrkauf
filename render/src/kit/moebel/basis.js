@@ -161,6 +161,7 @@ export function inselModul(L, r, d, ctx = {}, o = {}) {
 
 export function dekoModul(L, r, d, ctx = {}, o = {}) {
   const art = o.art ?? 'pflanze';
+  if (LOD.stufe === 'fern') { L.box(art === 'pflanze' ? 0.9 : art === 'banner' ? 1.5 : 2.3, art === 'pflanze' ? 1.2 : 2.7, art === 'pflanze' ? 0.9 : 0.3, 0, 0, art === 'pflanze' ? 0.95 : 0.17, o.akzent ?? '#849da0'); return; }
   if (art === 'pflanze') { L.box(0.9, 0.44, 0.9, 0, 0, 0.95, '#d7d1c7'); L.kugel(0.42, 0, 0.85, 0.95, '#5d9563'); }
   else if (art === 'klettern') { L.box(2.4, 2.7, 0.3, 0, 0, 0.17, '#d7d0c4'); if (LOD.stufe !== 'fern') for(let i=0;i<12;i++) L.box(0.21,0.14,0.14,(i%4-1.5)*0.48,0.3+Math.floor(i/4)*0.70,0.42,farbe(r,palette('outdoor'))); }
   else if (art === 'bild') { L.box(2.3, 2.7, 0.3, 0, 0, 0.17, '#e8e3dc'); L.box(1.9, 1.9, 0.06, 0, 0.4, 0.34, o.akzent ?? '#64879a'); }
@@ -171,6 +172,7 @@ export function dekoModul(L, r, d, ctx = {}, o = {}) {
 export function serviceModul(L, r, d, ctx = {}, o = {}) {
   const w = o.w ?? 2.5, art = o.art ?? 'info';
   if (art === 'umkleide') {
+    if (LOD.stufe === 'fern') { L.box(w,2.4,0.08,0,0,0.04,'#e0d9d0'); L.box(w,2.1,0.06,0,0.18,1.86,'#8b7581'); return; }
     const n = o.kabinen ?? 2, tiefe = 1.9;
     L.box(w, 2.4, 0.08, 0, 0, 0.04, '#e0d9d0');
     for (let i=0;i<=n;i++) L.box(0.07,2.4,tiefe,-w/2 + i*w/n,0,tiefe/2,'#e0d9d0');
