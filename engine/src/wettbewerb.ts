@@ -88,12 +88,13 @@ export function wettbewerbFrequenzFaktor(s: GameState, h: Haus): number {
 function neuerName(s: GameState, art: WettbewerberArt, stadt: string): string {
   const namen = WETTBEWERBER_NAMEN[art];
   const frei = namen.filter((n) => !s.wettbewerber.some((w) => w.name === n && entfernung(stadt, w.stadt) < 28));
-  return wahl(s, frei.length ? frei : namen);
+  return frei.length ? wahl(s, frei) : namen[0] + ' ' + stadt;
 }
 function anlegen(s: GameState, stadt: string, art: WettbewerberArt, lage: Lage, qm: number, seit: number, inHaus?: string): Wettbewerber {
   const name = neuerName(s, art, stadt);
+  const kette = name.endsWith(' ' + stadt) ? name.slice(0, -(stadt.length + 1)) : name;
   const w: Wettbewerber = {
-    id: 'C' + String(++s.wettbewerbNaechsteId).padStart(3, '0'), name, kette: name, art, stadt, lage,
+    id: 'C' + String(++s.wettbewerbNaechsteId).padStart(3, '0'), name, kette, art, stadt, lage,
     grundflaecheQm: qm, staerke: z(s, 0.28, 0.85), preisdruck: 0,
     status: seit > 0 ? 'eroeffnung' : 'offen', seit, bis: seit > 0 ? seit + 4 : undefined,
     form: gz(s, 0, 4), inHartwigGebaeude: inHaus,
