@@ -226,7 +226,7 @@ function verdichteLadenplan(plan,profil){
     if(gross<=R.leerflaecheMax&&besetzt>=R.moebelAnteilMin*verfuegbar)break;
     let eingefuegt=false;
     for(const f of felder){
-      if(f.size<(gross>R.leerflaecheMax?5:3.75))break;
+      if(f.size<(gross>R.leerflaecheMax?5:2.5))break;
       for(const art of varianten){
         const def=moebel(art.id),gedreht=art.winkel===90;
         const w=(gedreht?def.rasterT:def.rasterB)*U;
@@ -238,7 +238,7 @@ function verdichteLadenplan(plan,profil){
             const raum=plan.abteilungen.find(r=>x>=r.x&&z>=r.z&&x+w<=r.x+r.w&&z+d<=r.z+r.d);
             if(!raum)continue;
             const key=raum.id+':'+art.gruppe;
-            if((zaehler.get(key)||0)>=(art.gruppe==='insel'?6:8))continue;
+            if((zaehler.get(key)||0)>=(art.gruppe==='insel'?6:12))continue;
             const m=item(art.id,x,z,art.winkel,raum.id,{ausgleich:true,kopf:art.gruppe==='kopf'});
             if(!passeIn(m,raum)||!passe(m,plan,
               [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
