@@ -85,3 +85,38 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 3. **Phase 3:** Reihenplanung und Freiflächen optimieren, bis Dichte 35–50 % und größte Leerfläche ≤6 m erreicht werden; alle 50 bzw. nach aktuellem Stamm 44 Sporthäuser samt Etagen prüfen und Teile tatsächlich zählen. Weitere Prüflücken (insbesondere Wegesuche, Randband und kassenfreier Plan) nachbessern, Diagnosekataloge rendern/ansehen, grünen Render-Build und Browser-Smoke nachweisen. Dann PR #9 mergen.
 4. **Phase 4 Sport:** erst nach Phase-3-Abnahme beginnen; Sport-Außenfamilien und Spiel-Logik beibehalten.
 
+
+## Fortsetzung 19.10.2026: Produktionsdaten-Regressionscheck (Phase 3)
+
+### Durchgeführt und committed auf `feat/ladenbau-p3`
+- Das Programm erzeugt für echte Sporthausdaten einen durchgängigen Hauptgang, der rückwärtige Treppen- und Lagerraster berücksichtigt; unpassierbare Querwege werden nicht erzeugt. Kassen weichen Hindernissen aus.
+- Sortimentstrennung: pro Abteilung rechteckige Fläche im 1,25-m-Raster; maximal ein durchgängiger 2,5-m-Querweg je Seite, statt eines Gangs nach jeder Abteilung.
+- Möbel: beidseitige Gondelreihen (2 × 1,25 m Rücken an Rücken) mit 1,875-m-Laufgängen, kurze Restmodule und begrenzte Waren-/Kopfinseln zum Schließen von Leerflächen. Max. eine **Erlebnisinszenierung** pro Abteilung bleibt erhalten; normale Kopf-/Wareninseln sind keine Erlebnisinszenierungen.
+- Rück- und Westwand: Modul auf 2,5 m reduzieren, wenn 5 m wegen Hindernis nicht passt; nach 5-m-Treppenrastern wieder modular bestücken. Wandprüfung berechnet belegte vs. *nutzbare* Wandintervalle korrekt; Treppen, Rolltreppen, Aufzüge und Lagerräume sind Ausnahmen.
+- `render/tests/ladenbau-smoke.cjs`: jetzt harte Assertions für alle vier synthetischen Fälle **und alle 50 Sporthäuser / 101 Verkaufsetagen** aus `render/haeuser.json`. Bis zur Node-Ausführung sind das neu geschriebene Tests, **keine bestandenen Node-Tests**.
+
+### Gemessen (isolierte V8-Ausführung mit den tatsächlichen Funktionen und Produktionsdaten)
+| Kennzahl | Neuer Stand |
+|---|---|
+| Sporthäuser | **50** |
+| Verkaufsetagen | **101** |
+| Ohne Planabbruch | **101 / 101** |
+| Ohne Ladenbau-Regelverstoß im isolierten Logiktest | **101 / 101** |
+| Möbeldichte, Minimum / Maximum | **35,12 % / 46,03 %**, Ziel 35–50 % |
+| Wandbelegung / Kasse / Wege / Leerfläche | **0 Verstöße** in 101 Datenplänen |
+| Geplante Möbelobjekte über alle 101 Etagen | **14.976** |
+| Vier synthetische Grundrisse (30×30, 45×40, 55×40, 75×55 m) | **jeweils 0 Verstöße** |
+
+**Testabgrenzung:** Für diese Prüfung wurden die konkreten JavaScript-Funktionen und Möbel-Metadaten über den GitHub-Connector geladen und in isolierter V8-Laufzeit ausgewertet. Die originalen Eingabedaten `render/haeuser.json`, `sportRaster`, `masseSport`, `familieSport` und die echte Plan-Prüflogik wurden verwendet; Modulimporte und Three.js-Build wurden nicht ausgeführt. Das Ergebnis ist **kein** Nachweis für `npm ci`, `esbuild`, `pruef-ladenbau.js --teile`, Chromium-Rendering oder `spiel-render.js`.
+
+### Offene Abnahme- und Merge-Blocker
+1. **Phase 1 (PR #6):** `feat/ladenbau` hängt hinter dem aktuellen `main`, Merge-Konflikte. Erforderlich: Rebase, vollständiger lokaler Build/Engine/Render-Smoke, `pruef-moebel`, vier Katalog-PNGs tatsächlich in `bilder/` aufnehmen und prüfen. Letzter CI-Lauf auf einem älteren Commit grün; aktueller HEAD hat wegen GitHub-Runner-Provisionierung kein grünes CI.
+2. **Phase 2 (PR #8):** `feat/ladenbau-p2` als Entwurf; Regeln/Konstanten vorhanden, es fehlen Integrationstest, Review und Merge nach Phase 1.
+3. **Phase 3 (PR #9):** Plan-Datenregression nun isoliert grün. Zwingend offen: vollständige Node-`ladenbau:smoke` und `ladenbau:pruefen:teile` mit echten Sammler-Teilen, Render-Build, alle Bilder erstellen und **visuell inspizieren**, Regression `spiel-render.js`, Kompatibilität mit jüngstem `main`. Erst nach grüner Abnahme in Abhängigkeitsreihenfolge mergen.
+4. **Phase 4 Sport:** fachlich freigegeben, aber noch nicht begonnen. Abhängig von abgenommener Phase 3. Die bestehende Sport-Innengeometrie wurde **nicht** umgestellt.
+5. **Umgebung:** Lokaler Checkout des privaten GitHub-Repos ist derzeit nicht möglich: Shell-Netzwerkauflösung für github.com fehlgeschlagen. Die hier dokumentierten Commits wurden über die authentifizierte GitHub-Verbindung erstellt. **Nichts nach `main` gemergt.**
+
+### Letzter Stand und nächste konkrete Aktion
+- Letzte Codekorrekturen: `render/src/kit/ladenplan.js`, `render/src/kit/ladenbau-pruefung.js`, `render/tests/ladenbau-smoke.cjs` auf Branch `feat/ladenbau-p3`.
+- Die älteren Zeilen im Abschnitt „Fortsetzung ... Phasen 2 und 3 vorgezogen“ beschreiben den **damaligen Zwischenstand**; die Werte „rot“ werden durch die obigen 101/101-Prüfwerte ersetzt.
+- **Priorität:** Phase 1 auf aktuellen `main` bringen und lokal abnehmen, Bilddateien versionieren, PR #6 mergen; danach Phase 2 und Phase 3 mit echtem Node/Three.js/Browsertest abnehmen und mergen. `main` bis dahin unverändert lassen.
