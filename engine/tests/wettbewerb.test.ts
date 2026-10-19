@@ -157,3 +157,14 @@ describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
     }
   });
 });
+
+describe('Altzustand ohne Wettbewerbsdynamik', () => {
+  test('Bot C besteht bei Seeds 2 und 3 die Gläubigerversammlung', () => {
+    for (const seed of [2, 3]) {
+      const s = neuesSpiel(seed);
+      s.wettbewerbDeaktiviert = true;
+      for (let i = 0; i < 40 && s.phase !== 'zerschlagen'; i++) { botTief(s); wocheAbspielen(s); }
+      expect({ seed, phase: s.phase }).toEqual({ seed, phase: 'regulaer' });
+    }
+  });
+});
