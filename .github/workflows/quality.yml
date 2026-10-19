@@ -5,6 +5,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Neue Pushes auf demselben Feature-Branch ersetzen veraltete Prüfungen.
+concurrency:
+  group: ruhrkauf-qualitaet-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
