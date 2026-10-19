@@ -1,4 +1,4 @@
-name: Hartwig Sport Nachbesserung – Bildabnahme
+name: Hartwig Sport Nachbesserung – Runde 2
 on:
   push:
     branches: [feat/grafik-sport]
@@ -51,7 +51,7 @@ jobs:
           const stats=JSON.parse(line.slice(14));
           if(stats.length!==28)throw Error('Erwartet 28 Varianten, erhalten: '+stats.length);
           for(const s of stats)if(s.teile>8000)throw Error('Über 8000 Teile: '+JSON.stringify(s));
-          const s=stats.filter(x=>x.id.includes('S003'));
+          const s=stats.filter(x=>x.id==='S003 · Referenz');
           if(s.length!==4)throw Error('S003: 4 Vergleichszustände fehlen');
           if(s[1].teile<s[0].teile)throw Error('S003 Abverkauf hat weniger Teile als Normal: '+s[1].teile+' < '+s[0].teile);
           console.log('28 Varianten innerhalb 8000 Teile; S003 normal',s[0].teile,'Abverkauf',s[1].teile);
