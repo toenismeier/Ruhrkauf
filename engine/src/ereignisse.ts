@@ -176,7 +176,7 @@ function lieferantenEreignisse(s: GameState): void {
     if (l.id === 'hallberg' && (l.verspaetungen > 1.5 || s.phase === 'insolvenz') && chance(s, l.fragilitaet)) {
       l.aktiv = false;
       l.ausfallBis = s.woche + Math.max(4, Math.round(12 * schwierigkeit(s).ereignisse));
-      melde(s, 'presse', 'Hallberg & Söhne meldet Insolvenz an. „Ein großer Kunde hat uns mitgerissen.“');
+      melde(s, 'presse', 'Hallberg & Söhne meldet Insolvenz an. „Ein großer Kunde hat uns mitgerissen.“', { modul: 'einkauf' });
       melde(s, 'warnung', 'Herrenware von Hallberg fällt für rund 12 Wochen aus, danach übernehmen andere Lieferanten.');
     }
     if (l.id === 'nordline' && !l.dtc && chance(s, 0.003)) {
@@ -264,7 +264,7 @@ export function ereignisse(s: GameState): void {
     const dauer = ganzZwischen(s, 1, 2);
     for (const h of betroffen) h.streikBis = w + dauer;
     s.stakeholder.image = clamp(s.stakeholder.image - schwierigkeit(s).ereignisse, 0, 100);
-    melde(s, 'presse', `Verdi ruft zum Streik auf: ${betroffen.length} Häuser betroffen.`);
+    melde(s, 'presse', `Verdi ruft zum Streik auf: ${betroffen.length} Häuser betroffen.`, { modul: 'zentrale' });
   }
 
   if (chance(s, 0.04)) melde(s, 'presse', waehle(s, SATIRE));
