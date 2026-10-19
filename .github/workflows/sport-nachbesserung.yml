@@ -1,4 +1,4 @@
-name: Hartwig Sport Nachbesserung – Runde 2
+name: Hartwig Sport Nachbesserung – Runde 3
 on:
   push:
     branches: [feat/grafik-sport]
@@ -53,8 +53,15 @@ jobs:
           for(const s of stats)if(s.teile>8000)throw Error('Über 8000 Teile: '+JSON.stringify(s));
           const s=stats.filter(x=>x.id==='S003 · Referenz');
           if(s.length!==4)throw Error('S003: 4 Vergleichszustände fehlen');
-          if(s[1].teile<s[0].teile)throw Error('S003 Abverkauf hat weniger Teile als Normal: '+s[1].teile+' < '+s[0].teile);
-          console.log('28 Varianten innerhalb 8000 Teile; S003 normal',s[0].teile,'Abverkauf',s[1].teile);
+          for(let q=0;q<stats.length;q+=4){
+            if(stats[q+1].teile<stats[q].teile)throw Error('Abverkauf hat weniger Teile: '+JSON.stringify(stats.slice(q,q+2)));
+          }
+          const hline=fs.readFileSync('out/.log-sporthaeuser','utf8').split('\n').find(s=>s.startsWith('SPORTHAEUSER_STAT '));
+          if(!hline)throw Error('Teileprotokoll aller 56 Sporthaus-Szenarien fehlt');
+          const alle=JSON.parse(hline.slice('SPORTHAEUSER_STAT '.length));
+          if(alle.length!==56)throw Error('56 Sporthäuser erwartet, erhalten: '+alle.length);
+          for(const h of alle)if(h.teile>8000)throw Error('Über 8000 Teile im Basiskatalog: '+JSON.stringify(h));
+          console.log('Abnahme: 56 Hausansichten und 28 Zustandsvarianten unter 8000 Teilen; S003',s[0].teile,'→',s[1].teile);
           NODE
       - name: Bilder im Repository aktualisieren
         shell: bash
