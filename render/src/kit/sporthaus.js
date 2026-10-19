@@ -1236,13 +1236,19 @@ function abverkaufFassade(K){
 function substanzAkzente(K){
  if(!K.matt||K.zu)return;
  const s=K.seiten[0], t=(K.tRelief??0.5)+0.85;
- const u=Math.max(5,Math.min(s.L*0.34,s.L-6)), y=EG_S-0.9;
- const wb=Math.min(15,s.L*0.40);
+ const u=s.L*0.5, y=EG_S-0.85;
+ const wb=Math.min(s.L*0.78,s.L-2.0);
  // Ausgebleichtes, schief hängendes Tuch auf halber Fassadenbreite,
  // sichtbar bereits bei fester Spielkamera und nicht als Schließung interpretiert.
- s.kipp(wb,1.65,0.15,u,y,t+0.45,'#b1ab90',-0.095);
- s.kipp(wb-0.45,1.30,0.16,u,y-0.05,t+0.54,'#d3c8a3',-0.095);
- plakat(K.scene,s,'LETZTE SAISON',u,y,t+0.66,passend('LETZTE SAISON',wb-1.0,0.83),'#77705d',null,{rz:-0.095});
+ s.kipp(wb,1.85,0.15,u,y,t+0.58,'#858b82',-0.032);
+ s.kipp(wb-0.45,1.55,0.18,u,y-0.08,t+0.69,'#c2c1b0',-0.032);
+ s.q(u-wb*0.46,u+wb*0.46,y-0.88,y-0.76,t+0.84,t+0.91,'#9d9f93');
+ plakat(K.scene,s,'LETZTE SAISON',u,y,t+0.94,passend('LETZTE SAISON',wb-1.3,1.0),'#595d5b',null,{rz:-0.032});
+ // Grauer, noch intakter Rahmen ersetzt hier frische Werbetechnik; kein Verfallszustand.
+ for(let i=0;i<4;i++){
+   const xx=u-wb*0.43+i*wb*0.26;
+   s.q(xx,xx+0.08,y-0.84,y+0.72,t+0.80,t+0.93,'#7a817f');
+ }
  for(let k=0;k<4;k++){
    const sx=1.0+k*(s.L-2.0)/4;
    s.q(sx,sx+Math.min(3.1,s.L-sx),K.Hw-0.62,K.Hw-0.35,t-0.19,t+0.15,k%2?'#9fa299':'#8e9995');
@@ -1272,20 +1278,21 @@ function erlebnisPortal(K){
  const s=K.seiten[0], kandidaten=K.glas.filter(g=>g.s===s&&g.eg&&!g.tuer&&!g.mieter&&g.b-g.a>2.1);
  const g=kandidaten[0];
  const center=g?(g.a+g.b)/2:Math.max(7,s.L*0.31);
- const maxW=Math.min(9,s.L-2.0);
+ const maxW=Math.min(13,s.L-2.0);
  const a=clamp(center-maxW/2,0.7,s.L-maxW-0.7),b=a+maxW;
  const tt=Math.max(0.35,(g?.t??0)+1.55);
  const color=K.erlebnis==='laufanalyse'?'#21628b':'#277a6f';
  // Über dem Glasvorbau lesbare Kennzeichnung und heller, eigener Boden.
  s.q(a,b,0.15,0.31,tt-2.05,tt+0.6,'#efdcb1');
- s.q(a,b,3.50,4.13,tt-2.05,tt+0.55,color);
- s.q(a,b,4.05,4.18,tt+0.36,tt+0.58,'#c4dce3');
+ s.q(a,b,3.15,4.17,tt-2.05,tt+0.55,color);
+ s.q(a,b,4.06,4.22,tt+0.36,tt+0.58,'#c4dce3');
+ s.q(a,b,3.09,3.21,tt+0.40,tt+0.61,'#f4c247');
  for(const du of [a,b]){
-  s.q(du-0.11,du+0.11,0.18,4.16,tt-1.9,tt+0.58,'#d9e5eb');
+  s.q(du-0.14,du+0.14,0.18,4.20,tt-1.9,tt+0.58,'#d9e5eb');
   s.q(du-0.16,du+0.16,0.23,0.39,tt-1.9,tt+0.58,'#465e6e');
  }
  const titel=K.erlebnis==='laufanalyse'?'LAUFANALYSE':'FITNESS';
- plakat(K.scene,s,titel,(a+b)/2,3.79,tt+0.61,passend(titel,b-a-0.8,0.47),'#ffffff');
+ plakat(K.scene,s,titel,(a+b)/2,3.69,tt+0.63,passend(titel,b-a-1.0,0.80),'#ffffff');
  if(K.erlebnis==='laufanalyse'){
    // Drei verkaufsfertige Lauftests, der mittlere mit laufendem Menschen.
    for(let i=0;i<3;i++){
