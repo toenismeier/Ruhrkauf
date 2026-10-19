@@ -1150,14 +1150,16 @@ export function statusSport(K) {
     return;
   }
   if (K.matt && !K.zu) {
-    const auswahl=K.glas.filter(g=>!g.tuer && !g.mieter && g.b-g.a>1.7);
+    const front=K.glas.filter(g=>g.s===K.seiten[0]&&g.eg&&!g.tuer&&!g.mieter&&g.b-g.a>1.7);
+    const weitere=K.glas.filter(g=>!front.includes(g)&&!g.tuer&&!g.mieter&&g.b-g.a>1.7);
+    const auswahl=[...front,...weitere];
     const r=rng(String(K.haus.id)+'/blindglas');
     const start=auswahl.length?Math.floor(r()*auswahl.length):0;
     const zahl=Math.min(4,auswahl.length);
     for(let i=0;i<zahl;i++){
       const g=auswahl[(start+i*Math.max(1,Math.floor(auswahl.length/zahl)))%auswahl.length];
       const front=g.t+0.10;
-      g.s.q(g.a+0.10,g.b-0.10,g.y0+0.12,g.y1-0.13,front,front+0.07,i%2?'#a5afa8':'#bdc6c0');
+      g.s.q(g.a+0.10,g.b-0.10,g.y0+0.12,g.y1-0.13,front,front+0.10,i%2?'#d1d0b3':'#b8c5b8');
       g.s.q(g.a+0.13,g.b-0.13,g.y1-0.35,g.y1-0.25,front+0.08,front+0.10,'#737c79');
     }
   }
@@ -1234,9 +1236,17 @@ function abverkaufFassade(K){
 function substanzAkzente(K){
  if(!K.matt||K.zu)return;
  const s=K.seiten[0], t=(K.tRelief??0.5)+0.85;
- const u=Math.max(6,Math.min(s.L*0.64,s.L-5)), y=Math.max(3.4,K.Hw-1.15);
- s.kipp(Math.min(12,s.L*0.30),1.25,0.12,u,y,t,'#8c8c7e',-0.065);
- plakat(K.scene,s,'LETZTE SAISON',u,y,t+0.10,passend('LETZTE SAISON',Math.min(10,s.L*0.28),0.78),'#d1cfbd',null,{rz:-0.065});
+ const u=Math.max(5,Math.min(s.L*0.34,s.L-6)), y=EG_S-0.9;
+ const wb=Math.min(15,s.L*0.40);
+ // Ausgebleichtes, schief hängendes Tuch auf halber Fassadenbreite,
+ // sichtbar bereits bei fester Spielkamera und nicht als Schließung interpretiert.
+ s.kipp(wb,1.65,0.15,u,y,t+0.45,'#b1ab90',-0.095);
+ s.kipp(wb-0.45,1.30,0.16,u,y-0.05,t+0.54,'#d3c8a3',-0.095);
+ plakat(K.scene,s,'LETZTE SAISON',u,y,t+0.66,passend('LETZTE SAISON',wb-1.0,0.83),'#77705d',null,{rz:-0.095});
+ for(let k=0;k<4;k++){
+   const sx=1.0+k*(s.L-2.0)/4;
+   s.q(sx,sx+Math.min(3.1,s.L-sx),K.Hw-0.62,K.Hw-0.35,t-0.19,t+0.15,k%2?'#9fa299':'#8e9995');
+ }
  for(const face of K.seiten){
    const tt=(K.tRelief??0.5)+0.40;
    for(let p=0.8;p<face.L-0.8;p+=3.8){
@@ -1254,6 +1264,55 @@ function substanzAkzente(K){
    }
  }
 }
+/** Präsentationsfläche an der Hauptseite: großes lesbares Studio statt kleiner Warenfenster.
+ * Ein offenes Glasrahmensystem, damit Geräte, Monitor und Figur nicht hinter opakem GLAS verschwinden.
+ */
+function erlebnisPortal(K){
+ if(!K.erlebnis||K.zu)return;
+ const s=K.seiten[0], kandidaten=K.glas.filter(g=>g.s===s&&g.eg&&!g.tuer&&!g.mieter&&g.b-g.a>2.1);
+ const g=kandidaten[0];
+ const center=g?(g.a+g.b)/2:Math.max(7,s.L*0.31);
+ const maxW=Math.min(9,s.L-2.0);
+ const a=clamp(center-maxW/2,0.7,s.L-maxW-0.7),b=a+maxW;
+ const tt=Math.max(0.35,(g?.t??0)+1.55);
+ const color=K.erlebnis==='laufanalyse'?'#21628b':'#277a6f';
+ // Über dem Glasvorbau lesbare Kennzeichnung und heller, eigener Boden.
+ s.q(a,b,0.15,0.31,tt-2.05,tt+0.6,'#efdcb1');
+ s.q(a,b,3.50,4.13,tt-2.05,tt+0.55,color);
+ s.q(a,b,4.05,4.18,tt+0.36,tt+0.58,'#c4dce3');
+ for(const du of [a,b]){
+  s.q(du-0.11,du+0.11,0.18,4.16,tt-1.9,tt+0.58,'#d9e5eb');
+  s.q(du-0.16,du+0.16,0.23,0.39,tt-1.9,tt+0.58,'#465e6e');
+ }
+ const titel=K.erlebnis==='laufanalyse'?'LAUFANALYSE':'FITNESS';
+ plakat(K.scene,s,titel,(a+b)/2,3.79,tt+0.61,passend(titel,b-a-0.8,0.47),'#ffffff');
+ if(K.erlebnis==='laufanalyse'){
+   // Drei verkaufsfertige Lauftests, der mittlere mit laufendem Menschen.
+   for(let i=0;i<3;i++){
+     const cx=a+1.75+i*2.65, t=tt-0.42;
+     s.q(cx-0.95,cx+0.92,0.42,0.64,t-0.6,t+0.50,'#25313b');
+     s.q(cx-0.85,cx+0.80,0.65,0.68,t-0.50,t+0.35,'#111a22');
+     for(const du of [-0.75,0.72])s.q(cx+du,cx+du+0.07,0.70,1.75,t+0.36,t+0.44,'#cbdde4');
+     s.q(cx-0.35,cx+0.45,1.52,2.15,t+0.42,t+0.51,'#2a394a');
+     s.q(cx-0.25,cx+0.35,1.65,2.01,t+0.52,t+0.57,'#38bbcf');
+     if(i===1&&K.leute){const [x,z]=s.welt(cx,t-0.12);mensch(K.S,K.r,x,0.55,z);}
+   }
+   s.q(a+0.36,a+1.35,1.1,2.65,tt-1.58,tt-1.50,'#234564');
+   s.q(a+0.48,a+1.23,1.22,2.47,tt-1.49,tt-1.45,'#7ee3ee');
+ }else{
+   for(let i=0;i<3;i++){
+     const cx=a+1.65+i*2.65;
+     s.q(cx-0.73,cx+0.73,0.32,0.42,tt-0.8,tt+0.54,'#3c5a68');
+     for(const dd of [-0.52,0.52])s.q(cx+dd,cx+dd+0.08,0.43,2.60,tt+0.15,tt+0.22,'#e1e6e9');
+     s.q(cx-0.60,cx+0.60,2.43,2.52,tt+0.14,tt+0.25,'#56666e');
+     s.q(cx-0.45,cx+0.45,0.79,1.01,tt-0.55,tt+0.15,'#df9c39');
+     for(let k=0;k<4;k++)s.q(cx-0.46+k*0.24,cx-0.36+k*0.24,1.30,1.55,tt-0.72,tt-0.50,k%2?'#222b32':'#d5a043');
+   }
+   if(K.leute){const [x,z]=s.welt((a+b)/2,tt-0.6);mensch(K.S,K.r,x,0.2,z);}
+   s.q(a+0.4,b-0.4,0.55,3.25,tt-1.85,tt-1.79,'#a2c8d3');
+ }
+}
+
 // ---------------------------------------------------------------- Hauptfunktion
 /**
  * Baut ein Sporthaus aus haeuser.json (format 'sport').
@@ -1312,6 +1371,7 @@ export function sporthaus(S, scene, haus, opt = {}) {
   hoehe = Math.max(hoehe, K.hoeheDach ?? 0);
   K.Hw = K.Hw ?? (m.n === 1 ? 7 : EG_S + (m.n - 1) * OG_S);
   const mieterEG = mieterFronten(K);
+  erlebnisPortal(K);
   abverkaufFassade(K);
   statusSport(K);
   substanzAkzente(K);
