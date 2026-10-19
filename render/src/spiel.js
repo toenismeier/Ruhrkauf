@@ -561,7 +561,7 @@ function oeffneHaus(id) {
   if (!d.wettbewerber?.length) html += '<div class="zeile">Keine Wettbewerber in dieser Stadt</div>';
   for (const w of d.wettbewerber ?? []) {
     const wirkung = Object.entries(w.wirkung ?? {}).filter(([, v]) => v < 0)
-      .sort((a, b) => a[1] - b[1]).slice(0, 3).map(([g, v]) => esc(g) + ' ' + v.toFixed(2) + ' %').join(' · ');
+      .sort((a, b) => a[1] - b[1]).slice(0, 3).map(([g, v]) => esc(E.GRUPPEN[g]?.name ?? g) + ' ' + v.toFixed(2) + ' %').join(' · ');
     html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' +
       esc(w.name) + '</b> <i>' + esc(WB_ART[w.art] ?? w.art) + ' · ' + esc(WB_STATUS[w.status] ?? w.status) + '</i>' +
       (wirkung ? '<small>' + wirkung + '</small>' : '') + '</span><span>→</span></button>';
@@ -584,11 +584,13 @@ function oeffneWettbewerber(id) {
     esc(WB_STATUS[w.status] ?? w.status) + '</span></div>';
   html += '<div class="karte"><div class="zeile"><span>Standort</span><b>' + esc(stadtName) + '</b></div>' +
     '<div class="zeile"><span>Status seit</span><b>' + esc(start) + '</b></div>' +
+    '<div class="zeile"><span>Grundfläche</span><b>' + fmt.format(w.grundflaecheQm) + ' m²</b></div>' +
+    '<div class="zeile"><span>Wettbewerbsstärke</span><b>' + Math.round(u.staerke * 100) + ' / 100</b></div>' +
     '<div class="zeile"><span>Aktuelle Aktion</span><b>' +
     (w.status === 'raeumung' ? 'Räumungsverkauf bis 70 %' : w.rabatt ? Math.round(w.rabatt * 100) + ' % Rabatt' : w.status === 'eroeffnung' ? 'Neueröffnung' : 'Keine') +
     '</b></div>' + (w.inHartwigGebaeude ? '<div class="zeile">Nachnutzung eines ehemaligen Hartwig-Standorts</div>' : '') + '</div>';
   html += '<div class="karte"><div class="khead">Wirkung auf Hartwig nach Warengruppe</div>' +
-    wirkung.map(([g, v]) => '<div class="zeile"><span>' + esc(g) + '</span><b>' + Number(v).toFixed(2) + ' %</b></div>').join('') + '</div>';
+    wirkung.map(([g, v]) => '<div class="zeile"><span>' + esc(E.GRUPPEN[g]?.name ?? g) + '</span><b>' + Number(v).toFixed(2) + ' %</b></div>').join('') + '</div>';
   panel(w.name, esc(stadtName) + ' · ' + esc(WB_ART[w.art] ?? w.art), html);
   if (neu) {
     const x = sb.wettbewerber.get(id) ?? (w.inHartwigGebaeude ? sb.haeuser.get(w.inHartwigGebaeude) : null);
