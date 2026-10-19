@@ -17,7 +17,7 @@ import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
-import { geld, fmt } from './ui/format.js';
+import { geld, fmt, esc } from './ui/format.js';
 import { quelle } from './ui/quelle.js';
 import { einkaufModul } from './ui/einkauf.js';
 import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
@@ -81,8 +81,14 @@ ren.shadowMap.type = THREE.PCFShadowMap;
 
 const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
 let scene = null, cam = null, wurzel = null, plan = null, sb = null, s = null, stadtName = null;
-let offenesHaus = null, offenesHq = null;
-let angebotPins = [];
+let offenesHaus = null, offenesHq = null, offenerWettbewerber = null;
+let angebotPins = [], wettbewerbPins = [], wettbewerbPinTimer = null;
+const WB_FARBEN = { modehaus: '#795846', fastfashion: '#292b39', premium: '#9e773e',
+  offprice: '#d62867', textildiscounter: '#2565b5', elektronik: '#d34532', leer_ehemals: '#777d80' };
+const WB_ART = { modehaus: 'Modehaus', fastfashion: 'Fast Fashion', premium: 'Premium',
+  offprice: 'Offprice', textildiscounter: 'Textildiscounter', elektronik: 'Elektronik', leer_ehemals: 'Leerstehendes Kaufhaus' };
+const WB_STATUS = { offen: 'Geöffnet', eroeffnung: 'Neueröffnung', raeumung: 'Räumungsverkauf', geschlossen: 'Geschlossen' };
+
 
 function groesse() { return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight]; }
 function kameraSetzen() {
@@ -119,11 +125,13 @@ function aufBoden(px, py) {
 function hausUnter(px, py) {
   const r = canvas.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2(((px - r.left) / r.width) * 2 - 1, -((py - r.top) / r.height) * 2 + 1), cam);
+  const wp = wettbewerbPins.length ? ray.intersectObjects(wettbewerbPins, false)[0] : null;
+  if (wp?.object.userData.wbId) return 'wb:' + wp.object.userData.wbId;
   const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
   if (ap?.object.userData.angebotId) return 'angebot:' + ap.object.userData.angebotId;
   const t = ray.intersectObject(wurzel, true)[0];
   const u = t?.object.userData;
-  return u?.hausId ?? (u?.hqId ? 'hq:' + u.hqId : null);
+  return u?.hausId ?? (u?.wbId ? 'wb:' + u.wbId : (u?.hqId ? 'hq:' + u.hqId : null));
 }
 
 /** Kamera so setzen, dass alle Hartwig-Häuser der Stadt im freien Kartenbereich (zwischen Cockpit und unterer Leiste) liegen. */
@@ -165,13 +173,16 @@ function tippPunkt(id) {
 }
 
 // Verschieben, Wischen mit Trägheit, Pinch-Zoom, Mausrad, Antippen (ui/karte.js)
-const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id) oeffneHaus(id); } });
+const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id?.startsWith('wb:')) oeffneWettbewerber(id.slice(3)); else if (id) oeffneHaus(id); } });
 window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
 function raeumeSzene() {
   if (!scene) return;
   angebotPins = [];
+  clearInterval(wettbewerbPinTimer); wettbewerbPinTimer = null;
+  for (const p of wettbewerbPins) { scene.remove(p); p.material?.map?.dispose(); p.material?.dispose(); }
+  wettbewerbPins = [];
   const texs = new Set();
   scene.traverse((o) => {
     if (o.geometry) o.geometry.dispose();
@@ -211,7 +222,7 @@ function baueStadtAusSpiel(name) {
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
-  sb = spielBauer(s, { getrennt: true, wurzel, merk: merk(), hausLod: 'nah', hq: hqGrafik });
+  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik });
   // Grundgerüst: Straßen, Blöcke, Wasser, Stadtrandgürtel, Sonderbauten und Hartwig; normale Stadthäuser kommen als Kacheln
   const T = new KompaktSammler();
   const offen = [];
@@ -231,10 +242,11 @@ function baueStadtAusSpiel(name) {
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
   // Pins: Hartwig, Sport, Wettbewerber und Zentrale wie im Katalog; freie Bürogebäude mit Schlüssel-Pin
-  const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', hq: 'hartwig' };
-  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle] ?? 'hartwig', groesse: q.rolle === 'wettbewerber' ? 7.2 : 9 })));
+  const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', hq: 'hartwig' };
+  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && pins[q.rolle]).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle], groesse: 9 })));
   for (const q of plan.standorte.filter((x) => x.angebot)) { const pz = plan.parzellen.find((x) => x.id === q.parzelle); if (pz) angebotMarker(scene, pz.x + pz.w / 2, (e.hoehen.get(pz.id) ?? 30) + 2, pz.z + pz.d / 2, 9); }
   angebotsPinsAktualisieren();
+  wettbewerbPinsAktualisieren();
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
   const nm = nahMitte(plan, 'einkauf', 62);
   K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
@@ -371,6 +383,7 @@ function grafikNachziehen() {
   }
   const geaendert = sb.aktualisiere();
   for (const id of geaendert) sb.neuBauen(id);
+  wettbewerbPinsAktualisieren();
   if (geaendert.length) zeichnen();
   return geaendert;
 }
@@ -406,6 +419,7 @@ function woche(mitBot = false) {
   const t2 = performance.now();
   cockpitZeigen();
   if (offenesHaus) oeffneHaus(offenesHaus);
+  else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
   else if (offenesHq) oeffneHq(offenesHq === true ? undefined : offenesHq);
   else for (const m of module()) if (m.aktiv()) m.neuZeichnen();
   ek.badge(); menueBadge();
@@ -445,7 +459,7 @@ function panel(titel, unter, html, klasse = '') {
   $('panel').classList.add('offen');
   document.body.classList.add('panel-offen');
 }
-function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; }
+function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; }
 /** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
 function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
@@ -479,7 +493,7 @@ function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
   if (!d) return;
   const neu = offenesHaus !== id;
-  offenesHaus = id; offenesHq = null;
+  offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
   const h = d.haus, k = h.kpi;
   const z = sb.zustand(id);
   const bild = z ? [z.status, ...z.zusatz].filter((q) => q !== 'offen').map((q) => (q === 'aktion' && z.aktion ? `Aktion ${AKTION_NAME[z.aktion]}` : STATUS_TITEL[q])).join(' · ') : '';
