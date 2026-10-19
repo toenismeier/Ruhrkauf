@@ -111,7 +111,7 @@ export function posteingang(s: GameState): Posteingang {
     };
   });
   const erledigt: PostErledigt[] = [
-    ...s.angebote.filter((a) => a.status !== 'offen' && a.woche >= grenze).map((a) => ({
+    ...s.angebote.filter((a) => a.status !== 'offen' && (a.erledigtWoche ?? a.woche) >= grenze).map((a) => ({
       id: a.id, art: 'angebot' as const, titel: a.titel, woche: a.erledigtWoche ?? a.woche,
       ergebnis: a.status === 'angenommen' ? 'Angenommen' : a.status === 'abgelehnt' ? 'Abgelehnt' : 'Frist abgelaufen',
       standard: a.status === 'verfallen', bezug: hausBezug(s, a.wunschHaeuser ?? []),
