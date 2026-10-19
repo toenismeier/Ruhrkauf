@@ -135,6 +135,7 @@ export interface Haus {
   wettbewerbRohStart?: number;
   wettbewerbRohGruppenStart?: Partial<Record<GruppeId, number>>;
   wettbewerbLeerStart?: number;
+  wettbewerbRohOffpriceStart?: number;
   wettbewerbSchliessungWoche?: number;
   etagen: number[];
   grundflaecheQm: number;
