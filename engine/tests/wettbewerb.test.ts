@@ -132,3 +132,28 @@ describe('Wettbewerber: Dynamik', () => {
     expect(s.cash).toBeLessThan(cash);
   });
 });
+
+describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
+  test('Ausgangslage bleibt im ersten Jahr bei Umsatz und EBITDA innerhalb von 1 %', () => {
+    const lauf = (aktiv: boolean) => {
+      const s = neuesSpiel(1);
+      s.cash = 5e9;
+      if (!aktiv) s.wettbewerbDeaktiviert = true;
+      for (let i = 0; i < 52; i++) {
+        fuehreAus(s, { typ: 'sammelfreigabe' });
+        wocheAbspielen(s);
+      }
+      return s.historie.reduce((sum, k) => ({ umsatz: sum.umsatz + k.umsatz, ebitda: sum.ebitda + k.ebitda }), { umsatz: 0, ebitda: 0 });
+    };
+    const basis = lauf(false), neu = lauf(true);
+    expect(Math.abs(neu.umsatz - basis.umsatz) / Math.abs(basis.umsatz)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(neu.ebitda - basis.ebitda) / Math.abs(basis.ebitda)).toBeLessThanOrEqual(0.01);
+  });
+  test('Bot C überlebt auf Seeds 1 bis 3 fünf Jahre', () => {
+    for (const seed of [1, 2, 3]) {
+      const s = neuesSpiel(seed);
+      for (let i = 0; i < 260 && s.phase !== 'zerschlagen'; i++) { botTief(s); wocheAbspielen(s); }
+      expect({ seed, phase: s.phase, woche: s.woche }).toEqual({ seed, phase: 'regulaer', woche: 260 });
+    }
+  });
+});
