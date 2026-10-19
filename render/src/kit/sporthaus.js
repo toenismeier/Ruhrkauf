@@ -186,9 +186,10 @@ function erlebnisHinterGlas(K, s, a, b, y0, tF, tiefe) {
   }
   // Bei F2/F4/F6 macht ein verglaster Vorbau das Studio im Spielzoom sichtbar.
   if([2,4,6].includes(K.fam)){
-    s.q(left-0.2,right+0.2,y+0.05,y+2.73,vorne+0.68,vorne+0.72,GLAS_HELL);
+    // Keine geschlossene Scheibe aus opakem GLAS_HELL: die Geräte sollen durch die Front erkennbar bleiben.
     for(const edge of [left-0.2,right+0.2])s.q(edge-0.07,edge+0.07,y,y+3.48,vorne,vorne+0.92,'#cedce2');
     s.q(left-0.2,right+0.2,y+3.37,y+3.48,vorne,vorne+0.92,'#d6e3e8');
+    s.q(left-0.2,right+0.2,y+0.06,y+0.16,vorne,vorne+0.92,'#d6e3e8');
   }
   K.erlebnisGezeigt=true;
 }
