@@ -248,7 +248,13 @@ export function ereignisse(s: GameState): void {
     }
     const fl = h.personal.filialleiter;
     if (fl.moral < 40 && fl.skill > 0.6 && chance(s, 0.02)) {
-      melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht zur Konkurrenz.`);
+      // Wettbewerber werden nur bei passender aktiver Kette als Abwerber gewertet.
+      // Im Deaktivierungs-Test bleibt die ursprüngliche Regel unverändert.
+      const kandidaten = s.wettbewerber.filter((x) => x.stadt === h.stadt && ['modehaus', 'premium', 'fastfashion'].includes(x.art)
+        && (x.status === 'offen' || x.status === 'eroeffnung'));
+      if (!s.wettbewerbDeaktiviert && !kandidaten.length) continue;
+      const ziel = kandidaten[0]?.name;
+      melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht ${ziel ? 'zu ' + ziel : 'zur Konkurrenz'}.`);
       h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: zwischen(s, 0.3, 0.65), moral: 50, interimBis: w + 4 };
     }
   }
@@ -314,6 +320,22 @@ export function loeseEntscheidung(s: GameState, id: string, option: string): str
   const d = e.daten;
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
   switch (e.typ) {
+    case 'wettbewerb_eroeffnung': {
+      const wb = s.wettbewerber.find((x) => x.id === d.wettbewerber);
+      if (!wb) return null;
+      if (option === 'aktion') {
+        einmalKosten(s, 180_000);
+        wb.abwehrBis = s.woche + 4;
+        wb.abwehrFaktor = 0.55;
+        melde(s, 'info', 'Eröffnungsaktion gegen ' + wb.name + ': kurzfristiger Kundenschutz, geringere Marge.');
+      } else if (option === 'mailing' && s.marketing.kundenkarte) {
+        einmalKosten(s, 65_000);
+        wb.abwehrBis = s.woche + 4;
+        wb.abwehrFaktor = 0.7;
+        melde(s, 'info', 'Stammkunden-Mailing gegen ' + wb.name + ' verschickt.');
+      }
+      return null;
+    }
     case 'instandhaltung':
       if (!haus) return null;
       if (option === 'zahlen') { einmalKosten(s, Number(d.kosten)); haus.substanz = clamp(haus.substanz + 10, 0, 100); }
