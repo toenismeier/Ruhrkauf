@@ -67,6 +67,8 @@ export function wandModul(L, r, d, ctx = {}, o = {}) {
         if (art === 'schuhe' || art === 'stollen') {
           L.box(a * 0.60, 0.12, 0.32, x, y + 0.09, 0.34, f);
           if (d > 0.75) L.box(a * 0.35, 0.065, 0.12, x + a * 0.18, y + 0.18, 0.43, f);
+          if (o.variante === 'laufen' && i % 3 === 0) L.box(a*0.60,0.035,0.36,x,y+0.23,0.37,'#c7d6e2');
+          if (o.variante === 'kinder' && i % 2 === 0) L.box(a*0.35,0.08,0.05,x,y+0.26,0.52,'#ffcc49');
         } else if (art === 'ball' || art === 'helm') {
           L.zyl(Math.min(0.18, a * 0.35), Math.min(0.18, a * 0.35), 0.31, x, y + 0.04, 0.35, f, 8);
         } else if (art === 'rucksack') {
@@ -148,7 +150,10 @@ export function inselModul(L, r, d, ctx = {}, o = {}) {
       L.box(0.34, 0.56, 0.25, x, 0.75, 1.22, pal[i % pal.length]);
       L.box(0.18, 0.20, 0.18, x, 1.29, 1.22, '#cfaf91');
       L.box(0.09, 0.50, 0.12, x - 0.09, 0.25, 1.22, '#353f49');
-      L.box(0.09, 0.50, 0.12, x + 0.09, 0.25, 1.22, '#353f49');
+      L.box(0.09, 0.50, 0.12, x + 0.09, 0.25, 1.22+(i%3===0?0.18:0), '#353f49');
+      // Drei Haltungen: neutral, Laufbewegung und zeigender Arm.
+      L.box(0.085, i%3===2?0.34:0.42, 0.11, x-0.27, i%3===2?1.02:0.84, 1.22+(i%3===1?0.16:0), pal[i%pal.length]);
+      L.box(0.085, 0.40, 0.11, x+0.27, i%3===0?1.02:0.84, 1.22+(i%3===0?0.15:0), pal[i%pal.length]);
     }
   } else {
     L.box(w * 0.83, 0.65, 1.6, 0, 0.2, 1.25, '#f4f1ed');
