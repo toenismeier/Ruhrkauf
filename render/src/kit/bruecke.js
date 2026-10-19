@@ -121,7 +121,7 @@ export function stadtEintragAusSpiel(s, name) {
     const f = fussabdruck(h);
     return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
-  return { ...d, standorte: [...eigene, ...d.standorte.filter((q) => q.rolle === 'wettbewerber')] };
+  return { ...d, standorte: [...eigene, ...d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester')] };
 }
 
 /** Ursprung eines Baus W × D im Slot (wie bauer.js imSlot). */
@@ -214,7 +214,7 @@ export function spielBauer(s, o = {}) {
     haeuser.set(h.id, { p, gruppe: null, e, schluessel: zustand(h).schluessel });
     return e;
   };
-  const bauer = { ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'), 'slot:hq': hqSlot };
+  const bauer = { ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'), 'slot:schwester': slot('slot:schwester'), 'slot:hq': hqSlot };
 
   /** Zustände neu lesen (nach wocheAbspielen); gibt die Ids der Häuser zurück, deren Bild sich ändert. */
   function aktualisiere() {

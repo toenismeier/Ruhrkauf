@@ -15,11 +15,13 @@ import {
 import * as I from './innen.js';
 import { flaeche, fremdflaeche, abteilungsArt, ABT, schirmTisch, pflanzentrog } from './abteilung.js';
 import { sportEtage } from './sportgrundriss.js';
+import { NAME_SCHWESTER, FARBE_SCHWESTER } from './schwesterhaus.js';
 
 const R = RASTER;
 const FASSADE = ['#efe4c9', '#e3d3bd', '#ece5d7', '#d3d9de', '#b9785e', '#e8dfcf', '#c9b8a0', '#dde1e4'];
 const GANG = { a: '#f2f1ee', b: '#dedcd7', m: 'fliese' };
 const HALLE = { a: '#e8e1d4', b: '#d6cdbd', c: '#c4b8a4', m: 'platten' };
+const SCHWESTER_BODEN = { a: '#cfc6b4', b: '#c5bba9', m: 'fliese' };
 
 /** Maße eines Hauses im 5-m-Raster (wie beim Außengebäude). */
 export function masse(haus) {
@@ -36,7 +38,7 @@ export function raster(haus, etageNr) {
   const setz = (i, j, t) => { if (i >= 0 && j >= 0 && i < nx && j < nz && !typ[i][j]) typ[i][j] = t; };
   const kx = Math.max(1, Math.min(nx - 3, Math.floor(nx / 2) - 1)), kz = Math.max(1, Math.min(nz - 2, Math.floor(nz / 2) - 1));
   for (let i = kx; i < kx + 2; i++) for (let j = kz; j < kz + 2; j++) typ[i][j] = 'kern';
-  const ring = nx >= 8 && nz >= 7;
+  const ring = haus.kette !== 'schwester' && nx >= 8 && nz >= 7;
   if (ring) for (let i = kx - 1; i <= kx + 2; i++) for (let j = kz - 1; j <= kz + 1; j++) setz(i, j, 'halle');
   const gz = Math.min(nz - 1, kz + 2), gx = kx;
   if (gz > kz + 1) for (let i = 0; i < nx; i++) setz(i, gz, 'gang');
@@ -56,7 +58,7 @@ export function raster(haus, etageNr) {
     const n = Math.round(w / 4.5);
     for (let q = 1; q < n; q++) { const i = a + Math.round((q * w) / n); for (let j = c; j < e; j++) setz(i, j, 'neben'); }
   }
-  return { B, T, nx, nz, typ, kx, kz, gx, gz, ring };
+  return { B, T, nx, nz, typ, kx, kz, gx, gz, ring, schwester: haus.kette === 'schwester' };
 }
 
 /** Große Flächen in Fachabteilungen teilen (Accessoires: Schuhe, Lederwaren, Schmuck, Strümpfe; Wohnen: Living, Haushalt, Elektro). */
@@ -138,12 +140,34 @@ function zonenUmsatz(haus, fl) {
   return ((k.umsatz ?? 0) * fl.qm) / gesQm;
 }
 
+/** Untergeschoss der Schwesterkette: ausschließlich Anlieferung und Lager, keine Kunden und kein Verkauf. */
+function lagerSchwester(S, scene, haus) {
+  const { B, T } = masse(haus);
+  S.box(B, 0.4, T, B / 2, -0.2, T / 2, '#999185');
+  S.box(B, 3.6, 0.45, B / 2, 1.7, 0, '#aaa69d');
+  S.box(0.45, 3.6, T, 0, 1.7, T / 2, '#b2ada2');
+  // Querregale, Anlieferung, zentrale schlichte Treppe.
+  let regale = 0;
+  for (let x = 3; x < B - 3; x += 7) for (let z = 3; z < T - 3; z += 5) {
+    if (Math.abs(x - B / 2) < 5 && Math.abs(z - T / 2) < 6) continue;
+    S.box(3.7, 2.4, 0.9, x, 1.2, z, '#77796f');
+    S.box(3.5, 0.15, 0.95, x, 0.6, z, '#b3a99a');
+    S.box(3.5, 0.15, 0.95, x, 1.45, z, '#b3a99a');
+    regale++;
+  }
+  const stufen = 7, steigung = 0.25;
+  for (let j = 0; j < stufen; j++) S.box(3.2, 0.22, 0.55, B / 2, 0.25 + j * steigung, T / 2 - 2.3 + j * 0.5, '#a4a39b');
+  S.box(3, 2.4, 0.24, B - 4.5, 1.2, T - 0.35, FARBE_SCHWESTER);
+  return { box: new THREE.Box3(new THREE.Vector3(-0.6, -0.6, -0.6), new THREE.Vector3(B + 0.6, 4, T + 0.6)), breite: B, tiefe: T, zonen: [], anzahl: S.anzahl, dichte: 0, kunden: 0, regale };
+}
+
 /**
  * Baut Etage etageNr von haus. o: { ausschnitt: true | { x, z, w, d, anker: 'eingang'|'ecke'|'kern' } (Meter, Raster 5),
  * budget = 25000 (Ausschnitt 8000), dichte, kunden }
  * Rückgabe: { box, breite, tiefe, zonen, anzahl, dichte, kunden }
  */
 export function etage(S, scene, haus, etageNr, o = {}) {
+  if (haus.kette === 'schwester' && etageNr < 0) return lagerSchwester(S, scene, haus);
   if (haus.format === 'sport') return sportEtage(S, scene, haus, etageNr, o);
   vorbereiten(S, scene);
   const ra = raster(haus, etageNr);
@@ -168,7 +192,7 @@ export function etage(S, scene, haus, etageNr, o = {}) {
   const jeZelle = Math.max(0.35, Math.min(1.9, umsatz / 850 / verkaufsZellen));
   const anteil = ((ax1 - ax0) * (az1 - az0)) / (B * T);
   const zellenImBild = zn.reduce((s, z) => s + z.zellen.filter((c) => drin(c.i, c.j)).length, 0);
-  let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil) * (etageNr === 0 ? 1.15 : 1));
+  let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil) * (etageNr === 0 ? 1.15 : 1) * (haus.kette === 'schwester' ? 0.6 : 1));
 
   let d = o.dichte ?? 1;
   let tmp, gruppe, versuch = 0;
@@ -185,7 +209,12 @@ export function etage(S, scene, haus, etageNr, o = {}) {
     if (d > 0.3) d = Math.max(0.3, d * f); else kunden = Math.floor(kunden * 0.75);
     gruppe.traverse((m) => { if (m.geometry) m.geometry.dispose(); });
   }
-  for (const [k, gs] of tmp.teile) { if (!S.teile.has(k)) S.teile.set(k, []); S.teile.get(k).push(...gs); }
+  // Branding im gemeinsamen Sortiment-Modul: Rot der Hartwig-Infrastruktur nur fuer Schwester umfaerben.
+  for (const [k, gs] of tmp.teile) {
+    const farbe = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
+    if (!S.teile.has(farbe)) S.teile.set(farbe, []);
+    S.teile.get(farbe).push(...gs);
+  }
   S.anzahl += tmp.anzahl;
   while (gruppe.children.length) scene.add(gruppe.children[0]);
   const eg = etageNr === 0;
@@ -214,7 +243,7 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
   const platte = (x0, z0, x1, z1) => { if (x1 > x0 && z1 > z0) S.box(x1 - x0, 0.5, z1 - z0, (x0 + x1) / 2, -0.25, (z0 + z1) / 2, '#59626a'); };
   const kz0 = kz * R + 5.5, kz1 = kz * R + 8.7, kx0 = kx * R + 0.9, kx1 = kx * R + 9.3;
   const kernDrin = drin(kx, kz) && drin(kx + 1, kz + 1);
-  if (hatUnten && kernDrin) {
+  if (hatUnten && kernDrin && !ra.schwester) {
     platte(ax0, az0, ax1, kz0); platte(ax0, kz1, ax1, az1); platte(ax0, kz0, kx0, kz1); platte(kx1, kz0, ax1, kz1);
   } else platte(ax0, az0, ax1, az1);
   if (!eg) {
@@ -245,7 +274,7 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
     const f = z.flaeche, art = z.art;
     // Ausschnitt: nur sichtbare Zellen, damit die Abteilung ihre Warenwände an die Schnittwand stellt
     const Z = { alle: z.zellen.filter((c) => drin(c.i, c.j)), kante, sicht, y: 0, bereich: [ax0, az0, ax1, az1] };
-    const opt = { seed: hid % 1000 + zi * 37 + etageNr * 11 + 1, dichte: d, eg, basis: f.gruppe, mieter: f.mieter, marke: f.marke, name: f.name };
+    const opt = { seed: hid % 1000 + zi * 37 + etageNr * 11 + 1, dichte: ra.schwester ? Math.min(d, 0.48) : d, eg, basis: f.gruppe, mieter: f.mieter, marke: ra.schwester ? undefined : f.marke, name: f.name, ...(ra.schwester ? { teil: true, schildEinmal: true } : {}) };
     const res = art === 'konzession' || art === 'untermiete'
       ? fremdflaeche(S, scene, art, Z, { ...opt, mieter: f.mieter ?? ['discounter', 'gastro', 'fitness', 'arzt'][(zi + etageNr) % 4], marke: I.MARKEN.find((m) => m.gruppe === f.gruppe) ?? I.MARKEN[((hid >> 3) + zi) % I.MARKEN.length], seed: (hid >> 3) + zi })
       : flaeche(S, scene, art, Z, opt);
@@ -267,7 +296,7 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
   }
 
   // ---- Kern mit Lichthof
-  if (kernDrin) {
+  if (kernDrin && !ra.schwester) {
     rolltreppenKern(S, kx * R, kz * R, { auf: hatOben, ab: hatUnten, dichte: d });
     if (!hatUnten) {
       // ohne Lichthof nach unten: Aktionsfläche vor den Rolltreppen (Podest, Kampagne, Bänke)
@@ -280,7 +309,24 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
       belegt.push([kx * R + 2.5, kz * R + 5.2, kx * R + 7.5, kz * R + 9.5]);
     }
   }
-  else for (let i = kx; i < kx + 2; i++) for (let j = kz; j < kz + 2; j++) if (drin(i, j)) gangZelle(S, scene, 'halle', i, j, ra, eg, d, freiGang, rng(i + j));
+  else if (!ra.schwester) for (let i = kx; i < kx + 2; i++) for (let j = kz; j < kz + 2; j++) if (drin(i, j)) gangZelle(S, scene, 'halle', i, j, ra, eg, d, freiGang, rng(i + j));
+
+  if (kernDrin && ra.schwester) {
+    // Altbau: schlichte zentrale Stiege mit geraden Läufen und niedrigen Betonwangen.
+    // Keine Rolltreppen und kein offener Lichthof.
+    const x0 = kx * R, z0 = kz * R;
+    const stufen = 12, schritt = 3.0 / stufen;
+    S.box(9.5, 0.16, 9.5, x0 + 5, 0.08, z0 + 5, SCHWESTER_BODEN.a);
+    for (let j = 0; j < stufen; j++) {
+      S.box(2.6, 0.2, 0.55, x0 + 3.3, 0.25 + j * schritt, z0 + 1.6 + j * 0.51, '#b0aca3');
+      S.box(2.6, 0.2, 0.55, x0 + 6.7, 3.2 - j * schritt, z0 + 1.6 + j * 0.51, '#bab6ad');
+    }
+    S.box(0.22, 2.8, 8.0, x0 + 1.8, 1.45, z0 + 5, '#96968e');
+    S.box(0.22, 2.8, 8.0, x0 + 8.2, 1.45, z0 + 5, '#9c9a91');
+    S.box(1.3, 0.7, 0.55, x0 + 5, 0.45, z0 + 8.8, '#a79e90');
+    S.box(1.18, 0.08, 0.62, x0 + 5, 0.85, z0 + 8.8, FARBE_SCHWESTER);
+    belegt.push([x0 + 0.5, z0 + 0.5, x0 + 9.5, z0 + 9.5]);
+  }
 
   // ---- Stützen im 10-m-Raster (nicht in Möbeln)
   for (let i = 2; i < nx; i += 2) for (let j = 2; j < nz; j += 2) {
@@ -298,7 +344,7 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
   rueckwand(S, 'z', az0, az1, ax0, 0, WANDHOEHE, { pilasterVersatz: 0, putz: '#f1e9dd' });
   if (scene && az0 === 0 && ax1 - ax0 > 14) {
     const lx = Math.min(ax1 - 6, Math.max(ax0 + 6, (kx + 1) * R));
-    if (!(lx > (nx - 2) * R - 3)) wandschild(S, scene, sport ? 'HARTWIG SPORT' : 'HARTWIG', 'x', lx, 4.05, 0.25, { schrift: '#d23c32', hoehe: 0.7 });
+    if (!(lx > (nx - 2) * R - 3)) wandschild(S, scene, haus.kette === 'schwester' ? NAME_SCHWESTER.toUpperCase() : sport ? 'HARTWIG SPORT' : 'HARTWIG', 'x', lx, 4.05, 0.25, { schrift: haus.kette === 'schwester' ? FARBE_SCHWESTER : '#d23c32', hoehe: haus.kette === 'schwester' ? 0.48 : 0.7 });
   }
 
   // ---- Front: Schaufenster (EG) oder Brüstung
@@ -328,6 +374,19 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
       if (dp[a][c] > best) { best = dp[a][c]; wo = [ax0 + (a + 1 - best) * q, az0 + (c + 1 - best) * q]; }
     }
     k.leer = { m: best * q, wo };
+  }
+
+  // Schwesterkette: Rasterleuchten und eine kleine Etagenkasse nahe der Front statt Zentralkassenrotunde.
+  if (ra.schwester) {
+    for (let ix = ax0 + 5; ix < ax1 - 2; ix += 8) for (let iz = az0 + 5; iz < az1 - 2; iz += 8) {
+      S.box(1.8, 0.1, 0.7, ix, WANDHOEHE - 0.12, iz, '#e1dfd4');
+      S.box(1.45, 0.045, 0.50, ix, WANDHOEHE - 0.18, iz, '#f2eee0');
+    }
+    const kx = ax1 - 5.0, kz = az1 - 5.2;
+    S.box(2.6, 0.88, 0.85, kx, 0.52, kz, '#968f83');
+    S.box(2.8, 0.12, 0.92, kx, 1.02, kz, '#b6ada0');
+    S.box(0.8, 0.25, 0.42, kx - 0.6, 1.19, kz, '#48565b');
+    S.box(0.3, 0.18, 0.35, kx + 0.55, 1.2, kz, '#d9d0bd');
   }
 
   // ---- Kundschaft
@@ -484,7 +543,7 @@ function gangZelle(S, scene, t, i, j, ra, eg, d, frei, r) {
   const { nx, nz, kx, kz, gx, gz, ring } = ra;
   const typ = (a, b) => ra.typ[a]?.[b];
   const x = i * R, z = j * R;
-  boden(S, x, z, R, R, 0, t === 'halle' ? HALLE : GANG, d);
+  boden(S, x, z, R, R, 0, ra.schwester ? SCHWESTER_BODEN : t === 'halle' ? HALLE : GANG, d);
   const fr = (fx, fz) => frei.push([x + fx, z + fz]);
   for (let q = 0; q < 5; q++) fr(zw(r, 0.6, 4.4), zw(r, 0.6, 4.4));
   const [ax0, az0] = ra.ausschnitt;

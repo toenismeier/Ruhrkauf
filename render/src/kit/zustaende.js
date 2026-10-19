@@ -144,7 +144,7 @@ export function zustandFlags(Z) {
 }
 
 /** EG-Teilflächen für eigene Läden (Untermieter mit eigenem Eingang, Outlet). L: { '+z': Länge, '+x': Länge } nutzbar. */
-export function eigeneMieterflaechen(Z, L, reihe = ['+z', '+x']) {
+export function eigeneMieterflaechen(Z, L, reihe = ['+z', '+x'], offpriceName = 'HARTWIG OUTLET') {
   const aus = [];
   const belegt = { '+z': 0, '+x': 0 };
   const platz = (m, anteil, min, max) => {
@@ -155,7 +155,7 @@ export function eigeneMieterflaechen(Z, L, reihe = ['+z', '+x']) {
     belegt[seite] = u1;
     aus.push({ ...m, seite, u0, u1: Math.min(u1, l - 4), ua: u0 - 0.5, ub: Math.min(u1, l - 4) + 0.5 });
   };
-  if (Z.hat('offprice') && Z.offpriceEtage === 0) platz(mieterInfo({ name: 'HARTWIG OUTLET', etage: 0 }), 0.8, 12, 60);
+  if (Z.hat('offprice') && Z.offpriceEtage === 0) platz(mieterInfo({ name: offpriceName, etage: 0 }), 0.8, 12, 60);
   // Fremdmieter im EG deutlich breit (aus Spielabstand als fremde Front erkennbar)
   for (const m of Z.untermieter) if (m.etage === 0 && m.typ !== 'gastro') platz(m, 0.45, 12, 30);
   return aus;
@@ -803,6 +803,8 @@ function dachGastro(Z, mi, rect) {
  * Reihenfolge = Priorität der Fassadenflächen: Mieter > Outlet > Umbau > Räumung > Geschlossen > Leerstand > Neueröffnung > Teilschließung > Aktion.
  */
 export function zustandsDekor(S, scene, k, Zin, opt = {}) {
+  const ROT = k.kettenFarbe ?? '#d23c32';
+  const ROT_KAMPAGNE = k.kettenFarbe ?? '#c8102e';
   const Z = { S, scene, k, r: rng(`${k.seed ?? 'z'}/zustand`), ...opt, leute: opt.passanten !== false, belegt: { '+z': [], '+x': [] }, top: k.hoehe };
   const st = zustandNormal(Zin);
   const hat = st.hat;
@@ -944,7 +946,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
   }
   if (hat('offprice') && st.offpriceEtage > 0 && n >= 2) {
     const e = Math.min(st.offpriceEtage, n - 1), L = Z.nutz(sz);
-    const out = mieterInfo({ name: 'HARTWIG OUTLET', etage: e });
+    const out = mieterInfo({ name: k.kettenName ? k.kettenName + ' Restposten' : 'HARTWIG OUTLET', etage: e });
     const y0 = etagenY(k, e) + 0.2, y1 = y0 + GH - 0.4, t = tFront(k) + 0.05;
     sz.q(L * 0.04, L * 0.8, y0, y1, t, t + 0.1, '#f5b400');
     sz.q(L * 0.32, L * 0.78, y0 + 0.5, y1 - 0.4, t + 0.1, t + 0.14, '#8fa8b5');
@@ -976,7 +978,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     if (m.typ === 'offprice') {
       aufsteller(Z, s, m.ua + 2, 2.6, 'ALLES -50 %', '#1d1d1d', '#f5b400');
       const hO = Math.min(GH * 1.15, Math.max(3, k.hoehe - EG - 1));
-      fassadenBanner(Z, s, [{ text: 'HARTWIG OUTLET', h: 2.6, fg: '#1d1d1d' }, { text: 'Marken bis -70 %', h: 1.1, fg: '#c8102e' }], '#f5b400', { u: (m.ua + m.ub) / 2, maxB: (m.ub - m.ua) * 0.98, zielH: hO, y: n <= 1 ? undefined : EG + 0.35 + hO / 2, rahmen: '#1d1d1d', fuellen: true });
+      fassadenBanner(Z, s, [{ text: k.kettenName ? k.kettenName.toUpperCase() + ' RESTPOSTEN' : 'HARTWIG OUTLET', h: 2.6, fg: '#1d1d1d' }, { text: 'Marken bis -70 %', h: 1.1, fg: ROT_KAMPAGNE }], '#f5b400', { u: (m.ua + m.ub) / 2, maxB: (m.ub - m.ua) * 0.98, zielH: hO, y: n <= 1 ? undefined : EG + 0.35 + hO / 2, rahmen: '#1d1d1d', fuellen: true });
       if (n >= 2) bahnen(Z, s, [m.ua + 1.6, m.ub - 1.6], 'OUTLET', '#1d1d1d', '#f5b400', { y0: EG + 0.6 });
       for (let i = 0; i < 3; i++) { const [x, zz] = s.welt(m.ua + 3 + i * 3, 3.0); S.box(1.8, 0.8, 0.9, x, 0.7, zz, '#f5b400'); for (let q = 0; q < 3; q++) S.box(0.5, 0.3, 0.7, x - 0.6 + q * 0.6, 1.25, zz, waehle(r, ['#e04b3a', '#3a7bd5', '#4caf50', '#ffffff', '#2b2b2b'])); }
     }
@@ -1026,20 +1028,20 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
 
   // ---------- Räumungsverkauf
   if (hat('raeumung')) {
-    fassadenBanner(Z, sz, [{ text: 'ALLES MUSS RAUS', h: 2.4, fg: '#c8102e' }, { text: 'RÄUMUNGSVERKAUF', h: 1.0, fg: '#1d1d1d' }], '#f6d32d', { anteil: 0.8, rahmen: '#c8102e', zielH: GROSS, modus: 'mitte', fuellen: true });
-    fassadenBanner(Z, sx, [{ text: '-70 %', h: 3.2, fg: '#ffffff' }, { text: 'LETZTE TAGE', h: 0.9, fg: '#f6d32d' }], '#c8102e', { anteil: 0.5, zielH: GROSS * 0.9, modus: 'mitte' });
+    fassadenBanner(Z, sz, [{ text: 'ALLES MUSS RAUS', h: 2.4, fg: ROT_KAMPAGNE }, { text: 'RÄUMUNGSVERKAUF', h: 1.0, fg: '#1d1d1d' }], '#f6d32d', { anteil: 0.8, rahmen: ROT_KAMPAGNE, zielH: GROSS, modus: 'mitte', fuellen: true });
+    fassadenBanner(Z, sx, [{ text: '-70 %', h: 3.2, fg: '#ffffff' }, { text: 'LETZTE TAGE', h: 0.9, fg: '#f6d32d' }], ROT_KAMPAGNE, { anteil: 0.5, zielH: GROSS * 0.9, modus: 'mitte' });
     const Lz = Z.nutz(sz), Lx = Z.nutz(sx);
-    bahnen(Z, sz, [Lz * 0.06, Lz * 0.94], 'RÄUMUNG', ['#c8102e', '#1d1d1d'], ['#f6d32d', '#c8102e'], { y1: k.hoehe - 0.8 });
-    bahnen(Z, sx, [Lx * 0.12, Lx * 0.88], 'ALLES -70 %', ['#ffffff', '#c8102e'], ['#c8102e', '#f6d32d']);
+    bahnen(Z, sz, [Lz * 0.06, Lz * 0.94], 'RÄUMUNG', [ROT_KAMPAGNE, '#1d1d1d'], ['#f6d32d', ROT_KAMPAGNE], { y1: k.hoehe - 0.8 });
+    bahnen(Z, sx, [Lx * 0.12, Lx * 0.88], 'ALLES -70 %', ['#ffffff', ROT_KAMPAGNE], [ROT_KAMPAGNE, '#f6d32d']);
     for (const f of fensterEG) {
       const s = seiten[f.seite], m = (f.a + f.b) / 2;
       const txt = waehle(r, ['-70 %', '-50 %', 'ALLES MUSS RAUS', '-60 %']);
-      plakat(Z, s, txt, m, (f.y0 + f.y1) / 2 + 0.3, f.t + 0.12, 1.1, txt.startsWith('A') ? '#c8102e' : '#ffffff', txt.startsWith('A') ? '#f6d32d' : '#c8102e', f.b - f.a - 0.3);
+      plakat(Z, s, txt, m, (f.y0 + f.y1) / 2 + 0.3, f.t + 0.12, 1.1, txt.startsWith('A') ? ROT_KAMPAGNE : '#ffffff', txt.startsWith('A') ? '#f6d32d' : ROT_KAMPAGNE, f.b - f.a - 0.3);
     }
     const he = haupt(), s = seiten[he.seite];
     menge(Z, s, he.u, 3.2, 34, 7, 3.0, { tMin: (he.t ?? 0) + 0.8 });
     schlange(Z, s, he.u + 4, Math.min(s.L - 1, he.u + 18), 1.6);
-    aufsteller(Z, s, he.u - 5, 3.8, '-70 %', '#ffffff', '#c8102e');
+    aufsteller(Z, s, he.u - 5, 3.8, '-70 %', '#ffffff', ROT_KAMPAGNE);
   }
 
   // ---------- Geschlossen: dunkle Rollgitter, Rollläden, schwarz-rotes Schild, Hebebühne baut die Buchstaben ab, Absperrgitter
@@ -1055,8 +1057,8 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       s.q(e.u - b, e.u + b, 0.3, 3.9, t, t + 0.04, '#3e444a');
       for (let y = 0.5; y < 3.8; y += 0.34) s.q(e.u - b, e.u + b, y, y + 0.06, t + 0.04, t + 0.07, '#2b3035');
       s.q(e.u - 0.6, e.u + 0.6, 1.4, 2.6, t + 0.07, t + 0.1, '#ffffff');
-      plakat(Z, s, 'GESCHLOSSEN', e.u, 2.0, t + 0.12, 0.35, '#c8102e', '#ffffff', 1.1);
-      bauzaun(Z, s, e.u - b - 1.5, e.u + b + 1.5, (e.t ?? 0) + 2.6, { text: 'GESCHLOSSEN', fg: '#ffffff', bg: '#c8102e' });
+      plakat(Z, s, 'GESCHLOSSEN', e.u, 2.0, t + 0.12, 0.35, ROT_KAMPAGNE, '#ffffff', 1.1);
+      bauzaun(Z, s, e.u - b - 1.5, e.u + b + 1.5, (e.t ?? 0) + 2.6, { text: 'GESCHLOSSEN', fg: '#ffffff', bg: ROT_KAMPAGNE });
     }
     const jahre = k.baujahr ? jahr - k.baujahr : null;
     // Hebebühne zuerst festlegen und ihren Bildbereich sperren (Ausleger steht vor der Fassade), Banner weichen ihr aus
@@ -1066,8 +1068,8 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     if (mitBuehne) sperre(Z, ab.s, ab.u - 5.5, ab.u + 2, 0, ab.y + 1.5, 'hebebuehne');
     for (const s of [sz, sx]) {
       if (!rest[s.seite]) continue;
-      if (s === sz || !rest['+z']) fassadenBanner(Z, s, [{ text: 'GESCHLOSSEN', h: 2.6, fg: '#ffffff' }, { text: 'Diese Filiale ist dauerhaft geschlossen', h: 0.7, fg: '#ffb3a8' }], '#1d2125', { anteil: 0.86, zielH: GROSS, rahmen: '#c8102e', modus: 'mitte', fuellen: true, streifen: true, minSchrift: 0.6 });
-      else fassadenBanner(Z, s, [{ text: jahre ? `DANKE FÜR ${jahre} JAHRE` : 'DANKE FÜR ALLES', h: 1.5, fg: '#1d2125' }, { text: 'Ihr Hartwig-Team', h: 0.7, fg: '#5c6670' }], '#ffffff', { anteil: 0.8, zielH: GROSS * 0.8, rahmen: '#1d2125', modus: 'mitte', fuellen: true, minSchrift: 0.6 });
+      if (s === sz || !rest['+z']) fassadenBanner(Z, s, [{ text: 'GESCHLOSSEN', h: 2.6, fg: '#ffffff' }, { text: k.kettenName ? k.kettenName + ' schließt' : 'Diese Filiale ist dauerhaft geschlossen', h: 0.7, fg: '#ffb3a8' }], '#1d2125', { anteil: 0.86, zielH: GROSS, rahmen: ROT_KAMPAGNE, modus: 'mitte', fuellen: true, streifen: true, minSchrift: 0.6 });
+      else fassadenBanner(Z, s, [{ text: jahre ? `DANKE FÜR ${jahre} JAHRE${k.kettenName ? ' ' + k.kettenName.toUpperCase() : ''}` : 'DANKE FÜR ALLES', h: 1.5, fg: '#1d2125' }, { text: (k.kettenName ? 'Ihr ' + k.kettenName + '-Team' : 'Ihr Hartwig-Team'), h: 0.7, fg: '#5c6670' }], '#ffffff', { anteil: 0.8, zielH: GROSS * 0.8, rahmen: '#1d2125', modus: 'mitte', fuellen: true, minSchrift: 0.6 });
     }
     // Hebebühne am Schriftzug
     if (mitBuehne) hebebuehne(Z, ab.s, ab.u, ab.y, ab.t ?? tFront(k));
@@ -1128,9 +1130,9 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
   // ---------- Neueröffnung
   if (hat('neueroeffnung')) {
     const he = haupt(), s = seiten[he.seite], u = he.u, t0 = (he.t ?? 0) + 0.2;
-    s.q(u - 1.3, u + 1.3, 0.3, 0.34, t0, 5.4, '#c8102e');
+    s.q(u - 1.3, u + 1.3, 0.3, 0.34, t0, 5.4, ROT_KAMPAGNE);
     for (let t = t0 + 0.8; t < 5.2; t += 1.4) for (const du of [-1.7, 1.7]) { const [x, zz] = s.welt(u + du, t); zyl(S, x, 0.3, zz, 0.07, 1.0, '#d4a017', 6); }
-    for (const du of [-1.7, 1.7]) s.q(u + du - 0.03, u + du + 0.03, 1.15, 1.22, t0 + 0.8, 5.0, '#c8102e');
+    for (const du of [-1.7, 1.7]) s.q(u + du - 0.03, u + du + 0.03, 1.15, 1.22, t0 + 0.8, 5.0, ROT_KAMPAGNE);
     ballonbogen(Z, s, u, Math.min(5, t0 + 3.2), 7, 5.2, [ROT, '#ffffff', '#d4a017']);
     for (let i = -3; i <= 3; i++) { if (i === 0) continue; const [x, zz] = s.welt(u + i * 3.2, 4.6); fahne(Z, x, zz, i % 2 ? ROT : '#ffffff', 8.5, i % 2 ? '#ffffff' : ROT); }
     schlange(Z, s, u - 2.5, Math.max(1, u - 22), 1.7);
@@ -1157,17 +1159,17 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       }
       const txt = n >= 3 ? 'Ab sofort nur noch EG und 1. OG' : 'Ab sofort nur noch im EG';
       const zH = Math.min(GH * 1.4, 6.2, k.hoehe - yG - 1);
-      fassadenBanner(Z, sz, [{ text: 'TEILSCHLIESSUNG', h: 1.7, fg: '#ffffff' }, { text: txt, h: 0.8, fg: '#ffd0c8' }], '#2b3035', { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.75, zielH: zH, rahmen: '#c8102e', minSchrift: 0.55 });
-      fassadenBanner(Z, sx, [{ text: 'OBERE ETAGEN GESCHLOSSEN', h: 1.4, fg: '#ffffff' }, { text: txt, h: 0.8, fg: '#ffd0c8' }], '#2b3035', { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.8, zielH: zH, rahmen: '#c8102e', minSchrift: 0.55 });
+      fassadenBanner(Z, sz, [{ text: 'TEILSCHLIESSUNG', h: 1.7, fg: '#ffffff' }, { text: txt, h: 0.8, fg: '#ffd0c8' }], '#2b3035', { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.75, zielH: zH, rahmen: ROT_KAMPAGNE, minSchrift: 0.55 });
+      fassadenBanner(Z, sx, [{ text: 'OBERE ETAGEN GESCHLOSSEN', h: 1.4, fg: '#ffffff' }, { text: txt, h: 0.8, fg: '#ffd0c8' }], '#2b3035', { lo: yG + 0.5, y: yG + 0.6 + zH / 2, anteil: 0.8, zielH: zH, rahmen: ROT_KAMPAGNE, minSchrift: 0.55 });
     } else { // eingeschossig: hintere Hälfte der Schaufenster mit Folie zu, Schild auf dem Dach
       for (const f of fensterEG) {
         const s = seiten[f.seite];
         if (!(f.seite === '+x' ? (f.a + f.b) / 2 < Z.nutz(s) * 0.6 : (f.a + f.b) / 2 < Z.nutz(s) * 0.5)) continue;
         const m = (f.a + f.b) / 2, ym = (f.y0 + f.y1) / 2, l = Math.hypot(f.b - f.a, f.y1 - f.y0) * 0.92, w = Math.atan2(f.y1 - f.y0, f.b - f.a);
         s.q(f.a, f.b, f.y0, f.y1, f.t + 0.1, f.t + 0.14, '#f2f0ea');
-        s.kipp(l, 0.35, 0.03, m, ym, f.t + 0.16, '#c8102e', w); s.kipp(l, 0.35, 0.03, m, ym, f.t + 0.19, '#c8102e', -w);
+        s.kipp(l, 0.35, 0.03, m, ym, f.t + 0.16, ROT_KAMPAGNE, w); s.kipp(l, 0.35, 0.03, m, ym, f.t + 0.19, ROT_KAMPAGNE, -w);
       }
-      fassadenBanner(Z, sx, [{ text: 'TEILFLÄCHE GESCHLOSSEN', h: 1.1, fg: '#ffffff' }], '#3b4248', { anteil: 0.6, zielH: 2.4, rahmen: '#c8102e', minSchrift: 0.5 });
+      fassadenBanner(Z, sx, [{ text: 'TEILFLÄCHE GESCHLOSSEN', h: 1.1, fg: '#ffffff' }], '#3b4248', { anteil: 0.6, zielH: 2.4, rahmen: ROT_KAMPAGNE, minSchrift: 0.5 });
     }
   }
 
@@ -1178,8 +1180,8 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     const rb = st.rabatt, pr = (x) => `-${rb ?? x} %`;
     const P = {
       sale: { bg: '#d8102e', fg: '#ffffff', z: [{ text: 'SALE', h: 3.4, fg: '#ffffff' }, { text: rb ? `jetzt ${pr(50)}` : 'bis zu -50 %', h: 1.1, fg: '#ffe066' }], x: [{ text: pr(50), h: 3.0, fg: '#ffffff' }], wimpel: ['#d8102e', '#ffffff'], ballon: ['#d8102e', '#ffffff'], fenster: rb ? [pr(50), 'SALE'] : ['-30 %', '-50 %', 'SALE'], stopper: 'SALE', bahn: 'SALE %' },
-      jubilaeum: { bg: '#1f3f6b', fg: '#e8c25a', z: [{ text: k.baujahr ? `${jahr - k.baujahr} JAHRE HARTWIG` : 'JUBILÄUM', h: 2.2, fg: '#e8c25a' }, { text: 'Danke für Ihre Treue', h: 0.9, fg: '#ffffff' }], x: [{ text: 'JUBILÄUM', h: 1.9, fg: '#e8c25a' }, { text: k.baujahr ? `seit ${k.baujahr}` : 'seit jeher', h: 0.9, fg: '#ffffff' }], wimpel: ['#e8c25a', '#1f3f6b', ROT], ballon: ['#e8c25a', ROT, '#1f3f6b'], fenster: ['JUBILÄUM', pr(20)], stopper: 'Jubelpreise', bahn: 'JUBILÄUM' },
-      weihnachten: { bg: '#1f5a3a', fg: '#ffffff', z: [{ text: 'WEIHNACHTSZAUBER', h: 2.0, fg: '#ffffff' }, { text: 'Geschenke für alle', h: 0.9, fg: '#f2d27a' }], x: [{ text: 'FROHES FEST', h: 1.8, fg: '#f2d27a' }], wimpel: ['#c8102e', '#f2d27a', '#1f5a3a'], ballon: null, fenster: ['GESCHENKE', '★'], stopper: 'Geschenkideen' },
+      jubilaeum: { bg: '#1f3f6b', fg: '#e8c25a', z: [{ text: k.baujahr ? `${jahr - k.baujahr} JAHRE ${k.kettenName ? k.kettenName.toUpperCase() : 'HARTWIG'}` : 'JUBILÄUM', h: 2.2, fg: '#e8c25a' }, { text: 'Danke für Ihre Treue', h: 0.9, fg: '#ffffff' }], x: [{ text: 'JUBILÄUM', h: 1.9, fg: '#e8c25a' }, { text: k.baujahr ? `seit ${k.baujahr}` : 'seit jeher', h: 0.9, fg: '#ffffff' }], wimpel: ['#e8c25a', '#1f3f6b', ROT], ballon: ['#e8c25a', ROT, '#1f3f6b'], fenster: ['JUBILÄUM', pr(20)], stopper: 'Jubelpreise', bahn: 'JUBILÄUM' },
+      weihnachten: { bg: '#1f5a3a', fg: '#ffffff', z: [{ text: 'WEIHNACHTSZAUBER', h: 2.0, fg: '#ffffff' }, { text: 'Geschenke für alle', h: 0.9, fg: '#f2d27a' }], x: [{ text: 'FROHES FEST', h: 1.8, fg: '#f2d27a' }], wimpel: [ROT_KAMPAGNE, '#f2d27a', '#1f5a3a'], ballon: null, fenster: ['GESCHENKE', '★'], stopper: 'Geschenkideen' },
       blackfriday: { bg: '#121212', fg: '#ffd400', z: [{ text: 'BLACK FRIDAY', h: 2.8, fg: '#ffffff' }, { text: rb ? `jetzt ${pr(60)}` : 'bis zu -60 %', h: 1.1, fg: '#ffd400' }], x: [{ text: pr(60), h: 3.0, fg: '#ffd400' }], wimpel: ['#121212', '#ffd400'], ballon: ['#121212', '#ffd400'], fenster: [pr(60), 'BLACK FRIDAY'], stopper: pr(60), bahn: 'BLACK FRIDAY' },
     }[a] ?? aktionStil(a, st, pr);
     if (st.mechanik === 'punkte' && st.punkteFaktor && P.z[1]) P.z[1] = { ...P.z[1], text: `${st.punkteFaktor}-fach Punkte mit der Karte` };
@@ -1214,9 +1216,9 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       const [x, zz] = s.welt(he.u + (he.breite ?? 4) / 2 + 3.4, 3.4);
       for (let i = 0; i < 3; i++) { const g = new THREE.ConeGeometry(2.4 - i * 0.6, 2.6, 8); g.translate(x, 1.6 + i * 1.6, zz); S.add(g, '#2f7a45'); }
       kugel(S, x, 6.8, zz, 0.45, '#f2d27a');
-      for (let i = 0; i < 10; i++) kugel(S, x + zw(r, -1.6, 1.6) * (1 - i / 14), 1.4 + i * 0.5, zz + zw(r, -1.6, 1.6) * (1 - i / 14), 0.18, i % 2 ? '#c8102e' : '#f2d27a');
+      for (let i = 0; i < 10; i++) kugel(S, x + zw(r, -1.6, 1.6) * (1 - i / 14), 1.4 + i * 0.5, zz + zw(r, -1.6, 1.6) * (1 - i / 14), 0.18, i % 2 ? ROT_KAMPAGNE : '#f2d27a');
       for (const s2 of [sz, sx]) { const L = Z.nutz(s2); for (let u = 0.5; u < L; u += 1.0) s2.q(u - 0.1, u + 0.1, k.hoehe - 0.3 - 0.35 * Math.sin(u * 0.7) ** 2, k.hoehe - 0.1 - 0.35 * Math.sin(u * 0.7) ** 2, tFront(k) + 0.1, tFront(k) + 0.3, '#ffe58a'); }
-      for (let i = 0; i < 4; i++) { const [gx, gz] = s.welt(he.u - (he.breite ?? 4) / 2 - 2.6 - i * 1.1, 1.6); const g = 0.6 + r() * 0.4; S.box(g, g, g, gx, 0.3 + g / 2, gz, i % 2 ? '#c8102e' : '#f2d27a'); }
+      for (let i = 0; i < 4; i++) { const [gx, gz] = s.welt(he.u - (he.breite ?? 4) / 2 - 2.6 - i * 1.1, 1.6); const g = 0.6 + r() * 0.4; S.box(g, g, g, gx, 0.3 + g / 2, gz, i % 2 ? ROT_KAMPAGNE : '#f2d27a'); }
     }
     if (a === 'blackfriday') menge(Z, s, he.u, 3.0, 24, 6, 2.6, { tMin: (he.t ?? 0) + 0.8 });
   }
