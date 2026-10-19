@@ -276,11 +276,24 @@ function pruefe(name) {
       if (process.env.UFER) console.log('UFER', name, ax, Math.round(a1), Math.round(qa0), Math.round(qa1), Math.round(qb0), Math.round(qb1));
     }
   }
+  // Schwesterkette: Standort nicht im Hartwig-Block, höchstens 80 Prozent Grundfläche,
+  // keine gleiche Familien-/Variantenkombination innerhalb benachbarter Städte.
+  const schwester = s.standorte.filter((q) => q.rolle === 'schwester');
+  const whBlock = new Set(plan.parzellen.filter((q) => q.typ === 'slot:warenhaus').map((q) => q.block));
+  const schwesterBlock = plan.parzellen.filter((q) => q.typ === 'slot:schwester' && whBlock.has(q.block)).length;
+  const maxW = Math.max(0, ...s.standorte.filter((q) => q.rolle === 'warenhaus').map((q) => q.grundflaecheQm ?? 0));
+  const schwesterGross = schwester.filter((q) => maxW && q.grundflaecheQm > maxW * 0.8).length;
+  const schwesterGleich = schwester.filter((q) => nachbarStaedte(name).some((n) =>
+    stadtDaten(n)?.standorte.some((v) => v.rolle === 'schwester' && v.familie === q.familie && v.variante === q.variante)
+  )).length;
   const gross = [...grossNah.values()].filter((g) => g.n > 50);
   const grossInnen = gross.filter((g) => g.innen > 0.25 * g.n);
   return {
     name, plan,
     werte: {
+      'Schwester: gleicher Hartwig-Block': schwesterBlock,
+      'Schwester: mehr als 80 % Hartwig': schwesterGross,
+      'Schwester: gleiche Nachbar-Variante': schwesterGleich,
       'Grün in Blöcken Stadt %': pz(stadt.gruenBlock ?? 0, blockFl(stadt)),
       'Grün in Blöcken nah %': pz(nah.gruenBlock ?? 0, blockFl(nah)),
       'Blockrand unbebaut Stadt %': pz(randLeer, randL),
@@ -315,6 +328,9 @@ function pruefe(name) {
 
 // Grenzwerte aus GESTALTUNG.md (Nahausschnitt); überschrittene Werte werden mit ! markiert und gezählt
 const GRENZE = {
+  'Schwester: gleicher Hartwig-Block': 0,
+  'Schwester: mehr als 80 % Hartwig': 0,
+  'Schwester: gleiche Nachbar-Variante': 0,
   'Grün in Blöcken nah %': 0, 'Grün in Blöcken Stadt %': 1, 'Blockrand unbebaut nah %': 2, 'Bauten nicht ebenerdig nah': 0,
   'Gleisfläche nah %': 2, 'Bahnhof nah %': 3, 'Wasser nah %': 15, 'Außerhalb Karte nah %': 0, 'Wasserkante nackt nah m': 0,
   'Wasserkante nackt Stadt m': 0, 'Wasserkante Kartenrand nah m': 0, 'Großbauten nah (Anzahl)': 1, 'Großbauten nah innen': 0,

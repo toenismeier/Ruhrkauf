@@ -1,0 +1,2078 @@
+[
+  {
+    "id": "K001",
+    "name": "Essen Nebenlage",
+    "stadt": "Essen",
+    "format": "schwester",
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 900,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1955,
+    "fassade": 0,
+    "substanz": 15,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K001-f1",
+        "etage": 0,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K001-f2",
+        "etage": 0,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K001-f3",
+        "etage": 1,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K001-f4",
+        "etage": 1,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K001-f5",
+        "etage": 2,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K001-f6",
+        "etage": 2,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K001-f7",
+        "etage": 3,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K001-f8",
+        "etage": 3,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K002",
+    "name": "Dortmund Nebenlage",
+    "stadt": "Dortmund",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1030,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1962,
+    "fassade": 0,
+    "substanz": 26,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K002-f1",
+        "etage": 0,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K002-f2",
+        "etage": 0,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K002-f3",
+        "etage": 1,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K002-f4",
+        "etage": 1,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K002-f5",
+        "etage": 2,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K002-f6",
+        "etage": 2,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K002-f7",
+        "etage": 3,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K002-f8",
+        "etage": 3,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K002-f9",
+        "etage": 4,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K002-f10",
+        "etage": 4,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K003",
+    "name": "Duisburg Nebenlage",
+    "stadt": "Duisburg",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1160,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1969,
+    "fassade": 0,
+    "substanz": 37,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K003-f1",
+        "etage": 0,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K003-f2",
+        "etage": 0,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K003-f3",
+        "etage": 1,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K003-f4",
+        "etage": 1,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K003-f5",
+        "etage": 2,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K003-f6",
+        "etage": 2,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K003-f7",
+        "etage": 3,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K003-f8",
+        "etage": 3,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K004",
+    "name": "Bochum Nebenlage",
+    "stadt": "Bochum",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1976,
+    "fassade": 1,
+    "substanz": 48,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K004-f1",
+        "etage": 0,
+        "qm": 696,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K004-f2",
+        "etage": 0,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K004-f3",
+        "etage": 1,
+        "qm": 696,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K004-f4",
+        "etage": 1,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K004-f5",
+        "etage": 2,
+        "qm": 696,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K004-f6",
+        "etage": 2,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K004-f7",
+        "etage": 3,
+        "qm": 696,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K004-f8",
+        "etage": 3,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K004-f9",
+        "etage": 4,
+        "qm": 696,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K004-f10",
+        "etage": 4,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K005",
+    "name": "Wuppertal Nebenlage",
+    "stadt": "Wuppertal",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1420,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1958,
+    "fassade": 1,
+    "substanz": 59,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K005-f1",
+        "etage": 0,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K005-f2",
+        "etage": 0,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K005-f3",
+        "etage": 1,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K005-f4",
+        "etage": 1,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K005-f5",
+        "etage": 2,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K005-f6",
+        "etage": 2,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K005-f7",
+        "etage": 3,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K005-f8",
+        "etage": 3,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K006",
+    "name": "Gelsenkirchen Nebenlage",
+    "stadt": "Gelsenkirchen",
+    "format": "schwester",
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 900,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1965,
+    "fassade": 1,
+    "substanz": 24,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K006-f1",
+        "etage": 0,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K006-f2",
+        "etage": 0,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K006-f3",
+        "etage": 1,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K006-f4",
+        "etage": 1,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K006-f5",
+        "etage": 2,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K006-f6",
+        "etage": 2,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K006-f7",
+        "etage": 3,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K006-f8",
+        "etage": 3,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K006-f9",
+        "etage": 4,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K006-f10",
+        "etage": 4,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K007",
+    "name": "Mülheim Nebenlage",
+    "stadt": "Mülheim",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1030,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1972,
+    "fassade": 2,
+    "substanz": 35,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K007-f1",
+        "etage": 0,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K007-f2",
+        "etage": 0,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K007-f3",
+        "etage": 1,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K007-f4",
+        "etage": 1,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K007-f5",
+        "etage": 2,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K007-f6",
+        "etage": 2,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K007-f7",
+        "etage": 3,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K007-f8",
+        "etage": 3,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K008",
+    "name": "Bottrop Nebenlage",
+    "stadt": "Bottrop",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1050,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1979,
+    "fassade": 2,
+    "substanz": 46,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K008-f1",
+        "etage": 0,
+        "qm": 609,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K008-f2",
+        "etage": 0,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K008-f3",
+        "etage": 1,
+        "qm": 609,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K008-f4",
+        "etage": 1,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K008-f5",
+        "etage": 2,
+        "qm": 609,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K008-f6",
+        "etage": 2,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K008-f7",
+        "etage": 3,
+        "qm": 609,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K008-f8",
+        "etage": 3,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K008-f9",
+        "etage": 4,
+        "qm": 609,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K008-f10",
+        "etage": 4,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K009",
+    "name": "Düren Nebenlage",
+    "stadt": "Düren",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1290,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1961,
+    "fassade": 2,
+    "substanz": 57,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K009-f1",
+        "etage": 0,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K009-f2",
+        "etage": 0,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K009-f3",
+        "etage": 1,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K009-f4",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K009-f5",
+        "etage": 2,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K009-f6",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K009-f7",
+        "etage": 3,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K009-f8",
+        "etage": 3,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K010",
+    "name": "Wesel Nebenlage",
+    "stadt": "Wesel",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1968,
+    "fassade": 3,
+    "substanz": 22,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K010-f1",
+        "etage": 0,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K010-f2",
+        "etage": 0,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K010-f3",
+        "etage": 1,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K010-f4",
+        "etage": 1,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K010-f5",
+        "etage": 2,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K010-f6",
+        "etage": 2,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K010-f7",
+        "etage": 3,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K010-f8",
+        "etage": 3,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K010-f9",
+        "etage": 4,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K010-f10",
+        "etage": 4,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K011",
+    "name": "Neuss Nebenlage",
+    "stadt": "Neuss",
+    "format": "schwester",
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 900,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1975,
+    "fassade": 3,
+    "substanz": 33,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K011-f1",
+        "etage": 0,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K011-f2",
+        "etage": 0,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K011-f3",
+        "etage": 1,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K011-f4",
+        "etage": 1,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K011-f5",
+        "etage": 2,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K011-f6",
+        "etage": 2,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K011-f7",
+        "etage": 3,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K011-f8",
+        "etage": 3,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K012",
+    "name": "Krefeld Nebenlage",
+    "stadt": "Krefeld",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1030,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1957,
+    "fassade": 3,
+    "substanz": 44,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K012-f1",
+        "etage": 0,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K012-f2",
+        "etage": 0,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K012-f3",
+        "etage": 1,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K012-f4",
+        "etage": 1,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K012-f5",
+        "etage": 2,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K012-f6",
+        "etage": 2,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K012-f7",
+        "etage": 3,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K012-f8",
+        "etage": 3,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K012-f9",
+        "etage": 4,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K012-f10",
+        "etage": 4,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K013",
+    "name": "Gütersloh Nebenlage",
+    "stadt": "Gütersloh",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1160,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1964,
+    "fassade": 4,
+    "substanz": 55,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K013-f1",
+        "etage": 0,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K013-f2",
+        "etage": 0,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K013-f3",
+        "etage": 1,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K013-f4",
+        "etage": 1,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K013-f5",
+        "etage": 2,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K013-f6",
+        "etage": 2,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K013-f7",
+        "etage": 3,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K013-f8",
+        "etage": 3,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K014",
+    "name": "Recklinghausen Nebenlage",
+    "stadt": "Recklinghausen",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1290,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1971,
+    "fassade": 4,
+    "substanz": 20,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K014-f1",
+        "etage": 0,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K014-f2",
+        "etage": 0,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K014-f3",
+        "etage": 1,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K014-f4",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K014-f5",
+        "etage": 2,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K014-f6",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K014-f7",
+        "etage": 3,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K014-f8",
+        "etage": 3,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K014-f9",
+        "etage": 4,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K014-f10",
+        "etage": 4,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K015",
+    "name": "Oberhausen Nebenlage",
+    "stadt": "Oberhausen",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1978,
+    "fassade": 4,
+    "substanz": 31,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K015-f1",
+        "etage": 0,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K015-f2",
+        "etage": 0,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K015-f3",
+        "etage": 1,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K015-f4",
+        "etage": 1,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K015-f5",
+        "etage": 2,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K015-f6",
+        "etage": 2,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K015-f7",
+        "etage": 3,
+        "qm": 754,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K015-f8",
+        "etage": 3,
+        "qm": 546,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K016",
+    "name": "Hamm Nebenlage",
+    "stadt": "Hamm",
+    "format": "schwester",
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 900,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1960,
+    "fassade": 5,
+    "substanz": 42,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K016-f1",
+        "etage": 0,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K016-f2",
+        "etage": 0,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K016-f3",
+        "etage": 1,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K016-f4",
+        "etage": 1,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K016-f5",
+        "etage": 2,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K016-f6",
+        "etage": 2,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K016-f7",
+        "etage": 3,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K016-f8",
+        "etage": 3,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K016-f9",
+        "etage": 4,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K016-f10",
+        "etage": 4,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K017",
+    "name": "Iserlohn Nebenlage",
+    "stadt": "Iserlohn",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1030,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1967,
+    "fassade": 5,
+    "substanz": 53,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K017-f1",
+        "etage": 0,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K017-f2",
+        "etage": 0,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K017-f3",
+        "etage": 1,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K017-f4",
+        "etage": 1,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K017-f5",
+        "etage": 2,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K017-f6",
+        "etage": 2,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K017-f7",
+        "etage": 3,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K017-f8",
+        "etage": 3,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K018",
+    "name": "Lüdenscheid Nebenlage",
+    "stadt": "Lüdenscheid",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1160,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1974,
+    "fassade": 5,
+    "substanz": 18,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K018-f1",
+        "etage": 0,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K018-f2",
+        "etage": 0,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K018-f3",
+        "etage": 1,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K018-f4",
+        "etage": 1,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K018-f5",
+        "etage": 2,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K018-f6",
+        "etage": 2,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K018-f7",
+        "etage": 3,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K018-f8",
+        "etage": 3,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K018-f9",
+        "etage": 4,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K018-f10",
+        "etage": 4,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K019",
+    "name": "Witten Nebenlage",
+    "stadt": "Witten",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "grundflaecheQm": 1290,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1956,
+    "fassade": 6,
+    "substanz": 29,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K019-f1",
+        "etage": 0,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K019-f2",
+        "etage": 0,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K019-f3",
+        "etage": 1,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K019-f4",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K019-f5",
+        "etage": 2,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K019-f6",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K019-f7",
+        "etage": 3,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K019-f8",
+        "etage": 3,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K020",
+    "name": "Solingen Nebenlage",
+    "stadt": "Solingen",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1420,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1963,
+    "fassade": 6,
+    "substanz": 40,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K020-f1",
+        "etage": 0,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K020-f2",
+        "etage": 0,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K020-f3",
+        "etage": 1,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K020-f4",
+        "etage": 1,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K020-f5",
+        "etage": 2,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K020-f6",
+        "etage": 2,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K020-f7",
+        "etage": 3,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K020-f8",
+        "etage": 3,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K020-f9",
+        "etage": 4,
+        "qm": 824,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K020-f10",
+        "etage": 4,
+        "qm": 596,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K021",
+    "name": "Leverkusen Nebenlage",
+    "stadt": "Leverkusen",
+    "format": "schwester",
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 900,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1970,
+    "fassade": 6,
+    "substanz": 51,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K021-f1",
+        "etage": 0,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K021-f2",
+        "etage": 0,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K021-f3",
+        "etage": 1,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K021-f4",
+        "etage": 1,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K021-f5",
+        "etage": 2,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K021-f6",
+        "etage": 2,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K021-f7",
+        "etage": 3,
+        "qm": 522,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K021-f8",
+        "etage": 3,
+        "qm": 378,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K022",
+    "name": "Paderborn Nebenlage",
+    "stadt": "Paderborn",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1030,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1977,
+    "fassade": 7,
+    "substanz": 16,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K022-f1",
+        "etage": 0,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K022-f2",
+        "etage": 0,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K022-f3",
+        "etage": 1,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K022-f4",
+        "etage": 1,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K022-f5",
+        "etage": 2,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K022-f6",
+        "etage": 2,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K022-f7",
+        "etage": 3,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K022-f8",
+        "etage": 3,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K022-f9",
+        "etage": 4,
+        "qm": 597,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K022-f10",
+        "etage": 4,
+        "qm": 433,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K023",
+    "name": "Aachen Nebenlage",
+    "stadt": "Aachen",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1160,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1959,
+    "fassade": 7,
+    "substanz": 27,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K023-f1",
+        "etage": 0,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K023-f2",
+        "etage": 0,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K023-f3",
+        "etage": 1,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K023-f4",
+        "etage": 1,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K023-f5",
+        "etage": 2,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K023-f6",
+        "etage": 2,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K023-f7",
+        "etage": 3,
+        "qm": 673,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K023-f8",
+        "etage": 3,
+        "qm": 487,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      }
+    ],
+    "kette": "schwester"
+  },
+  {
+    "id": "K024",
+    "name": "Bielefeld Nebenlage",
+    "stadt": "Bielefeld",
+    "format": "schwester",
+    "lage": "b",
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1290,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1966,
+    "fassade": 7,
+    "substanz": 38,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K024-f1",
+        "etage": 0,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K024-f2",
+        "etage": 0,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K024-f3",
+        "etage": 1,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K024-f4",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K024-f5",
+        "etage": 2,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K024-f6",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K024-f7",
+        "etage": 3,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K024-f8",
+        "etage": 3,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K024-f9",
+        "etage": 4,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K024-f10",
+        "etage": 4,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ],
+    "kette": "schwester"
+  }
+]

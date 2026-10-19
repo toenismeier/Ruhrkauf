@@ -3,6 +3,8 @@ import { sockel, THREE } from '../kit/basis.js';
 import { zeigeKatalog } from '../kit/katalog.js';
 import { warenhaus, FAMILIEN } from '../kit/warenhaus.js';
 import haeuser from '../../haeuser.json';
+import hauserSchwester from '../../haeuser-schwester.json';
+import { schwesterhaus } from '../kit/schwesterhaus.js';
 
 const stat = [];
 const t0 = performance.now();
@@ -22,10 +24,24 @@ const eintraege = haeuser.map((h) => ({
     return new THREE.Box3(new THREE.Vector3(-4, 0, -4), new THREE.Vector3(erg.w + 4, erg.hoehe, erg.d + 4));
   },
 }));
+// Schwesterkette ebenfalls im Gesamtatlas abbilden; ihre Grundflächen bleiben kleiner.
+for (const h of hauserSchwester) eintraege.push({
+  titel: h.id + ' ' + h.stadt,
+  unter: 'Schwesterkette · ' + h.baujahr + ' · ' + h.grundflaecheQm + ' m²',
+  bau(S, scene) {
+    if (letzteSonne?.shadow.map) { letzteSonne.shadow.map.dispose(); letzteSonne.shadow.map = null; }
+    letzteSonne = scene.userData.sonne;
+    const t = performance.now();
+    const erg = schwesterhaus(S, scene, h, { x: 0, z: 0, passanten: false });
+    stat.push({ id: h.id, fam: erg.familie, teile: erg.teile, w: erg.w, d: erg.d, h: +erg.hoehe.toFixed(1), ms: +(performance.now() - t).toFixed(1) });
+    sockel(S, 0, 0, erg.w, erg.d, 4);
+    return new THREE.Box3(new THREE.Vector3(-4, 0, -4), new THREE.Vector3(erg.w + 4, erg.hoehe, erg.d + 4));
+  },
+});
 // Erst nach dem load-Ereignis rechnen, sonst läuft page.goto des Renderers in sein 30-s-Limit.
 setTimeout(() => {
   const t1 = performance.now();
-  zeigeKatalog(eintraege, { titel: 'Hartwig – alle 180 Häuser', spalten: 10, kachel: [300, 300] });
+  zeigeKatalog(eintraege, { titel: 'Hartwig und Schwesterkette – 204 Häuser', spalten: 10, kachel: [300, 300] });
   const bauMs = stat.reduce((a, s) => a + s.ms, 0);
   console.log(`STAT gesamt ${(performance.now() - t1).toFixed(0)} ms, davon Geometrie ${bauMs.toFixed(0)} ms, max Teile ${Math.max(...stat.map((s) => s.teile))}`);
   console.log('STATJSON ' + JSON.stringify(stat));

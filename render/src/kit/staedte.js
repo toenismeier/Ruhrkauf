@@ -11,6 +11,8 @@ import { fussabdruck } from './bauer.js';
 import { masse } from './warenhaus.js';
 import { NAMEN as WB_NAMEN } from './wettbewerber.js';
 import haeuser from '../../haeuser.json';
+import schwesterHauser from '../../haeuser-schwester.json';
+import { NAME_SCHWESTER, masseSchwester, familieSchwester } from './schwesterhaus.js';
 
 /** Region aus der echten Lage der Stadt (grob: Nord, Ost, West = NRW, Mitte = Hessen/RLP/Saar/Südniedersachsen, Süd = BW/BY). */
 const REGION_VON = {
@@ -90,6 +92,15 @@ function baueEintrag(name, liste) {
     const f = fussabdruck(h);
     return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
+  // Eine Schwesterfiliale pro ausgewaehlter Stadt. Hartwig behält die zentrale Einkaufslage.
+  // Die Daten sind rein grafisch und gehoeren nicht zum Engine-Portfolio.
+  const schwester = schwesterHauser.find((h) => h.stadt === name);
+  if (schwester) {
+    const f = masseSchwester(schwester);
+    standorte.push({ id: schwester.id, name: NAME_SCHWESTER, rolle: 'schwester',
+      lage: schwester.lage, grundflaecheQm: schwester.grundflaecheQm,
+      w: f.w, d: f.d, familie: familieSchwester(schwester), variante: schwester.fassade });
+  }
   const [a, b] = WETTBEWERBER[typ];
   const n = Math.min(b, a + Math.floor(r() * (b - a + 1)));
   const ARTEN_1A = ['modehaus', 'fastfashion', 'premium', 'leer_ehemals', 'modehaus', 'fastfashion'];

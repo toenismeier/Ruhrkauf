@@ -1144,7 +1144,7 @@ export function flaeche(S, scene, art, Z, o = {}) {
   const komp = komponenten(alle);
   if (komp.length > 1) {
     komp.forEach((t, k) => {
-      const rr = flaeche(S, scene, art, { ...Z, alle: t }, { ...o, teil: true, kasse: (o.kasse ?? true) && k === 0, seed: (o.seed ?? 1) + k * 53, schild: o.schild });
+      const rr = flaeche(S, scene, art, { ...Z, alle: t }, { ...o, teil: true, kasse: (o.kasse ?? true) && k === 0, seed: (o.seed ?? 1) + k * 53, schild: o.schildEinmal ? k === 0 && o.schild !== false : o.schild });
       res.frei.push(...rr.frei); res.belegt.push(...rr.belegt);
     });
     return res;

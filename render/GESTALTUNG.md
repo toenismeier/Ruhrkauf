@@ -109,3 +109,15 @@ Grenzwerte unten in eckigen Klammern sind die Prüfwerte des Skripts für den Na
 - Fensterraster, Gesimse, Ladenzone, Dachlandschaft mit Aufbauten an jedem sichtbaren Bau, auch an Hofbauten (Fensterband,
   Gesims, Oberlichter). Nichts Kistiges: keine Blöcke ohne Fassadengliederung, keine sichtbaren Seitenwände mit Fassade
   zwischen angebauten Häusern.
+
+## 7. Schwesterkette (Volkskauf)
+
+Die Schwesterkette ist eine bewusst ältere und schwächere Konzernkette und muss schon in der Stadtübersicht von Hartwig zu unterscheiden sein.
+
+- Nur Nachkriegsbauten von 1955 bis 1979: Klinkerkasten, Sichtbeton-Raster oder Waschbeton-Fensterband, jeweils mindestens vier Fassadenvarianten. Keine Kaiserzeit, Kuppeln, Rotunden, Center-Kopfbauten oder postmoderne Glasfronten.
+- Petrol `#2f6f73` als einziger Markenakzent für Schriftband, Türrahmen und Markisen. Keine roten Hartwig-Schriftzüge oder Fahnen.
+- Maximal 80 Prozent der größten Hartwig-Grundfläche derselben Stadt; nicht im selben Block wie Hartwig. In Nachbarstädten keine identische Kombination aus Schwester-Familie und Fassadenvariante. Das prüft `pruef-schwester.js` für 112 Städte und `pruef-gestaltung.js` für die abgefragten Städte.
+- Fassadenverschleiß über Geometrie: versetzte graue Attika-/Gesimsbänder, einzelne blinde Fensterfelder, alte Dachtechnik, matte, gut lesbare Kastenbuchstaben auf dem Petrolband über dem EG (Glyphenhöhe 1,2 bis 1,6 m). Gepflegter Altbau, keine verfallene Ruine als Standardzustand.
+- EG breite Schaufenster und zwei schmale Türen, keine Drehtür und kein monumentales Portal. Vorplatz ohne Fahnen oder Kübel, höchstens zwei Fahrradständer und eine Bank. Fußgängerdichte rund 60 Prozent von Hartwig.
+- Innenräume über `grundriss.js` mit `kette: 'schwester'`: einfache zentrale Treppe ohne Rolltreppenhalle oder Lichthof, weniger Abteilungen, Kassen auf den Verkaufsetagen, Rasterdeckenleuchten, gealterter Belag `#cfc6b4`, UG nur Lager und Anlieferung, kein Restaurant und keine Feinkost.
+- Zustände der bestehenden `zustandsDekor()`-Mechanik, höchstens 8.000 Sammler-Teile je Schwesterhaus, Nah/Fern über `setzeLod()`, Zufall ausschließlich über `rng(seed)`.
