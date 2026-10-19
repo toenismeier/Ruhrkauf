@@ -135,6 +135,7 @@ export interface Haus {
   wettbewerbRohStart?: number;
   wettbewerbRohGruppenStart?: Partial<Record<GruppeId, number>>;
   wettbewerbLeerStart?: number;
+  wettbewerbSchliessungWoche?: number;
   etagen: number[];
   grundflaecheQm: number;
   baujahr: number;
@@ -397,6 +398,7 @@ export interface GameState {
   /** Testschalter: reproduziert die alte Simulation ohne Wettbewerbsdynamik. */
   wettbewerbDeaktiviert?: boolean;
   wettbewerbNaechsteId: number;
+  wettbewerbStadtUmsatz: Record<string, number[]>;
   bestand: Kohorte[];
   bestellungen: Bestellung[];
   verbindlichkeiten: Verbindlichkeit[];
