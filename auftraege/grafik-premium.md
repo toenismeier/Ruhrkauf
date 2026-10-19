@@ -1,6 +1,6 @@
 # Auftrag: Premium-Häuser (Trophy Stores)
 
-Branch `feat/grafik-premium`, erst nach Merge von `feat/grafik-schwesterkette` starten (gleiche Einbaupunkte). Engine und Grafik in einem Auftrag.
+Branch `feat/grafik-premium`, erst nach Merge von `feat/grafik-schwesterkette` starten (gleiche Einbaupunkte). Darf parallel zum Outlet laufen: in den gemeinsamen Dateien nur ergänzen (Regeln in `auftraege/README.md`), vor dem PR auf `main` rebasen. Engine und Grafik in einem Auftrag.
 
 ## Worum es geht
 Vorbild ist das Premium-Quartett des Ruhrkauf-Konzerns: vier Weltstadt-Warenhäuser, die nicht wie die Masse geführt werden. Profitabel (EBITDA-Marge 6 bis 12 %), Immobilie mehr wert als der Handel, im Ernstfall eigener Verkaufsprozess an Luxusgruppen und Family Offices. Im Spiel sind das die Kronjuwelen: das Beste, was Hartwig hat, und das Erste, was Käufer wollen.

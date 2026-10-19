@@ -79,4 +79,4 @@ Vorhandenes wiederverwenden: `innen.js` (Stangen, Ständer, Gondeln, Kassentrese
 
 ## Grenzen
 - Arbeit auf Branch `feat/grafik-outlet`, CI muss grün sein.
-- Gemeinsam berührte Dateien (`bruecke.js`, `bauer.js`, `stadtplan.js`, `GESTALTUNG.md`, `pruef-gestaltung.js`, `alle-haeuser.js`) teilen sich die Aufträge Schwesterkette, Premium und dieses Format. Erst nach dem Merge der Schwesterkette starten.
+- Gemeinsam berührte Dateien (`bruecke.js`, `bauer.js`, `stadtplan.js`, `GESTALTUNG.md`, `pruef-gestaltung.js`, `alle-haeuser.js`) teilen sich die Aufträge Schwesterkette, Premium und dieses Format. Erst nach dem Merge der Schwesterkette starten. Premium darf parallel laufen: in den gemeinsamen Dateien nur ergänzen (Regeln in `auftraege/README.md`), vor dem PR auf `main` rebasen.
