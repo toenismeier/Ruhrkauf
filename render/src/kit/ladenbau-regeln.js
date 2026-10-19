@@ -29,7 +29,7 @@ export const FORMAT_PROFILE = Object.freeze({
     id: 'sport', titel: 'Hartwig Sport',
     boden: Object.freeze({gang:'#efefea', flaeche:'#dadde0', akzent:'#c8c9c3'}),
     wand: 'sport_schuh_marken', gondel: 'gondel_textil',
-    insel: 'sport_insel_neuheiten', kasse: 'kasse_sport_klein',
+    insel: 'sport_insel_neuheit', kasse: 'kasse_sport_klein',
     inszenierung: true, kunstrasenNurTorinsel: true, treppe: 'rolltreppe',
     abteilungsMoebel: Object.freeze({
       sportschuhe: Object.freeze({wand:'sport_schuh_laufen',gondel:'gondel_schuhe',insel:'sport_insel_laufanalyse'}),
@@ -62,7 +62,7 @@ export const FORMAT_PROFILE = Object.freeze({
     boden: Object.freeze({gang:'#e7e3d9',flaeche:'#cbbda9',akzent:'#b9a98f'}),
     wand:'alt_holz_regal', gondel:'gondel_kurzwaren',
     insel:'insel_alt_neuheit', kasse:'kasse_alt_kasse_klein',
-    inszenierung:false, treppe:'treppe_alt_offen', beleuchtung:'rasterleuchten',
+    inszenierung:false, treppe:'alt_treppe_offen', beleuchtung:'rasterleuchten',
     abteilungsMoebel: Object.freeze({
       damen: Object.freeze({wand:'alt_damen_haengung',gondel:'gondel_waesche'}),
       herren: Object.freeze({wand:'alt_herren_haengung',gondel:'gondel_kurzwaren'}),
