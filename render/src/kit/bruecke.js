@@ -20,7 +20,7 @@
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
-import { sporthaus } from './sporthaus.js';
+import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
 import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
@@ -193,7 +193,7 @@ export function spielBauer(s, o = {}) {
     const { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
     const nutzer = nachnutzer(h);
-    return nutzer ? sporthaus(S, scene, h, { x, z, hartwig: false, status: 'offen', passanten: false })
+    return nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
       : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
   };
   const bau = (S, scene, p, h) => (h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
