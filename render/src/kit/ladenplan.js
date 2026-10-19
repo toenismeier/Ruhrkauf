@@ -190,6 +190,66 @@ function inszenierung(plan,profil,raum) {
     }
   }
 }
+
+function schwerpunkte(plan) {
+  const r=R.suchRaster,nx=Math.round(plan.breite/r),nz=Math.round(plan.tiefe/r);
+  const block=new Uint8Array(nx*nz),prev=new Int16Array(nx+1),jetzt=new Int16Array(nx+1);
+  for(const m of [...plan.hindernisse,...plan.moebel]){
+    const x0=Math.max(0,Math.floor((m.x+1e-8)/r)),x1=Math.min(nx,Math.ceil((m.x+m.w-1e-8)/r));
+    const z0=Math.max(0,Math.floor((m.z+1e-8)/r)),z1=Math.min(nz,Math.ceil((m.z+m.d-1e-8)/r));
+    for(let z=z0;z<z1;z++)for(let x=x0;x<x1;x++)block[z*nx+x]=1;
+  }
+  const felder=[];
+  for(let z=1;z<=nz;z++){
+    for(let x=1;x<=nx;x++)if(!block[(z-1)*nx+x-1]){
+      jetzt[x]=1+Math.min(jetzt[x-1],prev[x],prev[x-1]);
+      if(jetzt[x]>=6)felder.push({x:(x-jetzt[x])*r,z:(z-jetzt[x])*r,size:jetzt[x]*r});
+    }
+    prev.set(jetzt);jetzt.fill(0);
+  }
+  felder.sort((a,b)=>b.size-a.size||a.z-b.z||a.x-b.x);
+  return felder;
+}
+// Dezente Neuheiten-Inseln nur an einem Reihenende oder neben dem Kundenlauf;
+// sie schließen verbliebene Freiflächen, ohne die Gondelachsen aufzulösen.
+function verdichteLadenplan(plan,profil){
+  const id=profil.insel;
+  if(!id)return;
+  const def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
+  const zaehler=new Map();
+  const verfuegbar=plan.breite*plan.tiefe-
+    plan.hindernisse.reduce((s,h)=>s+rechteckFlaeche(h),0);
+  let besetzt=plan.moebel.reduce((s,m)=>s+rechteckFlaeche(m),0);
+  for(let durchlauf=0;durchlauf<75;durchlauf++){
+    const felder=schwerpunkte(plan);
+    const groesste=felder[0]?.size??0;
+    if(groesste<=R.leerflaecheMax && besetzt>=R.moebelAnteilMin*verfuegbar)break;
+    if(besetzt+w*d>Math.min(0.485*verfuegbar,R.moebelAnteilMax*verfuegbar))break;
+    let eingefuegt=false;
+    for(const f of felder){
+      if(f.size<(groesste>R.leerflaecheMax?5:3.75))break;
+      const x0=Math.ceil((f.x-1e-8)/U)*U,z0=Math.ceil((f.z-1e-8)/U)*U;
+      for(let z=z0;z+d<=f.z+f.size+1e-8&&!eingefuegt;z+=U)
+        for(let x=x0;x+w<=f.x+f.size+1e-8&&!eingefuegt;x+=U){
+          const raum=plan.abteilungen.find(a=>x>=a.x&&z>=a.z&&x+w<=a.x+a.w&&z+d<=a.z+a.d);
+          if(!raum || (zaehler.get(raum.id)||0)>=6)continue;
+          const m=item(id,x,z,0,raum.id,{ausgleich:true});
+          if(!passeIn(m,raum)||!passe(m,plan,
+            [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
+          const nah=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
+            Math.hypot(Math.max(0,q.x-x-w,x-q.x-q.w),
+                       Math.max(0,q.z-z-d,z-q.z-q.d))<=3*U);
+          const gangNah=plan.gaenge.some(g=>schneidet(m,g,2*U));
+          if(!nah&&!gangNah)continue;
+          plan.moebel.push(m);zaehler.set(raum.id,(zaehler.get(raum.id)||0)+1);
+          besetzt+=w*d;eingefuegt=true;
+        }
+      if(eingefuegt)break;
+    }
+    if(!eingefuegt)break;
+  }
+}
+
 /**
  * @param {object} flaeche Außenmaß, Eingänge, Hindernisse (Meter)
  * @param {'sport'|'outlet'|'schwester'|object} profil Formatprofil
@@ -234,6 +294,7 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
   }
   for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
   for(const raum of plan.abteilungen)inszenierung(plan,p,raum);
+  verdichteLadenplan(plan,p);
   // Die Bodentypen sind definitionsgemäß etagenweit, nie je Sortiment.
   plan.boeden.push({...quadrat(0,0,plan.breite,plan.tiefe),typ:'flaeche',farbe:p.boden.flaeche});
   for(const g of plan.gaenge)plan.boeden.push({...g,typ:'gang',farbe:p.boden.gang});
