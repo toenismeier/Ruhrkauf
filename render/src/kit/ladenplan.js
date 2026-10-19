@@ -213,37 +213,54 @@ function schwerpunkte(plan) {
 // Dezente Neuheiten-Inseln nur an einem Reihenende oder neben dem Kundenlauf;
 // sie schließen verbliebene Freiflächen, ohne die Gondelachsen aufzulösen.
 function verdichteLadenplan(plan,profil){
-  const id=profil.insel;
-  if(!id)return;
-  const def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
+  if(!profil.insel)return;
+  const kurz=profil.id==='sport'?'gondel_schuhe':'gondel_spielzeug';
+  const varianten=[{id:profil.insel,winkel:0,gruppe:'insel'},
+    {id:kurz,winkel:90,gruppe:'kopf'},{id:kurz,winkel:0,gruppe:'kopf'}];
   const zaehler=new Map();
   const verfuegbar=plan.breite*plan.tiefe-
     plan.hindernisse.reduce((s,h)=>s+rechteckFlaeche(h),0);
   let besetzt=plan.moebel.reduce((s,m)=>s+rechteckFlaeche(m),0);
-  for(let durchlauf=0;durchlauf<75;durchlauf++){
-    const felder=schwerpunkte(plan);
-    const groesste=felder[0]?.size??0;
-    if(groesste<=R.leerflaecheMax && besetzt>=R.moebelAnteilMin*verfuegbar)break;
-    if(besetzt+w*d>Math.min(0.485*verfuegbar,R.moebelAnteilMax*verfuegbar))break;
+  for(let durchlauf=0;durchlauf<110;durchlauf++){
+    const felder=schwerpunkte(plan),gross=felder[0]?.size??0;
+    if(gross<=R.leerflaecheMax&&besetzt>=R.moebelAnteilMin*verfuegbar)break;
     let eingefuegt=false;
     for(const f of felder){
-      if(f.size<(groesste>R.leerflaecheMax?5:3.75))break;
-      const x0=Math.ceil((f.x-1e-8)/U)*U,z0=Math.ceil((f.z-1e-8)/U)*U;
-      for(let z=z0;z+d<=f.z+f.size+1e-8&&!eingefuegt;z+=U)
-        for(let x=x0;x+w<=f.x+f.size+1e-8&&!eingefuegt;x+=U){
-          const raum=plan.abteilungen.find(a=>x>=a.x&&z>=a.z&&x+w<=a.x+a.w&&z+d<=a.z+a.d);
-          if(!raum || (zaehler.get(raum.id)||0)>=6)continue;
-          const m=item(id,x,z,0,raum.id,{ausgleich:true});
-          if(!passeIn(m,raum)||!passe(m,plan,
-            [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
-          const nah=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
-            Math.hypot(Math.max(0,q.x-x-w,x-q.x-q.w),
-                       Math.max(0,q.z-z-d,z-q.z-q.d))<=3*U);
-          const gangNah=plan.gaenge.some(g=>schneidet(m,g,2*U));
-          if(!nah&&!gangNah)continue;
-          plan.moebel.push(m);zaehler.set(raum.id,(zaehler.get(raum.id)||0)+1);
-          besetzt+=w*d;eingefuegt=true;
-        }
+      if(f.size<(gross>R.leerflaecheMax?5:3.75))break;
+      for(const art of varianten){
+        const def=moebel(art.id),gedreht=art.winkel===90;
+        const w=(gedreht?def.rasterT:def.rasterB)*U;
+        const d=(gedreht?def.rasterB:def.rasterT)*U;
+        if(besetzt+w*d>0.49*verfuegbar)continue;
+        const x0=Math.ceil((f.x-1e-8)/U)*U,z0=Math.ceil((f.z-1e-8)/U)*U;
+        for(let z=z0;z+d<=f.z+f.size+1e-8&&!eingefuegt;z+=U)
+          for(let x=x0;x+w<=f.x+f.size+1e-8&&!eingefuegt;x+=U){
+            const raum=plan.abteilungen.find(r=>x>=r.x&&z>=r.z&&x+w<=r.x+r.w&&z+d<=r.z+r.d);
+            if(!raum)continue;
+            const key=raum.id+':'+art.gruppe;
+            if((zaehler.get(key)||0)>=(art.gruppe==='insel'?6:8))continue;
+            const m=item(art.id,x,z,art.winkel,raum.id,{ausgleich:true,kopf:art.gruppe==='kopf'});
+            if(!passeIn(m,raum)||!passe(m,plan,
+              [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
+            const nah=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
+              Math.hypot(Math.max(0,q.x-x-w,x-q.x-q.w),
+                         Math.max(0,q.z-z-d,z-q.z-q.d))<=3*U);
+            const gangNah=plan.gaenge.some(g=>schneidet(m,g,2*U));
+            if(!nah&&!gangNah)continue;
+            if(m.typ==='gondel'&&plan.moebel.some(q=>{
+              if(q.typ!=='gondel'||q.abteilung!==raum.id||q.winkel!==m.winkel)return false;
+              const xO=m.x<q.x+q.w-1e-8&&m.x+m.w>q.x+1e-8;
+              const zO=m.z<q.z+q.d-1e-8&&m.z+m.d>q.z+1e-8;
+              const dist=m.winkel%180===0?
+                Math.max(q.z-m.z-m.d,m.z-q.z-q.d):
+                Math.max(q.x-m.x-m.w,m.x-q.x-q.w);
+              return (m.winkel%180===0?xO:zO)&&dist>=0&&dist<R.gondelGang-1e-8;
+            }))continue;
+            plan.moebel.push(m);zaehler.set(key,(zaehler.get(key)||0)+1);
+            besetzt+=w*d;eingefuegt=true;
+          }
+        if(eingefuegt)break;
+      }
       if(eingefuegt)break;
     }
     if(!eingefuegt)break;
