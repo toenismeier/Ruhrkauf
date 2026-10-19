@@ -19,6 +19,7 @@ npx tsx scripts/marketing-vergleich.ts 1,2,3 3  # Marketingstrategien auf Basis 
 npx tsx scripts/schwierigkeit-vergleich.ts leicht,mittel,schwer 1,2,3 260  # Plan-EBITDA und Überleben je Stufe (Bot C, Bot A, ohne Eingriff)
 npx tsx scripts/bot.ts 1 260 --tief --schwer  # jeder Bot auch mit --leicht oder --schwer (Standard mittel)
 npx tsx scripts/marketing-beispiel.ts      # schreibt render/marketing-beispiel.json (Woche 30, Seed 1, Bot C)
+npx tsx scripts/wettbewerb-beispiel.ts     # schreibt render/wettbewerb-beispiel.json (Woche 0, 30, 104, Bot C)
 npx tsx scripts/bot.ts 1 260 --ek-nos      # weitere: --ek-em, --ek-kahlschlag, --ek-kahlschlag-frueh
 npx tsx scripts/vergleich.ts               # Jahr 2 je Strategie, Liquidität ausgeblendet
 npx tsx scripts/vorstand-vergleich.ts 1,2,3 3   # Vorstand gut/schwach/unbesetzt und Produktstrategie gut/schlecht auf Basis Bot C
@@ -37,6 +38,7 @@ npx tsx scripts/vorstand-beispiel.ts       # schreibt render/vorstand-beispiel.j
 | `src/stakeholder.ts` | Bank, Kreditversicherer, Lieferanten, Vermieter, Betriebsrat, Image |
 | `src/prozesse.ts` | Schließung, Insolvenz, Gläubigerversammlung, Eigentümer-Quartal |
 | `src/ereignisse.ts` | Zufallsereignisse, Angebote, Entscheidungen mit Frist |
+| `src/wettbewerb.ts` | Persistente Wettbewerber, eigenständiger RNG, Eröffnungen, Schließungen, Aktionen, Gegenmaßnahmen, Standortübernahmen und Grafik-Abfragen |
 | `src/aktionen.ts` | Alle Spieleraktionen (`fuehreAus`) |
 | `src/engine.ts` | Wochentakt (`wocheAbspielen`) und Liquiditätsvorschau (`vorschau`) |
 | `src/hq.ts` | Hauptverwaltung: Bürogebäude, Etagen, 11 Abteilungen (mit Produktentwicklung), Büroangebote, Zentralkosten, Wirkungen, HQ-Aktionen, `hqUebersicht`, `hqFuerGrafik` |
@@ -188,3 +190,17 @@ Stand Balancing Marketing: `kalibrierung.ts 1` unverändert (3.084,1 / 1.262,4 /
 | Markenaufbau | 2.051 | 41,3 % | 50 | 41,1 | 0 | 36,3 % | 58 | 0,013 |
 
 Rabattschlacht bringt im ersten Jahr mehr Umsatz (2.395 statt 2.375) und Frequenz, kostet aber gut 2 Punkte Rohertragsquote und treibt die Gewöhnung; ab Jahr 2 liegt der Umsatz unter Standard, das EBITDA rund 50 Mio. € darunter. Schon ab Woche 4 drückt sie das Plan-EBITDA unter die Schwelle, der Insolvenzplan scheitert auf allen drei Seeds (Woche 23). CRM und Karte hebt den Kartenanteil auf 48 % und liegt ab Jahr 1 vorn. Markenaufbau (Budget 2,5 % statt 1,8 %, TV, Plakat, Social, weniger Tiefstrabatte) hat die beste Rohertragsquote und das höchste Image, zahlt sich aber erst langsam aus.
+
+## Wettbewerber als Akteure
+
+Auftrag: `../auftraege/engine-wettbewerber.md`. Der Spielstand enthält die Wettbewerber in `wettbewerber[]` mit Art, Name/Kette, Lage, Stärke, eigener Fläche, Status, laufendem Preisdruck, Aktionszeitraum und gegebenenfalls der Nachnutzung eines Hartwig-Hauses. Die Namenslisten und Bauformen entsprechen dem vorhandenen Stadtbaukasten. Im Startbestand besitzt jede Metropole 3–5, jede Großstadt 1–3 und jede Mittelstadt 0–1 Wettbewerber; identische Namen werden im 28-km-Umkreis vermieden. Das Render-Modul selbst bleibt unverändert.
+
+**Kalibrierung und Zufallsfolgen:** Der bisherige Wert `einzug.wettbewerb` ist individuell je Hartwig-Haus ausgewürfelt, bei mehreren Häusern derselben Stadt also mathematisch nicht allein aus identischen lokalen Wettbewerbern ableitbar. Pro Haus wird deshalb der Ausgangszustand als historischer Offset (`wettbewerbStart`, `wettbewerbRohStart`, `wettbewerbRohGruppenStart`) gespeichert. `wettbewerbAus` und die gruppenspezifische Variante berechnen *nur die Veränderung* gegenüber diesem Startzustand. Damit bleibt der Startwert exakt erhalten und `potenzial` wird nie neu kalibriert. `wettbewerbRng` ist vom übrigen Engine-RNG getrennt. `wettbewerbDeaktiviert` unterdrückt die Dynamik für Regressionstests.
+
+**Wirkung:** Der Marktdruck ist von Warenüberlappung, Standortlage, Stärke, Eröffnungssog und Gegenaktionen abhängig. `wirtschaft.ts` wendet den Quotienten `(1 − 0,25 · w_neu_g) / (1 − 0,25 · w_start)` auf die Bruttonachfrage je Gruppe (auch Konzession) an; Offprice-Flächen erhalten einen separaten Überschneidungsfaktor. Leerstände führen erst bei *zusätzlichem* Leerstand gegenüber dem Ausgangszustand zu −2 % Stadtfrequenz je leerem Wettbewerbsgebäude. Die Schwierigkeit skaliert die Effektschwere, nicht das Eintreten.
+
+**Dynamik und Reaktionen:** Neue Wettbewerber eröffnen marktabhängig, können an bessere Standorte ziehen und führen saisonale Aktionen durch. Hartwig-Marketingaktionen können zeitversetzte Gegenaktionen hervorrufen. Schließungen führen nach Räumungsverkauf zu Leerstand, zusätzlichen Kundentransfers und optionalen Angeboten für Outlet- oder Erweiterungsflächen (`angebotAnnehmen` oder `angebotUebernehmen`). Geschlossene Hartwig-Häuser können nach 26–78 Wochen durch Wettbewerber nachgenutzt werden. Premium- und Modehaus-Großeröffnungen erzeugen befristete Entscheidungen (Aktion, Mailing bei Kundenkarte oder Nichtstun); lokale Abwerbungen nennen den konkreten Arbeitgeber.
+
+**Abfragen:** `wettbewerbUebersicht(s, stadt?)` liefert Akteure und Nachfragerückgang je Gruppe, `wettbewerbFuerGrafik(s, stadt)` die für die spätere Visualisierung benötigten JSON-Felder einschließlich Aktionsrabatt. `hausDetail` enthält die Wettbewerber derselben Stadt. Das Beispielskript exportiert vollständige Stadtsnapshots für Wochen 0, 30 und 104 unter Seed 1/Bot C.
+
+**Abnahme:** `npm run typecheck`, `npm test -- --runInBand`; die neuen Wettbewerbstests prüfen Startkalibrierung, Namensabstände, Determinismus über 260 Wochen, eigenen Zufallsstrom, Nachnutzung, Konter, Fristen, Standortübernahmen und die 1-%-Jahreskalibrierung. Balancing-Ergebnisse sind erst nach erfolgreichen CI-Läufen als bestätigt zu behandeln.
