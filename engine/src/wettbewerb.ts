@@ -37,17 +37,18 @@ function lageFaktor(haus: Haus, w: Wettbewerber): number {
 function istMarktAktiv(w: Wettbewerber): boolean {
   return w.art !== 'leer_ehemals' && w.status !== 'geschlossen';
 }
-function wertJeGruppe(w: Wettbewerber, g: GruppeId, s: GameState): number {
+function wertJeGruppe(w: Wettbewerber, g: GruppeId | 'offprice', s: GameState): number {
   if (!istMarktAktiv(w)) return 0;
-  const u = WETTBEWERB_UEBERSCHNEIDUNG[w.art][g] ?? 0;
+  const u = g === 'offprice' ? (w.art === 'offprice' ? 1 : 0) : (WETTBEWERB_UEBERSCHNEIDUNG[w.art][g] ?? 0);
   if (!u) return 0;
-  const eroeffnung = w.status === 'eroeffnung' ? 1.5 : 1;
+  const sev = schwierigkeit(s).ereignisse;
+  const eroeffnung = w.status === 'eroeffnung' ? 1 + 0.5 * sev : 1;
   const aktion = (w.aktionVon ?? Infinity) <= s.woche && (w.aktionBis ?? -1) > s.woche;
   const druck = w.status === 'raeumung' ? 0.6 : aktion ? w.preisdruck : 0;
   const abwehr = (w.abwehrBis ?? 0) > s.woche ? (w.abwehrFaktor ?? 1) : 1;
-  return w.staerke * u * eroeffnung * (1 + druck) * abwehr;
+  return w.staerke * (w.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
 }
-function roh(s: GameState, h: Haus, g?: GruppeId): number {
+function roh(s: GameState, h: Haus, g?: GruppeId | 'offprice'): number {
   let sum = 0;
   for (const w of s.wettbewerber) {
     if (w.stadt !== h.stadt || !istMarktAktiv(w)) continue;
@@ -79,6 +80,12 @@ export function wettbewerbAusGruppe(s: GameState, h: Haus, g: GruppeId): number 
 export function wettbewerbNachfrageFaktor(s: GameState, h: Haus, g: GruppeId): number {
   const vor = 1 - 0.25 * h.wettbewerbStart;
   return (1 - 0.25 * wettbewerbAusGruppe(s, h, g)) / vor;
+}
+/** Offprice-Flächen überschneiden sich mit konkurrierendem Offprice vollständig. */
+export function wettbewerbOffpriceFaktor(s: GameState, h: Haus): number {
+  if (s.wettbewerbDeaktiviert) return 1;
+  const neu = clamp(h.wettbewerbStart + roh(s, h, 'offprice') - (h.wettbewerbRohOffpriceStart ?? roh(s, h, 'offprice')), 0, 1);
+  return (1 - 0.25 * neu) / (1 - 0.25 * h.wettbewerbStart);
 }
 export function wettbewerbFrequenzFaktor(s: GameState, h: Haus): number {
   if (s.wettbewerbDeaktiviert) return 1;
@@ -128,6 +135,7 @@ export function initialisiereWettbewerb(s: GameState): void {
     h.wettbewerbRohStart = roh(s, h);
     h.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, roh(s, h, g)]));
     h.wettbewerbLeerStart = leerzahl(s, h.stadt);
+    h.wettbewerbRohOffpriceStart = roh(s, h, 'offprice');
   }
 }
 
@@ -244,6 +252,13 @@ export function wettbewerbWoche(s: GameState): void {
       const aktion = istStadtAktion(s, stadt);
       const wachstum = stadtWachstum(s, stadt);
       for (const wb of s.wettbewerber.filter((x) => x.stadt === stadt && x.status === 'offen' && x.art !== 'leer_ehemals')) {
+        // Standortwechsel schafft einen neuen Eröffnungssog; Eintrittschance bleibt schwierigkeitsunabhängig.
+        if (w > 10 && chance(s, 0.0006)) {
+          wb.lage = wb.lage === '1a' ? 'center' : '1a';
+          wb.status = 'eroeffnung'; wb.seit = w; wb.bis = w + 4;
+          melde(s, 'presse', wb.name + ' verlegt seinen Standort innerhalb von ' + stadt + ' nach ' + wb.lage + '.');
+          continue;
+        }
         if (hs[0].einzug.kaufkraft < 0.9) wb.staerke *= 0.998;
         if (wb.staerke < 0.25 && hs[0].einzug.kaufkraft < 0.9 && chance(s, 0.003)) { raeumung(s, wb); continue; }
         if (aktion && chance(s, 0.4)) {
@@ -311,6 +326,7 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
     neu.wettbewerbRohStart = roh(s, neu);
     neu.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(neu.format).map((g) => [g, roh(s, neu, g)]));
     neu.wettbewerbLeerStart = leerzahl(s, neu.stadt);
+    neu.wettbewerbRohOffpriceStart = roh(s, neu, 'offprice');
     s.haeuser.push(neu);
   }
   wb.status = 'geschlossen';
