@@ -1,5 +1,6 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { ereignisse } from './ereignisse';
+import { wettbewerbWoche } from './wettbewerb';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
 import type { Format, GameState, GruppeId, HausKpi, WochenKpi } from './types';
@@ -196,6 +197,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // 9. Stakeholder, Ereignisse, Aktionsauswertung
   aktualisiereStakeholder(s);
   ereignisse(s);
+  wettbewerbWoche(s);
   werteAktionenAus(s);
 
   if (s.insolvenz && w + 1 >= s.insolvenz.versammlung) glaeubigerversammlung(s);
