@@ -149,7 +149,6 @@ function neuEroeffnet(s: GameState, stadt: string, art: WettbewerberArt, inHaus?
   const wb = anlegen(s, stadt, art, chance(s, 0.7) ? '1a' : 'b', qm, s.woche, inHaus);
   const h = betroffeneHaeuser(s, stadt)[0];
   const gruppe = h ? gruppenFuer(h.format).sort((a, b) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a] ?? 0))[0] : 'damen';
-  const delta = h ? Math.max(0, wettbewerbNachfrageFaktor(s, h, gruppe) - 1) : 0;
   const prozent = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s, h, gruppe)) * 100) : 0;
   melde(s, 'presse', wb.name + ' (' + art + ') eröffnet in ' + stadt + (inHaus ? ' im ehemaligen ' + inHaus : '') + '. Erwarteter Nachfragerückgang ' + GRUPPEN[gruppe].name + ': rund ' + prozent + ' %.');
   if ((art === 'modehaus' || art === 'premium') && qm >= 2300) {
@@ -188,20 +187,24 @@ function istStadtAktion(s: GameState, stadt: string): boolean {
       (a.scope.typ === 'haeuser' && a.scope.ids.includes(h.id)))));
 }
 function stadtWachstum(s: GameState, stadt: string): boolean {
-  if (s.woche < 65 || s.historie.length < 65) return false;
-  const hs = s.haeuser.filter((h) => h.stadt === stadt);
-  // Hausumsätze der vergangenen 13 Wochen mit 52 Wochen Vorlauf (per Haus muss Verlauf erst verfügbar sein).
-  const hist = hs.filter((h) => h.kpi && h.kpi.woche === s.woche);
-  const akt = hist.reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0);
-  const alt = s.historie.at(-53)?.umsatz ?? 0;
-  const gesamt = s.historie.at(-1)?.umsatz ?? 1;
-  return akt > 0 && alt > 0 && akt / Math.max(1, gesamt) > 0 && ((gesamt / alt) - 1) > 0.08;
+  const werte = s.wettbewerbStadtUmsatz[stadt] ?? [];
+  if (werte.length < 65) return false;
+  const neu = werte.slice(-13).reduce((a, b) => a + b, 0);
+  const vorjahr = werte.slice(-65, -52).reduce((a, b) => a + b, 0);
+  return vorjahr > 0 && neu / vorjahr > 1.08;
 }
 
 /** Wöchentlicher Statuslauf direkt nach ereignisse; Ereignisse beeinflussen das folgende Verkaufsgeschäft. */
 export function wettbewerbWoche(s: GameState): void {
   if (s.wettbewerbDeaktiviert) return;
   const w = s.woche;
+  if (!s.prognose) for (const stadt of new Set(s.haeuser.map((h) => h.stadt))) {
+    const umsatz = s.haeuser.filter((h) => h.stadt === stadt && h.kpi?.woche === w && h.status !== 'geschlossen' && h.status !== 'verkauft')
+      .reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0);
+    const hist = s.wettbewerbStadtUmsatz[stadt] ?? (s.wettbewerbStadtUmsatz[stadt] = []);
+    hist.push(umsatz);
+    if (hist.length > 65) hist.shift();
+  }
   for (const wb of s.wettbewerber) {
     if (wb.status === 'eroeffnung' && (wb.bis ?? 0) <= w) { wb.status = 'offen'; wb.bis = undefined; }
     if (wb.status === 'raeumung' && (wb.bis ?? 0) <= w) {
@@ -220,6 +223,7 @@ export function wettbewerbWoche(s: GameState): void {
   if (!s.prognose) {
     for (const h of s.haeuser.filter((h) => h.status === 'geschlossen' && !s.wettbewerbGeseheneSchliessungen.includes(h.id))) {
       s.wettbewerbGeseheneSchliessungen.push(h.id);
+      h.wettbewerbSchliessungWoche = w;
       if (chance(s, 0.35)) s.wettbewerbNachnutzungen.push({ haus: h.id, woche: w + gz(s, 26, 78) });
     }
     for (const n of s.wettbewerbNachnutzungen.filter((n) => n.woche <= w)) {
@@ -232,12 +236,14 @@ export function wettbewerbWoche(s: GameState): void {
       const hs = s.haeuser.filter((h) => h.stadt === stadt);
       const gesamtkm = hs.reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
       const zu = hs.filter((h) => h.status === 'geschlossen').reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
-      const faktor = gesamtkm > 0 && zu / gesamtkm > 0.5 ? 3 : 1;
+      const kuerzlich = hs.some((h) => h.wettbewerbSchliessungWoche !== undefined && w - h.wettbewerbSchliessungWoche < 52);
+      const faktor = gesamtkm > 0 && zu / gesamtkm > 0.5 && kuerzlich ? 3 : 1;
       const p = clamp(0.002 * (hs.reduce((a, h) => a + h.einzug.kaufkraft, 0) / hs.length) * (1 + zu / Math.max(1, gesamtkm)) * faktor, 0, 0.05);
       if (chance(s, p)) neuEroeffnet(s, stadt, eroeffnungsArt(s, stadt));
       const aktion = istStadtAktion(s, stadt);
       const wachstum = stadtWachstum(s, stadt);
       for (const wb of s.wettbewerber.filter((x) => x.stadt === stadt && x.status === 'offen' && x.art !== 'leer_ehemals')) {
+        if (hs[0].einzug.kaufkraft < 0.9) wb.staerke *= 0.998;
         if (wb.staerke < 0.25 && hs[0].einzug.kaufkraft < 0.9 && chance(s, 0.003)) { raeumung(s, wb); continue; }
         if (aktion && chance(s, 0.4)) {
           const action = s.marketing.aktionen.find((a) => a.status !== 'abgesagt' && a.start === w);
@@ -282,13 +288,16 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
   const basis = s.haeuser.find((h) => h.stadt === wb.stadt && h.format === 'warenhaus' && h.status === 'offen');
   if (!basis) return 'Kein offenes Hartwig-Warenhaus am Standort.';
   const qm = wb.grundflaecheQm;
+  const kosten = eur(qm * (modus === 'erweiterung' ? 250 : 200));
+  if (s.cash + s.kreditlinie < kosten) return 'Nicht genug Liquidität für die Umbaukosten.';
+  s.cash -= kosten;
+  s.einmalkostenWoche += kosten;
   if (modus === 'erweiterung') {
     const g: GruppeId = 'damen';
     const idF = basis.id + '-wb-' + wb.id;
     basis.flaechen.push({ id: idF, etage: 0, qm, konzept: 'eigen', gruppe: g, umbauBis: s.woche + 8 });
     basis.potenzial[g] = (basis.potenzial[g] ?? 0) + qm * GRUPPEN[g].qmUmsatz;
     basis.miete.mieteWoche += eur(qm * 12 * 12 / 52);
-    s.einmalkostenWoche += eur(qm * 250);
   } else {
     const neu: Haus = structuredClone(basis);
     neu.id = 'O' + wb.id; neu.name = 'Hartwig Outlet ' + wb.stadt; neu.etagen = [0]; neu.grundflaecheQm = qm;
@@ -302,7 +311,6 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
     neu.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(neu.format).map((g) => [g, roh(s, neu, g)]));
     neu.wettbewerbLeerStart = leerzahl(s, neu.stadt);
     s.haeuser.push(neu);
-    s.einmalkostenWoche += eur(qm * 200);
   }
   wb.status = 'geschlossen';
   wb.seit = s.woche;
