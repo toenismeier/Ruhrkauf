@@ -274,7 +274,7 @@ export function ereignisse(s: GameState): void {
     a.status = 'verfallen';
     a.erledigtWoche = w;
   }
-  s.angebote = s.angebote.filter((a) => a.status === 'offen' || w - (a.erledigtWoche ?? a.woche) <= 13);
+  s.angebote = s.angebote.filter((a) => a.status === 'offen' || w - (a.erledigtWoche ?? a.woche) < 13);
   const faellig = s.entscheidungen.filter((e) => e.frist <= w);
   for (const e of faellig) loeseEntscheidung(s, e.id, e.standard, true);
 
