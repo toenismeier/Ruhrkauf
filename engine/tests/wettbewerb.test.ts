@@ -146,6 +146,26 @@ describe('Wettbewerber: Dynamik', () => {
 });
 
 describe('Abnahme: Bilanz und Überlebensfähigkeit', () => {
+  test('mittlerer Wettbewerbsfaktor ohne Spielereingriff über 260 Wochen: 0,97 bis 1,00', () => {
+    for (const seed of [1, 2, 3]) {
+      const s = neuesSpiel(seed);
+      let summe = 0, anzahl = 0;
+      for (let w = 0; w < 260; w++) {
+        s.woche = w;
+        wettbewerbWoche(s);
+        if (w % 13 !== 0) continue;
+        for (const h of s.haeuser) {
+          for (const g of gruppenFuer(h.format)) {
+            summe += wettbewerbNachfrageFaktor(s, h, g);
+            anzahl++;
+          }
+        }
+      }
+      const mittel = summe / anzahl;
+      expect(mittel).toBeGreaterThanOrEqual(0.97);
+      expect(mittel).toBeLessThanOrEqual(1.0);
+    }
+  });
   test('Ausgangslage bleibt im ersten Jahr bei Umsatz und EBITDA innerhalb von 0,2 %', () => {
     const lauf = (aktiv: boolean) => {
       const s = neuesSpiel(1);

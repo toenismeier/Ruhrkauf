@@ -59,9 +59,9 @@ function roh(s: GameState, h: Haus, g?: GruppeId | 'offprice'): number {
     if (g) sum += wertJeGruppe(w, g, s) * lage;
     else {
       const gruppen = gruppenFuer(h.format);
-      const gewicht = gruppen.reduce((a, x) => a + (h.potenzial[x] ?? 0) * (h.saettigungQm[x] ?? 0), 0);
-      const summe = gruppen.reduce((a, x) => a + (h.potenzial[x] ?? 0) * (h.saettigungQm[x] ?? 0) * wertJeGruppe(w, x, s), 0);
-      sum += lage * (gewicht ? summe / gewicht : 0);
+      const summe = gruppen.reduce((a, x) => a + wertJeGruppe(w, x, s), 0);
+      // Für die lokale Attraktivität keine gewichtete Flächenverdrängung ansetzen.
+      sum += lage * (gruppen.length ? summe / gruppen.length : 0);
     }
   }
   // Sensitivität bewusst gedämpft: Wettbewerbsaktionen bleiben lokal sichtbar,
