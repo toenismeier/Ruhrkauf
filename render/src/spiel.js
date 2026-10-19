@@ -557,9 +557,50 @@ function oeffneHaus(id) {
     }
     html += '</div>';
   }
+  html += '<div class="karte"><div class="khead">Konkurrenz in der Stadt</div>';
+  if (!d.wettbewerber?.length) html += '<div class="zeile">Keine Wettbewerber in dieser Stadt</div>';
+  for (const w of d.wettbewerber ?? []) {
+    const wirkung = Object.entries(w.wirkung ?? {}).filter(([, v]) => v < 0)
+      .sort((a, b) => a[1] - b[1]).slice(0, 3).map(([g, v]) => esc(g) + ' ' + v.toFixed(2) + ' %').join(' · ');
+    html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' +
+      esc(w.name) + '</b> <i>' + esc(WB_ART[w.art] ?? w.art) + ' · ' + esc(WB_STATUS[w.status] ?? w.status) + '</i>' +
+      (wirkung ? '<small>' + wirkung + '</small>' : '') + '</span><span>→</span></button>';
+  }
+  html += '</div>';
   panel(h.name, `${h.stadt} · ${h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
   if (neu) hausZeigen(id);
 }
+
+/** Lesendes Konkurrenzdetail aus den offiziellen Engine-Abfragen. */
+function oeffneWettbewerber(id) {
+  const w = E.wettbewerbFuerGrafik(s, stadtName).find((q) => q.id === id);
+  const u = E.wettbewerbUebersicht(s, stadtName).find((q) => q.id === id);
+  if (!w || !u) return;
+  const neu = offenerWettbewerber !== id;
+  offenerWettbewerber = id; offenesHaus = null; offenesHq = null;
+  const start = w.seit === 0 ? 'Seit Spielbeginn' : 'Seit KW ' + ((w.seit % 52) + 1) + ' / Jahr ' + (Math.floor(w.seit / 52) + 1);
+  const wirkung = Object.entries(u.wirkung ?? {}).sort((a, b) => a[1] - b[1]);
+  let html = '<div class="chips"><span class="chip">' + esc(WB_ART[w.art] ?? w.art) + '</span><span class="chip">' +
+    esc(WB_STATUS[w.status] ?? w.status) + '</span></div>';
+  html += '<div class="karte"><div class="zeile"><span>Standort</span><b>' + esc(stadtName) + '</b></div>' +
+    '<div class="zeile"><span>Status seit</span><b>' + esc(start) + '</b></div>' +
+    '<div class="zeile"><span>Aktuelle Aktion</span><b>' +
+    (w.status === 'raeumung' ? 'Räumungsverkauf bis 70 %' : w.rabatt ? Math.round(w.rabatt * 100) + ' % Rabatt' : w.status === 'eroeffnung' ? 'Neueröffnung' : 'Keine') +
+    '</b></div>' + (w.inHartwigGebaeude ? '<div class="zeile">Nachnutzung eines ehemaligen Hartwig-Standorts</div>' : '') + '</div>';
+  html += '<div class="karte"><div class="khead">Wirkung auf Hartwig nach Warengruppe</div>' +
+    wirkung.map(([g, v]) => '<div class="zeile"><span>' + esc(g) + '</span><b>' + Number(v).toFixed(2) + ' %</b></div>').join('') + '</div>';
+  panel(w.name, esc(stadtName) + ' · ' + esc(WB_ART[w.art] ?? w.art), html);
+  if (neu) {
+    const x = sb.wettbewerber.get(id) ?? (w.inHartwigGebaeude ? sb.haeuser.get(w.inHartwigGebaeude) : null);
+    if (x?.p) {
+      K.x = x.p.x + x.p.w / 2; K.z = x.p.z + x.p.d / 2; kameraSetzen();
+    }
+  }
+}
+$('pinhalt').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-wb-id]');
+  if (el) oeffneWettbewerber(el.dataset.wbId);
+});
 
 // ─────────────────────────────────────────── Zentrale (HQ)
 const STUFE_FARBE = ['#c9c4bb', '#e0b23c', '#2f8f5b', '#2f63b5'];
@@ -707,7 +748,8 @@ po = posteingangModul({
       baueStadtAusSpiel(bezug.stadt);
     }
     const hausId = bezug.hausIds?.find((id) => sb?.haeuser.has(id));
-    if (hausId) oeffneHaus(hausId);
+    if (bezug.wettbewerberId) oeffneWettbewerber(bezug.wettbewerberId);
+    else if (hausId) oeffneHaus(hausId);
     else if (bezug.modul === 'einkauf') oeffneEinkauf();
     else if (bezug.modul === 'vorstand') oeffneModul(vs);
     else if (bezug.modul === 'marketing') oeffneModul(mk);
@@ -810,7 +852,16 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+  oeffneWettbewerber,
+  pruefeWettbewerber: () => {
+    const soll = E.wettbewerbFuerGrafik(s, stadtName);
+    const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
+    const pinIds = new Set(wettbewerbPins.map((p) => p.userData.wbId));
+    const fehler = soll.filter((w) => w.status !== 'geschlossen' && !gezeigt.has(w.id)).map((w) => 'Fehlt: ' + w.id);
+    for (const id of gezeigt) if (!pinIds.has(id)) fehler.push('Pin fehlt: ' + id);
+    return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler };
+  }, stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
