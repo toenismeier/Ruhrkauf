@@ -1,4 +1,5 @@
 import { definition, inselModul } from './basis.js';
+import { LOD } from '../basis.js';
 
 export const INSEL_ALT_PUPPEN = definition("insel_alt_puppen", "Puppengruppe klassisch", "allgemein", "insel", 4, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"puppen","pal":"allgemein","w":5}));
 export const INSEL_ALT_NEUHEIT = definition("insel_alt_neuheit", "Kaufhausneuheiten", "allgemein", "insel", 2, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","w":2.5}));
@@ -11,7 +12,7 @@ export const INSEL_ALT_KINDER = definition("insel_alt_kinder", "Kinderwelt", "al
 export const VITRINE_ALT = definition('vitrine_alt','Glasvitrine Kaufhaus alt','allgemein','insel',2,2,1.5,260,(L,r,d,ctx)=>{
   L.box(2.35,0.20,1.1,0,0,1.25,'#765946');
   L.box(2.35,0.12,1.1,0,1.30,1.25,'#765946');
-  if (d < 0.5) return;
+  if (LOD.stufe === 'fern' || d < 0.5) return;
   L.box(0.05,1.1,0.05,-1.08,0.2,0.72,'#80624a');
   L.box(0.05,1.1,0.05,1.08,0.2,0.72,'#80624a');
   L.box(0.05,1.1,0.05,-1.08,0.2,1.78,'#80624a');
