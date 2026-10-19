@@ -46,36 +46,44 @@ function normiereFlaeche(f) {
 function hauptgangWaehlen(b,t,e,hindernisse) {
   const w=gangZellen(R.hauptgang)*U;
   const kandidaten=[];
-  for(let x=2*U;x+w<=b-2*U;x+=U){
-    const lauf=quadrat(x,0,w,t), v=hindernisse.reduce((s,h)=>s+(schneidet(lauf,h)?300+rechteckFlaeche(h):0),0);
-    const orient=e.reduce((s,p)=>s+Math.abs(p.x-(x+w/2)),0);
-    kandidaten.push({x,z:0,w,d:t,typ:'haupt',score:v+orient*0.8+Math.abs(x+w/2-b/2)});
-  }
-  kandidaten.sort((a,b)=>a.score-b.score||a.x-b.x);
-  if(!kandidaten.length||kandidaten[0].score>=300) throw new Error('Kein hindernisfreier Hauptgang');
+  // Das rückwärtige Treppen-/Lagerraster darf den Hauptgang nicht blockieren.
+  // Der Lauf endet hinter diesem Funktionsband, bleibt aber bis zum Eingang durchgehend.
+  const maxRueckversatz=Math.min(10*U,t-8*U);
+  for(let z=0;z<=maxRueckversatz+1e-8;z+=U)
+    for(let x=2*U;x+w<=b-2*U;x+=U) {
+      const lauf=quadrat(x,z,w,t-z);
+      if(hindernisse.some(h=>schneidet(lauf,h)))continue;
+      const dist=e.reduce((s,p)=>s+Math.abs(p.x-(x+w/2)),0);
+      kandidaten.push({...lauf,typ:'haupt',score:z*0.3+dist*0.8+Math.abs(x+w/2-b/2)});
+    }
+  kandidaten.sort((a,b)=>a.score-b.score||a.z-b.z||a.x-b.x);
+  if(!kandidaten.length)throw new Error('Kein hindernisfreier Hauptgang');
   const {score,...gang}=kandidaten[0];
   return gang;
 }
 function teilung(teile,abteile,schacht) {
-  if(!teile.length) return [];
-  const mind=3*U, frei=schacht.d-(teile.length-1)*2*U;
-  if(frei<teile.length*mind) throw new Error('Zu viele Abteilungen für verfügbare Etagentiefe');
+  if(!teile.length)return [];
+  // Ein durchgehender Nebengang statt eines Gangs zwischen *jeder* Abteilung.
+  // Alle Rechtecke besitzen ohnehin einen Anschluss zum Hauptgang.
+  const gangIndex=teile.length>1?Math.floor((teile.length-1)/2):-1;
+  const verfuegbar=schacht.d-(gangIndex>=0?2*U:0);
+  const mind=3*U;
+  if(verfuegbar<teile.length*mind)throw new Error('Zu viele Abteilungen für Etagentiefe');
   const summe=teile.reduce((s,f)=>s+f.qm,0);
-  const laengen=teile.map(f=>Math.max(3,Math.floor(f.qm/summe*frei/U)));
-  let rest=Math.round(frei/U)-laengen.reduce((a,b)=>a+b,0);
-  // Rundungsreste gehen an die größte Abteilung; bei Überschuss von kleinen abziehen.
+  const laengen=teile.map(f=>Math.max(3,Math.floor(f.qm/summe*verfuegbar/U)));
+  let rest=Math.round(verfuegbar/U)-laengen.reduce((a,b)=>a+b,0);
   const groesste=teile.reduce((a,f,i)=>f.qm>teile[a].qm?i:a,0);
-  if(rest>=0) laengen[groesste]+=rest;
-  else for(const i of [...laengen.keys()].sort((a,b)=>laengen[b]-laengen[a])) {
+  if(rest>=0)laengen[groesste]+=rest;
+  else for(const i of [...laengen.keys()].sort((a,b)=>laengen[b]-laengen[a])){
     const weg=Math.min(-rest,Math.max(0,laengen[i]-3));
-    laengen[i]-=weg; rest+=weg; if(rest>=0)break;
+    laengen[i]-=weg;rest+=weg;if(rest>=0)break;
   }
-  if(rest<0) throw new Error('Abteilungsflächen nicht aufteilbar');
+  if(rest<0)throw new Error('Abteilungen nicht aufteilbar');
   let z=schacht.z;const out=[];
-  for(let i=0;i<teile.length;i++) {
+  for(let i=0;i<teile.length;i++){
     const f=teile[i],d=laengen[i]*U;
     out.push({...quadrat(schacht.x,z,schacht.w,d),id:f.id,titel:f.titel,qmSoll:f.qm});
-    z+=d+2*U;
+    z+=d+(i===gangIndex?2*U:0);
   }
   return out;
 }
@@ -116,32 +124,46 @@ function wandband(plan,profil) {
 }
 function warenReihen(plan,profil,raum) {
   const art=profil.abteilungsMoebel[raum.id]??{};
-  const id=art.gondel??profil.gondel,m=moebel(id);
-  // Keine diagonalen oder zufälligen Inselstellungen.
-  const laenge=m.rasterB*U,t=m.rasterT*U, gang=Math.ceil(R.gondelGang/R.suchRaster)*R.suchRaster;
-  const seitenLuft=U; // 1,25 m ab Abteilungsrand: zur Westwand verbleiben 1,90 m
-  const startX=raum.x+seitenLuft;
-  const endeX=raum.x+raum.w-(raum.x+raum.w>plan.breite-U?U:gang);
-  for(let z=raum.z+gang; z+t+gang<=raum.z+raum.d+1e-8;z+=t+gang){
-    for(let x=startX;x+laenge<=endeX+1e-8;x+=laenge){
-      const g=item(id,x,z,0,raum.id);
-      if(!passeIn(g,raum)||!passe(g,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel],0))continue;
-      plan.moebel.push(g);
+  const idHaupt=art.gondel??profil.gondel;
+  // Im Sortimentskontext verbleiben: kurze Restmodule füllen Gassenenden.
+  const kurz=profil.id==='sport'?'gondel_schuhe':profil.id==='outlet'?'outlet_beauty':'gondel_spielzeug';
+  const module=[idHaupt,kurz].filter((id,i,a)=>a.indexOf(id)===i)
+    .sort((a,b)=>moebel(b).rasterB-moebel(a).rasterB);
+  const startX=raum.x+0.625,endeX=raum.x+raum.w-0.625;
+  const gang=Math.ceil(R.gondelGang/R.suchRaster)*R.suchRaster;
+  // Rücken an Rücken: 2 × 1,25 m Gondeln bilden eine funktionale Warenreihe.
+  // Dazwischen 1,875 m Kundengang; Blickachsen bleiben auf 1,4 m Höhe frei.
+  const bankTiefe=2*U,schritt=bankTiefe+gang;
+  for(let z=raum.z+0.625;z+bankTiefe+0.625<=raum.z+raum.d+1e-8;z+=schritt) {
+    let x=startX;
+    while(x+2.5<=endeX+1e-8) {
+      const id=module.find(id=>moebel(id).rasterB*U<=endeX-x+1e-8);
+      if(!id)break;
+      const w=moebel(id).rasterB*U;
+      for(let j=0;j<2;j++) {
+        const g=item(id,x,z+j*U,j?180:0,raum.id,{reihenGruppe:Math.round(z/U)});
+        if(passeIn(g,raum)&&passe(g,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))
+          plan.moebel.push(g);
+      }
+      x+=w;
     }
   }
 }
 function kassenPlatz(plan,profil) {
-  const id=profil.kasse,m=moebel(id),w=m.rasterB*U,d=m.rasterT*U;
-  const main=plan.gaenge[0],xRechts=main.x+main.w+gangZellen(R.kassenVorfeld)*U;
-  const xLinks=main.x-w-gangZellen(R.kassenVorfeld)*U;
-  const xK=xRechts+w<=plan.breite-U?xRechts:xLinks;
-  const zK=plan.tiefe-d-3*U;
-  const mK=item(id,xK,zK,0,null,{amAusgang:true});
-  const wR=quadrat(xK,zK+d,w,2*U);
-  if(!passe(mK,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel])||
-     !passe(wR,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel]))
-    return; // Prüfung meldet fehlende Kasse; keine Scheinplatzierung über Hindernisse.
-  plan.kassenVorfeld.push(wR);plan.moebel.push(mK);
+  const id=profil.kasse,def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
+  const main=plan.gaenge[0],vorfeld=gangZellen(R.kassenVorfeld)*U;
+  const xs=[main.x+main.w+U,main.x-w-U,main.x+main.w+2*U,main.x-w-2*U];
+  // Positionen in Eingangsnähe, bei Treppen und Stützen ausweichend.
+  for(let z=plan.tiefe-d-3*U;z>=Math.max(U,plan.tiefe-d-9*U);z-=U)
+    for(const x of xs){
+      const k=item(id,x,z,0,null,{amAusgang:true});
+      const frei=quadrat(x,z+d,w,vorfeld);
+      const verbote=[...plan.hindernisse,...plan.gaenge,...plan.moebel];
+      if(passe(k,plan,verbote)&&passe(frei,plan,verbote)){
+        plan.kassenVorfeld.push(frei);plan.moebel.push(k);return;
+      }
+    }
+  plan.hinweise.push('Kasse wegen Hindernissen nicht platzierbar');
 }
 function inszenierung(plan,profil,raum) {
   if(!profil.inszenierung)return;
@@ -192,7 +214,7 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
     const rs=plan.abteilungen.filter(x=>x.x===zone.x);
     for(let j=0;j<rs.length-1;j++) {
       const x=rs[j],z=x.z+x.d;
-      plan.gaenge.push({...quadrat(zone.x,z,zone.w,2*U),typ:'neben'});
+      if(rs[j+1].z>z+1e-8)plan.gaenge.push({...quadrat(zone.x,z,zone.w,rs[j+1].z-z),typ:'neben'});
     }
   }
   for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
