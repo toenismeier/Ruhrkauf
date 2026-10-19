@@ -48,3 +48,16 @@ cd engine && npx tsx scripts/haeuser-export.ts
 
 ## 6. Ohne CI arbeiten
 Die GitHub-Actions-Läufe starten derzeit nicht (Kontingent). Bis das geklärt ist, alle Prüfungen lokal ausführen und die Ausgaben (Tests, Export-Diff, `pruef-staedte`) in `massstab-stand.md` festhalten. Ein lokaler grüner Lauf mit Protokoll gilt als Abnahme für Phase 1.
+
+## 7. Zweite Prüfung (19.10. abends)
+- Nach dem Merge der Wettbewerber-Engine waren 23 Tests rot und `spiel-render.js` brach ab („Cannot read properties of undefined (reading 'name')“ in `wettbewerb.ts neuEroeffnet`). Ursache: Volkskauf- und FUNDUS-Häuser mit `nurDaten` liefen durch die Wettbewerbslogik. **Behoben** in Commit `f51ae63` auf diesem Branch: Hilfsfunktion `aktive(s)` in `wettbewerb.ts`.
+- Danach sind noch 6 Tests rot. Alle hängen an der Kalibrierung der alten Welt:
+  - `abnahme.test.ts`: Ausgangslage 0,2 %, Bot C fünf Jahre,
+  - `hq.test.ts`: Aktion „controlling“,
+  - `kalibrierung.test.ts`: Bot C Gläubigerversammlung,
+  - `engine.test.ts`: tiefe Sanierung fünf Jahre,
+  - `wettbewerber.test.ts`: Startkalibrierung exakt.
+- Vorgehen wie in Abschnitt 5: diese Tests mit `test.skip` und dem Kommentar `// Maßstab Phase 2: neu kalibrieren` markieren, in `massstab-stand.md` auflisten, **nicht** umschreiben.
+- Ausnahme: Ist ein Test wegen eines echten Fehlers rot (NaN, Absturz, Determinismus), wird er nicht übersprungen, sondern der Fehler wird behoben.
+- Danach die Punkte 1 bis 4 dieses Auftrags (7 Metropolen, Obergrenzen, Sport-IDs, Export). Sie sind weiterhin offen.
+- `spiel-render.js` muss mit dem Branch 0 Abweichungen liefern, bevor Phase 1 als abgenommen gilt.

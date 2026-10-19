@@ -6,14 +6,14 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 
 | Auftrag | Branch | Hängt ab von | Darf parallel zu |
 |---|---|---|---|
-| `grafik-schwesterkette.md` + `nachbesserung-schwesterkette.md` | `feat/grafik-schwesterkette` | | Sport, Posteingang, Wettbewerber-Engine |
+| `grafik-schwesterkette.md` + `nachbesserung-schwesterkette.md` | `feat/grafik-schwesterkette` | **gemergt 19.10.** | |
 | `grafik-sport.md` + `nachbesserung-sport.md` | `feat/grafik-sport` | **gemergt 19.10.** | |
-| `grafik-outlet.md` | `feat/grafik-outlet` | (Merge Schwesterkette, darf vorher starten) | Premium, Posteingang, Wettbewerber-Engine |
-| `grafik-premium.md` | `feat/grafik-premium` | (Merge Schwesterkette, darf vorher starten) | Outlet, Posteingang, Wettbewerber-Engine |
+| `grafik-outlet.md` + `nachbesserung-outlet.md` | `feat/grafik-outlet` | (Merge Schwesterkette, darf vorher starten) | Premium, Posteingang, Wettbewerber-Engine |
+| `grafik-premium.md` + `nachbesserung-premium.md` | `feat/grafik-premium` | (Merge Schwesterkette, darf vorher starten) | Outlet, Posteingang, Wettbewerber-Engine |
 | `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | **gemergt 19.10.** | |
-| `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | Merge Wettbewerber-Engine | Premium, Outlet |
+| `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | **gemergt 19.10.** | |
 | `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet, Engine-Maßstab Phase 1 | Posteingang, Städte, Oberfläche |
-| `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`) | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | Phase 4 nach Merge Sport, Phase 5 nach Merge Outlet-Außenbau, Phase 6 nach Merge Schwesterkette | Engine-Aufträgen, Posteingang |
+| `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`), aktuell `nachbesserung-ladenbau-p3.md` | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | Phase 4 nach Merge Sport, Phase 5 nach Merge Outlet-Außenbau, Phase 6 nach Merge Schwesterkette | Engine-Aufträgen, Posteingang |
 | `engine-massstab.md` + `nachbesserung-massstab.md` (mehrere Chats, Stand in `massstab-stand.md`) | `feat/engine-massstab` | Phase 1 sofort; Phase 3 nach `engine-formate.md` | allem außer `engine-formate.md` gleichzeitig |
 | `massstab-staedte.md` | `feat/massstab-staedte` | Engine-Maßstab Phase 1 | Oberfläche, Ladenbau, Engine-Aufträgen |
 | `massstab-oberflaeche.md` | `feat/massstab-oberflaeche` | Engine-Maßstab Phase 1 | allem |
@@ -44,7 +44,7 @@ Premium, Outlet und Schwesterkette hängen sich an dieselben Einbaupunkte. In di
 
 Vor dem PR immer auf den aktuellen `main` rebasen. Wer als Zweiter mergt, löst die Konflikte.
 
-Merge in `main` nur mit grüner CI. Nach jedem Merge: `README.md` (Abschnitt Stand) und betroffene Verträge fortschreiben.
+Merge in `main` nur mit grüner CI bzw., solange die CI blockiert ist, mit grünem lokalem Lauf. Nach jedem Merge: `README.md` (Abschnitt Stand) und betroffene Verträge fortschreiben.
 
 ## Regeln für alle Aufträge
 - **Actions-Minuten sparen:** Kataloge nicht bei jedem Push in der CI rendern. Render-Workflows nur über `workflow_dispatch` oder einmal vor dem PR. Kein `push`-Trigger für Render-Jobs, keine Bild-Commits durch den Bot bei jedem Lauf. Prüfungen und Renderings, wo möglich, lokal ausführen und das Protokoll in die Stand-Datei schreiben.
