@@ -210,6 +210,42 @@ function angebotsPinsAktualisieren() {
     }
   }
 }
+/** Engine-Wettbewerber als klickbare, farbkodierte Pins. Ohne Eingriff in den Stadtplan. */
+function wettbewerbPinsAktualisieren() {
+  if (!scene || !sb || !s) return;
+  clearInterval(wettbewerbPinTimer); wettbewerbPinTimer = null;
+  for (const p of wettbewerbPins) { scene.remove(p); p.material?.map?.dispose(); p.material?.dispose(); }
+  wettbewerbPins = [];
+  const liste = E.wettbewerbFuerGrafik(s, stadtName);
+  for (const w of liste) {
+    let x = sb.wettbewerber.get(w.id);
+    if (!x && w.inHartwigGebaeude && w.status !== 'geschlossen') x = sb.haeuser.get(w.inHartwigGebaeude);
+    if (!x?.p) continue;
+    const p = x.p;
+    const c = document.createElement('canvas'); c.width = 96; c.height = 96;
+    const g = c.getContext('2d'), farbe = WB_FARBEN[w.art] ?? '#67717b';
+    g.beginPath(); g.arc(48, 48, 34, 0, Math.PI * 2); g.fillStyle = '#ffffff'; g.fill();
+    g.beginPath(); g.arc(48, 48, 29, 0, Math.PI * 2); g.fillStyle = farbe; g.fill();
+    if (w.rabatt > 0) {
+      g.fillStyle = '#fff'; g.font = 'bold 38px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText('%', 48, 49);
+    } else {
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(48, 48, 8, 0, Math.PI * 2); g.fill();
+    }
+    const neu = w.status === 'eroeffnung' && s.woche - (w.seit ?? 0) < 4;
+    if (neu) { g.strokeStyle = '#f3c951'; g.lineWidth = 6; g.beginPath(); g.arc(48, 48, 40, 0, Math.PI * 2); g.stroke(); }
+    const pin = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
+    pin.position.set(p.x + p.w / 2, Math.max(20, (x.e?.hoehe ?? 28) + 5), p.z + p.d / 2);
+    pin.scale.set(10.5, 10.5, 1); pin.userData.wbId = w.id; pin.userData.puls = neu; pin.renderOrder = 30;
+    scene.add(pin); wettbewerbPins.push(pin);
+  }
+  const puls = wettbewerbPins.filter((p) => p.userData.puls);
+  if (puls.length) wettbewerbPinTimer = setInterval(() => {
+    const t = performance.now() * 0.007;
+    for (const p of puls) { const k = 10.5 + 2 * (1 + Math.sin(t)); p.scale.set(k, k, 1); }
+    zeichnen();
+  }, 260);
+}
 function baueStadtAusSpiel(name) {
   const t0 = performance.now();
   raeumeSzene();
