@@ -7,7 +7,7 @@ import { neueEntscheidung, neuesAngebot } from './ereignisse';
 import { schwierigkeit } from './schwierigkeit';
 
 // Relative Wettbewerbsänderungen wirken lokal; die Intensität schützt die Basiskalibrierung.
-const WIRKUNGSFAKTOR = 0.05;
+const WIRKUNGSFAKTOR = 0.035;
 const ARTEN: WettbewerberArt[] = ['modehaus', 'fastfashion', 'premium', 'offprice', 'textildiscounter', 'elektronik', 'leer_ehemals'];
 const START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
 const START_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
@@ -76,12 +76,15 @@ function leerzahl(s: GameState, stadt: string): number {
  * Ohne hausindividuellen Offset wäre der Auftrag für zwei gleich gelegene Häuser derselben Stadt mathematisch nicht lösbar. */
 export function wettbewerbAus(s: GameState, h: Haus): number {
   if (s.wettbewerbDeaktiviert) return h.wettbewerbStart;
-  return clamp(h.wettbewerbStart + roh(s, h) - (h.wettbewerbRohStart ?? roh(s, h)), 0, 1);
+  const aktuell = roh(s, h);
+  // Erst die Änderung bilden: start + aktuell - basis würde durch Rundung den Startwert verschieben.
+  return clamp(h.wettbewerbStart + (aktuell - (h.wettbewerbRohStart ?? aktuell)), 0, 1);
 }
 export function wettbewerbAusGruppe(s: GameState, h: Haus, g: GruppeId): number {
   const start = h.wettbewerbGruppeStart?.[g] ?? h.wettbewerbStart;
   if (s.wettbewerbDeaktiviert) return start;
-  return clamp(start + roh(s, h, g) - (h.wettbewerbRohGruppenStart?.[g] ?? roh(s, h, g)), 0, 1);
+  const aktuell = roh(s, h, g);
+  return clamp(start + (aktuell - (h.wettbewerbRohGruppenStart?.[g] ?? aktuell)), 0, 1);
 }
 export function wettbewerbNachfrageFaktor(s: GameState, h: Haus, g: GruppeId): number {
   const start = h.wettbewerbGruppeStart?.[g] ?? h.wettbewerbStart;
@@ -92,7 +95,8 @@ export function wettbewerbNachfrageFaktor(s: GameState, h: Haus, g: GruppeId): n
 export function wettbewerbOffpriceFaktor(s: GameState, h: Haus): number {
   if (s.wettbewerbDeaktiviert) return 1;
   const start = h.wettbewerbOffpriceStart ?? h.wettbewerbStart;
-  const neu = clamp(start + roh(s, h, 'offprice') - (h.wettbewerbRohOffpriceStart ?? roh(s, h, 'offprice')), 0, 1);
+  const aktuell = roh(s, h, 'offprice');
+  const neu = clamp(start + (aktuell - (h.wettbewerbRohOffpriceStart ?? aktuell)), 0, 1);
   return (1 - 0.25 * neu) / (1 - 0.25 * start);
 }
 export function wettbewerbFrequenzFaktor(s: GameState, h: Haus): number {

@@ -208,7 +208,7 @@ Auftrag: `../auftraege/engine-wettbewerber.md`. Der Spielstand enthält die Wett
 ## Nachbesserung Wettbewerber-Engine (19.10.2026)
 
 - Nachfrage: Vergleich je Haus/Warengruppe und Offprice mit eingefrorenem Startwert; unveränderter Bestand ergibt einen Wettbewerbsfaktor von 1,0.
-- Keine zusätzliche Verkaufsflächen- oder Umsatzgewichtung im Grundzustand. Attraktivität bei Angeboten relativ zur historischen Startbasis. Wirkungsintensität der Wettbewerbsänderungen: 0,05 (zuvor 0,18).
+- Keine zusätzliche Verkaufsflächen- oder Umsatzgewichtung im Grundzustand. Attraktivität bei Angeboten relativ zur historischen Startbasis. Wirkungsintensität der Wettbewerbsänderungen: 0,035 (zuvor 0,18). Die Differenz wird vor Addition zum Startwert berechnet, sodass unveränderte Bestände auch auf Bit-Ebene identische Werte liefern.
 - Regressionstest für Seeds 1 bis 3, Wochen 0 bis 12: vollständige Identität der `historie` bei aktiver Bestandsrechnung ohne neue Wettbewerbsereignisse gegenüber ausgeschaltetem Modul.
 - Abnahmetest: mittlerer Wettbewerbsfaktor 0,97 bis 1,00 über 260 Wochen (Seeds 1–3, Stichprobe alle 13 Wochen); Umsatz und EBITDA im ersten Jahr maximal ±0,2 % zum Altmodell; Bot C auf Seeds 1 bis 3 über 260 Wochen. CI von PR #5 maßgeblich.
 
