@@ -149,7 +149,8 @@ export function spielBauer(s, o = {}) {
   const haeuser = new Map();   // hausId → { p, gruppe, e, schluessel }
   const wettbewerber = new Map(); // Wettbewerber-Id → eigene Gruppe
   const wbSlots = new Map();      // Parzellen-Id → { p, wbId, gruppe, ... }
-  const wbDaten = () => o.stadt ? wettbewerbFuerGrafik(s, o.stadt) : [];
+  let wbCache = null;
+  const wbDaten = () => wbCache ?? (wbCache = o.stadt ? wettbewerbFuerGrafik(s, o.stadt) : []);
   const wbVon = (id) => wbDaten().find((w) => w.id === id);
   const wbSchluessel = (wb) => wb ? JSON.stringify([wb.id, wb.art, wb.form, wb.name, wb.status, wb.rabatt, wb.seit]) : 'stadthaus';
   const nachnutzer = (h) => wbDaten().find((w) => w.inHartwigGebaeude === h.id && w.status !== 'geschlossen');
@@ -279,7 +280,10 @@ export function spielBauer(s, o = {}) {
     let x = wbSlots.get(id);
     if (!x) {
       const gebraucht = new Set([...wbSlots.values()].map((q) => q.wbId).filter(Boolean));
-      const erste = wbDaten().filter((w) => !w.inHartwigGebaeude).find((w) => !gebraucht.has(w.id));
+      // Beim Laden fortgeschrittener Spielstände zunächst aktive Betriebe belegen.
+      const erste = wbDaten().filter((w) => !w.inHartwigGebaeude)
+        .sort((a, b) => Number(a.status === 'geschlossen') - Number(b.status === 'geschlossen') || b.seit - a.seit)
+        .find((w) => !gebraucht.has(w.id));
       x = { p, wbId: erste?.id ?? null, gruppe: null, schluessel: null };
       wbSlots.set(id, x);
     }
@@ -310,6 +314,7 @@ export function spielBauer(s, o = {}) {
 
   /** Zustände neu lesen (nach wocheAbspielen); gibt die Ids der Häuser zurück, deren Bild sich ändert. */
   function aktualisiere() {
+    wbCache = null;
     zust.clear();
     neuVerteilen();
     const geaendert = [];
