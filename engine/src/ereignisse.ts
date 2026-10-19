@@ -252,10 +252,13 @@ export function ereignisse(s: GameState): void {
       // Im Deaktivierungs-Test bleibt die ursprüngliche Regel unverändert.
       const kandidaten = s.wettbewerber.filter((x) => x.stadt === h.stadt && ['modehaus', 'premium', 'fastfashion'].includes(x.art)
         && (x.status === 'offen' || x.status === 'eroeffnung'));
+      // Der Interim-Skill wurde früher immer gezogen, sobald der Abgangstest positiv war.
+      // RNG-Draw auch ohne lokale Konkurrenz verbrauchen, damit alle übrigen Ereignisse identisch bleiben.
+      const interimSkill = zwischen(s, 0.3, 0.65);
       if (!s.wettbewerbDeaktiviert && !kandidaten.length) continue;
       const ziel = kandidaten[0]?.name;
       melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht ${ziel ? 'zu ' + ziel : 'zur Konkurrenz'}.`);
-      h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: zwischen(s, 0.3, 0.65), moral: 50, interimBis: w + 4 };
+      h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: interimSkill, moral: 50, interimBis: w + 4 };
     }
   }
 
