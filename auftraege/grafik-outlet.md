@@ -24,6 +24,8 @@ Das Outlet ist die Abverkaufsschiene des Konzerns: Hierhin geht, was in den Ware
 - Wenige Passanten, mehr Autos.
 
 ## Innenräume
+Hinweis: Der Innenraum wird im Workstream Ladenbau (Phase 5) mit Möbelbibliothek und Planer gebaut. In diesem Auftrag nur einen einfachen Platzhalter-Innenraum liefern, wenn der Workstream noch nicht so weit ist.
+
 - Eine einfache Halle: Wühltische, Gitterkörbe, lange Kleiderstangen, Paletten mit Ware, Kassenzeile am Ausgang, abgehängte Rasterleuchten.
 - Wiederverwenden, was es gibt (`innen.js`: Ständer, Warentische, Konzept `offprice` aus `grundriss.js`), statt neu zu bauen.
 - Optional OG als Lager mit Hochregal.
