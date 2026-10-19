@@ -79,7 +79,7 @@ function paketDeal(s: GameState): void {
     titel: `${name} will ${n} Standorte`,
     text: `${name} möchte in ${n} Häusern jeweils rund ${qm} qm im ${etage === 0 ? 'Erdgeschoss' : etage === -1 ? 'Untergeschoss' : etage + '. OG'} anmieten, ${miete.toFixed(2)} €/qm im Monat. Gewünscht sind natürlich die besten Lagen.`,
   });
-  melde(s, 'ereignis', `Paketanfrage: ${name} will ${n} Standorte.`);
+  melde(s, 'ereignis', `Paketanfrage: ${name} will ${n} Standorte.`, { modul: 'zentrale' });
 }
 
 function stadtAngebot(s: GameState): void {
@@ -92,7 +92,7 @@ function stadtAngebot(s: GameState): void {
     titel: `Stadt ${h.stadt} will ${h.name} übernehmen`,
     text: `Die Stadt ${h.stadt} würde den Mietvertrag übernehmen und das Haus zu Bürgeramt und Bibliothek umbauen. ${zahlung > 0 ? `Sie zahlt ${mio(zahlung)} Ablöse.` : 'Eine Ablöse gibt es nicht.'} Die Restmiete entfällt.`,
   });
-  melde(s, 'ereignis', `Die Stadt ${h.stadt} interessiert sich für ${h.name}.`);
+  melde(s, 'ereignis', `Die Stadt ${h.stadt} interessiert sich für ${h.name}.`, { stadt: h.stadt, hausId: h.id });
 }
 
 export function sportEbitdaJahr(s: GameState): number {
@@ -134,7 +134,7 @@ function instandhaltung(s: GameState, h: Haus): void {
     });
   } else {
     h.substanz = clamp(h.substanz + 8, 0, 100);
-    melde(s, 'info', `${art[0]} in ${h.name}: Der Vermieter trägt die Kosten (${h.miete.netTyp === 'net' ? 'Net' : 'Double-Net'}-Vertrag).`);
+    melde(s, 'info', `${art[0]} in ${h.name}: Der Vermieter trägt die Kosten (${h.miete.netTyp === 'net' ? 'Net' : 'Double-Net'}-Vertrag).`, { stadt: h.stadt, hausId: h.id });
   }
 }
 
@@ -142,7 +142,7 @@ function mietende(s: GameState, h: Haus): void {
   // Die Immobilienabteilung verhandelt die Anschlussmiete
   const markt = eur((basisUmsatzHaus(h) * MARKTMIETE[h.lage] * zwischen(s, 0.85, 1.15)) * hqMietendeFaktor(s));
   if (h.miete.keineVerlaengerung) {
-    melde(s, 'warnung', `Der Vermieter von ${h.name} verlängert nicht. Der Vertrag endet in 26 Wochen.`);
+    melde(s, 'warnung', `Der Vermieter von ${h.name} verlängert nicht. Der Vertrag endet in 26 Wochen.`, { stadt: h.stadt, hausId: h.id });
     return;
   }
   neueEntscheidung(s, {
@@ -248,7 +248,7 @@ export function ereignisse(s: GameState): void {
     }
     const fl = h.personal.filialleiter;
     if (fl.moral < 40 && fl.skill > 0.6 && chance(s, 0.02)) {
-      melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht zur Konkurrenz.`);
+      melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht zur Konkurrenz.`, { stadt: h.stadt, hausId: h.id });
       h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: zwischen(s, 0.3, 0.65), moral: 50, interimBis: w + 4 };
     }
   }
@@ -270,10 +270,13 @@ export function ereignisse(s: GameState): void {
   if (chance(s, 0.04)) melde(s, 'presse', waehle(s, SATIRE));
 
   // Fristen
-  for (const a of s.angebote) if (a.status === 'offen' && a.frist <= w) a.status = 'verfallen';
-  s.angebote = s.angebote.filter((a) => a.status === 'offen' || w - a.woche < 26);
+  for (const a of s.angebote) if (a.status === 'offen' && a.frist <= w) {
+    a.status = 'verfallen';
+    a.erledigtWoche = w;
+  }
+  s.angebote = s.angebote.filter((a) => a.status === 'offen' || w - (a.erledigtWoche ?? a.woche) <= 13);
   const faellig = s.entscheidungen.filter((e) => e.frist <= w);
-  for (const e of faellig) loeseEntscheidung(s, e.id, e.standard);
+  for (const e of faellig) loeseEntscheidung(s, e.id, e.standard, true);
 
   // Berater
   for (const b of s.berater) if (!b.ergebnis && b.ende <= w) beraterErgebnis(s, b.id);
@@ -305,11 +308,19 @@ export function zufallsProjektname(s: GameState): string {
 }
 
 /** Wendet eine Entscheidung an. Wird auch bei Fristablauf mit der Standardoption aufgerufen. */
-export function loeseEntscheidung(s: GameState, id: string, option: string): string | null {
+export function loeseEntscheidung(s: GameState, id: string, option: string, standardGewählt = false): string | null {
   const e = s.entscheidungen.find((x) => x.id === id);
   if (!e) return 'Entscheidung nicht gefunden.';
   if (!e.optionen.some((o) => o.id === option)) return 'Unbekannte Option.';
   s.entscheidungen = s.entscheidungen.filter((x) => x.id !== id);
+  // Nur protokollieren: keinerlei Änderung an Wirkung, Zufallsfolge oder Entscheidungen.
+  (s.entscheidungsprotokoll ??= []).push({
+    id: e.id, typ: e.typ, titel: e.titel, option,
+    ergebnis: e.optionen.find((o) => o.id === option)?.label ?? option,
+    woche: s.woche, standard: standardGewählt,
+    hausId: typeof e.daten.haus === 'string' ? e.daten.haus : undefined,
+  });
+  s.entscheidungsprotokoll = s.entscheidungsprotokoll.filter((p) => s.woche - p.woche <= 52);
   if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
   const d = e.daten;
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
