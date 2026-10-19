@@ -126,7 +126,7 @@ function wandband(plan,profil) {
         ziel.push(m);z+=m.d;gesetzt=true;break;
       }
     }
-    if(!gesetzt)z+=2.5;
+    if(!gesetzt)z+=U; // An 5-m-Hindernisgrenzen exakt wieder anschließen.
   }
 }
 function warenReihen(plan,profil,raum) {
@@ -144,15 +144,20 @@ function warenReihen(plan,profil,raum) {
   for(let z=raum.z+0.625;z+bankTiefe+0.625<=raum.z+raum.d+1e-8;z+=schritt) {
     let x=startX;
     while(x+2.5<=endeX+1e-8) {
-      const id=module.find(id=>moebel(id).rasterB*U<=endeX-x+1e-8);
-      if(!id)break;
-      const w=moebel(id).rasterB*U;
-      for(let j=0;j<2;j++) {
-        const g=item(id,x,z+j*U,j?180:0,raum.id,{reihenGruppe:Math.round(z/U)});
-        if(passeIn(g,raum)&&passe(g,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))
-          plan.moebel.push(g);
+      let platziert=false;
+      for(const id of module) {
+        const w=moebel(id).rasterB*U;
+        if(x+w>endeX+1e-8)continue;
+        const modelle=[0,1].map(j=>item(id,x,z+j*U,j?180:0,raum.id,{reihenGruppe:Math.round(z/U)}));
+        const frei=modelle.map(m=>passeIn(m,raum)&&passe(m,plan,
+          [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]));
+        if(!frei[0]&&!frei[1])continue;
+        for(let j=0;j<2;j++)if(frei[j])plan.moebel.push(modelle[j]);
+        x+=w;platziert=true;break;
       }
-      x+=w;
+      // Eine Stütze blockiert nicht die *ganze* 5-m-Gondelgasse:
+      // in Rastervierteln weitersuchen, statt ein komplettes Modul zu überspringen.
+      if(!platziert)x+=U;
     }
   }
 }
