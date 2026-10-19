@@ -161,8 +161,8 @@ export function inselModul(L, r, d, ctx = {}, o = {}) {
 
 export function dekoModul(L, r, d, ctx = {}, o = {}) {
   const art = o.art ?? 'pflanze';
-  if (LOD.stufe === 'fern') { L.box(art === 'pflanze' ? 0.9 : art === 'banner' ? 1.5 : 2.3, art === 'pflanze' ? 1.2 : 2.7, art === 'pflanze' ? 0.9 : 0.3, 0, 0, art === 'pflanze' ? 0.95 : 0.17, o.akzent ?? '#849da0'); return; }
-  if (art === 'pflanze') { L.box(0.9, 0.44, 0.9, 0, 0, 0.95, '#d7d1c7'); L.kugel(0.42, 0, 0.85, 0.95, '#5d9563'); }
+  if (LOD.stufe === 'fern') { L.box(art === 'pflanze' ? 0.9 : art === 'banner' ? 1.5 : 2.3, art === 'pflanze' ? 1.2 : 2.7, art === 'pflanze' ? 0.9 : 0.3, 0, 0, art === 'pflanze' ? 0.75 : 0.17, o.akzent ?? '#849da0'); return; }
+  if (art === 'pflanze') { L.box(0.9, 0.44, 0.9, 0, 0, 0.75, '#d7d1c7'); L.kugel(0.42, 0, 0.85, 0.75, '#5d9563'); }
   else if (art === 'klettern') { L.box(2.4, 2.7, 0.3, 0, 0, 0.17, '#d7d0c4'); if (LOD.stufe !== 'fern') for(let i=0;i<12;i++) L.box(0.21,0.14,0.14,(i%4-1.5)*0.48,0.3+Math.floor(i/4)*0.70,0.42,farbe(r,palette('outdoor'))); }
   else if (art === 'bild') { L.box(2.3, 2.7, 0.3, 0, 0, 0.17, '#e8e3dc'); L.box(1.9, 1.9, 0.06, 0, 0.4, 0.34, o.akzent ?? '#64879a'); }
   else if (art === 'banner') { L.box(0.09, 2.8, 0.09, 0, 0, 0.6, '#8b939a'); L.box(1.5, 0.8, 0.07, 0, 1.8, 0.6, o.akzent ?? '#ca5040'); textAuf(L, o.titel ?? 'Saison', 0, 2.24, 0.65, 1.3, 0.34); }
@@ -190,8 +190,8 @@ export function serviceModul(L, r, d, ctx = {}, o = {}) {
   } else if (art === 'bank') {
     L.box(w-0.25,0.30,0.62,0,1.0,t/2,'#8e7358');
   } else if (art === 'beflockung') {
-    L.box(0.48,0.62,0.44,0,1.19,t/2,'#bd564a');
+    L.box(0.48,0.26,0.44,0,1.19,t/2,'#bd564a');
   } else {
-    L.box(0.32,0.36,0.14,0,1.19,t/2,'#30383d');
+    L.box(0.32,0.26,0.14,0,1.19,t/2,'#30383d');
   }
 }
