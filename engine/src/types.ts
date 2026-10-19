@@ -266,6 +266,7 @@ export interface Angebot {
   wert?: Eur;
   _passt?: boolean;
   status: 'offen' | 'angenommen' | 'abgelehnt' | 'verfallen';
+  erledigtWoche?: number;
 }
 
 export interface Entscheidung {
@@ -283,6 +284,7 @@ export interface Entscheidung {
 export type MeldungTyp = 'presse' | 'info' | 'warnung' | 'ereignis' | 'eigentuemer' | 'insolvenz';
 
 export interface Meldung {
+  id?: string;
   woche: number;
   typ: MeldungTyp;
   text: string;
