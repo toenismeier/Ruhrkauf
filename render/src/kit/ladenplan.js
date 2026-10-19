@@ -118,8 +118,8 @@ function warenReihen(plan,profil,raum) {
   const art=profil.abteilungsMoebel[raum.id]??{};
   const id=art.gondel??profil.gondel,m=moebel(id);
   // Keine diagonalen oder zufälligen Inselstellungen.
-  const laenge=m.rasterB*U,t=m.rasterT*U, gang=gangZellen(R.gondelGang)*U;
-  const seitenLuft=raum.x<U*2?2*U:U;
+  const laenge=m.rasterB*U,t=m.rasterT*U, gang=Math.ceil(R.gondelGang/R.suchRaster)*R.suchRaster;
+  const seitenLuft=U; // 1,25 m ab Abteilungsrand: zur Westwand verbleiben 1,90 m
   const startX=raum.x+seitenLuft;
   const endeX=raum.x+raum.w-(raum.x+raum.w>plan.breite-U?U:gang);
   for(let z=raum.z+gang; z+t+gang<=raum.z+raum.d+1e-8;z+=t+gang){
