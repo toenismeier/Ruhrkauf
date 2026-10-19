@@ -265,6 +265,32 @@ function verdichteLadenplan(plan,profil){
     }
     if(!eingefuegt)break;
   }
+  // Wenn die größte freie Prüffläche im breiten Hauptgang liegt,
+  // verbleibende Möbeldichte an bestehenden Gondelreihen ergänzen.
+  if(besetzt<R.moebelAnteilMin*verfuegbar){
+    const def=moebel(kurz);
+    for(const raum of plan.abteilungen){
+      for(let z=raum.z;z+def.rasterT*U<=raum.z+raum.d+1e-8;z+=U)
+        for(let x=raum.x;x+def.rasterB*U<=raum.x+raum.w+1e-8;x+=U){
+          if(besetzt>=R.moebelAnteilMin*verfuegbar)break;
+          const m=item(kurz,x,z,0,raum.id,{ausgleich:true,kopf:true});
+          if(!passeIn(m,raum)||!passe(m,plan,
+            [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
+          const nahe=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
+            Math.hypot(Math.max(0,q.x-x-m.w,x-q.x-q.w),
+                       Math.max(0,q.z-z-m.d,z-q.z-q.d))<=3*U);
+          if(!nahe)continue;
+          const zuEng=plan.moebel.some(q=>{
+            if(q.typ!=='gondel'||q.abteilung!==raum.id||q.winkel!==0)return false;
+            const xO=m.x<q.x+q.w-1e-8&&m.x+m.w>q.x+1e-8;
+            const dist=Math.max(q.z-m.z-m.d,m.z-q.z-q.d);
+            return xO&&dist>=0&&dist<R.gondelGang-1e-8;
+          });
+          if(zuEng)continue;
+          plan.moebel.push(m);besetzt+=m.w*m.d;
+        }
+    }
+  }
 }
 
 /**
