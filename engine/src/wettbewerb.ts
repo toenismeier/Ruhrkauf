@@ -6,6 +6,7 @@ import { clamp, eur, kw, melde } from './util';
 import { neueEntscheidung, neuesAngebot } from './ereignisse';
 import { schwierigkeit } from './schwierigkeit';
 
+const WIRKUNGSFAKTOR = 0.18;
 const ARTEN: WettbewerberArt[] = ['modehaus', 'fastfashion', 'premium', 'offprice', 'textildiscounter', 'elektronik', 'leer_ehemals'];
 const START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
 const START_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
@@ -63,7 +64,7 @@ function roh(s: GameState, h: Haus, g?: GruppeId | 'offprice'): number {
   }
   // Sensitivität bewusst gedämpft: Wettbewerbsaktionen bleiben lokal sichtbar,
   // die bestehende EBITDA-Kalibrierung und der Insolvenzplan bleiben stabil.
-  return sum * 0.18;
+  return sum * WIRKUNGSFAKTOR;
 }
 function leerzahl(s: GameState, stadt: string): number {
   return s.wettbewerber.filter((w) => w.stadt === stadt && w.art === 'leer_ehemals' && w.status !== 'geschlossen').length;
@@ -286,7 +287,7 @@ export function wettbewerbUebersicht(s: GameState, stadt?: string) {
     status: w.status, preisdruck: w.preisdruck,
     wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w.art]).map((g) => {
       const h = s.haeuser.find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g as GruppeId));
-      const faktor = h ? 0.25 * 0.65 * wertJeGruppe(w, g as GruppeId, s) * lageFaktor(h, w) / (1 - 0.25 * h.wettbewerbStart) : 0;
+      const faktor = h ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w, g as GruppeId, s) * lageFaktor(h, w) / (1 - 0.25 * h.wettbewerbStart) : 0;
       return [g, -Math.round(faktor * 10_000) / 100];
     })),
   }));
