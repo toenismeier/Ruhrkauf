@@ -282,6 +282,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     wettbewerber: [],
     wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,
     wettbewerbNaechsteId: 0,
+    wettbewerbStadtUmsatz: {},
     wettbewerbNachnutzungen: [],
     wettbewerbGeseheneSchliessungen: [],
     bestand,
