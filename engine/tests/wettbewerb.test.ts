@@ -168,3 +168,22 @@ describe('Altzustand ohne Wettbewerbsdynamik', () => {
     }
   });
 });
+
+describe('Schwierigkeit und Wettbewerbsdruck', () => {
+  test('identische neue Konkurrenz wirkt auf leicht schwächer als mittel und schwer', () => {
+    const effekt = (schwierigkeit: 'leicht' | 'mittel' | 'schwer') => {
+      const s = neuesSpiel(12, { schwierigkeit });
+      const h = s.haeuser.find((x) => x.format === 'warenhaus')!;
+      const muster = s.wettbewerber[0];
+      s.wettbewerber.push({
+        ...muster, id: 'C9999', art: 'modehaus', stadt: h.stadt, lage: h.lage,
+        grundflaecheQm: 3200, staerke: 0.7, status: 'eroeffnung', seit: 1, bis: 4,
+        preisdruck: 0.25, aktionVon: 0, aktionBis: 4,
+      });
+      return wettbewerbNachfrageFaktor(s, h, 'damen');
+    };
+    const leicht = effekt('leicht'), mittel = effekt('mittel'), schwer = effekt('schwer');
+    expect(leicht).toBeGreaterThan(mittel);
+    expect(mittel).toBeGreaterThan(schwer);
+  });
+});
