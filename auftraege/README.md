@@ -7,10 +7,10 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | Auftrag | Branch | Hängt ab von | Darf parallel zu |
 |---|---|---|---|
 | `grafik-schwesterkette.md` + `nachbesserung-schwesterkette.md` | `feat/grafik-schwesterkette` | | Sport, Posteingang, Wettbewerber-Engine |
-| `grafik-sport.md` + `nachbesserung-sport.md` | `feat/grafik-sport` | | allem |
-| `grafik-outlet.md` | `feat/grafik-outlet` | Merge Schwesterkette | Premium, Posteingang, Wettbewerber-Engine |
-| `grafik-premium.md` | `feat/grafik-premium` | Merge Schwesterkette | Outlet, Posteingang, Wettbewerber-Engine |
-| `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | | Grafik-Aufträgen, Posteingang |
+| `grafik-sport.md` + `nachbesserung-sport.md` | `feat/grafik-sport` | **gemergt 19.10.** | |
+| `grafik-outlet.md` | `feat/grafik-outlet` | (Merge Schwesterkette, darf vorher starten) | Premium, Posteingang, Wettbewerber-Engine |
+| `grafik-premium.md` | `feat/grafik-premium` | (Merge Schwesterkette, darf vorher starten) | Outlet, Posteingang, Wettbewerber-Engine |
+| `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | **gemergt 19.10.** | |
 | `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | Merge Wettbewerber-Engine | Premium, Outlet |
 | `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet, Engine-Maßstab Phase 1 | Posteingang, Städte, Oberfläche |
 | `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`) | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | Phase 4 nach Merge Sport, Phase 5 nach Merge Outlet-Außenbau, Phase 6 nach Merge Schwesterkette | Engine-Aufträgen, Posteingang |
@@ -18,7 +18,14 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `massstab-staedte.md` | `feat/massstab-staedte` | Engine-Maßstab Phase 1 | Oberfläche, Ladenbau, Engine-Aufträgen |
 | `massstab-oberflaeche.md` | `feat/massstab-oberflaeche` | Engine-Maßstab Phase 1 | allem |
 | `massstab-leistung.md` | `feat/massstab-leistung` | Städte Phase 2 | Oberfläche |
-| `spiel-posteingang.md` | `feat/spiel-posteingang` | | allem; nach Merge der Wettbewerber-Engine deren Meldungen einbinden |
+| `spiel-posteingang.md` | `feat/spiel-posteingang` | **gemergt 19.10.** Folgeschritt: Wettbewerbsmeldungen in die Kategorie Konkurrenz (kleiner Commit) | |
+
+## Ohne CI arbeiten (gilt, solange GitHub Actions blockiert ist)
+- GitHub Actions startet derzeit keine Jobs (Kontingent). Nicht auf die CI warten.
+- Abnahme stattdessen lokal: `cd engine && npm ci && npm run typecheck && npx jest`, `cd render && npm ci && npm run build && node spiel-render.js`, dazu die im Auftrag genannten Prüfskripte. Chromium für Playwright: `CHROMIUM_PATH=<Pfad zur Chromium-Datei>` setzen, falls `spiel-render.js` keinen Browser findet. Ist kein Browser verfügbar, Rendering und Bilder als offen markieren und alles andere trotzdem fertigstellen.
+- Das Protokoll der lokalen Läufe (Befehle, Ergebnisse, Zahlen) in die Stand-Datei bzw. die PR-Beschreibung schreiben.
+- **Merge:** Ist der lokale Lauf grün und ist der Auftrag vollständig, darf der PR ohne CI gemergt werden (vorher auf `main` rebasen, Konflikte lösen, lokal erneut prüfen).
+- Branches, die von noch nicht gemergten Branches abhängen, dürfen bereits starten. Sie zweigen von `main` ab und rebasen später.
 
 ## Namen und Maßstab (entschieden)
 - Hauptkette Hartwig, Sportkette Hartwig Sport, Hertie-Pendant **Volkskauf**, SchnäppchenCenter-Pendant (TK-Maxx-Prinzip) **FUNDUS**.
