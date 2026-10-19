@@ -296,6 +296,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     beraterQualitaet,
     angebote: [],
     entscheidungen: [],
+    entscheidungsprotokoll: [],
     quartale: [],
     eigentuemer: { strikes: 0, kapitalZugefuehrt: 0 },
     makro: { konjunktur: 1, schockStaerke: 0, phase: zwischen(h, 0, Math.PI * 2) },
