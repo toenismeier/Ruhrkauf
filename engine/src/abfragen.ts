@@ -67,7 +67,7 @@ function meldungKategorie(typ: PostMeldung['typ'], text: string): PostKategorie 
 }
 
 export function posteingang(s: GameState): Posteingang {
-  const grenze = s.woche - 13;
+  const grenze = s.woche - 12; // aktuelle plus zwölf vorangegangene Wochen
   const handeln: PostHandeln[] = [];
   for (const e of s.entscheidungen) {
     const restWochen = Math.max(0, e.frist - s.woche);
