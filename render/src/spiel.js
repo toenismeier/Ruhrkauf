@@ -659,6 +659,10 @@ po = posteingangModul({
     const hausId = bezug.hausIds?.find((id) => sb?.haeuser.has(id));
     if (hausId) oeffneHaus(hausId);
     else if (bezug.modul === 'einkauf') oeffneEinkauf();
+    else if (bezug.modul === 'vorstand') oeffneModul(vs);
+    else if (bezug.modul === 'marketing') oeffneModul(mk);
+    else if (bezug.modul === 'produkte') oeffneModul(pr);
+    else if (bezug.modul === 'zentrale') oeffneHq();
     else schliessePanel();
   },
 });
