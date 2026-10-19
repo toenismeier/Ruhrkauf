@@ -37,5 +37,6 @@ const eintraege=sportFeelingFaelle.map(f=>({
 }));
 setTimeout(()=>{
  zeigeKatalog(eintraege,{titel:'Hartwig Sport · Normal | Sale | Substanz | Beides',spalten:4,kachel:[600,490]});
- console.log('SPORTFEELING_STAT '+JSON.stringify(ergebnis));
+ const melde=()=>window.fertig?console.log('SPORTFEELING_STAT '+JSON.stringify(ergebnis)):setTimeout(melde,300);
+ melde();
 },50);
