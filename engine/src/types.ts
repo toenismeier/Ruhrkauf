@@ -266,6 +266,7 @@ export interface Angebot {
   wert?: Eur;
   _passt?: boolean;
   status: 'offen' | 'angenommen' | 'abgelehnt' | 'verfallen';
+  erledigtWoche?: number;
 }
 
 export interface Entscheidung {
@@ -283,9 +284,22 @@ export interface Entscheidung {
 export type MeldungTyp = 'presse' | 'info' | 'warnung' | 'ereignis' | 'eigentuemer' | 'insolvenz';
 
 export interface Meldung {
+  id?: string;
   woche: number;
   typ: MeldungTyp;
   text: string;
+  bezug?: { stadt?: string; hausId?: string; modul?: string };
+}
+
+export interface Entscheidungsprotokoll {
+  id: string;
+  typ: string;
+  titel: string;
+  option: string;
+  ergebnis: string;
+  woche: number;
+  standard: boolean;
+  hausId?: string;
 }
 
 export interface Stakeholder {
@@ -391,6 +405,8 @@ export interface GameState {
   beraterQualitaet: Record<string, number>; // verdeckt, je Beratungshaus
   angebote: Angebot[];
   entscheidungen: Entscheidung[];
+  /** Gefallene Entscheidungen, maximal 52 Wochen. Für alte Spielstände optional. */
+  entscheidungsprotokoll?: Entscheidungsprotokoll[];
   quartale: Quartal[];
   eigentuemer: { strikes: number; kapitalZugefuehrt: Eur; forderung?: string };
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };

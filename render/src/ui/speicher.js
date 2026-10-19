@@ -57,10 +57,10 @@ export async function laden() {
   return pruefen(await aktion('readonly', (store) => store.get(KEY)));
 }
 
-export function speichern(spiel, stadt) {
+export function speichern(spiel, stadt, ui = {}) {
   if (!spiel || spiel.version !== 1) return Promise.reject(new Error('Kein gueltiges Spiel gestartet.'));
   // Wichtig: Zustand jetzt einfrieren. Eine laufende Simulation darf die wartende Transaktion nicht veraendern.
-  const datensatz = { format: FORMAT, datum: new Date().toISOString(), stadt, spiel: structuredClone(spiel) };
+  const datensatz = { format: FORMAT, datum: new Date().toISOString(), stadt, spiel: structuredClone(spiel), ui: structuredClone(ui) };
   const naechste = queue.then(() => aktion('readwrite', (store) => store.put(datensatz, KEY)));
   queue = naechste.catch(() => {}); // Nach einem Fehler weitere Speicherungen weiterhin erlauben.
   return naechste;

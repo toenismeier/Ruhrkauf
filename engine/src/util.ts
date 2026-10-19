@@ -33,9 +33,11 @@ export function neueId(s: GameState, prefix: string): string {
   return `${prefix}${s.zaehler}`;
 }
 
-export function melde(s: GameState, typ: MeldungTyp, text: string): void {
+export function melde(s: GameState, typ: MeldungTyp, text: string, bezug?: { stadt?: string; hausId?: string; modul?: string }): void {
   if (s.prognose) return;
-  s.meldungen.push({ woche: s.woche, typ, text });
+  // Meldungs-IDs unabhängig von Spiel-ID-Zähler und Zufallsstrom erzeugen.
+  const nummer = s.meldungen.filter((m) => m.woche === s.woche).length;
+  s.meldungen.push({ id: `m-${s.woche}-${nummer}`, woche: s.woche, typ, text, ...(bezug ? { bezug } : {}) });
   if (s.meldungen.length > 400) s.meldungen.splice(0, s.meldungen.length - 400);
 }
 

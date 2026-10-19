@@ -31,6 +31,40 @@
   .kz b { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
   .unten { position: fixed; left: 10px; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  #postdirekt { min-width: 46px; position: relative; font-size: 21px; padding: 0 9px; }
+  #postbadge.dringend, #postmenubadge.dringend { background: #a92120; }
+  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: 12px; right: 12px; z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
+  #wochenstreifen.an { display: block; }
+  body.panel-offen #wochenstreifen { display: none; }
+  .postkarte .postkopf { padding: 12px 12px 6px; }
+  .postkopf h3 { font-size: 15px; margin: 5px 0; line-height: 1.3; }
+  .posttyp, .posterledigt small { font-size: 11px; font-weight: 700; color: var(--leise); display: block; }
+  .postchips { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
+  .postort { border: 0; background: transparent; color: #2f63b5; font-size: 12px; font-weight: 700; min-height: 44px; padding: 0 4px; }
+  .postdetail { padding: 0 12px 4px; font-size: 12.5px; color: var(--text); line-height: 1.45; }
+  .postdetail summary { color: #2f63b5; font-weight: 700; cursor: pointer; min-height: 35px; display: flex; align-items: center; }
+  .postdetail p { margin: 6px 0; white-space: pre-wrap; }
+  .postwert { padding: 4px 12px; display: flex; align-items: baseline; gap: 6px; } .postwert b { font-size: 15px; } .postwert span { color: var(--leise); font-size: 11px; }
+  .poststandard { margin: 6px 12px 10px; background: #f8f4ed; border-radius: 9px; padding: 8px; font-size: 11.5px; color: #7d5424; }
+  .postaktionen { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
+  .postaktionen button { flex: 1 1 calc(50% - 8px); min-width: 130px; min-height: 44px; overflow-wrap: anywhere; background: #e9e5de; border-radius: 10px; padding: 7px 9px; color: var(--text); font-weight: 800; font-size: 12px; }
+  .postaktionen button.gruen { background: var(--gruen); color: white; } .postaktionen button.rot { background: #fbe3e1; color: var(--rot); }
+  .postleer { min-height: 64px; } .postfilter { display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+  .postfilter select { display: block; } .postalle, .postzurueck { min-height: 44px; padding: 6px 10px; background: transparent; color: #2f63b5; font-size: 12px; font-weight: 700; }
+  .postmeldung { position: relative; } .postmeldung.ungelesen { border-left: 4px solid var(--rot); }
+  .postmeldung > button:first-child { display: flex; gap: 9px; align-items: flex-start; background: transparent; text-align: left; min-height: 54px; padding: 11px; width: 100%; }
+  .postmeldung .postort { margin: 0 8px 4px; } .postsymbol { font-size: 19px; min-width: 24px; line-height: 1.4; }
+  .postnachricht { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; line-height: 1.4; }
+  .postnachricht small { color: var(--leise); font-size: 10.5px; }
+  .posterledigt { display: flex; flex-direction: column; gap: 5px; padding: 12px; }
+  .posterledigt b { font-size: 13px; } .posterledigt span { font-size: 12px; color: var(--gruen); }
+  .posthausliste { max-height: 45vh; overflow: auto; border-block: 1px solid var(--linie); margin: 8px 0; }
+  .posthaus { display: flex; gap: 12px; align-items: center; padding: 7px 12px; min-height: 48px; border-top: 1px solid var(--linie); font-size: 12.5px; }
+  .posthaus input { width: 22px; height: 22px; accent-color: var(--gruen); }
+  .posthaus small { display: block; color: var(--leise); font-size: 11px; margin-top: 2px; }
+  .posthinweis { font-size: 12px; line-height: 1.4; }
+  #postwarnungswahl { margin: 12px 16px 2px; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text); }
+  #postwarnungswahl input { width: 20px; height: 20px; }
   .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 0 12px; height: 46px; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; position: relative; }
   .chipstadt span { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .chipstadt i { color: var(--leise); font-style: normal; font-size: 12px; }
@@ -287,12 +321,14 @@
 <div class="unten">
   <div class="chipstadt"><span id="stadtname">Essen</span><i>▾</i><select id="stadtwahl" aria-label="Stadt wählen"></select></div>
   <button class="knopf" id="weiter">Woche weiter</button>
+  <button class="knopf mitbadge" id="postdirekt" aria-label="Posteingang öffnen" title="Posteingang">✉<span id="postbadge" class="badge" style="display:none">0</span></button>
   <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>
 </div>
 <div id="menue">
   <div class="menuekarte">
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
+      <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
@@ -301,12 +337,14 @@
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>
       <button class="mkachel" id="performance" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18a9 9 0 1 1 18 0M12 17l5-7M7 18h10"/></svg><b>Performance</b><small>iPhone messen</small></button>
     </div>
+    <label id="postwarnungswahl"><input type="checkbox" id="postwarnung" checked> Vor Fristablauf beim Wochenwechsel warnen</label>
   </div>
 </div>
 <div id="panel">
   <div class="pkopf"><div class="griff"></div><div id="ptitel"></div><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
   <div id="pinhalt"></div>
 </div>
+<button id="wochenstreifen" type="button" aria-live="polite"></button>
 <div id="meldung"></div>
 <div id="lade" class="an">Stadt wird gebaut …</div>
 <div id="start">

@@ -4,6 +4,126 @@ import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
 
+
+/** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */
+export interface PostBezug {
+  stadt?: string;
+  hausIds?: string[];
+  gebaeudeId?: string;
+  modul?: string;
+}
+export interface PostHandeln {
+  id: string;
+  art: 'entscheidung' | 'angebot';
+  typ: string;
+  titel: string;
+  text: string;
+  woche: number;
+  frist: number;
+  restWochen: number;
+  optionen: { id: string; label: string }[];
+  standard: string;
+  bezug?: PostBezug;
+  wert?: { betrag: number; einheit: string };
+  dringend: boolean;
+}
+export type PostKategorie = 'Presse' | 'Häuser' | 'Finanzen' | 'Personal' | 'Konkurrenz' | 'Eigentümer';
+export interface PostMeldung {
+  id: string;
+  woche: number;
+  typ: GameState['meldungen'][number]['typ'];
+  text: string;
+  kategorie: PostKategorie;
+  bezug?: PostBezug;
+}
+export interface PostErledigt {
+  id: string;
+  art: 'entscheidung' | 'angebot';
+  titel: string;
+  woche: number;
+  ergebnis: string;
+  standard: boolean;
+  bezug?: PostBezug;
+}
+export interface Posteingang {
+  handeln: PostHandeln[];
+  meldungen: PostMeldung[];
+  erledigt: PostErledigt[];
+}
+
+function hausBezug(s: GameState, ids: string[] = [], modul?: string): PostBezug | undefined {
+  const hs = [...new Set(ids)].map((id) => s.haeuser.find((h) => h.id === id)).filter((h): h is Haus => !!h);
+  return hs.length ? { stadt: hs[0].stadt, hausIds: hs.map((h) => h.id), ...(modul ? { modul } : {}) }
+    : modul ? { modul } : undefined;
+}
+
+function meldungKategorie(typ: PostMeldung['typ'], text: string): PostKategorie {
+  if (typ === 'eigentuemer') return 'Eigentümer';
+  if (/konkurrenz|wettbewerb|mitbewerber|discounter|konkurrent|abwerb/i.test(text)) return 'Konkurrenz';
+  if (/filialleiter|personal|beschäftig|mitarbeiter|betriebsrat|streik|verdi|tarif/i.test(text)) return 'Personal';
+  if (/haus|häuser|standort|filiale|miete|vermieter|umbau|schließ|schliess|rolltreppe|brandschutz/i.test(text)) return 'Häuser';
+  if (/kredit|liquid|kasse|bank|cash|kosten|zuschuss|insolvenz|euro|€|umsatz|ertrag|kapital/i.test(text) || typ === 'insolvenz') return 'Finanzen';
+  return 'Presse';
+}
+
+export function posteingang(s: GameState): Posteingang {
+  const grenze = s.woche - 12; // aktuelle plus zwölf vorangegangene Wochen
+  const handeln: PostHandeln[] = [];
+  for (const e of s.entscheidungen) {
+    const restWochen = Math.max(0, e.frist - s.woche);
+    const option = e.optionen.find((o) => o.id === e.standard);
+    const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
+    const modul = e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
+    handeln.push({
+      id: e.id, art: 'entscheidung', typ: e.typ, titel: e.titel, text: e.text,
+      woche: e.woche, frist: e.frist, restWochen, optionen: e.optionen,
+      standard: option ? option.label : e.standard,
+      bezug: hausBezug(s, hausId ? [hausId] : [], modul),
+      wert: typeof e.daten.kosten === 'number' ? { betrag: e.daten.kosten, einheit: 'einmalig' } : undefined,
+      dringend: restWochen <= 1,
+    });
+  }
+  for (const a of s.angebote.filter((a) => a.status === 'offen')) {
+    const restWochen = Math.max(0, a.frist - s.woche);
+    const ids = a.vorschlagHaeuser?.length ? a.vorschlagHaeuser : a.wunschHaeuser ?? [];
+    const wert = a.einmalzahlung !== undefined ? { betrag: a.einmalzahlung, einheit: 'Ablöse, einmalig' }
+      : a.kaufpreis !== undefined ? { betrag: a.kaufpreis, einheit: 'Kaufpreis, einmalig' }
+      : a.wert !== undefined ? { betrag: a.wert, einheit: 'Warenwert, einmalig' }
+      : a.mieteQmMonat !== undefined && a.qmJeHaus !== undefined
+        ? { betrag: Math.round(a.mieteQmMonat * a.qmJeHaus * 12 * ids.length), einheit: 'Miete pro Jahr' } : undefined;
+    handeln.push({
+      id: a.id, art: 'angebot', typ: a.typ, titel: a.titel, text: a.text, woche: a.woche, frist: a.frist, restWochen,
+      optionen: [{ id: 'annehmen', label: 'Annehmen' }, { id: 'ablehnen', label: 'Ablehnen' },
+        ...(a.typ === 'paket' ? [{ id: 'verhandeln', label: 'Verhandeln' }] : [])],
+      standard: 'Angebot verfällt',
+      bezug: hausBezug(s, ids, a.typ === 'sonderposten' ? 'einkauf' : undefined), wert, dringend: restWochen <= 1,
+    });
+  }
+  handeln.sort((a, b) => a.frist - b.frist || a.woche - b.woche || a.id.localeCompare(b.id));
+  const meldungen = s.meldungen.map((m, i) => ({ m, i })).filter(({ m }) => m.woche >= grenze).reverse().map(({ m, i }) => {
+    const ids = m.bezug?.hausId ? [m.bezug.hausId] : [];
+    const gefunden = ids.length ? ids : s.haeuser.filter((h) => m.text.includes(h.name)).map((h) => h.id).slice(0, 8);
+    const bezug = hausBezug(s, gefunden, m.bezug?.modul);
+    return {
+      id: m.id ?? `alt-${m.woche}-${i}`, woche: m.woche, typ: m.typ, text: m.text,
+      kategorie: meldungKategorie(m.typ, m.text),
+      bezug: { ...bezug, ...(m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}) },
+    };
+  });
+  const erledigt: PostErledigt[] = [
+    ...s.angebote.filter((a) => a.status !== 'offen' && (a.erledigtWoche ?? a.woche) >= grenze).map((a) => ({
+      id: a.id, art: 'angebot' as const, titel: a.titel, woche: a.erledigtWoche ?? a.woche,
+      ergebnis: a.status === 'angenommen' ? 'Angenommen' : a.status === 'abgelehnt' ? 'Abgelehnt' : 'Frist abgelaufen',
+      standard: a.status === 'verfallen', bezug: hausBezug(s, a.wunschHaeuser ?? []),
+    })),
+    ...(s.entscheidungsprotokoll ?? []).filter((p) => p.woche >= grenze).map((p) => ({
+      id: p.id, art: 'entscheidung' as const, titel: p.titel, woche: p.woche,
+      ergebnis: p.ergebnis, standard: p.standard, bezug: hausBezug(s, p.hausId ? [p.hausId] : []),
+    })),
+  ].sort((a, b) => b.woche - a.woche || a.id.localeCompare(b.id));
+  return { handeln, meldungen, erledigt };
+}
+
 export interface Cockpit {
   kw: number;
   jahr: number;

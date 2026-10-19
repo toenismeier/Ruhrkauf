@@ -52,6 +52,33 @@ const server = http.createServer((req, res) => {
       woche: window.spiel.s.woche, cash: window.spiel.s.cash, umsatz: window.spiel.s.historie.at(-1).umsatz
     }));
     assert.deepEqual(nachher, vorher, 'Fortsetzen bewahrt exakt dieselbe Wochen-GuV und Liquidität');
+    // Posteingang: Öffnen, Zähler und eine tatsächliche Engine-Entscheidung prüfen.
+    await page.evaluate(() => {
+      const s = window.spiel.s, h = s.haeuser[0];
+      s.entscheidungen.push({
+        id: 'e-mobil-post', typ: 'instandhaltung', woche: s.woche, frist: s.woche + 1,
+        titel: 'Brandschutz im Haus', text: 'Prüfung für den Posteingang.',
+        optionen: [{ id: 'zahlen', label: 'Zahlen' }, { id: 'verschieben', label: 'Verschieben' }],
+        standard: 'zahlen', daten: { haus: h.id, kosten: 500000 },
+      });
+      window.spiel.oeffnePosteingang('handeln');
+    });
+    const eingang = await page.evaluate(() => ({
+      ...window.spiel.posteingang.pruefe(), titel: document.getElementById('ptitel').textContent
+    }));
+    assert.equal(eingang.titel, 'Posteingang');
+    assert.equal(eingang.badge, eingang.soll, 'Badge zählt alle offenen Vorgänge');
+    assert.equal(eingang.karten, eingang.soll, 'Jeder Vorgang hat eine Karte');
+    const entscheidungSoll = await page.evaluate(() => {
+      const kopie = structuredClone(window.spiel.s);
+      const r = window.spiel.E.fuehreAus(kopie, { typ: 'entscheiden', id: 'e-mobil-post', option: 'verschieben' });
+      if (!r.ok) throw new Error(r.text);
+      return JSON.stringify(kopie);
+    });
+    await page.locator('[data-post-id="e-mobil-post"] [data-po-a="option"][data-v="verschieben"]').click();
+    const entscheidungIst = await page.evaluate(() => JSON.stringify(window.spiel.s));
+    assert.equal(entscheidungIst, entscheidungSoll, 'UI-Aktion entspricht fuehreAus auf einem Klon');
+    await page.locator('#pzu').click();
     await page.locator('#menueknopf').click();
     await page.locator('#performance').click();
     await page.waitForFunction(() =>

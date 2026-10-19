@@ -234,7 +234,7 @@ function lieferantenZahlungen(s: GameState): void {
   if (unbezahlt) {
     if (s.zahlungsstockungSeit === undefined) {
       s.zahlungsstockungSeit = w;
-      melde(s, 'warnung', 'Zahlungsstockung: Fällige Lieferantenrechnungen können nicht beglichen werden.');
+      melde(s, 'warnung', 'Zahlungsstockung: Fällige Lieferantenrechnungen können nicht beglichen werden.', { modul: 'einkauf' });
     }
     if (w - s.zahlungsstockungSeit >= 3 && s.phase === 'regulaer') eroeffneInsolvenz(s, 'Zahlungsunfähigkeit: Lieferanten seit drei Wochen nicht bezahlt');
   } else s.zahlungsstockungSeit = undefined;
@@ -259,7 +259,7 @@ function werteAktionenAus(s: GameState): void {
       schaetzungBis: eur(zentrum + halb),
       hinweis: stoer ? 'Störfaktoren in der Messung (Wetter, Ferienverschiebung, Nachbarschließung).' : kontrolle ? 'Gemessen gegen Kontrollhäuser.' : 'Gemessen gegen Vorjahr und Trend.',
     };
-    melde(s, 'info', `Aktion „${a.name}“ ausgewertet. Marketing meldet ${mio(a.ausgewertet.marketingBericht)} Mehrumsatz, Controlling schätzt ${mio(a.ausgewertet.schaetzungVon)} bis ${mio(a.ausgewertet.schaetzungBis)}.`);
+    melde(s, 'info', `Aktion „${a.name}“ ausgewertet. Marketing meldet ${mio(a.ausgewertet.marketingBericht)} Mehrumsatz, Controlling schätzt ${mio(a.ausgewertet.schaetzungVon)} bis ${mio(a.ausgewertet.schaetzungBis)}.`, { modul: 'marketing' });
   }
 }
 

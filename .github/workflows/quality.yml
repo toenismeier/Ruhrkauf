@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -46,9 +50,13 @@ jobs:
         working-directory: render
       - run: npm test
         working-directory: render
+      - run: node spiel-render.js --nur-posteingang
+        working-directory: render
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: browser-smoke
-          path: render/out/
+          path: |
+            render/out/
+            render/bilder/
           if-no-files-found: ignore

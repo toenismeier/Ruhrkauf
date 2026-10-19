@@ -34,7 +34,7 @@ export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEnde
   h.statusBis = s.woche + dauer;
   if (opts.mietvertragEndetMit) h.miete.bisWoche = Math.min(h.miete.bisWoche, s.woche + dauer + 6);
   s.stakeholder.betriebsrat = clamp(s.stakeholder.betriebsrat - 60 * fteAnteil(s, h), 0, 100);
-  melde(s, 'presse', `${h.name} soll schließen. Betriebsrat und Geschäftsführung verhandeln über Interessenausgleich und Sozialplan (ca. ${dauer} Wochen).`);
+  melde(s, 'presse', `${h.name} soll schließen. Betriebsrat und Geschäftsführung verhandeln über Interessenausgleich und Sozialplan (ca. ${dauer} Wochen).`, { stadt: h.stadt, hausId: h.id });
   return null;
 }
 
@@ -79,7 +79,7 @@ export function schliesseEndgueltig(s: GameState, h: Haus): void {
       }
     }
   }
-  melde(s, 'presse', `${h.name} schließt endgültig. Sozialplan ${mio(sozialplan)}, ${Math.round(fte)} Beschäftigte betroffen.`);
+  melde(s, 'presse', `${h.name} schließt endgültig. Sozialplan ${mio(sozialplan)}, ${Math.round(fte)} Beschäftigte betroffen.`, { stadt: h.stadt, hausId: h.id });
 }
 
 /** Statuswechsel, Umbauten, Personalfluktuation, Substanz. */
@@ -89,7 +89,7 @@ export function prozesse(s: GameState): void {
     if (h.status === 'schliessung_verhandlung' && (h.statusBis ?? 0) <= w) {
       h.status = 'raeumung';
       h.statusBis = w + 6;
-      melde(s, 'presse', `„Alles muss raus“: Räumungsverkauf in ${h.name} beginnt.`);
+      melde(s, 'presse', `„Alles muss raus“: Räumungsverkauf in ${h.name} beginnt.`, { stadt: h.stadt, hausId: h.id });
       for (const n of s.haeuser) if (n !== h && n.stadt === h.stadt && n.status === 'offen') n.transferBonus -= 0.04;
     } else if (h.status === 'raeumung' && (h.statusBis ?? 0) <= w) {
       for (const n of s.haeuser) if (n !== h && n.stadt === h.stadt && n.status === 'offen') n.transferBonus += 0.04;
@@ -109,7 +109,7 @@ export function prozesse(s: GameState): void {
         f.umbauZiel = undefined;
       }
       if (f.konzept === 'untermiete' && f.mieter && f.mieter.bisWoche <= w) {
-        melde(s, 'info', `Untermieter ${f.mieter.name} in ${h.name} zieht aus.`);
+        melde(s, 'info', `Untermieter ${f.mieter.name} in ${h.name} zieht aus.`, { stadt: h.stadt, hausId: h.id });
         f.konzept = 'leer';
         f.mieter = undefined;
       }
@@ -257,21 +257,21 @@ export function quartalsBewertung(s: GameState): void {
       s.eigentuemer.kapitalZugefuehrt += kapital;
       txt += ` Der Eigentümer schießt ${mio(kapital)} nach.`;
     }
-    melde(s, 'eigentuemer', txt);
+    melde(s, 'eigentuemer', txt, { modul: 'vorstand' });
   } else if (ist >= plan - tol) {
     st.eigentuemer = clamp(st.eigentuemer - 2, 0, 100);
-    melde(s, 'eigentuemer', `Quartal ${q.nr + 1}: Plan knapp verfehlt (Ist ${mio(ist)}, Plan ${mio(plan)}). Kein frisches Geld, neue Frist.`);
+    melde(s, 'eigentuemer', `Quartal ${q.nr + 1}: Plan knapp verfehlt (Ist ${mio(ist)}, Plan ${mio(plan)}). Kein frisches Geld, neue Frist.`, { modul: 'vorstand' });
   } else {
     st.eigentuemer = clamp(st.eigentuemer - 12, 0, 100);
     s.eigentuemer.strikes += 1;
-    melde(s, 'eigentuemer', `Quartal ${q.nr + 1}: Plan klar verfehlt (Ist ${mio(ist)}, Plan ${mio(plan)}). Verwarnung ${s.eigentuemer.strikes}/2.`);
+    melde(s, 'eigentuemer', `Quartal ${q.nr + 1}: Plan klar verfehlt (Ist ${mio(ist)}, Plan ${mio(plan)}). Verwarnung ${s.eigentuemer.strikes}/2.`, { modul: 'vorstand' });
     if (s.eigentuemer.strikes >= 2 && s.phase === 'regulaer') {
       if (runwayWochen(s) < 13) {
         s.eigentuemer.forderung = 'insolvenzantrag';
-        melde(s, 'eigentuemer', 'Der Eigentümer stellt keine weiteren Mittel bereit und verlangt den Insolvenzantrag.');
+        melde(s, 'eigentuemer', 'Der Eigentümer stellt keine weiteren Mittel bereit und verlangt den Insolvenzantrag.', { modul: 'vorstand' });
         eroeffneInsolvenz(s, 'Eigentümer verweigert weitere Mittel');
       } else {
-        melde(s, 'eigentuemer', 'Der Eigentümer prüft Alternativen. Ein weiteres verfehltes Quartal beendet seine Unterstützung.');
+        melde(s, 'eigentuemer', 'Der Eigentümer prüft Alternativen. Ein weiteres verfehltes Quartal beendet seine Unterstützung.', { modul: 'vorstand' });
       }
     }
   }
