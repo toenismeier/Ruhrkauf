@@ -28,14 +28,16 @@ export function sportGefuehl(haus, zustand = {}) {
   const n = (haus.etagen ?? [0]).filter((e) => e >= 0).length;
   const erlebnis = haus.lage === '1a' && (haus.grundflaecheQm ?? 0) >= 2000
     ? (rng(String(haus.id) + '/erlebnisart')() < 0.5 ? 'laufanalyse' : 'fitness') : null;
-  const rabatt = Number(zustand.rabatt ?? 0);
+  // Rohoptionen liefern 0..1, zustandNormal() liefert bereits 0..100. Nie doppelt multiplizieren.
+  const rohRabatt = Number(zustand.rabatt ?? 0);
+  const rabatt = rohRabatt > 1 ? rohRabatt : rohRabatt * 100;
   const aktiv = !!zustand.aktion || zustand.status === 'aktion' || (zustand.zusatz ?? []).includes('aktion');
   const offen = !['geschlossen', 'leer', 'verfall', 'abriss', 'raeumung'].includes(zustand.status ?? haus.status);
   return {
     erlebnis,
     erlebnisSeite: '+z', // Hauptseite zum Kunden, identisch für Vorbau und normale Glasfront
     abverkauf: n > 1 && offen && aktiv && rabatt > 0,
-    rabatt: aktiv && rabatt > 0 ? Math.round(rabatt * 100) : null,
+    rabatt: aktiv && rabatt > 0 ? Math.round(rabatt) : null,
     obereEtage: Math.max(0, ...(haus.etagen ?? [0]).filter((e) => e >= 0)),
     matt: (haus.substanz ?? 100) < 40 && offen,
   };
