@@ -3,9 +3,9 @@
 Übergabedatei für `auftraege/workstream-ladenbau.md`. Vor jedem neuen Chat vollständig lesen und am Ende fortschreiben.
 
 ## Aktuelle Phase
-**Phase 1: Möbelbibliothek – implementiert, technische und visuelle Abnahme größtenteils erfolgt; Merge-Freigabe noch offen (19.10.2026).**
+**Phase 1 offen (Merge-Blocker), Phasen 2 und 3 vorgezogen als Drafts.** Stand: 19.10.2026.
 
-Branch: `feat/ladenbau`, Draft-PR: https://github.com/toenismeier/Ruhrkauf/pull/6. **Nicht mergen**, bevor die aktuelle HEAD-CI grün und die Bilder im Repository bestätigt sind. Phase 2 ist noch nicht begonnen.
+Phase 1: `feat/ladenbau`, Draft-PR #6. Phase 2: `feat/ladenbau-p2`, Draft-PR #8 gegen Phase 1. Phase 3: `feat/ladenbau-p3`, Draft-PR #9 gegen Phase 2. **Keinen PR mergen**, bevor die technische und visuelle Abnahme grün ist; Abhängigkeiten in der Reihenfolge Phase 1 → 2 → 3 auf `main` bringen.
 
 ## Erledigt
 - Neuer Ordner `render/src/kit/moebel/` mit `index.js`, `basis.js`, `wand.js`, `gondel.js`, `insel.js`, `kasse.js`, `deko.js`, `sport.js`, `outlet.js`, `service.js` sowie Katalog- und Prüfhelfern.
@@ -51,5 +51,37 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 - Eigenständige Möbel-CI und automatischer Bild-Commit hinzugefügt. Der letzte Schritt benötigt eine funktionsfähige GitHub-Runner-Bereitstellung. Bis dahin keine Merge-Freigabe.
 - Keine Änderungen an den Außenbauten, Stadtplänen, Engine-Kalibrierung und Basis-API.
 
+## Fortsetzung vom 19.10.2026: Phasen 2 und 3 vorgezogen
+
+### Phase 2 (Draft-PR #8)
+- `render/LADENBAU.md`: verbindliche Gänge 3,0 / 1,8 m, Wandbelegung 85 %, Dichte 35–50 %, Akzentboden höchstens 10 %, Deko 2 %, Inszenierung höchstens eine je Abteilung, Kasse/Vorfeld und drei Profile.
+- `render/src/kit/ladenbau-regeln.js`: zentrale Kennzahlen, Formatprofile und Möbel-IDs der 147er Bibliothek. Die Profilreferenzen wurden auf vorhandene IDs abgeglichen.
+- **Offen:** Node/Render-Abnahme, Prüfung der Auswirkungen auf vorhandene Module, Rebase nach Phase 1. Kein Merge.
+
+### Phase 3 (Draft-PR #9)
+- `render/src/kit/ladenplan.js`: Plan-Datenmodell für Hindernisse, Eingang, Gänge, Abteilungsrechtecke, Wandband, Gondelreihen, Kasse und Böden; Bibliotheks-Renderer `baueLadenplan`.
+- `render/src/kit/ladenbau-sport.js`: Adapter für Sporthaus-Maße, Bestands-Hindernisse und `haus.flaechen`.
+- `render/src/kit/ladenbau-pruefung.js` und `render/pruef-ladenbau.js`: Wegesuche auf 0,625-m-Raster, Flächen-, Wand-, Möbel-, Deko- und Budgetprüfung. CLI `--teile` zählt die tatsächlichen Geometrieteile.
+- `render/src/kataloge/ladenplan-diagnose.js`: Draufsicht neben 3D; Katalogkamera in `render/src/kit/katalog.js` optional ergänzt.
+- `render/tests/ladenbau-smoke.cjs` und npm-Skripte für Smoke, Prüfung und Diagnose hinzugefügt.
+- **Isolierter Logiktest (nicht: Node/npm oder Browser):** vier künstliche Grundrisse von 30×30 bis 75×55 m mit sechs Abteilungen; 147 Möbel-IDs abgeglichen. Modell generiert 32–232 Möbel und je eine Kasse, keine fehlenden Möbel-IDs. **Rot:** Möbeldichte rund 16–25 % statt 35–50 %, größte freie quadratische Prüffläche 8,75–11,25 m statt höchstens 6 m. Insbesondere Flächendichte und Leerfläche müssen konstruktiv nachgebessert werden.
+- **Nicht ausgeführt:** `npm ci`, `npm run build`, `node spiel-render.js`, `node pruef-ladenbau.js --teile`, vollständiger Sporthaus-Lauf, Chromium-Kataloge und PNG-Sichtprüfung. Der Chat-Zugriff auf dieses private Repository erfolgt über den GitHub-Connector; ein lokal testbarer Repository-Checkout stand in der Sitzung nicht zur Verfügung.
+- Phase 3 deshalb **nicht abgenommen, nicht mergefähig**. Phase 4 ist nach Sport-Merge grundsätzlich frei, darf aber nicht vor grünem Planer beginnen.
+
+### Relevante PRs und letzte Messwerte
+| Gegenstand | Wert / Beleg |
+|---|---|
+| Phase 1 | PR #6, 147 Möbel, 0 Fehler im früheren vollständig ausgeführten CI-Lauf 39233091971; HEAD-Abnahme und versionierte Bilder offen |
+| Phase 2 | Draft-PR https://github.com/toenismeier/Ruhrkauf/pull/8, keine Endabnahme |
+| Phase 3 | Draft-PR https://github.com/toenismeier/Ruhrkauf/pull/9, künstliche Logiktestfälle noch rot |
+| `pruef-ladenbau` alle Sporthäuser | offen / nicht ausgeführt |
+| `spiel-render.js` neuer HEAD | offen / nicht ausgeführt |
+| Diagnosebild | Katalogcode vorhanden, keine erzeugte/gesichtete PNG |
+| Neu versionierte Möbel-PNGs in `bilder/` | weiterhin offen |
+
 ## Nächster Schritt
-**Phase 1 abschließen:** GitHub-Runner-Ausfall untersuchen, neuesten HEAD vollständig grün testen, vier final gerenderte PNGs unter `bilder/` tatsächlich versionieren und prüfen, dann Draft-PR #6 freigeben. **Erst danach Phase 2**: `render/LADENBAU.md` und `render/src/kit/ladenbau-regeln.js` mit verbindlichen Flächen-, Gang-, Wand- und Dichte-Grenzen.
+1. **Phase 1 lokal abschließen:** aktuellen `main` integrieren, `npm ci`, Engine- und Render-Prüfungen, Möbelprüfung, Browser-Smoke und Katalogbilder tatsächlich lokal ausführen; finale PNGs nach `bilder/` committen. Erst bei grünem Lauf PR #6 mergen.
+2. **Phase 2:** auf gemergtem `main` rebasen, zentrale Regeln und Referenz-IDs automatisiert prüfen, lokalen Build/Smoke durchführen, dann PR #8 mergen.
+3. **Phase 3:** Reihenplanung und Freiflächen optimieren, bis Dichte 35–50 % und größte Leerfläche ≤6 m erreicht werden; alle 50 bzw. nach aktuellem Stamm 44 Sporthäuser samt Etagen prüfen und Teile tatsächlich zählen. Weitere Prüflücken (insbesondere Wegesuche, Randband und kassenfreier Plan) nachbessern, Diagnosekataloge rendern/ansehen, grünen Render-Build und Browser-Smoke nachweisen. Dann PR #9 mergen.
+4. **Phase 4 Sport:** erst nach Phase-3-Abnahme beginnen; Sport-Außenfamilien und Spiel-Logik beibehalten.
+
