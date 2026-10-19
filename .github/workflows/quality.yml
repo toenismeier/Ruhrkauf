@@ -33,8 +33,6 @@ jobs:
 
   browser:
     name: Mobiler Browser-Smoketest
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -54,18 +52,6 @@ jobs:
         working-directory: render
       - run: node spiel-render.js --nur-posteingang
         working-directory: render
-      # Einmalig: Bundle nach erfolgreichen Tests ins Feature-Branch übernehmen,
-      # damit spiel.html ohne lokale Build-Schritte die neue Oberfläche lädt.
-      - name: Built bundle aktualisieren
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/spiel-posteingang'
-        run: |
-          if ! git diff --quiet -- render/spiel-bundle.js; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add render/spiel-bundle.js
-            git commit -m "build: aktualisiertes Spiel-Bundle für Posteingang"
-            git push
-          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
