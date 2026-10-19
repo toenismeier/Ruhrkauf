@@ -12,6 +12,7 @@ import {
   busch, kuebelbaum, buchten, wand, attika, lichtkuppeln, technik, solar, parkreihe, geruest, clamp, GLAS, GLAS_D, GLAS_HELL, LICHT, RAHMEN, STAHL, KIES, KLEID, BUNT,
 } from './sporthelfer.js';
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
+import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
 
 export const HS_ROT = '#d23c32', HS_BLAU = '#1d2f4f', HS_WEISS = '#f4f3ef';
 export const EG_S = 5.0, OG_S = 4.2;
@@ -1335,6 +1336,18 @@ function erlebnisPortal(K){
  *        untermieter?: [Name | { name, typ, etage }], hartwig?: false, passanten?: false, abrissSeite?: '+x' | '+z' | 'ecke', jahr? }
  * Rückgabe: { hoehe, w, d (belegte Fläche ab x, z, inkl. Parkplatz/Mall), familie, teile, status }
  */
+/** Sporthaus bleibt als Gebäudekörper bestehen, wird aber als Fremdhandelsfläche gebrandet. */
+export function nachnutzungSport(S, scene, haus, w, opt = {}) {
+  const start = S.anzahl;
+  const b = sporthaus(S, scene, haus, { ...opt, status: 'offen', hartwig: false, passanten: false });
+  const x = opt.x ?? 0, z = opt.z ?? 0, farbe = WETTBEWERBER_FARBEN[w.art] ?? '#596c76';
+  for (const seite of seitenVon(S, x, z, b.w, b.d)) {
+    seite.q(1, seite.L - 1, 0.8, 3.9, 0.55, 0.68, '#698999');
+    seite.q(1, seite.L - 1, 4.0, 5.4, 0.62, 0.82, farbe);
+    plakat(scene, seite, w.name, seite.L / 2, 4.7, 0.93, passend(w.name, seite.L * 0.75, 1.3), '#ffffff');
+  }
+  return { ...b, teile: S.anzahl - start, nachnutzung: w.id };
+}
 export function sporthaus(S, scene, haus, opt = {}) {
   const start = S.anzahl;
   const marke = merke(S, scene);
