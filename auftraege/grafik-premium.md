@@ -19,7 +19,8 @@ Rangfolge wie im Vorbild: 1 und 1 gleichauf, dann 2, dann 3 deutlich schwächer.
 
 ## Engine
 1. **Kein neues Format.** `Haus` bekommt ein optionales Feld `klasse?: 'premium'`. Format bleibt `'warenhaus'`, damit Einkauf, Marketing und Aktionen ohne Sonderfälle weiterlaufen.
-2. **Umwidmen statt hinzufügen,** damit die Kalibrierung hält: In `welt.ts neueWelt` wird je Stadt das bisher größte Hartwig-1a-Haus (Grundfläche × Etagen) in Berlin, München, Hamburg, Düsseldorf umgewidmet: neuer Name, `klasse: 'premium'`, `premiumSchluessel: 'P001'` bis `'P004'`. Die Haus-Id (W…) bleibt unverändert, damit HQ, Spielstände, Prüfskripte und Brücke weiter funktionieren. Bei Seed 1 sind das nach heutigem Stand W003 (Berlin), W009 (München), W006 (Hamburg), W016 (Düsseldorf); die Auswahl muss aber regelbasiert sein, nicht fest verdrahtet.
+2. **Hinweis Maßstab:** Läuft dieser Auftrag nach Phase 1 von `engine-massstab.md`, sind die vier Premium-Häuser dort bereits als eigene Einträge angelegt (zusätzlich zu den 360 regulären Häusern). Dann nicht umwidmen, sondern diese Einträge nutzen. Läuft er vorher, gilt:
+   **Umwidmen statt hinzufügen,** damit die Kalibrierung hält: In `welt.ts neueWelt` wird je Stadt das bisher größte Hartwig-1a-Haus (Grundfläche × Etagen) in Berlin, München, Hamburg, Düsseldorf umgewidmet: neuer Name, `klasse: 'premium'`, `premiumSchluessel: 'P001'` bis `'P004'`. Die Haus-Id (W…) bleibt unverändert, damit HQ, Spielstände, Prüfskripte und Brücke weiter funktionieren. Bei Seed 1 sind das nach heutigem Stand W003 (Berlin), W009 (München), W006 (Hamburg), W016 (Düsseldorf); die Auswahl muss aber regelbasiert sein, nicht fest verdrahtet.
 3. **Wirtschaft (`wirtschaft.ts`, `welt.ts`):**
    - Flächenproduktivität je Gruppe Faktor 1,8 (Rang 1), 1,5 (Rang 2), 1,25 (Rang 3) gegenüber einem normalen Metropolenhaus.
    - Gruppenmix: beauty, accessoires, damen, food stärker, spielwaren und wohnen kleiner.

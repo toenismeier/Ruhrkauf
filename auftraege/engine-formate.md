@@ -1,12 +1,14 @@
 # Auftrag: Schwesterkette und Outlet als Formate in der Engine
 
-Branch `feat/engine-formate`. Erst nach Merge von `feat/grafik-schwesterkette` und `feat/grafik-outlet` starten. Engine, Brücke und Oberfläche.
+Branch `feat/engine-formate`. Erst nach Merge von `feat/grafik-schwesterkette`, `feat/grafik-outlet` und Phase 1 von `engine-massstab.md` starten. Engine, Brücke und Oberfläche.
+
+**Mengen:** Es gilt der Ruhrkauf-Maßstab aus `engine-massstab.md`: 86 Volkskauf-Häuser und 66 FUNDUS-Häuser. Sie liegen nach Phase 1 dort bereits als Daten in der Welt (`nurDaten: true`). Dieser Auftrag baut ihre Wirtschaft; die Kalibrierung auf die Umsatzziele erfolgt in Phase 3 von `engine-massstab.md`. Die Zahlen 24 und 20 weiter unten stammen aus den Grafik-Aufträgen und sind überholt.
 
 ## Ausgangslage
 - `Format = 'warenhaus' | 'sport'` (`engine/src/types.ts`). 130 Warenhäuser und 50 Sporthäuser entstehen in `welt.ts neueWelt`/`bauHaus`.
 - Die Grafik kennt nach den Grafik-Aufträgen zwei weitere Formate, rein grafisch und ohne Engine:
-  - Schwesterkette „Kaufhaus Wendt“: `render/haeuser-schwester.json`, 24 Häuser `K001` bis `K024`, `format: 'schwester'`, Nachkriegsbauten, Lage 1a oder b, Mittel- und Großstädte, Schwerpunkt NRW, Name als Konstante `NAME_SCHWESTER` in `render/src/kit/schwesterhaus.js`.
-  - Off-Price-Kette (TK-Maxx-Prinzip, eigene Marke, Arbeitsname „MARKENWERT“): `render/haeuser-outlet.json`, 20 Häuser `O001` bis `O020`, `format: 'outlet'`, 14 × Lage `rand` (Retail Park), 6 × Lage `b` (Innenstadt), Konstante `NAME_OUTLET` in `render/src/kit/outlet.js`. Format-Kennung im Code bleibt `outlet`.
+  - Schwesterkette „Volkskauf“: `render/haeuser-schwester.json`, 24 Häuser `K001` bis `K024`, `format: 'schwester'`, Nachkriegsbauten, Lage 1a oder b, Mittel- und Großstädte, Schwerpunkt NRW, Name als Konstante `NAME_SCHWESTER` in `render/src/kit/schwesterhaus.js`.
+  - Off-Price-Kette (TK-Maxx-Prinzip, eigene Marke, Name „FUNDUS“): `render/haeuser-outlet.json`, 20 Häuser `O001` bis `O020`, `format: 'outlet'`, 14 × Lage `rand` (Retail Park), 6 × Lage `b` (Innenstadt), Konstante `NAME_OUTLET` in `render/src/kit/outlet.js`. Format-Kennung im Code bleibt `outlet`.
 - Offprice läuft heute je Format über Flächen mit Konzept `offprice` und `einkauf.ts verbraucheAltwareWg(s, format, wert)`, das Altware (`istAlt`) des Formats verbraucht. In `engine.ts` stehen `Record<Format, …>`-Objekte mit festen Schlüsseln `warenhaus` und `sport`.
 
 Vorbild Ruhrkauf: Die Schwesterkette ist „der vergessene Zwilling“: eigener Rechtsträger, eigene Regionalführung und eigenes Warenwirtschaftssystem, nur die Jahresrechnung läuft in die Zentrale. Sie ist härter, früher und standardisierter abzuwickeln, Volumen ohne Profil und kapitalintensiv. Das Outlet ist die Abverkaufsschiene des Konzerns: Was in Warenhaus und Sport nicht verkauft wird, geht dorthin.
@@ -17,7 +19,7 @@ Vorbild Ruhrkauf: Die Schwesterkette ist „der vergessene Zwilling“: eigener 
 - `GameState.firma` bekommt `schwesterName` und `outletName` (Startwerte aus Szenario, gleich den Konstanten der Grafik).
 
 ## 2. Welt (`welt.ts`)
-- Liste der 24 Schwester- und 20 Outlet-Standorte als Konstante in `daten.ts` (Id, Stadt, Lage, Baujahr, Fassade, Grundfläche, Etagen, Substanz), **identisch** zu den beiden JSON-Dateien der Grafik. Neues Skript `engine/scripts/haeuser-export.ts` schreibt ab jetzt `render/haeuser.json`, `render/haeuser-schwester.json` und `render/haeuser-outlet.json` aus `neueWelt(1)`; danach dürfen sich die JSON-Dateien nur noch über dieses Skript ändern.
+- Standorte, Mengen und Export (`engine/scripts/haeuser-export.ts`) kommen aus Phase 1 von `engine-massstab.md`. Hier nur `nurDaten` für beide Formate durch echte Wirtschaft ersetzen.
 - **Schwesterkette** (`bauHaus` mit Format `schwester`):
   - Warenhausgruppen ohne `food`; UG nur Lager (keine Fläche).
   - Flächenproduktivität ×0,72 gegenüber einem Hartwig-Haus gleicher Lage und Stadtgröße, Kundschaft älter (`alter` ×1,1), Substanz 15 bis 60.
@@ -63,7 +65,7 @@ Vorbild sind die Ruhrkauf-Verhältnisse: Spezialformate klein gegenüber dem Ker
 - `spiel-render.js` prüft die neuen Anzeigen gegen die Abfragen (0 Abweichungen).
 
 ## 8. Tests (`engine/tests/formate.test.ts`)
-- `neueWelt(1)` erzeugt 24 Schwester- und 20 Outlethäuser, identisch zu den exportierten JSON-Dateien.
+- `neueWelt(1)` erzeugt 86 Volkskauf- und 66 FUNDUS-Häuser, identisch zu den exportierten JSON-Dateien.
 - Altwarefluss: Bei Quote 1 landet alte Ware im Outlet-Pool, bei Quote 0 nicht.
 - Umflaggen: Format wechselt nach Umbau, Kosten werden gebucht, ohne Immobilienabteilung abgelehnt.
 - Kettenverkauf entfernt alle Schwesterhäuser und bucht den Kaufpreis.

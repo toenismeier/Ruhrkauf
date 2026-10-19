@@ -5,7 +5,7 @@ Repo `toenismeier/Ruhrkauf`, Grafik-Baukasten in `render/`. Vor dem Start vollst
 
 Hartwig ist die Hauptkette (rot `#d23c32`). Dazu kommt jetzt eine zweite, ältere und schwächere Warenhauskette, die zum selben Konzern gehört: der „vergessene Zwilling“. Solide, nicht glamourös, die Arbeiterkette.
 
-**Name:** Arbeitsname `Kaufhaus Wendt`, als eine einzige Konstante `NAME_SCHWESTER` in der neuen Moduldatei. Keine echten Marken, keinen Namen aus `wettbewerber.js` oder den Eigenmarken verwenden. Der endgültige Name kommt später und darf nur diese Konstante ändern.
+**Name:** `Volkskauf` (entschieden, ersetzt den früheren Arbeitsnamen „Kaufhaus Wendt“), als eine einzige Konstante `NAME_SCHWESTER` in der neuen Moduldatei. Keine echten Marken, keinen Namen aus `wettbewerber.js` oder den Eigenmarken verwenden. Der endgültige Name kommt später und darf nur diese Konstante ändern.
 
 ## Aussehen und Feeling
 - Nur Nachkriegsbauten, Baujahr 1955 bis 1979. Keine Kaiserzeit, keine Kuppel, kein Glas der Postmoderne, kein Center-Kopfbau.

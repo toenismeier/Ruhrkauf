@@ -12,9 +12,17 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `grafik-premium.md` | `feat/grafik-premium` | Merge Schwesterkette | Outlet, Posteingang, Wettbewerber-Engine |
 | `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | | Grafik-Aufträgen, Posteingang |
 | `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | Merge Wettbewerber-Engine | Premium, Outlet |
-| `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet | Posteingang |
+| `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet, Engine-Maßstab Phase 1 | Posteingang, Städte, Oberfläche |
 | `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`) | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | Phase 4 nach Merge Sport, Phase 5 nach Merge Outlet-Außenbau, Phase 6 nach Merge Schwesterkette | Engine-Aufträgen, Posteingang |
+| `engine-massstab.md` (mehrere Chats, Stand in `massstab-stand.md`) | `feat/engine-massstab` | Phase 1 sofort; Phase 3 nach `engine-formate.md` | allem außer `engine-formate.md` gleichzeitig |
+| `massstab-staedte.md` | `feat/massstab-staedte` | Engine-Maßstab Phase 1 | Oberfläche, Ladenbau, Engine-Aufträgen |
+| `massstab-oberflaeche.md` | `feat/massstab-oberflaeche` | Engine-Maßstab Phase 1 | allem |
+| `massstab-leistung.md` | `feat/massstab-leistung` | Städte Phase 2 | Oberfläche |
 | `spiel-posteingang.md` | `feat/spiel-posteingang` | | allem; nach Merge der Wettbewerber-Engine deren Meldungen einbinden |
+
+## Namen und Maßstab (entschieden)
+- Hauptkette Hartwig, Sportkette Hartwig Sport, Hertie-Pendant **Volkskauf**, SchnäppchenCenter-Pendant (TK-Maxx-Prinzip) **FUNDUS**.
+- Maßstab nach Ruhrkauf: 360 Hartwig regulär plus 4 Premium, 86 Volkskauf, 44 Sport, 66 FUNDUS, gemischt auf rund 180 Städte (`engine-massstab.md`).
 
 ## Gemeinsam berührte Dateien (Parallelbetrieb)
 Premium, Outlet und Schwesterkette hängen sich an dieselben Einbaupunkte. In diesen Dateien gilt: nur ergänzen, nichts umbauen, eigene Zeilen bzw. eigener Block je Format, damit parallele Branches beim Rebase höchstens triviale Konflikte haben.

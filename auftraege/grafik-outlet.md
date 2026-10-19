@@ -7,7 +7,7 @@ Repo `toenismeier/Ruhrkauf`, Grafik-Baukasten in `render/`. Vor dem Start vollst
 
 Referenzbilder liegen in `render/ref/`. Bestehende Kataloge zum Vergleich: `bilder/katalog-sporthaeuser.png`, `bilder/katalog-wettbewerber.png`.
 
-**Was das Format ist:** eine Off-Price-Kette nach dem Muster TK Maxx. Markenware zu deutlich reduzierten Preisen, ständig wechselndes Sortiment, Schatzsuche. Hierhin geht unter anderem, was Hartwig, Kaufhaus Wendt und Hartwig Sport nicht verkauft haben. Dazu kommen günstig zugekaufte Markenposten.
+**Was das Format ist:** eine Off-Price-Kette nach dem Muster TK Maxx. Markenware zu deutlich reduzierten Preisen, ständig wechselndes Sortiment, Schatzsuche. Hierhin geht unter anderem, was Hartwig, Volkskauf und Hartwig Sport nicht verkauft haben. Dazu kommen günstig zugekaufte Markenposten.
 
 **Was es nicht ist:**
 - kein Restpostenlager,
@@ -16,7 +16,7 @@ Referenzbilder liegen in `render/ref/`. Bestehende Kataloge zum Vergleich: `bild
 
 Das Off-Price-Format ist ein ordentlicher, heller Laden mit sehr dichter Ware.
 
-**Name:** eigene Marke, nicht Hartwig. Arbeitsname `MARKENWERT`, als eine einzige Konstante `NAME_OUTLET` in `render/src/kit/outlet.js`. Der endgültige Name kommt später und darf nur diese Konstante ändern. Der Name darf nicht in `wettbewerber.js NAMEN` vorkommen.
+**Name:** eigene Marke, nicht Hartwig. Name `FUNDUS` (entschieden), als eine einzige Konstante `NAME_OUTLET` in `render/src/kit/outlet.js`. Der endgültige Name kommt später und darf nur diese Konstante ändern. Der Name darf nicht in `wettbewerber.js NAMEN` vorkommen.
 
 ## Aussehen außen
 - **Lagen:**

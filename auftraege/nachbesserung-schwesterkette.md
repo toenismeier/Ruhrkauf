@@ -1,7 +1,10 @@
-# Nachbesserung Grafik: Schwesterkette (Kaufhaus Wendt)
+# Nachbesserung Grafik: Schwesterkette (Volkskauf)
 
 Branch: `feat/grafik-schwesterkette` (weiterarbeiten, kein neuer Branch). Grundlage bleibt `auftraege/grafik-schwesterkette.md`.
 Technik und Prüfungen sind abgenommen (Plätze in 112 Städten, 80-%-Regel, Blocksperre, CI grün). Offen ist die Optik: Die 24 Häuser lesen sich als Bürogebäude, nicht als Warenhäuser.
+
+## 0. Name
+Die Kette heißt ab jetzt **Volkskauf** (entschieden). `NAME_SCHWESTER = 'Volkskauf'`, Schriftzug `VOLKSKAUF`. Alle Texte, Zustandsbeschriftungen („Volkskauf schließt“, „Danke für … Jahre Volkskauf“, Modernisierungsplane) und Katalogtitel umstellen. Kein „Wendt“ mehr im Code (`grep -rn Wendt render` muss leer sein).
 
 ## 1. Als Warenhaus lesbar machen (Hauptpunkt)
 - EG als echte Ladenzone: helle, beleuchtete Schaufenster mit sichtbarer Ware und Puppen (Helfer aus `zustaende.js ladenInhalt` bzw. `innen.js` nutzen), nicht das durchgehende dunkle Band. Schaufensterhöhe wie bei Hartwig F3/F4, Sockel und Kämpfer sichtbar.
@@ -9,10 +12,10 @@ Technik und Prüfungen sind abgenommen (Plätze in 112 Städten, 80-%-Regel, Blo
 - Eingang als erkennbare Eingangsachse: zwei schmale Türen mit Vordach oder Rücksprung, davor Fußmatte, Aufsteller.
 - Über dem EG ein durchgehendes Gesims bzw. Kragdach, damit Laden und Obergeschosse klar getrennt sind.
 - Mindestens ein warenhaustypisches Element je Familie: Familie 1 Werbepylon oder Uhr an der Ecke, Familie 2 geschlossenes Wandfeld mit großem Schriftzug, Familie 3 auskragendes Treppenhaus oder Eckerker.
-- Vergleichsmaßstab: `bilder/katalog-warenhaus.png` F3 Nachkrieg und F4 Kachelfassade. Wendt ist schlichter und müder, aber in derselben Detailtiefe.
+- Vergleichsmaßstab: `bilder/katalog-warenhaus.png` F3 Nachkrieg und F4 Kachelfassade. Volkskauf ist schlichter und müder, aber in derselben Detailtiefe.
 
 ## 2. Schriftzug lesbar
-- `KAUFHAUS WENDT` als Kastenbuchstaben auf dem Petrolband, Buchstabenhöhe 1,2 bis 1,6 m (heute 0,57 bis 0,68 m). Im Katalog (Kachel 350 px) muss der Name lesbar sein, im Spielzoom auf dem iPhone ebenfalls.
+- `VOLKSKAUF` als Kastenbuchstaben auf dem Petrolband, Buchstabenhöhe 1,2 bis 1,6 m (heute 0,57 bis 0,68 m). Im Katalog (Kachel 350 px) muss der Name lesbar sein, im Spielzoom auf dem iPhone ebenfalls.
 - Auf beiden sichtbaren Seiten. Zusätzlich ein Dachschriftzug oder Wandschild bei Familie 2.
 - Matter als Hartwig (kein Leuchten, Farbe `#e4e5db` darf bleiben), aber gleich gut lesbar.
 - Bei Substanz unter 30 darf, wie bei Hartwig, höchstens ein Buchstabe fehlen.
@@ -28,11 +31,11 @@ Technik und Prüfungen sind abgenommen (Plätze in 112 Städten, 80-%-Regel, Blo
 - UG bleibt Lager und Anlieferung.
 
 ## 5. Patina
-- Patina-Zustand mit Bäumen auf dem Dach und Ranken über die ganze Fassade ist zu stark für eine Kette im laufenden Betrieb. Für Wendt: Ranken höchstens an einer Gebäudeecke, Dachbewuchs nur Moosflächen, keine Bäume. Der volle Verfall bleibt dem Zustand „geschlossen“ bzw. „leer“ vorbehalten.
+- Patina-Zustand mit Bäumen auf dem Dach und Ranken über die ganze Fassade ist zu stark für eine Kette im laufenden Betrieb. Für Volkskauf: Ranken höchstens an einer Gebäudeecke, Dachbewuchs nur Moosflächen, keine Bäume. Der volle Verfall bleibt dem Zustand „geschlossen“ bzw. „leer“ vorbehalten.
 
 ## Abnahme
-1. Kataloge `schwesterhaeuser`, `schwester-stichprobe`, `schwester-etagen` neu rendern. Zusätzlich ein Vergleichskatalog `schwester-vergleich.js`: je Familie ein Wendt-Haus neben einem Hartwig F3 und F4 in derselben Kachelgröße.
+1. Kataloge `schwesterhaeuser`, `schwester-stichprobe`, `schwester-etagen` neu rendern. Zusätzlich ein Vergleichskatalog `schwester-vergleich.js`: je Familie ein Volkskauf-Haus neben einem Hartwig F3 und F4 in derselben Kachelgröße.
 2. Jedes Bild ansehen, mindestens drei Runden Nachbessern.
 3. Prüfungen: `node pruef-staedte.js` 0 Fehler, `node pruef-alle-gestaltung.js` 0 Verstöße, `pruef-schwester` 0 Fehler, höchstens 8.000 Teile je Haus.
-4. Erfolgskriterium: Wer den Vergleichskatalog sieht, erkennt Wendt sofort als Warenhaus, liest den Namen und hält es für älter und kleiner als Hartwig. Kein Haus wirkt wie ein Bürobau.
+4. Erfolgskriterium: Wer den Vergleichskatalog sieht, erkennt Volkskauf sofort als Warenhaus, liest den Namen und hält es für älter und kleiner als Hartwig. Kein Haus wirkt wie ein Bürobau.
 5. Bilder nach `bilder/` (überschreiben).
