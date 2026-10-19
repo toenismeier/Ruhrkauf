@@ -11,6 +11,7 @@ import { erzeugeVorstand, vorstandKostenWoche } from './vorstand';
 import { erzeugeProdukte } from './produkte';
 import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
+import { initialisiereWettbewerb } from './wettbewerb';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -187,7 +188,7 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   return {
     id,
     name: `${f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`,
-    stadt, region, cluster, lage, format: f, einzug, etagen,
+    stadt, region, cluster, lage, format: f, einzug, wettbewerbStart: einzug.wettbewerb, etagen,
     grundflaecheQm: grundflaeche,
     baujahr: (() => { const r = zwischen(h, 0, 1); return f === 'sport' ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008); })(),
     fassade: ganzZwischen(h, 0, 7),
@@ -278,6 +279,11 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
+    wettbewerber: [],
+    wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,
+    wettbewerbNaechsteId: 0,
+    wettbewerbNachnutzungen: [],
+    wettbewerbGeseheneSchliessungen: [],
     bestand,
     bestellungen: [],
     verbindlichkeiten: [],
@@ -327,6 +333,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Startkalender (Standardplan = Ausgangslage)
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
+  initialisiereWettbewerb(s);
   return s;
 }
 
