@@ -8,6 +8,7 @@ import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } fro
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
+import { STADT_GEOGRAFIE } from './stadt-geografie.js';
 
 export const ROT = '#d23c32';
 export const EG = 5.5, GH = 4.5;
@@ -15,7 +16,7 @@ export const FAMILIEN = { 1: 'Kaiserzeit', 2: 'Neue Sachlichkeit', 3: 'Nachkrieg
   8: 'Aluwabe', 9: 'Kachelraster Ost', 10: 'Glasvorhang 70er Ost', 11: 'Magistrale 50er' };
 
 /** Städte der ehemaligen DDR (Berlin nur teilweise, siehe istOstHaus). */
-export const DDR_STAEDTE = ['Berlin', 'Dresden', 'Leipzig', 'Magdeburg', 'Erfurt', 'Chemnitz', 'Halle', 'Potsdam', 'Cottbus', 'Jena', 'Zwickau', 'Görlitz', 'Dessau', 'Gera', 'Weimar', 'Rostock', 'Stralsund', 'Schwerin'];
+export const DDR_STAEDTE = Object.keys(STADT_GEOGRAFIE).filter((name) => STADT_GEOGRAFIE[name].ddr || ['Berlin', 'Rostock', 'Stralsund', 'Schwerin', 'Dresden', 'Leipzig', 'Magdeburg', 'Erfurt', 'Chemnitz', 'Halle', 'Potsdam', 'Cottbus', 'Jena', 'Zwickau', 'Görlitz', 'Dessau', 'Gera', 'Weimar'].includes(name));
 const anteil = (id, salz) => rng(`${id}/${salz}`)();
 /**
  * Ehemaliges DDR-Warenhaus? Nur Warenhäuser außerhalb von Centern (Grundfläche/Mall-Flügel bleiben unverändert).
