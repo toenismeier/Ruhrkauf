@@ -250,3 +250,6 @@ export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+
+// O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
+export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking } from './haus';
