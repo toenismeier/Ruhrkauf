@@ -15,6 +15,15 @@ export function einkaufStandard(s: GameState): void {
   fuehreAus(s, { typ: 'sammelfreigabe' });
 }
 
+/** Die beiden noch nicht simulierten Formate dürfen niemals im Sanierungsbot geschlossen werden. */
+function aktivesPortfolio(s: GameState) {
+  const ids = new Set(s.haeuser.filter((h) => !h.nurDaten).map((h) => h.id));
+  return portfolio(s).filter((x) => x.status === 'offen' && ids.has(x.id));
+}
+
+/** Schließungen als Quote des zu sanierenden Portfolios statt fixe Hauszahl. */
+export const TIEF_SCHLIESSUNGSQUOTE = 50 / 180;
+
 export function botWoche(s: GameState, log = false): void {
   const w = s.woche;
   const tu = (a: Parameters<typeof fuehreAus>[1]) => { const r = fuehreAus(s, a); if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`); return r; };
@@ -25,7 +34,7 @@ export function botWoche(s: GameState, log = false): void {
     tu({ typ: 'marketingBudget', quote: 0.02 });
   }
   if (w === 4) {
-    const p = portfolio(s).filter((x) => x.status === 'offen').sort((a, b) => a.db - b.db);
+    const p = aktivesPortfolio(s).sort((a, b) => a.db - b.db);
     for (const x of p.slice(0, 28)) tu({ typ: 'schliessen', haus: x.id });
     for (const x of p.filter((x) => x.mietquote > 0.14)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
   }
@@ -49,7 +58,7 @@ export function botSchutzschirm(s: GameState, log = false): void {
     tu({ typ: 'marketingBudget', quote: 0.02 });
     tu({ typ: 'insolvenzAntrag' });
     tu({ typ: 'zentrale', prozent: 0.25 });
-    const p = portfolio(s).filter((x) => x.status === 'offen').sort((a, b) => a.db - b.db);
+    const p = aktivesPortfolio(s).sort((a, b) => a.db - b.db);
     for (const x of p.slice(0, 30)) tu({ typ: 'schliessen', haus: x.id });
     for (const x of p.slice(30).filter((x) => x.mietquote > 0.13)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.2 });
     tu({ typ: 'insolvenzplanQuote', quote: 0.12 });
@@ -77,9 +86,10 @@ export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boole
     tu({ typ: 'marketingBudget', quote: 0.018 });
     tu({ typ: 'insolvenzAntrag' });
     if (zentralePauschal) tu({ typ: 'zentrale', prozent: 0.3 });
-    const p = portfolio(s).filter((x) => x.status === 'offen').sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
-    for (const x of p.slice(0, 50)) tu({ typ: 'schliessen', haus: x.id });
-    for (const x of p.slice(50).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.2 });
+    const p = aktivesPortfolio(s).sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
+    const schliessungen = Math.round(p.length * TIEF_SCHLIESSUNGSQUOTE);
+    for (const x of p.slice(0, schliessungen)) tu({ typ: 'schliessen', haus: x.id });
+    for (const x of p.slice(schliessungen).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.2 });
     for (const h of s.haeuser.filter((x) => x.status === 'offen' && x.kpi)) {
       const ist = h.kpi!.fteIst, bedarf = h.kpi!.fteBedarf;
       if (ist > bedarf * 1.02) tu({ typ: 'personalabbau', haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
@@ -113,7 +123,7 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     tu({ typ: 'marketingBudget', quote: 0.018 });
   }
   if (w === 4) {
-    const p = portfolio(s).filter((x) => x.status === 'offen').sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
+    const p = aktivesPortfolio(s).sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
     for (const x of p.slice(0, 35)) tu({ typ: 'schliessen', haus: x.id });
     for (const x of p.slice(35).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
     for (const h of s.haeuser.filter((x) => x.status === 'offen' && x.kpi)) {
