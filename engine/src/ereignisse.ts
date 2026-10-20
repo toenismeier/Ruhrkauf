@@ -7,6 +7,7 @@ import { loeseVorstandEntscheidung } from './vorstand';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
 import { premiumAngebote } from './premium';
+import { zeitungInterviewAntwort } from './zeitung';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
   return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
@@ -335,6 +336,7 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
   });
   s.entscheidungsprotokoll = s.entscheidungsprotokoll.filter((p) => s.woche - p.woche <= 52);
   if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
+  if (e.typ === 'interview') { zeitungInterviewAntwort(s, e, option); return null; }
   const d = e.daten;
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
   switch (e.typ) {
