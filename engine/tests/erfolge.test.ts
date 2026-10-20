@@ -30,6 +30,24 @@ describe('N03 Erfolge und Abzeichen', () => {
     expect(s.erfolgeVerlauf).toBeDefined();
   });
 
+  test('Doppelte Prüfung derselben Woche zählt Streaks nicht doppelt', () => {
+    const s = neuesSpiel(17);
+    wocheAbspielen(s);
+    const vor = structuredClone(s.erfolgeVerlauf);
+    expect(erfolgeWoche(s)).toEqual([]);
+    expect(s.erfolgeVerlauf).toEqual(vor);
+  });
+
+  test('Premium-Schutz muss 52 Wochen ununterbrochen aktiv sein', () => {
+    const s = neuesSpiel(18);
+    s.premiumSchuetzen = false;
+    for (let i = 0; i < 2; i++) wocheAbspielen(s);
+    expect(s.erfolgeVerlauf?.premiumGeschuetztWochen).toBe(0);
+    s.premiumSchuetzen = true;
+    wocheAbspielen(s);
+    expect(s.erfolgeVerlauf?.premiumGeschuetztWochen).toBe(1);
+  });
+
   test('Ausschalten und Prognosen verändern Erfolge nicht', () => {
     const s = neuesSpiel(10);
     s.erfolgeAktiv = false;
