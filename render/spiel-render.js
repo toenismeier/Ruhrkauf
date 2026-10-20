@@ -622,6 +622,7 @@ async function buendeln() {
     pruefe(w.bericht?.umsatz === w.soll.umsatzWoche && Number(w.aktuell) === w.soll.umsatzWoche, 'Umsatz entspricht Engine');
     pruefe(w.bericht?.ebitda === w.soll.ebitdaWoche && Number(w.ebitda) === w.soll.ebitdaWoche, 'EBITDA entspricht Engine');
     pruefe(!!w.zeitung?.includes('Der Handelsbote'), 'Zeitung vorhanden');
+    pruefe((w.bericht?.meldungstexte ?? []).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche');
     await p.screenshot({ path: path.join(ordnerWoche, '99-wochenbericht.png') });
     if (w.bericht?.vorgaenge > 0) {
       await p.waitForSelector('#wb-vorfall.offen .wb-vorfall');
