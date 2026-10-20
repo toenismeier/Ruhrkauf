@@ -1,4 +1,4 @@
-// Aufruf: node spiel-render.js [--bundle] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
+// Aufruf: node spiel-render.js [--bundle] [--nur-haus] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
 // Bündelt src/spiel.js (Engine-TS direkt aus /home/claude/turnaround/src) nach spiel-bundle.js. Mit --bundle nur bündeln.
 // Sonst headless im Hochformat 390 × 844: Woche 0, 26 und 52 mit Bot-Strategie C, dazu ein Bild mit offenem Hauspanel
 // (out/spiel-w00.png, out/spiel-w26.png, out/spiel-w52.png, out/spiel-haus.png, out/spiel-hq-w00.png, out/spiel-hq.png, out/spiel-essen.png, out/spiel-essen-hq.png, out/spiel-hq-abteilungen.png), Messwerte nach out/spiel-messung.json.
@@ -695,6 +695,52 @@ async function buendeln() {
       report.leistungswerte.length + ' Neubauten, ' + report.fehler.length + ' Abweichungen');
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
+  }
+  // O07 Haus: Oberfläche gegen echte Engine-Abfragen prüfen und alle sieben Reiter fotografieren.
+  async function hausPruefen() {
+    const fehler = [];
+    const reiter = ['ueberblick','leitung','personal','ware','partner','kosten','kommentare'];
+    const id = await p.evaluate(() => {
+      window.spiel.neuesSpiel(1, 'Essen');
+      return window.spiel.s.haeuser.find(h => h.stadt === 'Essen' && h.status === 'offen').id;
+    });
+    const check = await p.evaluate(id => window.spiel.pruefeHaus(id), id);
+    fehler.push(...check.fehler);
+    for (const r of reiter) {
+      const daten = await p.evaluate(({id,r}) => {
+        window.spiel.oeffneHausReiter(id,r);
+        const el = document.getElementById('pinhalt'), d = window.spiel.E.hausUebersicht(window.spiel.s,id);
+        const tab = [...el.querySelectorAll('.haus-reiter button')].find(q => q.classList.contains('an'));
+        return { aktiv: tab?.textContent, tabs: el.querySelectorAll('.haus-reiter button').length, text: el.textContent, d };
+      }, {id,r});
+      if (daten.tabs !== 7) fehler.push(r + ': 7 Reiter erwartet');
+      const title = {ueberblick:'Überblick',leitung:'Leitung',personal:'Personal',ware:'Ware',partner:'Fläche & Partner',kosten:'Kosten',kommentare:'Kommentare'}[r];
+      if (daten.aktiv !== title) fehler.push(r+': falscher aktiver Reiter ' + daten.aktiv);
+      if (r==='ueberblick' && !daten.text.includes(String(daten.d.kundenScore))) fehler.push('Kundenscore stimmt nicht');
+      if (r==='leitung' && !daten.text.includes(daten.d.leitungsdaten.name)) fehler.push('Name Hausleitung fehlt');
+      if (r==='kosten' && !daten.text.includes('Energie')) fehler.push('Kostenposten Energie fehlt');
+      if (r==='partner' && !daten.text.includes('Gastronomie')) fehler.push('Gastronomie fehlt');
+      await bild('haus-o07-'+r+'.png');
+    }
+    const score = await p.evaluate(id => {
+      const e=window.spiel.E,s=window.spiel.s,vor=e.hausKundenscore(s,s.haeuser.find(h=>h.id===id));
+      const erg=e.fuehreAus(s,{typ:'hausKostenSetzen',haus:id,posten:'reinigung',faktor:0.6});
+      const nach=e.hausKundenscore(s,s.haeuser.find(h=>h.id===id));
+      return {vor,nach,erg};
+    },id);
+    if(!score.erg.ok || score.nach >= score.vor) fehler.push('Reinigungskürzung ohne Kundenscore-Absenkung');
+    await p.evaluate(() => window.spiel.oeffneBeobachtung());
+    await bild('haus-o07-beobachtung.png');
+    await p.evaluate(() => window.spiel.oeffneHausReporting());
+    await bild('haus-o07-reporting.png');
+    const bericht = { id, pruefung:check, reinigen:score, reiter, fehler };
+    fs.writeFileSync(path.join(__dirname,'out','haus-o07-pruefung.json'),JSON.stringify(bericht,null,2));
+    if(fehler.length) throw Error('O07 Hausfehler: '+fehler.join('; '));
+    return bericht;
+  }
+  if (process.argv.includes('--nur-haus')) {
+    try { await hausPruefen(); } finally { await b.close(); }
+    return;
   }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
