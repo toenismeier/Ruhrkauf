@@ -51,10 +51,11 @@ export type PersonalAktion =
   | { typ: 'personalSamstagKasse'; haus?: string; hauscluster?: string; faktor: number }
   | { typ: 'personalAushilfen'; haus?: string; hauscluster?: string; quote: number }
   | { typ: 'personalSpringer'; hauscluster: string; an: boolean }
-  | { typ: 'personalWeiterbildung'; hauscluster?: string; stufe: number };
+  | { typ: 'personalWeiterbildung'; hauscluster?: string; stufe: number }
+  | { typ: 'personalWeihnachtenNachbuchen'; hauscluster?: string; quote: number };
 export const PERSONAL_AKTIONEN = new Set<string>([
   'personalSteuern', 'personalSamstagKasse', 'personalAushilfen',
-  'personalSpringer', 'personalWeiterbildung',
+  'personalSpringer', 'personalWeiterbildung', 'personalWeihnachtenNachbuchen',
 ]);
 export interface PersonalCluster {
   id: string; name: string; haeuser: {
@@ -153,8 +154,6 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
       let plan = bedarf * relativ * st.faktor[g] * genau * (1 + st.training * 0.035);
       if (g === 'kasse' && i === 5) plan *= st.samstagKasse;
       if (g === 'kasse' && dezember && weihnachten === 'sparsam') plan *= 0.88;
-      if (g === 'kasse' && dezember && weihnachten === 'spaet') plan *= 0.78;
-      if (g === 'verkauf' && dezember && weihnachten === 'spaet') plan *= 0.86;
       const referenz = bedarf * bezug;
       extra += Math.max(0, (st.faktor[g] - 1) * bedarf) + (g === 'kasse' && i === 5 ? Math.max(0, st.samstagKasse - 1) * bedarf : 0);
       return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf), plan: rund(plan), referenz: rund(referenz), springer: 0, deckung: bedarf ? plan / bedarf : 1 };
@@ -168,7 +167,9 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
   const ahQuote = st.aushilfenQuote;
   const gesamt = Object.values(gruppen).reduce((a, g) => a + g.bedarf, 0);
   const weihnachtsReserve = dezember && weihnachten === 'reserve' ? gesamt * 0.02 : 0;
-  const aushilfenStunden = gesamt * ahQuote;
+  const gebuchteAushilfenStunden = gesamt * ahQuote;
+  // Nachbuchung ab KW 44: 35 % der angefragten Stunden können nicht besetzt werden.
+  const aushilfenStunden = gebuchteAushilfenStunden * (dezember && weihnachten === 'spaet' ? 0.65 : 1);
   // Bei früh gebuchter Weihnachtsreserve sind zusätzliche Schichten tatsächlich besetzt.
   if (weihnachtsReserve > 0) {
     gruppen.verkauf.tage[5].plan += rund(weihnachtsReserve * 0.6);
@@ -185,7 +186,7 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
   const basisStunden = Math.max(1, st.basisFte * 40);
   const normalLohn = (h.personal.vollzeit * 860 + h.personal.teilzeit * 690 + h.personal.aushilfen * 490) / basisStunden;
   const aufschlag = dezember && weihnachten === 'spaet' ? 1.55 : 1;
-  const zusatzkosten = eur(aushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 +
+  const zusatzkosten = eur(gebuchteAushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 +
     weihnachtsReserve * 490 / 40);
   const plan: PersonalPlan = { woche: s.woche, gruppen, krank: aus.krank, urlaub: aus.urlaub,
     aushilfenStunden: rund(aushilfenStunden), zusatzkosten, verfuegbarkeit: 1,
@@ -403,6 +404,18 @@ export function personalAktion(s: GameState, a: PersonalAktion): { ok: boolean; 
     s.personaleinsatz!.springer[a.hauscluster] = a.an;
     neuPlanen(s);
     return { ok: true, text: 'Springerpool ' + (a.an ? 'aktiviert.' : 'deaktiviert.') };
+  }
+  if (a.typ === 'personalWeihnachtenNachbuchen') {
+    const kw = s.woche % 52;
+    if (kw < 43 || kw > 51) return { ok: false, text: 'Weihnachts-Nachbuchungen sind erst ab KW 44 möglich.' };
+    if (!Number.isFinite(a.quote) || a.quote < 0.05 || a.quote > 0.3)
+      return { ok: false, text: 'Aushilfenquote muss zwischen 5 % und 30 % liegen.' };
+    const hs = a.hauscluster ? auswahl(s, { hauscluster: a.hauscluster }) : s.haeuser.filter(aktiv);
+    if (!hs.length) return { ok: false, text: 'Keine Häuser ausgewählt.' };
+    s.personaleinsatz!.weihnachten[Math.floor(s.woche / 52)] = 'spaet';
+    for (const h of hs) h.personaleinsatz!.aushilfenQuote = Math.max(h.personaleinsatz!.aushilfenQuote, a.quote);
+    neuPlanen(s);
+    return { ok: true, text: 'Weihnachts-Aushilfen nachgebucht: 55 % Preisaufschlag, 35 % der Stunden nicht verfügbar.' };
   }
   if (a.typ === 'personalWeiterbildung') {
     if (!Number.isFinite(a.stufe) || a.stufe < 0 || a.stufe > 3) return { ok: false, text: 'Stufe 0 bis 3 wählen.' };
