@@ -137,7 +137,7 @@ function artikelAusMix(h: Haus, umsatz: number): number {
 }
 /** Wird genau einmal nach der Buchung der Haus-KPI pro Woche aufgerufen. */
 export function erfasseTreiber(s: GameState): void {
-  if (s.prognose) return;
+  if (s.prognose || s.treiberErfassungAus) return;
   for (const h of s.haeuser) {
     const umsatz = h.kpi?.woche === s.woche ? h.kpi.umsatz : 0;
     const f = treiberFaktor(h);
