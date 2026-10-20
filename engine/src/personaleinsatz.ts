@@ -63,7 +63,13 @@ export interface PersonalCluster {
 const fte = (h: Haus): number => h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
 const aktiv = (h: Haus): boolean => h.status === 'offen' || h.status === 'raeumung' || h.status === 'schliessung_verhandlung';
 const rund = (n: number) => Math.round(n * 10) / 10;
-const gruppeHauscluster = (h: Haus): string => h.hauscluster || 'region-' + h.region;
+const gruppeHauscluster = (h: Haus, s: GameState): string => {
+  // O01: Premiumhäuser und vom Spieler gewählte Flagships gehören zum Sondercluster.
+  const org = s as GameState & { organisation?: { flagships: string[] } };
+  if (org.organisation && (h.klasse === 'premium' || org.organisation.flagships.includes(h.id)))
+    return 'premium-flagships';
+  return h.hauscluster || 'region-' + h.region;
+};
 function clusterName(s: GameState, id: string): string {
   const org = s as GameState & { organisation?: { hauscluster: { id: string; name: string }[] } };
   return org.organisation?.hauscluster.find((x) => x.id === id)?.name ?? id.replace('region-', '');
@@ -194,7 +200,7 @@ function neuPlanen(s: GameState): void {
   for (const h of s.haeuser) {
     if (!aktiv(h) || !h.personaleinsatz) continue;
     h.personaleinsatz.plan = dienstplan(s, h);
-    const id = gruppeHauscluster(h);
+    const id = gruppeHauscluster(h, s);
     if (!gruppen.has(id)) gruppen.set(id, []);
     gruppen.get(id)!.push(h);
   }
@@ -309,7 +315,7 @@ export function personaleinsatzWoche(s: GameState): void {
 function gruppiereCluster(s: GameState): Map<string, Haus[]> {
   const m = new Map<string, Haus[]>();
   for (const h of s.haeuser) if (aktiv(h)) {
-    const id = gruppeHauscluster(h);
+    const id = gruppeHauscluster(h, s);
     if (!m.has(id)) m.set(id, []);
     m.get(id)!.push(h);
   }
@@ -355,7 +361,7 @@ export function personalVerfuegbarkeit(h: Haus): number {
 }
 function auswahl(s: GameState, a: { haus?: string; hauscluster?: string }): Haus[] {
   if (a.haus) return s.haeuser.filter((h) => h.id === a.haus && aktiv(h));
-  if (a.hauscluster) return s.haeuser.filter((h) => gruppeHauscluster(h) === a.hauscluster && aktiv(h));
+  if (a.hauscluster) return s.haeuser.filter((h) => gruppeHauscluster(h, s) === a.hauscluster && aktiv(h));
   return [];
 }
 export function personalAktion(s: GameState, a: PersonalAktion): { ok: boolean; text: string } {
