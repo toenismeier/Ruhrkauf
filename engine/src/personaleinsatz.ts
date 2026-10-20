@@ -67,8 +67,8 @@ const aktiv = (h: Haus): boolean => h.status === 'offen' || h.status === 'raeumu
 const rund = (n: number) => Math.round(n * 10) / 10;
 const gruppeHauscluster = (h: Haus, s: GameState): string => {
   // O01: Premiumhäuser und vom Spieler gewählte Flagships gehören zum Sondercluster.
-  const org = s as GameState & { organisation?: { flagships: string[] } };
-  if (org.organisation && (h.klasse === 'premium' || org.organisation.flagships.includes(h.id)))
+  const org = s as GameState & { organisation?: { flagships?: string[] } };
+  if (org.organisation && (h.klasse === 'premium' || org.organisation.flagships?.includes(h.id)))
     return 'premium-flagships';
   return h.hauscluster || 'region-' + h.region;
 };
