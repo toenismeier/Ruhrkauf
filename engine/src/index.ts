@@ -46,3 +46,7 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+// O08 Umbau – zentraler Export für Spiel und Tests.
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
+export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from './umbau';
