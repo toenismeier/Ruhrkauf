@@ -15,7 +15,8 @@ describe('N01 Statistik ohne Wirtschaftseffekt', () => {
       expect(mit.phase).toBe(ohne.phase);
     }
     expect(ohne.haeuser.every(h => !h.verlauf)).toBe(true);
-    const h = mit.haeuser[0];
+    const h = mit.haeuser.find(h => h.status === 'offen' && h.kpi && h.verlauf?.length)!;
+    expect(h).toBeDefined();
     expect(h.verlauf!.length).toBeLessThanOrEqual(156);
     expect(h.verlauf!.length).toBeGreaterThanOrEqual(52);
     if (mit.statistik?.sparsam) {
