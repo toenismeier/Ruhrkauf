@@ -212,10 +212,10 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.kreditFrei = eur(s.cash + s.kreditlinie);
   k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
   s.historie.push(k);
-  statistikWoche(s, k);
   if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
 
   if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
+  statistikWoche(s, k);
   // Einmaleffekte, die ab jetzt anfallen (Aktionen des Spielers), zählen zur nächsten Woche
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
