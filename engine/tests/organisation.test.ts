@@ -73,11 +73,16 @@ describe('O01 Organisation', () => {
     expect(einzeln.filter((e)=>e.titel.includes('ohne CPO'))).toHaveLength(einkaufsbereiche.length);
     s.vorstand.ressorts.cpo.person=vorher; // Wiederbesetzung isoliert von Angebotswahrscheinlichkeit prüfen
     wocheAbspielen(s);
-    expect(s.entscheidungen.some((e)=>e.typ==='organisation_vorlage'&&e.titel.includes('CPO: Vorlagen gebündelt'))).toBe(true);
-    const vorlage=einzeln[0];
-    for(let i=0;i<4;i++)wocheAbspielen(s);
-    expect(s.entscheidungen.find((e)=>e.id===vorlage.id)).toBeUndefined();
-    expect(s.entscheidungsprotokoll?.some((e)=>e.id===vorlage.id&&e.standard)).toBe(true);
+    expect(s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.titel.includes('CPO: Vorlagen gebündelt'))).toHaveLength(1);
+    expect(s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.titel.includes('ohne CPO'))).toHaveLength(0);
+
+    const ablauf=neuesSpiel(4);
+    expect(fuehreAus(ablauf,{typ:'vorstandEntlassen',ressort:'cpo'}).ok).toBe(true);
+    wocheAbspielen(ablauf);
+    const vorlage=ablauf.entscheidungen.find((e)=>e.typ==='organisation_vorlage'&&e.titel.includes('ohne CPO'))!;
+    for(let i=0;i<4;i++)wocheAbspielen(ablauf);
+    expect(ablauf.entscheidungen.find((e)=>e.id===vorlage.id)).toBeUndefined();
+    expect(ablauf.entscheidungsprotokoll?.some((e)=>e.id===vorlage.id&&e.standard)).toBe(true);
   });
 
   test('Bestehende Vorstandsdelegationen bleiben in allen Ressorts kompatibel', () => {

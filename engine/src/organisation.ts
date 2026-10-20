@@ -347,8 +347,15 @@ export function organisationWoche(s: GameState): void {
       for (const b of betroffene) neueVorlage(s, { bereich:b.id, titel:b.name + ': Entscheidung ohne ' + r.toUpperCase(),
         text:'Die Bereichsleitung legt ihren Personal- und Kapazitätsvorschlag direkt dem CEO vor.',frist:3 });
     } else {
+      // Beim Rückkehr des Vorstands werden offene Einzelvorlagen der Vakanz gebündelt.
+      const einzelfrist = ': Entscheidung ohne ' + r.toUpperCase();
+      const zuvor = s.entscheidungen.length;
+      s.entscheidungen = s.entscheidungen.filter((e) =>
+        !(e.typ === 'organisation_vorlage' && e.titel.endsWith(einzelfrist)));
+      const gebuendelt = zuvor - s.entscheidungen.length;
       neueVorlage(s, { bereich:betroffene[0]?.id, titel:r.toUpperCase() + ': Vorlagen gebündelt',
-        text:betroffene.length + ' Bereiche berichten wieder an den Ressortvorstand.',grundsaetzlich:true,frist:3 });
+        text:betroffene.length + ' Bereiche berichten wieder an den Ressortvorstand; ' +
+          gebuendelt + ' Einzelvorlagen übernommen.',grundsaetzlich:true,frist:3 });
     }
   }
 }
