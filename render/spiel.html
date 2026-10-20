@@ -44,7 +44,7 @@
   .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
   #postdirekt { min-width: 46px; position: relative; font-size: 21px; padding: 0 9px; }
   #postbadge.dringend, #postmenubadge.dringend { background: #a92120; }
-  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: 12px; right: 12px; z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
+  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
   #wochenstreifen.an { display: block; }
   body.panel-offen #wochenstreifen { display: none; }
   .postkarte .postkopf { padding: 12px 12px 6px; }
@@ -84,7 +84,7 @@
   .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: 14px; color: var(--text); }
   #weiter { background: var(--rot); color: #fff; }
   #weiter:disabled { opacity: 0.6; }
-  .botwahl { position: fixed; right: 12px; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: 11px; color: var(--leise); display: flex; gap: 5px; align-items: center; }
+  .botwahl { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: 11px; color: var(--leise); display: flex; gap: 5px; align-items: center; }
   #panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; background: var(--grund); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); transform: translateY(105%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
   #panel.offen { transform: none; }
   .pkopf { padding: 8px 16px 10px; background: var(--karte); border-radius: 22px 22px 0 0; border-bottom: 1px solid var(--linie); position: relative; }
