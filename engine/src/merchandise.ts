@@ -40,6 +40,8 @@ export interface WareStand {
   inventur: Record<string, { woche: number; differenz: number; quote: number }>;
   letzterInventurverlust: number;
   inventurAufwandWoche?: number;
+  /** Saisonale Reduzierungsstufen: nach Abverkauf und bestehendem WG-Mix. */
+  saisonAbschlag?: Partial<Record<GruppeId, number>>;
   /** O01-Leitungsqualität auf den Startwert normiert. */
   allokationStart?: number;
 }
@@ -144,6 +146,7 @@ export function initialisiereWare(s: GameState): void {
     fundusFremd: 60_000_000, inventur: {}, letzterInventurverlust: 0,
     allokationStart: bereichsQualitaet(s, 'allokation'),
     inventurAufwandWoche: 0,
+    saisonAbschlag: {},
   };
   verteileZugang(s);
 }
@@ -152,6 +155,8 @@ export function wareWoche(s: GameState): void {
   if (!s.ware) initialisiereWare(s); // alte Speicherstände
   const w = s.ware!;
   w.inventurAufwandWoche = 0;
+  // O05: kalendergeführte Stufen, einmal je Woche für alle Hauscluster vorbereiten.
+  w.saisonAbschlag = saisonabschlag(s);
   for (const t of w.umlagerungen.filter(t => t.ankunft <= s.woche)) {
     s.bestand.push(...t.kohorten.map(k => ({ ...k, hauscluster: t.nach })));
   }
@@ -282,11 +287,33 @@ export function reduzierungGesperrt(s: GameState, gruppe: GruppeId, cluster: str
   const x = s.ware?.zentral ?? {};
   return !!(x['*|*'] || x[`${gruppe}|*`] || x[`*|${cluster}`] || x[`${gruppe}|${cluster}`]);
 }
+/** Saisonstufen je WG nach Abverkaufsquote, bereits auf die saisonale Eigenware gewichtet. */
+function saisonabschlag(s: GameState): Partial<Record<GruppeId, number>> {
+  const ergebnis: Partial<Record<GruppeId, number>> = {};
+  const sid = saisonId(s.woche);
+  const q = bereichsQualitaet(s, 'preis_reduzierung');
+  for (const d of WG_DEF) {
+    const st = s.einkauf.wgs[d.id];
+    if (!st) continue;
+    const lauf = st.saisons[String(sid)];
+    const quote = lauf ? lauf.abverkauf / Math.max(1, lauf.eingang) : 0;
+    const stufe = quote < 0.35 ? 0 : quote < 0.55 ? 0.2 :
+      quote < 0.75 ? 0.3 : quote < 0.9 ? 0.5 : 0.7;
+    const takt = clamp(0.75 + q * 0.25, 0.75, 1);
+    const altQuote = d.anteil * (1 - st.nosAnteil);
+    ergebnis[d.bereich] = (ergebnis[d.bereich] ?? 0) + stufe * altQuote * takt;
+  }
+  return ergebnis;
+}
+/** Ein Kalender wirkt nur dort, wo zentral durchgesetzt oder lokal nachreduziert wird.
+ * Ohne Spieler-/Leitungsentscheidung bleibt der kalibrierte Einkaufspreis unverändert. */
 export function preisFaktorHaus(s: GameState, h: Haus, g: GruppeId): number {
   const hc = hausclusterId(h);
-  if (reduzierungGesperrt(s, g, hc)) return 1;
-  const pp = s.ware?.lokal[`${g}|${hc}`] ?? 0;
-  return 1 - pp * 0.25; // lokale zusätzliche Nachlässe betreffen nur den reduzierten Altware-Teil
+  const gesperrt = reduzierungGesperrt(s, g, hc);
+  const pp = gesperrt ? 0 : (s.ware?.lokal[`${g}|${hc}`] ?? 0);
+  if (!gesperrt && pp <= 0) return 1;
+  const saison = s.ware?.saisonAbschlag?.[g] ?? 0;
+  return clamp(1 - saison * 0.08 - pp * 0.25, 0.85, 1);
 }
 export function fundusFrequenzFaktor(s: GameState): number {
   const w = s.ware;
