@@ -328,7 +328,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       return ok(a.erlaubt ? 'Ware wird bei Bedarf gegen Vorkasse bezogen.' : 'Keine Vorkasse: Lieferungen über dem Limit entfallen.');
 
     case 'mieteVerhandeln': {
-      const h = haus(s, a.haus);
+      const h = haus(s, a.haus ?? '');
       if (!h || h.status !== 'offen') return fehler('Haus nicht offen.');
       if (h.miete.verhandeltWoche !== undefined && w - h.miete.verhandeltWoche < 26) return fehler('Mit diesem Vermieter wurde vor weniger als 26 Wochen verhandelt.');
       h.miete.verhandeltWoche = w;
