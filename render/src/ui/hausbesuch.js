@@ -2,6 +2,9 @@
 // Der Schalter kann nach Einbau von N13 über setzenAktiv() angebunden werden.
 import { THREE, Sammler, neueSzene, isoKamera, rng, sonneAuf } from '../kit/basis.js';
 import { etage } from '../kit/grundriss.js';
+import { masseOutlet } from '../kit/outlet.js';
+import { ladenplan, baueLadenplan } from '../kit/ladenplan.js';
+import fundusHaeuser from '../../haeuser-outlet.json';
 import { karteSteuerung } from './karte.js';
 import { esc } from './format.js';
 import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
@@ -57,11 +60,11 @@ export function hausbesuchBesatz(haus, etageNr) {
   const gesamt = Math.max(1, (haus.flaechen ?? []).filter((f) => f.konzept !== 'leer').reduce((n, f) => n + f.qm, 0));
   const k = haus.kpi ?? {};
   const ist = Math.max(0, k.fteIst ?? ((haus.personal?.vollzeit ?? 0) + (haus.personal?.teilzeit ?? 0) + (haus.personal?.aushilfen ?? 0)));
-  const fte = ist * qm / gesamt;
+  const fte = haus.format === 'outlet' ? Math.round(qm / 140) : ist * qm / gesamt;
   const umsatz = Math.max(0, Object.entries(k.umsatzJeGruppe ?? {}).reduce((n, [g, u]) => n + u * (fl.some((f) => f.gruppe === g) ? 1 : 0), 0));
   return {
     kunden: fl.length ? begrenze(Math.round(2 + umsatz / 18000 + qm / 240), 2, 36) : 0,
-    verkauf: fl.length ? begrenze(Math.round(fte / 9), 0, 12) : 0,
+    verkauf: fl.length ? begrenze(Math.round(haus.format === 'outlet' ? qm / 300 : fte / 9), haus.format === 'outlet' ? 1 : 0, 12) : 0,
     fte: Math.round(fte * 10) / 10,
     personalquote: (k.fteBedarf ?? 0) > 0 ? ist / k.fteBedarf : 1
   };
@@ -81,7 +84,7 @@ function stilEinbauen(wurzel) {
   css.textContent = [
     '.hb{position:fixed;inset:0;z-index:30;background:#26313a;color:#fff;display:flex;flex-direction:column;font-family:system-ui,sans-serif;}',
     '.hb[hidden]{display:none!important}.hb header{height:65px;padding:calc(9px + env(safe-area-inset-top)) 12px 8px;box-sizing:content-box;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#18242c;z-index:2;}',
-    '.hb header strong{font-size:15px}.hb small{display:block;opacity:.7;font-size:11px}.hb button{font:inherit;cursor:pointer;min-height:44px;border:0;border-radius:9px;background:#ebebe5;color:#17232a;padding:7px 11px;}',
+    '.hb header strong{font-size:15px}.hb small{display:block;opacity:.7;font-size:11px}.hb select{display:block;max-width:210px;background:#f4f4f0;color:#19262c;border-radius:6px;margin-top:5px;padding:5px;}.hb button{font:inherit;cursor:pointer;min-height:44px;border:0;border-radius:9px;background:#ebebe5;color:#17232a;padding:7px 11px;}',
     '.hb .hb-bild{flex:1;position:relative;min-height:0;touch-action:none;}.hb canvas{width:100%;height:100%;display:block;touch-action:none;}',
     '.hb .hb-etagen{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:7px;z-index:2;}',
     '.hb .hb-etagen button{min-width:51px;box-shadow:0 2px 7px #17232a70}.hb .hb-etagen button[aria-pressed=true]{background:#c33e35;color:#fff;}',
@@ -111,11 +114,12 @@ export function hausbesuchModul(ctx) {
     host = document.createElement('div'); host.className = 'hb'; host.hidden = true;
     host.setAttribute('role', 'dialog'); host.setAttribute('aria-modal', 'true'); host.setAttribute('aria-label', 'Hausbesuch');
     stilEinbauen(host);
-    host.insertAdjacentHTML('beforeend', '<header><div><strong class="hb-titel">Hausbesuch</strong><small class="hb-unter"></small></div><button type="button" data-hb="zu">Schließen ×</button></header>' +
+    host.insertAdjacentHTML('beforeend', '<header><div><strong class="hb-titel">Hausbesuch</strong><select class="hb-hauswahl" aria-label="Filiale auswählen"></select><small class="hb-unter"></small></div><button type="button" data-hb="zu">Schließen ×</button></header>' +
       '<div class="hb-bild"><canvas aria-label="Interaktiver Etagenrundgang"></canvas><nav class="hb-etagen" aria-label="Etagen"></nav><div class="hb-blase" aria-live="polite" hidden></div></div>' +
       '<footer><button type="button" class="hb-info" data-hb="leitung">Filialleitung</button><span class="hb-hinweis">Wischen: bewegen · Zwei Finger: zoomen · Tippen: sprechen oder einkaufen</span></footer>');
     document.body.append(host);
     bild = host.querySelector('.hb-bild'); canvas = host.querySelector('canvas');
+    host.querySelector('.hb-hauswahl').addEventListener('change', (e) => oeffne(e.target.value));
     host.addEventListener('click', (e) => {
       const action = e.target.closest('[data-hb]');
       if (action?.dataset.hb === 'zu') return schliesse();
@@ -199,12 +203,24 @@ export function hausbesuchModul(ctx) {
   }
   function bauen(etageNr, delta = 0) {
     const s = ctx.s(); const frisch = s.haeuser.find((h) => h.id === haus.id);
+    buehne = null;
     if (frisch) haus = frisch;
     sceneLeeren();
     scene = neueSzene('#26313a');
     const S = new Sammler();
-    const grafikHaus = { ...haus, flaechen: haus.flaechen };
-    buehne = etage(S, scene, grafikHaus, etageNr, { kunden: 0, dichte: 0.42, budget: 14500 });
+    if (haus.format === 'outlet') {
+      const m = masseOutlet(haus), flaechen = haus.flaechen.filter((f) => f.etage === etageNr && f.qm >= 10);
+      if (flaechen.length) {
+        const plan = ladenplan({ breite: m.bw, tiefe: m.bd }, 'outlet', flaechen, haus.id + ':' + etageNr);
+        S.quader(0, -0.3, 0, m.bw, 0, m.bd, '#e7e6e1');
+        baueLadenplan(S, scene, plan, { dichte: 0.42 });
+        buehne = { box: new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan.abteilungen, anzahl: S.anzahl };
+      }
+    }
+    if (!buehne) {
+      const grafikHaus = { ...haus, flaechen: haus.flaechen };
+      buehne = etage(S, scene, grafikHaus, etageNr, { kunden: 0, dichte: 0.42, budget: 14500 });
+    }
     S.bauen(scene);
     const bbox = buehne.box;
     sonneAuf(scene, bbox.getCenter(new THREE.Vector3()), Math.max(30, bbox.getSize(new THREE.Vector3()).length()));
@@ -215,7 +231,7 @@ export function hausbesuchModul(ctx) {
     K.x = buehne.breite / 2; K.z = buehne.tiefe / 2;
     K.max = Math.max(20, Math.max(buehne.breite, buehne.tiefe) * 1.25);
     K.min = 7; K.halb = Math.min(K.max, Math.max(16, Math.max(buehne.breite, buehne.tiefe) * 0.8));
-    host.querySelector('.hb-unter').textContent = etageName(etageNr) + ' · ' + besatz.kunden + ' Kunden · ' + besatz.verkauf + ' Beschäftigte · ' + besatz.fte + ' FTE';
+    host.querySelector('.hb-unter').textContent = etageName(etageNr) + ' · ' + besatz.kunden + ' Kunden · ' + besatz.verkauf + ' Beschäftigte' + (haus.format === 'outlet' ? ' · Modellbetrieb' : ' · ' + besatz.fte + ' FTE');
     host.querySelector('.hb-blase').hidden = true;
     host.querySelectorAll('[data-hb=etage]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.nr) === etageNr)));
     fahrt = delta ? { seit: performance.now(), start: delta > 0 ? -8 : 8, dauer: 300 } : null;
@@ -243,9 +259,9 @@ export function hausbesuchModul(ctx) {
   function abteilungSprechen(z, person) {
     const s = ctx.s(), daten = ctx.E.einkaufUebersicht(s).bereiche.find((b) => b.bereich === z.gruppe);
     const k = daten?.kennzahlen ?? {}, besatz = hausbesuchBesatz(haus, nr);
-    const lage = hausbesuchLage(k, besatz.personalquote);
+    const lage = haus.format === 'outlet' ? 'gut' : hausbesuchLage(k, besatz.personalquote);
     sprechblase(person?.personal ? 'Verkauf' : 'Kundschaft', hausbesuchSpruch(s.woche, z.gruppe ?? z.id, lage, person?.index ?? 0),
-      daten?.wgs?.length ? '<button type="button" data-hb="einkauf" data-wg="' + sicher(daten.wgs[0].id) + '">Zum Einkauf: ' + sicher(daten.wgs[0].name) + ' →</button>' : '');
+      haus.format !== 'outlet' && daten?.wgs?.length ? '<button type="button" data-hb="einkauf" data-wg="' + sicher(daten.wgs[0].id) + '">Zum Einkauf: ' + sicher(daten.wgs[0].name) + ' →</button>' : '');
   }
   function antippen(e) {
     if (!haus || !cam) return;
@@ -274,7 +290,11 @@ export function hausbesuchModul(ctx) {
     const name = chef?.name ?? 'Filialleitung';
     const quotient = (k.fteBedarf ?? 0) > 0 ? (k.fteIst ?? 0) / k.fteBedarf : 1;
     const q = k.db ?? 0;
-    const saetze = [
+    const saetze = haus.format === 'outlet' ? [
+      'FUNDUS wird hier als eigenständiger grafischer Standort gezeigt.',
+      'Dafür liegen noch keine Kennzahlen der Wirtschafts-Engine vor.',
+      'Die Filialleitung ist deshalb eine Modellfigur.'
+    ] : [
       q < 0 ? 'Unser Haus liegt beim Deckungsbeitrag unter Plan.' : 'Der Deckungsbeitrag ist derzeit positiv.',
       quotient < 0.9 ? 'Uns fehlen in dieser Woche Kräfte auf der Fläche.' : 'Unsere Personalbesetzung ist weitgehend gesichert.',
       (haus.substanz ?? 100) < 45 ? 'Wir müssen dringend in die Substanz investieren.' : (chef?.moral ?? 50) < 40 ? 'Die Stimmung im Team verlangt Aufmerksamkeit.' : 'Das Team hält den Betrieb stabil.'
@@ -289,12 +309,14 @@ export function hausbesuchModul(ctx) {
   function oeffne(id) {
     if (!aktiv) return false;
     const s = ctx.s(); if (!s) return false;
-    const h = s.haeuser.find((q) => q.id === id);
+    const h = s.haeuser.find((q) => q.id === id) ?? fundusHaeuser.find((q) => q.id === id && q.stadt === ctx.stadtName());
     if (!h || !h.etagen.length || h.status === 'verkauft') return false;
     if (haus) schliesse();
     anlegen(); haus = h;
     const angebot = h.etagen.includes(0) ? 0 : h.etagen[0]; nr = angebot;
     host.querySelector('.hb-titel').textContent = h.name + ' · Hausbesuch';
+    const kandidaten = [...s.haeuser.filter((q) => q.stadt === ctx.stadtName() && q.status !== 'verkauft'), ...fundusHaeuser.filter((q) => q.stadt === ctx.stadtName())];
+    host.querySelector('.hb-hauswahl').innerHTML = kandidaten.map((q) => '<option value="' + sicher(q.id) + '"' + (q.id === h.id ? ' selected' : '') + '>' + sicher(q.name) + '</option>').join('');
     host.querySelector('.hb-etagen').innerHTML = [...h.etagen].sort((a, b) => a - b).map((n) =>
       '<button type="button" data-hb="etage" data-nr="' + n + '" aria-pressed="' + (n === nr) + '">' + etageName(n) + '</button>').join('');
     host.hidden = false;
