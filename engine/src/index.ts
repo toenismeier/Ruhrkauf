@@ -1,4 +1,7 @@
 export * from './types';
+// O06 Planung
+export { planungBericht, planJahr, planWoche, planBudgetFaktor, forecastVertrauensDelta } from './planung';
+export type { PlanungStand, Jahresplan, PlanZiele, PlanKnoten, PlanungAktion, Quartalsforecast } from './planung';
 export { neuesSpiel, wocheAbspielen, vorschau, type VorschauWoche } from './engine';
 export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
 export { posteingang, cockpit, portfolio, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
