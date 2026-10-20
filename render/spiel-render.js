@@ -576,15 +576,18 @@ async function buendeln() {
     const ankunft = p.locator('[data-reiseziel="Düsseldorf"]');
     await ankunft.click();
     if (animationen) {
+      const rasterStart = Date.now();
       for (let ms = 0; ms <= 4900; ms += 100) {
+        await p.waitForTimeout(Math.max(0, rasterStart + ms - Date.now()));
         await p.screenshot({ path: path.join(ordnerReise, String(ms).padStart(5, '0') + '.png') });
-        await p.waitForTimeout(100);
       }
     }
     await p.waitForFunction(() => window.spiel.reise.pruefe().stadt === 'Düsseldorf' && !window.spiel.reise.pruefe().aktiv, null, { timeout: 30000 });
     const r = await p.evaluate(() => ({ ...window.spiel.reise.pruefe(), ort: window.spiel.bahnhofBildpunkt(),
       stadt: document.getElementById('stadtname').textContent }));
     zeiten.reise = r.schritte;
+    if (animationen) { const fertig = r.schritte.find((x) => x.schritt === 'Reise abgeschlossen');
+      pruefe(!!fertig && Math.abs(fertig.reiseMs - 4950) <= 495, 'Reisedauer 4.950 ms ±10 %'); }
     pruefe(r.stadt === 'Düsseldorf', 'Reiseziel und Stadtchip sind Düsseldorf');
     pruefe(!!r.ort && r.ort.x >= 0 && r.ort.x <= 390 && r.ort.y >= 0 && r.ort.y <= 844, 'Zielbahnhof im sichtbaren Kamerabereich');
     await p.screenshot({ path: path.join(ordnerReise, '99-angekommen.png') });
@@ -607,9 +610,10 @@ async function buendeln() {
     await p.screenshot({ path: path.join(ordnerWoche, '00-bestaetigung.png') });
     await p.locator('[data-wa="ja"]').click();
     if (animationen) {
+      const rasterStart = Date.now();
       for (let ms = 0; ms <= 12900; ms += 100) {
+        await p.waitForTimeout(Math.max(0, rasterStart + ms - Date.now()));
         await p.screenshot({ path: path.join(ordnerWoche, String(ms).padStart(5, '0') + '.png') });
-        await p.waitForTimeout(100);
       }
     }
     await p.waitForFunction(() => ['bericht', 'vorfall'].includes(window.spiel.wochenbericht.status), null, { timeout: 30000 });
@@ -619,6 +623,8 @@ async function buendeln() {
       ebitda: document.getElementById('wb-ebitda')?.dataset.wert,
       zeitung: document.querySelector('.wb-zeitung')?.textContent }));
     zeiten.wochenbericht = w.zeiten;
+    if (animationen) { const fertig = w.zeiten.find((x) => x.ereignis === 'Zählung beendet');
+      pruefe(!!fertig && Math.abs(fertig.jaMs - 11860) <= 1186, 'Wochenbericht bis Zählerende 11.860 ms ±10 %'); }
     pruefe(w.bericht?.umsatz === w.soll.umsatzWoche && Number(w.aktuell) === w.soll.umsatzWoche, 'Umsatz entspricht Engine');
     pruefe(w.bericht?.ebitda === w.soll.ebitdaWoche && Number(w.ebitda) === w.soll.ebitdaWoche, 'EBITDA entspricht Engine');
     pruefe(!!w.zeitung?.includes('Der Handelsbote'), 'Zeitung vorhanden');
