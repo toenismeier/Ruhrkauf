@@ -1,6 +1,7 @@
 // O03 IT: deterministische Zustandsübergänge und neutraler Start.
 import { neuesSpiel } from '../src/engine';
 import { fuehreAus } from '../src/aktionen';
+import { posteingang } from '../src/abfragen';
 import {
   ausfallRisiko, generationInCluster, initialisiereIt, itCluster, itDeckel, itProjektPlan,
   itUebersicht, itWoche, SYSTEME,
@@ -75,6 +76,15 @@ describe('O03 IT-Systeme', () => {
     expect(plan.gesamt).toBe(plan.konzept+plan.umsetzung+plan.rollout);
     for(let i=0;i<7;i++){itWoche(s);itWoche(t);expect(s.it).toEqual(t.it);s.woche++;t.woche++;}
     expect(s.rng).toBe(t.rng);
+  });
+
+  it('meldet Projekte und Meilensteine im IT-Posteingang mit Navigation', () => {
+    const s=neuesSpiel(9),c=itCluster(s)[0].id;
+    expect(fuehreAus(s,{typ:'itProjekt',system:'app',art:'kaufen',zielGeneration:3,clusterIds:[c]}).ok).toBe(true);
+    const post=posteingang(s);
+    const eingang=post.handeln.find(e=>e.typ==='it_meilenstein');
+    expect(eingang?.bezug?.modul).toBe('it');
+    expect(post.meldungen.some(m=>m.kategorie==='IT')).toBe(true);
   });
 
   it('ist für ältere Spielstände ohne IT-Objekt rückwärtskompatibel', () => {
