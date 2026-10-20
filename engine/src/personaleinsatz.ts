@@ -16,7 +16,7 @@ export const PERSONAL_ANTEILE: Record<PersonalGruppe, number> = {
   logistik: 0.19, verkauf: 0.52, kasse: 0.19, verwaltung: 0.10,
 };
 export const PERSONAL_TAGE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] as const;
-export interface PersonalTag { tag: string; bedarf: number; plan: number; springer: number; deckung: number }
+export interface PersonalTag { tag: string; bedarf: number; plan: number; referenz: number; springer: number; deckung: number }
 export interface PersonalZeile { gruppe: PersonalGruppe; name: string; fte: number; tage: PersonalTag[]; bedarf: number; plan: number; deckung: number }
 export interface PersonalPlan {
   woche: number; gruppen: Record<PersonalGruppe, PersonalZeile>;
@@ -103,11 +103,6 @@ function ausfall(s: GameState): { krank: number; urlaub: number } {
     urlaub: kw >= 26 && kw <= 35 ? 0.14 : kw >= 51 ? 0.10 : 0.055,
   };
 }
-function kapazitaet(h: Haus, st: PersonalHausStand): number {
-  // Bestehende FTE-Steuerung bleibt wirksam, neue Einstellungen sind vier Wochen nur halb produktiv.
-  const wirk = st.einarbeitungBis > (h.personaleinsatz?.plan?.woche ?? -1) ? 0.5 : 1;
-  return st.basisFte > 0 ? clamp(fte(h) / st.basisFte, 0, 3) * wirk : 1;
-}
 function dienstplan(s: GameState, h: Haus): PersonalPlan {
   const st = h.personaleinsatz!;
   const aus = ausfall(s), q = qualitaet(s);
@@ -134,18 +129,20 @@ function dienstplan(s: GameState, h: Haus): PersonalPlan {
       const fehler = richtung * 0.19;
       const bezug = 1 + fehler * (1 - st.basisQualitaet);
       const genau = 1 + fehler * (1 - q);
-      let plan = bedarf * relativ * (neu ? 0.75 : 1) * st.faktor[g] * genau / Math.max(0.5, bezug);
+      let plan = bedarf * relativ * (neu ? 0.75 : 1) * st.faktor[g] * genau * (1 + st.training * 0.035);
       if (g === 'kasse' && i === 5) plan *= st.samstagKasse;
       if (g === 'kasse' && dezember && weihnachten === 'sparsam') plan *= 0.88;
       if (g === 'kasse' && dezember && weihnachten === 'spaet') plan *= 0.78;
       if (g === 'verkauf' && dezember && weihnachten === 'spaet') plan *= 0.86;
-      return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf), plan: rund(plan), springer: 0, deckung: bedarf ? plan / bedarf : 1 };
+      const referenz = bedarf * bezug;
+      extra += Math.max(0, (st.faktor[g] - 1) * bedarf) + (g === 'kasse' && i === 5 ? Math.max(0, st.samstagKasse - 1) * bedarf : 0);
+      return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf), plan: rund(plan), referenz: rund(referenz), springer: 0, deckung: bedarf ? plan / bedarf : 1 };
     });
     const bedarf = tage.reduce((a, t) => a + t.bedarf, 0);
     const plan = tage.reduce((a, t) => a + t.plan, 0);
     gruppen[g] = { gruppe: g, name: PERSONAL_NAMEN[g], fte: rund(fte(h) * PERSONAL_ANTEILE[g]),
       tage, bedarf: rund(bedarf), plan: rund(plan), deckung: bedarf ? plan / bedarf : 1 };
-    extra += Math.max(0, plan - bedarf);
+
   }
   const ahQuote = st.aushilfenQuote;
   const gesamt = Object.values(gruppen).reduce((a, g) => a + g.bedarf, 0);
@@ -174,7 +171,9 @@ function berechneWirkung(h: Haus, p: PersonalPlan): void {
   // Ausschließlich Unterdeckung wirkt auf Verkäufe; Überdeckung erhöht nur die Kosten.
   const defizit = (g: PersonalGruppe, i: number) => {
     const t = p.gruppen[g].tage[i];
-    return Math.max(0, 1 - t.plan / Math.max(0.01, t.bedarf));
+    // Gegen den unveränderten Startplan normiert. Prognosefehler in der
+    // Ausgangslage bleiben sichtbar, verändern Umsatz und EBITDA aber nicht.
+    return Math.max(0, 1 - t.plan / Math.max(0.01, t.referenz));
   };
   const gewicht = [0.105, 0.137, 0.147, 0.157, 0.191, 0.263];
   const verkauf = gewicht.reduce((a, w, i) => a + w * defizit('verkauf', i), 0);
@@ -335,7 +334,7 @@ export function personalVerkaufsFaktor(h: Haus, gruppe: GruppeId): number {
   if (!p) return 1;
   const beratung = GRUPPEN[gruppe]?.beratung ?? 0.5;
   const v = p.gruppen.verkauf.tage.reduce((a, t) => a +
-    (Math.max(0, 1 - t.plan / Math.max(0.01, t.bedarf)) / 6), 0);
+    (Math.max(0, 1 - t.plan / Math.max(0.01, t.referenz)) / 6), 0);
   const faktor = clamp(1 - (0.15 + 0.38 * beratung) * v, 0.65, 1) *
     clamp(p.kaufquote / Math.max(0.000001, 1 - 0.33 * v), 0.65, 1);
   // O02 wendet den globalen Kaufquotenfaktor später selbst an.
@@ -346,8 +345,10 @@ export function personalOffpriceFaktor(h: Haus): number {
   return p ? (h.treiber ? 1 : p.kaufquote) : 1;
 }
 export function personalZusatzkosten(h: Haus): number {
-  const p = h.personaleinsatz?.plan;
-  return p ? p.zusatzkosten + p.fehlerkosten : 0;
+  return h.personaleinsatz?.plan?.zusatzkosten ?? 0;
+}
+export function personalFehlerkosten(h: Haus): number {
+  return h.personaleinsatz?.plan?.fehlerkosten ?? 0;
 }
 export function personalVerfuegbarkeit(h: Haus): number {
   return h.personaleinsatz?.plan?.verfuegbarkeit ?? 1;
