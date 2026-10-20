@@ -992,7 +992,7 @@ window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffne
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
-  oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { hausReiter = reiter; oeffneHaus(id); },
+  oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },
   pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];
     if (!text.includes(String(d.kundenScore))) fehler.push('Kundenscore fehlt');
     for (const [reiter,wort] of [['leitung',d.leitungsdaten.name],['kosten','Betriebskosten'],['kommentare','Wochenkommentierung']]) {
