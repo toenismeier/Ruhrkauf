@@ -737,7 +737,7 @@ function einkaufsKreuz(E, innen, zc) {
     kand = kand.filter((x) => x !== q);
   };
   // Reihenfolge: Hartwig-Warenhäuser (groß zuerst) bekommen die besten Ecken, danach Wettbewerber und Sport nach Größe
-  const rang = (e) => (e.rolle === 'warenhaus' ? 0 : 1);
+  const rang = (e) => e.rolle === 'warenhaus' && e.st.premium ? 0 : e.rolle === 'warenhaus' && e.st.hausklasse === 'A' ? 1 : e.rolle === 'warenhaus' ? 2 : 3;
   const a1 = innen.filter((e) => e.lage === '1a').sort((a, b) => rang(a) - rang(b) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n);
   const zuB = [];
   for (const e of a1) {
