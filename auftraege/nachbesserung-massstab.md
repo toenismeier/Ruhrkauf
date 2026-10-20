@@ -125,3 +125,11 @@ Geprüft wurde der Branch nach einem Probe-Merge von `main` (Stand nach FUNDUS u
   - Danach Bot C erneut auf Seeds 1 bis 3 prüfen, ebenso „ohne Eingriff folgt die Insolvenz binnen zwei Jahren“.
   - Laufzeit: `laufzeitOhneQuartalsvorschauMs` 77 ms. Die Quartalsvorschau (Prognose) kostet 1,2 s und rechnet offenbar die ganze Welt für das Quartal vor. Vorschlag: Prognose nur alle 13 Wochen und nur auf Konzernebene mit Durchschnittswerten je Hauscluster statt Hausweise, oder inkrementell über die Wochen verteilt. Ziel: keine Woche über 250 ms.
 - Weiter auf diesem Branch, `main` vorher hineinmergen (dort sind inzwischen Premium, FUNDUS, Ladenbau 1–3 und Reise/Woche).
+
+## 11. Wochenverlauf im ersten Quartal abschwächen (Ummo, 20.10.2026)
+Befund aus TestFlight-Wurf 1 und Claudes Nachrechnung (Seed 1, Leicht, ohne Eingriffe, 130 Warenhäuser auf `main`): EBITDA je Woche KW 1 +2,4 Mio., KW 2 −1,0, KW 3 −4,9, KW 8 −7,2, KW 13 −3,6 Mio. bei rund 47 bis 53 Mio. Umsatz je Woche. Entscheidung Ummo: **zu hart, abschwächen**.
+- Januar und Februar dürfen negativ sein, aber im Mittel höchstens etwa −4 % EBITDA-Quote (Zielwert aus Abschnitt 10), keine Woche unter −6 % auf Mittel, −8 % auf Schwer; auf Leicht entsprechend milder.
+- KW 1 nicht künstlich positiv: kein Sprung von + auf − zwischen KW 1 und KW 2 (Ursache suchen, z. B. fehlende Kosten oder Vorlauf in der ersten Woche).
+- Ursachenanalyse in die PR: Saisonkurve Januar/Februar, Personal- und Mietkosten je Woche, Wareneinsatz/Abschriften nach Weihnachten.
+- Ausrichtung (Ummo, 20.10.2026): Turnaround und Management stehen im Fokus, die Insolvenz steht ganz am Ende. Der Standardverlauf ohne Eingriffe darf im ersten Jahr nicht in die Insolvenz zwingen.
+- Prüfung: Wochenverlauf 13 und 52 Wochen je Schwierigkeit als Tabelle in `massstab-stand.md`; Bot C überlebt weiter 5 Jahre.
