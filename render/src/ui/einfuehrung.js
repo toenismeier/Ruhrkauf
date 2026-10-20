@@ -202,11 +202,11 @@ export function einfuehrungModul() {
       '<button type="button" data-ein="ja">Ja</button><button type="button" data-ein="spaeter">Später</button>' +
       '<button type="button" data-ein="nie">Nie</button></div></section>';
   }
-  function spielStart() {
+  function spielStart(fortsetzen = false) {
     // Prüfskripte und Bot-Läufe sollen nicht durch die Einführung blockiert werden.
     if (new URLSearchParams(location.search).has('ohne-animation')) return;
     if (zustand.modus === 'aktiv') starten();
-    else if (zustand.modus === 'neu' || zustand.modus === 'spaeter') abfrage();
+    else if (!fortsetzen && (zustand.modus === 'neu' || zustand.modus === 'spaeter')) abfrage();
   }
   root.addEventListener('click', (e) => {
     const b = e.target.closest('[data-ein]');
