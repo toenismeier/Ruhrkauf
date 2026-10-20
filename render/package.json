@@ -18,7 +18,8 @@
     "ladenbau:pruefen": "node pruef-ladenbau.js",
     "ladenbau:pruefen:teile": "node pruef-ladenbau.js --teile",
     "ladenbau:smoke": "node tests/ladenbau-smoke.cjs",
-    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose"
+    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose",
+    "smoke:werkzeuge": "node spiel-render.js --nur-werkzeuge"
   },
   "keywords": [],
   "author": "",
