@@ -69,7 +69,7 @@ function verlauf(historie) {
   ];
   const werte = historie.filter((k,i) => i % 13 === 12 || i === historie.length - 1);
   if (werte.length < 2) return '';
-  const end = 200, unten = 95, oben = 9, links = 16, rechts = 594;
+  const unten = 95, oben = 9, links = 16, rechts = 594;
   const alle = werte.flatMap(k => [schonen(k.umsatz), schonen(k.ebitda)]);
   const min = Math.min(0, ...alle), max = Math.max(1, ...alle), span = Math.max(1, max-min);
   const px = i => links + (rechts-links)*i/(werte.length-1);
@@ -157,7 +157,7 @@ export function spielendeModul(ctx) {
       gespeicherterSchluessel = schluessel; aufzeichnen(s,e);
       bilanziert=false;
     }
-    if (!node.hidden) return true;
+    if (!node.hidden && ansicht === 'szene') return true;
     const a = ART[e.art] || ART.zerschlagen;
     rahmen(a.titel,'<div class="se-szene"><div class="se-bild">'+spielendeSzene(e.art,e.kaeufer)+
       '</div><div class="se-zeitung"><small>DER HANDELSBOTE · SONDERAUSGABE · WOCHE '+zahl(e.woche)+'</small>'+
@@ -167,7 +167,6 @@ export function spielendeModul(ctx) {
   }
   function bestenliste() {
     if (!stand()) return;
-    const stufe = stand().schwierigkeit || 'mittel';
     rahmen('Bestenliste','<div class="se-bilanz"><h1>Bestenliste</h1><p class="se-unter">Die zehn besten Ergebnisse je Schwierigkeitsstufe bleiben auf diesem Gerät gespeichert.</p>'+
       ['leicht','mittel','schwer'].map(id=>'<h2>'+esc(SCHWIERIGKEIT[id])+'</h2><div class="se-karte">'+rangliste(id)+'</div>').join('')+
       '<button class="se-knopf se-sek" data-se="schliessen">Zurück zum Spiel</button></div>');
