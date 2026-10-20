@@ -23,10 +23,42 @@ export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZEN
 
 const beendet = (s: GameState): boolean => s.phase === 'zerschlagen';
 
+/** Schlanke Konzernplanung statt 13-mal die gesamte 560-Häuser-Welt durchzuspielen.
+ * Die interaktive Liquiditätsvorschau bleibt separat über vorschau() verfügbar.
+ * Saisonale Abweichungen werden warengruppengewichtet auf Rohertragsebene geplant.
+ */
+function quartalsPlanSchnell(s: GameState): number {
+  const aktiv = s.haeuser.filter((h) => !h.nurDaten && h.status !== 'geschlossen');
+  const letzte = s.historie.slice(-13);
+  // Im ersten Quartal liegen noch keine Ist-Wochen vor: rein aggregierte Start-GuV.
+  const basisRoh = (Object.entries(s.basisUmsatz) as [GruppeId, number][])
+    .reduce((sum, [g, u]) => sum + u * GRUPPEN[g].marge, 0);
+  const basisUmsatz = Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
+  const basisPersonal = aktiv.reduce((sum, h) =>
+    sum + h.personal.vollzeit * PARAM.lohnVollzeit
+      + h.personal.teilzeit * PARAM.lohnTeilzeit
+      + h.personal.aushilfen * PARAM.lohnAushilfe, 0);
+  const basisMiete = aktiv.reduce((sum, h) => sum + h.miete.mieteWoche, 0);
+  const basis = letzte.length
+    ? letzte.reduce((sum, k) => sum + k.ebitda, 0) / letzte.length
+    : basisRoh - basisPersonal - basisMiete - s.zentrale.kostenWoche
+      - basisUmsatz * (PARAM.marketingQuote + PARAM.logistikQuote + PARAM.sonstigeQuote);
+  const vorigeStartwoche = letzte.length ? s.woche - letzte.length : s.woche;
+  let saisonDelta = 0;
+  for (const [g, u] of Object.entries(s.basisUmsatz) as [GruppeId, number][]) {
+    let alt = 0; let neu = 0;
+    for (let i = 0; i < 13; i++) {
+      alt += saisonFaktor(g, vorigeStartwoche + i);
+      neu += saisonFaktor(g, s.woche + i);
+    }
+    saisonDelta += u * GRUPPEN[g].marge * (neu - alt);
+  }
+  return eur(basis * 13 + saisonDelta);
+}
+
 function quartalsStart(s: GameState): void {
   if (s.prognose || s.woche % 13 !== 0) return;
-  const p = vorschau(s, 13);
-  s.quartale.push({ nr: s.quartale.length, start: s.woche, planStandard: eur(p.reduce((a, b) => a + b.ebitda, 0)), ebitdaIst: 0 });
+  s.quartale.push({ nr: s.quartale.length, start: s.woche, planStandard: quartalsPlanSchnell(s), ebitdaIst: 0 });
 }
 
 export function wocheAbspielen(s: GameState): WochenKpi {

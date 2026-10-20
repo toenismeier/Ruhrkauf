@@ -110,8 +110,10 @@ export const PARAM = {
   lohnVollzeit: 1_050, // € je FTE und Woche inkl. Nebenkosten
   lohnTeilzeit: 990,
   lohnAushilfe: 600,
-  qmJeFte: 500,
-  umsatzJeFte: 8_800,
+  // Maßstab 560: Filialbesetzung pro Fläche dichter (Fixkosten der Ausgangskrise).
+  qmJeFte: 400,
+  // Umsatzbasierter Personalbedarf; verschiebt EBITDA ohne Eingriff Richtung -4 %.
+  umsatzJeFte: 5_750,
   sonstigeQuote: 0.016,
   sonstigeQm: 0.45,
   logistikQuote: 0.025,
