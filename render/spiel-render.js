@@ -728,8 +728,24 @@ async function buendeln() {
     }));
     if (sprung.fertig !== 13 || snapshot.woche !== 13 || !snapshot.test || !snapshot.label.includes('Testspiel'))
       throw new Error('Zeitsprung nicht korrekt: ' + JSON.stringify({ sprung, snapshot }));
+    await p.evaluate(() => console.error('N14 Fehlerprobe'));
+    const fehlerpunkt = await p.evaluate(() => document.querySelector('.datum').classList.contains('testfehler'));
+    if (!fehlerpunkt) throw new Error('Fehlerpunkt nach Konsolenfehler fehlt.');
     const bericht = await p.evaluate(() => window.spiel.werkzeuge.erstelleBericht());
     if (!bericht.startsWith('RUHRKAUF-TEST-1:gzip:')) throw new Error('Fehlerbericht nicht gzip/Base64.');
+    const archiv = await p.evaluate(async (b) => {
+      const roh = atob(b.slice('RUHRKAUF-TEST-1:gzip:'.length));
+      const bytes = Uint8Array.from(roh, (c) => c.charCodeAt(0));
+      const text = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+      const daten = JSON.parse(text);
+      return {
+        woche: daten.woche, cash: daten.spiel.cash, seed: daten.seed,
+        fehler: daten.fehler.some((e) => e.text.includes('N14 Fehlerprobe')),
+        userAgent: !!daten.userAgent, version: daten.version,
+      };
+    }, bericht);
+    if (!archiv.fehler || !archiv.userAgent || archiv.version !== 1 || archiv.woche !== 13 || archiv.cash !== snapshot.cash)
+      throw new Error('Komprimierter Fehlerbericht unvollständig: ' + JSON.stringify(archiv));
     await p.evaluate(() => window.spiel.neuesSpiel(3, 'Essen'));
     const wieder = await p.evaluate((b) => window.spiel.werkzeuge.berichtLaden(b), bericht);
     if (wieder.woche !== snapshot.woche || wieder.cash !== snapshot.cash || wieder.seed !== 1)
@@ -743,7 +759,7 @@ async function buendeln() {
     }));
     if (!urlFreischaltung.entsperrt || !urlFreischaltung.geoeffnet)
       throw new Error('URL-Freischaltung fehlgeschlagen: ' + JSON.stringify(urlFreischaltung));
-    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, urlFreischaltung, berichtZeichen: bericht.length }, null, 2));
+    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, archiv, urlFreischaltung, berichtZeichen: bericht.length }, null, 2));
     console.log('N14 Testwerkzeuge: beide Freischaltungen, 13 Wochen, gzip-Bericht und Wiederherstellung identisch.');
     return { sprung, snapshot, wieder, urlFreischaltung };
   }
