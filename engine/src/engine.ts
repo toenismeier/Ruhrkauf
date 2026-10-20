@@ -1,6 +1,7 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
+import { chronikAktualisieren } from './chronik';
 import { wettbewerbWoche } from './wettbewerb';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
@@ -217,6 +218,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
   s.woche += 1;
+  chronikAktualisieren(s, w);
   return k;
 }
 
