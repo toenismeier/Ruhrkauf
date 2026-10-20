@@ -98,7 +98,7 @@ for(const [art,stile] of Object.entries(THEMEN))
       definitionen.push(definition(id,art+' · '+stil,'sport','gondel',rasterB,1,1.4,120,
         (L,r,d)=>baueMix(L,r,d,art,stil,w)));
     }
-export const SPORT_MIX_MOEBEL=Object.freeze(definitionen);
+export const SPORT_MIX_MOEBEL=definitionen;
 export const SPORT_MIX_PROFILE=Object.freeze(Object.fromEntries(
   Object.entries(THEMEN).map(([art,stile])=>[art,Object.freeze(Object.fromEntries(
     [2,4].map(b=>[b,Object.freeze(stile.map(stil=>'sport_mix_'+art+'_'+stil+'_'+b))])
@@ -125,3 +125,5 @@ export const SPORT_MIX_WAENDE=Object.freeze(Object.fromEntries(
     return id;
   }))])
 ));
+
+Object.freeze(SPORT_MIX_MOEBEL);
