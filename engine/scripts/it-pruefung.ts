@@ -1,5 +1,5 @@
 // O03 IT: reproduzierbare lokale Abnahme. Aufruf: npx tsx scripts/it-pruefung.ts
-import { performance } from 'perf';
+import { performance } from 'node:perf_hooks';
 import { neuesSpiel, wocheAbspielen } from '../src/engine';
 import { fuehreAus } from '../src/aktionen';
 import { initialisiereIt, itCluster, itDeckel, itWoche } from '../src/it';

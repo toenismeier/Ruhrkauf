@@ -92,6 +92,6 @@ describe('O03 IT-Systeme', () => {
     delete s.it;
     expect(itDeckel(s,'it')).toBe(1);
     initialisiereIt(s);
-    expect(s.it?.projekte).toHaveLength(0);
+    expect((s as { it?: { projekte: unknown[] } }).it?.projekte).toHaveLength(0);
   });
 });
