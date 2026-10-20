@@ -45,10 +45,15 @@ describe('O06 Jahresplanung', () => {
     expect(s.entscheidungen.some((x) => x.typ === 'planung_jahr')).toBe(true);
     expect(fuehreAus(s, { typ: 'planungZiel', kennzahl: 'umsatz', wert: e.ziele.umsatz + 5_000_000 }).ok).toBe(true);
     expect(fuehreAus(s, { typ: 'planungVerteilen', id, umsatz: 12_000_000 }).ok).toBe(true);
+    const wg = planungAssistent(s).warengruppen;
+    const damenZiel = wg.damen ?? 0;
+    expect(fuehreAus(s, { typ: 'planungWarengruppe', gruppe: 'damen', umsatz: damenZiel + 1_000_000 }).ok).toBe(true);
     expect(fuehreAus(s, { typ: 'planungAbschliessen', quelle: 'spieler' }).ok).toBe(true);
     const p = planJahr(s, s.startJahr + 1)!;
     expect(p.ziele.umsatz).toBe(davor.vorschlag.umsatz + 5_000_000);
     expect(p.knoten[id].umsatz).toBe(12_000_000);
+    expect(p.warengruppen.damen).toBe(damenZiel + 1_000_000);
+    expect(summe(Object.values(p.warengruppen).map((v) => v ?? 0))).toBe(p.ziele.umsatz);
     expect(summe(Object.values(p.phasing).map((a) => summe(a)))).toBe(p.ziele.umsatz);
     expect(s.entscheidungen.some((x) => x.typ === 'planung_jahr')).toBe(false);
     expect(fuehreAus(s, { typ: 'planungZiel', kennzahl: 'umsatz', wert: 1 }).ok).toBe(false);
