@@ -638,12 +638,38 @@ function einkaufslage(E, standorte) {
   E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') && e.rolle !== 'outlet');
   E.einkauf = [];
   E.einkaufZellen = new Set();
-  // Geteilte Stadt (Berlin): Standorte abwechselnd je Rolle auf zwei Kerne verteilen
+  // Maßstab: Metropolen mit vielen eigenen Innenstadthäusern erhalten ein bis zwei
+  // eigenständige Stadtteilzentren. Die Position hängt nur von Raster und Standortzahl ab.
+  const eigeneInnen = innen.filter((e) => e.rolle !== 'wettbewerber');
+  if (E.typ === 'metropole' && eigeneInnen.length >= 4 && !E.zweiKerne) {
+    const nx = E.spalten.length, nz = E.reihen.length;
+    E.zweiKerne = [E.zentrum, { i: Math.max(2, Math.floor(nx * 0.76)), j: Math.max(2, Math.floor(nz * 0.26)) }];
+    if (eigeneInnen.length >= 7) E.zweiKerne.push({ i: Math.max(2, Math.floor(nx * 0.24)), j: Math.max(2, Math.floor(nz * 0.76)) });
+  }
   const kerne = E.zweiKerne ?? [E.zentrum];
   const gruppen = kerne.map(() => []);
   const zaehl = {};
-  for (const e of innen) { const k = (zaehl[e.rolle] = (zaehl[e.rolle] ?? -1) + 1); gruppen[k % kerne.length].push(e); }
+  let anHauptlage = 0, anNebenlage = 0;
+  for (const e of innen) {
+    let k;
+    if (e.lage === '1a' && e.rolle !== 'wettbewerber') {
+      // Die maximal drei eigenen prominenten Standorte besetzen die Hauptachse.
+      k = kerne.length > 1 && anHauptlage >= 3 ? 1 + ((anHauptlage - 3) % (kerne.length - 1)) : 0;
+      anHauptlage++;
+    } else if (kerne.length > 1 && e.lage === 'b' && e.rolle !== 'wettbewerber') {
+      k = 1 + (anNebenlage++ % (kerne.length - 1));
+    } else {
+      k = (zaehl[e.rolle] = (zaehl[e.rolle] ?? -1) + 1) % kerne.length;
+    }
+    gruppen[k].push(e);
+  }
   const lagen = kerne.map((zc, g) => einkaufsKreuz(E, gruppen[g], zc)).filter(Boolean);
+  // Kleiner Platz als lesbares Zentrum der sekundären Einkaufslagen (nie auf Standorten).
+  for (const L of lagen.slice(1)) {
+    const kandidaten = [[L.kF - 2, L.lF - 2], [L.kF + 1, L.lF + 1], [L.kF - 2, L.lF + 1], [L.kF + 1, L.lF - 2]];
+    const platz = kandidaten.find(([i, j]) => zelleFrei(E, i, j));
+    if (platz) nimm(E, { art: 'platz', i0: platz[0], i1: platz[0], j0: platz[1], j1: platz[1], seiten: ['-z', '-x', '+x'] });
+  }
   const altEinschub = E.einschub;
   E.einschub = (i, j) => (E.einkaufZellen.has(`${i},${j}`) ? 0 : altEinschub(i, j));
   E.einkaufslage = lagen[0];
@@ -695,6 +721,15 @@ function einkaufsKreuz(E, innen, zc) {
   const { kF, lF } = best;
   let kand = best.k;
   const meine = [];
+  const eigenesHaus = (rolle) => ['warenhaus', 'schwester', 'sport', 'outlet'].includes(rolle);
+  const zulassig = (e, i, j) => E.einkauf.every((q) => {
+    if (!eigenesHaus(e.rolle) || !eigenesHaus(q.standort?.rolle)) return true;
+    const abstand = Math.abs(q.i - i) + Math.abs(q.j - j);
+    if (e.rolle === 'warenhaus' && q.standort.rolle === 'warenhaus') return abstand >= 3;
+    if ((e.rolle === 'schwester' && q.standort.rolle === 'warenhaus') ||
+        (e.rolle === 'warenhaus' && q.standort.rolle === 'schwester')) return abstand >= 2;
+    return abstand >= 1;
+  });
   const nimmZelle = (e, q, typLage) => {
     const slot = { i: q.i, j: q.j, W: e.m.w, D: e.m.d, ecke: q.ecke, typ: SLOT_ROLLE[e.rolle] ?? 'slot:warenhaus', standort: e.st, lage: typLage };
     E.einkauf.push(slot); meine.push(slot);
@@ -705,13 +740,18 @@ function einkaufsKreuz(E, innen, zc) {
   const rang = (e) => (e.rolle === 'warenhaus' ? 0 : 1);
   const a1 = innen.filter((e) => e.lage === '1a').sort((a, b) => rang(a) - rang(b) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n);
   const zuB = [];
-  for (const e of a1) { kand = kand.filter((q) => zelleFrei(E, q.i, q.j)); if (kand.length) nimmZelle(e, kand[0], '1a'); else zuB.push(e); }
+  for (const e of a1) {
+    kand = kand.filter((q) => zelleFrei(E, q.i, q.j));
+    const moeglich = kand.filter((q) => zulassig(e, q.i, q.j));
+    if (moeglich.length) nimmZelle(e, moeglich[0], '1a');
+    else zuB.push(e);
+  }
   // Nebenlagen: frei, nicht an der Einkaufsstraße, 1,5 bis 3,5 Zellen vom Kreuz, gern an einer Hauptstraße
   const kx = kF - 0.5, kz = lF - 0.5;
   for (const e of [...innen.filter((x) => x.lage === 'b'), ...zuB]) {
     const l = [];
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-      if (!zelleFrei(E, i, j) || i === kF - 1 || i === kF || j === lF - 1 || j === lF) continue;
+      if (!zelleFrei(E, i, j) || !zulassig(e, i, j) || i === kF - 1 || i === kF || j === lF - 1 || j === lF) continue;
       const dd = Math.hypot(i + 0.5 - kx, j + 0.5 - kz);
       if (dd < 1.2 || dd > 4) continue;
       const anHaupt = istHaupt(E.zTyp[i + 1]) || istHaupt(E.xTyp[j + 1]) || istHaupt(E.zTyp[i]) || istHaupt(E.xTyp[j]);
@@ -720,7 +760,15 @@ function einkaufsKreuz(E, innen, zc) {
     }
     kand = kand.filter((q) => zelleFrei(E, q.i, q.j));
     if (l.length) nimmZelle(e, wahlGewichtet(r, l), 'b');
-    else if (kand.length) nimmZelle(e, kand[0], 'b');
+    else {
+      const ausweich = [];
+      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++)
+        if (zelleFrei(E, i, j) && zulassig(e, i, j)) ausweich.push({ i, j, ecke: '+x+z' });
+      if (ausweich.length) {
+        ausweich.sort((a, b) => Math.abs(a.i - kF) + Math.abs(a.j - lF) - Math.abs(b.i - kF) - Math.abs(b.j - lF));
+        nimmZelle(e, ausweich[0], 'b');
+      } else throw new Error('Kein regelkonformer Standort für ' + e.st.id + ' im Raster');
+    }
   }
   // Blöcke vergrößern, damit die Slots passen (Restbebauung bleibt dahinter)
   for (const e of meine) {
@@ -752,10 +800,9 @@ function randLagen(E, randZelle, zellenNach) {
   const belegt = [];
   const center = E.randStandorte.filter((e) => e.lage === 'center');
   const rand = E.randStandorte.filter((e) => e.lage !== 'center');
-  const nC = center.length === 0 ? 0 : center.length <= 2 ? 1 : 2;
-  const gruppen = Array.from({ length: nC }, () => []);
-  const sortiert = [...center].sort((a, b) => (a.rolle === 'warenhaus' ? 0 : 1) - (b.rolle === 'warenhaus' ? 0 : 1) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n);
-  sortiert.forEach((e, k) => gruppen[k % Math.max(1, nC)].push(e));
+  // Keine zwei eigenen Häuser unter demselben Block-/Center-Dach.
+  const gruppen = [...center].sort((a, b) => (a.rolle === 'warenhaus' ? 0 : 1) - (b.rolle === 'warenhaus' ? 0 : 1)
+    || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n).map((e) => [e]);
   const lagen = [...gruppen.map((g) => ({ art: 'center', liste: g })), ...rand.map((e) => ({ art: 'fachmarkt', liste: [e] }))];
   for (const L of lagen) {
     const dist = (i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
@@ -1392,6 +1439,7 @@ function baueRaster(seed, E) {
     landmarken: parzellen.filter((p) => p.typ.startsWith('slot:') && !p.standort && p.typ !== 'slot:warenhaus' && p.typ !== 'slot:center_passage').map((p) => p.id),
     standorte, einkaufslage, ddr: !!E.ddr, ost: E.ost ?? null, diagonalen, zwickel,
     einkaufslagen: (E.einkaufslagen ?? []).map((L) => ({ ...L, x0: sx[L.i0], x1: sx[L.i1] + E.spalten[L.i1], z0: sz[L.j0], z1: sz[L.j1] + E.reihen[L.j1], xF: zL[L.kF].x, zF: xL[L.lF].z })),
+    nebenzentren: (E.einkaufslagen ?? []).slice(1).map((L) => ({ i: L.kF, j: L.lF, x: zL[L.kF].x, z: xL[L.lF].z })),
     kern: { i: E.warenhaus?.i ?? E.zentrum.i, j: E.warenhaus?.j ?? E.zentrum.j },
     zentrum: E.zentrum, marktVariante: E.marktVariante ?? null,
   };
