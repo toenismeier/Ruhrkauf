@@ -1,4 +1,6 @@
 import { GRUPPEN } from './daten';
+import { abfindungJeFte } from './prozesse';
+import { hqRechtFaktor } from './hq';
 import { runwayWochen } from './stakeholder';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
@@ -243,9 +245,9 @@ export function formatCockpit(s: GameState) {
 export function schliessungVorschau(s: GameState, ids: string[]) {
   const hs = [...new Set(ids)].map((id) => s.haeuser.find((h) => h.id === id))
     .filter((h): h is Haus => !!h && !h.nurDaten && h.status === 'offen' && !h.standortgarantie);
-  const jeFte = s.phase === 'insolvenz' ? 13000 : 26000;
+  const jeFte = abfindungJeFte(s) * hqRechtFaktor(s);
   const sozialplan = eur(hs.reduce((sum, h) => sum + (h.personal.vollzeit + h.personal.teilzeit) * jeFte, 0));
-  const restmiete = eur(hs.reduce((sum, h) => sum + h.miete.mieteWoche *
+  const restmiete = eur(hs.reduce((sum, h) => sum + h.miete.mieteWoche * hqRechtFaktor(s) *
     Math.max(0, Math.min(s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52, h.miete.bisWoche - s.woche)), 0));
   return { anzahl: hs.length, sozialplan, restmiete, gesamt: sozialplan + restmiete,
     hinweis: 'Schätzung ohne Verhandlungs-, Transfer- und Rechtsabteilungseffekte; tatsächliche Kosten können abweichen.' };
