@@ -1,41 +1,73 @@
-// Gesonderte reproduzierbare Abnahme: cd engine && npx tsx scripts/premium-kalibrierung.ts
-import { neuesSpiel, wocheAbspielen, premiumUebersicht } from '../src';
+// Diagnose und Abnahme der Premium-Kronjuwelen gegen dieselbe Engine ohne Umwidmung.
+// Aufruf: cd engine && npx tsx scripts/premium-kalibrierung.ts
+import { neuesSpiel, wocheAbspielen } from '../src';
 import { botTief } from './bot';
+import type { GameState } from '../src';
 
-const ziele:Record<string,number>={P001:.11,P002:.11,P003:.09,P004:.06};
-let fehler=0;
-for(const seed of [1,2,3]){
- const normal=neuesSpiel(seed,{premiumDeaktiviert:true}),premium=neuesSpiel(seed);
- for(const s of [normal,premium]){s.cash=5e9;s.wettbewerbEreignisseDeaktiviert=true;}
- let umsatzAlt=0,umsatzNeu=0;
- const kpi=new Map<string,{u:number;db:number}>();
- for(let w=0;w<52;w++){
-  umsatzAlt+=wocheAbspielen(normal).umsatz;
-  umsatzNeu+=wocheAbspielen(premium).umsatz;
-  for(const p of premiumUebersicht(premium)){
-   const k=kpi.get(p.schluessel!)??{u:0,db:0};
-   k.u+=p.umsatz;k.db+=p.ebitda;kpi.set(p.schluessel!,k);
+const ziele: Record<string, number> = { P001: .11, P002: .11, P003: .09, P004: .06 };
+const ids = Object.keys(ziele);
+type Kennzahl = { u: number; db: number };
+const addiere = (map: Map<string, Kennzahl>, id: string, u: number, db: number) => {
+  const k = map.get(id) ?? { u: 0, db: 0 };
+  k.u += u; k.db += db; map.set(id, k);
+};
+const format = (x: number) => (x / 1e6).toFixed(2);
+const marge = (x?: Kennzahl) => x && x.u > 0 ? 100 * x.db / x.u : NaN;
+const kurz = (s: GameState) => ({
+  phase: s.phase, woche: s.woche, br: s.stakeholder.betriebsrat,
+  quartal: s.historie.slice(0, 13).reduce((v, k) => v + k.ebitda, 0),
+  insolvenz: s.meldungen.filter(m => m.typ === 'insolvenz').slice(-2).map(m => `W${m.woche}: ${m.text}`),
+});
+
+let fehler = 0;
+for (const seed of [1, 2, 3]) {
+  const basis = neuesSpiel(seed, { premiumDeaktiviert: true });
+  const premium = neuesSpiel(seed);
+  for (const s of [basis, premium]) {
+    s.cash = 5_000_000_000;
+    s.wettbewerbEreignisseDeaktiviert = true;
   }
- }
- const delta=100*(umsatzNeu/umsatzAlt-1);
- if(Math.abs(delta)>1.5)fehler++;
- console.log(`Seed ${seed} | Konzernumsatz Jahr 1: ${delta.toFixed(3)} % gegenüber Kontrolllauf`);
- console.log('Haus  | Umsatz Mio. EUR | EBITDA Mio. EUR | EBITDA-Marge % | Ziel % | Abweichung PP');
- for(const [id,k] of kpi){
-  const m=k.db/k.u;
-  console.log([id,(k.u/1e6).toFixed(2),(k.db/1e6).toFixed(2),(100*m).toFixed(2),(100*ziele[id]).toFixed(0),(100*(m-ziele[id])).toFixed(2)].join(' | '));
-  if(Math.abs(m-ziele[id])>.02)fehler++;
- }
- const bot=neuesSpiel(seed);
- for(let w=0;w<260 && bot.phase!=='zerschlagen';w++){
-  botTief(bot);
-  wocheAbspielen(bot);
- }
- console.log('Bot C:',bot.woche,'Wochen; Phase',bot.phase,'Cash',bot.cash);
- if(bot.woche<260){
-  console.log('Bot C Insolvenzursache / letzte Warnungen:',bot.meldungen.filter(m=>['insolvenz','warnung','eigentuemer'].includes(m.typ)).slice(-8).map(m=>`W${m.woche}: ${m.text}`).join(' | '));
-  console.log('Premiumstatus:',bot.haeuser.filter(h=>h.klasse==='premium').map(h=>`${h.premiumSchluessel}: ${h.status}`).join(', '));
- }
- if(bot.woche<260)fehler++;
+  let alt = 0, neu = 0;
+  const vorher = new Map<string, Kennzahl>(), nachher = new Map<string, Kennzahl>();
+  const idZuHaus = new Map(premium.haeuser.filter(h => h.klasse === 'premium').map(h => [h.premiumSchluessel!, h.id]));
+  for (let w = 0; w < 52; w++) {
+    alt += wocheAbspielen(basis).umsatz;
+    neu += wocheAbspielen(premium).umsatz;
+    for (const id of ids) {
+      const hausId = idZuHaus.get(id)!;
+      const altKpi = basis.haeuser.find(h => h.id === hausId)?.kpi;
+      const neuKpi = premium.haeuser.find(h => h.id === hausId)?.kpi;
+      if (altKpi) addiere(vorher, id, altKpi.umsatz, altKpi.db);
+      if (neuKpi) addiere(nachher, id, neuKpi.umsatz, neuKpi.db);
+    }
+  }
+  const delta = 100 * (neu / alt - 1);
+  if (Math.abs(delta) > 1.5) fehler++;
+  console.log(`\nSeed ${seed} | Konzernumsatz Jahr 1: Basis ${format(alt)}, Premium ${format(neu)} Mio. EUR; Abweichung ${delta.toFixed(3)} %`);
+  console.log('Haus | Umsatz vorher/nachher Mio. EUR | Marge vorher/nachher % | Marge Ziel % | Abweichung Ziel PP');
+  for (const id of ids) {
+    const b = vorher.get(id), p = nachher.get(id);
+    const ziel = ziele[id], ist = marge(p) / 100;
+    console.log(`${id} | ${format(b?.u ?? 0)} / ${format(p?.u ?? 0)} | ${marge(b).toFixed(2)} / ${marge(p).toFixed(2)} | ${(100 * ziel).toFixed(0)} | ${(100 * (ist - ziel)).toFixed(2)}`);
+    if (!(p && p.u > 0 && Math.abs(ist - ziel) <= .02)) fehler++;
+  }
+  // Nur diese Bot-Läufe verwenden echte Cashflows, Insolvenzplan und Gläubigervoten.
+  const kontrollBot = neuesSpiel(seed, { premiumDeaktiviert: true });
+  const premiumBot = neuesSpiel(seed);
+  for (const [label, s] of [['main-Logik ohne Premium', kontrollBot], ['Premium', premiumBot]] as const) {
+    while (s.woche < 260 && s.phase !== 'zerschlagen') {
+      botTief(s);
+      wocheAbspielen(s);
+      if (s.woche === 13 || s.woche === 23) console.log(`  ${label} W${s.woche}: ${JSON.stringify(kurz(s))}`);
+    }
+    console.log(`  ${label} Ende: ${JSON.stringify(kurz(s))}`);
+    if (s === premiumBot && s.woche < 260) {
+      fehler++;
+      console.log('  Premiumstatus:', s.haeuser.filter(h => h.klasse === 'premium').map(h => `${h.premiumSchluessel}: ${h.status}`).join(', '));
+    }
+  }
 }
-if(fehler){console.error('Abnahme nicht erfüllt:',fehler,'Verstöße');process.exitCode=1;}
+if (fehler) {
+  console.error('Premium-Abnahme nicht erfüllt:', fehler, 'Verstöße');
+  process.exitCode = 1;
+}
