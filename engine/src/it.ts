@@ -30,6 +30,7 @@ export interface ItStand {
   projekte: ItProjekt[];
   naechsteId: number;
   umsatzFaktoren: Record<string, number>;
+  hausCluster: Record<string, string>; // vorberechnete Zuordnung, O(1) je Haus
   startprobleme: Record<string, number>; // Schlüssel System:Cluster, Ende exklusiv
   meldungen: number;
 }
@@ -80,7 +81,7 @@ export function initialisiereIt(s: GameState): void {
       ...(id === 'kasse' ? { kasseAusbau: { selbstbedienung: 0, mobil: 0 } } : {}),
     };
   }
-  s.it = { systeme, projekte: [], naechsteId: 0, umsatzFaktoren: {}, startprobleme: {}, meldungen: 0 };
+  s.it = { systeme, projekte: [], naechsteId: 0, umsatzFaktoren: {}, hausCluster: {}, startprobleme: {}, meldungen: 0 };
 }
 const system = (s: GameState, id: ItSystemId): ItSystem | undefined => s.it?.systeme[id];
 export function generationInCluster(s: GameState, id: ItSystemId, clusterId: string): Generation {
@@ -242,6 +243,8 @@ export function itWoche(s: GameState): void {
   const it=s.it!;
   it.umsatzFaktoren={};
   const clusters=itCluster(s);
+  it.hausCluster={};
+  for (const cluster of clusters) for (const id of cluster.hausIds) it.hausCluster[id]=cluster.id;
   const delta=IT_IDS.reduce((sum,id)=>sum+it.systeme[id].kostenWoche-it.systeme[id].basisKosten,0);
   s.zentrale.kostenWoche+=delta;
   const q=qualitaet(s);
@@ -298,7 +301,19 @@ export function itWoche(s: GameState): void {
   }
 }
 export function itHausFaktor(s: GameState, h: Haus): number {
-  return s.it?.umsatzFaktoren[h.id] ?? 1;
+  const it=s.it;
+  if(!it)return 1;
+  const id=it.hausCluster?.[h.id];
+  if(!id)return it.umsatzFaktoren[h.id] ?? 1;
+  // O03: Modernisierung fördert Kassenfluss, Kundenbindung und Bestandsverfügbarkeit.
+  // Differenz zur Ausgangsgeneration sorgt für den neutralen Startwert von exakt 1.
+  const kasse=Math.max(0,generationInCluster(s,'kasse',id)-SYSTEME.kasse.start);
+  const app=Math.max(0,generationInCluster(s,'app',id)-SYSTEME.app.start);
+  const ware=Math.max(0,generationInCluster(s,'warenwirtschaft',id)-SYSTEME.warenwirtschaft.start);
+  const kAusbau=it.systeme.kasse.kasseAusbau;
+  const qualitaet=1 + kasse*0.005 + app*0.004 + ware*0.002
+    + (kasse>0 ? (kAusbau?.selbstbedienung??0)*0.002+(kAusbau?.mobil??0)*0.001 : 0);
+  return qualitaet * (it.umsatzFaktoren[h.id] ?? 1);
 }
 export function itUebersicht(s: GameState) {
   const clusters=itCluster(s), it=s.it;
