@@ -1,5 +1,9 @@
 // Wochenabschluss ausschließlich aus Engine-Abfragen: auftraege/spiel-reise-und-wochenabschluss.md
 import { esc } from './format.js';
+import { portraetSVG } from '../kit/portraet.js';
+const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
+const BANK = portraetSVG({ geschlecht: 'm', alter: 56, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 'hell', kleidung: 'anzug', seed: 236 }, 110);
+const BETRIEBSRAT = portraetSVG({ geschlecht: 'w', alter: 49, haar: 'halblang', haarfarbe: 'dunkelbraun', kleidung: 'bluse', seed: 922 }, 110);
 export const WOCHEN_ZEIT = Object.freeze({
   frageEin: 200, frageAus: 300, stillstand: 180, berichtEin: 380,
   zaehlStart: 900, zaehlen: 11000, vorfallEin: 150, vorfallText: 1500,
@@ -26,7 +30,7 @@ export function wochenberichtModul(ctx) {
   function abbruch() { if (status !== 'rechnen') aufraeumen(); }
   function fragDialog() {
     const warnungen = ctx.posteingang().handeln.filter((x) => x.restWochen === 0);
-    node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschließen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schließen">×</button><h2>Woche abschließen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">H</span></div>' + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + ' Vorgänge laufen ab. Der Standard wird gewählt beziehungsweise das Angebot verfällt.</p>' : '') + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
+    node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschließen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schließen">×</button><h2>Woche abschließen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN + '</span></div>' + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + ' Vorgänge laufen ab. Der Standard wird gewählt beziehungsweise das Angebot verfällt.</p>' : '') + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
     node.hidden = false; node.className = 'frage-ein'; document.body.classList.add('wochen-aktiv'); status = 'frage';
     requestAnimationFrame(() => node.classList.add('sichtbar'));
   }
