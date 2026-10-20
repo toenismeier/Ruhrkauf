@@ -1,3 +1,4 @@
+import { warenHaus } from './merchandise';
 import { GRUPPEN } from './daten';
 // O01 Organisation: reine Datenprojektion für die Oberfläche.
 export { organisationUebersicht } from './organisation';
@@ -229,7 +230,7 @@ export function hausDetail(s: GameState, id: string) {
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),
   }));
-  return { haus: h, etagen, wettbewerber: wettbewerbUebersicht(s, h.stadt) };
+  return { haus: h, etagen, waren: warenHaus(s, h), wettbewerber: wettbewerbUebersicht(s, h.stadt) };
 }
 
 export function warenwirtschaft(s: GameState) {
@@ -250,6 +251,8 @@ export { hqUebersicht, hqFuerGrafik } from './hq';
 
 /** Einkauf: Übersicht nach Bereich und WG, WG-Detail, Freigabe-Eingang. */
 export { einkaufUebersicht, wgDetail, freigaben } from './einkauf';
+// O05 Ware
+export { warenUebersicht, warenHaus, fundusFrequenzFaktor } from './merchandise';
 /** Eigenmarken: Markenkarten, Shop-Anteile je Bereich, Vorschau für den Gründungsassistenten. */
 export { eigenmarkenUebersicht, eigenmarkeVorschau } from './eigenmarken';
 /** Vorstand: Ressortkarten, Profil, Kandidatenkarussell. */

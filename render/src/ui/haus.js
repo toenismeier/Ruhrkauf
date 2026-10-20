@@ -47,7 +47,7 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
       line('Ist',p(k?.fteIst,1)+' FTE')+line('Personalkosten',geld(k?.personal??0))+'</div>';
   }
   if (r === 'ware') {
-    inhalt = '<div class="karte"><div class="khead">Ware · Grundlage O05</div>' +
+    inhalt = '<div class="karte"><div class="khead">Umsatz je Warengruppe</div>' +
       Object.entries(k?.umsatzJeGruppe ?? {}).sort((a,b)=>b[1]-a[1]).map(([key, wert])=>line(key, geld(wert))).join('') +
       '</div>';
   }

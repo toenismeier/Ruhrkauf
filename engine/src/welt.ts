@@ -1,3 +1,4 @@
+import { initialisiereWare } from './merchandise';
 import {
   CLUSTER_FAKTOR, GRUPPEN, LAGE_FAKTOR, LIEFERANTEN, NACHNAMEN, STAEDTE, STANDORT_ZUSATZ, VERMIETER, VORNAMEN,
   BERATER, gruppenFuer,
@@ -368,6 +369,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.kapitalflussStartCash = s.cash;
   // O04 Personal: neutraler Referenzplan auf Basis der bisherigen FTE.
   initialisierePersonaleinsatz(s);
+  // O05 Ware
+  initialisiereWare(s);
   return s;
 }
 

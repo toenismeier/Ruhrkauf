@@ -724,6 +724,8 @@ function oeffneHaus(id) {
   html = hausSteckbrief(d, html, hausReiter, s.woche);
   // O04 Personal: Wochentagsplanung im Reiter Personal des Hausdetails.
   if (hausReiter === 'personal' && pe) html += pe.hausBlock(id);
+  // O05 Ware
+  if (hausReiter === 'ware' && d.waren) html += `<div class="karte"><div class="khead">Ware · ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl('Warenverfügbarkeit', (d.waren.verfuegbarkeit * 100).toFixed(1) + ' %')}${zahl('Altwareanteil', (d.waren.altwareanteil * 100).toFixed(1) + ' %')}${zahl('Inventurdifferenz', d.waren.inventur ? geld(d.waren.inventur.differenz) : 'Noch offen')}${zahl('Flächenproduktivität', geld(d.waren.flaechenproduktivitaet) + '/qm')}</div></div>`;
   panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
   if (neu) hausZeigen(id);
 }
