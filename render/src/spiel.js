@@ -23,6 +23,7 @@ import { einkaufModul } from './ui/einkauf.js';
 import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 import { posteingangModul } from './ui/posteingang.js';
+import { zeitungModul } from './ui/zeitung.js';
 import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
 import { laden, speichern } from './ui/speicher.js';
@@ -519,7 +520,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, zt].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -784,7 +785,7 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null;
+let vs = null, mk = null, pr = null, po = null, zt = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -815,6 +816,10 @@ po = posteingangModul({
   },
 });
 
+// ─────────────────────────────────────────── Handelsbote
+zt = zeitungModul({ E, s: () => s, panel, meldung, nachAktion });
+$('zeitung').addEventListener('click', () => oeffneModul(zt));
+
 // ─────────────────────────────────────────── Reise & Wochenabschluss
 reise = reiseModul({
   stadt: () => stadtName,
@@ -837,6 +842,7 @@ wochenbericht = wochenberichtModul({
   modus: () => postUi.wochenbericht ?? 'voll', warnen: () => postUi.warnen,
   cockpit: () => E.cockpit(s), posteingang: () => E.posteingang(s),
   historie: () => s.historie, wocheNr: () => s.woche,
+  zeitung: () => E.zeitungAktuelle(s), oeffneZeitung: () => oeffneModul(zt),
   woche: () => woche(false), sperren: () => { $('weiter').disabled = true; },
   entsperren: () => { $('weiter').disabled = false; },
   oeffneVorgang: (id) => oeffneModul(po, 'handeln', id),
@@ -939,7 +945,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
