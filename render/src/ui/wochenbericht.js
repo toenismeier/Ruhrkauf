@@ -145,5 +145,5 @@ export function wochenberichtModul(ctx) {
       case 'ansehen': vorfallWeiter(true); break;
     }
   });
-  return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht && { ...bericht, vorgaenge: bericht.vorgaenge.length, meldungen: bericht.meldungen.length }, zeiten: [...zeiten] }), get status() { return status; } };
+  return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht && { ...bericht, vorgaenge: bericht.vorgaenge.length, meldungen: bericht.meldungen.length, meldungstexte: bericht.meldungen.map((m) => m.text) }, zeiten: [...zeiten] }), get status() { return status; } };
 }
