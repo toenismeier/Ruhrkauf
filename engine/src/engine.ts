@@ -45,7 +45,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // Marketing: Kanäle, Karte, CRM-Versand, laufende Aktionen der Woche (vor der Nachfrage)
   marketingVorbereiten(s);
   // O04 Personal: ein Plan je Woche, vor Ermittlung der Hausnachfrage.
-  personaleinsatzWoche(s);
+  if (!s.personaleinsatzDeaktiviert) personaleinsatzWoche(s);
 
   const lohn = lohnSumme(s);
   einkaufFristen(s);
