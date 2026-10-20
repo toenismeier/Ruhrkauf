@@ -41,7 +41,13 @@ export function planungModul(ctx) {
         const kinder = (n.kinder || []).map((x) => renderNode(x, tiefe + 1)).join('');
         return tiefe === 0 ? inhalt + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? ' open' : '') + '><summary>' + esc(n.name) + ' · ' + mio(n.umsatz) + (n.verdacht ? ' · !' : '') + '</summary>' + inhalt + kinder + '</details>';
       };
-      html += renderNode('konzern', 0) + '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss →</button></div>';
+      html += renderNode('konzern', 0) + '</div>';
+      html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div>' +
+        '<div class="olief">Die Konzernsumme bleibt bei Änderungen einzelner Warengruppen erhalten.</div>' +
+        Object.entries(D.warengruppen || {}).map(([id, value]) => '<label class="zeile"><span class="was">' +
+          esc(E.GRUPPEN?.[id]?.name || id) + '</span><input style="width:105px;max-width:42%" type="number" min="0" step="0.1"' +
+          ' data-pl-wg="' + esc(id) + '" value="' + (value / 1e6).toFixed(1) + '" aria-label="' + esc(id) + ' Ziel Mio. Euro"></label>').join('') +
+        '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss →</button></div>';
     } else {
       html += '<div class="karte"><div class="khead">Jahresplan ' + e.jahr + ' freigeben</div>' +
         zeile('Konzernumsatz', mio(e.ziele.umsatz)) + zeile('EBITDA-Ziel', mio(e.ziele.ebitda)) +
@@ -141,6 +147,7 @@ export function planungModul(ctx) {
     const el = ev.target;
     if (el.dataset.plRegler) { tun({ typ: 'planungZiel', kennzahl: el.dataset.plRegler, wert: Number(el.value) }); return zeigen(true); }
     if (el.dataset.plKnoten) { tun({ typ: 'planungVerteilen', id: el.dataset.plKnoten, umsatz: Math.round(Number(el.value) * 1e6) }); return zeigen(true); }
+    if (el.dataset.plWg) { tun({ typ: 'planungWarengruppe', gruppe: el.dataset.plWg, umsatz: Math.round(Number(el.value) * 1e6) }); return zeigen(true); }
     if (el.dataset.plBonus) { tun({ typ: 'planungBonus', ebene: el.dataset.plBonus, anteil: Number(el.value) }); return zeigen(true); }
   });
   return {
