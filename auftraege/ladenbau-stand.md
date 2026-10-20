@@ -242,3 +242,34 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 2. **Acht** Fälle in `sport-etagen-vergleich` als PNG rendern, **jedes** Vorher-/Nachher-Bild prüfen; die endgültigen PNGs nach `bilder/` legen. Die optische Rücknahme des Supermarkt-Eindrucks ist noch nicht anhand von Bildern verifiziert.
 3. Abteilungsfarben, Hängeschilder, charakteristische Möbel, Inszenierungen/Familieneigenheiten im Browser sichten; Familien 1–6 und obere Abverkaufsetagen gezielt prüfen; auftretende Visual-/Budgetfehler beheben.
 4. Erst nach grüner technischer und visueller Abnahme PR #13 auf aktuellen `main` integrieren bzw. Konflikte lösen und mergen. Branch ist gegenüber `main` zurück; kein Merge/Rebase erfolgt.
+
+
+---
+
+## 20.10.2026 · Phase 5 FUNDUS innen, Branch `feat/ladenbau-p5` (von `main`)
+
+### Stand und Umsetzung
+- Ausgangspunkt war der aktuelle `main` mit integrierten Ladenbau-Phasen 1–4. Kein Merge und keine Änderung an der Engine; sämtliche Arbeiten in `feat/ladenbau-p5`.
+- `render/src/kit/ladenbau-outlet.js` neu: Verkaufsflächen und Sortimente für alle drei FUNDUS-Bauformen (ein Geschoss, zwei Geschosse, Innenstadt-Geschäftshaus bis drei Verkaufsetagen). Damen ist die größte Warengruppe, übrige sechs Sortimente sind zwischen den Verkaufsetagen verteilt.
+- `outlet.js`: der bisherige frei platzierte Innenraum wurde durch `ladenplan` + `baueLadenplan` je Etage ersetzt. Rechteckige Abteilungen, Hängeschilder, Doppelstangen, sortimentsspezifische Schuh-, Taschen-, Home- und Beauty-Möbel sowie zentrale Ausgangskasse kommen aus dem gemeinsamen Formatprofil. `baueLadenplan` verwendet einen frei wählbaren Koordinatenversatz für Gebäude und Etagen.
+- Vier deterministische Bestückungs-/Betriebszustände `normal`, `schwach`, `ansturm`, `raeumung`. Gestelle und Schildbänder bleiben selbst bei Räumung erhalten; Warteschlange und Nachräumwagen sind zustandsbezogene Sondergeometrie.
+- Ergänztes maßhaltiges Möbel `outlet_schuhe`, kompakte Warengruppen an Doppelstangen (weniger Einzelgeometrie), Lückenfüllung ohne Sperrung der Kundenwege. FUNDUS bleibt frei von Wühltischen, Gitterboxen und Paletten.
+- Neue Kataloge `outlet-innen.js` (drei Bauformen, alle exemplarischen Verkaufsetagen) und `outlet-innen-zustaende.js` (vier Zustände). Das bestehende Prüfskript `pruef-ladenbau` umfasst nun zusätzlich FUNDUS. Neues `render/tests/outlet-ladenbau-smoke.cjs`, über `npm run ladenbau:smoke` mit den Sport-Regressionstests verknüpft.
+
+### Phase-4-Restpunkte
+- Sport-Hängeschilder sind in der Abteilungsmitte statt am Rand positioniert. Ein fehlender Rundständer oder eine fehlende Puppengruppe in Sporttextil wird durch ein *maßgleiches* Bibliotheksmöbel ergänzt; auch gedrehte Kopfmodelle behalten ihren ursprünglichen Raster-Footprint.
+- Die Bühnenvergabe durchsucht mehr geeignete Positionen; für enge Outdoor-Flächen steht `sport_insel_zelt_klein` zur Verfügung. In S035 / 2. OG belegt die bereits vorhandene Rundbühne die Outdoor-Fläche vollständig und wird folgerichtig als *baulich integrierte* Erlebnisinszenierung dokumentiert, anstatt dort kollidierende zusätzliche Möbel aufzustellen.
+- Die Regelprüfung verlangt pro Sportabteilung jetzt **exakt eine** Erlebnisinszenierung (entweder mobiles Bühnenmöbel oder dokumentierte Bestandsbühne). Sport-Smoketest prüft diese Eigenschaft sowie Rundständer/Puppengruppen in der produktiven 101-Etagen-Stichprobe.
+
+### Prüfprotokoll: tatsächlich durchgeführt
+- Über die GitHub-Repository-Schnittstelle auf den Branch committed; die geänderten JavaScript-Quellen wurden in der isolierten V8-Laufzeit auf syntaktische Parsbarkeit geprüft. Kein lokaler Git-Checkout vorhanden (Netzwerkauflösung zu github.com im Terminal fehlgeschlagen).
+- **Isolierte, exakte Planer-/Regelprüfungsfunktionen** mit den produktiven `render/haeuser-outlet.json`-Daten und den realen Profil-/Möbelrasterwerten: **20 FUNDUS-Filialen, 35 Verkaufsetagen, 4.024 Ladenplan-Möbel, 0 Regelverstöße**. Nutzflächendichte **36,09–44,19 %**, geringste Wandbelegung **90,67 %**, größte unbestückte Verkaufsraumfläche **5,625 m**. Unter den validierten Grundrissen befinden sich alle drei Bauformen. Angelegte `outlet-ladenbau-smoke.cjs`-Datei ist selbst **noch nicht unter Node ausgeführt** worden.
+- Isolierte V8-Produktionsdatenprüfung mit den ursprünglichen Sportmaß-, Raster-, Adapter- und Planfunktionen: **50 Sporthäuser / 101 Verkaufsetagen, 0 allgemeine Planregelverstöße**, keine fehlenden Sporttextil-Rundständer-/Puppengruppen. Die Kontrolle vor der S035-Korrektur zeigte genau eine fehlende Outdoor-Inszenierung; diese ist nun im Plan als vorhandene feste Bühne erfasst. Nach Einbau der *strengen* Ein-Bühnen-Prüfung muss die gesamte 101-Etagen-Stichprobe erneut ausgeführt werden.
+- Synthetische Sport-Grundrisse **30×30, 45×40, 55×40 und 75×55 m** mit der strengen Ein-Bühnen-Prüfung erneut durchlaufen: **0 Verstöße**, je Abteilung eine Bühne.
+- **Nicht durchgeführt / nicht als erfolgreich behauptet:** `npm ci`, `npm run build`, `npm run ladenbau:smoke`, `node pruef-ladenbau.js` unter Node, `--teile`-Sammlerprüfung, Gesamtgebäude-Teilebudget, Playwright-/Chromium-Rendering, PNG-Sichtprüfung, Regression gegen `spiel-render.js` und Bildübernahme nach `bilder/`.
+
+### Abnahme und nächster Schritt
+1. In einem vollständigen Repository-Checkout unter Node: `cd render && npm ci && npm run ladenbau:smoke && npm run ladenbau:pruefen && npm run ladenbau:pruefen:teile && npm run build`.
+2. Die FUNDUS-Kataloge `outlet-innen` und `outlet-innen-zustaende` sowie die acht Sport-Vorher-/Nachher-Häuser `sport-etagen-vergleich` rendern und ansehen, insbesondere Geschossübergänge, lesbare Beschilderung, freie Kassenwege, Wandbänder und Statuslogik. Erst nach visueller Prüfung aktuelle Bilder nach `bilder/` übernehmen.
+3. Reale Sammler-Gesamtgebäude-Teilezahl der 20 FUNDUS-Häuser mit `render/KIT.md` abgleichen (Obergrenze 3.000 je Haus); Sport-Nachher darf in keinem Vergleichsfall die Vorher-Teilezahl überschreiten.
+4. Anschließend PR auf aktuellen `main` aktualisieren/rebasen und erst bei grüner technischer und visueller Abnahme mergen. **Keine Mergefreigabe zum Zeitpunkt dieses Stands.**
