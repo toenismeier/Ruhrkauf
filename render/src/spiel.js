@@ -654,6 +654,7 @@ window.hausTun = (art, id, key, wert) => {
     : art === 'standard' ? { typ:'hausStandardSetzen', cluster:b.hauscluster, feld:key, wert:Math.max(1,Math.min(3,b.standard[key]+wert)) }
     : art === 'stunden' ? { typ:'hausStandardSetzen', cluster:b.hauscluster, feld:key, wert:Math.max(7,Math.min(22,b.standard.oeffnung[key]+wert)) }
     : art === 'clusterservice' ? { typ:'hausClusterServiceSetzen', cluster:b.hauscluster, service:key, an:wert }
+    : art === 'sonntag' ? { typ:'hausSonntag', stadt:h.stadt, woche:s.woche+2 }
     : null;
   if (!a) return;
   const ergebnis = E.fuehreAus(s, a);
