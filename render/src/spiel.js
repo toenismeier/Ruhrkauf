@@ -26,6 +26,7 @@ import { posteingangModul } from './ui/posteingang.js';
 import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
 import { laden, speichern } from './ui/speicher.js';
+import { portfolioModul } from './ui/portfolio.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 
 const param = new URLSearchParams(location.search);
@@ -292,6 +293,7 @@ function baueStadtAusSpiel(name) {
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
   $('stadtname').textContent = name;
+  stadtChipsZeigen();
   return ms;
 }
 // ─────────────────────────────────────────── Kacheln (Detailstufen für das iPhone)
@@ -427,8 +429,44 @@ const MERK = new Map();
 function merk() { return MERK; }
 
 // ─────────────────────────────────────────── Cockpit
+/** Schnelle Stadtnavigation über alle eigenen Häuser und die Konkurrenz. */
+function stadtChipsZeigen() {
+  if (!s || !stadtName) return;
+  const hs = E.portfolio(s).filter((h) => h.stadt === stadtName);
+  const konkurrenz = E.wettbewerbFuerGrafik(s, stadtName).filter((w) => w.status !== 'geschlossen');
+  $('stadt-chips').innerHTML = hs.map((h) => '<button class="' + h.formatKey +
+    '" data-stadthaus="' + esc(h.id) + '" title="' + esc(h.name) + '">' +
+    esc(h.name) + '</button>').join('') +
+    konkurrenz.map((w) => '<button data-stadtwb="' + esc(w.id) + '" title="Wettbewerber: ' +
+    esc(w.name) + '">Konkurrenz: ' + esc(w.name) + '</button>').join('');
+}
+$('stadt-chips').addEventListener('click', (e) => {
+  const h = e.target.closest('[data-stadthaus]'), w = e.target.closest('[data-stadtwb]');
+  if (h) oeffneHaus(h.dataset.stadthaus);
+  else if (w) oeffneWettbewerber(w.dataset.stadtwb);
+});
+/** Orte ohne bereits neu erzeugte Render-JSON bleiben über die Portfolio-Daten nutzbar. */
+function portfolioStadtOeffnen(name, id) {
+  if (STADTLISTE.some((stadt) => stadt.name === name)) {
+    wahl.value = name;
+    baueStadtAusSpiel(name);
+    if (id) oeffneHaus(id);
+    else schliessePanel();
+    return;
+  }
+  const hs = E.portfolio(s).filter((h) => h.stadt === name);
+  const konkurrenz = E.wettbewerbFuerGrafik(s, name).filter((w) => w.status !== 'geschlossen');
+  panel(name, 'Standortnetz · Stadtgrafik nach vollständigem Haus-Export', '<div class="karte">' +
+    hs.map((h) => '<div class="zeile"><span class="was"><b>' + esc(h.name) + '</b><i>' +
+      esc(h.formatKey) + ' · ' + esc(h.status) + '</i></span><b>' + geld(h.umsatz) + '</b></div>').join('') +
+    '</div><div class="karte"><div class="khead">Wettbewerber der Stadt</div>' +
+    konkurrenz.map((w) => '<div class="zeile"><span>' + esc(w.name) + '</span></div>').join('') +
+    '</div>');
+}
+
 function cockpitZeigen() {
   const c = E.cockpit(s);
+  const formate = E.formatCockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
   $('cockpit').innerHTML = [
     kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
@@ -437,6 +475,12 @@ function cockpitZeigen() {
     kachel('Umsatz Woche', s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
+    '<div class="formatkopfe">' + formate.map((f) => '<button data-format="' + f.formatKey + '" aria-label="' + esc(f.name) + ' im Portfolio filtern">' +
+      '<strong>' + esc(f.name) + '</strong><small>' + geld(f.umsatz) + ' / ' + geld(f.ebitda) +
+      ' · ' + f.offen + ' offen</small></button>').join('') + '</div>',
+    '<div class="formatsumme"><b>Gesamtportfolio</b><span>' + geld(formate.reduce((a, f) => a + f.umsatz, 0)) +
+      ' / ' + geld(formate.reduce((a, f) => a + f.ebitda, 0)) +
+      ' · ' + formate.reduce((a, f) => a + f.offen, 0) + ' offen</span></div>',
   ].join('');
   $('kw').textContent = `KW ${c.kw} / ${c.jahr}`;
   $('phase').textContent = c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '';
@@ -454,6 +498,7 @@ function woche(mitBot = false) {
   const geaendert = grafikNachziehen();
   const t2 = performance.now();
   cockpitZeigen();
+  stadtChipsZeigen();
   if (offenesHaus) oeffneHaus(offenesHaus);
   else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
   else if (offenesHq) oeffneHq(offenesHq === true ? undefined : offenesHq);
@@ -484,7 +529,8 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po].filter(Boolean);
+let pp = null;
+const module = () => [ek, vs, mk, pr, po, pp].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -731,7 +777,7 @@ function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesH
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
+const nachAktion = () => { cockpitZeigen(); stadtChipsZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -761,6 +807,20 @@ po = posteingangModul({
   },
 });
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
+pp = portfolioModul({ E, s: () => s, panel, meldung, nachAktion,
+  sprungStadt: (name) => portfolioStadtOeffnen(name),
+  sprungHaus: (id) => {
+    const h = s.haeuser.find((x) => x.id === id);
+    if (h) portfolioStadtOeffnen(h.stadt, id);
+  },
+});
+$('deutschland').addEventListener('click', () => oeffneModul(pp, 'karte'));
+$('deutschland-direkt').addEventListener('click', () => oeffneModul(pp, 'karte'));
+$('haeuser').addEventListener('click', () => oeffneModul(pp, 'liste'));
+$('cockpit').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-format]');
+  if (b) { pp.filterSetzen(b.dataset.format); oeffneModul(pp, 'liste'); }
+});
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
@@ -854,7 +914,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
