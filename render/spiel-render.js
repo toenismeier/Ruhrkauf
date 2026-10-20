@@ -696,6 +696,112 @@ async function buendeln() {
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
   }
+  // N04: Browser-Abnahme mit echten UI-Handlungen. Bilder aller 14 Schritte.
+  async function einfuehrungPruefen() {
+    const ordner = path.join(__dirname, '..', 'bilder', 'nice', 'einfuehrung');
+    fs.mkdirSync(ordner, { recursive: true });
+    const fehler = [], durchlauf = [], javascriptFehler = [];
+    p.on('pageerror', (e) => javascriptFehler.push(e.message));
+    await p.evaluate(() => {
+      const spiel = window.spiel;
+      spiel.neuesSpiel(1, 'Essen');
+      // Reale Freigaben für die Abnahme aufbauen; keine Test-Orders erzeugen.
+      for (let n = 0; n < 8; n++) spiel.woche(false);
+      spiel.fokusHaeuser();
+      spiel.einfuehrung.starten(true);
+    });
+    async function schritt(n) {
+      const id = ['lage', 'karte', 'haus', 'kennzahlen', 'cockpit', 'posteingang',
+        'einkauf', 'marketing', 'vorstand', 'hq', 'insolvenz', 'woche', 'bericht', 'reise'][n - 1];
+      await p.waitForFunction((v) => window.spiel.einfuehrung.zustand().schritt === v, id, { timeout: 12000 });
+      await p.waitForTimeout(120);
+      const z = await p.evaluate(() => window.spiel.einfuehrung.zustand());
+      const name = String(n).padStart(2, '0') + '-' + id + '.png';
+      await p.screenshot({ path: path.join(ordner, name) });
+      durchlauf.push({ n, id, datei: name, index: z.index });
+    }
+    async function klick(selector) {
+      const q = p.locator(selector).first();
+      await q.waitFor({ state: 'visible', timeout: 12000 });
+      await q.click();
+      await p.waitForTimeout(100);
+    }
+    try {
+      await schritt(1); await klick('[data-ein="weiter"]');
+      await schritt(2);
+      await p.mouse.move(190, 355); await p.mouse.down();
+      await p.mouse.move(230, 385, { steps: 6 }); await p.mouse.up();
+      await p.mouse.move(190, 355); await p.mouse.wheel(0, -170);
+      await schritt(3);
+      const punkt = await p.evaluate(() => {
+        const spiel = window.spiel;
+        spiel.fokusHaeuser();
+        const haus = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen')
+          .map((h) => spiel.tippPunkt(h.id)).find((q) => q && q.y < 620);
+        return haus;
+      });
+      if (!punkt) throw new Error('Kein antippbares Haus für Schritt 3');
+      await p.touchscreen.tap(punkt.x, punkt.y);
+      await schritt(4); await klick('[data-ein="weiter"]');
+      await schritt(5); await klick('[data-ein="weiter"]');
+      await schritt(6);
+      await klick('#pzu'); await klick('#postdirekt');
+      await schritt(7);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#einkauf');
+      await klick('#pinhalt [data-a="seite"][data-v="freigaben"]');
+      const freigaben = await p.evaluate(() => window.spiel.E.freigaben(window.spiel.s).anzahl);
+      if (freigaben) {
+        await klick('#pinhalt [data-a="frei"]');
+      } else {
+        // Keine Engine-Freigabe verfügbar: explizite UI-Alternative benutzen.
+        await klick('[data-ein="weiter"]');
+      }
+      await schritt(8);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#marketing');
+      await klick('#pinhalt [data-a="seite"][data-v="kalender"]');
+      await schritt(9);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#vorstand');
+      await schritt(10);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#hq');
+      await schritt(11); await klick('[data-ein="weiter"]');
+      await schritt(12);
+      await klick('#pzu'); await klick('#weiter'); await klick('[data-wa="ja"]');
+      await schritt(13);
+      await p.waitForSelector('#wochen-overlay .wb-bericht');
+      await klick('[data-ein="weiter"]');
+      await schritt(14);
+      for (let i = 0; i < 4 && await p.locator('#wb-vorfall .wb-vorfall').count(); i++) {
+        await p.locator('#wb-vorfall [data-wa="spaeter"]').click();
+        await p.waitForTimeout(30);
+      }
+      if (await p.locator('#wochen-overlay .wb-bericht').count()) await klick('#wochen-overlay [data-wa="schliessen"]');
+      await klick('#stadt-reise');
+      await p.waitForSelector('[data-reiseziel="Düsseldorf"]');
+      await klick('[data-reiseziel="Düsseldorf"]');
+      await p.waitForFunction(() => window.spiel.einfuehrung.zustand().modus === 'fertig', null, { timeout: 40000 });
+      const ergebnis = await p.evaluate(() => ({
+        tutorial: window.spiel.einfuehrung.zustand(),
+        stadt: window.spiel.reise.pruefe().stadt,
+        woche: window.spiel.s.woche,
+        freigaben: window.spiel.E.freigaben(window.spiel.s).anzahl,
+      }));
+      if (ergebnis.stadt !== 'Düsseldorf') fehler.push('Stadtwechsel nicht ausgeführt');
+      if (ergebnis.tutorial.modus !== 'fertig') fehler.push('Einführung nicht abgeschlossen');
+    } catch (e) {
+      fehler.push(e.message);
+    }
+    fehler.push(...javascriptFehler);
+    if (durchlauf.length !== 14) fehler.push('Bildnachweis nur ' + durchlauf.length + '/14 Schritte');
+    const protokoll = { durchlauf, fehler, aufruf: 'node spiel-render.js --nur-einfuehrung',
+      stand: 'Bilder und Protokoll nur nach tatsächlich ausgeführtem Browser-Test belastbar' };
+    fs.writeFileSync(path.join(ordner, 'pruefung.json'), JSON.stringify(protokoll, null, 2));
+    console.log('Einführung: ' + durchlauf.length + '/14 Schritte, ' + fehler.length + ' Fehler');
+    if (fehler.length) throw new Error('Einführung: ' + fehler.join('; '));
+  }
+  if (process.argv.includes('--nur-einfuehrung')) {
+    try { await einfuehrungPruefen(); } finally { await b.close(); }
+    return;
+  }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
     return;
