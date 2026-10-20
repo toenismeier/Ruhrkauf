@@ -61,3 +61,11 @@ Die GitHub-Actions-Läufe starten derzeit nicht (Kontingent). Bis das geklärt i
 - Ausnahme: Ist ein Test wegen eines echten Fehlers rot (NaN, Absturz, Determinismus), wird er nicht übersprungen, sondern der Fehler wird behoben.
 - Danach die Punkte 1 bis 4 dieses Auftrags (7 Metropolen, Obergrenzen, Sport-IDs, Export). Sie sind weiterhin offen.
 - `spiel-render.js` muss mit dem Branch 0 Abweichungen liefern, bevor Phase 1 als abgenommen gilt.
+
+## 8. Dritte Prüfung (20.10. früh)
+- **Phase-1-Daten abgenommen:** 220 Städte (7 Metropolen, 73 Großstädte, 140 Mittelstädte), 360 Hartwig + 4 Premium + 86 Volkskauf + 44 Sport + 66 FUNDUS, höchstens 9 Häuser je Metropole. Typecheck grün, 95 Tests grün, 14 sauber als Phase 2 übersprungen.
+- **Offen:**
+  - `render/haeuser-outlet.json` fehlt im Branch. Den Export für FUNDUS nachziehen (Abschnitt 4).
+  - `spiel-render.js` bricht ab mit „Wochenstreifen enthält nicht die aktuelle Kalenderwoche“. Das Spiel ist mit Bot C in Woche 23 zerschlagen, und die Woche läuft nicht weiter. Mit der neuen Welt überlebt der Bot die Insolvenz nicht.
+- **Folge:** Phase 1 wird **nicht allein** in `main` gemergt, weil das Spiel dort sonst nach 23 Wochen endet. **Phase 2 (Kalibrierung) direkt auf diesem Branch anschließen.** Gemergt wird nach Phase 2, wenn Bot C auf Seeds 1 bis 3 fünf Jahre überlebt und `spiel-render.js` 0 Abweichungen liefert.
+- Die Grafik-Aufträge `massstab-staedte.md` und `massstab-oberflaeche.md` dürfen schon jetzt von `feat/engine-massstab` abzweigen statt von `main`.

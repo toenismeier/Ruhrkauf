@@ -57,3 +57,24 @@ Ziel je Haus 4.000 bis 9.000 Teile. Werte in `KIT.md`. Jedes Haus muss allein an
 - Sichtprüfung im Katalog `premium-stadt`: Das Premium-Haus ist das prägnanteste Gebäude der Stadt und klar von Hartwig-Häusern und Premium-Wettbewerbern (Haus Ahlert usw.) unterscheidbar.
 - Lokal: Typecheck, alle Tests grün (inklusive Bot C), Build, `spiel-render.js` 0 Abweichungen, `pruef-staedte` 0 Fehler, `pruef-gestaltung` 0 Verstöße.
 - Ohne CI arbeiten wie in `auftraege/README.md`.
+
+## 5. Zweite Prüfung (20.10. früh)
+- **Optik: deutlich besser, im Kern abgenommen.** Die vier Häuser sind jetzt Unikate (5.200 bis 6.800 Teile), die Zustände sind erkennbar. Zwei Restpunkte:
+  - P001 Berlin: Die Fahnenmasten auf der Traufe stehen ohne Fahnen da und wirken wie Antennen. Entweder Fahnen daran oder die Masten entfernen und die Fahnen nur über den Eingang setzen (Abschnitt 2).
+  - P003 Hamburg: Die Kuppel ist noch zu klein und niedrig. Sie muss mindestens 8 m über die Traufe ragen und über der Ecke sitzen, nicht in der Dachmitte.
+- **Engine: weiter rot, das ist der Blocker.**
+  - `jest`: 4 rot. Premium-Margen Seed 1 und 2, „Bot C überlebt fünf Jahre“, „tiefe Sanierung überlebt fünf Jahre“.
+  - `spiel-render.js` bricht ab mit „Wochenstreifen enthält nicht die aktuelle Kalenderwoche“. Das ist kein Fehler der Oberfläche: Das Spiel ist in Woche 23 schon zerschlagen, deshalb läuft die Woche nicht weiter.
+  - **Befund mit `npx tsx scripts/bot.ts 1 260 --tief`:**
+
+    | | `main` | `feat/grafik-premium` |
+    |---|---|---|
+    | W12 EBITDA13 | −58,1 Mio. € | −65,3 Mio. € |
+    | W12 BR | 11 | 5 |
+    | W22 | Insolvenzplan angenommen, danach regulär bis W260 | Insolvenzplan von **allen** Gläubigergruppen abgelehnt, zerschlagen |
+
+  - Die Premium-Häuser sollen den Konzern-EBITDA verbessern, hier verschlechtern sie ihn um rund 7 Mio. € im Quartal. Prüfen:
+    1. `premiumServiceQuote` in `sonstige` und der FTE-Zuschlag zusammen gegen den Produktivitätsfaktor: Rechnet ein Premium-Haus in W1 bis W12 wirklich mit rund 11 % Marge, oder mit weniger als das Haus vorher? Tabelle je Haus vorher/nachher in die PR.
+    2. `premiumAngebote` (in `ereignisse.ts`) darf in der Insolvenz keine Zufallszahlen aus dem gemeinsamen Strom ziehen, solange kein Angebot entsteht. Sonst verschiebt sich die Ereignisfolge gegenüber `main` (Maison Arvel, Hallberg). Für Premium-Angebote einen eigenen abgeleiteten RNG nehmen.
+    3. Die Abstimmung über den Insolvenzplan: Was senkt die Zustimmung so stark (BR 5 statt 11)? Wenn das Premium-Image, der Schutz oder offene Premium-Angebote in die Bewertung einfließen, gehört das raus. Die Gläubiger stimmen über den Plan ab, nicht über das Image der vier Häuser.
+  - Ziel: Der Bot-Lauf mit Seed 1 bis 3 verläuft wie auf `main` (Insolvenzplan angenommen, Ende regulär W260), die Margen liegen im Ziel ±2 Punkte, `spiel-render.js` 0 Abweichungen.
