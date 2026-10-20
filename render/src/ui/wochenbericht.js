@@ -52,12 +52,12 @@ export function wochenberichtModul(ctx) {
     if (mitDialog) await warten(istReduziert ? 0 : WOCHEN_ZEIT.frageAus + WOCHEN_ZEIT.stillstand);
     if (meins !== token) return;
     markieren('Wochenberechnung');
-    const vor = ctx.posteingang(), alt = ctx.cockpit(), davorCash = alt.cash;
+    const vor = ctx.posteingang();
     try {
       ctx.woche();
     } catch (e) { aufraeumen(); ctx.fehler?.(e); return; }
     const nach = ctx.posteingang(), neu = new Set(vor.handeln.map((x) => x.id)), gemeldet = new Set(vor.meldungen.map((x) => x.id));
-    const c = ctx.cockpit(), ver = ctx.historie();
+    const c = ctx.cockpit(), ver = ctx.historie(), fluss = ctx.kapitalfluss();
     const vergangen = ver.length > 1 ? ver[ver.length - 2] : null;
     const jetzt = ver[ver.length - 1];
     // Die Engine verbucht Ereignisse für die gerade beendete Woche, bevor sie s.woche erhöht.
@@ -67,9 +67,9 @@ export function wochenberichtModul(ctx) {
     const vorgaenge = nach.handeln.filter((h) => !neu.has(h.id)).sort((a, b) => Number(b.dringend) - Number(a.dringend) || a.frist - b.frist);
     bericht = {
       kw: kwEnde, jahr: jahrEnde, umsatz: c.umsatzWoche, ebitda: c.ebitdaWoche, umsatzVor: vergangen?.umsatz ?? null,
-      ebitdaVor: vergangen?.ebitda ?? null, cashNetto: c.cash - davorCash, cash: c.cash,
+      ebitdaVor: vergangen?.ebitda ?? null, cashNetto: fluss.netto, cash: c.cash,
       phase: c.phase, kredite: c.kreditFrei, runway: c.runwayWochen,
-      meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt, kapitalfluss: ctx.kapitalfluss(),
+      meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt, kapitalfluss: fluss,
     };
     markieren('Engine abgeschlossen');
     if (modus() === 'aus') { aufraeumen(); return; }
