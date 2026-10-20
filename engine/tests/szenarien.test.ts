@@ -90,7 +90,7 @@ describe('N09 Szenarien', () => {
     expect(s.cash).toBe(900_000_000);
     expect(szenarioFrequenz(s)).toBeLessThan(1);
     expect(s.szenario?.umsatzZiel).toBeGreaterThan(0);
-    expect(szenarioZiel(s).text).toContain('Marktführer');
+    expect(szenarioZiel(s).text).toContain('marktführer');
   });
 
   test('Sandkasten: keine Insolvenz, kein Wertungsziel, wiederauffüllbare Kasse', () => {

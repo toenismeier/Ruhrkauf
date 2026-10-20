@@ -571,10 +571,11 @@ export function initialisiereEinkauf(s: GameState): void {
  * Open to Buy einer Saison: Planbasis = Bedarf aller Pools über die 26 Saisonwochen nach der aktuellen Nachfragebasis
  * (wird wöchentlich fortgeschrieben, damit Schließungen und Nachfragerückgang das Limit senken).
  */
-export function limitFuer(s: GameState, st: WgStand, sid: number): { plan: number; verbraucht: number } {
+export function limitFuer(s: GameState, st: WgStand, sid: number, nurLesen = false): { plan: number; verbraucht: number } {
   const key = String(sid);
   let l = st.limits[key];
-  if (!l) {
+  if (!l && nurLesen) l = { plan: 0, verbraucht: 0, stand: -1 }; // Abfragen legen keinen Spielstand an
+  else if (!l) {
     l = st.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
     for (const k of Object.keys(st.limits)) if (Number(k) < sid - 2) delete st.limits[k];
   }
@@ -1402,7 +1403,7 @@ function basisWg(s: GameState, d: WgDef, bestandJe: Map<WgId, { best: number; al
   const sz = st.saisons[String(saisonId(s.woche))] ?? { eingang: 0, abverkauf: 0 };
   b.sEin = sz.eingang; b.sAb = sz.abverkauf * R('s');
   const sid = saisonId(s.woche);
-  const L = limitFuer(s, st, sid);
+  const L = limitFuer(s, st, sid, true);
   b.limit = limitWert(st, L); b.limitV = L.verbraucht;
   for (const x of s.bestellungen) if (x.wg === d.id) b.pipe += x.wert;
   for (const f of s.einkauf.freigaben) if (f.wg === d.id) { b.offenN++; b.offenW += f.wert; }

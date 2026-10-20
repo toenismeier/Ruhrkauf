@@ -76,6 +76,7 @@ describe('N12 Konzernchronik', () => {
     chronikAktualisieren(s);
     expect(s.chronik?.some(e => e.art === 'vorstand' && e.bezug === 'cfo')).toBe(true);
     s.quartale.push({ nr: 0, start: 0, planStandard: 0, ebitdaIst: 1000 });
+    s.woche = 13; // Quartal abgeschlossen
     chronikAktualisieren(s, 12);
     expect(s.chronik?.some(e => e.art === 'quartal' && e.bezug === 'quartal-0')).toBe(true);
     chronikErfolg(s, 'aufbruch', 'Aufbruch');

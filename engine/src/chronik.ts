@@ -91,7 +91,7 @@ export function chronikAktualisieren(s: GameState, ereignisWoche = s.woche): voi
       eintragen(s, 'vorstand', `${person.name} übernimmt das Ressort ${id.toUpperCase()}.`, id, ereignisWoche);
     }
   }
-  const q = s.quartale.find(q => q.start + 12 === ereignisWoche && q.nr > alt.letztesQuartal);
+  const q = s.quartale.find(q => q.start + 12 === ereignisWoche && q.start + 13 <= s.woche && q.nr > alt.letztesQuartal);
   let bestesQuartal = alt.bestesQuartal;
   let letztesQuartal = alt.letztesQuartal;
   if (q) {

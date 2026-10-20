@@ -239,7 +239,7 @@ describe('HQ Kompatibilität und Wirkungen', () => {
     for (const g of j.gebaeude) {
       expect(Object.keys(g).sort()).toEqual(['etagen', 'id', 'name', 'stadt', 'typ']);
       for (const e of g.etagen) {
-        expect(Object.keys(e).sort()).toEqual(['abteilungen', 'gemietet', 'nr', 'qm']);
+        expect(Object.keys(e).sort()).toEqual(['abteilungen', 'archiv', 'gemietet', 'nr', 'qm']);
         for (const a of e.abteilungen) expect(Object.keys(a).sort()).toEqual(['fte', 'id', 'stufe']);
       }
     }

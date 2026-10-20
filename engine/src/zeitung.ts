@@ -123,7 +123,7 @@ export function zeitungInterviewAntwort(s: GameState, e: Entscheidung, option: s
   if (!zeitungAktiv(s) || e.typ !== 'interview') return;
   const wirkung = {
     offensiv: { image: 2, betriebsrat: -2, bank: -1, kreditversicherer: -1, zitat: 'Wir treiben den Umbau konsequent voran und werden unsere Ziele erreichen.' },
-    sachlich: { image: 1, betriebsrat: 1, bank: 1, kreditversicherer: 1, zitat: 'Wir gehen Schritt für Schritt vor und messen jede Maßnahme an belastbaren Zahlen.' },
+    sachlich: { image: 0, betriebsrat: 0, bank: 0, kreditversicherer: 0, zitat: 'Wir gehen Schritt für Schritt vor und messen jede Maßnahme an belastbaren Zahlen.' },
     ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: 'Zu einzelnen Punkten möchten wir uns gegenwärtig nicht äußern.' },
   }[option as 'offensiv' | 'sachlich' | 'ausweichend'];
   if (!wirkung) return;

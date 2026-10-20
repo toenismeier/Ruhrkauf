@@ -46,7 +46,7 @@ describe('Der Handelsbote', () => {
     expect(s.rng).toBe(alteRng);
   });
 
-  test('Interview: sachliche Bot-Antwort mit kleinem Effekt und Zitat in nächster Ausgabe', () => {
+  test('Interview: sachliche Standardantwort ist neutral, Zitat in nächster Ausgabe', () => {
     const s = neuesSpiel(11);
     s.woche = 9;
     const rng = s.rng, zaehler = s.zaehler;
@@ -59,9 +59,8 @@ describe('Der Handelsbote', () => {
     s.woche = 10;
     const vor = { ...s.stakeholder };
     expect(fuehreAus(s, { typ: 'entscheiden', id: e!.id, option: 'sachlich' }).ok).toBe(true);
-    expect(s.stakeholder.image).toBe(vor.image + 1);
-    expect(s.stakeholder.betriebsrat).toBe(vor.betriebsrat + 1);
-    expect(s.stakeholder.bank).toBe(vor.bank + 1);
+    // Standard bleibt neutral (Regel: ohne Eingriff keine Wirkung); offensiv/ausweichend wirken.
+    expect(s.stakeholder).toEqual(vor);
     zeitungWoche(s);
     expect([zeitungArchiv(s).at(-1)!.aufmacher, ...zeitungArchiv(s).at(-1)!.meldungen].some((x) => x.art === 'interview' && x.text.includes('„'))).toBe(true);
   });
