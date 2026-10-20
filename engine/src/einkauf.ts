@@ -1,3 +1,4 @@
+import { verbraucheCluster } from './merchandise';
 // Einkauf: 57 Warengruppen (WG) unter den 16 Bereichen, Bestand und Orders je WG und Art (NOS, Saison),
 // Orderrhythmus (Vororder, Nachorder, NOS-Dispo), Open to Buy, Freigabe-Eingang und Kennzahlen.
 // Vertrag: ../EINKAUF-VERTRAG.md. Die Bereichswerte (GameState.bestand je gruppe, basisUmsatz, Wareneinsatz)
@@ -799,7 +800,8 @@ export function einkaufVerbrauch(s: GameState, n: EinkaufNachfrage): { verfuegba
         let ziel = ekBedarf * quote;
         let extraVk = 0;
         if (pool === FREMD && ausweichVk > 0) { extraVk = ausweichVk; ziel += ausweichVk * (1 - m) * quote; }
-        const x = nimm(topf, ziel, ekBedarf * (art === 'saison' ? capM : 1), sAkt, st);
+        const x = verbraucheCluster(s, topf, ziel, ekBedarf * (art === 'saison' ? capM : 1), d.bereich,
+          (ks, wert, alt) => nimm(ks, wert, alt, sAkt, st));
         if (art === 'saison' && x.alt > 0) marketingAltVerkauf(s, d.bereich, x.alt, d.id);
         const vkR = x.voll / Math.max(0.05, 1 - m);
         if (pool !== FREMD) {
