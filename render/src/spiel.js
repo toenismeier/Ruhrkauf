@@ -531,11 +531,13 @@ function panel(titel, unter, html, klasse = '') {
   $('pinhalt').innerHTML = html;
   const neu = !$('panel').classList.contains('offen');
   if (neu) vorherigerFokus = document.activeElement;
+  $('panel').inert = false;
+  $('panel').removeAttribute('aria-hidden');
   $('panel').classList.add('offen');
   document.body.classList.add('panel-offen');
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
-function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
+function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
 /** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
 function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
@@ -866,8 +868,8 @@ $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
 $('einstellungen').addEventListener('click', () => oeffneModul(es));
 // Menü wie Coffee Inc: Knopf unten rechts öffnet die Kacheln Zentrale, Einkauf, Vorstand, Marketing, Produkte
-function menueZu() { $('menue').classList.remove('offen'); $('menueknopf').classList.remove('an'); }
-$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menueknopf').classList.toggle('an', o); });
+function menueZu() { $('menue').classList.remove('offen'); $('menue').inert = true; $('menueknopf').classList.remove('an'); }
+$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menue').inert = !o; $('menueknopf').classList.toggle('an', o); });
 $('menue').addEventListener('click', (e) => { if (e.target === $('menue')) menueZu(); });
 function menueBadge() {
   const n = (s ? E.freigaben(s).anzahl : 0), v = vs?.badge() ?? 0, b = $('menuebadge');
