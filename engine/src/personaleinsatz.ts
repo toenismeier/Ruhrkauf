@@ -35,6 +35,7 @@ export interface PersonalHausStand {
   aushilfenQuote: number; // zusätzlich eingeplante Aushilfenstunden / planmäßige Stunden
   stimmung: number;
   einarbeitungBis: number;
+  einarbeitungFte: number;
   training: number;
   plan?: PersonalPlan;
 }
@@ -115,7 +116,8 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
   const st = h.personaleinsatz!;
   const aus = ausfall(s), q = qualitaet(s);
   const neu = st.einarbeitungBis > s.woche;
-  const relativ = st.basisFte ? fte(h) / st.basisFte : 1;
+  // Nur neu eingestellte Kräfte leisten in den ersten vier Wochen effektiv 50 %.
+  const relativ = st.basisFte ? (fte(h) - (neu ? 0.5 * st.einarbeitungFte : 0)) / st.basisFte : 1;
   const dezember = s.woche % 52 >= 47 && s.woche % 52 <= 51;
   const jahr = Math.floor(s.woche / 52);
   const weihnachten = s.personaleinsatz?.weihnachten[jahr] ?? 'basis';
@@ -148,7 +150,7 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
       const fehler = richtung * 0.19;
       const bezug = 1 + fehler * (1 - st.basisQualitaet);
       const genau = 1 + fehler * (1 - q);
-      let plan = bedarf * relativ * (neu ? 0.75 : 1) * st.faktor[g] * genau * (1 + st.training * 0.035);
+      let plan = bedarf * relativ * st.faktor[g] * genau * (1 + st.training * 0.035);
       if (g === 'kasse' && i === 5) plan *= st.samstagKasse;
       if (g === 'kasse' && dezember && weihnachten === 'sparsam') plan *= 0.88;
       if (g === 'kasse' && dezember && weihnachten === 'spaet') plan *= 0.78;
@@ -287,7 +289,7 @@ export function initialisierePersonaleinsatz(s: GameState): void {
         return wert + (P ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g as GruppeId] ?? 1)));
       }, 0)), basisQualitaet: q, anteile: { ...PERSONAL_ANTEILE },
       faktor: { logistik: 1, verkauf: 1, kasse: 1, verwaltung: 1 }, samstagKasse: 1,
-      aushilfenQuote: 0, stimmung: 70, einarbeitungBis: -1, training: 0,
+      aushilfenQuote: 0, stimmung: 70, einarbeitungBis: -1, einarbeitungFte: 0, training: 0,
     };
   }
   neuPlanen(s);
@@ -321,6 +323,7 @@ export function personaleinsatzWoche(s: GameState): void {
     if (st.stimmung < 32 && (s.woche + h.id.length * 7) % 17 === 0) {
       h.personal.teilzeit = Math.max(0, h.personal.teilzeit * 0.98);
       st.einarbeitungBis = s.woche + 4;
+      st.einarbeitungFte = Math.max(st.einarbeitungFte, fte(h) * 0.02);
       melde(s, 'warnung', h.name + ': erhöhte Fluktuation. Neue Kräfte sind vier Wochen nur halb produktiv.', { hausId: h.id, modul: 'personal' });
     }
   }
