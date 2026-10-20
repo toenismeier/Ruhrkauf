@@ -17,6 +17,12 @@ pruefe(Object.keys({ 1: 1, 2: 1, 3: 1 }).every((n) => outlets.some((h) => famili
 for (const h of outlets) {
   const m = masseOutlet(h);
   pruefe(m.w > 0 && m.d > 0 && Number.isFinite(m.H), h.id + ' Maße');
+  // Nachbesserung: drei Baukörper müssen sich schon über Geschosszahl und Silhouette unterscheiden.
+  if (m.familie === 1) pruefe(m.n === 1 && m.H >= 6 && m.H <= 7, h.id + ': Retail-Park-Box 6–7 m');
+  if (m.familie === 2) pruefe(m.n === 2 && m.H >= 10 && m.H <= 11, h.id + ': Fachmarkt 10–11 m');
+  if (m.familie === 3) pruefe(m.n >= 2 && m.n <= 3 && m.buero >= 1 && m.buero <= 2 && m.H > 11, h.id + ': Geschäftshaus mit Büros');
+  pruefe(m.familie === 3 ? m.park === 0 : m.park >= 18, h.id + ': Parken nach Bauform');
+
   pruefe(h.substanz >= 40 && h.substanz <= 85, h.id + ' Substanz');
   pruefe(h.baujahr >= 1998 && h.baujahr <= 2016, h.id + ' Baujahr');
   if (h.lage === 'b') {
