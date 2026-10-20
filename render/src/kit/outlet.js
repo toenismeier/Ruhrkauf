@@ -18,27 +18,35 @@ export function familieOutlet(haus) {
 
 export function masseOutlet(haus) {
   const familie = familieOutlet(haus);
+  const variante = Number(haus.fassade ?? 0);
   const n = familie === 3 ? clamp((haus.etagen ?? [0, 1]).filter((e) => e >= 0).length, 2, 3) : familie === 2 ? 2 : 1;
+  const buero = familie === 3 ? 1 + (variante % 2) : 0;
   const A = clamp(haus.grundflaecheQm ?? 1700, 650, 3100);
-  const bw = Math.round(clamp(Math.sqrt(A * 1.55), 26, 68) / 2) * 2;
+  const bw = Math.round(clamp(Math.sqrt(A * (1.4 + (variante % 3) * 0.11)), 26, 68) / 2) * 2;
   const bd = Math.round(clamp(A / bw, 19, 55) / 2) * 2;
-  const park = familie === 3 ? 0 : 18;
-  return { w: bw, d: bd + park, bw, bd, n, H: (familie === 1 ? 7.2 : 5.2 + (n - 1) * 4.25), familie, park };
+  const park = familie === 3 ? 0 : 18 + (variante % 3) * 2;
+  const H = familie === 1 ? 6.65 + (variante % 3) * 0.1
+    : familie === 2 ? 10.35 + (variante % 3) * 0.18
+    : 5 + (n - 1) * 3.9 + buero * 3.5;
+  return { w: bw, d: bd + park, bw, bd, n, H, familie, park, buero, variante };
 }
 
 function text(scene, s, inhalt, u, y, t, breite, hoehe, farbe = '#ffffff', bg = null) {
   if (breite < 1) return;
   plakat(scene, s, inhalt, u, y, t, passend(inhalt, breite, hoehe), farbe, bg);
 }
-function marke(scene, s, H, band) {
-  const y = Math.max(3.4, H - (H > 9 ? 3.1 : 2.6));
-  s.q(0, s.L, y, y + 1.9, 0.22, 0.55, FARBE_OUTLET);
-  text(scene, s, NAME_OUTLET, s.L * 0.53, y + 1.07, 0.61, s.L - 4, 1.38);
-  if (band) {
-    s.q(0.4, s.L - 0.4, y - 0.77, y - 0.05, 0.26, 0.50, '#f9f5ef');
-    text(scene, s, 'Marken. Bis zu 60 % unter dem empfohlenen Preis.', s.L / 2, y - 0.39, 0.54, s.L - 2.5, 0.46, FARBE_OUTLET);
-  }
-  return { u0: 0.4, u1: s.L - 0.4, y0: y - 0.78, y1: y + 1.94, art: 'logo' };
+function marke(scene, s, H, bandUnterkante, zusatz = false) {
+  // Durchgehende 3,5-m-Brüstung auf beiden sichtbaren Seiten, kein kleines Dachlogoschild.
+  const y = bandUnterkante;
+  s.q(0, s.L, y, y + 3.5, 0.45, 0.90, FARBE_OUTLET);
+  s.q(0, s.L, y + 3.38, y + 3.55, 0.91, 1.05, '#64152d');
+  // Weiße Versalien im Format einer echten Handelsfassade (2,4 m / 2,0 m City).
+  const city = H > 11.5;
+  text(scene, s, NAME_OUTLET, s.L / 2, y + 1.88, 1.10, s.L - 2.2, city ? 2.35 : 2.70);
+  const claim = zusatz ? 'Neue Ware jede Woche' : 'Marken. Bis zu 60 % unter dem empfohlenen Preis.';
+  s.q(0.3, s.L - 0.3, y - 1.14, y - 0.08, 0.48, 0.88, '#f3ede3');
+  text(scene, s, claim, s.L / 2, y - 0.61, 1.07, s.L - 1.5, 0.69, FARBE_OUTLET);
+  return { u0: 0, u1: s.L, y0: y - 1.16, y1: y + 3.56, art: 'logo' };
 }
 
 // Lange Bekleidungsreihen statt Wühltischen; durch die beiden großen Glasfronten lesbar.
@@ -106,37 +114,48 @@ export function innenOutlet(S, scene, haus, opt = {}) {
   return { hoehe: H, w, d: bd };
 }
 
-function glasfront(S, scene, s, H, offen, r, oben = false) {
-  const y0 = 0.48, y1 = Math.min(4.55, H - 2.45);
-  if (offen) {
-    s.q(0.55, s.L - 0.55, y0, y1, -0.01, 0.09, GLAS);
-    for (let u = 0.8; u < s.L - 0.5; u += 3.2)
-      s.q(u, u + 0.09, y0, y1, 0.10, 0.22, '#d9dce0');
-    // Schaufensterpuppen vor Kleiderstangen; Schuhe/Taschen/Home, keine Plakatwand.
-    for (let u = 4; u < s.L - 3; u += 7.5) {
-      if (Math.abs(u - s.L * 0.52) < 4) continue;
-      puppe(s, u, 0.7, -0.55, waehle(r, KLEID), waehle(r, KLEID), 0.85);
-      s.q(u - 1.6, u + 1.7, 0.55, 1.0, -1.5, -0.9, '#e1ddd4');
-      s.q(u - 1.5, u + 1.5, 1.0, 1.2, -1.5, -0.9, '#b7a6a0');
+function glasfront(S, scene, s, maxY, offen, r, oben = false) {
+  // Nicht durch einen grauen Vollquader verdecken: Rahmen, Schaufenster und sichtbare Displays.
+  const y0 = 0.48, y1 = Math.max(3.2, Math.min(maxY, oben ? 7.05 : 4.25));
+  s.q(0.25, s.L - 0.25, 0.35, 0.60, 0.10, 0.27, '#bfc2c3');
+  s.q(0.25, s.L - 0.25, y1 - 0.18, y1, 0.1, 0.30, '#e0e1dc');
+  for (let u = 0.6; u < s.L; u += 3.3) {
+    s.q(u, u + 0.12, y0, y1, 0.11, 0.28, '#a9b6bd');
+    if (offen && u > 2 && u < s.L - 3 && Math.abs(u - s.L * 0.52) > 4.5) {
+      // Dekorierte Schaufensterinsel: Mannequins, Taschen, Schuhe und Home.
+      const farbe = waehle(r, WAREN);
+      puppe(s, u + 1.05, 0.85, -0.42, farbe, waehle(r, KLEID), 1.12);
+      s.q(u + 0.38, u + 2.5, 0.42, 0.62, -1.3, -0.9, '#dedacf');
+      s.q(u + 0.45, u + 0.95, 1.18, 1.55, -1.35, -0.87, waehle(r, WAREN));
+      s.q(u + 1.62, u + 2.13, 0.83, 1.13, -1.35, -0.87, waehle(r, WAREN));
+      s.q(u + 1.58, u + 2.44, 1.85, 2.03, -1.35, -0.95, '#dedacf');
+      s.q(u + 1.68, u + 2.32, 2.03, 2.53, -1.32, -0.98, waehle(r, WAREN));
     }
-  } else s.q(0.55, s.L - 0.55, y0, y1, -0.01, 0.10, '#c6c9ca');
+  }
+  if (!offen) s.q(0.55, s.L - 0.55, y0, y1 - 0.2, -0.01, 0.09, '#93999a');
   const tuer = s.L * 0.52;
-  s.q(tuer - 1.9, tuer + 1.9, 0.40, y1, 0.10, 0.30, '#a9c4cf');
-  s.q(tuer - 0.09, tuer + 0.09, 0.40, y1, 0.30, 0.35, '#d6dde1');
+  s.q(tuer - 1.9, tuer + 1.9, 0.4, 3.1, 0.15, 0.31, '#b1d1dc');
+  s.q(tuer - 0.07, tuer + 0.07, 0.4, 3.1, 0.32, 0.39, '#d6dde1');
   if (oben) {
-    const sy = 5.3;
-    s.q(0.5, s.L - 0.5, sy, sy + 2.45, 0.02, 0.12, '#80a5b5');
-    for (let u = 1; u < s.L - 1; u += 3.4) s.q(u, u + 0.16, sy, sy + 2.45, 0.15, 0.21, '#d9dedf');
-    // Angedeutete Rolltreppe hinter der zweigeschossigen Glasfront.
-    for (let i = 0; i < 11; i++) s.q(Math.max(0.6, s.L / 2 - 4 + i * 0.68), Math.min(s.L - 0.6, s.L / 2 - 3.5 + i * 0.68), 0.9 + i * 0.46, 1.08 + i * 0.46, -2.2, -1.4, '#c8cdd0');
+    s.q(0.6, s.L - 0.6, 4.95, 7.75, 0.02, 0.12, '#91b9ca');
+    for (let u = 0.7; u < s.L - 1; u += 3.4)
+      s.q(u, u + 0.16, 4.95, 7.75, 0.15, 0.31, '#e1e3e3');
+    s.q(0, s.L, 4.72, 4.98, 0.17, 0.36, '#e3e3de');
+    // Lesbare aufsteigende Rolltreppe, nicht bloß horizontale Stufen im Glas.
+    for (let i = 0; i < 12; i++) {
+      const u = Math.min(s.L - 3, s.L * 0.30 + i * 0.51);
+      s.q(u, u + 0.8, 1.1 + i * 0.45, 1.22 + i * 0.45, -1.7, -0.75, '#bdc5c8');
+      s.q(u, u + 0.1, 1.1 + i * 0.45, 2.0 + i * 0.45, -0.8, -0.65, '#788994');
+    }
   }
 }
 
 function pylon(S, scene, x, z) {
-  S.box(0.28, 7.0, 0.28, x, 3.65, z, '#747c84');
-  S.box(5.8, 2.6, 0.70, x, 7.1, z, FARBE_OUTLET);
-  const s = new Seite(S, x - 2.9, z - 0.35, 5.8, 0.7, '+z');
-  text(scene, s, NAME_OUTLET, 2.9, 7.55, 0.12, 5.3, 1.32);
+  S.box(0.34, 9.3, 0.34, x, 4.95, z, '#697178');
+  S.box(8.2, 2.95, 0.85, x, 9.8, z, FARBE_OUTLET);
+  const s = new Seite(S, x - 4.1, z - 0.43, 8.2, 0.86, '+z');
+  text(scene, s, NAME_OUTLET, 4.1, 10.0, 0.60, 7.75, 1.76);
+  s.q(0.2, 8, 7.85, 8.28, 0.4, 0.48, '#f3ede3');
 }
 
 export function outlet(S, scene, haus, opt = {}) {
