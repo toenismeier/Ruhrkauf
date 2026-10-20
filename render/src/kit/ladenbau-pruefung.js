@@ -71,7 +71,7 @@ function wanddeckung(plan) {
   // Nur wirklich gesperrte Wandabschnitte aus dem Nenner entfernen.
   // Die frühere Subtraktion der *gesamten* Ausnahmen vom belegten Band
   // hat dort Belegung als Null gezählt, wo ein Lager das Wandmodul ersetzte.
-  const exempt=plan.hindernisse.filter(h=>/^(treppe|rt|lager|umkleide|service|aufzug|wc|werkstatt|luft|turm)/.test(String(h.typ)));
+  const exempt=plan.hindernisse.filter(h=>/^(treppe|rt|lager|umkleide|service|aufzug|wc|werkstatt|luft|turm|radbuehne)/.test(String(h.typ)));
   const intervalle=(typ,max)=>({
     ausnahmen:exempt.filter(h=>typ==='west'?h.x<=S:h.z<=S).map(h=>typ==='west'?[h.z,h.z+h.d]:[h.x,h.x+h.w]),
     band:plan.moebel.filter(m=>m.typ==='wand'&&m.band===typ).map(m=>typ==='west'?[m.z,m.z+m.d]:[m.x,m.x+m.w]),

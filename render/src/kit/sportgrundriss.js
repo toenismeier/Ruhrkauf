@@ -298,7 +298,8 @@ function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
   };
   const egFront = eg && [2, 3, 5, 6].includes(fam) && !ra.mall;
   if (plan) {
-    baueLadenplan(S, scene, plan, { vorbereiten: false, dichte: d });
+    baueLadenplan(S, scene, plan, { vorbereiten: false, dichte: d,
+      bodenAussparungen: loecher.map(([x0,z0,x1,z1])=>({x:x0,z:z0,w:x1-x0,d:z1-z0})) });
     // Die vorhandene Leerflächenmessung und Kundenverteilung berücksichtigen die neuen Möbel.
     belegt.push(...plan.moebel.map(m => [m.x, m.z, m.x + m.w, m.z + m.d]));
     belegt.push(...plan.hindernisse.map(h => [h.x, h.z, h.x + h.w, h.z + h.d]));

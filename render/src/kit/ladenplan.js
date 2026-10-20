@@ -168,9 +168,12 @@ function kassenPlatz(plan,profil) {
   const id=profil.kasse,def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
   const main=plan.gaenge[0],vorfeld=gangZellen(R.kassenVorfeld)*U;
   const xs=[main.x+main.w+U,main.x-w-U,main.x+main.w+2*U,main.x-w-2*U];
-  // Positionen in Eingangsnähe, bei Treppen und Stützen ausweichend.
-  for(let z=plan.tiefe-d-3*U;z>=Math.max(U,plan.tiefe-d-9*U);z-=U)
-    for(const x of xs){
+  // Erst Eingangsnähe, danach sämtliche zulässigen Seitenspuren absuchen.
+  // Sonst kann bei fest eingebauter Sport-Inszenierung die einzige Kasse fehlen.
+  for(let x=U;x+w<=plan.breite-U;x+=U)xs.push(x);
+  const stellen=[...new Set(xs)].filter(x=>x>=U&&x+w<=plan.breite-U);
+  for(let z=plan.tiefe-d-3*U;z>=U;z-=U)
+    for(const x of stellen){
       const k=item(id,x,z,0,null,{amAusgang:true});
       const frei=quadrat(x,z+d,w,vorfeld);
       const verbote=[...plan.hindernisse,...plan.gaenge,...plan.moebel];
@@ -356,9 +359,24 @@ export function baueLadenplan(S,scene,plan,o={}) {
   if(o.vorbereiten!==false)vorbereiten(S,scene);
   const n0=S.anzahl;
   // Flächen zuerst, die Gangflächen zuletzt darüber; keine neuen Bodenarten je Abteilung.
+  // Geschossdecken aus dem Bestand besitzen Öffnungen für Treppen und Lufträume.
+  // Bodenauflagen dürfen diese Aussparungen nicht nachträglich wieder verschließen.
+  const ohneLoch=(b,h)=>{
+    const x0=Math.max(b.x,h.x),x1=Math.min(b.x+b.w,h.x+h.w);
+    const z0=Math.max(b.z,h.z),z1=Math.min(b.z+b.d,h.z+h.d);
+    if(x1<=x0||z1<=z0)return [b];
+    return [
+      {x:b.x,z:b.z,w:b.w,d:z0-b.z},
+      {x:b.x,z:z1,w:b.w,d:b.z+b.d-z1},
+      {x:b.x,z:z0,w:x0-b.x,d:z1-z0},
+      {x:x1,z:z0,w:b.x+b.w-x1,d:z1-z0},
+    ].filter(q=>q.w>0.001&&q.d>0.001);
+  };
   for(const b of plan.boeden) {
     const hoehe=b.typ==='gang'?0.038:b.typ==='akzent'?0.045:0.03;
-    S.box(b.w,hoehe,b.d,b.x+b.w/2,y-hoehe/2+(b.typ==='gang'?0.01:b.typ==='akzent'?0.016:0),b.z+b.d/2,b.farbe);
+    let stuecke=[b];
+    for(const h of o.bodenAussparungen??[])stuecke=stuecke.flatMap(q=>ohneLoch(q,h));
+    for(const q of stuecke)S.box(q.w,hoehe,q.d,q.x+q.w/2,y-hoehe/2+(b.typ==='gang'?0.01:b.typ==='akzent'?0.016:0),q.z+q.d/2,b.farbe);
   }
   for(let j=0;j<plan.moebel.length;j++){
     const m=plan.moebel[j],def=moebel(m.id),w=def.rasterB*U;
