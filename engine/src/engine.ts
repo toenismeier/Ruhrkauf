@@ -15,6 +15,7 @@ import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './w
 import { vorstandWoche } from './vorstand';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+import { szenarioNachWoche, szenarioWoche } from './szenarien';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -33,6 +34,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   if (s.phase === 'zerschlagen') throw new Error('Spiel beendet: Die Kette ist zerschlagen.');
   const w = s.woche;
 
+  szenarioWoche(s);
   prozesse(s);
   premiumWoche(s);
   hqWoche(s);
@@ -217,6 +219,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
   s.woche += 1;
+  szenarioNachWoche(s);
   return k;
 }
 

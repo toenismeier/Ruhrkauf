@@ -5,6 +5,7 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+import type { SzenarioStand } from './szenarien';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -122,6 +123,8 @@ export interface HausKpi {
 }
 
 export interface Haus {
+  /** Nur zusätzliche Altstandorte des Fusionsszenarios. */
+  fusionUrsprung?: 'volkskauf';
   id: string;
   name: string;
   stadt: string;
@@ -278,7 +281,7 @@ export interface BeraterMandat {
   ergebnis?: { empfohleneSchliessungen: string[]; folien: number; fazit: string };
 }
 
-export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf';
+export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf' | 'staatshilfe';
 
 export interface Angebot {
   id: string;
@@ -401,6 +404,8 @@ export interface Quartal {
 }
 
 export interface GameState {
+  /** Optional, damit historische Spielstände und das Standardszenario identisch bleiben. */
+  szenario?: SzenarioStand;
   version: 1;
   /** Schwierigkeit beim Spielstart (src/schwierigkeit.ts), fehlt = mittel. */
   schwierigkeit?: SchwierigkeitId;

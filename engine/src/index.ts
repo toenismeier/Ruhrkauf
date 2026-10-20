@@ -10,6 +10,7 @@ export {
 } from './hq';
 export { GRUPPEN, gruppenFuer } from './daten';
 export { STANDARD_SZENARIO, type Szenario } from './welt';
+export { SZENARIEN, szenarioKonfiguration, szenarioZiel, szenarioName, unternehmensWert, type SzenarioId, type SzenarioRegeln, type SzenarioStand, type SzenarioZiel } from './szenarien';
 export {
   WG_DEF, WG, WG_JE_BEREICH, EK_PARAM, EINKAUF_SPALTEN, saisonId, saisonName,
   type WgId, type WgDef, type Art, type FreigabeModus, type Reduzierung, type Servicegrad, type OrderTyp, type Ampel, type WgAuswahl,
