@@ -326,6 +326,60 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   };
 }
 
+// In Etappen aufgebaute Szene für ICE-Reise. Sonstige Aufrufer nutzen unverändert baueStadt().
+export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer, o = {}) {
+  // Maximal rund 9 ms JS-Arbeit am Stück: Übergang bleibt auch beim Stadtaufbau animiert.
+  let letzterFrame = performance.now();
+  const bildFreigeben = async () => {
+    if (performance.now() - letzterFrame >= 9) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      letzterFrame = performance.now();
+    }
+  };
+  const I = o.instanzer ?? new Instanzer();
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  ostVerkehr = !!plan.ddr;
+  for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
+  const t0 = S.anzahl;
+  for (const s of plan.strassen) { (s.bruecke ? baueBruecke : baueSegment)(ctx, s); await bildFreigeben(); }
+  for (const k of plan.kreuzungen) { baueKreuzung(ctx, k); await bildFreigeben(); }
+  for (const b of plan.bloecke) { baueBlock(ctx, b); await bildFreigeben(); }
+  // Stadtrandgürtel (plan.aussen, stadtrand.js): Wasser der Karte und des Gürtels gemeinsam, damit Ufer und Kaimauern
+  // über die Kartenkante durchlaufen. o.aussenring === 0 schaltet den Gürtel ab (Kataloge mit Einzelausschnitten).
+  const ring = plan.aussen && o.aussenring !== 0;
+  baueWasserAlle(ctx, [...plan.bloecke.filter((b) => b.art === 'wasser'), ...(ring ? plan.aussen.wasser : [])]);
+  if (ring) baueStadtrand(ctx);
+  else {
+    for (const u of plan.umland ?? []) baueUmland(ctx, u);
+    baueAussenring(ctx, o.aussenring ?? 420);
+  }
+  if (plan.diagonalen?.length || plan.zwickel?.length) baueDiagonalen(ctx);
+  const t1 = S.anzahl;
+  const hoehen = new Map();
+  let maxH = 20;
+  if (!o.ohneHaeuser) for (const p of plan.parzellen) {
+    const f = bauerFuer(bauer, p.typ);
+    const e = f(S, scene, p) ?? {};
+    // Slots mit eigenem Wasser (erg.wasser = [x0, z0, x1, z1]) je Block merken, für FLAECHEN[art].nachBau
+    if (e.wasser) { if (!ctx.slotWasser) ctx.slotWasser = new Map(); if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []); ctx.slotWasser.get(p.block).push(e.wasser); }
+    const h = e.hoehe ?? 12;
+    hoehen.set(p.id, h);
+    maxH = Math.max(maxH, h);
+    await bildFreigeben();
+  }
+  // Bauten im Stadtrandgürtel (Burg am Berg, plan.aussen.bauten)
+  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) { const e = bauerFuer(bauer, q.typ)(S, scene, q) ?? {}; hoehen.set(q.id, e.hoehe ?? 12); await bildFreigeben(); }
+  // Flächen, die ihren Boden erst nach den Slots bauen (Aussparungen unter abgesenktem Slot-Wasser)
+  for (const b of plan.bloecke) { FLAECHEN[b.art]?.nachBau?.(ctx, b, ctx.slotWasser?.get(b.id) ?? [], BODEN_HILFE); await bildFreigeben(); }
+  ostVerkehr = false;
+  const calls = o.instanzer ? 0 : I.bauen(scene);
+  return {
+    box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
+    hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
+  };
+}
+
+
 export function bauerFuer(bauer, typ) {
   // Rückwärtskompatibel: Rathaus und Hochhaus hießen früher slot:sonder (mit p.sonder)
   if (!bauer[typ] && (typ === 'slot:rathaus' || typ === 'slot:hochhaus') && bauer['slot:sonder']) return bauer['slot:sonder'];
