@@ -154,7 +154,7 @@ export const KONZERN_KAEUFER: { typ: 'Finanzinvestor' | 'Handelskonzern' | 'Immo
   { typ: 'Handelskonzern', name: 'Nordstern Handelsholding' },
   { typ: 'Immobilienfonds', name: 'Mosaik Immobilienfonds' },
   { typ: 'Finanzinvestor', name: 'Südwest Kapitalpartner' },
-  { typ: 'Handelskonzern', name: 'Wertheim Handelspartner' },
+  { typ: 'Handelskonzern', name: 'Wesergrund Handelspartner' },
 ];
 
 export const VERMIETER = ['Rheinkontor Immobilien', 'Nordwert Real Estate', 'Prisma Asset Management', 'Familie von Haller', 'Stadtwerk Grundbesitz', 'Atlas Retail Properties', 'Merian Fonds IV', 'Kontinental Immobilien KG'];
