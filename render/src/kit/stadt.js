@@ -1625,7 +1625,7 @@ function rundRechteck(k, x, y, w, h, r) {
 
 /** Marker-Liste für alle Standorte eines Plans: Hartwig rot (H), Hartwig Sport grün (S), Wettbewerber grau (W). */
 export function standortMarker(plan, groesse) {
-  const art = { warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', outlet: 'wettbewerber' };
+  const art = { premium: 'premium', warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', outlet: 'wettbewerber' };
   return (plan.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? 'hartwig', groesse: st.rolle === 'wettbewerber' ? (groesse ?? 10) * 0.8 : groesse }));
 }
 
