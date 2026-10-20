@@ -41,7 +41,7 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
   }
   if (r === 'personal') {
     const v=h.personal;
-    inhalt = '<div class="karte"><div class="khead">Personaleinsatz · Grundlage O04</div>' +
+    inhalt = '<div class="karte"><div class="khead">Besetzung</div>' +
       line('Vollzeit',p(v.vollzeit,1)+' FTE')+line('Teilzeit',p(v.teilzeit,1)+' FTE')+
       line('Aushilfen',p(v.aushilfen,1)+' FTE')+line('Bedarf',p(k?.fteBedarf,1)+' FTE')+
       line('Ist',p(k?.fteIst,1)+' FTE')+line('Personalkosten',geld(k?.personal??0))+'</div>';

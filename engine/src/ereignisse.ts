@@ -13,6 +13,8 @@ import { organisationVorlageEntscheidung } from './organisation';
 // O07 Haus
 import { loeseHausVorlage } from './haus';
 import { umbauProgrammEntscheiden } from './umbau';
+// O04 Personal
+import { loesePersonalEntscheidung } from './personaleinsatz';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
   return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
@@ -344,6 +346,8 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
     hausId: typeof e.daten.haus === 'string' ? e.daten.haus : undefined,
   });
   s.entscheidungsprotokoll = s.entscheidungsprotokoll.filter((p) => s.woche - p.woche <= 52);
+  // O04 Personal: derselbe Fristenmechanismus gilt für die Personalvorlagen.
+  if (e.typ.startsWith('personal_')) { loesePersonalEntscheidung(s, e.typ, e.daten, option); return null; }
   if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
   if (e.typ === 'organisation_vorlage') { organisationVorlageEntscheidung(s,e,option); return null; }
   // O06 Planung: automatische Fristentscheidung entspricht Freigabe des Controllings.

@@ -4,7 +4,7 @@ import type { AbteilungId } from './hq';
 import type { RessortId, Portraet } from './vorstand';
 import { RESSORT_INFO, DELEGATIONEN } from './vorstand';
 import { KOORDINATEN } from './standorte';
-import { HAUSCLUSTER_NAMEN, VORNAMEN, NACHNAMEN } from './daten';
+import { VORNAMEN, NACHNAMEN } from './daten';
 import { clamp, eur } from './util';
 import { einmalKosten } from './prozesse';
 import { itDeckel } from './it';
@@ -139,6 +139,18 @@ function gruppiere(haeuser: Haus[]): Haus[][] {
   }
   return ergebnis;
 }
+/** Name aus den tatsächlichen Städten: stärkste Stadt, bei Dopplung ergänzt um die nächstgrößere. */
+function clusterName(gruppe: Haus[], vergeben: string[]): string {
+  const zahl = new Map<string, number>();
+  for (const h of gruppe) zahl.set(h.stadt, (zahl.get(h.stadt) ?? 0) + 1);
+  const staedte = [...zahl.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de')).map(([st]) => st);
+  for (let i = 1; i < staedte.length; i++) {
+    const name = 'Raum ' + staedte[0] + ' · ' + staedte[i];
+    if (!vergeben.includes('Raum ' + staedte[0])) break;
+    if (!vergeben.includes(name)) return name;
+  }
+  return vergeben.includes('Raum ' + staedte[0]) ? 'Raum ' + staedte[0] + ' ' + (vergeben.length + 1) : 'Raum ' + staedte[0];
+}
 /** Einmalige, RNG-neutrale Initialisierung am Ende von neueWelt. */
 export function bildeHauscluster(s: GameState): void {
   const organisation: OrganisationsStand = {
@@ -150,10 +162,8 @@ export function bildeHauscluster(s: GameState): void {
     organisation.regionalleitungen[region] = stelle(s.seed, 'region-' + region);
     const einheiten = gruppiere(s.haeuser.filter((h) => h.region === region && h.status === 'offen'));
     einheiten.forEach((gruppe, i) => {
-      const namen = HAUSCLUSTER_NAMEN[region], basis = namen[i % namen.length];
-      const nummer = i >= namen.length ? ' ' + (Math.floor(i / namen.length) + 1) : '';
       const id = 'hc-' + region.toLocaleLowerCase('de') + '-' + (i+1);
-      organisation.hauscluster.push({ id, name: basis + nummer, region, hausIds: gruppe.map((h) => h.id), sonder: false, stelle: stelle(s.seed, id) });
+      organisation.hauscluster.push({ id, name: clusterName(gruppe, organisation.hauscluster.map((c) => c.name)), region, hausIds: gruppe.map((h) => h.id), sonder: false, stelle: stelle(s.seed, id) });
       gruppe.forEach((h) => { h.hauscluster = id; organisation.geografisch[h.id] = id; });
     });
   }

@@ -14,6 +14,8 @@ import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber'
 import type { ItStand } from './it';
 // O07 Haus
 import type { HausBetrieb, HausbetriebStand } from './haus';
+// O04 Personal
+import type { PersonalHausStand, PersonalStand } from './personaleinsatz';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -178,6 +180,8 @@ export interface Haus {
   restmieteWoche?: Eur; // laufende Miete nach Schließung
   restmieteBis?: number;
   personal: Personal;
+  // O04 Personal: zusätzliche Dienstplanung, Basis-FTE bleiben in personal.
+  personaleinsatz?: PersonalHausStand;
   substanz: number; // 0..100
   substanzStart: number;
   // O08 Umbau
@@ -465,6 +469,10 @@ export interface GameState {
   hausbetriebAbnahmeAus?: boolean;
   // O08 Umbau
   umbau?: UmbauStand;
+  // O04 Personal
+  personaleinsatz?: PersonalStand;
+  /** O04 ausschließlich A/B-Laufzeitmessung: überspringt die wöchentliche Neuplanung. */
+  personaleinsatzDeaktiviert?: boolean;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];

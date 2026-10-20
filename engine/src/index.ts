@@ -68,3 +68,6 @@ export type { HausStaerke, HausStandard, HausKommentar, HausMassnahme, HausAktio
 // O08 Umbau – zentraler Export für Spiel und Tests.
 export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
 export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from './umbau';
+// O04 Personal
+export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
+export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';

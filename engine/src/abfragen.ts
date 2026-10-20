@@ -78,7 +78,7 @@ export function posteingang(s: GameState): Posteingang {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
-    const modul = e.typ.startsWith('planung_') ? 'planung' : e.typ === 'organisation_vorlage' ? 'organisation' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ.startsWith('it_') ? 'it' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
+    const modul = e.typ.startsWith('personal_') ? 'personal' : e.typ.startsWith('planung_') ? 'planung' : e.typ === 'organisation_vorlage' ? 'organisation' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ.startsWith('it_') ? 'it' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
     handeln.push({
       id: e.id, art: 'entscheidung', typ: e.typ, titel: e.titel, text: e.text,
       woche: e.woche, frist: e.frist, restWochen, optionen: e.optionen,
@@ -276,3 +276,5 @@ export { planungBericht, planWoche };
 export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';
 // O08 Umbau
 export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
+// O04 Personal: Anzeigeprojektionen, keine Personalberechnung in der Oberfläche.
+export { personalHaus, personalUebersicht } from './personaleinsatz';

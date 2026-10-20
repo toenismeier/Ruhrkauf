@@ -26,6 +26,8 @@ import { PLANUNG_AKTIONEN, planungAktion, type PlanungAktion } from './planung';
 // O07 Haus
 import { HAUS_AKTIONEN, hausAktion, type HausAktion } from './haus';
 import { UMBAU_AKTIONEN, umbauAktion, type UmbauAktion } from './umbau';
+// O04 Personal
+import { PERSONAL_AKTIONEN, personalAktion, type PersonalAktion } from './personaleinsatz';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -78,7 +80,9 @@ export type SpielerAktion =
   // O07 Haus
   | HausAktion
   // O08 Umbau
-  | UmbauAktion;
+  | UmbauAktion
+  // O04 Personal
+  | PersonalAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -143,6 +147,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (IT_AKTIONEN.has(a.typ)) return itAktion(s, a as ItAktion);
   // O08 Umbau
   if (UMBAU_AKTIONEN.has(a.typ)) return umbauAktion(s, a as UmbauAktion);
+  if (PERSONAL_AKTIONEN.has(a.typ)) return personalAktion(s, a as PersonalAktion);
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
   // O01 Organisation
@@ -285,7 +290,13 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       const p = clamp(a.prozent, 0, 0.5);
       const hs = auswahl(s, a.haeuser);
       let fte = 0;
-      for (const h of hs) { const add = (h.personal.vollzeit + h.personal.teilzeit) * p; h.personal.teilzeit += add; fte += add; }
+      for (const h of hs) { const add = (h.personal.vollzeit + h.personal.teilzeit) * p; h.personal.teilzeit += add; fte += add;
+        // O04 Personal: Neue Kräfte müssen vier Wochen eingearbeitet werden.
+        if (h.personaleinsatz && add > 0) {
+          h.personaleinsatz.einarbeitungBis = w + 4;
+          h.personaleinsatz.einarbeitungFte += add;
+        }
+      }
       einmalKosten(s, fte * 1500);
       return ok(`${Math.round(fte)} FTE Teilzeit eingestellt.`);
     }

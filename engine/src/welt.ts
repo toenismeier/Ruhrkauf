@@ -230,6 +230,9 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   };
 }
 
+// O04 Personal
+import { initialisierePersonaleinsatz } from './personaleinsatz';
+
 export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameState {
   const h: RngHalter = { rng: seed >>> 0 };
   const haeuser: Haus[] = [];
@@ -363,6 +366,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // O08 Umbau
   initialisiereUmbau(s);
   s.kapitalflussStartCash = s.cash;
+  // O04 Personal: neutraler Referenzplan auf Basis der bisherigen FTE.
+  initialisierePersonaleinsatz(s);
   return s;
 }
 

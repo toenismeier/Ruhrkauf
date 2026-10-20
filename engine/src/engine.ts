@@ -19,6 +19,8 @@ import { organisationWoche } from './organisation';
 // O03 IT
 import { itWoche } from './it';
 import { produkteBuchen, produkteWoche } from './produkte';
+// O04 Personal
+import { personaleinsatzWoche } from './personaleinsatz';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 // O02 Umsatztreiber
 import { erfasseTreiber } from './treiber';
@@ -58,6 +60,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   produkteWoche(s);
   // Marketing: Kanäle, Karte, CRM-Versand, laufende Aktionen der Woche (vor der Nachfrage)
   marketingVorbereiten(s);
+  // O04 Personal: ein Plan je Woche, vor Ermittlung der Hausnachfrage.
+  if (!s.personaleinsatzDeaktiviert) personaleinsatzWoche(s);
 
   const lohn = lohnSumme(s);
   einkaufFristen(s);
