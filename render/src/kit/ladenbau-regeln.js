@@ -38,6 +38,7 @@ export const FORMAT_PROFILE = Object.freeze({
       rad: Object.freeze({wand:'sport_rad',gondel:'gondel_rad',insel:'sport_insel_ebike'}),
       wintersport: Object.freeze({wand:'sport_ski',gondel:'gondel_ski',insel:'sport_insel_winterpod'}),
       teamsport: Object.freeze({wand:'sport_trikot_verein',gondel:'gondel_baelle',insel:'sport_insel_tor'}),
+      fitness: Object.freeze({wand:'sport_fitness_wand',gondel:'gondel_fitness',insel:'sport_insel_fitness'}),
     }),
   }),
   outlet: Object.freeze({
@@ -50,7 +51,7 @@ export const FORMAT_PROFILE = Object.freeze({
       damen: Object.freeze({wand:'outlet_wandstange',gondel:'outlet_doppelstange'}),
       herren: Object.freeze({wand:'outlet_wandstange',gondel:'outlet_doppelstange'}),
       kinder: Object.freeze({wand:'outlet_wandstange',gondel:'outlet_doppelstange'}),
-      schuhe: Object.freeze({wand:'outlet_schuh_kartons',gondel:'outlet_doppelstange'}),
+      schuhe: Object.freeze({wand:'outlet_schuh_kartons',gondel:'outlet_schuhe'}),
       taschen: Object.freeze({wand:'outlet_taschenwand',gondel:'outlet_accessoires'}),
       accessoires: Object.freeze({wand:'outlet_taschenwand',gondel:'outlet_accessoires'}),
       home: Object.freeze({wand:'outlet_homewand',gondel:'outlet_home'}),
