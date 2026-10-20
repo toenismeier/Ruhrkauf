@@ -586,7 +586,7 @@ async function buendeln() {
       stadt: document.getElementById('stadtname').textContent }));
     zeiten.reise = r.schritte;
     pruefe(r.stadt === 'Düsseldorf', 'Reiseziel und Stadtchip sind Düsseldorf');
-    pruefe(!!r.ort && r.ort.x >= 0 && r.ort.x <= innerWidth && r.ort.y >= 0 && r.ort.y <= innerHeight, 'Zielbahnhof im sichtbaren Kamerabereich');
+    pruefe(!!r.ort && r.ort.x >= 0 && r.ort.x <= 390 && r.ort.y >= 0 && r.ort.y <= 844, 'Zielbahnhof im sichtbaren Kamerabereich');
     await p.screenshot({ path: path.join(ordnerReise, '99-angekommen.png') });
     await p.locator('#weiter').click();
     await p.waitForSelector('#wochen-overlay:not([hidden]) .wochen-frage');
