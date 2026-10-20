@@ -82,10 +82,10 @@ const TAKT = 60 / BPM;
 
 export function tonModul(ctx = {}) {
   let audio = null, master = null, effekt = null, stadt = null, musik = null;
-  let rausch = null, stadtNah = null, stadtFern = null, rhythmus = null;
+  let rausch = null, stadtNah = null, stadtFern = null, stadtStimmen = null;
   let gestartet = false, verfuegbar = true, freigabeLaeuft = false;
   let uiAktiv = false, letzteKassenzeit = -Infinity, berichtFertig = false;
-  let reiseBeginn = null, reiseToken = 0, musikNaechste = 0, musikSchritt = 0;
+  let reiseToken = 0, musikNaechste = 0, musikSchritt = 0;
   let timer = null, zugRaf = 0, letztePhase = null;
   const jetzt = () => audio?.currentTime ?? 0;
   const aktiv = () => audio && audio.state === 'running' && typeof document !== 'undefined' && !document.hidden;
@@ -184,7 +184,6 @@ export function tonModul(ctx = {}) {
     if (!gestartet || !aktiv() || !laut('klaenge')) return false;
     ++reiseToken;
     const token = reiseToken, start = performance.now(), t = jetzt();
-    reiseBeginn = start;
     const q = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
     q.buffer = rauschPuffer(); q.loop = true;
     filter.type = 'lowpass'; filter.frequency.value = 450;
@@ -219,9 +218,10 @@ export function tonModul(ctx = {}) {
       quelle.connect(filter); filter.connect(g); g.connect(stadt);
       quelle.start(); return g;
     }
-    // Zwei eigene Rauschbänder: fernes Verkehrsrauschen und nahes Stimmengewirr.
+    // Fernes Verkehrsrauschen und zwei langsam modulierte Sprachformanten.
     stadtFern = schicht('lowpass', 380);
     stadtNah = schicht('bandpass', 920);
+    stadtStimmen = schicht('bandpass', 460);
   }
   function musikNote(ton, start, dauer, pegel) {
     note(ton, start, dauer, pegel, 'sine', musik);
@@ -261,9 +261,10 @@ export function tonModul(ctx = {}) {
       const halb = ctx.zoom?.() ?? 110;
       const nah = begrenze((240 - halb) / 218, 0, 1);
       const bewegung = .85 + .15 * Math.sin(performance.now() / 1800);
-      leise(stadtNah, .055 * nah * bewegung, .11);
+      leise(stadtNah, .038 * nah * bewegung, .11);
+      leise(stadtStimmen, .020 * nah * (.7 + .3 * Math.sin(performance.now() / 490)), .11);
       leise(stadtFern, .022 * (1 - nah) + .006, .11);
-    } else { leise(stadtNah, 0); leise(stadtFern, 0); }
+    } else { leise(stadtNah, 0); leise(stadtStimmen, 0); leise(stadtFern, 0); }
     if (mv > 0) musikNachziehen();
     else musikNaechste = 0;
   }
@@ -281,12 +282,6 @@ export function tonModul(ctx = {}) {
     } else if (t - letzteKassenzeit > 95 + fortschritt * 155) {
       letzteKassenzeit = t; abspielen('kasse', .30);
     }
-  }
-  function richtung() {
-    const s = ctx.spiel?.();
-    if (s?.phase === 'zerschlagen') return 'insolvenz';
-    if (s?.phase === 'insolvenz') return 'warnung';
-    return 'erfolg';
   }
   function eingabe(e) {
     const el = e.target?.closest?.('button,[role="button"]');
