@@ -131,3 +131,13 @@ Die Schwesterkette ist eine bewusst ältere und schwächere Konzernkette und mus
 - EG breite Schaufenster und zwei schmale Türen, keine Drehtür und kein monumentales Portal. Vorplatz ohne Fahnen oder Kübel, höchstens zwei Fahrradständer und eine Bank. Fußgängerdichte rund 60 Prozent von Hartwig.
 - Innenräume über `grundriss.js` mit `kette: 'schwester'`: einfache zentrale Treppe ohne Rolltreppenhalle oder Lichthof, weniger Abteilungen, Kassen auf den Verkaufsetagen, Rasterdeckenleuchten, gealterter Belag `#cfc6b4`, UG nur Lager und Anlieferung, kein Restaurant und keine Feinkost.
 - Zustände der bestehenden `zustandsDekor()`-Mechanik, höchstens 8.000 Sammler-Teile je Schwesterhaus, Nah/Fern über `setzeLod()`, Zufall ausschließlich über `rng(seed)`.
+
+
+## 8. Maßstab 220 Städte / gemischte Konzernstandorte (Entwicklungsstand 20.10.2026)
+
+- Der Engine-Städtestamm bestimmt den Stadttyp; 108 neue Städte bekommen explizite Bildarchetypen, statt ein zufälliges Stadtbild zu erben.
+- Metropolen mit vier oder mehr eigenen Innenstadtstandorten besitzen weitere Einkaufszentren mit eigener Fußgängerachse und Platz. `plan.nebenzentren` enthält ihre Koordinaten; das Hauptzentrum bleibt `plan.einkaufslagen[0]`.
+- In Innenstadtblöcken nie zwei eigene Häuser. Hartwig-Warenhäuser haben mindestens zwei freie Blöcke zwischen sich (Raster-Manhattan-Distanz mindestens 3). Volkskauf steht nicht im selben oder unmittelbar gegenüberliegenden Block von Hartwig (Distanz mindestens 2).
+- Premium und Hartwig A erhalten in der 1a-Zuordnung Vorrang; übrige Hartwig-Formate, Volkskauf, Sport und FUNDUS nutzen geeignete Neben-, Center- und Fachmarktlagen. Bei knappem Raum wird ein regelkonformer Ersatzblock gesucht; ein nicht platzierbares Haus ist ein expliziter Fehler.
+- Für Nachbarbilder 28 km, für identische Konzernhaus-Signaturen 50 km. `pruef-kopien.js` untersucht Familie/Variante/Fassade je Konzernformat, `pruef-stadt-geografie.js` die vollständigen Stadtzuordnungen. Alle 560 Häuser werden erst nach dem deterministischen Engine-Export prüfbar.
+- Solange Haus-Exporte und visuelle Abnahme nicht vollständig sind, gelten die neuen Regeln **nicht als nachgewiesen erfüllt**.
