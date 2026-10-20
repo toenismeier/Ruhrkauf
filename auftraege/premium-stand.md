@@ -34,3 +34,35 @@ Stand: 19.10.2026 · Branch: `feat/grafik-premium`
 - Grafik: individuelle Dach-/Turmsilhouetten erweitert, Fensterrelief und Werksteinstruktur detailliert, Messingschrift größer, Fahnen und Auslagen überarbeitet. Umbau hat Kran/Plane/Zaun; Verkaufsprozess Investorenschild, eingeholte Fahnen und weniger Passanten. Neue Zustandskatalogdatei `premium-zustaende.js`, Geometrie-Soll 4.000–9.000 Teile.
 - Noch **nicht ausgeführt**: `npm ci`, Engine-Typecheck/Jest, 52-Wochen-Umsatz- und Margenmessung, Bot-C-Verläufe, Render-Build, Spiel-Render, Stadt-/Gestaltungsprüfungen, Katalog-Rendering (drei Durchläufe), Bild-Sichtprüfung. Ursache: lokaler Container erreicht den privaten GitHub-Checkout nicht (`Could not resolve host: github.com`), GitHub-Actions laut Auftrag ohne Kontingent. Die alten Testergebnisse aus dem Auftrag dürfen nicht als aktuelle Abnahme ausgegeben werden.
 - **Kein Merge nach `main`**, bevor Abnahme und korrigierende Iteration anhand konkreter Zahlen und Bilder vollständig grün sind.
+
+
+## Fortschreibung 20.10.2026 – Rebase und Abschnitt 5
+
+**Repository-Abgleich:** `feat/grafik-premium` basiert wieder auf `main` (Basis `105beffbb`); laut GitHub-Vergleich 0 Commits zurück, 16 voraus. Die fünf älteren Premium-Commits wurden als inhaltliche Übernahme auf `main` neu aufgebaut; dabei wurden 28 Premium-eigene Dateien übernommen und neun gemeinsam geänderte Renderer-Dateien konfliktbewusst mit FUNDUS, Volkskauf und Ladenbau zusammengeführt. `main` blieb unverändert, PR #12 bleibt Draft.
+
+**Engine zuerst:**
+- Flächenproduktivität Ränge 1 / 2 / 3: **2,20 / 1,84 / 1,57**, zuvor 1,98 / 1,67 / 1,42.
+- Zusätzliche Servicequote: P001/P002 **4,5 %**, P003 **4,3 %**, P004 **3,0 %** des Hausumsatzes; bisher 6,0 / 5,8 / 4,5 %. Konzessions- und Personalbestand sowie die Testtoleranzen blieben unverändert.
+- `premiumAngebote` nutzt eigenständige deterministische IDs statt des globalen `neueId`-Zählers; dazu Regressionstest auf unberührten `rng` und `zaehler` für drei Seeds. Hier wird **keine** Änderung am Votum der Gläubiger vorgenommen: das Votum stützt sich weiterhin auf Planung, Quote, Finanzierbarkeit und Stakeholderwerte.
+- `engine/scripts/premium-kalibrierung.ts` dokumentiert künftig je Seed den A/B-Konzernumsatz, die Hausumsätze und Margen vor/nach Premium-Umwidmung, W12-Konzern-EBITDA/BR, die Planentscheidung und die Bot-C-Laufzeit. Grenzwerte unverändert: 11 / 11 / 9 / 6 % ±2 PP; Jahresumsatz ±1,5 %; Bot C 260 Wochen.
+
+**Grafische Restpunkte aus Abschnitt 5:** P001 besitzt zusätzlich vier beflaggte Traufmasten mit dunklem Tuch und Messing-Signet (im Verkaufsprozess vollständig entfernt). P003 hat jetzt eine grüne Kuppel mit größerem Radius auf der sichtbaren Gebäudeecke, die konstruktiv mindestens 8 m über die Traufe ragt. Karten-/Slot-Verzweigungen nach dem Rebase auch für Premium kontrolliert, ohne FUNDUS zu verdrängen.
+
+**Abnahme ausdrücklich offen:** In dieser Laufzeit scheitert `git ls-remote` bereits am DNS (`Could not resolve host: github.com`); ein vollständiger privater Repo-Checkout, die `npm ci`-Prüfungen, Jest, Typecheck, `check:premium`, Bot C und Grafik-Rendering waren daher **nicht ausführbar**. Die im Auftrag erwähnten vier roten Jest-Tests sind Vorbefund, keine Neu-Messung. Der hier vorgenommene Parameterabgleich ist **kein nachgewiesener grüner Testlauf**. Nächster Schritt mit lokalem Checkout:
+
+```bash
+cd engine
+npm ci && npm run typecheck && npx jest --runInBand && npm run check:premium
+for seed in 1 2 3; do npx tsx scripts/bot.ts "$seed" 260 --tief; done
+npx tsx scripts/kalibrierung.ts 1
+npm run export:haeuser
+cd ../render
+npm ci && npm run build && node spiel-render.js && node pruef-staedte.js && node pruef-gestaltung.js && node pruef-premium.js
+for runde in 1 2 3; do
+  for katalog in premium premium-zustaende premium-etagen premium-stadt; do
+    node render-katalog.js "$katalog"
+  done
+done
+```
+
+**Kein Merge** nach `main`, bis die tatsächlichen Margen, das Konzernumsatzdelta, Bot C, Render-/Gestaltungsprüfungen und die Bildkontrolle grün sind. Grafikexport `render/haeuser.json` ist nach Engine-Neukalibrierung frisch zu erzeugen.
