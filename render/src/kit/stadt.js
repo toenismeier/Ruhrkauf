@@ -1339,7 +1339,11 @@ function baueVorortBlock(ctx, b, r) {
   let wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND), dach = waehle(r, VORORT_DACH);
   for (const q of b.bauten ?? []) {
     let f;
-    if (q.art === 'reihenhaus') { if (r() < 0.65) wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND); f = [wand, dach]; }
+    if (q.art === 'reihenhaus') {
+      // Gedämpfte Variation je Haus: Farb- und Dachmischung ohne neue Instanzgeometrie.
+      wand = waehle(r, [...VORORT_WAND, ...VORORT_KLINKER, ...ZEILE_WAND]);
+      f = [wand, waehle(r, VORORT_DACH)];
+    }
     else if (q.art === 'zeile') f = [waehle(r, ZEILE_WAND), dach];
     else if (q.art === 'halle') f = [waehle(r, ['#d9dcdf', '#cfd3d6', '#e4e1da', '#b9bec2', '#d8cdb8']), waehle(r, ['#2f6f8f', '#c8322b', '#3f7d56', '#e0b23c', '#5d646b', '#2b3a55'])];
     else if (q.art === 'scheune') f = [waehle(r, ['#8a5a45', '#a8664f', '#7a6a58', '#c9bfae']), waehle(r, ['#6f6a64', '#9a4e3a', '#5d6268'])];
