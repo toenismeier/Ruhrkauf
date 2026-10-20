@@ -212,6 +212,8 @@ export function premiumInvestieren(s: GameState, id: string, betrag: number): st
   if (s.cash + s.kreditlinie < betrag) return 'Nicht genügend Liquidität.';
   s.cash -= betrag;
   s.einmalkostenWoche += betrag;
+  s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+  s.kapitalflussOffen.investitionen -= betrag;
   h.premiumInvestition = {
     bis: s.woche + 26, substanzProWoche: Math.min(30, betrag / 3_000_000) / 26,
     imageProWoche: Math.min(15, betrag / 5_000_000) / 26,

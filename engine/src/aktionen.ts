@@ -189,6 +189,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       const p = umbauParameter(f.konzept, a.konzept);
       const kosten = p.qm * f.qm;
       einmalKosten(s, kosten);
+      s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+      s.kapitalflussOffen.investitionen -= kosten;
       f.umbauBis = w + p.wochen;
       f.umbauZiel = { konzept: a.konzept, gruppe: a.konzept === 'eigen' ? a.gruppe : undefined };
       return ok(`Umbau ${etageName(f.etage)} in ${h.name}: ${f.qm} qm zu ${a.konzept === 'eigen' ? GRUPPEN[a.gruppe as GruppeId].name : a.konzept}, ${mio(kosten)}, ${p.wochen} Wochen.`);
@@ -472,6 +474,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
           erfolgreich++;
         }
         einmalKosten(s, kostenGesamt);
+        s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+        s.kapitalflussOffen.investitionen -= kostenGesamt;
         an.status = erfolgreich ? 'angenommen' : 'abgelehnt'; an.erledigtWoche = w;
         if (!erfolgreich) return fehler(`Kein Standort umsetzbar. ${ergebnisse.join('; ')}`);
         melde(s, 'presse', `${an.mieterName} zieht in ${erfolgreich} Häuser von ${s.firma.name} ein.`);

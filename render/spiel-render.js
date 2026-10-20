@@ -562,13 +562,17 @@ async function buendeln() {
   async function reiseWochePruefen() {
     const fehler = [], zeiten = {}, bilder = path.join(__dirname, 'bilder');
     const ordnerReise = path.join(bilder, 'reise'), ordnerWoche = path.join(bilder, 'wochenbericht');
-    fs.mkdirSync(ordnerReise, { recursive: true }); fs.mkdirSync(ordnerWoche, { recursive: true });
+    const abnahme = path.join(bilder, 'reise-woche');
+    for (const dir of [ordnerReise, ordnerWoche, abnahme]) fs.mkdirSync(dir, { recursive: true });
     const errors = []; p.on('pageerror', (err) => errors.push(err.message));
     const pruefe = (ok, msg) => { if (!ok) fehler.push(msg); console.log((ok ? 'OK: ' : 'FEHLER: ') + msg); };
     await p.evaluate(() => window.spiel.neuesSpiel(1, 'Essen'));
     await p.locator('#stadt-reise').click();
     await p.waitForSelector('#reise-overlay:not([hidden]) .reise-panel');
     await p.screenshot({ path: path.join(ordnerReise, '00-hauptbahnhof.png') });
+    await p.screenshot({ path: path.join(abnahme, '04-reiseziele.png') });
+    const zielBilder = await p.locator('.reise-vorschaurahmen').count();
+    pruefe(zielBilder > 0, 'Reiseziele enthalten eigene Vorschaurahmen');
     await p.locator('.reise-suche').fill('Düsseldorf');
     const gefiltert = await p.locator('[data-reiseziel]').count();
     pruefe(gefiltert === 1, 'Reisesuche filtert Düsseldorf');
@@ -591,6 +595,15 @@ async function buendeln() {
     pruefe(r.stadt === 'Düsseldorf', 'Reiseziel und Stadtchip sind Düsseldorf');
     pruefe(!!r.ort && r.ort.x >= 0 && r.ort.x <= 390 && r.ort.y >= 0 && r.ort.y <= 844, 'Zielbahnhof im sichtbaren Kamerabereich');
     await p.screenshot({ path: path.join(ordnerReise, '99-angekommen.png') });
+    // Nach der ersten Reise muss der Cache einen echten Stadtbildausschnitt statt generischem Motiv enthalten.
+    await p.locator('#stadt-reise').click();
+    await p.waitForSelector('#reise-overlay:not([hidden]) .reise-panel');
+    const erstesZiel = await p.locator('[data-reiseziel]').first().getAttribute('data-reiseziel');
+    pruefe(erstesZiel === 'Essen', 'Zuletzt besuchte Stadt steht vor umsatzsortierten Reisezielen');
+    const cached = await p.locator('[data-reiseziel="Essen"] .reise-vorschaurahmen img').getAttribute('src');
+    pruefe(cached?.startsWith('data:image/jpeg;base64,'), 'Bereiste Stadt nutzt gecachten 96x96-Kartenausschnitt');
+    await p.screenshot({ path: path.join(abnahme, '05-stadtvorschau.png') });
+    await p.locator('[data-reisezu]').click();
     // Eine tatsächliche Engine-Woche mit neuem Vorgang suchen; keine Testmeldung erfinden.
     const testWoche = await p.evaluate(() => {
       const spiel = window.spiel, E = spiel.E;
@@ -607,7 +620,18 @@ async function buendeln() {
     pruefe(!!testWoche, 'Engine-Testwoche mit mindestens einem neuen Vorgang gefunden');
     await p.locator('#weiter').click();
     await p.waitForSelector('#wochen-overlay:not([hidden]) .wochen-frage');
+    await p.waitForTimeout(300);
+    const dialogDarstellung = await p.evaluate(() => {
+      const maske = getComputedStyle(document.querySelector('.wochen-maske'));
+      const karte = getComputedStyle(document.querySelector('.wochen-frage'));
+      return { maske: maske.backgroundColor, karte: karte.backgroundColor, opacity: Number(karte.opacity) };
+    });
+    pruefe(/rgba?\(12, 20, 28, (?:0\.6|0\.60)\)/.test(dialogDarstellung.maske),
+      'Hintergrund um 60 Prozent abgedunkelt: ' + dialogDarstellung.maske);
+    pruefe(dialogDarstellung.karte === 'rgb(248, 247, 244)' && dialogDarstellung.opacity > .95,
+      'Bestätigungskarte deckend: ' + JSON.stringify(dialogDarstellung));
     await p.screenshot({ path: path.join(ordnerWoche, '00-bestaetigung.png') });
+    await p.screenshot({ path: path.join(abnahme, '01-bestaetigung.png') });
     await p.locator('[data-wa="ja"]').click();
     if (animationen) {
       const rasterStart = Date.now();
@@ -621,25 +645,52 @@ async function buendeln() {
       soll: window.spiel.E.cockpit(window.spiel.s),
       aktuell: document.getElementById('wb-umsatz')?.dataset.wert,
       ebitda: document.getElementById('wb-ebitda')?.dataset.wert,
-      zeitung: document.querySelector('.wb-zeitung')?.textContent }));
+      zeitung: document.querySelector('.wb-zeitung')?.textContent,
+      kapitalfluss: window.spiel.E.kapitalfluss(window.spiel.s),
+      kapitalflussText: document.querySelector('.wb-cash')?.textContent }));
     zeiten.wochenbericht = w.zeiten;
     if (animationen) { const fertig = w.zeiten.find((x) => x.ereignis === 'Zählung beendet');
       pruefe(!!fertig && Math.abs(fertig.jaMs - 11860) <= 1186, 'Wochenbericht bis Zählerende 11.860 ms ±10 %'); }
     pruefe(w.bericht?.umsatz === w.soll.umsatzWoche && Number(w.aktuell) === w.soll.umsatzWoche, 'Umsatz entspricht Engine');
     pruefe(w.bericht?.ebitda === w.soll.ebitdaWoche && Number(w.ebitda) === w.soll.ebitdaWoche, 'EBITDA entspricht Engine');
     pruefe(!!w.zeitung?.includes('Der Handelsbote'), 'Zeitung vorhanden');
+    const f = w.kapitalfluss;
+    pruefe(!!f && f.operativ + f.investitionen + f.finanzierung + f.sonstiges === f.netto,
+      'Kapitalfluss nach Zahlarten stimmt exakt mit Cash netto überein');
+    pruefe(!!f && f.netto === w.bericht?.cashNetto && f.bestand === w.soll.cash,
+      'Kapitalfluss stimmt mit Woche und Cash-Bestand überein');
+    pruefe(!!w.kapitalflussText && !w.kapitalflussText.includes('nicht separat erfasst') &&
+      ['Cash operativ', 'Investitionen', 'Finanzierung', 'Sonstiges', 'Cash netto', 'Cash-Bestand']
+        .every((x) => w.kapitalflussText.includes(x)), 'Kapitalfluss wird vollständig angezeigt');
     pruefe((w.bericht?.meldungstexte ?? []).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche');
     await p.screenshot({ path: path.join(ordnerWoche, '99-wochenbericht.png') });
+    await p.screenshot({ path: path.join(abnahme, '02-kapitalfluss.png') });
     if (w.bericht?.vorgaenge > 0) {
       await p.waitForSelector('#wb-vorfall.offen .wb-vorfall');
       await p.screenshot({ path: path.join(ordnerWoche, '100-vorfall.png') });
+      await p.screenshot({ path: path.join(abnahme, '03-vorfall-portraet.png') });
+      pruefe(await p.locator('#wb-vorfall.offen .wb-gesicht svg').count() === 1, 'Zuständiges Porträt als SVG (kein Buchstabe)');
       pruefe(true, 'Neuer Engine-Vorgang als Bottom-Sheet');
+      // Alle Vorfälle verlassen, damit der Wochenstreifen nach Schließen des Berichts prüfbar ist.
+      for (let i = 0; i < Math.min(3, w.bericht.vorgaenge); i++) {
+        await p.waitForSelector('#wb-vorfall.offen [data-wa="spaeter"]:not([hidden])');
+        await p.locator('#wb-vorfall [data-wa="spaeter"]').click();
+      }
+      await p.waitForFunction(() => window.spiel.wochenbericht.status === 'bericht');
     } else {
       console.warn('Kein neuer Vorgang in dieser Testwoche; Vorfall-Test nicht abgedeckt.');
       fehler.push('Vorfalldialog nicht überprüft: keine neuen Vorgänge aus der Engine');
     }
+    if (await p.locator('.wb-schliessen:visible').count()) {
+      await p.locator('.wb-schliessen').click();
+      const streifen = await p.locator('#wochenstreifen').evaluate((el) =>
+        ({ sichtbar: !!el.offsetWidth && !!el.offsetHeight, text: el.textContent }));
+      pruefe(!streifen.sichtbar, 'Im normalen Spiel erscheint kein Wochenstreifen nach dem Bericht');
+    }
     pruefe(errors.length === 0, 'Keine JavaScript-Konsolenfehler: ' + errors.join('; '));
     fs.writeFileSync(path.join(ordnerWoche, 'pruefung.json'), JSON.stringify({ fehler, zeiten, engine: w.soll }, null, 2));
+    fs.writeFileSync(path.join(abnahme, 'pruefung.json'), JSON.stringify({ fehler, zeiten,
+      kapitalfluss: w.kapitalfluss, dialog: dialogDarstellung, engine: w.soll }, null, 2));
     if (fehler.length) throw new Error('Reise/Wochenbericht: ' + fehler.length + ' Abweichungen: ' + fehler.join('; '));
     console.log('Reise und Wochenbericht: 0 Abweichungen, ' + bilder);
   }

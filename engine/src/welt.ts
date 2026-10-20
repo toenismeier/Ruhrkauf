@@ -362,6 +362,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereHausbetrieb(s);
   // O08 Umbau
   initialisiereUmbau(s);
+  s.kapitalflussStartCash = s.cash;
   return s;
 }
 

@@ -4,6 +4,8 @@ import { portraetSVG } from '../kit/portraet.js';
 const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 const BANK = portraetSVG({ geschlecht: 'm', alter: 56, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 'hell', kleidung: 'anzug', seed: 236 }, 110);
 const BETRIEBSRAT = portraetSVG({ geschlecht: 'w', alter: 49, haar: 'halblang', haarfarbe: 'dunkelbraun', kleidung: 'bluse', seed: 922 }, 110);
+const VERMIETER = portraetSVG({ geschlecht: 'm', alter: 59, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 2, kleidung: 'anzug', seed: 197 }, 110);
+const LIEFERANT = portraetSVG({ geschlecht: 'w', alter: 43, haar: 'halblang', haarfarbe: 'braun', hautton: 2, kleidung: 'blazer', seed: 379 }, 110);
 export const WOCHEN_ZEIT = Object.freeze({
   frageEin: 200, frageAus: 300, stillstand: 180, berichtEin: 380,
   zaehlStart: 900, zaehlen: 11000, vorfallEin: 150, vorfallText: 1500,
@@ -50,12 +52,12 @@ export function wochenberichtModul(ctx) {
     if (mitDialog) await warten(istReduziert ? 0 : WOCHEN_ZEIT.frageAus + WOCHEN_ZEIT.stillstand);
     if (meins !== token) return;
     markieren('Wochenberechnung');
-    const vor = ctx.posteingang(), alt = ctx.cockpit(), davorCash = alt.cash;
+    const vor = ctx.posteingang();
     try {
       ctx.woche();
     } catch (e) { aufraeumen(); ctx.fehler?.(e); return; }
     const nach = ctx.posteingang(), neu = new Set(vor.handeln.map((x) => x.id)), gemeldet = new Set(vor.meldungen.map((x) => x.id));
-    const c = ctx.cockpit(), ver = ctx.historie();
+    const c = ctx.cockpit(), ver = ctx.historie(), fluss = ctx.kapitalfluss();
     const vergangen = ver.length > 1 ? ver[ver.length - 2] : null;
     const jetzt = ver[ver.length - 1];
     // Die Engine verbucht Ereignisse für die gerade beendete Woche, bevor sie s.woche erhöht.
@@ -65,13 +67,31 @@ export function wochenberichtModul(ctx) {
     const vorgaenge = nach.handeln.filter((h) => !neu.has(h.id)).sort((a, b) => Number(b.dringend) - Number(a.dringend) || a.frist - b.frist);
     bericht = {
       kw: kwEnde, jahr: jahrEnde, umsatz: c.umsatzWoche, ebitda: c.ebitdaWoche, umsatzVor: vergangen?.umsatz ?? null,
-      ebitdaVor: vergangen?.ebitda ?? null, cashNetto: c.cash - davorCash, cash: c.cash,
+      ebitdaVor: vergangen?.ebitda ?? null, cashNetto: fluss.netto, cash: c.cash,
       phase: c.phase, kredite: c.kreditFrei, runway: c.runwayWochen,
-      meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt,
+      meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt, kapitalfluss: fluss,
     };
     markieren('Engine abgeschlossen');
     if (modus() === 'aus') { aufraeumen(); return; }
     berichtZeigen(meins);
+  }
+  function portraetZumVorgang(m) {
+    const typ = String(m.typ ?? '').toLocaleLowerCase('de');
+    const thema = (typ + ' ' + String(m.titel ?? '')).toLocaleLowerCase('de');
+    if (/betriebsrat|tarif|streik/.test(thema)) return { bild: BETRIEBSRAT, rolle: 'Betriebsrat' };
+    if (/vermieter|mietvertrag|mietverhandlung/.test(thema)) return { bild: VERMIETER, rolle: 'Vermieter' };
+    if (/lieferant|warenkreditversicher/.test(thema)) return { bild: LIEFERANT, rolle: 'Lieferant' };
+    if (/bank|kredit|finanzier/.test(thema)) return { bild: BANK, rolle: 'Bank' };
+    const ressort = /einkauf|produkt|marke/.test(thema) ? 'cpo'
+      : /marketing|werbung|kundenkarte/.test(thema) ? 'cmo'
+      : /personal|mitarbeiter|belegschaft/.test(thema) ? 'chro'
+      : /filial|vertrieb/.test(thema) ? 'cso'
+      : /online|digital|it_/.test(thema) ? 'cdo'
+      : /vorstand|leitung|betrieb/.test(thema) ? 'coo'
+      : /schließ|schliess|sanierung|insolvenz/.test(thema) ? 'cro' : 'cfo';
+    const person = ctx.person?.(ressort);
+    return { bild: person?.portraet ? portraetSVG(person.portraet, 110) : ASSISTENTIN,
+      rolle: person?.name ?? 'Vorstand' };
   }
   function zeile(name, wert, k = '') { return '<div class="wb-zeile ' + k + '"><span>' + esc(name) + '</span><strong>' + esc(wert) + '</strong></div>'; }
   function berichtZeigen(meins) {
@@ -82,11 +102,14 @@ export function wochenberichtModul(ctx) {
       : eur(wert - vorher) + ' (' + (vorher === 0 ? '–' : new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + ' %') + ')';
     const uDelta = delta(bericht.umsatz, bericht.umsatzVor);
     const eDelta = delta(bericht.ebitda, bericht.ebitdaVor);
-    const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? 'hafen' : 'altstadt') + '.png)"></div><span>' + esc(a.text) + '</span></div>' : '';
+    const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? 'hafen' : 'altstadt') + '.jpg)"></div><span>' + esc(a.text) + '</span></div>' : '';
     node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht.kw + ' · Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schließen">×</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht.umsatz + '">0 €</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht.ebitda + '">0 €</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' +
-      zeile('Cash operativ', 'nicht separat erfasst') + zeile('Investitionen', 'nicht separat erfasst') + zeile('Finanzierung', 'nicht separat erfasst') +
-      zeile('Cash netto', eur(bericht.cashNetto)) + zeile('Cash-Bestand', eur(bericht.cash), 'wb-summe') +
-      '<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>' +
+      zeile('Cash operativ', eur(bericht.kapitalfluss.operativ)) +
+      zeile('Investitionen', eur(bericht.kapitalfluss.investitionen)) +
+      zeile('Finanzierung', eur(bericht.kapitalfluss.finanzierung)) +
+      zeile('Sonstiges', eur(bericht.kapitalfluss.sonstiges)) +
+      zeile('Cash netto', eur(bericht.kapitalfluss.netto)) +
+      zeile('Cash-Bestand', eur(bericht.kapitalfluss.bestand), 'wb-summe') + '</div>' +
       (bericht.phase === 'insolvenz' ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur(bericht.kredite) + ' · Liquiditätsreichweite: ' + bericht.runway + ' Wochen</span></div>' : '') +
       '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + '</h4>' +
       nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') + '</div></div><div id="wb-vorfall"></div></section>';
@@ -112,7 +135,8 @@ export function wochenberichtModul(ctx) {
     if (!m || !node.querySelector('#wb-vorfall')) return;
     status = 'vorfall'; markieren('Vorfall ' + (vorfall + 1));
     const feld = node.querySelector('#wb-vorfall'), meins = token;
-    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>HARTWIG</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + (m.typ.includes('bank') ? '€' : m.typ.includes('betriebsrat') ? 'BR' : 'H') + '</div></div><h4>' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
+    const verantwortlich = portraetZumVorgang(m);
+    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4>' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
     requestAnimationFrame(() => feld.classList.add('offen'));
     const text = m.text ?? '', el = feld.querySelector('.wb-tippt'), beginn = performance.now();
     function tick(t) {

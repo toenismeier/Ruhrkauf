@@ -376,7 +376,7 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
     }
     case 'instandhaltung':
       if (!haus) return null;
-      if (option === 'zahlen') { einmalKosten(s, Number(d.kosten)); haus.substanz = clamp(haus.substanz + 10, 0, 100); }
+      if (option === 'zahlen') { einmalKosten(s, Number(d.kosten)); s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 }; s.kapitalflussOffen.investitionen -= Number(d.kosten); haus.substanz = clamp(haus.substanz + 10, 0, 100); }
       else haus.substanz = clamp(haus.substanz - 12, 0, 100);
       return null;
     case 'mietende': {
