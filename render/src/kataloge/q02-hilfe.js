@@ -24,7 +24,9 @@ export function q02Szene(S, scene, plan, box, o = {}) {
   const mini = { ...plan, bloecke, strassen: plan.strassen.filter((s) => schnittStrasse(s, box)),
     kreuzungen: plan.kreuzungen.filter((k) => inBox(k.x, k.z, box)),
     parzellen: plan.parzellen.filter((p) => ids.has(p.block) && (o.ohneHaeuser !== true)),
-    aussen: null, umland: [], diagonalen: [], zwickel: [] };
-  const erg = baueStadt(S, scene, mini, echterBauer(), { aussenring: 0, dichte: 0.8, ohneHaeuser: o.ohneHaeuser === true });
+    aussen: o.aussen ? { ...plan.aussen, wasser: [], gruen: [], kreuzungen: [], strassen: [], bauten: [],
+      bloecke: plan.aussen.bloecke.filter((q) => schneidet(q, box)) } : null,
+    umland: [], diagonalen: [], zwickel: [] };
+  const erg = baueStadt(S, scene, mini, echterBauer(), { aussenring: o.aussen ? 1 : 0, dichte: 0.8, ohneHaeuser: o.ohneHaeuser === true });
   return new THREE.Box3(new THREE.Vector3(box.x0, -1, box.z0), new THREE.Vector3(box.x1, Math.max(28, Math.min(erg.box.max.y, 55)), box.z1));
 }
