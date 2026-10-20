@@ -1,0 +1,1781 @@
+[
+  {
+    "id": "O001",
+    "name": "FUNDUS Berlin Am Stadtrand",
+    "stadt": "Berlin",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "metropole",
+    "region": "Ost",
+    "grundflaecheQm": 2100,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1953,
+    "fassade": 5,
+    "substanz": 34,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O001-f1",
+        "etage": 0,
+        "qm": 4200,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O002",
+    "name": "FUNDUS Frankfurt Fachmarktzentrum",
+    "stadt": "Frankfurt",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "metropole",
+    "region": "Mitte",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1969,
+    "fassade": 5,
+    "substanz": 44,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O002-f1",
+        "etage": 0,
+        "qm": 3100,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O003",
+    "name": "FUNDUS Stuttgart Fachmarktzentrum",
+    "stadt": "Stuttgart",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "metropole",
+    "region": "Süd",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1919,
+    "fassade": 6,
+    "substanz": 86,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O003-f1",
+        "etage": 0,
+        "qm": 3500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O004",
+    "name": "FUNDUS Essen Am Stadtrand",
+    "stadt": "Essen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1898,
+    "fassade": 6,
+    "substanz": 55,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O004-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O005",
+    "name": "FUNDUS Dortmund Am Stadtrand",
+    "stadt": "Dortmund",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 2500,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1911,
+    "fassade": 5,
+    "substanz": 50,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O005-f1",
+        "etage": 0,
+        "qm": 4900,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O006",
+    "name": "FUNDUS Bremen Gewerbepark",
+    "stadt": "Bremen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 3600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1958,
+    "fassade": 4,
+    "substanz": 58,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O006-f1",
+        "etage": 0,
+        "qm": 3600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O007",
+    "name": "FUNDUS Leipzig Am Stadtrand",
+    "stadt": "Leipzig",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 4400,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1968,
+    "fassade": 5,
+    "substanz": 64,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O007-f1",
+        "etage": 0,
+        "qm": 4400,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O008",
+    "name": "FUNDUS Dresden Gewerbepark",
+    "stadt": "Dresden",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 2000,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1939,
+    "fassade": 7,
+    "substanz": 78,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O008-f1",
+        "etage": 0,
+        "qm": 3900,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O009",
+    "name": "FUNDUS Hannover Fachmarktzentrum",
+    "stadt": "Hannover",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1965,
+    "fassade": 1,
+    "substanz": 44,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O009-f1",
+        "etage": 0,
+        "qm": 4900,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O010",
+    "name": "FUNDUS Nürnberg Am Stadtrand",
+    "stadt": "Nürnberg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 4100,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1991,
+    "fassade": 4,
+    "substanz": 70,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O010-f1",
+        "etage": 0,
+        "qm": 4100,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O011",
+    "name": "FUNDUS Duisburg Am Stadtrand",
+    "stadt": "Duisburg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1980,
+    "fassade": 1,
+    "substanz": 85,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O011-f1",
+        "etage": 0,
+        "qm": 3400,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O012",
+    "name": "FUNDUS Bochum Fachmarktzentrum",
+    "stadt": "Bochum",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1922,
+    "fassade": 4,
+    "substanz": 34,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O012-f1",
+        "etage": 0,
+        "qm": 3200,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O013",
+    "name": "FUNDUS Wuppertal Gewerbepark",
+    "stadt": "Wuppertal",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 2000,
+    "fassade": 4,
+    "substanz": 36,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O013-f1",
+        "etage": 0,
+        "qm": 3800,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O014",
+    "name": "FUNDUS Bielefeld Am Stadtrand",
+    "stadt": "Bielefeld",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 3200,
+    "etagen": [
+      0
+    ],
+    "baujahr": 2008,
+    "fassade": 1,
+    "substanz": 37,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O014-f1",
+        "etage": 0,
+        "qm": 3200,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O015",
+    "name": "FUNDUS Bonn Fachmarktzentrum",
+    "stadt": "Bonn",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1972,
+    "fassade": 2,
+    "substanz": 49,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O015-f1",
+        "etage": 0,
+        "qm": 4700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O016",
+    "name": "FUNDUS Münster Gewerbepark",
+    "stadt": "Münster",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1400,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1978,
+    "fassade": 2,
+    "substanz": 56,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O016-f1",
+        "etage": 0,
+        "qm": 2700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O017",
+    "name": "FUNDUS Mannheim Am Stadtrand",
+    "stadt": "Mannheim",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 4600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1969,
+    "fassade": 4,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O017-f1",
+        "etage": 0,
+        "qm": 4600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O018",
+    "name": "FUNDUS Karlsruhe Gewerbepark",
+    "stadt": "Karlsruhe",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1934,
+    "fassade": 5,
+    "substanz": 63,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O018-f1",
+        "etage": 0,
+        "qm": 3400,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O019",
+    "name": "FUNDUS Augsburg Am Stadtrand",
+    "stadt": "Augsburg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1984,
+    "fassade": 2,
+    "substanz": 81,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O019-f1",
+        "etage": 0,
+        "qm": 3200,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O020",
+    "name": "FUNDUS Wiesbaden Fachmarktzentrum",
+    "stadt": "Wiesbaden",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 4500,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1960,
+    "fassade": 4,
+    "substanz": 43,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O020-f1",
+        "etage": 0,
+        "qm": 4500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O021",
+    "name": "FUNDUS Mönchengladbach Gewerbepark",
+    "stadt": "Mönchengladbach",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 2500,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1996,
+    "fassade": 0,
+    "substanz": 89,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O021-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O022",
+    "name": "FUNDUS Gelsenkirchen Gewerbepark",
+    "stadt": "Gelsenkirchen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1500,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1963,
+    "fassade": 0,
+    "substanz": 72,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O022-f1",
+        "etage": 0,
+        "qm": 4600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O023",
+    "name": "FUNDUS Aachen Gewerbepark",
+    "stadt": "Aachen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 3300,
+    "etagen": [
+      0
+    ],
+    "baujahr": 2000,
+    "fassade": 6,
+    "substanz": 58,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O023-f1",
+        "etage": 0,
+        "qm": 3300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O024",
+    "name": "FUNDUS Braunschweig Am Stadtrand",
+    "stadt": "Braunschweig",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 2400,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1898,
+    "fassade": 6,
+    "substanz": 90,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O024-f1",
+        "etage": 0,
+        "qm": 4800,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O025",
+    "name": "FUNDUS Kiel Fachmarktzentrum",
+    "stadt": "Kiel",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 3300,
+    "etagen": [
+      0
+    ],
+    "baujahr": 2008,
+    "fassade": 7,
+    "substanz": 36,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O025-f1",
+        "etage": 0,
+        "qm": 3300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O026",
+    "name": "FUNDUS Halle Gewerbepark",
+    "stadt": "Halle",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 4200,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1985,
+    "fassade": 4,
+    "substanz": 39,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O026-f1",
+        "etage": 0,
+        "qm": 4200,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O027",
+    "name": "FUNDUS Kassel Am Stadtrand",
+    "stadt": "Kassel",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1974,
+    "fassade": 1,
+    "substanz": 77,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O027-f1",
+        "etage": 0,
+        "qm": 1800,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O028",
+    "name": "FUNDUS Hagen Gewerbepark",
+    "stadt": "Hagen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1957,
+    "fassade": 1,
+    "substanz": 65,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O028-f1",
+        "etage": 0,
+        "qm": 2100,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O029",
+    "name": "FUNDUS Potsdam Gewerbepark",
+    "stadt": "Potsdam",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 4700,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1999,
+    "fassade": 0,
+    "substanz": 31,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O029-f1",
+        "etage": 0,
+        "qm": 4700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O030",
+    "name": "FUNDUS Saarbrücken Gewerbepark",
+    "stadt": "Saarbrücken",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1990,
+    "fassade": 1,
+    "substanz": 45,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O030-f1",
+        "etage": 0,
+        "qm": 3300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O031",
+    "name": "FUNDUS Hamm Gewerbepark",
+    "stadt": "Hamm",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 4100,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1974,
+    "fassade": 2,
+    "substanz": 61,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O031-f1",
+        "etage": 0,
+        "qm": 4100,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O032",
+    "name": "FUNDUS Ludwigshafen Am Stadtrand",
+    "stadt": "Ludwigshafen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 800,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1897,
+    "fassade": 2,
+    "substanz": 49,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O032-f1",
+        "etage": 0,
+        "qm": 2300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O033",
+    "name": "FUNDUS Oldenburg Gewerbepark",
+    "stadt": "Oldenburg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 2006,
+    "fassade": 2,
+    "substanz": 50,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O033-f1",
+        "etage": 0,
+        "qm": 3100,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O034",
+    "name": "FUNDUS Mülheim Fachmarktzentrum",
+    "stadt": "Mülheim",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 4600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1957,
+    "fassade": 6,
+    "substanz": 89,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O034-f1",
+        "etage": 0,
+        "qm": 4600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O035",
+    "name": "FUNDUS Osnabrück Gewerbepark",
+    "stadt": "Osnabrück",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1960,
+    "fassade": 7,
+    "substanz": 68,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O035-f1",
+        "etage": 0,
+        "qm": 3500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O036",
+    "name": "FUNDUS Leverkusen Am Stadtrand",
+    "stadt": "Leverkusen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 4600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1987,
+    "fassade": 4,
+    "substanz": 65,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O036-f1",
+        "etage": 0,
+        "qm": 4600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O037",
+    "name": "FUNDUS Darmstadt Am Stadtrand",
+    "stadt": "Darmstadt",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1943,
+    "fassade": 5,
+    "substanz": 49,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O037-f1",
+        "etage": 0,
+        "qm": 3600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O038",
+    "name": "FUNDUS Heidelberg Fachmarktzentrum",
+    "stadt": "Heidelberg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1979,
+    "fassade": 1,
+    "substanz": 48,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O038-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O039",
+    "name": "FUNDUS Solingen Fachmarktzentrum",
+    "stadt": "Solingen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 3600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1999,
+    "fassade": 2,
+    "substanz": 54,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O039-f1",
+        "etage": 0,
+        "qm": 3600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O040",
+    "name": "FUNDUS Regensburg Fachmarktzentrum",
+    "stadt": "Regensburg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1969,
+    "fassade": 6,
+    "substanz": 89,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O040-f1",
+        "etage": 0,
+        "qm": 3400,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O041",
+    "name": "FUNDUS Paderborn Fachmarktzentrum",
+    "stadt": "Paderborn",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 3200,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1984,
+    "fassade": 3,
+    "substanz": 66,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O041-f1",
+        "etage": 0,
+        "qm": 3200,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O042",
+    "name": "FUNDUS Ingolstadt Fachmarktzentrum",
+    "stadt": "Ingolstadt",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 2000,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1999,
+    "fassade": 6,
+    "substanz": 58,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O042-f1",
+        "etage": 0,
+        "qm": 4000,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O043",
+    "name": "FUNDUS Würzburg Fachmarktzentrum",
+    "stadt": "Würzburg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 900,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1987,
+    "fassade": 3,
+    "substanz": 45,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O043-f1",
+        "etage": 0,
+        "qm": 2700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O044",
+    "name": "FUNDUS Ulm Am Stadtrand",
+    "stadt": "Ulm",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 2500,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1991,
+    "fassade": 3,
+    "substanz": 84,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O044-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O045",
+    "name": "FUNDUS Wolfsburg Gewerbepark",
+    "stadt": "Wolfsburg",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1987,
+    "fassade": 7,
+    "substanz": 56,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O045-f1",
+        "etage": 0,
+        "qm": 4900,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O046",
+    "name": "FUNDUS Göttingen Fachmarktzentrum",
+    "stadt": "Göttingen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "rand",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 2700,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1985,
+    "fassade": 2,
+    "substanz": 31,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O046-f1",
+        "etage": 0,
+        "qm": 2700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O047",
+    "name": "FUNDUS Pforzheim Neustadt",
+    "stadt": "Pforzheim",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1400,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1941,
+    "fassade": 2,
+    "substanz": 49,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O047-f1",
+        "etage": 0,
+        "qm": 2800,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O048",
+    "name": "FUNDUS Offenbach Ring",
+    "stadt": "Offenbach",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1961,
+    "fassade": 5,
+    "substanz": 83,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O048-f1",
+        "etage": 0,
+        "qm": 3300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O049",
+    "name": "FUNDUS Heilbronn Lindenstraße",
+    "stadt": "Heilbronn",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1500,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1959,
+    "fassade": 2,
+    "substanz": 80,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O049-f1",
+        "etage": 0,
+        "qm": 4400,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O050",
+    "name": "FUNDUS Bremerhaven Lindenstraße",
+    "stadt": "Bremerhaven",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 2008,
+    "fassade": 0,
+    "substanz": 32,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O050-f1",
+        "etage": 0,
+        "qm": 3700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O051",
+    "name": "FUNDUS Trier Am Wall",
+    "stadt": "Trier",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1998,
+    "fassade": 3,
+    "substanz": 47,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O051-f1",
+        "etage": 0,
+        "qm": 4700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O052",
+    "name": "FUNDUS Koblenz Neustadt",
+    "stadt": "Koblenz",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 4700,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1980,
+    "fassade": 4,
+    "substanz": 35,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O052-f1",
+        "etage": 0,
+        "qm": 4700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O053",
+    "name": "FUNDUS Jena Lindenstraße",
+    "stadt": "Jena",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1972,
+    "fassade": 3,
+    "substanz": 84,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O053-f1",
+        "etage": 0,
+        "qm": 4700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O054",
+    "name": "FUNDUS Siegen Lindenstraße",
+    "stadt": "Siegen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 4600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1970,
+    "fassade": 5,
+    "substanz": 86,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O054-f1",
+        "etage": 0,
+        "qm": 4600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O055",
+    "name": "FUNDUS Hildesheim Ring",
+    "stadt": "Hildesheim",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1958,
+    "fassade": 2,
+    "substanz": 45,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O055-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O056",
+    "name": "FUNDUS Gütersloh Lindenstraße",
+    "stadt": "Gütersloh",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1907,
+    "fassade": 4,
+    "substanz": 87,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O056-f1",
+        "etage": 0,
+        "qm": 5000,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O057",
+    "name": "FUNDUS Recklinghausen Am Wall",
+    "stadt": "Recklinghausen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1917,
+    "fassade": 7,
+    "substanz": 83,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O057-f1",
+        "etage": 0,
+        "qm": 3300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O058",
+    "name": "FUNDUS Bottrop Am Wall",
+    "stadt": "Bottrop",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 2400,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1933,
+    "fassade": 0,
+    "substanz": 34,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O058-f1",
+        "etage": 0,
+        "qm": 4800,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O059",
+    "name": "FUNDUS Reutlingen Ring",
+    "stadt": "Reutlingen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 2300,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1963,
+    "fassade": 6,
+    "substanz": 79,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O059-f1",
+        "etage": 0,
+        "qm": 2300,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O060",
+    "name": "FUNDUS Erlangen Lindenstraße",
+    "stadt": "Erlangen",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1500,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 2002,
+    "fassade": 7,
+    "substanz": 56,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O060-f1",
+        "etage": 0,
+        "qm": 2900,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O061",
+    "name": "FUNDUS Fürth Bahnhofstraße",
+    "stadt": "Fürth",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1400,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1996,
+    "fassade": 0,
+    "substanz": 30,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O061-f1",
+        "etage": 0,
+        "qm": 2700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O062",
+    "name": "FUNDUS Neuss Neustadt",
+    "stadt": "Neuss",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 3700,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1951,
+    "fassade": 6,
+    "substanz": 75,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O062-f1",
+        "etage": 0,
+        "qm": 3700,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O063",
+    "name": "FUNDUS Moers Ring",
+    "stadt": "Moers",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1
+    ],
+    "baujahr": 1987,
+    "fassade": 3,
+    "substanz": 87,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O063-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O064",
+    "name": "FUNDUS Kaiserslautern Neustadt",
+    "stadt": "Kaiserslautern",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 3600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1946,
+    "fassade": 4,
+    "substanz": 32,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O064-f1",
+        "etage": 0,
+        "qm": 3600,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O065",
+    "name": "FUNDUS Remscheid Lindenstraße",
+    "stadt": "Remscheid",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 2500,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1916,
+    "fassade": 2,
+    "substanz": 80,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O065-f1",
+        "etage": 0,
+        "qm": 2500,
+        "konzept": "leer"
+      }
+    ]
+  },
+  {
+    "id": "O066",
+    "name": "FUNDUS Bergisch Gladbach Am Wall",
+    "stadt": "Bergisch Gladbach",
+    "format": "outlet",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 4600,
+    "etagen": [
+      0
+    ],
+    "baujahr": 1994,
+    "fassade": 1,
+    "substanz": 87,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "O066-f1",
+        "etage": 0,
+        "qm": 4600,
+        "konzept": "leer"
+      }
+    ]
+  }
+]
