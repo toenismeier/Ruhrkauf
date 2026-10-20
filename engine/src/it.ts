@@ -312,7 +312,7 @@ export function itHausFaktor(s: GameState, h: Haus): number {
   const ware=Math.max(0,generationInCluster(s,'warenwirtschaft',id)-SYSTEME.warenwirtschaft.start);
   const kAusbau=it.systeme.kasse.kasseAusbau;
   const qualitaet=1 + kasse*0.005 + app*0.004 + ware*0.002
-    + (kasse>0 ? (kAusbau?.selbstbedienung??0)*0.002+(kAusbau?.mobil??0)*0.001 : 0);
+    + (kAusbau?.selbstbedienung??0)*0.002+(kAusbau?.mobil??0)*0.001;
   return qualitaet * (it.umsatzFaktoren[h.id] ?? 1);
 }
 export function itUebersicht(s: GameState) {
