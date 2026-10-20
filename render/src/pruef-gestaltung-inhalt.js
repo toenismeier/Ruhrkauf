@@ -4,15 +4,17 @@
 // Aufruf über node pruef-gestaltung.js [Stadt,Stadt,…] [--zoom 62] [--kachel 720x1280]
 import { THREE, kameraFuer } from './kit/basis.js';
 import { stadtplan, streifenSchneidet } from './kit/stadtplan.js';
-import { stadtDaten, nachbarStaedte } from './kit/staedte.js';
+import { stadtDaten, nachbarStaedte, STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import outletHaeuser from '../haeuser-outlet.json';
 import hartwigHaeuser from '../haeuser.json';
 import { familieOutlet, masseOutlet } from './kit/outlet.js';
+import { pruefeStadtQualitaet } from './kit/q02-pruefer.js';
 
 const arg = process.argv.slice(2);
 const opt = (n, d) => { const i = arg.indexOf(n); return i >= 0 ? arg[i + 1] : d; };
-const namen = (arg[0] && !arg[0].startsWith('--') ? arg[0] : 'Essen,Duisburg,Gelsenkirchen').split(',');
+const namen = arg.includes('--alle') ? STADTLISTE.map((s) => s.name) : (arg[0] && !arg[0].startsWith('--') ? arg[0] : 'Essen,Duisburg,Gelsenkirchen').split(',');
+const Q02 = arg.includes('--q02');
 const zoom = Number(opt('--zoom', 62));
 const [KW, KH] = opt('--kachel', '720x1280').split('x').map(Number);
 const RAND = Number(opt('--rand', 1.1));
@@ -145,6 +147,7 @@ function pruefe(name) {
   WN.clear();
   const s = stadtDaten(name);
   const plan = stadtplan(s.seed, { typ: s.typ, archetyp: s.archetyp, region: s.region, strassenFaktor: 1.6, ...s.extra, standorte: s.standorte });
+  const q02 = Q02 ? pruefeStadtQualitaet(plan) : null;
   const f = raster(plan);
   const proj = kamera(plan);
   // ---- Flächenanteile: Nahausschnitt (2 m) und ganze Stadt (4 m) ----
@@ -302,6 +305,7 @@ function pruefe(name) {
   return {
     name, plan,
     werte: {
+      ...(q02?.werte ?? {}),
       'Schwester: gleicher Hartwig-Block': schwesterBlock,
       'Schwester: mehr als 80 % Hartwig': schwesterGross,
       'Schwester: gleiche Nachbar-Variante': schwesterGleich,
@@ -342,6 +346,9 @@ function pruefe(name) {
 
 // Grenzwerte aus GESTALTUNG.md (Nahausschnitt); überschrittene Werte werden mit ! markiert und gezählt
 const GRENZE = {
+  'Offene Gleisenden ohne Abschluss': 0, 'Oberleitung ohne Gleis': 0,
+  'Fahrzeuge außerhalb Fahrbahn/Gleis': 0, 'Dachaufbauten außerhalb Dachfläche': 0,
+  'Wiederholung über 15 %': 0,
   'Schwester: gleicher Hartwig-Block': 0,
   'Schwester: mehr als 80 % Hartwig': 0,
   'Schwester: gleiche Nachbar-Variante': 0,
@@ -359,6 +366,7 @@ console.log(''.padEnd(br) + erg.map((e) => (' ' + e.name.slice(0, 15)).padStart(
 const verstoss = new Map(erg.map((e) => [e.name, 0]));
 for (const z of zeilen) console.log(z.padEnd(br) + erg.map((e) => { const v = e.werte[z], g = GRENZE[z]; const x = g !== undefined && Number(v) > g + 1e-9; if (x) verstoss.set(e.name, verstoss.get(e.name) + 1); return ((x ? '!' : '') + v).padStart(17); }).join(''));
 console.log('Verstöße (Grenzwerte GESTALTUNG.md)'.padEnd(br) + erg.map((e) => String(verstoss.get(e.name)).padStart(17)).join(''));
+if (Q02 && [...verstoss.values()].some((v) => v > 0)) process.exitCode = 1;
 for (const e of erg) console.log(`${e.name}: Großbauten nah [${e.gross.join(', ')}] (* = innen); nicht ebenerdig nah [${e.niveauListe.join(', ')}]; nackte Wasserkante nah an [${e.nacktNah.join(', ')}]`);
 
 // ---- Vielfalt zwischen Nachbarstädten: gleiche Wettbewerber-Bauform (Art + Form), gleiche Art, gleicher Kirchenstil, gleicher Konzernbau ----
