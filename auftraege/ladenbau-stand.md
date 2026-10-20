@@ -219,3 +219,26 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 2. `node render-katalog.js sport-etagen-vergleich` sowie `sport-etagen`, `sport-abteilungen`, `sport-feeling` und `sport-feeling-nah` ausführen, finale Bilder nach `bilder/` übernehmen und wirklich ansehen. Die Vergleichs-PNG ist **noch nicht erzeugt**.
 3. Teile je tatsächlicher Sportetage **vorher/nachher messen**, als harte Regression (neu ≤ alt) prüfen. Teilebudgets und reale Geometrie einschließlich aller Ausschnitt-/Familienstile sind noch nicht validiert.
 4. Sichtprüfung der sechs Architekturfamilien sowie der oberen Abverkaufsflächen (ruhiger Boden, Wandband, klare Korridore, Inszenierung, Service-/Kassenvorfeld); entdeckte Kollisionen korrigieren. Erst bei vollständiger grüner Abnahme PR freigeben und mergen. Bis dahin `main` unverändert lassen.
+
+## Fortsetzung 20.10.2026: Nachbesserung Phase 4 gemäß `nachbesserung-ladenbau-p4.md`
+
+### Ausgangsbefund
+- Die technische Phase-4-Integration im Vergleichskatalog war zuvor regelkonform, bildlich aber nicht abgenommen: überwiegend monotone Gondelreihen ohne erkennbare Sportabteilungen. Die Vorher-/Nachher-Teilezahl lag in S002 EG bei 7.564 / 10.916 und überschritt damit die Zielgrenze (Quelle: Nachbesserungsauftrag auf `main`).
+- Bearbeitet wurde ausschließlich `feat/ladenbau-p4`; `main` blieb unverändert. Der Nachbesserungsauftrag selbst liegt nur auf `main` und wurde dort gelesen.
+
+### Auf dem Branch umgesetzt
+- Neue Bibliothek `render/src/kit/moebel/sport-mix.js`: **112** sortimentsbezogene kompakte Module (84 freistehende Präsentationen, 28 schmale Wandpräsentationen), darunter Kleiderstangen, Rundständer, Puppen, Tische/Anprobe, Radreihen, Geräte, Outdoor und Wintersport; Maße 1,25-m-Raster, vereinfachte Warenkörper statt vieler Fachböden.
+- `ladenplan.js`: Vorfahrt für die Erlebnisinszenierung vor dem Bestücken; Bereichszuordnung der Wandmodule; pro Abteilung deterministisch variierter Möbelmix und zusätzliche schmale Innenwände in kleinen Randabteilungen; Sport-Abteilungsrechtecke in den vorhandenen Farben; Hängeschilder aus `sportabteilung.js`. Die übrigen Formatprofile behalten ihre bisherige Reihenlogik.
+- `ladenbau-pruefung.js`: harte zusätzliche Prüfungen **mindestens vier Arten je Sportabteilung und maximal 40 % Anteil pro Möbelart**. `render/tests/ladenbau-smoke.cjs`: Produktionsdaten-Assertions, Sortimentsboden-Assertions und Mutationstest gegen uniforme Regale hinzugefügt.
+- `render/LADENBAU.md`: Abteilungsidentität, Präzisierung der funktionalen Bodenarten und abweichende Sporthausfarben dokumentiert.
+
+### Prüfprotokoll / tatsächlich ausgeführt
+- **Isolierte V8-Datenplanprüfung** mit produktiven Hausdaten, Sport-Raster-, Maß-, Adapter-, Ladenplan- und Prüffunktionen: **50 Sporthäuser / 101 Etagen, 0 Regelverstöße, 0 Möbelmixverstöße**; Dichte **35,12–47,08 %**. Vor dem neuen Validator wurde zusätzlich die Vielfalt jeder Abteilung unabhängig ausgewertet.
+- Synthetische Grundrisse **30×30, 45×40, 55×40, 75×55 m**, jeweils 0 Verstöße und vollständiger Mindestmix. **84** neue freistehende Möbelmodelle hinsichtlich geometrischer Fußabdruck-/Höhen-/Budgetgrenzen mit einem isolierten Sammler-Dummy geprüft: 0 Überschreitungen.
+- **Nicht ausgeführt:** echter Node-/esbuild-Lauf, `npm ci`, Jest/Typecheck, Three.js-Geometrievergleich, `pruef-moebel`, `spiel-render.js`, Chromium-Renders und Bildsichtung. Der GitHub-Connector stellt keinen lokalen Repository-Checkout bereit. Die aktuellen Datentests sind **kein** Beleg für die vollständige Abnahme.
+
+### Abnahme offen (PR #13 nicht mergefähig)
+1. Vollständigen Node- und Browserlauf gemäß `auftraege/README.md` im Repository-Checkout ausführen. Insbesondere alle 101 tatsächlichen Etagen mit realer Sammler-Teilezahl einschließlich Architektur und Möbelbibliothek gegen die jeweilige **Vorher-Teilezahl** prüfen; neuer Wert muss überall **≤ vorher** sein. Der vorhandene Katalog zeigt die Werte, ersetzt aber keine maschinelle Regression.
+2. **Acht** Fälle in `sport-etagen-vergleich` als PNG rendern, **jedes** Vorher-/Nachher-Bild prüfen; die endgültigen PNGs nach `bilder/` legen. Die optische Rücknahme des Supermarkt-Eindrucks ist noch nicht anhand von Bildern verifiziert.
+3. Abteilungsfarben, Hängeschilder, charakteristische Möbel, Inszenierungen/Familieneigenheiten im Browser sichten; Familien 1–6 und obere Abverkaufsetagen gezielt prüfen; auftretende Visual-/Budgetfehler beheben.
+4. Erst nach grüner technischer und visueller Abnahme PR #13 auf aktuellen `main` integrieren bzw. Konflikte lösen und mergen. Branch ist gegenüber `main` zurück; kein Merge/Rebase erfolgt.
