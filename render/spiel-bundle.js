@@ -32,6 +32,7 @@
     MATERIALIEN: () => MATERIALIEN,
     MECHANIK_TEXT: () => MECHANIK_TEXT,
     MK: () => MK,
+    PREMIUM_HAEUSER: () => PREMIUM_HAEUSER,
     PRODUKT_KATEGORIEN: () => PRODUKT_KATEGORIEN,
     PRODUKT_PARAM: () => PRODUKT_PARAM,
     RESSORTS: () => RESSORTS,
@@ -73,6 +74,7 @@
     passungHaus: () => passungHaus,
     portfolio: () => portfolio,
     posteingang: () => posteingang,
+    premiumUebersicht: () => premiumUebersicht,
     produktKatalog: () => produktKatalog,
     produktMargeDelta: () => produktMargeDelta,
     produktNachfrageFaktor: () => produktNachfrageFaktor,
@@ -339,6 +341,12 @@
     premium: { beauty: 1, accessoires: 1, damen: 0.6, food: 0.5 },
     leer_ehemals: {}
   };
+  var PREMIUM_HAEUSER = [
+    { id: "P001", name: "Palais Hartwig", stadt: "Berlin", rang: 1 },
+    { id: "P002", name: "Hartwig am Hofgarten", stadt: "M\xFCnchen", rang: 1 },
+    { id: "P003", name: "Alsterhaus Hartwig", stadt: "Hamburg", rang: 2 },
+    { id: "P004", name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf", rang: 3 }
+  ];
 
   // ../engine/src/util.ts
   function zufall(h) {
@@ -2044,8 +2052,9 @@
   }
   var rngM = (s2) => s2.marketing.stand;
   var marketingRng = rngM;
-  function trifft(a, h) {
+  function trifft(a, h, s2) {
     if (a.kontrollHaeuser.includes(h.id)) return false;
+    if (h.klasse === "premium" && a.scope.typ === "alle" && s2.premiumSchuetzen !== false) return false;
     const sc = a.scope;
     return sc.typ === "alle" || sc.typ === "format" && sc.format === h.format || sc.typ === "region" && sc.region === h.region || sc.typ === "cluster" && sc.cluster === h.cluster || sc.typ === "haeuser" && sc.ids.includes(h.id);
   }
@@ -2208,8 +2217,8 @@
       return out;
     }
     const w = s2.woche;
-    const ist = s2.marketing.aktionen.filter((a) => laeuft(a, w) && trifft(a, h));
-    const plan2 = m.referenz.filter((a) => laeuft(a, w) && trifft(a, h));
+    const ist = s2.marketing.aktionen.filter((a) => laeuft(a, w) && trifft(a, h, s2));
+    const plan2 = m.referenz.filter((a) => laeuft(a, w) && trifft(a, h, s2));
     const A = m.woche;
     const gruppen = Object.keys(basis);
     const eI = {};
@@ -2492,7 +2501,7 @@
       const u = h.kpi && h.kpi.woche === s2.woche - 1 ? h.kpi.umsatz : 0;
       if (u <= 0) continue;
       y += u;
-      if (trifft(a, h)) x += u;
+      if (trifft(a, h, s2)) x += u;
     }
     return y > 0 ? x / y : 1;
   }
@@ -5174,6 +5183,231 @@
     return null;
   }
 
+  // ../engine/src/premium.ts
+  var PREMIUM_PROFIL = {
+    P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
+    P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
+    P003: { qm: 18e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 },
+    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 }
+  };
+  var premiumProfil = (id) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id) ? PREMIUM_PROFIL[id] : void 0;
+  var EURO_JE_QM_WOCHE = 40;
+  var MIX = {
+    beauty: 1.55,
+    accessoires: 1.55,
+    damen: 1.25,
+    food: 1.45,
+    spielwaren: 0.55,
+    wohnen: 0.6
+  };
+  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6 };
+  var KAEUFER = [
+    { typ: "Luxusgruppe", name: "Luxusgruppe Valens" },
+    { typ: "Family Office", name: "Family Office Merian" },
+    { typ: "Staatsfonds", name: "Staatsfonds Aurum" }
+  ];
+  function grundumsatz(h) {
+    return Object.entries(h.potenzial).reduce((sum, [g, p]) => {
+      const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === "eigen").reduce((a, f) => a + f.qm, 0);
+      return sum + (p ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g] ?? 1)));
+    }, 0);
+  }
+  function normierePremiumFlaechen(h, p) {
+    const alteEtagen = [...h.etagen].sort((a, b) => a - b);
+    const neueEtagen = [...p.etagen];
+    const anzahl = Math.max(1, alteEtagen.length - 1);
+    for (const f of h.flaechen) {
+      const index2 = Math.max(0, alteEtagen.indexOf(f.etage));
+      f.etage = neueEtagen[Math.round(index2 / anzahl * (neueEtagen.length - 1))];
+    }
+    h.etagen = neueEtagen;
+    h.grundflaecheQm = p.qm / neueEtagen.length;
+    const gruppen = Object.keys(h.potenzial);
+    const gewicht2 = gruppen.reduce((a, g) => a + GRUPPEN[g].anteilFlaeche, 0);
+    for (const g of gruppen) {
+      const bereiche = h.flaechen.filter((f) => f.gruppe === g);
+      const altQm = bereiche.reduce((a, f) => a + f.qm, 0);
+      if (!altQm) continue;
+      const zielQm = Math.round(p.qm * GRUPPEN[g].anteilFlaeche / gewicht2);
+      let rest2 = zielQm;
+      for (let i = 0; i < bereiche.length; i++) {
+        const f = bereiche[i];
+        const neuQm = i === bereiche.length - 1 ? rest2 : Math.max(1, Math.round(zielQm * f.qm / altQm));
+        f.qm = neuQm;
+        rest2 -= neuQm;
+      }
+    }
+    const rest = p.qm - h.flaechen.reduce((a, f) => a + f.qm, 0);
+    const ausgleich = h.flaechen.find((f) => f.gruppe === "damen") ?? h.flaechen[0];
+    if (ausgleich) ausgleich.qm += rest;
+    for (const g of gruppen) {
+      const qm = h.flaechen.filter((f) => f.gruppe === g).reduce((a, f) => a + f.qm, 0);
+      if (!qm) continue;
+      h.saettigungQm[g] = qm * 0.75;
+      h.potenzial[g] = qm * GRUPPEN[g].qmUmsatz * (MIX[g] ?? 1) / (1 - Math.exp(-qm / h.saettigungQm[g]));
+    }
+  }
+  function kennzeichnePremium(haeuser) {
+    const vorhanden = PREMIUM_HAEUSER.every((p) => haeuser.some((h) => h.premiumSchluessel === p.id || h.klasse === "premium" && h.stadt === p.stadt));
+    if (vorhanden) {
+      for (const p of PREMIUM_HAEUSER) {
+        const h = haeuser.find((x) => x.premiumSchluessel === p.id || x.klasse === "premium" && x.stadt === p.stadt);
+        if (!h) continue;
+        h.klasse = "premium";
+        h.premiumSchluessel = p.id;
+        h.name = p.name;
+        h.premiumImage ?? (h.premiumImage = 80);
+      }
+      return;
+    }
+    const ursprung = haeuser.reduce((a, h) => a + grundumsatz(h), 0);
+    for (const p of PREMIUM_HAEUSER) {
+      const kandidaten2 = haeuser.filter((h2) => h2.format === "warenhaus" && h2.stadt === p.stadt && h2.klasse !== "premium");
+      const h = [...kandidaten2].sort((a, b) => (b.lage === "1a" ? 1 : 0) - (a.lage === "1a" ? 1 : 0) || b.grundflaecheQm * b.etagen.length - a.grundflaecheQm * a.etagen.length || a.id.localeCompare(b.id))[0];
+      if (!h) continue;
+      h.name = p.name;
+      h.klasse = "premium";
+      h.premiumSchluessel = p.id;
+      h.premiumImage = 80;
+      h.lage = "1a";
+      const profil = premiumProfil(p.id);
+      normierePremiumFlaechen(h, profil);
+      h.miete.vermieter = "eigentuemer";
+      h.miete.vermieterName = "Hartwig Immobilien";
+      const sollUmsatzWoche = profil.qm * EURO_JE_QM_WOCHE * profil.produktivitaet;
+      h.miete.mieteWoche = eur(sollUmsatzWoche * profil.mietQuote);
+      h.miete.bisWoche = 15 * 52;
+      h.miete.keineVerlaengerung = false;
+      const normalUmsatzWoche = profil.qm * EURO_JE_QM_WOCHE;
+      const fte = 1.15 * (profil.qm / 500 + normalUmsatzWoche / 8800);
+      h.personal.vollzeit = fte * 0.5;
+      h.personal.teilzeit = fte * 0.4;
+      h.personal.aushilfen = fte * 0.1;
+      h.substanz = Math.max(78, h.substanz);
+      h.substanzStart = h.substanz;
+      for (const g of ["beauty", "accessoires"]) {
+        const f = h.flaechen.find((f2) => f2.gruppe === g && f2.konzept === "eigen" && f2.qm > 250);
+        if (f) {
+          const qm = Math.round(f.qm * 0.07);
+          f.qm -= qm;
+          h.flaechen.push({ ...f, id: f.id + "-luxus", qm, konzept: "konzession" });
+        }
+      }
+      const faktor = sollUmsatzWoche / Math.max(1, grundumsatz(h));
+      for (const g of Object.keys(h.potenzial))
+        h.potenzial[g] = (h.potenzial[g] ?? 0) * faktor;
+    }
+    const praemie = haeuser.filter((h) => h.klasse === "premium").reduce((a, h) => a + grundumsatz(h), 0);
+    const regulaer = haeuser.filter((h) => h.klasse !== "premium");
+    const sum = regulaer.reduce((a, h) => a + grundumsatz(h), 0);
+    const kompensation = Math.max(0.5, (ursprung - praemie) / Math.max(1, sum));
+    for (const h of regulaer) for (const g of Object.keys(h.potenzial)) h.potenzial[g] = (h.potenzial[g] ?? 0) * kompensation;
+  }
+  function premiumServiceQuote(h) {
+    return h.klasse === "premium" ? premiumProfil(h.premiumSchluessel)?.service ?? 0 : 0;
+  }
+  function premiumImageFaktor(h) {
+    return h.klasse === "premium" ? clamp(0.65 + 0.35 * (h.premiumImage ?? 80) / 80, 0.65, 1.0875) : 1;
+  }
+  function premiumWoche(s2) {
+    for (const h of s2.haeuser.filter((h2) => h2.klasse === "premium" && h2.status === "offen")) {
+      const inv = h.premiumInvestition;
+      if (inv && s2.woche < inv.bis) {
+        h.substanz = clamp(h.substanz + inv.substanzProWoche, 0, 100);
+        h.premiumImage = clamp((h.premiumImage ?? 80) + inv.imageProWoche, 0, 100);
+      }
+      const aktiv = s2.marketing.aktionen.filter((a) => a.status !== "abgesagt" && a.start <= s2.woche && s2.woche < a.ende && !a.kontrollHaeuser?.includes(h.id) && (a.scope.typ === "alle" ? s2.premiumSchuetzen === false : a.scope.typ === "haeuser" ? a.scope.ids.includes(h.id) : a.scope.typ === "format" ? a.scope.format === "warenhaus" : a.scope.typ === "region" ? a.scope.region === h.region : a.scope.cluster === h.cluster));
+      const imageVerlust = aktiv.reduce((a, x) => a + Math.min(2.5, x.rabatt * 5), 0);
+      h.premiumImage = clamp((h.premiumImage ?? 80) - imageVerlust + (aktiv.length ? 0 : 0.05), 0, 100);
+    }
+  }
+  function premiumMarktwert(h) {
+    if (h.klasse !== "premium") return 0;
+    const rang = PREMIUM_HAEUSER.find((p) => p.id === h.premiumSchluessel)?.rang ?? 3;
+    const ebitda = (h.kpi?.db ?? 0) * 52;
+    const multiplex = rang === 1 ? 18 : rang === 2 ? 15 : 11;
+    return eur(Math.max(0, ebitda) * multiplex + (IMMOBILIE[h.premiumSchluessel ?? ""] ?? 0) * (0.85 + 0.15 * (h.substanz / 100)) * (0.8 + 0.2 * ((h.premiumImage ?? 80) / 80)));
+  }
+  function premiumUebersicht(s2) {
+    return s2.haeuser.filter((h) => h.klasse === "premium").map((h) => {
+      const umsatz = h.kpi?.umsatz ?? 0, ebitda = h.kpi?.db ?? 0;
+      return {
+        id: h.id,
+        schluessel: h.premiumSchluessel,
+        name: h.name,
+        stadt: h.stadt,
+        status: h.status,
+        umsatz: eur(umsatz),
+        ebitda: eur(ebitda),
+        marge: umsatz > 0 ? ebitda / umsatz : 0,
+        image: h.premiumImage ?? 80,
+        substanz: h.substanz,
+        marktwert: premiumMarktwert(h),
+        schutz: s2.premiumSchuetzen !== false,
+        eigentuemer: h.premiumEigentuemer
+      };
+    });
+  }
+  function premiumInvestieren(s2, id, betrag) {
+    const h = s2.haeuser.find((x) => x.id === id && x.klasse === "premium" && x.status === "offen");
+    if (!h) return "Premium-Haus nicht verf\xFCgbar.";
+    if (!Number.isSafeInteger(betrag) || betrag < 5e5 || betrag > 1e8) return "Investition von 0,5 bis 100 Mio. \u20AC w\xE4hlen.";
+    if (h.premiumInvestition && s2.woche < h.premiumInvestition.bis) return "Eine Premium-Investition l\xE4uft bereits. Bitte zun\xE4chst die 26 Wochen abwarten.";
+    if (s2.cash + s2.kreditlinie < betrag) return "Nicht gen\xFCgend Liquidit\xE4t.";
+    s2.cash -= betrag;
+    s2.einmalkostenWoche += betrag;
+    h.premiumInvestition = {
+      bis: s2.woche + 26,
+      substanzProWoche: Math.min(30, betrag / 3e6) / 26,
+      imageProWoche: Math.min(15, betrag / 5e6) / 26
+    };
+    melde(s2, "info", `Premium-Investition in ${h.name}: ${mio(betrag)} \xFCber 26 Wochen.`, { stadt: h.stadt, hausId: h.id });
+    return null;
+  }
+  function premiumAngebote(s2) {
+    if (s2.phase !== "insolvenz" || s2.prognose) return;
+    for (const h of s2.haeuser.filter((x) => x.klasse === "premium" && x.status === "offen")) {
+      if (s2.angebote.some((a) => a.typ === "premiumVerkauf" && a.wunschHaeuser?.[0] === h.id)) continue;
+      const p = PREMIUM_HAEUSER.find((x) => x.id === h.premiumSchluessel);
+      const kaeufer = KAEUFER[(p?.rang ?? 3) === 1 ? h.premiumSchluessel === "P001" ? 0 : 1 : (p?.rang ?? 3) === 2 ? 2 : 1];
+      const kaufpreis = premiumMarktwert(h);
+      s2.angebote.push({
+        // Eigenständige deterministische IDs: keine Veränderung des globalen ID-Zählers
+        // und kein zusätzlicher Zug aus dem gemeinsamen Ereignis-Zufallsstrom.
+        id: `premium-${h.premiumSchluessel ?? h.id}-${s2.woche}`,
+        typ: "premiumVerkauf",
+        woche: s2.woche,
+        frist: s2.woche + 10 + (p?.rang ?? 3) * 3,
+        status: "offen",
+        titel: `Kaufangebot f\xFCr ${h.name}`,
+        text: `${kaeufer.name} bietet ${mio(kaufpreis)} inklusive Immobilie. Der Verkauf entzieht Hartwig ein Kronjuwel.`,
+        kaufpreis,
+        wunschHaeuser: [h.id],
+        premiumKaeuferTyp: kaeufer.typ,
+        premiumKaeuferName: kaeufer.name
+      });
+      melde(s2, "presse", `Ein Investor bietet f\xFCr ${h.name}.`, { stadt: h.stadt, hausId: h.id });
+    }
+  }
+  function premiumVerkaufen(s2, an) {
+    if (an.typ !== "premiumVerkauf" || s2.phase !== "insolvenz") return "Premium-Verkauf nur im Insolvenzverfahren.";
+    const h = s2.haeuser.find((x) => x.id === an.wunschHaeuser?.[0] && x.klasse === "premium" && x.status === "offen");
+    if (!h) return "Premium-Haus nicht verf\xFCgbar.";
+    h.status = "verkauft";
+    h.premiumEigentuemer = an.premiumKaeuferName ?? "Neuer Eigent\xFCmer";
+    h.personal.vollzeit = 0;
+    h.personal.teilzeit = 0;
+    h.personal.aushilfen = 0;
+    s2.cash += an.kaufpreis ?? 0;
+    s2.einmalErloeseWoche += an.kaufpreis ?? 0;
+    s2.stakeholder.image = clamp(s2.stakeholder.image - 8, 0, 100);
+    s2.stakeholder.eigentuemer = clamp(s2.stakeholder.eigentuemer - 12, 0, 100);
+    an.status = "angenommen";
+    an.erledigtWoche = s2.woche;
+    melde(s2, "presse", `${h.name} ist an ${h.premiumEigentuemer} verkauft worden.`, { stadt: h.stadt, hausId: h.id });
+    return null;
+  }
+
   // ../engine/src/aktionen.ts
   var ok3 = (text3) => ({ ok: true, text: text3 });
   var fehler3 = (text3) => ({ ok: false, text: text3 });
@@ -5222,6 +5456,13 @@
     if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s2, a);
     if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s2, a, (x) => einmalKosten(s2, x));
     switch (a.typ) {
+      case "premiumSchuetzen":
+        s2.premiumSchuetzen = a.an;
+        return ok3(a.an ? "Premiumh\xE4user sind vor pauschalen Rabattaktionen gesch\xFCtzt." : "Premiumschutz deaktiviert.");
+      case "premiumInvestition": {
+        const fehlerText = premiumInvestieren(s2, a.haus, a.betrag);
+        return fehlerText ? fehler3(fehlerText) : ok3("Premium-Investition gestartet (26 Wochen).");
+      }
       case "schliessen": {
         const h = haus(s2, a.haus);
         if (!h) return fehler3("Haus nicht gefunden.");
@@ -5444,7 +5685,14 @@
       }
       case "angebotVerhandeln": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen");
-        if (!an || an.typ !== "paket") return fehler3("Nur Paketangebote lassen sich mit Standorttausch verhandeln.");
+        if (an?.typ === "premiumVerkauf") {
+          if (s2.phase !== "insolvenz") return fehler3("Premiumverkauf nur in Insolvenz.");
+          if (an.vorschlagHaeuser?.length) return fehler3("Dieses Angebot wurde bereits verhandelt.");
+          an.kaufpreis = eur((an.kaufpreis ?? 0) * 1.04);
+          an.vorschlagHaeuser = [...an.wunschHaeuser ?? []];
+          return ok3(`Nachverhandelt: ${mio(an.kaufpreis)} Kaufpreis.`);
+        }
+        if (!an || an.typ !== "paket") return fehler3("Nur Paket- und Premiumangebote lassen sich verhandeln.");
         const hs = a.haeuser.map((id) => haus(s2, id)).filter((h) => !!h && h.status === "offen" && h.etagen.includes(an.etage ?? 0));
         if (hs.length < (an.minHaeuser ?? 1)) return ok3(`${an.mieterName}: \u201EUnter ${an.minHaeuser} Standorten lohnt sich das f\xFCr uns nicht.\u201C`);
         const wunsch = (an.wunschHaeuser ?? []).map((id) => haus(s2, id)).filter((h) => !!h);
@@ -5480,6 +5728,10 @@
       case "angebotAnnehmen": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen");
         if (!an) return fehler3("Angebot nicht gefunden oder abgelaufen.");
+        if (an.typ === "premiumVerkauf") {
+          const grund2 = premiumVerkaufen(s2, an);
+          return grund2 ? fehler3(grund2) : ok3(`Premiumhaus verkauft: ${mio(an.kaufpreis ?? 0)} flie\xDFen zu.`);
+        }
         if (an.typ === "uebernahme") {
           if (!an.wettbewerberId) return fehler3("Wettbewerber fehlt.");
           const grund2 = uebernehmeWettbewerber(s2, an.wettbewerberId, "outlet", an.mieteQmMonat);
@@ -7751,6 +8003,7 @@
       else haeuser.push(bauHaus(h, ++sp, stadt, region, cluster, kk, "sport", sz, 2));
       k++;
     }
+    if (!sz.premiumDeaktiviert) kennzeichnePremium(haeuser);
     const bestand = [];
     const basisUmsatz = {};
     for (const x of haeuser) {
@@ -7786,6 +8039,7 @@
       kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? "mittel"].kreditlinie),
       kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? "mittel"].kreditlinie),
       haeuser,
+      premiumSchuetzen: true,
       wettbewerber: [],
       wettbewerbRng: (seed ^ 2654435769) >>> 0,
       wettbewerbNaechsteId: 0,
@@ -7893,7 +8147,7 @@
     const streik = h.streikBis !== void 0 && h.streikBis > w ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale;
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h);
   }
   function saettigung(qm, Q) {
     return Q > 0 ? 1 - Math.exp(-qm / Q) : 0;
@@ -7943,7 +8197,7 @@
     summeBedarf += offBasis;
     const p = h.personal;
     const fteIst = p.vollzeit + p.teilzeit + p.aushilfen;
-    roh2.fteBedarf = qmVerkauf / PARAM.qmJeFte + summeBedarf / PARAM.umsatzJeFte;
+    roh2.fteBedarf = qmVerkauf / PARAM.qmJeFte * (h.klasse === "premium" ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
     const besetzung = roh2.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh2.fteBedarf / hqBesetzungsNorm(s2), 0, 1), 0.5) : 1;
     const ahQuote = fteIst > 0 ? p.aushilfen / fteIst : 0;
     const basisJe = {};
@@ -8000,7 +8254,7 @@
       qmBetrieb += f.konzept === "leer" ? f.qm * 0.25 : f.qm;
     }
     k.nebenkosten = h.miete.netTyp === "net" ? 0 : qmNk * h.miete.nebenkostenQmWoche;
-    k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb;
+    k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt;
     k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2);
     return k;
   }
@@ -8503,6 +8757,7 @@
   function ereignisse(s2) {
     if (s2.prognose) return;
     const w = s2.woche;
+    premiumAngebote(s2);
     const zyklus = 0.035 * Math.sin(2 * Math.PI * w / 260 + s2.makro.phase);
     if (s2.makro.schockBis !== void 0 && s2.makro.schockBis <= w) {
       s2.makro.schockBis = void 0;
@@ -8695,6 +8950,7 @@
     if (s2.phase === "zerschlagen") throw new Error("Spiel beendet: Die Kette ist zerschlagen.");
     const w = s2.woche;
     prozesse(s2);
+    premiumWoche(s2);
     hqWoche(s2);
     quartalsStart(s2);
     vorstandWoche(s2);
@@ -8766,7 +9022,7 @@
         umsatzEigen += u;
         umsatzEigenJe[g] = (umsatzEigenJe[g] ?? 0) + u;
         kpi.umsatz += u;
-        kpi.rohertrag += u - e;
+        kpi.rohertrag += u - e + (h.klasse === "premium" && (g === "beauty" || g === "accessoires") ? u * 0.03 : 0);
         kpi.umsatzJeGruppe[g] = (kpi.umsatzJeGruppe[g] ?? 0) + u;
       }
       for (const [g, u] of Object.entries(r.kommission)) {
@@ -8950,7 +9206,8 @@
       tu2({ typ: "marketingBudget", quote: 0.018 });
       tu2({ typ: "insolvenzAntrag" });
       if (zentralePauschal) tu2({ typ: "zentrale", prozent: 0.3 });
-      const p = portfolio(s2).filter((x) => x.status === "offen").sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
+      const premiumIds = new Set(s2.haeuser.filter((h) => h.klasse === "premium").map((h) => h.id));
+      const p = portfolio(s2).filter((x) => x.status === "offen" && !premiumIds.has(x.id)).sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
       for (const x of p.slice(0, 50)) tu2({ typ: "schliessen", haus: x.id });
       for (const x of p.slice(50).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.2 });
       for (const h of s2.haeuser.filter((x) => x.status === "offen" && x.kpi)) {
@@ -41813,8 +42070,8 @@
     const dunkel3 = dunkler(stein, 0.06);
     const natur = waehle2(r, ["#e8dfcf", "#efe8da", "#ddd3c2", "#cfc6b4"]);
     const egF = waehle2(r, ["#6f6a66", natur, "#8a817a", "#4f4c4a", stein]);
-    const variante = ctx.eck ? wz(r, [["staffel", 3], ["kupferwalm", 1.2], ["flach", 1]]) : wz(r, [["giebel", ctx.w <= 17 ? 1.4 : 0.3], ["staffel", 1.6], ["flach", 1], ["kupferwalm", 1.2], ["trauf", 1.6]]);
-    const nStaffel = variante === "staffel" ? n >= 5 ? 2 : 1 : 0;
+    const variante2 = ctx.eck ? wz(r, [["staffel", 3], ["kupferwalm", 1.2], ["flach", 1]]) : wz(r, [["giebel", ctx.w <= 17 ? 1.4 : 0.3], ["staffel", 1.6], ["flach", 1], ["kupferwalm", 1.2], ["trauf", 1.6]]);
+    const nStaffel = variante2 === "staffel" ? n >= 5 ? 2 : 1 : 0;
     const nVoll = n - nStaffel;
     const H = eg + nVoll * gh;
     ctx.H = H;
@@ -41862,7 +42119,7 @@
       backsteinGeschosse(F2, eg + 0.25, nVoll, ax, H);
     }
     let top = H + 0.12;
-    if (variante === "giebel") {
+    if (variante2 === "giebel") {
       const strZ = ctx.strasse === "+z";
       const span = strZ ? ctx.w : ctx.d;
       const G2 = clamp3(span * 0.62, 4.5, 10);
@@ -41871,7 +42128,7 @@
       for (const F2 of ctx.fassaden) if (F2.art === "haupt") treppengiebel(F2, H, G2, stein, natur, r);
       top = H + G2;
       dachkram(ctx, rechteck(ctx.x + ctx.w * 0.45, ctx.z + 2, ctx.x + ctx.w * 0.55, ctx.z + ctx.d - 2), H, H + G2 - 1.2, { schornsteine: 2, kaminFarbe: dunkel3, antenne: 0.3 });
-    } else if (variante === "trauf") {
+    } else if (variante2 === "trauf") {
       ctx.achsenJe = new Map(ctx.fassaden.map((F2) => [F2, achsen(F2.L, raster4, 0.75)]));
       top = dach(ctx, H, {
         typ: "sattel",
@@ -41884,7 +42141,7 @@
         giebel: { rahmen: rahmen2 },
         kram: { schornsteine: 2, kaminFarbe: dunkel3 }
       });
-    } else if (variante === "kupferwalm") {
+    } else if (variante2 === "kupferwalm") {
       ctx.achsenJe = new Map(ctx.fassaden.map((F2) => [F2, F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, raster4, 0.75)]));
       top = dach(ctx, H, { typ: "walm", farbe: dachfarbe(ctx, { kupfer: 3, schiefer: 1 }), neigung: zw(r, 0.45, 0.6), ueberstand: 0.3, traufe: natur, gaube: { form: "flach", wand: natur, jedeZweite: true }, kram: { schornsteine: 1, kaminFarbe: dunkel3 } });
     } else {
@@ -42139,7 +42396,7 @@
     const glas2 = waehle2(r, ["#4b6272", "#55636f", "#5a7080", "#625a55", "#6b5f48"]);
     const beton = "#c9c5bd";
     const jal = waehle2(r, ["#e8e2d2", "#c9b28d", "#d9dcdf", "#e07a3f"]);
-    const variante = wz(r, [["band", 3], ["raster", 1.5], ["kassette", 1.5], ["eternit", 1]]);
+    const variante2 = wz(r, [["band", 3], ["raster", 1.5], ["kassette", 1.5], ["eternit", 1]]);
     const eternit = "#4f555c";
     const arkade2 = r() < 0.45;
     const staffel2 = n >= 5 && r() < 0.35;
@@ -42163,16 +42420,16 @@
     }
     const baender = (F2, y0, k, top) => {
       const [s0, s1] = F2.spanne(0.3);
-      if (variante === "kassette" || variante === "eternit") {
-        const ax = F2.art === "ecke" ? Object.assign([F2.L / 2], { abstand: F2.L }) : achsen(F2.L, variante === "kassette" ? 1.9 : 2.4, 0.6);
+      if (variante2 === "kassette" || variante2 === "eternit") {
+        const ax = F2.art === "ecke" ? Object.assign([F2.L / 2], { abstand: F2.L }) : achsen(F2.L, variante2 === "kassette" ? 1.9 : 2.4, 0.6);
         for (let kk = 0; kk < k; kk++) {
           const yF = y0 + kk * gh;
-          if (variante === "eternit") {
+          if (variante2 === "eternit") {
             F2.box(s0, s1, yF - 0.02, yF + gh, 0, 0.12, eternit);
             for (let yy = yF + 0.35; yy < yF + gh; yy += 0.35) F2.box(s0, s1, yy - 0.02, yy, 0.12, 0.13, dunkler(eternit, 0.04));
           }
           ax.forEach((u) => {
-            if (variante === "kassette") {
+            if (variante2 === "kassette") {
               const b2 = ax.abstand / 2 - 0.04;
               F2.box(u - b2, u + b2, yF + 0.02, yF + gh - 0.02, 0, 0.5, platte4);
               F2.box(u - b2 + 0.28, u + b2 - 0.28, yF + 0.75, yF + gh - 0.4, 0.3, 0.52, dunkler(platte4, 0.25));
@@ -42180,7 +42437,7 @@
             } else fenster(F2, u, yF + 0.9, 1.6, 1.45, { kreuz: "senkrecht", t: 0.13, rahmen: "#f4f2ee", glas: glas2 });
           });
         }
-        F2.box(s0, s1, top - 0.4, top + 0.9, 0, variante === "kassette" ? 0.55 : 0.3, platte4);
+        F2.box(s0, s1, top - 0.4, top + 0.9, 0, variante2 === "kassette" ? 0.55 : 0.3, platte4);
         F2.box(s0 - 0.02, s1 + 0.02, top + 0.9, top + 1, -0.05, 0.6, "#d9dcdf");
         return;
       }
@@ -42190,9 +42447,9 @@
         for (let i = 0; i < np; i++) F2.box(s0 + i * pw + 0.03, s0 + (i + 1) * pw - 0.03, yF - (kk || !arkade2 ? 0.4 : 0.6), yF + 1, 0, 0.3, platte4);
         const ya = yF + 1, yb = yF + gh - 0.4;
         F2.box(s0 + 0.1, s1 - 0.1, ya, yb, -0.02, 0.12, glas2);
-        const st = variante === "raster" ? 1.25 : 1.3;
+        const st = variante2 === "raster" ? 1.25 : 1.3;
         for (let u = 0.6; u < F2.L - 0.3; u += st) {
-          if (variante === "raster") F2.box(u - 0.09, u + 0.09, ya, yb, 0, 0.45, platte4);
+          if (variante2 === "raster") F2.box(u - 0.09, u + 0.09, ya, yb, 0, 0.45, platte4);
           else F2.box(u - 0.04, u + 0.04, ya, yb, 0.1, 0.15, profil);
         }
         F2.box(s0 + 0.1, s1 - 0.1, ya - 0.04, ya + 0.04, 0.1, 0.15, profil);
@@ -42244,29 +42501,29 @@
   function neubau(ctx) {
     const { S, r, n } = ctx;
     const eg = zw(r, 4.5, 4.9), gh = zw(r, 3.15, 3.35);
-    const variante = wz(r, [["platten", 3], ["glas", 0.8], ["weiss", 1.6], ["holz", 0.9], ["klinker", ctx.region === "Nord" ? 1.8 : 0.7]]);
+    const variante2 = wz(r, [["platten", 3], ["glas", 0.8], ["weiss", 1.6], ["holz", 0.9], ["klinker", ctx.region === "Nord" ? 1.8 : 0.7]]);
     const palette = {
       platten: waehle2(r, [["#4a4f55", "#5a6067"], ["#9aa0a6", "#8b9198"], ["#eceeee", "#dfe2e3"], ["#d8d0c2", "#cbc2b2"], ["#6b6f63", "#7a7e72"], ["#b9a68c", "#a99880"]]),
       glas: [waehle2(r, ["#e9ebec", "#cfd4d8", "#4a4f55"]), "#dfe2e3"],
       weiss: [waehle2(r, ["#f2f2ef", "#ebe8e1", "#e6e8e8"]), "#e8e8e4"],
       holz: [waehle2(r, ["#b08a62", "#9c7a56", "#c49e74"]), "#3b4046"],
       klinker: [ziegelstein(ctx, { dunkelrot: 2, braun: 2, rot: 1, gelb: 1 }), "#3b4046"]
-    }[variante];
+    }[variante2];
     const [pf, pf2] = palette;
-    const rahmen2 = variante === "platten" && pf === "#4a4f55" ? "#2b2f33" : variante === "holz" ? "#3b4046" : "#3b4046";
+    const rahmen2 = variante2 === "platten" && pf === "#4a4f55" ? "#2b2f33" : variante2 === "holz" ? "#3b4046" : "#3b4046";
     const glas2 = waehle2(r, ["#6f8a9c", "#647f91", "#7a95a6"]);
     const staffel2 = n >= 3 && r() < 0.75;
     const nVoll = staffel2 ? n - 1 : n;
     const H = eg + nVoll * gh;
     ctx.H = H;
     ctx.farbe = pf;
-    S.add(prismoid(ctx.P, 0, H), variante === "glas" ? "#6b8597" : dunkler(pf, 0.06));
+    S.add(prismoid(ctx.P, 0, H), variante2 === "glas" ? "#6b8597" : dunkler(pf, 0.06));
     if (ctx.eck) ctx.eckName = waehle2(r, ["Optik Lange", "H\xF6rger\xE4te Klar", "Brillen Fuchs", "Bioladen Gr\xFCnzeug"]);
-    const versatzMuster = variante === "weiss" || r() < 0.4;
-    const loggien = variante !== "glas" && r() < 0.35;
+    const versatzMuster = variante2 === "weiss" || r() < 0.4;
+    const loggien = variante2 !== "glas" && r() < 0.35;
     const geschosse2 = (F2, y0, k) => {
       const [s0, s1] = F2.spanne(0.15);
-      if (variante === "glas") {
+      if (variante2 === "glas") {
         F2.box(s0 + 0.1, s1 - 0.1, y0, y0 + k * gh, 0, 0.05, glas2);
         for (let u = 0.75; u < F2.L - 0.3; u += 1.5) F2.box(u - 0.035, u + 0.035, y0, y0 + k * gh, 0.05, 0.14, pf2);
         for (let kk = 0; kk <= k; kk++) F2.box(s0, s1, y0 + kk * gh - 0.3, y0 + kk * gh + 0.12, 0, 0.18, pf);
@@ -42276,23 +42533,23 @@
         }
         return;
       }
-      const fwBasis = variante === "weiss" ? null : zw(r, 1.6, 2.3);
+      const fwBasis = variante2 === "weiss" ? null : zw(r, 1.6, 2.3);
       const ax = F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, zw(r, 2.6, 3.1), 1);
       const logIdx = loggien && ax.length >= 3 ? r() < 0.5 ? 0 : ax.length - 1 : -1;
       for (let kk = 0; kk < k; kk++) {
         const yF = y0 + kk * gh;
         F2.box(s0, s1, yF - 0.2, yF + 0.3, 0, 0.16, pf);
         const fenst = ax.map((u, i) => {
-          const fw = F2.art === "ecke" ? Math.min(1.6, F2.L - 0.6) : variante === "weiss" ? waehle2(r, [1, 1.4, 2.2, 2.6]) : i === logIdx ? 2.4 : fwBasis;
+          const fw = F2.art === "ecke" ? Math.min(1.6, F2.L - 0.6) : variante2 === "weiss" ? waehle2(r, [1, 1.4, 2.2, 2.6]) : i === logIdx ? 2.4 : fwBasis;
           const du = versatzMuster && F2.art !== "ecke" && i !== logIdx ? (kk % 2 ? 0.45 : -0.45) * (i % 2 ? 1 : -1) : 0;
           return [clamp3(u + du, fw / 2 + 0.4, F2.L - fw / 2 - 0.4), fw, i === logIdx];
         });
         let last = s0;
         for (const [u, fw] of fenst) {
-          if (u - fw / 2 - 0.12 > last) F2.box(last + 0.02, u - fw / 2 - 0.12, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante === "platten" ? pf2 : pf);
+          if (u - fw / 2 - 0.12 > last) F2.box(last + 0.02, u - fw / 2 - 0.12, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante2 === "platten" ? pf2 : pf);
           last = u + fw / 2 + 0.12;
         }
-        if (s1 > last) F2.box(last + 0.02, s1, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante === "platten" ? pf2 : pf);
+        if (s1 > last) F2.box(last + 0.02, s1, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante2 === "platten" ? pf2 : pf);
         for (const [u, fw, log] of fenst) {
           if (log) {
             F2.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + gh - 0.2, -0.02, 0.04, "#4d555c");
@@ -42306,7 +42563,7 @@
           if (r() < 0.6) F2.box(u - fw / 2, u + fw / 2, yF + 0.33, yF + 1.2, 0.26, 0.3, GLAS_GELAENDER);
           else if (r() < 0.3) F2.box(u - fw / 2, u + fw / 2, yF + gh - 0.25 - zw(r, 0.3, 1.2), yF + gh - 0.25, 0.24, 0.27, "#e1e3e4");
         }
-        if (variante === "holz") {
+        if (variante2 === "holz") {
           for (let u = s0 + 0.15; u < s1; u += 0.3) if (!fenst.some(([fu, fw]) => Math.abs(u - fu) < fw / 2 + 0.15)) F2.box(u - 0.05, u + 0.05, yF + 0.3, yF + gh - 0.2, 0.16, 0.2, dunkler(pf, 0.06));
         }
       }
@@ -42598,7 +42855,7 @@
     ctx.H = H;
     ctx.farbe = wand2;
     S.add(prismoid(ctx.P, 0, H), wand2);
-    const variante = wz(r, [["band", 3], ["loch", 1.5]]);
+    const variante2 = wz(r, [["band", 3], ["loch", 1.5]]);
     const sockelB = waehle2(r, ["#5a5c5f", akzent, "#8a8478", "#3b4046"]);
     const turmVor = r() < 0.5, turmFarbe = r() < 0.5 ? wand2 : waehle2(r, [akzent, "#d9d6cf", "#b9654e"]);
     const sprosse = waehle2(r, ["#2b2f33", "#2b2f33", "#f4f3ef", "#7a2f2f", "#2f4f6f"]);
@@ -42611,7 +42868,7 @@
       const trU = treppe && F2.art === "haupt" && F2.L > 10 ? r() < 0.5 ? 1.6 : F2.L - 1.6 : null;
       for (let k = 1; k <= n; k++) {
         const yF = eg + (k - 1) * gh;
-        if (variante === "band" || F2.art === "ecke") {
+        if (variante2 === "band" || F2.art === "ecke") {
           const a = F2.extL ? -0.12 : 0.6, b = F2.L - (F2.extR ? -0.12 : 0.6);
           const ua = trU != null && trU < F2.L / 2 ? trU + 1 : a, ub = trU != null && trU > F2.L / 2 ? trU - 1 : b;
           F2.box(ua, ub, yF + 0.95, yF + 2.25, -0.02, 0.05, FARBEN3.fenster);
@@ -44047,14 +44304,14 @@
       for (const k of [wh[0], wh[0] + 1]) fixiere(E, k, wh[1], wh[1]);
     }
     const nachbarn = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => [wh[0] + a, wh[1] + b]).filter(([i, j]) => zelleFrei(E, i, j));
-    const variante = E.marktVariante ?? (E.archetyp === "dom" ? wahlGewichtet(r, [["keiner", 0.5], ["einer", 0.5]]) : wahlGewichtet(r, [["keiner", 0.12], ["einer", 0.43], ["laenglich", 0.27], ["zwei", 0.18]]));
-    E.marktVariante = variante;
+    const variante2 = E.marktVariante ?? (E.archetyp === "dom" ? wahlGewichtet(r, [["keiner", 0.5], ["einer", 0.5]]) : wahlGewichtet(r, [["keiner", 0.12], ["einer", 0.43], ["laenglich", 0.27], ["zwei", 0.18]]));
+    E.marktVariante = variante2;
     const kirchSeiten = () => waehle2(r, [["-z", "-x"], ["-z", "-x"], ["-z", "-x", "+x"], ["-x"], ["-z"], ["-z", "-x", "+z"]]);
     const seitenWahl = () => waehle2(r, [["-z", "-x", "+x"], ["-z", "-x", "+z"], ["-z", "-x", "+x"], ["-z", "-x", "+z", "+x"]]);
-    if (variante !== "keiner" && nachbarn.length) {
+    if (variante2 !== "keiner" && nachbarn.length) {
       const [mi, mj] = waehle2(r, nachbarn);
       let f = { art: "markt", i0: mi, i1: mi, j0: mj, j1: mj, seiten: seitenWahl() };
-      if (variante === "laenglich") {
+      if (variante2 === "laenglich") {
         const opt = [[mi + 1, mj, "x"], [mi - 1, mj, "x"], [mi, mj + 1, "z"], [mi, mj - 1, "z"]].filter(([i, j]) => zelleFrei(E, i, j));
         if (opt.length) {
           const [i, j] = waehle2(r, opt);
@@ -44063,7 +44320,7 @@
       }
       nimm2(E, f);
       for (let k = f.i0; k <= f.i1 + 1; k++) fixiere(E, k, f.j0, f.j1);
-      if (variante === "zwei") {
+      if (variante2 === "zwei") {
         const l = [];
         for (let i = 0; i < nx(); i++) for (let j = 0; j < nz(); j++) {
           const dd = Math.hypot(i - mi, j - mj);
@@ -44209,7 +44466,7 @@
     const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
     return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
   }
-  var SLOT_ROLLE = { warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester", outlet: "slot:outlet" };
+  var SLOT_ROLLE = { premium: "slot:premium", warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester", outlet: "slot:outlet" };
   function einkaufslage(E, standorte) {
     const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? "1a", rolle: st.rolle ?? "warenhaus" }));
     const innen = liste.filter((e) => e.lage === "1a" || e.lage === "b");
@@ -44285,7 +44542,7 @@
       E.einkaufZellen.add(`${q2.i},${q2.j}`);
       kand = kand.filter((x) => x !== q2);
     };
-    const rang = (e) => e.rolle === "warenhaus" ? 0 : 1;
+    const rang = (e) => e.rolle === "premium" ? -1 : e.rolle === "warenhaus" ? 0 : 1;
     const a1 = innen.filter((e) => e.lage === "1a").sort((a, b) => rang(a) - rang(b) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n);
     const zuB = [];
     for (const e of a1) {
@@ -45684,7 +45941,7 @@
       }
     }
     const BAU3 = (q2) => q2 && !["luecke", "baustelle", "parkplatz", "platz", "durchgang"].includes(q2.typ) && !q2.leer;
-    const hartwig = meine.some((q2) => q2.typ === "slot:warenhaus");
+    const hartwig = meine.some((q2) => q2.typ === "slot:warenhaus" || q2.typ === "slot:premium");
     if (hartwig) {
       for (const p of meine) if (p.typ === "stadthaus" || p.typ === "eck") p.hartwigBlock = true;
     }
@@ -48094,17 +48351,17 @@
     if (!mitRotunde) return Math.max(h1, Hv + 0.2);
     const R9 = clamp4(Math.min(w, d) * 0.2, 4, 9), H = clamp4(h1 + 3, 10, 28);
     const cx = x0 + w - R9 + 0.6, cz = z0 + d - R9 + 0.6;
-    const zylinder = (rad2, y0, y1, f) => {
+    const zylinder2 = (rad2, y0, y1, f) => {
       const g = new three_module_exports.CylinderGeometry(rad2, rad2, y1 - y0, 24);
       g.translate(cx, (y0 + y1) / 2, cz);
       S.add(g, f);
     };
-    zylinder(R9, 0, H, wand2);
-    for (let y = EG; y < H - 2; y += OG) zylinder(R9 + 0.05, y + 0.8, y + 3, glas2);
-    zylinder(R9 + 0.25, H - 0.2, H + 0.4, akzent);
-    zylinder(R9 + 0.05, H - 0.15, H + 0.3, KIES2);
-    zylinder(R9 * 0.6, H + 0.4, H + 1.6, "#c9cbcc");
-    zylinder(R9 * 0.62, H + 1.6, H + 1.75, "#9ea2a5");
+    zylinder2(R9, 0, H, wand2);
+    for (let y = EG; y < H - 2; y += OG) zylinder2(R9 + 0.05, y + 0.8, y + 3, glas2);
+    zylinder2(R9 + 0.25, H - 0.2, H + 0.4, akzent);
+    zylinder2(R9 + 0.05, H - 0.15, H + 0.3, KIES2);
+    zylinder2(R9 * 0.6, H + 0.4, H + 1.6, "#c9cbcc");
+    zylinder2(R9 * 0.62, H + 1.6, H + 1.75, "#9ea2a5");
     return Math.max(h1, H + 1.6);
   }
 
@@ -50505,7 +50762,7 @@
     const { x, z: z2, seed = 1 } = p;
     const r = rng2(seed);
     const w = p.w ?? 76, d = p.d ?? 58;
-    const variante = p.variante ?? waehle2(r, ["rotunde", "portal"]);
+    const variante2 = p.variante ?? waehle2(r, ["rotunde", "portal"]);
     const G2 = p.geschosse ?? 3, eg = 6, gh = 5, H = eg + (G2 - 1) * gh;
     const name2 = p.name ?? waehle2(r, ["Stadtgalerie", "L\xF6wen-Arkaden", "Forum am Markt", "Br\xFCckenpassage", "City-Center"]);
     const haut = p.farbe ?? waehle2(r, ["#ebe6dc", "#e1e5e8", "#e9dfcf"]);
@@ -50514,7 +50771,7 @@
     const mieter = [...MIETER2].sort(() => r() - 0.5);
     let mi = 0;
     const R9 = 10, ecke = 2 * R9 - 2;
-    const koerper3 = variante === "rotunde" ? [[x, z2, w - ecke, d], [x + w - ecke, z2, ecke, d - ecke]] : [[x, z2, w, d]];
+    const koerper3 = variante2 === "rotunde" ? [[x, z2, w - ecke, d], [x + w - ecke, z2, ecke, d - ecke]] : [[x, z2, w, d]];
     for (const [bx, bz, bw, bd] of koerper3) {
       S.quader(bx, 0, bz, bx + bw - 1.2, eg, bz + bd - 1.2, "#4b5965");
       S.quader(bx, eg, bz, bx + bw, H, bz + bd, haut);
@@ -50546,7 +50803,7 @@
         }
       }
     }
-    const az0 = z2 + d * 0.5 - 6, aw = w * (variante === "rotunde" ? 0.62 : 0.78), ax0 = x + 5;
+    const az0 = z2 + d * 0.5 - 6, aw = w * (variante2 === "rotunde" ? 0.62 : 0.78), ax0 = x + 5;
     const Hd = H + 0.5;
     S.quader(ax0 - 0.5, Hd, az0 - 0.5, ax0 + aw + 0.5, Hd + 1.2, az0 + 12.5, haut);
     satteldach2(S, ax0, az0, aw, 12, Hd + 1.2, 4, glas2, "x", 0.8);
@@ -50558,14 +50815,14 @@
     S.box(aw + 0.4, 0.25, 1, ax0 + aw / 2, Hd + 5.3, az0 + 6, "#f4f4f2");
     const pz0 = z2 + 1, pz1 = az0 - 2.5;
     if (p.parkdeck !== false && pz1 - pz0 > 12) {
-      const px1 = x + w - (variante === "rotunde" ? 2 : 2);
+      const px1 = x + w - (variante2 === "rotunde" ? 2 : 2);
       parkplatz(S, x + 1.5, pz0, px1 - x - 1.5, pz1 - pz0, r, { y: Hd, dichte: 0.55, laternen: true });
       S.quader(x + 1, Hd, pz1, px1, Hd + 1.1, pz1 + 0.4, "#d9d6cf");
       S.quader(x + 2, Hd, pz0 + 1, x + 14, Hd + 3.8, pz0 + 8, "#cfcac0");
       S.quader(x + 3, Hd + 0.05, pz0 + 8, x + 13, Hd + 2.6, pz0 + 8.1, "#3a434b");
       schild(scene2, "P", "+x", pz0 + 4.5, Hd + 2.4, x + 14, 2.2, "#ffffff", "#2a62b8");
     }
-    if (variante === "rotunde") {
+    if (variante2 === "rotunde") {
       const cx = x + w - R9 + 1.5, cz = z2 + d - R9 + 1.5;
       zyl4(S, R9, R9, H + 2, cx, 0, cz, glas2, 28);
       for (let k = 1; k <= G2; k++) zyl4(S, R9 + 0.25, R9 + 0.25, 0.45, cx, eg + (k - 1) * gh - 0.4, cz, "#f4f2ee", 28);
@@ -50599,12 +50856,12 @@
     const { x, z: z2, seed = 1 } = p;
     const r = rng2(seed);
     const w = p.w ?? 34, d = p.d ?? 42;
-    const variante = p.variante ?? waehle2(r, ["offen", "lamellen", "spirale"]);
+    const variante2 = p.variante ?? waehle2(r, ["offen", "lamellen", "spirale"]);
     const G2 = p.geschosse ?? 5, gh = 3;
     const beton = p.farbe ?? waehle2(r, ["#d4d0c7", "#cbc7bf", "#d9d4ca"]);
-    const brF = variante === "offen" ? waehle2(r, ["#e9e6df", "#e3c46a", "#7fb0c9", "#e2e4e6"]) : "#e6e3dc";
+    const brF = variante2 === "offen" ? waehle2(r, ["#e9e6df", "#e3c46a", "#7fb0c9", "#e2e4e6"]) : "#e6e3dc";
     const lamF = waehle2(r, ["#b9925f", "#9aa7b0", "#7d8a72"]);
-    const sp = variante === "spirale" ? 15 : 0;
+    const sp = variante2 === "spirale" ? 15 : 0;
     const mx1 = x + w - sp;
     const H = G2 * gh;
     S.quader(x, 0, z2, mx1 - 5.5, H, z2 + d - 5.5, "#5d666e");
@@ -50614,7 +50871,7 @@
       if (e === G2) break;
       S.quader(x, yb, z2, mx1, yb + 0.05, z2 + d, "#9aa0a6");
       const b0 = yb + (e === 0 ? 0 : 0), b1 = yb + 1.15;
-      if (e > 0 || variante !== "offen") {
+      if (e > 0 || variante2 !== "offen") {
         S.quader(x, b0, z2 + d - 0.3, mx1, b1, z2 + d, brF);
         S.quader(mx1 - 0.3, b0, z2, mx1, b1, z2 + d, brF);
       }
@@ -50627,28 +50884,28 @@
     S.quader(x, yd, z2 + d - 0.3, mx1, yd + 1.1, z2 + d, brF);
     S.quader(mx1 - 0.3, yd, z2, mx1, yd + 1.1, z2 + d, brF);
     parkplatz(S, x + 1, z2 + 1, mx1 - x - 9, d - 2, r, { y: yd, dichte: 0.4, belag: "#8d939a" });
-    if (variante !== "spirale") {
+    if (variante2 !== "spirale") {
       const g = new three_module_exports.BoxGeometry(5, 0.4, 20);
       g.rotateX(-0.14);
       g.translate(mx1 - 4.5, yd - 1.2, z2 + d * 0.45);
       S.add(g, beton);
       S.quader(mx1 - 7.2, yd, z2 + d * 0.45 - 10, mx1 - 6.9, yd + 1, z2 + d * 0.45 + 10, brF);
     }
-    if (variante === "lamellen") {
+    if (variante2 === "lamellen") {
       for (let u = x + 0.6; u < mx1 - 0.2; u += 0.9) S.box(0.18, H - 0.6, 0.5, u, 0.3 + (H - 0.6) / 2 + 0.6, z2 + d + 0.3, lamF);
       for (let u = z2 + 0.6; u < z2 + d - 0.2; u += 0.9) S.box(0.5, H - 0.6, 0.18, mx1 + 0.3, 0.3 + (H - 0.6) / 2 + 0.6, u, lamF);
       S.quader(x, H - 0.4, z2 + d, mx1 + 0.6, H + 0.4, z2 + d + 0.6, beton);
       S.quader(mx1, H - 0.4, z2, mx1 + 0.6, H + 0.4, z2 + d + 0.6, beton);
     }
     const tx0 = mx1 - 6, tz0 = z2 + 2;
-    S.quader(tx0, 0, tz0, mx1 + (variante === "lamellen" ? 0.6 : 0), H + 4, tz0 + 6, "#3f6f9a");
-    S.quader(mx1 + (variante === "lamellen" ? 0.6 : 0), 1, tz0 + 1.5, mx1 + (variante === "lamellen" ? 0.75 : 0.15), H + 3, tz0 + 4.5, "#8fb2c4");
+    S.quader(tx0, 0, tz0, mx1 + (variante2 === "lamellen" ? 0.6 : 0), H + 4, tz0 + 6, "#3f6f9a");
+    S.quader(mx1 + (variante2 === "lamellen" ? 0.6 : 0), 1, tz0 + 1.5, mx1 + (variante2 === "lamellen" ? 0.75 : 0.15), H + 3, tz0 + 4.5, "#8fb2c4");
     schild(scene2, "P", "+x", tz0 + 3, H + 6.5, mx1 + 0.2, 4, "#ffffff", "#2a62b8");
     S.quader(tx0 + 1, H + 4, tz0 + 1, mx1 - 0.5, H + 8.6, tz0 + 5, "#2a62b8");
     const ez = z2 + d * 0.62;
     S.quader(mx1 - 0.1, 0.3, ez - 3.5, mx1 + 0.2, 2.6, ez + 3.5, "#2b3237");
-    schildPasst(scene2, "Einfahrt", "+x", ez, 3.3, mx1 + (variante === "lamellen" ? 0.6 : 0), 0.9, 7, "#ffffff", "#2a62b8");
-    if (variante === "spirale") {
+    schildPasst(scene2, "Einfahrt", "+x", ez, 3.3, mx1 + (variante2 === "lamellen" ? 0.6 : 0), 0.9, 7, "#ffffff", "#2a62b8");
+    if (variante2 === "spirale") {
       const cx = x + w - 7.5, cz = z2 + d - 7.5;
       zyl4(S, 2.2, 2.2, H + 1.5, cx, 0, cz, beton, 14);
       zyl4(S, 6.7, 6.7, H, cx, 0, cz, "#5d666e", 24);
@@ -51727,7 +51984,7 @@
     const r = rng2(seed);
     const w = p.w ?? 26, d = p.d ?? 24;
     const G2 = p.geschosse ?? Math.round(zw(r, 12, 30));
-    const variante = p.variante ?? waehle2(r, ["glas", "raster", "band", "rund", "stufen"]);
+    const variante2 = p.variante ?? waehle2(r, ["glas", "raster", "band", "rund", "stufen"]);
     const name2 = p.name ?? waehle2(r, ["Hollenbach Bank", "Talwerk Versicherung", "Weserland Energie", "Kessler Immobilien", "Lindqvist AG", "Brandtner & Co"]);
     const gh = 3.7, H0 = 8;
     const glasF = p.glas ?? waehle2(r, ["#5f87a3", "#6c9a96", "#4f6f86", "#7d8f9c"]);
@@ -51744,7 +52001,7 @@
       for (let u = x0 + 1.6; u < x0 + ww - 0.4; u += 1.6) S.box(0.14, n * gh, 0.14, u, y0 + n * gh / 2, z0 + dd + 0.04, pfosten);
       for (let u = z0 + 1.6; u < z0 + dd - 0.4; u += 1.6) S.box(0.14, n * gh, 0.14, x0 + ww + 0.04, y0 + n * gh / 2, u, pfosten);
     };
-    if (variante === "glas") {
+    if (variante2 === "glas") {
       glasTurm(tx0, tz0, tw, td, H0, G2);
       const krone = waehle2(r, ["schraeg", "flach", "spitze"]);
       S.quader(tx0 + 1, Ht, tz0 + 1, tx0 + tw - 1, Ht + 3, tz0 + td - 1, "#c9d1d6");
@@ -51755,20 +52012,20 @@
         zyl4(S, 0.35, 0.6, 16, tx0 + tw / 2, Ht + 3, tz0 + td / 2, "#d5dfe5", 6);
         top = Ht + 19;
       } else top = Ht + 3;
-    } else if (variante === "raster") {
+    } else if (variante2 === "raster") {
       lochBlock(S, tx0, tz0, tw, td, H0, Ht, stein, { y0: H0, geschosse: G2, gh, raster: 2.4, fw: 1.55, fh: 2.3, tiefe: 0.55, innen: glasF });
       for (let u = tx0; u <= tx0 + tw + 0.01; u += tw / 4) S.box(0.6, G2 * gh, 0.5, u, H0 + G2 * gh / 2, tz0 + td + 0.2, heller(stein, 0.04));
       S.quader(tx0 - 0.3, Ht, tz0 - 0.3, tx0 + tw + 0.3, Ht + 1.2, tz0 + td + 0.3, heller(stein, 0.04));
       S.quader(tx0 + 2, Ht + 1.2, tz0 + 2, tx0 + tw - 4, Ht + 4, tz0 + td - 3, "#bfc5c9");
       schildFarbe = "#2f3b44";
       top = Ht + 4;
-    } else if (variante === "band") {
+    } else if (variante2 === "band") {
       S.quader(tx0 + 0.3, H0, tz0 + 0.3, tx0 + tw - 0.3, Ht, tz0 + td - 0.3, glasF);
       for (let k = 0; k < G2; k++) S.quader(tx0 - 0.2, H0 + k * gh, tz0 - 0.2, tx0 + tw + 0.2, H0 + k * gh + 1.25, tz0 + td + 0.2, stein);
       S.quader(tx0 - 0.2, Ht, tz0 - 0.2, tx0 + tw + 0.2, Ht + 1.6, tz0 + td + 0.2, stein);
       S.quader(tx0 + 3, Ht + 1.6, tz0 + 3, tx0 + tw - 3, Ht + 4.5, tz0 + td - 3, "#bfc5c9");
       top = Ht + 4.5;
-    } else if (variante === "rund") {
+    } else if (variante2 === "rund") {
       const R9 = Math.min(tw, td) / 2 + 0.6, cx = tx0 + tw / 2, cz = tz0 + td / 2;
       zyl4(S, R9, R9, G2 * gh, cx, H0, cz, glasF, 32);
       for (let k = 0; k <= G2; k++) zyl4(S, R9 + 0.12, R9 + 0.12, 0.3, cx, H0 + k * gh - 0.15, cz, pfosten, 32);
@@ -51803,9 +52060,9 @@
       schildPasst(scene2, name2, "+x", sz0 + sd / 2, yS, sx0 + sw, 1.6, sd - 1, "#ffffff");
       top += 12;
     }
-    if (variante !== "stufen") {
-      const yS = variante === "rund" ? Ht - 2.2 : Ht - 2;
-      const fz = variante === "rund" ? sz0 + sd + 0.9 : sz0 + sd, fx = variante === "rund" ? sx0 + sw + 0.9 : sx0 + sw;
+    if (variante2 !== "stufen") {
+      const yS = variante2 === "rund" ? Ht - 2.2 : Ht - 2;
+      const fz = variante2 === "rund" ? sz0 + sd + 0.9 : sz0 + sd, fx = variante2 === "rund" ? sx0 + sw + 0.9 : sx0 + sw;
       schildPasst(scene2, name2, "+z", sx0 + sw / 2, yS, fz, 2, sw - 1.5, schildFarbe);
       schildPasst(scene2, name2, "+x", sz0 + sd / 2, yS, fx, 2, sd - 1.5, schildFarbe);
     }
@@ -52111,10 +52368,10 @@
   function markthalleAlt(S, scene2, p) {
     const { x, z: z2, seed = 1 } = p;
     const r = rng2(seed);
-    const variante = p.variante ?? waehle2(r, ["backstein", "eisen"]);
+    const variante2 = p.variante ?? waehle2(r, ["backstein", "eisen"]);
     const w = p.w ?? 54, d = p.d ?? 30;
     const dt = d - 8;
-    const back = variante === "backstein";
+    const back = variante2 === "backstein";
     const wand2 = back ? waehle2(r, ["#b06a52", "#a8664f", "#b9785e"]) : "#e3d3bd";
     const hell4 = back ? "#ece5d7" : "#f1eadc";
     const Hw = 11;
@@ -56814,15 +57071,15 @@
   }
   function masseOutlet(haus2) {
     const familie = familieOutlet(haus2);
-    const variante = Number(haus2.fassade ?? 0);
+    const variante2 = Number(haus2.fassade ?? 0);
     const n = familie === 3 ? clamp4((haus2.etagen ?? [0, 1]).filter((e) => e >= 0).length, 2, 3) : familie === 2 ? 2 : 1;
-    const buero = familie === 3 ? 1 + variante % 2 : 0;
+    const buero = familie === 3 ? 1 + variante2 % 2 : 0;
     const A = clamp4(haus2.grundflaecheQm ?? 1700, 650, 3100);
-    const bw = Math.round(clamp4(Math.sqrt(A * (1.4 + variante % 3 * 0.11)), 26, 68) / 2) * 2;
+    const bw = Math.round(clamp4(Math.sqrt(A * (1.4 + variante2 % 3 * 0.11)), 26, 68) / 2) * 2;
     const bd = Math.round(clamp4(A / bw, 19, 55) / 2) * 2;
-    const park = familie === 3 ? 0 : 18 + variante % 3 * 2;
-    const H = familie === 1 ? 6.65 + variante % 3 * 0.1 : familie === 2 ? 10.35 + variante % 3 * 0.18 : 5 + (n - 1) * 3.9 + buero * 3.5;
-    return { w: bw, d: bd + park, bw, bd, n, H, familie, park, buero, variante };
+    const park = familie === 3 ? 0 : 18 + variante2 % 3 * 2;
+    const H = familie === 1 ? 6.65 + variante2 % 3 * 0.1 : familie === 2 ? 10.35 + variante2 % 3 * 0.18 : 5 + (n - 1) * 3.9 + buero * 3.5;
+    return { w: bw, d: bd + park, bw, bd, n, H, familie, park, buero, variante: variante2 };
   }
   function text(scene2, s2, inhalt, u, y, t, breite, hoehe, farbe = "#ffffff", bg = null) {
     if (breite < 1) return;
@@ -57033,11 +57290,11 @@
       logos2.push(marke3(scene2, s2, H, bandY, werbung));
     }
     if (!stadt) {
-      const vordach2 = zweigeschossig ? 4.45 : 3.18;
-      S.box(bw + 1.2, 0.23, 3.25, x + bw / 2, vordach2, z2 + bd + 1.55, "#aac4d0");
-      S.box(bw + 1.1, 0.12, 0.18, x + bw / 2, vordach2 + 0.06, z2 + bd + 3.12, "#efeee9");
+      const vordach3 = zweigeschossig ? 4.45 : 3.18;
+      S.box(bw + 1.2, 0.23, 3.25, x + bw / 2, vordach3, z2 + bd + 1.55, "#aac4d0");
+      S.box(bw + 1.1, 0.12, 0.18, x + bw / 2, vordach3 + 0.06, z2 + bd + 3.12, "#efeee9");
       for (let xx = x + 2.5; xx < x + bw - 1.5; xx += 7.4)
-        S.box(0.18, vordach2 - 0.55, 0.18, xx, (vordach2 + 0.55) / 2, z2 + bd + 2.95, "#b2bac1");
+        S.box(0.18, vordach3 - 0.55, 0.18, xx, (vordach3 + 0.55) / 2, z2 + bd + 2.95, "#b2bac1");
     }
     const ex = x + bw * eingang, portalH = stadt ? 5.85 : 5.95;
     const pz4 = z2 + bd + (stadt ? 1.25 : 1.8);
@@ -61010,8 +61267,23361 @@
     }
   ];
 
+  // src/kit/premium.js
+  var PREMIUM_NAMEN = Object.freeze({
+    P001: "Palais Hartwig",
+    P002: "Hartwig am Hofgarten",
+    P003: "Alsterhaus Hartwig",
+    P004: "Hartwig K\xF6nigsallee"
+  });
+  var PREMIUM_MESSING = "#b8955a";
+  var BRONZE2 = "#665341";
+  var KUPFER2 = "#5f8f7a";
+  var DUNKEL = "#253b34";
+  var STEIN = { P001: "#e2d5c1", P002: "#e5d2b8", P003: "#eeeae0", P004: "#dad5cb" };
+  var GLAS5 = "#608394";
+  var GLAS_HELL3 = "#8bb2bd";
+  function premiumMasse(haus2) {
+    const m = masse(haus2);
+    const p = haus2.premiumSchluessel;
+    return { w: m.w, d: m.d, n: Math.max(p === "P001" ? 6 : 5, m.n), H: Math.max(p === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
+  }
+  function zylinder(S, x, z2, r, y, h, f, seg = 16, oben = r) {
+    const geo = new three_module_exports.CylinderGeometry(oben, r, h, seg).translate(x, y + h / 2, z2);
+    S.add(geo, f);
+  }
+  function kuppel2(S, x, z2, r, y, f) {
+    for (let i = 0; i < 5; i++) zylinder(S, x, z2, r * (1 - i * 0.12), y + i * 0.7, 0.85, f, 20, r * (1 - (i + 1) * 0.12));
+    zylinder(S, x, z2, Math.max(0.5, r * 0.35), y + 3.4, 1.1, PREMIUM_MESSING, 14, 0.25);
+  }
+  function fensterachsen(S, x, z2, w, d, n, typ) {
+    const eg = 6.6, gh = 4.45, raster4 = typ === "P004" ? 4.5 : 4.7;
+    for (let seite = 0; seite < 2; seite++) {
+      const len = seite === 0 ? w : d;
+      for (let i = 0; i < n; i++) {
+        const y = eg + i * gh + 2.1, sep = seite === 0 ? z2 + d + 0.07 : x + w + 0.07;
+        for (let u = 3; u < len - 2; u += raster4) {
+          const mitte = (seite === 0 ? x : z2) + u;
+          const br = Math.min(2.6, raster4 - 1.4);
+          if (seite === 0) {
+            S.box(br, 2.6, 0.18, mitte, y, sep, GLAS5);
+            S.box(br + 0.35, 0.18, 0.48, mitte, y - 1.4, sep + 0.05, PREMIUM_MESSING);
+            S.box(0.16, 2.9, 0.38, mitte, y, sep + 0.08, typ === "P003" ? "#f4f0e8" : PREMIUM_MESSING);
+          } else {
+            S.box(0.18, 2.6, br, sep, y, mitte, GLAS5);
+            S.box(0.48, 0.18, br + 0.35, sep + 0.05, y - 1.4, mitte, PREMIUM_MESSING);
+            S.box(0.38, 2.9, 0.16, sep + 0.08, y, mitte, typ === "P003" ? "#f4f0e8" : PREMIUM_MESSING);
+          }
+        }
+        const yy = eg + (i + 1) * gh;
+        if (seite === 0) S.box(w + 0.6, 0.34, 0.62, x + w / 2, yy, z2 + d + 0.12, PREMIUM_MESSING);
+        else S.box(0.62, 0.34, d + 0.6, x + w + 0.12, yy, z2 + d / 2, PREMIUM_MESSING);
+      }
+    }
+  }
+  function glasdach(S, x, z2, w, d, y, typ) {
+    const B2 = typ === "P001" ? w * 0.81 : Math.min(w * 0.48, 29), T = Math.min(d * 0.46, 25), cx = x + w / 2, cz = z2 + d / 2;
+    const rahmen2 = 0.65;
+    for (const s2 of [-1, 1]) {
+      S.box(B2 + rahmen2, 0.45, rahmen2, cx, y, cz + s2 * T / 2, PREMIUM_MESSING);
+      S.box(rahmen2, 0.45, T + rahmen2, cx + s2 * B2 / 2, y, cz, PREMIUM_MESSING);
+    }
+    S.box(B2, 0.18, T, cx, y + 0.4, cz, GLAS_HELL3);
+    for (let u = -B2 / 2; u <= B2 / 2; u += 3.2) S.box(0.16, 0.25, T, cx + u, y + 0.6, cz, BRONZE2);
+    for (let u = -T / 2; u <= T / 2; u += 3.2) S.box(B2, 0.25, 0.16, cx, y + 0.6, cz + u, BRONZE2);
+    S.box(B2 * 0.38, 2.6, T * 0.38, cx, y + 1.65, cz, GLAS_HELL3);
+    return { x: cx, z: cz, B: B2, T };
+  }
+  function vordach2(S, x, z2, w, d) {
+    S.box(12, 0.6, 3.8, x + w / 2, 5.25, z2 + d + 1.7, BRONZE2);
+    S.box(11.8, 0.16, 3.8, x + w / 2, 5.62, z2 + d + 1.7, PREMIUM_MESSING);
+    for (const a of [-5, 5]) {
+      S.box(0.27, 5, 0.27, x + w / 2 + a, 2.5, z2 + d + 3.1, PREMIUM_MESSING);
+      S.box(0.6, 0.35, 0.6, x + w / 2 + a, 0.45, z2 + d + 3.1, BRONZE2);
+    }
+  }
+  function strassenleben(S, x, z2, w, d, r, opt = {}) {
+    for (let i = 0; i < 2; i++) {
+      const xx = x + w * 0.28 + i * w * 0.43, zz = z2 + d + 5.8;
+      S.box(4.2, 0.7, 1.8, xx, 0.7, zz, ["#2b3338", "#46515a", "#5e625e"][i]);
+      S.box(2.4, 0.6, 1.58, xx, 1.25, zz, GLAS5);
+    }
+    for (let i = 0; i < 5; i++) {
+      const xx = x + w * (0.12 + 0.76 * i / 4);
+      S.box(0.13, 5, 0.13, xx, 5.2, z2 + d + 0.8, BRONZE2);
+      if (!opt.verkaufsprozess && !opt.insolvenz) {
+        S.box(1.2, 1.1, 0.1, xx + 0.6, 7.25, z2 + d + 0.8, opt.kaeufer ? "#314c6a" : DUNKEL);
+        S.box(0.6, 0.1, 0.15, xx + 0.5, 7.15, z2 + d + 0.87, PREMIUM_MESSING);
+        S.box(0.28, 0.38, 0.17, xx + 0.78, 7.3, z2 + d + 0.9, PREMIUM_MESSING);
+      } else S.box(0.07, 2.8, 0.07, xx + 0.17, 5.8, z2 + d + 0.82, "#b8a588");
+    }
+    const gaeste = Math.min(130, Math.round((w + d) * 0.96));
+    for (let i = 0; i < (opt.verkaufsprozess || opt.insolvenz ? Math.ceil(gaeste / 2) : gaeste); i++) {
+      const seite = r() > 0.3;
+      const xx = seite ? x + zw(r, 1, w) : x + w + zw(r, 0.8, 2.6);
+      const zz = seite ? z2 + d + zw(r, 0.8, 3.4) : z2 + zw(r, 1, d);
+      S.box(0.38, 1.2, 0.32, xx, 1.05, zz, r() < 0.65 ? "#2d3740" : "#776858");
+      S.box(0.3, 0.32, 0.32, xx, 1.82, zz, "#c4a48a");
+    }
+  }
+  function arkaden(S, x, z2, w, d) {
+    for (let u = 2; u < w - 3; u += 6) {
+      S.box(0.8, 5.7, 0.9, x + u, 3, z2 + d + 0.8, STEIN.P002);
+      S.box(5.5, 0.5, 1.2, x + u + 2.8, 6.1, z2 + d + 0.8, PREMIUM_MESSING);
+      S.box(1.1, 0.7, 1, x + u + 2.8, 5.25, z2 + d + 0.8, STEIN.P002);
+    }
+  }
+  function dachterrasse(S, x, z2, w, d, y, r) {
+    const bx = x + w * 0.64, bz = z2 + d * 0.3;
+    S.box(w * 0.32, 0.18, d * 0.42, bx, y + 0.2, bz, "#bea991");
+    for (let i = 0; i < 5; i++) {
+      const xx = x + w * 0.51 + i * w * 0.07;
+      S.box(0.12, 2.9, 0.12, xx, y + 1.75, bz, BRONZE2);
+      zylinder(S, xx, bz, 1.8, y + 3.05, 0.18, ["#ebddc5", "#f6f1e7"][i % 2], 10, 0.3);
+    }
+  }
+  function variante(S, typ, x, z2, w, d, y, r) {
+    if (typ === "P001") {
+      const cx = x + w - 3, cz = z2 + d - 3;
+      zylinder(S, cx, cz, 4.1, 3, y + 9.2 - 3, STEIN.P001, 22);
+      for (let i = 0; i < 6; i++) S.box(0.7, 0.45, 1.4, cx + 3.65, 6.5 + i * 4.45, cz, PREMIUM_MESSING);
+      for (let i = 0; i < 3; i++) zylinder(S, cx, cz, 4.18 - i * 0.18, y + 5 + i * 1.25, 0.25, PREMIUM_MESSING, 22);
+      kuppel2(S, cx, cz, 4.3, y + 9.2, BRONZE2);
+      S.box(w + 0.4, 0.8, 0.9, x + w / 2, y - 2, z2 + d + 0.1, STEIN.P001);
+    } else if (typ === "P002") {
+      for (const [ax, bw] of [[x + w * 0.21, w * 0.42], [x + w * 0.88, w * 0.24]]) {
+        const steigung = 8.2, half = d * 0.5;
+        for (const sign2 of [-1, 1]) {
+          const dach3 = new three_module_exports.BoxGeometry(bw, 0.5, Math.hypot(steigung, half));
+          dach3.rotateX(sign2 * Math.atan2(steigung, half));
+          dach3.translate(ax, y + steigung / 2 + 1, z2 + d / 2 + sign2 * d / 4);
+          S.add(dach3, KUPFER2);
+        }
+      }
+      for (let reihe = 0; reihe < 2; reihe++) for (let u = 4; u < w - 4; u += 7.5) {
+        S.box(3.1, 2.8, 2.5, x + u, y + 2 + reihe * 3, z2 + d - 5 - reihe * 6, STEIN.P002);
+        S.box(2.2, 1.45, 0.16, x + u, y + 2 + reihe * 3, z2 + d - 3.65 - reihe * 6, GLAS5);
+        S.box(3.6, 0.28, 2.9, x + u, y + 3.55 + reihe * 3, z2 + d - 5 - reihe * 6, KUPFER2);
+      }
+      dachterrasse(S, x, z2, w, d, y + 2.7, r);
+    } else if (typ === "P003") {
+      const radius = 9.2, cx = x + w - radius - 0.6, cz = z2 + d - radius - 0.6;
+      zylinder(S, cx, cz, radius, y, 6.2, STEIN.P003, 28);
+      kuppel2(S, cx, cz, radius, y + 6.2, KUPFER2);
+      for (let u = 3; u < w - 3; u += 5.5) S.box(0.9, 5.2, 0.85, x + u, 3.1, z2 + d + 0.65, "#f5f1e9");
+    } else {
+      S.box(w + 0.7, 1.1, 1.2, x + w / 2, y - 0.6, z2 + d + 0.15, "#c1b8ac");
+      S.box(13, 0.9, 5, x + w / 2, 5.3, z2 + d + 2.4, BRONZE2);
+      S.box(13, 0.16, 5, x + w / 2, 5.85, z2 + d + 2.4, PREMIUM_MESSING);
+      for (let u = 2; u < w - 1; u += 4.5) S.box(0.6, y - 4.8, 1.15, x + u, (y - 4.8) / 2 + 6.6, z2 + d + 0.42, "#c5bcb1");
+      for (let u = 2; u < d - 1; u += 4.5) S.box(1.15, y - 4.8, 0.6, x + w + 0.42, (y - 4.8) / 2 + 6.6, z2 + u, "#c5bcb1");
+    }
+  }
+  function statusBau(S, scene2, typ, x, z2, w, d, H, zust, haus2, opt) {
+    const hat = (s2) => zust.status === s2 || zust.zusatz.includes(s2);
+    if (hat("umbau")) {
+      for (let u = 0; u < w * 0.44; u += 3.5) {
+        S.box(0.19, H * 0.86, 0.19, x + u, H * 0.43, z2 + d + 1.3, "#88959a");
+        for (let y = 4; y < H * 0.88; y += 4.5) S.box(3.5, 0.18, 0.3, x + u + 1.7, y, z2 + d + 1.3, "#a2a8a6");
+      }
+      S.box(w * 0.43, H * 0.67, 0.06, x + w * 0.215, H * 0.53, z2 + d + 1.55, "#dad7cb");
+      for (let u = 0; u < w * 0.43; u += 2.5) S.box(0.11, 2, 0.12, x + u, 1.25, z2 + d + 3.3, "#859490");
+      S.box(0.35, H + 15, 0.35, x + w * 0.9, (H + 15) / 2, z2 + d + 5, "#dfb94a");
+      S.box(w * 0.65, 0.45, 0.5, x + w * 0.64, H + 14, z2 + d + 5, "#dfb94a");
+      S.box(0.1, 9, 0.1, x + w * 0.32, H + 10, z2 + d + 5, "#7b756c");
+    }
+    if (hat("geschlossen") || hat("leer") || hat("verfall") || hat("abriss")) {
+      for (let u = 2; u < w - 2; u += 5) S.box(4.1, 3.2, 0.12, x + u, 2.1, z2 + d + 0.55, "#797974");
+    }
+    if (hat("raeumung") || hat("offprice") || hat("teilschliessung")) {
+      S.box(8, 1, 0.25, x + w * 0.7, 4.2, z2 + d + 0.68, BRONZE2);
+      if (scene2) schild(scene2, "R\xC4UMUNG", "+z", x + w * 0.7, 4.2, z2 + d + 0.68, 0.75, "#e5d7c4");
+    }
+    if (hat("neueroeffnung")) {
+      S.box(11, 0.9, 0.3, x + w * 0.5, 7.2, z2 + d + 0.5, DUNKEL);
+      if (scene2) schild(scene2, "NEUER\xD6FFNUNG", "+z", x + w * 0.5, 7.2, z2 + d + 0.5, 0.65, PREMIUM_MESSING);
+    }
+    if (hat("aktion") && !opt.verkaufsprozess) {
+      S.box(4.2, 1.1, 0.2, x + w * 0.8, 2.4, z2 + d + 0.65, DUNKEL);
+      if (scene2) schild(scene2, "AKTION", "+z", x + w * 0.8, 2.4, z2 + d + 0.65, 0.55, "#f0e7d8");
+    }
+    if (opt.verkaufsprozess) {
+      S.box(8, 1.9, 0.25, x + w * 0.22, 2, z2 + d + 1.2, "#293e37");
+      if (scene2) {
+        schild(scene2, "EXKLUSIVER VERKAUFSPROZESS", "+z", x + w * 0.22, 2.7, z2 + d + 1.3, 0.62, "#e2d6c2");
+        schild(scene2, opt.investor || "Investorenpr\xFCfung", "+z", x + w * 0.22, 1.75, z2 + d + 1.3, 0.5, "#e2d6c2");
+      }
+    }
+    if (hat("untermiete")) {
+      S.box(5.5, 0.5, 0.2, x + w * 0.15, 5.3, z2 + d + 0.65, BRONZE2);
+    }
+    if (hat("abriss")) {
+      S.box(w * 0.32, 1, 1, x + w * 0.17, 0.7, z2 + d + 2.2, "#a09b90");
+    }
+    if (opt.kaeufer || opt.hartwig === false || haus2.status === "verkauft") {
+      if (scene2) schild(scene2, opt.kaeufer || haus2.premiumEigentuemer || "NEUER EIGENT\xDCMER", "+z", x + w / 2, H - 4, z2 + d + 0.6, Math.max(1.65, Math.min(2, w / 19)), PREMIUM_MESSING);
+    } else if (!hat("geschlossen") && !hat("verfall") && !hat("leer") && !hat("abriss")) {
+      if (scene2) schild(scene2, PREMIUM_NAMEN[typ].toUpperCase(), "+z", x + w / 2, H - 4, z2 + d + 0.6, Math.max(typ === "P001" ? 1.9 : 1.65, Math.min(2.2, w / 20)), PREMIUM_MESSING);
+    }
+  }
+  function kostbareFassade(S, typ, x, z2, w, d, n, H, start) {
+    const achse = typ === "P004" ? 4.5 : 4.7, stein = STEIN[typ];
+    const ornament = typ === "P004" ? "#bcb5aa" : typ === "P003" ? "#e0ddcf" : "#cbbda9";
+    for (const seite of ["+z", "+x"]) {
+      const len = seite === "+z" ? w : d;
+      for (let geschoss = 0; geschoss < n; geschoss++) {
+        const mitteY = 6.6 + geschoss * 4.45 + 2.1;
+        for (let u = 3; u < len - 2; u += achse) {
+          const ww = Math.min(2.6, achse - 1.4), c = (seite === "+z" ? x : z2) + u;
+          const vorne = seite === "+z" ? z2 + d + 0.39 : x + w + 0.39;
+          const k = (breite, hoehe, tiefe, versatz, y, col) => seite === "+z" ? S.box(breite, hoehe, tiefe, c + versatz, y, vorne, col) : S.box(tiefe, hoehe, breite, vorne, y, c + versatz, col);
+          for (const dd of [-1, 1]) {
+            k(0.16, 3.28, 0.23, dd * (ww / 2 + 0.19), mitteY, ornament);
+            k(0.12, 3.1, 0.16, dd * (ww / 2 + 0.34), mitteY, stein);
+            k(0.18, 0.28, 0.38, dd * (ww / 2 + 0.22), mitteY + 1.68, PREMIUM_MESSING);
+          }
+          for (let z3 = 0; z3 < 4; z3++) k(ww + 0.58 - z3 * 0.11, 0.13, 0.36 - z3 * 0.04, 0, mitteY + 1.55 + z3 * 0.17, z3 % 2 ? ornament : stein);
+          for (let z3 = 1; z3 <= 4; z3++) k(0.08, 2.46, 0.12, -ww / 2 + ww * z3 / 5, mitteY + 0.02, typ === "P004" ? "#b4bab9" : BRONZE2);
+          for (let z3 = 1; z3 <= 3; z3++) k(ww, 0.08, 0.14, 0, mitteY - 1.12 + z3 * 0.69, "#c9bdac");
+          for (let z3 = 0; z3 < 8; z3++) k(0.15, 0.54, 0.18, -ww / 2 + (z3 + 0.5) * ww / 8, mitteY - 1.23, typ === "P004" ? stein : PREMIUM_MESSING);
+          for (let z3 = 0; z3 < 3; z3++) k(0.45, 0.2, 0.3, (-1 + z3) * ww / 3, mitteY - 1.65, stein);
+        }
+      }
+    }
+    const abschnitte = typ === "P001" ? 3 : typ === "P004" ? n : 2;
+    for (const seite of ["+z", "+x"]) {
+      const len = seite === "+z" ? w : d;
+      for (let u = 1; u < len - 1; u += typ === "P001" ? 11.7 : 9.4) {
+        for (let g = 0; g < abschnitte; g++) {
+          const h = typ === "P001" ? Math.min(n * 4.45, 13.35) : Math.max(2.5, n * 4.45 / abschnitte);
+          const yy = 6.6 + g * h + h / 2;
+          for (let f = 0; f < 4; f++) {
+            const v = u + (f - 1.5) * 0.28;
+            if (seite === "+z") S.box(0.18, h, 0.55, x + v, yy, z2 + d + 0.55, ornament);
+            else S.box(0.55, h, 0.18, x + w + 0.55, yy, z2 + v, ornament);
+          }
+        }
+      }
+    }
+    const ziel = typ === "P001" ? 6400 : typ === "P002" ? 5900 : typ === "P003" ? 5600 : 5100;
+    const a = Math.max(8, Math.floor(w / 1.55)), b = Math.max(8, Math.floor(d / 1.55));
+    let t = 0;
+    while (S.anzahl - start < ziel && t < 12e3) {
+      const reihe = Math.floor(t / (a + b)), spalte = t % (a + b);
+      const yy = 0.85 + reihe * 0.64;
+      if (yy > H - 0.5) break;
+      if (spalte < a) {
+        const xx = x + (spalte + 0.5) * w / a + reihe % 2 * 0.12;
+        S.box(0.32, 0.11, 0.12, xx, yy, z2 + d + 0.22, ornament);
+      } else {
+        const zz = z2 + (spalte - a + 0.5) * d / b + reihe % 2 * 0.12;
+        S.box(0.12, 0.11, 0.32, x + w + 0.22, yy, zz, ornament);
+      }
+      t++;
+    }
+    for (let i = 0; S.anzahl - start < ziel && i < 3e3; i++) {
+      const seite = i % 2, v = Math.floor(i / 2), len = seite ? w : d, step = 0.34;
+      const u = v * step % len, reihe = Math.floor(v * step / len);
+      const yy = H - 0.8 + reihe * 0.22;
+      if (reihe > 5) break;
+      if (!seite) S.box(0.18, 0.2, 0.33, x + u, yy, z2 + d + 0.4, PREMIUM_MESSING);
+      else S.box(0.33, 0.2, 0.18, x + w + 0.4, yy, z2 + u, PREMIUM_MESSING);
+    }
+  }
+  function edleAuslagen(S, x, z2, w, d, r) {
+    for (let u = 3; u < w - 2; u += 5) {
+      for (const v of [-0.65, 0.65]) {
+        S.box(0.45, 1.17, 0.33, x + u + v, 2.02, z2 + d + 0.62, r() > 0.5 ? "#d3b99b" : "#667a78");
+        S.box(0.23, 0.35, 0.24, x + u + v, 2.81, z2 + d + 0.63, "#dcccb4");
+        S.box(0.1, 0.2, 0.1, x + u + v, 3.15, z2 + d + 0.61, PREMIUM_MESSING);
+      }
+      S.box(0.18, 4.6, 0.24, x + u - 2.05, 2.72, z2 + d + 0.45, "#d8c89f");
+      S.box(0.18, 4.6, 0.24, x + u + 2.05, 2.72, z2 + d + 0.45, "#d8c89f");
+    }
+  }
+  function platzbrunnen(S, x, z2, w, d, typ) {
+    if (typ !== "P003") return;
+    const cx = x + w * 0.78, cz = z2 + d + 8.8;
+    zylinder(S, cx, cz, 3.6, 0.12, 0.62, "#c5c9c0", 22);
+    zylinder(S, cx, cz, 2.9, 0.77, 0.08, "#71b4ba", 22);
+    zylinder(S, cx, cz, 0.56, 0.85, 2.2, "#d8d4c6", 12);
+    for (let i = 0; i < 12; i++) {
+      const a = i * Math.PI / 6;
+      S.box(0.13, 0.75, 0.13, cx + Math.cos(a) * 2.2, 1.4, cz + Math.sin(a) * 2.2, "#b1d5d7");
+    }
+  }
+  function premiumhaus(S, scene2, haus2, opt = {}) {
+    const start = S.anzahl;
+    const typ = haus2.premiumSchluessel ?? Object.keys(PREMIUM_NAMEN).find((key) => PREMIUM_NAMEN[key] === haus2.name) ?? "P004";
+    const m = premiumMasse(haus2), { w, d, n, H } = m, x = opt.x ?? 0, z2 = opt.z ?? 0, r = rng2(haus2.id + "/premium/" + typ);
+    const stein = STEIN[typ], eg = 6.6, gh = 4.45;
+    const zust = zustandNormal({ ...opt, status: opt.status ?? haus2.status ?? "offen", seed: haus2.id });
+    S.box(w, eg, d, x + w / 2, eg / 2, z2 + d / 2, BRONZE2);
+    const lichtW = Math.min(w * 0.48, 29), lichtD = Math.min(d * 0.46, 25);
+    const seitenW = (w - lichtW) / 2, seitenD = (d - lichtD) / 2;
+    const mitteX = x + w / 2, mitteZ = z2 + d / 2, fluegelY = eg + n * gh / 2;
+    S.box(seitenW, n * gh, d, x + seitenW / 2, fluegelY, mitteZ, stein);
+    S.box(seitenW, n * gh, d, x + w - seitenW / 2, fluegelY, mitteZ, stein);
+    S.box(lichtW, n * gh, seitenD, mitteX, fluegelY, z2 + seitenD / 2, stein);
+    S.box(lichtW, n * gh, seitenD, mitteX, fluegelY, z2 + d - seitenD / 2, stein);
+    S.box(w + 0.9, 0.7, d + 0.9, x + w / 2, eg - 0.25, z2 + d / 2, PREMIUM_MESSING);
+    fensterachsen(S, x, z2, w, d, n, typ);
+    for (let u = 3; u < w - 2; u += 5) {
+      S.box(3.5, 4.3, 0.24, x + u, 2.7, z2 + d + 0.11, GLAS_HELL3);
+      S.box(3.7, 0.28, 0.55, x + u, 0.95, z2 + d + 0.28, PREMIUM_MESSING);
+      S.box(0.85, 1.4, 0.65, x + u, 1.8, z2 + d + 0.43, u % 2 ? "#ede1cf" : "#b0a58b");
+    }
+    for (let u = 3; u < d - 2; u += 5) {
+      S.box(0.24, 4.3, 3.5, x + w + 0.11, 2.7, z2 + u, GLAS_HELL3);
+      S.box(0.55, 0.28, 3.7, x + w + 0.28, 0.95, z2 + u, PREMIUM_MESSING);
+    }
+    const dach3 = typ === "P002" ? KUPFER2 : BRONZE2;
+    S.box(seitenW + 0.5, 1, d + 1, x + seitenW / 2, H + 0.5, mitteZ, dach3);
+    S.box(seitenW + 0.5, 1, d + 1, x + w - seitenW / 2, H + 0.5, mitteZ, dach3);
+    S.box(lichtW, 1, seitenD + 0.5, mitteX, H + 0.5, z2 + seitenD / 2, dach3);
+    S.box(lichtW, 1, seitenD + 0.5, mitteX, H + 0.5, z2 + d - seitenD / 2, dach3);
+    glasdach(S, x, z2, w, d, H + 1, typ);
+    vordach2(S, x, z2, w, d);
+    variante(S, typ, x, z2, w, d, H + 1, r);
+    if (typ === "P001" && !opt.verkaufsprozess && !opt.insolvenz && haus2.status !== "verkauft") {
+      for (let i = 0; i < 4; i++) {
+        const fx = x + w * (0.16 + i * 0.22), fz = z2 + d - 1.5;
+        S.box(0.18, 4.8, 0.18, fx, H + 3.8, fz, BRONZE2);
+        S.box(1.9, 1.2, 0.13, fx + 0.95, H + 5.45, fz, DUNKEL);
+        S.box(0.43, 0.38, 0.17, fx + 0.86, H + 5.55, fz + 0.12, PREMIUM_MESSING);
+      }
+    }
+    if (typ === "P002") arkaden(S, x, z2, w, d);
+    edleAuslagen(S, x, z2, w, d, r);
+    platzbrunnen(S, x, z2, w, d, typ);
+    kostbareFassade(S, typ, x, z2, w, d, n, H, start);
+    strassenleben(S, x, z2, w, d, r, { ...opt, insolvenz: haus2.status === "insolvenz" });
+    statusBau(S, scene2, typ, x, z2, w, d, H, zust, haus2, opt);
+    const hoehe = H + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : 6);
+    return { hoehe, w, d, familie: "premium", teile: S.anzahl - start, status: zust.status };
+  }
+
   // haeuser.json
-  var haeuser_default = [{ id: "W001", name: "Hartwig Berlin", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1932, fassade: 4, substanz: 65, status: "offen", flaechen: [{ id: "W001-f1", etage: 0, qm: 816, konzept: "eigen", gruppe: "food" }, { id: "W001-f2", etage: 0, qm: 827, konzept: "eigen", gruppe: "beauty" }, { id: "W001-f3", etage: 0, qm: 690, konzept: "eigen", gruppe: "accessoires" }, { id: "W001-f4", etage: 1, qm: 712, konzept: "eigen", gruppe: "accessoires" }, { id: "W001-f5", etage: 1, qm: 1621, konzept: "eigen", gruppe: "damen" }, { id: "W001-f6", etage: 2, qm: 1510, konzept: "eigen", gruppe: "damen" }, { id: "W001-f7", etage: 2, qm: 809, konzept: "eigen", gruppe: "waesche" }, { id: "W001-f8", etage: 2, qm: 15, konzept: "eigen", gruppe: "herren" }, { id: "W001-f9", etage: 3, qm: 1614, konzept: "eigen", gruppe: "herren" }, { id: "W001-f10", etage: 3, qm: 719, konzept: "eigen", gruppe: "kinder" }, { id: "W001-f11", etage: 4, qm: 512, konzept: "eigen", gruppe: "kinder" }, { id: "W001-f12", etage: 4, qm: 1402, konzept: "eigen", gruppe: "sport" }, { id: "W001-f13", etage: 4, qm: 419, konzept: "eigen", gruppe: "spielwaren" }, { id: "W001-f14", etage: 5, qm: 320, konzept: "eigen", gruppe: "spielwaren" }, { id: "W001-f15", etage: 5, qm: 2013, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 459926, rohertrag: 194319, konzessionserloes: 0, untermiete: 0, personal: 95905, miete: 62501, nebenkosten: 0, sonstige: 25157, db: 10756, fteBedarf: 84.40254506016997, fteIst: 98.82583318279478, umsatzJeGruppe: { food: 37385, beauty: 75986, accessoires: 79466, damen: 80130, waesche: 23873, herren: 49876, kinder: 28367, sport: 31525, spielwaren: 11849, wohnen: 41468 } } }, { id: "W002", name: "Hartwig Berlin Marktplatz", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3900, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1983, fassade: 1, substanz: 69, status: "offen", flaechen: [{ id: "W002-f1", etage: -1, qm: 1599, konzept: "eigen", gruppe: "food" }, { id: "W002-f2", etage: -1, qm: 2301, konzept: "eigen", gruppe: "wohnen" }, { id: "W002-f3", etage: 0, qm: 1476, konzept: "eigen", gruppe: "beauty" }, { id: "W002-f4", etage: 0, qm: 2424, konzept: "eigen", gruppe: "accessoires" }, { id: "W002-f5", etage: 1, qm: 839, konzept: "eigen", gruppe: "accessoires" }, { id: "W002-f6", etage: 1, qm: 3061, konzept: "eigen", gruppe: "damen" }, { id: "W002-f7", etage: 2, qm: 1365, konzept: "eigen", gruppe: "damen" }, { id: "W002-f8", etage: 2, qm: 1928, konzept: "eigen", gruppe: "waesche" }, { id: "W002-f9", etage: 2, qm: 606, konzept: "eigen", gruppe: "herren" }, { id: "W002-f10", etage: 3, qm: 1925, konzept: "eigen", gruppe: "herren" }, { id: "W002-f11", etage: 3, qm: 1975, konzept: "eigen", gruppe: "kinder" }, { id: "W002-f12", etage: 4, qm: 298, konzept: "eigen", gruppe: "kinder" }, { id: "W002-f13", etage: 4, qm: 2983, konzept: "eigen", gruppe: "sport" }, { id: "W002-f14", etage: 4, qm: 619, konzept: "eigen", gruppe: "spielwaren" }, { id: "W002-f15", etage: 5, qm: 1194, konzept: "eigen", gruppe: "spielwaren" }, { id: "W002-f16", etage: 5, qm: 2706, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 852216, rohertrag: 361304, konzessionserloes: 0, untermiete: 0, personal: 175041, miete: 146077, nebenkosten: 40835, sonstige: 47225, db: -47874, fteBedarf: 159.1439244982958, fteIst: 179.8138710299985, umsatzJeGruppe: { food: 65845, wohnen: 110516, beauty: 120255, accessoires: 161460, damen: 139119, waesche: 61707, herren: 75383, kinder: 46997, sport: 45468, spielwaren: 25465 } } }, { id: "W003", name: "Hartwig Berlin Am Markt", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 5600, etagen: [0, 1, 2, 3, 4], baujahr: 1997, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W003-f1", etage: 0, qm: 1688, konzept: "eigen", gruppe: "food" }, { id: "W003-f2", etage: 0, qm: 1393, konzept: "eigen", gruppe: "beauty" }, { id: "W003-f3", etage: 0, qm: 2154, konzept: "eigen", gruppe: "accessoires" }, { id: "W003-f4", etage: 0, qm: 325, konzept: "eigen", gruppe: "damen" }, { id: "W003-f5", etage: 1, qm: 5560, konzept: "eigen", gruppe: "damen" }, { id: "W003-f6", etage: 2, qm: 509, konzept: "eigen", gruppe: "damen" }, { id: "W003-f7", etage: 2, qm: 1557, konzept: "eigen", gruppe: "waesche" }, { id: "W003-f8", etage: 2, qm: 3494, konzept: "eigen", gruppe: "herren" }, { id: "W003-f9", etage: 3, qm: 222, konzept: "eigen", gruppe: "herren" }, { id: "W003-f10", etage: 3, qm: 2164, konzept: "eigen", gruppe: "kinder" }, { id: "W003-f11", etage: 3, qm: 3173, konzept: "eigen", gruppe: "sport" }, { id: "W003-f12", etage: 4, qm: 44, konzept: "eigen", gruppe: "sport" }, { id: "W003-f13", etage: 4, qm: 1653, konzept: "eigen", gruppe: "spielwaren" }, { id: "W003-f14", etage: 4, qm: 3863, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 979603, rohertrag: 415245, konzessionserloes: 0, untermiete: 0, personal: 208278, miete: 154580, nebenkosten: 36778, sonstige: 52673, db: -37064, fteBedarf: 175.8039877202085, fteIst: 210.91327047161073, umsatzJeGruppe: { food: 94423, beauty: 140977, accessoires: 111199, damen: 199727, waesche: 63883, herren: 130601, kinder: 68480, sport: 65416, spielwaren: 29282, wohnen: 75616 } } }, { id: "W004", name: "Hartwig Berlin Marktplatz", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1967, fassade: 1, substanz: 33, status: "offen", flaechen: [{ id: "W004-f1", etage: -1, qm: 1430, konzept: "eigen", gruppe: "food" }, { id: "W004-f2", etage: -1, qm: 1737, konzept: "eigen", gruppe: "wohnen" }, { id: "W004-f3", etage: 0, qm: 898, konzept: "eigen", gruppe: "beauty" }, { id: "W004-f4", etage: 0, qm: 2207, konzept: "eigen", gruppe: "accessoires" }, { id: "W004-f5", etage: 0, qm: 61, konzept: "eigen", gruppe: "damen" }, { id: "W004-f6", etage: 1, qm: 3167, konzept: "eigen", gruppe: "damen" }, { id: "W004-f7", etage: 2, qm: 716, konzept: "eigen", gruppe: "damen" }, { id: "W004-f8", etage: 2, qm: 1096, konzept: "eigen", gruppe: "waesche" }, { id: "W004-f9", etage: 2, qm: 1355, konzept: "eigen", gruppe: "herren" }, { id: "W004-f10", etage: 3, qm: 1097, konzept: "eigen", gruppe: "herren" }, { id: "W004-f11", etage: 3, qm: 1084, konzept: "eigen", gruppe: "kinder" }, { id: "W004-f12", etage: 3, qm: 985, konzept: "eigen", gruppe: "sport" }, { id: "W004-f13", etage: 4, qm: 725, konzept: "eigen", gruppe: "sport" }, { id: "W004-f14", etage: 4, qm: 1016, konzept: "eigen", gruppe: "spielwaren" }, { id: "W004-f15", etage: 4, qm: 1425, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 585065, rohertrag: 247893, konzessionserloes: 0, untermiete: 0, personal: 145415, miete: 55456, nebenkosten: 19182, sonstige: 32537, db: -4696, fteBedarf: 109.66479703142903, fteIst: 148.2748420327744, umsatzJeGruppe: { food: 57737, wohnen: 82827, beauty: 65046, accessoires: 102715, damen: 114541, waesche: 35235, herren: 57287, kinder: 23377, sport: 31891, spielwaren: 14410 } } }, { id: "S001", name: "Hartwig Sport Berlin Einkaufszentrum", stadt: "Berlin", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2400, etagen: [0, 1], baujahr: 2007, fassade: 7, substanz: 41, status: "offen", flaechen: [{ id: "S001-f1", etage: 0, qm: 1137, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S001-f2", etage: 0, qm: 1213, konzept: "eigen", gruppe: "sporttextil" }, { id: "S001-f3", etage: 1, qm: 267, konzept: "eigen", gruppe: "sporttextil" }, { id: "S001-f4", etage: 1, qm: 667, konzept: "eigen", gruppe: "outdoor" }, { id: "S001-f5", etage: 1, qm: 451, konzept: "eigen", gruppe: "teamsport" }, { id: "S001-f6", etage: 1, qm: 609, konzept: "eigen", gruppe: "rad" }, { id: "S001-f7", etage: 1, qm: 357, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 179903, rohertrag: 75386, konzessionserloes: 0, untermiete: 0, personal: 38549, miete: 21292, nebenkosten: 6841, sonstige: 9491, db: -788, fteBedarf: 30.239009917290254, fteIst: 38.696345666978516, umsatzJeGruppe: { sportschuhe: 65271, sporttextil: 47575, outdoor: 26034, teamsport: 10307, rad: 7255, wintersport: 23461 } } }, { id: "S002", name: "Hartwig Sport Berlin Altstadt", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2300, etagen: [0], baujahr: 2006, fassade: 5, substanz: 77, status: "offen", flaechen: [{ id: "S002-f1", etage: 0, qm: 544, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S002-f2", etage: 0, qm: 690, konzept: "eigen", gruppe: "sporttextil" }, { id: "S002-f3", etage: 0, qm: 391, konzept: "eigen", gruppe: "outdoor" }, { id: "S002-f4", etage: 0, qm: 209, konzept: "eigen", gruppe: "teamsport" }, { id: "S002-f5", etage: 0, qm: 234, konzept: "eigen", gruppe: "rad" }, { id: "S002-f6", etage: 0, qm: 232, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 108474, rohertrag: 45890, konzessionserloes: 0, untermiete: 0, personal: 18775, miete: 10820, nebenkosten: 3327, sonstige: 5482, db: 7486, fteBedarf: 17.019141900564524, fteIst: 19.161316769992233, umsatzJeGruppe: { sportschuhe: 34264, sporttextil: 29933, outdoor: 19753, teamsport: 6942, rad: 2798, wintersport: 14784 } } }, { id: "S003", name: "Hartwig Sport Berlin Hauptstra\xDFe", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 2e3, fassade: 4, substanz: 66, status: "offen", flaechen: [{ id: "S003-f1", etage: 0, qm: 323, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S003-f2", etage: 0, qm: 327, konzept: "eigen", gruppe: "sporttextil" }, { id: "S003-f3", etage: 1, qm: 295, konzept: "eigen", gruppe: "sporttextil" }, { id: "S003-f4", etage: 1, qm: 355, konzept: "eigen", gruppe: "outdoor" }, { id: "S003-f5", etage: 2, qm: 89, konzept: "eigen", gruppe: "outdoor" }, { id: "S003-f6", etage: 2, qm: 218, konzept: "eigen", gruppe: "teamsport" }, { id: "S003-f7", etage: 2, qm: 201, konzept: "eigen", gruppe: "rad" }, { id: "S003-f8", etage: 2, qm: 142, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 82058, rohertrag: 35014, konzessionserloes: 0, untermiete: 0, personal: 15293, miete: 10457, nebenkosten: 0, sonstige: 4242, db: 5022, fteBedarf: 13.390945213639425, fteIst: 15.77817675309605, umsatzJeGruppe: { sportschuhe: 18870, sporttextil: 22575, outdoor: 22976, teamsport: 6380, rad: 2597, wintersport: 8659 } } }, { id: "W005", name: "Hartwig Hamburg", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3500, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1976, fassade: 0, substanz: 67, status: "offen", flaechen: [{ id: "W005-f1", etage: 0, qm: 1496, konzept: "eigen", gruppe: "food" }, { id: "W005-f2", etage: 0, qm: 1318, konzept: "eigen", gruppe: "beauty" }, { id: "W005-f3", etage: 0, qm: 686, konzept: "eigen", gruppe: "accessoires" }, { id: "W005-f4", etage: 1, qm: 1332, konzept: "eigen", gruppe: "accessoires" }, { id: "W005-f5", etage: 1, qm: 2168, konzept: "eigen", gruppe: "damen" }, { id: "W005-f6", etage: 2, qm: 1977, konzept: "eigen", gruppe: "damen" }, { id: "W005-f7", etage: 2, qm: 1523, konzept: "eigen", gruppe: "waesche" }, { id: "W005-f8", etage: 3, qm: 333, konzept: "eigen", gruppe: "waesche" }, { id: "W005-f9", etage: 3, qm: 2181, konzept: "eigen", gruppe: "herren" }, { id: "W005-f10", etage: 3, qm: 986, konzept: "eigen", gruppe: "kinder" }, { id: "W005-f11", etage: 4, qm: 563, konzept: "eigen", gruppe: "kinder" }, { id: "W005-f12", etage: 4, qm: 1659, konzept: "eigen", gruppe: "sport" }, { id: "W005-f13", etage: 4, qm: 1278, konzept: "eigen", gruppe: "spielwaren" }, { id: "W005-f14", etage: 5, qm: 24, konzept: "eigen", gruppe: "spielwaren" }, { id: "W005-f15", etage: 5, qm: 3476, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 680628, rohertrag: 286925, konzessionserloes: 0, untermiete: 0, personal: 149721, miete: 77503, nebenkosten: 0, sonstige: 37356, db: 22345, fteBedarf: 125.4791372076569, fteIst: 151.3347673572255, umsatzJeGruppe: { food: 63679, beauty: 124070, accessoires: 90919, damen: 119082, waesche: 59093, herren: 61736, kinder: 36364, sport: 29704, spielwaren: 18269, wohnen: 77713 } } }, { id: "W006", name: "Hartwig Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1974, fassade: 4, substanz: 48, status: "offen", flaechen: [{ id: "W006-f1", etage: -1, qm: 2198, konzept: "eigen", gruppe: "food" }, { id: "W006-f2", etage: -1, qm: 1773, konzept: "eigen", gruppe: "wohnen" }, { id: "W006-f3", etage: 0, qm: 1498, konzept: "eigen", gruppe: "beauty" }, { id: "W006-f4", etage: 0, qm: 2473, konzept: "eigen", gruppe: "accessoires" }, { id: "W006-f5", etage: 1, qm: 689, konzept: "eigen", gruppe: "accessoires" }, { id: "W006-f6", etage: 1, qm: 3282, konzept: "eigen", gruppe: "damen" }, { id: "W006-f7", etage: 2, qm: 1473, konzept: "eigen", gruppe: "damen" }, { id: "W006-f8", etage: 2, qm: 2234, konzept: "eigen", gruppe: "waesche" }, { id: "W006-f9", etage: 2, qm: 264, konzept: "eigen", gruppe: "herren" }, { id: "W006-f10", etage: 3, qm: 3676, konzept: "eigen", gruppe: "herren" }, { id: "W006-f11", etage: 3, qm: 295, konzept: "eigen", gruppe: "kinder" }, { id: "W006-f12", etage: 4, qm: 1171, konzept: "eigen", gruppe: "kinder" }, { id: "W006-f13", etage: 4, qm: 2800, konzept: "eigen", gruppe: "sport" }, { id: "W006-f14", etage: 5, qm: 72, konzept: "eigen", gruppe: "sport" }, { id: "W006-f15", etage: 5, qm: 1830, konzept: "eigen", gruppe: "spielwaren" }, { id: "W006-f16", etage: 5, qm: 2069, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 1178083, rohertrag: 495107, konzessionserloes: 0, untermiete: 0, personal: 238157, miete: 99040, nebenkosten: 37651, sonstige: 60810, db: 59449, fteBedarf: 200.11818584531616, fteIst: 239.41977394155487, umsatzJeGruppe: { food: 133383, wohnen: 111208, beauty: 179962, accessoires: 219673, damen: 162609, waesche: 102807, herren: 125207, kinder: 43506, sport: 63011, spielwaren: 36717 } } }, { id: "W007", name: "Hartwig Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 2600, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1994, fassade: 0, substanz: 55, status: "offen", flaechen: [{ id: "W007-f1", etage: -1, qm: 867, konzept: "eigen", gruppe: "food" }, { id: "W007-f2", etage: -1, qm: 1700, konzept: "eigen", gruppe: "wohnen" }, { id: "W007-f3", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W007-f4", etage: 0, qm: 1456, konzept: "eigen", gruppe: "accessoires" }, { id: "W007-f5", etage: 0, qm: 346, konzept: "eigen", gruppe: "damen" }, { id: "W007-f6", etage: 1, qm: 2567, konzept: "eigen", gruppe: "damen" }, { id: "W007-f7", etage: 2, qm: 608, konzept: "eigen", gruppe: "damen" }, { id: "W007-f8", etage: 2, qm: 999, konzept: "eigen", gruppe: "waesche" }, { id: "W007-f9", etage: 2, qm: 960, konzept: "eigen", gruppe: "herren" }, { id: "W007-f10", etage: 3, qm: 1351, konzept: "eigen", gruppe: "herren" }, { id: "W007-f11", etage: 3, qm: 1216, konzept: "eigen", gruppe: "kinder" }, { id: "W007-f12", etage: 4, qm: 38, konzept: "eigen", gruppe: "kinder" }, { id: "W007-f13", etage: 4, qm: 1254, konzept: "eigen", gruppe: "sport" }, { id: "W007-f14", etage: 4, qm: 972, konzept: "eigen", gruppe: "spielwaren" }, { id: "W007-f15", etage: 4, qm: 303, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 548568, rohertrag: 234303, konzessionserloes: 0, untermiete: 0, personal: 128534, miete: 89059, nebenkosten: 21860, sonstige: 29422, db: -34572, fteBedarf: 98.09131739332074, fteIst: 130.37834865459325, umsatzJeGruppe: { food: 42747, wohnen: 46575, beauty: 82472, accessoires: 95294, damen: 108453, waesche: 34915, herren: 65480, kinder: 29978, sport: 27247, spielwaren: 15408 } } }, { id: "S004", name: "Hartwig Sport Hamburg City-Center", stadt: "Hamburg", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 1700, etagen: [0], baujahr: 1978, fassade: 1, substanz: 63, status: "offen", flaechen: [{ id: "S004-f1", etage: 0, qm: 458, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S004-f2", etage: 0, qm: 414, konzept: "eigen", gruppe: "sporttextil" }, { id: "S004-f3", etage: 0, qm: 328, konzept: "eigen", gruppe: "outdoor" }, { id: "S004-f4", etage: 0, qm: 190, konzept: "eigen", gruppe: "teamsport" }, { id: "S004-f5", etage: 0, qm: 161, konzept: "eigen", gruppe: "rad" }, { id: "S004-f6", etage: 0, qm: 148, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 71451, rohertrag: 29891, konzessionserloes: 0, untermiete: 0, personal: 13130, miete: 10970, nebenkosten: 1816, sonstige: 3694, db: 281, fteBedarf: 11.600725058482464, fteIst: 13.178316073396308, umsatzJeGruppe: { sportschuhe: 29938, sporttextil: 12697, outdoor: 13057, teamsport: 4484, rad: 1691, wintersport: 9585 } } }, { id: "S005", name: "Hartwig Sport Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2900, etagen: [0], baujahr: 2004, fassade: 7, substanz: 72, status: "offen", flaechen: [{ id: "S005-f1", etage: 0, qm: 555, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S005-f2", etage: 0, qm: 934, konzept: "eigen", gruppe: "sporttextil" }, { id: "S005-f3", etage: 0, qm: 599, konzept: "eigen", gruppe: "outdoor" }, { id: "S005-f4", etage: 0, qm: 227, konzept: "eigen", gruppe: "teamsport" }, { id: "S005-f5", etage: 0, qm: 306, konzept: "eigen", gruppe: "rad" }, { id: "S005-f6", etage: 0, qm: 279, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 105833, rohertrag: 45107, konzessionserloes: 0, untermiete: 0, personal: 19463, miete: 7685, nebenkosten: 2932, sonstige: 5644, db: 9382, fteBedarf: 17.82897189599727, fteIst: 20.084530607437635, umsatzJeGruppe: { sportschuhe: 26258, sporttextil: 31012, outdoor: 24526, teamsport: 4568, rad: 3267, wintersport: 16202 } } }, { id: "W008", name: "Hartwig M\xFCnchen", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3100, etagen: [-1, 0, 1, 2, 3], baujahr: 1962, fassade: 3, substanz: 81, status: "offen", flaechen: [{ id: "W008-f1", etage: -1, qm: 1304, konzept: "eigen", gruppe: "food" }, { id: "W008-f2", etage: -1, qm: 1836, konzept: "eigen", gruppe: "wohnen" }, { id: "W008-f3", etage: 0, qm: 1084, konzept: "eigen", gruppe: "beauty" }, { id: "W008-f4", etage: 0, qm: 1913, konzept: "eigen", gruppe: "accessoires" }, { id: "W008-f5", etage: 0, qm: 143, konzept: "eigen", gruppe: "damen" }, { id: "W008-f6", etage: 1, qm: 2487, konzept: "eigen", gruppe: "damen" }, { id: "W008-f7", etage: 1, qm: 653, konzept: "eigen", gruppe: "waesche" }, { id: "W008-f8", etage: 2, qm: 490, konzept: "eigen", gruppe: "waesche" }, { id: "W008-f9", etage: 2, qm: 1625, konzept: "eigen", gruppe: "herren" }, { id: "W008-f10", etage: 2, qm: 1024, konzept: "eigen", gruppe: "kinder" }, { id: "W008-f11", etage: 3, qm: 1297, konzept: "eigen", gruppe: "sport" }, { id: "W008-f12", etage: 3, qm: 1235, konzept: "eigen", gruppe: "spielwaren" }, { id: "W008-f13", etage: 3, qm: 608, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 634710, rohertrag: 264730, konzessionserloes: 0, untermiete: 0, personal: 141836, miete: 67430, nebenkosten: 19695, sonstige: 33088, db: 2681, fteBedarf: 109.37454007714577, fteIst: 142.05388052311054, umsatzJeGruppe: { food: 76793, wohnen: 56825, beauty: 107775, accessoires: 124104, damen: 105929, waesche: 38824, herren: 47022, kinder: 27713, sport: 25323, spielwaren: 24403 } } }, { id: "W009", name: "Hartwig M\xFCnchen Marktplatz", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4700, etagen: [0, 1, 2, 3, 4], baujahr: 1945, fassade: 2, substanz: 32, status: "offen", flaechen: [{ id: "W009-f1", etage: 0, qm: 1302, konzept: "eigen", gruppe: "food" }, { id: "W009-f2", etage: 0, qm: 1456, konzept: "eigen", gruppe: "beauty" }, { id: "W009-f3", etage: 0, qm: 1962, konzept: "eigen", gruppe: "accessoires" }, { id: "W009-f4", etage: 1, qm: 218, konzept: "eigen", gruppe: "accessoires" }, { id: "W009-f5", etage: 1, qm: 4502, konzept: "eigen", gruppe: "damen" }, { id: "W009-f6", etage: 2, qm: 829, konzept: "eigen", gruppe: "damen" }, { id: "W009-f7", etage: 2, qm: 1915, konzept: "eigen", gruppe: "waesche" }, { id: "W009-f8", etage: 2, qm: 1976, konzept: "eigen", gruppe: "herren" }, { id: "W009-f9", etage: 3, qm: 910, konzept: "eigen", gruppe: "herren" }, { id: "W009-f10", etage: 3, qm: 1191, konzept: "eigen", gruppe: "kinder" }, { id: "W009-f11", etage: 3, qm: 2495, konzept: "eigen", gruppe: "sport" }, { id: "W009-f12", etage: 3, qm: 123, konzept: "eigen", gruppe: "spielwaren" }, { id: "W009-f13", etage: 4, qm: 1293, konzept: "eigen", gruppe: "spielwaren" }, { id: "W009-f14", etage: 4, qm: 3427, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 720317, rohertrag: 305682, konzessionserloes: 0, untermiete: 0, personal: 152859, miete: 89731, nebenkosten: 24126, sonstige: 40153, db: -1188, fteBedarf: 135.57209511125842, fteIst: 156.51258713771043, umsatzJeGruppe: { food: 61885, beauty: 124020, accessoires: 101640, damen: 147043, waesche: 55782, herren: 74935, kinder: 23748, sport: 41749, spielwaren: 21705, wohnen: 67810 } } }, { id: "W010", name: "Hartwig M\xFCnchen Am Markt", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1931, fassade: 2, substanz: 37, status: "offen", flaechen: [{ id: "W010-f1", etage: -1, qm: 2019, konzept: "eigen", gruppe: "food" }, { id: "W010-f2", etage: -1, qm: 1152, konzept: "eigen", gruppe: "wohnen" }, { id: "W010-f3", etage: 0, qm: 1271, konzept: "eigen", gruppe: "beauty" }, { id: "W010-f4", etage: 0, qm: 1901, konzept: "eigen", gruppe: "accessoires" }, { id: "W010-f5", etage: 1, qm: 147, konzept: "eigen", gruppe: "accessoires" }, { id: "W010-f6", etage: 1, qm: 3025, konzept: "eigen", gruppe: "damen" }, { id: "W010-f7", etage: 2, qm: 2194, konzept: "eigen", gruppe: "damen" }, { id: "W010-f8", etage: 2, qm: 977, konzept: "eigen", gruppe: "waesche" }, { id: "W010-f9", etage: 3, qm: 773, konzept: "eigen", gruppe: "waesche" }, { id: "W010-f10", etage: 3, qm: 2399, konzept: "eigen", gruppe: "herren" }, { id: "W010-f11", etage: 4, qm: 17, konzept: "eigen", gruppe: "herren" }, { id: "W010-f12", etage: 4, qm: 1422, konzept: "eigen", gruppe: "kinder" }, { id: "W010-f13", etage: 4, qm: 1733, konzept: "eigen", gruppe: "sport" }, { id: "W010-f14", etage: 5, qm: 502, konzept: "eigen", gruppe: "sport" }, { id: "W010-f15", etage: 5, qm: 1216, konzept: "eigen", gruppe: "spielwaren" }, { id: "W010-f16", etage: 5, qm: 1453, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 806829, rohertrag: 339765, konzessionserloes: 0, untermiete: 0, personal: 153763, miete: 68917, nebenkosten: 30518, sonstige: 43070, db: 43496, fteBedarf: 143.31180767469192, fteIst: 157.84199784570941, umsatzJeGruppe: { food: 87138, wohnen: 60440, beauty: 143798, accessoires: 122653, damen: 157112, waesche: 57139, herren: 77158, kinder: 35745, sport: 45807, spielwaren: 19840 } } }, { id: "S006", name: "Hartwig Sport M\xFCnchen", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1986, fassade: 3, substanz: 71, status: "offen", flaechen: [{ id: "S006-f1", etage: 0, qm: 1098, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S006-f2", etage: 0, qm: 1577, konzept: "eigen", gruppe: "sporttextil" }, { id: "S006-f3", etage: 1, qm: 21, konzept: "eigen", gruppe: "sporttextil" }, { id: "S006-f4", etage: 1, qm: 1072, konzept: "eigen", gruppe: "outdoor" }, { id: "S006-f5", etage: 1, qm: 449, konzept: "eigen", gruppe: "teamsport" }, { id: "S006-f6", etage: 1, qm: 664, konzept: "eigen", gruppe: "rad" }, { id: "S006-f7", etage: 1, qm: 469, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 231121, rohertrag: 97740, konzessionserloes: 0, untermiete: 0, personal: 40916, miete: 22361, nebenkosten: 6540, sonstige: 11883, db: 16040, fteBedarf: 37.16834450392001, fteIst: 41.18710472301602, umsatzJeGruppe: { sportschuhe: 67499, sporttextil: 66855, outdoor: 42458, teamsport: 11189, rad: 8634, wintersport: 34486 } } }, { id: "S007", name: "Hartwig Sport M\xFCnchen Am Wall", stadt: "M\xFCnchen", format: "sport", lage: "b", cluster: "metropole", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 1975, fassade: 7, substanz: 38, status: "offen", flaechen: [{ id: "S007-f1", etage: 0, qm: 474, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S007-f2", etage: 0, qm: 259, konzept: "eigen", gruppe: "sporttextil" }, { id: "S007-f3", etage: 1, qm: 283, konzept: "eigen", gruppe: "sporttextil" }, { id: "S007-f4", etage: 1, qm: 444, konzept: "eigen", gruppe: "outdoor" }, { id: "S007-f5", etage: 1, qm: 6, konzept: "eigen", gruppe: "teamsport" }, { id: "S007-f6", etage: 2, qm: 198, konzept: "eigen", gruppe: "teamsport" }, { id: "S007-f7", etage: 2, qm: 331, konzept: "eigen", gruppe: "rad" }, { id: "S007-f8", etage: 2, qm: 204, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 80683, rohertrag: 33793, konzessionserloes: 0, untermiete: 0, personal: 14890, miete: 9125, nebenkosten: 2845, sonstige: 4298, db: 2635, fteBedarf: 13.668988032611951, fteIst: 15.396758071949431, umsatzJeGruppe: { sportschuhe: 26124, sporttextil: 16787, outdoor: 16323, teamsport: 4204, rad: 4006, wintersport: 13239 } } }, { id: "S008", name: "Hartwig Sport M\xFCnchen Altstadt", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1500, etagen: [0, 1, 2], baujahr: 2012, fassade: 4, substanz: 60, status: "offen", flaechen: [{ id: "S008-f1", etage: 0, qm: 1156, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S008-f2", etage: 0, qm: 311, konzept: "eigen", gruppe: "sporttextil" }, { id: "S008-f3", etage: 1, qm: 789, konzept: "eigen", gruppe: "sporttextil" }, { id: "S008-f4", etage: 1, qm: 678, konzept: "eigen", gruppe: "outdoor" }, { id: "S008-f5", etage: 2, qm: 107, konzept: "eigen", gruppe: "outdoor" }, { id: "S008-f6", etage: 2, qm: 472, konzept: "eigen", gruppe: "teamsport" }, { id: "S008-f7", etage: 2, qm: 491, konzept: "eigen", gruppe: "rad" }, { id: "S008-f8", etage: 2, qm: 396, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 204261, rohertrag: 85772, konzessionserloes: 0, untermiete: 0, personal: 35739, miete: 24774, nebenkosten: 5223, sonstige: 10355, db: 9682, fteBedarf: 32.2807452085907, fteIst: 36.230434659385594, umsatzJeGruppe: { sportschuhe: 79692, sporttextil: 49890, outdoor: 32164, teamsport: 9822, rad: 5738, wintersport: 26955 } } }, { id: "W011", name: "Hartwig K\xF6ln City-Center", stadt: "K\xF6ln", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 3700, etagen: [0, 1, 2, 3, 4], baujahr: 1974, fassade: 3, substanz: 54, status: "offen", flaechen: [{ id: "W011-f1", etage: 0, qm: 1289, konzept: "eigen", gruppe: "food" }, { id: "W011-f2", etage: 0, qm: 1367, konzept: "eigen", gruppe: "beauty" }, { id: "W011-f3", etage: 0, qm: 1024, konzept: "eigen", gruppe: "accessoires" }, { id: "W011-f4", etage: 1, qm: 362, konzept: "eigen", gruppe: "accessoires" }, { id: "W011-f5", etage: 1, qm: 3318, konzept: "eigen", gruppe: "damen" }, { id: "W011-f6", etage: 2, qm: 1066, konzept: "eigen", gruppe: "damen" }, { id: "W011-f7", etage: 2, qm: 1438, konzept: "eigen", gruppe: "waesche" }, { id: "W011-f8", etage: 2, qm: 1176, konzept: "eigen", gruppe: "herren" }, { id: "W011-f9", etage: 3, qm: 1364, konzept: "eigen", gruppe: "herren" }, { id: "W011-f10", etage: 3, qm: 1391, konzept: "eigen", gruppe: "kinder" }, { id: "W011-f11", etage: 3, qm: 925, konzept: "eigen", gruppe: "sport" }, { id: "W011-f12", etage: 4, qm: 665, konzept: "eigen", gruppe: "sport" }, { id: "W011-f13", etage: 4, qm: 914, konzept: "eigen", gruppe: "spielwaren" }, { id: "W011-f14", etage: 4, qm: 2101, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 470422, rohertrag: 199054, konzessionserloes: 0, untermiete: 0, personal: 118997, miete: 70819, nebenkosten: 26008, sonstige: 27567, db: -44337, fteBedarf: 94.52113235739775, fteIst: 121.51666383366833, umsatzJeGruppe: { food: 39701, beauty: 95717, accessoires: 55926, damen: 100455, waesche: 29755, herren: 51254, kinder: 24955, sport: 24217, spielwaren: 12823, wohnen: 35620 } } }, { id: "W012", name: "Hartwig K\xF6ln Arkaden", stadt: "K\xF6ln", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 4500, etagen: [-1, 0, 1, 2, 3], baujahr: 1924, fassade: 1, substanz: 37, status: "offen", flaechen: [{ id: "W012-f1", etage: -1, qm: 1611, konzept: "eigen", gruppe: "food" }, { id: "W012-f2", etage: -1, qm: 2909, konzept: "eigen", gruppe: "wohnen" }, { id: "W012-f3", etage: 0, qm: 1617, konzept: "eigen", gruppe: "beauty" }, { id: "W012-f4", etage: 0, qm: 2083, konzept: "eigen", gruppe: "accessoires" }, { id: "W012-f5", etage: 0, qm: 820, konzept: "eigen", gruppe: "damen" }, { id: "W012-f6", etage: 1, qm: 4202, konzept: "eigen", gruppe: "damen" }, { id: "W012-f7", etage: 1, qm: 318, konzept: "eigen", gruppe: "waesche" }, { id: "W012-f8", etage: 2, qm: 1232, konzept: "eigen", gruppe: "waesche" }, { id: "W012-f9", etage: 2, qm: 2675, konzept: "eigen", gruppe: "herren" }, { id: "W012-f10", etage: 2, qm: 613, konzept: "eigen", gruppe: "kinder" }, { id: "W012-f11", etage: 3, qm: 1015, konzept: "eigen", gruppe: "kinder" }, { id: "W012-f12", etage: 3, qm: 2267, konzept: "eigen", gruppe: "sport" }, { id: "W012-f13", etage: 3, qm: 1298, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 651290, rohertrag: 273778, konzessionserloes: 0, untermiete: 0, personal: 138764, miete: 56433, nebenkosten: 31429, sonstige: 36900, db: 10253, fteBedarf: 125.30892118053129, fteIst: 141.94311506493966, umsatzJeGruppe: { food: 59767, wohnen: 43604, beauty: 137372, accessoires: 101936, damen: 115606, waesche: 43876, herren: 62814, kinder: 30657, sport: 34197, spielwaren: 21460 } } }, { id: "S009", name: "Hartwig Sport K\xF6ln Galerie am Fluss", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 900, etagen: [0, 1, 2], baujahr: 2007, fassade: 6, substanz: 79, status: "offen", flaechen: [{ id: "S009-f1", etage: 0, qm: 585, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S009-f2", etage: 0, qm: 349, konzept: "eigen", gruppe: "sporttextil" }, { id: "S009-f3", etage: 1, qm: 491, konzept: "eigen", gruppe: "sporttextil" }, { id: "S009-f4", etage: 1, qm: 442, konzept: "eigen", gruppe: "outdoor" }, { id: "S009-f5", etage: 2, qm: 150, konzept: "eigen", gruppe: "outdoor" }, { id: "S009-f6", etage: 2, qm: 250, konzept: "eigen", gruppe: "teamsport" }, { id: "S009-f7", etage: 2, qm: 342, konzept: "eigen", gruppe: "rad" }, { id: "S009-f8", etage: 2, qm: 191, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 105889, rohertrag: 44857, konzessionserloes: 0, untermiete: 0, personal: 19904, miete: 11623, nebenkosten: 4145, sonstige: 5601, db: 3584, fteBedarf: 17.942361818663294, fteIst: 20.210898954929757, umsatzJeGruppe: { sportschuhe: 36485, sporttextil: 32969, outdoor: 19833, teamsport: 4540, rad: 3167, wintersport: 8896 } } }, { id: "S010", name: "Hartwig Sport K\xF6ln Arkaden", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 600, etagen: [0, 1, 2], baujahr: 1994, fassade: 0, substanz: 67, status: "offen", flaechen: [{ id: "S010-f1", etage: 0, qm: 339, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S010-f2", etage: 0, qm: 211, konzept: "eigen", gruppe: "sporttextil" }, { id: "S010-f3", etage: 1, qm: 196, konzept: "eigen", gruppe: "sporttextil" }, { id: "S010-f4", etage: 1, qm: 354, konzept: "eigen", gruppe: "outdoor" }, { id: "S010-f5", etage: 2, qm: 24, konzept: "eigen", gruppe: "outdoor" }, { id: "S010-f6", etage: 2, qm: 141, konzept: "eigen", gruppe: "teamsport" }, { id: "S010-f7", etage: 2, qm: 241, konzept: "eigen", gruppe: "rad" }, { id: "S010-f8", etage: 2, qm: 144, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 49425, rohertrag: 20827, konzessionserloes: 0, untermiete: 0, personal: 10455, miete: 9964, nebenkosten: 2257, sonstige: 2769, db: -4619, fteBedarf: 9.003018787165358, fteIst: 10.5564706810127, umsatzJeGruppe: { sportschuhe: 15321, sporttextil: 10691, outdoor: 12072, teamsport: 2432, rad: 2164, wintersport: 6745 } } }, { id: "W013", name: "Hartwig Frankfurt", stadt: "Frankfurt", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3900, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1984, fassade: 1, substanz: 32, status: "offen", flaechen: [{ id: "W013-f1", etage: -1, qm: 1937, konzept: "eigen", gruppe: "food" }, { id: "W013-f2", etage: -1, qm: 1948, konzept: "eigen", gruppe: "wohnen" }, { id: "W013-f3", etage: 0, qm: 1610, konzept: "eigen", gruppe: "beauty" }, { id: "W013-f4", etage: 0, qm: 2276, konzept: "eigen", gruppe: "accessoires" }, { id: "W013-f5", etage: 1, qm: 214, konzept: "eigen", gruppe: "accessoires" }, { id: "W013-f6", etage: 1, qm: 3672, konzept: "eigen", gruppe: "damen" }, { id: "W013-f7", etage: 2, qm: 2280, konzept: "eigen", gruppe: "damen" }, { id: "W013-f8", etage: 2, qm: 1605, konzept: "eigen", gruppe: "waesche" }, { id: "W013-f9", etage: 3, qm: 123, konzept: "eigen", gruppe: "waesche" }, { id: "W013-f10", etage: 3, qm: 3252, konzept: "eigen", gruppe: "herren" }, { id: "W013-f11", etage: 3, qm: 511, konzept: "eigen", gruppe: "kinder" }, { id: "W013-f12", etage: 4, qm: 1471, konzept: "eigen", gruppe: "kinder" }, { id: "W013-f13", etage: 4, qm: 2415, konzept: "eigen", gruppe: "sport" }, { id: "W013-f14", etage: 5, qm: 35, konzept: "eigen", gruppe: "sport" }, { id: "W013-f15", etage: 5, qm: 1449, konzept: "eigen", gruppe: "spielwaren" }, { id: "W013-f16", etage: 5, qm: 2402, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 776164, rohertrag: 326020, konzessionserloes: 0, untermiete: 0, personal: 179406, miete: 83657, nebenkosten: 37419, sonstige: 44063, db: -18524, fteBedarf: 149.61121766248164, fteIst: 183.57388462592328, umsatzJeGruppe: { food: 79441, wohnen: 63469, beauty: 147742, accessoires: 99784, damen: 147390, waesche: 46343, herren: 84336, kinder: 47607, sport: 39539, spielwaren: 20513 } } }, { id: "W014", name: "Hartwig Frankfurt Hauptstra\xDFe", stadt: "Frankfurt", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1981, fassade: 7, substanz: 56, status: "offen", flaechen: [{ id: "W014-f1", etage: -1, qm: 1472, konzept: "eigen", gruppe: "food" }, { id: "W014-f2", etage: -1, qm: 1799, konzept: "eigen", gruppe: "wohnen" }, { id: "W014-f3", etage: 0, qm: 1283, konzept: "eigen", gruppe: "beauty" }, { id: "W014-f4", etage: 0, qm: 1988, konzept: "eigen", gruppe: "accessoires" }, { id: "W014-f5", etage: 1, qm: 9, konzept: "eigen", gruppe: "accessoires" }, { id: "W014-f6", etage: 1, qm: 3262, konzept: "eigen", gruppe: "damen" }, { id: "W014-f7", etage: 2, qm: 1102, konzept: "eigen", gruppe: "damen" }, { id: "W014-f8", etage: 2, qm: 1310, konzept: "eigen", gruppe: "waesche" }, { id: "W014-f9", etage: 2, qm: 859, konzept: "eigen", gruppe: "herren" }, { id: "W014-f10", etage: 3, qm: 1406, konzept: "eigen", gruppe: "herren" }, { id: "W014-f11", etage: 3, qm: 1596, konzept: "eigen", gruppe: "kinder" }, { id: "W014-f12", etage: 3, qm: 270, konzept: "eigen", gruppe: "sport" }, { id: "W014-f13", etage: 4, qm: 2508, konzept: "eigen", gruppe: "sport" }, { id: "W014-f14", etage: 4, qm: 764, konzept: "eigen", gruppe: "spielwaren" }, { id: "W014-f15", etage: 5, qm: 905, konzept: "eigen", gruppe: "spielwaren" }, { id: "W014-f16", etage: 5, qm: 2366, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 841120, rohertrag: 352675, konzessionserloes: 0, untermiete: 0, personal: 185385, miete: 63203, nebenkosten: 26921, sonstige: 44790, db: 32376, fteBedarf: 149.26307186005968, fteIst: 189.37930208572513, umsatzJeGruppe: { food: 66645, wohnen: 83922, beauty: 149843, accessoires: 122577, damen: 147543, waesche: 41271, herren: 82452, kinder: 52063, sport: 58557, spielwaren: 36246 } } }, { id: "S011", name: "Hartwig Sport Frankfurt", stadt: "Frankfurt", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2e3, etagen: [0, 1], baujahr: 2011, fassade: 2, substanz: 56, status: "offen", flaechen: [{ id: "S011-f1", etage: 0, qm: 1116, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S011-f2", etage: 0, qm: 884, konzept: "eigen", gruppe: "sporttextil" }, { id: "S011-f3", etage: 1, qm: 144, konzept: "eigen", gruppe: "sporttextil" }, { id: "S011-f4", etage: 1, qm: 678, konzept: "eigen", gruppe: "outdoor" }, { id: "S011-f5", etage: 1, qm: 481, konzept: "eigen", gruppe: "teamsport" }, { id: "S011-f6", etage: 1, qm: 413, konzept: "eigen", gruppe: "rad" }, { id: "S011-f7", etage: 1, qm: 283, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 204272, rohertrag: 85965, konzessionserloes: 0, untermiete: 0, personal: 38043, miete: 14902, nebenkosten: 4291, sonstige: 10175, db: 18554, fteBedarf: 31.55101315478689, fteIst: 38.59533266697779, umsatzJeGruppe: { sportschuhe: 74193, sporttextil: 53406, outdoor: 32356, teamsport: 14173, rad: 5289, wintersport: 24855 } } }, { id: "S012", name: "Hartwig Sport Frankfurt Am Markt", stadt: "Frankfurt", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 3500, etagen: [0], baujahr: 1995, fassade: 5, substanz: 60, status: "offen", flaechen: [{ id: "S012-f1", etage: 0, qm: 835, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S012-f2", etage: 0, qm: 863, konzept: "eigen", gruppe: "sporttextil" }, { id: "S012-f3", etage: 0, qm: 754, konzept: "eigen", gruppe: "outdoor" }, { id: "S012-f4", etage: 0, qm: 346, konzept: "eigen", gruppe: "teamsport" }, { id: "S012-f5", etage: 0, qm: 407, konzept: "eigen", gruppe: "rad" }, { id: "S012-f6", etage: 0, qm: 295, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 160296, rohertrag: 67764, konzessionserloes: 0, untermiete: 0, personal: 31372, miete: 23987, nebenkosten: 3708, sonstige: 8147, db: 550, fteBedarf: 25.499037707470766, fteIst: 31.851320333159077, umsatzJeGruppe: { sportschuhe: 47350, sporttextil: 38706, outdoor: 38331, teamsport: 9307, rad: 6155, wintersport: 20446 } } }, { id: "W015", name: "Hartwig D\xFCsseldorf City-Center", stadt: "D\xFCsseldorf", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 4100, etagen: [-1, 0, 1, 2, 3], baujahr: 1978, fassade: 5, substanz: 44, status: "offen", flaechen: [{ id: "W015-f1", etage: -1, qm: 1397, konzept: "eigen", gruppe: "food" }, { id: "W015-f2", etage: -1, qm: 2723, konzept: "eigen", gruppe: "wohnen" }, { id: "W015-f3", etage: 0, qm: 1047, konzept: "eigen", gruppe: "beauty" }, { id: "W015-f4", etage: 0, qm: 1851, konzept: "eigen", gruppe: "accessoires" }, { id: "W015-f5", etage: 0, qm: 1222, konzept: "eigen", gruppe: "damen" }, { id: "W015-f6", etage: 1, qm: 2653, konzept: "eigen", gruppe: "damen" }, { id: "W015-f7", etage: 1, qm: 1457, konzept: "eigen", gruppe: "waesche" }, { id: "W015-f8", etage: 1, qm: 11, konzept: "eigen", gruppe: "herren" }, { id: "W015-f9", etage: 2, qm: 2058, konzept: "eigen", gruppe: "herren" }, { id: "W015-f10", etage: 2, qm: 1548, konzept: "eigen", gruppe: "kinder" }, { id: "W015-f11", etage: 2, qm: 514, konzept: "eigen", gruppe: "sport" }, { id: "W015-f12", etage: 3, qm: 1792, konzept: "eigen", gruppe: "sport" }, { id: "W015-f13", etage: 3, qm: 1321, konzept: "eigen", gruppe: "spielwaren" }, { id: "W015-f14", etage: 3, qm: 1007, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 681687, rohertrag: 286212, konzessionserloes: 0, untermiete: 0, personal: 154921, miete: 97006, nebenkosten: 0, sonstige: 37220, db: -2935, fteBedarf: 124.86729317467515, fteIst: 157.28323075819483, umsatzJeGruppe: { food: 66200, wohnen: 81001, beauty: 113343, accessoires: 93807, damen: 113845, waesche: 51182, herren: 65435, kinder: 37839, sport: 37424, spielwaren: 21611 } } }, { id: "W016", name: "Hartwig D\xFCsseldorf Hauptstra\xDFe", stadt: "D\xFCsseldorf", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1975, fassade: 4, substanz: 36, status: "offen", flaechen: [{ id: "W016-f1", etage: -1, qm: 1548, konzept: "eigen", gruppe: "food" }, { id: "W016-f2", etage: -1, qm: 2486, konzept: "eigen", gruppe: "wohnen" }, { id: "W016-f3", etage: 0, qm: 1563, konzept: "eigen", gruppe: "beauty" }, { id: "W016-f4", etage: 0, qm: 2170, konzept: "eigen", gruppe: "accessoires" }, { id: "W016-f5", etage: 0, qm: 301, konzept: "eigen", gruppe: "damen" }, { id: "W016-f6", etage: 1, qm: 4033, konzept: "eigen", gruppe: "damen" }, { id: "W016-f7", etage: 2, qm: 533, konzept: "eigen", gruppe: "damen" }, { id: "W016-f8", etage: 2, qm: 1943, konzept: "eigen", gruppe: "waesche" }, { id: "W016-f9", etage: 2, qm: 1558, konzept: "eigen", gruppe: "herren" }, { id: "W016-f10", etage: 3, qm: 1816, konzept: "eigen", gruppe: "herren" }, { id: "W016-f11", etage: 3, qm: 1734, konzept: "eigen", gruppe: "kinder" }, { id: "W016-f12", etage: 3, qm: 484, konzept: "eigen", gruppe: "sport" }, { id: "W016-f13", etage: 4, qm: 1904, konzept: "eigen", gruppe: "sport" }, { id: "W016-f14", etage: 4, qm: 1290, konzept: "eigen", gruppe: "spielwaren" }, { id: "W016-f15", etage: 4, qm: 840, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 989132, rohertrag: 419154, konzessionserloes: 0, untermiete: 0, personal: 211005, miete: 79198, nebenkosten: 27906, sonstige: 51446, db: 49599, fteBedarf: 169.60885016905962, fteIst: 219.54370796368428, umsatzJeGruppe: { food: 96531, wohnen: 70471, beauty: 183498, accessoires: 138198, damen: 186702, waesche: 74598, herren: 125288, kinder: 41422, sport: 51355, spielwaren: 21068 } } }, { id: "S013", name: "Hartwig Sport D\xFCsseldorf Einkaufszentrum", stadt: "D\xFCsseldorf", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 2015, fassade: 1, substanz: 35, status: "offen", flaechen: [{ id: "S013-f1", etage: 0, qm: 1032, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S013-f2", etage: 0, qm: 1093, konzept: "eigen", gruppe: "sporttextil" }, { id: "S013-f3", etage: 1, qm: 143, konzept: "eigen", gruppe: "sporttextil" }, { id: "S013-f4", etage: 1, qm: 841, konzept: "eigen", gruppe: "outdoor" }, { id: "S013-f5", etage: 1, qm: 297, konzept: "eigen", gruppe: "teamsport" }, { id: "S013-f6", etage: 1, qm: 493, konzept: "eigen", gruppe: "rad" }, { id: "S013-f7", etage: 1, qm: 351, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 141487, rohertrag: 59654, konzessionserloes: 0, untermiete: 0, personal: 27950, miete: 13866, nebenkosten: 5805, sonstige: 7713, db: 4319, fteBedarf: 24.701643702090895, fteIst: 28.54927540580955, umsatzJeGruppe: { sportschuhe: 44774, sporttextil: 39674, outdoor: 23638, teamsport: 6333, rad: 5398, wintersport: 21670 } } }, { id: "S014", name: "Hartwig Sport D\xFCsseldorf Galerie am Fluss", stadt: "D\xFCsseldorf", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2200, etagen: [0], baujahr: 1981, fassade: 2, substanz: 64, status: "offen", flaechen: [{ id: "S014-f1", etage: 0, qm: 584, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S014-f2", etage: 0, qm: 531, konzept: "eigen", gruppe: "sporttextil" }, { id: "S014-f3", etage: 0, qm: 458, konzept: "eigen", gruppe: "outdoor" }, { id: "S014-f4", etage: 0, qm: 186, konzept: "eigen", gruppe: "teamsport" }, { id: "S014-f5", etage: 0, qm: 237, konzept: "eigen", gruppe: "rad" }, { id: "S014-f6", etage: 0, qm: 204, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 92903, rohertrag: 38898, konzessionserloes: 0, untermiete: 0, personal: 17743, miete: 13086, nebenkosten: 2692, sonstige: 4799, db: 578, fteBedarf: 15.099560843823076, fteIst: 18.383528103935355, umsatzJeGruppe: { sportschuhe: 37227, sporttextil: 19399, outdoor: 16025, teamsport: 5155, rad: 2804, wintersport: 12293 } } }, { id: "W017", name: "Hartwig Stuttgart", stadt: "Stuttgart", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3e3, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1973, fassade: 4, substanz: 86, status: "offen", flaechen: [{ id: "W017-f1", etage: -1, qm: 1135, konzept: "eigen", gruppe: "food" }, { id: "W017-f2", etage: -1, qm: 1815, konzept: "eigen", gruppe: "wohnen" }, { id: "W017-f3", etage: 0, qm: 921, konzept: "eigen", gruppe: "beauty" }, { id: "W017-f4", etage: 0, qm: 1471, konzept: "eigen", gruppe: "accessoires" }, { id: "W017-f5", etage: 0, qm: 558, konzept: "eigen", gruppe: "damen" }, { id: "W017-f6", etage: 1, qm: 2779, konzept: "eigen", gruppe: "damen" }, { id: "W017-f7", etage: 1, qm: 171, konzept: "eigen", gruppe: "waesche" }, { id: "W017-f8", etage: 2, qm: 1357, konzept: "eigen", gruppe: "waesche" }, { id: "W017-f9", etage: 2, qm: 1593, konzept: "eigen", gruppe: "herren" }, { id: "W017-f10", etage: 3, qm: 897, konzept: "eigen", gruppe: "herren" }, { id: "W017-f11", etage: 3, qm: 1513, konzept: "eigen", gruppe: "kinder" }, { id: "W017-f12", etage: 3, qm: 540, konzept: "eigen", gruppe: "sport" }, { id: "W017-f13", etage: 4, qm: 1271, konzept: "eigen", gruppe: "sport" }, { id: "W017-f14", etage: 4, qm: 861, konzept: "eigen", gruppe: "spielwaren" }, { id: "W017-f15", etage: 4, qm: 818, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 795476, rohertrag: 338444, konzessionserloes: 0, untermiete: 0, personal: 139952, miete: 106668, nebenkosten: 18061, sonstige: 40580, db: 33183, fteBedarf: 132.95607663611813, fteIst: 144.1291221195617, umsatzJeGruppe: { food: 76105, wohnen: 58379, beauty: 125048, accessoires: 95350, damen: 155112, waesche: 68833, herren: 102773, kinder: 50330, sport: 42703, spielwaren: 20843 } } }, { id: "W018", name: "Hartwig Stuttgart Arkaden", stadt: "Stuttgart", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4, 5, 6], baujahr: 1935, fassade: 2, substanz: 78, status: "offen", flaechen: [{ id: "W018-f1", etage: 0, qm: 904, konzept: "eigen", gruppe: "food" }, { id: "W018-f2", etage: 0, qm: 765, konzept: "eigen", gruppe: "beauty" }, { id: "W018-f3", etage: 0, qm: 531, konzept: "eigen", gruppe: "accessoires" }, { id: "W018-f4", etage: 1, qm: 926, konzept: "eigen", gruppe: "accessoires" }, { id: "W018-f5", etage: 1, qm: 1274, konzept: "eigen", gruppe: "damen" }, { id: "W018-f6", etage: 2, qm: 2198, konzept: "eigen", gruppe: "damen" }, { id: "W018-f7", etage: 2, qm: 2, konzept: "eigen", gruppe: "waesche" }, { id: "W018-f8", etage: 3, qm: 1203, konzept: "eigen", gruppe: "waesche" }, { id: "W018-f9", etage: 3, qm: 997, konzept: "eigen", gruppe: "herren" }, { id: "W018-f10", etage: 4, qm: 910, konzept: "eigen", gruppe: "herren" }, { id: "W018-f11", etage: 4, qm: 1153, konzept: "eigen", gruppe: "kinder" }, { id: "W018-f12", etage: 4, qm: 137, konzept: "eigen", gruppe: "sport" }, { id: "W018-f13", etage: 5, qm: 1276, konzept: "eigen", gruppe: "sport" }, { id: "W018-f14", etage: 5, qm: 801, konzept: "eigen", gruppe: "spielwaren" }, { id: "W018-f15", etage: 5, qm: 123, konzept: "eigen", gruppe: "wohnen" }, { id: "W018-f16", etage: 6, qm: 2200, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 438669, rohertrag: 186053, konzessionserloes: 0, untermiete: 0, personal: 99460, miete: 100316, nebenkosten: 19697, sonstige: 24915, db: -58336, fteBedarf: 84.61337809168313, fteIst: 101.37414919327071, umsatzJeGruppe: { food: 38633, beauty: 72609, accessoires: 56318, damen: 85133, waesche: 33529, herren: 51791, kinder: 19557, sport: 22764, spielwaren: 12806, wohnen: 45529 } } }, { id: "S015", name: "Hartwig Sport Stuttgart City-Center", stadt: "Stuttgart", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2900, etagen: [0], baujahr: 1988, fassade: 1, substanz: 34, status: "offen", flaechen: [{ id: "S015-f1", etage: 0, qm: 534, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S015-f2", etage: 0, qm: 821, konzept: "eigen", gruppe: "sporttextil" }, { id: "S015-f3", etage: 0, qm: 674, konzept: "eigen", gruppe: "outdoor" }, { id: "S015-f4", etage: 0, qm: 291, konzept: "eigen", gruppe: "teamsport" }, { id: "S015-f5", etage: 0, qm: 293, konzept: "eigen", gruppe: "rad" }, { id: "S015-f6", etage: 0, qm: 237, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 118007, rohertrag: 49797, konzessionserloes: 0, untermiete: 0, personal: 22713, miete: 15088, nebenkosten: 2858, sonstige: 6121, db: 3017, fteBedarf: 19.209130891754945, fteIst: 23.462436092808183, umsatzJeGruppe: { sportschuhe: 38479, sporttextil: 31215, outdoor: 21413, teamsport: 5938, rad: 3804, wintersport: 17157 } } }, { id: "S016", name: "Hartwig Sport Stuttgart Am Markt", stadt: "Stuttgart", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1992, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "S016-f1", etage: 0, qm: 913, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S016-f2", etage: 0, qm: 387, konzept: "eigen", gruppe: "sporttextil" }, { id: "S016-f3", etage: 1, qm: 888, konzept: "eigen", gruppe: "sporttextil" }, { id: "S016-f4", etage: 1, qm: 412, konzept: "eigen", gruppe: "outdoor" }, { id: "S016-f5", etage: 2, qm: 263, konzept: "eigen", gruppe: "outdoor" }, { id: "S016-f6", etage: 2, qm: 377, konzept: "eigen", gruppe: "teamsport" }, { id: "S016-f7", etage: 2, qm: 434, konzept: "eigen", gruppe: "rad" }, { id: "S016-f8", etage: 2, qm: 226, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 187941, rohertrag: 79919, konzessionserloes: 0, untermiete: 0, personal: 33215, miete: 28226, nebenkosten: 0, sonstige: 9461, db: 9017, fteBedarf: 29.657375862347894, fteIst: 33.668931300002356, umsatzJeGruppe: { sportschuhe: 58606, sporttextil: 65164, outdoor: 33445, teamsport: 9593, rad: 5086, wintersport: 16047 } } }, { id: "W019", name: "Hartwig Essen", stadt: "Essen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1916, fassade: 1, substanz: 44, status: "offen", flaechen: [{ id: "W019-f1", etage: -1, qm: 588, konzept: "eigen", gruppe: "food" }, { id: "W019-f2", etage: -1, qm: 1262, konzept: "eigen", gruppe: "wohnen" }, { id: "W019-f3", etage: 0, qm: 807, konzept: "eigen", gruppe: "beauty" }, { id: "W019-f4", etage: 0, qm: 854, konzept: "eigen", gruppe: "accessoires" }, { id: "W019-f5", etage: 0, qm: 189, konzept: "eigen", gruppe: "damen" }, { id: "W019-f6", etage: 1, qm: 1850, konzept: "eigen", gruppe: "damen" }, { id: "W019-f7", etage: 2, qm: 47, konzept: "eigen", gruppe: "damen" }, { id: "W019-f8", etage: 2, qm: 908, konzept: "eigen", gruppe: "waesche" }, { id: "W019-f9", etage: 2, qm: 895, konzept: "eigen", gruppe: "herren" }, { id: "W019-f10", etage: 3, qm: 644, konzept: "eigen", gruppe: "herren" }, { id: "W019-f11", etage: 3, qm: 672, konzept: "eigen", gruppe: "kinder" }, { id: "W019-f12", etage: 3, qm: 534, konzept: "eigen", gruppe: "sport" }, { id: "W019-f13", etage: 4, qm: 804, konzept: "eigen", gruppe: "sport" }, { id: "W019-f14", etage: 4, qm: 553, konzept: "eigen", gruppe: "spielwaren" }, { id: "W019-f15", etage: 4, qm: 493, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 361363, rohertrag: 152958, konzessionserloes: 0, untermiete: 0, personal: 78812, miete: 59149, nebenkosten: 11715, sonstige: 19811, db: -16529, fteBedarf: 66.52777079567127, fteIst: 79.68751270938957, umsatzJeGruppe: { food: 27681, wohnen: 33716, beauty: 65262, accessoires: 49358, damen: 53796, waesche: 28774, herren: 48521, kinder: 20384, sport: 24219, spielwaren: 9650 } } }, { id: "W020", name: "Hartwig Essen Ring", stadt: "Essen", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2], baujahr: 1958, fassade: 2, substanz: 54, status: "offen", flaechen: [{ id: "W020-f1", etage: -1, qm: 828, konzept: "eigen", gruppe: "food" }, { id: "W020-f2", etage: -1, qm: 1847, konzept: "eigen", gruppe: "wohnen" }, { id: "W020-f3", etage: 0, qm: 516, konzept: "eigen", gruppe: "beauty" }, { id: "W020-f4", etage: 0, qm: 1107, konzept: "eigen", gruppe: "accessoires" }, { id: "W020-f5", etage: 0, qm: 1052, konzept: "eigen", gruppe: "damen" }, { id: "W020-f6", etage: 1, qm: 1070, konzept: "eigen", gruppe: "damen" }, { id: "W020-f7", etage: 1, qm: 711, konzept: "eigen", gruppe: "waesche" }, { id: "W020-f8", etage: 1, qm: 894, konzept: "eigen", gruppe: "herren" }, { id: "W020-f9", etage: 2, qm: 338, konzept: "eigen", gruppe: "herren" }, { id: "W020-f10", etage: 2, qm: 668, konzept: "eigen", gruppe: "kinder" }, { id: "W020-f11", etage: 2, qm: 1351, konzept: "eigen", gruppe: "sport" }, { id: "W020-f12", etage: 2, qm: 818, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 244289, rohertrag: 101830, konzessionserloes: 0, untermiete: 0, personal: 57783, miete: 35624, nebenkosten: 0, sonstige: 15056, db: -6633, fteBedarf: 52.42723191788461, fteIst: 58.52095393627797, umsatzJeGruppe: { food: 27382, wohnen: 23518, beauty: 36048, accessoires: 35462, damen: 41552, waesche: 14093, herren: 25691, kinder: 9826, sport: 20267, spielwaren: 10450 } } }, { id: "S017", name: "Hartwig Sport Essen", stadt: "Essen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 5100, etagen: [0], baujahr: 2010, fassade: 2, substanz: 50, status: "offen", flaechen: [{ id: "S017-f1", etage: 0, qm: 827, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S017-f2", etage: 0, qm: 1647, konzept: "eigen", gruppe: "sporttextil" }, { id: "S017-f3", etage: 0, qm: 1189, konzept: "eigen", gruppe: "outdoor" }, { id: "S017-f4", etage: 0, qm: 503, konzept: "eigen", gruppe: "teamsport" }, { id: "S017-f5", etage: 0, qm: 598, konzept: "eigen", gruppe: "rad" }, { id: "S017-f6", etage: 0, qm: 336, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 203026, rohertrag: 86622, konzessionserloes: 0, untermiete: 0, personal: 42337, miete: 37024, nebenkosten: 5990, sonstige: 10619, db: -9348, fteBedarf: 33.82178552279264, fteIst: 43.13466579059574, umsatzJeGruppe: { sportschuhe: 52408, sporttextil: 65762, outdoor: 48625, teamsport: 11735, rad: 6651, wintersport: 17845 } } }, { id: "W021", name: "Hartwig Dortmund", stadt: "Dortmund", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1956, fassade: 1, substanz: 53, status: "offen", flaechen: [{ id: "W021-f1", etage: -1, qm: 1352, konzept: "eigen", gruppe: "food" }, { id: "W021-f2", etage: -1, qm: 1431, konzept: "eigen", gruppe: "wohnen" }, { id: "W021-f3", etage: 0, qm: 981, konzept: "eigen", gruppe: "beauty" }, { id: "W021-f4", etage: 0, qm: 1482, konzept: "eigen", gruppe: "accessoires" }, { id: "W021-f5", etage: 0, qm: 320, konzept: "eigen", gruppe: "damen" }, { id: "W021-f6", etage: 1, qm: 2783, konzept: "eigen", gruppe: "damen" }, { id: "W021-f7", etage: 2, qm: 656, konzept: "eigen", gruppe: "damen" }, { id: "W021-f8", etage: 2, qm: 1257, konzept: "eigen", gruppe: "waesche" }, { id: "W021-f9", etage: 2, qm: 870, konzept: "eigen", gruppe: "herren" }, { id: "W021-f10", etage: 3, qm: 959, konzept: "eigen", gruppe: "herren" }, { id: "W021-f11", etage: 3, qm: 1242, konzept: "eigen", gruppe: "kinder" }, { id: "W021-f12", etage: 3, qm: 583, konzept: "eigen", gruppe: "sport" }, { id: "W021-f13", etage: 4, qm: 1340, konzept: "eigen", gruppe: "sport" }, { id: "W021-f14", etage: 4, qm: 858, konzept: "eigen", gruppe: "spielwaren" }, { id: "W021-f15", etage: 4, qm: 585, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 464194, rohertrag: 194944, konzessionserloes: 0, untermiete: 0, personal: 99075, miete: 45771, nebenkosten: 19012, sonstige: 26546, db: 4538, fteBedarf: 90.30579582824927, fteIst: 101.98513821558086, umsatzJeGruppe: { food: 52001, wohnen: 31836, beauty: 81123, accessoires: 60128, damen: 100750, waesche: 33269, herren: 34529, kinder: 25651, sport: 33689, spielwaren: 11218 } } }, { id: "W022", name: "Hartwig Dortmund Neustadt", stadt: "Dortmund", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3, 4], baujahr: 2002, fassade: 4, substanz: 42, status: "offen", flaechen: [{ id: "W022-f1", etage: 0, qm: 682, konzept: "eigen", gruppe: "food" }, { id: "W022-f2", etage: 0, qm: 414, konzept: "eigen", gruppe: "beauty" }, { id: "W022-f3", etage: 0, qm: 784, konzept: "eigen", gruppe: "accessoires" }, { id: "W022-f4", etage: 1, qm: 255, konzept: "eigen", gruppe: "accessoires" }, { id: "W022-f5", etage: 1, qm: 1625, konzept: "eigen", gruppe: "damen" }, { id: "W022-f6", etage: 2, qm: 485, konzept: "eigen", gruppe: "damen" }, { id: "W022-f7", etage: 2, qm: 711, konzept: "eigen", gruppe: "waesche" }, { id: "W022-f8", etage: 2, qm: 684, konzept: "eigen", gruppe: "herren" }, { id: "W022-f9", etage: 3, qm: 209, konzept: "eigen", gruppe: "herren" }, { id: "W022-f10", etage: 3, qm: 620, konzept: "eigen", gruppe: "kinder" }, { id: "W022-f11", etage: 3, qm: 942, konzept: "eigen", gruppe: "sport" }, { id: "W022-f12", etage: 3, qm: 109, konzept: "eigen", gruppe: "spielwaren" }, { id: "W022-f13", etage: 4, qm: 379, konzept: "eigen", gruppe: "spielwaren" }, { id: "W022-f14", etage: 4, qm: 1501, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 230370, rohertrag: 98399, konzessionserloes: 0, untermiete: 0, personal: 51442, miete: 18361, nebenkosten: 12578, sonstige: 13675, db: 2344, fteBedarf: 47.05700663771704, fteIst: 51.770796778870405, umsatzJeGruppe: { food: 21219, beauty: 23767, accessoires: 41835, damen: 46772, waesche: 20717, herren: 19395, kinder: 10178, sport: 12422, spielwaren: 7393, wohnen: 26673 } } }, { id: "S018", name: "Hartwig Sport Dortmund", stadt: "Dortmund", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1978, fassade: 2, substanz: 36, status: "offen", flaechen: [{ id: "S018-f1", etage: 0, qm: 718, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S018-f2", etage: 0, qm: 757, konzept: "eigen", gruppe: "sporttextil" }, { id: "S018-f3", etage: 1, qm: 152, konzept: "eigen", gruppe: "sporttextil" }, { id: "S018-f4", etage: 1, qm: 515, konzept: "eigen", gruppe: "outdoor" }, { id: "S018-f5", etage: 1, qm: 258, konzept: "eigen", gruppe: "teamsport" }, { id: "S018-f6", etage: 1, qm: 264, konzept: "eigen", gruppe: "rad" }, { id: "S018-f7", etage: 1, qm: 286, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 130598, rohertrag: 54884, konzessionserloes: 0, untermiete: 0, personal: 23701, miete: 29278, nebenkosten: 4225, sonstige: 6682, db: -9002, fteBedarf: 20.899984269574617, fteIst: 24.323003700029545, umsatzJeGruppe: { sportschuhe: 50764, sporttextil: 31443, outdoor: 21584, teamsport: 6129, rad: 3500, wintersport: 17179 } } }, { id: "W023", name: "Hartwig Bremen", stadt: "Bremen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1933, fassade: 5, substanz: 30, status: "offen", flaechen: [{ id: "W023-f1", etage: -1, qm: 594, konzept: "eigen", gruppe: "food" }, { id: "W023-f2", etage: -1, qm: 1506, konzept: "eigen", gruppe: "wohnen" }, { id: "W023-f3", etage: 0, qm: 665, konzept: "eigen", gruppe: "beauty" }, { id: "W023-f4", etage: 0, qm: 1012, konzept: "eigen", gruppe: "accessoires" }, { id: "W023-f5", etage: 0, qm: 423, konzept: "eigen", gruppe: "damen" }, { id: "W023-f6", etage: 1, qm: 1966, konzept: "eigen", gruppe: "damen" }, { id: "W023-f7", etage: 1, qm: 134, konzept: "eigen", gruppe: "waesche" }, { id: "W023-f8", etage: 2, qm: 574, konzept: "eigen", gruppe: "waesche" }, { id: "W023-f9", etage: 2, qm: 1254, konzept: "eigen", gruppe: "herren" }, { id: "W023-f10", etage: 2, qm: 272, konzept: "eigen", gruppe: "kinder" }, { id: "W023-f11", etage: 3, qm: 607, konzept: "eigen", gruppe: "kinder" }, { id: "W023-f12", etage: 3, qm: 1237, konzept: "eigen", gruppe: "sport" }, { id: "W023-f13", etage: 3, qm: 582, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 371271, rohertrag: 158160, konzessionserloes: 0, untermiete: 0, personal: 81087, miete: 66364, nebenkosten: 16102, sonstige: 20094, db: -25486, fteBedarf: 67.16796810504911, fteIst: 83.66840168021653, umsatzJeGruppe: { food: 28898, wohnen: 31631, beauty: 57253, accessoires: 59594, damen: 71063, waesche: 28359, herren: 37604, kinder: 23921, sport: 24096, spielwaren: 8851 } } }, { id: "W024", name: "Hartwig Bremen Altstadt", stadt: "Bremen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1, 2, 3, 4, 5], baujahr: 2002, fassade: 1, substanz: 36, status: "offen", flaechen: [{ id: "W024-f1", etage: 0, qm: 1021, konzept: "eigen", gruppe: "food" }, { id: "W024-f2", etage: 0, qm: 1113, konzept: "eigen", gruppe: "beauty" }, { id: "W024-f3", etage: 0, qm: 500, konzept: "eigen", gruppe: "accessoires" }, { id: "W024-f4", etage: 1, qm: 927, konzept: "eigen", gruppe: "accessoires" }, { id: "W024-f5", etage: 1, qm: 1707, konzept: "eigen", gruppe: "damen" }, { id: "W024-f6", etage: 2, qm: 1262, konzept: "eigen", gruppe: "damen" }, { id: "W024-f7", etage: 2, qm: 1196, konzept: "eigen", gruppe: "waesche" }, { id: "W024-f8", etage: 2, qm: 175, konzept: "eigen", gruppe: "herren" }, { id: "W024-f9", etage: 3, qm: 1488, konzept: "eigen", gruppe: "herren" }, { id: "W024-f10", etage: 3, qm: 944, konzept: "eigen", gruppe: "kinder" }, { id: "W024-f11", etage: 3, qm: 201, konzept: "eigen", gruppe: "sport" }, { id: "W024-f12", etage: 4, qm: 1748, konzept: "eigen", gruppe: "sport" }, { id: "W024-f13", etage: 4, qm: 757, konzept: "eigen", gruppe: "spielwaren" }, { id: "W024-f14", etage: 4, qm: 128, konzept: "eigen", gruppe: "wohnen" }, { id: "W024-f15", etage: 5, qm: 2633, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 480978, rohertrag: 202465, konzessionserloes: 0, untermiete: 0, personal: 114937, miete: 41851, nebenkosten: 22948, sonstige: 26830, db: -4101, fteBedarf: 90.58082781498368, fteIst: 115.57645553816583, umsatzJeGruppe: { food: 44595, beauty: 82375, accessoires: 72179, damen: 86215, waesche: 40058, herren: 37388, kinder: 19548, sport: 34418, spielwaren: 13025, wohnen: 51177 } } }, { id: "S019", name: "Hartwig Sport Bremen", stadt: "Bremen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [0, 1], baujahr: 2001, fassade: 1, substanz: 52, status: "offen", flaechen: [{ id: "S019-f1", etage: 0, qm: 709, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S019-f2", etage: 0, qm: 946, konzept: "eigen", gruppe: "sporttextil" }, { id: "S019-f3", etage: 0, qm: 95, konzept: "eigen", gruppe: "outdoor" }, { id: "S019-f4", etage: 1, qm: 608, konzept: "eigen", gruppe: "outdoor" }, { id: "S019-f5", etage: 1, qm: 353, konzept: "eigen", gruppe: "teamsport" }, { id: "S019-f6", etage: 1, qm: 448, konzept: "eigen", gruppe: "rad" }, { id: "S019-f7", etage: 1, qm: 340, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 117691, rohertrag: 49420, konzessionserloes: 0, untermiete: 0, personal: 26819, miete: 9556, nebenkosten: 5078, sonstige: 6400, db: 1567, fteBedarf: 20.593128359090677, fteIst: 26.97408982811513, umsatzJeGruppe: { sportschuhe: 36860, sporttextil: 29101, outdoor: 21584, teamsport: 8042, rad: 5270, wintersport: 16833 } } }, { id: "W025", name: "Hartwig Leipzig", stadt: "Leipzig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3400, etagen: [-1, 0, 1, 2, 3], baujahr: 1997, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "W025-f1", etage: -1, qm: 1061, konzept: "eigen", gruppe: "food" }, { id: "W025-f2", etage: -1, qm: 2299, konzept: "eigen", gruppe: "wohnen" }, { id: "W025-f3", etage: 0, qm: 1082, konzept: "eigen", gruppe: "beauty" }, { id: "W025-f4", etage: 0, qm: 2090, konzept: "eigen", gruppe: "accessoires" }, { id: "W025-f5", etage: 0, qm: 188, konzept: "eigen", gruppe: "damen" }, { id: "W025-f6", etage: 1, qm: 2856, konzept: "eigen", gruppe: "damen" }, { id: "W025-f7", etage: 1, qm: 504, konzept: "eigen", gruppe: "waesche" }, { id: "W025-f8", etage: 2, qm: 719, konzept: "eigen", gruppe: "waesche" }, { id: "W025-f9", etage: 2, qm: 1710, konzept: "eigen", gruppe: "herren" }, { id: "W025-f10", etage: 2, qm: 931, konzept: "eigen", gruppe: "kinder" }, { id: "W025-f11", etage: 3, qm: 313, konzept: "eigen", gruppe: "kinder" }, { id: "W025-f12", etage: 3, qm: 1687, konzept: "eigen", gruppe: "sport" }, { id: "W025-f13", etage: 3, qm: 869, konzept: "eigen", gruppe: "spielwaren" }, { id: "W025-f14", etage: 3, qm: 491, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 527405, rohertrag: 221405, konzessionserloes: 0, untermiete: 0, personal: 114080, miete: 64037, nebenkosten: 0, sonstige: 29184, db: 14104, fteBedarf: 98.32372246832225, fteIst: 117.92613794454667, umsatzJeGruppe: { food: 44142, wohnen: 66748, beauty: 95868, accessoires: 99545, damen: 81810, waesche: 34268, herren: 37777, kinder: 25268, sport: 25825, spielwaren: 16155 } } }, { id: "W026", name: "Hartwig Leipzig K\xF6nigstra\xDFe", stadt: "Leipzig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3400, etagen: [-1, 0, 1, 2], baujahr: 1937, fassade: 7, substanz: 43, status: "offen", flaechen: [{ id: "W026-f1", etage: -1, qm: 1052, konzept: "eigen", gruppe: "food" }, { id: "W026-f2", etage: -1, qm: 2323, konzept: "eigen", gruppe: "wohnen" }, { id: "W026-f3", etage: 0, qm: 625, konzept: "eigen", gruppe: "beauty" }, { id: "W026-f4", etage: 0, qm: 1419, konzept: "eigen", gruppe: "accessoires" }, { id: "W026-f5", etage: 0, qm: 1331, konzept: "eigen", gruppe: "damen" }, { id: "W026-f6", etage: 1, qm: 1354, konzept: "eigen", gruppe: "damen" }, { id: "W026-f7", etage: 1, qm: 1045, konzept: "eigen", gruppe: "waesche" }, { id: "W026-f8", etage: 1, qm: 975, konzept: "eigen", gruppe: "herren" }, { id: "W026-f9", etage: 2, qm: 555, konzept: "eigen", gruppe: "herren" }, { id: "W026-f10", etage: 2, qm: 1159, konzept: "eigen", gruppe: "kinder" }, { id: "W026-f11", etage: 2, qm: 1338, konzept: "eigen", gruppe: "sport" }, { id: "W026-f12", etage: 2, qm: 820, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 423322, rohertrag: 178779, konzessionserloes: 0, untermiete: 0, personal: 104783, miete: 46719, nebenkosten: 18036, sonstige: 23654, db: -14414, fteBedarf: 79.95537714608625, fteIst: 106.9272495788456, umsatzJeGruppe: { food: 39939, wohnen: 44292, beauty: 55588, accessoires: 72472, damen: 66508, waesche: 33160, herren: 43220, kinder: 26473, sport: 27456, spielwaren: 14214 } } }, { id: "S020", name: "Hartwig Sport Leipzig Galerie am Fluss", stadt: "Leipzig", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [0], baujahr: 1999, fassade: 1, substanz: 54, status: "offen", flaechen: [{ id: "S020-f1", etage: 0, qm: 632, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S020-f2", etage: 0, qm: 842, konzept: "eigen", gruppe: "sporttextil" }, { id: "S020-f3", etage: 0, qm: 684, konzept: "eigen", gruppe: "outdoor" }, { id: "S020-f4", etage: 0, qm: 313, konzept: "eigen", gruppe: "teamsport" }, { id: "S020-f5", etage: 0, qm: 469, konzept: "eigen", gruppe: "rad" }, { id: "S020-f6", etage: 0, qm: 309, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 108355, rohertrag: 45708, konzessionserloes: 0, untermiete: 0, personal: 24165, miete: 13070, nebenkosten: 3271, sonstige: 5905, db: -704, fteBedarf: 18.98898544290149, fteIst: 24.601704377963856, umsatzJeGruppe: { sportschuhe: 30768, sporttextil: 31632, outdoor: 19148, teamsport: 6327, rad: 4859, wintersport: 15623 } } }, { id: "W027", name: "Hartwig Dresden Einkaufszentrum", stadt: "Dresden", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4], baujahr: 1997, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W027-f1", etage: 0, qm: 533, konzept: "eigen", gruppe: "food" }, { id: "W027-f2", etage: 0, qm: 503, konzept: "eigen", gruppe: "beauty" }, { id: "W027-f3", etage: 0, qm: 704, konzept: "eigen", gruppe: "accessoires" }, { id: "W027-f4", etage: 1, qm: 115, konzept: "eigen", gruppe: "accessoires" }, { id: "W027-f5", etage: 1, qm: 1625, konzept: "eigen", gruppe: "damen" }, { id: "W027-f6", etage: 2, qm: 287, konzept: "eigen", gruppe: "damen" }, { id: "W027-f7", etage: 2, qm: 735, konzept: "eigen", gruppe: "waesche" }, { id: "W027-f8", etage: 2, qm: 718, konzept: "eigen", gruppe: "herren" }, { id: "W027-f9", etage: 3, qm: 544, konzept: "eigen", gruppe: "herren" }, { id: "W027-f10", etage: 3, qm: 523, konzept: "eigen", gruppe: "kinder" }, { id: "W027-f11", etage: 3, qm: 673, konzept: "eigen", gruppe: "sport" }, { id: "W027-f12", etage: 4, qm: 13, konzept: "eigen", gruppe: "sport" }, { id: "W027-f13", etage: 4, qm: 450, konzept: "eigen", gruppe: "spielwaren" }, { id: "W027-f14", etage: 4, qm: 1277, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 258403, rohertrag: 110539, konzessionserloes: 0, untermiete: 0, personal: 63506, miete: 31490, nebenkosten: 10557, sonstige: 14510, db: -9524, fteBedarf: 49.098192250090236, fteIst: 64.17475409089238, umsatzJeGruppe: { food: 23600, beauty: 36727, accessoires: 40697, damen: 50300, waesche: 26482, herren: 27994, kinder: 9768, sport: 9633, spielwaren: 7933, wohnen: 25269 } } }, { id: "W028", name: "Hartwig Dresden K\xF6nigstra\xDFe", stadt: "Dresden", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3100, etagen: [0, 1, 2, 3, 4], baujahr: 1989, fassade: 1, substanz: 72, status: "offen", flaechen: [{ id: "W028-f1", etage: 0, qm: 937, konzept: "eigen", gruppe: "food" }, { id: "W028-f2", etage: 0, qm: 1131, konzept: "eigen", gruppe: "beauty" }, { id: "W028-f3", etage: 0, qm: 1071, konzept: "eigen", gruppe: "accessoires" }, { id: "W028-f4", etage: 1, qm: 628, konzept: "eigen", gruppe: "accessoires" }, { id: "W028-f5", etage: 1, qm: 2512, konzept: "eigen", gruppe: "damen" }, { id: "W028-f6", etage: 2, qm: 207, konzept: "eigen", gruppe: "damen" }, { id: "W028-f7", etage: 2, qm: 1092, konzept: "eigen", gruppe: "waesche" }, { id: "W028-f8", etage: 2, qm: 1841, konzept: "eigen", gruppe: "herren" }, { id: "W028-f9", etage: 3, qm: 228, konzept: "eigen", gruppe: "herren" }, { id: "W028-f10", etage: 3, qm: 863, konzept: "eigen", gruppe: "kinder" }, { id: "W028-f11", etage: 3, qm: 1409, konzept: "eigen", gruppe: "sport" }, { id: "W028-f12", etage: 3, qm: 641, konzept: "eigen", gruppe: "spielwaren" }, { id: "W028-f13", etage: 4, qm: 350, konzept: "eigen", gruppe: "spielwaren" }, { id: "W028-f14", etage: 4, qm: 2790, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 554426, rohertrag: 232498, konzessionserloes: 0, untermiete: 0, personal: 118577, miete: 52017, nebenkosten: 18147, sonstige: 29796, db: 13960, fteBedarf: 99.46032703433085, fteIst: 121.49490900491055, umsatzJeGruppe: { food: 48963, beauty: 107719, accessoires: 95944, damen: 74307, waesche: 40348, herren: 59003, kinder: 19117, sport: 30385, spielwaren: 18075, wohnen: 60566 } } }, { id: "S021", name: "Hartwig Sport Dresden Galerie am Fluss", stadt: "Dresden", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [0, 1], baujahr: 1983, fassade: 7, substanz: 36, status: "offen", flaechen: [{ id: "S021-f1", etage: 0, qm: 1097, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S021-f2", etage: 0, qm: 1391, konzept: "eigen", gruppe: "sporttextil" }, { id: "S021-f3", etage: 0, qm: 12, konzept: "eigen", gruppe: "outdoor" }, { id: "S021-f4", etage: 1, qm: 1019, konzept: "eigen", gruppe: "outdoor" }, { id: "S021-f5", etage: 1, qm: 555, konzept: "eigen", gruppe: "teamsport" }, { id: "S021-f6", etage: 1, qm: 529, konzept: "eigen", gruppe: "rad" }, { id: "S021-f7", etage: 1, qm: 397, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 161780, rohertrag: 68472, konzessionserloes: 0, untermiete: 0, personal: 29711, miete: 19214, nebenkosten: 0, sonstige: 8883, db: 10664, fteBedarf: 28.691107359331617, fteIst: 30.29475567515675, umsatzJeGruppe: { sportschuhe: 51295, sporttextil: 47712, outdoor: 29187, teamsport: 10903, rad: 4490, wintersport: 18193 } } }, { id: "W029", name: "Hartwig Hannover Lindenstra\xDFe", stadt: "Hannover", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2, 3], baujahr: 1957, fassade: 4, substanz: 62, status: "offen", flaechen: [{ id: "W029-f1", etage: -1, qm: 971, konzept: "eigen", gruppe: "food" }, { id: "W029-f2", etage: -1, qm: 2329, konzept: "eigen", gruppe: "wohnen" }, { id: "W029-f3", etage: 0, qm: 897, konzept: "eigen", gruppe: "beauty" }, { id: "W029-f4", etage: 0, qm: 1595, konzept: "eigen", gruppe: "accessoires" }, { id: "W029-f5", etage: 0, qm: 807, konzept: "eigen", gruppe: "damen" }, { id: "W029-f6", etage: 1, qm: 2833, konzept: "eigen", gruppe: "damen" }, { id: "W029-f7", etage: 1, qm: 467, konzept: "eigen", gruppe: "waesche" }, { id: "W029-f8", etage: 2, qm: 743, konzept: "eigen", gruppe: "waesche" }, { id: "W029-f9", etage: 2, qm: 1748, konzept: "eigen", gruppe: "herren" }, { id: "W029-f10", etage: 2, qm: 809, konzept: "eigen", gruppe: "kinder" }, { id: "W029-f11", etage: 3, qm: 501, konzept: "eigen", gruppe: "kinder" }, { id: "W029-f12", etage: 3, qm: 1791, konzept: "eigen", gruppe: "sport" }, { id: "W029-f13", etage: 3, qm: 739, konzept: "eigen", gruppe: "spielwaren" }, { id: "W029-f14", etage: 3, qm: 269, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 369570, rohertrag: 157042, konzessionserloes: 0, untermiete: 0, personal: 90487, miete: 44129, nebenkosten: 19243, sonstige: 22577, db: -19393, fteBedarf: 78.32268793198118, fteIst: 91.26172466077023, umsatzJeGruppe: { food: 32053, wohnen: 31655, beauty: 59254, accessoires: 52502, damen: 73809, waesche: 29597, herren: 36315, kinder: 23737, sport: 21014, spielwaren: 9634 } } }, { id: "W030", name: "Hartwig Hannover Neustadt", stadt: "Hannover", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1979, fassade: 7, substanz: 80, status: "offen", flaechen: [{ id: "W030-f1", etage: 0, qm: 837, konzept: "eigen", gruppe: "food" }, { id: "W030-f2", etage: 0, qm: 774, konzept: "eigen", gruppe: "beauty" }, { id: "W030-f3", etage: 0, qm: 855, konzept: "eigen", gruppe: "accessoires" }, { id: "W030-f4", etage: 1, qm: 449, konzept: "eigen", gruppe: "accessoires" }, { id: "W030-f5", etage: 1, qm: 2018, konzept: "eigen", gruppe: "damen" }, { id: "W030-f6", etage: 2, qm: 968, konzept: "eigen", gruppe: "damen" }, { id: "W030-f7", etage: 2, qm: 1275, konzept: "eigen", gruppe: "waesche" }, { id: "W030-f8", etage: 2, qm: 223, konzept: "eigen", gruppe: "herren" }, { id: "W030-f9", etage: 3, qm: 1797, konzept: "eigen", gruppe: "herren" }, { id: "W030-f10", etage: 3, qm: 670, konzept: "eigen", gruppe: "kinder" }, { id: "W030-f11", etage: 4, qm: 622, konzept: "eigen", gruppe: "kinder" }, { id: "W030-f12", etage: 4, qm: 1451, konzept: "eigen", gruppe: "sport" }, { id: "W030-f13", etage: 4, qm: 393, konzept: "eigen", gruppe: "spielwaren" }, { id: "W030-f14", etage: 5, qm: 382, konzept: "eigen", gruppe: "spielwaren" }, { id: "W030-f15", etage: 5, qm: 2084, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 323160, rohertrag: 137747, konzessionserloes: 0, untermiete: 0, personal: 83859, miete: 55671, nebenkosten: 0, sonstige: 19909, db: -21691, fteBedarf: 69.25963413621675, fteIst: 84.3049846266934, umsatzJeGruppe: { food: 23364, beauty: 53748, accessoires: 50694, damen: 53748, waesche: 27061, herren: 40934, kinder: 17539, sport: 18316, spielwaren: 9917, wohnen: 27837 } } }, { id: "S022", name: "Hartwig Sport Hannover", stadt: "Hannover", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1], baujahr: 2006, fassade: 5, substanz: 34, status: "offen", flaechen: [{ id: "S022-f1", etage: 0, qm: 1072, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S022-f2", etage: 0, qm: 1203, konzept: "eigen", gruppe: "sporttextil" }, { id: "S022-f3", etage: 1, qm: 82, konzept: "eigen", gruppe: "sporttextil" }, { id: "S022-f4", etage: 1, qm: 948, konzept: "eigen", gruppe: "outdoor" }, { id: "S022-f5", etage: 1, qm: 405, konzept: "eigen", gruppe: "teamsport" }, { id: "S022-f6", etage: 1, qm: 457, konzept: "eigen", gruppe: "rad" }, { id: "S022-f7", etage: 1, qm: 383, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 172534, rohertrag: 72813, konzessionserloes: 0, untermiete: 0, personal: 31274, miete: 20649, nebenkosten: 0, sonstige: 9121, db: 11769, fteBedarf: 28.991555686271752, fteIst: 32.10267404781496, umsatzJeGruppe: { sportschuhe: 61329, sporttextil: 46840, outdoor: 29943, teamsport: 9867, rad: 4422, wintersport: 20133 } } }, { id: "W031", name: "Hartwig N\xFCrnberg", stadt: "N\xFCrnberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [0, 1, 2, 3], baujahr: 1957, fassade: 7, substanz: 34, status: "offen", flaechen: [{ id: "W031-f1", etage: 0, qm: 1216, konzept: "eigen", gruppe: "food" }, { id: "W031-f2", etage: 0, qm: 689, konzept: "eigen", gruppe: "beauty" }, { id: "W031-f3", etage: 0, qm: 1370, konzept: "eigen", gruppe: "accessoires" }, { id: "W031-f4", etage: 1, qm: 18, konzept: "eigen", gruppe: "accessoires" }, { id: "W031-f5", etage: 1, qm: 2388, konzept: "eigen", gruppe: "damen" }, { id: "W031-f6", etage: 1, qm: 869, konzept: "eigen", gruppe: "waesche" }, { id: "W031-f7", etage: 2, qm: 351, konzept: "eigen", gruppe: "waesche" }, { id: "W031-f8", etage: 2, qm: 1509, konzept: "eigen", gruppe: "herren" }, { id: "W031-f9", etage: 2, qm: 841, konzept: "eigen", gruppe: "kinder" }, { id: "W031-f10", etage: 2, qm: 574, konzept: "eigen", gruppe: "sport" }, { id: "W031-f11", etage: 3, qm: 525, konzept: "eigen", gruppe: "sport" }, { id: "W031-f12", etage: 3, qm: 1034, konzept: "eigen", gruppe: "spielwaren" }, { id: "W031-f13", etage: 3, qm: 1715, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 435944, rohertrag: 182826, konzessionserloes: 0, untermiete: 0, personal: 91474, miete: 109262, nebenkosten: 17956, sonstige: 23768, db: -59634, fteBedarf: 79.68273664668298, fteIst: 92.0915964104501, umsatzJeGruppe: { food: 63392, beauty: 56162, accessoires: 73656, damen: 75393, waesche: 35381, herren: 46948, kinder: 20629, sport: 16286, spielwaren: 14287, wohnen: 33810 } } }, { id: "W032", name: "Hartwig N\xFCrnberg K\xF6nigstra\xDFe", stadt: "N\xFCrnberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [0, 1, 2, 3, 4], baujahr: 1937, fassade: 4, substanz: 50, status: "offen", flaechen: [{ id: "W032-f1", etage: 0, qm: 602, konzept: "eigen", gruppe: "food" }, { id: "W032-f2", etage: 0, qm: 682, konzept: "eigen", gruppe: "beauty" }, { id: "W032-f3", etage: 0, qm: 716, konzept: "eigen", gruppe: "accessoires" }, { id: "W032-f4", etage: 1, qm: 214, konzept: "eigen", gruppe: "accessoires" }, { id: "W032-f5", etage: 1, qm: 1786, konzept: "eigen", gruppe: "damen" }, { id: "W032-f6", etage: 2, qm: 164, konzept: "eigen", gruppe: "damen" }, { id: "W032-f7", etage: 2, qm: 748, konzept: "eigen", gruppe: "waesche" }, { id: "W032-f8", etage: 2, qm: 1088, konzept: "eigen", gruppe: "herren" }, { id: "W032-f9", etage: 3, qm: 249, konzept: "eigen", gruppe: "herren" }, { id: "W032-f10", etage: 3, qm: 750, konzept: "eigen", gruppe: "kinder" }, { id: "W032-f11", etage: 3, qm: 1001, konzept: "eigen", gruppe: "sport" }, { id: "W032-f12", etage: 4, qm: 49, konzept: "eigen", gruppe: "sport" }, { id: "W032-f13", etage: 4, qm: 702, konzept: "eigen", gruppe: "spielwaren" }, { id: "W032-f14", etage: 4, qm: 1249, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 352181, rohertrag: 148496, konzessionserloes: 0, untermiete: 0, personal: 68125, miete: 34966, nebenkosten: 11106, sonstige: 18939, db: 15360, fteBedarf: 63.25510820727785, fteIst: 70.41773503920322, umsatzJeGruppe: { food: 29253, beauty: 70306, accessoires: 51913, damen: 57769, waesche: 22868, herren: 44079, kinder: 18244, sport: 20676, spielwaren: 11710, wohnen: 25361 } } }, { id: "S023", name: "Hartwig Sport N\xFCrnberg", stadt: "N\xFCrnberg", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1400, etagen: [0, 1], baujahr: 1993, fassade: 6, substanz: 80, status: "offen", flaechen: [{ id: "S023-f1", etage: 0, qm: 517, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S023-f2", etage: 0, qm: 740, konzept: "eigen", gruppe: "sporttextil" }, { id: "S023-f3", etage: 0, qm: 119, konzept: "eigen", gruppe: "outdoor" }, { id: "S023-f4", etage: 1, qm: 526, konzept: "eigen", gruppe: "outdoor" }, { id: "S023-f5", etage: 1, qm: 303, konzept: "eigen", gruppe: "teamsport" }, { id: "S023-f6", etage: 1, qm: 359, konzept: "eigen", gruppe: "rad" }, { id: "S023-f7", etage: 1, qm: 187, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 111693, rohertrag: 47444, konzessionserloes: 0, untermiete: 0, personal: 19631, miete: 16446, nebenkosten: 0, sonstige: 5817, db: 5549, fteBedarf: 18.421358816515944, fteIst: 20.263031981652187, umsatzJeGruppe: { sportschuhe: 27803, sporttextil: 30053, outdoor: 29382, teamsport: 6152, rad: 4759, wintersport: 13544 } } }, { id: "W033", name: "Hartwig Duisburg Am Wall", stadt: "Duisburg", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2], baujahr: 1949, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W033-f1", etage: -1, qm: 1115, konzept: "eigen", gruppe: "food" }, { id: "W033-f2", etage: -1, qm: 2160, konzept: "eigen", gruppe: "wohnen" }, { id: "W033-f3", etage: 0, qm: 915, konzept: "eigen", gruppe: "beauty" }, { id: "W033-f4", etage: 0, qm: 1434, konzept: "eigen", gruppe: "accessoires" }, { id: "W033-f5", etage: 0, qm: 926, konzept: "eigen", gruppe: "damen" }, { id: "W033-f6", etage: 1, qm: 1570, konzept: "eigen", gruppe: "damen" }, { id: "W033-f7", etage: 1, qm: 1044, konzept: "eigen", gruppe: "waesche" }, { id: "W033-f8", etage: 1, qm: 661, konzept: "eigen", gruppe: "herren" }, { id: "W033-f9", etage: 2, qm: 1002, konzept: "eigen", gruppe: "herren" }, { id: "W033-f10", etage: 2, qm: 733, konzept: "eigen", gruppe: "kinder" }, { id: "W033-f11", etage: 2, qm: 1142, konzept: "eigen", gruppe: "sport" }, { id: "W033-f12", etage: 2, qm: 919, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 260360, rohertrag: 108688, konzessionserloes: 0, untermiete: 0, personal: 70962, miete: 60988, nebenkosten: 15429, sonstige: 16804, db: -55495, fteBedarf: 59.22994531188261, fteIst: 71.18333910064324, umsatzJeGruppe: { food: 29415, wohnen: 25276, beauty: 43881, accessoires: 38796, damen: 44268, waesche: 16772, herren: 24941, kinder: 12470, sport: 14541, spielwaren: 10001 } } }, { id: "S024", name: "Hartwig Sport Duisburg Galerie am Fluss", stadt: "Duisburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 4700, etagen: [0], baujahr: 1979, fassade: 2, substanz: 51, status: "offen", flaechen: [{ id: "S024-f1", etage: 0, qm: 1146, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S024-f2", etage: 0, qm: 1471, konzept: "eigen", gruppe: "sporttextil" }, { id: "S024-f3", etage: 0, qm: 785, konzept: "eigen", gruppe: "outdoor" }, { id: "S024-f4", etage: 0, qm: 449, konzept: "eigen", gruppe: "teamsport" }, { id: "S024-f5", etage: 0, qm: 399, konzept: "eigen", gruppe: "rad" }, { id: "S024-f6", etage: 0, qm: 399, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 155916, rohertrag: 65775, konzessionserloes: 0, untermiete: 0, personal: 31941, miete: 16397, nebenkosten: 6745, sonstige: 8485, db: 2207, fteBedarf: 27.191699657864234, fteIst: 33.09545457497372, umsatzJeGruppe: { sportschuhe: 52579, sporttextil: 45956, outdoor: 22157, teamsport: 10065, rad: 4172, wintersport: 20988 } } }, { id: "W034", name: "Hartwig Bochum", stadt: "Bochum", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1961, fassade: 6, substanz: 57, status: "offen", flaechen: [{ id: "W034-f1", etage: 0, qm: 643, konzept: "eigen", gruppe: "food" }, { id: "W034-f2", etage: 0, qm: 744, konzept: "eigen", gruppe: "beauty" }, { id: "W034-f3", etage: 0, qm: 330, konzept: "eigen", gruppe: "accessoires" }, { id: "W034-f4", etage: 1, qm: 609, konzept: "eigen", gruppe: "accessoires" }, { id: "W034-f5", etage: 1, qm: 1108, konzept: "eigen", gruppe: "damen" }, { id: "W034-f6", etage: 2, qm: 972, konzept: "eigen", gruppe: "damen" }, { id: "W034-f7", etage: 2, qm: 744, konzept: "eigen", gruppe: "waesche" }, { id: "W034-f8", etage: 3, qm: 46, konzept: "eigen", gruppe: "waesche" }, { id: "W034-f9", etage: 3, qm: 1005, konzept: "eigen", gruppe: "herren" }, { id: "W034-f10", etage: 3, qm: 666, konzept: "eigen", gruppe: "kinder" }, { id: "W034-f11", etage: 4, qm: 56, konzept: "eigen", gruppe: "kinder" }, { id: "W034-f12", etage: 4, qm: 1081, konzept: "eigen", gruppe: "sport" }, { id: "W034-f13", etage: 4, qm: 492, konzept: "eigen", gruppe: "spielwaren" }, { id: "W034-f14", etage: 4, qm: 88, konzept: "eigen", gruppe: "wohnen" }, { id: "W034-f15", etage: 5, qm: 1717, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 280054, rohertrag: 118599, konzessionserloes: 0, untermiete: 0, personal: 67076, miete: 40524, nebenkosten: 11647, sonstige: 16118, db: -16766, fteBedarf: 54.95014665336467, fteIst: 68.55277813391183, umsatzJeGruppe: { food: 23935, beauty: 48206, accessoires: 39572, damen: 48731, waesche: 26512, herren: 26531, kinder: 12544, sport: 15721, spielwaren: 7729, wohnen: 30573 } } }, { id: "S025", name: "Hartwig Sport Bochum", stadt: "Bochum", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1], baujahr: 2002, fassade: 5, substanz: 62, status: "offen", flaechen: [{ id: "S025-f1", etage: 0, qm: 1027, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S025-f2", etage: 0, qm: 1542, konzept: "eigen", gruppe: "sporttextil" }, { id: "S025-f3", etage: 0, qm: 56, konzept: "eigen", gruppe: "outdoor" }, { id: "S025-f4", etage: 1, qm: 1150, konzept: "eigen", gruppe: "outdoor" }, { id: "S025-f5", etage: 1, qm: 487, konzept: "eigen", gruppe: "teamsport" }, { id: "S025-f6", etage: 1, qm: 482, konzept: "eigen", gruppe: "rad" }, { id: "S025-f7", etage: 1, qm: 505, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 195484, rohertrag: 82616, konzessionserloes: 0, untermiete: 0, personal: 40749, miete: 33704, nebenkosten: 7790, sonstige: 10377, db: -10003, fteBedarf: 33.05019124380917, fteIst: 41.85979119116115, umsatzJeGruppe: { sportschuhe: 64501, sporttextil: 49001, outdoor: 41618, teamsport: 11806, rad: 5661, wintersport: 22897 } } }, { id: "W035", name: "Hartwig Wuppertal", stadt: "Wuppertal", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2400, etagen: [0, 1, 2, 3, 4], baujahr: 2007, fassade: 6, substanz: 85, status: "offen", flaechen: [{ id: "W035-f1", etage: 0, qm: 1037, konzept: "eigen", gruppe: "food" }, { id: "W035-f2", etage: 0, qm: 677, konzept: "eigen", gruppe: "beauty" }, { id: "W035-f3", etage: 0, qm: 646, konzept: "eigen", gruppe: "accessoires" }, { id: "W035-f4", etage: 1, qm: 395, konzept: "eigen", gruppe: "accessoires" }, { id: "W035-f5", etage: 1, qm: 1965, konzept: "eigen", gruppe: "damen" }, { id: "W035-f6", etage: 2, qm: 635, konzept: "eigen", gruppe: "damen" }, { id: "W035-f7", etage: 2, qm: 941, konzept: "eigen", gruppe: "waesche" }, { id: "W035-f8", etage: 2, qm: 784, konzept: "eigen", gruppe: "herren" }, { id: "W035-f9", etage: 3, qm: 343, konzept: "eigen", gruppe: "herren" }, { id: "W035-f10", etage: 3, qm: 1058, konzept: "eigen", gruppe: "kinder" }, { id: "W035-f11", etage: 3, qm: 960, konzept: "eigen", gruppe: "sport" }, { id: "W035-f12", etage: 4, qm: 132, konzept: "eigen", gruppe: "sport" }, { id: "W035-f13", etage: 4, qm: 682, konzept: "eigen", gruppe: "spielwaren" }, { id: "W035-f14", etage: 4, qm: 1546, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 411442, rohertrag: 172760, konzessionserloes: 0, untermiete: 0, personal: 95075, miete: 54936, nebenkosten: 12128, sonstige: 22180, db: -11557, fteBedarf: 74.08847483876315, fteIst: 97.59371172510765, umsatzJeGruppe: { food: 51835, beauty: 53890, accessoires: 57549, damen: 82794, waesche: 30963, herren: 33006, kinder: 31866, sport: 23295, spielwaren: 12686, wohnen: 33557 } } }, { id: "S026", name: "Hartwig Sport Wuppertal", stadt: "Wuppertal", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0], baujahr: 2009, fassade: 3, substanz: 48, status: "offen", flaechen: [{ id: "S026-f1", etage: 0, qm: 433, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S026-f2", etage: 0, qm: 688, konzept: "eigen", gruppe: "sporttextil" }, { id: "S026-f3", etage: 0, qm: 300, konzept: "eigen", gruppe: "outdoor" }, { id: "S026-f4", etage: 0, qm: 227, konzept: "eigen", gruppe: "teamsport" }, { id: "S026-f5", etage: 0, qm: 259, konzept: "eigen", gruppe: "rad" }, { id: "S026-f6", etage: 0, qm: 193, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 85293, rohertrag: 35867, konzessionserloes: 0, untermiete: 0, personal: 17078, miete: 7723, nebenkosten: 2891, sonstige: 4442, db: 3732, fteBedarf: 14.034670714758327, fteIst: 17.212563034533623, umsatzJeGruppe: { sportschuhe: 28872, sporttextil: 24396, outdoor: 11683, teamsport: 6121, rad: 2825, wintersport: 11396 } } }, { id: "W036", name: "Hartwig Bielefeld", stadt: "Bielefeld", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1926, fassade: 4, substanz: 54, status: "offen", flaechen: [{ id: "W036-f1", etage: -1, qm: 1106, konzept: "eigen", gruppe: "food" }, { id: "W036-f2", etage: -1, qm: 1661, konzept: "eigen", gruppe: "wohnen" }, { id: "W036-f3", etage: 0, qm: 1171, konzept: "eigen", gruppe: "beauty" }, { id: "W036-f4", etage: 0, qm: 1596, konzept: "eigen", gruppe: "accessoires" }, { id: "W036-f5", etage: 1, qm: 195, konzept: "eigen", gruppe: "accessoires" }, { id: "W036-f6", etage: 1, qm: 2572, konzept: "eigen", gruppe: "damen" }, { id: "W036-f7", etage: 2, qm: 681, konzept: "eigen", gruppe: "damen" }, { id: "W036-f8", etage: 2, qm: 913, konzept: "eigen", gruppe: "waesche" }, { id: "W036-f9", etage: 2, qm: 1173, konzept: "eigen", gruppe: "herren" }, { id: "W036-f10", etage: 3, qm: 382, konzept: "eigen", gruppe: "herren" }, { id: "W036-f11", etage: 3, qm: 1121, konzept: "eigen", gruppe: "kinder" }, { id: "W036-f12", etage: 3, qm: 1264, konzept: "eigen", gruppe: "sport" }, { id: "W036-f13", etage: 4, qm: 532, konzept: "eigen", gruppe: "sport" }, { id: "W036-f14", etage: 4, qm: 985, konzept: "eigen", gruppe: "spielwaren" }, { id: "W036-f15", etage: 4, qm: 1250, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 511698, rohertrag: 214081, konzessionserloes: 0, untermiete: 0, personal: 101773, miete: 47862, nebenkosten: 23231, sonstige: 28451, db: 12764, fteBedarf: 95.98759390249725, fteIst: 104.27841530887343, umsatzJeGruppe: { food: 42130, wohnen: 56668, beauty: 105207, accessoires: 78563, damen: 91392, waesche: 24475, herren: 39429, kinder: 29167, sport: 30742, spielwaren: 13924 } } }, { id: "S027", name: "Hartwig Sport Bielefeld Einkaufszentrum", stadt: "Bielefeld", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 2014, fassade: 6, substanz: 33, status: "offen", flaechen: [{ id: "S027-f1", etage: 0, qm: 549, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S027-f2", etage: 0, qm: 184, konzept: "eigen", gruppe: "sporttextil" }, { id: "S027-f3", etage: 1, qm: 477, konzept: "eigen", gruppe: "sporttextil" }, { id: "S027-f4", etage: 1, qm: 256, konzept: "eigen", gruppe: "outdoor" }, { id: "S027-f5", etage: 2, qm: 85, konzept: "eigen", gruppe: "outdoor" }, { id: "S027-f6", etage: 2, qm: 233, konzept: "eigen", gruppe: "teamsport" }, { id: "S027-f7", etage: 2, qm: 283, konzept: "eigen", gruppe: "rad" }, { id: "S027-f8", etage: 2, qm: 133, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 70660, rohertrag: 29738, konzessionserloes: 0, untermiete: 0, personal: 14396, miete: 7922, nebenkosten: 2709, sonstige: 3887, db: 824, fteBedarf: 12.669226029267431, fteIst: 14.781855370757716, umsatzJeGruppe: { sportschuhe: 27156, sporttextil: 20210, outdoor: 11431, teamsport: 3773, rad: 2247, wintersport: 5843 } } }, { id: "W037", name: "Hartwig Bonn Bahnhofstra\xDFe", stadt: "Bonn", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1927, fassade: 3, substanz: 61, status: "offen", flaechen: [{ id: "W037-f1", etage: -1, qm: 570, konzept: "eigen", gruppe: "food" }, { id: "W037-f2", etage: -1, qm: 930, konzept: "eigen", gruppe: "wohnen" }, { id: "W037-f3", etage: 0, qm: 660, konzept: "eigen", gruppe: "beauty" }, { id: "W037-f4", etage: 0, qm: 840, konzept: "eigen", gruppe: "accessoires" }, { id: "W037-f5", etage: 1, qm: 53, konzept: "eigen", gruppe: "accessoires" }, { id: "W037-f6", etage: 1, qm: 1447, konzept: "eigen", gruppe: "damen" }, { id: "W037-f7", etage: 2, qm: 297, konzept: "eigen", gruppe: "damen" }, { id: "W037-f8", etage: 2, qm: 612, konzept: "eigen", gruppe: "waesche" }, { id: "W037-f9", etage: 2, qm: 590, konzept: "eigen", gruppe: "herren" }, { id: "W037-f10", etage: 3, qm: 694, konzept: "eigen", gruppe: "herren" }, { id: "W037-f11", etage: 3, qm: 499, konzept: "eigen", gruppe: "kinder" }, { id: "W037-f12", etage: 3, qm: 307, konzept: "eigen", gruppe: "sport" }, { id: "W037-f13", etage: 4, qm: 829, konzept: "eigen", gruppe: "sport" }, { id: "W037-f14", etage: 4, qm: 464, konzept: "eigen", gruppe: "spielwaren" }, { id: "W037-f15", etage: 4, qm: 207, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 272634, rohertrag: 115282, konzessionserloes: 0, untermiete: 0, personal: 53430, miete: 34520, nebenkosten: 12728, sonstige: 15228, db: -625, fteBedarf: 51.408625112435445, fteIst: 54.780311309823475, umsatzJeGruppe: { food: 25094, wohnen: 23726, beauty: 48708, accessoires: 41629, damen: 50370, waesche: 20050, herren: 30078, kinder: 8496, sport: 18156, spielwaren: 6327 } } }, { id: "S028", name: "Hartwig Sport Bonn", stadt: "Bonn", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 2010, fassade: 7, substanz: 55, status: "offen", flaechen: [{ id: "S028-f1", etage: 0, qm: 1107, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S028-f2", etage: 0, qm: 993, konzept: "eigen", gruppe: "sporttextil" }, { id: "S028-f3", etage: 1, qm: 75, konzept: "eigen", gruppe: "sporttextil" }, { id: "S028-f4", etage: 1, qm: 979, konzept: "eigen", gruppe: "outdoor" }, { id: "S028-f5", etage: 1, qm: 331, konzept: "eigen", gruppe: "teamsport" }, { id: "S028-f6", etage: 1, qm: 386, konzept: "eigen", gruppe: "rad" }, { id: "S028-f7", etage: 1, qm: 329, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 164552, rohertrag: 69733, konzessionserloes: 0, untermiete: 0, personal: 31754, miete: 12148, nebenkosten: 4898, sonstige: 8637, db: 12296, fteBedarf: 27.3400796208445, fteIst: 32.412390244375956, umsatzJeGruppe: { sportschuhe: 58665, sporttextil: 38878, outdoor: 39343, teamsport: 6627, rad: 3498, wintersport: 17541 } } }, { id: "W038", name: "Hartwig M\xFCnster", stadt: "M\xFCnster", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1990, fassade: 1, substanz: 49, status: "offen", flaechen: [{ id: "W038-f1", etage: 0, qm: 1041, konzept: "eigen", gruppe: "food" }, { id: "W038-f2", etage: 0, qm: 616, konzept: "eigen", gruppe: "beauty" }, { id: "W038-f3", etage: 0, qm: 493, konzept: "eigen", gruppe: "accessoires" }, { id: "W038-f4", etage: 1, qm: 643, konzept: "eigen", gruppe: "accessoires" }, { id: "W038-f5", etage: 1, qm: 1507, konzept: "eigen", gruppe: "damen" }, { id: "W038-f6", etage: 2, qm: 1363, konzept: "eigen", gruppe: "damen" }, { id: "W038-f7", etage: 2, qm: 787, konzept: "eigen", gruppe: "waesche" }, { id: "W038-f8", etage: 3, qm: 89, konzept: "eigen", gruppe: "waesche" }, { id: "W038-f9", etage: 3, qm: 1507, konzept: "eigen", gruppe: "herren" }, { id: "W038-f10", etage: 3, qm: 554, konzept: "eigen", gruppe: "kinder" }, { id: "W038-f11", etage: 4, qm: 357, konzept: "eigen", gruppe: "kinder" }, { id: "W038-f12", etage: 4, qm: 1491, konzept: "eigen", gruppe: "sport" }, { id: "W038-f13", etage: 4, qm: 301, konzept: "eigen", gruppe: "spielwaren" }, { id: "W038-f14", etage: 5, qm: 495, konzept: "eigen", gruppe: "spielwaren" }, { id: "W038-f15", etage: 5, qm: 1655, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 445823, rohertrag: 188618, konzessionserloes: 0, untermiete: 0, personal: 87151, miete: 34095, nebenkosten: 14541, sonstige: 24083, db: 28748, fteBedarf: 80.5172683086623, fteIst: 88.62350484133029, umsatzJeGruppe: { food: 44886, beauty: 66206, accessoires: 65666, damen: 99971, waesche: 27742, herren: 41196, kinder: 23383, sport: 29087, spielwaren: 14457, wohnen: 33230 } } }, { id: "S029", name: "Hartwig Sport M\xFCnster", stadt: "M\xFCnster", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 1982, fassade: 2, substanz: 34, status: "offen", flaechen: [{ id: "S029-f1", etage: 0, qm: 1115, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S029-f2", etage: 0, qm: 502, konzept: "eigen", gruppe: "sporttextil" }, { id: "S029-f3", etage: 1, qm: 865, konzept: "eigen", gruppe: "sporttextil" }, { id: "S029-f4", etage: 1, qm: 752, konzept: "eigen", gruppe: "outdoor" }, { id: "S029-f5", etage: 2, qm: 180, konzept: "eigen", gruppe: "outdoor" }, { id: "S029-f6", etage: 2, qm: 463, konzept: "eigen", gruppe: "teamsport" }, { id: "S029-f7", etage: 2, qm: 614, konzept: "eigen", gruppe: "rad" }, { id: "S029-f8", etage: 2, qm: 360, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 174153, rohertrag: 73555, konzessionserloes: 0, untermiete: 0, personal: 32956, miete: 18835, nebenkosten: 0, sonstige: 9323, db: 12440, fteBedarf: 29.938185954086208, fteIst: 33.37451432170405, umsatzJeGruppe: { sportschuhe: 52261, sporttextil: 43572, outdoor: 41505, teamsport: 9303, rad: 7588, wintersport: 19925 } } }, { id: "W039", name: "Hartwig Mannheim", stadt: "Mannheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2, 3], baujahr: 1939, fassade: 0, substanz: 62, status: "offen", flaechen: [{ id: "W039-f1", etage: -1, qm: 755, konzept: "eigen", gruppe: "food" }, { id: "W039-f2", etage: -1, qm: 1265, konzept: "eigen", gruppe: "wohnen" }, { id: "W039-f3", etage: 0, qm: 514, konzept: "eigen", gruppe: "beauty" }, { id: "W039-f4", etage: 0, qm: 785, konzept: "eigen", gruppe: "accessoires" }, { id: "W039-f5", etage: 0, qm: 721, konzept: "eigen", gruppe: "damen" }, { id: "W039-f6", etage: 1, qm: 1207, konzept: "eigen", gruppe: "damen" }, { id: "W039-f7", etage: 1, qm: 738, konzept: "eigen", gruppe: "waesche" }, { id: "W039-f8", etage: 1, qm: 75, konzept: "eigen", gruppe: "herren" }, { id: "W039-f9", etage: 2, qm: 1196, konzept: "eigen", gruppe: "herren" }, { id: "W039-f10", etage: 2, qm: 807, konzept: "eigen", gruppe: "kinder" }, { id: "W039-f11", etage: 2, qm: 18, konzept: "eigen", gruppe: "sport" }, { id: "W039-f12", etage: 3, qm: 951, konzept: "eigen", gruppe: "sport" }, { id: "W039-f13", etage: 3, qm: 692, konzept: "eigen", gruppe: "spielwaren" }, { id: "W039-f14", etage: 3, qm: 377, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 282958, rohertrag: 118014, konzessionserloes: 0, untermiete: 0, personal: 71787, miete: 61779, nebenkosten: 0, sonstige: 16147, db: -31699, fteBedarf: 54.95752546154688, fteIst: 72.87446584447383, umsatzJeGruppe: { food: 34766, wohnen: 30446, beauty: 40104, accessoires: 28698, damen: 50241, waesche: 18093, herren: 33957, kinder: 18023, sport: 17987, spielwaren: 10643 } } }, { id: "S030", name: "Hartwig Sport Mannheim Galerie am Fluss", stadt: "Mannheim", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 4800, etagen: [0], baujahr: 1993, fassade: 1, substanz: 60, status: "offen", flaechen: [{ id: "S030-f1", etage: 0, qm: 1147, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S030-f2", etage: 0, qm: 1092, konzept: "eigen", gruppe: "sporttextil" }, { id: "S030-f3", etage: 0, qm: 1064, konzept: "eigen", gruppe: "outdoor" }, { id: "S030-f4", etage: 0, qm: 567, konzept: "eigen", gruppe: "teamsport" }, { id: "S030-f5", etage: 0, qm: 515, konzept: "eigen", gruppe: "rad" }, { id: "S030-f6", etage: 0, qm: 364, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 144810, rohertrag: 60744, konzessionserloes: 0, untermiete: 0, personal: 27770, miete: 14047, nebenkosten: 5251, sonstige: 8074, db: 5602, fteBedarf: 26.272606857762057, fteIst: 28.554078733226028, umsatzJeGruppe: { sportschuhe: 54964, sporttextil: 29333, outdoor: 28422, teamsport: 11814, rad: 3942, wintersport: 16335 } } }, { id: "W040", name: "Hartwig Karlsruhe", stadt: "Karlsruhe", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1983, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "W040-f1", etage: -1, qm: 856, konzept: "eigen", gruppe: "food" }, { id: "W040-f2", etage: -1, qm: 1860, konzept: "eigen", gruppe: "wohnen" }, { id: "W040-f3", etage: 0, qm: 810, konzept: "eigen", gruppe: "beauty" }, { id: "W040-f4", etage: 0, qm: 1263, konzept: "eigen", gruppe: "accessoires" }, { id: "W040-f5", etage: 0, qm: 643, konzept: "eigen", gruppe: "damen" }, { id: "W040-f6", etage: 1, qm: 2717, konzept: "eigen", gruppe: "damen" }, { id: "W040-f7", etage: 2, qm: 261, konzept: "eigen", gruppe: "damen" }, { id: "W040-f8", etage: 2, qm: 1095, konzept: "eigen", gruppe: "waesche" }, { id: "W040-f9", etage: 2, qm: 1360, konzept: "eigen", gruppe: "herren" }, { id: "W040-f10", etage: 3, qm: 911, konzept: "eigen", gruppe: "herren" }, { id: "W040-f11", etage: 3, qm: 1246, konzept: "eigen", gruppe: "kinder" }, { id: "W040-f12", etage: 3, qm: 560, konzept: "eigen", gruppe: "sport" }, { id: "W040-f13", etage: 4, qm: 750, konzept: "eigen", gruppe: "sport" }, { id: "W040-f14", etage: 4, qm: 932, konzept: "eigen", gruppe: "spielwaren" }, { id: "W040-f15", etage: 4, qm: 1035, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 517585, rohertrag: 220251, konzessionserloes: 0, untermiete: 0, personal: 106474, miete: 73744, nebenkosten: 20465, sonstige: 28556, db: -8987, fteBedarf: 96.14209753147138, fteIst: 107.95207219423338, umsatzJeGruppe: { food: 37358, wohnen: 64894, beauty: 83511, accessoires: 55371, damen: 110861, waesche: 35058, herren: 62261, kinder: 25237, sport: 25611, spielwaren: 17422 } } }, { id: "S031", name: "Hartwig Sport Karlsruhe", stadt: "Karlsruhe", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1988, fassade: 2, substanz: 61, status: "offen", flaechen: [{ id: "S031-f1", etage: 0, qm: 930, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S031-f2", etage: 0, qm: 320, konzept: "eigen", gruppe: "sporttextil" }, { id: "S031-f3", etage: 1, qm: 711, konzept: "eigen", gruppe: "sporttextil" }, { id: "S031-f4", etage: 1, qm: 539, konzept: "eigen", gruppe: "outdoor" }, { id: "S031-f5", etage: 2, qm: 332, konzept: "eigen", gruppe: "outdoor" }, { id: "S031-f6", etage: 2, qm: 292, konzept: "eigen", gruppe: "teamsport" }, { id: "S031-f7", etage: 2, qm: 351, konzept: "eigen", gruppe: "rad" }, { id: "S031-f8", etage: 2, qm: 276, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 151911, rohertrag: 64148, konzessionserloes: 0, untermiete: 0, personal: 28413, miete: 34324, nebenkosten: 0, sonstige: 7916, db: -6506, fteBedarf: 24.908923516066512, fteIst: 29.329654828011094, umsatzJeGruppe: { sportschuhe: 49687, sporttextil: 33500, outdoor: 35371, teamsport: 7412, rad: 4826, wintersport: 21115 } } }, { id: "W041", name: "Hartwig Augsburg", stadt: "Augsburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2], baujahr: 1960, fassade: 0, substanz: 73, status: "offen", flaechen: [{ id: "W041-f1", etage: -1, qm: 585, konzept: "eigen", gruppe: "food" }, { id: "W041-f2", etage: -1, qm: 2165, konzept: "eigen", gruppe: "wohnen" }, { id: "W041-f3", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W041-f4", etage: 0, qm: 1315, konzept: "eigen", gruppe: "accessoires" }, { id: "W041-f5", etage: 0, qm: 670, konzept: "eigen", gruppe: "damen" }, { id: "W041-f6", etage: 1, qm: 1551, konzept: "eigen", gruppe: "damen" }, { id: "W041-f7", etage: 1, qm: 846, konzept: "eigen", gruppe: "waesche" }, { id: "W041-f8", etage: 1, qm: 353, konzept: "eigen", gruppe: "herren" }, { id: "W041-f9", etage: 2, qm: 1159, konzept: "eigen", gruppe: "herren" }, { id: "W041-f10", etage: 2, qm: 613, konzept: "eigen", gruppe: "kinder" }, { id: "W041-f11", etage: 2, qm: 899, konzept: "eigen", gruppe: "sport" }, { id: "W041-f12", etage: 2, qm: 518, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 397194, rohertrag: 168492, konzessionserloes: 0, untermiete: 0, personal: 79380, miete: 83738, nebenkosten: 12194, sonstige: 21432, db: -28253, fteBedarf: 71.58712868852105, fteIst: 79.97857104541941, umsatzJeGruppe: { food: 27883, wohnen: 50055, beauty: 69970, accessoires: 67508, damen: 64413, waesche: 25802, herren: 46682, kinder: 16132, sport: 18008, spielwaren: 10741 } } }, { id: "S032", name: "Hartwig Sport Augsburg City-Center", stadt: "Augsburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1994, fassade: 7, substanz: 90, status: "offen", flaechen: [{ id: "S032-f1", etage: 0, qm: 522, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S032-f2", etage: 0, qm: 1003, konzept: "eigen", gruppe: "sporttextil" }, { id: "S032-f3", etage: 1, qm: 41, konzept: "eigen", gruppe: "sporttextil" }, { id: "S032-f4", etage: 1, qm: 541, konzept: "eigen", gruppe: "outdoor" }, { id: "S032-f5", etage: 1, qm: 324, konzept: "eigen", gruppe: "teamsport" }, { id: "S032-f6", etage: 1, qm: 422, konzept: "eigen", gruppe: "rad" }, { id: "S032-f7", etage: 1, qm: 198, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 96253, rohertrag: 41037, konzessionserloes: 0, untermiete: 0, personal: 20839, miete: 23516, nebenkosten: 4333, sonstige: 5319, db: -12970, fteBedarf: 17.317565258921988, fteIst: 21.10772516462578, umsatzJeGruppe: { sportschuhe: 21677, sporttextil: 36559, outdoor: 18014, teamsport: 6787, rad: 3807, wintersport: 9409 } } }, { id: "W042", name: "Hartwig Wiesbaden Bahnhofstra\xDFe", stadt: "Wiesbaden", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [-1, 0, 1, 2], baujahr: 1975, fassade: 7, substanz: 34, status: "offen", flaechen: [{ id: "W042-f1", etage: -1, qm: 833, konzept: "eigen", gruppe: "food" }, { id: "W042-f2", etage: -1, qm: 1792, konzept: "eigen", gruppe: "wohnen" }, { id: "W042-f3", etage: 0, qm: 596, konzept: "eigen", gruppe: "beauty" }, { id: "W042-f4", etage: 0, qm: 1049, konzept: "eigen", gruppe: "accessoires" }, { id: "W042-f5", etage: 0, qm: 981, konzept: "eigen", gruppe: "damen" }, { id: "W042-f6", etage: 1, qm: 916, konzept: "eigen", gruppe: "damen" }, { id: "W042-f7", etage: 1, qm: 608, konzept: "eigen", gruppe: "waesche" }, { id: "W042-f8", etage: 1, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W042-f9", etage: 2, qm: 281, konzept: "eigen", gruppe: "herren" }, { id: "W042-f10", etage: 2, qm: 656, konzept: "eigen", gruppe: "kinder" }, { id: "W042-f11", etage: 2, qm: 1194, konzept: "eigen", gruppe: "sport" }, { id: "W042-f12", etage: 2, qm: 557, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 270011, rohertrag: 112707, konzessionserloes: 0, untermiete: 0, personal: 61330, miete: 29751, nebenkosten: 0, sonstige: 15824, db: 5801, fteBedarf: 54.22578098147522, fteIst: 61.63350767894528, umsatzJeGruppe: { food: 33886, wohnen: 23691, beauty: 44655, accessoires: 39980, damen: 47374, waesche: 15858, herren: 30110, kinder: 10033, sport: 17406, spielwaren: 7019 } } }, { id: "S033", name: "Hartwig Sport Wiesbaden City-Center", stadt: "Wiesbaden", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1986, fassade: 6, substanz: 63, status: "offen", flaechen: [{ id: "S033-f1", etage: 0, qm: 1376, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S033-f2", etage: 0, qm: 1274, konzept: "eigen", gruppe: "sporttextil" }, { id: "S033-f3", etage: 1, qm: 356, konzept: "eigen", gruppe: "sporttextil" }, { id: "S033-f4", etage: 1, qm: 783, konzept: "eigen", gruppe: "outdoor" }, { id: "S033-f5", etage: 1, qm: 460, konzept: "eigen", gruppe: "teamsport" }, { id: "S033-f6", etage: 1, qm: 669, konzept: "eigen", gruppe: "rad" }, { id: "S033-f7", etage: 1, qm: 382, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 179688, rohertrag: 75303, konzessionserloes: 0, untermiete: 0, personal: 34796, miete: 39708, nebenkosten: 0, sonstige: 9752, db: -8953, fteBedarf: 31.47617613749901, fteIst: 35.28392768198496, umsatzJeGruppe: { sportschuhe: 67828, sporttextil: 50838, outdoor: 23196, teamsport: 9365, rad: 7029, wintersport: 21432 } } }, { id: "W043", name: "Hartwig M\xF6nchengladbach", stadt: "M\xF6nchengladbach", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1959, fassade: 0, substanz: 72, status: "offen", flaechen: [{ id: "W043-f1", etage: 0, qm: 654, konzept: "eigen", gruppe: "food" }, { id: "W043-f2", etage: 0, qm: 667, konzept: "eigen", gruppe: "beauty" }, { id: "W043-f3", etage: 0, qm: 412, konzept: "eigen", gruppe: "accessoires" }, { id: "W043-f4", etage: 1, qm: 858, konzept: "eigen", gruppe: "accessoires" }, { id: "W043-f5", etage: 1, qm: 875, konzept: "eigen", gruppe: "damen" }, { id: "W043-f6", etage: 2, qm: 1281, konzept: "eigen", gruppe: "damen" }, { id: "W043-f7", etage: 2, qm: 452, konzept: "eigen", gruppe: "waesche" }, { id: "W043-f8", etage: 3, qm: 307, konzept: "eigen", gruppe: "waesche" }, { id: "W043-f9", etage: 3, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W043-f10", etage: 3, qm: 326, konzept: "eigen", gruppe: "kinder" }, { id: "W043-f11", etage: 4, qm: 439, konzept: "eigen", gruppe: "kinder" }, { id: "W043-f12", etage: 4, qm: 956, konzept: "eigen", gruppe: "sport" }, { id: "W043-f13", etage: 4, qm: 339, konzept: "eigen", gruppe: "spielwaren" }, { id: "W043-f14", etage: 5, qm: 266, konzept: "eigen", gruppe: "spielwaren" }, { id: "W043-f15", etage: 5, qm: 1467, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 346337, rohertrag: 146719, konzessionserloes: 0, untermiete: 0, personal: 72901, miete: 69278, nebenkosten: 14693, sonstige: 18880, db: -29033, fteBedarf: 63.30560755819009, fteIst: 73.93711858209177, umsatzJeGruppe: { food: 27014, beauty: 62637, accessoires: 65467, damen: 58495, waesche: 27448, herren: 27374, kinder: 20173, sport: 18549, spielwaren: 10171, wohnen: 29010 } } }, { id: "W044", name: "Hartwig Gelsenkirchen", stadt: "Gelsenkirchen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1, 2], baujahr: 2005, fassade: 5, substanz: 74, status: "offen", flaechen: [{ id: "W044-f1", etage: -1, qm: 1010, konzept: "eigen", gruppe: "food" }, { id: "W044-f2", etage: -1, qm: 1965, konzept: "eigen", gruppe: "wohnen" }, { id: "W044-f3", etage: 0, qm: 663, konzept: "eigen", gruppe: "beauty" }, { id: "W044-f4", etage: 0, qm: 1087, konzept: "eigen", gruppe: "accessoires" }, { id: "W044-f5", etage: 0, qm: 1225, konzept: "eigen", gruppe: "damen" }, { id: "W044-f6", etage: 1, qm: 908, konzept: "eigen", gruppe: "damen" }, { id: "W044-f7", etage: 1, qm: 959, konzept: "eigen", gruppe: "waesche" }, { id: "W044-f8", etage: 1, qm: 1108, konzept: "eigen", gruppe: "herren" }, { id: "W044-f9", etage: 2, qm: 512, konzept: "eigen", gruppe: "herren" }, { id: "W044-f10", etage: 2, qm: 669, konzept: "eigen", gruppe: "kinder" }, { id: "W044-f11", etage: 2, qm: 1275, konzept: "eigen", gruppe: "sport" }, { id: "W044-f12", etage: 2, qm: 722, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 434384, rohertrag: 181455, konzessionserloes: 0, untermiete: 0, personal: 91555, miete: 78802, nebenkosten: 12824, sonstige: 23256, db: -24982, fteBedarf: 77.49945946670631, fteIst: 92.5254157643862, umsatzJeGruppe: { food: 54490, wohnen: 41144, beauty: 65404, accessoires: 63330, damen: 67806, waesche: 32312, herren: 51481, kinder: 15525, sport: 28898, spielwaren: 13995 } } }, { id: "W045", name: "Hartwig Aachen", stadt: "Aachen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 2006, fassade: 6, substanz: 49, status: "offen", flaechen: [{ id: "W045-f1", etage: -1, qm: 1025, konzept: "eigen", gruppe: "food" }, { id: "W045-f2", etage: -1, qm: 1425, konzept: "eigen", gruppe: "wohnen" }, { id: "W045-f3", etage: 0, qm: 758, konzept: "eigen", gruppe: "beauty" }, { id: "W045-f4", etage: 0, qm: 1102, konzept: "eigen", gruppe: "accessoires" }, { id: "W045-f5", etage: 0, qm: 590, konzept: "eigen", gruppe: "damen" }, { id: "W045-f6", etage: 1, qm: 2325, konzept: "eigen", gruppe: "damen" }, { id: "W045-f7", etage: 1, qm: 125, konzept: "eigen", gruppe: "waesche" }, { id: "W045-f8", etage: 2, qm: 1091, konzept: "eigen", gruppe: "waesche" }, { id: "W045-f9", etage: 2, qm: 1359, konzept: "eigen", gruppe: "herren" }, { id: "W045-f10", etage: 3, qm: 427, konzept: "eigen", gruppe: "herren" }, { id: "W045-f11", etage: 3, qm: 1210, konzept: "eigen", gruppe: "kinder" }, { id: "W045-f12", etage: 3, qm: 813, konzept: "eigen", gruppe: "sport" }, { id: "W045-f13", etage: 4, qm: 931, konzept: "eigen", gruppe: "sport" }, { id: "W045-f14", etage: 4, qm: 1070, konzept: "eigen", gruppe: "spielwaren" }, { id: "W045-f15", etage: 4, qm: 449, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 427240, rohertrag: 180211, konzessionserloes: 0, untermiete: 0, personal: 102341, miete: 62686, nebenkosten: 17005, sonstige: 24132, db: -25953, fteBedarf: 81.9113128034242, fteIst: 102.91160433753704, umsatzJeGruppe: { food: 42660, wohnen: 41798, beauty: 57778, accessoires: 51041, damen: 69680, waesche: 41522, herren: 46903, kinder: 30239, sport: 28363, spielwaren: 17256 } } }, { id: "S034", name: "Hartwig Sport Aachen", stadt: "Aachen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [0], baujahr: 2013, fassade: 4, substanz: 60, status: "offen", flaechen: [{ id: "S034-f1", etage: 0, qm: 615, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S034-f2", etage: 0, qm: 901, konzept: "eigen", gruppe: "sporttextil" }, { id: "S034-f3", etage: 0, qm: 443, konzept: "eigen", gruppe: "outdoor" }, { id: "S034-f4", etage: 0, qm: 339, konzept: "eigen", gruppe: "teamsport" }, { id: "S034-f5", etage: 0, qm: 408, konzept: "eigen", gruppe: "rad" }, { id: "S034-f6", etage: 0, qm: 245, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 92764, rohertrag: 39024, konzessionserloes: 0, untermiete: 0, personal: 20778, miete: 12968, nebenkosten: 4114, sonstige: 5131, db: -3968, fteBedarf: 16.570085352990063, fteIst: 21.12856542377301, umsatzJeGruppe: { sportschuhe: 28305, sporttextil: 26279, outdoor: 13511, teamsport: 7487, rad: 3458, wintersport: 13723 } } }, { id: "W046", name: "Hartwig Braunschweig", stadt: "Braunschweig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4], baujahr: 1972, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W046-f1", etage: 0, qm: 996, konzept: "eigen", gruppe: "food" }, { id: "W046-f2", etage: 0, qm: 643, konzept: "eigen", gruppe: "beauty" }, { id: "W046-f3", etage: 0, qm: 681, konzept: "eigen", gruppe: "accessoires" }, { id: "W046-f4", etage: 1, qm: 711, konzept: "eigen", gruppe: "accessoires" }, { id: "W046-f5", etage: 1, qm: 1609, konzept: "eigen", gruppe: "damen" }, { id: "W046-f6", etage: 2, qm: 294, konzept: "eigen", gruppe: "damen" }, { id: "W046-f7", etage: 2, qm: 840, konzept: "eigen", gruppe: "waesche" }, { id: "W046-f8", etage: 2, qm: 1186, konzept: "eigen", gruppe: "herren" }, { id: "W046-f9", etage: 3, qm: 291, konzept: "eigen", gruppe: "herren" }, { id: "W046-f10", etage: 3, qm: 695, konzept: "eigen", gruppe: "kinder" }, { id: "W046-f11", etage: 3, qm: 1334, konzept: "eigen", gruppe: "sport" }, { id: "W046-f12", etage: 4, qm: 12, konzept: "eigen", gruppe: "sport" }, { id: "W046-f13", etage: 4, qm: 703, konzept: "eigen", gruppe: "spielwaren" }, { id: "W046-f14", etage: 4, qm: 1605, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 393643, rohertrag: 163648, konzessionserloes: 0, untermiete: 0, personal: 80571, miete: 52073, nebenkosten: 14530, sonstige: 21359, db: -4886, fteBedarf: 71.54075862173269, fteIst: 82.92838601566278, umsatzJeGruppe: { food: 50322, beauty: 52905, accessoires: 76824, damen: 55127, waesche: 24222, herren: 35633, kinder: 20486, sport: 27974, spielwaren: 14747, wohnen: 35403 } } }, { id: "S035", name: "Hartwig Sport Braunschweig", stadt: "Braunschweig", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1100, etagen: [0, 1, 2], baujahr: 1992, fassade: 2, substanz: 62, status: "offen", flaechen: [{ id: "S035-f1", etage: 0, qm: 797, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S035-f2", etage: 0, qm: 253, konzept: "eigen", gruppe: "sporttextil" }, { id: "S035-f3", etage: 1, qm: 612, konzept: "eigen", gruppe: "sporttextil" }, { id: "S035-f4", etage: 1, qm: 438, konzept: "eigen", gruppe: "outdoor" }, { id: "S035-f5", etage: 2, qm: 223, konzept: "eigen", gruppe: "outdoor" }, { id: "S035-f6", etage: 2, qm: 265, konzept: "eigen", gruppe: "teamsport" }, { id: "S035-f7", etage: 2, qm: 278, konzept: "eigen", gruppe: "rad" }, { id: "S035-f8", etage: 2, qm: 284, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 114523, rohertrag: 48221, konzessionserloes: 0, untermiete: 0, personal: 22348, miete: 9147, nebenkosten: 4262, sonstige: 6113, db: 6352, fteBedarf: 19.464251966026293, fteIst: 23.10104433546691, umsatzJeGruppe: { sportschuhe: 43495, sporttextil: 22867, outdoor: 25612, teamsport: 5399, rad: 2960, wintersport: 14191 } } }, { id: "W047", name: "Hartwig Kiel Einkaufszentrum", stadt: "Kiel", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1981, fassade: 4, substanz: 40, status: "offen", flaechen: [{ id: "W047-f1", etage: -1, qm: 717, konzept: "eigen", gruppe: "food" }, { id: "W047-f2", etage: -1, qm: 1433, konzept: "eigen", gruppe: "wohnen" }, { id: "W047-f3", etage: 0, qm: 795, konzept: "eigen", gruppe: "beauty" }, { id: "W047-f4", etage: 0, qm: 1355, konzept: "eigen", gruppe: "accessoires" }, { id: "W047-f5", etage: 1, qm: 134, konzept: "eigen", gruppe: "accessoires" }, { id: "W047-f6", etage: 1, qm: 2016, konzept: "eigen", gruppe: "damen" }, { id: "W047-f7", etage: 2, qm: 684, konzept: "eigen", gruppe: "damen" }, { id: "W047-f8", etage: 2, qm: 708, konzept: "eigen", gruppe: "waesche" }, { id: "W047-f9", etage: 2, qm: 758, konzept: "eigen", gruppe: "herren" }, { id: "W047-f10", etage: 3, qm: 1193, konzept: "eigen", gruppe: "herren" }, { id: "W047-f11", etage: 3, qm: 782, konzept: "eigen", gruppe: "kinder" }, { id: "W047-f12", etage: 3, qm: 174, konzept: "eigen", gruppe: "sport" }, { id: "W047-f13", etage: 4, qm: 1248, konzept: "eigen", gruppe: "sport" }, { id: "W047-f14", etage: 4, qm: 839, konzept: "eigen", gruppe: "spielwaren" }, { id: "W047-f15", etage: 4, qm: 63, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 377293, rohertrag: 160119, konzessionserloes: 0, untermiete: 0, personal: 82325, miete: 54279, nebenkosten: 0, sonstige: 21274, db: 2241, fteBedarf: 72.08823264454394, fteIst: 84.64631588618568, umsatzJeGruppe: { food: 31206, wohnen: 34042, beauty: 61623, accessoires: 68778, damen: 64873, waesche: 24613, herren: 44899, kinder: 15173, sport: 20759, spielwaren: 11327 } } }, { id: "S036", name: "Hartwig Sport Kiel", stadt: "Kiel", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1100, etagen: [0, 1, 2], baujahr: 2013, fassade: 5, substanz: 72, status: "offen", flaechen: [{ id: "S036-f1", etage: 0, qm: 763, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S036-f2", etage: 0, qm: 321, konzept: "eigen", gruppe: "sporttextil" }, { id: "S036-f3", etage: 1, qm: 564, konzept: "eigen", gruppe: "sporttextil" }, { id: "S036-f4", etage: 1, qm: 519, konzept: "eigen", gruppe: "outdoor" }, { id: "S036-f5", etage: 2, qm: 208, konzept: "eigen", gruppe: "outdoor" }, { id: "S036-f6", etage: 2, qm: 251, konzept: "eigen", gruppe: "teamsport" }, { id: "S036-f7", etage: 2, qm: 334, konzept: "eigen", gruppe: "rad" }, { id: "S036-f8", etage: 2, qm: 290, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 129498, rohertrag: 54750, konzessionserloes: 0, untermiete: 0, personal: 25364, miete: 17566, nebenkosten: 3961, sonstige: 6772, db: 1088, fteBedarf: 21.368605856959235, fteIst: 26.147810965136394, umsatzJeGruppe: { sportschuhe: 46401, sporttextil: 31962, outdoor: 27382, teamsport: 4567, rad: 3337, wintersport: 15850 } } }, { id: "W048", name: "Hartwig Chemnitz Neustadt", stadt: "Chemnitz", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3600, etagen: [-1, 0, 1, 2], baujahr: 2e3, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W048-f1", etage: -1, qm: 1164, konzept: "eigen", gruppe: "food" }, { id: "W048-f2", etage: -1, qm: 2461, konzept: "eigen", gruppe: "wohnen" }, { id: "W048-f3", etage: 0, qm: 701, konzept: "eigen", gruppe: "beauty" }, { id: "W048-f4", etage: 0, qm: 1169, konzept: "eigen", gruppe: "accessoires" }, { id: "W048-f5", etage: 0, qm: 1755, konzept: "eigen", gruppe: "damen" }, { id: "W048-f6", etage: 1, qm: 1144, konzept: "eigen", gruppe: "damen" }, { id: "W048-f7", etage: 1, qm: 1155, konzept: "eigen", gruppe: "waesche" }, { id: "W048-f8", etage: 1, qm: 1325, konzept: "eigen", gruppe: "herren" }, { id: "W048-f9", etage: 2, qm: 190, konzept: "eigen", gruppe: "herren" }, { id: "W048-f10", etage: 2, qm: 1188, konzept: "eigen", gruppe: "kinder" }, { id: "W048-f11", etage: 2, qm: 1565, konzept: "eigen", gruppe: "sport" }, { id: "W048-f12", etage: 2, qm: 769, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 346429, rohertrag: 145267, konzessionserloes: 0, untermiete: 0, personal: 84148, miete: 30786, nebenkosten: 17619, sonstige: 20767, db: -8053, fteBedarf: 71.67318065692153, fteIst: 86.63676289336188, umsatzJeGruppe: { food: 42584, wohnen: 41395, beauty: 40046, accessoires: 46025, damen: 60997, waesche: 26580, herren: 34917, kinder: 22089, sport: 20660, spielwaren: 11136 } } }, { id: "S037", name: "Hartwig Sport Chemnitz", stadt: "Chemnitz", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1], baujahr: 1985, fassade: 5, substanz: 61, status: "offen", flaechen: [{ id: "S037-f1", etage: 0, qm: 561, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S037-f2", etage: 0, qm: 714, konzept: "eigen", gruppe: "sporttextil" }, { id: "S037-f3", etage: 1, qm: 54, konzept: "eigen", gruppe: "sporttextil" }, { id: "S037-f4", etage: 1, qm: 485, konzept: "eigen", gruppe: "outdoor" }, { id: "S037-f5", etage: 1, qm: 242, konzept: "eigen", gruppe: "teamsport" }, { id: "S037-f6", etage: 1, qm: 297, konzept: "eigen", gruppe: "rad" }, { id: "S037-f7", etage: 1, qm: 197, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 89813, rohertrag: 37961, konzessionserloes: 0, untermiete: 0, personal: 19107, miete: 14358, nebenkosten: 0, sonstige: 4830, db: -334, fteBedarf: 15.549604821386373, fteIst: 19.379036831414552, umsatzJeGruppe: { sportschuhe: 30681, sporttextil: 27203, outdoor: 15645, teamsport: 4937, rad: 2784, wintersport: 8563 } } }, { id: "W049", name: "Hartwig Halle Am Wall", stadt: "Halle", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1990, fassade: 5, substanz: 70, status: "offen", flaechen: [{ id: "W049-f1", etage: 0, qm: 1090, konzept: "eigen", gruppe: "food" }, { id: "W049-f2", etage: 0, qm: 889, konzept: "eigen", gruppe: "beauty" }, { id: "W049-f3", etage: 0, qm: 587, konzept: "eigen", gruppe: "accessoires" }, { id: "W049-f4", etage: 1, qm: 661, konzept: "eigen", gruppe: "accessoires" }, { id: "W049-f5", etage: 1, qm: 1906, konzept: "eigen", gruppe: "damen" }, { id: "W049-f6", etage: 2, qm: 1760, konzept: "eigen", gruppe: "damen" }, { id: "W049-f7", etage: 2, qm: 807, konzept: "eigen", gruppe: "waesche" }, { id: "W049-f8", etage: 3, qm: 439, konzept: "eigen", gruppe: "waesche" }, { id: "W049-f9", etage: 3, qm: 1532, konzept: "eigen", gruppe: "herren" }, { id: "W049-f10", etage: 3, qm: 596, konzept: "eigen", gruppe: "kinder" }, { id: "W049-f11", etage: 4, qm: 507, konzept: "eigen", gruppe: "kinder" }, { id: "W049-f12", etage: 4, qm: 1407, konzept: "eigen", gruppe: "sport" }, { id: "W049-f13", etage: 4, qm: 652, konzept: "eigen", gruppe: "spielwaren" }, { id: "W049-f14", etage: 5, qm: 188, konzept: "eigen", gruppe: "spielwaren" }, { id: "W049-f15", etage: 5, qm: 2379, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 444572, rohertrag: 188076, konzessionserloes: 0, untermiete: 0, personal: 102455, miete: 62638, nebenkosten: 16204, sonstige: 25157, db: -18378, fteBedarf: 85.32397064138165, fteIst: 104.26081803912479, umsatzJeGruppe: { food: 49229, beauty: 62532, accessoires: 55077, damen: 90964, waesche: 42649, herren: 38283, kinder: 26289, sport: 22302, spielwaren: 12692, wohnen: 44555 } } }, { id: "W050", name: "Hartwig Magdeburg Arkaden", stadt: "Magdeburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1983, fassade: 1, substanz: 42, status: "offen", flaechen: [{ id: "W050-f1", etage: -1, qm: 652, konzept: "eigen", gruppe: "food" }, { id: "W050-f2", etage: -1, qm: 848, konzept: "eigen", gruppe: "wohnen" }, { id: "W050-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W050-f4", etage: 0, qm: 763, konzept: "eigen", gruppe: "accessoires" }, { id: "W050-f5", etage: 0, qm: 306, konzept: "eigen", gruppe: "damen" }, { id: "W050-f6", etage: 1, qm: 1500, konzept: "eigen", gruppe: "damen" }, { id: "W050-f7", etage: 2, qm: 153, konzept: "eigen", gruppe: "damen" }, { id: "W050-f8", etage: 2, qm: 692, konzept: "eigen", gruppe: "waesche" }, { id: "W050-f9", etage: 2, qm: 655, konzept: "eigen", gruppe: "herren" }, { id: "W050-f10", etage: 3, qm: 531, konzept: "eigen", gruppe: "herren" }, { id: "W050-f11", etage: 3, qm: 725, konzept: "eigen", gruppe: "kinder" }, { id: "W050-f12", etage: 3, qm: 244, konzept: "eigen", gruppe: "sport" }, { id: "W050-f13", etage: 4, qm: 565, konzept: "eigen", gruppe: "sport" }, { id: "W050-f14", etage: 4, qm: 625, konzept: "eigen", gruppe: "spielwaren" }, { id: "W050-f15", etage: 4, qm: 309, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 199260, rohertrag: 84120, konzessionserloes: 0, untermiete: 0, personal: 49234, miete: 22754, nebenkosten: 10455, sonstige: 12219, db: -10542, fteBedarf: 42.51892501333179, fteIst: 49.59452388162267, umsatzJeGruppe: { food: 19029, wohnen: 16290, beauty: 28474, accessoires: 25067, damen: 39770, waesche: 15323, herren: 18874, kinder: 15166, sport: 11997, spielwaren: 9272 } } }, { id: "S038", name: "Hartwig Sport Magdeburg Galerie am Fluss", stadt: "Magdeburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 800, etagen: [0, 1], baujahr: 1989, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "S038-f1", etage: 0, qm: 296, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S038-f2", etage: 0, qm: 479, konzept: "eigen", gruppe: "sporttextil" }, { id: "S038-f3", etage: 1, qm: 63, konzept: "eigen", gruppe: "sporttextil" }, { id: "S038-f4", etage: 1, qm: 298, konzept: "eigen", gruppe: "outdoor" }, { id: "S038-f5", etage: 1, qm: 121, konzept: "eigen", gruppe: "teamsport" }, { id: "S038-f6", etage: 1, qm: 175, konzept: "eigen", gruppe: "rad" }, { id: "S038-f7", etage: 1, qm: 117, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 54142, rohertrag: 23024, konzessionserloes: 0, untermiete: 0, personal: 11487, miete: 7880, nebenkosten: 1646, sonstige: 2917, db: -906, fteBedarf: 9.323675282137211, fteIst: 11.735136837466078, umsatzJeGruppe: { sportschuhe: 15363, sporttextil: 19120, outdoor: 8832, teamsport: 2494, rad: 1646, wintersport: 6688 } } }, { id: "W051", name: "Hartwig Freiburg", stadt: "Freiburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1923, fassade: 4, substanz: 68, status: "offen", flaechen: [{ id: "W051-f1", etage: -1, qm: 522, konzept: "eigen", gruppe: "food" }, { id: "W051-f2", etage: -1, qm: 1318, konzept: "eigen", gruppe: "wohnen" }, { id: "W051-f3", etage: 0, qm: 524, konzept: "eigen", gruppe: "beauty" }, { id: "W051-f4", etage: 0, qm: 1090, konzept: "eigen", gruppe: "accessoires" }, { id: "W051-f5", etage: 0, qm: 226, konzept: "eigen", gruppe: "damen" }, { id: "W051-f6", etage: 1, qm: 1533, konzept: "eigen", gruppe: "damen" }, { id: "W051-f7", etage: 1, qm: 307, konzept: "eigen", gruppe: "waesche" }, { id: "W051-f8", etage: 2, qm: 193, konzept: "eigen", gruppe: "waesche" }, { id: "W051-f9", etage: 2, qm: 1147, konzept: "eigen", gruppe: "herren" }, { id: "W051-f10", etage: 2, qm: 499, konzept: "eigen", gruppe: "kinder" }, { id: "W051-f11", etage: 3, qm: 90, konzept: "eigen", gruppe: "kinder" }, { id: "W051-f12", etage: 3, qm: 971, konzept: "eigen", gruppe: "sport" }, { id: "W051-f13", etage: 3, qm: 634, konzept: "eigen", gruppe: "spielwaren" }, { id: "W051-f14", etage: 3, qm: 144, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 294645, rohertrag: 124365, konzessionserloes: 0, untermiete: 0, personal: 59586, miete: 28162, nebenkosten: 12373, sonstige: 16220, db: 8025, fteBedarf: 54.57246764348757, fteIst: 59.836159162032736, umsatzJeGruppe: { food: 23905, wohnen: 27778, beauty: 50119, accessoires: 56791, damen: 51327, waesche: 15705, herren: 28345, kinder: 12797, sport: 17924, spielwaren: 9952 } } }, { id: "S039", name: "Hartwig Sport Freiburg", stadt: "Freiburg", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 600, etagen: [0, 1, 2], baujahr: 2012, fassade: 5, substanz: 85, status: "offen", flaechen: [{ id: "S039-f1", etage: 0, qm: 304, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S039-f2", etage: 0, qm: 212, konzept: "eigen", gruppe: "sporttextil" }, { id: "S039-f3", etage: 1, qm: 279, konzept: "eigen", gruppe: "sporttextil" }, { id: "S039-f4", etage: 1, qm: 238, konzept: "eigen", gruppe: "outdoor" }, { id: "S039-f5", etage: 2, qm: 51, konzept: "eigen", gruppe: "outdoor" }, { id: "S039-f6", etage: 2, qm: 171, konzept: "eigen", gruppe: "teamsport" }, { id: "S039-f7", etage: 2, qm: 197, konzept: "eigen", gruppe: "rad" }, { id: "S039-f8", etage: 2, qm: 98, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 52523, rohertrag: 22315, konzessionserloes: 0, untermiete: 0, personal: 10185, miete: 6087, nebenkosten: 2062, sonstige: 2851, db: 1130, fteBedarf: 9.243032444303095, fteIst: 10.234731895337532, umsatzJeGruppe: { sportschuhe: 15678, sporttextil: 17787, outdoor: 10228, teamsport: 2923, rad: 1777, wintersport: 4131 } } }, { id: "W052", name: "Hartwig Krefeld Bahnhofstra\xDFe", stadt: "Krefeld", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1982, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W052-f1", etage: -1, qm: 745, konzept: "eigen", gruppe: "food" }, { id: "W052-f2", etage: -1, qm: 638, konzept: "eigen", gruppe: "wohnen" }, { id: "W052-f3", etage: 0, qm: 580, konzept: "eigen", gruppe: "beauty" }, { id: "W052-f4", etage: 0, qm: 804, konzept: "eigen", gruppe: "accessoires" }, { id: "W052-f5", etage: 1, qm: 127, konzept: "eigen", gruppe: "accessoires" }, { id: "W052-f6", etage: 1, qm: 1256, konzept: "eigen", gruppe: "damen" }, { id: "W052-f7", etage: 2, qm: 194, konzept: "eigen", gruppe: "damen" }, { id: "W052-f8", etage: 2, qm: 550, konzept: "eigen", gruppe: "waesche" }, { id: "W052-f9", etage: 2, qm: 640, konzept: "eigen", gruppe: "herren" }, { id: "W052-f10", etage: 3, qm: 198, konzept: "eigen", gruppe: "herren" }, { id: "W052-f11", etage: 3, qm: 638, konzept: "eigen", gruppe: "kinder" }, { id: "W052-f12", etage: 3, qm: 547, konzept: "eigen", gruppe: "sport" }, { id: "W052-f13", etage: 4, qm: 365, konzept: "eigen", gruppe: "sport" }, { id: "W052-f14", etage: 4, qm: 400, konzept: "eigen", gruppe: "spielwaren" }, { id: "W052-f15", etage: 4, qm: 618, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 208175, rohertrag: 86112, konzessionserloes: 0, untermiete: 0, personal: 52990, miete: 29555, nebenkosten: 8948, sonstige: 12270, db: -17651, fteBedarf: 42.138195499237554, fteIst: 53.14615030069136, umsatzJeGruppe: { food: 26893, wohnen: 18138, beauty: 39983, accessoires: 31398, damen: 29728, waesche: 14123, herren: 17024, kinder: 14144, sport: 11098, spielwaren: 5645 } } }, { id: "W053", name: "Hartwig Mainz", stadt: "Mainz", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [-1, 0, 1, 2], baujahr: 2004, fassade: 2, substanz: 50, status: "offen", flaechen: [{ id: "W053-f1", etage: -1, qm: 1201, konzept: "eigen", gruppe: "food" }, { id: "W053-f2", etage: -1, qm: 2449, konzept: "eigen", gruppe: "wohnen" }, { id: "W053-f3", etage: 0, qm: 777, konzept: "eigen", gruppe: "beauty" }, { id: "W053-f4", etage: 0, qm: 1264, konzept: "eigen", gruppe: "accessoires" }, { id: "W053-f5", etage: 0, qm: 1609, konzept: "eigen", gruppe: "damen" }, { id: "W053-f6", etage: 1, qm: 748, konzept: "eigen", gruppe: "damen" }, { id: "W053-f7", etage: 1, qm: 861, konzept: "eigen", gruppe: "waesche" }, { id: "W053-f8", etage: 1, qm: 2041, konzept: "eigen", gruppe: "herren" }, { id: "W053-f9", etage: 2, qm: 136, konzept: "eigen", gruppe: "herren" }, { id: "W053-f10", etage: 2, qm: 1234, konzept: "eigen", gruppe: "kinder" }, { id: "W053-f11", etage: 2, qm: 1258, konzept: "eigen", gruppe: "sport" }, { id: "W053-f12", etage: 2, qm: 900, konzept: "eigen", gruppe: "spielwaren" }, { id: "W053-f13", etage: 2, qm: 122, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 493354, rohertrag: 205888, konzessionserloes: 0, untermiete: 0, personal: 111195, miete: 54943, nebenkosten: 18190, sonstige: 26798, db: -5237, fteBedarf: 89.75461299441628, fteIst: 112.49641862829989, umsatzJeGruppe: { food: 61907, wohnen: 55365, beauty: 69458, accessoires: 64774, damen: 64335, waesche: 34368, herren: 73631, kinder: 26208, sport: 26377, spielwaren: 16933 } } }, { id: "S040", name: "Hartwig Sport Mainz Lindenstra\xDFe", stadt: "Mainz", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1992, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "S040-f1", etage: 0, qm: 922, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S040-f2", etage: 0, qm: 328, konzept: "eigen", gruppe: "sporttextil" }, { id: "S040-f3", etage: 1, qm: 459, konzept: "eigen", gruppe: "sporttextil" }, { id: "S040-f4", etage: 1, qm: 791, konzept: "eigen", gruppe: "outdoor" }, { id: "S040-f5", etage: 2, qm: 138, konzept: "eigen", gruppe: "outdoor" }, { id: "S040-f6", etage: 2, qm: 321, konzept: "eigen", gruppe: "teamsport" }, { id: "S040-f7", etage: 2, qm: 487, konzept: "eigen", gruppe: "rad" }, { id: "S040-f8", etage: 2, qm: 304, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 119753, rohertrag: 50286, konzessionserloes: 0, untermiete: 0, personal: 22058, miete: 17436, nebenkosten: 5553, sonstige: 6597, db: -1359, fteBedarf: 21.344614123859888, fteIst: 22.89930007547081, umsatzJeGruppe: { sportschuhe: 42329, sporttextil: 22203, outdoor: 29362, teamsport: 5186, rad: 5058, wintersport: 15614 } } }, { id: "W054", name: "Hartwig L\xFCbeck", stadt: "L\xFCbeck", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2], baujahr: 1992, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W054-f1", etage: -1, qm: 1044, konzept: "eigen", gruppe: "food" }, { id: "W054-f2", etage: -1, qm: 2981, konzept: "eigen", gruppe: "wohnen" }, { id: "W054-f3", etage: 0, qm: 1021, konzept: "eigen", gruppe: "beauty" }, { id: "W054-f4", etage: 0, qm: 1868, konzept: "eigen", gruppe: "accessoires" }, { id: "W054-f5", etage: 0, qm: 1136, konzept: "eigen", gruppe: "damen" }, { id: "W054-f6", etage: 1, qm: 2345, konzept: "eigen", gruppe: "damen" }, { id: "W054-f7", etage: 1, qm: 1204, konzept: "eigen", gruppe: "waesche" }, { id: "W054-f8", etage: 1, qm: 476, konzept: "eigen", gruppe: "herren" }, { id: "W054-f9", etage: 2, qm: 1627, konzept: "eigen", gruppe: "herren" }, { id: "W054-f10", etage: 2, qm: 947, konzept: "eigen", gruppe: "kinder" }, { id: "W054-f11", etage: 2, qm: 2272, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 552353, rohertrag: 234883, konzessionserloes: 0, untermiete: 0, personal: 112295, miete: 105490, nebenkosten: 18393, sonstige: 30261, db: -31556, fteBedarf: 101.25734101968146, fteIst: 113.80977676792214, umsatzJeGruppe: { food: 53714, wohnen: 54849, beauty: 87579, accessoires: 104260, damen: 100771, waesche: 38380, herren: 59319, kinder: 21725, sport: 31756 } } }, { id: "S041", name: "Hartwig Sport L\xFCbeck Ring", stadt: "L\xFCbeck", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 1998, fassade: 3, substanz: 69, status: "offen", flaechen: [{ id: "S041-f1", etage: 0, qm: 921, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S041-f2", etage: 0, qm: 1161, konzept: "eigen", gruppe: "sporttextil" }, { id: "S041-f3", etage: 0, qm: 42, konzept: "eigen", gruppe: "outdoor" }, { id: "S041-f4", etage: 1, qm: 953, konzept: "eigen", gruppe: "outdoor" }, { id: "S041-f5", etage: 1, qm: 352, konzept: "eigen", gruppe: "teamsport" }, { id: "S041-f6", etage: 1, qm: 390, konzept: "eigen", gruppe: "rad" }, { id: "S041-f7", etage: 1, qm: 429, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 133301, rohertrag: 56536, konzessionserloes: 0, untermiete: 0, personal: 27340, miete: 10430, nebenkosten: 4806, sonstige: 7377, db: 6582, fteBedarf: 23.852386020383413, fteIst: 27.735516106171353, umsatzJeGruppe: { sportschuhe: 41943, sporttextil: 36381, outdoor: 29217, teamsport: 6733, rad: 3704, wintersport: 15323 } } }, { id: "W055", name: "Hartwig Erfurt", stadt: "Erfurt", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3], baujahr: 1957, fassade: 7, substanz: 78, status: "offen", flaechen: [{ id: "W055-f1", etage: -1, qm: 973, konzept: "eigen", gruppe: "food" }, { id: "W055-f2", etage: -1, qm: 1527, konzept: "eigen", gruppe: "wohnen" }, { id: "W055-f3", etage: 0, qm: 739, konzept: "eigen", gruppe: "beauty" }, { id: "W055-f4", etage: 0, qm: 998, konzept: "eigen", gruppe: "accessoires" }, { id: "W055-f5", etage: 0, qm: 763, konzept: "eigen", gruppe: "damen" }, { id: "W055-f6", etage: 1, qm: 1322, konzept: "eigen", gruppe: "damen" }, { id: "W055-f7", etage: 1, qm: 691, konzept: "eigen", gruppe: "waesche" }, { id: "W055-f8", etage: 1, qm: 488, konzept: "eigen", gruppe: "herren" }, { id: "W055-f9", etage: 2, qm: 1184, konzept: "eigen", gruppe: "herren" }, { id: "W055-f10", etage: 2, qm: 935, konzept: "eigen", gruppe: "kinder" }, { id: "W055-f11", etage: 2, qm: 381, konzept: "eigen", gruppe: "sport" }, { id: "W055-f12", etage: 3, qm: 1190, konzept: "eigen", gruppe: "sport" }, { id: "W055-f13", etage: 3, qm: 639, konzept: "eigen", gruppe: "spielwaren" }, { id: "W055-f14", etage: 3, qm: 671, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 339183, rohertrag: 140078, konzessionserloes: 0, untermiete: 0, personal: 80693, miete: 33011, nebenkosten: 14914, sonstige: 19532, db: -8072, fteBedarf: 66.61228005145064, fteIst: 83.79886769625847, umsatzJeGruppe: { food: 41467, wohnen: 45347, beauty: 54443, accessoires: 36596, damen: 49086, waesche: 18827, herren: 35346, kinder: 24602, sport: 23599, spielwaren: 9870 } } }, { id: "S042", name: "Hartwig Sport Erfurt Einkaufszentrum", stadt: "Erfurt", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 2010, fassade: 4, substanz: 58, status: "offen", flaechen: [{ id: "S042-f1", etage: 0, qm: 1039, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S042-f2", etage: 0, qm: 528, konzept: "eigen", gruppe: "sporttextil" }, { id: "S042-f3", etage: 1, qm: 669, konzept: "eigen", gruppe: "sporttextil" }, { id: "S042-f4", etage: 1, qm: 898, konzept: "eigen", gruppe: "outdoor" }, { id: "S042-f5", etage: 2, qm: 171, konzept: "eigen", gruppe: "outdoor" }, { id: "S042-f6", etage: 2, qm: 471, konzept: "eigen", gruppe: "teamsport" }, { id: "S042-f7", etage: 2, qm: 639, konzept: "eigen", gruppe: "rad" }, { id: "S042-f8", etage: 2, qm: 286, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 131311, rohertrag: 55369, konzessionserloes: 0, untermiete: 0, personal: 26013, miete: 29563, nebenkosten: 0, sonstige: 7499, db: -7706, fteBedarf: 24.774700318339345, fteIst: 26.161759234308235, umsatzJeGruppe: { sportschuhe: 47461, sporttextil: 31715, outdoor: 29748, teamsport: 7459, rad: 4391, wintersport: 10536 } } }, { id: "W056", name: "Hartwig Oberhausen", stadt: "Oberhausen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1933, fassade: 3, substanz: 48, status: "offen", flaechen: [{ id: "W056-f1", etage: -1, qm: 513, konzept: "eigen", gruppe: "food" }, { id: "W056-f2", etage: -1, qm: 1267, konzept: "eigen", gruppe: "wohnen" }, { id: "W056-f3", etage: 0, qm: 611, konzept: "eigen", gruppe: "beauty" }, { id: "W056-f4", etage: 0, qm: 950, konzept: "eigen", gruppe: "accessoires" }, { id: "W056-f5", etage: 0, qm: 219, konzept: "eigen", gruppe: "damen" }, { id: "W056-f6", etage: 1, qm: 1703, konzept: "eigen", gruppe: "damen" }, { id: "W056-f7", etage: 1, qm: 77, konzept: "eigen", gruppe: "waesche" }, { id: "W056-f8", etage: 2, qm: 539, konzept: "eigen", gruppe: "waesche" }, { id: "W056-f9", etage: 2, qm: 916, konzept: "eigen", gruppe: "herren" }, { id: "W056-f10", etage: 2, qm: 325, konzept: "eigen", gruppe: "kinder" }, { id: "W056-f11", etage: 3, qm: 156, konzept: "eigen", gruppe: "kinder" }, { id: "W056-f12", etage: 3, qm: 984, konzept: "eigen", gruppe: "sport" }, { id: "W056-f13", etage: 3, qm: 490, konzept: "eigen", gruppe: "spielwaren" }, { id: "W056-f14", etage: 3, qm: 149, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 311485, rohertrag: 131374, konzessionserloes: 0, untermiete: 0, personal: 60336, miete: 40751, nebenkosten: 13339, sonstige: 16775, db: 172, fteBedarf: 56.005128184916984, fteIst: 61.12087493713988, umsatzJeGruppe: { food: 27299, wohnen: 28440, beauty: 52832, accessoires: 50478, damen: 52532, waesche: 23588, herren: 29183, kinder: 15969, sport: 22564, spielwaren: 8601 } } }, { id: "S043", name: "Hartwig Sport Oberhausen Galerie am Fluss", stadt: "Oberhausen", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 5200, etagen: [0], baujahr: 1986, fassade: 5, substanz: 44, status: "offen", flaechen: [{ id: "S043-f1", etage: 0, qm: 1314, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S043-f2", etage: 0, qm: 1204, konzept: "eigen", gruppe: "sporttextil" }, { id: "S043-f3", etage: 0, qm: 1137, konzept: "eigen", gruppe: "outdoor" }, { id: "S043-f4", etage: 0, qm: 432, konzept: "eigen", gruppe: "teamsport" }, { id: "S043-f5", etage: 0, qm: 684, konzept: "eigen", gruppe: "rad" }, { id: "S043-f6", etage: 0, qm: 380, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 164828, rohertrag: 69491, konzessionserloes: 0, untermiete: 0, personal: 36435, miete: 18056, nebenkosten: 0, sonstige: 9076, db: 5924, fteBedarf: 29.558171121462824, fteIst: 37.600396150871944, umsatzJeGruppe: { sportschuhe: 56638, sporttextil: 39022, outdoor: 38675, teamsport: 8923, rad: 6306, wintersport: 15263 } } }, { id: "W057", name: "Hartwig Rostock Am Wall", stadt: "Rostock", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1962, fassade: 6, substanz: 81, status: "offen", flaechen: [{ id: "W057-f1", etage: -1, qm: 999, konzept: "eigen", gruppe: "food" }, { id: "W057-f2", etage: -1, qm: 1485, konzept: "eigen", gruppe: "wohnen" }, { id: "W057-f3", etage: 0, qm: 1149, konzept: "eigen", gruppe: "beauty" }, { id: "W057-f4", etage: 0, qm: 1335, konzept: "eigen", gruppe: "accessoires" }, { id: "W057-f5", etage: 1, qm: 138, konzept: "eigen", gruppe: "accessoires" }, { id: "W057-f6", etage: 1, qm: 2345, konzept: "eigen", gruppe: "damen" }, { id: "W057-f7", etage: 2, qm: 560, konzept: "eigen", gruppe: "damen" }, { id: "W057-f8", etage: 2, qm: 1009, konzept: "eigen", gruppe: "waesche" }, { id: "W057-f9", etage: 2, qm: 914, konzept: "eigen", gruppe: "herren" }, { id: "W057-f10", etage: 3, qm: 998, konzept: "eigen", gruppe: "herren" }, { id: "W057-f11", etage: 3, qm: 963, konzept: "eigen", gruppe: "kinder" }, { id: "W057-f12", etage: 3, qm: 523, konzept: "eigen", gruppe: "sport" }, { id: "W057-f13", etage: 4, qm: 979, konzept: "eigen", gruppe: "sport" }, { id: "W057-f14", etage: 4, qm: 1014, konzept: "eigen", gruppe: "spielwaren" }, { id: "W057-f15", etage: 4, qm: 491, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 428406, rohertrag: 179742, konzessionserloes: 0, untermiete: 0, personal: 86931, miete: 37333, nebenkosten: 15692, sonstige: 24271, db: 15515, fteBedarf: 82.39433344045942, fteIst: 90.0649736045208, umsatzJeGruppe: { food: 39782, wohnen: 35604, beauty: 86417, accessoires: 64067, damen: 68579, waesche: 30122, herren: 44060, kinder: 22213, sport: 24452, spielwaren: 13109 } } }, { id: "S044", name: "Hartwig Sport Rostock", stadt: "Rostock", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1999, fassade: 7, substanz: 63, status: "offen", flaechen: [{ id: "S044-f1", etage: 0, qm: 1391, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S044-f2", etage: 0, qm: 1138, konzept: "eigen", gruppe: "sporttextil" }, { id: "S044-f3", etage: 0, qm: 122, konzept: "eigen", gruppe: "outdoor" }, { id: "S044-f4", etage: 1, qm: 1146, konzept: "eigen", gruppe: "outdoor" }, { id: "S044-f5", etage: 1, qm: 453, konzept: "eigen", gruppe: "teamsport" }, { id: "S044-f6", etage: 1, qm: 656, konzept: "eigen", gruppe: "rad" }, { id: "S044-f7", etage: 1, qm: 395, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 220780, rohertrag: 92105, konzessionserloes: 0, untermiete: 0, personal: 43059, miete: 20994, nebenkosten: 7122, sonstige: 11437, db: 9493, fteBedarf: 36.289872381666, fteIst: 44.29044951899844, umsatzJeGruppe: { sportschuhe: 94682, sporttextil: 38819, outdoor: 42367, teamsport: 13077, rad: 7524, wintersport: 24310 } } }, { id: "W058", name: "Hartwig Kassel", stadt: "Kassel", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4], baujahr: 2001, fassade: 5, substanz: 38, status: "offen", flaechen: [{ id: "W058-f1", etage: 0, qm: 619, konzept: "eigen", gruppe: "food" }, { id: "W058-f2", etage: 0, qm: 706, konzept: "eigen", gruppe: "beauty" }, { id: "W058-f3", etage: 0, qm: 975, konzept: "eigen", gruppe: "accessoires" }, { id: "W058-f4", etage: 1, qm: 311, konzept: "eigen", gruppe: "accessoires" }, { id: "W058-f5", etage: 1, qm: 1989, konzept: "eigen", gruppe: "damen" }, { id: "W058-f6", etage: 2, qm: 607, konzept: "eigen", gruppe: "damen" }, { id: "W058-f7", etage: 2, qm: 666, konzept: "eigen", gruppe: "waesche" }, { id: "W058-f8", etage: 2, qm: 1027, konzept: "eigen", gruppe: "herren" }, { id: "W058-f9", etage: 3, qm: 601, konzept: "eigen", gruppe: "herren" }, { id: "W058-f10", etage: 3, qm: 808, konzept: "eigen", gruppe: "kinder" }, { id: "W058-f11", etage: 3, qm: 891, konzept: "eigen", gruppe: "sport" }, { id: "W058-f12", etage: 4, qm: 158, konzept: "eigen", gruppe: "sport" }, { id: "W058-f13", etage: 4, qm: 675, konzept: "eigen", gruppe: "spielwaren" }, { id: "W058-f14", etage: 4, qm: 1466, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 386018, rohertrag: 163456, konzessionserloes: 0, untermiete: 0, personal: 84931, miete: 49209, nebenkosten: 11727, sonstige: 21001, db: -3413, fteBedarf: 70.38013826468638, fteIst: 87.73621738146602, umsatzJeGruppe: { food: 32939, beauty: 70716, accessoires: 59318, damen: 79825, waesche: 21863, herren: 39463, kinder: 21758, sport: 19741, spielwaren: 11681, wohnen: 28714 } } }, { id: "S045", name: "Hartwig Sport Kassel Galerie am Fluss", stadt: "Kassel", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [0, 1, 2], baujahr: 2005, fassade: 4, substanz: 64, status: "offen", flaechen: [{ id: "S045-f1", etage: 0, qm: 1114, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S045-f2", etage: 0, qm: 653, konzept: "eigen", gruppe: "sporttextil" }, { id: "S045-f3", etage: 1, qm: 744, konzept: "eigen", gruppe: "sporttextil" }, { id: "S045-f4", etage: 1, qm: 1022, konzept: "eigen", gruppe: "outdoor" }, { id: "S045-f5", etage: 2, qm: 112, konzept: "eigen", gruppe: "outdoor" }, { id: "S045-f6", etage: 2, qm: 463, konzept: "eigen", gruppe: "teamsport" }, { id: "S045-f7", etage: 2, qm: 708, konzept: "eigen", gruppe: "rad" }, { id: "S045-f8", etage: 2, qm: 483, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 156368, rohertrag: 65804, konzessionserloes: 0, untermiete: 0, personal: 29140, miete: 15580, nebenkosten: 0, sonstige: 8796, db: 12289, fteBedarf: 28.48920296329611, fteIst: 29.50626515089279, umsatzJeGruppe: { sportschuhe: 51739, sporttextil: 38488, outdoor: 28692, teamsport: 7157, rad: 5901, wintersport: 24391 } } }, { id: "W059", name: "Hartwig Hagen Arkaden", stadt: "Hagen", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2400, etagen: [-1, 0, 1, 2], baujahr: 1928, fassade: 4, substanz: 71, status: "offen", flaechen: [{ id: "W059-f1", etage: -1, qm: 730, konzept: "eigen", gruppe: "food" }, { id: "W059-f2", etage: -1, qm: 1695, konzept: "eigen", gruppe: "wohnen" }, { id: "W059-f3", etage: 0, qm: 663, konzept: "eigen", gruppe: "beauty" }, { id: "W059-f4", etage: 0, qm: 973, konzept: "eigen", gruppe: "accessoires" }, { id: "W059-f5", etage: 0, qm: 789, konzept: "eigen", gruppe: "damen" }, { id: "W059-f6", etage: 1, qm: 1393, konzept: "eigen", gruppe: "damen" }, { id: "W059-f7", etage: 1, qm: 613, konzept: "eigen", gruppe: "waesche" }, { id: "W059-f8", etage: 1, qm: 419, konzept: "eigen", gruppe: "herren" }, { id: "W059-f9", etage: 2, qm: 483, konzept: "eigen", gruppe: "herren" }, { id: "W059-f10", etage: 2, qm: 682, konzept: "eigen", gruppe: "kinder" }, { id: "W059-f11", etage: 2, qm: 848, konzept: "eigen", gruppe: "sport" }, { id: "W059-f12", etage: 2, qm: 674, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 223223, rohertrag: 93248, konzessionserloes: 0, untermiete: 0, personal: 49926, miete: 29860, nebenkosten: 12726, sonstige: 13635, db: -12899, fteBedarf: 47.34049843643294, fteIst: 51.097237782158786, umsatzJeGruppe: { food: 23368, wohnen: 24387, beauty: 38725, accessoires: 36377, damen: 40151, waesche: 13964, herren: 15368, kinder: 10677, sport: 12120, spielwaren: 8086 } } }, { id: "W060", name: "Hartwig Potsdam Bahnhofstra\xDFe", stadt: "Potsdam", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4], baujahr: 1987, fassade: 4, substanz: 78, status: "offen", flaechen: [{ id: "W060-f1", etage: 0, qm: 563, konzept: "eigen", gruppe: "food" }, { id: "W060-f2", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W060-f3", etage: 0, qm: 893, konzept: "eigen", gruppe: "accessoires" }, { id: "W060-f4", etage: 1, qm: 82, konzept: "eigen", gruppe: "accessoires" }, { id: "W060-f5", etage: 1, qm: 2138, konzept: "eigen", gruppe: "damen" }, { id: "W060-f6", etage: 2, qm: 414, konzept: "eigen", gruppe: "damen" }, { id: "W060-f7", etage: 2, qm: 640, konzept: "eigen", gruppe: "waesche" }, { id: "W060-f8", etage: 2, qm: 1166, konzept: "eigen", gruppe: "herren" }, { id: "W060-f9", etage: 3, qm: 268, konzept: "eigen", gruppe: "herren" }, { id: "W060-f10", etage: 3, qm: 583, konzept: "eigen", gruppe: "kinder" }, { id: "W060-f11", etage: 3, qm: 1012, konzept: "eigen", gruppe: "sport" }, { id: "W060-f12", etage: 3, qm: 357, konzept: "eigen", gruppe: "spielwaren" }, { id: "W060-f13", etage: 4, qm: 340, konzept: "eigen", gruppe: "spielwaren" }, { id: "W060-f14", etage: 4, qm: 1880, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 293259, rohertrag: 124668, konzessionserloes: 0, untermiete: 0, personal: 63524, miete: 47938, nebenkosten: 0, sonstige: 17019, db: -3812, fteBedarf: 58.21452959194201, fteIst: 65.62847515777923, umsatzJeGruppe: { food: 21236, beauty: 57168, accessoires: 40026, damen: 64249, waesche: 16313, herren: 34031, kinder: 11014, sport: 12251, spielwaren: 9963, wohnen: 27007 } } }, { id: "W061", name: "Hartwig Saarbr\xFCcken Galerie am Fluss", stadt: "Saarbr\xFCcken", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1971, fassade: 2, substanz: 65, status: "offen", flaechen: [{ id: "W061-f1", etage: 0, qm: 578, konzept: "eigen", gruppe: "food" }, { id: "W061-f2", etage: 0, qm: 636, konzept: "eigen", gruppe: "beauty" }, { id: "W061-f3", etage: 0, qm: 453, konzept: "eigen", gruppe: "accessoires" }, { id: "W061-f4", etage: 1, qm: 623, konzept: "eigen", gruppe: "accessoires" }, { id: "W061-f5", etage: 1, qm: 1043, konzept: "eigen", gruppe: "damen" }, { id: "W061-f6", etage: 2, qm: 913, konzept: "eigen", gruppe: "damen" }, { id: "W061-f7", etage: 2, qm: 753, konzept: "eigen", gruppe: "waesche" }, { id: "W061-f8", etage: 3, qm: 63, konzept: "eigen", gruppe: "waesche" }, { id: "W061-f9", etage: 3, qm: 1236, konzept: "eigen", gruppe: "herren" }, { id: "W061-f10", etage: 3, qm: 368, konzept: "eigen", gruppe: "kinder" }, { id: "W061-f11", etage: 4, qm: 266, konzept: "eigen", gruppe: "kinder" }, { id: "W061-f12", etage: 4, qm: 993, konzept: "eigen", gruppe: "sport" }, { id: "W061-f13", etage: 4, qm: 408, konzept: "eigen", gruppe: "spielwaren" }, { id: "W061-f14", etage: 5, qm: 193, konzept: "eigen", gruppe: "spielwaren" }, { id: "W061-f15", etage: 5, qm: 1474, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 247117, rohertrag: 104077, konzessionserloes: 0, untermiete: 0, personal: 57268, miete: 44221, nebenkosten: 0, sonstige: 14632, db: -12044, fteBedarf: 50.34145186039213, fteIst: 57.73996380669992, umsatzJeGruppe: { food: 20684, beauty: 47345, accessoires: 38208, damen: 37480, waesche: 17642, herren: 28132, kinder: 13054, sport: 13050, spielwaren: 7943, wohnen: 23579 } } }, { id: "S046", name: "Hartwig Sport Saarbr\xFCcken Bahnhofstra\xDFe", stadt: "Saarbr\xFCcken", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1989, fassade: 0, substanz: 54, status: "offen", flaechen: [{ id: "S046-f1", etage: 0, qm: 557, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S046-f2", etage: 0, qm: 918, konzept: "eigen", gruppe: "sporttextil" }, { id: "S046-f3", etage: 1, qm: 18, konzept: "eigen", gruppe: "sporttextil" }, { id: "S046-f4", etage: 1, qm: 555, konzept: "eigen", gruppe: "outdoor" }, { id: "S046-f5", etage: 1, qm: 279, konzept: "eigen", gruppe: "teamsport" }, { id: "S046-f6", etage: 1, qm: 354, konzept: "eigen", gruppe: "rad" }, { id: "S046-f7", etage: 1, qm: 268, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 84061, rohertrag: 35415, konzessionserloes: 0, untermiete: 0, personal: 18913, miete: 11269, nebenkosten: 0, sonstige: 4774, db: 460, fteBedarf: 15.58681695248675, fteIst: 19.278873529770344, umsatzJeGruppe: { sportschuhe: 27685, sporttextil: 22107, outdoor: 15199, teamsport: 4968, rad: 2971, wintersport: 11132 } } }, { id: "W062", name: "Hartwig Hamm Am Wall", stadt: "Hamm", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2], baujahr: 1994, fassade: 1, substanz: 87, status: "offen", flaechen: [{ id: "W062-f1", etage: -1, qm: 976, konzept: "eigen", gruppe: "food" }, { id: "W062-f2", etage: -1, qm: 2199, konzept: "eigen", gruppe: "wohnen" }, { id: "W062-f3", etage: 0, qm: 735, konzept: "eigen", gruppe: "beauty" }, { id: "W062-f4", etage: 0, qm: 1265, konzept: "eigen", gruppe: "accessoires" }, { id: "W062-f5", etage: 0, qm: 1175, konzept: "eigen", gruppe: "damen" }, { id: "W062-f6", etage: 1, qm: 1551, konzept: "eigen", gruppe: "damen" }, { id: "W062-f7", etage: 1, qm: 841, konzept: "eigen", gruppe: "waesche" }, { id: "W062-f8", etage: 1, qm: 783, konzept: "eigen", gruppe: "herren" }, { id: "W062-f9", etage: 2, qm: 669, konzept: "eigen", gruppe: "herren" }, { id: "W062-f10", etage: 2, qm: 982, konzept: "eigen", gruppe: "kinder" }, { id: "W062-f11", etage: 2, qm: 1243, konzept: "eigen", gruppe: "sport" }, { id: "W062-f12", etage: 2, qm: 581, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 284883, rohertrag: 120260, konzessionserloes: 0, untermiete: 0, personal: 71571, miete: 41062, nebenkosten: 15693, sonstige: 17530, db: -25597, fteBedarf: 60.91138640509787, fteIst: 72.01398634010162, umsatzJeGruppe: { food: 30366, wohnen: 28274, beauty: 38282, accessoires: 45102, damen: 57705, waesche: 16188, herren: 26283, kinder: 20729, sport: 15397, spielwaren: 6557 } } }, { id: "W063", name: "Hartwig Ludwigshafen", stadt: "Ludwigshafen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1950, fassade: 0, substanz: 53, status: "offen", flaechen: [{ id: "W063-f1", etage: -1, qm: 754, konzept: "eigen", gruppe: "food" }, { id: "W063-f2", etage: -1, qm: 1313, konzept: "eigen", gruppe: "wohnen" }, { id: "W063-f3", etage: 0, qm: 924, konzept: "eigen", gruppe: "beauty" }, { id: "W063-f4", etage: 0, qm: 1143, konzept: "eigen", gruppe: "accessoires" }, { id: "W063-f5", etage: 1, qm: 230, konzept: "eigen", gruppe: "accessoires" }, { id: "W063-f6", etage: 1, qm: 1836, konzept: "eigen", gruppe: "damen" }, { id: "W063-f7", etage: 2, qm: 848, konzept: "eigen", gruppe: "damen" }, { id: "W063-f8", etage: 2, qm: 974, konzept: "eigen", gruppe: "waesche" }, { id: "W063-f9", etage: 2, qm: 245, konzept: "eigen", gruppe: "herren" }, { id: "W063-f10", etage: 3, qm: 1037, konzept: "eigen", gruppe: "herren" }, { id: "W063-f11", etage: 3, qm: 692, konzept: "eigen", gruppe: "kinder" }, { id: "W063-f12", etage: 3, qm: 338, konzept: "eigen", gruppe: "sport" }, { id: "W063-f13", etage: 4, qm: 1066, konzept: "eigen", gruppe: "sport" }, { id: "W063-f14", etage: 4, qm: 837, konzept: "eigen", gruppe: "spielwaren" }, { id: "W063-f15", etage: 4, qm: 164, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 429755, rohertrag: 180621, konzessionserloes: 0, untermiete: 0, personal: 87780, miete: 37935, nebenkosten: 18442, sonstige: 23200, db: 13264, fteBedarf: 77.54743115596361, fteIst: 91.16634127729695, umsatzJeGruppe: { food: 41883, wohnen: 37748, beauty: 80829, accessoires: 61286, damen: 76363, waesche: 39585, herren: 33505, kinder: 15590, sport: 29430, spielwaren: 13537 } } }, { id: "W064", name: "Hartwig Oldenburg Neustadt", stadt: "Oldenburg", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1896, fassade: 2, substanz: 35, status: "offen", flaechen: [{ id: "W064-f1", etage: 0, qm: 868, konzept: "eigen", gruppe: "food" }, { id: "W064-f2", etage: 0, qm: 677, konzept: "eigen", gruppe: "beauty" }, { id: "W064-f3", etage: 0, qm: 772, konzept: "eigen", gruppe: "accessoires" }, { id: "W064-f4", etage: 1, qm: 860, konzept: "eigen", gruppe: "accessoires" }, { id: "W064-f5", etage: 1, qm: 1457, konzept: "eigen", gruppe: "damen" }, { id: "W064-f6", etage: 2, qm: 882, konzept: "eigen", gruppe: "damen" }, { id: "W064-f7", etage: 2, qm: 801, konzept: "eigen", gruppe: "waesche" }, { id: "W064-f8", etage: 2, qm: 634, konzept: "eigen", gruppe: "herren" }, { id: "W064-f9", etage: 3, qm: 717, konzept: "eigen", gruppe: "herren" }, { id: "W064-f10", etage: 3, qm: 1096, konzept: "eigen", gruppe: "kinder" }, { id: "W064-f11", etage: 3, qm: 504, konzept: "eigen", gruppe: "sport" }, { id: "W064-f12", etage: 4, qm: 1163, konzept: "eigen", gruppe: "sport" }, { id: "W064-f13", etage: 4, qm: 861, konzept: "eigen", gruppe: "spielwaren" }, { id: "W064-f14", etage: 4, qm: 292, konzept: "eigen", gruppe: "wohnen" }, { id: "W064-f15", etage: 5, qm: 2317, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 356155, rohertrag: 149968, konzessionserloes: 0, untermiete: 0, personal: 82294, miete: 55149, nebenkosten: 15587, sonstige: 20858, db: -23921, fteBedarf: 71.52217944618246, fteIst: 84.80035505442447, umsatzJeGruppe: { food: 27680, beauty: 47875, accessoires: 68908, damen: 55230, waesche: 19569, herren: 29868, kinder: 23068, sport: 27371, spielwaren: 11881, wohnen: 44705 } } }, { id: "W065", name: "Hartwig M\xFClheim", stadt: "M\xFClheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1918, fassade: 5, substanz: 40, status: "offen", flaechen: [{ id: "W065-f1", etage: -1, qm: 739, konzept: "eigen", gruppe: "food" }, { id: "W065-f2", etage: -1, qm: 1341, konzept: "eigen", gruppe: "wohnen" }, { id: "W065-f3", etage: 0, qm: 606, konzept: "eigen", gruppe: "beauty" }, { id: "W065-f4", etage: 0, qm: 1209, konzept: "eigen", gruppe: "accessoires" }, { id: "W065-f5", etage: 0, qm: 265, konzept: "eigen", gruppe: "damen" }, { id: "W065-f6", etage: 1, qm: 1965, konzept: "eigen", gruppe: "damen" }, { id: "W065-f7", etage: 1, qm: 115, konzept: "eigen", gruppe: "waesche" }, { id: "W065-f8", etage: 2, qm: 465, konzept: "eigen", gruppe: "waesche" }, { id: "W065-f9", etage: 2, qm: 1345, konzept: "eigen", gruppe: "herren" }, { id: "W065-f10", etage: 2, qm: 269, konzept: "eigen", gruppe: "kinder" }, { id: "W065-f11", etage: 3, qm: 423, konzept: "eigen", gruppe: "kinder" }, { id: "W065-f12", etage: 3, qm: 1073, konzept: "eigen", gruppe: "sport" }, { id: "W065-f13", etage: 3, qm: 597, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 316375, rohertrag: 134279, konzessionserloes: 0, untermiete: 0, personal: 67142, miete: 54606, nebenkosten: 13807, sonstige: 17657, db: -18934, fteBedarf: 59.64358699227566, fteIst: 67.85518485173044, umsatzJeGruppe: { food: 27951, wohnen: 28104, beauty: 44505, accessoires: 60498, damen: 61490, waesche: 19179, herren: 30825, kinder: 14238, sport: 19617, spielwaren: 9969 } } }, { id: "W066", name: "Hartwig Osnabr\xFCck", stadt: "Osnabr\xFCck", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [-1, 0, 1, 2], baujahr: 1977, fassade: 2, substanz: 72, status: "offen", flaechen: [{ id: "W066-f1", etage: -1, qm: 874, konzept: "eigen", gruppe: "food" }, { id: "W066-f2", etage: -1, qm: 2851, konzept: "eigen", gruppe: "wohnen" }, { id: "W066-f3", etage: 0, qm: 722, konzept: "eigen", gruppe: "beauty" }, { id: "W066-f4", etage: 0, qm: 1601, konzept: "eigen", gruppe: "accessoires" }, { id: "W066-f5", etage: 0, qm: 1402, konzept: "eigen", gruppe: "damen" }, { id: "W066-f6", etage: 1, qm: 1183, konzept: "eigen", gruppe: "damen" }, { id: "W066-f7", etage: 1, qm: 973, konzept: "eigen", gruppe: "waesche" }, { id: "W066-f8", etage: 1, qm: 1569, konzept: "eigen", gruppe: "herren" }, { id: "W066-f9", etage: 2, qm: 277, konzept: "eigen", gruppe: "herren" }, { id: "W066-f10", etage: 2, qm: 952, konzept: "eigen", gruppe: "kinder" }, { id: "W066-f11", etage: 2, qm: 1777, konzept: "eigen", gruppe: "sport" }, { id: "W066-f12", etage: 2, qm: 1060, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 452760, rohertrag: 190236, konzessionserloes: 0, untermiete: 0, personal: 110866, miete: 58880, nebenkosten: 18043, sonstige: 25422, db: -22974, fteBedarf: 86.07514731670713, fteIst: 111.88550443860093, umsatzJeGruppe: { food: 41026, wohnen: 57852, beauty: 57020, accessoires: 80125, damen: 65399, waesche: 29617, herren: 45570, kinder: 25091, sport: 34565, spielwaren: 16494 } } }, { id: "W067", name: "Hartwig Leverkusen Bahnhofstra\xDFe", stadt: "Leverkusen", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1, 2], baujahr: 1964, fassade: 4, substanz: 68, status: "offen", flaechen: [{ id: "W067-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W067-f2", etage: -1, qm: 1680, konzept: "eigen", gruppe: "wohnen" }, { id: "W067-f3", etage: 0, qm: 461, konzept: "eigen", gruppe: "beauty" }, { id: "W067-f4", etage: 0, qm: 1007, konzept: "eigen", gruppe: "accessoires" }, { id: "W067-f5", etage: 0, qm: 731, konzept: "eigen", gruppe: "damen" }, { id: "W067-f6", etage: 1, qm: 1124, konzept: "eigen", gruppe: "damen" }, { id: "W067-f7", etage: 1, qm: 688, konzept: "eigen", gruppe: "waesche" }, { id: "W067-f8", etage: 1, qm: 388, konzept: "eigen", gruppe: "herren" }, { id: "W067-f9", etage: 2, qm: 501, konzept: "eigen", gruppe: "herren" }, { id: "W067-f10", etage: 2, qm: 488, konzept: "eigen", gruppe: "kinder" }, { id: "W067-f11", etage: 2, qm: 1101, konzept: "eigen", gruppe: "sport" }, { id: "W067-f12", etage: 2, qm: 454, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 224449, rohertrag: 95642, konzessionserloes: 0, untermiete: 0, personal: 49163, miete: 23070, nebenkosten: 10523, sonstige: 13317, db: -431, fteBedarf: 45.781792677381304, fteIst: 50.48617987985613, umsatzJeGruppe: { food: 19010, wohnen: 26605, beauty: 28815, accessoires: 39303, damen: 43722, waesche: 20339, herren: 16897, kinder: 10255, sport: 14350, spielwaren: 5154 } } }, { id: "W068", name: "Hartwig Darmstadt Bahnhofstra\xDFe", stadt: "Darmstadt", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 2004, fassade: 6, substanz: 39, status: "offen", flaechen: [{ id: "W068-f1", etage: -1, qm: 995, konzept: "eigen", gruppe: "food" }, { id: "W068-f2", etage: -1, qm: 1088, konzept: "eigen", gruppe: "wohnen" }, { id: "W068-f3", etage: 0, qm: 888, konzept: "eigen", gruppe: "beauty" }, { id: "W068-f4", etage: 0, qm: 1195, konzept: "eigen", gruppe: "accessoires" }, { id: "W068-f5", etage: 1, qm: 218, konzept: "eigen", gruppe: "accessoires" }, { id: "W068-f6", etage: 1, qm: 1865, konzept: "eigen", gruppe: "damen" }, { id: "W068-f7", etage: 2, qm: 674, konzept: "eigen", gruppe: "damen" }, { id: "W068-f8", etage: 2, qm: 722, konzept: "eigen", gruppe: "waesche" }, { id: "W068-f9", etage: 2, qm: 687, konzept: "eigen", gruppe: "herren" }, { id: "W068-f10", etage: 3, qm: 925, konzept: "eigen", gruppe: "herren" }, { id: "W068-f11", etage: 3, qm: 994, konzept: "eigen", gruppe: "kinder" }, { id: "W068-f12", etage: 3, qm: 165, konzept: "eigen", gruppe: "sport" }, { id: "W068-f13", etage: 4, qm: 838, konzept: "eigen", gruppe: "sport" }, { id: "W068-f14", etage: 4, qm: 762, konzept: "eigen", gruppe: "spielwaren" }, { id: "W068-f15", etage: 4, qm: 483, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 348945, rohertrag: 147547, konzessionserloes: 0, untermiete: 0, personal: 72635, miete: 74721, nebenkosten: 0, sonstige: 19931, db: -19740, fteBedarf: 67.7948143550212, fteIst: 74.05785589868562, umsatzJeGruppe: { food: 33914, wohnen: 23045, beauty: 60922, accessoires: 64821, damen: 60287, waesche: 20902, herren: 40183, kinder: 19575, sport: 16183, spielwaren: 9114 } } }, { id: "W069", name: "Hartwig Heidelberg", stadt: "Heidelberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 4200, etagen: [-1, 0, 1, 2], baujahr: 1901, fassade: 3, substanz: 58, status: "offen", flaechen: [{ id: "W069-f1", etage: -1, qm: 1297, konzept: "eigen", gruppe: "food" }, { id: "W069-f2", etage: -1, qm: 2853, konzept: "eigen", gruppe: "wohnen" }, { id: "W069-f3", etage: 0, qm: 914, konzept: "eigen", gruppe: "beauty" }, { id: "W069-f4", etage: 0, qm: 1727, konzept: "eigen", gruppe: "accessoires" }, { id: "W069-f5", etage: 0, qm: 1509, konzept: "eigen", gruppe: "damen" }, { id: "W069-f6", etage: 1, qm: 1118, konzept: "eigen", gruppe: "damen" }, { id: "W069-f7", etage: 1, qm: 1169, konzept: "eigen", gruppe: "waesche" }, { id: "W069-f8", etage: 1, qm: 1863, konzept: "eigen", gruppe: "herren" }, { id: "W069-f9", etage: 2, qm: 132, konzept: "eigen", gruppe: "herren" }, { id: "W069-f10", etage: 2, qm: 1401, konzept: "eigen", gruppe: "kinder" }, { id: "W069-f11", etage: 2, qm: 1725, konzept: "eigen", gruppe: "sport" }, { id: "W069-f12", etage: 2, qm: 949, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 489213, rohertrag: 203933, konzessionserloes: 0, untermiete: 0, personal: 116365, miete: 47545, nebenkosten: 19745, sonstige: 27553, db: -7275, fteBedarf: 93.33639216198918, fteIst: 116.9917581155009, umsatzJeGruppe: { food: 62227, wohnen: 51711, beauty: 73859, accessoires: 66061, damen: 81319, waesche: 36801, herren: 44298, kinder: 31624, sport: 26390, spielwaren: 14923 } } }, { id: "W070", name: "Hartwig Solingen", stadt: "Solingen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2900, etagen: [-1, 0, 1, 2], baujahr: 2002, fassade: 1, substanz: 47, status: "offen", flaechen: [{ id: "W070-f1", etage: -1, qm: 697, konzept: "eigen", gruppe: "food" }, { id: "W070-f2", etage: -1, qm: 2228, konzept: "eigen", gruppe: "wohnen" }, { id: "W070-f3", etage: 0, qm: 863, konzept: "eigen", gruppe: "beauty" }, { id: "W070-f4", etage: 0, qm: 1203, konzept: "eigen", gruppe: "accessoires" }, { id: "W070-f5", etage: 0, qm: 859, konzept: "eigen", gruppe: "damen" }, { id: "W070-f6", etage: 1, qm: 1617, konzept: "eigen", gruppe: "damen" }, { id: "W070-f7", etage: 1, qm: 725, konzept: "eigen", gruppe: "waesche" }, { id: "W070-f8", etage: 1, qm: 584, konzept: "eigen", gruppe: "herren" }, { id: "W070-f9", etage: 2, qm: 854, konzept: "eigen", gruppe: "herren" }, { id: "W070-f10", etage: 2, qm: 624, konzept: "eigen", gruppe: "kinder" }, { id: "W070-f11", etage: 2, qm: 1442, konzept: "eigen", gruppe: "sport" }, { id: "W070-f12", etage: 2, qm: 591, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 423994, rohertrag: 178474, konzessionserloes: 0, untermiete: 0, personal: 88030, miete: 54382, nebenkosten: 15780, sonstige: 22913, db: -2631, fteBedarf: 76.50796448447498, fteIst: 90.63549154864674, umsatzJeGruppe: { food: 31403, wohnen: 52470, beauty: 84324, accessoires: 64934, damen: 72150, waesche: 21564, herren: 45840, kinder: 14711, sport: 28503, spielwaren: 8094 } } }, { id: "W071", name: "Hartwig Regensburg Einkaufszentrum", stadt: "Regensburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1951, fassade: 6, substanz: 51, status: "offen", flaechen: [{ id: "W071-f1", etage: -1, qm: 1099, konzept: "eigen", gruppe: "food" }, { id: "W071-f2", etage: -1, qm: 1385, konzept: "eigen", gruppe: "wohnen" }, { id: "W071-f3", etage: 0, qm: 821, konzept: "eigen", gruppe: "beauty" }, { id: "W071-f4", etage: 0, qm: 1636, konzept: "eigen", gruppe: "accessoires" }, { id: "W071-f5", etage: 0, qm: 26, konzept: "eigen", gruppe: "damen" }, { id: "W071-f6", etage: 1, qm: 2483, konzept: "eigen", gruppe: "damen" }, { id: "W071-f7", etage: 2, qm: 292, konzept: "eigen", gruppe: "damen" }, { id: "W071-f8", etage: 2, qm: 958, konzept: "eigen", gruppe: "waesche" }, { id: "W071-f9", etage: 2, qm: 1233, konzept: "eigen", gruppe: "herren" }, { id: "W071-f10", etage: 3, qm: 624, konzept: "eigen", gruppe: "herren" }, { id: "W071-f11", etage: 3, qm: 908, konzept: "eigen", gruppe: "kinder" }, { id: "W071-f12", etage: 3, qm: 951, konzept: "eigen", gruppe: "sport" }, { id: "W071-f13", etage: 4, qm: 876, konzept: "eigen", gruppe: "sport" }, { id: "W071-f14", etage: 4, qm: 852, konzept: "eigen", gruppe: "spielwaren" }, { id: "W071-f15", etage: 4, qm: 755, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 408117, rohertrag: 171541, konzessionserloes: 0, untermiete: 0, personal: 92220, miete: 67021, nebenkosten: 15793, sonstige: 23437, db: -26930, fteBedarf: 79.91215555938443, fteIst: 93.53863691089289, umsatzJeGruppe: { food: 36513, wohnen: 31591, beauty: 72069, accessoires: 70223, damen: 71295, waesche: 24339, herren: 37018, kinder: 21424, sport: 30023, spielwaren: 13621 } } }, { id: "W072", name: "Hartwig Paderborn", stadt: "Paderborn", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2, 3], baujahr: 1955, fassade: 0, substanz: 43, status: "offen", flaechen: [{ id: "W072-f1", etage: -1, qm: 664, konzept: "eigen", gruppe: "food" }, { id: "W072-f2", etage: -1, qm: 1296, konzept: "eigen", gruppe: "wohnen" }, { id: "W072-f3", etage: 0, qm: 579, konzept: "eigen", gruppe: "beauty" }, { id: "W072-f4", etage: 0, qm: 819, konzept: "eigen", gruppe: "accessoires" }, { id: "W072-f5", etage: 0, qm: 562, konzept: "eigen", gruppe: "damen" }, { id: "W072-f6", etage: 1, qm: 1845, konzept: "eigen", gruppe: "damen" }, { id: "W072-f7", etage: 1, qm: 115, konzept: "eigen", gruppe: "waesche" }, { id: "W072-f8", etage: 2, qm: 467, konzept: "eigen", gruppe: "waesche" }, { id: "W072-f9", etage: 2, qm: 1070, konzept: "eigen", gruppe: "herren" }, { id: "W072-f10", etage: 2, qm: 424, konzept: "eigen", gruppe: "kinder" }, { id: "W072-f11", etage: 3, qm: 433, konzept: "eigen", gruppe: "kinder" }, { id: "W072-f12", etage: 3, qm: 814, konzept: "eigen", gruppe: "sport" }, { id: "W072-f13", etage: 3, qm: 677, konzept: "eigen", gruppe: "spielwaren" }, { id: "W072-f14", etage: 3, qm: 35, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 281185, rohertrag: 118448, konzessionserloes: 0, untermiete: 0, personal: 66941, miete: 40041, nebenkosten: 12390, sonstige: 15939, db: -16863, fteBedarf: 54.1175509102335, fteIst: 67.31589840966596, umsatzJeGruppe: { food: 28931, wohnen: 26886, beauty: 46607, accessoires: 38166, damen: 62745, waesche: 15865, herren: 22942, kinder: 18242, sport: 11806, spielwaren: 8995 } } }, { id: "W073", name: "Hartwig Ingolstadt", stadt: "Ingolstadt", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1927, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W073-f1", etage: -1, qm: 506, konzept: "eigen", gruppe: "food" }, { id: "W073-f2", etage: -1, qm: 1028, konzept: "eigen", gruppe: "wohnen" }, { id: "W073-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W073-f4", etage: 0, qm: 1102, konzept: "eigen", gruppe: "accessoires" }, { id: "W073-f5", etage: 1, qm: 48, konzept: "eigen", gruppe: "accessoires" }, { id: "W073-f6", etage: 1, qm: 1486, konzept: "eigen", gruppe: "damen" }, { id: "W073-f7", etage: 2, qm: 492, konzept: "eigen", gruppe: "damen" }, { id: "W073-f8", etage: 2, qm: 569, konzept: "eigen", gruppe: "waesche" }, { id: "W073-f9", etage: 2, qm: 473, konzept: "eigen", gruppe: "herren" }, { id: "W073-f10", etage: 3, qm: 536, konzept: "eigen", gruppe: "herren" }, { id: "W073-f11", etage: 3, qm: 652, konzept: "eigen", gruppe: "kinder" }, { id: "W073-f12", etage: 3, qm: 345, konzept: "eigen", gruppe: "sport" }, { id: "W073-f13", etage: 4, qm: 739, konzept: "eigen", gruppe: "sport" }, { id: "W073-f14", etage: 4, qm: 597, konzept: "eigen", gruppe: "spielwaren" }, { id: "W073-f15", etage: 4, qm: 198, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 278999, rohertrag: 119002, konzessionserloes: 0, untermiete: 0, personal: 59699, miete: 40530, nebenkosten: 10068, sonstige: 15580, db: -6874, fteBedarf: 52.62232814910955, fteIst: 60.036515679849245, umsatzJeGruppe: { food: 21256, wohnen: 27519, beauty: 37271, accessoires: 55365, damen: 59546, waesche: 16506, herren: 22860, kinder: 12681, sport: 17894, spielwaren: 8100 } } }, { id: "W074", name: "Hartwig W\xFCrzburg", stadt: "W\xFCrzburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2], baujahr: 1973, fassade: 2, substanz: 33, status: "offen", flaechen: [{ id: "W074-f1", etage: -1, qm: 771, konzept: "eigen", gruppe: "food" }, { id: "W074-f2", etage: -1, qm: 2054, konzept: "eigen", gruppe: "wohnen" }, { id: "W074-f3", etage: 0, qm: 536, konzept: "eigen", gruppe: "beauty" }, { id: "W074-f4", etage: 0, qm: 1383, konzept: "eigen", gruppe: "accessoires" }, { id: "W074-f5", etage: 0, qm: 906, konzept: "eigen", gruppe: "damen" }, { id: "W074-f6", etage: 1, qm: 920, konzept: "eigen", gruppe: "damen" }, { id: "W074-f7", etage: 1, qm: 782, konzept: "eigen", gruppe: "waesche" }, { id: "W074-f8", etage: 1, qm: 1123, konzept: "eigen", gruppe: "herren" }, { id: "W074-f9", etage: 2, qm: 600, konzept: "eigen", gruppe: "herren" }, { id: "W074-f10", etage: 2, qm: 649, konzept: "eigen", gruppe: "kinder" }, { id: "W074-f11", etage: 2, qm: 939, konzept: "eigen", gruppe: "sport" }, { id: "W074-f12", etage: 2, qm: 625, konzept: "eigen", gruppe: "spielwaren" }, { id: "W074-f13", etage: 2, qm: 12, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 398689, rohertrag: 167046, konzessionserloes: 0, untermiete: 0, personal: 93523, miete: 53333, nebenkosten: 14173, sonstige: 21431, db: -15414, fteBedarf: 71.46526933716856, fteIst: 96.58136190461292, umsatzJeGruppe: { food: 46650, wohnen: 57506, beauty: 51054, accessoires: 73003, damen: 51051, waesche: 26957, herren: 47584, kinder: 18034, sport: 15927, spielwaren: 10923 } } }, { id: "W075", name: "Hartwig Ulm", stadt: "Ulm", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [0, 1, 2, 3], baujahr: 1952, fassade: 0, substanz: 85, status: "offen", flaechen: [{ id: "W075-f1", etage: 0, qm: 753, konzept: "eigen", gruppe: "food" }, { id: "W075-f2", etage: 0, qm: 802, konzept: "eigen", gruppe: "beauty" }, { id: "W075-f3", etage: 0, qm: 1022, konzept: "eigen", gruppe: "accessoires" }, { id: "W075-f4", etage: 0, qm: 198, konzept: "eigen", gruppe: "damen" }, { id: "W075-f5", etage: 1, qm: 2367, konzept: "eigen", gruppe: "damen" }, { id: "W075-f6", etage: 1, qm: 408, konzept: "eigen", gruppe: "waesche" }, { id: "W075-f7", etage: 2, qm: 356, konzept: "eigen", gruppe: "waesche" }, { id: "W075-f8", etage: 2, qm: 1210, konzept: "eigen", gruppe: "herren" }, { id: "W075-f9", etage: 2, qm: 717, konzept: "eigen", gruppe: "kinder" }, { id: "W075-f10", etage: 2, qm: 492, konzept: "eigen", gruppe: "sport" }, { id: "W075-f11", etage: 3, qm: 706, konzept: "eigen", gruppe: "sport" }, { id: "W075-f12", etage: 3, qm: 642, konzept: "eigen", gruppe: "spielwaren" }, { id: "W075-f13", etage: 3, qm: 1427, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 455098, rohertrag: 189230, konzessionserloes: 0, untermiete: 0, personal: 91561, miete: 61925, nebenkosten: 12620, sonstige: 23654, db: -530, fteBedarf: 78.05033022258182, fteIst: 92.93549910869459, umsatzJeGruppe: { food: 50651, beauty: 104436, accessoires: 58055, damen: 79877, waesche: 28632, herren: 41437, kinder: 21212, sport: 24775, spielwaren: 12803, wohnen: 33220 } } }, { id: "W076", name: "Hartwig Wolfsburg Galerie am Fluss", stadt: "Wolfsburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2], baujahr: 1989, fassade: 3, substanz: 72, status: "offen", flaechen: [{ id: "W076-f1", etage: -1, qm: 875, konzept: "eigen", gruppe: "food" }, { id: "W076-f2", etage: -1, qm: 3100, konzept: "eigen", gruppe: "wohnen" }, { id: "W076-f3", etage: 0, qm: 976, konzept: "eigen", gruppe: "beauty" }, { id: "W076-f4", etage: 0, qm: 1563, konzept: "eigen", gruppe: "accessoires" }, { id: "W076-f5", etage: 0, qm: 1436, konzept: "eigen", gruppe: "damen" }, { id: "W076-f6", etage: 1, qm: 1480, konzept: "eigen", gruppe: "damen" }, { id: "W076-f7", etage: 1, qm: 1227, konzept: "eigen", gruppe: "waesche" }, { id: "W076-f8", etage: 1, qm: 1269, konzept: "eigen", gruppe: "herren" }, { id: "W076-f9", etage: 2, qm: 371, konzept: "eigen", gruppe: "herren" }, { id: "W076-f10", etage: 2, qm: 1278, konzept: "eigen", gruppe: "kinder" }, { id: "W076-f11", etage: 2, qm: 1992, konzept: "eigen", gruppe: "sport" }, { id: "W076-f12", etage: 2, qm: 1193, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 500430, rohertrag: 210142, konzessionserloes: 0, untermiete: 0, personal: 112735, miete: 113290, nebenkosten: 0, sonstige: 28060, db: -43942, fteBedarf: 94.97014585477983, fteIst: 116.22600399086899, umsatzJeGruppe: { food: 38263, wohnen: 62165, beauty: 85447, accessoires: 67165, damen: 84024, waesche: 32809, herren: 46465, kinder: 27122, sport: 39927, spielwaren: 17042 } } }, { id: "W077", name: "Hartwig G\xF6ttingen", stadt: "G\xF6ttingen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1921, fassade: 3, substanz: 76, status: "offen", flaechen: [{ id: "W077-f1", etage: -1, qm: 599, konzept: "eigen", gruppe: "food" }, { id: "W077-f2", etage: -1, qm: 1181, konzept: "eigen", gruppe: "wohnen" }, { id: "W077-f3", etage: 0, qm: 626, konzept: "eigen", gruppe: "beauty" }, { id: "W077-f4", etage: 0, qm: 671, konzept: "eigen", gruppe: "accessoires" }, { id: "W077-f5", etage: 0, qm: 484, konzept: "eigen", gruppe: "damen" }, { id: "W077-f6", etage: 1, qm: 1669, konzept: "eigen", gruppe: "damen" }, { id: "W077-f7", etage: 1, qm: 111, konzept: "eigen", gruppe: "waesche" }, { id: "W077-f8", etage: 2, qm: 622, konzept: "eigen", gruppe: "waesche" }, { id: "W077-f9", etage: 2, qm: 1004, konzept: "eigen", gruppe: "herren" }, { id: "W077-f10", etage: 2, qm: 154, konzept: "eigen", gruppe: "kinder" }, { id: "W077-f11", etage: 3, qm: 349, konzept: "eigen", gruppe: "kinder" }, { id: "W077-f12", etage: 3, qm: 908, konzept: "eigen", gruppe: "sport" }, { id: "W077-f13", etage: 3, qm: 638, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 285471, rohertrag: 120762, konzessionserloes: 0, untermiete: 0, personal: 61588, miete: 27672, nebenkosten: 13224, sonstige: 15762, db: 2516, fteBedarf: 53.1335837797041, fteIst: 61.905744077275685, umsatzJeGruppe: { food: 23655, wohnen: 21458, beauty: 56779, accessoires: 32804, damen: 57099, waesche: 24209, herren: 28817, kinder: 14630, sport: 14564, spielwaren: 11456 } } }, { id: "W078", name: "Hartwig Pforzheim Bahnhofstra\xDFe", stadt: "Pforzheim", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [0, 1, 2, 3, 4], baujahr: 1937, fassade: 5, substanz: 55, status: "offen", flaechen: [{ id: "W078-f1", etage: 0, qm: 1249, konzept: "eigen", gruppe: "food" }, { id: "W078-f2", etage: 0, qm: 937, konzept: "eigen", gruppe: "beauty" }, { id: "W078-f3", etage: 0, qm: 814, konzept: "eigen", gruppe: "accessoires" }, { id: "W078-f4", etage: 1, qm: 770, konzept: "eigen", gruppe: "accessoires" }, { id: "W078-f5", etage: 1, qm: 2230, konzept: "eigen", gruppe: "damen" }, { id: "W078-f6", etage: 2, qm: 395, konzept: "eigen", gruppe: "damen" }, { id: "W078-f7", etage: 2, qm: 1213, konzept: "eigen", gruppe: "waesche" }, { id: "W078-f8", etage: 2, qm: 1392, konzept: "eigen", gruppe: "herren" }, { id: "W078-f9", etage: 3, qm: 390, konzept: "eigen", gruppe: "herren" }, { id: "W078-f10", etage: 3, qm: 1097, konzept: "eigen", gruppe: "kinder" }, { id: "W078-f11", etage: 3, qm: 1379, konzept: "eigen", gruppe: "sport" }, { id: "W078-f12", etage: 3, qm: 134, konzept: "eigen", gruppe: "spielwaren" }, { id: "W078-f13", etage: 4, qm: 683, konzept: "eigen", gruppe: "spielwaren" }, { id: "W078-f14", etage: 4, qm: 2317, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 372646, rohertrag: 156116, konzessionserloes: 0, untermiete: 0, personal: 96991, miete: 33109, nebenkosten: 20184, sonstige: 22028, db: -16197, fteBedarf: 75.67169598181093, fteIst: 99.54701479934208, umsatzJeGruppe: { food: 45996, beauty: 56948, accessoires: 55192, damen: 55630, waesche: 34948, herren: 37144, kinder: 16910, sport: 18595, spielwaren: 9502, wohnen: 41782 } } }, { id: "W079", name: "Hartwig Offenbach", stadt: "Offenbach", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2, 3], baujahr: 1913, fassade: 0, substanz: 44, status: "offen", flaechen: [{ id: "W079-f1", etage: -1, qm: 944, konzept: "eigen", gruppe: "food" }, { id: "W079-f2", etage: -1, qm: 1756, konzept: "eigen", gruppe: "wohnen" }, { id: "W079-f3", etage: 0, qm: 768, konzept: "eigen", gruppe: "beauty" }, { id: "W079-f4", etage: 0, qm: 1349, konzept: "eigen", gruppe: "accessoires" }, { id: "W079-f5", etage: 0, qm: 583, konzept: "eigen", gruppe: "damen" }, { id: "W079-f6", etage: 1, qm: 2058, konzept: "eigen", gruppe: "damen" }, { id: "W079-f7", etage: 1, qm: 642, konzept: "eigen", gruppe: "waesche" }, { id: "W079-f8", etage: 2, qm: 420, konzept: "eigen", gruppe: "waesche" }, { id: "W079-f9", etage: 2, qm: 1670, konzept: "eigen", gruppe: "herren" }, { id: "W079-f10", etage: 2, qm: 609, konzept: "eigen", gruppe: "kinder" }, { id: "W079-f11", etage: 3, qm: 161, konzept: "eigen", gruppe: "kinder" }, { id: "W079-f12", etage: 3, qm: 1228, konzept: "eigen", gruppe: "sport" }, { id: "W079-f13", etage: 3, qm: 749, konzept: "eigen", gruppe: "spielwaren" }, { id: "W079-f14", etage: 3, qm: 561, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 419800, rohertrag: 177495, konzessionserloes: 0, untermiete: 0, personal: 93625, miete: 53294, nebenkosten: 19738, sonstige: 23286, db: -12448, fteBedarf: 78.44626198751102, fteIst: 96.0801887770173, umsatzJeGruppe: { food: 42524, wohnen: 45556, beauty: 63123, accessoires: 69221, damen: 71773, waesche: 34081, herren: 44802, kinder: 15911, sport: 22153, spielwaren: 10656 } } }, { id: "W080", name: "Hartwig Heilbronn", stadt: "Heilbronn", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1914, fassade: 0, substanz: 41, status: "offen", flaechen: [{ id: "W080-f1", etage: -1, qm: 966, konzept: "eigen", gruppe: "food" }, { id: "W080-f2", etage: -1, qm: 1368, konzept: "eigen", gruppe: "wohnen" }, { id: "W080-f3", etage: 0, qm: 767, konzept: "eigen", gruppe: "beauty" }, { id: "W080-f4", etage: 0, qm: 1425, konzept: "eigen", gruppe: "accessoires" }, { id: "W080-f5", etage: 0, qm: 142, konzept: "eigen", gruppe: "damen" }, { id: "W080-f6", etage: 1, qm: 2333, konzept: "eigen", gruppe: "damen" }, { id: "W080-f7", etage: 2, qm: 711, konzept: "eigen", gruppe: "damen" }, { id: "W080-f8", etage: 2, qm: 1006, konzept: "eigen", gruppe: "waesche" }, { id: "W080-f9", etage: 2, qm: 617, konzept: "eigen", gruppe: "herren" }, { id: "W080-f10", etage: 3, qm: 756, konzept: "eigen", gruppe: "herren" }, { id: "W080-f11", etage: 3, qm: 1124, konzept: "eigen", gruppe: "kinder" }, { id: "W080-f12", etage: 3, qm: 454, konzept: "eigen", gruppe: "sport" }, { id: "W080-f13", etage: 4, qm: 788, konzept: "eigen", gruppe: "sport" }, { id: "W080-f14", etage: 4, qm: 788, konzept: "eigen", gruppe: "spielwaren" }, { id: "W080-f15", etage: 4, qm: 757, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 433089, rohertrag: 182690, konzessionserloes: 0, untermiete: 0, personal: 103956, miete: 42353, nebenkosten: 18088, sonstige: 24058, db: -5765, fteBedarf: 81.0949679501219, fteIst: 106.9578032767022, umsatzJeGruppe: { food: 45379, wohnen: 47137, beauty: 70071, accessoires: 59859, damen: 94847, waesche: 30915, herren: 31432, kinder: 22918, sport: 19648, spielwaren: 10882 } } }, { id: "W081", name: "Hartwig Bremerhaven", stadt: "Bremerhaven", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2900, etagen: [0, 1, 2, 3, 4], baujahr: 1984, fassade: 1, substanz: 39, status: "offen", flaechen: [{ id: "W081-f1", etage: 0, qm: 1100, konzept: "eigen", gruppe: "food" }, { id: "W081-f2", etage: 0, qm: 867, konzept: "eigen", gruppe: "beauty" }, { id: "W081-f3", etage: 0, qm: 913, konzept: "eigen", gruppe: "accessoires" }, { id: "W081-f4", etage: 1, qm: 461, konzept: "eigen", gruppe: "accessoires" }, { id: "W081-f5", etage: 1, qm: 2419, konzept: "eigen", gruppe: "damen" }, { id: "W081-f6", etage: 2, qm: 630, konzept: "eigen", gruppe: "damen" }, { id: "W081-f7", etage: 2, qm: 893, konzept: "eigen", gruppe: "waesche" }, { id: "W081-f8", etage: 2, qm: 1357, konzept: "eigen", gruppe: "herren" }, { id: "W081-f9", etage: 3, qm: 332, konzept: "eigen", gruppe: "herren" }, { id: "W081-f10", etage: 3, qm: 892, konzept: "eigen", gruppe: "kinder" }, { id: "W081-f11", etage: 3, qm: 1406, konzept: "eigen", gruppe: "sport" }, { id: "W081-f12", etage: 3, qm: 250, konzept: "eigen", gruppe: "spielwaren" }, { id: "W081-f13", etage: 4, qm: 590, konzept: "eigen", gruppe: "spielwaren" }, { id: "W081-f14", etage: 4, qm: 2290, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 364211, rohertrag: 152969, konzessionserloes: 0, untermiete: 0, personal: 85323, miete: 37193, nebenkosten: 19313, sonstige: 21413, db: -10272, fteBedarf: 73.47684547615721, fteIst: 86.1167648364924, umsatzJeGruppe: { food: 40885, beauty: 49273, accessoires: 43350, damen: 76049, waesche: 25636, herren: 32417, kinder: 15573, sport: 22949, spielwaren: 11556, wohnen: 46521 } } }, { id: "W082", name: "Hartwig Trier", stadt: "Trier", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1994, fassade: 6, substanz: 61, status: "offen", flaechen: [{ id: "W082-f1", etage: -1, qm: 584, konzept: "eigen", gruppe: "food" }, { id: "W082-f2", etage: -1, qm: 983, konzept: "eigen", gruppe: "wohnen" }, { id: "W082-f3", etage: 0, qm: 531, konzept: "eigen", gruppe: "beauty" }, { id: "W082-f4", etage: 0, qm: 833, konzept: "eigen", gruppe: "accessoires" }, { id: "W082-f5", etage: 0, qm: 203, konzept: "eigen", gruppe: "damen" }, { id: "W082-f6", etage: 1, qm: 1526, konzept: "eigen", gruppe: "damen" }, { id: "W082-f7", etage: 1, qm: 41, konzept: "eigen", gruppe: "waesche" }, { id: "W082-f8", etage: 2, qm: 654, konzept: "eigen", gruppe: "waesche" }, { id: "W082-f9", etage: 2, qm: 913, konzept: "eigen", gruppe: "herren" }, { id: "W082-f10", etage: 3, qm: 406, konzept: "eigen", gruppe: "herren" }, { id: "W082-f11", etage: 3, qm: 671, konzept: "eigen", gruppe: "kinder" }, { id: "W082-f12", etage: 3, qm: 490, konzept: "eigen", gruppe: "sport" }, { id: "W082-f13", etage: 4, qm: 610, konzept: "eigen", gruppe: "sport" }, { id: "W082-f14", etage: 4, qm: 615, konzept: "eigen", gruppe: "spielwaren" }, { id: "W082-f15", etage: 4, qm: 342, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 296021, rohertrag: 125326, konzessionserloes: 0, untermiete: 0, personal: 65086, miete: 46347, nebenkosten: 12142, sonstige: 16368, db: -14618, fteBedarf: 55.139067866867336, fteIst: 66.78537801156742, umsatzJeGruppe: { food: 24957, wohnen: 25470, beauty: 44139, accessoires: 40878, damen: 49387, waesche: 20987, herren: 40429, kinder: 16345, sport: 23884, spielwaren: 9546 } } }, { id: "W083", name: "Hartwig Koblenz Arkaden", stadt: "Koblenz", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 4100, etagen: [0, 1, 2, 3], baujahr: 1931, fassade: 2, substanz: 87, status: "offen", flaechen: [{ id: "W083-f1", etage: 0, qm: 1175, konzept: "eigen", gruppe: "food" }, { id: "W083-f2", etage: 0, qm: 1163, konzept: "eigen", gruppe: "beauty" }, { id: "W083-f3", etage: 0, qm: 1364, konzept: "eigen", gruppe: "accessoires" }, { id: "W083-f4", etage: 0, qm: 348, konzept: "eigen", gruppe: "damen" }, { id: "W083-f5", etage: 1, qm: 2606, konzept: "eigen", gruppe: "damen" }, { id: "W083-f6", etage: 1, qm: 1444, konzept: "eigen", gruppe: "waesche" }, { id: "W083-f7", etage: 2, qm: 90, konzept: "eigen", gruppe: "waesche" }, { id: "W083-f8", etage: 2, qm: 1740, konzept: "eigen", gruppe: "herren" }, { id: "W083-f9", etage: 2, qm: 1007, konzept: "eigen", gruppe: "kinder" }, { id: "W083-f10", etage: 2, qm: 1212, konzept: "eigen", gruppe: "sport" }, { id: "W083-f11", etage: 3, qm: 308, konzept: "eigen", gruppe: "sport" }, { id: "W083-f12", etage: 3, qm: 1197, konzept: "eigen", gruppe: "spielwaren" }, { id: "W083-f13", etage: 3, qm: 2545, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 421035, rohertrag: 176174, konzessionserloes: 0, untermiete: 0, personal: 89750, miete: 54354, nebenkosten: 22496, sonstige: 24552, db: -14977, fteBedarf: 84.15255396038125, fteIst: 90.7486162454476, umsatzJeGruppe: { food: 42371, beauty: 78329, accessoires: 53733, damen: 67432, waesche: 37867, herren: 36625, kinder: 20950, sport: 22065, spielwaren: 16905, wohnen: 44757 } } }, { id: "W084", name: "Hartwig Jena", stadt: "Jena", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [0, 1, 2, 3], baujahr: 1977, fassade: 5, substanz: 40, status: "offen", flaechen: [{ id: "W084-f1", etage: 0, qm: 1066, konzept: "eigen", gruppe: "food" }, { id: "W084-f2", etage: 0, qm: 849, konzept: "eigen", gruppe: "beauty" }, { id: "W084-f3", etage: 0, qm: 1341, konzept: "eigen", gruppe: "accessoires" }, { id: "W084-f4", etage: 0, qm: 444, konzept: "eigen", gruppe: "damen" }, { id: "W084-f5", etage: 1, qm: 2418, konzept: "eigen", gruppe: "damen" }, { id: "W084-f6", etage: 1, qm: 1080, konzept: "eigen", gruppe: "waesche" }, { id: "W084-f7", etage: 1, qm: 202, konzept: "eigen", gruppe: "herren" }, { id: "W084-f8", etage: 2, qm: 1620, konzept: "eigen", gruppe: "herren" }, { id: "W084-f9", etage: 2, qm: 833, konzept: "eigen", gruppe: "kinder" }, { id: "W084-f10", etage: 2, qm: 1247, konzept: "eigen", gruppe: "sport" }, { id: "W084-f11", etage: 3, qm: 580, konzept: "eigen", gruppe: "sport" }, { id: "W084-f12", etage: 3, qm: 880, konzept: "eigen", gruppe: "spielwaren" }, { id: "W084-f13", etage: 3, qm: 2240, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 418729, rohertrag: 175387, konzessionserloes: 0, untermiete: 0, personal: 104315, miete: 62750, nebenkosten: 21111, sonstige: 23828, db: -36617, fteBedarf: 80.99693141011863, fteIst: 104.49131323756708, umsatzJeGruppe: { food: 43526, beauty: 63348, accessoires: 54755, damen: 71303, waesche: 31802, herren: 40826, kinder: 21322, sport: 34673, spielwaren: 13968, wohnen: 43207 } } }, { id: "W085", name: "Hartwig Siegen", stadt: "Siegen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1927, fassade: 4, substanz: 55, status: "offen", flaechen: [{ id: "W085-f1", etage: -1, qm: 675, konzept: "eigen", gruppe: "food" }, { id: "W085-f2", etage: -1, qm: 1385, konzept: "eigen", gruppe: "wohnen" }, { id: "W085-f3", etage: 0, qm: 613, konzept: "eigen", gruppe: "beauty" }, { id: "W085-f4", etage: 0, qm: 1088, konzept: "eigen", gruppe: "accessoires" }, { id: "W085-f5", etage: 0, qm: 359, konzept: "eigen", gruppe: "damen" }, { id: "W085-f6", etage: 1, qm: 1511, konzept: "eigen", gruppe: "damen" }, { id: "W085-f7", etage: 1, qm: 549, konzept: "eigen", gruppe: "waesche" }, { id: "W085-f8", etage: 2, qm: 227, konzept: "eigen", gruppe: "waesche" }, { id: "W085-f9", etage: 2, qm: 1321, konzept: "eigen", gruppe: "herren" }, { id: "W085-f10", etage: 2, qm: 512, konzept: "eigen", gruppe: "kinder" }, { id: "W085-f11", etage: 3, qm: 56, konzept: "eigen", gruppe: "kinder" }, { id: "W085-f12", etage: 3, qm: 1107, konzept: "eigen", gruppe: "sport" }, { id: "W085-f13", etage: 3, qm: 553, konzept: "eigen", gruppe: "spielwaren" }, { id: "W085-f14", etage: 3, qm: 345, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 328902, rohertrag: 138900, konzessionserloes: 0, untermiete: 0, personal: 70885, miete: 25961, nebenkosten: 13307, sonstige: 18120, db: 10626, fteBedarf: 60.97082378608198, fteIst: 72.54402763085625, umsatzJeGruppe: { food: 24956, wohnen: 32419, beauty: 59712, accessoires: 52275, damen: 59393, waesche: 21314, herren: 30981, kinder: 15624, sport: 22106, spielwaren: 10122 } } }, { id: "W086", name: "Hartwig Hildesheim", stadt: "Hildesheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1915, fassade: 0, substanz: 66, status: "offen", flaechen: [{ id: "W086-f1", etage: -1, qm: 726, konzept: "eigen", gruppe: "food" }, { id: "W086-f2", etage: -1, qm: 740, konzept: "eigen", gruppe: "wohnen" }, { id: "W086-f3", etage: 0, qm: 496, konzept: "eigen", gruppe: "beauty" }, { id: "W086-f4", etage: 0, qm: 971, konzept: "eigen", gruppe: "accessoires" }, { id: "W086-f5", etage: 1, qm: 25, konzept: "eigen", gruppe: "accessoires" }, { id: "W086-f6", etage: 1, qm: 1441, konzept: "eigen", gruppe: "damen" }, { id: "W086-f7", etage: 2, qm: 129, konzept: "eigen", gruppe: "damen" }, { id: "W086-f8", etage: 2, qm: 634, konzept: "eigen", gruppe: "waesche" }, { id: "W086-f9", etage: 2, qm: 704, konzept: "eigen", gruppe: "herren" }, { id: "W086-f10", etage: 3, qm: 562, konzept: "eigen", gruppe: "herren" }, { id: "W086-f11", etage: 3, qm: 507, konzept: "eigen", gruppe: "kinder" }, { id: "W086-f12", etage: 3, qm: 398, konzept: "eigen", gruppe: "sport" }, { id: "W086-f13", etage: 4, qm: 298, konzept: "eigen", gruppe: "sport" }, { id: "W086-f14", etage: 4, qm: 593, konzept: "eigen", gruppe: "spielwaren" }, { id: "W086-f15", etage: 4, qm: 575, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 258981, rohertrag: 109383, konzessionserloes: 0, untermiete: 0, personal: 52326, miete: 27654, nebenkosten: 9449, sonstige: 14578, db: 5376, fteBedarf: 49.39765951548749, fteIst: 54.17215499352276, umsatzJeGruppe: { food: 28225, wohnen: 26267, beauty: 35041, accessoires: 41065, damen: 43253, waesche: 17866, herren: 35669, kinder: 10911, sport: 11096, spielwaren: 9588 } } }, { id: "W087", name: "Hartwig Cottbus Arkaden", stadt: "Cottbus", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1988, fassade: 5, substanz: 78, status: "offen", flaechen: [{ id: "W087-f1", etage: -1, qm: 782, konzept: "eigen", gruppe: "food" }, { id: "W087-f2", etage: -1, qm: 1085, konzept: "eigen", gruppe: "wohnen" }, { id: "W087-f3", etage: 0, qm: 823, konzept: "eigen", gruppe: "beauty" }, { id: "W087-f4", etage: 0, qm: 980, konzept: "eigen", gruppe: "accessoires" }, { id: "W087-f5", etage: 0, qm: 64, konzept: "eigen", gruppe: "damen" }, { id: "W087-f6", etage: 1, qm: 1867, konzept: "eigen", gruppe: "damen" }, { id: "W087-f7", etage: 2, qm: 225, konzept: "eigen", gruppe: "damen" }, { id: "W087-f8", etage: 2, qm: 883, konzept: "eigen", gruppe: "waesche" }, { id: "W087-f9", etage: 2, qm: 759, konzept: "eigen", gruppe: "herren" }, { id: "W087-f10", etage: 3, qm: 654, konzept: "eigen", gruppe: "herren" }, { id: "W087-f11", etage: 3, qm: 647, konzept: "eigen", gruppe: "kinder" }, { id: "W087-f12", etage: 3, qm: 565, konzept: "eigen", gruppe: "sport" }, { id: "W087-f13", etage: 4, qm: 658, konzept: "eigen", gruppe: "sport" }, { id: "W087-f14", etage: 4, qm: 840, konzept: "eigen", gruppe: "spielwaren" }, { id: "W087-f15", etage: 4, qm: 369, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 292077, rohertrag: 121734, konzessionserloes: 0, untermiete: 0, personal: 63346, miete: 34167, nebenkosten: 12408, sonstige: 17016, db: -5202, fteBedarf: 58.30877635131459, fteIst: 63.996752599812204, umsatzJeGruppe: { food: 29834, wohnen: 23616, beauty: 65222, accessoires: 33631, damen: 43836, waesche: 22175, herren: 35370, kinder: 10584, sport: 16282, spielwaren: 11528 } } }, { id: "W088", name: "Hartwig G\xFCtersloh Am Wall", stadt: "G\xFCtersloh", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1], baujahr: 1993, fassade: 0, substanz: 56, status: "offen", flaechen: [{ id: "W088-f1", etage: -1, qm: 322, konzept: "eigen", gruppe: "food" }, { id: "W088-f2", etage: -1, qm: 1611, konzept: "eigen", gruppe: "wohnen" }, { id: "W088-f3", etage: 0, qm: 392, konzept: "eigen", gruppe: "beauty" }, { id: "W088-f4", etage: 0, qm: 695, konzept: "eigen", gruppe: "accessoires" }, { id: "W088-f5", etage: 0, qm: 846, konzept: "eigen", gruppe: "damen" }, { id: "W088-f6", etage: 1, qm: 269, konzept: "eigen", gruppe: "damen" }, { id: "W088-f7", etage: 1, qm: 374, konzept: "eigen", gruppe: "waesche" }, { id: "W088-f8", etage: 1, qm: 842, konzept: "eigen", gruppe: "herren" }, { id: "W088-f9", etage: 1, qm: 351, konzept: "eigen", gruppe: "kinder" }, { id: "W088-f10", etage: 1, qm: 904, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 124671, rohertrag: 52928, konzessionserloes: 0, untermiete: 0, personal: 29053, miete: 18298, nebenkosten: 9018, sonstige: 8084, db: -11525, fteBedarf: 28.428846813084405, fteIst: 29.48714567675355, umsatzJeGruppe: { food: 7495, wohnen: 21073, beauty: 20934, accessoires: 18818, damen: 19281, waesche: 7905, herren: 14991, kinder: 4697, sport: 9477 } } }, { id: "W089", name: "Hartwig Recklinghausen Bahnhofstra\xDFe", stadt: "Recklinghausen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2], baujahr: 1996, fassade: 7, substanz: 39, status: "offen", flaechen: [{ id: "W089-f1", etage: -1, qm: 494, konzept: "eigen", gruppe: "food" }, { id: "W089-f2", etage: -1, qm: 1456, konzept: "eigen", gruppe: "wohnen" }, { id: "W089-f3", etage: 0, qm: 606, konzept: "eigen", gruppe: "beauty" }, { id: "W089-f4", etage: 0, qm: 727, konzept: "eigen", gruppe: "accessoires" }, { id: "W089-f5", etage: 0, qm: 617, konzept: "eigen", gruppe: "damen" }, { id: "W089-f6", etage: 1, qm: 1068, konzept: "eigen", gruppe: "damen" }, { id: "W089-f7", etage: 1, qm: 483, konzept: "eigen", gruppe: "waesche" }, { id: "W089-f8", etage: 1, qm: 399, konzept: "eigen", gruppe: "herren" }, { id: "W089-f9", etage: 2, qm: 361, konzept: "eigen", gruppe: "herren" }, { id: "W089-f10", etage: 2, qm: 566, konzept: "eigen", gruppe: "kinder" }, { id: "W089-f11", etage: 2, qm: 1004, konzept: "eigen", gruppe: "sport" }, { id: "W089-f12", etage: 2, qm: 515, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 203447, rohertrag: 85087, konzessionserloes: 0, untermiete: 0, personal: 43783, miete: 49672, nebenkosten: 0, sonstige: 12075, db: -20443, fteBedarf: 41.56703944462395, fteIst: 45.29348812867737, umsatzJeGruppe: { food: 17434, wohnen: 24610, beauty: 36363, accessoires: 30622, damen: 35222, waesche: 12592, herren: 14835, kinder: 9197, sport: 15897, spielwaren: 6676 } } }, { id: "W090", name: "Hartwig Bottrop", stadt: "Bottrop", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1962, fassade: 4, substanz: 45, status: "offen", flaechen: [{ id: "W090-f1", etage: 0, qm: 455, konzept: "eigen", gruppe: "food" }, { id: "W090-f2", etage: 0, qm: 366, konzept: "eigen", gruppe: "beauty" }, { id: "W090-f3", etage: 0, qm: 300, konzept: "eigen", gruppe: "accessoires" }, { id: "W090-f4", etage: 1, qm: 133, konzept: "eigen", gruppe: "accessoires" }, { id: "W090-f5", etage: 1, qm: 985, konzept: "eigen", gruppe: "damen" }, { id: "W090-f6", etage: 1, qm: 2, konzept: "eigen", gruppe: "waesche" }, { id: "W090-f7", etage: 2, qm: 464, konzept: "eigen", gruppe: "waesche" }, { id: "W090-f8", etage: 2, qm: 509, konzept: "eigen", gruppe: "herren" }, { id: "W090-f9", etage: 2, qm: 147, konzept: "eigen", gruppe: "kinder" }, { id: "W090-f10", etage: 3, qm: 324, konzept: "eigen", gruppe: "kinder" }, { id: "W090-f11", etage: 3, qm: 639, konzept: "eigen", gruppe: "sport" }, { id: "W090-f12", etage: 3, qm: 158, konzept: "eigen", gruppe: "spielwaren" }, { id: "W090-f13", etage: 4, qm: 103, konzept: "eigen", gruppe: "spielwaren" }, { id: "W090-f14", etage: 4, qm: 1017, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 138992, rohertrag: 57510, konzessionserloes: 0, untermiete: 0, personal: 34268, miete: 22132, nebenkosten: 6819, sonstige: 8220, db: -13928, fteBedarf: 28.257745128797616, fteIst: 34.92298984870858, umsatzJeGruppe: { food: 15425, beauty: 27777, accessoires: 17366, damen: 19928, waesche: 10777, herren: 9110, kinder: 10219, sport: 9114, spielwaren: 3768, wohnen: 15506 } } }, { id: "W091", name: "Hartwig Reutlingen", stadt: "Reutlingen", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2], baujahr: 1961, fassade: 4, substanz: 70, status: "offen", flaechen: [{ id: "W091-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W091-f2", etage: -1, qm: 1305, konzept: "eigen", gruppe: "wohnen" }, { id: "W091-f3", etage: 0, qm: 346, konzept: "eigen", gruppe: "beauty" }, { id: "W091-f4", etage: 0, qm: 658, konzept: "eigen", gruppe: "accessoires" }, { id: "W091-f5", etage: 0, qm: 821, konzept: "eigen", gruppe: "damen" }, { id: "W091-f6", etage: 1, qm: 812, konzept: "eigen", gruppe: "damen" }, { id: "W091-f7", etage: 1, qm: 548, konzept: "eigen", gruppe: "waesche" }, { id: "W091-f8", etage: 1, qm: 465, konzept: "eigen", gruppe: "herren" }, { id: "W091-f9", etage: 2, qm: 217, konzept: "eigen", gruppe: "herren" }, { id: "W091-f10", etage: 2, qm: 595, konzept: "eigen", gruppe: "kinder" }, { id: "W091-f11", etage: 2, qm: 638, konzept: "eigen", gruppe: "sport" }, { id: "W091-f12", etage: 2, qm: 438, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 184099, rohertrag: 77623, konzessionserloes: 0, untermiete: 0, personal: 45978, miete: 15699, nebenkosten: 9841, sonstige: 10861, db: -4756, fteBedarf: 37.29137562435482, fteIst: 47.13499948950924, umsatzJeGruppe: { food: 21031, wohnen: 20202, beauty: 25356, accessoires: 26480, damen: 36289, waesche: 15953, herren: 14126, kinder: 10446, sport: 9486, spielwaren: 4730 } } }, { id: "W092", name: "Hartwig Erlangen Am Wall", stadt: "Erlangen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1], baujahr: 2001, fassade: 0, substanz: 60, status: "offen", flaechen: [{ id: "W092-f1", etage: -1, qm: 432, konzept: "eigen", gruppe: "food" }, { id: "W092-f2", etage: -1, qm: 2102, konzept: "eigen", gruppe: "wohnen" }, { id: "W092-f3", etage: 0, qm: 366, konzept: "eigen", gruppe: "beauty" }, { id: "W092-f4", etage: 0, qm: 851, konzept: "eigen", gruppe: "accessoires" }, { id: "W092-f5", etage: 0, qm: 1316, konzept: "eigen", gruppe: "damen" }, { id: "W092-f6", etage: 1, qm: 507, konzept: "eigen", gruppe: "damen" }, { id: "W092-f7", etage: 1, qm: 392, konzept: "eigen", gruppe: "waesche" }, { id: "W092-f8", etage: 1, qm: 1113, konzept: "eigen", gruppe: "herren" }, { id: "W092-f9", etage: 1, qm: 1617, konzept: "eigen", gruppe: "kinder" }], kpi: { woche: 2, umsatz: 176118, rohertrag: 75385, konzessionserloes: 0, untermiete: 0, personal: 45543, miete: 18490, nebenkosten: 10572, sonstige: 11134, db: -10354, fteBedarf: 38.91110942200965, fteIst: 46.02220199007599, umsatzJeGruppe: { food: 12785, wohnen: 26662, beauty: 22441, accessoires: 27921, damen: 33587, waesche: 7411, herren: 18684, kinder: 26626 } } }, { id: "W093", name: "Hartwig F\xFCrth Fachmarktzentrum", stadt: "F\xFCrth", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [-1, 0, 1, 2], baujahr: 1900, fassade: 1, substanz: 53, status: "offen", flaechen: [{ id: "W093-f1", etage: -1, qm: 495, konzept: "eigen", gruppe: "food" }, { id: "W093-f2", etage: -1, qm: 1130, konzept: "eigen", gruppe: "wohnen" }, { id: "W093-f3", etage: 0, qm: 430, konzept: "eigen", gruppe: "beauty" }, { id: "W093-f4", etage: 0, qm: 537, konzept: "eigen", gruppe: "accessoires" }, { id: "W093-f5", etage: 0, qm: 659, konzept: "eigen", gruppe: "damen" }, { id: "W093-f6", etage: 1, qm: 359, konzept: "eigen", gruppe: "damen" }, { id: "W093-f7", etage: 1, qm: 405, konzept: "eigen", gruppe: "waesche" }, { id: "W093-f8", etage: 1, qm: 861, konzept: "eigen", gruppe: "herren" }, { id: "W093-f9", etage: 2, qm: 88, konzept: "eigen", gruppe: "herren" }, { id: "W093-f10", etage: 2, qm: 539, konzept: "eigen", gruppe: "kinder" }, { id: "W093-f11", etage: 2, qm: 822, konzept: "eigen", gruppe: "sport" }, { id: "W093-f12", etage: 2, qm: 381, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 115943, rohertrag: 48298, konzessionserloes: 0, untermiete: 0, personal: 34094, miete: 21965, nebenkosten: 0, sonstige: 7771, db: -15532, fteBedarf: 27.641040197921114, fteIst: 34.87133638586731, umsatzJeGruppe: { food: 12466, wohnen: 12492, beauty: 19041, accessoires: 15480, damen: 16212, waesche: 8012, herren: 12194, kinder: 8236, sport: 8286, spielwaren: 3523 } } }, { id: "W094", name: "Hartwig Bamberg", stadt: "Bamberg", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1920, fassade: 1, substanz: 85, status: "offen", flaechen: [{ id: "W094-f1", etage: 0, qm: 568, konzept: "eigen", gruppe: "food" }, { id: "W094-f2", etage: 0, qm: 443, konzept: "eigen", gruppe: "beauty" }, { id: "W094-f3", etage: 0, qm: 628, konzept: "eigen", gruppe: "accessoires" }, { id: "W094-f4", etage: 1, qm: 400, konzept: "eigen", gruppe: "accessoires" }, { id: "W094-f5", etage: 1, qm: 1240, konzept: "eigen", gruppe: "damen" }, { id: "W094-f6", etage: 2, qm: 291, konzept: "eigen", gruppe: "damen" }, { id: "W094-f7", etage: 2, qm: 529, konzept: "eigen", gruppe: "waesche" }, { id: "W094-f8", etage: 2, qm: 820, konzept: "eigen", gruppe: "herren" }, { id: "W094-f9", etage: 3, qm: 128, konzept: "eigen", gruppe: "herren" }, { id: "W094-f10", etage: 3, qm: 537, konzept: "eigen", gruppe: "kinder" }, { id: "W094-f11", etage: 3, qm: 731, konzept: "eigen", gruppe: "sport" }, { id: "W094-f12", etage: 3, qm: 244, konzept: "eigen", gruppe: "spielwaren" }, { id: "W094-f13", etage: 4, qm: 177, konzept: "eigen", gruppe: "spielwaren" }, { id: "W094-f14", etage: 4, qm: 1463, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 268299, rohertrag: 112783, konzessionserloes: 0, untermiete: 0, personal: 52968, miete: 16609, nebenkosten: 8892, sonstige: 14690, db: 19625, fteBedarf: 49.296812978589855, fteIst: 54.445077070060776, umsatzJeGruppe: { food: 24438, beauty: 44625, accessoires: 47129, damen: 39335, waesche: 20350, herren: 23296, kinder: 13532, sport: 14160, spielwaren: 7136, wohnen: 34299 } } }, { id: "W095", name: "Hartwig Bayreuth Gewerbepark", stadt: "Bayreuth", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1956, fassade: 1, substanz: 79, status: "offen", flaechen: [{ id: "W095-f1", etage: 0, qm: 640, konzept: "eigen", gruppe: "food" }, { id: "W095-f2", etage: 0, qm: 439, konzept: "eigen", gruppe: "beauty" }, { id: "W095-f3", etage: 0, qm: 604, konzept: "eigen", gruppe: "accessoires" }, { id: "W095-f4", etage: 0, qm: 166, konzept: "eigen", gruppe: "damen" }, { id: "W095-f5", etage: 1, qm: 1425, konzept: "eigen", gruppe: "damen" }, { id: "W095-f6", etage: 1, qm: 425, konzept: "eigen", gruppe: "waesche" }, { id: "W095-f7", etage: 2, qm: 209, konzept: "eigen", gruppe: "waesche" }, { id: "W095-f8", etage: 2, qm: 881, konzept: "eigen", gruppe: "herren" }, { id: "W095-f9", etage: 2, qm: 640, konzept: "eigen", gruppe: "kinder" }, { id: "W095-f10", etage: 2, qm: 120, konzept: "eigen", gruppe: "sport" }, { id: "W095-f11", etage: 3, qm: 481, konzept: "eigen", gruppe: "sport" }, { id: "W095-f12", etage: 3, qm: 422, konzept: "eigen", gruppe: "spielwaren" }, { id: "W095-f13", etage: 3, qm: 947, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 150166, rohertrag: 62717, konzessionserloes: 0, untermiete: 0, personal: 36268, miete: 15556, nebenkosten: 0, sonstige: 9486, db: 1407, fteBedarf: 33.20495126750215, fteIst: 36.81777817173233, umsatzJeGruppe: { food: 20323, beauty: 22858, accessoires: 19239, damen: 25232, waesche: 12923, herren: 14402, kinder: 9990, sport: 7719, spielwaren: 3720, wohnen: 13761 } } }, { id: "W096", name: "Hartwig Landshut Am Wall", stadt: "Landshut", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2], baujahr: 1995, fassade: 5, substanz: 35, status: "offen", flaechen: [{ id: "W096-f1", etage: -1, qm: 405, konzept: "eigen", gruppe: "food" }, { id: "W096-f2", etage: -1, qm: 1070, konzept: "eigen", gruppe: "wohnen" }, { id: "W096-f3", etage: 0, qm: 426, konzept: "eigen", gruppe: "beauty" }, { id: "W096-f4", etage: 0, qm: 673, konzept: "eigen", gruppe: "accessoires" }, { id: "W096-f5", etage: 0, qm: 376, konzept: "eigen", gruppe: "damen" }, { id: "W096-f6", etage: 1, qm: 768, konzept: "eigen", gruppe: "damen" }, { id: "W096-f7", etage: 1, qm: 339, konzept: "eigen", gruppe: "waesche" }, { id: "W096-f8", etage: 1, qm: 368, konzept: "eigen", gruppe: "herren" }, { id: "W096-f9", etage: 2, qm: 471, konzept: "eigen", gruppe: "herren" }, { id: "W096-f10", etage: 2, qm: 452, konzept: "eigen", gruppe: "kinder" }, { id: "W096-f11", etage: 2, qm: 908, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 135608, rohertrag: 57181, konzessionserloes: 0, untermiete: 0, personal: 35675, miete: 16341, nebenkosten: 7692, sonstige: 8375, db: -10902, fteBedarf: 29.070348033675355, fteIst: 36.679922151243574, umsatzJeGruppe: { food: 12259, wohnen: 12068, beauty: 25503, accessoires: 22572, damen: 22486, waesche: 7059, herren: 16129, kinder: 6548, sport: 10984 } } }, { id: "W097", name: "Hartwig Rosenheim Bahnhofstra\xDFe", stadt: "Rosenheim", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [0, 1, 2, 3], baujahr: 1964, fassade: 1, substanz: 56, status: "offen", flaechen: [{ id: "W097-f1", etage: 0, qm: 458, konzept: "eigen", gruppe: "food" }, { id: "W097-f2", etage: 0, qm: 599, konzept: "eigen", gruppe: "beauty" }, { id: "W097-f3", etage: 0, qm: 745, konzept: "eigen", gruppe: "accessoires" }, { id: "W097-f4", etage: 0, qm: 249, konzept: "eigen", gruppe: "damen" }, { id: "W097-f5", etage: 1, qm: 1369, konzept: "eigen", gruppe: "damen" }, { id: "W097-f6", etage: 1, qm: 498, konzept: "eigen", gruppe: "waesche" }, { id: "W097-f7", etage: 1, qm: 183, konzept: "eigen", gruppe: "herren" }, { id: "W097-f8", etage: 2, qm: 1010, konzept: "eigen", gruppe: "herren" }, { id: "W097-f9", etage: 2, qm: 651, konzept: "eigen", gruppe: "kinder" }, { id: "W097-f10", etage: 2, qm: 390, konzept: "eigen", gruppe: "sport" }, { id: "W097-f11", etage: 3, qm: 413, konzept: "eigen", gruppe: "sport" }, { id: "W097-f12", etage: 3, qm: 536, konzept: "eigen", gruppe: "spielwaren" }, { id: "W097-f13", etage: 3, qm: 1100, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 172862, rohertrag: 72518, konzessionserloes: 0, untermiete: 0, personal: 42004, miete: 25166, nebenkosten: 0, sonstige: 10778, db: -5429, fteBedarf: 37.627392734685365, fteIst: 43.04955422287533, umsatzJeGruppe: { food: 12442, beauty: 40203, accessoires: 20760, damen: 27829, waesche: 10676, herren: 19312, kinder: 9360, sport: 9508, spielwaren: 5179, wohnen: 17593 } } }, { id: "W098", name: "Hartwig Kempten Am Stadtrand", stadt: "Kempten", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1966, fassade: 7, substanz: 32, status: "offen", flaechen: [{ id: "W098-f1", etage: 0, qm: 477, konzept: "eigen", gruppe: "food" }, { id: "W098-f2", etage: 0, qm: 441, konzept: "eigen", gruppe: "beauty" }, { id: "W098-f3", etage: 0, qm: 702, konzept: "eigen", gruppe: "accessoires" }, { id: "W098-f4", etage: 1, qm: 100, konzept: "eigen", gruppe: "accessoires" }, { id: "W098-f5", etage: 1, qm: 1520, konzept: "eigen", gruppe: "damen" }, { id: "W098-f6", etage: 2, qm: 313, konzept: "eigen", gruppe: "damen" }, { id: "W098-f7", etage: 2, qm: 641, konzept: "eigen", gruppe: "waesche" }, { id: "W098-f8", etage: 2, qm: 666, konzept: "eigen", gruppe: "herren" }, { id: "W098-f9", etage: 3, qm: 309, konzept: "eigen", gruppe: "herren" }, { id: "W098-f10", etage: 3, qm: 580, konzept: "eigen", gruppe: "kinder" }, { id: "W098-f11", etage: 3, qm: 635, konzept: "eigen", gruppe: "sport" }, { id: "W098-f12", etage: 3, qm: 97, konzept: "eigen", gruppe: "spielwaren" }, { id: "W098-f13", etage: 4, qm: 340, konzept: "eigen", gruppe: "spielwaren" }, { id: "W098-f14", etage: 4, qm: 1280, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 151465, rohertrag: 64572, konzessionserloes: 0, untermiete: 0, personal: 39328, miete: 23412, nebenkosten: 11264, sonstige: 9856, db: -19288, fteBedarf: 34.75651464344672, fteIst: 39.397004033886304, umsatzJeGruppe: { food: 13541, beauty: 24116, accessoires: 21104, damen: 32554, waesche: 11366, herren: 16363, kinder: 7130, sport: 5118, spielwaren: 3195, wohnen: 16979 } } }, { id: "W099", name: "Hartwig Passau", stadt: "Passau", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3], baujahr: 1983, fassade: 0, substanz: 75, status: "offen", flaechen: [{ id: "W099-f1", etage: 0, qm: 436, konzept: "eigen", gruppe: "food" }, { id: "W099-f2", etage: 0, qm: 364, konzept: "eigen", gruppe: "beauty" }, { id: "W099-f3", etage: 0, qm: 619, konzept: "eigen", gruppe: "accessoires" }, { id: "W099-f4", etage: 0, qm: 306, konzept: "eigen", gruppe: "damen" }, { id: "W099-f5", etage: 1, qm: 1222, konzept: "eigen", gruppe: "damen" }, { id: "W099-f6", etage: 1, qm: 482, konzept: "eigen", gruppe: "waesche" }, { id: "W099-f7", etage: 1, qm: 20, konzept: "eigen", gruppe: "herren" }, { id: "W099-f8", etage: 2, qm: 1049, konzept: "eigen", gruppe: "herren" }, { id: "W099-f9", etage: 2, qm: 531, konzept: "eigen", gruppe: "kinder" }, { id: "W099-f10", etage: 2, qm: 145, konzept: "eigen", gruppe: "sport" }, { id: "W099-f11", etage: 3, qm: 476, konzept: "eigen", gruppe: "sport" }, { id: "W099-f12", etage: 3, qm: 406, konzept: "eigen", gruppe: "spielwaren" }, { id: "W099-f13", etage: 3, qm: 843, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 168057, rohertrag: 71352, konzessionserloes: 0, untermiete: 0, personal: 38638, miete: 20763, nebenkosten: 7255, sonstige: 9995, db: -5300, fteBedarf: 34.41694374425633, fteIst: 39.66429120620631, umsatzJeGruppe: { food: 16196, beauty: 25378, accessoires: 23952, damen: 32460, waesche: 13067, herren: 19659, kinder: 10357, sport: 9127, spielwaren: 4915, wohnen: 12947 } } }, { id: "W100", name: "Hartwig Konstanz Neustadt", stadt: "Konstanz", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1908, fassade: 4, substanz: 51, status: "offen", flaechen: [{ id: "W100-f1", etage: 0, qm: 460, konzept: "eigen", gruppe: "food" }, { id: "W100-f2", etage: 0, qm: 385, konzept: "eigen", gruppe: "beauty" }, { id: "W100-f3", etage: 0, qm: 622, konzept: "eigen", gruppe: "accessoires" }, { id: "W100-f4", etage: 0, qm: 432, konzept: "eigen", gruppe: "damen" }, { id: "W100-f5", etage: 1, qm: 1254, konzept: "eigen", gruppe: "damen" }, { id: "W100-f6", etage: 1, qm: 520, konzept: "eigen", gruppe: "waesche" }, { id: "W100-f7", etage: 1, qm: 126, konzept: "eigen", gruppe: "herren" }, { id: "W100-f8", etage: 2, qm: 708, konzept: "eigen", gruppe: "herren" }, { id: "W100-f9", etage: 2, qm: 584, konzept: "eigen", gruppe: "kinder" }, { id: "W100-f10", etage: 2, qm: 607, konzept: "eigen", gruppe: "sport" }, { id: "W100-f11", etage: 3, qm: 82, konzept: "eigen", gruppe: "sport" }, { id: "W100-f12", etage: 3, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W100-f13", etage: 3, qm: 1393, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 171450, rohertrag: 72427, konzessionserloes: 0, untermiete: 0, personal: 43520, miete: 24528, nebenkosten: 9868, sonstige: 10449, db: -15938, fteBedarf: 36.25351399451973, fteIst: 45.03906490261539, umsatzJeGruppe: { food: 13776, beauty: 30009, accessoires: 19457, damen: 34149, waesche: 11361, herren: 18758, kinder: 9128, sport: 10612, spielwaren: 5991, wohnen: 18209 } } }, { id: "W101", name: "Hartwig Esslingen", stadt: "Esslingen", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1], baujahr: 1966, fassade: 6, substanz: 66, status: "offen", flaechen: [{ id: "W101-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W101-f2", etage: -1, qm: 2513, konzept: "eigen", gruppe: "wohnen" }, { id: "W101-f3", etage: 0, qm: 626, konzept: "eigen", gruppe: "beauty" }, { id: "W101-f4", etage: 0, qm: 1087, konzept: "eigen", gruppe: "accessoires" }, { id: "W101-f5", etage: 0, qm: 1320, konzept: "eigen", gruppe: "damen" }, { id: "W101-f6", etage: 1, qm: 444, konzept: "eigen", gruppe: "damen" }, { id: "W101-f7", etage: 1, qm: 769, konzept: "eigen", gruppe: "waesche" }, { id: "W101-f8", etage: 1, qm: 874, konzept: "eigen", gruppe: "herren" }, { id: "W101-f9", etage: 1, qm: 789, konzept: "eigen", gruppe: "kinder" }, { id: "W101-f10", etage: 1, qm: 1251, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 268700, rohertrag: 113360, konzessionserloes: 0, untermiete: 0, personal: 60361, miete: 28560, nebenkosten: 11774, sonstige: 15604, db: -2938, fteBedarf: 53.19083552355613, fteIst: 61.93458171953874, umsatzJeGruppe: { food: 19027, wohnen: 45331, beauty: 48759, accessoires: 46243, damen: 36138, waesche: 21425, herren: 20922, kinder: 14119, sport: 16737 } } }, { id: "W102", name: "Hartwig Ludwigsburg Bahnhofstra\xDFe", stadt: "Ludwigsburg", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1992, fassade: 6, substanz: 81, status: "offen", flaechen: [{ id: "W102-f1", etage: 0, qm: 511, konzept: "eigen", gruppe: "food" }, { id: "W102-f2", etage: 0, qm: 486, konzept: "eigen", gruppe: "beauty" }, { id: "W102-f3", etage: 0, qm: 423, konzept: "eigen", gruppe: "accessoires" }, { id: "W102-f4", etage: 1, qm: 301, konzept: "eigen", gruppe: "accessoires" }, { id: "W102-f5", etage: 1, qm: 1119, konzept: "eigen", gruppe: "damen" }, { id: "W102-f6", etage: 2, qm: 206, konzept: "eigen", gruppe: "damen" }, { id: "W102-f7", etage: 2, qm: 419, konzept: "eigen", gruppe: "waesche" }, { id: "W102-f8", etage: 2, qm: 795, konzept: "eigen", gruppe: "herren" }, { id: "W102-f9", etage: 3, qm: 127, konzept: "eigen", gruppe: "herren" }, { id: "W102-f10", etage: 3, qm: 484, konzept: "eigen", gruppe: "kinder" }, { id: "W102-f11", etage: 3, qm: 616, konzept: "eigen", gruppe: "sport" }, { id: "W102-f12", etage: 3, qm: 192, konzept: "eigen", gruppe: "spielwaren" }, { id: "W102-f13", etage: 4, qm: 187, konzept: "eigen", gruppe: "spielwaren" }, { id: "W102-f14", etage: 4, qm: 1233, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 142135, rohertrag: 59992, konzessionserloes: 0, untermiete: 0, personal: 39428, miete: 16603, nebenkosten: 9144, sonstige: 9022, db: -14205, fteBedarf: 31.62373885682738, fteIst: 40.51818469564541, umsatzJeGruppe: { food: 13624, beauty: 25358, accessoires: 19871, damen: 25542, waesche: 8860, herren: 17460, kinder: 7348, sport: 5467, spielwaren: 3507, wohnen: 15100 } } }, { id: "W103", name: "Hartwig T\xFCbingen Gewerbepark", stadt: "T\xFCbingen", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1], baujahr: 1985, fassade: 7, substanz: 42, status: "offen", flaechen: [{ id: "W103-f1", etage: -1, qm: 459, konzept: "eigen", gruppe: "food" }, { id: "W103-f2", etage: -1, qm: 1374, konzept: "eigen", gruppe: "wohnen" }, { id: "W103-f3", etage: 0, qm: 329, konzept: "eigen", gruppe: "beauty" }, { id: "W103-f4", etage: 0, qm: 616, konzept: "eigen", gruppe: "accessoires" }, { id: "W103-f5", etage: 0, qm: 888, konzept: "eigen", gruppe: "damen" }, { id: "W103-f6", etage: 1, qm: 477, konzept: "eigen", gruppe: "damen" }, { id: "W103-f7", etage: 1, qm: 393, konzept: "eigen", gruppe: "waesche" }, { id: "W103-f8", etage: 1, qm: 589, konzept: "eigen", gruppe: "herren" }, { id: "W103-f9", etage: 1, qm: 325, konzept: "eigen", gruppe: "kinder" }, { id: "W103-f10", etage: 1, qm: 778, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 132568, rohertrag: 55834, konzessionserloes: 0, untermiete: 0, personal: 32193, miete: 16625, nebenkosten: 7770, sonstige: 8238, db: -8993, fteBedarf: 28.63271004794145, fteIst: 33.015858727339364, umsatzJeGruppe: { food: 12932, wohnen: 21452, beauty: 21428, accessoires: 19338, damen: 23366, waesche: 10401, herren: 10385, kinder: 4764, sport: 8500 } } }, { id: "W104", name: "Hartwig Gie\xDFen Am Wall", stadt: "Gie\xDFen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2], baujahr: 2003, fassade: 6, substanz: 55, status: "offen", flaechen: [{ id: "W104-f1", etage: -1, qm: 358, konzept: "eigen", gruppe: "food" }, { id: "W104-f2", etage: -1, qm: 917, konzept: "eigen", gruppe: "wohnen" }, { id: "W104-f3", etage: 0, qm: 359, konzept: "eigen", gruppe: "beauty" }, { id: "W104-f4", etage: 0, qm: 493, konzept: "eigen", gruppe: "accessoires" }, { id: "W104-f5", etage: 0, qm: 423, konzept: "eigen", gruppe: "damen" }, { id: "W104-f6", etage: 1, qm: 476, konzept: "eigen", gruppe: "damen" }, { id: "W104-f7", etage: 1, qm: 374, konzept: "eigen", gruppe: "waesche" }, { id: "W104-f8", etage: 1, qm: 425, konzept: "eigen", gruppe: "herren" }, { id: "W104-f9", etage: 2, qm: 171, konzept: "eigen", gruppe: "herren" }, { id: "W104-f10", etage: 2, qm: 361, konzept: "eigen", gruppe: "kinder" }, { id: "W104-f11", etage: 2, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W104-f12", etage: 2, qm: 357, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 113296, rohertrag: 47363, konzessionserloes: 0, untermiete: 0, personal: 26641, miete: 25935, nebenkosten: 0, sonstige: 7061, db: -12274, fteBedarf: 24.638005707066768, fteIst: 27.111889263397853, umsatzJeGruppe: { food: 10242, wohnen: 14637, beauty: 18883, accessoires: 16279, damen: 17994, waesche: 7895, herren: 8934, kinder: 6255, sport: 8739, spielwaren: 3439 } } }, { id: "W105", name: "Hartwig Marburg Bahnhofstra\xDFe", stadt: "Marburg", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1], baujahr: 1993, fassade: 1, substanz: 69, status: "offen", flaechen: [{ id: "W105-f1", etage: -1, qm: 811, konzept: "eigen", gruppe: "food" }, { id: "W105-f2", etage: -1, qm: 2189, konzept: "eigen", gruppe: "wohnen" }, { id: "W105-f3", etage: 0, qm: 653, konzept: "eigen", gruppe: "beauty" }, { id: "W105-f4", etage: 0, qm: 970, konzept: "eigen", gruppe: "accessoires" }, { id: "W105-f5", etage: 0, qm: 1377, konzept: "eigen", gruppe: "damen" }, { id: "W105-f6", etage: 1, qm: 256, konzept: "eigen", gruppe: "damen" }, { id: "W105-f7", etage: 1, qm: 497, konzept: "eigen", gruppe: "waesche" }, { id: "W105-f8", etage: 1, qm: 1277, konzept: "eigen", gruppe: "herren" }, { id: "W105-f9", etage: 1, qm: 697, konzept: "eigen", gruppe: "kinder" }, { id: "W105-f10", etage: 1, qm: 1385, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 232639, rohertrag: 96259, konzessionserloes: 0, untermiete: 0, personal: 54606, miete: 42301, nebenkosten: 13243, sonstige: 14089, db: -27980, fteBedarf: 48.61394990938224, fteIst: 55.60839542009545, umsatzJeGruppe: { food: 30929, wohnen: 33251, beauty: 35676, accessoires: 32234, damen: 34786, waesche: 11022, herren: 23098, kinder: 13222, sport: 18419 } } }, { id: "W106", name: "Hartwig Fulda Lindenstra\xDFe", stadt: "Fulda", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [0, 1, 2], baujahr: 1963, fassade: 0, substanz: 55, status: "offen", flaechen: [{ id: "W106-f1", etage: 0, qm: 584, konzept: "eigen", gruppe: "food" }, { id: "W106-f2", etage: 0, qm: 458, konzept: "eigen", gruppe: "beauty" }, { id: "W106-f3", etage: 0, qm: 776, konzept: "eigen", gruppe: "accessoires" }, { id: "W106-f4", etage: 0, qm: 715, konzept: "eigen", gruppe: "damen" }, { id: "W106-f5", etage: 1, qm: 696, konzept: "eigen", gruppe: "damen" }, { id: "W106-f6", etage: 1, qm: 546, konzept: "eigen", gruppe: "waesche" }, { id: "W106-f7", etage: 1, qm: 968, konzept: "eigen", gruppe: "herren" }, { id: "W106-f8", etage: 1, qm: 323, konzept: "eigen", gruppe: "kinder" }, { id: "W106-f9", etage: 2, qm: 301, konzept: "eigen", gruppe: "kinder" }, { id: "W106-f10", etage: 2, qm: 670, konzept: "eigen", gruppe: "sport" }, { id: "W106-f11", etage: 2, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W106-f12", etage: 2, qm: 1138, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 161788, rohertrag: 67372, konzessionserloes: 0, untermiete: 0, personal: 37421, miete: 20102, nebenkosten: 9683, sonstige: 10053, db: -9887, fteBedarf: 35.03601353250928, fteIst: 38.30472747897493, umsatzJeGruppe: { food: 20050, beauty: 26395, accessoires: 24546, damen: 23090, waesche: 11676, herren: 16069, kinder: 9006, sport: 7148, spielwaren: 4286, wohnen: 19522 } } }, { id: "W107", name: "Hartwig Hanau Am Wall", stadt: "Hanau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2], baujahr: 1986, fassade: 3, substanz: 85, status: "offen", flaechen: [{ id: "W107-f1", etage: 0, qm: 311, konzept: "eigen", gruppe: "food" }, { id: "W107-f2", etage: 0, qm: 371, konzept: "eigen", gruppe: "beauty" }, { id: "W107-f3", etage: 0, qm: 529, konzept: "eigen", gruppe: "accessoires" }, { id: "W107-f4", etage: 0, qm: 689, konzept: "eigen", gruppe: "damen" }, { id: "W107-f5", etage: 1, qm: 410, konzept: "eigen", gruppe: "damen" }, { id: "W107-f6", etage: 1, qm: 472, konzept: "eigen", gruppe: "waesche" }, { id: "W107-f7", etage: 1, qm: 686, konzept: "eigen", gruppe: "herren" }, { id: "W107-f8", etage: 1, qm: 331, konzept: "eigen", gruppe: "kinder" }, { id: "W107-f9", etage: 2, qm: 28, konzept: "eigen", gruppe: "kinder" }, { id: "W107-f10", etage: 2, qm: 591, konzept: "eigen", gruppe: "sport" }, { id: "W107-f11", etage: 2, qm: 273, konzept: "eigen", gruppe: "spielwaren" }, { id: "W107-f12", etage: 2, qm: 1007, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 130679, rohertrag: 55327, konzessionserloes: 0, untermiete: 0, personal: 32301, miete: 19071, nebenkosten: 8230, sonstige: 7922, db: -12196, fteBedarf: 27.404696713077392, fteIst: 33.009344199434615, umsatzJeGruppe: { food: 12470, beauty: 23904, accessoires: 16921, damen: 25485, waesche: 12274, herren: 11806, kinder: 5151, sport: 6282, spielwaren: 2702, wohnen: 13684 } } }, { id: "W108", name: "Hartwig Wetzlar Neustadt", stadt: "Wetzlar", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1929, fassade: 2, substanz: 89, status: "offen", flaechen: [{ id: "W108-f1", etage: -1, qm: 432, konzept: "eigen", gruppe: "food" }, { id: "W108-f2", etage: -1, qm: 808, konzept: "eigen", gruppe: "wohnen" }, { id: "W108-f3", etage: 0, qm: 303, konzept: "eigen", gruppe: "beauty" }, { id: "W108-f4", etage: 0, qm: 714, konzept: "eigen", gruppe: "accessoires" }, { id: "W108-f5", etage: 0, qm: 223, konzept: "eigen", gruppe: "damen" }, { id: "W108-f6", etage: 1, qm: 832, konzept: "eigen", gruppe: "damen" }, { id: "W108-f7", etage: 1, qm: 371, konzept: "eigen", gruppe: "waesche" }, { id: "W108-f8", etage: 1, qm: 37, konzept: "eigen", gruppe: "herren" }, { id: "W108-f9", etage: 2, qm: 843, konzept: "eigen", gruppe: "herren" }, { id: "W108-f10", etage: 2, qm: 397, konzept: "eigen", gruppe: "kinder" }, { id: "W108-f11", etage: 3, qm: 103, konzept: "eigen", gruppe: "kinder" }, { id: "W108-f12", etage: 3, qm: 809, konzept: "eigen", gruppe: "sport" }, { id: "W108-f13", etage: 3, qm: 298, konzept: "eigen", gruppe: "spielwaren" }, { id: "W108-f14", etage: 3, qm: 29, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 138196, rohertrag: 58235, konzessionserloes: 0, untermiete: 0, personal: 36626, miete: 9469, nebenkosten: 8240, sonstige: 8456, db: -4557, fteBedarf: 29.324977527408173, fteIst: 37.26392954841004, umsatzJeGruppe: { food: 15379, wohnen: 12081, beauty: 17155, accessoires: 28179, damen: 18571, waesche: 10009, herren: 16322, kinder: 7504, sport: 9968, spielwaren: 3028 } } }, { id: "W109", name: "Hartwig L\xFCneburg City-Center", stadt: "L\xFCneburg", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1], baujahr: 1910, fassade: 2, substanz: 85, status: "offen", flaechen: [{ id: "W109-f1", etage: -1, qm: 512, konzept: "eigen", gruppe: "food" }, { id: "W109-f2", etage: -1, qm: 1722, konzept: "eigen", gruppe: "wohnen" }, { id: "W109-f3", etage: 0, qm: 357, konzept: "eigen", gruppe: "beauty" }, { id: "W109-f4", etage: 0, qm: 712, konzept: "eigen", gruppe: "accessoires" }, { id: "W109-f5", etage: 0, qm: 1165, konzept: "eigen", gruppe: "damen" }, { id: "W109-f6", etage: 1, qm: 205, konzept: "eigen", gruppe: "damen" }, { id: "W109-f7", etage: 1, qm: 589, konzept: "eigen", gruppe: "waesche" }, { id: "W109-f8", etage: 1, qm: 773, konzept: "eigen", gruppe: "herren" }, { id: "W109-f9", etage: 1, qm: 454, konzept: "eigen", gruppe: "kinder" }, { id: "W109-f10", etage: 1, qm: 1146, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 170160, rohertrag: 71429, konzessionserloes: 0, untermiete: 0, personal: 44227, miete: 32689, nebenkosten: 0, sonstige: 10412, db: -15900, fteBedarf: 36.03153607851873, fteIst: 45.667466054187166, umsatzJeGruppe: { food: 18596, wohnen: 25781, beauty: 23257, accessoires: 25451, damen: 25213, waesche: 16003, herren: 13352, kinder: 7878, sport: 14630 } } }, { id: "W110", name: "Hartwig Celle", stadt: "Celle", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 2001, fassade: 7, substanz: 59, status: "offen", flaechen: [{ id: "W110-f1", etage: 0, qm: 477, konzept: "eigen", gruppe: "food" }, { id: "W110-f2", etage: 0, qm: 445, konzept: "eigen", gruppe: "beauty" }, { id: "W110-f3", etage: 0, qm: 518, konzept: "eigen", gruppe: "accessoires" }, { id: "W110-f4", etage: 1, qm: 320, konzept: "eigen", gruppe: "accessoires" }, { id: "W110-f5", etage: 1, qm: 1120, konzept: "eigen", gruppe: "damen" }, { id: "W110-f6", etage: 2, qm: 421, konzept: "eigen", gruppe: "damen" }, { id: "W110-f7", etage: 2, qm: 559, konzept: "eigen", gruppe: "waesche" }, { id: "W110-f8", etage: 2, qm: 460, konzept: "eigen", gruppe: "herren" }, { id: "W110-f9", etage: 3, qm: 182, konzept: "eigen", gruppe: "herren" }, { id: "W110-f10", etage: 3, qm: 579, konzept: "eigen", gruppe: "kinder" }, { id: "W110-f11", etage: 3, qm: 661, konzept: "eigen", gruppe: "sport" }, { id: "W110-f12", etage: 3, qm: 18, konzept: "eigen", gruppe: "spielwaren" }, { id: "W110-f13", etage: 4, qm: 319, konzept: "eigen", gruppe: "spielwaren" }, { id: "W110-f14", etage: 4, qm: 1121, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 182052, rohertrag: 77144, konzessionserloes: 0, untermiete: 0, personal: 46445, miete: 27904, nebenkosten: 10692, sonstige: 10704, db: -18602, fteBedarf: 36.712401339758976, fteIst: 48.04042953192403, umsatzJeGruppe: { food: 15054, beauty: 32807, accessoires: 28184, damen: 34544, waesche: 14e3, herren: 14883, kinder: 11038, sport: 7664, spielwaren: 3945, wohnen: 19932 } } }, { id: "W111", name: "Hartwig Flensburg", stadt: "Flensburg", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [0, 1, 2], baujahr: 1918, fassade: 6, substanz: 86, status: "offen", flaechen: [{ id: "W111-f1", etage: 0, qm: 431, konzept: "eigen", gruppe: "food" }, { id: "W111-f2", etage: 0, qm: 476, konzept: "eigen", gruppe: "beauty" }, { id: "W111-f3", etage: 0, qm: 684, konzept: "eigen", gruppe: "accessoires" }, { id: "W111-f4", etage: 0, qm: 909, konzept: "eigen", gruppe: "damen" }, { id: "W111-f5", etage: 1, qm: 709, konzept: "eigen", gruppe: "damen" }, { id: "W111-f6", etage: 1, qm: 442, konzept: "eigen", gruppe: "waesche" }, { id: "W111-f7", etage: 1, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W111-f8", etage: 1, qm: 249, konzept: "eigen", gruppe: "kinder" }, { id: "W111-f9", etage: 2, qm: 296, konzept: "eigen", gruppe: "kinder" }, { id: "W111-f10", etage: 2, qm: 631, konzept: "eigen", gruppe: "sport" }, { id: "W111-f11", etage: 2, qm: 480, konzept: "eigen", gruppe: "spielwaren" }, { id: "W111-f12", etage: 2, qm: 1093, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 220657, rohertrag: 93663, konzessionserloes: 0, untermiete: 0, personal: 50720, miete: 26179, nebenkosten: 10981, sonstige: 12422, db: -6639, fteBedarf: 42.090746407091515, fteIst: 50.91814237491502, umsatzJeGruppe: { food: 19106, beauty: 39593, accessoires: 32186, damen: 42335, waesche: 14837, herren: 28404, kinder: 9050, sport: 9281, spielwaren: 7214, wohnen: 18652 } } }, { id: "W112", name: "Hartwig Neum\xFCnster Ring", stadt: "Neum\xFCnster", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1959, fassade: 7, substanz: 52, status: "offen", flaechen: [{ id: "W112-f1", etage: -1, qm: 522, konzept: "eigen", gruppe: "food" }, { id: "W112-f2", etage: -1, qm: 1018, konzept: "eigen", gruppe: "wohnen" }, { id: "W112-f3", etage: 0, qm: 445, konzept: "eigen", gruppe: "beauty" }, { id: "W112-f4", etage: 0, qm: 654, konzept: "eigen", gruppe: "accessoires" }, { id: "W112-f5", etage: 0, qm: 441, konzept: "eigen", gruppe: "damen" }, { id: "W112-f6", etage: 1, qm: 1330, konzept: "eigen", gruppe: "damen" }, { id: "W112-f7", etage: 1, qm: 210, konzept: "eigen", gruppe: "waesche" }, { id: "W112-f8", etage: 2, qm: 433, konzept: "eigen", gruppe: "waesche" }, { id: "W112-f9", etage: 2, qm: 759, konzept: "eigen", gruppe: "herren" }, { id: "W112-f10", etage: 2, qm: 348, konzept: "eigen", gruppe: "kinder" }, { id: "W112-f11", etage: 3, qm: 286, konzept: "eigen", gruppe: "kinder" }, { id: "W112-f12", etage: 3, qm: 917, konzept: "eigen", gruppe: "sport" }, { id: "W112-f13", etage: 3, qm: 447, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 134600, rohertrag: 57144, konzessionserloes: 0, untermiete: 0, personal: 38224, miete: 20427, nebenkosten: 9839, sonstige: 9033, db: -20378, fteBedarf: 32.150787234537454, fteIst: 38.7976552495561, umsatzJeGruppe: { food: 11377, wohnen: 12998, beauty: 19827, accessoires: 16697, damen: 29307, waesche: 12496, herren: 9154, kinder: 9116, sport: 8923, spielwaren: 4705 } } }, { id: "W113", name: "Hartwig Stralsund", stadt: "Stralsund", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1957, fassade: 5, substanz: 89, status: "offen", flaechen: [{ id: "W113-f1", etage: 0, qm: 451, konzept: "eigen", gruppe: "food" }, { id: "W113-f2", etage: 0, qm: 301, konzept: "eigen", gruppe: "beauty" }, { id: "W113-f3", etage: 0, qm: 447, konzept: "eigen", gruppe: "accessoires" }, { id: "W113-f4", etage: 1, qm: 227, konzept: "eigen", gruppe: "accessoires" }, { id: "W113-f5", etage: 1, qm: 973, konzept: "eigen", gruppe: "damen" }, { id: "W113-f6", etage: 2, qm: 238, konzept: "eigen", gruppe: "damen" }, { id: "W113-f7", etage: 2, qm: 504, konzept: "eigen", gruppe: "waesche" }, { id: "W113-f8", etage: 2, qm: 458, konzept: "eigen", gruppe: "herren" }, { id: "W113-f9", etage: 3, qm: 206, konzept: "eigen", gruppe: "herren" }, { id: "W113-f10", etage: 3, qm: 495, konzept: "eigen", gruppe: "kinder" }, { id: "W113-f11", etage: 3, qm: 499, konzept: "eigen", gruppe: "sport" }, { id: "W113-f12", etage: 4, qm: 163, konzept: "eigen", gruppe: "sport" }, { id: "W113-f13", etage: 4, qm: 296, konzept: "eigen", gruppe: "spielwaren" }, { id: "W113-f14", etage: 4, qm: 741, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 163894, rohertrag: 69621, konzessionserloes: 0, untermiete: 0, personal: 40625, miete: 16371, nebenkosten: 6019, sonstige: 9419, db: -2813, fteBedarf: 32.07715791461758, fteIst: 40.82268437451354, umsatzJeGruppe: { food: 16665, beauty: 21002, accessoires: 29219, damen: 32240, waesche: 13882, herren: 13477, kinder: 8825, sport: 10603, spielwaren: 3730, wohnen: 14251 } } }, { id: "W114", name: "Hartwig Schwerin", stadt: "Schwerin", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1983, fassade: 4, substanz: 70, status: "offen", flaechen: [{ id: "W114-f1", etage: 0, qm: 543, konzept: "eigen", gruppe: "food" }, { id: "W114-f2", etage: 0, qm: 602, konzept: "eigen", gruppe: "beauty" }, { id: "W114-f3", etage: 0, qm: 495, konzept: "eigen", gruppe: "accessoires" }, { id: "W114-f4", etage: 1, qm: 471, konzept: "eigen", gruppe: "accessoires" }, { id: "W114-f5", etage: 1, qm: 1169, konzept: "eigen", gruppe: "damen" }, { id: "W114-f6", etage: 2, qm: 112, konzept: "eigen", gruppe: "damen" }, { id: "W114-f7", etage: 2, qm: 514, konzept: "eigen", gruppe: "waesche" }, { id: "W114-f8", etage: 2, qm: 823, konzept: "eigen", gruppe: "herren" }, { id: "W114-f9", etage: 2, qm: 192, konzept: "eigen", gruppe: "kinder" }, { id: "W114-f10", etage: 3, qm: 462, konzept: "eigen", gruppe: "kinder" }, { id: "W114-f11", etage: 3, qm: 788, konzept: "eigen", gruppe: "sport" }, { id: "W114-f12", etage: 3, qm: 389, konzept: "eigen", gruppe: "spielwaren" }, { id: "W114-f13", etage: 4, qm: 86, konzept: "eigen", gruppe: "spielwaren" }, { id: "W114-f14", etage: 4, qm: 1554, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 242307, rohertrag: 101995, konzessionserloes: 0, untermiete: 0, personal: 54044, miete: 20752, nebenkosten: 9732, sonstige: 13625, db: 3842, fteBedarf: 46.12401705766281, fteIst: 54.68752297695232, umsatzJeGruppe: { food: 20071, beauty: 42312, accessoires: 39948, damen: 36396, waesche: 18056, herren: 21326, kinder: 13867, sport: 11010, spielwaren: 6784, wohnen: 32538 } } }, { id: "W115", name: "Hartwig Zwickau Neustadt", stadt: "Zwickau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1918, fassade: 5, substanz: 42, status: "offen", flaechen: [{ id: "W115-f1", etage: 0, qm: 461, konzept: "eigen", gruppe: "food" }, { id: "W115-f2", etage: 0, qm: 371, konzept: "eigen", gruppe: "beauty" }, { id: "W115-f3", etage: 0, qm: 668, konzept: "eigen", gruppe: "accessoires" }, { id: "W115-f4", etage: 1, qm: 96, konzept: "eigen", gruppe: "accessoires" }, { id: "W115-f5", etage: 1, qm: 1404, konzept: "eigen", gruppe: "damen" }, { id: "W115-f6", etage: 2, qm: 140, konzept: "eigen", gruppe: "damen" }, { id: "W115-f7", etage: 2, qm: 435, konzept: "eigen", gruppe: "waesche" }, { id: "W115-f8", etage: 2, qm: 925, konzept: "eigen", gruppe: "herren" }, { id: "W115-f9", etage: 3, qm: 88, konzept: "eigen", gruppe: "herren" }, { id: "W115-f10", etage: 3, qm: 701, konzept: "eigen", gruppe: "kinder" }, { id: "W115-f11", etage: 3, qm: 710, konzept: "eigen", gruppe: "sport" }, { id: "W115-f12", etage: 4, qm: 181, konzept: "eigen", gruppe: "sport" }, { id: "W115-f13", etage: 4, qm: 391, konzept: "eigen", gruppe: "spielwaren" }, { id: "W115-f14", etage: 4, qm: 928, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 135987, rohertrag: 57321, konzessionserloes: 0, untermiete: 0, personal: 39126, miete: 25960, nebenkosten: 8991, sonstige: 8950, db: -25706, fteBedarf: 31.69334209857719, fteIst: 40.26825628480668, umsatzJeGruppe: { food: 12e3, beauty: 20004, accessoires: 21152, damen: 21948, waesche: 8453, herren: 15178, kinder: 10264, sport: 8932, spielwaren: 4423, wohnen: 13631 } } }, { id: "W116", name: "Hartwig G\xF6rlitz Neustadt", stadt: "G\xF6rlitz", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1962, fassade: 7, substanz: 32, status: "offen", flaechen: [{ id: "W116-f1", etage: 0, qm: 439, konzept: "eigen", gruppe: "food" }, { id: "W116-f2", etage: 0, qm: 324, konzept: "eigen", gruppe: "beauty" }, { id: "W116-f3", etage: 0, qm: 517, konzept: "eigen", gruppe: "accessoires" }, { id: "W116-f4", etage: 1, qm: 27, konzept: "eigen", gruppe: "accessoires" }, { id: "W116-f5", etage: 1, qm: 1253, konzept: "eigen", gruppe: "damen" }, { id: "W116-f6", etage: 2, qm: 545, konzept: "eigen", gruppe: "waesche" }, { id: "W116-f7", etage: 2, qm: 735, konzept: "eigen", gruppe: "herren" }, { id: "W116-f8", etage: 3, qm: 48, konzept: "eigen", gruppe: "herren" }, { id: "W116-f9", etage: 3, qm: 543, konzept: "eigen", gruppe: "kinder" }, { id: "W116-f10", etage: 3, qm: 625, konzept: "eigen", gruppe: "sport" }, { id: "W116-f11", etage: 3, qm: 63, konzept: "eigen", gruppe: "spielwaren" }, { id: "W116-f12", etage: 4, qm: 373, konzept: "eigen", gruppe: "spielwaren" }, { id: "W116-f13", etage: 4, qm: 907, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 111334, rohertrag: 46987, konzessionserloes: 0, untermiete: 0, personal: 29518, miete: 13145, nebenkosten: 9244, sonstige: 7444, db: -12364, fteBedarf: 26.476304085586563, fteIst: 29.653068201935838, umsatzJeGruppe: { food: 11123, beauty: 14615, accessoires: 14563, damen: 19915, waesche: 8447, herren: 12787, kinder: 7226, sport: 6562, spielwaren: 4319, wohnen: 11778 } } }, { id: "W117", name: "Hartwig Dessau Ring", stadt: "Dessau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1993, fassade: 7, substanz: 53, status: "offen", flaechen: [{ id: "W117-f1", etage: 0, qm: 383, konzept: "eigen", gruppe: "food" }, { id: "W117-f2", etage: 0, qm: 390, konzept: "eigen", gruppe: "beauty" }, { id: "W117-f3", etage: 0, qm: 467, konzept: "eigen", gruppe: "accessoires" }, { id: "W117-f4", etage: 1, qm: 94, konzept: "eigen", gruppe: "accessoires" }, { id: "W117-f5", etage: 1, qm: 1146, konzept: "eigen", gruppe: "damen" }, { id: "W117-f6", etage: 2, qm: 275, konzept: "eigen", gruppe: "damen" }, { id: "W117-f7", etage: 2, qm: 327, konzept: "eigen", gruppe: "waesche" }, { id: "W117-f8", etage: 2, qm: 638, konzept: "eigen", gruppe: "herren" }, { id: "W117-f9", etage: 3, qm: 166, konzept: "eigen", gruppe: "herren" }, { id: "W117-f10", etage: 3, qm: 502, konzept: "eigen", gruppe: "kinder" }, { id: "W117-f11", etage: 3, qm: 572, konzept: "eigen", gruppe: "sport" }, { id: "W117-f12", etage: 4, qm: 73, konzept: "eigen", gruppe: "sport" }, { id: "W117-f13", etage: 4, qm: 401, konzept: "eigen", gruppe: "spielwaren" }, { id: "W117-f14", etage: 4, qm: 766, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 124090, rohertrag: 52439, konzessionserloes: 0, untermiete: 0, personal: 34531, miete: 15509, nebenkosten: 7810, sonstige: 7878, db: -13288, fteBedarf: 27.63489178230885, fteIst: 35.41967988039547, umsatzJeGruppe: { food: 11276, beauty: 21149, accessoires: 15289, damen: 27505, waesche: 6286, herren: 13045, kinder: 8891, sport: 6826, spielwaren: 3889, wohnen: 9934 } } }, { id: "W118", name: "Hartwig Gera Bahnhofstra\xDFe", stadt: "Gera", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1700, etagen: [-1, 0, 1, 2], baujahr: 1959, fassade: 1, substanz: 80, status: "offen", flaechen: [{ id: "W118-f1", etage: -1, qm: 467, konzept: "eigen", gruppe: "food" }, { id: "W118-f2", etage: -1, qm: 1208, konzept: "eigen", gruppe: "wohnen" }, { id: "W118-f3", etage: 0, qm: 464, konzept: "eigen", gruppe: "beauty" }, { id: "W118-f4", etage: 0, qm: 740, konzept: "eigen", gruppe: "accessoires" }, { id: "W118-f5", etage: 0, qm: 470, konzept: "eigen", gruppe: "damen" }, { id: "W118-f6", etage: 1, qm: 638, konzept: "eigen", gruppe: "damen" }, { id: "W118-f7", etage: 1, qm: 487, konzept: "eigen", gruppe: "waesche" }, { id: "W118-f8", etage: 1, qm: 550, konzept: "eigen", gruppe: "herren" }, { id: "W118-f9", etage: 2, qm: 281, konzept: "eigen", gruppe: "herren" }, { id: "W118-f10", etage: 2, qm: 556, konzept: "eigen", gruppe: "kinder" }, { id: "W118-f11", etage: 2, qm: 780, konzept: "eigen", gruppe: "sport" }, { id: "W118-f12", etage: 2, qm: 421, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 127654, rohertrag: 53638, konzessionserloes: 0, untermiete: 0, personal: 32715, miete: 17690, nebenkosten: 8815, sonstige: 8412, db: -13993, fteBedarf: 29.78830284208975, fteIst: 33.84594612605813, umsatzJeGruppe: { food: 11876, wohnen: 15828, beauty: 19681, accessoires: 19148, damen: 17799, waesche: 10501, herren: 13650, kinder: 6855, sport: 8321, spielwaren: 3994 } } }, { id: "W119", name: "Hartwig Weimar Lindenstra\xDFe", stadt: "Weimar", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1918, fassade: 0, substanz: 32, status: "offen", flaechen: [{ id: "W119-f1", etage: 0, qm: 368, konzept: "eigen", gruppe: "food" }, { id: "W119-f2", etage: 0, qm: 465, konzept: "eigen", gruppe: "beauty" }, { id: "W119-f3", etage: 0, qm: 775, konzept: "eigen", gruppe: "accessoires" }, { id: "W119-f4", etage: 0, qm: 243, konzept: "eigen", gruppe: "damen" }, { id: "W119-f5", etage: 1, qm: 1442, konzept: "eigen", gruppe: "damen" }, { id: "W119-f6", etage: 1, qm: 408, konzept: "eigen", gruppe: "waesche" }, { id: "W119-f7", etage: 2, qm: 179, konzept: "eigen", gruppe: "waesche" }, { id: "W119-f8", etage: 2, qm: 972, konzept: "eigen", gruppe: "herren" }, { id: "W119-f9", etage: 2, qm: 401, konzept: "eigen", gruppe: "kinder" }, { id: "W119-f10", etage: 2, qm: 298, konzept: "eigen", gruppe: "sport" }, { id: "W119-f11", etage: 3, qm: 367, konzept: "eigen", gruppe: "sport" }, { id: "W119-f12", etage: 3, qm: 402, konzept: "eigen", gruppe: "spielwaren" }, { id: "W119-f13", etage: 3, qm: 1080, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 159937, rohertrag: 68613, konzessionserloes: 0, untermiete: 0, personal: 43028, miete: 19780, nebenkosten: 9941, sonstige: 9887, db: -14024, fteBedarf: 34.442610275942585, fteIst: 44.425974740154246, umsatzJeGruppe: { food: 9868, beauty: 26194, accessoires: 25713, damen: 34500, waesche: 11744, herren: 17739, kinder: 6921, sport: 8548, spielwaren: 5600, wohnen: 13110 } } }, { id: "W120", name: "Hartwig Neuss", stadt: "Neuss", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2600, etagen: [0, 1, 2], baujahr: 1958, fassade: 6, substanz: 69, status: "offen", flaechen: [{ id: "W120-f1", etage: 0, qm: 667, konzept: "eigen", gruppe: "food" }, { id: "W120-f2", etage: 0, qm: 422, konzept: "eigen", gruppe: "beauty" }, { id: "W120-f3", etage: 0, qm: 900, konzept: "eigen", gruppe: "accessoires" }, { id: "W120-f4", etage: 0, qm: 579, konzept: "eigen", gruppe: "damen" }, { id: "W120-f5", etage: 1, qm: 674, konzept: "eigen", gruppe: "damen" }, { id: "W120-f6", etage: 1, qm: 653, konzept: "eigen", gruppe: "waesche" }, { id: "W120-f7", etage: 1, qm: 1109, konzept: "eigen", gruppe: "herren" }, { id: "W120-f8", etage: 1, qm: 131, konzept: "eigen", gruppe: "kinder" }, { id: "W120-f9", etage: 2, qm: 486, konzept: "eigen", gruppe: "kinder" }, { id: "W120-f10", etage: 2, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W120-f11", etage: 2, qm: 528, konzept: "eigen", gruppe: "spielwaren" }, { id: "W120-f12", etage: 2, qm: 899, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 199121, rohertrag: 83647, konzessionserloes: 0, untermiete: 0, personal: 41494, miete: 31831, nebenkosten: 11208, sonstige: 11630, db: -12516, fteBedarf: 39.832093686319794, fteIst: 43.054497310622246, umsatzJeGruppe: { food: 22440, beauty: 30852, accessoires: 32326, damen: 25986, waesche: 19152, herren: 21098, kinder: 12952, sport: 9904, spielwaren: 5782, wohnen: 18628 } } }, { id: "W121", name: "Hartwig D\xFCren Lindenstra\xDFe", stadt: "D\xFCren", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2400, etagen: [0, 1, 2], baujahr: 1978, fassade: 7, substanz: 57, status: "offen", flaechen: [{ id: "W121-f1", etage: 0, qm: 488, konzept: "eigen", gruppe: "food" }, { id: "W121-f2", etage: 0, qm: 361, konzept: "eigen", gruppe: "beauty" }, { id: "W121-f3", etage: 0, qm: 741, konzept: "eigen", gruppe: "accessoires" }, { id: "W121-f4", etage: 0, qm: 810, konzept: "eigen", gruppe: "damen" }, { id: "W121-f5", etage: 1, qm: 688, konzept: "eigen", gruppe: "damen" }, { id: "W121-f6", etage: 1, qm: 537, konzept: "eigen", gruppe: "waesche" }, { id: "W121-f7", etage: 1, qm: 773, konzept: "eigen", gruppe: "herren" }, { id: "W121-f8", etage: 1, qm: 401, konzept: "eigen", gruppe: "kinder" }, { id: "W121-f9", etage: 2, qm: 112, konzept: "eigen", gruppe: "kinder" }, { id: "W121-f10", etage: 2, qm: 628, konzept: "eigen", gruppe: "sport" }, { id: "W121-f11", etage: 2, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W121-f12", etage: 2, qm: 1235, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 157044, rohertrag: 66834, konzessionserloes: 0, untermiete: 0, personal: 40858, miete: 41287, nebenkosten: 0, sonstige: 9678, db: -24989, fteBedarf: 33.676305073393294, fteIst: 41.63853731486583, umsatzJeGruppe: { food: 13443, beauty: 19925, accessoires: 25252, damen: 31051, waesche: 14105, herren: 12621, kinder: 7108, sport: 7179, spielwaren: 5596, wohnen: 20764 } } }, { id: "W122", name: "Hartwig Wesel", stadt: "Wesel", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [0, 1, 2], baujahr: 1960, fassade: 2, substanz: 79, status: "offen", flaechen: [{ id: "W122-f1", etage: 0, qm: 411, konzept: "eigen", gruppe: "food" }, { id: "W122-f2", etage: 0, qm: 283, konzept: "eigen", gruppe: "beauty" }, { id: "W122-f3", etage: 0, qm: 420, konzept: "eigen", gruppe: "accessoires" }, { id: "W122-f4", etage: 0, qm: 719, konzept: "eigen", gruppe: "damen" }, { id: "W122-f5", etage: 1, qm: 485, konzept: "eigen", gruppe: "damen" }, { id: "W122-f6", etage: 1, qm: 286, konzept: "eigen", gruppe: "waesche" }, { id: "W122-f7", etage: 1, qm: 761, konzept: "eigen", gruppe: "herren" }, { id: "W122-f8", etage: 1, qm: 302, konzept: "eigen", gruppe: "kinder" }, { id: "W122-f9", etage: 2, qm: 61, konzept: "eigen", gruppe: "kinder" }, { id: "W122-f10", etage: 2, qm: 666, konzept: "eigen", gruppe: "sport" }, { id: "W122-f11", etage: 2, qm: 349, konzept: "eigen", gruppe: "spielwaren" }, { id: "W122-f12", etage: 2, qm: 757, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 137008, rohertrag: 56920, konzessionserloes: 0, untermiete: 0, personal: 33717, miete: 16290, nebenkosten: 7134, sonstige: 8092, db: -8313, fteBedarf: 27.82440931157522, fteIst: 34.81144363920361, umsatzJeGruppe: { food: 17327, beauty: 21948, accessoires: 18380, damen: 24407, waesche: 7359, herren: 14163, kinder: 6876, sport: 10096, spielwaren: 4917, wohnen: 11534 } } }, { id: "W123", name: "Hartwig Iserlohn", stadt: "Iserlohn", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1989, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W123-f1", etage: -1, qm: 355, konzept: "eigen", gruppe: "food" }, { id: "W123-f2", etage: -1, qm: 825, konzept: "eigen", gruppe: "wohnen" }, { id: "W123-f3", etage: 0, qm: 367, konzept: "eigen", gruppe: "beauty" }, { id: "W123-f4", etage: 0, qm: 600, konzept: "eigen", gruppe: "accessoires" }, { id: "W123-f5", etage: 0, qm: 214, konzept: "eigen", gruppe: "damen" }, { id: "W123-f6", etage: 1, qm: 852, konzept: "eigen", gruppe: "damen" }, { id: "W123-f7", etage: 1, qm: 328, konzept: "eigen", gruppe: "waesche" }, { id: "W123-f8", etage: 2, qm: 65, konzept: "eigen", gruppe: "waesche" }, { id: "W123-f9", etage: 2, qm: 839, konzept: "eigen", gruppe: "herren" }, { id: "W123-f10", etage: 2, qm: 276, konzept: "eigen", gruppe: "kinder" }, { id: "W123-f11", etage: 3, qm: 150, konzept: "eigen", gruppe: "kinder" }, { id: "W123-f12", etage: 3, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W123-f13", etage: 3, qm: 278, konzept: "eigen", gruppe: "spielwaren" }, { id: "W123-f14", etage: 3, qm: 98, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 190165, rohertrag: 80440, konzessionserloes: 0, untermiete: 0, personal: 43231, miete: 51396, nebenkosten: 0, sonstige: 10452, db: -24640, fteBedarf: 35.111149363542914, fteIst: 44.22610112222914, umsatzJeGruppe: { food: 16970, wohnen: 17543, beauty: 30471, accessoires: 33297, damen: 29663, waesche: 12254, herren: 23973, kinder: 9861, sport: 11596, spielwaren: 4538 } } }, { id: "W124", name: "Hartwig L\xFCdenscheid", stadt: "L\xFCdenscheid", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2], baujahr: 2e3, fassade: 2, substanz: 52, status: "offen", flaechen: [{ id: "W124-f1", etage: -1, qm: 558, konzept: "eigen", gruppe: "food" }, { id: "W124-f2", etage: -1, qm: 1492, konzept: "eigen", gruppe: "wohnen" }, { id: "W124-f3", etage: 0, qm: 590, konzept: "eigen", gruppe: "beauty" }, { id: "W124-f4", etage: 0, qm: 916, konzept: "eigen", gruppe: "accessoires" }, { id: "W124-f5", etage: 0, qm: 544, konzept: "eigen", gruppe: "damen" }, { id: "W124-f6", etage: 1, qm: 1106, konzept: "eigen", gruppe: "damen" }, { id: "W124-f7", etage: 1, qm: 488, konzept: "eigen", gruppe: "waesche" }, { id: "W124-f8", etage: 1, qm: 457, konzept: "eigen", gruppe: "herren" }, { id: "W124-f9", etage: 2, qm: 467, konzept: "eigen", gruppe: "herren" }, { id: "W124-f10", etage: 2, qm: 481, konzept: "eigen", gruppe: "kinder" }, { id: "W124-f11", etage: 2, qm: 883, konzept: "eigen", gruppe: "sport" }, { id: "W124-f12", etage: 2, qm: 532, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 248141, rohertrag: 103588, konzessionserloes: 0, untermiete: 0, personal: 53257, miete: 23557, nebenkosten: 9506, sonstige: 14005, db: 3263, fteBedarf: 47.48653790856885, fteIst: 54.8025435906923, umsatzJeGruppe: { food: 21718, wohnen: 33491, beauty: 47380, accessoires: 41780, damen: 36313, waesche: 14103, herren: 21645, kinder: 10138, sport: 13585, spielwaren: 7987 } } }, { id: "W125", name: "Hartwig Witten", stadt: "Witten", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2400, etagen: [-1, 0, 1], baujahr: 1965, fassade: 5, substanz: 50, status: "offen", flaechen: [{ id: "W125-f1", etage: -1, qm: 379, konzept: "eigen", gruppe: "food" }, { id: "W125-f2", etage: -1, qm: 1988, konzept: "eigen", gruppe: "wohnen" }, { id: "W125-f3", etage: 0, qm: 341, konzept: "eigen", gruppe: "beauty" }, { id: "W125-f4", etage: 0, qm: 697, konzept: "eigen", gruppe: "accessoires" }, { id: "W125-f5", etage: 0, qm: 1329, konzept: "eigen", gruppe: "damen" }, { id: "W125-f6", etage: 1, qm: 90, konzept: "eigen", gruppe: "damen" }, { id: "W125-f7", etage: 1, qm: 503, konzept: "eigen", gruppe: "waesche" }, { id: "W125-f8", etage: 1, qm: 926, konzept: "eigen", gruppe: "herren" }, { id: "W125-f9", etage: 1, qm: 479, konzept: "eigen", gruppe: "kinder" }, { id: "W125-f10", etage: 1, qm: 1178, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 207897, rohertrag: 88137, konzessionserloes: 0, untermiete: 0, personal: 42822, miete: 23077, nebenkosten: 11283, sonstige: 12083, db: -1128, fteBedarf: 41.178571941445384, fteIst: 43.482234344412205, umsatzJeGruppe: { food: 17058, wohnen: 41192, beauty: 22815, accessoires: 30698, damen: 39444, waesche: 13545, herren: 17832, kinder: 8832, sport: 16482 } } }, { id: "W126", name: "Hartwig Marl Arkaden", stadt: "Marl", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1], baujahr: 1991, fassade: 6, substanz: 49, status: "offen", flaechen: [{ id: "W126-f1", etage: -1, qm: 557, konzept: "eigen", gruppe: "food" }, { id: "W126-f2", etage: -1, qm: 2209, konzept: "eigen", gruppe: "wohnen" }, { id: "W126-f3", etage: 0, qm: 503, konzept: "eigen", gruppe: "beauty" }, { id: "W126-f4", etage: 0, qm: 814, konzept: "eigen", gruppe: "accessoires" }, { id: "W126-f5", etage: 0, qm: 1449, konzept: "eigen", gruppe: "damen" }, { id: "W126-f6", etage: 1, qm: 333, konzept: "eigen", gruppe: "damen" }, { id: "W126-f7", etage: 1, qm: 499, konzept: "eigen", gruppe: "waesche" }, { id: "W126-f8", etage: 1, qm: 1159, konzept: "eigen", gruppe: "herren" }, { id: "W126-f9", etage: 1, qm: 609, konzept: "eigen", gruppe: "kinder" }, { id: "W126-f10", etage: 1, qm: 1390, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 200125, rohertrag: 84686, konzessionserloes: 0, untermiete: 0, personal: 50420, miete: 24264, nebenkosten: 13558, sonstige: 12490, db: -16046, fteBedarf: 43.46300279849733, fteIst: 51.07734507627857, umsatzJeGruppe: { food: 17253, wohnen: 30489, beauty: 25610, accessoires: 27266, damen: 34223, waesche: 13139, herren: 23512, kinder: 9647, sport: 18985 } } }, { id: "W127", name: "Hartwig Moers City-Center", stadt: "Moers", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [0, 1, 2, 3], baujahr: 2002, fassade: 1, substanz: 39, status: "offen", flaechen: [{ id: "W127-f1", etage: 0, qm: 486, konzept: "eigen", gruppe: "food" }, { id: "W127-f2", etage: 0, qm: 640, konzept: "eigen", gruppe: "beauty" }, { id: "W127-f3", etage: 0, qm: 949, konzept: "eigen", gruppe: "accessoires" }, { id: "W127-f4", etage: 1, qm: 118, konzept: "eigen", gruppe: "accessoires" }, { id: "W127-f5", etage: 1, qm: 1329, konzept: "eigen", gruppe: "damen" }, { id: "W127-f6", etage: 1, qm: 628, konzept: "eigen", gruppe: "waesche" }, { id: "W127-f7", etage: 2, qm: 37, konzept: "eigen", gruppe: "waesche" }, { id: "W127-f8", etage: 2, qm: 877, konzept: "eigen", gruppe: "herren" }, { id: "W127-f9", etage: 2, qm: 704, konzept: "eigen", gruppe: "kinder" }, { id: "W127-f10", etage: 2, qm: 458, konzept: "eigen", gruppe: "sport" }, { id: "W127-f11", etage: 3, qm: 539, konzept: "eigen", gruppe: "sport" }, { id: "W127-f12", etage: 3, qm: 401, konzept: "eigen", gruppe: "spielwaren" }, { id: "W127-f13", etage: 3, qm: 1135, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 190560, rohertrag: 80211, konzessionserloes: 0, untermiete: 0, personal: 46830, miete: 27102, nebenkosten: 0, sonstige: 11548, db: -5270, fteBedarf: 39.96069300195375, fteIst: 47.16919069182678, umsatzJeGruppe: { food: 13937, beauty: 38615, accessoires: 36760, damen: 22481, waesche: 15427, herren: 17476, kinder: 10852, sport: 13278, spielwaren: 4023, wohnen: 17709 } } }, { id: "W128", name: "Hartwig Kaiserslautern Neustadt", stadt: "Kaiserslautern", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1971, fassade: 0, substanz: 81, status: "offen", flaechen: [{ id: "W128-f1", etage: -1, qm: 644, konzept: "eigen", gruppe: "food" }, { id: "W128-f2", etage: -1, qm: 896, konzept: "eigen", gruppe: "wohnen" }, { id: "W128-f3", etage: 0, qm: 506, konzept: "eigen", gruppe: "beauty" }, { id: "W128-f4", etage: 0, qm: 668, konzept: "eigen", gruppe: "accessoires" }, { id: "W128-f5", etage: 0, qm: 365, konzept: "eigen", gruppe: "damen" }, { id: "W128-f6", etage: 1, qm: 1138, konzept: "eigen", gruppe: "damen" }, { id: "W128-f7", etage: 1, qm: 402, konzept: "eigen", gruppe: "waesche" }, { id: "W128-f8", etage: 2, qm: 51, konzept: "eigen", gruppe: "waesche" }, { id: "W128-f9", etage: 2, qm: 1079, konzept: "eigen", gruppe: "herren" }, { id: "W128-f10", etage: 2, qm: 410, konzept: "eigen", gruppe: "kinder" }, { id: "W128-f11", etage: 3, qm: 58, konzept: "eigen", gruppe: "kinder" }, { id: "W128-f12", etage: 3, qm: 695, konzept: "eigen", gruppe: "sport" }, { id: "W128-f13", etage: 3, qm: 478, konzept: "eigen", gruppe: "spielwaren" }, { id: "W128-f14", etage: 3, qm: 309, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 159536, rohertrag: 66721, konzessionserloes: 0, untermiete: 0, personal: 38665, miete: 29785, nebenkosten: 0, sonstige: 10006, db: -11735, fteBedarf: 34.98472410817196, fteIst: 39.94232786450628, umsatzJeGruppe: { food: 18573, wohnen: 15270, beauty: 28326, accessoires: 22532, damen: 29331, waesche: 9381, herren: 17218, kinder: 6428, sport: 6990, spielwaren: 5485 } } }, { id: "W129", name: "Hartwig Worms Neustadt", stadt: "Worms", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1], baujahr: 1919, fassade: 4, substanz: 31, status: "offen", flaechen: [{ id: "W129-f1", etage: -1, qm: 478, konzept: "eigen", gruppe: "food" }, { id: "W129-f2", etage: -1, qm: 2255, konzept: "eigen", gruppe: "wohnen" }, { id: "W129-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W129-f4", etage: 0, qm: 798, konzept: "eigen", gruppe: "accessoires" }, { id: "W129-f5", etage: 0, qm: 1505, konzept: "eigen", gruppe: "damen" }, { id: "W129-f6", etage: 1, qm: 50, konzept: "eigen", gruppe: "damen" }, { id: "W129-f7", etage: 1, qm: 503, konzept: "eigen", gruppe: "waesche" }, { id: "W129-f8", etage: 1, qm: 1175, konzept: "eigen", gruppe: "herren" }, { id: "W129-f9", etage: 1, qm: 652, konzept: "eigen", gruppe: "kinder" }, { id: "W129-f10", etage: 1, qm: 1128, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 179713, rohertrag: 75668, konzessionserloes: 0, untermiete: 0, personal: 46503, miete: 21992, nebenkosten: 10631, sonstige: 11407, db: -14865, fteBedarf: 39.88357256127091, fteIst: 47.20129659805884, umsatzJeGruppe: { food: 13033, wohnen: 37324, beauty: 27586, accessoires: 23784, damen: 25896, waesche: 11236, herren: 18495, kinder: 10138, sport: 12221 } } }, { id: "W130", name: "Hartwig Speyer", stadt: "Speyer", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2800, etagen: [0, 1, 2], baujahr: 1910, fassade: 4, substanz: 74, status: "offen", flaechen: [{ id: "W130-f1", etage: 0, qm: 597, konzept: "eigen", gruppe: "food" }, { id: "W130-f2", etage: 0, qm: 505, konzept: "eigen", gruppe: "beauty" }, { id: "W130-f3", etage: 0, qm: 862, konzept: "eigen", gruppe: "accessoires" }, { id: "W130-f4", etage: 0, qm: 837, konzept: "eigen", gruppe: "damen" }, { id: "W130-f5", etage: 1, qm: 1152, konzept: "eigen", gruppe: "damen" }, { id: "W130-f6", etage: 1, qm: 604, konzept: "eigen", gruppe: "waesche" }, { id: "W130-f7", etage: 1, qm: 912, konzept: "eigen", gruppe: "herren" }, { id: "W130-f8", etage: 1, qm: 131, konzept: "eigen", gruppe: "kinder" }, { id: "W130-f9", etage: 2, qm: 405, konzept: "eigen", gruppe: "kinder" }, { id: "W130-f10", etage: 2, qm: 826, konzept: "eigen", gruppe: "sport" }, { id: "W130-f11", etage: 2, qm: 602, konzept: "eigen", gruppe: "spielwaren" }, { id: "W130-f12", etage: 2, qm: 967, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 263398, rohertrag: 111518, konzessionserloes: 0, untermiete: 0, personal: 57092, miete: 27771, nebenkosten: 11762, sonstige: 14579, db: 313, fteBedarf: 49.13564139890457, fteIst: 57.834649496069126, umsatzJeGruppe: { food: 27849, beauty: 40839, accessoires: 42141, damen: 48508, waesche: 23018, herren: 27824, kinder: 11101, sport: 12354, spielwaren: 9041, wohnen: 20723 } } }, { id: "S047", name: "Hartwig Sport Berlin Am Markt", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2100, etagen: [0], baujahr: 2012, fassade: 1, substanz: 68, status: "offen", flaechen: [{ id: "S047-f1", etage: 0, qm: 446, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S047-f2", etage: 0, qm: 549, konzept: "eigen", gruppe: "sporttextil" }, { id: "S047-f3", etage: 0, qm: 467, konzept: "eigen", gruppe: "outdoor" }, { id: "S047-f4", etage: 0, qm: 223, konzept: "eigen", gruppe: "teamsport" }, { id: "S047-f5", etage: 0, qm: 202, konzept: "eigen", gruppe: "rad" }, { id: "S047-f6", etage: 0, qm: 163, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 81535, rohertrag: 34571, konzessionserloes: 0, untermiete: 0, personal: 16540, miete: 6703, nebenkosten: 2333, sonstige: 4265, db: 4729, fteBedarf: 13.467695526262736, fteIst: 16.73675352368738, umsatzJeGruppe: { sportschuhe: 23993, sporttextil: 20420, outdoor: 19364, teamsport: 5069, rad: 2385, wintersport: 10304 } } }, { id: "S048", name: "Hartwig Sport Hamburg Galerie am Fluss", stadt: "Hamburg", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2600, etagen: [0, 1], baujahr: 1986, fassade: 7, substanz: 55, status: "offen", flaechen: [{ id: "S048-f1", etage: 0, qm: 1345, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S048-f2", etage: 0, qm: 1139, konzept: "eigen", gruppe: "sporttextil" }, { id: "S048-f3", etage: 0, qm: 66, konzept: "eigen", gruppe: "outdoor" }, { id: "S048-f4", etage: 1, qm: 884, konzept: "eigen", gruppe: "outdoor" }, { id: "S048-f5", etage: 1, qm: 443, konzept: "eigen", gruppe: "teamsport" }, { id: "S048-f6", etage: 1, qm: 765, konzept: "eigen", gruppe: "rad" }, { id: "S048-f7", etage: 1, qm: 457, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 244892, rohertrag: 102350, konzessionserloes: 0, untermiete: 0, personal: 45741, miete: 29218, nebenkosten: 7145, sonstige: 12335, db: 7911, fteBedarf: 38.55786679293943, fteIst: 46.992706440506666, umsatzJeGruppe: { sportschuhe: 96681, sporttextil: 51925, outdoor: 43637, teamsport: 10221, rad: 10277, wintersport: 32151 } } }, { id: "S049", name: "Hartwig Sport M\xFCnchen Am Markt", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 1997, fassade: 0, substanz: 38, status: "offen", flaechen: [{ id: "S049-f1", etage: 0, qm: 1012, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S049-f2", etage: 0, qm: 555, konzept: "eigen", gruppe: "sporttextil" }, { id: "S049-f3", etage: 1, qm: 984, konzept: "eigen", gruppe: "sporttextil" }, { id: "S049-f4", etage: 1, qm: 583, konzept: "eigen", gruppe: "outdoor" }, { id: "S049-f5", etage: 2, qm: 216, konzept: "eigen", gruppe: "outdoor" }, { id: "S049-f6", etage: 2, qm: 528, konzept: "eigen", gruppe: "teamsport" }, { id: "S049-f7", etage: 2, qm: 446, konzept: "eigen", gruppe: "rad" }, { id: "S049-f8", etage: 2, qm: 377, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 239768, rohertrag: 101653, konzessionserloes: 0, untermiete: 0, personal: 40472, miete: 30764, nebenkosten: 6681, sonstige: 11946, db: 11790, fteBedarf: 37.16889344552324, fteIst: 41.33673937946676, umsatzJeGruppe: { sportschuhe: 71817, sporttextil: 78570, outdoor: 40188, teamsport: 16449, rad: 7060, wintersport: 25685 } } }, { id: "S050", name: "Hartwig Sport K\xF6ln City-Center", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2100, etagen: [0], baujahr: 1992, fassade: 6, substanz: 90, status: "offen", flaechen: [{ id: "S050-f1", etage: 0, qm: 375, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S050-f2", etage: 0, qm: 673, konzept: "eigen", gruppe: "sporttextil" }, { id: "S050-f3", etage: 0, qm: 333, konzept: "eigen", gruppe: "outdoor" }, { id: "S050-f4", etage: 0, qm: 217, konzept: "eigen", gruppe: "teamsport" }, { id: "S050-f5", etage: 0, qm: 285, konzept: "eigen", gruppe: "rad" }, { id: "S050-f6", etage: 0, qm: 167, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 78252, rohertrag: 33027, konzessionserloes: 0, untermiete: 0, personal: 16086, miete: 9263, nebenkosten: 0, sonstige: 4131, db: 3548, fteBedarf: 13.159530268777383, fteIst: 16.35596187631147, umsatzJeGruppe: { sportschuhe: 24276, sporttextil: 25834, outdoor: 10617, teamsport: 5070, rad: 2874, wintersport: 9581 } } }];
+  var haeuser_default = [
+    {
+      id: "W001",
+      name: "Hartwig Berlin",
+      stadt: "Berlin",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1932,
+      fassade: 4,
+      substanz: 65,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W001-f1",
+          etage: 0,
+          qm: 816,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W001-f2",
+          etage: 0,
+          qm: 827,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W001-f3",
+          etage: 0,
+          qm: 690,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W001-f4",
+          etage: 1,
+          qm: 712,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W001-f5",
+          etage: 1,
+          qm: 1621,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W001-f6",
+          etage: 2,
+          qm: 1510,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W001-f7",
+          etage: 2,
+          qm: 809,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W001-f8",
+          etage: 2,
+          qm: 15,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W001-f9",
+          etage: 3,
+          qm: 1614,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W001-f10",
+          etage: 3,
+          qm: 719,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W001-f11",
+          etage: 4,
+          qm: 512,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W001-f12",
+          etage: 4,
+          qm: 1402,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W001-f13",
+          etage: 4,
+          qm: 419,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W001-f14",
+          etage: 5,
+          qm: 320,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W001-f15",
+          etage: 5,
+          qm: 2013,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 459926,
+        rohertrag: 194319,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 95905,
+        miete: 62501,
+        nebenkosten: 0,
+        sonstige: 25157,
+        db: 10756,
+        fteBedarf: 84.40254506016997,
+        fteIst: 98.82583318279478,
+        umsatzJeGruppe: {
+          food: 37385,
+          beauty: 75986,
+          accessoires: 79466,
+          damen: 80130,
+          waesche: 23873,
+          herren: 49876,
+          kinder: 28367,
+          sport: 31525,
+          spielwaren: 11849,
+          wohnen: 41468
+        }
+      }
+    },
+    {
+      id: "W002",
+      name: "Hartwig Berlin Marktplatz",
+      stadt: "Berlin",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1983,
+      fassade: 1,
+      substanz: 69,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W002-f1",
+          etage: -1,
+          qm: 1599,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W002-f2",
+          etage: -1,
+          qm: 2301,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W002-f3",
+          etage: 0,
+          qm: 1476,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W002-f4",
+          etage: 0,
+          qm: 2424,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W002-f5",
+          etage: 1,
+          qm: 839,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W002-f6",
+          etage: 1,
+          qm: 3061,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W002-f7",
+          etage: 2,
+          qm: 1365,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W002-f8",
+          etage: 2,
+          qm: 1928,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W002-f9",
+          etage: 2,
+          qm: 606,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W002-f10",
+          etage: 3,
+          qm: 1925,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W002-f11",
+          etage: 3,
+          qm: 1975,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W002-f12",
+          etage: 4,
+          qm: 298,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W002-f13",
+          etage: 4,
+          qm: 2983,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W002-f14",
+          etage: 4,
+          qm: 619,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W002-f15",
+          etage: 5,
+          qm: 1194,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W002-f16",
+          etage: 5,
+          qm: 2706,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 852216,
+        rohertrag: 361304,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 175041,
+        miete: 146077,
+        nebenkosten: 40835,
+        sonstige: 47225,
+        db: -47874,
+        fteBedarf: 159.1439244982958,
+        fteIst: 179.8138710299985,
+        umsatzJeGruppe: {
+          food: 65845,
+          wohnen: 110516,
+          beauty: 120255,
+          accessoires: 161460,
+          damen: 139119,
+          waesche: 61707,
+          herren: 75383,
+          kinder: 46997,
+          sport: 45468,
+          spielwaren: 25465
+        }
+      }
+    },
+    {
+      id: "W003",
+      name: "Palais Hartwig",
+      stadt: "Berlin",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 5600,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1997,
+      fassade: 0,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W003-f1",
+          etage: 0,
+          qm: 1688,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W003-f2",
+          etage: 0,
+          qm: 1295,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W003-f3",
+          etage: 0,
+          qm: 2003,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W003-f4",
+          etage: 0,
+          qm: 325,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W003-f5",
+          etage: 1,
+          qm: 5560,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W003-f6",
+          etage: 2,
+          qm: 509,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W003-f7",
+          etage: 2,
+          qm: 1557,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W003-f8",
+          etage: 2,
+          qm: 3494,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W003-f9",
+          etage: 3,
+          qm: 222,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W003-f10",
+          etage: 3,
+          qm: 2164,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W003-f11",
+          etage: 3,
+          qm: 3173,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W003-f12",
+          etage: 4,
+          qm: 44,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W003-f13",
+          etage: 4,
+          qm: 1653,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W003-f14",
+          etage: 4,
+          qm: 3863,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W003-f2-luxus",
+          etage: 0,
+          qm: 98,
+          konzept: "konzession",
+          gruppe: "beauty"
+        },
+        {
+          id: "W003-f3-luxus",
+          etage: 0,
+          qm: 151,
+          konzept: "konzession",
+          gruppe: "accessoires"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 979603,
+        rohertrag: 415245,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 208278,
+        miete: 154580,
+        nebenkosten: 36778,
+        sonstige: 52673,
+        db: -37064,
+        fteBedarf: 175.8039877202085,
+        fteIst: 210.91327047161073,
+        umsatzJeGruppe: {
+          food: 94423,
+          beauty: 140977,
+          accessoires: 111199,
+          damen: 199727,
+          waesche: 63883,
+          herren: 130601,
+          kinder: 68480,
+          sport: 65416,
+          spielwaren: 29282,
+          wohnen: 75616
+        }
+      },
+      klasse: "premium",
+      premiumSchluessel: "P001",
+      premiumImage: 80
+    },
+    {
+      id: "W004",
+      name: "Hartwig Berlin Marktplatz",
+      stadt: "Berlin",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1967,
+      fassade: 1,
+      substanz: 33,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W004-f1",
+          etage: -1,
+          qm: 1430,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W004-f2",
+          etage: -1,
+          qm: 1737,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W004-f3",
+          etage: 0,
+          qm: 898,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W004-f4",
+          etage: 0,
+          qm: 2207,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W004-f5",
+          etage: 0,
+          qm: 61,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W004-f6",
+          etage: 1,
+          qm: 3167,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W004-f7",
+          etage: 2,
+          qm: 716,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W004-f8",
+          etage: 2,
+          qm: 1096,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W004-f9",
+          etage: 2,
+          qm: 1355,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W004-f10",
+          etage: 3,
+          qm: 1097,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W004-f11",
+          etage: 3,
+          qm: 1084,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W004-f12",
+          etage: 3,
+          qm: 985,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W004-f13",
+          etage: 4,
+          qm: 725,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W004-f14",
+          etage: 4,
+          qm: 1016,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W004-f15",
+          etage: 4,
+          qm: 1425,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 585065,
+        rohertrag: 247893,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 145415,
+        miete: 55456,
+        nebenkosten: 19182,
+        sonstige: 32537,
+        db: -4696,
+        fteBedarf: 109.66479703142903,
+        fteIst: 148.2748420327744,
+        umsatzJeGruppe: {
+          food: 57737,
+          wohnen: 82827,
+          beauty: 65046,
+          accessoires: 102715,
+          damen: 114541,
+          waesche: 35235,
+          herren: 57287,
+          kinder: 23377,
+          sport: 31891,
+          spielwaren: 14410
+        }
+      }
+    },
+    {
+      id: "S001",
+      name: "Hartwig Sport Berlin Einkaufszentrum",
+      stadt: "Berlin",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2400,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2007,
+      fassade: 7,
+      substanz: 41,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S001-f1",
+          etage: 0,
+          qm: 1137,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S001-f2",
+          etage: 0,
+          qm: 1213,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S001-f3",
+          etage: 1,
+          qm: 267,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S001-f4",
+          etage: 1,
+          qm: 667,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S001-f5",
+          etage: 1,
+          qm: 451,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S001-f6",
+          etage: 1,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S001-f7",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 179903,
+        rohertrag: 75386,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 38549,
+        miete: 21292,
+        nebenkosten: 6841,
+        sonstige: 9491,
+        db: -788,
+        fteBedarf: 30.239009917290254,
+        fteIst: 38.696345666978516,
+        umsatzJeGruppe: {
+          sportschuhe: 65271,
+          sporttextil: 47575,
+          outdoor: 26034,
+          teamsport: 10307,
+          rad: 7255,
+          wintersport: 23461
+        }
+      }
+    },
+    {
+      id: "S002",
+      name: "Hartwig Sport Berlin Altstadt",
+      stadt: "Berlin",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2300,
+      etagen: [
+        0
+      ],
+      baujahr: 2006,
+      fassade: 5,
+      substanz: 77,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S002-f1",
+          etage: 0,
+          qm: 544,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S002-f2",
+          etage: 0,
+          qm: 690,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S002-f3",
+          etage: 0,
+          qm: 391,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S002-f4",
+          etage: 0,
+          qm: 209,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S002-f5",
+          etage: 0,
+          qm: 234,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S002-f6",
+          etage: 0,
+          qm: 232,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 108474,
+        rohertrag: 45890,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 18775,
+        miete: 10820,
+        nebenkosten: 3327,
+        sonstige: 5482,
+        db: 7486,
+        fteBedarf: 17.019141900564524,
+        fteIst: 19.161316769992233,
+        umsatzJeGruppe: {
+          sportschuhe: 34264,
+          sporttextil: 29933,
+          outdoor: 19753,
+          teamsport: 6942,
+          rad: 2798,
+          wintersport: 14784
+        }
+      }
+    },
+    {
+      id: "S003",
+      name: "Hartwig Sport Berlin Hauptstra\xDFe",
+      stadt: "Berlin",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 700,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2e3,
+      fassade: 4,
+      substanz: 66,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S003-f1",
+          etage: 0,
+          qm: 323,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S003-f2",
+          etage: 0,
+          qm: 327,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S003-f3",
+          etage: 1,
+          qm: 295,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S003-f4",
+          etage: 1,
+          qm: 355,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S003-f5",
+          etage: 2,
+          qm: 89,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S003-f6",
+          etage: 2,
+          qm: 218,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S003-f7",
+          etage: 2,
+          qm: 201,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S003-f8",
+          etage: 2,
+          qm: 142,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 82058,
+        rohertrag: 35014,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 15293,
+        miete: 10457,
+        nebenkosten: 0,
+        sonstige: 4242,
+        db: 5022,
+        fteBedarf: 13.390945213639425,
+        fteIst: 15.77817675309605,
+        umsatzJeGruppe: {
+          sportschuhe: 18870,
+          sporttextil: 22575,
+          outdoor: 22976,
+          teamsport: 6380,
+          rad: 2597,
+          wintersport: 8659
+        }
+      }
+    },
+    {
+      id: "W005",
+      name: "Hartwig Hamburg",
+      stadt: "Hamburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1976,
+      fassade: 0,
+      substanz: 67,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W005-f1",
+          etage: 0,
+          qm: 1496,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W005-f2",
+          etage: 0,
+          qm: 1318,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W005-f3",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W005-f4",
+          etage: 1,
+          qm: 1332,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W005-f5",
+          etage: 1,
+          qm: 2168,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W005-f6",
+          etage: 2,
+          qm: 1977,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W005-f7",
+          etage: 2,
+          qm: 1523,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W005-f8",
+          etage: 3,
+          qm: 333,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W005-f9",
+          etage: 3,
+          qm: 2181,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W005-f10",
+          etage: 3,
+          qm: 986,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W005-f11",
+          etage: 4,
+          qm: 563,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W005-f12",
+          etage: 4,
+          qm: 1659,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W005-f13",
+          etage: 4,
+          qm: 1278,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W005-f14",
+          etage: 5,
+          qm: 24,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W005-f15",
+          etage: 5,
+          qm: 3476,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 680628,
+        rohertrag: 286925,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 149721,
+        miete: 77503,
+        nebenkosten: 0,
+        sonstige: 37356,
+        db: 22345,
+        fteBedarf: 125.4791372076569,
+        fteIst: 151.3347673572255,
+        umsatzJeGruppe: {
+          food: 63679,
+          beauty: 124070,
+          accessoires: 90919,
+          damen: 119082,
+          waesche: 59093,
+          herren: 61736,
+          kinder: 36364,
+          sport: 29704,
+          spielwaren: 18269,
+          wohnen: 77713
+        }
+      }
+    },
+    {
+      id: "W006",
+      name: "Alsterhaus Hartwig",
+      stadt: "Hamburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 4e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1974,
+      fassade: 4,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W006-f1",
+          etage: -1,
+          qm: 2198,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W006-f2",
+          etage: -1,
+          qm: 1773,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W006-f3",
+          etage: 0,
+          qm: 1393,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W006-f4",
+          etage: 0,
+          qm: 2300,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W006-f5",
+          etage: 1,
+          qm: 689,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W006-f6",
+          etage: 1,
+          qm: 3282,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W006-f7",
+          etage: 2,
+          qm: 1473,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W006-f8",
+          etage: 2,
+          qm: 2234,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W006-f9",
+          etage: 2,
+          qm: 264,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W006-f10",
+          etage: 3,
+          qm: 3676,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W006-f11",
+          etage: 3,
+          qm: 295,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W006-f12",
+          etage: 4,
+          qm: 1171,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W006-f13",
+          etage: 4,
+          qm: 2800,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W006-f14",
+          etage: 5,
+          qm: 72,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W006-f15",
+          etage: 5,
+          qm: 1830,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W006-f16",
+          etage: 5,
+          qm: 2069,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W006-f3-luxus",
+          etage: 0,
+          qm: 105,
+          konzept: "konzession",
+          gruppe: "beauty"
+        },
+        {
+          id: "W006-f4-luxus",
+          etage: 0,
+          qm: 173,
+          konzept: "konzession",
+          gruppe: "accessoires"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 1178083,
+        rohertrag: 495107,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 238157,
+        miete: 99040,
+        nebenkosten: 37651,
+        sonstige: 60810,
+        db: 59449,
+        fteBedarf: 200.11818584531616,
+        fteIst: 239.41977394155487,
+        umsatzJeGruppe: {
+          food: 133383,
+          wohnen: 111208,
+          beauty: 179962,
+          accessoires: 219673,
+          damen: 162609,
+          waesche: 102807,
+          herren: 125207,
+          kinder: 43506,
+          sport: 63011,
+          spielwaren: 36717
+        }
+      },
+      klasse: "premium",
+      premiumSchluessel: "P003",
+      premiumImage: 80
+    },
+    {
+      id: "W007",
+      name: "Hartwig Hamburg Hauptstra\xDFe",
+      stadt: "Hamburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2600,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1994,
+      fassade: 0,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W007-f1",
+          etage: -1,
+          qm: 867,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W007-f2",
+          etage: -1,
+          qm: 1700,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W007-f3",
+          etage: 0,
+          qm: 764,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W007-f4",
+          etage: 0,
+          qm: 1456,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W007-f5",
+          etage: 0,
+          qm: 346,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W007-f6",
+          etage: 1,
+          qm: 2567,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W007-f7",
+          etage: 2,
+          qm: 608,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W007-f8",
+          etage: 2,
+          qm: 999,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W007-f9",
+          etage: 2,
+          qm: 960,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W007-f10",
+          etage: 3,
+          qm: 1351,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W007-f11",
+          etage: 3,
+          qm: 1216,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W007-f12",
+          etage: 4,
+          qm: 38,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W007-f13",
+          etage: 4,
+          qm: 1254,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W007-f14",
+          etage: 4,
+          qm: 972,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W007-f15",
+          etage: 4,
+          qm: 303,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 548568,
+        rohertrag: 234303,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 128534,
+        miete: 89059,
+        nebenkosten: 21860,
+        sonstige: 29422,
+        db: -34572,
+        fteBedarf: 98.09131739332074,
+        fteIst: 130.37834865459325,
+        umsatzJeGruppe: {
+          food: 42747,
+          wohnen: 46575,
+          beauty: 82472,
+          accessoires: 95294,
+          damen: 108453,
+          waesche: 34915,
+          herren: 65480,
+          kinder: 29978,
+          sport: 27247,
+          spielwaren: 15408
+        }
+      }
+    },
+    {
+      id: "S004",
+      name: "Hartwig Sport Hamburg City-Center",
+      stadt: "Hamburg",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 1700,
+      etagen: [
+        0
+      ],
+      baujahr: 1978,
+      fassade: 1,
+      substanz: 63,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S004-f1",
+          etage: 0,
+          qm: 458,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S004-f2",
+          etage: 0,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S004-f3",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S004-f4",
+          etage: 0,
+          qm: 190,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S004-f5",
+          etage: 0,
+          qm: 161,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S004-f6",
+          etage: 0,
+          qm: 148,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 71451,
+        rohertrag: 29891,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 13130,
+        miete: 10970,
+        nebenkosten: 1816,
+        sonstige: 3694,
+        db: 281,
+        fteBedarf: 11.600725058482464,
+        fteIst: 13.178316073396308,
+        umsatzJeGruppe: {
+          sportschuhe: 29938,
+          sporttextil: 12697,
+          outdoor: 13057,
+          teamsport: 4484,
+          rad: 1691,
+          wintersport: 9585
+        }
+      }
+    },
+    {
+      id: "S005",
+      name: "Hartwig Sport Hamburg Hauptstra\xDFe",
+      stadt: "Hamburg",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2900,
+      etagen: [
+        0
+      ],
+      baujahr: 2004,
+      fassade: 7,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S005-f1",
+          etage: 0,
+          qm: 555,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S005-f2",
+          etage: 0,
+          qm: 934,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S005-f3",
+          etage: 0,
+          qm: 599,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S005-f4",
+          etage: 0,
+          qm: 227,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S005-f5",
+          etage: 0,
+          qm: 306,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S005-f6",
+          etage: 0,
+          qm: 279,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 105833,
+        rohertrag: 45107,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 19463,
+        miete: 7685,
+        nebenkosten: 2932,
+        sonstige: 5644,
+        db: 9382,
+        fteBedarf: 17.82897189599727,
+        fteIst: 20.084530607437635,
+        umsatzJeGruppe: {
+          sportschuhe: 26258,
+          sporttextil: 31012,
+          outdoor: 24526,
+          teamsport: 4568,
+          rad: 3267,
+          wintersport: 16202
+        }
+      }
+    },
+    {
+      id: "W008",
+      name: "Hartwig M\xFCnchen",
+      stadt: "M\xFCnchen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1962,
+      fassade: 3,
+      substanz: 81,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W008-f1",
+          etage: -1,
+          qm: 1304,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W008-f2",
+          etage: -1,
+          qm: 1836,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W008-f3",
+          etage: 0,
+          qm: 1084,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W008-f4",
+          etage: 0,
+          qm: 1913,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W008-f5",
+          etage: 0,
+          qm: 143,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W008-f6",
+          etage: 1,
+          qm: 2487,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W008-f7",
+          etage: 1,
+          qm: 653,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W008-f8",
+          etage: 2,
+          qm: 490,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W008-f9",
+          etage: 2,
+          qm: 1625,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W008-f10",
+          etage: 2,
+          qm: 1024,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W008-f11",
+          etage: 3,
+          qm: 1297,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W008-f12",
+          etage: 3,
+          qm: 1235,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W008-f13",
+          etage: 3,
+          qm: 608,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 634710,
+        rohertrag: 264730,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 141836,
+        miete: 67430,
+        nebenkosten: 19695,
+        sonstige: 33088,
+        db: 2681,
+        fteBedarf: 109.37454007714577,
+        fteIst: 142.05388052311054,
+        umsatzJeGruppe: {
+          food: 76793,
+          wohnen: 56825,
+          beauty: 107775,
+          accessoires: 124104,
+          damen: 105929,
+          waesche: 38824,
+          herren: 47022,
+          kinder: 27713,
+          sport: 25323,
+          spielwaren: 24403
+        }
+      }
+    },
+    {
+      id: "W009",
+      name: "Hartwig am Hofgarten",
+      stadt: "M\xFCnchen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 4700,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1945,
+      fassade: 2,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W009-f1",
+          etage: 0,
+          qm: 1302,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W009-f2",
+          etage: 0,
+          qm: 1354,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W009-f3",
+          etage: 0,
+          qm: 1825,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W009-f4",
+          etage: 1,
+          qm: 218,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W009-f5",
+          etage: 1,
+          qm: 4502,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W009-f6",
+          etage: 2,
+          qm: 829,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W009-f7",
+          etage: 2,
+          qm: 1915,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W009-f8",
+          etage: 2,
+          qm: 1976,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W009-f9",
+          etage: 3,
+          qm: 910,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W009-f10",
+          etage: 3,
+          qm: 1191,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W009-f11",
+          etage: 3,
+          qm: 2495,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W009-f12",
+          etage: 3,
+          qm: 123,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W009-f13",
+          etage: 4,
+          qm: 1293,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W009-f14",
+          etage: 4,
+          qm: 3427,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W009-f2-luxus",
+          etage: 0,
+          qm: 102,
+          konzept: "konzession",
+          gruppe: "beauty"
+        },
+        {
+          id: "W009-f3-luxus",
+          etage: 0,
+          qm: 137,
+          konzept: "konzession",
+          gruppe: "accessoires"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 720317,
+        rohertrag: 305682,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 152859,
+        miete: 89731,
+        nebenkosten: 24126,
+        sonstige: 40153,
+        db: -1188,
+        fteBedarf: 135.57209511125842,
+        fteIst: 156.51258713771043,
+        umsatzJeGruppe: {
+          food: 61885,
+          beauty: 124020,
+          accessoires: 101640,
+          damen: 147043,
+          waesche: 55782,
+          herren: 74935,
+          kinder: 23748,
+          sport: 41749,
+          spielwaren: 21705,
+          wohnen: 67810
+        }
+      },
+      klasse: "premium",
+      premiumSchluessel: "P002",
+      premiumImage: 80
+    },
+    {
+      id: "W010",
+      name: "Hartwig M\xFCnchen Am Markt",
+      stadt: "M\xFCnchen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1931,
+      fassade: 2,
+      substanz: 37,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W010-f1",
+          etage: -1,
+          qm: 2019,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W010-f2",
+          etage: -1,
+          qm: 1152,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W010-f3",
+          etage: 0,
+          qm: 1271,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W010-f4",
+          etage: 0,
+          qm: 1901,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W010-f5",
+          etage: 1,
+          qm: 147,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W010-f6",
+          etage: 1,
+          qm: 3025,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W010-f7",
+          etage: 2,
+          qm: 2194,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W010-f8",
+          etage: 2,
+          qm: 977,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W010-f9",
+          etage: 3,
+          qm: 773,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W010-f10",
+          etage: 3,
+          qm: 2399,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W010-f11",
+          etage: 4,
+          qm: 17,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W010-f12",
+          etage: 4,
+          qm: 1422,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W010-f13",
+          etage: 4,
+          qm: 1733,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W010-f14",
+          etage: 5,
+          qm: 502,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W010-f15",
+          etage: 5,
+          qm: 1216,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W010-f16",
+          etage: 5,
+          qm: 1453,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 806829,
+        rohertrag: 339765,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 153763,
+        miete: 68917,
+        nebenkosten: 30518,
+        sonstige: 43070,
+        db: 43496,
+        fteBedarf: 143.31180767469192,
+        fteIst: 157.84199784570941,
+        umsatzJeGruppe: {
+          food: 87138,
+          wohnen: 60440,
+          beauty: 143798,
+          accessoires: 122653,
+          damen: 157112,
+          waesche: 57139,
+          herren: 77158,
+          kinder: 35745,
+          sport: 45807,
+          spielwaren: 19840
+        }
+      }
+    },
+    {
+      id: "S006",
+      name: "Hartwig Sport M\xFCnchen",
+      stadt: "M\xFCnchen",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2700,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1986,
+      fassade: 3,
+      substanz: 71,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S006-f1",
+          etage: 0,
+          qm: 1098,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S006-f2",
+          etage: 0,
+          qm: 1577,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S006-f3",
+          etage: 1,
+          qm: 21,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S006-f4",
+          etage: 1,
+          qm: 1072,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S006-f5",
+          etage: 1,
+          qm: 449,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S006-f6",
+          etage: 1,
+          qm: 664,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S006-f7",
+          etage: 1,
+          qm: 469,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 231121,
+        rohertrag: 97740,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 40916,
+        miete: 22361,
+        nebenkosten: 6540,
+        sonstige: 11883,
+        db: 16040,
+        fteBedarf: 37.16834450392001,
+        fteIst: 41.18710472301602,
+        umsatzJeGruppe: {
+          sportschuhe: 67499,
+          sporttextil: 66855,
+          outdoor: 42458,
+          teamsport: 11189,
+          rad: 8634,
+          wintersport: 34486
+        }
+      }
+    },
+    {
+      id: "S007",
+      name: "Hartwig Sport M\xFCnchen Am Wall",
+      stadt: "M\xFCnchen",
+      format: "sport",
+      lage: "b",
+      cluster: "metropole",
+      grundflaecheQm: 700,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1975,
+      fassade: 7,
+      substanz: 38,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S007-f1",
+          etage: 0,
+          qm: 474,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S007-f2",
+          etage: 0,
+          qm: 259,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S007-f3",
+          etage: 1,
+          qm: 283,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S007-f4",
+          etage: 1,
+          qm: 444,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S007-f5",
+          etage: 1,
+          qm: 6,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S007-f6",
+          etage: 2,
+          qm: 198,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S007-f7",
+          etage: 2,
+          qm: 331,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S007-f8",
+          etage: 2,
+          qm: 204,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 80683,
+        rohertrag: 33793,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 14890,
+        miete: 9125,
+        nebenkosten: 2845,
+        sonstige: 4298,
+        db: 2635,
+        fteBedarf: 13.668988032611951,
+        fteIst: 15.396758071949431,
+        umsatzJeGruppe: {
+          sportschuhe: 26124,
+          sporttextil: 16787,
+          outdoor: 16323,
+          teamsport: 4204,
+          rad: 4006,
+          wintersport: 13239
+        }
+      }
+    },
+    {
+      id: "S008",
+      name: "Hartwig Sport M\xFCnchen Altstadt",
+      stadt: "M\xFCnchen",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2012,
+      fassade: 4,
+      substanz: 60,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S008-f1",
+          etage: 0,
+          qm: 1156,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S008-f2",
+          etage: 0,
+          qm: 311,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S008-f3",
+          etage: 1,
+          qm: 789,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S008-f4",
+          etage: 1,
+          qm: 678,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S008-f5",
+          etage: 2,
+          qm: 107,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S008-f6",
+          etage: 2,
+          qm: 472,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S008-f7",
+          etage: 2,
+          qm: 491,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S008-f8",
+          etage: 2,
+          qm: 396,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 204261,
+        rohertrag: 85772,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 35739,
+        miete: 24774,
+        nebenkosten: 5223,
+        sonstige: 10355,
+        db: 9682,
+        fteBedarf: 32.2807452085907,
+        fteIst: 36.230434659385594,
+        umsatzJeGruppe: {
+          sportschuhe: 79692,
+          sporttextil: 49890,
+          outdoor: 32164,
+          teamsport: 9822,
+          rad: 5738,
+          wintersport: 26955
+        }
+      }
+    },
+    {
+      id: "W011",
+      name: "Hartwig K\xF6ln City-Center",
+      stadt: "K\xF6ln",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 3700,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1974,
+      fassade: 3,
+      substanz: 54,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W011-f1",
+          etage: 0,
+          qm: 1289,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W011-f2",
+          etage: 0,
+          qm: 1367,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W011-f3",
+          etage: 0,
+          qm: 1024,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W011-f4",
+          etage: 1,
+          qm: 362,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W011-f5",
+          etage: 1,
+          qm: 3318,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W011-f6",
+          etage: 2,
+          qm: 1066,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W011-f7",
+          etage: 2,
+          qm: 1438,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W011-f8",
+          etage: 2,
+          qm: 1176,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W011-f9",
+          etage: 3,
+          qm: 1364,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W011-f10",
+          etage: 3,
+          qm: 1391,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W011-f11",
+          etage: 3,
+          qm: 925,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W011-f12",
+          etage: 4,
+          qm: 665,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W011-f13",
+          etage: 4,
+          qm: 914,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W011-f14",
+          etage: 4,
+          qm: 2101,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 470422,
+        rohertrag: 199054,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 118997,
+        miete: 70819,
+        nebenkosten: 26008,
+        sonstige: 27567,
+        db: -44337,
+        fteBedarf: 94.52113235739775,
+        fteIst: 121.51666383366833,
+        umsatzJeGruppe: {
+          food: 39701,
+          beauty: 95717,
+          accessoires: 55926,
+          damen: 100455,
+          waesche: 29755,
+          herren: 51254,
+          kinder: 24955,
+          sport: 24217,
+          spielwaren: 12823,
+          wohnen: 35620
+        }
+      }
+    },
+    {
+      id: "W012",
+      name: "Hartwig K\xF6ln Arkaden",
+      stadt: "K\xF6ln",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 4500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1924,
+      fassade: 1,
+      substanz: 37,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W012-f1",
+          etage: -1,
+          qm: 1611,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W012-f2",
+          etage: -1,
+          qm: 2909,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W012-f3",
+          etage: 0,
+          qm: 1617,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W012-f4",
+          etage: 0,
+          qm: 2083,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W012-f5",
+          etage: 0,
+          qm: 820,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W012-f6",
+          etage: 1,
+          qm: 4202,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W012-f7",
+          etage: 1,
+          qm: 318,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W012-f8",
+          etage: 2,
+          qm: 1232,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W012-f9",
+          etage: 2,
+          qm: 2675,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W012-f10",
+          etage: 2,
+          qm: 613,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W012-f11",
+          etage: 3,
+          qm: 1015,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W012-f12",
+          etage: 3,
+          qm: 2267,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W012-f13",
+          etage: 3,
+          qm: 1298,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 651290,
+        rohertrag: 273778,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 138764,
+        miete: 56433,
+        nebenkosten: 31429,
+        sonstige: 36900,
+        db: 10253,
+        fteBedarf: 125.30892118053129,
+        fteIst: 141.94311506493966,
+        umsatzJeGruppe: {
+          food: 59767,
+          wohnen: 43604,
+          beauty: 137372,
+          accessoires: 101936,
+          damen: 115606,
+          waesche: 43876,
+          herren: 62814,
+          kinder: 30657,
+          sport: 34197,
+          spielwaren: 21460
+        }
+      }
+    },
+    {
+      id: "S009",
+      name: "Hartwig Sport K\xF6ln Galerie am Fluss",
+      stadt: "K\xF6ln",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 900,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2007,
+      fassade: 6,
+      substanz: 79,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S009-f1",
+          etage: 0,
+          qm: 585,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S009-f2",
+          etage: 0,
+          qm: 349,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S009-f3",
+          etage: 1,
+          qm: 491,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S009-f4",
+          etage: 1,
+          qm: 442,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S009-f5",
+          etage: 2,
+          qm: 150,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S009-f6",
+          etage: 2,
+          qm: 250,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S009-f7",
+          etage: 2,
+          qm: 342,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S009-f8",
+          etage: 2,
+          qm: 191,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 105889,
+        rohertrag: 44857,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 19904,
+        miete: 11623,
+        nebenkosten: 4145,
+        sonstige: 5601,
+        db: 3584,
+        fteBedarf: 17.942361818663294,
+        fteIst: 20.210898954929757,
+        umsatzJeGruppe: {
+          sportschuhe: 36485,
+          sporttextil: 32969,
+          outdoor: 19833,
+          teamsport: 4540,
+          rad: 3167,
+          wintersport: 8896
+        }
+      }
+    },
+    {
+      id: "S010",
+      name: "Hartwig Sport K\xF6ln Arkaden",
+      stadt: "K\xF6ln",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1994,
+      fassade: 0,
+      substanz: 67,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S010-f1",
+          etage: 0,
+          qm: 339,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S010-f2",
+          etage: 0,
+          qm: 211,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S010-f3",
+          etage: 1,
+          qm: 196,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S010-f4",
+          etage: 1,
+          qm: 354,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S010-f5",
+          etage: 2,
+          qm: 24,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S010-f6",
+          etage: 2,
+          qm: 141,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S010-f7",
+          etage: 2,
+          qm: 241,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S010-f8",
+          etage: 2,
+          qm: 144,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 49425,
+        rohertrag: 20827,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 10455,
+        miete: 9964,
+        nebenkosten: 2257,
+        sonstige: 2769,
+        db: -4619,
+        fteBedarf: 9.003018787165358,
+        fteIst: 10.5564706810127,
+        umsatzJeGruppe: {
+          sportschuhe: 15321,
+          sporttextil: 10691,
+          outdoor: 12072,
+          teamsport: 2432,
+          rad: 2164,
+          wintersport: 6745
+        }
+      }
+    },
+    {
+      id: "W013",
+      name: "Hartwig Frankfurt",
+      stadt: "Frankfurt",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1984,
+      fassade: 1,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W013-f1",
+          etage: -1,
+          qm: 1937,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W013-f2",
+          etage: -1,
+          qm: 1948,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W013-f3",
+          etage: 0,
+          qm: 1610,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W013-f4",
+          etage: 0,
+          qm: 2276,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W013-f5",
+          etage: 1,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W013-f6",
+          etage: 1,
+          qm: 3672,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W013-f7",
+          etage: 2,
+          qm: 2280,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W013-f8",
+          etage: 2,
+          qm: 1605,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W013-f9",
+          etage: 3,
+          qm: 123,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W013-f10",
+          etage: 3,
+          qm: 3252,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W013-f11",
+          etage: 3,
+          qm: 511,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W013-f12",
+          etage: 4,
+          qm: 1471,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W013-f13",
+          etage: 4,
+          qm: 2415,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W013-f14",
+          etage: 5,
+          qm: 35,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W013-f15",
+          etage: 5,
+          qm: 1449,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W013-f16",
+          etage: 5,
+          qm: 2402,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 776164,
+        rohertrag: 326020,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 179406,
+        miete: 83657,
+        nebenkosten: 37419,
+        sonstige: 44063,
+        db: -18524,
+        fteBedarf: 149.61121766248164,
+        fteIst: 183.57388462592328,
+        umsatzJeGruppe: {
+          food: 79441,
+          wohnen: 63469,
+          beauty: 147742,
+          accessoires: 99784,
+          damen: 147390,
+          waesche: 46343,
+          herren: 84336,
+          kinder: 47607,
+          sport: 39539,
+          spielwaren: 20513
+        }
+      }
+    },
+    {
+      id: "W014",
+      name: "Hartwig Frankfurt Hauptstra\xDFe",
+      stadt: "Frankfurt",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3300,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1981,
+      fassade: 7,
+      substanz: 56,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W014-f1",
+          etage: -1,
+          qm: 1472,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W014-f2",
+          etage: -1,
+          qm: 1799,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W014-f3",
+          etage: 0,
+          qm: 1283,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W014-f4",
+          etage: 0,
+          qm: 1988,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W014-f5",
+          etage: 1,
+          qm: 9,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W014-f6",
+          etage: 1,
+          qm: 3262,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W014-f7",
+          etage: 2,
+          qm: 1102,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W014-f8",
+          etage: 2,
+          qm: 1310,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W014-f9",
+          etage: 2,
+          qm: 859,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W014-f10",
+          etage: 3,
+          qm: 1406,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W014-f11",
+          etage: 3,
+          qm: 1596,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W014-f12",
+          etage: 3,
+          qm: 270,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W014-f13",
+          etage: 4,
+          qm: 2508,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W014-f14",
+          etage: 4,
+          qm: 764,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W014-f15",
+          etage: 5,
+          qm: 905,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W014-f16",
+          etage: 5,
+          qm: 2366,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 841120,
+        rohertrag: 352675,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 185385,
+        miete: 63203,
+        nebenkosten: 26921,
+        sonstige: 44790,
+        db: 32376,
+        fteBedarf: 149.26307186005968,
+        fteIst: 189.37930208572513,
+        umsatzJeGruppe: {
+          food: 66645,
+          wohnen: 83922,
+          beauty: 149843,
+          accessoires: 122577,
+          damen: 147543,
+          waesche: 41271,
+          herren: 82452,
+          kinder: 52063,
+          sport: 58557,
+          spielwaren: 36246
+        }
+      }
+    },
+    {
+      id: "S011",
+      name: "Hartwig Sport Frankfurt",
+      stadt: "Frankfurt",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2e3,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2011,
+      fassade: 2,
+      substanz: 56,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S011-f1",
+          etage: 0,
+          qm: 1116,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S011-f2",
+          etage: 0,
+          qm: 884,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S011-f3",
+          etage: 1,
+          qm: 144,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S011-f4",
+          etage: 1,
+          qm: 678,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S011-f5",
+          etage: 1,
+          qm: 481,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S011-f6",
+          etage: 1,
+          qm: 413,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S011-f7",
+          etage: 1,
+          qm: 283,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 204272,
+        rohertrag: 85965,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 38043,
+        miete: 14902,
+        nebenkosten: 4291,
+        sonstige: 10175,
+        db: 18554,
+        fteBedarf: 31.55101315478689,
+        fteIst: 38.59533266697779,
+        umsatzJeGruppe: {
+          sportschuhe: 74193,
+          sporttextil: 53406,
+          outdoor: 32356,
+          teamsport: 14173,
+          rad: 5289,
+          wintersport: 24855
+        }
+      }
+    },
+    {
+      id: "S012",
+      name: "Hartwig Sport Frankfurt Am Markt",
+      stadt: "Frankfurt",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3500,
+      etagen: [
+        0
+      ],
+      baujahr: 1995,
+      fassade: 5,
+      substanz: 60,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S012-f1",
+          etage: 0,
+          qm: 835,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S012-f2",
+          etage: 0,
+          qm: 863,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S012-f3",
+          etage: 0,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S012-f4",
+          etage: 0,
+          qm: 346,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S012-f5",
+          etage: 0,
+          qm: 407,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S012-f6",
+          etage: 0,
+          qm: 295,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 160296,
+        rohertrag: 67764,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 31372,
+        miete: 23987,
+        nebenkosten: 3708,
+        sonstige: 8147,
+        db: 550,
+        fteBedarf: 25.499037707470766,
+        fteIst: 31.851320333159077,
+        umsatzJeGruppe: {
+          sportschuhe: 47350,
+          sporttextil: 38706,
+          outdoor: 38331,
+          teamsport: 9307,
+          rad: 6155,
+          wintersport: 20446
+        }
+      }
+    },
+    {
+      id: "W015",
+      name: "Hartwig D\xFCsseldorf City-Center",
+      stadt: "D\xFCsseldorf",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 4100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1978,
+      fassade: 5,
+      substanz: 44,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W015-f1",
+          etage: -1,
+          qm: 1397,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W015-f2",
+          etage: -1,
+          qm: 2723,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W015-f3",
+          etage: 0,
+          qm: 1047,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W015-f4",
+          etage: 0,
+          qm: 1851,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W015-f5",
+          etage: 0,
+          qm: 1222,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W015-f6",
+          etage: 1,
+          qm: 2653,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W015-f7",
+          etage: 1,
+          qm: 1457,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W015-f8",
+          etage: 1,
+          qm: 11,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W015-f9",
+          etage: 2,
+          qm: 2058,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W015-f10",
+          etage: 2,
+          qm: 1548,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W015-f11",
+          etage: 2,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W015-f12",
+          etage: 3,
+          qm: 1792,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W015-f13",
+          etage: 3,
+          qm: 1321,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W015-f14",
+          etage: 3,
+          qm: 1007,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 681687,
+        rohertrag: 286212,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 154921,
+        miete: 97006,
+        nebenkosten: 0,
+        sonstige: 37220,
+        db: -2935,
+        fteBedarf: 124.86729317467515,
+        fteIst: 157.28323075819483,
+        umsatzJeGruppe: {
+          food: 66200,
+          wohnen: 81001,
+          beauty: 113343,
+          accessoires: 93807,
+          damen: 113845,
+          waesche: 51182,
+          herren: 65435,
+          kinder: 37839,
+          sport: 37424,
+          spielwaren: 21611
+        }
+      }
+    },
+    {
+      id: "W016",
+      name: "Hartwig K\xF6nigsallee",
+      stadt: "D\xFCsseldorf",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 4e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1975,
+      fassade: 4,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W016-f1",
+          etage: -1,
+          qm: 1548,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W016-f2",
+          etage: -1,
+          qm: 2486,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W016-f3",
+          etage: 0,
+          qm: 1454,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W016-f4",
+          etage: 0,
+          qm: 2018,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W016-f5",
+          etage: 0,
+          qm: 301,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W016-f6",
+          etage: 1,
+          qm: 4033,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W016-f7",
+          etage: 2,
+          qm: 533,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W016-f8",
+          etage: 2,
+          qm: 1943,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W016-f9",
+          etage: 2,
+          qm: 1558,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W016-f10",
+          etage: 3,
+          qm: 1816,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W016-f11",
+          etage: 3,
+          qm: 1734,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W016-f12",
+          etage: 3,
+          qm: 484,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W016-f13",
+          etage: 4,
+          qm: 1904,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W016-f14",
+          etage: 4,
+          qm: 1290,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W016-f15",
+          etage: 4,
+          qm: 840,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W016-f3-luxus",
+          etage: 0,
+          qm: 109,
+          konzept: "konzession",
+          gruppe: "beauty"
+        },
+        {
+          id: "W016-f4-luxus",
+          etage: 0,
+          qm: 152,
+          konzept: "konzession",
+          gruppe: "accessoires"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 989132,
+        rohertrag: 419154,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 211005,
+        miete: 79198,
+        nebenkosten: 27906,
+        sonstige: 51446,
+        db: 49599,
+        fteBedarf: 169.60885016905962,
+        fteIst: 219.54370796368428,
+        umsatzJeGruppe: {
+          food: 96531,
+          wohnen: 70471,
+          beauty: 183498,
+          accessoires: 138198,
+          damen: 186702,
+          waesche: 74598,
+          herren: 125288,
+          kinder: 41422,
+          sport: 51355,
+          spielwaren: 21068
+        }
+      },
+      klasse: "premium",
+      premiumSchluessel: "P004",
+      premiumImage: 80
+    },
+    {
+      id: "S013",
+      name: "Hartwig Sport D\xFCsseldorf Einkaufszentrum",
+      stadt: "D\xFCsseldorf",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2015,
+      fassade: 1,
+      substanz: 35,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S013-f1",
+          etage: 0,
+          qm: 1032,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S013-f2",
+          etage: 0,
+          qm: 1093,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S013-f3",
+          etage: 1,
+          qm: 143,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S013-f4",
+          etage: 1,
+          qm: 841,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S013-f5",
+          etage: 1,
+          qm: 297,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S013-f6",
+          etage: 1,
+          qm: 493,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S013-f7",
+          etage: 1,
+          qm: 351,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 141487,
+        rohertrag: 59654,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 27950,
+        miete: 13866,
+        nebenkosten: 5805,
+        sonstige: 7713,
+        db: 4319,
+        fteBedarf: 24.701643702090895,
+        fteIst: 28.54927540580955,
+        umsatzJeGruppe: {
+          sportschuhe: 44774,
+          sporttextil: 39674,
+          outdoor: 23638,
+          teamsport: 6333,
+          rad: 5398,
+          wintersport: 21670
+        }
+      }
+    },
+    {
+      id: "S014",
+      name: "Hartwig Sport D\xFCsseldorf Galerie am Fluss",
+      stadt: "D\xFCsseldorf",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2200,
+      etagen: [
+        0
+      ],
+      baujahr: 1981,
+      fassade: 2,
+      substanz: 64,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S014-f1",
+          etage: 0,
+          qm: 584,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S014-f2",
+          etage: 0,
+          qm: 531,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S014-f3",
+          etage: 0,
+          qm: 458,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S014-f4",
+          etage: 0,
+          qm: 186,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S014-f5",
+          etage: 0,
+          qm: 237,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S014-f6",
+          etage: 0,
+          qm: 204,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 92903,
+        rohertrag: 38898,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 17743,
+        miete: 13086,
+        nebenkosten: 2692,
+        sonstige: 4799,
+        db: 578,
+        fteBedarf: 15.099560843823076,
+        fteIst: 18.383528103935355,
+        umsatzJeGruppe: {
+          sportschuhe: 37227,
+          sporttextil: 19399,
+          outdoor: 16025,
+          teamsport: 5155,
+          rad: 2804,
+          wintersport: 12293
+        }
+      }
+    },
+    {
+      id: "W017",
+      name: "Hartwig Stuttgart",
+      stadt: "Stuttgart",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 3e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1973,
+      fassade: 4,
+      substanz: 86,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W017-f1",
+          etage: -1,
+          qm: 1135,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W017-f2",
+          etage: -1,
+          qm: 1815,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W017-f3",
+          etage: 0,
+          qm: 921,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W017-f4",
+          etage: 0,
+          qm: 1471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W017-f5",
+          etage: 0,
+          qm: 558,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W017-f6",
+          etage: 1,
+          qm: 2779,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W017-f7",
+          etage: 1,
+          qm: 171,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W017-f8",
+          etage: 2,
+          qm: 1357,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W017-f9",
+          etage: 2,
+          qm: 1593,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W017-f10",
+          etage: 3,
+          qm: 897,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W017-f11",
+          etage: 3,
+          qm: 1513,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W017-f12",
+          etage: 3,
+          qm: 540,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W017-f13",
+          etage: 4,
+          qm: 1271,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W017-f14",
+          etage: 4,
+          qm: 861,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W017-f15",
+          etage: 4,
+          qm: 818,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 795476,
+        rohertrag: 338444,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 139952,
+        miete: 106668,
+        nebenkosten: 18061,
+        sonstige: 40580,
+        db: 33183,
+        fteBedarf: 132.95607663611813,
+        fteIst: 144.1291221195617,
+        umsatzJeGruppe: {
+          food: 76105,
+          wohnen: 58379,
+          beauty: 125048,
+          accessoires: 95350,
+          damen: 155112,
+          waesche: 68833,
+          herren: 102773,
+          kinder: 50330,
+          sport: 42703,
+          spielwaren: 20843
+        }
+      }
+    },
+    {
+      id: "W018",
+      name: "Hartwig Stuttgart Arkaden",
+      stadt: "Stuttgart",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2200,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      baujahr: 1935,
+      fassade: 2,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W018-f1",
+          etage: 0,
+          qm: 904,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W018-f2",
+          etage: 0,
+          qm: 765,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W018-f3",
+          etage: 0,
+          qm: 531,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W018-f4",
+          etage: 1,
+          qm: 926,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W018-f5",
+          etage: 1,
+          qm: 1274,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W018-f6",
+          etage: 2,
+          qm: 2198,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W018-f7",
+          etage: 2,
+          qm: 2,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W018-f8",
+          etage: 3,
+          qm: 1203,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W018-f9",
+          etage: 3,
+          qm: 997,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W018-f10",
+          etage: 4,
+          qm: 910,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W018-f11",
+          etage: 4,
+          qm: 1153,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W018-f12",
+          etage: 4,
+          qm: 137,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W018-f13",
+          etage: 5,
+          qm: 1276,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W018-f14",
+          etage: 5,
+          qm: 801,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W018-f15",
+          etage: 5,
+          qm: 123,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W018-f16",
+          etage: 6,
+          qm: 2200,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 438669,
+        rohertrag: 186053,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 99460,
+        miete: 100316,
+        nebenkosten: 19697,
+        sonstige: 24915,
+        db: -58336,
+        fteBedarf: 84.61337809168313,
+        fteIst: 101.37414919327071,
+        umsatzJeGruppe: {
+          food: 38633,
+          beauty: 72609,
+          accessoires: 56318,
+          damen: 85133,
+          waesche: 33529,
+          herren: 51791,
+          kinder: 19557,
+          sport: 22764,
+          spielwaren: 12806,
+          wohnen: 45529
+        }
+      }
+    },
+    {
+      id: "S015",
+      name: "Hartwig Sport Stuttgart City-Center",
+      stadt: "Stuttgart",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2900,
+      etagen: [
+        0
+      ],
+      baujahr: 1988,
+      fassade: 1,
+      substanz: 34,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S015-f1",
+          etage: 0,
+          qm: 534,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S015-f2",
+          etage: 0,
+          qm: 821,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S015-f3",
+          etage: 0,
+          qm: 674,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S015-f4",
+          etage: 0,
+          qm: 291,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S015-f5",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S015-f6",
+          etage: 0,
+          qm: 237,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 118007,
+        rohertrag: 49797,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 22713,
+        miete: 15088,
+        nebenkosten: 2858,
+        sonstige: 6121,
+        db: 3017,
+        fteBedarf: 19.209130891754945,
+        fteIst: 23.462436092808183,
+        umsatzJeGruppe: {
+          sportschuhe: 38479,
+          sporttextil: 31215,
+          outdoor: 21413,
+          teamsport: 5938,
+          rad: 3804,
+          wintersport: 17157
+        }
+      }
+    },
+    {
+      id: "S016",
+      name: "Hartwig Sport Stuttgart Am Markt",
+      stadt: "Stuttgart",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 1300,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1992,
+      fassade: 4,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S016-f1",
+          etage: 0,
+          qm: 913,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S016-f2",
+          etage: 0,
+          qm: 387,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S016-f3",
+          etage: 1,
+          qm: 888,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S016-f4",
+          etage: 1,
+          qm: 412,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S016-f5",
+          etage: 2,
+          qm: 263,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S016-f6",
+          etage: 2,
+          qm: 377,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S016-f7",
+          etage: 2,
+          qm: 434,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S016-f8",
+          etage: 2,
+          qm: 226,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 187941,
+        rohertrag: 79919,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 33215,
+        miete: 28226,
+        nebenkosten: 0,
+        sonstige: 9461,
+        db: 9017,
+        fteBedarf: 29.657375862347894,
+        fteIst: 33.668931300002356,
+        umsatzJeGruppe: {
+          sportschuhe: 58606,
+          sporttextil: 65164,
+          outdoor: 33445,
+          teamsport: 9593,
+          rad: 5086,
+          wintersport: 16047
+        }
+      }
+    },
+    {
+      id: "W019",
+      name: "Hartwig Essen",
+      stadt: "Essen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1916,
+      fassade: 1,
+      substanz: 44,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W019-f1",
+          etage: -1,
+          qm: 588,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W019-f2",
+          etage: -1,
+          qm: 1262,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W019-f3",
+          etage: 0,
+          qm: 807,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W019-f4",
+          etage: 0,
+          qm: 854,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W019-f5",
+          etage: 0,
+          qm: 189,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W019-f6",
+          etage: 1,
+          qm: 1850,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W019-f7",
+          etage: 2,
+          qm: 47,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W019-f8",
+          etage: 2,
+          qm: 908,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W019-f9",
+          etage: 2,
+          qm: 895,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W019-f10",
+          etage: 3,
+          qm: 644,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W019-f11",
+          etage: 3,
+          qm: 672,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W019-f12",
+          etage: 3,
+          qm: 534,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W019-f13",
+          etage: 4,
+          qm: 804,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W019-f14",
+          etage: 4,
+          qm: 553,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W019-f15",
+          etage: 4,
+          qm: 493,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 361363,
+        rohertrag: 152958,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 78812,
+        miete: 59149,
+        nebenkosten: 11715,
+        sonstige: 19811,
+        db: -16529,
+        fteBedarf: 66.52777079567127,
+        fteIst: 79.68751270938957,
+        umsatzJeGruppe: {
+          food: 27681,
+          wohnen: 33716,
+          beauty: 65262,
+          accessoires: 49358,
+          damen: 53796,
+          waesche: 28774,
+          herren: 48521,
+          kinder: 20384,
+          sport: 24219,
+          spielwaren: 9650
+        }
+      }
+    },
+    {
+      id: "W020",
+      name: "Hartwig Essen Ring",
+      stadt: "Essen",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2700,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1958,
+      fassade: 2,
+      substanz: 54,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W020-f1",
+          etage: -1,
+          qm: 828,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W020-f2",
+          etage: -1,
+          qm: 1847,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W020-f3",
+          etage: 0,
+          qm: 516,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W020-f4",
+          etage: 0,
+          qm: 1107,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W020-f5",
+          etage: 0,
+          qm: 1052,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W020-f6",
+          etage: 1,
+          qm: 1070,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W020-f7",
+          etage: 1,
+          qm: 711,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W020-f8",
+          etage: 1,
+          qm: 894,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W020-f9",
+          etage: 2,
+          qm: 338,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W020-f10",
+          etage: 2,
+          qm: 668,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W020-f11",
+          etage: 2,
+          qm: 1351,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W020-f12",
+          etage: 2,
+          qm: 818,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 244289,
+        rohertrag: 101830,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 57783,
+        miete: 35624,
+        nebenkosten: 0,
+        sonstige: 15056,
+        db: -6633,
+        fteBedarf: 52.42723191788461,
+        fteIst: 58.52095393627797,
+        umsatzJeGruppe: {
+          food: 27382,
+          wohnen: 23518,
+          beauty: 36048,
+          accessoires: 35462,
+          damen: 41552,
+          waesche: 14093,
+          herren: 25691,
+          kinder: 9826,
+          sport: 20267,
+          spielwaren: 10450
+        }
+      }
+    },
+    {
+      id: "S017",
+      name: "Hartwig Sport Essen",
+      stadt: "Essen",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 5100,
+      etagen: [
+        0
+      ],
+      baujahr: 2010,
+      fassade: 2,
+      substanz: 50,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S017-f1",
+          etage: 0,
+          qm: 827,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S017-f2",
+          etage: 0,
+          qm: 1647,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S017-f3",
+          etage: 0,
+          qm: 1189,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S017-f4",
+          etage: 0,
+          qm: 503,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S017-f5",
+          etage: 0,
+          qm: 598,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S017-f6",
+          etage: 0,
+          qm: 336,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 203026,
+        rohertrag: 86622,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 42337,
+        miete: 37024,
+        nebenkosten: 5990,
+        sonstige: 10619,
+        db: -9348,
+        fteBedarf: 33.82178552279264,
+        fteIst: 43.13466579059574,
+        umsatzJeGruppe: {
+          sportschuhe: 52408,
+          sporttextil: 65762,
+          outdoor: 48625,
+          teamsport: 11735,
+          rad: 6651,
+          wintersport: 17845
+        }
+      }
+    },
+    {
+      id: "W021",
+      name: "Hartwig Dortmund",
+      stadt: "Dortmund",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1956,
+      fassade: 1,
+      substanz: 53,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W021-f1",
+          etage: -1,
+          qm: 1352,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W021-f2",
+          etage: -1,
+          qm: 1431,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W021-f3",
+          etage: 0,
+          qm: 981,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W021-f4",
+          etage: 0,
+          qm: 1482,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W021-f5",
+          etage: 0,
+          qm: 320,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W021-f6",
+          etage: 1,
+          qm: 2783,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W021-f7",
+          etage: 2,
+          qm: 656,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W021-f8",
+          etage: 2,
+          qm: 1257,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W021-f9",
+          etage: 2,
+          qm: 870,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W021-f10",
+          etage: 3,
+          qm: 959,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W021-f11",
+          etage: 3,
+          qm: 1242,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W021-f12",
+          etage: 3,
+          qm: 583,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W021-f13",
+          etage: 4,
+          qm: 1340,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W021-f14",
+          etage: 4,
+          qm: 858,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W021-f15",
+          etage: 4,
+          qm: 585,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 464194,
+        rohertrag: 194944,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 99075,
+        miete: 45771,
+        nebenkosten: 19012,
+        sonstige: 26546,
+        db: 4538,
+        fteBedarf: 90.30579582824927,
+        fteIst: 101.98513821558086,
+        umsatzJeGruppe: {
+          food: 52001,
+          wohnen: 31836,
+          beauty: 81123,
+          accessoires: 60128,
+          damen: 100750,
+          waesche: 33269,
+          herren: 34529,
+          kinder: 25651,
+          sport: 33689,
+          spielwaren: 11218
+        }
+      }
+    },
+    {
+      id: "W022",
+      name: "Hartwig Dortmund Neustadt",
+      stadt: "Dortmund",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 2002,
+      fassade: 4,
+      substanz: 42,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W022-f1",
+          etage: 0,
+          qm: 682,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W022-f2",
+          etage: 0,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W022-f3",
+          etage: 0,
+          qm: 784,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W022-f4",
+          etage: 1,
+          qm: 255,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W022-f5",
+          etage: 1,
+          qm: 1625,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W022-f6",
+          etage: 2,
+          qm: 485,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W022-f7",
+          etage: 2,
+          qm: 711,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W022-f8",
+          etage: 2,
+          qm: 684,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W022-f9",
+          etage: 3,
+          qm: 209,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W022-f10",
+          etage: 3,
+          qm: 620,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W022-f11",
+          etage: 3,
+          qm: 942,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W022-f12",
+          etage: 3,
+          qm: 109,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W022-f13",
+          etage: 4,
+          qm: 379,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W022-f14",
+          etage: 4,
+          qm: 1501,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 230370,
+        rohertrag: 98399,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 51442,
+        miete: 18361,
+        nebenkosten: 12578,
+        sonstige: 13675,
+        db: 2344,
+        fteBedarf: 47.05700663771704,
+        fteIst: 51.770796778870405,
+        umsatzJeGruppe: {
+          food: 21219,
+          beauty: 23767,
+          accessoires: 41835,
+          damen: 46772,
+          waesche: 20717,
+          herren: 19395,
+          kinder: 10178,
+          sport: 12422,
+          spielwaren: 7393,
+          wohnen: 26673
+        }
+      }
+    },
+    {
+      id: "S018",
+      name: "Hartwig Sport Dortmund",
+      stadt: "Dortmund",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1978,
+      fassade: 2,
+      substanz: 36,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S018-f1",
+          etage: 0,
+          qm: 718,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S018-f2",
+          etage: 0,
+          qm: 757,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S018-f3",
+          etage: 1,
+          qm: 152,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S018-f4",
+          etage: 1,
+          qm: 515,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S018-f5",
+          etage: 1,
+          qm: 258,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S018-f6",
+          etage: 1,
+          qm: 264,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S018-f7",
+          etage: 1,
+          qm: 286,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 130598,
+        rohertrag: 54884,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 23701,
+        miete: 29278,
+        nebenkosten: 4225,
+        sonstige: 6682,
+        db: -9002,
+        fteBedarf: 20.899984269574617,
+        fteIst: 24.323003700029545,
+        umsatzJeGruppe: {
+          sportschuhe: 50764,
+          sporttextil: 31443,
+          outdoor: 21584,
+          teamsport: 6129,
+          rad: 3500,
+          wintersport: 17179
+        }
+      }
+    },
+    {
+      id: "W023",
+      name: "Hartwig Bremen",
+      stadt: "Bremen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1933,
+      fassade: 5,
+      substanz: 30,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W023-f1",
+          etage: -1,
+          qm: 594,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W023-f2",
+          etage: -1,
+          qm: 1506,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W023-f3",
+          etage: 0,
+          qm: 665,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W023-f4",
+          etage: 0,
+          qm: 1012,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W023-f5",
+          etage: 0,
+          qm: 423,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W023-f6",
+          etage: 1,
+          qm: 1966,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W023-f7",
+          etage: 1,
+          qm: 134,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W023-f8",
+          etage: 2,
+          qm: 574,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W023-f9",
+          etage: 2,
+          qm: 1254,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W023-f10",
+          etage: 2,
+          qm: 272,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W023-f11",
+          etage: 3,
+          qm: 607,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W023-f12",
+          etage: 3,
+          qm: 1237,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W023-f13",
+          etage: 3,
+          qm: 582,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 371271,
+        rohertrag: 158160,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 81087,
+        miete: 66364,
+        nebenkosten: 16102,
+        sonstige: 20094,
+        db: -25486,
+        fteBedarf: 67.16796810504911,
+        fteIst: 83.66840168021653,
+        umsatzJeGruppe: {
+          food: 28898,
+          wohnen: 31631,
+          beauty: 57253,
+          accessoires: 59594,
+          damen: 71063,
+          waesche: 28359,
+          herren: 37604,
+          kinder: 23921,
+          sport: 24096,
+          spielwaren: 8851
+        }
+      }
+    },
+    {
+      id: "W024",
+      name: "Hartwig Bremen Altstadt",
+      stadt: "Bremen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2600,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 2002,
+      fassade: 1,
+      substanz: 36,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W024-f1",
+          etage: 0,
+          qm: 1021,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W024-f2",
+          etage: 0,
+          qm: 1113,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W024-f3",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W024-f4",
+          etage: 1,
+          qm: 927,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W024-f5",
+          etage: 1,
+          qm: 1707,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W024-f6",
+          etage: 2,
+          qm: 1262,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W024-f7",
+          etage: 2,
+          qm: 1196,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W024-f8",
+          etage: 2,
+          qm: 175,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W024-f9",
+          etage: 3,
+          qm: 1488,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W024-f10",
+          etage: 3,
+          qm: 944,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W024-f11",
+          etage: 3,
+          qm: 201,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W024-f12",
+          etage: 4,
+          qm: 1748,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W024-f13",
+          etage: 4,
+          qm: 757,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W024-f14",
+          etage: 4,
+          qm: 128,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W024-f15",
+          etage: 5,
+          qm: 2633,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 480978,
+        rohertrag: 202465,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 114937,
+        miete: 41851,
+        nebenkosten: 22948,
+        sonstige: 26830,
+        db: -4101,
+        fteBedarf: 90.58082781498368,
+        fteIst: 115.57645553816583,
+        umsatzJeGruppe: {
+          food: 44595,
+          beauty: 82375,
+          accessoires: 72179,
+          damen: 86215,
+          waesche: 40058,
+          herren: 37388,
+          kinder: 19548,
+          sport: 34418,
+          spielwaren: 13025,
+          wohnen: 51177
+        }
+      }
+    },
+    {
+      id: "S019",
+      name: "Hartwig Sport Bremen",
+      stadt: "Bremen",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2001,
+      fassade: 1,
+      substanz: 52,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S019-f1",
+          etage: 0,
+          qm: 709,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S019-f2",
+          etage: 0,
+          qm: 946,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S019-f3",
+          etage: 0,
+          qm: 95,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S019-f4",
+          etage: 1,
+          qm: 608,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S019-f5",
+          etage: 1,
+          qm: 353,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S019-f6",
+          etage: 1,
+          qm: 448,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S019-f7",
+          etage: 1,
+          qm: 340,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 117691,
+        rohertrag: 49420,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 26819,
+        miete: 9556,
+        nebenkosten: 5078,
+        sonstige: 6400,
+        db: 1567,
+        fteBedarf: 20.593128359090677,
+        fteIst: 26.97408982811513,
+        umsatzJeGruppe: {
+          sportschuhe: 36860,
+          sporttextil: 29101,
+          outdoor: 21584,
+          teamsport: 8042,
+          rad: 5270,
+          wintersport: 16833
+        }
+      }
+    },
+    {
+      id: "W025",
+      name: "Hartwig Leipzig",
+      stadt: "Leipzig",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3400,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1997,
+      fassade: 4,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W025-f1",
+          etage: -1,
+          qm: 1061,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W025-f2",
+          etage: -1,
+          qm: 2299,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W025-f3",
+          etage: 0,
+          qm: 1082,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W025-f4",
+          etage: 0,
+          qm: 2090,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W025-f5",
+          etage: 0,
+          qm: 188,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W025-f6",
+          etage: 1,
+          qm: 2856,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W025-f7",
+          etage: 1,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W025-f8",
+          etage: 2,
+          qm: 719,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W025-f9",
+          etage: 2,
+          qm: 1710,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W025-f10",
+          etage: 2,
+          qm: 931,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W025-f11",
+          etage: 3,
+          qm: 313,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W025-f12",
+          etage: 3,
+          qm: 1687,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W025-f13",
+          etage: 3,
+          qm: 869,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W025-f14",
+          etage: 3,
+          qm: 491,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 527405,
+        rohertrag: 221405,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 114080,
+        miete: 64037,
+        nebenkosten: 0,
+        sonstige: 29184,
+        db: 14104,
+        fteBedarf: 98.32372246832225,
+        fteIst: 117.92613794454667,
+        umsatzJeGruppe: {
+          food: 44142,
+          wohnen: 66748,
+          beauty: 95868,
+          accessoires: 99545,
+          damen: 81810,
+          waesche: 34268,
+          herren: 37777,
+          kinder: 25268,
+          sport: 25825,
+          spielwaren: 16155
+        }
+      }
+    },
+    {
+      id: "W026",
+      name: "Hartwig Leipzig K\xF6nigstra\xDFe",
+      stadt: "Leipzig",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3400,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1937,
+      fassade: 7,
+      substanz: 43,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W026-f1",
+          etage: -1,
+          qm: 1052,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W026-f2",
+          etage: -1,
+          qm: 2323,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W026-f3",
+          etage: 0,
+          qm: 625,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W026-f4",
+          etage: 0,
+          qm: 1419,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W026-f5",
+          etage: 0,
+          qm: 1331,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W026-f6",
+          etage: 1,
+          qm: 1354,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W026-f7",
+          etage: 1,
+          qm: 1045,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W026-f8",
+          etage: 1,
+          qm: 975,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W026-f9",
+          etage: 2,
+          qm: 555,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W026-f10",
+          etage: 2,
+          qm: 1159,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W026-f11",
+          etage: 2,
+          qm: 1338,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W026-f12",
+          etage: 2,
+          qm: 820,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 423322,
+        rohertrag: 178779,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 104783,
+        miete: 46719,
+        nebenkosten: 18036,
+        sonstige: 23654,
+        db: -14414,
+        fteBedarf: 79.95537714608625,
+        fteIst: 106.9272495788456,
+        umsatzJeGruppe: {
+          food: 39939,
+          wohnen: 44292,
+          beauty: 55588,
+          accessoires: 72472,
+          damen: 66508,
+          waesche: 33160,
+          herren: 43220,
+          kinder: 26473,
+          sport: 27456,
+          spielwaren: 14214
+        }
+      }
+    },
+    {
+      id: "S020",
+      name: "Hartwig Sport Leipzig Galerie am Fluss",
+      stadt: "Leipzig",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 3300,
+      etagen: [
+        0
+      ],
+      baujahr: 1999,
+      fassade: 1,
+      substanz: 54,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S020-f1",
+          etage: 0,
+          qm: 632,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S020-f2",
+          etage: 0,
+          qm: 842,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S020-f3",
+          etage: 0,
+          qm: 684,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S020-f4",
+          etage: 0,
+          qm: 313,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S020-f5",
+          etage: 0,
+          qm: 469,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S020-f6",
+          etage: 0,
+          qm: 309,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 108355,
+        rohertrag: 45708,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 24165,
+        miete: 13070,
+        nebenkosten: 3271,
+        sonstige: 5905,
+        db: -704,
+        fteBedarf: 18.98898544290149,
+        fteIst: 24.601704377963856,
+        umsatzJeGruppe: {
+          sportschuhe: 30768,
+          sporttextil: 31632,
+          outdoor: 19148,
+          teamsport: 6327,
+          rad: 4859,
+          wintersport: 15623
+        }
+      }
+    },
+    {
+      id: "W027",
+      name: "Hartwig Dresden Einkaufszentrum",
+      stadt: "Dresden",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1997,
+      fassade: 3,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W027-f1",
+          etage: 0,
+          qm: 533,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W027-f2",
+          etage: 0,
+          qm: 503,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W027-f3",
+          etage: 0,
+          qm: 704,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W027-f4",
+          etage: 1,
+          qm: 115,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W027-f5",
+          etage: 1,
+          qm: 1625,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W027-f6",
+          etage: 2,
+          qm: 287,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W027-f7",
+          etage: 2,
+          qm: 735,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W027-f8",
+          etage: 2,
+          qm: 718,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W027-f9",
+          etage: 3,
+          qm: 544,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W027-f10",
+          etage: 3,
+          qm: 523,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W027-f11",
+          etage: 3,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W027-f12",
+          etage: 4,
+          qm: 13,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W027-f13",
+          etage: 4,
+          qm: 450,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W027-f14",
+          etage: 4,
+          qm: 1277,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 258403,
+        rohertrag: 110539,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 63506,
+        miete: 31490,
+        nebenkosten: 10557,
+        sonstige: 14510,
+        db: -9524,
+        fteBedarf: 49.098192250090236,
+        fteIst: 64.17475409089238,
+        umsatzJeGruppe: {
+          food: 23600,
+          beauty: 36727,
+          accessoires: 40697,
+          damen: 50300,
+          waesche: 26482,
+          herren: 27994,
+          kinder: 9768,
+          sport: 9633,
+          spielwaren: 7933,
+          wohnen: 25269
+        }
+      }
+    },
+    {
+      id: "W028",
+      name: "Hartwig Dresden K\xF6nigstra\xDFe",
+      stadt: "Dresden",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3100,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1989,
+      fassade: 1,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W028-f1",
+          etage: 0,
+          qm: 937,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W028-f2",
+          etage: 0,
+          qm: 1131,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W028-f3",
+          etage: 0,
+          qm: 1071,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W028-f4",
+          etage: 1,
+          qm: 628,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W028-f5",
+          etage: 1,
+          qm: 2512,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W028-f6",
+          etage: 2,
+          qm: 207,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W028-f7",
+          etage: 2,
+          qm: 1092,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W028-f8",
+          etage: 2,
+          qm: 1841,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W028-f9",
+          etage: 3,
+          qm: 228,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W028-f10",
+          etage: 3,
+          qm: 863,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W028-f11",
+          etage: 3,
+          qm: 1409,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W028-f12",
+          etage: 3,
+          qm: 641,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W028-f13",
+          etage: 4,
+          qm: 350,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W028-f14",
+          etage: 4,
+          qm: 2790,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 554426,
+        rohertrag: 232498,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 118577,
+        miete: 52017,
+        nebenkosten: 18147,
+        sonstige: 29796,
+        db: 13960,
+        fteBedarf: 99.46032703433085,
+        fteIst: 121.49490900491055,
+        umsatzJeGruppe: {
+          food: 48963,
+          beauty: 107719,
+          accessoires: 95944,
+          damen: 74307,
+          waesche: 40348,
+          herren: 59003,
+          kinder: 19117,
+          sport: 30385,
+          spielwaren: 18075,
+          wohnen: 60566
+        }
+      }
+    },
+    {
+      id: "S021",
+      name: "Hartwig Sport Dresden Galerie am Fluss",
+      stadt: "Dresden",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1983,
+      fassade: 7,
+      substanz: 36,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S021-f1",
+          etage: 0,
+          qm: 1097,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S021-f2",
+          etage: 0,
+          qm: 1391,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S021-f3",
+          etage: 0,
+          qm: 12,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S021-f4",
+          etage: 1,
+          qm: 1019,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S021-f5",
+          etage: 1,
+          qm: 555,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S021-f6",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S021-f7",
+          etage: 1,
+          qm: 397,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 161780,
+        rohertrag: 68472,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 29711,
+        miete: 19214,
+        nebenkosten: 0,
+        sonstige: 8883,
+        db: 10664,
+        fteBedarf: 28.691107359331617,
+        fteIst: 30.29475567515675,
+        umsatzJeGruppe: {
+          sportschuhe: 51295,
+          sporttextil: 47712,
+          outdoor: 29187,
+          teamsport: 10903,
+          rad: 4490,
+          wintersport: 18193
+        }
+      }
+    },
+    {
+      id: "W029",
+      name: "Hartwig Hannover Lindenstra\xDFe",
+      stadt: "Hannover",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 3300,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1957,
+      fassade: 4,
+      substanz: 62,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W029-f1",
+          etage: -1,
+          qm: 971,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W029-f2",
+          etage: -1,
+          qm: 2329,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W029-f3",
+          etage: 0,
+          qm: 897,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W029-f4",
+          etage: 0,
+          qm: 1595,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W029-f5",
+          etage: 0,
+          qm: 807,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W029-f6",
+          etage: 1,
+          qm: 2833,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W029-f7",
+          etage: 1,
+          qm: 467,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W029-f8",
+          etage: 2,
+          qm: 743,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W029-f9",
+          etage: 2,
+          qm: 1748,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W029-f10",
+          etage: 2,
+          qm: 809,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W029-f11",
+          etage: 3,
+          qm: 501,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W029-f12",
+          etage: 3,
+          qm: 1791,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W029-f13",
+          etage: 3,
+          qm: 739,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W029-f14",
+          etage: 3,
+          qm: 269,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 369570,
+        rohertrag: 157042,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 90487,
+        miete: 44129,
+        nebenkosten: 19243,
+        sonstige: 22577,
+        db: -19393,
+        fteBedarf: 78.32268793198118,
+        fteIst: 91.26172466077023,
+        umsatzJeGruppe: {
+          food: 32053,
+          wohnen: 31655,
+          beauty: 59254,
+          accessoires: 52502,
+          damen: 73809,
+          waesche: 29597,
+          herren: 36315,
+          kinder: 23737,
+          sport: 21014,
+          spielwaren: 9634
+        }
+      }
+    },
+    {
+      id: "W030",
+      name: "Hartwig Hannover Neustadt",
+      stadt: "Hannover",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1979,
+      fassade: 7,
+      substanz: 80,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W030-f1",
+          etage: 0,
+          qm: 837,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W030-f2",
+          etage: 0,
+          qm: 774,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W030-f3",
+          etage: 0,
+          qm: 855,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W030-f4",
+          etage: 1,
+          qm: 449,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W030-f5",
+          etage: 1,
+          qm: 2018,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W030-f6",
+          etage: 2,
+          qm: 968,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W030-f7",
+          etage: 2,
+          qm: 1275,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W030-f8",
+          etage: 2,
+          qm: 223,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W030-f9",
+          etage: 3,
+          qm: 1797,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W030-f10",
+          etage: 3,
+          qm: 670,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W030-f11",
+          etage: 4,
+          qm: 622,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W030-f12",
+          etage: 4,
+          qm: 1451,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W030-f13",
+          etage: 4,
+          qm: 393,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W030-f14",
+          etage: 5,
+          qm: 382,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W030-f15",
+          etage: 5,
+          qm: 2084,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 323160,
+        rohertrag: 137747,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 83859,
+        miete: 55671,
+        nebenkosten: 0,
+        sonstige: 19909,
+        db: -21691,
+        fteBedarf: 69.25963413621675,
+        fteIst: 84.3049846266934,
+        umsatzJeGruppe: {
+          food: 23364,
+          beauty: 53748,
+          accessoires: 50694,
+          damen: 53748,
+          waesche: 27061,
+          herren: 40934,
+          kinder: 17539,
+          sport: 18316,
+          spielwaren: 9917,
+          wohnen: 27837
+        }
+      }
+    },
+    {
+      id: "S022",
+      name: "Hartwig Sport Hannover",
+      stadt: "Hannover",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2006,
+      fassade: 5,
+      substanz: 34,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S022-f1",
+          etage: 0,
+          qm: 1072,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S022-f2",
+          etage: 0,
+          qm: 1203,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S022-f3",
+          etage: 1,
+          qm: 82,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S022-f4",
+          etage: 1,
+          qm: 948,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S022-f5",
+          etage: 1,
+          qm: 405,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S022-f6",
+          etage: 1,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S022-f7",
+          etage: 1,
+          qm: 383,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 172534,
+        rohertrag: 72813,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 31274,
+        miete: 20649,
+        nebenkosten: 0,
+        sonstige: 9121,
+        db: 11769,
+        fteBedarf: 28.991555686271752,
+        fteIst: 32.10267404781496,
+        umsatzJeGruppe: {
+          sportschuhe: 61329,
+          sporttextil: 46840,
+          outdoor: 29943,
+          teamsport: 9867,
+          rad: 4422,
+          wintersport: 20133
+        }
+      }
+    },
+    {
+      id: "W031",
+      name: "Hartwig N\xFCrnberg",
+      stadt: "N\xFCrnberg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3300,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1957,
+      fassade: 7,
+      substanz: 34,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W031-f1",
+          etage: 0,
+          qm: 1216,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W031-f2",
+          etage: 0,
+          qm: 689,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W031-f3",
+          etage: 0,
+          qm: 1370,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W031-f4",
+          etage: 1,
+          qm: 18,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W031-f5",
+          etage: 1,
+          qm: 2388,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W031-f6",
+          etage: 1,
+          qm: 869,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W031-f7",
+          etage: 2,
+          qm: 351,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W031-f8",
+          etage: 2,
+          qm: 1509,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W031-f9",
+          etage: 2,
+          qm: 841,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W031-f10",
+          etage: 2,
+          qm: 574,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W031-f11",
+          etage: 3,
+          qm: 525,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W031-f12",
+          etage: 3,
+          qm: 1034,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W031-f13",
+          etage: 3,
+          qm: 1715,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 435944,
+        rohertrag: 182826,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 91474,
+        miete: 109262,
+        nebenkosten: 17956,
+        sonstige: 23768,
+        db: -59634,
+        fteBedarf: 79.68273664668298,
+        fteIst: 92.0915964104501,
+        umsatzJeGruppe: {
+          food: 63392,
+          beauty: 56162,
+          accessoires: 73656,
+          damen: 75393,
+          waesche: 35381,
+          herren: 46948,
+          kinder: 20629,
+          sport: 16286,
+          spielwaren: 14287,
+          wohnen: 33810
+        }
+      }
+    },
+    {
+      id: "W032",
+      name: "Hartwig N\xFCrnberg K\xF6nigstra\xDFe",
+      stadt: "N\xFCrnberg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2e3,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1937,
+      fassade: 4,
+      substanz: 50,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W032-f1",
+          etage: 0,
+          qm: 602,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W032-f2",
+          etage: 0,
+          qm: 682,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W032-f3",
+          etage: 0,
+          qm: 716,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W032-f4",
+          etage: 1,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W032-f5",
+          etage: 1,
+          qm: 1786,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W032-f6",
+          etage: 2,
+          qm: 164,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W032-f7",
+          etage: 2,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W032-f8",
+          etage: 2,
+          qm: 1088,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W032-f9",
+          etage: 3,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W032-f10",
+          etage: 3,
+          qm: 750,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W032-f11",
+          etage: 3,
+          qm: 1001,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W032-f12",
+          etage: 4,
+          qm: 49,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W032-f13",
+          etage: 4,
+          qm: 702,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W032-f14",
+          etage: 4,
+          qm: 1249,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 352181,
+        rohertrag: 148496,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 68125,
+        miete: 34966,
+        nebenkosten: 11106,
+        sonstige: 18939,
+        db: 15360,
+        fteBedarf: 63.25510820727785,
+        fteIst: 70.41773503920322,
+        umsatzJeGruppe: {
+          food: 29253,
+          beauty: 70306,
+          accessoires: 51913,
+          damen: 57769,
+          waesche: 22868,
+          herren: 44079,
+          kinder: 18244,
+          sport: 20676,
+          spielwaren: 11710,
+          wohnen: 25361
+        }
+      }
+    },
+    {
+      id: "S023",
+      name: "Hartwig Sport N\xFCrnberg",
+      stadt: "N\xFCrnberg",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1400,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1993,
+      fassade: 6,
+      substanz: 80,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S023-f1",
+          etage: 0,
+          qm: 517,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S023-f2",
+          etage: 0,
+          qm: 740,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S023-f3",
+          etage: 0,
+          qm: 119,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S023-f4",
+          etage: 1,
+          qm: 526,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S023-f5",
+          etage: 1,
+          qm: 303,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S023-f6",
+          etage: 1,
+          qm: 359,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S023-f7",
+          etage: 1,
+          qm: 187,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 111693,
+        rohertrag: 47444,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 19631,
+        miete: 16446,
+        nebenkosten: 0,
+        sonstige: 5817,
+        db: 5549,
+        fteBedarf: 18.421358816515944,
+        fteIst: 20.263031981652187,
+        umsatzJeGruppe: {
+          sportschuhe: 27803,
+          sporttextil: 30053,
+          outdoor: 29382,
+          teamsport: 6152,
+          rad: 4759,
+          wintersport: 13544
+        }
+      }
+    },
+    {
+      id: "W033",
+      name: "Hartwig Duisburg Am Wall",
+      stadt: "Duisburg",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 3300,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1949,
+      fassade: 7,
+      substanz: 76,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W033-f1",
+          etage: -1,
+          qm: 1115,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W033-f2",
+          etage: -1,
+          qm: 2160,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W033-f3",
+          etage: 0,
+          qm: 915,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W033-f4",
+          etage: 0,
+          qm: 1434,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W033-f5",
+          etage: 0,
+          qm: 926,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W033-f6",
+          etage: 1,
+          qm: 1570,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W033-f7",
+          etage: 1,
+          qm: 1044,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W033-f8",
+          etage: 1,
+          qm: 661,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W033-f9",
+          etage: 2,
+          qm: 1002,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W033-f10",
+          etage: 2,
+          qm: 733,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W033-f11",
+          etage: 2,
+          qm: 1142,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W033-f12",
+          etage: 2,
+          qm: 919,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 260360,
+        rohertrag: 108688,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 70962,
+        miete: 60988,
+        nebenkosten: 15429,
+        sonstige: 16804,
+        db: -55495,
+        fteBedarf: 59.22994531188261,
+        fteIst: 71.18333910064324,
+        umsatzJeGruppe: {
+          food: 29415,
+          wohnen: 25276,
+          beauty: 43881,
+          accessoires: 38796,
+          damen: 44268,
+          waesche: 16772,
+          herren: 24941,
+          kinder: 12470,
+          sport: 14541,
+          spielwaren: 10001
+        }
+      }
+    },
+    {
+      id: "S024",
+      name: "Hartwig Sport Duisburg Galerie am Fluss",
+      stadt: "Duisburg",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 4700,
+      etagen: [
+        0
+      ],
+      baujahr: 1979,
+      fassade: 2,
+      substanz: 51,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S024-f1",
+          etage: 0,
+          qm: 1146,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S024-f2",
+          etage: 0,
+          qm: 1471,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S024-f3",
+          etage: 0,
+          qm: 785,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S024-f4",
+          etage: 0,
+          qm: 449,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S024-f5",
+          etage: 0,
+          qm: 399,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S024-f6",
+          etage: 0,
+          qm: 399,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 155916,
+        rohertrag: 65775,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 31941,
+        miete: 16397,
+        nebenkosten: 6745,
+        sonstige: 8485,
+        db: 2207,
+        fteBedarf: 27.191699657864234,
+        fteIst: 33.09545457497372,
+        umsatzJeGruppe: {
+          sportschuhe: 52579,
+          sporttextil: 45956,
+          outdoor: 22157,
+          teamsport: 10065,
+          rad: 4172,
+          wintersport: 20988
+        }
+      }
+    },
+    {
+      id: "W034",
+      name: "Hartwig Bochum",
+      stadt: "Bochum",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1961,
+      fassade: 6,
+      substanz: 57,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W034-f1",
+          etage: 0,
+          qm: 643,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W034-f2",
+          etage: 0,
+          qm: 744,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W034-f3",
+          etage: 0,
+          qm: 330,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W034-f4",
+          etage: 1,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W034-f5",
+          etage: 1,
+          qm: 1108,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W034-f6",
+          etage: 2,
+          qm: 972,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W034-f7",
+          etage: 2,
+          qm: 744,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W034-f8",
+          etage: 3,
+          qm: 46,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W034-f9",
+          etage: 3,
+          qm: 1005,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W034-f10",
+          etage: 3,
+          qm: 666,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W034-f11",
+          etage: 4,
+          qm: 56,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W034-f12",
+          etage: 4,
+          qm: 1081,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W034-f13",
+          etage: 4,
+          qm: 492,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W034-f14",
+          etage: 4,
+          qm: 88,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W034-f15",
+          etage: 5,
+          qm: 1717,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 280054,
+        rohertrag: 118599,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 67076,
+        miete: 40524,
+        nebenkosten: 11647,
+        sonstige: 16118,
+        db: -16766,
+        fteBedarf: 54.95014665336467,
+        fteIst: 68.55277813391183,
+        umsatzJeGruppe: {
+          food: 23935,
+          beauty: 48206,
+          accessoires: 39572,
+          damen: 48731,
+          waesche: 26512,
+          herren: 26531,
+          kinder: 12544,
+          sport: 15721,
+          spielwaren: 7729,
+          wohnen: 30573
+        }
+      }
+    },
+    {
+      id: "S025",
+      name: "Hartwig Sport Bochum",
+      stadt: "Bochum",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2600,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2002,
+      fassade: 5,
+      substanz: 62,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S025-f1",
+          etage: 0,
+          qm: 1027,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S025-f2",
+          etage: 0,
+          qm: 1542,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S025-f3",
+          etage: 0,
+          qm: 56,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S025-f4",
+          etage: 1,
+          qm: 1150,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S025-f5",
+          etage: 1,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S025-f6",
+          etage: 1,
+          qm: 482,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S025-f7",
+          etage: 1,
+          qm: 505,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 195484,
+        rohertrag: 82616,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 40749,
+        miete: 33704,
+        nebenkosten: 7790,
+        sonstige: 10377,
+        db: -10003,
+        fteBedarf: 33.05019124380917,
+        fteIst: 41.85979119116115,
+        umsatzJeGruppe: {
+          sportschuhe: 64501,
+          sporttextil: 49001,
+          outdoor: 41618,
+          teamsport: 11806,
+          rad: 5661,
+          wintersport: 22897
+        }
+      }
+    },
+    {
+      id: "W035",
+      name: "Hartwig Wuppertal",
+      stadt: "Wuppertal",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2400,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 2007,
+      fassade: 6,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W035-f1",
+          etage: 0,
+          qm: 1037,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W035-f2",
+          etage: 0,
+          qm: 677,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W035-f3",
+          etage: 0,
+          qm: 646,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W035-f4",
+          etage: 1,
+          qm: 395,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W035-f5",
+          etage: 1,
+          qm: 1965,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W035-f6",
+          etage: 2,
+          qm: 635,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W035-f7",
+          etage: 2,
+          qm: 941,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W035-f8",
+          etage: 2,
+          qm: 784,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W035-f9",
+          etage: 3,
+          qm: 343,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W035-f10",
+          etage: 3,
+          qm: 1058,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W035-f11",
+          etage: 3,
+          qm: 960,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W035-f12",
+          etage: 4,
+          qm: 132,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W035-f13",
+          etage: 4,
+          qm: 682,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W035-f14",
+          etage: 4,
+          qm: 1546,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 411442,
+        rohertrag: 172760,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 95075,
+        miete: 54936,
+        nebenkosten: 12128,
+        sonstige: 22180,
+        db: -11557,
+        fteBedarf: 74.08847483876315,
+        fteIst: 97.59371172510765,
+        umsatzJeGruppe: {
+          food: 51835,
+          beauty: 53890,
+          accessoires: 57549,
+          damen: 82794,
+          waesche: 30963,
+          herren: 33006,
+          kinder: 31866,
+          sport: 23295,
+          spielwaren: 12686,
+          wohnen: 33557
+        }
+      }
+    },
+    {
+      id: "S026",
+      name: "Hartwig Sport Wuppertal",
+      stadt: "Wuppertal",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        0
+      ],
+      baujahr: 2009,
+      fassade: 3,
+      substanz: 48,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S026-f1",
+          etage: 0,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S026-f2",
+          etage: 0,
+          qm: 688,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S026-f3",
+          etage: 0,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S026-f4",
+          etage: 0,
+          qm: 227,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S026-f5",
+          etage: 0,
+          qm: 259,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S026-f6",
+          etage: 0,
+          qm: 193,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 85293,
+        rohertrag: 35867,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 17078,
+        miete: 7723,
+        nebenkosten: 2891,
+        sonstige: 4442,
+        db: 3732,
+        fteBedarf: 14.034670714758327,
+        fteIst: 17.212563034533623,
+        umsatzJeGruppe: {
+          sportschuhe: 28872,
+          sporttextil: 24396,
+          outdoor: 11683,
+          teamsport: 6121,
+          rad: 2825,
+          wintersport: 11396
+        }
+      }
+    },
+    {
+      id: "W036",
+      name: "Hartwig Bielefeld",
+      stadt: "Bielefeld",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1926,
+      fassade: 4,
+      substanz: 54,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W036-f1",
+          etage: -1,
+          qm: 1106,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W036-f2",
+          etage: -1,
+          qm: 1661,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W036-f3",
+          etage: 0,
+          qm: 1171,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W036-f4",
+          etage: 0,
+          qm: 1596,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W036-f5",
+          etage: 1,
+          qm: 195,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W036-f6",
+          etage: 1,
+          qm: 2572,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W036-f7",
+          etage: 2,
+          qm: 681,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W036-f8",
+          etage: 2,
+          qm: 913,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W036-f9",
+          etage: 2,
+          qm: 1173,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W036-f10",
+          etage: 3,
+          qm: 382,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W036-f11",
+          etage: 3,
+          qm: 1121,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W036-f12",
+          etage: 3,
+          qm: 1264,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W036-f13",
+          etage: 4,
+          qm: 532,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W036-f14",
+          etage: 4,
+          qm: 985,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W036-f15",
+          etage: 4,
+          qm: 1250,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 511698,
+        rohertrag: 214081,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 101773,
+        miete: 47862,
+        nebenkosten: 23231,
+        sonstige: 28451,
+        db: 12764,
+        fteBedarf: 95.98759390249725,
+        fteIst: 104.27841530887343,
+        umsatzJeGruppe: {
+          food: 42130,
+          wohnen: 56668,
+          beauty: 105207,
+          accessoires: 78563,
+          damen: 91392,
+          waesche: 24475,
+          herren: 39429,
+          kinder: 29167,
+          sport: 30742,
+          spielwaren: 13924
+        }
+      }
+    },
+    {
+      id: "S027",
+      name: "Hartwig Sport Bielefeld Einkaufszentrum",
+      stadt: "Bielefeld",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 700,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2014,
+      fassade: 6,
+      substanz: 33,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S027-f1",
+          etage: 0,
+          qm: 549,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S027-f2",
+          etage: 0,
+          qm: 184,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S027-f3",
+          etage: 1,
+          qm: 477,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S027-f4",
+          etage: 1,
+          qm: 256,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S027-f5",
+          etage: 2,
+          qm: 85,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S027-f6",
+          etage: 2,
+          qm: 233,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S027-f7",
+          etage: 2,
+          qm: 283,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S027-f8",
+          etage: 2,
+          qm: 133,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 70660,
+        rohertrag: 29738,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 14396,
+        miete: 7922,
+        nebenkosten: 2709,
+        sonstige: 3887,
+        db: 824,
+        fteBedarf: 12.669226029267431,
+        fteIst: 14.781855370757716,
+        umsatzJeGruppe: {
+          sportschuhe: 27156,
+          sporttextil: 20210,
+          outdoor: 11431,
+          teamsport: 3773,
+          rad: 2247,
+          wintersport: 5843
+        }
+      }
+    },
+    {
+      id: "W037",
+      name: "Hartwig Bonn Bahnhofstra\xDFe",
+      stadt: "Bonn",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1927,
+      fassade: 3,
+      substanz: 61,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W037-f1",
+          etage: -1,
+          qm: 570,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W037-f2",
+          etage: -1,
+          qm: 930,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W037-f3",
+          etage: 0,
+          qm: 660,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W037-f4",
+          etage: 0,
+          qm: 840,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W037-f5",
+          etage: 1,
+          qm: 53,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W037-f6",
+          etage: 1,
+          qm: 1447,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W037-f7",
+          etage: 2,
+          qm: 297,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W037-f8",
+          etage: 2,
+          qm: 612,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W037-f9",
+          etage: 2,
+          qm: 590,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W037-f10",
+          etage: 3,
+          qm: 694,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W037-f11",
+          etage: 3,
+          qm: 499,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W037-f12",
+          etage: 3,
+          qm: 307,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W037-f13",
+          etage: 4,
+          qm: 829,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W037-f14",
+          etage: 4,
+          qm: 464,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W037-f15",
+          etage: 4,
+          qm: 207,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 272634,
+        rohertrag: 115282,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 53430,
+        miete: 34520,
+        nebenkosten: 12728,
+        sonstige: 15228,
+        db: -625,
+        fteBedarf: 51.408625112435445,
+        fteIst: 54.780311309823475,
+        umsatzJeGruppe: {
+          food: 25094,
+          wohnen: 23726,
+          beauty: 48708,
+          accessoires: 41629,
+          damen: 50370,
+          waesche: 20050,
+          herren: 30078,
+          kinder: 8496,
+          sport: 18156,
+          spielwaren: 6327
+        }
+      }
+    },
+    {
+      id: "S028",
+      name: "Hartwig Sport Bonn",
+      stadt: "Bonn",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2010,
+      fassade: 7,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S028-f1",
+          etage: 0,
+          qm: 1107,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S028-f2",
+          etage: 0,
+          qm: 993,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S028-f3",
+          etage: 1,
+          qm: 75,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S028-f4",
+          etage: 1,
+          qm: 979,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S028-f5",
+          etage: 1,
+          qm: 331,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S028-f6",
+          etage: 1,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S028-f7",
+          etage: 1,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 164552,
+        rohertrag: 69733,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 31754,
+        miete: 12148,
+        nebenkosten: 4898,
+        sonstige: 8637,
+        db: 12296,
+        fteBedarf: 27.3400796208445,
+        fteIst: 32.412390244375956,
+        umsatzJeGruppe: {
+          sportschuhe: 58665,
+          sporttextil: 38878,
+          outdoor: 39343,
+          teamsport: 6627,
+          rad: 3498,
+          wintersport: 17541
+        }
+      }
+    },
+    {
+      id: "W038",
+      name: "Hartwig M\xFCnster",
+      stadt: "M\xFCnster",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2200,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1990,
+      fassade: 1,
+      substanz: 49,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W038-f1",
+          etage: 0,
+          qm: 1041,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W038-f2",
+          etage: 0,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W038-f3",
+          etage: 0,
+          qm: 493,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W038-f4",
+          etage: 1,
+          qm: 643,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W038-f5",
+          etage: 1,
+          qm: 1507,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W038-f6",
+          etage: 2,
+          qm: 1363,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W038-f7",
+          etage: 2,
+          qm: 787,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W038-f8",
+          etage: 3,
+          qm: 89,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W038-f9",
+          etage: 3,
+          qm: 1507,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W038-f10",
+          etage: 3,
+          qm: 554,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W038-f11",
+          etage: 4,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W038-f12",
+          etage: 4,
+          qm: 1491,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W038-f13",
+          etage: 4,
+          qm: 301,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W038-f14",
+          etage: 5,
+          qm: 495,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W038-f15",
+          etage: 5,
+          qm: 1655,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 445823,
+        rohertrag: 188618,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 87151,
+        miete: 34095,
+        nebenkosten: 14541,
+        sonstige: 24083,
+        db: 28748,
+        fteBedarf: 80.5172683086623,
+        fteIst: 88.62350484133029,
+        umsatzJeGruppe: {
+          food: 44886,
+          beauty: 66206,
+          accessoires: 65666,
+          damen: 99971,
+          waesche: 27742,
+          herren: 41196,
+          kinder: 23383,
+          sport: 29087,
+          spielwaren: 14457,
+          wohnen: 33230
+        }
+      }
+    },
+    {
+      id: "S029",
+      name: "Hartwig Sport M\xFCnster",
+      stadt: "M\xFCnster",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1982,
+      fassade: 2,
+      substanz: 34,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S029-f1",
+          etage: 0,
+          qm: 1115,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S029-f2",
+          etage: 0,
+          qm: 502,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S029-f3",
+          etage: 1,
+          qm: 865,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S029-f4",
+          etage: 1,
+          qm: 752,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S029-f5",
+          etage: 2,
+          qm: 180,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S029-f6",
+          etage: 2,
+          qm: 463,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S029-f7",
+          etage: 2,
+          qm: 614,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S029-f8",
+          etage: 2,
+          qm: 360,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 174153,
+        rohertrag: 73555,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 32956,
+        miete: 18835,
+        nebenkosten: 0,
+        sonstige: 9323,
+        db: 12440,
+        fteBedarf: 29.938185954086208,
+        fteIst: 33.37451432170405,
+        umsatzJeGruppe: {
+          sportschuhe: 52261,
+          sporttextil: 43572,
+          outdoor: 41505,
+          teamsport: 9303,
+          rad: 7588,
+          wintersport: 19925
+        }
+      }
+    },
+    {
+      id: "W039",
+      name: "Hartwig Mannheim",
+      stadt: "Mannheim",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1939,
+      fassade: 0,
+      substanz: 62,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W039-f1",
+          etage: -1,
+          qm: 755,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W039-f2",
+          etage: -1,
+          qm: 1265,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W039-f3",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W039-f4",
+          etage: 0,
+          qm: 785,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W039-f5",
+          etage: 0,
+          qm: 721,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W039-f6",
+          etage: 1,
+          qm: 1207,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W039-f7",
+          etage: 1,
+          qm: 738,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W039-f8",
+          etage: 1,
+          qm: 75,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W039-f9",
+          etage: 2,
+          qm: 1196,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W039-f10",
+          etage: 2,
+          qm: 807,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W039-f11",
+          etage: 2,
+          qm: 18,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W039-f12",
+          etage: 3,
+          qm: 951,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W039-f13",
+          etage: 3,
+          qm: 692,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W039-f14",
+          etage: 3,
+          qm: 377,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 282958,
+        rohertrag: 118014,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 71787,
+        miete: 61779,
+        nebenkosten: 0,
+        sonstige: 16147,
+        db: -31699,
+        fteBedarf: 54.95752546154688,
+        fteIst: 72.87446584447383,
+        umsatzJeGruppe: {
+          food: 34766,
+          wohnen: 30446,
+          beauty: 40104,
+          accessoires: 28698,
+          damen: 50241,
+          waesche: 18093,
+          herren: 33957,
+          kinder: 18023,
+          sport: 17987,
+          spielwaren: 10643
+        }
+      }
+    },
+    {
+      id: "S030",
+      name: "Hartwig Sport Mannheim Galerie am Fluss",
+      stadt: "Mannheim",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 4800,
+      etagen: [
+        0
+      ],
+      baujahr: 1993,
+      fassade: 1,
+      substanz: 60,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S030-f1",
+          etage: 0,
+          qm: 1147,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S030-f2",
+          etage: 0,
+          qm: 1092,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S030-f3",
+          etage: 0,
+          qm: 1064,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S030-f4",
+          etage: 0,
+          qm: 567,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S030-f5",
+          etage: 0,
+          qm: 515,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S030-f6",
+          etage: 0,
+          qm: 364,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 144810,
+        rohertrag: 60744,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 27770,
+        miete: 14047,
+        nebenkosten: 5251,
+        sonstige: 8074,
+        db: 5602,
+        fteBedarf: 26.272606857762057,
+        fteIst: 28.554078733226028,
+        umsatzJeGruppe: {
+          sportschuhe: 54964,
+          sporttextil: 29333,
+          outdoor: 28422,
+          teamsport: 11814,
+          rad: 3942,
+          wintersport: 16335
+        }
+      }
+    },
+    {
+      id: "W040",
+      name: "Hartwig Karlsruhe",
+      stadt: "Karlsruhe",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2700,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1983,
+      fassade: 4,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W040-f1",
+          etage: -1,
+          qm: 856,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W040-f2",
+          etage: -1,
+          qm: 1860,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W040-f3",
+          etage: 0,
+          qm: 810,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W040-f4",
+          etage: 0,
+          qm: 1263,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W040-f5",
+          etage: 0,
+          qm: 643,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W040-f6",
+          etage: 1,
+          qm: 2717,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W040-f7",
+          etage: 2,
+          qm: 261,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W040-f8",
+          etage: 2,
+          qm: 1095,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W040-f9",
+          etage: 2,
+          qm: 1360,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W040-f10",
+          etage: 3,
+          qm: 911,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W040-f11",
+          etage: 3,
+          qm: 1246,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W040-f12",
+          etage: 3,
+          qm: 560,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W040-f13",
+          etage: 4,
+          qm: 750,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W040-f14",
+          etage: 4,
+          qm: 932,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W040-f15",
+          etage: 4,
+          qm: 1035,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 517585,
+        rohertrag: 220251,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 106474,
+        miete: 73744,
+        nebenkosten: 20465,
+        sonstige: 28556,
+        db: -8987,
+        fteBedarf: 96.14209753147138,
+        fteIst: 107.95207219423338,
+        umsatzJeGruppe: {
+          food: 37358,
+          wohnen: 64894,
+          beauty: 83511,
+          accessoires: 55371,
+          damen: 110861,
+          waesche: 35058,
+          herren: 62261,
+          kinder: 25237,
+          sport: 25611,
+          spielwaren: 17422
+        }
+      }
+    },
+    {
+      id: "S031",
+      name: "Hartwig Sport Karlsruhe",
+      stadt: "Karlsruhe",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1300,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1988,
+      fassade: 2,
+      substanz: 61,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S031-f1",
+          etage: 0,
+          qm: 930,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S031-f2",
+          etage: 0,
+          qm: 320,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S031-f3",
+          etage: 1,
+          qm: 711,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S031-f4",
+          etage: 1,
+          qm: 539,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S031-f5",
+          etage: 2,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S031-f6",
+          etage: 2,
+          qm: 292,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S031-f7",
+          etage: 2,
+          qm: 351,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S031-f8",
+          etage: 2,
+          qm: 276,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 151911,
+        rohertrag: 64148,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 28413,
+        miete: 34324,
+        nebenkosten: 0,
+        sonstige: 7916,
+        db: -6506,
+        fteBedarf: 24.908923516066512,
+        fteIst: 29.329654828011094,
+        umsatzJeGruppe: {
+          sportschuhe: 49687,
+          sporttextil: 33500,
+          outdoor: 35371,
+          teamsport: 7412,
+          rad: 4826,
+          wintersport: 21115
+        }
+      }
+    },
+    {
+      id: "W041",
+      name: "Hartwig Augsburg",
+      stadt: "Augsburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1960,
+      fassade: 0,
+      substanz: 73,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W041-f1",
+          etage: -1,
+          qm: 585,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W041-f2",
+          etage: -1,
+          qm: 2165,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W041-f3",
+          etage: 0,
+          qm: 764,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W041-f4",
+          etage: 0,
+          qm: 1315,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W041-f5",
+          etage: 0,
+          qm: 670,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W041-f6",
+          etage: 1,
+          qm: 1551,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W041-f7",
+          etage: 1,
+          qm: 846,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W041-f8",
+          etage: 1,
+          qm: 353,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W041-f9",
+          etage: 2,
+          qm: 1159,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W041-f10",
+          etage: 2,
+          qm: 613,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W041-f11",
+          etage: 2,
+          qm: 899,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W041-f12",
+          etage: 2,
+          qm: 518,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 397194,
+        rohertrag: 168492,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 79380,
+        miete: 83738,
+        nebenkosten: 12194,
+        sonstige: 21432,
+        db: -28253,
+        fteBedarf: 71.58712868852105,
+        fteIst: 79.97857104541941,
+        umsatzJeGruppe: {
+          food: 27883,
+          wohnen: 50055,
+          beauty: 69970,
+          accessoires: 67508,
+          damen: 64413,
+          waesche: 25802,
+          herren: 46682,
+          kinder: 16132,
+          sport: 18008,
+          spielwaren: 10741
+        }
+      }
+    },
+    {
+      id: "S032",
+      name: "Hartwig Sport Augsburg City-Center",
+      stadt: "Augsburg",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1994,
+      fassade: 7,
+      substanz: 90,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S032-f1",
+          etage: 0,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S032-f2",
+          etage: 0,
+          qm: 1003,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S032-f3",
+          etage: 1,
+          qm: 41,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S032-f4",
+          etage: 1,
+          qm: 541,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S032-f5",
+          etage: 1,
+          qm: 324,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S032-f6",
+          etage: 1,
+          qm: 422,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S032-f7",
+          etage: 1,
+          qm: 198,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 96253,
+        rohertrag: 41037,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 20839,
+        miete: 23516,
+        nebenkosten: 4333,
+        sonstige: 5319,
+        db: -12970,
+        fteBedarf: 17.317565258921988,
+        fteIst: 21.10772516462578,
+        umsatzJeGruppe: {
+          sportschuhe: 21677,
+          sporttextil: 36559,
+          outdoor: 18014,
+          teamsport: 6787,
+          rad: 3807,
+          wintersport: 9409
+        }
+      }
+    },
+    {
+      id: "W042",
+      name: "Hartwig Wiesbaden Bahnhofstra\xDFe",
+      stadt: "Wiesbaden",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2600,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1975,
+      fassade: 7,
+      substanz: 34,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W042-f1",
+          etage: -1,
+          qm: 833,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W042-f2",
+          etage: -1,
+          qm: 1792,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W042-f3",
+          etage: 0,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W042-f4",
+          etage: 0,
+          qm: 1049,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W042-f5",
+          etage: 0,
+          qm: 981,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W042-f6",
+          etage: 1,
+          qm: 916,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W042-f7",
+          etage: 1,
+          qm: 608,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W042-f8",
+          etage: 1,
+          qm: 1101,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W042-f9",
+          etage: 2,
+          qm: 281,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W042-f10",
+          etage: 2,
+          qm: 656,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W042-f11",
+          etage: 2,
+          qm: 1194,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W042-f12",
+          etage: 2,
+          qm: 557,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 270011,
+        rohertrag: 112707,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 61330,
+        miete: 29751,
+        nebenkosten: 0,
+        sonstige: 15824,
+        db: 5801,
+        fteBedarf: 54.22578098147522,
+        fteIst: 61.63350767894528,
+        umsatzJeGruppe: {
+          food: 33886,
+          wohnen: 23691,
+          beauty: 44655,
+          accessoires: 39980,
+          damen: 47374,
+          waesche: 15858,
+          herren: 30110,
+          kinder: 10033,
+          sport: 17406,
+          spielwaren: 7019
+        }
+      }
+    },
+    {
+      id: "S033",
+      name: "Hartwig Sport Wiesbaden City-Center",
+      stadt: "Wiesbaden",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 2700,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1986,
+      fassade: 6,
+      substanz: 63,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S033-f1",
+          etage: 0,
+          qm: 1376,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S033-f2",
+          etage: 0,
+          qm: 1274,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S033-f3",
+          etage: 1,
+          qm: 356,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S033-f4",
+          etage: 1,
+          qm: 783,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S033-f5",
+          etage: 1,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S033-f6",
+          etage: 1,
+          qm: 669,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S033-f7",
+          etage: 1,
+          qm: 382,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 179688,
+        rohertrag: 75303,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 34796,
+        miete: 39708,
+        nebenkosten: 0,
+        sonstige: 9752,
+        db: -8953,
+        fteBedarf: 31.47617613749901,
+        fteIst: 35.28392768198496,
+        umsatzJeGruppe: {
+          sportschuhe: 67828,
+          sporttextil: 50838,
+          outdoor: 23196,
+          teamsport: 9365,
+          rad: 7029,
+          wintersport: 21432
+        }
+      }
+    },
+    {
+      id: "W043",
+      name: "Hartwig M\xF6nchengladbach",
+      stadt: "M\xF6nchengladbach",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1959,
+      fassade: 0,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W043-f1",
+          etage: 0,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W043-f2",
+          etage: 0,
+          qm: 667,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W043-f3",
+          etage: 0,
+          qm: 412,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W043-f4",
+          etage: 1,
+          qm: 858,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W043-f5",
+          etage: 1,
+          qm: 875,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W043-f6",
+          etage: 2,
+          qm: 1281,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W043-f7",
+          etage: 2,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W043-f8",
+          etage: 3,
+          qm: 307,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W043-f9",
+          etage: 3,
+          qm: 1101,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W043-f10",
+          etage: 3,
+          qm: 326,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W043-f11",
+          etage: 4,
+          qm: 439,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W043-f12",
+          etage: 4,
+          qm: 956,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W043-f13",
+          etage: 4,
+          qm: 339,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W043-f14",
+          etage: 5,
+          qm: 266,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W043-f15",
+          etage: 5,
+          qm: 1467,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 346337,
+        rohertrag: 146719,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 72901,
+        miete: 69278,
+        nebenkosten: 14693,
+        sonstige: 18880,
+        db: -29033,
+        fteBedarf: 63.30560755819009,
+        fteIst: 73.93711858209177,
+        umsatzJeGruppe: {
+          food: 27014,
+          beauty: 62637,
+          accessoires: 65467,
+          damen: 58495,
+          waesche: 27448,
+          herren: 27374,
+          kinder: 20173,
+          sport: 18549,
+          spielwaren: 10171,
+          wohnen: 29010
+        }
+      }
+    },
+    {
+      id: "W044",
+      name: "Hartwig Gelsenkirchen",
+      stadt: "Gelsenkirchen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 2005,
+      fassade: 5,
+      substanz: 74,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W044-f1",
+          etage: -1,
+          qm: 1010,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W044-f2",
+          etage: -1,
+          qm: 1965,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W044-f3",
+          etage: 0,
+          qm: 663,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W044-f4",
+          etage: 0,
+          qm: 1087,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W044-f5",
+          etage: 0,
+          qm: 1225,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W044-f6",
+          etage: 1,
+          qm: 908,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W044-f7",
+          etage: 1,
+          qm: 959,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W044-f8",
+          etage: 1,
+          qm: 1108,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W044-f9",
+          etage: 2,
+          qm: 512,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W044-f10",
+          etage: 2,
+          qm: 669,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W044-f11",
+          etage: 2,
+          qm: 1275,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W044-f12",
+          etage: 2,
+          qm: 722,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 434384,
+        rohertrag: 181455,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 91555,
+        miete: 78802,
+        nebenkosten: 12824,
+        sonstige: 23256,
+        db: -24982,
+        fteBedarf: 77.49945946670631,
+        fteIst: 92.5254157643862,
+        umsatzJeGruppe: {
+          food: 54490,
+          wohnen: 41144,
+          beauty: 65404,
+          accessoires: 63330,
+          damen: 67806,
+          waesche: 32312,
+          herren: 51481,
+          kinder: 15525,
+          sport: 28898,
+          spielwaren: 13995
+        }
+      }
+    },
+    {
+      id: "W045",
+      name: "Hartwig Aachen",
+      stadt: "Aachen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 2006,
+      fassade: 6,
+      substanz: 49,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W045-f1",
+          etage: -1,
+          qm: 1025,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W045-f2",
+          etage: -1,
+          qm: 1425,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W045-f3",
+          etage: 0,
+          qm: 758,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W045-f4",
+          etage: 0,
+          qm: 1102,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W045-f5",
+          etage: 0,
+          qm: 590,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W045-f6",
+          etage: 1,
+          qm: 2325,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W045-f7",
+          etage: 1,
+          qm: 125,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W045-f8",
+          etage: 2,
+          qm: 1091,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W045-f9",
+          etage: 2,
+          qm: 1359,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W045-f10",
+          etage: 3,
+          qm: 427,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W045-f11",
+          etage: 3,
+          qm: 1210,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W045-f12",
+          etage: 3,
+          qm: 813,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W045-f13",
+          etage: 4,
+          qm: 931,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W045-f14",
+          etage: 4,
+          qm: 1070,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W045-f15",
+          etage: 4,
+          qm: 449,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 427240,
+        rohertrag: 180211,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 102341,
+        miete: 62686,
+        nebenkosten: 17005,
+        sonstige: 24132,
+        db: -25953,
+        fteBedarf: 81.9113128034242,
+        fteIst: 102.91160433753704,
+        umsatzJeGruppe: {
+          food: 42660,
+          wohnen: 41798,
+          beauty: 57778,
+          accessoires: 51041,
+          damen: 69680,
+          waesche: 41522,
+          herren: 46903,
+          kinder: 30239,
+          sport: 28363,
+          spielwaren: 17256
+        }
+      }
+    },
+    {
+      id: "S034",
+      name: "Hartwig Sport Aachen",
+      stadt: "Aachen",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3e3,
+      etagen: [
+        0
+      ],
+      baujahr: 2013,
+      fassade: 4,
+      substanz: 60,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S034-f1",
+          etage: 0,
+          qm: 615,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S034-f2",
+          etage: 0,
+          qm: 901,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S034-f3",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S034-f4",
+          etage: 0,
+          qm: 339,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S034-f5",
+          etage: 0,
+          qm: 408,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S034-f6",
+          etage: 0,
+          qm: 245,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 92764,
+        rohertrag: 39024,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 20778,
+        miete: 12968,
+        nebenkosten: 4114,
+        sonstige: 5131,
+        db: -3968,
+        fteBedarf: 16.570085352990063,
+        fteIst: 21.12856542377301,
+        umsatzJeGruppe: {
+          sportschuhe: 28305,
+          sporttextil: 26279,
+          outdoor: 13511,
+          teamsport: 7487,
+          rad: 3458,
+          wintersport: 13723
+        }
+      }
+    },
+    {
+      id: "W046",
+      name: "Hartwig Braunschweig",
+      stadt: "Braunschweig",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1972,
+      fassade: 7,
+      substanz: 76,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W046-f1",
+          etage: 0,
+          qm: 996,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W046-f2",
+          etage: 0,
+          qm: 643,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W046-f3",
+          etage: 0,
+          qm: 681,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W046-f4",
+          etage: 1,
+          qm: 711,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W046-f5",
+          etage: 1,
+          qm: 1609,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W046-f6",
+          etage: 2,
+          qm: 294,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W046-f7",
+          etage: 2,
+          qm: 840,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W046-f8",
+          etage: 2,
+          qm: 1186,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W046-f9",
+          etage: 3,
+          qm: 291,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W046-f10",
+          etage: 3,
+          qm: 695,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W046-f11",
+          etage: 3,
+          qm: 1334,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W046-f12",
+          etage: 4,
+          qm: 12,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W046-f13",
+          etage: 4,
+          qm: 703,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W046-f14",
+          etage: 4,
+          qm: 1605,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 393643,
+        rohertrag: 163648,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 80571,
+        miete: 52073,
+        nebenkosten: 14530,
+        sonstige: 21359,
+        db: -4886,
+        fteBedarf: 71.54075862173269,
+        fteIst: 82.92838601566278,
+        umsatzJeGruppe: {
+          food: 50322,
+          beauty: 52905,
+          accessoires: 76824,
+          damen: 55127,
+          waesche: 24222,
+          herren: 35633,
+          kinder: 20486,
+          sport: 27974,
+          spielwaren: 14747,
+          wohnen: 35403
+        }
+      }
+    },
+    {
+      id: "S035",
+      name: "Hartwig Sport Braunschweig",
+      stadt: "Braunschweig",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1100,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1992,
+      fassade: 2,
+      substanz: 62,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S035-f1",
+          etage: 0,
+          qm: 797,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S035-f2",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S035-f3",
+          etage: 1,
+          qm: 612,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S035-f4",
+          etage: 1,
+          qm: 438,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S035-f5",
+          etage: 2,
+          qm: 223,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S035-f6",
+          etage: 2,
+          qm: 265,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S035-f7",
+          etage: 2,
+          qm: 278,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S035-f8",
+          etage: 2,
+          qm: 284,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 114523,
+        rohertrag: 48221,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 22348,
+        miete: 9147,
+        nebenkosten: 4262,
+        sonstige: 6113,
+        db: 6352,
+        fteBedarf: 19.464251966026293,
+        fteIst: 23.10104433546691,
+        umsatzJeGruppe: {
+          sportschuhe: 43495,
+          sporttextil: 22867,
+          outdoor: 25612,
+          teamsport: 5399,
+          rad: 2960,
+          wintersport: 14191
+        }
+      }
+    },
+    {
+      id: "W047",
+      name: "Hartwig Kiel Einkaufszentrum",
+      stadt: "Kiel",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 2200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1981,
+      fassade: 4,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W047-f1",
+          etage: -1,
+          qm: 717,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W047-f2",
+          etage: -1,
+          qm: 1433,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W047-f3",
+          etage: 0,
+          qm: 795,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W047-f4",
+          etage: 0,
+          qm: 1355,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W047-f5",
+          etage: 1,
+          qm: 134,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W047-f6",
+          etage: 1,
+          qm: 2016,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W047-f7",
+          etage: 2,
+          qm: 684,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W047-f8",
+          etage: 2,
+          qm: 708,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W047-f9",
+          etage: 2,
+          qm: 758,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W047-f10",
+          etage: 3,
+          qm: 1193,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W047-f11",
+          etage: 3,
+          qm: 782,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W047-f12",
+          etage: 3,
+          qm: 174,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W047-f13",
+          etage: 4,
+          qm: 1248,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W047-f14",
+          etage: 4,
+          qm: 839,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W047-f15",
+          etage: 4,
+          qm: 63,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 377293,
+        rohertrag: 160119,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 82325,
+        miete: 54279,
+        nebenkosten: 0,
+        sonstige: 21274,
+        db: 2241,
+        fteBedarf: 72.08823264454394,
+        fteIst: 84.64631588618568,
+        umsatzJeGruppe: {
+          food: 31206,
+          wohnen: 34042,
+          beauty: 61623,
+          accessoires: 68778,
+          damen: 64873,
+          waesche: 24613,
+          herren: 44899,
+          kinder: 15173,
+          sport: 20759,
+          spielwaren: 11327
+        }
+      }
+    },
+    {
+      id: "S036",
+      name: "Hartwig Sport Kiel",
+      stadt: "Kiel",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1100,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2013,
+      fassade: 5,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S036-f1",
+          etage: 0,
+          qm: 763,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S036-f2",
+          etage: 0,
+          qm: 321,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S036-f3",
+          etage: 1,
+          qm: 564,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S036-f4",
+          etage: 1,
+          qm: 519,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S036-f5",
+          etage: 2,
+          qm: 208,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S036-f6",
+          etage: 2,
+          qm: 251,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S036-f7",
+          etage: 2,
+          qm: 334,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S036-f8",
+          etage: 2,
+          qm: 290,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 129498,
+        rohertrag: 54750,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 25364,
+        miete: 17566,
+        nebenkosten: 3961,
+        sonstige: 6772,
+        db: 1088,
+        fteBedarf: 21.368605856959235,
+        fteIst: 26.147810965136394,
+        umsatzJeGruppe: {
+          sportschuhe: 46401,
+          sporttextil: 31962,
+          outdoor: 27382,
+          teamsport: 4567,
+          rad: 3337,
+          wintersport: 15850
+        }
+      }
+    },
+    {
+      id: "W048",
+      name: "Hartwig Chemnitz Neustadt",
+      stadt: "Chemnitz",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 3600,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 2e3,
+      fassade: 0,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W048-f1",
+          etage: -1,
+          qm: 1164,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W048-f2",
+          etage: -1,
+          qm: 2461,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W048-f3",
+          etage: 0,
+          qm: 701,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W048-f4",
+          etage: 0,
+          qm: 1169,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W048-f5",
+          etage: 0,
+          qm: 1755,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W048-f6",
+          etage: 1,
+          qm: 1144,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W048-f7",
+          etage: 1,
+          qm: 1155,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W048-f8",
+          etage: 1,
+          qm: 1325,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W048-f9",
+          etage: 2,
+          qm: 190,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W048-f10",
+          etage: 2,
+          qm: 1188,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W048-f11",
+          etage: 2,
+          qm: 1565,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W048-f12",
+          etage: 2,
+          qm: 769,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 346429,
+        rohertrag: 145267,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 84148,
+        miete: 30786,
+        nebenkosten: 17619,
+        sonstige: 20767,
+        db: -8053,
+        fteBedarf: 71.67318065692153,
+        fteIst: 86.63676289336188,
+        umsatzJeGruppe: {
+          food: 42584,
+          wohnen: 41395,
+          beauty: 40046,
+          accessoires: 46025,
+          damen: 60997,
+          waesche: 26580,
+          herren: 34917,
+          kinder: 22089,
+          sport: 20660,
+          spielwaren: 11136
+        }
+      }
+    },
+    {
+      id: "S037",
+      name: "Hartwig Sport Chemnitz",
+      stadt: "Chemnitz",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1985,
+      fassade: 5,
+      substanz: 61,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S037-f1",
+          etage: 0,
+          qm: 561,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S037-f2",
+          etage: 0,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S037-f3",
+          etage: 1,
+          qm: 54,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S037-f4",
+          etage: 1,
+          qm: 485,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S037-f5",
+          etage: 1,
+          qm: 242,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S037-f6",
+          etage: 1,
+          qm: 297,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S037-f7",
+          etage: 1,
+          qm: 197,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 89813,
+        rohertrag: 37961,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 19107,
+        miete: 14358,
+        nebenkosten: 0,
+        sonstige: 4830,
+        db: -334,
+        fteBedarf: 15.549604821386373,
+        fteIst: 19.379036831414552,
+        umsatzJeGruppe: {
+          sportschuhe: 30681,
+          sporttextil: 27203,
+          outdoor: 15645,
+          teamsport: 4937,
+          rad: 2784,
+          wintersport: 8563
+        }
+      }
+    },
+    {
+      id: "W049",
+      name: "Hartwig Halle Am Wall",
+      stadt: "Halle",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2600,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1990,
+      fassade: 5,
+      substanz: 70,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W049-f1",
+          etage: 0,
+          qm: 1090,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W049-f2",
+          etage: 0,
+          qm: 889,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W049-f3",
+          etage: 0,
+          qm: 587,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W049-f4",
+          etage: 1,
+          qm: 661,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W049-f5",
+          etage: 1,
+          qm: 1906,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W049-f6",
+          etage: 2,
+          qm: 1760,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W049-f7",
+          etage: 2,
+          qm: 807,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W049-f8",
+          etage: 3,
+          qm: 439,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W049-f9",
+          etage: 3,
+          qm: 1532,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W049-f10",
+          etage: 3,
+          qm: 596,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W049-f11",
+          etage: 4,
+          qm: 507,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W049-f12",
+          etage: 4,
+          qm: 1407,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W049-f13",
+          etage: 4,
+          qm: 652,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W049-f14",
+          etage: 5,
+          qm: 188,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W049-f15",
+          etage: 5,
+          qm: 2379,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 444572,
+        rohertrag: 188076,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 102455,
+        miete: 62638,
+        nebenkosten: 16204,
+        sonstige: 25157,
+        db: -18378,
+        fteBedarf: 85.32397064138165,
+        fteIst: 104.26081803912479,
+        umsatzJeGruppe: {
+          food: 49229,
+          beauty: 62532,
+          accessoires: 55077,
+          damen: 90964,
+          waesche: 42649,
+          herren: 38283,
+          kinder: 26289,
+          sport: 22302,
+          spielwaren: 12692,
+          wohnen: 44555
+        }
+      }
+    },
+    {
+      id: "W050",
+      name: "Hartwig Magdeburg Arkaden",
+      stadt: "Magdeburg",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1983,
+      fassade: 1,
+      substanz: 42,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W050-f1",
+          etage: -1,
+          qm: 652,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W050-f2",
+          etage: -1,
+          qm: 848,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W050-f3",
+          etage: 0,
+          qm: 431,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W050-f4",
+          etage: 0,
+          qm: 763,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W050-f5",
+          etage: 0,
+          qm: 306,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W050-f6",
+          etage: 1,
+          qm: 1500,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W050-f7",
+          etage: 2,
+          qm: 153,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W050-f8",
+          etage: 2,
+          qm: 692,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W050-f9",
+          etage: 2,
+          qm: 655,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W050-f10",
+          etage: 3,
+          qm: 531,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W050-f11",
+          etage: 3,
+          qm: 725,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W050-f12",
+          etage: 3,
+          qm: 244,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W050-f13",
+          etage: 4,
+          qm: 565,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W050-f14",
+          etage: 4,
+          qm: 625,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W050-f15",
+          etage: 4,
+          qm: 309,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 199260,
+        rohertrag: 84120,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 49234,
+        miete: 22754,
+        nebenkosten: 10455,
+        sonstige: 12219,
+        db: -10542,
+        fteBedarf: 42.51892501333179,
+        fteIst: 49.59452388162267,
+        umsatzJeGruppe: {
+          food: 19029,
+          wohnen: 16290,
+          beauty: 28474,
+          accessoires: 25067,
+          damen: 39770,
+          waesche: 15323,
+          herren: 18874,
+          kinder: 15166,
+          sport: 11997,
+          spielwaren: 9272
+        }
+      }
+    },
+    {
+      id: "S038",
+      name: "Hartwig Sport Magdeburg Galerie am Fluss",
+      stadt: "Magdeburg",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 800,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1989,
+      fassade: 7,
+      substanz: 76,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S038-f1",
+          etage: 0,
+          qm: 296,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S038-f2",
+          etage: 0,
+          qm: 479,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S038-f3",
+          etage: 1,
+          qm: 63,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S038-f4",
+          etage: 1,
+          qm: 298,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S038-f5",
+          etage: 1,
+          qm: 121,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S038-f6",
+          etage: 1,
+          qm: 175,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S038-f7",
+          etage: 1,
+          qm: 117,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 54142,
+        rohertrag: 23024,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 11487,
+        miete: 7880,
+        nebenkosten: 1646,
+        sonstige: 2917,
+        db: -906,
+        fteBedarf: 9.323675282137211,
+        fteIst: 11.735136837466078,
+        umsatzJeGruppe: {
+          sportschuhe: 15363,
+          sporttextil: 19120,
+          outdoor: 8832,
+          teamsport: 2494,
+          rad: 1646,
+          wintersport: 6688
+        }
+      }
+    },
+    {
+      id: "W051",
+      name: "Hartwig Freiburg",
+      stadt: "Freiburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1923,
+      fassade: 4,
+      substanz: 68,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W051-f1",
+          etage: -1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W051-f2",
+          etage: -1,
+          qm: 1318,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W051-f3",
+          etage: 0,
+          qm: 524,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W051-f4",
+          etage: 0,
+          qm: 1090,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W051-f5",
+          etage: 0,
+          qm: 226,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W051-f6",
+          etage: 1,
+          qm: 1533,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W051-f7",
+          etage: 1,
+          qm: 307,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W051-f8",
+          etage: 2,
+          qm: 193,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W051-f9",
+          etage: 2,
+          qm: 1147,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W051-f10",
+          etage: 2,
+          qm: 499,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W051-f11",
+          etage: 3,
+          qm: 90,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W051-f12",
+          etage: 3,
+          qm: 971,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W051-f13",
+          etage: 3,
+          qm: 634,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W051-f14",
+          etage: 3,
+          qm: 144,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 294645,
+        rohertrag: 124365,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 59586,
+        miete: 28162,
+        nebenkosten: 12373,
+        sonstige: 16220,
+        db: 8025,
+        fteBedarf: 54.57246764348757,
+        fteIst: 59.836159162032736,
+        umsatzJeGruppe: {
+          food: 23905,
+          wohnen: 27778,
+          beauty: 50119,
+          accessoires: 56791,
+          damen: 51327,
+          waesche: 15705,
+          herren: 28345,
+          kinder: 12797,
+          sport: 17924,
+          spielwaren: 9952
+        }
+      }
+    },
+    {
+      id: "S039",
+      name: "Hartwig Sport Freiburg",
+      stadt: "Freiburg",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2012,
+      fassade: 5,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S039-f1",
+          etage: 0,
+          qm: 304,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S039-f2",
+          etage: 0,
+          qm: 212,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S039-f3",
+          etage: 1,
+          qm: 279,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S039-f4",
+          etage: 1,
+          qm: 238,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S039-f5",
+          etage: 2,
+          qm: 51,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S039-f6",
+          etage: 2,
+          qm: 171,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S039-f7",
+          etage: 2,
+          qm: 197,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S039-f8",
+          etage: 2,
+          qm: 98,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 52523,
+        rohertrag: 22315,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 10185,
+        miete: 6087,
+        nebenkosten: 2062,
+        sonstige: 2851,
+        db: 1130,
+        fteBedarf: 9.243032444303095,
+        fteIst: 10.234731895337532,
+        umsatzJeGruppe: {
+          sportschuhe: 15678,
+          sporttextil: 17787,
+          outdoor: 10228,
+          teamsport: 2923,
+          rad: 1777,
+          wintersport: 4131
+        }
+      }
+    },
+    {
+      id: "W052",
+      name: "Hartwig Krefeld Bahnhofstra\xDFe",
+      stadt: "Krefeld",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1982,
+      fassade: 0,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W052-f1",
+          etage: -1,
+          qm: 745,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W052-f2",
+          etage: -1,
+          qm: 638,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W052-f3",
+          etage: 0,
+          qm: 580,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W052-f4",
+          etage: 0,
+          qm: 804,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W052-f5",
+          etage: 1,
+          qm: 127,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W052-f6",
+          etage: 1,
+          qm: 1256,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W052-f7",
+          etage: 2,
+          qm: 194,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W052-f8",
+          etage: 2,
+          qm: 550,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W052-f9",
+          etage: 2,
+          qm: 640,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W052-f10",
+          etage: 3,
+          qm: 198,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W052-f11",
+          etage: 3,
+          qm: 638,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W052-f12",
+          etage: 3,
+          qm: 547,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W052-f13",
+          etage: 4,
+          qm: 365,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W052-f14",
+          etage: 4,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W052-f15",
+          etage: 4,
+          qm: 618,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 208175,
+        rohertrag: 86112,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 52990,
+        miete: 29555,
+        nebenkosten: 8948,
+        sonstige: 12270,
+        db: -17651,
+        fteBedarf: 42.138195499237554,
+        fteIst: 53.14615030069136,
+        umsatzJeGruppe: {
+          food: 26893,
+          wohnen: 18138,
+          beauty: 39983,
+          accessoires: 31398,
+          damen: 29728,
+          waesche: 14123,
+          herren: 17024,
+          kinder: 14144,
+          sport: 11098,
+          spielwaren: 5645
+        }
+      }
+    },
+    {
+      id: "W053",
+      name: "Hartwig Mainz",
+      stadt: "Mainz",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3700,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 2004,
+      fassade: 2,
+      substanz: 50,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W053-f1",
+          etage: -1,
+          qm: 1201,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W053-f2",
+          etage: -1,
+          qm: 2449,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W053-f3",
+          etage: 0,
+          qm: 777,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W053-f4",
+          etage: 0,
+          qm: 1264,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W053-f5",
+          etage: 0,
+          qm: 1609,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W053-f6",
+          etage: 1,
+          qm: 748,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W053-f7",
+          etage: 1,
+          qm: 861,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W053-f8",
+          etage: 1,
+          qm: 2041,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W053-f9",
+          etage: 2,
+          qm: 136,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W053-f10",
+          etage: 2,
+          qm: 1234,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W053-f11",
+          etage: 2,
+          qm: 1258,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W053-f12",
+          etage: 2,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W053-f13",
+          etage: 2,
+          qm: 122,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 493354,
+        rohertrag: 205888,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 111195,
+        miete: 54943,
+        nebenkosten: 18190,
+        sonstige: 26798,
+        db: -5237,
+        fteBedarf: 89.75461299441628,
+        fteIst: 112.49641862829989,
+        umsatzJeGruppe: {
+          food: 61907,
+          wohnen: 55365,
+          beauty: 69458,
+          accessoires: 64774,
+          damen: 64335,
+          waesche: 34368,
+          herren: 73631,
+          kinder: 26208,
+          sport: 26377,
+          spielwaren: 16933
+        }
+      }
+    },
+    {
+      id: "S040",
+      name: "Hartwig Sport Mainz Lindenstra\xDFe",
+      stadt: "Mainz",
+      format: "sport",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1300,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1992,
+      fassade: 0,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S040-f1",
+          etage: 0,
+          qm: 922,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S040-f2",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S040-f3",
+          etage: 1,
+          qm: 459,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S040-f4",
+          etage: 1,
+          qm: 791,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S040-f5",
+          etage: 2,
+          qm: 138,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S040-f6",
+          etage: 2,
+          qm: 321,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S040-f7",
+          etage: 2,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S040-f8",
+          etage: 2,
+          qm: 304,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 119753,
+        rohertrag: 50286,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 22058,
+        miete: 17436,
+        nebenkosten: 5553,
+        sonstige: 6597,
+        db: -1359,
+        fteBedarf: 21.344614123859888,
+        fteIst: 22.89930007547081,
+        umsatzJeGruppe: {
+          sportschuhe: 42329,
+          sporttextil: 22203,
+          outdoor: 29362,
+          teamsport: 5186,
+          rad: 5058,
+          wintersport: 15614
+        }
+      }
+    },
+    {
+      id: "W054",
+      name: "Hartwig L\xFCbeck",
+      stadt: "L\xFCbeck",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 4e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1992,
+      fassade: 3,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W054-f1",
+          etage: -1,
+          qm: 1044,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W054-f2",
+          etage: -1,
+          qm: 2981,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W054-f3",
+          etage: 0,
+          qm: 1021,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W054-f4",
+          etage: 0,
+          qm: 1868,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W054-f5",
+          etage: 0,
+          qm: 1136,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W054-f6",
+          etage: 1,
+          qm: 2345,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W054-f7",
+          etage: 1,
+          qm: 1204,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W054-f8",
+          etage: 1,
+          qm: 476,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W054-f9",
+          etage: 2,
+          qm: 1627,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W054-f10",
+          etage: 2,
+          qm: 947,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W054-f11",
+          etage: 2,
+          qm: 2272,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 552353,
+        rohertrag: 234883,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 112295,
+        miete: 105490,
+        nebenkosten: 18393,
+        sonstige: 30261,
+        db: -31556,
+        fteBedarf: 101.25734101968146,
+        fteIst: 113.80977676792214,
+        umsatzJeGruppe: {
+          food: 53714,
+          wohnen: 54849,
+          beauty: 87579,
+          accessoires: 104260,
+          damen: 100771,
+          waesche: 38380,
+          herren: 59319,
+          kinder: 21725,
+          sport: 31756
+        }
+      }
+    },
+    {
+      id: "S041",
+      name: "Hartwig Sport L\xFCbeck Ring",
+      stadt: "L\xFCbeck",
+      format: "sport",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1998,
+      fassade: 3,
+      substanz: 69,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S041-f1",
+          etage: 0,
+          qm: 921,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S041-f2",
+          etage: 0,
+          qm: 1161,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S041-f3",
+          etage: 0,
+          qm: 42,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S041-f4",
+          etage: 1,
+          qm: 953,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S041-f5",
+          etage: 1,
+          qm: 352,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S041-f6",
+          etage: 1,
+          qm: 390,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S041-f7",
+          etage: 1,
+          qm: 429,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 133301,
+        rohertrag: 56536,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 27340,
+        miete: 10430,
+        nebenkosten: 4806,
+        sonstige: 7377,
+        db: 6582,
+        fteBedarf: 23.852386020383413,
+        fteIst: 27.735516106171353,
+        umsatzJeGruppe: {
+          sportschuhe: 41943,
+          sporttextil: 36381,
+          outdoor: 29217,
+          teamsport: 6733,
+          rad: 3704,
+          wintersport: 15323
+        }
+      }
+    },
+    {
+      id: "W055",
+      name: "Hartwig Erfurt",
+      stadt: "Erfurt",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1957,
+      fassade: 7,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W055-f1",
+          etage: -1,
+          qm: 973,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W055-f2",
+          etage: -1,
+          qm: 1527,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W055-f3",
+          etage: 0,
+          qm: 739,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W055-f4",
+          etage: 0,
+          qm: 998,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W055-f5",
+          etage: 0,
+          qm: 763,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W055-f6",
+          etage: 1,
+          qm: 1322,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W055-f7",
+          etage: 1,
+          qm: 691,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W055-f8",
+          etage: 1,
+          qm: 488,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W055-f9",
+          etage: 2,
+          qm: 1184,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W055-f10",
+          etage: 2,
+          qm: 935,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W055-f11",
+          etage: 2,
+          qm: 381,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W055-f12",
+          etage: 3,
+          qm: 1190,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W055-f13",
+          etage: 3,
+          qm: 639,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W055-f14",
+          etage: 3,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 339183,
+        rohertrag: 140078,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 80693,
+        miete: 33011,
+        nebenkosten: 14914,
+        sonstige: 19532,
+        db: -8072,
+        fteBedarf: 66.61228005145064,
+        fteIst: 83.79886769625847,
+        umsatzJeGruppe: {
+          food: 41467,
+          wohnen: 45347,
+          beauty: 54443,
+          accessoires: 36596,
+          damen: 49086,
+          waesche: 18827,
+          herren: 35346,
+          kinder: 24602,
+          sport: 23599,
+          spielwaren: 9870
+        }
+      }
+    },
+    {
+      id: "S042",
+      name: "Hartwig Sport Erfurt Einkaufszentrum",
+      stadt: "Erfurt",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2010,
+      fassade: 4,
+      substanz: 58,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S042-f1",
+          etage: 0,
+          qm: 1039,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S042-f2",
+          etage: 0,
+          qm: 528,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S042-f3",
+          etage: 1,
+          qm: 669,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S042-f4",
+          etage: 1,
+          qm: 898,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S042-f5",
+          etage: 2,
+          qm: 171,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S042-f6",
+          etage: 2,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S042-f7",
+          etage: 2,
+          qm: 639,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S042-f8",
+          etage: 2,
+          qm: 286,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 131311,
+        rohertrag: 55369,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 26013,
+        miete: 29563,
+        nebenkosten: 0,
+        sonstige: 7499,
+        db: -7706,
+        fteBedarf: 24.774700318339345,
+        fteIst: 26.161759234308235,
+        umsatzJeGruppe: {
+          sportschuhe: 47461,
+          sporttextil: 31715,
+          outdoor: 29748,
+          teamsport: 7459,
+          rad: 4391,
+          wintersport: 10536
+        }
+      }
+    },
+    {
+      id: "W056",
+      name: "Hartwig Oberhausen",
+      stadt: "Oberhausen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1933,
+      fassade: 3,
+      substanz: 48,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W056-f1",
+          etage: -1,
+          qm: 513,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W056-f2",
+          etage: -1,
+          qm: 1267,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W056-f3",
+          etage: 0,
+          qm: 611,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W056-f4",
+          etage: 0,
+          qm: 950,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W056-f5",
+          etage: 0,
+          qm: 219,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W056-f6",
+          etage: 1,
+          qm: 1703,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W056-f7",
+          etage: 1,
+          qm: 77,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W056-f8",
+          etage: 2,
+          qm: 539,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W056-f9",
+          etage: 2,
+          qm: 916,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W056-f10",
+          etage: 2,
+          qm: 325,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W056-f11",
+          etage: 3,
+          qm: 156,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W056-f12",
+          etage: 3,
+          qm: 984,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W056-f13",
+          etage: 3,
+          qm: 490,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W056-f14",
+          etage: 3,
+          qm: 149,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 311485,
+        rohertrag: 131374,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 60336,
+        miete: 40751,
+        nebenkosten: 13339,
+        sonstige: 16775,
+        db: 172,
+        fteBedarf: 56.005128184916984,
+        fteIst: 61.12087493713988,
+        umsatzJeGruppe: {
+          food: 27299,
+          wohnen: 28440,
+          beauty: 52832,
+          accessoires: 50478,
+          damen: 52532,
+          waesche: 23588,
+          herren: 29183,
+          kinder: 15969,
+          sport: 22564,
+          spielwaren: 8601
+        }
+      }
+    },
+    {
+      id: "S043",
+      name: "Hartwig Sport Oberhausen Galerie am Fluss",
+      stadt: "Oberhausen",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 5200,
+      etagen: [
+        0
+      ],
+      baujahr: 1986,
+      fassade: 5,
+      substanz: 44,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S043-f1",
+          etage: 0,
+          qm: 1314,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S043-f2",
+          etage: 0,
+          qm: 1204,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S043-f3",
+          etage: 0,
+          qm: 1137,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S043-f4",
+          etage: 0,
+          qm: 432,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S043-f5",
+          etage: 0,
+          qm: 684,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S043-f6",
+          etage: 0,
+          qm: 380,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 164828,
+        rohertrag: 69491,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 36435,
+        miete: 18056,
+        nebenkosten: 0,
+        sonstige: 9076,
+        db: 5924,
+        fteBedarf: 29.558171121462824,
+        fteIst: 37.600396150871944,
+        umsatzJeGruppe: {
+          sportschuhe: 56638,
+          sporttextil: 39022,
+          outdoor: 38675,
+          teamsport: 8923,
+          rad: 6306,
+          wintersport: 15263
+        }
+      }
+    },
+    {
+      id: "W057",
+      name: "Hartwig Rostock Am Wall",
+      stadt: "Rostock",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1962,
+      fassade: 6,
+      substanz: 81,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W057-f1",
+          etage: -1,
+          qm: 999,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W057-f2",
+          etage: -1,
+          qm: 1485,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W057-f3",
+          etage: 0,
+          qm: 1149,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W057-f4",
+          etage: 0,
+          qm: 1335,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W057-f5",
+          etage: 1,
+          qm: 138,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W057-f6",
+          etage: 1,
+          qm: 2345,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W057-f7",
+          etage: 2,
+          qm: 560,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W057-f8",
+          etage: 2,
+          qm: 1009,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W057-f9",
+          etage: 2,
+          qm: 914,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W057-f10",
+          etage: 3,
+          qm: 998,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W057-f11",
+          etage: 3,
+          qm: 963,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W057-f12",
+          etage: 3,
+          qm: 523,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W057-f13",
+          etage: 4,
+          qm: 979,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W057-f14",
+          etage: 4,
+          qm: 1014,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W057-f15",
+          etage: 4,
+          qm: 491,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 428406,
+        rohertrag: 179742,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 86931,
+        miete: 37333,
+        nebenkosten: 15692,
+        sonstige: 24271,
+        db: 15515,
+        fteBedarf: 82.39433344045942,
+        fteIst: 90.0649736045208,
+        umsatzJeGruppe: {
+          food: 39782,
+          wohnen: 35604,
+          beauty: 86417,
+          accessoires: 64067,
+          damen: 68579,
+          waesche: 30122,
+          herren: 44060,
+          kinder: 22213,
+          sport: 24452,
+          spielwaren: 13109
+        }
+      }
+    },
+    {
+      id: "S044",
+      name: "Hartwig Sport Rostock",
+      stadt: "Rostock",
+      format: "sport",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2700,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1999,
+      fassade: 7,
+      substanz: 63,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S044-f1",
+          etage: 0,
+          qm: 1391,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S044-f2",
+          etage: 0,
+          qm: 1138,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S044-f3",
+          etage: 0,
+          qm: 122,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S044-f4",
+          etage: 1,
+          qm: 1146,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S044-f5",
+          etage: 1,
+          qm: 453,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S044-f6",
+          etage: 1,
+          qm: 656,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S044-f7",
+          etage: 1,
+          qm: 395,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 220780,
+        rohertrag: 92105,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 43059,
+        miete: 20994,
+        nebenkosten: 7122,
+        sonstige: 11437,
+        db: 9493,
+        fteBedarf: 36.289872381666,
+        fteIst: 44.29044951899844,
+        umsatzJeGruppe: {
+          sportschuhe: 94682,
+          sporttextil: 38819,
+          outdoor: 42367,
+          teamsport: 13077,
+          rad: 7524,
+          wintersport: 24310
+        }
+      }
+    },
+    {
+      id: "W058",
+      name: "Hartwig Kassel",
+      stadt: "Kassel",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 2001,
+      fassade: 5,
+      substanz: 38,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W058-f1",
+          etage: 0,
+          qm: 619,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W058-f2",
+          etage: 0,
+          qm: 706,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W058-f3",
+          etage: 0,
+          qm: 975,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W058-f4",
+          etage: 1,
+          qm: 311,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W058-f5",
+          etage: 1,
+          qm: 1989,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W058-f6",
+          etage: 2,
+          qm: 607,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W058-f7",
+          etage: 2,
+          qm: 666,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W058-f8",
+          etage: 2,
+          qm: 1027,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W058-f9",
+          etage: 3,
+          qm: 601,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W058-f10",
+          etage: 3,
+          qm: 808,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W058-f11",
+          etage: 3,
+          qm: 891,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W058-f12",
+          etage: 4,
+          qm: 158,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W058-f13",
+          etage: 4,
+          qm: 675,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W058-f14",
+          etage: 4,
+          qm: 1466,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 386018,
+        rohertrag: 163456,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 84931,
+        miete: 49209,
+        nebenkosten: 11727,
+        sonstige: 21001,
+        db: -3413,
+        fteBedarf: 70.38013826468638,
+        fteIst: 87.73621738146602,
+        umsatzJeGruppe: {
+          food: 32939,
+          beauty: 70716,
+          accessoires: 59318,
+          damen: 79825,
+          waesche: 21863,
+          herren: 39463,
+          kinder: 21758,
+          sport: 19741,
+          spielwaren: 11681,
+          wohnen: 28714
+        }
+      }
+    },
+    {
+      id: "S045",
+      name: "Hartwig Sport Kassel Galerie am Fluss",
+      stadt: "Kassel",
+      format: "sport",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2005,
+      fassade: 4,
+      substanz: 64,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S045-f1",
+          etage: 0,
+          qm: 1114,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S045-f2",
+          etage: 0,
+          qm: 653,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S045-f3",
+          etage: 1,
+          qm: 744,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S045-f4",
+          etage: 1,
+          qm: 1022,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S045-f5",
+          etage: 2,
+          qm: 112,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S045-f6",
+          etage: 2,
+          qm: 463,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S045-f7",
+          etage: 2,
+          qm: 708,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S045-f8",
+          etage: 2,
+          qm: 483,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 156368,
+        rohertrag: 65804,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 29140,
+        miete: 15580,
+        nebenkosten: 0,
+        sonstige: 8796,
+        db: 12289,
+        fteBedarf: 28.48920296329611,
+        fteIst: 29.50626515089279,
+        umsatzJeGruppe: {
+          sportschuhe: 51739,
+          sporttextil: 38488,
+          outdoor: 28692,
+          teamsport: 7157,
+          rad: 5901,
+          wintersport: 24391
+        }
+      }
+    },
+    {
+      id: "W059",
+      name: "Hartwig Hagen Arkaden",
+      stadt: "Hagen",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 2400,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1928,
+      fassade: 4,
+      substanz: 71,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W059-f1",
+          etage: -1,
+          qm: 730,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W059-f2",
+          etage: -1,
+          qm: 1695,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W059-f3",
+          etage: 0,
+          qm: 663,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W059-f4",
+          etage: 0,
+          qm: 973,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W059-f5",
+          etage: 0,
+          qm: 789,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W059-f6",
+          etage: 1,
+          qm: 1393,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W059-f7",
+          etage: 1,
+          qm: 613,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W059-f8",
+          etage: 1,
+          qm: 419,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W059-f9",
+          etage: 2,
+          qm: 483,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W059-f10",
+          etage: 2,
+          qm: 682,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W059-f11",
+          etage: 2,
+          qm: 848,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W059-f12",
+          etage: 2,
+          qm: 674,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 223223,
+        rohertrag: 93248,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 49926,
+        miete: 29860,
+        nebenkosten: 12726,
+        sonstige: 13635,
+        db: -12899,
+        fteBedarf: 47.34049843643294,
+        fteIst: 51.097237782158786,
+        umsatzJeGruppe: {
+          food: 23368,
+          wohnen: 24387,
+          beauty: 38725,
+          accessoires: 36377,
+          damen: 40151,
+          waesche: 13964,
+          herren: 15368,
+          kinder: 10677,
+          sport: 12120,
+          spielwaren: 8086
+        }
+      }
+    },
+    {
+      id: "W060",
+      name: "Hartwig Potsdam Bahnhofstra\xDFe",
+      stadt: "Potsdam",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2200,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1987,
+      fassade: 4,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W060-f1",
+          etage: 0,
+          qm: 563,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W060-f2",
+          etage: 0,
+          qm: 764,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W060-f3",
+          etage: 0,
+          qm: 893,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W060-f4",
+          etage: 1,
+          qm: 82,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W060-f5",
+          etage: 1,
+          qm: 2138,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W060-f6",
+          etage: 2,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W060-f7",
+          etage: 2,
+          qm: 640,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W060-f8",
+          etage: 2,
+          qm: 1166,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W060-f9",
+          etage: 3,
+          qm: 268,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W060-f10",
+          etage: 3,
+          qm: 583,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W060-f11",
+          etage: 3,
+          qm: 1012,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W060-f12",
+          etage: 3,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W060-f13",
+          etage: 4,
+          qm: 340,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W060-f14",
+          etage: 4,
+          qm: 1880,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 293259,
+        rohertrag: 124668,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 63524,
+        miete: 47938,
+        nebenkosten: 0,
+        sonstige: 17019,
+        db: -3812,
+        fteBedarf: 58.21452959194201,
+        fteIst: 65.62847515777923,
+        umsatzJeGruppe: {
+          food: 21236,
+          beauty: 57168,
+          accessoires: 40026,
+          damen: 64249,
+          waesche: 16313,
+          herren: 34031,
+          kinder: 11014,
+          sport: 12251,
+          spielwaren: 9963,
+          wohnen: 27007
+        }
+      }
+    },
+    {
+      id: "W061",
+      name: "Hartwig Saarbr\xFCcken Galerie am Fluss",
+      stadt: "Saarbr\xFCcken",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1971,
+      fassade: 2,
+      substanz: 65,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W061-f1",
+          etage: 0,
+          qm: 578,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W061-f2",
+          etage: 0,
+          qm: 636,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W061-f3",
+          etage: 0,
+          qm: 453,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W061-f4",
+          etage: 1,
+          qm: 623,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W061-f5",
+          etage: 1,
+          qm: 1043,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W061-f6",
+          etage: 2,
+          qm: 913,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W061-f7",
+          etage: 2,
+          qm: 753,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W061-f8",
+          etage: 3,
+          qm: 63,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W061-f9",
+          etage: 3,
+          qm: 1236,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W061-f10",
+          etage: 3,
+          qm: 368,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W061-f11",
+          etage: 4,
+          qm: 266,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W061-f12",
+          etage: 4,
+          qm: 993,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W061-f13",
+          etage: 4,
+          qm: 408,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W061-f14",
+          etage: 5,
+          qm: 193,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W061-f15",
+          etage: 5,
+          qm: 1474,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 247117,
+        rohertrag: 104077,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 57268,
+        miete: 44221,
+        nebenkosten: 0,
+        sonstige: 14632,
+        db: -12044,
+        fteBedarf: 50.34145186039213,
+        fteIst: 57.73996380669992,
+        umsatzJeGruppe: {
+          food: 20684,
+          beauty: 47345,
+          accessoires: 38208,
+          damen: 37480,
+          waesche: 17642,
+          herren: 28132,
+          kinder: 13054,
+          sport: 13050,
+          spielwaren: 7943,
+          wohnen: 23579
+        }
+      }
+    },
+    {
+      id: "S046",
+      name: "Hartwig Sport Saarbr\xFCcken Bahnhofstra\xDFe",
+      stadt: "Saarbr\xFCcken",
+      format: "sport",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1989,
+      fassade: 0,
+      substanz: 54,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S046-f1",
+          etage: 0,
+          qm: 557,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S046-f2",
+          etage: 0,
+          qm: 918,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S046-f3",
+          etage: 1,
+          qm: 18,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S046-f4",
+          etage: 1,
+          qm: 555,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S046-f5",
+          etage: 1,
+          qm: 279,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S046-f6",
+          etage: 1,
+          qm: 354,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S046-f7",
+          etage: 1,
+          qm: 268,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 84061,
+        rohertrag: 35415,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 18913,
+        miete: 11269,
+        nebenkosten: 0,
+        sonstige: 4774,
+        db: 460,
+        fteBedarf: 15.58681695248675,
+        fteIst: 19.278873529770344,
+        umsatzJeGruppe: {
+          sportschuhe: 27685,
+          sporttextil: 22107,
+          outdoor: 15199,
+          teamsport: 4968,
+          rad: 2971,
+          wintersport: 11132
+        }
+      }
+    },
+    {
+      id: "W062",
+      name: "Hartwig Hamm Am Wall",
+      stadt: "Hamm",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 3200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1994,
+      fassade: 1,
+      substanz: 87,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W062-f1",
+          etage: -1,
+          qm: 976,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W062-f2",
+          etage: -1,
+          qm: 2199,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W062-f3",
+          etage: 0,
+          qm: 735,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W062-f4",
+          etage: 0,
+          qm: 1265,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W062-f5",
+          etage: 0,
+          qm: 1175,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W062-f6",
+          etage: 1,
+          qm: 1551,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W062-f7",
+          etage: 1,
+          qm: 841,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W062-f8",
+          etage: 1,
+          qm: 783,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W062-f9",
+          etage: 2,
+          qm: 669,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W062-f10",
+          etage: 2,
+          qm: 982,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W062-f11",
+          etage: 2,
+          qm: 1243,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W062-f12",
+          etage: 2,
+          qm: 581,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 284883,
+        rohertrag: 120260,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 71571,
+        miete: 41062,
+        nebenkosten: 15693,
+        sonstige: 17530,
+        db: -25597,
+        fteBedarf: 60.91138640509787,
+        fteIst: 72.01398634010162,
+        umsatzJeGruppe: {
+          food: 30366,
+          wohnen: 28274,
+          beauty: 38282,
+          accessoires: 45102,
+          damen: 57705,
+          waesche: 16188,
+          herren: 26283,
+          kinder: 20729,
+          sport: 15397,
+          spielwaren: 6557
+        }
+      }
+    },
+    {
+      id: "W063",
+      name: "Hartwig Ludwigshafen",
+      stadt: "Ludwigshafen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1950,
+      fassade: 0,
+      substanz: 53,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W063-f1",
+          etage: -1,
+          qm: 754,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W063-f2",
+          etage: -1,
+          qm: 1313,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W063-f3",
+          etage: 0,
+          qm: 924,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W063-f4",
+          etage: 0,
+          qm: 1143,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W063-f5",
+          etage: 1,
+          qm: 230,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W063-f6",
+          etage: 1,
+          qm: 1836,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W063-f7",
+          etage: 2,
+          qm: 848,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W063-f8",
+          etage: 2,
+          qm: 974,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W063-f9",
+          etage: 2,
+          qm: 245,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W063-f10",
+          etage: 3,
+          qm: 1037,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W063-f11",
+          etage: 3,
+          qm: 692,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W063-f12",
+          etage: 3,
+          qm: 338,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W063-f13",
+          etage: 4,
+          qm: 1066,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W063-f14",
+          etage: 4,
+          qm: 837,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W063-f15",
+          etage: 4,
+          qm: 164,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 429755,
+        rohertrag: 180621,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 87780,
+        miete: 37935,
+        nebenkosten: 18442,
+        sonstige: 23200,
+        db: 13264,
+        fteBedarf: 77.54743115596361,
+        fteIst: 91.16634127729695,
+        umsatzJeGruppe: {
+          food: 41883,
+          wohnen: 37748,
+          beauty: 80829,
+          accessoires: 61286,
+          damen: 76363,
+          waesche: 39585,
+          herren: 33505,
+          kinder: 15590,
+          sport: 29430,
+          spielwaren: 13537
+        }
+      }
+    },
+    {
+      id: "W064",
+      name: "Hartwig Oldenburg Neustadt",
+      stadt: "Oldenburg",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      baujahr: 1896,
+      fassade: 2,
+      substanz: 35,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W064-f1",
+          etage: 0,
+          qm: 868,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W064-f2",
+          etage: 0,
+          qm: 677,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W064-f3",
+          etage: 0,
+          qm: 772,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W064-f4",
+          etage: 1,
+          qm: 860,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W064-f5",
+          etage: 1,
+          qm: 1457,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W064-f6",
+          etage: 2,
+          qm: 882,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W064-f7",
+          etage: 2,
+          qm: 801,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W064-f8",
+          etage: 2,
+          qm: 634,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W064-f9",
+          etage: 3,
+          qm: 717,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W064-f10",
+          etage: 3,
+          qm: 1096,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W064-f11",
+          etage: 3,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W064-f12",
+          etage: 4,
+          qm: 1163,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W064-f13",
+          etage: 4,
+          qm: 861,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W064-f14",
+          etage: 4,
+          qm: 292,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W064-f15",
+          etage: 5,
+          qm: 2317,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 356155,
+        rohertrag: 149968,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 82294,
+        miete: 55149,
+        nebenkosten: 15587,
+        sonstige: 20858,
+        db: -23921,
+        fteBedarf: 71.52217944618246,
+        fteIst: 84.80035505442447,
+        umsatzJeGruppe: {
+          food: 27680,
+          beauty: 47875,
+          accessoires: 68908,
+          damen: 55230,
+          waesche: 19569,
+          herren: 29868,
+          kinder: 23068,
+          sport: 27371,
+          spielwaren: 11881,
+          wohnen: 44705
+        }
+      }
+    },
+    {
+      id: "W065",
+      name: "Hartwig M\xFClheim",
+      stadt: "M\xFClheim",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1918,
+      fassade: 5,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W065-f1",
+          etage: -1,
+          qm: 739,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W065-f2",
+          etage: -1,
+          qm: 1341,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W065-f3",
+          etage: 0,
+          qm: 606,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W065-f4",
+          etage: 0,
+          qm: 1209,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W065-f5",
+          etage: 0,
+          qm: 265,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W065-f6",
+          etage: 1,
+          qm: 1965,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W065-f7",
+          etage: 1,
+          qm: 115,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W065-f8",
+          etage: 2,
+          qm: 465,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W065-f9",
+          etage: 2,
+          qm: 1345,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W065-f10",
+          etage: 2,
+          qm: 269,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W065-f11",
+          etage: 3,
+          qm: 423,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W065-f12",
+          etage: 3,
+          qm: 1073,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W065-f13",
+          etage: 3,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 316375,
+        rohertrag: 134279,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 67142,
+        miete: 54606,
+        nebenkosten: 13807,
+        sonstige: 17657,
+        db: -18934,
+        fteBedarf: 59.64358699227566,
+        fteIst: 67.85518485173044,
+        umsatzJeGruppe: {
+          food: 27951,
+          wohnen: 28104,
+          beauty: 44505,
+          accessoires: 60498,
+          damen: 61490,
+          waesche: 19179,
+          herren: 30825,
+          kinder: 14238,
+          sport: 19617,
+          spielwaren: 9969
+        }
+      }
+    },
+    {
+      id: "W066",
+      name: "Hartwig Osnabr\xFCck",
+      stadt: "Osnabr\xFCck",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3700,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1977,
+      fassade: 2,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W066-f1",
+          etage: -1,
+          qm: 874,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W066-f2",
+          etage: -1,
+          qm: 2851,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W066-f3",
+          etage: 0,
+          qm: 722,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W066-f4",
+          etage: 0,
+          qm: 1601,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W066-f5",
+          etage: 0,
+          qm: 1402,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W066-f6",
+          etage: 1,
+          qm: 1183,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W066-f7",
+          etage: 1,
+          qm: 973,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W066-f8",
+          etage: 1,
+          qm: 1569,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W066-f9",
+          etage: 2,
+          qm: 277,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W066-f10",
+          etage: 2,
+          qm: 952,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W066-f11",
+          etage: 2,
+          qm: 1777,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W066-f12",
+          etage: 2,
+          qm: 1060,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 452760,
+        rohertrag: 190236,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 110866,
+        miete: 58880,
+        nebenkosten: 18043,
+        sonstige: 25422,
+        db: -22974,
+        fteBedarf: 86.07514731670713,
+        fteIst: 111.88550443860093,
+        umsatzJeGruppe: {
+          food: 41026,
+          wohnen: 57852,
+          beauty: 57020,
+          accessoires: 80125,
+          damen: 65399,
+          waesche: 29617,
+          herren: 45570,
+          kinder: 25091,
+          sport: 34565,
+          spielwaren: 16494
+        }
+      }
+    },
+    {
+      id: "W067",
+      name: "Hartwig Leverkusen Bahnhofstra\xDFe",
+      stadt: "Leverkusen",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1964,
+      fassade: 4,
+      substanz: 68,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W067-f1",
+          etage: -1,
+          qm: 520,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W067-f2",
+          etage: -1,
+          qm: 1680,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W067-f3",
+          etage: 0,
+          qm: 461,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W067-f4",
+          etage: 0,
+          qm: 1007,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W067-f5",
+          etage: 0,
+          qm: 731,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W067-f6",
+          etage: 1,
+          qm: 1124,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W067-f7",
+          etage: 1,
+          qm: 688,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W067-f8",
+          etage: 1,
+          qm: 388,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W067-f9",
+          etage: 2,
+          qm: 501,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W067-f10",
+          etage: 2,
+          qm: 488,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W067-f11",
+          etage: 2,
+          qm: 1101,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W067-f12",
+          etage: 2,
+          qm: 454,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 224449,
+        rohertrag: 95642,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 49163,
+        miete: 23070,
+        nebenkosten: 10523,
+        sonstige: 13317,
+        db: -431,
+        fteBedarf: 45.781792677381304,
+        fteIst: 50.48617987985613,
+        umsatzJeGruppe: {
+          food: 19010,
+          wohnen: 26605,
+          beauty: 28815,
+          accessoires: 39303,
+          damen: 43722,
+          waesche: 20339,
+          herren: 16897,
+          kinder: 10255,
+          sport: 14350,
+          spielwaren: 5154
+        }
+      }
+    },
+    {
+      id: "W068",
+      name: "Hartwig Darmstadt Bahnhofstra\xDFe",
+      stadt: "Darmstadt",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 2004,
+      fassade: 6,
+      substanz: 39,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W068-f1",
+          etage: -1,
+          qm: 995,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W068-f2",
+          etage: -1,
+          qm: 1088,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W068-f3",
+          etage: 0,
+          qm: 888,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W068-f4",
+          etage: 0,
+          qm: 1195,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W068-f5",
+          etage: 1,
+          qm: 218,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W068-f6",
+          etage: 1,
+          qm: 1865,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W068-f7",
+          etage: 2,
+          qm: 674,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W068-f8",
+          etage: 2,
+          qm: 722,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W068-f9",
+          etage: 2,
+          qm: 687,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W068-f10",
+          etage: 3,
+          qm: 925,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W068-f11",
+          etage: 3,
+          qm: 994,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W068-f12",
+          etage: 3,
+          qm: 165,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W068-f13",
+          etage: 4,
+          qm: 838,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W068-f14",
+          etage: 4,
+          qm: 762,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W068-f15",
+          etage: 4,
+          qm: 483,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 348945,
+        rohertrag: 147547,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 72635,
+        miete: 74721,
+        nebenkosten: 0,
+        sonstige: 19931,
+        db: -19740,
+        fteBedarf: 67.7948143550212,
+        fteIst: 74.05785589868562,
+        umsatzJeGruppe: {
+          food: 33914,
+          wohnen: 23045,
+          beauty: 60922,
+          accessoires: 64821,
+          damen: 60287,
+          waesche: 20902,
+          herren: 40183,
+          kinder: 19575,
+          sport: 16183,
+          spielwaren: 9114
+        }
+      }
+    },
+    {
+      id: "W069",
+      name: "Hartwig Heidelberg",
+      stadt: "Heidelberg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 4200,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1901,
+      fassade: 3,
+      substanz: 58,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W069-f1",
+          etage: -1,
+          qm: 1297,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W069-f2",
+          etage: -1,
+          qm: 2853,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W069-f3",
+          etage: 0,
+          qm: 914,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W069-f4",
+          etage: 0,
+          qm: 1727,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W069-f5",
+          etage: 0,
+          qm: 1509,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W069-f6",
+          etage: 1,
+          qm: 1118,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W069-f7",
+          etage: 1,
+          qm: 1169,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W069-f8",
+          etage: 1,
+          qm: 1863,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W069-f9",
+          etage: 2,
+          qm: 132,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W069-f10",
+          etage: 2,
+          qm: 1401,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W069-f11",
+          etage: 2,
+          qm: 1725,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W069-f12",
+          etage: 2,
+          qm: 949,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 489213,
+        rohertrag: 203933,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 116365,
+        miete: 47545,
+        nebenkosten: 19745,
+        sonstige: 27553,
+        db: -7275,
+        fteBedarf: 93.33639216198918,
+        fteIst: 116.9917581155009,
+        umsatzJeGruppe: {
+          food: 62227,
+          wohnen: 51711,
+          beauty: 73859,
+          accessoires: 66061,
+          damen: 81319,
+          waesche: 36801,
+          herren: 44298,
+          kinder: 31624,
+          sport: 26390,
+          spielwaren: 14923
+        }
+      }
+    },
+    {
+      id: "W070",
+      name: "Hartwig Solingen",
+      stadt: "Solingen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 2002,
+      fassade: 1,
+      substanz: 47,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W070-f1",
+          etage: -1,
+          qm: 697,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W070-f2",
+          etage: -1,
+          qm: 2228,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W070-f3",
+          etage: 0,
+          qm: 863,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W070-f4",
+          etage: 0,
+          qm: 1203,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W070-f5",
+          etage: 0,
+          qm: 859,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W070-f6",
+          etage: 1,
+          qm: 1617,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W070-f7",
+          etage: 1,
+          qm: 725,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W070-f8",
+          etage: 1,
+          qm: 584,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W070-f9",
+          etage: 2,
+          qm: 854,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W070-f10",
+          etage: 2,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W070-f11",
+          etage: 2,
+          qm: 1442,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W070-f12",
+          etage: 2,
+          qm: 591,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 423994,
+        rohertrag: 178474,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 88030,
+        miete: 54382,
+        nebenkosten: 15780,
+        sonstige: 22913,
+        db: -2631,
+        fteBedarf: 76.50796448447498,
+        fteIst: 90.63549154864674,
+        umsatzJeGruppe: {
+          food: 31403,
+          wohnen: 52470,
+          beauty: 84324,
+          accessoires: 64934,
+          damen: 72150,
+          waesche: 21564,
+          herren: 45840,
+          kinder: 14711,
+          sport: 28503,
+          spielwaren: 8094
+        }
+      }
+    },
+    {
+      id: "W071",
+      name: "Hartwig Regensburg Einkaufszentrum",
+      stadt: "Regensburg",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1951,
+      fassade: 6,
+      substanz: 51,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W071-f1",
+          etage: -1,
+          qm: 1099,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W071-f2",
+          etage: -1,
+          qm: 1385,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W071-f3",
+          etage: 0,
+          qm: 821,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W071-f4",
+          etage: 0,
+          qm: 1636,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W071-f5",
+          etage: 0,
+          qm: 26,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W071-f6",
+          etage: 1,
+          qm: 2483,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W071-f7",
+          etage: 2,
+          qm: 292,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W071-f8",
+          etage: 2,
+          qm: 958,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W071-f9",
+          etage: 2,
+          qm: 1233,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W071-f10",
+          etage: 3,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W071-f11",
+          etage: 3,
+          qm: 908,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W071-f12",
+          etage: 3,
+          qm: 951,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W071-f13",
+          etage: 4,
+          qm: 876,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W071-f14",
+          etage: 4,
+          qm: 852,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W071-f15",
+          etage: 4,
+          qm: 755,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 408117,
+        rohertrag: 171541,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 92220,
+        miete: 67021,
+        nebenkosten: 15793,
+        sonstige: 23437,
+        db: -26930,
+        fteBedarf: 79.91215555938443,
+        fteIst: 93.53863691089289,
+        umsatzJeGruppe: {
+          food: 36513,
+          wohnen: 31591,
+          beauty: 72069,
+          accessoires: 70223,
+          damen: 71295,
+          waesche: 24339,
+          herren: 37018,
+          kinder: 21424,
+          sport: 30023,
+          spielwaren: 13621
+        }
+      }
+    },
+    {
+      id: "W072",
+      name: "Hartwig Paderborn",
+      stadt: "Paderborn",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1955,
+      fassade: 0,
+      substanz: 43,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W072-f1",
+          etage: -1,
+          qm: 664,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W072-f2",
+          etage: -1,
+          qm: 1296,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W072-f3",
+          etage: 0,
+          qm: 579,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W072-f4",
+          etage: 0,
+          qm: 819,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W072-f5",
+          etage: 0,
+          qm: 562,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W072-f6",
+          etage: 1,
+          qm: 1845,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W072-f7",
+          etage: 1,
+          qm: 115,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W072-f8",
+          etage: 2,
+          qm: 467,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W072-f9",
+          etage: 2,
+          qm: 1070,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W072-f10",
+          etage: 2,
+          qm: 424,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W072-f11",
+          etage: 3,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W072-f12",
+          etage: 3,
+          qm: 814,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W072-f13",
+          etage: 3,
+          qm: 677,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W072-f14",
+          etage: 3,
+          qm: 35,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 281185,
+        rohertrag: 118448,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 66941,
+        miete: 40041,
+        nebenkosten: 12390,
+        sonstige: 15939,
+        db: -16863,
+        fteBedarf: 54.1175509102335,
+        fteIst: 67.31589840966596,
+        umsatzJeGruppe: {
+          food: 28931,
+          wohnen: 26886,
+          beauty: 46607,
+          accessoires: 38166,
+          damen: 62745,
+          waesche: 15865,
+          herren: 22942,
+          kinder: 18242,
+          sport: 11806,
+          spielwaren: 8995
+        }
+      }
+    },
+    {
+      id: "W073",
+      name: "Hartwig Ingolstadt",
+      stadt: "Ingolstadt",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1927,
+      fassade: 7,
+      substanz: 76,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W073-f1",
+          etage: -1,
+          qm: 506,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W073-f2",
+          etage: -1,
+          qm: 1028,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W073-f3",
+          etage: 0,
+          qm: 431,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W073-f4",
+          etage: 0,
+          qm: 1102,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W073-f5",
+          etage: 1,
+          qm: 48,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W073-f6",
+          etage: 1,
+          qm: 1486,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W073-f7",
+          etage: 2,
+          qm: 492,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W073-f8",
+          etage: 2,
+          qm: 569,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W073-f9",
+          etage: 2,
+          qm: 473,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W073-f10",
+          etage: 3,
+          qm: 536,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W073-f11",
+          etage: 3,
+          qm: 652,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W073-f12",
+          etage: 3,
+          qm: 345,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W073-f13",
+          etage: 4,
+          qm: 739,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W073-f14",
+          etage: 4,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W073-f15",
+          etage: 4,
+          qm: 198,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 278999,
+        rohertrag: 119002,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 59699,
+        miete: 40530,
+        nebenkosten: 10068,
+        sonstige: 15580,
+        db: -6874,
+        fteBedarf: 52.62232814910955,
+        fteIst: 60.036515679849245,
+        umsatzJeGruppe: {
+          food: 21256,
+          wohnen: 27519,
+          beauty: 37271,
+          accessoires: 55365,
+          damen: 59546,
+          waesche: 16506,
+          herren: 22860,
+          kinder: 12681,
+          sport: 17894,
+          spielwaren: 8100
+        }
+      }
+    },
+    {
+      id: "W074",
+      name: "Hartwig W\xFCrzburg",
+      stadt: "W\xFCrzburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1973,
+      fassade: 2,
+      substanz: 33,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W074-f1",
+          etage: -1,
+          qm: 771,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W074-f2",
+          etage: -1,
+          qm: 2054,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W074-f3",
+          etage: 0,
+          qm: 536,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W074-f4",
+          etage: 0,
+          qm: 1383,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W074-f5",
+          etage: 0,
+          qm: 906,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W074-f6",
+          etage: 1,
+          qm: 920,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W074-f7",
+          etage: 1,
+          qm: 782,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W074-f8",
+          etage: 1,
+          qm: 1123,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W074-f9",
+          etage: 2,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W074-f10",
+          etage: 2,
+          qm: 649,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W074-f11",
+          etage: 2,
+          qm: 939,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W074-f12",
+          etage: 2,
+          qm: 625,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W074-f13",
+          etage: 2,
+          qm: 12,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 398689,
+        rohertrag: 167046,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 93523,
+        miete: 53333,
+        nebenkosten: 14173,
+        sonstige: 21431,
+        db: -15414,
+        fteBedarf: 71.46526933716856,
+        fteIst: 96.58136190461292,
+        umsatzJeGruppe: {
+          food: 46650,
+          wohnen: 57506,
+          beauty: 51054,
+          accessoires: 73003,
+          damen: 51051,
+          waesche: 26957,
+          herren: 47584,
+          kinder: 18034,
+          sport: 15927,
+          spielwaren: 10923
+        }
+      }
+    },
+    {
+      id: "W075",
+      name: "Hartwig Ulm",
+      stadt: "Ulm",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1952,
+      fassade: 0,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W075-f1",
+          etage: 0,
+          qm: 753,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W075-f2",
+          etage: 0,
+          qm: 802,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W075-f3",
+          etage: 0,
+          qm: 1022,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W075-f4",
+          etage: 0,
+          qm: 198,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W075-f5",
+          etage: 1,
+          qm: 2367,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W075-f6",
+          etage: 1,
+          qm: 408,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W075-f7",
+          etage: 2,
+          qm: 356,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W075-f8",
+          etage: 2,
+          qm: 1210,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W075-f9",
+          etage: 2,
+          qm: 717,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W075-f10",
+          etage: 2,
+          qm: 492,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W075-f11",
+          etage: 3,
+          qm: 706,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W075-f12",
+          etage: 3,
+          qm: 642,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W075-f13",
+          etage: 3,
+          qm: 1427,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 455098,
+        rohertrag: 189230,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 91561,
+        miete: 61925,
+        nebenkosten: 12620,
+        sonstige: 23654,
+        db: -530,
+        fteBedarf: 78.05033022258182,
+        fteIst: 92.93549910869459,
+        umsatzJeGruppe: {
+          food: 50651,
+          beauty: 104436,
+          accessoires: 58055,
+          damen: 79877,
+          waesche: 28632,
+          herren: 41437,
+          kinder: 21212,
+          sport: 24775,
+          spielwaren: 12803,
+          wohnen: 33220
+        }
+      }
+    },
+    {
+      id: "W076",
+      name: "Hartwig Wolfsburg Galerie am Fluss",
+      stadt: "Wolfsburg",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 4e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1989,
+      fassade: 3,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W076-f1",
+          etage: -1,
+          qm: 875,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W076-f2",
+          etage: -1,
+          qm: 3100,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W076-f3",
+          etage: 0,
+          qm: 976,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W076-f4",
+          etage: 0,
+          qm: 1563,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W076-f5",
+          etage: 0,
+          qm: 1436,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W076-f6",
+          etage: 1,
+          qm: 1480,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W076-f7",
+          etage: 1,
+          qm: 1227,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W076-f8",
+          etage: 1,
+          qm: 1269,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W076-f9",
+          etage: 2,
+          qm: 371,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W076-f10",
+          etage: 2,
+          qm: 1278,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W076-f11",
+          etage: 2,
+          qm: 1992,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W076-f12",
+          etage: 2,
+          qm: 1193,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 500430,
+        rohertrag: 210142,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 112735,
+        miete: 113290,
+        nebenkosten: 0,
+        sonstige: 28060,
+        db: -43942,
+        fteBedarf: 94.97014585477983,
+        fteIst: 116.22600399086899,
+        umsatzJeGruppe: {
+          food: 38263,
+          wohnen: 62165,
+          beauty: 85447,
+          accessoires: 67165,
+          damen: 84024,
+          waesche: 32809,
+          herren: 46465,
+          kinder: 27122,
+          sport: 39927,
+          spielwaren: 17042
+        }
+      }
+    },
+    {
+      id: "W077",
+      name: "Hartwig G\xF6ttingen",
+      stadt: "G\xF6ttingen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1921,
+      fassade: 3,
+      substanz: 76,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W077-f1",
+          etage: -1,
+          qm: 599,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W077-f2",
+          etage: -1,
+          qm: 1181,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W077-f3",
+          etage: 0,
+          qm: 626,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W077-f4",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W077-f5",
+          etage: 0,
+          qm: 484,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W077-f6",
+          etage: 1,
+          qm: 1669,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W077-f7",
+          etage: 1,
+          qm: 111,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W077-f8",
+          etage: 2,
+          qm: 622,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W077-f9",
+          etage: 2,
+          qm: 1004,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W077-f10",
+          etage: 2,
+          qm: 154,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W077-f11",
+          etage: 3,
+          qm: 349,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W077-f12",
+          etage: 3,
+          qm: 908,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W077-f13",
+          etage: 3,
+          qm: 638,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 285471,
+        rohertrag: 120762,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 61588,
+        miete: 27672,
+        nebenkosten: 13224,
+        sonstige: 15762,
+        db: 2516,
+        fteBedarf: 53.1335837797041,
+        fteIst: 61.905744077275685,
+        umsatzJeGruppe: {
+          food: 23655,
+          wohnen: 21458,
+          beauty: 56779,
+          accessoires: 32804,
+          damen: 57099,
+          waesche: 24209,
+          herren: 28817,
+          kinder: 14630,
+          sport: 14564,
+          spielwaren: 11456
+        }
+      }
+    },
+    {
+      id: "W078",
+      name: "Hartwig Pforzheim Bahnhofstra\xDFe",
+      stadt: "Pforzheim",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 3e3,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1937,
+      fassade: 5,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W078-f1",
+          etage: 0,
+          qm: 1249,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W078-f2",
+          etage: 0,
+          qm: 937,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W078-f3",
+          etage: 0,
+          qm: 814,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W078-f4",
+          etage: 1,
+          qm: 770,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W078-f5",
+          etage: 1,
+          qm: 2230,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W078-f6",
+          etage: 2,
+          qm: 395,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W078-f7",
+          etage: 2,
+          qm: 1213,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W078-f8",
+          etage: 2,
+          qm: 1392,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W078-f9",
+          etage: 3,
+          qm: 390,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W078-f10",
+          etage: 3,
+          qm: 1097,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W078-f11",
+          etage: 3,
+          qm: 1379,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W078-f12",
+          etage: 3,
+          qm: 134,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W078-f13",
+          etage: 4,
+          qm: 683,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W078-f14",
+          etage: 4,
+          qm: 2317,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 372646,
+        rohertrag: 156116,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 96991,
+        miete: 33109,
+        nebenkosten: 20184,
+        sonstige: 22028,
+        db: -16197,
+        fteBedarf: 75.67169598181093,
+        fteIst: 99.54701479934208,
+        umsatzJeGruppe: {
+          food: 45996,
+          beauty: 56948,
+          accessoires: 55192,
+          damen: 55630,
+          waesche: 34948,
+          herren: 37144,
+          kinder: 16910,
+          sport: 18595,
+          spielwaren: 9502,
+          wohnen: 41782
+        }
+      }
+    },
+    {
+      id: "W079",
+      name: "Hartwig Offenbach",
+      stadt: "Offenbach",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2700,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1913,
+      fassade: 0,
+      substanz: 44,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W079-f1",
+          etage: -1,
+          qm: 944,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W079-f2",
+          etage: -1,
+          qm: 1756,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W079-f3",
+          etage: 0,
+          qm: 768,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W079-f4",
+          etage: 0,
+          qm: 1349,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W079-f5",
+          etage: 0,
+          qm: 583,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W079-f6",
+          etage: 1,
+          qm: 2058,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W079-f7",
+          etage: 1,
+          qm: 642,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W079-f8",
+          etage: 2,
+          qm: 420,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W079-f9",
+          etage: 2,
+          qm: 1670,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W079-f10",
+          etage: 2,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W079-f11",
+          etage: 3,
+          qm: 161,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W079-f12",
+          etage: 3,
+          qm: 1228,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W079-f13",
+          etage: 3,
+          qm: 749,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W079-f14",
+          etage: 3,
+          qm: 561,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 419800,
+        rohertrag: 177495,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 93625,
+        miete: 53294,
+        nebenkosten: 19738,
+        sonstige: 23286,
+        db: -12448,
+        fteBedarf: 78.44626198751102,
+        fteIst: 96.0801887770173,
+        umsatzJeGruppe: {
+          food: 42524,
+          wohnen: 45556,
+          beauty: 63123,
+          accessoires: 69221,
+          damen: 71773,
+          waesche: 34081,
+          herren: 44802,
+          kinder: 15911,
+          sport: 22153,
+          spielwaren: 10656
+        }
+      }
+    },
+    {
+      id: "W080",
+      name: "Hartwig Heilbronn",
+      stadt: "Heilbronn",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2300,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1914,
+      fassade: 0,
+      substanz: 41,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W080-f1",
+          etage: -1,
+          qm: 966,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W080-f2",
+          etage: -1,
+          qm: 1368,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W080-f3",
+          etage: 0,
+          qm: 767,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W080-f4",
+          etage: 0,
+          qm: 1425,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W080-f5",
+          etage: 0,
+          qm: 142,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W080-f6",
+          etage: 1,
+          qm: 2333,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W080-f7",
+          etage: 2,
+          qm: 711,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W080-f8",
+          etage: 2,
+          qm: 1006,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W080-f9",
+          etage: 2,
+          qm: 617,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W080-f10",
+          etage: 3,
+          qm: 756,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W080-f11",
+          etage: 3,
+          qm: 1124,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W080-f12",
+          etage: 3,
+          qm: 454,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W080-f13",
+          etage: 4,
+          qm: 788,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W080-f14",
+          etage: 4,
+          qm: 788,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W080-f15",
+          etage: 4,
+          qm: 757,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 433089,
+        rohertrag: 182690,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 103956,
+        miete: 42353,
+        nebenkosten: 18088,
+        sonstige: 24058,
+        db: -5765,
+        fteBedarf: 81.0949679501219,
+        fteIst: 106.9578032767022,
+        umsatzJeGruppe: {
+          food: 45379,
+          wohnen: 47137,
+          beauty: 70071,
+          accessoires: 59859,
+          damen: 94847,
+          waesche: 30915,
+          herren: 31432,
+          kinder: 22918,
+          sport: 19648,
+          spielwaren: 10882
+        }
+      }
+    },
+    {
+      id: "W081",
+      name: "Hartwig Bremerhaven",
+      stadt: "Bremerhaven",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2900,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1984,
+      fassade: 1,
+      substanz: 39,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W081-f1",
+          etage: 0,
+          qm: 1100,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W081-f2",
+          etage: 0,
+          qm: 867,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W081-f3",
+          etage: 0,
+          qm: 913,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W081-f4",
+          etage: 1,
+          qm: 461,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W081-f5",
+          etage: 1,
+          qm: 2419,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W081-f6",
+          etage: 2,
+          qm: 630,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W081-f7",
+          etage: 2,
+          qm: 893,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W081-f8",
+          etage: 2,
+          qm: 1357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W081-f9",
+          etage: 3,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W081-f10",
+          etage: 3,
+          qm: 892,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W081-f11",
+          etage: 3,
+          qm: 1406,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W081-f12",
+          etage: 3,
+          qm: 250,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W081-f13",
+          etage: 4,
+          qm: 590,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W081-f14",
+          etage: 4,
+          qm: 2290,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 364211,
+        rohertrag: 152969,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 85323,
+        miete: 37193,
+        nebenkosten: 19313,
+        sonstige: 21413,
+        db: -10272,
+        fteBedarf: 73.47684547615721,
+        fteIst: 86.1167648364924,
+        umsatzJeGruppe: {
+          food: 40885,
+          beauty: 49273,
+          accessoires: 43350,
+          damen: 76049,
+          waesche: 25636,
+          herren: 32417,
+          kinder: 15573,
+          sport: 22949,
+          spielwaren: 11556,
+          wohnen: 46521
+        }
+      }
+    },
+    {
+      id: "W082",
+      name: "Hartwig Trier",
+      stadt: "Trier",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1994,
+      fassade: 6,
+      substanz: 61,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W082-f1",
+          etage: -1,
+          qm: 584,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W082-f2",
+          etage: -1,
+          qm: 983,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W082-f3",
+          etage: 0,
+          qm: 531,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W082-f4",
+          etage: 0,
+          qm: 833,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W082-f5",
+          etage: 0,
+          qm: 203,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W082-f6",
+          etage: 1,
+          qm: 1526,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W082-f7",
+          etage: 1,
+          qm: 41,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W082-f8",
+          etage: 2,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W082-f9",
+          etage: 2,
+          qm: 913,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W082-f10",
+          etage: 3,
+          qm: 406,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W082-f11",
+          etage: 3,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W082-f12",
+          etage: 3,
+          qm: 490,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W082-f13",
+          etage: 4,
+          qm: 610,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W082-f14",
+          etage: 4,
+          qm: 615,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W082-f15",
+          etage: 4,
+          qm: 342,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 296021,
+        rohertrag: 125326,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 65086,
+        miete: 46347,
+        nebenkosten: 12142,
+        sonstige: 16368,
+        db: -14618,
+        fteBedarf: 55.139067866867336,
+        fteIst: 66.78537801156742,
+        umsatzJeGruppe: {
+          food: 24957,
+          wohnen: 25470,
+          beauty: 44139,
+          accessoires: 40878,
+          damen: 49387,
+          waesche: 20987,
+          herren: 40429,
+          kinder: 16345,
+          sport: 23884,
+          spielwaren: 9546
+        }
+      }
+    },
+    {
+      id: "W083",
+      name: "Hartwig Koblenz Arkaden",
+      stadt: "Koblenz",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 4100,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1931,
+      fassade: 2,
+      substanz: 87,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W083-f1",
+          etage: 0,
+          qm: 1175,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W083-f2",
+          etage: 0,
+          qm: 1163,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W083-f3",
+          etage: 0,
+          qm: 1364,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W083-f4",
+          etage: 0,
+          qm: 348,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W083-f5",
+          etage: 1,
+          qm: 2606,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W083-f6",
+          etage: 1,
+          qm: 1444,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W083-f7",
+          etage: 2,
+          qm: 90,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W083-f8",
+          etage: 2,
+          qm: 1740,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W083-f9",
+          etage: 2,
+          qm: 1007,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W083-f10",
+          etage: 2,
+          qm: 1212,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W083-f11",
+          etage: 3,
+          qm: 308,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W083-f12",
+          etage: 3,
+          qm: 1197,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W083-f13",
+          etage: 3,
+          qm: 2545,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 421035,
+        rohertrag: 176174,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 89750,
+        miete: 54354,
+        nebenkosten: 22496,
+        sonstige: 24552,
+        db: -14977,
+        fteBedarf: 84.15255396038125,
+        fteIst: 90.7486162454476,
+        umsatzJeGruppe: {
+          food: 42371,
+          beauty: 78329,
+          accessoires: 53733,
+          damen: 67432,
+          waesche: 37867,
+          herren: 36625,
+          kinder: 20950,
+          sport: 22065,
+          spielwaren: 16905,
+          wohnen: 44757
+        }
+      }
+    },
+    {
+      id: "W084",
+      name: "Hartwig Jena",
+      stadt: "Jena",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 3700,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1977,
+      fassade: 5,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W084-f1",
+          etage: 0,
+          qm: 1066,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W084-f2",
+          etage: 0,
+          qm: 849,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W084-f3",
+          etage: 0,
+          qm: 1341,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W084-f4",
+          etage: 0,
+          qm: 444,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W084-f5",
+          etage: 1,
+          qm: 2418,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W084-f6",
+          etage: 1,
+          qm: 1080,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W084-f7",
+          etage: 1,
+          qm: 202,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W084-f8",
+          etage: 2,
+          qm: 1620,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W084-f9",
+          etage: 2,
+          qm: 833,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W084-f10",
+          etage: 2,
+          qm: 1247,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W084-f11",
+          etage: 3,
+          qm: 580,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W084-f12",
+          etage: 3,
+          qm: 880,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W084-f13",
+          etage: 3,
+          qm: 2240,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 418729,
+        rohertrag: 175387,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 104315,
+        miete: 62750,
+        nebenkosten: 21111,
+        sonstige: 23828,
+        db: -36617,
+        fteBedarf: 80.99693141011863,
+        fteIst: 104.49131323756708,
+        umsatzJeGruppe: {
+          food: 43526,
+          beauty: 63348,
+          accessoires: 54755,
+          damen: 71303,
+          waesche: 31802,
+          herren: 40826,
+          kinder: 21322,
+          sport: 34673,
+          spielwaren: 13968,
+          wohnen: 43207
+        }
+      }
+    },
+    {
+      id: "W085",
+      name: "Hartwig Siegen",
+      stadt: "Siegen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1927,
+      fassade: 4,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W085-f1",
+          etage: -1,
+          qm: 675,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W085-f2",
+          etage: -1,
+          qm: 1385,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W085-f3",
+          etage: 0,
+          qm: 613,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W085-f4",
+          etage: 0,
+          qm: 1088,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W085-f5",
+          etage: 0,
+          qm: 359,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W085-f6",
+          etage: 1,
+          qm: 1511,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W085-f7",
+          etage: 1,
+          qm: 549,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W085-f8",
+          etage: 2,
+          qm: 227,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W085-f9",
+          etage: 2,
+          qm: 1321,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W085-f10",
+          etage: 2,
+          qm: 512,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W085-f11",
+          etage: 3,
+          qm: 56,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W085-f12",
+          etage: 3,
+          qm: 1107,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W085-f13",
+          etage: 3,
+          qm: 553,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W085-f14",
+          etage: 3,
+          qm: 345,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 328902,
+        rohertrag: 138900,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 70885,
+        miete: 25961,
+        nebenkosten: 13307,
+        sonstige: 18120,
+        db: 10626,
+        fteBedarf: 60.97082378608198,
+        fteIst: 72.54402763085625,
+        umsatzJeGruppe: {
+          food: 24956,
+          wohnen: 32419,
+          beauty: 59712,
+          accessoires: 52275,
+          damen: 59393,
+          waesche: 21314,
+          herren: 30981,
+          kinder: 15624,
+          sport: 22106,
+          spielwaren: 10122
+        }
+      }
+    },
+    {
+      id: "W086",
+      name: "Hartwig Hildesheim",
+      stadt: "Hildesheim",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1915,
+      fassade: 0,
+      substanz: 66,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W086-f1",
+          etage: -1,
+          qm: 726,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W086-f2",
+          etage: -1,
+          qm: 740,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W086-f3",
+          etage: 0,
+          qm: 496,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W086-f4",
+          etage: 0,
+          qm: 971,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W086-f5",
+          etage: 1,
+          qm: 25,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W086-f6",
+          etage: 1,
+          qm: 1441,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W086-f7",
+          etage: 2,
+          qm: 129,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W086-f8",
+          etage: 2,
+          qm: 634,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W086-f9",
+          etage: 2,
+          qm: 704,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W086-f10",
+          etage: 3,
+          qm: 562,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W086-f11",
+          etage: 3,
+          qm: 507,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W086-f12",
+          etage: 3,
+          qm: 398,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W086-f13",
+          etage: 4,
+          qm: 298,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W086-f14",
+          etage: 4,
+          qm: 593,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W086-f15",
+          etage: 4,
+          qm: 575,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 258981,
+        rohertrag: 109383,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 52326,
+        miete: 27654,
+        nebenkosten: 9449,
+        sonstige: 14578,
+        db: 5376,
+        fteBedarf: 49.39765951548749,
+        fteIst: 54.17215499352276,
+        umsatzJeGruppe: {
+          food: 28225,
+          wohnen: 26267,
+          beauty: 35041,
+          accessoires: 41065,
+          damen: 43253,
+          waesche: 17866,
+          herren: 35669,
+          kinder: 10911,
+          sport: 11096,
+          spielwaren: 9588
+        }
+      }
+    },
+    {
+      id: "W087",
+      name: "Hartwig Cottbus Arkaden",
+      stadt: "Cottbus",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "grossstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1988,
+      fassade: 5,
+      substanz: 78,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W087-f1",
+          etage: -1,
+          qm: 782,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W087-f2",
+          etage: -1,
+          qm: 1085,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W087-f3",
+          etage: 0,
+          qm: 823,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W087-f4",
+          etage: 0,
+          qm: 980,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W087-f5",
+          etage: 0,
+          qm: 64,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W087-f6",
+          etage: 1,
+          qm: 1867,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W087-f7",
+          etage: 2,
+          qm: 225,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W087-f8",
+          etage: 2,
+          qm: 883,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W087-f9",
+          etage: 2,
+          qm: 759,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W087-f10",
+          etage: 3,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W087-f11",
+          etage: 3,
+          qm: 647,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W087-f12",
+          etage: 3,
+          qm: 565,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W087-f13",
+          etage: 4,
+          qm: 658,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W087-f14",
+          etage: 4,
+          qm: 840,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W087-f15",
+          etage: 4,
+          qm: 369,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 292077,
+        rohertrag: 121734,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 63346,
+        miete: 34167,
+        nebenkosten: 12408,
+        sonstige: 17016,
+        db: -5202,
+        fteBedarf: 58.30877635131459,
+        fteIst: 63.996752599812204,
+        umsatzJeGruppe: {
+          food: 29834,
+          wohnen: 23616,
+          beauty: 65222,
+          accessoires: 33631,
+          damen: 43836,
+          waesche: 22175,
+          herren: 35370,
+          kinder: 10584,
+          sport: 16282,
+          spielwaren: 11528
+        }
+      }
+    },
+    {
+      id: "W088",
+      name: "Hartwig G\xFCtersloh Am Wall",
+      stadt: "G\xFCtersloh",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1993,
+      fassade: 0,
+      substanz: 56,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W088-f1",
+          etage: -1,
+          qm: 322,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W088-f2",
+          etage: -1,
+          qm: 1611,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W088-f3",
+          etage: 0,
+          qm: 392,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W088-f4",
+          etage: 0,
+          qm: 695,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W088-f5",
+          etage: 0,
+          qm: 846,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W088-f6",
+          etage: 1,
+          qm: 269,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W088-f7",
+          etage: 1,
+          qm: 374,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W088-f8",
+          etage: 1,
+          qm: 842,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W088-f9",
+          etage: 1,
+          qm: 351,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W088-f10",
+          etage: 1,
+          qm: 904,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 124671,
+        rohertrag: 52928,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 29053,
+        miete: 18298,
+        nebenkosten: 9018,
+        sonstige: 8084,
+        db: -11525,
+        fteBedarf: 28.428846813084405,
+        fteIst: 29.48714567675355,
+        umsatzJeGruppe: {
+          food: 7495,
+          wohnen: 21073,
+          beauty: 20934,
+          accessoires: 18818,
+          damen: 19281,
+          waesche: 7905,
+          herren: 14991,
+          kinder: 4697,
+          sport: 9477
+        }
+      }
+    },
+    {
+      id: "W089",
+      name: "Hartwig Recklinghausen Bahnhofstra\xDFe",
+      stadt: "Recklinghausen",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2e3,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1996,
+      fassade: 7,
+      substanz: 39,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W089-f1",
+          etage: -1,
+          qm: 494,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W089-f2",
+          etage: -1,
+          qm: 1456,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W089-f3",
+          etage: 0,
+          qm: 606,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W089-f4",
+          etage: 0,
+          qm: 727,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W089-f5",
+          etage: 0,
+          qm: 617,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W089-f6",
+          etage: 1,
+          qm: 1068,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W089-f7",
+          etage: 1,
+          qm: 483,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W089-f8",
+          etage: 1,
+          qm: 399,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W089-f9",
+          etage: 2,
+          qm: 361,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W089-f10",
+          etage: 2,
+          qm: 566,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W089-f11",
+          etage: 2,
+          qm: 1004,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W089-f12",
+          etage: 2,
+          qm: 515,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 203447,
+        rohertrag: 85087,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 43783,
+        miete: 49672,
+        nebenkosten: 0,
+        sonstige: 12075,
+        db: -20443,
+        fteBedarf: 41.56703944462395,
+        fteIst: 45.29348812867737,
+        umsatzJeGruppe: {
+          food: 17434,
+          wohnen: 24610,
+          beauty: 36363,
+          accessoires: 30622,
+          damen: 35222,
+          waesche: 12592,
+          herren: 14835,
+          kinder: 9197,
+          sport: 15897,
+          spielwaren: 6676
+        }
+      }
+    },
+    {
+      id: "W090",
+      name: "Hartwig Bottrop",
+      stadt: "Bottrop",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1962,
+      fassade: 4,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W090-f1",
+          etage: 0,
+          qm: 455,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W090-f2",
+          etage: 0,
+          qm: 366,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W090-f3",
+          etage: 0,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W090-f4",
+          etage: 1,
+          qm: 133,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W090-f5",
+          etage: 1,
+          qm: 985,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W090-f6",
+          etage: 1,
+          qm: 2,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W090-f7",
+          etage: 2,
+          qm: 464,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W090-f8",
+          etage: 2,
+          qm: 509,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W090-f9",
+          etage: 2,
+          qm: 147,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W090-f10",
+          etage: 3,
+          qm: 324,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W090-f11",
+          etage: 3,
+          qm: 639,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W090-f12",
+          etage: 3,
+          qm: 158,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W090-f13",
+          etage: 4,
+          qm: 103,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W090-f14",
+          etage: 4,
+          qm: 1017,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 138992,
+        rohertrag: 57510,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 34268,
+        miete: 22132,
+        nebenkosten: 6819,
+        sonstige: 8220,
+        db: -13928,
+        fteBedarf: 28.257745128797616,
+        fteIst: 34.92298984870858,
+        umsatzJeGruppe: {
+          food: 15425,
+          beauty: 27777,
+          accessoires: 17366,
+          damen: 19928,
+          waesche: 10777,
+          herren: 9110,
+          kinder: 10219,
+          sport: 9114,
+          spielwaren: 3768,
+          wohnen: 15506
+        }
+      }
+    },
+    {
+      id: "W091",
+      name: "Hartwig Reutlingen",
+      stadt: "Reutlingen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1961,
+      fassade: 4,
+      substanz: 70,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W091-f1",
+          etage: -1,
+          qm: 520,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W091-f2",
+          etage: -1,
+          qm: 1305,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W091-f3",
+          etage: 0,
+          qm: 346,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W091-f4",
+          etage: 0,
+          qm: 658,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W091-f5",
+          etage: 0,
+          qm: 821,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W091-f6",
+          etage: 1,
+          qm: 812,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W091-f7",
+          etage: 1,
+          qm: 548,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W091-f8",
+          etage: 1,
+          qm: 465,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W091-f9",
+          etage: 2,
+          qm: 217,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W091-f10",
+          etage: 2,
+          qm: 595,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W091-f11",
+          etage: 2,
+          qm: 638,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W091-f12",
+          etage: 2,
+          qm: 438,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 184099,
+        rohertrag: 77623,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 45978,
+        miete: 15699,
+        nebenkosten: 9841,
+        sonstige: 10861,
+        db: -4756,
+        fteBedarf: 37.29137562435482,
+        fteIst: 47.13499948950924,
+        umsatzJeGruppe: {
+          food: 21031,
+          wohnen: 20202,
+          beauty: 25356,
+          accessoires: 26480,
+          damen: 36289,
+          waesche: 15953,
+          herren: 14126,
+          kinder: 10446,
+          sport: 9486,
+          spielwaren: 4730
+        }
+      }
+    },
+    {
+      id: "W092",
+      name: "Hartwig Erlangen Am Wall",
+      stadt: "Erlangen",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 2001,
+      fassade: 0,
+      substanz: 60,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W092-f1",
+          etage: -1,
+          qm: 432,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W092-f2",
+          etage: -1,
+          qm: 2102,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W092-f3",
+          etage: 0,
+          qm: 366,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W092-f4",
+          etage: 0,
+          qm: 851,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W092-f5",
+          etage: 0,
+          qm: 1316,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W092-f6",
+          etage: 1,
+          qm: 507,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W092-f7",
+          etage: 1,
+          qm: 392,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W092-f8",
+          etage: 1,
+          qm: 1113,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W092-f9",
+          etage: 1,
+          qm: 1617,
+          konzept: "eigen",
+          gruppe: "kinder"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 176118,
+        rohertrag: 75385,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 45543,
+        miete: 18490,
+        nebenkosten: 10572,
+        sonstige: 11134,
+        db: -10354,
+        fteBedarf: 38.91110942200965,
+        fteIst: 46.02220199007599,
+        umsatzJeGruppe: {
+          food: 12785,
+          wohnen: 26662,
+          beauty: 22441,
+          accessoires: 27921,
+          damen: 33587,
+          waesche: 7411,
+          herren: 18684,
+          kinder: 26626
+        }
+      }
+    },
+    {
+      id: "W093",
+      name: "Hartwig F\xFCrth Fachmarktzentrum",
+      stadt: "F\xFCrth",
+      format: "warenhaus",
+      lage: "rand",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1900,
+      fassade: 1,
+      substanz: 53,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W093-f1",
+          etage: -1,
+          qm: 495,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W093-f2",
+          etage: -1,
+          qm: 1130,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W093-f3",
+          etage: 0,
+          qm: 430,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W093-f4",
+          etage: 0,
+          qm: 537,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W093-f5",
+          etage: 0,
+          qm: 659,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W093-f6",
+          etage: 1,
+          qm: 359,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W093-f7",
+          etage: 1,
+          qm: 405,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W093-f8",
+          etage: 1,
+          qm: 861,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W093-f9",
+          etage: 2,
+          qm: 88,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W093-f10",
+          etage: 2,
+          qm: 539,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W093-f11",
+          etage: 2,
+          qm: 822,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W093-f12",
+          etage: 2,
+          qm: 381,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 115943,
+        rohertrag: 48298,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 34094,
+        miete: 21965,
+        nebenkosten: 0,
+        sonstige: 7771,
+        db: -15532,
+        fteBedarf: 27.641040197921114,
+        fteIst: 34.87133638586731,
+        umsatzJeGruppe: {
+          food: 12466,
+          wohnen: 12492,
+          beauty: 19041,
+          accessoires: 15480,
+          damen: 16212,
+          waesche: 8012,
+          herren: 12194,
+          kinder: 8236,
+          sport: 8286,
+          spielwaren: 3523
+        }
+      }
+    },
+    {
+      id: "W094",
+      name: "Hartwig Bamberg",
+      stadt: "Bamberg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1920,
+      fassade: 1,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W094-f1",
+          etage: 0,
+          qm: 568,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W094-f2",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W094-f3",
+          etage: 0,
+          qm: 628,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W094-f4",
+          etage: 1,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W094-f5",
+          etage: 1,
+          qm: 1240,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W094-f6",
+          etage: 2,
+          qm: 291,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W094-f7",
+          etage: 2,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W094-f8",
+          etage: 2,
+          qm: 820,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W094-f9",
+          etage: 3,
+          qm: 128,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W094-f10",
+          etage: 3,
+          qm: 537,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W094-f11",
+          etage: 3,
+          qm: 731,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W094-f12",
+          etage: 3,
+          qm: 244,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W094-f13",
+          etage: 4,
+          qm: 177,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W094-f14",
+          etage: 4,
+          qm: 1463,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 268299,
+        rohertrag: 112783,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 52968,
+        miete: 16609,
+        nebenkosten: 8892,
+        sonstige: 14690,
+        db: 19625,
+        fteBedarf: 49.296812978589855,
+        fteIst: 54.445077070060776,
+        umsatzJeGruppe: {
+          food: 24438,
+          beauty: 44625,
+          accessoires: 47129,
+          damen: 39335,
+          waesche: 20350,
+          herren: 23296,
+          kinder: 13532,
+          sport: 14160,
+          spielwaren: 7136,
+          wohnen: 34299
+        }
+      }
+    },
+    {
+      id: "W095",
+      name: "Hartwig Bayreuth Gewerbepark",
+      stadt: "Bayreuth",
+      format: "warenhaus",
+      lage: "rand",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1956,
+      fassade: 1,
+      substanz: 79,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W095-f1",
+          etage: 0,
+          qm: 640,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W095-f2",
+          etage: 0,
+          qm: 439,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W095-f3",
+          etage: 0,
+          qm: 604,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W095-f4",
+          etage: 0,
+          qm: 166,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W095-f5",
+          etage: 1,
+          qm: 1425,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W095-f6",
+          etage: 1,
+          qm: 425,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W095-f7",
+          etage: 2,
+          qm: 209,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W095-f8",
+          etage: 2,
+          qm: 881,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W095-f9",
+          etage: 2,
+          qm: 640,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W095-f10",
+          etage: 2,
+          qm: 120,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W095-f11",
+          etage: 3,
+          qm: 481,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W095-f12",
+          etage: 3,
+          qm: 422,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W095-f13",
+          etage: 3,
+          qm: 947,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 150166,
+        rohertrag: 62717,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 36268,
+        miete: 15556,
+        nebenkosten: 0,
+        sonstige: 9486,
+        db: 1407,
+        fteBedarf: 33.20495126750215,
+        fteIst: 36.81777817173233,
+        umsatzJeGruppe: {
+          food: 20323,
+          beauty: 22858,
+          accessoires: 19239,
+          damen: 25232,
+          waesche: 12923,
+          herren: 14402,
+          kinder: 9990,
+          sport: 7719,
+          spielwaren: 3720,
+          wohnen: 13761
+        }
+      }
+    },
+    {
+      id: "W096",
+      name: "Hartwig Landshut Am Wall",
+      stadt: "Landshut",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1995,
+      fassade: 5,
+      substanz: 35,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W096-f1",
+          etage: -1,
+          qm: 405,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W096-f2",
+          etage: -1,
+          qm: 1070,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W096-f3",
+          etage: 0,
+          qm: 426,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W096-f4",
+          etage: 0,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W096-f5",
+          etage: 0,
+          qm: 376,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W096-f6",
+          etage: 1,
+          qm: 768,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W096-f7",
+          etage: 1,
+          qm: 339,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W096-f8",
+          etage: 1,
+          qm: 368,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W096-f9",
+          etage: 2,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W096-f10",
+          etage: 2,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W096-f11",
+          etage: 2,
+          qm: 908,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 135608,
+        rohertrag: 57181,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 35675,
+        miete: 16341,
+        nebenkosten: 7692,
+        sonstige: 8375,
+        db: -10902,
+        fteBedarf: 29.070348033675355,
+        fteIst: 36.679922151243574,
+        umsatzJeGruppe: {
+          food: 12259,
+          wohnen: 12068,
+          beauty: 25503,
+          accessoires: 22572,
+          damen: 22486,
+          waesche: 7059,
+          herren: 16129,
+          kinder: 6548,
+          sport: 10984
+        }
+      }
+    },
+    {
+      id: "W097",
+      name: "Hartwig Rosenheim Bahnhofstra\xDFe",
+      stadt: "Rosenheim",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1964,
+      fassade: 1,
+      substanz: 56,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W097-f1",
+          etage: 0,
+          qm: 458,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W097-f2",
+          etage: 0,
+          qm: 599,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W097-f3",
+          etage: 0,
+          qm: 745,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W097-f4",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W097-f5",
+          etage: 1,
+          qm: 1369,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W097-f6",
+          etage: 1,
+          qm: 498,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W097-f7",
+          etage: 1,
+          qm: 183,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W097-f8",
+          etage: 2,
+          qm: 1010,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W097-f9",
+          etage: 2,
+          qm: 651,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W097-f10",
+          etage: 2,
+          qm: 390,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W097-f11",
+          etage: 3,
+          qm: 413,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W097-f12",
+          etage: 3,
+          qm: 536,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W097-f13",
+          etage: 3,
+          qm: 1100,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 172862,
+        rohertrag: 72518,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 42004,
+        miete: 25166,
+        nebenkosten: 0,
+        sonstige: 10778,
+        db: -5429,
+        fteBedarf: 37.627392734685365,
+        fteIst: 43.04955422287533,
+        umsatzJeGruppe: {
+          food: 12442,
+          beauty: 40203,
+          accessoires: 20760,
+          damen: 27829,
+          waesche: 10676,
+          herren: 19312,
+          kinder: 9360,
+          sport: 9508,
+          spielwaren: 5179,
+          wohnen: 17593
+        }
+      }
+    },
+    {
+      id: "W098",
+      name: "Hartwig Kempten Am Stadtrand",
+      stadt: "Kempten",
+      format: "warenhaus",
+      lage: "rand",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1966,
+      fassade: 7,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W098-f1",
+          etage: 0,
+          qm: 477,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W098-f2",
+          etage: 0,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W098-f3",
+          etage: 0,
+          qm: 702,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W098-f4",
+          etage: 1,
+          qm: 100,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W098-f5",
+          etage: 1,
+          qm: 1520,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W098-f6",
+          etage: 2,
+          qm: 313,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W098-f7",
+          etage: 2,
+          qm: 641,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W098-f8",
+          etage: 2,
+          qm: 666,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W098-f9",
+          etage: 3,
+          qm: 309,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W098-f10",
+          etage: 3,
+          qm: 580,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W098-f11",
+          etage: 3,
+          qm: 635,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W098-f12",
+          etage: 3,
+          qm: 97,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W098-f13",
+          etage: 4,
+          qm: 340,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W098-f14",
+          etage: 4,
+          qm: 1280,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 151465,
+        rohertrag: 64572,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 39328,
+        miete: 23412,
+        nebenkosten: 11264,
+        sonstige: 9856,
+        db: -19288,
+        fteBedarf: 34.75651464344672,
+        fteIst: 39.397004033886304,
+        umsatzJeGruppe: {
+          food: 13541,
+          beauty: 24116,
+          accessoires: 21104,
+          damen: 32554,
+          waesche: 11366,
+          herren: 16363,
+          kinder: 7130,
+          sport: 5118,
+          spielwaren: 3195,
+          wohnen: 16979
+        }
+      }
+    },
+    {
+      id: "W099",
+      name: "Hartwig Passau",
+      stadt: "Passau",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1983,
+      fassade: 0,
+      substanz: 75,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W099-f1",
+          etage: 0,
+          qm: 436,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W099-f2",
+          etage: 0,
+          qm: 364,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W099-f3",
+          etage: 0,
+          qm: 619,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W099-f4",
+          etage: 0,
+          qm: 306,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W099-f5",
+          etage: 1,
+          qm: 1222,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W099-f6",
+          etage: 1,
+          qm: 482,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W099-f7",
+          etage: 1,
+          qm: 20,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W099-f8",
+          etage: 2,
+          qm: 1049,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W099-f9",
+          etage: 2,
+          qm: 531,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W099-f10",
+          etage: 2,
+          qm: 145,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W099-f11",
+          etage: 3,
+          qm: 476,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W099-f12",
+          etage: 3,
+          qm: 406,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W099-f13",
+          etage: 3,
+          qm: 843,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 168057,
+        rohertrag: 71352,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 38638,
+        miete: 20763,
+        nebenkosten: 7255,
+        sonstige: 9995,
+        db: -5300,
+        fteBedarf: 34.41694374425633,
+        fteIst: 39.66429120620631,
+        umsatzJeGruppe: {
+          food: 16196,
+          beauty: 25378,
+          accessoires: 23952,
+          damen: 32460,
+          waesche: 13067,
+          herren: 19659,
+          kinder: 10357,
+          sport: 9127,
+          spielwaren: 4915,
+          wohnen: 12947
+        }
+      }
+    },
+    {
+      id: "W100",
+      name: "Hartwig Konstanz Neustadt",
+      stadt: "Konstanz",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1908,
+      fassade: 4,
+      substanz: 51,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W100-f1",
+          etage: 0,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W100-f2",
+          etage: 0,
+          qm: 385,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W100-f3",
+          etage: 0,
+          qm: 622,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W100-f4",
+          etage: 0,
+          qm: 432,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W100-f5",
+          etage: 1,
+          qm: 1254,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W100-f6",
+          etage: 1,
+          qm: 520,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W100-f7",
+          etage: 1,
+          qm: 126,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W100-f8",
+          etage: 2,
+          qm: 708,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W100-f9",
+          etage: 2,
+          qm: 584,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W100-f10",
+          etage: 2,
+          qm: 607,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W100-f11",
+          etage: 3,
+          qm: 82,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W100-f12",
+          etage: 3,
+          qm: 425,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W100-f13",
+          etage: 3,
+          qm: 1393,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 171450,
+        rohertrag: 72427,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 43520,
+        miete: 24528,
+        nebenkosten: 9868,
+        sonstige: 10449,
+        db: -15938,
+        fteBedarf: 36.25351399451973,
+        fteIst: 45.03906490261539,
+        umsatzJeGruppe: {
+          food: 13776,
+          beauty: 30009,
+          accessoires: 19457,
+          damen: 34149,
+          waesche: 11361,
+          herren: 18758,
+          kinder: 9128,
+          sport: 10612,
+          spielwaren: 5991,
+          wohnen: 18209
+        }
+      }
+    },
+    {
+      id: "W101",
+      name: "Hartwig Esslingen",
+      stadt: "Esslingen",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 3e3,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1966,
+      fassade: 6,
+      substanz: 66,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W101-f1",
+          etage: -1,
+          qm: 520,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W101-f2",
+          etage: -1,
+          qm: 2513,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W101-f3",
+          etage: 0,
+          qm: 626,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W101-f4",
+          etage: 0,
+          qm: 1087,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W101-f5",
+          etage: 0,
+          qm: 1320,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W101-f6",
+          etage: 1,
+          qm: 444,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W101-f7",
+          etage: 1,
+          qm: 769,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W101-f8",
+          etage: 1,
+          qm: 874,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W101-f9",
+          etage: 1,
+          qm: 789,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W101-f10",
+          etage: 1,
+          qm: 1251,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 268700,
+        rohertrag: 113360,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 60361,
+        miete: 28560,
+        nebenkosten: 11774,
+        sonstige: 15604,
+        db: -2938,
+        fteBedarf: 53.19083552355613,
+        fteIst: 61.93458171953874,
+        umsatzJeGruppe: {
+          food: 19027,
+          wohnen: 45331,
+          beauty: 48759,
+          accessoires: 46243,
+          damen: 36138,
+          waesche: 21425,
+          herren: 20922,
+          kinder: 14119,
+          sport: 16737
+        }
+      }
+    },
+    {
+      id: "W102",
+      name: "Hartwig Ludwigsburg Bahnhofstra\xDFe",
+      stadt: "Ludwigsburg",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1992,
+      fassade: 6,
+      substanz: 81,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W102-f1",
+          etage: 0,
+          qm: 511,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W102-f2",
+          etage: 0,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W102-f3",
+          etage: 0,
+          qm: 423,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W102-f4",
+          etage: 1,
+          qm: 301,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W102-f5",
+          etage: 1,
+          qm: 1119,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W102-f6",
+          etage: 2,
+          qm: 206,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W102-f7",
+          etage: 2,
+          qm: 419,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W102-f8",
+          etage: 2,
+          qm: 795,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W102-f9",
+          etage: 3,
+          qm: 127,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W102-f10",
+          etage: 3,
+          qm: 484,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W102-f11",
+          etage: 3,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W102-f12",
+          etage: 3,
+          qm: 192,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W102-f13",
+          etage: 4,
+          qm: 187,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W102-f14",
+          etage: 4,
+          qm: 1233,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 142135,
+        rohertrag: 59992,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 39428,
+        miete: 16603,
+        nebenkosten: 9144,
+        sonstige: 9022,
+        db: -14205,
+        fteBedarf: 31.62373885682738,
+        fteIst: 40.51818469564541,
+        umsatzJeGruppe: {
+          food: 13624,
+          beauty: 25358,
+          accessoires: 19871,
+          damen: 25542,
+          waesche: 8860,
+          herren: 17460,
+          kinder: 7348,
+          sport: 5467,
+          spielwaren: 3507,
+          wohnen: 15100
+        }
+      }
+    },
+    {
+      id: "W103",
+      name: "Hartwig T\xFCbingen Gewerbepark",
+      stadt: "T\xFCbingen",
+      format: "warenhaus",
+      lage: "rand",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1985,
+      fassade: 7,
+      substanz: 42,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W103-f1",
+          etage: -1,
+          qm: 459,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W103-f2",
+          etage: -1,
+          qm: 1374,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W103-f3",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W103-f4",
+          etage: 0,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W103-f5",
+          etage: 0,
+          qm: 888,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W103-f6",
+          etage: 1,
+          qm: 477,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W103-f7",
+          etage: 1,
+          qm: 393,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W103-f8",
+          etage: 1,
+          qm: 589,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W103-f9",
+          etage: 1,
+          qm: 325,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W103-f10",
+          etage: 1,
+          qm: 778,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 132568,
+        rohertrag: 55834,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 32193,
+        miete: 16625,
+        nebenkosten: 7770,
+        sonstige: 8238,
+        db: -8993,
+        fteBedarf: 28.63271004794145,
+        fteIst: 33.015858727339364,
+        umsatzJeGruppe: {
+          food: 12932,
+          wohnen: 21452,
+          beauty: 21428,
+          accessoires: 19338,
+          damen: 23366,
+          waesche: 10401,
+          herren: 10385,
+          kinder: 4764,
+          sport: 8500
+        }
+      }
+    },
+    {
+      id: "W104",
+      name: "Hartwig Gie\xDFen Am Wall",
+      stadt: "Gie\xDFen",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 2003,
+      fassade: 6,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W104-f1",
+          etage: -1,
+          qm: 358,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W104-f2",
+          etage: -1,
+          qm: 917,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W104-f3",
+          etage: 0,
+          qm: 359,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W104-f4",
+          etage: 0,
+          qm: 493,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W104-f5",
+          etage: 0,
+          qm: 423,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W104-f6",
+          etage: 1,
+          qm: 476,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W104-f7",
+          etage: 1,
+          qm: 374,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W104-f8",
+          etage: 1,
+          qm: 425,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W104-f9",
+          etage: 2,
+          qm: 171,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W104-f10",
+          etage: 2,
+          qm: 361,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W104-f11",
+          etage: 2,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W104-f12",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 113296,
+        rohertrag: 47363,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 26641,
+        miete: 25935,
+        nebenkosten: 0,
+        sonstige: 7061,
+        db: -12274,
+        fteBedarf: 24.638005707066768,
+        fteIst: 27.111889263397853,
+        umsatzJeGruppe: {
+          food: 10242,
+          wohnen: 14637,
+          beauty: 18883,
+          accessoires: 16279,
+          damen: 17994,
+          waesche: 7895,
+          herren: 8934,
+          kinder: 6255,
+          sport: 8739,
+          spielwaren: 3439
+        }
+      }
+    },
+    {
+      id: "W105",
+      name: "Hartwig Marburg Bahnhofstra\xDFe",
+      stadt: "Marburg",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 3e3,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1993,
+      fassade: 1,
+      substanz: 69,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W105-f1",
+          etage: -1,
+          qm: 811,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W105-f2",
+          etage: -1,
+          qm: 2189,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W105-f3",
+          etage: 0,
+          qm: 653,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W105-f4",
+          etage: 0,
+          qm: 970,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W105-f5",
+          etage: 0,
+          qm: 1377,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W105-f6",
+          etage: 1,
+          qm: 256,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W105-f7",
+          etage: 1,
+          qm: 497,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W105-f8",
+          etage: 1,
+          qm: 1277,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W105-f9",
+          etage: 1,
+          qm: 697,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W105-f10",
+          etage: 1,
+          qm: 1385,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 232639,
+        rohertrag: 96259,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 54606,
+        miete: 42301,
+        nebenkosten: 13243,
+        sonstige: 14089,
+        db: -27980,
+        fteBedarf: 48.61394990938224,
+        fteIst: 55.60839542009545,
+        umsatzJeGruppe: {
+          food: 30929,
+          wohnen: 33251,
+          beauty: 35676,
+          accessoires: 32234,
+          damen: 34786,
+          waesche: 11022,
+          herren: 23098,
+          kinder: 13222,
+          sport: 18419
+        }
+      }
+    },
+    {
+      id: "W106",
+      name: "Hartwig Fulda Lindenstra\xDFe",
+      stadt: "Fulda",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1963,
+      fassade: 0,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W106-f1",
+          etage: 0,
+          qm: 584,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W106-f2",
+          etage: 0,
+          qm: 458,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W106-f3",
+          etage: 0,
+          qm: 776,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W106-f4",
+          etage: 0,
+          qm: 715,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W106-f5",
+          etage: 1,
+          qm: 696,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W106-f6",
+          etage: 1,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W106-f7",
+          etage: 1,
+          qm: 968,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W106-f8",
+          etage: 1,
+          qm: 323,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W106-f9",
+          etage: 2,
+          qm: 301,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W106-f10",
+          etage: 2,
+          qm: 670,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W106-f11",
+          etage: 2,
+          qm: 425,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W106-f12",
+          etage: 2,
+          qm: 1138,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 161788,
+        rohertrag: 67372,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 37421,
+        miete: 20102,
+        nebenkosten: 9683,
+        sonstige: 10053,
+        db: -9887,
+        fteBedarf: 35.03601353250928,
+        fteIst: 38.30472747897493,
+        umsatzJeGruppe: {
+          food: 20050,
+          beauty: 26395,
+          accessoires: 24546,
+          damen: 23090,
+          waesche: 11676,
+          herren: 16069,
+          kinder: 9006,
+          sport: 7148,
+          spielwaren: 4286,
+          wohnen: 19522
+        }
+      }
+    },
+    {
+      id: "W107",
+      name: "Hartwig Hanau Am Wall",
+      stadt: "Hanau",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1986,
+      fassade: 3,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W107-f1",
+          etage: 0,
+          qm: 311,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W107-f2",
+          etage: 0,
+          qm: 371,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W107-f3",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W107-f4",
+          etage: 0,
+          qm: 689,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W107-f5",
+          etage: 1,
+          qm: 410,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W107-f6",
+          etage: 1,
+          qm: 472,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W107-f7",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W107-f8",
+          etage: 1,
+          qm: 331,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W107-f9",
+          etage: 2,
+          qm: 28,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W107-f10",
+          etage: 2,
+          qm: 591,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W107-f11",
+          etage: 2,
+          qm: 273,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W107-f12",
+          etage: 2,
+          qm: 1007,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 130679,
+        rohertrag: 55327,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 32301,
+        miete: 19071,
+        nebenkosten: 8230,
+        sonstige: 7922,
+        db: -12196,
+        fteBedarf: 27.404696713077392,
+        fteIst: 33.009344199434615,
+        umsatzJeGruppe: {
+          food: 12470,
+          beauty: 23904,
+          accessoires: 16921,
+          damen: 25485,
+          waesche: 12274,
+          herren: 11806,
+          kinder: 5151,
+          sport: 6282,
+          spielwaren: 2702,
+          wohnen: 13684
+        }
+      }
+    },
+    {
+      id: "W108",
+      name: "Hartwig Wetzlar Neustadt",
+      stadt: "Wetzlar",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1929,
+      fassade: 2,
+      substanz: 89,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W108-f1",
+          etage: -1,
+          qm: 432,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W108-f2",
+          etage: -1,
+          qm: 808,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W108-f3",
+          etage: 0,
+          qm: 303,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W108-f4",
+          etage: 0,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W108-f5",
+          etage: 0,
+          qm: 223,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W108-f6",
+          etage: 1,
+          qm: 832,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W108-f7",
+          etage: 1,
+          qm: 371,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W108-f8",
+          etage: 1,
+          qm: 37,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W108-f9",
+          etage: 2,
+          qm: 843,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W108-f10",
+          etage: 2,
+          qm: 397,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W108-f11",
+          etage: 3,
+          qm: 103,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W108-f12",
+          etage: 3,
+          qm: 809,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W108-f13",
+          etage: 3,
+          qm: 298,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W108-f14",
+          etage: 3,
+          qm: 29,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 138196,
+        rohertrag: 58235,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 36626,
+        miete: 9469,
+        nebenkosten: 8240,
+        sonstige: 8456,
+        db: -4557,
+        fteBedarf: 29.324977527408173,
+        fteIst: 37.26392954841004,
+        umsatzJeGruppe: {
+          food: 15379,
+          wohnen: 12081,
+          beauty: 17155,
+          accessoires: 28179,
+          damen: 18571,
+          waesche: 10009,
+          herren: 16322,
+          kinder: 7504,
+          sport: 9968,
+          spielwaren: 3028
+        }
+      }
+    },
+    {
+      id: "W109",
+      name: "Hartwig L\xFCneburg City-Center",
+      stadt: "L\xFCneburg",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2200,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1910,
+      fassade: 2,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W109-f1",
+          etage: -1,
+          qm: 512,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W109-f2",
+          etage: -1,
+          qm: 1722,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W109-f3",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W109-f4",
+          etage: 0,
+          qm: 712,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W109-f5",
+          etage: 0,
+          qm: 1165,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W109-f6",
+          etage: 1,
+          qm: 205,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W109-f7",
+          etage: 1,
+          qm: 589,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W109-f8",
+          etage: 1,
+          qm: 773,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W109-f9",
+          etage: 1,
+          qm: 454,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W109-f10",
+          etage: 1,
+          qm: 1146,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 170160,
+        rohertrag: 71429,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 44227,
+        miete: 32689,
+        nebenkosten: 0,
+        sonstige: 10412,
+        db: -15900,
+        fteBedarf: 36.03153607851873,
+        fteIst: 45.667466054187166,
+        umsatzJeGruppe: {
+          food: 18596,
+          wohnen: 25781,
+          beauty: 23257,
+          accessoires: 25451,
+          damen: 25213,
+          waesche: 16003,
+          herren: 13352,
+          kinder: 7878,
+          sport: 14630
+        }
+      }
+    },
+    {
+      id: "W110",
+      name: "Hartwig Celle",
+      stadt: "Celle",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 2001,
+      fassade: 7,
+      substanz: 59,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W110-f1",
+          etage: 0,
+          qm: 477,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W110-f2",
+          etage: 0,
+          qm: 445,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W110-f3",
+          etage: 0,
+          qm: 518,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W110-f4",
+          etage: 1,
+          qm: 320,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W110-f5",
+          etage: 1,
+          qm: 1120,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W110-f6",
+          etage: 2,
+          qm: 421,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W110-f7",
+          etage: 2,
+          qm: 559,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W110-f8",
+          etage: 2,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W110-f9",
+          etage: 3,
+          qm: 182,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W110-f10",
+          etage: 3,
+          qm: 579,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W110-f11",
+          etage: 3,
+          qm: 661,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W110-f12",
+          etage: 3,
+          qm: 18,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W110-f13",
+          etage: 4,
+          qm: 319,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W110-f14",
+          etage: 4,
+          qm: 1121,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 182052,
+        rohertrag: 77144,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 46445,
+        miete: 27904,
+        nebenkosten: 10692,
+        sonstige: 10704,
+        db: -18602,
+        fteBedarf: 36.712401339758976,
+        fteIst: 48.04042953192403,
+        umsatzJeGruppe: {
+          food: 15054,
+          beauty: 32807,
+          accessoires: 28184,
+          damen: 34544,
+          waesche: 14e3,
+          herren: 14883,
+          kinder: 11038,
+          sport: 7664,
+          spielwaren: 3945,
+          wohnen: 19932
+        }
+      }
+    },
+    {
+      id: "W111",
+      name: "Hartwig Flensburg",
+      stadt: "Flensburg",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2500,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1918,
+      fassade: 6,
+      substanz: 86,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W111-f1",
+          etage: 0,
+          qm: 431,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W111-f2",
+          etage: 0,
+          qm: 476,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W111-f3",
+          etage: 0,
+          qm: 684,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W111-f4",
+          etage: 0,
+          qm: 909,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W111-f5",
+          etage: 1,
+          qm: 709,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W111-f6",
+          etage: 1,
+          qm: 442,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W111-f7",
+          etage: 1,
+          qm: 1101,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W111-f8",
+          etage: 1,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W111-f9",
+          etage: 2,
+          qm: 296,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W111-f10",
+          etage: 2,
+          qm: 631,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W111-f11",
+          etage: 2,
+          qm: 480,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W111-f12",
+          etage: 2,
+          qm: 1093,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 220657,
+        rohertrag: 93663,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 50720,
+        miete: 26179,
+        nebenkosten: 10981,
+        sonstige: 12422,
+        db: -6639,
+        fteBedarf: 42.090746407091515,
+        fteIst: 50.91814237491502,
+        umsatzJeGruppe: {
+          food: 19106,
+          beauty: 39593,
+          accessoires: 32186,
+          damen: 42335,
+          waesche: 14837,
+          herren: 28404,
+          kinder: 9050,
+          sport: 9281,
+          spielwaren: 7214,
+          wohnen: 18652
+        }
+      }
+    },
+    {
+      id: "W112",
+      name: "Hartwig Neum\xFCnster Ring",
+      stadt: "Neum\xFCnster",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1959,
+      fassade: 7,
+      substanz: 52,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W112-f1",
+          etage: -1,
+          qm: 522,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W112-f2",
+          etage: -1,
+          qm: 1018,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W112-f3",
+          etage: 0,
+          qm: 445,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W112-f4",
+          etage: 0,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W112-f5",
+          etage: 0,
+          qm: 441,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W112-f6",
+          etage: 1,
+          qm: 1330,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W112-f7",
+          etage: 1,
+          qm: 210,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W112-f8",
+          etage: 2,
+          qm: 433,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W112-f9",
+          etage: 2,
+          qm: 759,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W112-f10",
+          etage: 2,
+          qm: 348,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W112-f11",
+          etage: 3,
+          qm: 286,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W112-f12",
+          etage: 3,
+          qm: 917,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W112-f13",
+          etage: 3,
+          qm: 447,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 134600,
+        rohertrag: 57144,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 38224,
+        miete: 20427,
+        nebenkosten: 9839,
+        sonstige: 9033,
+        db: -20378,
+        fteBedarf: 32.150787234537454,
+        fteIst: 38.7976552495561,
+        umsatzJeGruppe: {
+          food: 11377,
+          wohnen: 12998,
+          beauty: 19827,
+          accessoires: 16697,
+          damen: 29307,
+          waesche: 12496,
+          herren: 9154,
+          kinder: 9116,
+          sport: 8923,
+          spielwaren: 4705
+        }
+      }
+    },
+    {
+      id: "W113",
+      name: "Hartwig Stralsund",
+      stadt: "Stralsund",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1957,
+      fassade: 5,
+      substanz: 89,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W113-f1",
+          etage: 0,
+          qm: 451,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W113-f2",
+          etage: 0,
+          qm: 301,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W113-f3",
+          etage: 0,
+          qm: 447,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W113-f4",
+          etage: 1,
+          qm: 227,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W113-f5",
+          etage: 1,
+          qm: 973,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W113-f6",
+          etage: 2,
+          qm: 238,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W113-f7",
+          etage: 2,
+          qm: 504,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W113-f8",
+          etage: 2,
+          qm: 458,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W113-f9",
+          etage: 3,
+          qm: 206,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W113-f10",
+          etage: 3,
+          qm: 495,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W113-f11",
+          etage: 3,
+          qm: 499,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W113-f12",
+          etage: 4,
+          qm: 163,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W113-f13",
+          etage: 4,
+          qm: 296,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W113-f14",
+          etage: 4,
+          qm: 741,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 163894,
+        rohertrag: 69621,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 40625,
+        miete: 16371,
+        nebenkosten: 6019,
+        sonstige: 9419,
+        db: -2813,
+        fteBedarf: 32.07715791461758,
+        fteIst: 40.82268437451354,
+        umsatzJeGruppe: {
+          food: 16665,
+          beauty: 21002,
+          accessoires: 29219,
+          damen: 32240,
+          waesche: 13882,
+          herren: 13477,
+          kinder: 8825,
+          sport: 10603,
+          spielwaren: 3730,
+          wohnen: 14251
+        }
+      }
+    },
+    {
+      id: "W114",
+      name: "Hartwig Schwerin",
+      stadt: "Schwerin",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1983,
+      fassade: 4,
+      substanz: 70,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W114-f1",
+          etage: 0,
+          qm: 543,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W114-f2",
+          etage: 0,
+          qm: 602,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W114-f3",
+          etage: 0,
+          qm: 495,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W114-f4",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W114-f5",
+          etage: 1,
+          qm: 1169,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W114-f6",
+          etage: 2,
+          qm: 112,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W114-f7",
+          etage: 2,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W114-f8",
+          etage: 2,
+          qm: 823,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W114-f9",
+          etage: 2,
+          qm: 192,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W114-f10",
+          etage: 3,
+          qm: 462,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W114-f11",
+          etage: 3,
+          qm: 788,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W114-f12",
+          etage: 3,
+          qm: 389,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W114-f13",
+          etage: 4,
+          qm: 86,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W114-f14",
+          etage: 4,
+          qm: 1554,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 242307,
+        rohertrag: 101995,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 54044,
+        miete: 20752,
+        nebenkosten: 9732,
+        sonstige: 13625,
+        db: 3842,
+        fteBedarf: 46.12401705766281,
+        fteIst: 54.68752297695232,
+        umsatzJeGruppe: {
+          food: 20071,
+          beauty: 42312,
+          accessoires: 39948,
+          damen: 36396,
+          waesche: 18056,
+          herren: 21326,
+          kinder: 13867,
+          sport: 11010,
+          spielwaren: 6784,
+          wohnen: 32538
+        }
+      }
+    },
+    {
+      id: "W115",
+      name: "Hartwig Zwickau Neustadt",
+      stadt: "Zwickau",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1918,
+      fassade: 5,
+      substanz: 42,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W115-f1",
+          etage: 0,
+          qm: 461,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W115-f2",
+          etage: 0,
+          qm: 371,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W115-f3",
+          etage: 0,
+          qm: 668,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W115-f4",
+          etage: 1,
+          qm: 96,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W115-f5",
+          etage: 1,
+          qm: 1404,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W115-f6",
+          etage: 2,
+          qm: 140,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W115-f7",
+          etage: 2,
+          qm: 435,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W115-f8",
+          etage: 2,
+          qm: 925,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W115-f9",
+          etage: 3,
+          qm: 88,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W115-f10",
+          etage: 3,
+          qm: 701,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W115-f11",
+          etage: 3,
+          qm: 710,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W115-f12",
+          etage: 4,
+          qm: 181,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W115-f13",
+          etage: 4,
+          qm: 391,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W115-f14",
+          etage: 4,
+          qm: 928,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 135987,
+        rohertrag: 57321,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 39126,
+        miete: 25960,
+        nebenkosten: 8991,
+        sonstige: 8950,
+        db: -25706,
+        fteBedarf: 31.69334209857719,
+        fteIst: 40.26825628480668,
+        umsatzJeGruppe: {
+          food: 12e3,
+          beauty: 20004,
+          accessoires: 21152,
+          damen: 21948,
+          waesche: 8453,
+          herren: 15178,
+          kinder: 10264,
+          sport: 8932,
+          spielwaren: 4423,
+          wohnen: 13631
+        }
+      }
+    },
+    {
+      id: "W116",
+      name: "Hartwig G\xF6rlitz Neustadt",
+      stadt: "G\xF6rlitz",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1962,
+      fassade: 7,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W116-f1",
+          etage: 0,
+          qm: 439,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W116-f2",
+          etage: 0,
+          qm: 324,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W116-f3",
+          etage: 0,
+          qm: 517,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W116-f4",
+          etage: 1,
+          qm: 27,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W116-f5",
+          etage: 1,
+          qm: 1253,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W116-f6",
+          etage: 2,
+          qm: 545,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W116-f7",
+          etage: 2,
+          qm: 735,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W116-f8",
+          etage: 3,
+          qm: 48,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W116-f9",
+          etage: 3,
+          qm: 543,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W116-f10",
+          etage: 3,
+          qm: 625,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W116-f11",
+          etage: 3,
+          qm: 63,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W116-f12",
+          etage: 4,
+          qm: 373,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W116-f13",
+          etage: 4,
+          qm: 907,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 111334,
+        rohertrag: 46987,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 29518,
+        miete: 13145,
+        nebenkosten: 9244,
+        sonstige: 7444,
+        db: -12364,
+        fteBedarf: 26.476304085586563,
+        fteIst: 29.653068201935838,
+        umsatzJeGruppe: {
+          food: 11123,
+          beauty: 14615,
+          accessoires: 14563,
+          damen: 19915,
+          waesche: 8447,
+          herren: 12787,
+          kinder: 7226,
+          sport: 6562,
+          spielwaren: 4319,
+          wohnen: 11778
+        }
+      }
+    },
+    {
+      id: "W117",
+      name: "Hartwig Dessau Ring",
+      stadt: "Dessau",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      baujahr: 1993,
+      fassade: 7,
+      substanz: 53,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W117-f1",
+          etage: 0,
+          qm: 383,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W117-f2",
+          etage: 0,
+          qm: 390,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W117-f3",
+          etage: 0,
+          qm: 467,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W117-f4",
+          etage: 1,
+          qm: 94,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W117-f5",
+          etage: 1,
+          qm: 1146,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W117-f6",
+          etage: 2,
+          qm: 275,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W117-f7",
+          etage: 2,
+          qm: 327,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W117-f8",
+          etage: 2,
+          qm: 638,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W117-f9",
+          etage: 3,
+          qm: 166,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W117-f10",
+          etage: 3,
+          qm: 502,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W117-f11",
+          etage: 3,
+          qm: 572,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W117-f12",
+          etage: 4,
+          qm: 73,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W117-f13",
+          etage: 4,
+          qm: 401,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W117-f14",
+          etage: 4,
+          qm: 766,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 124090,
+        rohertrag: 52439,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 34531,
+        miete: 15509,
+        nebenkosten: 7810,
+        sonstige: 7878,
+        db: -13288,
+        fteBedarf: 27.63489178230885,
+        fteIst: 35.41967988039547,
+        umsatzJeGruppe: {
+          food: 11276,
+          beauty: 21149,
+          accessoires: 15289,
+          damen: 27505,
+          waesche: 6286,
+          herren: 13045,
+          kinder: 8891,
+          sport: 6826,
+          spielwaren: 3889,
+          wohnen: 9934
+        }
+      }
+    },
+    {
+      id: "W118",
+      name: "Hartwig Gera Bahnhofstra\xDFe",
+      stadt: "Gera",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1700,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 1959,
+      fassade: 1,
+      substanz: 80,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W118-f1",
+          etage: -1,
+          qm: 467,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W118-f2",
+          etage: -1,
+          qm: 1208,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W118-f3",
+          etage: 0,
+          qm: 464,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W118-f4",
+          etage: 0,
+          qm: 740,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W118-f5",
+          etage: 0,
+          qm: 470,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W118-f6",
+          etage: 1,
+          qm: 638,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W118-f7",
+          etage: 1,
+          qm: 487,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W118-f8",
+          etage: 1,
+          qm: 550,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W118-f9",
+          etage: 2,
+          qm: 281,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W118-f10",
+          etage: 2,
+          qm: 556,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W118-f11",
+          etage: 2,
+          qm: 780,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W118-f12",
+          etage: 2,
+          qm: 421,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 127654,
+        rohertrag: 53638,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 32715,
+        miete: 17690,
+        nebenkosten: 8815,
+        sonstige: 8412,
+        db: -13993,
+        fteBedarf: 29.78830284208975,
+        fteIst: 33.84594612605813,
+        umsatzJeGruppe: {
+          food: 11876,
+          wohnen: 15828,
+          beauty: 19681,
+          accessoires: 19148,
+          damen: 17799,
+          waesche: 10501,
+          herren: 13650,
+          kinder: 6855,
+          sport: 8321,
+          spielwaren: 3994
+        }
+      }
+    },
+    {
+      id: "W119",
+      name: "Hartwig Weimar Lindenstra\xDFe",
+      stadt: "Weimar",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1918,
+      fassade: 0,
+      substanz: 32,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W119-f1",
+          etage: 0,
+          qm: 368,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W119-f2",
+          etage: 0,
+          qm: 465,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W119-f3",
+          etage: 0,
+          qm: 775,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W119-f4",
+          etage: 0,
+          qm: 243,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W119-f5",
+          etage: 1,
+          qm: 1442,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W119-f6",
+          etage: 1,
+          qm: 408,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W119-f7",
+          etage: 2,
+          qm: 179,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W119-f8",
+          etage: 2,
+          qm: 972,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W119-f9",
+          etage: 2,
+          qm: 401,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W119-f10",
+          etage: 2,
+          qm: 298,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W119-f11",
+          etage: 3,
+          qm: 367,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W119-f12",
+          etage: 3,
+          qm: 402,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W119-f13",
+          etage: 3,
+          qm: 1080,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 159937,
+        rohertrag: 68613,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 43028,
+        miete: 19780,
+        nebenkosten: 9941,
+        sonstige: 9887,
+        db: -14024,
+        fteBedarf: 34.442610275942585,
+        fteIst: 44.425974740154246,
+        umsatzJeGruppe: {
+          food: 9868,
+          beauty: 26194,
+          accessoires: 25713,
+          damen: 34500,
+          waesche: 11744,
+          herren: 17739,
+          kinder: 6921,
+          sport: 8548,
+          spielwaren: 5600,
+          wohnen: 13110
+        }
+      }
+    },
+    {
+      id: "W120",
+      name: "Hartwig Neuss",
+      stadt: "Neuss",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1958,
+      fassade: 6,
+      substanz: 69,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W120-f1",
+          etage: 0,
+          qm: 667,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W120-f2",
+          etage: 0,
+          qm: 422,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W120-f3",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W120-f4",
+          etage: 0,
+          qm: 579,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W120-f5",
+          etage: 1,
+          qm: 674,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W120-f6",
+          etage: 1,
+          qm: 653,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W120-f7",
+          etage: 1,
+          qm: 1109,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W120-f8",
+          etage: 1,
+          qm: 131,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W120-f9",
+          etage: 2,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W120-f10",
+          etage: 2,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W120-f11",
+          etage: 2,
+          qm: 528,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W120-f12",
+          etage: 2,
+          qm: 899,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 199121,
+        rohertrag: 83647,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 41494,
+        miete: 31831,
+        nebenkosten: 11208,
+        sonstige: 11630,
+        db: -12516,
+        fteBedarf: 39.832093686319794,
+        fteIst: 43.054497310622246,
+        umsatzJeGruppe: {
+          food: 22440,
+          beauty: 30852,
+          accessoires: 32326,
+          damen: 25986,
+          waesche: 19152,
+          herren: 21098,
+          kinder: 12952,
+          sport: 9904,
+          spielwaren: 5782,
+          wohnen: 18628
+        }
+      }
+    },
+    {
+      id: "W121",
+      name: "Hartwig D\xFCren Lindenstra\xDFe",
+      stadt: "D\xFCren",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2400,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1978,
+      fassade: 7,
+      substanz: 57,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W121-f1",
+          etage: 0,
+          qm: 488,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W121-f2",
+          etage: 0,
+          qm: 361,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W121-f3",
+          etage: 0,
+          qm: 741,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W121-f4",
+          etage: 0,
+          qm: 810,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W121-f5",
+          etage: 1,
+          qm: 688,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W121-f6",
+          etage: 1,
+          qm: 537,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W121-f7",
+          etage: 1,
+          qm: 773,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W121-f8",
+          etage: 1,
+          qm: 401,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W121-f9",
+          etage: 2,
+          qm: 112,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W121-f10",
+          etage: 2,
+          qm: 628,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W121-f11",
+          etage: 2,
+          qm: 425,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W121-f12",
+          etage: 2,
+          qm: 1235,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 157044,
+        rohertrag: 66834,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 40858,
+        miete: 41287,
+        nebenkosten: 0,
+        sonstige: 9678,
+        db: -24989,
+        fteBedarf: 33.676305073393294,
+        fteIst: 41.63853731486583,
+        umsatzJeGruppe: {
+          food: 13443,
+          beauty: 19925,
+          accessoires: 25252,
+          damen: 31051,
+          waesche: 14105,
+          herren: 12621,
+          kinder: 7108,
+          sport: 7179,
+          spielwaren: 5596,
+          wohnen: 20764
+        }
+      }
+    },
+    {
+      id: "W122",
+      name: "Hartwig Wesel",
+      stadt: "Wesel",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1960,
+      fassade: 2,
+      substanz: 79,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W122-f1",
+          etage: 0,
+          qm: 411,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W122-f2",
+          etage: 0,
+          qm: 283,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W122-f3",
+          etage: 0,
+          qm: 420,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W122-f4",
+          etage: 0,
+          qm: 719,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W122-f5",
+          etage: 1,
+          qm: 485,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W122-f6",
+          etage: 1,
+          qm: 286,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W122-f7",
+          etage: 1,
+          qm: 761,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W122-f8",
+          etage: 1,
+          qm: 302,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W122-f9",
+          etage: 2,
+          qm: 61,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W122-f10",
+          etage: 2,
+          qm: 666,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W122-f11",
+          etage: 2,
+          qm: 349,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W122-f12",
+          etage: 2,
+          qm: 757,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 137008,
+        rohertrag: 56920,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 33717,
+        miete: 16290,
+        nebenkosten: 7134,
+        sonstige: 8092,
+        db: -8313,
+        fteBedarf: 27.82440931157522,
+        fteIst: 34.81144363920361,
+        umsatzJeGruppe: {
+          food: 17327,
+          beauty: 21948,
+          accessoires: 18380,
+          damen: 24407,
+          waesche: 7359,
+          herren: 14163,
+          kinder: 6876,
+          sport: 10096,
+          spielwaren: 4917,
+          wohnen: 11534
+        }
+      }
+    },
+    {
+      id: "W123",
+      name: "Hartwig Iserlohn",
+      stadt: "Iserlohn",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1989,
+      fassade: 3,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W123-f1",
+          etage: -1,
+          qm: 355,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W123-f2",
+          etage: -1,
+          qm: 825,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W123-f3",
+          etage: 0,
+          qm: 367,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W123-f4",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W123-f5",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W123-f6",
+          etage: 1,
+          qm: 852,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W123-f7",
+          etage: 1,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W123-f8",
+          etage: 2,
+          qm: 65,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W123-f9",
+          etage: 2,
+          qm: 839,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W123-f10",
+          etage: 2,
+          qm: 276,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W123-f11",
+          etage: 3,
+          qm: 150,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W123-f12",
+          etage: 3,
+          qm: 654,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W123-f13",
+          etage: 3,
+          qm: 278,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W123-f14",
+          etage: 3,
+          qm: 98,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 190165,
+        rohertrag: 80440,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 43231,
+        miete: 51396,
+        nebenkosten: 0,
+        sonstige: 10452,
+        db: -24640,
+        fteBedarf: 35.111149363542914,
+        fteIst: 44.22610112222914,
+        umsatzJeGruppe: {
+          food: 16970,
+          wohnen: 17543,
+          beauty: 30471,
+          accessoires: 33297,
+          damen: 29663,
+          waesche: 12254,
+          herren: 23973,
+          kinder: 9861,
+          sport: 11596,
+          spielwaren: 4538
+        }
+      }
+    },
+    {
+      id: "W124",
+      name: "Hartwig L\xFCdenscheid",
+      stadt: "L\xFCdenscheid",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        -1,
+        0,
+        1,
+        2
+      ],
+      baujahr: 2e3,
+      fassade: 2,
+      substanz: 52,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W124-f1",
+          etage: -1,
+          qm: 558,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W124-f2",
+          etage: -1,
+          qm: 1492,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W124-f3",
+          etage: 0,
+          qm: 590,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W124-f4",
+          etage: 0,
+          qm: 916,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W124-f5",
+          etage: 0,
+          qm: 544,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W124-f6",
+          etage: 1,
+          qm: 1106,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W124-f7",
+          etage: 1,
+          qm: 488,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W124-f8",
+          etage: 1,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W124-f9",
+          etage: 2,
+          qm: 467,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W124-f10",
+          etage: 2,
+          qm: 481,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W124-f11",
+          etage: 2,
+          qm: 883,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W124-f12",
+          etage: 2,
+          qm: 532,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 248141,
+        rohertrag: 103588,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 53257,
+        miete: 23557,
+        nebenkosten: 9506,
+        sonstige: 14005,
+        db: 3263,
+        fteBedarf: 47.48653790856885,
+        fteIst: 54.8025435906923,
+        umsatzJeGruppe: {
+          food: 21718,
+          wohnen: 33491,
+          beauty: 47380,
+          accessoires: 41780,
+          damen: 36313,
+          waesche: 14103,
+          herren: 21645,
+          kinder: 10138,
+          sport: 13585,
+          spielwaren: 7987
+        }
+      }
+    },
+    {
+      id: "W125",
+      name: "Hartwig Witten",
+      stadt: "Witten",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2400,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1965,
+      fassade: 5,
+      substanz: 50,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W125-f1",
+          etage: -1,
+          qm: 379,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W125-f2",
+          etage: -1,
+          qm: 1988,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W125-f3",
+          etage: 0,
+          qm: 341,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W125-f4",
+          etage: 0,
+          qm: 697,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W125-f5",
+          etage: 0,
+          qm: 1329,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W125-f6",
+          etage: 1,
+          qm: 90,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W125-f7",
+          etage: 1,
+          qm: 503,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W125-f8",
+          etage: 1,
+          qm: 926,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W125-f9",
+          etage: 1,
+          qm: 479,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W125-f10",
+          etage: 1,
+          qm: 1178,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 207897,
+        rohertrag: 88137,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 42822,
+        miete: 23077,
+        nebenkosten: 11283,
+        sonstige: 12083,
+        db: -1128,
+        fteBedarf: 41.178571941445384,
+        fteIst: 43.482234344412205,
+        umsatzJeGruppe: {
+          food: 17058,
+          wohnen: 41192,
+          beauty: 22815,
+          accessoires: 30698,
+          damen: 39444,
+          waesche: 13545,
+          herren: 17832,
+          kinder: 8832,
+          sport: 16482
+        }
+      }
+    },
+    {
+      id: "W126",
+      name: "Hartwig Marl Arkaden",
+      stadt: "Marl",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1991,
+      fassade: 6,
+      substanz: 49,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W126-f1",
+          etage: -1,
+          qm: 557,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W126-f2",
+          etage: -1,
+          qm: 2209,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W126-f3",
+          etage: 0,
+          qm: 503,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W126-f4",
+          etage: 0,
+          qm: 814,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W126-f5",
+          etage: 0,
+          qm: 1449,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W126-f6",
+          etage: 1,
+          qm: 333,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W126-f7",
+          etage: 1,
+          qm: 499,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W126-f8",
+          etage: 1,
+          qm: 1159,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W126-f9",
+          etage: 1,
+          qm: 609,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W126-f10",
+          etage: 1,
+          qm: 1390,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 200125,
+        rohertrag: 84686,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 50420,
+        miete: 24264,
+        nebenkosten: 13558,
+        sonstige: 12490,
+        db: -16046,
+        fteBedarf: 43.46300279849733,
+        fteIst: 51.07734507627857,
+        umsatzJeGruppe: {
+          food: 17253,
+          wohnen: 30489,
+          beauty: 25610,
+          accessoires: 27266,
+          damen: 34223,
+          waesche: 13139,
+          herren: 23512,
+          kinder: 9647,
+          sport: 18985
+        }
+      }
+    },
+    {
+      id: "W127",
+      name: "Hartwig Moers City-Center",
+      stadt: "Moers",
+      format: "warenhaus",
+      lage: "center",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 2002,
+      fassade: 1,
+      substanz: 39,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W127-f1",
+          etage: 0,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W127-f2",
+          etage: 0,
+          qm: 640,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W127-f3",
+          etage: 0,
+          qm: 949,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W127-f4",
+          etage: 1,
+          qm: 118,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W127-f5",
+          etage: 1,
+          qm: 1329,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W127-f6",
+          etage: 1,
+          qm: 628,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W127-f7",
+          etage: 2,
+          qm: 37,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W127-f8",
+          etage: 2,
+          qm: 877,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W127-f9",
+          etage: 2,
+          qm: 704,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W127-f10",
+          etage: 2,
+          qm: 458,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W127-f11",
+          etage: 3,
+          qm: 539,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W127-f12",
+          etage: 3,
+          qm: 401,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W127-f13",
+          etage: 3,
+          qm: 1135,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 190560,
+        rohertrag: 80211,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 46830,
+        miete: 27102,
+        nebenkosten: 0,
+        sonstige: 11548,
+        db: -5270,
+        fteBedarf: 39.96069300195375,
+        fteIst: 47.16919069182678,
+        umsatzJeGruppe: {
+          food: 13937,
+          beauty: 38615,
+          accessoires: 36760,
+          damen: 22481,
+          waesche: 15427,
+          herren: 17476,
+          kinder: 10852,
+          sport: 13278,
+          spielwaren: 4023,
+          wohnen: 17709
+        }
+      }
+    },
+    {
+      id: "W128",
+      name: "Hartwig Kaiserslautern Neustadt",
+      stadt: "Kaiserslautern",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      baujahr: 1971,
+      fassade: 0,
+      substanz: 81,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W128-f1",
+          etage: -1,
+          qm: 644,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W128-f2",
+          etage: -1,
+          qm: 896,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W128-f3",
+          etage: 0,
+          qm: 506,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W128-f4",
+          etage: 0,
+          qm: 668,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W128-f5",
+          etage: 0,
+          qm: 365,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W128-f6",
+          etage: 1,
+          qm: 1138,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W128-f7",
+          etage: 1,
+          qm: 402,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W128-f8",
+          etage: 2,
+          qm: 51,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W128-f9",
+          etage: 2,
+          qm: 1079,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W128-f10",
+          etage: 2,
+          qm: 410,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W128-f11",
+          etage: 3,
+          qm: 58,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W128-f12",
+          etage: 3,
+          qm: 695,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W128-f13",
+          etage: 3,
+          qm: 478,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W128-f14",
+          etage: 3,
+          qm: 309,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 159536,
+        rohertrag: 66721,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 38665,
+        miete: 29785,
+        nebenkosten: 0,
+        sonstige: 10006,
+        db: -11735,
+        fteBedarf: 34.98472410817196,
+        fteIst: 39.94232786450628,
+        umsatzJeGruppe: {
+          food: 18573,
+          wohnen: 15270,
+          beauty: 28326,
+          accessoires: 22532,
+          damen: 29331,
+          waesche: 9381,
+          herren: 17218,
+          kinder: 6428,
+          sport: 6990,
+          spielwaren: 5485
+        }
+      }
+    },
+    {
+      id: "W129",
+      name: "Hartwig Worms Neustadt",
+      stadt: "Worms",
+      format: "warenhaus",
+      lage: "b",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2700,
+      etagen: [
+        -1,
+        0,
+        1
+      ],
+      baujahr: 1919,
+      fassade: 4,
+      substanz: 31,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W129-f1",
+          etage: -1,
+          qm: 478,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W129-f2",
+          etage: -1,
+          qm: 2255,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "W129-f3",
+          etage: 0,
+          qm: 431,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W129-f4",
+          etage: 0,
+          qm: 798,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W129-f5",
+          etage: 0,
+          qm: 1505,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W129-f6",
+          etage: 1,
+          qm: 50,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W129-f7",
+          etage: 1,
+          qm: 503,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W129-f8",
+          etage: 1,
+          qm: 1175,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W129-f9",
+          etage: 1,
+          qm: 652,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W129-f10",
+          etage: 1,
+          qm: 1128,
+          konzept: "eigen",
+          gruppe: "sport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 179713,
+        rohertrag: 75668,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 46503,
+        miete: 21992,
+        nebenkosten: 10631,
+        sonstige: 11407,
+        db: -14865,
+        fteBedarf: 39.88357256127091,
+        fteIst: 47.20129659805884,
+        umsatzJeGruppe: {
+          food: 13033,
+          wohnen: 37324,
+          beauty: 27586,
+          accessoires: 23784,
+          damen: 25896,
+          waesche: 11236,
+          herren: 18495,
+          kinder: 10138,
+          sport: 12221
+        }
+      }
+    },
+    {
+      id: "W130",
+      name: "Hartwig Speyer",
+      stadt: "Speyer",
+      format: "warenhaus",
+      lage: "1a",
+      cluster: "mittelstadt",
+      grundflaecheQm: 2800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1910,
+      fassade: 4,
+      substanz: 74,
+      status: "offen",
+      flaechen: [
+        {
+          id: "W130-f1",
+          etage: 0,
+          qm: 597,
+          konzept: "eigen",
+          gruppe: "food"
+        },
+        {
+          id: "W130-f2",
+          etage: 0,
+          qm: 505,
+          konzept: "eigen",
+          gruppe: "beauty"
+        },
+        {
+          id: "W130-f3",
+          etage: 0,
+          qm: 862,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "W130-f4",
+          etage: 0,
+          qm: 837,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W130-f5",
+          etage: 1,
+          qm: 1152,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "W130-f6",
+          etage: 1,
+          qm: 604,
+          konzept: "eigen",
+          gruppe: "waesche"
+        },
+        {
+          id: "W130-f7",
+          etage: 1,
+          qm: 912,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "W130-f8",
+          etage: 1,
+          qm: 131,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W130-f9",
+          etage: 2,
+          qm: 405,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "W130-f10",
+          etage: 2,
+          qm: 826,
+          konzept: "eigen",
+          gruppe: "sport"
+        },
+        {
+          id: "W130-f11",
+          etage: 2,
+          qm: 602,
+          konzept: "eigen",
+          gruppe: "spielwaren"
+        },
+        {
+          id: "W130-f12",
+          etage: 2,
+          qm: 967,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 263398,
+        rohertrag: 111518,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 57092,
+        miete: 27771,
+        nebenkosten: 11762,
+        sonstige: 14579,
+        db: 313,
+        fteBedarf: 49.13564139890457,
+        fteIst: 57.834649496069126,
+        umsatzJeGruppe: {
+          food: 27849,
+          beauty: 40839,
+          accessoires: 42141,
+          damen: 48508,
+          waesche: 23018,
+          herren: 27824,
+          kinder: 11101,
+          sport: 12354,
+          spielwaren: 9041,
+          wohnen: 20723
+        }
+      }
+    },
+    {
+      id: "S047",
+      name: "Hartwig Sport Berlin Am Markt",
+      stadt: "Berlin",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0
+      ],
+      baujahr: 2012,
+      fassade: 1,
+      substanz: 68,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S047-f1",
+          etage: 0,
+          qm: 446,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S047-f2",
+          etage: 0,
+          qm: 549,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S047-f3",
+          etage: 0,
+          qm: 467,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S047-f4",
+          etage: 0,
+          qm: 223,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S047-f5",
+          etage: 0,
+          qm: 202,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S047-f6",
+          etage: 0,
+          qm: 163,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 81535,
+        rohertrag: 34571,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 16540,
+        miete: 6703,
+        nebenkosten: 2333,
+        sonstige: 4265,
+        db: 4729,
+        fteBedarf: 13.467695526262736,
+        fteIst: 16.73675352368738,
+        umsatzJeGruppe: {
+          sportschuhe: 23993,
+          sporttextil: 20420,
+          outdoor: 19364,
+          teamsport: 5069,
+          rad: 2385,
+          wintersport: 10304
+        }
+      }
+    },
+    {
+      id: "S048",
+      name: "Hartwig Sport Hamburg Galerie am Fluss",
+      stadt: "Hamburg",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2600,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1986,
+      fassade: 7,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S048-f1",
+          etage: 0,
+          qm: 1345,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S048-f2",
+          etage: 0,
+          qm: 1139,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S048-f3",
+          etage: 0,
+          qm: 66,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S048-f4",
+          etage: 1,
+          qm: 884,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S048-f5",
+          etage: 1,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S048-f6",
+          etage: 1,
+          qm: 765,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S048-f7",
+          etage: 1,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 244892,
+        rohertrag: 102350,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 45741,
+        miete: 29218,
+        nebenkosten: 7145,
+        sonstige: 12335,
+        db: 7911,
+        fteBedarf: 38.55786679293943,
+        fteIst: 46.992706440506666,
+        umsatzJeGruppe: {
+          sportschuhe: 96681,
+          sporttextil: 51925,
+          outdoor: 43637,
+          teamsport: 10221,
+          rad: 10277,
+          wintersport: 32151
+        }
+      }
+    },
+    {
+      id: "S049",
+      name: "Hartwig Sport M\xFCnchen Am Markt",
+      stadt: "M\xFCnchen",
+      format: "sport",
+      lage: "1a",
+      cluster: "metropole",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1997,
+      fassade: 0,
+      substanz: 38,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S049-f1",
+          etage: 0,
+          qm: 1012,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S049-f2",
+          etage: 0,
+          qm: 555,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S049-f3",
+          etage: 1,
+          qm: 984,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S049-f4",
+          etage: 1,
+          qm: 583,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S049-f5",
+          etage: 2,
+          qm: 216,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S049-f6",
+          etage: 2,
+          qm: 528,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S049-f7",
+          etage: 2,
+          qm: 446,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S049-f8",
+          etage: 2,
+          qm: 377,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 239768,
+        rohertrag: 101653,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 40472,
+        miete: 30764,
+        nebenkosten: 6681,
+        sonstige: 11946,
+        db: 11790,
+        fteBedarf: 37.16889344552324,
+        fteIst: 41.33673937946676,
+        umsatzJeGruppe: {
+          sportschuhe: 71817,
+          sporttextil: 78570,
+          outdoor: 40188,
+          teamsport: 16449,
+          rad: 7060,
+          wintersport: 25685
+        }
+      }
+    },
+    {
+      id: "S050",
+      name: "Hartwig Sport K\xF6ln City-Center",
+      stadt: "K\xF6ln",
+      format: "sport",
+      lage: "center",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0
+      ],
+      baujahr: 1992,
+      fassade: 6,
+      substanz: 90,
+      status: "offen",
+      flaechen: [
+        {
+          id: "S050-f1",
+          etage: 0,
+          qm: 375,
+          konzept: "eigen",
+          gruppe: "sportschuhe"
+        },
+        {
+          id: "S050-f2",
+          etage: 0,
+          qm: 673,
+          konzept: "eigen",
+          gruppe: "sporttextil"
+        },
+        {
+          id: "S050-f3",
+          etage: 0,
+          qm: 333,
+          konzept: "eigen",
+          gruppe: "outdoor"
+        },
+        {
+          id: "S050-f4",
+          etage: 0,
+          qm: 217,
+          konzept: "eigen",
+          gruppe: "teamsport"
+        },
+        {
+          id: "S050-f5",
+          etage: 0,
+          qm: 285,
+          konzept: "eigen",
+          gruppe: "rad"
+        },
+        {
+          id: "S050-f6",
+          etage: 0,
+          qm: 167,
+          konzept: "eigen",
+          gruppe: "wintersport"
+        }
+      ],
+      kpi: {
+        woche: 2,
+        umsatz: 78252,
+        rohertrag: 33027,
+        konzessionserloes: 0,
+        untermiete: 0,
+        personal: 16086,
+        miete: 9263,
+        nebenkosten: 0,
+        sonstige: 4131,
+        db: 3548,
+        fteBedarf: 13.159530268777383,
+        fteIst: 16.35596187631147,
+        umsatzJeGruppe: {
+          sportschuhe: 24276,
+          sporttextil: 25834,
+          outdoor: 10617,
+          teamsport: 5070,
+          rad: 2874,
+          wintersport: 9581
+        }
+      }
+    }
+  ];
 
   // src/kit/bauer.js
   var REGION2 = { nord: "Nord", ost: "Ost", west: "West", mitte: "Mitte", sued: "S\xFCd" };
@@ -61027,6 +84637,10 @@
     }
     if (haus2.format === "outlet") {
       const m2 = masseOutlet(haus2);
+      return { w: m2.w, d: m2.d, mall: 0 };
+    }
+    if (haus2.klasse === "premium") {
+      const m2 = premiumMasse(haus2);
       return { w: m2.w, d: m2.d, mall: 0 };
     }
     if (haus2.format === "sport" && familie !== 7) {
@@ -61168,6 +84782,10 @@
         const h0 = p.standort?.id && HAUS.get(p.standort.id) || passendesHaus(p, o.warenhausId);
         const f = fussabdruck(h0);
         const { x, z: z2 } = imSlot(p, f.w, f.d);
+        if (h0.klasse === "premium") {
+          p.haus = h0;
+          return premiumhaus(S, scene2, h0, { x, z: z2, ...zustandFuer(h0) });
+        }
         let fam = familieVon(h0), h = h0;
         if (famBenutzt.has(fam)) {
           const alt = fam <= 5 ? [fam + 1, fam - 1, fam + 2, fam - 2].find((q2) => q2 >= 1 && q2 <= 5 && !famBenutzt.has(q2)) : null;
@@ -61178,6 +84796,13 @@
         const e = warenhaus(S, scene2, h, { x, z: z2, familie: fam, ...zustandFuer(h0) });
         p.haus = h;
         return e;
+      },
+      "slot:premium": (S, scene2, p) => {
+        const h = HAUS.get(p.standort?.id) ?? haeuser_default.find((q2) => q2.klasse === "premium" && q2.stadt === p.standort?.stadt);
+        if (!h) return { hoehe: 0 };
+        const f = fussabdruck(h), { x, z: z2 } = imSlot(p, f.w, f.d);
+        p.haus = h;
+        return premiumhaus(S, scene2, h, { x, z: z2, ...zustandFuer(h) });
       },
       "slot:sport": (S, scene2, p) => {
         const h = HAUS.get(p.standort?.id) ?? haeuser_default.find((q2) => q2.format === "sport");
@@ -64253,7 +87878,7 @@
   var PFLASTER = "#cbc5b8";
   var ASPHALT = "#8d939a";
   var SCHOTTER = "#aaa498";
-  var GLAS5 = "#4e5c67";
+  var GLAS6 = "#4e5c67";
   var BACKSTEIN2 = ["#9b4f3a", "#a35a43", "#8f4a37", "#a8604a"];
   var KLINKER = ["#6e3b30", "#7a4234", "#5f3a34", "#71433a"];
   var SCHIEFER2 = ["#55616a", "#5c6870", "#4d5860"];
@@ -64552,7 +88177,7 @@
   function fenster3(S, F2, u, y, b, h, o = {}) {
     const art = o.art ?? null, t = o.t ?? 0;
     if (o.laibung) fform(S, F2, bogenForm(u - b / 2 - 0.22, y - 0.12, u + b / 2 + 0.22, y + h + (art ? 0.22 : 0.18), art), t - 0.02, t + 0.07, o.laibung);
-    fform(S, F2, bogenForm(u - b / 2, y, u + b / 2, y + h, art), t, t + 0.1, o.glas ?? GLAS5);
+    fform(S, F2, bogenForm(u - b / 2, y, u + b / 2, y + h, art), t, t + 0.1, o.glas ?? GLAS6);
     if (o.sims) fb(S, F2, u - b / 2 - 0.3, u + b / 2 + 0.3, y - 0.2, y - 0.04, t - 0.02, t + 0.2, o.sims);
     const [nu, nv] = o.sprossen ?? [0, 0];
     const sc = o.rahmen ?? "#e9e4d8";
@@ -64600,7 +88225,7 @@
         const u = off + (i + 0.5) * fo.raster;
         for (let k = 0; k < (fo.zeilen ?? 1); k++) {
           const y = fo.y + k * (fo.h + 1.2);
-          let glas2 = o.glas ?? GLAS5;
+          let glas2 = o.glas ?? GLAS6;
           if (o.zustand === "stillgelegt") {
             const q2 = r();
             glas2 = q2 < 0.25 ? "#2a2f33" : q2 < 0.4 ? "#8a7356" : glas2;
@@ -65408,11 +89033,11 @@
     g([u1 - b * 0.18, y], [u1 - b * 0.36, ym]);
     g([u0, y], [um, y + h]);
     g([u1, y], [um, y + h]);
-    fb(S, F2, um - 0.45, um + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS5);
+    fb(S, F2, um - 0.45, um + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS6);
   }
   function siedlFenster(S, F2, u, y, fw, fh, o = {}) {
     fb(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y - 0.12, y + fh + 0.12, 0, 0.05, o.rahmen ?? "#f4f2ec");
-    fb(S, F2, u - fw / 2, u + fw / 2, y, y + fh, 0, 0.08, o.glas ?? GLAS5);
+    fb(S, F2, u - fw / 2, u + fw / 2, y, y + fh, 0, 0.08, o.glas ?? GLAS6);
     fb(S, F2, u - 0.04, u + 0.04, y, y + fh, 0, 0.11, o.rahmen ?? "#f4f2ec");
     fb(S, F2, u - fw / 2, u + fw / 2, y + fh * 0.62, y + fh * 0.62 + 0.07, 0, 0.11, o.rahmen ?? "#f4f2ec");
     fb(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y - 0.2, y - 0.08, 0, 0.18, o.bank ?? "#cfc8b8");
@@ -65472,7 +89097,7 @@
       for (let e = 0; e < n; e++) {
         const gx = x0 + w * (e + 0.5) / n, gz2 = z0 + d - d / 2 * 0.45, gh = o.dachH * 0.45;
         S.quader(gx - 1.1, H + gh * 0.3, gz2 - 1.2, gx + 1.1, H + gh * 1.25, gz2 + 0.3, o.oben ?? o.wand);
-        S.quader(gx - 0.7, H + gh * 0.45, gz2 + 0.3, gx + 0.7, H + gh * 1.1, gz2 + 0.34, GLAS5);
+        S.quader(gx - 0.7, H + gh * 0.45, gz2 + 0.3, gx + 0.7, H + gh * 1.1, gz2 + 0.34, GLAS6);
         const gd = dachProfil(1.8, 2.6, 0.7, 0.1, "z");
         gd.translate(gx, H + gh * 1.25, gz2 - 0.4);
         S.add(gd, o.dach);
@@ -66071,7 +89696,7 @@
         }
         for (let i = 0; i < na; i++) for (let k = 0; k < n; k++) {
           const u = off + (i + 0.5) * ra, y = y0 + k * gh;
-          fb(S, F2, u - 0.75, u + 0.75, y + 0.9, y + gh - 0.4, -0.05, 0.05, GLAS5);
+          fb(S, F2, u - 0.75, u + 0.75, y + 0.9, y + gh - 0.4, -0.05, 0.05, GLAS6);
           fb(S, F2, u - 0.05, u + 0.05, y + 0.9, y + gh - 0.4, 0, 0.1, "#e9e4d8");
           fpoly(S, F2, [[u - 0.75, y + 0.2], [u, y + 0.75], [u + 0.75, y + 0.2]], 0, 0.2, kl2);
         }
@@ -66296,7 +89921,7 @@
           const na = Math.max(1, Math.floor(F2.L / 3.2)), off = (F2.L - na * 3.2) / 2;
           for (let i = 0; i < na; i++) {
             const u = off + (i + 0.5) * 3.2;
-            fb(S, F2, u - 0.65, u + 0.65, yy + 0.8, yy + 2.3, -0.05, 0.05, GLAS5);
+            fb(S, F2, u - 0.65, u + 0.65, yy + 0.8, yy + 2.3, -0.05, 0.05, GLAS6);
             fb(S, F2, u - 0.75, u + 0.75, yy + 0.7, yy + 0.8, 0, 0.18, "#f4f2ec");
             if (traufe && F2.s === "+z" && (i + k) % 3 === 1) {
               fb(S, F2, u - 1.3, u + 1.3, yy, yy + 0.15, 0, 1.2, "#cfccc6");
@@ -66423,7 +90048,7 @@
           achse: "x",
           r,
           fenster: { art: "segment", b: 1.4, h: 2, y: 1.8, raster: 3.4, zeilen: 3 },
-          glas: GLAS5
+          glas: GLAS6
         });
         for (const F2 of sichtbar2(p, 3, sz0, sw, sz1 - sz0)) if (F2.L > 20) ftext(scene2, F2, "Lagerhaus 3", F2.L / 2, 12.6, 0.3, 1.2, F2.L * 0.4, "#f4f0e4");
         const six = 3 + sw + 4, siw = Math.min(16, W3 - six - 12);
@@ -66432,7 +90057,7 @@
           for (let i = 0; i < sn; i++) for (let k = 0; k < 2; k++) zyl5(S, sr, sr, 30, six + sr + i * 2 * sr, 0.3, sz0 + sr + k * 2 * sr, "#d6d1c6", 14);
           S.quader(six, 30.3, sz0, six + siw, 36, sz0 + 4 * sr, "#cfcac0");
           for (const F2 of sichtbar2(p, six, sz0, siw, 4 * sr)) {
-            fb(S, F2, 1, F2.L - 1, 33, 35, 0, 0.1, GLAS5);
+            fb(S, F2, 1, F2.L - 1, 33, 35, 0, 0.1, GLAS6);
             ftext(scene2, F2, "Silo", F2.L / 2, 31.4, 0.12, 1.1, F2.L * 0.5, "#5a6168");
           }
           H = 37;
@@ -66469,7 +90094,7 @@
       }
       const hx = ox1 - 2, Ht = 18;
       for (const zz of [z0 - 2.5, z0 + kb + mm / 2, zB - 6 + 2.5 - 1]) S.quader(hx - 2, 0.6, zz - 1.6, hx + 2, Ht, zz + 1.6, "#e2ddd2");
-      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS5);
+      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS6);
       S.quader(hx - 2.2, Ht, z0 - 4.3, hx + 2.2, Ht + 1, zB - 6 + 2.5 + 0.8, "#c9c4b8");
       S.quader(hx - 0.8, 7.5, z0 + 0.2, hx + 0.8, 11.5, z0 + kb - 0.2, "#2f5f8f");
       S.quader(hx - 0.8, 6.5, z0 + kb + mm + 0.2, hx + 0.8, 10, z0 + kb + mm + kb2 - 0.2, "#2f5f8f");
@@ -66737,8 +90362,8 @@
         for (let y = 2.8; y < H; y += 2.6) fb(S, F2, 0, F2.L, y - 0.05, y + 0.05, 0, 0.12, "#f4f2ec");
       }
       for (const F2 of sichtbar2(p, ex, ez0, ew, ed)) for (let u = 1.5; u < F2.L * 0.25 - 0.5; u += 2.4) for (const y of [1.5, 4.8]) {
-        fb(S, F2, u - 0.7, u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS5);
-        fb(S, F2, F2.L - u - 0.7, F2.L - u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS5);
+        fb(S, F2, u - 0.7, u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS6);
+        fb(S, F2, F2.L - u - 0.7, F2.L - u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS6);
       }
       const g = new three_module_exports.BoxGeometry(ew * 0.6, 0.35, ed + 4);
       g.rotateX(-0.06);
@@ -66763,7 +90388,7 @@
         fscheibeW(S, F2, 3, 25.5, 0, 0.15, 1.8, "#f4f0e4");
         fscheibeW(S, F2, 3, 25.5, 0.15, 0.25, 0.25, "#2f3438");
         fb(S, F2, -0.2, 6.2, 22.8, 23.3, 0, 0.3, stein);
-        fb(S, F2, 2.2, 3.8, 5, 18, 0, 0.06, GLAS5);
+        fb(S, F2, 2.2, 3.8, 5, 18, 0, 0.06, GLAS6);
       }
       const hm = walmdach(6.8, 6.8, 6);
       hm.translate(tx + 3, 30, tz + 3);
@@ -67072,7 +90697,7 @@
   }
   function gruenderzeitHaus(S, scene2, p, r, o) {
     const { x0, z0, w, d, n } = o, egH = o.egH ?? 4.2, gh = o.gh ?? 3.5, H = egH + n * gh;
-    const c = { wand: o.wand, orn: o.orn ?? heller(o.wand, 0.04), glas: GLAS5, sockel: o.sockel ?? dunkler(o.wand, 0.1) };
+    const c = { wand: o.wand, orn: o.orn ?? heller(o.wand, 0.04), glas: GLAS6, sockel: o.sockel ?? dunkler(o.wand, 0.1) };
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, c.wand);
     const achsen7 = Math.max(2, Math.round(w / 2.6));
     for (const F2 of sichtbar2(p, x0, z0, w, d)) {
@@ -67197,7 +90822,7 @@
           const g = new three_module_exports.BoxGeometry(0.1, 2, 0.9);
           g.rotateY(-ang);
           g.translate(tx + Math.cos(ang) * tr, 5.2 + k * 3.5, tz + Math.sin(ang) * tr);
-          S.add(g, GLAS5);
+          S.add(g, GLAS6);
         }
         const helm3 = new three_module_exports.ConeGeometry(tr + 0.4, 7, 8);
         helm3.translate(tx, tH + 3.5, tz);
@@ -67576,7 +91201,7 @@
             const y = egH + k * gh + 0.8;
             for (let a = 0; a < na; a++) {
               const u = F2.L * (a + 0.5) / na;
-              stuckFenster(S, F2, u, y, 1.1, 2, { orn, glas: GLAS5 }, k, r, { verdachung: k === 0 ? "gerade" : null });
+              stuckFenster(S, F2, u, y, 1.1, 2, { orn, glas: GLAS6 }, k, r, { verdachung: k === 0 ? "gerade" : null });
             }
             fb(S, F2, -0.02, F2.L + 0.02, egH + (k + 1) * gh - 0.15, egH + (k + 1) * gh + 0.05, 0, 0.22, orn);
           }
@@ -67586,7 +91211,7 @@
             fb(S, F2, F2.L / 2 - bb / 2, F2.L / 2 + bb / 2, yy - 0.1, yy + 0.06, 0.25, 0.4, orn);
             for (let a = 0; a < m; a++) {
               const u = F2.L / 2 + (a - (m - 1) / 2) * (bb / Math.max(1, m)) * 0.9;
-              if (yy + 2 < Hh + G2) fb(S, F2, u - 0.45, u + 0.45, yy + 0.4, yy + 1.9, 0.25, 0.33, GLAS5);
+              if (yy + 2 < Hh + G2) fb(S, F2, u - 0.45, u + 0.45, yy + 0.4, yy + 1.9, 0.25, 0.33, GLAS6);
             }
           }
           if (art !== "schlicht") kugel2(S, ...(() => {
@@ -67602,12 +91227,12 @@
               fb(S, F2, u - 0.6, u + 0.6, 0.3, 2.5, 0, 0.1, "#5a3a2a");
               continue;
             }
-            fb(S, F2, u - 0.55, u + 0.55, y, y + 1.8, 0, 0.1, GLAS5);
+            fb(S, F2, u - 0.55, u + 0.55, y, y + 1.8, 0, 0.1, GLAS6);
             fb(S, F2, u - 0.65, u + 0.65, y - 0.15, y, 0, 0.2, orn);
           }
           for (let k = 1; k <= n; k++) fb(S, F2, -0.02, F2.L + 0.02, egH + (k - 1) * gh - 0.1, egH + (k - 1) * gh + 0.05, 0, 0.15, orn);
           fform(S, F2, giebelForm(0, F2.L, Hh, G2 * 0.66, "schlicht"), -0.2, 0.1, rw, 4);
-          fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, Hh + 1, Hh + 2.5, 0.1, 0.16, GLAS5);
+          fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, Hh + 1, Hh + 2.5, 0.1, 0.16, GLAS6);
           if (hz > 6 && i % 2 === 0) {
             const [ax, az] = wp(F2, F2.L * 0.7, 0);
             S.quader(ax - 1.8, 0.3, az - 3.5, ax + 1.8, 3.2, az, waehle2(r, SANDSTEIN));
@@ -67909,11 +91534,11 @@
           } else ladenFront2(S, scene2, teil(F2, 0, F2.L), 0.3, F2.L - 0.3, egH - 0.1, { name: waehle2(r, RHEIN_LADEN), blende: holz, vordach: false, auslage: r, tief: -0.05 });
           for (let k = 0; k < n; k++) {
             const y = egH + k * gh + 0.75, na = F2.L > 7 ? 3 : 2;
-            for (let a = 0; a < na; a++) stuckFenster(S, F2, F2.L * (a + 0.5) / na, y, 1, 1.9, { orn, glas: GLAS5 }, k, r, { verdachung: k === 0 ? "gerade" : null });
+            for (let a = 0; a < na; a++) stuckFenster(S, F2, F2.L * (a + 0.5) / na, y, 1, 1.9, { orn, glas: GLAS6 }, k, r, { verdachung: k === 0 ? "gerade" : null });
             fb(S, F2, -0.02, F2.L + 0.02, egH + (k + 1) * gh - 0.12, egH + (k + 1) * gh + 0.05, 0, 0.18, orn);
           }
           fform(S, F2, giebelForm(0, F2.L, Hh, G2, art), -0.2, 0.2, putz2, 6);
-          fb(S, F2, F2.L / 2 - 0.45, F2.L / 2 + 0.45, Hh + 0.9, Hh + 2.3, 0.2, 0.28, GLAS5);
+          fb(S, F2, F2.L / 2 - 0.45, F2.L / 2 + 0.45, Hh + 0.9, Hh + 2.3, 0.2, 0.28, GLAS6);
         } else if (F2.s === "+x" || F2.s === "-x") fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.06));
         else fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.04));
       }
@@ -68031,7 +91656,7 @@
     const cz = D / 2;
     const tx = 3, tw = 10, tH = 46;
     S.quader(tx, 0.3, cz - 5, tx + tw, tH, cz + 5, stein2);
-    for (const F2 of sichtbar2(p, tx, cz - 5, tw, 10)) for (let k = 0; k < 4; k++) fenster3(S, F2, F2.L / 2, 8 + k * 9, 1.6, 4.2, { art: "spitz", glas: GLAS5, laibung: heller(stein2, 0.05) });
+    for (const F2 of sichtbar2(p, tx, cz - 5, tw, 10)) for (let k = 0; k < 4; k++) fenster3(S, F2, F2.L / 2, 8 + k * 9, 1.6, 4.2, { art: "spitz", glas: GLAS6, laibung: heller(stein2, 0.05) });
     const sp = new three_module_exports.ConeGeometry(4.2, 12, 4);
     sp.rotateY(PI5 / 4);
     sp.translate(tx + tw / 2, tH + 6, cz);
@@ -68049,7 +91674,7 @@
       const g = new three_module_exports.BoxGeometry(0.3, 5.5, 2.4);
       g.rotateY(-a);
       g.translate(wx, 17, wz2);
-      S.add(g, GLAS5);
+      S.add(g, GLAS6);
     }
     const ku = new three_module_exports.ConeGeometry(rO + 0.6, 9, 8);
     ku.translate(ox, hO + 4.5 + 0.3, cz);
@@ -68128,7 +91753,7 @@
         achse: "x",
         r,
         fenster: { art: "rund", b: 1.6, h: 2.6, y: 2, raster: 3.6, zeilen: 2 },
-        glas: GLAS5
+        glas: GLAS6
       });
       for (const F2 of sichtbar2(p, 2, 2, hw, hd)) if (F2.s === "+z" && F2.L > 16) ftext(scene2, F2, "Westfalia-Br\xE4u", F2.L / 2, 11.2, 0.3, 1.3, F2.L * 0.7, "#f4f0e4");
     }
@@ -69985,6 +93610,7 @@
       az1 = az0 + d2;
     }
     const drin = (i, j) => i * R4 >= ax0 && (i + 1) * R4 <= ax1 && j * R4 >= az0 && (j + 1) * R4 <= az1;
+    const premium2 = haus2.klasse === "premium";
     const budget = o.budget ?? (o.ausschnitt ? 8e3 : 25e3);
     let umsatz = 0;
     for (const z2 of zn) umsatz += zonenUmsatz(haus2, z2.flaeche);
@@ -70002,6 +93628,7 @@
       vorbereiten(tmp2, gruppe2);
       var kk = { ax0, az0, ax1, az1, drin, d, kunden, o };
       bauen2(tmp2, gruppe2, haus2, etageNr, ra, zn, kk);
+      if (premium2) premiumInnen(tmp2, gruppe2, haus2, etageNr, { ax0, az0, ax1, az1, d });
       if (tmp2.anzahl <= budget || versuch > 8) break;
       versuch++;
       const f = Math.max(0.5, Math.min(0.92, budget * 0.97 / tmp2.anzahl));
@@ -70573,6 +94200,34 @@
       const vorne = r() < (ax1 - ax0) / (ax1 - ax0 + (az1 - az0));
       if (vorne) figur2(S, zw(r, ax0 + 1, ax1 + gw - 1), az1 + zw(r, 0.8, gw - 1.6), q2 + 500, "kunde", { y: yg + 0.15, ry: r() < 0.5 ? Math.PI / 2 : -Math.PI / 2, pose: r() < 0.7 ? "gehen" : "tasche" });
       else figur2(S, ax1 + zw(r, 0.8, gw - 1.6), zw(r, az0 + 1, az1), q2 + 700, "kunde", { y: yg + 0.15, ry: r() < 0.5 ? 0 : Math.PI, pose: r() < 0.7 ? "gehen" : "tasche" });
+    }
+  }
+  function premiumInnen(S, scene2, haus2, nr, k) {
+    const { ax0, az0, ax1, az1, d } = k;
+    const B2 = ax1 - ax0, T = az1 - az0, cx = (ax0 + ax1) / 2, cz = (az0 + az1) / 2;
+    const gold = "#b8955a", dunkel3 = "#284139", stein = "#eee3d1";
+    const ring = Math.min(B2, T) > 18;
+    if (ring) {
+      for (const dx of [-1, 1]) for (const dz of [-1, 1]) S.box(0.55, 3.8, 0.55, cx + dx * 5.2, 1.9, cz + dz * 5.2, gold);
+      for (const dz of [-1, 1]) S.box(10.5, 0.22, 0.3, cx, 3.65, cz + dz * 5.2, gold);
+      for (const dx of [-1, 1]) S.box(0.3, 0.22, 10.5, cx + dx * 5.2, 3.65, cz, gold);
+    }
+    if (nr === -1 || nr === 0 && !haus2.etagen.includes(-1)) {
+      S.box(Math.min(B2 * 0.3, 9), 1.15, 1.7, cx, 0.7, cz + T * 0.23, stein);
+      for (let u = 0; u < 7; u++) S.box(0.28, 0.7, 0.28, cx - 3 + u, 1.5, cz + T * 0.23, "#e0cba8");
+      for (let u = 0; u < 8; u++) S.box(0.5, 2.3, 0.4, ax0 + 2 + u * 0.7, 1.4, az0 + 1, dunkel3);
+    } else if (nr === 0 || nr === 1) {
+      for (let u = 0; u < 4; u++) {
+        const x = ax0 + 3 + u * 3.6;
+        S.box(2.1, 1.9, 1, x, 1.1, az0 + 2, stein);
+        S.box(2.15, 1.6, 0.1, x, 2, az0 + 2.52, "#8db0b8");
+        S.box(2.2, 0.18, 1.2, x, 2.16, az0 + 2, gold);
+      }
+    } else if (nr === Math.max(...haus2.etagen)) {
+      for (let u = 0; u < 5; u++) {
+        const x = ax0 + 3 + u * 3;
+        if (x < ax1 - 2) S.box(1.1, 0.8, 1.1, x, 0.6, az0 + 2, "#ede8dc");
+      }
     }
   }
 
@@ -73051,8 +96706,8 @@
   var PFLASTER2 = "#cbc5b8";
   var ASPHALT2 = "#8d939a";
   var TRAMPEL = "#cbb88e";
-  var GLAS6 = "#4e5c67";
-  var GLAS_HELL3 = "#6f8696";
+  var GLAS7 = "#4e5c67";
+  var GLAS_HELL4 = "#6f8696";
   var GLAS_GRUEN = "#5d8c8f";
   var STAHL3 = "#5a6168";
   var MOSAIK_FARBEN = [["#d9482e", "#f0b23a", "#2f6fa8", "#f4efe2", "#3b8a5a", "#1e2c44"], ["#c43a2c", "#e8c547", "#4f9fc9", "#efe8d8", "#7a4a8c", "#2a3a2e"], ["#e46b2e", "#f6d36b", "#2c7c8c", "#f2ece0", "#b8322a", "#26384f"]];
@@ -73483,7 +97138,7 @@
   function qBlock(S, F2, T, o) {
     const { fa, r, n } = o, L2 = F2.L, gh = 2.85, y0 = 0.9, H = y0 + n * gh;
     const wand2 = o.wand, fuge = dunkler(wand2, 0.09);
-    fb2(S, F2, 0, L2, 0, H, o.rueck ? -T + 0.35 : -T, -0.35, GLAS6);
+    fb2(S, F2, 0, L2, 0, H, o.rueck ? -T + 0.35 : -T, -0.35, GLAS7);
     if (o.rueck) {
       const FR2 = rueckseite(F2, T), raster5 = 3, na2 = Math.max(3, Math.round(L2 / raster5)), rb2 = L2 / na2, Lr = [];
       for (let i = 0; i < na2; i++) for (let k = 0; k < n; k++) {
@@ -73559,10 +97214,10 @@
       fpoly2(S, G2, [[-0.1, H + 0.25], [T + 0.1, H + 0.25], [T / 2, H + 0.25 + dh * 0.95]], -0.2, 0.05, wand2);
       for (let k = 0; k < n; k++) {
         const y = y0 + k * gh;
-        fb2(S, G2, T / 2 - 0.5, T / 2 + 0.5, y + 1.2, y + 2.2, 0, 0.06, GLAS6);
+        fb2(S, G2, T / 2 - 0.5, T / 2 + 0.5, y + 1.2, y + 2.2, 0, 0.06, GLAS7);
         fb2(S, G2, T / 2 - 0.6, T / 2 + 0.6, y + 1.1, y + 1.2, 0, 0.14, "#e9e5da");
       }
-      fb2(S, G2, T / 2 - 0.4, T / 2 + 0.4, H + 1, H + 1.8, 0, 0.08, GLAS6);
+      fb2(S, G2, T / 2 - 0.4, T / 2 + 0.4, H + 1, H + 1.8, 0, 0.08, GLAS7);
       fb2(S, G2, 0, T, 0, y0, -0.3, 0.12, fa.sockel);
     }
     for (let i = 0; i < Math.round(L2 / 9); i++) {
@@ -73860,7 +97515,7 @@
     const FL = teil2(F2, u0, u1, -A);
     for (let i = 0; i < ax.length; i++) {
       const u = ax[i] - u0;
-      fb2(S, FL, u - ra / 2 + 0.25, u + ra / 2 - 0.25, 0.3, egH - 1.1, 0, 0.06, GLAS_HELL3);
+      fb2(S, FL, u - ra / 2 + 0.25, u + ra / 2 - 0.25, 0.3, egH - 1.1, 0, 0.06, GLAS_HELL4);
       fb2(S, FL, u - 0.06, u + 0.06, 0.3, egH - 1.1, 0, 0.12, STAHL3);
       fb2(S, FL, u - ra / 2 + 0.2, u + ra / 2 - 0.2, egH - 1.1, egH - 0.6, 0, 0.1, "#3a3f44");
     }
@@ -73869,7 +97524,7 @@
   function magTurm(S, scene2, xa, za, tw, c, r, o) {
     const { egH, gh, orn, wand: wand2 } = c;
     const H = o.H, Ht = H + o.extra * gh;
-    S.quader(xa + 0.4, egH, za + 0.4, xa + tw - 0.4, Ht, za + tw - 0.4, GLAS6);
+    S.quader(xa + 0.4, egH, za + 0.4, xa + tw - 0.4, Ht, za + tw - 0.4, GLAS7);
     for (const F2 of [RZ(xa, za, tw, tw), RX(xa, za, tw, tw)]) {
       const ax = achsen3(0, tw, tw / 3, 0.9);
       const L2 = [];
@@ -73888,7 +97543,7 @@
     }
     S.quader(xa - 0.7, Ht, za - 0.7, xa + tw + 0.7, Ht + 0.8, za + tw + 0.7, orn);
     const t2 = tw * 0.64, xb = xa + (tw - t2) / 2, zb = za + (tw - t2) / 2, h2 = 4.6, y2 = Ht + 0.8;
-    S.quader(xb + 1, y2, zb + 1, xb + t2 - 1, y2 + h2, zb + t2 - 1, GLAS6);
+    S.quader(xb + 1, y2, zb + 1, xb + t2 - 1, y2 + h2, zb + t2 - 1, GLAS7);
     for (let i = 0; i <= 3; i++) {
       const s2 = i / 3 * (t2 - 0.7) + 0.35;
       S.box(0.7, h2, 0.7, xb + s2, y2 + h2 / 2, zb + t2 - 0.35, orn);
@@ -73935,7 +97590,7 @@
       const hh = h * (f === 0 ? 0.62 : 0.42);
       fb2(S, F2, m + f * b - 0.32, m + f * b + 0.32, y + 0.6, y + 0.6 + hh, 0.15, 0.2, orn);
     }
-    fscheibe(S, F2, m, y + h * 0.78, 0.15, 0.22, 0.45, GLAS6, 12);
+    fscheibe(S, F2, m, y + h * 0.78, 0.15, 0.22, 0.45, GLAS7, 12);
     for (let s2 = 0; s2 <= stufen; s2++) {
       fb2(S, F2, u1 - s2 * dx - 0.4, u1 - s2 * dx + 0.05, y + (s2 + 1) * st, y + (s2 + 1) * st + 0.15, -0.5, 0.25, orn);
       fb2(S, F2, u0 + s2 * dx - 0.05, u0 + s2 * dx + 0.4, y + (s2 + 1) * st, y + (s2 + 1) * st + 0.15, -0.5, 0.25, orn);
@@ -73946,7 +97601,7 @@
     for (const u of achsen3(u0, u1, ra * 2, 1.5)) {
       const tf = -1.4, yb = H + -tf * neig;
       fb2(S, F2, u - 0.85, u + 0.85, H, yb + 1.7, -3.8, tf, c.wand);
-      fb2(S, F2, u - 0.45, u + 0.45, yb + 0.25, yb + 1.35, tf, tf + 0.05, GLAS6);
+      fb2(S, F2, u - 0.45, u + 0.45, yb + 0.25, yb + 1.35, tf, tf + 0.05, GLAS7);
       fb2(S, F2, u - 1.05, u + 1.05, yb + 1.7, yb + 1.92, -3.9, tf + 0.25, c.dach);
     }
   }
@@ -74011,15 +97666,15 @@
     const H = c.egH + c.n * c.gh;
     const A = 3.4;
     const kz0 = sk.hinten ? zA + 0.4 : zA, kx0 = sk.links ? x0 + 0.4 : x0;
-    S.quader(sk.links ? x0 + A : x0, 0, kz0, x0 + w - A, c.egH, z0 + d - A, GLAS6);
-    S.quader(kx0, c.egH, kz0, x0 + w - 0.4, H, z0 + d - 0.4, GLAS6);
+    S.quader(sk.links ? x0 + A : x0, 0, kz0, x0 + w - A, c.egH, z0 + d - A, GLAS7);
+    S.quader(kx0, c.egH, kz0, x0 + w - 0.4, H, z0 + d - 0.4, GLAS7);
     S.quader(x0, H - 0.05, zA, x0 + w - 0.4, H + 0.1, z0 + d - 0.4, c.dach);
     if (gedrehtGebaut && d > T + 3) hofGruen(S, r, x0, z0, x0 + w, zA - 0.5, { maxBaeume: 6, weg: false });
     const FR2 = sk.hinten ? R5(x0 + w - 0.4, zA, -1, 0, w - 0.4) : null, FL = sk.links ? R5(x0, zA, 0, 1, T - 0.4) : null;
     if (FR2) magHof(S, scene2, FR2, c, r, { schild: r() < 0.5 ? waehle2(r, ["Hausgemeinschaft", "W\xE4scherei", "Hof 2"]) : null });
     if (fluegel2) {
-      S.quader(x0 + w - T, 0, z0, x0 + w - A, c.egH, zA, GLAS6);
-      S.quader(x0 + w - T, c.egH, z0, x0 + w - 0.4, H, zA, GLAS6);
+      S.quader(x0 + w - T, 0, z0, x0 + w - A, c.egH, zA, GLAS7);
+      S.quader(x0 + w - T, c.egH, z0, x0 + w - 0.4, H, zA, GLAS7);
       S.quader(x0 + w - T, H - 0.05, z0, x0 + w - 0.4, H + 0.1, zA, c.dach);
       hofGruen(S, r, x0, z0, x0 + w - T, zA, { spiel: false, waesche: false, maxBaeume: 6 });
     }
@@ -74083,7 +97738,7 @@
       if (FL) fb2(S, FL, -0.3, FL.L + 0.3, H, H + 0.7, -0.6, 0.6, c.orn);
       if (!sk.vorn) return { hoehe: H + 8 };
       const rb = c.ra * 5, ur0 = w * 0.42 - rb / 2, ur1 = ur0 + rb, FRis = teil2(FZ, ur0, ur1, 0.9);
-      fb2(S, FZ, ur0, ur1, c.egH + 0.3, H, 0, 0.5, GLAS6);
+      fb2(S, FZ, ur0, ur1, c.egH + 0.3, H, 0, 0.5, GLAS7);
       const ax = achsen3(0, rb, c.ra, 0.4), L2 = [];
       for (let k = 0; k < c.n; k++) for (const u of ax) L2.push({ u0: u - 0.7, u1: u + 0.7, v0: c.egH + k * c.gh + 0.9, v1: c.egH + k * c.gh + 2.6, bogen: k === 0 });
       fwand(S, FRis, 0, rb, c.egH + 0.3, H, -0.4, 0, c.wand, L2);
@@ -74098,7 +97753,7 @@
       fb2(S, FRis, -0.4, rb + 0.4, H, H + 0.7, -1, 0.6, c.orn);
       fpoly2(S, FRis, [[-0.3, H + 0.7], [rb + 0.3, H + 0.7], [rb / 2, H + 4.4]], -3, 0.2, c.wand);
       fpoly2(S, FRis, [[-0.6, H + 0.6], [rb + 0.6, H + 0.6], [rb / 2, H + 4.75], [rb / 2, H + 4.45], [rb - 0.2, H + 0.95], [0.2, H + 0.95], [rb / 2, H + 4.45], [rb / 2, H + 4.75]], -0.2, 0.45, c.orn);
-      fscheibe(S, FRis, rb / 2, H + 2.2, 0.2, 0.3, 0.7, GLAS6, 14);
+      fscheibe(S, FRis, rb / 2, H + 2.2, 0.2, 0.3, 0.7, GLAS7, 14);
       top = H + 8;
     }
     return { hoehe: top };
@@ -74110,7 +97765,7 @@
   var magistrale = gedreht(magistraleLokal);
   function bandFassade(S, F2, o) {
     const { n, gh, y0 } = o, L2 = F2.L, H = y0 + n * gh;
-    fb2(S, F2, 0, L2, y0, H, -1, -0.1, o.glas ?? GLAS6);
+    fb2(S, F2, 0, L2, y0, H, -1, -0.1, o.glas ?? GLAS7);
     for (let k = 0; k < n; k++) {
       const y = y0 + k * gh;
       fb2(S, F2, -0.05, L2 + 0.05, y, y + (o.bru ?? 1), -0.3, 0.2, k % 2 && o.bruest2 ? o.bruest2 : o.bruest);
@@ -74131,7 +97786,7 @@
     S.quader(x0 + ein("-x"), 0, z0 + ein("-z"), x0 + w - ein("+x"), H, z0 + d - ein("+z"), wand2);
     for (const F2 of vis.map((q2) => SEITE_RAHMEN[q2](x0, z0, w, d))) {
       const L2 = F2.L;
-      fb2(S, F2, 0, L2, 0.3, eh - 0.6, -1.6, -1.5, GLAS_HELL3);
+      fb2(S, F2, 0, L2, 0.3, eh - 0.6, -1.6, -1.5, GLAS_HELL4);
       for (let u = 1.6; u < L2 - 0.5; u += 2) fb2(S, F2, u - 0.05, u + 0.05, 0.3, eh - 0.6, -1.6, -1.4, STAHL3);
       fb2(S, F2, 0, L2, eh - 0.6, eh, -1.6, -0.2, "#3a3f44");
       if (o.stuetzen !== false) for (let u = 0.3; u < L2; u += 6) fb2(S, F2, u - 0.2, u + 0.2, 0.3, eh, -0.4, 0, "#d9d6cf");
@@ -74202,7 +97857,7 @@
       const sk = sicht(p);
       top = plattenBlock(S, F2, T, { fa, r, n: p.geschosse && p.geschosse > 5 ? Math.min(14, p.geschosse) : 5, cols, y0: 4.6, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: fa.saniert ? "feld" : "rippen", balkone: false, salz: 1, rueck: sk.hinten, aufzug: (p.geschosse ?? 5) > 8 });
       fb2(S, F2, 0, L2, 0, 4.6, -T, -3.6, "#3f4a53");
-      fb2(S, F2, 0, L2, 0.3, 3.6, -3.62, -3.5, GLAS_HELL3);
+      fb2(S, F2, 0, L2, 0.3, 3.6, -3.62, -3.5, GLAS_HELL4);
       for (let u = 3; u < L2; u += 6) {
         fb2(S, F2, u - 0.06, u + 0.06, 0.3, 3.6, -3.5, -3.4, STAHL3);
       }
@@ -74231,7 +97886,7 @@
       const n = p.geschosse ?? 5;
       top = plattenBlock(S, F2, T, { fa, r, n, cols, y0: 4.2, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", balkone: false, salz: 4, rueck: sk.hinten, aufsatz: fa.saniert ? "flach" : false });
       fb2(S, F2, 0, L2, 0, 4.2, -T, -2, "#3f4a53");
-      fb2(S, F2, 0.3, L2 - 0.3, 0.3, 3.4, -2.02, -1.9, GLAS_HELL3);
+      fb2(S, F2, 0.3, L2 - 0.3, 0.3, 3.4, -2.02, -1.9, GLAS_HELL4);
       for (let u = 2.4; u < L2 - 1; u += 4.8) fb2(S, F2, u - 0.06, u + 0.06, 0.3, 3.4, -1.9, -1.8, STAHL3);
       fb2(S, F2, 0, L2, 3.4, 4.2, -2, 0.25, fa.attika);
       ftext2(scene2, F2, namen[0], L2 / 2, 3.8, 0.27, 0.5, L2 * 0.7, "#c8463c");
@@ -74274,7 +97929,7 @@
       freitreppe(S, FP, 4, bw + 2, pl2, 5, 4, "#d8d2c4");
       S.quader(bx, pl2, bz, bx + bw - 1, H, bz + bd - 1, "#33404a");
       const FZ = RZ(bx, bz, bw, bd), FX = RX(bx, bz, bw, bd);
-      fb2(S, FZ, 0, bw, pl2, H - 1.4, -1, -0.9, GLAS_HELL3);
+      fb2(S, FZ, 0, bw, pl2, H - 1.4, -1, -0.9, GLAS_HELL4);
       for (let u = 0; u <= bw + 0.01; u += bw / Math.round(bw / 1.8)) fb2(S, FZ, u - 0.1, u + 0.1, pl2, H - 1.4, -1, 0.25, "#eeeeea");
       fb2(S, FZ, 0, bw, 7.6, 7.85, -1, 0.1, "#eeeeea");
       fb2(S, FX, 0, bd, pl2, H, -1, 0, "#e6e1d4");
@@ -74317,7 +97972,7 @@
       S.quader(bx, Hf - 0.05, hz1 - 1, bx + bw - 1, Hf + 0.25, bz + bd - 1, "#b9b5ab");
       const FF = RZ(bx, hz1 - 1, bw, fd2 + 1), FFX = RX(bx, hz1 - 1, bw, fd2 + 1);
       for (const F2 of [FF, FFX]) {
-        fb2(S, F2, 0, F2.L, 0.3, Hf - 1, -1, -0.92, GLAS_HELL3);
+        fb2(S, F2, 0, F2.L, 0.3, Hf - 1, -1, -0.92, GLAS_HELL4);
         for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 2.4)) fb2(S, F2, u - 0.07, u + 0.07, 0.3, Hf - 1, -1, -0.8, "#d9dcdf");
         fb2(S, F2, 0, F2.L, 4.3, 4.45, -1, -0.8, "#d9dcdf");
         fb2(S, F2, -2.5, F2.L + 0.5, Hf - 1, Hf + 0.2, -1, 2.5, "#f1efe9");
@@ -74337,7 +97992,7 @@
     const H1 = 9.6, Hm = 13.5;
     for (const s2 of [-1, 1]) {
       const fx0 = s2 < 0 ? cx - mb / 2 - fw : cx + mb / 2, fz0 = zf - fd - 2;
-      S.quader(fx0, 0, fz0, fx0 + fw - (s2 > 0 ? 0.4 : 0), H1, fz0 + fd - 0.4, GLAS6);
+      S.quader(fx0, 0, fz0, fx0 + fw - (s2 > 0 ? 0.4 : 0), H1, fz0 + fd - 0.4, GLAS7);
       S.quader(fx0, H1 - 0.05, fz0, fx0 + fw - 0.2, H1 + 0.1, fz0 + fd - 0.2, "#a9a59c");
       const F2 = RZ(fx0, fz0, fw, fd), L2 = [];
       for (const u of achsen3(0, fw, 3.2, 0.8)) for (let k2 = 0; k2 < 2; k2++) L2.push({ u0: u - 0.75, u1: u + 0.75, v0: 1.2 + k2 * 4.2, v1: 3.5 + k2 * 4.2, bogen: k2 === 0 });
@@ -74359,7 +98014,7 @@
     const mx0 = cx - mb / 2, mz0 = zf - md;
     S.quader(mx0, 0, mz0, mx0 + mb, Hm, zf, putz2);
     const FM = RZ(mx0, mz0, mb, md);
-    fb2(S, FM, 1.5, mb - 1.5, 0.3, Hm - 2.4, -0.2, 0.05, GLAS6);
+    fb2(S, FM, 1.5, mb - 1.5, 0.3, Hm - 2.4, -0.2, 0.05, GLAS7);
     for (const u of achsen3(1.5, mb - 1.5, 3.4, 0.2)) fb2(S, FM, u - 0.12, u + 0.12, 0.3, Hm - 2.4, -0.2, 0.15, orn);
     const pt = 6.5, pl = 1.6;
     S.quader(mx0 - 0.5, 0, zf, mx0 + mb + 0.5, pl, zf + pt + 2, "#d9d2c2");
@@ -74411,7 +98066,7 @@
     if (v === "fernsehturm") {
       const hs = 128, rk = 12;
       zyl6(S, 2.8, 5.6, hs, cx, 0, cz, beton, 20);
-      zyl6(S, 15, 15, 5.5, cx, 0, cz, GLAS_HELL3, 16);
+      zyl6(S, 15, 15, 5.5, cx, 0, cz, GLAS_HELL4, 16);
       for (let i = 0; i < 8; i++) {
         const a = i / 8 * 2 * PI8, ax = cx + Math.cos(a) * 12, az = cz + Math.sin(a) * 12;
         const g = new three_module_exports.ConeGeometry(6.6, 3.2, 3);
@@ -74465,7 +98120,7 @@
       antennenSpitze(S, cx, hs + 16.4, cz, 26, 1);
       S.quader(cx - 9, 0, cz + 6, cx + 9, 4.5, cz + 14, "#e6e1d4");
       const FB = RZ(cx - 9, cz + 6, 18, 8);
-      fb2(S, FB, 1, 17, 0.3, 3.4, -0.1, 0.06, GLAS_HELL3);
+      fb2(S, FB, 1, 17, 0.3, 3.4, -0.1, 0.06, GLAS_HELL4);
       fb2(S, FB, -0.5, 18.5, 4.5, 5, -8, 0.8, "#f1efe9");
       for (let i = 0; i < 5; i++) baum(S, x0 + 3 + r() * (w - 6), z0 + 3 + r() * 6, r, 1);
       return { hoehe: hs + 43 };
@@ -74476,7 +98131,7 @@
       S.quader(sx, 0, sz, sx + sw2 - 0.6, y0, sz + sd - 0.6, "#33404a");
       S.quader(sx, y0 - 0.05, sz, sx + sw2 - 0.6, y0 + 0.3, sz + sd - 0.6, "#b3afa5");
       for (const F2 of [RZ(sx, sz, sw2, sd), RX(sx, sz, sw2, sd)]) {
-        fb2(S, F2, 0, F2.L, 0.3, y0 - 1.6, -0.6, -0.5, GLAS_HELL3);
+        fb2(S, F2, 0, F2.L, 0.3, y0 - 1.6, -0.6, -0.5, GLAS_HELL4);
         for (let u = 0; u <= F2.L; u += F2.L / Math.round(F2.L / 3)) fb2(S, F2, u - 0.15, u + 0.15, 0.3, y0 - 1.6, -0.6, 0.2, "#e3e0d8");
         fb2(S, F2, -0.3, F2.L + 0.3, y0 - 1.6, y0, -0.6, 0.4, "#e3e0d8");
       }
@@ -74508,7 +98163,7 @@
         }
         for (let k = 0; k < n2 - 2; k++) fb2(S, F2, 0, F2.L, y0 + k * gh2, y0 + k * gh2 + 0.9, -0.4, 0.25, "#d9d5cb");
         fb2(S, F2, -0.6, F2.L + 0.6, Ht - 2 * gh2, Ht - 2 * gh2 + 0.8, -0.4, 0.9, "#f0ede6");
-        fb2(S, F2, 1.4, F2.L - 1.4, Ht - 2 * gh2 + 0.8, Ht, -1.6, -1.5, GLAS_HELL3);
+        fb2(S, F2, 1.4, F2.L - 1.4, Ht - 2 * gh2 + 0.8, Ht, -1.6, -1.5, GLAS_HELL4);
         fb2(S, F2, -0.6, 1, Ht - 2 * gh2, Ht + 9, -1, 0.6, "#f0ede6");
         fb2(S, F2, F2.L - 1, F2.L + 0.6, Ht - 2 * gh2, Ht + 9, -1, 0.6, "#f0ede6");
         for (let i = 1; i < 4; i++) fb2(S, F2, i * F2.L / 4 - 0.4, i * F2.L / 4 + 0.4, Ht, Ht + 9, -1, 0.3, "#f0ede6");
@@ -74528,7 +98183,7 @@
     S.quader(px2, Hp - 0.05, pz4, px2 + pw - 1, Hp + 0.3, pz4 + pd - 1, "#b3afa5");
     for (let i = 0; i < 8; i++) S.box(1.2, 0.6, 1.2, px2 + pw * 0.75 + i % 4 * 2.4, Hp + 0.6, pz4 + 4 + Math.floor(i / 4) * 3, "#d9dcdf");
     for (const F2 of [RZ(px2, pz4, pw, pd), RX(px2, pz4, pw, pd)]) {
-      fb2(S, F2, 0, F2.L, 0.3, 4.2, -1, -0.9, GLAS_HELL3);
+      fb2(S, F2, 0, F2.L, 0.3, 4.2, -1, -0.9, GLAS_HELL4);
       for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 2.5)) fb2(S, F2, u - 0.06, u + 0.06, 0.3, 4.2, -1, -0.8, "#c9cdd0");
       for (let u = 0; u < F2.L; u += 3) fb2(S, F2, u + 0.05, Math.min(F2.L, u + 3) - 0.05, 4.2, Hp, -1, 0.05, u / 3 % 2 ? "#e6dfcf" : "#dcd4c2");
       fb2(S, F2, -0.5, F2.L + 0.5, Hp, Hp + 0.6, -1, 0.6, "#f1efe9");
@@ -74544,7 +98199,7 @@
     const FG = endeRechts(FS, st);
     fb2(S, FG, -0.3, st, Hp + 0.6, Hs + 0.8, -0.3, 0.25, "#ded6c2");
     for (let u = 1.2; u < st - 0.5; u += 1.6) fb2(S, FG, u - 0.3, u + 0.3, Hp + 0.6, Hs + 0.8, 0.25, 0.4, "#e9e2cf");
-    for (let k = 0; k < n; k++) fb2(S, FG, st / 2 - 0.8, st / 2 + 0.8, Hp + 0.6 + k * gh + 1.1, Hp + 0.6 + k * gh + 2.3, 0.25, 0.45, GLAS6);
+    for (let k = 0; k < n; k++) fb2(S, FG, st / 2 - 0.8, st / 2 + 0.8, Hp + 0.6 + k * gh + 1.1, Hp + 0.6 + k * gh + 2.3, 0.25, 0.45, GLAS7);
     S.quader(sxx, Hs + 0.8, szz, sxx + sw, Hs + 0.95, szz + st, "#9a9893");
     S.quader(sxx + sw * 0.84, Hs + 0.8, szz + 3, sxx + sw * 0.97, Hs + 4, szz + st - 3, "#e6dfcf");
     const FT = teil2(FS, 0, sw, -1.4);
@@ -74618,10 +98273,10 @@
           }
         }
       };
-      wand2([xi0, zi1], [xi1, zi1], GLAS_HELL3);
-      wand2([xi1, zi1], [xi1, zi0], GLAS_HELL3);
-      wand2([xi1, zi0], [xi0, zi0], GLAS6);
-      wand2([xi0, zi0], [xi0, zi1], GLAS6);
+      wand2([xi0, zi1], [xi1, zi1], GLAS_HELL4);
+      wand2([xi1, zi1], [xi1, zi0], GLAS_HELL4);
+      wand2([xi1, zi0], [xi0, zi0], GLAS7);
+      wand2([xi0, zi0], [xi0, zi1], GLAS7);
       for (let i = 0; i < 4; i++) schirm(S, x0 + 4 + i * 4, z0 + d - 3.2, 1.5, ["#c8463c", "#f4efe2", "#2f6fa8", "#e8c547"][i % 4]);
       const FS = R5(xb - 12, z0 + d - 1.2, 1, 0, 11);
       fb2(S, FS, 0, 11, 0.3, 1.5, -0.4, 0, "#d8d3c6");
@@ -74632,7 +98287,7 @@
       const pw = Math.min(w - 8, 18), pd = Math.min(d - 9, 11), px2 = x0 + 3, pz4 = z0 + 3, H2 = 3.8;
       S.quader(px2 + 0.3, 0.3, pz4 + 0.3, px2 + pw - 0.3, H2, pz4 + pd - 0.3, "#3a4650");
       for (const F2 of [RZ(px2, pz4, pw, pd), RX(px2, pz4, pw, pd)]) {
-        fb2(S, F2, 0, F2.L, 0.3, H2, -0.35, -0.28, GLAS_HELL3);
+        fb2(S, F2, 0, F2.L, 0.3, H2, -0.35, -0.28, GLAS_HELL4);
         for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 1.8)) fb2(S, F2, u - 0.05, u + 0.05, 0.3, H2, -0.35, -0.2, "#e9e6de");
         fb2(S, F2, 0, F2.L, 0.3, 0.9, -0.35, -0.15, "#d9d4c8");
       }
@@ -74656,7 +98311,7 @@
       }
       const kx = x0 + w - 9, kz2 = z0 + d - 8;
       S.quader(kx, 0.3, kz2, kx + 5, 3, kz2 + 4, "#e9e6de");
-      fb2(S, RZ(kx, kz2, 5, 4), 0.4, 4.6, 1, 2.5, 0, 0.06, GLAS_HELL3);
+      fb2(S, RZ(kx, kz2, 5, 4), 0.4, 4.6, 1, 2.5, 0, 0.06, GLAS_HELL4);
       S.quader(kx - 0.6, 3, kz2 - 0.6, kx + 5.6, 3.35, kz2 + 4.8, "#c8463c");
       ftext2(scene2, RZ(kx, kz2, 5, 4), "Zeitungen", 2.5, 2.75, 0.85, 0.35, 4.6, "#2a3a4a");
       brunnen(S, x0 + w - 7, pz4 + 4, 2.6, { duesen: 4 });
@@ -74667,7 +98322,7 @@
       const uw = Math.min(w - 10, 20), ud = Math.min(d - 11, 14), ux = x0 + 4, uz = z0 + 3, h1 = 3.9, h2 = 3.6;
       S.quader(ux + 1.5, 0.3, uz + 1.5, ux + uw - 1.5, h1, uz + ud - 1.5, "#3a4650");
       for (const F2 of [RZ(ux + 1.5, uz + 1.5, uw - 3, ud - 3), RX(ux + 1.5, uz + 1.5, uw - 3, ud - 3)]) {
-        fb2(S, F2, 0, F2.L, 0.3, h1, 0, 0.06, GLAS_HELL3);
+        fb2(S, F2, 0, F2.L, 0.3, h1, 0, 0.06, GLAS_HELL4);
         for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 1.6)) fb2(S, F2, u - 0.05, u + 0.05, 0.3, h1, 0, 0.12, "#e9e6de");
       }
       S.quader(ux, h1, uz, ux + uw, h1 + 0.5, uz + ud, "#f3f1ec");
@@ -74694,7 +98349,7 @@
     S.quader(gx, 0.3, gz2, gx + gw - 0.6, H, gz2 + gd - 0.6, "#3a4650");
     S.quader(gx - 0.8, H - 0.05, gz2 - 0.8, gx + gw + 0.4, H + 0.12, gz2 + gd + 0.8, "#b3afa5");
     const FZ = RZ(gx, gz2, gw, gd), FX = RX(gx, gz2, gw, gd);
-    fb2(S, FZ, 0, gw * 0.62, 0.3, H - 0.6, -0.6, -0.5, GLAS_HELL3);
+    fb2(S, FZ, 0, gw * 0.62, 0.3, H - 0.6, -0.6, -0.5, GLAS_HELL4);
     for (let u = 0; u <= gw * 0.62; u += 2) fb2(S, FZ, u - 0.05, u + 0.05, 0.3, H - 0.6, -0.6, -0.4, "#e9e6de");
     formsteinwand(S, FZ, gw * 0.62, gw, 0.3, H - 0.6, -0.6, -0.2, "#e3ddcf", waehle2(r, ["kreis", "raute", "schlitz"]));
     formsteinwand(S, FX, 0, gd, 0.3, H - 0.6, -0.6, -0.2, "#e3ddcf", "kreis");
@@ -74731,7 +98386,7 @@
     S.quader(bx, H - 0.05, bz, bx + bw - 0.6, H + 0.15, bz + bd - 0.6, "#9e9b94");
     const FZ = RZ(bx, bz, bw, bd), FX = RX(bx, bz, bw, bd);
     const blende = disc ? "#3f8a78" : v === "waschbeton" ? "#c8bea8" : "#f4f3ef";
-    fb2(S, FZ, 1, bw - 1, 0.9, 3.5, -0.6, -0.5, GLAS_HELL3);
+    fb2(S, FZ, 1, bw - 1, 0.9, 3.5, -0.6, -0.5, GLAS_HELL4);
     for (let u = 1; u <= bw - 0.99; u += (bw - 2) / Math.round((bw - 2) / 1.5)) fb2(S, FZ, u - 0.05, u + 0.05, 0.9, 3.5, -0.6, -0.4, disc ? "#9aa1a7" : "#e9e6de");
     if (v === "waschbeton") for (let u = 0; u < bw; u += 3) {
       fb2(S, FZ, u + 0.06, Math.min(bw, u + 3) - 0.06, 0.3, 0.9, -0.6, 0.1, u / 3 % 2 ? "#b9ae98" : "#b0a58e");
@@ -74748,7 +98403,7 @@
     if (disc) {
       S.box(0.1, 0.1, 0.1, bx, 0, bz, wand2);
       fb2(S, FZ, ex - 3, ex + 3, 0.3, 3, 0.2, 3, "#3a4650");
-      fb2(S, FZ, ex - 2.9, ex + 2.9, 0.4, 2.9, 2.95, 3.05, GLAS_HELL3);
+      fb2(S, FZ, ex - 2.9, ex + 2.9, 0.4, 2.9, 2.95, 3.05, GLAS_HELL4);
       ftext2(scene2, FZ, "Kaufmarkt Elster", bw * 0.58, 4.5, 0.5, 1.4, bw * 0.6, "#ffffff");
       fb2(S, FZ, bw * 0.3, bw * 0.5, 1.2, 3, -0.4, -0.35, "#e8463c");
       ftext2(scene2, FZ, "Neuer\xF6ffnung!", bw * 0.4, 2.1, -0.33, 0.6, bw * 0.19, "#ffffff");
@@ -74956,7 +98611,7 @@
     for (let k = 0; k < n; k++) {
       const y = y0 + k * gh;
       for (let u = 0; u < L2; u += 3.6) fb2(S, F2, u + 0.06, Math.min(L2, u + 3.6) - 0.06, y + 0.06, y + 1.05, -0.3, 0.18, farben[(k + (o.salz ?? 0)) % farben.length]);
-      fb2(S, F2, 0, L2, y + 1.05, y + gh, -1, -0.9, GLAS_HELL3);
+      fb2(S, F2, 0, L2, y + 1.05, y + gh, -1, -0.9, GLAS_HELL4);
       for (let u = 0; u <= L2 + 0.01; u += 1.2) fb2(S, F2, u - 0.05, u + 0.05, y + 1.05, y + gh, -1, -0.82, "#f2f1ec");
       fb2(S, F2, 0, L2, y + 2.45, y + 2.52, -1, -0.82, "#f2f1ec");
     }
@@ -74966,12 +98621,12 @@
     const G2 = endeRechts(F2, T);
     if (o.giebel !== false) {
       fb2(S, G2, -0.3, T, 0, H + 0.6, -0.2, 0.15, "#d6d0c2");
-      for (let k = 0; k < n; k++) fb2(S, G2, T / 2 - 0.6, T / 2 + 0.6, y0 + k * gh + 1.2, y0 + k * gh + 2.6, 0.15, 0.2, GLAS6);
+      for (let k = 0; k < n; k++) fb2(S, G2, T / 2 - 0.6, T / 2 + 0.6, y0 + k * gh + 1.2, y0 + k * gh + 2.6, 0.15, 0.2, GLAS7);
       mosaik2(S, G2, 1.5, T * 0.4, y0 + 1.5, H - 1.5, 0.15, r, { motiv: "figur", nu: 4 });
     }
     const tu2 = L2 * (o.treppe ?? 0.3);
     fb2(S, F2, tu2 - 2.2, tu2 + 2.2, 0, H + 1.4, -0.3, 2, "#e3ded1");
-    fb2(S, F2, tu2 - 0.8, tu2 + 0.8, 1.2, H - 0.5, 1.9, 2.06, GLAS_HELL3);
+    fb2(S, F2, tu2 - 0.8, tu2 + 0.8, 1.2, H - 0.5, 1.9, 2.06, GLAS_HELL4);
     fb2(S, F2, tu2 - 1.3, tu2 + 1.3, 0.3, 2.5, 1.95, 2.08, "#5a6570");
     fb2(S, F2, tu2 - 2.6, tu2 + 2.6, 2.6, 2.85, 0, 4, "#f2f1ec");
     if (o.name) ftext2(scene2, F2, o.name, tu2, H + 0.6, 2.1, 0.6, 4.2, "#2a3a4a");
@@ -74982,7 +98637,7 @@
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, "#d6d0c2");
     for (const F2 of [RZ(x0, z0, w, d), RX(x0, z0, w, d)]) {
       for (let u = 0; u < F2.L; u += 3) fb2(S, F2, u + 0.06, Math.min(F2.L, u + 3) - 0.06, 0.3, H - 2.6, 0, 0.12, u / 3 % 2 ? "#d6d0c2" : "#cdc6b6");
-      fb2(S, F2, 0, F2.L, H - 2.6, H - 0.6, -0.1, 0.06, GLAS_HELL3);
+      fb2(S, F2, 0, F2.L, H - 2.6, H - 0.6, -0.1, 0.06, GLAS_HELL4);
       for (let u = 0; u <= F2.L; u += 1.5) fb2(S, F2, u - 0.06, u + 0.06, H - 2.6, H - 0.6, 0, 0.12, "#f2f1ec");
       fb2(S, F2, -0.5, F2.L + 0.5, H - 0.6, H + 0.2, -0.2, 0.6, "#f2f1ec");
     }
@@ -75021,7 +98676,7 @@
         for (const F3 of [RZ(fx, fz, fw, fd), RX(fx, fz, fw, fd)]) for (let k = 0; k < 2; k++) {
           const y = 0.6 + k * 3.3;
           for (let u = 0; u < F3.L; u += 2.4) fb2(S, F3, u + 0.05, Math.min(F3.L, u + 2.4) - 0.05, y, y + 0.9, -0.1, 0.16, farben[Math.floor(u / 2.4 + k) % farben.length]);
-          fb2(S, F3, 0.3, F3.L - 0.3, y + 0.9, y + 2.7, -0.1, 0.06, GLAS_HELL3);
+          fb2(S, F3, 0.3, F3.L - 0.3, y + 0.9, y + 2.7, -0.1, 0.06, GLAS_HELL4);
           for (let u = 0.3; u <= F3.L - 0.29; u += 1.2) fb2(S, F3, u - 0.04, u + 0.04, y + 0.9, y + 2.7, 0, 0.1, "#f2f1ec");
         }
         S.quader(fx - 0.4, H2, fz - 0.4, fx + fw + 0.4, H2 + 0.5, fz + fd + 0.4, "#f2f1ec");
@@ -75057,7 +98712,7 @@
     const tx = x0 + 4 + L2 + 8, tw = Math.min(x0 + w - 3 - tx, 20), td = 30;
     turnhalle(S, scene2, tx, zf - td + 2, tw, td, r);
     S.quader(x0 + 4 + L2, 0, zf - 8, tx, 3.6, zf - 4, "#e3ded1");
-    fb2(S, R5(x0 + 4 + L2, zf - 4, 1, 0, 8), 0.3, 7.7, 0.8, 3, 0, 0.06, GLAS_HELL3);
+    fb2(S, R5(x0 + 4 + L2, zf - 4, 1, 0, 8), 0.3, 7.7, 0.8, 3, 0, 0.06, GLAS_HELL4);
     hofGruen(S, r, x0 + 2, z0 + 2, x0 + 4 + L2, zf - T - 1, { spiel: false, waesche: false, teppich: false, maxBaeume: 6 });
     return { hoehe: H };
   }
@@ -75085,14 +98740,14 @@
         fb2(S, F2, 0, F2.L, y0, H2, -0.1, 0.02, glas2);
         for (let u = 0; u <= F2.L + 0.01; u += 1.5) fb2(S, F2, u - 0.06, u + 0.06, y0, H2, 0, 0.15, alu);
         for (let k = 0; k <= n2; k++) fb2(S, F2, 0, F2.L, y0 + k * gh2 - 0.08, y0 + k * gh2 + 0.08, 0, 0.15, alu);
-        fb2(S, F2, 0.6, F2.L - 0.6, 0.6, y0 - 0.6, 0.15, 0.2, GLAS6);
+        fb2(S, F2, 0.6, F2.L - 0.6, 0.6, y0 - 0.6, 0.15, 0.2, GLAS7);
       }
       zyl6(S, rr + 0.05, rr + 0.05, H2 - y0, bx2 + bw2 - rr, y0, bz2 + bd2 - rr, glas2, 20);
       for (let k = 0; k <= n2; k++) zyl6(S, rr + 0.15, rr + 0.15, 0.16, bx2 + bw2 - rr, y0 + k * gh2 - 0.08, bz2 + bd2 - rr, alu, 20, true);
       zyl6(S, rr + 0.1, rr + 0.1, y0 - 0.3, bx2 + bw2 - rr, 0.3, bz2 + bd2 - rr, granit, 20);
       const tu2 = FZ2.L * 0.28;
       fb2(S, FZ2, tu2 - 2.2, tu2 + 2.2, 0, H2 + 2.4, -0.2, 1.4, "#e9e4dc");
-      for (let k = 0; k < n2 + 1; k++) fscheibe(S, FZ2, tu2, y0 + k * gh2 - 1.2, 1.35, 1.5, 0.75, GLAS6, 16);
+      for (let k = 0; k < n2 + 1; k++) fscheibe(S, FZ2, tu2, y0 + k * gh2 - 1.2, 1.35, 1.5, 0.75, GLAS7, 16);
       for (let k = 0; k < n2 + 1; k++) fscheibe(S, FZ2, tu2, y0 + k * gh2 - 1.2, 1.3, 1.45, 0.95, alu, 16);
       const g = walmdach(12, 10, 5);
       g.translate(bx2 + bw2 * 0.45, H2, bz2 + bd2 * 0.45);
@@ -75112,7 +98767,7 @@
     if (v === "passage") {
       const bw2 = Math.min(w - 4, 54), bd2 = Math.min(d - 4, 32), bx2 = x0 + 2, bz2 = z0 + 2, n2 = 2, gh2 = 3.8, eg2 = 4.6, H2 = eg2 + n2 * gh2;
       const stein2 = waehle2(r, ["#d9b9a4", "#e3cfb6", "#cfb4a2"]), orn = "#f3ece0";
-      S.quader(bx2, 0, bz2, bx2 + bw2 - 0.3, H2, bz2 + bd2 - 0.3, GLAS6);
+      S.quader(bx2, 0, bz2, bx2 + bw2 - 0.3, H2, bz2 + bd2 - 0.3, GLAS7);
       S.quader(bx2 + 0.2, H2, bz2 + 0.2, bx2 + bw2 - 0.2, H2 + 0.25, bz2 + bd2 - 0.2, "#a9a59c");
       const mitte = bw2 * 0.5, pb = 9;
       for (const F2 of [RZ(bx2, bz2, bw2, bd2), RX(bx2, bz2, bw2, bd2)]) {
@@ -75146,7 +98801,7 @@
       }
       const FZ2 = RZ(bx2, bz2, bw2, bd2);
       ftext2(scene2, FZ2, p.name ?? "Markt-Passage", mitte, H2 - 0.6, 0.65, 1, pb * 2.2, "#1f3a5f");
-      fb2(S, FZ2, mitte - pb / 2, mitte + pb / 2, 0.3, H2 - 1.2, -0.29, -0.2, GLAS_HELL3);
+      fb2(S, FZ2, mitte - pb / 2, mitte + pb / 2, 0.3, H2 - 1.2, -0.29, -0.2, GLAS_HELL4);
       for (let i = 0; i < 4; i++) {
         const fx = x0 + 4 + i * 2.5;
         S.box(0.12, 9, 0.12, fx, 4.8, z0 + d - 1, "#d9dcdf");
@@ -75157,14 +98812,14 @@
     }
     const bw = Math.min(w - 4, 32), bd = Math.min(d - 4, 22), bx = x0 + 2, bz = z0 + 2, n = 3, gh = 3.5, eg = 4.4, H = eg + n * gh;
     const stein = waehle2(r, ["#e6dccb", "#d9cbb5"]), rot = "#2f6a5a";
-    S.quader(bx, 0, bz, bx + bw - 0.6, eg, bz + bd - 0.6, GLAS6);
-    S.quader(bx, eg, bz, bx + bw - 0.3, H, bz + bd - 0.3, GLAS6);
+    S.quader(bx, 0, bz, bx + bw - 0.6, eg, bz + bd - 0.6, GLAS7);
+    S.quader(bx, eg, bz, bx + bw - 0.3, H, bz + bd - 0.3, GLAS7);
     S.quader(bx + 0.2, H, bz + 0.2, bx + bw - 0.2, H + 0.3, bz + bd - 0.2, "#a9a59c");
     for (const F2 of [RZ(bx, bz, bw, bd), RX(bx, bz, bw, bd)]) {
       const L2 = [];
       for (const u of achsen3(0, F2.L, 3, 0.8)) for (let k = 0; k < n; k++) L2.push({ u0: u - 0.85, u1: u + 0.85, v0: eg + k * gh + 0.7, v1: eg + k * gh + 2.9 });
       fwand(S, F2, 0, F2.L, eg, H, -0.4, 0, stein, L2);
-      fb2(S, F2, 0, F2.L, 0, eg, -0.6, -0.5, GLAS_HELL3);
+      fb2(S, F2, 0, F2.L, 0, eg, -0.6, -0.5, GLAS_HELL4);
       for (let u = 0; u <= F2.L; u += 2) fb2(S, F2, u - 0.15, u + 0.15, 0.3, eg, -0.5, 0.1, "#8b8f93");
       fb2(S, F2, -0.2, F2.L + 0.2, eg - 0.4, eg, -0.5, 0.3, "#8b8f93");
       fb2(S, F2, -0.3, F2.L + 0.3, H, H + 0.5, -0.4, 0.4, stein);
@@ -75288,7 +98943,7 @@
     const wand2 = zustand === "saniert" ? waehle2(r, ["#e9c46a", "#e6b8a2", "#c9d6b5", "#b9cbd8", "#f1e2c0", "#d9a68e", "#efd8c0"]) : zustand === "leer" ? waehle2(r, ["#8f8a81", "#99938a"]) : waehle2(r, ["#a39e94", "#9d978c", "#aaa498", "#a49d8e"]);
     const c = { n, eg, gh, wand: wand2, orn: zustand === "saniert" ? "#fbf7ee" : heller(wand2, 0.05), sockel: zustand === "saniert" ? dunkler(wand2, 0.15) : dunkler(wand2, 0.1), zustand, ra: 3.1, bogen: r() < 0.5 };
     const zb = z0 + d - T;
-    S.quader(x0, 0, zb, x0 + w - 0.45, H, z0 + d - 0.45, GLAS6);
+    S.quader(x0, 0, zb, x0 + w - 0.45, H, z0 + d - 0.45, GLAS7);
     const FZ = RZ(x0, z0, w, d), FX = R5(x0 + w, z0 + d, 0, -1, T);
     altFassade(S, scene2, FZ, c, r, { haupt: true, salz: 1 });
     if (eck) altFassade(S, scene2, FX, c, r, { haupt: false, salz: 2 });
@@ -75314,7 +98969,7 @@
     for (let i = 0; i < ng; i++) {
       const u = (i + 0.5) * w / ng, s2 = 0.35, yb = H + 0.6 + s2 * dh, zf = z0 + d - s2 * T / 2;
       S.quader(x0 + u - 0.8, H + 0.6, zf - 2, x0 + u + 0.8, yb + 1.5, zf, zustand === "saniert" ? "#efe9dc" : "#7d7f80");
-      S.box(1, 1, 0.1, x0 + u, yb + 0.7, zf + 0.02, zustand === "leer" ? "#262b30" : GLAS6);
+      S.box(1, 1, 0.1, x0 + u, yb + 0.7, zf + 0.02, zustand === "leer" ? "#262b30" : GLAS7);
       S.quader(x0 + u - 1, yb + 1.5, zf - 2.2, x0 + u + 1, yb + 1.7, zf + 0.2, dach3);
     }
     for (const u of [w * 0.25, w * 0.7]) S.quader(x0 + u - 0.5, H + 2, zb + T * 0.45, x0 + u + 0.5, H + dh + 2, zb + T * 0.45 + 1, zustand === "saniert" ? "#b9654e" : "#7a6a60");
@@ -75405,7 +99060,7 @@
     if (v === "kiosk") {
       const kx = x0 + w - 8, kz2 = z0 + d - 7;
       S.quader(kx, 0.3, kz2, kx + 5.5, 3, kz2 + 4, "#f2efe6");
-      fb2(S, RZ(kx, kz2, 5.5, 4), 0.5, 5, 1.2, 2.4, 0, 0.06, GLAS_HELL3);
+      fb2(S, RZ(kx, kz2, 5.5, 4), 0.5, 5, 1.2, 2.4, 0, 0.06, GLAS_HELL4);
       fb2(S, RZ(kx, kz2, 5.5, 4), 0.4, 5.1, 1.1, 1.2, 0, 0.6, "#d8d3c6");
       S.quader(kx - 0.5, 3, kz2 - 0.4, kx + 6, 3.3, kz2 + 5.2, "#c8463c");
       ftext2(scene2, RZ(kx, kz2, 5.5, 4), "Imbiss \xB7 Bratwurst", 2.75, 2.75, 1.25, 0.32, 5.2, "#ffffff", "#c8463c");
@@ -75445,7 +99100,7 @@
     const { n, gh, eg, stein, orn, pfeiler } = c, L2 = F2.L, H = eg + n * gh;
     const ra = c.ra, na = Math.max(2, Math.round(L2 / ra)), rb = L2 / na;
     const pmitte = o.passage ? Math.floor(na / 2) : -1;
-    fb2(S, F2, 0, L2, eg, H, -0.6, -0.45, GLAS6);
+    fb2(S, F2, 0, L2, eg, H, -0.6, -0.45, GLAS7);
     for (let i = 0; i < na; i++) {
       const u0 = i * rb, u1 = (i + 1) * rb;
       for (let k = 0; k < n; k++) {
@@ -75460,7 +99115,7 @@
       fb2(S, F2, u - br, u + br, eg - 0.4, H - 0.3, -0.6, pfeiler, stein);
       fb2(S, F2, u - br - 0.15, u + br + 0.15, H - 1.6, H - 0.3, -0.6, pfeiler + 0.15, orn);
     }
-    fb2(S, F2, 0, L2, 0, eg, -1.4, -1.3, GLAS_HELL3);
+    fb2(S, F2, 0, L2, 0, eg, -1.4, -1.3, GLAS_HELL4);
     for (let i = 0; i <= na; i++) fb2(S, F2, i * rb - 0.6, i * rb + 0.6, 0, eg, -1.4, 0.2, stein);
     for (let i = 0; i < na; i++) {
       if (i === pmitte) continue;
@@ -75497,7 +99152,7 @@
     };
     const H = c.eg + c.n * c.gh, T = Math.min(d, 22);
     const zb = z0 + d - T;
-    S.quader(x0, 0, zb, x0 + w - 0.6, H, z0 + d - 0.6, GLAS6);
+    S.quader(x0, 0, zb, x0 + w - 0.6, H, z0 + d - 0.6, GLAS7);
     const FZ = RZ(x0, z0, w, d), FX = R5(x0 + w, z0 + d, 0, -1, T);
     messeFassade(S, scene2, FZ, c, r, { passage: w >= 18, salz: 1 });
     const eck = p.ecke ? p.ecke.includes("+x") : p.variante === "eck";
@@ -75505,13 +99160,13 @@
     else {
       fb2(S, FX, 0, T, 0, H, -0.6, -0.1, dunkler(stein, 0.04));
       for (let k = 0; k <= c.n; k++) fb2(S, FX, 0, T, c.eg + k * c.gh - 0.12, c.eg + k * c.gh + 0.1, -0.1, 0.05, dunkler(stein, 0.1));
-      for (const u of achsen3(0, T, 3.4, 1.2)) for (let k = c.n - 2; k < c.n; k++) fb2(S, FX, u - 0.6, u + 0.6, c.eg + k * c.gh + 0.9, c.eg + k * c.gh + 2.6, -0.1, 0.02, GLAS6);
+      for (const u of achsen3(0, T, 3.4, 1.2)) for (let k = c.n - 2; k < c.n; k++) fb2(S, FX, u - 0.6, u + 0.6, c.eg + k * c.gh + 0.9, c.eg + k * c.gh + 2.6, -0.1, 0.02, GLAS7);
     }
     const dh = 5.2, flach = r() < 0.4;
     if (flach) {
       S.quader(x0, H + 0.5, zb, x0 + w - 0.6, H + 0.75, z0 + d - 0.6, "#9a9893");
       S.quader(x0 + 1.5, H + 0.5, zb + 1, x0 + w - 2.4, H + 4.2, z0 + d - 3, c.orn);
-      for (const u of achsen3(2, w - 3, 2.6, 0.6)) S.box(1.6, 1.8, 0.1, x0 + u, H + 2.4, z0 + d - 2.95, GLAS6);
+      for (const u of achsen3(2, w - 3, 2.6, 0.6)) S.box(1.6, 1.8, 0.1, x0 + u, H + 2.4, z0 + d - 2.95, GLAS7);
       S.quader(x0 + 1.2, H + 4.2, zb + 0.7, x0 + w - 2.1, H + 4.6, z0 + d - 2.7, heller(c.orn, 0.04));
       return { hoehe: H + 4.6 };
     }
@@ -75521,7 +99176,7 @@
     for (const u of achsen3(1, w - 2, c.ra * 2, 1)) {
       const zf = z0 + d - 1.8;
       S.quader(x0 + u - 1, H + 0.5, zf - 2.2, x0 + u + 1, H + 3.3, zf, c.orn);
-      S.box(1.2, 1.5, 0.1, x0 + u, H + 1.9, zf + 0.02, GLAS6);
+      S.box(1.2, 1.5, 0.1, x0 + u, H + 1.9, zf + 0.02, GLAS7);
     }
     let top = H + dh + 0.5;
     if (eck && w >= 24) {
@@ -75930,16 +99585,16 @@
     const { rb } = ctx;
     const q2 = (E.unsaniert?.[art] ?? 0) * (rb() < 0.5 ? 0.3 : 1.7) * faktor;
     for (const p of parzellenVon(ctx)) if ((p.typ === "stadthaus" || p.typ === "eck") && rb() < q2) {
-      const variante = p.typ === "eck" ? "eck" : "reihe";
-      Object.assign(p, { typ: "slot:altbau_unsaniert", sonder: "altbau_unsaniert", zustand: "unsaniert", variante, stilAlt: p.stil, stil: null, landmarke: false });
+      const variante2 = p.typ === "eck" ? "eck" : "reihe";
+      Object.assign(p, { typ: "slot:altbau_unsaniert", sonder: "altbau_unsaniert", zustand: "unsaniert", variante: variante2, stilAlt: p.stil, stil: null, landmarke: false });
     }
   }
   function ostMagistrale(ctx, E, b, seiten4) {
     const { rb } = ctx;
     const s2 = seiten4.includes("+z") ? "+z" : seiten4.includes("+x") ? "+x" : seiten4[0];
-    const variante = E.magistraleVariante ?? "berlin";
+    const variante2 = E.magistraleVariante ?? "berlin";
     const g = E.typ === "metropole" ? 9 : E.typ === "mittelstadt" ? 5 : 7;
-    const ex = { klasse: 5, variante, geschosse: g, landmarke: false };
+    const ex = { klasse: 5, variante: variante2, geschosse: g, landmarke: false };
     const stuecke = (L2) => {
       const n = Math.max(1, Math.round(L2 / 80));
       return Array.from({ length: n }, () => L2 / n);
@@ -76055,8 +99710,8 @@
     const aus = AUSSTATTUNG[(E.plattenNr - 1) % AUSSTATTUNG.length];
     const MA = { kaufhalle: ["slot:kaufhalle", 44, 38, void 0, 1], schule: ["slot:schule", 82, 54, "erfurt", 4], kita: ["slot:schule", 56, 48, "kita", 2] }[aus];
     if (MA && MA[1] <= X1 - X0 && MA[2] + 40 <= Z1 - Z0) {
-      const [typ, aw, ad, variante, g] = MA;
-      setze(typ, X1 - aw, Z1 - ad, aw, ad, ["+z", "+x"], { variante, geschosse: g });
+      const [typ, aw, ad, variante2, g] = MA;
+      setze(typ, X1 - aw, Z1 - ad, aw, ad, ["+z", "+x"], { variante: variante2, geschosse: g });
       const rw = X1 - X0 - aw - 4;
       if (rw >= 30) zeile(X0, Z1 - TD, rw, TD, "+z");
       else if (rw >= 14) b.spiel.push({ x: X0, z: Z1 - ad, w: rw, d: ad });
@@ -76739,7 +100394,7 @@
     for (const l of oeff) {
       if (l.typ === "offen") continue;
       const tief2 = l.tief ?? (l.typ === "nische" ? 0.2 : 0.26);
-      const c = l.fuell ?? (l.typ === "nische" ? o.nische ?? dunkler(farbe, 0.08) : l.typ === "tuer" ? o.tuer ?? "#3a4a3c" : o.glas ?? GLAS7);
+      const c = l.fuell ?? (l.typ === "nische" ? o.nische ?? dunkler(farbe, 0.08) : l.typ === "tuer" ? o.tuer ?? "#3a4a3c" : o.glas ?? GLAS8);
       add(c, tief2, pfad(new three_module_exports.Shape(), l, 0.07));
       const rahmen2 = l.rahmen ?? o.rahmen;
       if ((l.typ === "fenster" || l.typ === "laden") && rahmen2 && LOD2.stufe !== "fern") {
@@ -76777,8 +100432,8 @@
     formen(S, F2, liste.map((q2) => q2.length === 4 && typeof q2[0] === "number" ? rform(...q2) : umrissForm(q2)), t0, t1, c);
   }
   var fenster4 = (u, v, b, h, art = null, x = {}) => ({ u0: u - b / 2, u1: u + b / 2, v0: v, v1: v + h, art, typ: "fenster", ...x });
-  var GLAS7 = "#4b5a66";
-  var GLAS_HELL4 = "#6d8595";
+  var GLAS8 = "#4b5a66";
+  var GLAS_HELL5 = "#6d8595";
   var WEISS = "#f7f5ef";
   var YW = -1.1;
   var PFLASTER3 = "#cbc5b8";
@@ -76989,7 +100644,7 @@
     ax.forEach((u, i) => {
       if (i === ut) return;
       if (i === tAx) oe.push({ u0: u - 0.8, u1: u + 0.8, v0: 0.3, v1: 3.2, art: putz2 ? "rund" : "spitz", typ: "tuer", fuell: o.tuer });
-      else if (o.laden) oe.push({ u0: u - Math.min(1.2, bw / na / 2 - 0.2), u1: u + Math.min(1.2, bw / na / 2 - 0.2), v0: 0.7, v1: eg - 0.9, typ: "laden", fuell: GLAS_HELL4 });
+      else if (o.laden) oe.push({ u0: u - Math.min(1.2, bw / na / 2 - 0.2), u1: u + Math.min(1.2, bw / na / 2 - 0.2), v0: 0.7, v1: eg - 0.9, typ: "laden", fuell: GLAS_HELL5 });
       else oe.push(fenster4(u, 1, fb_, eg - 1.8, art));
     });
     for (let k = 0; k < n; k++) for (const u of ax) oe.push(fenster4(u, eg + k * gh + 0.65, fb_, fh, art));
@@ -77135,7 +100790,7 @@
       if (bw > 7) for (const s2 of [-1, 1]) {
         const ug = c + s2 * bw * 0.3, yb = H + 0.9, zg = D - 0.4 - 0.9 / Math.tan(Math.atan2(dh, T / 2 + 0.25)) - 0.4;
         S.quader(a + ug - 0.6, yb - 0.6, zg - 1.4, a + ug + 0.6, yb + 1.4, zg, WEISS);
-        S.box(0.8, 1, 0.08, a + ug, yb + 0.5, zg + 0.02, GLAS7);
+        S.box(0.8, 1, 0.08, a + ug, yb + 0.5, zg + 0.02, GLAS8);
         S.quader(a + ug - 0.8, yb + 1.4, zg - 1.6, a + ug + 0.8, yb + 1.6, zg + 0.2, dach3);
       }
     } else {
@@ -77342,10 +100997,10 @@
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.25, y0 + 1, farbe ?? "#2d3338");
       rumpf(S, F2, L3 - 0.6, B3 - 0.5, y0 + 1, y0 + 1.06, "#a07a52");
       fb3(S, F2, -4.6, 2.4, y0 + 1, y0 + 2.1, -1.25, 1.25, "#efe9dc");
-      fb3(S, F2, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS7);
+      fb3(S, F2, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS8);
       fb3(S, F2, -4.9, 2.7, y0 + 2.1, y0 + 2.25, -1.5, 1.5, "#a05a3a");
       fb3(S, F2, 2.4, 3.6, y0 + 1, y0 + 2.6, -0.7, 0.7, "#efe9dc");
-      fb3(S, F2, 2.45, 3.55, y0 + 1.9, y0 + 2.4, -0.75, 0.75, GLAS7);
+      fb3(S, F2, 2.45, 3.55, y0 + 1.9, y0 + 2.4, -0.75, 0.75, GLAS8);
       fb3(S, F2, -6.2, -5.2, y0 + 1, y0 + 2.2, -0.04, 0.04, "#2b2f33");
       fb3(S, F2, -6.25, -5.25, y0 + 1.6, y0 + 2.2, 0.04, 0.9, waehle2(rng2(Math.round(x * 7 + z2)), ["#d23c32", "#2f6f8f", "#f2f1ec"]));
       return;
@@ -77356,7 +101011,7 @@
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.3, y0 + 1.6, c2, 0.3);
       rumpf(S, F2, L3 - 0.5, B3 - 0.5, y0 + 1.6, y0 + 1.66, "#9a8d78", 0.3);
       fb3(S, F2, -6, -2.6, y0 + 1.6, y0 + 4, -1.3, 1.3, "#f2efe6");
-      fb3(S, F2, -5.95, -2.65, y0 + 3, y0 + 3.7, -1.35, 1.35, GLAS7);
+      fb3(S, F2, -5.95, -2.65, y0 + 3, y0 + 3.7, -1.35, 1.35, GLAS8);
       fb3(S, F2, -6.2, -2.4, y0 + 4, y0 + 4.2, -1.5, 1.5, c2);
       stab3(S, P3(F2, 1.5, y0 + 1.6, 0), P3(F2, 1.5, y0 + 9, 0), 0.12, "#e8e6e0");
       stab3(S, P3(F2, 1.5, y0 + 4, 0), P3(F2, 6.5, y0 + 2.4, 0), 0.08, "#e8e6e0");
@@ -77371,14 +101026,14 @@
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.5, y0 + 2.1, "#f6f4ee", 0.22, 0.9);
       rumpf(S, F2, L3 - 0.6, B3 - 0.5, y0 + 2.1, y0 + 2.16, "#b08a62", 0.22, 0.9);
       fb3(S, F2, -13, 7.5, y0 + 2.16, y0 + 4.5, -2.9, 2.9, "#f6f4ee");
-      fb3(S, F2, -12.8, 7.3, y0 + 3, y0 + 4.1, -2.95, 2.95, GLAS7);
+      fb3(S, F2, -12.8, 7.3, y0 + 3, y0 + 4.1, -2.95, 2.95, GLAS8);
       fb3(S, F2, -13.4, 8, y0 + 4.5, y0 + 4.7, -3.3, 3.3, "#e9e6de");
       fb3(S, F2, -13.4, 8, y0 + 4.7, y0 + 5.6, 3.2, 3.3, "#e9e6de");
       fb3(S, F2, -13.4, 8, y0 + 4.7, y0 + 5.6, -3.3, -3.2, "#e9e6de");
       fb3(S, F2, -6, 4.5, y0 + 4.7, y0 + 6.6, -2.2, 2.2, "#f6f4ee");
-      fb3(S, F2, -5.8, 4.3, y0 + 5.3, y0 + 6.2, -2.25, 2.25, GLAS7);
+      fb3(S, F2, -5.8, 4.3, y0 + 5.3, y0 + 6.2, -2.25, 2.25, GLAS8);
       fb3(S, F2, 4.5, 7, y0 + 4.7, y0 + 7.4, -1.6, 1.6, "#f6f4ee");
-      fb3(S, F2, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS7);
+      fb3(S, F2, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS8);
       fb3(S, F2, -6.2, 4.7, y0 + 6.6, y0 + 6.8, -2.6, 2.6, "#e9e6de");
       const [fx2, fz2] = wp3(F2, -1, 0);
       zyl7(S, 0.9, 1, 3.2, fx2, y0 + 6.8, fz2, farbe ?? "#d23c32", 12);
@@ -77399,8 +101054,8 @@
     rumpf(S, F2, L2 + 0.1, B2 + 0.1, y0 + 1.2, y0 + 5.2, c, 0.16, 0.95);
     rumpf(S, F2, L2 - 1, B2 - 0.8, y0 + 5.2, y0 + 5.3, "#7d6a58", 0.16, 0.95);
     fb3(S, F2, -28, -17, y0 + 5.3, y0 + 13.5, -4.6, 4.6, "#f2efe6");
-    fb3(S, F2, -27.8, -17.2, y0 + 12.2, y0 + 13.2, -4.65, 4.65, GLAS7);
-    for (let k = 0; k < 2; k++) fb3(S, F2, -27.8, -17.2, y0 + 7.3 + k * 2.2, y0 + 8 + k * 2.2, -4.65, 4.65, GLAS_HELL4);
+    fb3(S, F2, -27.8, -17.2, y0 + 12.2, y0 + 13.2, -4.65, 4.65, GLAS8);
+    for (let k = 0; k < 2; k++) fb3(S, F2, -27.8, -17.2, y0 + 7.3 + k * 2.2, y0 + 8 + k * 2.2, -4.65, 4.65, GLAS_HELL5);
     fb3(S, F2, -18.5, -17, y0 + 13.5, y0 + 13.7, -5.6, 5.6, "#f2efe6");
     const [fx, fz] = wp3(F2, -24, 0);
     S.quader(fx - 1.4, y0 + 13.5, fz - 1.4, fx + 1.4, y0 + 17.5, fz + 1.4, "#d23c32");
@@ -77415,8 +101070,8 @@
     for (const tt of [-3.2, 1.2]) fbalken(S, F2, -2.7, yK + 1.5, 2.7, yK + 5.5, 0.25, tt - 0.1, tt + 0.1, farbe);
     fb3(S, F2, -3.1, 3.1, yK + 6, yK + 6.6, -3.6, 1.6, farbe);
     fb3(S, F2, -1.9, 1.9, yK + 6.6, yK + 10, -3.4, 0.9, farbe);
-    fb3(S, F2, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS7);
-    fb3(S, F2, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS7);
+    fb3(S, F2, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS8);
+    fb3(S, F2, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS8);
     fb3(S, F2, -2, 2, yK + 10, yK + 10.3, -3.6, 1.1, dunkler(farbe, 0.12));
     fb3(S, F2, -1.2, 1.2, yK + 8.6, yK + 10.8, -5.2, -3.4, "#3a3f44");
     const tipY = yK + 8.4 + Math.sin(winkel) * ausleger, tipT = 0.6 + Math.cos(winkel) * ausleger;
@@ -77485,7 +101140,7 @@
     const pi = o.portal ? Math.floor(nb / 2) : -1;
     for (let i = 0; i < nb; i++) {
       if (i === pi) oe.push({ u0: i * ra + 1.2, u1: (i + 1) * ra - 1.2, v0: 0.3, v1: o.eg - 0.2, art: "spitz", typ: "tuer", fuell: "#3d3328" });
-      else oe.push({ u0: i * ra + 0.5, u1: (i + 1) * ra - 0.5, v0: 0.65, v1: o.eg - 1.1, typ: "laden", fuell: GLAS_HELL4 });
+      else oe.push({ u0: i * ra + 0.5, u1: (i + 1) * ra - 0.5, v0: 0.65, v1: o.eg - 1.1, typ: "laden", fuell: GLAS_HELL5 });
     }
     lochwand3(S, F2, [0, 0, L2, o.eg], oe, o.stein, { rahmen: "#2f3a40" });
     platten(S, F2, [[-0.05, o.eg - 0.3, L2 + 0.05, o.eg + 0.05]], 0, 0.36, o.gold);
@@ -77567,7 +101222,7 @@
       for (let y = eg + gh; y < yK - 1; y += gh) prisma2(S, keil, y - 0.15, y + 0.1, gold);
       const pl = einruecken(poly, st * 2.4 + 3), cx = pl.reduce((a, q2) => a + q2[0], 0) / pl.length, cz = pl.reduce((a, q2) => a + q2[1], 0) / pl.length;
       S.quader(cx - 3, yTop, cz - 2.5, cx + 3, yTop + 3.2, cz + 2.5, o.pfeiler);
-      for (let i = 0; i < 4; i++) S.box(0.9, 1.8, 0.1, cx - 2.2 + i * 1.45, yTop + 1.8, cz + 2.52, GLAS7);
+      for (let i = 0; i < 4; i++) S.box(0.9, 1.8, 0.1, cx - 2.2 + i * 1.45, yTop + 1.8, cz + 2.52, GLAS8);
       const g = walmdach(7, 6, 2.6);
       g.translate(cx, yTop + 3.2, cz);
       S.add(g, kupf);
@@ -77576,7 +101231,7 @@
     } else if (v === "block") {
       const pl = einruecken(poly, st * 2.4 + 3), cx = pl.reduce((a, q2) => a + q2[0], 0) / pl.length, cz = pl.reduce((a, q2) => a + q2[1], 0) / pl.length;
       zyl7(S, 3.4, 3.4, 0.6, cx, yTop, cz, o.akzent, 12);
-      zyl7(S, 3, 3, 3.2, cx, yTop + 0.6, cz, GLAS_HELL4, 12);
+      zyl7(S, 3, 3, 3.2, cx, yTop + 0.6, cz, GLAS_HELL5, 12);
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * 2 * PI9;
         S.box(0.22, 3.2, 0.22, cx + Math.cos(a) * 3.05, yTop + 2.2, cz + Math.sin(a) * 3.05, o.akzent);
@@ -77634,7 +101289,7 @@
     const W3 = p.w, D = p.d, Wc = Math.min(14, Math.max(8, D * 0.3)), zF = D - Wc, T = Math.min(zF, 22), zB = zF - T;
     const stein = v === "giebel" ? waehle2(r, NF.backstein) : waehle2(r, [...NF.backstein, ...NF.dunkel]);
     const kupf = waehle2(r, NF.kupfer), holz = um ? "#3f4a52" : waehle2(r, ["#2f5243", "#3d4f45", "#5a3a2c"]);
-    const glas2 = um ? GLAS_HELL4 : GLAS7, rahm = um ? "#3a3f44" : "#ece6da";
+    const glas2 = um ? GLAS_HELL5 : GLAS8, rahm = um ? "#3a3f44" : "#ece6da";
     becken(S, 0, zF, W3, D - 1.8, W3, D, 0, r);
     S.quader(0, YW - 0.6, D - 1.8, W3, 0.3, D, GRANIT);
     boden4(S, 0, D - 1.8, W3, D, "#c9c3b6", 0.3, 0.05);
@@ -77653,7 +101308,7 @@
     const fassade3 = (F2, L2, lad, giebel3 = []) => {
       const oe = [];
       for (let k = 0; k < n; k++) for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, sock + k * gh + 0.8, um ? 1.3 : 1.05, 1.6, fensterArt));
-      if (lad) for (const u of luken) for (let k = 0; k < n; k++) oe.push({ u0: u - 0.75, u1: u + 0.75, v0: sock + k * gh + 0.3, v1: sock + k * gh + 2.5, typ: um ? "fenster" : "tuer", fuell: um ? GLAS_HELL4 : holz, art: "segment", sprosse: false });
+      if (lad) for (const u of luken) for (let k = 0; k < n; k++) oe.push({ u0: u - 0.75, u1: u + 0.75, v0: sock + k * gh + 0.3, v1: sock + k * gh + 2.5, typ: um ? "fenster" : "tuer", fuell: um ? GLAS_HELL5 : holz, art: "segment", sprosse: false });
       for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, 1, 0.9, 0.9, null));
       if (lad) for (const u of luken) oe.push({ u0: u - 0.9, u1: u + 0.9, v0: 0.36, v1: sock - 0.2, typ: "tuer", fuell: holz });
       for (const g of giebel3) if (g.typ !== "dreieck") oe.push(...giebelNischen(g.u0, g.u1 - g.u0, H, g.G, g.m, "spitz", dunkler(stein, 0.12), true));
@@ -77759,7 +101414,7 @@
       }
       if (v !== "giebel") for (let i = 0; i < Math.floor(W3 / 14); i++) {
         const x = 5 + i * 14;
-        S.quader(x, H + (v === "schlicht" ? 0.15 : 0), zB + T * 0.2, x + 5, H + 2.8 + (v === "schlicht" ? 0.15 : dhS * 0.35), zB + T * 0.55, GLAS_HELL4);
+        S.quader(x, H + (v === "schlicht" ? 0.15 : 0), zB + T * 0.2, x + 5, H + 2.8 + (v === "schlicht" ? 0.15 : dhS * 0.35), zB + T * 0.55, GLAS_HELL5);
         S.quader(x - 0.2, H + 2.8 + (v === "schlicht" ? 0.15 : dhS * 0.35), zB + T * 0.2 - 0.2, x + 5.2, H + 3 + (v === "schlicht" ? 0.15 : dhS * 0.35), zB + T * 0.55 + 0.2, "#e9e6de");
       }
       const px0 = Math.min(W3 - 4, W3 * 0.55), px1 = Math.min(W3 - 1, px0 + 16);
@@ -77804,8 +101459,8 @@
       const u0 = i * ra + 0.2, u1 = (i + 1) * ra - 0.2;
       if (i % 4 === 2) {
         oe.push({ u0: u0 + 0.6, u1: u0 + 1.8, v0: 0.3, v1: 2.6, typ: "tuer", fuell: "#5f7787" });
-        oe.push({ u0: u0 + 2.1, u1, v0: 0.6, v1: o.eg - 1, typ: "laden", fuell: GLAS_HELL4 });
-      } else oe.push({ u0, u1, v0: 0.6, v1: o.eg - 1, typ: "laden", fuell: GLAS_HELL4 });
+        oe.push({ u0: u0 + 2.1, u1, v0: 0.6, v1: o.eg - 1, typ: "laden", fuell: GLAS_HELL5 });
+      } else oe.push({ u0, u1, v0: 0.6, v1: o.eg - 1, typ: "laden", fuell: GLAS_HELL5 });
     }
     lochwand3(S, F2, [0, 0, L2, o.eg], oe, o.wand, { rahmen: "#2f3a40", tw: 0.4 });
     for (let i = 0; i <= nb; i++) fb3(S, F2, i * ra - 0.15, i * ra + 0.15, 0.3, o.eg, 0, 0.14, o.raster);
@@ -77857,7 +101512,7 @@
     } else {
       S.quader(0.4, H, z0 + 0.4, W3 - 0.4, H + 0.3, D - 0.4, "#8a9095");
       if (v === "hannover") {
-        S.quader(1.8, H + 0.3, z0 + 2.2, W3 - 1.8, H + 3, D - 2.2, GLAS_HELL4);
+        S.quader(1.8, H + 0.3, z0 + 2.2, W3 - 1.8, H + 3, D - 2.2, GLAS_HELL5);
         S.quader(1.2, H + 3, z0 + 1.4, W3 - 1.2, H + 3.25, D - 1, WEISS);
         S.quader(1.5, H + 3.25, z0 + 1.7, W3 - 1.5, H + 3.3, D - 1.3, "#8a9095");
         for (let x = 2; x < W3 - 1.5; x += 3.1) S.box(0.2, 2.7, 0.2, x, H + 1.65, D - 2, WEISS);
@@ -77880,7 +101535,7 @@
     if (v === "laubengang") {
       const sx = W3 - 3.5;
       S.quader(sx, 0, D - 0.2, sx + 3, H + 1.6, D + 1.7 - 0.01, rast);
-      S.quader(sx + 0.3, 0.6, D + 1.7 - 0.02, sx + 2.7, H + 1.2, D + 1.71, GLAS_HELL4);
+      S.quader(sx + 0.3, 0.6, D + 1.7 - 0.02, sx + 2.7, H + 1.2, D + 1.71, GLAS_HELL5);
     }
     if (z0 > 2) {
       boden4(S, 0, 0, W3, z0, RASEN4, 0.3, 0.05);
@@ -77951,7 +101606,7 @@
       walm(S, -0.4, z0 - 0.4, W3 + 0.4, zv + 0.4, H, dh, waehle2(r, NF.ziegel), { achse: "x", kv: T / 2 + 0.4, kh: T / 2 + 0.4 });
       for (let x = 4; x < W3 - 3; x += 5.4) {
         S.quader(x - 0.7, H + 0.4, zv - 2.6, x + 0.7, H + 2.1, zv - 1.2, "#efe9dc");
-        S.box(0.9, 0.9, 0.06, x, H + 1.3, zv - 1.18, GLAS7);
+        S.box(0.9, 0.9, 0.06, x, H + 1.3, zv - 1.18, GLAS8);
         S.quader(x - 0.85, H + 2.1, zv - 2.8, x + 0.85, H + 2.25, zv - 1, "#8c3b2b");
       }
       for (let x = 8; x < W3 - 4; x += 16) S.quader(x, H + dh * 0.5, z0 + T / 2 - 0.5, x + 0.9, H + dh + 0.8, z0 + T / 2 + 0.4, band);
@@ -78025,7 +101680,7 @@
       S.add(g, waehle2(r, NF.schiefer));
       if (r() < 0.5) {
         fpolyF(S, FF, [[ue - 1.2, Ha + 0.25], [ue + 1.2, Ha + 0.25], [ue, Ha + 2.4]], -1.5, 0.1, wand2);
-        fb3(S, FF, ue - 0.4, ue + 0.4, Ha + 0.6, Ha + 1.5, 0.1, 0.14, GLAS7);
+        fb3(S, FF, ue - 0.4, ue + 0.4, Ha + 0.6, Ha + 1.5, 0.1, 0.14, GLAS8);
       }
       S.quader(x + b * 0.7, Ha + 1, z0 + T * 0.4, x + b * 0.7 + 0.7, Ha + 4.2, z0 + T * 0.4 + 0.7, dunkler(wand2, 0.25));
       if (visL || visR) {
@@ -78077,7 +101732,7 @@
     for (let i = 0; i < nh; i++) {
       const xc = (i + 0.5) * b, zf = zv - 2.6;
       S.quader(xc - 1.5, H + 2.4, zf - 1.8, xc + 1.5, H + 4, zf, "#efe9dc");
-      S.box(2.4, 0.8, 0.06, xc, H + 3.4, zf + 0.03, GLAS7);
+      S.box(2.4, 0.8, 0.06, xc, H + 3.4, zf + 0.03, GLAS8);
       const gg = new three_module_exports.BoxGeometry(3.4, 0.12, 2.4);
       gg.rotateX(neig * 0.35);
       gg.translate(xc, H + 4.1, zf - 0.9);
@@ -78424,7 +102079,7 @@
         fb3(S, FF, u0 - 0.2, u1 + 0.2, H - 0.2, H + 0.7, 1.35, 1.5, SANDSTEIN2);
         const [tx, tz] = wp3(FF, W3 - 2.6, -0.6);
         zyl7(S, 2.4, 2.4, H + 7, tx, 0, tz, stein, 8);
-        for (let y = 2.5; y < H + 6; y += 3.2) S.box(0.7, 1.3, 0.2, tx + 1.75, y, tz + 1.75, GLAS7, PI9 / 4);
+        for (let y = 2.5; y < H + 6; y += 3.2) S.box(0.7, 1.3, 0.2, tx + 1.75, y, tz + 1.75, GLAS8, PI9 / 4);
         for (let y = 1.6; y < H + 6; y += 1.6) zyl7(S, 2.46, 2.46, 0.3, tx, y, tz, SANDSTEIN2, 8);
         kegel(S, 2.9, 3, tx, H + 7, tz, kupfer, 8);
         zyl7(S, 0.9, 0.9, 1.6, tx, H + 10, tz, kupfer, 8);
@@ -78472,7 +102127,7 @@
   }
   function bude(S, scene2, F2, u, y0, farbe, text3) {
     fb3(S, F2, u - 2.2, u + 2.2, y0, y0 + 2.7, -3, 0, "#f3efe6");
-    fb3(S, F2, u - 1.8, u + 1.8, y0 + 1.05, y0 + 2.15, 0, 0.05, GLAS_HELL4);
+    fb3(S, F2, u - 1.8, u + 1.8, y0 + 1.05, y0 + 2.15, 0, 0.05, GLAS_HELL5);
     fb3(S, F2, u - 1.95, u + 1.95, y0 + 0.95, y0 + 1.08, 0, 0.55, "#d8d3c6");
     streifenMarkise(S, F2, u - 2.3, u + 2.3, y0 + 2.35, farbe, "#f4f1ea", 6, 1.4);
     fb3(S, F2, u - 2.4, u + 2.4, y0 + 2.7, y0 + 2.9, -3.2, 0.15, farbe);
@@ -78577,7 +102232,7 @@
       }
       for (const xh of [W3 * 0.3, W3 * 0.7]) {
         S.quader(xh - 3, yP, zP + 0.8, xh + 3, yP + 3, zP + 4.4, "#efe9dc");
-        S.quader(xh - 2.8, yP + 0.8, zP + 4.4, xh + 2.8, yP + 2.3, zP + 4.45, GLAS_HELL4);
+        S.quader(xh - 2.8, yP + 0.8, zP + 4.4, xh + 2.8, yP + 2.3, zP + 4.45, GLAS_HELL5);
         const g = walmdach(7, 4.6, 2.2);
         g.translate(xh, yP + 3, zP + 2.6);
         S.add(g, waehle2(r, NF.kupfer));
@@ -78663,7 +102318,7 @@
       const g = dachProfil(hx1 - hx0 + 0.6, hz1 - hz0 + 0.8, 4.5, 0.2, "x");
       g.translate((hx0 + hx1) / 2, yK + H, (hz0 + hz1) / 2);
       S.add(g, waehle2(r, NF.schiefer));
-      S.quader(W3 / 2 - 4, yK + H + 3.5, (hz0 + hz1) / 2 - 2.5, W3 / 2 + 4, yK + H + 6.5, (hz0 + hz1) / 2 + 2.5, GLAS_HELL4);
+      S.quader(W3 / 2 - 4, yK + H + 3.5, (hz0 + hz1) / 2 - 2.5, W3 / 2 + 4, yK + H + 6.5, (hz0 + hz1) / 2 + 2.5, GLAS_HELL5);
       const g2 = dachProfil(8.6, 5.6, 2, 0.1, "x");
       g2.translate(W3 / 2, yK + H + 6.5, (hz0 + hz1) / 2);
       S.add(g2, waehle2(r, NF.kupfer));
@@ -78724,7 +102379,7 @@
         for (let i = 0; i < 8; i++) {
           const a = i / 8 * 2 * PI9 + PI9 / 8;
           if (Math.cos(a) + Math.sin(a) < 0.2) continue;
-          S.box(0.2, 1.3, 0.9, cx + Math.cos(a) * 5.15, i % 2 ? 4.8 : 2, cz + Math.sin(a) * 5.15, i % 3 ? GLAS7 : "#2f5243", -a);
+          S.box(0.2, 1.3, 0.9, cx + Math.cos(a) * 5.15, i % 2 ? 4.8 : 2, cz + Math.sin(a) * 5.15, i % 3 ? GLAS8 : "#2f5243", -a);
         }
         zyl7(S, 7.2, 7.2, 0.3, cx, 7.2, cz, "#7a5d43", 16);
         zyl7(S, 7.1, 7.1, 1, cx, 7.5, cz, "#5a4532", 16, true);
@@ -78949,7 +102604,7 @@
     const wand2 = o.wand, n = o.n, eg = 0.9, gh = 3.2, H = eg + n * gh, holz = o.holz, dach3 = o.dach, L2 = x1 - x0, T = z1 - z0;
     const vis = koerper2(S, p, x0, z0, x1, z1, 0, H, dunkler(wand2, 0.08), (F2, s2) => {
       const oe = [], front2 = s2 === "+z";
-      for (let k = 0; k < n; k++) for (const [i, u] of achsen4(0, F2.L, 2.4, 0.6).entries()) oe.push(front2 && k === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL4, art: "segment" } : fenster4(u, eg + k * gh + 0.55, 1.1, 2, "segment"));
+      for (let k = 0; k < n; k++) for (const [i, u] of achsen4(0, F2.L, 2.4, 0.6).entries()) oe.push(front2 && k === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL5, art: "segment" } : fenster4(u, eg + k * gh + 0.55, 1.1, 2, "segment"));
       lochwand3(S, F2, [0, 0, F2.L, H], oe, wand2, { rahmen: WEISS, bank: WEISS });
       const bd = [[0, 0, F2.L, eg]];
       for (let k = 1; k < n; k++) bd.push([-0.05, eg + k * gh - 0.1, F2.L + 0.05, eg + k * gh + 0.08]);
@@ -78970,7 +102625,7 @@
     if (vis.vis["+z"]) {
       const gb = Math.min(5, L2 * 0.4), uc = L2 / 2 + (o.turm ? L2 * 0.15 : 0);
       fpolyF(S, teil3(FF, uc - gb / 2, uc + gb / 2, 0), [[0, H], [gb, H], [gb / 2, H + gb * 0.7]], -2.5, 0.1, wand2);
-      fb3(S, FF, uc - 0.6, uc + 0.6, H + 0.4, H + 1.8, 0.1, 0.14, GLAS7);
+      fb3(S, FF, uc - 0.6, uc + 0.6, H + 0.4, H + 1.8, 0.1, 0.14, GLAS8);
       fbalken(S, FF, uc - gb / 2 - 0.3, H - 0.1, uc, H + gb * 0.7 + 0.2, 0.25, 0.1, 0.3, holz);
       fbalken(S, FF, uc + gb / 2 + 0.3, H - 0.1, uc, H + gb * 0.7 + 0.2, 0.25, 0.1, 0.3, holz);
       fb3(S, FF, uc - 0.08, uc + 0.08, H + gb * 0.45, H + gb * 0.7 + 1, 0.12, 0.3, holz);
@@ -78982,7 +102637,7 @@
     if (o.turm) {
       const tx = x1 - 1.6, tz = z1 - 1;
       zyl7(S, 2, 2, H + 3.2, tx, 0, tz, wand2, 8);
-      for (let k = 0; k < n + 1; k++) S.box(0.8, 1.6, 0.15, tx + 1.45, eg + k * gh + 1.4, tz + 1.45, GLAS7, -PI9 / 4);
+      for (let k = 0; k < n + 1; k++) S.box(0.8, 1.6, 0.15, tx + 1.45, eg + k * gh + 1.4, tz + 1.45, GLAS8, -PI9 / 4);
       zyl7(S, 2.15, 2.15, 0.25, tx, H, tz, WEISS, 8);
       kegel(S, 2.4, 4.5, tx, H + 3.2, tz, dach3, 8);
       zyl7(S, 0.04, 0.1, 1.2, tx, H + 7.7, tz, "#c9a24a", 6);
@@ -79072,7 +102727,7 @@
         const pr2 = 6.2, pz4 = D - pr2 - 0.5;
         zyl7(S, pr2, pr2, 0.3, sx, 1.6, pz4, "#b08a62", 16);
         zyl7(S, pr2 - 1.5, pr2 - 1.5, 3.2, sx, 1.9, pz4, "#f6f4ee", 12);
-        zyl7(S, pr2 - 1.45, pr2 - 1.45, 1.6, sx, 2.7, pz4, GLAS_HELL4, 12);
+        zyl7(S, pr2 - 1.45, pr2 - 1.45, 1.6, sx, 2.7, pz4, GLAS_HELL5, 12);
         const g = new three_module_exports.ConeGeometry(pr2 - 0.5, 2.6, 12);
         g.translate(sx, 5.1 + 1.3, pz4);
         S.add(g, waehle2(r, NF.kupfer));
@@ -79091,7 +102746,7 @@
       const tx = v === "seebruecke" ? W3 * 0.2 : W3 * 0.5, tz = zW - 3;
       for (const [a, b] of [[-0.9, -0.9], [0.9, -0.9], [-0.9, 0.9], [0.9, 0.9]]) S.box(0.18, 3.2, 0.18, tx + a, 1.95, tz + b, WEISS);
       S.quader(tx - 1.3, 3.5, tz - 1.3, tx + 1.3, 5.6, tz + 1.3, "#d9482e");
-      S.box(2.62, 0.7, 2.62, tx, 4.9, tz, GLAS_HELL4);
+      S.box(2.62, 0.7, 2.62, tx, 4.9, tz, GLAS_HELL5);
       S.quader(tx - 1.5, 5.6, tz - 1.5, tx + 1.5, 5.8, tz + 1.5, WEISS);
       fahne2(S, tx, tz, 5.8, 2.5, "#e2b83b");
     }
@@ -79445,14 +103100,14 @@
     if (art === "kontor") {
       const n = ein || rb() < 0.55 ? 1 : 0;
       for (let k = 0; k < n; k++) {
-        const variante = E.typ === "metropole" && rb() < 0.22 ? "turm" : waehle2(rb, ["block", "block", "spitz"]);
-        if (!mergeRand3(ctx, "slot:nord_kontorhaus", [34, 66], 26, gemischt(rb), { ...ex, variante })) break;
+        const variante2 = E.typ === "metropole" && rb() < 0.22 ? "turm" : waehle2(rb, ["block", "block", "spitz"]);
+        if (!mergeRand3(ctx, "slot:nord_kontorhaus", [34, 66], 26, gemischt(rb), { ...ex, variante: variante2 })) break;
       }
     } else if (art === "wiederaufbau") {
       const n = ein ? 2 : 1 + (rb() < 0.6 ? 1 : 0);
       for (let k = 0; k < n; k++) {
-        const variante = ein && rb() < 0.7 ? "geschaeft" : waehle2(rb, E.waV);
-        if (!mergeRand3(ctx, "slot:nord_wiederaufbau", [22, 48], variante === "geschaeft" ? 18 : 14, gemischt(rb), { ...ex, variante })) break;
+        const variante2 = ein && rb() < 0.7 ? "geschaeft" : waehle2(rb, E.waV);
+        if (!mergeRand3(ctx, "slot:nord_wiederaufbau", [22, 48], variante2 === "geschaeft" ? 18 : 14, gemischt(rb), { ...ex, variante: variante2 })) break;
       }
     } else if (art === "klinker") {
       if (rb() < 0.55) mergeRand3(ctx, "slot:nord_reihenhaus", [26, 56], 16, gemischt(rb), { ...ex, variante: waehle2(rb, E.reihenV) });
@@ -79471,10 +103126,10 @@
     p.waV = E.waV;
     if (p.typ === "slot:rathaus") Object.assign(p, { typ: "slot:nord_rathaus", sonder: "nord_rathaus", variante: E.rathausV, front: [p.front?.[0] ?? "+z"] });
   }
-  function nordBau(p, typ, variante, stil, geschosse2, extra = {}) {
+  function nordBau(p, typ, variante2, stil, geschosse2, extra = {}) {
     return {
       bau: (S, scene2, q2) => {
-        const e = NORD_SLOTS[typ](S, scene2, { ...q2, front: p.front?.[0] ?? "+z", variante, ...extra });
+        const e = NORD_SLOTS[typ](S, scene2, { ...q2, front: p.front?.[0] ?? "+z", variante: variante2, ...extra });
         return { hoehe: e.hoehe, stil, geschosse: geschosse2, farbe: null };
       }
     };
@@ -79554,7 +103209,7 @@
       u += l + 7;
     }
     for (let k = 0; k < n; k++) for (const [u, l] of segs) {
-      const variante = waehle2(rb, E.speicherV ?? ["speicherstadt"]);
+      const variante2 = waehle2(rb, E.speicherV ?? ["speicherstadt"]);
       const zustand = rb() < 0.3 ? "umgenutzt" : void 0;
       const t0 = k * rowT;
       let x, z2, w, d;
@@ -79569,7 +103224,7 @@
         z2 = f === "+z" ? b.z + b.d - t0 - rowT : b.z + t0;
         x = b.x + u;
       }
-      neueParzelle3(ctx, "slot:nord_speicher", x, z2, w, d, [f], "frei", { klasse: 4, variante, zustand, landmarke: false });
+      neueParzelle3(ctx, "slot:nord_speicher", x, z2, w, d, [f], "frei", { klasse: 4, variante: variante2, zustand, landmarke: false });
     }
   }
   function parzHafen(ctx, E, b) {
@@ -79583,9 +103238,9 @@
     const l = (L2 - 2 - (n - 1) * 4) / n;
     for (let k = 0; k < n; k++) {
       const u = 1 + k * (l + 4);
-      const variante = liste[k % liste.length];
+      const variante2 = liste[k % liste.length];
       const x = quer2 ? f === "+x" ? b.x + b.w - tief2 : b.x : b.x + u, z2 = quer2 ? b.z + u : f === "+z" ? b.z + b.d - tief2 : b.z;
-      neueParzelle3(ctx, "slot:nord_hafen", x, z2, quer2 ? tief2 : l, quer2 ? l : tief2, [f], "frei", { klasse: 4, variante, landmarke: false });
+      neueParzelle3(ctx, "slot:nord_hafen", x, z2, quer2 ? tief2 : l, quer2 ? l : tief2, [f], "frei", { klasse: 4, variante: variante2, landmarke: false });
     }
     b.lager = quer2 ? { x: f === "+x" ? b.x + 1 : b.x + tief2 + 1, z: b.z + 2, w: T - tief2 - 3, d: L2 - 4 } : { x: b.x + 2, z: f === "+z" ? b.z + 1 : b.z + tief2 + 1, w: L2 - 4, d: T - tief2 - 3 };
   }
@@ -79627,8 +103282,8 @@
     b.platz = { x: b.x + t["-x"], z: b.z + t["-z"], w: b.w - t["-x"] - t["+x"], d: b.d - t["-z"] - t["+z"] };
     const P2 = b.platz;
     const L2 = Math.min(80, P2.w - 8), Bk = Math.min(42, P2.d - 8);
-    const variante = b.variante ?? (L2 >= 70 && Bk >= 36 ? "marien" : L2 >= 56 ? "hallen" : "dorf");
-    neueParzelle3(ctx, "slot:nord_kirche", P2.x + (P2.w - L2) * 0.4, P2.z + (P2.d - Bk) * 0.4, L2, Bk, ["+x"], "frei", { klasse: 5, variante, zustand: b.zustand, landmarke: true });
+    const variante2 = b.variante ?? (L2 >= 70 && Bk >= 36 ? "marien" : L2 >= 56 ? "hallen" : "dorf");
+    neueParzelle3(ctx, "slot:nord_kirche", P2.x + (P2.w - L2) * 0.4, P2.z + (P2.d - Bk) * 0.4, L2, Bk, ["+x"], "frei", { klasse: 5, variante: variante2, zustand: b.zustand, landmarke: true });
   }
   function bodenKirche(ctx, b, r, teile, B2) {
     const { I } = ctx;
@@ -79797,7 +103452,7 @@
     fform3(S, F2, s2, t0, t1, c);
   }
   function lochwand4(S, F2, u0, u1, y0, y1, farbe, loecher, o = {}) {
-    fb4(S, F2, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o.glasT ?? 0.04, o.glas ?? GLAS8);
+    fb4(S, F2, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o.glasT ?? 0.04, o.glas ?? GLAS9);
     fwand2(S, F2, u0, u1, y0, y1, 0, o.dick ?? 0.35, farbe, loecher);
   }
   function fpoly3(S, F2, pkt, t0, t1, c) {
@@ -79933,16 +103588,16 @@
   var RASEN5 = "#9dc283";
   var RASEN24 = "#a9cb8c";
   var KIES4 = "#d8cfb8";
-  var GLAS8 = "#4e5c67";
-  var GLAS_HELL5 = "#6f8696";
-  var DUNKEL = "#3e474f";
+  var GLAS9 = "#4e5c67";
+  var GLAS_HELL6 = "#6f8696";
+  var DUNKEL2 = "#3e474f";
   var METALL = "#9aa1a7";
   var WEISS2 = "#f6f3ec";
   var SCHIEFER3 = "#4f565e";
   var SCHIEFER22 = "#5b626a";
   var ZIEGEL2 = "#b4583f";
   var ZIEGEL22 = "#a24e38";
-  var KUPFER2 = "#6f9a7d";
+  var KUPFER3 = "#6f9a7d";
   var ROTSTEIN = ["#b0574a", "#a8513f", "#b9634f", "#9f4d40"];
   var AUTOS = ["#2b2f33", "#a3abb2", "#c84a3c", "#2f5f8f", "#f4f3ef", "#3d6b4f", "#6b7680", "#1f3a5f", "#e3c35e"];
   function baumAuf(S, x, y, z2, r, s2 = 1) {
@@ -79989,7 +103644,7 @@
   function fenster5(S, F2, u, y, fw, fh, o = {}) {
     const t = o.t ?? 0;
     if (o.rahmen !== null) fb4(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y - 0.12, y + fh + 0.12, t, t + 0.05, o.rahmen ?? WEISS2);
-    fb4(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t, t + 0.07, o.glas ?? GLAS8);
+    fb4(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t, t + 0.07, o.glas ?? GLAS9);
     if (o.kreuz) {
       fb4(S, F2, u - 0.04, u + 0.04, y, y + fh, t, t + 0.1, o.rahmen ?? WEISS2);
       fb4(S, F2, u - fw / 2, u + fw / 2, y + fh * 0.62, y + fh * 0.62 + 0.08, t, t + 0.1, o.rahmen ?? WEISS2);
@@ -80065,7 +103720,7 @@
   ];
   function podium(S, scene2, p, x0, z0, w, d, h, o = {}) {
     const stein = o.stein ?? "#d7d2c8";
-    S.quader(x0, 0, z0, x0 + w, h, z0 + d, GLAS_HELL5);
+    S.quader(x0, 0, z0, x0 + w, h, z0 + d, GLAS_HELL6);
     S.quader(x0 - 0.3, h, z0 - 0.3, x0 + w + 0.3, h + 1, z0 + d + 0.3, stein);
     S.quader(x0 + 1, h + 1, z0 + 1, x0 + w - 1, h + 1.2, z0 + d - 1, "#b9b6ae");
     for (const [k, F2] of seiten2(p, x0, z0, w, d)) {
@@ -80074,7 +103729,7 @@
       if (k === "+z") {
         fb4(S, F2, F2.L / 2 - 6, F2.L / 2 + 6, 4.2, 4.6, 0, 4.5, "#e9e7e2");
         for (const s2 of [-1, 1]) fb4(S, F2, F2.L / 2 + s2 * 5.6 - 0.15, F2.L / 2 + s2 * 5.6 + 0.15, 0.3, 4.2, 4.2, 4.5, METALL);
-        fb4(S, F2, F2.L / 2 - 2.5, F2.L / 2 + 2.5, 0.3, 3.6, 0, 0.12, DUNKEL);
+        fb4(S, F2, F2.L / 2 - 2.5, F2.L / 2 + 2.5, 0.3, 3.6, 0, 0.12, DUNKEL2);
       }
     }
   }
@@ -80127,7 +103782,7 @@
     const H2 = pod + Math.round(n * 0.74) * gh;
     turm4(cx - sp / 2 - a, cz - b / 2, H, 0);
     turm4(cx + sp / 2, cz - b / 2, H2, 1);
-    S.quader(cx - sp / 2 - 0.1, pod, cz - b * 0.3, cx + sp / 2 + 0.1, pod + 3 * gh, cz + b * 0.3, GLAS_HELL5);
+    S.quader(cx - sp / 2 - 0.1, pod, cz - b * 0.3, cx + sp / 2 + 0.1, pod + 3 * gh, cz + b * 0.3, GLAS_HELL6);
     for (let y = pod + gh; y <= pod + 3 * gh; y += gh) S.quader(cx - sp / 2, y - 0.3, cz - b * 0.3 - 0.05, cx + sp / 2, y, cz + b * 0.3 + 0.05, stein);
     for (const [k, F2] of seiten2(p, cx - sp / 2 - a, cz - b / 2, a, b, ["+z", "-z"])) logo(S, scene2, F2, F2.L / 2, H - 3 * gh - 3, 0.36, 4, farbe, null);
     for (const [k, F2] of seiten2(p, cx + sp / 2, cz - b / 2, a, b, ["+x", "-x"])) logo(S, scene2, F2, F2.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe, null);
@@ -80189,7 +103844,7 @@
     if (o.podium !== false) podium(S, scene2, p, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8, pod - 1, { stein });
     S.quader(kx0, 0, kz0, kx0 + kb, Hk, kz0 + kd, stein);
     for (const [k, F2] of seiten2(p, kx0, kz0, kb, kd)) {
-      for (const u of achsen5(0, F2.L, 2.4, 0.8)) fb4(S, F2, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS8);
+      for (const u of achsen5(0, F2.L, 2.4, 0.8)) fb4(S, F2, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS9);
       for (let y = pod + 2 * gh; y < Hk - 3; y += 2 * gh) fb4(S, F2, 0, F2.L, y - 0.3, y, 0, 0.12, heller(stein, 0.05));
       fb4(S, F2, -0.1, F2.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
     }
@@ -80322,7 +103977,7 @@
     fb4(S, F2, -0.02, L2 + 0.02, 0, 0.55, 0, 0.12, dunkler(o.stein, 0.12));
     if (o.laden) {
       const lb = Math.min(L2 - 1.6, 5.5), u0 = (L2 - lb) / 2;
-      fb4(S, F2, u0, u0 + lb, 0.4, eg - 0.7, 0, 0.06, GLAS_HELL5);
+      fb4(S, F2, u0, u0 + lb, 0.4, eg - 0.7, 0, 0.06, GLAS_HELL6);
       fb4(S, F2, u0 - 0.15, u0 + lb + 0.15, eg - 0.7, eg - 0.45, 0, 0.12, o.laden);
       for (const u of [u0, u0 + lb / 2, u0 + lb]) fb4(S, F2, u - 0.07, u + 0.07, 0.4, eg - 0.7, 0, 0.1, o.laden);
       if (o.name) ftext4(scene2, F2, o.name, L2 / 2, eg - 0.2, 0.14, 0.42, L2 - 0.8, "#3a2a20");
@@ -80467,7 +104122,7 @@
           S.box(0.18, gh * 2 + 0.5, 0.18, ex + Math.cos(w) * rr, eg + 0.2 + gh + 0.25, ez + Math.sin(w) * rr, holz);
         }
       }
-      for (let k = 0; k < 2; k++) zyl8(S, rr + 0.06, rr + 0.06, 0.2, ex, eg + 0.2 + k * gh + gh * 0.4, ez, GLAS8, 8);
+      for (let k = 0; k < 2; k++) zyl8(S, rr + 0.06, rr + 0.06, 0.2, ex, eg + 0.2 + k * gh + gh * 0.4, ez, GLAS9, 8);
       const g2 = new three_module_exports.ConeGeometry(rr + 0.4, 5.5, 8);
       g2.translate(ex, eg + 0.7 + gh * 2 + 2.75, ez);
       S.add(g2, SCHIEFER3);
@@ -80615,7 +104270,7 @@
     fstrebe(S, F2, u1 + 0.3, y - 0.05, m, y + h + 0.15, 0.4, t0, t1 + 0.2, orn);
     fb4(S, F2, u0 - 0.4, u1 + 0.4, y - 0.4, y, t0, t1 + 0.25, orn);
   }
-  function kuppel2(S, x, y, z2, rad2, o = {}) {
+  function kuppel3(S, x, y, z2, rad2, o = {}) {
     const tamb = o.tambour ?? rad2 * 0.5;
     if (tamb > 0) {
       zyl8(S, rad2, rad2, tamb, x, y, z2, o.wand ?? "#ece4d2", 16);
@@ -80624,12 +104279,12 @@
     const g = new three_module_exports.SphereGeometry(rad2, 18, 8, 0, 2 * PI10, 0, PI10 / 2);
     g.scale(1, o.hoch ?? 0.75, 1);
     g.translate(x, y + tamb, z2);
-    S.add(g, o.dach ?? KUPFER2);
+    S.add(g, o.dach ?? KUPFER3);
     const yl = y + tamb + rad2 * (o.hoch ?? 0.75);
     zyl8(S, rad2 * 0.16, rad2 * 0.16, rad2 * 0.35, x, yl - 0.2, z2, o.orn ?? WEISS2, 8);
     const k = new three_module_exports.ConeGeometry(rad2 * 0.2, rad2 * 0.3, 8);
     k.translate(x, yl + rad2 * 0.3, z2);
-    S.add(k, o.dach ?? KUPFER2);
+    S.add(k, o.dach ?? KUPFER3);
     zyl8(S, 0.05, 0.12, 1.4, x, yl + rad2 * 0.45, z2, "#d8b45a", 4);
     return yl + rad2 * 0.45 + 1.4;
   }
@@ -80721,7 +104376,7 @@
     const g = new three_module_exports.SphereGeometry(rr + 0.5, 16, 6, 0, 2 * PI10, 0, PI10 / 2);
     g.scale(1, 0.6, 1);
     g.translate(x, 8.3, z2);
-    S.add(g, KUPFER2);
+    S.add(g, KUPFER3);
     zyl8(S, 0.15, 0.3, 1.2, x, 8.3 + (rr + 0.5) * 0.6, z2, "#d8b45a", 6);
     zyl8(S, rr * 0.55, rr * 0.6, 1, x, 1.3, z2, "#cfc6b4", 12);
     zyl8(S, rr * 0.45, rr * 0.45, 1.02, x, 1.32, z2, FARBEN3.wasser, 12);
@@ -80755,7 +104410,7 @@
       fb4(S, F2, 0.4, risB - 0.4, 1.2 + gh + 1.05, 1.2 + gh + 1.15, 0.9, 1.1, "#3b3f44");
       fenster5(S, F2, risB / 2, 1.2 + gh + 0.9, 1.2, 2.1, { kreuz: true, rahmen: orn });
       dreiecksgiebel(S, F2, -0.2, risB + 0.2, H + 0.5, 2.6, -1.5, 0.12, wand2, orn);
-      fscheibe3(S, F2, risB / 2, H + 1.5, 0.12, 0.2, 0.5, GLAS8);
+      fscheibe3(S, F2, risB / 2, H + 1.5, 0.12, 0.2, 0.5, GLAS9);
     }
     const gd = dachProfil(3, risB + 0.4, 2.6, 0.05, "z");
     gd.translate(rx0 + risB / 2, H + 0.5, z0 + t - 0.6);
@@ -80765,7 +104420,7 @@
     for (const [k, F2] of seiten2(p, tx0, tz0, ts, ts)) {
       for (let kk = 0; kk < n; kk++) fenster5(S, F2, ts / 2, 1.2 + kk * gh + 0.9, 1, 2.1, { kreuz: true, rahmen: orn, sims: orn });
       fwand2(S, F2, 0, ts, H, Ht - 0.6, 0, 0.1, wand2, [{ u0: ts / 2 - 0.9, u1: ts / 2 - 0.15, v0: H + 0.6, v1: Ht - 1, bogen: true }, { u0: ts / 2 + 0.15, u1: ts / 2 + 0.9, v0: H + 0.6, v1: Ht - 1, bogen: true }]);
-      fb4(S, F2, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS8);
+      fb4(S, F2, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS9);
       fb4(S, F2, -0.3, ts + 0.3, Ht - 0.6, Ht, 0, 0.4, orn);
     }
     const helm3 = waehle2(r, ["spitz", "zwiebel", "pyramide"]);
@@ -80773,10 +104428,10 @@
       const g = new three_module_exports.SphereGeometry(ts * 0.52, 10, 8);
       g.scale(1, 1.15, 1);
       g.translate(tx0 + ts / 2, Ht + 1.5, tz0 + ts / 2);
-      S.add(g, KUPFER2);
+      S.add(g, KUPFER3);
       const k = new three_module_exports.ConeGeometry(0.5, 3, 8);
       k.translate(tx0 + ts / 2, Ht + 4.6, tz0 + ts / 2);
-      S.add(k, KUPFER2);
+      S.add(k, KUPFER3);
     } else {
       const g = new three_module_exports.ConeGeometry(ts * 0.75, helm3 === "spitz" ? 7 : 3.6, 4);
       g.rotateY(PI10 / 4);
@@ -80786,7 +104441,7 @@
     zyl8(S, 0.04, 0.1, 1.6, tx0 + ts / 2, Ht + (helm3 === "spitz" ? 7 : 5.5), tz0 + ts / 2, "#d8b45a", 4);
     const vx0 = o.turmLinks ? x0 + b : x0 - 3.6;
     S.quader(vx0, 0.3, z0 + 2, vx0 + 3.6, 1, z0 + t - 3, stein);
-    S.quader(vx0 + 0.2, 1, z0 + 2.2, vx0 + 3.4, 4, z0 + t - 3.2, GLAS_HELL5);
+    S.quader(vx0 + 0.2, 1, z0 + 2.2, vx0 + 3.4, 4, z0 + t - 3.2, GLAS_HELL6);
     for (const [k, F2] of seiten2(p, vx0 + 0.2, z0 + 2.2, 3.2, t - 5.4)) for (const u of achsen5(0, F2.L, 1, 0)) fb4(S, F2, u - 0.06, u + 0.06, 1, 4, 0, 0.08, WEISS2);
     S.quader(vx0, 4, z0 + 2, vx0 + 3.6, 4.3, z0 + t - 3, WEISS2);
     return Ht + 7;
@@ -80807,7 +104462,7 @@
       const mb = 34, md = 22, mz0 = z0 + 4, cx = x0 + w / 2, Hm = 17, fbw = Math.min(26, (w - mb - 6) / 2), fd = 17, Hf = 12.5;
       for (const s2 of [-1, 1]) kurFluegel(S, scene2, p, s2 < 0 ? cx - mb / 2 - fbw : cx + mb / 2, mz0 + 2, fbw, fd, Hf, { wand: wand2, orn, ra: 4.2 });
       kurFluegel(S, scene2, p, cx - mb / 2, mz0, mb, md, Hm, { wand: wand2, orn, ra: 4.6 });
-      const hk = kuppel2(S, cx, Hm + 0.25, mz0 + md / 2, 9, { tambour: 3.5, wand: wand2, orn, hoch: 0.6 });
+      const hk = kuppel3(S, cx, Hm + 0.25, mz0 + md / 2, 9, { tambour: 3.5, wand: wand2, orn, hoch: 0.6 });
       const pt = 7, FP = R7(cx - 13, mz0 + md + pt, 1, 0, 26);
       S.quader(cx - 14, 0.3, mz0 + md, cx + 14, 1.4, mz0 + md + pt + 1.5, "#e2dccf");
       for (let i = 0; i < 4; i++) S.quader(cx - 13 + i * 0.4 - 0.2, 0.3, mz0 + md + pt + 1.5 + i * 0.6, cx + 13 - i * 0.4 + 0.2, 1.4 - i * 0.28, mz0 + md + pt + 2.1 + i * 0.6, "#e2dccf");
@@ -80854,7 +104509,7 @@
           const g = new three_module_exports.ConeGeometry(4.6, 2.6, 8, 1);
           g.rotateY(PI10 / 8);
           g.translate(px2, 4.85 + 1.3, pz4);
-          S.add(g, KUPFER2);
+          S.add(g, KUPFER3);
           zyl8(S, 0.05, 0.12, 1.2, px2, 7.4, pz4, "#c9a24a", 6);
           for (const db of [-6.5, 6.5]) bank4(S, px2 + db, pz4 + 5.2);
         } else {
@@ -80876,7 +104531,7 @@
       S.quader(hx0, 0, hz0, hx0 + hb, H, hz0 + ht, wand2);
       for (const [k, F2] of seiten2(p, hx0, hz0, hb, ht)) {
         const L2 = achsen5(0, F2.L, 4.2, 1).map((u) => ({ u0: u - 1.5, u1: u + 1.5, v0: 1.2, v1: H - 1.6, bogen: true }));
-        lochwand4(S, F2, 0, F2.L, 0.3, H - 0.9, wand2, L2, { glas: GLAS_HELL5, dick: 0.3 });
+        lochwand4(S, F2, 0, F2.L, 0.3, H - 0.9, wand2, L2, { glas: GLAS_HELL6, dick: 0.3 });
         for (const l of L2) {
           fb4(S, F2, (l.u0 + l.u1) / 2 - 0.06, (l.u0 + l.u1) / 2 + 0.06, 1.2, H - 2.6, 0.02, 0.1, WEISS2);
           fb4(S, F2, l.u0, l.u1, 5, 5.12, 0.02, 0.1, WEISS2);
@@ -80886,17 +104541,17 @@
       }
       const gd = dachProfil(hb, ht, 3.2, 1, "x");
       gd.translate(hx0 + hb / 2, H, hz0 + ht / 2);
-      S.add(gd, KUPFER2);
-      S.quader(hx0 + 2, H + 3.2, hz0 + ht / 2 - 0.5, hx0 + hb - 2, H + 3.9, hz0 + ht / 2 + 0.5, GLAS_HELL5);
+      S.add(gd, KUPFER3);
+      S.quader(hx0 + 2, H + 3.2, hz0 + ht / 2 - 0.5, hx0 + hb - 2, H + 3.9, hz0 + ht / 2 + 0.5, GLAS_HELL6);
       const cx = hx0 + hb / 2, pb = 14;
       S.quader(cx - pb / 2, 0, hz0 - 1, cx + pb / 2, H + 4, hz0 + ht + 1.5, wand2);
       for (const [k, F2] of seiten2(p, cx - pb / 2, hz0 - 1, pb, ht + 2.5)) {
-        lochwand4(S, F2, 0, F2.L, 0.3, H + 3, wand2, [{ u0: F2.L / 2 - 3, u1: F2.L / 2 + 3, v0: 0.3, v1: H + 1.5, bogen: true }], { glas: GLAS_HELL5 });
+        lochwand4(S, F2, 0, F2.L, 0.3, H + 3, wand2, [{ u0: F2.L / 2 - 3, u1: F2.L / 2 + 3, v0: 0.3, v1: H + 1.5, bogen: true }], { glas: GLAS_HELL6 });
         for (let u = F2.L / 2 - 2.4; u < F2.L / 2 + 2.5; u += 1.2) fb4(S, F2, u - 0.05, u + 0.05, 0.3, H + 0.5, 0.02, 0.1, WEISS2);
         fb4(S, F2, -0.4, F2.L + 0.4, H + 3, H + 4, 0, 0.6, orn);
         for (const u of [0.6, F2.L - 0.6]) fb4(S, F2, u - 0.6, u + 0.6, 0.3, H + 3, 0, 0.5, orn);
       }
-      const hk = kuppel2(S, cx, H + 4, hz0 + ht / 2 + 0.25, 6, { tambour: 2, wand: wand2, orn, hoch: 0.9 });
+      const hk = kuppel3(S, cx, H + 4, hz0 + ht / 2 + 0.25, 6, { tambour: 2, wand: wand2, orn, hoch: 0.9 });
       const tx = x0 + w * 0.25, tz = z0 + d - 12;
       brunnenTempel(S, tx, tz, 3.6, { orn });
       const mx = x0 + w * 0.75, mz = z0 + d - 12;
@@ -81083,7 +104738,7 @@
   }
   function domRoh(S, scene2, p) {
     const r = rng2(`dom:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
-    const c = waehle2(r, ROTSTEIN), hell4 = heller(c, 0.06), dach3 = waehle2(r, [SCHIEFER3, "#5d646b", KUPFER2]);
+    const c = waehle2(r, ROTSTEIN), hell4 = heller(c, 0.06), dach3 = waehle2(r, [SCHIEFER3, "#5d646b", KUPFER3]);
     boden5(S, x0, z0, x0 + w, z0 + d, PLATZ, 0.3, 0.07);
     const cz = z0 + d / 2 - 3, ms = 14, sb2 = 7, Hm = 26, Hs = 13;
     const ex = v === "kaiserdom" ? 16 : 18;
@@ -81183,7 +104838,7 @@
     for (const [k, F2] of seiten2(p, x0, z0, b, t)) {
       const laden4 = o.strasse.includes(k);
       if (laden4) {
-        fb4(S, F2, 0.2, F2.L - 0.2, y0 + 0.3, y0 + eg - 0.6, 0, 0.05, GLAS_HELL5);
+        fb4(S, F2, 0.2, F2.L - 0.2, y0 + 0.3, y0 + eg - 0.6, 0, 0.05, GLAS_HELL6);
         for (const u of achsen5(0, F2.L, 3.2, 0)) fb4(S, F2, u - 0.08, u + 0.08, y0 + 0.3, y0 + eg - 0.6, 0, 0.12, "#3b4046");
         fb4(S, F2, 0, F2.L, y0 + 0.3, y0 + 0.7, 0, 0.12, "#d8d2c4");
         fb4(S, F2, -0.3, F2.L + 0.3, y0 + eg - 0.6, y0 + eg - 0.35, 0, 2.6, "#f4f2ec");
@@ -81196,7 +104851,7 @@
       }
       const yo = y0 + eg;
       if (art === "raster") {
-        fb4(S, F2, 0.1, F2.L - 0.1, yo, H + y0 - 0.4, 0, 0.04, GLAS8);
+        fb4(S, F2, 0.1, F2.L - 0.1, yo, H + y0 - 0.4, 0, 0.04, GLAS9);
         const ax = achsen5(0, F2.L, 2, 0);
         for (let i = 0; i < n; i++) {
           const y = yo + i * gh;
@@ -81207,7 +104862,7 @@
       } else if (art === "band") {
         for (let i = 0; i < n; i++) {
           const y = yo + i * gh;
-          fb4(S, F2, 0.3, F2.L - 0.3, y + 1, y + 2.4, 0, 0.05, GLAS8);
+          fb4(S, F2, 0.3, F2.L - 0.3, y + 1, y + 2.4, 0, 0.05, GLAS9);
           for (const u of achsen5(0.3, F2.L - 0.3, 1.4, 0)) fb4(S, F2, u - 0.05, u + 0.05, y + 1, y + 2.4, 0, 0.09, WEISS2);
           fb4(S, F2, -0.05, F2.L + 0.05, y + 0.9, y + 1, 0, 0.2, raster4);
         }
@@ -81224,7 +104879,7 @@
     S.quader(x0 + 0.5, y0 + H, z0 + 0.5, x0 + b - 0.5, y0 + H + 0.1, z0 + t - 0.5, "#a9a59c");
     if (o.staffel) {
       S.quader(x0 + 1.5, y0 + H, z0 + 1.5, x0 + b - 1.5, y0 + H + 2.8, z0 + t - 2.5, raster4);
-      for (const [k, F2] of seiten2(p, x0 + 1.5, z0 + 1.5, b - 3, t - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS8);
+      for (const [k, F2] of seiten2(p, x0 + 1.5, z0 + 1.5, b - 3, t - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS9);
       S.quader(x0 + 1, y0 + H + 2.8, z0 + 1, x0 + b - 1, y0 + H + 3.1, z0 + t - 2, "#f4f2ec");
     }
     return y0 + H + (o.staffel ? 3.1 : 0);
@@ -81241,7 +104896,7 @@
   }
   function kioskPilz(S, x, z2, y0 = 0.3, farbe = "#e8c547") {
     zyl8(S, 1.6, 1.6, 2.6, x, y0, z2, "#f2efe6", 12);
-    zyl8(S, 1.5, 1.5, 1.2, x, y0 + 1, z2, GLAS_HELL5, 12);
+    zyl8(S, 1.5, 1.5, 1.2, x, y0 + 1, z2, GLAS_HELL6, 12);
     zyl8(S, 3.4, 0.6, 0.9, x, y0 + 2.6, z2, farbe, 16);
     zyl8(S, 3.45, 3.45, 0.2, x, y0 + 3.4, z2, "#f4f2ec", 16);
   }
@@ -81290,10 +104945,10 @@
       zyl8(S, rr, rr, H, gx0 + b - rr, 0, gz0 + t2 - rr, putz2, 20);
       for (const [k, F2] of [["+z", R7(gx0, gz0 + t2, 1, 0, b - rr)], ["+x", R7(gx0 + b, gz0 + t2 - rr, 0, -1, t2 - rr)]]) {
         if (!sichtF(p, F2)) continue;
-        fb4(S, F2, 0, F2.L, 0.3, eg - 0.4, -2.2, -2.15, GLAS_HELL5);
+        fb4(S, F2, 0, F2.L, 0.3, eg - 0.4, -2.2, -2.15, GLAS_HELL6);
         for (const u of achsen5(0, F2.L, 3.4, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, eg, -2.2, 0, raster4);
         fb4(S, F2, 0, F2.L, eg - 0.6, eg, -2.2, 0.05, raster4);
-        fb4(S, F2, 0.1, F2.L - 0.1, eg, H - 0.4, 0, 0.04, GLAS8);
+        fb4(S, F2, 0.1, F2.L - 0.1, eg, H - 0.4, 0, 0.04, GLAS9);
         const ax = achsen5(0, F2.L, 1.8, 0);
         for (let i = 0; i < n; i++) {
           const y = eg + i * gh;
@@ -81306,16 +104961,16 @@
       for (const [k, F2] of seiten2(p, gx0, gz0, b, t2, ["-x", "-z"])) {
         fb4(S, F2, 0, F2.L, 0, eg, 0, 0.05, dunkler(putz2, 0.06));
         for (const u of achsen5(0, F2.L, 3.4, 1)) {
-          fb4(S, F2, u - 1.2, u + 1.2, 0.3, 3, 0, 0.08, GLAS_HELL5);
+          fb4(S, F2, u - 1.2, u + 1.2, 0.3, 3, 0, 0.08, GLAS_HELL6);
           for (let i = 0; i < n; i++) fenster5(S, F2, u, eg + i * gh + 0.9, 1.6, 1.6, { rahmen: raster4 });
         }
         for (let i = 1; i <= n; i++) fb4(S, F2, -0.05, F2.L + 0.05, eg + i * gh - 0.15, eg + i * gh, 0, 0.15, raster4);
       }
       for (let i = 0; i < n; i++) {
-        zyl8(S, rr + 0.05, rr + 0.05, 1.5, gx0 + b - rr, eg + i * gh + 1, gz0 + t2 - rr, GLAS8, 20);
+        zyl8(S, rr + 0.05, rr + 0.05, 1.5, gx0 + b - rr, eg + i * gh + 1, gz0 + t2 - rr, GLAS9, 20);
         zyl8(S, rr + 0.25, rr + 0.25, 0.25, gx0 + b - rr, eg + i * gh, gz0 + t2 - rr, raster4, 20);
       }
-      zyl8(S, rr - 2.2, rr - 2.2, eg - 0.4, gx0 + b - rr, 0.3, gz0 + t2 - rr, GLAS_HELL5, 16);
+      zyl8(S, rr - 2.2, rr - 2.2, eg - 0.4, gx0 + b - rr, 0.3, gz0 + t2 - rr, GLAS_HELL6, 16);
       for (let i = 0; i < 6; i++) {
         const a = i / 5 * PI10 / 2;
         zyl8(S, 0.3, 0.3, eg - 0.3, gx0 + b - rr + Math.sin(a) * (rr - 0.4), 0.3, gz0 + t2 - rr + Math.cos(a) * (rr - 0.4), raster4, 8);
@@ -81324,7 +104979,7 @@
       S.quader(gx0 - 0.6, H - 0.4, gz0 - 0.6, gx0 + b - rr, H, gz0 + t2 + 0.6, raster4);
       S.quader(gx0 + b - rr, H - 0.4, gz0 - 0.6, gx0 + b + 0.6, H, gz0 + t2 - rr, raster4);
       S.quader(gx0 + 2, H, gz0 + 2, gx0 + b - 8, H + 3, gz0 + t2 - 3, raster4);
-      for (const [k, F2] of seiten2(p, gx0 + 2, gz0 + 2, b - 10, t2 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS8);
+      for (const [k, F2] of seiten2(p, gx0 + 2, gz0 + 2, b - 10, t2 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS9);
       const g4 = new three_module_exports.BoxGeometry(b - 6, 0.25, t2 - 2);
       g4.rotateX(-0.08);
       g4.translate(gx0 + b / 2 - 3, H + 3.4, gz0 + t2 / 2 - 0.5);
@@ -81483,7 +105138,7 @@
         const lang = F3.L > 20;
         for (let i = 0; i <= n; i++) fb4(S, F3, 0, F3.L, 4 + i * gh - 0.9, 4 + i * gh, 0, 0.45, be);
         for (const u of achsen5(0, F3.L, lang ? 1.7 : 2.2, 0)) fb4(S, F3, u - 0.2, u + 0.2, 4, Hh - 2, 0, 0.7, be);
-        fb4(S, F3, -0.1, F3.L + 0.1, 0, 4, -1.5, -1.45, GLAS_HELL5);
+        fb4(S, F3, -0.1, F3.L + 0.1, 0, 4, -1.5, -1.45, GLAS_HELL6);
         for (const u of achsen5(0, F3.L, 4.5, 0)) fb4(S, F3, u - 0.4, u + 0.4, 0, 4, -1.5, 0.3, be);
         fb4(S, F3, -0.2, F3.L + 0.2, Hh - 2, Hh, 0, 0.75, be);
       }
@@ -81506,14 +105161,14 @@
       }
       prisma3(S, pts, 0, 10, be);
       for (const F3 of kanten2(pts)) if (sichtF(p, F3)) {
-        fb4(S, F3, 0.3, F3.L - 0.3, 0.3, 3.2, 0, 0.05, GLAS_HELL5);
+        fb4(S, F3, 0.3, F3.L - 0.3, 0.3, 3.2, 0, 0.05, GLAS_HELL6);
         for (const u of achsen5(0, F3.L, 1.4, 0)) fb4(S, F3, u - 0.15, u + 0.15, 3.2, 10, 0, 0.3, hell4);
         fb4(S, F3, -0.1, F3.L + 0.1, 9.2, 10.2, 0, 0.5, hell4);
       }
       zyl8(S, ra * 0.55, ra * 0.7, 2.5, cx, 10, cz, hell4, 8);
       ftext4(scene2, R7(cx - 4, cz + ra * 0.93 + 0.1, 1, 0, 8), "H\xF6rsaalzentrum", 4, 8.4, 0.5, 0.7, 7.5, "#2a3036");
       S.quader(hx0 + hb - 2, 7, hz0 + ht, hx0 + hb + 2, 10, tz0, be);
-      for (const [k, F3] of seiten2(p, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS8);
+      for (const [k, F3] of seiten2(p, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS9);
       for (const z2 of [hz0 + ht + 3, tz0 - 3]) S.box(0.8, 7, 0.8, hx0 + hb, 3.65, z2, be);
       for (let i = 0; i < 5; i++) pflanzkuebel2(S, r, x0 + 6 + i * 3.2, z0 + d - 4, 0.3, i % 2 === 0);
       for (let i = 0; i < 10; i++) {
@@ -81645,7 +105300,7 @@
       const ex = 4.5, tr = 5.6;
       S.quader(cx2 - B2 / 2, 0, cz2 - T / 2, cx2 + B2 / 2, H - 2.5, cz2 + T / 2, c);
       S.quader(cx2 - B2 / 2, H - 2.5, cz2 - T / 2, cx2 + 3, H, cz2 + T / 2, c);
-      const arkaden = (F3, u0, u1, geschosse2, durchgang) => {
+      const arkaden2 = (F3, u0, u1, geschosse2, durchgang) => {
         const L2 = [];
         let y = 0;
         geschosse2.forEach((gh, k) => {
@@ -81657,7 +105312,7 @@
       };
       for (const [k, F3] of seiten2(p, cx2 - B2 / 2, cz2 - T / 2, B2, T, ["-z", "-x", "+x"])) {
         const geschosse2 = k === "-z" ? ze : ze.slice(0, 3);
-        const L2 = arkaden(F3, 0, F3.L, geschosse2, k === "-z" ? [F3.L / 2 - 2.4, F3.L / 2 + 2.4] : null);
+        const L2 = arkaden2(F3, 0, F3.L, geschosse2, k === "-z" ? [F3.L / 2 - 2.4, F3.L / 2 + 2.4] : null);
         lochwand4(S, F3, 0, F3.L, 0, H - 2.5, c, L2, { glas: dk, dick: 0.6 });
         let y = 0;
         for (const gh of geschosse2) {
@@ -81668,7 +105323,7 @@
       }
       const FM = R7(cx2 - ex, cz2 + T / 2, 1, 0, 2 * ex);
       if (sichtF(p, FM)) {
-        lochwand4(S, FM, 0, 2 * ex, 0, H - 2.5, c, arkaden(FM, 0, 2 * ex, ze.slice(0, 3), [2 * ex / 2 - 2.4, 2 * ex / 2 + 2.4]), { glas: dk, dick: 0.6 });
+        lochwand4(S, FM, 0, 2 * ex, 0, H - 2.5, c, arkaden2(FM, 0, 2 * ex, ze.slice(0, 3), [2 * ex / 2 - 2.4, 2 * ex / 2 + 2.4]), { glas: dk, dick: 0.6 });
         let y = 0;
         for (const gh of ze.slice(0, 3)) {
           y += gh;
@@ -81865,7 +105520,7 @@
       infotafel(S, bx0 + bb + 2, bz0 + bt + 6, PI10 / 2);
       for (const [k, F3] of seiten2(p, px0, pz0, pw, pt, ["+x", "-x"])) for (const u of achsen5(0, F3.L, 6, 2)) {
         fb4(S, F3, u - 0.6, u + 0.6, Hp + 0.4, Hp + 2.2, -2.4, -0.6, rosa);
-        fb4(S, F3, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS8);
+        fb4(S, F3, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS9);
         fpoly3(S, teil4(F3, u - 0.75, u + 0.75, -0.6), [[0, Hp + 2.2], [1.5, Hp + 2.2], [0.75, Hp + 2.9]], -1.8, 0.1, "#5d646b");
       }
       return { hoehe: H + 4.5 };
@@ -82019,7 +105674,7 @@
     S.quader(x + L2 - 0.1, 0.05, z2 - 3.5, x + L2 + 4, 2.6, z2 + 3.5, farbe);
     S.quader(x, 2.6, z2 - 5, x + L2, 2.9, z2 + 5, "#c8463c");
     S.quader(x + 1, 2.9, z2 - 4, x + 9, 9, z2 + 4, "#f2efe6");
-    S.quader(x + 1.5, 7.2, z2 - 4.05, x + 8.5, 8, z2 + 4.05, GLAS8);
+    S.quader(x + 1.5, 7.2, z2 - 4.05, x + 8.5, 8, z2 + 4.05, GLAS9);
     S.box(1.2, 4, 1.2, x + 6, 11, z2, "#e3c35e");
     for (let i = 0; i < 4; i++) S.quader(x + 12 + i * (L2 - 14) / 4, 2.9, z2 - 2.5, x + 11 + (i + 1) * (L2 - 14) / 4, 3.6, z2 + 2.5, "#5d656c");
     stab4(S, [x + 11, 4, z2], [x + L2 - 1, 4, z2], 0.3, "#9aa1a7");
@@ -82117,7 +105772,7 @@
         const vx0 = x0 + w * 0.58, vz0 = ufer - 28, vb = 30, vt = 12;
         S.quader(vx0, 0, vz0, vx0 + vb, 14, vz0 + vt, "#e9e3d6");
         for (const [k, F2] of seiten2(p, vx0, vz0, vb, vt)) {
-          for (let i = 0; i < 3; i++) fb4(S, F2, 0.5, F2.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS8);
+          for (let i = 0; i < 3; i++) fb4(S, F2, 0.5, F2.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS9);
           fb4(S, F2, -0.1, F2.L + 0.1, 13.4, 14, 0, 0.3, "#c9c3b6");
           if (k === "+z") {
             const tb = Math.min(F2.L - 3, 26), u0 = (F2.L - tb) / 2;
@@ -82146,7 +105801,7 @@
       for (let x = x0 + 6; x < x0 + w * 0.76 - 2; x += 6) S.quader(x, 0.39, z0 + 49.15, x + 3, 0.41, z0 + 49.35, "#f2f1ec");
       autoReihe(S, r, x0 + w * 0.58, x0 + w * 0.8, ufer - 13.5, 0, 0.75);
       S.quader(x0 + w - 26, 0.3, ufer - 24, x0 + w - 18, 3.6, ufer - 18, "#e9e3d6");
-      for (const [k, F2] of seiten2(p, x0 + w - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS8);
+      for (const [k, F2] of seiten2(p, x0 + w - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS9);
       S.quader(x0 + w - 26.5, 3.6, ufer - 24.5, x0 + w - 17.5, 3.9, ufer - 17.5, "#c8463c");
       S.box(6, 0.15, 0.15, x0 + w - 21, 1.3, ufer - 15.5, "#c8463c");
       const ux0 = x0 + w - 14, uz0 = ufer - 30;
@@ -82325,7 +105980,7 @@
     for (const [k, F2] of seiten2(p, x0, z0 - 0.2, b, t + 0.4, ["+z", "-z"])) for (const u of achsen5(0, F2.L, 3.6, 1.6)) {
       const ys = H + 0.9;
       fb4(S, F2, u - 0.7, u + 0.7, ys - 0.5, ys + 1.2, -2.4, -0.7, wand2);
-      fb4(S, F2, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS8);
+      fb4(S, F2, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS9);
       const g = new three_module_exports.BoxGeometry(1.7, 0.12, 2.2);
       g.rotateX(0.35);
       g.translate(u, ys + 1.45, -1.5);
@@ -82346,7 +106001,7 @@
     for (const [k, F2] of seiten2(p, tx0, tz0, ts, ts)) {
       lochwand4(S, F2, 0, ts, Ht - 4, Ht, wand2, [{ u0: ts / 2 - 0.6, u1: ts / 2 + 0.6, v0: Ht - 3.5, v1: Ht - 0.6, bogen: "spitz" }], { dick: 0.15 });
       fscheibe3(S, F2, ts / 2, Ht - 5.2, 0, 0.12, 0.7, "#2b3036");
-      fb4(S, F2, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS8);
+      fb4(S, F2, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS9);
     }
     const g = new three_module_exports.ConeGeometry(ts * 0.72, 13, 8);
     g.rotateY(PI10 / 8);
@@ -82402,7 +106057,7 @@
       baumreihe(S, r, x0 + 2, x0 + w - 2, prom + 3.5, 9, 0.95);
       for (let i2 = 0; i2 < 3; i2++) bank4(S, x0 + 8 + i2 * 26, prom + 5.5);
       S.quader(x0 + w * 0.4, 0.05, ufer + 3, x0 + w * 0.4 + 28, 1.9, ufer + 8.5, "#f2efe6");
-      S.quader(x0 + w * 0.4 + 3, 1.9, ufer + 3.6, x0 + w * 0.4 + 24, 4.2, ufer + 7.9, GLAS_HELL5);
+      S.quader(x0 + w * 0.4 + 3, 1.9, ufer + 3.6, x0 + w * 0.4 + 24, 4.2, ufer + 7.9, GLAS_HELL6);
       S.quader(x0 + w * 0.4 + 2.6, 4.2, ufer + 3.3, x0 + w * 0.4 + 24.4, 4.5, ufer + 8.2, "#2f6f8f");
     }
     const nT = mosel ? 8 : 6, plateau = z0 + 22, hangZ1 = hof2 ? z0 + d - 36 : hz0 - 4, tt = (hangZ1 - plateau) / (nT - 1), dh = mosel ? 5.2 : 3.8;
@@ -82578,7 +106233,7 @@
     S.quader(cx - mb / 2, 0, z0 - 2, cx + mb / 2, Hm, mz1, st);
     for (const [k, F2] of seiten2(p, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
       if (k === "+z" || k === "-z") {
-        lochwand4(S, F2, 0, F2.L, 0.3, Hm - 2, st, [{ u0: 5.5, u1: F2.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL5, dick: 0.6 });
+        lochwand4(S, F2, 0, F2.L, 0.3, Hm - 2, st, [{ u0: 5.5, u1: F2.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL6, dick: 0.6 });
         for (let u = 7.5; u < F2.L - 6; u += 2.4) fb4(S, F2, u - 0.08, u + 0.08, 6.5, Hm - 4, 0.02, 0.15, "#4a525a");
         fb4(S, F2, 5.5, F2.L - 5.5, 12, 12.2, 0.02, 0.15, "#4a525a");
         for (const u of [1.8, F2.L - 1.8]) fb4(S, F2, u - 1.5, u + 1.5, 0, Hm - 2, 0, 0.9, orn);
@@ -82613,7 +106268,7 @@
   }
   function empfang50(S, scene2, p, r, x0, z0, b, t, H, o) {
     const be = "#e9e6de", cx = x0 + b / 2;
-    S.quader(x0, 0, z0, x0 + b, H, z0 + t, GLAS_HELL5);
+    S.quader(x0, 0, z0, x0 + b, H, z0 + t, GLAS_HELL6);
     for (const [k, F2] of seiten2(p, x0, z0, b, t)) {
       for (const u of achsen5(0, F2.L, 2.4, 0)) fb4(S, F2, u - 0.08, u + 0.08, 0.3, H, 0, 0.15, "#f2f1ec");
       for (const y of [4.2, 8.4]) fb4(S, F2, 0, F2.L, y, y + 0.2, 0, 0.15, "#f2f1ec");
@@ -82625,7 +106280,7 @@
     for (const s2 of [-1, 1]) {
       const fx0 = s2 < 0 ? x0 - 14 : x0 + b, fb22 = 14;
       S.quader(fx0, 0, z0 + 1, fx0 + fb22, H + 3, z0 + t - 1, "#d9d2c2");
-      for (const [k, F2] of seiten2(p, fx0, z0 + 1, fb22, t - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS8);
+      for (const [k, F2] of seiten2(p, fx0, z0 + 1, fb22, t - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS9);
       S.quader(fx0 - 0.4, H + 3, z0 + 0.6, fx0 + fb22 + 0.4, H + 3.4, z0 + t - 0.6, be);
     }
     const ux = x0 + b + 4;
@@ -82672,7 +106327,7 @@
     }
     const ex0 = x0 + 4, eb = w - 8;
     if (v === "nachkrieg") hmax = Math.max(hmax, empfang50(S, scene2, p, r, ex0 + 16, ez0, eb - 32, et, 12, {}));
-    else hmax = Math.max(hmax, empfangAlt(S, scene2, p, r, ex0 + 4, ez0, eb - 8, et, v === "gross" ? 16 : 14, { stein: waehle2(r, ["#d8c6a5", "#cdbb9e", "#d9cdb5"]), orn: "#efe6d2", dach: v === "gross" ? KUPFER2 : SCHIEFER3 }));
+    else hmax = Math.max(hmax, empfangAlt(S, scene2, p, r, ex0 + 4, ez0, eb - 8, et, v === "gross" ? 16 : 14, { stein: waehle2(r, ["#d8c6a5", "#cdbb9e", "#d9cdb5"]), orn: "#efe6d2", dach: v === "gross" ? KUPFER3 : SCHIEFER3 }));
     boden5(S, x0, ez1, x0 + w, z0 + d, "#d6d0c2", 0.3, 0.1);
     for (let x = x0 + 10; x < x0 + w * 0.4; x += 5) ostFahrzeug(S, x, ez1 + 4.5, "modern", 0, "#efd25c");
     baumreihe(S, r, x0 + w * 0.6, x0 + w - 4, ez1 + 5, 9, 0.9);
@@ -82813,10 +106468,10 @@
     }
     const kx = px2 + pb, kb = 12, kt = Math.min(t - 6, 26);
     S.quader(kx, y, pz4, kx + kb, y + H + 2, pz4 + kt, stein);
-    for (const [k, F2] of seiten2(p, kx, pz4, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y + 4, y + H - 1, 0, 0.06, GLAS8);
+    for (const [k, F2] of seiten2(p, kx, pz4, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y + 4, y + H - 1, 0, 0.06, GLAS9);
     satteldach4(S, kx, pz4, kx + kb, pz4 + kt, y + H + 2, 8, "z", dach3, stein, 0.4);
     S.box(1.2, 6, 1.2, kx + kb / 2, y + H + 13, pz4 + kt * 0.5, dach3);
-    zyl8(S, 0, 0.9, 4, kx + kb / 2, y + H + 16, pz4 + kt * 0.5, KUPFER2, 8);
+    zyl8(S, 0, 0.9, 4, kx + kb / 2, y + H + 16, pz4 + kt * 0.5, KUPFER3, 8);
     const tx = px2 - 2, tz = pz4 + pt - 1;
     zyl8(S, 3.6, 3.8, H + 12, tx, y, tz, stein, 16);
     zyl8(S, 0, 4.4, 9, tx, y + H + 12, tz, dach3, 16);
@@ -84587,12 +108242,12 @@
   var KRAEFTIG = ["#e6b45a", "#dc9878", "#9fc29a", "#8fb5cf", "#e0a19e", "#d8bf6a", "#b8a3cf", "#e49066", "#c9d98f"];
   var BIBER = ["#b4583f", "#a85440", "#c26a4a", "#9e4e3a"];
   var SCHIEFER4 = ["#5d6a72", "#56636c", "#626e75"];
-  var KUPFER3 = ["#6f9a7d", "#79a487", "#628f73"];
+  var KUPFER4 = ["#6f9a7d", "#79a487", "#628f73"];
   var ZWIEBEL_DUNKEL = ["#4f5a5a", "#5a4b42", "#4d5864"];
   var WEISS3 = "#f4f1ea";
   var ORN2 = "#fbf8f0";
   var GOLD = "#d8b45a";
-  var GLAS9 = "#4f5f6b";
+  var GLAS10 = "#4f5f6b";
   var GLAS_LADEN2 = "#5f7787";
   var GLAS_DUNKEL = "#3c4852";
   var LADENRAHMEN2 = ["#3f4a53", "#2f5d4a", "#6b2e35", "#5a4636", "#1f3a5f", "#e9e4da", "#7a2f2f", "#2e4f6b"];
@@ -84685,8 +108340,8 @@
   function fenster6(S, F2, u, y, fw, fh, o = {}) {
     const t = o.t ?? 0, rah = o.rahmen ?? ORN2;
     if (o.fasche) fb5(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y - 0.22, y + fh + 0.22, t, t + 0.03, o.fasche);
-    if (o.bogen) fbogen(S, F2, u, y, fw, fh, t - 0.12, t + 0.04, o.glas ?? GLAS9);
-    else fb5(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t - 0.12, t + 0.04, o.glas ?? GLAS9);
+    if (o.bogen) fbogen(S, F2, u, y, fw, fh, t - 0.12, t + 0.04, o.glas ?? GLAS10);
+    else fb5(S, F2, u - fw / 2, u + fw / 2, y, y + fh, t - 0.12, t + 0.04, o.glas ?? GLAS10);
     if (o.kreuz !== false && fw > 0.75) {
       fb5(S, F2, u - 0.045, u + 0.045, y, y + fh * (o.bogen ? 0.8 : 1), t, t + 0.07, rah);
       if (!o.bogen) fb5(S, F2, u - fw / 2, u + fw / 2, y + fh * 0.66 - 0.04, y + fh * 0.66 + 0.04, t, t + 0.07, rah);
@@ -85027,7 +108682,7 @@
     const laedenF = r() < 0.35 ? waehle2(r, ["#3f6b4a", "#6b3a2e", "#3f5a7a"]) : null;
     const fen = {
       rahmen: orn,
-      glas: GLAS9,
+      glas: GLAS10,
       fasche: v === "passau" ? null : r() < 0.6 ? orn : dunkler(wand2, 0.08),
       laeden: v === "wasserburg" ? laedenF : null,
       simsF: orn,
@@ -85099,7 +108754,7 @@
       if (sichtF2(p, F2.v)) {
         for (const u of [b * 0.3, b * 0.7]) fenster6(S, F2.v, u, H + 0.9, 0.95, 1.4, { ...fen, laeden: null, blumen: null });
         fenster6(S, F2.v, b / 2, H + hg * 0.52, 0.8, 1.1, { ...fen, laeden: null, blumen: null, kreuz: false });
-        if (hg > 7) fscheibe4(S, F2.v, b / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS9);
+        if (hg > 7) fscheibe4(S, F2.v, b / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS10);
       }
       if (sichtF2(p, F2.h)) fpoly4(S, F2.h, giebelUmriss2(0, b, H, hg * 0.9, "spitz"), -0.3, 0, dunkler(wand2, 0.03));
       return { top: H + hg, H };
@@ -85119,7 +108774,7 @@
         const [a0, a1] = umriss[i], [b0, b1] = umriss[i + 1];
         if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2 && a1 > H + 0.5) fb5(S, F2.v, Math.min(a0, b0) - 0.08, Math.max(a0, b0) + 0.08, a1 - 0.02, a1 + 0.16, -0.65, 0.1, orn);
       }
-      if (art === "aufsatz" && sichtF2(p, F2.v)) fscheibe4(S, F2.v, b / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS9);
+      if (art === "aufsatz" && sichtF2(p, F2.v)) fscheibe4(S, F2.v, b / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS10);
     }
     const fm = dunkler(wand2, 0.04);
     S.quader(x0, H, z0, x0 + 0.45, top - 0.35, z0 + T - 0.3, fm);
@@ -85181,9 +108836,9 @@
     const us = achsen6(0, b, ra, 0.6);
     const fbreite = stil === "wiederaufbau" ? 1.15 : 1.35, fhoehe = stil === "wiederaufbau" ? 1.55 : 2.05;
     const fenF = (k) => {
-      if (stil === "wiederaufbau") return { rahmen: "#f6f4ee", glas: GLAS9, sims: true, simsF: "#c9c3b6", kreuz: r() < 0.3 };
-      if (stil === "neorenaissance") return { rahmen: orn, glas: GLAS9, fasche: orn, verdachung: k === 0 ? r() < 0.5 ? "dreieck" : "segment" : k === 1 ? "gerade" : null, ornF: orn };
-      return { rahmen: orn, glas: GLAS9, fasche: k < 2 ? orn : null, verdachung: k === 0 ? "segment" : null, ornF: orn };
+      if (stil === "wiederaufbau") return { rahmen: "#f6f4ee", glas: GLAS10, sims: true, simsF: "#c9c3b6", kreuz: r() < 0.3 };
+      if (stil === "neorenaissance") return { rahmen: orn, glas: GLAS10, fasche: orn, verdachung: k === 0 ? r() < 0.5 ? "dreieck" : "segment" : k === 1 ? "gerade" : null, ornF: orn };
+      return { rahmen: orn, glas: GLAS10, fasche: k < 2 ? orn : null, verdachung: k === 0 ? "segment" : null, ornF: orn };
     };
     const ladenFront3 = (Fk, L2) => {
       if (stil === "wiederaufbau") {
@@ -85231,18 +108886,18 @@
       if (erker3) {
         const e0 = b * 0.18, e1 = e0 + 3.2;
         fb5(S, F2.v, e0, e1, eg + 0.4, eg + 2 * gh, 0, 1, wand2);
-        for (let k = 0; k < 2; k++) fenster6(S, F2.v, (e0 + e1) / 2, eg + k * gh + 0.8, 1.6, 2, { rahmen: orn, glas: GLAS9, t: 1 });
+        for (let k = 0; k < 2; k++) fenster6(S, F2.v, (e0 + e1) / 2, eg + k * gh + 0.8, 1.6, 2, { rahmen: orn, glas: GLAS10, t: 1 });
         fb5(S, F2.v, e0 - 0.2, e1 + 0.2, eg + 2 * gh, eg + 2 * gh + 0.3, 0, 1.3, orn);
         fb5(S, F2.v, e0 + 0.3, e1 - 0.3, eg + 2 * gh + 0.3, eg + 2 * gh + 1.2, 0.6, 1.2, "#3b4046");
       }
     }
-    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS9, simsF: "#cfc9bd" });
+    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS10, simsF: "#cfc9bd" });
     if (sichtF2(p, F2.h)) fb5(S, F2.h, 0, b, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
       if (!ok5 || !sichtF2(p, F2[k])) continue;
       if (stil === "wiederaufbau") {
         ladenFront3(teil5(F2[k], 0, 7), 7);
-        lochfassade(S, F2[k], 0, T, eg, n, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS9, simsF: "#c9c3b6" });
+        lochfassade(S, F2[k], 0, T, eg, n, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS10, simsF: "#c9c3b6" });
         fb5(S, F2[k], -0.1, T + 0.1, H - 0.2, H + 0.05, 0, 0.35, "#e8e3d8");
       } else {
         ladenFront3(teil5(F2[k], 0, 8.4), 8.4);
@@ -85258,15 +108913,15 @@
       top = H + h1 + 1.6;
       if (sichtF2(p, F2.v)) for (const u of achsen6(0, b, ra, 0.6)) {
         fb5(S, F2.v, u - 0.7, u + 0.7, H + 0.4, H + 2.6, -1.4, -0.5, orn);
-        fb5(S, F2.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS9);
+        fb5(S, F2.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS10);
         fbogen(S, F2.v, u, H + 2.4, 1.6, 0.8, -1.5, -0.45, dachF);
       }
       if (b > 10) {
         const gb = Math.min(7.5, b * 0.5), g0 = b / 2 - gb / 2;
         fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, 5.2, "geschweift"), -0.5, 0, wand2);
         if (sichtF2(p, F2.v)) {
-          fenster6(S, F2.v, b / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS9, fasche: orn });
-          fscheibe4(S, F2.v, b / 2, H + 3.9, 0, 0.06, 0.45, GLAS9);
+          fenster6(S, F2.v, b / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS10, fasche: orn });
+          fscheibe4(S, F2.v, b / 2, H + 3.9, 0, 0.06, 0.45, GLAS10);
         }
         fb5(S, F2.v, g0 - 0.2, g0 + gb + 0.2, H - 0.05, H + 0.15, 0, 0.6, orn);
         top = Math.max(top, H + 5.2);
@@ -85281,14 +108936,14 @@
           const gb = 5.6, g0 = b / 2 - gb / 2, hg = 6.2;
           fb5(S, F2.v, g0, g0 + gb, H, H + hg * 0.55, -2.2, 0, wand2);
           fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, hg, "geschweift"), -2.2, 0.08, wand2);
-          fenster6(S, F2.v, b / 2 - 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS9, fasche: orn });
-          fenster6(S, F2.v, b / 2 + 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS9, fasche: orn });
-          fscheibe4(S, F2.v, b / 2, H + hg * 0.68, 0.08, 0.14, 0.4, GLAS9);
-          for (const u of [g0 + 0.8, b - g0 - 0.8]) gaube2(S, F2.v, u < b / 2 ? Math.max(1.3, g0 - 1.6) : Math.min(b - 1.3, b - g0 + 1.6), H, s2, 1.5, wand2, dachF, GLAS9);
+          fenster6(S, F2.v, b / 2 - 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS10, fasche: orn });
+          fenster6(S, F2.v, b / 2 + 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS10, fasche: orn });
+          fscheibe4(S, F2.v, b / 2, H + hg * 0.68, 0.08, 0.14, 0.4, GLAS10);
+          for (const u of [g0 + 0.8, b - g0 - 0.8]) gaube2(S, F2.v, u < b / 2 ? Math.max(1.3, g0 - 1.6) : Math.min(b - 1.3, b - g0 + 1.6), H, s2, 1.5, wand2, dachF, GLAS10);
           top = Math.max(top, H + hg);
         } else {
           const ng = stil === "wiederaufbau" ? Math.max(1, Math.round(b / 3.4)) : Math.max(1, Math.round(b / 4.2));
-          for (let i = 0; i < ng; i++) gaube2(S, F2.v, (i + 0.5) * b / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS9, 1);
+          for (let i = 0; i < ng; i++) gaube2(S, F2.v, (i + 0.5) * b / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS10, 1);
         }
       }
       if (letzter && stil === "neorenaissance" && sichtF2(p, F2.r) && r() < 0.7) {
@@ -85371,7 +109026,7 @@
       orn: ORN2,
       lisene: waehle2(r, ["#e8cf8f", "#e6c0a8", "#d8e0c8", "#efe6cf", "#e3c78a"]),
       dach: waehle2(r, v === "dorf" ? BIBER : [...BIBER, ...SCHIEFER4]),
-      helm: waehle2(r, v === "wallfahrt" ? KUPFER3 : [...KUPFER3, ...ZWIEBEL_DUNKEL, "#b4583f"]),
+      helm: waehle2(r, v === "wallfahrt" ? KUPFER4 : [...KUPFER4, ...ZWIEBEL_DUNKEL, "#b4583f"]),
       uhr: waehle2(r, ["#2f4f6f", "#3b4046", "#7a2f2f"])
     };
   }
@@ -85412,7 +109067,7 @@
         const a = i * PI11 / 4;
         if (sicht2(p, Math.cos(a), Math.sin(a))) S.box(0.35, 1.2, 0.35, cx + Math.cos(a) * 0.82, yr + 1.1, cz + Math.sin(a) * 0.82, GLAS_DUNKEL);
       }
-      zwiebel(S, cx, yr + 2.4, cz, 0.95, 2.6, c.helm ?? KUPFER3[0], 10);
+      zwiebel(S, cx, yr + 2.4, cz, 0.95, 2.6, c.helm ?? KUPFER4[0], 10);
       kreuz2(S, cx, yr + 4.6, cz, 1);
     }
     for (const k of ["r", "l"]) if (sichtF2(p, F2[k]) && L2 > 20) {
@@ -85669,7 +109324,7 @@
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     boden6(S, 0, 0, w, zf, PFLASTER22, 0.3, 0.05);
     if (v === "brauerei") {
-      const klinker = waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]), putz2 = "#efe6d2", dach3 = waehle2(r, SCHIEFER4), kup = waehle2(r, KUPFER3);
+      const klinker = waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]), putz2 = "#efe6d2", dach3 = waehle2(r, SCHIEFER4), kup = waehle2(r, KUPFER4);
       const sx = 4, sb2 = 16, st = 14, sH = 17, sz = zf - st;
       S.quader(sx, 0, sz, sx + sb2, sH, zf, klinker);
       const Fs = seiten3(sx, sz, sb2, st);
@@ -85677,9 +109332,9 @@
         if (!sichtF2(p, Fs[k])) continue;
         const L2 = Fs[k].L;
         for (const u of achsen6(0, L2, 3.6, 0.8)) {
-          fbogen(S, Fs[k], u, 1.6, 2, 5.4, -0.1, 0.06, GLAS9);
+          fbogen(S, Fs[k], u, 1.6, 2, 5.4, -0.1, 0.06, GLAS10);
           fbogen(S, Fs[k], u, 1.6, 2.4, 5.6, 0, 0.04, putz2);
-          fbogen(S, Fs[k], u, 9, 2, 5.6, -0.1, 0.06, GLAS9);
+          fbogen(S, Fs[k], u, 9, 2, 5.6, -0.1, 0.06, GLAS10);
           fbogen(S, Fs[k], u, 9, 2.4, 5.8, 0, 0.04, putz2);
         }
         fb5(S, Fs[k], -0.1, L2 + 0.1, 7.8, 8.2, 0, 0.2, putz2);
@@ -85705,7 +109360,7 @@
         S.quader(lx, 0, lz, lx + lb, 7, zf, putz2);
         const Fl = seiten3(lx, lz, lb, lt);
         for (const k of ["v", "r"]) if (sichtF2(p, Fl[k])) {
-          lochfassade(S, Fl[k], 0, Fl[k].L, 1.5, 1, 4.5, { ra: 3.2, fw: 1.4, fh: 1.4, rahmen: ORN2, glas: GLAS9, simsF: "#d8cfbd" });
+          lochfassade(S, Fl[k], 0, Fl[k].L, 1.5, 1, 4.5, { ra: 3.2, fw: 1.4, fh: 1.4, rahmen: ORN2, glas: GLAS10, simsF: "#d8cfbd" });
         }
         if (sichtF2(p, Fl.v)) {
           fbogen(S, Fl.v, lb - 3, 0.3, 3.2, 4.2, -0.1, 0.06, "#5a4636");
@@ -85751,9 +109406,9 @@
           haustuer2(S, Fk, u, 0.3, 1.6, 2.7, waehle2(r, HOLZ5), "#e8dcc0", true);
           return;
         }
-        fenster6(S, Fk, u, 1.2, 1.2, brau ? 2.4 : 1.6, { rahmen: ORN2, glas: GLAS9, laeden: brau ? null : laedenF, bogen: brau, fasche: "#e8dcc0", simsF: "#e8dcc0" });
+        fenster6(S, Fk, u, 1.2, 1.2, brau ? 2.4 : 1.6, { rahmen: ORN2, glas: GLAS10, laeden: brau ? null : laedenF, bogen: brau, fasche: "#e8dcc0", simsF: "#e8dcc0" });
       });
-      for (let kk = 0; kk < n; kk++) for (const u of us) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.15, 1.6, { rahmen: ORN2, glas: GLAS9, laeden: laedenF, fasche: brau ? null : "#e8dcc0", blumen: !brau && kk === 0 && r() < 0.8 ? "#d0453a" : null, simsF: "#e8dcc0" });
+      for (let kk = 0; kk < n; kk++) for (const u of us) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.15, 1.6, { rahmen: ORN2, glas: GLAS10, laeden: laedenF, fasche: brau ? null : "#e8dcc0", blumen: !brau && kk === 0 && r() < 0.8 ? "#d0453a" : null, simsF: "#e8dcc0" });
       fb5(S, Fk, -0.05, L2 + 0.05, eg - 0.1, eg + 0.12, 0, 0.12, "#e8dcc0");
       if (front2) {
         ftext5(scene2, Fk, name2, L2 / 2, eg + n * gh - 0.25 - (brau ? 0 : 0) + 0, 0.08, brau ? 1 : 0.62, L2 * 0.6, "#5a3a2a");
@@ -85765,7 +109420,7 @@
     }
     if (brau) {
       dachTrauf(S, F2.v, 0, hb, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
-      if (sichtF2(p, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS9);
+      if (sichtF2(p, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
       S.quader(0.5 + hb * 0.4, H + 4, hz + ht / 2 - 0.5, 0.5 + hb * 0.4 + 1, H + ht * 0.52 + 1, hz + ht / 2 + 0.5, "#b9a89a");
     } else if (r() < 0.5) {
       walm3(S, 0.5, hz, 0.5 + hb, zf, H, ht * 0.4, dachF, 0.7);
@@ -85969,7 +109624,7 @@
     const F2 = seiten3(x0, z0, b, T), leer2 = p.zustand === "leerstand";
     const { n, eg, gh } = o, kr = o.kr ?? 0.3;
     const H = eg + n * gh + kr * 0;
-    const fen = { rahmen: ORN2, glas: GLAS9, laeden: o.laedenF, blumen: o.blumen };
+    const fen = { rahmen: ORN2, glas: GLAS10, laeden: o.laedenF, blumen: o.blumen };
     S.quader(x0, 0, z0, x0 + b, eg, z0 + T, o.steinEG ? o.stein : o.wand);
     for (let k = 0; k < n; k++) S.quader(x0, eg + k * gh, z0, x0 + b, eg + (k + 1) * gh, z0 + T + kr * (k + 1), o.steinOG && k === 0 ? o.stein : o.wand);
     const tTop = kr * n;
@@ -86022,7 +109677,7 @@
       else fpoly4(S, F2.h, [[0, H], [b, H], [b / 2, H + hg - 0.2]], -0.4, 0, o.wand);
       for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) {
         const s2 = 2 * hg / b;
-        for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k], u, H, s2, 1.6, o.wand, o.dach, GLAS9, 1);
+        for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k], u, H, s2, 1.6, o.wand, o.dach, GLAS10, 1);
       }
       S.quader(x0 + b * 0.5 - 0.4, H + hg * 0.5, z0 + T * 0.3, x0 + b * 0.5 + 0.4, H + hg + 0.6, z0 + T * 0.3 + 0.8, "#a8988a");
       top = H + hg;
@@ -86041,8 +109696,8 @@
           dachGiebel(S, Fd, z0u, z0u + zb, -3.4, 0, H + hz * 0.85, zb * 0.75, o.dach, null, { ue: 0.25, uf: 0.5, ub: 0 });
           fb5(S, Fd, b / 2 - 0.12, b / 2 + 0.12, H + hz * 0.85 + zb * 0.5, H + hz * 0.85 + zb * 0.5 + 0.24, 0, 1.6, o.holz);
           top = Math.max(top, H + hz * 0.85 + zb * 0.75);
-          for (const u of [z0u - 2, z0u + zb + 2]) if (u > 1 && u < b - 1) gaube2(S, Fd, u, H, s2, 1.3, o.wand, o.dach, GLAS9, 0.9);
-        } else for (const u of achsen6(0, b, 3.6, 0.8)) gaube2(S, Fd, u, H, s2, 1.4, o.wand, o.dach, GLAS9, 0.9);
+          for (const u of [z0u - 2, z0u + zb + 2]) if (u > 1 && u < b - 1) gaube2(S, Fd, u, H, s2, 1.3, o.wand, o.dach, GLAS10, 0.9);
+        } else for (const u of achsen6(0, b, 3.6, 0.8)) gaube2(S, Fd, u, H, s2, 1.4, o.wand, o.dach, GLAS10, 0.9);
         if (o.choerlein) {
           const cu = us[Math.floor(us.length / 2)], y0 = eg + 0.3, t0 = kr;
           fb5(S, F2.v, cu - 1.1, cu + 1.1, y0 + 0.9, y0 + gh * 0.95, t0, t0 + 0.9, o.choerleinF ?? o.stein);
@@ -86108,7 +109763,7 @@
     const F2 = seiten3(x0, z0, b, T), leer2 = p.zustand === "leerstand";
     const H = o.eg + o.n * o.gh, st = o.stein, hst = heller(st, 0.08);
     S.quader(x0, 0, z0, x0 + b, H, z0 + T, st);
-    const fen = { rahmen: ORN2, glas: GLAS9, fasche: hst, simsF: hst };
+    const fen = { rahmen: ORN2, glas: GLAS10, fasche: hst, simsF: hst };
     for (const [k, ok5] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
       if (!ok5 || !sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
@@ -86133,8 +109788,8 @@
       fb5(S, F2.v, b / 2 - 0.65, b / 2 + 0.65, H + 0.5, H + 2.6, -0.1, 0.04, "#5a4636");
       fb5(S, F2.v, b / 2 - 0.12, b / 2 + 0.12, H + hz + 1.4, H + hz + 1.65, 0, 1.4, HOLZ5[0]);
       dachGiebel(S, F2.v, zu + 0.2, zu + zb - 0.2, -3.6, -0.2, H + hz, 3, o.dach, null, { ue: 0, uf: 0, ub: 0 });
-      for (const u of [b * 0.15, b * 0.85]) if (b > 9) gaube2(S, F2.v, u, H, s2, 1.1, st, o.dach, GLAS9, 0.9);
-      for (const u of [b * 0.35, b * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st, o.dach, GLAS9, 3.3);
+      for (const u of [b * 0.15, b * 0.85]) if (b > 9) gaube2(S, F2.v, u, H, s2, 1.1, st, o.dach, GLAS10, 0.9);
+      for (const u of [b * 0.35, b * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st, o.dach, GLAS10, 3.3);
       top = Math.max(top, H + hz + 3.4);
       if (o.choerlein) {
         const cu = b * 0.3, y0 = o.eg + 0.4;
@@ -86303,7 +109958,7 @@
     S.quader(x0, 0, z0, x0 + b, eg, z0 + T, putz2);
     S.quader(x0, eg, z0, x0 + b, H, z0 + T, holzOG ? holz : putz2);
     const blume = waehle2(r, ["#d0453a", "#e05a7a", "#d0453a"]);
-    const fen = { rahmen: ORN2, glas: GLAS9, laeden: laedenF, simsF: "#efe9dc" };
+    const fen = { rahmen: ORN2, glas: GLAS10, laeden: laedenF, simsF: "#efe9dc" };
     const lfarben = ["#d8a64a", "#b85a4a", "#5f8f6a", "#5a7fa8"];
     const lf = waehle2(r, lfarben);
     for (const k of ["v", "r", "h", "l"]) {
@@ -86540,7 +110195,7 @@
     const wand2 = o.wand ?? waehle2(r, ["#efe6d2", "#e8dcc8", "#f1e2c4", "#e3e6dc", "#f0d8c4", "#dfe3e6", "#f3ede0"]);
     const dachF = o.dach ?? waehle2(r, BIBER);
     S.quader(x0, 0, z0, x0 + b, H, z0 + T, wand2);
-    const fen = { rahmen: ORN2, glas: GLAS9, laeden: o.laeden ?? (r() < 0.5 ? waehle2(r, ["#3f6b4a", "#5a6168", "#2f5d7a"]) : null), simsF: "#e9e3d6" };
+    const fen = { rahmen: ORN2, glas: GLAS10, laeden: o.laeden ?? (r() < 0.5 ? waehle2(r, ["#3f6b4a", "#5a6168", "#2f5d7a"]) : null), simsF: "#e9e3d6" };
     for (const k of ["v", "r", "h", "l"]) {
       if (!sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
@@ -86564,7 +110219,7 @@
       dachTrauf(S, F2.v, 0, b, T, H, T * 0.45, dachF, wand2, { ue: 0.6, us: 0.5 });
       top = H + T * 0.45;
     }
-    if (sichtF2(p, F2.v) && b > 8) gaube2(S, F2.v, b / 2, H, 0.9, 1.6, wand2, dachF, GLAS9, 1.4);
+    if (sichtF2(p, F2.v) && b > 8) gaube2(S, F2.v, b / 2, H, 0.9, 1.6, wand2, dachF, GLAS10, 1.4);
     S.quader(x0 + b * 0.3, H + 1, z0 + T * 0.5, x0 + b * 0.3 + 0.7, top + 0.4, z0 + T * 0.5 + 0.7, "#b9a89a");
     return { top };
   }
@@ -86614,7 +110269,7 @@
       } else if (typ === "band") {
         for (let k = 0; k < n; k++) {
           const y = eg + k * gh;
-          fb5(S, Fk, 0.4, L2 - 0.4, y + 0.95, y + gh - 0.5, -0.1, 0.03, GLAS9);
+          fb5(S, Fk, 0.4, L2 - 0.4, y + 0.95, y + gh - 0.5, -0.1, 0.03, GLAS10);
           for (let u = 1.4; u < L2 - 0.6; u += 1.4) fb5(S, Fk, u - 0.04, u + 0.04, y + 0.95, y + gh - 0.5, 0, 0.06, "#f4f3ef");
           fb5(S, Fk, 0, L2, y + 0.85, y + 0.95, 0, 0.25, "#f4f3ef");
         }
@@ -86623,7 +110278,7 @@
         for (let k = 0; k < n; k++) for (const u of achsen6(0, L2, 2.3, 0.6)) {
           const y = eg + k * gh + 0.8;
           fb5(S, Fk, u - 0.8, u + 0.8, y - 0.12, y + 1.62, 0, 0.12, "#f7f6f2");
-          fb5(S, Fk, u - 0.66, u + 0.66, y, y + 1.5, -0.1, 0.13, GLAS9);
+          fb5(S, Fk, u - 0.66, u + 0.66, y, y + 1.5, -0.1, 0.13, GLAS10);
         }
         if (haupt && L2 > 10) for (let k = 1; k < n; k++) {
           const y = eg + k * gh;
@@ -86634,7 +110289,7 @@
       if (haupt) ftext5(scene2, Fk, waehle2(r, ["Kaufhaus W\xF6rner", "Modehaus Bleyle", "Schuh-Haug", "Radio Fischer", "M\xF6bel Kienzle", "Sport-Scheck"]), L2 / 2, H - 0.9, 0.4, 0.9, L2 * 0.7, akz);
     };
     if (sichtF2(p, F2.v)) front2(F2.v, b, true);
-    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS9, sims: false });
+    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS10, sims: false });
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) front2(F2[k], T, false);
     const sb2 = Math.max(6, b * 0.62), st0 = x0 + (b - sb2) * (typ === "band" ? 0.2 : 0.6), sT = T - 5.5;
     S.quader(st0, H, z0 + 2, st0 + sb2, H + 2.9, z0 + 2 + sT, "#e2e6e8");
@@ -86656,7 +110311,7 @@
     const wand2 = waehle2(r, ["#f1e6c8", "#efe0d6", "#e6eadf", "#f2efe6", "#e9d9c3"]), orn = ORN2, dachF = waehle2(r, [...BIBER, ...SCHIEFER4]);
     const eg = 3.8, og = 3.4, H = eg + og;
     S.quader(x0, 0, z0, x0 + b, H, z0 + T, wand2);
-    const fen = { rahmen: orn, glas: GLAS9, fasche: orn, laeden: waehle2(r, ["#3f6b4a", "#5a6168"]) };
+    const fen = { rahmen: orn, glas: GLAS10, fasche: orn, laeden: waehle2(r, ["#3f6b4a", "#5a6168"]) };
     for (const k of ["v", "r", "h", "l"]) {
       if (!sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
@@ -86682,7 +110337,7 @@
       }
     }
     walm3(S, x0, z0, x0 + b, z0 + T, H, Math.min(b, T) * 0.45, dachF, 0.7, 2);
-    if (sichtF2(p, F2.v)) gaube2(S, F2.v, b * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS9, 1.5);
+    if (sichtF2(p, F2.v)) gaube2(S, F2.v, b * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS10, 1.5);
     S.quader(x0 + b * 0.4, H + 2, z0 + T * 0.5, x0 + b * 0.4 + 0.8, H + Math.min(b, T) * 0.45 + 1, z0 + T * 0.5 + 0.8, "#b9a89a");
     return { top: H + Math.min(b, T) * 0.45 + 1 };
   }
@@ -86783,8 +110438,8 @@
       for (let i = 1; i < 4; i++) fb5(S, Fk, 0, L2, 0.3 + i * (eg / 4), 0.36 + i * (eg / 4), 0.1, 0.14, dunkler(c.rust, 0.08));
       const us = achsen6(0, L2, o.ra ?? 3.4, 0.9);
       for (const u of us) {
-        fenster6(S, Fk, u, 1.3, 1.3, 2.4, { rahmen: c.orn, glas: GLAS9, bogen: true, sims: false, t: 0.1 });
-        for (let kk = 0; kk < n; kk++) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.35, kk === 0 ? 2.5 : 2, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, verdachung: kk === 0 ? o.risalit === k2 && Math.abs(u - L2 / 2) < 6 ? "dreieck" : "segment" : null, ornF: c.orn });
+        fenster6(S, Fk, u, 1.3, 1.3, 2.4, { rahmen: c.orn, glas: GLAS10, bogen: true, sims: false, t: 0.1 });
+        for (let kk = 0; kk < n; kk++) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.35, kk === 0 ? 2.5 : 2, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, verdachung: kk === 0 ? o.risalit === k2 && Math.abs(u - L2 / 2) < 6 ? "dreieck" : "segment" : null, ornF: c.orn });
       }
       fb5(S, Fk, -0.1, L2 + 0.1, eg - 0.1, eg + 0.2, 0, 0.3, c.orn);
       fb5(S, Fk, -0.2, L2 + 0.2, H - 0.5, H, 0, 0.6, c.orn);
@@ -86796,8 +110451,8 @@
         const rb = Math.min(14, L2 * 0.36), u0 = L2 / 2 - rb / 2;
         fb5(S, Fk, u0, u0 + rb, 0.3, H, 0, 1, c.wand);
         for (const u of achsen6(u0, u0 + rb, 3.4, 0.5)) {
-          fenster6(S, Fk, u, 1.3, 1.6, 3, { rahmen: c.orn, glas: GLAS9, bogen: true, sims: false, t: 1 });
-          for (let kk = 0; kk < n; kk++) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.4, kk === 0 ? 2.6 : 2, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, t: 1, verdachung: kk === 0 ? "dreieck" : null });
+          fenster6(S, Fk, u, 1.3, 1.6, 3, { rahmen: c.orn, glas: GLAS10, bogen: true, sims: false, t: 1 });
+          for (let kk = 0; kk < n; kk++) fenster6(S, Fk, u, eg + kk * gh + 0.8, 1.4, kk === 0 ? 2.6 : 2, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, t: 1, verdachung: kk === 0 ? "dreieck" : null });
         }
         for (const u of achsen6(u0, u0 + rb, 1.7, 0.2)) fb5(S, Fk, u - 0.3, u + 0.3, eg + 0.2, H - 0.5, 1, 1.25, c.lis);
         fb5(S, Fk, u0 - 0.2, u0 + rb + 0.2, H - 0.6, H, 0.9, 1.6, c.orn);
@@ -86815,7 +110470,7 @@
       if (!sichtF2(p, F2[kk])) continue;
       for (const u of achsen6(0, F2[kk].L, (o.ra ?? 3.4) * 2, 1.2)) {
         fb5(S, F2[kk], u - 0.6, u + 0.6, H + 0.3, H + 2.4, -1.6, -0.5, c.orn);
-        fb5(S, F2[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS9);
+        fb5(S, F2[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS10);
         fbogen(S, F2[kk], u, H + 2.2, 1.5, 0.75, -1.7, -0.4, c.dach);
       }
     }
@@ -86862,15 +110517,15 @@
       zyl9(S, 4.9, 4.9, 0.5, tx, Hb + 12, tz, c.orn, 8);
       for (const { F: Fo, nx, nz, kante } of oktoRahmen(tx, tz, 4.6 * Math.cos(PI11 / 8))) {
         if (!sicht2(p, nx, nz)) continue;
-        fbogen(S, Fo, kante / 2, Hb + 3, 1.3, 4.5, -0.1, 0.08, GLAS9);
+        fbogen(S, Fo, kante / 2, Hb + 3, 1.3, 4.5, -0.1, 0.08, GLAS10);
         fscheibe4(S, Fo, kante / 2, Hb + 9.5, 0, 0.1, 0.9, "#f4efe0");
         fb5(S, Fo, -0.05, 0.4, Hb, Hb + 12, 0, 0.15, c.lis);
       }
       const kup = new three_module_exports.LatheGeometry([[5, 0], [4.8, 1.6], [4, 3.2], [2.6, 4.4], [1.2, 5], [1e-3, 5.2]].map(([a, b]) => new three_module_exports.Vector2(a, b)), 12);
       kup.translate(tx, Hb + 12.5, tz);
-      S.add(kup, waehle2(r, KUPFER3));
+      S.add(kup, waehle2(r, KUPFER4));
       zyl9(S, 1, 1, 2.6, tx, Hb + 17.4, tz, c.wand, 8);
-      zwiebel(S, tx, Hb + 20, tz, 1.1, 2.6, waehle2(r, KUPFER3), 10);
+      zwiebel(S, tx, Hb + 20, tz, 1.1, 2.6, waehle2(r, KUPFER4), 10);
       S.add(new three_module_exports.SphereGeometry(0.4, 8, 6).translate(tx, Hb + 22.6, tz), GOLD);
       top = Math.max(top, Hb + 23);
       const hx0 = xa + fl + 2, hx1 = xb - fl - 2;
@@ -86899,15 +110554,15 @@
       zyl9(S, rr * 0.8, rr * 0.8, 1.2, cx, Hs, cz - 1.5, c.wand, 12);
       const kup = new three_module_exports.LatheGeometry([[rr * 0.85, 0], [rr * 0.8, 1.8], [rr * 0.6, 3.6], [rr * 0.3, 4.8], [1e-3, 5.2]].map(([a, bb]) => new three_module_exports.Vector2(a, bb)), 14);
       kup.translate(cx, Hs + 1.2, cz - 1.5);
-      S.add(kup, waehle2(r, KUPFER3));
+      S.add(kup, waehle2(r, KUPFER4));
       S.add(new three_module_exports.SphereGeometry(0.5, 8, 6).translate(cx, Hs + 6.6, cz - 1.5), GOLD);
       for (let i = 0; i < 5; i++) {
         const a = -PI11 / 2 + (i + 0.5) * PI11 / 5, nx = Math.sin(a), nz = Math.cos(a) / 0.75;
         if (!sicht2(p, nx, nz)) continue;
         const px2 = cx + Math.sin(a) * rr, pz4 = cz + Math.cos(a) * rr * 0.75, L2 = Math.hypot(nx, nz);
         const Fo = R8(px2 - nz / L2 * 1.2, pz4 + nx / L2 * 1.2, nz / L2, -nx / L2, 2.4);
-        fbogen(S, Fo, 1.2, 1, 1.6, 4, -0.2, 0.1, GLAS9);
-        fenster6(S, Fo, 1.2, 6.6, 1.4, 2.4, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, sims: false });
+        fbogen(S, Fo, 1.2, 1, 1.6, 4, -0.2, 0.1, GLAS10);
+        fenster6(S, Fo, 1.2, 6.6, 1.4, 2.4, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, sims: false });
       }
       top = Math.max(top, Hs + 7);
       parterre(S, r, x0, z0 + T2 + 9, x0 + b, d - 4, { nx: 4, nz: 2 });
@@ -86935,21 +110590,21 @@
         if (sichtF2(p, F2)) {
           fb5(S, F2, 0, Ls, 0.3, eg2, 0, 0.08, c.rust);
           for (const u of achsen6(0, Ls, 3, 0.4)) {
-            fenster6(S, F2, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS9, bogen: true, sims: false, t: 0.08 });
-            for (let k = 0; k < n2; k++) fenster6(S, F2, u, eg2 + k * gh2 + 0.8, 1.25, 1.9, { rahmen: c.orn, glas: GLAS9, fasche: c.orn, verdachung: k === 0 ? "gerade" : null });
+            fenster6(S, F2, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS10, bogen: true, sims: false, t: 0.08 });
+            for (let k = 0; k < n2; k++) fenster6(S, F2, u, eg2 + k * gh2 + 0.8, 1.25, 1.9, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, verdachung: k === 0 ? "gerade" : null });
           }
           fb5(S, F2, -ext, Ls + ext, eg2 - 0.1, eg2 + 0.15, 0, 0.25, c.orn);
           fb5(S, F2, -ext, Ls + ext, H2 - 0.4, H2, 0, 0.5, c.orn);
           fb5(S, F2, 0, 0.6, eg2, H2 - 0.4, 0, 0.15, c.lis);
         }
         const Fr = R8(...wp5(F2, Ls, -T2), -F2.dx, -F2.dz, Ls);
-        if (sichtF2(p, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n2, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS9 });
+        if (sichtF2(p, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n2, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS10 });
         const Q = quer(F2, T2);
         fpoly4(S, Q, [[-0.4, H2], [T2 + 0.4, H2], [T2 - 1.4, H2 + 3.6], [1.4, H2 + 3.6]], -ext, Ls + ext, c.dach);
         fpoly4(S, Q, [[1.4, H2 + 3.6], [T2 - 1.4, H2 + 3.6], [T2 / 2, H2 + 5]], -ext, Ls + ext, c.dach2);
         if (sichtF2(p, F2)) for (const u of achsen6(0, Ls, 4.5, 0.6)) {
           fb5(S, F2, u - 0.55, u + 0.55, H2 + 0.3, H2 + 2.3, -1.5, -0.5, c.orn);
-          fb5(S, F2, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS9);
+          fb5(S, F2, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS10);
         }
         top = H2 + 5;
         const [bx, bz] = wp5(F2, Ls / 2, 4);
@@ -86980,8 +110635,8 @@
             laden(S, scene2, Fk, 0.5, b - 0.5, eg - 0.4, r, { leer: p.zustand === "leerstand", namen: LAEDEN_BW });
             fb5(S, Fk, -0.03, b + 0.03, eg - 0.1, eg + 0.15, 0, 0.2, ORN2);
           }
-          for (let k = 0; k < n; k++) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster6(S, Fk, uu, eg + k * gh + 0.8, 1.2, 1.9, { rahmen: ORN2, glas: GLAS9, fasche: haupt ? ORN2 : null, verdachung: haupt && k === 0 ? "gerade" : null });
-          if (!haupt) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster6(S, Fk, uu, 1.4, 1.1, 1.6, { rahmen: ORN2, glas: GLAS9 });
+          for (let k = 0; k < n; k++) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster6(S, Fk, uu, eg + k * gh + 0.8, 1.2, 1.9, { rahmen: ORN2, glas: GLAS10, fasche: haupt ? ORN2 : null, verdachung: haupt && k === 0 ? "gerade" : null });
+          if (!haupt) for (const uu of achsen6(0, b, 2.9, 0.5)) fenster6(S, Fk, uu, 1.4, 1.1, 1.6, { rahmen: ORN2, glas: GLAS10 });
           fb5(S, Fk, -0.03, b + 0.03, H - 0.35, H, 0, haupt ? 0.45 : 0.2, ORN2);
         }
         const Q = quer(Fh, T);
@@ -86989,7 +110644,7 @@
         fpoly4(S, Q, [[1.3, H + 3.4], [T - 1.3, H + 3.4], [T / 2, H + 4.6]], 0, b, c.dach2);
         if (sichtF2(p, Fh)) for (const uu of achsen6(0, b, 4.4, 0.8)) {
           fb5(S, Fh, uu - 0.55, uu + 0.55, H + 0.3, H + 2.2, -1.4, -0.5, ORN2);
-          fb5(S, Fh, uu - 0.35, uu + 0.35, H + 0.6, H + 1.8, -0.55, -0.46, GLAS9);
+          fb5(S, Fh, uu - 0.35, uu + 0.35, H + 0.6, H + 1.8, -0.55, -0.46, GLAS10);
         }
         u += b;
       });
@@ -87311,7 +110966,7 @@
           }
         }
         T2.quader(kx2 - 0.8, Hk + 2.2, kz3 + L2 / 2 - 2.2, kx2 + 0.8, Hk + 4.6, kz3 + L2 / 2 - 0.6, c.wand);
-        zwiebel(T2, kx2, Hk + 4.6, kz3 + L2 / 2 - 1.4, 0.9, 2.4, waehle2(r, KUPFER3), 10);
+        zwiebel(T2, kx2, Hk + 4.6, kz3 + L2 / 2 - 1.4, 0.9, 2.4, waehle2(r, KUPFER4), 10);
         kreuz2(T2, kx2, Hk + 6.7, kz3 + L2 / 2 - 1.4, 1);
         baumRund2(T2, kx2 - B2 / 2 - 4, kz3, r, 1.1, LAUB, 0.08);
         baumRund2(T2, kx2 + B2 / 2 + 3.5, kz3 - 2, r, 0.9, LAUB, 0.08);
@@ -87434,7 +111089,7 @@
       for (const k of ["v", "h", "r", "l"]) if (sichtF2(p, Ft[k])) {
         const L2 = Ft[k].L;
         if (k === "v" || k === "h") fbogen(S, Ft[k], L2 / 2, Y + 4, bb + 0.4, 3.2, -0.1, 0.12, heller(stein, 0.06));
-        for (const u of achsen6(0, L2, 3.6, 1)) fenster6(S, Ft[k], u, Y + 9.5, 1, 1.6, { rahmen: heller(stein, 0.08), glas: GLAS9, sims: false });
+        for (const u of achsen6(0, L2, 3.6, 1)) fenster6(S, Ft[k], u, Y + 9.5, 1, 1.6, { rahmen: heller(stein, 0.08), glas: GLAS10, sims: false });
         if (k === "v") {
           fscheibe4(S, Ft[k], L2 / 2, Ht - 3.5, 0, 0.1, 1.3, "#f4efe0");
           fscheibe4(S, Ft[k], L2 / 2, Ht - 3.5, 0.1, 0.13, 1.1, "#2f4f6f");
@@ -87491,7 +111146,7 @@
     const Fk = R8(kx - 1.5, kz2 + 3.5, 1, 0, 3);
     if (sichtF2(p, Fk)) {
       fbogen(S, Fk, 1.5, Y, 1.4, 2.4, -0.2, 0.1, "#5a4636");
-      fenster6(S, Fk, 1.5, Y + 4, 0.8, 1, { rahmen: ORN2, glas: GLAS9, sims: false });
+      fenster6(S, Fk, 1.5, Y + 4, 0.8, 1, { rahmen: ORN2, glas: GLAS10, sims: false });
     }
     for (let x = 4; x < w - 2; x += 8) if (Math.abs(x - kx) > 6) kastanie(S, x, zq - 3.2, r, 0.75, Y);
     for (let x = 8; x < w - 4; x += 16) if (Math.abs(x - kx) > 6) bank5(S, x, zq - 1.2, 0, Y);
@@ -87976,8 +111631,8 @@
       const ax = front2[0][1];
       const L2 = ax === "z" ? p.w : p.d, T = ax === "z" ? p.d : p.w;
       if (L2 < 14 || T < 11) continue;
-      const [typ, variante] = zeileWahl(E, v, rb);
-      Object.assign(p, { typ, sonder: typ.slice(5), variante, front: front2, stil: null, leer: false, landmarke: false, minMass: [14, 12], ...E.baechle && gruppe(v) !== "rand" ? { baechle: true } : {} });
+      const [typ, variante2] = zeileWahl(E, v, rb);
+      Object.assign(p, { typ, sonder: typ.slice(5), variante: variante2, front: front2, stil: null, leer: false, landmarke: false, minMass: [14, 12], ...E.baechle && gruppe(v) !== "rand" ? { baechle: true } : {} });
     }
   }
   var ZEILEN_TIEFE = { muenchen: [22, 24], franken: [20, 22], schwaben: [20, 22], stuttgart: [21, 23], faecher_quadrate: [21, 23] };
@@ -88000,40 +111655,40 @@
     const front2 = [oben ? "+z" : "+x"];
     st.forEach(([u, l], k) => {
       const R9 = oben ? { x: b.x + u, z: b.z, w: l, d: T } : { x: b.x, z: b.z + u, w: T, d: l };
-      let typ, variante;
+      let typ, variante2;
       if (k === iBurg) {
         typ = "slot:sued_burg";
-        variante = b.burg;
+        variante2 = b.burg;
       } else if (k === iTurm) {
         typ = "slot:sued_turm";
-        variante = "fernmeldeturm";
+        variante2 = "fernmeldeturm";
       } else switch (b.inhalt) {
         case "alpen":
           typ = "slot:sued_berg";
-          variante = "alpen";
+          variante2 = "alpen";
           break;
         // glatter Hang, die Gipfel stehen im Stadtrandgürtel
         case "alpen_fern":
           typ = "slot:sued_alpen";
-          variante = "fern";
+          variante2 = "fern";
           break;
         case "voralpen":
-          [typ, variante] = waehle2(rb, [["slot:sued_berg", "wiese"], ["slot:sued_berg", "wald"], ["slot:sued_berg", "wiese"], ["slot:sued_berg", "wald"]]);
+          [typ, variante2] = waehle2(rb, [["slot:sued_berg", "wiese"], ["slot:sued_berg", "wald"], ["slot:sued_berg", "wiese"], ["slot:sued_berg", "wald"]]);
           break;
         case "wein":
-          [typ, variante] = waehle2(rb, [["slot:sued_hang", "wein"], ["slot:sued_hang", "wein"], ["slot:sued_hang", "wein"], ["slot:sued_weinberg", "kapelle"]]);
+          [typ, variante2] = waehle2(rb, [["slot:sued_hang", "wein"], ["slot:sued_hang", "wein"], ["slot:sued_hang", "wein"], ["slot:sued_weinberg", "kapelle"]]);
           break;
         case "kessel":
-          [typ, variante] = waehle2(rb, [["slot:sued_hang", "kessel"], ["slot:sued_hang", "kessel"], ["slot:sued_hang", "haeuser"], ["slot:sued_hang", "wein"]]);
+          [typ, variante2] = waehle2(rb, [["slot:sued_hang", "kessel"], ["slot:sued_hang", "kessel"], ["slot:sued_hang", "haeuser"], ["slot:sued_hang", "wein"]]);
           break;
         case "halbhoehe":
-          [typ, variante] = waehle2(rb, [["slot:sued_hang", "haeuser"], ["slot:sued_hang", "kessel"]]);
+          [typ, variante2] = waehle2(rb, [["slot:sued_hang", "haeuser"], ["slot:sued_hang", "kessel"]]);
           break;
         default:
           typ = "slot:sued_berg";
-          variante = rb() < 0.75 ? "wald" : "wiese";
+          variante2 = rb() < 0.75 ? "wald" : "wiese";
       }
-      neueParzelle5(ctx, typ, R9.x, R9.z, R9.w, R9.d, front2, "frei", { klasse: 1, landmarke: false, variante, ...b.inhalt === "halbhoehe" ? { niedrig: true } : {} });
+      neueParzelle5(ctx, typ, R9.x, R9.z, R9.w, R9.d, front2, "frei", { klasse: 1, landmarke: false, variante: variante2, ...b.inhalt === "halbhoehe" ? { niedrig: true } : {} });
     });
   }
   function bodenGruen(ctx, b, r, teile, B2) {
@@ -88805,8 +112460,8 @@
       for (const s2 of seiten4) for (let k = 0; k < 3; k++) if (!mergeRand5(ctx, FR, [26, 96], 24, [s2], { variante: "stadtmauer", landmarke: false })) break;
     }
     if (BAYRISCH.has(E.sued) && (E.wirtsN ?? 0) < (E.wirtsMax ?? 0) && !slots && gruppe(v) !== "rand" && rb() < 0.3) {
-      const variante = E.sued === "muenchen" && !E.wirtsN ? "braeuhaus" : waehle2(rb, ["wirtshaus", "wirtshaus", "braeuhaus", E.sued === "franken" ? "brauerei" : "wirtshaus"]);
-      if (mergeRand5(ctx, "slot:bay_wirtshaus", [40, 72], 30, ["+z", "+x"], { variante, landmarke: false })) E.wirtsN = (E.wirtsN ?? 0) + 1;
+      const variante2 = E.sued === "muenchen" && !E.wirtsN ? "braeuhaus" : waehle2(rb, ["wirtshaus", "wirtshaus", "braeuhaus", E.sued === "franken" ? "brauerei" : "wirtshaus"]);
+      if (mergeRand5(ctx, "slot:bay_wirtshaus", [40, 72], 30, ["+z", "+x"], { variante: variante2, landmarke: false })) E.wirtsN = (E.wirtsN ?? 0) + 1;
     }
     if (E.nachkrieg && b.zeilen && (gruppe(v) === "zentrum" || slots && gruppe(v) !== "alt") && rb() < 0.55) mergeRand5(ctx, ST2, [30, 64], 32, ["+z", "+x", "-z"], { variante: "geschaeft50", landmarke: false });
     if (["muenchen", "altbayern", "alpenrand"].includes(E.sued) && !E.maibaumEinkauf && !slots && E.einkaufKern?.(b.i0, b.j0)) {
@@ -89409,8 +113064,8 @@
       if (einkauf || v === "ruhr60") {
         for (let q2 = 0; q2 < (einkauf ? 4 : 2); q2++) {
           const hoch = (E.ruhrHoch ?? 0) < (E.o.kern60 ? 3 : 1) && rb() < 0.3;
-          const variante = hoch ? "hochhaus" : wahlGewichtet6(rb, [["zeile", 3], ["kaufhaus", einkauf ? 1.2 : 0.4]]);
-          if (m("slot:ruhr_innenstadt60", variante === "zeile" ? [26, 60] : [42, 66], variante === "zeile" ? 28 : 34, einkauf ? alle : vorn, { variante })) {
+          const variante2 = hoch ? "hochhaus" : wahlGewichtet6(rb, [["zeile", 3], ["kaufhaus", einkauf ? 1.2 : 0.4]]);
+          if (m("slot:ruhr_innenstadt60", variante2 === "zeile" ? [26, 60] : [42, 66], variante2 === "zeile" ? 28 : 34, einkauf ? alle : vorn, { variante: variante2 })) {
             if (hoch) E.ruhrHoch = (E.ruhrHoch ?? 0) + 1;
           }
         }
@@ -89438,8 +113093,8 @@
       if (einkauf || v === "westfalt") {
         const seiten4 = einkauf ? alle : ["+z", "+x", "-z", "-x"];
         for (let q2 = 0; q2 < 4; q2++) {
-          const variante = fz.length && q2 < 2 ? "markt" : wahlGewichtet6(rb, [["markt", einkauf ? 2 : 0.8], ["renaissance", 1.4], ["nachkrieg", 1]]);
-          m("slot:westf_giebelhaus", [16, 44], 22, q2 < 2 && fz.length ? fz : seiten4, { variante });
+          const variante2 = fz.length && q2 < 2 ? "markt" : wahlGewichtet6(rb, [["markt", einkauf ? 2 : 0.8], ["renaissance", 1.4], ["nachkrieg", 1]]);
+          m("slot:westf_giebelhaus", [16, 44], 22, q2 < 2 && fz.length ? fz : seiten4, { variante: variante2 });
         }
       }
     } else if (t === "berg") {
@@ -89562,14 +113217,14 @@
     }
     const genutzt = [];
     liste.forEach((f, k) => {
-      const [art, variante] = f.split(":");
+      const [art, variante2] = f.split(":");
       const minW = { konzern: 50 }[art] ?? 44;
       const l = kand.filter((c2) => !genutzt.includes(c2) && c2.b.w >= minW && c2.b.d >= 44).map((c2) => [c2, -Math.abs(c2.u - c2.v) - genutzt.filter((q2) => Math.abs(q2.b.i0 - c2.b.i0) + Math.abs(q2.b.j0 - c2.b.j0) < 3).length * 3 + (k % 2 === 0 === c2.u + c2.v < 0 ? 0.5 : 0)]).sort((a, b2) => b2[1] - a[1]);
       if (!l.length) return;
       const c = l[0][0], b = c.b;
       genutzt.push(c);
       if (art === "konzern") {
-        konzernEinbetten({ T, rb: rng2(b.seed + 31 * k), b, parzellen, region: E.region, typ }, variante ?? "turm70");
+        konzernEinbetten({ T, rb: rng2(b.seed + 31 * k), b, parzellen, region: E.region, typ }, variante2 ?? "turm70");
         return;
       }
       for (const id of [...b.parzellen]) {
@@ -89581,7 +113236,7 @@
       b.art = NAH_ART[art];
       const ctx = { T, rb: rng2(b.seed + 31 * k), b, parzellen, region: E.region, typ };
       if (art === "konzern") {
-        b.variante = variante ?? "turm70";
+        b.variante = variante2 ?? "turm70";
         konzernParzelle(ctx, E, b);
       } else if (art === "brauturm") voll("slot:ruhr_brauturm", 2)(ctx, E, b);
       else if (art === "turm") {
@@ -89646,9 +113301,9 @@
     }
   }
   var KONZERN_MASS = { glas60: [[52, 90], 44], turm70: [[42, 66], 48], backstein20: [[44, 80], 34] };
-  function konzernEinbetten(ctx, variante = "turm70") {
-    const [br, tiefe] = KONZERN_MASS[variante] ?? KONZERN_MASS.turm70;
-    return mergeRand6(ctx, "slot:ruhr_buero", br, tiefe, ["+z", "+x"], { variante, landmarke: true, klasse: 5 });
+  function konzernEinbetten(ctx, variante2 = "turm70") {
+    const [br, tiefe] = KONZERN_MASS[variante2] ?? KONZERN_MASS.turm70;
+    return mergeRand6(ctx, "slot:ruhr_buero", br, tiefe, ["+z", "+x"], { variante: variante2, landmarke: true, klasse: 5 });
   }
   function konzernParzelle(ctx, E, b) {
     const v = b.variante ?? "glas60";
@@ -89875,11 +113530,11 @@
     const r = rng2((p.seed ?? 1) * 2654435761 + 4111 >>> 0);
     const t = p.westTyp ?? "ruhr";
     if (t === "berg" && p.w <= 15 && r() < (BERG_ANTEIL[p.viertel] ?? 0.4) * (nachbar?.stil === "bergisch" ? 1 : 1.15)) {
-      const variante = wahlGewichtet6(r, [["schiefer", 3], ["putz", p.westEinkauf ? 2 : 1], ["fachwerk", p.viertel === "berghang" ? 1.6 : 0.9]]);
+      const variante2 = wahlGewichtet6(r, [["schiefer", 3], ["putz", p.westEinkauf ? 2 : 1], ["fachwerk", p.viertel === "berghang" ? 1.6 : 0.9]]);
       const laden4 = !!p.westEinkauf && r() < 0.8;
       const front2 = p.front?.[0] ?? "+z";
       const geschosse2 = 2 + (r() < (p.viertel === "bergkern" ? 0.6 : 0.35) ? 1 : 0);
-      return { bau: (S, scene2, q2) => WEST_SLOTS["slot:berg_haus"](S, scene2, { ...q2, front: front2, variante, laden: laden4, sockelY: p.sockelY ?? 0, geschosse: geschosse2, traufe: p.w >= 10.5 ? void 0 : false }) };
+      return { bau: (S, scene2, q2) => WEST_SLOTS["slot:berg_haus"](S, scene2, { ...q2, front: front2, variante: variante2, laden: laden4, sockelY: p.sockelY ?? 0, geschosse: geschosse2, traufe: p.w >= 10.5 ? void 0 : false }) };
     }
     const tab = STILE_WEST[t] ?? STILE_WEST.ruhr;
     let basis = { ...tab[p.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
@@ -90969,7 +114624,7 @@
     baueParkplatz: (...a) => baueParkplatz(...a),
     imRechteck: (...a) => imRechteck(...a)
   };
-  var EINKAUF_SLOTS = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:sport", "slot:wettbewerber", "slot:outlet"]);
+  var EINKAUF_SLOTS = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:premium", "slot:sport", "slot:wettbewerber", "slot:outlet"]);
   function baueCenterFlaeche(ctx, b, r, teile) {
     const { S, I } = ctx;
     const y = 0.33;
@@ -91129,15 +114784,15 @@
     pflasterFlaeche(ctx, P2, y, waehle2(r, ["#e6dfd2", "#ddd5c6", "#e9e3d6"]), 3);
     const cx = P2.x + P2.w / 2, cz = P2.z + P2.d / 2;
     const mitteFrei = !hinder.some((p) => imRechteck(cx, cz, p, 5));
-    const variante = r();
-    if (mitteFrei && variante < 0.4) brunnen3(S, cx, cz, y, 0.7);
+    const variante2 = r();
+    if (mitteFrei && variante2 < 0.4) brunnen3(S, cx, cz, y, 0.7);
     else if (mitteFrei) {
       S.quader(cx - 6, y, cz - 6, cx + 6, y + 0.06, cz + 6, F.rasen);
       for (const [dx, dz] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) baumSetzen(I, waehle2(r, ctx.plan.baumarten ?? ["linde"]), cx + dx, y + 0.06, cz + dz, r, 0.9);
     }
     platzRand(ctx, b, P2, y, r, "kugel", 8);
     baumraster(ctx, P2, y, r, hinder, cx, cz);
-    if (variante > 0.7) {
+    if (variante2 > 0.7) {
       for (let x = P2.x + 5; x < P2.x + P2.w - 5; x += 4.2) if (r() < 0.6 && !hinder.some((p) => imRechteck(x, P2.z + 5, p, 2.5))) I.setze("marktstand", x, y, P2.z + 5, 0, 1, [waehle2(r, FARBEN3.markise), waehle2(r, ["#d9493a", "#e0b23c", "#7cb369"])]);
     }
     for (let i = 0; i < 8; i++) I.setze("bank", P2.x + zw(r, 3, P2.w - 3), y, P2.z + zw(r, 3, P2.d - 3), Math.floor(r() * 4) * Math.PI / 2);
@@ -91831,6 +115486,7 @@
   var MARKER = {
     hartwig: { farbe: "#d23c32", zeichen: "H" },
     hartwigSport: { farbe: "#1d8a6b", zeichen: "S" },
+    premium: { farbe: "#b8955a", zeichen: "\u265B" },
     wettbewerber: { farbe: "#7b858e", zeichen: "W" },
     modehaus: { farbe: "#6b4f8f", zeichen: "M" },
     outlet: { farbe: "#d39a2b", zeichen: "O" },
@@ -91895,7 +115551,7 @@
     k.closePath();
   }
   function standortMarker(plan2, groesse2) {
-    const art = { warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber", outlet: "wettbewerber" };
+    const art = { premium: "premium", warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber", outlet: "wettbewerber" };
     return (plan2.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? "hartwig", groesse: st.rolle === "wettbewerber" ? (groesse2 ?? 10) * 0.8 : groesse2 }));
   }
   function setzeMarker(scene2, plan2, ergebnis, liste = [], o = {}) {
@@ -92580,7 +116236,7 @@
     const extra = { ...bild2?.[1] ?? {}, ...ddr ? { ddr: true } : {} };
     const standorte = liste.map((h) => {
       const f = fussabdruck(h);
-      return { id: h.id, name: h.name, rolle: h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+      return { id: h.id, name: h.name, rolle: h.klasse === "premium" ? "premium" : h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
     });
     const schwester = haeuser_schwester_default.find((h) => h.stadt === name2);
     if (schwester) {
@@ -92772,6 +116428,7 @@
       if (s2.woche < a.start || s2.woche >= a.ende) continue;
       if (a.kontrollHaeuser?.includes(h.id)) continue;
       const sc = a.scope ?? { typ: "alle" };
+      if (h.klasse === "premium" && sc.typ === "alle" && s2?.premiumSchuetzen !== false) continue;
       const trifft3 = sc.typ === "alle" || sc.typ === "format" && sc.format === h.format || sc.typ === "region" && sc.region === h.region || sc.typ === "cluster" && sc.cluster === h.cluster || sc.typ === "haeuser" && sc.ids.includes(h.id);
       if (trifft3 && (!best || a.rabatt > best.rabatt)) best = a;
     }
@@ -92804,6 +116461,7 @@
     } else if (st === "verkauft") {
       z2.status = "offen";
       z2.hartwig = false;
+      z2.kaeufer = haus2.premiumEigentuemer;
     } else if (st === "raeumung") {
       z2.status = "raeumung";
     } else {
@@ -92852,8 +116510,19 @@
         }
       }
     }
+    if (haus2.klasse === "premium") {
+      if (haus2.premiumInvestition && w < haus2.premiumInvestition.bis) {
+        if (z2.status === "offen") z2.status = "umbau";
+        else if (!z2.zusatz.includes("umbau")) z2.zusatz.push("umbau");
+      }
+      const angebot = s2?.angebote?.find((a) => a.typ === "premiumVerkauf" && a.status === "offen" && a.wunschHaeuser?.includes(haus2.id));
+      if (angebot) {
+        z2.verkaufsprozess = true;
+        z2.investor = angebot.premiumKaeuferName;
+      }
+    }
     const u = z2.untermieter.map((m) => `${m.name}@${m.etage}`).join(",");
-    z2.schluessel = [z2.status, ...z2.zusatz, z2.aktion ?? "", z2.rabatt ?? "", u, z2.offpriceEtage, z2.hartwig === false ? "ohne" : ""].join("|");
+    z2.schluessel = [z2.status, ...z2.zusatz, z2.aktion ?? "", z2.rabatt ?? "", u, z2.offpriceEtage, z2.hartwig === false ? "ohne" : "", z2.kaeufer ?? "", z2.verkaufsprozess ? "investor" : ""].join("|");
     return z2;
   }
   function bauZustand(z2) {
@@ -92865,7 +116534,7 @@
     if (!d) return void 0;
     const eigene = s2.haeuser.filter((h) => h.stadt === name2).map((h) => {
       const f = fussabdruck(h);
-      return { id: h.id, name: h.name, rolle: h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+      return { id: h.id, name: h.name, rolle: h.klasse === "premium" ? "premium" : h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
     });
     const alt = d.standorte.filter((q2) => q2.rolle === "wettbewerber" || q2.rolle === "schwester" || q2.rolle === "outlet");
     const reserve = Array.from({ length: 2 }, (_, i) => ({
@@ -92912,6 +116581,10 @@
     const baueWarenhaus = (S, scene2, p, h) => {
       const f = fussabdruck(h);
       const { x, z: z2 } = imSlot2(p, f.w, f.d);
+      if (h.klasse === "premium") {
+        p.haus = h;
+        return premiumhaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+      }
       if (!wahl3.has(h.id)) {
         let fam2 = familieVon(h), fassade4 = h.fassade;
         if (famBenutzt.has(fam2)) {
@@ -93082,6 +116755,7 @@
       "slot:sport": slot4("slot:sport"),
       "slot:schwester": slot4("slot:schwester"),
       "slot:outlet": basis["slot:outlet"],
+      "slot:premium": slot4("slot:premium"),
       "slot:hq": hqSlot,
       "slot:wettbewerber": wbSlot,
       "slot:wettbewerber_reserve": wbSlot
@@ -96507,7 +120181,7 @@
   var VOLL_MAX_ZOOM = 340;
   var KA = { liste: [], teileGrund: 0, laeuft: false };
   var HAUSTYPEN = /* @__PURE__ */ new Set(["stadthaus", "eck", "hofhaus"]);
-  var IMMER_GRUND = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:sport", "slot:wettbewerber", "slot:hq", "slot:dominante", "slot:kirche", "slot:hochhaus", "slot:rathaus", "slot:heizwerk", "slot:dom", "slot:fernsehturm", "slot:wasserturm", "slot:nord_kirche", "slot:nord_kontorhaus", "slot:nord_speicher", "slot:nord_hafen", "slot:center_passage"]);
+  var IMMER_GRUND = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:premium", "slot:sport", "slot:wettbewerber", "slot:hq", "slot:dominante", "slot:kirche", "slot:hochhaus", "slot:rathaus", "slot:heizwerk", "slot:dom", "slot:fernsehturm", "slot:wasserturm", "slot:nord_kirche", "slot:nord_kontorhaus", "slot:nord_speicher", "slot:nord_hafen", "slot:center_passage"]);
   function klotzHoehe(p) {
     const g = p.hofbau ? 2 : p.typ === "hofhaus" ? Math.max(2, (p.geschosse ?? 4) - 1) : p.geschosse ?? 4;
     return 4.2 + g * 3.3;
@@ -96763,6 +120437,17 @@
     $("pinhalt").scrollTop = 0;
   };
   var AKTION_NAME = { sale: "Sale", jubilaeum: "Jubil\xE4um", weihnachten: "Weihnachten", blackfriday: "Black Friday" };
+  window.premiumTun = (was, id) => {
+    const a = was === "schutz" ? { typ: "premiumSchuetzen", an: s.premiumSchuetzen === false } : was === "investieren" ? { typ: "premiumInvestition", haus: id, betrag: 1e7 } : was === "verhandeln" ? { typ: "angebotVerhandeln", angebot: id, haeuser: [] } : was === "verkaufen" ? { typ: "angebotAnnehmen", angebot: id } : null;
+    if (!a) return;
+    const r = fuehreAus(s, a);
+    meldung(r.text, r.ok);
+    if (r.ok) {
+      grafikNachziehen();
+      nachAktion();
+      if (offenesHaus) oeffneHaus(offenesHaus);
+    }
+  };
   function oeffneHaus(id) {
     const d = hausDetail(s, id);
     if (!d) return;
@@ -96777,6 +120462,15 @@
     const zahl2 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild2 ? `<span class="chip">${bild2}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
     html += `<div class="raster">${zahl2("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl2("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl2("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl2("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
+    if (h.klasse === "premium") {
+      const p = premiumUebersicht(s).find((q2) => q2.id === id);
+      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl2("Premium-Image", Math.round(p?.image ?? 80) + " / 100")}${zahl2("Immobilien- & Marktwert", geld(p?.marktwert ?? 0))}${zahl2("EBITDA-Marge (DB)", ((p?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl2("Aktionsschutz", p?.schutz ? "Aktiv" : "Aus")}</div>`;
+      if (h.premiumEigentuemer) html += `<div class="zeile">Eigent\xFCmer: ${h.premiumEigentuemer}</div>`;
+      else if (h.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
+      const an = s.angebote.find((a) => a.status === "offen" && a.typ === "premiumVerkauf" && a.wunschHaeuser?.includes(id));
+      if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || "Investor"} \xB7 ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
+      html += "</div>";
+    }
     const shops = EQ.shops(s, h);
     if (hausEtageWahl?.id === id) {
       const b = innenBild(h, hausEtageWahl.nr);
@@ -96804,7 +120498,7 @@
       html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' + esc(w.name) + "</b> <i>" + esc(WB_ART[w.art] ?? w.art) + " \xB7 " + esc(WB_STATUS[w.status] ?? w.status) + "</i>" + (wirkung ? "<small>" + wirkung + "</small>" : "") + "</span><span>\u2192</span></button>";
     }
     html += "</div>";
-    panel(h.name, `${h.stadt} \xB7 ${h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
+    panel(h.name, `${h.stadt} \xB7 ${h.klasse === "premium" ? "Premiumhaus" : h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
     if (neu) hausZeigen(id);
   }
   function oeffneWettbewerber(id) {

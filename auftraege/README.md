@@ -21,6 +21,9 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | | allem (nur `render/`, eigene Module) |
 | `spiel-posteingang.md` | `feat/spiel-posteingang` | **gemergt 19.10.** Folgeschritt: Wettbewerbsmeldungen in die Kategorie Konkurrenz (kleiner Commit) | |
 
+## Nice-to-have
+Eigene Aufträge in `auftraege/nice/` (Übersicht in `auftraege/nice/README.md`). N13 Einstellungen und N14 Testwerkzeuge zuerst, danach alles parallel.
+
 ## Ohne CI arbeiten (gilt, solange GitHub Actions blockiert ist)
 - GitHub Actions startet derzeit keine Jobs (Kontingent). Nicht auf die CI warten.
 - Abnahme stattdessen lokal: `cd engine && npm ci && npm run typecheck && npx jest`, `cd render && npm ci && npm run build && node spiel-render.js`, dazu die im Auftrag genannten Prüfskripte. Chromium für Playwright: `CHROMIUM_PATH=<Pfad zur Chromium-Datei>` setzen, falls `spiel-render.js` keinen Browser findet. Ist kein Browser verfügbar, Rendering und Bilder als offen markieren und alles andere trotzdem fertigstellen.
