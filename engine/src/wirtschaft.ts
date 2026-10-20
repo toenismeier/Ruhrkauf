@@ -31,6 +31,13 @@ export function aktiveFlaeche(h: Haus, w: number) {
   return h.flaechen.filter((f) => f.umbauBis === undefined || f.umbauBis <= w);
 }
 
+/** Phase 2: 52-Wochen-Realisierung gegenüber der exakt normierten
+ * Nachfragebasis. Der bisherige Lauf auf Seeds 1–3 lag formatübergreifend
+ * 9–11 % unter Ziel. Vorläufiger Ist-Faktor; nach erneutem 52-Wochen-Lauf
+ * ebenso wie die EBITDA-Marge zu verifizieren (keine zweite Basiskalibrierung).
+ */
+export const MASSSTAB_REALISIERUNG = 1.115;
+
 /** Echter Mengeneffekt einer Rabattaktion. */
 export function aktionsUplift(s: GameState, h: Haus, rabatt: number): number {
   const basis = 0.9 * Math.pow(rabatt, 0.9);
@@ -75,7 +82,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale;
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG;
 }
 
 export function saettigung(qm: number, Q: number): number {
