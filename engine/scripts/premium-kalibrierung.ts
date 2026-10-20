@@ -41,6 +41,11 @@ for (const seed of [1, 2, 3]) {
       if (neuKpi) addiere(nachher, id, neuKpi.umsatz, neuKpi.db);
     }
   }
+  const flaechen = premium.haeuser.filter(h => h.klasse === 'premium').map(h => ({
+    haus: h.premiumSchluessel, qm: h.flaechen.reduce((sum, f) => sum + f.qm, 0),
+    grundflaecheQm: h.grundflaecheQm, geschosse: h.etagen.length,
+  }));
+  console.log('Normierte Premiumflächen:', JSON.stringify(flaechen));
   const delta = 100 * (neu / alt - 1);
   if (Math.abs(delta) > 1.5) fehler++;
   console.log(`\nSeed ${seed} | Konzernumsatz Jahr 1: Basis ${format(alt)}, Premium ${format(neu)} Mio. EUR; Abweichung ${delta.toFixed(3)} %`);
@@ -51,6 +56,10 @@ for (const seed of [1, 2, 3]) {
     console.log(`${id} | ${format(b?.u ?? 0)} / ${format(p?.u ?? 0)} | ${marge(b).toFixed(2)} / ${marge(p).toFixed(2)} | ${(100 * ziel).toFixed(0)} | ${(100 * (ist - ziel)).toFixed(2)}`);
     if (!(p && p.u > 0 && Math.abs(ist - ziel) <= .02)) fehler++;
   }
+  const u=(id:string)=>nachher.get(id)?.u ?? 0;
+  const umsatzfolge = Math.min(u('P001'), u('P002')) > u('P003') && u('P003') > u('P004');
+  console.log('Umsatzrangfolge P001 ≈ P002 > P003 > P004:', umsatzfolge ? 'erfüllt' : 'NICHT erfüllt');
+  if (!umsatzfolge) fehler++;
   // Nur diese Bot-Läufe verwenden echte Cashflows, Insolvenzplan und Gläubigervoten.
   const kontrollBot = neuesSpiel(seed, { premiumDeaktiviert: true });
   const premiumBot = neuesSpiel(seed);
