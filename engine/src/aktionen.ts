@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { zeitungEinstellen } from './zeitung';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -48,6 +49,7 @@ export type SpielerAktion =
   | { typ: 'insolvenzAntrag' }
   | { typ: 'insolvenzplanQuote'; quote: number }
   | { typ: 'entscheiden'; id: string; option: string }
+  | { typ: 'zeitungAktiv'; an: boolean }
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
@@ -126,6 +128,9 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
   switch (a.typ) {
+    case 'zeitungAktiv':
+      zeitungEinstellen(s, a.an);
+      return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
       return ok(a.an ? 'Premiumhäuser sind vor pauschalen Rabattaktionen geschützt.' : 'Premiumschutz deaktiviert.');
