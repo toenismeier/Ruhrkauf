@@ -36,6 +36,7 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { hausbesuchModul } from './ui/hausbesuch.js';
 import { szenarienModul } from './ui/szenarien.js';
 import { tonModul } from './ui/ton.js';
 import { einfuehrungModul } from './ui/einfuehrung.js';
@@ -757,6 +758,7 @@ function oeffneHaus(id) {
     html += `<div class="karte haus3d"><img src="${b.url}" alt=""><div class="zeile"><span class="was"><b>${etageName(hausEtageWahl.nr)}</b> <i>Innenansicht</i></span><button class="mini" onclick="hausKlick('zu')">Schließen</button></div></div>`;
     if (b.nah) html += `<div class="karte haus3d"><img src="${b.nah}" alt=""><div class="zeile"><span class="dot" style="background:${b.shop.farbe}"></span><span class="was"><b>Eigenmarken-Shop ${b.shop.name}</b> <i>${Math.round(b.shop.anteil * 100)} % der Fläche</i></span></div></div>`;
   }
+  html += '<div class="karte"><button type="button" class="mini" data-hausbesuch="' + esc(id) + '">Haus besuchen</button></div>';
   for (const e of [...d.etagen].reverse()) {
     html += `<div class="karte"><div class="khead">${etageName(e.etage)}<button class="mini" onclick="hausKlick('etage','${id}',${e.etage})">Ansehen</button></div>`;
     if (!e.flaechen.length) html += '<div class="zeile grau">keine Fläche</div>';
@@ -989,6 +991,7 @@ let ek = null;
 ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); } });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
+const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
@@ -1270,7 +1273,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 window.spiel = { personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   leben,
-  reise, wochenbericht, szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
   oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },
   pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];

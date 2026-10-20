@@ -8320,9 +8320,9 @@
         const k = res.kandidaten.find((x) => x.id === a.kandidat);
         if (!k) return fehler6("Kandidat nicht gefunden.");
         const gehalt = Math.max(0, Math.round(a.gehalt / 5e3) * 5e3);
-        const hb = Math.max(0, eur(a.haltebonus ?? 0));
+        const hb2 = Math.max(0, eur(a.haltebonus ?? 0));
         const eb = clamp(a.erfolgsbonus ?? 0, 0, 1);
-        const p2 = angebotsChance(s2, a.ressort, k.id, gehalt, hb, eb);
+        const p2 = angebotsChance(s2, a.ressort, k.id, gehalt, hb2, eb);
         if (!chance(rng(s2), p2)) {
           const ford = gehaltsforderung(s2, a.ressort, k);
           if (zufall(rng(s2)) < 0.5) res.kandidaten = res.kandidaten.filter((x) => x.id !== k.id);
@@ -8336,8 +8336,8 @@
           fachwissen: k.fachwissen,
           loyalitaet: clamp(k.loyalitaet + 10 * (gehalt / gehaltsforderung(s2, a.ressort, k) - 1) * 3, 0, 100),
           gehalt,
-          haltebonus: hb,
-          halteBis: hb > 0 ? s2.woche + 52 : void 0,
+          haltebonus: hb2,
+          halteBis: hb2 > 0 ? s2.woche + 52 : void 0,
           halteStart: s2.woche,
           erfolgsbonus: eb,
           seitWoche: s2.woche,
@@ -8380,13 +8380,13 @@
         if (!p2) return fehler6(`${info.kurz} ist unbesetzt.`);
         const teile2 = [];
         if (a.haltebonus !== void 0) {
-          const hb = Math.max(0, eur(a.haltebonus));
+          const hb2 = Math.max(0, eur(a.haltebonus));
           const wochen = clamp(Math.round(a.halteWochen ?? 52), 13, 156);
-          p2.haltebonus = hb;
-          p2.halteBis = hb > 0 ? s2.woche + wochen : void 0;
+          p2.haltebonus = hb2;
+          p2.halteBis = hb2 > 0 ? s2.woche + wochen : void 0;
           p2.halteStart = s2.woche;
-          if (hb > 0) p2.loyalitaet = clamp(p2.loyalitaet + 6, 0, 100);
-          teile2.push(hb > 0 ? `Haltebonus ${Math.round(hb / 1e3)} Tsd. \u20AC \xFCber ${wochen} Wochen` : "kein Haltebonus");
+          if (hb2 > 0) p2.loyalitaet = clamp(p2.loyalitaet + 6, 0, 100);
+          teile2.push(hb2 > 0 ? `Haltebonus ${Math.round(hb2 / 1e3)} Tsd. \u20AC \xFCber ${wochen} Wochen` : "kein Haltebonus");
         }
         if (a.erfolgsbonus !== void 0) {
           p2.erfolgsbonus = clamp(a.erfolgsbonus, 0, 1);
@@ -27538,8 +27538,8 @@
       state.ambient[0] = r;
       state.ambient[1] = g;
       state.ambient[2] = b2;
-      const hash6 = state.hash;
-      if (hash6.directionalLength !== directionalLength || hash6.pointLength !== pointLength || hash6.spotLength !== spotLength || hash6.rectAreaLength !== rectAreaLength || hash6.hemiLength !== hemiLength || hash6.numDirectionalShadows !== numDirectionalShadows || hash6.numPointShadows !== numPointShadows || hash6.numSpotShadows !== numSpotShadows || hash6.numSpotMaps !== numSpotMaps || hash6.numLightProbes !== numLightProbes) {
+      const hash7 = state.hash;
+      if (hash7.directionalLength !== directionalLength || hash7.pointLength !== pointLength || hash7.spotLength !== spotLength || hash7.rectAreaLength !== rectAreaLength || hash7.hemiLength !== hemiLength || hash7.numDirectionalShadows !== numDirectionalShadows || hash7.numPointShadows !== numPointShadows || hash7.numSpotShadows !== numSpotShadows || hash7.numSpotMaps !== numSpotMaps || hash7.numLightProbes !== numLightProbes) {
         state.directional.length = directionalLength;
         state.spot.length = spotLength;
         state.rectArea.length = rectAreaLength;
@@ -27557,16 +27557,16 @@
         state.spotLightMap.length = numSpotMaps;
         state.numSpotLightShadowsWithMaps = numSpotShadowsWithMaps;
         state.numLightProbes = numLightProbes;
-        hash6.directionalLength = directionalLength;
-        hash6.pointLength = pointLength;
-        hash6.spotLength = spotLength;
-        hash6.rectAreaLength = rectAreaLength;
-        hash6.hemiLength = hemiLength;
-        hash6.numDirectionalShadows = numDirectionalShadows;
-        hash6.numPointShadows = numPointShadows;
-        hash6.numSpotShadows = numSpotShadows;
-        hash6.numSpotMaps = numSpotMaps;
-        hash6.numLightProbes = numLightProbes;
+        hash7.directionalLength = directionalLength;
+        hash7.pointLength = pointLength;
+        hash7.spotLength = spotLength;
+        hash7.rectAreaLength = rectAreaLength;
+        hash7.hemiLength = hemiLength;
+        hash7.numDirectionalShadows = numDirectionalShadows;
+        hash7.numPointShadows = numPointShadows;
+        hash7.numSpotShadows = numSpotShadows;
+        hash7.numSpotMaps = numSpotMaps;
+        hash7.numLightProbes = numLightProbes;
         state.version = nextVersion++;
       }
     }
@@ -36049,7 +36049,7 @@
             const vecHash1 = hashes[jNext];
             const v0 = _triangle[vertKeys[j]];
             const v1 = _triangle[vertKeys[jNext]];
-            const hash6 = `${vecHash0}_${vecHash1}`;
+            const hash7 = `${vecHash0}_${vecHash1}`;
             const reverseHash = `${vecHash1}_${vecHash0}`;
             if (reverseHash in edgeData && edgeData[reverseHash]) {
               if (_normal.dot(edgeData[reverseHash].normal) <= thresholdDot) {
@@ -36057,8 +36057,8 @@
                 vertices.push(v1.x, v1.y, v1.z);
               }
               edgeData[reverseHash] = null;
-            } else if (!(hash6 in edgeData)) {
-              edgeData[hash6] = {
+            } else if (!(hash7 in edgeData)) {
+              edgeData[hash7] = {
                 index0: indexArr[j],
                 index1: indexArr[jNext],
                 normal: _normal.clone()
@@ -45786,32 +45786,32 @@
   function gaube(F2, u, y, hu, a, o = {}) {
     if (o.form === "keine") return;
     const ochs = o.form === "ochsenauge", schlepp = o.form === "schlepp";
-    const hb = 0.45, hd = Math.min(ochs ? 1.2 : schlepp ? 1.5 : o.hoehe ?? 1.9, hu * 0.8), bw = ochs ? 1 : schlepp ? o.breite ?? 2.6 : o.breite ?? 1.35;
+    const hb2 = 0.45, hd = Math.min(ochs ? 1.2 : schlepp ? 1.5 : o.hoehe ?? 1.9, hu * 0.8), bw = ochs ? 1 : schlepp ? o.breite ?? 2.6 : o.breite ?? 1.35;
     if (ochs) {
-      const tf2 = -a * hb / hu + 0.04, tbk2 = -a * (hb + hd) / hu - 0.6;
-      F2.box(u - bw / 2, u + bw / 2, y + hb, y + hb + hd * 0.6, tbk2, tf2, o.wand ?? ORN);
+      const tf2 = -a * hb2 / hu + 0.04, tbk2 = -a * (hb2 + hd) / hu - 0.6;
+      F2.box(u - bw / 2, u + bw / 2, y + hb2, y + hb2 + hd * 0.6, tbk2, tf2, o.wand ?? ORN);
       const g = new three_module_exports.CylinderGeometry(bw / 2, bw / 2, tf2 - tbk2, 12);
       g.rotateX(Math.PI / 2);
-      g.translate(u, y + hb + hd * 0.6, (tf2 + tbk2) / 2);
+      g.translate(u, y + hb2 + hd * 0.6, (tf2 + tbk2) / 2);
       F2.geo(g, o.wand ?? ORN);
       const gl = new three_module_exports.CylinderGeometry(0.3, 0.3, 0.06, 12);
       gl.rotateX(Math.PI / 2);
-      gl.translate(u, y + hb + hd * 0.55, tf2 + 0.02);
+      gl.translate(u, y + hb2 + hd * 0.55, tf2 + 0.02);
       F2.geo(gl, o.glas ?? FARBEN3.fenster);
       return;
     }
-    const tf = -a * hb / hu + 0.04, tbk = -a * (hb + hd) / hu - 0.6;
+    const tf = -a * hb2 / hu + 0.04, tbk = -a * (hb2 + hd) / hu - 0.6;
     const wand2 = o.wand ?? ORN, dach3 = o.dach ?? "#7c848c";
-    F2.box(u - bw / 2, u + bw / 2, y + hb, y + hb + hd, tbk, tf, wand2);
-    F2.box(u - bw / 2 + 0.22, u + bw / 2 - 0.22, y + hb + 0.25, y + hb + hd - 0.2, tf - 0.05, tf + 0.03, o.glas ?? FARBEN3.fenster);
-    F2.box(u - 0.03, u + 0.03, y + hb + 0.25, y + hb + hd - 0.2, tf, tf + 0.05, RAHMEN);
+    F2.box(u - bw / 2, u + bw / 2, y + hb2, y + hb2 + hd, tbk, tf, wand2);
+    F2.box(u - bw / 2 + 0.22, u + bw / 2 - 0.22, y + hb2 + 0.25, y + hb2 + hd - 0.2, tf - 0.05, tf + 0.03, o.glas ?? FARBEN3.fenster);
+    F2.box(u - 0.03, u + 0.03, y + hb2 + 0.25, y + hb2 + hd - 0.2, tf, tf + 0.05, RAHMEN);
     const s2 = new three_module_exports.Shape(), b2 = bw / 2 + 0.12;
     if (schlepp) {
       const g = new three_module_exports.BoxGeometry(bw + 0.3, 0.14, tf - tbk + 0.4);
       g.rotateX(0.22);
-      g.translate(u, y + hb + hd + 0.1, (tf + tbk) / 2);
+      g.translate(u, y + hb2 + hd + 0.1, (tf + tbk) / 2);
       F2.geo(g, dach3);
-      F2.box(u + 0.02, u + bw / 2 - 0.22, y + hb + 0.25, y + hb + hd - 0.2, tf - 0.05, tf + 0.03, o.glas ?? FARBEN3.fenster);
+      F2.box(u + 0.02, u + bw / 2 - 0.22, y + hb2 + 0.25, y + hb2 + hd - 0.2, tf - 0.05, tf + 0.03, o.glas ?? FARBEN3.fenster);
       return;
     }
     if (o.form === "bogen") {
@@ -45830,7 +45830,7 @@
       s2.lineTo(0, 0.75);
       s2.closePath();
     }
-    F2.profil(s2, u, y + hb + hd, tbk, tf + 0.1, dach3);
+    F2.profil(s2, u, y + hb2 + hd, tbk, tf + 0.1, dach3);
   }
   function satteldach(ctx, x0, z0, x1, z1, y, h, achse, o = {}) {
     const S = ctx.S, ov = o.ueberstand ?? 0.45, ovG = o.ortgang ?? 0.3, th = 0.22, dach3 = o.dach, wand2 = o.wand;
@@ -46607,50 +46607,50 @@
     return top;
   }
   function zwerchgiebel(ctx, F2, uc, B2, y, G2, c, dachF, form = "geschwungen") {
-    const hb = B2 / 2;
+    const hb2 = B2 / 2;
     const kontur = (sx, sy) => {
       const s2 = new three_module_exports.Shape();
-      s2.moveTo(-hb * sx, 0);
+      s2.moveTo(-hb2 * sx, 0);
       if (form === "rund") {
-        s2.lineTo(-hb * sx, G2 * 0.45 * sy);
-        s2.absarc(0, G2 * 0.45 * sy, hb * sx, Math.PI, 0, true);
-        s2.lineTo(hb * sx, 0);
+        s2.lineTo(-hb2 * sx, G2 * 0.45 * sy);
+        s2.absarc(0, G2 * 0.45 * sy, hb2 * sx, Math.PI, 0, true);
+        s2.lineTo(hb2 * sx, 0);
         s2.closePath();
         return s2;
       }
       if (form === "spitz") {
-        s2.lineTo(-hb * sx, G2 * 0.25 * sy);
-        s2.quadraticCurveTo(-hb * 0.35 * sx, G2 * 0.5 * sy, 0, G2 * sy);
-        s2.quadraticCurveTo(hb * 0.35 * sx, G2 * 0.5 * sy, hb * sx, G2 * 0.25 * sy);
-        s2.lineTo(hb * sx, 0);
+        s2.lineTo(-hb2 * sx, G2 * 0.25 * sy);
+        s2.quadraticCurveTo(-hb2 * 0.35 * sx, G2 * 0.5 * sy, 0, G2 * sy);
+        s2.quadraticCurveTo(hb2 * 0.35 * sx, G2 * 0.5 * sy, hb2 * sx, G2 * 0.25 * sy);
+        s2.lineTo(hb2 * sx, 0);
         s2.closePath();
         return s2;
       }
       if (form === "volute") {
-        s2.lineTo(-hb * sx, G2 * 0.1 * sy);
-        s2.quadraticCurveTo(-hb * 0.6 * sx, G2 * 0.1 * sy, -hb * 0.6 * sx, G2 * 0.45 * sy);
-        s2.lineTo(-hb * 0.6 * sx, G2 * 0.52 * sy);
-        s2.quadraticCurveTo(-hb * 0.3 * sx, G2 * 0.52 * sy, -hb * 0.3 * sx, G2 * 0.8 * sy);
-        s2.quadraticCurveTo(0, G2 * 1.05 * sy, hb * 0.3 * sx, G2 * 0.8 * sy);
-        s2.quadraticCurveTo(hb * 0.3 * sx, G2 * 0.52 * sy, hb * 0.6 * sx, G2 * 0.52 * sy);
-        s2.lineTo(hb * 0.6 * sx, G2 * 0.45 * sy);
-        s2.quadraticCurveTo(hb * 0.6 * sx, G2 * 0.1 * sy, hb * sx, G2 * 0.1 * sy);
-        s2.lineTo(hb * sx, 0);
+        s2.lineTo(-hb2 * sx, G2 * 0.1 * sy);
+        s2.quadraticCurveTo(-hb2 * 0.6 * sx, G2 * 0.1 * sy, -hb2 * 0.6 * sx, G2 * 0.45 * sy);
+        s2.lineTo(-hb2 * 0.6 * sx, G2 * 0.52 * sy);
+        s2.quadraticCurveTo(-hb2 * 0.3 * sx, G2 * 0.52 * sy, -hb2 * 0.3 * sx, G2 * 0.8 * sy);
+        s2.quadraticCurveTo(0, G2 * 1.05 * sy, hb2 * 0.3 * sx, G2 * 0.8 * sy);
+        s2.quadraticCurveTo(hb2 * 0.3 * sx, G2 * 0.52 * sy, hb2 * 0.6 * sx, G2 * 0.52 * sy);
+        s2.lineTo(hb2 * 0.6 * sx, G2 * 0.45 * sy);
+        s2.quadraticCurveTo(hb2 * 0.6 * sx, G2 * 0.1 * sy, hb2 * sx, G2 * 0.1 * sy);
+        s2.lineTo(hb2 * sx, 0);
         s2.closePath();
         return s2;
       }
-      s2.lineTo(-hb * sx, G2 * 0.22 * sy);
-      s2.bezierCurveTo(-hb * sx, G2 * 0.48 * sy, -hb * 0.38 * sx, G2 * 0.42 * sy, -hb * 0.4 * sx, G2 * 0.66 * sy);
-      s2.bezierCurveTo(-hb * 0.42 * sx, G2 * 0.92 * sy, -hb * 0.12 * sx, G2 * sy, 0, G2 * sy);
-      s2.bezierCurveTo(hb * 0.12 * sx, G2 * sy, hb * 0.42 * sx, G2 * 0.92 * sy, hb * 0.4 * sx, G2 * 0.66 * sy);
-      s2.bezierCurveTo(hb * 0.38 * sx, G2 * 0.42 * sy, hb * sx, G2 * 0.48 * sy, hb * sx, G2 * 0.22 * sy);
-      s2.lineTo(hb * sx, 0);
+      s2.lineTo(-hb2 * sx, G2 * 0.22 * sy);
+      s2.bezierCurveTo(-hb2 * sx, G2 * 0.48 * sy, -hb2 * 0.38 * sx, G2 * 0.42 * sy, -hb2 * 0.4 * sx, G2 * 0.66 * sy);
+      s2.bezierCurveTo(-hb2 * 0.42 * sx, G2 * 0.92 * sy, -hb2 * 0.12 * sx, G2 * sy, 0, G2 * sy);
+      s2.bezierCurveTo(hb2 * 0.12 * sx, G2 * sy, hb2 * 0.42 * sx, G2 * 0.92 * sy, hb2 * 0.4 * sx, G2 * 0.66 * sy);
+      s2.bezierCurveTo(hb2 * 0.38 * sx, G2 * 0.42 * sy, hb2 * sx, G2 * 0.48 * sy, hb2 * sx, G2 * 0.22 * sy);
+      s2.lineTo(hb2 * sx, 0);
       s2.closePath();
       return s2;
     };
     const tief2 = 4;
-    const poly = [F2.welt(uc - hb * 0.9, -0.3), F2.welt(uc + hb * 0.9, -0.3), F2.welt(uc + hb * 0.9, -tief2), F2.welt(uc - hb * 0.9, -tief2)];
-    ctx.S.add(prismoid(poly, y + 0.1, G2 * 0.8, [0, hb * 0.9 - 0.01, 0, hb * 0.9 - 0.01]), dachF);
+    const poly = [F2.welt(uc - hb2 * 0.9, -0.3), F2.welt(uc + hb2 * 0.9, -0.3), F2.welt(uc + hb2 * 0.9, -tief2), F2.welt(uc - hb2 * 0.9, -tief2)];
+    ctx.S.add(prismoid(poly, y + 0.1, G2 * 0.8, [0, hb2 * 0.9 - 0.01, 0, hb2 * 0.9 - 0.01]), dachF);
     F2.profil(kontur(1.06, 1.06), uc, y, -0.42, 0.06, c.orn, 10);
     F2.profil(kontur(1, 1), uc, y, -0.36, 0.14, c.wand, 10);
     const ring = new three_module_exports.CylinderGeometry(0.62, 0.62, 0.08, 16);
@@ -46661,12 +46661,12 @@
     gl.rotateX(Math.PI / 2);
     gl.translate(uc, y + G2 * 0.62, 0.2);
     F2.geo(gl, FARBEN3.fenster);
-    if (B2 > 5) for (const s2 of [-1, 1]) fenster(F2, uc + s2 * hb * 0.42, y + 0.55, 0.8, Math.min(1.5, G2 * 0.3), { t: 0.14, kreuz: "quer", verd: "rund", verdFarbe: c.orn });
+    if (B2 > 5) for (const s2 of [-1, 1]) fenster(F2, uc + s2 * hb2 * 0.42, y + 0.55, 0.8, Math.min(1.5, G2 * 0.3), { t: 0.14, kreuz: "quer", verd: "rund", verdFarbe: c.orn });
     else fenster(F2, uc, y + 0.55, 1, Math.min(1.4, G2 * 0.3), { t: 0.14, verd: null });
     if (form === "volute") for (const s2 of [-1, 1]) {
-      const p2 = F2.welt(uc + s2 * hb * 0.95, 0);
+      const p2 = F2.welt(uc + s2 * hb2 * 0.95, 0);
       ctx.S.box(0.3, 0.45, 0.3, p2[0], y + G2 * 0.1 + 0.22, p2[1], c.orn);
-      const q2 = F2.welt(uc + s2 * hb * 0.55, 0);
+      const q2 = F2.welt(uc + s2 * hb2 * 0.55, 0);
       ctx.S.box(0.26, 0.4, 0.26, q2[0], y + G2 * 0.52 + 0.2, q2[1], c.orn);
     }
     ctx.S.box(0.08, 1, 0.08, ...pt3(F2.welt(uc, -0.1), y + G2 + 0.5), "#5f646b");
@@ -47328,33 +47328,33 @@
     });
   }
   function zwerchgiebelVoll(ctx, F2, y, G2, c, r) {
-    const L2 = F2.L - 0.1, hb = L2 / 2;
+    const L2 = F2.L - 0.1, hb2 = L2 / 2;
     const form = (sx, sy) => {
       const s2 = new three_module_exports.Shape();
-      s2.moveTo(-hb * sx, 0);
-      s2.lineTo(-hb * sx, G2 * 0.1 * sy);
-      s2.quadraticCurveTo(-hb * 0.62 * sx, G2 * 0.1 * sy, -hb * 0.62 * sx, G2 * 0.42 * sy);
-      s2.lineTo(-hb * 0.62 * sx, G2 * 0.5 * sy);
-      s2.quadraticCurveTo(-hb * 0.3 * sx, G2 * 0.5 * sy, -hb * 0.3 * sx, G2 * 0.78 * sy);
-      s2.quadraticCurveTo(0, G2 * 1.02 * sy, hb * 0.3 * sx, G2 * 0.78 * sy);
-      s2.quadraticCurveTo(hb * 0.3 * sx, G2 * 0.5 * sy, hb * 0.62 * sx, G2 * 0.5 * sy);
-      s2.lineTo(hb * 0.62 * sx, G2 * 0.42 * sy);
-      s2.quadraticCurveTo(hb * 0.62 * sx, G2 * 0.1 * sy, hb * sx, G2 * 0.1 * sy);
-      s2.lineTo(hb * sx, 0);
+      s2.moveTo(-hb2 * sx, 0);
+      s2.lineTo(-hb2 * sx, G2 * 0.1 * sy);
+      s2.quadraticCurveTo(-hb2 * 0.62 * sx, G2 * 0.1 * sy, -hb2 * 0.62 * sx, G2 * 0.42 * sy);
+      s2.lineTo(-hb2 * 0.62 * sx, G2 * 0.5 * sy);
+      s2.quadraticCurveTo(-hb2 * 0.3 * sx, G2 * 0.5 * sy, -hb2 * 0.3 * sx, G2 * 0.78 * sy);
+      s2.quadraticCurveTo(0, G2 * 1.02 * sy, hb2 * 0.3 * sx, G2 * 0.78 * sy);
+      s2.quadraticCurveTo(hb2 * 0.3 * sx, G2 * 0.5 * sy, hb2 * 0.62 * sx, G2 * 0.5 * sy);
+      s2.lineTo(hb2 * 0.62 * sx, G2 * 0.42 * sy);
+      s2.quadraticCurveTo(hb2 * 0.62 * sx, G2 * 0.1 * sy, hb2 * sx, G2 * 0.1 * sy);
+      s2.lineTo(hb2 * sx, 0);
       s2.closePath();
       return s2;
     };
     F2.profil(form(1.03, 1.03), F2.L / 2, y, -0.5, 0.08, c.orn, 10);
     F2.profil(form(1, 1), F2.L / 2, y, -0.45, 0.16, c.wand, 10);
-    F2.box(F2.L / 2 - hb * 0.62 - 0.1, F2.L / 2 + hb * 0.62 + 0.1, y + G2 * 0.46 - 0.08, y + G2 * 0.46 + 0.08, -0.4, 0.26, c.orn);
+    F2.box(F2.L / 2 - hb2 * 0.62 - 0.1, F2.L / 2 + hb2 * 0.62 + 0.1, y + G2 * 0.46 - 0.08, y + G2 * 0.46 + 0.08, -0.4, 0.26, c.orn);
     for (const s2 of [-1, 1]) {
-      fenster(F2, F2.L / 2 + s2 * hb * 0.36, y + 0.55, 0.85, Math.min(1.5, G2 * 0.24), { t: 0.16, faschen: c.orn, ohren: true, verd: "bogen", verdFarbe: c.orn, kreuz: true });
+      fenster(F2, F2.L / 2 + s2 * hb2 * 0.36, y + 0.55, 0.85, Math.min(1.5, G2 * 0.24), { t: 0.16, faschen: c.orn, ohren: true, verd: "bogen", verdFarbe: c.orn, kreuz: true });
     }
     fenster(F2, F2.L / 2, y + G2 * 0.5 + 0.3, 0.75, Math.min(1.1, G2 * 0.16), { t: 0.16, faschen: c.orn, kreuz: false, verd: "rund", verdFarbe: c.orn });
     for (const s2 of [-1, 1]) {
-      const p3 = F2.welt(F2.L / 2 + s2 * hb * 0.92, 0);
+      const p3 = F2.welt(F2.L / 2 + s2 * hb2 * 0.92, 0);
       ctx.S.box(0.32, 0.55, 0.32, p3[0], y + G2 * 0.1 + 0.27, p3[1], c.orn);
-      const q2 = F2.welt(F2.L / 2 + s2 * hb * 0.55, 0);
+      const q2 = F2.welt(F2.L / 2 + s2 * hb2 * 0.55, 0);
       ctx.S.box(0.28, 0.5, 0.28, q2[0], y + G2 * 0.5 + 0.25, q2[1], c.orn);
     }
     const g = new three_module_exports.SphereGeometry(0.28, 8, 6);
@@ -52381,22 +52381,22 @@
     }
     if (r() < 0.6) s2.kipp((b2 - a) * 0.7, 0.35, 0.03, (a + b2) / 2, y0 + zw(r, 0.6, 1.4), t + 0.08, waehle2(r, ["#e8336d", "#3a7bd5", "#2b2b2b", "#4caf50"]), zw(r, -0.15, 0.15));
   }
-  function kastenBreite(text3, hb) {
+  function kastenBreite(text3, hb2) {
     const z2 = [...text3];
-    return z2.reduce((a, c) => a + (c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62), 0) + hb * 0.12 * (z2.length - 1);
+    return z2.reduce((a, c) => a + (c === " " ? hb2 * 0.4 : plakatBreite(c, hb2) * 0.62), 0) + hb2 * 0.12 * (z2.length - 1);
   }
-  function kastenSchrift(K3, s2, text3, um2, y, t, hb, fg, bg) {
+  function kastenSchrift(K3, s2, text3, um2, y, t, hb2, fg, bg) {
     const z2 = [...text3];
-    const br = z2.map((c) => c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62);
-    const gap = hb * 0.12;
+    const br = z2.map((c) => c === " " ? hb2 * 0.4 : plakatBreite(c, hb2) * 0.62);
+    const gap = hb2 * 0.12;
     const total = br.reduce((a, b2) => a + b2, 0) + gap * (z2.length - 1);
     let acc = 0;
     z2.forEach((c, i) => {
       const uc = um2 + s2.lese * (-total / 2 + acc + br[i] / 2);
       acc += br[i] + gap;
       if (c === " ") return;
-      s2.q(uc - br[i] / 2, uc + br[i] / 2, y - hb * 0.55, y + hb * 0.55, t, t + 0.45, bg);
-      plakat2(K3.scene, s2, c, uc, y, t + 0.47, hb * 1.05, fg);
+      s2.q(uc - br[i] / 2, uc + br[i] / 2, y - hb2 * 0.55, y + hb2 * 0.55, t, t + 0.45, bg);
+      plakat2(K3.scene, s2, c, uc, y, t + 0.47, hb2 * 1.05, fg);
     });
     return total;
   }
@@ -52482,8 +52482,8 @@
       for (let u = 0.5; u < s2.L - 0.5; u += 1) s2.kipp(1, 0.12, 1.6, u + 0.5, 4.25, 0.75, Math.round(u) % 2 ? "#ffffff" : haupt, 0, 0.42);
       s2.q(0, s2.L, EG, H, 0, 0.2, haupt);
       s2.q(0, s2.L, EG, EG + 0.35, 0.2, 0.3, akzent);
-      const hb = passend(K3.name, s2.L * 0.62, (H - EG) * 0.78);
-      plakat2(scene2, s2, K3.name, s2.L * 0.42, EG + (H - EG) * 0.55, 0.22, hb, "#ffffff");
+      const hb2 = passend(K3.name, s2.L * 0.62, (H - EG) * 0.78);
+      plakat2(scene2, s2, K3.name, s2.L * 0.42, EG + (H - EG) * 0.55, 0.22, hb2, "#ffffff");
       const su = s2.L * 0.86, sy = EG + (H - EG) * 0.5, sr = Math.min(1.8, (H - EG) * 0.4);
       for (let k = 0; k < 3; k++) s2.kipp(sr * 1.6, sr * 1.6, 0.12, su, sy, 0.3 + k * 0.01, akzent, k * Math.PI / 6);
       s2.q(su - sr * 0.62, su + sr * 0.62, sy - sr * 0.3, sy + sr * 0.3, 0.42, 0.44, "#ffffff");
@@ -52609,8 +52609,8 @@
       s2.q(0, s2.L, 4.2, 4.5, 0, 0.6, lbg);
       const wandAus = s2 === sx && !K3.leer && s2.L >= 30 ? s2.L * 0.12 + Math.min(12, s2.L * 0.35) + 0.8 : 0;
       const frei6 = s2.L - wandAus - (K3.ecke ?? 0);
-      const hb = Math.min((H - 4.5) * 0.55, frei6 * 0.85 / kastenBreite(K3.name, 1));
-      kastenSchrift(K3, s2, K3.name, wandAus + frei6 * 0.5, 4.5 + (H - 4.5) * 0.5, 0.1, hb, letter, lbg);
+      const hb2 = Math.min((H - 4.5) * 0.55, frei6 * 0.85 / kastenBreite(K3.name, 1));
+      kastenSchrift(K3, s2, K3.name, wandAus + frei6 * 0.5, 4.5 + (H - 4.5) * 0.5, 0.1, hb2, letter, lbg);
     }
     if (!K3.leer && sx.L >= 30) {
       const u0 = sx.L * 0.12, u1 = u0 + Math.min(12, sx.L * 0.35), y0 = 4.9, y1 = H - 0.6;
@@ -53150,17 +53150,17 @@
   var tex3 = (text3, farbe3, bg = null) => textTextur(text3, farbe3, 120, bg);
   var texMat3 = (text3, farbe3, bg = null, lit = false) => textMaterial(text3, farbe3, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
   var PH = 2.05;
-  function buchstabenBreite(c, hb) {
-    return c === " " ? hb * 0.45 : (tex3(c, "#000").seitenverhaeltnis * 180 - 96) / 180 * hb * PH;
+  function buchstabenBreite(c, hb2) {
+    return c === " " ? hb2 * 0.45 : (tex3(c, "#000").seitenverhaeltnis * 180 - 96) / 180 * hb2 * PH;
   }
-  function schriftBreite(text3, hb) {
+  function schriftBreite(text3, hb2) {
     const z2 = [...text3];
-    return z2.reduce((a, c) => a + buchstabenBreite(c, hb), 0) + hb * 0.16 * (z2.length - 1);
+    return z2.reduce((a, c) => a + buchstabenBreite(c, hb2), 0) + hb2 * 0.16 * (z2.length - 1);
   }
-  function leuchtschrift(K3, s2, text3, um2, y, t, hb, farbe3, o = {}) {
+  function leuchtschrift(K3, s2, text3, um2, y, t, hb2, farbe3, o = {}) {
     const z2 = [...text3];
-    const br = z2.map((c) => buchstabenBreite(c, hb));
-    const gap = hb * 0.16;
+    const br = z2.map((c) => buchstabenBreite(c, hb2));
+    const gap = hb2 * 0.16;
     const total = br.reduce((a, b2) => a + b2, 0) + gap * (z2.length - 1);
     const r = o.r ?? K3.r;
     const defekt = /* @__PURE__ */ new Map();
@@ -53192,14 +53192,14 @@
       const df = defekt.get(i);
       if (df === "weg" && o.aus && o.aus.u == null) o.aus.u = uc;
       if (df === "weg") {
-        s2.q(uc - hb * 0.25, uc - hb * 0.15, y - hb * 0.3, y + hb * 0.3, t - 0.3, t - 0.05, "#6c6c6c");
-        s2.q(uc + hb * 0.15, uc + hb * 0.25, y - hb * 0.3, y + hb * 0.3, t - 0.3, t - 0.05, "#6c6c6c");
+        s2.q(uc - hb2 * 0.25, uc - hb2 * 0.15, y - hb2 * 0.3, y + hb2 * 0.3, t - 0.3, t - 0.05, "#6c6c6c");
+        s2.q(uc + hb2 * 0.15, uc + hb2 * 0.25, y - hb2 * 0.3, y + hb2 * 0.3, t - 0.3, t - 0.05, "#6c6c6c");
         return;
       }
       const f = o.geist ?? (df === "tot" ? TOT : farbe3);
-      const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(tex3(c, f).seitenverhaeltnis * hb * PH, hb * PH), texMat3(c, f, null, !!o.geist));
+      const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(tex3(c, f).seitenverhaeltnis * hb2 * PH, hb2 * PH), texMat3(c, f, null, !!o.geist));
       const rz = df === "schief" ? (r() < 0.5 ? -1 : 1) * zw(r, 0.18, 0.4) : 0;
-      s2.flaeche(m, uc, y - (df === "schief" ? hb * 0.15 : 0), t, rz);
+      s2.flaeche(m, uc, y - (df === "schief" ? hb2 * 0.15 : 0), t, rz);
       K3.scene.add(m);
     });
     return total;
@@ -53581,25 +53581,25 @@
         s2.q(z2.u - br / 2, z2.u + br / 2, yB, yB + 0.12, -1, -0.85, "#4a4f55");
         Object.assign(z2, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: s2.L * 0.6, dach: true });
       }
-      const hb = Math.min(z2.hb, z2.max / schriftBreite(text3, 1));
-      z2.hbIst = hb;
+      const hb2 = Math.min(z2.hb, z2.max / schriftBreite(text3, 1));
+      z2.hbIst = hb2;
       if (z2.sport) {
-        const br = schriftBreite(text3, hb);
+        const br = schriftBreite(text3, hb2);
         if (!K3.ohneLogo) {
-          s2.q(z2.u - br / 2 - hb * 0.6, z2.u + br / 2 + hb * 0.6, z2.y - hb * 0.95, z2.y + hb * 0.95, z2.t - 0.25, z2.t - 0.05, K3.alt ? dunkler(ROT2, 0.1) : ROT2);
-          leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t + 0.02, hb, "#ffffff", { kaputt: K3.alt });
-        } else s2.q(z2.u - br / 2 - hb * 0.6, z2.u + br / 2 + hb * 0.6, z2.y - hb * 0.95, z2.y + hb * 0.95, z2.t - 0.25, z2.t - 0.2, dunkler(z2.grund, 0.05));
+          s2.q(z2.u - br / 2 - hb2 * 0.6, z2.u + br / 2 + hb2 * 0.6, z2.y - hb2 * 0.95, z2.y + hb2 * 0.95, z2.t - 0.25, z2.t - 0.05, K3.alt ? dunkler(ROT2, 0.1) : ROT2);
+          leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t + 0.02, hb2, "#ffffff", { kaputt: K3.alt });
+        } else s2.q(z2.u - br / 2 - hb2 * 0.6, z2.u + br / 2 + hb2 * 0.6, z2.y - hb2 * 0.95, z2.y + hb2 * 0.95, z2.t - 0.25, z2.t - 0.2, dunkler(z2.grund, 0.05));
         if (K3.abbau) K3.abbauPos[s2.seite] = { u: z2.u, y: z2.y, t: z2.t };
         continue;
       }
       if (K3.abbau) {
         const aus = {};
-        const tot = leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t, hb, dunkler(z2.farbe ?? ROT2, 0.14), { abbau: 0.45, aus });
+        const tot = leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t, hb2, dunkler(z2.farbe ?? ROT2, 0.14), { abbau: 0.45, aus });
         const anf = z2.u - s2.lese * tot / 2, ende = aus.u ?? z2.u;
-        K3.abbauPos[s2.seite] = { u: ende, y: z2.y, t: z2.t, rest: { u: (anf + ende) / 2, breite: Math.abs(ende - anf) + hb * 0.6, hb } };
+        K3.abbauPos[s2.seite] = { u: ende, y: z2.y, t: z2.t, rest: { u: (anf + ende) / 2, breite: Math.abs(ende - anf) + hb2 * 0.6, hb: hb2 } };
       } else if (K3.ohneLogo) {
-        if (!z2.dach) leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t - 0.25, hb, ROT2, { geist: dunkler(z2.grund, 0.045) });
-      } else leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t, hb, z2.farbe ?? ROT2, { kaputt: K3.alt });
+        if (!z2.dach) leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t - 0.25, hb2, ROT2, { geist: dunkler(z2.grund, 0.045) });
+      } else leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t, hb2, z2.farbe ?? ROT2, { kaputt: K3.alt });
     }
   }
   function familie1(K3) {
@@ -53874,9 +53874,9 @@
     }
     for (const s2 of K3.seiten) {
       const uEnd = s2.L - R10;
-      const hb = clamp5(uEnd * 0.07, 2.2, 4.2);
-      const u = uEnd * 0.55, br = Math.min(schriftBreite("HARTWIG", hb), uEnd * 0.8);
-      const hbIst = Math.min(hb, uEnd * 0.8 / schriftBreite("HARTWIG", 1));
+      const hb2 = clamp5(uEnd * 0.07, 2.2, 4.2);
+      const u = uEnd * 0.55, br = Math.min(schriftBreite("HARTWIG", hb2), uEnd * 0.8);
+      const hbIst = Math.min(hb2, uEnd * 0.8 / schriftBreite("HARTWIG", 1));
       const yB = (staffel2 ? Hb + 1.15 : Hb + 1.15) + 0.3, y = yB + hbIst * 0.7;
       const tf = staffel2 ? -0.6 : -0.6;
       for (let k = 0; k <= 4; k++) {
@@ -53885,7 +53885,7 @@
       }
       s2.q(u - br / 2, u + br / 2, yB, yB + 0.12, tf - 0.4, tf - 0.24, "#4a4f55");
       s2.q(u - br / 2, u + br / 2, yB + hbIst * 1.3, yB + hbIst * 1.3 + 0.12, tf - 0.4, tf - 0.24, "#4a4f55");
-      K3.zonen[s2.seite] = { u, y, t: tf, hb, max: uEnd * 0.8, grund: putz2, dach: true };
+      K3.zonen[s2.seite] = { u, y, t: tf, hb: hb2, max: uEnd * 0.8, grund: putz2, dach: true };
     }
     return Hw + 6;
   }
@@ -53971,7 +53971,7 @@
     }
     for (const s2 of K3.seiten) {
       if (K3.zonen[s2.seite]) continue;
-      const hb = clamp5(s2.L * 0.065, 2, 3.8), hbIst = Math.min(hb, s2.L * 0.7 / schriftBreite("HARTWIG", 1));
+      const hb2 = clamp5(s2.L * 0.065, 2, 3.8), hbIst = Math.min(hb2, s2.L * 0.7 / schriftBreite("HARTWIG", 1));
       const u = s2.L * 0.5, br = schriftBreite("HARTWIG", hbIst), yB = staffel2 ? Hw + 0.25 : Hb + 0.9;
       const tf = staffel2 ? -2.4 : -0.8;
       for (let k = 0; k <= 5; k++) {
@@ -53979,7 +53979,7 @@
         s2.q(uu - 0.07, uu + 0.07, yB - (staffel2 ? 0 : 0.7), yB + hbIst * 1.6, tf - 0.4, tf - 0.25, "#4a4f55");
       }
       s2.q(u - br / 2, u + br / 2, yB + 0.25, yB + 0.37, tf - 0.4, tf - 0.25, "#4a4f55");
-      K3.zonen[s2.seite] = { u, y: yB + 0.4 + hbIst * 0.75, t: tf, hb, max: s2.L * 0.7, grund: stein, dach: true };
+      K3.zonen[s2.seite] = { u, y: yB + 0.4 + hbIst * 0.75, t: tf, hb: hb2, max: s2.L * 0.7, grund: stein, dach: true };
     }
     if (v % 3 === 1 && n >= 2) {
       const s2 = K3.seiten[1], u = s2.L - 2.5, y = EG2 + GH * 0.6;
@@ -54083,8 +54083,8 @@
       technik2(K3, x0 + 6 + tw, z0 + 3, x0 + w - 3, z0 + d2 - 3, Hw + 0.5, { max: 4 });
     }
     for (const s2 of K3.seiten) {
-      const hb = clamp5(s2.L * 0.075, 2.4, 5.5);
-      if (n >= 2) K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG2 + (Hw - EG2) * (schlitz ? 0.42 : 0.55), t: 0.6, hb: Math.min(hb, (Hw - EG2) * 0.32), max: s2.L * 0.72, grund: kF };
+      const hb2 = clamp5(s2.L * 0.075, 2.4, 5.5);
+      if (n >= 2) K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG2 + (Hw - EG2) * (schlitz ? 0.42 : 0.55), t: 0.6, hb: Math.min(hb2, (Hw - EG2) * 0.32), max: s2.L * 0.72, grund: kF };
       else K3.zonen[s2.seite] = { u: s2.L * 0.5, y: EG2 + 1.2, t: 0.45, hb: 1.5, max: s2.L * 0.7, grund: kF };
     }
     return Hw + 7;
@@ -54432,8 +54432,8 @@
     S.quader(cx - 0.01, y0, z0, x0 + w + aus - ein, y1, cz, f);
     viertelzylinder2(S, cx, cz, R10 + aus - ein, y0, y1, f, 16);
   }
-  function schriftGeruest(K3, s2, u, br, yFuss, yB, hb, t) {
-    const st2 = "#4f565c", yT = yB + hb * 1.55;
+  function schriftGeruest(K3, s2, u, br, yFuss, yB, hb2, t) {
+    const st2 = "#4f565c", yT = yB + hb2 * 1.55;
     s2.q(u - br / 2 - 0.4, u + br / 2 + 0.4, yB, yB + 0.16, t - 0.2, t - 0.04, st2);
     s2.q(u - br / 2 - 0.4, u + br / 2 + 0.4, yT, yT + 0.16, t - 0.2, t - 0.04, st2);
     const nf = Math.max(3, Math.round((br + 0.8) / 2.2)), df = (br + 0.8) / nf;
@@ -54624,10 +54624,10 @@
     technik2(K3, x0 + 3, z0 + 3, x0 + w - 5, z0 + d2 - 6, yD, { max: 4, farbe: "#cfccc4" });
     for (const s2 of K3.seiten) {
       const L2 = K3.nutz[s2.seite];
-      const hbS = clamp5(L2 * 0.07, 2, 4), hb = Math.min(hbS, L2 * 0.62 / schriftBreite("HARTWIG", 1));
-      const br = schriftBreite("HARTWIG", hb), u = L2 * 0.5, t = -1.4, yB = Hw + HA + 0.35;
-      schriftGeruest(K3, s2, u, br, yD, yB, hb, t);
-      K3.zonen[s2.seite] = { u, y: yB + 0.1 + hb * 0.78, t: t + 0.05, hb, max: L2 * 0.62, grund: beton, dach: true };
+      const hbS = clamp5(L2 * 0.07, 2, 4), hb2 = Math.min(hbS, L2 * 0.62 / schriftBreite("HARTWIG", 1));
+      const br = schriftBreite("HARTWIG", hb2), u = L2 * 0.5, t = -1.4, yB = Hw + HA + 0.35;
+      schriftGeruest(K3, s2, u, br, yD, yB, hb2, t);
+      K3.zonen[s2.seite] = { u, y: yB + 0.1 + hb2 * 0.78, t: t + 0.05, hb: hb2, max: L2 * 0.62, grund: beton, dach: true };
     }
     return Hw + HA + 6;
   }
@@ -54974,10 +54974,10 @@
     }
     if (n >= 2) {
       const s2 = K3.seiten[1], L2 = s2.L - tw - 1;
-      const hb = Math.min(clamp5(L2 * 0.08, 2, 3.6), L2 * 0.7 / schriftBreite("HARTWIG", 1)), br = schriftBreite("HARTWIG", hb);
+      const hb2 = Math.min(clamp5(L2 * 0.08, 2, 3.6), L2 * 0.7 / schriftBreite("HARTWIG", 1)), br = schriftBreite("HARTWIG", hb2);
       const t = -1.6, yB = Hw + 1.6;
-      schriftGeruest(K3, s2, L2 * 0.5, br, Hw + 0.15, yB, hb, t);
-      K3.zonen["+x"] = { u: L2 * 0.5, y: yB + 0.1 + hb * 0.78, t: t + 0.05, hb, max: L2 * 0.7, grund: stein, dach: true };
+      schriftGeruest(K3, s2, L2 * 0.5, br, Hw + 0.15, yB, hb2, t);
+      K3.zonen["+x"] = { u: L2 * 0.5, y: yB + 0.1 + hb2 * 0.78, t: t + 0.05, hb: hb2, max: L2 * 0.7, grund: stein, dach: true };
     }
     if (n >= 3) haengefahnen(K3, K3.seiten[1], [K3.seiten[1].L * 0.2, K3.seiten[1].L * 0.5], EG2 + GH * 1.9, 0.6);
     return hoch + 3;
@@ -55111,9 +55111,9 @@
     if (laut && K3.n >= 3) for (const s2 of K3.seiten) {
       const z3 = K3.zonen[s2.seite];
       if (!z3 || z3.dach || z3.sport || z3.wand) continue;
-      const hb = Math.min(z3.hb, Math.max(2.2, (K3.Hw - EG2) * 0.2));
-      const y = Math.max(z3.y, K3.Hw - 0.7 - hb * 0.95);
-      if (y + hb * 0.95 <= K3.Hw + 0.3) Object.assign(z3, { hb, y });
+      const hb2 = Math.min(z3.hb, Math.max(2.2, (K3.Hw - EG2) * 0.2));
+      const y = Math.max(z3.y, K3.Hw - 0.7 - hb2 * 0.95);
+      if (y + hb2 * 0.95 <= K3.Hw + 0.3) Object.assign(z3, { hb: hb2, y });
     }
     logos(K3);
     K3.fahnen = (() => {
@@ -56522,9 +56522,9 @@
       const zf1 = waehle2(r, ["#f2f2ef", "#e9e6df"]);
       zug(S, hx1 - 30, x + w - 8, (gleise2[1].z0 + gleise2[1].z1) / 2, 0.55, zf1, "#2f6f8f");
       zug(S, hx1 - 30, hx1 + 12, (gleise2[4].z0 + gleise2[4].z1) / 2, 0.55, "#e3b23c", "#3c4852");
-      const hb = (zb - z2) / hallen;
+      const hb2 = (zb - z2) / hallen;
       for (let i = 0; i < hallen; i++) {
-        const cz = z2 + hb * (i + 0.5), rad2 = hb / 2 - 0.3;
+        const cz = z2 + hb2 * (i + 0.5), rad2 = hb2 / 2 - 0.3;
         const y0 = hallen === 1 ? 3 : 6, hv = hallen === 1 ? rad2 * 0.82 : rad2 * 1.05;
         S.quader(hx0, 0, cz - rad2 - 0.3, hx1, y0, cz - rad2 + 0.3, stein);
         S.quader(hx0, 0, cz + rad2 - 0.3, hx1, y0, cz + rad2 + 0.3, stein);
@@ -58627,19 +58627,19 @@
       const s2 = sx, y0 = EG_S, y1 = H + 0.7;
       s2.q(0, panelU, y0, y1 + (n >= 3 ? 0 : 1.5), 0, 0.45, "#f2f1ec");
       s2.q(0.3, panelU - 0.3, y0, y0 + 0.4, 0.45, 0.6, HS_ROT);
-      const yo = y1 + (n >= 3 ? 0 : 1.5), buch = [..."SPORT"], hb = Math.min(panelU * 0.8, (yo - y0 - 1.2) / 5);
-      if (hb < 1.6) {
+      const yo = y1 + (n >= 3 ? 0 : 1.5), buch = [..."SPORT"], hb2 = Math.min(panelU * 0.8, (yo - y0 - 1.2) / 5);
+      if (hb2 < 1.6) {
         const ph = passend("SPORT", panelU - 1, (yo - y0 - 1) * 0.6);
         if (K3.ohneLogo) s2.q(0.5, panelU - 0.5, (y0 + yo) / 2 - ph * 0.4, (y0 + yo) / 2 + ph * 0.4, 0.45, 0.48, "#e2e0d8");
         else plakat2(K3.scene, s2, "SPORT", panelU / 2, (y0 + 0.4 + yo) / 2, 0.5, ph, K3.alt ? dunkler(HS_ROT, 0.15) : HS_ROT);
       } else buch.forEach((c, i) => {
-        const yy = y1 + (n >= 3 ? 0 : 1.5) - 0.6 - hb * (i + 0.5);
+        const yy = y1 + (n >= 3 ? 0 : 1.5) - 0.6 - hb2 * (i + 0.5);
         if (K3.ohneLogo) {
-          s2.q(panelU / 2 - hb * 0.35, panelU / 2 + hb * 0.35, yy - hb * 0.4, yy + hb * 0.4, 0.45, 0.48, "#e2e0d8");
+          s2.q(panelU / 2 - hb2 * 0.35, panelU / 2 + hb2 * 0.35, yy - hb2 * 0.4, yy + hb2 * 0.4, 0.45, 0.48, "#e2e0d8");
           return;
         }
         const kaputt = K3.alt && i === 3;
-        plakat2(K3.scene, s2, c, panelU / 2, yy - (kaputt ? hb * 0.08 : 0), 0.5, hb * 1.2, kaputt ? dunkler(HS_ROT, 0.28) : HS_ROT, null, { rz: kaputt ? 0.18 : 0 });
+        plakat2(K3.scene, s2, c, panelU / 2, yy - (kaputt ? hb2 * 0.08 : 0), 0.5, hb2 * 1.2, kaputt ? dunkler(HS_ROT, 0.28) : HS_ROT, null, { rz: kaputt ? 0.18 : 0 });
       });
     }
     if (n >= 3 && v % 2 === 0) {
@@ -58875,9 +58875,9 @@
       plakat2(scene2, sMall, name2, portalU, ph - 1, 2.1, passend(name2, pu1 - pu0 - 0.8, 1.2), typ === "medien" ? "#ffffff" : "#2b3a4a", typ === "medien" ? "#2b3036" : "#ffffff");
       sMall.q(pu0, pu1, ph, ph + 0.3, -0.2, 2.2, "#bfc5c9");
       if (arkade2) {
-        const hb = passend(name2, M2 * 0.55, 2.4);
-        plakat2(scene2, sMall, name2, M2 * 0.35, Hb + 0.5 + hb * 0.55, -0.3, hb, "#c8102e");
-        for (const du of [-M2 * 0.2, 0, M2 * 0.2]) sMall.q(M2 * 0.35 + du - 0.06, M2 * 0.35 + du + 0.06, Hb + 0.4, Hb + 0.6 + hb * 0.4, -0.6, -0.45, "#4a4f55");
+        const hb2 = passend(name2, M2 * 0.55, 2.4);
+        plakat2(scene2, sMall, name2, M2 * 0.35, Hb + 0.5 + hb2 * 0.55, -0.3, hb2, "#c8102e");
+        for (const du of [-M2 * 0.2, 0, M2 * 0.2]) sMall.q(M2 * 0.35 + du - 0.06, M2 * 0.35 + du + 0.06, Hb + 0.4, Hb + 0.6 + hb2 * 0.4, -0.6, -0.45, "#4a4f55");
       }
     }
     const rb = 1.2, rt = 1;
@@ -66828,13 +66828,13 @@
     }
     return { ySchrift, hSchrift, L: L2 };
   }
-  function beschriftung(scene2, s2, K3, y, hb) {
+  function beschriftung(scene2, s2, K3, y, hb2) {
     if (K3.zu) return;
     const text3 = (K3.haus.substanz ?? 50) < 30 ? NAME_SCHWESTER.toUpperCase().replace("KAUF", " AUF") : NAME_SCHWESTER.toUpperCase();
     const u = s2.L / 2, [wx, wz2] = s2.welt(u, 0);
     const weltU = s2.seite === "+z" ? wx : wz2;
-    schild(scene2, text3, s2.seite, weltU + 0.1, y - 0.07, s2.ebene + 0.87, hb, "#1d4c50");
-    schild(scene2, text3, s2.seite, weltU, y, s2.ebene + 1.02, hb, "#e4e5db");
+    schild(scene2, text3, s2.seite, weltU + 0.1, y - 0.07, s2.ebene + 0.87, hb2, "#1d4c50");
+    schild(scene2, text3, s2.seite, weltU, y, s2.ebene + 1.02, hb2, "#e4e5db");
   }
   function dach2(S, K3) {
     const { x, z: z2, w, d: d2, H, arch } = K3;
@@ -110860,9 +110860,9 @@
       return { hoehe: hk };
     }
     if (v === "wandelhalle") {
-      const hz0 = z0 + 4, ht = 12, hb = w - 10, hx0 = x0 + 5, H = 9.5;
-      S.quader(hx0, 0, hz0, hx0 + hb, H, hz0 + ht, wand2);
-      for (const [k, F2] of seiten2(p2, hx0, hz0, hb, ht)) {
+      const hz0 = z0 + 4, ht = 12, hb2 = w - 10, hx0 = x0 + 5, H = 9.5;
+      S.quader(hx0, 0, hz0, hx0 + hb2, H, hz0 + ht, wand2);
+      for (const [k, F2] of seiten2(p2, hx0, hz0, hb2, ht)) {
         const L2 = achsen5(0, F2.L, 4.2, 1).map((u) => ({ u0: u - 1.5, u1: u + 1.5, v0: 1.2, v1: H - 1.6, bogen: true }));
         lochwand4(S, F2, 0, F2.L, 0.3, H - 0.9, wand2, L2, { glas: GLAS_HELL6, dick: 0.3 });
         for (const l of L2) {
@@ -110872,11 +110872,11 @@
         for (const l of L2) fb4(S, F2, l.u1 + 0.2, l.u1 + 0.65, 0.3, H - 0.9, 0, 0.45, orn);
         fb4(S, F2, -0.3, F2.L + 0.3, H - 0.9, H, 0, 0.6, orn);
       }
-      const gd = dachProfil(hb, ht, 3.2, 1, "x");
-      gd.translate(hx0 + hb / 2, H, hz0 + ht / 2);
+      const gd = dachProfil(hb2, ht, 3.2, 1, "x");
+      gd.translate(hx0 + hb2 / 2, H, hz0 + ht / 2);
       S.add(gd, KUPFER3);
-      S.quader(hx0 + 2, H + 3.2, hz0 + ht / 2 - 0.5, hx0 + hb - 2, H + 3.9, hz0 + ht / 2 + 0.5, GLAS_HELL6);
-      const cx = hx0 + hb / 2, pb = 14;
+      S.quader(hx0 + 2, H + 3.2, hz0 + ht / 2 - 0.5, hx0 + hb2 - 2, H + 3.9, hz0 + ht / 2 + 0.5, GLAS_HELL6);
+      const cx = hx0 + hb2 / 2, pb = 14;
       S.quader(cx - pb / 2, 0, hz0 - 1, cx + pb / 2, H + 4, hz0 + ht + 1.5, wand2);
       for (const [k, F2] of seiten2(p2, cx - pb / 2, hz0 - 1, pb, ht + 2.5)) {
         lochwand4(S, F2, 0, F2.L, 0.3, H + 3, wand2, [{ u0: F2.L / 2 - 3, u1: F2.L / 2 + 3, v0: 0.3, v1: H + 1.5, bogen: true }], { glas: GLAS_HELL6 });
@@ -111465,9 +111465,9 @@
     }
     if (v === "betonuni") {
       const be = waehle2(r, ["#b9b5ad", "#c2bdb2", "#aeaaa1"]), hell4 = heller(be, 0.06), dk = "#3a434b";
-      const hx0 = x0 + 4, hz0 = z0 + 4, hb = 34, ht = 14, n = 14, gh = 3.4, Hh = 4 + n * gh;
-      S.quader(hx0, 0, hz0, hx0 + hb, Hh, hz0 + ht, dk);
-      for (const [k, F3] of seiten2(p2, hx0, hz0, hb, ht)) {
+      const hx0 = x0 + 4, hz0 = z0 + 4, hb2 = 34, ht = 14, n = 14, gh = 3.4, Hh = 4 + n * gh;
+      S.quader(hx0, 0, hz0, hx0 + hb2, Hh, hz0 + ht, dk);
+      for (const [k, F3] of seiten2(p2, hx0, hz0, hb2, ht)) {
         const lang = F3.L > 20;
         for (let i = 0; i <= n; i++) fb4(S, F3, 0, F3.L, 4 + i * gh - 0.9, 4 + i * gh, 0, 0.45, be);
         for (const u of achsen5(0, F3.L, lang ? 1.7 : 2.2, 0)) fb4(S, F3, u - 0.2, u + 0.2, 4, Hh - 2, 0, 0.7, be);
@@ -111500,9 +111500,9 @@
       }
       zyl8(S, ra * 0.55, ra * 0.7, 2.5, cx, 10, cz, hell4, 8);
       ftext4(scene2, R7(cx - 4, cz + ra * 0.93 + 0.1, 1, 0, 8), "H\xF6rsaalzentrum", 4, 8.4, 0.5, 0.7, 7.5, "#2a3036");
-      S.quader(hx0 + hb - 2, 7, hz0 + ht, hx0 + hb + 2, 10, tz0, be);
-      for (const [k, F3] of seiten2(p2, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS9);
-      for (const z2 of [hz0 + ht + 3, tz0 - 3]) S.box(0.8, 7, 0.8, hx0 + hb, 3.65, z2, be);
+      S.quader(hx0 + hb2 - 2, 7, hz0 + ht, hx0 + hb2 + 2, 10, tz0, be);
+      for (const [k, F3] of seiten2(p2, hx0 + hb2 - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS9);
+      for (const z2 of [hz0 + ht + 3, tz0 - 3]) S.box(0.8, 7, 0.8, hx0 + hb2, 3.65, z2, be);
       for (let i = 0; i < 5; i++) pflanzkuebel2(S, r, x0 + 6 + i * 3.2, z0 + d2 - 4, 0.3, i % 2 === 0);
       for (let i = 0; i < 10; i++) {
         const bx = x0 + 6 + i * 0.8;
@@ -111514,8 +111514,8 @@
       for (let i = 0; i < 3; i++) S.quader(hx0 + 17 + i * 5, Hh, hz0 + 3, hx0 + 20 + i * 5, Hh + 2.2, hz0 + 7, "#c9cdd0");
       for (let i = 0; i < 3; i++) zyl8(S, 0.8, 0.8, 0.6, hx0 + 18.5 + i * 5, Hh + 2.2, hz0 + 5, "#5d656c", 10);
       zyl8(S, 0.15, 0.2, 9, hx0 + 30, Hh, hz0 + 10, "#d9dcdf", 6);
-      gelaender(S, [hx0 + 0.3, hz0 + ht - 0.3], [hx0 + hb - 0.3, hz0 + ht - 0.3], Hh, "#7d858c", 2.2);
-      gelaender(S, [hx0 + hb - 0.3, hz0 + ht - 0.3], [hx0 + hb - 0.3, hz0 + 0.3], Hh, "#7d858c", 2.2);
+      gelaender(S, [hx0 + 0.3, hz0 + ht - 0.3], [hx0 + hb2 - 0.3, hz0 + ht - 0.3], Hh, "#7d858c", 2.2);
+      gelaender(S, [hx0 + hb2 - 0.3, hz0 + ht - 0.3], [hx0 + hb2 - 0.3, hz0 + 0.3], Hh, "#7d858c", 2.2);
       for (let k = 0; k < 3; k++) {
         const zB = tz0 + tt - k * 4.5, y = k * 3.8 + 4.3;
         for (let x = tx0 + k * 3 + 2; x < tx0 + tb - 1; x += 4.5) buschAuf(S, x, y, zB - 0.6, r, 0.7);
@@ -112426,21 +112426,21 @@
     }
     let hmax = hmaxBurg;
     if (hof2) {
-      const hx0 = x0 + w * 0.2, hb = w * 0.6, hzv = z0 + d2 - 32, hd = 26;
-      hmax = Math.max(hmax, winzerhaus(S, scene2, p2, r, hx0, hzv, hb, 11, { n: 2, schild: "Weingut Kellerhals", frei: ["+x", "-x"] }));
-      for (const s2 of [0, 1]) hmax = Math.max(hmax, unterbau(S, scene2, p2, s2 ? "-x" : "+x", s2 ? hx0 + hb - 10 : hx0, hzv + 11.5, hd - 15, 10, (S2, sc2, p22) => fwHaus(S2, sc2, p22, r, 0, 0, hd - 15, 10, { giebel: false, n: 1, zwerch: false, frei: ["+x", "-x"] })));
-      const F2 = R7(hx0 + 10, hzv + hd, 1, 0, hb - 20);
-      fwand2(S, F2, 0, hb - 20, 0, 4.2, -0.6, 0, "#c9b292", [{ u0: (hb - 20) / 2 - 1.8, u1: (hb - 20) / 2 + 1.8, v0: -0.1, v1: 3.6, bogen: true }]);
-      if (sichtF(p2, F2)) ftext4(scene2, F2, "Weingut Kellerhals", (hb - 20) / 2, 3.95, 0.05, 0.36, 6, "#5a2a24");
+      const hx0 = x0 + w * 0.2, hb2 = w * 0.6, hzv = z0 + d2 - 32, hd = 26;
+      hmax = Math.max(hmax, winzerhaus(S, scene2, p2, r, hx0, hzv, hb2, 11, { n: 2, schild: "Weingut Kellerhals", frei: ["+x", "-x"] }));
+      for (const s2 of [0, 1]) hmax = Math.max(hmax, unterbau(S, scene2, p2, s2 ? "-x" : "+x", s2 ? hx0 + hb2 - 10 : hx0, hzv + 11.5, hd - 15, 10, (S2, sc2, p22) => fwHaus(S2, sc2, p22, r, 0, 0, hd - 15, 10, { giebel: false, n: 1, zwerch: false, frei: ["+x", "-x"] })));
+      const F2 = R7(hx0 + 10, hzv + hd, 1, 0, hb2 - 20);
+      fwand2(S, F2, 0, hb2 - 20, 0, 4.2, -0.6, 0, "#c9b292", [{ u0: (hb2 - 20) / 2 - 1.8, u1: (hb2 - 20) / 2 + 1.8, v0: -0.1, v1: 3.6, bogen: true }]);
+      if (sichtF(p2, F2)) ftext4(scene2, F2, "Weingut Kellerhals", (hb2 - 20) / 2, 3.95, 0.05, 0.36, 6, "#5a2a24");
       for (let i2 = 0; i2 < 5; i2++) {
         const g = new three_module_exports.CylinderGeometry(0.6, 0.6, 1.5, 10);
         g.rotateZ(PI10 / 2);
         g.translate(hx0 + 13 + i2 * 1.5, 0.95, hzv + 14 + i2 % 2 * 1.4);
         S.add(g, "#8a5a3a");
       }
-      S.box(2.6, 0.9, 1.2, hx0 + hb / 2, 0.75, hzv + 18, "#8a6a4a");
-      schirmWein(S, hx0 + hb / 2, hzv + 18);
-      for (const [a, b2] of [[x0 + 2, hx0 - 2], [hx0 + hb + 2, x0 + w - 2]]) for (let z2 = hzv; z2 < z0 + d2 - 3; z2 += 2.2) S.quader(a, 0.3, z2 - 0.3, b2, 1.3, z2 + 0.3, rebe);
+      S.box(2.6, 0.9, 1.2, hx0 + hb2 / 2, 0.75, hzv + 18, "#8a6a4a");
+      schirmWein(S, hx0 + hb2 / 2, hzv + 18);
+      for (const [a, b2] of [[x0 + 2, hx0 - 2], [hx0 + hb2 + 2, x0 + w - 2]]) for (let z2 = hzv; z2 < z0 + d2 - 3; z2 += 2.2) S.quader(a, 0.3, z2 - 0.3, b2, 1.3, z2 + 0.3, rebe);
       return { hoehe: hmax };
     }
     const namen = ["Weinstube Rebstock", "Strau\xDFwirtschaft", "Hotel Zur Krone", "Weinhaus Lay", "Caf\xE9 am Ufer", "Winzerstube", "Gasthaus Anker"].map((x2) => x2);
@@ -115721,13 +115721,13 @@
       return { hoehe: 34.8 };
     }
     const brau = v === "braeuhaus";
-    const hb = brau ? Math.min(30, w * 0.55) : Math.min(20, w * 0.48), ht = brau ? 17 : 13, n = brau ? 3 : 2;
+    const hb2 = brau ? Math.min(30, w * 0.55) : Math.min(20, w * 0.48), ht = brau ? 17 : 13, n = brau ? 3 : 2;
     const eg = brau ? 4.6 : 3.8, gh = brau ? 3.6 : 3.1, H = eg + n * gh;
     const wand2 = brau ? waehle2(r, ["#efe6d2", "#f1e2c4", "#e8dcc8", "#f3ede2"]) : waehle2(r, [WEISS3, "#f3ead3", "#f1e6d6", "#f6efdc"]);
     const laedenF = waehle2(r, ["#3f6b4a", "#2f5d4a", "#6b3a2e", "#466b8a"]);
     const dachF = waehle2(r, BIBER), hz = zf - ht;
-    S.quader(0.5, 0, hz, 0.5 + hb, H, zf, wand2);
-    const F2 = seiten3(0.5, hz, hb, ht);
+    S.quader(0.5, 0, hz, 0.5 + hb2, H, zf, wand2);
+    const F2 = seiten3(0.5, hz, hb2, ht);
     const name2 = brau ? waehle2(r, BRAEU) : waehle2(r, WIRTSNAMEN);
     for (const k of ["v", "r", "h", "l"]) {
       if (!sichtF2(p2, F2[k])) continue;
@@ -115752,18 +115752,18 @@
       }
     }
     if (brau) {
-      dachTrauf(S, F2.v, 0, hb, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
-      if (sichtF2(p2, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
-      S.quader(0.5 + hb * 0.4, H + 4, hz + ht / 2 - 0.5, 0.5 + hb * 0.4 + 1, H + ht * 0.52 + 1, hz + ht / 2 + 0.5, "#b9a89a");
+      dachTrauf(S, F2.v, 0, hb2, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
+      if (sichtF2(p2, F2.v)) for (const u of achsen6(0, hb2, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
+      S.quader(0.5 + hb2 * 0.4, H + 4, hz + ht / 2 - 0.5, 0.5 + hb2 * 0.4 + 1, H + ht * 0.52 + 1, hz + ht / 2 + 0.5, "#b9a89a");
     } else if (r() < 0.5) {
-      walm3(S, 0.5, hz, 0.5 + hb, zf, H, ht * 0.4, dachF, 0.7);
+      walm3(S, 0.5, hz, 0.5 + hb2, zf, H, ht * 0.4, dachF, 0.7);
     } else {
-      dachTrauf(S, F2.v, 0, hb, ht, H, ht * 0.42, dachF, wand2, { ue: 0.8, us: 0.7 });
+      dachTrauf(S, F2.v, 0, hb2, ht, H, ht * 0.42, dachF, wand2, { ue: 0.8, us: 0.7 });
     }
-    const bx0 = hb + 2.5;
+    const bx0 = hb2 + 2.5;
     if (w - bx0 > 10) biergarten(S, scene2, r, bx0, 2, w - 0.5, zf - 0.5);
     if (sichtF2(p2, { nx: 0, nz: 1 })) ftext5(scene2, R8(bx0, zf - 0.3, 1, 0, 10), "Biergarten", 3.2, 1.75, 0.2, 0.7, 6, "#f7f2e6", "#3f6b4a");
-    if (hz > 10) biergarten(S, scene2, r, 0.5, 1, hb, hz - 1.5, { zaun: false, ausschank: false });
+    if (hz > 10) biergarten(S, scene2, r, 0.5, 1, hb2, hz - 1.5, { zaun: false, ausschank: false });
     return { hoehe: H + ht * 0.55 };
   }
   var MAI_V = ["dorf", "markt", "fest"];
@@ -116724,13 +116724,13 @@
         const T2 = Math.min(11, dz - 5), frei6 = sx - 2.5, zwei = frei6 > 22;
         const b3 = zwei ? Math.min(13, (frei6 - 3) / 2) : Math.min(14, frei6 - 1);
         const plaetze = zwei ? [[1.5, b3], [1.5 + b3 + 3 + k % 2 * 0, b3]] : [[1.5 + k % 2 * Math.max(0, frei6 - 1 - b3), b3]];
-        for (const [hx, hb] of plaetze) {
-          if (hb < 8) continue;
+        for (const [hx, hb2] of plaetze) {
+          if (hb2 < 8) continue;
           const z0 = zv - (k === 0 ? 1.5 : 3) - T2;
-          top2 = Math.max(top2, versetzt3(S, scene2, 0, y - 0.3, 0, (T22, g) => hanghaus(T22, g, r, p2, hx, z0, hb, T2, { n: k === 0 ? 4 : 3 }).top) + y - 0.3);
+          top2 = Math.max(top2, versetzt3(S, scene2, 0, y - 0.3, 0, (T22, g) => hanghaus(T22, g, r, p2, hx, z0, hb2, T2, { n: k === 0 ? 4 : 3 }).top) + y - 0.3);
           if (k > 0) {
-            baumRund2(S, hx + hb + 1.2, zv - 2, r, 0.7, LAUB, y);
-            for (let x = hx; x < hx + hb; x += 1.6) busch6(S, x + 0.8, zv - 1.1, r, 0.5, y);
+            baumRund2(S, hx + hb2 + 1.2, zv - 2, r, 0.7, LAUB, y);
+            for (let x = hx; x < hx + hb2; x += 1.6) busch6(S, x + 0.8, zv - 1.1, r, 0.5, y);
           }
         }
       }
@@ -124162,7 +124162,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "48f44b8" : "Entwicklung";
+  var version = () => true ? "a6dc867" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -125265,6 +125265,15 @@
     };
   }
   var nimm8 = (r, l) => l[Math.floor(r() * l.length) % l.length];
+  function gewichtet(r, paare) {
+    let s2 = 0;
+    for (const [, g] of paare) s2 += g;
+    let x = r() * s2;
+    for (const [w, g] of paare) {
+      if ((x -= g) <= 0) return w;
+    }
+    return paare[0][0];
+  }
   function rgb(h) {
     h = h.replace("#", "");
     if (h.length === 3) h = h.split("").map((c) => c + c).join("");
@@ -125284,6 +125293,26 @@
     const [r, g, b2] = rgb(c);
     return (0.299 * r + 0.587 * g + 0.114 * b2) / 255;
   };
+  function zufallsMerkmale(seed) {
+    const r = zufall3("portraet:" + seed);
+    const geschlecht = r() < 0.5 ? "w" : "m";
+    const alter = Math.round(29 + r() * 37);
+    const hautton = gewichtet(r, [["hell", 3], ["rosig", 3], ["mittel", 2.2], ["oliv", 1.6], ["braun", 1.3], ["dunkel", 1]]);
+    const dunkleHaut = hautton === "braun" || hautton === "dunkel";
+    let haar = geschlecht === "w" ? gewichtet(r, [["bob", 3], ["lang", 2.5], ["zopf", 1.5], ["dutt", 1.5], ["pony", 1.5], ["halblang", 2], ["kurz", 1], ["locken", 1.2], ["afro", dunkleHaut ? 1.5 : 0.2]]) : gewichtet(r, [["kurz", 3], ["seitenscheitel", 3], ["halbglatze", alter > 45 ? 2.5 : 0.4], ["glatze", alter > 40 ? 1.2 : 0.4], ["locken", 1], ["afro", dunkleHaut ? 1.2 : 0.1], ["halblang", 0.6]]);
+    let haarfarbe;
+    if (alter > 58 && r() < 0.65) haarfarbe = r() < 0.4 ? "wei\xDF" : "grau";
+    else if (alter > 50 && r() < 0.35) haarfarbe = "grau";
+    else if (dunkleHaut || hautton === "oliv") haarfarbe = gewichtet(r, [["schwarz", 4], ["dunkelbraun", 2]]);
+    else haarfarbe = gewichtet(r, [["schwarz", 1], ["dunkelbraun", 2.5], ["braun", 2.5], ["hellbraun", 1.6], ["blond", 1.6], ["rot", 0.7]]);
+    const brille = r() < (alter > 50 ? 0.55 : 0.3) ? nimm8(r, ["rund", "eckig", "horn"]) : "keine";
+    const kleidung = geschlecht === "w" ? gewichtet(r, [["kostuem", 2.4], ["blazer", 2.2], ["bluse", 2], ["strick", 1.5], ["pullover", 1], ["rollkragen", 1]]) : gewichtet(r, [["anzug", 3], ["blazer", 2], ["hemd", 2], ["pullover", 1.2], ["rollkragen", 0.8], ["strick", 0.6]]);
+    const businessFarben = ["marine", "anthrazit", "grau", "schwarz", "marine", "anthrazit", "petrol", "bordeaux", "camel"];
+    const legerFarben = ["hellblau", "wei\xDF", "rosa", "mintgr\xFCn", "beige", "senf", "gr\xFCn", "bordeaux", "olive", "petrol", "rot", "camel", "grau"];
+    const kleidungFarbe = ["anzug", "kostuem", "blazer"].includes(kleidung) ? nimm8(r, businessFarben) : nimm8(r, legerFarben);
+    const bart = geschlecht === "m" && r() < 0.3 ? nimm8(r, ["drei", "drei", "voll", "schnauz"]) : "keiner";
+    return { geschlecht, haar, haarfarbe, brille, kleidungFarbe, hautton, alter, kleidung, bart, seed: hash5(seed) % 1e5 };
+  }
   function norm(m = {}) {
     const r = zufall3("n:" + JSON.stringify(m));
     const geschlecht = m.geschlecht === "m" || m.geschlecht === "m\xE4nnlich" ? "m" : m.geschlecht === "w" || m.geschlecht === "weiblich" ? "w" : r() < 0.5 ? "w" : "m";
@@ -125652,10 +125681,10 @@
       h += karussell("kandidaten", karten, ui.k, "kandidat");
       const k = L2.kandidaten[ui.k];
       if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
-      const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st2, L2.ressort, k.id, A.gehalt, hb, A.erfolg);
+      const A = ui.angebot, hb2 = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st2, L2.ressort, k.id, A.gehalt, hb2, A.erfolg);
       h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc2(k.name) + "</div>";
       h += regler("Jahresgehalt", stepper("angebotGehalt", P2("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
-      h += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb ? geld(hb) : "vom Jahresgehalt");
+      h += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb2 ? geld(hb2) : "vom Jahresgehalt");
       h += regler("Erfolgsbonus", segment("angebotErfolg", A.erfolg, ERFOLG), "vom Jahresgehalt");
       h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P2("a:chance", pz3(ch))}</div><div class="balken"><span style="width:${(ch * 100).toFixed(0)}%;background:${ch >= 0.6 ? "var(--gruen)" : ch >= 0.35 ? "#e3a90d" : "var(--rot)"}"></span></div><small class="rfuss">h\xE4ngt von Angebot, Lage der Firma und Image ab</small></div>`;
       h += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="anbieten"${L2.besetzt ? " disabled" : ""}>Angebot machen</button></div>`;
@@ -128019,9 +128048,9 @@
   };
   function deutschlandPunkte(staedte, hier) {
     const punkte2 = staedte.map((stadt) => {
-      const hash6 = [...stadt.name].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7);
+      const hash7 = [...stadt.name].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7);
       const [x, y] = MAP_FELDER[String(stadt.region ?? "mitte").toLocaleLowerCase("de")] ?? MAP_FELDER.mitte;
-      const dx = hash6 % 29 - 14, dy = Math.floor(hash6 / 37) % 35 - 17;
+      const dx = hash7 % 29 - 14, dy = Math.floor(hash7 / 37) % 35 - 17;
       return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier, hauscluster: stadt.hauscluster };
     });
     return punkte2.sort((a, b2) => Number(a.aktuell) - Number(b2.aktuell)).map((p2) => {
@@ -128452,6 +128481,461 @@
     } };
   }
 
+  // src/ui/hausbesuch.js
+  var HAUSBESUCH_AKTIV = true;
+  var PHRASE = Object.freeze({
+    altware: [
+      "Das h\xE4ngt hier schon seit dem Fr\xFChjahr.",
+      "Die Kollektion kenne ich noch vom letzten Besuch.",
+      "Gibt es hiervon auch etwas Neues?",
+      "Die Farben wirken ein bisschen von gestern.",
+      "Das Schild wurde schon dreimal reduziert.",
+      "Auf frische Ware hoffe ich n\xE4chste Woche.",
+      "Das lag doch schon im letzten Schlussverkauf.",
+      "Die Auswahl k\xF6nnte moderner sein.",
+      "Hier stehen immer noch die alten Modelle.",
+      "Vielleicht kommt bald eine neue Lieferung."
+    ],
+    fehlmengen: [
+      "Meine Gr\xF6\xDFe ist wieder nicht da.",
+      "Schon wieder nur die letzten zwei St\xFCck.",
+      "Kommt meine Gr\xF6\xDFe noch einmal rein?",
+      "Das Regal ist schon wieder leer.",
+      "Das beliebte Modell fehlt seit Wochen.",
+      "Leider ist die Farbe ausverkauft.",
+      "Ich h\xE4tte gern mehr Auswahl.",
+      "Schade, der Artikel ist nicht lieferbar.",
+      "Warum fehlt ausgerechnet die mittlere Gr\xF6\xDFe?",
+      "Dann muss ich sp\xE4ter noch einmal vorbeischauen."
+    ],
+    personal: [
+      "Hier ist ja nie jemand.",
+      "Wo finde ich eine Beratung?",
+      "An der Kasse dauert es heute l\xE4nger.",
+      "Ich suche schon seit Minuten jemanden.",
+      "Die Mitarbeiter haben alle H\xE4nde voll zu tun.",
+      "Ist diese Kasse ge\xF6ffnet?",
+      "Ich h\xE4tte gern eine zweite Meinung.",
+      "Wer kann mir bei der Auswahl helfen?",
+      "Die Beratung ist heute sehr knapp besetzt.",
+      "Ich warte kurz auf eine Verk\xE4uferin."
+    ],
+    gut: [
+      "Endlich mal wieder sch\xF6ne Sachen.",
+      "Hier finde ich fast immer etwas Passendes.",
+      "Die neue Auswahl gef\xE4llt mir.",
+      "Das ist wirklich sch\xF6n pr\xE4sentiert.",
+      "Heute macht das St\xF6bern Spa\xDF.",
+      "Die Beratung war sehr hilfreich.",
+      "Alles ist gut sortiert.",
+      "Hier komme ich gern wieder her.",
+      "Das neue Sortiment ist gelungen.",
+      "Die Auswahl \xFCberrascht mich positiv."
+    ]
+  });
+  var hash6 = (str) => {
+    let h = 2166136261;
+    for (const c of String(str)) {
+      h ^= c.charCodeAt(0);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  };
+  var begrenze = (x, a, b2) => Math.min(b2, Math.max(a, x));
+  var etageName2 = (e) => e < 0 ? "UG" : e === 0 ? "EG" : e + ". OG";
+  function hausbesuchLage(k = {}, personalquote = 1) {
+    if ((k.altwarenanteil ?? 0) >= 0.22) return "altware";
+    if ((k.nosVerfuegbarkeit ?? 1) < 0.88 || (k.entgangenerUmsatz ?? 0) > Math.max(1e3, (k.umsatz ?? 0) * 0.04)) return "fehlmengen";
+    if (personalquote < 0.84) return "personal";
+    return "gut";
+  }
+  function hausbesuchSpruch(woche2, abteilung2, lage, person3 = 0) {
+    const saetze = PHRASE[PHRASE[lage] ? lage : "gut"];
+    return saetze[hash6(String(woche2) + ":" + abteilung2 + ":" + person3) % saetze.length];
+  }
+  function hausbesuchBesatz(haus2, etageNr2) {
+    const fl = (haus2.flaechen ?? []).filter((f) => f.etage === etageNr2 && f.konzept !== "leer");
+    const qm = fl.reduce((n, f) => n + f.qm, 0);
+    const gesamt = Math.max(1, (haus2.flaechen ?? []).filter((f) => f.konzept !== "leer").reduce((n, f) => n + f.qm, 0));
+    const k = haus2.kpi ?? {};
+    const ist = Math.max(0, k.fteIst ?? (haus2.personal?.vollzeit ?? 0) + (haus2.personal?.teilzeit ?? 0) + (haus2.personal?.aushilfen ?? 0));
+    const fte2 = haus2.format === "outlet" ? Math.round(qm / 140) : ist * qm / gesamt;
+    const umsatz = Math.max(0, Object.entries(k.umsatzJeGruppe ?? {}).reduce((n, [g, u]) => n + u * (fl.some((f) => f.gruppe === g) ? 1 : 0), 0));
+    return {
+      kunden: fl.length ? begrenze(Math.round(2 + umsatz / 18e3 + qm / 240), 2, 36) : 0,
+      verkauf: fl.length ? begrenze(Math.round(haus2.format === "outlet" ? qm / 300 : fte2 / 9), haus2.format === "outlet" ? 1 : 0, 12) : 0,
+      fte: Math.round(fte2 * 10) / 10,
+      personalquote: (k.fteBedarf ?? 0) > 0 ? ist / k.fteBedarf : 1
+    };
+  }
+  function zonenNormalisieren(zonen2, haus2) {
+    return (zonen2 ?? []).map((z2, i) => {
+      const f = z2.flaeche ?? haus2.flaechen.find((f2) => f2.id === z2.id || f2.gruppe === z2.id) ?? z2;
+      const punkte2 = z2.zellen?.map((c) => ({ x: (c.i + 0.5) * 5, z: (c.j + 0.5) * 5 })) ?? (Number.isFinite(z2.x) ? [{ x: z2.x + z2.w / 2, z: z2.z + z2.d / 2 }] : []);
+      return { id: f.id ?? z2.id ?? String(i), gruppe: f.gruppe ?? z2.gruppe ?? z2.art, name: f.name ?? z2.name, punkte: punkte2 };
+    }).filter((z2) => z2.punkte.length);
+  }
+  function stilEinbauen(wurzel2) {
+    const css = document.createElement("style");
+    css.textContent = [
+      ".hb{position:fixed;inset:0;z-index:30;background:#26313a;color:#fff;display:flex;flex-direction:column;font-family:system-ui,sans-serif;}",
+      ".hb[hidden]{display:none!important}.hb header{height:65px;padding:calc(9px + env(safe-area-inset-top)) 12px 8px;box-sizing:content-box;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#18242c;z-index:2;}",
+      ".hb header strong{font-size:15px}.hb small{display:block;opacity:.7;font-size:11px}.hb select{display:block;max-width:210px;background:#f4f4f0;color:#19262c;border-radius:6px;margin-top:5px;padding:5px;}.hb button{font:inherit;cursor:pointer;min-height:44px;border:0;border-radius:9px;background:#ebebe5;color:#17232a;padding:7px 11px;}",
+      ".hb .hb-bild{flex:1;position:relative;min-height:0;touch-action:none;}.hb canvas{width:100%;height:100%;display:block;touch-action:none;}",
+      ".hb .hb-etagen{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:7px;z-index:2;}",
+      ".hb .hb-etagen button{min-width:51px;box-shadow:0 2px 7px #17232a70}.hb .hb-etagen button[aria-pressed=true]{background:#c33e35;color:#fff;}",
+      ".hb .hb-blase{position:absolute;left:12px;right:71px;bottom:17px;z-index:3;background:#fff;color:#17232a;border-radius:15px;padding:13px 14px;box-shadow:0 4px 14px #0007;font-size:14px;line-height:1.4;max-width:400px;}",
+      ".hb .hb-blase[hidden]{display:none}.hb .hb-blase b{display:block;margin-bottom:3px}.hb .hb-blase p{margin:4px 0}.hb .hb-blase svg{width:64px;height:64px;float:left;margin-right:10px;}",
+      ".hb footer{display:flex;justify-content:space-between;align-items:center;gap:9px;padding:9px 13px calc(9px + env(safe-area-inset-bottom));background:#18242c;font-size:12px;}",
+      ".hb .hb-info{background:#d9ebed}.hb .hb-hinweis{opacity:.75;max-width:230px}.hb .hb-fehler{padding:20px;text-align:center;}"
+    ].join("");
+    wurzel2.append(css);
+  }
+  function hausbesuchModul(ctx) {
+    let aktiv5 = HAUSBESUCH_AKTIV, haus2 = null, nr = 0, host, bild3, canvas2, renderer, scene2, cam2, buehne;
+    let figuren2 = [], personenMesh = [], treffer = [], animation = 0, fahrt = null, rahmenzeiten = [], letzte = 0;
+    let K3 = { x: 0, z: 0, halb: 40, min: 8, max: 100 };
+    let steuerung2, kalender = null;
+    const status = () => ({ offen: !!haus2, haus: haus2?.id, etage: nr, figuren: figuren2.length, kunden: figuren2.filter((f) => !f.personal).length, personal: figuren2.filter((f) => f.personal).length });
+    const messung2 = () => {
+      const a = rahmenzeiten.slice(-90).filter((n) => n > 0);
+      const ms = a.length ? a.reduce((s2, x) => s2 + x, 0) / a.length : 0;
+      return { ...status(), frames: a.length, fps: ms ? Math.round(1e3 / ms) : null, durchschnittMs: Math.round(ms * 10) / 10, renderer: renderer ? { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles } : null };
+    };
+    const sicher = (s2) => esc2(String(s2 ?? ""));
+    function anlegen2() {
+      if (host) return;
+      host = document.createElement("div");
+      host.className = "hb";
+      host.hidden = true;
+      host.setAttribute("role", "dialog");
+      host.setAttribute("aria-modal", "true");
+      host.setAttribute("aria-label", "Hausbesuch");
+      stilEinbauen(host);
+      host.insertAdjacentHTML("beforeend", '<header><div><strong class="hb-titel">Hausbesuch</strong><select class="hb-hauswahl" aria-label="Filiale ausw\xE4hlen"></select><small class="hb-unter"></small></div><button type="button" data-hb="zu">Schlie\xDFen \xD7</button></header><div class="hb-bild"><canvas aria-label="Interaktiver Etagenrundgang"></canvas><nav class="hb-etagen" aria-label="Etagen"></nav><div class="hb-blase" aria-live="polite" hidden></div></div><footer><button type="button" class="hb-info" data-hb="leitung">Filialleitung</button><span class="hb-hinweis">Wischen: bewegen \xB7 Zwei Finger: zoomen \xB7 Tippen: sprechen oder einkaufen</span></footer>');
+      document.body.append(host);
+      bild3 = host.querySelector(".hb-bild");
+      canvas2 = host.querySelector("canvas");
+      host.querySelector(".hb-hauswahl").addEventListener("change", (e) => oeffne(e.target.value));
+      host.addEventListener("click", (e) => {
+        const action = e.target.closest("[data-hb]");
+        if (action?.dataset.hb === "zu") return schliesse();
+        if (action?.dataset.hb === "leitung") return leitung2();
+        if (action?.dataset.hb === "etage") return etageWaehlen(Number(action.dataset.nr));
+        if (action?.dataset.hb === "einkauf") {
+          const wg = action.dataset.wg;
+          schliesse();
+          ctx.oeffneEinkauf("wg", wg);
+        }
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && haus2) schliesse();
+      });
+      window.addEventListener("resize", () => {
+        if (haus2) kameraSetzen2();
+      });
+      steuerung2 = karteSteuerung({
+        canvas: canvas2,
+        K: K3,
+        setzen: kameraSetzen2,
+        aufBoden: (px2, py2) => {
+          if (!cam2) return null;
+          const r = canvas2.getBoundingClientRect();
+          const ray2 = new three_module_exports.Raycaster();
+          ray2.setFromCamera(new three_module_exports.Vector2((px2 - r.left) / r.width * 2 - 1, 1 - (py2 - r.top) / r.height * 2), cam2);
+          return ray2.ray.intersectPlane(new three_module_exports.Plane(new three_module_exports.Vector3(0, 1, 0), 0), new three_module_exports.Vector3());
+        },
+        tippen: antippen
+      });
+    }
+    function kameraSetzen2() {
+      if (!haus2 || !renderer || !scene2) return;
+      const w = Math.max(1, bild3.clientWidth), h = Math.max(1, bild3.clientHeight);
+      K3.halb = begrenze(K3.halb, K3.min, K3.max);
+      K3.x = begrenze(K3.x, 0, buehne?.breite ?? 100);
+      K3.z = begrenze(K3.z, 0, buehne?.tiefe ?? 100);
+      renderer.setSize(w, h, false);
+      cam2 = isoKamera(w, h, K3.halb, new three_module_exports.Vector3(K3.x, 0, K3.z));
+      cam2.updateMatrixWorld();
+    }
+    function sceneLeeren() {
+      if (!scene2) return;
+      scene2.traverse((o) => {
+        if (o.geometry) o.geometry.dispose();
+      });
+      scene2.userData.sonne?.shadow?.map?.dispose();
+      renderer?.renderLists?.dispose();
+      scene2 = null;
+      buehne = null;
+      figuren2 = [];
+      personenMesh = [];
+      treffer = [];
+    }
+    function instanz(anz3, farbe3, geo) {
+      const m = new three_module_exports.InstancedMesh(geo, new three_module_exports.MeshLambertMaterial({ color: farbe3 }), Math.max(1, anz3));
+      m.count = anz3;
+      m.frustumCulled = false;
+      scene2.add(m);
+      personenMesh.push(m);
+      return m;
+    }
+    function menschen(zn, besatz) {
+      const r = rng2(haus2.id + ":besuch:" + nr + ":" + ctx.s().woche);
+      const personen = [];
+      if (!zn.length) return;
+      for (let i = 0; i < besatz.kunden + besatz.verkauf; i++) {
+        const personal = i >= besatz.kunden, zone = zn[Math.floor(r() * zn.length)];
+        const pos = zone.punkte[Math.floor(r() * zone.punkte.length)];
+        const zielZone = personal ? zone : zn[Math.floor(r() * zn.length)];
+        const ziel = zielZone.punkte[Math.floor(r() * zielZone.punkte.length)];
+        const x = begrenze(pos.x + (r() - 0.5) * 2, 1, buehne.breite - 1);
+        const z2 = begrenze(pos.z + (r() - 0.5) * 2, 1, buehne.tiefe - 1);
+        personen.push({
+          x,
+          z: z2,
+          startX: x,
+          startZ: z2,
+          zielX: begrenze(ziel.x, 1, buehne.breite - 1),
+          zielZ: begrenze(ziel.z, 1, buehne.tiefe - 1),
+          phase: r() * Math.PI * 2,
+          tempo: personal ? 0 : 0.13 + r() * 0.23,
+          richtung: r() * Math.PI * 2,
+          zone,
+          zielZone,
+          personal,
+          index: i
+        });
+      }
+      figuren2 = personen;
+      const koerper3 = new three_module_exports.BoxGeometry(0.66, 1.15, 0.42), kopf = new three_module_exports.SphereGeometry(0.37, 6, 5);
+      for (const p2 of [false, true]) {
+        const n = personen.filter((f) => f.personal === p2).length;
+        instanz(n, p2 ? "#235a79" : "#ac715e", koerper3);
+        instanz(n, p2 ? "#d5a37f" : "#edc9a4", kopf);
+      }
+    }
+    function menschenSetzen(t) {
+      const obj = new three_module_exports.Object3D();
+      for (const personal of [false, true]) {
+        const liste = figuren2.filter((p2) => p2.personal === personal);
+        const ms = personal ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
+        liste.forEach((p2, i) => {
+          const weg = p2.personal ? 0 : (1 - Math.cos(t * p2.tempo + p2.phase)) / 2;
+          const x = begrenze(p2.startX + (p2.zielX - p2.startX) * weg, 0.5, buehne.breite - 0.5);
+          const z2 = begrenze(p2.startZ + (p2.zielZ - p2.startZ) * weg, 0.5, buehne.tiefe - 0.5);
+          p2.x = x;
+          p2.z = z2;
+          p2.zoneJetzt = weg > 0.5 ? p2.zielZone : p2.zone;
+          obj.position.set(x, 0.82, z2);
+          obj.rotation.set(0, p2.richtung, 0);
+          obj.updateMatrix();
+          ms[0].setMatrixAt(i, obj.matrix);
+          obj.position.y = 1.6;
+          obj.updateMatrix();
+          ms[1].setMatrixAt(i, obj.matrix);
+        });
+        for (const m of ms) m.instanceMatrix.needsUpdate = true;
+      }
+    }
+    function bauen3(etageNr2, delta = 0) {
+      const s2 = ctx.s();
+      const frisch = s2.haeuser.find((h) => h.id === haus2.id);
+      buehne = null;
+      if (frisch) haus2 = frisch;
+      sceneLeeren();
+      scene2 = neueSzene("#26313a");
+      const S = new Sammler();
+      if (haus2.format === "outlet") {
+        const m = masseOutlet(haus2), flaechen = haus2.flaechen.filter((f) => f.etage === etageNr2 && f.qm >= 10);
+        if (flaechen.length) {
+          const plan2 = ladenplan({ breite: m.bw, tiefe: m.bd }, "outlet", flaechen, haus2.id + ":" + etageNr2);
+          S.quader(0, -0.3, 0, m.bw, 0, m.bd, "#e7e6e1");
+          baueLadenplan(S, scene2, plan2, { dichte: 0.42 });
+          buehne = { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.5, -0.5, -0.5), new three_module_exports.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan2.abteilungen, anzahl: S.anzahl };
+        }
+      }
+      if (!buehne) {
+        const grafikHaus = { ...haus2, flaechen: haus2.flaechen };
+        buehne = etage(S, scene2, grafikHaus, etageNr2, { kunden: 0, dichte: 0.42, budget: 14500 });
+      }
+      S.bauen(scene2);
+      const bbox = buehne.box;
+      sonneAuf(scene2, bbox.getCenter(new three_module_exports.Vector3()), Math.max(30, bbox.getSize(new three_module_exports.Vector3()).length()));
+      const zn = zonenNormalisieren(buehne.zonen, haus2);
+      const besatz = hausbesuchBesatz(haus2, etageNr2);
+      menschen(zn, besatz);
+      treffer = zn;
+      K3.x = buehne.breite / 2;
+      K3.z = buehne.tiefe / 2;
+      K3.max = Math.max(20, Math.max(buehne.breite, buehne.tiefe) * 1.25);
+      K3.min = 7;
+      K3.halb = Math.min(K3.max, Math.max(16, Math.max(buehne.breite, buehne.tiefe) * 0.8));
+      host.querySelector(".hb-unter").textContent = etageName2(etageNr2) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.verkauf + " Besch\xE4ftigte" + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " \xB7 " + besatz.fte + " FTE");
+      host.querySelector(".hb-blase").hidden = true;
+      host.querySelectorAll("[data-hb=etage]").forEach((b2) => b2.setAttribute("aria-pressed", String(Number(b2.dataset.nr) === etageNr2)));
+      fahrt = delta ? { seit: performance.now(), start: delta > 0 ? -8 : 8, dauer: 300 } : null;
+      kameraSetzen2();
+    }
+    function frame(t) {
+      if (!haus2 || !scene2) return;
+      animation = requestAnimationFrame(frame);
+      if (letzte) rahmenzeiten.push(Math.min(1e3, t - letzte));
+      if (rahmenzeiten.length > 120) rahmenzeiten.shift();
+      letzte = t;
+      if (fahrt) {
+        const k = begrenze((t - fahrt.seit) / fahrt.dauer, 0, 1);
+        scene2.position.y = fahrt.start * (1 - k) * (1 - k);
+        if (k === 1) {
+          scene2.position.y = 0;
+          fahrt = null;
+        }
+      }
+      menschenSetzen(t / 1e3);
+      renderer.render(scene2, cam2);
+    }
+    function sprechblase(titel, inhalt, zusatz = "") {
+      const b2 = host.querySelector(".hb-blase");
+      b2.innerHTML = "<b>" + sicher(titel) + "</b><p>" + sicher(inhalt) + "</p>" + zusatz;
+      b2.hidden = false;
+    }
+    function abteilungSprechen(z2, person3) {
+      const s2 = ctx.s(), daten = ctx.E.einkaufUebersicht(s2).bereiche.find((b2) => b2.bereich === z2.gruppe);
+      const k = daten?.kennzahlen ?? {}, besatz = hausbesuchBesatz(haus2, nr);
+      const lage = haus2.format === "outlet" ? "gut" : hausbesuchLage(k, besatz.personalquote);
+      sprechblase(
+        person3?.personal ? "Verkauf" : "Kundschaft",
+        hausbesuchSpruch(s2.woche, z2.gruppe ?? z2.id, lage, person3?.index ?? 0),
+        haus2.format !== "outlet" && daten?.wgs?.length ? '<button type="button" data-hb="einkauf" data-wg="' + sicher(daten.wgs[0].id) + '">Zum Einkauf: ' + sicher(daten.wgs[0].name) + " \u2192</button>" : ""
+      );
+    }
+    function antippen(e) {
+      if (!haus2 || !cam2) return;
+      const r = canvas2.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      let nah = null, dist2 = 26;
+      for (const p3 of figuren2) {
+        const v = new three_module_exports.Vector3(p3.x, 1.1, p3.z).project(cam2);
+        const px2 = (v.x + 1) / 2 * r.width, py2 = (1 - v.y) / 2 * r.height;
+        const d2 = Math.hypot(px2 - x, py2 - y);
+        if (d2 < dist2) {
+          nah = p3;
+          dist2 = d2;
+        }
+      }
+      if (nah) return abteilungSprechen(nah.zoneJetzt ?? nah.zone, nah);
+      const ray2 = new three_module_exports.Raycaster();
+      ray2.setFromCamera(new three_module_exports.Vector2(x / r.width * 2 - 1, 1 - y / r.height * 2), cam2);
+      const p2 = ray2.ray.intersectPlane(new three_module_exports.Plane(new three_module_exports.Vector3(0, 1, 0), 0), new three_module_exports.Vector3());
+      if (!p2) return;
+      const z2 = treffer.find((q2) => q2.punkte.some((v) => Math.hypot(v.x - p2.x, v.z - p2.z) < 4.2));
+      if (z2) {
+        const bereich = ctx.E.einkaufUebersicht(ctx.s()).bereiche.find((b2) => b2.bereich === z2.gruppe);
+        if (haus2.format !== "outlet" && bereich?.wgs?.length) {
+          const wg = bereich.wgs.find((g) => g.id.endsWith("." + z2.id)) ?? bereich.wgs[0];
+          schliesse();
+          ctx.oeffneEinkauf("wg", wg.id);
+          return;
+        }
+        return abteilungSprechen(z2, null);
+      }
+      if (Math.hypot(p2.x - buehne.breite / 2, p2.z - buehne.tiefe / 2) < 6) leitung2();
+      else host.querySelector(".hb-blase").hidden = true;
+    }
+    function leitung2() {
+      if (!haus2) return;
+      const s2 = ctx.s(), k = haus2.kpi ?? {}, chef = haus2.personal?.filialleiter;
+      const name2 = chef?.name ?? "Filialleitung";
+      const quotient = (k.fteBedarf ?? 0) > 0 ? (k.fteIst ?? 0) / k.fteBedarf : 1;
+      const q2 = k.db ?? 0;
+      const saetze = haus2.format === "outlet" ? [
+        "FUNDUS wird hier als eigenst\xE4ndiger grafischer Standort gezeigt.",
+        "Daf\xFCr liegen noch keine Kennzahlen der Wirtschafts-Engine vor.",
+        "Die Filialleitung ist deshalb eine Modellfigur."
+      ] : [
+        q2 < 0 ? "Unser Haus liegt beim Deckungsbeitrag unter Plan." : "Der Deckungsbeitrag ist derzeit positiv.",
+        quotient < 0.9 ? "Uns fehlen in dieser Woche Kr\xE4fte auf der Fl\xE4che." : "Unsere Personalbesetzung ist weitgehend gesichert.",
+        (haus2.substanz ?? 100) < 45 ? "Wir m\xFCssen dringend in die Substanz investieren." : (chef?.moral ?? 50) < 40 ? "Die Stimmung im Team verlangt Aufmerksamkeit." : "Das Team h\xE4lt den Betrieb stabil."
+      ];
+      const merkmale = zufallsMerkmale("filialleitung:" + haus2.id);
+      sprechblase(name2, saetze.join(" "), portraetSVG(merkmale, 96, { hintergrund: "#e8edf0" }));
+    }
+    function etageWaehlen(n) {
+      if (!haus2 || !haus2.etagen.includes(n) || nr === n) return;
+      const delta = n - nr;
+      nr = n;
+      bauen3(n, delta);
+    }
+    function oeffne(id) {
+      if (!aktiv5) return false;
+      const s2 = ctx.s();
+      if (!s2) return false;
+      const h = s2.haeuser.find((q2) => q2.id === id) ?? haeuser_outlet_default.find((q2) => q2.id === id && q2.stadt === ctx.stadtName());
+      if (!h || !h.etagen.length || h.status === "verkauft") return false;
+      if (haus2) schliesse();
+      anlegen2();
+      haus2 = h;
+      const angebot = h.etagen.includes(0) ? 0 : h.etagen[0];
+      nr = angebot;
+      host.querySelector(".hb-titel").textContent = h.name + " \xB7 Hausbesuch";
+      const kandidaten2 = [...s2.haeuser.filter((q2) => q2.stadt === ctx.stadtName() && q2.status !== "verkauft"), ...haeuser_outlet_default.filter((q2) => q2.stadt === ctx.stadtName())];
+      host.querySelector(".hb-hauswahl").innerHTML = kandidaten2.map((q2) => '<option value="' + sicher(q2.id) + '"' + (q2.id === h.id ? " selected" : "") + ">" + sicher(q2.name) + "</option>").join("");
+      host.querySelector(".hb-etagen").innerHTML = [...h.etagen].sort((a, b2) => a - b2).map((n) => '<button type="button" data-hb="etage" data-nr="' + n + '" aria-pressed="' + (n === nr) + '">' + etageName2(n) + "</button>").join("");
+      host.hidden = false;
+      renderer = new three_module_exports.WebGLRenderer({ canvas: canvas2, antialias: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
+      renderer.outputColorSpace = three_module_exports.SRGBColorSpace;
+      renderer.shadowMap.enabled = false;
+      rahmenzeiten = [];
+      letzte = 0;
+      try {
+        bauen3(nr);
+        animation = requestAnimationFrame(frame);
+      } catch (e) {
+        console.error("Hausbesuch konnte nicht aufgebaut werden:", e);
+        schliesse();
+        return false;
+      }
+      return true;
+    }
+    function schliesse() {
+      if (!haus2) return;
+      cancelAnimationFrame(animation);
+      animation = 0;
+      steuerung2?.stopp();
+      sceneLeeren();
+      renderer?.dispose();
+      renderer?.forceContextLoss();
+      renderer = null;
+      cam2 = null;
+      haus2 = null;
+      letzte = 0;
+      if (host) host.hidden = true;
+    }
+    document.getElementById("pinhalt")?.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-hausbesuch]");
+      if (t) oeffne(t.dataset.hausbesuch);
+    });
+    document.getElementById("hausbesuch")?.addEventListener("click", () => {
+      ctx.menueZu();
+      const id = ctx.erstHaus();
+      if (id) oeffne(id);
+    });
+    return {
+      oeffne,
+      schliesse,
+      etage: etageWaehlen,
+      status,
+      messung: messung2,
+      get aktiv() {
+        return aktiv5;
+      },
+      setzenAktiv: (an) => {
+        aktiv5 = !!an;
+        if (!aktiv5) schliesse();
+      }
+    };
+  }
+
   // src/kit/szenarien.js
   var BILDER = {
     standard: ["#477d8c", "#f5ca85", "M0 80L30 56L58 74L96 43L126 65L165 31L220 65V110H0Z"],
@@ -128571,7 +129055,7 @@
     { schluessel: "ton_haptik", titel: "Haptische R\xFCckmeldung", gruppe: "Klang", art: "schalter", standard: true }
   ];
   var definition2 = new Map(TON_SCHALTER.map((d2) => [d2.schluessel, d2]));
-  var begrenze = (v, min, max) => Math.min(max, Math.max(min, v));
+  var begrenze2 = (v, min, max) => Math.min(max, Math.max(min, v));
   var fremdeEinstellungen = null;
   var lokaleWerte = null;
   function laden4() {
@@ -128589,7 +129073,7 @@
     if (d2.art === "schalter") return typeof wert === "boolean" ? wert : d2.standard;
     const n = Number(wert);
     if (!Number.isFinite(n)) return d2.standard;
-    return begrenze(Math.round(n / 5) * 5, d2.optionen.min, d2.optionen.max);
+    return begrenze2(Math.round(n / 5) * 5, d2.optionen.min, d2.optionen.max);
   }
   function tonEinstellung(schluessel) {
     const d2 = definition2.get(schluessel);
@@ -128745,7 +129229,7 @@
     }
     function abspielen(art, faktor2 = 1) {
       if (!gestartet || !aktiv5() || !tonEinstellung("ton_klaenge")) return false;
-      const p2 = laut("klaenge") * begrenze(faktor2, 0, 1), t = jetzt() + 8e-3;
+      const p2 = laut("klaenge") * begrenze2(faktor2, 0, 1), t = jetzt() + 8e-3;
       if (p2 === 0) return false;
       switch (art) {
         case "tippen":
@@ -128818,7 +129302,7 @@
         }
         const overlay = document.querySelector(".reise-flug");
         const position = overlay?.classList.contains("ankunft") ? 0.18 : overlay?.classList.contains("bewegt") ? 1 : 0.35;
-        leise(g, 0.08 * laut("klaenge") * Math.sin(Math.PI * begrenze(x, 0, 1)) * position, 0.035);
+        leise(g, 0.08 * laut("klaenge") * Math.sin(Math.PI * begrenze2(x, 0, 1)) * position, 0.035);
         zugRaf = requestAnimationFrame(lautstaerke);
       }
       cancelAnimationFrame(zugRaf);
@@ -128884,7 +129368,7 @@
       if (sichtbar4 && zv > 0) {
         stadtrauschen();
         const halb = ctx.zoom?.() ?? 110;
-        const nah = begrenze((240 - halb) / 218, 0, 1);
+        const nah = begrenze2((240 - halb) / 218, 0, 1);
         const bewegung = 0.85 + 0.15 * Math.sin(performance.now() / 1800);
         leise(stadtNah, 0.038 * nah * bewegung, 0.11);
         leise(stadtStimmen, 0.02 * nah * (0.7 + 0.3 * Math.sin(performance.now() / 490)), 0.11);
@@ -128908,7 +129392,7 @@
       const ziel = Math.abs(Number(element.dataset.wert));
       const zahl4 = Math.abs(Number((element.textContent || "0").replace(/[^0-9-]/g, "")));
       if (!(ziel > 0) || !Number.isFinite(zahl4)) return;
-      const fortschritt = begrenze(zahl4 / ziel, 0, 1);
+      const fortschritt = begrenze2(zahl4 / ziel, 0, 1);
       const t = performance.now();
       if (fortschritt >= 0.9999) {
         if (!berichtFertig) {
@@ -130872,7 +131356,7 @@
       speichern(s, stadtName, postUi).catch((e) => console.error("Autosave bei App-Wechsel:", e));
     }
   });
-  var etageName2 = (e) => e === -1 ? "Untergeschoss" : e === 0 ? "Erdgeschoss" : `${e}. Obergeschoss`;
+  var etageName3 = (e) => e === -1 ? "Untergeschoss" : e === 0 ? "Erdgeschoss" : `${e}. Obergeschoss`;
   var KONZEPT = { eigen: "Eigenfl\xE4che", kommission: "Kommission", konzession: "Konzession", untermiete: "Untermiete", offprice: "Outlet", leer: "Leerfl\xE4che" };
   var STATUS_HAUS = { offen: "Offen", schliessung_verhandlung: "Schlie\xDFung in Verhandlung", raeumung: "R\xE4umungsverkauf", geschlossen: "Geschlossen", verkauft: "Verkauft" };
   var canvas = $("karte");
@@ -131706,11 +132190,12 @@
     if (hausEtageWahl?.id === id) {
       const b2 = innenBild(h, hausEtageWahl.nr);
       letztesInnenbild = { id, nr: hausEtageWahl.nr, shops: h.flaechen.filter((f) => f.etage === hausEtageWahl.nr && shops[f.gruppe] && ["eigen", "kommission"].includes(f.konzept)).map((f) => shops[f.gruppe].name), teile: b2.res?.anzahl };
-      html += `<div class="karte haus3d"><img src="${b2.url}" alt=""><div class="zeile"><span class="was"><b>${etageName2(hausEtageWahl.nr)}</b> <i>Innenansicht</i></span><button class="mini" onclick="hausKlick('zu')">Schlie\xDFen</button></div></div>`;
+      html += `<div class="karte haus3d"><img src="${b2.url}" alt=""><div class="zeile"><span class="was"><b>${etageName3(hausEtageWahl.nr)}</b> <i>Innenansicht</i></span><button class="mini" onclick="hausKlick('zu')">Schlie\xDFen</button></div></div>`;
       if (b2.nah) html += `<div class="karte haus3d"><img src="${b2.nah}" alt=""><div class="zeile"><span class="dot" style="background:${b2.shop.farbe}"></span><span class="was"><b>Eigenmarken-Shop ${b2.shop.name}</b> <i>${Math.round(b2.shop.anteil * 100)} % der Fl\xE4che</i></span></div></div>`;
     }
+    html += '<div class="karte"><button type="button" class="mini" data-hausbesuch="' + esc2(id) + '">Haus besuchen</button></div>';
     for (const e of [...d2.etagen].reverse()) {
-      html += `<div class="karte"><div class="khead">${etageName2(e.etage)}<button class="mini" onclick="hausKlick('etage','${id}',${e.etage})">Ansehen</button></div>`;
+      html += `<div class="karte"><div class="khead">${etageName3(e.etage)}<button class="mini" onclick="hausKlick('etage','${id}',${e.etage})">Ansehen</button></div>`;
       if (!e.flaechen.length) html += '<div class="zeile grau">keine Fl\xE4che</div>';
       for (const f of e.flaechen) {
         const was = f.konzept === "untermiete" ? f.mieter ?? "Untermieter" : f.konzept === "leer" ? "Leerfl\xE4che" : f.gruppe ?? KONZEPT[f.konzept];
@@ -131950,6 +132435,7 @@
     ek.oeffne(seite, arg);
   }
   $("einkauf").addEventListener("click", () => oeffneEinkauf());
+  var hb = hausbesuchModul({ E: src_exports, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === "offen")?.id, menueZu });
   var vs = null;
   var mk = null;
   var pr = null;
@@ -132387,6 +132873,8 @@
     leben,
     reise,
     wochenbericht,
+    hausbesuch: hb,
+    oeffneHausbesuch: (id) => hb.oeffne(id),
     szenarien: szenarienUI,
     zeitung: zt,
     oeffneZeitung: (...a) => oeffneModul(zt, ...a),
