@@ -16,7 +16,7 @@ const path = require('node:path');
   page.on('pageerror', err => fehler.push(err.message));
   try {
     await page.goto('file://' + path.join(root, 'spiel.html') + '?stadt=Essen&seed=1&ohne-animation=1');
-    await page.waitForFunction(() => window.bereit === true, { timeout: 120_000 });
+    await page.waitForFunction(() => window.bereit === true, null, { timeout: 120_000 });
     const daten = await page.evaluate(() => window.spiel.E.erfolgeUebersicht(window.spiel.s));
     if (daten.length !== 30) throw new Error('Erwartet 30 Erfolge, gefunden: ' + daten.length);
     await page.evaluate(() => window.spiel.oeffneErfolge());
@@ -34,15 +34,8 @@ const path = require('node:path');
     if (!bericht.includes('Halbes Jahr')) throw new Error('Wochenergebnis ohne neuen Erfolg: ' + bericht);
     await page.screenshot({ path: path.join(bilder, 'erfolge-wochenbericht.png') });
 
-    // Für den Toast im identischen Spielstand einen weiteren neuen Erfolg auslösen,
-    // ohne eine spielwirtschaftliche Aktion zu simulieren.
-    await page.evaluate(() => {
-      document.querySelector('#wochen-overlay .wb-schliessen')?.click();
-      const s = window.spiel.s, vor = new Set(Object.keys(s.erfolge ?? {}));
-      s.formatErfolge = { ...(s.formatErfolge ?? {}), fundusDb: 1 };
-      window.spiel.E.erfolgeWoche(s);
-      window.spiel.erfolge.nachWoche(vor);
-    });
+    // Toast der echten Freischaltung fotografieren; keine fiktiven Format-Daten injizieren.
+    await page.evaluate(() => document.querySelector('#wochen-overlay .wb-schliessen')?.click());
     await page.waitForSelector('#erfolge-toast.sichtbar', { timeout: 10000 });
     await page.screenshot({ path: path.join(bilder, 'erfolge-toast.png') });
     if (fehler.length) throw new Error('Browserfehler: ' + fehler.join('; '));
