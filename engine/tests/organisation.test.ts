@@ -77,6 +77,29 @@ describe('O01 Organisation', () => {
     expect(s.entscheidungsprotokoll?.some((e)=>e.id===vorlage.id&&e.standard)).toBe(true);
   });
 
+  test('Bestehende Vorstandsdelegationen bleiben in allen Ressorts kompatibel', () => {
+    const s=neuesSpiel(1);
+    expect(fuehreAus(s,{typ:'vorstandDelegation',ressort:'cpo',bereich:'freigaben',an:true}).ok).toBe(true);
+    const einkauf=organisationUebersicht(s).bereiche.find((b)=>b.id==='merchandise_planning')!;
+    expect(einkauf.delegiert).toBe(true);
+    expect(fuehreAus(s,{typ:'delegation',bereich:'merchandise_planning',an:false}).ok).toBe(true);
+    expect(s.vorstand.ressorts.cpo.delegation.freigaben).toBe(false);
+    s.vorstand.ressorts.cro.delegation.mietverhandlungen=true;
+    expect(organisationUebersicht(s).bereiche.find((b)=>b.id==='immobilien')?.delegiert).toBe(true);
+  });
+
+  test('Auch die Maßstab-Welt mit 560 Häusern bildet Cluster ohne harte Stadtgrenzen',()=>{
+    const s=neuesSpiel(1,{warenhaeuser:500,sporthaeuser:60});
+    const geo=s.organisation!.hauscluster.filter((c)=>!c.sonder);
+    const ids=geo.flatMap((c)=>c.hausIds);
+    expect(ids.length).toBe(560);
+    expect(new Set(ids).size).toBe(560);
+    for(const c of geo){
+      expect(c.hausIds.length).toBeGreaterThanOrEqual(6);
+      expect(c.hausIds.length).toBeLessThanOrEqual(12);
+    }
+  });
+
   test('Hausleitung wird befördert und die Stellvertretung übernimmt',()=>{
     const s=neuesSpiel(3), h=s.haeuser.find((h)=>h.personal.filialleiter.skill>=0.7 && h.status==='offen' && h.klasse!=='premium')!;
     const c=hausclusterVon(s,h.id)!;

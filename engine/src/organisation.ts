@@ -196,9 +196,11 @@ export function berichtetAn(s: GameState, id: BereichId): 'spieler' | RessortId 
 export function istDelegiert(s: GameState, id: BereichId): boolean {
   const bereich = BEREICHE.find((x) => x.id === id);
   if (!bereich) return false;
-  const alt = s.vorstand?.ressorts[bereich.ressort]?.delegation ?? {};
   return !!s.organisation?.bereiche[id]?.delegiert ||
-    Object.entries(ALTE_DELEGATIONEN).some(([k, neu]) => neu === id && !!alt[k.split('.')[1]]);
+    Object.entries(ALTE_DELEGATIONEN).some(([k, neu]) => {
+      const [ressort, delegationsId] = k.split('.') as [RessortId, string];
+      return neu === id && !!s.vorstand?.ressorts[ressort]?.delegation[delegationsId];
+    });
 }
 export function bereichsQualitaet(s: GameState, id: BereichId): number {
   const def = BEREICHE.find((x) => x.id === id), st = s.organisation?.bereiche[id];

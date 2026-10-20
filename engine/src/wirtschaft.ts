@@ -6,6 +6,8 @@ import { premiumImageFaktor, premiumServiceQuote } from './premium';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
+// O01 Organisation: normierte Wirkung der Vertriebsleitungen.
+import { hausclusterFaktor } from './organisation';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -52,9 +54,6 @@ function lieferantenFaktor(s: GameState, h: Haus, g: GruppeId): number {
   }
   return f;
 }
-
-// O01 Organisation: neutrale Startwirkung der Cluster- und Regionalleitungen.
-import { hausclusterFaktor } from './organisation';
 
 export function hausFaktor(s: GameState, h: Haus): number {
   const w = s.woche;
