@@ -51,10 +51,17 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
       nurDaten: true, lage: h.lage, cluster: h.cluster, region: h.region,
       grundflaecheQm: h.grundflaecheQm, etagen: h.etagen, baujahr: h.baujahr,
       fassade: h.fassade, substanz: h.substanz, status: h.status,
-      flaechen: h.flaechen.map((f) => ({ id: f.id, etage: f.etage, qm: f.qm, konzept: f.konzept })),
+      flaechen: h.flaechen.map((f) => ({ id: f.id, etage: f.etage, qm: f.qm, konzept: f.konzept, ...(f.gruppe ? { gruppe: f.gruppe } : {}) })),
     }));
     expect(exportiert).toHaveLength(66);
     expect(exportiert).toEqual(ausWelt);
+    for (const h of exportiert) {
+      const f = h.flaechen as { gruppe?: string; konzept: string }[];
+      expect(f.map((x) => x.gruppe)).toEqual(['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']);
+      expect(f.every((x) => x.konzept === 'eigen')).toBe(true);
+      expect((h.name as string).startsWith('FUNDUS ' + h.stadt)).toBe(true);
+      expect(h.lage === 'rand' ? (h.baujahr as number) >= 1998 : (h.baujahr as number) >= 1965).toBe(true);
+    }
   });
 
   test('Bot C schließt proportional und berücksichtigt keine Datenhäuser', () => {
