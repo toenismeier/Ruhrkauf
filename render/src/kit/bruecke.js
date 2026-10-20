@@ -22,6 +22,7 @@ import { echterBauer, fussabdruck } from './bauer.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
+import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
 import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
@@ -36,6 +37,7 @@ export function aktionFuer(s, h) {
     if (s.woche < a.start || s.woche >= a.ende) continue;
     if (a.kontrollHaeuser?.includes(h.id)) continue;
     const sc = a.scope ?? { typ: 'alle' };
+    if (h.klasse === 'premium' && sc.typ === 'alle' && s?.premiumSchuetzen !== false) continue;
     const trifft = sc.typ === 'alle' || (sc.typ === 'format' && sc.format === h.format) || (sc.typ === 'region' && sc.region === h.region)
       || (sc.typ === 'cluster' && sc.cluster === h.cluster) || (sc.typ === 'haeuser' && sc.ids.includes(h.id));
     if (trifft && (!best || a.rabatt > best.rabatt)) best = a;
@@ -71,7 +73,7 @@ export function zustandAusHaus(haus, s, merk) {
     z.status = frisch ? 'geschlossen' : substanz < 35 ? 'verfall' : 'leer';
     if (frisch && substanz < 35) z.zusatz.push('verfall');
   } else if (st === 'verkauft') {
-    z.status = 'offen'; z.hartwig = false;   // Betrieb läuft unter dem Käufer weiter, Hartwig-Logo ab
+    z.status = 'offen'; z.hartwig = false; z.kaeufer = haus.premiumEigentuemer;   // Käuferlogo statt Hartwig
   } else if (st === 'raeumung') {
     z.status = 'raeumung';
   } else {
@@ -109,8 +111,18 @@ export function zustandAusHaus(haus, s, merk) {
       if (liste.length) { z.status = liste[0]; z.zusatz = liste.slice(1); }
     }
   }
+  if (haus.klasse === 'premium') {
+    // Die 26-wöchige Premiuminvestition ist ein optischer Umbau, keine Filialschließung.
+    // Sichtbaren Status direkt aus Engine-Daten ableiten, nicht nur aus Katalog-Optionen.
+    if (haus.premiumInvestition && w < haus.premiumInvestition.bis) {
+      if (z.status === 'offen') z.status = 'umbau';
+      else if (!z.zusatz.includes('umbau')) z.zusatz.push('umbau');
+    }
+    const angebot = s?.angebote?.find((a) => a.typ === 'premiumVerkauf' && a.status === 'offen' && a.wunschHaeuser?.includes(haus.id));
+    if (angebot) { z.verkaufsprozess = true; z.investor = angebot.premiumKaeuferName; }
+  }
   const u = z.untermieter.map((m) => `${m.name}@${m.etage}`).join(',');
-  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : ''].join('|');
+  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : '', z.kaeufer ?? '', z.verkaufsprozess ? 'investor' : ''].join('|');
   return z;
 }
 
@@ -122,7 +134,7 @@ export function stadtEintragAusSpiel(s, name) {
   if (!d) return undefined;
   const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
     const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
@@ -172,6 +184,7 @@ export function spielBauer(s, o = {}) {
   const baueWarenhaus = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
+    if (h.klasse === 'premium') { p.haus = h; return premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); }
     // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
     if (!wahl.has(h.id)) {
       let fam = familieVon(h), fassade = h.fassade;
@@ -319,6 +332,7 @@ export function spielBauer(s, o = {}) {
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
     'slot:schwester': slot('slot:schwester'), 'slot:outlet': basis['slot:outlet'],
+    'slot:premium': slot('slot:premium'),
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };
 
