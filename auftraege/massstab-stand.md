@@ -48,6 +48,25 @@ Hartwig 360 regulär (45 A, 115 B, 200 C) plus 4 Premium, Volkskauf 86, Hartwig 
 - **Weiterhin offen, zwingend vor Abnahme/Merge:** `npm ci && npm run typecheck && npx jest` in `engine`; alle sechs Pausierungen anhand tatsächlicher Fehlermeldungen validieren; `npx tsx scripts/haeuser-export.ts` zweimal, Determinismus per Git-Diff nachweisen und alle drei JSON-Dateien einchecken; `npm run build && node pruef-staedte.js && node spiel-render.js` in `render` (20 Städte, 0 Abweichungen), Bots/Kalibrierung als bewusst offen dokumentieren. Derzeit sind `render/haeuser.json`, `render/haeuser-schwester.json` (von Schwesterkette) und `render/haeuser-outlet.json` **nicht als konsistente 560-Häuser-Exporte bestätigt**.
 - **Status:** Phase 1 weiter **nicht abgenommen**, kein Merge. Die technische Freigabe bleibt bis zur tatsächlichen lokalen Prüfung gesperrt.
 
+### Fortsetzung am 20.10.2026: FUNDUS nachgezogen und Phase 2 begonnen
+
+**Beschlussgrundlage:** `nachbesserung-massstab.md` Abschnitt 8, bereits auf `main` dokumentiert: Standortnetz fachlich abgenommen (220 Städte, 560 Häuser), zuletzt Typecheck grün, 95 Tests grün und 14 als Phase-2-Kalibrierung markiert. Bot C wurde im bisherigen Stand in Woche 23 zerschlagen. Diese Befunde sind **historische Vorprüfung**, keine neuen Messungen.
+
+**Auf `feat/engine-massstab` umgesetzt:**
+- `engine/src/welt.ts`: eigener RNG für FUNDUS; `render/haeuser-outlet.json` mit O001–O066 (46 Randlagen / 20 b-Lagen, 66 einzigartige IDs) ergänzt. Rechnerische Prüfung der generierten JSON-Daten gegen die 220 Stadtzeilen bestanden.
+- `welt.ts`: Umsatzanker 8.950 Mio. € Hartwig regulär (45 A / 115 B / 200 C), 820 Mio. € Premium und 545 Mio. € Sport. Die Standortpotenziale, Ausgangsmieten und Anfangspersonal werden nach Hausklasse normiert. **Das sind Nachfragemodell-Anker, keine nachgewiesenen 52-Wochen-IST-Umsätze.**
+- Konzernfinanzierung: Startkasse 400 Mio. € (zuvor 120), Kreditlinie 300 Mio. € (zuvor 90), KV-Basis 1.260 Mio. € (zuvor 380). Massekredit und Eigentümernachschuss skalieren mit der Nachfragebasis.
+- `engine/src/einkauf.ts`: Freigabegrenze wird beim Spielstart proportional zur Nachfragebasis skaliert (gerundet auf 5 T€). Noch offen: tatsächliche Freigabezahl pro Woche und Orderrunde.
+- `engine/scripts/bot.ts`: Bot C schließt `50 / 180 ≈ 27,8 %` der simulierten Standorte, bei 408 aktiven Häusern rechnerisch 113; Schwesterkette/FUNDUS `nurDaten` werden aus Schließungsportfolio sämtlicher Bots herausgefiltert.
+- `engine/tests/massstab-phase2.test.ts`: zusätzliche Tests zu Hausklassen-Nachfragebasis (Seeds 1–3), Liquiditätsparametern, FUNDUS-JSON-Konsistenz und Bot-Quote angelegt.
+- `engine/scripts/massstab-phase2.ts`: Reproduzierbares Messskript für Jahr-1-Umsätze je Format, EBITDA und Q4, Einkaufsfreigaben, Bot C und Wochenlaufzeit hinzugefügt. `engine/README.md` mit den Zielen und Befehlen ergänzt.
+
+**GitHub-Commits (dieser Lauf):** `6224d276` (RNG), `6af73232` (FUNDUS-JSON), `c770546d` (Umsatz/Liquidität), `62aa42e7` (Bot C), `f2d15bf8` (Massekredit/Eigentümer), `5cd7a629` (Tests), `057e035e` (Freigabegrenze), `1471d930` (Abschnitt 8), `c4eff2a3` (Messskript), `83d9b6de` (Engine-README).
+
+**Prüfbefund in diesem Lauf:** Skript-/Modelllogik und erzeugte FUNDUS-Einträge mit dem GitHub-Connector statisch geprüft, keine lokalen TypeScript-/Jest-/Render-Ausführungen. Der Container enthält keinen Checkout; GitHub-DNS-/Netzzugriff steht hier nicht bereit. **Folglich keine Behauptung zu Typecheck, Testgrün, Export-Diff, Bot-Überleben, Spielrender oder 60-ms-Ziel.** Die beiden anderen Render-JSON-Dateien enthalten noch den alten Maßstab und sind durch das vollständige Exportskript nachzuziehen.
+
+**Noch offen bis Phase-2-Abnahme:** `npm ci && npm run typecheck && npx jest`; 3 Exporte generieren und zweiten Export auf Diff prüfen; `scripts/massstab-phase2.ts 1,2,3` mit und ohne `--bot`; Ergebnis Umsatz ±3 %, EBITDA rund −4 %, Q4 positiv, Bot C 260 Wochen Seeds 1–3, Schwierigkeit monoton, Freigaben ca. 8/Woche / maximal 80 in Orderrunden, `wocheAbspielen` unter 60 ms; `render`-Build, 20-Städte-Stichprobe und `spiel-render.js` mit 0 Abweichungen. Die 14 alten Kalibrierungstests erst nach echten Messungen aktualisieren und aktivieren. Keine Freigabe, kein Merge.
+
 ## Grafik (Städte)
 - Phase: wartet auf abgenommenen Engine-Phase-1-Export (die Standortdaten im Branch sind bereits angelegt).
 - Erledigt:
