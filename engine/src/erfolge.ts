@@ -9,6 +9,7 @@ export type ErfolgStufe = 'bronze' | 'silber' | 'gold';
 export interface ErfolgStand {
   letztePruefung?: number;
   ohneSchliessung: number;
+  premiumGeschuetztWochen: number;
   ohneStreik: number;
   ohneInsolvenz: number;
   letzteGeschlossen: string[];
@@ -80,7 +81,7 @@ export const ERFOLGE: readonly Definition[] = [
   d('premium-verkauft', 'Kronjuwel veräußert', 'Formate', 'silber', 'Verkaufe ein Premium-Haus.', 1, bool(s => s.haeuser.some(h => h.klasse === 'premium' && h.status === 'verkauft'))),
   d('sport-plus', 'Sportlicher Erfolg', 'Formate', 'bronze', 'Mindestens ein Sporthaus erwirtschaftet positiven Deckungsbeitrag.', 1, (_s, k) => Number(k.positivesSporthaus > 0)),
   d('zehn-haeuser-plus', 'Zehn Zugpferde', 'Formate', 'silber', 'Zehn Häuser mit positivem Deckungsbeitrag.', 10, (_s, k) => k.positivesHaus),
-  d('premium-geschuetzt', 'Kronjuwelen bewahrt', 'Formate', 'bronze', 'Schütze die Premium-Häuser über 52 Wochen.', 1, bool((s, k) => s.woche >= 52 && k.premiumSchutz === 1)),
+  d('premium-geschuetzt', 'Kronjuwelen bewahrt', 'Formate', 'bronze', 'Schütze die Premium-Häuser 52 Wochen ohne Unterbrechung.', 52, (_s, k) => k.premiumSchutz),
 
   d('weihnachtsquartal', 'Weihnachtswunder', 'Kurios', 'gold', 'Übertreffe im vierten Quartal den Plan um 20 %.', 1, bool(s => s.quartale.some(q => q.nr % 4 === 3 && q.start + 13 <= s.woche &&
     q.ebitdaIst - (q.plan ?? q.planStandard) >= .2 * Math.abs(q.plan ?? q.planStandard))), true),
@@ -93,7 +94,7 @@ export const ERFOLGE: readonly Definition[] = [
 ];
 
 const leererVerlauf = (s: GameState): ErfolgStand => ({
-  ohneSchliessung: 0, ohneStreik: 0, ohneInsolvenz: 0,
+  ohneSchliessung: 0, ohneStreik: 0, ohneInsolvenz: 0, premiumGeschuetztWochen: 0,
   letzteGeschlossen: s.haeuser.filter(h => ['geschlossen', 'verkauft'].includes(h.status)).map(h => h.id),
   letzteInsolvenzen: s.insolvenzenGesamt, beworbeneBereiche: [],
 });
@@ -111,6 +112,7 @@ export function erfolgeWoche(s: GameState): string[] {
   v.letzteGeschlossen = geschlossen;
   v.ohneStreik = s.haeuser.some(h => h.streikBis !== undefined && h.streikBis >= s.woche - 1) ? 0 : v.ohneStreik + 1;
   v.ohneInsolvenz = s.insolvenzenGesamt > v.letzteInsolvenzen ? 0 : v.ohneInsolvenz + 1;
+  v.premiumGeschuetztWochen = s.premiumSchuetzen !== false ? (v.premiumGeschuetztWochen ?? 0) + 1 : 0;
   v.letzteInsolvenzen = s.insolvenzenGesamt;
   const zielBereiche = new Set(Object.keys(GRUPPEN));
   const erreicht = new Set(v.beworbeneBereiche);
@@ -155,7 +157,7 @@ function kontext(s: GameState): Kontext {
     positivesHaus: hausPlus.length,
     positivesSporthaus: hausPlus.filter(h => h.format === 'sport').length,
     positiveStaedte: new Set(hausPlus.map(h => h.stadt)).size,
-    premiumSchutz: Number(s.premiumSchuetzen !== false),
+    premiumSchutz: v?.premiumGeschuetztWochen ?? 0,
     geschlossene: v?.ohneSchliessung ?? 0,
     streikfrei: v?.ohneStreik ?? 0,
     insolvenzfrei: v?.ohneInsolvenz ?? 0,
