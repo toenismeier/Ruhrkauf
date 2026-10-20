@@ -8,7 +8,7 @@ const path = require('node:path');
 
 const quelle = readFileSync(path.join(__dirname, '../src/ui/ton.js'), 'utf8')
   .replace(/^\s*export\s+(?=(const|function|class|async))/gm, '');
-const auswahl = '\n;({ tonModul, tonEinstellung, setzeTonEinstellung, haptik, TON_SCHALTER, TON_DAUER })';
+const auswahl = '\n;({ tonModul, tonEinstellung, setzeTonEinstellung, registriereTonEinstellungen, haptik, TON_SCHALTER, TON_DAUER })';
 
 function testUmgebung(audioVorhanden) {
   let kontexte = 0, oszillatoren = 0, schwingungen = 0, audioStart = 0;
@@ -101,6 +101,12 @@ test('N13-Registrierung verwendet Geräte-Schlüssel und behält gespeicherte We
   u.tonModul({});
   u.setzeTonEinstellung('ton_stadt_lautstaerke', 70);
   assert.equal(u.TON_SCHALTER.length, 7);
+  u.registriereTonEinstellungen({
+    meldeSchalter: (d) => definitionen.push(d.schluessel),
+    einstellung: (schluessel) => schluessel === 'ton_stadt_lautstaerke' ? 70 : undefined,
+    setzeEinstellung: () => 70,
+  });
+  assert.equal(definitionen.length, 7);
   assert.equal(u.tonEinstellung('ton_stadt_lautstaerke'), 70);
   assert.equal(u.TON_DAUER.reise, 4.4);
   assert.equal(u.TON_DAUER.tippen, 0.02);
