@@ -76,6 +76,7 @@ export function reiseModul(ctx) {
   function oeffne() {
     if (aktiv) return;
     ++token; const meins = token;
+    letzte = [...(ctx.zuletzt?.() ?? letzte)];
     aktiv = true; gestartet = performance.now(); protokoll.length = 0; messen('Pin angetippt');
     const hier = ctx.stadt(), p = ortPunkt(); kreis(p);
     z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
@@ -112,6 +113,7 @@ export function reiseModul(ctx) {
       await warten(reduziert ? REISE_ZEIT.reduziert : REISE_ZEIT.kreisZu);
       if (meins !== token) return;
       letzte = [von, ...letzte.filter((c) => c !== von && c !== ziel)].slice(0, 12);
+      ctx.besucht?.(letzte);
       ctx.fertig(ziel); messen('Reise abgeschlossen'); schliessen();
     } catch (e) { schliessen(); ctx.fehler?.(e); }
   }
