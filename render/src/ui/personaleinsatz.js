@@ -72,7 +72,9 @@ export function personalModul(ctx) {
       '<button class="mini"' + steuer('springer', { 'data-cluster': c.id, 'data-an': c.springerAktiv ? '0' : '1' }) +
       '>' + (c.springerAktiv ? 'Springerpool deaktivieren' : 'Springerpool aktivieren') + '</button>' +
       '<button class="mini"' + steuer('weiterbildung', { 'data-cluster': c.id }) +
-      '>Weiterbildung Stufe +1</button></div>';
+      '>Weiterbildung Stufe +1</button>' +
+      (ctx.s().woche % 52 >= 43 ? '<button class="mini"' + steuer('weihnachten', { 'data-cluster': c.id }) +
+      '>Weihnachts-Aushilfen nachbuchen (teurer, knapper)</button>' : '') + '</div>';
     out += '<div class="karte pe-uebersicht"><div class="pe-tabellenkopf">Haus · Logistik · Verkauf · Kasse · Verwaltung</div>';
     for (const h of c.haeuser) {
       out += '<button class="pe-tabellenzeile"' + steuer('haus', { 'data-haus': h.id }) + '><b>' +
@@ -105,6 +107,10 @@ export function personalModul(ctx) {
     if (a === 'cluster') { ui.cluster = wert; ui.haus = null; anzeigen(); return; }
     if (a === 'haus') { ui.haus = id; anzeigen(); return; }
     if (a === 'springer') { actions({ typ: 'personalSpringer', hauscluster: cluster, an: el.dataset.an === '1' }); anzeigen(true); return; }
+    if (a === 'weihnachten') {
+      actions({ typ: 'personalWeihnachtenNachbuchen', hauscluster: cluster, quote: 0.10 });
+      anzeigen(true); return;
+    }
     if (a === 'weiterbildung') {
       const hauser = ctx.s().haeuser.filter((h) => h.hauscluster === cluster || 'region-' + h.region === cluster);
       const stufe = Math.min(3, 1 + Math.max(0, ...hauser.map((h) => h.personaleinsatz?.training ?? 0)));
