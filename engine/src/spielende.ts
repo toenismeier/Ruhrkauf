@@ -93,7 +93,8 @@ export function konzernVerkaufAnbieten(s: GameState): void {
   if (s.woche < 156 || (s.woche - 156) % 52 !== 0) return;
   const id = 'konzern-' + s.woche;
   if (s.angebote.some(a => a.id === id)) return;
-  const k = KONZERN_KAEUFER[(s.seed + Math.floor((s.woche - 156) / 52)) % KONZERN_KAEUFER.length];
+  const index = ((s.seed + Math.floor((s.woche - 156) / 52)) % KONZERN_KAEUFER.length + KONZERN_KAEUFER.length) % KONZERN_KAEUFER.length;
+  const k = KONZERN_KAEUFER[index];
   const kaufpreis = unternehmenswert(s);
   const an: Angebot = {
     id, typ: 'konzernVerkauf', woche: s.woche, frist: s.woche + 8,
