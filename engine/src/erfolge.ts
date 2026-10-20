@@ -7,6 +7,7 @@ export const ERFOLGE_AKTIV = true; // Fallback bis N13-Einstellungen integriert 
 export type ErfolgGruppe = 'Sanierung' | 'Handel' | 'Menschen' | 'Formate' | 'Kurios';
 export type ErfolgStufe = 'bronze' | 'silber' | 'gold';
 export interface ErfolgStand {
+  letztePruefung?: number;
   ohneSchliessung: number;
   ohneStreik: number;
   ohneInsolvenz: number;
@@ -102,6 +103,8 @@ const aktiv = (s: GameState) => ERFOLGE_AKTIV && s.erfolgeAktiv !== false;
 export function erfolgeWoche(s: GameState): string[] {
   if (s.prognose || !aktiv(s)) return [];
   const v = s.erfolgeVerlauf ?? (s.erfolgeVerlauf = leererVerlauf(s));
+  if (v.letztePruefung === s.woche) return [];
+  v.letztePruefung = s.woche;
   s.erfolge ??= {};
   const geschlossen = s.haeuser.filter(h => ['geschlossen', 'verkauft'].includes(h.status)).map(h => h.id);
   v.ohneSchliessung = geschlossen.some(id => !v.letzteGeschlossen.includes(id)) ? 0 : v.ohneSchliessung + 1;
