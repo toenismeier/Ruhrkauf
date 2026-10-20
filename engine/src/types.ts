@@ -278,7 +278,7 @@ export interface BeraterMandat {
   ergebnis?: { empfohleneSchliessungen: string[]; folien: number; fazit: string };
 }
 
-export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf';
+export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf' | 'konzernVerkauf';
 
 export interface Angebot {
   id: string;
@@ -306,6 +306,8 @@ export interface Angebot {
   kaufpreis?: Eur;
   premiumKaeuferTyp?: 'Luxusgruppe' | 'Family Office' | 'Staatsfonds';
   premiumKaeuferName?: string;
+  konzernKaeuferTyp?: 'Finanzinvestor' | 'Handelskonzern' | 'Immobilienfonds';
+  konzernKaeuferName?: string;
   // sonderposten
   gruppe?: GruppeId;
   wert?: Eur;
@@ -400,8 +402,37 @@ export interface Quartal {
   ebitdaIst: Eur;
 }
 
+export type EndArt = 'zerschlagen' | 'saniert' | 'investor' | 'ruhestand';
+export interface WertungTeil { id: string; name: string; wert: number; punkte: number }
+export interface Endwertung {
+  teile: WertungTeil[];
+  grundpunkte: number;
+  multiplikator: number;
+  punkte: number;
+  schwierigkeit: SchwierigkeitId;
+}
+export interface SpielendeKennzahlen {
+  geretteteHaeuser: number; startHaeuser: number;
+  fte: number; startFte: number;
+  ebitda52: Eur; umsatz52: Eur; unternehmenswert: Eur; image: number;
+}
+export interface SpielEnde {
+  art: EndArt;
+  woche: number;
+  kennzahlen: SpielendeKennzahlen;
+  wertung: Endwertung;
+  kaeufer?: string;
+}
+
 export interface GameState {
   version: 1;
+  /** Anfangsbasis der Endwertung; bei alten Spielständen optional. */
+  spielendeStart?: { haeuser: number; fte: number };
+  /** N02 abschaltbar (künftig über Einstellungen). */
+  spielendeDeaktiviert?: boolean;
+  spielendeFortgesetzt?: boolean;
+  testspiel?: boolean;
+  ende?: SpielEnde;
   /** Schwierigkeit beim Spielstart (src/schwierigkeit.ts), fehlt = mittel. */
   schwierigkeit?: SchwierigkeitId;
   seed: number;
