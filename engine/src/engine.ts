@@ -13,6 +13,8 @@ import { neueWelt, PARAM, STANDARD_SZENARIO, type Szenario } from './welt';
 import { hqControllingExzellenz, hqEinkaufKonditionen, hqRestmieteWoche, hqWkzFaktor, hqWoche } from './hq';
 import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './wirtschaft';
 import { vorstandWoche } from './vorstand';
+// O01 Organisation
+import { organisationWoche } from './organisation';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 
@@ -39,6 +41,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   quartalsStart(s);
   // Vorstand (Loyalität, Abwerbung, Sitzung, Ressort-KI) und Produktentwicklung (Einführungen)
   vorstandWoche(s);
+  organisationWoche(s); // O01: genau ein Organisationsaufruf je Woche.
   produkteWoche(s);
   // Marketing: Kanäle, Karte, CRM-Versand, laufende Aktionen der Woche (vor der Nachfrage)
   marketingVorbereiten(s);

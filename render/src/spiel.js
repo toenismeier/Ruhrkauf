@@ -22,6 +22,8 @@ import { quelle } from './ui/quelle.js';
 import { einkaufModul } from './ui/einkauf.js';
 import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
+// O01 Organisation
+import { organisationModul } from './ui/organisation.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
@@ -325,6 +327,10 @@ function baueStadtAusSpiel(name) {
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
   $('stadtname').textContent = name;
+  // O01: geografische Zuordnung im Stadtchip anzeigen.
+  const hausHier = s.haeuser.find((h) => h.stadt === name && h.hauscluster);
+  const geoCluster = s.organisation?.hauscluster.find((c) => c.id === hausHier?.hauscluster);
+  const chipCluster = $('stadtcluster'); if (chipCluster) chipCluster.textContent = geoCluster?.name ?? '';
   return ms;
 }
 // ─────────────────────────────────────────── Kacheln (Detailstufen für das iPhone)
@@ -519,7 +525,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -784,9 +790,10 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null;
+let vs = null, mk = null, pr = null, po = null, org = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
+org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
 po = posteingangModul({
@@ -795,6 +802,7 @@ po = posteingangModul({
     if (bezug.modul && !bezug.hausIds?.length && !bezug.stadt) {
       if (bezug.modul === 'einkauf') return oeffneEinkauf();
       if (bezug.modul === 'vorstand') return oeffneModul(vs);
+      if (bezug.modul === 'organisation') return oeffneModul(org);
       if (bezug.modul === 'marketing') return oeffneModul(mk);
       if (bezug.modul === 'produkte') return oeffneModul(pr);
       if (bezug.modul === 'zentrale') return oeffneHq();
@@ -808,6 +816,7 @@ po = posteingangModul({
     else if (hausId) oeffneHaus(hausId);
     else if (bezug.modul === 'einkauf') oeffneEinkauf();
     else if (bezug.modul === 'vorstand') oeffneModul(vs);
+    else if (bezug.modul === 'organisation') oeffneModul(org);
     else if (bezug.modul === 'marketing') oeffneModul(mk);
     else if (bezug.modul === 'produkte') oeffneModul(pr);
     else if (bezug.modul === 'zentrale') oeffneHq();
@@ -822,7 +831,7 @@ reise = reiseModul({
     const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
     const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', zahl('schwester')], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', zahl('outlet')]];
-    return { name: d.name, region: d.region, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
       formate: formate.filter((p) => p[1]).map((p) => p[0] + ' ' + p[1]).join(' · ') };
   }),
   pinPunkt: bahnhofBildpunkt,
@@ -847,6 +856,7 @@ $('wochenbericht-modus').addEventListener('change', (e) => { postUi.wochenberich
 
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
+$('organisation').addEventListener('click', () => oeffneModul(org));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
 $('posteingang').addEventListener('click', () => oeffneModul(po));
@@ -937,7 +947,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {

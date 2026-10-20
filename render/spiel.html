@@ -313,6 +313,8 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+/* O01 Organisation */
+.org-tabs{display:flex;gap:8px;margin-bottom:12px}.org-tabs button{flex:1;padding:12px;border:1px solid #c3cbd1;border-radius:9px;background:#f4f6f7;color:#2b4049}.org-tabs button.an{background:#243e50;color:#fff}.org-zeile{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #e5e8eb;padding:10px 0}.org-zeile>div:nth-child(2){flex:1;min-width:0}.org-zeile small,.org-profil small{display:block;color:#667781;font-size:11px}.org-aktionen{display:grid;gap:4px;max-width:100px}.org-aktionen button{font-size:10px;padding:6px}.org-balken{display:block;height:6px;border-radius:6px;background:#e0e6e9;overflow:hidden;margin:6px 0}.org-balken i{display:block;height:100%;background:#498875}.org-ampel{color:#5b9b68}.org-ampel.warn,.org-profil .frei{color:#b43336}.org-profil .vkopf{display:flex;gap:10px;align-items:center}.org-profil .vkopf>div{flex:1}
 </style>
 </head>
 <body>
@@ -326,7 +328,7 @@
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
 <div class="unten">
-  <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><i>🚆</i></button>
+  <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster" style="display:block;font-size:9px;font-weight:normal"></small><i>🚆</i></button>
   <button class="knopf" id="weiter">Woche weiter</button>
   <button class="knopf mitbadge" id="postdirekt" aria-label="Posteingang öffnen" title="Posteingang">✉<span id="postbadge" class="badge" style="display:none">0</span></button>
   <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>
@@ -339,6 +341,8 @@
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
+      <!-- O01 Organisation -->
+      <button class="mkachel" id="organisation"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="1" y="17" width="6" height="5" rx="1"/><rect x="9" y="17" width="6" height="5" rx="1"/><rect x="17" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M4 17v-5h16v5M12 12v5"/></svg><b>Organisation</b><small>Bereiche, Regionen, Hauscluster</small></button>
       <button class="mkachel" id="marketing"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l7 4V6L6 10zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg><b>Marketing</b><small>Kanäle, Karte, CRM, Aktionen</small></button>
       <button class="mkachel" id="produkte"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c-1 0-2 .8-2 2v.5L3 17h18l-9-6.5"/></svg><b>Produkte</b><small>Eigenmarken entwickeln</small></button>
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>

@@ -53,6 +53,9 @@ function lieferantenFaktor(s: GameState, h: Haus, g: GruppeId): number {
   return f;
 }
 
+// O01 Organisation: neutrale Startwirkung der Cluster- und Regionalleitungen.
+import { hausclusterFaktor } from './organisation';
+
 export function hausFaktor(s: GameState, h: Haus): number {
   const w = s.woche;
   const makro = s.makro.konjunktur * Math.pow(1 - TREND_LAGE[h.lage], w / 52);
@@ -76,7 +79,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h);
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h);
 }
 
 export function saettigung(qm: number, Q: number): number {

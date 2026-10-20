@@ -13,6 +13,7 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+import { bildeHauscluster } from './organisation';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -342,6 +343,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
   return s;
 }
 

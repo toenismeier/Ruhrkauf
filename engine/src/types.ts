@@ -1,4 +1,5 @@
 import type { Hq } from './hq';
+import type { OrganisationsStand } from './organisation';
 import type { Art, Einkauf, WgId } from './einkauf';
 import type { EigenmarkenStand } from './eigenmarken';
 import type { VorstandStand } from './vorstand';
@@ -127,6 +128,8 @@ export interface Haus {
   stadt: string;
   region: Region;
   cluster: Cluster;
+  // O01 Organisation: geografischer Hauscluster (auch bei Premium/Flagship für Rankings).
+  hauscluster?: string;
   lage: Lage;
   format: Format;
   klasse?: 'premium';
@@ -447,6 +450,8 @@ export interface GameState {
   zentrale: { kostenWoche: Eur; kostenStart: Eur; fte: number };
   /** Hauptverwaltung: Bürogebäude, Etagen, Abteilungen, Angebote. */
   hq: Hq;
+  // O01 Organisation (optional für ältere Spielstände).
+  organisation?: OrganisationsStand;
   /** Einkauf: Warengruppen, Steuerung, Freigabe-Eingang, Kennzahlenverlauf. */
   einkauf: Einkauf;
   /** Eigenmarken. */

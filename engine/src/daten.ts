@@ -138,6 +138,15 @@ export const STAEDTE: StadtDef[] = [
   ['Detmold', 'West', 'mittelstadt', 0.97, 1, 0], ['Minden', 'West', 'mittelstadt', 0.95, 1, 0],
 ];
 
+// O01 Organisation: Namen nach geografischen Teilräumen je Region.
+export const HAUSCLUSTER_NAMEN: Record<Region, string[]> = {
+  Nord: ['Elbe West','Unterweser','Ostholstein','Nordseeküste','Hannover Nord','Weserbergland','Schleswig'],
+  Ost: ['Berlin & Umland','Sachsen Nord','Lausitz','Thüringen Ost','Sachsen-Anhalt','Ostseeküste'],
+  West: ['Ruhr West','Ruhr Ost','Rheinland Süd','Niederrhein','Westfalen Nord','Bergisches Land','Rhein-Wupper'],
+  Mitte: ['Rhein-Main','Nordhessen','Mittelhessen','Pfalz','Mainfranken','Taunus'],
+  Süd: ['Oberbayern','Schwaben','Neckarraum','Oberfranken','Südbaden','Donau','Allgäu'],
+};
+
 export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
   '1a': ['Marktplatz', 'Hauptstraße', 'Innenstadt', 'Am Markt', 'Königstraße', 'Altstadt'],
   b: ['Bahnhofstraße', 'Am Wall', 'Neustadt', 'Ring', 'Lindenstraße'],

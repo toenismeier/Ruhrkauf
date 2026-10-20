@@ -1,7 +1,7 @@
 export * from './types';
 export { neuesSpiel, wocheAbspielen, vorschau, type VorschauWoche } from './engine';
 export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
-export { posteingang, cockpit, portfolio, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
+export { organisationUebersicht, posteingang, cockpit, portfolio, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
 export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau } from './abfragen';
 export {
   ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte,
@@ -46,3 +46,11 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+// O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
+export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
+  clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert,
+  neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor,
+  type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion,
+} from './organisation';
+export { itDeckel } from './it';
