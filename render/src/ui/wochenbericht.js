@@ -74,8 +74,7 @@ export function wochenberichtModul(ctx) {
       kw: kwEnde, jahr: jahrEnde, umsatz: c.umsatzWoche, ebitda: c.ebitdaWoche, umsatzVor: vergangen?.umsatz ?? null,
       ebitdaVor: vergangen?.ebitda ?? null, cashNetto: fluss.netto, cash: c.cash,
       phase: c.phase, kredite: c.kreditFrei, runway: c.runwayWochen,
-      meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt, kapitalfluss: fluss,
-      meldungen, vorgaenge, erfolge: ctx.erfolge?.() ?? [], woche: ctx.wocheNr(), letzte: jetzt,
+      meldungen, vorgaenge, erfolge: ctx.erfolge?.() ?? [], woche: ctx.wocheNr(), letzte: jetzt, kapitalfluss: fluss,
     };
     markieren('Engine abgeschlossen');
     if (modus() === 'aus') { aufraeumen(); return; }
@@ -145,7 +144,7 @@ export function wochenberichtModul(ctx) {
     status = 'vorfall'; markieren('Vorfall ' + (vorfall + 1));
     const feld = node.querySelector('#wb-vorfall'), meins = token;
     const verantwortlich = portraetZumVorgang(m);
-    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4>' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
+    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
     feld.querySelector('.wb-vorfall h4')?.focus({ preventScroll: true });
     requestAnimationFrame(() => feld.classList.add('offen'));
     const text = m.text ?? '', el = feld.querySelector('.wb-tippt'), beginn = performance.now();

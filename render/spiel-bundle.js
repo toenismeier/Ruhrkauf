@@ -50,6 +50,7 @@
     STANDARD_SZENARIO: () => STANDARD_SZENARIO,
     STARTKALENDER: () => STARTKALENDER,
     SYSTEME: () => SYSTEME,
+    SZENARIEN: () => SZENARIEN,
     TEST_EREIGNISSE: () => TEST_EREIGNISSE,
     TREND_GRUPPEN: () => TREND_GRUPPEN,
     UMBAU_STUFEN: () => UMBAU_STUFEN,
@@ -152,6 +153,9 @@
     sollFte: () => sollFte,
     spielBeenden: () => spielBeenden,
     spielendePruefen: () => spielendePruefen,
+    szenarioKonfiguration: () => szenarioKonfiguration,
+    szenarioName: () => szenarioName,
+    szenarioZiel: () => szenarioZiel,
     treiberFaktor: () => treiberFaktor,
     trendFuer: () => trendFuer,
     trendbericht: () => trendbericht,
@@ -160,6 +164,7 @@
     umbauUebersicht: () => umbauUebersicht,
     umsatzBezug: () => umsatzBezug,
     umsatzbruecke: () => umsatzbruecke,
+    unternehmensWert: () => unternehmensWert,
     unternehmenswert: () => unternehmenswert,
     verlauf: () => verlauf,
     vorschau: () => vorschau,
@@ -3620,8 +3625,8 @@
     const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm, s2.woche, inHaus);
     const h = betroffeneHaeuser(s2, stadt)[0];
     const gruppe2 = h ? gruppenFuer(h.format).sort((a, b2) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b2] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a] ?? 0))[0] : "damen";
-    const prozent2 = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h, gruppe2)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe2].name + ": rund " + prozent2 + " %.");
+    const prozent3 = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h, gruppe2)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe2].name + ": rund " + prozent3 + " %.");
     if ((art === "modehaus" || art === "premium") && qm >= 2300) {
       neueEntscheidung(s2, {
         typ: "wettbewerb_eroeffnung",
@@ -4115,6 +4120,178 @@
     an.erledigtWoche = s2.woche;
     melde(s2, "presse", `${h.name} ist an ${h.premiumEigentuemer} verkauft worden.`, { stadt: h.stadt, hausId: h.id });
     return null;
+  }
+
+  // ../engine/src/szenarien.ts
+  var SZENARIEN_AKTIV = true;
+  var SZENARIEN = [
+    { id: "standard", name: "Die Sanierung", beschreibung: "Hartwig steckt in der Krise. Das bekannte Ausgangsszenario.", schwierigkeit: "Mittel", ziel: "260 Wochen \xFCberleben", bild: "sanierung", start: {} },
+    { id: "schutzschirm", name: "Schutzschirm", beschreibung: "Das Verfahren ist er\xF6ffnet. Der Plan muss in 12 Wochen angenommen sein.", schwierigkeit: "Sehr schwer", ziel: "Insolvenzplan fristgerecht durchsetzen", bild: "schutzschirm", start: { szenarioRegeln: { schutzschirmFrist: 12 } } },
+    { id: "lockdown", name: "Geschlossene Innenst\xE4dte", beschreibung: "Ab Woche 8 sinkt die Frequenz zehn Wochen lang um 70 %. Staatshilfe wird angeboten.", schwierigkeit: "Schwer", ziel: "Bis Woche 18 zahlungsf\xE4hig bleiben", bild: "lockdown", start: { szenarioRegeln: { lockdown: { beginn: 8, dauer: 10, frequenz: 0.3, staatshilfe: 14e7 } } } },
+    { id: "fusion", name: "Die Fusion", beschreibung: "30 zus\xE4tzliche Volkskauf-Altstandorte \xFCberschneiden sich mit Hartwig.", schwierigkeit: "Schwer", ziel: "Doppelstandorte ohne Streik abbauen", bild: "fusion", start: { szenarioRegeln: { fusionDoppelStaedte: 30 }, startCash: 23e7 } },
+    { id: "investor", name: "Der neue Eigent\xFCmer", beschreibung: "Ein Immobilieninvestor fordert j\xE4hrlich mindestens einen Hausverkauf.", schwierigkeit: "Schwer", ziel: "Unternehmenswert in f\xFCnf Jahren verdoppeln", bild: "investor", start: { szenarioRegeln: { immobilienInvestor: true }, startCash: 26e7 } },
+    { id: "aufbruch", name: "Aufbruch", beschreibung: "Solide finanzierte Kette, aber starke Konkurrenz.", schwierigkeit: "Mittel", ziel: "In drei Jahren Umsatzmarktf\xFChrer werden", bild: "aufbruch", start: { startCash: 9e8, kreditlinie: 3e8, szenarioRegeln: { aufbruchKonkurrenz: 0.86 } } },
+    { id: "sandkasten", name: "Sandkasten", beschreibung: "Unbegrenzte Mittel, kein Insolvenzrisiko und keine Wertung.", schwierigkeit: "Frei", ziel: "Ohne Zeitlimit experimentieren", bild: "sandkasten", start: { szenarioRegeln: { sandkasten: true } } }
+  ];
+  function szenarioKonfiguration(id) {
+    const karte = SZENARIEN.find((x) => x.id === id);
+    if (!SZENARIEN_AKTIV || !karte || karte.id === "standard") return {};
+    return { ...karte.start, szenarioId: karte.id };
+  }
+  function szenarioName(s2) {
+    return SZENARIEN.find((x) => x.id === (s2.szenario?.id ?? "standard"))?.name ?? SZENARIEN[0].name;
+  }
+  function hausWert(h) {
+    return eur(Math.max(5e6, h.grundflaecheQm * 4500));
+  }
+  function unternehmensWert(s2) {
+    const immobiliensumme = s2.haeuser.filter((h) => h.miete.vermieter === "eigentuemer" && h.status !== "verkauft" && h.status !== "geschlossen").reduce((sum2, h) => sum2 + hausWert(h), 0);
+    const ertrag = s2.historie.slice(-52).reduce((sum2, k) => sum2 + k.ebitda, 0);
+    const hochrechnung = s2.historie.length ? ertrag * 52 / Math.min(52, s2.historie.length) : 0;
+    return eur(Math.max(0, s2.cash) + immobiliensumme + Math.max(0, hochrechnung) * 5);
+  }
+  function groessterWettbewerberUmsatz(s2) {
+    const ketten = /* @__PURE__ */ new Map();
+    for (const w of s2.wettbewerber) {
+      if (w.status === "geschlossen" || w.art === "leer_ehemals") continue;
+      const umsatz = Math.round(w.grundflaecheQm * (125 + 90 * w.staerke));
+      ketten.set(w.kette, (ketten.get(w.kette) ?? 0) + umsatz);
+    }
+    return Math.max(0, ...ketten.values());
+  }
+  function szenarioStart(s2, sz) {
+    if (!sz.szenarioId || sz.szenarioId === "standard") return;
+    const regeln = structuredClone(sz.szenarioRegeln ?? {});
+    const lauf = { id: sz.szenarioId, regeln };
+    s2.szenario = lauf;
+    if (regeln.fusionDoppelStaedte) lauf.fusionHausIds = s2.haeuser.filter((h) => h.fusionUrsprung === "volkskauf").map((h) => h.id);
+    if (regeln.immobilienInvestor) {
+      lauf.immobilienVerkaeufe = [];
+      lauf.wertStart = unternehmensWert(s2);
+    }
+    if (regeln.aufbruchKonkurrenz) {
+      const umsatz = Object.values(s2.basisUmsatz).reduce((sum2, wert) => sum2 + (wert ?? 0), 0);
+      lauf.umsatzZiel = Math.round(Math.max(umsatz * 1.2, groessterWettbewerberUmsatz(s2) * 1.05));
+    }
+    if (regeln.schutzschirmFrist) {
+      eroeffneInsolvenz(s2, "Schutzschirm zum Spielstart");
+      if (s2.insolvenz) s2.insolvenz.versammlung = s2.woche + regeln.schutzschirmFrist;
+    }
+    if (regeln.sandkasten) {
+      s2.cash = 1e15;
+      s2.kreditlinie = 1e15;
+    }
+  }
+  function szenarioFrequenz(s2) {
+    const r = s2.szenario?.regeln;
+    if (!r) return 1;
+    if (r.lockdown && s2.woche >= r.lockdown.beginn && s2.woche < r.lockdown.beginn + r.lockdown.dauer) return r.lockdown.frequenz;
+    return r.aufbruchKonkurrenz ?? 1;
+  }
+  function szenarioWoche(s2) {
+    const lauf = s2.szenario;
+    if (!lauf || s2.prognose) return;
+    const lockdown = lauf.regeln.lockdown;
+    if (lockdown && s2.woche === lockdown.beginn && !s2.angebote.some((a) => a.typ === "staatshilfe")) {
+      s2.angebote.push({
+        id: "sz-staatshilfe-" + s2.woche,
+        typ: "staatshilfe",
+        woche: s2.woche,
+        frist: s2.woche + 4,
+        status: "offen",
+        titel: "Staatliche \xDCberbr\xFCckungshilfe",
+        text: "Einmalige Hilfe zur Deckung laufender Kosten bei geschlossenen Innenst\xE4dten. Annehmen oder ablehnen.",
+        einmalzahlung: lockdown.staatshilfe
+      });
+      melde(s2, "warnung", "Innenst\xE4dte geschlossen: zehn Wochen mit 70 % weniger Kundenfrequenz. Die \xDCberbr\xFCckungshilfe liegt im Posteingang.");
+    }
+    if (lauf.regeln.immobilienInvestor && s2.woche > 0 && s2.woche % 52 === 0 && !(lauf.immobilienVerkaeufe ?? []).some((w) => w >= s2.woche - 52 && w < s2.woche)) {
+      s2.stakeholder.eigentuemer = Math.max(0, s2.stakeholder.eigentuemer - 10);
+      melde(s2, "eigentuemer", "Der Investor beanstandet das vergangene Jahr: kein Immobilienverkauf.");
+    }
+    if (lauf.fusionHausIds?.length && s2.haeuser.some((h) => h.streikBis !== void 0 && h.streikBis > s2.woche)) lauf.streikErlebt = true;
+    if (lauf.regeln.sandkasten) s2.cash = Math.max(s2.cash, 1e15);
+  }
+  function immobilieVerkaufen(s2, hausId) {
+    if (s2.szenario?.id !== "investor") return "Immobilien-Sale-and-Leaseback ist nur in \u201EDer neue Eigent\xFCmer\u201C verf\xFCgbar.";
+    const h = s2.haeuser.find((x) => x.id === hausId);
+    if (!h || h.status !== "offen" || h.miete.vermieter !== "eigentuemer") return "Nur offene, eigene Immobilien k\xF6nnen verkauft werden.";
+    const wert = hausWert(h);
+    h.miete.vermieter = "dritt";
+    h.miete.vermieterName = "Immobilienfonds Nord";
+    h.miete.mieteWoche = eur(h.miete.mieteWoche + wert * 0.06 / 52);
+    s2.cash += wert;
+    s2.einmalErloeseWoche += wert;
+    s2.szenario.immobilienVerkaeufe = [...s2.szenario.immobilienVerkaeufe ?? [], s2.woche];
+    melde(s2, "presse", h.name + " im Sale-and-Leaseback verkauft. Erl\xF6s " + Math.round(wert / 1e6) + " Mio. \u20AC.");
+    return null;
+  }
+  function szenarioZiel(s2) {
+    const id = s2.szenario?.id ?? "standard";
+    const karte = SZENARIEN.find((x) => x.id === id) ?? SZENARIEN[0];
+    let fortschritt = 0, erreicht = false, gescheitert = s2.phase === "zerschlagen", details = "";
+    const w = s2.woche;
+    switch (id) {
+      case "standard":
+        fortschritt = Math.min(1, w / 260);
+        erreicht = w >= 260 && !gescheitert;
+        details = w + " von 260 Wochen \xFCberstanden";
+        break;
+      case "schutzschirm":
+        fortschritt = Math.min(1, w / 12);
+        erreicht = s2.phase === "regulaer" && s2.insolvenzenGesamt > 0 && w <= 12;
+        gescheitert || (gescheitert = w >= 12 && !erreicht);
+        details = s2.phase === "insolvenz" ? "Gl\xE4ubigerversammlung sp\xE4testens Woche 12" : "Verfahren: " + s2.phase;
+        break;
+      case "lockdown":
+        fortschritt = Math.min(1, w / 18);
+        erreicht = w >= 18 && s2.phase === "regulaer" && s2.cash + s2.kreditlinie >= 0;
+        gescheitert || (gescheitert = s2.phase !== "regulaer" || s2.cash + s2.kreditlinie < 0);
+        details = "Liquidit\xE4tsreserve " + Math.round((s2.cash + s2.kreditlinie) / 1e6) + " Mio. \u20AC";
+        break;
+      case "fusion": {
+        const ids = s2.szenario?.fusionHausIds ?? [];
+        const offen = ids.filter((hid) => s2.haeuser.find((h) => h.id === hid)?.status !== "geschlossen");
+        fortschritt = ids.length ? (ids.length - offen.length) / ids.length : 0;
+        erreicht = !!ids.length && !offen.length && !s2.szenario?.streikErlebt && s2.phase === "regulaer";
+        gescheitert || (gescheitert = !!s2.szenario?.streikErlebt || w >= 156 && !erreicht);
+        details = ids.length - offen.length + " von " + ids.length + " Doppelstandorten bereinigt; " + (s2.szenario?.streikErlebt ? "Streik aufgetreten" : "kein Streik");
+        break;
+      }
+      case "investor": {
+        const basis3 = Math.max(1, s2.szenario?.wertStart ?? 1);
+        const jetzt = unternehmensWert(s2);
+        const verkaeufe = s2.szenario?.immobilienVerkaeufe ?? [];
+        const jahre = Math.min(5, Math.floor(w / 52));
+        const alleJahre = Array.from({ length: jahre }, (_, i) => verkaeufe.some((v) => v >= i * 52 && v < (i + 1) * 52)).every(Boolean);
+        fortschritt = Math.min(1, jetzt / (2 * basis3));
+        erreicht = w >= 260 && jetzt >= 2 * basis3 && alleJahre && !gescheitert;
+        gescheitert || (gescheitert = w >= 260 && !erreicht);
+        details = "Unternehmenswert " + Math.round(jetzt / 1e6) + " / " + Math.round(2 * basis3 / 1e6) + " Mio. \u20AC \xB7 " + verkaeufe.length + " Hausverk\xE4ufe";
+        break;
+      }
+      case "aufbruch": {
+        const ziel = s2.szenario?.umsatzZiel ?? 1;
+        const ist = s2.historie.length ? s2.historie.slice(-13).reduce((a, k) => a + k.umsatz, 0) / Math.min(13, s2.historie.length) : 0;
+        fortschritt = Math.min(1, ist / ziel);
+        erreicht = w >= 156 && ist >= ziel && ist >= groessterWettbewerberUmsatz(s2) && !gescheitert;
+        gescheitert || (gescheitert = w >= 156 && !erreicht);
+        details = "Wochenumsatz " + Math.round(ist / 1e6) + " / Ziel " + Math.round(ziel / 1e6) + " Mio. \u20AC \xB7 gr\xF6\xDFte Konkurrenzkette ca. " + Math.round(groessterWettbewerberUmsatz(s2) / 1e6) + " Mio. \u20AC";
+        break;
+      }
+      case "sandkasten":
+        return { id, name: karte.name, text: karte.ziel, fortschritt: 0, erreicht: false, gescheitert: false, wertung: false, details: "Freies Spiel ohne Punktwertung" };
+    }
+    return { id, name: karte.name, text: karte.ziel, fortschritt: Math.max(0, fortschritt), erreicht: !!(s2.szenario?.erreicht || erreicht), gescheitert: !!(s2.szenario?.gescheitert || gescheitert), wertung: true, details };
+  }
+  function szenarioNachWoche(s2) {
+    if (!s2.szenario || s2.prognose || s2.szenario.erreicht || s2.szenario.gescheitert) return;
+    if (s2.szenario.fusionHausIds?.length && s2.haeuser.some((h) => h.streikBis !== void 0 && h.streikBis >= s2.woche)) s2.szenario.streikErlebt = true;
+    const ziel = szenarioZiel(s2);
+    s2.szenario.erreicht = ziel.erreicht;
+    s2.szenario.gescheitert = ziel.gescheitert;
+    if (ziel.erreicht) melde(s2, "info", "Szenarioziel erreicht: " + ziel.text);
+    if (ziel.gescheitert) melde(s2, "warnung", "Szenarioziel verfehlt: " + ziel.text);
   }
 
   // ../engine/src/zeitung.ts
@@ -7119,9 +7296,23 @@
         an.erledigtWoche = w;
         return ok4(`${an.titel}: abgelehnt.`);
       }
+      case "immobilieVerkaufen": {
+        const grund2 = immobilieVerkaufen(s2, a.haus);
+        return grund2 ? fehler4(grund2) : ok4("Immobilie verkauft und langfristig zur\xFCckgemietet.");
+      }
       case "angebotAnnehmen": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen");
         if (!an) return fehler4("Angebot nicht gefunden oder abgelaufen.");
+        if (an.typ === "staatshilfe") {
+          if (s2.szenario?.id !== "lockdown" || s2.szenario.hilfeGenutzt) return fehler4("Die Hilfe ist nicht mehr verf\xFCgbar.");
+          const hilfe = an.einmalzahlung ?? 0;
+          s2.cash += hilfe;
+          s2.einmalErloeseWoche += hilfe;
+          s2.szenario.hilfeGenutzt = true;
+          an.status = "angenommen";
+          an.erledigtWoche = s2.woche;
+          return ok4("\xDCberbr\xFCckungshilfe erhalten: " + mio(hilfe) + ".");
+        }
         if (an.typ === "konzernVerkauf") {
           if (s2.phase !== "regulaer") return fehler4("Konzernverkauf nur au\xDFerhalb der Insolvenz m\xF6glich.");
           if (s2.spielendeDeaktiviert) return fehler4("Spielende ist deaktiviert.");
@@ -7258,6 +7449,7 @@
         return ok4(`Plan f\xFCr Quartal ${q2.nr + 1} eingereicht: EBITDA ${mio(q2.plan)} (Prognose ${mio(q2.planStandard)}).`);
       }
       case "insolvenzAntrag": {
+        if (s2.szenario?.regeln.sandkasten) return fehler4("Im Sandkasten gibt es keine Insolvenz.");
         if (inso) return fehler4("Das Verfahren l\xE4uft bereits.");
         const frueh = runwayWochen(s2) > 8;
         eroeffneInsolvenz(s2, frueh ? "Eigenantrag im Schutzschirmverfahren" : "Eigenantrag");
@@ -9037,8 +9229,8 @@
     hqAktualisiere(s2);
     return ok5(alteStufe === st2 ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st2}.`);
   }
-  function zentraleKuerzen(s2, prozent2) {
-    const p2 = clamp(prozent2, 0, 0.3);
+  function zentraleKuerzen(s2, prozent3) {
+    const p2 = clamp(prozent3, 0, 0.3);
     let fte2 = 0;
     for (const a of s2.hq.abteilungen) {
       const weg = Math.round(a.fte * p2);
@@ -12009,6 +12201,18 @@
       k++;
     }
     if (!sz.premiumDeaktiviert) kennzeichnePremium(haeuser);
+    if (sz.szenarioRegeln?.fusionDoppelStaedte) {
+      const staedte = [...new Set(haeuser.filter((x) => x.format === "warenhaus").map((x) => x.stadt))].slice(0, sz.szenarioRegeln.fusionDoppelStaedte);
+      for (const stadt of staedte) {
+        const eintrag2 = STAEDTE.find((x) => x[0] === stadt);
+        if (!eintrag2) continue;
+        const [, region, cluster, kk] = eintrag2;
+        const alt = bauHaus(h, ++wh, stadt, region, cluster, kk, "warenhaus", sz, 2);
+        alt.name = "Volkskauf " + stadt;
+        alt.fusionUrsprung = "volkskauf";
+        haeuser.push(alt);
+      }
+    }
     const bestand = [];
     const basisUmsatz = {};
     for (const x of haeuser) {
@@ -12102,6 +12306,7 @@
     s2.marketing.stand = erzeugeMarketing(s2);
     initialisiereMarketing(s2);
     initialisiereWettbewerb(s2);
+    szenarioStart(s2, sz);
     bildeHauscluster(s2);
     initialisiereIt(s2);
     initialisierePlanung(s2);
@@ -12165,7 +12370,7 @@
     const streik = h.streikBis !== void 0 && h.streikBis > w ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h) * umbauFrequenzFaktor(h);
+    return makro * image * mkt * substanz * szenarioFrequenz(s2) * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h) * umbauFrequenzFaktor(h);
   }
   function saettigung(qm, Q) {
     return Q > 0 ? 1 - Math.exp(-qm / Q) : 0;
@@ -12402,7 +12607,7 @@
     }
   }
   function eroeffneInsolvenz(s2, grund2) {
-    if (s2.phase !== "regulaer") return;
+    if (s2.phase !== "regulaer" || s2.szenario?.regeln.sandkasten) return;
     const w = s2.woche;
     let alt = 0;
     for (const v of s2.verbindlichkeiten) alt += v.wert;
@@ -13256,6 +13461,7 @@
     if (s2.phase === "zerschlagen" || s2.ende && !s2.spielendeFortgesetzt && !s2.prognose) throw new Error("Spiel beendet. Bitte ein neues Spiel beginnen oder zul\xE4ssig weiterspielen.");
     const w = s2.woche;
     const cashVorher = s2.historie[s2.historie.length - 1]?.cash ?? s2.kapitalflussStartCash ?? s2.cash;
+    szenarioWoche(s2);
     prozesse(s2);
     premiumWoche(s2);
     umbauWoche(s2);
@@ -13460,6 +13666,7 @@
     s2.einmalErloeseWoche = 0;
     zeitungWoche(s2);
     s2.woche += 1;
+    szenarioNachWoche(s2);
     erfolgeWoche(s2);
     spielendePruefen(s2);
     return k;
@@ -13539,7 +13746,26 @@
     fuehreAus(s2, { typ: "sammelfreigabe" });
   }
   function botTief(s2, log = false) {
-    botTiefBasis(s2, log, true);
+    if (s2.szenario?.id === "investor" || s2.szenario?.id === "aufbruch") {
+      botRegulaer(s2, log);
+    } else {
+      botTiefBasis(s2, log, true);
+    }
+    if (s2.szenario?.id === "lockdown") {
+      for (const angebot of s2.angebote.filter((a) => a.typ === "staatshilfe" && a.status === "offen")) {
+        fuehreAus(s2, { typ: "angebotAnnehmen", angebot: angebot.id });
+      }
+    }
+    if (s2.szenario?.id === "fusion" && s2.woche % 20 === 3) {
+      const alt = new Set(s2.szenario.fusionHausIds ?? []);
+      for (const h of s2.haeuser.filter((h2) => alt.has(h2.id) && h2.status === "offen").slice(0, 5)) {
+        fuehreAus(s2, { typ: "schliessen", haus: h.id });
+      }
+    }
+    if (s2.szenario?.id === "investor" && s2.woche % 52 === 1) {
+      const haus2 = s2.haeuser.find((h) => h.status === "offen" && h.miete.vermieter === "eigentuemer");
+      if (haus2) fuehreAus(s2, { typ: "immobilieVerkaufen", haus: haus2.id });
+    }
   }
   function botTiefBasis(s2, log, zentralePauschal, einkauf = einkaufStandard) {
     const w = s2.woche;
@@ -13576,6 +13802,43 @@
       if (a.typ === "untermiete" || a.typ === "paket" || a.typ === "stadt") tu2({ typ: "angebotAnnehmen", angebot: a.id });
     }
     einkauf(s2);
+  }
+  function botRegulaer(s2, log = false) {
+    botRegulaerBasis(s2, log, 0.25);
+  }
+  function botRegulaerBasis(s2, log, zentralePauschal) {
+    const w = s2.woche;
+    const tu2 = (a) => {
+      const r = fuehreAus(s2, a);
+      if (log) console.log(`  W${w} ${r.ok ? "\u2713" : "\u2717"} ${r.text}`);
+      return r;
+    };
+    if (w === 0) {
+      tu2({ typ: "berater", beraterTyp: "sanierung" });
+      if (zentralePauschal > 0) tu2({ typ: "zentrale", prozent: zentralePauschal });
+      tu2({ typ: "orderLevel", gruppe: "alle", level: 0.85 });
+      tu2({ typ: "marketingBudget", quote: 0.018 });
+    }
+    if (w === 4) {
+      const p2 = portfolio(s2).filter((x) => x.status === "offen").sort((a, b2) => a.db / Math.max(1, a.umsatz) - b2.db / Math.max(1, b2.umsatz));
+      for (const x of p2.slice(0, 35)) tu2({ typ: "schliessen", haus: x.id });
+      for (const x of p2.slice(35).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.15 });
+      for (const h of s2.haeuser.filter((x) => x.status === "offen" && x.kpi)) {
+        const ist = h.kpi.fteIst, bedarf = h.kpi.fteBedarf;
+        if (ist > bedarf * 1.02) tu2({ typ: "personalabbau", haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
+      }
+    }
+    if (w === 4) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.16 });
+    if (w % 52 === 44) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.22 });
+    if (w % 52 === 2 && w > 4) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.16 });
+    if (w % 13 === 0) {
+      const q2 = s2.quartale[s2.quartale.length - 1];
+      if (q2) tu2({ typ: "plan", ebitda: q2.planStandard });
+    }
+    for (const a of s2.angebote.filter((x) => x.status === "offen")) {
+      if (a.typ === "untermiete" || a.typ === "paket" || a.typ === "stadt") tu2({ typ: "angebotAnnehmen", angebot: a.id });
+    }
+    einkaufStandard(s2);
   }
   var ALLE = (st2) => Object.fromEntries(ABTEILUNGEN.map((id) => [id, st2]));
   var HQ_GUT = { ...ALLE(1), controlling: 2, ecommerce: 2 };
@@ -123899,7 +124162,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "e6e62b4" : "Entwicklung";
+  var version = () => true ? "48f44b8" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -128037,14 +128300,10 @@
         runway: c.runwayWochen,
         meldungen,
         vorgaenge,
-        woche: ctx.wocheNr(),
-        letzte: jetzt,
-        kapitalfluss: fluss2,
-        meldungen,
-        vorgaenge,
         erfolge: ctx.erfolge?.() ?? [],
         woche: ctx.wocheNr(),
-        letzte: jetzt
+        letzte: jetzt,
+        kapitalfluss: fluss2
       };
       markieren("Engine abgeschlossen");
       if (modus() === "aus") {
@@ -128122,7 +128381,7 @@
       markieren("Vorfall " + (vorfall + 1));
       const feld = node.querySelector("#wb-vorfall"), meins = token;
       const verantwortlich = portraetZumVorgang(m);
-      feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + "</div></div><h4>" + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
+      feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
       feld.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
       requestAnimationFrame(() => feld.classList.add("offen"));
       const text3 = m.text ?? "", el2 = feld.querySelector(".wb-tippt"), beginn = performance.now();
@@ -128191,6 +128450,603 @@
     return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht2 && { ...bericht2, vorgaenge: bericht2.vorgaenge.length, meldungen: bericht2.meldungen.length, meldungstexte: bericht2.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() {
       return status;
     } };
+  }
+
+  // src/kit/szenarien.js
+  var BILDER = {
+    standard: ["#477d8c", "#f5ca85", "M0 80L30 56L58 74L96 43L126 65L165 31L220 65V110H0Z"],
+    schutzschirm: ["#355d78", "#add1cf", "M0 89L35 58L77 87L120 34L166 72L220 47V110H0Z"],
+    lockdown: ["#5d667c", "#bdc3d2", "M0 76L42 54L77 68L112 40L157 68L220 46V110H0Z"],
+    fusion: ["#567e68", "#eec887", "M0 88L33 44L79 70L110 36L155 68L220 48V110H0Z"],
+    investor: ["#7c6655", "#e4bf88", "M0 90L26 63L76 78L116 34L149 66L220 42V110H0Z"],
+    aufbruch: ["#3a8290", "#ffdb9d", "M0 78L46 51L94 65L133 27L176 62L220 38V110H0Z"],
+    sandkasten: ["#7399a3", "#fbdda5", "M0 82L38 56L82 71L119 41L158 64L220 50V110H0Z"]
+  };
+  function szenarioBild(id) {
+    const [himmel, licht, berge] = BILDER[id] ?? BILDER.standard;
+    const fenster8 = Array.from({ length: 9 }, (_, i) => '<rect x="' + (19 + i % 3 * 12) + '" y="' + (76 + Math.floor(i / 3) * 12) + '" width="5" height="7" fill="#d7e7dc"/>').join("");
+    const sonder = id === "lockdown" ? '<path d="M70 107L70 70L151 70V107M70 80H151" stroke="#e7aba3" stroke-width="5"/>' : id === "schutzschirm" ? '<path d="M177 22L196 30V49L177 62L158 49V30Z" fill="#e5e8e0" stroke="#516e83" stroke-width="3"/>' : id === "aufbruch" ? '<path d="M166 46L183 27L200 39M183 27V66" stroke="#f6f0cc" stroke-width="6" fill="none"/>' : id === "fusion" ? '<rect x="124" y="59" width="42" height="51" fill="#c8b7a3"/><rect x="133" y="65" width="24" height="7" fill="#ebc46b"/>' : id === "investor" ? '<path d="M165 57L165 15M153 28L165 15L177 28" stroke="#ffe2aa" stroke-width="5" fill="none"/>' : id === "sandkasten" ? '<circle cx="184" cy="25" r="13" fill="#fff1b7"/>' : "";
+    return '<svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration einer fiktiven Innenstadt"><rect width="220" height="110" fill="' + himmel + '"/><circle cx="175" cy="29" r="21" fill="' + licht + '"/><path d="' + berge + '" fill="#537b80"/><rect x="10" y="65" width="60" height="45" fill="#e9dcc3"/><rect x="18" y="57" width="48" height="8" fill="#a94f43"/>' + fenster8 + '<rect x="95" y="48" width="45" height="62" fill="#d9d1bc"/><path d="M91 48L118 30L144 48" fill="#895e50"/><rect x="109" y="70" width="14" height="40" fill="#426477"/><rect x="152" y="73" width="60" height="37" fill="#c9d7cf"/><path d="M148 73H216" stroke="#a9524a" stroke-width="8"/><path d="M0 109H220" stroke="#555d62" stroke-width="4"/>' + sonder + "</svg>";
+  }
+
+  // src/ui/szenarien.js
+  var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
+  var prozent = (w) => Math.max(0, Math.min(100, Math.round(100 * w)));
+  var leseBestwerte = () => {
+    try {
+      return JSON.parse(localStorage.getItem(SPEICHERSCHLUESSEL) || "{}");
+    } catch {
+      return {};
+    }
+  };
+  function speichereBestwert(id, wochen) {
+    try {
+      const alt = leseBestwerte();
+      if (alt[id] !== void 0 && alt[id] <= wochen) return;
+      alt[id] = wochen;
+      localStorage.setItem(SPEICHERSCHLUESSEL, JSON.stringify(alt));
+    } catch {
+    }
+  }
+  function szenarienModul(ctx) {
+    let seite = "karten";
+    let letzterSieg = null;
+    const start = () => ctx.wahl();
+    function zeichneStart() {
+      const id = start().szenario;
+      const best = leseBestwerte();
+      const karten = document.getElementById("startszenarien");
+      karten.innerHTML = ctx.E.SZENARIEN.map((k) => '<button type="button" class="sz-karte ' + (id === k.id ? "ausgewaehlt" : "") + '" data-szenario="' + esc2(k.id) + '" aria-label="' + esc2(k.name + ": " + k.ziel) + '"><span class="sz-bild">' + szenarioBild(k.id) + "</span><b>" + esc2(k.name) + '</b><span class="sz-level">' + esc2(k.schwierigkeit) + "</span><small>" + esc2(k.beschreibung) + '</small><span class="sz-best">' + (best[k.id] !== void 0 ? "Bestwert: " + best[k.id] + " Wochen" : "Noch kein Bestwert") + "</span></button>").join("");
+      document.getElementById("startsetup").hidden = seite !== "setup";
+      document.getElementById("startauswahl").hidden = seite !== "karten";
+      const auswahl4 = ctx.E.SZENARIEN.find((k) => k.id === id) ?? ctx.E.SZENARIEN[0];
+      document.getElementById("szenario-gewaehlt").textContent = auswahl4.name + " \xB7 " + auswahl4.ziel;
+    }
+    document.getElementById("startszenarien").addEventListener("click", (event) => {
+      const karte = event.target.closest("[data-szenario]");
+      if (!karte) return;
+      start().szenario = karte.dataset.szenario;
+      seite = "setup";
+      zeichneStart();
+    });
+    document.getElementById("szenario-zurueck").addEventListener("click", () => {
+      seite = "karten";
+      zeichneStart();
+    });
+    function aktualisieren() {
+      const spiel = ctx.spiel();
+      const zielknopf = document.getElementById("szenarioziel");
+      if (!spiel) {
+        zielknopf.hidden = true;
+        return;
+      }
+      const ziel = ctx.E.szenarioZiel(spiel);
+      zielknopf.hidden = false;
+      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent(ziel.fortschritt) + " %" : "\u221E";
+      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent(ziel.fortschritt) : 100) + "%";
+      zielknopf.setAttribute("aria-label", ziel.name + ": " + ziel.details + ". Szenarioziel \xF6ffnen");
+      zielknopf.title = ziel.name + " \xB7 " + ziel.text;
+      if (ziel.erreicht && ziel.wertung && letzterSieg !== spiel) {
+        letzterSieg = spiel;
+        speichereBestwert(ziel.id, spiel.woche);
+      }
+    }
+    function oeffne() {
+      const s2 = ctx.spiel();
+      if (!s2) return;
+      const z2 = ctx.E.szenarioZiel(s2);
+      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z2.name) + "</div><p>" + esc2(z2.text) + '</p><div class="sz-balken"><span style="width:' + prozent(z2.fortschritt) + '%"></span></div><p><b>' + (z2.wertung ? prozent(z2.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z2.details) + "</p><p>" + (z2.erreicht ? "Ziel erreicht" : z2.gescheitert ? "Ziel verfehlt" : z2.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
+      if (z2.id === "investor") {
+        const eigene = s2.haeuser.filter((h) => h.status === "offen" && h.miete.vermieter === "eigentuemer").slice(0, 16);
+        inhalt += "<h3>Immobilienverkauf mit R\xFCckmietung</h3><p>Der Investor verlangt mindestens einen Verkauf pro Gesch\xE4ftsjahr. Ein Verkauf erh\xF6ht die laufende Miete.</p>" + (eigene.map((h) => '<button class="breit" type="button" data-sz-verkauf="' + esc2(h.id) + '">' + esc2(h.name) + " verkaufen \xB7 " + geld(Math.max(5e6, h.grundflaecheQm * 4500)) + "</button>").join("") || "<p>Keine verk\xE4uflichen Immobilien vorhanden.</p>");
+      }
+      ctx.panel("Szenarioziel", "Woche " + s2.woche, inhalt, "gross");
+    }
+    document.getElementById("szenarioziel").addEventListener("click", oeffne);
+    document.getElementById("pinhalt").addEventListener("click", (event) => {
+      const knopf2 = event.target.closest("[data-sz-verkauf]");
+      if (!knopf2) return;
+      const r = ctx.E.fuehreAus(ctx.spiel(), { typ: "immobilieVerkaufen", haus: knopf2.dataset.szVerkauf });
+      ctx.meldung(r.text, r.ok);
+      if (r.ok) {
+        ctx.nachAktion();
+        oeffne();
+      }
+    });
+    return { aktualisieren, oeffne, zeichneStart, neu: () => {
+      seite = "karten";
+      zeichneStart();
+    } };
+  }
+
+  // src/ui/ton.js
+  var SPEICHER2 = "hartwig.einstellungen.v1";
+  var TON_SCHALTER = [
+    { schluessel: "ton_klaenge", titel: "Kl\xE4nge", gruppe: "Klang", art: "schalter", standard: true },
+    { schluessel: "ton_klaenge_lautstaerke", titel: "Lautst\xE4rke Kl\xE4nge", gruppe: "Klang", art: "regler", optionen: { min: 0, max: 100, schritt: 5 }, standard: 40 },
+    { schluessel: "ton_stadt", titel: "Stadtklang", gruppe: "Klang", art: "schalter", standard: true },
+    { schluessel: "ton_stadt_lautstaerke", titel: "Lautst\xE4rke Stadt", gruppe: "Klang", art: "regler", optionen: { min: 0, max: 100, schritt: 5 }, standard: 25 },
+    { schluessel: "ton_musik", titel: "Musik (standardm\xE4\xDFig aus)", gruppe: "Klang", art: "schalter", standard: false },
+    { schluessel: "ton_musik_lautstaerke", titel: "Lautst\xE4rke Musik", gruppe: "Klang", art: "regler", optionen: { min: 0, max: 100, schritt: 5 }, standard: 25 },
+    { schluessel: "ton_haptik", titel: "Haptische R\xFCckmeldung", gruppe: "Klang", art: "schalter", standard: true }
+  ];
+  var definition2 = new Map(TON_SCHALTER.map((d2) => [d2.schluessel, d2]));
+  var begrenze = (v, min, max) => Math.min(max, Math.max(min, v));
+  var fremdeEinstellungen = null;
+  var lokaleWerte = null;
+  function laden4() {
+    if (lokaleWerte !== null) return lokaleWerte;
+    lokaleWerte = {};
+    try {
+      const roh2 = globalThis.localStorage?.getItem(SPEICHER2);
+      const gelesen = roh2 ? JSON.parse(roh2) : null;
+      if (gelesen && typeof gelesen === "object" && !Array.isArray(gelesen)) lokaleWerte = gelesen;
+    } catch {
+    }
+    return lokaleWerte;
+  }
+  function normiere(d2, wert) {
+    if (d2.art === "schalter") return typeof wert === "boolean" ? wert : d2.standard;
+    const n = Number(wert);
+    if (!Number.isFinite(n)) return d2.standard;
+    return begrenze(Math.round(n / 5) * 5, d2.optionen.min, d2.optionen.max);
+  }
+  function tonEinstellung(schluessel) {
+    const d2 = definition2.get(schluessel);
+    if (!d2) return void 0;
+    if (fremdeEinstellungen) {
+      const wert = fremdeEinstellungen.einstellung(schluessel);
+      if (wert !== void 0) return normiere(d2, wert);
+    }
+    return normiere(d2, laden4()[schluessel] ?? d2.standard);
+  }
+  function setzeTonEinstellung(schluessel, wert) {
+    const d2 = definition2.get(schluessel);
+    if (!d2) throw new Error("Unbekannte Ton-Einstellung.");
+    const neu = normiere(d2, wert);
+    if (fremdeEinstellungen?.setzeEinstellung) return fremdeEinstellungen.setzeEinstellung(schluessel, neu);
+    if (Object.is(neu, tonEinstellung(schluessel))) return neu;
+    laden4()[schluessel] = neu;
+    try {
+      globalThis.localStorage?.setItem(SPEICHER2, JSON.stringify(lokaleWerte));
+    } catch {
+    }
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("einstellung", { detail: { schluessel, wert: neu } }));
+    return neu;
+  }
+  function haptik(art = "tippen") {
+    if (!tonEinstellung("ton_haptik")) return false;
+    try {
+      if (typeof window !== "undefined" && typeof window.hartwigHaptik === "function") {
+        window.hartwigHaptik(art);
+        return true;
+      }
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        return !!navigator.vibrate({ tippen: 8, erfolg: [14, 35, 14], warnung: [22, 40, 22], insolvenz: 60 }[art] ?? 8);
+      }
+    } catch {
+    }
+    return false;
+  }
+  var ZEIT = {
+    tippen: 0.02,
+    panelAuf: 0.12,
+    panelZu: 0.12,
+    erfolg: 0.3,
+    warnung: 0.31,
+    kasse: 0.025,
+    kassenklingeln: 0.36,
+    reise: 4.4,
+    insolvenz: 0.45,
+    freigeschaltet: 0.65
+  };
+  var TON_DAUER = Object.freeze(ZEIT);
+  var BPM = 70;
+  var TAKT = 60 / BPM;
+  function tonModul(ctx = {}) {
+    let audio = null, master = null, effekt = null, stadt = null, musik = null;
+    let rausch = null, stadtNah = null, stadtFern = null, stadtStimmen = null;
+    let gestartet = false, verfuegbar2 = true, freigabeLaeuft = false;
+    let uiAktiv = false, letzteKassenzeit = -Infinity, berichtFertig = false;
+    let reiseToken = 0, musikNaechste = 0, musikSchritt = 0;
+    let timer = null, zugRaf = 0, letztePhase = null;
+    const jetzt = () => audio?.currentTime ?? 0;
+    const aktiv5 = () => audio && audio.state === "running" && typeof document !== "undefined" && !document.hidden;
+    const laut = (typ) => tonEinstellung("ton_" + typ) ? tonEinstellung("ton_" + typ + "_lautstaerke") / 100 : 0;
+    const leise = (g, wert, zeit = 0.07) => {
+      if (!g || !audio) return;
+      try {
+        g.gain.setTargetAtTime(wert, jetzt(), zeit);
+      } catch {
+      }
+    };
+    function tonQuelle() {
+      if (audio || !verfuegbar2) return audio;
+      const C2 = globalThis.AudioContext || globalThis.webkitAudioContext;
+      if (!C2) {
+        verfuegbar2 = false;
+        return null;
+      }
+      try {
+        audio = new C2();
+        master = audio.createGain();
+        master.gain.value = 0.75;
+        master.connect(audio.destination);
+        effekt = audio.createGain();
+        effekt.connect(master);
+        stadt = audio.createGain();
+        stadt.gain.value = 0;
+        stadt.connect(master);
+        musik = audio.createGain();
+        musik.gain.value = 0;
+        musik.connect(master);
+      } catch {
+        audio = null;
+        verfuegbar2 = false;
+        return null;
+      }
+      return audio;
+    }
+    async function freischalten() {
+      if (freigabeLaeuft || !tonQuelle()) return false;
+      if (audio.state === "running") {
+        gestartet = true;
+        return true;
+      }
+      freigabeLaeuft = true;
+      try {
+        await audio.resume();
+        gestartet = audio.state === "running";
+        return gestartet;
+      } catch {
+        return false;
+      } finally {
+        freigabeLaeuft = false;
+      }
+    }
+    function note(freq, zeit, dauer, pegel, typ = "sine", ziel = effekt, ende = freq) {
+      if (!aktiv5() || !ziel || pegel <= 0) return;
+      const osz = audio.createOscillator(), g = audio.createGain();
+      osz.type = typ;
+      osz.frequency.setValueAtTime(freq, zeit);
+      if (ende !== freq) osz.frequency.exponentialRampToValueAtTime(Math.max(20, ende), zeit + dauer);
+      g.gain.setValueAtTime(1e-4, zeit);
+      g.gain.exponentialRampToValueAtTime(Math.max(2e-4, pegel), zeit + Math.min(0.012, dauer / 4));
+      g.gain.exponentialRampToValueAtTime(1e-4, zeit + dauer);
+      osz.connect(g);
+      g.connect(ziel);
+      osz.start(zeit);
+      osz.stop(zeit + dauer + 0.01);
+    }
+    function rauschPuffer() {
+      if (rausch || !audio) return rausch;
+      const laenge2 = Math.round(audio.sampleRate * 5), b2 = audio.createBuffer(1, laenge2, audio.sampleRate);
+      const daten = b2.getChannelData(0);
+      for (let i = 0; i < laenge2; i++) daten[i] = Math.random() * 2 - 1;
+      rausch = b2;
+      return b2;
+    }
+    function rauschen2(zeit, dauer, pegel, filterFrequenz = 800, art = "lowpass", ziel = effekt) {
+      if (!aktiv5() || !ziel || pegel <= 0) return;
+      const quelle2 = audio.createBufferSource(), f = audio.createBiquadFilter(), g = audio.createGain();
+      quelle2.buffer = rauschPuffer();
+      quelle2.loop = dauer >= 4.5;
+      f.type = art;
+      f.frequency.value = filterFrequenz;
+      f.Q.value = 0.8;
+      g.gain.setValueAtTime(1e-4, zeit);
+      g.gain.exponentialRampToValueAtTime(Math.max(2e-4, pegel), zeit + 0.015);
+      g.gain.exponentialRampToValueAtTime(1e-4, zeit + dauer);
+      quelle2.connect(f);
+      f.connect(g);
+      g.connect(ziel);
+      quelle2.start(zeit);
+      quelle2.stop(zeit + dauer + 0.01);
+    }
+    function abspielen(art, faktor2 = 1) {
+      if (!gestartet || !aktiv5() || !tonEinstellung("ton_klaenge")) return false;
+      const p2 = laut("klaenge") * begrenze(faktor2, 0, 1), t = jetzt() + 8e-3;
+      if (p2 === 0) return false;
+      switch (art) {
+        case "tippen":
+          note(1100, t, 0.02, p2 * 0.13, "triangle", effekt, 430);
+          break;
+        case "panelAuf":
+          rauschen2(t, 0.12, p2 * 0.1, 1400, "bandpass");
+          break;
+        case "panelZu":
+          note(350, t, 0.12, p2 * 0.065, "sine", effekt, 190);
+          break;
+        case "erfolg":
+          note(523.25, t, 0.19, p2 * 0.18);
+          note(783.99, t + 0.105, 0.195, p2 * 0.18);
+          break;
+        case "warnung":
+          note(180, t, 0.11, p2 * 0.22, "triangle");
+          note(155, t + 0.16, 0.15, p2 * 0.23, "triangle");
+          break;
+        case "kasse":
+          note(950, t, 0.025, p2 * 0.065, "triangle", effekt, 600);
+          break;
+        case "kassenklingeln":
+          note(1046.5, t, 0.33, p2 * 0.16);
+          note(1568, t + 0.06, 0.3, p2 * 0.13);
+          break;
+        case "insolvenz":
+          note(100, t, 0.45, p2 * 0.3, "triangle", effekt, 41);
+          rauschen2(t, 0.23, p2 * 0.12, 160);
+          break;
+        case "freigeschaltet":
+          [784, 1174.66, 1568].forEach((f, i) => note(f, t + i * 0.11, 0.43, p2 * 0.1));
+          break;
+        case "reise":
+          reisen();
+          break;
+        default:
+          return false;
+      }
+      return true;
+    }
+    function reisen() {
+      if (!gestartet || !aktiv5() || !laut("klaenge")) return false;
+      ++reiseToken;
+      const token = reiseToken, start = performance.now(), t = jetzt();
+      const q2 = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
+      q2.buffer = rauschPuffer();
+      q2.loop = true;
+      filter.type = "lowpass";
+      filter.frequency.value = 450;
+      g.gain.value = 0;
+      q2.connect(filter);
+      filter.connect(g);
+      g.connect(effekt);
+      q2.start(t);
+      q2.stop(t + ZEIT.reise);
+      for (let i = 0; i < 13; i++) {
+        const z2 = t + 0.15 + i * 0.325;
+        note(90, z2, 0.044, laut("klaenge") * 0.09, "triangle", effekt, 58);
+      }
+      function lautstaerke() {
+        if (token !== reiseToken || !aktiv5() || !tonEinstellung("ton_klaenge")) {
+          leise(g, 0, 0.015);
+          return;
+        }
+        const x = (performance.now() - start) / 4400;
+        if (x >= 1) {
+          leise(g, 0, 0.025);
+          return;
+        }
+        const overlay = document.querySelector(".reise-flug");
+        const position = overlay?.classList.contains("ankunft") ? 0.18 : overlay?.classList.contains("bewegt") ? 1 : 0.35;
+        leise(g, 0.08 * laut("klaenge") * Math.sin(Math.PI * begrenze(x, 0, 1)) * position, 0.035);
+        zugRaf = requestAnimationFrame(lautstaerke);
+      }
+      cancelAnimationFrame(zugRaf);
+      zugRaf = requestAnimationFrame(lautstaerke);
+      return true;
+    }
+    function stadtrauschen() {
+      if (!aktiv5() || stadtNah) return;
+      function schicht(typ, frequenz) {
+        const quelle2 = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
+        quelle2.buffer = rauschPuffer();
+        quelle2.loop = true;
+        filter.type = typ;
+        filter.frequency.value = frequenz;
+        filter.Q.value = 0.6;
+        g.gain.value = 0;
+        quelle2.connect(filter);
+        filter.connect(g);
+        g.connect(stadt);
+        quelle2.start();
+        return g;
+      }
+      stadtFern = schicht("lowpass", 380);
+      stadtNah = schicht("bandpass", 920);
+      stadtStimmen = schicht("bandpass", 460);
+    }
+    function musikNote(ton2, start, dauer, pegel) {
+      note(ton2, start, dauer, pegel, "sine", musik);
+      note(ton2 * 2, start, dauer * 0.85, pegel * 0.1, "triangle", musik);
+    }
+    function musikNachziehen() {
+      if (!aktiv5() || !laut("musik")) {
+        musikNaechste = 0;
+        return;
+      }
+      const s2 = ctx.spiel?.(), insolvenz = s2?.phase === "insolvenz" || s2?.phase === "zerschlagen";
+      const ebitda = ctx.ebitda13?.() ?? 0;
+      const moll = insolvenz || ebitda < 0;
+      const akkorde = moll ? [[220, 261.63, 329.63], [196, 220, 293.66], [261.63, 329.63, 392], [293.66, 329.63, 392]] : [[261.63, 329.63, 392], [196, 293.66, 440], [220, 261.63, 329.63], [293.66, 392, 440]];
+      if (!musikNaechste || musikNaechste < jetzt() - TAKT * 2) musikNaechste = jetzt() + 0.05;
+      while (musikNaechste < jetzt() + 0.4) {
+        const takt = Math.floor(musikSchritt / 4), schritt = musikSchritt % 4, akkord = akkorde[takt % 4];
+        if (schritt === 0) for (const f of akkord) musikNote(f, musikNaechste, TAKT * 3.8, 0.025);
+        const melodie = moll ? [0, 2, 4, 2, 3, 1, 2, 0] : [0, 2, 4, 3, 2, 1, 3, 4];
+        const skala = moll ? [220, 261.63, 293.66, 329.63, 392] : [261.63, 293.66, 329.63, 392, 440];
+        musikNote(skala[melodie[musikSchritt % melodie.length]] * 2, musikNaechste + TAKT * 0.52, TAKT * 0.4, 0.014);
+        musikSchritt++;
+        musikNaechste += TAKT;
+      }
+    }
+    function aktualisieren() {
+      const phase = ctx.spiel?.()?.phase ?? null;
+      if (letztePhase !== null && phase !== letztePhase && (phase === "insolvenz" || phase === "zerschlagen")) {
+        abspielen("insolvenz");
+        haptik("insolvenz");
+      }
+      letztePhase = phase;
+      if (!audio) return;
+      const sichtbar4 = aktiv5();
+      const zv = sichtbar4 ? laut("stadt") : 0, mv = sichtbar4 ? laut("musik") : 0;
+      leise(stadt, zv, 0.09);
+      leise(musik, mv, 0.13);
+      if (sichtbar4 && zv > 0) {
+        stadtrauschen();
+        const halb = ctx.zoom?.() ?? 110;
+        const nah = begrenze((240 - halb) / 218, 0, 1);
+        const bewegung = 0.85 + 0.15 * Math.sin(performance.now() / 1800);
+        leise(stadtNah, 0.038 * nah * bewegung, 0.11);
+        leise(stadtStimmen, 0.02 * nah * (0.7 + 0.3 * Math.sin(performance.now() / 490)), 0.11);
+        leise(stadtFern, 0.022 * (1 - nah) + 6e-3, 0.11);
+      } else {
+        leise(stadtNah, 0);
+        leise(stadtStimmen, 0);
+        leise(stadtFern, 0);
+      }
+      if (mv > 0) musikNachziehen();
+      else musikNaechste = 0;
+    }
+    function kassenZaehlung() {
+      const overlay = document.getElementById("wochen-overlay");
+      const element = overlay?.querySelector("#wb-umsatz");
+      if (!element || overlay.hidden) {
+        berichtFertig = false;
+        letzteKassenzeit = -Infinity;
+        return;
+      }
+      const ziel = Math.abs(Number(element.dataset.wert));
+      const zahl4 = Math.abs(Number((element.textContent || "0").replace(/[^0-9-]/g, "")));
+      if (!(ziel > 0) || !Number.isFinite(zahl4)) return;
+      const fortschritt = begrenze(zahl4 / ziel, 0, 1);
+      const t = performance.now();
+      if (fortschritt >= 0.9999) {
+        if (!berichtFertig) {
+          berichtFertig = true;
+          abspielen("kassenklingeln");
+        }
+      } else if (t - letzteKassenzeit > 95 + fortschritt * 155) {
+        letzteKassenzeit = t;
+        abspielen("kasse", 0.3);
+      }
+    }
+    function eingabe(e) {
+      const el2 = e.target?.closest?.('button,[role="button"]');
+      if (!el2 || el2.disabled) return;
+      freischalten().then((ok6) => {
+        if (ok6) abspielen("tippen");
+      }).catch(() => {
+      });
+      haptik("tippen");
+    }
+    function oeffne() {
+      const feld = (d2) => {
+        const v = tonEinstellung(d2.schluessel), id = "ton-" + d2.schluessel;
+        return '<label class="zeile" for="' + id + '" style="display:flex;align-items:center;gap:12px;min-height:48px"><span style="flex:1">' + d2.titel + (d2.art === "regler" ? ': <output id="' + id + '-wert">' + v + " %</output>" : "") + "</span>" + (d2.art === "schalter" ? '<input id="' + id + '" data-ton="' + d2.schluessel + '" type="checkbox" ' + (v ? "checked " : "") + 'aria-label="' + d2.titel + '">' : '<input id="' + id + '" data-ton="' + d2.schluessel + '" type="range" min="0" max="100" step="5" value="' + v + '" aria-label="' + d2.titel + '">') + "</label>";
+      };
+      ctx.panel?.("Klang & Haptik", "Synthetische Kl\xE4nge \xB7 ger\xE4teweit", '<div class="karte">' + TON_SCHALTER.map(feld).join("") + '</div><div class="karte"><p class="leise">Musik ist standardm\xE4\xDFig ausgeschaltet. Der iPhone-Stummschalter schaltet Web Audio nicht zuverl\xE4ssig stumm. Zum vollst\xE4ndigen Stummschalten die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Ger\xE4ten zur Verf\xFCgung.</p><button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', "gross");
+      uiAktiv = true;
+    }
+    function aendern(e) {
+      if (!uiAktiv || !e.target.matches?.("[data-ton]")) return;
+      const schluessel = e.target.dataset.ton;
+      const wert = e.target.type === "checkbox" ? e.target.checked : Number(e.target.value);
+      setzeTonEinstellung(schluessel, wert);
+      const output = document.getElementById(e.target.id + "-wert");
+      if (output) output.textContent = wert + " %";
+      aktualisieren();
+    }
+    function zustand() {
+      return {
+        audio: audio?.state ?? "nicht gestartet",
+        gestartet,
+        verfuegbar: verfuegbar2,
+        klang: tonEinstellung("ton_klaenge"),
+        stadt: tonEinstellung("ton_stadt"),
+        musik: tonEinstellung("ton_musik")
+      };
+    }
+    if (typeof document !== "undefined") {
+      document.addEventListener("pointerdown", eingabe, { capture: true, passive: true });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") freischalten().catch(() => {
+        });
+      }, { capture: true });
+      document.getElementById("pinhalt")?.addEventListener("change", aendern);
+      document.getElementById("pinhalt")?.addEventListener("input", aendern);
+      document.getElementById("pinhalt")?.addEventListener("click", (e) => {
+        if (uiAktiv && e.target.closest?.("[data-ton-probe]")) abspielen(e.target.closest("[data-ton-probe]").dataset.tonProbe);
+      });
+      let warOffen = false, menueOffen = false, letzteReise = null, letzteBericht = null;
+      const beobachter = new MutationObserver(() => {
+        const panelOffen = document.getElementById("panel")?.classList.contains("offen") ?? false;
+        if (panelOffen !== warOffen) {
+          abspielen(panelOffen ? "panelAuf" : "panelZu");
+          warOffen = panelOffen;
+        }
+        const menue = document.getElementById("menue")?.classList.contains("offen") ?? false;
+        if (menue !== menueOffen) {
+          abspielen(menue ? "panelAuf" : "panelZu");
+          menueOffen = menue;
+        }
+        const reise2 = document.querySelector("#reise-overlay .reise-flug");
+        if (reise2 && reise2 !== letzteReise) {
+          letzteReise = reise2;
+          reisen();
+        }
+        if (!reise2) letzteReise = null;
+        const bericht2 = document.querySelector("#wochen-overlay #wb-umsatz");
+        if (bericht2 !== letzteBericht) {
+          letzteBericht = bericht2;
+          berichtFertig = false;
+          letzteKassenzeit = -Infinity;
+        }
+        if (bericht2) kassenZaehlung();
+      });
+      beobachter.observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ["class", "hidden"]
+      });
+      window.addEventListener("hartwig:erfolg-freigeschaltet", () => {
+        abspielen("freigeschaltet");
+        haptik("erfolg");
+      });
+      window.addEventListener("hartwig:erfolg", () => {
+        abspielen("erfolg");
+        haptik("erfolg");
+      });
+      window.addEventListener("hartwig:warnung", () => {
+        abspielen("warnung");
+        haptik("warnung");
+      });
+      document.addEventListener("visibilitychange", aktualisieren);
+      window.addEventListener("pagehide", () => {
+        if (audio) audio.suspend().catch(() => {
+        });
+      });
+      window.addEventListener("pageshow", () => {
+        if (audio && gestartet) audio.resume().then(aktualisieren).catch(() => {
+        });
+      });
+      window.addEventListener("einstellung", (e) => {
+        if (e.detail?.schluessel?.startsWith("ton_")) aktualisieren();
+      });
+      timer = window.setInterval(aktualisieren, 250);
+    }
+    return {
+      oeffne,
+      zu: () => {
+        uiAktiv = false;
+      },
+      aktiv: () => uiAktiv,
+      pruefe: zustand,
+      abspielen,
+      freischalten,
+      haptik,
+      aktualisieren,
+      get audio() {
+        return audio;
+      },
+      zerstoren: () => {
+        if (timer) clearInterval(timer);
+        cancelAnimationFrame(zugRaf);
+        audio?.close?.().catch(() => {
+        });
+      }
+    };
   }
 
   // src/ui/einfuehrung.js
@@ -128576,6 +129432,197 @@
     }) };
   }
 
+  // src/kit/abzeichen.js
+  var cache2 = /* @__PURE__ */ new Map();
+  var metalle = {
+    bronze: ["#6d3f28", "#dba26f", "#a5673e"],
+    silber: ["#556573", "#f0f3f5", "#9aa6b0"],
+    gold: ["#8c611b", "#fff2a4", "#d1a02e"]
+  };
+  function symbol(g, c) {
+    c.save();
+    c.translate(64, 62);
+    c.strokeStyle = "#26313a";
+    c.fillStyle = "#26313a";
+    c.lineWidth = 5;
+    c.lineJoin = "round";
+    c.lineCap = "round";
+    switch (g) {
+      case "Sanierung":
+        c.beginPath();
+        c.moveTo(-26, 22);
+        c.lineTo(-8, 5);
+        c.lineTo(4, 14);
+        c.lineTo(26, -18);
+        c.stroke();
+        c.beginPath();
+        c.moveTo(11, -18);
+        c.lineTo(28, -19);
+        c.lineTo(26, -3);
+        c.stroke();
+        break;
+      case "Handel":
+        c.strokeRect(-23, -6, 46, 31);
+        c.beginPath();
+        c.moveTo(-13, -6);
+        c.lineTo(-5, -22);
+        c.lineTo(5, -22);
+        c.lineTo(13, -6);
+        c.stroke();
+        for (const x of [-9, 0, 9]) {
+          c.beginPath();
+          c.moveTo(x, 0);
+          c.lineTo(x, 17);
+          c.stroke();
+        }
+        break;
+      case "Menschen":
+        for (const [x, y, r] of [[0, -15, 12], [-22, 0, 8], [22, 0, 8]]) {
+          c.beginPath();
+          c.arc(x, y, r, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.beginPath();
+        c.arc(0, 37, 27, Math.PI, 0);
+        c.stroke();
+        c.beginPath();
+        c.moveTo(-32, 23);
+        c.lineTo(-19, 14);
+        c.moveTo(32, 23);
+        c.lineTo(19, 14);
+        c.stroke();
+        break;
+      case "Formate":
+        for (const [x, h] of [[-26, 27], [-7, 41], [14, 34]]) {
+          c.strokeRect(x, 24 - h, 19, h);
+          c.fillRect(x + 7, 24 - h + 7, 5, 6);
+        }
+        break;
+      default:
+        c.beginPath();
+        for (let n = 0; n < 10; n++) {
+          const a = -Math.PI / 2 + n * Math.PI / 5, r = n % 2 ? 13 : 29;
+          const x = Math.cos(a) * r, y = Math.sin(a) * r;
+          if (!n) c.moveTo(x, y);
+          else c.lineTo(x, y);
+        }
+        c.closePath();
+        c.fill();
+    }
+    c.restore();
+  }
+  function abzeichen(gruppe2, stufe2 = "bronze") {
+    const key = gruppe2 + ":" + stufe2;
+    if (cache2.has(key)) return cache2.get(key);
+    const c = document.createElement("canvas");
+    c.width = c.height = 128;
+    const x = c.getContext("2d");
+    const farben = metalle[stufe2] ?? metalle.bronze;
+    const rand = x.createRadialGradient(39, 31, 7, 64, 64, 64);
+    rand.addColorStop(0, farben[1]);
+    rand.addColorStop(0.76, farben[2]);
+    rand.addColorStop(1, farben[0]);
+    x.fillStyle = "#26313a";
+    x.beginPath();
+    x.arc(64, 64, 62, 0, Math.PI * 2);
+    x.fill();
+    x.fillStyle = rand;
+    x.beginPath();
+    x.arc(64, 64, 58, 0, Math.PI * 2);
+    x.fill();
+    x.lineWidth = 3;
+    x.strokeStyle = "rgba(255,255,255,.55)";
+    x.beginPath();
+    x.arc(64, 64, 49, 0, Math.PI * 2);
+    x.stroke();
+    x.lineWidth = 2;
+    x.strokeStyle = farben[0];
+    x.beginPath();
+    x.arc(64, 64, 44, 0, Math.PI * 2);
+    x.stroke();
+    symbol(gruppe2, x);
+    const png = c.toDataURL("image/png");
+    cache2.set(key, png);
+    return png;
+  }
+
+  // src/ui/erfolge.js
+  function erfolgeModul(ctx) {
+    const E = ctx.E, spielstand = ctx.s;
+    const zustand = { offen: false, filter: "Alle" };
+    const toast = document.createElement("div");
+    toast.id = "erfolge-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.hidden = true;
+    document.body.append(toast);
+    const schlange2 = [];
+    let toastTimer = null, zeigt = false;
+    const liste = () => E.erfolgeUebersicht(spielstand());
+    const freigeschaltet = (e) => Object.prototype.hasOwnProperty.call(e, "freigeschaltet");
+    const bild3 = (e) => '<img class="erfolge-bild" src="' + abzeichen(e.gruppe, e.stufe) + '" alt="">';
+    function karten() {
+      const alle = liste();
+      const offen = alle.filter(freigeschaltet).length;
+      const gruppen = ["Alle", "Sanierung", "Handel", "Menschen", "Formate", "Kurios"];
+      const ausw = zustand.filter === "Alle" ? alle : alle.filter((e) => e.gruppe === zustand.filter);
+      return '<div class="erfolge-seite"><div class="erfolge-kopf"><b>' + offen + " / " + alle.length + '</b><span>Abzeichen freigeschaltet</span><div class="erfolge-balken" role="progressbar" aria-valuenow="' + offen + '" aria-valuemin="0" aria-valuemax="' + alle.length + '"><i style="width:' + (alle.length ? offen / alle.length * 100 : 0) + '%"></i></div></div><div class="erfolge-filter" role="group" aria-label="Erfolge filtern">' + gruppen.map((g) => '<button type="button" data-erfolge-filter="' + g + '" class="' + (zustand.filter === g ? "an" : "") + '">' + g + "</button>").join("") + '</div><div class="erfolge-raster">' + ausw.map((e) => {
+        const frei6 = freigeschaltet(e), geheim = e.geheim && !frei6;
+        return '<article class="erfolge-karte' + (frei6 ? " frei" : " gesperrt") + '" data-erfolg="' + esc2(e.id) + '" aria-label="' + (geheim ? "Geheimer Erfolg" : esc2(e.titel)) + '">' + (geheim ? '<div class="erfolge-geheim" aria-hidden="true">?</div>' : bild3(e)) + "<b>" + (geheim ? "Geheim" : esc2(e.titel)) + "</b><small>" + (geheim ? "Noch nicht enth\xFCllt" : esc2(e.gruppe + " \xB7 " + e.stufe)) + "</small>" + (frei6 ? '<span class="erfolge-frei">Seit Woche ' + e.freigeschaltet + "</span>" : geheim ? '<span class="erfolge-hinweis">Geheimer Erfolg</span>' : '<span class="erfolge-hinweis">' + esc2(e.hinweis) + '</span><div class="erfolge-balken" role="progressbar" aria-valuenow="' + Math.round(e.fortschritt * 100) + '" aria-valuemin="0" aria-valuemax="100" aria-label="Fortschritt"><i style="width:' + Math.round(e.fortschritt * 100) + '%"></i></div>') + "</article>";
+      }).join("") + "</div></div>";
+    }
+    function neuZeichnen() {
+      if (!zustand.offen) return;
+      ctx.panel("Erfolge", "Meilensteine, Handel und besondere Momente", karten(), "gross");
+      zustand.offen = true;
+      const node = document.getElementById("pinhalt");
+      node.querySelectorAll("[data-erfolge-filter]").forEach((b2) => b2.addEventListener("click", () => {
+        zustand.filter = b2.dataset.erfolgeFilter;
+        neuZeichnen();
+      }));
+    }
+    function oeffne() {
+      zustand.offen = true;
+      neuZeichnen();
+    }
+    function zu() {
+      zustand.offen = false;
+    }
+    function naechstes() {
+      if (zeigt || !schlange2.length) return;
+      zeigt = true;
+      const e = schlange2.shift();
+      toast.innerHTML = '<div class="erfolge-toast-bild">' + bild3(e) + "</div><div><small>NEUER ERFOLG \xB7 " + esc2(e.gruppe) + "</small><strong>" + esc2(e.titel) + "</strong><span>" + esc2(e.hinweis) + "</span></div>";
+      toast.hidden = false;
+      requestAnimationFrame(() => toast.classList.add("sichtbar"));
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("sichtbar");
+        setTimeout(() => {
+          toast.hidden = true;
+          zeigt = false;
+          naechstes();
+        }, 180);
+      }, 2500);
+    }
+    function nachWoche(vorher) {
+      if (!spielstand() || spielstand().erfolgeAktiv === false) return [];
+      const neu = liste().filter((e) => freigeschaltet(e) && !vorher.has(e.id));
+      schlange2.push(...neu);
+      naechstes();
+      if (zustand.offen) neuZeichnen();
+      return neu.map((e) => e.titel);
+    }
+    return {
+      oeffne,
+      zu,
+      aktiv: () => zustand.offen,
+      neuZeichnen,
+      nachWoche,
+      pruefe: () => ({ gesamt: liste().length, frei: liste().filter(freigeschaltet).length, toast: !toast.hidden })
+    };
+  }
+
   // src/kit/spielende.js
   var fenster7 = (x, y, hell4, art) => '<rect x="' + x + '" y="' + y + '" width="19" height="28" rx="2" fill="' + hell4 + '"/>' + (art === "zerschlagen" ? '<path d="M' + x + " " + (y + 15) + 'h19" stroke="#868b8a" stroke-width="3"/>' : "");
   function gebaeude2(x, breite, hoehe, art, i) {
@@ -128818,11 +129865,290 @@
     };
   }
 
+  // src/ui/werkzeuge.js
+  var WERKZEUGE_AKTIV = true;
+  var BERICHT_FORMAT = "RUHRKAUF-TEST-1:gzip:";
+  var MAX_FEHLER = 50;
+  function base64(bytes) {
+    let s2 = "";
+    for (let i = 0; i < bytes.length; i += 16384)
+      s2 += String.fromCharCode(...bytes.subarray(i, i + 16384));
+    return btoa(s2);
+  }
+  function bytesAusBase64(s2) {
+    const bin = atob(s2);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr;
+  }
+  async function gzip(text3) {
+    if (typeof CompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt CompressionStream nicht.");
+    const rohr = new Blob([new TextEncoder().encode(text3)]).stream().pipeThrough(new CompressionStream("gzip"));
+    return base64(new Uint8Array(await new Response(rohr).arrayBuffer()));
+  }
+  async function ungzip(base64Text) {
+    if (typeof DecompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt DecompressionStream nicht.");
+    const daten = bytesAusBase64(base64Text);
+    const rohr = new Blob([daten]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Response(rohr).text();
+  }
+  async function kopiereText(text3) {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text3);
+        return;
+      } catch (_) {
+      }
+    }
+    const feld = document.createElement("textarea");
+    feld.value = text3;
+    feld.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(feld);
+    feld.select();
+    const ok6 = document.execCommand("copy");
+    feld.remove();
+    if (!ok6) throw new Error("Kopieren nicht erlaubt. Bitte den Text im Berichtsfeld manuell kopieren.");
+  }
+  function werkzeugeModul(ctx) {
+    const datum = document.querySelector(".datum");
+    const menu = document.getElementById("werkzeuge");
+    const inhalt = document.getElementById("pinhalt");
+    const fehler6 = [];
+    const frames = [];
+    const einmal2 = new URLSearchParams(location.search).get("werkzeuge") === "1";
+    let freigeschaltet = false, aktiv5 = false, beschaeftigt = false;
+    let messTimer = null, raf = null;
+    let berichteingabe = "";
+    let letzterBericht = "";
+    const klicks = [];
+    const num2 = (x) => Number.isFinite(x) ? Math.round(x * 10) / 10 : null;
+    function eintrag2(art, text3) {
+      fehler6.push({ zeit: (/* @__PURE__ */ new Date()).toISOString(), art, text: String(text3).slice(0, 3e3) });
+      if (fehler6.length > MAX_FEHLER) fehler6.shift();
+      if (freigeschaltet) datum.classList.add("testfehler");
+    }
+    window.addEventListener("error", (e) => eintrag2("error", e.message || e.error?.stack || "Unbekannter Fehler"));
+    window.addEventListener("unhandledrejection", (e) => eintrag2("unhandledrejection", e.reason?.stack || e.reason || "Unbehandeltes Promise"));
+    const originalConsoleError = console.error.bind(console);
+    console.error = (...args) => {
+      eintrag2("console.error", args.map((x) => x?.stack || String(x)).join(" "));
+      originalConsoleError(...args);
+    };
+    function entsperren() {
+      if (!WERKZEUGE_AKTIV) return false;
+      freigeschaltet = true;
+      menu.hidden = false;
+      menu.style.display = "";
+      datum.classList.toggle("testfehler", fehler6.length > 0);
+      return true;
+    }
+    datum.addEventListener("click", () => {
+      if (!WERKZEUGE_AKTIV) return;
+      const jetzt = performance.now();
+      klicks.push(jetzt);
+      while (klicks.length && jetzt - klicks[0] > 1800) klicks.shift();
+      if (klicks.length >= 5) {
+        klicks.length = 0;
+        if (entsperren() && ctx.s()) oeffne();
+      }
+    });
+    menu.addEventListener("click", () => oeffne());
+    function fenster8() {
+      const seit = performance.now() - 2e3;
+      while (frames.length && frames[0] < seit) frames.shift();
+      const abstaende = frames.slice(1).map((x, i) => x - frames[i]).filter((x) => x > 0);
+      return {
+        fpsMittel: abstaende.length ? num2(1e3 * abstaende.length / abstaende.reduce((a, b2) => a + b2, 0)) : null,
+        fpsSchlechteste: abstaende.length ? num2(1e3 / Math.max(...abstaende)) : null
+      };
+    }
+    function animation(t) {
+      if (!aktiv5) return;
+      ctx.renderFrame();
+      frames.push(t);
+      fenster8();
+      raf = requestAnimationFrame(animation);
+    }
+    function metriken() {
+      const m = fenster8();
+      const teile2 = ctx.teileStand()?.teile ?? 0;
+      const ende = ctx.messung.wocheMs.at(-1);
+      const speicher = performance.memory?.usedJSHeapSize;
+      return { ...m, teile: teile2, engineMs: ende?.engineMs ?? null, speicherMiB: speicher === void 0 ? null : num2(speicher / 1048576) };
+    }
+    function metrikZeigen() {
+      if (!aktiv5) return;
+      const m = metriken();
+      for (const [id, wert] of Object.entries(m)) {
+        const el2 = document.getElementById("test-" + id);
+        if (el2) el2.textContent = wert === null ? "Nicht verf\xFCgbar" : String(wert);
+      }
+    }
+    function zeigeMetrik(name2, id, einheit) {
+      return '<div class="zeile"><span>' + name2 + '</span><b><span id="test-' + id + '">\u2013</span>' + (einheit || "") + "</b></div>";
+    }
+    function zeigen(scroll = false) {
+      if (!freigeschaltet || !ctx.s()) return;
+      const sc = scroll ? inhalt.scrollTop : 0, s2 = ctx.s();
+      const stakeholder = Object.entries(s2.stakeholder).map(([feld, wert]) => '<label class="test-eingabe">' + esc2(feld) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld) + '" value="' + Math.round(wert) + '"></label>').join("");
+      const angebot = ctx.E.TEST_EREIGNISSE.filter((e) => e.id.startsWith("angebot:"));
+      const ereignis = ctx.E.TEST_EREIGNISSE.filter((e) => !e.id.startsWith("angebot:"));
+      const knoepfe = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
+      const html = '<div class="testwerkzeuge"><div class="karte"><h3>Teststeuerung</h3><p class="leise">Nur f\xFCr Tests. \xC4nderungen markieren den Spielstand dauerhaft als Testspiel.</p><label><input id="test-bot" type="checkbox"' + (document.getElementById("test-bot")?.checked ? " checked" : "") + '> Bot C f\xFCr den Zeitsprung einsetzen</label><div class="test-tasten">' + [1, 4, 13, 52].map((n) => '<button type="button" data-test-wochen="' + n + '">' + n + " Woche" + (n > 1 ? "n" : "") + "</button>").join("") + '</div><progress id="test-fortschritt" max="1" value="0" hidden></progress><div id="test-status" role="status"></div><label class="test-eingabe">Cash (\u20AC) <input id="test-cash" type="number" step="1" value="' + s2.cash + '"></label><button type="button" data-test-a="cash">Cash setzen</button> <button type="button" class="rot" data-test-a="insolvenz">Insolvenz er\xF6ffnen</button><h3>Stakeholder</h3><div class="test-felder">' + stakeholder + '</div><label class="test-eingabe">Schwierigkeit <select id="test-schwierigkeit">' + ["leicht", "mittel", "schwer"].map((v) => '<option value="' + v + '"' + ((s2.schwierigkeit ?? "mittel") === v ? " selected" : "") + ">" + v + "</option>").join("") + '</select></label><button type="button" data-test-a="schwierigkeit">Schwierigkeit setzen</button></div><div class="karte"><h3>Angebote ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(angebot) + '</div><h3>Ereignisse ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(ereignis) + '</div></div><div class="karte"><h3>Live-Messung (letzte 2 Sekunden)</h3>' + zeigeMetrik("Bildrate Mittel", "fpsMittel", " FPS") + zeigeMetrik("Schlechteste Bildrate", "fpsSchlechteste", " FPS") + zeigeMetrik("Szenenteile", "teile", "") + zeigeMetrik("Engine letzte Woche", "engineMs", " ms") + zeigeMetrik("JS-Speicher", "speicherMiB", " MiB") + '</div><div class="karte"><h3>Fehlerbericht</h3><p class="leise">Enth\xE4lt den vollst\xE4ndigen Spielstand und Ger\xE4teinformationen. Nur an vertrauensw\xFCrdige Empf\xE4nger weitergeben.</p><button type="button" data-test-a="kopieren">Bericht kopieren</button> <button type="button" data-test-a="laden">Bericht laden</button><textarea id="test-bericht" rows="4" placeholder="Komprimierten Fehlerbericht hier einf\xFCgen" spellcheck="false"></textarea><small>' + fehler6.length + " Konsolenfehler gespeichert, 20 im Bericht</small></div></div>";
+      ctx.panel("Testwerkzeuge", "Seed " + s2.seed + " \xB7 Woche " + s2.woche + " \xB7 Version " + s2.version, html, "gross");
+      aktiv5 = true;
+      inhalt.scrollTop = sc;
+      document.getElementById("test-bericht").value = berichteingabe;
+      metrikZeigen();
+      if (!messTimer) messTimer = setInterval(metrikZeigen, 400);
+      if (!raf) raf = requestAnimationFrame(animation);
+    }
+    function oeffne() {
+      if (!freigeschaltet || !ctx.s()) return false;
+      zeigen();
+      return true;
+    }
+    function zu() {
+      aktiv5 = false;
+      clearInterval(messTimer);
+      messTimer = null;
+      if (raf !== null) cancelAnimationFrame(raf);
+      raf = null;
+      frames.length = 0;
+    }
+    const sende = (a) => {
+      const r = ctx.E.fuehreAus(ctx.s(), a);
+      ctx.meldung(r.text, r.ok);
+      if (r.ok) ctx.nachAktion();
+      if (aktiv5) zeigen(true);
+      return r;
+    };
+    async function springen(n, bot) {
+      if (!aktiv5 || beschaeftigt || ![1, 4, 13, 52].includes(n)) return { fertig: 0 };
+      beschaeftigt = true;
+      const bar = document.getElementById("test-fortschritt");
+      const status = document.getElementById("test-status");
+      bar.hidden = false;
+      bar.max = n;
+      bar.value = 0;
+      let fertig2 = 0;
+      try {
+        for (let i = 0; i < n; i++) {
+          if (ctx.s().phase === "zerschlagen") break;
+          const m = ctx.testWoche(bot);
+          if (!m) break;
+          fertig2++;
+          bar.value = fertig2;
+          status.textContent = fertig2 + " / " + n + " Wochen";
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+        status.textContent = "Zeitsprung: " + fertig2 + " von " + n + " Wochen abgeschlossen.";
+        if (fertig2 !== n) ctx.meldung("Zeitsprung beendet: Spielende erreicht.", false);
+        return { fertig: fertig2 };
+      } catch (e) {
+        ctx.meldung("Zeitsprung fehlgeschlagen: " + e.message, false);
+        throw e;
+      } finally {
+        beschaeftigt = false;
+        if (aktiv5) zeigen();
+      }
+    }
+    async function erstelleBericht() {
+      if (!freigeschaltet || !ctx.s()) throw new Error("Testwerkzeuge nicht freigeschaltet.");
+      const s2 = ctx.s();
+      const daten = {
+        format: 1,
+        erzeugt: (/* @__PURE__ */ new Date()).toISOString(),
+        seed: s2.seed,
+        woche: s2.woche,
+        version: s2.version,
+        userAgent: navigator.userAgent,
+        fehler: fehler6.slice(-20),
+        stadt: ctx.stadt(),
+        spiel: structuredClone(s2),
+        ui: structuredClone(ctx.ui())
+      };
+      letzterBericht = BERICHT_FORMAT + await gzip(JSON.stringify(daten));
+      return letzterBericht;
+    }
+    async function berichtKopieren() {
+      const bericht2 = await erstelleBericht();
+      berichteingabe = bericht2;
+      const feld = document.getElementById("test-bericht");
+      if (feld) feld.value = bericht2;
+      await kopiereText(bericht2);
+      ctx.meldung("Fehlerbericht kopiert (" + bericht2.length + " Zeichen).");
+      return bericht2;
+    }
+    async function berichtLaden(text3) {
+      if (!freigeschaltet) throw new Error("Testwerkzeuge nicht freigeschaltet.");
+      const input = String(text3 || "").trim();
+      if (!input.startsWith(BERICHT_FORMAT)) throw new Error("Unbekanntes Berichtsformat.");
+      const datensatz = JSON.parse(await ungzip(input.slice(BERICHT_FORMAT.length)));
+      if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 1 || !Number.isInteger(datensatz.spiel.woche) || !Number.isInteger(datensatz.spiel.seed) || !Array.isArray(datensatz.spiel.haeuser) || !Array.isArray(datensatz.spiel.historie) || !datensatz.spiel.hq || !datensatz.spiel.einkauf || !datensatz.spiel.vorstand || !datensatz.spiel.produkte || !datensatz.spiel.marketing?.stand)
+        throw new Error("Bericht enth\xE4lt keinen g\xFCltigen Spielstand.");
+      await ctx.standLaden(datensatz);
+      ctx.meldung("Testbericht geladen: Seed " + datensatz.spiel.seed + ", Woche " + datensatz.spiel.woche + ".");
+      if (aktiv5) zeigen();
+      return { seed: ctx.s().seed, woche: ctx.s().woche, cash: ctx.s().cash };
+    }
+    inhalt.addEventListener("input", (e) => {
+      if (aktiv5 && e.target.id === "test-bericht") berichteingabe = e.target.value;
+    });
+    inhalt.addEventListener("change", (e) => {
+      if (!aktiv5) return;
+      const feld = e.target.dataset.testStake;
+      if (feld && e.target.validity.valid && e.target.value !== "")
+        sende({ typ: "testStakeholder", feld, wert: Number(e.target.value) });
+    });
+    inhalt.addEventListener("click", async (e) => {
+      if (!aktiv5 || beschaeftigt) return;
+      const button2 = e.target.closest("[data-test-a],[data-test-wochen],[data-test-ereignis]");
+      if (!button2) return;
+      const a = button2.dataset.testA;
+      try {
+        if (button2.dataset.testWochen) return springen(Number(button2.dataset.testWochen), document.getElementById("test-bot").checked);
+        if (button2.dataset.testEreignis) return sende({ typ: "testEreignis", ereignis: button2.dataset.testEreignis });
+        if (a === "cash") return sende({ typ: "testCash", betrag: Number(document.getElementById("test-cash").value) });
+        if (a === "insolvenz") return sende({ typ: "testInsolvenz" });
+        if (a === "schwierigkeit") return sende({ typ: "testSchwierigkeit", stufe: document.getElementById("test-schwierigkeit").value });
+        if (a === "kopieren") return await berichtKopieren();
+        if (a === "laden") return await berichtLaden(document.getElementById("test-bericht").value);
+      } catch (err) {
+        eintrag2("werkzeuge", err.stack || err.message);
+        ctx.meldung("Testwerkzeuge: " + err.message, false);
+      }
+    });
+    return {
+      oeffne,
+      zu,
+      aktiv: () => aktiv5,
+      neuZeichnen: () => {
+        if (aktiv5 && !beschaeftigt) zeigen(true);
+      },
+      nachStart: () => {
+        if (einmal2 && entsperren()) oeffne();
+      },
+      freischalten: entsperren,
+      get freigeschaltet() {
+        return freigeschaltet;
+      },
+      springen,
+      erstelleBericht,
+      berichtKopieren,
+      berichtLaden,
+      metriken,
+      get fehler() {
+        return [...fehler6];
+      }
+    };
+  }
+
   // src/ui/reporting.js
-  var prozent = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
+  var prozent2 = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl3 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
   var euro2 = (x) => zahl3(x, 2) + " \u20AC";
-  var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent(basis3 ? wert / basis3 - 1 : 0);
+  var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent2(basis3 ? wert / basis3 - 1 : 0);
   var punkt2 = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl3((wert - basis3) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
@@ -128837,10 +130163,10 @@
     const a = d2.aktuell, v = d2.vorjahr;
     const br = E.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent(a.kaufquote), punkt2(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl3(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent2(a.kaufquote), punkt2(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl3(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile(z2, haus2 = false) {
-    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
+    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent2(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent2(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
   }
   function reportingModul(ctx) {
     const E = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
@@ -128934,7 +130260,7 @@
     const optionen2 = ["kaufen", "entwickeln", "dienstleister"];
     const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
-    const prozent2 = (x) => Math.round(x * 100) + " %";
+    const prozent3 = (x) => Math.round(x * 100) + " %";
     function daten() {
       return E.itUebersicht(s2());
     }
@@ -128950,7 +130276,7 @@
     function systemKarte(x) {
       const ampel = x.risiko < 2e-3 ? "gruen" : x.risiko < 0.01 ? "gelb" : "rot";
       let h = '<div class="karte"><div class="khead">' + esc2(x.name) + "<small>Generation " + x.generation + " / 4</small></div>";
-      h += '<div class="it-werte"><span>Alter <b>' + Math.floor(x.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent2(x.risiko) + "/Woche</span></div>";
+      h += '<div class="it-werte"><span>Alter <b>' + Math.floor(x.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent3(x.risiko) + "/Woche</span></div>";
       if (x.wartungGekuendigt) h += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
       if (x.kasseAusbau) h += '<div class="zeile">SB-Kassen ' + x.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x.kasseAusbau.mobil + "/2</div>";
       const akt = x.verteilung.filter((c) => c.generation > x.generation);
@@ -128978,7 +130304,7 @@
     }
     function projektKarte(p2, d2) {
       let h = '<div class="karte"><div class="khead">' + esc2(E.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent2(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
+      h += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent3(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
       h += zeile2("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
       h += zeile2("Mehrwochen durch Verzug", p2.verzug);
       h += zeile2("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
@@ -129508,966 +130834,6 @@
         haus: ui.haus,
         daten: E.personalUebersicht(ctx.s(), ui.cluster)
       })
-    };
-  }
-
-  // src/ui/werkzeuge.js
-  var WERKZEUGE_AKTIV = true;
-  var BERICHT_FORMAT = "RUHRKAUF-TEST-1:gzip:";
-  var MAX_FEHLER = 50;
-  function base64(bytes) {
-    let s2 = "";
-    for (let i = 0; i < bytes.length; i += 16384)
-      s2 += String.fromCharCode(...bytes.subarray(i, i + 16384));
-    return btoa(s2);
-  }
-  function bytesAusBase64(s2) {
-    const bin = atob(s2);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return arr;
-  }
-  async function gzip(text3) {
-    if (typeof CompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt CompressionStream nicht.");
-    const rohr = new Blob([new TextEncoder().encode(text3)]).stream().pipeThrough(new CompressionStream("gzip"));
-    return base64(new Uint8Array(await new Response(rohr).arrayBuffer()));
-  }
-  async function ungzip(base64Text) {
-    if (typeof DecompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt DecompressionStream nicht.");
-    const daten = bytesAusBase64(base64Text);
-    const rohr = new Blob([daten]).stream().pipeThrough(new DecompressionStream("gzip"));
-    return new Response(rohr).text();
-  }
-  async function kopiereText(text3) {
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(text3);
-        return;
-      } catch (_) {
-      }
-    }
-    const feld = document.createElement("textarea");
-    feld.value = text3;
-    feld.style.cssText = "position:fixed;left:-9999px;top:0";
-    document.body.appendChild(feld);
-    feld.select();
-    const ok6 = document.execCommand("copy");
-    feld.remove();
-    if (!ok6) throw new Error("Kopieren nicht erlaubt. Bitte den Text im Berichtsfeld manuell kopieren.");
-  }
-  function werkzeugeModul(ctx) {
-    const datum = document.querySelector(".datum");
-    const menu = document.getElementById("werkzeuge");
-    const inhalt = document.getElementById("pinhalt");
-    const fehler6 = [];
-    const frames = [];
-    const einmal2 = new URLSearchParams(location.search).get("werkzeuge") === "1";
-    let freigeschaltet = false, aktiv5 = false, beschaeftigt = false;
-    let messTimer = null, raf = null;
-    let berichteingabe = "";
-    let letzterBericht = "";
-    const klicks = [];
-    const num2 = (x) => Number.isFinite(x) ? Math.round(x * 10) / 10 : null;
-    function eintrag2(art, text3) {
-      fehler6.push({ zeit: (/* @__PURE__ */ new Date()).toISOString(), art, text: String(text3).slice(0, 3e3) });
-      if (fehler6.length > MAX_FEHLER) fehler6.shift();
-      if (freigeschaltet) datum.classList.add("testfehler");
-    }
-    window.addEventListener("error", (e) => eintrag2("error", e.message || e.error?.stack || "Unbekannter Fehler"));
-    window.addEventListener("unhandledrejection", (e) => eintrag2("unhandledrejection", e.reason?.stack || e.reason || "Unbehandeltes Promise"));
-    const originalConsoleError = console.error.bind(console);
-    console.error = (...args) => {
-      eintrag2("console.error", args.map((x) => x?.stack || String(x)).join(" "));
-      originalConsoleError(...args);
-    };
-    function entsperren() {
-      if (!WERKZEUGE_AKTIV) return false;
-      freigeschaltet = true;
-      menu.hidden = false;
-      menu.style.display = "";
-      datum.classList.toggle("testfehler", fehler6.length > 0);
-      return true;
-    }
-    datum.addEventListener("click", () => {
-      if (!WERKZEUGE_AKTIV) return;
-      const jetzt = performance.now();
-      klicks.push(jetzt);
-      while (klicks.length && jetzt - klicks[0] > 1800) klicks.shift();
-      if (klicks.length >= 5) {
-        klicks.length = 0;
-        if (entsperren() && ctx.s()) oeffne();
-      }
-    });
-    menu.addEventListener("click", () => oeffne());
-    function fenster8() {
-      const seit = performance.now() - 2e3;
-      while (frames.length && frames[0] < seit) frames.shift();
-      const abstaende = frames.slice(1).map((x, i) => x - frames[i]).filter((x) => x > 0);
-      return {
-        fpsMittel: abstaende.length ? num2(1e3 * abstaende.length / abstaende.reduce((a, b2) => a + b2, 0)) : null,
-        fpsSchlechteste: abstaende.length ? num2(1e3 / Math.max(...abstaende)) : null
-      };
-    }
-    function animation(t) {
-      if (!aktiv5) return;
-      ctx.renderFrame();
-      frames.push(t);
-      fenster8();
-      raf = requestAnimationFrame(animation);
-    }
-    function metriken() {
-      const m = fenster8();
-      const teile2 = ctx.teileStand()?.teile ?? 0;
-      const ende = ctx.messung.wocheMs.at(-1);
-      const speicher = performance.memory?.usedJSHeapSize;
-      return { ...m, teile: teile2, engineMs: ende?.engineMs ?? null, speicherMiB: speicher === void 0 ? null : num2(speicher / 1048576) };
-    }
-    function metrikZeigen() {
-      if (!aktiv5) return;
-      const m = metriken();
-      for (const [id, wert] of Object.entries(m)) {
-        const el2 = document.getElementById("test-" + id);
-        if (el2) el2.textContent = wert === null ? "Nicht verf\xFCgbar" : String(wert);
-      }
-    }
-    function zeigeMetrik(name2, id, einheit) {
-      return '<div class="zeile"><span>' + name2 + '</span><b><span id="test-' + id + '">\u2013</span>' + (einheit || "") + "</b></div>";
-    }
-    function zeigen(scroll = false) {
-      if (!freigeschaltet || !ctx.s()) return;
-      const sc = scroll ? inhalt.scrollTop : 0, s2 = ctx.s();
-      const stakeholder = Object.entries(s2.stakeholder).map(([feld, wert]) => '<label class="test-eingabe">' + esc2(feld) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld) + '" value="' + Math.round(wert) + '"></label>').join("");
-      const angebot = ctx.E.TEST_EREIGNISSE.filter((e) => e.id.startsWith("angebot:"));
-      const ereignis = ctx.E.TEST_EREIGNISSE.filter((e) => !e.id.startsWith("angebot:"));
-      const knoepfe = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
-      const html = '<div class="testwerkzeuge"><div class="karte"><h3>Teststeuerung</h3><p class="leise">Nur f\xFCr Tests. \xC4nderungen markieren den Spielstand dauerhaft als Testspiel.</p><label><input id="test-bot" type="checkbox"' + (document.getElementById("test-bot")?.checked ? " checked" : "") + '> Bot C f\xFCr den Zeitsprung einsetzen</label><div class="test-tasten">' + [1, 4, 13, 52].map((n) => '<button type="button" data-test-wochen="' + n + '">' + n + " Woche" + (n > 1 ? "n" : "") + "</button>").join("") + '</div><progress id="test-fortschritt" max="1" value="0" hidden></progress><div id="test-status" role="status"></div><label class="test-eingabe">Cash (\u20AC) <input id="test-cash" type="number" step="1" value="' + s2.cash + '"></label><button type="button" data-test-a="cash">Cash setzen</button> <button type="button" class="rot" data-test-a="insolvenz">Insolvenz er\xF6ffnen</button><h3>Stakeholder</h3><div class="test-felder">' + stakeholder + '</div><label class="test-eingabe">Schwierigkeit <select id="test-schwierigkeit">' + ["leicht", "mittel", "schwer"].map((v) => '<option value="' + v + '"' + ((s2.schwierigkeit ?? "mittel") === v ? " selected" : "") + ">" + v + "</option>").join("") + '</select></label><button type="button" data-test-a="schwierigkeit">Schwierigkeit setzen</button></div><div class="karte"><h3>Angebote ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(angebot) + '</div><h3>Ereignisse ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(ereignis) + '</div></div><div class="karte"><h3>Live-Messung (letzte 2 Sekunden)</h3>' + zeigeMetrik("Bildrate Mittel", "fpsMittel", " FPS") + zeigeMetrik("Schlechteste Bildrate", "fpsSchlechteste", " FPS") + zeigeMetrik("Szenenteile", "teile", "") + zeigeMetrik("Engine letzte Woche", "engineMs", " ms") + zeigeMetrik("JS-Speicher", "speicherMiB", " MiB") + '</div><div class="karte"><h3>Fehlerbericht</h3><p class="leise">Enth\xE4lt den vollst\xE4ndigen Spielstand und Ger\xE4teinformationen. Nur an vertrauensw\xFCrdige Empf\xE4nger weitergeben.</p><button type="button" data-test-a="kopieren">Bericht kopieren</button> <button type="button" data-test-a="laden">Bericht laden</button><textarea id="test-bericht" rows="4" placeholder="Komprimierten Fehlerbericht hier einf\xFCgen" spellcheck="false"></textarea><small>' + fehler6.length + " Konsolenfehler gespeichert, 20 im Bericht</small></div></div>";
-      ctx.panel("Testwerkzeuge", "Seed " + s2.seed + " \xB7 Woche " + s2.woche + " \xB7 Version " + s2.version, html, "gross");
-      aktiv5 = true;
-      inhalt.scrollTop = sc;
-      document.getElementById("test-bericht").value = berichteingabe;
-      metrikZeigen();
-      if (!messTimer) messTimer = setInterval(metrikZeigen, 400);
-      if (!raf) raf = requestAnimationFrame(animation);
-    }
-    function oeffne() {
-      if (!freigeschaltet || !ctx.s()) return false;
-      zeigen();
-      return true;
-    }
-    function zu() {
-      aktiv5 = false;
-      clearInterval(messTimer);
-      messTimer = null;
-      if (raf !== null) cancelAnimationFrame(raf);
-      raf = null;
-      frames.length = 0;
-    }
-    const sende = (a) => {
-      const r = ctx.E.fuehreAus(ctx.s(), a);
-      ctx.meldung(r.text, r.ok);
-      if (r.ok) ctx.nachAktion();
-      if (aktiv5) zeigen(true);
-      return r;
-    };
-    async function springen(n, bot) {
-      if (!aktiv5 || beschaeftigt || ![1, 4, 13, 52].includes(n)) return { fertig: 0 };
-      beschaeftigt = true;
-      const bar = document.getElementById("test-fortschritt");
-      const status = document.getElementById("test-status");
-      bar.hidden = false;
-      bar.max = n;
-      bar.value = 0;
-      let fertig2 = 0;
-      try {
-        for (let i = 0; i < n; i++) {
-          if (ctx.s().phase === "zerschlagen") break;
-          const m = ctx.testWoche(bot);
-          if (!m) break;
-          fertig2++;
-          bar.value = fertig2;
-          status.textContent = fertig2 + " / " + n + " Wochen";
-          await new Promise((resolve) => setTimeout(resolve, 0));
-        }
-        status.textContent = "Zeitsprung: " + fertig2 + " von " + n + " Wochen abgeschlossen.";
-        if (fertig2 !== n) ctx.meldung("Zeitsprung beendet: Spielende erreicht.", false);
-        return { fertig: fertig2 };
-      } catch (e) {
-        ctx.meldung("Zeitsprung fehlgeschlagen: " + e.message, false);
-        throw e;
-      } finally {
-        beschaeftigt = false;
-        if (aktiv5) zeigen();
-      }
-    }
-    async function erstelleBericht() {
-      if (!freigeschaltet || !ctx.s()) throw new Error("Testwerkzeuge nicht freigeschaltet.");
-      const s2 = ctx.s();
-      const daten = {
-        format: 1,
-        erzeugt: (/* @__PURE__ */ new Date()).toISOString(),
-        seed: s2.seed,
-        woche: s2.woche,
-        version: s2.version,
-        userAgent: navigator.userAgent,
-        fehler: fehler6.slice(-20),
-        stadt: ctx.stadt(),
-        spiel: structuredClone(s2),
-        ui: structuredClone(ctx.ui())
-      };
-      letzterBericht = BERICHT_FORMAT + await gzip(JSON.stringify(daten));
-      return letzterBericht;
-    }
-    async function berichtKopieren() {
-      const bericht2 = await erstelleBericht();
-      berichteingabe = bericht2;
-      const feld = document.getElementById("test-bericht");
-      if (feld) feld.value = bericht2;
-      await kopiereText(bericht2);
-      ctx.meldung("Fehlerbericht kopiert (" + bericht2.length + " Zeichen).");
-      return bericht2;
-    }
-    async function berichtLaden(text3) {
-      if (!freigeschaltet) throw new Error("Testwerkzeuge nicht freigeschaltet.");
-      const input = String(text3 || "").trim();
-      if (!input.startsWith(BERICHT_FORMAT)) throw new Error("Unbekanntes Berichtsformat.");
-      const datensatz = JSON.parse(await ungzip(input.slice(BERICHT_FORMAT.length)));
-      if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 1 || !Number.isInteger(datensatz.spiel.woche) || !Number.isInteger(datensatz.spiel.seed) || !Array.isArray(datensatz.spiel.haeuser) || !Array.isArray(datensatz.spiel.historie) || !datensatz.spiel.hq || !datensatz.spiel.einkauf || !datensatz.spiel.vorstand || !datensatz.spiel.produkte || !datensatz.spiel.marketing?.stand)
-        throw new Error("Bericht enth\xE4lt keinen g\xFCltigen Spielstand.");
-      await ctx.standLaden(datensatz);
-      ctx.meldung("Testbericht geladen: Seed " + datensatz.spiel.seed + ", Woche " + datensatz.spiel.woche + ".");
-      if (aktiv5) zeigen();
-      return { seed: ctx.s().seed, woche: ctx.s().woche, cash: ctx.s().cash };
-    }
-    inhalt.addEventListener("input", (e) => {
-      if (aktiv5 && e.target.id === "test-bericht") berichteingabe = e.target.value;
-    });
-    inhalt.addEventListener("change", (e) => {
-      if (!aktiv5) return;
-      const feld = e.target.dataset.testStake;
-      if (feld && e.target.validity.valid && e.target.value !== "")
-        sende({ typ: "testStakeholder", feld, wert: Number(e.target.value) });
-    });
-    inhalt.addEventListener("click", async (e) => {
-      if (!aktiv5 || beschaeftigt) return;
-      const button2 = e.target.closest("[data-test-a],[data-test-wochen],[data-test-ereignis]");
-      if (!button2) return;
-      const a = button2.dataset.testA;
-      try {
-        if (button2.dataset.testWochen) return springen(Number(button2.dataset.testWochen), document.getElementById("test-bot").checked);
-        if (button2.dataset.testEreignis) return sende({ typ: "testEreignis", ereignis: button2.dataset.testEreignis });
-        if (a === "cash") return sende({ typ: "testCash", betrag: Number(document.getElementById("test-cash").value) });
-        if (a === "insolvenz") return sende({ typ: "testInsolvenz" });
-        if (a === "schwierigkeit") return sende({ typ: "testSchwierigkeit", stufe: document.getElementById("test-schwierigkeit").value });
-        if (a === "kopieren") return await berichtKopieren();
-        if (a === "laden") return await berichtLaden(document.getElementById("test-bericht").value);
-      } catch (err) {
-        eintrag2("werkzeuge", err.stack || err.message);
-        ctx.meldung("Testwerkzeuge: " + err.message, false);
-      }
-    });
-    return {
-      oeffne,
-      zu,
-      aktiv: () => aktiv5,
-      neuZeichnen: () => {
-        if (aktiv5 && !beschaeftigt) zeigen(true);
-      },
-      nachStart: () => {
-        if (einmal2 && entsperren()) oeffne();
-      },
-      freischalten: entsperren,
-      get freigeschaltet() {
-        return freigeschaltet;
-      },
-      springen,
-      erstelleBericht,
-      berichtKopieren,
-      berichtLaden,
-      metriken,
-      get fehler() {
-        return [...fehler6];
-      }
-    };
-  }
-
-  // src/kit/abzeichen.js
-  var cache2 = /* @__PURE__ */ new Map();
-  var metalle = {
-    bronze: ["#6d3f28", "#dba26f", "#a5673e"],
-    silber: ["#556573", "#f0f3f5", "#9aa6b0"],
-    gold: ["#8c611b", "#fff2a4", "#d1a02e"]
-  };
-  function symbol(g, c) {
-    c.save();
-    c.translate(64, 62);
-    c.strokeStyle = "#26313a";
-    c.fillStyle = "#26313a";
-    c.lineWidth = 5;
-    c.lineJoin = "round";
-    c.lineCap = "round";
-    switch (g) {
-      case "Sanierung":
-        c.beginPath();
-        c.moveTo(-26, 22);
-        c.lineTo(-8, 5);
-        c.lineTo(4, 14);
-        c.lineTo(26, -18);
-        c.stroke();
-        c.beginPath();
-        c.moveTo(11, -18);
-        c.lineTo(28, -19);
-        c.lineTo(26, -3);
-        c.stroke();
-        break;
-      case "Handel":
-        c.strokeRect(-23, -6, 46, 31);
-        c.beginPath();
-        c.moveTo(-13, -6);
-        c.lineTo(-5, -22);
-        c.lineTo(5, -22);
-        c.lineTo(13, -6);
-        c.stroke();
-        for (const x of [-9, 0, 9]) {
-          c.beginPath();
-          c.moveTo(x, 0);
-          c.lineTo(x, 17);
-          c.stroke();
-        }
-        break;
-      case "Menschen":
-        for (const [x, y, r] of [[0, -15, 12], [-22, 0, 8], [22, 0, 8]]) {
-          c.beginPath();
-          c.arc(x, y, r, 0, Math.PI * 2);
-          c.fill();
-        }
-        c.beginPath();
-        c.arc(0, 37, 27, Math.PI, 0);
-        c.stroke();
-        c.beginPath();
-        c.moveTo(-32, 23);
-        c.lineTo(-19, 14);
-        c.moveTo(32, 23);
-        c.lineTo(19, 14);
-        c.stroke();
-        break;
-      case "Formate":
-        for (const [x, h] of [[-26, 27], [-7, 41], [14, 34]]) {
-          c.strokeRect(x, 24 - h, 19, h);
-          c.fillRect(x + 7, 24 - h + 7, 5, 6);
-        }
-        break;
-      default:
-        c.beginPath();
-        for (let n = 0; n < 10; n++) {
-          const a = -Math.PI / 2 + n * Math.PI / 5, r = n % 2 ? 13 : 29;
-          const x = Math.cos(a) * r, y = Math.sin(a) * r;
-          if (!n) c.moveTo(x, y);
-          else c.lineTo(x, y);
-        }
-        c.closePath();
-        c.fill();
-    }
-    c.restore();
-  }
-  function abzeichen(gruppe2, stufe2 = "bronze") {
-    const key = gruppe2 + ":" + stufe2;
-    if (cache2.has(key)) return cache2.get(key);
-    const c = document.createElement("canvas");
-    c.width = c.height = 128;
-    const x = c.getContext("2d");
-    const farben = metalle[stufe2] ?? metalle.bronze;
-    const rand = x.createRadialGradient(39, 31, 7, 64, 64, 64);
-    rand.addColorStop(0, farben[1]);
-    rand.addColorStop(0.76, farben[2]);
-    rand.addColorStop(1, farben[0]);
-    x.fillStyle = "#26313a";
-    x.beginPath();
-    x.arc(64, 64, 62, 0, Math.PI * 2);
-    x.fill();
-    x.fillStyle = rand;
-    x.beginPath();
-    x.arc(64, 64, 58, 0, Math.PI * 2);
-    x.fill();
-    x.lineWidth = 3;
-    x.strokeStyle = "rgba(255,255,255,.55)";
-    x.beginPath();
-    x.arc(64, 64, 49, 0, Math.PI * 2);
-    x.stroke();
-    x.lineWidth = 2;
-    x.strokeStyle = farben[0];
-    x.beginPath();
-    x.arc(64, 64, 44, 0, Math.PI * 2);
-    x.stroke();
-    symbol(gruppe2, x);
-    const png = c.toDataURL("image/png");
-    cache2.set(key, png);
-    return png;
-  }
-
-  // src/ui/erfolge.js
-  function erfolgeModul(ctx) {
-    const E = ctx.E, spielstand = ctx.s;
-    const zustand = { offen: false, filter: "Alle" };
-    const toast = document.createElement("div");
-    toast.id = "erfolge-toast";
-    toast.setAttribute("role", "status");
-    toast.setAttribute("aria-live", "polite");
-    toast.hidden = true;
-    document.body.append(toast);
-    const schlange2 = [];
-    let toastTimer = null, zeigt = false;
-    const liste = () => E.erfolgeUebersicht(spielstand());
-    const freigeschaltet = (e) => Object.prototype.hasOwnProperty.call(e, "freigeschaltet");
-    const bild3 = (e) => '<img class="erfolge-bild" src="' + abzeichen(e.gruppe, e.stufe) + '" alt="">';
-    function karten() {
-      const alle = liste();
-      const offen = alle.filter(freigeschaltet).length;
-      const gruppen = ["Alle", "Sanierung", "Handel", "Menschen", "Formate", "Kurios"];
-      const ausw = zustand.filter === "Alle" ? alle : alle.filter((e) => e.gruppe === zustand.filter);
-      return '<div class="erfolge-seite"><div class="erfolge-kopf"><b>' + offen + " / " + alle.length + '</b><span>Abzeichen freigeschaltet</span><div class="erfolge-balken" role="progressbar" aria-valuenow="' + offen + '" aria-valuemin="0" aria-valuemax="' + alle.length + '"><i style="width:' + (alle.length ? offen / alle.length * 100 : 0) + '%"></i></div></div><div class="erfolge-filter" role="group" aria-label="Erfolge filtern">' + gruppen.map((g) => '<button type="button" data-erfolge-filter="' + g + '" class="' + (zustand.filter === g ? "an" : "") + '">' + g + "</button>").join("") + '</div><div class="erfolge-raster">' + ausw.map((e) => {
-        const frei6 = freigeschaltet(e), geheim = e.geheim && !frei6;
-        return '<article class="erfolge-karte' + (frei6 ? " frei" : " gesperrt") + '" data-erfolg="' + esc2(e.id) + '" aria-label="' + (geheim ? "Geheimer Erfolg" : esc2(e.titel)) + '">' + (geheim ? '<div class="erfolge-geheim" aria-hidden="true">?</div>' : bild3(e)) + "<b>" + (geheim ? "Geheim" : esc2(e.titel)) + "</b><small>" + (geheim ? "Noch nicht enth\xFCllt" : esc2(e.gruppe + " \xB7 " + e.stufe)) + "</small>" + (frei6 ? '<span class="erfolge-frei">Seit Woche ' + e.freigeschaltet + "</span>" : geheim ? '<span class="erfolge-hinweis">Geheimer Erfolg</span>' : '<span class="erfolge-hinweis">' + esc2(e.hinweis) + '</span><div class="erfolge-balken" role="progressbar" aria-valuenow="' + Math.round(e.fortschritt * 100) + '" aria-valuemin="0" aria-valuemax="100" aria-label="Fortschritt"><i style="width:' + Math.round(e.fortschritt * 100) + '%"></i></div>') + "</article>";
-      }).join("") + "</div></div>";
-    }
-    function neuZeichnen() {
-      if (!zustand.offen) return;
-      ctx.panel("Erfolge", "Meilensteine, Handel und besondere Momente", karten(), "gross");
-      zustand.offen = true;
-      const node = document.getElementById("pinhalt");
-      node.querySelectorAll("[data-erfolge-filter]").forEach((b2) => b2.addEventListener("click", () => {
-        zustand.filter = b2.dataset.erfolgeFilter;
-        neuZeichnen();
-      }));
-    }
-    function oeffne() {
-      zustand.offen = true;
-      neuZeichnen();
-    }
-    function zu() {
-      zustand.offen = false;
-    }
-    function naechstes() {
-      if (zeigt || !schlange2.length) return;
-      zeigt = true;
-      const e = schlange2.shift();
-      toast.innerHTML = '<div class="erfolge-toast-bild">' + bild3(e) + "</div><div><small>NEUER ERFOLG \xB7 " + esc2(e.gruppe) + "</small><strong>" + esc2(e.titel) + "</strong><span>" + esc2(e.hinweis) + "</span></div>";
-      toast.hidden = false;
-      requestAnimationFrame(() => toast.classList.add("sichtbar"));
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.remove("sichtbar");
-        setTimeout(() => {
-          toast.hidden = true;
-          zeigt = false;
-          naechstes();
-        }, 180);
-      }, 2500);
-    }
-    function nachWoche(vorher) {
-      if (!spielstand() || spielstand().erfolgeAktiv === false) return [];
-      const neu = liste().filter((e) => freigeschaltet(e) && !vorher.has(e.id));
-      schlange2.push(...neu);
-      naechstes();
-      if (zustand.offen) neuZeichnen();
-      return neu.map((e) => e.titel);
-    }
-    return {
-      oeffne,
-      zu,
-      aktiv: () => zustand.offen,
-      neuZeichnen,
-      nachWoche,
-      pruefe: () => ({ gesamt: liste().length, frei: liste().filter(freigeschaltet).length, toast: !toast.hidden })
-    };
-  }
-
-  // src/ui/ton.js
-  var SPEICHER2 = "hartwig.einstellungen.v1";
-  var TON_SCHALTER = [
-    { schluessel: "ton_klaenge", titel: "Kl\xE4nge", gruppe: "Klang", art: "schalter", standard: true },
-    { schluessel: "ton_klaenge_lautstaerke", titel: "Lautst\xE4rke Kl\xE4nge", gruppe: "Klang", art: "regler", optionen: { min: 0, max: 100, schritt: 5 }, standard: 40 },
-    { schluessel: "ton_stadt", titel: "Stadtklang", gruppe: "Klang", art: "schalter", standard: true },
-    { schluessel: "ton_stadt_lautstaerke", titel: "Lautst\xE4rke Stadt", gruppe: "Klang", art: "regler", optionen: { min: 0, max: 100, schritt: 5 }, standard: 25 },
-    { schluessel: "ton_musik", titel: "Musik (standardm\xE4\xDFig aus)", gruppe: "Klang", art: "schalter", standard: false },
-    { schluessel: "ton_musik_lautstaerke", titel: "Lautst\xE4rke Musik", gruppe: "Klang", art: "regler", optionen: { min: 0, max: 100, schritt: 5 }, standard: 25 },
-    { schluessel: "ton_haptik", titel: "Haptische R\xFCckmeldung", gruppe: "Klang", art: "schalter", standard: true }
-  ];
-  var definition2 = new Map(TON_SCHALTER.map((d2) => [d2.schluessel, d2]));
-  var begrenze = (v, min, max) => Math.min(max, Math.max(min, v));
-  var fremdeEinstellungen = null;
-  var lokaleWerte = null;
-  function laden4() {
-    if (lokaleWerte !== null) return lokaleWerte;
-    lokaleWerte = {};
-    try {
-      const roh2 = globalThis.localStorage?.getItem(SPEICHER2);
-      const gelesen = roh2 ? JSON.parse(roh2) : null;
-      if (gelesen && typeof gelesen === "object" && !Array.isArray(gelesen)) lokaleWerte = gelesen;
-    } catch {
-    }
-    return lokaleWerte;
-  }
-  function normiere(d2, wert) {
-    if (d2.art === "schalter") return typeof wert === "boolean" ? wert : d2.standard;
-    const n = Number(wert);
-    if (!Number.isFinite(n)) return d2.standard;
-    return begrenze(Math.round(n / 5) * 5, d2.optionen.min, d2.optionen.max);
-  }
-  function tonEinstellung(schluessel) {
-    const d2 = definition2.get(schluessel);
-    if (!d2) return void 0;
-    if (fremdeEinstellungen) {
-      const wert = fremdeEinstellungen.einstellung(schluessel);
-      if (wert !== void 0) return normiere(d2, wert);
-    }
-    return normiere(d2, laden4()[schluessel] ?? d2.standard);
-  }
-  function setzeTonEinstellung(schluessel, wert) {
-    const d2 = definition2.get(schluessel);
-    if (!d2) throw new Error("Unbekannte Ton-Einstellung.");
-    const neu = normiere(d2, wert);
-    if (fremdeEinstellungen?.setzeEinstellung) return fremdeEinstellungen.setzeEinstellung(schluessel, neu);
-    if (Object.is(neu, tonEinstellung(schluessel))) return neu;
-    laden4()[schluessel] = neu;
-    try {
-      globalThis.localStorage?.setItem(SPEICHER2, JSON.stringify(lokaleWerte));
-    } catch {
-    }
-    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("einstellung", { detail: { schluessel, wert: neu } }));
-    return neu;
-  }
-  function haptik(art = "tippen") {
-    if (!tonEinstellung("ton_haptik")) return false;
-    try {
-      if (typeof window !== "undefined" && typeof window.hartwigHaptik === "function") {
-        window.hartwigHaptik(art);
-        return true;
-      }
-      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
-        return !!navigator.vibrate({ tippen: 8, erfolg: [14, 35, 14], warnung: [22, 40, 22], insolvenz: 60 }[art] ?? 8);
-      }
-    } catch {
-    }
-    return false;
-  }
-  var ZEIT = {
-    tippen: 0.02,
-    panelAuf: 0.12,
-    panelZu: 0.12,
-    erfolg: 0.3,
-    warnung: 0.31,
-    kasse: 0.025,
-    kassenklingeln: 0.36,
-    reise: 4.4,
-    insolvenz: 0.45,
-    freigeschaltet: 0.65
-  };
-  var TON_DAUER = Object.freeze(ZEIT);
-  var BPM = 70;
-  var TAKT = 60 / BPM;
-  function tonModul(ctx = {}) {
-    let audio = null, master = null, effekt = null, stadt = null, musik = null;
-    let rausch = null, stadtNah = null, stadtFern = null, stadtStimmen = null;
-    let gestartet = false, verfuegbar2 = true, freigabeLaeuft = false;
-    let uiAktiv = false, letzteKassenzeit = -Infinity, berichtFertig = false;
-    let reiseToken = 0, musikNaechste = 0, musikSchritt = 0;
-    let timer = null, zugRaf = 0, letztePhase = null;
-    const jetzt = () => audio?.currentTime ?? 0;
-    const aktiv5 = () => audio && audio.state === "running" && typeof document !== "undefined" && !document.hidden;
-    const laut = (typ) => tonEinstellung("ton_" + typ) ? tonEinstellung("ton_" + typ + "_lautstaerke") / 100 : 0;
-    const leise = (g, wert, zeit = 0.07) => {
-      if (!g || !audio) return;
-      try {
-        g.gain.setTargetAtTime(wert, jetzt(), zeit);
-      } catch {
-      }
-    };
-    function tonQuelle() {
-      if (audio || !verfuegbar2) return audio;
-      const C2 = globalThis.AudioContext || globalThis.webkitAudioContext;
-      if (!C2) {
-        verfuegbar2 = false;
-        return null;
-      }
-      try {
-        audio = new C2();
-        master = audio.createGain();
-        master.gain.value = 0.75;
-        master.connect(audio.destination);
-        effekt = audio.createGain();
-        effekt.connect(master);
-        stadt = audio.createGain();
-        stadt.gain.value = 0;
-        stadt.connect(master);
-        musik = audio.createGain();
-        musik.gain.value = 0;
-        musik.connect(master);
-      } catch {
-        audio = null;
-        verfuegbar2 = false;
-        return null;
-      }
-      return audio;
-    }
-    async function freischalten() {
-      if (freigabeLaeuft || !tonQuelle()) return false;
-      if (audio.state === "running") {
-        gestartet = true;
-        return true;
-      }
-      freigabeLaeuft = true;
-      try {
-        await audio.resume();
-        gestartet = audio.state === "running";
-        return gestartet;
-      } catch {
-        return false;
-      } finally {
-        freigabeLaeuft = false;
-      }
-    }
-    function note(freq, zeit, dauer, pegel, typ = "sine", ziel = effekt, ende = freq) {
-      if (!aktiv5() || !ziel || pegel <= 0) return;
-      const osz = audio.createOscillator(), g = audio.createGain();
-      osz.type = typ;
-      osz.frequency.setValueAtTime(freq, zeit);
-      if (ende !== freq) osz.frequency.exponentialRampToValueAtTime(Math.max(20, ende), zeit + dauer);
-      g.gain.setValueAtTime(1e-4, zeit);
-      g.gain.exponentialRampToValueAtTime(Math.max(2e-4, pegel), zeit + Math.min(0.012, dauer / 4));
-      g.gain.exponentialRampToValueAtTime(1e-4, zeit + dauer);
-      osz.connect(g);
-      g.connect(ziel);
-      osz.start(zeit);
-      osz.stop(zeit + dauer + 0.01);
-    }
-    function rauschPuffer() {
-      if (rausch || !audio) return rausch;
-      const laenge2 = Math.round(audio.sampleRate * 5), b2 = audio.createBuffer(1, laenge2, audio.sampleRate);
-      const daten = b2.getChannelData(0);
-      for (let i = 0; i < laenge2; i++) daten[i] = Math.random() * 2 - 1;
-      rausch = b2;
-      return b2;
-    }
-    function rauschen2(zeit, dauer, pegel, filterFrequenz = 800, art = "lowpass", ziel = effekt) {
-      if (!aktiv5() || !ziel || pegel <= 0) return;
-      const quelle2 = audio.createBufferSource(), f = audio.createBiquadFilter(), g = audio.createGain();
-      quelle2.buffer = rauschPuffer();
-      quelle2.loop = dauer >= 4.5;
-      f.type = art;
-      f.frequency.value = filterFrequenz;
-      f.Q.value = 0.8;
-      g.gain.setValueAtTime(1e-4, zeit);
-      g.gain.exponentialRampToValueAtTime(Math.max(2e-4, pegel), zeit + 0.015);
-      g.gain.exponentialRampToValueAtTime(1e-4, zeit + dauer);
-      quelle2.connect(f);
-      f.connect(g);
-      g.connect(ziel);
-      quelle2.start(zeit);
-      quelle2.stop(zeit + dauer + 0.01);
-    }
-    function abspielen(art, faktor2 = 1) {
-      if (!gestartet || !aktiv5() || !tonEinstellung("ton_klaenge")) return false;
-      const p2 = laut("klaenge") * begrenze(faktor2, 0, 1), t = jetzt() + 8e-3;
-      if (p2 === 0) return false;
-      switch (art) {
-        case "tippen":
-          note(1100, t, 0.02, p2 * 0.13, "triangle", effekt, 430);
-          break;
-        case "panelAuf":
-          rauschen2(t, 0.12, p2 * 0.1, 1400, "bandpass");
-          break;
-        case "panelZu":
-          note(350, t, 0.12, p2 * 0.065, "sine", effekt, 190);
-          break;
-        case "erfolg":
-          note(523.25, t, 0.19, p2 * 0.18);
-          note(783.99, t + 0.105, 0.195, p2 * 0.18);
-          break;
-        case "warnung":
-          note(180, t, 0.11, p2 * 0.22, "triangle");
-          note(155, t + 0.16, 0.15, p2 * 0.23, "triangle");
-          break;
-        case "kasse":
-          note(950, t, 0.025, p2 * 0.065, "triangle", effekt, 600);
-          break;
-        case "kassenklingeln":
-          note(1046.5, t, 0.33, p2 * 0.16);
-          note(1568, t + 0.06, 0.3, p2 * 0.13);
-          break;
-        case "insolvenz":
-          note(100, t, 0.45, p2 * 0.3, "triangle", effekt, 41);
-          rauschen2(t, 0.23, p2 * 0.12, 160);
-          break;
-        case "freigeschaltet":
-          [784, 1174.66, 1568].forEach((f, i) => note(f, t + i * 0.11, 0.43, p2 * 0.1));
-          break;
-        case "reise":
-          reisen();
-          break;
-        default:
-          return false;
-      }
-      return true;
-    }
-    function reisen() {
-      if (!gestartet || !aktiv5() || !laut("klaenge")) return false;
-      ++reiseToken;
-      const token = reiseToken, start = performance.now(), t = jetzt();
-      const q2 = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
-      q2.buffer = rauschPuffer();
-      q2.loop = true;
-      filter.type = "lowpass";
-      filter.frequency.value = 450;
-      g.gain.value = 0;
-      q2.connect(filter);
-      filter.connect(g);
-      g.connect(effekt);
-      q2.start(t);
-      q2.stop(t + ZEIT.reise);
-      for (let i = 0; i < 13; i++) {
-        const z2 = t + 0.15 + i * 0.325;
-        note(90, z2, 0.044, laut("klaenge") * 0.09, "triangle", effekt, 58);
-      }
-      function lautstaerke() {
-        if (token !== reiseToken || !aktiv5() || !tonEinstellung("ton_klaenge")) {
-          leise(g, 0, 0.015);
-          return;
-        }
-        const x = (performance.now() - start) / 4400;
-        if (x >= 1) {
-          leise(g, 0, 0.025);
-          return;
-        }
-        const overlay = document.querySelector(".reise-flug");
-        const position = overlay?.classList.contains("ankunft") ? 0.18 : overlay?.classList.contains("bewegt") ? 1 : 0.35;
-        leise(g, 0.08 * laut("klaenge") * Math.sin(Math.PI * begrenze(x, 0, 1)) * position, 0.035);
-        zugRaf = requestAnimationFrame(lautstaerke);
-      }
-      cancelAnimationFrame(zugRaf);
-      zugRaf = requestAnimationFrame(lautstaerke);
-      return true;
-    }
-    function stadtrauschen() {
-      if (!aktiv5() || stadtNah) return;
-      function schicht(typ, frequenz) {
-        const quelle2 = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
-        quelle2.buffer = rauschPuffer();
-        quelle2.loop = true;
-        filter.type = typ;
-        filter.frequency.value = frequenz;
-        filter.Q.value = 0.6;
-        g.gain.value = 0;
-        quelle2.connect(filter);
-        filter.connect(g);
-        g.connect(stadt);
-        quelle2.start();
-        return g;
-      }
-      stadtFern = schicht("lowpass", 380);
-      stadtNah = schicht("bandpass", 920);
-      stadtStimmen = schicht("bandpass", 460);
-    }
-    function musikNote(ton2, start, dauer, pegel) {
-      note(ton2, start, dauer, pegel, "sine", musik);
-      note(ton2 * 2, start, dauer * 0.85, pegel * 0.1, "triangle", musik);
-    }
-    function musikNachziehen() {
-      if (!aktiv5() || !laut("musik")) {
-        musikNaechste = 0;
-        return;
-      }
-      const s2 = ctx.spiel?.(), insolvenz = s2?.phase === "insolvenz" || s2?.phase === "zerschlagen";
-      const ebitda = ctx.ebitda13?.() ?? 0;
-      const moll = insolvenz || ebitda < 0;
-      const akkorde = moll ? [[220, 261.63, 329.63], [196, 220, 293.66], [261.63, 329.63, 392], [293.66, 329.63, 392]] : [[261.63, 329.63, 392], [196, 293.66, 440], [220, 261.63, 329.63], [293.66, 392, 440]];
-      if (!musikNaechste || musikNaechste < jetzt() - TAKT * 2) musikNaechste = jetzt() + 0.05;
-      while (musikNaechste < jetzt() + 0.4) {
-        const takt = Math.floor(musikSchritt / 4), schritt = musikSchritt % 4, akkord = akkorde[takt % 4];
-        if (schritt === 0) for (const f of akkord) musikNote(f, musikNaechste, TAKT * 3.8, 0.025);
-        const melodie = moll ? [0, 2, 4, 2, 3, 1, 2, 0] : [0, 2, 4, 3, 2, 1, 3, 4];
-        const skala = moll ? [220, 261.63, 293.66, 329.63, 392] : [261.63, 293.66, 329.63, 392, 440];
-        musikNote(skala[melodie[musikSchritt % melodie.length]] * 2, musikNaechste + TAKT * 0.52, TAKT * 0.4, 0.014);
-        musikSchritt++;
-        musikNaechste += TAKT;
-      }
-    }
-    function aktualisieren() {
-      const phase = ctx.spiel?.()?.phase ?? null;
-      if (letztePhase !== null && phase !== letztePhase && (phase === "insolvenz" || phase === "zerschlagen")) {
-        abspielen("insolvenz");
-        haptik("insolvenz");
-      }
-      letztePhase = phase;
-      if (!audio) return;
-      const sichtbar4 = aktiv5();
-      const zv = sichtbar4 ? laut("stadt") : 0, mv = sichtbar4 ? laut("musik") : 0;
-      leise(stadt, zv, 0.09);
-      leise(musik, mv, 0.13);
-      if (sichtbar4 && zv > 0) {
-        stadtrauschen();
-        const halb = ctx.zoom?.() ?? 110;
-        const nah = begrenze((240 - halb) / 218, 0, 1);
-        const bewegung = 0.85 + 0.15 * Math.sin(performance.now() / 1800);
-        leise(stadtNah, 0.038 * nah * bewegung, 0.11);
-        leise(stadtStimmen, 0.02 * nah * (0.7 + 0.3 * Math.sin(performance.now() / 490)), 0.11);
-        leise(stadtFern, 0.022 * (1 - nah) + 6e-3, 0.11);
-      } else {
-        leise(stadtNah, 0);
-        leise(stadtStimmen, 0);
-        leise(stadtFern, 0);
-      }
-      if (mv > 0) musikNachziehen();
-      else musikNaechste = 0;
-    }
-    function kassenZaehlung() {
-      const overlay = document.getElementById("wochen-overlay");
-      const element = overlay?.querySelector("#wb-umsatz");
-      if (!element || overlay.hidden) {
-        berichtFertig = false;
-        letzteKassenzeit = -Infinity;
-        return;
-      }
-      const ziel = Math.abs(Number(element.dataset.wert));
-      const zahl4 = Math.abs(Number((element.textContent || "0").replace(/[^0-9-]/g, "")));
-      if (!(ziel > 0) || !Number.isFinite(zahl4)) return;
-      const fortschritt = begrenze(zahl4 / ziel, 0, 1);
-      const t = performance.now();
-      if (fortschritt >= 0.9999) {
-        if (!berichtFertig) {
-          berichtFertig = true;
-          abspielen("kassenklingeln");
-        }
-      } else if (t - letzteKassenzeit > 95 + fortschritt * 155) {
-        letzteKassenzeit = t;
-        abspielen("kasse", 0.3);
-      }
-    }
-    function eingabe(e) {
-      const el2 = e.target?.closest?.('button,[role="button"]');
-      if (!el2 || el2.disabled) return;
-      freischalten().then((ok6) => {
-        if (ok6) abspielen("tippen");
-      }).catch(() => {
-      });
-      haptik("tippen");
-    }
-    function oeffne() {
-      const feld = (d2) => {
-        const v = tonEinstellung(d2.schluessel), id = "ton-" + d2.schluessel;
-        return '<label class="zeile" for="' + id + '" style="display:flex;align-items:center;gap:12px;min-height:48px"><span style="flex:1">' + d2.titel + (d2.art === "regler" ? ': <output id="' + id + '-wert">' + v + " %</output>" : "") + "</span>" + (d2.art === "schalter" ? '<input id="' + id + '" data-ton="' + d2.schluessel + '" type="checkbox" ' + (v ? "checked " : "") + 'aria-label="' + d2.titel + '">' : '<input id="' + id + '" data-ton="' + d2.schluessel + '" type="range" min="0" max="100" step="5" value="' + v + '" aria-label="' + d2.titel + '">') + "</label>";
-      };
-      ctx.panel?.("Klang & Haptik", "Synthetische Kl\xE4nge \xB7 ger\xE4teweit", '<div class="karte">' + TON_SCHALTER.map(feld).join("") + '</div><div class="karte"><p class="leise">Musik ist standardm\xE4\xDFig ausgeschaltet. Der iPhone-Stummschalter schaltet Web Audio nicht zuverl\xE4ssig stumm. Zum vollst\xE4ndigen Stummschalten die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Ger\xE4ten zur Verf\xFCgung.</p><button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', "gross");
-      uiAktiv = true;
-    }
-    function aendern(e) {
-      if (!uiAktiv || !e.target.matches?.("[data-ton]")) return;
-      const schluessel = e.target.dataset.ton;
-      const wert = e.target.type === "checkbox" ? e.target.checked : Number(e.target.value);
-      setzeTonEinstellung(schluessel, wert);
-      const output = document.getElementById(e.target.id + "-wert");
-      if (output) output.textContent = wert + " %";
-      aktualisieren();
-    }
-    function zustand() {
-      return {
-        audio: audio?.state ?? "nicht gestartet",
-        gestartet,
-        verfuegbar: verfuegbar2,
-        klang: tonEinstellung("ton_klaenge"),
-        stadt: tonEinstellung("ton_stadt"),
-        musik: tonEinstellung("ton_musik")
-      };
-    }
-    if (typeof document !== "undefined") {
-      document.addEventListener("pointerdown", eingabe, { capture: true, passive: true });
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") freischalten().catch(() => {
-        });
-      }, { capture: true });
-      document.getElementById("pinhalt")?.addEventListener("change", aendern);
-      document.getElementById("pinhalt")?.addEventListener("input", aendern);
-      document.getElementById("pinhalt")?.addEventListener("click", (e) => {
-        if (uiAktiv && e.target.closest?.("[data-ton-probe]")) abspielen(e.target.closest("[data-ton-probe]").dataset.tonProbe);
-      });
-      let warOffen = false, menueOffen = false, letzteReise = null, letzteBericht = null;
-      const beobachter = new MutationObserver(() => {
-        const panelOffen = document.getElementById("panel")?.classList.contains("offen") ?? false;
-        if (panelOffen !== warOffen) {
-          abspielen(panelOffen ? "panelAuf" : "panelZu");
-          warOffen = panelOffen;
-        }
-        const menue = document.getElementById("menue")?.classList.contains("offen") ?? false;
-        if (menue !== menueOffen) {
-          abspielen(menue ? "panelAuf" : "panelZu");
-          menueOffen = menue;
-        }
-        const reise2 = document.querySelector("#reise-overlay .reise-flug");
-        if (reise2 && reise2 !== letzteReise) {
-          letzteReise = reise2;
-          reisen();
-        }
-        if (!reise2) letzteReise = null;
-        const bericht2 = document.querySelector("#wochen-overlay #wb-umsatz");
-        if (bericht2 !== letzteBericht) {
-          letzteBericht = bericht2;
-          berichtFertig = false;
-          letzteKassenzeit = -Infinity;
-        }
-        if (bericht2) kassenZaehlung();
-      });
-      beobachter.observe(document.body, {
-        subtree: true,
-        childList: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["class", "hidden"]
-      });
-      window.addEventListener("hartwig:erfolg-freigeschaltet", () => {
-        abspielen("freigeschaltet");
-        haptik("erfolg");
-      });
-      window.addEventListener("hartwig:erfolg", () => {
-        abspielen("erfolg");
-        haptik("erfolg");
-      });
-      window.addEventListener("hartwig:warnung", () => {
-        abspielen("warnung");
-        haptik("warnung");
-      });
-      document.addEventListener("visibilitychange", aktualisieren);
-      window.addEventListener("pagehide", () => {
-        if (audio) audio.suspend().catch(() => {
-        });
-      });
-      window.addEventListener("pageshow", () => {
-        if (audio && gestartet) audio.resume().then(aktualisieren).catch(() => {
-        });
-      });
-      window.addEventListener("einstellung", (e) => {
-        if (e.detail?.schluessel?.startsWith("ton_")) aktualisieren();
-      });
-      timer = window.setInterval(aktualisieren, 250);
-    }
-    return {
-      oeffne,
-      zu: () => {
-        uiAktiv = false;
-      },
-      aktiv: () => uiAktiv,
-      pruefe: zustand,
-      abspielen,
-      freischalten,
-      haptik,
-      aktualisieren,
-      get audio() {
-        return audio;
-      },
-      zerstoren: () => {
-        if (timer) clearInterval(timer);
-        cancelAnimationFrame(zugRaf);
-        audio?.close?.().catch(() => {
-        });
-      }
     };
   }
 
@@ -131183,13 +131549,13 @@
         return null;
       }
     } else wocheAbspielen(s);
-    wocheAbspielen(s);
     er?.nachWoche(erfolgeDavor);
     const t1 = performance.now();
     const geaendert = grafikNachziehen();
     leben.woche(ankommendeOrders);
     const t2 = performance.now();
     cockpitZeigen();
+    szenarienUI.aktualisieren();
     if (offenesHaus) oeffneHaus(offenesHaus);
     else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
     else if (offenesHq) oeffneHq(offenesHq === true ? void 0 : offenesHq);
@@ -131223,9 +131589,9 @@
     if (st2.woche === 24) fuehreAus(st2, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
     if (st2.woche === 50) fuehreAus(st2, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
-  var st = null;
-  var wk = null;
   var vorherigerFokus = null;
+  var wk = null;
+  var st = null;
   var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
@@ -131254,6 +131620,11 @@
     if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true });
     vorherigerFokus = null;
   }
+  var szenarienUI = szenarienModul({ E: src_exports, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => {
+    cockpitZeigen();
+    szenarienUI.aktualisieren();
+    automatischSpeichern();
+  } });
   function hausZeigen(id) {
     const x = sb?.haeuser.get(id);
     if (!x?.gruppe) return;
@@ -131319,9 +131690,9 @@
     const zahl4 = (t, w, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
     html += `<div class="raster">${zahl4("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl4("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl4("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl4("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
+    html += st?.hausGrafik(id) ?? "";
     html += hausTreiberZeile(src_exports, s, id);
     html += um?.hausKarte(id) ?? "";
-    html += st?.hausGrafik(id) ?? "";
     if (h.klasse === "premium") {
       const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
       html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl4("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl4("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl4("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl4("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
@@ -131592,18 +131963,27 @@
   var spielende = null;
   var er = null;
   var zt = null;
+  var nachAktion = () => {
+    cockpitZeigen();
+    ek.badge();
+    menueBadge();
+    angebotsPinsAktualisieren();
+    zeichnen();
+    automatischSpeichern();
+    if (s.ende) setTimeout(() => spielende?.anzeigen(), 0);
+  };
   vs = vorstandModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   org = organisationModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
+  er = erfolgeModul({ E: src_exports, s: () => s, panel });
   pl = planungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
     grafikNachziehen();
     nachAktion();
   }, hausOeffnen: oeffneHaus });
   pe = personalModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, oeffneHaus });
-  er = erfolgeModul({ E: src_exports, s: () => s, panel });
   po = posteingangModul({
     E: src_exports,
     s: () => s,
@@ -131675,6 +132055,7 @@
       spielende.anzeigen();
     }
   });
+  st = statistikModul({ E: src_exports, s: () => s, panel, oeffneHaus });
   rg = reportingModul({ E: src_exports, s: () => s, panel, inhalt: $("pinhalt"), hausOeffnen: (id) => {
     const h = s.haeuser.find((x) => x.id === id);
     if (h && h.stadt !== stadtName) {
@@ -131684,7 +132065,6 @@
     oeffneHaus(id);
   } });
   $("reporting").addEventListener("click", () => oeffneModul(rg));
-  st = statistikModul({ E: src_exports, s: () => s, panel, oeffneHaus });
   reise = reiseModul({
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d2) => s?.haeuser.some((h) => h.stadt === d2.name)).map((d2) => {
@@ -131744,9 +132124,9 @@
     wocheNr: () => s.woche,
     zeitung: () => zeitungAktuelle(s),
     oeffneZeitung: () => oeffneModul(zt),
+    erfolge: () => erfolgeUebersicht(s).filter((x) => Object.prototype.hasOwnProperty.call(x, "freigeschaltet") && x.freigeschaltet === s.woche),
     kapitalfluss: () => kapitalfluss(s),
     person: (ressort) => s?.vorstand?.ressorts?.[ressort]?.person,
-    erfolge: () => erfolgeUebersicht(s).filter((x) => Object.prototype.hasOwnProperty.call(x, "freigeschaltet") && x.freigeschaltet === s.woche),
     woche: () => woche(false),
     sperren: () => {
       $("weiter").disabled = true;
@@ -131820,14 +132200,14 @@
   $("marketing").addEventListener("click", () => oeffneModul(mk));
   $("modernisierung").addEventListener("click", () => oeffneModul(um));
   $("produkte").addEventListener("click", () => oeffneModul(pr));
+  $("statistik").addEventListener("click", () => oeffneModul(st));
   $("planung").addEventListener("click", () => oeffneModul(pl));
   $("personaleinsatz").addEventListener("click", () => oeffneModul(pe));
-  $("statistik").addEventListener("click", () => oeffneModul(st));
   $("posteingang").addEventListener("click", () => oeffneModul(po));
+  $("erfolge").addEventListener("click", () => oeffneModul(er));
   $("beobachtung").addEventListener("click", oeffneBeobachtung);
   $("haus-reporting").addEventListener("click", oeffneHausReporting);
   $("hausbeobachtung").addEventListener("click", oeffneBeobachtung);
-  $("erfolge").addEventListener("click", () => oeffneModul(er));
   $("postdirekt").addEventListener("click", () => oeffneModul(po));
   $("wochenstreifen").addEventListener("click", () => {
     $("wochenstreifen").classList.remove("an");
@@ -131911,16 +132291,17 @@
     { id: "schwer", name: "Schwer", beschreibung: "Knappe Kasse, nerv\xF6se Gl\xE4ubiger, wenig Zeit." }
   ];
   var schwierigkeitId = "mittel";
-  function neuesSpiel3(seed = 1, stadt = "Essen", schwierigkeit2 = schwierigkeitId) {
+  function neuesSpiel3(seed = 1, stadt = "Essen", schwierigkeit2 = schwierigkeitId, szenario = "standard") {
     spielende?.zu();
     $("spiel-ruhestand").hidden = true;
     schwierigkeitId = SCHWIERIGKEITEN2.some((x) => x.id === schwierigkeit2) ? schwierigkeit2 : "mittel";
-    s = neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
+    s = neuesSpiel(seed, { ...szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId });
     postUi = neuerPostUi();
     $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
     EQ.freigaben(s);
     cockpitZeigen();
+    szenarienUI.aktualisieren();
     baueStadtAusSpiel(stadt);
     ek.badge();
     menueBadge();
@@ -131958,6 +132339,10 @@
   if (typeof hqUebersicht === "function") $("hq").addEventListener("click", () => oeffneHq());
   else $("hq").style.display = "none";
   window.spiel = {
+    personaleinsatz: pe,
+    oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a),
+    neuesSpiel: neuesSpiel3,
+    speichern: sofortSpeichern,
     erfolge: er,
     oeffneErfolge: () => oeffneModul(er),
     statistik: st,
@@ -131966,10 +132351,6 @@
     oeffneWerkzeuge: () => wk.oeffne(),
     einstellungen: es,
     oeffneEinstellungen: () => oeffneModul(es),
-    personaleinsatz: pe,
-    oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a),
-    neuesSpiel: neuesSpiel3,
-    speichern: sofortSpeichern,
     planung: pl,
     oeffnePlanung: (...a) => oeffneModul(pl, ...a),
     it: itM,
@@ -131979,6 +132360,7 @@
     posteingang: po,
     oeffnePosteingang: (...a) => oeffneModul(po, ...a),
     performanceMessen: diagnoseZeigen,
+    ton,
     oeffneEinkauf,
     vorstand: vs,
     organisation: org,
@@ -132005,6 +132387,7 @@
     leben,
     reise,
     wochenbericht,
+    szenarien: szenarienUI,
     zeitung: zt,
     oeffneZeitung: (...a) => oeffneModul(zt, ...a),
     spielende,
@@ -132134,11 +132517,12 @@
   };
   var einfuehrung = einfuehrungModul();
   window.spiel.einfuehrung = einfuehrung;
-  var startWahl = { stadt: param.get("stadt") ?? "Essen", schwierigkeit: param.get("schwierigkeit") ?? "mittel", seed: Number(param.get("seed") ?? 1) };
+  var startWahl = { stadt: param.get("stadt") ?? "Essen", schwierigkeit: param.get("schwierigkeit") ?? "mittel", szenario: param.get("szenario") ?? "standard", seed: Number(param.get("seed") ?? 1) };
   function startZeigen() {
     $("startstadt").innerHTML = STADTLISTE.map((q2) => `<option${q2.name === startWahl.stadt ? " selected" : ""}>${q2.name}</option>`).join("");
     $("startstufen").innerHTML = SCHWIERIGKEITEN2.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? "an" : ""}" data-v="${x.id}"><span class="sterne-stufe">${"\u25CF".repeat(1 + SCHWIERIGKEITEN2.indexOf(x))}${"\u25CB".repeat(SCHWIERIGKEITEN2.length - 1 - SCHWIERIGKEITEN2.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join("");
     $("startseed").value = startWahl.seed;
+    szenarienUI.zeichneStart();
     $("start").classList.add("an");
     $("lade").classList.remove("an");
     laden3().then((datensatz) => {
@@ -132168,7 +132552,7 @@
     $("lade").classList.add("an");
     setTimeout(() => {
       wahl2.value = startWahl.stadt;
-      neuesSpiel3(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit);
+      neuesSpiel3(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
       $("lade").classList.remove("an");
       window.bereit = true;
       einfuehrung.spielStart();
@@ -132185,7 +132569,7 @@
       s = d2.spiel;
       if (!s.organisation) bildeHauscluster(s);
       if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) initialisierePersonaleinsatz(s);
-      postUi = { ...neuerPostUi(), ...d2.ui ?? {} };
+      postUi = { gelesen: d2.ui?.gelesen ?? [], reiter: d2.ui?.reiter ?? "handeln", reiseZuletzt: d2.ui?.reiseZuletzt ?? [] };
       if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
       schwierigkeitId = s.schwierigkeit ?? "mittel";
       $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
@@ -132196,6 +132580,7 @@
       $("lade").classList.add("an");
       await new Promise((resolve) => setTimeout(resolve, 30));
       cockpitZeigen();
+      szenarienUI.aktualisieren();
       baueStadtAusSpiel(wahl2.value);
       ek.badge();
       menueBadge();
@@ -132221,7 +132606,7 @@
   window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN2;
   Object.defineProperty(window.spiel, "schwierigkeit", { get: () => schwierigkeitId });
   setTimeout(() => {
-    if (param.has("stadt") || param.has("schwierigkeit") || param.has("seed")) spielStarten();
+    if (param.has("stadt") || param.has("schwierigkeit") || param.has("seed") || param.has("szenario")) spielStarten();
     else startZeigen();
   }, 20);
 })();

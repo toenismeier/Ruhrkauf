@@ -36,8 +36,13 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { szenarienModul } from './ui/szenarien.js';
+import { tonModul } from './ui/ton.js';
 import { einfuehrungModul } from './ui/einfuehrung.js';
+import { erfolgeModul } from './ui/erfolge.js';
 import { spielendeModul } from './ui/spielende.js';
+import { werkzeugeModul } from './ui/werkzeuge.js';
+import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
 // O02 Umsatztreiber
 import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 // O03 IT
@@ -47,11 +52,6 @@ import { planungModul } from './ui/planung.js';
 import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml } from './ui/haus.js';
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
-import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
-import { werkzeugeModul } from './ui/werkzeuge.js';
-import { erfolgeModul } from './ui/erfolge.js';
-import { tonModul } from './ui/ton.js';
-import { szenarienModul } from './ui/szenarien.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -616,7 +616,6 @@ function woche(mitBot = false, test = false) {
     const ergebnis = E.fuehreAus(s, { typ: 'testWoche' });
     if (!ergebnis.ok) { meldung(ergebnis.text, false); return null; }
   } else E.wocheAbspielen(s);
-  E.wocheAbspielen(s);
   er?.nachWoche(erfolgeDavor);
   const t1 = performance.now();
   const geaendert = grafikNachziehen();
@@ -659,9 +658,9 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-let st = null;
-let wk = null;
 let vorherigerFokus = null;
+let wk = null;
+let st = null;
 const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
@@ -679,7 +678,6 @@ function panel(titel, unter, html, klasse = '') {
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
 function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
-function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; }
 const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
 function hausZeigen(id) {
@@ -738,11 +736,11 @@ function oeffneHaus(id) {
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
+  html += st?.hausGrafik(id) ?? '';
   // O02: ausschließlich Engine-Werte, auch bei geschlossenen Häusern oder fehlendem Vorjahr.
   html += hausTreiberZeile(E, s, id);
   // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
   html += um?.hausKarte(id) ?? '';
-  html += st?.hausGrafik(id) ?? '';
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -993,18 +991,19 @@ function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesH
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null;
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
+er = erfolgeModul({ E, s: () => s, panel });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
 um = umbauModul({ E, s:()=>s, panel, meldung, nachAktion:()=>{ grafikNachziehen(); nachAktion(); }, hausOeffnen: oeffneHaus });
 // O04 Personal
 pe = personalModul({ E, s: () => s, panel, meldung, nachAktion, oeffneHaus });
-er = erfolgeModul({ E, s: () => s, panel });
 po = posteingangModul({
   E, s: () => s, panel, meldung, nachAktion, zustand: () => postUi, nachZustand: automatischSpeichern,
   springe: (bezug) => {
@@ -1060,6 +1059,7 @@ $('spiel-ruhestand').addEventListener('click', () => {
   else { automatischSpeichern(); spielende.anzeigen(); }
 });
 
+st = statistikModul({ E, s: () => s, panel, oeffneHaus });
 // O02 Umsatztreiber: klickbarer Portfolio-Bericht und Beobachtungsliste.
 rg = reportingModul({ E, s: () => s, panel, inhalt: $('pinhalt'), hausOeffnen: (id) => {
   const h = s.haeuser.find((x) => x.id === id);
@@ -1068,7 +1068,6 @@ rg = reportingModul({ E, s: () => s, panel, inhalt: $('pinhalt'), hausOeffnen: (
 } });
 $('reporting').addEventListener('click', () => oeffneModul(rg));
 
-st = statistikModul({ E, s: () => s, panel, oeffneHaus });
 // ─────────────────────────────────────────── Reise & Wochenabschluss
 reise = reiseModul({
   stadt: () => stadtName,
@@ -1102,9 +1101,9 @@ wochenbericht = wochenberichtModul({
   cockpit: () => E.cockpit(s), posteingang: () => E.posteingang(s),
   historie: () => s.historie, wocheNr: () => s.woche,
   zeitung: () => E.zeitungAktuelle(s), oeffneZeitung: () => oeffneModul(zt),
+  erfolge: () => E.erfolgeUebersicht(s).filter(x => Object.prototype.hasOwnProperty.call(x, 'freigeschaltet') && x.freigeschaltet === s.woche),
   kapitalfluss: () => E.kapitalfluss(s),
   person: (ressort) => s?.vorstand?.ressorts?.[ressort]?.person,
-  erfolge: () => E.erfolgeUebersicht(s).filter(x => Object.prototype.hasOwnProperty.call(x, 'freigeschaltet') && x.freigeschaltet === s.woche),
   woche: () => woche(false), sperren: () => { $('weiter').disabled = true; },
   entsperren: () => { $('weiter').disabled = false; },
   oeffneVorgang: (id) => oeffneModul(po, 'handeln', id),
@@ -1155,16 +1154,16 @@ $('it').addEventListener('click', () => oeffneModul(itM));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('modernisierung').addEventListener('click', () => oeffneModul(um));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
+$('statistik').addEventListener('click', () => oeffneModul(st));
 $('planung').addEventListener('click', () => oeffneModul(pl));
 // O04 Personal
 $('personaleinsatz').addEventListener('click', () => oeffneModul(pe));
-$('statistik').addEventListener('click', () => oeffneModul(st));
 $('posteingang').addEventListener('click', () => oeffneModul(po));
+$('erfolge').addEventListener('click', () => oeffneModul(er));
 // O07 Haus
 $('beobachtung').addEventListener('click', oeffneBeobachtung);
 $('haus-reporting').addEventListener('click', oeffneHausReporting);
 $('hausbeobachtung').addEventListener('click', oeffneBeobachtung);
-$('erfolge').addEventListener('click', () => oeffneModul(er));
 $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
 $('einstellungen').addEventListener('click', () => oeffneModul(es));
@@ -1238,15 +1237,11 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
   { id: 'schwer', name: 'Schwer', beschreibung: 'Knappe Kasse, nervöse Gläubiger, wenig Zeit.' },
 ];
 let schwierigkeitId = 'mittel';
-function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
+function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard') {
   spielende?.zu(); $('spiel-ruhestand').hidden = true;
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
-  s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
-  postUi = neuerPostUi();
-function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard') {
-  schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId });
-  postUi = neuerPostUi(); $('postwarnung').checked = true; $('wochenbericht-modus').value = postUi.wochenbericht;
+  postUi = neuerPostUi();
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
   EQ.freigaben(s);
@@ -1272,10 +1267,10 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   leben,
-  reise, wochenbericht, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
   oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },
   pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];
@@ -1285,7 +1280,6 @@ window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: s
     }
     hausReiter='ueberblick'; oeffneHaus(id);
     return { id, score:d.kundenScore, reiter:7, fehler }; },
-  reise, wochenbericht, szenarien: szenarienUI, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
@@ -1392,7 +1386,7 @@ async function spielFortsetzen() {
     if (!s.organisation) E.bildeHauscluster(s);
     // O04: alte Spielstände ohne Personalplanung deterministisch migrieren.
     if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) E.initialisierePersonaleinsatz(s);
-    postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
+    postUi = { gelesen: d.ui?.gelesen ?? [], reiter: d.ui?.reiter ?? 'handeln', reiseZuletzt: d.ui?.reiseZuletzt ?? [] };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
     schwierigkeitId = s.schwierigkeit ?? 'mittel';
     $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
