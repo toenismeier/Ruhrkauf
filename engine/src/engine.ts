@@ -17,6 +17,8 @@ import { vorstandWoche } from './vorstand';
 import { organisationWoche } from './organisation';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+// O02 Umsatztreiber
+import { erfasseTreiber } from './treiber';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -213,6 +215,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.kreditFrei = eur(s.cash + s.kreditlinie);
   k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
   s.historie.push(k);
+  // O02: aktuelle Haus-KPI in die Umsatztreiber zerlegen, ohne weitere Umsatzbuchung.
+  erfasseTreiber(s);
   if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
 
   if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);

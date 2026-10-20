@@ -252,3 +252,6 @@ export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+
+// O02 Umsatztreiber: ausschließlich lesende Projektionen, keine Berechnung in der UI.
+export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './treiber';

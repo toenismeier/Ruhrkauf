@@ -741,6 +741,13 @@ async function buendeln() {
   if (!offen) await p.evaluate((id) => window.spiel.oeffneHaus(id), punkt);
   await p.waitForTimeout(400);
   await bild('spiel-haus.png');
+  // O02: Hauswerte und Treiberdarstellung gegen die Engine prüfen.
+  await pruefe('Haus Umsatztreiber');
+  await p.evaluate(() => window.spiel.oeffneReporting());
+  await p.waitForTimeout(150);
+  await pruefe('Reporting Umsatzbrücke');
+  await bild('spiel-reporting.png');
+  await p.evaluate(() => window.spiel.schliessePanel());
   // HQ-Übersicht
   await p.evaluate(() => { window.spiel.schliessePanel(); document.getElementById('hq').click(); });
   await p.waitForTimeout(400);

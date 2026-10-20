@@ -54,3 +54,6 @@ export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, beric
   type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion,
 } from './organisation';
 export { itDeckel } from './it';
+// O02 Umsatztreiber
+export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './abfragen';
+export type { TreiberId, TreiberFaktoren, TreiberQuellen, TreiberPeriode, TreiberVergleich, Umsatzbruecke, Ebene, RankingKennzahl, RankingZeile, Reporting, ReportingZeile } from './treiber';

@@ -8,6 +8,8 @@ import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './ma
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
 // O01 Organisation: normierte Wirkung der Vertriebsleitungen.
 import { hausclusterFaktor } from './organisation';
+// O02 Umsatztreiber
+import { wirkeTreiber } from './treiber';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -165,7 +167,8 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     const Q = h.saettigungQm[g] ?? 1;
     roh.konzessionUmsatz += P * saettigung(qm, Q) * saisonFaktor(g, w) * hf * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g);
   }
-  return roh;
+  // O02: Quellen wirken auf die Nachfrage, ohne das Bestandsmodell zu ersetzen.
+  return wirkeTreiber(h, roh);
 }
 
 export interface HausKosten {

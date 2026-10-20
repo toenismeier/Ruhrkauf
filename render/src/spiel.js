@@ -31,6 +31,8 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+// O02 Umsatztreiber
+import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -525,7 +527,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po, org].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -588,6 +590,8 @@ function oeffneHaus(id) {
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
+  // O02: ausschließlich Engine-Werte, auch bei geschlossenen Häusern oder fehlendem Vorjahr.
+  html += hausTreiberZeile(E, s, id);
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -790,7 +794,7 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null;
+let vs = null, mk = null, pr = null, po = null, org = null, rg = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -823,6 +827,14 @@ po = posteingangModul({
     else schliessePanel();
   },
 });
+
+// O02 Umsatztreiber: klickbarer Portfolio-Bericht und Beobachtungsliste.
+rg = reportingModul({ E, s: () => s, panel, inhalt: $('pinhalt'), hausOeffnen: (id) => {
+  const h = s.haeuser.find((x) => x.id === id);
+  if (h && h.stadt !== stadtName) { wahl.value = h.stadt; baueStadtAusSpiel(h.stadt); }
+  oeffneHaus(id);
+} });
+$('reporting').addEventListener('click', () => oeffneModul(rg));
 
 // ─────────────────────────────────────────── Reise & Wochenabschluss
 reise = reiseModul({
@@ -947,7 +959,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
@@ -967,6 +979,18 @@ window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffne
     if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), 'Umsatz Woche': geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
+    // O02 Umsatztreiber: Browseranzeige gegen Engine und Brückensumme.
+    if (offenesHaus) {
+      const d = E.hausTreiber(s, offenesHaus);
+      const el = $('pinhalt').querySelector('.o02-haus');
+      if (d && el) {
+        for (const [schluessel, sollWert] of Object.entries({ umsatz: d.aktuell.umsatz, frequenz: d.aktuell.frequenz, kaufquote: d.aktuell.kaufquote, bon: d.aktuell.bon }))
+          if (Number(el.dataset['o02' + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler.push('O02 ' + schluessel + ': Hausanzeige ungleich Engine');
+        const br = el.querySelector('.o02-bruecke');
+        if (br && Number(br.dataset.o02Summe) !== Number(br.dataset.o02Diff)) fehler.push('O02 Brücke summiert nicht exakt');
+      } else if (d) fehler.push('O02 Haus-Treiberzeile fehlt');
+    }
+    if (rg?.aktiv && !rg.pruefe()) fehler.push('O02 Reporting-Brücke summiert nicht exakt');
     if (offenesHq && typeof E.hqUebersicht === 'function') {
       const u = E.hqUebersicht(s), hk = kz($('pinhalt'));
       const sollHq = { 'Kosten Zentrale je Woche': geld(u.kostenWoche), 'Beschäftigte': fmt.format(Math.round(u.fte)) + ' FTE' };
