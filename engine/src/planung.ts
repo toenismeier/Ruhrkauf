@@ -24,6 +24,7 @@ export interface Jahresplan {
 }
 export interface PlanEntwurf {
   jahr: number; ziele: PlanZiele; overrides: Record<string, number>;
+  wgOverrides?: Partial<Record<GruppeId, number>>;
   stand: 'offen' | 'abgeschlossen';
 }
 export interface Quartalsforecast {
@@ -206,12 +207,20 @@ function warengruppenZiel(s: GameState, knoten: Record<string, PlanKnoten>): Par
   }
   return wg;
 }
-function erstelleJahresplan(s: GameState, j: number, ziele: PlanZiele, override: Record<string, number>, quelle: Jahresplan['quelle']): Jahresplan {
+function budgetWarengruppen(s: GameState, knoten: Record<string, PlanKnoten>,
+  overrides: Partial<Record<GruppeId, number>> = {}): Partial<Record<GruppeId, number>> {
+  const basis = warengruppenZiel(s, knoten);
+  const ids = Object.keys(basis) as GruppeId[];
+  return verteileBetrag(sum(Object.values(basis).map((v) => v ?? 0)), ids, basis as Record<string, number>,
+    overrides as Record<string, number>) as Partial<Record<GruppeId, number>>;
+}
+function erstelleJahresplan(s: GameState, j: number, ziele: PlanZiele, override: Record<string, number>, quelle: Jahresplan['quelle'],
+  wgOverride: Partial<Record<GruppeId, number>> = {}): Jahresplan {
   const knoten = machKnoten(s, ziele, override);
   const referenzKnoten = quelle === 'vorgaenger' ? machKnoten(s, ziele) : machKnoten(s, jahresVorschlag(s, j));
   const phasing: Record<string, number[]> = {};
   for (const h of s.haeuser.filter(aktiv)) phasing[h.id] = planWochen(s, j, h, knoten['haus:' + h.id]?.umsatz ?? 0);
-  const wg = warengruppenZiel(s, knoten);
+  const wg = budgetWarengruppen(s, knoten, wgOverride);
   return { jahr: j, ziele: { ...ziele }, quelle, knoten, phasing, warengruppen: wg,
     referenz: { knoten: Object.fromEntries(Object.entries(referenzKnoten).map(([id, n]) => [id, n.umsatz])),
       warengruppen: warengruppenZiel(s, referenzKnoten) },
@@ -272,6 +281,13 @@ export function planungAktion(s: GameState, a: PlanungAktion): string | null {
     if (!Number.isFinite(a.wert) || a.wert < 0 && a.kennzahl !== 'ebitda') return 'Ungültiger Zielwert.';
     ent.ziele[a.kennzahl] = eur(a.wert); return null;
   }
+  if (a.typ === 'planungWarengruppe') {
+    if (!Number.isFinite(a.umsatz) || a.umsatz < 0 || a.umsatz > ent.ziele.umsatz) return 'Warengruppenziel außerhalb des Budgets.';
+    const gruppen = warengruppenZiel(s, machKnoten(s, ent.ziele, ent.overrides));
+    if (!(a.gruppe in gruppen)) return 'Unbekannte Warengruppe.';
+    (ent.wgOverrides ??= {})[a.gruppe] = eur(a.umsatz);
+    return null;
+  }
   if (a.typ === 'planungVerteilen') {
     if (!Number.isFinite(a.umsatz) || a.umsatz < 0) return 'Ungültiger Zielwert.';
     const probe = machKnoten(s, ent.ziele, ent.overrides);
@@ -286,15 +302,17 @@ export function planungAktion(s: GameState, a: PlanungAktion): string | null {
 export type PlanungAktion =
   | { typ: 'planungZiel'; kennzahl: keyof PlanZiele; wert: number }
   | { typ: 'planungVerteilen'; id: string; umsatz: number }
+  | { typ: 'planungWarengruppe'; gruppe: GruppeId; umsatz: number }
   | { typ: 'planungAbschliessen'; quelle: 'controlling' | 'spieler' }
   | { typ: 'planungForecast'; umsatz: number; ebitda: number }
   | { typ: 'planungBonus'; ebene: keyof PlanungStand['bonusAnteil']; anteil: number };
-export const PLANUNG_AKTIONEN = new Set<PlanungAktion['typ']>(['planungZiel', 'planungVerteilen', 'planungAbschliessen', 'planungForecast', 'planungBonus']);
+export const PLANUNG_AKTIONEN = new Set<PlanungAktion['typ']>(['planungZiel', 'planungVerteilen', 'planungWarengruppe', 'planungAbschliessen', 'planungForecast', 'planungBonus']);
 
 function abschliessen(s: GameState, quelle: Jahresplan['quelle']): void {
   const e = s.planung!.entwurf; if (!e || e.stand !== 'offen') return;
   const ziele = quelle === 'controlling' ? jahresVorschlag(s, e.jahr) : e.ziele;
-  const plan = erstelleJahresplan(s, e.jahr, ziele, quelle === 'controlling' ? {} : e.overrides, quelle);
+  const plan = erstelleJahresplan(s, e.jahr, ziele, quelle === 'controlling' ? {} : e.overrides,
+    quelle, quelle === 'controlling' ? {} : e.wgOverrides);
   if (quelle === 'spieler') {
     // Ein bewusst überzogener Plan erzeugt Führungsdruck. Die Ausgangslage bleibt neutral.
     for (const h of s.haeuser) {
@@ -499,8 +517,10 @@ export function planungAssistent(s: GameState) {
   if (!s.planung) initialisierePlanung(s);
   const e = s.planung!.entwurf;
   const vorschlag = e ? jahresVorschlag(s, e.jahr) : jahresVorschlag(s, jahr(s) + 1);
-  const knoten = e ? Object.values(machKnoten(s, e.ziele, e.overrides)) : [];
+  const entwurfKnoten = e ? machKnoten(s, e.ziele, e.overrides) : undefined;
+  const knoten = entwurfKnoten ? Object.values(entwurfKnoten) : [];
   return { entwurf: e, vorschlag, knoten,
+    warengruppen: entwurfKnoten ? budgetWarengruppen(s, entwurfKnoten, e?.wgOverrides) : {},
     ebitdaSensitivitaet: e ? eur(vorschlag.ebitda + (e.ziele.umsatz - vorschlag.umsatz) * 0.25) : vorschlag.ebitda,
     bericht: planungBericht(s) };
 }
