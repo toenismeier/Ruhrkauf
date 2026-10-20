@@ -125,7 +125,7 @@ export function zustandAusHaus(haus, s, merk) {
     if (angebot) { z.verkaufsprozess = true; z.investor = angebot.premiumKaeuferName; }
   }
   const u = z.untermieter.map((m) => `${m.name}@${m.etage}`).join(',');
-  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : '', z.kaeufer ?? '', z.verkaufsprozess ? 'investor' : '', Object.values(haus.etagenBau??{}).map(e=>e.technik?.klima).join(',')].join('|');
+  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : '', z.kaeufer ?? '', z.verkaufsprozess ? 'investor' : '', Object.values(haus.etagenBau??{}).map(e=>String(e.technik?.klima)+String(!!e.klimaModernisiert)).join(',')].join('|');
   return z;
 }
 
