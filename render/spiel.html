@@ -328,9 +328,14 @@
   .einst-zeile input[type="range"] { flex: 1; min-width: 100px; min-height: 44px; accent-color: var(--rot); }
   .einst-info { padding: 9px 12px; margin: 0; font-size: calc(12px * var(--schrift)); line-height: 1.5; }
   body.farbschwach { --rot: #c07821; --gruen: #245ea8; }
-  body.farbschwach .kz.rot b::before, body.farbschwach .rotwert::before, body.farbschwach .chip.warn::before, body.farbschwach .ampel.rot::before { content: "▼ "; color: #c07821; }
-  body.farbschwach .kz.gruen b::before, body.farbschwach .gruenwert::before, body.farbschwach .ampel.gruen::before { content: "▲ "; color: #245ea8; }
-  body.farbschwach .ampel:not(.rot):not(.gruen)::before { content: "● "; }
+  body.farbschwach .kz.rot b::before, body.farbschwach .rotwert::before, body.farbschwach .chip.warn::before { content: "▼ "; color: #c07821; }
+  body.farbschwach .kz.gruen b::before, body.farbschwach .gruenwert::before { content: "▲ "; color: #245ea8; }
+  body.farbschwach .ampel { width: auto; height: auto; border-radius: 0; background: transparent !important; font-size: 14px; font-weight: 800; line-height: 1; vertical-align: baseline; }
+  body.farbschwach .ampel::before { content: "●"; color: #7b8790; }
+  body.farbschwach .ampel.a-gruen::before { content: "▲"; color: #245ea8; }
+  body.farbschwach .ampel.a-rot::before { content: "▼"; color: #c07821; }
+  body.farbschwach .ampel.a-gelb::before { content: "●"; color: #b57f16; }
+  body.farbschwach .ampel.ohne::before { content: "○"; color: #7b8790; }
   body.farbschwach .kz.rot b, body.farbschwach .rotwert { color: #c07821; }
   body.farbschwach .kz.gruen b, body.farbschwach .gruenwert { color: #245ea8; }
   :root[data-animation="reduziert"] *, :root[data-animation="reduziert"] *::before, :root[data-animation="reduziert"] *::after { animation-duration: 0.15s !important; transition-duration: 0.08s !important; }
