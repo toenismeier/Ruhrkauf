@@ -255,6 +255,8 @@ export function quartalsBewertung(s: GameState): void {
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;
       s.eigentuemer.kapitalZugefuehrt += kapital;
+      s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+      s.kapitalflussOffen.finanzierung += kapital;
       txt += ` Der Eigentümer schießt ${mio(kapital)} nach.`;
     }
     melde(s, 'eigentuemer', txt, { modul: 'vorstand' });
