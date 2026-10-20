@@ -38,8 +38,8 @@ export function reiseModul(ctx) {
   const z = document.createElement('div');
   z.id = 'reise-overlay'; z.hidden = true; document.body.append(z);
   const protokoll = [];
-  let aktiv = false, token = 0, gestartet = 0, letzte = [];
-  const messen = (schritt) => protokoll.push({ schritt, ms: Math.round(performance.now() - gestartet) });
+  let aktiv = false, token = 0, gestartet = 0, zielStart = null, letzte = [];
+  const messen = (schritt) => { const t = performance.now(); protokoll.push({ schritt, ms: Math.round(t - gestartet), ...(zielStart === null ? {} : { reiseMs: Math.round(t - zielStart) }) }); };
   function schliessen() { ++token; aktiv = false; z.hidden = true; z.innerHTML = ''; z.className = ''; document.body.classList.remove('reise-aktiv'); }
   function ortPunkt() {
     const p = ctx.pinPunkt();
@@ -77,7 +77,7 @@ export function reiseModul(ctx) {
     if (aktiv) return;
     ++token; const meins = token;
     letzte = [...(ctx.zuletzt?.() ?? letzte)];
-    aktiv = true; gestartet = performance.now(); protokoll.length = 0; messen('Pin angetippt');
+    aktiv = true; gestartet = performance.now(); zielStart = null; protokoll.length = 0; messen('Pin angetippt');
     const hier = ctx.stadt(), p = ortPunkt(); kreis(p);
     z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
     document.body.classList.add('reise-aktiv');
@@ -91,6 +91,7 @@ export function reiseModul(ctx) {
   async function fahren(ziel) {
     if (!aktiv || !ctx.staedte().some((c) => c.name === ziel) || ziel === ctx.stadt()) return;
     const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert = bewegungReduziert() || ohneAnimation();
+    zielStart = start; messen('Reiseziel gewählt');
     const p = ortPunkt(); kreis(p); z.classList.remove('offen', 'ziele-offen'); z.classList.add('faehrt');
     z.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + '"><div class="reise-panorama" style="background-image:url(\'' + bild(ziel) + '\')"></div><div class="reise-dunst"></div>' + zug + '<div class="reise-strecke"><div>' + esc(kode(von)) + ' <span>🚆</span> ' + esc(kode(ziel)) + '</div><small>' + esc(von) + ' → ' + esc(ziel) + '</small></div></section>';
     const flug = z.querySelector('.reise-flug'); flug.classList.add('start');
