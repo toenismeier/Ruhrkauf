@@ -145,8 +145,11 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
   if(leer>R.leerflaecheMax+EPS)add('Leerfläche',leer.toFixed(2)+' m statt 6 m');
   for(const a of plan.abteilungen){
     const ins=plan.moebel.filter(m=>m.abteilung===a.id&&m.inszenierung);
-    if(ins.length>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+ins.length+' Inszenierungen');
-    if(plan.profil==='outlet'&&ins.length)add('Format','FUNDUS ohne Inszenierung');
+    const fest=(plan.festeInszenierungen??[]).filter(m=>m.abteilung===a.id);
+    const anzahl=ins.length+fest.length;
+    if(anzahl>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+anzahl+' Inszenierungen');
+    if(plan.profil==='sport'&&anzahl!==1)add('Insel',a.id+': genau eine Erlebnisinszenierung erforderlich, '+anzahl+' gefunden');
+    if(plan.profil==='outlet'&&anzahl)add('Format','FUNDUS ohne Inszenierung');
   }
   // Phase 4: Kompositionsprüfung zusätzlich zu Dichte und Laufwegen.
   if(plan.profil==='sport')for(const a of plan.abteilungen) {
