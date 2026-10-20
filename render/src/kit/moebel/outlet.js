@@ -13,10 +13,12 @@ function aufhaengung(L, r, d, ctx, doppelt = false, anWand = false) {
     L.box(0.07,hoehe,0.08,w/2-0.1,0,z,'#999fa6');
     L.box(w-0.22,0.055,0.07,0,hoehe-0.10,z,'#8a959d');
     if(LOD.stufe==='fern') { if(f>0)L.box((w-0.28)*f,0.8,0.65,-(w-0.28)*(1-f)/2,0.48,z,pal[j]);continue; }
-    const n=Math.floor(36*f);
+    // Jede Box repräsentiert eine kompakte, dicht gehängte Gruppe statt
+    // einzelner Bügel. Das hält auch zweigeschossige Häuser im Teilebudget.
+    const gruppen=12,n=Math.floor(gruppen*f);
     for(let i=0;i<n;i++) {
-      const x=-w/2+0.2+(i+0.5)*(w-0.4)/36;
-      L.box(0.075,0.70+(i%5)*0.055,0.48,x,0.12,z,farbe(r,pal));
+      const x=-w/2+0.2+(i+0.5)*(w-0.4)/gruppen;
+      L.box(0.33,0.70+(i%5)*0.055,0.48,x,0.12,z,farbe(r,pal));
     }
     for(let i=0;i<5;i++) {
       const x=-w/2+(i+0.5);
