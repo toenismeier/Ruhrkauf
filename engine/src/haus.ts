@@ -106,7 +106,10 @@ function steuerungscluster(s: GameState, h: Haus): string {
   return mitOrganisation.organisation?.flagships.includes(h.id) ? 'premium-flagships' : hausclusterSchluessel(h);
 }
 export function hausStandard(s: GameState, h: Haus): HausStandard {
-  return betrieb(h)?.standardAusnahme ?? s.hausbetrieb?.standards[steuerungscluster(s,h)] ?? STANDARD;
+  const cluster = steuerungscluster(s,h);
+  // O01 kann den geografischen Hauscluster nach unserer Initialisierung zuweisen.
+  if (s.hausbetrieb && !s.hausbetrieb.standards[cluster]) s.hausbetrieb.standards[cluster] = structuredStandard();
+  return betrieb(h)?.standardAusnahme ?? s.hausbetrieb?.standards[cluster] ?? STANDARD;
 }
 /** Servicevorgaben des Hausclusters plus ausdrücklich gesetzte Ausnahmen vor Ort. */
 export function hausServices(s: GameState, h: Haus): Record<HausService, boolean> {
