@@ -44,8 +44,9 @@ async function pruefen() {
     const seitenfehler = [];
     page.on('pageerror', (e) => seitenfehler.push(e.message));
     await page.goto('file://' + path.join(__dirname, 'spiel.html') + '?stadt=Essen&seed=1&ohne-animation=1', { waitUntil: 'load', timeout: 0 });
-    await page.waitForFunction(() => window.bereit === true, { timeout: 120000 });
+    await page.waitForFunction(() => window.bereit === true, null, { timeout: 120000 });
     await pruefe(page, 'Cockpit');
+    await page.screenshot({ path: path.join(ziel, 'cockpit-normal.png'), animations: 'disabled' });
     await page.locator('#menueknopf').click();
     await pruefe(page, 'Menü');
     for (const id of ['posteingang', 'hq', 'einkauf', 'vorstand', 'marketing', 'produkte', 'einstellungen']) {
