@@ -250,3 +250,4 @@ export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+export { chronikUebersicht } from './chronik';
