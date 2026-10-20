@@ -189,6 +189,7 @@ export const ZUSATZ_ARTIKELTYPEN: TypDef[] = (Object.keys(ZUSATZ_ARTIKEL) as Pro
     } satisfies TypDef;
   })
 );
+const BASIS_ARTIKELTYPEN = [...ARTIKELTYPEN];
 ARTIKELTYPEN.push(...ZUSATZ_ARTIKELTYPEN);
 export const TYP: Record<string, TypDef> = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
 
@@ -284,8 +285,14 @@ export function trendFuer(s: GameState, sid: number): TrendSaison {
   const gruppen = {} as TrendSaison['gruppen'];
   (Object.keys(TREND_GRUPPEN) as TrendGruppe[]).forEach((g, i) => {
     const r = hashRng(s.seed, sid, i);
-    const typen = ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === 'ganz' || (t.saison === 'sommer') === sommer));
-    const artikel = ziehe(r, typen.map((t) => t.typ), 5);
+    // Die fünf bisherigen Saisontrends müssen exakt gleich bleiben: Startkalibrierung.
+    const typen = BASIS_ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === 'ganz' || (t.saison === 'sommer') === sommer));
+    const basisArtikel = ziehe(r, typen.map((t) => t.typ), 5);
+    // Zusätzliche Trends laufen in einem eigenen deterministischen Zufallsstrom und
+    // verschieben weder die bisherigen Artikel noch Farben und Materialien.
+    const z = hashRng(s.seed, sid, 100 + i);
+    const neu = ZUSATZ_ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === 'ganz' || (t.saison === 'sommer') === sommer));
+    const artikel = [...basisArtikel, ...ziehe(z, neu.map((t) => t.typ), 4)];
     // Trendfarben: zwei aus der Grundpalette der Gruppe, zwei frische von außerhalb
     const basis = FARB_BASIS[g];
     const farben = [...ziehe(r, basis, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis.includes(f)), 2)];
