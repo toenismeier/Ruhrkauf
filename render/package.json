@@ -17,8 +17,9 @@
     "moebel:kataloge": "node render-katalog.js moebel-sport && node render-katalog.js moebel-outlet && node render-katalog.js moebel-allgemein && node render-katalog.js moebel-reihen",
     "ladenbau:pruefen": "node pruef-ladenbau.js",
     "ladenbau:pruefen:teile": "node pruef-ladenbau.js --teile",
-    "ladenbau:smoke": "node tests/ladenbau-smoke.cjs",
-    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose"
+    "ladenbau:smoke": "node tests/ladenbau-smoke.cjs && node tests/outlet-ladenbau-smoke.cjs",
+    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose",
+    "ladenbau:outlet:smoke": "node tests/outlet-ladenbau-smoke.cjs"
   },
   "keywords": [],
   "author": "",
