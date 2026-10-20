@@ -8,7 +8,10 @@ cd render && npm ci && npm run build
 cd ../app && npm ci && npm run spiel && npm run typecheck && npm run smoke
 ```
 
-## Build und Upload nach TestFlight (EAS, kein Mac nötig)
+## Automatische Auslieferung (EAS Workflows, `.eas/workflows/ausliefern.yml`)
+Jeder Push auf `main` löst auf den Expo-Servern aus: Hülle unverändert → Update (App holt es beim Start), Hülle geändert → neuer Build und Übermittlung an TestFlight. Voraussetzung: GitHub-Repo im Expo-Projekt verbunden, Basisverzeichnis `app`.
+
+## Build und Upload nach TestFlight von Hand (EAS, kein Mac nötig)
 ```
 cd app && npx eas-cli@latest build --platform ios --profile production --auto-submit
 ```
