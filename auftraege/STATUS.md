@@ -1,4 +1,4 @@
-# Status aller Workstreams (Stand 20.10.2026, 18:30)
+# Status aller Workstreams (Stand 20.10.2026, 19:45)
 
 Legende: **abnahmefähig** = PR offen, GPT fertig, wartet auf Claudes lokale Prüfung und Merge · **in Arbeit** = Branch ohne PR, GPT arbeitet · **offen** = nicht gestartet · **gemergt** = in `main`.
 Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
@@ -31,8 +31,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 ## Operatives Paket
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
-| O01 Organisation, O02 Umsatztreiber, O03 IT, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
-| O04 Personal | `feat/op-personal` #39 | abnahmefähig | prüfen, mergen |
+| O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
 | O05 Ware | `feat/op-ware` | in Arbeit | GPT fertigstellen, PR öffnen |
 | O09 E-Commerce | `feat/op-ecommerce` | in Arbeit | GPT fertigstellen, PR öffnen |
 
@@ -45,13 +44,13 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Punkt | Status |
 |---|---|
 | iOS-Hülle, TestFlight-Wurf 1 | gemergt, läuft auf Ummos iPhone |
-| Automatische Auslieferung (Push auf main → Update, Hülle geändert → TestFlight) | eingebaut; wartet auf Ummo: GitHub im Expo-Projekt verbinden (Base directory `app`) |
-| GitHub-Billing für CI | wartet auf Ummo |
+| Automatische Auslieferung (Push auf main → Update, Hülle geändert → TestFlight) | verbunden (Base directory `/app`); läuft im Build-Zug Di/Fr 18 Uhr, außer der Reihe nur von Hand |
+| GitHub-Billing für CI | erledigt 20.10.; CI auf main grün |
 | `feat/iphone-playtest-ci` (Stand 18.10.) | veraltet, ohne PR; nach Merge der Nice-to-haves prüfen und verwerfen |
 
 ## Reihenfolge, sobald der Nice-Chat fertig ist
 1. Q03 Fingerabdruck mergen (Gate scharf).
-2. Q04, Q05, O04 prüfen und mergen.
+2. Q04 und Q05 prüfen und mergen.
 3. Q02 prüfen (Rendern, Leistung, Fingerabdrücke nur für geänderte Städte neu).
 4. #7 Maßstab Engine und Maßstab Oberfläche abnehmen; danach Q07 starten.
 5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
