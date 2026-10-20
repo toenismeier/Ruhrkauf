@@ -44,5 +44,8 @@ export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, Po
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
 export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
+export {
+  endwertung, ebitdaJahr, immobilienWert, unternehmenswert, endKennzahlen, spielBeenden, spielendePruefen,
+} from './spielende';
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
