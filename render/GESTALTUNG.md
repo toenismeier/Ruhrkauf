@@ -104,6 +104,16 @@ Grenzwerte unten in eckigen Klammern sind die Prüfwerte des Skripts für den Na
 - Gedämpfte, regional stimmige Palette. West: Grau, Beige, Taupe, Backstein, dunkle Schiefer- und Zinkdächer; Pastell und
   Ziegelrot selten (Ziegeldach-Gewicht × 0,3).
 
+## 5a. FUNDUS – eigenständiger Marken-Off-Price
+
+- FUNDUS ist ein Marken-Off-Price-Laden, kein Hartwig Outlet und kein Billig-Restpostenmarkt. Die Hausfarbe ist Weinrot (`#8c1d40`).
+- Das mindestens 3,5 m hohe Fassadenband läuft über beide sichtbaren Seiten. Weißer FUNDUS-Schriftzug: Versalhöhe mindestens 2,4 m bei Boxen und 2,0 m in der Innenstadt. Darunter ein helles Claim-Band mit „Marken. Bis zu 60 % unter dem empfohlenen Preis.“
+- Vorspringendes Eingangsportal, Retail-Park-Glasvordach über die ganze Front, Pylon mindestens 9 m hoch, volle Parkplätze und Warenpräsentation hinter dem Schaufenster.
+- Drei Bauformen: eingeschossige Retail-Park-Box (6–7 m), zweigeschossiger Fachmarkt (10–11 m, Glasecke und Rolltreppe), Innenstadt-Geschäftshaus mit zwei bis drei Ladengeschossen und ein bis zwei Bürogeschossen (Raster-/Lochfassade), ohne Parkplatz.
+- Länge, Tiefe, Dachaufbauten, Eingang, drei Paneelgrautöne und Parkplätze variieren deterministisch über `rng(seed)`.
+- 14 Retail-Parks im Außenring, 6 Innenstadtlagen als eigene `slot:outlet`-Parzellen ohne Hartwig-/Volkskauf-Überschneidung. City-Grundfläche höchstens 80 % des größten Hartwig-Hauses; nicht im selben Block wie ein Billig-Offprice-Wettbewerber. Keine gleiche Bauform mit gleicher Fassadenvariante in Nachbarstädten.
+- Alle 12 Zustände; für Aktion/Offprice kein Rabattplakat, sondern „Neue Ware jede Woche“. Zielbudget 900–1.800 Teile, Obergrenze 3.000; Fern-LOD prüfen.
+
 ## 6. Jedes Haus mit Sorgfalt
 
 - Fensterraster, Gesimse, Ladenzone, Dachlandschaft mit Aufbauten an jedem sichtbaren Bau, auch an Hofbauten (Fensterband,
