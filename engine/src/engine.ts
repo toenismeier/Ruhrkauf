@@ -17,6 +17,8 @@ import { vorstandWoche } from './vorstand';
 import { organisationWoche } from './organisation';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+// O05 Ware
+import { wareWoche, wareBedarf, preisFaktorHaus, verdichteWare } from './merchandise';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -49,9 +51,13 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   const lohn = lohnSumme(s);
   einkaufFristen(s);
   wareneingang(s, lohn * 2);
+  // O05 Ware
+  wareWoche(s);
 
   // 1. Nachfrage aller Häuser; Eigenmarken und Sortimentsmix je Warengruppe wirken auf die Bruttonachfrage
   const roh: HausRoh[] = s.haeuser.map((h) => simuliereHaus(s, h));
+  // O05 Ware
+  wareBedarf(s, roh);
   const nachfrage = einkaufNachfrage(s, roh);
 
   // 2. Bestand begrenzt den Abverkauf eigener Ware
@@ -97,7 +103,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     let umsatzEigen = 0;
     for (const [g, v] of Object.entries(r.eigen) as [GruppeId, { brutto: number; umsatz: number }][]) {
       const f = verfuegbar[g] ?? 1;
-      const u = v.umsatz * f;
+      const u = v.umsatz * f * preisFaktorHaus(s, h, g);
       const anteil = (bruttoSumme[g] ?? 0) > 0 ? v.brutto / (bruttoSumme[g] ?? 1) : 0;
       const e = (einsatz[g] ?? 0) * anteil;
       umsatzEigen += u;
@@ -174,6 +180,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   // 6. Abschriften und Gewöhnung
   k.abschriften = einkaufAltern(s);
+  // O05 Ware
+  verdichteWare(s);
   k.rohertrag -= k.abschriften;
   eigenmarkenWoche(s, einkaufBuchen(s, umsatzEigenJe));
   produkteBuchen(s);
