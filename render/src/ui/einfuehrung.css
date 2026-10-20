@@ -1,0 +1,41 @@
+/* N04: Einführung mit der Vorstandsassistentin. Ohne Aktivierung keine Wirkung. */
+#einfuehrung-root[hidden], #ein-kontext[hidden] { display: none!important; }
+#einfuehrung-root { position: fixed; inset: 0; z-index: 18; pointer-events: none; color: #23333f; }
+.ein-maske, .ein-fragemaske { position: fixed; inset: 0; background: rgba(11,24,34,.73); pointer-events: auto; }
+.ein-maske { touch-action: none; }
+.ein-ring { position: fixed; border: 3px solid #f7c45b; border-radius: 12px; box-shadow: 0 0 0 1px #fff9, 0 0 0 6px #f7c45b44; animation: ein-puls 1.2s ease-in-out infinite; pointer-events: none; }
+.ein-ring[hidden] { display: none; }
+@keyframes ein-puls { 0%,100% { box-shadow:0 0 0 1px #fff9,0 0 0 4px #f7c45b44; } 50% { box-shadow:0 0 0 1px #fff9,0 0 0 12px #f7c45b22; } }
+.ein-sheet, .ein-frage { background: #f4f2ec; border-radius: 22px 22px 0 0; color: #23333f; padding: 14px 17px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 36px #07131b6d; pointer-events: auto; }
+.ein-sheet { position: absolute; left: 0; bottom: 0; right: 0; margin-inline: auto; width: min(100%, 650px); max-height: 45dvh; overflow: auto; }
+.ein-sheet.ein-oben { top: calc(52px + env(safe-area-inset-top)); bottom: auto; max-height: 37dvh; border-radius: 18px; padding-bottom: 14px; }
+.ein-kopf { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.ein-kopf>div { display: flex; flex-direction: column; flex: 1; gap: 2px; }
+.ein-kopf b { font-size: 13px; } .ein-kopf small { font-size: 11px; color: #78858d; }
+.ein-kopf button { border: none; background: #fff; color: #334553; border-radius: 50%; min-width: 38px; height: 38px; font-size: 24px; cursor: pointer; }
+.ein-logo { display: grid; place-items: center; background: #d23c32; color: #fff; border-radius: 10px; width: 37px; height: 37px; font-size: 20px; font-weight: 800; }
+.ein-inhalt { display: flex; gap: 14px; align-items: center; }
+.ein-text { font-size: 14px; line-height: 1.48; margin: 5px 0; flex: 1; min-width: 0; min-height: 50px; cursor: pointer; white-space: pre-wrap; }
+.ein-portraet { width: 75px; height: 82px; flex: none; background: #dfe5e8; border-radius: 50% 50% 12px 12px; overflow: hidden; }
+.ein-portraet svg { width: 100%; height: 100%; }
+.ein-fuss { display: flex; gap: 9px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.ein-fuss span { font-size: 10px; color: #6b7881; }
+.ein-fuss button, .ein-antworten button { background: #2f8f5b; color: #fff; font-size: 13px; font-weight: 750; padding: 11px 14px; border-radius: 10px; min-height: 44px; cursor: pointer; }
+.ein-fuss button.ein-ueberspringen { background: #e5e9e9; color: #50626d; font-size: 11px; }
+.ein-frage { position: absolute; left: 16px; right: 16px; top: 50%; transform: translateY(-50%); width: min(calc(100% - 32px), 440px); margin: auto; border-radius: 21px; padding: 20px; }
+.ein-frage .ein-inhalt p { margin: 0; font-size: 14px; line-height: 1.45; flex: 1; }
+.ein-frage .ein-inhalt b { display: block; font-size: 20px; margin-bottom: 8px; }
+.ein-frage .ein-inhalt span { display: block; }
+.ein-antworten { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
+.ein-antworten button:not(:first-child) { background: #e5e8e8; color: #33434c; }
+#ein-kontext { position: fixed; z-index: 17; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); margin: auto; width: min(100% - 32px, 420px); background: #263644; color: #fff; box-shadow: 0 5px 25px #0007; border-radius: 12px; padding: 14px 18px; font-size: 13px; line-height: 1.5; pointer-events: none; }
+.ein-optionen { display: flex; align-items: center; gap: 10px; margin: 10px 14px 2px; font-size: 12px; }
+.ein-optionen button { border: 1px solid #cbd6db; background: #fff; color: #334553; padding: 9px 11px; border-radius: 10px; min-height: 44px; }
+.ein-optionen label { display: flex; align-items: center; gap: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .ein-ring { animation: none!important; }
+}
+@media (max-height: 580px) {
+  .ein-sheet { max-height: 57dvh; }
+  .ein-sheet.ein-oben { top: 8px; max-height: 45dvh; }
+}
