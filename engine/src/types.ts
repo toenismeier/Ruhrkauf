@@ -434,6 +434,8 @@ export interface GameState {
   haeuser: Haus[];
   // O07 Haus
   hausbetrieb?: HausbetriebStand;
+  /** O07 Haus: nur für A/B-Performance und Baseline-Kalibrierung. */
+  hausbetriebAbnahmeAus?: boolean;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
