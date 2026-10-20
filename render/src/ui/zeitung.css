@@ -1,0 +1,37 @@
+/* Der Handelsbote, bewusst unabhängig von der übrigen Spieloberfläche. */
+.zb-root { background: #f6f0e3; color: #262521; padding: 14px 12px 20px; border-radius: 8px; margin: -2px; font-family: Georgia, "Times New Roman", "DejaVu Serif", serif; }
+.zb-root * { box-sizing: border-box; }
+.zb-einstellung { display: flex; align-items: center; gap: 8px; padding: 10px 6px; font: 12px/1.4 -apple-system, Arial, sans-serif; color: #4e4b43; }
+.zb-einstellung input { width: 17px; height: 17px; flex-shrink: 0; accent-color: #8e2d2a; }
+.zb-navigation { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin: 6px 0; font-family: -apple-system, Arial, sans-serif; }
+.zb-navigation button { border: 1px solid #c5bbab; background: #fffbf2; color: #473b33; border-radius: 5px; padding: 9px 8px; font-size: 12px; flex: 1; }
+.zb-navigation button[disabled] { opacity: 0.36; }
+.zb-zahl, .zb-wischhinweis, .zb-hinweis { text-align: center; font: 11px/1.6 -apple-system, Arial, sans-serif; color: #625c53; margin: 7px 0 13px; }
+.zb-kopf { border-top: 5px double #22201b; border-bottom: 3px double #22201b; padding: 6px 0 8px; text-align: center; }
+.zb-ausgabenzeile, .zb-datum { display: flex; justify-content: space-between; gap: 8px; text-align: left; font: 9px/1.5 Georgia, serif; letter-spacing: .08em; }
+.zb-kopf h2 { font: bold clamp(30px, 9vw, 49px)/1.1 Georgia, "Times New Roman", "DejaVu Serif", serif; letter-spacing: -.055em; margin: 3px 0 5px; color: #231e1a; }
+.zb-datum { border-top: 1px solid #3c352e; padding-top: 4px; }
+.zb-tabs { display: flex; overflow-x: auto; gap: 1px; border-bottom: 2px solid #3b352d; margin: 12px 0 15px; font-family: -apple-system, Arial, sans-serif; }
+.zb-tabs button { flex: 1 0 auto; font-size: 11px; text-align: center; padding: 9px 6px; background: none; border: none; color: #625a50; border-bottom: 3px solid transparent; }
+.zb-tabs button.aktiv { border-color: #9b3934; color: #712622; font-weight: 800; }
+.zb-spalten { columns: 2 135px; column-gap: 18px; column-rule: 1px solid #c7bdae; }
+.zb-artikel { break-inside: avoid; margin-bottom: 18px; border-top: 1px solid #bcb3a5; padding-top: 8px; }
+.zb-aufmacher { column-span: all; margin-bottom: 12px; border-top: 0; padding-top: 0; }
+.zb-rubrik { font: 700 9px/1.5 -apple-system, Arial, sans-serif; text-transform: uppercase; letter-spacing: .13em; color: #8d332b; }
+.zb-artikel h3 { font: bold 18px/1.13 Georgia, "Times New Roman", "DejaVu Serif", serif; margin: 4px 0 7px; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.zb-aufmacher h3 { font-size: 29px; line-height: 1.07; }
+.zb-unter { font: italic 13px/1.34 Georgia, serif; margin: 0 0 8px; color: #585046; }
+.zb-text { font: 12px/1.55 Georgia, "DejaVu Serif", serif; margin: 7px 0 0; text-align: justify; hyphens: auto; overflow-wrap: break-word; }
+.zb-text::first-letter { font-weight: bold; }
+.zb-bild { margin: 10px 0 11px; padding: 0; }
+.zb-bild .zb-isobild { display: block; width: 100%; max-height: 210px; background: #e1e5df; border: 1px solid #aca698; }
+.zb-bild figcaption { font: 9px/1.4 Georgia, serif; color: #666158; margin-top: 3px; }
+.zb-archivtitel { font: bold 22px Georgia, serif; text-align: center; margin: 20px 0 5px; }
+.zb-archivliste { display: flex; flex-direction: column; gap: 7px; }
+.zb-archivliste button { background: #fffaf0; color: #342e27; text-align: left; display: grid; gap: 5px; border: 1px solid #cbc0ac; border-radius: 4px; padding: 11px; }
+.zb-archivliste small, .zb-archivliste span { font: 10px -apple-system, Arial, sans-serif; color: #776e62; }
+.zb-archivliste strong { font: bold 17px Georgia, serif; }
+.zb-leer, .zb-keine { padding: 22px 10px; text-align: center; color: #685e50; }
+.zb-leer h3 { font: bold 18px Georgia, serif; }
+@media (min-width: 650px) { .zb-root { max-width: 620px; margin: 0 auto; padding: 20px 24px; } .zb-aufmacher h3 { font-size: 34px; } }
+@media (prefers-reduced-motion: reduce) { .zb-root * { scroll-behavior: auto !important; transition: none !important; } }
