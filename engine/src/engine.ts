@@ -15,6 +15,8 @@ import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './w
 import { vorstandWoche } from './vorstand';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+// O07 Haus
+import { hausGastroErgebnis, hausKonzessionserloes, hausWoche } from './haus';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -116,9 +118,15 @@ export function wocheAbspielen(s: GameState): WochenKpi {
       kpi.rohertrag += r.offprice - (oe.gebucht + oe.zukauf) * t;
       umsatzEigen += r.offprice;
     }
-    kpi.konzessionserloes = r.konzessionUmsatz * PARAM.konzessionsQuote;
-    kpi.untermiete = r.untermiete;
+    // O07 Haus: Konzessionsverträge und Restaurant als Pacht oder Eigenbetrieb.
+    kpi.konzessionserloes = hausKonzessionserloes(s, h, r.konzessionUmsatz, PARAM.konzessionsQuote);
+    const gastro = hausGastroErgebnis(s, h, kpi.umsatz);
+    kpi.untermiete = r.untermiete + gastro.pacht;
+    kpi.umsatz += gastro.umsatz;
+    kpi.rohertrag += gastro.rohertrag;
     const kosten = hausKosten(s, h, umsatzEigen, kpi.umsatz);
+    kosten.personal += gastro.personal;
+    kosten.sonstige += gastro.sonstige;
     kpi.personal = kosten.personal;
     kpi.miete = h.status === 'geschlossen' ? 0 : kosten.miete;
     if (h.status === 'geschlossen') restmieten += kosten.miete;
@@ -200,6 +208,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   aktualisiereStakeholder(s);
   ereignisse(s);
   wettbewerbWoche(s);
+  // O07 Haus: ein Aufruf je Woche für Kommentierung, Mystery Shopping und Umfeld.
+  hausWoche(s);
   werteAktionenAus(s);
 
   if (s.insolvenz && w + 1 >= s.insolvenz.versammlung) glaeubigerversammlung(s);
