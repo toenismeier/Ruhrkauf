@@ -204,9 +204,9 @@ export function statistikModul(ctx) {
     aktiv:()=>ui.aktiv, zu:()=>{ui.aktiv=false;}, neuZeichnen:()=>{if(ui.aktiv)zeigen(true);},
     pruefe:()=>{
       const fehler=[];
-      for(const k of ['umsatz','ebitda','cash']){
+      for(const k of ['umsatz','ebitda','cash','stimmung']){
         const d=daten('konzern',undefined,k),p=d.punkte.at(-1),c=E.cockpit(s());
-        const soll=k==='umsatz'?c.umsatzWoche:k==='ebitda'?c.ebitdaWoche:c.cash;
+        const soll=k==='umsatz'?c.umsatzWoche:k==='ebitda'?c.ebitdaWoche:k==='stimmung'?c.vertrauen:c.cash;
         if(p && p.wert!==soll)fehler.push(k+': '+p.wert+' statt '+soll);
       }
       return { fehler, diagramme:inhalt.querySelectorAll('.stat-diagramm').length };
