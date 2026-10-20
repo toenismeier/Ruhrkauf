@@ -158,7 +158,7 @@ function fit(g: GruppeId, kaufkraft: number, alter: number, wettbewerb: number):
 export const gruppenFit = fit;
 
 function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: number[]): Flaeche[] {
-  if (f === 'schwester') return [{ id: `${id}-f1`, etage: 0, qm: vkQm, konzept: 'leer' }];
+  // Volkskauf besitzt bereits die vollständige Warengruppenstruktur, bleibt aber nurDaten.
   if (f === 'outlet') {
     // FUNDUS ist bis Phase 3 nur Stammdatensatz, benötigt aber bereits reale
     // Abteilungsflächen für den Grafik-/Ladenbau. "schuhe" ist ein reines
@@ -178,7 +178,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
   // Etagen von oben nach unten befüllen, Reihenfolge wie im Warenhaus typisch
   const reihenfolgeWH: GruppeId[] = ['food', 'beauty', 'accessoires', 'damen', 'waesche', 'herren', 'kinder', 'sport', 'spielwaren', 'wohnen'];
   const reihenfolgeSport: GruppeId[] = ['sportschuhe', 'sporttextil', 'outdoor', 'teamsport', 'rad', 'wintersport'];
-  const reihenfolge = f === 'warenhaus' ? reihenfolgeWH : reihenfolgeSport;
+  const reihenfolge = f === 'sport' ? reihenfolgeSport : reihenfolgeWH;
   // EG zuerst, dann OGs, UG zuletzt (Food ins UG wenn vorhanden)
   const etagenOrdnung = [...etagen.filter((e) => e >= 0).sort((a, b) => a - b), ...etagen.filter((e) => e < 0)];
   const proEtage = vkQm / etagen.length;
@@ -414,6 +414,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   const bestand: Kohorte[] = [];
   const basisUmsatz: Partial<Record<GruppeId, number>> = {};
   for (const x of haeuser) {
+    // Schwesterkette und FUNDUS besitzen Gruppen, aber bis Phase 3 keinen Umsatz/Warenbestand.
+    if (x.nurDaten) continue;
     for (const [g, P] of Object.entries(x.potenzial) as [GruppeId, number][]) {
       const qmG = x.flaechen.filter((f) => f.gruppe === g).reduce((a, b) => a + b.qm, 0);
       const ist = P * (1 - Math.exp(-qmG / (x.saettigungQm[g] as number)));

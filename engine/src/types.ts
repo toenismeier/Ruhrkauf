@@ -40,7 +40,7 @@ export type Cluster = 'metropole' | 'grossstadt' | 'mittelstadt';
 export type Region = 'Nord' | 'Ost' | 'West' | 'Mitte' | 'Süd';
 
 export type GruppeId =
-  | 'damen' | 'herren' | 'kinder' | 'beauty' | 'accessoires' | 'waesche'
+  | 'damen' | 'herren' | 'kinder' | 'beauty' | 'accessoires' | 'waesche' | 'schuhe'
   | 'wohnen' | 'spielwaren' | 'food' | 'sport'
   | 'sportschuhe' | 'sporttextil' | 'outdoor' | 'rad' | 'wintersport' | 'teamsport';
 

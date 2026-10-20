@@ -33,6 +33,8 @@ const ROH: GruppeDef[] = [
   { id: 'food', name: 'Feinkost', format: 'warenhaus', marge: 0.3, saisonAnteil: 0.05, vorlauf: 1, beratung: 0.3, kkElast: 0.5, alterElast: 0.3, qmUmsatz: 55, anteilFlaeche: 0.07, saison: mit(WH, { 11: 1.5 }) },
   { id: 'sport', name: 'Sport', format: 'warenhaus', marge: 0.38, saisonAnteil: 0.5, vorlauf: 12, beratung: 0.5, kkElast: 0.1, alterElast: -0.3, qmUmsatz: 22, anteilFlaeche: 0.1, saison: WH },
 
+  // Eigenes Schuhsortiment von FUNDUS (Phase 3: wirtschaftliche Simulation).
+  { id: 'schuhe', name: 'Schuhe', format: 'outlet', marge: 0.43, saisonAnteil: 0.5, vorlauf: 10, beratung: 0.3, kkElast: 0.2, alterElast: 0, qmUmsatz: 38, anteilFlaeche: 0.14, saison: WH },
   { id: 'sportschuhe', name: 'Sportschuhe', format: 'sport', marge: 0.4, saisonAnteil: 0.3, vorlauf: 10, beratung: 0.6, kkElast: 0.1, alterElast: -0.5, qmUmsatz: 70, anteilFlaeche: 0.22, saison: [0.9, 0.8, 1.0, 1.05, 1.05, 1.0, 1.0, 1.05, 1.1, 0.95, 1.05, 1.3] },
   { id: 'sporttextil', name: 'Sporttextil', format: 'sport', marge: 0.45, saisonAnteil: 0.6, vorlauf: 12, beratung: 0.4, kkElast: 0.1, alterElast: -0.3, qmUmsatz: 40, anteilFlaeche: 0.28, saison: [0.95, 0.8, 0.95, 1.0, 1.05, 1.05, 1.0, 0.95, 1.0, 0.95, 1.05, 1.4] },
   { id: 'outdoor', name: 'Outdoor', format: 'sport', marge: 0.45, saisonAnteil: 0.6, vorlauf: 14, beratung: 0.7, kkElast: 0.4, alterElast: 0.2, qmUmsatz: 40, anteilFlaeche: 0.2, saison: [1.0, 0.8, 0.9, 1.0, 1.0, 0.95, 0.95, 0.85, 1.0, 1.2, 1.3, 1.5] },
@@ -49,7 +51,11 @@ export const GRUPPEN: Record<GruppeId, GruppeDef> = Object.fromEntries(
 ) as Record<GruppeId, GruppeDef>;
 
 export const GRUPPEN_LISTE: GruppeId[] = ROH.map((g) => g.id);
-export const gruppenFuer = (f: Format): GruppeId[] => ROH.filter((g) => g.format === f).map((g) => g.id);
+/** Die Sortimentstruktur steht schon vor dem wirtschaftlichen Start von Engine-Formate. */
+export const gruppenFuer = (f: Format): GruppeId[] =>
+  f === 'schwester' ? ROH.filter((g) => g.format === 'warenhaus').map((g) => g.id)
+  : f === 'outlet' ? ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']
+  : ROH.filter((g) => g.format === f).map((g) => g.id);
 
 /** Saisonfaktor einer Gruppe in einer Woche (linear zwischen Monaten interpoliert). */
 export function saisonFaktor(g: GruppeId, woche: number): number {
