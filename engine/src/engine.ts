@@ -32,6 +32,7 @@ function quartalsStart(s: GameState): void {
 export function wocheAbspielen(s: GameState): WochenKpi {
   if (s.phase === 'zerschlagen') throw new Error('Spiel beendet: Die Kette ist zerschlagen.');
   const w = s.woche;
+  const cashVorher = s.historie[s.historie.length - 1]?.cash ?? s.cash;
 
   prozesse(s);
   premiumWoche(s);
@@ -45,7 +46,9 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   const lohn = lohnSumme(s);
   einkaufFristen(s);
+  const vorWareneingang = s.cash;
   wareneingang(s, lohn * 2);
+  const warenVorkasse = s.cash - vorWareneingang;
 
   // 1. Nachfrage aller Häuser; Eigenmarken und Sortimentsmix je Warengruppe wirken auf die Bruttonachfrage
   const roh: HausRoh[] = s.haeuser.map((h) => simuliereHaus(s, h));
@@ -184,6 +187,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   einkaufDispo(s);
 
   // 8. Zahlungen: erst Pflichtzahlungen, dann Lieferanten
+  const cashVorPflicht = s.cash;
   const zinsen = Math.max(0, -s.cash) * (PARAM.zinsSatz / 52);
   const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz;
   const pflicht = kommissionAuszahlung + personalCash + k.miete + restmieten + k.nebenkosten + k.sonstige + k.logistik + k.zentrale + k.marketing + k.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf;
@@ -195,6 +199,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     else if (s.phase === 'insolvenz') zerschlagungDurchMasseunzulaenglichkeit(s);
   }
   if (!beendet(s)) lieferantenZahlungen(s);
+  const cashOperativ = eur(warenVorkasse + s.cash - cashVorPflicht);
 
   // 9. Stakeholder, Ereignisse, Aktionsauswertung
   aktualisiereStakeholder(s);
@@ -206,6 +211,14 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   for (const key of Object.keys(k) as (keyof WochenKpi)[]) if (typeof k[key] === 'number') (k[key] as number) = eur(k[key] as number);
   k.fte = Math.round(k.fte);
+  // Zahlungsarten werden nur aus tatsächlich gebuchten Cash-Bewegungen abgeleitet.
+  // Noch nicht nach Zahlart instrumentierte Effekte (insbesondere alte Sonderfälle) stehen in Sonstiges.
+  const offen = s.kapitalflussOffen ?? { investitionen: 0, finanzierung: 0 };
+  const netto = eur(s.cash - cashVorher);
+  const investitionen = eur(offen.investitionen), finanzierung = eur(offen.finanzierung);
+  k.kapitalfluss = { woche: w, operativ: cashOperativ, investitionen, finanzierung,
+    sonstiges: netto - cashOperativ - investitionen - finanzierung, netto, bestand: eur(s.cash) };
+  s.kapitalflussOffen = { investitionen: 0, finanzierung: 0 };
   k.cash = eur(s.cash);
   k.kreditFrei = eur(s.cash + s.kreditlinie);
   k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
