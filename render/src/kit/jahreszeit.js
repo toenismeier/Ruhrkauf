@@ -56,22 +56,25 @@ function zweigGeometrie() {
 const addBox = (S, x, y, z, w, h, d, farbe) => S.box(w, h, d, x, y, z, farbe);
 
 function weihnachtsmarkt(S, plan) {
-  const maerkte = (plan.bloecke ?? []).filter((b) => b.art === 'markt' && (b.platz ?? b).w > 18)
-    .sort((a, b) => (b.platz ?? b).w * (b.platz ?? b).d - (a.platz ?? a).w * (a.platz ?? a).d);
-  const p = maerkte[0]?.platz ?? maerkte[0];
+  const plaetze = (plan.bloecke ?? []).filter((b) =>
+    ['markt', 'platz'].includes(b.art) && (b.platz ?? b).w > 18 && (b.platz ?? b).d > 18
+  ).sort((a, b) => (b.platz ?? b).w * (b.platz ?? b).d - (a.platz ?? a).w * (a.platz ?? a).d);
+  const p = plaetze[0]?.platz ?? plaetze[0];
   if (!p) return 0;
-  const spalten = 3, zeilen = 3, n = 9;
-  const schrittX = Math.min(8, p.w / (spalten + 1)), schrittZ = Math.min(9, p.d / (zeilen + 1));
+  // Acht Buden am Platzrand, die Platzmitte bleibt für Brunnen und Fußgänger frei.
+  const raster = [[0, 0], [1, 0], [2, 0], [0, 1], [2, 1], [0, 2], [1, 2], [2, 2]];
+  const schrittX = Math.min(8, p.w / 4), schrittZ = Math.min(9, p.d / 4);
   const startX = p.x + p.w / 2 - schrittX, startZ = p.z + p.d / 2 - schrittZ;
-  for (let i = 0; i < n; i++) {
-    const x = startX + i % spalten * schrittX, z = startZ + Math.floor(i / spalten) * schrittZ;
+  for (let i = 0; i < raster.length; i++) {
+    const [rx, rz] = raster[i];
+    const x = startX + rx * schrittX, z = startZ + rz * schrittZ;
     const farbe = i % 2 ? '#a92f34' : '#245b43';
     addBox(S, x, .75, z, 3.4, 1.2, 2.7, '#936e4e');
     addBox(S, x, 2.15, z, 3.8, .25, 3.0, farbe);
     for (const dx of [-1.5, 1.5]) for (const dz of [-1.1, 1.1]) addBox(S, x + dx, 1.35, z + dz, .16, 2.6, .16, '#e0c49a');
     for (const dx of [-1.2, 0, 1.2]) addBox(S, x + dx, 2.38, z + 1.25, .18, .22, .18, '#ffe79a');
   }
-  return n;
+  return raster.length;
 }
 function tanne(S, x, z, h = 6) {
   addBox(S, x, .9, z, .48, 1.8, .48, '#78533b');
