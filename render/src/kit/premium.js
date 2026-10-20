@@ -152,9 +152,11 @@ function variante(S,typ,x,z,w,d,y,r) {
     dachterrasse(S,x,z,w,d,y+2.7,r);
   } else if(typ==='P003') {
     // Hamburg: weiße Kolonnaden, große grün patinierte Kuppel.
-    const cx=x+w*0.66,cz=z+d*0.63;
-    zylinder(S,cx,cz,7.0,y,4.5,STEIN.P003,24);
-    kuppel(S,cx,cz,7.1,y+4.5,KUPFER);
+    // Kuppel bewusst auf die sichtbare Fassadenecke versetzt, nicht in Dachmitte.
+    // Sockel 6,2 m plus Kuppel/Laterne ca. 5 m: über 8 m über Haupttraufe.
+    const radius=9.2,cx=x+w-radius-0.6,cz=z+d-radius-0.6;
+    zylinder(S,cx,cz,radius,y,6.2,STEIN.P003,28);
+    kuppel(S,cx,cz,radius,y+6.2,KUPFER);
     for(let u=3;u<w-3;u+=5.5) S.box(0.9,5.2,0.85,x+u,3.1,z+d+0.65,'#f5f1e9');
   } else {
     // Düsseldorf: 1920er Natursteinraster und markanter, flacher Baldachin.
@@ -353,6 +355,16 @@ export function premiumhaus(S,scene,haus,opt={}) {
   glasdach(S,x,z,w,d,H+1.0,typ);
   vordach(S,x,z,w,d);
   variante(S,typ,x,z,w,d,H+1.0,r);
+  // Berlin: vier tatsächlich beflaggte Traufmasten statt leerer Antennen-Silhouette.
+  // Im Verkaufsprozess werden Mast und Tuch vollständig eingeholt, nicht leer gezeigt.
+  if(typ==='P001' && !opt.verkaufsprozess && !opt.insolvenz && haus.status!=='verkauft') {
+    for(let i=0;i<4;i++){
+      const fx=x+w*(0.16+i*0.22),fz=z+d-1.5;
+      S.box(0.18,4.8,0.18,fx,H+3.8,fz,BRONZE);
+      S.box(1.9,1.2,0.13,fx+0.95,H+5.45,fz,DUNKEL);
+      S.box(0.43,0.38,0.17,fx+0.86,H+5.55,fz+0.12,PREMIUM_MESSING);
+    }
+  }
   if(typ==='P002') arkaden(S,x,z,w,d);
   edleAuslagen(S,x,z,w,d,r);
   platzbrunnen(S,x,z,w,d,typ);
