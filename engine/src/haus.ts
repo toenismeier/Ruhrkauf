@@ -141,14 +141,14 @@ export function initialisiereHausbetrieb(s: GameState): void {
     l.wechselwille ??= 0;
     l.stellvertretung ??= { name: 'Stellvertretung ' + h.stadt, qualitaet: clamp(l.skill * 0.85, 0, 1) };
     h.betrieb ??= {
-      leitungStart: l.skill, leitungGehaltStart: l.gehalt, kosten: { energie: 1, reinigung: 1, sicherheit: 1, instandhaltung: 1, versicherung: 1 },
+      leitungStart: l.skill, leitungGehaltStart: l.gehalt ?? 0, kosten: { energie: 1, reinigung: 1, sicherheit: 1, instandhaltung: 1, versicherung: 1 },
       services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false },
       kundenScore: 0, scoreWoche: -1, umsatzHistorie: [], kommentare: [],
       massnahmeBis: 0, massnahmeFaktor: 1, gastro: 'keine', gastroVertragBis: 0,
       restaurantQm: h.format === 'warenhaus' && h.etagen.length >= 4 ? Math.min(350, Math.round(h.grundflaecheQm * 0.06)) : 0,
       konzessionen: {},
     };
-    h.betrieb.leitungGehaltStart ??= l.gehalt;
+    h.betrieb.leitungGehaltStart ??= l.gehalt ?? 0;
     for (const f of h.flaechen.filter(x => x.konzept === 'konzession')) {
       h.betrieb.konzessionen[f.id] ??= { name: 'Partner ' + (f.gruppe ?? 'Sortiment'), quote: 0.22, bis: s.woche + 260, exklusiv: false };
     }
@@ -179,7 +179,7 @@ export function hausBetriebsFaktor(s: GameState, h: Haus): number {
   const geschenk = services.geschenkverpackung && (s.woche % 52 >= 47) ? 1.014 : 1;
   const abholung = services.abholstation ? 1.005 : 1;
   const standard = 1 + 0.007 * (st.sauberkeit - 2) + 0.009 * (st.praesentation - 2) + 0.006 * (st.kasse - 2)
-    + 0.003 * (st.oeffnung.bis - 20) + 0.002 * (st.oeffnung.samstagBis - 20);
+    + 0.002 * (10 - st.oeffnung.von) + 0.003 * (st.oeffnung.bis - 20) + 0.002 * (st.oeffnung.samstagBis - 20);
   // Der alte skill-Faktor bleibt in wirtschaft.ts: nur Änderungen an den vier neuen Stärken wirken zusätzlich.
   const delta = (l.staerken?.kunde ?? l.skill) - b.leitungStart;
   const ware = (l.staerken?.ware ?? l.skill) - b.leitungStart;
@@ -203,7 +203,7 @@ export function hausBetriebskosten(s: GameState, h: Haus, sonstige: number): num
   const service = Object.values(hausServices(s,h)).filter(Boolean).length * 180;
   const l = leitung(h);
   const kostenLeitung = 1 - 0.035 * ((l.staerken?.kosten ?? l.skill) - b.leitungStart);
-  return Math.max(0, sonstige * faktor * kostenLeitung + service + eur(((l.gehalt ?? b.leitungGehaltStart) - b.leitungGehaltStart)/52));
+  return Math.max(0, sonstige * faktor * kostenLeitung + service);
 }
 export function hausKonzessionserloes(s: GameState, h: Haus, umsatz: number, quoteBasis: number): number {
   const fl = h.flaechen.filter(f => f.konzept === 'konzession');
