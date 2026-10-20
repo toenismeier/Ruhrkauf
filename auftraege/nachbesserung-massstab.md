@@ -69,3 +69,37 @@ Die GitHub-Actions-Läufe starten derzeit nicht (Kontingent). Bis das geklärt i
   - `spiel-render.js` bricht ab mit „Wochenstreifen enthält nicht die aktuelle Kalenderwoche“. Das Spiel ist mit Bot C in Woche 23 zerschlagen, und die Woche läuft nicht weiter. Mit der neuen Welt überlebt der Bot die Insolvenz nicht.
 - **Folge:** Phase 1 wird **nicht allein** in `main` gemergt, weil das Spiel dort sonst nach 23 Wochen endet. **Phase 2 (Kalibrierung) direkt auf diesem Branch anschließen.** Gemergt wird nach Phase 2, wenn Bot C auf Seeds 1 bis 3 fünf Jahre überlebt und `spiel-render.js` 0 Abweichungen liefert.
 - Die Grafik-Aufträge `massstab-staedte.md` und `massstab-oberflaeche.md` dürfen schon jetzt von `feat/engine-massstab` abzweigen statt von `main`.
+
+## 9. Vierte Prüfung (20.10. früh)
+Geprüft wurde der Branch nach einem Probe-Merge von `main` (Stand nach FUNDUS und Ladenbau).
+- **Konflikte beim Merge:** `auftraege/nachbesserung-massstab.md` (Version von `main` nehmen) und `render/haeuser-outlet.json` (siehe unten). Vor dem nächsten Push `main` in den Branch mergen. Der Branch liegt 84 Commits zurück.
+- **Bot C überlebt jetzt auf Seeds 1 bis 3 fünf Jahre.** Ende regulär in W260, Insolvenzplan jeweils angenommen. Das ist der wichtigste Schritt.
+- **Tests:** 98 grün, 14 übersprungen, 3 rot:
+  - Marketing-Werbequote 2,99 % statt über 3 %,
+  - Startcash 400 Mio. € statt 120 Mio. € im Schwierigkeitstest,
+  - HQ-FTE-Abweichung 13 statt höchstens 10.
+  - Alle drei gehören zu Phase 2: entweder kalibrieren oder begründet auf den neuen Maßstab umstellen.
+- **`massstab-phase2.ts` 1,2,3** (Ziel in Klammern):
+
+  | Kennzahl | Ist | Ziel |
+  |---|---|---|
+  | Umsatz Jahr 1 Hartwig | 8.000 bis 8.040 Mio. € (−10,2 bis −10,6 %) | 8.950 Mio. € ±3 % |
+  | Umsatz Premium | 734 bis 736 Mio. € (−10 %) | 820 Mio. € ±3 % |
+  | Umsatz Sport | 493 bis 495 Mio. € (−9 %) | 545 Mio. € ±3 % |
+  | EBITDA-Quote Jahr 1 | −2,2 bis −2,7 % | rund −4 %, Q4 positiv (Q4 positiv: erfüllt) |
+  | Freigaben je Woche im Mittel | 77 (max. 137) | rund 8 |
+  | Laufzeit je Woche (Node) | 102 bis 106 ms | unter 60 ms |
+  | Laufzeit je Woche im Browser (`spiel-render`) | 248 ms | – |
+
+  - Umsatz: Alle Formate liegen gleichmäßig rund 10 % zu tief. Das spricht für einen globalen Faktor, nicht für einzelne Häuser.
+  - Freigaben: Einkauf liefert das Zehnfache. Startfreigabegrenze und Orderrunden weiter skalieren (Phase 2, Punkt 4).
+- **`spiel-render.js`:** läuft durch, 0 Anzeige- und Panelabweichungen. Aber 2 Fehler im Einkaufsteil:
+  - „FEHLER Freigabegrenze +10.000 €: 175000 €“
+  - „FEHLER Folgewoche: Regler und Grenze wirken weiter: Servicegrad 0.98, Grenze 175000“
+  - Die Prüfung erwartet die alte Startgrenze. Entweder die Prüfung auf die skalierte Grenze umstellen oder den Regler reparieren, je nachdem, was richtig ist.
+- **`render/haeuser-outlet.json`:** Die 66 FUNDUS-Häuser aus dem Export passen nicht zum Format, das der FUNDUS-Grafikbau auf `main` erwartet:
+  - nur eine Fläche `konzept: 'leer'` statt der Abteilungsflächen mit `gruppe` (damen, herren, kinder, schuhe usw.),
+  - Baujahr 1953 bei einer Fachmarkt-Box am Stadtrand,
+  - Namen wie „FUNDUS Berlin Am Stadtrand“.
+  - Der Export muss dieselben Felder liefern wie die bisherige Datei auf `main`: Flächen nach Gruppen, Baujahr passend zur Bauform (Box ab 1995, Innenstadthaus 1965 bis 1985), Name „FUNDUS <Stadt>“, bei zwei Häusern in einer Stadt mit Stadtteil.
+  - Danach die Kataloge `outlets` und `outlet-lagen` rendern und prüfen, dass sie weiter funktionieren.

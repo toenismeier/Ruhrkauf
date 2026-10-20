@@ -78,3 +78,19 @@ Ziel je Haus 4.000 bis 9.000 Teile. Werte in `KIT.md`. Jedes Haus muss allein an
     2. `premiumAngebote` (in `ereignisse.ts`) darf in der Insolvenz keine Zufallszahlen aus dem gemeinsamen Strom ziehen, solange kein Angebot entsteht. Sonst verschiebt sich die Ereignisfolge gegenüber `main` (Maison Arvel, Hallberg). Für Premium-Angebote einen eigenen abgeleiteten RNG nehmen.
     3. Die Abstimmung über den Insolvenzplan: Was senkt die Zustimmung so stark (BR 5 statt 11)? Wenn das Premium-Image, der Schutz oder offene Premium-Angebote in die Bewertung einfließen, gehört das raus. Die Gläubiger stimmen über den Plan ab, nicht über das Image der vier Häuser.
   - Ziel: Der Bot-Lauf mit Seed 1 bis 3 verläuft wie auf `main` (Insolvenzplan angenommen, Ende regulär W260), die Margen liegen im Ziel ±2 Punkte, `spiel-render.js` 0 Abweichungen.
+
+## 6. Dritte Prüfung (20.10. früh)
+- **Fortschritt:** Bot C überlebt jetzt, „tiefe Sanierung“ ist grün, `spiel-render.js` läuft. 114 von 117 Tests grün.
+- **Rot: nur noch die Margen** (`premium.test.ts`, „operative Premium-Margen und Rangfolge“, Seeds 1 bis 3). Gemessen mit dem Testaufbau (52 Wochen, Cash 5 Mrd., Wettbewerbsereignisse aus):
+
+  | Seed | P001 Berlin (Ziel 11 %) | P002 München (Ziel 11 %) | P003 Hamburg (Ziel 9 %) | P004 Düsseldorf (Ziel 6 %) |
+  |---|---|---|---|---|
+  | 1 | 13,1 % · 92 Mio. € | 13,9 % · 69 Mio. € | 14,3 % · 99 Mio. € | 13,5 % · 78 Mio. € |
+  | 2 | 15,4 % · 90 Mio. € | 14,7 % · 104 Mio. € | 12,1 % · 86 Mio. € | 7,3 % · 42 Mio. € |
+  | 3 | 15,6 % · 91 Mio. € | 12,3 % · 85 Mio. € | 10,7 % · 54 Mio. € | 11,2 % · 80 Mio. € |
+
+- **Zwei Fehler:**
+  1. Alle Margen liegen zu hoch, die Abstufung nach Rang fehlt. Hamburg und Düsseldorf verdienen so viel wie Berlin.
+  2. Die Umsätze schwanken je Seed stark und folgen nicht dem Rang (Seed 1: Hamburg vor Berlin, Seed 2: Düsseldorf nur 42 Mio. €). Ursache prüfen: Das umgewidmete Haus ist je Seed ein anderes, unterschiedlich großes Haus.
+- **Lösung:** Größe und Grundfläche der Premium-Häuser fest je Rang setzen (zum Beispiel Rang 1 rund 30.000 m², Rang 2 rund 18.000 m², Rang 3 rund 14.000 m²), unabhängig vom Seed. Danach die Margen über den Produktivitätsfaktor und `premiumServiceQuote` je Rang einstellen, bis alle drei Seeds im Ziel ±2 Punkte liegen und die Umsatzrangfolge P001 ≈ P002 > P003 > P004 stimmt.
+- Die Toleranz im Test nicht aufweichen.
