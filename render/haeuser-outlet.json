@@ -1,68 +1,66 @@
 [
   {
     "id": "O001",
-    "name": "FUNDUS Berlin",
-    "stadt": "Berlin",
+    "name": "FUNDUS Essen",
+    "stadt": "Essen",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
-    "cluster": "metropole",
-    "region": "Ost",
-    "grundflaecheQm": 4200,
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1500,
     "etagen": [
       0
     ],
-    "baujahr": 2013,
-    "fassade": 5,
+    "baujahr": 1998,
+    "fassade": 0,
     "substanz": 40,
     "status": "offen",
     "flaechen": [
       {
         "id": "O001-f1",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O001-f2",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O001-f3",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O001-f4",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O001-f5",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O001-f6",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O001-f7",
         "etage": 0,
-        "qm": 600,
+        "qm": 214,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -70,69 +68,67 @@
   },
   {
     "id": "O002",
-    "name": "FUNDUS Frankfurt",
-    "stadt": "Frankfurt",
+    "name": "FUNDUS Duisburg",
+    "stadt": "Duisburg",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
-    "cluster": "metropole",
-    "region": "Mitte",
-    "grundflaecheQm": 1600,
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1637,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2010,
-    "fassade": 5,
-    "substanz": 44,
+    "baujahr": 2005,
+    "fassade": 1,
+    "substanz": 57,
     "status": "offen",
     "flaechen": [
       {
         "id": "O002-f1",
         "etage": 0,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O002-f2",
         "etage": 1,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O002-f3",
         "etage": 0,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O002-f4",
         "etage": 1,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O002-f5",
         "etage": 0,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O002-f6",
         "etage": 1,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O002-f7",
         "etage": 0,
-        "qm": 443,
+        "qm": 468,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -140,68 +136,66 @@
   },
   {
     "id": "O003",
-    "name": "FUNDUS Stuttgart",
-    "stadt": "Stuttgart",
+    "name": "FUNDUS Dortmund",
+    "stadt": "Dortmund",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
-    "cluster": "metropole",
-    "region": "Süd",
-    "grundflaecheQm": 3500,
+    "cluster": "grossstadt",
+    "grundflaecheQm": 1774,
     "etagen": [
       0
     ],
-    "baujahr": 1998,
-    "fassade": 6,
-    "substanz": 85,
+    "baujahr": 2012,
+    "fassade": 2,
+    "substanz": 74,
     "status": "offen",
     "flaechen": [
       {
         "id": "O003-f1",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O003-f2",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O003-f3",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O003-f4",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O003-f5",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O003-f6",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O003-f7",
         "etage": 0,
-        "qm": 500,
+        "qm": 253,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -209,69 +203,67 @@
   },
   {
     "id": "O004",
-    "name": "FUNDUS Essen",
-    "stadt": "Essen",
+    "name": "FUNDUS Bochum",
+    "stadt": "Bochum",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1300,
+    "grundflaecheQm": 1911,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2015,
-    "fassade": 6,
-    "substanz": 55,
+    "baujahr": 2000,
+    "fassade": 3,
+    "substanz": 45,
     "status": "offen",
     "flaechen": [
       {
         "id": "O004-f1",
         "etage": 0,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O004-f2",
         "etage": 1,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O004-f3",
         "etage": 0,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O004-f4",
         "etage": 1,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O004-f5",
         "etage": 0,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O004-f6",
         "etage": 1,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O004-f7",
         "etage": 0,
-        "qm": 357,
+        "qm": 546,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -279,68 +271,66 @@
   },
   {
     "id": "O005",
-    "name": "FUNDUS Dortmund",
-    "stadt": "Dortmund",
+    "name": "FUNDUS Oberhausen",
+    "stadt": "Oberhausen",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 4900,
+    "grundflaecheQm": 2048,
     "etagen": [
       0
     ],
-    "baujahr": 2009,
-    "fassade": 5,
-    "substanz": 50,
+    "baujahr": 2007,
+    "fassade": 4,
+    "substanz": 62,
     "status": "offen",
     "flaechen": [
       {
         "id": "O005-f1",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O005-f2",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O005-f3",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O005-f4",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O005-f5",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O005-f6",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O005-f7",
         "etage": 0,
-        "qm": 700,
+        "qm": 293,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -348,69 +338,67 @@
   },
   {
     "id": "O006",
-    "name": "FUNDUS Bremen",
-    "stadt": "Bremen",
+    "name": "FUNDUS Gelsenkirchen",
+    "stadt": "Gelsenkirchen",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 1800,
+    "grundflaecheQm": 2185,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 1999,
-    "fassade": 4,
-    "substanz": 58,
+    "baujahr": 2014,
+    "fassade": 5,
+    "substanz": 79,
     "status": "offen",
     "flaechen": [
       {
         "id": "O006-f1",
         "etage": 0,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O006-f2",
         "etage": 1,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O006-f3",
         "etage": 0,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O006-f4",
         "etage": 1,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O006-f5",
         "etage": 0,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O006-f6",
         "etage": 1,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O006-f7",
         "etage": 0,
-        "qm": 514,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -418,68 +406,66 @@
   },
   {
     "id": "O007",
-    "name": "FUNDUS Leipzig",
-    "stadt": "Leipzig",
+    "name": "FUNDUS Wuppertal",
+    "stadt": "Wuppertal",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "Ost",
-    "grundflaecheQm": 4400,
+    "grundflaecheQm": 2322,
     "etagen": [
       0
     ],
-    "baujahr": 2009,
-    "fassade": 5,
-    "substanz": 64,
+    "baujahr": 2002,
+    "fassade": 6,
+    "substanz": 50,
     "status": "offen",
     "flaechen": [
       {
         "id": "O007-f1",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O007-f2",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O007-f3",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O007-f4",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O007-f5",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O007-f6",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O007-f7",
         "etage": 0,
-        "qm": 629,
+        "qm": 332,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -487,69 +473,67 @@
   },
   {
     "id": "O008",
-    "name": "FUNDUS Dresden",
-    "stadt": "Dresden",
+    "name": "FUNDUS Bielefeld",
+    "stadt": "Bielefeld",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "Ost",
-    "grundflaecheQm": 2000,
+    "grundflaecheQm": 1609,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 1999,
+    "baujahr": 2009,
     "fassade": 7,
-    "substanz": 78,
+    "substanz": 67,
     "status": "offen",
     "flaechen": [
       {
         "id": "O008-f1",
         "etage": 0,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O008-f2",
         "etage": 1,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O008-f3",
         "etage": 0,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O008-f4",
         "etage": 1,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O008-f5",
         "etage": 0,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O008-f6",
         "etage": 1,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O008-f7",
         "etage": 0,
-        "qm": 557,
+        "qm": 460,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -557,68 +541,66 @@
   },
   {
     "id": "O009",
-    "name": "FUNDUS Hannover",
-    "stadt": "Hannover",
+    "name": "FUNDUS Mönchengladbach",
+    "stadt": "Mönchengladbach",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 4900,
+    "grundflaecheQm": 1746,
     "etagen": [
       0
     ],
-    "baujahr": 2006,
-    "fassade": 1,
-    "substanz": 44,
+    "baujahr": 2016,
+    "fassade": 0,
+    "substanz": 84,
     "status": "offen",
     "flaechen": [
       {
         "id": "O009-f1",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O009-f2",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O009-f3",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O009-f4",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O009-f5",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O009-f6",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O009-f7",
         "etage": 0,
-        "qm": 700,
+        "qm": 249,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -626,69 +608,67 @@
   },
   {
     "id": "O010",
-    "name": "FUNDUS Nürnberg",
-    "stadt": "Nürnberg",
+    "name": "FUNDUS Münster",
+    "stadt": "Münster",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 2100,
+    "grundflaecheQm": 1883,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2013,
-    "fassade": 4,
-    "substanz": 70,
+    "baujahr": 2004,
+    "fassade": 1,
+    "substanz": 55,
     "status": "offen",
     "flaechen": [
       {
         "id": "O010-f1",
         "etage": 0,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O010-f2",
         "etage": 1,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O010-f3",
         "etage": 0,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O010-f4",
         "etage": 1,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O010-f5",
         "etage": 0,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O010-f6",
         "etage": 1,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O010-f7",
         "etage": 0,
-        "qm": 586,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -696,68 +676,66 @@
   },
   {
     "id": "O011",
-    "name": "FUNDUS Duisburg",
-    "stadt": "Duisburg",
+    "name": "FUNDUS Bonn",
+    "stadt": "Bonn",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 3400,
+    "grundflaecheQm": 2020,
     "etagen": [
       0
     ],
-    "baujahr": 2002,
-    "fassade": 1,
-    "substanz": 85,
+    "baujahr": 2011,
+    "fassade": 2,
+    "substanz": 72,
     "status": "offen",
     "flaechen": [
       {
         "id": "O011-f1",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O011-f2",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O011-f3",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O011-f4",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O011-f5",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O011-f6",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O011-f7",
         "etage": 0,
-        "qm": 486,
+        "qm": 289,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -765,69 +743,67 @@
   },
   {
     "id": "O012",
-    "name": "FUNDUS Bochum",
-    "stadt": "Bochum",
+    "name": "FUNDUS Hannover",
+    "stadt": "Hannover",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
     "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1600,
+    "grundflaecheQm": 2157,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2001,
-    "fassade": 4,
-    "substanz": 40,
+    "baujahr": 1999,
+    "fassade": 3,
+    "substanz": 43,
     "status": "offen",
     "flaechen": [
       {
         "id": "O012-f1",
         "etage": 0,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O012-f2",
         "etage": 1,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O012-f3",
         "etage": 0,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O012-f4",
         "etage": 1,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O012-f5",
         "etage": 0,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O012-f6",
         "etage": 1,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O012-f7",
         "etage": 0,
-        "qm": 457,
+        "qm": 616,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -835,68 +811,66 @@
   },
   {
     "id": "O013",
-    "name": "FUNDUS Wuppertal",
-    "stadt": "Wuppertal",
+    "name": "FUNDUS Frankfurt",
+    "stadt": "Frankfurt",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 3800,
+    "cluster": "metropole",
+    "grundflaecheQm": 2294,
     "etagen": [
       0
     ],
-    "baujahr": 2003,
+    "baujahr": 2006,
     "fassade": 4,
-    "substanz": 40,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "O013-f1",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O013-f2",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O013-f3",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O013-f4",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O013-f5",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O013-f6",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O013-f7",
         "etage": 0,
-        "qm": 543,
+        "qm": 328,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -904,69 +878,67 @@
   },
   {
     "id": "O014",
-    "name": "FUNDUS Bielefeld",
-    "stadt": "Bielefeld",
+    "name": "FUNDUS Stuttgart",
+    "stadt": "Stuttgart",
     "format": "outlet",
-    "nurDaten": true,
     "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1600,
+    "cluster": "metropole",
+    "grundflaecheQm": 1581,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2011,
-    "fassade": 1,
-    "substanz": 40,
+    "baujahr": 2013,
+    "fassade": 5,
+    "substanz": 77,
     "status": "offen",
     "flaechen": [
       {
         "id": "O014-f1",
         "etage": 0,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O014-f2",
         "etage": 1,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O014-f3",
         "etage": 0,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O014-f4",
         "etage": 1,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O014-f5",
         "etage": 0,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O014-f6",
         "etage": 1,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O014-f7",
         "etage": 0,
-        "qm": 457,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -974,68 +946,67 @@
   },
   {
     "id": "O015",
-    "name": "FUNDUS Bonn",
-    "stadt": "Bonn",
+    "name": "FUNDUS Düsseldorf",
+    "stadt": "Düsseldorf",
     "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 4700,
+    "lage": "b",
+    "cluster": "metropole",
+    "grundflaecheQm": 2100,
     "etagen": [
-      0
+      0,
+      1
     ],
-    "baujahr": 2013,
-    "fassade": 2,
-    "substanz": 49,
+    "baujahr": 2001,
+    "fassade": 6,
+    "substanz": 48,
     "status": "offen",
     "flaechen": [
       {
         "id": "O015-f1",
         "etage": 0,
-        "qm": 671,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O015-f2",
-        "etage": 0,
-        "qm": 671,
+        "etage": 1,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O015-f3",
         "etage": 0,
-        "qm": 671,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O015-f4",
-        "etage": 0,
-        "qm": 671,
+        "etage": 1,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O015-f5",
         "etage": 0,
-        "qm": 671,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O015-f6",
-        "etage": 0,
-        "qm": 671,
+        "etage": 1,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O015-f7",
         "etage": 0,
-        "qm": 671,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -1043,69 +1014,68 @@
   },
   {
     "id": "O016",
-    "name": "FUNDUS Münster",
-    "stadt": "Münster",
+    "name": "FUNDUS Köln",
+    "stadt": "Köln",
     "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1400,
+    "lage": "b",
+    "cluster": "metropole",
+    "grundflaecheQm": 2100,
     "etagen": [
       0,
-      1
+      1,
+      2
     ],
-    "baujahr": 2000,
-    "fassade": 2,
-    "substanz": 56,
+    "baujahr": 2008,
+    "fassade": 7,
+    "substanz": 65,
     "status": "offen",
     "flaechen": [
       {
         "id": "O016-f1",
         "etage": 0,
-        "qm": 386,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O016-f2",
         "etage": 1,
-        "qm": 386,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O016-f3",
-        "etage": 0,
-        "qm": 386,
+        "etage": 2,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O016-f4",
-        "etage": 1,
-        "qm": 386,
+        "etage": 0,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O016-f5",
-        "etage": 0,
-        "qm": 386,
+        "etage": 1,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O016-f6",
-        "etage": 1,
-        "qm": 386,
+        "etage": 2,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O016-f7",
         "etage": 0,
-        "qm": 386,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -1113,68 +1083,67 @@
   },
   {
     "id": "O017",
-    "name": "FUNDUS Mannheim",
-    "stadt": "Mannheim",
+    "name": "FUNDUS Berlin",
+    "stadt": "Berlin",
     "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 4600,
+    "lage": "b",
+    "cluster": "metropole",
+    "grundflaecheQm": 2100,
     "etagen": [
-      0
+      0,
+      1
     ],
-    "baujahr": 2010,
-    "fassade": 4,
-    "substanz": 60,
+    "baujahr": 2015,
+    "fassade": 0,
+    "substanz": 82,
     "status": "offen",
     "flaechen": [
       {
         "id": "O017-f1",
         "etage": 0,
-        "qm": 657,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O017-f2",
-        "etage": 0,
-        "qm": 657,
+        "etage": 1,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O017-f3",
         "etage": 0,
-        "qm": 657,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O017-f4",
-        "etage": 0,
-        "qm": 657,
+        "etage": 1,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O017-f5",
         "etage": 0,
-        "qm": 657,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O017-f6",
-        "etage": 0,
-        "qm": 657,
+        "etage": 1,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O017-f7",
         "etage": 0,
-        "qm": 657,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -1182,69 +1151,67 @@
   },
   {
     "id": "O018",
-    "name": "FUNDUS Karlsruhe",
-    "stadt": "Karlsruhe",
+    "name": "FUNDUS Hamburg",
+    "stadt": "Hamburg",
     "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1700,
+    "lage": "b",
+    "cluster": "metropole",
+    "grundflaecheQm": 2100,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2013,
-    "fassade": 5,
-    "substanz": 63,
+    "baujahr": 2003,
+    "fassade": 1,
+    "substanz": 53,
     "status": "offen",
     "flaechen": [
       {
         "id": "O018-f1",
         "etage": 0,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O018-f2",
         "etage": 1,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O018-f3",
         "etage": 0,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O018-f4",
         "etage": 1,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O018-f5",
         "etage": 0,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O018-f6",
         "etage": 1,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O018-f7",
         "etage": 0,
-        "qm": 486,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -1252,68 +1219,68 @@
   },
   {
     "id": "O019",
-    "name": "FUNDUS Augsburg",
-    "stadt": "Augsburg",
+    "name": "FUNDUS Leipzig",
+    "stadt": "Leipzig",
     "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
+    "lage": "b",
     "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 3200,
+    "grundflaecheQm": 2100,
     "etagen": [
-      0
+      0,
+      1,
+      2
     ],
-    "baujahr": 2006,
+    "baujahr": 2010,
     "fassade": 2,
-    "substanz": 81,
+    "substanz": 70,
     "status": "offen",
     "flaechen": [
       {
         "id": "O019-f1",
         "etage": 0,
-        "qm": 457,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O019-f2",
-        "etage": 0,
-        "qm": 457,
+        "etage": 1,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O019-f3",
-        "etage": 0,
-        "qm": 457,
+        "etage": 2,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O019-f4",
         "etage": 0,
-        "qm": 457,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O019-f5",
-        "etage": 0,
-        "qm": 457,
+        "etage": 1,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O019-f6",
-        "etage": 0,
-        "qm": 457,
+        "etage": 2,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O019-f7",
         "etage": 0,
-        "qm": 457,
+        "qm": 900,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
@@ -1321,3286 +1288,67 @@
   },
   {
     "id": "O020",
-    "name": "FUNDUS Wiesbaden",
-    "stadt": "Wiesbaden",
+    "name": "FUNDUS München",
+    "stadt": "München",
     "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 2300,
+    "lage": "b",
+    "cluster": "metropole",
+    "grundflaecheQm": 2100,
     "etagen": [
       0,
       1
     ],
-    "baujahr": 2001,
-    "fassade": 4,
-    "substanz": 43,
+    "baujahr": 1998,
+    "fassade": 3,
+    "substanz": 41,
     "status": "offen",
     "flaechen": [
       {
         "id": "O020-f1",
         "etage": 0,
-        "qm": 643,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "O020-f2",
         "etage": 1,
-        "qm": 643,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "O020-f3",
         "etage": 0,
-        "qm": 643,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "O020-f4",
         "etage": 1,
-        "qm": 643,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "schuhe"
       },
       {
         "id": "O020-f5",
         "etage": 0,
-        "qm": 643,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "O020-f6",
         "etage": 1,
-        "qm": 643,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "O020-f7",
         "etage": 0,
-        "qm": 643,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O021",
-    "name": "FUNDUS Mönchengladbach",
-    "stadt": "Mönchengladbach",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2500,
-    "etagen": [
-      0
-    ],
-    "baujahr": 1999,
-    "fassade": 0,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O021-f1",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O021-f2",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O021-f3",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O021-f4",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O021-f5",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O021-f6",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O021-f7",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O022",
-    "name": "FUNDUS Gelsenkirchen",
-    "stadt": "Gelsenkirchen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2004,
-    "fassade": 0,
-    "substanz": 72,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O022-f1",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O022-f2",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O022-f3",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O022-f4",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O022-f5",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O022-f6",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O022-f7",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O023",
-    "name": "FUNDUS Aachen",
-    "stadt": "Aachen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 3300,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2003,
-    "fassade": 6,
-    "substanz": 58,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O023-f1",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O023-f2",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O023-f3",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O023-f4",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O023-f5",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O023-f6",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O023-f7",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O024",
-    "name": "FUNDUS Braunschweig",
-    "stadt": "Braunschweig",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 2400,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2015,
-    "fassade": 6,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O024-f1",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O024-f2",
-        "etage": 1,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O024-f3",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O024-f4",
-        "etage": 1,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O024-f5",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O024-f6",
-        "etage": 1,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O024-f7",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O025",
-    "name": "FUNDUS Kiel",
-    "stadt": "Kiel",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 3300,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2011,
-    "fassade": 7,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O025-f1",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O025-f2",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O025-f3",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O025-f4",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O025-f5",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O025-f6",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O025-f7",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O026",
-    "name": "FUNDUS Halle",
-    "stadt": "Halle",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Ost",
-    "grundflaecheQm": 2100,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2007,
-    "fassade": 4,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O026-f1",
-        "etage": 0,
         "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O026-f2",
-        "etage": 1,
-        "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O026-f3",
-        "etage": 0,
-        "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O026-f4",
-        "etage": 1,
-        "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O026-f5",
-        "etage": 0,
-        "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O026-f6",
-        "etage": 1,
-        "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O026-f7",
-        "etage": 0,
-        "qm": 600,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O027",
-    "name": "FUNDUS Kassel",
-    "stadt": "Kassel",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 1800,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2015,
-    "fassade": 1,
-    "substanz": 77,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O027-f1",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O027-f2",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O027-f3",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O027-f4",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O027-f5",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O027-f6",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O027-f7",
-        "etage": 0,
-        "qm": 257,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O028",
-    "name": "FUNDUS Hagen",
-    "stadt": "Hagen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1100,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1998,
-    "fassade": 1,
-    "substanz": 65,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O028-f1",
-        "etage": 0,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O028-f2",
-        "etage": 1,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O028-f3",
-        "etage": 0,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O028-f4",
-        "etage": 1,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O028-f5",
-        "etage": 0,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O028-f6",
-        "etage": 1,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O028-f7",
-        "etage": 0,
-        "qm": 300,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O029",
-    "name": "FUNDUS Potsdam",
-    "stadt": "Potsdam",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Ost",
-    "grundflaecheQm": 4700,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2002,
-    "fassade": 0,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O029-f1",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O029-f2",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O029-f3",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O029-f4",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O029-f5",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O029-f6",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O029-f7",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O030",
-    "name": "FUNDUS Saarbrücken",
-    "stadt": "Saarbrücken",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 1700,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2012,
-    "fassade": 1,
-    "substanz": 45,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O030-f1",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O030-f2",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O030-f3",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O030-f4",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O030-f5",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O030-f6",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O030-f7",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O031",
-    "name": "FUNDUS Hamm",
-    "stadt": "Hamm",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 4100,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2015,
-    "fassade": 2,
-    "substanz": 61,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O031-f1",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O031-f2",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O031-f3",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O031-f4",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O031-f5",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O031-f6",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O031-f7",
-        "etage": 0,
-        "qm": 586,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O032",
-    "name": "FUNDUS Ludwigshafen",
-    "stadt": "Ludwigshafen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 1200,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2014,
-    "fassade": 2,
-    "substanz": 49,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O032-f1",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O032-f2",
-        "etage": 1,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O032-f3",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O032-f4",
-        "etage": 1,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O032-f5",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O032-f6",
-        "etage": 1,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O032-f7",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O033",
-    "name": "FUNDUS Oldenburg",
-    "stadt": "Oldenburg",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 3100,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2009,
-    "fassade": 2,
-    "substanz": 50,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O033-f1",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O033-f2",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O033-f3",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O033-f4",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O033-f5",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O033-f6",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O033-f7",
-        "etage": 0,
-        "qm": 443,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O034",
-    "name": "FUNDUS Mülheim",
-    "stadt": "Mülheim",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1998,
-    "fassade": 6,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O034-f1",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O034-f2",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O034-f3",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O034-f4",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O034-f5",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O034-f6",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O034-f7",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O035",
-    "name": "FUNDUS Osnabrück",
-    "stadt": "Osnabrück",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 3500,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2001,
-    "fassade": 7,
-    "substanz": 68,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O035-f1",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O035-f2",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O035-f3",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O035-f4",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O035-f5",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O035-f6",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O035-f7",
-        "etage": 0,
-        "qm": 500,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O036",
-    "name": "FUNDUS Leverkusen",
-    "stadt": "Leverkusen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2009,
-    "fassade": 4,
-    "substanz": 65,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O036-f1",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O036-f2",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O036-f3",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O036-f4",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O036-f5",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O036-f6",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O036-f7",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O037",
-    "name": "FUNDUS Darmstadt",
-    "stadt": "Darmstadt",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 3600,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2003,
-    "fassade": 5,
-    "substanz": 49,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O037-f1",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O037-f2",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O037-f3",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O037-f4",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O037-f5",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O037-f6",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O037-f7",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O038",
-    "name": "FUNDUS Heidelberg",
-    "stadt": "Heidelberg",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2001,
-    "fassade": 1,
-    "substanz": 48,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O038-f1",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O038-f2",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O038-f3",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O038-f4",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O038-f5",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O038-f6",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O038-f7",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O039",
-    "name": "FUNDUS Solingen",
-    "stadt": "Solingen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 3600,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2002,
-    "fassade": 2,
-    "substanz": 54,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O039-f1",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O039-f2",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O039-f3",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O039-f4",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O039-f5",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O039-f6",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O039-f7",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O040",
-    "name": "FUNDUS Regensburg",
-    "stadt": "Regensburg",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1700,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2010,
-    "fassade": 6,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O040-f1",
-        "etage": 0,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O040-f2",
-        "etage": 1,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O040-f3",
-        "etage": 0,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O040-f4",
-        "etage": 1,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O040-f5",
-        "etage": 0,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O040-f6",
-        "etage": 1,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O040-f7",
-        "etage": 0,
-        "qm": 486,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O041",
-    "name": "FUNDUS Paderborn",
-    "stadt": "Paderborn",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 3200,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2006,
-    "fassade": 3,
-    "substanz": 66,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O041-f1",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O041-f2",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O041-f3",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O041-f4",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O041-f5",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O041-f6",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O041-f7",
-        "etage": 0,
-        "qm": 457,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O042",
-    "name": "FUNDUS Ingolstadt",
-    "stadt": "Ingolstadt",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 2000,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2002,
-    "fassade": 6,
-    "substanz": 58,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O042-f1",
-        "etage": 0,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O042-f2",
-        "etage": 1,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O042-f3",
-        "etage": 0,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O042-f4",
-        "etage": 1,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O042-f5",
-        "etage": 0,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O042-f6",
-        "etage": 1,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O042-f7",
-        "etage": 0,
-        "qm": 571,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O043",
-    "name": "FUNDUS Würzburg",
-    "stadt": "Würzburg",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 2700,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2009,
-    "fassade": 3,
-    "substanz": 45,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O043-f1",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O043-f2",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O043-f3",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O043-f4",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O043-f5",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O043-f6",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O043-f7",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O044",
-    "name": "FUNDUS Ulm",
-    "stadt": "Ulm",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2013,
-    "fassade": 3,
-    "substanz": 84,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O044-f1",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O044-f2",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O044-f3",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O044-f4",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O044-f5",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O044-f6",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O044-f7",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O045",
-    "name": "FUNDUS Wolfsburg",
-    "stadt": "Wolfsburg",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 4900,
-    "etagen": [
-      0
-    ],
-    "baujahr": 2009,
-    "fassade": 7,
-    "substanz": 56,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O045-f1",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O045-f2",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O045-f3",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O045-f4",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O045-f5",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O045-f6",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O045-f7",
-        "etage": 0,
-        "qm": 700,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O046",
-    "name": "FUNDUS Göttingen",
-    "stadt": "Göttingen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "rand",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 1400,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 2007,
-    "fassade": 2,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O046-f1",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O046-f2",
-        "etage": 1,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O046-f3",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O046-f4",
-        "etage": 1,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O046-f5",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O046-f6",
-        "etage": 1,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O046-f7",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O047",
-    "name": "FUNDUS Pforzheim",
-    "stadt": "Pforzheim",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 900,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1974,
-    "fassade": 2,
-    "substanz": 49,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O047-f1",
-        "etage": 0,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O047-f2",
-        "etage": 1,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O047-f3",
-        "etage": 2,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O047-f4",
-        "etage": 0,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O047-f5",
-        "etage": 1,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O047-f6",
-        "etage": 2,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O047-f7",
-        "etage": 0,
-        "qm": 400,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O048",
-    "name": "FUNDUS Offenbach",
-    "stadt": "Offenbach",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 1700,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1973,
-    "fassade": 5,
-    "substanz": 83,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O048-f1",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O048-f2",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O048-f3",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O048-f4",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O048-f5",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O048-f6",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O048-f7",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O049",
-    "name": "FUNDUS Heilbronn",
-    "stadt": "Heilbronn",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1500,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1971,
-    "fassade": 2,
-    "substanz": 80,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O049-f1",
-        "etage": 0,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O049-f2",
-        "etage": 1,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O049-f3",
-        "etage": 2,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O049-f4",
-        "etage": 0,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O049-f5",
-        "etage": 1,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O049-f6",
-        "etage": 2,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O049-f7",
-        "etage": 0,
-        "qm": 629,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O050",
-    "name": "FUNDUS Bremerhaven",
-    "stadt": "Bremerhaven",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 1900,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1978,
-    "fassade": 0,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O050-f1",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O050-f2",
-        "etage": 1,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O050-f3",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O050-f4",
-        "etage": 1,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O050-f5",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O050-f6",
-        "etage": 1,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O050-f7",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O051",
-    "name": "FUNDUS Trier",
-    "stadt": "Trier",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 1600,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1968,
-    "fassade": 3,
-    "substanz": 47,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O051-f1",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O051-f2",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O051-f3",
-        "etage": 2,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O051-f4",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O051-f5",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O051-f6",
-        "etage": 2,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O051-f7",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O052",
-    "name": "FUNDUS Koblenz",
-    "stadt": "Koblenz",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 2400,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1971,
-    "fassade": 4,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O052-f1",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O052-f2",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O052-f3",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O052-f4",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O052-f5",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O052-f6",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O052-f7",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O053",
-    "name": "FUNDUS Jena",
-    "stadt": "Jena",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Ost",
-    "grundflaecheQm": 1600,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1984,
-    "fassade": 3,
-    "substanz": 84,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O053-f1",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O053-f2",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O053-f3",
-        "etage": 2,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O053-f4",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O053-f5",
-        "etage": 1,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O053-f6",
-        "etage": 2,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O053-f7",
-        "etage": 0,
-        "qm": 671,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O054",
-    "name": "FUNDUS Siegen",
-    "stadt": "Siegen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1982,
-    "fassade": 5,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O054-f1",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O054-f2",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O054-f3",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O054-f4",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O054-f5",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O054-f6",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O054-f7",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O055",
-    "name": "FUNDUS Hildesheim",
-    "stadt": "Hildesheim",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Nord",
-    "grundflaecheQm": 800,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1970,
-    "fassade": 2,
-    "substanz": 45,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O055-f1",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O055-f2",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O055-f3",
-        "etage": 2,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O055-f4",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O055-f5",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O055-f6",
-        "etage": 2,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O055-f7",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O056",
-    "name": "FUNDUS Gütersloh",
-    "stadt": "Gütersloh",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2500,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1982,
-    "fassade": 4,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O056-f1",
-        "etage": 0,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O056-f2",
-        "etage": 1,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O056-f3",
-        "etage": 0,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O056-f4",
-        "etage": 1,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O056-f5",
-        "etage": 0,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O056-f6",
-        "etage": 1,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O056-f7",
-        "etage": 0,
-        "qm": 714,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O057",
-    "name": "FUNDUS Recklinghausen",
-    "stadt": "Recklinghausen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1100,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1971,
-    "fassade": 7,
-    "substanz": 83,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O057-f1",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O057-f2",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O057-f3",
-        "etage": 2,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O057-f4",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O057-f5",
-        "etage": 1,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O057-f6",
-        "etage": 2,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O057-f7",
-        "etage": 0,
-        "qm": 471,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O058",
-    "name": "FUNDUS Bottrop",
-    "stadt": "Bottrop",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2400,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1966,
-    "fassade": 0,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O058-f1",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O058-f2",
-        "etage": 1,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O058-f3",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O058-f4",
-        "etage": 1,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O058-f5",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O058-f6",
-        "etage": 1,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O058-f7",
-        "etage": 0,
-        "qm": 686,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O059",
-    "name": "FUNDUS Reutlingen",
-    "stadt": "Reutlingen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 800,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1975,
-    "fassade": 6,
-    "substanz": 79,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O059-f1",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O059-f2",
-        "etage": 1,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O059-f3",
-        "etage": 2,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O059-f4",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O059-f5",
-        "etage": 1,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O059-f6",
-        "etage": 2,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O059-f7",
-        "etage": 0,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O060",
-    "name": "FUNDUS Erlangen",
-    "stadt": "Erlangen",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1500,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1972,
-    "fassade": 7,
-    "substanz": 56,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O060-f1",
-        "etage": 0,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O060-f2",
-        "etage": 1,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O060-f3",
-        "etage": 0,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O060-f4",
-        "etage": 1,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O060-f5",
-        "etage": 0,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O060-f6",
-        "etage": 1,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O060-f7",
-        "etage": 0,
-        "qm": 414,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O061",
-    "name": "FUNDUS Fürth",
-    "stadt": "Fürth",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Süd",
-    "grundflaecheQm": 900,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1966,
-    "fassade": 0,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O061-f1",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O061-f2",
-        "etage": 1,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O061-f3",
-        "etage": 2,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O061-f4",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O061-f5",
-        "etage": 1,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O061-f6",
-        "etage": 2,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O061-f7",
-        "etage": 0,
-        "qm": 386,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O062",
-    "name": "FUNDUS Neuss",
-    "stadt": "Neuss",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1900,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1984,
-    "fassade": 6,
-    "substanz": 75,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O062-f1",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O062-f2",
-        "etage": 1,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O062-f3",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O062-f4",
-        "etage": 1,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O062-f5",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O062-f6",
-        "etage": 1,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O062-f7",
-        "etage": 0,
-        "qm": 529,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O063",
-    "name": "FUNDUS Moers",
-    "stadt": "Moers",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 800,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1978,
-    "fassade": 3,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O063-f1",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O063-f2",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O063-f3",
-        "etage": 2,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O063-f4",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O063-f5",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O063-f6",
-        "etage": 2,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O063-f7",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O064",
-    "name": "FUNDUS Kaiserslautern",
-    "stadt": "Kaiserslautern",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "Mitte",
-    "grundflaecheQm": 1800,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1979,
-    "fassade": 4,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O064-f1",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O064-f2",
-        "etage": 1,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O064-f3",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O064-f4",
-        "etage": 1,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O064-f5",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O064-f6",
-        "etage": 1,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O064-f7",
-        "etage": 0,
-        "qm": 514,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O065",
-    "name": "FUNDUS Remscheid",
-    "stadt": "Remscheid",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 800,
-    "etagen": [
-      0,
-      1,
-      2
-    ],
-    "baujahr": 1970,
-    "fassade": 2,
-    "substanz": 80,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O065-f1",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O065-f2",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O065-f3",
-        "etage": 2,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O065-f4",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O065-f5",
-        "etage": 1,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O065-f6",
-        "etage": 2,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O065-f7",
-        "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      }
-    ]
-  },
-  {
-    "id": "O066",
-    "name": "FUNDUS Bergisch Gladbach",
-    "stadt": "Bergisch Gladbach",
-    "format": "outlet",
-    "nurDaten": true,
-    "lage": "b",
-    "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 2300,
-    "etagen": [
-      0,
-      1
-    ],
-    "baujahr": 1985,
-    "fassade": 1,
-    "substanz": 85,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "O066-f1",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "O066-f2",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "O066-f3",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "O066-f4",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "schuhe"
-      },
-      {
-        "id": "O066-f5",
-        "etage": 0,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "O066-f6",
-        "etage": 1,
-        "qm": 657,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "O066-f7",
-        "etage": 0,
-        "qm": 657,
         "konzept": "eigen",
         "gruppe": "beauty"
       }
