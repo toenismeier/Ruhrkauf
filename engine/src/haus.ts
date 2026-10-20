@@ -303,6 +303,28 @@ export function hausWoche(s: GameState): void {
       b.inventurdifferenz = (b.inventurdifferenz ?? 0) + (0.75 - b.kosten.sicherheit) * 0.002;
       melde(s, 'warnung', h.name + ': erhöhte Inventurdifferenz durch geringere Sicherheitsdeckung.', { hausId: h.id, stadt: h.stadt });
     }
+    // O07: Neue fiktive Marken- und Servicekonzessionen als echte Entscheidung.
+    // Keine Standardakzeptanz; Platzierung ist nach Spielerentscheidung wirksam.
+    if (s.woche >= 52 && s.woche % 13 === 0 && hash(s.seed+':partner:'+h.id+':'+s.woche) < 0.003) {
+      const f = h.flaechen.find(x => x.konzept === 'eigen' && x.qm >= 400 && ['accessoires','beauty','herren','damen'].includes(x.gruppe ?? ''));
+      if (f) {
+        const anbieter = ['Optikhaus Lind', 'Uhrenatelier Merten', 'Markenstudio Falk'][Math.floor(hash(h.id+':anbieter:'+s.woche)*3)];
+        s.entscheidungen.push({ id: neueId(s,'e'), typ:'haus_konzession_neu', woche:s.woche, frist:s.woche+8,
+          titel: 'Konzessionsangebot für ' + h.name,
+          text: anbieter + ' bietet eine Konzession über 180 qm mit 22 % Umsatzmiete für fünf Jahre. Vertragsabschluss reduziert die eigene Verkaufsfläche.',
+          optionen:[{id:'annehmen',label:'Konzession abschließen'},{id:'ablehnen',label:'Ablehnen'}],
+          standard:'ablehnen', daten:{haus:h.id, flaeche:f.id, partner:anbieter, qm:180, quote:0.22} });
+      }
+    }
+    // O07: dezentrale Jahresgespräche, im Posteingang nach Qualität der Clusterleitung gebündelt.
+    if (s.woche >= 52 && s.woche % 52 === 0 && hash(s.seed+':jahresgespraech:'+h.id+':'+s.woche) < 0.025) {
+      const l=h.personal.filialleiter;
+      s.entscheidungen.push({ id:neueId(s,'e'), typ:'haus_jahresgespraech', woche:s.woche, frist:s.woche+6,
+        titel:'Jahresgespräch: '+l.name+' ('+h.name+')',
+        text:'Stärken und Stimmung der Hausleitung: Personal '+Math.round((l.staerken?.personal??l.skill)*100)+' %, Ware '+Math.round((l.staerken?.ware??l.skill)*100)+' %, Kunde '+Math.round((l.staerken?.kunde??l.skill)*100)+' %, Kosten '+Math.round((l.staerken?.kosten??l.skill)*100)+' %. Wechselwille '+Math.round((l.wechselwille??0)*100)+' %.',
+        optionen:[{id:'coaching',label:'Persönliches Coaching (8.000 €)'},{id:'praemie',label:'Jahresbonus (10.000 €)'},{id:'beobachten',label:'Leistung beobachten'}],
+        standard:'beobachten', daten:{haus:h.id} });
+    }
     for (const [id, v] of Object.entries(b.konzessionen)) if (s.woche === v.bis - 8) {
       s.entscheidungen.push({ id: neueId(s, 'e'), typ: 'haus_konzession', woche: s.woche, frist: s.woche + 6,
         titel: 'Konzession ' + h.name, text: 'Vertrag mit ' + v.name + ' endet. Anschlussmiete verhandeln?',
@@ -326,12 +348,41 @@ export function hausAbschluss(s: GameState): void {
   }
 }
 export function loeseHausVorlage(s: GameState, typ: string, daten: Record<string, string | number | boolean>, option: string) {
+  const h = s.haeuser.find(x => x.id === daten.haus);
+  if (!h || !h.betrieb) return;
+  if (typ === 'haus_jahresgespraech') {
+    const l = h.personal.filialleiter;
+    if (option === 'coaching' && l.staerken) {
+      s.einmalkostenWoche += 8_000;
+      const schwaechste = (Object.keys(l.staerken) as HausStaerke[]).sort((a,b)=>l.staerken![a]-l.staerken![b])[0];
+      l.staerken[schwaechste] = clamp(l.staerken[schwaechste] + 0.055, 0, 1);
+      l.skill = Object.values(l.staerken).reduce((a,b)=>a+b,0)/4;
+      l.moral = clamp(l.moral + 8, 0, 100);
+    } else if (option === 'praemie') {
+      s.einmalkostenWoche += 10_000;
+      l.moral = clamp(l.moral + 12, 0, 100);
+      l.wechselwille = clamp((l.wechselwille ?? 0) - 0.12, 0, 1);
+    }
+    return;
+  }
+  if (typ === 'haus_konzession_neu') {
+    if (option !== 'annehmen' || h.status !== 'offen') return;
+    const alt = h.flaechen.find(f=>f.id===daten.flaeche && f.konzept==='eigen');
+    const qm = Number(daten.qm), quote=Number(daten.quote);
+    if (!alt || alt.qm < qm + 100 || !Number.isFinite(quote)) return;
+    alt.qm -= qm;
+    const id = h.id + '-konz-' + neueId(s,'');
+    h.flaechen.push({ ...alt, id, qm, konzept:'konzession' });
+    h.betrieb.konzessionen[id] = { name:String(daten.partner),quote,bis:s.woche+260,exklusiv:false };
+    melde(s, 'info', h.name+': '+String(daten.partner)+' bezieht '+qm+' qm mit Umsatzmiete.', { hausId:h.id, stadt:h.stadt });
+    return;
+  }
   if (typ !== 'haus_konzession') return;
-  const h = s.haeuser.find(x => x.id === daten.haus), v = h?.betrieb?.konzessionen[String(daten.flaeche)];
+  const v = h.betrieb.konzessionen[String(daten.flaeche)];
   if (!v) return;
   v.quote = option === 'neu' ? clamp(v.quote + 0.01, 0.1, 0.35) : v.quote;
   v.bis = s.woche + 260;
-  melde(s, 'info', h!.name + ': Konzessionsvertrag mit ' + v.name + ' verlängert.', { hausId: h!.id, stadt: h!.stadt });
+  melde(s, 'info', h.name + ': Konzessionsvertrag mit ' + v.name + ' verlängert.', { hausId: h.id, stadt: h.stadt });
 }
 
 export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: string } {
