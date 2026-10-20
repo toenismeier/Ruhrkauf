@@ -5,7 +5,7 @@ import { PARAM } from './welt';
 import { premiumImageFaktor, premiumServiceQuote } from './premium';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
-import { personalVerkaufsFaktor, personalOffpriceFaktor, personalZusatzkosten, personalFehlerkosten } from './personaleinsatz';
+import { personalVerkaufsFaktor, personalOffpriceFaktor, personalZusatzkosten, personalFehlerkosten, personalVerfuegbarkeit } from './personaleinsatz';
 // O04 Personal
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
 
@@ -140,7 +140,7 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     const d = GRUPPEN[g];
     const qualitaet = besetzung * (1 - d.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
     // O04: Kaufquote durch Beratungsbesetzung und Kassenschlangen; nach Warengruppe gewichtet.
-    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet * personalVerkaufsFaktor(h, g);
+    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet * personalVerkaufsFaktor(h, g) * personalVerfuegbarkeit(h);
     const qe = qmEigen[g] ?? 0;
     const qk = qmKomm[g] ?? 0;
     tEJe[g] = qe + qk > 0 ? qe / (qe + qk) : 0;
@@ -159,7 +159,7 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     if (qe > 0) roh.eigen[g] = { brutto: brutto * tE, umsatz: umsatz * tE };
     if (qk > 0) roh.kommission[g] = umsatz * (1 - tE);
   }
-  roh.offprice = offBasis * besetzung * personalOffpriceFaktor(h);
+  roh.offprice = offBasis * besetzung * personalOffpriceFaktor(h) * personalVerfuegbarkeit(h);
 
   for (const [g, qm] of Object.entries(qmKonz) as [GruppeId, number][]) {
     const P = h.potenzial[g] ?? 0;
