@@ -2,7 +2,7 @@
 export function technikAufDach(S, h, m) {
   if (!h.etagenBau || !m || !(m.hoehe>0)) return;
   const etagen=Object.values(h.etagenBau);
-  const aufgeruestet=etagen.some(e=>e.technik?.klima===2 && e.substanz>e.substanzStart+1);
+  const aufgeruestet=etagen.some(e=>e.technik?.klima===2 && e.klimaModernisiert===true);
   if (!aufgeruestet) return;
   const {x,z,w,d,hoehe}=m, cx=x+w*0.48,cz=z+d*0.43;
   for (let i=0;i<Math.min(3,Math.ceil(etagen.length/2));i++) {
