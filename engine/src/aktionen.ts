@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { spielBeenden, spielendePruefen } from './spielende';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -47,6 +48,8 @@ export type SpielerAktion =
   | { typ: 'plan'; ebitda: number }
   | { typ: 'insolvenzAntrag' }
   | { typ: 'insolvenzplanQuote'; quote: number }
+  | { typ: 'ruhestand' }
+  | { typ: 'spielFortsetzen' }
   | { typ: 'entscheiden'; id: string; option: string }
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
@@ -118,7 +121,13 @@ function letzterUmsatz(s: GameState): number {
 }
 
 export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
-  if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
+  if (a.typ === 'spielFortsetzen') {
+    if (!s.ende || !['saniert', 'ruhestand'].includes(s.ende.art)) return fehler('Weiterspielen ist nur nach Sanierung oder Ruhestand möglich.');
+    s.ende = undefined;
+    s.spielendeFortgesetzt = true;
+    return ok('Die nächste Geschäftswoche kann beginnen.');
+  }
+  if (s.ende || s.phase === 'zerschlagen') return fehler('Das Spiel ist beendet.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
@@ -126,6 +135,10 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
   switch (a.typ) {
+    case 'ruhestand':
+      if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
+      spielBeenden(s, 'ruhestand');
+      return s.ende?.art === 'ruhestand' ? ok('Der Ruhestand beginnt.') : fehler('Spielende ist deaktiviert.');
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
       return ok(a.an ? 'Premiumhäuser sind vor pauschalen Rabattaktionen geschützt.' : 'Premiumschutz deaktiviert.');
@@ -400,6 +413,13 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     case 'angebotAnnehmen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
+      if (an.typ === 'konzernVerkauf') {
+        if (s.phase !== 'regulaer') return fehler('Konzernverkauf nur außerhalb der Insolvenz möglich.');
+        an.status = 'angenommen'; an.erledigtWoche = s.woche;
+        spielBeenden(s, 'investor', an.konzernKaeuferName);
+        melde(s, 'presse', `${s.firma.name} wird an ${an.konzernKaeuferName ?? 'einen Investor'} verkauft. Kaufpreis ${mio(an.kaufpreis ?? 0)}.`);
+        return ok(`Konzern verkauft: ${mio(an.kaufpreis ?? 0)} Kaufpreis. Das Spiel ist beendet.`);
+      }
       if (an.typ === 'premiumVerkauf') {
         const grund = premiumVerkaufen(s, an);
         return grund ? fehler(grund) : ok(`Premiumhaus verkauft: ${mio(an.kaufpreis ?? 0)} fließen zu.`);
