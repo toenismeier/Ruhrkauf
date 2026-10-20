@@ -279,6 +279,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     firma: { name: sz.firma, sportName: sz.sportName },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
+    erfolge: {},
     schwierigkeit: sz.schwierigkeit ?? 'mittel',
     cash: Math.round(sz.startCash * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].startCash),
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
