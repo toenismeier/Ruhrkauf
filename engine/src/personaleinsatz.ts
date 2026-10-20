@@ -26,6 +26,8 @@ export interface PersonalPlan {
 }
 export interface PersonalHausStand {
   basisFte: number;
+  basisUmsatz: number;
+  basisFrequenz?: number;
   basisQualitaet: number;
   anteile: Record<PersonalGruppe, number>;
   faktor: Record<PersonalGruppe, number>;
@@ -109,7 +111,7 @@ function ausfall(s: GameState): { krank: number; urlaub: number } {
     urlaub: kw >= 26 && kw <= 35 ? 0.14 : kw >= 51 ? 0.10 : 0.055,
   };
 }
-function dienstplan(s: GameState, h: Haus): PersonalPlan {
+function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boolean): PersonalPlan {
   const st = h.personaleinsatz!;
   const aus = ausfall(s), q = qualitaet(s);
   const neu = st.einarbeitungBis > s.woche;
@@ -120,13 +122,24 @@ function dienstplan(s: GameState, h: Haus): PersonalPlan {
   // Der Wochenbedarf wächst mit Saison und Warenbewegung. Die Standardplanung
   // deckt diese schwankende Last mit dem bereits in den Löhnen enthaltenen Dienstplan.
   const saison = clamp(0.75 + 0.25 * saisonFaktor('damen', s.woche), 0.7, 1.35);
-  const liefer = 1 + h.flaechen.filter((f) => f.konzept === 'offprice').length * 0.03;
+  const letzterUmsatz = h.kpi?.umsatz ?? st.basisUmsatz;
+  const umsatzFaktor = clamp(letzterUmsatz / Math.max(1, st.basisUmsatz), 0.65, 1.6);
+  // O02 liefert die Frequenz aus der Vorwoche. Ohne O02 greift das Umsatzprofil.
+  const messung = (h as Haus & { treiberVerlauf?: { frequenz: number }[] }).treiberVerlauf?.slice(-1)[0];
+  if (!st.basisFrequenz && messung?.frequenz) st.basisFrequenz = messung.frequenz;
+  const frequenzFaktor = st.basisFrequenz && messung ? clamp(messung.frequenz / st.basisFrequenz, 0.65, 1.6) : umsatzFaktor;
+  const logistikFaktor = clamp(1 + (anlieferung - 1) * 0.1 +
+    h.flaechen.filter((f) => f.konzept === 'offprice').length * 0.03 +
+    (reduzierung ? 0.08 : 0), 0.75, 1.4);
   const gruppen = {} as Record<PersonalGruppe, PersonalZeile>;
   let extra = 0;
   for (const g of PERSONAL_GRUPPEN) {
     const p = profil(s, g);
-    const basis = st.basisFte * 40 * PERSONAL_ANTEILE[g] * saison *
-      (g === 'logistik' ? liefer : 1);
+    // Bedarf folgt Frequenz (Kasse), Umsatz und Beratungsvolumen (Verkauf),
+    // Verkaufsfläche sowie Wareneingang und Reduzierungsaufwand (Logistik).
+    const last = g === 'kasse' ? frequenzFaktor : g === 'verkauf' ? 0.6 * frequenzFaktor + 0.4 * umsatzFaktor
+      : g === 'logistik' ? logistikFaktor : 1;
+    const basis = st.basisFte * 40 * PERSONAL_ANTEILE[g] * saison * last;
     const tage = p.map((anteil, i) => {
       const bedarf = basis * anteil / (1 - aus.krank - aus.urlaub);
       // Gleiche Basis-Prognose wie beim Start: Neutralität bei q = basisQualitaet.
@@ -203,9 +216,14 @@ function berechneWirkung(h: Haus, p: PersonalPlan): void {
 }
 function neuPlanen(s: GameState): void {
   const gruppen = new Map<string, Haus[]>();
+  const anlieferungen = s.bestellungen.filter((b) => b.ankunft === s.woche).reduce((a, b) => a + b.wert, 0);
+  const norm = Math.max(1, s.haeuser.length * 100_000);
+  const anlieferung = clamp(anlieferungen / norm, 0.5, 1.8);
+  const reduzierung = s.marketing.aktionen.some((a) => a.start <= s.woche && a.ende > s.woche && a.rabatt >= 0.15);
+
   for (const h of s.haeuser) {
     if (!aktiv(h) || !h.personaleinsatz) continue;
-    h.personaleinsatz.plan = dienstplan(s, h);
+    h.personaleinsatz.plan = dienstplan(s, h, anlieferung, reduzierung);
     const id = gruppeHauscluster(h, s);
     if (!gruppen.has(id)) gruppen.set(id, []);
     gruppen.get(id)!.push(h);
@@ -262,7 +280,12 @@ export function initialisierePersonaleinsatz(s: GameState): void {
   const q = qualitaet(s);
   for (const h of s.haeuser) if (!h.personaleinsatz) {
     h.personaleinsatz = {
-      basisFte: Math.max(0.1, fte(h)), basisQualitaet: q, anteile: { ...PERSONAL_ANTEILE },
+      basisFte: Math.max(0.1, fte(h)),
+      basisUmsatz: Math.max(1, Object.entries(h.potenzial).reduce((wert, [g, P]) => {
+        const qm = h.flaechen.filter((f) => f.gruppe === g && (f.konzept === 'eigen' || f.konzept === 'kommission'))
+          .reduce((sum, f) => sum + f.qm, 0);
+        return wert + (P ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g as GruppeId] ?? 1)));
+      }, 0)), basisQualitaet: q, anteile: { ...PERSONAL_ANTEILE },
       faktor: { logistik: 1, verkauf: 1, kasse: 1, verwaltung: 1 }, samstagKasse: 1,
       aushilfenQuote: 0, stimmung: 70, einarbeitungBis: -1, training: 0,
     };
