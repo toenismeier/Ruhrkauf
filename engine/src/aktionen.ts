@@ -441,6 +441,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
           erfolgreich++;
         }
         einmalKosten(s, kostenGesamt);
+        s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+        s.kapitalflussOffen.investitionen -= kostenGesamt;
         an.status = erfolgreich ? 'angenommen' : 'abgelehnt'; an.erledigtWoche = w;
         if (!erfolgreich) return fehler(`Kein Standort umsetzbar. ${ergebnisse.join('; ')}`);
         melde(s, 'presse', `${an.mieterName} zieht in ${erfolgreich} Häuser von ${s.firma.name} ein.`);
