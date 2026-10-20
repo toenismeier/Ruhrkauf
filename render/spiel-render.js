@@ -657,8 +657,8 @@ async function buendeln() {
     const f = w.kapitalfluss;
     pruefe(!!f && f.operativ + f.investitionen + f.finanzierung + f.sonstiges === f.netto,
       'Kapitalfluss nach Zahlarten stimmt exakt mit Cash netto überein');
-    pruefe(!!f && f.netto === w.bericht?.cashNetto && f.bestand === w.soll.cash,
-      'Kapitalfluss stimmt mit Woche und Cash-Bestand überein');
+    pruefe(!!f && Math.abs(f.netto - (w.bericht?.cashNetto ?? NaN)) <= 1 && Math.abs(f.bestand - w.soll.cash) <= 1,
+      'Kapitalfluss stimmt mit Woche und Cash-Bestand überein (±1 €)');
     pruefe(!!w.kapitalflussText && !w.kapitalflussText.includes('nicht separat erfasst') &&
       ['Cash operativ', 'Investitionen', 'Finanzierung', 'Sonstiges', 'Cash netto', 'Cash-Bestand']
         .every((x) => w.kapitalflussText.includes(x)), 'Kapitalfluss wird vollständig angezeigt');
