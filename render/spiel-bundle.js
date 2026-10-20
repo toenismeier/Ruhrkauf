@@ -1102,13 +1102,13 @@
     const alle = [...werte2.keys()].sort((a, b2) => a - b2);
     for (const w of alle) {
       if (w < beginn) continue;
-      const punkt2 = { woche: w, wert: werte2.get(w) };
-      if (werte2.has(w - 52)) punkt2.vorjahr = werte2.get(w - 52);
+      const punkt3 = { woche: w, wert: werte2.get(w) };
+      if (werte2.has(w - 52)) punkt3.vorjahr = werte2.get(w - 52);
       if (ebene === "konzern" && kennzahl2 === "ebitda") {
         const q2 = s2.quartale.find((x) => w >= x.start && w < x.start + 13);
-        if (q2) punkt2.plan = (q2.plan ?? q2.planStandard) / 13;
+        if (q2) punkt3.plan = (q2.plan ?? q2.planStandard) / 13;
       }
-      ergebnis.punkte.push(punkt2);
+      ergebnis.punkte.push(punkt3);
     }
     return ergebnis;
   }
@@ -5921,7 +5921,7 @@
     for (const m of messungen) {
       const gemeinsam = Math.max(0, Math.min(bis, m.bis) - Math.max(von, m.von) + 1);
       if (!gemeinsam) continue;
-      const laenge = m.bis - m.von + 1, anteil3 = gemeinsam / laenge;
+      const laenge2 = m.bis - m.von + 1, anteil3 = gemeinsam / laenge2;
       if (anteil3 !== 1) geschaetzt = true;
       teile2.push(komplett(
         Math.max(von, m.von),
@@ -9677,10 +9677,10 @@
   }
   function produktVorschau(s2, e) {
     const c = pruefe(s2, e);
-    const fertig = s2.woche + (e.dauer || 0);
-    const sid = saisonId(fertig);
+    const fertig2 = s2.woche + (e.dauer || 0);
+    const sid = saisonId(fertig2);
     const bekannt = sid <= saisonId(s2.woche) + 1;
-    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
+    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig2, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
     if (!c.m || !c.t || !c.wg) return leer3;
     const team = teamStaerke(s2);
     const teile2 = bewerte(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
@@ -9707,7 +9707,7 @@
       ekStueck: ek2,
       marge: Math.round((1 - ek2 / np) * 1e3) / 1e3,
       kosten: eur(e.budgetWoche * e.dauer),
-      fertigWoche: fertig,
+      fertigWoche: fertig2,
       saisonEinfuehrung: saisonName(s2, sid),
       sterneErwartet: st2,
       sterneVon: halbe(st2 - spanne / 2),
@@ -14781,9 +14781,9 @@
       return this;
     }
     //
-    equals(matrix) {
+    equals(matrix2) {
       const te = this.elements;
-      const me = matrix.elements;
+      const me = matrix2.elements;
       for (let i = 0; i < 9; i++) {
         if (te[i] !== me[i]) return false;
       }
@@ -16835,16 +16835,16 @@
       this.max.max(box.max);
       return this;
     }
-    applyMatrix4(matrix) {
+    applyMatrix4(matrix2) {
       if (this.isEmpty()) return this;
-      _points[0].set(this.min.x, this.min.y, this.min.z).applyMatrix4(matrix);
-      _points[1].set(this.min.x, this.min.y, this.max.z).applyMatrix4(matrix);
-      _points[2].set(this.min.x, this.max.y, this.min.z).applyMatrix4(matrix);
-      _points[3].set(this.min.x, this.max.y, this.max.z).applyMatrix4(matrix);
-      _points[4].set(this.max.x, this.min.y, this.min.z).applyMatrix4(matrix);
-      _points[5].set(this.max.x, this.min.y, this.max.z).applyMatrix4(matrix);
-      _points[6].set(this.max.x, this.max.y, this.min.z).applyMatrix4(matrix);
-      _points[7].set(this.max.x, this.max.y, this.max.z).applyMatrix4(matrix);
+      _points[0].set(this.min.x, this.min.y, this.min.z).applyMatrix4(matrix2);
+      _points[1].set(this.min.x, this.min.y, this.max.z).applyMatrix4(matrix2);
+      _points[2].set(this.min.x, this.max.y, this.min.z).applyMatrix4(matrix2);
+      _points[3].set(this.min.x, this.max.y, this.max.z).applyMatrix4(matrix2);
+      _points[4].set(this.max.x, this.min.y, this.min.z).applyMatrix4(matrix2);
+      _points[5].set(this.max.x, this.min.y, this.max.z).applyMatrix4(matrix2);
+      _points[6].set(this.max.x, this.max.y, this.min.z).applyMatrix4(matrix2);
+      _points[7].set(this.max.x, this.max.y, this.max.z).applyMatrix4(matrix2);
       this.setFromPoints(_points);
       return this;
     }
@@ -16967,9 +16967,9 @@
       target.expandByScalar(this.radius);
       return target;
     }
-    applyMatrix4(matrix) {
-      this.center.applyMatrix4(matrix);
-      this.radius = this.radius * matrix.getMaxScaleOnAxis();
+    applyMatrix4(matrix2) {
+      this.center.applyMatrix4(matrix2);
+      this.radius = this.radius * matrix2.getMaxScaleOnAxis();
       return this;
     }
     translate(offset) {
@@ -17215,29 +17215,29 @@
       _edge2.subVectors(c, a);
       _normal$1.crossVectors(_edge1, _edge2);
       let DdN = this.direction.dot(_normal$1);
-      let sign2;
+      let sign3;
       if (DdN > 0) {
         if (backfaceCulling) return null;
-        sign2 = 1;
+        sign3 = 1;
       } else if (DdN < 0) {
-        sign2 = -1;
+        sign3 = -1;
         DdN = -DdN;
       } else {
         return null;
       }
       _diff.subVectors(this.origin, a);
-      const DdQxE2 = sign2 * this.direction.dot(_edge2.crossVectors(_diff, _edge2));
+      const DdQxE2 = sign3 * this.direction.dot(_edge2.crossVectors(_diff, _edge2));
       if (DdQxE2 < 0) {
         return null;
       }
-      const DdE1xQ = sign2 * this.direction.dot(_edge1.cross(_diff));
+      const DdE1xQ = sign3 * this.direction.dot(_edge1.cross(_diff));
       if (DdE1xQ < 0) {
         return null;
       }
       if (DdQxE2 + DdE1xQ > DdN) {
         return null;
       }
-      const QdN = -sign2 * _diff.dot(_normal$1);
+      const QdN = -sign3 * _diff.dot(_normal$1);
       if (QdN < 0) {
         return null;
       }
@@ -17987,9 +17987,9 @@
       te[15] = 1;
       return this;
     }
-    equals(matrix) {
+    equals(matrix2) {
       const te = this.elements;
-      const me = matrix.elements;
+      const me = matrix2.elements;
       for (let i = 0; i < 16; i++) {
         if (te[i] !== me[i]) return false;
       }
@@ -18317,9 +18317,9 @@
     }
     onAfterRender() {
     }
-    applyMatrix4(matrix) {
+    applyMatrix4(matrix2) {
       if (this.matrixAutoUpdate) this.updateMatrix();
-      this.matrix.premultiply(matrix);
+      this.matrix.premultiply(matrix2);
       this.matrix.decompose(this.position, this.quaternion, this.scale);
     }
     applyQuaternion(q2) {
@@ -20323,21 +20323,21 @@
       this.drawRange.start = start;
       this.drawRange.count = count;
     }
-    applyMatrix4(matrix) {
+    applyMatrix4(matrix2) {
       const position = this.attributes.position;
       if (position !== void 0) {
-        position.applyMatrix4(matrix);
+        position.applyMatrix4(matrix2);
         position.needsUpdate = true;
       }
       const normal2 = this.attributes.normal;
       if (normal2 !== void 0) {
-        const normalMatrix = new Matrix3().getNormalMatrix(matrix);
+        const normalMatrix = new Matrix3().getNormalMatrix(matrix2);
         normal2.applyNormalMatrix(normalMatrix);
         normal2.needsUpdate = true;
       }
       const tangent = this.attributes.tangent;
       if (tangent !== void 0) {
-        tangent.transformDirection(matrix);
+        tangent.transformDirection(matrix2);
         tangent.needsUpdate = true;
       }
       if (this.boundingBox !== null) {
@@ -21783,9 +21783,9 @@
     coplanarPoint(target) {
       return target.copy(this.normal).multiplyScalar(-this.constant);
     }
-    applyMatrix4(matrix, optionalNormalMatrix) {
-      const normalMatrix = optionalNormalMatrix || _normalMatrix.getNormalMatrix(matrix);
-      const referencePoint = this.coplanarPoint(_vector1).applyMatrix4(matrix);
+    applyMatrix4(matrix2, optionalNormalMatrix) {
+      const normalMatrix = optionalNormalMatrix || _normalMatrix.getNormalMatrix(matrix2);
+      const referencePoint = this.coplanarPoint(_vector1).applyMatrix4(matrix2);
       const normal2 = this.normal.applyMatrix3(normalMatrix).normalize();
       this.constant = -referencePoint.dot(normal2);
       return this;
@@ -32751,8 +32751,8 @@
       const boneMatrices = this.boneMatrices;
       const boneTexture = this.boneTexture;
       for (let i = 0, il = bones.length; i < il; i++) {
-        const matrix = bones[i] ? bones[i].matrixWorld : _identityMatrix$1;
-        _offsetMatrix.multiplyMatrices(matrix, boneInverses[i]);
+        const matrix2 = bones[i] ? bones[i].matrixWorld : _identityMatrix$1;
+        _offsetMatrix.multiplyMatrices(matrix2, boneInverses[i]);
         _offsetMatrix.toArray(boneMatrices, i * 16);
       }
       if (boneTexture !== null) {
@@ -32908,8 +32908,8 @@
     getColorAt(index2, color) {
       color.fromArray(this.instanceColor.array, index2 * 3);
     }
-    getMatrixAt(index2, matrix) {
-      matrix.fromArray(this.instanceMatrix.array, index2 * 16);
+    getMatrixAt(index2, matrix2) {
+      matrix2.fromArray(this.instanceMatrix.array, index2 * 16);
     }
     raycast(raycaster, intersects2) {
       const matrixWorld = this.matrixWorld;
@@ -32941,8 +32941,8 @@
       }
       color.toArray(this.instanceColor.array, index2 * 3);
     }
-    setMatrixAt(index2, matrix) {
-      matrix.toArray(this.instanceMatrix.array, index2 * 16);
+    setMatrixAt(index2, matrix2) {
+      matrix2.toArray(this.instanceMatrix.array, index2 * 16);
     }
     updateMorphTargets() {
     }
@@ -33328,7 +33328,7 @@
       target.copy(sphere);
       return target;
     }
-    setMatrixAt(geometryId, matrix) {
+    setMatrixAt(geometryId, matrix2) {
       const active = this._active;
       const matricesTexture = this._matricesTexture;
       const matricesArray = this._matricesTexture.image.data;
@@ -33336,18 +33336,18 @@
       if (geometryId >= geometryCount || active[geometryId] === false) {
         return this;
       }
-      matrix.toArray(matricesArray, geometryId * 16);
+      matrix2.toArray(matricesArray, geometryId * 16);
       matricesTexture.needsUpdate = true;
       return this;
     }
-    getMatrixAt(geometryId, matrix) {
+    getMatrixAt(geometryId, matrix2) {
       const active = this._active;
       const matricesArray = this._matricesTexture.image.data;
       const geometryCount = this._geometryCount;
       if (geometryId >= geometryCount || active[geometryId] === false) {
         return null;
       }
-      return matrix.fromArray(matricesArray, geometryId * 16);
+      return matrix2.fromArray(matricesArray, geometryId * 16);
     }
     setVisibleAt(geometryId, value) {
       const visibility = this._visibility;
@@ -35144,10 +35144,10 @@
         const vertex2 = new Vector3();
         let groupCount = 0;
         const radius = top === true ? radiusTop : radiusBottom;
-        const sign2 = top === true ? 1 : -1;
+        const sign3 = top === true ? 1 : -1;
         for (let x = 1; x <= radialSegments; x++) {
-          vertices.push(0, halfHeight * sign2, 0);
-          normals.push(0, sign2, 0);
+          vertices.push(0, halfHeight * sign3, 0);
+          normals.push(0, sign3, 0);
           uvs.push(0.5, 0.5);
           index2++;
         }
@@ -35158,12 +35158,12 @@
           const cosTheta = Math.cos(theta);
           const sinTheta = Math.sin(theta);
           vertex2.x = radius * sinTheta;
-          vertex2.y = halfHeight * sign2;
+          vertex2.y = halfHeight * sign3;
           vertex2.z = radius * cosTheta;
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
-          normals.push(0, sign2, 0);
+          normals.push(0, sign3, 0);
           uv.x = cosTheta * 0.5 + 0.5;
-          uv.y = sinTheta * 0.5 * sign2 + 0.5;
+          uv.y = sinTheta * 0.5 * sign3 + 0.5;
           uvs.push(uv.x, uv.y);
           index2++;
         }
@@ -43114,9 +43114,9 @@
       const t = this.closestPointToPointParameter(point, clampToLine);
       return this.delta(target).multiplyScalar(t).add(this.start);
     }
-    applyMatrix4(matrix) {
-      this.start.applyMatrix4(matrix);
-      this.end.applyMatrix4(matrix);
+    applyMatrix4(matrix2) {
+      this.start.applyMatrix4(matrix2);
+      this.end.applyMatrix4(matrix2);
       return this;
     }
     equals(line2) {
@@ -44395,15 +44395,15 @@
       this.puffer.clear();
     }
   };
-  function dachProfil(laenge, tiefe, hoehe, oben, achse = "x") {
+  function dachProfil(laenge2, tiefe, hoehe, oben, achse = "x") {
     const s2 = new Shape();
     s2.moveTo(-tiefe / 2, 0);
     s2.lineTo(tiefe / 2, 0);
     s2.lineTo(oben / 2, hoehe);
     s2.lineTo(-oben / 2, hoehe);
     s2.closePath();
-    const g = new ExtrudeGeometry(s2, { depth: laenge, bevelEnabled: false });
-    g.translate(0, 0, -laenge / 2);
+    const g = new ExtrudeGeometry(s2, { depth: laenge2, bevelEnabled: false });
+    g.translate(0, 0, -laenge2 / 2);
     if (achse === "x") g.rotateY(Math.PI / 2);
     return g;
   }
@@ -44419,8 +44419,8 @@
     const fw = o.fw ?? 1.35, fh = o.fh ?? 1.9;
     const farbe3 = o.farbe ?? FARBEN3.fenster;
     const lauf0 = seite === "+z" ? x0 : z0;
-    const laenge = seite === "+z" ? w : d2;
-    const von = o.von ?? lauf0, bis = o.bis ?? lauf0 + laenge;
+    const laenge2 = seite === "+z" ? w : d2;
+    const von = o.von ?? lauf0, bis = o.bis ?? lauf0 + laenge2;
     const n = Math.max(1, Math.floor((bis - von) / raster4));
     const rand = (bis - von - n * raster4) / 2;
     for (let k = 0; k < o.geschosse; k++) {
@@ -44444,14 +44444,14 @@
   function gesims(S, x0, z0, w, d2, y, hoehe, ueberstand, farbe3) {
     S.box(w + 2 * ueberstand, hoehe, d2 + 2 * ueberstand, x0 + w / 2, y, z0 + d2 / 2, farbe3);
   }
-  function markise(S, x0, z0, w, d2, seite, y, von, laenge, farbe3) {
-    const g = new BoxGeometry(seite === "+z" ? laenge : 1.6, 0.15, seite === "+z" ? 1.6 : laenge);
+  function markise(S, x0, z0, w, d2, seite, y, von, laenge2, farbe3) {
+    const g = new BoxGeometry(seite === "+z" ? laenge2 : 1.6, 0.15, seite === "+z" ? 1.6 : laenge2);
     if (seite === "+z") {
       g.rotateX(0.35);
-      g.translate(von + laenge / 2, y, z0 + d2 + 0.7);
+      g.translate(von + laenge2 / 2, y, z0 + d2 + 0.7);
     } else {
       g.rotateZ(-0.35);
-      g.translate(x0 + w + 0.7, y, von + laenge / 2);
+      g.translate(x0 + w + 0.7, y, von + laenge2 / 2);
     }
     S.add(g, farbe3);
   }
@@ -48771,11 +48771,11 @@
     for (const L2 of lagen) {
       const dist2 = (i2, j2) => Math.hypot(i2 - E.zentrum.i, j2 - E.zentrum.j);
       const anHaupt = (i2, j2) => HAUPTLICH.has(E.zTyp[i2 + 1]) || HAUPTLICH.has(E.xTyp[j2 + 1]) || HAUPTLICH.has(E.zTyp[i2]) || HAUPTLICH.has(E.xTyp[j2]);
-      const abstand2 = (i2, j2) => belegt2.reduce((a, [p2, q2]) => Math.min(a, Math.abs(p2 - i2) + Math.abs(q2 - j2)), 99);
+      const abstand3 = (i2, j2) => belegt2.reduce((a, [p2, q2]) => Math.min(a, Math.abs(p2 - i2) + Math.abs(q2 - j2)), 99);
       const zweiteReihe = (i2, j2) => E.aktiv(i2, j2) && Math.min(i2, j2, E.spalten.length - 1 - i2, E.reihen.length - 1 - j2) === 1;
-      let l = L2.art === "center" ? zellenNach((i2, j2) => zweiteReihe(i2, j2) && dist2(i2, j2) > 3.4 && abstand2(i2, j2) > 1, (i2, j2) => (anHaupt(i2, j2) ? 4 : 1) * dist2(i2, j2)) : [];
-      if (!l.length) l = zellenNach((i2, j2) => randZelle(i2, j2) && dist2(i2, j2) > 2.4 && abstand2(i2, j2) > 1, (i2, j2) => (anHaupt(i2, j2) ? L2.art === "center" ? 4 : 1.5 : 1) * dist2(i2, j2));
-      if (!l.length) l = zellenNach((i2, j2) => dist2(i2, j2) > 1.8 && abstand2(i2, j2) > 0, (i2, j2) => dist2(i2, j2));
+      let l = L2.art === "center" ? zellenNach((i2, j2) => zweiteReihe(i2, j2) && dist2(i2, j2) > 3.4 && abstand3(i2, j2) > 1, (i2, j2) => (anHaupt(i2, j2) ? 4 : 1) * dist2(i2, j2)) : [];
+      if (!l.length) l = zellenNach((i2, j2) => randZelle(i2, j2) && dist2(i2, j2) > 2.4 && abstand3(i2, j2) > 1, (i2, j2) => (anHaupt(i2, j2) ? L2.art === "center" ? 4 : 1.5 : 1) * dist2(i2, j2));
+      if (!l.length) l = zellenNach((i2, j2) => dist2(i2, j2) > 1.8 && abstand3(i2, j2) > 0, (i2, j2) => dist2(i2, j2));
       if (!l.length) continue;
       const [i, j] = wahlGewichtet(r, l);
       belegt2.push([i, j]);
@@ -51072,14 +51072,14 @@
         }
       }
       const hMax = EG4 + GH3;
-      const abstand2 = (x, z2) => Math.min(art === "+z" ? Infinity : x - R10.x0, art === "+x" ? Infinity : z2 - R10.z0);
+      const abstand3 = (x, z2) => Math.min(art === "+z" ? Infinity : x - R10.x0, art === "+x" ? Infinity : z2 - R10.z0);
       const tief2 = Math.max(k.w - (R10.x0 - k.x), k.d - (Math.max(k.z, R10.z0) - k.z));
       for (let x = R10.x0; x < k.x + k.w - 2; x += zw(r, 2.5, 4.5)) {
-        const h = Math.max(1.2, hMax * (1 - abstand2(x, k.z + k.d) / tief2) * zw(r, 0.5, 1.1));
+        const h = Math.max(1.2, hMax * (1 - abstand3(x, k.z + k.d) / tief2) * zw(r, 0.5, 1.1));
         S.quader(x, 0, k.z + k.d - 0.6, x + zw(r, 1.5, 3), h, k.z + k.d, farbe3);
       }
       for (let z2 = Math.max(k.z, R10.z0); z2 < k.z + k.d - 2; z2 += zw(r, 2.5, 4.5)) {
-        const h = Math.max(1.2, hMax * 0.8 * (1 - abstand2(k.x + k.w, z2) / tief2) * zw(r, 0.4, 1));
+        const h = Math.max(1.2, hMax * 0.8 * (1 - abstand3(k.x + k.w, z2) / tief2) * zw(r, 0.4, 1));
         S.quader(k.x + k.w - 0.6, 0, z2, k.x + k.w, h, z2 + zw(r, 1.5, 3), farbe3);
       }
       const rz0 = Math.max(k.z, R10.z0);
@@ -57991,16 +57991,16 @@
     plakat2(K3.scene, s2, text3, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? "#d1d3d1" : o.schrift ?? "#ffffff");
     return total;
   }
-  function hsLogoSenkrecht(K3, s2, u, yOben, t, breite, laenge) {
+  function hsLogoSenkrecht(K3, s2, u, yOben, t, breite, laenge2) {
     const q2 = breite;
-    K3.logos.push({ s: s2, u0: u - q2 / 2, u1: u + q2 / 2, y0: yOben - laenge, y1: yOben, t, grund: HS_ROT, senkrecht: true, sichtbar: !K3.ohneLogo });
+    K3.logos.push({ s: s2, u0: u - q2 / 2, u1: u + q2 / 2, y0: yOben - laenge2, y1: yOben, t, grund: HS_ROT, senkrecht: true, sichtbar: !K3.ohneLogo });
     if (K3.ohneLogo) {
       s2.q(u - q2 / 2, u + q2 / 2, yOben - q2, yOben, t, t + 0.04, dunkler(HS_ROT, 0.2));
       return;
     }
     s2.q(u - q2 / 2, u + q2 / 2, yOben - q2, yOben, t, t + 0.3, "#ffffff");
     plakat2(K3.scene, s2, "H", u, yOben - q2 * 0.45, t + 0.32, q2 * 0.8, HS_ROT);
-    const ph = Math.min(q2 * 0.55, (laenge - q2 - 0.6) / (plakatBreite("HARTWIG SPORT", 1) * 0.92));
+    const ph = Math.min(q2 * 0.55, (laenge2 - q2 - 0.6) / (plakatBreite("HARTWIG SPORT", 1) * 0.92));
     plakat2(K3.scene, s2, "HARTWIG SPORT", u, yOben - q2 - 0.3 - plakatBreite("HARTWIG SPORT", ph) * 0.92 / 2, t + 0.05, ph, "#ffffff", null, { rz: s2.lese * Math.PI / 2 });
   }
   function kampagne(K3, s2, u0, u1, y0, y1, t, bg) {
@@ -60855,11 +60855,11 @@
     S.box(0.84, 0.25, 0.84, x, y + 0.125, z2, dunkler(farbe3, 0.1));
     S.box(0.84, 0.2, 0.84, x, y + h - 0.1, z2, heller(farbe3, 0.03));
   }
-  function rolltreppe(S, x0, z2, laenge, hub, y = 0, d2 = 1, t0 = 0) {
-    const neig = Math.atan2(hub, laenge);
-    const lang = Math.hypot(laenge, hub) * (1 - t0);
+  function rolltreppe(S, x0, z2, laenge2, hub, y = 0, d2 = 1, t0 = 0) {
+    const neig = Math.atan2(hub, laenge2);
+    const lang = Math.hypot(laenge2, hub) * (1 - t0);
     const breit2 = 1.15;
-    const cx = x0 - laenge * (1 + t0) / 2, cy = y + hub * (1 + t0) / 2;
+    const cx = x0 - laenge2 * (1 + t0) / 2, cy = y + hub * (1 + t0) / 2;
     const schraeg = (w, h, t, dy, dz, f) => {
       const g = new three_module_exports.BoxGeometry(lang, h, t);
       g.rotateZ(-neig);
@@ -60871,7 +60871,7 @@
     const stufen = d2 < 0.5 ? 6 : 14;
     for (let i = 0; i < stufen; i++) {
       const t = t0 + (1 - t0) * (i + 0.5) / stufen;
-      S.box(lang / stufen * 0.5, 0.04, breit2 - 0.15, x0 - t * laenge, y + t * hub - 0.02, z2, "#c3cbd1");
+      S.box(lang / stufen * 0.5, 0.04, breit2 - 0.15, x0 - t * laenge2, y + t * hub - 0.02, z2, "#c3cbd1");
     }
     for (const s2 of [-1, 1]) {
       schraeg(lang, 0.9, 0.04, 0.5, s2 * (breit2 / 2 + 0.02), GLAS3);
@@ -60882,7 +60882,7 @@
       S.box(1.2, 0.03, breit2, x0 + 0.5, y + 0.02, z2, "#9aa3aa");
       S.box(0.8, 1.05, 0.16, x0 + 0.3, y + 0.52, z2 - breit2 / 2 - 0.06, "#d5dbdf");
     }
-    S.box(1.2, 0.03, breit2, x0 - laenge - 0.5, y + hub + 0.02, z2, "#9aa3aa");
+    S.box(1.2, 0.03, breit2, x0 - laenge2 - 0.5, y + hub + 0.02, z2, "#9aa3aa");
   }
   function rolltreppenKern(S, x, z2, o = {}) {
     const y = o.y ?? 0, hub = o.hub ?? WANDHOEHE, d2 = o.dichte ?? 1;
@@ -65186,8 +65186,8 @@
   function rechteckFlaeche(r) {
     return Math.max(0, r.w) * Math.max(0, r.d);
   }
-  function schneidet(a, b2, abstand2 = 0) {
-    return a.x < b2.x + b2.w + abstand2 - 1e-8 && a.x + a.w + abstand2 > b2.x + 1e-8 && a.z < b2.z + b2.d + abstand2 - 1e-8 && a.z + a.d + abstand2 > b2.z + 1e-8;
+  function schneidet(a, b2, abstand3 = 0) {
+    return a.x < b2.x + b2.w + abstand3 - 1e-8 && a.x + a.w + abstand3 > b2.x + 1e-8 && a.z < b2.z + b2.d + abstand3 - 1e-8 && a.z + a.d + abstand3 > b2.z + 1e-8;
   }
 
   // src/kit/ladenplan.js
@@ -70149,10 +70149,10 @@
     } else if (typ === "P002") {
       for (const [ax, bw] of [[x + w * 0.21, w * 0.42], [x + w * 0.88, w * 0.24]]) {
         const steigung = 8.2, half = d2 * 0.5;
-        for (const sign2 of [-1, 1]) {
+        for (const sign3 of [-1, 1]) {
           const dach3 = new three_module_exports.BoxGeometry(bw, 0.5, Math.hypot(steigung, half));
-          dach3.rotateX(sign2 * Math.atan2(steigung, half));
-          dach3.translate(ax, y + steigung / 2 + 1, z2 + d2 / 2 + sign2 * d2 / 4);
+          dach3.rotateX(sign3 * Math.atan2(steigung, half));
+          dach3.translate(ax, y + steigung / 2 + 1, z2 + d2 / 2 + sign3 * d2 / 4);
           S.add(dach3, KUPFER2);
         }
       }
@@ -104370,7 +104370,7 @@
       }
     }
   }
-  function dehnbogen(S, x, z2, laenge, y, hoch, achse = "x") {
+  function dehnbogen(S, x, z2, laenge2, y, hoch, achse = "x") {
     const P2 = (u, h) => achse === "x" ? [x + u, h, z2] : [x, h, z2 + u];
     for (const s2 of [-0.6, 0.6]) {
       const Q = (u, h) => {
@@ -104380,10 +104380,10 @@
         return q2;
       };
       stab2(S, Q(0, y), Q(0, y + hoch), 0.45, "#c9cdd0", 8);
-      stab2(S, Q(0, y + hoch), Q(laenge, y + hoch), 0.45, "#c9cdd0", 8);
-      stab2(S, Q(laenge, y + hoch), Q(laenge, y), 0.45, "#c9cdd0", 8);
+      stab2(S, Q(0, y + hoch), Q(laenge2, y + hoch), 0.45, "#c9cdd0", 8);
+      stab2(S, Q(laenge2, y + hoch), Q(laenge2, y), 0.45, "#c9cdd0", 8);
     }
-    for (const u of [0, laenge]) {
+    for (const u of [0, laenge2]) {
       const q2 = P2(u, 0);
       S.box(0.5, y + hoch, 0.5, q2[0], (y + hoch) / 2 + 0.3, q2[2], "#8a8f94");
     }
@@ -108228,13 +108228,13 @@
   function nordHafen(S, scene2, p2) {
     return gedreht2(S, scene2, p2, hafenRoh, [32, 30]);
   }
-  function fluegel(S, F2, y, nab, laenge, phi, holz, gitter) {
+  function fluegel(S, F2, y, nab, laenge2, phi, holz, gitter) {
     for (let k = 0; k < 4; k++) {
       const a = phi + k * PI9 / 2, ca = Math.cos(a), sa = Math.sin(a), qa = -sa, qb = ca;
       const U2 = (s2, q2) => nab[0] + ca * s2 + qa * q2, Y = (s2, q2) => y + sa * s2 + qb * q2;
-      fbalken(S, F2, U2(-0.4, 0), Y(-0.4, 0), U2(laenge, 0), Y(laenge, 0), 0.28, -0.15, 0.15, holz);
-      for (const q2 of [0.25, 1.9]) fbalken(S, F2, U2(laenge * 0.2, q2), Y(laenge * 0.2, q2), U2(laenge, q2), Y(laenge, q2), 0.09, -0.06, 0.06, gitter);
-      for (let s2 = laenge * 0.2; s2 <= laenge + 0.01; s2 += laenge * 0.8 / 7) fbalken(S, F2, U2(s2, 0), Y(s2, 0), U2(s2, 1.9), Y(s2, 1.9), 0.08, -0.06, 0.06, gitter);
+      fbalken(S, F2, U2(-0.4, 0), Y(-0.4, 0), U2(laenge2, 0), Y(laenge2, 0), 0.28, -0.15, 0.15, holz);
+      for (const q2 of [0.25, 1.9]) fbalken(S, F2, U2(laenge2 * 0.2, q2), Y(laenge2 * 0.2, q2), U2(laenge2, q2), Y(laenge2, q2), 0.09, -0.06, 0.06, gitter);
+      for (let s2 = laenge2 * 0.2; s2 <= laenge2 + 0.01; s2 += laenge2 * 0.8 / 7) fbalken(S, F2, U2(s2, 0), Y(s2, 0), U2(s2, 1.9), Y(s2, 1.9), 0.08, -0.06, 0.06, gitter);
     }
     fscheibe2(S, F2, nab[0], y, -0.4, 0.3, 0.55, holz, 10);
   }
@@ -119890,7 +119890,7 @@
   var richtung = (dx, dz) => Math.atan2(-dz, dx);
   function baueStadt(S, scene2, plan2, bauer = platzhalterBauer, o = {}) {
     const I = o.instanzer ?? new Instanzer();
-    const ctx = { S, I, scene: scene2, plan: plan2, r: rng2(plan2.seed * 31 + 5), dichte: TYPEN[plan2.typ].dichte * (o.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr };
+    const ctx = { S, I, scene: scene2, plan: plan2, r: rng2(plan2.seed * 31 + 5), dichte: TYPEN[plan2.typ].dichte * (o.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, keineStandAutos: !!o.keineStandAutos };
     ostVerkehr = !!plan2.ddr;
     for (const p2 of plan2.parzellen) {
       if (!ctx.proBlock.has(p2.block)) ctx.proBlock.set(p2.block, []);
@@ -120025,9 +120025,9 @@
       dv: (sg) => z2 ? [sg, 0] : [0, sg]
     };
   }
-  function strich(I, R10, u, v, laenge, breite, y = 0) {
+  function strich(I, R10, u, v, laenge2, breite, y = 0) {
     const [x, z2] = R10.w(u, v);
-    I.setze("strich", x, y, z2, R10.ru, [laenge, 1, breite]);
+    I.setze("strich", x, y, z2, R10.ru, [laenge2, 1, breite]);
   }
   function fahrstreifen(s2) {
     const fb6 = s2.breite - 2 * s2.gehweg;
@@ -120145,7 +120145,7 @@
         figur4(I, x, YG, z2, r, R10.ru + (r() < 0.5 ? 0 : Math.PI) + zw(r, -0.3, 0.3));
       }
     }
-    verkehrAufSegment(ctx, s2, R10, s2.von + 7, s2.bis - 7, 0);
+    if (!ctx.keineStandAutos) verkehrAufSegment(ctx, s2, R10, s2.von + 7, s2.bis - 7, 0);
     if (s2.typ === "haupt" && L2 > 50 && r() < 0.45) {
       const sg = r() < 0.5 ? -1 : 1;
       const u = s2.von + L2 * zw(r, 0.35, 0.6);
@@ -120379,7 +120379,7 @@
       const sx = r() < 0.5 ? -1 : 1, sz = r() < 0.5 ? -1 : 1;
       if (k.arme[sz > 0 ? "+z" : "-z"] && k.arme[sx > 0 ? "+x" : "-x"]) I.setze("litfass", k.x + sx * (k.bx / 2 + 1), YG, k.z + sz * (k.bz / 2 + 1), 0, 1, [waehle2(r, OBERTEIL), waehle2(r, OBERTEIL), waehle2(r, OBERTEIL)]);
     }
-    if (!k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto3(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
+    if (!ctx.keineStandAutos && !k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto3(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
   }
   function polyPlatte(S, P2, yTop, dicke, farbe3) {
     const sh = new three_module_exports.Shape();
@@ -120697,15 +120697,15 @@
     S.add(new three_module_exports.SphereGeometry(0.4 * g, 8, 6).translate(x, y + 4.5 * g, z2), "#7aa68a");
   }
   var offeneSeiten = (b2) => ["+z", "+x", "-z", "-x"].filter((s2) => !(b2.seiten ?? ["-z", "-x"]).includes(s2));
-  function platzRand(ctx, b2, P2, y, r, art = "linde", abstand2 = 9) {
+  function platzRand(ctx, b2, P2, y, r, art = "linde", abstand3 = 9) {
     const { I } = ctx;
     for (const s2 of offeneSeiten(b2)) {
       if (s2[1] === "z") {
         const z2 = s2 === "+z" ? P2.z + P2.d - 2.6 : P2.z + 2.6;
-        for (let x = P2.x + 4; x < P2.x + P2.w - 2; x += abstand2) baumSetzen(I, art, x, y, z2, r, 0.85, true);
+        for (let x = P2.x + 4; x < P2.x + P2.w - 2; x += abstand3) baumSetzen(I, art, x, y, z2, r, 0.85, true);
       } else {
         const x = s2 === "+x" ? P2.x + P2.w - 2.6 : P2.x + 2.6;
-        for (let z2 = P2.z + 4; z2 < P2.z + P2.d - 2; z2 += abstand2) baumSetzen(I, art, x, y, z2, r, 0.85, true);
+        for (let z2 = P2.z + 4; z2 < P2.z + P2.d - 2; z2 += abstand3) baumSetzen(I, art, x, y, z2, r, 0.85, true);
       }
     }
   }
@@ -122389,6 +122389,542 @@
     return INDEX.get(name2);
   }
 
+  // src/kit/leben.js
+  var STANDARD_LEBEN = "voll";
+  var MODI = ["voll", "wenig", "aus"];
+  var MAX_AUTO = 60;
+  var MAX_FUSS = 110;
+  var MAX_BUS = 8;
+  var MAX_BAHN = 6;
+  var MAX_LKW = 5;
+  var KLEINSTE_LUECKE = 6.5;
+  var clamp8 = (v, a, b2) => Math.max(a, Math.min(b2, v));
+  var koordinate = (s2, u, v) => s2.achse === "z" ? { x: s2.mitte + v, z: u } : { x: u, z: s2.mitte + v };
+  var sign2 = (s2) => s2.achse === "z" ? -1 : 1;
+  var wegStart = (l) => l.dir > 0 ? l.s.von + 2 : l.s.bis - 2;
+  var punkt = (l, meter) => koordinate(l.s, wegStart(l) + l.dir * meter, l.v);
+  var laenge = (l) => Math.max(0, l.s.bis - l.s.von - 4);
+  var abstand = (a, b2) => Math.hypot(a.x - b2.x, a.z - b2.z);
+  function verkehrsnetz(plan2) {
+    const spuren = [], fusswege = [], trams = [], haupt = [];
+    for (const s2 of plan2?.strassen ?? []) {
+      if (s2.bis - s2.von < 14 || s2.bruecke && s2.typ === "fussgaenger") continue;
+      const fb6 = s2.breite - 2 * s2.gehweg, ps = sign2(s2);
+      if (s2.typ !== "fussgaenger" && !s2.leitwand) {
+        const seiten4 = s2.typ === "haupt" ? [(s2.mittel || 6) / 2 + (fb6 / 2 - (s2.mittel || 6) / 2) * 0.35, (s2.mittel || 6) / 2 + (fb6 / 2 - (s2.mittel || 6) / 2) * 0.73] : [Math.max(1.3, fb6 / 4)];
+        for (const dir of [1, -1]) for (let i = 0; i < seiten4.length; i++) {
+          const v = ps * dir * seiten4[i];
+          const l = { s: s2, dir, v, id: s2.id + ":" + dir + ":" + i, naechste: [] };
+          spuren.push(l);
+          if (s2.typ === "haupt") haupt.push(l);
+        }
+        if (s2.tram && (s2.art === "magistrale" || s2.typ === "haupt"))
+          for (const dir of [1, -1]) trams.push({ s: s2, dir, v: -ps * dir * 1.6, id: "tram:" + s2.id + ":" + dir, naechste: [] });
+      }
+      for (const seite of [-1, 1]) {
+        const v = s2.typ === "fussgaenger" ? seite * Math.max(1.5, fb6 * 0.29) : seite * (s2.breite / 2 - s2.gehweg / 2);
+        fusswege.push({ s: s2, dir: 1, v, id: s2.id + ":f:" + seite });
+      }
+    }
+    const verbinde = (liste) => {
+      const proSegment = /* @__PURE__ */ new Map();
+      for (const l of liste) {
+        if (!proSegment.has(l.s.id)) proSegment.set(l.s.id, []);
+        proSegment.get(l.s.id).push(l);
+      }
+      for (const l of liste) {
+        const end = punkt(l, laenge(l));
+        const knoten = (plan2.kreuzungen ?? []).filter((k) => Object.values(k.arme ?? {}).some((a) => a?.id === l.s.id)).sort((a, b2) => abstand(a, end) - abstand(b2, end))[0];
+        if (!knoten || abstand(knoten, end) > Math.max(33, l.s.breite)) continue;
+        for (const a of Object.values(knoten.arme ?? {})) {
+          if (!a || a.id === l.s.id || a.typ === "fussgaenger") continue;
+          for (const n of proSegment.get(a.id) ?? []) {
+            const start = punkt(n, 0);
+            if (abstand(knoten, start) <= Math.max(33, a.breite) && abstand(start, end) < 65) l.naechste.push(n);
+          }
+        }
+      }
+    };
+    verbinde(spuren);
+    verbinde(trams);
+    return { spuren, fusswege, trams, haupt };
+  }
+  function hausGewicht2(haus2, median = 1) {
+    if (haus2?.status !== "offen" && haus2?.status !== "raeumung") return 0;
+    const umsatz = Math.max(0, haus2?.kpi?.umsatz ?? 0);
+    const lage = haus2.lage === "1a" ? 1.25 : haus2.lage === "rand" ? 0.7 : 1;
+    return clamp8((umsatz ? Math.sqrt(umsatz / Math.max(1, median)) : 0.65) * lage * (1 + clamp8(haus2.transferBonus ?? 0, -0.5, 1)), 0.25, 3.5);
+  }
+  var FORMAT_FARBE = {
+    warenhaus: "#d23c32",
+    sport: "#327cb4",
+    schwester: "#397e69",
+    volkskauf: "#397e69",
+    outlet: "#752d52",
+    fundus: "#752d52"
+  };
+  var autoFarben = ["#d04a3f", "#2f63b5", "#ece8e1", "#28303a", "#b09a52", "#598b6c", "#9f6f83"];
+  function formatFarbe(h) {
+    return FORMAT_FARBE[h?.format] ?? (h?.id?.startsWith("V") ? "#397e69" : "#d23c32");
+  }
+  function instanzen(scene2, geometrie, max, name2) {
+    const m = new three_module_exports.InstancedMesh(geometrie, new three_module_exports.MeshLambertMaterial({ color: "#ffffff", side: three_module_exports.FrontSide }), max);
+    m.name = "leben:" + name2;
+    m.count = 0;
+    m.frustumCulled = false;
+    m.castShadow = false;
+    scene2.add(m);
+    return m;
+  }
+  var dummy = new three_module_exports.Object3D();
+  function matrix(mesh, i, pos, winkel, groesse2, farbe3) {
+    dummy.position.set(pos.x, pos.y, pos.z);
+    dummy.rotation.set(0, winkel, 0);
+    dummy.scale.set(groesse2[0], groesse2[1], groesse2[2]);
+    dummy.updateMatrix();
+    mesh.setMatrixAt(i, dummy.matrix);
+    if (farbe3) mesh.setColorAt(i, farbe3);
+  }
+  function fertig(m, n) {
+    m.count = n;
+    m.instanceMatrix.needsUpdate = true;
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  }
+  function lebenModul({ canvas: canvas2, scene: szene, camera: kamera, K: zoom, spiel, zeichnen: zeichnen2, sparsam: sparsam2 = false }) {
+    let modus = STANDARD_LEBEN, scene2 = null, plan2 = null, netz2 = null, r = rng2(1);
+    let autos = [], fuss = [], busse = [], bahnen2 = [], lkw = [], hauspunkte = [];
+    let meshes = {}, raf = 0, zuletzt = 0, letzterKontakt = 0, letzteAuswahl = -1, pause = false;
+    let frameKosten = [], limitFaktor = 1, langsameFrames = 0, aufnahme = false;
+    const farbe3 = (c) => new three_module_exports.Color(c);
+    const projektion = new three_module_exports.Vector3();
+    const sichtbar4 = (p2, rand = 1.35) => {
+      const k = zoom();
+      if (!k) return false;
+      if (Math.abs(p2.x - k.x) + Math.abs(p2.z - k.z) > k.halb * 5) return false;
+      const c = kamera();
+      if (!c) return false;
+      const v = projektion.set(p2.x, 0.5, p2.z).project(c);
+      return Math.abs(v.x) < rand && Math.abs(v.y) < rand;
+    };
+    function waehle3(liste) {
+      return liste[Math.floor(r() * liste.length)];
+    }
+    function meshBauen() {
+      meshes = {
+        auto: instanzen(scene2, new three_module_exports.BoxGeometry(4.5, 1.5, 2), MAX_AUTO, "auto"),
+        glas: instanzen(scene2, new three_module_exports.BoxGeometry(2.3, 0.8, 1.8), MAX_AUTO, "autoglas"),
+        bus: instanzen(scene2, new three_module_exports.BoxGeometry(11.5, 3.1, 2.6), MAX_BUS, "bus"),
+        tram: instanzen(scene2, new three_module_exports.BoxGeometry(19, 3.5, 2.65), MAX_BAHN, "tram"),
+        rumpf: instanzen(scene2, new three_module_exports.CylinderGeometry(0.38, 0.44, 1.25, 5), MAX_FUSS, "passant"),
+        kopf: instanzen(scene2, new three_module_exports.SphereGeometry(0.35, 5, 4), MAX_FUSS, "kopf"),
+        tuete: instanzen(scene2, new three_module_exports.BoxGeometry(0.43, 0.52, 0.25), MAX_FUSS, "tuete"),
+        lkw: instanzen(scene2, new three_module_exports.BoxGeometry(8.1, 3.1, 2.7), MAX_LKW, "lieferwagen")
+      };
+    }
+    function loeschen() {
+      anhalten();
+      if (scene2) for (const m of Object.values(meshes)) {
+        m.parent?.remove(m);
+        m.geometry.dispose();
+        m.material.dispose();
+      }
+      meshes = {};
+      scene2 = null;
+      plan2 = null;
+      netz2 = null;
+      autos = [];
+      fuss = [];
+      busse = [];
+      bahnen2 = [];
+      lkw = [];
+      hauspunkte = [];
+      zuletzt = 0;
+      letzteAuswahl = -1;
+    }
+    function hausStandorte() {
+      const s2 = spiel();
+      if (!s2 || !plan2) return [];
+      const punkte2 = [];
+      for (const st2 of plan2.standorte ?? []) {
+        const h = (s2.haeuser ?? []).find((x) => x.id === st2.id || x.id === st2.hausId);
+        const p2 = plan2.parzellen.find((p3) => p3.id === st2.parzelle);
+        if (!h || !p2 || !netz2?.fusswege.length) continue;
+        const mitte = { x: p2.x + p2.w / 2, z: p2.z + p2.d / 2 };
+        const f = netz2.fusswege.filter((w) => Math.abs(w.s.mitte - (w.s.achse === "z" ? mitte.x : mitte.z)) < 65).map((w) => ({ w, u: clamp8(w.s.achse === "z" ? mitte.z : mitte.x, w.s.von + 3, w.s.bis - 3) }));
+        f.sort((a2, b2) => abstand(koordinate(a2.w.s, a2.u, a2.w.v), mitte) - abstand(koordinate(b2.w.s, b2.u, b2.w.v), mitte));
+        if (!f.length) continue;
+        const a = f[0], weg = koordinate(a.w.s, a.u, a.w.v);
+        const ein = a.w.s.achse === "z" ? { x: a.w.s.mitte < mitte.x ? p2.x : p2.x + p2.w, z: clamp8(a.u, p2.z + 1, p2.z + p2.d - 1) } : { x: clamp8(a.u, p2.x + 1, p2.x + p2.w - 1), z: a.w.s.mitte < mitte.z ? p2.z : p2.z + p2.d };
+        punkte2.push({ h, p: p2, mitte, weg, ein, lane: a.w, u: a.u });
+      }
+      const umsaetze = punkte2.map((p2) => p2.h.kpi?.umsatz ?? 0).filter((x) => x > 0).sort((a, b2) => a - b2);
+      const median = umsaetze[Math.floor(umsaetze.length / 2)] ?? 1;
+      for (const p2 of punkte2) p2.gewicht = hausGewicht2(p2.h, median);
+      return punkte2;
+    }
+    function neueFussgaenger(wege) {
+      if (!wege.length) return null;
+      const aktive = hauspunkte.filter((x) => x.gewicht && sichtbar4(x.weg, 1.7));
+      let haus2 = null;
+      if (aktive.length && r() < 0.8) {
+        const sum2 = aktive.reduce((a, b2) => a + b2.gewicht, 0);
+        let v = r() * sum2;
+        haus2 = aktive.find((a) => (v -= a.gewicht) <= 0) ?? aktive.at(-1);
+      }
+      const weg = haus2?.lane ?? waehle3(wege);
+      const anfang = haus2 ? clamp8(haus2.u - weg.s.von + (r() - 0.5) * 32, 0, laenge(weg)) : r() * laenge(weg);
+      return {
+        weg,
+        m: anfang,
+        dir: r() < 0.5 ? -1 : 1,
+        geschw: 0.9 + r() * 0.8,
+        haus: haus2,
+        phase: "weg",
+        lauf: 0,
+        tuete: false,
+        farbe: farbe3(waehle3(["#be9d78", "#518c88", "#9c765c", "#4b5e7b", "#9a434c"])),
+        haut: farbe3(waehle3(["#efc49f", "#d3a07c", "#986843", "#78492e"]))
+      };
+    }
+    function neuerWagen(lanes, art = "auto") {
+      if (!lanes.length) return null;
+      const lane = waehle3(lanes);
+      return {
+        lane,
+        m: r() * laenge(lane),
+        geschw: art === "tram" ? 7 + r() * 2 : art === "bus" ? 5 + r() * 2 : 6 + r() * 5,
+        farbe: farbe3(waehle3(autoFarben)),
+        art,
+        sprung: null
+      };
+    }
+    function aktualisiereAuswahl() {
+      if (!netz2 || !scene2 || modus === "aus") return;
+      const k = zoom(), neu = Math.round(k.x / 18) + ":" + Math.round(k.z / 18) + ":" + Math.round(k.halb / 9) + ":" + modus + ":" + limitFaktor;
+      if (neu === letzteAuswahl) return;
+      letzteAuswahl = neu;
+      if (k.halb > 110) {
+        autos = [];
+        fuss = [];
+        busse = [];
+        bahnen2 = [];
+        return;
+      }
+      const lanes = netz2.spuren.filter((l) => sichtbar4(punkt(l, laenge(l) * 0.5), 1.6));
+      const wege = netz2.fusswege.filter((l) => sichtbar4(punkt(l, laenge(l) * 0.5), 1.5));
+      const busLanes = lanes.filter((l) => l.s.typ === "haupt");
+      const tramLanes = netz2.trams.filter((l) => l.s.art === "magistrale" && sichtbar4(punkt(l, laenge(l) * 0.5), 1.5));
+      const dichte = (modus === "wenig" ? 0.5 : 1) * limitFaktor;
+      const sollAuto = lanes.length ? Math.min(MAX_AUTO, Math.max(1, Math.round((20 + 40 * clamp8((110 - k.halb) / 88, 0, 1)) * dichte))) : 0;
+      const sollFuss = wege.length ? Math.round(100 * dichte) : 0;
+      const anpassen = (arr, n, liste, art, sonstige = []) => {
+        const weiter = arr.filter((a) => a?.lane && liste.includes(a.lane)).slice(0, n);
+        for (let i = 0; i < n * 18 && weiter.length < n; i++) {
+          const a = neuerWagen(liste, art);
+          if (!a) break;
+          if ([...weiter, ...sonstige].some((b2) => b2.lane === a.lane && Math.abs(b2.m - a.m) < (a.art === "tram" || b2.art === "tram" ? 22 : a.art === "bus" || b2.art === "bus" ? 14 : KLEINSTE_LUECKE))) continue;
+          weiter.push(a);
+        }
+        return weiter;
+      };
+      autos = anpassen(autos, sollAuto, lanes, "auto");
+      busse = anpassen(busse, Math.min(MAX_BUS, Math.round(busLanes.length / 5 * dichte)), busLanes, "bus", autos);
+      bahnen2 = anpassen(bahnen2, Math.min(MAX_BAHN, Math.round(tramLanes.length / 3 * dichte)), tramLanes, "tram");
+      fuss = fuss.filter((a) => wege.includes(a.weg)).slice(0, sollFuss);
+      while (fuss.length < sollFuss) {
+        const f = neueFussgaenger(wege);
+        if (!f) break;
+        fuss.push(f);
+      }
+    }
+    function bewegungWagen(liste, dt) {
+      const belegung = /* @__PURE__ */ new Map();
+      const sortiert = [...liste].sort((a, b2) => b2.m - a.m);
+      for (const a of sortiert) {
+        const key = a.lane.id;
+        const voraus = belegung.get(key);
+        let ziel = a.m + a.geschw * dt;
+        if (voraus) ziel = Math.min(ziel, voraus.m - (a.art === "tram" || voraus.art === "tram" ? 22 : a.art === "bus" || voraus.art === "bus" ? 14 : KLEINSTE_LUECKE));
+        if (ziel >= laenge(a.lane)) {
+          const moeglich = a.lane.naechste.filter((n) => !liste.some((b2) => b2 !== a && b2.lane === n && b2.m < KLEINSTE_LUECKE * 2));
+          const nach = moeglich.length ? waehle3(moeglich) : null;
+          if (nach) {
+            a.sprung = { von: punkt(a.lane, laenge(a.lane)), nach: punkt(nach, 0), fort: 0 };
+            a.lane = nach;
+            a.m = 0;
+          } else a.m = Math.max(0, laenge(a.lane) - 1);
+        } else a.m = Math.max(0, ziel);
+        belegung.set(a.lane.id, a);
+        if (a.sprung) {
+          a.sprung.fort += a.geschw * dt;
+          if (a.sprung.fort >= abstand(a.sprung.von, a.sprung.nach)) a.sprung = null;
+        }
+      }
+    }
+    function positionWagen(a) {
+      const p2 = punkt(a.lane, a.m), q2 = punkt(a.lane, Math.min(laenge(a.lane), a.m + 1));
+      if (a.sprung) {
+        const t = clamp8(a.sprung.fort / Math.max(0.01, abstand(a.sprung.von, a.sprung.nach)), 0, 1);
+        const { von, nach } = a.sprung;
+        return {
+          x: von.x + (nach.x - von.x) * t,
+          y: 0.95,
+          z: von.z + (nach.z - von.z) * t,
+          winkel: Math.atan2(-(nach.z - von.z), nach.x - von.x)
+        };
+      }
+      return { ...p2, y: 0.95, winkel: Math.atan2(-(q2.z - p2.z) || -a.lane.dir * (a.lane.s.achse === "z" ? 1 : 0), q2.x - p2.x || a.lane.dir * (a.lane.s.achse === "x" ? 1 : 0)) };
+    }
+    function fussBewegen(dt) {
+      for (const f of fuss) {
+        if (f.phase === "weg") {
+          f.m += f.dir * f.geschw * dt;
+          if (f.m < 0 || f.m > laenge(f.weg)) {
+            f.dir *= -1;
+            f.m = clamp8(f.m, 0, laenge(f.weg));
+          }
+          if (f.haus && !f.tuete && Math.abs(f.weg.s.von + f.m - f.haus.u) < 1.5) {
+            f.phase = "hinein";
+            f.lauf = 0;
+          }
+        } else {
+          f.lauf += dt;
+          if (f.phase === "hinein" && f.lauf >= 0.9) {
+            f.phase = "drinnen";
+            f.lauf = 0;
+          } else if (f.phase === "drinnen" && f.lauf >= 1 + r() * 0.4) {
+            f.phase = "heraus";
+            f.lauf = 0;
+            f.tuete = r() < clamp8(0.24 + f.haus.gewicht * 0.15, 0.2, 0.83);
+            f.tuetenFarbe = farbe3(formatFarbe(f.haus.h));
+          } else if (f.phase === "heraus" && f.lauf >= 0.9) {
+            f.phase = "weg";
+            f.lauf = 0;
+            f.haus = null;
+          }
+        }
+      }
+    }
+    function fussPosition(f) {
+      const p2 = koordinate(f.weg.s, f.weg.s.von + f.m, f.weg.v);
+      if (!f.haus || f.phase === "weg") return p2;
+      const t = f.phase === "hinein" ? clamp8(f.lauf / 0.9, 0, 1) : f.phase === "heraus" ? 1 - clamp8(f.lauf / 0.9, 0, 1) : 1;
+      return { x: p2.x + (f.haus.ein.x - p2.x) * t, z: p2.z + (f.haus.ein.z - p2.z) * t };
+    }
+    function zeichneInstanzen() {
+      if (!meshes.auto) return;
+      let n = 0;
+      for (const a of autos) {
+        const p2 = positionWagen(a);
+        if (!sichtbar4(p2)) continue;
+        matrix(meshes.auto, n, p2, p2.winkel, [1, 1, 1], a.farbe);
+        matrix(meshes.glas, n, { ...p2, y: 1.95 }, p2.winkel, [1, 1, 1], farbe3("#718d9d"));
+        n++;
+      }
+      fertig(meshes.auto, n);
+      fertig(meshes.glas, n);
+      const grosse = (liste, key, palette2) => {
+        let m = 0;
+        for (const a of liste) {
+          const p2 = positionWagen(a);
+          if (!sichtbar4(p2)) continue;
+          matrix(meshes[key], m++, { ...p2, y: 1.65 }, p2.winkel, [1, 1, 1], palette2);
+        }
+        fertig(meshes[key], m);
+      };
+      grosse(busse, "bus", farbe3("#d7c7a0"));
+      grosse(bahnen2, "tram", farbe3("#c83c36"));
+      n = 0;
+      for (const f of fuss) {
+        const p2 = fussPosition(f);
+        if (f.phase === "drinnen" || !sichtbar4(p2)) continue;
+        const winkel = f.weg.s.achse === "z" ? -Math.PI / 2 : 0;
+        const huepfen = 0.035 * Math.sin(f.m * 7);
+        matrix(meshes.rumpf, n, { ...p2, y: 1.05 + huepfen }, winkel, [1, 1, 1], f.farbe);
+        matrix(meshes.kopf, n, { ...p2, y: 1.93 + huepfen }, 0, [1, 1, 1], f.haut);
+        const bag = f.tuete ? [1, 1, 1] : [1e-4, 1e-4, 1e-4];
+        matrix(meshes.tuete, n, { x: p2.x + 0.55, y: 0.67, z: p2.z + 0.15 }, winkel, bag, f.tuetenFarbe ?? farbe3(formatFarbe(f.haus?.h)));
+        n++;
+      }
+      fertig(meshes.rumpf, n);
+      fertig(meshes.kopf, n);
+      fertig(meshes.tuete, n);
+      n = 0;
+      for (const a of lkw) {
+        const t = clamp8(a.fort / 4.5, 0, 1);
+        if (a.fort > 12) continue;
+        const ein = a.fort < 4.5 ? t : a.fort < 8 ? 1 : 1 - clamp8((a.fort - 8) / 4, 0, 1);
+        const p2 = { x: a.start.x + (a.ziel.x - a.start.x) * ein, z: a.start.z + (a.ziel.z - a.start.z) * ein };
+        if (!sichtbar4(p2)) continue;
+        matrix(meshes.lkw, n++, { ...p2, y: 1.7 }, a.winkel, [1, 1, 1], farbe3("#e1ddd1"));
+      }
+      fertig(meshes.lkw, n);
+    }
+    function schritt(dt) {
+      const t0 = performance.now();
+      aktualisiereAuswahl();
+      bewegungWagen([...autos, ...busse], dt);
+      bewegungWagen(bahnen2, dt);
+      fussBewegen(dt);
+      for (const a of lkw) a.fort += dt;
+      zeichneInstanzen();
+      const ms = performance.now() - t0;
+      frameKosten.push(ms);
+      if (frameKosten.length > 60) frameKosten.shift();
+      const mittel = frameKosten.reduce((a, b2) => a + b2, 0) / frameKosten.length;
+      if (mittel > 2) langsameFrames++;
+      else langsameFrames = Math.max(0, langsameFrames - 1);
+      if (langsameFrames >= 12 && limitFaktor > 0.25) {
+        limitFaktor *= 0.5;
+        langsameFrames = 0;
+        letzteAuswahl = -1;
+      } else if (frameKosten.length === 60 && mittel < 0.85 && limitFaktor < 1 && !aufnahme) {
+        limitFaktor = Math.min(1, limitFaktor * 2);
+        letzteAuswahl = -1;
+      }
+      return ms;
+    }
+    function takt(zeit) {
+      raf = 0;
+      if (pause || !scene2 || modus === "aus" || document.hidden) return;
+      const still = zeit - letzterKontakt > 3e4;
+      if (still && zeit - zuletzt < 1e3 / 15) {
+        raf = requestAnimationFrame(takt);
+        return;
+      }
+      const dt = zuletzt ? clamp8((zeit - zuletzt) / 1e3, 0, 0.07) : 0;
+      zuletzt = zeit;
+      if (zoom().halb <= 110) {
+        schritt(dt);
+        zeichnen2();
+      } else if (Object.values(meshes).some((m) => m.count)) {
+        autos = [];
+        fuss = [];
+        busse = [];
+        bahnen2 = [];
+        zeichneInstanzen();
+        zeichnen2();
+      }
+      raf = requestAnimationFrame(takt);
+    }
+    function starten() {
+      if (!raf && scene2 && !pause && modus !== "aus" && !document.hidden) {
+        zuletzt = 0;
+        raf = requestAnimationFrame(takt);
+      }
+    }
+    function anhalten() {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    }
+    function stadtSetzen(neu) {
+      loeschen();
+      scene2 = szene();
+      plan2 = neu;
+      if (!scene2 || !plan2) return;
+      netz2 = verkehrsnetz(plan2);
+      r = rng2((plan2.seed ?? 1) * 37 + 907);
+      hauspunkte = hausStandorte();
+      meshBauen();
+      letzterKontakt = performance.now();
+      aktualisiereAuswahl();
+      zeichneInstanzen();
+      starten();
+    }
+    function woche2(neueBestellungen = 0) {
+      if (!scene2) return;
+      hauspunkte = hausStandorte();
+      const anzahl = Math.min(MAX_LKW, Math.max(0, Math.floor(neueBestellungen)));
+      const rang = [...hauspunkte].filter((h) => h.gewicht > 0).sort((a, b2) => b2.gewicht - a.gewicht);
+      lkw = rang.slice(0, anzahl).map((h) => {
+        const s2 = netz2.spuren.filter((l) => l.s.typ !== "fussgaenger").sort((a, b2) => abstand(punkt(a, laenge(a) / 2), h.mitte) - abstand(punkt(b2, laenge(b2) / 2), h.mitte))[0];
+        const p2 = s2 ? koordinate(
+          s2.s,
+          clamp8(s2.s.achse === "z" ? h.mitte.z : h.mitte.x, s2.s.von + 4, s2.s.bis - 4),
+          Math.sign((s2.s.achse === "z" ? h.mitte.x : h.mitte.z) - s2.s.mitte) * (s2.s.breite / 2 - 0.8)
+        ) : h.weg;
+        const ziel = h.weg;
+        return { start: p2, ziel, fort: 0, winkel: s2?.s.achse === "z" ? -Math.PI / 2 : 0, hausId: h.h.id };
+      });
+      letzteAuswahl = -1;
+      zeichneInstanzen();
+      if (modus !== "aus") zeichnen2();
+    }
+    function setzen(wert) {
+      if (!MODI.includes(wert)) return modus;
+      modus = wert;
+      letzteAuswahl = -1;
+      if (modus === "aus") {
+        anhalten();
+        autos = [];
+        fuss = [];
+        busse = [];
+        bahnen2 = [];
+        lkw = [];
+        for (const m of Object.values(meshes)) {
+          m.count = 0;
+          m.instanceMatrix.needsUpdate = true;
+        }
+        if (scene2) zeichnen2();
+      } else {
+        letzterKontakt = performance.now();
+        aktualisiereAuswahl();
+        zeichneInstanzen();
+        starten();
+      }
+      return modus;
+    }
+    function kontakt() {
+      letzterKontakt = performance.now();
+    }
+    function sichtbarkeit() {
+      if (document.hidden) {
+        anhalten();
+        zuletzt = 0;
+      } else starten();
+    }
+    canvas2.addEventListener("pointerdown", kontakt, { passive: true });
+    canvas2.addEventListener("wheel", kontakt, { passive: true });
+    document.addEventListener("visibilitychange", sichtbarkeit);
+    return {
+      stadt: stadtSetzen,
+      woche: woche2,
+      setzen,
+      get modus() {
+        return modus;
+      },
+      kamera: () => {
+        letzteAuswahl = -1;
+        kontakt();
+      },
+      pause: (an) => {
+        pause = !!an;
+        if (pause) anhalten();
+        else starten();
+      },
+      kontakt,
+      zu: loeschen,
+      /** Debug-API und Abnahme: 10 Zeitpunkte im 100-ms-Abstand mit externen Canvas-Screenshots. */
+      schritt: (dt = 0.1, bild3 = true) => {
+        const ms = schritt(dt);
+        if (bild3) zeichnen2();
+        return ms;
+      },
+      status: () => ({
+        modus,
+        autos: autos.length,
+        passanten: fuss.length,
+        busse: busse.length,
+        strassenbahnen: bahnen2.length,
+        lieferwagen: lkw.length,
+        netzSpuren: netz2?.spuren.length ?? 0,
+        budget: limitFaktor,
+        updateMittelMs: +(frameKosten.reduce((a, b2) => a + b2, 0) / Math.max(1, frameKosten.length)).toFixed(2),
+        akkuFps: performance.now() - letzterKontakt > 3e4 ? 15 : 60
+      })
+    };
+  }
+
   // src/kit/umbau-aussen.js
   function technikAufDach(S, h, m) {
     if (!h.etagenBau || !m || !(m.hoehe > 0)) return;
@@ -122865,8 +123401,8 @@
   }
   function zweigGeometrie() {
     const teile2 = [];
-    for (const [winkel, hoehe, laenge] of [[0, 3.45, 2], [1.25, 4.3, 2.1], [2.5, 4, 1.9], [3.75, 4.7, 1.8], [5, 3.6, 1.7]]) {
-      const g = new three_module_exports.BoxGeometry(0.17, laenge, 0.17);
+    for (const [winkel, hoehe, laenge2] of [[0, 3.45, 2], [1.25, 4.3, 2.1], [2.5, 4, 1.9], [3.75, 4.7, 1.8], [5, 3.6, 1.7]]) {
+      const g = new three_module_exports.BoxGeometry(0.17, laenge2, 0.17);
       g.rotateZ(0.75);
       g.rotateY(winkel);
       g.translate(Math.sin(winkel) * 0.55, hoehe, Math.cos(winkel) * 0.55);
@@ -122986,10 +123522,10 @@
       dach3.length || 1
     );
     mesh.count = dach3.length;
-    const matrix = new three_module_exports.Matrix4(), pos = new three_module_exports.Vector3(), scl = new three_module_exports.Vector3(), rot = new three_module_exports.Quaternion();
+    const matrix2 = new three_module_exports.Matrix4(), pos = new three_module_exports.Vector3(), scl = new three_module_exports.Vector3(), rot = new three_module_exports.Quaternion();
     dach3.forEach((p2, i) => {
-      matrix.compose(pos.set(p2.x, p2.y, p2.z), rot, scl.set(p2.w, 1, p2.d));
-      mesh.setMatrixAt(i, matrix);
+      matrix2.compose(pos.set(p2.x, p2.y, p2.z), rot, scl.set(p2.w, 1, p2.d));
+      mesh.setMatrixAt(i, matrix2);
     });
     mesh.instanceMatrix.needsUpdate = true;
     mesh.castShadow = false;
@@ -123032,12 +123568,12 @@
     schnee.add(schneeMesh(plan2, hoehen));
     bauen3(regen, (S) => regenOverlay(S, plan2));
     const geo = zweigGeometrie(), mat2 = new three_module_exports.MeshLambertMaterial({ color: "#806b50" });
-    const matrix = new three_module_exports.Matrix4();
+    const matrix2 = new three_module_exports.Matrix4();
     for (const { m } of baeume) {
       const aeste = new three_module_exports.InstancedMesh(geo, mat2, m.count);
       for (let i = 0; i < m.count; i++) {
-        m.getMatrixAt(i, matrix);
-        aeste.setMatrixAt(i, matrix);
+        m.getMatrixAt(i, matrix2);
+        aeste.setMatrixAt(i, matrix2);
       }
       aeste.instanceMatrix.needsUpdate = true;
       aeste.castShadow = false;
@@ -123186,7 +123722,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "e25dd51" : "Entwicklung";
+  var version = () => true ? "675926e" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -126810,16 +127346,19 @@
   // src/ui/diagnose.js
   var runde = (x) => Math.round(x * 10) / 10;
   var perzentil = (a, p2) => a[Math.min(a.length - 1, Math.ceil(a.length * p2) - 1)];
-  async function messen({ renderer, scene: scene2, camera, info }) {
+  async function messen({ renderer, scene: scene2, camera, info, vorBild, anzahl = 90 }) {
     if (!scene2 || !camera) throw new Error("Bitte zuerst ein Spiel starten.");
-    const renderMs = [], frameMs = [];
+    const renderMs = [], frameMs = [], updateMs = [];
     let vorher = 0;
     const startGesamt = performance.now();
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < anzahl; i++) {
       if (i >= 5 && performance.now() - startGesamt > 8e3) break;
       const zeit = await new Promise((resolve) => requestAnimationFrame(resolve));
       if (vorher) frameMs.push(zeit - vorher);
       vorher = zeit;
+      const vor = performance.now();
+      if (vorBild) vorBild();
+      updateMs.push(performance.now() - vor);
       const start = performance.now();
       renderer.render(scene2(), camera());
       renderMs.push(performance.now() - start);
@@ -126834,6 +127373,7 @@
       frameP95Ms: runde(perzentil(f, 0.95)),
       renderMittelMs: runde(renderMs.reduce((a, b2) => a + b2, 0) / renderMs.length),
       renderP95Ms: runde(perzentil(r, 0.95)),
+      updateMittelMs: runde(updateMs.reduce((a, b2) => a + b2, 0) / updateMs.length),
       frameUeber33ms: frameMs.filter((x) => x > 33.4).length,
       drawCalls: renderer.info.render.calls,
       dreiecke: renderer.info.render.triangles,
@@ -127037,8 +127577,8 @@
             messen2("Flug beginnt");
           }
         } else flug.classList.add("bewegt");
-        const fertig = await vorbereitung;
-        if (!fertig || meins !== token) return;
+        const fertig2 = await vorbereitung;
+        if (!fertig2 || meins !== token) return;
         await warten(reduziert3 ? 0 : Math.max(0, REISE_ZEIT.wechsel + REISE_ZEIT.fahrt - (performance.now() - start)));
         if (meins !== token) return;
         ctx.bahnhofFokussieren();
@@ -127398,7 +127938,7 @@
       zustand.index = index2;
       sichern(SCHLUESSEL, zustand);
     };
-    function beenden(fertig = false) {
+    function beenden(fertig2 = false) {
       aktiv5 = false;
       frage = false;
       clearInterval(tick);
@@ -127408,7 +127948,7 @@
       root.hidden = true;
       root.innerHTML = "";
       document.body.classList.remove("einfuehrung-aktiv");
-      if (fertig) {
+      if (fertig2) {
         zustand.modus = "fertig";
         index2 = 0;
         speichern2();
@@ -127963,7 +128503,7 @@
   var zahl3 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
   var euro2 = (x) => zahl3(x, 2) + " \u20AC";
   var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent(basis3 ? wert / basis3 - 1 : 0);
-  var punkt = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl3((wert - basis3) * 100) + " Punkte";
+  var punkt2 = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl3((wert - basis3) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
@@ -127977,7 +128517,7 @@
     const a = d2.aktuell, v = d2.vorjahr;
     const br = E.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent(a.kaufquote), punkt(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl3(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent(a.kaufquote), punkt2(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl3(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile(z2, haus2 = false) {
     return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
@@ -128125,8 +128665,8 @@
       const alle = new Map(d2.cluster.map((c) => [c.id, c]));
       if (p2.phase === "rollout" || p2.phase === "umsetzung" || p2.phase === "konzept") {
         const ausgabe = p2.clusterIds.map((id, i) => {
-          const c = alle.get(id), fertig = p2.erledigteCluster.includes(id);
-          return '<div class="it-cluster ' + (fertig ? "fertig" : "") + '"><span>' + (fertig ? "\u2713 " : "") + esc2(c?.name ?? id) + "</span>" + (fertig ? "<b>Generation " + p2.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig && p2.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === p2.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
+          const c = alle.get(id), fertig2 = p2.erledigteCluster.includes(id);
+          return '<div class="it-cluster ' + (fertig2 ? "fertig" : "") + '"><span>' + (fertig2 ? "\u2713 " : "") + esc2(c?.name ?? id) + "</span>" + (fertig2 ? "<b>Generation " + p2.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig2 && p2.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === p2.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
         });
         h += '<details class="it-details"><summary>Rollout-Reihenfolge und Clusterkarte</summary>' + ausgabe.join("") + "</details>";
       }
@@ -128817,20 +129357,20 @@
       bar.hidden = false;
       bar.max = n;
       bar.value = 0;
-      let fertig = 0;
+      let fertig2 = 0;
       try {
         for (let i = 0; i < n; i++) {
           if (ctx.s().phase === "zerschlagen") break;
           const m = ctx.testWoche(bot);
           if (!m) break;
-          fertig++;
-          bar.value = fertig;
-          status.textContent = fertig + " / " + n + " Wochen";
+          fertig2++;
+          bar.value = fertig2;
+          status.textContent = fertig2 + " / " + n + " Wochen";
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
-        status.textContent = "Zeitsprung: " + fertig + " von " + n + " Wochen abgeschlossen.";
-        if (fertig !== n) ctx.meldung("Zeitsprung beendet: Spielende erreicht.", false);
-        return { fertig };
+        status.textContent = "Zeitsprung: " + fertig2 + " von " + n + " Wochen abgeschlossen.";
+        if (fertig2 !== n) ctx.meldung("Zeitsprung beendet: Spielende erreicht.", false);
+        return { fertig: fertig2 };
       } catch (e) {
         ctx.meldung("Zeitsprung fehlgeschlagen: " + e.message, false);
         throw e;
@@ -129282,9 +129822,9 @@
     }
     function rauschPuffer() {
       if (rausch || !audio) return rausch;
-      const laenge = Math.round(audio.sampleRate * 5), b2 = audio.createBuffer(1, laenge, audio.sampleRate);
+      const laenge2 = Math.round(audio.sampleRate * 5), b2 = audio.createBuffer(1, laenge2, audio.sampleRate);
       const daten = b2.getChannelData(0);
-      for (let i = 0; i < laenge; i++) daten[i] = Math.random() * 2 - 1;
+      for (let i = 0; i < laenge2; i++) daten[i] = Math.random() * 2 - 1;
       rausch = b2;
       return b2;
     }
@@ -129710,6 +130250,7 @@
     sonne.target.position.set(K2.x, 0, K2.z);
     Object.assign(sonne.shadow.camera, { left: -r, right: r, top: r, bottom: -r });
     sonne.shadow.camera.updateProjectionMatrix();
+    leben.kamera();
     zeichnen();
     kachelnPlanen();
   }
@@ -129729,6 +130270,38 @@
     ren.render(scene, cam);
     return Math.round(performance.now() - t);
   }
+  var leben = lebenModul({
+    canvas,
+    scene: () => scene,
+    camera: () => cam,
+    K: () => K2,
+    spiel: () => s,
+    zeichnen,
+    sparsam
+  });
+  var lebenEinstellung = param.get("leben") ?? (() => {
+    try {
+      return localStorage.getItem("ruhrkauf.leben");
+    } catch {
+      return null;
+    }
+  })();
+  if (["aus", "wenig", "voll"].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
+  $("leben-modus").value = leben.modus;
+  $("leben-modus").addEventListener("change", (e) => {
+    const vorher = leben.modus;
+    leben.setzen(e.target.value);
+    try {
+      localStorage.setItem("ruhrkauf.leben", leben.modus);
+    } catch {
+    }
+    if (vorher === "aus" !== (leben.modus === "aus") && s && scene) {
+      const kameraAlt = { x: K2.x, z: K2.z, halb: K2.halb };
+      baueStadtAusSpiel(stadtName);
+      Object.assign(K2, kameraAlt);
+      kameraSetzen();
+    }
+  });
   var ray = new three_module_exports.Raycaster();
   var boden7 = new three_module_exports.Plane(new three_module_exports.Vector3(0, 1, 0), 0);
   function aufBoden(px2, py2) {
@@ -129799,6 +130372,7 @@
   } });
   window.addEventListener("resize", kameraSetzen);
   function raeumeSzene() {
+    leben.zu();
     if (!scene) return;
     jahreszeiten?.aufraeumen();
     jahreszeiten = null;
@@ -129980,7 +130554,7 @@
     setzeLod("fern");
     let e;
     try {
-      e = baueStadt(T, scene, plan, grund2);
+      e = baueStadt(T, scene, plan, grund2, { keineStandAutos: leben.modus !== "aus" });
       T.bauen(scene);
       entferneKleineSchilder(scene);
     } finally {
@@ -130006,6 +130580,7 @@
     K2.halb = param.has("zoom") ? Number(param.get("zoom")) : 60;
     K2._G = null;
     kameraSetzen();
+    leben.stadt(plan);
     kachelnSichtbarBauen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
@@ -130172,7 +130747,7 @@
     }
     return x1 > -rand && x0 < rand && y1 > -rand && y0 < rand;
   }
-  var abstand = (k) => {
+  var abstand2 = (k) => {
     const c = k.box.getCenter(new three_module_exports.Vector3());
     return Math.hypot(c.x - K2.x, c.z - K2.z);
   };
@@ -130189,20 +130764,20 @@
   function naechsteKachel() {
     if (K2.halb > VOLL_MAX_ZOOM) return null;
     const st2 = teileStand();
-    const kand = KA.liste.filter((k) => k.stufe !== "voll").map((k) => ({ k, s: sichtbar3(k), d: abstand(k) })).sort((a, b2) => b2.s - a.s || a.d - b2.d);
+    const kand = KA.liste.filter((k) => k.stufe !== "voll").map((k) => ({ k, s: sichtbar3(k), d: abstand2(k) })).sort((a, b2) => b2.s - a.s || a.d - b2.d);
     const n = kand[0];
     if (!n) return null;
     const schaetzung = n.k.parz.length * 380;
     if (st2.teile + schaetzung <= BUDGET) return n.k;
     if (!n.s) return null;
-    const weg = KA.liste.filter((k) => k.stufe === "voll" && !sichtbar3(k, 1.4)).sort((a, b2) => abstand(b2) - abstand(a))[0];
+    const weg = KA.liste.filter((k) => k.stufe === "voll" && !sichtbar3(k, 1.4)).sort((a, b2) => abstand2(b2) - abstand2(a))[0];
     if (!weg) return null;
     klotzBauen(weg);
     return n.k;
   }
   function kachelnSichtbarBauen() {
     if (K2.halb > VOLL_MAX_ZOOM) return;
-    for (const k of KA.liste.filter((q2) => q2.stufe !== "voll" && sichtbar3(q2, 1.05)).sort((a, b2) => abstand(a) - abstand(b2))) {
+    for (const k of KA.liste.filter((q2) => q2.stufe !== "voll" && sichtbar3(q2, 1.05)).sort((a, b2) => abstand2(a) - abstand2(b2))) {
       if (teileStand().teile + k.parz.length * 380 > BUDGET) break;
       vollBauen(k);
     }
@@ -130280,6 +130855,7 @@
     const t0 = performance.now();
     const erfolgeDavor = new Set(Object.keys(s.erfolge ?? {}));
     if (mitBot) botSchritt(s);
+    const ankommendeOrders = (s.bestellungen ?? []).filter((b2) => b2.ankunft === s.woche + 1).length;
     if (test) {
       const ergebnis = fuehreAus(s, { typ: "testWoche" });
       if (!ergebnis.ok) {
@@ -130291,6 +130867,7 @@
     er?.nachWoche(erfolgeDavor);
     const t1 = performance.now();
     const geaendert = grafikNachziehen();
+    leben.woche(ankommendeOrders);
     const t2 = performance.now();
     cockpitZeigen();
     if (offenesHaus) oeffneHaus(offenesHaus);
@@ -130971,22 +131548,31 @@
     if (!s || !scene) return;
     menueZu();
     panel("Performance", "Messung direkt auf diesem Ger\xE4t", '<div class="karte"><div class="zeile">Bis zu 90 Frames werden aktiv gerendert \u2026</div></div>', "gross");
-    const vorher = KA.pause;
+    const vorher = KA.pause, vorherLeben = leben.modus;
     KA.pause = true;
+    leben.pause(true);
     try {
-      const d2 = await messen({
+      const daten = {
         renderer: ren,
         scene: () => scene,
         camera: () => cam,
+        anzahl: 45,
         info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + " \xD7 " + canvas.height, grafikprofil: sparsam ? "sparsam" : "hoch" })
-      });
+      };
+      leben.setzen("aus");
+      const ohne2 = await messen(daten);
+      leben.setzen(vorherLeben);
+      const d2 = await messen({ ...daten, vorBild: vorherLeben === "aus" ? void 0 : () => leben.schritt(1 / 30, false) });
+      d2.vergleich = { ohneFps: ohne2.fps, mitFps: d2.fps, ohneRenderMs: ohne2.renderMittelMs, mitRenderMs: d2.renderMittelMs };
       const zeile2 = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
-      const html = '<div class="karte"><div class="khead">' + d2.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile2("Gesch\xE4tzte Bildrate", d2.fps + " FPS") + zeile2("Framezeit, 95. Perzentil", d2.frameP95Ms + " ms") + zeile2("Renderaufruf, 95. Perzentil", d2.renderP95Ms + " ms") + zeile2("Frames \xFCber 33 ms", d2.frameUeber33ms + " / " + (d2.frames - 1)) + zeile2("Draw Calls", d2.drawCalls) + zeile2("Dreiecke", fmt.format(d2.dreiecke)) + zeile2("Geometrien / Texturen", d2.geometrien + " / " + d2.texturen) + zeile2("Teile der Stadt", fmt.format(d2.teile)) + zeile2("Canvas", d2.bild) + zeile2("Pixelratio", d2.pixelRatio) + zeile2("Grafikprofil", d2.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
+      const html = '<div class="karte"><div class="khead">' + d2.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile2("Bildrate ohne Leben", ohne2.fps + " FPS") + zeile2("Bildrate mit Leben (" + vorherLeben + ")", d2.fps + " FPS") + zeile2("Leben: Aktualisierung je Bild", d2.updateMittelMs + " ms (Ziel h\xF6chstens 2 ms)") + zeile2("Framezeit, 95. Perzentil", d2.frameP95Ms + " ms") + zeile2("Renderaufruf, 95. Perzentil", d2.renderP95Ms + " ms") + zeile2("Frames \xFCber 33 ms", d2.frameUeber33ms + " / " + (d2.frames - 1)) + zeile2("Draw Calls", d2.drawCalls) + zeile2("Dreiecke", fmt.format(d2.dreiecke)) + zeile2("Geometrien / Texturen", d2.geometrien + " / " + d2.texturen) + zeile2("Teile der Stadt", fmt.format(d2.teile)) + zeile2("Canvas", d2.bild) + zeile2("Pixelratio", d2.pixelRatio) + zeile2("Grafikprofil", d2.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
       panel("Performance", d2.stadt + " \xB7 KW " + (d2.woche + 1), html, "gross");
       window.spiel.letzteDiagnose = d2;
     } catch (e) {
       panel("Performance", "Messung fehlgeschlagen", '<div class="karte"><div class="zeile">' + e.message + "</div></div>", "gross");
     } finally {
+      leben.setzen(vorherLeben);
+      leben.pause(false);
       KA.pause = vorher;
       if (!KA.pause) kachelnPlanen();
     }
@@ -131091,6 +131677,7 @@
     EQ,
     pruefeEinkauf: () => ek.pruefe(),
     oeffneWettbewerber,
+    leben,
     reise,
     wochenbericht,
     spielende,

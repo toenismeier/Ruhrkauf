@@ -15,6 +15,7 @@ import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './ki
 import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
+import { lebenModul } from './kit/leben.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { jahreszeitenStadt, jahreszeit } from './kit/jahreszeit.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
@@ -127,6 +128,7 @@ function kameraSetzen() {
   sonne.target.position.set(K.x, 0, K.z);
   Object.assign(sonne.shadow.camera, { left: -r, right: r, top: r, bottom: -r });
   sonne.shadow.camera.updateProjectionMatrix();
+  leben.kamera();
   zeichnen();
   kachelnPlanen();
 }
@@ -137,6 +139,25 @@ function zeichnen() {
   requestAnimationFrame(() => { geplant = false; const t = performance.now(); ren.render(scene, cam); messung.renderMs.push(Math.round(performance.now() - t)); });
 }
 function jetztZeichnen() { const t = performance.now(); ren.render(scene, cam); return Math.round(performance.now() - t); }
+
+// N07: eigenes Animationsmodul, keine Engine-Mutation. Einstellungen via N13 nachrüstbar.
+const leben = lebenModul({ canvas, scene: () => scene, camera: () => cam, K: () => K, spiel: () => s,
+  zeichnen, sparsam });
+const lebenEinstellung = param.get('leben') ?? (() => { try { return localStorage.getItem('ruhrkauf.leben'); } catch { return null; } })();
+if (['aus', 'wenig', 'voll'].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
+$('leben-modus').value = leben.modus;
+$('leben-modus').addEventListener('change', (e) => {
+  const vorher = leben.modus;
+  leben.setzen(e.target.value);
+  try { localStorage.setItem('ruhrkauf.leben', leben.modus); } catch { /* Privater Browsermodus */ }
+  // Beim Abschalten bleibt der statische Verkehr aus dem ursprünglichen Stadtplan sichtbar.
+  if ((vorher === 'aus') !== (leben.modus === 'aus') && s && scene) {
+    const kameraAlt = { x: K.x, z: K.z, halb: K.halb };
+    baueStadtAusSpiel(stadtName);
+    Object.assign(K, kameraAlt);
+    kameraSetzen();
+  }
+});
 
 // Bodenpunkt unter einem Bildschirmpunkt (orthografisch: Strahl parallel zur Blickrichtung)
 const ray = new THREE.Raycaster(), boden = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -203,6 +224,7 @@ window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
 function raeumeSzene() {
+  leben.zu();
   if (!scene) return;
   jahreszeiten?.aufraeumen();
   jahreszeiten = null;
@@ -328,7 +350,7 @@ function baueStadtAusSpiel(name) {
   } });
   setzeLod('fern');
   let e;
-  try { e = baueStadt(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s);
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
@@ -345,6 +367,7 @@ function baueStadtAusSpiel(name) {
   K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
   K._G = null;
   kameraSetzen();
+  leben.stadt(plan);
   kachelnSichtbarBauen();
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
@@ -586,6 +609,7 @@ function woche(mitBot = false, test = false) {
   const t0 = performance.now();
   const erfolgeDavor = new Set(Object.keys(s.erfolge ?? {}));
   if (mitBot) botSchritt(s);
+  const ankommendeOrders = (s.bestellungen ?? []).filter((b) => b.ankunft === s.woche + 1).length;
   if (test) {
     const ergebnis = E.fuehreAus(s, { typ: 'testWoche' });
     if (!ergebnis.ok) { meldung(ergebnis.text, false); return null; }
@@ -594,6 +618,7 @@ function woche(mitBot = false, test = false) {
   er?.nachWoche(erfolgeDavor);
   const t1 = performance.now();
   const geaendert = grafikNachziehen();
+  leben.woche(ankommendeOrders);
   const t2 = performance.now();
   cockpitZeigen();
   if (offenesHaus) oeffneHaus(offenesHaus);
@@ -1152,14 +1177,22 @@ async function diagnoseZeigen() {
   if (!s || !scene) return;
   menueZu();
   panel('Performance', 'Messung direkt auf diesem Gerät', '<div class="karte"><div class="zeile">Bis zu 90 Frames werden aktiv gerendert …</div></div>', 'gross');
-  const vorher = KA.pause;
+  const vorher = KA.pause, vorherLeben = leben.modus;
   KA.pause = true;
+  leben.pause(true);
   try {
-    const d = await performanceMessen({ renderer: ren, scene: () => scene, camera: () => cam,
-      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) });
+    const daten = { renderer: ren, scene: () => scene, camera: () => cam, anzahl: 45,
+      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) };
+    leben.setzen('aus');
+    const ohne = await performanceMessen(daten);
+    leben.setzen(vorherLeben);
+    const d = await performanceMessen({ ...daten, vorBild: vorherLeben === 'aus' ? undefined : () => leben.schritt(1 / 30, false) });
+    d.vergleich = { ohneFps: ohne.fps, mitFps: d.fps, ohneRenderMs: ohne.renderMittelMs, mitRenderMs: d.renderMittelMs };
     const zeile = (name, wert) => `<div class="zeile"><span class="was">${name}</span><b>${wert}</b></div>`;
     const html = '<div class="karte"><div class="khead">' + d.frames + ' gerenderte Frames auf diesem Gerät</div>' +
-      zeile('Geschätzte Bildrate', d.fps + ' FPS') +
+      zeile('Bildrate ohne Leben', ohne.fps + ' FPS') +
+      zeile('Bildrate mit Leben (' + vorherLeben + ')', d.fps + ' FPS') +
+      zeile('Leben: Aktualisierung je Bild', d.updateMittelMs + ' ms (Ziel höchstens 2 ms)') +
       zeile('Framezeit, 95. Perzentil', d.frameP95Ms + ' ms') +
       zeile('Renderaufruf, 95. Perzentil', d.renderP95Ms + ' ms') +
       zeile('Frames über 33 ms', d.frameUeber33ms + ' / ' + (d.frames - 1)) +
@@ -1176,6 +1209,8 @@ async function diagnoseZeigen() {
   } catch (e) {
     panel('Performance', 'Messung fehlgeschlagen', '<div class="karte"><div class="zeile">' + e.message + '</div></div>', 'gross');
   } finally {
+    leben.setzen(vorherLeben);
+    leben.pause(false);
     KA.pause = vorher;
     if (!KA.pause) kachelnPlanen();
   }
@@ -1224,6 +1259,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
+  leben,
   reise, wochenbericht, spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
   oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },

@@ -290,7 +290,7 @@ export const richtung = (dx, dz) => Math.atan2(-dz, dx);
  */
 export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   const I = o.instanzer ?? new Instanzer();
-  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr, keineStandAutos: !!o.keineStandAutos };
   ostVerkehr = !!plan.ddr;
   for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
   const t0 = S.anzahl;
@@ -504,7 +504,7 @@ function baueSegment(ctx, s) {
     }
   }
   // --- Verkehr ---
-  verkehrAufSegment(ctx, s, R, s.von + 7, s.bis - 7, 0);
+  if (!ctx.keineStandAutos) verkehrAufSegment(ctx, s, R, s.von + 7, s.bis - 7, 0);
   // Bushaltestelle an Hauptstraßen
   if (s.typ === 'haupt' && L > 50 && r() < 0.45) {
     const sg = r() < 0.5 ? -1 : 1;
@@ -702,7 +702,7 @@ function baueKreuzung(ctx, k) {
     if (k.arme[sz > 0 ? '+z' : '-z'] && k.arme[sx > 0 ? '+x' : '-x']) I.setze('litfass', k.x + sx * (k.bx / 2 + 1.0), YG, k.z + sz * (k.bz / 2 + 1.0), 0, 1, [waehle(r, OBERTEIL), waehle(r, OBERTEIL), waehle(r, OBERTEIL)]);
   }
   // ein paar Autos auf der Kreuzung (abbiegend)
-  if (!k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
+  if (!ctx.keineStandAutos && !k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
 }
 
 // ---- Diagonale Straßen (plan.diagonalen) und Zwickel (plan.zwickel), siehe stadtplan.js diagonaleSchneiden ----
