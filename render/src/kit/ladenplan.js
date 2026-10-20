@@ -3,7 +3,7 @@
 import { rng } from './basis.js';
 import { lokal, vorbereiten, haengeschild } from './innen.js';
 import { SPORT_BOEDEN, SPORT_SCHILDER, SPORT_NAMEN } from './sportabteilung.js';
-import { SPORT_MIX_PROFILE } from './moebel/sport-mix.js';
+import { SPORT_MIX_PROFILE, SPORT_MIX_WAENDE } from './moebel/sport-mix.js';
 import { moebel } from './moebel/index.js';
 import { LADENBAU as R, ladeProfil, gangZellen, rechteckFlaeche, schneidet } from './ladenbau-regeln.js';
 
@@ -323,6 +323,39 @@ function verdichteLadenplan(plan,profil){
   }
 }
 
+// Randabteilungen erhalten Ergänzungswände nur, wenn die Stellreihen weniger
+// als vier Präsentationsarten bieten oder ein Typ mehr als 40 % ausmacht.
+function sichereSportMix(plan) {
+  if(plan.profil!=='sport')return;
+  const verbote=()=>[...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld];
+  for(const raum of plan.abteilungen){
+    const passend=()=>plan.moebel.filter(m=>m.abteilung===raum.id);
+    const gueltig=()=>{
+      const ms=passend(),t=new Map();
+      for(const m of ms){const art=m.moebelart??m.id;t.set(art,(t.get(art)??0)+1);}
+      return t.size>=4 && [...t.values()].every(n=>n<=0.4*ms.length+1e-8);
+    };
+    if(gueltig())continue;
+    const ids=SPORT_MIX_WAENDE[raum.id]??SPORT_MIX_WAENDE.sporttextil;
+    const kandidaten=[];
+    for(let z=raum.z;z+2.5<=raum.z+raum.d+1e-8;z+=U)
+      for(const x of [raum.x,raum.x+raum.w-R.wandTiefe])
+        kandidaten.push({x,z,winkel:90});
+    for(let x=raum.x;x+2.5<=raum.x+raum.w+1e-8;x+=U)
+      for(const z of [raum.z,raum.z+raum.d-R.wandTiefe])
+        kandidaten.push({x,z,winkel:0});
+    let gesetzt=0;
+    for(const k of kandidaten){
+      if(gueltig()||gesetzt>=8)break;
+      const id=ids[gesetzt%ids.length];
+      const m=item(id,k.x,k.z,k.winkel,raum.id,{innenwand:true,moebelart:id});
+      if(!passeIn(m,raum)||!passe(m,plan,verbote()))continue;
+      plan.moebel.push(m);gesetzt++;
+    }
+    if(!gueltig())plan.hinweise.push('Sortimentsmix nicht erreichbar: '+raum.id);
+  }
+}
+
 /**
  * @param {object} flaeche Außenmaß, Eingänge, Hindernisse (Meter)
  * @param {'sport'|'outlet'|'schwester'|object} profil Formatprofil
@@ -371,6 +404,7 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
   for(const raum of plan.abteilungen)inszenierung(plan,p,raum);
   for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
   verdichteLadenplan(plan,p);
+  sichereSportMix(plan);
   // Farbige Abteilungsrechtecke unter dem Gangbelag erhalten die Sporthaus-Identität.
   plan.boeden.push({...quadrat(0,0,plan.breite,plan.tiefe),typ:'flaeche',farbe:p.boden.flaeche});
   if(p.id==='sport')for(const a of plan.abteilungen)
