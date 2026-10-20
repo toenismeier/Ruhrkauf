@@ -1,7 +1,7 @@
 // O06 Planung – Jahresbudget, Gegenstromverfahren, Quartalsforecast und Boni.
 // Alle Werte in Euro. Keine Zufallsziehungen: die Berechnung verändert den Engine-RNG nicht.
-import { GRUPPEN, saisonFaktor } from './daten';
-import type { Entscheidung, Format, GameState, GruppeId, Haus, Region, WochenKpi } from './types';
+import { saisonFaktor } from './daten';
+import type { Entscheidung, GameState, GruppeId, Haus, WochenKpi } from './types';
 import { clamp, eur, jahr, kw, melde, neueId } from './util';
 
 export type PlanEbene = 'konzern' | 'format' | 'region' | 'hauscluster' | 'haus' | 'warengruppe';
@@ -334,14 +334,17 @@ function bonusErmitteln(s: GameState, p: Jahresplan): void {
   }
   s.planung.boni.push({ jahr: p.jahr, faellig: (p.jahr - s.startJahr + 1) * 52 + 5, betrag: sum(details.map((x) => x.betrag)), bezahlt: false, details });
 }
-export function planungBonusWoche(s: GameState, k: WochenKpi): void {
-  if (!s.planung || s.prognose) return;
+export function planungBonusWoche(s: GameState, k: WochenKpi): number {
+  if (!s.planung || s.prognose) return 0;
+  let betrag = 0;
   for (const b of s.planung.boni) if (!b.bezahlt && s.woche >= b.faellig) {
     // Wird vor EBITDA und den Pflichtzahlungen gebucht, kein doppelter Cash-Abzug.
     k.personal += b.betrag;
+    betrag += b.betrag;
     b.bezahlt = true;
     melde(s, 'info', 'Führungsboni für ' + b.jahr + ' ausgezahlt: ' + Math.round(b.betrag / 1000) + ' Tsd. € Personalaufwand.', { modul: 'planung' });
   }
+  return betrag;
 }
 /** Einmal je Woche nach dem Schreiben von s.historie aufrufen. */
 export function planungWoche(s: GameState): void {
