@@ -38,6 +38,7 @@ export interface HausBetrieb {
   massnahmeFaktor: number;
   gastro: 'keine' | 'selbst' | 'pacht';
   gastroVertragBis: number;
+  gastroStoerungBis?: number;
   restaurantQm: number;
   konzessionen: Record<string, { name: string; quote: number; bis: number; exklusiv: boolean }>;
 }
@@ -221,6 +222,8 @@ export function hausGastroErgebnis(s: GameState, h: Haus, umsatzBasis: number) {
   if (s.hausbetriebAbnahmeAus || !b || b.gastro === 'keine' || b.restaurantQm <= 0 || !istOffen(h)) return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: 0 };
   const wochenUmsatz = eur(Math.max(0, umsatzBasis) * 0.012 + b.restaurantQm * 32);
   if (b.gastro === 'pacht') return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: eur(wochenUmsatz * 0.115) };
+  // Eigenbetriebsrisiko: Hygienestörung schließt zeitweise, Fixkosten laufen weiter.
+  if ((b.gastroStoerungBis ?? 0) > s.woche) return { umsatz: 0, rohertrag: 0, personal: eur(b.restaurantQm * 260), sonstige: eur(b.restaurantQm * 70), pacht: 0 };
   return { umsatz: wochenUmsatz, rohertrag: eur(wochenUmsatz * 0.6),
     personal: eur(wochenUmsatz * 0.37), sonstige: eur(wochenUmsatz * 0.13), pacht: 0 };
 }
@@ -309,6 +312,11 @@ export function hausWoche(s: GameState): void {
     if (s.woche % 13 === 0 && s.woche !== 0) { b.kundenScore = hausKundenscore(s, h); b.scoreWoche = s.woche; }
     const delta = (h.personal.filialleiter.staerken?.personal ?? h.personal.filialleiter.skill) - b.leitungStart;
     h.personal.filialleiter.wechselwille = clamp((h.personal.filialleiter.wechselwille ?? 0) + Math.max(0, 45 - h.personal.filialleiter.moral) / 500 - Math.max(0, delta) * 0.01, 0, 1);
+    if (s.woche >= 52 && s.woche % 13 === 0 && b.gastro === 'selbst'
+      && hash(s.seed+':gastro:'+h.id+':'+s.woche) < 0.02) {
+      b.gastroStoerungBis = s.woche + 3;
+      melde(s, 'warnung', h.name + ': Hygienemängel – Restaurant drei Wochen geschlossen, Personal und Fixkosten laufen weiter.', {hausId:h.id,stadt:h.stadt});
+    }
     if (b.kosten.instandhaltung < 0.75 && s.woche % 13 === 0) {
       h.substanz = clamp(h.substanz - (0.75 - b.kosten.instandhaltung) * 4, 0, 100);
       if (hash(s.seed + ':ausfall:' + h.id + ':' + s.woche) < (0.75 - b.kosten.instandhaltung) * 0.6) {
@@ -529,7 +537,7 @@ export function hausUebersicht(s: GameState, id: string) {
     planWoche:(s as GameState & {planung?: {jahre:{jahr:number;phasing:Record<string,number[]>}[]}}).planung?.jahre.find(j=>j.jahr===s.startJahr+Math.floor(s.woche/52))?.phasing[h.id]?.[s.woche%52] ?? h.wochenPlan,
     treiberAktuell:(h as Haus & {treiberVerlauf?:{von:number;bis:number;frequenz:number;kaufquote:number;bon:number}[]}).treiberVerlauf?.slice().reverse().find(x=>x.bis===s.woche-1),
     kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
-    services: hausServices(s,h), gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, restaurantQm: b?.restaurantQm,
+    services: hausServices(s,h), gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, gastroStoerungBis:b?.gastroStoerungBis, restaurantQm: b?.restaurantQm,
     konzessionen: b?.konzessionen, kommentar: b?.kommentare[0], kommentare: b?.kommentare ?? [],
     umfeld: s.hausbetrieb?.staedte[h.stadt], ausnahmeGrund: b?.ausnahmeGrund,
     flaechen: h.flaechen.filter(f => f.konzept === 'konzession' || f.konzept === 'untermiete'),
