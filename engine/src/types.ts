@@ -1,4 +1,5 @@
 import type { Hq } from './hq';
+import type { ChronikEintrag, ChronikStand } from './chronik';
 import type { Art, Einkauf, WgId } from './einkauf';
 import type { EigenmarkenStand } from './eigenmarken';
 import type { VorstandStand } from './vorstand';
@@ -465,6 +466,9 @@ export interface GameState {
   /** Gefallene Entscheidungen, maximal 52 Wochen. Für alte Spielstände optional. */
   entscheidungsprotokoll?: Entscheidungsprotokoll[];
   quartale: Quartal[];
+  /** Freiwillige, deterministische Chronik des Spielverlaufs (N12). */
+  chronik?: ChronikEintrag[];
+  chronikStand?: ChronikStand;
   eigentuemer: { strikes: number; kapitalZugefuehrt: Eur; forderung?: string };
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
