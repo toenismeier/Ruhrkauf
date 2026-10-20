@@ -13,6 +13,8 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+// O07 Haus
+import { initialisiereHausbetrieb } from './haus';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -342,6 +344,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
+  initialisiereHausbetrieb(s);
   return s;
 }
 
