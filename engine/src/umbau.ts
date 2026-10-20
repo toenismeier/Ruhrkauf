@@ -59,7 +59,7 @@ function flaechenQm(h: Haus, nr: number): number {
 }
 export function umbauSchaetzung(s: GameState, hausId: string, nr: number, stufe: UmbauStufe) {
   const h=s.haeuser.find(x=>x.id===hausId), p=UMBAU_STUFEN[stufe];
-  if (!h || !p || (stufe==='komplett' ? !h.etagen.includes(nr) : !h.etagen.includes(nr))) return undefined;
+  if (!h || !p || !h.etagen.includes(nr)) return undefined;
   const etagen=stufe==='komplett'?[...h.etagen]:[nr], qm=etagen.reduce((v,e)=>v+flaechenQm(h,e),0);
   const q=clamp(bereichsQualitaet(s,'ladenbau'),0,1);
   const kosten=eur(qm*p.qm*(1+0.4*(1-q)));
@@ -122,7 +122,7 @@ export function umbauWoche(s:GameState):void {
         if (!s.prognose && s.woche===frist-12) melde(s,'warnung',
           'Behörde setzt Frist: '+pflicht+' in '+h.name+', '+nr+'. Etage bis Woche '+frist+'.',
           {hausId:h.id,stadt:h.stadt,modul:'umbau'});
-        if (!e.gesperrt && s.woche>frist && !laufend(s,h).some(p=>p.stufe==='technik' && p.etagen.includes(nr))) {
+        if (!e.gesperrt && s.woche>frist) {
           e.gesperrt=true;
           if (!s.prognose) melde(s,'warnung','Behördliche Sperrung: '+h.name+', Etage '+nr+'. '+pflicht+' überfällig.',
             {hausId:h.id,stadt:h.stadt,modul:'umbau'});
@@ -159,7 +159,9 @@ export function umbauWoche(s:GameState):void {
     stand.vorlageJahr=jahr;
     const budget=(s as GameState & {planung?:{modernisierungBudget?:number;umbauBudget?:number}}).planung;
     stand.budget=budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
-    const v=umbauProgramm(s).slice(0,5), auswahl=v.filter(x=>x.kosten<=stand.budget && x.kosten>0);
+    const v=umbauProgramm(s).slice(0,5), auswahl:typeof v=[];
+    let rest=stand.budget;
+    for (const x of v) if (x.kosten>0 && x.kosten<=rest) {auswahl.push(x);rest-=x.kosten;}
     neueVorlage(s,{bereich:'ladenbau',titel:'Modernisierungsprogramm '+(s.startJahr+jahr),
       text:'Bau & Ladenbau priorisiert nach jährlicher Rendite: '+v.map(x=>x.name+' '+x.etage+' ('+x.rendite+' %)').join(', ')+'. Budget: '+stand.budget.toLocaleString('de-DE')+' €.',
       frist:4,optionen:[{id:'annehmen',label:'Modernisierungsprogramm freigeben'},{id:'zurueckstellen',label:'Zurückstellen'}],standard:'annehmen'});
