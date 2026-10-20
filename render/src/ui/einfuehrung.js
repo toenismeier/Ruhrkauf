@@ -88,6 +88,8 @@ export function einfuehrungModul() {
     if (!aktiv) return;
     cancelAnimationFrame(rAF); rAF = 0;
     const d = EINFUEHRUNG[index];
+    if (d.warte === 'woche') wocheVor = getSpiel()?.s?.woche ?? 0;
+    if (d.warte === 'reise') stadtVor = getSpiel()?.reise?.pruefe()?.stadt ?? '';
     const keineFreigaben = d.warte === 'freigabe' &&
       (getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0) === 0;
     root.hidden = false;
