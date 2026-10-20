@@ -120,3 +120,35 @@ describe('O05 Steuerung', () => {
     expect(s.meldungen.some(m => m.text.includes('Inventur KW 6'))).toBe(true);
   });
 });
+
+describe('O05 Organisation und Posteingang', () => {
+  test('Saisonvorschlag erscheint mit Frist und Bereich im Posteingang', () => {
+    const s = neuesSpiel(1);
+    wocheAbspielen(s);
+    const vorlage = s.entscheidungen.find(e => e.typ === 'organisation_vorlage' && e.titel.startsWith('Saisonbudget'));
+    expect(vorlage).toBeDefined();
+    expect(vorlage!.frist).toBe(2);
+    expect(vorlage!.daten.bereich).toBe('merchandise_planning');
+    expect(s.ware!.vorlagen).toHaveLength(1);
+  });
+  test('Delegation aktiviert den qualitätsabhängigen WG-Budgetvorschlag', () => {
+    const s = neuesSpiel(1);
+    const alt = s.einkauf.wgs['damen.kleider'].st.limitEuro;
+    expect(fuehreAus(s, { typ: 'delegation', bereich: 'merchandise_planning', an: true }).ok).toBe(true);
+    wocheAbspielen(s);
+    const sid = s.ware!.vorlagen[0].saison;
+    const plan = s.ware!.plaene[`damen.kleider|${sid}`];
+    expect(plan).toBeDefined();
+    expect(plan.budget).toBeGreaterThan(0);
+    expect(s.einkauf.wgs['damen.kleider'].st.limitEuro).toBe(plan.budget);
+    expect(s.ware!.allokationStart).toBeGreaterThan(0);
+  });
+  test('Zentraler Kalender wirkt auf den Verkaufspreis nur nach Aktivierung', () => {
+    const s = neuesSpiel(1), h = s.haeuser.find(h => (h.potenzial.damen ?? 0) > 0)!;
+    expect(preisFaktorHaus(s, h, 'damen')).toBe(1);
+    expect(fuehreAus(s, { typ: 'reduzierungZentral', gruppe: 'damen', an: true }).ok).toBe(true);
+    s.ware!.saisonAbschlag = { damen: 0.25 };
+    expect(preisFaktorHaus(s, h, 'damen')).toBeCloseTo(0.98, 8);
+    expect(fuehreAus(s, { typ: 'reduzierungLokal', gruppe: 'damen', hauscluster: h.hauscluster!, punkte: 10 }).ok).toBe(false);
+  });
+});
