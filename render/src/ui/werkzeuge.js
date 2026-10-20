@@ -101,6 +101,8 @@ export function werkzeugeModul(ctx) {
   }
   function animation(t) {
     if (!aktiv) return;
+    // Bei geöffnetem Panel aktiv einen echten WebGL-Frame zeichnen, nicht nur RAF-Aufrufe zählen.
+    ctx.renderFrame();
     frames.push(t);
     fenster();
     raf = requestAnimationFrame(animation);
