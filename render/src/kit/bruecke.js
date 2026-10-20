@@ -26,6 +26,7 @@ import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
 import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
+import { technikAufDach } from './umbau-aussen.js';
 import './hq.js';   // meldet 'slot:hq' an
 
 const kwVon = (woche) => (woche % 52) + 1;
@@ -90,6 +91,8 @@ export function zustandAusHaus(haus, s, merk) {
       if (f.konzept === 'leer' && !(f.umbauBis > w)) leerQm += f.qm || 0;
     }
     const zus = new Set();
+    // O08 Umbau: Haus-/Etagenmodernisierung nutzt den vorhandenen Gerüst-/Kran-Zustand.
+    if ((s?.umbau?.projekte??[]).some(p=>p.haus===haus.id && p.status==='laufend' && p.ende>w)) umbau=true;
     if (umbau) zus.add('umbau');
     if (unter.size) { zus.add('untermiete'); z.untermieter = [...unter.values()].sort((a, b) => a.etage - b.etage); }
     if (offEtage !== null) { zus.add('offprice'); z.offpriceEtage = Math.max(0, offEtage); }
@@ -122,7 +125,7 @@ export function zustandAusHaus(haus, s, merk) {
     if (angebot) { z.verkaufsprozess = true; z.investor = angebot.premiumKaeuferName; }
   }
   const u = z.untermieter.map((m) => `${m.name}@${m.etage}`).join(',');
-  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : '', z.kaeufer ?? '', z.verkaufsprozess ? 'investor' : ''].join('|');
+  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : '', z.kaeufer ?? '', z.verkaufsprozess ? 'investor' : '', Object.values(haus.etagenBau??{}).map(e=>e.technik?.klima).join(',')].join('|');
   return z;
 }
 
@@ -184,7 +187,7 @@ export function spielBauer(s, o = {}) {
   const baueWarenhaus = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
-    if (h.klasse === 'premium') { p.haus = h; return premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); }
+    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); return res; }
     // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
     if (!wahl.has(h.id)) {
       let fam = familieVon(h), fassade = h.fassade;
@@ -199,16 +202,20 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     const roh = fassade === h.fassade ? h : { ...h, fassade };
     const nutzer = nachnutzer(h);
-    return nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
+    const res=nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
       : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    return res;
   };
   const baueSport = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
     const nutzer = nachnutzer(h);
-    return nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
+    const res=nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
       : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    return res;
   };
   const baueOutlet = (S, scene, p, h) => {
     const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
