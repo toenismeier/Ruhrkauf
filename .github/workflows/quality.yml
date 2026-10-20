@@ -1,8 +1,9 @@
 name: Ruhrkauf Qualität
+# Nur bei PRs gegen main und von Hand. Kein Lauf bei jedem Push (spart Minuten und Benachrichtigungen).
 on:
-  push:
-    branches: [main, "feat/**"]
   pull_request:
+    branches: [main]
+    types: [opened, ready_for_review, reopened]
   workflow_dispatch:
 
 concurrency:
