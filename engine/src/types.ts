@@ -5,6 +5,8 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+// O03 IT
+import type { ItStand } from './it';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -445,6 +447,8 @@ export interface GameState {
   tarifVersuch?: number;
   /** Zentralkosten je Woche, berechnet aus der Hauptverwaltung (hq). */
   zentrale: { kostenWoche: Eur; kostenStart: Eur; fte: number };
+  // O03 IT: optional für ältere Spielstände.
+  it?: ItStand;
   /** Hauptverwaltung: Bürogebäude, Etagen, Abteilungen, Angebote. */
   hq: Hq;
   /** Einkauf: Warengruppen, Steuerung, Freigabe-Eingang, Kennzahlenverlauf. */
