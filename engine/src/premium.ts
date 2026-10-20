@@ -1,11 +1,13 @@
 /** Vier eigenständige Hartwig-Kronjuwelen. Kein neues Format: Einkauf und Marketing bleiben Warenhaus. */
 import { PREMIUM_HAEUSER } from './daten';
 import type { Angebot, GameState, GruppeId, Haus } from './types';
-import { clamp, eur, melde, mio, neueId } from './util';
+import { clamp, eur, melde, mio } from './util';
 
-// Mehrproduktivität trägt die hohen Service- und Personalkosten; Rangfolge bleibt bewusst gestaffelt.
-// Anpassung nach Wettbewerber-Merge: gegen Seed 1–3 erneut zu kalibrieren.
-const RANGFAKTOR: Record<number, number> = { 1: 1.98, 2: 1.67, 3: 1.42 };
+// Premium-Aufschlag nach Rang: hochwertige Beratung trägt sich durch höhere Flächenleistung.
+// Gemäß Nachbesserung Abschnitt 5 zuerst Produktivität, danach Servicequote angepasst;
+// die Konzern-Umsatzbasis wird weiterhin in kennzeichnePremium auf den Normalfall normiert.
+// Empirische Seed-Abnahme bleibt bis zu einem verfügbaren lokalen Testlauf offen.
+const RANGFAKTOR: Record<number, number> = { 1: 2.20, 2: 1.84, 3: 1.57 };
 const MIX: Partial<Record<GruppeId, number>> = {
   beauty: 1.55, accessoires: 1.55, damen: 1.25, food: 1.45,
   spielwaren: 0.55, wohnen: 0.6,
@@ -92,7 +94,9 @@ export function kennzeichnePremium(haeuser: Haus[]): void {
 /** Service, Concierge, Warenpräsentation und Sicherheit als zusätzlicher Betriebsaufwand. */
 export function premiumServiceQuote(h: Haus): number {
   if (h.klasse !== 'premium') return 0;
-  return h.premiumSchluessel === 'P003' ? 0.058 : h.premiumSchluessel === 'P004' ? 0.045 : 0.06;
+  // Ein Teil des Concierge- und Sicherheitsaufwands wird durch die höhere Flächenleistung gedeckt;
+  // verbleibende laufende Sonderkosten werden umsatzabhängig belastet, nicht als fiktiver Gewinn.
+  return h.premiumSchluessel === 'P003' ? 0.043 : h.premiumSchluessel === 'P004' ? 0.030 : 0.045;
 }
 
 export function premiumImageFaktor(h: Haus): number {
@@ -164,7 +168,9 @@ export function premiumAngebote(s: GameState): void {
     const kaeufer = KAEUFER[(p?.rang ?? 3) === 1 ? (h.premiumSchluessel === 'P001' ? 0 : 1) : (p?.rang ?? 3) === 2 ? 2 : 1];
     const kaufpreis = premiumMarktwert(h);
     s.angebote.push({
-      id: neueId(s, 'a'), typ: 'premiumVerkauf', woche: s.woche, frist: s.woche + 10 + ((p?.rang ?? 3) * 3),
+      // Eigenständige deterministische IDs: keine Veränderung des globalen ID-Zählers
+      // und kein zusätzlicher Zug aus dem gemeinsamen Ereignis-Zufallsstrom.
+      id: `premium-${h.premiumSchluessel ?? h.id}-${s.woche}`, typ: 'premiumVerkauf', woche: s.woche, frist: s.woche + 10 + ((p?.rang ?? 3) * 3),
       status: 'offen', titel: `Kaufangebot für ${h.name}`,
       text: `${kaeufer.name} bietet ${mio(kaufpreis)} inklusive Immobilie. Der Verkauf entzieht Hartwig ein Kronjuwel.`,
       kaufpreis, wunschHaeuser: [h.id], premiumKaeuferTyp: kaeufer.typ, premiumKaeuferName: kaeufer.name,
