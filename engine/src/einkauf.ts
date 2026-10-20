@@ -443,7 +443,13 @@ function nosAttraktivitaet(d: WgDef, st: WgStand): number {
 
 /** Legt den Einkauf an und baut Bestand und Pipeline je WG auf (ersetzt die Bereichskohorten). */
 export function erzeugeEinkauf(s: GameState): Einkauf {
-  const e: Einkauf = { grenze: EK_PARAM.grenze, wgs: {}, freigaben: [], rng: (s.seed * 2654435761 + 97) >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
+  // Eine identische 50-T€-Freigabegrenze würde bei ca. dreifachem
+  // Warenvolumen unverhältnismäßig viele Einzelentscheidungen erzeugen.
+  // Die Freigabegrenze wird nur beim Spielstart mit der Warennachfrage skaliert.
+  const basisJahr = Object.values(s.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52;
+  const volumenFaktor = Math.max(1, basisJahr / 3_100_000_000);
+  const startGrenze = Math.round(EK_PARAM.grenze * volumenFaktor / 5_000) * 5_000;
+  const e: Einkauf = { grenze: startGrenze, wgs: {}, freigaben: [], rng: (s.seed * 2654435761 + 97) >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
   for (const d of WG_DEF) {
     e.wgs[d.id] = {
       id: d.id, st: STANDARD_STEUERUNG(d), nosAnteil: d.nosAnteil, margeNos: d.margeNos, margeSaison: d.margeSaison, norm: 1,
