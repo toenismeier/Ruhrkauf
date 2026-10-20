@@ -55,6 +55,8 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     expect(gruppenFuer('outlet')).toEqual(['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']);
     for (const h of [...schwester, ...fundus]) {
       expect(h.nurDaten).toBe(true);
+      expect(h.miete.mieteWoche).toBe(0);
+      expect(h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen).toBe(0);
       expect(h.flaechen.length).toBeGreaterThan(1);
       for (const g of gruppenFuer(h.format)) {
         expect(h.flaechen.some((f) => f.gruppe === g && f.qm > 0)).toBe(true);

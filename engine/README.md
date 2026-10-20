@@ -295,3 +295,15 @@ Die Personalbemessung basiert auf Referenzflächenleistung zuzüglich 15 % Berat
 Ergänzte Regressionen in `tests/premium.test.ts` prüfen je Seed 1–3 die Flächen, Stockwerke, seedunabhängige Anfangsnachfrage, 52-Wochen-Umsatzrangfolge sowie weiterhin **unverändert** 11 / 11 / 9 / 6 % mit ±2 Prozentpunkten. `scripts/premium-kalibrierung.ts` berichtet nun zusätzlich Flächen und Umsatzrangfolge. Auch die bisherigen Prüfungen für A/B-Umsatz (±1,5 %), Bot C (260 Wochen), Insolvenz und RNG bleiben bestehen.
 
 **Validierungsstatus:** Der vorliegende Branch wurde über die GitHub-Dateischnittstelle bearbeitet. Der private Checkout ist in dieser Ausführungsumgebung wegen fehlender DNS-Auflösung von `github.com` nicht verfügbar. Daher **keine neuen Messwerte** und **keine Behauptung grüner Tests**. Nach lokalem Checkout ausführen: `cd engine && npm ci && npm run typecheck && npx jest --runInBand && npm run check:premium`; zusätzlich `npx tsx scripts/bot.ts <seed> 260 --tief` für Seed 1, 2 und 3. Bei Abweichungen die Rangparameter anhand der 52-Wochen-Messungen iterieren. Grafik und Renderer wurden in diesem Arbeitsschritt nicht bearbeitet.
+
+## Engine-Maßstab Phase 2 – Kalibrierungsfortsetzung vom 20.10.2026
+
+Aktive Wirtschaftsformate: 360 Hartwig regulär, 4 Premium und 44 Hartwig Sport; Volkskauf (86) und FUNDUS (66) bleiben `nurDaten`. Ihre Warengruppen sind bereits im Engine-Datenmodell gepflegt, tragen aber bis `engine-formate.md` weder Umsatz noch Warenbestand, Miete oder FTE zur Simulation bei.
+
+Für die Phase-2-Nachkalibrierung gelten folgende **vorläufige, noch nicht numerisch abgenommene** Parameter: `PARAM.qmJeFte = 400`, `PARAM.umsatzJeFte = 5750`; Einkaufsstartgrenze = auf 5.000 Euro gerundete `50.000 × max(1, Jahresbasis / 3,1 Mrd.) × 2`. Die Quartalsplanprognose wird nun auf Konzernebene aus Vorquartal, Kosten und Warengruppensaison aggregiert, statt 13 Wochen vollständig im Klon zu simulieren. Die separate explizite Liquiditäts-`vorschau()` bleibt unverändert verfügbar.
+
+**Ziele:** Startjahresumsatz je Format ±3 % (Hartwig 8.950 Mio. €, Premium 820 Mio. €, Sport 545 Mio. €); EBITDA ungefähr −4 % bei positivem Q4; ca. acht manuelle Freigaben pro Woche, in Orderwochen höchstens 80; `wocheAbspielen` unter 60 ms im Node-Mittel und keine Ausreißer über 250 ms; Bot C über 260 Wochen auf Seeds 1–3. Historische Ausgangsmessung vor dem letzten Parameterwechsel: Umsatz 10.694 Mio. €, EBITDA +2,6 %, Freigaben 18,1/Woche, Laufzeit regulär ~77 ms und Quartalswoche ~1.198 ms (Seed 1).
+
+**Reproduzieren:** `cd engine && npm ci && npm run typecheck && npx jest --runInBand`, danach `npx tsx scripts/massstab-phase2.ts 1` (auch 2 und 3 sowie jeweils `--bot`) und `npx tsx scripts/haeuser-export.ts` zweimal mit Diffkontrolle. Abschließend `cd render && npm ci && npm run build && node pruef-staedte.js && node spiel-render.js`. Die nach der Integration alten JSON-Exporte für Hartwig und Volkskauf müssen erst erzeugt werden.
+
+**Abnahmestatus:** Noch offen; in diesem GitHub-Connector-Lauf kein lokaler Testlauf, kein Benchmark und kein Export ausgeführt. Keine Freigabe für Merge in `main`.

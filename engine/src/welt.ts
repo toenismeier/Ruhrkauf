@@ -307,7 +307,7 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     fassade: ganzZwischen(h, 0, 7),
     flaechen,
     miete: {
-      mieteWoche: eur((basisUmsatz * 52 * mietQuote) / 52),
+      mieteWoche: nurDaten ? 0 : eur(basisUmsatz * mietQuote),
       bisWoche: ganzZwischen(h, 26, 15 * 52),
       netTyp,
       vermieter: vermieterEig ? 'eigentuemer' : 'dritt',
