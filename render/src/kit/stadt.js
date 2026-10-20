@@ -516,6 +516,7 @@ function baueSegment(ctx, s) {
     }
   }
   // --- Verkehr ---
+  if (ctx.qualitaet && s.typ !== 'fussgaenger') ctx.qualitaet.fahrbahnen.push({ achse: s.achse, mitte: s.mitte, von: s.von, bis: s.bis, breite: fb });
   verkehrAufSegment(ctx, s, R, s.von + 7, s.bis - 7, 0);
   // Bushaltestelle an Hauptstraßen
   if (s.typ === 'haupt' && L > 50 && r() < 0.45) {
@@ -560,6 +561,7 @@ function verkehrAufSegment(ctx, s, R, u0, u1, y) {
       if (r() < 0.55 * ctx.dichte) {
         const [x, z] = R.w(u, f.v);
         const l = auto(I, x, y, z, R.ru + (f.dir > 0 ? 0 : Math.PI), r);
+        if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'auto', x, z, laenge: l });
         u += l + zw(r, 3, 10);
       } else u += zw(r, 8, 22);
     }
@@ -1337,7 +1339,7 @@ function baueVorortBlock(ctx, b, r) {
   let wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND), dach = waehle(r, VORORT_DACH);
   for (const q of b.bauten ?? []) {
     let f;
-    if (q.art === 'reihenhaus') { if (r() < 0.3) wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND); f = [wand, dach]; }
+    if (q.art === 'reihenhaus') { if (r() < 0.65) wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND); f = [wand, dach]; }
     else if (q.art === 'zeile') f = [waehle(r, ZEILE_WAND), dach];
     else if (q.art === 'halle') f = [waehle(r, ['#d9dcdf', '#cfd3d6', '#e4e1da', '#b9bec2', '#d8cdb8']), waehle(r, ['#2f6f8f', '#c8322b', '#3f7d56', '#e0b23c', '#5d646b', '#2b3a55'])];
     else if (q.art === 'scheune') f = [waehle(r, ['#8a5a45', '#a8664f', '#7a6a58', '#c9bfae']), waehle(r, ['#6f6a64', '#9a4e3a', '#5d6268'])];
@@ -1346,6 +1348,7 @@ function baueVorortBlock(ctx, b, r) {
     else if (q.art === 'tankstelle') f = [waehle(r, ['#2f6f8f', '#c8322b', '#3f7d56', '#e0b23c'])];
     else f = [r() < 0.25 ? waehle(r, VORORT_KLINKER) : waehle(r, VORORT_WAND), waehle(r, VORORT_DACH)];
     I.setze(q.art, q.x, y, q.z, q.ry, q.s ?? 1, f);
+    if (ctx.qualitaet && (q.art === 'reihenhaus' || q.art === 'zeile' || q.art === 'efh')) ctx.qualitaet.gruppen.push({ x: q.x, z: q.z, muster: 'wohn/' + q.art + '/' + f.join('-') + '/' + Math.round((q.w ?? 10) * 2) + '/' + Math.round((q.d ?? 10) * 2) });
   }
   for (const [x, z, art] of b.baeume ?? []) baumSetzen(I, art, x, y, z, r, zw(r, 0.65, 0.95));
 }
