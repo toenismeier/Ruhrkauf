@@ -95,7 +95,9 @@ function entscheidungen(s) {
 }
 export function spielendeModul(ctx) {
   const node = document.createElement('div');
-  node.id = 'spielende-overlay'; node.hidden = true; document.body.append(node);
+  node.id = 'spielende-overlay'; node.hidden = true;
+  node.setAttribute('role', 'dialog'); node.setAttribute('aria-modal', 'true'); node.setAttribute('aria-label', 'Spielende und Bilanz');
+  document.body.append(node);
   let ansicht = 'zu', gespeicherterSchluessel = '', zaehlRaf = 0, bilanziert = false;
   const stand = () => ctx.s();
   function zahlenAnimieren() {
