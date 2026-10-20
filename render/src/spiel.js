@@ -889,14 +889,22 @@ async function diagnoseZeigen() {
   if (!s || !scene) return;
   menueZu();
   panel('Performance', 'Messung direkt auf diesem Gerät', '<div class="karte"><div class="zeile">Bis zu 90 Frames werden aktiv gerendert …</div></div>', 'gross');
-  const vorher = KA.pause;
+  const vorher = KA.pause, vorherLeben = leben.modus;
   KA.pause = true;
+  leben.pause(true);
   try {
-    const d = await performanceMessen({ renderer: ren, scene: () => scene, camera: () => cam,
-      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) });
+    const daten = { renderer: ren, scene: () => scene, camera: () => cam, anzahl: 45,
+      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) };
+    leben.setzen('aus');
+    const ohne = await performanceMessen(daten);
+    leben.setzen(vorherLeben);
+    const d = await performanceMessen({ ...daten, vorBild: vorherLeben === 'aus' ? undefined : () => leben.schritt(1 / 30, false) });
+    d.vergleich = { ohneFps: ohne.fps, mitFps: d.fps, ohneRenderMs: ohne.renderMittelMs, mitRenderMs: d.renderMittelMs };
     const zeile = (name, wert) => `<div class="zeile"><span class="was">${name}</span><b>${wert}</b></div>`;
     const html = '<div class="karte"><div class="khead">' + d.frames + ' gerenderte Frames auf diesem Gerät</div>' +
-      zeile('Geschätzte Bildrate', d.fps + ' FPS') +
+      zeile('Bildrate ohne Leben', ohne.fps + ' FPS') +
+      zeile('Bildrate mit Leben (' + vorherLeben + ')', d.fps + ' FPS') +
+      zeile('Leben: Aktualisierung je Bild', d.updateMittelMs + ' ms (Ziel höchstens 2 ms)') +
       zeile('Framezeit, 95. Perzentil', d.frameP95Ms + ' ms') +
       zeile('Renderaufruf, 95. Perzentil', d.renderP95Ms + ' ms') +
       zeile('Frames über 33 ms', d.frameUeber33ms + ' / ' + (d.frames - 1)) +
@@ -913,6 +921,8 @@ async function diagnoseZeigen() {
   } catch (e) {
     panel('Performance', 'Messung fehlgeschlagen', '<div class="karte"><div class="zeile">' + e.message + '</div></div>', 'gross');
   } finally {
+    leben.setzen(vorherLeben);
+    leben.pause(false);
     KA.pause = vorher;
     if (!KA.pause) kachelnPlanen();
   }
