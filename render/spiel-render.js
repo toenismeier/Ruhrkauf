@@ -620,7 +620,7 @@ async function buendeln() {
     pruefe(!!testWoche, 'Engine-Testwoche mit mindestens einem neuen Vorgang gefunden');
     await p.locator('#weiter').click();
     await p.waitForSelector('#wochen-overlay:not([hidden]) .wochen-frage');
-    await p.waitForTimeout(animationen ? 260 : 30);
+    await p.waitForTimeout(300);
     const dialogDarstellung = await p.evaluate(() => {
       const maske = getComputedStyle(document.querySelector('.wochen-maske'));
       const karte = getComputedStyle(document.querySelector('.wochen-frage'));
