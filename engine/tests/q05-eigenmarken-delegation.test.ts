@@ -23,6 +23,16 @@ describe('Q05: Delegation je Aufgabe', () => {
     expect(o.aufgaben.every((a) => !a.an)).toBe(true);
   });
 
+  test('Gezielte Freigaben schließen alte Ressort-KI ein, ohne ihre Action-API zu brechen', () => {
+    const s = neuesSpiel(1);
+    expect(fuehreAus(s, { typ: 'vorstandDelegation', ressort: 'cpo', bereich: 'freigaben', an: true }).ok).toBe(true);
+    expect(s.vorstand.ressorts.cpo.delegation.freigaben).toBe(true);
+    expect(fuehreAus(s, { typ: 'delegation', bereich: 'merchandise_planning', aufgabe: 'freigaben', an: false }).ok).toBe(true);
+    expect(s.vorstand.ressorts.cpo.delegation.freigaben).toBe(false);
+    expect(fuehreAus(s, { typ: 'delegation', bereich: 'merchandise_planning', aufgabe: 'freigaben', an: true }).ok).toBe(true);
+    expect(s.vorstand.ressorts.cpo.delegation.freigaben).toBe(true);
+  });
+
   test('Cluster steuert Öffnungszeiten und Reparaturen unabhängig, Grenzen sind validiert', () => {
     const s = neuesSpiel(2), cluster = s.organisation!.hauscluster[0].id;
     expect(fuehreAus(s, { typ: 'delegation', hauscluster: cluster, aufgabe: 'reparaturen', an: true }).ok).toBe(true);
