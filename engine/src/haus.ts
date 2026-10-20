@@ -504,7 +504,7 @@ export function hausUebersicht(s: GameState, id: string) {
     kundenScore: hausKundenscore(s, h), letzteMessung: b?.scoreWoche,
     kosten: b?.kosten, ausfallBis:b?.ausfallBis, inventurdifferenz:b?.inventurdifferenz ?? 0, energiePreis:s.hausbetrieb?.energiePreis ?? 1,
     planWoche:(s as GameState & {planung?: {jahre:{jahr:number;phasing:Record<string,number[]>}[]}}).planung?.jahre.find(j=>j.jahr===s.startJahr+Math.floor(s.woche/52))?.phasing[h.id]?.[s.woche%52] ?? h.wochenPlan,
-    treiberAktuell:(h as Haus & {treiberVerlauf?:{von:number;bis:number;frequenz:number;kaufquote:number;bon:number}[]}).treiberVerlauf?.findLast(x=>x.bis===s.woche-1),
+    treiberAktuell:(h as Haus & {treiberVerlauf?:{von:number;bis:number;frequenz:number;kaufquote:number;bon:number}[]}).treiberVerlauf?.slice().reverse().find(x=>x.bis===s.woche-1),
     kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
     services: b?.services, gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, restaurantQm: b?.restaurantQm,
     konzessionen: b?.konzessionen, kommentar: b?.kommentare[0], kommentare: b?.kommentare ?? [],
