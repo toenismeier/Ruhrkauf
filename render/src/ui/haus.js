@@ -86,6 +86,10 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
       + line('Vertrag bis Woche', b?.gastroVertragBis ?? '–')
       + '<div class="zeile">' + button('Selbst betreiben', "hausTun('gastro','"+id+"','selbst')")
       + button('Verpachten', "hausTun('gastro','"+id+"','pacht')") + '</div></div>'
+      + '<div class="karte"><div class="khead">Stadt und Sonntagsverkauf</div>'
+      + line('Umfeld', b?.umfeld?.ereignis ?? 'Regulär')
+      + line('Innenstadtfrequenz', PROZENT(b?.umfeld?.trend ?? 1))
+      + '<div class="zeile">' + button('Verkaufsoffenen Sonntag beantragen (in 2 Wochen)', "hausTun('sonntag','"+id+"')") + '</div></div>'
       + '<div class="karte"><div class="khead">Fläche, Konzessionäre und Untermieter</div>'
       + (partnerZeilen || '<div class="zeile">Keine Verträge hinterlegt</div>') + '</div>';
   }
