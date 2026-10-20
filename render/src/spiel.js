@@ -799,6 +799,7 @@ po = posteingangModul({
     if (bezug.modul && !bezug.hausIds?.length && !bezug.stadt) {
       if (bezug.modul === 'einkauf') return oeffneEinkauf();
       if (bezug.modul === 'vorstand') return oeffneModul(vs);
+      if (bezug.modul === 'it') return oeffneModul(itM);
       if (bezug.modul === 'marketing') return oeffneModul(mk);
       if (bezug.modul === 'produkte') return oeffneModul(pr);
       if (bezug.modul === 'zentrale') return oeffneHq();
@@ -812,6 +813,7 @@ po = posteingangModul({
     else if (hausId) oeffneHaus(hausId);
     else if (bezug.modul === 'einkauf') oeffneEinkauf();
     else if (bezug.modul === 'vorstand') oeffneModul(vs);
+    else if (bezug.modul === 'it') oeffneModul(itM);
     else if (bezug.modul === 'marketing') oeffneModul(mk);
     else if (bezug.modul === 'produkte') oeffneModul(pr);
     else if (bezug.modul === 'zentrale') oeffneHq();
