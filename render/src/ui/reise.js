@@ -10,7 +10,7 @@ const warten = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const kuerzel = { Essen: 'E', Düsseldorf: 'D', Dortmund: 'DO', Duisburg: 'DU', Köln: 'K',
   Bochum: 'BO', Berlin: 'B', Hamburg: 'HH', München: 'M', Frankfurt: 'F', Bremen: 'HB',
   Hannover: 'H', Stuttgart: 'S', Leipzig: 'L', Bonn: 'BN', Wuppertal: 'W', Dresden: 'DD' };
-const kode = (name) => kuerzel[name] ?? name.replace(/[^A-ZÄÖÜ]/g, '').slice(0, 3) || name.slice(0, 2).toUpperCase();
+const kode = (name) => kuerzel[name] ?? (name.replace(/[^A-ZÄÖÜ]/g, '').slice(0, 3) || name.slice(0, 2).toUpperCase());
 const typBild = (name) => /Hamburg|Bremen|Kiel|Lübeck|Rostock|Bremerhaven|Wismar|Wilhelmshaven/i.test(name)
   ? 'hafen' : /Köln|Dresden|Heidelberg|Bamberg|Erfurt|Münster|Aachen/i.test(name) ? 'altstadt' : 'ruhr';
 const bild = (name) => './bilder/reise-' + typBild(name) + '.png';
@@ -21,7 +21,7 @@ export function reiseModul(ctx) {
   const protokoll = [];
   let aktiv = false, token = 0, gestartet = 0, letzte = [];
   const messen = (schritt) => protokoll.push({ schritt, ms: Math.round(performance.now() - gestartet) });
-  function schliessen() { ++token; aktiv = false; z.hidden = true; z.innerHTML = ''; document.body.classList.remove('reise-aktiv'); }
+  function schliessen() { ++token; aktiv = false; z.hidden = true; z.innerHTML = ''; z.className = ''; document.body.classList.remove('reise-aktiv'); }
   function ortPunkt() {
     const p = ctx.pinPunkt();
     return { x: Math.round(p?.x ?? innerWidth * .5), y: Math.round(p?.y ?? innerHeight * .65) };
