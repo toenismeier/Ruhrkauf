@@ -7,6 +7,8 @@ import { loeseVorstandEntscheidung } from './vorstand';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
 import { premiumAngebote } from './premium';
+// O07 Haus
+import { loeseHausVorlage } from './haus';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
   return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
@@ -262,7 +264,11 @@ export function ereignisse(s: GameState): void {
       if (!s.wettbewerbDeaktiviert && !s.wettbewerbEreignisseDeaktiviert && !kandidaten.length) continue;
       const ziel = kandidaten[0]?.name;
       melde(s, 'warnung', `Filialleiter${fl.name.endsWith('a') || fl.name.endsWith('e') ? 'in' : ''} ${fl.name} verlässt ${h.name} und geht ${ziel ? 'zu ' + ziel : 'zur Konkurrenz'}.`, { stadt: h.stadt, hausId: h.id });
-      h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: interimSkill, moral: 50, interimBis: w + 4 };
+      h.personal.filialleiter = { name: `Interim (${fl.name.split(' ')[1]}-Nachfolge)`, skill: interimSkill, moral: 50, interimBis: w + 4,
+        // O07 Haus: neue Eigenschaften auch bei Interimspersonen bewahren.
+        staerken: { personal: interimSkill, ware: interimSkill, kunde: interimSkill, kosten: interimSkill },
+        ehrlichkeit: fl.ehrlichkeit, gehalt: fl.gehalt, bonusAnteil: fl.bonusAnteil,
+        wechselwille: 0, stellvertretung: fl.stellvertretung };
     }
   }
 
@@ -335,6 +341,8 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
   });
   s.entscheidungsprotokoll = s.entscheidungsprotokoll.filter((p) => s.woche - p.woche <= 52);
   if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
+  // O07 Haus: Konzessionsverträge laufen als Vorlagen im Posteingang.
+  if (e.typ.startsWith('haus_')) { loeseHausVorlage(s, e.typ, e.daten, option); return null; }
   const d = e.daten;
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
   switch (e.typ) {
