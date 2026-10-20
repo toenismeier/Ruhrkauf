@@ -696,10 +696,54 @@ async function buendeln() {
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
   }
+  // N14: Testpanel im iPhone-Viewport, 13 Wochen und Fehlerbericht-Roundtrip.
+  async function werkzeugePruefen() {
+    const ausgabe = path.join(__dirname, '..', 'bilder', 'nice', 'werkzeuge');
+    fs.mkdirSync(ausgabe, { recursive: true });
+    await p.evaluate(() => window.spiel.neuesSpiel(1, 'Essen'));
+    const zuerst = await p.evaluate(() => ({
+      verborgen: document.getElementById('werkzeuge').hidden,
+      menue: getComputedStyle(document.getElementById('werkzeuge')).display,
+      sichtbar: document.querySelector('.testwerkzeuge') !== null,
+      markiert: !!window.spiel.s.testGenutzt,
+    }));
+    if (!zuerst.verborgen || zuerst.menue !== 'none' || zuerst.sichtbar || zuerst.markiert)
+      throw new Error('Testwerkzeuge sind vor Freischaltung sichtbar: ' + JSON.stringify(zuerst));
+    await p.evaluate(() => {
+      const datum = document.querySelector('.datum');
+      for (let i = 0; i < 5; i++) datum.click();
+    });
+    const offen = await p.evaluate(() => ({
+      entsperrt: window.spiel.werkzeuge.freigeschaltet,
+      kachel: !document.getElementById('werkzeuge').hidden,
+      panel: !!document.querySelector('.testwerkzeuge'),
+    }));
+    if (!offen.entsperrt || !offen.kachel || !offen.panel)
+      throw new Error('Fünffach-Tipp hat Werkzeuge nicht geöffnet: ' + JSON.stringify(offen));
+    await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge.png') });
+    const sprung = await p.evaluate(() => window.spiel.werkzeuge.springen(13, true));
+    const snapshot = await p.evaluate(() => ({
+      woche: window.spiel.s.woche, cash: window.spiel.s.cash,
+      test: window.spiel.s.testGenutzt, label: document.getElementById('phase').textContent,
+    }));
+    if (sprung.fertig !== 13 || snapshot.woche !== 13 || !snapshot.test || !snapshot.label.includes('Testspiel'))
+      throw new Error('Zeitsprung nicht korrekt: ' + JSON.stringify({ sprung, snapshot }));
+    const bericht = await p.evaluate(() => window.spiel.werkzeuge.erstelleBericht());
+    if (!bericht.startsWith('RUHRKAUF-TEST-1:gzip:')) throw new Error('Fehlerbericht nicht gzip/Base64.');
+    await p.evaluate(() => window.spiel.neuesSpiel(3, 'Essen'));
+    const wieder = await p.evaluate((b) => window.spiel.werkzeuge.berichtLaden(b), bericht);
+    if (wieder.woche !== snapshot.woche || wieder.cash !== snapshot.cash || wieder.seed !== 1)
+      throw new Error('Fehlerbericht verändert Spielstand: ' + JSON.stringify({ snapshot, wieder }));
+    await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge-geladen.png') });
+    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, berichtZeichen: bericht.length }, null, 2));
+    console.log('N14 Testwerkzeuge: 13 Wochen, gzip-Bericht und Wiederherstellung identisch.');
+    return { sprung, snapshot, wieder };
+  }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
     return;
   }
+  if (process.argv.includes('--nur-werkzeuge')) { try { await werkzeugePruefen(); } finally { await b.close(); } return; }
   if (process.argv.includes('--nur-reise-woche')) { try { await reiseWochePruefen(); } finally { await b.close(); } return; }
   if (process.argv.includes('--nur-posteingang')) { await posteingangPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-start')) {
