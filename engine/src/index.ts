@@ -46,3 +46,6 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+// O02 Umsatztreiber
+export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './abfragen';
+export type { TreiberId, TreiberFaktoren, TreiberQuellen, TreiberPeriode, TreiberVergleich, Umsatzbruecke, Ebene, RankingKennzahl, RankingZeile, Reporting, ReportingZeile } from './treiber';
