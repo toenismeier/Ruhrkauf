@@ -160,7 +160,20 @@ function fit(g: GruppeId, kaufkraft: number, alter: number, wettbewerb: number):
 export const gruppenFit = fit;
 
 function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: number[]): Flaeche[] {
-  // Volkskauf besitzt bereits die vollständige Warengruppenstruktur, bleibt aber nurDaten.
+  if (f === 'schwester') {
+    // Vollständiger, flächengewichteter Warenhausmix als Stammdaten.
+    // Keine RNG-Aufrufe: Volkskauf verändert nicht die übrigen Standortparameter.
+    const gruppen = gruppenFuer(f);
+    const summeAnteile = gruppen.reduce((sum, g) => sum + GRUPPEN[g].anteilFlaeche, 0);
+    let verbleibend = vkQm;
+    return gruppen.map((g, i) => {
+      const qm = i === gruppen.length - 1
+        ? verbleibend
+        : Math.max(1, Math.round(vkQm * GRUPPEN[g].anteilFlaeche / summeAnteile));
+      verbleibend -= qm;
+      return { id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length], qm, konzept: 'eigen' as const, gruppe: g };
+    });
+  }
   if (f === 'outlet') {
     // FUNDUS ist bis Phase 3 nur Stammdatensatz, benötigt aber bereits reale
     // Abteilungsflächen für den Grafik-/Ladenbau. "schuhe" ist ein reines
