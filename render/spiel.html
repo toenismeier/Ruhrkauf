@@ -353,7 +353,7 @@
   <button class="knopf mitbadge" id="postdirekt" aria-label="Posteingang öffnen" title="Posteingang">✉<span id="postbadge" class="badge" style="display:none">0</span></button>
   <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>
 </div>
-<div id="menue">
+<div id="menue" inert>
   <div class="menuekarte">
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
@@ -371,7 +371,7 @@
     <select id="stadtwahl" class="ort gross" aria-label="Stadt direkt wählen" style="margin:0 14px 14px;width:calc(100% - 28px)"></select>
   </div>
 </div>
-<div id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter">
+<div id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter" aria-hidden="true" inert>
   <div class="pkopf"><div class="griff"></div><h2 id="ptitel" tabindex="-1"></h2><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
   <div id="pinhalt"></div>
 </div>
