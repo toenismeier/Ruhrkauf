@@ -153,15 +153,32 @@ const SPARTEN_KATEGORIE: Record<Produktsparte, ProduktKategorie> = {
 const SPARTEN_PREIS: Record<Produktsparte, number> = {
   damen: 49, herren: 49, kinder: 25, schuhe: 79, accessoires: 39, heimtextil: 35, haushalt: 18, beauty: 19,
 };
+/** Die Warengruppe und Produktkategorie passen je Schnitt zur realen Sparte. */
+const BEKLEIDUNG_DEF: Record<'damen' | 'herren', { kategorie: ProduktKategorie; wg: WgId }[]> = {
+  damen: [
+    {kategorie:'unterteile',wg:'damen.kleider'}, {kategorie:'unterteile',wg:'damen.kleider'},
+    {kategorie:'oberteile',wg:'damen.blusen'}, {kategorie:'oberteile',wg:'damen.blusen'},
+    {kategorie:'unterteile',wg:'damen.denim'}, {kategorie:'unterteile',wg:'damen.hosen'},
+    {kategorie:'unterteile',wg:'damen.hosen'}, {kategorie:'unterteile',wg:'damen.hosen'},
+    {kategorie:'oberteile',wg:'damen.strick'}, {kategorie:'oberteile',wg:'damen.strick'},
+    {kategorie:'jacken',wg:'damen.jacken'}, {kategorie:'jacken',wg:'damen.jacken'},
+  ],
+  herren: [
+    {kategorie:'oberteile',wg:'herren.hemden'}, {kategorie:'oberteile',wg:'herren.hemden'},
+    {kategorie:'oberteile',wg:'herren.hemden'}, {kategorie:'oberteile',wg:'herren.casual'},
+    {kategorie:'oberteile',wg:'herren.strick'}, {kategorie:'oberteile',wg:'herren.strick'},
+    {kategorie:'unterteile',wg:'herren.hosen'}, {kategorie:'unterteile',wg:'herren.hosen'},
+    {kategorie:'unterteile',wg:'herren.casual'}, {kategorie:'jacken',wg:'herren.business'},
+    {kategorie:'jacken',wg:'herren.jacken'}, {kategorie:'jacken',wg:'herren.business'},
+  ],
+};
+
 export const ZUSATZ_ARTIKELTYPEN: TypDef[] = (Object.keys(ZUSATZ_ARTIKEL) as Produktsparte[]).flatMap((sparte) =>
   ZUSATZ_ARTIKEL[sparte].map((typ, index) => {
     const wgs = ZUSATZ_WG[sparte];
-    const kategorie = sparte === 'damen' || sparte === 'herren'
-      ? index >= 10 ? 'jacken' : index >= 4 && index <= 7 ? 'unterteile' : 'oberteile'
-      : SPARTEN_KATEGORIE[sparte];
-    const wg = sparte === 'damen' || sparte === 'herren'
-      ? [wgs[Math.min(index < 4 ? index % 2 : index < 8 ? 2 + (index % 2) : index < 10 ? 3 : wgs.length - 1, wgs.length - 1)]]
-      : sparte === 'schuhe' ? wgs : [wgs[index % wgs.length]];
+    const bekleidung = (sparte === 'damen' || sparte === 'herren') ? BEKLEIDUNG_DEF[sparte][index] : undefined;
+    const kategorie = bekleidung?.kategorie ?? SPARTEN_KATEGORIE[sparte];
+    const wg = bekleidung ? [bekleidung.wg] : sparte === 'schuhe' ? wgs : [wgs[index % wgs.length]];
     return {
       typ, sparte, kategorie, wgs: wg,
       saison: index % 3 === 0 ? 'sommer' : index % 3 === 1 ? 'winter' : 'ganz',
