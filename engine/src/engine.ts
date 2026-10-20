@@ -32,7 +32,7 @@ function quartalsStart(s: GameState): void {
 export function wocheAbspielen(s: GameState): WochenKpi {
   if (s.phase === 'zerschlagen') throw new Error('Spiel beendet: Die Kette ist zerschlagen.');
   const w = s.woche;
-  const cashVorher = s.historie[s.historie.length - 1]?.cash ?? s.cash;
+  const cashVorher = s.historie[s.historie.length - 1]?.cash ?? s.kapitalflussStartCash ?? s.cash;
 
   prozesse(s);
   premiumWoche(s);
