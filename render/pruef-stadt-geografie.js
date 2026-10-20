@@ -8,7 +8,7 @@ const stadt = fs.readFileSync(path.join(__dirname, 'src/kit/staedte.js'), 'utf8'
 const m = engine.match(/export const STAEDTE:[\s\S]*?\n\];/);
 if (!m) throw new Error('Engine-Stadtliste nicht gefunden');
 const engineZeilen = [...m[0].matchAll(/^\s*\["([^"]+)",\s*'([^']+)',\s*'([^']+)'/gm)];
-const soll = new Map(engineZeilen.map((x) => [x[1], { region: x[2].toLowerCase(), typ: x[3] }]));
+const soll = new Map(engineZeilen.map((x) => [x[1], { region: x[2].toLowerCase().replace('ü', 'ue'), typ: x[3] }]));
 const zeilen = [...grafik.matchAll(/^\s*("[^"]+"):\s*(\{.*\}),$/gm)];
 const ist = new Map(zeilen.map((m) => [JSON.parse(m[1]), JSON.parse(m[2])]));
 const bildAlt = stadt.match(/const BILD = \{([\s\S]*?)\n\};/);
