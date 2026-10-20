@@ -664,7 +664,8 @@ async function buendeln() {
           scroll.scrollTop = (i + 1) * 58;
           scroll.dispatchEvent(new Event('scroll'));
           const row = scroll.querySelector('[data-haus="' + hs[i].id + '"]');
-          if (!row || !row.textContent.includes(hs[i].name)) fehlt.push(hs[i].id);
+          if (!row || !row.textContent.includes(hs[i].name) ||
+            Number(row.dataset.wert) !== hs[i].umsatz) fehlt.push(hs[i].id);
         }
         return { anzahl: hs.length, geprueft: Math.min(50, hs.length), fehlt };
       }, format);
@@ -692,7 +693,6 @@ async function buendeln() {
         pp.filterSetzen('alle');
         window.spiel.oeffnePortfolio('liste');
         // Kein direkter UI-Bypass: Liste per Checkboxen selektieren, ggf. scrollen.
-        const scroll = document.getElementById('pp-scroll');
         const zeilen = window.spiel.E.portfolio(window.spiel.s);
         const sort = [...zeilen].sort((a, b) => b.umsatz - a.umsatz || a.stadt.localeCompare(b.stadt, 'de') || a.id.localeCompare(b.id, 'de'));
         const formatNamen = ['hartwig', 'premium', 'sport', 'volkskauf', 'fundus'];
@@ -707,6 +707,7 @@ async function buendeln() {
         for (const id of ids) {
           const i = positionen.findIndex((x) => x.id === id);
           if (i < 0) throw new Error('Nicht in der Liste: ' + id);
+          const scroll = document.getElementById('pp-scroll');
           scroll.scrollTop = i * 58;
           scroll.dispatchEvent(new Event('scroll'));
           const cb = scroll.querySelector('[data-pp-id="' + id + '"]');
