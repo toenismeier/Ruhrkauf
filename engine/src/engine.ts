@@ -14,6 +14,8 @@ import { hqControllingExzellenz, hqEinkaufKonditionen, hqRestmieteWoche, hqWkzFa
 import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './wirtschaft';
 import { vorstandWoche } from './vorstand';
 import { produkteBuchen, produkteWoche } from './produkte';
+// O04 Personal
+import { personaleinsatzWoche } from './personaleinsatz';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
@@ -42,6 +44,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   produkteWoche(s);
   // Marketing: Kanäle, Karte, CRM-Versand, laufende Aktionen der Woche (vor der Nachfrage)
   marketingVorbereiten(s);
+  // O04 Personal: ein Plan je Woche, vor Ermittlung der Hausnachfrage.
+  personaleinsatzWoche(s);
 
   const lohn = lohnSumme(s);
   einkaufFristen(s);
