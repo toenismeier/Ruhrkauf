@@ -55,8 +55,11 @@ function erreichbar(reach,g,r,puffer=0) {
   for(let z=c;z<d;z++)for(let x=a;x<b;x++)if(seen[z*nx+x]&&!block[z*nx+x])return true;
   return false;
 }
-function groessteLeere(g) {
-  const {nx,nz,block}=g;let max=0;
+function groessteLeere(g, gaenge=[]) {
+  const {nx,nz}=g,block=g.block.slice();let max=0;
+  // Haupt- und Nebengänge sind bewusst freigehaltene Verkehrsflächen,
+  // keine fehlbestückten Restflächen. Nur echte Verkaufsraumlücken messen.
+  for(const weg of gaenge)g.set(weg,block);
   const vorher=new Int32Array(nx+1),jetzt=new Int32Array(nx+1);
   for(let z=1;z<=nz;z++) {
     for(let x=1;x<=nx;x++){
@@ -99,7 +102,7 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
   const flaeche=plan.breite*plan.tiefe,verfuegbar=flaeche-zaehle(g.ob,1)*S*S;
   const belegt=zaehle(g.mob,1)*S*S;
   const dichte=verfuegbar>0?belegt/verfuegbar:0;
-  const wand=wanddeckung(plan),leer=groessteLeere(g);
+  const wand=wanddeckung(plan),leer=groessteLeere(g,plan.gaenge);
   const boeden=unique(plan.boeden.map(b=>b.typ)),akzent=plan.boeden.filter(b=>b.typ==='akzent').reduce((n,b)=>n+rechteckFlaeche(b),0)/flaeche;
   const dekoflaeche=plan.moebel.filter(m=>m.typ==='deko').reduce((n,m)=>n+rechteckFlaeche(m),0)/flaeche;
   if(!reach.start)add('Wege','Eingang blockiert');
