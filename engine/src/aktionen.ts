@@ -22,6 +22,7 @@ import { premiumInvestieren, premiumVerkaufen } from './premium';
 import { ORGANISATION_AKTIONEN, organisationAktion, type OrganisationAktion } from './organisation';
 // O03 IT
 import { IT_AKTIONEN, itAktion, type ItAktion } from './it';
+import { PLANUNG_AKTIONEN, planungAktion, type PlanungAktion } from './planung';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -68,7 +69,9 @@ export type SpielerAktion =
   // O01 Organisation
   | OrganisationAktion
   // O03 IT
-  | ItAktion;
+  | ItAktion
+  // O06 Planung
+  | PlanungAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -137,6 +140,11 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s, a as OrganisationAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
+  // O06 Planung: alle Mutationen laufen über fuehreAus.
+  if (PLANUNG_AKTIONEN.has(a.typ as PlanungAktion['typ'])) {
+    const fehlerText = planungAktion(s, a as PlanungAktion);
+    return fehlerText ? fehler(fehlerText) : ok('Planung aktualisiert.');
+  }
   switch (a.typ) {
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;

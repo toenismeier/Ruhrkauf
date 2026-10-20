@@ -4,6 +4,7 @@ import { chance, clamp, eur, ganzZwischen, kw, melde, mio, neueId, waehle, zufal
 import { einmalKosten, starteSchliessung } from './prozesse';
 import { bestandWert } from './ware';
 import { loeseVorstandEntscheidung } from './vorstand';
+import { planungEntscheidung } from './planung';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
 import { premiumAngebote } from './premium';
@@ -338,6 +339,8 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
   s.entscheidungsprotokoll = s.entscheidungsprotokoll.filter((p) => s.woche - p.woche <= 52);
   if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
   if (e.typ === 'organisation_vorlage') { organisationVorlageEntscheidung(s,e,option); return null; }
+  // O06 Planung: automatische Fristentscheidung entspricht Freigabe des Controllings.
+  if (e.typ.startsWith('planung_')) { planungEntscheidung(s, e, option); return null; }
   const d = e.daten;
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
   switch (e.typ) {

@@ -21,6 +21,7 @@ import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 // O02 Umsatztreiber
 import { erfasseTreiber } from './treiber';
+import { planungBonusWoche, planungWoche } from './planung';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -185,6 +186,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   produkteBuchen(s);
   s.marketing.gewoehnung = Math.max(0, s.marketing.gewoehnung * 0.99);
 
+  // O06 Planung: Boni als Personalaufwand; Auszahlung erfolgt im Februar.
+  personalCash += planungBonusWoche(s, k);
   k.ebitda = k.rohertrag + k.konzession + k.untermiete + k.wkz - k.personal - k.miete - k.nebenkosten - k.sonstige - k.logistik - k.zentrale - k.marketing - k.beratung;
   k.sondereffekte = s.einmalErloeseWoche - s.einmalkostenWoche - restmieten;
   marketingAbschluss(s, k.umsatz, mk);
@@ -223,6 +226,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   erfasseTreiber(s);
   if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
 
+  // O06 Planung: Quartalsforecast, Vertrauensabgleich, Planungsfenster und Jahresabschluss.
+  planungWoche(s);
   if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
   // Einmaleffekte, die ab jetzt anfallen (Aktionen des Spielers), zählen zur nächsten Woche
   s.einmalkostenWoche = 0;
