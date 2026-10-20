@@ -96,8 +96,13 @@ const istOffen = (h: Haus): boolean => h.status === 'offen' || h.status === 'sch
 export function hausclusterSchluessel(h: Haus): string {
   return h.klasse === 'premium' || h.flagship ? 'premium-flagships' : String(h.hauscluster ?? h.region);
 }
+/** O01-kompatibel: ein vom CSO als Flagship gesetztes Haus verlässt den Steuerungscluster. */
+function steuerungscluster(s: GameState, h: Haus): string {
+  const mitOrganisation = s as GameState & { organisation?: { flagships: string[] } };
+  return mitOrganisation.organisation?.flagships.includes(h.id) ? 'premium-flagships' : hausclusterSchluessel(h);
+}
 export function hausStandard(s: GameState, h: Haus): HausStandard {
-  return betrieb(h)?.standardAusnahme ?? s.hausbetrieb?.standards[hausclusterSchluessel(h)] ?? STANDARD;
+  return betrieb(h)?.standardAusnahme ?? s.hausbetrieb?.standards[steuerungscluster(s,h)] ?? STANDARD;
 }
 export function hausKandidaten(s: GameState, hausId: string) {
   const h = s.haeuser.find(x => x.id === hausId);
@@ -115,7 +120,7 @@ export function initialisiereHausbetrieb(s: GameState): void {
   s.hausbetrieb ??= { standards: {}, staedte: {}, befoerderungen: [] };
   s.hausbetrieb.standards['premium-flagships'] ??= structuredStandard();
   for (const h of s.haeuser) {
-    s.hausbetrieb.standards[hausclusterSchluessel(h)] ??= structuredStandard();
+    s.hausbetrieb.standards[steuerungscluster(s,h)] ??= structuredStandard();
     s.hausbetrieb.staedte[h.stadt] ??= { trend: 1, ereignisBis: 0, sonntage: [] };
     const l = leitung(h);
     l.staerken ??= { personal: l.skill, ware: l.skill, kunde: l.skill, kosten: l.skill };
@@ -153,7 +158,7 @@ function stadtFaktor(s: GameState, h: Haus): number {
 /** Eingriffe an Frequenz/Kaufquote werden mit Faktor 1 gestartet. */
 export function hausBetriebsFaktor(s: GameState, h: Haus): number {
   const b = betrieb(h);
-  if (!b || !istOffen(h)) return 1;
+  if (s.hausbetriebAbnahmeAus || !b || !istOffen(h)) return 1;
   const l = leitung(h);
   const st = hausStandard(s, h);
   const kundendienst = b.services.kundendienst ? 1.007 : 1;
@@ -174,7 +179,7 @@ export function hausBetriebsFaktor(s: GameState, h: Haus): number {
 
 export function hausBetriebskosten(s: GameState, h: Haus, sonstige: number): number {
   const b = betrieb(h);
-  if (!b || !istOffen(h)) return sonstige;
+  if (s.hausbetriebAbnahmeAus || !b || !istOffen(h)) return sonstige;
   let faktor = 0;
   const preis = s.hausbetrieb?.energiePreis ?? 1;
   const basisTechnik = h.baujahr < 1970 ? 0 : h.baujahr < 2005 ? 1 : 2;
@@ -189,14 +194,14 @@ export function hausBetriebskosten(s: GameState, h: Haus, sonstige: number): num
 }
 export function hausKonzessionserloes(s: GameState, h: Haus, umsatz: number, quoteBasis: number): number {
   const fl = h.flaechen.filter(f => f.konzept === 'konzession');
-  if (!fl.length || !h.betrieb) return umsatz * quoteBasis;
+  if (s.hausbetriebAbnahmeAus || !fl.length || !h.betrieb) return umsatz * quoteBasis;
   const qm = fl.reduce((v, f) => v + f.qm, 0) || 1;
   const quote = fl.reduce((v, f) => v + f.qm / qm * (h.betrieb?.konzessionen[f.id]?.quote ?? quoteBasis), 0);
   return umsatz * quote;
 }
 export function hausGastroErgebnis(s: GameState, h: Haus, umsatzBasis: number) {
   const b = betrieb(h);
-  if (!b || b.gastro === 'keine' || b.restaurantQm <= 0 || !istOffen(h)) return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: 0 };
+  if (s.hausbetriebAbnahmeAus || !b || b.gastro === 'keine' || b.restaurantQm <= 0 || !istOffen(h)) return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: 0 };
   const wochenUmsatz = eur(Math.max(0, umsatzBasis) * 0.012 + b.restaurantQm * 32);
   if (b.gastro === 'pacht') return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: eur(wochenUmsatz * 0.115) };
   return { umsatz: wochenUmsatz, rohertrag: eur(wochenUmsatz * 0.6),
@@ -243,7 +248,8 @@ function stelleKommentar(s: GameState, h: Haus, vergleich: 'vorjahr' | 'plan', d
   h.betrieb.kommentare.unshift({ woche: s.woche, abweichung: delta, vergleich, grund, wahrerGrund: wahr, massnahme, ...pruefung });
   h.betrieb.kommentare.length = Math.min(h.betrieb.kommentare.length, 26);
   // Clusterleitung setzt ihre Routineempfehlung um. O01 kann hier die Qualität übersteuern.
-  const qualitaet = clamp(h.clusterleitungQualitaet ?? 0.55, 0, 1);
+  const organisation = (s as GameState & { organisation?: { hauscluster: { id:string; stelle:{ person?:{ qualitaet:number } } }[] } }).organisation;
+  const qualitaet = clamp(organisation?.hauscluster.find(x => x.id === steuerungscluster(s,h))?.stelle.person?.qualitaet ?? h.clusterleitungQualitaet ?? 0.55, 0, 1);
   if (hash(s.seed+':massnahme:'+h.id+':'+s.woche) < qualitaet) {
     h.betrieb.massnahmeBis = s.woche + 3;
     h.betrieb.massnahmeFaktor = 1 + 0.006 + 0.008 * qualitaet;
@@ -254,7 +260,8 @@ function stelleKommentar(s: GameState, h: Haus, vergleich: 'vorjahr' | 'plan', d
 export function hausWoche(s: GameState): void {
   if (!s.hausbetrieb) initialisiereHausbetrieb(s);
   hausAbschluss(s);
-  if (s.prognose) return;
+  if (s.prognose || s.hausbetriebAbnahmeAus) return;
+  if ((s.hausbetrieb!.energieBis ?? 0) <= s.woche) s.hausbetrieb!.energiePreis = 1;
   // Die Ausgangslage im ersten Geschäftsjahr bleibt exakt unverändert.
   if (s.woche >= 52 && s.woche % 13 === 0) {
     const stand = s.hausbetrieb!;
@@ -306,7 +313,7 @@ export function hausWoche(s: GameState): void {
 }
 /** Ein Aufruf nach der Berechnung aller Haus-KPIs. */
 export function hausAbschluss(s: GameState): void {
-  if (!s.hausbetrieb || s.prognose) return;
+  if (!s.hausbetrieb || s.prognose || s.hausbetriebAbnahmeAus) return;
   for (const h of s.haeuser) {
     if (!istOffen(h) || !h.kpi || !h.betrieb) continue;
     const b = h.betrieb, vorher = b.umsatzHistorie.find(x => x.woche === s.woche - 52);
@@ -358,14 +365,14 @@ export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: st
       return { ok: true, text: 'Halteprämie zugesagt.' };
     case 'hausLeitungBefordern':
       if (!h || !l || !b || l.skill < 0.6) return { ok: false, text: 'Hausleitung benötigt mindestens 60 % Kompetenz.' };
-      s.hausbetrieb!.befoerderungen.push({ haus: h.id, cluster: hausclusterSchluessel(h), name: l.name, qualitaet: l.skill, woche: s.woche });
+      s.hausbetrieb!.befoerderungen.push({ haus: h.id, cluster: steuerungscluster(s,h), name: l.name, qualitaet: l.skill, woche: s.woche });
       h.personal.filialleiter = { ...l, name: l.stellvertretung?.name ?? 'Interim ' + h.stadt, skill: l.stellvertretung?.qualitaet ?? 0.5,
         staerken: { personal: l.stellvertretung?.qualitaet ?? 0.5, ware: l.stellvertretung?.qualitaet ?? 0.5, kunde: l.stellvertretung?.qualitaet ?? 0.5, kosten: l.stellvertretung?.qualitaet ?? 0.5 } };
       h.personal.filialleiter.wechselwille = 0;
       return { ok: true, text: l.name + ' als Clusterleitungs-Kandidat vorgemerkt. Stellvertretung übernimmt das Haus.' };
     case 'hausStandardSetzen': {
       if (a.haus && !a.begruendung?.trim()) return { ok: false, text: 'Einzelabweichungen benötigen eine Begründung.' };
-      if (h && a.cluster !== hausclusterSchluessel(h)) return { ok: false, text: 'Haus gehört nicht zum angegebenen Hauscluster.' };
+      if (h && a.cluster !== steuerungscluster(s,h)) return { ok: false, text: 'Haus gehört nicht zum angegebenen Hauscluster.' };
       const basis = h ? hausStandard(s, h) : s.hausbetrieb!.standards[a.cluster];
       if (!basis) return { ok: false, text: 'Hauscluster nicht gefunden.' };
       const n = Number(a.wert);
@@ -438,7 +445,7 @@ export function hausUebersicht(s: GameState, id: string) {
   if (!h) return undefined;
   const b = h.betrieb, l = h.personal.filialleiter;
   return {
-    id: h.id, name: h.name, hauscluster: hausclusterSchluessel(h), stadtgroesse: h.cluster,
+    id: h.id, name: h.name, hauscluster: steuerungscluster(s,h), stadtgroesse: h.cluster,
     standard: hausStandard(s, h), leitungsdaten: l, kandidaten: hausKandidaten(s, id),
     kundenScore: hausKundenscore(s, h), letzteMessung: b?.scoreWoche,
     kosten: b?.kosten, ausfallBis:b?.ausfallBis, inventurdifferenz:b?.inventurdifferenz ?? 0, energiePreis:s.hausbetrieb?.energiePreis ?? 1, kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
