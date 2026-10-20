@@ -2,6 +2,53 @@
 
 Spiellogik ohne Grafik für den Warenhaus-Turnaround-Tycoon. Reines TypeScript (strict), deterministisch über einen Seed, Geldbeträge in ganzen Euro. Die Engine kommt später unverändert in die Expo-App.
 
+## Maßstab Phase 2: aktueller Integrationsstand (20.10.2026)
+
+**In Entwicklung, noch nicht kalibriert oder abgenommen.** Das folgende Modell ersetzt die unten dokumentierte historische 130-Häuser-Kalibrierung erst nach erfolgreichen lokalen Messungen.
+
+| Netz/Format | Häuser | Umsatzanker Jahr 1 |
+|---|---:|---:|
+| Hartwig A | 45 | 2.145,6 Mio. € |
+| Hartwig B | 115 | 3.427,0 Mio. € |
+| Hartwig C | 200 | 3.377,4 Mio. € |
+| Premium | 4 | 820,0 Mio. € |
+| Hartwig Sport | 44 | 545,0 Mio. € |
+| Volkskauf | 86 | Noch ohne Simulation (`nurDaten`) |
+| FUNDUS | 66 | Noch ohne Simulation (`nurDaten`) |
+| **Gesamt** | **560** | **10.315,0 Mio. € aktive Formate** |
+
+- 220 Städte: 7 Metropolen, 73 Groß- und 140 Mittelstädte.
+- `UMSATZZIELE_JAHR1` und `kalibriereStandortumsatz` normieren die **jährliche Start-Nachfragebasis**, nicht automatisch den tatsächlichen Umsatz nach 52 simulierten Wochen. Die Ziele gelten für die Simulation mit Freigaben, Saisonverlauf und Wettbewerbern erst nach Prüfung von Seeds 1–3 mit ±3 %.
+- `STANDARD_SZENARIO` erhält 400 Mio. € Startkasse und 300 Mio. € Kreditlinie; `PARAM.kvLimitBasis` 1.260 Mio. €. Massekredit, Eigentümernachschuss und Freigabegrenze skalieren mit der laufenden Konzernnachfrage.
+- Die bestehende HQ-Erzeugung skaliert Abteilungs-FTE proportional zur unveränderten Zielquote von 3,4 % an der Umsatzbasis. Bot C schließt 27,8 % des aktiven Portfolios, nicht fixe 50 Häuser; Volkskauf und FUNDUS bleiben unberührt.
+- Der deterministische FUNDUS-Seed ist unabhängig von den restlichen Formaten. `render/haeuser-outlet.json` enthält 66 Häuser; die noch alten Exporte `haeuser.json` und `haeuser-schwester.json` müssen im lokalen Komplettlauf ebenfalls neu erzeugt werden.
+- **Offene Abnahme:** Typecheck, Jest, Exporte zweimal, Render-Build/`pruef-staedte`/`spiel-render` (0 Abweichungen), Jahr-1-Umsätze ±3 %, EBITDA ~−4 %, Q4 positiv, Bestellfreigaben ca. 8/Woche und höchstens 80 in Orderrunden, Bot C 260 Wochen für Seeds 1–3, Laufzeit weniger als 60 ms/Woche. Die alten pausierten Kalibrierungstests sind anschließend mit korrigierten Zielwerten wieder zu aktivieren.
+- CI ist aufgrund des Actions-Kontingents blockiert; **keine Mess- oder Testläufe sind mit den neuen Phase-2-Commits nachgewiesen. Kein Merge bis zur Abnahme.**
+
+### Lokale Prüfsequenz
+
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest
+npx tsx scripts/haeuser-export.ts
+npx tsx scripts/haeuser-export.ts # zweiter Lauf: git diff ohne neue Änderungen
+npx tsx scripts/massstab-phase2.ts 1,2,3
+npx tsx scripts/massstab-phase2.ts 1,2,3 --bot
+npx tsx scripts/schwierigkeit-vergleich.ts leicht,mittel,schwer 1,2,3 260
+for seed in 1 2 3; do npx tsx scripts/bot.ts "$seed" 260 --tief; done
+cd ../render
+npm ci
+npm run build
+node pruef-staedte.js
+node spiel-render.js
+```
+
+### Historische Dokumentation
+
+Die folgenden früheren Balancing- und Hauszahlen beziehen sich noch auf die vor Phase 1 verwendete 130er-Kette. Sie sind bis zum nachgemessenen Phase-2-Stand **keine Freigabewerte**.
+
 ## Befehle
 
 ```
