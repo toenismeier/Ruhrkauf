@@ -11,6 +11,8 @@ import type { SchwierigkeitId } from './schwierigkeit';
 import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber';
 // O03 IT
 import type { ItStand } from './it';
+// O07 Haus
+import type { HausBetrieb, HausbetriebStand } from './haus';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -53,7 +55,7 @@ export type GruppeId =
 /** Was auf einer Fläche passiert. */
 export type Konzept = 'eigen' | 'kommission' | 'konzession' | 'untermiete' | 'offprice' | 'leer';
 
-export type MieterTyp = 'discounter' | 'fitness' | 'aerztehaus' | 'behoerde' | 'gastro' | 'coworking' | 'drogerie';
+export type MieterTyp = 'discounter' | 'fitness' | 'aerztehaus' | 'behoerde' | 'gastro' | 'coworking' | 'drogerie' | 'baeckerei' | 'paketshop' | 'bibliothek';
 
 export interface Untermieter {
   name: string;
@@ -94,6 +96,13 @@ export interface Filialleiter {
   skill: number; // 0..1
   moral: number; // 0..100
   interimBis?: number;
+  // O07 Haus
+  staerken?: { personal: number; ware: number; kunde: number; kosten: number };
+  ehrlichkeit?: number;
+  gehalt?: number;
+  bonusAnteil?: number;
+  wechselwille?: number;
+  stellvertretung?: { name: string; qualitaet: number };
 }
 
 export interface Personal {
@@ -135,6 +144,11 @@ export interface Haus {
   cluster: Cluster;
   // O01 Organisation: geografischer Hauscluster (auch bei Premium/Flagship für Rankings).
   hauscluster?: string;
+  // O07 Haus: Schnittstellen zu O01 (Hauscluster) und O06 (Wochenplan)
+  flagship?: boolean;
+  clusterleitungQualitaet?: number;
+  wochenPlan?: number;
+  betrieb?: HausBetrieb;
   lage: Lage;
   format: Format;
   klasse?: 'premium';
@@ -429,6 +443,10 @@ export interface GameState {
   kreditlinieBasis: Eur;
   zahlungsstockungSeit?: number;
   haeuser: Haus[];
+  // O07 Haus
+  hausbetrieb?: HausbetriebStand;
+  /** O07 Haus: nur für A/B-Performance und Baseline-Kalibrierung. */
+  hausbetriebAbnahmeAus?: boolean;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];

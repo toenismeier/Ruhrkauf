@@ -23,6 +23,8 @@ import { ORGANISATION_AKTIONEN, organisationAktion, type OrganisationAktion } fr
 // O03 IT
 import { IT_AKTIONEN, itAktion, type ItAktion } from './it';
 import { PLANUNG_AKTIONEN, planungAktion, type PlanungAktion } from './planung';
+// O07 Haus
+import { HAUS_AKTIONEN, hausAktion, type HausAktion } from './haus';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -71,7 +73,9 @@ export type SpielerAktion =
   // O03 IT
   | ItAktion
   // O06 Planung
-  | PlanungAktion;
+  | PlanungAktion
+  // O07 Haus
+  | HausAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -145,6 +149,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     const fehlerText = planungAktion(s, a as PlanungAktion);
     return fehlerText ? fehler(fehlerText) : ok('Planung aktualisiert.');
   }
+  // O07 Haus
+  if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;

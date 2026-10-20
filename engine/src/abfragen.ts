@@ -261,3 +261,5 @@ export { premiumUebersicht } from './premium';
 export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './treiber';
 // O06 Planung: Anzeigeabfragen ausschließlich aus der Engine.
 export { planungBericht, planWoche };
+// O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
+export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';

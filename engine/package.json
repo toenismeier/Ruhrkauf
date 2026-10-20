@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "sim": "tsx scripts/headless.ts",
     "export:haeuser": "tsx scripts/haeuser-export.ts",
-    "check:premium": "tsx scripts/premium-kalibrierung.ts"
+    "check:premium": "tsx scripts/premium-kalibrierung.ts",
+    "check:haus": "tsx scripts/haus-vergleich.ts",
+    "check:haus:560": "tsx scripts/haus-vergleich.ts --massstab"
   },
   "keywords": [],
   "author": "",

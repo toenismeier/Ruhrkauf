@@ -17,6 +17,8 @@ import { kennzeichnePremium } from './premium';
 import { bildeHauscluster } from './organisation';
 // O03 IT
 import { initialisiereIt } from './it';
+// O07 Haus
+import { initialisiereHausbetrieb } from './haus';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -355,6 +357,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereIt(s);
   // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).
   initialisierePlanung(s);
+  // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
+  initialisiereHausbetrieb(s);
   return s;
 }
 

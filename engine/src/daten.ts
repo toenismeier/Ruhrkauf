@@ -197,7 +197,11 @@ export const MIETER: MieterDef[] = [
   { typ: 'behoerde', namen: ['Bürgeramt', 'Stadtbibliothek', 'Volkshochschule'], etagen: [1, 2, 3], qm: [1500, 4000], mieteQmMonat: [8, 12], laufzeit: [10, 20], frequenzBonus: 0.03, umbauAnteil: 0.4 },
   { typ: 'gastro', namen: ['Markthalle Kost', 'Café Fräulein', 'Burgerwerk'], etagen: [0, 4, 5], qm: [300, 900], mieteQmMonat: [14, 25], laufzeit: [5, 10], frequenzBonus: 0.015, umbauAnteil: 0.5 },
   { typ: 'coworking', namen: ['Deskhaus', 'WorkLoft', 'Raum & Ruhe'], etagen: [3, 4, 5], qm: [800, 2000], mieteQmMonat: [9, 14], laufzeit: [5, 10], frequenzBonus: 0.005, umbauAnteil: 0.3 },
-  { typ: 'drogerie', namen: ['Rossberg Drogerie', 'dm-Nachbar', 'Pflegewelt'], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+  { typ: 'drogerie', namen: ['Rossberg Drogerie', 'Pflegewelt', 'Drogeriekontor'], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+  // O07 Haus: zusätzliche Frequenzbringer mit fiktiven Eigennamen.
+  { typ: 'baeckerei', namen: ['Backstube Mühlenfeld', 'Brot & Krumme', 'Kruste & Korn'], etagen: [0, -1], qm: [120, 350], mieteQmMonat: [15, 27], laufzeit: [5, 10], frequenzBonus: 0.017, umbauAnteil: 0.4 },
+  { typ: 'paketshop', namen: ['PaketKontor', 'Paketpunkt Markt', 'Paketstube'], etagen: [0, -1], qm: [100, 270], mieteQmMonat: [12, 19], laufzeit: [5, 10], frequenzBonus: 0.014, umbauAnteil: 0.5 },
+  { typ: 'bibliothek', namen: ['Stadtteilbibliothek', 'Lesekontor', 'Bücherraum'], etagen: [1, 2, 3], qm: [400, 1200], mieteQmMonat: [6, 11], laufzeit: [10, 20], frequenzBonus: 0.025, umbauAnteil: 0.3 },
 ];
 
 export interface BeraterDef {

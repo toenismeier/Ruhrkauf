@@ -12,6 +12,8 @@ import { hausclusterFaktor } from './organisation';
 import { wirkeTreiber } from './treiber';
 // O03 IT
 import { itHausFaktor } from './it';
+// O07 Haus
+import { hausBetriebsFaktor, hausBetriebskosten } from './haus';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -82,7 +84,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h);
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h);
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -185,7 +187,9 @@ export interface HausKosten {
 export function lohnKosten(s: GameState, h: Haus): number {
   const p = h.personal;
   const tarifF = s.tarif === 'sanierung' ? 0.93 : s.tarif === 'ohne' ? 0.89 : 1;
-  return (p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF + p.aushilfen * PARAM.lohnAushilfe;
+  // O07: Differenz zum eingepreisten Startgehalt der Hausleitung als Personalaufwand.
+  const leitungDelta = h.betrieb && !s.hausbetriebAbnahmeAus ? ((p.filialleiter.gehalt ?? h.betrieb.leitungGehaltStart) - h.betrieb.leitungGehaltStart) / 52 : 0;
+  return (p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF + p.aushilfen * PARAM.lohnAushilfe + leitungDelta;
 }
 
 export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGesamt: number): HausKosten {
@@ -196,6 +200,8 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     return k;
   }
   k.personal = lohnKosten(s, h);
+  // O07: genehmigter Verkaufs-Sonntag benötigt zusätzliche Besetzung.
+  if (!s.hausbetriebAbnahmeAus && s.hausbetrieb?.staedte[h.stadt]?.sonntage.includes(s.woche)) k.personal *= 1.18;
   k.miete = h.miete.mieteWoche;
   let qmNk = 0;
   let qmBetrieb = 0;
@@ -205,7 +211,8 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     qmBetrieb += f.konzept === 'leer' ? f.qm * 0.25 : f.qm;
   }
   k.nebenkosten = h.miete.netTyp === 'net' ? 0 : qmNk * h.miete.nebenkostenQmWoche;
-  k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt;
+  // O07 Haus: identische Kosten im neutralen Standard, Aufteilung in fünf Posten.
+  k.sonstige = hausBetriebskosten(s, h, PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt);
   k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s);
   return k;
 }

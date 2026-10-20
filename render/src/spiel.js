@@ -36,6 +36,8 @@ import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 // O03 IT
 import { itModul } from './ui/it.js';
 import { planungModul } from './ui/planung.js';
+// O07 Haus
+import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml } from './ui/haus.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -482,6 +484,9 @@ function cockpitZeigen() {
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
+  // O07 Haus: Ausnahme-Kachel im Cockpit.
+  const ausnahmen = E.hausBeobachtung(s, 30).length;
+  $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
   $('kw').textContent = `KW ${c.kw} / ${c.jahr}`;
   $('phase').textContent = c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '';
   $('phase').style.display = c.phase === 'regulaer' ? 'none' : '';
@@ -565,6 +570,8 @@ function hausZeigen(id) {
 }
 $('pzu').addEventListener('click', schliessePanel);
 
+// O07 Haus
+let hausReiter = 'ueberblick';
 let hausEtageWahl = null, letztesInnenbild = null;
 window.hausKlick = (art, id, nr) => {
   if (art === 'zu') { hausEtageWahl = null; oeffneHaus(offenesHaus); return; }
@@ -585,6 +592,9 @@ function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
   if (!d) return;
   const neu = offenesHaus !== id;
+  if (neu) hausReiter = 'ueberblick';
+  // O07 Haus
+  d.betrieb = E.hausUebersicht(s, id);
   offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
   const h = d.haus, k = h.kpi;
   const z = sb.zustand(id);
@@ -634,10 +644,50 @@ function oeffneHaus(id) {
       (wirkung ? '<small>' + wirkung + '</small>' : '') + '</span><span>→</span></button>';
   }
   html += '</div>';
+  // O07 Haus: alter Etagen- und Konkurrenzinhalt bleibt im Reiter Überblick.
+  html = hausSteckbrief(d, html, hausReiter, s.woche);
   panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
   if (neu) hausZeigen(id);
 }
 
+// O07 Haus: einheitlicher Aktionspfad über die Engine, keine UI-seitige Berechnung.
+window.hausReiterWahl = (reiter) => { hausReiter = reiter; if (offenesHaus) oeffneHaus(offenesHaus); };
+window.hausTun = (art, id, key, wert) => {
+  const h = s.haeuser.find((x) => x.id === id);
+  if (!h) return;
+  const b = E.hausUebersicht(s, id);
+  const a = art === 'foerdern' ? { typ: 'hausLeitungFoerdern', haus:id, staerke:key }
+    : art === 'ersetzen' ? { typ:'hausLeitungErsetzen', haus:id, kandidat:key }
+    : art === 'praemie' ? { typ:'hausHaltepraemie', haus:id, betrag:10000 }
+    : art === 'befoerdern' ? { typ:'hausLeitungBefordern', haus:id }
+    : art === 'service' ? { typ:'hausServiceSetzen', haus:id, service:key, an:wert }
+    : art === 'kosten' ? { typ:'hausKostenSetzen', haus:id, posten:key, faktor:Math.round(((b?.kosten?.[key]??1)+wert)*100)/100 }
+    : art === 'gastro' ? { typ:'hausGastronomie', haus:id, modus:key }
+    : art === 'massnahme' ? { typ:'hausMassnahme', haus:id, massnahme:key }
+    : art === 'standard' ? { typ:'hausStandardSetzen', cluster:b.hauscluster, feld:key, wert:Math.max(1,Math.min(3,b.standard[key]+wert)) }
+    : art === 'stunden' ? { typ:'hausStandardSetzen', cluster:b.hauscluster, feld:key, wert:Math.max(7,Math.min(22,b.standard.oeffnung[key]+wert)) }
+    : art === 'clusterservice' ? { typ:'hausClusterServiceSetzen', cluster:b.hauscluster, service:key, an:wert }
+    : art === 'sonntag' ? { typ:'hausSonntag', stadt:h.stadt, woche:s.woche+2 }
+    : null;
+  if (!a) return;
+  const ergebnis = E.fuehreAus(s, a);
+  meldung(ergebnis.text, ergebnis.ok);
+  if (ergebnis.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
+};
+window.hausSpringen = (id) => {
+  const h = s.haeuser.find(x => x.id === id);
+  if (!h) return;
+  if (stadtName !== h.stadt) { baueStadtAusSpiel(h.stadt); wahl.value=h.stadt; }
+  oeffneHaus(id);
+};
+function oeffneBeobachtung() {
+  offenesHaus = null; offenesHq = null;
+  panel('Beobachtungsliste','Ausnahmen im Filialnetz',hausBeobachtungHtml(E.hausBeobachtung(s,30)));
+}
+function oeffneHausReporting() {
+  offenesHaus = null; offenesHq = null;
+  panel('Reporting','Wochenkommentare und Mystery Shopping',hausReportingHtml(E.hausKommentareDerWoche(s),E.hausKundenRanking(s)));
+}
 /** Lesendes Konkurrenzdetail aus den offiziellen Engine-Abfragen. */
 function oeffneWettbewerber(id) {
   const w = E.wettbewerbFuerGrafik(s, stadtName).find((q) => q.id === id);
@@ -886,6 +936,10 @@ $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
 $('planung').addEventListener('click', () => oeffneModul(pl));
 $('posteingang').addEventListener('click', () => oeffneModul(po));
+// O07 Haus
+$('beobachtung').addEventListener('click', oeffneBeobachtung);
+$('haus-reporting').addEventListener('click', oeffneHausReporting);
+$('hausbeobachtung').addEventListener('click', oeffneBeobachtung);
 $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
 $('postwarnung').addEventListener('change', (e) => { postUi.warnen = e.target.checked; automatischSpeichern(); });
@@ -976,6 +1030,15 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 window.spiel = { neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
+  // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
+  oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },
+  pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];
+    if (!text.includes(String(d.kundenScore))) fehler.push('Kundenscore fehlt');
+    for (const [reiter,wort] of [['leitung',d.leitungsdaten.name],['kosten','Betriebskosten'],['kommentare','Wochenkommentierung']]) {
+      hausReiter=reiter; oeffneHaus(id); if (!$('pinhalt').textContent.includes(wort)) fehler.push(reiter+' nicht korrekt');
+    }
+    hausReiter='ueberblick'; oeffneHaus(id);
+    return { id, score:d.kundenScore, reiter:7, fehler }; },
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
