@@ -30,8 +30,8 @@ export {
   type VorstandUebersicht, type VorstandProfil, type RessortKarte, type PersonKarte, type KandidatenListe, type KandidatKarte, type VorstandSitzung,
 } from './vorstand';
 export {
-  ARTIKELTYPEN, FARBEN, MATERIALIEN, PRODUKT_KATEGORIEN, PRODUKT_PARAM, DAUER_STUFEN, TREND_GRUPPEN, trendFuer, produktNachfrageFaktor, produktMargeDelta,
-  type ArtikelTyp, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
+  ARTIKELTYPEN, ZUSATZ_ARTIKEL, ZUSATZ_ARTIKELTYPEN, FARBEN, MATERIALIEN, PRODUKT_KATEGORIEN, PRODUKT_PARAM, DAUER_STUFEN, TREND_GRUPPEN, trendFuer, produktNachfrageFaktor, produktMargeDelta,
+  type ArtikelTyp, type Produktsparte, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
   type ProduktKarte, type ProdukteListe, type MarkenProdukte, type ProduktKatalog, type Trendbericht, type TrendSaison, type ProduktVorschau, type SterneTeile,
 } from './produkte';
 export {
