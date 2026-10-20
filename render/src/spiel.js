@@ -29,6 +29,7 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { hausbesuchModul } from './ui/hausbesuch.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -598,6 +599,7 @@ function oeffneHaus(id) {
     html += `<div class="karte haus3d"><img src="${b.url}" alt=""><div class="zeile"><span class="was"><b>${etageName(hausEtageWahl.nr)}</b> <i>Innenansicht</i></span><button class="mini" onclick="hausKlick('zu')">Schließen</button></div></div>`;
     if (b.nah) html += `<div class="karte haus3d"><img src="${b.nah}" alt=""><div class="zeile"><span class="dot" style="background:${b.shop.farbe}"></span><span class="was"><b>Eigenmarken-Shop ${b.shop.name}</b> <i>${Math.round(b.shop.anteil * 100)} % der Fläche</i></span></div></div>`;
   }
+  html += '<div class="karte"><button type="button" class="mini" data-hausbesuch="' + esc(id) + '">Haus besuchen</button></div>';
   for (const e of [...d.etagen].reverse()) {
     html += `<div class="karte"><div class="khead">${etageName(e.etage)}<button class="mini" onclick="hausKlick('etage','${id}',${e.etage})">Ansehen</button></div>`;
     if (!e.flaechen.length) html += '<div class="zeile grau">keine Fläche</div>';
@@ -783,6 +785,7 @@ let ek = null;
 ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); } });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
+const hb = hausbesuchModul({ E, s: () => s, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
@@ -939,7 +942,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
