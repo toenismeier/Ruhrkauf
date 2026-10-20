@@ -1,7 +1,7 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
-import { chronikAktualisieren } from './chronik';
+import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { wettbewerbWoche } from './wettbewerb';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
