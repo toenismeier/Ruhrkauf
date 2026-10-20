@@ -39,7 +39,9 @@ export function wochenberichtModul(ctx) {
   function oeffne() {
     if (status !== 'zu') return;
     ++token; start = performance.now(); bestaetigt = null; zeiten.length = 0; markieren('Wochenknopf');
-    if (modus() === 'aus') return berechnen(false);
+    // Auch ohne Wochenbericht vor tatsächlich ablaufenden Vorgängen warnen, sofern aktiviert.
+    const faellig = ctx.warnen() && ctx.posteingang().handeln.some((p) => p.restWochen === 0);
+    if (modus() === 'aus' && !faellig) return berechnen(false);
     fragDialog();
   }
   async function berechnen(mitDialog = true) {
