@@ -41,13 +41,14 @@ import { planungModul } from './ui/planung.js';
 import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml } from './ui/haus.js';
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
+import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
 let speicherWarnung = false;
-const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', warnen: true, wochenbericht: 'voll', reiseZuletzt: [] });
+const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', reiseZuletzt: [] });
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
@@ -56,8 +57,8 @@ function speicherFehler(e) {
   speicherWarnung = true;
 }
 function automatischSpeichern() {
-  if (!s) return;
   clearTimeout(speicherTimer);
+  if (!s || !einstellung('autospeichern')) return;
   speicherTimer = setTimeout(() => {
     speichern(s, stadtName, postUi).then(() => { speicherWarnung = false; }).catch(speicherFehler);
   }, 350);
@@ -69,7 +70,7 @@ async function sofortSpeichern() {
   speicherWarnung = false;
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden' && s) {
+  if (document.visibilityState === 'hidden' && s && einstellung('autospeichern')) {
     // iOS kann Hintergrund-Tabs beenden: ausstehende Aenderungen sofort schreiben.
     clearTimeout(speicherTimer);
     speichern(s, stadtName, postUi).catch((e) => console.error('Autosave bei App-Wechsel:', e));
@@ -609,7 +610,8 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es].filter(Boolean);
+let vorherigerFokus = null;
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -617,10 +619,15 @@ function panel(titel, unter, html, klasse = '') {
   $('ptitel').textContent = titel;
   $('punter').textContent = unter;
   $('pinhalt').innerHTML = html;
+  const neu = !$('panel').classList.contains('offen');
+  if (neu) vorherigerFokus = document.activeElement;
+  $('panel').inert = false;
+  $('panel').removeAttribute('aria-hidden');
   $('panel').classList.add('offen');
   document.body.classList.add('panel-offen');
+  if (neu) $('ptitel').focus({ preventScroll: true });
 }
-function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; }
+function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
 /** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
 function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
@@ -643,6 +650,7 @@ function hausZeigen(id) {
   kameraSetzen();
 }
 $('pzu').addEventListener('click', schliessePanel);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('panel').classList.contains('offen')) schliessePanel(); });
 
 // O07 Haus
 let hausReiter = 'ueberblick';
@@ -922,6 +930,9 @@ function oeffneHq(gebaeudeId, bleiben = false) {
 
 // ─────────────────────────────────────────── Einkauf und Eigenmarken (ui/einkauf.js, ui/eigenmarken.js)
 const EQ = quelle(E);
+let es = null;
+es = einstellungenModul({ panel });
+aktiviereBarrierefreiheit();
 let ek = null;
 ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); } });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
@@ -1013,7 +1024,7 @@ reise = reiseModul({
   fehler: (e) => { KA.pause = false; console.error('Bahnreise fehlgeschlagen:', e); meldung('Stadtwechsel fehlgeschlagen', false); },
 });
 wochenbericht = wochenberichtModul({
-  modus: () => postUi.wochenbericht ?? 'voll', warnen: () => postUi.warnen,
+  modus: () => einstellung('wochenbericht'), warnen: () => einstellung('warnung'),
   cockpit: () => E.cockpit(s), posteingang: () => E.posteingang(s),
   historie: () => s.historie, wocheNr: () => s.woche,
   kapitalfluss: () => E.kapitalfluss(s),
@@ -1024,7 +1035,10 @@ wochenbericht = wochenberichtModul({
   fehler: (e) => { console.error('Wochenabschluss fehlgeschlagen:', e); meldung('Woche konnte nicht abgeschlossen werden', false); },
 });
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
-$('wochenbericht-modus').addEventListener('change', (e) => { postUi.wochenbericht = e.target.value; automatischSpeichern(); });
+window.addEventListener('einstellung', (e) => {
+  if (e.detail.schluessel === 'autospeichern' && !e.detail.wert) clearTimeout(speicherTimer);
+  if (e.detail.schluessel === 'zahlen' && s) cockpitZeigen();
+});
 
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
@@ -1044,10 +1058,10 @@ $('haus-reporting').addEventListener('click', oeffneHausReporting);
 $('hausbeobachtung').addEventListener('click', oeffneBeobachtung);
 $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
-$('postwarnung').addEventListener('change', (e) => { postUi.warnen = e.target.checked; automatischSpeichern(); });
+$('einstellungen').addEventListener('click', () => oeffneModul(es));
 // Menü wie Coffee Inc: Knopf unten rechts öffnet die Kacheln Zentrale, Einkauf, Vorstand, Marketing, Produkte
-function menueZu() { $('menue').classList.remove('offen'); $('menueknopf').classList.remove('an'); }
-$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menueknopf').classList.toggle('an', o); });
+function menueZu() { $('menue').classList.remove('offen'); $('menue').inert = true; $('menueknopf').classList.remove('an'); }
+$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menue').inert = !o; $('menueknopf').classList.toggle('an', o); });
 $('menue').addEventListener('click', (e) => { if (e.target === $('menue')) menueZu(); });
 function menueBadge() {
   const n = (s ? E.freigaben(s).anzahl : 0), v = vs?.badge() ?? 0, b = $('menuebadge');
@@ -1105,7 +1119,7 @@ let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
-  postUi = neuerPostUi(); $('postwarnung').checked = true; $('wochenbericht-modus').value = postUi.wochenbericht;
+  postUi = neuerPostUi();
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
   EQ.freigaben(s);
@@ -1129,7 +1143,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
@@ -1244,8 +1258,6 @@ async function spielFortsetzen() {
     if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) E.initialisierePersonaleinsatz(s);
     postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
-    $('postwarnung').checked = postUi.warnen;
-    $('wochenbericht-modus').value = ['voll', 'kurz', 'aus'].includes(postUi.wochenbericht) ? postUi.wochenbericht : 'voll';
     schwierigkeitId = s.schwierigkeit ?? 'mittel';
     $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();

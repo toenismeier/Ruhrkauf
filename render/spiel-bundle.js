@@ -773,16 +773,16 @@
     s2.entscheidungen = s2.entscheidungen.filter((x) => x.typ !== "planung_jahr" || x.daten.jahr !== e.jahr);
     melde(s2, "info", "Jahresplanung " + plan2.jahr + " beschlossen: Konzernziel " + Math.round(plan2.ziele.umsatz / 1e6) + " Mio. \u20AC Umsatz.", { modul: "planung" });
   }
-  function planungEntscheidung(s2, e, option) {
+  function planungEntscheidung(s2, e, option2) {
     if (e.typ === "planung_jahr") {
       if (s2.planung?.entwurf?.jahr === e.daten.jahr && s2.planung.entwurf.stand === "offen") {
-        if (option === "controlling") abschliessen(s2, "controlling");
-        else if (option === "anpassen") abschliessen(s2, "spieler");
+        if (option2 === "controlling") abschliessen(s2, "controlling");
+        else if (option2 === "anpassen") abschliessen(s2, "spieler");
       }
     } else if (e.typ === "planung_forecast") {
       const f = s2.planung?.forecasts.find((x) => x.jahr === e.daten.jahr && x.quartal === e.daten.quartal);
       if (f && f.status === "offen") {
-        f.status = option === "abgeben" ? "abgegeben" : "zurueckgehalten";
+        f.status = option2 === "abgeben" ? "abgegeben" : "zurueckgehalten";
         melde(s2, "info", f.bezeichnung + "-Forecast " + f.jahr + ": " + (f.status === "abgegeben" ? "an Eigent\xFCmer und Bank abgegeben." : "zur\xFCckgehalten."), { modul: "planung" });
       }
     }
@@ -3551,10 +3551,10 @@
     return s2.marketing.aktionen.some((a) => a.status !== "abgesagt" && a.start === s2.woche && s2.haeuser.some((h) => h.stadt === stadt && (a.scope.typ === "alle" || a.scope.typ === "region" && a.scope.region === h.region || a.scope.typ === "cluster" && a.scope.cluster === h.cluster || a.scope.typ === "format" && a.scope.format === h.format || a.scope.typ === "haeuser" && a.scope.ids.includes(h.id))));
   }
   function stadtWachstum(s2, stadt) {
-    const werte = s2.wettbewerbStadtUmsatz[stadt] ?? [];
-    if (werte.length < 65) return false;
-    const neu = werte.slice(-13).reduce((a, b2) => a + b2, 0);
-    const vorjahr2 = werte.slice(-65, -52).reduce((a, b2) => a + b2, 0);
+    const werte2 = s2.wettbewerbStadtUmsatz[stadt] ?? [];
+    if (werte2.length < 65) return false;
+    const neu = werte2.slice(-13).reduce((a, b2) => a + b2, 0);
+    const vorjahr2 = werte2.slice(-65, -52).reduce((a, b2) => a + b2, 0);
     return vorjahr2 > 0 && neu / vorjahr2 > 1.08;
   }
   function wettbewerbWoche(s2) {
@@ -4108,8 +4108,8 @@
     if (a.typ === "itRolloutPlan") {
       const p3 = it.projekte.find((p4) => p4.id === a.projekt);
       if (!p3 || p3.phase === "abgeschlossen" || p3.erledigteCluster.length) return { ok: false, text: "Rollout-Reihenfolge nicht mehr \xE4nderbar." };
-      const gueltig2 = new Set(itCluster(s2).map((c) => c.id));
-      if (!a.clusterIds.length || new Set(a.clusterIds).size !== a.clusterIds.length || a.clusterIds.some((id) => !gueltig2.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
+      const gueltig3 = new Set(itCluster(s2).map((c) => c.id));
+      if (!a.clusterIds.length || new Set(a.clusterIds).size !== a.clusterIds.length || a.clusterIds.some((id) => !gueltig3.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
       if (a.clusterIds.some((id) => generationInCluster(s2, p3.system, id) >= p3.zielGeneration)) return { ok: false, text: "Im gew\xE4hlten Cluster ist diese Generation bereits vorhanden." };
       if (a.clusterIds.length !== p3.clusterIds.length || a.clusterIds.some((id) => !p3.clusterIds.includes(id))) return { ok: false, text: "Nach Projektstart kann nur die Reihenfolge, nicht der Umfang ge\xE4ndert werden." };
       p3.clusterIds = [...a.clusterIds];
@@ -4121,9 +4121,9 @@
     if (!Number.isInteger(a.zielGeneration) || a.zielGeneration < 1 || a.zielGeneration > 4) return { ok: false, text: "Ung\xFCltige Zielgeneration." };
     if (a.art === "kaufen" && a.zielGeneration > 3 || a.art === "dienstleister" && a.zielGeneration !== 3) return { ok: false, text: "Diese Generation ist f\xFCr die gew\xE4hlte Projektart nicht verf\xFCgbar." };
     if (it.projekte.some((p3) => p3.system === a.system && p3.phase !== "abgeschlossen")) return { ok: false, text: "F\xFCr das System l\xE4uft bereits ein Projekt." };
-    const gueltig = new Set(itCluster(s2).map((c) => c.id));
-    const clusterIds = a.clusterIds ? [...a.clusterIds] : [...gueltig];
-    if (!clusterIds.length || new Set(clusterIds).size !== clusterIds.length || clusterIds.some((id) => !gueltig.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
+    const gueltig2 = new Set(itCluster(s2).map((c) => c.id));
+    const clusterIds = a.clusterIds ? [...a.clusterIds] : [...gueltig2];
+    if (!clusterIds.length || new Set(clusterIds).size !== clusterIds.length || clusterIds.some((id) => !gueltig2.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
     if (clusterIds.some((id) => generationInCluster(s2, a.system, id) >= a.zielGeneration)) return { ok: false, text: "Zielgeneration muss in jedem gew\xE4hlten Cluster h\xF6her sein." };
     const plan2 = itProjektPlan(s2, a.system, a.art, a.zielGeneration, clusterIds.length);
     const p2 = {
@@ -4529,8 +4529,8 @@
       daten: { bereich: bereich?.id ?? "", hauscluster: cluster?.id ?? "", absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : "" }
     });
   }
-  function organisationVorlageEntscheidung(s2, e, option) {
-    if (option !== "vorschlag" || typeof e.daten.aktion !== "string" || !e.daten.aktion) return;
+  function organisationVorlageEntscheidung(s2, e, option2) {
+    if (option2 !== "vorschlag" || typeof e.daten.aktion !== "string" || !e.daten.aktion) return;
     const a = JSON.parse(e.daten.aktion);
     organisationAktion(s2, a);
   }
@@ -5040,18 +5040,18 @@
       if (b2.umsatzHistorie.length > 105) b2.umsatzHistorie.shift();
     }
   }
-  function loeseHausVorlage(s2, typ, daten, option) {
+  function loeseHausVorlage(s2, typ, daten, option2) {
     const h = s2.haeuser.find((x) => x.id === daten.haus);
     if (!h || !h.betrieb) return;
     if (typ === "haus_jahresgespraech") {
       const l = h.personal.filialleiter;
-      if (option === "coaching" && l.staerken) {
+      if (option2 === "coaching" && l.staerken) {
         s2.einmalkostenWoche += 8e3;
         const schwaechste = Object.keys(l.staerken).sort((a, b2) => l.staerken[a] - l.staerken[b2])[0];
         l.staerken[schwaechste] = clamp(l.staerken[schwaechste] + 0.055, 0, 1);
         l.skill = Object.values(l.staerken).reduce((a, b2) => a + b2, 0) / 4;
         l.moral = clamp(l.moral + 8, 0, 100);
-      } else if (option === "praemie") {
+      } else if (option2 === "praemie") {
         s2.einmalkostenWoche += 1e4;
         l.moral = clamp(l.moral + 12, 0, 100);
         l.wechselwille = clamp((l.wechselwille ?? 0) - 0.12, 0, 1);
@@ -5059,7 +5059,7 @@
       return;
     }
     if (typ === "haus_konzession_neu") {
-      if (option !== "annehmen" || h.status !== "offen") return;
+      if (option2 !== "annehmen" || h.status !== "offen") return;
       const alt = h.flaechen.find((f) => f.id === daten.flaeche && f.konzept === "eigen");
       const qm = Number(daten.qm), quote = Number(daten.quote);
       if (!alt || alt.qm < qm + 100 || !Number.isFinite(quote)) return;
@@ -5073,7 +5073,7 @@
     if (typ !== "haus_konzession") return;
     const v = h.betrieb.konzessionen[String(daten.flaeche)];
     if (!v) return;
-    v.quote = option === "neu" ? clamp(v.quote + 0.01, 0.1, 0.35) : v.quote;
+    v.quote = option2 === "neu" ? clamp(v.quote + 0.01, 0.1, 0.35) : v.quote;
     v.bis = s2.woche + 260;
     melde(s2, "info", h.name + ": Konzessionsvertrag mit " + v.name + " verl\xE4ngert.", { hausId: h.id, stadt: h.stadt });
   }
@@ -6181,14 +6181,14 @@
     }
     return m;
   }
-  function loesePersonalEntscheidung(s2, typ, daten, option) {
+  function loesePersonalEntscheidung(s2, typ, daten, option2) {
     if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
     if (typ === "personal_weihnachten") {
-      s2.personaleinsatz.weihnachten[Number(daten.jahr)] = option;
+      s2.personaleinsatz.weihnachten[Number(daten.jahr)] = option2;
     } else if (typ === "personal_kasse") {
       const id = String(daten.cluster);
-      if (option === "springer") s2.personaleinsatz.springer[id] = true;
-      if (option === "aushilfen") {
+      if (option2 === "springer") s2.personaleinsatz.springer[id] = true;
+      if (option2 === "aushilfen") {
         for (const h of gruppiereCluster(s2).get(id) ?? [])
           if (h.personaleinsatz) h.personaleinsatz.aushilfenQuote = Math.max(h.personaleinsatz.aushilfenQuote, 0.08);
       }
@@ -6791,7 +6791,7 @@
     const handeln = [];
     for (const e of s2.entscheidungen) {
       const restWochen = Math.max(0, e.frist - s2.woche);
-      const option = e.optionen.find((o) => o.id === e.standard);
+      const option2 = e.optionen.find((o) => o.id === e.standard);
       const hausId = typeof e.daten.haus === "string" ? e.daten.haus : void 0;
       const modul = e.typ.startsWith("personal_") ? "personal" : e.typ.startsWith("planung_") ? "planung" : e.typ === "organisation_vorlage" ? "organisation" : e.typ.startsWith("vorstand_") ? "vorstand" : e.typ.startsWith("it_") ? "it" : e.typ === "jahresgespraech" || e.typ === "nordline_dtc" ? "einkauf" : void 0;
       handeln.push({
@@ -6804,7 +6804,7 @@
         frist: e.frist,
         restWochen,
         optionen: e.optionen,
-        standard: option ? option.label : e.standard,
+        standard: option2 ? option2.label : e.standard,
         bezug: hausBezug(s2, hausId ? [hausId] : [], modul),
         wert: typeof e.daten.kosten === "number" ? { betrag: e.daten.kosten, einheit: "einmalig" } : void 0,
         dringend: restWochen <= 1
@@ -7418,17 +7418,17 @@
     v.sitzungen.push(sitzung);
     if (v.sitzungen.length > 24) v.sitzungen.splice(0, v.sitzungen.length - 24);
   }
-  function loeseVorstandEntscheidung(s2, e, option) {
+  function loeseVorstandEntscheidung(s2, e, option2) {
     const v = s2.vorstand;
     const r = e.daten.ressort;
     if (e.typ === "vorstand_abwerbung") {
       const p2 = v.ressorts[r]?.person;
       if (!p2 || p2.id !== e.daten.person) return;
-      if (option === "gegenangebot") {
+      if (option2 === "gegenangebot") {
         p2.gehalt = Math.round(p2.gehalt * (1 + Number(e.daten.plus) / 100) / 5e3) * 5e3;
         p2.loyalitaet = clamp(p2.loyalitaet + 15, 0, 100);
         protokolliere(s2, r, `Gegenangebot angenommen, neues Gehalt ${Math.round(p2.gehalt / 1e3)} Tsd. \u20AC.`);
-      } else if (option === "haltebonus") {
+      } else if (option2 === "haltebonus") {
         p2.haltebonus = Math.round(p2.gehalt / 2);
         p2.halteBis = s2.woche + 52;
         p2.halteStart = s2.woche;
@@ -7446,19 +7446,19 @@
       const sitzung = v.sitzungen.find((x) => x.thema?.entscheidungId === e.id);
       const p2 = v.ressorts[r]?.person;
       if (!t) return;
-      if (option === "vertagen") {
+      if (option2 === "vertagen") {
         if (p2) p2.loyalitaet = clamp(p2.loyalitaet - 3, 0, 100);
         if (sitzung?.thema) sitzung.thema.ergebnis = "vertagt";
         return;
       }
-      const anteil3 = option === "kleiner" ? 0.5 : 1;
+      const anteil3 = option2 === "kleiner" ? 0.5 : 1;
       const g = Number(e.daten.guete) * anteil3;
       einmalKosten(s2, t.kosten * anteil3);
       for (const b2 of t.boosts) v.boosts.push({ abteilung: b2.abteilung, faktor: 1 + (b2.faktor - 1) * g, bis: s2.woche + b2.wochen, text: t.titel });
       t.extra?.(s2, g);
       if (p2) p2.loyalitaet = clamp(p2.loyalitaet + 4, 0, 100);
-      if (sitzung?.thema) sitzung.thema.ergebnis = option === "kleiner" ? "kleiner umgesetzt" : "umgesetzt";
-      protokolliere(s2, r, `${t.titel} ${option === "kleiner" ? "in kleinem Umfang " : ""}beschlossen.`);
+      if (sitzung?.thema) sitzung.thema.ergebnis = option2 === "kleiner" ? "kleiner umgesetzt" : "umgesetzt";
+      protokolliere(s2, r, `${t.titel} ${option2 === "kleiner" ? "in kleinem Umfang " : ""}beschlossen.`);
       hqAktualisiere(s2);
     }
   }
@@ -8428,13 +8428,13 @@
     const jahr2 = wochenMiete(qm, g.mieteQmMonat + g.nebenkostenQmMonat) * 52;
     return ok4(`${g.name} (${g.stadt}): ${nrs.length} Etage${nrs.length > 1 ? "n" : ""} mit ${qm.toLocaleString("de-DE")} qm gemietet, ${mio(jahr2)} im Jahr warm, Herrichtung ${mio(ausbau)}${an ? `, Laufzeit ${an.laufzeitJahre} Jahre` : ""}.`);
   }
-  function kuendigeEtagen(s2, g, es) {
-    const qm = es.reduce((x, e) => x + e.qm, 0);
+  function kuendigeEtagen(s2, g, es2) {
+    const qm = es2.reduce((x, e) => x + e.qm, 0);
     const wochen = restmietWochen(s2, g);
     const rest = eur(wochenMiete(qm, g.mieteQmMonat) * hqRechtFaktor(s2));
     if (wochen > 0 && rest > 0) s2.hq.restmieten.push({ text: `${g.name} (${g.stadt})`, mieteWoche: rest, bis: s2.woche + wochen });
     const ohnePlatz = [];
-    for (const e of es) {
+    for (const e of es2) {
       for (const id of raeumeEtage(s2, g, e)) if (!ohnePlatz.includes(id)) ohnePlatz.push(id);
       e.gemietet = false;
     }
@@ -8454,8 +8454,8 @@
   function hqGebaeudeKuendigen(s2, gebaeudeId) {
     const g = gebaeude(s2, gebaeudeId);
     if (!g) return fehler4("Geb\xE4ude nicht gefunden.");
-    const es = g.etagen.filter((e) => e.gemietet);
-    const r = kuendigeEtagen(s2, g, es);
+    const es2 = g.etagen.filter((e) => e.gemietet);
+    const r = kuendigeEtagen(s2, g, es2);
     s2.hq.gebaeude = s2.hq.gebaeude.filter((x) => x !== g);
     pruefeSitz(s2);
     hqAktualisiere(s2);
@@ -12354,45 +12354,45 @@
   function zufallsProjektname(s2) {
     return waehle(s2, PROJEKTNAMEN);
   }
-  function loeseEntscheidung(s2, id, option, standardGew\u00E4hlt = false) {
+  function loeseEntscheidung(s2, id, option2, standardGew\u00E4hlt = false) {
     const e = s2.entscheidungen.find((x) => x.id === id);
     if (!e) return "Entscheidung nicht gefunden.";
-    if (!e.optionen.some((o) => o.id === option)) return "Unbekannte Option.";
+    if (!e.optionen.some((o) => o.id === option2)) return "Unbekannte Option.";
     s2.entscheidungen = s2.entscheidungen.filter((x) => x.id !== id);
     (s2.entscheidungsprotokoll ?? (s2.entscheidungsprotokoll = [])).push({
       id: e.id,
       typ: e.typ,
       titel: e.titel,
-      option,
-      ergebnis: e.optionen.find((o) => o.id === option)?.label ?? option,
+      option: option2,
+      ergebnis: e.optionen.find((o) => o.id === option2)?.label ?? option2,
       woche: s2.woche,
       standard: standardGew\u00E4hlt,
       hausId: typeof e.daten.haus === "string" ? e.daten.haus : void 0
     });
     s2.entscheidungsprotokoll = s2.entscheidungsprotokoll.filter((p2) => s2.woche - p2.woche <= 52);
     if (e.typ.startsWith("personal_")) {
-      loesePersonalEntscheidung(s2, e.typ, e.daten, option);
+      loesePersonalEntscheidung(s2, e.typ, e.daten, option2);
       return null;
     }
     if (e.typ.startsWith("vorstand_")) {
-      loeseVorstandEntscheidung(s2, e, option);
+      loeseVorstandEntscheidung(s2, e, option2);
       return null;
     }
     if (e.typ === "organisation_vorlage") {
-      organisationVorlageEntscheidung(s2, e, option);
+      organisationVorlageEntscheidung(s2, e, option2);
       return null;
     }
     if (e.typ.startsWith("planung_")) {
-      planungEntscheidung(s2, e, option);
+      planungEntscheidung(s2, e, option2);
       return null;
     }
     if (e.typ.startsWith("haus_")) {
-      loeseHausVorlage(s2, e.typ, e.daten, option);
+      loeseHausVorlage(s2, e.typ, e.daten, option2);
       return null;
     }
     const d = e.daten;
     if (e.typ === "organisation_vorlage" && typeof d.umbauProgramm === "string") {
-      if (option === "annehmen" || option === "vorschlag") umbauProgrammEntscheiden(s2, d.umbauProgramm);
+      if (option2 === "annehmen" || option2 === "vorschlag") umbauProgrammEntscheiden(s2, d.umbauProgramm);
       return null;
     }
     const haus2 = typeof d.haus === "string" ? s2.haeuser.find((h) => h.id === d.haus) : void 0;
@@ -12400,12 +12400,12 @@
       case "wettbewerb_eroeffnung": {
         const wb = s2.wettbewerber.find((x) => x.id === d.wettbewerber);
         if (!wb) return null;
-        if (option === "aktion") {
+        if (option2 === "aktion") {
           einmalKosten(s2, 18e4);
           wb.abwehrBis = s2.woche + 4;
           wb.abwehrFaktor = 0.55;
           melde(s2, "info", "Er\xF6ffnungsaktion gegen " + wb.name + ": kurzfristiger Kundenschutz, geringere Marge.");
-        } else if (option === "mailing" && s2.marketing.kundenkarte) {
+        } else if (option2 === "mailing" && s2.marketing.kundenkarte) {
           einmalKosten(s2, 65e3);
           wb.abwehrBis = s2.woche + 4;
           wb.abwehrFaktor = 0.7;
@@ -12415,7 +12415,7 @@
       }
       case "instandhaltung":
         if (!haus2) return null;
-        if (option === "zahlen") {
+        if (option2 === "zahlen") {
           einmalKosten(s2, Number(d.kosten));
           s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
           s2.kapitalflussOffen.investitionen -= Number(d.kosten);
@@ -12425,10 +12425,10 @@
       case "mietende": {
         if (!haus2) return null;
         const markt = Number(d.markt);
-        if (option === "verlaengern") {
+        if (option2 === "verlaengern") {
           haus2.miete.mieteWoche = markt;
           haus2.miete.bisWoche += 260;
-        } else if (option === "nachverhandeln") {
+        } else if (option2 === "nachverhandeln") {
           const p2 = 0.3 + 0.5 * (s2.stakeholder.vermieter / 100);
           if (chance(s2, p2)) {
             haus2.miete.mieteWoche = eur(markt * 0.88);
@@ -12451,11 +12451,11 @@
       case "jahresgespraech": {
         const l = s2.lieferanten.find((x) => x.id === d.lieferant);
         if (!l) return null;
-        if (option === "mengenzusage") {
+        if (option2 === "mengenzusage") {
           l.wkzQuote += 8e-3;
           l.vertrauen = clamp(l.vertrauen + 6, 0, 100);
           for (const g of Object.keys(l.gruppen)) s2.orderLevel[g] = Math.max(s2.orderLevel[g] ?? 1, 1.05);
-        } else if (option === "platzierung") l.vertrauen = clamp(l.vertrauen + 4, 0, 100);
+        } else if (option2 === "platzierung") l.vertrauen = clamp(l.vertrauen + 4, 0, 100);
         else {
           l.wkzQuote += 4e-3;
           l.vertrauen = clamp(l.vertrauen - 8, 0, 100);
@@ -12465,7 +12465,7 @@
       case "nordline_dtc": {
         const l = s2.lieferanten.find((x) => x.id === "nordline");
         if (!l) return null;
-        if (option === "investieren") {
+        if (option2 === "investieren") {
           einmalKosten(s2, 35e5);
           l.vertrauen = clamp(l.vertrauen + 10, 0, 100);
         } else {
@@ -23871,10 +23871,10 @@
       const indices = [];
       const geometryIndex = geometry.index;
       const geometryPosition = geometry.attributes.position;
-      let version = 0;
+      let version2 = 0;
       if (geometryIndex !== null) {
         const array = geometryIndex.array;
-        version = geometryIndex.version;
+        version2 = geometryIndex.version;
         for (let i = 0, l = array.length; i < l; i += 3) {
           const a = array[i + 0];
           const b2 = array[i + 1];
@@ -23883,7 +23883,7 @@
         }
       } else if (geometryPosition !== void 0) {
         const array = geometryPosition.array;
-        version = geometryPosition.version;
+        version2 = geometryPosition.version;
         for (let i = 0, l = array.length / 3 - 1; i < l; i += 3) {
           const a = i + 0;
           const b2 = i + 1;
@@ -23894,7 +23894,7 @@
         return;
       }
       const attribute = new (arrayNeedsUint32(indices) ? Uint32BufferAttribute : Uint16BufferAttribute)(indices, 1);
-      attribute.version = version;
+      attribute.version = version2;
       const previousAttribute = wireframeAttributes.get(geometry);
       if (previousAttribute) attributes.remove(previousAttribute);
       wireframeAttributes.set(geometry, attribute);
@@ -27128,14 +27128,14 @@
     let currentPolygonOffsetUnits = null;
     const maxTextures = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     let lineWidthAvailable = false;
-    let version = 0;
+    let version2 = 0;
     const glVersion = gl.getParameter(gl.VERSION);
     if (glVersion.indexOf("WebGL") !== -1) {
-      version = parseFloat(/^WebGL (\d)/.exec(glVersion)[1]);
-      lineWidthAvailable = version >= 1;
+      version2 = parseFloat(/^WebGL (\d)/.exec(glVersion)[1]);
+      lineWidthAvailable = version2 >= 1;
     } else if (glVersion.indexOf("OpenGL ES") !== -1) {
-      version = parseFloat(/^OpenGL ES (\d)/.exec(glVersion)[1]);
-      lineWidthAvailable = version >= 2;
+      version2 = parseFloat(/^OpenGL ES (\d)/.exec(glVersion)[1]);
+      lineWidthAvailable = version2 >= 2;
     }
     let currentTextureSlot = null;
     let currentBoundTextures = {};
@@ -60666,10 +60666,10 @@
       get(z2, k) {
         const methode = Reflect.get(z2, k);
         if (typeof methode !== "function" || !["box", "zyl", "geo"].includes(k)) return methode;
-        return (...werte) => {
+        return (...werte2) => {
           const stelle2 = k === "geo" ? 4 : 6;
-          if (typeof werte[stelle2] === "string") werte[stelle2] = farbeGeneration(werte[stelle2], generation);
-          return methode.apply(z2, werte);
+          if (typeof werte2[stelle2] === "string") werte2[stelle2] = farbeGeneration(werte2[stelle2], generation);
+          return methode.apply(z2, werte2);
         };
       }
     });
@@ -62437,7 +62437,7 @@
     const [nI, iwE] = passe2(X1 - X0, iw), [nJ, itE] = passe2(Z1 - Z0, it);
     const pwE = iwE + gap, ptE = itE + gap;
     const offX = (X1 - X0 - (nI * pwE - gap)) / 2, offZ = (Z1 - Z0 - (nJ * ptE - gap)) / 2;
-    const gueltig = (sx0, sz0, sx1, sz1) => {
+    const gueltig2 = (sx0, sz0, sx1, sz1) => {
       for (let i = Math.floor(sx0 / R); i <= Math.floor((sx1 - 1e-6) / R); i++) {
         const a = cols.get(i);
         if (!a) return false;
@@ -62453,7 +62453,7 @@
     const slots = [];
     for (let i = 0; i < nI; i++) for (let j = 0; j < nJ; j++) {
       const cx = X0 + offX + i * pwE + iwE / 2, cz = Z0 + offZ + j * ptE + itE / 2;
-      if (gueltig(cx - iwE / 2, cz - itE / 2, cx + iwE / 2, cz + itE / 2)) slots.push({ i, j, cx, cz });
+      if (gueltig2(cx - iwE / 2, cz - itE / 2, cx + iwE / 2, cz + itE / 2)) slots.push({ i, j, cx, cz });
     }
     if (!slots.length && X1 - X0 > 2.6 && Z1 - Z0 > 2.6) slots.push({ i: 0, j: 0, cx: (X0 + X1) / 2, cz: (Z0 + Z1) / 2, klein: true });
     const vergeben = /* @__PURE__ */ new Map();
@@ -64252,7 +64252,7 @@
   var SPORT_ABVERKAUF_TISCH = definition("sport_abverkauf_tisch", "Sport-Abverkaufstisch", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d) => {
     L2.box(4.8, 0.16, 1.1, 0, 0.82, 0.625, "#cdd3d7");
     for (const x of [-2.2, 2.2]) for (const z2 of [0.15, 1.1]) L2.box(0.09, 0.82, 0.09, x, 0, z2, "#727b83");
-    if (d < 0.3) return;
+    if (!detail(d)) return;
     for (let i = 0; i < 12; i++) {
       const x = -2.05 + i % 6 * 0.82, z2 = i < 6 ? 0.34 : 0.84;
       L2.box(0.65, 0.2, 0.35, x, 1, z2, ["#b7474d", "#d5b86b", "#497b9f", "#7c8e62"][Math.floor(r() * 4)]);
@@ -64261,7 +64261,7 @@
   var SPORT_ABVERKAUF_GITTER = definition("sport_abverkauf_gitter", "Sport-Abverkaufskorb", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d) => {
     L2.box(4.8, 0.12, 1, 0, 0.25, 0.625, "#737f89");
     for (const x of [-2.3, 2.3]) for (const z2 of [0.18, 1.07]) L2.box(0.06, 0.92, 0.06, x, 0.25, z2, "#a7b4bd");
-    if (d < 0.3) return;
+    if (!detail(d)) return;
     for (let i = 0; i < 9; i++) L2.box(
       0.42,
       0.2,
@@ -64616,8 +64616,8 @@
     if (!f || typeof f !== "object") throw new Error("flaeche muss Au\xDFenma\xDFe und Eing\xE4nge enthalten");
     const breite = down(num(f.breite ?? f.bw ?? f.w ?? f.B)), tiefe = down(num(f.tiefe ?? f.bd ?? f.d ?? f.T));
     if (breite < 15 || tiefe < 15) throw new Error("Laden f\xFCr das 1,25-m-Raster zu klein");
-    const es = f.eingaenge ?? (f.eingang ? [f.eingang] : []);
-    const eingaenge = (es.length ? es : [{ x: breite / 2, z: tiefe }]).map((p2) => ({
+    const es2 = f.eingaenge ?? (f.eingang ? [f.eingang] : []);
+    const eingaenge = (es2.length ? es2 : [{ x: breite / 2, z: tiefe }]).map((p2) => ({
       x: clamp7(snap(num(p2.x, breite / 2)), U, breite - U),
       z: clamp7(snap(num(p2.z, tiefe)), 0, tiefe)
     }));
@@ -65019,7 +65019,7 @@
     const verbote = () => [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld];
     for (const raum of plan2.abteilungen) {
       const passend2 = () => plan2.moebel.filter((m) => m.abteilung === raum.id);
-      const gueltig = () => {
+      const gueltig2 = () => {
         const ms = passend2(), t = /* @__PURE__ */ new Map();
         for (const m of ms) {
           const art = m.moebelart ?? m.id;
@@ -65027,7 +65027,7 @@
         }
         return t.size >= 4 && [...t.values()].every((n) => n <= 0.4 * ms.length + 1e-8);
       };
-      if (gueltig()) continue;
+      if (gueltig2()) continue;
       const ids = SPORT_MIX_WAENDE[raum.id] ?? SPORT_MIX_WAENDE.sporttextil;
       const kandidaten2 = [];
       for (let z2 = raum.z; z2 + 2.5 <= raum.z + raum.d + 1e-8; z2 += U)
@@ -65038,14 +65038,14 @@
           kandidaten2.push({ x, z: z2, winkel: 0 });
       let gesetzt = 0;
       for (const k of kandidaten2) {
-        if (gueltig() || gesetzt >= 8) break;
+        if (gueltig2() || gesetzt >= 8) break;
         const id = ids[gesetzt % ids.length];
         const m = item(id, k.x, k.z, k.winkel, raum.id, { innenwand: true, moebelart: id });
         if (!passeIn(m, raum) || !passe(m, plan2, verbote())) continue;
         plan2.moebel.push(m);
         gesetzt++;
       }
-      if (!gueltig()) plan2.hinweise.push("Sortimentsmix nicht erreichbar: " + raum.id);
+      if (!gueltig2()) plan2.hinweise.push("Sortimentsmix nicht erreichbar: " + raum.id);
     }
   }
   function ladenplan(flaeche5, profil2, abteilungen, seed = 1) {
@@ -97067,10 +97067,10 @@
     ra.abverkauf = e > 0 && e === g.obereEtage && g.abverkauf;
     ra.erlebnis = e === 0 ? g.erlebnis : null;
     if (!ra.erlebnis || ra.nx < 5 || ra.nz < 3) return ra;
-    const gueltig = /* @__PURE__ */ new Set([null, "lauf", "aktion"]);
+    const gueltig2 = /* @__PURE__ */ new Set([null, "lauf", "aktion"]);
     const kandidaten2 = [];
     for (let i2 = 1; i2 < ra.nx - 2; i2++)
-      if (gueltig.has(ra.typ[i2][ra.nz - 1]) && gueltig.has(ra.typ[i2 + 1][ra.nz - 1])) kandidaten2.push(i2);
+      if (gueltig2.has(ra.typ[i2][ra.nz - 1]) && gueltig2.has(ra.typ[i2 + 1][ra.nz - 1])) kandidaten2.push(i2);
     if (!kandidaten2.length) {
       ra.erlebnis = null;
       return ra;
@@ -122202,10 +122202,168 @@
     } };
   }
 
+  // src/ui/einstellungen.js
+  var SPEICHER = "hartwig.einstellungen.v1";
+  var definitionen2 = /* @__PURE__ */ new Map();
+  var werte = null;
+  function gespeicherteWerte() {
+    if (werte) return werte;
+    werte = {};
+    try {
+      const roh2 = typeof localStorage !== "undefined" ? localStorage.getItem(SPEICHER) : null;
+      const gelesen = roh2 ? JSON.parse(roh2) : {};
+      if (gelesen && typeof gelesen === "object" && !Array.isArray(gelesen)) werte = gelesen;
+    } catch {
+    }
+    return werte;
+  }
+  function optionenVon(d) {
+    return Array.isArray(d.optionen) ? d.optionen.map((o) => typeof o === "object" ? o.wert ?? o.value : o) : [];
+  }
+  function gueltig(d, wert) {
+    if (d.art === "schalter") return typeof wert === "boolean" ? wert : d.standard;
+    if (d.art === "auswahl") return optionenVon(d).includes(wert) ? wert : d.standard;
+    if (d.art === "regler") {
+      const o = d.optionen ?? {}, min = Number(o.min ?? 0), max = Number(o.max ?? 100);
+      const zahl3 = Number(wert), schritt = Number(o.schritt ?? o.step ?? 1);
+      if (!Number.isFinite(zahl3)) return d.standard;
+      const rund2 = schritt > 0 ? min + Math.round((zahl3 - min) / schritt) * schritt : zahl3;
+      return Math.min(max, Math.max(min, rund2));
+    }
+    return d.standard;
+  }
+  function meldeSchalter({ schluessel, titel, gruppe: gruppe2, art = "schalter", optionen: optionen2, standard }) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(schluessel ?? "") || !titel || !gruppe2 || !["schalter", "auswahl", "regler"].includes(art))
+      throw new Error("Ung\xFCltige Einstellungsdefinition.");
+    if (definitionen2.has(schluessel)) return;
+    const d = { schluessel, titel, gruppe: gruppe2, art, optionen: optionen2, standard };
+    if (art === "schalter" && typeof standard !== "boolean") throw new Error("Schalter ben\xF6tigen einen booleschen Standardwert.");
+    if (art === "auswahl" && !optionenVon(d).includes(standard)) throw new Error("Auswahlstandard fehlt in Optionen.");
+    definitionen2.set(schluessel, d);
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("einstellung-registriert"));
+  }
+  function einstellung(schluessel) {
+    const d = definitionen2.get(schluessel);
+    return d ? gueltig(d, gespeicherteWerte()[schluessel] ?? d.standard) : void 0;
+  }
+  function setzeEinstellung(schluessel, wert) {
+    const d = definitionen2.get(schluessel);
+    if (!d) throw new Error("Unbekannte Einstellung: " + schluessel);
+    const neu = gueltig(d, wert), alt = einstellung(schluessel);
+    if (Object.is(neu, alt)) return alt;
+    gespeicherteWerte()[schluessel] = neu;
+    try {
+      if (typeof localStorage !== "undefined") localStorage.setItem(SPEICHER, JSON.stringify(werte));
+    } catch {
+    }
+    if (typeof window !== "undefined") {
+      if (["schrift", "animationen", "farbschwaeche"].includes(schluessel)) anwendenDarstellung();
+      window.dispatchEvent(new CustomEvent("einstellung", { detail: { schluessel, wert: neu } }));
+    }
+    return neu;
+  }
+  function effektiveAnimation() {
+    const wunsch = einstellung("animationen") ?? "voll";
+    if (wunsch === "aus") return "aus";
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "reduziert";
+    } catch {
+    }
+    return wunsch;
+  }
+  function anwendenDarstellung() {
+    if (typeof document === "undefined") return;
+    document.documentElement.style.setProperty("--schrift", { klein: 0.9, normal: 1, gross: 1.16 }[einstellung("schrift")] ?? 1);
+    document.documentElement.dataset.animation = effektiveAnimation();
+    document.body?.classList.toggle("farbschwach", einstellung("farbschwaeche") === true);
+  }
+  var einstellungen = [
+    { schluessel: "schrift", titel: "Schriftgr\xF6\xDFe", gruppe: "Darstellung", art: "auswahl", standard: "normal", optionen: [{ wert: "klein", titel: "Klein" }, { wert: "normal", titel: "Normal" }, { wert: "gross", titel: "Gro\xDF" }] },
+    { schluessel: "zahlen", titel: "Zahlenformat", gruppe: "Darstellung", art: "auswahl", standard: "kompakt", optionen: [{ wert: "kompakt", titel: "Kompakt \xB7 12,4 Mio. \u20AC" }, { wert: "voll", titel: "Voll \xB7 12.403.221 \u20AC" }] },
+    { schluessel: "animationen", titel: "Animationen", gruppe: "Darstellung", art: "auswahl", standard: "voll", optionen: [{ wert: "voll", titel: "Voll" }, { wert: "reduziert", titel: "Reduziert" }, { wert: "aus", titel: "Aus" }] },
+    { schluessel: "farbschwaeche", titel: "Farbschw\xE4che-Modus", gruppe: "Darstellung", art: "schalter", standard: false },
+    { schluessel: "warnung", titel: "Vor ablaufenden Vorg\xE4ngen warnen", gruppe: "Spiel", art: "schalter", standard: true },
+    { schluessel: "wochenbericht", titel: "Wochenbericht", gruppe: "Spiel", art: "auswahl", standard: "voll", optionen: [{ wert: "voll", titel: "Voll \xB7 11 Sekunden" }, { wert: "kurz", titel: "Kurz \xB7 2 Sekunden" }, { wert: "aus", titel: "Aus" }] },
+    { schluessel: "autospeichern", titel: "Autospeichern", gruppe: "Spiel", art: "schalter", standard: true }
+  ];
+  for (const d of einstellungen) meldeSchalter(d);
+  var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
+  var version = () => true ? "bdbd57e" : "Entwicklung";
+  function einstellungenModul(ctx) {
+    let aktiv3 = false;
+    function feld(d) {
+      const v = einstellung(d.schluessel), id = "einst-" + d.schluessel;
+      if (d.art === "schalter") return '<label class="einst-zeile einst-schalter" for="' + id + '"><span>' + esc(d.titel) + '</span><input id="' + id + '" type="checkbox" data-einstellung="' + d.schluessel + '" ' + (v ? "checked" : "") + ' aria-label="' + esc(d.titel) + '"></label>';
+      if (d.art === "auswahl") return '<label class="einst-zeile" for="' + id + '"><span>' + esc(d.titel) + '</span><select id="' + id + '" data-einstellung="' + d.schluessel + '" aria-label="' + esc(d.titel) + '">' + d.optionen.map((o2) => {
+        const p2 = option(o2);
+        return '<option value="' + esc(p2.wert) + '" ' + (p2.wert === v ? "selected" : "") + ">" + esc(p2.titel) + "</option>";
+      }).join("") + "</select></label>";
+      const o = d.optionen ?? {};
+      return '<label class="einst-zeile" for="' + id + '"><span>' + esc(d.titel) + ': <output id="' + id + '-wert">' + esc(v) + '</output></span><input id="' + id + '" type="range" data-einstellung="' + d.schluessel + '" min="' + esc(o.min ?? 0) + '" max="' + esc(o.max ?? 100) + '" step="' + esc(o.schritt ?? o.step ?? 1) + '" value="' + esc(v) + '" aria-label="' + esc(d.titel) + '"></label>';
+    }
+    function zeigen(halten = false) {
+      const scroll = halten ? document.getElementById("pinhalt").scrollTop : 0;
+      const gruppen = /* @__PURE__ */ new Map();
+      for (const d of definitionen2.values()) {
+        if (!gruppen.has(d.gruppe)) gruppen.set(d.gruppe, []);
+        gruppen.get(d.gruppe).push(feld(d));
+      }
+      const html = [...gruppen.entries()].map(([name2, zeilen]) => '<section class="karte einst-gruppe"><h3 class="khead">' + esc(name2) + "</h3>" + zeilen.join("") + "</section>").join("") + '<section class="karte einst-gruppe"><h3 class="khead">\xDCber</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Die Einstellungen gelten ger\xE4teweit und geh\xF6ren nicht zum Spielstand.</p></section>';
+      ctx.panel("Einstellungen", "Darstellung, Bedienung und Spiel", html, "gross");
+      aktiv3 = true;
+      document.getElementById("pinhalt").scrollTop = scroll;
+    }
+    const inhalt = document.getElementById("pinhalt");
+    inhalt.addEventListener("change", (e) => {
+      if (!aktiv3 || !e.target.matches("[data-einstellung]")) return;
+      const d = definitionen2.get(e.target.dataset.einstellung);
+      if (!d) return;
+      setzeEinstellung(d.schluessel, d.art === "schalter" ? e.target.checked : e.target.value);
+      if (d.art !== "regler") zeigen(true);
+    });
+    inhalt.addEventListener("input", (e) => {
+      if (!aktiv3 || !e.target.matches('input[type="range"][data-einstellung]')) return;
+      const wert = setzeEinstellung(e.target.dataset.einstellung, Number(e.target.value));
+      const output = document.getElementById(e.target.id + "-wert");
+      if (output) output.textContent = wert;
+    });
+    window.addEventListener("einstellung-registriert", () => {
+      if (aktiv3) zeigen(true);
+    });
+    anwendenDarstellung();
+    try {
+      const medien = window.matchMedia("(prefers-reduced-motion: reduce)");
+      medien.addEventListener?.("change", anwendenDarstellung);
+    } catch {
+    }
+    return { oeffne: () => zeigen(), zu: () => {
+      aktiv3 = false;
+    }, aktiv: () => aktiv3, neuZeichnen: () => {
+      if (aktiv3) zeigen(true);
+    } };
+  }
+  function aktiviereBarrierefreiheit() {
+    function beschriften(wurzel2 = document) {
+      const knoepfe = [...wurzel2.matches?.("button") ? [wurzel2] : [], ...wurzel2.querySelectorAll("button")];
+      for (const b2 of knoepfe) {
+        if (b2.hasAttribute("aria-label")) continue;
+        const text3 = (b2.textContent ?? "").replace(/\s+/g, " ").trim();
+        const label = text3 === "\xD7" ? "Schlie\xDFen" : text3 === "+" ? "Erh\xF6hen" : text3 === "\u2212" || text3 === "-" ? "Verringern" : text3 || b2.getAttribute("title") || b2.id.replace(/[-_]/g, " ") || "Schaltfl\xE4che";
+        b2.setAttribute("aria-label", label);
+      }
+    }
+    beschriften();
+    new MutationObserver((mutationen) => {
+      for (const m of mutationen) for (const node of m.addedNodes) if (node.nodeType === 1) beschriften(node);
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
   // src/ui/format.js
   var fmt = new Intl.NumberFormat("de-DE");
   function geld(x) {
     const a = Math.abs(x), v = x < 0 ? "\u2212" : "";
+    if (einstellung("zahlen") === "voll") return `${v}${fmt.format(Math.round(a))} \u20AC`;
     if (a >= 1e9) return `${v}${(a / 1e9).toLocaleString("de-DE", { maximumFractionDigits: 2 })} Mrd. \u20AC`;
     if (a >= 1e6) return `${v}${(a / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Mio. \u20AC`;
     if (a >= 1e4) return `${v}${fmt.format(Math.round(a / 1e3))} Tsd. \u20AC`;
@@ -122214,7 +122372,7 @@
   var pz3 = (x, n = 0) => `${(x * 100).toLocaleString("de-DE", { minimumFractionDigits: n, maximumFractionDigits: n })} %`;
   var dez = (x, n = 1) => (x ?? 0).toLocaleString("de-DE", { minimumFractionDigits: n, maximumFractionDigits: n });
   var kwVon2 = (w) => (w % 52 + 52) % 52 + 1;
-  var esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  var esc2 = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
   // src/ui/quelle.js
   function quelle(E) {
@@ -122280,14 +122438,14 @@
     for (const m of u.marken) {
       const veraltet = m.stilAktualitaet < 45;
       const status = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
-      h += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
-      h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${"\u2605".repeat(m.qualitaet)}${"\u2606".repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc(m.beschaffungName)}</span></div>`;
+      h += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
+      h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${"\u2605".repeat(m.qualitaet)}${"\u2606".repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
       h += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
       h += `<div class="mzeile"><span>Bekanntheit</span>${balken6(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
       h += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltet ? "#d23c32" : "#2f8f5b")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
       h += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
-      h += `<div class="olief">${m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0).map((w) => `${esc(w.name)} ${pz3(w.anteilIst)}`).join(" \xB7 ") || "keine Warengruppe"}</div>`;
-      if (m.hinweise?.length) h += `<div class="olief warnung">${m.hinweise.map(esc).join(" \xB7 ")}</div>`;
+      h += `<div class="olief">${m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0).map((w) => `${esc2(w.name)} ${pz3(w.anteilIst)}`).join(" \xB7 ") || "keine Warengruppe"}</div>`;
+      if (m.hinweise?.length) h += `<div class="olief warnung">${m.hinweise.map(esc2).join(" \xB7 ")}</div>`;
       if (ui.em.einstellen === m.id) h += `<div class="oknoepfe"><button class="rot" data-a="emEinstellenJa" data-v="${m.id}">Wirklich einstellen</button><button data-a="emEinstellenNein">Behalten</button></div>`;
       else {
         h += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000">\u2212</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000">+</button></div></div>`;
@@ -122319,7 +122477,7 @@
     h += `<div class="schritte">${SCHRITTE.map((t, i) => `<button class="${i === A.schritt ? "an" : i < A.schritt ? "fertig" : ""}" data-a="emSchritt" data-v="${i}"><b>${i + 1}</b>${t}</button>`).join("")}</div>`;
     h += '<div class="karte steuerung">';
     if (A.schritt === 0) {
-      if (!A.id) h += feld("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc(x.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
+      if (!A.id) h += feld("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
       h += feld("Alter", seg("emAlter", m.zielgruppe.alter, ALTER));
       h += feld("Geschlecht", seg("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
     } else if (A.schritt === 1) {
@@ -122327,7 +122485,7 @@
       const liste = [...v.passendeWgs].sort((a, b2) => b2.passung - a.passung);
       const inh = liste.length ? liste.map((w) => {
         const a = m.wgAnteile[w.wg];
-        return `<button class="wgwahl ${a ? "an" : ""}" data-a="emWg" data-v="${w.wg}"><span>${esc(w.name)} <i>${esc(ctx.E.GRUPPEN[w.bereich]?.name ?? w.bereich)} \xB7 ${w.passung >= 1 ? "passt sehr gut" : w.passung >= 0.7 ? "passt gut" : "passt bedingt"}</i></span><b>${a ? pz3(a) : "+"}</b></button>`;
+        return `<button class="wgwahl ${a ? "an" : ""}" data-a="emWg" data-v="${w.wg}"><span>${esc2(w.name)} <i>${esc2(ctx.E.GRUPPEN[w.bereich]?.name ?? w.bereich)} \xB7 ${w.passung >= 1 ? "passt sehr gut" : w.passung >= 0.7 ? "passt gut" : "passt bedingt"}</i></span><b>${a ? pz3(a) : "+"}</b></button>`;
       }).join("") : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
       h += feld("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
     } else if (A.schritt === 2) {
@@ -122336,21 +122494,21 @@
       h += feld("Qualit\xE4t", seg("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, "\u2605".repeat(x)])));
     } else if (A.schritt === 3) {
       const B2 = ctx.q.beschaffung();
-      h += feld("Beschaffung", `<div class="wahlkarten">${Object.entries(B2).map(([k, b2]) => `<button class="${m.beschaffung === k ? "an" : ""}" data-a="emBeschaffung" data-v="${k}"><b>${esc(b2.name)}</b><small>${b2.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b2.mindestabnahme)}, ${punkte(b2.mehrmarge)} Marge</small></button>`).join("")}</div>`);
+      h += feld("Beschaffung", `<div class="wahlkarten">${Object.entries(B2).map(([k, b2]) => `<button class="${m.beschaffung === k ? "an" : ""}" data-a="emBeschaffung" data-v="${k}"><b>${esc2(b2.name)}</b><small>${b2.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b2.mindestabnahme)}, ${punkte(b2.mehrmarge)} Marge</small></button>`).join("")}</div>`);
       h += feld("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
     } else {
-      h += feld("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc(m.name)}">`);
+      h += feld("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
       if (!A.id) h += feld("Farbe", `<div class="farben">${FARBEN5.map((f) => `<button class="${m.farbe === f ? "an" : ""}" style="background:${f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
     }
     h += "</div>";
     const nWg = Object.values(m.wgAnteile).filter((a) => a > 0).length;
     const kosten = A.id ? u.kosten.neupositionierung : v.kosten;
-    h += `<div class="karte vorschau"><div class="mkopf" style="background:${m.farbe}"><b>${esc(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie} \xB7 ${preisText(m.preislage)} \xB7 ${m.stil}</small></div>`;
+    h += `<div class="karte vorschau"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie} \xB7 ${preisText(m.preislage)} \xB7 ${m.stil}</small></div>`;
     h += `<div class="owerte"><div><span>${A.id ? "Kosten" : "Einmalkosten"}</span><b data-p="v:kosten">${geld(kosten)}</b></div><div><span>${A.id ? "Umstellung" : "Erste Ware in"}</span><b data-p="v:aufbau">${A.id ? u.kosten.neupositionierungWochen : v.aufbauWochen} Wochen</b></div><div><span>Mehrmarge</span><b data-p="v:marge">${punkte(v.mehrmarge)}</b></div></div>`;
     h += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(v.passungRegion, "v:passung")}`;
     h += `<div class="olief">${nWg} Warengruppen \xB7 Mindestabnahme ${geld(v.mindestabnahme)} je Order${v.kapazitaetFrei > 0 ? ` \xB7 Platz f\xFCr ${String(v.kapazitaetFrei).replace(".", ",")} weitere Marken` : ""}</div>`;
     if (v.kapazitaetFrei <= 0 && !A.id) h += '<div class="olief warnung">Der Einkauf ist mit den bestehenden Marken ausgelastet: jede weitere Marke kostet Wirkung, mehr Platz bringt eine h\xF6here Stufe der Abteilung Einkauf im HQ.</div>';
-    if (!v.ok && v.fehler && !A.id) h += `<div class="olief warnung">${esc(v.fehler)}</div>`;
+    if (!v.ok && v.fehler && !A.id) h += `<div class="olief warnung">${esc2(v.fehler)}</div>`;
     h += "</div>";
     const letzte = A.schritt === SCHRITTE.length - 1;
     const gesperrt2 = !A.id && (!nWg || !v.ok);
@@ -122512,8 +122670,8 @@
   // src/ui/ware.js
   var reichweite = (r) => r == null ? "\u2013" : (r > 99 ? "> 99" : r.toFixed(1).replace(".", ",")) + (r == null ? "" : " Wo.");
   var proz = (x) => pz3(Number.isFinite(x) ? x : 0, 1);
-  var knopf = (a, v, text3, extra = "") => `<button class="mini" data-a="${a}" data-v="${esc(String(v))}" ${extra}>${text3}</button>`;
-  var optionen = (werte, auswahl4) => werte.map(([id, name2]) => `<option value="${esc(id)}" ${id === auswahl4 ? "selected" : ""}>${esc(name2)}</option>`).join("");
+  var knopf = (a, v, text3, extra = "") => `<button class="mini" data-a="${a}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
+  var optionen = (werte2, auswahl4) => werte2.map(([id, name2]) => `<option value="${esc2(id)}" ${id === auswahl4 ? "selected" : ""}>${esc2(name2)}</option>`).join("");
   var teile = (n) => fmt.format(Math.round(n));
   function warenSeite(ctx, ui, tabs) {
     const d = ctx.E.warenUebersicht(ctx.s());
@@ -122525,7 +122683,7 @@
       html += `<div class="legende">Saisonplanung circa 30 Wochen vor dem Start. Budgets in Euro EK (Open-to-Buy), Zielmarge, Zielabverkauf, Breite und Vororderquote. Solange keine \xC4nderung erfolgt, gilt die bestehende Einkaufssteuerung.</div>`;
       html += '<div class="karte liste"><div class="lkopf"><span class="lname">Warengruppe / Saison</span><span class="lwert">Budget EK</span><span class="lwert">Zielabverkauf</span></div>';
       for (const p2 of d.plaene) {
-        html += `<div class="lzeile"><span class="lname">${esc(p2.name)}<i>${esc(p2.saisonName)} \xB7 Marge ${proz(p2.zielmarge)} \xB7 Breite ${proz(p2.breite)} \xB7 Vororder ${proz(p2.vororderquote)}</i><span class="lknoepfe">${knopf("warePlanMinus", p2.wg, "\u22125 %")} ${knopf("warePlanPlus", p2.wg, "+5 %")}</span></span><span class="lwert"><i data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</i></span><span class="lwert">${proz(p2.zielabverkauf)}</span></div>`;
+        html += `<div class="lzeile"><span class="lname">${esc2(p2.name)}<i>${esc2(p2.saisonName)} \xB7 Marge ${proz(p2.zielmarge)} \xB7 Breite ${proz(p2.breite)} \xB7 Vororder ${proz(p2.vororderquote)}</i><span class="lknoepfe">${knopf("warePlanMinus", p2.wg, "\u22125 %")} ${knopf("warePlanPlus", p2.wg, "+5 %")}</span></span><span class="lwert"><i data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</i></span><span class="lwert">${proz(p2.zielabverkauf)}</span></div>`;
       }
       html += "</div>";
       return { titel: "Merchandise Planning", unter: `${d.plaene.length} Warengruppen \xB7 ${d.vorlagen.length} Vorlagen`, html };
@@ -122536,7 +122694,7 @@
       html += '<div class="karte liste"><div class="lkopf"><span class="lname">Hauscluster</span><span class="lwert">Reichweite</span><span class="lwert">Altware</span></div>';
       for (const c of d.cluster) {
         const ton = c.reichweite != null && c.reichweite < 6 ? "rot" : c.altware > 0.2 ? "warn" : "";
-        html += `<div class="lzeile ${ton}"><span class="lname">${esc(c.name)} <i>${c.haeuser} H\xE4user \xB7 Bestand <i data-p="ware:cluster:${c.id}:bestand">${geld(c.bestand)}</i> \xB7 Fehlmenge ${geld(c.fehlmenge)}</i></span><span class="lwert" data-p="ware:cluster:${c.id}:reichweite">${reichweite(c.reichweite)}</span><span class="lwert" data-p="ware:cluster:${c.id}:alt">${proz(c.altware)}</span></div>`;
+        html += `<div class="lzeile ${ton}"><span class="lname">${esc2(c.name)} <i>${c.haeuser} H\xE4user \xB7 Bestand <i data-p="ware:cluster:${c.id}:bestand">${geld(c.bestand)}</i> \xB7 Fehlmenge ${geld(c.fehlmenge)}</i></span><span class="lwert" data-p="ware:cluster:${c.id}:reichweite">${reichweite(c.reichweite)}</span><span class="lwert" data-p="ware:cluster:${c.id}:alt">${proz(c.altware)}</span></div>`;
       }
       html += "</div>";
       html += `<div class="karte"><div class="khead">Umlagerung (1 bis 2 Wochen)</div>
@@ -122547,7 +122705,7 @@
       <div class="zeile">${knopf("wareUmlagern", "ja", "Umlagerung beauftragen")}</div></div>`;
       if (d.umlagerungen.length) {
         html += '<div class="karte"><div class="khead">Unterwegs</div>';
-        for (const t of d.umlagerungen) html += `<div class="zeile">${esc(t.gruppe)}: ${esc(t.von)} \u2192 ${esc(t.nach)} \xB7 ${geld(t.wert)} \xB7 Woche ${t.ankunft + 1}</div>`;
+        for (const t of d.umlagerungen) html += `<div class="zeile">${esc2(t.gruppe)}: ${esc2(t.von)} \u2192 ${esc2(t.nach)} \xB7 ${geld(t.wert)} \xB7 Woche ${t.ankunft + 1}</div>`;
         html += "</div>";
       }
       html += `<div class="karte"><div class="khead">Abfluss an FUNDUS</div><div class="raster">
@@ -122568,7 +122726,7 @@
     html += '<div class="karte liste"><div class="lkopf"><span class="lname">Warengruppe</span><span class="lwert">Abverkauf</span><span class="lwert">Stufe</span></div>';
     for (const k of d.kalender) {
       const stufe2 = k.stufe === 1 ? "R\xE4umung" : k.stufe === 0 ? "Noch keine" : "\u2212" + Math.round(k.stufe * 100) + " %";
-      html += `<div class="lzeile"><span class="lname">${esc(k.name)} <i>Strategie: ${esc(k.strategie)} \xB7 Saison ${k.saison}</i></span><span class="lwert" data-p="ware:kal:${k.wg}">${proz(k.abverkauf)}</span><span class="lwert">${stufe2}</span></div>`;
+      html += `<div class="lzeile"><span class="lname">${esc2(k.name)} <i>Strategie: ${esc2(k.strategie)} \xB7 Saison ${k.saison}</i></span><span class="lwert" data-p="ware:kal:${k.wg}">${proz(k.abverkauf)}</span><span class="lwert">${stufe2}</span></div>`;
     }
     html += "</div>";
     return { titel: "Reduzierungskalender", unter: `${d.kalender.length} Warengruppen \xB7 lokale Abweichungen je Hauscluster`, html };
@@ -122665,31 +122823,31 @@
       }).join("")}</div>`;
       const kopf = (key, t, klasse) => `<button class="${klasse} ${ui.sort.key === key ? "an" : ""}" data-a="sort" data-v="${key}">${t}${ui.sort.key === key ? ui.sort.dir < 0 ? " \u25BC" : " \u25B2" : ""}</button>`;
       h += `<div class="karte liste"><div class="lkopf">${kopf("name", "Bereich und WG", "lname")}${ui.spalten.map((k) => kopf(k, KOPF[k] ?? SP().get(k)?.name, "lwert")).join("")}</div>`;
-      const werte = (k, a, p2) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p2}:${c}">${text3(c, k)}</i>${dot(a[c])}</span>`).join("");
+      const werte2 = (k, a, p2) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p2}:${c}">${text3(c, k)}</i>${dot(a[c])}</span>`).join("");
       for (const b2 of sortiere(u.bereiche)) {
         const auf = ui.offen.has(b2.bereich);
-        h += `<div class="lzeile bereich" data-a="bereich" data-v="${b2.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc(b2.name)} <i>${b2.wgs.length} WG</i></span>${werte(b2.kennzahlen, b2.ampeln, `b:${b2.bereich}`)}</div>`;
-        if (auf) for (const w of sortiere(b2.wgs)) h += `<div class="lzeile wgz" data-a="wg" data-v="${w.id}"><span class="lname">${w.eigenmarken.length ? '<i class="em" title="mit Eigenmarke">EM</i>' : ""}${esc(w.name)}</span>${werte(w.kennzahlen, w.ampeln, `w:${w.id}`)}</div>`;
+        h += `<div class="lzeile bereich" data-a="bereich" data-v="${b2.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc2(b2.name)} <i>${b2.wgs.length} WG</i></span>${werte2(b2.kennzahlen, b2.ampeln, `b:${b2.bereich}`)}</div>`;
+        if (auf) for (const w of sortiere(b2.wgs)) h += `<div class="lzeile wgz" data-a="wg" data-v="${w.id}"><span class="lname">${w.eigenmarken.length ? '<i class="em" title="mit Eigenmarke">EM</i>' : ""}${esc2(w.name)}</span>${werte2(w.kennzahlen, w.ampeln, `w:${w.id}`)}</div>`;
       }
       h += "</div>";
       const gen = { grob: "grob (Controlling schwach besetzt)", normal: "normal", exakt: "exakt" }[u.genauigkeit] ?? u.genauigkeit;
-      h += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
+      h += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc2(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a, b2) => a + b2.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h };
     }
-    function kurve4(titel, wochen, werte, fmtW, p2, farbe3) {
-      const W3 = 340, H = 64, n = werte.length;
-      if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${n ? fmtW(werte[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-      const min = Math.min(...werte), max = Math.max(...werte);
+    function kurve4(titel, wochen, werte2, fmtW, p2, farbe3) {
+      const W3 = 340, H = 64, n = werte2.length;
+      if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${n ? fmtW(werte2[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
+      const min = Math.min(...werte2), max = Math.max(...werte2);
       const lo = min - (max - min) * 0.1, hi = max + (max - min) * 0.1 || max + 1;
       const X = (i) => 4 + i / (n - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
-      const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-      const daten = esc(JSON.stringify(werte.map((v, i) => [kwVon2(wochen[i]), fmtW(v)])));
-      return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${fmtW(werte[n - 1])}</b><small class="khover"></small></div>
+      const pts = werte2.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+      const daten = esc2(JSON.stringify(werte2.map((v, i) => [kwVon2(wochen[i]), fmtW(v)])));
+      return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${fmtW(werte2[n - 1])}</b><small class="khover"></small></div>
       <svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none" data-reihe="${daten}" data-x0="4" data-dx="${(W3 - 8) / (n - 1)}">
         <line x1="0" x2="${W3}" y1="${H - 4}" y2="${H - 4}" stroke="#e7e3dc" stroke-width="1"/>
         <polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe3}" opacity="0.10"/>
         <polyline points="${pts}" fill="none" stroke="${farbe3}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(werte[n - 1]).toFixed(1)}" r="4" fill="${farbe3}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(werte2[n - 1]).toFixed(1)}" r="4" fill="${farbe3}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
         <line class="kreuz" x1="0" x2="0" y1="0" y2="${H}" stroke="#7b8790" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0"/>
       </svg><div class="kfuss"><span>KW ${kwVon2(wochen[0])}</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>KW ${kwVon2(wochen[n - 1])}</span></div></div>`;
     }
@@ -122701,7 +122859,7 @@
       }
       const k = d.kennzahlen, st = d.steuerung, a = d.ampeln;
       let h = tabs();
-      h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc(d.bereichName)}</button>`;
+      h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc2(d.bereichName)}</button>`;
       h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl3(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl3(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
       const v = d.verlauf;
       h += kurve4("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
@@ -122712,7 +122870,7 @@
       h += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
       const genutzt = k.limit > 0 ? Math.min(1, k.limitVerbraucht / k.limit) : 0;
       const naechste = d.limits[1];
-      h += regler2("Limit je Saison (Open to Buy)", `<div class="stepper"><button data-a="limit" data-v="-0.05">\u2212</button><span><b data-p="d:limitFaktor">${pz3(st.limitFaktor)}</b> \xB7 <i data-p="d:limit">${geld(k.limit)}</i></span><button data-a="limit" data-v="0.05">+</button></div><div class="balken"><span style="width:${(genutzt * 100).toFixed(1)}%"></span></div><small class="rfuss">${esc(d.limits[0]?.name ?? "")}: verbraucht <i data-p="d:limitVerbraucht">${geld(k.limitVerbraucht)}</i>, frei <i data-p="d:limitFrei2">${geld(k.limitFrei)}</i>${naechste ? `<br>${esc(naechste.name)}: Limit ${geld(naechste.limit)}, verbraucht ${geld(naechste.verbraucht)}` : ""}</small>`, "Faktor auf den Saisonplan");
+      h += regler2("Limit je Saison (Open to Buy)", `<div class="stepper"><button data-a="limit" data-v="-0.05">\u2212</button><span><b data-p="d:limitFaktor">${pz3(st.limitFaktor)}</b> \xB7 <i data-p="d:limit">${geld(k.limit)}</i></span><button data-a="limit" data-v="0.05">+</button></div><div class="balken"><span style="width:${(genutzt * 100).toFixed(1)}%"></span></div><small class="rfuss">${esc2(d.limits[0]?.name ?? "")}: verbraucht <i data-p="d:limitVerbraucht">${geld(k.limitVerbraucht)}</i>, frei <i data-p="d:limitFrei2">${geld(k.limitFrei)}</i>${naechste ? `<br>${esc2(naechste.name)}: Limit ${geld(naechste.limit)}, verbraucht ${geld(naechste.verbraucht)}` : ""}</small>`, "Faktor auf den Saisonplan");
       h += regler2("NOS-Anteil Ziel", schieber("nosZiel", Math.round(st.nosZiel * 100), 0, 95, 1), `heute ${pz3(st.nosAnteil)}, Rest Saisonware`);
       h += regler2("NOS-Servicegrad", seg("servicegrad", st.servicegrad, [[0.9, "90 %"], [0.95, "95 %"], [0.98, "98 %"]]), "mehr Sicherheitsbestand");
       h += regler2("Vororderquote", schieber("vororderquote", Math.round(st.vororderquote * 100), 20, 100, 5), "Rest als Nachorder alle 4 Wochen");
@@ -122722,12 +122880,12 @@
         const alle = q2.marken(s2()).marken;
         const drin = d.eigenmarken, ids = new Set(drin.map((m) => m.marke));
         const rest = alle.filter((m) => !ids.has(m.id) && m.status !== "eingestellt");
-        let inh = drin.map((m) => `<div class="emzeile"><span class="emfarbe" style="background:${m.farbe}"></span><span class="emname">${esc(m.name)}<i>ist ${pz3(m.anteilIst)}</i></span>${schieber("em:" + m.marke, Math.round(m.anteilZiel * 100), 0, 60, 5)}</div>`).join("");
+        let inh = drin.map((m) => `<div class="emzeile"><span class="emfarbe" style="background:${m.farbe}"></span><span class="emname">${esc2(m.name)}<i>ist ${pz3(m.anteilIst)}</i></span>${schieber("em:" + m.marke, Math.round(m.anteilZiel * 100), 0, 60, 5)}</div>`).join("");
         if (!drin.length) inh += '<div class="leise">Noch keine Eigenmarke in dieser Warengruppe.</div>';
-        if (rest.length) inh += `<select class="ort gross" data-a="emNeu"><option value="">Eigenmarke aufnehmen \u2026</option>${rest.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join("")}</select>`;
+        if (rest.length) inh += `<select class="ort gross" data-a="emNeu"><option value="">Eigenmarke aufnehmen \u2026</option>${rest.map((m) => `<option value="${m.id}">${esc2(m.name)}</option>`).join("")}</select>`;
         h += regler2("Eigenmarkenanteile", inh, "Ziel, Anteil am WG-Volumen");
       }
-      h += `<div class="regler"><small class="rfuss">Lieferant ${esc(d.lieferant)} \xB7 Vorlauf Vororder ${d.stammdaten.vorlaufVor}, Nachorder ${d.stammdaten.vorlaufNach}, NOS ${d.stammdaten.vorlaufNos} Wochen \xB7 Mindestabnahme ${geld(d.stammdaten.mindestabnahme)} je Saisonorder</small></div>`;
+      h += `<div class="regler"><small class="rfuss">Lieferant ${esc2(d.lieferant)} \xB7 Vorlauf Vororder ${d.stammdaten.vorlaufVor}, Nachorder ${d.stammdaten.vorlaufNach}, NOS ${d.stammdaten.vorlaufNos} Wochen \xB7 Mindestabnahme ${geld(d.stammdaten.mindestabnahme)} je Saisonorder</small></div>`;
       h += "</div>";
       if (d.freigaben?.length) h += `<button class="breit" data-a="seite" data-v="freigaben" data-bereich="${d.bereich}">${d.freigaben.length} offene Freigaben dieser Warengruppe</button>`;
       return { titel: d.name, unter: `${d.bereichName} \xB7 Warengruppe \xB7 KW ${kwVon2(s2().woche)}`, html: h };
@@ -122742,17 +122900,17 @@
       const bereiche = [...new Map(alle.liste.map((o) => [o.bereich, o.bereichName])).entries()];
       let h = tabs();
       h += `<div class="karte"><div class="regler"><div class="rkopf"><b>Freigabegrenze</b><small>Orders dar\xFCber brauchen deine Freigabe</small></div><div class="stepper"><button data-a="grenze" data-v="-10000">\u2212</button><span><b data-p="grenze">${geld(alle.grenze)}</b> EK je Order</span><button data-a="grenze" data-v="10000">+</button></div></div></div>`;
-      h += `<div class="filter"><select class="ort gross" data-a="filterBereich"><option value="">Alle Bereiche (${alle.anzahl})</option>${bereiche.map(([b2, n]) => `<option value="${b2}"${ui.filter.bereich === b2 ? " selected" : ""}>${esc(n)} (${alle.liste.filter((o) => o.bereich === b2).length})</option>`).join("")}</select>`;
+      h += `<div class="filter"><select class="ort gross" data-a="filterBereich"><option value="">Alle Bereiche (${alle.anzahl})</option>${bereiche.map(([b2, n]) => `<option value="${b2}"${ui.filter.bereich === b2 ? " selected" : ""}>${esc2(n)} (${alle.liste.filter((o) => o.bereich === b2).length})</option>`).join("")}</select>`;
       h += seg("filterArt", ui.filter.art, [["", "Alle"], ["nos", "NOS"], ["saison", "Saison"]]);
       h += seg("filterWert", ui.filter.wert, [["", "Jeder Wert"], ["klein", "bis 100 Tsd. \u20AC"], ["gross", "\xFCber 100 Tsd. \u20AC"]]) + "</div>";
       if (l.length) h += `<button class="breit gruen" data-a="sammel">Alle ${l.length} freigeben \xB7 <span data-p="sammel">${geld(l.reduce((a, o) => a + o.wert, 0))}</span></button>`;
       else h += `<div class="karte"><div class="zeile grau">${alle.anzahl ? "Keine Order passt zum Filter." : "Keine Order wartet auf Freigabe."}</div></div>`;
       for (const o of l) {
         const frist = o.restWochen <= 0 ? '<span class="chip warn">Frist l\xE4uft diese Woche ab</span>' : `<span class="chip ${o.restWochen <= 1 ? "warn" : "grau"}">Frist KW ${kwVon2(o.frist)} \xB7 noch ${o.restWochen} ${o.restWochen === 1 ? "Woche" : "Wochen"}</span>`;
-        h += `<div class="karte order"><div class="ohead"><b>${esc(o.wgName)}</b><i>${esc(o.bereichName)} \xB7 ${TYP3[o.typ] ?? ART[o.art]}${o.markeName ? ` \xB7 Eigenmarke ${esc(o.markeName)}` : ""}</i></div>
+        h += `<div class="karte order"><div class="ohead"><b>${esc2(o.wgName)}</b><i>${esc2(o.bereichName)} \xB7 ${TYP3[o.typ] ?? ART[o.art]}${o.markeName ? ` \xB7 Eigenmarke ${esc2(o.markeName)}` : ""}</i></div>
         <div class="ochips"><span class="chip ${o.art === "nos" ? "" : "blau"}">${ART[o.art]}</span>${frist}<span class="chip grau">danach ${o.modus === "auto" ? "automatisch frei" : "verf\xE4llt"}</span>${o.ueberLimit ? '<span class="chip warn">\xFCber Limit gek\xFCrzt</span>' : ""}</div>
         <div class="owerte"><div><span>Wert EK</span><b data-p="f:${o.id}:wert">${geld(o.wert)}</b></div><div><span>Erw. Abverkauf 8 Wo.</span><b data-p="f:${o.id}:abverkauf">${geld(o.erwarteterAbverkauf)}</b></div><div><span>Reichweite danach</span><b data-p="f:${o.id}:reichweite">${dez(o.reichweiteDanach, 1)} Wo.</b></div></div>
-        <div class="olief">${esc(o.lieferant)} \xB7 erste Lieferung KW ${kwVon2(o.ersteLieferung)}${o.lieferungen.length > 1 ? ` in ${o.lieferungen.length} Teilen` : ""}${o.hinweis ? ` \xB7 ${esc(o.hinweis)}` : ""}</div>`;
+        <div class="olief">${esc2(o.lieferant)} \xB7 erste Lieferung KW ${kwVon2(o.ersteLieferung)}${o.lieferungen.length > 1 ? ` in ${o.lieferungen.length} Teilen` : ""}${o.hinweis ? ` \xB7 ${esc2(o.hinweis)}` : ""}</div>`;
         if (ui.kuerzen === o.id) h += `<div class="oknoepfe">${[10, 25, 50].map((p3) => `<button data-a="kuerzen" data-v="${o.id}" data-p2="${p3}">\u2212${p3} % und frei</button>`).join("")}<button data-a="kuerzenZu" class="leise">Zur\xFCck</button></div>`;
         else h += `<div class="oknoepfe"><button class="gruen" data-a="frei" data-v="${o.id}">Freigeben</button><button data-a="kuerzenAuf" data-v="${o.id}">K\xFCrzen</button><button class="rot" data-a="ablehnen" data-v="${o.id}">Ablehnen</button></div>`;
         h += "</div>";
@@ -123489,7 +123647,7 @@
     const W3 = /* @__PURE__ */ new Map();
     const P2 = (k, text3, tag = "b", extra = "") => {
       W3.set(k, String(text3));
-      return `<${tag} data-p="${esc(k)}"${extra}>${esc(text3)}</${tag}>`;
+      return `<${tag} data-p="${esc2(k)}"${extra}>${esc2(text3)}</${tag}>`;
     };
     return { W: W3, P: P2 };
   }
@@ -123543,12 +123701,12 @@
       let h = `<div class="raster">${kz("Vorstand besetzt", P2("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`))}${kz("Geh\xE4lter im Jahr", P2("u:kostenJahr", geld(u.kostenJahr)))}${kz("Kosten je Woche", P2("u:kostenWoche", geld(u.kostenWoche)))}${kz("N\xE4chste Sitzung", P2("u:sitzung", wocheText(st, u.naechsteSitzung)))}</div>`;
       for (const e of u.offeneEntscheidungen) {
         const roh2 = st.entscheidungen.find((x) => x.id === e.id);
-        h += `<div class="karte order entscheid"><div class="ohead"><b>${esc(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc(roh2?.text ?? "")}</div><div class="oknoepfe">${(roh2?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join("")}</div></div>`;
+        h += `<div class="karte order entscheid"><div class="ohead"><b>${esc2(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc2(roh2?.text ?? "")}</div><div class="oknoepfe">${(roh2?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc2(o.label)}</button>`).join("")}</div></div>`;
       }
       h += '<div class="vgitter">';
       for (const r of u.ressorts) {
         const p2 = r.person;
-        h += `<button class="vkarte ${p2 ? "" : "leer"}" data-a="profil" data-v="${r.id}"><span class="vbild">${portraet(p2?.portraet, 64)}</span><span class="vtext"><b>${r.kurz}</b><small>${esc(r.titel)}</small>${p2 ? P2(`r:${r.id}:name`, p2.name, "em") : '<em class="frei">unbesetzt</em>'}</span>`;
+        h += `<button class="vkarte ${p2 ? "" : "leer"}" data-a="profil" data-v="${r.id}"><span class="vbild">${portraet(p2?.portraet, 64)}</span><span class="vtext"><b>${r.kurz}</b><small>${esc2(r.titel)}</small>${p2 ? P2(`r:${r.id}:name`, p2.name, "em") : '<em class="frei">unbesetzt</em>'}</span>`;
         if (p2) h += `<span class="vmini"><span title="F\xFChrung"><i style="width:${p2.fuehrung}%"></i></span><span title="Fachwissen"><i style="width:${p2.fachwissen}%"></i></span><span title="Loyalit\xE4t"><i style="width:${p2.loyalitaet}%"></i></span></span><span class="ampel a-${r.risikoAmpel}" title="Abwerberisiko ${RISIKO[r.risikoAmpel]}"></span>`;
         else h += '<span class="chip warn">einstellen</span>';
         h += "</button>";
@@ -123557,11 +123715,11 @@
       const ls = u.letzteSitzung;
       if (ls) {
         h += `<div class="karte"><div class="khead">Letzte Vorstandssitzung<small>${wocheText(st, ls.woche)}</small></div>`;
-        for (const b2 of ls.berichte) h += `<div class="zeile"><span class="was"><b>${E.RESSORT_INFO?.[b2.ressort]?.kurz ?? b2.ressort}</b>${b2.name ? ` <i>${esc(b2.name)}</i>` : ""}<em class="wirk">${esc(b2.text)}</em></span></div>`;
-        if (ls.thema) h += `<div class="zeile"><span class="was"><b>Beschluss</b> <i>${esc(ls.thema.titel)}</i><em>${esc(ls.thema.ergebnis ?? "offen")}</em></span></div>`;
+        for (const b2 of ls.berichte) h += `<div class="zeile"><span class="was"><b>${E.RESSORT_INFO?.[b2.ressort]?.kurz ?? b2.ressort}</b>${b2.name ? ` <i>${esc2(b2.name)}</i>` : ""}<em class="wirk">${esc2(b2.text)}</em></span></div>`;
+        if (ls.thema) h += `<div class="zeile"><span class="was"><b>Beschluss</b> <i>${esc2(ls.thema.titel)}</i><em>${esc2(ls.thema.ergebnis ?? "offen")}</em></span></div>`;
         h += "</div>";
       }
-      for (const b2 of u.boosts) h += `<div class="olief">${esc(b2.text)} wirkt bis ${wocheText(st, b2.bis)}</div>`;
+      for (const b2 of u.boosts) h += `<div class="olief">${esc2(b2.text)} wirkt bis ${wocheText(st, b2.bis)}</div>`;
       return { titel: "Vorstand", unter: `Du bist CEO \xB7 ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt \xB7 KW ${kwVon2(st.woche)}`, html: h };
     }
     function profil2(P2) {
@@ -123573,18 +123731,18 @@
       const p2 = r.person, id = r.id;
       let h = '<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 Vorstand</button>';
       if (!p2) {
-        h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(null, 120)}</span><div><b class="vname">${r.kurz} unbesetzt</b><small>${esc(r.titel)}</small><div class="olief">${esc(r.zustaendig)}</div>${r.vakantSeit !== void 0 ? `<div class="olief warnung">vakant seit ${wocheText(st, r.vakantSeit)}</div>` : ""}</div></div>`;
-        h += `<div class="olief">Ohne ${r.kurz} wirken die Abteilungen schw\xE4cher: ${r.abteilungen.map((a) => `${esc(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")}. Keine Delegation m\xF6glich.</div></div>`;
+        h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(null, 120)}</span><div><b class="vname">${r.kurz} unbesetzt</b><small>${esc2(r.titel)}</small><div class="olief">${esc2(r.zustaendig)}</div>${r.vakantSeit !== void 0 ? `<div class="olief warnung">vakant seit ${wocheText(st, r.vakantSeit)}</div>` : ""}</div></div>`;
+        h += `<div class="olief">Ohne ${r.kurz} wirken die Abteilungen schw\xE4cher: ${r.abteilungen.map((a) => `${esc2(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")}. Keine Delegation m\xF6glich.</div></div>`;
         h += `<button class="breit gruen" data-a="einstellen" data-v="${id}">${P2(`p:${id}:kandidaten`, `${r.kandidatenAnzahl} Kandidaten ansehen`, "span")}</button>`;
-        return { titel: `${r.kurz} einstellen`, unter: esc(r.zustaendig), html: h };
+        return { titel: `${r.kurz} einstellen`, unter: esc2(r.zustaendig), html: h };
       }
-      h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(p2.portraet, 120)}</span><div><b class="vname">${P2(`p:${id}:name`, p2.name, "span")}</b><small>${esc(r.titel)}</small>`;
+      h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(p2.portraet, 120)}</span><div><b class="vname">${P2(`p:${id}:name`, p2.name, "span")}</b><small>${esc2(r.titel)}</small>`;
       h += `<div class="vseit"><span>${r.kurz} seit</span>${P2(`p:${id}:seit`, wocheText(st, p2.seitWoche))}</div>${p2.gewachsen ? '<span class="chip grau">aus dem Haus gewachsen</span>' : ""}${p2.gehtWoche !== void 0 ? `<span class="chip warn">geht ${wocheText(st, p2.gehtWoche)}</span>` : ""}</div></div>`;
       h += `<div class="faehigkeiten"><div class="vtitel">F\xE4higkeiten</div>${faehigkeit("F\xFChrung", p2.fuehrung, P2(`p:${id}:fuehrung`, String(p2.fuehrung)))}${faehigkeit("Fachwissen", p2.fachwissen, P2(`p:${id}:fachwissen`, String(p2.fachwissen)))}${faehigkeit("Loyalit\xE4t", p2.loyalitaet, P2(`p:${id}:loyalitaet`, String(p2.loyalitaet)))}</div>`;
-      if (r.vorgeschichte) h += `<div class="olief">${esc(r.vorgeschichte)}</div>`;
-      h += `<div class="olief">Wirkung auf ${r.abteilungen.map((a) => `${esc(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")} \xB7 Abwerberisiko im Jahr ${P2(`p:${id}:risiko`, pz3(r.risiko), "b")}<span class="ampel a-${r.risikoAmpel}"></span></div></div>`;
+      if (r.vorgeschichte) h += `<div class="olief">${esc2(r.vorgeschichte)}</div>`;
+      h += `<div class="olief">Wirkung auf ${r.abteilungen.map((a) => `${esc2(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")} \xB7 Abwerberisiko im Jahr ${P2(`p:${id}:risiko`, pz3(r.risiko), "b")}<span class="ampel a-${r.risikoAmpel}"></span></div></div>`;
       h += '<div class="karte"><div class="khead">Delegation<small>die Ressort-KI entscheidet in der G\xFCte des Fachwissens</small></div>';
-      for (const d of r.delegationen) h += schalter(d.an, `data-a="delegation" data-v="${d.id}"`, esc(d.label), esc(d.beschreibung));
+      for (const d of r.delegationen) h += schalter(d.an, `data-a="delegation" data-v="${d.id}"`, esc2(d.label), esc2(d.beschreibung));
       h += "</div>";
       h += '<div class="karte steuerung"><div class="khead">Verg\xFCtung</div>';
       h += regler("Jahresgehalt", stepper("gehalt", P2(`p:${id}:gehalt`, geld(p2.gehalt)), P2(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p2.gehaltsforderung)}`, "i")), `Schritt ${geld(r.gehaltsSchritt)}`);
@@ -123594,12 +123752,12 @@
       h += "</div>";
       if (r.protokoll.length) {
         h += '<div class="karte"><div class="khead">Entscheidungen im Ressort</div>';
-        for (const x of [...r.protokoll].reverse().slice(0, 6)) h += `<div class="zeile"><span class="qm">KW ${kwVon2(x.woche)}</span><span class="was">${esc(x.text)}</span></div>`;
+        for (const x of [...r.protokoll].reverse().slice(0, 6)) h += `<div class="zeile"><span class="qm">KW ${kwVon2(x.woche)}</span><span class="was">${esc2(x.text)}</span></div>`;
         h += "</div>";
       }
       if (ui.entlassen) h += `<div class="oknoepfe unten2"><button class="rot" data-a="entlassenJa">Entlassen, Abfindung ${P2(`p:${id}:abfindung`, geld(r.abfindung ?? 0), "span")}</button><button data-a="entlassenNein">Behalten</button></div>`;
       else h += `<div class="oknoepfe unten2"><button class="rot" data-a="entlassen">Entlassen</button></div>`;
-      return { titel: `${r.kurz} Profil`, unter: `${esc(r.titel)} \xB7 ${esc(r.zustaendig)}`, html: h };
+      return { titel: `${r.kurz} Profil`, unter: `${esc2(r.titel)} \xB7 ${esc2(r.zustaendig)}`, html: h };
     }
     function einstellen(P2) {
       const st = s2(), L2 = E.kandidaten(st, ui.ressort);
@@ -123611,24 +123769,24 @@
       if (L2.besetzt) h += '<div class="olief warnung">Das Ressort ist besetzt. Erst entlassen, dann neu besetzen.</div>';
       if (!L2.kandidaten.length) {
         h += '<div class="karte"><div class="zeile grau">Gerade kein Kandidat am Markt. Neue Kandidaten kommen mit den Wochen.</div></div>';
-        return { titel: `${L2.kurz} einstellen`, unter: esc(L2.titel), html: h };
+        return { titel: `${L2.kurz} einstellen`, unter: esc2(L2.titel), html: h };
       }
       ui.k = Math.min(ui.k, L2.kandidaten.length - 1);
-      const karten = L2.kandidaten.map((k2) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild mittel">${portraet(k2.portraet, 92)}</span><div><b class="vname">${P2(`k:${k2.id}:name`, k2.name, "span")}</b><div class="vtitel">Aktuelle Position</div><small>${esc(k2.aktuellePosition)}<br>${esc(k2.aktuelleFirma)}</small></div></div>
+      const karten = L2.kandidaten.map((k2) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild mittel">${portraet(k2.portraet, 92)}</span><div><b class="vname">${P2(`k:${k2.id}:name`, k2.name, "span")}</b><div class="vtitel">Aktuelle Position</div><small>${esc2(k2.aktuellePosition)}<br>${esc2(k2.aktuelleFirma)}</small></div></div>
       <div class="faehigkeiten">${faehigkeit("F\xFChrung", k2.fuehrung, P2(`k:${k2.id}:fuehrung`, String(k2.fuehrung)))}${faehigkeit("Fachwissen", k2.fachwissen, P2(`k:${k2.id}:fachwissen`, String(k2.fachwissen)))}${faehigkeit("Loyalit\xE4t", k2.loyalitaet, P2(`k:${k2.id}:loyalitaet`, String(k2.loyalitaet)))}</div>
       <div class="owerte"><div><span>Aktuelles Gehalt</span>${P2(`k:${k2.id}:gehalt`, geld(k2.aktuellesGehalt))}</div><div><span>Forderung</span>${P2(`k:${k2.id}:forderung`, geld(k2.gehaltsforderung))}</div><div><span>Chance bei Forderung</span>${P2(`k:${k2.id}:chance`, pz3(k2.chanceBeiForderung))}</div></div>
-      <div class="olief">${esc(k2.vorgeschichte)}</div></div>`);
+      <div class="olief">${esc2(k2.vorgeschichte)}</div></div>`);
       h += karussell("kandidaten", karten, ui.k, "kandidat");
       const k = L2.kandidaten[ui.k];
       if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
       const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st, L2.ressort, k.id, A.gehalt, hb, A.erfolg);
-      h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc(k.name) + "</div>";
+      h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc2(k.name) + "</div>";
       h += regler("Jahresgehalt", stepper("angebotGehalt", P2("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
       h += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb ? geld(hb) : "vom Jahresgehalt");
       h += regler("Erfolgsbonus", segment("angebotErfolg", A.erfolg, ERFOLG), "vom Jahresgehalt");
       h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P2("a:chance", pz3(ch))}</div><div class="balken"><span style="width:${(ch * 100).toFixed(0)}%;background:${ch >= 0.6 ? "var(--gruen)" : ch >= 0.35 ? "#e3a90d" : "var(--rot)"}"></span></div><small class="rfuss">h\xE4ngt von Angebot, Lage der Firma und Image ab</small></div>`;
       h += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="anbieten"${L2.besetzt ? " disabled" : ""}>Angebot machen</button></div>`;
-      return { titel: `${L2.kurz} einstellen`, unter: `${esc(L2.titel)} \xB7 ${L2.kandidaten.length} Kandidaten`, html: h };
+      return { titel: `${L2.kurz} einstellen`, unter: `${esc2(L2.titel)} \xB7 ${L2.kandidaten.length} Kandidaten`, html: h };
     }
     function rendern() {
       const S = werteSammler();
@@ -123765,20 +123923,20 @@
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "zentrale", ebene: null, id: null };
     const bar = (q2) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0, Math.min(1, q2)) * 100) + '%"></i></span>';
-    const name2 = (st) => st?.person ? esc(st.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
+    const name2 = (st) => st?.person ? esc2(st.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
     const profil2 = (stelle2, titel, ebene, id) => {
       if (!stelle2) return "";
       const p2 = stelle2.person;
-      let h = '<button data-org="zurueck" class="zurueck">\u2039 Organigramm</button><div class="karte org-profil"><h3>' + esc(titel) + "</h3>";
-      if (p2) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p2.portraet, 110) + "</span><div><b>" + esc(p2.name) + "</b><small>" + geld(p2.gehalt) + " / Jahr</small>" + bar(p2.qualitaet) + "<small>Qualit\xE4t " + Math.round(p2.qualitaet * 100) + "% \xB7 Stimmung " + Math.round(p2.stimmung) + "% \xB7 Wechselwille " + Math.round(p2.wechselwille * 100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Haltepr\xE4mie 10.000 \u20AC</button></div>';
+      let h = '<button data-org="zurueck" class="zurueck">\u2039 Organigramm</button><div class="karte org-profil"><h3>' + esc2(titel) + "</h3>";
+      if (p2) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p2.portraet, 110) + "</span><div><b>" + esc2(p2.name) + "</b><small>" + geld(p2.gehalt) + " / Jahr</small>" + bar(p2.qualitaet) + "<small>Qualit\xE4t " + Math.round(p2.qualitaet * 100) + "% \xB7 Stimmung " + Math.round(p2.stimmung) + "% \xB7 Wechselwille " + Math.round(p2.wechselwille * 100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Haltepr\xE4mie 10.000 \u20AC</button></div>';
       else h += '<div class="olief">Vakante Leitungsstelle \u2013 berichtet unmittelbar nach oben.</div>';
       h += "<h4>Kandidaten</h4>";
-      for (const k of stelle2.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet, 56) + '</span><span class="was"><b>' + esc(k.name) + "</b><small>Qualit\xE4t " + Math.round(k.qualitaet * 100) + "% \xB7 Jahresgehalt " + geld(k.gehalt) + "</small>" + bar(k.qualitaet) + '</span><button data-org="besetzen" data-kandidat="' + esc(k.id) + '">Einstellen</button></div>';
+      for (const k of stelle2.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet, 56) + '</span><span class="was"><b>' + esc2(k.name) + "</b><small>Qualit\xE4t " + Math.round(k.qualitaet * 100) + "% \xB7 Jahresgehalt " + geld(k.gehalt) + "</small>" + bar(k.qualitaet) + '</span><button data-org="besetzen" data-kandidat="' + esc2(k.id) + '">Einstellen</button></div>';
       if (ebene === "cluster") {
         const moeglich = s2().haeuser.filter((h2) => h2.status === "offen" && h2.personal.filialleiter.skill >= 0.7 && E.hausclusterVon(s2(), h2.id)?.id === id).slice(0, 8);
         if (moeglich.length) {
           h += "<h4>Hausleitungen bef\xF6rdern</h4>";
-          for (const h0 of moeglich) h += '<div class="zeile"><span class="was">' + esc(h0.personal.filialleiter.name) + " \xB7 " + esc(h0.stadt) + '</span><button data-org="befoerdern" data-haus="' + esc(h0.id) + '">Bef\xF6rdern</button></div>';
+          for (const h0 of moeglich) h += '<div class="zeile"><span class="was">' + esc2(h0.personal.filialleiter.name) + " \xB7 " + esc2(h0.stadt) + '</span><button data-org="befoerdern" data-haus="' + esc2(h0.id) + '">Bef\xF6rdern</button></div>';
         }
       }
       h += "</div>";
@@ -123794,25 +123952,25 @@
       } else if (ui.reiter === "zentrale") {
         for (const ressort of x.ressorts) {
           const bs = x.bereiche.filter((b2) => b2.ressort === ressort.id);
-          h += '<div class="karte"><div class="khead"><b>' + esc(ressort.id.toUpperCase()) + " \xB7 " + esc(ressort.name) + "</b><small>" + (ressort.person ? esc(ressort.person.name) : '<span class="frei">unbesetzt</span>') + "</small></div>";
-          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>";
+          h += '<div class="karte"><div class="khead"><b>' + esc2(ressort.id.toUpperCase()) + " \xB7 " + esc2(ressort.name) + "</b><small>" + (ressort.person ? esc2(ressort.person.name) : '<span class="frei">unbesetzt</span>') + "</small></div>";
+          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>";
           h += "</div>";
         }
       } else {
         for (const r of x.regionen) {
-          h += '<div class="karte"><div class="khead"><b>Region ' + esc(r.id) + '</b><button data-org="profil" data-ebene="region" data-id="' + esc(r.id) + '">' + name2(r.stelle) + "</button></div>";
+          h += '<div class="karte"><div class="khead"><b>Region ' + esc2(r.id) + '</b><button data-org="profil" data-ebene="region" data-id="' + esc2(r.id) + '">' + name2(r.stelle) + "</button></div>";
           for (const c of r.cluster) {
             const rot = !c.stelle.person, ampel = c.umsatz > 0 ? "\u25CF" : "\u25CB";
-            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + geld(c.umsatz) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>";
+            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + geld(c.umsatz) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>";
           }
           h += "</div>";
         }
         if (x.sonder) {
           const c = x.sonder;
-          h += '<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="' + esc(c.id) + '">' + name2(c.stelle) + "</button></div><p>" + c.hausIds.length + " H\xE4user \xB7 " + x.flagships.length + " gew\xE4hlte Flagships</p>";
+          h += '<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + name2(c.stelle) + "</button></div><p>" + c.hausIds.length + " H\xE4user \xB7 " + x.flagships.length + " gew\xE4hlte Flagships</p>";
           for (const haus2 of st.haeuser.filter((v) => v.format === "warenhaus" && v.status === "offen").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12)) {
             const an = x.flagships.includes(haus2.id), premium2 = haus2.klasse === "premium";
-            h += '<div class="zeile"><span class="was">' + esc(haus2.name) + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
+            h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
           }
           h += "</div>";
         }
@@ -123867,12 +124025,12 @@
   function posteingangModul(ctx) {
     const E = ctx.E, s2 = ctx.s;
     const ui = { aktiv: false, filter: "Alle", verhandlung: null, ziel: null };
-    const einstellungen = () => ctx.zustand();
+    const einstellungen2 = () => ctx.zustand();
     const daten = () => E.posteingang(s2());
     const wochen = (n) => n === 0 ? "l\xE4uft diese Woche ab" : n === 1 ? "noch 1 Woche" : "noch " + n + " Wochen";
-    const leer3 = (t) => '<div class="karte"><div class="zeile postleer">' + esc(t) + "</div></div>";
+    const leer3 = (t) => '<div class="karte"><div class="zeile postleer">' + esc2(t) + "</div></div>";
     function tabs(D) {
-      const aktiv3 = einstellungen().reiter;
+      const aktiv3 = einstellungen2().reiter;
       return '<div class="tabs posttabs" role="tablist">' + [
         ["handeln", "Zu tun", D.handeln.length],
         ["meldungen", "Meldungen", D.meldungen.length],
@@ -123884,10 +124042,10 @@
       if (!D.handeln.length) return leer3("Keine offenen Angebote oder Entscheidungen.");
       return D.handeln.map((p2) => {
         const rest = '<span class="chip ' + (p2.dringend ? "warn" : "grau") + '">' + wochen(p2.restWochen) + "</span>";
-        const wert = p2.wert ? '<div class="postwert"><b>' + esc(geld(p2.wert.betrag)) + "</b><span>" + esc(p2.wert.einheit) + "</span></div>" : "";
-        const buttons = p2.optionen.map((o) => '<button class="' + (o.id === "ablehnen" ? "rot" : o.id === "annehmen" ? "gruen" : "") + '" data-po-a="option" data-id="' + esc(p2.id) + '" data-v="' + esc(o.id) + '">' + esc(o.label) + "</button>").join("");
-        const ort = p2.bezug && (p2.bezug.hausIds?.length || p2.bezug.stadt || p2.bezug.modul) ? '<button class="postort" data-po-a="ort" data-id="' + esc(p2.id) + '">Zum Ort \u2192</button>' : "";
-        return '<article class="karte postkarte" data-post-id="' + esc(p2.id) + '"><div class="postkopf"><div class="posttyp">' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</div><h3>" + esc(p2.titel) + '</h3><div class="postchips">' + rest + ort + '</div></div><details class="postdetail"><summary>Details anzeigen</summary><p>' + esc(p2.text) + "</p></details>" + wert + '<p class="poststandard">Ohne Entscheidung: ' + esc(p2.standard) + '</p><div class="postaktionen">' + buttons + "</div></article>";
+        const wert = p2.wert ? '<div class="postwert"><b>' + esc2(geld(p2.wert.betrag)) + "</b><span>" + esc2(p2.wert.einheit) + "</span></div>" : "";
+        const buttons = p2.optionen.map((o) => '<button class="' + (o.id === "ablehnen" ? "rot" : o.id === "annehmen" ? "gruen" : "") + '" data-po-a="option" data-id="' + esc2(p2.id) + '" data-v="' + esc2(o.id) + '">' + esc2(o.label) + "</button>").join("");
+        const ort = p2.bezug && (p2.bezug.hausIds?.length || p2.bezug.stadt || p2.bezug.modul) ? '<button class="postort" data-po-a="ort" data-id="' + esc2(p2.id) + '">Zum Ort \u2192</button>' : "";
+        return '<article class="karte postkarte" data-post-id="' + esc2(p2.id) + '"><div class="postkopf"><div class="posttyp">' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</div><h3>" + esc2(p2.titel) + '</h3><div class="postchips">' + rest + ort + '</div></div><details class="postdetail"><summary>Details anzeigen</summary><p>' + esc2(p2.text) + "</p></details>" + wert + '<p class="poststandard">Ohne Entscheidung: ' + esc2(p2.standard) + '</p><div class="postaktionen">' + buttons + "</div></article>";
       }).join("");
     }
     function verhandeln() {
@@ -123897,29 +124055,29 @@
         return leer3("Das Angebot ist nicht mehr offen.");
       }
       const hauser = s2().haeuser.filter((h) => h.status === "offen" && h.etagen.includes(a.etage ?? 0)).sort((x, y) => x.stadt.localeCompare(y.stadt) || x.name.localeCompare(y.name));
-      return '<button class="postzurueck" data-po-a="zurueck">\u2190 Zur\xFCck zu den Angeboten</button><div class="karte"><div class="postkopf"><div class="posttyp">Paketangebot verhandeln</div><h3>' + esc(a.titel) + '</h3><p class="posthinweis">Mindestens ' + (a.minHaeuser ?? 1) + ' Standorte ausw\xE4hlen. Die Engine pr\xFCft anschlie\xDFend die Verhandlungsposition.</p></div><div class="posthausliste">' + hauser.map((h) => '<label class="posthaus"><input data-po-haus="' + esc(h.id) + '" type="checkbox" ' + (ui.verhandlung.haeuser.has(h.id) ? "checked" : "") + "><span>" + esc(h.name) + "<small>" + esc(h.stadt) + "</small></span></label>").join("") + '</div><div class="postaktionen"><button data-po-a="verhandeln" class="gruen">Auswahl verhandeln (' + ui.verhandlung.haeuser.size + ")</button></div></div>";
+      return '<button class="postzurueck" data-po-a="zurueck">\u2190 Zur\xFCck zu den Angeboten</button><div class="karte"><div class="postkopf"><div class="posttyp">Paketangebot verhandeln</div><h3>' + esc2(a.titel) + '</h3><p class="posthinweis">Mindestens ' + (a.minHaeuser ?? 1) + ' Standorte ausw\xE4hlen. Die Engine pr\xFCft anschlie\xDFend die Verhandlungsposition.</p></div><div class="posthausliste">' + hauser.map((h) => '<label class="posthaus"><input data-po-haus="' + esc2(h.id) + '" type="checkbox" ' + (ui.verhandlung.haeuser.has(h.id) ? "checked" : "") + "><span>" + esc2(h.name) + "<small>" + esc2(h.stadt) + "</small></span></label>").join("") + '</div><div class="postaktionen"><button data-po-a="verhandeln" class="gruen">Auswahl verhandeln (' + ui.verhandlung.haeuser.size + ")</button></div></div>";
     }
     function meldungen(D) {
       const filter = ui.filter;
       const liste = D.meldungen.filter((m) => filter === "Alle" || m.kategorie === filter);
       const kategorien = ["Alle", "Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer", "IT"];
-      let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => "<option " + (k === filter ? "selected " : "") + 'value="' + esc(k) + '">' + esc(k) + "</option>").join("") + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
+      let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => "<option " + (k === filter ? "selected " : "") + 'value="' + esc2(k) + '">' + esc2(k) + "</option>").join("") + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
       if (!liste.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
-      const gelesen2 = new Set(einstellungen().gelesen ?? []);
+      const gelesen2 = new Set(einstellungen2().gelesen ?? []);
       const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6", IT: "\u2699" };
       return html + liste.map((m) => {
         const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
-        const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc(m.kategorie) + " \xB7 KW " + kwVon2(m.woche) + (gelesen2.has(m.id) ? "" : " \xB7 Neu") + "</small><span>" + esc(m.text) + "</span></span>";
-        return '<div class="karte postmeldung ' + (gelesen2.has(m.id) ? "" : "ungelesen") + '" data-post-id="' + esc(m.id) + '"><button data-po-a="lesen" data-id="' + esc(m.id) + '">' + info + "</button>" + (bezug ? '<button class="postort" data-po-a="sprung" data-id="' + esc(m.id) + '">Zum Ort \u2192</button>' : "") + "</div>";
+        const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc2(m.kategorie) + " \xB7 KW " + kwVon2(m.woche) + (gelesen2.has(m.id) ? "" : " \xB7 Neu") + "</small><span>" + esc2(m.text) + "</span></span>";
+        return '<div class="karte postmeldung ' + (gelesen2.has(m.id) ? "" : "ungelesen") + '" data-post-id="' + esc2(m.id) + '"><button data-po-a="lesen" data-id="' + esc2(m.id) + '">' + info + "</button>" + (bezug ? '<button class="postort" data-po-a="sprung" data-id="' + esc2(m.id) + '">Zum Ort \u2192</button>' : "") + "</div>";
       }).join("");
     }
     function erledigt(D) {
       if (!D.erledigt.length) return leer3("In den letzten 13 Wochen wurde noch nichts erledigt.");
-      return D.erledigt.map((p2) => '<div class="karte posterledigt" data-post-id="' + esc(p2.id) + '"><small>' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</small><b>" + esc(p2.titel) + "</b><span>" + esc(p2.ergebnis) + (p2.standard ? " \xB7 Automatisch bei Fristablauf" : "") + "</span></div>").join("");
+      return D.erledigt.map((p2) => '<div class="karte posterledigt" data-post-id="' + esc2(p2.id) + '"><small>' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</small><b>" + esc2(p2.titel) + "</b><span>" + esc2(p2.ergebnis) + (p2.standard ? " \xB7 Automatisch bei Fristablauf" : "") + "</span></div>").join("");
     }
     function zeigen(scrollHalten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop, D = daten();
-      const inhalt2 = tabs(D) + (einstellungen().reiter === "meldungen" ? meldungen(D) : einstellungen().reiter === "erledigt" ? erledigt(D) : handeln(D));
+      const inhalt2 = tabs(D) + (einstellungen2().reiter === "meldungen" ? meldungen(D) : einstellungen2().reiter === "erledigt" ? erledigt(D) : handeln(D));
       ctx.panel("Posteingang", D.handeln.length + " Vorg\xE4nge offen \xB7 KW " + kwVon2(s2().woche), inhalt2, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? vorher : 0;
@@ -123931,11 +124089,11 @@
       badge();
     }
     function gelesen(id) {
-      const z2 = einstellungen();
+      const z2 = einstellungen2();
       if (!z2.gelesen.includes(id)) {
         z2.gelesen.push(id);
-        const gueltig = new Set(daten().meldungen.map((m) => m.id));
-        z2.gelesen = z2.gelesen.filter((x) => gueltig.has(x));
+        const gueltig2 = new Set(daten().meldungen.map((m) => m.id));
+        z2.gelesen = z2.gelesen.filter((x) => gueltig2.has(x));
         ctx.nachZustand();
       }
     }
@@ -123954,7 +124112,7 @@
     function klicken(el) {
       const a = el.dataset.poA, id = el.dataset.id, v = el.dataset.v;
       if (a === "tab") {
-        einstellungen().reiter = v;
+        einstellungen2().reiter = v;
         ui.verhandlung = null;
         ctx.nachZustand();
         return zeigen();
@@ -124017,8 +124175,8 @@
     });
     return {
       ui,
-      oeffne: (reiter = einstellungen().reiter, ziel = null) => {
-        einstellungen().reiter = reiter;
+      oeffne: (reiter = einstellungen2().reiter, ziel = null) => {
+        einstellungen2().reiter = reiter;
         ui.verhandlung = null;
         ui.ziel = ziel;
         ctx.nachZustand();
@@ -124032,7 +124190,7 @@
         if (ui.aktiv) zeigen(true);
       },
       badge,
-      pruefe: () => ({ soll: daten().handeln.length, badge: Number(document.getElementById("postbadge")?.textContent ?? 0), karten: document.querySelectorAll(".postkarte").length, seite: einstellungen().reiter })
+      pruefe: () => ({ soll: daten().handeln.length, badge: Number(document.getElementById("postbadge")?.textContent ?? 0), karten: document.querySelectorAll(".postkarte").length, seite: einstellungen2().reiter })
     };
   }
 
@@ -124044,15 +124202,15 @@
   var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
   var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
   var KANAL2 = [["mail", "Mail"], ["push", "Push"], ["brief", "Brief"]];
-  function kurve2(titel, werte, fmtW, p2, P2, farbe3) {
-    const W3 = 340, H = 56, n = werte.length;
-    if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p2, n ? fmtW(werte[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-    let min = Math.min(...werte), max = Math.max(...werte);
+  function kurve2(titel, werte2, fmtW, p2, P2, farbe3) {
+    const W3 = 340, H = 56, n = werte2.length;
+    if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p2, n ? fmtW(werte2[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
+    let min = Math.min(...werte2), max = Math.max(...werte2);
     const flach = max - min < 1e-9 * Math.max(1, Math.abs(max));
     const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
     const X = (i) => 4 + i / (n - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
-    const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p2, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe3}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe3}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
+    const pts = werte2.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p2, fmtW(werte2[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe3}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe3}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
   }
   function marketingModul(ctx) {
     const E = ctx.E, s2 = () => ctx.s();
@@ -124078,10 +124236,10 @@
       const v = u.verlauf.slice(-26);
       h += kurve2("Kundschaft je Woche", v.map((x) => x.kunden), (x) => fmt.format(Math.round(x)), "k:kunden", P2, "#2f63b5");
       h += kurve2("Markenst\xE4rke", v.map((x) => x.marke), (x) => dez(x, 1), "k:marke", P2, "#8c5a7a");
-      const zeile2 = (a) => `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status] ?? "#999"}"></span><span class="was">${esc(a.name)} <i>${esc(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}</i></span><span class="qm">KW ${a.startKw} bis ${a.endeKw}</span></div>`;
+      const zeile2 = (a) => `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status] ?? "#999"}"></span><span class="was">${esc2(a.name)} <i>${esc2(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}</i></span><span class="qm">KW ${a.startKw} bis ${a.endeKw}</span></div>`;
       if (u.laufend.length) h += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile2).join("")}</div>`;
       if (u.naechste.length) h += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile2).join("")}</div>`;
-      for (const x of u.hinweise) h += `<div class="olief warnung">${esc(x)}</div>`;
+      for (const x of u.hinweise) h += `<div class="olief warnung">${esc2(x)}</div>`;
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h };
     }
     function kanaele2(P2) {
@@ -124091,7 +124249,7 @@
       h += `<div class="oknoepfe unten2"><button data-a="kanalAlle" data-v="0.9">Alle \u221210 %</button><button data-a="kanalAlle" data-v="1.1">Alle +10 %</button></div>`;
       for (const c of k.kanaele) {
         const auf = ui.kanal === c.id;
-        h += `<div class="karte kanal"><div class="ohead klickbar" data-a="kanalAuf" data-v="${c.id}"><b>${esc(c.name)}</b><i>${esc(c.text)}</i></div>`;
+        h += `<div class="karte kanal"><div class="ohead klickbar" data-a="kanalAuf" data-v="${c.id}"><b>${esc2(c.name)}</b><i>${esc2(c.text)}</i></div>`;
         h += `<div class="regler">${stepper("kanalBudget", P2(`kn:${c.id}:woche`, geld(c.budgetWoche)), `${P2(`kn:${c.id}:jahr`, geld(c.budgetJahr), "span")} im Jahr \xB7 Start ${geld(c.startBudgetWoche)}`, ` data-k="${c.id}"`)}</div>`;
         h += `<div class="mzeile"><span>Anteil am Budget</span><span class="mbalken"><span style="width:${(c.anteil * 100).toFixed(0)}%;background:#2f63b5"></span></span>${P2(`kn:${c.id}:anteil`, pz3(c.anteil))}</div>`;
         h += `<div class="mzeile"><span>Wirkung</span><span class="mbalken"><span style="width:${Math.min(100, c.wirkung * 50).toFixed(0)}%;background:#2f8f5b"></span></span>${P2(`kn:${c.id}:wirkung`, dez(c.wirkung, 2))}</div>`;
@@ -124104,7 +124262,7 @@
     function karte(P2) {
       const k = E.kundenkarte(s2()), a = k.app;
       let h = tabs();
-      h += `<div class="karte emkarte"><div class="mkopf" style="background:#d23c32"><b>${esc(k.name)}</b><small>${esc(k.punkteText)}${k.stufen ? " \xB7 Stufen Silber und Gold" : ""}</small></div>`;
+      h += `<div class="karte emkarte"><div class="mkopf" style="background:#d23c32"><b>${esc2(k.name)}</b><small>${esc2(k.punkteText)}${k.stufen ? " \xB7 Stufen Silber und Gold" : ""}</small></div>`;
       h += `<div class="owerte"><div><span>Mitglieder</span>${P2("ka:mitglieder", fmt.format(k.mitglieder))}</div><div><span>aktiv</span>${P2("ka:aktiv", pz3(k.aktivQuote))}</div><div><span>Umsatzanteil</span>${P2("ka:anteil", pz3(k.umsatzAnteil, 1))}</div><div><span>neu je Woche</span>${P2("ka:neu", fmt.format(k.neuWoche))}</div><div><span>Abg\xE4nge je Woche</span>${P2("ka:ab", fmt.format(k.abgaengeWoche))}</div><div><span>Mail-Einwilligung</span>${P2("ka:mail", pz3(k.mailQuote))}</div></div>`;
       h += `<div class="mzeile"><span>Datenqualit\xE4t</span><span class="mbalken"><span style="width:${(k.datenqualitaet * 100).toFixed(0)}%;background:#2f63b5"></span></span>${P2("ka:daten", String(Math.round(k.datenqualitaet * 100)))}</div><div class="olief">Bessere Daten machen CRM-Kampagnen treffsicherer.</div></div>`;
       h += '<div class="karte steuerung"><div class="khead">Vorteile</div>';
@@ -124114,7 +124272,7 @@
       h += regler("Anmeldepr\xE4mie f\xFCr 8 Wochen", segment("praemie", k.anmeldeBis !== void 0 && k.anmeldeBis > s2().woche ? k.anmeldepraemie : 0, [[0, "keine"], [5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]]), k.anmeldeBis !== void 0 && k.anmeldeBis > s2().woche ? `l\xE4uft bis ${wocheText(s2(), k.anmeldeBis)}` : "Willkommensgutschein");
       h += regler("Datenpflege je Woche", stepper("daten", P2("ka:datenBudget", geld(k.datenBudgetWoche))), "Adressen, Dubletten, Einwilligungen");
       h += `<div class="regler"><small class="rfuss">Kosten je Woche: Punkte ${P2("ka:k:punkte", geld(k.kostenWoche.punkte), "i")}, Stufen ${geld(k.kostenWoche.stufen)}, Betrieb ${geld(k.kostenWoche.betrieb)}, Daten ${geld(k.kostenWoche.daten)}, Anmeldung ${geld(k.kostenWoche.anmeldung)}, zusammen ${P2("ka:k:summe", geld(k.kostenWoche.summe), "i")}</small></div></div>`;
-      h += `<div class="karte emkarte"><div class="mkopf" style="background:#8c5a7a"><b>${esc(a.name)}</b><small>${a.relaunchBis !== void 0 && a.relaunchBis > s2().woche ? `Relaunch bis ${wocheText(s2(), a.relaunchBis)}` : "Coupons, Punkte, Push"}</small></div>`;
+      h += `<div class="karte emkarte"><div class="mkopf" style="background:#8c5a7a"><b>${esc2(a.name)}</b><small>${a.relaunchBis !== void 0 && a.relaunchBis > s2().woche ? `Relaunch bis ${wocheText(s2(), a.relaunchBis)}` : "Coupons, Punkte, Push"}</small></div>`;
       h += `<div class="owerte"><div><span>Downloads</span>${P2("ap:downloads", fmt.format(a.downloads))}</div><div><span>aktive Nutzer</span>${P2("ap:aktiv", fmt.format(a.aktiveNutzer))}</div><div><span>Push erlaubt</span>${P2("ap:push", pz3(a.pushQuote))}</div></div>`;
       h += `<div class="mzeile"><span>App-Qualit\xE4t</span><span class="mbalken"><span style="width:${(a.qualitaet * 100).toFixed(0)}%;background:${a.qualitaet < 0.3 ? "#d23c32" : "#2f8f5b"}"></span></span>${P2("ap:qualitaet", String(Math.round(a.qualitaet * 100)))}</div>`;
       h += regler("App-Budget je Woche", stepper("appBudget", P2("ap:budget", geld(a.budgetWoche))), "Pflege und Werbung f\xFCr Downloads");
@@ -124127,7 +124285,7 @@
       let h = tabs();
       h += `<div class="raster">${kz("Erreichbar per Mail", P2("c:mail", fmt.format(c.pools.mail)))}${kz("Erreichbar per Push", P2("c:push", fmt.format(c.pools.push)))}${kz("Erreichbar per Brief", P2("c:brief", fmt.format(c.pools.brief)))}${kz("Erm\xFCdung Mail", P2("c:ermuedung", pz3(c.ermuedung.mail ?? 0)), (c.ermuedung.mail ?? 0) > 0.5 ? "rot" : "")}</div>`;
       h += '<div class="karte steuerung"><div class="khead">Neue Kampagne</div>';
-      h += regler("Segment", `<select class="ort gross" data-a="crmSeg">${c.segmente.map((x, i) => `<option value="${i}"${i === B2.seg ? " selected" : ""}>${esc(x.text)} (${fmt.format(x.groesse)})</option>`).join("")}</select>`);
+      h += regler("Segment", `<select class="ort gross" data-a="crmSeg">${c.segmente.map((x, i) => `<option value="${i}"${i === B2.seg ? " selected" : ""}>${esc2(x.text)} (${fmt.format(x.groesse)})</option>`).join("")}</select>`);
       h += regler("Kanal", segment("crmKanal", B2.kanal, KANAL2));
       h += regler("Angebot", segment("crmAngebot", B2.angebot, ANGEBOT));
       if (B2.angebot === "coupon") h += `<div class="regler">${segment("crmProzent", B2.prozent, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.25, "25 %"]])}<div style="height:6px"></div>${segment("crmMindestbon", B2.mindestbon, [[0, "ohne Mindestbon"], [40, "ab 40 \u20AC"], [80, "ab 80 \u20AC"]])}</div>`;
@@ -124139,11 +124297,11 @@
       h += '<div class="oknoepfe"><button class="gruen" data-a="crmStart">Kampagne starten</button></div></div>';
       const liste = [...c.kampagnen].sort((a, b2) => (a.status === "aktiv" ? -1 : 0) - (b2.status === "aktiv" ? -1 : 0) || b2.start - a.start);
       for (const k of liste) {
-        h += `<div class="karte order"><div class="ohead"><b>${esc(k.name)}</b><i>${esc(k.segmentText)} \xB7 ${k.kanalText} \xB7 ${esc(k.angebotText)} \xB7 ${esc(k.frequenzText)}</i></div>`;
+        h += `<div class="karte order"><div class="ohead"><b>${esc2(k.name)}</b><i>${esc2(k.segmentText)} \xB7 ${k.kanalText} \xB7 ${esc2(k.angebotText)} \xB7 ${esc2(k.frequenzText)}</i></div>`;
         h += `<div class="ochips"><span class="chip ${k.status === "aktiv" ? "" : "grau"}">${STATUS2[k.status] ?? k.status}</span>${k.standard ? '<span class="chip grau">Grundprogramm</span>' : ""}${k.kontrollgruppe ? '<span class="chip blau">mit Kontrollgruppe</span>' : ""}${k.naechsterVersand !== void 0 ? `<span class="chip grau">n\xE4chster Versand KW ${kwVon2(k.naechsterVersand)}</span>` : ""}</div>`;
         const z2 = k.summe;
         h += `<div class="owerte"><div><span>Versendet</span>${P2(`c:${k.id}:versendet`, fmt.format(z2.versendet))}</div><div><span>\xD6ffnung</span>${P2(`c:${k.id}:oeffnung`, pz3(z2.oeffnungsrate, 1))}</div><div><span>Einl\xF6sung</span>${P2(`c:${k.id}:einloesung`, pz3(z2.einloesequote, 1))}</div></div>`;
-        if (k.auswertung) h += `<div class="owerte"><div><span>Mehrumsatz</span>${P2(`c:${k.id}:mehr`, `${geld(k.auswertung.mehrumsatzVon)} bis ${geld(k.auswertung.mehrumsatzBis)}`)}</div><div><span>Ergebnis</span>${P2(`c:${k.id}:ergebnis`, geld(k.auswertung.ergebnis), "b", k.auswertung.ergebnis < 0 ? ' class="rotwert"' : "")}</div><div><span>Abmeldungen</span>${P2(`c:${k.id}:ab`, fmt.format(z2.abmeldungen))}</div></div><div class="olief">${esc(k.auswertung.hinweis)}</div>`;
+        if (k.auswertung) h += `<div class="owerte"><div><span>Mehrumsatz</span>${P2(`c:${k.id}:mehr`, `${geld(k.auswertung.mehrumsatzVon)} bis ${geld(k.auswertung.mehrumsatzBis)}`)}</div><div><span>Ergebnis</span>${P2(`c:${k.id}:ergebnis`, geld(k.auswertung.ergebnis), "b", k.auswertung.ergebnis < 0 ? ' class="rotwert"' : "")}</div><div><span>Abmeldungen</span>${P2(`c:${k.id}:ab`, fmt.format(z2.abmeldungen))}</div></div><div class="olief">${esc2(k.auswertung.hinweis)}</div>`;
         if (k.status === "aktiv" || k.status === "geplant") h += `<div class="oknoepfe"><button class="rot" data-a="crmStopp" data-v="${k.id}">Stoppen</button></div>`;
         h += "</div>";
       }
@@ -124170,7 +124328,7 @@
       }
       for (const { a, von, bis, z: z2 } of balken7) {
         const x = L2 + von * B2, w = Math.max(3, (bis - von) * B2 - 1), y = 18 + z2 * RH;
-        g += `<g data-a="aktion" data-v="${a.id}" class="klickbar"><rect x="${x}" y="${y}" width="${w}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a.status]}"${a.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w > 34 ? `<text x="${x + 4}" y="${y + 11.5}" font-size="8.5" font-weight="700" fill="#fff">${esc(a.name.length > Math.floor(w / 4.6) ? a.name.slice(0, Math.max(3, Math.floor(w / 4.6) - 1)) + "." : a.name)}</text>` : ""}</g>`;
+        g += `<g data-a="aktion" data-v="${a.id}" class="klickbar"><rect x="${x}" y="${y}" width="${w}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a.status]}"${a.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w > 34 ? `<text x="${x + 4}" y="${y + 11.5}" font-size="8.5" font-weight="700" fill="#fff">${esc2(a.name.length > Math.floor(w / 4.6) ? a.name.slice(0, Math.max(3, Math.floor(w / 4.6) - 1)) + "." : a.name)}</text>` : ""}</g>`;
       }
       const jetzt = s2().woche - (K3.jahr - s2().startJahr) * 52;
       if (jetzt >= 0 && jetzt < 52) {
@@ -124189,17 +124347,17 @@
       h += '<button class="breit gruen" data-a="planen">+ Aktion planen</button>';
       if (ui.planen) h += planenKarte(K3);
       h += '<div class="karte">';
-      for (const a of K3.eintraege) h += `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status]}"></span><span class="was">${esc(a.name)} <i>${esc(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""} \xB7 ${esc(a.scopeText)}</i></span><span class="qm">KW ${a.startKw}${a.wochen > 1 ? ` bis ${a.endeKw}` : ""}</span><span class="uq">${P2(`kal:${a.id}:status`, STATUS2[a.status], "span")}</span></div>`;
+      for (const a of K3.eintraege) h += `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status]}"></span><span class="was">${esc2(a.name)} <i>${esc2(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""} \xB7 ${esc2(a.scopeText)}</i></span><span class="qm">KW ${a.startKw}${a.wochen > 1 ? ` bis ${a.endeKw}` : ""}</span><span class="uq">${P2(`kal:${a.id}:status`, STATUS2[a.status], "span")}</span></div>`;
       if (!K3.eintraege.length) h += '<div class="zeile grau">Keine Aktion in diesem Jahr.</div>';
       h += "</div>";
-      for (const r of K3.raeumungen) h += `<div class="olief">${esc(r.name)}: ${esc(r.text)}</div>`;
+      for (const r of K3.raeumungen) h += `<div class="olief">${esc2(r.name)}: ${esc2(r.text)}</div>`;
       return { titel: "Aktionskalender", unter: `${K3.jahr} \xB7 ${K3.eintraege.filter((a) => a.status !== "abgesagt").length} Aktionen \xB7 KW ${K3.kw}`, html: h };
     }
     function planenKarte(K3) {
       const p2 = ui.planen, an = K3.anlaesse.find((x) => x.id === p2.anlass);
       let h = '<div class="karte steuerung"><div class="khead">Neue Aktion</div>';
-      h += regler("Anlass", `<select class="ort gross" data-a="planAnlass">${K3.anlaesse.filter((x) => x.id !== "raeumung").map((x) => `<option value="${x.id}"${x.id === p2.anlass ? " selected" : ""}>${esc(x.name)} (KW ${x.kw})</option>`).join("")}</select>`);
-      h += regler("Mechanik", `<select class="ort gross" data-a="planMechanik">${K3.mechaniken.map((m) => `<option value="${m.id}"${m.id === p2.mechanik ? " selected" : ""}>${esc(m.text)}</option>`).join("")}</select>`, an?.bereiche ? `Bereiche: ${an.bereiche.length}` : "");
+      h += regler("Anlass", `<select class="ort gross" data-a="planAnlass">${K3.anlaesse.filter((x) => x.id !== "raeumung").map((x) => `<option value="${x.id}"${x.id === p2.anlass ? " selected" : ""}>${esc2(x.name)} (KW ${x.kw})</option>`).join("")}</select>`);
+      h += regler("Mechanik", `<select class="ort gross" data-a="planMechanik">${K3.mechaniken.map((m) => `<option value="${m.id}"${m.id === p2.mechanik ? " selected" : ""}>${esc2(m.text)}</option>`).join("")}</select>`, an?.bereiche ? `Bereiche: ${an.bereiche.length}` : "");
       if (!["punkte", "staffel"].includes(p2.mechanik)) h += regler("Rabatt", segment("planRabatt", p2.rabatt, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.3, "30 %"], [0.4, "40 %"]]));
       if (p2.mechanik === "punkte") h += regler("Punkte", segment("planPunkte", p2.punkteFaktor, [[3, "3-fach"], [5, "5-fach"], [10, "10-fach"]]));
       h += regler("Start", stepper("planKw", `<b>KW ${p2.kw} / ${p2.jahr}</b>`), "Kalenderwoche");
@@ -124216,13 +124374,13 @@
         return kalender(P2);
       }
       let h = tabs() + '<button class="zurueck" data-a="seite" data-v="kalender">\u2039 Kalender</button>';
-      h += `<div class="karte order"><div class="ohead"><b>${esc(a.name)}</b><i>${esc(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}${a.bereicheText?.length ? ` auf ${a.bereicheText.map(esc).join(", ")}` : ""}</i></div>`;
-      h += `<div class="ochips"><span class="chip ${a.status === "laufend" ? "" : "grau"}">${STATUS2[a.status]}</span><span class="chip grau">KW ${a.startKw}${a.wochen > 1 ? ` bis ${a.endeKw}` : ""} / ${a.jahr}</span><span class="chip grau">${esc(a.scopeText)}</span>${a.sonderwerbung ? `<span class="chip blau">Sonderwerbung ${geld(a.sonderwerbung)}</span>` : ""}</div>`;
-      if (!a.gemessen) h += `<div class="olief">${esc(a.text)}</div>`;
+      h += `<div class="karte order"><div class="ohead"><b>${esc2(a.name)}</b><i>${esc2(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}${a.bereicheText?.length ? ` auf ${a.bereicheText.map(esc2).join(", ")}` : ""}</i></div>`;
+      h += `<div class="ochips"><span class="chip ${a.status === "laufend" ? "" : "grau"}">${STATUS2[a.status]}</span><span class="chip grau">KW ${a.startKw}${a.wochen > 1 ? ` bis ${a.endeKw}` : ""} / ${a.jahr}</span><span class="chip grau">${esc2(a.scopeText)}</span>${a.sonderwerbung ? `<span class="chip blau">Sonderwerbung ${geld(a.sonderwerbung)}</span>` : ""}</div>`;
+      if (!a.gemessen) h += `<div class="olief">${esc2(a.text)}</div>`;
       else {
         h += `<div class="owerte"><div><span>Mehrumsatz</span>${P2("a:mehr", `${geld(a.mehrumsatzVon)} bis ${geld(a.mehrumsatzBis)}`)}</div><div><span>Rohertragseffekt</span>${P2("a:roh", `${geld(a.rohertragseffektVon)} bis ${geld(a.rohertragseffektBis)}`)}</div><div><span>Ergebnis</span>${P2("a:ergebnis", geld(a.ergebnis), "b", a.ergebnis < 0 ? ' class="rotwert"' : "")}</div></div>`;
         h += `<div class="owerte"><div><span>Rabattkosten</span>${P2("a:rabatt", geld(a.rabattkosten))}</div><div><span>Mitnahme</span>${P2("a:mitnahme", geld(a.mitnahme))}</div><div><span>Vorzieheffekt</span>${P2("a:vorzieh", geld(a.vorzieheffekt))}</div><div><span>Kannibalisierung</span>${P2("a:kanni", geld(a.kannibalisierung))}</div><div><span>Altwarenabbau</span>${P2("a:altware", geld(a.altwarenabbau))}</div><div><span>Image</span>${P2("a:image", `${a.image >= 0 ? "+" : ""}${dez(a.image, 1)}`)}</div></div>`;
-        h += `<div class="olief">Genauigkeit ${esc(a.genauigkeit)}${a.kontrollHaeuser ? ` \xB7 ${a.kontrollHaeuser} Kontrollh\xE4user` : ""}${a.hinweis ? ` \xB7 ${esc(a.hinweis)}` : ""}${a.marketingBericht ? ` \xB7 Marketing meldete ${geld(a.marketingBericht)}` : ""}</div>`;
+        h += `<div class="olief">Genauigkeit ${esc2(a.genauigkeit)}${a.kontrollHaeuser ? ` \xB7 ${a.kontrollHaeuser} Kontrollh\xE4user` : ""}${a.hinweis ? ` \xB7 ${esc2(a.hinweis)}` : ""}${a.marketingBericht ? ` \xB7 Marketing meldete ${geld(a.marketingBericht)}` : ""}</div>`;
       }
       if (a.status === "geplant") h += `<div class="oknoepfe"><button data-a="aktionLaenger" data-v="${a.id}">Eine Woche l\xE4nger</button><button class="rot" data-a="aktionAbsagen" data-v="${a.id}">Absagen</button></div>`;
       h += "</div>";
@@ -124443,11 +124601,11 @@
     function hausKarte(id) {
       if (typeof E.umbauHaus !== "function") return "";
       const etagen = E.umbauHaus(s2(), id) ?? [];
-      let html = '<div class="karte" data-umbau-karte="' + esc(id) + '"><div class="khead">Bau \xB7 Modernisierung</div>';
-      html += '<div class="tabs"><button class="tab an" data-umbau="haus" data-id="' + esc(id) + '">Bau</button><button class="tab" data-umbau="modernisierung">Konzernprogramm</button></div>';
+      let html = '<div class="karte" data-umbau-karte="' + esc2(id) + '"><div class="khead">Bau \xB7 Modernisierung</div>';
+      html += '<div class="tabs"><button class="tab an" data-umbau="haus" data-id="' + esc2(id) + '">Bau</button><button class="tab" data-umbau="modernisierung">Konzernprogramm</button></div>';
       for (const e of [...etagen].reverse()) {
         const pf = e.pflichten, technik3 = e.technik;
-        html += '<div class="zeile"><span class="was"><b>' + ETAGE(e.etage) + "</b> <i>Substanz " + Math.round(e.substanz) + "/100 \xB7 M\xF6bel " + e.moebelGeneration + " \xB7 Klima " + technik3.klima + "/2, Licht " + technik3.licht + "/2, Brandschutz " + technik3.brandschutz + "/2</i><small>Pr\xFCffristen: Brandschutz W" + pf.brandschutz + " \xB7 Aufzug W" + pf.aufzug + "</small>" + (e.gesperrt ? '<small class="rot">Beh\xF6rdlich gesperrt</small>' : e.projekt ? "<small>Baustelle bis Woche " + e.projekt.ende + "</small>" : "") + '</span><button class="mini" data-umbau="planen" data-id="' + esc(id) + '" data-etage="' + e.etage + '">Umbau planen</button></div>';
+        html += '<div class="zeile"><span class="was"><b>' + ETAGE(e.etage) + "</b> <i>Substanz " + Math.round(e.substanz) + "/100 \xB7 M\xF6bel " + e.moebelGeneration + " \xB7 Klima " + technik3.klima + "/2, Licht " + technik3.licht + "/2, Brandschutz " + technik3.brandschutz + "/2</i><small>Pr\xFCffristen: Brandschutz W" + pf.brandschutz + " \xB7 Aufzug W" + pf.aufzug + "</small>" + (e.gesperrt ? '<small class="rot">Beh\xF6rdlich gesperrt</small>' : e.projekt ? "<small>Baustelle bis Woche " + e.projekt.ende + "</small>" : "") + '</span><button class="mini" data-umbau="planen" data-id="' + esc2(id) + '" data-etage="' + e.etage + '">Umbau planen</button></div>';
       }
       return html + "</div>";
     }
@@ -124456,22 +124614,22 @@
         const h = s2().haeuser.find((x) => x.id === ui.haus);
         const p2 = E.umbauSchaetzung(s2(), ui.haus, ui.etage, ui.stufe);
         const aktiv3 = (s2().umbau?.projekte ?? []).some((x) => x.status === "laufend" && x.haus === ui.haus && x.etagen.includes(ui.etage));
-        let html2 = '<div class="karte"><div class="khead">Umbau planen</div><div class="zeile"><b>' + esc(h?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage) + "</b></div>";
+        let html2 = '<div class="karte"><div class="khead">Umbau planen</div><div class="zeile"><b>' + esc2(h?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage) + "</b></div>";
         html2 += '<label>Stufe <select class="ort gross" data-umbau="stufe">' + Object.entries(BEZEICHNUNG).map(([id, name2]) => '<option value="' + id + '"' + (id === ui.stufe ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select></label>";
         html2 += '<div class="raster"><div class="kz"><span>Fl\xE4che</span><b>' + fmt.format(p2?.qm ?? 0) + ' qm</b></div><div class="kz"><span>Kosten</span><b>' + geld(p2?.kosten ?? 0) + '</b></div><div class="kz"><span>Bauzeit</span><b>' + (p2?.wochen ?? 0) + ' Wochen</b></div><div class="kz"><span>Wirkung Kaufquote</span><b>+' + Math.round((p2?.kaufquote ?? 0) * 100) + " %</b></div></div>";
         if (ui.stufe === "komplett") html2 += '<div class="zeile warnung">Komplettumbau betrifft das gesamte Haus.</div>';
         html2 += '<button class="breit gruen" data-umbau="starten" ' + (aktiv3 ? "disabled" : "") + ">Umbau starten</button></div>";
-        ctx.panel("Bau", esc(h?.stadt ?? ""), html2);
+        ctx.panel("Bau", esc2(h?.stadt ?? ""), html2);
         ui.aktiv = true;
         return;
       }
       const u = zustand();
       let html = '<div class="raster"><div class="kz"><span>Jahresbudget</span><b>' + geld(u.budget) + '</b></div><div class="kz"><span>Verbraucht</span><b>' + geld(u.verbraucht) + '</b></div><div class="kz"><span>Rest</span><b>' + geld(u.rest) + '</b></div><div class="kz"><span>Laufende Baustellen</span><b>' + u.laufend.length + "</b></div></div>";
       html += '<div class="karte"><div class="khead">Programm von Bau & Ladenbau \xB7 Priorit\xE4t nach Rendite</div>';
-      for (const v of u.programm.slice(0, 20)) html += '<button class="zeile" data-umbau="planen" data-id="' + esc(v.haus) + '" data-etage="' + v.etage + '"><span class="was"><b>' + esc(v.name) + "</b> \xB7 " + ETAGE(v.etage) + "<i>" + BEZEICHNUNG[v.stufe] + " \xB7 " + v.rendite.toFixed(1) + " % Jahrespotenzial</i></span><span>" + geld(v.kosten) + "</span></button>";
+      for (const v of u.programm.slice(0, 20)) html += '<button class="zeile" data-umbau="planen" data-id="' + esc2(v.haus) + '" data-etage="' + v.etage + '"><span class="was"><b>' + esc2(v.name) + "</b> \xB7 " + ETAGE(v.etage) + "<i>" + BEZEICHNUNG[v.stufe] + " \xB7 " + v.rendite.toFixed(1) + " % Jahrespotenzial</i></span><span>" + geld(v.kosten) + "</span></button>";
       html += '</div><div class="karte"><div class="khead">Laufende Baustellen</div>';
       if (!u.laufend.length) html += '<div class="zeile">Keine laufenden Umbauten.</div>';
-      for (const p2 of u.laufend) html += '<div class="zeile"><span class="was"><b>' + esc(s2().haeuser.find((x) => x.id === p2.haus)?.name ?? p2.haus) + "</b><i>" + BEZEICHNUNG[p2.stufe] + " \xB7 bis Woche " + p2.ende + "</i></span><span>" + geld(p2.kosten) + "</span></div>";
+      for (const p2 of u.laufend) html += '<div class="zeile"><span class="was"><b>' + esc2(s2().haeuser.find((x) => x.id === p2.haus)?.name ?? p2.haus) + "</b><i>" + BEZEICHNUNG[p2.stufe] + " \xB7 bis Woche " + p2.ende + "</i></span><span>" + geld(p2.kosten) + "</span></div>";
       html += '</div><div class="karte"><div class="khead">Premium-Investitionen</div><div class="zeile">' + u.premiumInvestitionen + " laufend \xB7 z\xE4hlen als freiwillige Modernisierung</div></div>";
       ctx.panel("Modernisierung", "Programm " + u.jahr + " \xB7 Bau & Ladenbau", html, "gross");
       ui.aktiv = true;
@@ -125148,7 +125306,7 @@
   // src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
   var euro = (x) => `${dez(x, 2)} \u20AC`;
-  var bild = (typ, farbe3, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe3, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`;
+  var bild = (typ, farbe3, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe3, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc2(typ)}</text></svg>`;
   var kachel = (typ, g = 76) => typeof typKachelSVG === "function" ? typKachelSVG(typ, g) : bild(typ, void 0, void 0, g);
   var sternNr = 0;
   function sterne(x, g = 18) {
@@ -125169,7 +125327,7 @@
     const da = typeof E.produkte === "function";
     const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null };
     function markenwahl(L2) {
-      return `<div class="spaltenwahl">${L2.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? "an" : ""}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join("")}</div>`;
+      return `<div class="spaltenwahl">${L2.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? "an" : ""}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc2(m.name)}</button>`).join("")}</div>`;
     }
     function aktuelleMarke(L2) {
       if (!L2.marken.length) return null;
@@ -125184,17 +125342,17 @@
       h += `<div class="raster">${kz("Team Produktentwicklung", P2("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P2("l:kosten", geld(L2.kostenWoche)))}</div>`;
       const kats = M2.kategorien.filter((k2) => k2.kapazitaet > 0 || k2.belegt > 0);
       if (!kats.some((k2) => k2.id === ui.kategorie)) ui.kategorie = (kats.find((k2) => M2.produkte.some((p2) => p2.kategorie === k2.id && p2.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
-      h += `<div class="seg umbruch kats">${kats.map((k2) => `<button class="${k2.id === ui.kategorie ? "an" : ""}" data-a="kategorie" data-v="${k2.id}">${esc(k2.name)} ${P2(`l:kat:${k2.id}`, `${k2.belegt} / ${k2.kapazitaet}`, "i")}</button>`).join("")}</div>`;
+      h += `<div class="seg umbruch kats">${kats.map((k2) => `<button class="${k2.id === ui.kategorie ? "an" : ""}" data-a="kategorie" data-v="${k2.id}">${esc2(k2.name)} ${P2(`l:kat:${k2.id}`, `${k2.belegt} / ${k2.kapazitaet}`, "i")}</button>`).join("")}</div>`;
       const prod = M2.produkte.filter((p2) => p2.kategorie === ui.kategorie && p2.status !== "ausgelistet");
       ui.k = Math.min(ui.k, Math.max(0, prod.length - 1));
-      if (M2.hinweis) h += `<div class="olief warnung">${esc(M2.hinweis)}</div>`;
+      if (M2.hinweis) h += `<div class="olief warnung">${esc2(M2.hinweis)}</div>`;
       if (!prod.length) h += '<div class="karte"><div class="zeile grau">In dieser Kategorie gibt es noch kein Produkt.</div></div>';
       else {
         const karten = prod.map((p2) => {
           const ent = p2.status === "entwicklung";
           let c = `<div class="karte produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(p2.typ, p2.farbe, p2.material, 150)}</div>`;
           if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
-          c += `<div class="pname">${P2(`p:${p2.id}:name`, p2.name, "b")}<small>${esc(p2.typ)} \xB7 ${esc(p2.farbe)} \xB7 ${esc(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
+          c += `<div class="pname">${P2(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
           if (ent) {
             c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P2(`p:${p2.id}:fertig`, `fertig ${wocheText(st, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P2(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
           } else {
@@ -125211,8 +125369,8 @@
       const k = M2.kategorien.find((x) => x.id === ui.kategorie);
       const voll2 = k && k.belegt >= k.kapazitaet;
       h += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
-      if (voll2 && !M2.hinweis) h += `<div class="olief warnung">Kapazit\xE4t in ${esc(k.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
-      return { titel: "Produktentwicklung", unter: `${esc(M2.name)} \xB7 ${esc(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st.woche)}`, html: h };
+      if (voll2 && !M2.hinweis) h += `<div class="olief warnung">Kapazit\xE4t in ${esc2(k.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
+      return { titel: "Produktentwicklung", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st.woche)}`, html: h };
     }
     function neu(P2) {
       const st = s2(), K3 = E.produktKatalog(st), L2 = E.produkte(st), M2 = aktuelleMarke(L2), e = ui.neu;
@@ -125224,43 +125382,43 @@
       }
       const T = K3.typen.find((t) => t.typ === e.typ);
       if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
-      let h = `<button class="zurueck" data-a="liste">\u2039 ${esc(M2.name)}</button>`;
+      let h = `<button class="zurueck" data-a="liste">\u2039 ${esc2(M2.name)}</button>`;
       h += markenwahl(L2);
       const v = E.produktVorschau(st, { marke: M2.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
-      if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc(M2.name)} kein Platz mehr. F\xFCr Neues bitte erst ein Produkt auslisten.</div>`;
+      if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc2(M2.name)} kein Platz mehr. F\xFCr Neues bitte erst ein Produkt auslisten.</div>`;
       h += '<div class="vtitel">Artikeltyp</div><div class="typkacheln">';
-      for (const t of typen) h += `<button class="${t.typ === e.typ ? "an" : ""} ${voll2.has(t.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc(t.typ)}">${kachel(t.typ, 64)}<span>${esc(t.typ)}</span>${voll2.has(t.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
+      for (const t of typen) h += `<button class="${t.typ === e.typ ? "an" : ""} ${voll2.has(t.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc2(t.typ)}">${kachel(t.typ, 64)}<span>${esc2(t.typ)}</span>${voll2.has(t.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
       h += '</div><div class="karte steuerung">';
-      h += regler("Farbe", `<div class="farben klein">${K3.farben.map((f) => `<button class="${f.name === e.farbe ? "an" : ""}" style="background:${f.hex}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}"></button>`).join("")}</div>`, esc(e.farbe));
+      h += regler("Farbe", `<div class="farben klein">${K3.farben.map((f) => `<button class="${f.name === e.farbe ? "an" : ""}" style="background:${f.hex}" data-a="farbe" data-v="${esc2(f.name)}" aria-label="${esc2(f.name)}"></button>`).join("")}</div>`, esc2(e.farbe));
       h += regler("Material", segment("material", e.material, (T?.materialien ?? []).map((m) => [m, m])));
       h += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p2) => [p2.id, PREISLAGE[p2.id] ?? p2.id])));
       h += regler("Qualit\xE4t", segment("qualitaet", e.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, "\u2605".repeat(x)])));
       h += regler("Entwicklungsdauer", segment("dauer", e.dauer, K3.dauer.map((d) => [d, String(d)])), "Wochen");
       h += regler("Budget je Woche", stepper("budget", P2("n:budget", geld(e.budgetWoche))), `Schritt ${geld(K3.budgetSchritt)}`);
       h += "</div>";
-      h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}</div><div class="pname">${P2("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc(v.saisonEinfuehrung)}</small></div>`;
+      h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}</div><div class="pname">${P2("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc2(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc2(v.saisonEinfuehrung)}</small></div>`;
       h += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P2("n:sterne", `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, "span")}</span></div>`;
       h += `<div class="owerte"><div><span>Normpreis</span>${P2("n:preis", euro(v.normpreis))}</div><div><span>EK je St\xFCck</span>${P2("n:ek", euro(v.ekStueck))}</div><div><span>Marge</span>${P2("n:marge", pz3(v.marge))}</div><div><span>Entwicklung</span>${P2("n:kosten", geld(v.kosten))}</div><div><span>Fertig</span>${P2("n:fertig", wocheText(st, v.fertigWoche))}</div><div><span>Platz frei</span>${P2("n:frei", String(v.kapazitaetFrei))}</div></div>`;
       if (v.teile) h += `<div class="passung">${[["zielgruppe", "Zielgruppe"], ["trend", "Trend"], ["preisQualitaet", "Preis"], ["entwicklung", "Aufwand"], ["team", "Team"]].map(([k, t]) => `<div><span class="psaeule"><span style="height:${(v.teile[k] * 100).toFixed(0)}%"></span></span><b>${Math.round(v.teile[k] * 100)}</b><i>${t}</i></div>`).join("")}</div>`;
-      for (const x of v.hinweise) h += `<div class="olief">${esc(x)}</div>`;
-      if (v.fehler) h += `<div class="olief warnung">${esc(v.fehler)}</div>`;
+      for (const x of v.hinweise) h += `<div class="olief">${esc2(x)}</div>`;
+      if (v.fehler) h += `<div class="olief warnung">${esc2(v.fehler)}</div>`;
       h += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="entwickeln"${v.ok ? "" : " disabled"}>Entwicklung starten \xB7 ${geld(v.kosten)}</button></div>`;
-      return { titel: "Neues Produkt", unter: `${esc(M2.name)} \xB7 ${esc(M2.zielgruppe)}`, html: h };
+      return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)}`, html: h };
     }
     function trend(P2) {
       const st = s2(), T = E.trendbericht(st), K3 = E.produktKatalog(st), hex3 = new Map(K3.farben.map((f) => [f.name, f.hex]));
       let h = '<button class="zurueck" data-a="liste">\u2039 Produkte</button>';
-      h += `<div class="olief">${esc(T.hinweis)}</div>`;
+      h += `<div class="olief">${esc2(T.hinweis)}</div>`;
       for (const [titel, S, pre] of [["Laufende Saison", T.aktuell, "a"], ["N\xE4chste Saison", T.naechste, "n"]]) {
         h += `<div class="karte"><div class="khead">${titel}<small>${P2(`t:${pre}:name`, S.name, "span")}</small></div>`;
         for (const z2 of T.zielgruppen) {
           const g = S.gruppen[z2.id];
           if (!g) continue;
-          h += `<div class="trend"><b>${esc(z2.name)}</b><div class="tfarben">${g.farben.map((f) => `<span style="background:${hex3.get(f) ?? "#ccc"}" title="${esc(f)}"></span><i>${esc(f)}</i>`).join("")}</div><div class="olief">Artikel: ${g.artikel.map(esc).join(", ")} \xB7 Material: ${g.materialien.map(esc).join(", ")}${g.out?.length ? ` \xB7 out: ${g.out.map(esc).join(", ")}` : ""}</div></div>`;
+          h += `<div class="trend"><b>${esc2(z2.name)}</b><div class="tfarben">${g.farben.map((f) => `<span style="background:${hex3.get(f) ?? "#ccc"}" title="${esc2(f)}"></span><i>${esc2(f)}</i>`).join("")}</div><div class="olief">Artikel: ${g.artikel.map(esc2).join(", ")} \xB7 Material: ${g.materialien.map(esc2).join(", ")}${g.out?.length ? ` \xB7 out: ${g.out.map(esc2).join(", ")}` : ""}</div></div>`;
         }
         h += "</div>";
       }
-      return { titel: "Trendbericht", unter: `Messe \xB7 ${esc(T.aktuell.name)} und ${esc(T.naechste.name)}`, html: h };
+      return { titel: "Trendbericht", unter: `Messe \xB7 ${esc2(T.aktuell.name)} und ${esc2(T.naechste.name)}`, html: h };
     }
     function rendern() {
       const S = werteSammler();
@@ -125588,7 +125746,7 @@
     return punkte2.sort((a, b2) => Number(a.aktuell) - Number(b2.aktuell)).map((p2) => {
       const farben = ["#597fa2", "#9b7954", "#638d70", "#8875a7", "#ac705e", "#718b9b"];
       const gruppe2 = p2.hauscluster ? [...p2.hauscluster].reduce((a, c) => a + c.charCodeAt(0), 0) : 0;
-      return '<circle cx="' + p2.x + '" cy="' + p2.y + '" r="' + (p2.aktuell ? 4 : 1.8) + '" fill="' + (p2.aktuell ? "#d23c32" : farben[gruppe2 % farben.length]) + '"><title>' + esc(p2.name) + "</title></circle>";
+      return '<circle cx="' + p2.x + '" cy="' + p2.y + '" r="' + (p2.aktuell ? 4 : 1.8) + '" fill="' + (p2.aktuell ? "#d23c32" : farben[gruppe2 % farben.length]) + '"><title>' + esc2(p2.name) + "</title></circle>";
     }).join("");
   }
   function reiseModul(ctx) {
@@ -125631,7 +125789,7 @@
       });
       const liste = z2.querySelector(".reise-zielraster");
       if (!liste) return;
-      liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc(c.name) + "</strong><small>" + esc(c.formate ?? "") + "</small></span></button>").join("");
+      liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + "</strong><small>" + esc2(c.formate ?? "") + "</small></span></button>").join("");
       if (!sortiert.length) liste.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
     }
     function schreibe(el, text3, dauer, meins) {
@@ -125664,7 +125822,7 @@
       const ausschnitt = ctx.vorschau?.();
       if (ausschnitt) vorschauen.set(hier, ausschnitt);
       z2.hidden = false;
-      z2.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug3 + '</div><button class="reise-zu" aria-label="Schlie\xDFen" data-reisezu>\xD7</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + "</span><strong>" + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen \u2026" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
+      z2.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug3 + '</div><button class="reise-zu" aria-label="Schlie\xDFen" data-reisezu>\xD7</button><span class="reise-bahnhof">Hauptbahnhof ' + esc2(hier) + "</span><strong>" + esc2(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen \u2026" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
       document.body.classList.add("reise-aktiv");
       z2.querySelector(".reise-suche").addEventListener("input", (e) => ziele(e.target.value));
       ziele();
@@ -125693,7 +125851,7 @@
       kreis(p2);
       z2.classList.remove("offen", "ziele-offen");
       z2.classList.add("faehrt");
-      z2.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild2(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc(kode(von)) + " <span>\u{1F686}</span> " + esc(kode(ziel)) + "</div><small>" + esc(von) + " \u2192 " + esc(ziel) + "</small></div></section>";
+      z2.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc2(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild2(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc2(kode(von)) + " <span>\u{1F686}</span> " + esc2(kode(ziel)) + "</div><small>" + esc2(von) + " \u2192 " + esc2(ziel) + "</small></div></section>";
       const flug = z2.querySelector(".reise-flug");
       flug.classList.add("start");
       const vorbereitung = new Promise((resolve, reject) => {
@@ -125766,7 +125924,7 @@
   });
   var eur2 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)) + " \u20AC";
   var kurve3 = (t) => 1 - (1 - t) ** 2;
-  var reduziert = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var reduziert = () => effektiveAnimation() !== "voll";
   var ohneAnimation2 = () => new URLSearchParams(location.search).has("ohne-animation");
   var warten2 = (ms) => new Promise((r) => setTimeout(r, ms));
   var KATEGORIE3 = ["Presse", "Konkurrenz"];
@@ -125799,11 +125957,12 @@
     }
     function fragDialog() {
       const warnungen = ctx.posteingang().handeln.filter((x) => x.restWochen === 0);
-      node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschlie\xDFen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schlie\xDFen">\xD7</button><h2>Woche abschlie\xDFen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN2 + "</span></div>" + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + " Vorg\xE4nge laufen ab. Der Standard wird gew\xE4hlt beziehungsweise das Angebot verf\xE4llt.</p>" : "") + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
+      node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschlie\xDFen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schlie\xDFen">\xD7</button><h2 tabindex="-1">Woche abschlie\xDFen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN2 + "</span></div>" + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + " Vorg\xE4nge laufen ab. Der Standard wird gew\xE4hlt beziehungsweise das Angebot verf\xE4llt.</p>" : "") + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
       node.hidden = false;
       node.className = "frage-ein";
       document.body.classList.add("wochen-aktiv");
       status = "frage";
+      node.querySelector(".wochen-frage h2")?.focus({ preventScroll: true });
       requestAnimationFrame(() => node.classList.add("sichtbar"));
     }
     function oeffne() {
@@ -125813,7 +125972,8 @@
       bestaetigt = null;
       zeiten.length = 0;
       markieren("Wochenknopf");
-      if (modus() === "aus") return berechnen(false);
+      const faellig = ctx.warnen() && ctx.posteingang().handeln.some((p2) => p2.restWochen === 0);
+      if (modus() === "aus" && !faellig) return berechnen(false);
       fragDialog();
     }
     async function berechnen(mitDialog = true) {
@@ -125885,7 +126045,7 @@
       };
     }
     function zeile2(name2, wert, k = "") {
-      return '<div class="wb-zeile ' + k + '"><span>' + esc(name2) + "</span><strong>" + esc(wert) + "</strong></div>";
+      return '<div class="wb-zeile ' + k + '"><span>' + esc2(name2) + "</span><strong>" + esc2(wert) + "</strong></div>";
     }
     function berichtZeigen(meins) {
       if (meins !== token) return;
@@ -125895,12 +126055,13 @@
       const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur2(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
       const uDelta = delta(bericht2.umsatz, bericht2.umsatzVor);
       const eDelta = delta(bericht2.ebitda, bericht2.ebitdaVor);
-      const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.jpg)"></div><span>' + esc(a.text) + "</span></div>" : "";
-      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile2("Cash operativ", eur2(bericht2.kapitalfluss.operativ)) + zeile2("Investitionen", eur2(bericht2.kapitalfluss.investitionen)) + zeile2("Finanzierung", eur2(bericht2.kapitalfluss.finanzierung)) + zeile2("Sonstiges", eur2(bericht2.kapitalfluss.sonstiges)) + zeile2("Cash netto", eur2(bericht2.kapitalfluss.netto)) + zeile2("Cash-Bestand", eur2(bericht2.kapitalfluss.bestand), "wb-summe") + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + "</h4>" + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
+      const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.jpg)"></div><span>' + esc2(a.text) + "</span></div>" : "";
+      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc2(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc2(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile2("Cash operativ", eur2(bericht2.kapitalfluss.operativ)) + zeile2("Investitionen", eur2(bericht2.kapitalfluss.investitionen)) + zeile2("Finanzierung", eur2(bericht2.kapitalfluss.finanzierung)) + zeile2("Sonstiges", eur2(bericht2.kapitalfluss.sonstiges)) + zeile2("Cash netto", eur2(bericht2.kapitalfluss.netto)) + zeile2("Cash-Bestand", eur2(bericht2.kapitalfluss.bestand), "wb-summe") + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc2(titel) + "</h4>" + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
       node.hidden = false;
       node.className = "bericht-ein";
       document.body.classList.add("wochen-aktiv");
       requestAnimationFrame(() => node.classList.add("sichtbar"));
+      node.querySelector(".wb-bericht h2")?.focus({ preventScroll: true });
       const originalDauer = dauer();
       const zaehlBeginn = performance.now() + (originalDauer ? WOCHEN_ZEIT.berichtEin : 0);
       let abgeschlossen = false;
@@ -125938,7 +126099,8 @@
       markieren("Vorfall " + (vorfall + 1));
       const feld = node.querySelector("#wb-vorfall"), meins = token;
       const verantwortlich = portraetZumVorgang(m);
-      feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + "</div></div><h4>" + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
+      feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + "</div></div><h4>" + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
+      feld.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
       requestAnimationFrame(() => feld.classList.add("offen"));
       const text3 = m.text ?? "", el = feld.querySelector(".wb-tippt"), beginn = performance.now();
       function tick(t) {
@@ -126009,10 +126171,10 @@
   var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent(basis3 ? wert / basis3 - 1 : 0);
   var punkt = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl2((wert - basis3) * 100) + " Punkte";
   function brueckeHtml(br) {
-    if (br.status !== "ok") return '<div class="o02-hinweis">' + esc(br.status) + "</div>";
+    if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
     const maximal = Math.max(1, ...eintraege.map((x) => Math.abs(x[1])));
-    const zeilen = eintraege.map(([name2, wert]) => '<div class="o02-effekt"><span>' + name2 + '</span><div class="o02-steg"><i class="' + (wert < 0 ? "minus" : "plus") + '" style="width:' + Math.max(1, Math.round(Math.abs(wert) / maximal * 100)) + '%"></i></div><b>' + esc(geld(wert)) + "</b></div>").join("");
+    const zeilen = eintraege.map(([name2, wert]) => '<div class="o02-effekt"><span>' + name2 + '</span><div class="o02-steg"><i class="' + (wert < 0 ? "minus" : "plus") + '" style="width:' + Math.max(1, Math.round(Math.abs(wert) / maximal * 100)) + '%"></i></div><b>' + esc2(geld(wert)) + "</b></div>").join("");
     return '<div class="o02-bruecke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '"><div class="o02-end"><b>Vorjahr ' + geld(br.vorher) + "</b><b>Ist " + geld(br.aktuell) + "</b></div>" + zeilen + '<div class="o02-end"><b>Abweichung ' + geld(br.differenz) + "</b><span>Boneffekt " + geld(br.bon) + "</span></div>" + (br.vorjahrGeschaetzt ? "<small>Vorjahreswerte teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt.</small>" : "") + "</div>";
   }
   function hausTreiberZeile(E, s2, id) {
@@ -126020,22 +126182,22 @@
     if (!d) return '<div class="karte o02-haus"><div class="khead">Umsatztreiber</div><div class="zeile grau">Noch keine abgeschlossene Woche</div></div>';
     const a = d.aktuell, v = d.vorjahr;
     const br = E.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
-    const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc(wert) + "</b><small>" + esc(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent(a.kaufquote), punkt(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl2(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent(a.kaufquote), punkt(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl2(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile(z2, haus2 = false) {
-    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc(z2.ampelfarbe) + '"></span>' + esc(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
+    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
   }
   function reportingModul(ctx) {
     const E = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
-    const sortiere = (werte) => [...werte].sort((a, b2) => {
+    const sortiere = (werte2) => [...werte2].sort((a, b2) => {
       const av = a[ui.sort], bv = b2[ui.sort];
       return (ui.sort === "name" ? String(av).localeCompare(String(bv), "de") : Number(bv ?? -1e15) - Number(av ?? -1e15)) || a.name.localeCompare(b2.name, "de");
     });
-    const karten = (werte) => sortiere(werte).map((z2) => zeile(z2, true)).join("");
+    const karten = (werte2) => sortiere(werte2).map((z2) => zeile(z2, true)).join("");
     const leere = '<div class="zeile grau">Keine H\xE4user im gew\xE4hlten Filter.</div>';
     const tabelle = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b><b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + "</div></div>";
-    const auswahl4 = (name2, key, optionen2) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen2.map(([wert, titel]) => '<option value="' + esc(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc(titel) + "</option>").join("") + "</select></label>";
+    const auswahl4 = (name2, key, optionen2) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen2.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
     function anzeigen() {
       const daten = E.reporting(ctx.s(), ui.wochen, ui.format);
       const hs = daten.zeilen;
@@ -126063,14 +126225,14 @@
               const x = treff.filter((z2) => z2.hauscluster === hc);
               if (unter.length === 1 && hc === id) return karten(x);
               const g = gruppen.find((gg) => gg.ebene === "hauscluster" && gg.id === hc);
-              return '<details class="o02-unter"><summary>' + esc(hc) + " (" + x.length + " H\xE4user)</summary>" + (g ? zeile(g) : "") + karten(x) + "</details>";
+              return '<details class="o02-unter"><summary>' + esc2(hc) + " (" + x.length + " H\xE4user)</summary>" + (g ? zeile(g) : "") + karten(x) + "</details>";
             }).join("");
           } else innen = karten(treff);
-          return '<details class="o02-gruppe"><summary>' + esc(id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe2 ? zeile(gruppe2) : "") + tabelle(innen) + "</details>";
+          return '<details class="o02-gruppe"><summary>' + esc2(id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe2 ? zeile(gruppe2) : "") + tabelle(innen) + "</details>";
         }).join("");
         content += abschnitte || leere;
       }
-      content += '<div class="karte"><div class="khead">Beobachtungsliste <small>zehn gr\xF6\xDFte negative Umsatzabweichungen</small></div>' + (daten.beobachtung.length ? daten.beobachtung.filter((o) => hs.some((z2) => z2.id === o.hausId)).map((o) => '<button class="zeile o02-beobachtung" data-o02-open="' + esc(o.hausId) + '"><span class="was"><b>' + esc(o.name) + "</b><small>" + esc(o.haupttreiber) + "</small></span><strong>" + geld(o.abweichung) + "</strong><span>\u2192</span></button>").join("") : '<div class="zeile grau">Noch keine negativen Vorjahresabweichungen verf\xFCgbar.</div>') + "</div>";
+      content += '<div class="karte"><div class="khead">Beobachtungsliste <small>zehn gr\xF6\xDFte negative Umsatzabweichungen</small></div>' + (daten.beobachtung.length ? daten.beobachtung.filter((o) => hs.some((z2) => z2.id === o.hausId)).map((o) => '<button class="zeile o02-beobachtung" data-o02-open="' + esc2(o.hausId) + '"><span class="was"><b>' + esc2(o.name) + "</b><small>" + esc2(o.haupttreiber) + "</small></span><strong>" + geld(o.abweichung) + "</strong><span>\u2192</span></button>").join("") : '<div class="zeile grau">Noch keine negativen Vorjahresabweichungen verf\xFCgbar.</div>') + "</div>";
       ctx.panel("Reporting", "Operatives Wochenreporting \xB7 " + ui.wochen + " Woche(n)", content, "gross");
       ui.aktiv = true;
     }
@@ -126123,7 +126285,7 @@
       return E.itUebersicht(s2());
     }
     function zeile2(t, wert) {
-      return '<div class="zeile"><span class="was">' + esc(t) + '</span><b class="uq" style="min-width:90px">' + esc(String(wert)) + "</b></div>";
+      return '<div class="zeile"><span class="was">' + esc2(t) + '</span><b class="uq" style="min-width:90px">' + esc2(String(wert)) + "</b></div>";
     }
     function balken7(w) {
       return '<div class="it-fortschritt"><i style="width:' + Math.max(0, Math.min(100, Math.round(w * 100))) + '%"></i></div>';
@@ -126133,14 +126295,14 @@
     }
     function systemKarte(x) {
       const ampel = x.risiko < 2e-3 ? "gruen" : x.risiko < 0.01 ? "gelb" : "rot";
-      let h = '<div class="karte"><div class="khead">' + esc(x.name) + "<small>Generation " + x.generation + " / 4</small></div>";
+      let h = '<div class="karte"><div class="khead">' + esc2(x.name) + "<small>Generation " + x.generation + " / 4</small></div>";
       h += '<div class="it-werte"><span>Alter <b>' + Math.floor(x.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent2(x.risiko) + "/Woche</span></div>";
       if (x.wartungGekuendigt) h += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
       if (x.kasseAusbau) h += '<div class="zeile">SB-Kassen ' + x.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x.kasseAusbau.mobil + "/2</div>";
       const akt = x.verteilung.filter((c) => c.generation > x.generation);
       if (akt.length) h += '<div class="zeile">Bereits modernisierte Cluster: ' + akt.length + " / " + x.verteilung.length + "</div>";
       const bereiche = E.SYSTEME[x.id].bereiche;
-      h += '<div class="it-meta">Begrenzt: ' + esc(bereiche.join(", ")) + "</div>";
+      h += '<div class="it-meta">Begrenzt: ' + esc2(bereiche.join(", ")) + "</div>";
       h += '<div class="oknoepfe"><button data-it="neues" data-v="' + x.id + '">Modernisieren</button></div></div>';
       return h;
     }
@@ -126161,8 +126323,8 @@
       return h;
     }
     function projektKarte(p2, d) {
-      let h = '<div class="karte"><div class="khead">' + esc(E.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc(artName[p2.art]) + "</small></div>";
-      h += '<div class="it-werte"><b>' + esc(phasen[p2.phase]) + "</b><b>" + prozent2(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
+      let h = '<div class="karte"><div class="khead">' + esc2(E.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
+      h += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent2(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
       h += zeile2("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
       h += zeile2("Mehrwochen durch Verzug", p2.verzug);
       h += zeile2("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
@@ -126170,7 +126332,7 @@
       if (p2.phase === "rollout" || p2.phase === "umsetzung" || p2.phase === "konzept") {
         const ausgabe = p2.clusterIds.map((id, i) => {
           const c = alle.get(id), fertig = p2.erledigteCluster.includes(id);
-          return '<div class="it-cluster ' + (fertig ? "fertig" : "") + '"><span>' + (fertig ? "\u2713 " : "") + esc(c?.name ?? id) + "</span>" + (fertig ? "<b>Generation " + p2.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig && p2.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === p2.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
+          return '<div class="it-cluster ' + (fertig ? "fertig" : "") + '"><span>' + (fertig ? "\u2713 " : "") + esc2(c?.name ?? id) + "</span>" + (fertig ? "<b>Generation " + p2.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig && p2.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === p2.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
         });
         h += '<details class="it-details"><summary>Rollout-Reihenfolge und Clusterkarte</summary>' + ausgabe.join("") + "</details>";
       }
@@ -126201,7 +126363,7 @@
       const zulaessig = ui.art === "entwickeln" ? ui.generation >= 1 : ui.generation === 3 || ui.art === "kaufen" && ui.generation <= 3;
       const plan2 = E.itProjektPlan(s2(), ui.system, ui.art, ui.generation, ausgew.length);
       let h = '<div class="karte"><div class="khead">Projekt konfigurieren</div>';
-      h += '<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">' + d.systeme.map((x) => '<option value="' + x.id + '" ' + (x.id === ui.system ? "selected" : "") + ">" + esc(x.name) + "</option>").join("") + "</select></div>";
+      h += '<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">' + d.systeme.map((x) => '<option value="' + x.id + '" ' + (x.id === ui.system ? "selected" : "") + ">" + esc2(x.name) + "</option>").join("") + "</select></div>";
       h += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen2.map((a) => '<button data-it="art" data-v="' + a + '" class="' + (ui.art === a ? "an" : "") + '">' + artName[a] + "</button>").join("") + "</div></div>";
       h += '<div class="regler"><b>Zielgeneration</b><div class="seg">' + [1, 2, 3, 4].map((g) => '<button data-it="generation" data-v="' + g + '" ' + (ui.generation === g ? 'class="an"' : "") + " " + (ui.art !== "entwickeln" && g === 4 || ui.art === "dienstleister" && g !== 3 ? "disabled" : "") + ">" + g + "</button>").join("") + "</div></div>";
       h += '<div class="it-vergleich">' + optionen2.map((art) => {
@@ -126213,7 +126375,7 @@
       h += '<div class="oknoepfe"><button data-it="alle">Alle w\xE4hlen</button><button data-it="keine">Keine w\xE4hlen</button></div>';
       h += '<div class="it-clusterauswahl">' + d.cluster.map((c) => {
         const g = sys.verteilung.find((v) => v.id === c.id)?.generation ?? sys.generation;
-        return '<label class="it-wahl"><input type="checkbox" data-it-cluster="' + esc(c.id) + '" ' + (ids.has(c.id) ? "checked" : "") + " " + (g >= ui.generation ? "disabled" : "") + "><span>" + esc(c.name) + "</span><small>Generation " + g + "</small></label>";
+        return '<label class="it-wahl"><input type="checkbox" data-it-cluster="' + esc2(c.id) + '" ' + (ids.has(c.id) ? "checked" : "") + " " + (g >= ui.generation ? "disabled" : "") + "><span>" + esc2(c.name) + "</span><small>Generation " + g + "</small></label>";
       }).join("") + "</div>";
       h += zeile2("Geplante Laufzeit", plan2.gesamt + " Wochen");
       h += zeile2("Planbudget", geld(plan2.kosten));
@@ -126342,7 +126504,7 @@
   function planungModul(ctx) {
     const E = ctx.E, s2 = ctx.s, ui = { aktiv: false, tab: "assistent", schritt: 1 };
     const vor = () => E.planungAssistent(s2());
-    const zeile2 = (text3, wert) => '<div class="zeile"><span class="was">' + esc(text3) + "</span><b>" + wert + "</b></div>";
+    const zeile2 = (text3, wert) => '<div class="zeile"><span class="was">' + esc2(text3) + "</span><b>" + wert + "</b></div>";
     const tabs = () => '<div class="tabs">' + [["assistent", "Planung"], ["report", "Reporting"], ["forecast", "Forecast"], ["bonus", "Boni"]].map(([id, t]) => '<button class="tab ' + (ui.tab === id ? "an" : "") + '" data-pl-tab="' + id + '">' + t + "</button>").join("") + "</div>";
     function entwurf(D) {
       const e = D.entwurf;
@@ -126365,12 +126527,12 @@
           const n = nodes[id];
           if (!n) return "";
           const hinweis = n.verdacht ? '<span class="chip warn">Sandbagging-Verdacht</span>' : "";
-          const inhalt2 = '<div class="zeile"><span class="was"><b>' + esc(n.name) + "</b><i>" + esc(n.ebene) + "</i></span><span>" + mio3(n.umsatz) + "</span></div>" + (n.ebene !== "konzern" ? '<label class="zeile"><span class="was">Ziel in Mio. \u20AC</span><input style="width:110px;max-width:45%" type="number" step="0.1" min="0" data-pl-knoten="' + esc(n.id) + '" value="' + (n.umsatz / 1e6).toFixed(1) + '"></label>' : "") + (n.ebene === "hauscluster" || n.ebene === "haus" ? '<div class="olief">R\xFCckmeldung Leitung: ' + mio3(n.rueckmeldung) + " " + hinweis + "</div>" : "");
+          const inhalt2 = '<div class="zeile"><span class="was"><b>' + esc2(n.name) + "</b><i>" + esc2(n.ebene) + "</i></span><span>" + mio3(n.umsatz) + "</span></div>" + (n.ebene !== "konzern" ? '<label class="zeile"><span class="was">Ziel in Mio. \u20AC</span><input style="width:110px;max-width:45%" type="number" step="0.1" min="0" data-pl-knoten="' + esc2(n.id) + '" value="' + (n.umsatz / 1e6).toFixed(1) + '"></label>' : "") + (n.ebene === "hauscluster" || n.ebene === "haus" ? '<div class="olief">R\xFCckmeldung Leitung: ' + mio3(n.rueckmeldung) + " " + hinweis + "</div>" : "");
           const kinder = (n.kinder || []).map((x) => renderNode(x, tiefe + 1)).join("");
-          return tiefe === 0 ? inhalt2 + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? " open" : "") + "><summary>" + esc(n.name) + " \xB7 " + mio3(n.umsatz) + (n.verdacht ? " \xB7 !" : "") + "</summary>" + inhalt2 + kinder + "</details>";
+          return tiefe === 0 ? inhalt2 + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? " open" : "") + "><summary>" + esc2(n.name) + " \xB7 " + mio3(n.umsatz) + (n.verdacht ? " \xB7 !" : "") + "</summary>" + inhalt2 + kinder + "</details>";
         };
         html += renderNode("konzern", 0) + "</div>";
-        html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div><div class="olief">Die Konzernsumme bleibt bei \xC4nderungen einzelner Warengruppen erhalten.</div>' + Object.entries(D.warengruppen || {}).map(([id, value]) => '<label class="zeile"><span class="was">' + esc(E.GRUPPEN?.[id]?.name || id) + '</span><input style="width:105px;max-width:42%" type="number" min="0" step="0.1" data-pl-wg="' + esc(id) + '" value="' + (value / 1e6).toFixed(1) + '" aria-label="' + esc(id) + ' Ziel Mio. Euro"></label>').join("") + '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss \u2192</button></div>';
+        html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div><div class="olief">Die Konzernsumme bleibt bei \xC4nderungen einzelner Warengruppen erhalten.</div>' + Object.entries(D.warengruppen || {}).map(([id, value]) => '<label class="zeile"><span class="was">' + esc2(E.GRUPPEN?.[id]?.name || id) + '</span><input style="width:105px;max-width:42%" type="number" min="0" step="0.1" data-pl-wg="' + esc2(id) + '" value="' + (value / 1e6).toFixed(1) + '" aria-label="' + esc2(id) + ' Ziel Mio. Euro"></label>').join("") + '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss \u2192</button></div>';
       } else {
         html += '<div class="karte"><div class="khead">Jahresplan ' + e.jahr + " freigeben</div>" + zeile2("Konzernumsatz", mio3(e.ziele.umsatz)) + zeile2("EBITDA-Ziel", mio3(e.ziele.ebitda)) + zeile2("Investitionsbudget", mio3(e.ziele.investitionen)) + '<p class="olief">Mit dem Abschluss werden Wochenbudgets und Clusterziele verbindlich. Ohne Aktion wird der Controlling-Vorschlag nach Fristablauf automatisch \xFCbernommen.</p></div><div class="oknoepfe"><button class="gruen" data-pl-abschluss="spieler">Angepasste Planung beschlie\xDFen</button><button data-pl-abschluss="controlling">Controlling-Vorschlag abschlie\xDFen</button></div>';
       }
@@ -126381,7 +126543,7 @@
       if (!b2.ziele) return '<div class="karte">Kein Jahresplan vorhanden.</div>';
       let html = '<div class="raster"><div class="kz"><span>Umsatzplan ' + b2.jahr + "</span><b>" + mio3(b2.ziele.umsatz) + '</b></div><div class="kz"><span>Ist kumuliert</span><b>' + mio3(b2.ist) + '</b></div><div class="kz"><span>Plan bis heute</span><b>' + mio3(b2.planBisHeute) + '</b></div><div class="kz"><span>Abweichung zum Plan</span><b>' + mio3(b2.abweichung) + '</b></div><div class="kz"><span>Jahresforecast</span><b>' + (b2.forecasting == null ? "noch offen" : mio3(b2.forecasting)) + '</b></div><div class="kz"><span>EBITDA-Plan</span><b>' + mio3(b2.ziele.ebitda) + "</b></div></div>";
       const nodes = b2.knoten.filter((n) => n.ebene === "format" || n.ebene === "region" || n.ebene === "hauscluster");
-      html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n) => "<tr><td>" + esc(n.name) + "</td><td>" + mio3(n.umsatz) + "</td><td>" + mio3(n.ist) + "</td><td>" + pct(n.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
+      html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n) => "<tr><td>" + esc2(n.name) + "</td><td>" + mio3(n.umsatz) + "</td><td>" + mio3(n.ist) + "</td><td>" + pct(n.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
       html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' + (b2.wochen || []).slice().reverse().map((w) => "<tr><td>" + (w.woche % 52 + 1) + "</td><td>" + mio3(w.ist) + "</td><td>" + mio3(w.plan) + "</td><td>" + pct(w.abweichungQuote) + "</td><td>" + (w.forecast == null ? "\u2013" : mio3(w.forecast)) + "</td></tr>").join("") + "</tbody></table></div></div>";
       if (b2.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' + Object.entries(b2.warengruppen).map(([g, v]) => zeile2(g, mio3(v))).join("") + "</details>";
       return html;
@@ -126488,11 +126650,11 @@
   var GRUENDE = { wetter: "Wetter", baustelle: "Baustelle vor dem Haus", ware: "Warenverf\xFCgbarkeit", personal: "Personaldeckung", konkurrenz: "Konkurrenzaktion", kasse: "Kassenausfall", stadtereignis: "Stadtereignis", sonstiges: "Sonstiges" };
   var MASS = { aktion: "Aktion vor Ort", springer: "Springer anfordern", umlagerung: "Ware umlagern", oeffnungszeit: "\xD6ffnungszeit anpassen" };
   var p = (n, stell = 0) => Number(n ?? 0).toFixed(stell).replace(".", ",");
-  var line = (a, b2) => '<div class="zeile"><span class="was">' + esc(a) + "</span><b>" + esc(String(b2)) + "</b></div>";
-  var button = (label, action, disabled = false) => '<button class="mini" ' + (disabled ? "disabled" : 'onclick="' + action + '"') + ">" + esc(label) + "</button>";
+  var line = (a, b2) => '<div class="zeile"><span class="was">' + esc2(a) + "</span><b>" + esc2(String(b2)) + "</b></div>";
+  var button = (label, action, disabled = false) => '<button class="mini" ' + (disabled ? "disabled" : 'onclick="' + action + '"') + ">" + esc2(label) + "</button>";
   function hausSteckbrief(d, ueberblick, reiter, woche2) {
     const h = d.haus, b2 = d.betrieb, l = b2?.leitungsdaten, k = h.kpi;
-    const id = esc(h.id), r = REITER.some((x) => x[0] === reiter) ? reiter : "ueberblick";
+    const id = esc2(h.id), r = REITER.some((x) => x[0] === reiter) ? reiter : "ueberblick";
     let inhalt = "";
     if (r === "ueberblick") {
       const tr = b2?.treiberAktuell;
@@ -126500,7 +126662,7 @@
     }
     if (r === "leitung") {
       inhalt = '<div class="karte"><div class="khead">Hausleitung</div>' + line("Name", l?.name ?? "Nicht besetzt") + line("Gehalt j\xE4hrlich", geld(l?.gehalt ?? 0)) + line("Bonusanteil", PROZENT(l?.bonusAnteil ?? 0)) + line("Stimmung", p(l?.moral) + " / 100") + line("Wechselwille", PROZENT(l?.wechselwille ?? 0)) + line("Ehrlichkeit", PROZENT(l?.ehrlichkeit ?? 0)) + line("Stellvertretung", (l?.stellvertretung?.name ?? "\u2013") + " \xB7 " + PROZENT(l?.stellvertretung?.qualitaet ?? 0)) + Object.entries(l?.staerken ?? {}).map(([key, v]) => line(SCHWERPUNKT[key] ?? key, PROZENT(v))).join("") + '<div class="zeile">' + Object.keys(SCHWERPUNKT).map((key) => button("F\xF6rdern: " + SCHWERPUNKT[key], "hausTun('foerdern','" + id + "','" + key + "')")).join(" ") + '</div><div class="zeile">' + button("Haltepr\xE4mie 10.000 \u20AC", "hausTun('praemie','" + id + "')") + button("Zur Clusterleitung bef\xF6rdern", "hausTun('befoerdern','" + id + "')") + "</div></div>";
-      inhalt += '<div class="karte"><div class="khead">Kandidaten \xFCber die Clusterleitung</div>' + (b2?.kandidaten ?? []).map((k2, i) => '<div class="zeile"><span class="was">' + esc(k2.name) + " <i>Kompetenz " + PROZENT(k2.qualitaet) + " \xB7 " + geld(k2.gehalt) + "/Jahr</i></span>" + button("Einstellen", "hausTun('ersetzen','" + id + "'," + i + ")") + "</div>").join("") + "</div>";
+      inhalt += '<div class="karte"><div class="khead">Kandidaten \xFCber die Clusterleitung</div>' + (b2?.kandidaten ?? []).map((k2, i) => '<div class="zeile"><span class="was">' + esc2(k2.name) + " <i>Kompetenz " + PROZENT(k2.qualitaet) + " \xB7 " + geld(k2.gehalt) + "/Jahr</i></span>" + button("Einstellen", "hausTun('ersetzen','" + id + "'," + i + ")") + "</div>").join("") + "</div>";
     }
     if (r === "personal") {
       const v = h.personal;
@@ -126512,10 +126674,10 @@
     if (r === "partner") {
       const std = b2?.standard;
       const standardZeilen = ["sauberkeit", "praesentation", "kasse"].map(
-        (key) => '<div class="zeile"><span class="was">' + esc({ sauberkeit: "Sauberkeit", praesentation: "Warenpr\xE4sentation", kasse: "Kassenstandard" }[key]) + " \xB7 " + p(std?.[key]) + "/3</span>" + button("\u2212", "hausTun('standard','" + id + "','" + key + "',-1)") + button("+", "hausTun('standard','" + id + "','" + key + "',1)") + "</div>"
+        (key) => '<div class="zeile"><span class="was">' + esc2({ sauberkeit: "Sauberkeit", praesentation: "Warenpr\xE4sentation", kasse: "Kassenstandard" }[key]) + " \xB7 " + p(std?.[key]) + "/3</span>" + button("\u2212", "hausTun('standard','" + id + "','" + key + "',-1)") + button("+", "hausTun('standard','" + id + "','" + key + "',1)") + "</div>"
       ).join("");
       const serviceZeilen = Object.entries(b2?.services ?? {}).map(
-        ([key, an]) => '<div class="zeile"><span class="was">' + esc(SERVICE[key] ?? key) + "</span>" + button(an ? "Lokal ausschalten" : "Lokal aktivieren", "hausTun('service','" + id + "','" + key + "'," + !an + ")") + button(an ? "Clusterweit aus" : "Clusterweit an", "hausTun('clusterservice','" + id + "','" + key + "'," + !an + ")") + "</div>"
+        ([key, an]) => '<div class="zeile"><span class="was">' + esc2(SERVICE[key] ?? key) + "</span>" + button(an ? "Lokal ausschalten" : "Lokal aktivieren", "hausTun('service','" + id + "','" + key + "'," + !an + ")") + button(an ? "Clusterweit aus" : "Clusterweit an", "hausTun('clusterservice','" + id + "','" + key + "'," + !an + ")") + "</div>"
       ).join("");
       const stundenZeilen = [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(
         ([feld, titel]) => '<div class="zeile"><span class="was">' + titel + ": " + p(std?.oeffnung?.[feld]) + " Uhr</span>" + button("\u2212 1h", "hausTun('stunden','" + id + "','" + feld + "',-1)") + button("+ 1h", "hausTun('stunden','" + id + "','" + feld + "',1)") + "</div>"
@@ -126531,18 +126693,18 @@
       inhalt = '<div class="karte"><div class="khead">Hausstandards und Services</div>' + line("\xD6ffnungszeiten Mo\u2013Fr", p(std?.oeffnung?.von) + "\u2013" + p(std?.oeffnung?.bis) + " Uhr") + line("Samstag bis", p(std?.oeffnung?.samstagBis) + " Uhr") + standardZeilen + stundenZeilen + serviceZeilen + (b2?.ausnahmeGrund ? line("Haus-Ausnahme", b2.ausnahmeGrund) : "") + '</div><div class="karte"><div class="khead">Gastronomie</div>' + line("Restaurantfl\xE4che", p(b2?.restaurantQm) + " qm") + line("Betriebsform", b2?.gastro === "selbst" ? "Eigenbetrieb" : b2?.gastro === "pacht" ? "Verpachtet" : "Noch keine") + line("Vertrag bis Woche", b2?.gastroVertragBis ?? "\u2013") + '<div class="zeile">' + button("Selbst betreiben", "hausTun('gastro','" + id + "','selbst')") + button("Verpachten", "hausTun('gastro','" + id + "','pacht')") + '</div></div><div class="karte"><div class="khead">Stadt und Sonntagsverkauf</div>' + line("Umfeld", b2?.umfeld?.ereignis ?? "Regul\xE4r") + line("Innenstadtfrequenz", PROZENT(b2?.umfeld?.trend ?? 1)) + '<div class="zeile">' + button("Verkaufsoffenen Sonntag beantragen (in 2 Wochen)", "hausTun('sonntag','" + id + "')") + '</div></div><div class="karte"><div class="khead">Fl\xE4che, Konzession\xE4re und Untermieter</div>' + (partnerZeilen || '<div class="zeile">Keine Vertr\xE4ge hinterlegt</div>') + "</div>";
     }
     if (r === "kosten") {
-      inhalt = '<div class="karte"><div class="khead">Betriebskosten je Woche</div>' + line("Sonstige Hauskosten gesamt", geld(k?.sonstige ?? 0)) + Object.entries(POSTEN2).map(([key, bezeichnung]) => '<div class="zeile"><span class="was">' + esc(bezeichnung) + " \xB7 " + PROZENT(b2?.kosten?.[key] ?? 1) + " Budget</span>" + button("\u2212 10 %", "hausTun('kosten','" + id + "','" + key + "',-0.1)") + button("+ 10 %", "hausTun('kosten','" + id + "','" + key + "',0.1)") + "</div>").join("") + '<div class="zeile grau">Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.</div></div>';
+      inhalt = '<div class="karte"><div class="khead">Betriebskosten je Woche</div>' + line("Sonstige Hauskosten gesamt", geld(k?.sonstige ?? 0)) + Object.entries(POSTEN2).map(([key, bezeichnung]) => '<div class="zeile"><span class="was">' + esc2(bezeichnung) + " \xB7 " + PROZENT(b2?.kosten?.[key] ?? 1) + " Budget</span>" + button("\u2212 10 %", "hausTun('kosten','" + id + "','" + key + "',-0.1)") + button("+ 10 %", "hausTun('kosten','" + id + "','" + key + "',0.1)") + "</div>").join("") + '<div class="zeile grau">Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.</div></div>';
     }
     if (r === "kommentare") {
-      inhalt = '<div class="karte"><div class="khead">Wochenkommentierung</div>' + (b2?.kommentare?.length ? b2.kommentare.map((c) => '<div class="zeile"><span class="was"><b>KW ' + (c.woche % 52 + 1) + " \xB7 " + PROZENT(c.abweichung) + "</b><i>" + esc(GRUENDE[c.grund] ?? c.grund) + " \xB7 " + esc(MASS[c.massnahme] ?? c.massnahme) + "</i><small>" + esc(c.pruefung) + "</small></span></div>").join("") : '<div class="zeile">Noch keine Abweichung unter \u22125 % mit Vorjahres- oder Planvergleich.</div>') + '<div class="zeile">' + Object.entries(MASS).map(([key, name2]) => button(name2, "hausTun('massnahme','" + id + "','" + key + "')")).join(" ") + "</div></div>";
+      inhalt = '<div class="karte"><div class="khead">Wochenkommentierung</div>' + (b2?.kommentare?.length ? b2.kommentare.map((c) => '<div class="zeile"><span class="was"><b>KW ' + (c.woche % 52 + 1) + " \xB7 " + PROZENT(c.abweichung) + "</b><i>" + esc2(GRUENDE[c.grund] ?? c.grund) + " \xB7 " + esc2(MASS[c.massnahme] ?? c.massnahme) + "</i><small>" + esc2(c.pruefung) + "</small></span></div>").join("") : '<div class="zeile">Noch keine Abweichung unter \u22125 % mit Vorjahres- oder Planvergleich.</div>') + '<div class="zeile">' + Object.entries(MASS).map(([key, name2]) => button(name2, "hausTun('massnahme','" + id + "','" + key + "')")).join(" ") + "</div></div>";
     }
     return '<nav class="haus-reiter">' + REITER.map(([key, name2]) => '<button class="' + (key === r ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
   }
   function hausBeobachtungHtml(liste) {
-    return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste.length ? liste.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc(x.id) + `')"><span class="was"><b>` + esc(x.name) + "</b><i>" + esc(x.stadt) + " \xB7 " + esc(x.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
+    return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste.length ? liste.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + "</b><i>" + esc2(x.stadt) + " \xB7 " + esc2(x.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
   }
   function hausReportingHtml(kommentare, ranking2) {
-    return '<div class="karte"><div class="khead">Kommentare der Woche</div>' + (kommentare.length ? kommentare.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc(x.id) + `')"><span class="was"><b>` + esc(x.name) + " \xB7 " + PROZENT(x.abweichung) + "</b><i>" + esc(GRUENDE[x.grund] ?? x.grund) + " / " + esc(MASS[x.massnahme] ?? x.massnahme) + "</i><small>" + esc(x.pruefung) + "</small></span><span>\u2192</span></button>").join("") : '<div class="zeile">Noch keine kommentierungspflichtigen Abweichungen.</div>') + '</div><div class="karte"><div class="khead">Mystery Shopping \xB7 Top 20</div>' + ranking2.slice(0, 20).map((x, i) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc(x.id) + `')"><span class="was">` + (i + 1) + ". " + esc(x.name) + "</span><b>" + x.score + "/100</b></button>").join("") + "</div>";
+    return '<div class="karte"><div class="khead">Kommentare der Woche</div>' + (kommentare.length ? kommentare.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + " \xB7 " + PROZENT(x.abweichung) + "</b><i>" + esc2(GRUENDE[x.grund] ?? x.grund) + " / " + esc2(MASS[x.massnahme] ?? x.massnahme) + "</i><small>" + esc2(x.pruefung) + "</small></span><span>\u2192</span></button>").join("") : '<div class="zeile">Noch keine kommentierungspflichtigen Abweichungen.</div>') + '</div><div class="karte"><div class="khead">Mystery Shopping \xB7 Top 20</div>' + ranking2.slice(0, 20).map((x, i) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was">` + (i + 1) + ". " + esc2(x.name) + "</span><b>" + x.score + "/100</b></button>").join("") + "</div>";
   }
 
   // src/ui/personaleinsatz.js
@@ -126550,7 +126712,7 @@
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n) => Math.round(n * 100) + " %";
   var farbe2 = (n) => n < 0.85 ? "var(--rot)" : n < 0.98 ? "#d8a123" : "var(--gruen)";
-  var steuer = (a, opts = {}) => Object.entries({ "data-pe": a, ...opts }).map(([k, v]) => " " + k + '="' + esc(String(v)) + '"').join("");
+  var steuer = (a, opts = {}) => Object.entries({ "data-pe": a, ...opts }).map(([k, v]) => " " + k + '="' + esc2(String(v)) + '"').join("");
   function personalModul(ctx) {
     const { E } = ctx;
     const ui = { aktiv: false, cluster: null, haus: null };
@@ -126562,14 +126724,14 @@
       return r.ok;
     };
     function titelGruppen(p2) {
-      return GRUPPEN2.map((g) => '<div class="pe-gruppe"><div class="zeile"><span class="was"><b>' + esc(NAME3[g]) + "</b><i>" + fmt.format(p2.gruppen[g].plan) + " / " + fmt.format(p2.gruppen[g].bedarf) + ' Stunden</i></span><strong style="color:' + farbe2(p2.gruppen[g].deckung) + '">' + pct2(p2.gruppen[g].deckung) + '</strong></div><div class="pe-tage">' + p2.gruppen[g].tage.map((t) => '<div class="pe-tag" aria-label="' + t.tag + ": " + fmt.format(t.plan) + " von " + fmt.format(t.bedarf) + ' Stunden"><small>' + t.tag + '</small><div class="pe-saeule"><span style="height:' + Math.min(100, Math.max(3, t.deckung * 85)) + "%;background:" + farbe2(t.deckung) + '"></span></div><small>' + pct2(t.deckung) + "</small></div>").join("") + "</div></div>").join("");
+      return GRUPPEN2.map((g) => '<div class="pe-gruppe"><div class="zeile"><span class="was"><b>' + esc2(NAME3[g]) + "</b><i>" + fmt.format(p2.gruppen[g].plan) + " / " + fmt.format(p2.gruppen[g].bedarf) + ' Stunden</i></span><strong style="color:' + farbe2(p2.gruppen[g].deckung) + '">' + pct2(p2.gruppen[g].deckung) + '</strong></div><div class="pe-tage">' + p2.gruppen[g].tage.map((t) => '<div class="pe-tag" aria-label="' + t.tag + ": " + fmt.format(t.plan) + " von " + fmt.format(t.bedarf) + ' Stunden"><small>' + t.tag + '</small><div class="pe-saeule"><span style="height:' + Math.min(100, Math.max(3, t.deckung * 85)) + "%;background:" + farbe2(t.deckung) + '"></span></div><small>' + pct2(t.deckung) + "</small></div>").join("") + "</div></div>").join("");
     }
     function hausBlock(id) {
       const h = ctx.s().haeuser.find((x) => x.id === id);
       const p2 = E.personalHaus(ctx.s(), id);
       if (!h || !p2) return '<div class="karte">Kein Personaleinsatzplan vorhanden.</div>';
       const st = h.personaleinsatz;
-      const slider = (name2, art, g, min, max, val, hint) => '<div class="pe-slider"><label><b>' + esc(name2) + "</b><span>" + pct2(val) + '</span></label><input type="range" min="' + min + '" max="' + max + '" step="5" value="' + Math.round(val * 100) + '"' + steuer(art, { "data-haus": id, "data-gruppe": g || "" }) + ' aria-label="' + esc(name2) + '"><small>' + esc(hint) + "</small></div>";
+      const slider = (name2, art, g, min, max, val, hint) => '<div class="pe-slider"><label><b>' + esc2(name2) + "</b><span>" + pct2(val) + '</span></label><input type="range" min="' + min + '" max="' + max + '" step="5" value="' + Math.round(val * 100) + '"' + steuer(art, { "data-haus": id, "data-gruppe": g || "" }) + ' aria-label="' + esc2(name2) + '"><small>' + esc2(hint) + "</small></div>";
       let out = '<div class="karte"><div class="khead">Woche ' + (p2.woche % 52 + 1) + ' \xB7 Personaleinsatz</div><div class="raster"><div class="kz"><span>Krankenstand</span><b>' + pct2(p2.krank) + '</b></div><div class="kz"><span>Urlaub</span><b>' + pct2(p2.urlaub) + '</b></div><div class="kz"><span>Aushilfen</span><b>' + fmt.format(p2.aushilfenStunden) + ' Std.</b></div><div class="kz"><span>Zusatzkosten</span><b>' + geld(p2.zusatzkosten) + '</b></div></div><div class="zeile"><span>Warenverf\xFCgbarkeit (Personalfaktor)</span><b>' + pct2(p2.verfuegbarkeit) + '</b></div><div class="zeile"><span>Kaufquotenfaktor</span><b>' + pct2(p2.kaufquote) + '</b></div><div class="zeile"><span>Springerbewegungen</span><b>' + fmt.format(p2.springerSaldo) + " Std.</b></div></div>";
       out += '<div class="karte"><div class="khead">Bedarf und Plan \xB7 Montag bis Samstag</div>' + titelGruppen(p2) + "</div>";
       out += '<div class="karte"><div class="khead">Einsatz \xFCbersteuern</div>' + GRUPPEN2.map((g) => slider(
@@ -126601,10 +126763,10 @@
     }
     function clusterBlock(c) {
       const haus2 = ui.haus && c.haeuser.some((h) => h.id === ui.haus) ? ui.haus : null;
-      let out = '<div class="karte"><div class="khead">' + esc(c.name) + '</div><div class="zeile"><span>' + c.haeuser.length + " H\xE4user \xB7 Springerbewegungen</span><b>" + c.bewegungen + '</b></div><button class="mini"' + steuer("springer", { "data-cluster": c.id, "data-an": c.springerAktiv ? "0" : "1" }) + ">" + (c.springerAktiv ? "Springerpool deaktivieren" : "Springerpool aktivieren") + '</button><button class="mini"' + steuer("weiterbildung", { "data-cluster": c.id }) + ">Weiterbildung Stufe +1</button>" + (ctx.s().woche % 52 >= 43 ? '<button class="mini"' + steuer("weihnachten", { "data-cluster": c.id }) + ">Weihnachts-Aushilfen nachbuchen (teurer, knapper)</button>" : "") + "</div>";
+      let out = '<div class="karte"><div class="khead">' + esc2(c.name) + '</div><div class="zeile"><span>' + c.haeuser.length + " H\xE4user \xB7 Springerbewegungen</span><b>" + c.bewegungen + '</b></div><button class="mini"' + steuer("springer", { "data-cluster": c.id, "data-an": c.springerAktiv ? "0" : "1" }) + ">" + (c.springerAktiv ? "Springerpool deaktivieren" : "Springerpool aktivieren") + '</button><button class="mini"' + steuer("weiterbildung", { "data-cluster": c.id }) + ">Weiterbildung Stufe +1</button>" + (ctx.s().woche % 52 >= 43 ? '<button class="mini"' + steuer("weihnachten", { "data-cluster": c.id }) + ">Weihnachts-Aushilfen nachbuchen (teurer, knapper)</button>" : "") + "</div>";
       out += '<div class="karte pe-uebersicht"><div class="pe-tabellenkopf">Haus \xB7 Logistik \xB7 Verkauf \xB7 Kasse \xB7 Verwaltung</div>';
       for (const h of c.haeuser) {
-        out += '<button class="pe-tabellenzeile"' + steuer("haus", { "data-haus": h.id }) + "><b>" + esc(h.name) + '</b><span class="pe-deckungen">' + GRUPPEN2.map((g) => '<span style="color:' + farbe2(h.gruppen[g]) + '">' + pct2(h.gruppen[g]) + "</span>").join("") + "</span><small>Krank " + pct2(h.krank) + " \xB7 Aushilfen " + fmt.format(h.aushilfen) + " Std. \xB7 Springer " + fmt.format(h.springer) + " Std.</small></button>";
+        out += '<button class="pe-tabellenzeile"' + steuer("haus", { "data-haus": h.id }) + "><b>" + esc2(h.name) + '</b><span class="pe-deckungen">' + GRUPPEN2.map((g) => '<span style="color:' + farbe2(h.gruppen[g]) + '">' + pct2(h.gruppen[g]) + "</span>").join("") + "</span><small>Krank " + pct2(h.krank) + " \xB7 Aushilfen " + fmt.format(h.aushilfen) + " Std. \xB7 Springer " + fmt.format(h.springer) + " Std.</small></button>";
       }
       out += "</div>";
       if (haus2) out += hausBlock(haus2);
@@ -126616,7 +126778,7 @@
       if (ui.cluster && !liste.some((c) => c.id === ui.cluster)) ui.cluster = null;
       const gewaehlt = liste.find((c) => c.id === ui.cluster) ?? liste[0];
       if (gewaehlt) ui.cluster = gewaehlt.id;
-      const selector = '<div class="karte"><div class="khead">Hauscluster</div><select class="ort" data-pe="cluster" aria-label="Hauscluster w\xE4hlen">' + liste.map((c) => '<option value="' + esc(c.id) + '"' + (c.id === ui.cluster ? " selected" : "") + ">" + esc(c.name) + " (" + c.haeuser.length + ")</option>").join("") + "</select></div>";
+      const selector = '<div class="karte"><div class="khead">Hauscluster</div><select class="ort" data-pe="cluster" aria-label="Hauscluster w\xE4hlen">' + liste.map((c) => '<option value="' + esc2(c.id) + '"' + (c.id === ui.cluster ? " selected" : "") + ">" + esc2(c.name) + " (" + c.haeuser.length + ")</option>").join("") + "</select></div>";
       ctx.panel(
         "Personaleinsatz",
         "Wochentagsplanung \xB7 vier Personalgruppen",
@@ -126701,7 +126863,7 @@
   var messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
   var speicherTimer = null;
   var speicherWarnung = false;
-  var neuerPostUi = () => ({ gelesen: [], reiter: "handeln", warnen: true, wochenbericht: "voll", reiseZuletzt: [] });
+  var neuerPostUi = () => ({ gelesen: [], reiter: "handeln", reiseZuletzt: [] });
   var postUi = neuerPostUi();
   var streifenTimer = null;
   function speicherFehler(e) {
@@ -126710,8 +126872,8 @@
     speicherWarnung = true;
   }
   function automatischSpeichern() {
-    if (!s) return;
     clearTimeout(speicherTimer);
+    if (!s || !einstellung("autospeichern")) return;
     speicherTimer = setTimeout(() => {
       speichern(s, stadtName, postUi).then(() => {
         speicherWarnung = false;
@@ -126725,7 +126887,7 @@
     speicherWarnung = false;
   }
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden" && s) {
+    if (document.visibilityState === "hidden" && s && einstellung("autospeichern")) {
       clearTimeout(speicherTimer);
       speichern(s, stadtName, postUi).catch((e) => console.error("Autosave bei App-Wechsel:", e));
     }
@@ -127388,7 +127550,8 @@
     if (st.woche === 24) fuehreAus(st, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
     if (st.woche === 50) fuehreAus(st, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es].filter(Boolean);
+  var vorherigerFokus = null;
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -127396,16 +127559,25 @@
     $("ptitel").textContent = titel;
     $("punter").textContent = unter;
     $("pinhalt").innerHTML = html;
+    const neu = !$("panel").classList.contains("offen");
+    if (neu) vorherigerFokus = document.activeElement;
+    $("panel").inert = false;
+    $("panel").removeAttribute("aria-hidden");
     $("panel").classList.add("offen");
     document.body.classList.add("panel-offen");
+    if (neu) $("ptitel").focus({ preventScroll: true });
   }
   function schliessePanel() {
     for (const m of module2()) m.zu();
     $("panel").classList.remove("offen");
+    $("panel").inert = true;
+    $("panel").setAttribute("aria-hidden", "true");
     document.body.classList.remove("panel-offen");
     offenesHaus = null;
     offenesHq = null;
     offenerWettbewerber = null;
+    if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true });
+    vorherigerFokus = null;
   }
   function hausZeigen(id) {
     const x = sb?.haeuser.get(id);
@@ -127428,6 +127600,9 @@
     kameraSetzen();
   }
   $("pzu").addEventListener("click", schliessePanel);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && $("panel").classList.contains("offen")) schliessePanel();
+  });
   var hausReiter = "ueberblick";
   var hausEtageWahl = null;
   var letztesInnenbild = null;
@@ -127503,13 +127678,13 @@
     html += '<div class="karte"><div class="khead">Konkurrenz in der Stadt</div>';
     if (!d.wettbewerber?.length) html += '<div class="zeile">Keine Wettbewerber in dieser Stadt</div>';
     for (const w of d.wettbewerber ?? []) {
-      const wirkung = Object.entries(w.wirkung ?? {}).filter(([, v]) => v < 0).sort((a, b2) => a[1] - b2[1]).slice(0, 3).map(([g, v]) => esc(GRUPPEN[g]?.name ?? g) + " " + v.toFixed(2) + " %").join(" \xB7 ");
-      html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' + esc(w.name) + "</b> <i>" + esc(WB_ART[w.art] ?? w.art) + " \xB7 " + esc(WB_STATUS[w.status] ?? w.status) + "</i>" + (wirkung ? "<small>" + wirkung + "</small>" : "") + "</span><span>\u2192</span></button>";
+      const wirkung = Object.entries(w.wirkung ?? {}).filter(([, v]) => v < 0).sort((a, b2) => a[1] - b2[1]).slice(0, 3).map(([g, v]) => esc2(GRUPPEN[g]?.name ?? g) + " " + v.toFixed(2) + " %").join(" \xB7 ");
+      html += '<button class="zeile wbdirekt" data-wb-id="' + esc2(w.id) + '"><span class="was"><b>' + esc2(w.name) + "</b> <i>" + esc2(WB_ART[w.art] ?? w.art) + " \xB7 " + esc2(WB_STATUS[w.status] ?? w.status) + "</i>" + (wirkung ? "<small>" + wirkung + "</small>" : "") + "</span><span>\u2192</span></button>";
     }
     html += "</div>";
     html = hausSteckbrief(d, html, hausReiter, s.woche);
     if (hausReiter === "personal" && pe) html += pe.hausBlock(id);
-    if (hausReiter === "ware" && d.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl3("Warenverf\xFCgbarkeit", (d.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl3("Altwareanteil", (d.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl3("Inventurdifferenz", d.waren.inventur ? geld(d.waren.inventur.differenz) : "Noch offen")}${zahl3("Fl\xE4chenproduktivit\xE4t", geld(d.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
+    if (hausReiter === "ware" && d.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d.waren.hauscluster)}</div><div class="raster">${zahl3("Warenverf\xFCgbarkeit", (d.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl3("Altwareanteil", (d.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl3("Inventurdifferenz", d.waren.inventur ? geld(d.waren.inventur.differenz) : "Noch offen")}${zahl3("Fl\xE4chenproduktivit\xE4t", geld(d.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
     panel(h.name, `${h.stadt} \xB7 ${h.klasse === "premium" ? "Premiumhaus" : h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
     if (neu) hausZeigen(id);
   }
@@ -127560,10 +127735,10 @@
     offenesHq = null;
     const start = w.seit === 0 ? "Seit Spielbeginn" : "Seit KW " + (w.seit % 52 + 1) + " / Jahr " + (Math.floor(w.seit / 52) + 1);
     const wirkung = Object.entries(u.wirkung ?? {}).sort((a, b2) => a[1] - b2[1]);
-    let html = '<div class="chips"><span class="chip">' + esc(WB_ART[w.art] ?? w.art) + '</span><span class="chip">' + esc(WB_STATUS[w.status] ?? w.status) + "</span></div>";
-    html += '<div class="karte"><div class="zeile"><span>Standort</span><b>' + esc(stadtName) + '</b></div><div class="zeile"><span>Status seit</span><b>' + esc(start) + '</b></div><div class="zeile"><span>Grundfl\xE4che</span><b>' + fmt.format(w.grundflaecheQm) + ' m\xB2</b></div><div class="zeile"><span>Wettbewerbsst\xE4rke</span><b>' + Math.round(u.staerke * 100) + ' / 100</b></div><div class="zeile"><span>Aktuelle Aktion</span><b>' + (w.status === "raeumung" ? "R\xE4umungsverkauf bis 70 %" : w.rabatt ? Math.round(w.rabatt * 100) + " % Rabatt" : w.status === "eroeffnung" ? "Neuer\xF6ffnung" : "Keine") + "</b></div>" + (w.inHartwigGebaeude ? '<div class="zeile">Nachnutzung eines ehemaligen Hartwig-Standorts</div>' : "") + "</div>";
-    html += '<div class="karte"><div class="khead">Wirkung auf Hartwig nach Warengruppe</div>' + wirkung.map(([g, v]) => '<div class="zeile"><span>' + esc(GRUPPEN[g]?.name ?? g) + "</span><b>" + Number(v).toFixed(2) + " %</b></div>").join("") + "</div>";
-    panel(w.name, esc(stadtName) + " \xB7 " + esc(WB_ART[w.art] ?? w.art), html);
+    let html = '<div class="chips"><span class="chip">' + esc2(WB_ART[w.art] ?? w.art) + '</span><span class="chip">' + esc2(WB_STATUS[w.status] ?? w.status) + "</span></div>";
+    html += '<div class="karte"><div class="zeile"><span>Standort</span><b>' + esc2(stadtName) + '</b></div><div class="zeile"><span>Status seit</span><b>' + esc2(start) + '</b></div><div class="zeile"><span>Grundfl\xE4che</span><b>' + fmt.format(w.grundflaecheQm) + ' m\xB2</b></div><div class="zeile"><span>Wettbewerbsst\xE4rke</span><b>' + Math.round(u.staerke * 100) + ' / 100</b></div><div class="zeile"><span>Aktuelle Aktion</span><b>' + (w.status === "raeumung" ? "R\xE4umungsverkauf bis 70 %" : w.rabatt ? Math.round(w.rabatt * 100) + " % Rabatt" : w.status === "eroeffnung" ? "Neuer\xF6ffnung" : "Keine") + "</b></div>" + (w.inHartwigGebaeude ? '<div class="zeile">Nachnutzung eines ehemaligen Hartwig-Standorts</div>' : "") + "</div>";
+    html += '<div class="karte"><div class="khead">Wirkung auf Hartwig nach Warengruppe</div>' + wirkung.map(([g, v]) => '<div class="zeile"><span>' + esc2(GRUPPEN[g]?.name ?? g) + "</span><b>" + Number(v).toFixed(2) + " %</b></div>").join("") + "</div>";
+    panel(w.name, esc2(stadtName) + " \xB7 " + esc2(WB_ART[w.art] ?? w.art), html);
     if (neu) {
       const x = sb.wettbewerber.get(id) ?? (w.inHartwigGebaeude ? sb.haeuser.get(w.inHartwigGebaeude) : null);
       if (x?.p) {
@@ -127712,6 +127887,9 @@
     if (bleiben) $("pinhalt").scrollTop = sc;
   }
   var EQ = quelle(src_exports);
+  var es = null;
+  es = einstellungenModul({ panel });
+  aktiviereBarrierefreiheit();
   var ek = null;
   ek = einkaufModul({ E: src_exports, q: EQ, s: () => s, panel, meldung, nachAktion: () => {
     cockpitZeigen();
@@ -127855,8 +128033,8 @@
     }
   });
   wochenbericht = wochenberichtModul({
-    modus: () => postUi.wochenbericht ?? "voll",
-    warnen: () => postUi.warnen,
+    modus: () => einstellung("wochenbericht"),
+    warnen: () => einstellung("warnung"),
     cockpit: () => cockpit(s),
     posteingang: () => posteingang(s),
     historie: () => s.historie,
@@ -127881,9 +128059,9 @@
     menueZu();
     reise.oeffne();
   });
-  $("wochenbericht-modus").addEventListener("change", (e) => {
-    postUi.wochenbericht = e.target.value;
-    automatischSpeichern();
+  window.addEventListener("einstellung", (e) => {
+    if (e.detail.schluessel === "autospeichern" && !e.detail.wert) clearTimeout(speicherTimer);
+    if (e.detail.schluessel === "zahlen" && s) cockpitZeigen();
   });
   var oeffneModul = (m, ...a) => {
     offenesHaus = null;
@@ -127907,12 +128085,10 @@
     $("wochenstreifen").classList.remove("an");
     oeffneModul(po);
   });
-  $("postwarnung").addEventListener("change", (e) => {
-    postUi.warnen = e.target.checked;
-    automatischSpeichern();
-  });
+  $("einstellungen").addEventListener("click", () => oeffneModul(es));
   function menueZu() {
     $("menue").classList.remove("offen");
+    $("menue").inert = true;
     $("menueknopf").classList.remove("an");
   }
   $("menueknopf").addEventListener("click", () => {
@@ -127921,6 +128097,7 @@
       schliessePanel();
     }
     $("menue").classList.toggle("offen", o);
+    $("menue").inert = !o;
     $("menueknopf").classList.toggle("an", o);
   });
   $("menue").addEventListener("click", (e) => {
@@ -127979,8 +128156,6 @@
     schwierigkeitId = SCHWIERIGKEITEN2.some((x) => x.id === schwierigkeit2) ? schwierigkeit2 : "mittel";
     s = neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
     postUi = neuerPostUi();
-    $("postwarnung").checked = true;
-    $("wochenbericht-modus").value = postUi.wochenbericht;
     $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
     EQ.freigaben(s);
@@ -128021,6 +128196,8 @@
   if (typeof hqUebersicht === "function") $("hq").addEventListener("click", () => oeffneHq());
   else $("hq").style.display = "none";
   window.spiel = {
+    einstellungen: es,
+    oeffneEinstellungen: () => oeffneModul(es),
     personaleinsatz: pe,
     oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a),
     neuesSpiel: neuesSpiel3,
@@ -128233,8 +128410,6 @@
       if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) initialisierePersonaleinsatz(s);
       postUi = { ...neuerPostUi(), ...d.ui ?? {} };
       if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
-      $("postwarnung").checked = postUi.warnen;
-      $("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
       schwierigkeitId = s.schwierigkeit ?? "mittel";
       $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
       MERK.clear();

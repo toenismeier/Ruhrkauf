@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node spiel-render.js --bundle",
-    "test": "node spiel-render.js --bundle && node tests/mobil-smoke.js",
+    "test": "node --test tests/einstellungen.test.cjs && node spiel-render.js --bundle && node tests/mobil-smoke.js",
     "smoke:panels": "node spiel-render.js --nur-panels",
     "smoke:karte": "node spiel-render.js --nur-karte",
     "smoke:voll": "node spiel-render.js",
@@ -20,7 +20,9 @@
     "ladenbau:smoke": "node tests/ladenbau-smoke.cjs && node tests/outlet-ladenbau-smoke.cjs",
     "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose",
     "ladenbau:outlet:smoke": "node tests/outlet-ladenbau-smoke.cjs",
-    "smoke:haus": "node spiel-render.js --nur-haus"
+    "smoke:haus": "node spiel-render.js --nur-haus",
+    "test:einstellungen": "node --test tests/einstellungen.test.cjs",
+    "bedienung:pruefen": "node pruef-bedienung.js"
   },
   "keywords": [],
   "author": "",
