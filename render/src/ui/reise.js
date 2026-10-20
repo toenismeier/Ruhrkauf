@@ -17,6 +17,23 @@ const typBild = (name) => /Hamburg|Bremen|Kiel|Lübeck|Rostock|Bremerhaven|Wisma
   ? 'hafen' : /Köln|Dresden|Heidelberg|Bamberg|Erfurt|Münster|Aachen/i.test(name) ? 'altstadt' : 'ruhr';
 const bild = (name) => './bilder/reise-' + typBild(name) + '.png';
 const zug = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
+
+// Schematische Deutschlandkarte: jedes Reiseziel als Punkt, die eigene Stadt rot.
+// Die Stadtliste liefert Regionen statt Koordinaten, daher bewusst keine geographische Präzision suggerieren.
+const MAP_FELDER = {
+  nord: [70, 35], ost: [103, 79], west: [42, 78], mitte: [72, 82], sued: [75, 125],
+};
+function deutschlandPunkte(staedte, hier) {
+  const punkte = staedte.map((stadt) => {
+    const hash = [...stadt.name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+    const [x, y] = MAP_FELDER[String(stadt.region ?? 'mitte').toLocaleLowerCase('de')] ?? MAP_FELDER.mitte;
+    const dx = (hash % 29) - 14, dy = (Math.floor(hash / 37) % 35) - 17;
+    return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier };
+  });
+  return punkte.sort((a, b) => Number(a.aktuell) - Number(b.aktuell))
+    .map((p) => '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (p.aktuell ? 4 : 1.4) + '" fill="' + (p.aktuell ? '#d23c32' : '#8295a0') + '"><title>' + esc(p.name) + '</title></circle>').join('');
+}
+
 export function reiseModul(ctx) {
   const z = document.createElement('div');
   z.id = 'reise-overlay'; z.hidden = true; document.body.append(z);
@@ -61,7 +78,7 @@ export function reiseModul(ctx) {
     ++token; const meins = token;
     aktiv = true; gestartet = performance.now(); protokoll.length = 0; messen('Pin angetippt');
     const hier = ctx.stadt(), p = ortPunkt(); kreis(p);
-    z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/><circle cx="50" cy="70" r="5" fill="#d23c32"/><circle cx="85" cy="46" r="3" fill="#8295a0"/><circle cx="67" cy="113" r="3" fill="#8295a0"/></svg></div><div class="reise-zielraster"></div></div></section>';
+    z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
     document.body.classList.add('reise-aktiv');
     z.querySelector('.reise-suche').addEventListener('input', (e) => ziele(e.target.value));
     ziele();
