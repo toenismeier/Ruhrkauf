@@ -8,6 +8,8 @@ import { abstand100, BALLUNGSRAUM, KNOTEN } from './standorte';
 import { clamp, eur, ganzZwischen, melde, mio, waehle, zwischen, type RngHalter } from './util';
 import { vorstandFuerGrafik, vorstandKostenWoche, vorstandWirkung } from './vorstand';
 import { produktKostenWoche } from './produkte';
+// O01 Organisation: Differenz der Leitungsgehälter, Start = 0.
+import { organisationLeitungKostenWoche } from './organisation';
 
 // ---------------------------------------------------------------------------------------------
 // Datenmodell (Vertrag)
@@ -368,7 +370,7 @@ export function verteilungsFaktor(s: GameState): number {
   return Math.max(HQ_PARAM.verteilungMin, 1 - HQ_PARAM.verteilungJeStadt * Math.max(0, n - 1));
 }
 
-export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; gesamt: number }
+export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; leitung: number; gesamt: number }
 
 export function hqKosten(s: GameState): HqKosten {
   const hq = s.hq;
@@ -395,7 +397,8 @@ export function hqKosten(s: GameState): HqKosten {
   const strafen = Math.max(0, 1 - Lv) * HQ_PARAM.verwaltungStrafe * s.zentrale.kostenStart;
   const vorstand = vorstandKostenWoche(s);
   const entwicklung = produktKostenWoche(s);
-  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung };
+  const leitung = organisationLeitungKostenWoche(s);
+  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, leitung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung + leitung };
 }
 
 /** Rechnet wirksame Stufen, Zentralkosten und Controllingstufe neu. Nach jeder HQ-Änderung aufrufen. */

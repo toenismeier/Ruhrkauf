@@ -73,11 +73,14 @@ export interface OrganisationsStand {
   flagships: string[];
   unruhe: Record<string, { bis: number; moral: number }>;
   letzteBesetzung: Partial<Record<RessortId, boolean>>;
+  letzteVakanz: Record<string, boolean>;
+  basisKosten: number;
   zaehler: number;
 }
 export interface VorlageEingabe {
   titel: string; text: string; bereich?: BereichId; hauscluster?: string; frist?: number;
   optionen?: { id: string; label: string }[]; standard?: string; grundsaetzlich?: boolean;
+  aktion?: OrganisationAktion;
 }
 export type OrganisationAktion =
   | { typ: 'flagship'; haus: string; an: boolean }
@@ -140,7 +143,7 @@ function gruppiere(haeuser: Haus[]): Haus[][] {
 export function bildeHauscluster(s: GameState): void {
   const organisation: OrganisationsStand = {
     hauscluster: [], geografisch: {}, flagships: [], unruhe: {}, zaehler: 0,
-    bereiche: {}, regionalleitungen: {} as Record<Region, Stelle>, letzteBesetzung: {},
+    bereiche: {}, regionalleitungen: {} as Record<Region, Stelle>, letzteBesetzung: {}, letzteVakanz: {}, basisKosten: 0,
   };
   for (const bereich of BEREICHE) organisation.bereiche[bereich.id] = stelle(s.seed, 'bereich-' + bereich.id);
   for (const region of REGIONEN) {
@@ -157,7 +160,16 @@ export function bildeHauscluster(s: GameState): void {
   const premium = s.haeuser.filter((h) => h.klasse === 'premium').map((h) => h.id);
   organisation.hauscluster.push({ id: 'premium-flagships', name: 'Premium & Flagships', hausIds: premium, sonder: true, stelle: stelle(s.seed, 'premium-flagships') });
   for (const r of Object.keys(s.vorstand.ressorts) as RessortId[]) organisation.letzteBesetzung[r] = !!s.vorstand.ressorts[r].person;
+  organisation.basisKosten = leitungsKosten(organisation);
   s.organisation = organisation;
+}
+function leitungsKosten(o: OrganisationsStand): number {
+  return [...Object.values(o.bereiche),...Object.values(o.regionalleitungen),...o.hauscluster.map((x)=>x.stelle)]
+    .reduce((sum,x)=>sum+(x.person?.gehalt??0),0);
+}
+/** Mehr- oder Minderkosten gegenüber den in der Startzentrale enthaltenen Leitungsgehältern. */
+export function organisationLeitungKostenWoche(s: GameState): number {
+  return s.organisation ? eur((leitungsKosten(s.organisation)-s.organisation.basisKosten)/52) : 0;
 }
 export function hausclusterVon(s: GameState, hausId: string): Hauscluster | undefined {
   const o = s.organisation;
@@ -219,12 +231,14 @@ export function neueVorlage(s: GameState, v: VorlageEingabe): void {
     frist: s.woche + (v.frist ?? 3), titel: v.titel, text: prefix + ': ' + v.text,
     optionen: v.optionen ?? [{ id:'vorschlag', label:'Vorschlag der Leitung übernehmen' },{ id:'ablehnen',label:'Ablehnen' }],
     standard: v.standard ?? 'vorschlag',
-    daten: { bereich: bereich?.id ?? '', hauscluster: cluster?.id ?? '', absender: prefix },
+    daten: { bereich: bereich?.id ?? '', hauscluster: cluster?.id ?? '', absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : '' },
   });
 }
 export function organisationVorlageEntscheidung(s: GameState, e: Entscheidung, option: string): void {
-  // O01-Vorlagen sind zunächst organisatorisch; O04–O09 ergänzen fachliche Effekte.
-  if (option === e.standard) return;
+  // Fristablauf nutzt denselben Leitungsvorschlag wie die manuelle Freigabe.
+  if (option !== 'vorschlag' || typeof e.daten.aktion !== 'string' || !e.daten.aktion) return;
+  const a = JSON.parse(e.daten.aktion) as OrganisationAktion;
+  organisationAktion(s,a);
 }
 function stelleFuer(s: GameState, ebene: 'bereich'|'cluster'|'region', id: string): Stelle | undefined {
   if (ebene === 'bereich') return s.organisation?.bereiche[id];
@@ -250,7 +264,13 @@ export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: b
     return { ok:true,text:a.an ? 'Flagship zugeordnet: acht Wochen Unruhe.' : 'Flagship wieder regional zugeordnet: acht Wochen Unruhe.' };
   }
   if (a.typ === 'delegation') {
-    if (a.bereich && o.bereiche[a.bereich]) { o.bereiche[a.bereich].delegiert = a.an; return { ok:true,text:'Bereichsdelegation geändert.' }; }
+    if (a.bereich && o.bereiche[a.bereich]) {
+      o.bereiche[a.bereich].delegiert = a.an;
+      for(const [alt,neu] of Object.entries(ALTE_DELEGATIONEN)) if(neu===a.bereich){
+        const [r,id]=alt.split('.') as [RessortId,string];
+        if(s.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d)=>d.id===id)) s.vorstand.ressorts[r].delegation[id]=a.an;
+      }
+      return { ok:true,text:'Bereichsdelegation geändert.' }; }
     const cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
     if (cluster) { cluster.stelle.delegiert = a.an; return { ok:true,text:'Clusterdelegation geändert.' }; }
     return { ok:false,text:'Bereich oder Hauscluster nicht gefunden.' };
@@ -295,6 +315,24 @@ export function organisationWoche(s: GameState): void {
       if (h) h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral + unruhe.moral,0,100);
       delete o.unruhe[hausId];
     }
+  }
+  // Neue freie Leitungsstellen erzeugen genau einmal einen befristeten Kandidatenvorschlag.
+  const stellen: { id:string; ebene:'bereich'|'cluster'|'region'; st:Stelle }[] = [
+    ...Object.entries(o.bereiche).map(([id,st])=>({id,ebene:'bereich' as const,st})),
+    ...Object.entries(o.regionalleitungen).map(([id,st])=>({id,ebene:'region' as const,st})),
+    ...o.hauscluster.map((c)=>({id:c.id,ebene:'cluster' as const,st:c.stelle})),
+  ];
+  for(const x of stellen){
+    const key=x.ebene+':'+x.id, vakant=!x.st.person;
+    if(vakant && !o.letzteVakanz[key]){
+      const kandidat=x.st.kandidaten[0];
+      if(kandidat) neueVorlage(s,{
+        ...(x.ebene==='bereich'?{bereich:x.id}:x.ebene==='cluster'?{hauscluster:x.id}:{}),
+        titel:'Leitungswechsel: '+x.id, text:kandidat.name+' als Nachfolge vorschlagen (Jahresgehalt '+kandidat.gehalt+' €).',
+        frist:3, aktion:{typ:'organisationBesetzen',ebene:x.ebene,id:x.id,kandidat:kandidat.id},
+      });
+    }
+    o.letzteVakanz[key]=vakant;
   }
   for (const r of ['cpo','cfo','cso','coo','chro','cmo','cdo'] as RessortId[]) {
     const aktuell = !!s.vorstand.ressorts[r].person, vorher = o.letzteBesetzung[r];

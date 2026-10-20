@@ -14,6 +14,13 @@ export function organisationModul(ctx) {
     else h += '<div class="olief">Vakante Leitungsstelle – berichtet unmittelbar nach oben.</div>';
     h += '<h4>Kandidaten</h4>';
     for (const k of stelle.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet,56) + '</span><span class="was"><b>' + esc(k.name) + '</b><small>Qualität ' + Math.round(k.qualitaet*100) + '% · Jahresgehalt ' + geld(k.gehalt) + '</small>' + bar(k.qualitaet) + '</span><button data-org="besetzen" data-kandidat="' + esc(k.id) + '">Einstellen</button></div>';
+    if(ebene==='cluster'){
+      const moeglich=s().haeuser.filter((h)=>h.status==='offen'&&h.personal.filialleiter.skill>=0.7&&E.hausclusterVon(s(),h.id)?.id===id).slice(0,8);
+      if(moeglich.length){
+        h+='<h4>Hausleitungen befördern</h4>';
+        for(const h0 of moeglich) h+='<div class="zeile"><span class="was">'+esc(h0.personal.filialleiter.name)+' · '+esc(h0.stadt)+'</span><button data-org="befoerdern" data-haus="'+esc(h0.id)+'">Befördern</button></div>';
+      }
+    }
     h += '</div>';
     return h;
   };
@@ -69,6 +76,7 @@ export function organisationModul(ctx) {
     if(a==='besetzen')tun({typ:'organisationBesetzen',ebene:ui.ebene,id:ui.id,kandidat:el.dataset.kandidat});
     if(a==='entlassen')tun({typ:'organisationEntlassen',ebene:ui.ebene,id:ui.id});
     if(a==='praemie')tun({typ:'organisationHaltepraemie',ebene:ui.ebene,id:ui.id,betrag:10000});
+    if(a==='befoerdern')tun({typ:'organisationBefoerdern',haus:el.dataset.haus,hauscluster:ui.id});
   });
   return { oeffne:(reiter='zentrale')=>{ui.reiter=reiter;ui.ebene=null;zeichnen();},zu:()=>{ui.aktiv=false;},aktiv:()=>ui.aktiv,pruefe:()=>({reiter:ui.reiter,bereiche:E.organisationUebersicht(s()).bereiche.length,cluster:E.organisationUebersicht(s()).regionen.reduce((n,r)=>n+r.cluster.length,0)}) };
 }

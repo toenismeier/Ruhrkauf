@@ -1035,6 +1035,8 @@ async function spielFortsetzen() {
     if (!d) throw new Error('Kein Spielstand vorhanden.');
     clearTimeout(speicherTimer);
     s = d.spiel;
+    // O01: ältere Spielstände ohne Organisationsmodell einmalig migrieren.
+    if (!s.organisation) E.bildeHauscluster(s);
     postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
     $('postwarnung').checked = postUi.warnen;

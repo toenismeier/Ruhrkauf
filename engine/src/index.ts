@@ -50,7 +50,7 @@ export { premiumUebersicht } from './abfragen';
 // O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
 export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
   clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert,
-  neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor,
+  neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor, organisationLeitungKostenWoche,
   type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion,
 } from './organisation';
 export { itDeckel } from './it';
