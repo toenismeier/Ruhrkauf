@@ -40,7 +40,8 @@ function pluginBild() {
   return m;
 }
 /** Städte der ehemaligen DDR (aus den registrierten Archetypen mit ddr: true; Region bleibt, Rostock/Stralsund/Schwerin sind 'nord'). */
-export const DDR_STAEDTE = new Set([...pluginBild()].filter(([, [a]]) => ARCHETYP_DEFS[a]?.ddr).map(([s]) => s));
+export const DDR_STAEDTE = new Set([ ...[...pluginBild()].filter(([, [a]]) => ARCHETYP_DEFS[a]?.ddr).map(([s]) => s),
+  ...Object.entries(STADT_GEOGRAFIE).filter(([, meta]) => meta.ddr).map(([name]) => name) ]);
 
 /**
  * Stadtbild nach echter Geografie: [archetyp, extra]. Hafen- und Küstenstädte bekommen Wasser als Umland,
