@@ -4,7 +4,7 @@ import type { Angebot, GameState, GruppeId, Haus } from './types';
 import { clamp, eur, melde, mio } from './util';
 
 // Festes Raum- und Betriebsprofil je Kronjuwel. Keine Seed-/Hausgrößenabhängigkeit.
- // Die Produktivitätsfaktoren wirken auf die Flächenleistung, nicht direkt auf die KPI.
+// Die Produktivitätsfaktoren wirken auf die Flächenleistung, nicht direkt auf die KPI.
 const PREMIUM_PROFIL = {
   P001: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.060, mietQuote: 0.057 },
   P002: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.060, mietQuote: 0.057 },
@@ -120,9 +120,11 @@ export function kennzeichnePremium(haeuser: Haus[]): void {
     h.miete.mieteWoche = eur(sollUmsatzWoche * profil.mietQuote);
     h.miete.bisWoche = 15 * 52;
     h.miete.keineVerlaengerung = false;
-    // Beratung/FTE auf die tatsächlich festgelegten Flächen und Absatzvolumen
-    // dimensionieren (Referenzparameter qmJeFte=500, umsatzJeFte=8800).
-    const fte = 1.15 * (profil.qm / 500 + sollUmsatzWoche / 8_800);
+    // Beratung/FTE auf die feste Grundfläche und normale Referenzleistung
+    // dimensionieren: 15 % Premium-Zuschlag, Mehrverkauf aus Flächenproduktivität.
+    // Der Bonus erhöht die Leistung pro FTE, nicht die Lohnkosten proportional.
+    const normalUmsatzWoche = profil.qm * EURO_JE_QM_WOCHE;
+    const fte = 1.15 * (profil.qm / 500 + normalUmsatzWoche / 8_800);
     h.personal.vollzeit = fte * 0.50;
     h.personal.teilzeit = fte * 0.40;
     h.personal.aushilfen = fte * 0.10;
