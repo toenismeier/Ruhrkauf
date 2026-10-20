@@ -126,3 +126,42 @@ Hartwig 360 regulär (45 A, 115 B, 200 C) plus 4 Premium, Volkskauf 86, Hartwig 
 **Prüfstatus:** Nur Änderungen per verbundenem GitHub-Connector geschrieben und Quelltext/Commitdaten geprüft, **kein** Typecheck, Jest, `tsx`, Bot-260-Wochen-Lauf, messbarer Benchmark oder Renderer-Lauf ausgeführt. Die historischen Zahlen aus Abschnitt 10 (Seed 1: +2,6 % EBITDA, 18,1 Freigaben/Woche, 163 ms/Woche, 1.198 ms Quartalswoche) sind **keine** Ergebnisse dieser neuen Implementierung. Das Umsatzziel ±3 %, Q4 >0, −4 % EBITDA, Bot C Seeds 1–3, Schwierigkeits-Monotonie und Freigabe-/Performance-Grenzwerte bleiben bis zur echten Messung offen.
 
 **Unmittelbare nächste Abnahme:** Checkout mit Node und GitHub-Zugang; `cd engine && npm ci && npm run typecheck && npx jest --runInBand`; `npx tsx scripts/haeuser-export.ts` zweimal + Diff und Commit aller drei JSON-Exporte (`haeuser.json`, `haeuser-schwester.json`, `haeuser-outlet.json`); `npx tsx scripts/massstab-phase2.ts 1`, `2`, `3` je mit und ohne `--bot`; `npx tsx scripts/schwierigkeit-vergleich.ts`; `cd render && npm ci && npm run build && node pruef-staedte.js && node spiel-render.js` mit 20-Städte-Stichprobe. Nach tatsächlichen Ergebnissen Parameter iterieren, bisher `test.skip` markierte Kalibrierungstests prüfen und reaktivieren. **Phase 2 noch nicht abgenommen; Featurebranch nicht nach `main` mergen.**
+
+
+### Fortsetzung am 20.10.2026: M7 – Q1-Engine-Kalibrierung (Abschnitt 11)
+
+**Befund und Grundursachen (Quelltextprüfung; noch keine neue Messung):**
+1. **Kalenderfehler in KW 1–3:** `saisonFaktor` interpolierte bei `woche = 0` mit der Position `−0,5` zwischen Dezember und Januar. Dadurch trug die erste Januarwoche noch 50 % des hohen Weihnachts-Saisonwerts in sich; mit KW 2 ging dieser Effekt zurück. Das erklärt einen **künstlichen Umsatz-/Rohertragssprung**, nicht eine einmalige Entlastung bei Personal oder Miete. Die exakte EBITDA-Wirkung steht erst nach Simulation fest.
+2. **Januar/Februar zu steil:** Die ursprüngliche Warenhauskurve begann bei `0,82 / 0,72` vor Normalisierung. Bei überwiegend fixen, wöchentlich gebuchten Lohnkosten und Mieten (`hausKosten`, `lohnKosten`) erzeugte das eine überproportionale operative Verlustlast. Die Hartwig-Basiskurve liegt jetzt bei `0,98 / 0,96`, weiterhin auf den Jahresdurchschnitt 1 normiert. Für Spielwaren bleiben die eigenständigen Januar-/Februarwerte des Weihnachtsabverkaufs ausdrücklich erhalten.
+3. **Wareneinsatz und Abschriften:** `einkaufVerbrauch` bucht Wareneinsatz bei Absatz, `einkaufAltern` belastet ältere Saisonkohorten *wöchentlich* durch Abschriften; `k.rohertrag` enthält diese Abschriften bereits. Der Jahresstart kennt daher keine gesonderte „Nach-Weihnachts-Einmalabschrift“; die Kombination aus niedrigem Abverkauf und anhaltender Altware-Abwertung verschärft die Marge. In der Wochenanalyse müssen Umsatz, Rohertrag **und** Abschriften getrennt sichtbar bleiben, nicht ein pauschaler EBITDA-Zuschlag.
+4. **Liquidität versus EBITDA:** Die Startwelt enthält acht Wochen fälliger Warenverbindlichkeiten und Waren im Zulauf. Der Abfluss aus Altverbindlichkeiten belastet Cash, aber nicht noch einmal das Wochen-EBITDA. Die unveränderten Anfangsmittel von 400 Mio. € und die Kreditlinie von 300 Mio. € (Standardstufe) sind getrennt von der operativen Kalibrierung zu prüfen. Der Standardverlauf soll ohne Spielerintervention im ersten Jahr zahlungsfähig bleiben; künstliche Insolvenzsperren wurden **nicht** eingebaut.
+5. **Schwierigkeitsgrade:** Die Schwierigkeit wirkt bisher primär auf Startliquidität, Lieferanten, Kreditversicherer und Ereignisschwere, nicht auf die Kassen-Gewinnmarge. Daher ist die separat gemessene Q1-Verteilung je Schwierigkeit erforderlich; keine pauschale Margengutschrift je Schwierigkeit.
+
+**Codeänderungen:** `engine/src/daten.ts` begrenzt die Januarinterpolation nach unten auf den Januarwert, sodass KW 1–3 nicht mehr Dezember enthalten; die Dezember-Kurve zum Jahresende bleibt unverändert. Die Warenhaus-Saisonbasis steigt in Januar/Februar, ohne an `PARAM`, `EBITDA`-Buchung oder Insolvenztriggern zu drehen. `engine/tests/m7-winter.test.ts` schützt den Kalenderübergang und die Jahreswiederholung.
+
+**Mess- und Abnahmewerkzeug:** `engine/scripts/m7-wochenverlauf.ts` spielt die Standardwelt **ohne Eingriffe** für je 52 Wochen auf Leicht/Mittel/Schwer durch und erzeugt zwei tatsächliche Wochentabellen je Stufe (KW 1–13 und KW 1–52) inklusive Saisonfaktor, Umsatz, Rohertrag, Abschriften, Personal, Miete, EBITDA-Quote, Cash und Insolvenzstatus. Zusätzlich werden Bot-C-Läufe für Seeds 1–3 auf allen drei Schwierigkeiten über bis zu 260 Wochen protokolliert. Der verbindliche Überlebenstest betrifft mindestens **Mittel, Seeds 1–3**; Leicht/Schwer sind zusätzliche Transparenz. Richtwerte Januar/Februar: Leicht −3 %, Mittel −4 %, Schwer −6 % mit 0,5 PP Toleranz; schlimmste Q1-Woche Leicht nicht unter −4,5 %, Mittel nicht unter −6 %, Schwer nicht unter −8 %. Bei Verstößen liefert das Skript Exitcode 1, die Tabellen bleiben trotzdem im Bericht sichtbar.
+
+**Befehle für die noch ausstehende lokale Prüfung:**
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest --runInBand
+npx tsx scripts/m7-wochenverlauf.ts --write-stand
+npx tsx scripts/massstab-phase2.ts 1,2,3
+npx tsx scripts/bot.ts 1 260 --tief
+npx tsx scripts/bot.ts 2 260 --tief
+npx tsx scripts/bot.ts 3 260 --tief
+cd ../render
+npm ci
+npm run build
+node spiel-render.js
+```
+
+**Prüfstatus:** Quelltextänderungen über GitHub vorgenommen; in dieser Umgebung ist `github.com` für einen lokalen Checkout/Datenabruf nicht auflösbar. Es wurden **keine** Typecheck-, Jest-, Node-Simulations- oder Renderläufe ausgeführt. Deshalb sind weder die Q1-Grenzen noch das Ausbleiben der Insolvenz in Jahr 1 oder die erneute 5-Jahres-Bot-C-Überlebensprüfung belegt. Die früher gemeldeten Werte von der **130-Häuser-Welt auf main** (KW 1: +2,4 Mio. €, KW 2: −1,0 Mio. €, KW 3: −4,9 Mio. €, KW 8: −7,2 Mio. €, KW 13: −3,6 Mio. €) dürfen nicht als neue Werte des 560-Häuser-Branches dargestellt werden. **PR #7 bleibt Draft; keine Mergefreigabe.**
+
+<!-- M7-WOCHENTABELLEN:START -->
+
+Die 13- und 52-Wochentabellen sind noch **nicht gemessen**. `npx tsx scripts/m7-wochenverlauf.ts --write-stand` ersetzt genau diesen Bereich nach dem tatsächlichen Simulationslauf mit den je Schwierigkeit vollständigen Zahlen. Keine geschätzten oder erfundenen Wochendaten.
+
+<!-- M7-WOCHENTABELLEN:ENDE -->
