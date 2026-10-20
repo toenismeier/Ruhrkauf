@@ -46,6 +46,7 @@
     STARTKALENDER: () => STARTKALENDER,
     SYSTEME: () => SYSTEME,
     TREND_GRUPPEN: () => TREND_GRUPPEN,
+    UMBAU_STUFEN: () => UMBAU_STUFEN,
     VORSTAND_PARAM: () => VORSTAND_PARAM,
     WG: () => WG,
     WG_DEF: () => WG_DEF,
@@ -130,6 +131,9 @@
     treiberFaktor: () => treiberFaktor,
     trendFuer: () => trendFuer,
     trendbericht: () => trendbericht,
+    umbauHaus: () => umbauHaus,
+    umbauSchaetzung: () => umbauSchaetzung,
+    umbauUebersicht: () => umbauUebersicht,
     umsatzBezug: () => umsatzBezug,
     umsatzbruecke: () => umsatzbruecke,
     vorschau: () => vorschau,
@@ -3514,9 +3518,9 @@
         const x = s2.marketing.aktionen.find((y) => y.id === a.id);
         if (!x) return fehler2("Aktion nicht gefunden.");
         if (x.status === "abgesagt" || x.ende <= w) return fehler2("Die Aktion ist vorbei oder abgesagt.");
-        const laufend = x.start <= w;
+        const laufend2 = x.start <= w;
         if (a.mechanik !== void 0 || a.bereiche !== void 0 || a.wg !== void 0) {
-          if (laufend) return fehler2("Die Mechanik einer laufenden Aktion l\xE4sst sich nicht mehr \xE4ndern.");
+          if (laufend2) return fehler2("Die Mechanik einer laufenden Aktion l\xE4sst sich nicht mehr \xE4ndern.");
           const neu = { mechanik: a.mechanik ?? mech(x), bereiche: a.bereiche ?? x.bereiche, wg: a.wg ?? x.wg };
           const f = pruefeEntwurf(neu);
           if (f) return fehler2(f);
@@ -3530,14 +3534,14 @@
         if (a.name !== void 0) x.name = a.name;
         if (a.sonderwerbung !== void 0) x.kosten = eur(Math.max(0, a.sonderwerbung));
         if (a.kontrollHaeuser !== void 0) x.kontrollHaeuser = [...a.kontrollHaeuser];
-        if (a.scope !== void 0 && !laufend) x.scope = a.scope;
+        if (a.scope !== void 0 && !laufend2) x.scope = a.scope;
         if (a.start !== void 0 || a.kw !== void 0) {
-          if (laufend) return fehler2("Eine laufende Aktion l\xE4sst sich nicht verschieben.");
+          if (laufend2) return fehler2("Eine laufende Aktion l\xE4sst sich nicht verschieben.");
           const d = x.ende - x.start;
           x.start = Math.max(w, startAus(s2, a, x.start));
           x.ende = x.start + d;
         }
-        if (a.wochen !== void 0) x.ende = Math.max(laufend ? w + 1 : x.start + 1, x.start + clamp(Math.round(a.wochen), 1, 8));
+        if (a.wochen !== void 0) x.ende = Math.max(laufend2 ? w + 1 : x.start + 1, x.start + clamp(Math.round(a.wochen), 1, 8));
         return ok2(`Aktion \u201E${x.name}\u201C ge\xE4ndert: ${MECHANIK_TEXT[mech(x)]}, KW ${kw(x.start)} bis ${kw(x.ende - 1)}.`, x.id);
       }
       case "aktionAbsagen": {
@@ -7313,6 +7317,254 @@
     return s2.haeuser.filter(istOffen).map((h) => ({ id: h.id, name: h.name, score: hausKundenscore(s2, h) })).sort((a, b2) => b2.score - a.score || a.id.localeCompare(b2.id));
   }
 
+  // ../engine/src/umbau.ts
+  var UMBAU_STUFEN = {
+    auffrischung: { name: "Auffrischung", qm: 60, min: 2, max: 2 },
+    ladenbau: { name: "Ladenbau neu", qm: 250, min: 4, max: 6 },
+    komplett: { name: "Komplettumbau", qm: 900, min: 16, max: 30 },
+    technik: { name: "Technik", qm: 120, min: 3, max: 8 }
+  };
+  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen"]);
+  function initialisiereUmbau(s2) {
+    s2.umbau ?? (s2.umbau = { projekte: [], budget: 0, verbraucht: 0, jahr: 0, vorlageJahr: -1, zaehler: 0 });
+    for (const h of s2.haeuser) {
+      h.etagenBau ?? (h.etagenBau = {});
+      const alt = h.baujahr < 1995 || h.substanz < 43 ? 1 : h.baujahr < 2010 || h.substanz < 70 ? 2 : 3;
+      for (const nr of h.etagen) if (!h.etagenBau[nr]) {
+        const technik3 = h.baujahr < 1970 ? 0 : h.baujahr < 2005 ? 1 : 2;
+        h.etagenBau[nr] = {
+          substanz: h.substanz,
+          substanzStart: h.substanz,
+          moebelGeneration: alt,
+          moebelGenerationStart: alt,
+          technik: { klima: technik3, licht: technik3, brandschutz: Math.max(1, technik3) },
+          // Pflichttermine frühestens nach mehr als fünf Spieljahren, damit das Startspiel neutral bleibt.
+          pflichten: {
+            brandschutz: 312 + (h.baujahr + nr + 99) % 104,
+            aufzug: 338 + (h.baujahr + nr + 127) % 104
+          },
+          gesperrt: false,
+          modernisierungWirkung: 0
+        };
+      }
+    }
+  }
+  function flaechenQm(h, nr) {
+    return Math.max(1, h.flaechen.filter((f) => f.etage === nr).reduce((a, f) => a + f.qm, 0) || h.grundflaecheQm);
+  }
+  function umbauSchaetzung(s2, hausId, nr, stufe2) {
+    const h = s2.haeuser.find((x) => x.id === hausId), p2 = UMBAU_STUFEN[stufe2];
+    if (!h || !p2 || !h.etagen.includes(nr)) return void 0;
+    const etagen = stufe2 === "komplett" ? [...h.etagen] : [nr], qm = etagen.reduce((v, e) => v + flaechenQm(h, e), 0);
+    const q2 = clamp(bereichsQualitaet(s2, "ladenbau"), 0, 1);
+    const kosten = eur(qm * p2.qm * (1 + 0.4 * (1 - q2)));
+    const basis2 = p2.min + (p2.max - p2.min) * Math.min(1, qm / Math.max(1, h.grundflaecheQm * 5));
+    const wochen = Math.ceil(basis2 * (1 + 0.5 * (1 - q2)));
+    const plus = stufe2 === "ladenbau" ? 0.08 : stufe2 === "komplett" ? 0.1 : stufe2 === "auffrischung" ? 0.02 : 0.01;
+    return {
+      etagen,
+      qm,
+      kosten,
+      wochen,
+      frequenz: stufe2 === "komplett" ? 0.06 : 0,
+      kaufquote: plus,
+      rendite: Math.round((h.kpi?.umsatz ?? Object.values(h.potenzial).reduce((a, b2) => a + (b2 ?? 0), 0)) * plus * 52 / Math.max(1, kosten) * 1e3) / 10
+    };
+  }
+  function umbauAktion(s2, a) {
+    initialisiereUmbau(s2);
+    const h = s2.haeuser.find((x) => x.id === a.haus), p2 = umbauSchaetzung(s2, a.haus, a.etage, a.stufe);
+    if (!h || !p2 || h.status !== "offen") return { ok: false, text: "Haus oder Etage nicht verf\xFCgbar." };
+    if (s2.umbau.projekte.some((x) => x.status === "laufend" && x.haus === h.id && x.etagen.some((n) => p2.etagen.includes(n))))
+      return { ok: false, text: "Mindestens eine Etage befindet sich bereits im Umbau." };
+    if (h.premiumInvestition && h.premiumInvestition.bis > s2.woche)
+      return { ok: false, text: "Laufende Premium-Investition muss zuerst abgeschlossen werden." };
+    einmalKosten(s2, p2.kosten);
+    s2.umbau.verbraucht += p2.kosten;
+    const projekt = {
+      id: "umbau-" + ++s2.umbau.zaehler,
+      haus: h.id,
+      etagen: p2.etagen,
+      stufe: a.stufe,
+      start: s2.woche,
+      ende: s2.woche + p2.wochen,
+      kosten: p2.kosten,
+      qm: p2.qm,
+      status: "laufend"
+    };
+    s2.umbau.projekte.push(projekt);
+    melde(s2, "info", UMBAU_STUFEN[a.stufe].name + " in " + h.name + " gestartet (" + p2.etagen.length + " Etage(n), " + p2.wochen + " Wochen).", { hausId: h.id, stadt: h.stadt, modul: "umbau" });
+    return { ok: true, text: "Baustart " + h.name + ": " + p2.kosten.toLocaleString("de-DE") + " \u20AC, fertig in " + p2.wochen + " Wochen." };
+  }
+  function laufend(s2, h, w = s2.woche) {
+    return (s2.umbau?.projekte ?? []).filter((p2) => p2.haus === h.id && p2.status === "laufend" && p2.start <= w && p2.ende > w);
+  }
+  function umbauNachfrageFaktor(s2, h, g) {
+    if (!h.etagenBau) return 1;
+    const baustellen = laufend(s2, h), gesamt = h.flaechen.filter((f) => (g === null ? f.konzept === "offprice" : f.gruppe === g && ["eigen", "kommission", "konzession"].includes(f.konzept)) && !h.etagenBau?.[f.etage]?.gesperrt);
+    const qm = gesamt.reduce((a, f) => a + f.qm, 0);
+    if (!qm) return 1;
+    let sum2 = 0;
+    for (const f of gesamt) {
+      const e = h.etagenBau[f.etage], imBau = baustellen.some((p2) => p2.etagen.includes(f.etage));
+      const behinderung = imBau ? 0.4 : baustellen.length ? 0.95 : 1;
+      sum2 += f.qm * behinderung * (1 + (e?.modernisierungWirkung ?? 0));
+    }
+    return sum2 / qm;
+  }
+  function umbauFrequenzFaktor(h) {
+    return 1 + (h.umbauFrequenz ?? 0);
+  }
+  function umbauWoche(s2) {
+    initialisiereUmbau(s2);
+    const stand = s2.umbau;
+    const jahr2 = Math.floor(s2.woche / 52);
+    if (jahr2 !== stand.jahr) {
+      stand.jahr = jahr2;
+      stand.verbraucht = 0;
+    }
+    for (const h of s2.haeuser) {
+      if (!h.etagenBau) continue;
+      for (const nr of h.etagen) {
+        const e = h.etagenBau[nr];
+        e.substanz = Math.max(0, e.substanz - 0.05);
+        if (e.modernisierungWirkung > 0) e.modernisierungWirkung = Math.max(0, e.modernisierungWirkung - 15e-5);
+        for (const pflicht of ["brandschutz", "aufzug"]) {
+          const frist = e.pflichten[pflicht];
+          if (!s2.prognose && s2.woche === frist - 12) melde(
+            s2,
+            "warnung",
+            "Beh\xF6rde setzt Frist: " + pflicht + " in " + h.name + ", " + nr + ". Etage bis Woche " + frist + ".",
+            { hausId: h.id, stadt: h.stadt, modul: "umbau" }
+          );
+          if (!e.gesperrt && s2.woche > frist) {
+            e.gesperrt = true;
+            if (!s2.prognose) melde(
+              s2,
+              "warnung",
+              "Beh\xF6rdliche Sperrung: " + h.name + ", Etage " + nr + ". " + pflicht + " \xFCberf\xE4llig.",
+              { hausId: h.id, stadt: h.stadt, modul: "umbau" }
+            );
+          }
+        }
+      }
+      if (h.umbauFrequenz) h.umbauFrequenz = Math.max(0, h.umbauFrequenz - 1e-4);
+    }
+    for (const p2 of stand.projekte) if (p2.status === "laufend" && s2.woche >= p2.ende) {
+      const h = s2.haeuser.find((x) => x.id === p2.haus);
+      if (!h) continue;
+      for (const nr of p2.etagen) {
+        const e = h.etagenBau?.[nr];
+        if (!e) continue;
+        if (p2.stufe === "auffrischung") {
+          e.substanz = clamp(e.substanz + 10, 0, 100);
+          e.technik.licht = Math.min(2, e.technik.licht + 1);
+        }
+        if (p2.stufe === "ladenbau") e.moebelGeneration = 3;
+        if (p2.stufe === "komplett") {
+          e.substanz = 90;
+          e.moebelGeneration = 3;
+          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
+          e.klimaModernisiert = true;
+        }
+        if (p2.stufe === "technik") {
+          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
+          e.pflichten = { brandschutz: s2.woche + 520, aufzug: s2.woche + 520 };
+          e.gesperrt = false;
+          e.klimaModernisiert = true;
+        }
+        e.modernisierungWirkung = Math.max(
+          e.modernisierungWirkung,
+          p2.stufe === "ladenbau" ? 0.08 : p2.stufe === "komplett" ? 0.1 : p2.stufe === "auffrischung" ? 0.02 : 0.01
+        );
+      }
+      if (p2.stufe === "komplett") {
+        h.umbauFrequenz = 0.06;
+        s2.stakeholder.image = clamp(s2.stakeholder.image + 0.8, 0, 100);
+      }
+      h.substanz = p2.etagen.length === h.etagen.length ? Math.round(
+        h.etagen.reduce((a, n) => a + (h.etagenBau?.[n]?.substanz ?? h.substanz), 0) / h.etagen.length
+      ) : h.substanz;
+      p2.status = "abgeschlossen";
+      if (!s2.prognose) melde(
+        s2,
+        "info",
+        UMBAU_STUFEN[p2.stufe].name + " abgeschlossen: " + h.name + ".",
+        { hausId: h.id, stadt: h.stadt, modul: "umbau" }
+      );
+    }
+    if (!s2.prognose && s2.woche % 52 === 0 && stand.vorlageJahr !== jahr2) {
+      stand.vorlageJahr = jahr2;
+      const budget = s2.planung;
+      stand.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
+      const v = umbauProgramm(s2).slice(0, 5), auswahl3 = [];
+      let rest = stand.budget;
+      for (const x of v) if (x.kosten > 0 && x.kosten <= rest) {
+        auswahl3.push(x);
+        rest -= x.kosten;
+      }
+      neueVorlage(s2, {
+        bereich: "ladenbau",
+        titel: "Modernisierungsprogramm " + (s2.startJahr + jahr2),
+        text: "Bau & Ladenbau priorisiert nach j\xE4hrlicher Rendite: " + v.map((x) => x.name + " " + x.etage + " (" + x.rendite + " %)").join(", ") + ". Budget: " + stand.budget.toLocaleString("de-DE") + " \u20AC.",
+        frist: 4,
+        optionen: [{ id: "annehmen", label: "Modernisierungsprogramm freigeben" }, { id: "zurueckstellen", label: "Zur\xFCckstellen" }],
+        standard: "annehmen"
+      });
+      const e = s2.entscheidungen[s2.entscheidungen.length - 1];
+      if (e?.woche === s2.woche && e.typ === "organisation_vorlage" && e.daten.bereich === "ladenbau") {
+        e.daten.umbauProgramm = JSON.stringify(auswahl3.map((x) => ({ haus: x.haus, etage: x.etage, stufe: x.stufe })));
+      }
+    }
+  }
+  function umbauProgramm(s2) {
+    const v = [];
+    for (const h of s2.haeuser) if (h.status === "offen") for (const nr of h.etagen) {
+      const e = h.etagenBau?.[nr];
+      if (!e || e.gesperrt) continue;
+      const stufe2 = e.moebelGeneration < 3 ? "ladenbau" : "auffrischung";
+      const p2 = umbauSchaetzung(s2, h.id, nr, stufe2);
+      if (p2 && !s2.umbau?.projekte.some((x) => x.status === "laufend" && x.haus === h.id && x.etagen.includes(nr)))
+        v.push({ haus: h.id, name: h.name, etage: nr, stufe: stufe2, kosten: p2.kosten, rendite: p2.rendite });
+    }
+    return v.sort((a, b2) => b2.rendite - a.rendite || a.haus.localeCompare(b2.haus) || a.etage - b2.etage);
+  }
+  function umbauProgrammEntscheiden(s2, programm) {
+    let liste = [];
+    try {
+      liste = JSON.parse(programm);
+    } catch {
+      return;
+    }
+    for (const a of liste) umbauAktion(s2, { typ: "umbauPlanen", ...a });
+  }
+  function umbauUebersicht(s2) {
+    initialisiereUmbau(s2);
+    const st = s2.umbau;
+    return {
+      budget: st.budget,
+      verbraucht: st.verbraucht,
+      rest: Math.max(0, st.budget - st.verbraucht),
+      jahr: s2.startJahr + Math.floor(s2.woche / 52),
+      programm: umbauProgramm(s2).slice(0, 30),
+      laufend: st.projekte.filter((x) => x.status === "laufend"),
+      abgeschlossen: st.projekte.filter((x) => x.status === "abgeschlossen").slice(-20),
+      premiumInvestitionen: s2.haeuser.filter((x) => x.premiumInvestition && x.premiumInvestition.bis > s2.woche).length
+    };
+  }
+  function umbauHaus(s2, id) {
+    initialisiereUmbau(s2);
+    const h = s2.haeuser.find((x) => x.id === id);
+    if (!h) return void 0;
+    return h.etagen.map((nr) => ({
+      etage: nr,
+      ...h.etagenBau[nr],
+      qm: flaechenQm(h, nr),
+      projekt: (s2.umbau?.projekte ?? []).find((x) => x.haus === id && x.status === "laufend" && x.etagen.includes(nr)),
+      schaetzungen: Object.keys(UMBAU_STUFEN).map((stufe2) => ({ stufe: stufe2, ...umbauSchaetzung(s2, id, nr, stufe2) }))
+    }));
+  }
+
   // ../engine/src/aktionen.ts
   var ok3 = (text3) => ({ ok: true, text: text3 });
   var fehler3 = (text3) => ({ ok: false, text: text3 });
@@ -7357,6 +7609,7 @@
     const w = s2.woche;
     const inso = s2.phase === "insolvenz";
     if (IT_AKTIONEN.has(a.typ)) return itAktion(s2, a);
+    if (UMBAU_AKTIONEN.has(a.typ)) return umbauAktion(s2, a);
     if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s2, a, (x) => einmalKosten(s2, x));
     if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s2, a);
     if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s2, a);
@@ -10352,6 +10605,7 @@
     initialisiereIt(s2);
     initialisierePlanung(s2);
     initialisiereHausbetrieb(s2);
+    initialisiereUmbau(s2);
     return s2;
   }
   function initialeVerbindlichkeiten(s2) {
@@ -10372,7 +10626,7 @@
     return h.status === "offen" || h.status === "schliessung_verhandlung" || h.status === "raeumung";
   }
   function aktiveFlaeche(h, w) {
-    return h.flaechen.filter((f) => f.umbauBis === void 0 || f.umbauBis <= w);
+    return h.flaechen.filter((f) => (f.umbauBis === void 0 || f.umbauBis <= w) && !h.etagenBau?.[f.etage]?.gesperrt);
   }
   function lieferantenFaktor(s2, h, g) {
     let f = 1;
@@ -10407,7 +10661,7 @@
     const streik = h.streikBis !== void 0 && h.streikBis > w ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h);
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h) * umbauFrequenzFaktor(h);
   }
   function saettigung(qm, Q) {
     return Q > 0 ? 1 - Math.exp(-qm / Q) : 0;
@@ -10447,12 +10701,12 @@
       const Q = h.saettigungQm[g] ?? 1;
       const qm = (qmEigen[g] ?? 0) + (qmKomm[g] ?? 0);
       const sf = saisonFaktor(g, w);
-      const b2 = P2 * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s2, h, g) * wettbewerbNachfrageFaktor(s2, h, g);
+      const b2 = P2 * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s2, h, g) * wettbewerbNachfrageFaktor(s2, h, g) * umbauNachfrageFaktor(s2, h, g);
       bruttoBasis[g] = b2;
       summeBasis += b2;
       summeBedarf += b2 / Math.max(0.05, sf) * Math.sqrt(sf);
     }
-    const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor("damen", w) * wettbewerbOffpriceFaktor(s2, h);
+    const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor("damen", w) * wettbewerbOffpriceFaktor(s2, h) * umbauNachfrageFaktor(s2, h, null);
     summeBasis += offBasis;
     summeBedarf += offBasis;
     const p2 = h.personal;
@@ -11139,6 +11393,10 @@
       return null;
     }
     const d = e.daten;
+    if (e.typ === "organisation_vorlage" && typeof d.umbauProgramm === "string") {
+      if (option === "annehmen" || option === "vorschlag") umbauProgrammEntscheiden(s2, d.umbauProgramm);
+      return null;
+    }
     const haus2 = typeof d.haus === "string" ? s2.haeuser.find((h) => h.id === d.haus) : void 0;
     switch (e.typ) {
       case "wettbewerb_eroeffnung": {
@@ -11237,6 +11495,7 @@
     const w = s2.woche;
     prozesse(s2);
     premiumWoche(s2);
+    umbauWoche(s2);
     hqWoche(s2);
     itWoche(s2);
     quartalsStart(s2);
@@ -42364,11 +42623,11 @@
     marke: "#d23c32"
     // Hartwig-Rot
   };
-  function heller(c, um = 0.05) {
-    return "#" + new Color(c).offsetHSL(0, 0, um).getHexString();
+  function heller(c, um2 = 0.05) {
+    return "#" + new Color(c).offsetHSL(0, 0, um2).getHexString();
   }
-  function dunkler(c, um = 0.06) {
-    return "#" + new Color(c).offsetHSL(0, 0, -um).getHexString();
+  function dunkler(c, um2 = 0.06) {
+    return "#" + new Color(c).offsetHSL(0, 0, -um2).getHexString();
   }
   var cache = /* @__PURE__ */ new Map();
   function mat(c) {
@@ -43250,18 +43509,18 @@
     }
     if (o.schild !== false) {
       const name2 = o.name ?? naechsterName(ctx);
-      const um = (a + b2) / 2;
+      const um2 = (a + b2) / 2;
       if (stil === "fuenfziger") {
-        F2.text(name2, um, egH - 0.42, 0.42, waehle2(r, ["#ffffff", "#f2d16b", "#e8604c", "#1f3a5f"]), tb + 1.45, wb - 0.3);
+        F2.text(name2, um2, egH - 0.42, 0.42, waehle2(r, ["#ffffff", "#f2d16b", "#e8604c", "#1f3a5f"]), tb + 1.45, wb - 0.3);
       } else if (stil === "alt") {
-        F2.text(name2, um, top - fasz / 2 + 0.03, 0.36, "#3b2d24", tb + 0.075, wb - 0.3);
+        F2.text(name2, um2, top - fasz / 2 + 0.03, 0.36, "#3b2d24", tb + 0.075, wb - 0.3);
       } else {
         const tafel3 = r() < 0.45;
         if (tafel3) {
           const tf = waehle2(r, ["#f4efe6", "#f2d16b", "#ffffff", "#d9e4e8"]);
           F2.box(a + 0.25, b2 - 0.25, top - fasz + 0.04, top - 0.06, tb, tb + 0.13, tf);
-          F2.text(name2, um, top - fasz / 2 - 0.01, 0.46, "#2a2f35", tb + 0.135, wb - 0.7);
-        } else F2.text(name2, um, top - fasz / 2 - 0.01, 0.48, o.leucht ? waehle2(r, ["#ffe680", "#ff8a6b", "#9fe6ff", "#ffffff"]) : hell4 ? "#2a2f35" : "#ffffff", tb + 0.075, wb - 0.5);
+          F2.text(name2, um2, top - fasz / 2 - 0.01, 0.46, "#2a2f35", tb + 0.135, wb - 0.7);
+        } else F2.text(name2, um2, top - fasz / 2 - 0.01, 0.48, o.leucht ? waehle2(r, ["#ffe680", "#ff8a6b", "#9fe6ff", "#ffffff"]) : hell4 ? "#2a2f35" : "#ffffff", tb + 0.075, wb - 0.5);
       }
     }
     if (o.markise) markise2(F2, a + 0.08, b2 - 0.08, top - fasz - 0.02, 1.35, o.markise, r() < 0.55, tb + 0.06);
@@ -45572,8 +45831,8 @@
     for (const e of o.berge ?? []) if (!berge.seiten[e.seite]) berge.seiten[e.seite] = { kante: 0, front: 0, H0: 0, Hr: (BERG[e.inhalt] ?? BERG.wald)[1], inhalt: e.inhalt, u0: 0, u1: e.seite === "-z" ? B2 : T };
     const ringBauten = [];
     for (const e of o.berge ?? []) if (e.burg) {
-      const s2 = e.seite, um = e.u ?? (s2 === "-z" ? B2 / 2 : T / 2), ab = e.abstand ?? 110, gr = 84;
-      const x = s2 === "-x" ? -ab - gr : um - gr / 2, z2 = s2 === "-z" ? -ab - gr : um - gr / 2;
+      const s2 = e.seite, um2 = e.u ?? (s2 === "-z" ? B2 / 2 : T / 2), ab = e.abstand ?? 110, gr = 84;
+      const x = s2 === "-x" ? -ab - gr : um2 - gr / 2, z2 = s2 === "-z" ? -ab - gr : um2 - gr / 2;
       berge.plateaus = [...berge.plateaus ?? []];
       const y = bergHoehe({ ...berge, plateaus: [] }, x + gr / 2, z2 + gr / 2);
       berge.plateaus.push({ x0: x + 6, z0: z2 + 6, x1: x + gr - 6, z1: z2 + gr - 6, y });
@@ -45938,14 +46197,14 @@
       return out;
     }
     if (b2.zone === "sonder") {
-      const um = (U0 + U1) / 2, vm = (V0 + V1) / 2;
+      const um2 = (U0 + U1) / 2, vm = (V0 + V1) / 2;
       if (b2.sonder === "supermarkt") {
         const sx = Math.min(1.5, (Lu - 10) / 30), sz = Math.min(1.7, (Lv - 30) / 18);
-        bau2("halle", um, V0 + 3 + 18 * sz / 2, 30 * sx, 18 * sz, "+v", [sx, 0.75, sz]);
+        bau2("halle", um2, V0 + 3 + 18 * sz / 2, 30 * sx, 18 * sz, "+v", [sx, 0.75, sz]);
         flaeche5("stellplatz", U0 + 2, V0 + 6 + 18 * sz, U1 - 2, V1 - 2);
         const hw = 15 * sx;
-        if (um - hw - 2 - U0 > 8) flaeche5("stellplatz", U0 + 2, V0 + 3, um - hw - 2, V0 + 4 + 18 * sz);
-        if (U1 - (um + hw + 2) > 8) flaeche5("hof", um + hw + 2, V0 + 3, U1 - 2, V0 + 4 + 18 * sz);
+        if (um2 - hw - 2 - U0 > 8) flaeche5("stellplatz", U0 + 2, V0 + 3, um2 - hw - 2, V0 + 4 + 18 * sz);
+        if (U1 - (um2 + hw + 2) > 8) flaeche5("hof", um2 + hw + 2, V0 + 3, U1 - 2, V0 + 4 + 18 * sz);
       } else if (b2.sonder === "schule") {
         const sx = Math.min(1.6, Lu * 0.55 / 24);
         bau2("zeile", U0 + 3 + 12 * sx, V0 + 9, 24 * sx, 12, "-v", [sx, 1, 1]);
@@ -45953,17 +46212,17 @@
         flaeche5("hof", U0 + 18, V0 + 16, U0 + 6 + 24 * sx, V1 - 4);
         flaeche5("sportplatz", U0 + 10 + 24 * sx, V0 + 4, U1 - 3, V1 - 4);
       } else if (b2.sonder === "kirche") {
-        flaeche5("hof", um - 22, vm - 16, um + 22, vm + 16);
-        bau2("dorfkirche", um, vm, 30, 11, "+v");
-        if (um - 24 - U0 > 10) {
-          flaeche5("stellplatz", U0 + 2, vm - 15, um - 24, vm + 15);
+        flaeche5("hof", um2 - 22, vm - 16, um2 + 22, vm + 16);
+        bau2("dorfkirche", um2, vm, 30, 11, "+v");
+        if (um2 - 24 - U0 > 10) {
+          flaeche5("stellplatz", U0 + 2, vm - 15, um2 - 24, vm + 15);
         }
-        if (U1 - (um + 24) > 10) {
-          const w2 = Math.min(22, U1 - um - 30);
-          if (w2 > 8) bau2("zeile", um + 26 + w2 / 2, vm, w2, 12, "+v", [w2 / 24, 0.8, 1]);
-          if (U1 - (um + 28 + w2) > 8) flaeche5("stellplatz", um + 28 + w2, vm - 15, U1 - 2, vm + 15);
+        if (U1 - (um2 + 24) > 10) {
+          const w2 = Math.min(22, U1 - um2 - 30);
+          if (w2 > 8) bau2("zeile", um2 + 26 + w2 / 2, vm, w2, 12, "+v", [w2 / 24, 0.8, 1]);
+          if (U1 - (um2 + 28 + w2) > 8) flaeche5("stellplatz", um2 + 28 + w2, vm - 15, U1 - 2, vm + 15);
         }
-        for (let i = 0; i < 6; i++) baum2(um + zw(r, -20, 20), vm + (i % 2 ? 13 : -13), "linde");
+        for (let i = 0; i < 6; i++) baum2(um2 + zw(r, -20, 20), vm + (i % 2 ? 13 : -13), "linde");
         out.frei = [vm - 19, vm + 19];
       } else {
         flaeche5("hof", U0 + 2, V1 - 26, U0 + 36, V1 - 2);
@@ -45975,11 +46234,11 @@
       if (b2.sonder === "supermarkt" || b2.sonder === "schule") return out;
     }
     if (b2.zone === "hof") {
-      const um = U0 + Lu * zw(r, 0.3, 0.6), vm = V0 + Lv * zw(r, 0.3, 0.6);
-      flaeche5("hof", um - 20, vm - 18, um + 20, vm + 18);
-      bau2("efh", um - 9, vm - 9, 9, 8, "+v");
-      bau2("scheune", um + 8, vm + 6, 18, 12, "+v");
-      for (let i = 0; i < 5; i++) baum2(um + zw(r, -18, 18), vm + zw(r, 14, 18), "linde");
+      const um2 = U0 + Lu * zw(r, 0.3, 0.6), vm = V0 + Lv * zw(r, 0.3, 0.6);
+      flaeche5("hof", um2 - 20, vm - 18, um2 + 20, vm + 18);
+      bau2("efh", um2 - 9, vm - 9, 9, 8, "+v");
+      bau2("scheune", um2 + 8, vm + 6, 18, 12, "+v");
+      for (let i = 0; i < 5; i++) baum2(um2 + zw(r, -18, 18), vm + zw(r, 14, 18), "linde");
       return out;
     }
     const dicht = b2.zone === "dicht";
@@ -47444,9 +47703,9 @@
         }
       } else if (["markt", "kirche", "platz", "domplatz"].includes(b2.art)) {
         const seiten4 = b2.seiten ?? ["-z", "-x"];
-        const um = { "-z": "+z", "-x": "+x", "+z": "-z", "+x": "-x" };
+        const um2 = { "-z": "+z", "-x": "+x", "+z": "-z", "+x": "-x" };
         const frontUm = {};
-        for (const s2 of seiten4) frontUm[s2] = um[s2];
+        for (const s2 of seiten4) frontUm[s2] = um2[s2];
         const t = parzelliere(ctx, seiten4, [], frontUm);
         b2.platz = { x: b2.x + t["-x"], z: b2.z + t["-z"], w: b2.w - t["-x"] - t["+x"], d: b2.d - t["-z"] - t["+z"] };
         if (b2.art === "markt" && (E.rathausAmMarkt ?? true) && (E.landmarken ?? []).includes("slot:rathaus")) {
@@ -49656,8 +49915,8 @@
       }
       const besetzt = [he.u - bE - 2.8, he.u - bE - 1.4, he.u + bE + 1.9, he.u + bE + 5.2, he.u];
       for (const f of nahe) {
-        const sf = seiten4[f.seite], um = (f.a + f.b) / 2, t2 = f.t + 3.2;
-        const u2 = [um, um + (f.b - f.a) * 0.3, um - (f.b - f.a) * 0.3, um + 1.6, um - 1.6].find((q2) => q2 > 1 && q2 < Z2.nutz(sf) - 1 && !besetzt.some((p2) => Math.abs(p2 - q2) < 1.5));
+        const sf = seiten4[f.seite], um2 = (f.a + f.b) / 2, t2 = f.t + 3.2;
+        const u2 = [um2, um2 + (f.b - f.a) * 0.3, um2 - (f.b - f.a) * 0.3, um2 + 1.6, um2 - 1.6].find((q2) => q2 > 1 && q2 < Z2.nutz(sf) - 1 && !besetzt.some((p2) => Math.abs(p2 - q2) < 1.5));
         if (u2 == null) continue;
         besetzt.push(u2);
         for (const du of [-0.6, 0.6]) {
@@ -50063,14 +50322,14 @@
     const z2 = [...text3];
     return z2.reduce((a, c) => a + (c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62), 0) + hb * 0.12 * (z2.length - 1);
   }
-  function kastenSchrift(K3, s2, text3, um, y, t, hb, fg, bg) {
+  function kastenSchrift(K3, s2, text3, um2, y, t, hb, fg, bg) {
     const z2 = [...text3];
     const br = z2.map((c) => c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62);
     const gap = hb * 0.12;
     const total = br.reduce((a, b2) => a + b2, 0) + gap * (z2.length - 1);
     let acc = 0;
     z2.forEach((c, i) => {
-      const uc = um + s2.lese * (-total / 2 + acc + br[i] / 2);
+      const uc = um2 + s2.lese * (-total / 2 + acc + br[i] / 2);
       acc += br[i] + gap;
       if (c === " ") return;
       s2.q(uc - br[i] / 2, uc + br[i] / 2, y - hb * 0.55, y + hb * 0.55, t, t + 0.45, bg);
@@ -50835,7 +51094,7 @@
     const z2 = [...text3];
     return z2.reduce((a, c) => a + buchstabenBreite(c, hb), 0) + hb * 0.16 * (z2.length - 1);
   }
-  function leuchtschrift(K3, s2, text3, um, y, t, hb, farbe2, o = {}) {
+  function leuchtschrift(K3, s2, text3, um2, y, t, hb, farbe2, o = {}) {
     const z2 = [...text3];
     const br = z2.map((c) => buchstabenBreite(c, hb));
     const gap = hb * 0.16;
@@ -50864,7 +51123,7 @@
     }
     let acc = 0;
     z2.forEach((c, i) => {
-      const uc = um + s2.lese * (-total / 2 + acc + br[i] / 2);
+      const uc = um2 + s2.lese * (-total / 2 + acc + br[i] / 2);
       acc += br[i] + gap;
       if (c === " ") return;
       const df = defekt.get(i);
@@ -51793,15 +52052,15 @@
       for (let u = uE; u <= s2.L + 0.01; u += A / Math.round(A / 1.5)) s2.q(u - 0.07, u + 0.07, 0.3, Ha, 0.05, 0.2, "#e6eaec");
       for (let y = 0.3; y < Ha; y += 1.5) s2.q(uE, s2.L, y - 0.05, y + 0.05, 0.05, 0.16, "#e6eaec");
       s2.q(uE - 0.2, uE + 0.2, 0, Ha + 0.2, 0, 0.35, "#59636b");
-      const um = uE + A * 0.45;
-      s2.q(um - 2.4, um + 2.4, 0.3, 3.4, 0.05, 0.12, GLAS_TUER);
-      K3.eingaenge.push({ seite: s2.seite, u: um, breite: 4.8, t: 0.12, haupt: s2.seite === "+z" });
+      const um2 = uE + A * 0.45;
+      s2.q(um2 - 2.4, um2 + 2.4, 0.3, 3.4, 0.05, 0.12, GLAS_TUER);
+      K3.eingaenge.push({ seite: s2.seite, u: um2, breite: 4.8, t: 0.12, haupt: s2.seite === "+z" });
       if (K3.zu) {
-        s2.q(um - 2.3, um + 2.3, 0.3, 3.3, 0.12, 0.16, "#8e9499");
-        for (let y = 0.6; y < 3.2; y += 0.42) s2.q(um - 2.3, um + 2.3, y, y + 0.07, 0.16, 0.2, "#6f757a");
+        s2.q(um2 - 2.3, um2 + 2.3, 0.3, 3.3, 0.12, 0.16, "#8e9499");
+        for (let y = 0.6; y < 3.2; y += 0.42) s2.q(um2 - 2.3, um2 + 2.3, y, y + 0.07, 0.16, 0.2, "#6f757a");
       }
-      s2.q(um - 2.7, um + 2.7, 3.4, 3.8, 0.05, 2.8, "#59636b");
-      s2.q(um - 2.7, um + 2.7, 3.8, 3.9, 0.05, 2.8, ROT2);
+      s2.q(um2 - 2.7, um2 + 2.7, 3.4, 3.8, 0.05, 2.8, "#59636b");
+      s2.q(um2 - 2.7, um2 + 2.7, 3.8, 3.9, 0.05, 2.8, ROT2);
       if (n < 2) continue;
       if (stil === "pomo") {
         for (let k = 0; k < nOG; k++) {
@@ -52401,13 +52660,13 @@
       }
     }
   }
-  function flugdach(K3, s2, um, typ, f) {
+  function flugdach(K3, s2, um2, typ, f) {
     const B2 = typ === "hypar" ? 13 : 17, T = typ === "hypar" ? 9 : 8, t0 = -0.4;
     if (typ === "hypar") {
       const N = 8, yM = 6.2, c = 1.25, dick = 0.18, p2 = [];
       const P2 = (i, j, off) => {
         const x = i / N * 2 - 1, z2 = j / N * 2 - 1;
-        return [um + x * B2 / 2, yM + c * x * z2 + off, t0 + T / 2 + z2 * T / 2];
+        return [um2 + x * B2 / 2, yM + c * x * z2 + off, t0 + T / 2 + z2 * T / 2];
       };
       for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
         const A = P2(i, j, 0), Bq = P2(i + 1, j, 0), C2 = P2(i + 1, j + 1, 0), D = P2(i, j + 1, 0);
@@ -52436,22 +52695,22 @@
     }
     if (typ === "falt") {
       const nf = 6, fw = B2 / nf, wi = 0.3, y2 = 5.6, by = 0.26, lang = fw / Math.cos(wi);
-      for (let i = 0; i < nf; i++) s2.kipp(lang, by, T, um - B2 / 2 + fw * (i + 0.5), y2, t0 + T / 2, f, (i % 2 ? 1 : -1) * wi);
-      s2.q(um - B2 / 2, um + B2 / 2, y2 - 0.25, y2 - 0.08, t0 + T - 0.1, t0 + T + 0.05, ROT2);
+      for (let i = 0; i < nf; i++) s2.kipp(lang, by, T, um2 - B2 / 2 + fw * (i + 0.5), y2, t0 + T / 2, f, (i % 2 ? 1 : -1) * wi);
+      s2.q(um2 - B2 / 2, um2 + B2 / 2, y2 - 0.25, y2 - 0.08, t0 + T - 0.1, t0 + T + 0.05, ROT2);
       for (const du of [-B2 * 0.3, B2 * 0.3]) {
-        const [x, z2] = s2.welt(um + du, t0 + T - 1.2);
+        const [x, z2] = s2.welt(um2 + du, t0 + T - 1.2);
         zyl3(K3.S, x, 0.3, z2, 0.16, y2 - 0.4, "#8d9196", 8);
       }
       return y2 + 1;
     }
     const y = 5;
-    s2.q(um - B2 / 2, um + B2 / 2, y, y + 0.35, t0, t0 + T, f);
-    s2.q(um - B2 / 2, um + B2 / 2, y + 0.35, y + 1, t0 + T - 0.3, t0 + T, f);
-    for (const uu of [um - B2 / 2, um + B2 / 2 - 0.3]) s2.q(uu, uu + 0.3, y + 0.35, y + 1, t0 + 1.5, t0 + T, f);
-    s2.q(um - B2 / 2 - 0.02, um + B2 / 2 + 0.02, y + 0.35, y + 0.5, t0 + T, t0 + T + 0.03, ROT2);
-    for (let u = um - B2 / 2 + 1.5; u < um + B2 / 2; u += 2.2) s2.q(u - 0.3, u + 0.3, y - 0.05, y, t0 + 1, t0 + T - 1, LICHT3);
+    s2.q(um2 - B2 / 2, um2 + B2 / 2, y, y + 0.35, t0, t0 + T, f);
+    s2.q(um2 - B2 / 2, um2 + B2 / 2, y + 0.35, y + 1, t0 + T - 0.3, t0 + T, f);
+    for (const uu of [um2 - B2 / 2, um2 + B2 / 2 - 0.3]) s2.q(uu, uu + 0.3, y + 0.35, y + 1, t0 + 1.5, t0 + T, f);
+    s2.q(um2 - B2 / 2 - 0.02, um2 + B2 / 2 + 0.02, y + 0.35, y + 0.5, t0 + T, t0 + T + 0.03, ROT2);
+    for (let u = um2 - B2 / 2 + 1.5; u < um2 + B2 / 2; u += 2.2) s2.q(u - 0.3, u + 0.3, y - 0.05, y, t0 + 1, t0 + T - 1, LICHT3);
     for (const du of [-B2 * 0.36, -B2 * 0.12, B2 * 0.12, B2 * 0.36]) {
-      const [x, z2] = s2.welt(um + du, t0 + T - 1);
+      const [x, z2] = s2.welt(um2 + du, t0 + T - 1);
       zyl3(K3.S, x, 0.3, z2, 0.12, y - 0.3, "#8d9196", 8);
     }
     return y + 1;
@@ -52580,21 +52839,21 @@
       for (let k = 1; k < n; k++) {
         const y0 = EG2 + (k - 1) * GH;
         for (let i = 0; i < nw; i++) {
-          const um = (i + 0.5) * aw;
+          const um2 = (i + 0.5) * aw;
           if (k === 1) {
-            if (FR2 < 3) s2.q(um - 0.75, um + 0.75, y0 + FR2 + 0.45, y0 + 3.9, 0, 0.05, GLAS2);
-            s2.q(um - 0.95, um + 0.95, y0 + 3.9, y0 + 4.15, 0, 0.22, stein);
+            if (FR2 < 3) s2.q(um2 - 0.75, um2 + 0.75, y0 + FR2 + 0.45, y0 + 3.9, 0, 0.05, GLAS2);
+            s2.q(um2 - 0.95, um2 + 0.95, y0 + 3.9, y0 + 4.15, 0, 0.22, stein);
             continue;
           }
-          s2.q(um - 0.75, um + 0.75, y0 + 1.6, y0 + 3.9, 0, 0.05, GLAS2);
-          s2.q(um - 0.05, um + 0.05, y0 + 1.6, y0 + 3.9, 0.05, 0.1, kreuz3);
-          s2.q(um - 0.75, um + 0.75, y0 + 3.05, y0 + 3.13, 0.05, 0.1, kreuz3);
-          s2.q(um - 0.95, um + 0.95, y0 + 3.9, y0 + 4.15, 0, 0.22, stein);
-          s2.q(um - 0.95, um + 0.95, y0 + 1.45, y0 + 1.6, 0, 0.26, stein);
+          s2.q(um2 - 0.75, um2 + 0.75, y0 + 1.6, y0 + 3.9, 0, 0.05, GLAS2);
+          s2.q(um2 - 0.05, um2 + 0.05, y0 + 1.6, y0 + 3.9, 0.05, 0.1, kreuz3);
+          s2.q(um2 - 0.75, um2 + 0.75, y0 + 3.05, y0 + 3.13, 0.05, 0.1, kreuz3);
+          s2.q(um2 - 0.95, um2 + 0.95, y0 + 3.9, y0 + 4.15, 0, 0.22, stein);
+          s2.q(um2 - 0.95, um2 + 0.95, y0 + 1.45, y0 + 1.6, 0, 0.26, stein);
           if (s2.seite === "+z" && k >= 2 && k < n - 1 && Math.abs(i - mitte) <= 1 && nw >= 5) {
-            s2.q(um - 1.25, um + 1.25, y0 + 1.25, y0 + 1.45, 0, 1.15, stein);
-            s2.q(um - 1.25, um + 1.25, y0 + 1.45, y0 + 2.45, 1, 1.15, hell4);
-            s2.q(um - 1.25, um + 1.25, y0 + 1.8, y0 + 1.95, 1.15, 1.2, ornF);
+            s2.q(um2 - 1.25, um2 + 1.25, y0 + 1.25, y0 + 1.45, 0, 1.15, stein);
+            s2.q(um2 - 1.25, um2 + 1.25, y0 + 1.45, y0 + 2.45, 1, 1.15, hell4);
+            s2.q(um2 - 1.25, um2 + 1.25, y0 + 1.8, y0 + 1.95, 1.15, 1.2, ornF);
           }
         }
       }
@@ -52624,10 +52883,10 @@
       for (const s2 of seitenVon2(S, tx0, tz0, tw, tw)) {
         const nf = 3, fw = tw / nf;
         for (let i = 0; i < nf; i++) {
-          const um = (i + 0.5) * fw;
-          s2.q(um - 0.6, um + 0.6, Hw + 1.4, Hw + h1 - 1.2, 0, 0.05, GLAS2);
-          s2.q(um - 0.05, um + 0.05, Hw + 1.4, Hw + h1 - 1.2, 0.05, 0.1, kreuz3);
-          s2.q(um - 0.8, um + 0.8, Hw + h1 - 1.2, Hw + h1 - 0.95, 0, 0.2, stein);
+          const um2 = (i + 0.5) * fw;
+          s2.q(um2 - 0.6, um2 + 0.6, Hw + 1.4, Hw + h1 - 1.2, 0, 0.05, GLAS2);
+          s2.q(um2 - 0.05, um2 + 0.05, Hw + 1.4, Hw + h1 - 1.2, 0.05, 0.1, kreuz3);
+          s2.q(um2 - 0.8, um2 + 0.8, Hw + h1 - 1.2, Hw + h1 - 0.95, 0, 0.2, stein);
         }
         for (let i = 0; i <= nf; i++) s2.q(i * fw - 0.3, i * fw + 0.3, Hw + 0.3, Hw + h1 - 0.6, 0, 0.3, hell4);
         s2.q(0, tw, Hw + h1 - 0.6, Hw + h1 - 0.2, 0, 0.3, ornF);
@@ -53234,43 +53493,43 @@
     else S.quader(f0, y0, u0, f1, y1, u1, farbe2);
   }
   function volutenForm(u0, u1, y, h) {
-    const s2 = new three_module_exports.Shape(), b2 = u1 - u0, um = (u0 + u1) / 2, q2 = b2 * 0.2;
+    const s2 = new three_module_exports.Shape(), b2 = u1 - u0, um2 = (u0 + u1) / 2, q2 = b2 * 0.2;
     s2.moveTo(u0, y);
     s2.lineTo(u1, y);
-    s2.quadraticCurveTo(u1 - b2 * 0.02, y + h * 0.5, um + q2, y + h * 0.52);
-    s2.lineTo(um + q2, y + h * 0.8);
-    s2.lineTo(um, y + h);
-    s2.lineTo(um - q2, y + h * 0.8);
-    s2.lineTo(um - q2, y + h * 0.52);
+    s2.quadraticCurveTo(u1 - b2 * 0.02, y + h * 0.5, um2 + q2, y + h * 0.52);
+    s2.lineTo(um2 + q2, y + h * 0.8);
+    s2.lineTo(um2, y + h);
+    s2.lineTo(um2 - q2, y + h * 0.8);
+    s2.lineTo(um2 - q2, y + h * 0.52);
     s2.quadraticCurveTo(u0 + b2 * 0.02, y + h * 0.5, u0, y);
     return s2;
   }
   function giebel2(S, seite, u0, u1, y, h, f, farbe2, art = "glatt", o = {}) {
-    const um = (u0 + u1) / 2;
+    const um2 = (u0 + u1) / 2;
     if (art === "treppe") {
       const n = o.stufen ?? 5;
       for (let i = 0; i < n; i++) {
         const b2 = (u1 - u0) * (1 - i / n), y0 = y + i * h / n, y1 = y0 + h / n + 0.7;
-        sbox(S, seite, um - b2 / 2, um + b2 / 2, y0, y1, f - 0.8, f + 0.1, farbe2);
-        sbox(S, seite, um - b2 / 2, um - b2 / 2 + 0.6, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe2);
-        sbox(S, seite, um + b2 / 2 - 0.6, um + b2 / 2, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe2);
+        sbox(S, seite, um2 - b2 / 2, um2 + b2 / 2, y0, y1, f - 0.8, f + 0.1, farbe2);
+        sbox(S, seite, um2 - b2 / 2, um2 - b2 / 2 + 0.6, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe2);
+        sbox(S, seite, um2 + b2 / 2 - 0.6, um2 + b2 / 2, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe2);
       }
     } else if (art === "volute") {
       flaeche(S, seite, volutenForm(u0, u1, y, h), f + 0.1, 0.8, farbe2);
       sbox(S, seite, u0 - 0.2, u1 + 0.2, y - 0.25, y + 0.25, f - 0.6, f + 0.3, o.hell ?? farbe2);
-      sbox(S, seite, um - (u1 - u0) * 0.22, um + (u1 - u0) * 0.22, y + h * 0.5, y + h * 0.56, f - 0.6, f + 0.3, o.hell ?? farbe2);
+      sbox(S, seite, um2 - (u1 - u0) * 0.22, um2 + (u1 - u0) * 0.22, y + h * 0.5, y + h * 0.56, f - 0.6, f + 0.3, o.hell ?? farbe2);
     } else {
       const s2 = new three_module_exports.Shape();
       s2.moveTo(u0, y);
       s2.lineTo(u1, y);
-      s2.lineTo(um, y + h);
+      s2.lineTo(um2, y + h);
       s2.lineTo(u0, y);
       flaeche(S, seite, s2, f + 0.05, 0.6, farbe2);
     }
     if (o.blenden) {
       const n = 5, bb = (u1 - u0) / (n + 1);
       for (let k = 0; k < n; k++) {
-        const uc = u0 + (k + 1) * bb, hk = h * (1 - Math.abs(uc - um) / ((u1 - u0) / 2)) * 0.82;
+        const uc = u0 + (k + 1) * bb, hk = h * (1 - Math.abs(uc - um2) / ((u1 - u0) / 2)) * 0.82;
         if (hk < bb * 0.9 + 0.8) continue;
         platte(S, seite, uc - bb * 0.28, y + 0.6, uc + bb * 0.28, y + 0.4 + hk, f + 0.12, o.blendF ?? "#ece6da", "spitz", 0.08);
       }
@@ -91311,16 +91570,16 @@
     roh: haldeRoh
   });
   function fachwerkGiebel(S, F2, u0, u1, y, h, holz, gefach) {
-    const b2 = u1 - u0, um = (u0 + u1) / 2;
-    fpoly(S, F2, [[u0 + 0.2, y], [u1 - 0.2, y], [um, y + h - 0.3]], 0, 0.06, gefach);
+    const b2 = u1 - u0, um2 = (u0 + u1) / 2;
+    fpoly(S, F2, [[u0 + 0.2, y], [u1 - 0.2, y], [um2, y + h - 0.3]], 0, 0.06, gefach);
     fb(S, F2, u0, u1, y - 0.12, y + 0.12, 0.06, 0.16, holz);
     const n = Math.max(2, Math.round(b2 / 1.5));
     for (let i = 1; i < n; i++) {
-      const u = u0 + b2 * i / n, hh = h * (1 - Math.abs(u - um) / (b2 / 2)) - 0.4;
+      const u = u0 + b2 * i / n, hh = h * (1 - Math.abs(u - um2) / (b2 / 2)) - 0.4;
       if (hh > 0.5) fb(S, F2, u - 0.09, u + 0.09, y, y + hh, 0.06, 0.15, holz);
     }
     const ym = y + h * 0.45, bm = b2 * 0.55;
-    fb(S, F2, um - bm / 2, um + bm / 2, ym - 0.09, ym + 0.09, 0.06, 0.15, holz);
+    fb(S, F2, um2 - bm / 2, um2 + bm / 2, ym - 0.09, ym + 0.09, 0.06, 0.15, holz);
     const g = (a, c) => {
       const dx = c[0] - a[0], dy = c[1] - a[1], L2 = Math.hypot(dx, dy);
       const gg = new three_module_exports.BoxGeometry(L2, 0.16, 0.1);
@@ -91330,9 +91589,9 @@
     };
     g([u0 + b2 * 0.18, y], [u0 + b2 * 0.36, ym]);
     g([u1 - b2 * 0.18, y], [u1 - b2 * 0.36, ym]);
-    g([u0, y], [um, y + h]);
-    g([u1, y], [um, y + h]);
-    fb(S, F2, um - 0.45, um + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS6);
+    g([u0, y], [um2, y + h]);
+    g([u1, y], [um2, y + h]);
+    fb(S, F2, um2 - 0.45, um2 + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS6);
   }
   function siedlFenster(S, F2, u, y, fw, fh, o = {}) {
     fb(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y - 0.12, y + fh + 0.12, 0, 0.05, o.rahmen ?? "#f4f2ec");
@@ -93394,7 +93653,7 @@
   });
   var SANDSTEIN = ["#e3d3b2", "#dccaa6", "#e6d8bc", "#d8c39c", "#e0cfae"];
   function giebelForm(u0, u1, y, G2, art) {
-    const s2 = new three_module_exports.Shape(), b2 = u1 - u0, um = (u0 + u1) / 2;
+    const s2 = new three_module_exports.Shape(), b2 = u1 - u0, um2 = (u0 + u1) / 2;
     s2.moveTo(u0, y);
     if (art === "treppe") {
       const n = 5, sb2 = b2 / 2 / n, sh = G2 / n;
@@ -93405,9 +93664,9 @@
         u += sb2;
         v += sh * 0.85;
       }
-      s2.lineTo(um - sb2 * 0.5, v + sh * 0.6);
-      s2.lineTo(um + sb2 * 0.5, v + sh * 0.6);
-      u = um + sb2 * 0.5 + 0;
+      s2.lineTo(um2 - sb2 * 0.5, v + sh * 0.6);
+      s2.lineTo(um2 + sb2 * 0.5, v + sh * 0.6);
+      u = um2 + sb2 * 0.5 + 0;
       let uu = u1 - (n - 1) * sb2 - sb2, vv = v;
       for (let i = 0; i < n; i++) {
         s2.lineTo(uu + 0, vv);
@@ -93424,8 +93683,8 @@
       s2.lineTo(u0 + b1, y + h1 + (h2 - h1) * 0.5);
       s2.absarc(u0 + b22 - b1 * 0 - (b22 - b1) * 0.5, y + h1 + (h2 - h1) * 0.5, (b22 - b1) * 0.5, PI5, PI5 / 2, true);
       s2.lineTo(u0 + b22, y + h2);
-      s2.lineTo(u0 + b22, y + G2 - (um - u0 - b22));
-      s2.absarc(um, y + G2 - (um - u0 - b22), um - u0 - b22, PI5, 0, true);
+      s2.lineTo(u0 + b22, y + G2 - (um2 - u0 - b22));
+      s2.absarc(um2, y + G2 - (um2 - u0 - b22), um2 - u0 - b22, PI5, 0, true);
       s2.lineTo(u1 - b22, y + h2);
       s2.absarc(u1 - b22 + (b22 - b1) * 0.5, y + h1 + (h2 - h1) * 0.5, (b22 - b1) * 0.5, PI5 / 2, 0, true);
       s2.lineTo(u1 - b1, y + h1 + (h2 - h1) * 0.5);
@@ -93436,17 +93695,17 @@
       s2.lineTo(u0, y + G2 * 0.25);
       s2.quadraticCurveTo(u0 + b2 * 0.08, y + G2 * 0.55, u0 + b2 * 0.26, y + G2 * 0.62);
       s2.lineTo(u0 + b2 * 0.26, y + G2 * 0.72);
-      s2.quadraticCurveTo(u0 + b2 * 0.3, y + G2 * 0.95, um, y + G2);
+      s2.quadraticCurveTo(u0 + b2 * 0.3, y + G2 * 0.95, um2, y + G2);
       s2.quadraticCurveTo(u1 - b2 * 0.3, y + G2 * 0.95, u1 - b2 * 0.26, y + G2 * 0.72);
       s2.lineTo(u1 - b2 * 0.26, y + G2 * 0.62);
       s2.quadraticCurveTo(u1 - b2 * 0.08, y + G2 * 0.55, u1, y + G2 * 0.25);
       s2.lineTo(u1, y);
     } else {
       s2.lineTo(u0, y + G2 * 0.1);
-      s2.lineTo(um - b2 * 0.12, y + G2 * 0.92);
-      s2.lineTo(um - b2 * 0.12, y + G2);
-      s2.lineTo(um + b2 * 0.12, y + G2);
-      s2.lineTo(um + b2 * 0.12, y + G2 * 0.92);
+      s2.lineTo(um2 - b2 * 0.12, y + G2 * 0.92);
+      s2.lineTo(um2 - b2 * 0.12, y + G2);
+      s2.lineTo(um2 + b2 * 0.12, y + G2);
+      s2.lineTo(um2 + b2 * 0.12, y + G2 * 0.92);
       s2.lineTo(u1, y + G2 * 0.1);
       s2.lineTo(u1, y);
     }
@@ -94084,6 +94343,41 @@
     "slot:west_pfalzdom": westPfalzdom,
     "slot:ruhr_brauturm": ruhrBrauturm
   };
+
+  // src/kit/moebel/generationen.js
+  var MATERIAL = {
+    "#737e85": ["#77573a", "#7b8791"],
+    "#444c55": ["#6c4c32", "#737a81"],
+    "#e8ebea": ["#a78158", "#b8bec5"],
+    "#dce1e1": ["#d5ba91", "#c5cbd0"],
+    "#3b434b": ["#705036", "#858e96"],
+    "#f4f1ed": ["#ead5b1", "#d5d9db"],
+    "#343b42": ["#765638", "#717d88"],
+    "#9ba5ad": ["#bd9b6e", "#aeb7c0"],
+    "#aab3b9": ["#b8996b", "#b6c1c8"],
+    "#5d666f": ["#846344", "#85949c"],
+    "#f2f1ee": ["#e7d2b2", "#e0e1e0"],
+    "#e8e6e1": ["#ddc7a4", "#d6d8d9"]
+  };
+  function farbeGeneration(farbe2, generation = 3) {
+    const nummer = Math.max(1, Math.min(3, Math.round(generation)));
+    return nummer === 3 ? farbe2 : MATERIAL[String(farbe2).toLowerCase()]?.[nummer - 1] ?? farbe2;
+  }
+  function baueMoebelGeneration(def, L2, r, d, ctx = {}, generation = 3) {
+    if (generation === 3) return def.bau(L2, r, d, ctx);
+    const zeichnet = new Proxy(L2, {
+      get(z2, k) {
+        const methode = Reflect.get(z2, k);
+        if (typeof methode !== "function" || !["box", "zyl", "geo"].includes(k)) return methode;
+        return (...werte) => {
+          const stelle2 = k === "geo" ? 4 : 6;
+          if (typeof werte[stelle2] === "string") werte[stelle2] = farbeGeneration(werte[stelle2], generation);
+          return methode.apply(z2, werte);
+        };
+      }
+    });
+    return def.bau(zeichnet, r, d, ctx);
+  }
 
   // src/kit/moebel/basis.js
   var PALETTEN2 = Object.freeze({
@@ -95531,11 +95825,13 @@
       const winkel = m.winkel * Math.PI / 180;
       const ox = m.winkel === 90 ? m.x : m.winkel === 270 ? m.x + m.w : m.x + w / 2;
       const oz = m.winkel === 90 ? m.z + m.d / 2 : m.winkel === 180 ? m.z + m.d : m.z;
-      def.bau(
+      baueMoebelGeneration(
+        def,
         lokal2(S, ox, y, oz, winkel),
         rng2(String(plan2.seed) + ":" + j + ":" + m.id),
         dichte,
-        { seed: String(plan2.seed) + ":" + j, bestueckung: o.bestueckung ?? 1, profil: p2.id }
+        { seed: String(plan2.seed) + ":" + j, bestueckung: o.bestueckung ?? 1, profil: p2.id },
+        o.moebelGeneration ?? 3
       );
     }
     return { teile: S.anzahl - n0, moebel: plan2.moebel.length, abteilungen: plan2.abteilungen.length };
@@ -95802,13 +96098,13 @@
     });
     return zz;
   }
-  function sportEtage(S, scene2, haus2, etageNr, o = {}) {
+  function sportEtage(S, scene2, haus2, etageNr2, o = {}) {
     vorbereiten(S, scene2);
-    const ra = sportRaster(haus2, etageNr, o);
-    const zn = sportZonen(haus2, etageNr, ra);
+    const ra = sportRaster(haus2, etageNr2, o);
+    const zn = sportZonen(haus2, etageNr2, ra);
     const plan2 = o.altbestand ? null : (() => {
-      const eingabe = sportLadenEingabe(haus2, etageNr, o, ra);
-      const p2 = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr);
+      const eingabe = sportLadenEingabe(haus2, etageNr2, o, ra);
+      const p2 = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr2);
       p2.variante = ra.box ? "halle" : "flaeche";
       for (const b2 of p2.boeden) if (b2.typ === "gang") b2.farbe = STIL[ra.fam].gang.a;
       if (ra.abverkauf) {
@@ -95838,7 +96134,7 @@
     const k = haus2.kpi ?? {};
     const zellenImBild = zn.reduce((s2, z2) => s2 + z2.zellen.filter((c) => drin(c.i, c.j)).length, 0);
     const jeZelle = Math.max(0.4, Math.min(1.6, (k.umsatz ?? 6e4) / 700 / Math.max(1, zn.reduce((s2, z2) => s2 + z2.zellen.length, 0))));
-    let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 3) * (etageNr === 0 ? 0.75 : 0.65));
+    let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 3) * (etageNr2 === 0 ? 0.75 : 0.65));
     let d = o.dichte ?? 1;
     let tmp2, gruppe2, versuch = 0, kk;
     for (; ; ) {
@@ -95847,7 +96143,7 @@
       tmp2.szene = gruppe2;
       vorbereiten(tmp2, gruppe2);
       kk = { ax0, az0, ax1, az1, drin, d, kunden, o };
-      bauen(tmp2, gruppe2, haus2, etageNr, ra, zn, kk, plan2);
+      bauen(tmp2, gruppe2, haus2, etageNr2, ra, zn, kk, plan2);
       if (tmp2.anzahl <= budget || versuch > 8) break;
       versuch++;
       const f = Math.max(0.5, Math.min(0.92, budget * 0.97 / tmp2.anzahl));
@@ -95863,7 +96159,7 @@
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe2.children.length) scene2.add(gruppe2.children[0]);
-    const eg = etageNr === 0;
+    const eg = etageNr2 === 0;
     const aussen = eg ? ra.mall ? 9.5 : ra.box ? 19 : 7 : ra.mall ? 9.5 : 0.4;
     const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new three_module_exports.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH2 + (ra.hochpunkt ?? 0), az1 + aussen));
     return { box, breite: B2, tiefe: T, zonen: plan2?.abteilungen ?? zn, anzahl: tmp2.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan2 };
@@ -95919,6 +96215,7 @@
       baueLadenplan(S, scene2, plan2, {
         vorbereiten: false,
         dichte: d,
+        moebelGeneration: haus2.etagenBau?.[etageNr]?.moebelGeneration ?? 3,
         ausschnitt: { x0: ax0, z0: az0, x1: ax1, z1: az1 },
         bodenAussparungen: loecher.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 }))
       });
@@ -96069,8 +96366,8 @@
     for (let i = 2; i < nx; i += 2) for (let j = 2; j < nz; j += 2) {
       const x = i * R3, z2 = j * R3;
       if (x < ax0 + 1 || x > ax1 - 1 || z2 < az0 + 1 || z2 > az1 - 1) continue;
-      const um = [typ[i - 1]?.[j - 1], typ[i]?.[j - 1], typ[i - 1]?.[j], typ[i]?.[j]];
-      if (um.some((t) => ohne2.has(t))) continue;
+      const um2 = [typ[i - 1]?.[j - 1], typ[i]?.[j - 1], typ[i - 1]?.[j], typ[i]?.[j]];
+      if (um2.some((t) => ohne2.has(t))) continue;
       if (belegt2.some((b2) => x > b2[0] - 0.45 && x < b2[2] + 0.45 && z2 > b2[1] - 0.45 && z2 < b2[3] + 0.45)) continue;
       stuetze(S, x, z2, 0, WH2, stil.stuetze);
     }
@@ -97263,7 +97560,7 @@
     const T = Math.max(15, Math.round(gf / B2 / 5) * 5);
     return { B: B2, T, nx: B2 / R4, nz: T / R4 };
   }
-  function raster(haus2, etageNr) {
+  function raster(haus2, etageNr2) {
     const { B: B2, T, nx, nz } = masse2(haus2);
     const typ = Array.from({ length: nx }, () => Array(nz).fill(null));
     const setz = (i, j, t) => {
@@ -97301,7 +97598,7 @@
     }
     return { B: B2, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring, schwester: haus2.kette === "schwester" };
   }
-  function unterteilen(fl, etageNr) {
+  function unterteilen(fl, etageNr2) {
     const out = [];
     for (const f of fl) {
       const art = abteilungsArt(f);
@@ -97313,15 +97610,15 @@
       else if (!fremd && art === "wohnen" && f.qm >= 600) teil6([["wohnen", 0.5], ["haushalt", 0.5]]);
       else out.push({ ...f, art });
     }
-    if (etageNr === 0) {
+    if (etageNr2 === 0) {
       const prio = { beauty: 0, schmuck: 1, lederwaren: 2, strumpf: 3, accessoires: 4 };
       out.sort((a, b2) => (prio[a.art] ?? 9) - (prio[b2.art] ?? 9));
     }
     return out;
   }
-  function zonen(haus2, etageNr, ra) {
+  function zonen(haus2, etageNr2, ra) {
     const { nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring } = ra;
-    let fl = unterteilen(haus2.flaechen.filter((f) => f.etage === etageNr && f.qm >= 10), etageNr);
+    let fl = unterteilen(haus2.flaechen.filter((f) => f.etage === etageNr2 && f.qm >= 10), etageNr2);
     const blocks = ring ? [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 3, nx, 0, gz2, -1], [kx - 1, kx + 3, 0, kz2 - 1, -1], [0, kx - 1, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]] : [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 2, nx, 0, gz2, -1], [kx, kx + 2, 0, kz2, -1], [0, kx, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]];
     const vergeben = Array.from({ length: nx }, () => Array(nz).fill(false));
     let spuren = [];
@@ -97404,12 +97701,12 @@
     S.box(3, 2.4, 0.24, B2 - 4.5, 1.2, T - 0.35, FARBE_SCHWESTER);
     return { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.6, -0.6), new three_module_exports.Vector3(B2 + 0.6, 4, T + 0.6)), breite: B2, tiefe: T, zonen: [], anzahl: S.anzahl, dichte: 0, kunden: 0, regale };
   }
-  function etage(S, scene2, haus2, etageNr, o = {}) {
-    if (haus2.kette === "schwester" && etageNr < 0) return lagerSchwester(S, scene2, haus2);
-    if (haus2.format === "sport") return sportEtage(S, scene2, haus2, etageNr, o);
+  function etage(S, scene2, haus2, etageNr2, o = {}) {
+    if (haus2.kette === "schwester" && etageNr2 < 0) return lagerSchwester(S, scene2, haus2);
+    if (haus2.format === "sport") return sportEtage(S, scene2, haus2, etageNr2, o);
     vorbereiten(S, scene2);
-    const ra = raster(haus2, etageNr);
-    const zn = zonen(haus2, etageNr, ra);
+    const ra = raster(haus2, etageNr2);
+    const zn = zonen(haus2, etageNr2, ra);
     const { B: B2, T, nx, nz } = ra;
     let ax0 = 0, az0 = 0, ax1 = B2, az1 = T;
     if (o.ausschnitt) {
@@ -97432,7 +97729,7 @@
     const jeZelle = Math.max(0.35, Math.min(1.9, umsatz / 850 / verkaufsZellen));
     const anteil3 = (ax1 - ax0) * (az1 - az0) / (B2 * T);
     const zellenImBild = zn.reduce((s2, z2) => s2 + z2.zellen.filter((c) => drin(c.i, c.j)).length, 0);
-    let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil3) * (etageNr === 0 ? 1.15 : 1) * (haus2.kette === "schwester" ? 0.6 : 1));
+    let kunden = o.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil3) * (etageNr2 === 0 ? 1.15 : 1) * (haus2.kette === "schwester" ? 0.6 : 1));
     let d = o.dichte ?? 1;
     let tmp2, gruppe2, versuch = 0;
     for (; ; ) {
@@ -97441,8 +97738,8 @@
       tmp2.szene = gruppe2;
       vorbereiten(tmp2, gruppe2);
       var kk = { ax0, az0, ax1, az1, drin, d, kunden, o };
-      bauen2(tmp2, gruppe2, haus2, etageNr, ra, zn, kk);
-      if (premium2) premiumInnen(tmp2, gruppe2, haus2, etageNr, { ax0, az0, ax1, az1, d });
+      bauen2(tmp2, gruppe2, haus2, etageNr2, ra, zn, kk);
+      if (premium2) premiumInnen(tmp2, gruppe2, haus2, etageNr2, { ax0, az0, ax1, az1, d });
       if (tmp2.anzahl <= budget || versuch > 8) break;
       versuch++;
       const f = Math.max(0.5, Math.min(0.92, budget * 0.97 / tmp2.anzahl));
@@ -97452,31 +97749,33 @@
         if (m.geometry) m.geometry.dispose();
       });
     }
+    const moebelGeneration = haus2.etagenBau?.[etageNr2]?.moebelGeneration ?? 3;
     for (const [k, gs] of tmp2.teile) {
-      const farbe2 = haus2.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k) ? FARBE_SCHWESTER : k;
+      const farbeAlt = haus2.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k) ? FARBE_SCHWESTER : k;
+      const farbe2 = farbeGeneration(farbeAlt, moebelGeneration);
       if (!S.teile.has(farbe2)) S.teile.set(farbe2, []);
       S.teile.get(farbe2).push(...gs);
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe2.children.length) scene2.add(gruppe2.children[0]);
-    const eg = etageNr === 0;
+    const eg = etageNr2 === 0;
     const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - 0.6, eg ? -0.3 : -2.2, az0 - 0.6), new three_module_exports.Vector3(ax1 + (eg ? 7 : 0.4), WANDHOEHE, az1 + (eg ? 7 : 0.4)));
     return { box, breite: B2, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d, kunden, leer: kk.leer };
   }
-  function bauen2(S, scene2, haus2, etageNr, ra, zn, k) {
+  function bauen2(S, scene2, haus2, etageNr2, ra, zn, k) {
     const { B: B2, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring } = ra;
     const { ax0, az0, ax1, az1, drin, d } = k;
     const hid = (haus2.id ?? "H").split("").reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
-    const r = rng2(hid + etageNr * 101);
-    const eg = etageNr === 0;
+    const r = rng2(hid + etageNr2 * 101);
+    const eg = etageNr2 === 0;
     const sport = haus2.format === "sport";
     const fassade3 = FASSADE[(haus2.fassade ?? 0) % FASSADE.length];
-    const hatOben = haus2.etagen.includes(etageNr + 1), hatUnten = haus2.etagen.includes(etageNr - 1);
+    const hatOben = haus2.etagen.includes(etageNr2 + 1), hatUnten = haus2.etagen.includes(etageNr2 - 1);
     const zoneVon = Array.from({ length: nx }, () => Array(nz).fill(-1));
     zn.forEach((z2, zi) => z2.zellen.forEach((c) => zoneVon[c.i][c.j] = zi));
     const sicht3 = (x, z2) => x >= ax0 - 0.01 && x <= ax1 + 0.01 && z2 >= az0 - 0.01 && z2 <= az1 + 0.01;
     const freiGang = [], freiZone = [], belegt2 = [];
-    ra.ug = etageNr < 0;
+    ra.ug = etageNr2 < 0;
     ra.belegt = belegt2;
     ra.ausschnitt = [ax0, az0, ax1, az1];
     ra.artAn = (i, j) => {
@@ -97499,7 +97798,7 @@
       S.box(0.3, 1.7, az1 - az0 + 0.3, ax1 + 0.15, -1.35, (az0 + az1) / 2, dunkler(fassade3, 0.04));
       S.box(ax1 - ax0 + 0.6, 0.25, 0.5, (ax0 + ax1) / 2, -0.4, az1 + 0.2, heller(fassade3, 0.04));
       S.box(0.5, 0.25, az1 - az0 + 0.6, ax1 + 0.2, -0.4, (az0 + az1) / 2, heller(fassade3, 0.03));
-      if (etageNr > 0) {
+      if (etageNr2 > 0) {
         for (let x = ax0 + 1.25; x < ax1; x += 2.5) S.box(1.4, 1, 0.1, x, -1.2, az1 + 0.31, "#55636f");
         for (let z2 = az0 + 1.25; z2 < az1; z2 += 2.5) S.box(0.1, 1, 1.4, ax1 + 0.31, -1.2, z2, "#55636f");
       }
@@ -97518,14 +97817,14 @@
       if (!z2.zellen.some((c) => drin(c.i, c.j))) return;
       const f = z2.flaeche, art = z2.art;
       const Z2 = { alle: z2.zellen.filter((c) => drin(c.i, c.j)), kante, sicht: sicht3, y: 0, bereich: [ax0, az0, ax1, az1] };
-      const opt = { seed: hid % 1e3 + zi * 37 + etageNr * 11 + 1, dichte: ra.schwester ? Math.min(d, 0.48) : d, eg, basis: f.gruppe, mieter: f.mieter, marke: ra.schwester ? void 0 : f.marke, name: f.name, ...ra.schwester ? { teil: true, schildEinmal: true } : {} };
-      const res = art === "konzession" || art === "untermiete" ? fremdflaeche(S, scene2, art, Z2, { ...opt, mieter: f.mieter ?? ["discounter", "gastro", "fitness", "arzt"][(zi + etageNr) % 4], marke: MARKEN2.find((m) => m.gruppe === f.gruppe) ?? MARKEN2[((hid >> 3) + zi) % MARKEN2.length], seed: (hid >> 3) + zi }) : flaeche2(S, scene2, art, Z2, opt);
+      const opt = { seed: hid % 1e3 + zi * 37 + etageNr2 * 11 + 1, dichte: ra.schwester ? Math.min(d, 0.48) : d, eg, basis: f.gruppe, mieter: f.mieter, marke: ra.schwester ? void 0 : f.marke, name: f.name, ...ra.schwester ? { teil: true, schildEinmal: true } : {} };
+      const res = art === "konzession" || art === "untermiete" ? fremdflaeche(S, scene2, art, Z2, { ...opt, mieter: f.mieter ?? ["discounter", "gastro", "fitness", "arzt"][(zi + etageNr2) % 4], marke: MARKEN2.find((m) => m.gruppe === f.gruppe) ?? MARKEN2[((hid >> 3) + zi) % MARKEN2.length], seed: (hid >> 3) + zi }) : flaeche2(S, scene2, art, Z2, opt);
       if (!["leer", "umbau"].includes(art)) freiZone.push(...res.frei);
       belegt2.push(...res.belegt);
     });
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       if (!drin(i, j)) continue;
-      const t = typ[i][j], x = i * R4, z2 = j * R4, seed = (i * 131 + j * 17 + etageNr * 7 + 1) * 3;
+      const t = typ[i][j], x = i * R4, z2 = j * R4, seed = (i * 131 + j * 17 + etageNr2 * 7 + 1) * 3;
       if (t === "neben") {
         nebengangZelle(S, scene2, i, j, ra, d, freiGang, rng2(seed), drin);
         continue;
@@ -97603,8 +97902,8 @@
     for (let i = 2; i < nx; i += 2) for (let j = 2; j < nz; j += 2) {
       const x = i * R4, z2 = j * R4;
       if (x < ax0 + 1 || x > ax1 - 1 || z2 < az0 + 1 || z2 > az1 - 1) continue;
-      const um = [typ[i - 1]?.[j - 1], typ[i]?.[j - 1], typ[i - 1]?.[j], typ[i]?.[j]];
-      if (um.some((t) => t === "kern" || t === "lager" || (t || "").startsWith("treppe") || t === "aufzug" || t === "wc")) continue;
+      const um2 = [typ[i - 1]?.[j - 1], typ[i]?.[j - 1], typ[i - 1]?.[j], typ[i]?.[j]];
+      if (um2.some((t) => t === "kern" || t === "lager" || (t || "").startsWith("treppe") || t === "aufzug" || t === "wc")) continue;
       if (belegt2.some((b2) => x > b2[0] - 0.45 && x < b2[2] + 0.45 && z2 > b2[1] - 0.45 && z2 < b2[3] + 0.45)) continue;
       stuetze(S, x, z2, 0, WANDHOEHE, "#e9e3d8");
     }
@@ -97661,7 +97960,7 @@
     for (let q2 = 0; q2 < n; q2++) {
       const idx = Math.floor(r() * pool.length);
       const [fx, fz] = pool.splice(idx, 1)[0];
-      figur2(S, fx + zw(r, -0.2, 0.2), fz + zw(r, -0.2, 0.2), q2 * 7 + etageNr * 1e3 + 3, r() < 0.1 ? "kind" : "kunde", { ry: Math.atan2(kx * R4 + 5 - fx, kz2 * R4 + 5 - fz) + zw(r, -1.2, 1.2) });
+      figur2(S, fx + zw(r, -0.2, 0.2), fz + zw(r, -0.2, 0.2), q2 * 7 + etageNr2 * 1e3 + 3, r() < 0.1 ? "kind" : "kunde", { ry: Math.atan2(kx * R4 + 5 - fx, kz2 * R4 + 5 - fz) + zw(r, -1.2, 1.2) });
     }
   }
   function aktionswand(S, scene2, L2, art, r, d) {
@@ -100397,7 +100696,7 @@
     ausgeben();
     for (const l of H) {
       if (!l.bogen) continue;
-      const b2 = l.u1 - l.u0, um = (l.u0 + l.u1) / 2;
+      const b2 = l.u1 - l.u0, um2 = (l.u0 + l.u1) / 2;
       const L2 = new three_module_exports.Shape(), Rr = new three_module_exports.Shape();
       if (l.bogen === "spitz") {
         const vs2 = l.v1 - b2 * 0.866;
@@ -100407,18 +100706,18 @@
         L2.lineTo(l.u0, vs2);
         Rr.moveTo(l.u1, vs2);
         Rr.lineTo(l.u1, l.v1);
-        Rr.lineTo(um, l.v1);
+        Rr.lineTo(um2, l.v1);
         Rr.absarc(l.u0, vs2, b2, PI8 / 3, 0, true);
       } else {
         const vs2 = l.v1 - b2 / 2;
         L2.moveTo(l.u0, vs2);
-        L2.absarc(um, vs2, b2 / 2, PI8, PI8 / 2, true);
+        L2.absarc(um2, vs2, b2 / 2, PI8, PI8 / 2, true);
         L2.lineTo(l.u0, l.v1);
         L2.lineTo(l.u0, vs2);
         Rr.moveTo(l.u1, vs2);
         Rr.lineTo(l.u1, l.v1);
-        Rr.lineTo(um, l.v1);
-        Rr.absarc(um, vs2, b2 / 2, PI8 / 2, 0, true);
+        Rr.lineTo(um2, l.v1);
+        Rr.absarc(um2, vs2, b2 / 2, PI8 / 2, 0, true);
       }
       fform2(S, F2, L2, t0, t1, c);
       fform2(S, F2, Rr, t0, t1, c);
@@ -104218,7 +104517,7 @@
         ringe.push([rahmen2, tief2, ring]);
         const sp = l.sprosse ?? o.sprosse ?? true;
         if (sp && !l.kreis) {
-          const b2 = l.u1 - l.u0, um = (l.u0 + l.u1) / 2, vk = kaempfer(l);
+          const b2 = l.u1 - l.u0, um2 = (l.u0 + l.u1) / 2, vk = kaempfer(l);
           const nv = l.typ === "laden" ? Math.max(1, Math.round(b2 / 1.4) - 1) : b2 > 1.7 ? 2 : 1;
           for (let i = 1; i <= nv; i++) {
             const u = l.u0 + b2 * i / (nv + 1);
@@ -104960,16 +105259,16 @@
     platten(S, F2, [[-0.05, o.eg - 0.3, L2 + 0.05, o.eg + 0.05]], 0, 0.36, o.gold);
     platten(S, F2, [[0, 0, L2, 0.65]], 0, 0.06, GRANIT_D);
     if (pi >= 0) {
-      const u0 = pi * ra + 1.2, u1 = (pi + 1) * ra - 1.2, um = (u0 + u1) / 2, b2 = u1 - u0;
+      const u0 = pi * ra + 1.2, u1 = (pi + 1) * ra - 1.2, um2 = (u0 + u1) / 2, b2 = u1 - u0;
       for (let s2 = 1; s2 <= 3; s2++) {
-        const e = s2 * 0.32, ring = umrissForm([[u0 - e, 0.3], [u1 + e, 0.3], [u1 + e, o.eg - 0.2 - b2 * 0.866 + e * 0.6], [um, o.eg - 0.2 + e * 1.1], [u0 - e, o.eg - 0.2 - b2 * 0.866 + e * 0.6]]);
+        const e = s2 * 0.32, ring = umrissForm([[u0 - e, 0.3], [u1 + e, 0.3], [u1 + e, o.eg - 0.2 - b2 * 0.866 + e * 0.6], [um2, o.eg - 0.2 + e * 1.1], [u0 - e, o.eg - 0.2 - b2 * 0.866 + e * 0.6]]);
         ring.holes.push((() => {
           const q2 = new three_module_exports.Path();
           const e2 = e - 0.32;
           q2.moveTo(u0 - e2, 0.3);
           q2.lineTo(u1 + e2, 0.3);
           q2.lineTo(u1 + e2, o.eg - 0.2 - b2 * 0.866 + e2 * 0.6);
-          q2.lineTo(um, o.eg - 0.2 + e2 * 1.1);
+          q2.lineTo(um2, o.eg - 0.2 + e2 * 1.1);
           q2.lineTo(u0 - e2, o.eg - 0.2 - b2 * 0.866 + e2 * 0.6);
           q2.lineTo(u0 - e2, 0.3);
           return q2;
@@ -104979,7 +105278,7 @@
       const zz = [];
       for (let u = u0 - 1.4; u < u1 + 1.3; u += 0.5) zz.push([[u, o.eg + 0.08], [u + 0.5, o.eg + 0.08], [u + 0.25, o.eg + 0.5]]);
       platten(S, F2, zz, 0, 0.3, o.gold);
-      fb3(S, F2, um - 0.05, um + 0.05, 0.3, o.eg - 1.6, -0.3, -0.18, "#c9a24a");
+      fb3(S, F2, um2 - 0.05, um2 + 0.05, 0.3, o.eg - 1.6, -0.3, -0.18, "#c9a24a");
       fb3(S, F2, u0 - 1.3, u1 + 1.3, 0.3, 0.45, 0, 0.5, GRANIT);
     }
     for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o.salz) % 2 === 0) ftext3(scene2, F2, KONTOR_LAEDEN[hash4(i, o.salz, 3) % KONTOR_LAEDEN.length], (i + 0.5) * ra, o.eg - 0.72, 0.05, 0.36, ra - 1.4, "#f4ead2");
@@ -105099,11 +105398,11 @@
   function speicherRoh(S, scene2, p2) {
     const r = rng2(`nsp:${p2.seed}`);
     const v = ["speicherstadt", "giebel", "schlicht"].includes(p2.variante) ? p2.variante : waehle2(r, ["speicherstadt", "giebel", "schlicht"]);
-    const um = p2.zustand === "umgenutzt";
+    const um2 = p2.zustand === "umgenutzt";
     const W3 = p2.w, D = p2.d, Wc = Math.min(14, Math.max(8, D * 0.3)), zF = D - Wc, T = Math.min(zF, 22), zB = zF - T;
     const stein = v === "giebel" ? waehle2(r, NF.backstein) : waehle2(r, [...NF.backstein, ...NF.dunkel]);
-    const kupf = waehle2(r, NF.kupfer), holz = um ? "#3f4a52" : waehle2(r, ["#2f5243", "#3d4f45", "#5a3a2c"]);
-    const glas2 = um ? GLAS_HELL5 : GLAS8, rahm = um ? "#3a3f44" : "#ece6da";
+    const kupf = waehle2(r, NF.kupfer), holz = um2 ? "#3f4a52" : waehle2(r, ["#2f5243", "#3d4f45", "#5a3a2c"]);
+    const glas2 = um2 ? GLAS_HELL5 : GLAS8, rahm = um2 ? "#3a3f44" : "#ece6da";
     becken(S, 0, zF, W3, D - 1.8, W3, D, 0, r);
     S.quader(0, YW - 0.6, D - 1.8, W3, 0.3, D, GRANIT);
     boden4(S, 0, D - 1.8, W3, D, "#c9c3b6", 0.3, 0.05);
@@ -105121,8 +105420,8 @@
     const fensterArt = v === "schlicht" ? "segment" : "rund";
     const fassade3 = (F2, L2, lad, giebel3 = []) => {
       const oe = [];
-      for (let k = 0; k < n; k++) for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, sock + k * gh + 0.8, um ? 1.3 : 1.05, 1.6, fensterArt));
-      if (lad) for (const u of luken) for (let k = 0; k < n; k++) oe.push({ u0: u - 0.75, u1: u + 0.75, v0: sock + k * gh + 0.3, v1: sock + k * gh + 2.5, typ: um ? "fenster" : "tuer", fuell: um ? GLAS_HELL5 : holz, art: "segment", sprosse: false });
+      for (let k = 0; k < n; k++) for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, sock + k * gh + 0.8, um2 ? 1.3 : 1.05, 1.6, fensterArt));
+      if (lad) for (const u of luken) for (let k = 0; k < n; k++) oe.push({ u0: u - 0.75, u1: u + 0.75, v0: sock + k * gh + 0.3, v1: sock + k * gh + 2.5, typ: um2 ? "fenster" : "tuer", fuell: um2 ? GLAS_HELL5 : holz, art: "segment", sprosse: false });
       for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, 1, 0.9, 0.9, null));
       if (lad) for (const u of luken) oe.push({ u0: u - 0.9, u1: u + 0.9, v0: 0.36, v1: sock - 0.2, typ: "tuer", fuell: holz });
       for (const g of giebel3) if (g.typ !== "dreieck") oe.push(...giebelNischen(g.u0, g.u1 - g.u0, H, g.G, g.m, "spitz", dunkler(stein, 0.12), true));
@@ -105221,7 +105520,7 @@
       fb3(S, FR2, 0, W3, 0.3, 1.4, 0, 1.6, GRANIT);
       fb3(S, FR2, 0, W3, 4.6, 4.8, 0, 2.2, "#5a6168");
     }
-    if (um) {
+    if (um2) {
       if (vis.f) for (const u of luken) for (let k = 1; k < n; k++) {
         fb3(S, FF, u - 1, u + 1, sock + k * gh + 0.15, sock + k * gh + 0.3, 0, 1.1, "#3a3f44");
         fb3(S, FF, u - 1, u + 1, sock + k * gh + 0.3, sock + k * gh + 1.3, 1.02, 1.1, "#a9c3cf");
@@ -107089,9 +107388,9 @@
   function parzKirche(ctx, E, b2) {
     b2.nordArt = E.nordArt ? E.nordArt(b2.i0, b2.j0) : "giebel";
     const seiten4 = b2.seiten ?? ["-z", "-x"];
-    const um = { "-z": "+z", "-x": "+x", "+z": "-z", "+x": "-x" };
+    const um2 = { "-z": "+z", "-x": "+x", "+z": "-z", "+x": "-x" };
     const frontUm = {};
-    for (const s2 of seiten4) frontUm[s2] = um[s2];
+    for (const s2 of seiten4) frontUm[s2] = um2[s2];
     const t = PLAN_HILFE.parzelliere(ctx, seiten4, [], frontUm);
     b2.platz = { x: b2.x + t["-x"], z: b2.z + t["-z"], w: b2.w - t["-x"] - t["+x"], d: b2.d - t["-z"] - t["+z"] };
     const P2 = b2.platz;
@@ -111973,11 +112272,11 @@
   }
   function dachGiebel(S, F2, u0, u1, t0, t1, y, h, c, wand2, o = {}) {
     const ue = o.ue ?? 0.5, dk = o.dick ?? 0.34, uf = o.uf ?? 0.6, ub = o.ub ?? 0.5;
-    const um = (u0 + u1) / 2, B2 = u1 - u0, s2 = 2 * h / B2, yE = y - ue * s2;
-    fdiag(S, F2, u0 - ue, yE, um + 0.05, y + h + 0.05 * s2, dk, t0 - ub, t1 + uf, c);
-    fdiag(S, F2, um - 0.05, y + h + 0.05 * s2, u1 + ue, yE, dk, t0 - ub, t1 + uf, c);
-    fb5(S, F2, um - 0.22, um + 0.22, y + h + 0.02, y + h + 0.26, t0 - ub, t1 + uf, dunkler(c, 0.07));
-    if (wand2) fpoly4(S, F2, [[u0 + 0.02, y - 0.02], [u1 - 0.02, y - 0.02], [um, y + h - 0.25]], t0, t1, wand2);
+    const um2 = (u0 + u1) / 2, B2 = u1 - u0, s2 = 2 * h / B2, yE = y - ue * s2;
+    fdiag(S, F2, u0 - ue, yE, um2 + 0.05, y + h + 0.05 * s2, dk, t0 - ub, t1 + uf, c);
+    fdiag(S, F2, um2 - 0.05, y + h + 0.05 * s2, u1 + ue, yE, dk, t0 - ub, t1 + uf, c);
+    fb5(S, F2, um2 - 0.22, um2 + 0.22, y + h + 0.02, y + h + 0.26, t0 - ub, t1 + uf, dunkler(c, 0.07));
+    if (wand2) fpoly4(S, F2, [[u0 + 0.02, y - 0.02], [u1 - 0.02, y - 0.02], [um2, y + h - 0.25]], t0, t1, wand2);
   }
   function gaube2(S, F2, u, H, s2, bw, c, dachF, glas2, a = 1.3) {
     const yb = H + s2 * a;
@@ -112236,8 +112535,8 @@
     }
   }
   function giebelUmriss2(u0, u1, y, hg, art) {
-    const B2 = u1 - u0, um = (u0 + u1) / 2, P2 = [];
-    if (art === "spitz") return [[u0, y], [u1, y], [um, y + hg]];
+    const B2 = u1 - u0, um2 = (u0 + u1) / 2, P2 = [];
+    if (art === "spitz") return [[u0, y], [u1, y], [um2, y + hg]];
     if (art === "flach") return [[u0, y], [u1, y], [u1, y + hg], [u0, y + hg]];
     if (art === "treppe") {
       const n = 4, sw = B2 / (2 * n + 1), sh = hg / n;
@@ -112263,12 +112562,12 @@
     }
     if (art === "aufsatz") {
       const a = B2 * 0.22, h0 = hg * 0.6;
-      P2.push([u0, y], [u0, y + h0], [um - a - 0.6, y + h0]);
+      P2.push([u0, y], [u0, y + h0], [um2 - a - 0.6, y + h0]);
       for (let i = 0; i <= 8; i++) {
         const ang = PI11 - i / 8 * PI11;
-        P2.push([um + Math.cos(ang) * a, y + h0 + 0.3 + Math.sin(ang) * (hg - h0 - 0.3)]);
+        P2.push([um2 + Math.cos(ang) * a, y + h0 + 0.3 + Math.sin(ang) * (hg - h0 - 0.3)]);
       }
-      P2.push([um + a + 0.6, y + h0], [u1, y + h0], [u1, y]);
+      P2.push([um2 + a + 0.6, y + h0], [u1, y + h0], [u1, y]);
       return P2;
     }
     const L2 = [];
@@ -113067,11 +113366,11 @@
           zyl9(S, 0.32, 0.36, 5, qx, 0.3, qz, c.lisene, 10);
         }
         fb5(S, Fl.v, B2 / 2 - 2.3, B2 / 2 + 2.3, 5.2, 5.45, 0, 0.7, c.orn);
-        const um = giebelUmriss2(tb - 1.2, B2 - tb + 1.2, Hn, hg, "geschweift");
-        for (const i of [3, um.length - 4]) {
-          const [qx, qz] = wp5(Fl.v, um[i][0], 0);
-          S.box(0.5, 0.9, 0.5, qx, um[i][1] + 0.45, qz, c.orn);
-          S.add(new three_module_exports.SphereGeometry(0.3, 6, 5).translate(qx, um[i][1] + 1.1, qz), GOLD);
+        const um2 = giebelUmriss2(tb - 1.2, B2 - tb + 1.2, Hn, hg, "geschweift");
+        for (const i of [3, um2.length - 4]) {
+          const [qx, qz] = wp5(Fl.v, um2[i][0], 0);
+          S.box(0.5, 0.9, 0.5, qx, um2[i][1] + 0.45, qz, c.orn);
+          S.add(new three_module_exports.SphereGeometry(0.3, 6, 5).translate(qx, um2[i][1] + 1.1, qz), GOLD);
         }
       }
       top = Math.max(kirchturm(S, scene2, p2, x0 - tb / 2 + 1.2, zf - tb + 0.6, tb, Ht, c), kirchturm(S, scene2, p2, x1 - tb / 2 - 1.2, zf - tb + 0.6, tb, Ht, c));
@@ -113415,24 +113714,24 @@
     }
   }
   function fwGiebel2(S, F2, u0, u1, y, hg, t, holz, putz2, fen, stufen = 2) {
-    const um = (u0 + u1) / 2, B2 = u1 - u0;
-    fpoly4(S, F2, [[u0, y], [u1, y], [um, y + hg]], t - 0.4, t, putz2);
+    const um2 = (u0 + u1) / 2, B2 = u1 - u0;
+    fpoly4(S, F2, [[u0, y], [u1, y], [um2, y + hg]], t - 0.4, t, putz2);
     for (let i = 0; i < stufen; i++) {
       const yy = y + i * hg / (stufen + 0.4), k = 1 - (yy - y) / hg, bb = B2 * k;
-      fb5(S, F2, um - bb / 2 + 0.1, um + bb / 2 - 0.1, yy, yy + 0.2, t, t + 0.08, holz);
+      fb5(S, F2, um2 - bb / 2 + 0.1, um2 + bb / 2 - 0.1, yy, yy + 0.2, t, t + 0.08, holz);
       const nf = Math.max(1, Math.round((bb - 1) / 2.6) - (i > 0 ? 0 : 0));
       const hh = hg / (stufen + 0.4);
       for (let j = 0; j < nf; j++) {
-        const u = um - ((nf - 1) / 2 - j) * Math.min(2.6, bb / (nf + 0.5));
-        if (Math.abs(u - um) + 0.6 > bb * (1 - hh / (hg * k)) / 2) continue;
+        const u = um2 - ((nf - 1) / 2 - j) * Math.min(2.6, bb / (nf + 0.5));
+        if (Math.abs(u - um2) + 0.6 > bb * (1 - hh / (hg * k)) / 2) continue;
         fenster6(S, F2, u, yy + 0.6, 0.8, Math.min(1.2, hh * 0.55), { ...fen, t, sims: false, laeden: null });
         fb5(S, F2, u - 0.55, u - 0.37, yy + 0.2, yy + hh - 0.1, t, t + 0.08, holz);
         fb5(S, F2, u + 0.37, u + 0.55, yy + 0.2, yy + hh - 0.1, t, t + 0.08, holz);
       }
     }
-    fb5(S, F2, um - 0.1, um + 0.1, y, y + hg - 0.3, t, t + 0.08, holz);
-    fdiag(S, F2, u0 + 0.1, y + 0.1, um, y + hg - 0.15, 0.22, t, t + 0.09, holz);
-    fdiag(S, F2, um, y + hg - 0.15, u1 - 0.1, y + 0.1, 0.22, t, t + 0.09, holz);
+    fb5(S, F2, um2 - 0.1, um2 + 0.1, y, y + hg - 0.3, t, t + 0.08, holz);
+    fdiag(S, F2, u0 + 0.1, y + 0.1, um2, y + hg - 0.15, 0.22, t, t + 0.09, holz);
+    fdiag(S, F2, um2, y + hg - 0.15, u1 - 0.1, y + 0.1, 0.22, t, t + 0.09, holz);
   }
   function fachwerkHaus(S, scene2, r, p2, x0, z0, b2, T, o, erster, letzter) {
     const F2 = seiten3(x0, z0, b2, T), leer3 = p2.zustand === "leerstand";
@@ -113793,12 +114092,12 @@
         if (malerei) fpoly4(S, Fk, [[u - 0.85, eg + kk * og + 2.1], [u + 0.85, eg + kk * og + 2.1], [u, eg + kk * og + 2.5]], 0, 0.04, lf);
       }
       if (malerei && front2 && us.length >= 2) {
-        const um = (us[0] + us[1]) / 2;
-        fb5(S, Fk, um - 0.65, um + 0.65, eg + 0.5, eg + 2.2, 0, 0.03, "#efe2c0");
-        fb5(S, Fk, um - 0.5, um + 0.5, eg + 0.65, eg + 2.05, 0.02, 0.05, "#6f9bc4");
-        fb5(S, Fk, um - 0.18, um + 0.18, eg + 0.75, eg + 1.7, 0.04, 0.07, "#c9483e");
-        fscheibe4(S, Fk, um, eg + 1.85, 0.04, 0.07, 0.17, "#f2d7b0", 8);
-        fscheibe4(S, Fk, um, eg + 1.85, 0.03, 0.05, 0.28, GOLD, 10);
+        const um2 = (us[0] + us[1]) / 2;
+        fb5(S, Fk, um2 - 0.65, um2 + 0.65, eg + 0.5, eg + 2.2, 0, 0.03, "#efe2c0");
+        fb5(S, Fk, um2 - 0.5, um2 + 0.5, eg + 0.65, eg + 2.05, 0.02, 0.05, "#6f9bc4");
+        fb5(S, Fk, um2 - 0.18, um2 + 0.18, eg + 0.75, eg + 1.7, 0.04, 0.07, "#c9483e");
+        fscheibe4(S, Fk, um2, eg + 1.85, 0.04, 0.07, 0.17, "#f2d7b0", 8);
+        fscheibe4(S, Fk, um2, eg + 1.85, 0.03, 0.05, 0.28, GOLD, 10);
       }
       if (holzOG) for (let y = eg + 0.3; y < H; y += 0.55) fb5(S, Fk, 0, L2, y, y + 0.06, 0, 0.04, dunkler(holz, 0.05));
       if (front2 || k === "r" || k === "l") {
@@ -114578,10 +114877,10 @@
       fdiag(S, Fv, Bg / 2 + Bn / 2 - 0.1, Ha + 3.4, Bg + 0.6, Ha - 0.3, 0.3, -L2, 0, dach3);
       dachGiebel(S, Fv, Bg / 2 - Bn / 2, Bg / 2 + Bn / 2, -L2, 0, Hn, Bn * 0.95, dach3, st, { ue: 0.4, uf: 0, ub: 0 });
       if (v === "freiburg") {
-        const u0 = Bg / 2 - Bn / 2 - 0.4, um = Bg / 2, hh = Bn * 0.95, y0 = Hn - 0.4 * (2 * hh / Bn);
+        const u0 = Bg / 2 - Bn / 2 - 0.4, um3 = Bg / 2, hh = Bn * 0.95, y0 = Hn - 0.4 * (2 * hh / Bn);
         for (const [a, b2, f] of [[0.3, 0.36, "#b98a4a"], [0.58, 0.64, "#56705a"]]) {
           for (const sg of [-1, 1]) {
-            const ua = um + sg * (um - u0) * (1 - a), ub = um + sg * (um - u0) * (1 - b2);
+            const ua = um3 + sg * (um3 - u0) * (1 - a), ub = um3 + sg * (um3 - u0) * (1 - b2);
             const ya = y0 + (Hn + hh - y0) * a, yb = y0 + (Hn + hh - y0) * b2;
             for (let i = 0; i < 10; i++) {
               const t0 = -L2 + i * L2 / 10 + 0.8, t1 = t0 + L2 / 10 - 1.6;
@@ -120234,6 +120533,22 @@
     return INDEX.get(name2);
   }
 
+  // src/kit/umbau-aussen.js
+  function technikAufDach(S, h, m) {
+    if (!h.etagenBau || !m || !(m.hoehe > 0)) return;
+    const etagen = Object.values(h.etagenBau);
+    const aufgeruestet = etagen.some((e) => e.technik?.klima === 2 && e.klimaModernisiert === true);
+    if (!aufgeruestet) return;
+    const { x, z: z2, w, d, hoehe } = m, cx = x + w * 0.48, cz = z2 + d * 0.43;
+    for (let i = 0; i < Math.min(3, Math.ceil(etagen.length / 2)); i++) {
+      const dx = i * 3.5;
+      S.box(2.4, 1.45, 2, cx + dx, hoehe + 0.73, cz, "#c0c9ce");
+      S.box(2.65, 0.12, 2.2, cx + dx, hoehe + 1.5, cz, "#687984");
+      S.box(1.9, 0.12, 1.8, cx + dx, hoehe + 1.57, cz, "#778894");
+      S.box(1.5, 0.1, 0.15, cx + dx, hoehe + 0.9, cz + 1.05, "#303d49");
+    }
+  }
+
   // src/kit/bruecke.js
   var kwVon = (woche2) => woche2 % 52 + 1;
   function aktionFuer(s2, h) {
@@ -120291,6 +120606,7 @@
         if (f.konzept === "leer" && !(f.umbauBis > w)) leerQm += f.qm || 0;
       }
       const zus = /* @__PURE__ */ new Set();
+      if ((s2?.umbau?.projekte ?? []).some((p2) => p2.haus === haus2.id && p2.status === "laufend" && p2.ende > w)) umbau = true;
       if (umbau) zus.add("umbau");
       if (unter.size) {
         zus.add("untermiete");
@@ -120336,7 +120652,7 @@
       }
     }
     const u = z2.untermieter.map((m) => `${m.name}@${m.etage}`).join(",");
-    z2.schluessel = [z2.status, ...z2.zusatz, z2.aktion ?? "", z2.rabatt ?? "", u, z2.offpriceEtage, z2.hartwig === false ? "ohne" : "", z2.kaeufer ?? "", z2.verkaufsprozess ? "investor" : ""].join("|");
+    z2.schluessel = [z2.status, ...z2.zusatz, z2.aktion ?? "", z2.rabatt ?? "", u, z2.offpriceEtage, z2.hartwig === false ? "ohne" : "", z2.kaeufer ?? "", z2.verkaufsprozess ? "investor" : "", Object.values(haus2.etagenBau ?? {}).map((e) => String(e.technik?.klima) + String(!!e.klimaModernisiert)).join(",")].join("|");
     return z2;
   }
   function bauZustand(z2) {
@@ -120397,7 +120713,9 @@
       const { x, z: z2 } = imSlot2(p2, f.w, f.d);
       if (h.klasse === "premium") {
         p2.haus = h;
-        return premiumhaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+        const res2 = premiumhaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+        technikAufDach(S, h, { x, z: z2, w: f.w, d: f.d, hoehe: res2?.hoehe });
+        return res2;
       }
       if (!wahl3.has(h.id)) {
         let fam2 = familieVon(h), fassade4 = h.fassade;
@@ -120413,14 +120731,18 @@
       p2.haus = h;
       const roh2 = fassade3 === h.fassade ? h : { ...h, fassade: fassade3 };
       const nutzer = nachnutzer(h);
-      return nutzer ? nachnutzung(S, scene2, roh2, nutzer, { x, z: z2, familie: fam }) : warenhaus(S, scene2, roh2, { x, z: z2, familie: fam, ...bauZustand(zustand(h)) });
+      const res = nutzer ? nachnutzung(S, scene2, roh2, nutzer, { x, z: z2, familie: fam }) : warenhaus(S, scene2, roh2, { x, z: z2, familie: fam, ...bauZustand(zustand(h)) });
+      if (!nutzer) technikAufDach(S, h, { x, z: z2, w: f.w, d: f.d, hoehe: res?.hoehe });
+      return res;
     };
     const baueSport = (S, scene2, p2, h) => {
       const f = fussabdruck(h);
       const { x, z: z2 } = imSlot2(p2, f.w, f.d);
       p2.haus = h;
       const nutzer = nachnutzer(h);
-      return nutzer ? nachnutzungSport(S, scene2, h, nutzer, { x, z: z2 }) : sporthaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+      const res = nutzer ? nachnutzungSport(S, scene2, h, nutzer, { x, z: z2 }) : sporthaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+      if (!nutzer) technikAufDach(S, h, { x, z: z2, w: f.w, d: f.d, hoehe: res?.hoehe });
+      return res;
     };
     const baueOutlet = (S, scene2, p2, h) => {
       const f = fussabdruck(h), { x, z: z2 } = imSlot2(p2, f.w, f.d);
@@ -122744,6 +123066,97 @@
       },
       pruefe: () => ({ seite: ui.seite, ...vergleiche(rendern().S.W) })
     };
+  }
+
+  // src/ui/umbau.js
+  var ETAGE = (nr) => nr === -1 ? "UG" : nr === 0 ? "EG" : nr + ". OG";
+  var BEZEICHNUNG = { auffrischung: "Auffrischung", ladenbau: "Ladenbau neu", komplett: "Komplettumbau", technik: "Technik" };
+  function umbauModul(ctx) {
+    const E = ctx.E, s2 = () => ctx.s();
+    const ui = { aktiv: false, haus: null, etage: 0, stufe: "auffrischung" };
+    const zustand = () => E.umbauUebersicht(s2());
+    function hausKarte(id) {
+      if (typeof E.umbauHaus !== "function") return "";
+      const etagen = E.umbauHaus(s2(), id) ?? [];
+      let html = '<div class="karte" data-umbau-karte="' + esc(id) + '"><div class="khead">Bau \xB7 Modernisierung</div>';
+      html += '<div class="tabs"><button class="tab an" data-umbau="haus" data-id="' + esc(id) + '">Bau</button><button class="tab" data-umbau="modernisierung">Konzernprogramm</button></div>';
+      for (const e of [...etagen].reverse()) {
+        const pf = e.pflichten, technik3 = e.technik;
+        html += '<div class="zeile"><span class="was"><b>' + ETAGE(e.etage) + "</b> <i>Substanz " + Math.round(e.substanz) + "/100 \xB7 M\xF6bel " + e.moebelGeneration + " \xB7 Klima " + technik3.klima + "/2, Licht " + technik3.licht + "/2, Brandschutz " + technik3.brandschutz + "/2</i><small>Pr\xFCffristen: Brandschutz W" + pf.brandschutz + " \xB7 Aufzug W" + pf.aufzug + "</small>" + (e.gesperrt ? '<small class="rot">Beh\xF6rdlich gesperrt</small>' : e.projekt ? "<small>Baustelle bis Woche " + e.projekt.ende + "</small>" : "") + '</span><button class="mini" data-umbau="planen" data-id="' + esc(id) + '" data-etage="' + e.etage + '">Umbau planen</button></div>';
+      }
+      return html + "</div>";
+    }
+    function anzeigen() {
+      if (ui.haus) {
+        const h = s2().haeuser.find((x) => x.id === ui.haus);
+        const p2 = E.umbauSchaetzung(s2(), ui.haus, ui.etage, ui.stufe);
+        const aktiv2 = (s2().umbau?.projekte ?? []).some((x) => x.status === "laufend" && x.haus === ui.haus && x.etagen.includes(ui.etage));
+        let html2 = '<div class="karte"><div class="khead">Umbau planen</div><div class="zeile"><b>' + esc(h?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage) + "</b></div>";
+        html2 += '<label>Stufe <select class="ort gross" data-umbau="stufe">' + Object.entries(BEZEICHNUNG).map(([id, name2]) => '<option value="' + id + '"' + (id === ui.stufe ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select></label>";
+        html2 += '<div class="raster"><div class="kz"><span>Fl\xE4che</span><b>' + fmt.format(p2?.qm ?? 0) + ' qm</b></div><div class="kz"><span>Kosten</span><b>' + geld(p2?.kosten ?? 0) + '</b></div><div class="kz"><span>Bauzeit</span><b>' + (p2?.wochen ?? 0) + ' Wochen</b></div><div class="kz"><span>Wirkung Kaufquote</span><b>+' + Math.round((p2?.kaufquote ?? 0) * 100) + " %</b></div></div>";
+        if (ui.stufe === "komplett") html2 += '<div class="zeile warnung">Komplettumbau betrifft das gesamte Haus.</div>';
+        html2 += '<button class="breit gruen" data-umbau="starten" ' + (aktiv2 ? "disabled" : "") + ">Umbau starten</button></div>";
+        ctx.panel("Bau", esc(h?.stadt ?? ""), html2);
+        ui.aktiv = true;
+        return;
+      }
+      const u = zustand();
+      let html = '<div class="raster"><div class="kz"><span>Jahresbudget</span><b>' + geld(u.budget) + '</b></div><div class="kz"><span>Verbraucht</span><b>' + geld(u.verbraucht) + '</b></div><div class="kz"><span>Rest</span><b>' + geld(u.rest) + '</b></div><div class="kz"><span>Laufende Baustellen</span><b>' + u.laufend.length + "</b></div></div>";
+      html += '<div class="karte"><div class="khead">Programm von Bau & Ladenbau \xB7 Priorit\xE4t nach Rendite</div>';
+      for (const v of u.programm.slice(0, 20)) html += '<button class="zeile" data-umbau="planen" data-id="' + esc(v.haus) + '" data-etage="' + v.etage + '"><span class="was"><b>' + esc(v.name) + "</b> \xB7 " + ETAGE(v.etage) + "<i>" + BEZEICHNUNG[v.stufe] + " \xB7 " + v.rendite.toFixed(1) + " % Jahrespotenzial</i></span><span>" + geld(v.kosten) + "</span></button>";
+      html += '</div><div class="karte"><div class="khead">Laufende Baustellen</div>';
+      if (!u.laufend.length) html += '<div class="zeile">Keine laufenden Umbauten.</div>';
+      for (const p2 of u.laufend) html += '<div class="zeile"><span class="was"><b>' + esc(s2().haeuser.find((x) => x.id === p2.haus)?.name ?? p2.haus) + "</b><i>" + BEZEICHNUNG[p2.stufe] + " \xB7 bis Woche " + p2.ende + "</i></span><span>" + geld(p2.kosten) + "</span></div>";
+      html += '</div><div class="karte"><div class="khead">Premium-Investitionen</div><div class="zeile">' + u.premiumInvestitionen + " laufend \xB7 z\xE4hlen als freiwillige Modernisierung</div></div>";
+      ctx.panel("Modernisierung", "Programm " + u.jahr + " \xB7 Bau & Ladenbau", html, "gross");
+      ui.aktiv = true;
+    }
+    function tun(a) {
+      const r = E.fuehreAus(s2(), a);
+      ctx.meldung(r.text, r.ok);
+      if (r.ok) ctx.nachAktion?.();
+      anzeigen();
+    }
+    document.getElementById("pinhalt").addEventListener("click", (ev) => {
+      const el = ev.target.closest("button[data-umbau]");
+      if (!el) return;
+      const art = el.dataset.umbau;
+      if (art === "modernisierung") {
+        ui.haus = null;
+        anzeigen();
+        return;
+      }
+      if (art === "haus") {
+        ui.haus = null;
+        ctx.hausOeffnen(el.dataset.id);
+        return;
+      }
+      if (art === "planen") {
+        ui.haus = el.dataset.id;
+        ui.etage = Number(el.dataset.etage);
+        ui.stufe = "auffrischung";
+        anzeigen();
+        return;
+      }
+      if (art === "starten") {
+        tun({ typ: "umbauPlanen", haus: ui.haus, etage: ui.etage, stufe: ui.stufe });
+        return;
+      }
+    });
+    document.getElementById("pinhalt").addEventListener("change", (ev) => {
+      if (!ui.aktiv || ev.target?.dataset.umbau !== "stufe") return;
+      ui.stufe = ev.target.value;
+      anzeigen();
+    });
+    return { oeffne: (haus2 = null, etage2 = 0) => {
+      ui.haus = haus2;
+      ui.etage = etage2;
+      anzeigen();
+    }, hausKarte, zu: () => {
+      ui.aktiv = false;
+    }, aktiv: () => ui.aktiv, neuZeichnen: () => {
+      if (ui.aktiv) anzeigen();
+    } };
   }
 
   // src/kit/produktbild.js
@@ -125323,7 +125736,7 @@
     if (offenesHaus) oeffneHaus(offenesHaus);
     else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
     else if (offenesHq) oeffneHq(offenesHq === true ? void 0 : offenesHq);
-    else for (const m2 of module2()) if (m2.aktiv()) m2.neuZeichnen();
+    else for (const m2 of module2()) if (m2.aktiv?.()) (m2.neuZeichnen ?? m2.oeffne)?.();
     ek.badge();
     menueBadge();
     angebotsPinsAktualisieren();
@@ -125347,7 +125760,7 @@
     if (st.woche === 24) fuehreAus(st, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
     if (st.woche === 50) fuehreAus(st, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -125429,6 +125842,7 @@
     let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
     html += `<div class="raster">${zahl3("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl3("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl3("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl3("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
     html += hausTreiberZeile(src_exports, s, id);
+    html += um?.hausKarte(id) ?? "";
     if (h.klasse === "premium") {
       const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
       html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl3("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl3("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl3("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl3("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
@@ -125647,10 +126061,10 @@
     if (u.abteilungen?.length) {
       html += '<div class="karte"><div class="khead">Abteilungen</div>';
       for (const a of u.abteilungen) {
-        const um = a.umzugBis !== void 0 && a.umzugBis > s.woche ? ` \xB7 Umzug bis KW ${a.umzugBis % 52 + 1}` : "";
+        const um2 = a.umzugBis !== void 0 && a.umzugBis > s.woche ? ` \xB7 Umzug bis KW ${a.umzugBis % 52 + 1}` : "";
         const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : "";
         const wahl3 = `<select class="ort" onchange="hqKlick('setzen','${a.id}',this.value)">${ort ? "" : "<option selected>ohne Platz</option>"}${ziele.map((z2) => `<option value="${z2.v}"${z2.v === ort ? " selected" : ""}>${z2.t}</option>`).join("")}</select>`;
-        html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${ABTEILUNGEN2[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE \xB7 ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ""}</em></span><span class="stufe">${knopf("\u2212", ["stufe", a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf("+", ["stufe", a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl3}</div></div>`;
+        html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${ABTEILUNGEN2[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE \xB7 ${geld(a.kostenWoche)} je Woche${um2}</i><em class="wirk">${a.wirkung ?? ""}</em></span><span class="stufe">${knopf("\u2212", ["stufe", a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf("+", ["stufe", a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl3}</div></div>`;
       }
       html += "</div>";
     }
@@ -125689,6 +126103,7 @@
   var rg = null;
   var itM = null;
   var pl = null;
+  var um = null;
   var nachAktion = () => {
     cockpitZeigen();
     ek.badge();
@@ -125703,6 +126118,10 @@
   mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   pl = planungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
+  um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
+    grafikNachziehen();
+    nachAktion();
+  }, hausOeffnen: oeffneHaus });
   po = posteingangModul({
     E: src_exports,
     s: () => s,
@@ -125721,6 +126140,7 @@
         if (bezug.modul === "produkte") return oeffneModul(pr);
         if (bezug.modul === "planung") return oeffneModul(pl);
         if (bezug.modul === "zentrale") return oeffneHq();
+        if (bezug.modul === "umbau") return oeffneModul(um);
       }
       if (bezug.stadt && bezug.stadt !== stadtName) {
         wahl2.value = bezug.stadt;
@@ -125737,6 +126157,7 @@
       else if (bezug.modul === "produkte") oeffneModul(pr);
       else if (bezug.modul === "planung") oeffneModul(pl);
       else if (bezug.modul === "zentrale") oeffneHq();
+      else if (bezug.modul === "umbau") oeffneModul(um);
       else schliessePanel();
     }
   });
@@ -125818,6 +126239,7 @@
   $("organisation").addEventListener("click", () => oeffneModul(org));
   $("it").addEventListener("click", () => oeffneModul(itM));
   $("marketing").addEventListener("click", () => oeffneModul(mk));
+  $("modernisierung").addEventListener("click", () => oeffneModul(um));
   $("produkte").addEventListener("click", () => oeffneModul(pr));
   $("planung").addEventListener("click", () => oeffneModul(pl));
   $("posteingang").addEventListener("click", () => oeffneModul(po));
