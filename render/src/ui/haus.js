@@ -61,7 +61,13 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
     ).join('');
     const serviceZeilen = Object.entries(b?.services ?? {}).map(([key, an]) =>
       '<div class="zeile"><span class="was">' + esc(SERVICE[key] ?? key) + '</span>'
-      + button(an ? 'Abschalten' : 'Aktivieren', "hausTun('service','"+id+"','"+key+"',"+(!an)+")") + '</div>'
+      + button(an ? 'Lokal ausschalten' : 'Lokal aktivieren', "hausTun('service','"+id+"','"+key+"',"+(!an)+")")
+      + button(an ? 'Clusterweit aus' : 'Clusterweit an', "hausTun('clusterservice','"+id+"','"+key+"',"+(!an)+")") + '</div>'
+    ).join('');
+    const stundenZeilen = [['von','Öffnung ab'],['bis','Öffnung bis'],['samstagBis','Samstag bis']].map(([feld,titel]) =>
+      '<div class="zeile"><span class="was">' + titel + ': ' + p(std?.oeffnung?.[feld]) + ' Uhr</span>'
+      + button('− 1h', "hausTun('stunden','"+id+"','"+feld+"',-1)")
+      + button('+ 1h', "hausTun('stunden','"+id+"','"+feld+"',1)") + '</div>'
     ).join('');
     const partnerZeilen = (b?.flaechen ?? []).map(f => {
       const bezeichnung = f.konzept === 'konzession' ? 'Konzession: ' : 'Untermiete: ';
@@ -72,7 +78,7 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
     inhalt = '<div class="karte"><div class="khead">Hausstandards und Services</div>'
       + line('Öffnungszeiten Mo–Fr', p(std?.oeffnung?.von) + '–' + p(std?.oeffnung?.bis) + ' Uhr')
       + line('Samstag bis', p(std?.oeffnung?.samstagBis) + ' Uhr')
-      + standardZeilen + serviceZeilen
+      + standardZeilen + stundenZeilen + serviceZeilen
       + (b?.ausnahmeGrund ? line('Haus-Ausnahme', b.ausnahmeGrund) : '') + '</div>'
       + '<div class="karte"><div class="khead">Gastronomie</div>'
       + line('Restaurantfläche', p(b?.restaurantQm) + ' qm')
