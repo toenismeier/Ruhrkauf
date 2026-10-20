@@ -74,7 +74,10 @@ export function itModul(ctx) {
     return h;
   }
   function auswahl(d){
-    if(!ui.auswahl)ui.auswahl=new Set(d.cluster.map(c=>c.id));
+    if(!ui.auswahl){
+      const sys=d.systeme.find(x=>x.id===ui.system);
+      ui.auswahl=new Set(d.cluster.filter(c=>(sys?.verteilung.find(v=>v.id===c.id)?.generation??0)<ui.generation).map(c=>c.id));
+    }
     return ui.auswahl;
   }
   function neu(d){
