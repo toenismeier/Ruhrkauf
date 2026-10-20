@@ -29,6 +29,8 @@ for (const seed of seeds) {
   let laufe = 0;
   let maxFreigaben = 0;
   let freigabenSumme = 0;
+  let vorschlaegeSumme = 0;
+  let vorschlaegeMax = 0;
   for (let i = 0; i < wochen && s.phase !== 'zerschlagen'; i++) {
     if (mitBot) botTief(s);
     else einkaufStandard(s);
@@ -39,9 +41,14 @@ for (const seed of seeds) {
     maximumMs = Math.max(maximumMs, ms);
     laufe++;
     const f = s.einkauf.protokoll.at(-1);
-    const freigaben = f?.neu ?? 0;
+    // "neu" umfasst auch sofort automatisch gebuchte Klein-/NOS-Bestellungen.
+    // Spielerentscheidungen sind ausschließlich "neu - direkt".
+    const vorschlaege = f?.neu ?? 0;
+    const freigaben = Math.max(0, vorschlaege - (f?.direkt ?? 0));
     maxFreigaben = Math.max(maxFreigaben, freigaben);
     freigabenSumme += freigaben;
+    vorschlaegeSumme += vorschlaege;
+    vorschlaegeMax = Math.max(vorschlaegeMax, vorschlaege);
     if (i < 52) {
       jahrUmsatz += k.umsatz;
       jahrEbitda += k.ebitda;
@@ -66,6 +73,8 @@ for (const seed of seeds) {
     q4EbitdaMio: (q4Ebitda / 1e6).toFixed(1),
     freigabenWocheMittel: laufe ? (freigabenSumme / laufe).toFixed(1) : '0',
     freigabenWocheMax: maxFreigaben,
+    bestellvorschlaegeWocheMittel: laufe ? (vorschlaegeSumme / laufe).toFixed(1) : '0',
+    bestellvorschlaegeWocheMax: vorschlaegeMax,
     laufzeitWocheMittelMs: laufe ? (summeMs / laufe).toFixed(2) : '0',
     laufzeitWocheMaxMs: maximumMs.toFixed(2),
     botZiel260: mitBot ? s.woche >= 260 && s.phase !== 'zerschlagen' : undefined,
