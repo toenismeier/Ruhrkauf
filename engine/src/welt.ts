@@ -193,6 +193,10 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     name: `${f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`,
     stadt, region, cluster, lage, format: f, einzug, wettbewerbStart: einzug.wettbewerb, etagen,
     grundflaecheQm: grundflaeche,
+    // O02 Umsatztreiber: alle drei Hebel starten neutral.
+    treiber: { frequenz: 1, kaufquote: 1, bon: 1 },
+    treiberQuellen: {},
+    treiberVerlauf: [],
     baujahr: (() => { const r = zwischen(h, 0, 1); return f === 'sport' ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008); })(),
     fassade: ganzZwischen(h, 0, 7),
     flaechen,
