@@ -72,6 +72,8 @@ export function botTief(s: GameState, log = false): void {
 export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boolean, einkauf: (s: GameState) => void = einkaufStandard): void {
   const w = s.woche;
   const tu = (a: Parameters<typeof fuehreAus>[1]) => { const r = fuehreAus(s, a); if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`); return r; };
+  // Der Sanierungsbot beantwortet Presseinterviews sachlich, ohne anderen RNG-Verbrauch.
+  for (const e of s.entscheidungen.filter((x) => x.typ === 'interview')) tu({ typ: 'entscheiden', id: e.id, option: 'sachlich' });
   if (w === 3) {
     tu({ typ: 'orderLevel', gruppe: 'alle', level: 0.88 });
     tu({ typ: 'marketingBudget', quote: 0.018 });
