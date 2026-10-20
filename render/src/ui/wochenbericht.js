@@ -98,7 +98,7 @@ export function wochenberichtModul(ctx) {
       if (f < 1) zaehlRaf = requestAnimationFrame(zahlen);
       else if (!abgeschlossen) { abgeschlossen = true; node.classList.add('gezaehlt'); status = 'bericht'; markieren('Zählung beendet'); if (bericht.vorgaenge.length) setTimeout(() => { if (meins === token) vorfallZeigen(); }, schnell() ? 0 : 200); }
     }
-    node.querySelector('.wb-kennzahlen').addEventListener('click', () => { if (status === 'zaehlen') { cancelAnimationFrame(zaehlRaf); zahlen(performance.now(), true); } });
+    node.querySelector('.wb-bericht').addEventListener('click', (e) => { if (status === 'zaehlen' && !e.target.closest('[data-wa]')) { cancelAnimationFrame(zaehlRaf); zahlen(performance.now(), true); } });
     if (originalDauer) zaehlRaf = requestAnimationFrame(zahlen); else zahlen(performance.now(), true);
   }
   function vorfallZeigen() {
