@@ -1,13 +1,23 @@
 /** Vier eigenständige Hartwig-Kronjuwelen. Kein neues Format: Einkauf und Marketing bleiben Warenhaus. */
-import { PREMIUM_HAEUSER } from './daten';
+import { GRUPPEN, PREMIUM_HAEUSER } from './daten';
 import type { Angebot, GameState, GruppeId, Haus } from './types';
 import { clamp, eur, melde, mio } from './util';
 
-// Premium-Aufschlag nach Rang: hochwertige Beratung trägt sich durch höhere Flächenleistung.
-// Gemäß Nachbesserung Abschnitt 5 zuerst Produktivität, danach Servicequote angepasst;
-// die Konzern-Umsatzbasis wird weiterhin in kennzeichnePremium auf den Normalfall normiert.
-// Empirische Seed-Abnahme bleibt bis zu einem verfügbaren lokalen Testlauf offen.
-const RANGFAKTOR: Record<number, number> = { 1: 2.20, 2: 1.84, 3: 1.57 };
+// Festes Raum- und Betriebsprofil je Kronjuwel. Keine Seed-/Hausgrößenabhängigkeit.
+ // Die Produktivitätsfaktoren wirken auf die Flächenleistung, nicht direkt auf die KPI.
+const PREMIUM_PROFIL = {
+  P001: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.060, mietQuote: 0.057 },
+  P002: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.060, mietQuote: 0.057 },
+  P003: { qm: 18_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.070, mietQuote: 0.060 },
+  P004: { qm: 14_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.092, mietQuote: 0.065 },
+} as const;
+type PremiumId = keyof typeof PREMIUM_PROFIL;
+const premiumProfil = (id?: string) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id)
+  ? PREMIUM_PROFIL[id as PremiumId] : undefined;
+// Wochenleistung eines normalen Referenzquadratmeters; individuelle Standort-RNGs
+// sollen die Kronjuwelen nicht um zig Millionen Euro pro Jahr auseinanderziehen.
+const EURO_JE_QM_WOCHE = 40;
+
 const MIX: Partial<Record<GruppeId, number>> = {
   beauty: 1.55, accessoires: 1.55, damen: 1.25, food: 1.45,
   spielwaren: 0.55, wohnen: 0.6,
@@ -24,6 +34,52 @@ function grundumsatz(h: Haus): number {
     const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === 'eigen').reduce((a, f) => a + f.qm, 0);
     return sum + (p ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g as GruppeId] ?? 1)));
   }, 0);
+}
+
+/** Bewahrt die bestehende Flächenstruktur/IDs, normiert aber Gesamtfläche, Stockwerke
+ * und Sortimentsanteile. Kein RNG-Verbrauch; Konzern-Nachfragebasis bleibt kalibrierbar. */
+function normierePremiumFlaechen(h: Haus, p: NonNullable<ReturnType<typeof premiumProfil>>): void {
+  const alteEtagen = [...h.etagen].sort((a, b) => a - b);
+  const neueEtagen: number[] = [...p.etagen];
+  const anzahl = Math.max(1, alteEtagen.length - 1);
+  for (const f of h.flaechen) {
+    const index = Math.max(0, alteEtagen.indexOf(f.etage));
+    f.etage = neueEtagen[Math.round(index / anzahl * (neueEtagen.length - 1))];
+  }
+  h.etagen = neueEtagen;
+  h.grundflaecheQm = p.qm / neueEtagen.length;
+
+  // Die zehn Warenhausgruppen behalten dieselben Flächen-IDs und denselben Mix
+  // innerhalb einer Gruppe. Nur die seedabhängigen Gruppengrößen verschwinden.
+  const gruppen = Object.keys(h.potenzial) as GruppeId[];
+  const gewicht = gruppen.reduce((a, g) => a + GRUPPEN[g].anteilFlaeche, 0);
+  for (const g of gruppen) {
+    const bereiche = h.flaechen.filter(f => f.gruppe === g);
+    const altQm = bereiche.reduce((a, f) => a + f.qm, 0);
+    if (!altQm) continue;
+    const zielQm = Math.round(p.qm * GRUPPEN[g].anteilFlaeche / gewicht);
+    let rest = zielQm;
+    for (let i = 0; i < bereiche.length; i++) {
+      const f = bereiche[i];
+      const neuQm = i === bereiche.length - 1 ? rest : Math.max(1, Math.round(zielQm * f.qm / altQm));
+      f.qm = neuQm;
+      rest -= neuQm;
+    }
+  }
+  // Rundungsrest genau einmal ausgleichen, damit die Gebäudefläche seedunabhängig ist.
+  const rest = p.qm - h.flaechen.reduce((a, f) => a + f.qm, 0);
+  const ausgleich = h.flaechen.find(f => f.gruppe === 'damen') ?? h.flaechen[0];
+  if (ausgleich) ausgleich.qm += rest;
+
+  // Feste Sättigung/Flächenleistung statt der ursprünglich je Seed ausgewürfelten
+  // Werte: Rank und Sortiment, nicht das zufällig umgewidmete Warenhaus, entscheiden.
+  for (const g of gruppen) {
+    const qm = h.flaechen.filter(f => f.gruppe === g).reduce((a, f) => a + f.qm, 0);
+    if (!qm) continue;
+    h.saettigungQm[g] = qm * 0.75;
+    h.potenzial[g] = qm * GRUPPEN[g].qmUmsatz * (MIX[g] ?? 1)
+      / (1 - Math.exp(-qm / h.saettigungQm[g]!));
+  }
 }
 
 /** Bestehende 1a-Häuser regelbasiert umwidmen; Haus-IDs bleiben für Spielstände und HQ erhalten. */
@@ -54,21 +110,22 @@ export function kennzeichnePremium(haeuser: Haus[]): void {
     h.premiumSchluessel = p.id;
     h.premiumImage = 80;
     h.lage = '1a';
+    const profil = premiumProfil(p.id)!;
+    normierePremiumFlaechen(h, profil);
     h.miete.vermieter = 'eigentuemer';
     h.miete.vermieterName = 'Hartwig Immobilien';
-    h.miete.mieteWoche = eur(h.miete.mieteWoche * (p.rang === 1 ? 0.65 : p.rang === 2 ? 0.75 : 0.85));
-    const alt = grundumsatz(h);
-    const ziel = RANGFAKTOR[p.rang];
-    const gewichtet = Object.entries(h.potenzial).reduce((a, [g, n]) => {
-      const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === 'eigen').reduce((v, f) => v + f.qm, 0);
-      return a + (n ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g as GruppeId] ?? 1))) * (MIX[g as GruppeId] ?? 1);
-    }, 0);
-    const norm = alt * ziel / Math.max(1, gewichtet);
-    for (const g of Object.keys(h.potenzial) as GruppeId[]) h.potenzial[g] = (h.potenzial[g] ?? 0) * norm * (MIX[g] ?? 1);
-    // Erhöhter Beratungsanspruch: 15 % mehr FTE.
-    h.personal.vollzeit *= 1.15;
-    h.personal.teilzeit *= 1.15;
-    h.personal.aushilfen *= 1.15;
+    // Die eigene Immobilie hat einen stabilen, rangbezogenen kalkulatorischen
+    // Mietansatz; ein zufälliger Altvertrag darf die Rangmarge nicht dominieren.
+    const sollUmsatzWoche = profil.qm * EURO_JE_QM_WOCHE * profil.produktivitaet;
+    h.miete.mieteWoche = eur(sollUmsatzWoche * profil.mietQuote);
+    h.miete.bisWoche = 15 * 52;
+    h.miete.keineVerlaengerung = false;
+    // Beratung/FTE auf die tatsächlich festgelegten Flächen und Absatzvolumen
+    // dimensionieren (Referenzparameter qmJeFte=500, umsatzJeFte=8800).
+    const fte = 1.15 * (profil.qm / 500 + sollUmsatzWoche / 8_800);
+    h.personal.vollzeit = fte * 0.50;
+    h.personal.teilzeit = fte * 0.40;
+    h.personal.aushilfen = fte * 0.10;
     h.substanz = Math.max(78, h.substanz);
     h.substanzStart = h.substanz;
     // Hochpreisige Shop-in-Shops bleiben im Format Warenhaus und folgen dem vorhandenen Konzessionskonzept.
@@ -80,6 +137,11 @@ export function kennzeichnePremium(haeuser: Haus[]): void {
         h.flaechen.push({ ...f, id: f.id + '-luxus', qm, konzept: 'konzession' });
       }
     }
+    // Shop-in-Shops entziehen der Eigenware Fläche. Den Produktivitätswert auf
+    // die verbleibende Eigenfläche kalibrieren statt die Margen per KPI zu setzen.
+    const faktor = sollUmsatzWoche / Math.max(1, grundumsatz(h));
+    for (const g of Object.keys(h.potenzial) as GruppeId[])
+      h.potenzial[g] = (h.potenzial[g] ?? 0) * faktor;
   }
   // Konzernkalibrierung: der Umsatzanstieg der Kronjuwelen wird ohne Änderung der Gesamtbasis
   // auf alle regulären Häuser proportional verteilt; kein neuer Standort und kein RNG-Verbrauch.
@@ -93,10 +155,7 @@ export function kennzeichnePremium(haeuser: Haus[]): void {
 /** Nachfragewirkung des lokalen Premium-Images, bei Start 80 exakt neutral. */
 /** Service, Concierge, Warenpräsentation und Sicherheit als zusätzlicher Betriebsaufwand. */
 export function premiumServiceQuote(h: Haus): number {
-  if (h.klasse !== 'premium') return 0;
-  // Ein Teil des Concierge- und Sicherheitsaufwands wird durch die höhere Flächenleistung gedeckt;
-  // verbleibende laufende Sonderkosten werden umsatzabhängig belastet, nicht als fiktiver Gewinn.
-  return h.premiumSchluessel === 'P003' ? 0.043 : h.premiumSchluessel === 'P004' ? 0.030 : 0.045;
+  return h.klasse === 'premium' ? (premiumProfil(h.premiumSchluessel)?.service ?? 0) : 0;
 }
 
 export function premiumImageFaktor(h: Haus): number {
