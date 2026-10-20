@@ -252,4 +252,4 @@ export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 export { premiumUebersicht } from './premium';
 
 // O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
-export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking } from './haus';
+export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';
