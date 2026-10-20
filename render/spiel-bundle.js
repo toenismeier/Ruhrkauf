@@ -68,6 +68,7 @@
     gehaltsforderung: () => gehaltsforderung,
     gruppenFuer: () => gruppenFuer,
     hausDetail: () => hausDetail,
+    hausTreiber: () => hausTreiber,
     hausclusterFaktor: () => hausclusterFaktor,
     hausclusterVon: () => hausclusterVon,
     hqFuerGrafik: () => hqFuerGrafik,
@@ -95,16 +96,21 @@
     produktNachfrageFaktor: () => produktNachfrageFaktor,
     produktVorschau: () => produktVorschau,
     produkte: () => produkte,
+    ranking: () => ranking,
     regionalleitungQualitaet: () => regionalleitungQualitaet,
     registriereDelegation: () => registriereDelegation,
+    reporting: () => reporting,
     saisonId: () => saisonId,
     saisonName: () => saisonName,
     schwierigkeit: () => schwierigkeit,
     segmentText: () => segmentText,
+    setzeTreiber: () => setzeTreiber,
     sollFte: () => sollFte,
+    treiberFaktor: () => treiberFaktor,
     trendFuer: () => trendFuer,
     trendbericht: () => trendbericht,
     umsatzBezug: () => umsatzBezug,
+    umsatzbruecke: () => umsatzbruecke,
     vorschau: () => vorschau,
     vorstandProfil: () => vorstandProfil,
     vorstandUebersicht: () => vorstandUebersicht,
@@ -667,10 +673,10 @@
     const ebitdaGut = avg(h) > 0 ? 8 : 0;
     const inso = s2.phase === "insolvenz";
     const beraterBonus = s2.berater.filter((b2) => b2.ende > s2.woche - 26).length > 0 ? 6 : 0;
-    const reporting = (hqControllingExzellenz(s2) ? 3 : 0) - hqVerwaltungMalus(s2);
+    const reporting2 = (hqControllingExzellenz(s2) ? 3 : 0) - hqVerwaltungMalus(s2);
     const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0) + schwierigkeit(s2).kvZiel;
     st.kreditversicherer = annaehern(st.kreditversicherer, kvZiel, 0.05);
-    const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting;
+    const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting2;
     st.bank = annaehern(st.bank, bankZiel, 0.03);
     st.betriebsrat = annaehern(st.betriebsrat, (s2.tarif === "ohne" ? 25 : 50) + hqBetriebsratZiel(s2), 0.01);
     st.image = annaehern(st.image, 50, 0.01);
@@ -1593,18 +1599,18 @@
     const preislage = e.preislage ?? m?.preislage ?? "mitte";
     const qualitaet = clamp(Math.round(e.qualitaet ?? m?.qualitaet ?? 3), 1, 5);
     const stil = e.stil ?? m?.stil ?? "klassisch";
-    const leer2 = { preislage, qualitaet, stil, kapFrei: 0 };
-    if (!m || m.status === "eingestellt") return { ...leer2, fehler: "Marke nicht gefunden." };
+    const leer3 = { preislage, qualitaet, stil, kapFrei: 0 };
+    if (!m || m.status === "eingestellt") return { ...leer3, fehler: "Marke nicht gefunden." };
     const t = TYP[e.typ];
-    if (!t) return { ...leer2, m, fehler: "Unbekannter Artikeltyp." };
-    if (!FARBEN2[e.farbe]) return { ...leer2, m, t, fehler: "Unbekannte Farbe." };
-    if (!t.materialien.includes(e.material)) return { ...leer2, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. M\xF6glich: ${t.materialien.join(", ")}.` };
-    if (!DAUER_STUFEN.includes(e.dauer)) return { ...leer2, m, t, fehler: "Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen." };
-    if (!(e.budgetWoche >= 0)) return { ...leer2, m, t, fehler: "Budget je Woche angeben." };
+    if (!t) return { ...leer3, m, fehler: "Unbekannter Artikeltyp." };
+    if (!FARBEN2[e.farbe]) return { ...leer3, m, t, fehler: "Unbekannte Farbe." };
+    if (!t.materialien.includes(e.material)) return { ...leer3, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. M\xF6glich: ${t.materialien.join(", ")}.` };
+    if (!DAUER_STUFEN.includes(e.dauer)) return { ...leer3, m, t, fehler: "Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen." };
+    if (!(e.budgetWoche >= 0)) return { ...leer3, m, t, fehler: "Budget je Woche angeben." };
     const wg = wgFuer(s2, m, t, e.wg);
-    if (!wg) return { ...leer2, m, t, fehler: `${e.typ} passt nicht zu ${m.name} (Kategorie oder Zielgruppe).` };
+    if (!wg) return { ...leer3, m, t, fehler: `${e.typ} passt nicht zu ${m.name} (Kategorie oder Zielgruppe).` };
     const kapFrei = kapazitaet(s2) - belegt(s2, m.id, t.kategorie);
-    if (kapFrei <= 0) return { ...leer2, m, t, wg, kapFrei, fehler: `Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[t.kategorie]} bei ${m.name} erreicht. Bitte erst Produkte auslisten.` };
+    if (kapFrei <= 0) return { ...leer3, m, t, wg, kapFrei, fehler: `Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[t.kategorie]} bei ${m.name} erreicht. Bitte erst Produkte auslisten.` };
     return { m, t, wg, preislage, qualitaet, stil, kapFrei };
   }
   function produktAktion(s2, a) {
@@ -1781,8 +1787,8 @@
     const fertig = s2.woche + (e.dauer || 0);
     const sid = saisonId(fertig);
     const bekannt = sid <= saisonId(s2.woche) + 1;
-    const leer2 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
-    if (!c.m || !c.t || !c.wg) return leer2;
+    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
+    if (!c.m || !c.t || !c.wg) return leer3;
     const team = teamStaerke(s2);
     const teile = bewerte(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
     const st = sterneAus(scoreAus(teile));
@@ -4980,8 +4986,8 @@
     const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm, s2.woche, inHaus);
     const h = betroffeneHaeuser(s2, stadt)[0];
     const gruppe2 = h ? gruppenFuer(h.format).sort((a, b2) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b2] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a] ?? 0))[0] : "damen";
-    const prozent = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h, gruppe2)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe2].name + ": rund " + prozent + " %.");
+    const prozent2 = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h, gruppe2)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe2].name + ": rund " + prozent2 + " %.");
     if ((art === "modehaus" || art === "premium") && qm >= 2300) {
       neueEntscheidung(s2, {
         typ: "wettbewerb_eroeffnung",
@@ -6287,6 +6293,345 @@
     return fehler3("Unbekannte Aktion.");
   }
 
+  // ../engine/src/treiber.ts
+  var NULL = { frequenz: 1, kaufquote: 1, bon: 1 };
+  var PREIS = {
+    damen: 43,
+    herren: 49,
+    kinder: 25,
+    beauty: 37,
+    accessoires: 53,
+    waesche: 21,
+    wohnen: 39,
+    spielwaren: 27,
+    food: 16,
+    sport: 48,
+    sportschuhe: 85,
+    sporttextil: 49,
+    outdoor: 110,
+    rad: 260,
+    wintersport: 115,
+    teamsport: 37
+  };
+  var leer2 = () => ({
+    von: 0,
+    bis: 0,
+    umsatz: 0,
+    frequenz: 0,
+    kaeufe: 0,
+    artikel: 0,
+    kaufquote: 0,
+    bon: 0,
+    teile: 0,
+    preis: 0
+  });
+  function komplett(von, bis, umsatz, frequenz, kaeufe, artikel) {
+    return {
+      von,
+      bis,
+      umsatz,
+      frequenz,
+      kaeufe,
+      artikel,
+      kaufquote: frequenz ? kaeufe / frequenz : 0,
+      bon: kaeufe ? umsatz / kaeufe : 0,
+      teile: kaeufe ? artikel / kaeufe : 0,
+      preis: artikel ? umsatz / artikel : 0
+    };
+  }
+  var hauscluster = (h) => h.hauscluster || h.region;
+  function setzeTreiber(s2, hausId, quelle2, treiber, faktor) {
+    const h = s2.haeuser.find((x) => x.id === hausId);
+    if (!h) throw new Error("Haus nicht gefunden: " + hausId);
+    if (!quelle2.trim()) throw new Error("Treiberquelle fehlt.");
+    if (!Number.isFinite(faktor) || faktor < 0 || faktor > 3) throw new Error("Treiberfaktor muss zwischen 0 und 3 liegen.");
+    const quellen = h.treiberQuellen ?? (h.treiberQuellen = {});
+    if (faktor === 1) {
+      if (quellen[quelle2]) {
+        delete quellen[quelle2][treiber];
+        if (!Object.keys(quellen[quelle2]).length) delete quellen[quelle2];
+      }
+    } else (quellen[quelle2] ?? (quellen[quelle2] = {}))[treiber] = faktor;
+    const produkt = { ...NULL };
+    for (const eintrag2 of Object.values(quellen)) for (const id of ["frequenz", "kaufquote", "bon"])
+      produkt[id] *= eintrag2[id] ?? 1;
+    h.treiber = produkt;
+  }
+  function treiberFaktor(h) {
+    if (!h.treiberQuellen) return h.treiber ?? NULL;
+    const produkt = { ...NULL };
+    for (const q2 of Object.values(h.treiberQuellen)) for (const t of ["frequenz", "kaufquote", "bon"])
+      produkt[t] *= q2[t] ?? 1;
+    return produkt;
+  }
+  function wirkeTreiber(h, roh2) {
+    const f = treiberFaktor(h);
+    const faktor = f.frequenz * f.kaufquote * f.bon;
+    if (faktor === 1) return roh2;
+    for (const v of Object.values(roh2.eigen)) if (v) {
+      v.brutto *= faktor;
+      v.umsatz *= faktor;
+    }
+    for (const g of Object.keys(roh2.kommission)) roh2.kommission[g] = (roh2.kommission[g] ?? 0) * faktor;
+    roh2.offprice *= faktor;
+    roh2.ohneAktion *= faktor;
+    roh2.ohneAktionRohertrag *= faktor;
+    return roh2;
+  }
+  function frequenzBasis(s2, h) {
+    const qm = h.flaechen.filter((f) => f.konzept !== "leer" && f.konzept !== "untermiete").reduce((sum, f) => sum + f.qm, 0);
+    const lage = { "1a": 1.12, b: 0.87, center: 1.07, rand: 0.79 }[h.lage];
+    const groesse2 = { metropole: 1.16, grossstadt: 1, mittelstadt: 0.84 }[h.cluster];
+    const saison2 = clamp(saisonFaktor("damen", s2.woche), 0.65, 1.75);
+    const marketing = marketingHausFaktor(s2, h);
+    return Math.max(0, Math.round((Math.max(0, qm) * 1.12 + 4400) * lage * groesse2 * clamp(h.einzug.kaufkraft, 0.7, 1.4) * saison2 * marketing * (1 + h.transferBonus)));
+  }
+  function kaufquoteBasis(h) {
+    if (h.format === "fundus") return 0.35;
+    if (h.format === "sport") return 0.215;
+    return h.klasse === "premium" ? 0.29 : h.lage === "1a" ? 0.27 : h.lage === "rand" ? 0.22 : 0.25;
+  }
+  function artikelAusMix(h, umsatz) {
+    const gruppen = Object.entries(h.kpi?.umsatzJeGruppe ?? {});
+    const mengen = gruppen.reduce((sum, [g, wert]) => sum + Math.max(0, wert) / (PREIS[g] ?? 40), 0);
+    const rest = Math.max(0, umsatz - gruppen.reduce((sum, [, v]) => sum + v, 0));
+    return umsatz > 0 ? Math.max(1e-6, mengen + rest / 18) : 0;
+  }
+  function erfasseTreiber(s2) {
+    if (s2.prognose || s2.treiberErfassungAus) return;
+    for (const h of s2.haeuser) {
+      const umsatz = h.kpi?.woche === s2.woche ? h.kpi.umsatz : 0;
+      const f = treiberFaktor(h);
+      const frequenz = h.status !== "geschlossen" && h.status !== "verkauft" ? Math.max(1, Math.round(frequenzBasis(s2, h) * f.frequenz)) : 0;
+      const q2 = umsatz > 0 ? clamp(kaufquoteBasis(h) * f.kaufquote, 0.01, 0.95) : 0;
+      const kaeufe = frequenz * q2;
+      const artikel = artikelAusMix(h, umsatz);
+      const messung2 = komplett(s2.woche, s2.woche, umsatz, frequenz, kaeufe, artikel);
+      const verlauf = h.treiberVerlauf ?? (h.treiberVerlauf = []);
+      verlauf.push(messung2);
+      const grenze = s2.woche - 51;
+      const erste = s2.woche - 103;
+      const zuschneiden = (p) => {
+        if (p.von >= erste) return p;
+        const anteil2 = (p.bis - erste + 1) / (p.bis - p.von + 1);
+        return komplett(
+          erste,
+          p.bis,
+          p.umsatz * anteil2,
+          p.frequenz * anteil2,
+          p.kaeufe * anteil2,
+          p.artikel * anteil2
+        );
+      };
+      const alt = verlauf.filter((p) => p.bis < grenze && p.bis >= erste).map(zuschneiden);
+      const jung = verlauf.filter((p) => p.bis >= grenze).map((p) => p.von < erste ? zuschneiden(p) : p);
+      const bloecke = /* @__PURE__ */ new Map();
+      for (const p of alt) {
+        const block = Math.floor(p.von / 4);
+        const gruppe2 = bloecke.get(block) ?? [];
+        gruppe2.push(p);
+        bloecke.set(block, gruppe2);
+      }
+      const archiv = [...bloecke.entries()].sort((a, b2) => a[0] - b2[0]).map(([, teile]) => summiere(teile));
+      h.treiberVerlauf = [...archiv, ...jung];
+    }
+  }
+  function summiere(eintraege) {
+    if (!eintraege.length) return leer2();
+    return komplett(
+      Math.min(...eintraege.map((e) => e.von)),
+      Math.max(...eintraege.map((e) => e.bis)),
+      eintraege.reduce((s2, e) => s2 + e.umsatz, 0),
+      eintraege.reduce((s2, e) => s2 + e.frequenz, 0),
+      eintraege.reduce((s2, e) => s2 + e.kaeufe, 0),
+      eintraege.reduce((s2, e) => s2 + e.artikel, 0)
+    );
+  }
+  function zeitraum(h, von, bis) {
+    const messungen = h.treiberVerlauf ?? [];
+    if (von < 0 || bis < von) return { geschaetzt: false };
+    const teile = [];
+    let abgedeckt2 = 0, geschaetzt = false;
+    for (const m of messungen) {
+      const gemeinsam = Math.max(0, Math.min(bis, m.bis) - Math.max(von, m.von) + 1);
+      if (!gemeinsam) continue;
+      const laenge = m.bis - m.von + 1, anteil2 = gemeinsam / laenge;
+      if (anteil2 !== 1) geschaetzt = true;
+      teile.push(komplett(
+        Math.max(von, m.von),
+        Math.min(bis, m.bis),
+        m.umsatz * anteil2,
+        m.frequenz * anteil2,
+        m.kaeufe * anteil2,
+        m.artikel * anteil2
+      ));
+      abgedeckt2 += gemeinsam;
+    }
+    if (abgedeckt2 !== bis - von + 1) return { geschaetzt };
+    const wert = summiere(teile);
+    wert.umsatz = eur(wert.umsatz);
+    wert.preis = wert.artikel ? wert.umsatz / wert.artikel : 0;
+    wert.bon = wert.kaeufe ? wert.umsatz / wert.kaeufe : 0;
+    return { wert, geschaetzt };
+  }
+  function hausTreiber(s2, hausId, wochen = 1) {
+    const h = s2.haeuser.find((x) => x.id === hausId);
+    if (!h) return void 0;
+    const bis = s2.woche - 1;
+    const aktuell = zeitraum(h, bis - wochen + 1, bis);
+    if (!aktuell.wert) return void 0;
+    const vorjahr = zeitraum(h, bis - wochen + 1 - 52, bis - 52);
+    return {
+      aktuell: aktuell.wert,
+      vorjahr: vorjahr.wert,
+      vorjahrGeschaetzt: vorjahr.geschaetzt,
+      abweichung: vorjahr.wert ? aktuell.wert.umsatz - vorjahr.wert.umsatz : void 0
+    };
+  }
+  function auswahl2(s2, ebene, id, format) {
+    return s2.haeuser.filter((h) => h.status !== "verkauft" && (!format || format === "alle" || h.format === format) && (ebene === "konzern" || ebene === "haus" && h.id === id || ebene === "region" && h.region === id || ebene === "hauscluster" && hauscluster(h) === id));
+  }
+  function umsatzbruecke(s2, o) {
+    const fehlend = (status) => ({
+      status,
+      vorher: 0,
+      aktuell: 0,
+      differenz: 0,
+      frequenz: 0,
+      kaufquote: 0,
+      teile: 0,
+      preis: 0,
+      bon: 0,
+      vorjahrGeschaetzt: false
+    });
+    if (o.vergleich === "plan") return fehlend("kein Plan vorhanden");
+    const ende = s2.woche - 1, anzahl = Math.max(1, Math.floor(o.wochen));
+    const alt = [], neu = [];
+    let geschaetzt = false;
+    for (const h of auswahl2(s2, o.ebene, o.id, o.format)) {
+      const jetzt = zeitraum(h, ende - anzahl + 1, ende);
+      const frueher = zeitraum(h, ende - anzahl + 1 - 52, ende - 52);
+      if (!jetzt.wert || !frueher.wert) continue;
+      neu.push(jetzt.wert);
+      alt.push(frueher.wert);
+      geschaetzt || (geschaetzt = frueher.geschaetzt);
+    }
+    if (!neu.length) return fehlend("kein Vorjahr vorhanden");
+    const v = summiere(alt), a = summiere(neu);
+    const f = eur(a.frequenz * v.kaufquote * v.teile * v.preis);
+    const q2 = eur(a.frequenz * a.kaufquote * v.teile * v.preis);
+    const t = eur(a.frequenz * a.kaufquote * a.teile * v.preis);
+    const u = eur(a.umsatz), vorher = eur(v.umsatz);
+    const teile = t - q2, preis = u - t;
+    return {
+      status: "ok",
+      vorher,
+      aktuell: u,
+      differenz: u - vorher,
+      frequenz: f - vorher,
+      kaufquote: q2 - f,
+      teile,
+      preis,
+      bon: teile + preis,
+      vorjahrGeschaetzt: geschaetzt
+    };
+  }
+  function kennzahl(s2, h, id) {
+    const d = hausTreiber(s2, h.id);
+    if (!d) return 0;
+    if (id === "umsatz") return d.aktuell.umsatz;
+    if (id === "frequenz") return d.aktuell.frequenz;
+    if (id === "kaufquote") return d.aktuell.kaufquote;
+    if (id === "bon") return d.aktuell.bon;
+    if (id === "abweichungVorjahr") return d.abweichung ?? 0;
+    const qm = h.flaechen.reduce((sum, f) => sum + f.qm, 0);
+    return qm > 0 ? d.aktuell.umsatz / qm : 0;
+  }
+  function ranking(s2, o) {
+    const alle = s2.haeuser.filter((h) => h.status !== "verkauft" && h.kpi?.woche === s2.woche - 1);
+    const vergleich = (h) => o.ebene === "region" ? h.region : hauscluster(h);
+    const gesamt = alle.map((h) => ({ h, wert: kennzahl(s2, h, o.kennzahl) })).sort((a, b2) => b2.wert - a.wert || a.h.id.localeCompare(b2.h.id));
+    const gruppe2 = o.ebene === "alle" || !o.innerhalb ? gesamt : gesamt.filter((e) => vergleich(e.h) === o.innerhalb);
+    return gruppe2.map((e, index2) => ({
+      hausId: e.h.id,
+      name: e.h.name,
+      region: e.h.region,
+      hauscluster: hauscluster(e.h),
+      format: e.h.format,
+      wert: e.wert,
+      rangGesamt: gesamt.indexOf(e) + 1,
+      rangVergleich: o.innerhalb ? index2 + 1 : gesamt.filter((x) => vergleich(x.h) === vergleich(e.h)).indexOf(e) + 1
+    }));
+  }
+  function reporting(s2, wochen = 1, format = "alle") {
+    const zeilen = [];
+    for (const h of s2.haeuser) {
+      if (h.status === "verkauft" || format !== "alle" && h.format !== format) continue;
+      const d = hausTreiber(s2, h.id, wochen);
+      if (!d) continue;
+      const v = d.vorjahr?.umsatz;
+      const diff = d.abweichung;
+      const anteil2 = v && diff !== void 0 ? diff / Math.abs(v) : void 0;
+      zeilen.push({
+        id: h.id,
+        name: h.name,
+        region: h.region,
+        hauscluster: hauscluster(h),
+        format: h.format,
+        umsatz: d.aktuell.umsatz,
+        vorjahr: v,
+        abweichung: diff,
+        abweichungProzent: anteil2,
+        frequenz: d.aktuell.frequenz,
+        kaufquote: d.aktuell.kaufquote,
+        bon: d.aktuell.bon,
+        ampelfarbe: anteil2 === void 0 ? "grau" : anteil2 < -0.05 ? "rot" : anteil2 < 0 ? "gelb" : "gruen"
+      });
+    }
+    const gruppen = [];
+    for (const ebene of ["region", "hauscluster"]) {
+      for (const id of new Set(zeilen.map((z2) => z2[ebene]))) {
+        const aus = zeilen.filter((z2) => z2[ebene] === id);
+        const umsatz = aus.reduce((a, z2) => a + z2.umsatz, 0);
+        const fre = aus.reduce((a, z2) => a + z2.frequenz, 0);
+        const kaeufe = aus.reduce((a, z2) => a + z2.frequenz * z2.kaufquote, 0);
+        const mitVj = aus.filter((z2) => z2.vorjahr !== void 0);
+        const vorjahr = mitVj.length === aus.length ? aus.reduce((a, z2) => a + (z2.vorjahr ?? 0), 0) : void 0;
+        const abweichung2 = vorjahr !== void 0 ? umsatz - vorjahr : void 0;
+        const abweichungProzent = vorjahr && abweichung2 !== void 0 ? abweichung2 / Math.abs(vorjahr) : void 0;
+        gruppen.push({
+          id,
+          name: id,
+          region: ebene === "region" ? id : aus[0].region,
+          hauscluster: ebene === "hauscluster" ? id : "",
+          ebene,
+          format: "alle",
+          umsatz,
+          vorjahr,
+          abweichung: abweichung2,
+          abweichungProzent,
+          frequenz: fre,
+          kaufquote: fre ? kaeufe / fre : 0,
+          bon: kaeufe ? umsatz / kaeufe : 0,
+          ampelfarbe: abweichungProzent === void 0 ? "grau" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen"
+        });
+      }
+    }
+    const beobachtung = zeilen.filter((z2) => z2.abweichung !== void 0 && z2.abweichung < 0).sort((a, b2) => (a.abweichung ?? 0) - (b2.abweichung ?? 0)).slice(0, 10).map((z2) => {
+      const br = umsatzbruecke(s2, { ebene: "haus", id: z2.id, vergleich: "vorjahr", wochen });
+      const h = s2.haeuser.find((x) => x.id === z2.id);
+      const d = hausTreiber(s2, h.id, wochen);
+      const effekte = [
+        { v: br.frequenz, name: "Frequenz", text: d.vorjahr?.frequenz ? ((d.aktuell.frequenz / d.vorjahr.frequenz - 1) * 100).toFixed(1).replace(".", ",") + " %" : "\u2013" },
+        { v: br.kaufquote, name: "Kaufquote", text: d.vorjahr ? ((d.aktuell.kaufquote - d.vorjahr.kaufquote) * 100).toFixed(1).replace(".", ",") + " Punkte" : "\u2013" },
+        { v: br.bon, name: "Bon", text: d.vorjahr?.bon ? ((d.aktuell.bon / d.vorjahr.bon - 1) * 100).toFixed(1).replace(".", ",") + " %" : "\u2013" }
+      ].sort((a, b2) => a.v - b2.v);
+      const haupt = effekte[0];
+      return { hausId: z2.id, name: z2.name, abweichung: z2.abweichung, haupttreiber: haupt.name + " " + haupt.text };
+    });
+    return { wochen, bruecke: umsatzbruecke(s2, { ebene: "konzern", vergleich: "vorjahr", wochen, format }), zeilen, gruppen, beobachtung };
+  }
+
   // ../engine/src/abfragen.ts
   function hausBezug(s2, ids = [], modul) {
     const hs = [...new Set(ids)].map((id) => s2.haeuser.find((h) => h.id === id)).filter((h) => !!h);
@@ -6610,8 +6955,8 @@
     return { id, name: name2, portraet: portraet2, fuehrung, fachwissen, loyalitaet, gehalt, haltebonus: 0, erfolgsbonus: 0, seitWoche, vorgeschichte, gewachsen: true };
   }
   function erzeugeVorstand(s2) {
-    const leer2 = (id) => ({ id, delegation: Object.fromEntries(DELEGATIONEN[id].map((d) => [d.id, false])), kandidaten: [] });
-    const ressorts = Object.fromEntries(RESSORTS.map((r) => [r, leer2(r)]));
+    const leer3 = (id) => ({ id, delegation: Object.fromEntries(DELEGATIONEN[id].map((d) => [d.id, false])), kandidaten: [] });
+    const ressorts = Object.fromEntries(RESSORTS.map((r) => [r, leer3(r)]));
     ressorts.cfo.person = startPerson(
       "vp1",
       "Renate Kolbeck",
@@ -8029,8 +8374,8 @@
     hqAktualisiere(s2);
     return ok4(alteStufe === st ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st}.`);
   }
-  function zentraleKuerzen(s2, prozent) {
-    const p = clamp(prozent, 0, 0.3);
+  function zentraleKuerzen(s2, prozent2) {
+    const p = clamp(prozent2, 0, 0.3);
     let fte = 0;
     for (const a of s2.hq.abteilungen) {
       const weg = Math.round(a.fte * p);
@@ -8049,16 +8394,16 @@
   }
   function wirkungText(s2, id) {
     const Lx = s2.hq.wirkung[id];
-    const NULL = "Standard";
+    const NULL2 = "Standard";
     const pz4 = (x, d = 1) => {
       const f = 10 ** d, r = Math.round(x * 100 * f) / f;
-      return r === 0 ? NULL : `${r > 0 ? "+" : ""}${r.toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d })} %`;
+      return r === 0 ? NULL2 : `${r > 0 ? "+" : ""}${r.toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d })} %`;
     };
     const pkt = (x) => {
       const r = Math.round(x);
-      return r === 0 ? NULL : `${r > 0 ? "+" : ""}${r} ${Math.abs(r) === 1 ? "Punkt" : "Punkte"}`;
+      return r === 0 ? NULL2 : `${r > 0 ? "+" : ""}${r} ${Math.abs(r) === 1 ? "Punkt" : "Punkte"}`;
     };
-    const teile = (...l) => l.every(([, v]) => v === NULL) ? "Marktstandard, Ausbau bringt mehr" : l.map(([k, v]) => `${k} ${v}`).join(", ");
+    const teile = (...l) => l.every(([, v]) => v === NULL2) ? "Marktstandard, Ausbau bringt mehr" : l.map(([k, v]) => `${k} ${v}`).join(", ");
     const W3 = HQ_WIRKUNG;
     switch (id) {
       case "controlling": {
@@ -8100,7 +8445,7 @@
       kostenWoche: s2.zentrale.kostenWoche,
       kostenStart: s2.zentrale.kostenStart,
       standort: standort(s2, hq.sitz),
-      kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), gesamt: eur(kosten.gesamt) },
+      kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), gesamt: eur(kosten.gesamt) },
       restmieteWoche: eur(hqRestmieteWoche(s2)),
       fte: s2.zentrale.fte,
       gebaeude: hq.gebaeude.map((g) => {
@@ -8368,6 +8713,10 @@
       wettbewerbStart: einzug.wettbewerb,
       etagen,
       grundflaecheQm: grundflaeche2,
+      // O02 Umsatztreiber: alle drei Hebel starten neutral.
+      treiber: { frequenz: 1, kaufquote: 1, bon: 1 },
+      treiberQuellen: {},
+      treiberVerlauf: [],
       baujahr: (() => {
         const r = zwischen(h, 0, 1);
         return f === "sport" ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008);
@@ -8644,7 +8993,7 @@
       const Q = h.saettigungQm[g] ?? 1;
       roh2.konzessionUmsatz += P2 * saettigung(qm, Q) * saisonFaktor(g, w) * hf * lieferantenFaktor(s2, h, g) * wettbewerbNachfrageFaktor(s2, h, g);
     }
-    return roh2;
+    return wirkeTreiber(h, roh2);
   }
   function lohnKosten(s2, h) {
     const p = h.personal;
@@ -9529,6 +9878,7 @@
     k.kreditFrei = eur(s2.cash + s2.kreditlinie);
     k.bestand = eur(s2.bestand.reduce((a, b2) => a + b2.wert, 0));
     s2.historie.push(k);
+    erfasseTreiber(s2);
     if (s2.historie.length > 520) s2.historie.splice(0, s2.historie.length - 520);
     if (!s2.prognose && w % 13 === 12 && !beendet(s2)) quartalsBewertung(s2);
     s2.einmalkostenWoche = 0;
@@ -50030,10 +50380,10 @@
     g.translate(xm + M2 / 2, hm + 0.4, zm + dm * 0.72);
     S.add(g, "#a9c6d3");
     for (let x = xm + 3; x < xm + M2 - 2; x += 3) {
-      const rg = new three_module_exports.TorusGeometry(3.25, 0.08, 3, 10, Math.PI);
-      rg.rotateY(Math.PI / 2);
-      rg.translate(x, hm + 0.4, zm + dm * 0.72);
-      S.add(rg, "#eef1f2");
+      const rg2 = new three_module_exports.TorusGeometry(3.25, 0.08, 3, 10, Math.PI);
+      rg2.rotateY(Math.PI / 2);
+      rg2.translate(x, hm + 0.4, zm + dm * 0.72);
+      S.add(rg2, "#eef1f2");
     }
     S.quader(xm, hm, zm, xm + M2, hm + 0.4, zm + dm, KIES_D);
     if (dm * 0.72 - 4 > 10) parkdeck(K3, xm + 1, zm + 1, xm + M2 - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
@@ -54749,10 +55099,10 @@
       g.translate(xm + M2 / 2, Hb + 0.3, z0 + d * 0.62);
       S.add(g, "#a9c6d3");
       for (let x = xm + 3.5; x < xm + M2 - 2.5; x += 3) {
-        const rg = new three_module_exports.TorusGeometry(3.05, 0.08, 3, 10, Math.PI);
-        rg.rotateY(Math.PI / 2);
-        rg.translate(x, Hb + 0.3, z0 + d * 0.62);
-        S.add(rg, "#eef1f2");
+        const rg2 = new three_module_exports.TorusGeometry(3.05, 0.08, 3, 10, Math.PI);
+        rg2.rotateY(Math.PI / 2);
+        rg2.translate(x, Hb + 0.3, z0 + d * 0.62);
+        S.add(rg2, "#eef1f2");
       }
       if (d * 0.62 - 4 > 10) {
         const z1 = z0 + d * 0.62 - 4;
@@ -55102,12 +55452,12 @@
     if (K3.matt && !K3.zu) {
       const front2 = K3.glas.filter((g) => g.s === K3.seiten[0] && g.eg && !g.tuer && !g.mieter && g.b - g.a > 1.7);
       const weitere = K3.glas.filter((g) => !front2.includes(g) && !g.tuer && !g.mieter && g.b - g.a > 1.7);
-      const auswahl2 = [...front2, ...weitere];
+      const auswahl3 = [...front2, ...weitere];
       const r = rng2(String(K3.haus.id) + "/blindglas");
-      const start = auswahl2.length ? Math.floor(r() * auswahl2.length) : 0;
-      const zahl2 = Math.min(4, auswahl2.length);
-      for (let i = 0; i < zahl2; i++) {
-        const g = auswahl2[(start + i * Math.max(1, Math.floor(auswahl2.length / zahl2))) % auswahl2.length];
+      const start = auswahl3.length ? Math.floor(r() * auswahl3.length) : 0;
+      const zahl3 = Math.min(4, auswahl3.length);
+      for (let i = 0; i < zahl3; i++) {
+        const g = auswahl3[(start + i * Math.max(1, Math.floor(auswahl3.length / zahl3))) % auswahl3.length];
         const front3 = g.t + 0.1;
         g.s.q(g.a + 0.1, g.b - 0.1, g.y0 + 0.12, g.y1 - 0.13, front3, front3 + 0.1, i % 2 ? "#d1d0b3" : "#b8c5b8");
         g.s.q(g.a + 0.13, g.b - 0.13, g.y1 - 0.35, g.y1 - 0.25, front3 + 0.08, front3 + 0.1, "#737c79");
@@ -101627,7 +101977,7 @@
     };
     const gewichte = [["wbs70_6", 3], ["p2", 1.4], ["q3a", klein ? 1.6 : 0.6], ["wbs70_11", metro ? 2 : klein ? 0.2 : 0.9], ["scheibe", metro ? 1 : 0.25]];
     const geschosse2 = (v) => /11|scheibe/.test(v) ? 11 : v === "q3a" ? 5 : 6;
-    const zeile = (x, z2, w, d, front2, vWunsch) => {
+    const zeile2 = (x, z2, w, d, front2, vWunsch) => {
       const entlangX = front2[1] === "z", L2 = entlangX ? w : d;
       if (L2 < 26) return;
       const v = vWunsch ?? wahlGewichtet2(rb, gewichte.filter(([q2]) => q2 !== "scheibe" || L2 >= 60));
@@ -101649,7 +101999,7 @@
       const [typ, aw, ad, variante2, g] = MA;
       setze(typ, X1 - aw, Z1 - ad, aw, ad, ["+z", "+x"], { variante: variante2, geschosse: g });
       const rw = X1 - X0 - aw - 4;
-      if (rw >= 30) zeile(X0, Z1 - TD, rw, TD, "+z");
+      if (rw >= 30) zeile2(X0, Z1 - TD, rw, TD, "+z");
       else if (rw >= 14) b2.spiel.push({ x: X0, z: Z1 - ad, w: rw, d: ad });
       b2.wege.push({ x: X0, z: Z1 - ad - 4, w: X1 - X0, d: 2.4 });
       Z1 = Z1 - ad - 5;
@@ -101669,11 +102019,11 @@
     })();
     b2.layout = lay;
     if (lay === "hof") {
-      zeile(X0, Z0, W3, TD, "-z");
-      zeile(X0, Z1 - TD, W3, TD, "+z");
+      zeile2(X0, Z0, W3, TD, "-z");
+      zeile2(X0, Z1 - TD, W3, TD, "+z");
       const zi0 = Z0 + TD + 5, zi1 = Z1 - TD - 5;
-      zeile(X0, zi0, TD, zi1 - zi0, "-x");
-      zeile(X1 - TD, zi0, TD, zi1 - zi0, "+x");
+      zeile2(X0, zi0, TD, zi1 - zi0, "-x");
+      zeile2(X1 - TD, zi0, TD, zi1 - zi0, "+x");
       const hof2 = { x: X0 + TD + 2, z: Z0 + TD + 2, w: W3 - 2 * TD - 4, d: D - 2 * TD - 4 };
       b2.spiel.push({ x: hof2.x + hof2.w * 0.3, z: hof2.z + hof2.d * 0.3, w: Math.min(16, hof2.w * 0.4), d: Math.min(12, hof2.d * 0.4) });
       b2.wege.push({ x: X0, z: Z0 + TD + 1, w: W3, d: 2.4 }, { x: X0 + TD + 1, z: Z0, w: 2.4, d: D });
@@ -101682,7 +102032,7 @@
       let x = X0, k = 0;
       while (X1 - x >= TD) {
         const front2 = k % 2 === 0 ? "+x" : "-x";
-        zeile(x, Z0, TD, D, front2);
+        zeile2(x, Z0, TD, D, front2);
         x += TD;
         if (k % 2 === 0 && X1 - x >= A2 + TD) {
           b2.parkplaetze.push({ x: x + 2, z: Z0 + 4, w: A2 - 4, d: Math.min(D - 8, 60) });
@@ -101699,7 +102049,7 @@
       let z2 = Z1, k = 0;
       while (z2 - Z0 >= TD) {
         const front2 = k % 2 === 0 ? "+z" : "-z";
-        zeile(X0, z2 - TD, W3, TD, front2);
+        zeile2(X0, z2 - TD, W3, TD, front2);
         z2 -= TD;
         if (k % 2 === 0 && z2 - Z0 >= A2 + TD) {
           b2.parkplaetze.push({ x: X0 + 4, z: z2 - A2 + 2, w: Math.min(W3 - 8, 70), d: A2 - 4 });
@@ -101712,12 +102062,12 @@
         k++;
       }
     } else if (lay === "winkel") {
-      zeile(X0, Z1 - TD, W3, TD, "+z");
-      zeile(X1 - TD, Z0, TD, D - TD - 4, "+x");
+      zeile2(X0, Z1 - TD, W3, TD, "+z");
+      zeile2(X1 - TD, Z0, TD, D - TD - 4, "+x");
       const iw = W3 - TD - 4, id = D - TD - 4;
       b2.wege.push({ x: X0, z: Z1 - TD - 3.4, w: W3 - TD, d: 2.4 });
       if (iw >= 36 && id >= 34 && rb() < 0.6) setze("slot:platte_wohn", X0, Z0, Math.min(36, iw), Math.min(34, id), ["-z"], { variante: metro ? "ph16" : "wuerfel", zustand: zustand(), geschosse: metro ? 16 : 6 });
-      else if (id >= 26) zeile(X0, Z0, iw, TD, "-z");
+      else if (id >= 26) zeile2(X0, Z0, iw, TD, "-z");
       b2.parkplaetze.push({ x: X0 + Math.min(40, iw * 0.55), z: Z0 + 2, w: Math.max(10, iw - Math.min(40, iw * 0.55) - 2), d: Math.min(16, id - 4) });
       b2.spiel.push({ x: X0 + iw * 0.35, z: Z0 + id * 0.6, w: Math.min(14, iw * 0.3), d: Math.min(10, id * 0.3) });
     } else if (lay === "punkt") {
@@ -101725,12 +102075,12 @@
       if (D > W3 * 1.25 && W3 >= TD + 40) {
         const n = Math.max(1, Math.floor((D + 10) / 40));
         for (let k = 0; k < n; k++) setze("slot:platte_wohn", X1 - 34, Z0 + k * (D / n), 34, Math.min(34, D / n - 4), ["+x"], { variante: vp, zustand: zustand(), geschosse: gp });
-        zeile(X0, Z0, TD, D, "-x", metro ? "wbs70_11" : void 0);
+        zeile2(X0, Z0, TD, D, "-x", metro ? "wbs70_11" : void 0);
         b2.parkplaetze.push({ x: X0 + TD + 3, z: Z0 + 4, w: Math.max(6, Math.min(14, W3 - TD - 40)), d: Math.min(D - 8, 60) });
       } else {
         const n = Math.max(1, Math.floor((W3 + 10) / 40));
         for (let k = 0; k < n; k++) setze("slot:platte_wohn", X0 + k * (W3 / n), Z1 - 34, Math.min(34, W3 / n - 4), 34, ["+z"], { variante: vp, zustand: zustand(), geschosse: gp });
-        zeile(X0, Z0, W3, TD, "-z", metro ? "wbs70_11" : void 0);
+        zeile2(X0, Z0, W3, TD, "-z", metro ? "wbs70_11" : void 0);
         b2.parkplaetze.push({ x: X0 + 4, z: Z0 + TD + 3, w: Math.min(W3 - 8, 60), d: Math.max(6, Math.min(14, D - TD - 40)) });
       }
     } else if (lay === "doppelwinkel") {
@@ -101746,14 +102096,14 @@
       else if (f === "+x") setze("slot:platte_wohn", X1 - Dk, Z0, Dk, D, [f], { variante: "kurve", zustand: zustand() });
       else setze("slot:platte_wohn", X0, Z0, Dk, D, [f], { variante: "kurve", zustand: zustand() });
       if (rest >= TD + 6) {
-        if (f === "+z") zeile(X0, Z0, W3, TD, "-z");
-        else if (f === "-z") zeile(X0, Z1 - TD, W3, TD, "+z");
-        else if (f === "+x") zeile(X0, Z0, TD, D, "-x");
-        else zeile(X1 - TD, Z0, TD, D, "+x");
+        if (f === "+z") zeile2(X0, Z0, W3, TD, "-z");
+        else if (f === "-z") zeile2(X0, Z1 - TD, W3, TD, "+z");
+        else if (f === "+x") zeile2(X0, Z0, TD, D, "-x");
+        else zeile2(X1 - TD, Z0, TD, D, "+x");
       }
     } else {
-      zeile(X0, Z1 - TD, W3, TD, "+z");
-      if (D >= 2 * TD + 10) zeile(X0, Z0, W3, TD, "-z");
+      zeile2(X0, Z1 - TD, W3, TD, "+z");
+      if (D >= 2 * TD + 10) zeile2(X0, Z0, W3, TD, "-z");
       else if (D - TD >= 12) {
         b2.parkplaetze.push({ x: X0 + 2, z: Z0 + 1, w: Math.min(W3 * 0.55, 50), d: Math.min(14, D - TD - 3) });
         if (W3 > 60) b2.spiel.push({ x: X0 + W3 * 0.68, z: Z0 + 2, w: Math.min(14, W3 * 0.25), d: Math.min(10, D - TD - 4) });
@@ -105080,9 +105430,9 @@
     const g = (a, b2) => Math.round(a + (b2 - a) * r()) + (metro ? 1 : 0) - (klein && b2 > 3 ? 1 : 0);
     const haus2 = (stil, geschosse2) => ({ stil, geschosse: Math.max(2, Math.min(7, geschosse2)), region: "Nord" });
     if (hof2) return haus2(r() < 0.7 ? "backstein" : "fuenfziger", 2);
-    const zeile = !eck && p.front?.length === 1 && T >= 10;
+    const zeile2 = !eck && p.front?.length === 1 && T >= 10;
     if (art === "giebel" || art === "fachwerk") {
-      if (zeile && L2 >= 6.5) {
+      if (zeile2 && L2 >= 6.5) {
         if (art === "fachwerk" && r() < 0.55) return haus2("fachwerk", g(2, 3));
         return nordBau(p, "slot:nord_giebelhaus", art === "fachwerk" ? "pastell" : r() < 0.18 ? "pastell" : p.giebelV, "nordgiebel", 3, { laden: p.nordEinkauf ? 0.85 : void 0 });
       }
@@ -105094,18 +105444,18 @@
     }
     if (art === "wiederaufbau") {
       if (eck) return haus2(r() < 0.8 ? "backstein" : "fuenfziger", g(4, 5));
-      if (zeile && L2 >= 12 && r() < 0.9) {
+      if (zeile2 && L2 >= 12 && r() < 0.9) {
         const v = p.nordEinkauf && r() < 0.6 ? "geschaeft" : waehle2(r, p.waV ?? ["kiel", "hannover"]);
         return nordBau(p, "slot:nord_wiederaufbau", v, "nordwa", 4);
       }
       return haus2(wahlGewichtet3(r, [["backstein", 3], ["fuenfziger", 0.8], ["wiederaufbau", 0.5]]), g(3, 5));
     }
     if (art === "klinker") {
-      if (zeile && L2 >= 10 && r() < 0.8) return nordBau(p, "slot:nord_reihenhaus", waehle2(r, p.reihenV ?? ["schumacher"]), "nordklinker", 3);
+      if (zeile2 && L2 >= 10 && r() < 0.8) return nordBau(p, "slot:nord_reihenhaus", waehle2(r, p.reihenV ?? ["schumacher"]), "nordklinker", 3);
       if (eck) return haus2(r() < 0.7 ? "backstein" : "gruenderzeit", g(3, 5));
       return haus2(wahlGewichtet3(r, [["backstein", 3], ["gruenderzeit", 1.4], ["jugendstil", 0.5], ["fuenfziger", 0.6]]), g(3, 5));
     }
-    if (zeile && L2 >= 10 && r() < 0.75) return nordBau(p, "slot:nord_reihenhaus", r() < 0.6 ? "siedlung" : waehle2(r, p.reihenV ?? ["schumacher"]), "nordklinker", 2);
+    if (zeile2 && L2 >= 10 && r() < 0.75) return nordBau(p, "slot:nord_reihenhaus", r() < 0.6 ? "siedlung" : waehle2(r, p.reihenV ?? ["schumacher"]), "nordklinker", 2);
     return haus2(wahlGewichtet3(r, [["backstein", 2.2], ["fuenfziger", 1.2], ["siebziger", 0.5], ["neubau", 0.6], ["wiederaufbau", 0.6]]), g(2, 4));
   }
   registriereStilProfil("nord", (p) => nordStil(p));
@@ -110314,9 +110664,9 @@
   function laden(S, scene2, F2, u0, u1, h, r, o = {}) {
     const b2 = u1 - u0;
     if (b2 < 1.8) return;
-    const rah = o.rahmen ?? waehle2(r, LADENRAHMEN2), leer2 = o.leer;
+    const rah = o.rahmen ?? waehle2(r, LADENRAHMEN2), leer3 = o.leer;
     fb5(S, F2, u0, u1, 0.3, 0.72, -0.1, 0.08, rah);
-    fb5(S, F2, u0 + 0.15, u1 - 0.15, 0.72, h - 0.85, -0.25, 0.03, leer2 ? "#dcd8ce" : GLAS_LADEN2);
+    fb5(S, F2, u0 + 0.15, u1 - 0.15, 0.72, h - 0.85, -0.25, 0.03, leer3 ? "#dcd8ce" : GLAS_LADEN2);
     fb5(S, F2, u0, u1, h - 0.85, h - 0.12, -0.1, 0.1, rah);
     const n = Math.max(1, Math.round(b2 / 2.5));
     for (let i = 0; i <= n; i++) {
@@ -110327,12 +110677,12 @@
       const ut = u0 + b2 * (r() < 0.5 ? 0.2 : 0.8);
       fb5(S, F2, ut - 0.55, ut + 0.55, 0.3, h - 1, -0.05, 0.06, dunkler(rah, 0.06));
     }
-    if (leer2) {
+    if (leer3) {
       const sh = Math.min(h - 1.3, Math.max(1.4, b2 * 0.2)), ym = 0.72 + (h - 0.85 - 0.72) / 2;
       fb5(S, F2, u0 + 0.2, u1 - 0.2, ym - sh / 2, ym + sh / 2, 0.03, 0.09, "#c8322a");
       ftext5(scene2, F2, "ZU VERMIETEN", (u0 + u1) / 2, ym, 0.1, sh * 0.8, b2 * 0.94, "#ffffff");
     } else if (o.name !== false) ftext5(scene2, F2, o.name ?? waehle2(r, o.namen ?? LAEDEN3), (u0 + u1) / 2, h - 0.49, 0.12, 0.42, b2 * 0.86, hell(rah) ? "#3a3f44" : "#f7f2e6");
-    if (o.markise && !leer2) {
+    if (o.markise && !leer3) {
       const g = new three_module_exports.BoxGeometry(b2 - 0.2, 0.12, 1.5);
       g.rotateX(0.38);
       g.translate((u0 + u1) / 2, h - 1.05, 0.72);
@@ -110627,7 +110977,7 @@
     const nAx = Math.max(2, Math.round(b2 / 2.9));
     const us = Array.from({ length: nAx }, (_, i) => b2 / nAx * (i + 0.5));
     const erker3 = (v === "wasserburg" || v === "passau" || v === "rosenheim") && b2 > 8 && r() < (v === "wasserburg" ? 0.6 : 0.35) && n >= 2;
-    const leer2 = p.zustand === "leerstand";
+    const leer3 = p.zustand === "leerstand";
     if (sichtF2(p, F2.v)) {
       const Fv = F2.v;
       if (arkade2) {
@@ -110636,11 +110986,11 @@
         fwand3(S, Fv, 0, b2, 0.3, eg, -0.6, 0, wand2, holes);
         fb5(S, Fv, 0, b2, 0.3, 0.75, -0.6, 0.06, sockelF);
         boden6(S, x0, z0 + T - tA, x0 + b2, z0 + T - 0.6, "#cfc2a8", 0.3, 0.07);
-        laden(S, scene2, teil5(Fv, 0.4, b2 - 0.4, -tA), 0, b2 - 0.8, eg - 0.25, r, { leer: leer2 });
+        laden(S, scene2, teil5(Fv, 0.4, b2 - 0.4, -tA), 0, b2 - 0.8, eg - 0.25, r, { leer: leer3 });
       } else {
         fb5(S, Fv, 0, b2, 0.3, 0.8, -0.1, 0.1, sockelF);
         if (v === "passau") for (let k = 1; k < 4; k++) fb5(S, Fv, 0, b2, 0.3 + k * 1.05, 0.38 + k * 1.05, 0, 0.06, dunkler(wand2, 0.1));
-        laden(S, scene2, Fv, 0.6, b2 - (b2 > 9 ? 2.6 : 0.6), eg - 0.35, r, { leer: leer2, markise: r() < 0.3 ? waehle2(r, FARBEN3.markise) : null });
+        laden(S, scene2, Fv, 0.6, b2 - (b2 > 9 ? 2.6 : 0.6), eg - 0.35, r, { leer: leer3, markise: r() < 0.3 ? waehle2(r, FARBEN3.markise) : null });
         if (b2 > 9) haustuer2(S, Fv, b2 - 1.5, 0.3, 1.2, 2.5, waehle2(r, HOLZ5), orn, true);
       }
       fb5(S, Fv, 0, b2, eg - 0.08, eg + 0.2, 0, 0.2, orn);
@@ -110741,7 +111091,7 @@
   }
   var MUENCHEN_V = ["neorenaissance", "neubarock", "wiederaufbau", "zeile"];
   function muenchenHaus(S, scene2, r, stil, x0, z0, b2, T, p, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer2 = p.zustand === "leerstand";
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
     let wand2, orn, dachF, n, eg, gh;
     if (stil === "neorenaissance") {
       wand2 = waehle2(r, ["#d9c3a0", "#cdb898", "#e3d2b4", "#c9c2ad", "#bdb79f", "#d8c8b0"]);
@@ -110778,7 +111128,7 @@
     };
     const ladenFront3 = (Fk, L2) => {
       if (stil === "wiederaufbau") {
-        laden(S, scene2, Fk, 0.3, L2 - 0.3, eg - 0.6, r, { leer: leer2, rahmen: waehle2(r, ["#3f4a53", "#e9e4da", "#5a4636", "#2e4f6b"]) });
+        laden(S, scene2, Fk, 0.3, L2 - 0.3, eg - 0.6, r, { leer: leer3, rahmen: waehle2(r, ["#3f4a53", "#e9e4da", "#5a4636", "#2e4f6b"]) });
         fb5(S, Fk, -0.05, L2 + 0.05, eg - 0.65, eg - 0.4, 0, 1.6, "#e8e6e0");
         fb5(S, Fk, -0.05, L2 + 0.05, eg - 0.72, eg - 0.65, 0.2, 1.62, "#3f4a53");
       } else {
@@ -110787,7 +111137,7 @@
         for (let i = 0; i < nB; i++) {
           const u0 = i * bb + 0.55, u1 = (i + 1) * bb - 0.55;
           fbogen(S, Fk, (u0 + u1) / 2, 0.3, u1 - u0 + 0.3, eg - 0.6, 0, 0.18, orn);
-          laden(S, scene2, teil5(Fk, u0, u1, 0.18), 0, u1 - u0, eg - 1.2, r, { leer: leer2, name: i === 0 ? void 0 : false, rahmen: waehle2(r, ["#3f4a53", "#2f5d4a", "#6b2e35", "#1f3a5f"]), tuer: i === nB - 1 });
+          laden(S, scene2, teil5(Fk, u0, u1, 0.18), 0, u1 - u0, eg - 1.2, r, { leer: leer3, name: i === 0 ? void 0 : false, rahmen: waehle2(r, ["#3f4a53", "#2f5d4a", "#6b2e35", "#1f3a5f"]), tuer: i === nB - 1 });
         }
         if (stil === "neorenaissance") for (let k = 1; k < 4; k++) fb5(S, Fk, 0, L2, 0.3 + k * 1.2, 0.38 + k * 1.2, 0.14, 0.2, dunkler(wand2, 0.16));
       }
@@ -111256,7 +111606,7 @@
   function wirtshausRoh(S, scene2, p) {
     const r = rng2(`wi:${p.seed}`);
     const v = p.variante ?? waehle2(r, WIRT_V);
-    const { w, d } = p, zf = d - 2.6, leer2 = p.zustand === "leerstand";
+    const { w, d } = p, zf = d - 2.6, leer3 = p.zustand === "leerstand";
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     boden6(S, 0, 0, w, zf, PFLASTER22, 0.3, 0.05);
     if (v === "brauerei") {
@@ -111557,7 +111907,7 @@
     fdiag(S, F2, um, y + hg - 0.15, u1 - 0.1, y + 0.1, 0.22, t, t + 0.09, holz);
   }
   function fachwerkHaus(S, scene2, r, p, x0, z0, b2, T, o, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer2 = p.zustand === "leerstand";
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
     const { n, eg, gh } = o, kr = o.kr ?? 0.3;
     const H = eg + n * gh + kr * 0;
     const fen = { rahmen: ORN2, glas: GLAS10, laeden: o.laedenF, blumen: o.blumen };
@@ -111568,7 +111918,7 @@
     const istStein = (k) => k < 0 ? o.steinEG : o.steinOG && k === 0;
     const seite = (Fk, L2, front2, kVersatz) => {
       if (front2 && o.laden !== false) {
-        laden(S, scene2, Fk, 0.5, L2 - (L2 > 8 ? 2.2 : 0.5), eg - 0.3, r, { leer: leer2, namen: o.namen, rahmen: o.steinEG ? waehle2(r, ["#3f4a53", "#5a4636", "#2f5d4a"]) : void 0 });
+        laden(S, scene2, Fk, 0.5, L2 - (L2 > 8 ? 2.2 : 0.5), eg - 0.3, r, { leer: leer3, namen: o.namen, rahmen: o.steinEG ? waehle2(r, ["#3f4a53", "#5a4636", "#2f5d4a"]) : void 0 });
         if (L2 > 8) haustuer2(S, Fk, L2 - 1.3, 0.3, 1.1, 2.5, waehle2(r, HOLZ5), o.steinEG ? heller(o.stein, 0.06) : o.holz, o.steinEG);
         if (!o.steinEG) {
           fb5(S, Fk, 0, L2, eg - 0.3, eg, 0, 0.1, o.holz);
@@ -111696,7 +112046,7 @@
     return H;
   }
   function sandsteinHaus(S, scene2, r, p, x0, z0, b2, T, o, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer2 = p.zustand === "leerstand";
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
     const H = o.eg + o.n * o.gh, st = o.stein, hst = heller(st, 0.08);
     S.quader(x0, 0, z0, x0 + b2, H, z0 + T, st);
     const fen = { rahmen: ORN2, glas: GLAS10, fasche: hst, simsF: hst };
@@ -111704,7 +112054,7 @@
       if (!ok5 || !sichtF2(p, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       if (k === "v") {
-        laden(S, scene2, Fk, 0.5, L2 - 2.2, o.eg - 0.3, r, { leer: leer2, rahmen: waehle2(r, ["#3f4a53", "#5a4636"]) });
+        laden(S, scene2, Fk, 0.5, L2 - 2.2, o.eg - 0.3, r, { leer: leer3, rahmen: waehle2(r, ["#3f4a53", "#5a4636"]) });
         haustuer2(S, Fk, L2 - 1.3, 0.3, 1.1, 2.6, waehle2(r, HOLZ5), hst, true);
       } else for (const u of achsen6(0, L2, 3.2, 0.6)) fenster6(S, Fk, u, 1.4, 0.9, 1.3, fen);
       for (let kk = 0; kk < o.n; kk++) {
@@ -112182,13 +112532,13 @@
     S.quader(x + b2 / 2, y + 1.2, z2 - 0.35, x + b2 / 2 + 0.05, y + 1.9, z2 + 0.35, GLAS_DUNKEL);
   }
   function fuenfzigerHaus(S, scene2, r, p, x0, z0, b2, T, typ, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer2 = p.zustand === "leerstand";
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
     const n = 4 + (r() < 0.5 ? 1 : 0), eg = 4.6, gh = 3.2, H = eg + n * gh;
     const wand2 = waehle2(r, ["#f2f0ea", "#e9e6de", "#ece3cf", "#e2e6e3", "#efe9dc"]);
     const akz = waehle2(r, ["#7fa6b8", "#d9a35a", "#c96a54", "#8fb09a", "#e2c56b", "#6f8fb5"]);
     S.quader(x0, 0, z0, x0 + b2, H, z0 + T, wand2);
     const front2 = (Fk, L2, haupt) => {
-      laden(S, scene2, Fk, 0.2, L2 - 0.2, eg - 0.5, r, { leer: leer2, namen: LAEDEN_BW, rahmen: waehle2(r, ["#3f4a53", "#e9e4da", "#2e4f6b"]) });
+      laden(S, scene2, Fk, 0.2, L2 - 0.2, eg - 0.5, r, { leer: leer3, namen: LAEDEN_BW, rahmen: waehle2(r, ["#3f4a53", "#e9e4da", "#2e4f6b"]) });
       fb5(S, Fk, -0.3, L2 + 0.3, eg - 0.6, eg - 0.35, 0, 2.2, "#f4f3ef");
       fb5(S, Fk, -0.3, L2 + 0.3, eg - 0.68, eg - 0.6, 1.9, 2.22, akz);
       if (typ === "raster") {
@@ -117253,10 +117603,10 @@
     };
     rr(ring, x0 + ri, z0 + ri, x1 - ri, z1 - ri, 8, false);
     rr(ring, x0 + ri + 3, z0 + ri + 3, x1 - ri - 3, z1 - ri - 3, 6, true);
-    const rg = new three_module_exports.ExtrudeGeometry(ring, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
-    rg.rotateX(Math.PI / 2);
-    rg.translate(0, y + 0.05, 0);
-    S.add(rg, F.weg);
+    const rg2 = new three_module_exports.ExtrudeGeometry(ring, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
+    rg2.rotateX(Math.PI / 2);
+    rg2.translate(0, y + 0.05, 0);
+    S.add(rg2, F.weg);
     const diagonalen = [[x0, z0], [x1, z0], [x0, z1], [x1, z1]];
     for (const [ex, ez] of diagonalen) {
       const len = Math.hypot(cx - ex, cz - ez) - 3;
@@ -118801,14 +119151,14 @@
   var ALTER = [["10-13", "Tweens"], ["13-17", "Teens"], ["18-29", "Young Adults"], ["30-49", "30 bis 49"], ["50+", "50 plus"], ["70+", "70 plus"]];
   var GESCHLECHT = [["damen", "Damen"], ["herren", "Herren"], ["unisex", "Unisex"], ["kinder", "Kinder"]];
   var KATEGORIE2 = ["Bekleidung", "Schuhe", "W\xE4sche", "Accessoires", "Home", "Beauty"];
-  var PREIS = [["einstieg", "Einstieg"], ["mitte", "Mitte"], ["gehoben", "Gehoben"]];
+  var PREIS2 = [["einstieg", "Einstieg"], ["mitte", "Mitte"], ["gehoben", "Gehoben"]];
   var STIL2 = [["klassisch", "klassisch"], ["modern", "modern"], ["sportlich", "sportlich"], ["trendig", "trendig"]];
   var FARBEN5 = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#c9483e", "#2f63b5", "#1f1f1f", "#d27aa0", "#3f8f8a", "#7a5a3a"];
   var NAMEN2 = { damen: ["Linnea", "Mira Lenz", "Johanna B.", "Ella Sommer"], herren: ["Nordhaven", "Carl Ostwind", "Feldweg", "Henrik & Co."], unisex: ["Studio Hartwig", "Kleeblatt", "Hafenblau"], kinder: ["Hafenkind", "Kai & Kalle", "Pusteblume"] };
   var REGIONEN4 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var alterText = (a) => ALTER.find((x) => x[0] === a)?.[1] ?? a;
   var zielText = (z2) => `${GESCHLECHT.find((g) => g[0] === z2.geschlecht)?.[1] ?? ""} ${alterText(z2.alter)}`;
-  var preisText = (p) => PREIS.find((x) => x[0] === p)?.[1] ?? p;
+  var preisText = (p) => PREIS2.find((x) => x[0] === p)?.[1] ?? p;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
   var punkte = (x) => `+${(x * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Punkte`;
   function balken6(wert, farbe2 = "#2f63b5") {
@@ -118878,7 +119228,7 @@
       }).join("") : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
       h += feld("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
     } else if (A.schritt === 2) {
-      h += feld("Preislage", seg("emPreis", m.preislage, PREIS));
+      h += feld("Preislage", seg("emPreis", m.preislage, PREIS2));
       h += feld("Stil", seg("emStil", m.stil, STIL2), "trendig veraltet schneller");
       h += feld("Qualit\xE4t", seg("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, "\u2605".repeat(x)])));
     } else if (A.schritt === 3) {
@@ -119088,7 +119438,7 @@
     const text3 = (id, k) => formatiere(SP().get(id)?.format ?? "eur", k[id] ?? 0);
     const dot = (a) => a ? `<span class="ampel a-${a}" title="${AMPEL_TEXT[a]}"></span>` : '<span class="ampel ohne"></span>';
     const seg = (act, wert, optionen, extra = "") => `<div class="seg">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
-    const zahl2 = (titel, inhalt2, p, ton = "", a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
+    const zahl3 = (titel, inhalt2, p, ton = "", a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
     function tabs() {
       const n = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
@@ -119103,7 +119453,7 @@
       const u = q2.uebersicht(s2(), { format: ui.format }), g = u.summe.kennzahlen, ga = u.summe.ampeln;
       let h = tabs();
       h += seg("format", ui.format, [["warenhaus", "Hartwig"], ["sport", "Hartwig Sport"]]);
-      h += `<div class="raster">${zahl2("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl2("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl2("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl2("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
+      h += `<div class="raster">${zahl3("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl3("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl3("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl3("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
       const spalten2 = [...q2.spalten()].sort((a, b2) => b2.standard - a.standard);
       h += `<div class="spaltenwahl"><span>Spalten</span>${spalten2.map((c) => {
         const i = ui.spalten.indexOf(c.id);
@@ -119148,7 +119498,7 @@
       const k = d.kennzahlen, st = d.steuerung, a = d.ampeln;
       let h = tabs();
       h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc(d.bereichName)}</button>`;
-      h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl2(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl2(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
+      h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl3(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl3(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
       const v = d.verlauf;
       h += kurve4("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
       h += kurve4("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
@@ -120305,7 +120655,7 @@
     const einstellungen = () => ctx.zustand();
     const daten = () => E.posteingang(s2());
     const wochen = (n) => n === 0 ? "l\xE4uft diese Woche ab" : n === 1 ? "noch 1 Woche" : "noch " + n + " Wochen";
-    const leer2 = (t) => '<div class="karte"><div class="zeile postleer">' + esc(t) + "</div></div>";
+    const leer3 = (t) => '<div class="karte"><div class="zeile postleer">' + esc(t) + "</div></div>";
     function tabs(D) {
       const aktiv = einstellungen().reiter;
       return '<div class="tabs posttabs" role="tablist">' + [
@@ -120316,7 +120666,7 @@
     }
     function handeln(D) {
       if (ui.verhandlung) return verhandeln();
-      if (!D.handeln.length) return leer2("Keine offenen Angebote oder Entscheidungen.");
+      if (!D.handeln.length) return leer3("Keine offenen Angebote oder Entscheidungen.");
       return D.handeln.map((p) => {
         const rest = '<span class="chip ' + (p.dringend ? "warn" : "grau") + '">' + wochen(p.restWochen) + "</span>";
         const wert = p.wert ? '<div class="postwert"><b>' + esc(geld(p.wert.betrag)) + "</b><span>" + esc(p.wert.einheit) + "</span></div>" : "";
@@ -120329,7 +120679,7 @@
       const a = s2().angebote.find((x) => x.id === ui.verhandlung.id && x.status === "offen");
       if (!a) {
         ui.verhandlung = null;
-        return leer2("Das Angebot ist nicht mehr offen.");
+        return leer3("Das Angebot ist nicht mehr offen.");
       }
       const hauser = s2().haeuser.filter((h) => h.status === "offen" && h.etagen.includes(a.etage ?? 0)).sort((x, y) => x.stadt.localeCompare(y.stadt) || x.name.localeCompare(y.name));
       return '<button class="postzurueck" data-po-a="zurueck">\u2190 Zur\xFCck zu den Angeboten</button><div class="karte"><div class="postkopf"><div class="posttyp">Paketangebot verhandeln</div><h3>' + esc(a.titel) + '</h3><p class="posthinweis">Mindestens ' + (a.minHaeuser ?? 1) + ' Standorte ausw\xE4hlen. Die Engine pr\xFCft anschlie\xDFend die Verhandlungsposition.</p></div><div class="posthausliste">' + hauser.map((h) => '<label class="posthaus"><input data-po-haus="' + esc(h.id) + '" type="checkbox" ' + (ui.verhandlung.haeuser.has(h.id) ? "checked" : "") + "><span>" + esc(h.name) + "<small>" + esc(h.stadt) + "</small></span></label>").join("") + '</div><div class="postaktionen"><button data-po-a="verhandeln" class="gruen">Auswahl verhandeln (' + ui.verhandlung.haeuser.size + ")</button></div></div>";
@@ -120339,7 +120689,7 @@
       const liste = D.meldungen.filter((m) => filter === "Alle" || m.kategorie === filter);
       const kategorien = ["Alle", "Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer"];
       let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => "<option " + (k === filter ? "selected " : "") + 'value="' + esc(k) + '">' + esc(k) + "</option>").join("") + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
-      if (!liste.length) return html + leer2("Keine Meldungen in dieser Kategorie.");
+      if (!liste.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
       const gelesen2 = new Set(einstellungen().gelesen ?? []);
       const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6" };
       return html + liste.map((m) => {
@@ -120349,7 +120699,7 @@
       }).join("");
     }
     function erledigt(D) {
-      if (!D.erledigt.length) return leer2("In den letzten 13 Wochen wurde noch nichts erledigt.");
+      if (!D.erledigt.length) return leer3("In den letzten 13 Wochen wurde noch nichts erledigt.");
       return D.erledigt.map((p) => '<div class="karte posterledigt" data-post-id="' + esc(p.id) + '"><small>' + (p.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p.woche) + "</small><b>" + esc(p.titel) + "</b><span>" + esc(p.ergebnis) + (p.standard ? " \xB7 Automatisch bei Fristablauf" : "") + "</span></div>").join("");
     }
     function zeigen(scrollHalten = false) {
@@ -120513,9 +120863,9 @@
       const v = u.verlauf.slice(-26);
       h += kurve2("Kundschaft je Woche", v.map((x) => x.kunden), (x) => fmt.format(Math.round(x)), "k:kunden", P2, "#2f63b5");
       h += kurve2("Markenst\xE4rke", v.map((x) => x.marke), (x) => dez(x, 1), "k:marke", P2, "#8c5a7a");
-      const zeile = (a) => `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status] ?? "#999"}"></span><span class="was">${esc(a.name)} <i>${esc(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}</i></span><span class="qm">KW ${a.startKw} bis ${a.endeKw}</span></div>`;
-      if (u.laufend.length) h += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile).join("")}</div>`;
-      if (u.naechste.length) h += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile).join("")}</div>`;
+      const zeile2 = (a) => `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status] ?? "#999"}"></span><span class="was">${esc(a.name)} <i>${esc(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}</i></span><span class="qm">KW ${a.startKw} bis ${a.endeKw}</span></div>`;
+      if (u.laufend.length) h += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile2).join("")}</div>`;
+      if (u.naechste.length) h += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile2).join("")}</div>`;
       for (const x of u.hinweise) h += `<div class="olief warnung">${esc(x)}</div>`;
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h };
     }
@@ -122198,7 +122548,7 @@
       }
       berichtZeigen(meins);
     }
-    function zeile(name2, wert, k = "") {
+    function zeile2(name2, wert, k = "") {
       return '<div class="wb-zeile ' + k + '"><span>' + esc(name2) + "</span><strong>" + esc(wert) + "</strong></div>";
     }
     function berichtZeigen(meins) {
@@ -122210,7 +122560,7 @@
       const uDelta = delta(bericht2.umsatz, bericht2.umsatzVor);
       const eDelta = delta(bericht2.ebitda, bericht2.ebitdaVor);
       const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.png)"></div><span>' + esc(a.text) + "</span></div>" : "";
-      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile("Cash operativ", "nicht separat erfasst") + zeile("Investitionen", "nicht separat erfasst") + zeile("Finanzierung", "nicht separat erfasst") + zeile("Cash netto", eur2(bericht2.cashNetto)) + zeile("Cash-Bestand", eur2(bericht2.cash), "wb-summe") + "<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + "</h4>" + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
+      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile2("Cash operativ", "nicht separat erfasst") + zeile2("Investitionen", "nicht separat erfasst") + zeile2("Finanzierung", "nicht separat erfasst") + zeile2("Cash netto", eur2(bericht2.cashNetto)) + zeile2("Cash-Bestand", eur2(bericht2.cash), "wb-summe") + "<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + "</h4>" + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
       node.hidden = false;
       node.className = "bericht-ein";
       document.body.classList.add("wochen-aktiv");
@@ -122313,6 +122663,115 @@
     return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht2 && { ...bericht2, vorgaenge: bericht2.vorgaenge.length, meldungen: bericht2.meldungen.length, meldungstexte: bericht2.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() {
       return status;
     } };
+  }
+
+  // src/ui/reporting.js
+  var prozent = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
+  var zahl2 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
+  var euro2 = (x) => zahl2(x, 2) + " \u20AC";
+  var abweichung = (wert, basis2) => basis2 == null ? "Kein Vorjahr" : (wert >= basis2 ? "\u2191 " : "\u2193 ") + prozent(basis2 ? wert / basis2 - 1 : 0);
+  var punkt = (wert, basis2) => basis2 == null ? "Kein Vorjahr" : (wert >= basis2 ? "\u2191 " : "\u2193 ") + zahl2((wert - basis2) * 100) + " Punkte";
+  function brueckeHtml(br) {
+    if (br.status !== "ok") return '<div class="o02-hinweis">' + esc(br.status) + "</div>";
+    const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
+    const maximal = Math.max(1, ...eintraege.map((x) => Math.abs(x[1])));
+    const zeilen = eintraege.map(([name2, wert]) => '<div class="o02-effekt"><span>' + name2 + '</span><div class="o02-steg"><i class="' + (wert < 0 ? "minus" : "plus") + '" style="width:' + Math.max(1, Math.round(Math.abs(wert) / maximal * 100)) + '%"></i></div><b>' + esc(geld(wert)) + "</b></div>").join("");
+    return '<div class="o02-bruecke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '"><div class="o02-end"><b>Vorjahr ' + geld(br.vorher) + "</b><b>Ist " + geld(br.aktuell) + "</b></div>" + zeilen + '<div class="o02-end"><b>Abweichung ' + geld(br.differenz) + "</b><span>Boneffekt " + geld(br.bon) + "</span></div>" + (br.vorjahrGeschaetzt ? "<small>Vorjahreswerte teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt.</small>" : "") + "</div>";
+  }
+  function hausTreiberZeile(E, s2, id) {
+    const d = E.hausTreiber(s2, id);
+    if (!d) return '<div class="karte o02-haus"><div class="khead">Umsatztreiber</div><div class="zeile grau">Noch keine abgeschlossene Woche</div></div>';
+    const a = d.aktuell, v = d.vorjahr;
+    const br = E.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
+    const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc(wert) + "</b><small>" + esc(delta) + "</small></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent(a.kaufquote), punkt(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl2(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+  }
+  function zeile(z2, haus2 = false) {
+    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc(z2.ampelfarbe) + '"></span>' + esc(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
+  }
+  function reportingModul(ctx) {
+    const E = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
+    const sortiere = (werte) => [...werte].sort((a, b2) => {
+      const av = a[ui.sort], bv = b2[ui.sort];
+      return (ui.sort === "name" ? String(av).localeCompare(String(bv), "de") : Number(bv ?? -1e15) - Number(av ?? -1e15)) || a.name.localeCompare(b2.name, "de");
+    });
+    const karten = (werte) => sortiere(werte).map((z2) => zeile(z2, true)).join("");
+    const leere = '<div class="zeile grau">Keine H\xE4user im gew\xE4hlten Filter.</div>';
+    const tabelle = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b><b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + "</div></div>";
+    const auswahl3 = (name2, key, optionen) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen.map(([wert, titel]) => '<option value="' + esc(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc(titel) + "</option>").join("") + "</select></label>";
+    function anzeigen() {
+      const daten = E.reporting(ctx.s(), ui.wochen, ui.format);
+      const hs = daten.zeilen;
+      const gruppen = daten.gruppen;
+      let content = '<div class="o02-filter">' + auswahl3("Ebene", "ebene", [["region", "Region"], ["hauscluster", "Hauscluster"], ["haus", "Haus"]]) + auswahl3("Format", "format", [["alle", "Alle"], ...[...new Set(ctx.s().haeuser.map((z2) => z2.format))].map((f) => [f, f === "warenhaus" ? "Hartwig" : f === "sport" ? "Hartwig Sport" : f === "fundus" ? "FUNDUS" : f])]) + auswahl3("Zeitraum", "wochen", [[1, "1 Woche"], [4, "4 Wochen"], [13, "13 Wochen"], [52, "52 Wochen"]]) + auswahl3("Sortieren", "sort", [
+        ["umsatz", "Umsatz"],
+        ["abweichung", "Abweichung"],
+        ["frequenz", "Frequenz"],
+        ["kaufquote", "Kaufquote"],
+        ["bon", "Bon"],
+        ["name", "Name"]
+      ]) + "</div>";
+      content += '<div class="karte"><div class="khead">Konzernbr\xFCcke zum Vorjahr</div>' + brueckeHtml(daten.bruecke) + "</div>";
+      if (ui.ebene === "haus") content += tabelle(karten(hs));
+      else {
+        const ebene = ui.ebene;
+        const ids = [...new Set(hs.map((z2) => z2[ebene]))];
+        const abschnitte = ids.sort((a, b2) => a.localeCompare(b2, "de")).map((id) => {
+          const gruppe2 = gruppen.find((g) => g.ebene === ebene && g.id === id);
+          const treff = hs.filter((z2) => z2[ebene] === id);
+          let innen = "";
+          if (ebene === "region") {
+            const unter = [...new Set(treff.map((z2) => z2.hauscluster))];
+            innen = unter.map((hc) => {
+              const x = treff.filter((z2) => z2.hauscluster === hc);
+              if (unter.length === 1 && hc === id) return karten(x);
+              const g = gruppen.find((gg) => gg.ebene === "hauscluster" && gg.id === hc);
+              return '<details class="o02-unter"><summary>' + esc(hc) + " (" + x.length + " H\xE4user)</summary>" + (g ? zeile(g) : "") + karten(x) + "</details>";
+            }).join("");
+          } else innen = karten(treff);
+          return '<details class="o02-gruppe"><summary>' + esc(id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe2 ? zeile(gruppe2) : "") + tabelle(innen) + "</details>";
+        }).join("");
+        content += abschnitte || leere;
+      }
+      content += '<div class="karte"><div class="khead">Beobachtungsliste <small>zehn gr\xF6\xDFte negative Umsatzabweichungen</small></div>' + (daten.beobachtung.length ? daten.beobachtung.filter((o) => hs.some((z2) => z2.id === o.hausId)).map((o) => '<button class="zeile o02-beobachtung" data-o02-open="' + esc(o.hausId) + '"><span class="was"><b>' + esc(o.name) + "</b><small>" + esc(o.haupttreiber) + "</small></span><strong>" + geld(o.abweichung) + "</strong><span>\u2192</span></button>").join("") : '<div class="zeile grau">Noch keine negativen Vorjahresabweichungen verf\xFCgbar.</div>') + "</div>";
+      ctx.panel("Reporting", "Operatives Wochenreporting \xB7 " + ui.wochen + " Woche(n)", content, "gross");
+      ui.aktiv = true;
+    }
+    ctx.inhalt.addEventListener("change", (e) => {
+      if (!ui.aktiv || !e.target?.dataset?.o02Wahl) return;
+      const key = e.target.dataset.o02Wahl;
+      if (!Object.prototype.hasOwnProperty.call(ui, key)) return;
+      ui[key] = key === "wochen" ? Number(e.target.value) : e.target.value;
+      anzeigen();
+    });
+    ctx.inhalt.addEventListener("click", (e) => {
+      if (!ui.aktiv) return;
+      const el = e.target.closest("[data-o02-open]");
+      if (el) {
+        ui.aktiv = false;
+        ctx.hausOeffnen(el.dataset.o02Open);
+      }
+    });
+    ctx.inhalt.addEventListener("keydown", (e) => {
+      if (!ui.aktiv || e.key !== "Enter" && e.key !== " ") return;
+      const el = e.target.closest("[data-o02-open]");
+      if (el) {
+        e.preventDefault();
+        ui.aktiv = false;
+        ctx.hausOeffnen(el.dataset.o02Open);
+      }
+    });
+    return {
+      oeffne: anzeigen,
+      zu: () => {
+        ui.aktiv = false;
+      },
+      aktiv: () => ui.aktiv,
+      pruefe: () => {
+        const b2 = ctx.inhalt.querySelector(".o02-bruecke");
+        return !b2 || Number(b2.dataset.o02Diff) === Number(b2.dataset.o02Summe);
+      }
+    };
   }
 
   // src/spiel.js
@@ -122667,9 +123126,9 @@
     sb = spielBauer(s, { getrennt: true, wurzel, stadt: name2, merk: merk(), hausLod: "nah", hq: hqGrafik });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl2 = /* @__PURE__ */ new Map();
-    for (const p of plan.parzellen) zahl2.set(p.typ, (zahl2.get(p.typ) ?? 0) + 1);
-    const kachelTyp = (p) => !p.standort && !IMMER_GRUND.has(p.typ) && (HAUSTYPEN.has(p.typ) || p.typ.startsWith("slot:") && zahl2.get(p.typ) >= 5);
+    const zahl3 = /* @__PURE__ */ new Map();
+    for (const p of plan.parzellen) zahl3.set(p.typ, (zahl3.get(p.typ) ?? 0) + 1);
+    const kachelTyp = (p) => !p.standort && !IMMER_GRUND.has(p.typ) && (HAUSTYPEN.has(p.typ) || p.typ.startsWith("slot:") && zahl3.get(p.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z2, typ) {
       const f = bauerFuer(z2, typ);
       return (S, sc, p) => {
@@ -122924,7 +123383,7 @@
     if (st.woche === 24) fuehreAus(st, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
     if (st.woche === 50) fuehreAus(st, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
-  var module2 = () => [ek, vs, mk, pr, po, org].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -122999,12 +123458,13 @@
     const z2 = sb.zustand(id);
     const bild3 = z2 ? [z2.status, ...z2.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z2.aktion ? `Aktion ${AKTION_NAME[z2.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
     const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
-    const zahl2 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
+    const zahl3 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
-    html += `<div class="raster">${zahl2("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl2("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl2("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl2("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
+    html += `<div class="raster">${zahl3("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl3("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl3("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl3("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
+    html += hausTreiberZeile(src_exports, s, id);
     if (h.klasse === "premium") {
       const p = premiumUebersicht(s).find((q2) => q2.id === id);
-      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl2("Premium-Image", Math.round(p?.image ?? 80) + " / 100")}${zahl2("Immobilien- & Marktwert", geld(p?.marktwert ?? 0))}${zahl2("EBITDA-Marge (DB)", ((p?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl2("Aktionsschutz", p?.schutz ? "Aktiv" : "Aus")}</div>`;
+      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl3("Premium-Image", Math.round(p?.image ?? 80) + " / 100")}${zahl3("Immobilien- & Marktwert", geld(p?.marktwert ?? 0))}${zahl3("EBITDA-Marge (DB)", ((p?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl3("Aktionsschutz", p?.schutz ? "Aktiv" : "Aus")}</div>`;
       if (h.premiumEigentuemer) html += `<div class="zeile">Eigent\xFCmer: ${h.premiumEigentuemer}</div>`;
       else if (h.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
       const an = s.angebote.find((a) => a.status === "offen" && a.typ === "premiumVerkauf" && a.wunschHaeuser?.includes(id));
@@ -123154,10 +123614,10 @@
     offenesHaus = null;
     offenesHq = gebaeudeId ?? true;
     const u = hqUebersicht(s), j = hqGrafik();
-    const zahl2 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
+    const zahl3 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
     const pz4 = (x) => `${Math.round((x ?? 0) * 100)} %`;
     const knopf = (text3, args, art = "") => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
-    let html = `<div class="raster">${zahl2("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl2("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl2("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl2("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
+    let html = `<div class="raster">${zahl3("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl3("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl3("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl3("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
     if (gWahl) {
@@ -123221,6 +123681,7 @@
   var pr = null;
   var po = null;
   var org = null;
+  var rg = null;
   var nachAktion = () => {
     cockpitZeigen();
     ek.badge();
@@ -123266,12 +123727,21 @@
       else schliessePanel();
     }
   });
+  rg = reportingModul({ E: src_exports, s: () => s, panel, inhalt: $("pinhalt"), hausOeffnen: (id) => {
+    const h = s.haeuser.find((x) => x.id === id);
+    if (h && h.stadt !== stadtName) {
+      wahl2.value = h.stadt;
+      baueStadtAusSpiel(h.stadt);
+    }
+    oeffneHaus(id);
+  } });
+  $("reporting").addEventListener("click", () => oeffneModul(rg));
   reise = reiseModul({
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
       const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== "geschlossen");
-      const zahl2 = (rolle2) => d.standorte.filter((p) => p.rolle === rolle2).length;
-      const formate = [["Hartwig", hs.filter((h) => h.format === "warenhaus").length], ["Volkskauf", zahl2("schwester")], ["Sport", hs.filter((h) => h.format === "sport").length], ["FUNDUS", zahl2("outlet")]];
+      const zahl3 = (rolle2) => d.standorte.filter((p) => p.rolle === rolle2).length;
+      const formate = [["Hartwig", hs.filter((h) => h.format === "warenhaus").length], ["Volkskauf", zahl3("schwester")], ["Sport", hs.filter((h) => h.format === "sport").length], ["FUNDUS", zahl3("outlet")]];
       return {
         name: d.name,
         region: d.region,
@@ -123391,8 +123861,8 @@
         camera: () => cam,
         info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + " \xD7 " + canvas.height, grafikprofil: sparsam ? "sparsam" : "hoch" })
       });
-      const zeile = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
-      const html = '<div class="karte"><div class="khead">' + d.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile("Gesch\xE4tzte Bildrate", d.fps + " FPS") + zeile("Framezeit, 95. Perzentil", d.frameP95Ms + " ms") + zeile("Renderaufruf, 95. Perzentil", d.renderP95Ms + " ms") + zeile("Frames \xFCber 33 ms", d.frameUeber33ms + " / " + (d.frames - 1)) + zeile("Draw Calls", d.drawCalls) + zeile("Dreiecke", fmt.format(d.dreiecke)) + zeile("Geometrien / Texturen", d.geometrien + " / " + d.texturen) + zeile("Teile der Stadt", fmt.format(d.teile)) + zeile("Canvas", d.bild) + zeile("Pixelratio", d.pixelRatio) + zeile("Grafikprofil", d.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
+      const zeile2 = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
+      const html = '<div class="karte"><div class="khead">' + d.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile2("Gesch\xE4tzte Bildrate", d.fps + " FPS") + zeile2("Framezeit, 95. Perzentil", d.frameP95Ms + " ms") + zeile2("Renderaufruf, 95. Perzentil", d.renderP95Ms + " ms") + zeile2("Frames \xFCber 33 ms", d.frameUeber33ms + " / " + (d.frames - 1)) + zeile2("Draw Calls", d.drawCalls) + zeile2("Dreiecke", fmt.format(d.dreiecke)) + zeile2("Geometrien / Texturen", d.geometrien + " / " + d.texturen) + zeile2("Teile der Stadt", fmt.format(d.teile)) + zeile2("Canvas", d.bild) + zeile2("Pixelratio", d.pixelRatio) + zeile2("Grafikprofil", d.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
       panel("Performance", d.stadt + " \xB7 KW " + (d.woche + 1), html, "gross");
       window.spiel.letzteDiagnose = d;
     } catch (e) {
@@ -123457,6 +123927,8 @@
   window.spiel = {
     neuesSpiel: neuesSpiel3,
     speichern: sofortSpeichern,
+    reporting: rg,
+    oeffneReporting: () => oeffneModul(rg),
     posteingang: po,
     oeffnePosteingang: (...a) => oeffneModul(po, ...a),
     performanceMessen: diagnoseZeigen,
@@ -123515,6 +123987,17 @@
       if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), "Umsatz Woche": geld(c.umsatzWoche) });
       for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler5.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
       if ($("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler5.push(`KW: ${$("kw").textContent}`);
+      if (offenesHaus) {
+        const d = hausTreiber(s, offenesHaus);
+        const el = $("pinhalt").querySelector(".o02-haus");
+        if (d && el) {
+          for (const [schluessel, sollWert] of Object.entries({ umsatz: d.aktuell.umsatz, frequenz: d.aktuell.frequenz, kaufquote: d.aktuell.kaufquote, bon: d.aktuell.bon }))
+            if (Number(el.dataset["o02" + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler5.push("O02 " + schluessel + ": Hausanzeige ungleich Engine");
+          const br = el.querySelector(".o02-bruecke");
+          if (br && Number(br.dataset.o02Summe) !== Number(br.dataset.o02Diff)) fehler5.push("O02 Br\xFCcke summiert nicht exakt");
+        } else if (d) fehler5.push("O02 Haus-Treiberzeile fehlt");
+      }
+      if (rg?.aktiv?.() && !rg.pruefe()) fehler5.push("O02 Reporting-Br\xFCcke summiert nicht exakt");
       if (offenesHq && typeof hqUebersicht === "function") {
         const u = hqUebersicht(s), hk = kz2($("pinhalt"));
         const sollHq = { "Kosten Zentrale je Woche": geld(u.kostenWoche), "Besch\xE4ftigte": fmt.format(Math.round(u.fte)) + " FTE" };
