@@ -299,6 +299,10 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
+    spielendeStart: {
+      haeuser: haeuser.length,
+      fte: haeuser.reduce((sum, haus) => sum + haus.personal.vollzeit + haus.personal.teilzeit + haus.personal.aushilfen, 0),
+    },
     premiumSchuetzen: true,
     wettbewerber: [],
     wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,

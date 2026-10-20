@@ -49,6 +49,9 @@ export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, Po
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
 export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
+export {
+  endwertung, ebitdaJahr, immobilienWert, unternehmenswert, endKennzahlen, spielBeenden, spielendePruefen,
+} from './spielende';
 // O03 IT
 export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itProjektPlan, generationInCluster, itAlter, ausfallRisiko, type ItStand, type ItSystemId, type ItProjekt, type ItAktion, type ItPhase, type ProjektArt, type Generation } from './it';
 

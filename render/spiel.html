@@ -11,6 +11,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./src/ui/reise-woche.css">
+<link rel="stylesheet" href="./src/ui/spielende.css">
 <link rel="stylesheet" href="./src/ui/statistik.css">
 <style>
   :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); --schrift: 1; }
@@ -483,6 +484,8 @@
       <!-- O04 Personal -->
       <button class="mkachel" id="personaleinsatz"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-2a6 6 0 0 1 12 0v2M14 13a5 5 0 0 1 8 4v4M3 11h10"/></svg><b>Personaleinsatz</b><small>Dienstplan, Aushilfen, Springer</small></button>
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>
+      <button class="mkachel" id="spiel-bestenliste" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6 3h12v9a6 6 0 0 1-12 0zM6 6H3v2a4 4 0 0 0 4 4M18 6h3v2a4 4 0 0 1-4 4"/></svg><b>Bestenliste</b><small>Bilanz und Rekorde</small></button>
+      <button class="mkachel" id="spiel-ruhestand" type="button" hidden><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>Ruhestand</b><small>Ab Jahr sechs</small></button>
       <button class="mkachel" id="werkzeuge" type="button" hidden style="display:none"><b>Testwerkzeuge</b><small>Diagnose und Fehlerberichte</small></button>
       <button class="mkachel" id="performance" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18a9 9 0 1 1 18 0M12 17l5-7M7 18h10"/></svg><b>Performance</b><small>iPhone messen</small></button>
       <button class="mkachel" id="einstellungen" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19 13 2-1-2-1-.5-2 1-2-2-2-2 1-2-.5-1-2-1 2-2 .5-2-1-2 2 1 2-.5 2-2 1 2 1 .5 2-1 2 2 2 2-1 2 .5 1 2 1-2 2-.5 2 1 2-2-1-2z"/></svg><b>Einstellungen</b><small>Anzeige und Bedienung</small></button>

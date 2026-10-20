@@ -33,6 +33,7 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { spielendeModul } from './ui/spielende.js';
 // O02 Umsatztreiber
 import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 // O03 IT
@@ -570,7 +571,7 @@ function cockpitZeigen() {
 
 // ─────────────────────────────────────────── Woche weiter
 function woche(mitBot = false, test = false) {
-  if (s.phase === 'zerschlagen') return null;
+  if (s.ende || s.phase === 'zerschlagen') { spielende?.anzeigen(); return null; }
   const davor = E.posteingang(s);
   const t0 = performance.now();
   if (mitBot) botSchritt(s);
@@ -604,6 +605,8 @@ function woche(mitBot = false, test = false) {
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
   automatischSpeichern();
+  if ($('spiel-ruhestand')) $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+  if (s.ende) setTimeout(() => { wochenbericht?.zu(); spielende?.anzeigen(); }, 0);
   return m;
 }
 
@@ -946,8 +949,8 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
+let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null;
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 // O03 IT
@@ -993,6 +996,21 @@ po = posteingangModul({
     else if (bezug.modul === 'umbau') oeffneModul(um);
     else schliessePanel();
   },
+});
+
+// ─────────────────────────────────────────── Spielende
+spielende = spielendeModul({
+  E, s: () => s,
+  neuesSpiel: () => { schliessePanel(); menueZu(); startZeigen(); },
+  fortgesetzt: () => { cockpitZeigen(); $('spiel-ruhestand').hidden = s.woche < 260; automatischSpeichern(); },
+  fehler: (text) => meldung(text, false),
+});
+$('spiel-bestenliste').addEventListener('click', () => { menueZu(); spielende.bestenliste(); });
+$('spiel-ruhestand').addEventListener('click', () => {
+  menueZu();
+  const r = E.fuehreAus(s, { typ: 'ruhestand' });
+  if (!r.ok) meldung(r.text, false);
+  else { automatischSpeichern(); spielende.anzeigen(); }
 });
 
 // O02 Umsatztreiber: klickbarer Portfolio-Bericht und Beobachtungsliste.
@@ -1158,6 +1176,7 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
 ];
 let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
+  spielende?.zu(); $('spiel-ruhestand').hidden = true;
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
   postUi = neuerPostUi();
@@ -1187,7 +1206,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
   oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },
   pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];
@@ -1316,7 +1335,9 @@ async function spielFortsetzen() {
     wk?.nachStart();
     window.bereit = true;
     $('lade').classList.remove('an');
-    meldung('Spielstand fortgesetzt.');
+    $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+    if (s.ende || s.phase === 'zerschlagen') spielende.anzeigen();
+    else meldung('Spielstand fortgesetzt.');
   } catch (e) {
     $('lade').classList.remove('an');
     $('start').classList.add('an');
