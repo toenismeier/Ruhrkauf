@@ -9,7 +9,7 @@ cd ../app && npm ci && npm run spiel && npm run typecheck && npm run smoke
 ```
 
 ## Automatische Auslieferung (EAS Workflows, `.eas/workflows/ausliefern.yml`)
-Jeder Push auf `main` löst auf den Expo-Servern aus: Hülle unverändert → Update (App holt es beim Start), Hülle geändert → neuer Build und Übermittlung an TestFlight. Voraussetzung: GitHub-Repo im Expo-Projekt verbunden, Basisverzeichnis `app`.
+Build-Zug Dienstag und Freitag 18 Uhr auf den Expo-Servern (kein Lauf bei jedem Push): Hülle unverändert → Update (App holt es beim Start), Hülle geändert → neuer Build und Übermittlung an TestFlight. Voraussetzung: GitHub-Repo im Expo-Projekt verbunden, Basisverzeichnis `app`.
 
 ## Build und Upload nach TestFlight von Hand (EAS, kein Mac nötig)
 ```
