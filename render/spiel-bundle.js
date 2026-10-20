@@ -72,8 +72,14 @@
     gehaltsforderung: () => gehaltsforderung,
     generationInCluster: () => generationInCluster,
     gruppenFuer: () => gruppenFuer,
+    hausBeobachtung: () => hausBeobachtung,
     hausDetail: () => hausDetail,
+    hausKandidaten: () => hausKandidaten,
+    hausKommentareDerWoche: () => hausKommentareDerWoche,
+    hausKundenRanking: () => hausKundenRanking,
+    hausKundenscore: () => hausKundenscore,
     hausTreiber: () => hausTreiber,
+    hausUebersicht: () => hausUebersicht,
     hausclusterFaktor: () => hausclusterFaktor,
     hausclusterVon: () => hausclusterVon,
     hqFuerGrafik: () => hqFuerGrafik,
@@ -342,7 +348,11 @@
     { typ: "behoerde", namen: ["B\xFCrgeramt", "Stadtbibliothek", "Volkshochschule"], etagen: [1, 2, 3], qm: [1500, 4e3], mieteQmMonat: [8, 12], laufzeit: [10, 20], frequenzBonus: 0.03, umbauAnteil: 0.4 },
     { typ: "gastro", namen: ["Markthalle Kost", "Caf\xE9 Fr\xE4ulein", "Burgerwerk"], etagen: [0, 4, 5], qm: [300, 900], mieteQmMonat: [14, 25], laufzeit: [5, 10], frequenzBonus: 0.015, umbauAnteil: 0.5 },
     { typ: "coworking", namen: ["Deskhaus", "WorkLoft", "Raum & Ruhe"], etagen: [3, 4, 5], qm: [800, 2e3], mieteQmMonat: [9, 14], laufzeit: [5, 10], frequenzBonus: 5e-3, umbauAnteil: 0.3 },
-    { typ: "drogerie", namen: ["Rossberg Drogerie", "dm-Nachbar", "Pflegewelt"], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 }
+    { typ: "drogerie", namen: ["Rossberg Drogerie", "Pflegewelt", "Drogeriekontor"], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+    // O07 Haus: zusätzliche Frequenzbringer mit fiktiven Eigennamen.
+    { typ: "baeckerei", namen: ["Backstube M\xFChlenfeld", "Brot & Krumme", "Kruste & Korn"], etagen: [0, -1], qm: [120, 350], mieteQmMonat: [15, 27], laufzeit: [5, 10], frequenzBonus: 0.017, umbauAnteil: 0.4 },
+    { typ: "paketshop", namen: ["PaketKontor", "Paketpunkt Markt", "Paketstube"], etagen: [0, -1], qm: [100, 270], mieteQmMonat: [12, 19], laufzeit: [5, 10], frequenzBonus: 0.014, umbauAnteil: 0.5 },
+    { typ: "bibliothek", namen: ["Stadtteilbibliothek", "Lesekontor", "B\xFCcherraum"], etagen: [1, 2, 3], qm: [400, 1200], mieteQmMonat: [6, 11], laufzeit: [10, 20], frequenzBonus: 0.025, umbauAnteil: 0.3 }
   ];
   var BERATER = [
     { typ: "strategie", haeuser: ["McKenzie Partners", "Barnstorm Group", "Rolland & Bergmann"], wochenSatz: 42e4, dauer: 10, bankBonus: 10, eigentuemerBonus: 6 },
@@ -401,7 +411,7 @@
   }
   var zwischen = (h, a, b2) => a + (b2 - a) * zufall(h);
   var ganzZwischen = (h, a, b2) => Math.floor(zwischen(h, a, b2 + 1));
-  var chance = (h, p) => zufall(h) < p;
+  var chance = (h, p2) => zufall(h) < p2;
   function waehle(h, arr) {
     return arr[Math.floor(zufall(h) * arr.length)];
   }
@@ -529,8 +539,8 @@
       }
       const ro = stable(n.id);
       const bonus = s2.planung?.bonusAnteil[n.ebene === "haus" ? "haus" : "hauscluster"] ?? 0.1;
-      const leitung = n.ebene === "hauscluster" ? organisation(s2)?.hauscluster.find((h) => n.id.endsWith(":" + h.id))?.stelle.person : void 0;
-      const tendenz = leitung ? clamp(1 - leitung.qualitaet, 0.1, 0.9) : ro;
+      const leitung2 = n.ebene === "hauscluster" ? organisation(s2)?.hauscluster.find((h) => n.id.endsWith(":" + h.id))?.stelle.person : void 0;
+      const tendenz = leitung2 ? clamp(1 - leitung2.qualitaet, 0.1, 0.9) : ro;
       const abweichung2 = ro < 0.72 ? -(0.015 + 0.045 * tendenz + 0.2 * bonus) : 0.01 + 0.045 * ro;
       n.rueckmeldung = eur(n.umsatz * (1 + abweichung2));
       n.verdacht = abweichung2 < -0.035 && qualitaet2 > 0.45 + stable("pruefung:" + n.id) * 0.35;
@@ -552,8 +562,8 @@
     const bisher = h.treiberVerlauf ?? [];
     const vorjahresWoche = (planJahr2 - s2.startJahr - 1) * 52;
     const archiv = /* @__PURE__ */ new Map();
-    for (const p of bisher) for (let w = Math.max(p.von, vorjahresWoche); w <= Math.min(p.bis, vorjahresWoche + 51); w++)
-      archiv.set(w - vorjahresWoche, (archiv.get(w - vorjahresWoche) ?? 0) + p.umsatz / (p.bis - p.von + 1));
+    for (const p2 of bisher) for (let w = Math.max(p2.von, vorjahresWoche); w <= Math.min(p2.bis, vorjahresWoche + 51); w++)
+      archiv.set(w - vorjahresWoche, (archiv.get(w - vorjahresWoche) ?? 0) + p2.umsatz / (p2.bis - p2.von + 1));
     const referenzSumme = sum([...archiv.values()]);
     const referenzDurchschnitt = archiv.size ? referenzSumme / archiv.size : 0;
     const roh2 = Array.from({ length: 52 }, (_, w) => {
@@ -652,28 +662,28 @@
     return plan2?.phasing[hausId]?.[woche2 % 52] ?? 0;
   }
   function planBudgetFaktor(s2, ebene, id) {
-    const p = planJahr(s2);
-    if (!p) return 1;
+    const p2 = planJahr(s2);
+    if (!p2) return 1;
     if (ebene === "ware") {
       const g = id.split(".")[0];
-      const ziel2 = p.warengruppen[g], ref = p.referenz?.warengruppen[g];
+      const ziel2 = p2.warengruppen[g], ref = p2.referenz?.warengruppen[g];
       return ziel2 !== void 0 && ref ? clamp(ziel2 / ref, 0.5, 1.5) : 1;
     }
-    const ids = p.knoten[id] ? [id] : Object.keys(p.knoten).filter((key) => (key.startsWith("hauscluster:") || key.startsWith("haus:")) && key.endsWith(":" + id));
-    const ziel = sum(ids.map((k) => p.knoten[k]?.umsatz ?? 0));
-    const referenz = sum(ids.map((k) => p.referenz?.knoten[k] ?? 0));
+    const ids = p2.knoten[id] ? [id] : Object.keys(p2.knoten).filter((key) => (key.startsWith("hauscluster:") || key.startsWith("haus:")) && key.endsWith(":" + id));
+    const ziel = sum(ids.map((k) => p2.knoten[k]?.umsatz ?? 0));
+    const referenz = sum(ids.map((k) => p2.referenz?.knoten[k] ?? 0));
     return referenz > 0 ? clamp(ziel / referenz, 0.5, 1.5) : 1;
   }
   function planungAktion(s2, a) {
-    const p = s2.planung;
-    if (!p) return "Planung nicht verf\xFCgbar.";
+    const p2 = s2.planung;
+    if (!p2) return "Planung nicht verf\xFCgbar.";
     if (a.typ === "planungBonus") {
       if (!(a.anteil >= 0 && a.anteil <= 0.5)) return "Bonusanteil muss zwischen 0 und 50 % liegen.";
-      p.bonusAnteil[a.ebene] = a.anteil;
+      p2.bonusAnteil[a.ebene] = a.anteil;
       return null;
     }
     if (a.typ === "planungForecast") {
-      const f = p.forecasts.find((x) => x.status === "offen" && x.jahr === jahr(s2));
+      const f = p2.forecasts.find((x) => x.status === "offen" && x.jahr === jahr(s2));
       if (!f) return "Aktuell ist kein Forecast offen.";
       if (!Number.isFinite(a.umsatz) || !Number.isFinite(a.ebitda)) return "Ung\xFCltige Zielwerte.";
       const cutoff = f.quartal * 13;
@@ -692,7 +702,7 @@
       f.korrigiert = true;
       return null;
     }
-    const ent = p.entwurf;
+    const ent = p2.entwurf;
     if (!ent || ent.stand !== "offen" || kw(s2.woche) < 40 || kw(s2.woche) > 44) return "Jahresplanung nur in KW 40 bis 44 m\xF6glich.";
     if (a.typ === "planungZiel") {
       if (!Number.isFinite(a.wert) || a.wert < 0 && a.kennzahl !== "ebitda") return "Ung\xFCltiger Zielwert.";
@@ -741,14 +751,14 @@
         if (referenz <= 0 || wert <= referenz * 1.07) continue;
         const malus = clamp((wert / referenz - 1.07) * 35, 0, 10);
         h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral - malus, 0, 100);
-        const leitung = organisation(s2)?.hauscluster.find((c) => c.id === clusterVon(h))?.stelle.person;
-        if (leitung) {
-          leitung.stimmung = clamp(leitung.stimmung - malus / 4, 0, 100);
-          leitung.wechselwille = clamp(leitung.wechselwille + malus / 400, 0, 1);
+        const leitung2 = organisation(s2)?.hauscluster.find((c) => c.id === clusterVon(h))?.stelle.person;
+        if (leitung2) {
+          leitung2.stimmung = clamp(leitung2.stimmung - malus / 4, 0, 100);
+          leitung2.wechselwille = clamp(leitung2.wechselwille + malus / 400, 0, 1);
         }
       }
     }
-    s2.planung.jahre = s2.planung.jahre.filter((p) => p.jahr !== plan2.jahr).concat(plan2);
+    s2.planung.jahre = s2.planung.jahre.filter((p2) => p2.jahr !== plan2.jahr).concat(plan2);
     e.stand = "abgeschlossen";
     s2.entscheidungen = s2.entscheidungen.filter((x) => x.typ !== "planung_jahr" || x.daten.jahr !== e.jahr);
     melde(s2, "info", "Jahresplanung " + plan2.jahr + " beschlossen: Konzernziel " + Math.round(plan2.ziele.umsatz / 1e6) + " Mio. \u20AC Umsatz.", { modul: "planung" });
@@ -772,10 +782,10 @@
     s2.entscheidungen.push({ id: neueId(s2, "pl"), typ, titel, text: text3, woche: s2.woche, frist, optionen, standard, daten });
   }
   function forecastErstellen(s2, q2) {
-    const p = planJahr(s2);
-    if (!p || !s2.planung) return;
-    const n = q2 * 13, bisher = s2.historie.filter((k) => jahr(s2, k.woche) === p.jahr).slice(0, n);
-    const wochen = Array.from({ length: 52 }, (_, i) => sum(Object.values(p.phasing).map((v) => v[i])));
+    const p2 = planJahr(s2);
+    if (!p2 || !s2.planung) return;
+    const n = q2 * 13, bisher = s2.historie.filter((k) => jahr(s2, k.woche) === p2.jahr).slice(0, n);
+    const wochen = Array.from({ length: 52 }, (_, i) => sum(Object.values(p2.phasing).map((v) => v[i])));
     const ytdPlan = sum(wochen.slice(0, n));
     const ytdIst = sum(bisher.map((x) => x.umsatz));
     const qualitaet2 = clamp(0.25 + 0.35 * bereichsG\u00FCte(s2) + 0.1 * s2.controllingStufe, 0, 1);
@@ -783,13 +793,13 @@
     for (let i = 0; i < n; i++) wochen[i] = bisher[i]?.umsatz ?? 0;
     for (let i = n; i < 52; i++) wochen[i] = eur(wochen[i] * (1 + trend * (0.5 + 0.5 * qualitaet2)));
     const istEbitda = sum(bisher.map((x) => x.ebitda));
-    const restPlan = p.ziele.ebitda * (52 - n) / 52;
+    const restPlan = p2.ziele.ebitda * (52 - n) / 52;
     const forecast = {
-      jahr: p.jahr,
+      jahr: p2.jahr,
       quartal: q2,
       bezeichnung: ["3+9", "6+6", "9+3"][q2 - 1],
       woche: s2.woche,
-      ziele: { ...p.ziele, umsatz: sum(wochen), ebitda: eur(istEbitda + restPlan * (1 + trend * qualitaet2)) },
+      ziele: { ...p2.ziele, umsatz: sum(wochen), ebitda: eur(istEbitda + restPlan * (1 + trend * qualitaet2)) },
       wochenUmsatz: wochen,
       status: "offen",
       korrigiert: false
@@ -798,12 +808,12 @@
     entscheidung(
       s2,
       "planung_forecast",
-      forecast.bezeichnung + "-Forecast " + p.jahr,
+      forecast.bezeichnung + "-Forecast " + p2.jahr,
       "Controlling meldet " + Math.round(forecast.ziele.umsatz / 1e6) + " Mio. \u20AC erwarteten Jahresumsatz. Prognose im Planungsassistenten korrigieren oder freigeben.",
       [{ id: "abgeben", label: "An Eigent\xFCmer und Bank abgeben" }, { id: "zurueckhalten", label: "Zur\xFCckhalten" }],
       "abgeben",
       s2.woche + 3,
-      { jahr: p.jahr, quartal: q2 }
+      { jahr: p2.jahr, quartal: q2 }
     );
   }
   function forecastVertrauensDelta(abweichung2) {
@@ -815,13 +825,13 @@
   }
   function vertrauenPruefen(s2, quartal) {
     if (!s2.planung) return;
-    const p = planJahr(s2);
-    if (!p) return;
-    const letztes = s2.planung.forecasts.filter((f) => f.jahr === p.jahr && f.status === "abgegeben" && f.quartal < quartal).at(-1);
+    const p2 = planJahr(s2);
+    if (!p2) return;
+    const letztes = s2.planung.forecasts.filter((f) => f.jahr === p2.jahr && f.status === "abgegeben" && f.quartal < quartal).at(-1);
     if (!letztes) return;
     const grenze = quartal * 13;
     const soll = sum(letztes.wochenUmsatz.slice(0, grenze));
-    const ist = sum(s2.historie.filter((k) => jahr(s2, k.woche) === p.jahr).slice(0, grenze).map((k) => k.umsatz));
+    const ist = sum(s2.historie.filter((k) => jahr(s2, k.woche) === p2.jahr).slice(0, grenze).map((k) => k.umsatz));
     const abw = anteil(ist - soll, Math.max(1, soll));
     const d = forecastVertrauensDelta(abw);
     s2.stakeholder.bank = clamp(s2.stakeholder.bank + d, 0, 100);
@@ -829,15 +839,15 @@
     s2.planung.vertrauenVerlauf.push({ woche: s2.woche, delta: d, abweichung: abw });
     melde(s2, d < 0 ? "warnung" : "info", "Forecast-Trefferquote: " + (100 * abw).toFixed(1).replace(".", ",") + " % Abweichung. Bank und Eigent\xFCmer " + (d > 0 ? "+" : "") + d + " Vertrauen.", { modul: "planung" });
   }
-  function bonusErmitteln(s2, p) {
-    if (!s2.planung || s2.planung.boni.some((x) => x.jahr === p.jahr)) return;
+  function bonusErmitteln(s2, p2) {
+    if (!s2.planung || s2.planung.boni.some((x) => x.jahr === p2.jahr)) return;
     const details = [];
     const quoten = s2.planung.bonusAnteil;
-    const hausZiele = Object.fromEntries(s2.haeuser.map((h) => [h.id, p.knoten["haus:" + h.id]?.umsatz ?? 0]));
+    const hausZiele = Object.fromEntries(s2.haeuser.map((h) => [h.id, p2.knoten["haus:" + h.id]?.umsatz ?? 0]));
     const score = (ist, ziel) => clamp(anteil(ist, Math.max(1, ziel)), 0, 1.25);
-    const ebitdaScore = p.ziele.ebitda > 0 ? score(p.istEbitda, p.ziele.ebitda) : clamp(1 + (p.istEbitda - p.ziele.ebitda) / Math.max(1, p.ziele.umsatz) * 5, 0, 1.25);
+    const ebitdaScore = p2.ziele.ebitda > 0 ? score(p2.istEbitda, p2.ziele.ebitda) : clamp(1 + (p2.istEbitda - p2.ziele.ebitda) / Math.max(1, p2.ziele.umsatz) * 5, 0, 1.25);
     for (const h of s2.haeuser) {
-      const annual = p.istHaus[h.id]?.umsatz ?? 0;
+      const annual = p2.istHaus[h.id]?.umsatz ?? 0;
       const ziel = hausZiele[h.id];
       if (!ziel) continue;
       const leistungsgrad = 0.5 * score(annual, ziel) + 0.5 * ebitdaScore;
@@ -849,15 +859,15 @@
       const hs = s2.haeuser.filter((h) => clusterVon(h) === c);
       const ziel = sum(hs.map((h) => hausZiele[h.id] ?? 0));
       if (!ziel) continue;
-      const ist = sum(hs.map((h) => p.istHaus[h.id]?.umsatz ?? 0));
+      const ist = sum(hs.map((h) => p2.istHaus[h.id]?.umsatz ?? 0));
       const gehalt = organisation(s2)?.hauscluster.find((x) => x.id === c)?.stelle.person?.gehalt ?? 105e3;
       details.push({ id: c, ebene: "hauscluster", betrag: eur(gehalt * quoten.hauscluster * (0.5 * score(ist, ziel) + 0.5 * ebitdaScore)) });
     }
     for (const id of ["konzerncontrolling", "vertriebscontrolling", "merchandise_planning", "store_operations"]) {
       const gehalt = organisation(s2)?.bereiche[id]?.person?.gehalt ?? 115e3;
-      details.push({ id, ebene: "bereich", betrag: eur(gehalt * quoten.bereich * (0.5 * score(p.istUmsatz, p.ziele.umsatz) + 0.5 * ebitdaScore)) });
+      details.push({ id, ebene: "bereich", betrag: eur(gehalt * quoten.bereich * (0.5 * score(p2.istUmsatz, p2.ziele.umsatz) + 0.5 * ebitdaScore)) });
     }
-    s2.planung.boni.push({ jahr: p.jahr, faellig: (p.jahr - s2.startJahr + 1) * 52 + 5, betrag: sum(details.map((x) => x.betrag)), bezahlt: false, details });
+    s2.planung.boni.push({ jahr: p2.jahr, faellig: (p2.jahr - s2.startJahr + 1) * 52 + 5, betrag: sum(details.map((x) => x.betrag)), bezahlt: false, details });
   }
   function planungBonusWoche(s2, k) {
     if (!s2.planung || s2.planungDeaktiviert) return 0;
@@ -874,16 +884,16 @@
     var _a2, _b;
     if (s2.prognose || s2.planungDeaktiviert) return;
     if (!s2.planung) initialisierePlanung(s2);
-    const p = planJahr(s2);
+    const p2 = planJahr(s2);
     const k = s2.historie.at(-1);
-    if (p && k && k.woche === s2.woche) {
-      p.istUmsatz += k.umsatz;
-      p.istEbitda += k.ebitda;
+    if (p2 && k && k.woche === s2.woche) {
+      p2.istUmsatz += k.umsatz;
+      p2.istEbitda += k.ebitda;
       for (const h of s2.haeuser) if (h.kpi?.woche === s2.woche) {
-        const u = (_a2 = p.istHaus)[_b = h.id] ?? (_a2[_b] = { umsatz: 0, db: 0 });
+        const u = (_a2 = p2.istHaus)[_b = h.id] ?? (_a2[_b] = { umsatz: 0, db: 0 });
         u.umsatz += h.kpi.umsatz;
         u.db += h.kpi.db;
-        const node = p.knoten["haus:" + h.id];
+        const node = p2.knoten["haus:" + h.id];
         if (node) node.ist = u.umsatz;
       }
     }
@@ -892,9 +902,9 @@
     if (beendetQ) {
       vertrauenPruefen(s2, q2);
       if (q2 < 4) forecastErstellen(s2, q2);
-      else if (p && !p.geschlossen) {
-        p.geschlossen = true;
-        bonusErmitteln(s2, p);
+      else if (p2 && !p2.geschlossen) {
+        p2.geschlossen = true;
+        bonusErmitteln(s2, p2);
       }
     }
     if ((s2.woche + 1) % 52 === 39) {
@@ -924,17 +934,17 @@
     if (s2.planung.jahre.length > 11) s2.planung.jahre.splice(0, s2.planung.jahre.length - 11);
   }
   function planungBericht(s2) {
-    const p = planJahr(s2);
-    if (!p) return { jahr: jahr(s2), ziele: null, entwurf: s2.planung?.entwurf, knoten: [], forecasting: null, quoten: s2.planung?.bonusAnteil, boni: s2.planung?.boni ?? [] };
-    const vor = s2.planung?.forecasts.filter((f2) => f2.jahr === p.jahr && f2.status === "abgegeben").at(-1);
+    const p2 = planJahr(s2);
+    if (!p2) return { jahr: jahr(s2), ziele: null, entwurf: s2.planung?.entwurf, knoten: [], forecasting: null, quoten: s2.planung?.bonusAnteil, boni: s2.planung?.boni ?? [] };
+    const vor = s2.planung?.forecasts.filter((f2) => f2.jahr === p2.jahr && f2.status === "abgegeben").at(-1);
     const abgelaufene = s2.woche % 52;
-    const ist = sum(s2.historie.filter((k) => jahr(s2, k.woche) === p.jahr).map((k) => k.umsatz));
-    const soll = sum(Object.values(p.phasing).flatMap((xs) => xs.slice(0, abgelaufene)));
+    const ist = sum(s2.historie.filter((k) => jahr(s2, k.woche) === p2.jahr).map((k) => k.umsatz));
+    const soll = sum(Object.values(p2.phasing).flatMap((xs) => xs.slice(0, abgelaufene)));
     const f = vor?.ziele.umsatz;
-    const historie = s2.historie.filter((k) => jahr(s2, k.woche) === p.jahr);
+    const historie = s2.historie.filter((k) => jahr(s2, k.woche) === p2.jahr);
     const wochen = historie.slice(-26).map((k) => {
       const i = k.woche % 52;
-      const plan2 = sum(Object.values(p.phasing).map((xs) => xs[i] ?? 0));
+      const plan2 = sum(Object.values(p2.phasing).map((xs) => xs[i] ?? 0));
       const forecast = vor?.wochenUmsatz[i] ?? null;
       return {
         woche: k.woche,
@@ -946,14 +956,14 @@
       };
     });
     const istJeEbene = {};
-    for (const h of s2.haeuser) for (const key of keys(h)) istJeEbene[key] = (istJeEbene[key] ?? 0) + (p.istHaus[h.id]?.umsatz ?? 0);
+    for (const h of s2.haeuser) for (const key of keys(h)) istJeEbene[key] = (istJeEbene[key] ?? 0) + (p2.istHaus[h.id]?.umsatz ?? 0);
     const bisHeute = {};
-    for (const h of s2.haeuser) for (const key of keys(h)) bisHeute[key] = (bisHeute[key] ?? 0) + sum((p.phasing[h.id] ?? []).slice(0, abgelaufene));
+    for (const h of s2.haeuser) for (const key of keys(h)) bisHeute[key] = (bisHeute[key] ?? 0) + sum((p2.phasing[h.id] ?? []).slice(0, abgelaufene));
     return {
-      jahr: p.jahr,
-      ziele: p.ziele,
+      jahr: p2.jahr,
+      ziele: p2.ziele,
       entwurf: s2.planung?.entwurf,
-      knoten: Object.values(p.knoten).map((n) => ({
+      knoten: Object.values(p2.knoten).map((n) => ({
         ...n,
         ist: istJeEbene[n.id] ?? 0,
         abweichung: bisHeute[n.id] ? ((istJeEbene[n.id] ?? 0) - bisHeute[n.id]) / bisHeute[n.id] : 0
@@ -962,9 +972,9 @@
       planBisHeute: soll,
       abweichung: ist - soll,
       wochen,
-      warengruppen: p.warengruppen,
+      warengruppen: p2.warengruppen,
       forecasting: f ?? null,
-      forecasts: s2.planung?.forecasts.filter((x) => x.jahr === p.jahr) ?? [],
+      forecasts: s2.planung?.forecasts.filter((x) => x.jahr === p2.jahr) ?? [],
       quoten: s2.planung?.bonusAnteil,
       boni: s2.planung?.boni ?? [],
       vertrauen: s2.planung?.vertrauenVerlauf ?? []
@@ -1173,11 +1183,11 @@
     "Hamburg"
   ]);
   function abstand100(a, b2) {
-    const p = KOORDINATEN[a];
+    const p2 = KOORDINATEN[a];
     const q2 = KOORDINATEN[b2];
-    if (!p || !q2) return 3;
-    const dy = (p[0] - q2[0]) * 111;
-    const dx = (p[1] - q2[1]) * 111 * Math.cos((p[0] + q2[0]) / 2 * (Math.PI / 180));
+    if (!p2 || !q2) return 3;
+    const dy = (p2[0] - q2[0]) * 111;
+    const dx = (p2[1] - q2[1]) * 111 * Math.cos((p2[0] + q2[0]) / 2 * (Math.PI / 180));
     return Math.sqrt(dx * dx + dy * dy) / 100;
   }
 
@@ -1587,11 +1597,11 @@
     let n = 0;
     for (const h of s2.haeuser) {
       if (h.status !== "offen" || h.format !== "warenhaus") continue;
-      const p = passungHaus(m, h);
-      a += p;
+      const p2 = passungHaus(m, h);
+      a += p2;
       n++;
       const r = sum2[_a2 = h.region] ?? (sum2[_a2] = [0, 0]);
-      r[0] += p;
+      r[0] += p2;
       r[1]++;
     }
     const region = {};
@@ -1612,11 +1622,11 @@
     const u13 = kz2.u.slice(-13).reduce((a, b2) => a + b2, 0);
     const r13 = kz2.r.slice(-13).reduce((a, b2) => a + b2, 0);
     const gesamt13 = s2.einkauf.eigenUmsatz.slice(-13).reduce((a, b2) => a + b2, 0);
-    const p = passungSchnitt(s2, m);
+    const p2 = passungSchnitt(s2, m);
     const hinweise = [];
     if (m.stilAktualitaet < 40) hinweise.push("Stil wirkt veraltet");
     if (m.bekanntheit < 25) hinweise.push("Kaum bekannt");
-    if (p.gesamt < 45) hinweise.push("Passt schlecht zu den Einzugsgebieten");
+    if (p2.gesamt < 45) hinweise.push("Passt schlecht zu den Einzugsgebieten");
     if (BESCHAFFUNG[m.beschaffung].vorlauf >= 20) hinweise.push("Lange Vorl\xE4ufe, hohe Mindestabnahme");
     if (emUeberlastung(s2) > 0) hinweise.push("Einkauf f\xFChrt mehr Marken, als er pflegen kann");
     const wgs = /* @__PURE__ */ new Set([...Object.keys(m.wgAnteile), ...Object.keys(m.wgIst)]);
@@ -1646,8 +1656,8 @@
       rohertrag13: eur(r13),
       rohertragsquote: u13 > 0 ? r13 / u13 : 0,
       mehrmarge: mehrmarge(m),
-      passung: p.gesamt,
-      passungRegion: p.region,
+      passung: p2.gesamt,
+      passungRegion: p2.region,
       wgs: [...wgs].filter((wg) => WG[wg]).map((wg) => ({ wg, name: WG[wg].name, bereich: WG[wg].bereich, anteilZiel: m.wgAnteile[wg] ?? 0, anteilIst: Math.round((m.wgIst[wg] ?? 0) * 1e3) / 1e3 })),
       neu: m.neu ? { ...m.neu } : void 0,
       hinweise
@@ -1700,14 +1710,14 @@
       wgIst: {}
     };
     const f = pruefeAnteile(s2, probe, e.wgAnteile);
-    const p = passungSchnitt(s2, probe);
+    const p2 = passungSchnitt(s2, probe);
     const n = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt").length;
     return {
       ok: !f,
       fehler: f,
       mehrmarge: mehrmarge(probe),
-      passung: p.gesamt,
-      passungRegion: p.region,
+      passung: p2.gesamt,
+      passungRegion: p2.region,
       attraktivitaet: Math.round(attraktivitaetSchnitt(s2, probe) * 100) / 100,
       kosten: gruendungsKosten(Object.values(e.wgAnteile).filter((a) => a > 0).length),
       aufbauWochen: aufbauWochen(e.beschaffung),
@@ -1872,8 +1882,8 @@
   }
   var PREIS_STUFE = { einstieg: 0, mitte: 1, gehoben: 2 };
   function normpreis(typ, preislage, material2, qualitaet2) {
-    const p = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet2);
-    return Math.max(3, Math.round(p) - 0.01);
+    const p2 = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet2);
+    return Math.max(3, Math.round(p2) - 0.01);
   }
   var produktStufe = (s2) => clamp(s2.hq?.wirkung.produkt ?? 1, 0, 3);
   function teamStaerke(s2) {
@@ -1915,21 +1925,21 @@
   }
   var halbe = (x) => clamp(Math.round(x * 2) / 2, 0.5, 5);
   var sterneAus = (score) => halbe(0.5 + 4.5 * score);
-  function sterneWirksam(s2, p) {
-    if (p.sterne === void 0) return 0;
-    const alter = s2.woche - (p.seit ?? s2.woche);
-    return Math.max(0.5, p.sterne - PRODUKT_PARAM.alterung * clamp((alter - 52) / 104, 0, 1));
+  function sterneWirksam(s2, p2) {
+    if (p2.sterne === void 0) return 0;
+    const alter = s2.woche - (p2.seit ?? s2.woche);
+    return Math.max(0.5, p2.sterne - PRODUKT_PARAM.alterung * clamp((alter - 52) / 104, 0, 1));
   }
-  var imSortiment = (p) => p.status === "sortiment";
-  function gewicht(s2, p) {
-    const st = sterneWirksam(s2, p);
-    return (PRODUKT_PARAM.gewichtBasis + PRODUKT_PARAM.gewichtJeStern * st) * Math.pow(p.normpreis / Math.max(0.5, p.preis), PRODUKT_PARAM.preisElastizitaet);
+  var imSortiment = (p2) => p2.status === "sortiment";
+  function gewicht(s2, p2) {
+    const st = sterneWirksam(s2, p2);
+    return (PRODUKT_PARAM.gewichtBasis + PRODUKT_PARAM.gewichtJeStern * st) * Math.pow(p2.normpreis / Math.max(0.5, p2.preis), PRODUKT_PARAM.preisElastizitaet);
   }
   function rohFaktor(s2, markeId, wg) {
     let sum2 = 0;
     let n = 0;
-    for (const p of s2.produkte.liste) if (p.marke === markeId && p.wg === wg && imSortiment(p)) {
-      sum2 += gewicht(s2, p);
+    for (const p2 of s2.produkte.liste) if (p2.marke === markeId && p2.wg === wg && imSortiment(p2)) {
+      sum2 += gewicht(s2, p2);
       n++;
     }
     if (!n) return 0.6;
@@ -1938,9 +1948,9 @@
   function rohMarge(s2, markeId, wg) {
     let sum2 = 0;
     let gw = 0;
-    for (const p of s2.produkte.liste) if (p.marke === markeId && p.wg === wg && imSortiment(p)) {
-      const x = gewicht(s2, p);
-      sum2 += x * (1 - p.ekStueck / Math.max(0.5, p.preis) - p.margeErwartet);
+    for (const p2 of s2.produkte.liste) if (p2.marke === markeId && p2.wg === wg && imSortiment(p2)) {
+      const x = gewicht(s2, p2);
+      sum2 += x * (1 - p2.ekStueck / Math.max(0.5, p2.preis) - p2.margeErwartet);
       gw += x;
     }
     return gw > 0 ? sum2 / gw : 0;
@@ -2002,17 +2012,17 @@
       saison: saisonId(s2.woche + e.dauer)
     };
   }
-  function einfuehren(s2, p, rauschen2) {
-    const m = s2.eigenmarken.marken.find((x) => x.id === p.marke);
+  function einfuehren(s2, p2, rauschen2) {
+    const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
     if (!m) return;
-    const teile = bewerte(s2, m, p, p.team, trendFuer(s2, saisonId(s2.woche)));
+    const teile = bewerte(s2, m, p2, p2.team, trendFuer(s2, saisonId(s2.woche)));
     const r = s2.produkte;
     const noise = rauschen2 ? clamp(normal(r) * 0.25, -0.5, 0.5) : 0;
-    p.teile = teile;
-    p.sterne = sterneAus(scoreAus(teile) + noise / 4.5);
-    p.status = "sortiment";
-    p.seit = s2.woche;
-    p.saison = saisonId(s2.woche);
+    p2.teile = teile;
+    p2.sterne = sterneAus(scoreAus(teile) + noise / 4.5);
+    p2.status = "sortiment";
+    p2.seit = s2.woche;
+    p2.saison = saisonId(s2.woche);
   }
   var START = {
     em1: [
@@ -2057,15 +2067,15 @@
     for (const m of s2.eigenmarken.marken) {
       for (const [typ, farbe2, material2, wg, budgetAnteil] of START[m.id] ?? []) {
         const t = TYP[typ];
-        const p = neuesProdukt(s2, m, { typ, farbe: farbe2, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
-        p.start = -300;
-        p.fertig = -288;
-        p.teile = bewerte(s2, m, p, p.team, void 0, m.id === "em1" ? 0.1 : 0.4);
-        p.sterne = sterneAus(scoreAus(p.teile));
-        p.status = "sortiment";
-        p.seit = -260;
-        p.saison = saisonId(-260);
-        pr2.liste.push(p);
+        const p2 = neuesProdukt(s2, m, { typ, farbe: farbe2, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
+        p2.start = -300;
+        p2.fertig = -288;
+        p2.teile = bewerte(s2, m, p2, p2.team, void 0, m.id === "em1" ? 0.1 : 0.4);
+        p2.sterne = sterneAus(scoreAus(p2.teile));
+        p2.status = "sortiment";
+        p2.seit = -260;
+        p2.saison = saisonId(-260);
+        pr2.liste.push(p2);
       }
     }
     setzeBasis(s2);
@@ -2073,7 +2083,7 @@
   }
   function setzeBasis(s2) {
     const pr2 = s2.produkte;
-    for (const m of s2.eigenmarken.marken) for (const wg of /* @__PURE__ */ new Set([...Object.keys(m.wgAnteile), ...Object.keys(m.wgIst), ...pr2.liste.filter((p) => p.marke === m.id).map((p) => p.wg)])) {
+    for (const m of s2.eigenmarken.marken) for (const wg of /* @__PURE__ */ new Set([...Object.keys(m.wgAnteile), ...Object.keys(m.wgIst), ...pr2.liste.filter((p2) => p2.marke === m.id).map((p2) => p2.wg)])) {
       const key = `${m.id}|${wg}`;
       pr2.basisF[key] = rohFaktor(s2, m.id, wg);
       pr2.basisM[key] = rohMarge(s2, m.id, wg);
@@ -2085,48 +2095,48 @@
     return Math.floor(k[Math.min(3, Math.floor(L2 + 1e-9))]);
   }
   function belegt(s2, markeId, kat, ohne2) {
-    return s2.produkte.liste.filter((p) => p.marke === markeId && p.kategorie === kat && p.id !== ohne2 && (p.status === "sortiment" || p.status === "entwicklung")).length;
+    return s2.produkte.liste.filter((p2) => p2.marke === markeId && p2.kategorie === kat && p2.id !== ohne2 && (p2.status === "sortiment" || p2.status === "entwicklung")).length;
   }
   function produktKostenWoche(s2) {
-    return s2.produkte ? s2.produkte.liste.reduce((a, p) => a + (p.status === "entwicklung" ? p.budgetWoche : 0), 0) : 0;
+    return s2.produkte ? s2.produkte.liste.reduce((a, p2) => a + (p2.status === "entwicklung" ? p2.budgetWoche : 0), 0) : 0;
   }
   function produkteWoche(s2) {
     var _a2, _b, _c, _d;
     const pr2 = s2.produkte;
     if (!pr2) return;
     let kosten = false;
-    for (const p of pr2.liste) {
-      if (p.status === "entwicklung" && s2.woche >= p.fertig) {
-        einfuehren(s2, p, !s2.prognose);
+    for (const p2 of pr2.liste) {
+      if (p2.status === "entwicklung" && s2.woche >= p2.fertig) {
+        einfuehren(s2, p2, !s2.prognose);
         kosten = true;
-        const m = s2.eigenmarken.marken.find((x) => x.id === p.marke);
-        if (m && (m.wgAnteile[p.wg] ?? 0) <= 0 && m.status !== "eingestellt") eigenmarkeAnteil(s2, m.id, p.wg, PRODUKT_PARAM.anteilNeu);
-        melde(s2, "info", `${m?.name ?? "Eigenmarke"}: ${p.name} ist im Sortiment (${(p.sterne ?? 0).toLocaleString("de-DE")} Sterne).`);
+        const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
+        if (m && (m.wgAnteile[p2.wg] ?? 0) <= 0 && m.status !== "eingestellt") eigenmarkeAnteil(s2, m.id, p2.wg, PRODUKT_PARAM.anteilNeu);
+        melde(s2, "info", `${m?.name ?? "Eigenmarke"}: ${p2.name} ist im Sortiment (${(p2.sterne ?? 0).toLocaleString("de-DE")} Sterne).`);
       }
     }
     for (const m of s2.eigenmarken.marken) {
       if (m.status === "eingestellt") {
-        for (const p of pr2.liste) if (p.marke === m.id && p.status !== "ausgelistet") {
-          if (p.status === "entwicklung") kosten = true;
-          p.status = "ausgelistet";
+        for (const p2 of pr2.liste) if (p2.marke === m.id && p2.status !== "ausgelistet") {
+          if (p2.status === "entwicklung") kosten = true;
+          p2.status = "ausgelistet";
         }
         continue;
       }
       for (const wg of Object.keys(m.wgAnteile)) {
-        if (pr2.liste.some((p2) => p2.marke === m.id && p2.wg === wg && p2.status !== "ausgelistet")) continue;
+        if (pr2.liste.some((p3) => p3.marke === m.id && p3.wg === wg && p3.status !== "ausgelistet")) continue;
         const t = ARTIKELTYPEN.find((x) => x.wgs.includes(wg) && x.gruppe[trendGruppe(m)] >= 0.5) ?? ARTIKELTYPEN.find((x) => x.wgs.includes(wg));
         if (!t) continue;
         const farbe2 = FARB_BASIS[trendGruppe(m)][0];
-        const p = neuesProdukt(s2, m, { typ: t.typ, farbe: farbe2, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
-        p.basis = true;
-        p.budgetWoche = 0;
-        p.teile = bewerte(s2, m, p, 0.4, void 0);
-        p.sterne = sterneAus(scoreAus(p.teile));
-        p.status = "sortiment";
-        p.seit = s2.woche;
+        const p2 = neuesProdukt(s2, m, { typ: t.typ, farbe: farbe2, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
+        p2.basis = true;
+        p2.budgetWoche = 0;
+        p2.teile = bewerte(s2, m, p2, 0.4, void 0);
+        p2.sterne = sterneAus(scoreAus(p2.teile));
+        p2.status = "sortiment";
+        p2.seit = s2.woche;
         (_a2 = pr2.basisF)[_b = `${m.id}|${wg}`] ?? (_a2[_b] = 1);
         (_c = pr2.basisM)[_d = `${m.id}|${wg}`] ?? (_c[_d] = 0);
-        pr2.liste.push(p);
+        pr2.liste.push(p2);
       }
     }
     if (kosten) hqAktualisiere(s2);
@@ -2135,34 +2145,34 @@
     const pr2 = s2.produkte;
     if (!pr2) return;
     const jeKey = /* @__PURE__ */ new Map();
-    for (const p of pr2.liste) if (imSortiment(p)) {
-      const k = `${p.marke}|${p.wg}`;
+    for (const p2 of pr2.liste) if (imSortiment(p2)) {
+      const k = `${p2.marke}|${p2.wg}`;
       const l = jeKey.get(k);
-      if (l) l.push(p);
-      else jeKey.set(k, [p]);
+      if (l) l.push(p2);
+      else jeKey.set(k, [p2]);
     }
     for (const [k, liste] of jeKey) {
       const [m, wg] = k.split("|");
       const st = s2.einkauf.wgs[wg];
       const u = st?.v?.u?.length ? st.v.u[st.v.u.length - 1] * (st.pool[m] ?? 0) : 0;
-      const gw = liste.map((p) => gewicht(s2, p));
+      const gw = liste.map((p2) => gewicht(s2, p2));
       const sum2 = gw.reduce((a, b2) => a + b2, 0) || 1;
-      liste.forEach((p, i) => {
+      liste.forEach((p2, i) => {
         const x = u * gw[i] / sum2;
-        p.umsatz.push(eur(x));
-        p.verkauf.push(Math.round(x / Math.max(0.5, p.preis)));
-        if (p.umsatz.length > 13) {
-          p.umsatz.shift();
-          p.verkauf.shift();
+        p2.umsatz.push(eur(x));
+        p2.verkauf.push(Math.round(x / Math.max(0.5, p2.preis)));
+        if (p2.umsatz.length > 13) {
+          p2.umsatz.shift();
+          p2.verkauf.shift();
         }
       });
     }
-    for (const p of pr2.liste) if (!imSortiment(p) && p.verkauf.length && p.verkauf[p.verkauf.length - 1] !== 0) {
-      p.umsatz.push(0);
-      p.verkauf.push(0);
-      if (p.umsatz.length > 13) {
-        p.umsatz.shift();
-        p.verkauf.shift();
+    for (const p2 of pr2.liste) if (!imSortiment(p2) && p2.verkauf.length && p2.verkauf[p2.verkauf.length - 1] !== 0) {
+      p2.umsatz.push(0);
+      p2.verkauf.push(0);
+      if (p2.umsatz.length > 13) {
+        p2.umsatz.shift();
+        p2.verkauf.shift();
       }
     }
   }
@@ -2194,36 +2204,36 @@
       const c = pruefe(s2, e);
       if (c.fehler || !c.m || !c.wg) return fehler5(c.fehler ?? "Ung\xFCltiger Entwurf.");
       if (s2.phase === "insolvenz" && e.budgetWoche * e.dauer > 15e5) return fehler5("Im Verfahren gibt der Sachwalter h\xF6chstens 1,5 Mio. \u20AC je Entwicklung frei.");
-      const p2 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, teamStaerke(s2));
-      s2.produkte.liste.push(p2);
+      const p3 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, teamStaerke(s2));
+      s2.produkte.liste.push(p3);
       hqAktualisiere(s2);
-      return ok5(`${c.m.name}: ${p2.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p2.fertig + 1}.`);
+      return ok5(`${c.m.name}: ${p3.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p3.fertig + 1}.`);
     }
-    const p = s2.produkte.liste.find((x) => x.id === a.produkt);
-    if (!p || p.status === "ausgelistet") return fehler5("Produkt nicht gefunden.");
+    const p2 = s2.produkte.liste.find((x) => x.id === a.produkt);
+    if (!p2 || p2.status === "ausgelistet") return fehler5("Produkt nicht gefunden.");
     switch (a.typ) {
       case "produktPreis": {
-        const neu = Math.round(clamp(a.preis, p.normpreis * 0.4, p.normpreis * 2.5) * 100) / 100;
-        p.preis = neu;
-        const marge = 1 - p.ekStueck / neu;
-        return ok5(`${p.name}: Preis ${neu.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} \u20AC, Marge ${Math.round(marge * 100)} %.`);
+        const neu = Math.round(clamp(a.preis, p2.normpreis * 0.4, p2.normpreis * 2.5) * 100) / 100;
+        p2.preis = neu;
+        const marge = 1 - p2.ekStueck / neu;
+        return ok5(`${p2.name}: Preis ${neu.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} \u20AC, Marge ${Math.round(marge * 100)} %.`);
       }
       case "produktAuslisten": {
-        const warEnt = p.status === "entwicklung";
-        p.status = "ausgelistet";
+        const warEnt = p2.status === "entwicklung";
+        p2.status = "ausgelistet";
         if (warEnt) hqAktualisiere(s2);
-        return ok5(`${p.name} ausgelistet${warEnt ? ", die Entwicklung ist gestoppt" : ""}.`);
+        return ok5(`${p2.name} ausgelistet${warEnt ? ", die Entwicklung ist gestoppt" : ""}.`);
       }
       case "produktSortiment": {
-        if (p.status === "entwicklung") return fehler5("Das Produkt ist noch in Entwicklung.");
+        if (p2.status === "entwicklung") return fehler5("Das Produkt ist noch in Entwicklung.");
         if (a.an) {
-          if (p.status === "sortiment") return ok5(`${p.name} ist im Sortiment.`);
-          if (belegt(s2, p.marke, p.kategorie) >= kapazitaet(s2)) return fehler5(`Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[p.kategorie]} erreicht.`);
-          p.status = "sortiment";
-          return ok5(`${p.name} wieder im Sortiment.`);
+          if (p2.status === "sortiment") return ok5(`${p2.name} ist im Sortiment.`);
+          if (belegt(s2, p2.marke, p2.kategorie) >= kapazitaet(s2)) return fehler5(`Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[p2.kategorie]} erreicht.`);
+          p2.status = "sortiment";
+          return ok5(`${p2.name} wieder im Sortiment.`);
         }
-        p.status = "pausiert";
-        return ok5(`${p.name} vor\xFCbergehend aus dem Sortiment.`);
+        p2.status = "pausiert";
+        return ok5(`${p2.name} vor\xFCbergehend aus dem Sortiment.`);
       }
     }
     return fehler5("Unbekannte Aktion.");
@@ -2234,14 +2244,14 @@
     const trifft3 = () => zufall(r) < 0.3 + 0.65 * guete;
     const kap = kapazitaet(s2);
     for (const m of s2.eigenmarken.marken.filter(istVerkaufsaktiv)) {
-      if (s2.produkte.liste.some((p) => p.marke === m.id && p.status === "entwicklung")) continue;
-      const eigene = s2.produkte.liste.filter((p) => p.marke === m.id && p.status === "sortiment");
-      const kats = [...new Set(eigene.map((p) => p.kategorie))];
+      if (s2.produkte.liste.some((p2) => p2.marke === m.id && p2.status === "entwicklung")) continue;
+      const eigene = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status === "sortiment");
+      const kats = [...new Set(eigene.map((p2) => p2.kategorie))];
       if (!kats.length) continue;
       const gut = trifft3();
       for (const k of kats) {
         if (belegt(s2, m.id, k) < kap) continue;
-        const liste = eigene.filter((p) => p.kategorie === k).sort((a, b2) => sterneWirksam(s2, a) - sterneWirksam(s2, b2));
+        const liste = eigene.filter((p2) => p2.kategorie === k).sort((a, b2) => sterneWirksam(s2, a) - sterneWirksam(s2, b2));
         const weg = gut ? liste[0] : waehle(r, liste);
         if (weg && (!gut || sterneWirksam(s2, weg) <= 3)) {
           produktAktion(s2, { typ: "produktAuslisten", produkt: weg.id });
@@ -2268,57 +2278,57 @@
     }
     return texte.length ? texte.join(" ") : void 0;
   }
-  function produktKarte(s2, p) {
-    const m = s2.eigenmarken.marken.find((x) => x.id === p.marke);
-    const n = p.verkauf.length;
-    const a = n ? p.verkauf[n - 1] : 0;
-    const b2 = n > 1 ? p.verkauf[n - 2] : a;
-    const ent = p.status === "entwicklung";
+  function produktKarte(s2, p2) {
+    const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
+    const n = p2.verkauf.length;
+    const a = n ? p2.verkauf[n - 1] : 0;
+    const b2 = n > 1 ? p2.verkauf[n - 2] : a;
+    const ent = p2.status === "entwicklung";
     return {
-      id: p.id,
-      marke: p.marke,
-      markeName: m?.name ?? p.marke,
-      typ: p.typ,
-      name: p.name,
-      farbe: p.farbe,
-      farbeHex: FARBEN2[p.farbe],
-      material: p.material,
-      stil: p.stil,
-      preislage: p.preislage,
-      qualitaet: p.qualitaet,
-      wg: p.wg,
-      wgName: WG[p.wg]?.name ?? p.wg,
-      bereich: WG[p.wg]?.bereich,
-      kategorie: p.kategorie,
-      kategorieName: PRODUKT_KATEGORIEN[p.kategorie],
-      status: p.status,
-      normpreis: p.normpreis,
-      preis: p.preis,
-      ekStueck: p.ekStueck,
-      marge: Math.round((1 - p.ekStueck / Math.max(0.5, p.preis)) * 1e3) / 1e3,
-      sterne: ent ? 0 : halbe(sterneWirksam(s2, p)),
-      sterneEinfuehrung: p.sterne,
-      sterneTeile: p.teile,
+      id: p2.id,
+      marke: p2.marke,
+      markeName: m?.name ?? p2.marke,
+      typ: p2.typ,
+      name: p2.name,
+      farbe: p2.farbe,
+      farbeHex: FARBEN2[p2.farbe],
+      material: p2.material,
+      stil: p2.stil,
+      preislage: p2.preislage,
+      qualitaet: p2.qualitaet,
+      wg: p2.wg,
+      wgName: WG[p2.wg]?.name ?? p2.wg,
+      bereich: WG[p2.wg]?.bereich,
+      kategorie: p2.kategorie,
+      kategorieName: PRODUKT_KATEGORIEN[p2.kategorie],
+      status: p2.status,
+      normpreis: p2.normpreis,
+      preis: p2.preis,
+      ekStueck: p2.ekStueck,
+      marge: Math.round((1 - p2.ekStueck / Math.max(0.5, p2.preis)) * 1e3) / 1e3,
+      sterne: ent ? 0 : halbe(sterneWirksam(s2, p2)),
+      sterneEinfuehrung: p2.sterne,
+      sterneTeile: p2.teile,
       verkaufLetzteWoche: a,
       verkaufVorwoche: b2,
       veraenderung: a - b2,
       veraenderungProzent: b2 > 0 ? Math.round((a - b2) / b2 * 1e3) / 1e3 : 0,
-      umsatzLetzteWoche: p.umsatz.length ? p.umsatz[p.umsatz.length - 1] : 0,
-      start: p.start,
-      fertigWoche: p.fertig,
-      dauer: p.dauer,
-      budgetWoche: p.budgetWoche,
-      fortschritt: ent ? clamp((s2.woche - p.start) / Math.max(1, p.dauer), 0, 1) : 1,
-      seit: p.seit,
-      basis: !!p.basis
+      umsatzLetzteWoche: p2.umsatz.length ? p2.umsatz[p2.umsatz.length - 1] : 0,
+      start: p2.start,
+      fertigWoche: p2.fertig,
+      dauer: p2.dauer,
+      budgetWoche: p2.budgetWoche,
+      fortschritt: ent ? clamp((s2.woche - p2.start) / Math.max(1, p2.dauer), 0, 1) : 1,
+      seit: p2.seit,
+      basis: !!p2.basis
     };
   }
   function produkte(s2, marke4) {
     const kap = kapazitaet(s2);
     const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
-      const liste = s2.produkte.liste.filter((p) => p.marke === m.id && p.status !== "ausgelistet");
-      const kats = [...new Set(liste.map((p) => p.kategorie))];
-      const ent = liste.filter((p) => p.status === "entwicklung").length;
+      const liste = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
+      const kats = [...new Set(liste.map((p2) => p2.kategorie))];
+      const ent = liste.filter((p2) => p2.status === "entwicklung").length;
       const voll2 = kats.filter((k) => belegt(s2, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
       return {
         marke: m.id,
@@ -2327,7 +2337,7 @@
         zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`,
         trendGruppe: trendGruppe(m),
         kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s2, m.id, k) })),
-        produkte: liste.map((p) => produktKarte(s2, p)),
+        produkte: liste.map((p2) => produktKarte(s2, p2)),
         inEntwicklung: ent,
         hinweis: ent ? `Wir entwickeln gerade ${ent === 1 ? "ein neues Produkt" : `${ent} neue Produkte`}.` : voll2.length ? `Kapazit\xE4t erreicht bei ${voll2.join(", ")}. F\xFCr Neues bitte erst auslisten.` : "Wir entwickeln gerade keine neuen Produkte. Zeit zu investieren."
       };
@@ -4439,11 +4449,11 @@
     const sd = interpol(EK_PARAM.prognoseSd, L2);
     for (const d of aktiveWg(s2)) {
       const st = s2.einkauf.wgs[d.id];
-      const p = vk[d.id] ?? {};
-      const D = Object.values(p).reduce((a, b2) => a + b2, 0);
+      const p2 = vk[d.id] ?? {};
+      const D = Object.values(p2).reduce((a, b2) => a + b2, 0);
       const S = Math.max(0.05, wgSaison(d, w));
       st.basisVK = 0.85 * st.basisVK + 0.15 * (D / S);
-      if (D > 0) st.pool = Object.fromEntries(Object.entries(p).map(([k, x]) => [k, x / D]));
+      if (D > 0) st.pool = Object.fromEntries(Object.entries(p2).map(([k, x]) => [k, x / D]));
       if (!s2.prognose) st.fehler = clamp(0.9 * st.fehler + sd * Math.sqrt(0.19) * normal(rngHalter(s2)), -0.4, 0.4);
       const z2 = st.st.nosZiel;
       st.nosAnteil = st.nosAnteil < z2 ? Math.min(z2, st.nosAnteil + EK_PARAM.nosTempo) : Math.max(z2, st.nosAnteil - EK_PARAM.nosTempo);
@@ -4529,17 +4539,17 @@
     WOCHE = {};
     for (const d of aktiveWg(s2)) {
       const st = s2.einkauf.wgs[d.id];
-      const p = n.vk[d.id] ?? {};
+      const p2 = n.vk[d.id] ?? {};
       const r = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
       const red = EK_PARAM.abschrift[st.st.reduzierung];
       const capM = Math.min(1, red.cap * marketingAltwareFaktor(s2, d.bereich, d.id));
       const sg = EK_PARAM.servicegrad[st.st.servicegrad];
       for (const art of ["nos", "saison"]) {
-        const pools = Object.keys(p).sort((a, b2) => a === FREMD ? 1 : b2 === FREMD ? -1 : a.localeCompare(b2));
+        const pools = Object.keys(p2).sort((a, b2) => a === FREMD ? 1 : b2 === FREMD ? -1 : a.localeCompare(b2));
         let ausweichVk = 0;
         for (const pool of pools) {
           const m = margeVon(s2, st, art, pool);
-          const vkBedarf = (p[pool] ?? 0) * artAnteil(st, art) * brutto(art) * (art === "saison" ? red.nachfrage : 1);
+          const vkBedarf = (p2[pool] ?? 0) * artAnteil(st, art) * brutto(art) * (art === "saison" ? red.nachfrage : 1);
           const ekBedarf = vkBedarf * (1 - m);
           const topf = toepfeMap.get(`${d.id}|${art}|${pool}`);
           const v = verfuegbar(topf);
@@ -4842,12 +4852,12 @@
   }
   var neueFreigabeId = (s2) => `o${++s2.einkauf.zaehler}`;
   function protokoll(s2) {
-    const p = s2.einkauf.protokoll;
-    let x = p[p.length - 1];
+    const p2 = s2.einkauf.protokoll;
+    let x = p2[p2.length - 1];
     if (!x || x.woche !== s2.woche) {
       x = { woche: s2.woche, neu: 0, direkt: 0, freigegeben: 0, auto: 0, verfallen: 0, verfallenWert: 0, abgelehnt: 0 };
-      p.push(x);
-      if (p.length > 26) p.splice(0, p.length - 26);
+      p2.push(x);
+      if (p2.length > 26) p2.splice(0, p2.length - 26);
     }
     return x;
   }
@@ -5024,17 +5034,17 @@
       case "freigabeKuerzen": {
         const f = s2.einkauf.freigaben.find((x) => x.id === a.id);
         if (!f) return fehler5("Order nicht gefunden.");
-        const p = clamp(a.prozent, 0, 0.95);
-        f.lieferungen = f.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p)) }));
+        const p2 = clamp(a.prozent, 0, 0.95);
+        f.lieferungen = f.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p2)) }));
         f.wert = f.lieferungen.reduce((x, l) => x + l.wert, 0);
-        f.reichweiteDanach = Math.round(f.reichweiteDanach * (1 - p) * 10) / 10;
+        f.reichweiteDanach = Math.round(f.reichweiteDanach * (1 - p2) * 10) / 10;
         f.erwarteterAbverkauf = eur(f.erwarteterAbverkauf);
-        f.hinweis = [f.hinweis, `um ${Math.round(p * 100)} % gek\xFCrzt`].filter(Boolean).join(", ");
+        f.hinweis = [f.hinweis, `um ${Math.round(p2 * 100)} % gek\xFCrzt`].filter(Boolean).join(", ");
         if (a.freigeben === false) return ok5(`Order ${WG[f.wg].name} auf ${mio(f.wert)} gek\xFCrzt.`);
         s2.einkauf.freigaben = s2.einkauf.freigaben.filter((x) => x.id !== f.id);
         gebeFrei(s2, f);
         pr2.freigegeben++;
-        return ok5(`Order ${WG[f.wg].name} um ${Math.round(p * 100)} % gek\xFCrzt und \xFCber ${mio(f.wert)} freigegeben.`);
+        return ok5(`Order ${WG[f.wg].name} um ${Math.round(p2 * 100)} % gek\xFCrzt und \xFCber ${mio(f.wert)} freigegeben.`);
       }
       case "sammelfreigabe": {
         const treffer = s2.einkauf.freigaben.filter((f) => passtFilter(f, a.filter));
@@ -5265,7 +5275,7 @@
   }
   function freigaben(s2, filter) {
     const liste = s2.einkauf.freigaben.filter((f) => passtFilter(f, filter)).map((f) => freigabeZeile(s2, f)).sort((a, b2) => a.frist - b2.frist || b2.wert - a.wert);
-    return { woche: s2.woche, grenze: s2.einkauf.grenze, anzahl: liste.length, wert: eur(liste.reduce((a, f) => a + f.wert, 0)), liste, protokoll: s2.einkauf.protokoll.map((p) => ({ ...p })) };
+    return { woche: s2.woche, grenze: s2.einkauf.grenze, anzahl: liste.length, wert: eur(liste.reduce((a, f) => a + f.wert, 0)), liste, protokoll: s2.einkauf.protokoll.map((p2) => ({ ...p2 })) };
   }
   function wgDetail(s2, wgId) {
     const d = WG[wgId];
@@ -5415,13 +5425,13 @@
   }
   var z = (s2, a, b2) => a + (b2 - a) * zufall2(s2);
   var gz = (s2, a, b2) => Math.floor(z(s2, a, b2 + 1));
-  var chance2 = (s2, p) => zufall2(s2) < p;
+  var chance2 = (s2, p2) => zufall2(s2) < p2;
   var wahl = (s2, a) => a[Math.floor(zufall2(s2) * a.length)];
   function entfernung(a, b2) {
-    const p = KOORDINATEN[a], q2 = KOORDINATEN[b2];
-    if (!p || !q2) return Infinity;
-    const dy = (p[0] - q2[0]) * 111;
-    const dx = (p[1] - q2[1]) * 111 * Math.cos((p[0] + q2[0]) / 2 * Math.PI / 180);
+    const p2 = KOORDINATEN[a], q2 = KOORDINATEN[b2];
+    if (!p2 || !q2) return Infinity;
+    const dy = (p2[0] - q2[0]) * 111;
+    const dx = (p2[1] - q2[1]) * 111 * Math.cos((p2[0] + q2[0]) / 2 * Math.PI / 180);
     return Math.hypot(dx, dy);
   }
   function lageFaktor(haus2, w) {
@@ -5665,8 +5675,8 @@
         const zu = hs.filter((h) => h.status === "geschlossen").reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
         const kuerzlich = hs.some((h) => h.wettbewerbSchliessungWoche !== void 0 && w - h.wettbewerbSchliessungWoche < 52);
         const faktor = gesamtkm > 0 && zu / gesamtkm > 0.5 && kuerzlich ? 3 : 1;
-        const p = clamp(2e-3 * (hs.reduce((a, h) => a + h.einzug.kaufkraft, 0) / hs.length) * (1 + zu / Math.max(1, gesamtkm)) * faktor, 0, 0.05);
-        if (chance2(s2, p)) neuEroeffnet(s2, stadt, eroeffnungsArt(s2, stadt));
+        const p2 = clamp(2e-3 * (hs.reduce((a, h) => a + h.einzug.kaufkraft, 0) / hs.length) * (1 + zu / Math.max(1, gesamtkm)) * faktor, 0, 0.05);
+        if (chance2(s2, p2)) neuEroeffnet(s2, stadt, eroeffnungsArt(s2, stadt));
         const aktion2 = istStadtAktion(s2, stadt);
         const wachstum = stadtWachstum(s2, stadt);
         for (const wb of s2.wettbewerber.filter((x) => x.stadt === stadt && x.status === "offen" && x.art !== "leer_ehemals")) {
@@ -5809,28 +5819,28 @@
     { typ: "Staatsfonds", name: "Staatsfonds Aurum" }
   ];
   function grundumsatz(h) {
-    return Object.entries(h.potenzial).reduce((sum2, [g, p]) => {
+    return Object.entries(h.potenzial).reduce((sum2, [g, p2]) => {
       const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === "eigen").reduce((a, f) => a + f.qm, 0);
-      return sum2 + (p ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g] ?? 1)));
+      return sum2 + (p2 ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g] ?? 1)));
     }, 0);
   }
-  function normierePremiumFlaechen(h, p) {
+  function normierePremiumFlaechen(h, p2) {
     const alteEtagen = [...h.etagen].sort((a, b2) => a - b2);
-    const neueEtagen = [...p.etagen];
+    const neueEtagen = [...p2.etagen];
     const anzahl = Math.max(1, alteEtagen.length - 1);
     for (const f of h.flaechen) {
       const index2 = Math.max(0, alteEtagen.indexOf(f.etage));
       f.etage = neueEtagen[Math.round(index2 / anzahl * (neueEtagen.length - 1))];
     }
     h.etagen = neueEtagen;
-    h.grundflaecheQm = p.qm / neueEtagen.length;
+    h.grundflaecheQm = p2.qm / neueEtagen.length;
     const gruppen = Object.keys(h.potenzial);
     const gewicht2 = gruppen.reduce((a, g) => a + GRUPPEN[g].anteilFlaeche, 0);
     for (const g of gruppen) {
       const bereiche = h.flaechen.filter((f) => f.gruppe === g);
       const altQm = bereiche.reduce((a, f) => a + f.qm, 0);
       if (!altQm) continue;
-      const zielQm = Math.round(p.qm * GRUPPEN[g].anteilFlaeche / gewicht2);
+      const zielQm = Math.round(p2.qm * GRUPPEN[g].anteilFlaeche / gewicht2);
       let rest2 = zielQm;
       for (let i = 0; i < bereiche.length; i++) {
         const f = bereiche[i];
@@ -5839,7 +5849,7 @@
         rest2 -= neuQm;
       }
     }
-    const rest = p.qm - h.flaechen.reduce((a, f) => a + f.qm, 0);
+    const rest = p2.qm - h.flaechen.reduce((a, f) => a + f.qm, 0);
     const ausgleich = h.flaechen.find((f) => f.gruppe === "damen") ?? h.flaechen[0];
     if (ausgleich) ausgleich.qm += rest;
     for (const g of gruppen) {
@@ -5850,29 +5860,29 @@
     }
   }
   function kennzeichnePremium(haeuser) {
-    const vorhanden = PREMIUM_HAEUSER.every((p) => haeuser.some((h) => h.premiumSchluessel === p.id || h.klasse === "premium" && h.stadt === p.stadt));
+    const vorhanden = PREMIUM_HAEUSER.every((p2) => haeuser.some((h) => h.premiumSchluessel === p2.id || h.klasse === "premium" && h.stadt === p2.stadt));
     if (vorhanden) {
-      for (const p of PREMIUM_HAEUSER) {
-        const h = haeuser.find((x) => x.premiumSchluessel === p.id || x.klasse === "premium" && x.stadt === p.stadt);
+      for (const p2 of PREMIUM_HAEUSER) {
+        const h = haeuser.find((x) => x.premiumSchluessel === p2.id || x.klasse === "premium" && x.stadt === p2.stadt);
         if (!h) continue;
         h.klasse = "premium";
-        h.premiumSchluessel = p.id;
-        h.name = p.name;
+        h.premiumSchluessel = p2.id;
+        h.name = p2.name;
         h.premiumImage ?? (h.premiumImage = 80);
       }
       return;
     }
     const ursprung = haeuser.reduce((a, h) => a + grundumsatz(h), 0);
-    for (const p of PREMIUM_HAEUSER) {
-      const kandidaten2 = haeuser.filter((h2) => h2.format === "warenhaus" && h2.stadt === p.stadt && h2.klasse !== "premium");
+    for (const p2 of PREMIUM_HAEUSER) {
+      const kandidaten2 = haeuser.filter((h2) => h2.format === "warenhaus" && h2.stadt === p2.stadt && h2.klasse !== "premium");
       const h = [...kandidaten2].sort((a, b2) => (b2.lage === "1a" ? 1 : 0) - (a.lage === "1a" ? 1 : 0) || b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length || a.id.localeCompare(b2.id))[0];
       if (!h) continue;
-      h.name = p.name;
+      h.name = p2.name;
       h.klasse = "premium";
-      h.premiumSchluessel = p.id;
+      h.premiumSchluessel = p2.id;
       h.premiumImage = 80;
       h.lage = "1a";
-      const profil = premiumProfil(p.id);
+      const profil = premiumProfil(p2.id);
       normierePremiumFlaechen(h, profil);
       h.miete.vermieter = "eigentuemer";
       h.miete.vermieterName = "Hartwig Immobilien";
@@ -5925,7 +5935,7 @@
   }
   function premiumMarktwert(h) {
     if (h.klasse !== "premium") return 0;
-    const rang = PREMIUM_HAEUSER.find((p) => p.id === h.premiumSchluessel)?.rang ?? 3;
+    const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h.premiumSchluessel)?.rang ?? 3;
     const ebitda = (h.kpi?.db ?? 0) * 52;
     const multiplex = rang === 1 ? 18 : rang === 2 ? 15 : 11;
     return eur(Math.max(0, ebitda) * multiplex + (IMMOBILIE[h.premiumSchluessel ?? ""] ?? 0) * (0.85 + 0.15 * (h.substanz / 100)) * (0.8 + 0.2 * ((h.premiumImage ?? 80) / 80)));
@@ -5970,8 +5980,8 @@
     if (s2.phase !== "insolvenz" || s2.prognose) return;
     for (const h of s2.haeuser.filter((x) => x.klasse === "premium" && x.status === "offen")) {
       if (s2.angebote.some((a) => a.typ === "premiumVerkauf" && a.wunschHaeuser?.[0] === h.id)) continue;
-      const p = PREMIUM_HAEUSER.find((x) => x.id === h.premiumSchluessel);
-      const kaeufer = KAEUFER[(p?.rang ?? 3) === 1 ? h.premiumSchluessel === "P001" ? 0 : 1 : (p?.rang ?? 3) === 2 ? 2 : 1];
+      const p2 = PREMIUM_HAEUSER.find((x) => x.id === h.premiumSchluessel);
+      const kaeufer = KAEUFER[(p2?.rang ?? 3) === 1 ? h.premiumSchluessel === "P001" ? 0 : 1 : (p2?.rang ?? 3) === 2 ? 2 : 1];
       const kaufpreis = premiumMarktwert(h);
       s2.angebote.push({
         // Eigenständige deterministische IDs: keine Veränderung des globalen ID-Zählers
@@ -5979,7 +5989,7 @@
         id: `premium-${h.premiumSchluessel ?? h.id}-${s2.woche}`,
         typ: "premiumVerkauf",
         woche: s2.woche,
-        frist: s2.woche + 10 + (p?.rang ?? 3) * 3,
+        frist: s2.woche + 10 + (p2?.rang ?? 3) * 3,
         status: "offen",
         titel: `Kaufangebot f\xFCr ${h.name}`,
         text: `${kaeufer.name} bietet ${mio(kaufpreis)} inklusive Immobilie. Der Verkauf entzieht Hartwig ein Kronjuwel.`,
@@ -6155,27 +6165,27 @@
       return { ok: true, text: "Kassenausbau beauftragt." };
     }
     if (a.typ === "itRolloutPlan") {
-      const p2 = it.projekte.find((p3) => p3.id === a.projekt);
-      if (!p2 || p2.phase === "abgeschlossen" || p2.erledigteCluster.length) return { ok: false, text: "Rollout-Reihenfolge nicht mehr \xE4nderbar." };
+      const p3 = it.projekte.find((p4) => p4.id === a.projekt);
+      if (!p3 || p3.phase === "abgeschlossen" || p3.erledigteCluster.length) return { ok: false, text: "Rollout-Reihenfolge nicht mehr \xE4nderbar." };
       const gueltig2 = new Set(itCluster(s2).map((c) => c.id));
       if (!a.clusterIds.length || new Set(a.clusterIds).size !== a.clusterIds.length || a.clusterIds.some((id) => !gueltig2.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
-      if (a.clusterIds.some((id) => generationInCluster(s2, p2.system, id) >= p2.zielGeneration)) return { ok: false, text: "Im gew\xE4hlten Cluster ist diese Generation bereits vorhanden." };
-      if (a.clusterIds.length !== p2.clusterIds.length || a.clusterIds.some((id) => !p2.clusterIds.includes(id))) return { ok: false, text: "Nach Projektstart kann nur die Reihenfolge, nicht der Umfang ge\xE4ndert werden." };
-      p2.clusterIds = [...a.clusterIds];
-      p2.rolloutWochen = a.clusterIds.length;
+      if (a.clusterIds.some((id) => generationInCluster(s2, p3.system, id) >= p3.zielGeneration)) return { ok: false, text: "Im gew\xE4hlten Cluster ist diese Generation bereits vorhanden." };
+      if (a.clusterIds.length !== p3.clusterIds.length || a.clusterIds.some((id) => !p3.clusterIds.includes(id))) return { ok: false, text: "Nach Projektstart kann nur die Reihenfolge, nicht der Umfang ge\xE4ndert werden." };
+      p3.clusterIds = [...a.clusterIds];
+      p3.rolloutWochen = a.clusterIds.length;
       return { ok: true, text: "Rollout-Auswahl und Reihenfolge gespeichert." };
     }
     if (!IT_IDS.includes(a.system)) return { ok: false, text: "Unbekanntes IT-System." };
     if (!["kaufen", "entwickeln", "dienstleister"].includes(a.art)) return { ok: false, text: "Unbekannte Projektart." };
     if (!Number.isInteger(a.zielGeneration) || a.zielGeneration < 1 || a.zielGeneration > 4) return { ok: false, text: "Ung\xFCltige Zielgeneration." };
     if (a.art === "kaufen" && a.zielGeneration > 3 || a.art === "dienstleister" && a.zielGeneration !== 3) return { ok: false, text: "Diese Generation ist f\xFCr die gew\xE4hlte Projektart nicht verf\xFCgbar." };
-    if (it.projekte.some((p2) => p2.system === a.system && p2.phase !== "abgeschlossen")) return { ok: false, text: "F\xFCr das System l\xE4uft bereits ein Projekt." };
+    if (it.projekte.some((p3) => p3.system === a.system && p3.phase !== "abgeschlossen")) return { ok: false, text: "F\xFCr das System l\xE4uft bereits ein Projekt." };
     const gueltig = new Set(itCluster(s2).map((c) => c.id));
     const clusterIds = a.clusterIds ? [...a.clusterIds] : [...gueltig];
     if (!clusterIds.length || new Set(clusterIds).size !== clusterIds.length || clusterIds.some((id) => !gueltig.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
     if (clusterIds.some((id) => generationInCluster(s2, a.system, id) >= a.zielGeneration)) return { ok: false, text: "Zielgeneration muss in jedem gew\xE4hlten Cluster h\xF6her sein." };
     const plan2 = itProjektPlan(s2, a.system, a.art, a.zielGeneration, clusterIds.length);
-    const p = {
+    const p2 = {
       id: "it-p-" + ++it.naechsteId,
       system: a.system,
       art: a.art,
@@ -6195,9 +6205,9 @@
       stoerungen: 0,
       gestartet: s2.woche
     };
-    it.projekte.push(p);
+    it.projekte.push(p2);
     vorlage(s2, "IT-Projekt beauftragt", SYSTEME[a.system].name + ": " + a.art + ", Generation " + a.zielGeneration + ", " + clusterIds.length + " Cluster, Planbudget " + plan2.kosten.toLocaleString("de-DE") + " \u20AC.");
-    return { ok: true, text: "Projekt " + p.id + " gestartet." };
+    return { ok: true, text: "Projekt " + p2.id + " gestartet." };
   }
   function itZufall(s2, schluessel) {
     return { rng: Math.imul(s2.seed ^ 1313820465, 1664525) + Math.imul(s2.woche + 1, 1013904223) + Math.imul(schluessel, 2246822519) >>> 0 };
@@ -6206,32 +6216,32 @@
     const verluste = s2.it.umsatzFaktoren;
     for (const id of cluster.hausIds) verluste[id] = Math.min(verluste[id] ?? 1, faktor);
   }
-  function upgrade(s2, p, cluster) {
-    const x = s2.it.systeme[p.system];
-    x.installationen[cluster.id] = { generation: p.zielGeneration, seitWoche: s2.woche };
-    s2.it.startprobleme[p.system + ":" + cluster.id] = s2.woche + 4;
-    const r = itZufall(s2, 311 + p.erledigteCluster.length);
+  function upgrade(s2, p2, cluster) {
+    const x = s2.it.systeme[p2.system];
+    x.installationen[cluster.id] = { generation: p2.zielGeneration, seitWoche: s2.woche };
+    s2.it.startprobleme[p2.system + ":" + cluster.id] = s2.woche + 4;
+    const r = itZufall(s2, 311 + p2.erledigteCluster.length);
     const probs = 0.11 * (1 - qualitaet(s2) * 0.7);
     const defekte = cluster.hausIds.length ? chance(r, probs) ? 1 + Math.floor(cluster.hausIds.length * 0.18) : 0 : 0;
-    p.stoerungen += defekte;
+    p2.stoerungen += defekte;
     if (defekte) stoerung(s2, cluster, 0.97);
-    p.erledigteCluster.push(cluster.id);
-    vorlage(s2, "Rollout " + SYSTEME[p.system].name, cluster.name + " fertig, " + defekte + " St\xF6rungen, " + p.erledigteCluster.length + "/" + p.clusterIds.length + " Cluster umgestellt.");
+    p2.erledigteCluster.push(cluster.id);
+    vorlage(s2, "Rollout " + SYSTEME[p2.system].name, cluster.name + " fertig, " + defekte + " St\xF6rungen, " + p2.erledigteCluster.length + "/" + p2.clusterIds.length + " Cluster umgestellt.");
   }
-  function beende(s2, p) {
-    p.phase = "abgeschlossen";
-    p.phaseRest = 0;
-    p.beendet = s2.woche;
-    const x = s2.it.systeme[p.system];
-    if (itCluster(s2).every((c) => generationInCluster(s2, p.system, c.id) >= p.zielGeneration)) {
-      x.generation = p.zielGeneration;
+  function beende(s2, p2) {
+    p2.phase = "abgeschlossen";
+    p2.phaseRest = 0;
+    p2.beendet = s2.woche;
+    const x = s2.it.systeme[p2.system];
+    if (itCluster(s2).every((c) => generationInCluster(s2, p2.system, c.id) >= p2.zielGeneration)) {
+      x.generation = p2.zielGeneration;
       x.alter = 0;
       x.wartungGekuendigt = false;
     }
-    const faktor = { kaufen: 1, entwickeln: 0.75, dienstleister: 2.1 }[p.art];
-    const betrieb = x.basisKosten || (p.system === "preisschilder" ? 22e3 : 0);
-    x.kostenWoche = eur(betrieb * (1 + 0.17 * (p.zielGeneration - SYSTEME[p.system].start)) * faktor);
-    vorlage(s2, "IT-Projekt abgeschlossen", SYSTEME[p.system].name + " Generation " + p.zielGeneration + ". Istkosten " + p.kostenIst.toLocaleString("de-DE") + " \u20AC, Plan " + p.kostenPlan.toLocaleString("de-DE") + " \u20AC.");
+    const faktor = { kaufen: 1, entwickeln: 0.75, dienstleister: 2.1 }[p2.art];
+    const betrieb2 = x.basisKosten || (p2.system === "preisschilder" ? 22e3 : 0);
+    x.kostenWoche = eur(betrieb2 * (1 + 0.17 * (p2.zielGeneration - SYSTEME[p2.system].start)) * faktor);
+    vorlage(s2, "IT-Projekt abgeschlossen", SYSTEME[p2.system].name + " Generation " + p2.zielGeneration + ". Istkosten " + p2.kostenIst.toLocaleString("de-DE") + " \u20AC, Plan " + p2.kostenPlan.toLocaleString("de-DE") + " \u20AC.");
   }
   function itWoche(s2) {
     initialisiereIt(s2);
@@ -6243,36 +6253,36 @@
     const delta = IT_IDS.reduce((sum2, id) => sum2 + it.systeme[id].kostenWoche - it.systeme[id].basisKosten, 0);
     s2.zentrale.kostenWoche += delta;
     const q2 = qualitaet(s2);
-    for (const p of it.projekte) {
-      if (p.phase === "abgeschlossen") continue;
-      const zuf = itZufall(s2, 100 + Number(p.id.slice(5)));
-      const risiko = clamp(0.1 * (1 - q2) + 0.025 * (p.art === "entwickeln" ? 2 : 1), 0, 0.16);
+    for (const p2 of it.projekte) {
+      if (p2.phase === "abgeschlossen") continue;
+      const zuf = itZufall(s2, 100 + Number(p2.id.slice(5)));
+      const risiko = clamp(0.1 * (1 - q2) + 0.025 * (p2.art === "entwickeln" ? 2 : 1), 0, 0.16);
       if (!s2.prognose && chance(zuf, risiko)) {
-        p.verzug++;
-        p.phaseRest++;
-        const mehr = eur(p.wochenBudget * 0.12);
-        p.kostenPlan += mehr;
+        p2.verzug++;
+        p2.phaseRest++;
+        const mehr = eur(p2.wochenBudget * 0.12);
+        p2.kostenPlan += mehr;
       }
-      const ausgabe = eur(p.wochenBudget * (1 + (p.verzug > 0 ? 0.09 : 0)));
+      const ausgabe = eur(p2.wochenBudget * (1 + (p2.verzug > 0 ? 0.09 : 0)));
       einmalKosten(s2, ausgabe);
-      p.kostenIst += ausgabe;
-      p.phaseRest--;
-      if (p.phaseRest > 0) continue;
-      if (p.phase === "konzept") {
-        p.phase = "umsetzung";
-        p.phaseSeit = s2.woche + 1;
-        p.phaseRest = p.umsetzungWochen;
-        vorlage(s2, "IT-Konzept freigegeben", SYSTEME[p.system].name + " geht in die Umsetzung.");
-      } else if (p.phase === "umsetzung") {
-        p.phase = "rollout";
-        p.phaseSeit = s2.woche + 1;
-        p.phaseRest = 1;
-        vorlage(s2, "Rollout beginnt", SYSTEME[p.system].name + " wird Cluster f\xFCr Cluster umgestellt.");
-      } else if (p.phase === "rollout") {
-        const next = clusters.find((c) => c.id === p.clusterIds[p.erledigteCluster.length]);
-        if (next) upgrade(s2, p, next);
-        if (p.erledigteCluster.length === p.clusterIds.length) beende(s2, p);
-        else p.phaseRest = 1;
+      p2.kostenIst += ausgabe;
+      p2.phaseRest--;
+      if (p2.phaseRest > 0) continue;
+      if (p2.phase === "konzept") {
+        p2.phase = "umsetzung";
+        p2.phaseSeit = s2.woche + 1;
+        p2.phaseRest = p2.umsetzungWochen;
+        vorlage(s2, "IT-Konzept freigegeben", SYSTEME[p2.system].name + " geht in die Umsetzung.");
+      } else if (p2.phase === "umsetzung") {
+        p2.phase = "rollout";
+        p2.phaseSeit = s2.woche + 1;
+        p2.phaseRest = 1;
+        vorlage(s2, "Rollout beginnt", SYSTEME[p2.system].name + " wird Cluster f\xFCr Cluster umgestellt.");
+      } else if (p2.phase === "rollout") {
+        const next = clusters.find((c) => c.id === p2.clusterIds[p2.erledigteCluster.length]);
+        if (next) upgrade(s2, p2, next);
+        if (p2.erledigteCluster.length === p2.clusterIds.length) beende(s2, p2);
+        else p2.phaseRest = 1;
       }
     }
     for (let i = 0; i < IT_IDS.length; i++) {
@@ -6340,9 +6350,9 @@
       woche: s2.woche,
       qualitaet: qualitaet(s2),
       systeme,
-      projekte: (it?.projekte ?? []).map((p) => ({
-        ...p,
-        fortschritt: p.phase === "abgeschlossen" ? 1 : clamp((p.phase === "konzept" ? p.konzeptWochen - p.phaseRest : p.phase === "umsetzung" ? p.konzeptWochen + p.umsetzungWochen - p.phaseRest : p.konzeptWochen + p.umsetzungWochen + p.erledigteCluster.length) / (p.konzeptWochen + p.umsetzungWochen + p.rolloutWochen), 0, 1)
+      projekte: (it?.projekte ?? []).map((p2) => ({
+        ...p2,
+        fortschritt: p2.phase === "abgeschlossen" ? 1 : clamp((p2.phase === "konzept" ? p2.konzeptWochen - p2.phaseRest : p2.phase === "umsetzung" ? p2.konzeptWochen + p2.umsetzungWochen - p2.phaseRest : p2.konzeptWochen + p2.umsetzungWochen + p2.erledigteCluster.length) / (p2.konzeptWochen + p2.umsetzungWochen + p2.rolloutWochen), 0, 1)
       })),
       cluster: clusters.map((c) => ({ id: c.id, name: c.name, haeuser: c.hausIds.length })),
       betriebskostenWoche: systeme.reduce((a, x) => a + x.kostenWoche, 0)
@@ -6635,7 +6645,7 @@
       st.person.wechselwille = clamp(st.person.wechselwille - a.betrag / 5e5, 0, 1);
       return { ok: true, text: "Haltepr\xE4mie ausgezahlt." };
     }
-    const k = st.kandidaten.find((p) => p.id === a.kandidat);
+    const k = st.kandidaten.find((p2) => p2.id === a.kandidat);
     if (!k) return { ok: false, text: "Kandidat nicht gefunden." };
     if (st.person) einmalKosten(s2, eur(st.person.gehalt / 4));
     st.person = { ...k };
@@ -6732,6 +6742,577 @@
     };
   }
 
+  // ../engine/src/haus.ts
+  var HAUS_AKTIONEN = /* @__PURE__ */ new Set([
+    "hausLeitungErsetzen",
+    "hausLeitungFoerdern",
+    "hausHaltepraemie",
+    "hausLeitungBefordern",
+    "hausStandardSetzen",
+    "hausKostenSetzen",
+    "hausServiceSetzen",
+    "hausClusterServiceSetzen",
+    "hausGastronomie",
+    "hausKonzession",
+    "hausMassnahme",
+    "hausSonntag"
+  ]);
+  var POSTEN = ["energie", "reinigung", "sicherheit", "instandhaltung", "versicherung"];
+  var ANTEILE = { energie: 0.35, reinigung: 0.2, sicherheit: 0.15, instandhaltung: 0.2, versicherung: 0.1 };
+  var STANDARD = {
+    oeffnung: { von: 10, bis: 20, samstagBis: 20 },
+    sauberkeit: 2,
+    praesentation: 2,
+    kasse: 2,
+    services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }
+  };
+  var NAME = ["Mara Berg", "Jonas Ritter", "Elin Werner", "Timo Falk", "Nora Lind", "Lea B\xF6ttcher"];
+  var MASSNAHME = {
+    wetter: "oeffnungszeit",
+    baustelle: "aktion",
+    ware: "umlagerung",
+    personal: "springer",
+    konkurrenz: "aktion",
+    kasse: "springer",
+    stadtereignis: "oeffnungszeit",
+    sonstiges: "aktion"
+  };
+  var GRUND_TEXT = {
+    wetter: "Wetter",
+    baustelle: "Baustelle vor dem Haus",
+    ware: "Warenverf\xFCgbarkeit",
+    personal: "Personaldeckung",
+    konkurrenz: "Konkurrenzaktion",
+    kasse: "Kassenausfall",
+    stadtereignis: "Stadtereignis",
+    sonstiges: "Sonstiges"
+  };
+  function hash2(t) {
+    let n = 2166136261;
+    for (let i = 0; i < t.length; i++) n = Math.imul(n ^ t.charCodeAt(i), 16777619);
+    return zufall({ rng: n >>> 0 });
+  }
+  var leitung = (h) => h.personal.filialleiter;
+  var betrieb = (h) => h.betrieb;
+  var istOffen = (h) => h.status === "offen" || h.status === "schliessung_verhandlung";
+  function hausclusterSchluessel(h) {
+    return h.klasse === "premium" || h.flagship ? "premium-flagships" : String(h.hauscluster ?? h.region);
+  }
+  function steuerungscluster(s2, h) {
+    const mitOrganisation = s2;
+    return mitOrganisation.organisation?.flagships.includes(h.id) ? "premium-flagships" : hausclusterSchluessel(h);
+  }
+  function hausStandard(s2, h) {
+    const cluster = steuerungscluster(s2, h);
+    if (s2.hausbetrieb && !s2.hausbetrieb.standards[cluster]) s2.hausbetrieb.standards[cluster] = structuredStandard();
+    return betrieb(h)?.standardAusnahme ?? s2.hausbetrieb?.standards[cluster] ?? STANDARD;
+  }
+  function hausServices(s2, h) {
+    const b2 = h.betrieb, standard = hausStandard(s2, h);
+    return Object.fromEntries(["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].map(
+      (key) => [key, b2?.serviceAusnahme?.[key] ?? (b2?.services[key] || standard.services?.[key] || false)]
+    ));
+  }
+  function hausKandidaten(s2, hausId) {
+    const h = s2.haeuser.find((x) => x.id === hausId);
+    if (!h) return [];
+    return [0, 1, 2].map((i) => {
+      const x = hash2(s2.seed + ":" + hausId + ":kandidat:" + i + ":" + Math.floor(s2.woche / 13));
+      const staerken = { personal: 0.4 + 0.5 * x, ware: 0.4 + 0.5 * hash2(hausId + "w" + i), kunde: 0.4 + 0.5 * hash2(hausId + "k" + i), kosten: 0.4 + 0.5 * hash2(hausId + "c" + i) };
+      return {
+        name: NAME[Math.floor(x * NAME.length)],
+        staerken,
+        ehrlichkeit: 0.4 + 0.6 * hash2(hausId + "e" + i),
+        gehalt: eur(85e3 + 85e3 * x),
+        qualitaet: (staerken.personal + staerken.ware + staerken.kunde + staerken.kosten) / 4
+      };
+    });
+  }
+  function initialisiereHausbetrieb(s2) {
+    var _a2, _b, _c, _d, _e, _f, _g, _h;
+    s2.hausbetrieb ?? (s2.hausbetrieb = { standards: {}, staedte: {}, befoerderungen: [] });
+    (_a2 = s2.hausbetrieb.standards)["premium-flagships"] ?? (_a2["premium-flagships"] = structuredStandard());
+    for (const h of s2.haeuser) {
+      (_b = s2.hausbetrieb.standards)[_c = steuerungscluster(s2, h)] ?? (_b[_c] = structuredStandard());
+      (_d = s2.hausbetrieb.staedte)[_e = h.stadt] ?? (_d[_e] = { trend: 1, ereignisBis: 0, sonntage: [] });
+      const l = leitung(h);
+      l.staerken ?? (l.staerken = { personal: l.skill, ware: l.skill, kunde: l.skill, kosten: l.skill });
+      l.ehrlichkeit ?? (l.ehrlichkeit = 0.35 + 0.6 * hash2(s2.seed + ":" + h.id + ":ehrlich"));
+      l.gehalt ?? (l.gehalt = eur(7e4 + 1e5 * l.skill));
+      l.bonusAnteil ?? (l.bonusAnteil = 0.1);
+      l.wechselwille ?? (l.wechselwille = 0);
+      l.stellvertretung ?? (l.stellvertretung = { name: "Stellvertretung " + h.stadt, qualitaet: clamp(l.skill * 0.85, 0, 1) });
+      h.betrieb ?? (h.betrieb = {
+        leitungStart: l.skill,
+        leitungGehaltStart: l.gehalt ?? 0,
+        kosten: { energie: 1, reinigung: 1, sicherheit: 1, instandhaltung: 1, versicherung: 1 },
+        services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false },
+        kundenScore: 0,
+        scoreWoche: -1,
+        umsatzHistorie: [],
+        kommentare: [],
+        massnahmeBis: 0,
+        massnahmeFaktor: 1,
+        gastro: "keine",
+        gastroVertragBis: 0,
+        restaurantQm: h.format === "warenhaus" && h.etagen.length >= 4 ? Math.min(350, Math.round(h.grundflaecheQm * 0.06)) : 0,
+        konzessionen: {}
+      });
+      (_f = h.betrieb).leitungGehaltStart ?? (_f.leitungGehaltStart = l.gehalt ?? 0);
+      for (const f of h.flaechen.filter((x) => x.konzept === "konzession")) {
+        (_g = h.betrieb.konzessionen)[_h = f.id] ?? (_g[_h] = { name: "Partner " + (f.gruppe ?? "Sortiment"), quote: 0.22, bis: s2.woche + 260, exklusiv: false });
+      }
+    }
+  }
+  function structuredStandard() {
+    return {
+      oeffnung: { ...STANDARD.oeffnung },
+      sauberkeit: 2,
+      praesentation: 2,
+      kasse: 2,
+      services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }
+    };
+  }
+  function stadtFaktor(s2, h) {
+    const u = s2.hausbetrieb?.staedte[h.stadt];
+    if (!u) return 1;
+    let f = u.trend;
+    if (u.ereignisBis > s2.woche) f *= u.ereignis === "stadtfest" ? 1.07 : u.ereignis === "baustelle" ? 0.9 : u.ereignis === "parkhaus" ? 0.93 : u.ereignis === "oepnv" ? 0.85 : 1;
+    if (u.sonntage.includes(s2.woche)) f *= 1.12;
+    return f;
+  }
+  function hausBetriebsFaktor(s2, h) {
+    const b2 = betrieb(h);
+    if (s2.hausbetriebAbnahmeAus || !b2 || !istOffen(h)) return 1;
+    const l = leitung(h);
+    const st = hausStandard(s2, h);
+    const services = hausServices(s2, h);
+    const kundendienst = services.kundendienst ? 1.007 : 1;
+    const schneiderei = services.schneiderei ? 1.004 : 1;
+    const geschenk = services.geschenkverpackung && s2.woche % 52 >= 47 ? 1.014 : 1;
+    const abholung = services.abholstation ? 1.005 : 1;
+    const standard = 1 + 7e-3 * (st.sauberkeit - 2) + 9e-3 * (st.praesentation - 2) + 6e-3 * (st.kasse - 2) + 2e-3 * (10 - st.oeffnung.von) + 3e-3 * (st.oeffnung.bis - 20) + 2e-3 * (st.oeffnung.samstagBis - 20);
+    const delta = (l.staerken?.kunde ?? l.skill) - b2.leitungStart;
+    const ware3 = (l.staerken?.ware ?? l.skill) - b2.leitungStart;
+    return Math.max(0.5, stadtFaktor(s2, h) * standard * (1 + 0.06 * delta + 0.035 * ware3) * kundendienst * schneiderei * geschenk * abholung * (b2.massnahmeBis > s2.woche ? b2.massnahmeFaktor : 1) * (b2.ausfallBis !== void 0 && b2.ausfallBis > s2.woche ? 0.96 : 1) * (b2.gastro === "selbst" ? 1.015 : b2.gastro === "pacht" ? 1.006 : 1));
+  }
+  function hausBetriebskosten(s2, h, sonstige) {
+    const b2 = betrieb(h);
+    if (s2.hausbetriebAbnahmeAus || !b2 || !istOffen(h)) return sonstige;
+    let faktor = 0;
+    const preis = s2.hausbetrieb?.energiePreis ?? 1;
+    const basisTechnik = h.baujahr < 1970 ? 0 : h.baujahr < 2005 ? 1 : 2;
+    const etagenBau = h.etagenBau;
+    const modernisiert = etagenBau ? Object.values(etagenBau).reduce((sum2, e) => sum2 + Math.max(0, e.technik.licht - basisTechnik) + Math.max(0, e.technik.klima - basisTechnik), 0) / Math.max(1, h.etagen.length) : 0;
+    for (const p2 of POSTEN) faktor += ANTEILE[p2] * b2.kosten[p2] * (p2 === "energie" ? preis * (1 - 0.07 * modernisiert) : 1);
+    const service = Object.values(hausServices(s2, h)).filter(Boolean).length * 180;
+    const l = leitung(h);
+    const kostenLeitung = 1 - 0.035 * ((l.staerken?.kosten ?? l.skill) - b2.leitungStart);
+    return Math.max(0, sonstige * faktor * kostenLeitung + service);
+  }
+  function hausKonzessionserloes(s2, h, umsatz, quoteBasis) {
+    const fl = h.flaechen.filter((f) => f.konzept === "konzession");
+    if (s2.hausbetriebAbnahmeAus || !fl.length || !h.betrieb) return umsatz * quoteBasis;
+    const qm = fl.reduce((v, f) => v + f.qm, 0) || 1;
+    const quote = fl.reduce((v, f) => v + f.qm / qm * (h.betrieb?.konzessionen[f.id]?.quote ?? quoteBasis), 0);
+    return umsatz * quote;
+  }
+  function hausGastroErgebnis(s2, h, umsatzBasis) {
+    const b2 = betrieb(h);
+    if (s2.hausbetriebAbnahmeAus || !b2 || b2.gastro === "keine" || b2.restaurantQm <= 0 || !istOffen(h)) return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: 0 };
+    const wochenUmsatz = eur(Math.max(0, umsatzBasis) * 0.012 + b2.restaurantQm * 32);
+    if (b2.gastro === "pacht") return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: eur(wochenUmsatz * 0.115) };
+    if ((b2.gastroStoerungBis ?? 0) > s2.woche) return { umsatz: 0, rohertrag: 0, personal: eur(b2.restaurantQm * 260), sonstige: eur(b2.restaurantQm * 70), pacht: 0 };
+    return {
+      umsatz: wochenUmsatz,
+      rohertrag: eur(wochenUmsatz * 0.6),
+      personal: eur(wochenUmsatz * 0.37),
+      sonstige: eur(wochenUmsatz * 0.13),
+      pacht: 0
+    };
+  }
+  function hausKundenscore(s2, h) {
+    const b2 = betrieb(h);
+    if (!b2) return 60;
+    const st = hausStandard(s2, h), k = h.kpi;
+    const personal = k && k.fteBedarf > 0 ? clamp(k.fteIst / k.fteBedarf, 0, 1.1) : 1;
+    const reinigung = clamp(b2.kosten.reinigung, 0, 1.3);
+    const verfuegbarkeit = (leitung(h).staerken?.ware ?? leitung(h).skill) - b2.leitungStart;
+    const score = 64 + 7 * (st.sauberkeit - 2) + 5 * (st.praesentation - 2) + 4 * (st.kasse - 2) + 14 * (personal - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h.substanz - 60) + Object.values(hausServices(s2, h)).filter(Boolean).length * 2;
+    return Math.round(clamp(score, 0, 100));
+  }
+  function realerGrund(s2, h) {
+    const u = s2.hausbetrieb?.staedte[h.stadt];
+    if (u?.ereignisBis && u.ereignisBis > s2.woche) {
+      if (u.ereignis === "baustelle" || u.ereignis === "parkhaus") return "baustelle";
+      if (u.ereignis === "oepnv" || u.ereignis === "stadtfest") return "stadtereignis";
+    }
+    const b2 = h.betrieb;
+    if (h.kpi && h.kpi.fteBedarf > 0 && h.kpi.fteIst / h.kpi.fteBedarf < 0.94) return "personal";
+    if (b2 && (leitung(h).staerken?.ware ?? leitung(h).skill) < b2.leitungStart - 0.03) return "ware";
+    if (s2.wettbewerber.some((w) => w.stadt === h.stadt && w.status === "offen" && w.aktionBis !== void 0 && w.aktionBis > s2.woche)) return "konkurrenz";
+    return "sonstiges";
+  }
+  function pruefeKommentar(s2, h, wahr, gemeldet) {
+    const q2 = s2.controllingStufe === 2 ? 0.95 : s2.controllingStufe === 1 ? 0.62 : 0.28;
+    const erkannt = wahr !== gemeldet && hash2(s2.seed + ":pr\xFCfung:" + h.id + ":" + s2.woche) < q2;
+    return { plausibel: !erkannt, pruefung: erkannt ? "Nicht plausibel, eigentlicher Treiber: " + GRUND_TEXT[wahr] : "Plausibel" };
+  }
+  function stelleKommentar(s2, h, vergleich, delta) {
+    if (!h.betrieb || s2.prognose) return;
+    const wahr = realerGrund(s2, h);
+    const ehrlich = hash2(s2.seed + ":ehrlichkeit:" + h.id + ":" + s2.woche) < (leitung(h).ehrlichkeit ?? 1);
+    const grund2 = ehrlich || !["ware", "personal", "kasse"].includes(wahr) ? wahr : hash2(h.id + ":ausrede:" + s2.woche) < 0.5 ? "wetter" : "baustelle";
+    const massnahme = MASSNAHME[grund2];
+    const pruefung = pruefeKommentar(s2, h, wahr, grund2);
+    h.betrieb.kommentare.unshift({ woche: s2.woche, abweichung: delta, vergleich, grund: grund2, wahrerGrund: wahr, massnahme, ...pruefung });
+    h.betrieb.kommentare.length = Math.min(h.betrieb.kommentare.length, 26);
+    if (vergleich !== "vorjahr" && s2.woche < 52) return;
+    const organisation2 = s2.organisation;
+    const qualitaet2 = clamp(organisation2?.hauscluster.find((x) => x.id === steuerungscluster(s2, h))?.stelle.person?.qualitaet ?? h.clusterleitungQualitaet ?? 0.55, 0, 1);
+    const b0 = h.betrieb;
+    if (b0.clusterQStart === void 0) b0.clusterQStart = qualitaet2;
+    const qRel = clamp(0.55 * qualitaet2 / Math.max(0.05, b0.clusterQStart), 0, 1);
+    if (hash2(s2.seed + ":massnahme:" + h.id + ":" + s2.woche) < qRel) {
+      h.betrieb.massnahmeBis = s2.woche + 3;
+      h.betrieb.massnahmeFaktor = 1 + 6e-3 + 8e-3 * qRel;
+    }
+  }
+  function hausWoche(s2) {
+    if (!s2.hausbetrieb) initialisiereHausbetrieb(s2);
+    hausAbschluss(s2);
+    if (s2.prognose || s2.hausbetriebAbnahmeAus) return;
+    if ((s2.hausbetrieb.energieBis ?? 0) <= s2.woche) s2.hausbetrieb.energiePreis = 1;
+    if (s2.woche >= 52 && s2.woche % 13 === 0) {
+      const stand = s2.hausbetrieb;
+      if ((stand.energieBis ?? 0) <= s2.woche) stand.energiePreis = 1;
+      if (hash2(s2.seed + ":energie:" + s2.woche) < 0.12) {
+        stand.energiePreis = hash2(s2.seed + ":energiehoehe:" + s2.woche) < 0.5 ? 0.8 : 1.2;
+        stand.energieBis = s2.woche + 8;
+        melde(s2, "ereignis", "Energiepreis\xE4nderung im Filialnetz: " + Math.round((stand.energiePreis - 1) * 100) + " % f\xFCr acht Wochen.", { modul: "haus" });
+      }
+    }
+    if (s2.woche >= 52) for (const [stadt, u] of Object.entries(s2.hausbetrieb.staedte)) {
+      if (u.ereignisBis <= s2.woche) {
+        u.ereignis = void 0;
+        if (hash2(s2.seed + ":stadt:" + stadt + ":" + s2.woche) < 18e-4) {
+          const typ = ["stadtfest", "baustelle", "parkhaus", "oepnv"];
+          u.ereignis = typ[Math.floor(hash2(stadt + ":art:" + s2.woche) * typ.length)];
+          u.ereignisBis = s2.woche + 1 + (u.ereignis === "baustelle" ? 4 + Math.floor(hash2(stadt + ":dauer:" + s2.woche) * 17) : 1);
+          melde(s2, "ereignis", stadt + ": " + { stadtfest: "Stadtfest", baustelle: "Baustelle vor dem Haus", parkhaus: "Parkhaus geschlossen", oepnv: "\xD6PNV-Streik" }[u.ereignis] + ".", { stadt, modul: "haus" });
+        }
+      }
+      if (s2.woche % 52 === 0) u.trend = clamp(u.trend + (hash2(s2.seed + stadt + ":trend:" + s2.woche) - 0.5) * 0.01, 0.9, 1.1);
+      u.sonntage = u.sonntage.filter((w) => Math.floor(w / 52) >= Math.floor(s2.woche / 52));
+    }
+    for (const h of s2.haeuser) {
+      if (!istOffen(h) || !h.betrieb) continue;
+      const b2 = h.betrieb;
+      if (s2.woche % 13 === 0 && s2.woche !== 0) {
+        b2.kundenScore = hausKundenscore(s2, h);
+        b2.scoreWoche = s2.woche;
+      }
+      const delta = (h.personal.filialleiter.staerken?.personal ?? h.personal.filialleiter.skill) - b2.leitungStart;
+      h.personal.filialleiter.wechselwille = clamp((h.personal.filialleiter.wechselwille ?? 0) + Math.max(0, 45 - h.personal.filialleiter.moral) / 500 - Math.max(0, delta) * 0.01, 0, 1);
+      if (s2.woche >= 52 && s2.woche % 13 === 0 && b2.gastro === "selbst" && hash2(s2.seed + ":gastro:" + h.id + ":" + s2.woche) < 0.02) {
+        b2.gastroStoerungBis = s2.woche + 3;
+        melde(s2, "warnung", h.name + ": Hygienem\xE4ngel \u2013 Restaurant drei Wochen geschlossen, Personal und Fixkosten laufen weiter.", { hausId: h.id, stadt: h.stadt });
+      }
+      if (b2.kosten.instandhaltung < 0.75 && s2.woche % 13 === 0) {
+        h.substanz = clamp(h.substanz - (0.75 - b2.kosten.instandhaltung) * 4, 0, 100);
+        if (hash2(s2.seed + ":ausfall:" + h.id + ":" + s2.woche) < (0.75 - b2.kosten.instandhaltung) * 0.6) {
+          b2.ausfallBis = s2.woche + 3;
+          melde(s2, "warnung", h.name + ": Rolltreppe oder Aufzug ausgefallen, Reparatur dauert drei Wochen.", { hausId: h.id, stadt: h.stadt });
+        }
+      }
+      if (b2.kosten.sicherheit < 0.75 && s2.woche % 13 === 0) {
+        b2.inventurdifferenz = (b2.inventurdifferenz ?? 0) + (0.75 - b2.kosten.sicherheit) * 2e-3;
+        melde(s2, "warnung", h.name + ": erh\xF6hte Inventurdifferenz durch geringere Sicherheitsdeckung.", { hausId: h.id, stadt: h.stadt });
+      }
+      if (s2.woche >= 52 && s2.woche % 13 === 0 && hash2(s2.seed + ":partner:" + h.id + ":" + s2.woche) < 3e-3) {
+        const f = h.flaechen.find((x) => x.konzept === "eigen" && x.qm >= 400 && ["accessoires", "beauty", "herren", "damen"].includes(x.gruppe ?? ""));
+        if (f) {
+          const anbieter = ["Optikhaus Lind", "Uhrenatelier Merten", "Markenstudio Falk"][Math.floor(hash2(h.id + ":anbieter:" + s2.woche) * 3)];
+          s2.entscheidungen.push({
+            id: neueId(s2, "e"),
+            typ: "haus_konzession_neu",
+            woche: s2.woche,
+            frist: s2.woche + 8,
+            titel: "Konzessionsangebot f\xFCr " + h.name,
+            text: anbieter + " bietet eine Konzession \xFCber 180 qm mit 22 % Umsatzmiete f\xFCr f\xFCnf Jahre. Vertragsabschluss reduziert die eigene Verkaufsfl\xE4che.",
+            optionen: [{ id: "annehmen", label: "Konzession abschlie\xDFen" }, { id: "ablehnen", label: "Ablehnen" }],
+            standard: "ablehnen",
+            daten: { haus: h.id, flaeche: f.id, partner: anbieter, qm: 180, quote: 0.22 }
+          });
+        }
+      }
+      if (s2.woche >= 52 && s2.woche % 52 === 0 && hash2(s2.seed + ":jahresgespraech:" + h.id + ":" + s2.woche) < 0.025) {
+        const l = h.personal.filialleiter;
+        s2.entscheidungen.push({
+          id: neueId(s2, "e"),
+          typ: "haus_jahresgespraech",
+          woche: s2.woche,
+          frist: s2.woche + 6,
+          titel: "Jahresgespr\xE4ch: " + l.name + " (" + h.name + ")",
+          text: "St\xE4rken und Stimmung der Hausleitung: Personal " + Math.round((l.staerken?.personal ?? l.skill) * 100) + " %, Ware " + Math.round((l.staerken?.ware ?? l.skill) * 100) + " %, Kunde " + Math.round((l.staerken?.kunde ?? l.skill) * 100) + " %, Kosten " + Math.round((l.staerken?.kosten ?? l.skill) * 100) + " %. Wechselwille " + Math.round((l.wechselwille ?? 0) * 100) + " %.",
+          optionen: [{ id: "coaching", label: "Pers\xF6nliches Coaching (8.000 \u20AC)" }, { id: "praemie", label: "Jahresbonus (10.000 \u20AC)" }, { id: "beobachten", label: "Leistung beobachten" }],
+          standard: "beobachten",
+          daten: { haus: h.id }
+        });
+      }
+      for (const [id, v] of Object.entries(b2.konzessionen)) if (s2.woche === v.bis - 8) {
+        s2.entscheidungen.push({
+          id: neueId(s2, "e"),
+          typ: "haus_konzession",
+          woche: s2.woche,
+          frist: s2.woche + 6,
+          titel: "Konzession " + h.name,
+          text: "Vertrag mit " + v.name + " endet. Anschlussmiete verhandeln?",
+          optionen: [{ id: "verlaengern", label: "Zu bisherigen Konditionen verl\xE4ngern" }, { id: "neu", label: "Neu verhandeln" }],
+          standard: "verlaengern",
+          daten: { haus: h.id, flaeche: id }
+        });
+      }
+    }
+  }
+  function hausAbschluss(s2) {
+    if (!s2.hausbetrieb || s2.prognose || s2.hausbetriebAbnahmeAus) return;
+    for (const h of s2.haeuser) {
+      if (!istOffen(h) || !h.kpi || !h.betrieb) continue;
+      const b2 = h.betrieb, vorher = b2.umsatzHistorie.find((x) => x.woche === s2.woche - 52);
+      const geplant2 = s2.planung;
+      const jahr2 = s2.startJahr + Math.floor(s2.woche / 52);
+      const plan2 = geplant2?.jahre.find((j) => j.jahr === jahr2)?.phasing[h.id]?.[s2.woche % 52] ?? h.wochenPlan;
+      const vergleich = vorher ? "vorjahr" : plan2 !== void 0 ? "plan" : void 0;
+      const referenz = vorher?.umsatz ?? plan2;
+      if (vergleich && referenz && referenz > 0 && h.kpi.umsatz / referenz < 0.95) stelleKommentar(s2, h, vergleich, h.kpi.umsatz / referenz - 1);
+      b2.umsatzHistorie.push({ woche: s2.woche, umsatz: h.kpi.umsatz });
+      if (b2.umsatzHistorie.length > 105) b2.umsatzHistorie.shift();
+    }
+  }
+  function loeseHausVorlage(s2, typ, daten, option) {
+    const h = s2.haeuser.find((x) => x.id === daten.haus);
+    if (!h || !h.betrieb) return;
+    if (typ === "haus_jahresgespraech") {
+      const l = h.personal.filialleiter;
+      if (option === "coaching" && l.staerken) {
+        s2.einmalkostenWoche += 8e3;
+        const schwaechste = Object.keys(l.staerken).sort((a, b2) => l.staerken[a] - l.staerken[b2])[0];
+        l.staerken[schwaechste] = clamp(l.staerken[schwaechste] + 0.055, 0, 1);
+        l.skill = Object.values(l.staerken).reduce((a, b2) => a + b2, 0) / 4;
+        l.moral = clamp(l.moral + 8, 0, 100);
+      } else if (option === "praemie") {
+        s2.einmalkostenWoche += 1e4;
+        l.moral = clamp(l.moral + 12, 0, 100);
+        l.wechselwille = clamp((l.wechselwille ?? 0) - 0.12, 0, 1);
+      }
+      return;
+    }
+    if (typ === "haus_konzession_neu") {
+      if (option !== "annehmen" || h.status !== "offen") return;
+      const alt = h.flaechen.find((f) => f.id === daten.flaeche && f.konzept === "eigen");
+      const qm = Number(daten.qm), quote = Number(daten.quote);
+      if (!alt || alt.qm < qm + 100 || !Number.isFinite(quote)) return;
+      alt.qm -= qm;
+      const id = h.id + "-konz-" + neueId(s2, "");
+      h.flaechen.push({ ...alt, id, qm, konzept: "konzession" });
+      h.betrieb.konzessionen[id] = { name: String(daten.partner), quote, bis: s2.woche + 260, exklusiv: false };
+      melde(s2, "info", h.name + ": " + String(daten.partner) + " bezieht " + qm + " qm mit Umsatzmiete.", { hausId: h.id, stadt: h.stadt });
+      return;
+    }
+    if (typ !== "haus_konzession") return;
+    const v = h.betrieb.konzessionen[String(daten.flaeche)];
+    if (!v) return;
+    v.quote = option === "neu" ? clamp(v.quote + 0.01, 0.1, 0.35) : v.quote;
+    v.bis = s2.woche + 260;
+    melde(s2, "info", h.name + ": Konzessionsvertrag mit " + v.name + " verl\xE4ngert.", { hausId: h.id, stadt: h.stadt });
+  }
+  function hausAktion(s2, a) {
+    if (!s2.hausbetrieb) initialisiereHausbetrieb(s2);
+    const h = "haus" in a ? s2.haeuser.find((x) => x.id === a.haus) : void 0;
+    if ("haus" in a && (!h || !istOffen(h))) return { ok: false, text: "Haus nicht gefunden oder geschlossen." };
+    const b2 = h?.betrieb;
+    const l = h?.personal.filialleiter;
+    switch (a.typ) {
+      case "hausLeitungErsetzen": {
+        if (!h || !l || !b2) break;
+        const k = hausKandidaten(s2, h.id)[a.kandidat];
+        if (!k) return { ok: false, text: "Kandidat nicht gefunden." };
+        s2.einmalkostenWoche += eur(k.gehalt / 3);
+        h.personal.filialleiter = {
+          name: k.name,
+          skill: k.qualitaet,
+          staerken: k.staerken,
+          ehrlichkeit: k.ehrlichkeit,
+          gehalt: k.gehalt,
+          bonusAnteil: 0.1,
+          moral: 70,
+          wechselwille: 0,
+          stellvertretung: l.stellvertretung
+        };
+        b2.leitungStart = l.skill;
+        return { ok: true, text: "Hausleitung " + k.name + " eingestellt." };
+      }
+      case "hausLeitungFoerdern":
+        if (!l || !l.staerken) break;
+        l.staerken[a.staerke] = clamp(l.staerken[a.staerke] + 0.08, 0, 1);
+        l.skill = (l.staerken.personal + l.staerken.ware + l.staerken.kunde + l.staerken.kosten) / 4;
+        s2.einmalkostenWoche += 12e3;
+        return { ok: true, text: "Weiterbildung erfolgreich: " + a.staerke + " gest\xE4rkt." };
+      case "hausHaltepraemie":
+        if (!l || !Number.isFinite(a.betrag) || a.betrag < 0 || a.betrag > 1e5) break;
+        s2.einmalkostenWoche += eur(a.betrag);
+        l.wechselwille = clamp((l.wechselwille ?? 0) - a.betrag / 1e5, 0, 1);
+        l.moral = clamp(l.moral + a.betrag / 1e4, 0, 100);
+        return { ok: true, text: "Haltepr\xE4mie zugesagt." };
+      case "hausLeitungBefordern":
+        if (!h || !l || !b2 || l.skill < 0.6) return { ok: false, text: "Hausleitung ben\xF6tigt mindestens 60 % Kompetenz." };
+        s2.hausbetrieb.befoerderungen.push({ haus: h.id, cluster: steuerungscluster(s2, h), name: l.name, qualitaet: l.skill, woche: s2.woche });
+        h.personal.filialleiter = {
+          ...l,
+          name: l.stellvertretung?.name ?? "Interim " + h.stadt,
+          skill: l.stellvertretung?.qualitaet ?? 0.5,
+          staerken: { personal: l.stellvertretung?.qualitaet ?? 0.5, ware: l.stellvertretung?.qualitaet ?? 0.5, kunde: l.stellvertretung?.qualitaet ?? 0.5, kosten: l.stellvertretung?.qualitaet ?? 0.5 }
+        };
+        h.personal.filialleiter.wechselwille = 0;
+        return { ok: true, text: l.name + " als Clusterleitungs-Kandidat vorgemerkt. Stellvertretung \xFCbernimmt das Haus." };
+      case "hausStandardSetzen": {
+        if (a.haus && !a.begruendung?.trim()) return { ok: false, text: "Einzelabweichungen ben\xF6tigen eine Begr\xFCndung." };
+        if (h && a.cluster !== steuerungscluster(s2, h)) return { ok: false, text: "Haus geh\xF6rt nicht zum angegebenen Hauscluster." };
+        const basis2 = h ? hausStandard(s2, h) : s2.hausbetrieb.standards[a.cluster];
+        if (!basis2) return { ok: false, text: "Hauscluster nicht gefunden." };
+        const n = Number(a.wert);
+        if (!Number.isInteger(n)) break;
+        const stand = { ...basis2, oeffnung: { ...basis2.oeffnung } };
+        if (a.feld === "von" || a.feld === "bis" || a.feld === "samstagBis") {
+          if (n < 7 || n > 22) break;
+          stand.oeffnung[a.feld] = n;
+          if (stand.oeffnung.von >= stand.oeffnung.bis || stand.oeffnung.von >= stand.oeffnung.samstagBis) break;
+        } else {
+          if (n < 1 || n > 3) break;
+          stand[a.feld] = n;
+        }
+        if (h) {
+          h.betrieb.standardAusnahme = stand;
+          h.betrieb.ausnahmeGrund = a.begruendung.trim();
+        } else s2.hausbetrieb.standards[a.cluster] = stand;
+        return { ok: true, text: "Hausstandard angepasst." };
+      }
+      case "hausKostenSetzen":
+        if (!b2 || !POSTEN.includes(a.posten) || !Number.isFinite(a.faktor) || a.faktor < 0.45 || a.faktor > 1.5) break;
+        b2.kosten[a.posten] = Math.round(a.faktor * 100) / 100;
+        return { ok: true, text: "Betriebskosten " + a.posten + " angepasst." };
+      case "hausServiceSetzen":
+        if (!b2 || !(a.service in b2.services)) break;
+        (b2.serviceAusnahme ?? (b2.serviceAusnahme = {}))[a.service] = a.an;
+        return { ok: true, text: "Hausausnahme f\xFCr Service " + a.service + (a.an ? " aktiviert." : " deaktiviert.") };
+      case "hausClusterServiceSetzen": {
+        const stand = s2.hausbetrieb.standards[a.cluster];
+        if (!stand || !["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].includes(a.service)) break;
+        (stand.services ?? (stand.services = { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }))[a.service] = a.an;
+        return { ok: true, text: "Service-Standard des Hausclusters ge\xE4ndert." };
+      }
+      case "hausGastronomie":
+        if (!b2 || b2.restaurantQm <= 0) return { ok: false, text: "Keine Restaurantfl\xE4che vorhanden." };
+        if (b2.gastro !== "keine" && b2.gastroVertragBis > s2.woche) return { ok: false, text: "Wechsel erst zum Vertragsende m\xF6glich." };
+        b2.gastro = a.modus;
+        b2.gastroVertragBis = s2.woche + 104;
+        s2.einmalkostenWoche += b2.restaurantQm * (a.modus === "selbst" ? 520 : 100);
+        return { ok: true, text: "Gastronomie wird " + (a.modus === "selbst" ? "selbst betrieben." : "verpachtet.") };
+      case "hausKonzession": {
+        if (!h || !b2 || !Number.isFinite(a.quote) || a.quote < 0.1 || a.quote > 0.35 || !Number.isInteger(a.laufzeit) || a.laufzeit < 26 || a.laufzeit > 520) break;
+        const f = h.flaechen.find((x) => x.id === a.flaeche && x.konzept === "konzession");
+        if (!f) return { ok: false, text: "Keine Konzessionsfl\xE4che." };
+        const bisher = b2.konzessionen[f.id];
+        if (bisher && bisher.bis > s2.woche) return { ok: false, text: "Vertrag l\xE4uft noch." };
+        b2.konzessionen[f.id] = { name: bisher?.name ?? "Partner " + (f.gruppe ?? ""), quote: a.quote, bis: s2.woche + a.laufzeit, exklusiv: a.exklusiv };
+        return { ok: true, text: "Konzessionsvertrag abgeschlossen." };
+      }
+      case "hausMassnahme":
+        if (!b2) break;
+        b2.massnahmeBis = s2.woche + 4;
+        b2.massnahmeFaktor = 1.012;
+        s2.einmalkostenWoche += 5e3;
+        return { ok: true, text: "Ad-hoc-Ma\xDFnahme f\xFCr vier Wochen eingeleitet." };
+      case "hausSonntag": {
+        const u = s2.hausbetrieb.staedte[a.stadt];
+        if (!u || !Number.isInteger(a.woche) || a.woche < s2.woche + 2 || a.woche >= s2.woche + 52) break;
+        const jahr2 = Math.floor(a.woche / 52);
+        if (u.sonntage.includes(a.woche)) return { ok: false, text: "F\xFCr diese Woche wurde bereits ein Sonntag genehmigt." };
+        if (u.sonntage.filter((w) => Math.floor(w / 52) === jahr2).length >= 4) return { ok: false, text: "H\xF6chstens vier Sonntage pro Jahr." };
+        const groesse2 = s2.haeuser.find((x) => x.stadt === a.stadt)?.cluster;
+        const p2 = groesse2 === "metropole" ? 0.65 : groesse2 === "grossstadt" ? 0.78 : 0.86;
+        const genehmigt = hash2(s2.seed + ":sonntag:" + a.stadt + ":" + a.woche) < p2;
+        if (genehmigt) u.sonntage.push(a.woche);
+        s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 2, 0, 100);
+        melde(s2, "info", a.stadt + ": Antrag auf verkaufsoffenen Sonntag " + (genehmigt ? "genehmigt." : "abgelehnt. Gegenwind von Gewerkschaft und Kirche."), { stadt: a.stadt, modul: "haus" });
+        return { ok: true, text: genehmigt ? "Sonntag genehmigt." : "Sonntag nicht genehmigt." };
+      }
+    }
+    return { ok: false, text: "Ung\xFCltige Hausaktion." };
+  }
+  function hausUebersicht(s2, id) {
+    const h = s2.haeuser.find((x) => x.id === id);
+    if (!h) return void 0;
+    const b2 = h.betrieb, l = h.personal.filialleiter;
+    return {
+      id: h.id,
+      name: h.name,
+      hauscluster: steuerungscluster(s2, h),
+      stadtgroesse: h.cluster,
+      standard: hausStandard(s2, h),
+      leitungsdaten: l,
+      kandidaten: hausKandidaten(s2, id),
+      kundenScore: hausKundenscore(s2, h),
+      letzteMessung: b2?.scoreWoche,
+      kosten: b2?.kosten,
+      ausfallBis: b2?.ausfallBis,
+      inventurdifferenz: b2?.inventurdifferenz ?? 0,
+      energiePreis: s2.hausbetrieb?.energiePreis ?? 1,
+      planWoche: s2.planung?.jahre.find((j) => j.jahr === s2.startJahr + Math.floor(s2.woche / 52))?.phasing[h.id]?.[s2.woche % 52] ?? h.wochenPlan,
+      treiberAktuell: h.treiberVerlauf?.slice().reverse().find((x) => x.bis === s2.woche - 1),
+      kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(1e-3, b2 ? Object.entries(b2.kosten).reduce((a, [p2, f]) => a + ANTEILE[p2] * f, 0) : 1)),
+      services: hausServices(s2, h),
+      gastro: b2?.gastro,
+      gastroVertragBis: b2?.gastroVertragBis,
+      gastroStoerungBis: b2?.gastroStoerungBis,
+      restaurantQm: b2?.restaurantQm,
+      konzessionen: b2?.konzessionen,
+      kommentar: b2?.kommentare[0],
+      kommentare: b2?.kommentare ?? [],
+      umfeld: s2.hausbetrieb?.staedte[h.stadt],
+      ausnahmeGrund: b2?.ausnahmeGrund,
+      flaechen: h.flaechen.filter((f) => f.konzept === "konzession" || f.konzept === "untermiete")
+    };
+  }
+  function hausBeobachtung(s2, limit = 30) {
+    return s2.haeuser.filter((h) => istOffen(h) && h.kpi).map((h) => {
+      const b2 = h.betrieb, c = b2?.kommentare[0], score = hausKundenscore(s2, h);
+      let grund2 = "";
+      let gewicht2 = 0;
+      if (c && c.woche >= s2.woche - 2 && !c.plausibel) {
+        grund2 = "Kommentar nicht plausibel";
+        gewicht2 = 100;
+      } else if ((h.personal.filialleiter.interimBis ?? 0) > s2.woche) {
+        grund2 = "Hausleitung unbesetzt";
+        gewicht2 = 90;
+      } else if (score < 50) {
+        grund2 = "Kundenscore " + score + "/100";
+        gewicht2 = 70 + (50 - score) / 10;
+      } else if (c && c.woche >= s2.woche - 2) {
+        grund2 = "Umsatzabweichung " + (c.abweichung * 100).toFixed(1) + " %";
+        gewicht2 = 50 - c.abweichung * 100;
+      }
+      return { id: h.id, name: h.name, stadt: h.stadt, grund: grund2, score, gewicht: gewicht2, kommentar: c };
+    }).filter((x) => x.gewicht > 0).sort((a, b2) => b2.gewicht - a.gewicht || a.id.localeCompare(b2.id)).slice(0, limit);
+  }
+  function hausKommentareDerWoche(s2) {
+    return s2.haeuser.flatMap((h) => (h.betrieb?.kommentare ?? []).filter((c) => c.woche === s2.woche - 1).map((c) => ({ id: h.id, name: h.name, stadt: h.stadt, ...c })));
+  }
+  function hausKundenRanking(s2) {
+    return s2.haeuser.filter(istOffen).map((h) => ({ id: h.id, name: h.name, score: hausKundenscore(s2, h) })).sort((a, b2) => b2.score - a.score || a.id.localeCompare(b2.id));
+  }
+
   // ../engine/src/aktionen.ts
   var ok3 = (text3) => ({ ok: true, text: text3 });
   var fehler3 = (text3) => ({ ok: false, text: text3 });
@@ -6785,6 +7366,7 @@
       const fehlerText = planungAktion(s2, a);
       return fehlerText ? fehler3(fehlerText) : ok3("Planung aktualisiert.");
     }
+    if (HAUS_AKTIONEN.has(a.typ)) return hausAktion(s2, a);
     switch (a.typ) {
       case "premiumSchuetzen":
         s2.premiumSchuetzen = a.an;
@@ -6813,12 +7395,12 @@
             h.potenzial[a.gruppe] = ref * f.qm / (1 - Math.exp(-1 / 0.8));
           }
         }
-        const p = umbauParameter(f.konzept, a.konzept);
-        const kosten = p.qm * f.qm;
+        const p2 = umbauParameter(f.konzept, a.konzept);
+        const kosten = p2.qm * f.qm;
         einmalKosten(s2, kosten);
-        f.umbauBis = w + p.wochen;
+        f.umbauBis = w + p2.wochen;
         f.umbauZiel = { konzept: a.konzept, gruppe: a.konzept === "eigen" ? a.gruppe : void 0 };
-        return ok3(`Umbau ${etageName(f.etage)} in ${h.name}: ${f.qm} qm zu ${a.konzept === "eigen" ? GRUPPEN[a.gruppe].name : a.konzept}, ${mio(kosten)}, ${p.wochen} Wochen.`);
+        return ok3(`Umbau ${etageName(f.etage)} in ${h.name}: ${f.qm} qm zu ${a.konzept === "eigen" ? GRUPPEN[a.gruppe].name : a.konzept}, ${mio(kosten)}, ${p2.wochen} Wochen.`);
       }
       case "flaecheTeilen": {
         const h = haus(s2, a.haus);
@@ -6858,12 +7440,12 @@
           if (a.modell === "konzession") {
             const qm = flaechen.reduce((x, f) => x + f.qm, 0);
             const fte = qm / PARAM.qmJeFte + (h.kpi?.umsatzJeGruppe[g] ?? 0) / PARAM.umsatzJeFte;
-            const p = h.personal;
-            const fest = p.vollzeit + p.teilzeit;
+            const p2 = h.personal;
+            const fest = p2.vollzeit + p2.teilzeit;
             const weg = Math.min(fte, fest * 0.5);
             if (fest > 0) {
-              p.vollzeit -= weg * p.vollzeit / fest;
-              p.teilzeit -= weg * p.teilzeit / fest;
+              p2.vollzeit -= weg * p2.vollzeit / fest;
+              p2.teilzeit -= weg * p2.teilzeit / fest;
             }
             fteWeg += weg;
           }
@@ -6890,12 +7472,12 @@
       }
       case "personalabbau": {
         if (s2.tarif === "sanierung" && s2.standortgarantieBis !== void 0) return fehler3("Der Sanierungstarifvertrag schlie\xDFt betriebsbedingte K\xFCndigungen aus.");
-        const p = clamp(a.prozent, 0, 0.4);
+        const p2 = clamp(a.prozent, 0, 0.4);
         const hs = auswahl(s2, a.haeuser);
         let fte = 0;
         for (const h of hs) {
           const x = h.personal;
-          const weg = (x.vollzeit + x.teilzeit) * p;
+          const weg = (x.vollzeit + x.teilzeit) * p2;
           const tz = Math.min(x.teilzeit, weg * 0.6);
           x.teilzeit -= tz;
           x.vollzeit -= weg - tz;
@@ -6908,11 +7490,11 @@
         return ok3(`${Math.round(fte)} FTE abgebaut, Abfindungen ${mio(abf)}.`);
       }
       case "personalaufbau": {
-        const p = clamp(a.prozent, 0, 0.5);
+        const p2 = clamp(a.prozent, 0, 0.5);
         const hs = auswahl(s2, a.haeuser);
         let fte = 0;
         for (const h of hs) {
-          const add = (h.personal.vollzeit + h.personal.teilzeit) * p;
+          const add = (h.personal.vollzeit + h.personal.teilzeit) * p2;
           h.personal.teilzeit += add;
           fte += add;
         }
@@ -6942,8 +7524,8 @@
         if (s2.tarifVersuch !== void 0 && w - s2.tarifVersuch < 13) return fehler3("Die Gewerkschaft verhandelt fr\xFChestens 13 Wochen nach dem letzten Versuch erneut.");
         s2.tarifVersuch = w;
         const garantie = clamp(a.garantieWochen ?? 52, 26, 156);
-        const p = s2.stakeholder.betriebsrat / 100 + (runwayWochen(s2) < 20 ? 0.2 : 0) + garantie / 52 * 0.12 + (inso ? 0.15 : 0);
-        if (!chance(s2, clamp(p, 0.05, 0.95))) {
+        const p2 = s2.stakeholder.betriebsrat / 100 + (runwayWochen(s2) < 20 ? 0.2 : 0) + garantie / 52 * 0.12 + (inso ? 0.15 : 0);
+        if (!chance(s2, clamp(p2, 0.05, 0.95))) {
           s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 3, 0, 100);
           return ok3("Die Gewerkschaft lehnt den Sanierungstarifvertrag ab.");
         }
@@ -6996,8 +7578,8 @@
           else if (r <= 0.05) erreicht = r;
           if (triple) erreicht = Math.max(erreicht, 0.12);
         } else {
-          const p = 0.15 + 0.5 * (s2.stakeholder.vermieter / 100) + (db < 0 ? 0.2 : 0) - 1.5 * Math.max(0, r - 0.1) + (inso ? 0.25 : 0) + (triple ? 0.2 : 0) + hqVerhandlungsBonus(s2);
-          if (chance(s2, clamp(p, 0.02, 0.95))) erreicht = r;
+          const p2 = 0.15 + 0.5 * (s2.stakeholder.vermieter / 100) + (db < 0 ? 0.2 : 0) - 1.5 * Math.max(0, r - 0.1) + (inso ? 0.25 : 0) + (triple ? 0.2 : 0) + hqVerhandlungsBonus(s2);
+          if (chance(s2, clamp(p2, 0.02, 0.95))) erreicht = r;
           else if (chance(s2, 0.3)) erreicht = r / 2;
           if (r > 0.2 && erreicht === 0 && chance(s2, 0.2)) {
             h.miete.keineVerlaengerung = true;
@@ -7088,14 +7670,14 @@
               ergebnisse.push(`${h.name}: nicht genug Fl\xE4che`);
               continue;
             }
-            const p = umbauParameter("eigen", "untermiete");
-            const kosten = p.qm * qm * (1 - (an.umbauAnteilMieter ?? 0));
+            const p2 = umbauParameter("eigen", "untermiete");
+            const kosten = p2.qm * qm * (1 - (an.umbauAnteilMieter ?? 0));
             kostenGesamt += kosten;
-            const ende = w + p.wochen + (an.laufzeitJahre ?? 10) * 52;
+            const ende = w + p2.wochen + (an.laufzeitJahre ?? 10) * 52;
             const gesamtMiete = qm * (an.mieteQmMonat ?? 0) * 12 / 52;
             for (const f of fl) {
               const mieter = { name: an.mieterName ?? "Mieter", typ: an.mieterTyp ?? "discounter", mieteWoche: eur(gesamtMiete * f.qm / qm), bisWoche: ende, frequenzBonus: (def?.frequenzBonus ?? 0.02) * f.qm / qm, dealId: an.id };
-              f.umbauBis = w + p.wochen;
+              f.umbauBis = w + p2.wochen;
               f.umbauZiel = { konzept: "untermiete", mieter };
             }
             if (ende > h.miete.bisWoche) {
@@ -7323,25 +7905,25 @@
       verlauf.push(messung2);
       const grenze = s2.woche - 51;
       const erste = s2.woche - 103;
-      const zuschneiden = (p) => {
-        if (p.von >= erste) return p;
-        const anteil3 = (p.bis - erste + 1) / (p.bis - p.von + 1);
+      const zuschneiden = (p2) => {
+        if (p2.von >= erste) return p2;
+        const anteil3 = (p2.bis - erste + 1) / (p2.bis - p2.von + 1);
         return komplett(
           erste,
-          p.bis,
-          p.umsatz * anteil3,
-          p.frequenz * anteil3,
-          p.kaeufe * anteil3,
-          p.artikel * anteil3
+          p2.bis,
+          p2.umsatz * anteil3,
+          p2.frequenz * anteil3,
+          p2.kaeufe * anteil3,
+          p2.artikel * anteil3
         );
       };
-      const alt = verlauf.filter((p) => p.bis < grenze && p.bis >= erste).map(zuschneiden);
-      const jung = verlauf.filter((p) => p.bis >= grenze).map((p) => p.von < erste ? zuschneiden(p) : p);
+      const alt = verlauf.filter((p2) => p2.bis < grenze && p2.bis >= erste).map(zuschneiden);
+      const jung = verlauf.filter((p2) => p2.bis >= grenze).map((p2) => p2.von < erste ? zuschneiden(p2) : p2);
       const bloecke = /* @__PURE__ */ new Map();
-      for (const p of alt) {
-        const block = Math.floor(p.von / 4);
+      for (const p2 of alt) {
+        const block = Math.floor(p2.von / 4);
         const gruppe2 = bloecke.get(block) ?? [];
-        gruppe2.push(p);
+        gruppe2.push(p2);
         bloecke.set(block, gruppe2);
       }
       const archiv = [...bloecke.entries()].sort((a, b2) => a[0] - b2[0]).map(([, teile]) => summiere(teile));
@@ -7630,14 +8212,14 @@
         standard: a.status === "verfallen",
         bezug: hausBezug(s2, a.wunschHaeuser ?? [])
       })),
-      ...(s2.entscheidungsprotokoll ?? []).filter((p) => p.woche >= grenze).map((p) => ({
-        id: p.id,
+      ...(s2.entscheidungsprotokoll ?? []).filter((p2) => p2.woche >= grenze).map((p2) => ({
+        id: p2.id,
         art: "entscheidung",
-        titel: p.titel,
-        woche: p.woche,
-        ergebnis: p.ergebnis,
-        standard: p.standard,
-        bezug: hausBezug(s2, p.hausId ? [p.hausId] : [])
+        titel: p2.titel,
+        woche: p2.woche,
+        ergebnis: p2.ergebnis,
+        standard: p2.standard,
+        bezug: hausBezug(s2, p2.hausId ? [p2.hausId] : [])
       }))
     ].sort((a, b2) => b2.woche - a.woche || a.id.localeCompare(b2.id));
     return { handeln, meldungen, erledigt };
@@ -7816,22 +8398,22 @@
     };
   }
   var rng = (s2) => s2.vorstand;
-  function neueVid(s2, p) {
+  function neueVid(s2, p2) {
     s2.vorstand.zaehler += 1;
-    return `${p}${s2.vorstand.zaehler}`;
+    return `${p2}${s2.vorstand.zaehler}`;
   }
-  var skill = (p) => (p.fuehrung + p.fachwissen) / 200;
-  function gehaltsforderung(s2, r, p, ohneRisiko = false) {
-    const f = 0.55 + 0.9 * skill(p);
+  var skill = (p2) => (p2.fuehrung + p2.fachwissen) / 200;
+  function gehaltsforderung(s2, r, p2, ohneRisiko = false) {
+    const f = 0.55 + 0.9 * skill(p2);
     const inso = s2.phase === "insolvenz" && !ohneRisiko ? 1.1 : 1;
     return Math.round(RESSORT_INFO[r].markt * f * inso / 5e3) * 5e3;
   }
   function ressortWert(s2, r) {
-    const p = s2.vorstand?.ressorts[r]?.person;
-    if (!p) return VORSTAND_PARAM.wertLeer;
-    const fuehrung = Math.min(100, p.fuehrung * (1 + 0.08 * Math.min(1, p.erfolgsbonus)));
-    const voll2 = (0.65 * fuehrung + 0.35 * p.fachwissen) / 100;
-    const ein = clamp((s2.woche - p.seitWoche) / VORSTAND_PARAM.einarbeitungWochen, 0, 1);
+    const p2 = s2.vorstand?.ressorts[r]?.person;
+    if (!p2) return VORSTAND_PARAM.wertLeer;
+    const fuehrung = Math.min(100, p2.fuehrung * (1 + 0.08 * Math.min(1, p2.erfolgsbonus)));
+    const voll2 = (0.65 * fuehrung + 0.35 * p2.fachwissen) / 100;
+    const ein = clamp((s2.woche - p2.seitWoche) / VORSTAND_PARAM.einarbeitungWochen, 0, 1);
     return VORSTAND_PARAM.wertLeer + (voll2 - VORSTAND_PARAM.wertLeer) * (0.5 + 0.5 * ein);
   }
   function vorstandWirkung(s2, a) {
@@ -7856,10 +8438,10 @@
     if (!v) return 0;
     let k = v.bonusWoche;
     for (const r of RESSORTS) {
-      const p = v.ressorts[r].person;
-      if (!p) continue;
-      k += p.gehalt / 52;
-      if (p.halteBis !== void 0 && p.halteBis > s2.woche && p.haltebonus > 0) k += p.haltebonus / Math.max(1, p.halteBis - (p.halteStart ?? p.seitWoche));
+      const p2 = v.ressorts[r].person;
+      if (!p2) continue;
+      k += p2.gehalt / 52;
+      if (p2.halteBis !== void 0 && p2.halteBis > s2.woche && p2.haltebonus > 0) k += p2.haltebonus / Math.max(1, p2.halteBis - (p2.halteStart ?? p2.seitWoche));
     }
     return k;
   }
@@ -7976,13 +8558,13 @@
     const loy = zwischen(h, 30, 90);
     const firma = waehle(h, FIRMEN);
     const pos = waehle(h, POSITIONEN[r]);
-    const p = { fuehrung: Math.round(f), fachwissen: Math.round(k) };
-    const ford = gehaltsforderung(s2, r, p);
+    const p2 = { fuehrung: Math.round(f), fachwissen: Math.round(k) };
+    const ford = gehaltsforderung(s2, r, p2);
     return {
       id: neueVid(s2, "vk"),
       name: name2,
       portraet: zufallsPortraet(h, w, alter),
-      ...p,
+      ...p2,
       loyalitaet: Math.round(loy),
       aktuellePosition: pos,
       aktuelleFirma: firma,
@@ -8000,18 +8582,18 @@
     if (!k) return 0;
     const ford = gehaltsforderung(s2, r, k);
     const lage = s2.phase === "insolvenz" ? -0.22 : runwayWochen(s2) < 8 ? -0.1 : 0;
-    const p = 0.45 + 3 * (gehalt / ford - 1) + 0.5 * Math.min(1, haltebonus / ford) * 0.5 + 0.12 * Math.min(1, erfolgsbonus) + (s2.stakeholder.image - 45) / 250 + lage + 0.25 * (k.wechselwille - 0.5);
-    return clamp(p, 0.02, 0.97);
+    const p2 = 0.45 + 3 * (gehalt / ford - 1) + 0.5 * Math.min(1, haltebonus / ford) * 0.5 + 0.12 * Math.min(1, erfolgsbonus) + (s2.stakeholder.image - 45) / 250 + lage + 0.25 * (k.wechselwille - 0.5);
+    return clamp(p2, 0.02, 0.97);
   }
   function protokolliere(s2, r, text3) {
     if (s2.prognose) return;
     s2.vorstand.protokoll.push({ woche: s2.woche, ressort: r, text: text3 });
     if (s2.vorstand.protokoll.length > 200) s2.vorstand.protokoll.splice(0, s2.vorstand.protokoll.length - 200);
   }
-  function loyalitaetsZiel(s2, r, p) {
-    const ford = gehaltsforderung(s2, r, p, true);
-    let z2 = 58 + 45 * (p.gehalt / ford - 1) + (p.gewachsen ? 12 : 0) + (s2.stakeholder.image - 45) / 4 + 8 * Math.min(1, p.erfolgsbonus);
-    if (p.halteBis !== void 0 && p.halteBis > s2.woche && p.haltebonus > 0) z2 += 10 + 10 * Math.min(1, p.haltebonus / p.gehalt);
+  function loyalitaetsZiel(s2, r, p2) {
+    const ford = gehaltsforderung(s2, r, p2, true);
+    let z2 = 58 + 45 * (p2.gehalt / ford - 1) + (p2.gewachsen ? 12 : 0) + (s2.stakeholder.image - 45) / 4 + 8 * Math.min(1, p2.erfolgsbonus);
+    if (p2.halteBis !== void 0 && p2.halteBis > s2.woche && p2.haltebonus > 0) z2 += 10 + 10 * Math.min(1, p2.haltebonus / p2.gehalt);
     if (s2.phase === "insolvenz") z2 -= 12;
     return clamp(z2, 0, 100);
   }
@@ -8025,10 +8607,10 @@
       const q2 = s2.quartale.find((x) => x.start === w - 13);
       if (q2 && q2.ebitdaIst >= (q2.plan ?? q2.planStandard)) {
         for (const r of RESSORTS) {
-          const p = v.ressorts[r].person;
-          if (p && p.erfolgsbonus > 0) {
-            v.bonusWoche += p.gehalt * p.erfolgsbonus / 4;
-            p.loyalitaet = clamp(p.loyalitaet + 3, 0, 100);
+          const p2 = v.ressorts[r].person;
+          if (p2 && p2.erfolgsbonus > 0) {
+            v.bonusWoche += p2.gehalt * p2.erfolgsbonus / 4;
+            p2.loyalitaet = clamp(p2.loyalitaet + 3, 0, 100);
           }
         }
         if (v.bonusWoche > 0) melde(s2, "info", `Quartalsplan erreicht: Erfolgsboni f\xFCr den Vorstand ${mio(v.bonusWoche)}.`);
@@ -8036,25 +8618,25 @@
     }
     for (const r of RESSORTS) {
       const res = v.ressorts[r];
-      const p = res.person;
-      if (!p) continue;
-      if (p.gehtWoche !== void 0 && p.gehtWoche <= w) {
-        melde(s2, "presse", `${p.name} (${RESSORT_INFO[r].kurz}) verl\xE4sst ${s2.firma.name}${p.gehtZu ? ` und wechselt zu ${p.gehtZu}` : ""}.`);
+      const p2 = res.person;
+      if (!p2) continue;
+      if (p2.gehtWoche !== void 0 && p2.gehtWoche <= w) {
+        melde(s2, "presse", `${p2.name} (${RESSORT_INFO[r].kurz}) verl\xE4sst ${s2.firma.name}${p2.gehtZu ? ` und wechselt zu ${p2.gehtZu}` : ""}.`);
         vakant(s2, r);
         continue;
       }
-      if (p.halteBis !== void 0 && p.halteBis <= w) {
-        p.halteBis = void 0;
-        p.halteStart = void 0;
-        p.haltebonus = 0;
+      if (p2.halteBis !== void 0 && p2.halteBis <= w) {
+        p2.halteBis = void 0;
+        p2.halteStart = void 0;
+        p2.haltebonus = 0;
       }
-      p.loyalitaet = clamp(p.loyalitaet + (loyalitaetsZiel(s2, r, p) - p.loyalitaet) * VORSTAND_PARAM.loyalitaetTempo, 0, 100);
-      if (s2.prognose || p.gehtWoche !== void 0 || s2.entscheidungen.some((e) => e.typ === "vorstand_abwerbung" && e.daten.ressort === r)) continue;
-      let pr2 = VORSTAND_PARAM.abwerbung * Math.pow((100 - p.loyalitaet) / 50, 3);
+      p2.loyalitaet = clamp(p2.loyalitaet + (loyalitaetsZiel(s2, r, p2) - p2.loyalitaet) * VORSTAND_PARAM.loyalitaetTempo, 0, 100);
+      if (s2.prognose || p2.gehtWoche !== void 0 || s2.entscheidungen.some((e) => e.typ === "vorstand_abwerbung" && e.daten.ressort === r)) continue;
+      let pr2 = VORSTAND_PARAM.abwerbung * Math.pow((100 - p2.loyalitaet) / 50, 3);
       if (s2.phase === "insolvenz") pr2 *= 1.5;
-      if (p.halteBis !== void 0 && p.halteBis > w) pr2 *= 0.4;
-      if (w - p.seitWoche < 26) pr2 *= 0.3;
-      if (chance(rng(s2), pr2)) abwerbung(s2, r, p);
+      if (p2.halteBis !== void 0 && p2.halteBis > w) pr2 *= 0.4;
+      if (w - p2.seitWoche < 26) pr2 *= 0.3;
+      if (chance(rng(s2), pr2)) abwerbung(s2, r, p2);
     }
     for (const r of RESSORTS) if (w > 0 && w % 13 === 3 || v.ressorts[r].kandidaten.length === 0) erneuereKandidaten(s2, r);
     if (!s2.prognose && w > 0 && w % 13 === VORSTAND_PARAM.sitzungWoche) vorstandssitzung(s2);
@@ -8068,7 +8650,7 @@
     erneuereKandidaten(s2, r);
     hqAktualisiere(s2);
   }
-  function abwerbung(s2, r, p) {
+  function abwerbung(s2, r, p2) {
     const h = rng(s2);
     const firma = waehle(h, FIRMEN);
     const plus = Math.round(zwischen(h, 15, 35));
@@ -8077,15 +8659,15 @@
       typ: "vorstand_abwerbung",
       woche: s2.woche,
       frist: s2.woche + 2,
-      titel: `${p.name} hat ein Angebot von ${firma}`,
-      text: `${firma} bietet ${p.name} (${RESSORT_INFO[r].kurz}) rund ${plus} % mehr Gehalt. Ohne Gegenangebot geht ${p.portraet.geschlecht === "w" ? "sie" : "er"} nach ${VORSTAND_PARAM.kuendigungsfrist} Wochen.`,
+      titel: `${p2.name} hat ein Angebot von ${firma}`,
+      text: `${firma} bietet ${p2.name} (${RESSORT_INFO[r].kurz}) rund ${plus} % mehr Gehalt. Ohne Gegenangebot geht ${p2.portraet.geschlecht === "w" ? "sie" : "er"} nach ${VORSTAND_PARAM.kuendigungsfrist} Wochen.`,
       optionen: [
         { id: "gegenangebot", label: `Gegenangebot: Gehalt plus ${plus} %` },
         { id: "haltebonus", label: "Haltebonus: ein halbes Jahresgehalt, 52 Wochen" },
         { id: "ziehen", label: "Ziehen lassen" }
       ],
       standard: "ziehen",
-      daten: { ressort: r, person: p.id, firma, plus }
+      daten: { ressort: r, person: p2.id, firma, plus }
     };
     s2.entscheidungen.push(e);
     melde(s2, "warnung", e.text);
@@ -8110,10 +8692,10 @@
     { id: "online", ressort: "cdo", titel: "Neuer Onlineshop", kosten: 25e5, boosts: [{ abteilung: "ecommerce", faktor: 1.4, wochen: 52 }], text: "Shopsystem erneuern, Click and Collect in allen H\xE4usern." }
   ];
   function bericht(s2, r) {
-    const p = s2.vorstand.ressorts[r].person;
-    if (!p) return "Ressort unbesetzt, der CEO berichtet selbst.";
+    const p2 = s2.vorstand.ressorts[r].person;
+    if (!p2) return "Ressort unbesetzt, der CEO berichtet selbst.";
     const h = rng(s2);
-    const fehl = (x) => x * (1 + normal(h) * 0.3 * (1 - p.fachwissen / 100));
+    const fehl = (x) => x * (1 + normal(h) * 0.3 * (1 - p2.fachwissen / 100));
     const k13 = s2.historie.slice(-13);
     const sum2 = (f) => k13.reduce((a, b2) => a + f(b2), 0);
     const offen = s2.haeuser.filter((x) => x.status === "offen");
@@ -8148,9 +8730,9 @@
     const moeglich = THEMEN.filter((t) => v.ressorts[t.ressort].person);
     if (moeglich.length) {
       const t = waehle(h, moeglich);
-      const p = v.ressorts[t.ressort].person;
+      const p2 = v.ressorts[t.ressort].person;
       const id = neueVid(s2, "ve");
-      const guete = clamp(0.35 + p.fachwissen / 100 + normal(h) * 0.15, 0.1, 1.4);
+      const guete = clamp(0.35 + p2.fachwissen / 100 + normal(h) * 0.15, 0.1, 1.4);
       const inso = s2.phase === "insolvenz";
       const e = {
         id,
@@ -8158,7 +8740,7 @@
         woche: s2.woche,
         frist: s2.woche + 3,
         titel: `Vorstandssitzung: ${t.titel}`,
-        text: `${p.name} (${RESSORT_INFO[t.ressort].kurz}) schl\xE4gt vor: ${t.text} Kosten ${mio(t.kosten)}${inso ? ", der Sachwalter muss zustimmen" : ""}.`,
+        text: `${p2.name} (${RESSORT_INFO[t.ressort].kurz}) schl\xE4gt vor: ${t.text} Kosten ${mio(t.kosten)}${inso ? ", der Sachwalter muss zustimmen" : ""}.`,
         optionen: [
           { id: "umsetzen", label: `Umsetzen (${mio(t.kosten)})` },
           { id: "kleiner", label: `Kleiner umsetzen (${mio(t.kosten / 2)})` },
@@ -8178,21 +8760,21 @@
     const v = s2.vorstand;
     const r = e.daten.ressort;
     if (e.typ === "vorstand_abwerbung") {
-      const p = v.ressorts[r]?.person;
-      if (!p || p.id !== e.daten.person) return;
+      const p2 = v.ressorts[r]?.person;
+      if (!p2 || p2.id !== e.daten.person) return;
       if (option === "gegenangebot") {
-        p.gehalt = Math.round(p.gehalt * (1 + Number(e.daten.plus) / 100) / 5e3) * 5e3;
-        p.loyalitaet = clamp(p.loyalitaet + 15, 0, 100);
-        protokolliere(s2, r, `Gegenangebot angenommen, neues Gehalt ${Math.round(p.gehalt / 1e3)} Tsd. \u20AC.`);
+        p2.gehalt = Math.round(p2.gehalt * (1 + Number(e.daten.plus) / 100) / 5e3) * 5e3;
+        p2.loyalitaet = clamp(p2.loyalitaet + 15, 0, 100);
+        protokolliere(s2, r, `Gegenangebot angenommen, neues Gehalt ${Math.round(p2.gehalt / 1e3)} Tsd. \u20AC.`);
       } else if (option === "haltebonus") {
-        p.haltebonus = Math.round(p.gehalt / 2);
-        p.halteBis = s2.woche + 52;
-        p.halteStart = s2.woche;
-        p.loyalitaet = clamp(p.loyalitaet + 10, 0, 100);
-        protokolliere(s2, r, `Bleibt gegen Haltebonus von ${Math.round(p.haltebonus / 1e3)} Tsd. \u20AC.`);
+        p2.haltebonus = Math.round(p2.gehalt / 2);
+        p2.halteBis = s2.woche + 52;
+        p2.halteStart = s2.woche;
+        p2.loyalitaet = clamp(p2.loyalitaet + 10, 0, 100);
+        protokolliere(s2, r, `Bleibt gegen Haltebonus von ${Math.round(p2.haltebonus / 1e3)} Tsd. \u20AC.`);
       } else {
-        p.gehtWoche = s2.woche + VORSTAND_PARAM.kuendigungsfrist;
-        p.gehtZu = String(e.daten.firma);
+        p2.gehtWoche = s2.woche + VORSTAND_PARAM.kuendigungsfrist;
+        p2.gehtZu = String(e.daten.firma);
         protokolliere(s2, r, `Hat gek\xFCndigt, geht in ${VORSTAND_PARAM.kuendigungsfrist} Wochen.`);
       }
       return;
@@ -8200,10 +8782,10 @@
     if (e.typ === "vorstand_sitzung") {
       const t = THEMEN.find((x) => x.id === e.daten.thema);
       const sitzung = v.sitzungen.find((x) => x.thema?.entscheidungId === e.id);
-      const p = v.ressorts[r]?.person;
+      const p2 = v.ressorts[r]?.person;
       if (!t) return;
       if (option === "vertagen") {
-        if (p) p.loyalitaet = clamp(p.loyalitaet - 3, 0, 100);
+        if (p2) p2.loyalitaet = clamp(p2.loyalitaet - 3, 0, 100);
         if (sitzung?.thema) sitzung.thema.ergebnis = "vertagt";
         return;
       }
@@ -8212,7 +8794,7 @@
       einmalKosten(s2, t.kosten * anteil3);
       for (const b2 of t.boosts) v.boosts.push({ abteilung: b2.abteilung, faktor: 1 + (b2.faktor - 1) * g, bis: s2.woche + b2.wochen, text: t.titel });
       t.extra?.(s2, g);
-      if (p) p.loyalitaet = clamp(p.loyalitaet + 4, 0, 100);
+      if (p2) p2.loyalitaet = clamp(p2.loyalitaet + 4, 0, 100);
       if (sitzung?.thema) sitzung.thema.ergebnis = option === "kleiner" ? "kleiner umgesetzt" : "umgesetzt";
       protokolliere(s2, r, `${t.titel} ${option === "kleiner" ? "in kleinem Umfang " : ""}beschlossen.`);
       hqAktualisiere(s2);
@@ -8226,9 +8808,9 @@
     const v = s2.vorstand;
     for (const r of RESSORTS) {
       const res = v.ressorts[r];
-      const p = res.person;
-      if (!p) continue;
-      const guete = p.fachwissen / 100;
+      const p2 = res.person;
+      if (!p2) continue;
+      const guete = p2.fachwissen / 100;
       for (const [bereich, an] of Object.entries(res.delegation)) {
         if (!an || s2.phase === "zerschlagen") continue;
         const f = EXTERN[`${r}.${bereich}`] ?? KI[`${r}.${bereich}`];
@@ -8346,24 +8928,24 @@
     },
     "cro.schliessungen": (s2, g, h) => {
       if (s2.woche % 13 !== 9) return;
-      const p = portfolio(s2).filter((x) => x.status === "offen" && x.umsatz > 0).sort((a, b2) => a.db / a.umsatz - b2.db / b2.umsatz);
-      const kand = trifft2(h, g) ? p.filter((x) => x.db / x.umsatz < -0.08).slice(0, 4) : p.slice(Math.floor(p.length * 0.3), Math.floor(p.length * 0.3) + 2);
+      const p2 = portfolio(s2).filter((x) => x.status === "offen" && x.umsatz > 0).sort((a, b2) => a.db / a.umsatz - b2.db / b2.umsatz);
+      const kand = trifft2(h, g) ? p2.filter((x) => x.db / x.umsatz < -0.08).slice(0, 4) : p2.slice(Math.floor(p2.length * 0.3), Math.floor(p2.length * 0.3) + 2);
       for (const x of kand) tu(s2, "cro", { typ: "schliessen", haus: x.id }, `${x.name} zur Schlie\xDFung gestellt.`);
     },
     "cro.mietverhandlungen": (s2, g, h) => {
       if (s2.woche % 13 !== 10) return;
-      const p = portfolio(s2).filter((x) => x.status === "offen" && x.mietquote > 0.13).sort((a, b2) => b2.mietquote - a.mietquote).slice(0, 5);
-      for (const x of p) {
+      const p2 = portfolio(s2).filter((x) => x.status === "offen" && x.mietquote > 0.13).sort((a, b2) => b2.mietquote - a.mietquote).slice(0, 5);
+      for (const x of p2) {
         const red = trifft2(h, g) ? 0.15 : 0.3;
         tu(s2, "cro", { typ: "mieteVerhandeln", haus: x.id, reduktion: red });
       }
     }
   };
   var VORSTAND_AKTIONEN = /* @__PURE__ */ new Set(["vorstandEinstellen", "vorstandEntlassen", "vorstandGehalt", "vorstandBonus", "vorstandDelegation"]);
-  function abfindung(s2, p) {
+  function abfindung(s2, p2) {
     const f = s2.phase === "insolvenz" ? VORSTAND_PARAM.abfindungInsolvenz : VORSTAND_PARAM.abfindungRegulaer;
-    const offenBonus = p.halteBis !== void 0 && p.halteBis > s2.woche ? p.haltebonus * ((p.halteBis - s2.woche) / Math.max(1, p.halteBis - (p.halteStart ?? p.seitWoche))) : 0;
-    return eur(p.gehalt * f + offenBonus);
+    const offenBonus = p2.halteBis !== void 0 && p2.halteBis > s2.woche ? p2.haltebonus * ((p2.halteBis - s2.woche) / Math.max(1, p2.halteBis - (p2.halteStart ?? p2.seitWoche))) : 0;
+    return eur(p2.gehalt * f + offenBonus);
   }
   function vorstandAktion(s2, a) {
     const ok5 = (text3) => ({ ok: true, text: text3 });
@@ -8379,11 +8961,11 @@
         const gehalt = Math.max(0, Math.round(a.gehalt / 5e3) * 5e3);
         const hb = Math.max(0, eur(a.haltebonus ?? 0));
         const eb = clamp(a.erfolgsbonus ?? 0, 0, 1);
-        const p = angebotsChance(s2, a.ressort, k.id, gehalt, hb, eb);
-        if (!chance(rng(s2), p)) {
+        const p2 = angebotsChance(s2, a.ressort, k.id, gehalt, hb, eb);
+        if (!chance(rng(s2), p2)) {
           const ford = gehaltsforderung(s2, a.ressort, k);
           if (zufall(rng(s2)) < 0.5) res.kandidaten = res.kandidaten.filter((x) => x.id !== k.id);
-          return fehler5(`${k.name} lehnt ab (Chance war ${Math.round(p * 100)} %). Forderung liegt bei ${Math.round(ford / 1e3)} Tsd. \u20AC.`);
+          return fehler5(`${k.name} lehnt ab (Chance war ${Math.round(p2 * 100)} %). Forderung liegt bei ${Math.round(ford / 1e3)} Tsd. \u20AC.`);
         }
         const person2 = {
           id: k.id,
@@ -8409,48 +8991,48 @@
         return ok5(`${k.name} sagt zu: ${info.kurz} ab sofort, Gehalt ${Math.round(gehalt / 1e3)} Tsd. \u20AC im Jahr. Volle Wirkung nach ${VORSTAND_PARAM.einarbeitungWochen} Wochen.`);
       }
       case "vorstandEntlassen": {
-        const p = res.person;
-        if (!p) return fehler5(`${info.kurz} ist unbesetzt.`);
-        const abf = abfindung(s2, p);
+        const p2 = res.person;
+        if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
+        const abf = abfindung(s2, p2);
         einmalKosten(s2, abf);
         for (const r of RESSORTS) {
           const x = s2.vorstand.ressorts[r].person;
-          if (x && x !== p) x.loyalitaet = clamp(x.loyalitaet - 3, 0, 100);
+          if (x && x !== p2) x.loyalitaet = clamp(x.loyalitaet - 3, 0, 100);
         }
         vakant(s2, a.ressort);
         hqAktualisiere(s2);
-        melde(s2, "presse", `${p.name} verl\xE4sst den Vorstand von ${s2.firma.name}.`);
-        return ok5(`${p.name} entlassen, Abfindung ${mio(abf)}. ${info.kurz} ist unbesetzt, Delegation aus.`);
+        melde(s2, "presse", `${p2.name} verl\xE4sst den Vorstand von ${s2.firma.name}.`);
+        return ok5(`${p2.name} entlassen, Abfindung ${mio(abf)}. ${info.kurz} ist unbesetzt, Delegation aus.`);
       }
       case "vorstandGehalt": {
-        const p = res.person;
-        if (!p) return fehler5(`${info.kurz} ist unbesetzt.`);
+        const p2 = res.person;
+        if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
         const neu = Math.max(0, Math.round(a.gehalt / 5e3) * 5e3);
-        const alt = p.gehalt;
-        if (neu < alt) p.loyalitaet = clamp(p.loyalitaet - 150 * (1 - neu / alt), 0, 100);
-        else p.loyalitaet = clamp(p.loyalitaet + 40 * (neu / alt - 1), 0, 100);
-        p.gehalt = neu;
-        return ok5(`${p.name}: Gehalt ${Math.round(neu / 1e3)} Tsd. \u20AC im Jahr (${neu >= alt ? "+" : ""}${Math.round((neu / alt - 1) * 100)} %). Loyalit\xE4t ${Math.round(p.loyalitaet)}.`);
+        const alt = p2.gehalt;
+        if (neu < alt) p2.loyalitaet = clamp(p2.loyalitaet - 150 * (1 - neu / alt), 0, 100);
+        else p2.loyalitaet = clamp(p2.loyalitaet + 40 * (neu / alt - 1), 0, 100);
+        p2.gehalt = neu;
+        return ok5(`${p2.name}: Gehalt ${Math.round(neu / 1e3)} Tsd. \u20AC im Jahr (${neu >= alt ? "+" : ""}${Math.round((neu / alt - 1) * 100)} %). Loyalit\xE4t ${Math.round(p2.loyalitaet)}.`);
       }
       case "vorstandBonus": {
-        const p = res.person;
-        if (!p) return fehler5(`${info.kurz} ist unbesetzt.`);
+        const p2 = res.person;
+        if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
         const teile = [];
         if (a.haltebonus !== void 0) {
           const hb = Math.max(0, eur(a.haltebonus));
           const wochen = clamp(Math.round(a.halteWochen ?? 52), 13, 156);
-          p.haltebonus = hb;
-          p.halteBis = hb > 0 ? s2.woche + wochen : void 0;
-          p.halteStart = s2.woche;
-          if (hb > 0) p.loyalitaet = clamp(p.loyalitaet + 6, 0, 100);
+          p2.haltebonus = hb;
+          p2.halteBis = hb > 0 ? s2.woche + wochen : void 0;
+          p2.halteStart = s2.woche;
+          if (hb > 0) p2.loyalitaet = clamp(p2.loyalitaet + 6, 0, 100);
           teile.push(hb > 0 ? `Haltebonus ${Math.round(hb / 1e3)} Tsd. \u20AC \xFCber ${wochen} Wochen` : "kein Haltebonus");
         }
         if (a.erfolgsbonus !== void 0) {
-          p.erfolgsbonus = clamp(a.erfolgsbonus, 0, 1);
-          teile.push(`Erfolgsbonus ${Math.round(p.erfolgsbonus * 100)} % vom Jahresgehalt bei Planerf\xFCllung`);
+          p2.erfolgsbonus = clamp(a.erfolgsbonus, 0, 1);
+          teile.push(`Erfolgsbonus ${Math.round(p2.erfolgsbonus * 100)} % vom Jahresgehalt bei Planerf\xFCllung`);
         }
         hqAktualisiere(s2);
-        return ok5(`${p.name}: ${teile.join(", ") || "unver\xE4ndert"}.`);
+        return ok5(`${p2.name}: ${teile.join(", ") || "unver\xE4ndert"}.`);
       }
       case "vorstandDelegation": {
         if (!DELEGATIONEN[a.ressort].some((d2) => d2.id === a.bereich)) return fehler5("Diesen Bereich gibt es im Ressort nicht.");
@@ -8462,42 +9044,42 @@
       }
     }
   }
-  function personKarte(s2, r, p) {
+  function personKarte(s2, r, p2) {
     return {
-      id: p.id,
-      name: p.name,
-      portraet: { ...p.portraet },
-      fuehrung: Math.round(p.fuehrung),
-      fachwissen: Math.round(p.fachwissen),
-      loyalitaet: Math.round(p.loyalitaet),
-      gehalt: p.gehalt,
-      gehaltsforderung: gehaltsforderung(s2, r, p),
-      haltebonus: p.haltebonus,
-      halteBis: p.halteBis,
-      erfolgsbonus: p.erfolgsbonus,
-      seitWoche: p.seitWoche,
-      gewachsen: p.gewachsen,
-      gehtWoche: p.gehtWoche
+      id: p2.id,
+      name: p2.name,
+      portraet: { ...p2.portraet },
+      fuehrung: Math.round(p2.fuehrung),
+      fachwissen: Math.round(p2.fachwissen),
+      loyalitaet: Math.round(p2.loyalitaet),
+      gehalt: p2.gehalt,
+      gehaltsforderung: gehaltsforderung(s2, r, p2),
+      haltebonus: p2.haltebonus,
+      halteBis: p2.halteBis,
+      erfolgsbonus: p2.erfolgsbonus,
+      seitWoche: p2.seitWoche,
+      gewachsen: p2.gewachsen,
+      gehtWoche: p2.gehtWoche
     };
   }
-  function jahresRisiko(s2, p) {
-    let pr2 = VORSTAND_PARAM.abwerbung * Math.pow((100 - p.loyalitaet) / 50, 3);
+  function jahresRisiko(s2, p2) {
+    let pr2 = VORSTAND_PARAM.abwerbung * Math.pow((100 - p2.loyalitaet) / 50, 3);
     if (s2.phase === "insolvenz") pr2 *= 1.5;
-    if (p.halteBis !== void 0 && p.halteBis > s2.woche) pr2 *= 0.4;
+    if (p2.halteBis !== void 0 && p2.halteBis > s2.woche) pr2 *= 0.4;
     return 1 - Math.pow(1 - Math.min(1, pr2), 52);
   }
   function ressortKarte(s2, r) {
     const res = s2.vorstand.ressorts[r];
     const info = RESSORT_INFO[r];
-    const p = res.person;
-    const risiko = p ? p.gehtWoche !== void 0 ? 1 : jahresRisiko(s2, p) : 0;
+    const p2 = res.person;
+    const risiko = p2 ? p2.gehtWoche !== void 0 ? 1 : jahresRisiko(s2, p2) : 0;
     return {
       id: r,
       kurz: info.kurz,
       titel: info.titel,
       zustaendig: info.zustaendig,
-      besetzt: !!p,
-      person: p ? personKarte(s2, r, p) : void 0,
+      besetzt: !!p2,
+      person: p2 ? personKarte(s2, r, p2) : void 0,
       wert: Math.round(ressortWert(s2, r) * 100),
       abteilungen: Object.keys(info.abteilungen).map((id) => ({ id, name: ABTEILUNG_NAME[id], faktor: Math.round(vorstandWirkung(s2, id) * 1e3) / 1e3 })),
       delegationen: DELEGATIONEN[r].map((d) => ({ ...d, an: !!res.delegation[d.id] })),
@@ -8526,13 +9108,13 @@
     const res = s2.vorstand.ressorts[r];
     if (!res) return void 0;
     const k = ressortKarte(s2, r);
-    const p = res.person;
+    const p2 = res.person;
     return {
       ...k,
-      vorgeschichte: p?.vorgeschichte,
-      abfindung: p ? abfindung(s2, p) : void 0,
+      vorgeschichte: p2?.vorgeschichte,
+      abfindung: p2 ? abfindung(s2, p2) : void 0,
       gehaltsSchritt: 1e4,
-      gehaltProzent: p ? Math.round((p.gehalt / gehaltsforderung(s2, r, p) - 1) * 100) : void 0,
+      gehaltProzent: p2 ? Math.round((p2.gehalt / gehaltsforderung(s2, r, p2) - 1) * 100) : void 0,
       protokoll: s2.vorstand.protokoll.filter((x) => x.ressort === r).slice(-12),
       kandidatenAnzahl: res.kandidaten.length
     };
@@ -8568,8 +9150,8 @@
   function vorstandFuerGrafik(s2) {
     if (!s2.vorstand) return [];
     return RESSORTS.map((r) => {
-      const p = s2.vorstand.ressorts[r].person;
-      return { id: r, kurz: RESSORT_INFO[r].kurz, titel: RESSORT_INFO[r].titel, name: p?.name, portraet: p ? { ...p.portraet } : void 0 };
+      const p2 = s2.vorstand.ressorts[r].person;
+      return { id: r, kurz: RESSORT_INFO[r].kurz, titel: RESSORT_INFO[r].titel, name: p2?.name, portraet: p2 ? { ...p2.portraet } : void 0 };
     });
   }
 
@@ -8907,8 +9489,8 @@
     const strafen = Math.max(0, 1 - Lv) * HQ_PARAM.verwaltungStrafe * s2.zentrale.kostenStart;
     const vorstand = vorstandKostenWoche(s2);
     const entwicklung = produktKostenWoche(s2);
-    const leitung = organisationLeitungKostenWoche(s2);
-    return { personal, sach, reise: reise2, miete, nebenkosten, strafen, vorstand, entwicklung, leitung, gesamt: personal + sach + reise2 + miete + nebenkosten + strafen + vorstand + entwicklung + leitung };
+    const leitung2 = organisationLeitungKostenWoche(s2);
+    return { personal, sach, reise: reise2, miete, nebenkosten, strafen, vorstand, entwicklung, leitung: leitung2, gesamt: personal + sach + reise2 + miete + nebenkosten + strafen + vorstand + entwicklung + leitung2 };
   }
   function hqAktualisiere(s2) {
     const hq = s2.hq;
@@ -9287,10 +9869,10 @@
     return ok4(alteStufe === st ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st}.`);
   }
   function zentraleKuerzen(s2, prozent2) {
-    const p = clamp(prozent2, 0, 0.3);
+    const p2 = clamp(prozent2, 0, 0.3);
     let fte = 0;
     for (const a of s2.hq.abteilungen) {
-      const weg = Math.round(a.fte * p);
+      const weg = Math.round(a.fte * p2);
       a.fte -= weg;
       if (a.neuFte !== void 0) a.neuFte = Math.min(a.neuFte, a.fte);
       schrumpfe(a, qmBedarf(a));
@@ -9298,11 +9880,11 @@
     }
     const abf = fte * abfindungJeFte(s2);
     einmal(s2, abf);
-    s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - p * 30, 0, 100);
+    s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - p2 * 30, 0, 100);
     hqAktualisiere(s2);
     const gesamt = 1 - s2.zentrale.kostenWoche / s2.zentrale.kostenStart;
     const unterSoll = s2.hq.abteilungen.filter((a) => s2.hq.wirkung[a.id] < a.stufe - 0.05).map((a) => ABTEILUNG_NAME[a.id]);
-    return ok4(`Zentrale um ${Math.round(p * 100)} % verkleinert (${fte} FTE, Abfindungen ${mio(abf)}). Kumuliert ${Math.round(gesamt * 100)} % unter Start${unterSoll.length ? `. Unter Soll und damit schw\xE4cher: ${unterSoll.join(", ")}` : ""}${gesamt > 0.3 ? ", die Organisation wird sp\xFCrbar d\xFCnn" : ""}.`);
+    return ok4(`Zentrale um ${Math.round(p2 * 100)} % verkleinert (${fte} FTE, Abfindungen ${mio(abf)}). Kumuliert ${Math.round(gesamt * 100)} % unter Start${unterSoll.length ? `. Unter Soll und damit schw\xE4cher: ${unterSoll.join(", ")}` : ""}${gesamt > 0.3 ? ", die Organisation wird sp\xFCrbar d\xFCnn" : ""}.`);
   }
   function wirkungText(s2, id) {
     const Lx = s2.hq.wirkung[id];
@@ -9769,6 +10351,7 @@
     bildeHauscluster(s2);
     initialisiereIt(s2);
     initialisierePlanung(s2);
+    initialisiereHausbetrieb(s2);
     return s2;
   }
   function initialeVerbindlichkeiten(s2) {
@@ -9824,7 +10407,7 @@
     const streik = h.streikBis !== void 0 && h.streikBis > w ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h);
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h);
   }
   function saettigung(qm, Q) {
     return Q > 0 ? 1 - Math.exp(-qm / Q) : 0;
@@ -9872,11 +10455,11 @@
     const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor("damen", w) * wettbewerbOffpriceFaktor(s2, h);
     summeBasis += offBasis;
     summeBedarf += offBasis;
-    const p = h.personal;
-    const fteIst = p.vollzeit + p.teilzeit + p.aushilfen;
+    const p2 = h.personal;
+    const fteIst = p2.vollzeit + p2.teilzeit + p2.aushilfen;
     roh2.fteBedarf = qmVerkauf / PARAM.qmJeFte * (h.klasse === "premium" ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
     const besetzung = roh2.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh2.fteBedarf / hqBesetzungsNorm(s2), 0, 1), 0.5) : 1;
-    const ahQuote = fteIst > 0 ? p.aushilfen / fteIst : 0;
+    const ahQuote = fteIst > 0 ? p2.aushilfen / fteIst : 0;
     const basisJe = {};
     const tEJe = {};
     for (const g of alleGruppen) {
@@ -9910,9 +10493,10 @@
     return wirkeTreiber(h, roh2);
   }
   function lohnKosten(s2, h) {
-    const p = h.personal;
+    const p2 = h.personal;
     const tarifF = s2.tarif === "sanierung" ? 0.93 : s2.tarif === "ohne" ? 0.89 : 1;
-    return (p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF + p.aushilfen * PARAM.lohnAushilfe;
+    const leitungDelta = h.betrieb && !s2.hausbetriebAbnahmeAus ? ((p2.filialleiter.gehalt ?? h.betrieb.leitungGehaltStart) - h.betrieb.leitungGehaltStart) / 52 : 0;
+    return (p2.vollzeit * PARAM.lohnVollzeit + p2.teilzeit * PARAM.lohnTeilzeit) * tarifF + p2.aushilfen * PARAM.lohnAushilfe + leitungDelta;
   }
   function hausKosten(s2, h, umsatzEigen, umsatzGesamt) {
     const k = { personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, logistik: 0, personalCash: 0 };
@@ -9922,6 +10506,7 @@
       return k;
     }
     k.personal = lohnKosten(s2, h);
+    if (!s2.hausbetriebAbnahmeAus && s2.hausbetrieb?.staedte[h.stadt]?.sonntage.includes(s2.woche)) k.personal *= 1.18;
     k.miete = h.miete.mieteWoche;
     let qmNk = 0;
     let qmBetrieb = 0;
@@ -9931,7 +10516,7 @@
       qmBetrieb += f.konzept === "leer" ? f.qm * 0.25 : f.qm;
     }
     k.nebenkosten = h.miete.netTyp === "net" ? 0 : qmNk * h.miete.nebenkostenQmWoche;
-    k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt;
+    k.sonstige = hausBetriebskosten(s2, h, PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt);
     k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2);
     return k;
   }
@@ -10042,12 +10627,12 @@
       }
       h.transferBonus *= 0.985;
       h.substanz = Math.max(0, h.substanz - 0.05);
-      const p = h.personal;
+      const p2 = h.personal;
       const krise = s2.phase === "insolvenz" ? 1e-3 : 0;
       const abgang = 12e-4 + krise + Math.max(0, (40 - s2.stakeholder.betriebsrat) / 100) * 1e-3;
-      p.vollzeit *= 1 - abgang;
-      p.teilzeit *= 1 - abgang;
-      const fl = p.filialleiter;
+      p2.vollzeit *= 1 - abgang;
+      p2.teilzeit *= 1 - abgang;
+      const fl = p2.filialleiter;
       const zielMoral = 55 + hqMoralZiel(s2) - (s2.phase === "insolvenz" ? 15 : 0) - (h.status === "schliessung_verhandlung" ? 25 : 0);
       fl.moral = clamp(fl.moral + (zielMoral - fl.moral) * 0.05, 0, 100);
     }
@@ -10466,7 +11051,19 @@
         if (!s2.wettbewerbDeaktiviert && !s2.wettbewerbEreignisseDeaktiviert && !kandidaten2.length) continue;
         const ziel = kandidaten2[0]?.name;
         melde(s2, "warnung", `Filialleiter${fl.name.endsWith("a") || fl.name.endsWith("e") ? "in" : ""} ${fl.name} verl\xE4sst ${h.name} und geht ${ziel ? "zu " + ziel : "zur Konkurrenz"}.`, { stadt: h.stadt, hausId: h.id });
-        h.personal.filialleiter = { name: `Interim (${fl.name.split(" ")[1]}-Nachfolge)`, skill: interimSkill, moral: 50, interimBis: w + 4 };
+        h.personal.filialleiter = {
+          name: `Interim (${fl.name.split(" ")[1]}-Nachfolge)`,
+          skill: interimSkill,
+          moral: 50,
+          interimBis: w + 4,
+          // O07 Haus: neue Eigenschaften auch bei Interimspersonen bewahren.
+          staerken: { personal: interimSkill, ware: interimSkill, kunde: interimSkill, kosten: interimSkill },
+          ehrlichkeit: fl.ehrlichkeit,
+          gehalt: fl.gehalt,
+          bonusAnteil: fl.bonusAnteil,
+          wechselwille: 0,
+          stellvertretung: fl.stellvertretung
+        };
       }
     }
     lieferantenEreignisse(s2);
@@ -10524,7 +11121,7 @@
       standard: standardGew\u00E4hlt,
       hausId: typeof e.daten.haus === "string" ? e.daten.haus : void 0
     });
-    s2.entscheidungsprotokoll = s2.entscheidungsprotokoll.filter((p) => s2.woche - p.woche <= 52);
+    s2.entscheidungsprotokoll = s2.entscheidungsprotokoll.filter((p2) => s2.woche - p2.woche <= 52);
     if (e.typ.startsWith("vorstand_")) {
       loeseVorstandEntscheidung(s2, e, option);
       return null;
@@ -10535,6 +11132,10 @@
     }
     if (e.typ.startsWith("planung_")) {
       planungEntscheidung(s2, e, option);
+      return null;
+    }
+    if (e.typ.startsWith("haus_")) {
+      loeseHausVorlage(s2, e.typ, e.daten, option);
       return null;
     }
     const d = e.daten;
@@ -10570,8 +11171,8 @@
           haus2.miete.mieteWoche = markt;
           haus2.miete.bisWoche += 260;
         } else if (option === "nachverhandeln") {
-          const p = 0.3 + 0.5 * (s2.stakeholder.vermieter / 100);
-          if (chance(s2, p)) {
+          const p2 = 0.3 + 0.5 * (s2.stakeholder.vermieter / 100);
+          if (chance(s2, p2)) {
             haus2.miete.mieteWoche = eur(markt * 0.88);
             haus2.miete.bisWoche += 260;
             melde(s2, "info", `${haus2.name}: Vermieter akzeptiert 12 % unter Angebot.`);
@@ -10628,8 +11229,8 @@
   var beendet = (s2) => s2.phase === "zerschlagen";
   function quartalsStart(s2) {
     if (s2.prognose || s2.woche % 13 !== 0) return;
-    const p = vorschau(s2, 13);
-    s2.quartale.push({ nr: s2.quartale.length, start: s2.woche, planStandard: eur(p.reduce((a, b2) => a + b2.ebitda, 0)), ebitdaIst: 0 });
+    const p2 = vorschau(s2, 13);
+    s2.quartale.push({ nr: s2.quartale.length, start: s2.woche, planStandard: eur(p2.reduce((a, b2) => a + b2.ebitda, 0)), ebitdaIst: 0 });
   }
   function wocheAbspielen(s2) {
     if (s2.phase === "zerschlagen") throw new Error("Spiel beendet: Die Kette ist zerschlagen.");
@@ -10725,9 +11326,14 @@
         kpi.rohertrag += r.offprice - (oe.gebucht + oe.zukauf) * t;
         umsatzEigen += r.offprice;
       }
-      kpi.konzessionserloes = r.konzessionUmsatz * PARAM.konzessionsQuote;
-      kpi.untermiete = r.untermiete;
+      kpi.konzessionserloes = hausKonzessionserloes(s2, h, r.konzessionUmsatz, PARAM.konzessionsQuote);
+      const gastro = hausGastroErgebnis(s2, h, kpi.umsatz);
+      kpi.untermiete = r.untermiete + gastro.pacht;
+      kpi.umsatz += gastro.umsatz;
+      kpi.rohertrag += gastro.rohertrag;
       const kosten = hausKosten(s2, h, umsatzEigen, kpi.umsatz);
+      kosten.personal += gastro.personal;
+      kosten.sonstige += gastro.sonstige;
       kpi.personal = kosten.personal;
       kpi.miete = h.status === "geschlossen" ? 0 : kosten.miete;
       if (h.status === "geschlossen") restmieten += kosten.miete;
@@ -10790,6 +11396,7 @@
     aktualisiereStakeholder(s2);
     ereignisse(s2);
     wettbewerbWoche(s2);
+    hausWoche(s2);
     werteAktionenAus(s2);
     if (s2.insolvenz && w + 1 >= s2.insolvenz.versammlung) glaeubigerversammlung(s2);
     for (const key of Object.keys(k)) if (typeof k[key] === "number") k[key] = eur(k[key]);
@@ -10897,9 +11504,9 @@
       tu2({ typ: "insolvenzAntrag" });
       if (zentralePauschal) tu2({ typ: "zentrale", prozent: 0.3 });
       const premiumIds = new Set(s2.haeuser.filter((h) => h.klasse === "premium").map((h) => h.id));
-      const p = portfolio(s2).filter((x) => x.status === "offen" && !premiumIds.has(x.id)).sort((a, b2) => a.db / Math.max(1, a.umsatz) - b2.db / Math.max(1, b2.umsatz));
-      for (const x of p.slice(0, 50)) tu2({ typ: "schliessen", haus: x.id });
-      for (const x of p.slice(50).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.2 });
+      const p2 = portfolio(s2).filter((x) => x.status === "offen" && !premiumIds.has(x.id)).sort((a, b2) => a.db / Math.max(1, a.umsatz) - b2.db / Math.max(1, b2.umsatz));
+      for (const x of p2.slice(0, 50)) tu2({ typ: "schliessen", haus: x.id });
+      for (const x of p2.slice(50).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.2 });
       for (const h of s2.haeuser.filter((x) => x.status === "offen" && x.kpi)) {
         const ist = h.kpi.fteIst, bedarf = h.kpi.fteBedarf;
         if (ist > bedarf * 1.02) tu2({ typ: "personalabbau", haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
@@ -15475,16 +16082,16 @@
       const te = this.elements;
       const w = 1 / (right - left);
       const h = 1 / (top - bottom);
-      const p = 1 / (far - near);
+      const p2 = 1 / (far - near);
       const x = (right + left) * w;
       const y = (top + bottom) * h;
       let z2, zInv;
       if (coordinateSystem === WebGLCoordinateSystem) {
-        z2 = (far + near) * p;
-        zInv = -2 * p;
+        z2 = (far + near) * p2;
+        zInv = -2 * p2;
       } else if (coordinateSystem === WebGPUCoordinateSystem) {
-        z2 = near * p;
-        zInv = -1 * p;
+        z2 = near * p2;
+        zInv = -1 * p2;
       } else {
         throw new Error("THREE.Matrix4.makeOrthographic(): Invalid coordinate system: " + coordinateSystem);
       }
@@ -16438,18 +17045,18 @@
     intersectsBox(box) {
       return box.intersectsTriangle(this);
     }
-    closestPointToPoint(p, target) {
+    closestPointToPoint(p2, target) {
       const a = this.a, b2 = this.b, c = this.c;
       let v, w;
       _vab.subVectors(b2, a);
       _vac.subVectors(c, a);
-      _vap.subVectors(p, a);
+      _vap.subVectors(p2, a);
       const d1 = _vab.dot(_vap);
       const d2 = _vac.dot(_vap);
       if (d1 <= 0 && d2 <= 0) {
         return target.copy(a);
       }
-      _vbp.subVectors(p, b2);
+      _vbp.subVectors(p2, b2);
       const d3 = _vab.dot(_vbp);
       const d4 = _vac.dot(_vbp);
       if (d3 >= 0 && d4 <= d3) {
@@ -16460,7 +17067,7 @@
         v = d1 / (d1 - d3);
         return target.copy(a).addScaledVector(_vab, v);
       }
-      _vcp.subVectors(p, c);
+      _vcp.subVectors(p2, c);
       const d5 = _vab.dot(_vcp);
       const d6 = _vac.dot(_vcp);
       if (d6 >= 0 && d5 <= d6) {
@@ -16638,13 +17245,13 @@
   };
   var _hslA = { h: 0, s: 0, l: 0 };
   var _hslB = { h: 0, s: 0, l: 0 };
-  function hue2rgb(p, q2, t) {
+  function hue2rgb(p2, q2, t) {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q2 - p) * 6 * t;
+    if (t < 1 / 6) return p2 + (q2 - p2) * 6 * t;
     if (t < 1 / 2) return q2;
-    if (t < 2 / 3) return p + (q2 - p) * 6 * (2 / 3 - t);
-    return p;
+    if (t < 2 / 3) return p2 + (q2 - p2) * 6 * (2 / 3 - t);
+    return p2;
   }
   var Color = class {
     constructor(r, g, b2) {
@@ -16697,11 +17304,11 @@
       if (s2 === 0) {
         this.r = this.g = this.b = l;
       } else {
-        const p = l <= 0.5 ? l * (1 + s2) : l + s2 - l * s2;
-        const q2 = 2 * l - p;
-        this.r = hue2rgb(q2, p, h + 1 / 3);
-        this.g = hue2rgb(q2, p, h);
-        this.b = hue2rgb(q2, p, h - 1 / 3);
+        const p2 = l <= 0.5 ? l * (1 + s2) : l + s2 - l * s2;
+        const q2 = 2 * l - p2;
+        this.r = hue2rgb(q2, p2, h + 1 / 3);
+        this.g = hue2rgb(q2, p2, h);
+        this.b = hue2rgb(q2, p2, h - 1 / 3);
       }
       ColorManagement.toWorkingColorSpace(this, colorSpace);
       return this;
@@ -18655,19 +19262,19 @@
     const dst = {};
     for (const u in src) {
       dst[u] = {};
-      for (const p in src[u]) {
-        const property = src[u][p];
+      for (const p2 in src[u]) {
+        const property = src[u][p2];
         if (property && (property.isColor || property.isMatrix3 || property.isMatrix4 || property.isVector2 || property.isVector3 || property.isVector4 || property.isTexture || property.isQuaternion)) {
           if (property.isRenderTargetTexture) {
             console.warn("UniformsUtils: Textures of render targets cannot be cloned via cloneUniforms() or mergeUniforms().");
-            dst[u][p] = null;
+            dst[u][p2] = null;
           } else {
-            dst[u][p] = property.clone();
+            dst[u][p2] = property.clone();
           }
         } else if (Array.isArray(property)) {
-          dst[u][p] = property.slice();
+          dst[u][p2] = property.slice();
         } else {
-          dst[u][p] = property;
+          dst[u][p2] = property;
         }
       }
     }
@@ -18677,8 +19284,8 @@
     const merged = {};
     for (let u = 0; u < uniforms.length; u++) {
       const tmp2 = cloneUniforms(uniforms[u]);
-      for (const p in tmp2) {
-        merged[p] = tmp2[p];
+      for (const p2 in tmp2) {
+        merged[p2] = tmp2[p2];
       }
     }
     return merged;
@@ -19273,24 +19880,24 @@
     projectPoint(point, target) {
       return target.copy(point).addScaledVector(this.normal, -this.distanceToPoint(point));
     }
-    intersectLine(line, target) {
-      const direction = line.delta(_vector1);
+    intersectLine(line2, target) {
+      const direction = line2.delta(_vector1);
       const denominator = this.normal.dot(direction);
       if (denominator === 0) {
-        if (this.distanceToPoint(line.start) === 0) {
-          return target.copy(line.start);
+        if (this.distanceToPoint(line2.start) === 0) {
+          return target.copy(line2.start);
         }
         return null;
       }
-      const t = -(line.start.dot(this.normal) + this.constant) / denominator;
+      const t = -(line2.start.dot(this.normal) + this.constant) / denominator;
       if (t < 0 || t > 1) {
         return null;
       }
-      return target.copy(line.start).addScaledVector(direction, t);
+      return target.copy(line2.start).addScaledVector(direction, t);
     }
-    intersectsLine(line) {
-      const startSign = this.distanceToPoint(line.start);
-      const endSign = this.distanceToPoint(line.end);
+    intersectsLine(line2) {
+      const startSign = this.distanceToPoint(line2.start);
+      const endSign = this.distanceToPoint(line2.end);
       return startSign < 0 && endSign > 0 || endSign < 0 && startSign > 0;
     }
     intersectsBox(box) {
@@ -23032,8 +23639,8 @@
     const from = Math.max(errorLine - 6, 0);
     const to = Math.min(errorLine + 6, lines.length);
     for (let i = from; i < to; i++) {
-      const line = i + 1;
-      lines2.push(`${line === errorLine ? ">" : " "} ${line}: ${lines[i]}`);
+      const line2 = i + 1;
+      lines2.push(`${line2 === errorLine ? ">" : " "} ${line2}: ${lines[i]}`);
     }
     return lines2.join("\n");
   }
@@ -24136,8 +24743,8 @@
     }
     function acquireProgram(parameters, cacheKey) {
       let program;
-      for (let p = 0, pl2 = programs.length; p < pl2; p++) {
-        const preexistingProgram = programs[p];
+      for (let p2 = 0, pl2 = programs.length; p2 < pl2; p2++) {
+        const preexistingProgram = programs[p2];
         if (preexistingProgram.cacheKey === cacheKey) {
           program = preexistingProgram;
           ++program.usedTimes;
@@ -24617,8 +25224,8 @@
       state.ambient[0] = r;
       state.ambient[1] = g;
       state.ambient[2] = b2;
-      const hash5 = state.hash;
-      if (hash5.directionalLength !== directionalLength || hash5.pointLength !== pointLength || hash5.spotLength !== spotLength || hash5.rectAreaLength !== rectAreaLength || hash5.hemiLength !== hemiLength || hash5.numDirectionalShadows !== numDirectionalShadows || hash5.numPointShadows !== numPointShadows || hash5.numSpotShadows !== numSpotShadows || hash5.numSpotMaps !== numSpotMaps || hash5.numLightProbes !== numLightProbes) {
+      const hash6 = state.hash;
+      if (hash6.directionalLength !== directionalLength || hash6.pointLength !== pointLength || hash6.spotLength !== spotLength || hash6.rectAreaLength !== rectAreaLength || hash6.hemiLength !== hemiLength || hash6.numDirectionalShadows !== numDirectionalShadows || hash6.numPointShadows !== numPointShadows || hash6.numSpotShadows !== numSpotShadows || hash6.numSpotMaps !== numSpotMaps || hash6.numLightProbes !== numLightProbes) {
         state.directional.length = directionalLength;
         state.spot.length = spotLength;
         state.rectArea.length = rectAreaLength;
@@ -24636,16 +25243,16 @@
         state.spotLightMap.length = numSpotMaps;
         state.numSpotLightShadowsWithMaps = numSpotShadowsWithMaps;
         state.numLightProbes = numLightProbes;
-        hash5.directionalLength = directionalLength;
-        hash5.pointLength = pointLength;
-        hash5.spotLength = spotLength;
-        hash5.rectAreaLength = rectAreaLength;
-        hash5.hemiLength = hemiLength;
-        hash5.numDirectionalShadows = numDirectionalShadows;
-        hash5.numPointShadows = numPointShadows;
-        hash5.numSpotShadows = numSpotShadows;
-        hash5.numSpotMaps = numSpotMaps;
-        hash5.numLightProbes = numLightProbes;
+        hash6.directionalLength = directionalLength;
+        hash6.pointLength = pointLength;
+        hash6.spotLength = spotLength;
+        hash6.rectAreaLength = rectAreaLength;
+        hash6.hemiLength = hemiLength;
+        hash6.numDirectionalShadows = numDirectionalShadows;
+        hash6.numPointShadows = numPointShadows;
+        hash6.numSpotShadows = numSpotShadows;
+        hash6.numSpotMaps = numSpotMaps;
+        hash6.numLightProbes = numLightProbes;
         state.version = nextVersion++;
       }
     }
@@ -26867,19 +27474,19 @@
   }
   function WebGLUtils(gl, extensions, capabilities) {
     const isWebGL2 = capabilities.isWebGL2;
-    function convert(p, colorSpace = NoColorSpace) {
+    function convert(p2, colorSpace = NoColorSpace) {
       let extension;
       const transfer = ColorManagement.getTransfer(colorSpace);
-      if (p === UnsignedByteType) return gl.UNSIGNED_BYTE;
-      if (p === UnsignedShort4444Type) return gl.UNSIGNED_SHORT_4_4_4_4;
-      if (p === UnsignedShort5551Type) return gl.UNSIGNED_SHORT_5_5_5_1;
-      if (p === ByteType) return gl.BYTE;
-      if (p === ShortType) return gl.SHORT;
-      if (p === UnsignedShortType) return gl.UNSIGNED_SHORT;
-      if (p === IntType) return gl.INT;
-      if (p === UnsignedIntType) return gl.UNSIGNED_INT;
-      if (p === FloatType) return gl.FLOAT;
-      if (p === HalfFloatType) {
+      if (p2 === UnsignedByteType) return gl.UNSIGNED_BYTE;
+      if (p2 === UnsignedShort4444Type) return gl.UNSIGNED_SHORT_4_4_4_4;
+      if (p2 === UnsignedShort5551Type) return gl.UNSIGNED_SHORT_5_5_5_1;
+      if (p2 === ByteType) return gl.BYTE;
+      if (p2 === ShortType) return gl.SHORT;
+      if (p2 === UnsignedShortType) return gl.UNSIGNED_SHORT;
+      if (p2 === IntType) return gl.INT;
+      if (p2 === UnsignedIntType) return gl.UNSIGNED_INT;
+      if (p2 === FloatType) return gl.FLOAT;
+      if (p2 === HalfFloatType) {
         if (isWebGL2) return gl.HALF_FLOAT;
         extension = extensions.get("OES_texture_half_float");
         if (extension !== null) {
@@ -26888,13 +27495,13 @@
           return null;
         }
       }
-      if (p === AlphaFormat) return gl.ALPHA;
-      if (p === RGBAFormat) return gl.RGBA;
-      if (p === LuminanceFormat) return gl.LUMINANCE;
-      if (p === LuminanceAlphaFormat) return gl.LUMINANCE_ALPHA;
-      if (p === DepthFormat) return gl.DEPTH_COMPONENT;
-      if (p === DepthStencilFormat) return gl.DEPTH_STENCIL;
-      if (p === _SRGBAFormat) {
+      if (p2 === AlphaFormat) return gl.ALPHA;
+      if (p2 === RGBAFormat) return gl.RGBA;
+      if (p2 === LuminanceFormat) return gl.LUMINANCE;
+      if (p2 === LuminanceAlphaFormat) return gl.LUMINANCE_ALPHA;
+      if (p2 === DepthFormat) return gl.DEPTH_COMPONENT;
+      if (p2 === DepthStencilFormat) return gl.DEPTH_STENCIL;
+      if (p2 === _SRGBAFormat) {
         extension = extensions.get("EXT_sRGB");
         if (extension !== null) {
           return extension.SRGB_ALPHA_EXT;
@@ -26902,46 +27509,46 @@
           return null;
         }
       }
-      if (p === RedFormat) return gl.RED;
-      if (p === RedIntegerFormat) return gl.RED_INTEGER;
-      if (p === RGFormat) return gl.RG;
-      if (p === RGIntegerFormat) return gl.RG_INTEGER;
-      if (p === RGBAIntegerFormat) return gl.RGBA_INTEGER;
-      if (p === RGB_S3TC_DXT1_Format || p === RGBA_S3TC_DXT1_Format || p === RGBA_S3TC_DXT3_Format || p === RGBA_S3TC_DXT5_Format) {
+      if (p2 === RedFormat) return gl.RED;
+      if (p2 === RedIntegerFormat) return gl.RED_INTEGER;
+      if (p2 === RGFormat) return gl.RG;
+      if (p2 === RGIntegerFormat) return gl.RG_INTEGER;
+      if (p2 === RGBAIntegerFormat) return gl.RGBA_INTEGER;
+      if (p2 === RGB_S3TC_DXT1_Format || p2 === RGBA_S3TC_DXT1_Format || p2 === RGBA_S3TC_DXT3_Format || p2 === RGBA_S3TC_DXT5_Format) {
         if (transfer === SRGBTransfer) {
           extension = extensions.get("WEBGL_compressed_texture_s3tc_srgb");
           if (extension !== null) {
-            if (p === RGB_S3TC_DXT1_Format) return extension.COMPRESSED_SRGB_S3TC_DXT1_EXT;
-            if (p === RGBA_S3TC_DXT1_Format) return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-            if (p === RGBA_S3TC_DXT3_Format) return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-            if (p === RGBA_S3TC_DXT5_Format) return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+            if (p2 === RGB_S3TC_DXT1_Format) return extension.COMPRESSED_SRGB_S3TC_DXT1_EXT;
+            if (p2 === RGBA_S3TC_DXT1_Format) return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+            if (p2 === RGBA_S3TC_DXT3_Format) return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+            if (p2 === RGBA_S3TC_DXT5_Format) return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
           } else {
             return null;
           }
         } else {
           extension = extensions.get("WEBGL_compressed_texture_s3tc");
           if (extension !== null) {
-            if (p === RGB_S3TC_DXT1_Format) return extension.COMPRESSED_RGB_S3TC_DXT1_EXT;
-            if (p === RGBA_S3TC_DXT1_Format) return extension.COMPRESSED_RGBA_S3TC_DXT1_EXT;
-            if (p === RGBA_S3TC_DXT3_Format) return extension.COMPRESSED_RGBA_S3TC_DXT3_EXT;
-            if (p === RGBA_S3TC_DXT5_Format) return extension.COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            if (p2 === RGB_S3TC_DXT1_Format) return extension.COMPRESSED_RGB_S3TC_DXT1_EXT;
+            if (p2 === RGBA_S3TC_DXT1_Format) return extension.COMPRESSED_RGBA_S3TC_DXT1_EXT;
+            if (p2 === RGBA_S3TC_DXT3_Format) return extension.COMPRESSED_RGBA_S3TC_DXT3_EXT;
+            if (p2 === RGBA_S3TC_DXT5_Format) return extension.COMPRESSED_RGBA_S3TC_DXT5_EXT;
           } else {
             return null;
           }
         }
       }
-      if (p === RGB_PVRTC_4BPPV1_Format || p === RGB_PVRTC_2BPPV1_Format || p === RGBA_PVRTC_4BPPV1_Format || p === RGBA_PVRTC_2BPPV1_Format) {
+      if (p2 === RGB_PVRTC_4BPPV1_Format || p2 === RGB_PVRTC_2BPPV1_Format || p2 === RGBA_PVRTC_4BPPV1_Format || p2 === RGBA_PVRTC_2BPPV1_Format) {
         extension = extensions.get("WEBGL_compressed_texture_pvrtc");
         if (extension !== null) {
-          if (p === RGB_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-          if (p === RGB_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
-          if (p === RGBA_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
-          if (p === RGBA_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+          if (p2 === RGB_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+          if (p2 === RGB_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+          if (p2 === RGBA_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+          if (p2 === RGBA_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
         } else {
           return null;
         }
       }
-      if (p === RGB_ETC1_Format) {
+      if (p2 === RGB_ETC1_Format) {
         extension = extensions.get("WEBGL_compressed_texture_etc1");
         if (extension !== null) {
           return extension.COMPRESSED_RGB_ETC1_WEBGL;
@@ -26949,58 +27556,58 @@
           return null;
         }
       }
-      if (p === RGB_ETC2_Format || p === RGBA_ETC2_EAC_Format) {
+      if (p2 === RGB_ETC2_Format || p2 === RGBA_ETC2_EAC_Format) {
         extension = extensions.get("WEBGL_compressed_texture_etc");
         if (extension !== null) {
-          if (p === RGB_ETC2_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ETC2 : extension.COMPRESSED_RGB8_ETC2;
-          if (p === RGBA_ETC2_EAC_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC : extension.COMPRESSED_RGBA8_ETC2_EAC;
+          if (p2 === RGB_ETC2_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ETC2 : extension.COMPRESSED_RGB8_ETC2;
+          if (p2 === RGBA_ETC2_EAC_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC : extension.COMPRESSED_RGBA8_ETC2_EAC;
         } else {
           return null;
         }
       }
-      if (p === RGBA_ASTC_4x4_Format || p === RGBA_ASTC_5x4_Format || p === RGBA_ASTC_5x5_Format || p === RGBA_ASTC_6x5_Format || p === RGBA_ASTC_6x6_Format || p === RGBA_ASTC_8x5_Format || p === RGBA_ASTC_8x6_Format || p === RGBA_ASTC_8x8_Format || p === RGBA_ASTC_10x5_Format || p === RGBA_ASTC_10x6_Format || p === RGBA_ASTC_10x8_Format || p === RGBA_ASTC_10x10_Format || p === RGBA_ASTC_12x10_Format || p === RGBA_ASTC_12x12_Format) {
+      if (p2 === RGBA_ASTC_4x4_Format || p2 === RGBA_ASTC_5x4_Format || p2 === RGBA_ASTC_5x5_Format || p2 === RGBA_ASTC_6x5_Format || p2 === RGBA_ASTC_6x6_Format || p2 === RGBA_ASTC_8x5_Format || p2 === RGBA_ASTC_8x6_Format || p2 === RGBA_ASTC_8x8_Format || p2 === RGBA_ASTC_10x5_Format || p2 === RGBA_ASTC_10x6_Format || p2 === RGBA_ASTC_10x8_Format || p2 === RGBA_ASTC_10x10_Format || p2 === RGBA_ASTC_12x10_Format || p2 === RGBA_ASTC_12x12_Format) {
         extension = extensions.get("WEBGL_compressed_texture_astc");
         if (extension !== null) {
-          if (p === RGBA_ASTC_4x4_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR : extension.COMPRESSED_RGBA_ASTC_4x4_KHR;
-          if (p === RGBA_ASTC_5x4_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR : extension.COMPRESSED_RGBA_ASTC_5x4_KHR;
-          if (p === RGBA_ASTC_5x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR : extension.COMPRESSED_RGBA_ASTC_5x5_KHR;
-          if (p === RGBA_ASTC_6x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR : extension.COMPRESSED_RGBA_ASTC_6x5_KHR;
-          if (p === RGBA_ASTC_6x6_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR : extension.COMPRESSED_RGBA_ASTC_6x6_KHR;
-          if (p === RGBA_ASTC_8x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR : extension.COMPRESSED_RGBA_ASTC_8x5_KHR;
-          if (p === RGBA_ASTC_8x6_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR : extension.COMPRESSED_RGBA_ASTC_8x6_KHR;
-          if (p === RGBA_ASTC_8x8_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR : extension.COMPRESSED_RGBA_ASTC_8x8_KHR;
-          if (p === RGBA_ASTC_10x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR : extension.COMPRESSED_RGBA_ASTC_10x5_KHR;
-          if (p === RGBA_ASTC_10x6_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR : extension.COMPRESSED_RGBA_ASTC_10x6_KHR;
-          if (p === RGBA_ASTC_10x8_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR : extension.COMPRESSED_RGBA_ASTC_10x8_KHR;
-          if (p === RGBA_ASTC_10x10_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR : extension.COMPRESSED_RGBA_ASTC_10x10_KHR;
-          if (p === RGBA_ASTC_12x10_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR : extension.COMPRESSED_RGBA_ASTC_12x10_KHR;
-          if (p === RGBA_ASTC_12x12_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR : extension.COMPRESSED_RGBA_ASTC_12x12_KHR;
+          if (p2 === RGBA_ASTC_4x4_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR : extension.COMPRESSED_RGBA_ASTC_4x4_KHR;
+          if (p2 === RGBA_ASTC_5x4_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR : extension.COMPRESSED_RGBA_ASTC_5x4_KHR;
+          if (p2 === RGBA_ASTC_5x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR : extension.COMPRESSED_RGBA_ASTC_5x5_KHR;
+          if (p2 === RGBA_ASTC_6x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR : extension.COMPRESSED_RGBA_ASTC_6x5_KHR;
+          if (p2 === RGBA_ASTC_6x6_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR : extension.COMPRESSED_RGBA_ASTC_6x6_KHR;
+          if (p2 === RGBA_ASTC_8x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR : extension.COMPRESSED_RGBA_ASTC_8x5_KHR;
+          if (p2 === RGBA_ASTC_8x6_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR : extension.COMPRESSED_RGBA_ASTC_8x6_KHR;
+          if (p2 === RGBA_ASTC_8x8_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR : extension.COMPRESSED_RGBA_ASTC_8x8_KHR;
+          if (p2 === RGBA_ASTC_10x5_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR : extension.COMPRESSED_RGBA_ASTC_10x5_KHR;
+          if (p2 === RGBA_ASTC_10x6_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR : extension.COMPRESSED_RGBA_ASTC_10x6_KHR;
+          if (p2 === RGBA_ASTC_10x8_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR : extension.COMPRESSED_RGBA_ASTC_10x8_KHR;
+          if (p2 === RGBA_ASTC_10x10_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR : extension.COMPRESSED_RGBA_ASTC_10x10_KHR;
+          if (p2 === RGBA_ASTC_12x10_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR : extension.COMPRESSED_RGBA_ASTC_12x10_KHR;
+          if (p2 === RGBA_ASTC_12x12_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR : extension.COMPRESSED_RGBA_ASTC_12x12_KHR;
         } else {
           return null;
         }
       }
-      if (p === RGBA_BPTC_Format || p === RGB_BPTC_SIGNED_Format || p === RGB_BPTC_UNSIGNED_Format) {
+      if (p2 === RGBA_BPTC_Format || p2 === RGB_BPTC_SIGNED_Format || p2 === RGB_BPTC_UNSIGNED_Format) {
         extension = extensions.get("EXT_texture_compression_bptc");
         if (extension !== null) {
-          if (p === RGBA_BPTC_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT : extension.COMPRESSED_RGBA_BPTC_UNORM_EXT;
-          if (p === RGB_BPTC_SIGNED_Format) return extension.COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT;
-          if (p === RGB_BPTC_UNSIGNED_Format) return extension.COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT;
+          if (p2 === RGBA_BPTC_Format) return transfer === SRGBTransfer ? extension.COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT : extension.COMPRESSED_RGBA_BPTC_UNORM_EXT;
+          if (p2 === RGB_BPTC_SIGNED_Format) return extension.COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT;
+          if (p2 === RGB_BPTC_UNSIGNED_Format) return extension.COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT;
         } else {
           return null;
         }
       }
-      if (p === RED_RGTC1_Format || p === SIGNED_RED_RGTC1_Format || p === RED_GREEN_RGTC2_Format || p === SIGNED_RED_GREEN_RGTC2_Format) {
+      if (p2 === RED_RGTC1_Format || p2 === SIGNED_RED_RGTC1_Format || p2 === RED_GREEN_RGTC2_Format || p2 === SIGNED_RED_GREEN_RGTC2_Format) {
         extension = extensions.get("EXT_texture_compression_rgtc");
         if (extension !== null) {
-          if (p === RGBA_BPTC_Format) return extension.COMPRESSED_RED_RGTC1_EXT;
-          if (p === SIGNED_RED_RGTC1_Format) return extension.COMPRESSED_SIGNED_RED_RGTC1_EXT;
-          if (p === RED_GREEN_RGTC2_Format) return extension.COMPRESSED_RED_GREEN_RGTC2_EXT;
-          if (p === SIGNED_RED_GREEN_RGTC2_Format) return extension.COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT;
+          if (p2 === RGBA_BPTC_Format) return extension.COMPRESSED_RED_RGTC1_EXT;
+          if (p2 === SIGNED_RED_RGTC1_Format) return extension.COMPRESSED_SIGNED_RED_RGTC1_EXT;
+          if (p2 === RED_GREEN_RGTC2_Format) return extension.COMPRESSED_RED_GREEN_RGTC2_EXT;
+          if (p2 === SIGNED_RED_GREEN_RGTC2_Format) return extension.COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT;
         } else {
           return null;
         }
       }
-      if (p === UnsignedInt248Type) {
+      if (p2 === UnsignedInt248Type) {
         if (isWebGL2) return gl.UNSIGNED_INT_24_8;
         extension = extensions.get("WEBGL_depth_texture");
         if (extension !== null) {
@@ -27009,7 +27616,7 @@
           return null;
         }
       }
-      return gl[p] !== void 0 ? gl[p] : null;
+      return gl[p2] !== void 0 ? gl[p2] : null;
     }
     return { convert };
   }
@@ -31449,8 +32056,8 @@
       let current, last = this.getPoint(0);
       let sum2 = 0;
       cache2.push(0);
-      for (let p = 1; p <= divisions; p++) {
-        current = this.getPoint(p / divisions);
+      for (let p2 = 1; p2 <= divisions; p2++) {
+        current = this.getPoint(p2 / divisions);
         sum2 += current.distanceTo(last);
         cache2.push(sum2);
         last = current;
@@ -31736,9 +32343,9 @@
       const point = optionalTarget;
       const points = this.points;
       const l = points.length;
-      const p = (l - (this.closed ? 0 : 1)) * t;
-      let intPoint = Math.floor(p);
-      let weight = p - intPoint;
+      const p2 = (l - (this.closed ? 0 : 1)) * t;
+      let intPoint = Math.floor(p2);
+      let weight = p2 - intPoint;
       if (this.closed) {
         intPoint += intPoint > 0 ? 0 : (Math.floor(Math.abs(intPoint) / l) + 1) * l;
       } else if (weight === 0 && intPoint === l - 1) {
@@ -31753,7 +32360,7 @@
         p0 = tmp;
       }
       const p1 = points[intPoint % l];
-      const p2 = points[(intPoint + 1) % l];
+      const p22 = points[(intPoint + 1) % l];
       if (this.closed || intPoint + 2 < l) {
         p3 = points[(intPoint + 2) % l];
       } else {
@@ -31763,18 +32370,18 @@
       if (this.curveType === "centripetal" || this.curveType === "chordal") {
         const pow = this.curveType === "chordal" ? 0.5 : 0.25;
         let dt0 = Math.pow(p0.distanceToSquared(p1), pow);
-        let dt1 = Math.pow(p1.distanceToSquared(p2), pow);
-        let dt2 = Math.pow(p2.distanceToSquared(p3), pow);
+        let dt1 = Math.pow(p1.distanceToSquared(p22), pow);
+        let dt2 = Math.pow(p22.distanceToSquared(p3), pow);
         if (dt1 < 1e-4) dt1 = 1;
         if (dt0 < 1e-4) dt0 = dt1;
         if (dt2 < 1e-4) dt2 = dt1;
-        px.initNonuniformCatmullRom(p0.x, p1.x, p2.x, p3.x, dt0, dt1, dt2);
-        py.initNonuniformCatmullRom(p0.y, p1.y, p2.y, p3.y, dt0, dt1, dt2);
-        pz2.initNonuniformCatmullRom(p0.z, p1.z, p2.z, p3.z, dt0, dt1, dt2);
+        px.initNonuniformCatmullRom(p0.x, p1.x, p22.x, p3.x, dt0, dt1, dt2);
+        py.initNonuniformCatmullRom(p0.y, p1.y, p22.y, p3.y, dt0, dt1, dt2);
+        pz2.initNonuniformCatmullRom(p0.z, p1.z, p22.z, p3.z, dt0, dt1, dt2);
       } else if (this.curveType === "catmullrom") {
-        px.initCatmullRom(p0.x, p1.x, p2.x, p3.x, this.tension);
-        py.initCatmullRom(p0.y, p1.y, p2.y, p3.y, this.tension);
-        pz2.initCatmullRom(p0.z, p1.z, p2.z, p3.z, this.tension);
+        px.initCatmullRom(p0.x, p1.x, p22.x, p3.x, this.tension);
+        py.initCatmullRom(p0.y, p1.y, p22.y, p3.y, this.tension);
+        pz2.initCatmullRom(p0.z, p1.z, p22.z, p3.z, this.tension);
       }
       point.set(
         px.calc(weight),
@@ -31827,32 +32434,32 @@
     const t3 = t * t2;
     return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
   }
-  function QuadraticBezierP0(t, p) {
+  function QuadraticBezierP0(t, p2) {
     const k = 1 - t;
-    return k * k * p;
+    return k * k * p2;
   }
-  function QuadraticBezierP1(t, p) {
-    return 2 * (1 - t) * t * p;
+  function QuadraticBezierP1(t, p2) {
+    return 2 * (1 - t) * t * p2;
   }
-  function QuadraticBezierP2(t, p) {
-    return t * t * p;
+  function QuadraticBezierP2(t, p2) {
+    return t * t * p2;
   }
   function QuadraticBezier(t, p0, p1, p2) {
     return QuadraticBezierP0(t, p0) + QuadraticBezierP1(t, p1) + QuadraticBezierP2(t, p2);
   }
-  function CubicBezierP0(t, p) {
+  function CubicBezierP0(t, p2) {
     const k = 1 - t;
-    return k * k * k * p;
+    return k * k * k * p2;
   }
-  function CubicBezierP1(t, p) {
+  function CubicBezierP1(t, p2) {
     const k = 1 - t;
-    return 3 * k * k * t * p;
+    return 3 * k * k * t * p2;
   }
-  function CubicBezierP2(t, p) {
-    return 3 * (1 - t) * t * t * p;
+  function CubicBezierP2(t, p2) {
+    return 3 * (1 - t) * t * t * p2;
   }
-  function CubicBezierP3(t, p) {
-    return t * t * t * p;
+  function CubicBezierP3(t, p2) {
+    return t * t * t * p2;
   }
   function CubicBezier(t, p0, p1, p2, p3) {
     return CubicBezierP0(t, p0) + CubicBezierP1(t, p1) + CubicBezierP2(t, p2) + CubicBezierP3(t, p3);
@@ -32131,16 +32738,16 @@
     getPoint(t, optionalTarget = new Vector2()) {
       const point = optionalTarget;
       const points = this.points;
-      const p = (points.length - 1) * t;
-      const intPoint = Math.floor(p);
-      const weight = p - intPoint;
+      const p2 = (points.length - 1) * t;
+      const intPoint = Math.floor(p2);
+      const weight = p2 - intPoint;
       const p0 = points[intPoint === 0 ? intPoint : intPoint - 1];
       const p1 = points[intPoint];
-      const p2 = points[intPoint > points.length - 2 ? points.length - 1 : intPoint + 1];
+      const p22 = points[intPoint > points.length - 2 ? points.length - 1 : intPoint + 1];
       const p3 = points[intPoint > points.length - 3 ? points.length - 1 : intPoint + 2];
       point.set(
-        CatmullRom(weight, p0.x, p1.x, p2.x, p3.x),
-        CatmullRom(weight, p0.y, p1.y, p2.y, p3.y)
+        CatmullRom(weight, p0.x, p1.x, p22.x, p3.x),
+        CatmullRom(weight, p0.y, p1.y, p22.y, p3.y)
       );
       return point;
     }
@@ -33128,7 +33735,7 @@
             const vecHash1 = hashes[jNext];
             const v0 = _triangle[vertKeys[j]];
             const v1 = _triangle[vertKeys[jNext]];
-            const hash5 = `${vecHash0}_${vecHash1}`;
+            const hash6 = `${vecHash0}_${vecHash1}`;
             const reverseHash = `${vecHash1}_${vecHash0}`;
             if (reverseHash in edgeData && edgeData[reverseHash]) {
               if (_normal.dot(edgeData[reverseHash].normal) <= thresholdDot) {
@@ -33136,8 +33743,8 @@
                 vertices.push(v1.x, v1.y, v1.z);
               }
               edgeData[reverseHash] = null;
-            } else if (!(hash5 in edgeData)) {
-              edgeData[hash5] = {
+            } else if (!(hash6 in edgeData)) {
+              edgeData[hash6] = {
                 index0: indexArr[j],
                 index1: indexArr[jNext],
                 normal: _normal.clone()
@@ -33257,18 +33864,18 @@
   function filterPoints(start, end) {
     if (!start) return start;
     if (!end) end = start;
-    let p = start, again;
+    let p2 = start, again;
     do {
       again = false;
-      if (!p.steiner && (equals(p, p.next) || area(p.prev, p, p.next) === 0)) {
-        removeNode(p);
-        p = end = p.prev;
-        if (p === p.next) break;
+      if (!p2.steiner && (equals(p2, p2.next) || area(p2.prev, p2, p2.next) === 0)) {
+        removeNode(p2);
+        p2 = end = p2.prev;
+        if (p2 === p2.next) break;
         again = true;
       } else {
-        p = p.next;
+        p2 = p2.next;
       }
-    } while (again || p !== end);
+    } while (again || p2 !== end);
     return end;
   }
   function earcutLinked(ear, triangles, dim, minX, minY, invSize, pass) {
@@ -33306,10 +33913,10 @@
     if (area(a, b2, c) >= 0) return false;
     const ax = a.x, bx = b2.x, cx = c.x, ay = a.y, by = b2.y, cy = c.y;
     const x0 = ax < bx ? ax < cx ? ax : cx : bx < cx ? bx : cx, y0 = ay < by ? ay < cy ? ay : cy : by < cy ? by : cy, x1 = ax > bx ? ax > cx ? ax : cx : bx > cx ? bx : cx, y1 = ay > by ? ay > cy ? ay : cy : by > cy ? by : cy;
-    let p = c.next;
-    while (p !== a) {
-      if (p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1 && pointInTriangle(ax, ay, bx, by, cx, cy, p.x, p.y) && area(p.prev, p, p.next) >= 0) return false;
-      p = p.next;
+    let p2 = c.next;
+    while (p2 !== a) {
+      if (p2.x >= x0 && p2.x <= x1 && p2.y >= y0 && p2.y <= y1 && pointInTriangle(ax, ay, bx, by, cx, cy, p2.x, p2.y) && area(p2.prev, p2, p2.next) >= 0) return false;
+      p2 = p2.next;
     }
     return true;
   }
@@ -33319,16 +33926,16 @@
     const ax = a.x, bx = b2.x, cx = c.x, ay = a.y, by = b2.y, cy = c.y;
     const x0 = ax < bx ? ax < cx ? ax : cx : bx < cx ? bx : cx, y0 = ay < by ? ay < cy ? ay : cy : by < cy ? by : cy, x1 = ax > bx ? ax > cx ? ax : cx : bx > cx ? bx : cx, y1 = ay > by ? ay > cy ? ay : cy : by > cy ? by : cy;
     const minZ = zOrder(x0, y0, minX, minY, invSize), maxZ = zOrder(x1, y1, minX, minY, invSize);
-    let p = ear.prevZ, n = ear.nextZ;
-    while (p && p.z >= minZ && n && n.z <= maxZ) {
-      if (p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1 && p !== a && p !== c && pointInTriangle(ax, ay, bx, by, cx, cy, p.x, p.y) && area(p.prev, p, p.next) >= 0) return false;
-      p = p.prevZ;
+    let p2 = ear.prevZ, n = ear.nextZ;
+    while (p2 && p2.z >= minZ && n && n.z <= maxZ) {
+      if (p2.x >= x0 && p2.x <= x1 && p2.y >= y0 && p2.y <= y1 && p2 !== a && p2 !== c && pointInTriangle(ax, ay, bx, by, cx, cy, p2.x, p2.y) && area(p2.prev, p2, p2.next) >= 0) return false;
+      p2 = p2.prevZ;
       if (n.x >= x0 && n.x <= x1 && n.y >= y0 && n.y <= y1 && n !== a && n !== c && pointInTriangle(ax, ay, bx, by, cx, cy, n.x, n.y) && area(n.prev, n, n.next) >= 0) return false;
       n = n.nextZ;
     }
-    while (p && p.z >= minZ) {
-      if (p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1 && p !== a && p !== c && pointInTriangle(ax, ay, bx, by, cx, cy, p.x, p.y) && area(p.prev, p, p.next) >= 0) return false;
-      p = p.prevZ;
+    while (p2 && p2.z >= minZ) {
+      if (p2.x >= x0 && p2.x <= x1 && p2.y >= y0 && p2.y <= y1 && p2 !== a && p2 !== c && pointInTriangle(ax, ay, bx, by, cx, cy, p2.x, p2.y) && area(p2.prev, p2, p2.next) >= 0) return false;
+      p2 = p2.prevZ;
     }
     while (n && n.z <= maxZ) {
       if (n.x >= x0 && n.x <= x1 && n.y >= y0 && n.y <= y1 && n !== a && n !== c && pointInTriangle(ax, ay, bx, by, cx, cy, n.x, n.y) && area(n.prev, n, n.next) >= 0) return false;
@@ -33337,20 +33944,20 @@
     return true;
   }
   function cureLocalIntersections(start, triangles, dim) {
-    let p = start;
+    let p2 = start;
     do {
-      const a = p.prev, b2 = p.next.next;
-      if (!equals(a, b2) && intersects(a, p, p.next, b2) && locallyInside(a, b2) && locallyInside(b2, a)) {
+      const a = p2.prev, b2 = p2.next.next;
+      if (!equals(a, b2) && intersects(a, p2, p2.next, b2) && locallyInside(a, b2) && locallyInside(b2, a)) {
         triangles.push(a.i / dim | 0);
-        triangles.push(p.i / dim | 0);
+        triangles.push(p2.i / dim | 0);
         triangles.push(b2.i / dim | 0);
-        removeNode(p);
-        removeNode(p.next);
-        p = start = b2;
+        removeNode(p2);
+        removeNode(p2.next);
+        p2 = start = b2;
       }
-      p = p.next;
-    } while (p !== start);
-    return filterPoints(p);
+      p2 = p2.next;
+    } while (p2 !== start);
+    return filterPoints(p2);
   }
   function splitEarcut(start, triangles, dim, minX, minY, invSize) {
     let a = start;
@@ -33399,60 +34006,60 @@
     return filterPoints(bridge, bridge.next);
   }
   function findHoleBridge(hole, outerNode) {
-    let p = outerNode, qx = -Infinity, m;
+    let p2 = outerNode, qx = -Infinity, m;
     const hx = hole.x, hy = hole.y;
     do {
-      if (hy <= p.y && hy >= p.next.y && p.next.y !== p.y) {
-        const x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
+      if (hy <= p2.y && hy >= p2.next.y && p2.next.y !== p2.y) {
+        const x = p2.x + (hy - p2.y) * (p2.next.x - p2.x) / (p2.next.y - p2.y);
         if (x <= hx && x > qx) {
           qx = x;
-          m = p.x < p.next.x ? p : p.next;
+          m = p2.x < p2.next.x ? p2 : p2.next;
           if (x === hx) return m;
         }
       }
-      p = p.next;
-    } while (p !== outerNode);
+      p2 = p2.next;
+    } while (p2 !== outerNode);
     if (!m) return null;
     const stop = m, mx = m.x, my = m.y;
     let tanMin = Infinity, tan;
-    p = m;
+    p2 = m;
     do {
-      if (hx >= p.x && p.x >= mx && hx !== p.x && pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
-        tan = Math.abs(hy - p.y) / (hx - p.x);
-        if (locallyInside(p, hole) && (tan < tanMin || tan === tanMin && (p.x > m.x || p.x === m.x && sectorContainsSector(m, p)))) {
-          m = p;
+      if (hx >= p2.x && p2.x >= mx && hx !== p2.x && pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p2.x, p2.y)) {
+        tan = Math.abs(hy - p2.y) / (hx - p2.x);
+        if (locallyInside(p2, hole) && (tan < tanMin || tan === tanMin && (p2.x > m.x || p2.x === m.x && sectorContainsSector(m, p2)))) {
+          m = p2;
           tanMin = tan;
         }
       }
-      p = p.next;
-    } while (p !== stop);
+      p2 = p2.next;
+    } while (p2 !== stop);
     return m;
   }
-  function sectorContainsSector(m, p) {
-    return area(m.prev, m, p.prev) < 0 && area(p.next, m, m.next) < 0;
+  function sectorContainsSector(m, p2) {
+    return area(m.prev, m, p2.prev) < 0 && area(p2.next, m, m.next) < 0;
   }
   function indexCurve(start, minX, minY, invSize) {
-    let p = start;
+    let p2 = start;
     do {
-      if (p.z === 0) p.z = zOrder(p.x, p.y, minX, minY, invSize);
-      p.prevZ = p.prev;
-      p.nextZ = p.next;
-      p = p.next;
-    } while (p !== start);
-    p.prevZ.nextZ = null;
-    p.prevZ = null;
-    sortLinked(p);
+      if (p2.z === 0) p2.z = zOrder(p2.x, p2.y, minX, minY, invSize);
+      p2.prevZ = p2.prev;
+      p2.nextZ = p2.next;
+      p2 = p2.next;
+    } while (p2 !== start);
+    p2.prevZ.nextZ = null;
+    p2.prevZ = null;
+    sortLinked(p2);
   }
   function sortLinked(list) {
-    let i, p, q2, e, tail, numMerges, pSize, qSize, inSize = 1;
+    let i, p2, q2, e, tail, numMerges, pSize, qSize, inSize = 1;
     do {
-      p = list;
+      p2 = list;
       list = null;
       tail = null;
       numMerges = 0;
-      while (p) {
+      while (p2) {
         numMerges++;
-        q2 = p;
+        q2 = p2;
         pSize = 0;
         for (i = 0; i < inSize; i++) {
           pSize++;
@@ -33461,9 +34068,9 @@
         }
         qSize = inSize;
         while (pSize > 0 || qSize > 0 && q2) {
-          if (pSize !== 0 && (qSize === 0 || !q2 || p.z <= q2.z)) {
-            e = p;
-            p = p.nextZ;
+          if (pSize !== 0 && (qSize === 0 || !q2 || p2.z <= q2.z)) {
+            e = p2;
+            p2 = p2.nextZ;
             pSize--;
           } else {
             e = q2;
@@ -33475,7 +34082,7 @@
           e.prevZ = tail;
           tail = e;
         }
-        p = q2;
+        p2 = q2;
       }
       tail.nextZ = null;
       inSize *= 2;
@@ -33496,11 +34103,11 @@
     return x | y << 1;
   }
   function getLeftmost(start) {
-    let p = start, leftmost = start;
+    let p2 = start, leftmost = start;
     do {
-      if (p.x < leftmost.x || p.x === leftmost.x && p.y < leftmost.y) leftmost = p;
-      p = p.next;
-    } while (p !== start);
+      if (p2.x < leftmost.x || p2.x === leftmost.x && p2.y < leftmost.y) leftmost = p2;
+      p2 = p2.next;
+    } while (p2 !== start);
     return leftmost;
   }
   function pointInTriangle(ax, ay, bx, by, cx, cy, px2, py2) {
@@ -33512,8 +34119,8 @@
     (area(a.prev, a, b2.prev) || area(a, b2.prev, b2)) || // does not create opposite-facing sectors
     equals(a, b2) && area(a.prev, a, a.next) > 0 && area(b2.prev, b2, b2.next) > 0);
   }
-  function area(p, q2, r) {
-    return (q2.y - p.y) * (r.x - q2.x) - (q2.x - p.x) * (r.y - q2.y);
+  function area(p2, q2, r) {
+    return (q2.y - p2.y) * (r.x - q2.x) - (q2.x - p2.x) * (r.y - q2.y);
   }
   function equals(p1, p2) {
     return p1.x === p2.x && p1.y === p2.y;
@@ -33530,31 +34137,31 @@
     if (o4 === 0 && onSegment(p2, q1, q2)) return true;
     return false;
   }
-  function onSegment(p, q2, r) {
-    return q2.x <= Math.max(p.x, r.x) && q2.x >= Math.min(p.x, r.x) && q2.y <= Math.max(p.y, r.y) && q2.y >= Math.min(p.y, r.y);
+  function onSegment(p2, q2, r) {
+    return q2.x <= Math.max(p2.x, r.x) && q2.x >= Math.min(p2.x, r.x) && q2.y <= Math.max(p2.y, r.y) && q2.y >= Math.min(p2.y, r.y);
   }
   function sign(num2) {
     return num2 > 0 ? 1 : num2 < 0 ? -1 : 0;
   }
   function intersectsPolygon(a, b2) {
-    let p = a;
+    let p2 = a;
     do {
-      if (p.i !== a.i && p.next.i !== a.i && p.i !== b2.i && p.next.i !== b2.i && intersects(p, p.next, a, b2)) return true;
-      p = p.next;
-    } while (p !== a);
+      if (p2.i !== a.i && p2.next.i !== a.i && p2.i !== b2.i && p2.next.i !== b2.i && intersects(p2, p2.next, a, b2)) return true;
+      p2 = p2.next;
+    } while (p2 !== a);
     return false;
   }
   function locallyInside(a, b2) {
     return area(a.prev, a, a.next) < 0 ? area(a, b2, a.next) >= 0 && area(a, a.prev, b2) >= 0 : area(a, b2, a.prev) < 0 || area(a, a.next, b2) < 0;
   }
   function middleInside(a, b2) {
-    let p = a, inside = false;
+    let p2 = a, inside = false;
     const px2 = (a.x + b2.x) / 2, py2 = (a.y + b2.y) / 2;
     do {
-      if (p.y > py2 !== p.next.y > py2 && p.next.y !== p.y && px2 < (p.next.x - p.x) * (py2 - p.y) / (p.next.y - p.y) + p.x)
+      if (p2.y > py2 !== p2.next.y > py2 && p2.next.y !== p2.y && px2 < (p2.next.x - p2.x) * (py2 - p2.y) / (p2.next.y - p2.y) + p2.x)
         inside = !inside;
-      p = p.next;
-    } while (p !== a);
+      p2 = p2.next;
+    } while (p2 !== a);
     return inside;
   }
   function splitPolygon(a, b2) {
@@ -33570,23 +34177,23 @@
     return b22;
   }
   function insertNode(i, x, y, last) {
-    const p = new Node(i, x, y);
+    const p2 = new Node(i, x, y);
     if (!last) {
-      p.prev = p;
-      p.next = p;
+      p2.prev = p2;
+      p2.next = p2;
     } else {
-      p.next = last.next;
-      p.prev = last;
-      last.next.prev = p;
-      last.next = p;
+      p2.next = last.next;
+      p2.prev = last;
+      last.next.prev = p2;
+      last.next = p2;
     }
-    return p;
+    return p2;
   }
-  function removeNode(p) {
-    p.next.prev = p.prev;
-    p.prev.next = p.next;
-    if (p.prevZ) p.prevZ.nextZ = p.nextZ;
-    if (p.nextZ) p.nextZ.prevZ = p.prevZ;
+  function removeNode(p2) {
+    p2.next.prev = p2.prev;
+    p2.prev.next = p2.next;
+    if (p2.prevZ) p2.prevZ.nextZ = p2.nextZ;
+    if (p2.nextZ) p2.nextZ.prevZ = p2.prevZ;
   }
   function Node(i, x, y) {
     this.i = i;
@@ -33612,8 +34219,8 @@
     static area(contour) {
       const n = contour.length;
       let a = 0;
-      for (let p = n - 1, q2 = 0; q2 < n; p = q2++) {
-        a += contour[p].x * contour[q2].y - contour[q2].x * contour[p].y;
+      for (let p2 = n - 1, q2 = 0; q2 < n; p2 = q2++) {
+        a += contour[p2].x * contour[q2].y - contour[q2].x * contour[p2].y;
       }
       return a * 0.5;
     }
@@ -34536,7 +35143,7 @@
     }
   };
   var TorusKnotGeometry = class _TorusKnotGeometry extends BufferGeometry {
-    constructor(radius = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p = 2, q2 = 3) {
+    constructor(radius = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p2 = 2, q2 = 3) {
       super();
       this.type = "TorusKnotGeometry";
       this.parameters = {
@@ -34544,7 +35151,7 @@
         tube,
         tubularSegments,
         radialSegments,
-        p,
+        p: p2,
         q: q2
       };
       tubularSegments = Math.floor(tubularSegments);
@@ -34561,9 +35168,9 @@
       const T = new Vector3();
       const N = new Vector3();
       for (let i = 0; i <= tubularSegments; ++i) {
-        const u = i / tubularSegments * p * Math.PI * 2;
-        calculatePositionOnCurve(u, p, q2, radius, P1);
-        calculatePositionOnCurve(u + 0.01, p, q2, radius, P2);
+        const u = i / tubularSegments * p2 * Math.PI * 2;
+        calculatePositionOnCurve(u, p2, q2, radius, P1);
+        calculatePositionOnCurve(u + 0.01, p2, q2, radius, P2);
         T.subVectors(P2, P1);
         N.addVectors(P2, P1);
         B2.crossVectors(T, N);
@@ -34598,10 +35205,10 @@
       this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
       this.setAttribute("normal", new Float32BufferAttribute(normals, 3));
       this.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
-      function calculatePositionOnCurve(u, p2, q3, radius2, position) {
+      function calculatePositionOnCurve(u, p3, q3, radius2, position) {
         const cu = Math.cos(u);
         const su = Math.sin(u);
-        const quOverP = q3 / p2 * u;
+        const quOverP = q3 / p3 * u;
         const cs = Math.cos(quOverP);
         position.x = radius2 * (2 + cs) * 0.5 * cu;
         position.y = radius2 * (2 + cs) * su * 0.5;
@@ -35671,10 +36278,10 @@
       this._offsetNext = iNext * stride;
     }
     interpolate_(i1, t0, t, t1) {
-      const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, o1 = i1 * stride, o0 = o1 - stride, oP = this._offsetPrev, oN = this._offsetNext, wP = this._weightPrev, wN = this._weightNext, p = (t - t0) / (t1 - t0), pp = p * p, ppp = pp * p;
-      const sP = -wP * ppp + 2 * wP * pp - wP * p;
-      const s0 = (1 + wP) * ppp + (-1.5 - 2 * wP) * pp + (-0.5 + wP) * p + 1;
-      const s1 = (-1 - wN) * ppp + (1.5 + wN) * pp + 0.5 * p;
+      const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, o1 = i1 * stride, o0 = o1 - stride, oP = this._offsetPrev, oN = this._offsetNext, wP = this._weightPrev, wN = this._weightNext, p2 = (t - t0) / (t1 - t0), pp = p2 * p2, ppp = pp * p2;
+      const sP = -wP * ppp + 2 * wP * pp - wP * p2;
+      const s0 = (1 + wP) * ppp + (-1.5 - 2 * wP) * pp + (-0.5 + wP) * p2 + 1;
+      const s1 = (-1 - wN) * ppp + (1.5 + wN) * pp + 0.5 * p2;
       const sN = wN * ppp - wN * pp;
       for (let i = 0; i !== stride; ++i) {
         result[i] = sP * values[oP + i] + s0 * values[o0 + i] + s1 * values[o1 + i] + sN * values[oN + i];
@@ -40598,9 +41205,9 @@
       this.end.copy(end);
       return this;
     }
-    copy(line) {
-      this.start.copy(line.start);
-      this.end.copy(line.end);
+    copy(line2) {
+      this.start.copy(line2.start);
+      this.end.copy(line2.end);
       return this;
     }
     getCenter(target) {
@@ -40638,8 +41245,8 @@
       this.end.applyMatrix4(matrix);
       return this;
     }
-    equals(line) {
-      return line.start.equals(this.start) && line.end.equals(this.end);
+    equals(line2) {
+      return line2.start.equals(this.start) && line2.end.equals(this.end);
     }
     clone() {
       return new this.constructor().copy(this);
@@ -41456,8 +42063,8 @@
       function isPointInsidePolygon(inPt, inPolygon) {
         const polyLen = inPolygon.length;
         let inside = false;
-        for (let p = polyLen - 1, q2 = 0; q2 < polyLen; p = q2++) {
-          let edgeLowPt = inPolygon[p];
+        for (let p2 = polyLen - 1, q2 = 0; q2 < polyLen; p2 = q2++) {
+          let edgeLowPt = inPolygon[p2];
           let edgeHighPt = inPolygon[q2];
           let edgeDx = edgeHighPt.x - edgeLowPt.x;
           let edgeDy = edgeHighPt.y - edgeLowPt.y;
@@ -41465,7 +42072,7 @@
             if (edgeDy < 0) {
               edgeLowPt = inPolygon[q2];
               edgeDx = -edgeDx;
-              edgeHighPt = inPolygon[p];
+              edgeHighPt = inPolygon[p2];
               edgeDy = -edgeDy;
             }
             if (inPt.y < edgeLowPt.y || inPt.y > edgeHighPt.y) continue;
@@ -42208,10 +42815,10 @@
   }
   function dreieckGeo(tris) {
     let cx = 0, cy = 0, cz = 0, k = 0;
-    for (const t of tris) for (const p of t) {
-      cx += p[0];
-      cy += p[1];
-      cz += p[2];
+    for (const t of tris) for (const p2 of t) {
+      cx += p2[0];
+      cy += p2[1];
+      cz += p2[2];
       k++;
     }
     cx /= k;
@@ -42247,9 +42854,9 @@
   function versetztRoh(poly, ins) {
     const n = poly.length;
     let cx = 0, cz = 0;
-    for (const p of poly) {
-      cx += p[0];
-      cz += p[1];
+    for (const p2 of poly) {
+      cx += p2[0];
+      cz += p2[1];
     }
     cx /= n;
     cz /= n;
@@ -42307,12 +42914,12 @@
     return dreieckGeo(tris);
   }
   function nGon(cx, cz, R9, seg, start = Math.PI / seg) {
-    const p = [];
+    const p2 = [];
     for (let j = seg; j > 0; j--) {
       const th = start + j * 2 * Math.PI / seg;
-      p.push([cx + R9 * Math.cos(th), cz + R9 * Math.sin(th)]);
+      p2.push([cx + R9 * Math.cos(th), cz + R9 * Math.sin(th)]);
     }
-    return p;
+    return p2;
   }
   function rechteck(x0, z0, x1, z1) {
     return [[x0, z1], [x1, z1], [x1, z0], [x0, z0]];
@@ -42321,9 +42928,9 @@
     const w = poly.map(() => r() + 0.15);
     const s2 = w.reduce((a, b2) => a + b2, 0);
     let x = 0, z2 = 0;
-    poly.forEach((p, i) => {
-      x += p[0] * w[i] / s2;
-      z2 += p[1] * w[i] / s2;
+    poly.forEach((p2, i) => {
+      x += p2[0] * w[i] / s2;
+      z2 += p2[1] * w[i] / s2;
     });
     return [x, z2];
   }
@@ -42956,13 +43563,13 @@
   function helm(ctx, poly, y, h, farbe2, spitze2 = true) {
     const ap = poly.map(() => 0);
     let cx = 0, cz = 0;
-    poly.forEach((p) => {
-      cx += p[0];
-      cz += p[1];
+    poly.forEach((p2) => {
+      cx += p2[0];
+      cz += p2[1];
     });
     cx /= poly.length;
     cz /= poly.length;
-    const big = poly.map((p) => [cx + (p[0] - cx) * 1.08, cz + (p[1] - cz) * 1.08]);
+    const big = poly.map((p2) => [cx + (p2[0] - cx) * 1.08, cz + (p2[1] - cz) * 1.08]);
     const R9 = Math.hypot(big[0][0] - cx, big[0][1] - cz) * Math.cos(Math.PI / poly.length);
     ctx.S.add(prismoid(big, y, h, ap.map(() => R9 - 2e-3)), farbe2);
     if (spitze2) {
@@ -42972,9 +43579,9 @@
   }
   function kuppel(ctx, poly, y, h, farbe2) {
     let cx = 0, cz = 0;
-    poly.forEach((p) => {
-      cx += p[0];
-      cz += p[1];
+    poly.forEach((p3) => {
+      cx += p3[0];
+      cz += p3[1];
     });
     cx /= poly.length;
     cz /= poly.length;
@@ -43273,7 +43880,7 @@
         G2.box(off - 0.06, off + (G2 === front2 && istVersatz ? bw : G2.L) + 0.06, yF - 0.1, yF + 0.08, -0.02, 0.08, c.orn);
       }
     }
-    ctx.S.add(prismoid(P2.map((p) => p), y1 - 0.2, 0.2), c.orn);
+    ctx.S.add(prismoid(P2.map((p2) => p2), y1 - 0.2, 0.2), c.orn);
     if (k1 < ctx.n) {
       if (c.erkerTyp === "polygon") ctx.S.add(prismoid(P2, y1, 0.9), c.orn);
       else balkon(F2, uL, uR, y1 + 0.02, td, { platte: c.orn, ornament: true, abstand: 0.22 });
@@ -43325,8 +43932,8 @@
     ctx.S.add(prismoid(nGon(cx, cz, R9 * 1.1, 8), y1, 0.2), c.orn);
     if (art === "helm") helm(ctx, nGon(cx, cz, R9 * 1.02, 8), y1 + 0.2, hoehe * 1.5, c.kuppel);
     else if (art === "zelt") {
-      const p = nGon(cx, cz, R9 * 1.05, 8);
-      ctx.S.add(prismoid(p, y1 + 0.2, hoehe * 0.7, p.map(() => R9 * 0.97)), c.kuppel);
+      const p2 = nGon(cx, cz, R9 * 1.05, 8);
+      ctx.S.add(prismoid(p2, y1 + 0.2, hoehe * 0.7, p2.map(() => R9 * 0.97)), c.kuppel);
     } else kuppel(ctx, nGon(cx, cz, R9 * 1.02, 8), y1 + 0.2, hoehe, c.kuppel);
   }
   function giebelFenster(F2, y, hg, o = {}) {
@@ -43743,14 +44350,14 @@
     if (B2 > 5) for (const s2 of [-1, 1]) fenster(F2, uc + s2 * hb * 0.42, y + 0.55, 0.8, Math.min(1.5, G2 * 0.3), { t: 0.14, kreuz: "quer", verd: "rund", verdFarbe: c.orn });
     else fenster(F2, uc, y + 0.55, 1, Math.min(1.4, G2 * 0.3), { t: 0.14, verd: null });
     if (form === "volute") for (const s2 of [-1, 1]) {
-      const p = F2.welt(uc + s2 * hb * 0.95, 0);
-      ctx.S.box(0.3, 0.45, 0.3, p[0], y + G2 * 0.1 + 0.22, p[1], c.orn);
+      const p2 = F2.welt(uc + s2 * hb * 0.95, 0);
+      ctx.S.box(0.3, 0.45, 0.3, p2[0], y + G2 * 0.1 + 0.22, p2[1], c.orn);
       const q2 = F2.welt(uc + s2 * hb * 0.55, 0);
       ctx.S.box(0.26, 0.4, 0.26, q2[0], y + G2 * 0.52 + 0.2, q2[1], c.orn);
     }
     ctx.S.box(0.08, 1, 0.08, ...pt3(F2.welt(uc, -0.1), y + G2 + 0.5), "#5f646b");
   }
-  var pt3 = (p, y) => [p[0], y, p[1]];
+  var pt3 = (p2, y) => [p2[0], y, p2[1]];
   function backstein(ctx) {
     const { S, r, n } = ctx;
     const eg = zw(r, 4.3, 4.7), gh = zw(r, 3.3, 3.7);
@@ -43911,7 +44518,7 @@
       const [s0, s1] = F2.spanne(0.12);
       F2.box(s0, s1, H - 0.02, H + 0.14, 0, 0.14, art === "verschiefert" ? "#f6f3ec" : holz);
     }
-    const xs = P2.map((p) => p[0]), zs = P2.map((p) => p[1]);
+    const xs = P2.map((p2) => p2[0]), zs = P2.map((p2) => p2[1]);
     const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
     const strZ = ctx.strasse === "+z";
     const achse = ctx.eck ? "x" : giebel3 ? strZ ? "z" : "x" : strZ ? "x" : "z";
@@ -44431,14 +45038,14 @@
     }
     fenster(F2, F2.L / 2, y + G2 * 0.5 + 0.3, 0.75, Math.min(1.1, G2 * 0.16), { t: 0.16, faschen: c.orn, kreuz: false, verd: "rund", verdFarbe: c.orn });
     for (const s2 of [-1, 1]) {
-      const p2 = F2.welt(F2.L / 2 + s2 * hb * 0.92, 0);
-      ctx.S.box(0.32, 0.55, 0.32, p2[0], y + G2 * 0.1 + 0.27, p2[1], c.orn);
+      const p3 = F2.welt(F2.L / 2 + s2 * hb * 0.92, 0);
+      ctx.S.box(0.32, 0.55, 0.32, p3[0], y + G2 * 0.1 + 0.27, p3[1], c.orn);
       const q2 = F2.welt(F2.L / 2 + s2 * hb * 0.55, 0);
       ctx.S.box(0.28, 0.5, 0.28, q2[0], y + G2 * 0.5 + 0.25, q2[1], c.orn);
     }
     const g = new three_module_exports.SphereGeometry(0.28, 8, 6);
-    const p = F2.welt(F2.L / 2, 0);
-    g.translate(p[0], y + G2 * 1 + 0.3, p[1]);
+    const p2 = F2.welt(F2.L / 2, 0);
+    g.translate(p2[0], y + G2 * 1 + 0.3, p2[1]);
     ctx.S.add(g, c.orn);
   }
   function ddr_platte(ctx) {
@@ -44689,23 +45296,23 @@
     if (ctx.strasse === "+z") S.quader(x + w - 0.02, 0.3, z2 + 0.02, x + w + 0.04, H, z2 + d - 0.02, f);
     else S.quader(x + 0.02, 0.3, z2 + d - 0.02, x + w - 0.02, H, z2 + d + 0.04, f);
   }
-  function stadthaus(S, scene2, p = {}) {
-    const stil = BAU[p.stil] ? p.stil : "gruenderzeit";
-    const x = p.x ?? 0, z2 = p.z ?? 0, w = p.w ?? 16, d = p.d ?? 13;
-    const n = clamp3(Math.round(p.geschosse ?? 4), 1, 8);
-    const seed = p.seed ?? 1;
+  function stadthaus(S, scene2, p2 = {}) {
+    const stil = BAU[p2.stil] ? p2.stil : "gruenderzeit";
+    const x = p2.x ?? 0, z2 = p2.z ?? 0, w = p2.w ?? 16, d = p2.d ?? 13;
+    const n = clamp3(Math.round(p2.geschosse ?? 4), 1, 8);
+    const seed = p2.seed ?? 1;
     const sz = typeof seed === "string" ? [...seed].reduce((a, ch) => a * 31 + ch.charCodeAt(0) >>> 0, 7) : seed;
     const r = rng2(mischHash(sz, STILE.indexOf(stil)));
     for (let i = 0; i < 3; i++) r();
-    let eck = !!p.eck, form = "gerade", turm4 = false;
+    let eck = !!p2.eck, form = "gerade", turm4 = false;
     if (eck) {
       const def = ECK[stil](r);
-      form = p.eck.form ?? def.form;
-      turm4 = p.eck.turm ?? def.turm;
+      form = p2.eck.form ?? def.form;
+      turm4 = p2.eck.turm ?? def.turm;
     }
     const cEck = clamp3(Math.min(w, d) * 0.24, 2.4, 4.4);
     const { P: P2, K: K3 } = grundriss(x, z2, w, d, eck ? form : "gerade", cEck);
-    const ctx = { S, scene: scene2, r, x, z: z2, w, d, n, stil, eck, form, turm: turm4, cEck, P: P2, K: K3, strasse: p.strasse === "+x" ? "+x" : "+z", seite: p.seite ?? "frei", region: p.region ?? "Mitte", cluster: p.cluster ?? "grossstadt", vermeide: p.vermeideFarbe ?? null, dachWunsch: p.dachWunsch ?? null, dachRegime: p.dachRegime ?? null };
+    const ctx = { S, scene: scene2, r, x, z: z2, w, d, n, stil, eck, form, turm: turm4, cEck, P: P2, K: K3, strasse: p2.strasse === "+x" ? "+x" : "+z", seite: p2.seite ?? "frei", region: p2.region ?? "Mitte", cluster: p2.cluster ?? "grossstadt", vermeide: p2.vermeideFarbe ?? null, dachWunsch: p2.dachWunsch ?? null, dachRegime: p2.dachRegime ?? null };
     ctx.glas = waehle2(r, [FARBEN3.fenster, FARBEN3.fenster, "#5a6b78", "#4f5f6c", "#5d6a72"]);
     ctx.namen = mischen(LADENNAMEN, r);
     ctx.fassaden = fassadenFuer(ctx, P2, K3);
@@ -44750,31 +45357,31 @@
     for (const st of STILE) out[st] = out[st] / s2;
     return out;
   }
-  function zufallsStadthaus(S, scene2, p = {}) {
-    const r = rng2(mischHash(typeof p.seed === "number" ? p.seed : 1, 4711));
-    const prof = stilProfil(p.region ?? "Mitte", p.cluster ?? "grossstadt");
+  function zufallsStadthaus(S, scene2, p2 = {}) {
+    const r = rng2(mischHash(typeof p2.seed === "number" ? p2.seed : 1, 4711));
+    const prof = stilProfil(p2.region ?? "Mitte", p2.cluster ?? "grossstadt");
     const liste = Object.entries(prof).map(([st, g2]) => {
       let w = g2;
-      if (p.nachbar?.stil === st) w *= 0.2;
-      if (st === "fachwerk" && (p.w ?? 16) > 18) w *= 0.3;
-      if (st === "ddr_platte" && (p.w ?? 16) < 14) w *= 0.3;
-      if (st === "barock" && (p.w ?? 16) > 22) w *= 0.4;
+      if (p2.nachbar?.stil === st) w *= 0.2;
+      if (st === "fachwerk" && (p2.w ?? 16) > 18) w *= 0.3;
+      if (st === "ddr_platte" && (p2.w ?? 16) < 14) w *= 0.3;
+      if (st === "barock" && (p2.w ?? 16) > 22) w *= 0.4;
       return [st, w];
     });
     const stil0 = wz(r, liste);
-    const stil = p.stilWunsch && GESCHOSSE[p.stilWunsch] && BAU[p.stilWunsch] ? p.stilWunsch : stil0;
+    const stil = p2.stilWunsch && GESCHOSSE[p2.stilWunsch] && BAU[p2.stilWunsch] ? p2.stilWunsch : stil0;
     let [a, b2] = GESCHOSSE[stil];
-    if (p.cluster === "metropole") {
+    if (p2.cluster === "metropole") {
       a += 1;
       b2 += 1;
-    } else if (p.cluster === "mittelstadt") {
+    } else if (p2.cluster === "mittelstadt") {
       b2 -= 1;
     }
     let g = Math.round(a + (b2 - a) * (r() * 0.6 + r() * 0.4));
-    if (p.nachbar?.geschosse && r() < 0.35) g = p.nachbar.geschosse + waehle2(r, [-2, -1, 1, 2]);
+    if (p2.nachbar?.geschosse && r() < 0.35) g = p2.nachbar.geschosse + waehle2(r, [-2, -1, 1, 2]);
     g = clamp3(g, Math.max(2, a - 1), Math.min(7, b2));
-    if (p.harmonisiere) g = p.harmonisiere(g);
-    return stadthaus(S, scene2, { ...p, stil, geschosse: clamp3(g, 2, 7), vermeideFarbe: p.nachbar?.farbe ?? p.vermeideFarbe });
+    if (p2.harmonisiere) g = p2.harmonisiere(g);
+    return stadthaus(S, scene2, { ...p2, stil, geschosse: clamp3(g, 2, 7), vermeideFarbe: p2.nachbar?.farbe ?? p2.vermeideFarbe });
   }
 
   // src/kit/gelaende.js
@@ -44864,12 +45471,12 @@
         const ya = hoehe(ax, az), yb = hoehe(bx, bz);
         if (!imWeinberg(ax, ya, az) || !imWeinberg(bx, yb, bz)) continue;
         const h2 = breite / 2;
-        const p = (uu, qq, y) => {
+        const p2 = (uu, qq, y) => {
           const [x, z2] = welt(uu, qq);
           return [x, y, z2];
         };
-        const A0 = p(ua, qa - h2, ya + hoch), A1 = p(ua, qa + h2, ya + hoch), B0 = p(ub, qb - h2, yb + hoch), B1 = p(ub, qb + h2, yb + hoch);
-        const AF = p(ua, qa + h2, ya - 0.2), BF = p(ub, qb + h2, yb - 0.2);
+        const A0 = p2(ua, qa - h2, ya + hoch), A1 = p2(ua, qa + h2, ya + hoch), B0 = p2(ub, qb - h2, yb + hoch), B1 = p2(ub, qb + h2, yb + hoch);
+        const AF = p2(ua, qa + h2, ya - 0.2), BF = p2(ub, qb + h2, yb - 0.2);
         const quad = (a, b2, c, d) => {
           ziel.push(...a, ...b2, ...c, ...a, ...c, ...d);
         };
@@ -44889,11 +45496,11 @@
       const [ax, az] = welt(u + kr(u) * 0, qa), [bx, bz] = welt(u, qb);
       const ya = hoehe(ax, az), yb = hoehe(bx, bz);
       if (!imWeinberg(ax, ya, az) || !imWeinberg(bx, yb, bz)) continue;
-      const p = (uu, qq, y) => {
+      const p2 = (uu, qq, y) => {
         const [x, z2] = welt(uu, qq);
         return [x, y + 0.08, z2];
       };
-      const a = p(u - 1.4, qa, ya), b2 = p(u + 1.4, qa, ya), c = p(u + 1.4, qb, yb), d = p(u - 1.4, qb, yb);
+      const a = p2(u - 1.4, qa, ya), b2 = p2(u + 1.4, qa, ya), c = p2(u + 1.4, qb, yb), d = p2(u - 1.4, qb, yb);
       if (quer2) wege.push(...a, ...b2, ...c, ...a, ...c, ...d);
       else wege.push(...a, ...c, ...b2, ...a, ...d, ...c);
     }
@@ -44914,7 +45521,7 @@
   var KUESTE_LAND = 150;
   var SEITEN = ["-x", "+x", "-z", "+z"];
   var vereinige2 = (ivs, luecke = 2) => {
-    const s2 = ivs.filter(([a, b2]) => b2 > a).sort((p, q2) => p[0] - q2[0]);
+    const s2 = ivs.filter(([a, b2]) => b2 > a).sort((p2, q2) => p2[0] - q2[0]);
     const out = [];
     for (const [a, b2] of s2) {
       const l = out[out.length - 1];
@@ -44925,7 +45532,7 @@
   };
   var abzug = ([a, b2], cuts) => {
     let rest = [[a, b2]];
-    for (const [c, d] of cuts) rest = rest.flatMap(([u, v]) => d <= u || c >= v ? [[u, v]] : [[u, Math.min(v, c)], [Math.max(u, d), v]].filter(([p, q2]) => q2 - p > 0.01));
+    for (const [c, d] of cuts) rest = rest.flatMap(([u, v]) => d <= u || c >= v ? [[u, v]] : [[u, Math.min(v, c)], [Math.max(u, d), v]].filter(([p2, q2]) => q2 - p2 > 0.01));
     return rest;
   };
   var deckt = (ivs, t) => ivs.some(([a, b2]) => t >= a - 0.01 && t <= b2 + 0.01);
@@ -44972,9 +45579,9 @@
       berge.plateaus.push({ x0: x + 6, z0: z2 + 6, x1: x + gr - 6, z1: z2 + gr - 6, y });
       ringBauten.push({ id: "aussen-burg", typ: "slot:sued_burg", variante: e.burg, x, z: z2, w: gr, d: gr, front: [s2 === "-x" ? "+x" : "+z"], seed: P2.seed * 3 + 7, region: P2.region, berg: berge, landmarke: true });
     }
-    for (const p of P2.parzellen ?? []) {
-      const b2 = P2.bloecke.find((q2) => q2.id === p.block);
-      if (b2?.art === "kulisse") p.berg = berge;
+    for (const p2 of P2.parzellen ?? []) {
+      const b2 = P2.bloecke.find((q2) => q2.id === p2.block);
+      if (b2?.art === "kulisse") p2.berg = berge;
     }
     const bergSeiten = Object.keys(berge.seiten);
     const ufer = { "-x": [], "+x": [], "-z": [], "+z": [] }, baender = [];
@@ -45003,12 +45610,12 @@
     for (const s2 of SEITEN) {
       const dir = s2[0] === "-" ? -1 : 1, rand = s2 === "-x" || s2 === "-z" ? 0 : s2 === "+x" ? B2 : T;
       const liste = [{ c: rand + dir * RS.breite / 2, ...RS, kante: true, seite: s2, n: 0 }];
-      let p = RS.breite, n = 1;
+      let p2 = RS.breite, n = 1;
       for (; ; ) {
-        p += Math.round(zw(r, 64, 90));
-        if (p + RS.breite > R9 - 30) break;
-        liste.push({ c: rand + dir * (p + RS.breite / 2), ...RS, seite: s2, n: n++ });
-        p += RS.breite;
+        p2 += Math.round(zw(r, 64, 90));
+        if (p2 + RS.breite > R9 - 30) break;
+        liste.push({ c: rand + dir * (p2 + RS.breite / 2), ...RS, seite: s2, n: n++ });
+        p2 += RS.breite;
       }
       ringLinien[s2] = liste;
     }
@@ -45096,7 +45703,7 @@
     const zerlege = (a0, a1, lines) => {
       const out = [];
       let start = a0, links = null;
-      for (const l of lines.filter((q2) => q2.c > a0 && q2.c < a1).sort((p, q2) => p.c - q2.c)) {
+      for (const l of lines.filter((q2) => q2.c > a0 && q2.c < a1).sort((p2, q2) => p2.c - q2.c)) {
         const e = l.c - l.breite / 2;
         if (e - start > 1) out.push({ a: start, b: e, links, rechts: l });
         start = l.c + l.breite / 2;
@@ -45473,7 +46080,7 @@
   function nahMitte(plan2, ansicht = "einkauf", zoom = 62, o = {}) {
     let x, z2;
     if (ansicht === "center") {
-      const st = plan2.standorte.find((p) => p.lage === "center") ?? plan2.standorte.find((p) => p.lage === "rand");
+      const st = plan2.standorte.find((p2) => p2.lage === "center") ?? plan2.standorte.find((p2) => p2.lage === "rand");
       const b2 = st && plan2.bloecke.find((q2) => q2.id === st.block);
       [x, z2] = b2 ? [b2.x + b2.w / 2, b2.z + b2.d / 2] : [plan2.breite / 2, plan2.tiefe / 2];
     } else if (o.punkt) [x, z2] = [plan2.breite * o.punkt[0], plan2.tiefe * o.punkt[1]];
@@ -45510,7 +46117,7 @@
       b2.flaechen = [];
       b2.hecken = [];
       b2.baeume = [];
-      const p = {
+      const p2 = {
         id: "aussen-" + st.id,
         typ: "slot:outlet",
         x: b2.x + (b2.w - st.w) / 2,
@@ -45526,9 +46133,9 @@
         front: ["+z", "+x"],
         block: b2.id
       };
-      plan2.aussen.bauten.push(p);
-      plan2.standorte.push({ ...st, parzelle: p.id, typ: p.typ, block: b2.id, lage: "rand" });
-      platziert.push(p.id);
+      plan2.aussen.bauten.push(p2);
+      plan2.standorte.push({ ...st, parzelle: p2.id, typ: p2.typ, block: b2.id, lage: "rand" });
+      platziert.push(p2.id);
     }
     plan2.aussen.outletStandorte = platziert;
     return platziert;
@@ -45537,7 +46144,7 @@
   // src/kit/stadtplan.js
   var klemm = (v, a, b2) => Math.max(a, Math.min(b2, v));
   var ganz = (r) => Math.floor(r() * 1e9);
-  var ordne = (a) => a.sort((p, q2) => "zx".indexOf(p[1]) - "zx".indexOf(q2[1]));
+  var ordne = (a) => a.sort((p2, q2) => "zx".indexOf(p2[1]) - "zx".indexOf(q2[1]));
   function wahlGewichtet(r, liste) {
     const summe2 = liste.reduce((a, [, w]) => a + w, 0);
     let x = r() * summe2;
@@ -46094,8 +46701,8 @@
       if (E.umriss === "voll") return true;
       const u = (i + 0.5) / nx() * 2 - 1, v = (j + 0.5) / nz() * 2 - 1;
       if (E.umriss === "oval") return u * u / ax + v * v * ax < 0.92 + rauschen2[i][j] * 1.5;
-      const p = (u + v) / 2, q2 = (u - v) / 2;
-      return p * p / 0.95 + q2 * q2 / 0.2 < 1 + rauschen2[i][j];
+      const p2 = (u + v) / 2, q2 = (u - v) / 2;
+      return p2 * p2 / 0.95 + q2 * q2 / 0.2 < 1 + rauschen2[i][j];
     };
     E.aktiv = (i, j) => {
       const f = E.belegt.get(`${i},${j}`);
@@ -46290,7 +46897,7 @@
     for (const L2 of lagen) {
       const dist2 = (i2, j2) => Math.hypot(i2 - E.zentrum.i, j2 - E.zentrum.j);
       const anHaupt = (i2, j2) => HAUPTLICH.has(E.zTyp[i2 + 1]) || HAUPTLICH.has(E.xTyp[j2 + 1]) || HAUPTLICH.has(E.zTyp[i2]) || HAUPTLICH.has(E.xTyp[j2]);
-      const abstand2 = (i2, j2) => belegt2.reduce((a, [p, q2]) => Math.min(a, Math.abs(p - i2) + Math.abs(q2 - j2)), 99);
+      const abstand2 = (i2, j2) => belegt2.reduce((a, [p2, q2]) => Math.min(a, Math.abs(p2 - i2) + Math.abs(q2 - j2)), 99);
       const zweiteReihe = (i2, j2) => E.aktiv(i2, j2) && Math.min(i2, j2, E.spalten.length - 1 - i2, E.reihen.length - 1 - j2) === 1;
       let l = L2.art === "center" ? zellenNach((i2, j2) => zweiteReihe(i2, j2) && dist2(i2, j2) > 3.4 && abstand2(i2, j2) > 1, (i2, j2) => (anHaupt(i2, j2) ? 4 : 1) * dist2(i2, j2)) : [];
       if (!l.length) l = zellenNach((i2, j2) => randZelle(i2, j2) && dist2(i2, j2) > 2.4 && abstand2(i2, j2) > 1, (i2, j2) => (anHaupt(i2, j2) ? L2.art === "center" ? 4 : 1.5 : 1) * dist2(i2, j2));
@@ -46941,8 +47548,8 @@
     for (const typL of E.landmarken ?? []) {
       const def = LANDMARKEN[typL];
       if (!def || def.art === "flaeche" || def.art === "block") continue;
-      const p = setzeLandmarke(typL, def, { E, r, bloecke, parzellen, T, R: R9, region: E.region, typ });
-      if (p) landmarken.push(p.id);
+      const p2 = setzeLandmarke(typL, def, { E, r, bloecke, parzellen, T, R: R9, region: E.region, typ });
+      if (p2) landmarken.push(p2.id);
     }
     for (let n = 0; n < (E.hochhausAnzahl ?? 0); n++) {
       const kand = bloecke.filter((b3) => b3.art === "bebaut");
@@ -46952,8 +47559,8 @@
       mergeRand(ctx, "slot:hochhaus", [20, 44], 26, ["+z", "+x"], { geschosse: Math.round(zw(ctx.rb, 12, 26)) });
     }
     for (const id of landmarken) {
-      const p = parzellen.find((q2) => q2.id === id);
-      if (p) p.landmarke = true;
+      const p2 = parzellen.find((q2) => q2.id === id);
+      if (p2) p2.landmarke = true;
     }
     const diagonalen = [], zwickel = [];
     if (E.diagonalen) for (const d of E.diagonalen({ r, bloecke, parzellen, T, typ, strassen, breite, tiefe }) ?? []) {
@@ -46963,15 +47570,15 @@
     for (const b2 of bloecke) if (b2.parzellen?.length) nachbarnSetzen(b2, parzellen);
     const blockVon = new Map(bloecke.map((q2) => [q2.id, q2]));
     const DEF = ARCHETYP_DEFS[E.archetyp];
-    for (const p of parzellen) {
-      p.region = E.region;
-      p.cluster = typ;
-      const bl = blockVon.get(p.block);
-      if (DEF?.stilProfil && !p.stilProfil) p.stilProfil = typeof DEF.stilProfil === "function" ? DEF.stilProfil(p, E, bl) : DEF.stilProfil;
-      DEF?.parzelleMarkieren?.(p, bl, E);
+    for (const p2 of parzellen) {
+      p2.region = E.region;
+      p2.cluster = typ;
+      const bl = blockVon.get(p2.block);
+      if (DEF?.stilProfil && !p2.stilProfil) p2.stilProfil = typeof DEF.stilProfil === "function" ? DEF.stilProfil(p2, E, bl) : DEF.stilProfil;
+      DEF?.parzelleMarkieren?.(p2, bl, E);
     }
     kirchenEindeutig(parzellen, E.region);
-    const standorte = parzellen.filter((p) => p.standort).map((p) => ({ ...p.standort, lage: p.lage ?? p.standort.lage, parzelle: p.id, typ: p.typ, block: p.block }));
+    const standorte = parzellen.filter((p2) => p2.standort).map((p2) => ({ ...p2.standort, lage: p2.lage ?? p2.standort.lage, parzelle: p2.id, typ: p2.typ, block: p2.block }));
     let einkaufslage2 = null;
     if (E.einkaufslage) {
       const L2 = E.einkaufslage;
@@ -46998,8 +47605,8 @@
       bloecke,
       parzellen,
       umland,
-      slots: parzellen.filter((p) => p.typ.startsWith("slot:")),
-      landmarken: parzellen.filter((p) => p.typ.startsWith("slot:") && !p.standort && p.typ !== "slot:warenhaus" && p.typ !== "slot:center_passage").map((p) => p.id),
+      slots: parzellen.filter((p2) => p2.typ.startsWith("slot:")),
+      landmarken: parzellen.filter((p2) => p2.typ.startsWith("slot:") && !p2.standort && p2.typ !== "slot:warenhaus" && p2.typ !== "slot:center_passage").map((p2) => p2.id),
       standorte,
       einkaufslage: einkaufslage2,
       ddr: !!E.ddr,
@@ -47021,7 +47628,7 @@
     const klasse = extra.klasse ?? klemm(Math.round((ctx.klasse ?? 3) + zw(rb, -(ctx.var ?? 1), ctx.var ?? 1) + (typ === "eck" && rb() < 0.5 ? 1 : 0) - rueck - (typ === "hofhaus" ? 1.5 : 0)), 1, 5);
     const geschosse2 = Math.round(T.gesch[0] + (T.gesch[1] - T.gesch[0]) * (klasse - 1) / 4);
     const istSlot = typ.startsWith("slot:");
-    const p = {
+    const p2 = {
       id: "p" + (parzellen.zaehler = (parzellen.zaehler ?? 0) + 1),
       typ,
       block: b2.id,
@@ -47046,11 +47653,11 @@
       ...istSlot ? { sonder: typ.slice(5) } : {},
       ...extra
     };
-    if (!istSlot && p.stil && ctx.stil === "fachwerk" && rb() < 0.6) p.stil = "fachwerk";
-    delete p.klasse;
-    parzellen.push(p);
-    b2.parzellen.push(p.id);
-    return p;
+    if (!istSlot && p2.stil && ctx.stil === "fachwerk" && rb() < 0.6) p2.stil = "fachwerk";
+    delete p2.klasse;
+    parzellen.push(p2);
+    b2.parzellen.push(p2.id);
+    return p2;
   }
   function vorplatzKuerzen(ctx, b2, achse, u0, uw, strasse3) {
     const V = b2.vorplatz, X = achse === "x";
@@ -47182,16 +47789,16 @@
     b2.tiefen = t;
     return t;
   }
-  var parzelleVon = (ctx, id) => ctx.parzellen.find((p) => p.id === id);
-  function entferneParzelle(ctx, p) {
+  var parzelleVon = (ctx, id) => ctx.parzellen.find((p2) => p2.id === id);
+  function entferneParzelle(ctx, p2) {
     const { b: b2, parzellen } = ctx;
-    parzellen.splice(parzellen.indexOf(p), 1);
-    b2.parzellen.splice(b2.parzellen.indexOf(p.id), 1);
+    parzellen.splice(parzellen.indexOf(p2), 1);
+    b2.parzellen.splice(b2.parzellen.indexOf(p2.id), 1);
   }
   function mergeRand(ctx, typ, [bmin, bmax], tiefe, seiten4, extra = {}) {
     const { b: b2, rb } = ctx;
     for (const seite of seiten4) {
-      const liste = b2.parzellen.map((id) => parzelleVon(ctx, id)).filter((p) => p && p.seite === seite && p.typ === "stadthaus");
+      const liste = b2.parzellen.map((id) => parzelleVon(ctx, id)).filter((p2) => p2 && p2.seite === seite && p2.typ === "stadthaus");
       const entlangX = seite[1] === "z";
       liste.sort((a, c) => entlangX ? a.x - c.x : a.z - c.z);
       const start = Math.floor(rb() * Math.max(1, liste.length));
@@ -47228,10 +47835,10 @@
           else rect = { ...rect, w: t0 };
           if (stoesst(rect)) continue;
         }
-        const p = erste;
+        const p2 = erste;
         for (let q2 = n0 + 1; q2 < n1; q2++) entferneParzelle(ctx, liste[q2]);
-        Object.assign(p, rect, { typ, sonder: typ.slice(5), stil: null, leer: false, hoehenklasse: 5, landmarke: true, ...extra });
-        return p;
+        Object.assign(p2, rect, { typ, sonder: typ.slice(5), stil: null, leer: false, hoehenklasse: 5, landmarke: true, ...extra });
+        return p2;
       }
     }
     return null;
@@ -47266,30 +47873,30 @@
     const alt = ctx.viertel === "altstadt";
     const meine = () => b2.parzellen.map((id) => parzelleVon(ctx, id)).filter(Boolean);
     const kernNah = Math.hypot((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j) < 3.2;
-    for (const p of meine()) {
-      if (p.typ !== "stadthaus") continue;
+    for (const p2 of meine()) {
+      if (p2.typ !== "stadthaus") continue;
       const x = rb();
       if (kernNah) continue;
-      if (x < 8e-3) p.typ = "luecke";
-      else if (x < 0.016) p.typ = "baustelle";
+      if (x < 8e-3) p2.typ = "luecke";
+      else if (x < 0.016) p2.typ = "baustelle";
     }
     if (alt) {
-      for (const p of meine()) if (p.typ === "eck") rb();
+      for (const p2 of meine()) if (p2.typ === "eck") rb();
     }
     if (alt && rb() < (E.durchgang ?? 0)) {
-      const kand = meine().filter((p) => p.typ === "stadthaus" && (p.seite === "+z" || p.seite === "+x") && (p.seite === "+z" ? p.w : p.d) >= 13);
+      const kand = meine().filter((p2) => p2.typ === "stadthaus" && (p2.seite === "+z" || p2.seite === "+x") && (p2.seite === "+z" ? p2.w : p2.d) >= 13);
       if (kand.length) {
-        const p = kand[Math.floor(rb() * kand.length)];
+        const p2 = kand[Math.floor(rb() * kand.length)];
         const breite = Math.round(zw(rb, 3.5, 5) * 2) / 2;
         if (kernNah) kand.length = 0;
-        const rest = { ...p };
+        const rest = { ...p2 };
         if (!kand.length) {
-        } else if (p.seite === "+z") {
-          p.w -= breite;
-          neueParzelle(ctx, "durchgang", p.x + p.w, p.z, breite, p.d, p.front, p.seite, {});
+        } else if (p2.seite === "+z") {
+          p2.w -= breite;
+          neueParzelle(ctx, "durchgang", p2.x + p2.w, p2.z, breite, p2.d, p2.front, p2.seite, {});
         } else {
-          p.d -= breite;
-          neueParzelle(ctx, "durchgang", p.x, p.z + p.d, p.w, breite, p.front, p.seite, {});
+          p2.d -= breite;
+          neueParzelle(ctx, "durchgang", p2.x, p2.z + p2.d, p2.w, breite, p2.front, p2.seite, {});
         }
         b2.hof.art = "pflaster";
       }
@@ -47319,8 +47926,8 @@
       const kand = bloecke.filter((b2) => b2.art === "bebaut").map((b2) => [b2, gewicht2(b2)]);
       for (let versuch = 0; versuch < 8 && kand.length; versuch++) {
         const b2 = wahlGewichtet(r, kand);
-        const p = mergeRand(ctxVon(b2), typL, br, tiefe, r() < 0.5 ? ["+z", "+x", "-z"] : ["+x", "+z", "-x"], typL === "slot:hochhaus" ? { geschosse: Math.round(zw(r, 12, 26)) } : {});
-        if (p) return p;
+        const p2 = mergeRand(ctxVon(b2), typL, br, tiefe, r() < 0.5 ? ["+z", "+x", "-z"] : ["+x", "+z", "-x"], typL === "slot:hochhaus" ? { geschosse: Math.round(zw(r, 12, 26)) } : {});
+        if (p2) return p2;
         kand.splice(kand.findIndex(([x]) => x === b2), 1);
       }
       return null;
@@ -47330,13 +47937,13 @@
       kand.sort((a, c) => dist2(c) - dist2(a));
       for (const b2 of kand.slice(0, 6)) {
         const ctx = ctxVon(b2);
-        const eck = b2.parzellen.map((id) => parzellen.find((p) => p.id === id)).find((p) => p && p.typ === "eck" && p.ecke === "+x+z");
+        const eck = b2.parzellen.map((id) => parzellen.find((p2) => p2.id === id)).find((p2) => p2 && p2.typ === "eck" && p2.ecke === "+x+z");
         if (!eck) continue;
         const W3 = Math.max(eck.w, zw(r, ...br)), D = eck.d;
         const rect = { x: b2.x + b2.w - W3, z: b2.z + b2.d - D, w: W3, d: D };
-        const weg = b2.parzellen.map((id) => parzellen.find((p) => p.id === id)).filter((p) => p && p !== eck && p.x < rect.x + rect.w - 0.1 && p.x + p.w > rect.x + 0.1 && p.z < rect.z + rect.d - 0.1 && p.z + p.d > rect.z + 0.1);
-        if (weg.some((p) => p.typ !== "stadthaus" || p.z < rect.z - 0.1)) continue;
-        for (const p of weg) entferneParzelle(ctx, p);
+        const weg = b2.parzellen.map((id) => parzellen.find((p2) => p2.id === id)).filter((p2) => p2 && p2 !== eck && p2.x < rect.x + rect.w - 0.1 && p2.x + p2.w > rect.x + 0.1 && p2.z < rect.z + rect.d - 0.1 && p2.z + p2.d > rect.z + 0.1);
+        if (weg.some((p2) => p2.typ !== "stadthaus" || p2.z < rect.z - 0.1)) continue;
+        for (const p2 of weg) entferneParzelle(ctx, p2);
         Object.assign(eck, rect, { typ: typL, sonder: typL.slice(5), stil: null, leer: false, hoehenklasse: 1, landmarke: true });
         return eck;
       }
@@ -47405,18 +48012,18 @@
   function polyKlipp(P2, a, b2, c) {
     const f = ([x, z2]) => a * x + b2 * z2 + c, out = [];
     for (let i = 0; i < P2.length; i++) {
-      const p = P2[i], q2 = P2[(i + 1) % P2.length], fp = f(p), fq = f(q2);
-      if (fp >= 0) out.push(p);
+      const p2 = P2[i], q2 = P2[(i + 1) % P2.length], fp = f(p2), fq = f(q2);
+      if (fp >= 0) out.push(p2);
       if (fp >= 0 !== fq >= 0) {
         const t = fp / (fp - fq);
-        out.push([p[0] + (q2[0] - p[0]) * t, p[1] + (q2[1] - p[1]) * t]);
+        out.push([p2[0] + (q2[0] - p2[0]) * t, p2[1] + (q2[1] - p2[1]) * t]);
       }
     }
     return out;
   }
-  var polyFlaeche = (P2) => Math.abs(P2.reduce((a, p, i) => {
+  var polyFlaeche = (P2) => Math.abs(P2.reduce((a, p2, i) => {
     const q2 = P2[(i + 1) % P2.length];
-    return a + p[0] * q2[1] - q2[0] * p[1];
+    return a + p2[0] * q2[1] - q2[0] * p2[1];
   }, 0)) / 2;
   var DIAG_UEBER = /* @__PURE__ */ new Set(["bebaut", "warenhaus", "park", "markt", "platz", "gruenguertel", "kleingarten", "parkplatz", "faecher", "suedmarkt"]);
   function diagonaleSchneiden(d, g) {
@@ -47433,7 +48040,7 @@
     const blockVon = new Map(bloecke.map((b2) => [b2.id, b2]));
     const sperre2 = [
       ...bloecke.filter((b2) => !DIAG_UEBER.has(b2.art)),
-      ...parzellen.filter((p) => p.standort || p.landmarke || !["bebaut", "warenhaus"].includes(blockVon.get(p.block)?.art))
+      ...parzellen.filter((p2) => p2.standort || p2.landmarke || !["bebaut", "warenhaus"].includes(blockVon.get(p2.block)?.art))
     ];
     const abschnitte = [];
     let a = null;
@@ -47451,31 +48058,31 @@
   function diagonalAbschnitt(d, g, C2, dx, dz, t0, t1, B2, h0, h, blockVon) {
     const { parzellen, zwickel } = g;
     const weg = [];
-    for (const p of parzellen) {
-      const b2 = blockVon.get(p.block);
-      if (!b2 || !["bebaut", "warenhaus"].includes(b2.art) || !streifenSchneidet(p, C2, dx, dz, t0, t1, h)) continue;
+    for (const p2 of parzellen) {
+      const b2 = blockVon.get(p2.block);
+      if (!b2 || !["bebaut", "warenhaus"].includes(b2.art) || !streifenSchneidet(p2, C2, dx, dz, t0, t1, h)) continue;
       const opt = [];
       if (Math.abs(dz) > 1e-6) {
-        const xs = [p.z, p.z + p.d].flatMap((z2) => [C2.x + ((z2 - C2.z) * dx - h) / dz, C2.x + ((z2 - C2.z) * dx + h) / dz]);
+        const xs = [p2.z, p2.z + p2.d].flatMap((z2) => [C2.x + ((z2 - C2.z) * dx - h) / dz, C2.x + ((z2 - C2.z) * dx + h) / dz]);
         const xa = Math.min(...xs), xb = Math.max(...xs);
-        opt.push({ x: p.x, z: p.z, w: xa - p.x, d: p.d, lauf: "x" }, { x: xb, z: p.z, w: p.x + p.w - xb, d: p.d, lauf: "x" });
+        opt.push({ x: p2.x, z: p2.z, w: xa - p2.x, d: p2.d, lauf: "x" }, { x: xb, z: p2.z, w: p2.x + p2.w - xb, d: p2.d, lauf: "x" });
       }
       if (Math.abs(dx) > 1e-6) {
-        const zs = [p.x, p.x + p.w].flatMap((x) => [C2.z + ((x - C2.x) * dz - h) / dx, C2.z + ((x - C2.x) * dz + h) / dx]);
+        const zs = [p2.x, p2.x + p2.w].flatMap((x) => [C2.z + ((x - C2.x) * dz - h) / dx, C2.z + ((x - C2.x) * dz + h) / dx]);
         const za = Math.min(...zs), zb = Math.max(...zs);
-        opt.push({ x: p.x, z: p.z, w: p.w, d: za - p.z, lauf: "z" }, { x: p.x, z: zb, w: p.w, d: p.z + p.d - zb, lauf: "z" });
+        opt.push({ x: p2.x, z: p2.z, w: p2.w, d: za - p2.z, lauf: "z" }, { x: p2.x, z: zb, w: p2.w, d: p2.z + p2.d - zb, lauf: "z" });
       }
-      const reiheX = p.seite === "+z" || p.seite === "-z", reiheZ = p.seite === "+x" || p.seite === "-x";
+      const reiheX = p2.seite === "+z" || p2.seite === "-z", reiheZ = p2.seite === "+x" || p2.seite === "-x";
       const gut = opt.filter((q2) => q2.w >= 6 && q2.d >= 6 && (!reiheX || q2.lauf === "x") && (!reiheZ || q2.lauf === "z") && !streifenSchneidet(q2, C2, dx, dz, t0, t1, h)).sort((a, c) => c.w * c.d - a.w * a.d);
-      const alt = { x: p.x, z: p.z, w: p.w, d: p.d };
+      const alt = { x: p2.x, z: p2.z, w: p2.w, d: p2.d };
       let rest;
       if (gut.length) {
         const q2 = gut[0];
-        rest = q2.lauf === "x" ? q2.x === p.x ? { x: q2.x + q2.w, z: p.z, w: p.w - q2.w, d: p.d } : { x: p.x, z: p.z, w: q2.x - p.x, d: p.d } : q2.z === p.z ? { x: p.x, z: q2.z + q2.d, w: p.w, d: p.d - q2.d } : { x: p.x, z: p.z, w: p.w, d: q2.z - p.z };
-        Object.assign(p, { x: q2.x, z: q2.z, w: q2.w, d: q2.d, diagonal: true });
+        rest = q2.lauf === "x" ? q2.x === p2.x ? { x: q2.x + q2.w, z: p2.z, w: p2.w - q2.w, d: p2.d } : { x: p2.x, z: p2.z, w: q2.x - p2.x, d: p2.d } : q2.z === p2.z ? { x: p2.x, z: q2.z + q2.d, w: p2.w, d: p2.d - q2.d } : { x: p2.x, z: p2.z, w: p2.w, d: q2.z - p2.z };
+        Object.assign(p2, { x: q2.x, z: q2.z, w: q2.w, d: q2.d, diagonal: true });
       } else {
         rest = alt;
-        weg.push(p);
+        weg.push(p2);
       }
       const R9 = [[rest.x, rest.z], [rest.x + rest.w, rest.z], [rest.x + rest.w, rest.z + rest.d], [rest.x, rest.z + rest.d]];
       const s0 = C2.x * dz - C2.z * dx, tC = C2.x * dx + C2.z * dz;
@@ -47486,12 +48093,12 @@
         // s ≥ h0, t ≤ t1
         polyKlipp(R9, dx, dz, -tC - t1)
         // t ≥ t1
-      ]) if (P2.length >= 3 && polyFlaeche(P2) > 3) zwickel.push({ poly: P2, block: p.block, art: "gruen" });
+      ]) if (P2.length >= 3 && polyFlaeche(P2) > 3) zwickel.push({ poly: P2, block: p2.block, art: "gruen" });
     }
-    for (const p of weg) {
-      parzellen.splice(parzellen.indexOf(p), 1);
-      const b2 = blockVon.get(p.block);
-      b2.parzellen.splice(b2.parzellen.indexOf(p.id), 1);
+    for (const p2 of weg) {
+      parzellen.splice(parzellen.indexOf(p2), 1);
+      const b2 = blockVon.get(p2.block);
+      b2.parzellen.splice(b2.parzellen.indexOf(p2.id), 1);
     }
     return { C: { ...C2 }, dx, dz, t0, t1, breite: B2, gehweg: d.gehweg ?? 2.5, baeume: d.baeume !== false };
   }
@@ -47506,33 +48113,33 @@
   function kirchenEindeutig(parzellen, region) {
     const liste = KIRCHEN_REGION[region] ?? KIRCHEN_REGION.mitte;
     const benutzt = /* @__PURE__ */ new Set();
-    for (const p of parzellen.filter((q2) => q2.typ === "slot:kirche")) {
-      let st = p.stil ?? liste[(p.seed ?? 0) % liste.length];
+    for (const p2 of parzellen.filter((q2) => q2.typ === "slot:kirche")) {
+      let st = p2.stil ?? liste[(p2.seed ?? 0) % liste.length];
       if (benutzt.has(st)) st = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? st;
-      p.stil = st;
+      p2.stil = st;
       benutzt.add(st);
-      if (benutzt.size > 1 && p.turm === "doppel") p.turm = "west";
+      if (benutzt.size > 1 && p2.turm === "doppel") p2.turm = "west";
     }
     const varianten = /* @__PURE__ */ new Set();
-    for (const p of parzellen.filter((q2) => q2.typ === "slot:nord_kirche")) {
-      const passt = (v) => Math.min(p.w, p.d) >= NORD_KIRCHE_MIN[v][0] && Math.max(p.w, p.d) >= NORD_KIRCHE_MIN[v][1];
-      if (p.variante && varianten.has(p.variante)) {
+    for (const p2 of parzellen.filter((q2) => q2.typ === "slot:nord_kirche")) {
+      const passt = (v) => Math.min(p2.w, p2.d) >= NORD_KIRCHE_MIN[v][0] && Math.max(p2.w, p2.d) >= NORD_KIRCHE_MIN[v][1];
+      if (p2.variante && varianten.has(p2.variante)) {
         const v = Object.keys(NORD_KIRCHE_MIN).find((q2) => !varianten.has(q2) && passt(q2));
-        if (v) p.variante = v;
+        if (v) p2.variante = v;
         else {
-          p.typ = "slot:kirche";
-          p.sonder = "kirche";
-          p.stil = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? "klassizismus";
-          benutzt.add(p.stil);
+          p2.typ = "slot:kirche";
+          p2.sonder = "kirche";
+          p2.stil = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? "klassizismus";
+          benutzt.add(p2.stil);
           continue;
         }
       }
-      if (p.variante) varianten.add(p.variante);
+      if (p2.variante) varianten.add(p2.variante);
     }
   }
   function randSchliessen(b2, g) {
     const { E, T, parzellen, diagonalen } = g;
-    const meine = () => b2.parzellen.map((id) => parzellen.find((p) => p.id === id)).filter(Boolean);
+    const meine = () => b2.parzellen.map((id) => parzellen.find((p2) => p2.id === id)).filter(Boolean);
     const OFFEN_T = /* @__PURE__ */ new Set(["luecke", "baustelle", "parkplatz", "platz", "durchgang"]);
     const V = VIERTEL[b2.viertel] ?? VIERTEL.gruenderzeit;
     const ctx = { T, rb: rng2((b2.seed ?? 1) + 4711), b: b2, parzellen, klasse: b2.klasse ?? 3, var: 0.5, stile: V.stile, stil: b2.stil, region: E.region, typ: g.typ, viertel: b2.viertel, material: g.R?.material };
@@ -47544,15 +48151,15 @@
       if (!b2.rand?.[sd]?.seg) continue;
       const entlangX = sd[1] === "z", L2 = entlangX ? b2.w : b2.d, a0 = entlangX ? b2.x : b2.z;
       const P2 = meine();
-      const anKante = (p) => sd === "+z" ? p.z + p.d > b2.z + b2.d - 2 : sd === "-z" ? p.z < b2.z + 2 : sd === "+x" ? p.x + p.w > b2.x + b2.w - 2 : p.x < b2.x + 2;
-      const belegt2 = P2.filter(anKante).map((p) => entlangX ? [p.x, p.x + p.w] : [p.z, p.z + p.d]);
+      const anKante = (p2) => sd === "+z" ? p2.z + p2.d > b2.z + b2.d - 2 : sd === "-z" ? p2.z < b2.z + 2 : sd === "+x" ? p2.x + p2.w > b2.x + b2.w - 2 : p2.x < b2.x + 2;
+      const belegt2 = P2.filter(anKante).map((p2) => entlangX ? [p2.x, p2.x + p2.w] : [p2.z, p2.z + p2.d]);
       const ueberlappt3 = (q2, ohne2) => meine().some((o) => o !== ohne2 && q2.x < o.x + o.w - 0.05 && q2.x + q2.w > o.x + 0.05 && q2.z < o.z + o.d - 0.05 && q2.z + q2.d > o.z + 0.05);
       for (const [u0, u1] of intervalleMinus(a0, a0 + L2, belegt2)) {
         if (u1 - u0 < 0.5) continue;
         if (u1 - u0 < 9) {
-          for (const p of P2.filter(anKante)) {
-            const pa = entlangX ? p.x : p.z, pe = entlangX ? p.x + p.w : p.z + p.d;
-            const q2 = { x: p.x, z: p.z, w: p.w, d: p.d };
+          for (const p2 of P2.filter(anKante)) {
+            const pa = entlangX ? p2.x : p2.z, pe = entlangX ? p2.x + p2.w : p2.z + p2.d;
+            const q2 = { x: p2.x, z: p2.z, w: p2.w, d: p2.d };
             if (Math.abs(pe - u0) < 0.6) {
               if (entlangX) q2.w += u1 - u0;
               else q2.d += u1 - u0;
@@ -47565,27 +48172,27 @@
                 q2.d += u1 - u0;
               }
             } else continue;
-            if (ueberlappt3(q2, p) || (diagonalen ?? []).some((dg) => streifenSchneidet(q2, dg.C, dg.dx, dg.dz, dg.t0, dg.t1, dg.breite / 2))) continue;
-            Object.assign(p, q2);
+            if (ueberlappt3(q2, p2) || (diagonalen ?? []).some((dg) => streifenSchneidet(q2, dg.C, dg.dx, dg.dz, dg.t0, dg.t1, dg.breite / 2))) continue;
+            Object.assign(p2, q2);
             break;
           }
           continue;
         }
         let t = Math.min(tiefe, (entlangX ? b2.d : b2.w) - 0.2);
-        for (const p of P2) {
-          const ov = entlangX ? Math.min(u1, p.x + p.w) - Math.max(u0, p.x) : Math.min(u1, p.z + p.d) - Math.max(u0, p.z);
+        for (const p2 of P2) {
+          const ov = entlangX ? Math.min(u1, p2.x + p2.w) - Math.max(u0, p2.x) : Math.min(u1, p2.z + p2.d) - Math.max(u0, p2.z);
           if (ov <= 0.1) continue;
-          const ab = sd === "+z" ? b2.z + b2.d - (p.z + p.d) : sd === "-z" ? p.z - b2.z : sd === "+x" ? b2.x + b2.w - (p.x + p.w) : p.x - b2.x;
+          const ab = sd === "+z" ? b2.z + b2.d - (p2.z + p2.d) : sd === "-z" ? p2.z - b2.z : sd === "+x" ? b2.x + b2.w - (p2.x + p2.w) : p2.x - b2.x;
           if (ab >= 0) t = Math.min(t, ab - 0.2);
         }
         if (t < 8) {
           if (t < 0.5) continue;
-          for (const p of P2) {
-            const ov = entlangX ? Math.min(u1, p.x + p.w) - Math.max(u0, p.x) : Math.min(u1, p.z + p.d) - Math.max(u0, p.z);
+          for (const p2 of P2) {
+            const ov = entlangX ? Math.min(u1, p2.x + p2.w) - Math.max(u0, p2.x) : Math.min(u1, p2.z + p2.d) - Math.max(u0, p2.z);
             if (ov <= 0.1) continue;
-            const ab = sd === "+z" ? b2.z + b2.d - (p.z + p.d) : sd === "-z" ? p.z - b2.z : sd === "+x" ? b2.x + b2.w - (p.x + p.w) : p.x - b2.x;
+            const ab = sd === "+z" ? b2.z + b2.d - (p2.z + p2.d) : sd === "-z" ? p2.z - b2.z : sd === "+x" ? b2.x + b2.w - (p2.x + p2.w) : p2.x - b2.x;
             if (ab < 0.5 || ab > t + 0.3) continue;
-            const q2 = { x: p.x, z: p.z, w: p.w, d: p.d };
+            const q2 = { x: p2.x, z: p2.z, w: p2.w, d: p2.d };
             if (sd === "+z") q2.d += ab;
             else if (sd === "-z") {
               q2.z -= ab;
@@ -47596,8 +48203,8 @@
               q2.w += ab;
             }
             if ((diagonalen ?? []).some((dg) => streifenSchneidet(q2, dg.C, dg.dx, dg.dz, dg.t0, dg.t1, dg.breite / 2))) continue;
-            Object.assign(p, q2);
-            if (p.typ.startsWith("slot:")) p.front = [.../* @__PURE__ */ new Set([...p.front ?? [], sd])];
+            Object.assign(p2, q2);
+            if (p2.typ.startsWith("slot:")) p2.front = [.../* @__PURE__ */ new Set([...p2.front ?? [], sd])];
           }
           continue;
         }
@@ -47619,26 +48226,26 @@
     if ((neu || kern) && b2.hof && (b2.hof.art === "gruen" || b2.hof.art === "spielplatz") && kern) b2.hof.art = "pflaster";
   }
   function nachbarnSetzen(b2, parzellen) {
-    const meine = b2.parzellen.map((id) => parzellen.find((p) => p.id === id)).filter(Boolean);
+    const meine = b2.parzellen.map((id) => parzellen.find((p2) => p2.id === id)).filter(Boolean);
     for (const s2 of ["+z", "-z", "+x", "-x"]) {
       const entlangX = s2[1] === "z";
-      const reihe = meine.filter((p) => p.seite === s2 || p.seite === "ecke" && p.ecke && p.ecke.includes(s2) || p.typ.startsWith("slot:") && p.seite !== "frei" && p.front?.includes(s2) && p.seite !== "block");
+      const reihe = meine.filter((p2) => p2.seite === s2 || p2.seite === "ecke" && p2.ecke && p2.ecke.includes(s2) || p2.typ.startsWith("slot:") && p2.seite !== "frei" && p2.front?.includes(s2) && p2.seite !== "block");
       reihe.sort((a, c) => entlangX ? a.x - c.x : a.z - c.z);
       for (let q2 = 0; q2 < reihe.length; q2++) {
-        const p = reihe[q2];
-        p.reihe = `${b2.id}${s2}`;
-        if (p.seite === s2 || !p.nachbar) p.nachbar = q2 > 0 ? reihe[q2 - 1].id : p.nachbar ?? null;
+        const p2 = reihe[q2];
+        p2.reihe = `${b2.id}${s2}`;
+        if (p2.seite === s2 || !p2.nachbar) p2.nachbar = q2 > 0 ? reihe[q2 - 1].id : p2.nachbar ?? null;
       }
     }
     const BAU3 = (q2) => q2 && !["luecke", "baustelle", "parkplatz", "platz", "durchgang"].includes(q2.typ) && !q2.leer;
     const hartwig = meine.some((q2) => q2.typ === "slot:warenhaus" || q2.typ === "slot:premium");
     if (hartwig) {
-      for (const p of meine) if (p.typ === "stadthaus" || p.typ === "eck") p.hartwigBlock = true;
+      for (const p2 of meine) if (p2.typ === "stadthaus" || p2.typ === "eck") p2.hartwigBlock = true;
     }
-    for (const p of meine) {
-      if (p.typ !== "stadthaus" && p.typ !== "hofhaus") continue;
-      const nurX = p.front?.includes("+x") && !p.front?.includes("+z");
-      p.anbau = meine.some((q2) => q2 !== p && BAU3(q2) && (nurX ? Math.abs(q2.z - (p.z + p.d)) < 0.3 && Math.min(p.x + p.w, q2.x + q2.w) - Math.max(p.x, q2.x) > p.w * 0.5 : Math.abs(q2.x - (p.x + p.w)) < 0.3 && Math.min(p.z + p.d, q2.z + q2.d) - Math.max(p.z, q2.z) > p.d * 0.5));
+    for (const p2 of meine) {
+      if (p2.typ !== "stadthaus" && p2.typ !== "hofhaus") continue;
+      const nurX = p2.front?.includes("+x") && !p2.front?.includes("+z");
+      p2.anbau = meine.some((q2) => q2 !== p2 && BAU3(q2) && (nurX ? Math.abs(q2.z - (p2.z + p2.d)) < 0.3 && Math.min(p2.x + p2.w, q2.x + q2.w) - Math.max(p2.x, q2.x) > p2.w * 0.5 : Math.abs(q2.x - (p2.x + p2.w)) < 0.3 && Math.min(p2.z + p2.d, q2.z + q2.d) - Math.max(p2.z, q2.z) > p2.d * 0.5));
     }
   }
   function einkaufSlotsSetzen(ctx) {
@@ -47683,7 +48290,7 @@
     blockDetails,
     entferneParzelle,
     parzellenVon: (ctx) => ctx.b.parzellen.map((id) => parzelleVon(ctx, id)).filter(Boolean),
-    slotsImBlock: (ctx) => ctx.b.parzellen.map((id) => parzelleVon(ctx, id)).filter((p) => p && p.standort),
+    slotsImBlock: (ctx) => ctx.b.parzellen.map((id) => parzelleVon(ctx, id)).filter((p2) => p2 && p2.standort),
     einkaufSlotsSetzen,
     freiePosition,
     ueberlappt,
@@ -48180,13 +48787,13 @@
           neu.push(g);
           return;
         }
-        const p = g.attributes.position.array;
+        const p2 = g.attributes.position.array;
         let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
-        for (let j = 0; j < p.length; j += 3) {
-          x0 = Math.min(x0, p[j]);
-          x1 = Math.max(x1, p[j]);
-          z0 = Math.min(z0, p[j + 2]);
-          z1 = Math.max(z1, p[j + 2]);
+        for (let j = 0; j < p2.length; j += 3) {
+          x0 = Math.min(x0, p2[j]);
+          x1 = Math.max(x1, p2[j]);
+          z0 = Math.min(z0, p2[j + 2]);
+          z1 = Math.max(z1, p2[j + 2]);
         }
         if (x1 <= R9.x0 + e || z1 <= R9.z0 + e) {
           neu.push(g);
@@ -48294,7 +48901,7 @@
     return st;
   }
   function freieHoehe(Z2, s2, u0, u1, y0, y1, m = 0.3) {
-    const b2 = Z2.belegt[s2.seite].filter((q2) => u0 < q2.u1 + m && u1 > q2.u0 - m).map((q2) => [q2.y0 - m, q2.y1 + m]).sort((p, q2) => p[0] - q2[0]);
+    const b2 = Z2.belegt[s2.seite].filter((q2) => u0 < q2.u1 + m && u1 > q2.u0 - m).map((q2) => [q2.y0 - m, q2.y1 + m]).sort((p2, q2) => p2[0] - q2[0]);
     let best = [y0, y0], c = y0;
     for (const [p0, p1] of b2) {
       if (p0 > c && Math.min(p0, y1) - c > best[1] - best[0]) best = [c, Math.min(p0, y1)];
@@ -48718,7 +49325,7 @@
       const Lz = Z2.nutz(sz), Lx = Z2.nutz(sx);
       const a = Lz * 0.04, b2 = a + Math.max(14, Lz * 0.55);
       const yA = k.hoehe + 0.5, yB = k.hoehe - GH3 * Math.min(1, n - 1) + 0.5;
-      if (opt.logosAbdecken) for (const s3 of [sz, sx]) for (const q2 of Z2.belegt[s3.seite].filter((p) => p.art === "logo")) {
+      if (opt.logosAbdecken) for (const s3 of [sz, sx]) for (const q2 of Z2.belegt[s3.seite].filter((p2) => p2.art === "logo")) {
         const t = (k.tLogo ?? tFront(k)) + 0.5;
         s3.q(q2.u0 - 0.2, q2.u1 + 0.2, q2.y0 - 0.2, q2.y1 + 0.2, t, t + 0.06, "#d8e3dc");
         for (const f of [0.25, 0.75]) s3.q(q2.u0 + (q2.u1 - q2.u0) * f - 0.12, q2.u0 + (q2.u1 - q2.u0) * f + 0.12, q2.y0 - 0.25, q2.y1 + 0.25, t + 0.06, t + 0.1, "#5f676e");
@@ -48933,7 +49540,7 @@
         for (let i = 0; i < st2; i++) wimpel(Z2, s3, L2 * i / st2, L2 * (i + 1) / st2, EG4 + 0.2, t + 0.6, P2.wimpel, 0.9);
         if (n >= 2) for (let i = 0; i < st2; i++) {
           const ua = L2 * i / st2, ub = L2 * (i + 1) / st2;
-          if (freieStuecke(Z2, s3, ua, ub, yW - 1.5, yW).some(([p, q2]) => q2 - p > ub - ua - 0.1)) wimpel(Z2, s3, ua, ub, yW, t, P2.wimpel, 1.4);
+          if (freieStuecke(Z2, s3, ua, ub, yW - 1.5, yW).some(([p2, q2]) => q2 - p2 > ub - ua - 0.1)) wimpel(Z2, s3, ua, ub, yW, t, P2.wimpel, 1.4);
         }
       }
       for (const f of fensterEG) {
@@ -49040,7 +49647,7 @@
       const sB = rest["+x"] ? sx : sz;
       fassadenBanner(Z2, sB, [{ text: "HARTWIG KARTE", h: 1.9, fg: "#ffffff" }, { text: "Punkte sammeln, Vorteile sichern", h: 0.75, fg: "#ffe2dc" }], ROT, { anteil: 0.5, zielH: Math.min(7, (k.hoehe - k.egHoehe) * 0.7), rahmen: "#ffffff", minSchrift: 0.55, u: Z2.nutz(sB) * 0.7, modus: "mitte" });
       const fe = fensterEG.filter((f) => f.b - f.a > 1.8);
-      const nahe = fe.filter((f) => f.seite === he.seite).sort((p, q2) => Math.abs((p.a + p.b) / 2 - he.u) - Math.abs((q2.a + q2.b) / 2 - he.u)).slice(0, 2);
+      const nahe = fe.filter((f) => f.seite === he.seite).sort((p2, q2) => Math.abs((p2.a + p2.b) / 2 - he.u) - Math.abs((q2.a + q2.b) / 2 - he.u)).slice(0, 2);
       const andere = fe.filter((f) => f.seite !== he.seite).slice(1, 2);
       for (const f of [...nahe, ...andere]) {
         const sf = seiten4[f.seite], b2 = Math.min(1.5, f.b - f.a - 0.4);
@@ -49050,7 +49657,7 @@
       const besetzt = [he.u - bE - 2.8, he.u - bE - 1.4, he.u + bE + 1.9, he.u + bE + 5.2, he.u];
       for (const f of nahe) {
         const sf = seiten4[f.seite], um = (f.a + f.b) / 2, t2 = f.t + 3.2;
-        const u2 = [um, um + (f.b - f.a) * 0.3, um - (f.b - f.a) * 0.3, um + 1.6, um - 1.6].find((q2) => q2 > 1 && q2 < Z2.nutz(sf) - 1 && !besetzt.some((p) => Math.abs(p - q2) < 1.5));
+        const u2 = [um, um + (f.b - f.a) * 0.3, um - (f.b - f.a) * 0.3, um + 1.6, um - 1.6].find((q2) => q2 > 1 && q2 < Z2.nutz(sf) - 1 && !besetzt.some((p2) => Math.abs(p2 - q2) < 1.5));
         if (u2 == null) continue;
         besetzt.push(u2);
         for (const du of [-0.6, 0.6]) {
@@ -49180,7 +49787,7 @@
   function prismaX(S, x0, x1, pts, y, f) {
     const sh = new three_module_exports.Shape();
     sh.moveTo(pts[0][0], pts[0][1]);
-    for (const p of pts.slice(1)) sh.lineTo(p[0], p[1]);
+    for (const p2 of pts.slice(1)) sh.lineTo(p2[0], p2[1]);
     sh.closePath();
     let g = new three_module_exports.ExtrudeGeometry(sh, { depth: x1 - x0, bevelEnabled: false });
     g = g.toNonIndexed();
@@ -49327,7 +49934,7 @@
     return Array.from({ length: nb }, (_, i) => [u0 + i * bw + pb / 2, u0 + (i + 1) * bw - pb / 2]);
   }
   function wand(s2, u0, u1, y0, y1, t0, t1, oeff, f) {
-    const o = oeff.filter((g) => g.b > u0 && g.a < u1).sort((p, q2) => p.a - q2.a);
+    const o = oeff.filter((g) => g.b > u0 && g.a < u1).sort((p2, q2) => p2.a - q2.a);
     let c = u0;
     for (const g of o) {
       if (g.a > c) s2.q(c, g.a, y0, y1, t0, t1, f);
@@ -49360,8 +49967,8 @@
     sued: { stein: ["#ecd9b0", "#e8cfa4", "#f0e2c4", "#e2c9a0"], hell: "#f6efe0", dach: "#b4583f", wand: "#efe3c8", akzent: "#c9a36a" },
     ost: { stein: ["#d4d2ca", "#cfccc2", "#d9d6cc", "#c9c8c0"], hell: "#e6e4de", dach: "#5f6b70", wand: "#d2d0c8", akzent: "#e07a3a" }
   };
-  function regionVon(p) {
-    const t = String(p ?? "").toLowerCase().replace("\xFC", "ue");
+  function regionVon(p2) {
+    const t = String(p2 ?? "").toLowerCase().replace("\xFC", "ue");
     return t === "nord" || t === "sued" || t === "ost" ? t : null;
   }
   function regionHaut(K3, s2, u0, u1, y0, y1, t, f) {
@@ -49447,8 +50054,8 @@
   function brett(K3, s2, a, b2, y0, y1, t) {
     const r = K3.r, nb = Math.max(1, Math.round((b2 - a) / 1.25));
     for (let i = 0; i < nb; i++) {
-      const p = a + i * (b2 - a) / nb, q2 = a + (i + 1) * (b2 - a) / nb;
-      s2.q(p + 0.02, q2 - 0.02, y0, y1, t, t + 0.05, i % 2 ? "#c9a77a" : "#bf9c6e");
+      const p2 = a + i * (b2 - a) / nb, q2 = a + (i + 1) * (b2 - a) / nb;
+      s2.q(p2 + 0.02, q2 - 0.02, y0, y1, t, t + 0.05, i % 2 ? "#c9a77a" : "#bf9c6e");
     }
     if (r() < 0.6) s2.kipp((b2 - a) * 0.7, 0.35, 0.03, (a + b2) / 2, y0 + zw(r, 0.6, 1.4), t + 0.08, waehle2(r, ["#e8336d", "#3a7bd5", "#2b2b2b", "#4caf50"]), zw(r, -0.15, 0.15));
   }
@@ -49481,15 +50088,15 @@
   function stumpf(w, d, h, ein) {
     const a = [[-w / 2, 0, -d / 2], [w / 2, 0, -d / 2], [w / 2, 0, d / 2], [-w / 2, 0, d / 2]];
     const b2 = a.map(([x, , z2]) => [x - Math.sign(x) * ein, h, z2 - Math.sign(z2) * ein]);
-    const p = [];
-    const quad = (A, B2, C2, D) => p.push(...A, ...B2, ...C2, ...A, ...C2, ...D);
+    const p2 = [];
+    const quad = (A, B2, C2, D) => p2.push(...A, ...B2, ...C2, ...A, ...C2, ...D);
     for (let i = 0; i < 4; i++) {
       const j = (i + 1) % 4;
       quad(a[i], b2[i], b2[j], a[j]);
     }
     quad(b2[0], b2[3], b2[2], b2[1]);
     const g = new three_module_exports.BufferGeometry();
-    g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p, 3));
+    g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p2, 3));
     g.computeVertexNormals();
     return g;
   }
@@ -49888,12 +50495,12 @@
     elektronik: "#d34532",
     leer_ehemals: "#777d80"
   };
-  function dekorZustand(S, scene2, p, art, hoehe) {
-    const z2 = p.zustand ?? {}, status = z2.status ?? p.status ?? "offen";
-    const rabatt = Math.max(0, Math.min(1, z2.rabatt ?? p.rabatt ?? 0));
+  function dekorZustand(S, scene2, p2, art, hoehe) {
+    const z2 = p2.zustand ?? {}, status = z2.status ?? p2.status ?? "offen";
+    const rabatt = Math.max(0, Math.min(1, z2.rabatt ?? p2.rabatt ?? 0));
     if (status === "offen" && !rabatt) return hoehe;
-    const w = Math.max(16, Math.min(90, p.w ?? 40)), d = Math.max(16, Math.min(70, p.d ?? 30));
-    const x = p.x ?? 0, zz = p.z ?? 0;
+    const w = Math.max(16, Math.min(90, p2.w ?? 40)), d = Math.max(16, Math.min(70, p2.d ?? 30));
+    const x = p2.x ?? 0, zz = p2.z ?? 0;
     const farbe2 = WETTBEWERBER_FARBEN[art] ?? "#51677a";
     const seiten4 = seitenVon(S, x, zz, w, d);
     const banner = (s2, t, y, breite = 0.75, h = 1.4, bg = farbe2) => {
@@ -49903,7 +50510,7 @@
     if (status === "eroeffnung") {
       banner(seiten4[0], "NEUER\xD6FFNUNG", EG + 2, 0.78, 1.65);
       S.quader(x + w * 0.37, 0.02, zz + d, x + w * 0.63, 0.09, zz + d + 4.5, "#b5292c");
-      const r = rng2("eroeffnung:" + (p.seed ?? 0));
+      const r = rng2("eroeffnung:" + (p2.seed ?? 0));
       for (let i = 0; i < 10; i++) {
         const xx = x + 2 + i * (w - 4) / 9;
         const farb = i % 3 === 0 ? "#f1c84a" : i % 2 ? farbe2 : "#f0f0e7";
@@ -49933,35 +50540,35 @@
     if (status === "geschlossen" || art === "leer_ehemals") {
       for (const s2 of seiten4) {
         banner(s2, "ZU VERMIETEN", EG + 1.7, 0.72, 1.35, "#596066");
-        if (p.name) plakat2(scene2, s2, p.name, s2.L / 2, Math.min(hoehe - 2, EG + 5), 0.35, passend(p.name, s2.L * 0.5, 1), "#a3a3a3");
+        if (p2.name) plakat2(scene2, s2, p2.name, s2.L / 2, Math.min(hoehe - 2, EG + 5), 0.35, passend(p2.name, s2.L * 0.5, 1), "#a3a3a3");
       }
     }
     return hoehe;
   }
-  function wettbewerber(S, scene2, p) {
+  function wettbewerber(S, scene2, p2) {
     const start = S.anzahl;
-    const r0 = rng2(`wb:${p.seed ?? 1}:${p.region ?? ""}`);
-    const artOriginal = BAU2[p.art] ? p.art : ARTEN2[Math.floor(r0() * ARTEN2.length)];
-    const art = p.zustand?.status === "geschlossen" ? "leer_ehemals" : artOriginal;
-    const name2 = p.name ?? NAMEN[art][Math.floor(r0() * 3)];
-    const w = clamp4(p.w ?? 40, 16, 90), d = clamp4(p.d ?? 30, 16, 70);
+    const r0 = rng2(`wb:${p2.seed ?? 1}:${p2.region ?? ""}`);
+    const artOriginal = BAU2[p2.art] ? p2.art : ARTEN2[Math.floor(r0() * ARTEN2.length)];
+    const art = p2.zustand?.status === "geschlossen" ? "leer_ehemals" : artOriginal;
+    const name2 = p2.name ?? NAMEN[art][Math.floor(r0() * 3)];
+    const w = clamp4(p2.w ?? 40, 16, 90), d = clamp4(p2.d ?? 30, 16, 70);
     const K3 = {
       S,
       scene: scene2,
       art,
       name: name2,
-      r: rng2(`wb:${p.seed}:${art}`),
+      r: rng2(`wb:${p2.seed}:${art}`),
       v: Math.floor(r0() * 8),
-      x0: p.x ?? 0,
-      z0: p.z ?? 0,
+      x0: p2.x ?? 0,
+      z0: p2.z ?? 0,
       w,
       d,
       leer: art === "leer_ehemals",
-      reg: regionVon(p.region),
-      leute: p.passanten !== false
+      reg: regionVon(p2.region),
+      leute: p2.passanten !== false
     };
-    let form = Number.isInteger(p.form) ? (p.form % 5 + 5) % 5 : Math.floor(r0() * 3);
-    if (form === 2 && (Math.imul((p.seed ?? 1) >>> 0, 2654435761) >>> 0) % 4 !== 0) form = [0, 1, 3][(p.seed ?? 1) % 3];
+    let form = Number.isInteger(p2.form) ? (p2.form % 5 + 5) % 5 : Math.floor(r0() * 3);
+    if (form === 2 && (Math.imul((p2.seed ?? 1) >>> 0, 2654435761) >>> 0) % 4 !== 0) form = [0, 1, 3][(p2.seed ?? 1) % 3];
     let hoehe;
     if (form === 3 && w >= 30) {
       const w2 = Math.round(w * 0.34);
@@ -49992,7 +50599,7 @@
       K3.seiten = seitenVon(S, K3.x0, K3.z0, w, d);
       hoehe = BAU2[art](K3);
     }
-    hoehe = dekorZustand(S, scene2, p, art, hoehe);
+    hoehe = dekorZustand(S, scene2, p2, art, hoehe);
     return { hoehe, art, name: name2, form, teile: S.anzahl - start };
   }
   var FORM_FARBEN = {
@@ -50180,15 +50787,15 @@
   function stumpf2(w, d, h, ein, einZ = ein) {
     const a = [[-w / 2, 0, -d / 2], [w / 2, 0, -d / 2], [w / 2, 0, d / 2], [-w / 2, 0, d / 2]];
     const b2 = [[-w / 2 + ein, h, -d / 2 + einZ], [w / 2 - ein, h, -d / 2 + einZ], [w / 2 - ein, h, d / 2 - einZ], [-w / 2 + ein, h, d / 2 - einZ]];
-    const p = [];
-    const quad = (A, B2, C2, D) => p.push(...A, ...B2, ...C2, ...A, ...C2, ...D);
+    const p2 = [];
+    const quad = (A, B2, C2, D) => p2.push(...A, ...B2, ...C2, ...A, ...C2, ...D);
     for (let i = 0; i < 4; i++) {
       const j = (i + 1) % 4;
       quad(a[i], b2[i], b2[j], a[j]);
     }
     quad(b2[0], b2[3], b2[2], b2[1]);
     const g = new three_module_exports.BufferGeometry();
-    g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p, 3));
+    g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p2, 3));
     g.computeVertexNormals();
     return g;
   }
@@ -50681,13 +51288,13 @@
     const kupfer = K3.c("#6f9a7d");
     const eck = ["kuppel", "spitz", "kuppel", "zelt", "kuppel", "spitz", "zelt", "kuppel"][v];
     const raster4 = [6, 6.5, 5.5, 6, 7, 6, 5.5, 6.5][v];
-    const tw = clamp5(Math.min(w, d) * 0.24, 7, 12), p = 0.9, rueck = 0.7;
+    const tw = clamp5(Math.min(w, d) * 0.24, 7, 12), p2 = 0.9, rueck = 0.7;
     const Ht = Hw + (n >= 2 ? GH * 1.6 : 4);
     K3.tRelief = 0.5;
     S.quader(x0, 0, z0, x0 + w - rueck - 0.1, EG2, z0 + d - rueck - 0.1, dunk);
     S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, stein);
     const tx0 = x0 + w - tw, tz0 = z0 + d - tw;
-    S.quader(tx0, 0, tz0, x0 + w + p, Ht, z0 + d + p, hell4);
+    S.quader(tx0, 0, tz0, x0 + w + p2, Ht, z0 + d + p2, hell4);
     const risalit = v % 2 === 0 && n >= 2;
     K3.raster = raster4;
     K3.fensterBand = [1, 3.9];
@@ -50751,39 +51358,39 @@
         giebel(s2, u, yb + 2.9, -1.9, 2.3, 0.9, 2.6, dachF);
       }
       flecken(K3, s2, 0, uEnd, EG2 + 0.8, Hw - 1.3, 0.46, stein, 10);
-      const tu0 = s2.L - tw, tu1 = s2.L + p, tm = (tu0 + tu1) / 2;
-      s2.q(tu0, tu1, 0, 0.55, p, p + 0.08, dunk);
-      s2.q(tm - 2.2, tm + 2.2, 0.3, 4.4, p, p + 0.05, GLAS_TUER);
-      K3.eingaenge.push({ seite: s2.seite, u: tm, breite: 4.4, t: p, haupt: s2.seite === "+z" });
+      const tu0 = s2.L - tw, tu1 = s2.L + p2, tm = (tu0 + tu1) / 2;
+      s2.q(tu0, tu1, 0, 0.55, p2, p2 + 0.08, dunk);
+      s2.q(tm - 2.2, tm + 2.2, 0.3, 4.4, p2, p2 + 0.05, GLAS_TUER);
+      K3.eingaenge.push({ seite: s2.seite, u: tm, breite: 4.4, t: p2, haupt: s2.seite === "+z" });
       if (K3.zu) {
-        s2.q(tm - 2.1, tm + 2.1, 0.3, 4.3, p + 0.06, p + 0.1, "#8e9499");
-        for (let y = 0.6; y < 4.2; y += 0.42) s2.q(tm - 2.1, tm + 2.1, y, y + 0.07, p + 0.1, p + 0.14, "#6f757a");
+        s2.q(tm - 2.1, tm + 2.1, 0.3, 4.3, p2 + 0.06, p2 + 0.1, "#8e9499");
+        for (let y = 0.6; y < 4.2; y += 0.42) s2.q(tm - 2.1, tm + 2.1, y, y + 0.07, p2 + 0.1, p2 + 0.14, "#6f757a");
       }
-      s2.q(tm - 2.45, tm + 2.45, 4.4, 4.8, p, p + 0.3, ROT2);
-      s2.q(tm - 2.45, tm - 2.2, 0.3, 4.4, p, p + 0.3, ROT2);
-      s2.q(tm + 2.2, tm + 2.45, 0.3, 4.4, p, p + 0.3, ROT2);
+      s2.q(tm - 2.45, tm + 2.45, 4.4, 4.8, p2, p2 + 0.3, ROT2);
+      s2.q(tm - 2.45, tm - 2.2, 0.3, 4.4, p2, p2 + 0.3, ROT2);
+      s2.q(tm + 2.2, tm + 2.45, 0.3, 4.4, p2, p2 + 0.3, ROT2);
       if (!K3.zu) {
         const g = new three_module_exports.CylinderGeometry(1.2, 1.2, 2.6, 12);
-        g.translate(tm, 1.6, p + 0.3);
+        g.translate(tm, 1.6, p2 + 0.3);
         s2.geo(g, "#6a8796");
       }
-      s2.q(tu0 - 0.4, tu1 + 0.4, 4.85, 5.2, p, p + 1.8, "#4a4f55");
-      s2.q(tu0, tu1, EG2 - 0.1, EG2 + 0.55, p, p + 0.45, hell4);
-      for (const uu of [tu0, tu1 - 0.8]) s2.q(uu, uu + 0.8, EG2, Ht, p, p + 0.2, dunk);
-      for (let y = EG2 + 0.6; y < Ht; y += 1.1) for (const uu of [tu0, tu1 - 1.1]) s2.q(uu, uu + 1.1, y, y + 0.5, p, p + 0.25, hell4);
+      s2.q(tu0 - 0.4, tu1 + 0.4, 4.85, 5.2, p2, p2 + 1.8, "#4a4f55");
+      s2.q(tu0, tu1, EG2 - 0.1, EG2 + 0.55, p2, p2 + 0.45, hell4);
+      for (const uu of [tu0, tu1 - 0.8]) s2.q(uu, uu + 0.8, EG2, Ht, p2, p2 + 0.2, dunk);
+      for (let y = EG2 + 0.6; y < Ht; y += 1.1) for (const uu of [tu0, tu1 - 1.1]) s2.q(uu, uu + 1.1, y, y + 0.5, p2, p2 + 0.25, hell4);
       if (n >= 2) {
         const rad2 = 1.4, yTop = Ht - 4.2;
-        s2.q(tm - rad2, tm + rad2, EG2 + 1.2, yTop, p, p + 0.05, GLAS2);
-        bogen(s2, tm, yTop, p, rad2, 0.05, GLAS2);
-        for (let k = 1; k < n - 1; k++) s2.q(tm - rad2, tm + rad2, EG2 + k * GH - 0.6, EG2 + k * GH + 0.2, p, p + 0.2, dunk);
+        s2.q(tm - rad2, tm + rad2, EG2 + 1.2, yTop, p2, p2 + 0.05, GLAS2);
+        bogen(s2, tm, yTop, p2, rad2, 0.05, GLAS2);
+        for (let k = 1; k < n - 1; k++) s2.q(tm - rad2, tm + rad2, EG2 + k * GH - 0.6, EG2 + k * GH + 0.2, p2, p2 + 0.2, dunk);
       }
       if (s2.seite === "+x" || v % 2) {
         const g = new three_module_exports.CylinderGeometry(1.3, 1.3, 0.2, 16);
         g.rotateX(Math.PI / 2);
-        g.translate(tm, Ht - 1.9, p + 0.1);
+        g.translate(tm, Ht - 1.9, p2 + 0.1);
         s2.geo(g, "#f6f3ea");
-        s2.q(tm - 0.06, tm + 0.06, Ht - 1.9, Ht - 1, p + 0.2, p + 0.25, "#222");
-        s2.kipp(0.7, 0.1, 0.05, tm + 0.3, Ht - 1.75, p + 0.25, "#222", 0.5);
+        s2.q(tm - 0.06, tm + 0.06, Ht - 1.9, Ht - 1, p2 + 0.2, p2 + 0.25, "#222");
+        s2.kipp(0.7, 0.1, 0.05, tm + 0.3, Ht - 1.75, p2 + 0.25, "#222", 0.5);
       }
     }
     S.quader(x0 - 0.7, Hw - 0.25, z0 - 0.7, x0 + w + 0.7, Hw + 0.45, z0 + d + 0.7, hell4);
@@ -50798,7 +51405,7 @@
     setzeDach(K3, fx0, fz0, 2 * (x0 + w / 2) - fx0 - tw * 0.8, 2 * (z0 + d / 2) - fz0, Hw + 6.1);
     lichtkuppeln2(K3, fx0, fz0, 2 * (x0 + w / 2) - fx0 - tw * 0.4, 2 * (z0 + d / 2) - fz0 - tw * 0.4, Hw + 6.1);
     technik2(K3, fx0, fz0, x0 + w - 6 - tw, z0 + d - 6 - tw * 0.5, Hw + 6.1, { max: 3, antenne: false });
-    const tc = tw + p, cx = x0 + w - tw + tc / 2, cz = z0 + d - tw + tc / 2;
+    const tc = tw + p2, cx = x0 + w - tw + tc / 2, cz = z0 + d - tw + tc / 2;
     S.box(tc + 1, 0.7, tc + 1, cx, Ht + 0.35, cz, hell4);
     if (eck === "kuppel") {
       zyl3(S, cx, Ht + 0.7, cz, tc * 0.42, 2.4, hell4, 16);
@@ -51797,19 +52404,19 @@
   function flugdach(K3, s2, um, typ, f) {
     const B2 = typ === "hypar" ? 13 : 17, T = typ === "hypar" ? 9 : 8, t0 = -0.4;
     if (typ === "hypar") {
-      const N = 8, yM = 6.2, c = 1.25, dick = 0.18, p = [];
+      const N = 8, yM = 6.2, c = 1.25, dick = 0.18, p2 = [];
       const P2 = (i, j, off) => {
         const x = i / N * 2 - 1, z2 = j / N * 2 - 1;
         return [um + x * B2 / 2, yM + c * x * z2 + off, t0 + T / 2 + z2 * T / 2];
       };
       for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
         const A = P2(i, j, 0), Bq = P2(i + 1, j, 0), C2 = P2(i + 1, j + 1, 0), D = P2(i, j + 1, 0);
-        p.push(...A, ...C2, ...Bq, ...A, ...D, ...C2);
+        p2.push(...A, ...C2, ...Bq, ...A, ...D, ...C2);
         const a2 = P2(i, j, -dick), b2 = P2(i + 1, j, -dick), c2 = P2(i + 1, j + 1, -dick), d2 = P2(i, j + 1, -dick);
-        p.push(...a2, ...b2, ...c2, ...a2, ...c2, ...d2);
+        p2.push(...a2, ...b2, ...c2, ...a2, ...c2, ...d2);
       }
       let g = new three_module_exports.BufferGeometry();
-      g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p, 3));
+      g.setAttribute("position", new three_module_exports.Float32BufferAttribute(p2, 3));
       g.computeVertexNormals();
       s2.geo(g, f);
       for (const [i0, j0, i1, j1] of [[0, 0, N, 0], [0, N, N, N], [0, 0, 0, N], [N, 0, N, N]]) {
@@ -52284,25 +52891,25 @@
     }
     S.add(g, farbe2);
   }
-  function oeffnung(p, u0, v0, u1, v1, art) {
-    p.moveTo(u0, v0);
-    p.lineTo(u1, v0);
+  function oeffnung(p2, u0, v0, u1, v1, art) {
+    p2.moveTo(u0, v0);
+    p2.lineTo(u1, v0);
     const b2 = u1 - u0;
     if (art === "spitz") {
       const vs2 = v1 - b2 * 0.866;
-      p.lineTo(u1, vs2);
-      p.absarc(u0, vs2, b2, 0, PI / 3, false);
-      p.absarc(u1, vs2, b2, 2 * PI / 3, PI, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc(u0, vs2, b2, 0, PI / 3, false);
+      p2.absarc(u1, vs2, b2, 2 * PI / 3, PI, false);
     } else if (art) {
       const vs2 = v1 - b2 / 2;
-      p.lineTo(u1, vs2);
-      p.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI, false);
     } else {
-      p.lineTo(u1, v1);
-      p.lineTo(u0, v1);
+      p2.lineTo(u1, v1);
+      p2.lineTo(u0, v1);
     }
-    p.lineTo(u0, v0);
-    return p;
+    p2.lineTo(u0, v0);
+    return p2;
   }
   function rechteck2(u0, v0, u1, v1) {
     const s2 = new three_module_exports.Shape();
@@ -52448,15 +53055,15 @@
     ["Kinowelt", "#232a31"],
     ["Juwelier Haas", "#6b4f8f"]
   ];
-  function einkaufszentrum(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function einkaufszentrum(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const w = p.w ?? 76, d = p.d ?? 58;
-    const variante2 = p.variante ?? waehle2(r, ["rotunde", "portal"]);
-    const G2 = p.geschosse ?? 3, eg = 6, gh = 5, H = eg + (G2 - 1) * gh;
-    const name2 = p.name ?? waehle2(r, ["Stadtgalerie", "L\xF6wen-Arkaden", "Forum am Markt", "Br\xFCckenpassage", "City-Center"]);
-    const haut = p.farbe ?? waehle2(r, ["#ebe6dc", "#e1e5e8", "#e9dfcf"]);
-    const akzent = p.akzent ?? waehle2(r, ["#c98a3a", "#4f7fa8", "#6f8f4f", "#a8574a", "#5b6f86"]);
+    const w = p2.w ?? 76, d = p2.d ?? 58;
+    const variante2 = p2.variante ?? waehle2(r, ["rotunde", "portal"]);
+    const G2 = p2.geschosse ?? 3, eg = 6, gh = 5, H = eg + (G2 - 1) * gh;
+    const name2 = p2.name ?? waehle2(r, ["Stadtgalerie", "L\xF6wen-Arkaden", "Forum am Markt", "Br\xFCckenpassage", "City-Center"]);
+    const haut = p2.farbe ?? waehle2(r, ["#ebe6dc", "#e1e5e8", "#e9dfcf"]);
+    const akzent = p2.akzent ?? waehle2(r, ["#c98a3a", "#4f7fa8", "#6f8f4f", "#a8574a", "#5b6f86"]);
     const glas2 = "#8fb2c4";
     const mieter = [...MIETER2].sort(() => r() - 0.5);
     let mi = 0;
@@ -52504,7 +53111,7 @@
     }
     S.box(aw + 0.4, 0.25, 1, ax0 + aw / 2, Hd + 5.3, az0 + 6, "#f4f4f2");
     const pz0 = z2 + 1, pz1 = az0 - 2.5;
-    if (p.parkdeck !== false && pz1 - pz0 > 12) {
+    if (p2.parkdeck !== false && pz1 - pz0 > 12) {
       const px1 = x + w - (variante2 === "rotunde" ? 2 : 2);
       parkplatz(S, x + 1.5, pz0, px1 - x - 1.5, pz1 - pz0, r, { y: Hd, dichte: 0.55, laternen: true });
       S.quader(x + 1, Hd, pz1, px1, Hd + 1.1, pz1 + 0.4, "#d9d6cf");
@@ -52542,13 +53149,13 @@
     for (let u = x + 6; u < x + w - 24; u += 11) baum(S, u, z2 + d + 4.5, r, 0.9);
     return { hoehe: H + 6, teile: S.anzahl };
   }
-  function parkhaus(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function parkhaus(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const w = p.w ?? 34, d = p.d ?? 42;
-    const variante2 = p.variante ?? waehle2(r, ["offen", "lamellen", "spirale"]);
-    const G2 = p.geschosse ?? 5, gh = 3;
-    const beton = p.farbe ?? waehle2(r, ["#d4d0c7", "#cbc7bf", "#d9d4ca"]);
+    const w = p2.w ?? 34, d = p2.d ?? 42;
+    const variante2 = p2.variante ?? waehle2(r, ["offen", "lamellen", "spirale"]);
+    const G2 = p2.geschosse ?? 5, gh = 3;
+    const beton = p2.farbe ?? waehle2(r, ["#d4d0c7", "#cbc7bf", "#d9d4ca"]);
     const brF = variante2 === "offen" ? waehle2(r, ["#e9e6df", "#e3c46a", "#7fb0c9", "#e2e4e6"]) : "#e6e3dc";
     const lamF = waehle2(r, ["#b9925f", "#9aa7b0", "#7d8a72"]);
     const sp = variante2 === "spirale" ? 15 : 0;
@@ -52789,8 +53396,8 @@
     g.translate(xc, y0 + h / 2, cz);
     S.add(g, farbe2);
   }
-  function langhausKirche(S, scene2, p, c) {
-    const { x, z: z2 } = p, w = p.w, d = p.d;
+  function langhausKirche(S, scene2, p2, c) {
+    const { x, z: z2 } = p2, w = p2.w, d = p2.d;
     const st = c.stein, sH = c.hell, glas2 = c.glas ?? "#435666", dach3 = c.dach, bog = c.bogen;
     let tB = 0;
     if (c.turm === "west" || c.turm === "seitlich") tB = clamp6(d * 0.45, 5, c.turmMax ?? 11);
@@ -52946,8 +53553,8 @@
     }
     return top;
   }
-  function klassizistischeKirche(S, scene2, p, c) {
-    const { x, z: z2, w, d } = p, r = c.r, st = c.stein, sH = c.hell, kup = c.helmF;
+  function klassizistischeKirche(S, scene2, p2, c) {
+    const { x, z: z2, w, d } = p2, r = c.r, st = c.stein, sH = c.hell, kup = c.helmF;
     const pt = clamp6(d * 0.2, 3, 5.5), bz1 = z2 + d - pt;
     let top;
     if (c.form === "rotunde") {
@@ -53013,8 +53620,8 @@
     }
     return top;
   }
-  function nachkriegsKirche(S, scene2, p, c) {
-    const { x, z: z2, w, d } = p, r = c.r, st = c.stein, bunt4 = c.glasBunt;
+  function nachkriegsKirche(S, scene2, p2, c) {
+    const { x, z: z2, w, d } = p2, r = c.r, st = c.stein, bunt4 = c.glasBunt;
     const ct = clamp6(d * 0.18, 2.8, 4.2), Hc = clamp6(w * 0.62, 18, 34);
     const bx0 = x + 0.5, bx1 = x + w - ct - 3.5, bz0 = z2 + 0.8, bz1 = z2 + d - 0.8, bw = bx1 - bx0, bd = bz1 - bz0;
     let top;
@@ -53069,8 +53676,8 @@
     S.quader(bx1, 0.3, tz - 0.25, tx - ct / 2, 2, tz + 0.25, st);
     return Math.max(top, Hc + 3.2);
   }
-  function domNeugotik(S, scene2, p, c) {
-    const { x, z: z2, w, d } = p, r = c.r;
+  function domNeugotik(S, scene2, p2, c) {
+    const { x, z: z2, w, d } = p2, r = c.r;
     const stein = c.stein, sH = heller(stein, 0.05), dachF = c.dach, helmF = c.helmF, glas2 = "#435666";
     const t = 11, Ht = c.Ht ?? zw(r, 50, 62), spH = c.spitzeH ?? zw(r, 26, 34);
     const ax1 = x + w - t, cz = z2 + d / 2, nb = 14, nz0 = cz - nb / 2, nz1 = cz + nb / 2;
@@ -53174,12 +53781,12 @@
     }
     return Ht + 7 + spH + 3;
   }
-  function skaliert(S, scene2, p, natW, natD, bau2) {
-    const s2 = Math.min(1, p.w / natW, p.d / natD);
-    if (s2 >= 0.999) return bau2(S, scene2, p);
+  function skaliert(S, scene2, p2, natW, natD, bau2) {
+    const s2 = Math.min(1, p2.w / natW, p2.d / natD);
+    if (s2 >= 0.999) return bau2(S, scene2, p2);
     const T = new Sammler(), grp = new three_module_exports.Group();
-    const erg = bau2(T, grp, { ...p, x: 0, z: 0, w: natW, d: natD });
-    const ox = p.x + (p.w - natW * s2) / 2, oz = p.z + (p.d - natD * s2) / 2;
+    const erg = bau2(T, grp, { ...p2, x: 0, z: 0, w: natW, d: natD });
+    const ox = p2.x + (p2.w - natW * s2) / 2, oz = p2.z + (p2.d - natD * s2) / 2;
     for (const [farbe2, gs] of T.teile) for (const g of gs) {
       g.scale(s2, s2, s2);
       g.translate(ox, 0, oz);
@@ -53210,8 +53817,8 @@
   var SCHIEFER = ["#56636c", "#5d6a72", "#4f5a62"];
   var ZIEGEL = ["#b4583f", "#a24e38", "#c06548"];
   var KUPFER = ["#6f9a7d", "#7aa68a", "#5f8c72"];
-  function kirchenKonfig(stil, r, p) {
-    const k = clamp6(p.d / 22, 0.62, 1.3);
+  function kirchenKonfig(stil, r, p2) {
+    const k = clamp6(p2.d / 22, 0.62, 1.3);
     const c = { r };
     switch (stil) {
       case "romanisch":
@@ -53362,28 +53969,28 @@
     }
     c.hell = c.hell ?? heller(c.stein, 0.05);
     c.helmF = c.helmF ?? (c.dach && KUPFER.includes(c.dach) ? c.dach : waehle2(r, [...KUPFER, ...SCHIEFER]));
-    if (p.stein) {
-      c.stein = p.stein;
-      c.hell = stil === "barock" ? "#f7f4ee" : stil === "backsteingotik" ? dunkler(p.stein, 0.05) : heller(p.stein, 0.05);
+    if (p2.stein) {
+      c.stein = p2.stein;
+      c.hell = stil === "barock" ? "#f7f4ee" : stil === "backsteingotik" ? dunkler(p2.stein, 0.05) : heller(p2.stein, 0.05);
     }
-    if (p.dach) c.dach = p.dach;
-    if (p.helmFarbe) c.helmF = p.helmFarbe;
-    if (p.helm) c.helm = p.helm;
-    if (p.turm) c.turm = p.turm;
-    if (p.turmHoehe) c.Ht = p.turmHoehe;
-    if (p.quer !== void 0) c.quer = p.quer;
-    if (p.chor) c.chor = p.chor;
-    if (p.form) c.form = p.form;
+    if (p2.dach) c.dach = p2.dach;
+    if (p2.helmFarbe) c.helmF = p2.helmFarbe;
+    if (p2.helm) c.helm = p2.helm;
+    if (p2.turm) c.turm = p2.turm;
+    if (p2.turmHoehe) c.Ht = p2.turmHoehe;
+    if (p2.quer !== void 0) c.quer = p2.quer;
+    if (p2.chor) c.chor = p2.chor;
+    if (p2.form) c.form = p2.form;
     return c;
   }
-  function kirche(S, scene2, p) {
-    const seed = p.seed ?? 1, r = rng2(`kirche:${seed}`);
-    const dom = p.typ === "dom";
-    const w = p.w ?? (dom ? 86 : 46), d = p.d ?? (dom ? 38 : 20);
-    let stil = p.stil;
-    if (!stil) stil = dom ? waehle2(r, ["neugotik", "neugotik", "romanisch", "backsteingotik"]) : waehle2(r, REGION_KIRCHEN[p.region] ?? KIRCHEN_STILE);
-    const c = kirchenKonfig(stil, r, { ...p, w, d });
-    const q2 = { ...p, w, d };
+  function kirche(S, scene2, p2) {
+    const seed = p2.seed ?? 1, r = rng2(`kirche:${seed}`);
+    const dom = p2.typ === "dom";
+    const w = p2.w ?? (dom ? 86 : 46), d = p2.d ?? (dom ? 38 : 20);
+    let stil = p2.stil;
+    if (!stil) stil = dom ? waehle2(r, ["neugotik", "neugotik", "romanisch", "backsteingotik"]) : waehle2(r, REGION_KIRCHEN[p2.region] ?? KIRCHEN_STILE);
+    const c = kirchenKonfig(stil, r, { ...p2, w, d });
+    const q2 = { ...p2, w, d };
     let top;
     if (stil === "neugotik") {
       const e = skaliert(S, scene2, q2, Math.max(86, w * 0), 38, (S2, sc2, pp) => ({ hoehe: domNeugotik(S2, sc2, pp, c) }));
@@ -53405,16 +54012,16 @@
     }
     return { hoehe: top, teile: S.anzahl, stil };
   }
-  function rathausHistorisch(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function rathausHistorisch(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const stil = p.stil ?? waehle2(r, ["backstein", "sandstein"]);
-    const w = p.w ?? 44, d = p.d ?? 24;
+    const stil = p2.stil ?? waehle2(r, ["backstein", "sandstein"]);
+    const w = p2.w ?? 44, d = p2.d ?? 24;
     const back = stil === "backstein";
-    const wand2 = p.farbe ?? (back ? waehle2(r, ["#b06a52", "#a8664f", "#b9785e"]) : waehle2(r, ["#e3d3bd", "#ece5d7", "#e6d5bf"]));
+    const wand2 = p2.farbe ?? (back ? waehle2(r, ["#b06a52", "#a8664f", "#b9785e"]) : waehle2(r, ["#e3d3bd", "#ece5d7", "#e6d5bf"]));
     const hell4 = back ? "#ece5d7" : heller(wand2, 0.05), dachF = back ? waehle2(r, ["#5d6a72", "#4f5a62"]) : waehle2(r, ["#6f9a7d", "#5d6a72"]);
     const helmF = waehle2(r, ["#6f9a7d", "#7aa68a"]);
-    const G2 = p.geschosse ?? waehle2(r, [2, 3, 3, 4]), eg = 6, gh = 4.4, H = eg + G2 * gh;
+    const G2 = p2.geschosse ?? waehle2(r, [2, 3, 3, 4]), eg = 6, gh = 4.4, H = eg + G2 * gh;
     const ar = 4;
     const t = 9, tu0 = x + (back ? waehle2(r, [w - t - 4, w * 0.3, w - t - 4]) : waehle2(r, [(w - t) / 2, (w - t) / 2, w * 0.25])), tz0 = z2 + d - t + 1.5;
     const bog = back ? "spitz" : true;
@@ -53465,7 +54072,7 @@
         if (i < n - 1) platte(S, "+x", z2 + d / 2 - 0.6, y0 + 0.6, z2 + d / 2 + 0.6, y0 + hr / n, x + w + 0.4, "#55636f", "spitz");
       }
     }
-    const Ht = p.turmHoehe ?? (back ? H + 22 : H + 18);
+    const Ht = p2.turmHoehe ?? (back ? H + 22 : H + 18);
     S.quader(tu0, 0, tz0, tu0 + t, Ht, tz0 + t, wand2);
     for (const yy of [eg, H, Ht - 8]) gesims(S, tu0, tz0, t, t, yy, 0.6, 0.35, hell4);
     platte(S, "+z", tu0 + 2, 0.3, tu0 + t - 2, eg - 0.6, tz0 + t, "#4a3a2e", bog, 0.2);
@@ -53551,15 +54158,15 @@
     S.quader(x0, y0 + 1.1, zc - 1.48, x1 - 1, y0 + 1.5, zc + 1.48, streifen);
     for (let u = x0 + 26; u < x1 - 4; u += 26) S.quader(u - 0.4, y0 + 0.5, zc - 1.5, u + 0.4, y0 + 4.1, zc + 1.5, "#59636b");
   }
-  function hauptbahnhof(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function hauptbahnhof(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const w = p.w ?? 136, d = p.d ?? 98;
-    const hallen = p.hallen ?? waehle2(r, [1, 2, 3]);
-    const stein = p.stein ?? waehle2(r, ["#e3d3bd", "#d9c4a8", "#cdbfa6", "#e8dfcf"]);
+    const w = p2.w ?? 136, d = p2.d ?? 98;
+    const hallen = p2.hallen ?? waehle2(r, [1, 2, 3]);
+    const stein = p2.stein ?? waehle2(r, ["#e3d3bd", "#d9c4a8", "#cdbfa6", "#e8dfcf"]);
     const hell4 = heller(stein, 0.05), dachF = waehle2(r, ["#5d6a72", "#6f9a7d"]);
     const kupfer = "#6f9a7d";
-    const nur = !!p.nurEmpfang;
+    const nur = !!p2.nurEmpfang;
     const vp = nur ? 0 : 22, bt = nur ? d : 22;
     const zf = z2 + d - vp;
     const zb = zf - bt;
@@ -53644,7 +54251,7 @@
     schildPasst(scene2, "Hauptbahnhof", "+z", (mx0 + mx1) / 2, Hm - 1.6, zf + 0.6, 2.6, mb - 4, "#ffffff", "#24435e");
     S.quader(mx0 + 3, 4, zf + 0.6, mx1 - 3, 4.5, zf + 5, "#e8ecee");
     const ut = 10, ux0 = bx1 - pav + 2, uz0 = zf - ut - 1.5;
-    const Hu = p.turmHoehe ?? (nur ? 42 : 52);
+    const Hu = p2.turmHoehe ?? (nur ? 42 : 52);
     S.quader(ux0, 0, uz0, ux0 + ut, Hu, uz0 + ut, stein);
     for (const yy of [Hf + 4.4, Hu - 10]) gesims(S, ux0, uz0, ut, ut, yy, 0.7, 0.4, hell4);
     for (const seite of ["+z", "+x"]) {
@@ -53669,16 +54276,16 @@
     uhr(S, "+x", uz, 5.8, uu + 0.2, 1);
     return { hoehe: Hu + 13, teile: S.anzahl };
   }
-  function buerohochhaus(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function buerohochhaus(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const w = p.w ?? 26, d = p.d ?? 24;
-    const G2 = p.geschosse ?? Math.round(zw(r, 12, 30));
-    const variante2 = p.variante ?? waehle2(r, ["glas", "raster", "band", "rund", "stufen"]);
-    const name2 = p.name ?? waehle2(r, ["Hollenbach Bank", "Talwerk Versicherung", "Weserland Energie", "Kessler Immobilien", "Lindqvist AG", "Brandtner & Co"]);
+    const w = p2.w ?? 26, d = p2.d ?? 24;
+    const G2 = p2.geschosse ?? Math.round(zw(r, 12, 30));
+    const variante2 = p2.variante ?? waehle2(r, ["glas", "raster", "band", "rund", "stufen"]);
+    const name2 = p2.name ?? waehle2(r, ["Hollenbach Bank", "Talwerk Versicherung", "Weserland Energie", "Kessler Immobilien", "Lindqvist AG", "Brandtner & Co"]);
     const gh = 3.7, H0 = 8;
-    const glasF = p.glas ?? waehle2(r, ["#5f87a3", "#6c9a96", "#4f6f86", "#7d8f9c"]);
-    const stein = p.farbe ?? waehle2(r, ["#e6e2da", "#d6d9db", "#e3d6c4", "#c9ccce"]);
+    const glasF = p2.glas ?? waehle2(r, ["#5f87a3", "#6c9a96", "#4f6f86", "#7d8f9c"]);
+    const stein = p2.farbe ?? waehle2(r, ["#e6e2da", "#d6d9db", "#e3d6c4", "#c9ccce"]);
     const pfosten = "#d5dfe5";
     lochBlock(S, x, z2, w, d, 0, H0, stein, { y0: 0, geschosse: 2, gh: 4, raster: 4, fw: 3.2, fh: 2.9, bruestung: 0.6, tiefe: 0.5, innen: "#4b5965" });
     gesims(S, x, z2, w, d, H0, 0.5, 0.3, heller(stein, 0.04));
@@ -53765,12 +54372,12 @@
     rossberg: { name: "Rossberg Drogerie", farbe: "#1f8f8a", zweit: "#ffffff", text: "#ffffff", stil: "drogerie" },
     lindgruen: { name: "Lindgr\xFCn Drogerie", farbe: "#7a4f9a", zweit: "#ffffff", text: "#ffffff", stil: "drogerie" }
   };
-  function discounter(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function discounter(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const m = typeof p.marke === "object" ? p.marke : MARKEN[p.marke ?? "preisfuchs"];
+    const m = typeof p2.marke === "object" ? p2.marke : MARKEN[p2.marke ?? "preisfuchs"];
     const drog = m.stil === "drogerie";
-    const w = p.w ?? (drog ? 38 : 50), d = p.d ?? (drog ? 46 : 50);
+    const w = p2.w ?? (drog ? 38 : 50), d = p2.d ?? (drog ? 46 : 50);
     const bt = drog ? 18 : 24, H = drog ? 6 : 6.8;
     const bx0 = x + 1, bx1 = x + w - 1, bz0 = z2 + 1, bz1 = z2 + 1 + bt;
     const wandF = drog ? "#f1efea" : waehle2(r, ["#eceae4", "#e2e4e5"]);
@@ -53821,13 +54428,13 @@
     lederer: { name: "Lederer", farbe: "#22252a" },
     kaufring: { name: "Kaufring", farbe: "#3a7d44" }
   };
-  function konkurrenzAlt(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function konkurrenzAlt(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const marke4 = p.marke ?? "kaufstadt";
+    const marke4 = p2.marke ?? "kaufstadt";
     const m = KONKURRENZ[marke4];
     if (marke4 === "kaufstadt" || marke4 === "ostermann") {
-      const w2 = p.w ?? 52, d2 = p.d ?? 40, G2 = p.geschosse ?? 4, eg = 6, gh = 4.6, H2 = eg + G2 * gh;
+      const w2 = p2.w ?? 52, d2 = p2.d ?? 40, G2 = p2.geschosse ?? 4, eg = 6, gh = 4.6, H2 = eg + G2 * gh;
       const kachel2 = marke4 === "kaufstadt" ? "#eef0f1" : "#e9e3d6", fuge = marke4 === "kaufstadt" ? "#c3cbd2" : "#cfc6b5";
       S.quader(x, 0, z2, x + w2 - 1.4, eg, z2 + d2 - 1.4, "#4b5965");
       S.quader(x, eg, z2, x + w2, H2, z2 + d2, fuge);
@@ -53870,8 +54477,8 @@
       return { hoehe: H2 + 6, teile: S.anzahl };
     }
     if (marke4 === "brenner") {
-      const w2 = p.w ?? 32, d2 = p.d ?? 26, G2 = p.geschosse ?? 3, eg = 6, gh = 4.2, H2 = eg + G2 * gh;
-      const stein = p.farbe ?? waehle2(r, ["#e3d3bd", "#e8dcc6", "#ece5d7"]), hell4 = heller(stein, 0.05);
+      const w2 = p2.w ?? 32, d2 = p2.d ?? 26, G2 = p2.geschosse ?? 3, eg = 6, gh = 4.2, H2 = eg + G2 * gh;
+      const stein = p2.farbe ?? waehle2(r, ["#e3d3bd", "#e8dcc6", "#ece5d7"]), hell4 = heller(stein, 0.05);
       const ob = { y0: eg, geschosse: G2, gh, raster: 3.4, fw: 1.5, fh: 2.6, bogen: (k) => k === G2 - 1, tiefe: 0.6 };
       lochBlock(S, x, z2, w2, d2, eg, H2, stein, ob);
       for (const seite of ["+z", "+x"]) {
@@ -53910,7 +54517,7 @@
       zyl4(S, Rt + 0.3, Rt + 0.3, 1.4, cx, eg - 1.2, cz, m.farbe, 16);
       return { hoehe: H2 + 13, teile: S.anzahl };
     }
-    const w = p.w ?? 34, d = p.d ?? 26, H = p.hoehe ?? 21;
+    const w = p2.w ?? 34, d = p2.d ?? 26, H = p2.hoehe ?? 21;
     const schwarz = m.farbe, hellInnen = "#f1e9da";
     S.quader(x, 0, z2, x + w, H, z2 + d, schwarz);
     const sch = 8.6;
@@ -53969,16 +54576,16 @@
     if (o.name) schildPasst(scene2, o.name, "+z", (u0 + u1) / 2, y0 + hS + 1.1, f + tiefe + 0.8, 1.2, u1 - u0 - 3, "#3a2e24");
     return yg + hg;
   }
-  function kulturbauKlassisch(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function kulturbauKlassisch(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const art = p.art ?? waehle2(r, ["theater", "oper", "museum"]);
-    const stein = p.farbe ?? waehle2(r, ["#ece5d7", "#e3d3bd", "#e8dfcf", "#dcd2c2"]);
+    const art = p2.art ?? waehle2(r, ["theater", "oper", "museum"]);
+    const stein = p2.farbe ?? waehle2(r, ["#ece5d7", "#e3d3bd", "#e8dfcf", "#dcd2c2"]);
     const hell4 = heller(stein, 0.05);
     const kupfer = FARBEN3.kupfer[0], dachF = "#5d6a72";
     if (art === "museum") {
-      const w2 = p.w ?? 64, d2 = p.d ?? 32, H2 = 15;
-      const name3 = p.name ?? "Kunstmuseum";
+      const w2 = p2.w ?? 64, d2 = p2.d ?? 32, H2 = 15;
+      const name3 = p2.name ?? "Kunstmuseum";
       const ob2 = { y0: 1.4, geschosse: 2, gh: 6.4, raster: 5, fw: 2, fh: 4, bogen: (k) => k === 1, tiefe: 0.6, innen: "#55636f" };
       lochBlock(S, x, z2, w2, d2 - 5, 0, H2, stein, ob2);
       gesims(S, x, z2, w2, d2 - 5, 1.4, 0.5, 0.2, hell4);
@@ -54001,8 +54608,8 @@
       return { hoehe: Math.max(top, H2 + 19.5), teile: S.anzahl };
     }
     if (art === "theater") {
-      const w2 = p.w ?? 40, d2 = p.d ?? 46, H2 = 16;
-      const name3 = p.name ?? "Stadttheater";
+      const w2 = p2.w ?? 40, d2 = p2.d ?? 46, H2 = 16;
+      const name3 = p2.name ?? "Stadttheater";
       const ob2 = { y0: 1.4, geschosse: 3, gh: 4.8, raster: 3.6, fw: 1.6, fh: 2.8, bogen: (k) => k === 1, tiefe: 0.6 };
       lochBlock(S, x, z2, w2, d2 - 6, 0, H2, stein, ob2);
       for (const seite of ["+z", "+x"]) {
@@ -54020,8 +54627,8 @@
       belag(S, x - 5, z2 + d2 - 1, x + w2 + 5, z2 + d2 + 6, "#e2ddd2");
       return { hoehe: H2 + 17, teile: S.anzahl };
     }
-    const w = p.w ?? 58, d = p.d ?? 50, H = 18;
-    const name2 = p.name ?? "Opernhaus";
+    const w = p2.w ?? 58, d = p2.d ?? 50, H = 18;
+    const name2 = p2.name ?? "Opernhaus";
     const ob = { y0: 1.4, geschosse: 3, gh: 5.4, raster: 4.2, fw: 2, fh: 3.4, bogen: true, tiefe: 0.7 };
     lochBlock(S, x, z2, w, d - 8, 0, H, stein, ob);
     gesims(S, x, z2, w, d - 8, H, 1.2, 0.6, hell4);
@@ -54055,11 +54662,11 @@
     belag(S, x - 5, z2 + d - 1, x + w + 5, z2 + d + 6, "#e2ddd2");
     return { hoehe: H + 25, teile: S.anzahl };
   }
-  function markthalleAlt(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function markthalleAlt(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const variante2 = p.variante ?? waehle2(r, ["backstein", "eisen"]);
-    const w = p.w ?? 54, d = p.d ?? 30;
+    const variante2 = p2.variante ?? waehle2(r, ["backstein", "eisen"]);
+    const w = p2.w ?? 54, d = p2.d ?? 30;
     const dt = d - 8;
     const back = variante2 === "backstein";
     const wand2 = back ? waehle2(r, ["#b06a52", "#a8664f", "#b9785e"]) : "#e3d3bd";
@@ -54126,11 +54733,11 @@
     nordtank: { name: "Nordtank", farbe: "#1d6fb8", zweit: "#ffffff", text: "#ffffff" },
     ventura: { name: "Ventura", farbe: "#2f8f4e", zweit: "#f2c23a", text: "#ffffff" }
   };
-  function tankstelle(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function tankstelle(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const m = typeof p.marke === "object" ? p.marke : TANKMARKEN[p.marke ?? "flink"];
-    const w = p.w ?? 38, d = p.d ?? 34;
+    const m = typeof p2.marke === "object" ? p2.marke : TANKMARKEN[p2.marke ?? "flink"];
+    const w = p2.w ?? 38, d = p2.d ?? 34;
     belag(S, x, z2, x + w, z2 + d, "#9aa0a6");
     const sx0 = x + 2, sx1 = x + 22, sz0 = z2 + 1.5, sz1 = z2 + 10, Hs = 4.4;
     S.quader(sx0, 0, sz0, sx1, Hs, sz1, "#eef0f1");
@@ -54174,16 +54781,16 @@
     preise.forEach(([t, v], i) => schildPasst(scene2, `${t} ${v.toFixed(2).replace(".", ",")}`, "+z", px2, ph - 2.4 - i * 1.25, pz4 + 0.5, 0.75, 3.3, "#f4f1e6"));
     return { hoehe: ph + 0.2, teile: S.anzahl };
   }
-  function hotelAlt(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p;
+  function hotelAlt(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2;
     const r = rng2(seed);
-    const stil = p.stil ?? waehle2(r, ["modern", "grand"]);
-    const G2 = p.geschosse ?? Math.round(zw(r, 8, 10.4));
-    const name2 = p.name ?? waehle2(r, ["Hotel Lindenhof", "Hotel Am Stadtpark", "Hotel F\xFCrstenhof", "Hotel Zur Post", "Hotel Rheinblick"]);
+    const stil = p2.stil ?? waehle2(r, ["modern", "grand"]);
+    const G2 = p2.geschosse ?? Math.round(zw(r, 8, 10.4));
+    const name2 = p2.name ?? waehle2(r, ["Hotel Lindenhof", "Hotel Am Stadtpark", "Hotel F\xFCrstenhof", "Hotel Zur Post", "Hotel Rheinblick"]);
     if (stil === "modern") {
-      const w2 = p.w ?? 36, d2 = p.d ?? 16, eg2 = 5, gh2 = 3.2, H2 = eg2 + G2 * gh2;
-      const wand2 = p.farbe ?? waehle2(r, ["#f1efea", "#e6e8e9", "#ece4d6"]);
-      const ak = p.akzent ?? waehle2(r, ["#2f6f8f", "#c98a3a", "#3f7d56", "#6b4f8f"]);
+      const w2 = p2.w ?? 36, d2 = p2.d ?? 16, eg2 = 5, gh2 = 3.2, H2 = eg2 + G2 * gh2;
+      const wand2 = p2.farbe ?? waehle2(r, ["#f1efea", "#e6e8e9", "#ece4d6"]);
+      const ak = p2.akzent ?? waehle2(r, ["#2f6f8f", "#c98a3a", "#3f7d56", "#6b4f8f"]);
       S.quader(x, 0, z2, x + w2 - 0.6, eg2, z2 + d2 - 0.6, "#56707f");
       for (let u = x + 1; u < x + w2; u += 3) S.box(0.3, eg2 - 0.3, 0.3, u, eg2 / 2, z2 + d2 - 0.4, "#e8ecee");
       const ob2 = { y0: eg2, geschosse: G2, gh: gh2, raster: 3, fw: 1.7, fh: 2.1, tiefe: 0.5 };
@@ -54210,8 +54817,8 @@
       }
       return { hoehe: H2 + 3.7, teile: S.anzahl };
     }
-    const w = p.w ?? 42, d = p.d ?? 22, eg = 5.5, gh = 3.6, Gm = 2, Gn = Math.max(4, G2 - Gm - 1), H = eg + Gn * gh;
-    const stein = p.farbe ?? waehle2(r, ["#efe6d6", "#e8dfcf", "#e3d3bd"]);
+    const w = p2.w ?? 42, d = p2.d ?? 22, eg = 5.5, gh = 3.6, Gm = 2, Gn = Math.max(4, G2 - Gm - 1), H = eg + Gn * gh;
+    const stein = p2.farbe ?? waehle2(r, ["#efe6d6", "#e8dfcf", "#e3d3bd"]);
     const hell4 = heller(stein, 0.05);
     const loE = (u0, L2) => rasterLoecher(u0, u0 + L2, { y0: 0, geschosse: 1, gh: eg, raster: 4.2, fw: 2.2, fh: 3.6, bruestung: 0.8, bogen: true });
     S.quader(x, 0, z2, x + w - 0.4, eg, z2 + d - 0.4, "#55636f");
@@ -54274,11 +54881,11 @@
     mitte: ["renaissance", "sandstein", "barock", "hochhaus", "neugotik"]
   };
   var RATHAUS_NENN = { backstein: [44, 24], sandstein: [44, 24], renaissance: [38, 20], neugotik: [44, 24], barock: [40, 22], hochhaus: [44, 30] };
-  function rathaus(S, scene2, p) {
-    const r = rng2(`rathaus:${p.seed ?? 1}`);
-    const stil = p.stil ?? waehle2(r, REGION_RATHAUS[p.region] ?? RATHAUS_STILE);
+  function rathaus(S, scene2, p2) {
+    const r = rng2(`rathaus:${p2.seed ?? 1}`);
+    const stil = p2.stil ?? waehle2(r, REGION_RATHAUS[p2.region] ?? RATHAUS_STILE);
     const [nw, nd] = RATHAUS_NENN[stil] ?? [44, 24];
-    const q2 = { ...p, w: p.w ?? nw, d: p.d ?? nd };
+    const q2 = { ...p2, w: p2.w ?? nw, d: p2.d ?? nd };
     const bau2 = { backstein: rathausHistorisch, sandstein: rathausHistorisch, renaissance: rathausRenaissance, neugotik: rathausNeugotik, barock: rathausBarock, hochhaus: rathausHochhaus }[stil];
     const e = skaliert(
       S,
@@ -54286,7 +54893,7 @@
       q2,
       Math.min(q2.w, nw) < nw * 0.75 ? nw * 0.75 : Math.min(q2.w, nw),
       Math.min(q2.d, nd) < nd * 0.7 ? nd * 0.7 : Math.min(q2.d, nd),
-      (S2, sc2, pp) => bau2(S2, sc2, { ...pp, stil, seed: p.seed })
+      (S2, sc2, pp) => bau2(S2, sc2, { ...pp, stil, seed: p2.seed })
     );
     return { hoehe: e.hoehe, teile: S.anzahl, stil };
   }
@@ -54320,8 +54927,8 @@
     dg.translate(seite === "+z" ? u : f, 0, seite === "+z" ? f : u);
     S.add(dg, dachF);
   }
-  function rathausRenaissance(S, scene2, p) {
-    const { x, z: z2, w, d } = p, r = rng2(`rr:${p.seed}`);
+  function rathausRenaissance(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2, r = rng2(`rr:${p2.seed}`);
     const wand2 = waehle2(r, ["#e9d79e", "#e6d5bf", "#d9b9a4", "#efe6d6", "#cfd6c0"]), hell4 = "#f4efe4", zier = waehle2(r, ["#b99a74", "#a9805f", "#c4a57e"]);
     const dachF = waehle2(r, ["#b4583f", "#a24e38", "#56636c"]), glas2 = "#55636f";
     const G2 = 3, eg = 5.5, gh = 4, H = eg + G2 * gh;
@@ -54375,8 +54982,8 @@
     schildPasst(scene2, "Rathaus", "+z", x + w * 0.62, eg - 0.6, z2 + d + 0.1, 0.9, 6, "#3a2e24");
     return { hoehe: Math.max(top, H + hr), teile: S.anzahl };
   }
-  function rathausNeugotik(S, scene2, p) {
-    const { x, z: z2, w, d } = p, r = rng2(`rn:${p.seed}`);
+  function rathausNeugotik(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2, r = rng2(`rn:${p2.seed}`);
     const back = r() < 0.3;
     const stein = back ? waehle2(r, ["#b06a52", "#a8664f"]) : waehle2(r, ["#cfc6b4", "#d6cdb9", "#c9bfae", "#ddd2bd"]);
     const hell4 = back ? "#e3d6c0" : heller(stein, 0.06), dachF = waehle2(r, ["#4f5a62", "#56636c"]), glas2 = "#55636f";
@@ -54406,7 +55013,7 @@
       spitze(S, 0.4, 2.2, u, H + 7.6, z2 + d - 0.3, hell4, 4);
     }
     const t = clamp6(w * 0.22, 7, 10), tx0 = x + waehle2(r, [w / 2 - t / 2, w / 2 - t / 2, w - t - 6, w * 0.22]), tz0 = z2 + d - t + 0.8;
-    const Ht = p.turmHoehe ?? H + clamp6(w * 0.75, 22, 36);
+    const Ht = p2.turmHoehe ?? H + clamp6(w * 0.75, 22, 36);
     S.quader(tx0, 0, tz0, tx0 + t, Ht, tz0 + t, stein);
     for (const yy of [H, Ht - 9]) gesims(S, tx0, tz0, t, t, yy, 0.6, 0.35, hell4);
     S.quader(tx0 - 0.8, Ht - 9.4, tz0 - 0.8, tx0 + t + 0.8, Ht - 9, tz0 + t + 0.8, hell4);
@@ -54426,8 +55033,8 @@
     schildPasst(scene2, "Rathaus", "+z", tx0 + t / 2, 5.8, tz0 + t, 0.9, t - 1, back ? "#ffffff" : "#3a2e24");
     return { hoehe: top, teile: S.anzahl };
   }
-  function rathausBarock(S, scene2, p) {
-    const { x, z: z2, w, d } = p, r = rng2(`rb:${p.seed}`);
+  function rathausBarock(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2, r = rng2(`rb:${p2.seed}`);
     const wand2 = waehle2(r, ["#f1e6c8", "#efe0d6", "#e9dcc1", "#f2d9b6", "#e3e8dc"]), hell4 = "#f7f4ee", dachF = waehle2(r, ["#56636c", "#b4583f", "#4f5a62"]), glas2 = "#55636f";
     const eg = 5, gh = 4.8, G2 = waehle2(r, [2, 2, 3]), H = eg + G2 * gh, rv = 1.2;
     const rw = clamp6(w * 0.34, 9, 15), cx = x + w / 2;
@@ -54477,8 +55084,8 @@
     const top = turmHelm(S, "welsch", cx, H + 10.8, dz, 3.4, waehle2(r, ["#6f9a7d", "#56636c"]), hell4, "kugel");
     return { hoehe: top, teile: S.anzahl };
   }
-  function rathausHochhaus(S, scene2, p) {
-    const { x, z: z2, w, d } = p, r = rng2(`rh:${p.seed}`);
+  function rathausHochhaus(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2, r = rng2(`rh:${p2.seed}`);
     const beton = waehle2(r, ["#d4d1ca", "#c9c6be", "#dcd6c8", "#b9785e"]), alu = waehle2(r, ["#c9d1d6", "#d8b45a", "#3a3f44"]), glas2 = waehle2(r, ["#56707f", "#4f6676", "#6a7f8c"]);
     const G2 = Math.round(zw(r, 9, 14)), gh = 3.4;
     const tw = clamp6(w * zw(r, 0.38, 0.55), 12, 24), td = clamp6(d * 0.42, 10, 14), tx0 = r() < 0.5 ? x + 1 : x + w - tw - 1, tz0 = z2 + 0.5, Ht = 4 + G2 * gh;
@@ -54513,11 +55120,11 @@
     }
     return { hoehe: Ht + 4, teile: S.anzahl };
   }
-  function schloss(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p, r = rng2(`schloss:${seed}`);
-    const w = p.w ?? 120, d = p.d ?? 100;
+  function schloss(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2, r = rng2(`schloss:${seed}`);
+    const w = p2.w ?? 120, d = p2.d ?? 100;
     const wand2 = waehle2(r, ["#ecd9a0", "#f1ece2", "#e9cfc3", "#e3d3bd", "#e6e2c8"]), hell4 = "#f7f4ee", dachF = waehle2(r, ["#56636c", "#6f9a7d", "#4f5a62"]);
-    const mitte = p.mitte ?? waehle2(r, ["kuppel", "giebel", "turm"]);
+    const mitte = p2.mitte ?? waehle2(r, ["kuppel", "giebel", "turm"]);
     const G2 = 3, gh = 4.6, H = 1.2 + G2 * gh, cd = 16, ww = 14;
     const wl = clamp6(d * zw(r, 0.25, 0.4), 16, 40);
     const ob = { y0: 1.2, geschosse: G2, gh, raster: 3.4, fw: 1.5, fh: 2.8, tiefe: 0.6, bogen: (k) => k === 1 };
@@ -54608,12 +55215,12 @@
   function zinnen(S, seite, u0, u1, y, f, farbe2, b2 = 0.9) {
     for (let u = u0 + b2 / 2; u < u1 - b2 / 2; u += b2 * 2) sbox(S, seite, u, u + b2, y, y + 1, f - 0.7, f, farbe2);
   }
-  function stadttor(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p, r = rng2(`tor:${seed}`);
-    const art = p.art ?? waehle2(r, ["turm", "doppel", "barock"]);
-    const w = p.w ?? 20, d = p.d ?? 12;
+  function stadttor(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2, r = rng2(`tor:${seed}`);
+    const art = p2.art ?? waehle2(r, ["turm", "doppel", "barock"]);
+    const w = p2.w ?? 20, d = p2.d ?? 12;
     const back = r() < 0.5;
-    const stein = p.stein ?? (back ? waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]) : waehle2(r, ["#cfc6b4", "#c9bfae", "#d9c4a8", "#bfae96"]));
+    const stein = p2.stein ?? (back ? waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]) : waehle2(r, ["#cfc6b4", "#c9bfae", "#d9c4a8", "#bfae96"]));
     const hell4 = back ? "#e3d6c0" : heller(stein, 0.05), dachF = waehle2(r, ["#56636c", "#b4583f", "#6f9a7d"]), dunkel3 = "#3a3f44";
     if (art === "barock") {
       const st = waehle2(r, ["#e3d3bd", "#ece5d7", "#d9c4a8"]), hl = heller(st, 0.05), H2 = clamp6(w * 0.75, 12, 18);
@@ -54675,11 +55282,11 @@
     if (back) for (const s2 of [-1, 1]) platte(S, "+z", tx0 + t / 2 + s2 * t * 0.3 - 0.4, H * 0.42, tx0 + t / 2 + s2 * t * 0.3 + 0.4, H * 0.82, tz0 + t, "#ece6da", "spitz", 0.08);
     return { hoehe: top, teile: S.anzahl };
   }
-  function stadtmauerturm(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p, r = rng2(`mauer:${seed}`);
-    const art = p.art ?? waehle2(r, ["rund", "eckig", "schale"]);
-    const w = p.w ?? 20, d = p.d ?? 10;
-    const stein = p.stein ?? waehle2(r, ["#a8583f", "#b9a58a", "#c9bfae", "#9e8e78", "#b06a52"]), dachF = waehle2(r, ["#b4583f", "#56636c", "#a24e38"]), dunkel3 = "#3a3f44";
+  function stadtmauerturm(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2, r = rng2(`mauer:${seed}`);
+    const art = p2.art ?? waehle2(r, ["rund", "eckig", "schale"]);
+    const w = p2.w ?? 20, d = p2.d ?? 10;
+    const stein = p2.stein ?? waehle2(r, ["#a8583f", "#b9a58a", "#c9bfae", "#9e8e78", "#b06a52"]), dachF = waehle2(r, ["#b4583f", "#56636c", "#a24e38"]), dunkel3 = "#3a3f44";
     const mz0 = z2 + 0.5, mz1 = z2 + 2.5, mh = 7;
     S.quader(x, 0, mz0, x + w, mh, mz1, stein);
     zinnen(S, "+z", x, x + w, mh, mz1, stein);
@@ -54723,10 +55330,10 @@
     spitze(S, R9 + 0.5, R9 * 2.4, cx, H, cz, dachF, 18);
     return { hoehe: H + R9 * 2.4, teile: S.anzahl };
   }
-  function denkmal(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p, r = rng2(`denkmal:${seed}`);
-    const art = p.art ?? waehle2(r, ["saeule", "reiter", "obelisk"]);
-    const w = p.w ?? 16, d = p.d ?? 16, cx = x + w / 2, cz = z2 + d / 2;
+  function denkmal(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2, r = rng2(`denkmal:${seed}`);
+    const art = p2.art ?? waehle2(r, ["saeule", "reiter", "obelisk"]);
+    const w = p2.w ?? 16, d = p2.d ?? 16, cx = x + w / 2, cz = z2 + d / 2;
     const stein = waehle2(r, ["#d6cdb9", "#c9c4b8", "#b9b0a2"]), bronze = waehle2(r, ["#5f8a78", "#6b8f7f", "#7a6a4f"]), gold = "#d8b45a";
     const s2 = clamp6(Math.min(w, d) / 16, 0.6, 1.4);
     for (let i = 0; i < 3; i++) S.box(w - 2 - i * 1.6, 0.35, d - 2 - i * 1.6, cx, 0.3 + i * 0.35 + 0.175, cz, i % 2 ? heller(stein, 0.04) : stein);
@@ -54801,10 +55408,10 @@
     S.box(0.75 * s2, 0.15 * s2, 0.75 * s2, cx - 0.05 * s2, hy + 4.95 * s2, cz, bronze);
     return { hoehe: hy + 5.2 * s2, teile: S.anzahl };
   }
-  function wasserturm(S, scene2, p) {
-    const { x, z: z2, seed = 1 } = p, r = rng2(`wasser:${seed}`);
-    const art = p.art ?? waehle2(r, ["backstein", "pilz", "stein"]);
-    const w = p.w ?? 18, d = p.d ?? 18, cx = x + w / 2, cz = z2 + d / 2;
+  function wasserturm(S, scene2, p2) {
+    const { x, z: z2, seed = 1 } = p2, r = rng2(`wasser:${seed}`);
+    const art = p2.art ?? waehle2(r, ["backstein", "pilz", "stein"]);
+    const w = p2.w ?? 18, d = p2.d ?? 18, cx = x + w / 2, cz = z2 + d / 2;
     const R9 = clamp6(Math.min(w, d) * 0.3, 3.5, 6.5);
     if (art === "pilz") {
       const b2 = waehle2(r, ["#e2e0da", "#d6d3cc"]), H2 = zw(r, 26, 34);
@@ -54881,9 +55488,9 @@
     spitze(S, 1.1, 2.6, cx, H + 11.1 + R9 * 1.5, cz, dachF, 8);
     return { hoehe: H + 13.7 + R9 * 1.5, teile: S.anzahl };
   }
-  function theaterModern(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`thm:${p.seed}`);
-    const w = p.w ?? 48, d = p.d ?? 40, name2 = p.name ?? waehle2(r, ["Schauspielhaus", "Stadttheater", "Kammerspiele"]);
+  function theaterModern(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`thm:${p2.seed}`);
+    const w = p2.w ?? 48, d = p2.d ?? 40, name2 = p2.name ?? waehle2(r, ["Schauspielhaus", "Stadttheater", "Kammerspiele"]);
     const platten2 = waehle2(r, ["#e9e4d8", "#dcd6c8", "#d4d1ca"]), glas2 = "#7f9fb0", weiss2 = "#f4f4f2";
     const fd = 10, Hf = 9;
     S.quader(x + 1, 0, z2 + d - fd, x + w - 1, Hf, z2 + d - 0.5, glas2);
@@ -54901,9 +55508,9 @@
     schildPasst(scene2, name2, "+z", x + w / 2, Hf + 1.6, z2 + d + 2.5, 1.1, w * 0.5, "#2f3b44");
     return { hoehe: 28, teile: S.anzahl };
   }
-  function museumModern(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`mum:${p.seed}`);
-    const w = p.w ?? 54, d = p.d ?? 32, name2 = p.name ?? waehle2(r, ["Kunsthalle", "Museum am Fluss", "Forum f\xFCr Kunst"]);
+  function museumModern(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`mum:${p2.seed}`);
+    const w = p2.w ?? 54, d = p2.d ?? 32, name2 = p2.name ?? waehle2(r, ["Kunsthalle", "Museum am Fluss", "Forum f\xFCr Kunst"]);
     const weiss2 = waehle2(r, ["#f2f1ec", "#e9e7e1", "#d9d4c8"]), dunkel3 = "#3a3f44";
     S.quader(x + 1, 0, z2 + 1, x + w * 0.62, 12, z2 + d - 6, weiss2);
     S.quader(x + w * 0.35, 6, z2 + d * 0.25, x + w - 1, 17, z2 + d - 1, weiss2);
@@ -54928,9 +55535,9 @@
     }
     return { hoehe: 17, teile: S.anzahl };
   }
-  function museumBackstein(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`mub:${p.seed}`);
-    const w = p.w ?? 56, d = p.d ?? 28, name2 = p.name ?? waehle2(r, ["Landesmuseum", "Stadtmuseum", "Naturkundemuseum"]);
+  function museumBackstein(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`mub:${p2.seed}`);
+    const w = p2.w ?? 56, d = p2.d ?? 28, name2 = p2.name ?? waehle2(r, ["Landesmuseum", "Stadtmuseum", "Naturkundemuseum"]);
     const bs = waehle2(r, ["#a8583f", "#b06a52"]), hell4 = "#e3d6c0", dachF = waehle2(r, ["#56636c", "#6f9a7d"]);
     const H = 15, ob = { y0: 1.2, geschosse: 2, gh: 6.6, raster: 4, fw: 2.2, fh: 4, bogen: true, tiefe: 0.7 };
     lochBlock(S, x, z2, w, d, 0, H, bs, ob);
@@ -54955,9 +55562,9 @@
     schildPasst(scene2, name2, "+z", tx0 + t / 2, 8.2, tz0 + t, 0.9, t - 1, "#ffffff");
     return { hoehe: Ht + 6.3, teile: S.anzahl };
   }
-  function markthalleBeton(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`mhb:${p.seed}`);
-    const w = p.w ?? 54, d = p.d ?? 30, dt = d - 6;
+  function markthalleBeton(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`mhb:${p2.seed}`);
+    const w = p2.w ?? 54, d = p2.d ?? 30, dt = d - 6;
     const beton = waehle2(r, ["#d6d3cc", "#cfccc6", "#e2e0da"]), glas2 = "#7f9fb0";
     S.quader(x, 0, z2, x + w, 6, z2 + dt, beton);
     S.quader(x + 1, 0.3, z2 + dt, x + w - 1, 4.6, z2 + dt + 0.06, glas2);
@@ -54991,11 +55598,11 @@
     }
     return { hoehe: 6 + hv, teile: S.anzahl };
   }
-  function hotelTurm(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`hoteltu:${p.seed}`);
-    const w = p.w ?? 30, d = p.d ?? 24, G2 = p.geschosse ?? Math.round(zw(r, 14, 20)), gh = 3.1;
-    const name2 = p.name ?? waehle2(r, ["Hotel Panorama", "Hotel Kontinental", "Hotel Rheinturm", "Parkhotel"]);
-    const wand2 = waehle2(r, ["#efece4", "#e3e6e8", "#e6dccb"]), ak = p.akzent ?? waehle2(r, ["#2f6f8f", "#c98a3a", "#6b4f8f"]);
+  function hotelTurm(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`hoteltu:${p2.seed}`);
+    const w = p2.w ?? 30, d = p2.d ?? 24, G2 = p2.geschosse ?? Math.round(zw(r, 14, 20)), gh = 3.1;
+    const name2 = p2.name ?? waehle2(r, ["Hotel Panorama", "Hotel Kontinental", "Hotel Rheinturm", "Parkhotel"]);
+    const wand2 = waehle2(r, ["#efece4", "#e3e6e8", "#e6dccb"]), ak = p2.akzent ?? waehle2(r, ["#2f6f8f", "#c98a3a", "#6b4f8f"]);
     lochBlock(S, x, z2, w, d, 0, 7, wand2, { y0: 0, geschosse: 1, gh: 7, raster: 4, fw: 3.2, fh: 5.4, bruestung: 0.4, innen: "#56707f" });
     S.quader(x - 0.2, 7, z2 - 0.2, x + w + 0.2, 7.6, z2 + d + 0.2, ak);
     const tw = w * 0.72, td = d * 0.62, tx0 = x + (w - tw) / 2, tz0 = z2 + 1, Ht = 7.6 + G2 * gh;
@@ -55009,10 +55616,10 @@
     schildPasst(scene2, name2, "+x", z2 + d / 2, 4.8, x + w, 1, d - 2, "#ffffff", ak);
     return { hoehe: Ht + 5.5, teile: S.anzahl };
   }
-  function hotelFuenfziger(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`hotel50:${p.seed}`);
-    const w = p.w ?? 40, d = p.d ?? 15, G2 = p.geschosse ?? Math.round(zw(r, 8, 10.4)), gh = 3.1, eg = 5;
-    const name2 = p.name ?? waehle2(r, ["Hotel Europa", "Hotel Kurf\xFCrst", "Hotel Am Ring", "Hotel Bahnhof"]);
+  function hotelFuenfziger(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`hotel50:${p2.seed}`);
+    const w = p2.w ?? 40, d = p2.d ?? 15, G2 = p2.geschosse ?? Math.round(zw(r, 8, 10.4)), gh = 3.1, eg = 5;
+    const name2 = p2.name ?? waehle2(r, ["Hotel Europa", "Hotel Kurf\xFCrst", "Hotel Am Ring", "Hotel Bahnhof"]);
     const wand2 = waehle2(r, ["#f2efe6", "#ece6d6"]), pastell = waehle2(r, [["#9ec3d6", "#e7c96b"], ["#e2a9a1", "#a9c9a4"], ["#b7c4d6", "#e8d6a4"]]);
     S.quader(x, 0, z2, x + w - 0.6, eg, z2 + d - 0.6, "#56707f");
     for (let u = x + 1; u < x + w; u += 4) S.box(0.5, eg, 0.5, u, eg / 2, z2 + d - 0.4, "#e8ecee");
@@ -55035,9 +55642,9 @@
     S.quader(x + 2, eg - 1, z2 + d, x + w * 0.4, eg - 0.6, z2 + d + 3.5, "#f4f4f2");
     return { hoehe: H + 4.5, teile: S.anzahl };
   }
-  function konkurrenzZentra(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`zentra:${p.seed}`);
-    const w = p.w ?? 46, d = p.d ?? 36, G2 = 5, eg = 5.5, gh = 3.8, H = eg + (G2 - 1) * gh;
+  function konkurrenzZentra(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`zentra:${p2.seed}`);
+    const w = p2.w ?? 46, d = p2.d ?? 36, G2 = 5, eg = 5.5, gh = 3.8, H = eg + (G2 - 1) * gh;
     const weiss2 = "#f2f0ea", navy = KONKURRENZ.zentra.farbe, band = "#45525c", R9 = Math.min(12, d * 0.35);
     S.quader(x, 0, z2, x + w - R9, H, z2 + d, weiss2);
     S.quader(x + w - R9, 0, z2, x + w, H, z2 + d - R9, weiss2);
@@ -55066,9 +55673,9 @@
     gesims(S, x, z2, w - R9, d, H, 0.5, 0.2, "#e3e0d8");
     return { hoehe: H + 7, teile: S.anzahl };
   }
-  function konkurrenzLederer(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`lederer:${p.seed}`);
-    const w = p.w ?? 30, d = p.d ?? 24, G2 = 3, eg = 6.5, gh = 4.2, H = eg + G2 * gh;
+  function konkurrenzLederer(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`lederer:${p2.seed}`);
+    const w = p2.w ?? 30, d = p2.d ?? 24, G2 = 3, eg = 6.5, gh = 4.2, H = eg + G2 * gh;
     const stein = waehle2(r, ["#e8e2d6", "#ece8e0"]), schwarz = "#22252a", gold = "#c8a24a";
     const loE = { y0: 0, geschosse: 1, gh: eg, raster: 5.4, fw: 4.2, fh: 5, bruestung: 0.5, bogen: true, tiefe: 0.8, innen: "#efe6d4" };
     lochBlock(S, x, z2, w, d, 0, eg, schwarz, loE);
@@ -55098,9 +55705,9 @@
     }
     return { hoehe: H + 1.8, teile: S.anzahl };
   }
-  function konkurrenzKaufring(S, scene2, p) {
-    const { x, z: z2 } = p, r = rng2(`kaufring:${p.seed}`);
-    const w = p.w ?? 50, d = p.d ?? 40, G2 = 4, eg = 5.5, gh = 4.4, H = eg + (G2 - 1) * gh;
+  function konkurrenzKaufring(S, scene2, p2) {
+    const { x, z: z2 } = p2, r = rng2(`kaufring:${p2.seed}`);
+    const w = p2.w ?? 50, d = p2.d ?? 40, G2 = 4, eg = 5.5, gh = 4.4, H = eg + (G2 - 1) * gh;
     const gruen = KONKURRENZ.kaufring.farbe, glas2 = "#6f8e9f", wand2 = "#e6e2d6";
     S.quader(x, 0, z2, x + w - 1.2, eg, z2 + d - 1.2, "#4b5965");
     S.quader(x, eg, z2, x + w, H, z2 + d, wand2);
@@ -55122,63 +55729,63 @@
     return { hoehe: H + 4, teile: S.anzahl };
   }
   function eingepasst(fn, min, max) {
-    return (S, scene2, p) => {
-      const w = p.w, d = p.d;
+    return (S, scene2, p2) => {
+      const w = p2.w, d = p2.d;
       if (w >= min[0] && d >= min[1]) {
         const bw = Math.min(w, max[0]), bd = Math.min(d, max[1]);
-        return fn(S, scene2, { ...p, x: p.x + (w - bw) / 2, z: p.z + (d - bd) / 2, w: bw, d: bd });
+        return fn(S, scene2, { ...p2, x: p2.x + (w - bw) / 2, z: p2.z + (d - bd) / 2, w: bw, d: bd });
       }
       const nw = Math.max(min[0], w), nd = Math.max(min[1], d);
-      return skaliert(S, scene2, p, nw, nd, (S2, sc2, pp) => fn(S2, sc2, pp));
+      return skaliert(S, scene2, p2, nw, nd, (S2, sc2, pp) => fn(S2, sc2, pp));
     };
   }
-  var nachSeed = (p, liste) => waehle2(rng2(`slot:${p.seed}:${p.id ?? ""}`), liste);
+  var nachSeed = (p2, liste) => waehle2(rng2(`slot:${p2.seed}:${p2.id ?? ""}`), liste);
   var SLOTS = {
-    "slot:kirche": (S, scene2, p) => kirche(S, scene2, { ...p, typ: p.typ ?? (p.w * p.d > 3e3 ? "dom" : "stadt") }),
-    "slot:rathaus": (S, scene2, p) => rathaus(S, scene2, p),
+    "slot:kirche": (S, scene2, p2) => kirche(S, scene2, { ...p2, typ: p2.typ ?? (p2.w * p2.d > 3e3 ? "dom" : "stadt") }),
+    "slot:rathaus": (S, scene2, p2) => rathaus(S, scene2, p2),
     "slot:schloss": eingepasst(schloss, [70, 56], [160, 130]),
-    "slot:theater": (S, scene2, p) => {
-      const v = p.variante ?? nachSeed(p, ["klassisch", "oper", "modern"]);
-      return eingepasst(kulturbau, v === "oper" ? [50, 44] : [36, 36], [70, 60])(S, scene2, { ...p, art: v === "oper" ? "oper" : "theater", variante: v === "modern" ? "modern" : "klassisch" });
+    "slot:theater": (S, scene2, p2) => {
+      const v = p2.variante ?? nachSeed(p2, ["klassisch", "oper", "modern"]);
+      return eingepasst(kulturbau, v === "oper" ? [50, 44] : [36, 36], [70, 60])(S, scene2, { ...p2, art: v === "oper" ? "oper" : "theater", variante: v === "modern" ? "modern" : "klassisch" });
     },
-    "slot:museum": (S, scene2, p) => eingepasst(kulturbau, [44, 26], [80, 40])(S, scene2, { ...p, art: "museum", variante: p.variante ?? nachSeed(p, ["klassisch", "modern", "backstein"]) }),
-    "slot:tor": (S, scene2, p) => (p.art === "mauerturm" ? eingepasst(stadtmauerturm, [12, 8], [26, 14]) : eingepasst(stadttor, [12, 10], [26, 18]))(S, scene2, p),
+    "slot:museum": (S, scene2, p2) => eingepasst(kulturbau, [44, 26], [80, 40])(S, scene2, { ...p2, art: "museum", variante: p2.variante ?? nachSeed(p2, ["klassisch", "modern", "backstein"]) }),
+    "slot:tor": (S, scene2, p2) => (p2.art === "mauerturm" ? eingepasst(stadtmauerturm, [12, 8], [26, 14]) : eingepasst(stadttor, [12, 10], [26, 18]))(S, scene2, p2),
     "slot:denkmal": eingepasst(denkmal, [8, 8], [24, 24]),
-    "slot:markthalle": (S, scene2, p) => eingepasst(markthalle, [34, 22], [80, 40])(S, scene2, { ...p, variante: p.variante ?? nachSeed(p, ["backstein", "eisen", "beton"]) }),
-    "slot:hochhaus": eingepasst((S, scene2, p) => buerohochhaus(S, scene2, { ...p, geschosse: p.geschosse ?? 14 + Math.floor(rng2(p.seed)() * 12) }), [16, 16], [40, 36]),
-    "slot:hotel": (S, scene2, p) => eingepasst(hotel, [24, 14], [50, 30])(S, scene2, { ...p, stil: p.stil ?? nachSeed(p, ["modern", "grand", "turm", "fuenfziger"]) }),
+    "slot:markthalle": (S, scene2, p2) => eingepasst(markthalle, [34, 22], [80, 40])(S, scene2, { ...p2, variante: p2.variante ?? nachSeed(p2, ["backstein", "eisen", "beton"]) }),
+    "slot:hochhaus": eingepasst((S, scene2, p2) => buerohochhaus(S, scene2, { ...p2, geschosse: p2.geschosse ?? 14 + Math.floor(rng2(p2.seed)() * 12) }), [16, 16], [40, 36]),
+    "slot:hotel": (S, scene2, p2) => eingepasst(hotel, [24, 14], [50, 30])(S, scene2, { ...p2, stil: p2.stil ?? nachSeed(p2, ["modern", "grand", "turm", "fuenfziger"]) }),
     "slot:parkhaus": eingepasst(parkhaus, [24, 30], [60, 60]),
-    "slot:konkurrenz": (S, scene2, p) => eingepasst(konkurrenz, [28, 22], [60, 46])(S, scene2, { ...p, marke: p.marke ?? nachSeed(p, Object.keys(KONKURRENZ)) }),
+    "slot:konkurrenz": (S, scene2, p2) => eingepasst(konkurrenz, [28, 22], [60, 46])(S, scene2, { ...p2, marke: p2.marke ?? nachSeed(p2, Object.keys(KONKURRENZ)) }),
     "slot:mall": eingepasst(einkaufszentrum, [50, 40], [120, 90]),
-    "slot:bahnhof": (S, scene2, p) => (p.d < 60 ? eingepasst(empfangsgebaeude, [50, 18], [140, 30]) : eingepasst(hauptbahnhof, [100, 80], [180, 120]))(S, scene2, p),
+    "slot:bahnhof": (S, scene2, p2) => (p2.d < 60 ? eingepasst(empfangsgebaeude, [50, 18], [140, 30]) : eingepasst(hauptbahnhof, [100, 80], [180, 120]))(S, scene2, p2),
     "slot:wasserturm": eingepasst(wasserturm, [10, 10], [24, 24]),
     "slot:tankstelle": eingepasst(tankstelle, [30, 26], [44, 40]),
-    "slot:discounter": (S, scene2, p) => eingepasst(discounter, [34, 40], [60, 60])(S, scene2, { ...p, marke: p.marke ?? nachSeed(p, Object.keys(MARKEN)) })
+    "slot:discounter": (S, scene2, p2) => eingepasst(discounter, [34, 40], [60, 60])(S, scene2, { ...p2, marke: p2.marke ?? nachSeed(p2, Object.keys(MARKEN)) })
   };
-  function kulturbau(S, scene2, p) {
-    const r = rng2(p.seed ?? 1);
-    const art = p.art ?? waehle2(r, ["theater", "oper", "museum"]);
-    if (art === "theater" && p.variante === "modern") return theaterModern(S, scene2, p);
-    if (art === "museum" && p.variante === "modern") return museumModern(S, scene2, p);
-    if (art === "museum" && p.variante === "backstein") return museumBackstein(S, scene2, p);
-    return kulturbauKlassisch(S, scene2, { ...p, art });
+  function kulturbau(S, scene2, p2) {
+    const r = rng2(p2.seed ?? 1);
+    const art = p2.art ?? waehle2(r, ["theater", "oper", "museum"]);
+    if (art === "theater" && p2.variante === "modern") return theaterModern(S, scene2, p2);
+    if (art === "museum" && p2.variante === "modern") return museumModern(S, scene2, p2);
+    if (art === "museum" && p2.variante === "backstein") return museumBackstein(S, scene2, p2);
+    return kulturbauKlassisch(S, scene2, { ...p2, art });
   }
-  function markthalle(S, scene2, p) {
-    return p.variante === "beton" ? markthalleBeton(S, scene2, p) : markthalleAlt(S, scene2, p);
+  function markthalle(S, scene2, p2) {
+    return p2.variante === "beton" ? markthalleBeton(S, scene2, p2) : markthalleAlt(S, scene2, p2);
   }
-  function hotel(S, scene2, p) {
-    if (p.stil === "turm") return hotelTurm(S, scene2, p);
-    if (p.stil === "fuenfziger") return hotelFuenfziger(S, scene2, p);
-    return hotelAlt(S, scene2, p);
+  function hotel(S, scene2, p2) {
+    if (p2.stil === "turm") return hotelTurm(S, scene2, p2);
+    if (p2.stil === "fuenfziger") return hotelFuenfziger(S, scene2, p2);
+    return hotelAlt(S, scene2, p2);
   }
-  function konkurrenz(S, scene2, p) {
-    if (p.marke === "zentra") return konkurrenzZentra(S, scene2, p);
-    if (p.marke === "lederer") return konkurrenzLederer(S, scene2, p);
-    if (p.marke === "kaufring") return konkurrenzKaufring(S, scene2, p);
-    return konkurrenzAlt(S, scene2, p);
+  function konkurrenz(S, scene2, p2) {
+    if (p2.marke === "zentra") return konkurrenzZentra(S, scene2, p2);
+    if (p2.marke === "lederer") return konkurrenzLederer(S, scene2, p2);
+    if (p2.marke === "kaufring") return konkurrenzKaufring(S, scene2, p2);
+    return konkurrenzAlt(S, scene2, p2);
   }
-  function empfangsgebaeude(S, scene2, p) {
-    return hauptbahnhof(S, scene2, { ...p, nurEmpfang: true, w: p.w ?? 96, d: p.d ?? 24 });
+  function empfangsgebaeude(S, scene2, p2) {
+    return hauptbahnhof(S, scene2, { ...p2, nurEmpfang: true, w: p2.w ?? 96, d: p2.d ?? 24 });
   }
 
   // src/kit/sporthaus.js
@@ -55387,8 +55994,8 @@
       const x = a + 0.6 + k * 1.42;
       if (x + 1.22 > b2 - 0.2) break;
       s2.q(x, x + 1.2, y0 + 0.78, y0 + 0.92, tF - 0.63, tF - 0.12, "#b9bdbe");
-      for (let p = 0; p < 5; p++) {
-        s2.q(x + 0.12 + p % 3 * 0.31, x + 0.36 + p % 3 * 0.31, y0 + 0.95 + Math.floor(p / 3) * 0.2, y0 + 1.1 + Math.floor(p / 3) * 0.2, tF - 0.55, tF - 0.2, p % 2 ? "#d8a64a" : "#f0efe8");
+      for (let p2 = 0; p2 < 5; p2++) {
+        s2.q(x + 0.12 + p2 % 3 * 0.31, x + 0.36 + p2 % 3 * 0.31, y0 + 0.95 + Math.floor(p2 / 3) * 0.2, y0 + 1.1 + Math.floor(p2 / 3) * 0.2, tF - 0.55, tF - 0.2, p2 % 2 ? "#d8a64a" : "#f0efe8");
       }
       s2.q(x + 0.3, x + 0.86, y0 + 1.19, y0 + 1.5, tF - 0.1, tF - 0.055, "#e0b221");
     }
@@ -55478,7 +56085,7 @@
     const total = q2 + tw + h * 0.35;
     const P2 = (k) => u + s2.lese * k;
     const ua = P2(-total / 2), uq = P2(-total / 2 + q2), ue = P2(total / 2);
-    const mn = (p, qq) => [Math.min(p, qq), Math.max(p, qq)];
+    const mn = (p2, qq) => [Math.min(p2, qq), Math.max(p2, qq)];
     K3.logos.push({ s: s2, u0: Math.min(ua, ue), u1: Math.max(ua, ue), y0: y - q2 / 2, y1: y + q2 / 2, t, grund: o.grund ?? "#cccccc", sichtbar: !K3.ohneLogo });
     if (K3.ohneLogo) {
       const [b02, b12] = mn(ua, ue);
@@ -56461,9 +57068,9 @@
     }
     for (const face of K3.seiten) {
       const tt = (K3.tRelief ?? 0.5) + 0.4;
-      for (let p = 0.8; p < face.L - 0.8; p += 3.8) {
-        face.q(p, p + Math.min(2, face.L - p - 0.4), K3.Hw - 0.17, K3.Hw + 0.12, tt, tt + 0.11, "#767c77");
-        face.q(p + 0.12, p + 0.28, K3.Hw - 0.74, K3.Hw - 0.17, tt, tt + 0.07, "#a8aaa2");
+      for (let p2 = 0.8; p2 < face.L - 0.8; p2 += 3.8) {
+        face.q(p2, p2 + Math.min(2, face.L - p2 - 0.4), K3.Hw - 0.17, K3.Hw + 0.12, tt, tt + 0.11, "#767c77");
+        face.q(p2 + 0.12, p2 + 0.28, K3.Hw - 0.74, K3.Hw - 0.17, tt, tt + 0.07, "#a8aaa2");
       }
     }
     const glass = K3.glas.filter((g) => !g.tuer && !g.mieter);
@@ -56618,7 +57225,7 @@
     substanzAkzente(K3);
     const seite = (s2) => {
       const lg = K3.logos.filter((l) => l.s === s2);
-      const gross2 = lg.filter((l) => !l.senkrecht).sort((p, q2) => (q2.u1 - q2.u0) * (q2.y1 - q2.y0) - (p.u1 - p.u0) * (p.y1 - p.y0))[0] ?? lg[0];
+      const gross2 = lg.filter((l) => !l.senkrecht).sort((p2, q2) => (q2.u1 - q2.u0) * (q2.y1 - q2.y0) - (p2.u1 - p2.u0) * (p2.y1 - p2.y0))[0] ?? lg[0];
       return {
         u1: s2.L - eck,
         sperren: lg.filter((l) => l.sichtbar !== false).map((l) => ({ u0: l.u0 - 0.3, u1: l.u1 + 0.3, y0: l.y0 - 0.3, y1: l.y1 + 0.3, art: "logo" })),
@@ -59343,7 +59950,7 @@
         const nz = z2 + 3 + dd / 2 + r() * (d - dd - 6);
         px2 = nx;
         pz4 = nz;
-        if (!platz.some((p) => Math.abs(p.x - px2) < (p.w + ww) / 2 + 1.2 && Math.abs(p.z - pz4) < (p.d + dd) / 2 + 1.2)) break;
+        if (!platz.some((p2) => Math.abs(p2.x - px2) < (p2.w + ww) / 2 + 1.2 && Math.abs(p2.z - pz4) < (p2.d + dd) / 2 + 1.2)) break;
       }
       platz.push({ x: px2, z: pz4, w: ww, d: dd });
       const farbe2 = waehle2(r, ["#a5a7a0", "#b3b0a8", "#959992", "#8d9493"]);
@@ -62973,8 +63580,8 @@
   var GLAS_HELL3 = "#8bb2bd";
   function premiumMasse(haus2) {
     const m = masse(haus2);
-    const p = haus2.premiumSchluessel;
-    return { w: m.w, d: m.d, n: Math.max(p === "P001" ? 6 : 5, m.n), H: Math.max(p === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
+    const p2 = haus2.premiumSchluessel;
+    return { w: m.w, d: m.d, n: Math.max(p2 === "P001" ? 6 : 5, m.n), H: Math.max(p2 === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
   }
   function zylinder(S, x, z2, r, y, h, f, seg = 16, oben = r) {
     const geo = new three_module_exports.CylinderGeometry(oben, r, h, seg).translate(x, y + h / 2, z2);
@@ -86315,7 +86922,7 @@
 
   // src/kit/bauer.js
   var REGION2 = { nord: "Nord", ost: "Ost", west: "West", mitte: "Mitte", sued: "S\xFCd" };
-  var regionVon2 = (p) => REGION2[p.region] ?? p.region ?? "Mitte";
+  var regionVon2 = (p2) => REGION2[p2.region] ?? p2.region ?? "Mitte";
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
   var HAUS = new Map(haeuser_default.map((h) => [h.id, h]));
   var SCHWESTER = new Map(haeuser_schwester_default.map((h) => [h.id, h]));
@@ -86352,26 +86959,26 @@
     const i = Math.floor((Math.imul((slot4.seed ?? 1) >>> 0, 2654435761) >>> 0) / 4294967296 * pool.length);
     return (pool[i] ?? { h: haeuser_default[0] }).h;
   }
-  function imSlot(p, W3, D) {
-    const ecke = p.ecke ?? "+x+z";
-    if (ecke === "block") return { x: p.x + Math.max(0, (p.w - W3) / 2), z: p.z + Math.max(0, (p.d - D) / 2) };
-    return { x: ecke.includes("+x") ? p.x + p.w - W3 : p.x, z: ecke.includes("+z") ? p.z + p.d - D : p.z };
+  function imSlot(p2, W3, D) {
+    const ecke = p2.ecke ?? "+x+z";
+    if (ecke === "block") return { x: p2.x + Math.max(0, (p2.w - W3) / 2), z: p2.z + Math.max(0, (p2.d - D) / 2) };
+    return { x: ecke.includes("+x") ? p2.x + p2.w - W3 : p2.x, z: ecke.includes("+z") ? p2.z + p2.d - D : p2.z };
   }
-  function sportEcht(S, scene2, p, haus2) {
+  function sportEcht(S, scene2, p2, haus2) {
     const f = fussabdruck(haus2);
-    const { x, z: z2 } = imSlot(p, f.w, f.d);
-    return sporthaus(S, scene2, haus2, { x, z: z2, ...p.zustand });
+    const { x, z: z2 } = imSlot(p2, f.w, f.d);
+    return sporthaus(S, scene2, haus2, { x, z: z2, ...p2.zustand });
   }
-  function wettbewerberEcht(S, scene2, p) {
-    const W3 = p.standort?.w ? Math.min(p.w, p.standort.w) : p.w, D = p.standort?.d ? Math.min(p.d, p.standort.d) : p.d;
-    const { x, z: z2 } = imSlot(p, W3, D);
-    return wettbewerber(S, scene2, { x, z: z2, w: W3, d: D, seed: p.seed, art: p.standort?.art, name: p.standort?.name, form: p.standort?.form, region: p.region });
+  function wettbewerberEcht(S, scene2, p2) {
+    const W3 = p2.standort?.w ? Math.min(p2.w, p2.standort.w) : p2.w, D = p2.standort?.d ? Math.min(p2.d, p2.standort.d) : p2.d;
+    const { x, z: z2 } = imSlot(p2, W3, D);
+    return wettbewerber(S, scene2, { x, z: z2, w: W3, d: D, seed: p2.seed, art: p2.standort?.art, name: p2.standort?.name, form: p2.standort?.form, region: p2.region });
   }
-  function schwesterEcht(S, scene2, p) {
-    const h = SCHWESTER.get(p.standort?.id);
+  function schwesterEcht(S, scene2, p2) {
+    const h = SCHWESTER.get(p2.standort?.id);
     if (!h) return { hoehe: 0 };
-    const m = masseSchwester(h), pos = imSlot(p, m.w, m.d);
-    p.haus = h;
+    const m = masseSchwester(h), pos = imSlot(p2, m.w, m.d);
+    p2.haus = h;
     return schwesterhaus(S, scene2, h, { ...pos, passanten: true });
   }
   var ERSATZ = { sport: sportEcht, wettbewerber: wettbewerberEcht, schwester: schwesterEcht };
@@ -86384,8 +86991,8 @@
     STILPROFILE.set(name2, fn);
   }
   var BAU_HILFE = { stadthaus, zufallsStadthaus, rng: rng2, waehle: waehle2, zw, wahlGewichtet, heller, dunkler };
-  function centerPassage(S, scene2, p) {
-    const { x, z: z2, w, d } = p;
+  function centerPassage(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2;
     const H = 9.5;
     S.quader(x, 0, z2, x + w, H, z2 + d, "#e4e0d6");
     S.quader(x + 0.3, 0.3, z2 + d - 0.4, x + w - 0.3, H - 2.2, z2 + d + 0.05, FARBEN3.glas);
@@ -86398,9 +87005,9 @@
     S.add(g, "#9fc3cf");
     return { hoehe: H + 2.7 };
   }
-  function hofbau(S, p) {
-    const r = rng2((p.seed ?? 1) * 31 + 5 >>> 0);
-    const { x, z: z2, w, d } = p, H = 7.2;
+  function hofbau(S, p2) {
+    const r = rng2((p2.seed ?? 1) * 31 + 5 >>> 0);
+    const { x, z: z2, w, d } = p2, H = 7.2;
     const wand2 = waehle2(r, ["#c9c2b5", "#bfb8ab", "#b9a48e", "#a86a52", "#cfc9be"]);
     S.quader(x, 0, z2, x + w, H, z2 + d, wand2);
     fensterRaster(S, x, z2, w, d, "+z", { y0: 0.8, geschosse: 2, gh: 3.1, raster: 3.2, fw: 1.8, fh: 1.3, farbe: FARBEN3.glas });
@@ -86417,63 +87024,63 @@
     const famBenutzt = /* @__PURE__ */ new Set();
     const traufe = /* @__PURE__ */ new Map();
     const reihen = /* @__PURE__ */ new Map();
-    const harmonisiere = (g, p, eck) => {
-      const t = traufe.get(p.block);
+    const harmonisiere = (g, p2, eck) => {
+      const t = traufe.get(p2.block);
       if (!t || !g) return g;
-      const r = rng2((p.seed ?? 1) * 7 + 13 >>> 0), x = r();
+      const r = rng2((p2.seed ?? 1) * 7 + 13 >>> 0), x = r();
       if (eck && x < 0.4) return Math.min(8, t + 1);
       if (x < 0.85) return t;
       return Math.max(2, Math.min(8, t + (g > t ? 1 : g < t ? -1 : r() < 0.5 ? 1 : -1)));
     };
-    const deckel = (g, p) => p.hartwigBlock && g ? Math.min(g, 4) : g;
-    const haus2 = (S, scene2, p, eck) => {
-      const n = p.nachbar ? gebaut.get(p.nachbar) : void 0;
-      const nurX = p.front?.includes("+x") && !p.front?.includes("+z");
-      const q2 = { x: p.x, z: p.z, w: p.w, d: p.d, seed: p.seed, eck, region: regionVon2(p), cluster: p.cluster, nachbar: n, strasse: nurX ? "+x" : "+z", seite: p.anbau ? "nachbar" : "frei", traufe: traufe.get(p.block) };
+    const deckel = (g, p2) => p2.hartwigBlock && g ? Math.min(g, 4) : g;
+    const haus2 = (S, scene2, p2, eck) => {
+      const n = p2.nachbar ? gebaut.get(p2.nachbar) : void 0;
+      const nurX = p2.front?.includes("+x") && !p2.front?.includes("+z");
+      const q2 = { x: p2.x, z: p2.z, w: p2.w, d: p2.d, seed: p2.seed, eck, region: regionVon2(p2), cluster: p2.cluster, nachbar: n, strasse: nurX ? "+x" : "+z", seite: p2.anbau ? "nachbar" : "frei", traufe: traufe.get(p2.block) };
       let e = null;
-      const prof = p.stilProfil && STILPROFILE.get(p.stilProfil) || STILPROFILE.get("region:" + p.region);
-      let w = prof ? prof(p, n, BAU_HILFE) : null;
-      const ri = !eck && p.typ === "stadthaus" && p.reihe ? reihen.get(p.reihe) : null;
-      const rr = rng2((p.seed ?? 1) * 11 + 3 >>> 0);
+      const prof = p2.stilProfil && STILPROFILE.get(p2.stilProfil) || STILPROFILE.get("region:" + p2.region);
+      let w = prof ? prof(p2, n, BAU_HILFE) : null;
+      const ri = !eck && p2.typ === "stadthaus" && p2.reihe ? reihen.get(p2.reihe) : null;
+      const rr = rng2((p2.seed ?? 1) * 11 + 3 >>> 0);
       const gleich = ri && rr() < 0.85;
       if (gleich && w && !w.bau && ri.stil && w.stil !== ri.stil) w = { ...w, stil: ri.stil };
       if (gleich) {
         q2.dachWunsch = ri.dach;
         if (!w) q2.stilWunsch = ri.stil;
       }
-      const hofG = (g) => p.hofbau ? 2 : p.typ === "hofhaus" ? Math.max(2, Math.min(g, (traufe.get(p.block) ?? 4) - 1)) : deckel(harmonisiere(g, p, eck), p);
-      if (p.hofbau) e = hofbau(S, p);
+      const hofG = (g) => p2.hofbau ? 2 : p2.typ === "hofhaus" ? Math.max(2, Math.min(g, (traufe.get(p2.block) ?? 4) - 1)) : deckel(harmonisiere(g, p2, eck), p2);
+      if (p2.hofbau) e = hofbau(S, p2);
       else if (w?.bau) e = w.bau(S, scene2, q2);
       else if (w) e = stadthaus(S, scene2, { ...q2, vermeideFarbe: n?.farbe, ...w, geschosse: hofG(w.geschosse) });
       if (!e) e = zufallsStadthaus(S, scene2, { ...q2, harmonisiere: hofG });
-      gebaut.set(p.id, { stil: e.stil, farbe: e.farbe, geschosse: e.geschosse });
-      if (!eck && p.typ === "stadthaus" && p.reihe && !reihen.has(p.reihe) && e.stil) reihen.set(p.reihe, { stil: e.stil, dach: e.dach });
-      if (!traufe.has(p.block) && e.geschosse && p.typ !== "hofhaus") traufe.set(p.block, e.geschosse);
+      gebaut.set(p2.id, { stil: e.stil, farbe: e.farbe, geschosse: e.geschosse });
+      if (!eck && p2.typ === "stadthaus" && p2.reihe && !reihen.has(p2.reihe) && e.stil) reihen.set(p2.reihe, { stil: e.stil, dach: e.dach });
+      if (!traufe.has(p2.block) && e.geschosse && p2.typ !== "hofhaus") traufe.set(p2.block, e.geschosse);
       return e;
     };
     const slots = {};
-    for (const [typ, f] of Object.entries(SLOTS)) slots[typ] = (S, scene2, p) => f(S, scene2, { ...p, region: p.region });
+    for (const [typ, f] of Object.entries(SLOTS)) slots[typ] = (S, scene2, p2) => f(S, scene2, { ...p2, region: p2.region });
     slots["slot:center_passage"] = centerPassage;
-    for (const [typ, f] of SLOT_PLUGINS) slots[typ] = (S, scene2, p) => {
+    for (const [typ, f] of SLOT_PLUGINS) slots[typ] = (S, scene2, p2) => {
       const n = S.anzahl;
       try {
-        return f(S, scene2, p);
+        return f(S, scene2, p2);
       } catch (err) {
-        if (p.variante === void 0 || S.anzahl !== n) throw err;
-        return f(S, scene2, { ...p, variante: void 0 });
+        if (p2.variante === void 0 || S.anzahl !== n) throw err;
+        return f(S, scene2, { ...p2, variante: void 0 });
       }
     };
     return {
-      stadthaus: (S, scene2, p) => p.leer ? { hoehe: 0 } : haus2(S, scene2, p, false),
-      hofhaus: (S, scene2, p) => haus2(S, scene2, p, false),
-      eck: (S, scene2, p) => haus2(S, scene2, p, true),
+      stadthaus: (S, scene2, p2) => p2.leer ? { hoehe: 0 } : haus2(S, scene2, p2, false),
+      hofhaus: (S, scene2, p2) => haus2(S, scene2, p2, false),
+      eck: (S, scene2, p2) => haus2(S, scene2, p2, true),
       ...slots,
-      "slot:warenhaus": (S, scene2, p) => {
-        const h0 = p.standort?.id && HAUS.get(p.standort.id) || passendesHaus(p, o.warenhausId);
+      "slot:warenhaus": (S, scene2, p2) => {
+        const h0 = p2.standort?.id && HAUS.get(p2.standort.id) || passendesHaus(p2, o.warenhausId);
         const f = fussabdruck(h0);
-        const { x, z: z2 } = imSlot(p, f.w, f.d);
+        const { x, z: z2 } = imSlot(p2, f.w, f.d);
         if (h0.klasse === "premium") {
-          p.haus = h0;
+          p2.haus = h0;
           return premiumhaus(S, scene2, h0, { x, z: z2, ...zustandFuer(h0) });
         }
         let fam = familieVon(h0), h = h0;
@@ -86484,28 +87091,28 @@
         }
         famBenutzt.add(fam);
         const e = warenhaus(S, scene2, h, { x, z: z2, familie: fam, ...zustandFuer(h0) });
-        p.haus = h;
+        p2.haus = h;
         return e;
       },
-      "slot:premium": (S, scene2, p) => {
-        const h = HAUS.get(p.standort?.id) ?? haeuser_default.find((q2) => q2.klasse === "premium" && q2.stadt === p.standort?.stadt);
+      "slot:premium": (S, scene2, p2) => {
+        const h = HAUS.get(p2.standort?.id) ?? haeuser_default.find((q2) => q2.klasse === "premium" && q2.stadt === p2.standort?.stadt);
         if (!h) return { hoehe: 0 };
-        const f = fussabdruck(h), { x, z: z2 } = imSlot(p, f.w, f.d);
-        p.haus = h;
+        const f = fussabdruck(h), { x, z: z2 } = imSlot(p2, f.w, f.d);
+        p2.haus = h;
         return premiumhaus(S, scene2, h, { x, z: z2, ...zustandFuer(h) });
       },
-      "slot:sport": (S, scene2, p) => {
-        const h = HAUS.get(p.standort?.id) ?? haeuser_default.find((q2) => q2.format === "sport");
-        p.haus = h;
-        return sport(S, scene2, { ...p, zustand: zustandFuer(h) }, h);
+      "slot:sport": (S, scene2, p2) => {
+        const h = HAUS.get(p2.standort?.id) ?? haeuser_default.find((q2) => q2.format === "sport");
+        p2.haus = h;
+        return sport(S, scene2, { ...p2, zustand: zustandFuer(h) }, h);
       },
-      "slot:wettbewerber": (S, scene2, p) => wettbewerber2(S, scene2, p),
-      "slot:schwester": (S, scene2, p) => ERSATZ.schwester(S, scene2, p),
-      "slot:outlet": (S, scene2, p) => {
-        const h = OUTLETS.get(p.standort?.id);
+      "slot:wettbewerber": (S, scene2, p2) => wettbewerber2(S, scene2, p2),
+      "slot:schwester": (S, scene2, p2) => ERSATZ.schwester(S, scene2, p2),
+      "slot:outlet": (S, scene2, p2) => {
+        const h = OUTLETS.get(p2.standort?.id);
         if (!h) return { hoehe: 0 };
-        const f = fussabdruck(h), { x, z: z2 } = imSlot(p, f.w, f.d);
-        p.haus = h;
+        const f = fussabdruck(h), { x, z: z2 } = imSlot(p2, f.w, f.d);
+        p2.haus = h;
         return outlet(S, scene2, h, { x, z: z2, ...zustandFuer(h) });
       }
     };
@@ -86664,23 +87271,23 @@
   }
   var damenInseln = [
     (L2, r, d, ctx) => {
-      const p = damenPal(ctx);
-      rundstaender(L2, -0.85, -0.6, p, r, d);
-      rundstaender(L2, 0.85, -0.6, p, r, d);
-      niedrigTisch(L2, 0, 0.75, 2.2, 0.8, p, r, d, HOLZ2.weiss);
+      const p2 = damenPal(ctx);
+      rundstaender(L2, -0.85, -0.6, p2, r, d);
+      rundstaender(L2, 0.85, -0.6, p2, r, d);
+      niedrigTisch(L2, 0, 0.75, 2.2, 0.8, p2, r, d, HOLZ2.weiss);
     },
     (L2, r, d, ctx) => {
-      const p = damenPal(ctx);
-      staender(L2, 0, -0.85, 2.8, p, r, d);
-      staender(L2, 0, 0.25, 2.8, p, r, d, 1.4);
-      puppe3(L2, 1.25, 1.05, r, "damen", p, 0.2);
+      const p2 = damenPal(ctx);
+      staender(L2, 0, -0.85, 2.8, p2, r, d);
+      staender(L2, 0, 0.25, 2.8, p2, r, d, 1.4);
+      puppe3(L2, 1.25, 1.05, r, "damen", p2, 0.2);
     },
     (L2, r, d, ctx) => {
-      const p = damenPal(ctx);
-      staender(L2, -0.6, -0.8, 1.6, p, r, d);
-      rundstaender(L2, 0.95, -0.7, p, r, d);
-      niedrigTisch(L2, -0.4, 0.7, 1.8, 0.8, p, r, d, HOLZ2.hell);
-      puppe3(L2, 1, 0.8, r, "damen", p, -0.3);
+      const p2 = damenPal(ctx);
+      staender(L2, -0.6, -0.8, 1.6, p2, r, d);
+      rundstaender(L2, 0.95, -0.7, p2, r, d);
+      niedrigTisch(L2, -0.4, 0.7, 1.8, 0.8, p2, r, d, HOLZ2.hell);
+      puppe3(L2, 1, 0.8, r, "damen", p2, -0.3);
     }
   ];
   function damenVorne(L2, r, d, ctx) {
@@ -87983,10 +88590,10 @@
       diff += diff > 0 ? -1 : 1;
     }
     const teile = [];
-    let p = 0;
+    let p2 = 0;
     anteile.forEach((a, k) => {
-      const cs = new Set(cols.slice(p, p + n[k]));
-      p += n[k];
+      const cs = new Set(cols.slice(p2, p2 + n[k]));
+      p2 += n[k];
       teile.push({ ...a, zellen: zellen.filter((c) => cs.has(c.i)) });
     });
     return teile.filter((t) => t.zellen.length);
@@ -88210,7 +88817,7 @@
     };
     const segNZ = segmente("nz"), segNX = segmente("nx"), segPZ = segmente("pz"), segPX = segmente("px");
     ctx.thekenRaum = !segNZ.some((sg) => sg.art === "wand" && sg.b - sg.a >= 8);
-    const kassenSeg = A.kassenzone ? [...segPZ, ...segPX, ...segNZ, ...segNX].filter((sg) => sg.art === "gang" && sg.b - sg.a >= 5).sort((p, q2) => q2.b - q2.a + (q2.achse === "pz" ? 0.5 : 0) - (p.b - p.a + (p.achse === "pz" ? 0.5 : 0)))[0] : null;
+    const kassenSeg = A.kassenzone ? [...segPZ, ...segPX, ...segNZ, ...segNX].filter((sg) => sg.art === "gang" && sg.b - sg.a >= 5).sort((p2, q2) => q2.b - q2.a + (q2.achse === "pz" ? 0.5 : 0) - (p2.b - p2.a + (p2.achse === "pz" ? 0.5 : 0)))[0] : null;
     if (kassenSeg) kassenSeg.kasse = true;
     const KZ = 3;
     const extras = (A.wandExtra ?? []).filter((e) => alle.length >= (e.min ?? 0)).map((e) => ({ ...e, frei: true }));
@@ -88317,7 +88924,7 @@
       res.belegt.push([s2.cx - iw / 2, s2.cz - it / 2, s2.cx + iw / 2, s2.cz + it / 2]);
       const v = vergeben.get(s2);
       const fp = [[s2.cx + iw / 2 + gap / 2, s2.cz + zw(r, -1, 1)], [s2.cx + zw(r, -1.2, 1.2), s2.cz + it / 2 + gap / 2], [s2.cx - iw / 2 - gap / 2, s2.cz + zw(r, -1, 1)]];
-      for (const p of fp) if (sicht3(p[0], p[1])) res.frei.push(p);
+      for (const p2 of fp) if (sicht3(p2[0], p2[1])) res.frei.push(p2);
       if (!sicht3(s2.cx, s2.cz)) continue;
       if (v === "kasse") {
         if (A.kasseFn) A.kasseFn(L2, r, d, ctx);
@@ -88398,8 +89005,8 @@
       else folienwand(L2, ua, ub, ctx);
     }
     for (const sg of [...segNZ, ...segNX]) for (let u = sg.a + 1; u < sg.b - 0.5; u += 2.2) {
-      const p = sg.achse === "nz" ? [u + zw(r, -0.4, 0.4), sg.pos + (WANDARTEN.has(sg.art) ? 1.45 : 0.5)] : [sg.pos + (WANDARTEN.has(sg.art) ? 1.45 : 0.5), u + zw(r, -0.4, 0.4)];
-      if (sicht3(p[0], p[1])) res.frei.push(p);
+      const p2 = sg.achse === "nz" ? [u + zw(r, -0.4, 0.4), sg.pos + (WANDARTEN.has(sg.art) ? 1.45 : 0.5)] : [sg.pos + (WANDARTEN.has(sg.art) ? 1.45 : 0.5), u + zw(r, -0.4, 0.4)];
+      if (sicht3(p2[0], p2[1])) res.frei.push(p2);
     }
     const nPers = A.personal ?? Math.max(1, Math.round(alle.length * 25 / 160 * d));
     for (let k = 0; k < nPers && res.frei.length; k++) {
@@ -88650,7 +89257,7 @@
   // src/kit/sportabteilung.js
   var PI4 = Math.PI;
   var { PAL: PAL3, HOLZ: HOLZ3 } = innen_exports;
-  var bunt3 = (r, p) => p[Math.floor(r() * p.length)];
+  var bunt3 = (r, p2) => p2[Math.floor(r() * p2.length)];
   var SPORT_ARTEN = ["sportschuhe", "sporttextil", "outdoor", "rad", "wintersport", "teamsport"];
   var SPORT_MARKEN = [
     { name: "Nordline", kopf: "#1d2f4f", schrift: "#ffffff", wand: "#e8ecef", boden: { a: "#dfe3e7", b: "#d2d8de", m: "dielen" }, pal: ["#1d2f4f", "#2f63b5", "#e8e4dc", "#9fb3c8", "#1f1f1f", "#c9483e", "#ffffff"] },
@@ -89454,11 +90061,11 @@
       "-x": R2(x0, z0, 0, 1, d, "-x")
     };
   }
-  function sichtbar2(p, x0, z0, w, d) {
+  function sichtbar2(p2, x0, z0, w, d) {
     const a = seitenRahmen(x0, z0, w, d);
-    return (p.sicht ?? ["+z", "+x"]).map((s2) => a[s2]);
+    return (p2.sicht ?? ["+z", "+x"]).map((s2) => a[s2]);
   }
-  var istSicht = (p, s2) => (p.sicht ?? ["+z", "+x"]).includes(s2);
+  var istSicht = (p2, s2) => (p2.sicht ?? ["+z", "+x"]).includes(s2);
   function wp(F2, u, t) {
     return [F2.ox + F2.dx * u + F2.nx * t, F2.oz + F2.dz * u + F2.nz * t];
   }
@@ -89581,24 +90188,24 @@
   var DREH = { "+z": 0, "+x": PI5 / 2, "-z": PI5, "-x": -PI5 / 2 };
   var SICHT = { "+z": ["+z", "+x"], "+x": ["+z", "-x"], "-z": ["-z", "-x"], "-x": ["+x", "-z"] };
   function slot(name2, cfg) {
-    return (S, scene2, p) => {
-      const r = rng2(`${name2}:${p.seed ?? 1}`);
-      const v = cfg.varianten.includes(p.variante) ? p.variante : waehle2(r, cfg.varianten);
-      let zustand = p.zustand === "industriekultur" ? "museum" : p.zustand;
+    return (S, scene2, p2) => {
+      const r = rng2(`${name2}:${p2.seed ?? 1}`);
+      const v = cfg.varianten.includes(p2.variante) ? p2.variante : waehle2(r, cfg.varianten);
+      let zustand = p2.zustand === "industriekultur" ? "museum" : p2.zustand;
       if (cfg.zustaende && !cfg.zustaende.includes(zustand)) zustand = cfg.zustandWahl ? cfg.zustandWahl(r, v) : waehle2(r, cfg.zustaende);
-      const frontStrasse = DREH[p.front] !== void 0 ? p.front : "+z";
+      const frontStrasse = DREH[p2.front] !== void 0 ? p2.front : "+z";
       const front2 = cfg.wasserZurKamera?.(v) ? { "+z": "+x", "+x": "+z", "-z": "+z", "-x": "+x" }[frontStrasse] : frontStrasse;
       const quer2 = front2[1] === "x";
-      const W3 = quer2 ? p.d : p.w, D = quer2 ? p.w : p.d;
+      const W3 = quer2 ? p2.d : p2.w, D = quer2 ? p2.w : p2.d;
       const [mw, md, xw = Infinity, xd = Infinity] = cfg.nenn[v];
       const Wb = Math.min(Math.max(W3, mw), xw), Db = Math.min(Math.max(D, md), xd);
       const s2 = Math.min(1, W3 / Wb, D / Db);
       const T = new Sammler(), grp = new three_module_exports.Group();
-      const q2 = { ...p, x: 0, z: 0, w: Wb, d: Db, variante: v, zustand, sicht: SICHT[front2], frontWelt: front2 };
+      const q2 = { ...p2, x: 0, z: 0, w: Wb, d: Db, variante: v, zustand, sicht: SICHT[front2], frontWelt: front2 };
       const erg = cfg.roh(T, grp, q2) ?? {};
       const ox = (W3 - Wb * s2) / 2, oz = (D - Db * s2) / 2;
       const th = DREH[front2];
-      const tw = { "+z": [p.x, p.z], "+x": [p.x, p.z + W3], "-z": [p.x + W3, p.z + D], "-x": [p.x + D, p.z] }[front2];
+      const tw = { "+z": [p2.x, p2.z], "+x": [p2.x, p2.z + W3], "-z": [p2.x + W3, p2.z + D], "-x": [p2.x + D, p2.z] }[front2];
       const M2 = new three_module_exports.Matrix4().makeTranslation(tw[0], 0, tw[1]).multiply(new three_module_exports.Matrix4().makeRotationY(th)).multiply(new three_module_exports.Matrix4().makeTranslation(ox, 0, oz)).multiply(new three_module_exports.Matrix4().makeScale(s2, s2, s2));
       for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.applyMatrix4(M2);
@@ -89882,12 +90489,12 @@
       fb(S, F2, u - b2 / 2, u + b2 / 2, yy - 0.05, yy + 0.05, t + 0.08, t + 0.13, sc);
     }
   }
-  function satteldach3(S, p, x0, z0, w, d, y, h, achse, dachF, wandF, ue = 0.45, oben = 0.3) {
+  function satteldach3(S, p2, x0, z0, w, d, y, h, achse, dachF, wandF, ue = 0.45, oben = 0.3) {
     const L2 = achse === "x" ? w : d, T = achse === "x" ? d : w;
     const g = dachProfil(L2 + 2 * ue, T + 2 * ue, h, oben, achse);
     g.translate(x0 + w / 2, y, z0 + d / 2);
     S.add(g, dachF);
-    if (wandF) for (const F2 of sichtbar2(p, x0, z0, w, d)) {
+    if (wandF) for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const stirn = achse === "x" ? F2.s[1] === "x" : F2.s[1] === "z";
       if (stirn) fpoly(S, F2, [[0, y], [F2.L, y], [F2.L / 2 + oben / 2, y + h * (1 - 2 * ue / (T + 2 * ue))], [F2.L / 2 - oben / 2, y + h * (1 - 2 * ue / (T + 2 * ue))]], -0.3, 0.02, wandF);
     }
@@ -89902,7 +90509,7 @@
       if (kappe) S.quader(x0 - 0.1, y + hA, z0 - 0.1, x0 + w + 0.1, y + hA + 0.1, z0 + d + 0.1, kappe);
     }
   }
-  function backsteinHalle(S, scene2, p, o) {
+  function backsteinHalle(S, scene2, p2, o) {
     const { x0, z0, w, d, H } = o, r = o.r;
     const orn = o.orn ?? "#d9c9a8";
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, o.wand);
@@ -89910,7 +90517,7 @@
     S.quader(x0 - 0.25, H - 0.7, z0 - 0.25, x0 + w + 0.25, H - 0.35, z0 + d + 0.25, orn);
     S.quader(x0 - 0.15, H - 0.35, z0 - 0.15, x0 + w + 0.15, H, z0 + d + 0.15, dunkler(o.wand, 0.04));
     const fo = o.fenster ?? { art: "rund", b: 2.2, h: H * 0.55, y: 2.2, raster: 4.2 };
-    for (const F2 of sichtbar2(p, x0, z0, w, d)) {
+    for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const n = Math.max(1, Math.floor((F2.L - 1.2) / fo.raster)), off = (F2.L - n * fo.raster) / 2;
       for (let i = 0; i <= n; i++) if (o.lisenen !== false) fb(S, F2, off + i * fo.raster - 0.35, off + i * fo.raster + 0.35, 1.1, H - 0.7, 0, 0.22, o.wand);
       for (let i = 0; i < n; i++) {
@@ -89932,7 +90539,7 @@
         const g = walmdach(w + 0.8, d + 0.8, o.dachH);
         g.translate(x0 + w / 2, H, z0 + d / 2);
         S.add(g, o.dach);
-      } else satteldach3(S, p, x0, z0, w, d, H, o.dachH, o.achse ?? "x", o.dach, o.wand, 0.45, o.oben ?? 0.3);
+      } else satteldach3(S, p2, x0, z0, w, d, H, o.dachH, o.achse ?? "x", o.dach, o.wand, 0.45, o.oben ?? 0.3);
     } else flachdach2(S, x0, z0, w, d, H, null, null, o.dach ?? "#8f8a82");
     if (o.dachreiter) {
       const cx = x0 + w / 2, cz = z0 + d / 2;
@@ -89943,11 +90550,11 @@
     }
     return H + (o.dachH ?? 0);
   }
-  function stahlfachwerkBau(S, scene2, p, o) {
+  function stahlfachwerkBau(S, scene2, p2, o) {
     const { x0, z0, w, d, H } = o, r = o.r;
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, o.ausfachung);
     const st = o.stahl, fr = o.feld ?? 3.6;
-    for (const F2 of sichtbar2(p, x0, z0, w, d)) {
+    for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const n = Math.max(1, Math.round(F2.L / fr)), du = F2.L / n;
       for (let i = 0; i <= n; i++) fb(S, F2, i * du - 0.18, i * du + 0.18, 0, H, 0, 0.2, st);
       const nz = Math.max(2, Math.round(H / fr)), dv = H / nz;
@@ -90083,7 +90690,7 @@
   function lichtlinie(S, a, b2, c = LICHT_ROT) {
     stab(S, a, b2, 0.12, c, 4);
   }
-  function foerdergeruest(S, p, sx, sz, Hs, Hg, v, c, r) {
+  function foerdergeruest(S, p2, sx, sz, Hs, Hg, v, c, r) {
     const st = c.stahl, st2 = c.stahl2;
     const bx = 3.2, bz = 3.6;
     if (v === "doppelbock") {
@@ -90110,10 +90717,10 @@
     if (v === "malakow") {
       const tw = 6.5, H = Hg, z2 = c.ziegel, orn = c.orn;
       S.quader(sx - tw, 0, sz - tw, sx + tw, H, sz + tw, z2);
-      for (const F2 of sichtbar2(p, sx - tw, sz - tw, 2 * tw, 2 * tw)) {
+      for (const F2 of sichtbar2(p2, sx - tw, sz - tw, 2 * tw, 2 * tw)) {
         for (const u of [2.8, F2.L / 2, F2.L - 2.8]) for (let k = 0; k < 4; k++) {
           let glas2 = c.glas;
-          if (p.zustand === "stillgelegt" && hashR(k, Math.round(u), 3) < 0.35) glas2 = "#2a2f33";
+          if (p2.zustand === "stillgelegt" && hashR(k, Math.round(u), 3) < 0.35) glas2 = "#2a2f33";
           fenster3(S, F2, u, 3 + k * 6.4, 1.6, 3.6, { art: "rund", glas: glas2, laibung: orn, sprossen: [1, 2] });
         }
         for (let k = 1; k < 5; k++) fb(S, F2, -0.05, F2.L + 0.05, k * 6.4 + 0.6, k * 6.4 + 0.9, 0, 0.18, orn);
@@ -90162,15 +90769,15 @@
     S.box(1.4, 0.5, bz * 2 + 1, sx, Hg + 8.4, sz, st2);
     return { seilA: [[sx + 2.4, Hg + 6.6], [sx + 3.2, Hg + 4.4]], seilB: null };
   }
-  function zecheRoh(S, scene2, p) {
-    const r = rng2(`zeche:${p.seed}:${p.variante}:${p.zustand}`);
-    const { w: W3, d: D, zustand: Z2 } = p, v = p.variante;
+  function zecheRoh(S, scene2, p2) {
+    const r = rng2(`zeche:${p2.seed}:${p2.variante}:${p2.zustand}`);
+    const { w: W3, d: D, zustand: Z2 } = p2, v = p2.variante;
     const c = industrieFarben(Z2, r);
-    const name2 = p.name ?? waehle2(r, ZECHEN);
+    const name2 = p2.name ?? waehle2(r, ZECHEN);
     boden2(S, 0, 0, W3, D, c.boden, 0.3, 0.05);
     const sx = Math.round(W3 * 0.42), sz = Math.round(D * 0.5);
     const Hs = 12, Hg = v === "doppelbock" ? 46 : v === "malakow" ? 30 : 54;
-    if (v !== "malakow") backsteinHalle(S, scene2, p, {
+    if (v !== "malakow") backsteinHalle(S, scene2, p2, {
       x0: sx - 8,
       z0: sz - 7,
       w: 16,
@@ -90187,9 +90794,9 @@
       glas: c.glas,
       lichtband: c.licht
     });
-    const g = foerdergeruest(S, p, sx, sz, Hs + 3, Hg, v, c, r);
+    const g = foerdergeruest(S, p2, sx, sz, Hs + 3, Hg, v, c, r);
     const mh = (x0, links) => {
-      backsteinHalle(S, scene2, p, {
+      backsteinHalle(S, scene2, p2, {
         x0,
         z0: sz - 8,
         w: 20,
@@ -90222,7 +90829,7 @@
         stab(S, [g.seilB[1][0], g.seilB[1][1], sz + dz], [aus, 12.5, sz + dz], 0.07, "#2b2f33", 4);
       }
     } else {
-      backsteinHalle(S, scene2, p, {
+      backsteinHalle(S, scene2, p2, {
         x0: sx - 30,
         z0: sz - 6,
         w: 18,
@@ -90240,8 +90847,8 @@
       });
     }
     const wz1 = sz - 10, wx1 = 4 + 22;
-    const Hw = stahlfachwerkBau(S, scene2, p, { x0: 4, z0: 3, w: 22, d: wz1 - 3, H: 20, ausfachung: c.ziegel, stahl: c.stahl, r, zustand: Z2, salz: p.seed, lichtband: c.licht, fensterAnteil: 0.4 });
-    stahlfachwerkBau(S, scene2, p, { x0: 8, z0: 6, w: 12, d: wz1 - 9, H: Hw + 5, ausfachung: c.ziegel, stahl: c.stahl, r, zustand: Z2, salz: p.seed + 3, fensterAnteil: 0.5 });
+    const Hw = stahlfachwerkBau(S, scene2, p2, { x0: 4, z0: 3, w: 22, d: wz1 - 3, H: 20, ausfachung: c.ziegel, stahl: c.stahl, r, zustand: Z2, salz: p2.seed, lichtband: c.licht, fensterAnteil: 0.4 });
+    stahlfachwerkBau(S, scene2, p2, { x0: 8, z0: 6, w: 12, d: wz1 - 9, H: Hw + 5, ausfachung: c.ziegel, stahl: c.stahl, r, zustand: Z2, salz: p2.seed + 3, fensterAnteil: 0.5 });
     const bA = [wx1 - 1, 16, wz1 - 4], bB = [sx - 8, Hs - 1.5, sz - 3];
     balken(S, bA, bB, 2.6, 2.4, c.stahl2);
     balken(S, [bA[0], bA[1] + 1.25, bA[2]], [bB[0], bB[1] + 1.25, bB[2]], 2.8, 0.2, c.dach);
@@ -90249,7 +90856,7 @@
       const t = i / 3, px2 = bA[0] + (bB[0] - bA[0]) * t, py2 = bA[1] + (bB[1] - bA[1]) * t, pz4 = bA[2] + (bB[2] - bA[2]) * t;
       S.box(0.7, py2 - 1.2, 0.7, px2, (py2 - 1.2) / 2 + 0.3, pz4, c.stahl);
     }
-    backsteinHalle(S, scene2, p, { x0: sx - 6, z0: 3, w: 16, d: 11, H: 10, wand: c.ziegel, orn: c.orn, dach: c.dach, dachH: 3, achse: "x", r, zustand: Z2, fenster: { art: "rund", b: 1.8, h: 4.4, y: 2.2, raster: 3.6 }, glas: c.glas });
+    backsteinHalle(S, scene2, p2, { x0: sx - 6, z0: 3, w: 16, d: 11, H: 10, wand: c.ziegel, orn: c.orn, dach: c.dach, dachH: 3, achse: "x", r, zustand: Z2, fenster: { art: "rund", b: 1.8, h: 4.4, y: 2.2, raster: 3.6 }, glas: c.glas });
     schlot(S, sx + 13, 8, 52, 2.4, 1.5, dunkler(c.ziegel, 0.03), { licht: c.licht });
     if (Z2 === "aktiv") rauch(S, sx + 13.5, 54, 8.5, r, 4, 1.1, "#e4e6e8");
     const hx = sx + 15 + 20 + 3, hrx = Math.max(7, (W3 - hx) / 2 + 4), hcx = W3 - hrx - 0.5, hrz = Math.max(6, (sz - 10) / 2 + 1);
@@ -90280,7 +90887,7 @@
       kohlenwagen(S, gx, sz + 6, PI5 / 2, true, "#5b3a2e");
     }
     const lz0 = D - 21, lw = Math.min(28, sx - 4);
-    backsteinHalle(S, scene2, p, {
+    backsteinHalle(S, scene2, p2, {
       x0: 4,
       z0: lz0,
       w: lw,
@@ -90298,7 +90905,7 @@
       glas: c.glas,
       lichtband: c.licht
     });
-    if (istSicht(p, "+z")) {
+    if (istSicht(p2, "+z")) {
       const F2 = seitenRahmen(4, lz0, lw, 12)["+z"];
       fb(S, F2, lw / 2 - 3, lw / 2 + 3, 0, 11.5, 0, 0.6, c.ziegel);
       fpoly(S, F2, [[lw / 2 - 3, 11.5], [lw / 2 + 3, 11.5], [lw / 2, 14]], 0, 0.6, c.ziegel);
@@ -90314,8 +90921,8 @@
       S.quader(xx - 0.75, 4.6, D - 3.75, xx + 0.75, 5, D - 2.25, c.orn);
     }
     S.quader(tx - 0.6, 5, D - 3.2, tx + tw + 0.6, 7.6, D - 2.8, c.stahl2);
-    if (istSicht(p, "+z")) ftext(scene2, seitenRahmen(tx, D - 3, tw, 0.2)["+z"], "Gl\xFCckauf", tw / 2, 6.3, 0.02, 2, tw + 0.6, "#f4f0e4");
-    if (istSicht(p, "-z")) ftext(scene2, R2(tx + tw, D - 3.22, -1, 0, tw, "-z"), "Gl\xFCckauf", tw / 2, 6.3, 0, 2, tw + 0.6, "#f4f0e4");
+    if (istSicht(p2, "+z")) ftext(scene2, seitenRahmen(tx, D - 3, tw, 0.2)["+z"], "Gl\xFCckauf", tw / 2, 6.3, 0.02, 2, tw + 0.6, "#f4f0e4");
+    if (istSicht(p2, "-z")) ftext(scene2, R2(tx + tw, D - 3.22, -1, 0, tw, "-z"), "Gl\xFCckauf", tw / 2, 6.3, 0, 2, tw + 0.6, "#f4f0e4");
     if (Z2 !== "museum") {
       zaun(S, 0.5, D - 3, tx - 0.7, D - 3);
       zaun(S, tx + tw + 0.7, D - 3, W3 - 0.5, D - 3);
@@ -90368,9 +90975,9 @@
     for (const o of [-4.8, 4.8]) S.box(3, 1.2, 2.6, x + c * o, 1, z2 - s2 * o, "#2b2f33", ry);
     S.box(1.2, 0.5, 1.2, x, 4.2, z2, glut ? "#ff8a2a" : "#3b3f44", ry);
   }
-  function kokereiRoh(S, scene2, p) {
-    const r = rng2(`kok:${p.seed}:${p.variante}:${p.zustand}`);
-    const { w: W3, d: D, zustand: Z2 } = p, v = p.variante;
+  function kokereiRoh(S, scene2, p2) {
+    const r = rng2(`kok:${p2.seed}:${p2.variante}:${p2.zustand}`);
+    const { w: W3, d: D, zustand: Z2 } = p2, v = p2.variante;
     const c = industrieFarben(Z2, r);
     boden2(S, 0, 0, W3, D, c.boden, 0.3, 0.05);
     const rost = Z2 === "aktiv" ? "#5d5650" : Z2 === "stillgelegt" ? "#7a5038" : "#6b4a3a";
@@ -90378,7 +90985,7 @@
       const bx0 = 18, bx1 = Math.min(W3 - 22, bx0 + 64), bz0 = Math.round(D * 0.36), bz1 = bz0 + 13, Hb = 9;
       S.quader(bx0, 0, bz0, bx1, Hb, bz1, "#7c7068");
       S.quader(bx0 - 0.4, Hb, bz0 - 0.4, bx1 + 0.4, Hb + 0.8, bz1 + 0.4, "#9a938a");
-      for (const F2 of sichtbar2(p, bx0, bz0, bx1 - bx0, bz1 - bz0)) {
+      for (const F2 of sichtbar2(p2, bx0, bz0, bx1 - bx0, bz1 - bz0)) {
         const lang = F2.L > 20;
         if (lang) {
           for (let u = 0.7; u < F2.L; u += 1.45) {
@@ -90401,8 +91008,8 @@
       stab(S, [bx0, Hb + 3, bz0 + 1.3], [bx1 + 2, Hb + 3, bz0 + 1.3], 0.9, "#4a4f55", 10);
       S.box(4, 2.6, 9, bx0 + (bx1 - bx0) * 0.6, Hb + 2.1, (bz0 + bz1) / 2 + 1.5, Z2 === "museum" ? "#e0b23a" : "#7a7f85");
       for (const zz of [bz0 + 3.5, bz1 - 0.8]) S.quader(bx0, Hb + 0.8, zz - 0.1, bx1, Hb + 1, zz + 0.1, "#5a6168");
-      const Hk = stahlfachwerkBau(S, scene2, p, { x0: 4, z0: bz0 - 2, w: bx0 - 5, d: 17, H: 34, ausfachung: c.ziegel, stahl: c.stahl, r, zustand: Z2, salz: p.seed, lichtband: c.licht, fensterAnteil: 0.3 });
-      satteldach3(S, p, 4, bz0 - 2, bx0 - 5, 17, Hk, 3, "z", c.dach, c.ziegel);
+      const Hk = stahlfachwerkBau(S, scene2, p2, { x0: 4, z0: bz0 - 2, w: bx0 - 5, d: 17, H: 34, ausfachung: c.ziegel, stahl: c.stahl, r, zustand: Z2, salz: p2.seed, lichtband: c.licht, fensterAnteil: 0.3 });
+      satteldach3(S, p2, 4, bz0 - 2, bx0 - 5, 17, Hk, 3, "z", c.dach, c.ziegel);
       balken(S, [10, Hk - 3, bz0 - 2], [W3 * 0.3, 8, 2], 2.4, 2.2, c.stahl2);
       for (let i = 1; i < 3; i++) {
         const t = i / 3, px2 = 10 + (W3 * 0.3 - 10) * t, py2 = Hk - 3 + (8 - Hk + 3) * t, pz4 = bz0 - 2 + (2 - bz0 + 2) * t;
@@ -90410,7 +91017,7 @@
       }
       const lx = bx1 + 6, lz = bz1 + 4;
       S.quader(lx - 3.5, 0, lz - 3.5, lx + 3.5, 30, lz + 3.5, Z2 === "museum" ? "#c9c2b4" : "#a8a196");
-      for (const F2 of sichtbar2(p, lx - 3.5, lz - 3.5, 7, 7)) {
+      for (const F2 of sichtbar2(p2, lx - 3.5, lz - 3.5, 7, 7)) {
         for (let y = 6; y < 30; y += 6) fb(S, F2, -0.1, 7.1, y - 0.15, y + 0.15, 0, 0.15, "#8f897e");
         fb(S, F2, 1, 6, 24, 29, 0, 0.05, "#2f3438");
       }
@@ -90493,7 +91100,7 @@
       stab(S, [wx0 - 4, 14, wz2 + 4.5], [hx + 7, 9.5, hz], 1.2, "#5d5650", 10);
       const mx = Math.max(6, hx - 34), mz = hz + 4;
       S.quader(mx - 4, 0, mz - 8, mx + 10, 10, mz + 8, "#a8a196");
-      for (const F2 of sichtbar2(p, mx - 4, mz - 8, 14, 16)) for (let u = 2; u < F2.L; u += 4) fb(S, F2, u - 0.25, u + 0.25, 0.3, 10, 0, 0.3, "#8f897e");
+      for (const F2 of sichtbar2(p2, mx - 4, mz - 8, 14, 16)) for (let u = 2; u < F2.L; u += 4) fb(S, F2, u - 0.25, u + 0.25, 0.3, 10, 0, 0.3, "#8f897e");
       for (const dz of [-1.6, 1.6]) balken(S, [mx + 8, 10, mz + dz], [hx - 3, Hg + 8, hz + dz * 0.8], 0.7, 0.9, c.stahl);
       for (let k = 1; k < 6; k++) {
         const t = k / 6, px2 = mx + 8 + (hx - 3 - mx - 8) * t, py2 = 10 + (Hg - 2) * t;
@@ -90502,12 +91109,12 @@
       }
       const gz0 = hz + 8, gz1 = Math.min(D - 14, hz + 22);
       S.quader(hx - 10, 0, gz0, hx + 12, 13, gz1, "#7d7a74");
-      for (const F2 of sichtbar2(p, hx - 10, gz0, 22, gz1 - gz0)) {
+      for (const F2 of sichtbar2(p2, hx - 10, gz0, 22, gz1 - gz0)) {
         for (let u = 0; u <= F2.L; u += 3.6) fb(S, F2, u - 0.2, u + 0.2, 0.3, 13, 0, 0.25, c.stahl);
         fb(S, F2, 0, F2.L, 9, 11.5, 0, 0.1, c.glas);
         fb(S, F2, 2, 8, 0.3, 6, 0, 0.12, Z2 === "aktiv" ? "#ff8a2a" : "#2f3438");
       }
-      satteldach3(S, p, hx - 10, gz0, 22, gz1 - gz0, 13, 3, "x", c.dach, "#7d7a74");
+      satteldach3(S, p2, hx - 10, gz0, 22, gz1 - gz0, 13, 3, "x", c.dach, "#7d7a74");
       S.quader(hx - 3, 16, gz0 - 0.4, hx + 3, 17.5, gz1 - 0.4, "#5d5650");
       gleis(S, 2, gz1 + 3, W3 - 2, gz1 + 3);
       torpedowagen(S, hx + 20, gz1 + 3, 0, Z2 === "aktiv");
@@ -90528,7 +91135,7 @@
       if (Z2 === "museum") {
         boden2(S, W3 * 0.4, gz1 + 6, W3 - 2, D - 2, PFLASTER, 0.3, 0.08);
         const vz0 = gz1 + 8, vd = Math.min(12, D - 4 - vz0), vw = Math.min(24, W3 * 0.22), vx = W3 * 0.42;
-        if (vd >= 7) backsteinHalle(S, scene2, p, { x0: vx, z0: vz0, w: vw, d: vd, H: 7, wand: c.ziegel, orn: c.orn, dach: c.dach, dachH: 2.4, achse: "x", r, zustand: Z2, fenster: { art: "rund", b: 1.4, h: 2.6, y: 1.6, raster: 3.2 }, glas: c.glas });
+        if (vd >= 7) backsteinHalle(S, scene2, p2, { x0: vx, z0: vz0, w: vw, d: vd, H: 7, wand: c.ziegel, orn: c.orn, dach: c.dach, dachH: 2.4, achse: "x", r, zustand: Z2, fenster: { art: "rund", b: 1.4, h: 2.6, y: 1.6, raster: 3.2 }, glas: c.glas });
         if (D - 4 - vz0 > 8) parkplatz2(S, r, vx + vw + 4, vz0, W3 - 4, D - 4, { dichte: 0.6 });
         for (let x = W3 * 0.42; x < W3 - 3; x += 7) birke(S, x, gz1 + 6.5, r, 0.9);
         figuren(S, r, W3 * 0.42, gz1 + 6.5, vx + vw + 3, D - 3, 14, 0.38);
@@ -90574,10 +91181,10 @@
     const ta = PI5 * 0.25, tx = cx + Math.cos(ta) * (rad2 + 2.6), tz = cz + Math.sin(ta) * (rad2 + 2.6);
     gitterturm(S, tx - 1.6, tz - 1.6, tx + 1.6, tz + 1.6, 0.3, H + 1, "#5a6168", 4, 0.35);
     for (let y = 12; y <= H; y += 12) stab(S, [tx, y, tz], [cx + Math.cos(ta) * rad2, y, cz + Math.sin(ta) * rad2], 0.2, "#5a6168", 4);
-    backsteinHalle(S, scene2, p, { x0: 4, z0: D - 18, w: 14, d: 10, H: 6, wand: c.ziegel, orn: c.orn, dach: c.dach, dachH: 2.6, achse: "x", r, zustand: Z2, fenster: { art: "rund", b: 1.4, h: 2.6, y: 1.6, raster: 3.2 }, glas: c.glas });
+    backsteinHalle(S, scene2, p2, { x0: 4, z0: D - 18, w: 14, d: 10, H: 6, wand: c.ziegel, orn: c.orn, dach: c.dach, dachH: 2.6, achse: "x", r, zustand: Z2, fenster: { art: "rund", b: 1.4, h: 2.6, y: 1.6, raster: 3.2 }, glas: c.glas });
     rohrtrasse(S, [[18, D - 13], [cx - rad2 * 0.7, D - 13], [cx - rad2 * 0.7, cz + rad2 * 0.72]], 4, 0.9, "#8a8f94", "#6b7178");
     rohrtrasse(S, [[cx + rad2 + 1, cz], [W3 - 2, cz]], 5, 0.8, "#8a8f94", "#6b7178");
-    const side = (p.sicht ?? ["+z"])[0], nrm = { "+z": [0, 1], "+x": [1, 0], "-z": [0, -1], "-x": [-1, 0] }[side];
+    const side = (p2.sicht ?? ["+z"])[0], nrm = { "+z": [0, 1], "+x": [1, 0], "-z": [0, -1], "-x": [-1, 0] }[side];
     const bfx = cx + nrm[0] * (rad2 + 0.5), bfz = cz + nrm[1] * (rad2 + 0.5);
     const FB = R2(bfx - nrm[1] * 8, bfz + nrm[0] * 8, nrm[1], -nrm[0], 16, side);
     if (Z2 === "museum") {
@@ -90610,9 +91217,9 @@
     },
     roh: kokereiRoh
   });
-  function haldeRoh(S, scene2, p) {
-    const r = rng2(`halde:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function haldeRoh(S, scene2, p2) {
+    const r = rng2(`halde:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, "#a9c48c", 0.3, 0.05);
     const cx = W3 / 2, cz = D / 2 - 2, rx = W3 / 2 - 4, rz = D / 2 - 6, H = Math.min(32, Math.min(W3, D) * zw(r, 0.38, 0.46));
     const gruen = ["#8fb873", "#86ae6a", "#93bb78", "#7ea664"];
@@ -90741,13 +91348,13 @@
     if (!o.bogen) fb(S, F2, u - b2 / 2 - 0.3, u + b2 / 2 + 0.3, h + 0.15, h + 0.3, 0, 0.8, o.vordach ?? "#5a5f63");
     fb(S, F2, u - b2 / 2 - 0.2, u + b2 / 2 + 0.2, 0.3, 0.5, 0, 0.7, "#bdb8ad");
   }
-  function siedlerHaus(S, scene2, p, r, o) {
+  function siedlerHaus(S, scene2, p2, r, o) {
     const { x0, z0, w, d, eh } = o, H = eh;
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, o.wand);
     S.quader(x0 - 0.06, 0, z0 - 0.06, x0 + w + 0.06, 0.7, z0 + d + 0.06, o.sockel ?? dunkler(o.wand, 0.12));
     if (o.band) S.quader(x0 - 0.08, H - 0.35, z0 - 0.08, x0 + w + 0.08, H - 0.15, z0 + d + 0.08, o.band);
     const n = o.einheiten ?? 2;
-    for (const F2 of sichtbar2(p, x0, z0, w, d)) {
+    for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const traufe = o.first === "x" ? F2.s[1] === "z" : F2.s[1] === "x";
       const vorne = F2.s === "+z";
       const eb = F2.L / n;
@@ -90827,9 +91434,9 @@
     }
     if (o.zaun !== false) S.quader(x1 - 0.04, 0.3, z0, x1 + 0.04, 1.1, z1, "#8a7a62");
   }
-  function siedlungRoh(S, scene2, p) {
-    const r = rng2(`sied:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function siedlungRoh(S, scene2, p2) {
+    const r = rng2(`sied:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, RASEN, 0.3, 0.05);
     boden2(S, 0, D - 3.2, W3, D, PFLASTER, 0.3, 0.08);
     const front2 = D - 3.2, vorg = v === "gartenstadt" ? 5 : 4.2;
@@ -90841,8 +91448,8 @@
         const c = { wand: waehle2(r, BACKSTEIN2), dach: waehle2(r, ["#4f565c", "#5a5450", "#a9523c", "#4a5258"]) };
         const fw = waehle2(r, [true, false]);
         const arm = { eh: 3.3, dachH: 4.2, wand: c.wand, dach: c.dach, fachwerk: fw, holz: "#4a3326", gefach: "#efe7d6", band: "#e3dccb", einheiten: 2, tuerF: waehle2(r, ["#3f6b4f", "#7a2f2f", "#2f4f6f"]) };
-        H = siedlerHaus(S, scene2, p, r, { ...arm, x0: cx - 10, z0: cz - 3.5, w: 20, d: 7, first: "x" });
-        siedlerHaus(S, scene2, p, r, { ...arm, x0: cx - 3.5, z0: cz - 10, w: 7, d: 20, first: "z", einheiten: 2 });
+        H = siedlerHaus(S, scene2, p2, r, { ...arm, x0: cx - 10, z0: cz - 3.5, w: 20, d: 7, first: "x" });
+        siedlerHaus(S, scene2, p2, r, { ...arm, x0: cx - 3.5, z0: cz - 10, w: 7, d: 20, first: "z", einheiten: 2 });
         for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
           const gx0 = sx < 0 ? cx - bw / 2 + 1 : cx + 4, gx1 = sx < 0 ? cx - 4 : cx + bw / 2 - 1;
           const gz0 = sz < 0 ? Math.max(1, cz - 16) : cz + 4, gz1 = sz < 0 ? cz - 4 : front2 - 0.5;
@@ -90868,7 +91475,7 @@
       gruppen.forEach(([gx, gw], gi) => {
         const zv = front2 - vorg - (gi % 2 ? 1.2 : 0), hd = 9;
         const c = { wand: waehle2(r, putz2), dach: waehle2(r, ["#a9523c", "#9a4a37", "#b4583f"]) };
-        H = siedlerHaus(S, scene2, p, r, {
+        H = siedlerHaus(S, scene2, p2, r, {
           x0: gx,
           z0: zv - hd,
           w: gw,
@@ -90891,7 +91498,7 @@
         if (gi === mitte) {
           const tx = gx + gw;
           S.quader(tx, 3.2, zv - hd + 1.5, tx + 2.4, 6.6, zv - 1.5, c.wand);
-          for (const F2 of sichtbar2(p, tx, zv - hd + 1.5, 2.4, hd - 3)) if (F2.s === "+z") fform(S, F2, bogenForm(0.2, 0.3, 2.2, 3.4, "rund"), -0.1, 0.05, "#e3dccb");
+          for (const F2 of sichtbar2(p2, tx, zv - hd + 1.5, 2.4, hd - 3)) if (F2.s === "+z") fform(S, F2, bogenForm(0.2, 0.3, 2.2, 3.4, "rund"), -0.1, 0.05, "#e3dccb");
           const td = dachProfil(2.8, hd - 2.4, 2.2, 0.2, "z");
           td.translate(tx + 1.2, 6.6, zv - hd / 2);
           S.add(td, c.dach);
@@ -90914,7 +91521,7 @@
         const ziegel = waehle2(r, BACKSTEIN2), putzOben = r() < 0.35;
         const c = { wand: putzOben ? waehle2(r, ["#e9e0cc", "#efe6d2"]) : ziegel, dach: waehle2(r, ["#4f565c", "#5a5450", "#4a5258", "#a9523c"]) };
         const first = giebel3 ? "z" : "x";
-        H = siedlerHaus(S, scene2, p, r, {
+        H = siedlerHaus(S, scene2, p2, r, {
           x0: hx,
           z0: hz,
           w: hw,
@@ -91078,11 +91685,11 @@
     }
     return H;
   }
-  function geschaeftshaus(S, scene2, p, r, o) {
+  function geschaeftshaus(S, scene2, p2, r, o) {
     const { x0, z0, w, d, n } = o, gh = o.gh ?? 3.1, egH = o.egH ?? 4.4;
     const H = egH + n * gh;
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, o.koerper ?? dunkler(o.c.panel, 0.25));
-    for (const F2 of sichtbar2(p, x0, z0, w, d)) {
+    for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const vorne = F2.s === "+z";
       obergeschosse(S, F2, F2.L < 8 && o.typ === "waben" ? "waschbeton" : o.typ, egH, n, gh, o.c, r);
       if (vorne) {
@@ -91101,8 +91708,8 @@
       const rb = Math.min(w * 0.8, 16);
       for (const u of [w / 2 - rb / 2 + 0.5, w / 2 + rb / 2 - 0.5]) fb(S, F2, u - 0.1, u + 0.1, H, H + 3.4, -2.2, -2, "#5a6168");
       fb(S, F2, w / 2 - rb / 2, w / 2 + rb / 2, H + 1.2, H + 3.6, -2.25, -1.95, o.dachReklameF ?? "#f4f2ec");
-      if (istSicht(p, "+z")) ftext(scene2, F2, o.dachReklame, w / 2, H + 2.4, -1.93, 1.6, rb - 0.6, o.dachReklameT ?? "#d23c32");
-      if (istSicht(p, "-z")) ftext(scene2, R2(x0 + w, z0 + d - 2.27, -1, 0, w, "-z"), o.dachReklame, w / 2, H + 2.4, 0, 1.6, rb - 0.6, o.dachReklameT ?? "#d23c32");
+      if (istSicht(p2, "+z")) ftext(scene2, F2, o.dachReklame, w / 2, H + 2.4, -1.93, 1.6, rb - 0.6, o.dachReklameT ?? "#d23c32");
+      if (istSicht(p2, "-z")) ftext(scene2, R2(x0 + w, z0 + d - 2.27, -1, 0, w, "-z"), o.dachReklame, w / 2, H + 2.4, 0, 1.6, rb - 0.6, o.dachReklameT ?? "#d23c32");
     }
     return H;
   }
@@ -91162,18 +91769,18 @@
     if (typ === "waben") return { panel: "#e7e2d6", wabe: waehle2(r, ["#e9e4d8", "#dcd6c8", "#cfd4d8"]), glas: glas2, sprosse: "#d4d6d8", attika: "#e7e2d6" };
     return { panel: "#d9d4c8", glas: glas2, sprosse: "#d4d6d8" };
   }
-  function innenstadtRoh(S, scene2, p) {
-    const r = rng2(`inn:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function innenstadtRoh(S, scene2, p2) {
+    const r = rng2(`inn:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     const fz = Math.min(11, Math.max(7, D * 0.32)), bz1 = D - fz, bd = bz1 - 1;
     boden2(S, 0, 0, W3, bz1, "#9e9b94", 0.3, 0.05);
     const namen = mischListe(LAEDEN_RUHR, r);
     let H = 0;
     if (v === "kaufhaus") {
       const kw2 = Math.max(30, W3 * 0.62), kx = (W3 - kw2) * (r() < 0.5 ? 0.15 : 0.85);
-      const kname = p.name ?? waehle2(r, ["Kaufhaus Overkamp", "Kaufhaus Br\xFCning", "Kaufhaus Tiemann"]);
+      const kname = p2.name ?? waehle2(r, ["Kaufhaus Overkamp", "Kaufhaus Br\xFCning", "Kaufhaus Tiemann"]);
       const c = wbFarben(r, "waben");
-      H = geschaeftshaus(S, scene2, p, r, {
+      H = geschaeftshaus(S, scene2, p2, r, {
         x0: kx,
         z0: 1,
         w: kw2,
@@ -91188,7 +91795,7 @@
         koerper: "#d6d1c4",
         seitenLaden: "Lebensmittel"
       });
-      if (istSicht(p, "+z")) {
+      if (istSicht(p2, "+z")) {
         const F2 = seitenRahmen(kx, 1, kw2, bd)["+z"];
         fb(S, F2, kw2 * 0.12, kw2 * 0.88, 5.2 + 4 * 3.6 - 4.6, 5.2 + 4 * 3.6 - 0.8, 0.22, 0.45, "#f4f2ec");
         ftext(scene2, F2, kname, kw2 / 2, 5.2 + 4 * 3.6 - 2.7, 0.47, 2.8, kw2 * 0.72, "#c9483e");
@@ -91197,7 +91804,7 @@
       const rest = [[0, kx - 0.2], [kx + kw2 + 0.2, W3]].filter(([a, b2]) => b2 - a > 7);
       rest.forEach(([a, b2], i) => {
         const typ = waehle2(r, ["waschbeton", "mosaik", "kunststoff"]);
-        geschaeftshaus(S, scene2, p, r, { x0: a + 0.2, z0: 1 + bd * 0.3, w: b2 - a - 0.4, d: bd * 0.7, n: 3 + i % 2, typ, c: wbFarben(r, typ), name: namen[i], blende: waehle2(r, BLENDEN) });
+        geschaeftshaus(S, scene2, p2, r, { x0: a + 0.2, z0: 1 + bd * 0.3, w: b2 - a - 0.4, d: bd * 0.7, n: 3 + i % 2, typ, c: wbFarben(r, typ), name: namen[i], blende: waehle2(r, BLENDEN) });
       });
     } else if (v === "hochhaus") {
       const c = wbFarben(r, "waschbeton");
@@ -91205,11 +91812,11 @@
       const laeden = [];
       const nL = Math.max(2, Math.round(W3 / 11)), lb = (W3 - 0.6) / nL;
       for (let i = 0; i < nL; i++) laeden.push({ u0: 0.3 + i * lb + 0.1, u1: 0.3 + (i + 1) * lb - 0.1, name: namen[i], blende: waehle2(r, BLENDEN) });
-      geschaeftshaus(S, scene2, p, r, { x0: 0.5, z0: 1, w: W3 - 1, d: bd, n: n0 - 1, typ: "band", c, laeden, vordach: 2.8 });
+      geschaeftshaus(S, scene2, p2, r, { x0: 0.5, z0: 1, w: W3 - 1, d: bd, n: n0 - 1, typ: "band", c, laeden, vordach: 2.8 });
       const tw = Math.min(W3 * 0.7, 46), tx = (W3 - tw) / 2, td = Math.min(13, bd * 0.6), tz = 1 + (bd - td) * 0.4, nt = 12;
       const ct = wbFarben(r, r() < 0.5 ? "raster" : "waschbeton");
       S.quader(tx, Hs, tz, tx + tw, Hs + nt * 2.9 + 0.4, tz + td, dunkler(ct.panel, 0.25));
-      for (const F3 of sichtbar2(p, tx, tz, tw, td)) {
+      for (const F3 of sichtbar2(p2, tx, tz, tw, td)) {
         if (F3.L > 20) {
           obergeschosse(S, F3, "waschbeton", Hs + 0.4, nt, 2.9, ct, r);
           for (let k = 0; k < nt; k++) for (let u = 1.6; u < F3.L - 1; u += 6.2) fb(S, F3, u, u + 3.2, Hs + 0.4 + k * 2.9, Hs + 0.4 + k * 2.9 + 1.05, 0.28, 1.4, k % 3 === 0 ? waehle2(r, ["#d97a3a", "#2f6f8f", "#3f7d56"]) : "#e9e5dc");
@@ -91224,8 +91831,8 @@
       const rb = Math.min(tw * 0.7, 22), F2 = seitenRahmen(tx, tz, tw, td)["+z"];
       for (const u of [tw / 2 - rb / 2 + 0.6, tw / 2 + rb / 2 - 0.6]) fb(S, F2, u - 0.12, u + 0.12, H, H + 4.2, -1.6, -1.4, "#5a6168");
       fb(S, F2, tw / 2 - rb / 2, tw / 2 + rb / 2, H + 1.6, H + 4.4, -1.65, -1.35, "#f4f2ec");
-      if (istSicht(p, "+z")) ftext(scene2, F2, waehle2(r, ["Revier-Versicherung", "Hotel am Markt", "Revierbank"]), tw / 2, H + 3, -1.32, 1.8, rb - 0.8, "#1f3a5f");
-      if (istSicht(p, "-z")) ftext(scene2, seitenRahmen(tx, tz + 1.4, tw, td - 1.4)["-z"], "Hotel am Markt", tw / 2, H + 3, 0.02, 1.8, rb - 0.8, "#1f3a5f");
+      if (istSicht(p2, "+z")) ftext(scene2, F2, waehle2(r, ["Revier-Versicherung", "Hotel am Markt", "Revierbank"]), tw / 2, H + 3, -1.32, 1.8, rb - 0.8, "#1f3a5f");
+      if (istSicht(p2, "-z")) ftext(scene2, seitenRahmen(tx, tz + 1.4, tw, td - 1.4)["-z"], "Hotel am Markt", tw / 2, H + 3, 0.02, 1.8, rb - 0.8, "#1f3a5f");
       H += 4.4;
     } else {
       let x = 0.2, i = 0;
@@ -91237,7 +91844,7 @@
         const bwE = W3 - 0.2 - x - bw < 6 ? W3 - 0.2 - x : bw;
         const typ = typen[i % typen.length], c = wbFarben(r, typ), n = 2 + Math.floor(r() * 4);
         const tiefe = bd - (r() < 0.3 ? 2 : 0);
-        const h = geschaeftshaus(S, scene2, p, r, {
+        const h = geschaeftshaus(S, scene2, p2, r, {
           x0: x,
           z0: 1 + (bd - tiefe),
           w: bwE,
@@ -91255,7 +91862,7 @@
         i++;
       }
     }
-    fussgaengerzone(S, scene2, r, 0, bz1 + 0.1, W3, D, { salz: p.seed });
+    fussgaengerzone(S, scene2, r, 0, bz1 + 0.1, W3, D, { salz: p2.seed });
     return { hoehe: H };
   }
   var ruhrInnenstadt60 = slot("slot:ruhr_innenstadt60", {
@@ -91263,7 +91870,7 @@
     nenn: { zeile: [30, 26], kaufhaus: [48, 34], hochhaus: [44, 34] },
     roh: innenstadtRoh
   });
-  function logoGeruest(S, scene2, p, x0, z0, w, y, text3, farbe2, emblem) {
+  function logoGeruest(S, scene2, p2, x0, z0, w, y, text3, farbe2, emblem) {
     const bw = Math.min(w, text3.length * 2.2 + 6), x = x0 + (w - bw) / 2, h = 4.2;
     for (const xx of [x + 0.4, x + bw / 2, x + bw - 0.4]) {
       S.box(0.25, h + 1.2, 0.25, xx, y + (h + 1.2) / 2, z0, "#5a6168");
@@ -91272,7 +91879,7 @@
     S.quader(x, y + 1, z0 - 0.15, x + bw, y + 1.25, z0 + 0.15, "#5a6168");
     S.quader(x, y + h + 0.9, z0 - 0.15, x + bw, y + h + 1.15, z0 + 0.15, "#5a6168");
     const F1 = R2(x, z0 + 0.2, 1, 0, bw, "+z"), F2 = R2(x + bw, z0 - 0.2, -1, 0, bw, "-z");
-    for (const F3 of [F1, F2]) if (istSicht(p, F3.s)) {
+    for (const F3 of [F1, F2]) if (istSicht(p2, F3.s)) {
       ftext(scene2, F3, text3, bw / 2 + (emblem ? 2.4 : 0), y + 1.2 + h / 2, 0.02, h * 0.62, bw - (emblem ? 6.4 : 1.2), farbe2);
       if (emblem) {
         const [ex, ez] = wp(F3, 2.6, 0.08);
@@ -91293,9 +91900,9 @@
       S.box(0.05, 2.8, 1.5, x0 + i * 2.6, 9.6, z0 + 0.8, farben[i % farben.length]);
     }
   }
-  function bueroRoh(S, scene2, p) {
-    const r = rng2(`buero:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function bueroRoh(S, scene2, p2) {
+    const r = rng2(`buero:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, "#cfccc4", 0.3, 0.06);
     let H;
     if (v === "glas60") {
@@ -91304,7 +91911,7 @@
       H = y0 + n * gh;
       S.quader(sx + 1.5, 0, sz + 1.5, sx + sw - 1.5, y0, sz + sd - 1.5, "#3c4852");
       S.quader(sx, y0, sz, sx + sw, H, sz + sd, dunkler(glas2, 0.1));
-      for (const F2 of sichtbar2(p, sx, sz, sw, sd)) {
+      for (const F2 of sichtbar2(p2, sx, sz, sw, sd)) {
         if (F2.L > 20) {
           for (let k = 0; k < n; k++) {
             const y = y0 + k * gh;
@@ -91321,8 +91928,8 @@
       }
       flachdach2(S, sx, sz, sw, sd, H, "#dfe2e4", null, "#9e9b94", 0.6);
       S.quader(sx + sw * 0.25, H, sz + 3, sx + sw * 0.75, H + 3.6, sz + sd - 3, "#c9cdd0");
-      const firma = p.name ?? waehle2(r, ["WESTKRAFT", "EMSCHERGAS", "LIPPESTROM"]);
-      logoGeruest(S, scene2, p, sx, sz + sd / 2, sw, H + 3.6, firma, "#c9483e", true);
+      const firma = p2.name ?? waehle2(r, ["WESTKRAFT", "EMSCHERGAS", "LIPPESTROM"]);
+      logoGeruest(S, scene2, p2, sx, sz + sd / 2, sw, H + 3.6, firma, "#c9483e", true);
       S.quader(sx + sw * 0.35, y0 - 0.6, sz + sd - 1.5, sx + sw * 0.65, y0 - 0.2, sz + sd + 4, "#e9e7e1");
       const vz0 = sz + sd + 5, vz1 = D - 1.5;
       if (vz1 - vz0 > 4) {
@@ -91340,14 +91947,14 @@
       const tw = Math.min(26, Math.min(W3, D) - 12), tx = (W3 - tw) / 2, tz = Math.max(3, (D - tw) / 2 - 3), n = 22, gh = 3.6, y0 = 7.2;
       const beton = waehle2(r, ["#cfcac0", "#c4bfb4", "#d6d1c6"]), bronze = waehle2(r, ["#6b5a48", "#5a5048", "#4d4a46"]);
       S.quader(tx - 8, 0, tz - 4, tx + tw + 8, y0, tz + tw + 6, beton);
-      for (const F2 of sichtbar2(p, tx - 8, tz - 4, tw + 16, tw + 10)) {
+      for (const F2 of sichtbar2(p2, tx - 8, tz - 4, tw + 16, tw + 10)) {
         fb(S, F2, 1, F2.L - 1, 1.2, y0 - 1.2, -0.3, 0.02, bronze);
         for (let u = 1; u < F2.L - 1; u += 3) fb(S, F2, u - 0.15, u + 0.15, 1.2, y0 - 1.2, 0, 0.2, beton);
       }
       flachdach2(S, tx - 8, tz - 4, tw + 16, tw + 10, y0, beton, null, "#9e9b94", 0.6);
       H = y0 + n * gh;
       S.quader(tx, y0, tz, tx + tw, H, tz + tw, dunkler(bronze, 0.05));
-      for (const F2 of sichtbar2(p, tx, tz, tw, tw)) {
+      for (const F2 of sichtbar2(p2, tx, tz, tw, tw)) {
         for (let k = 0; k < n; k++) fb(S, F2, 0, F2.L, y0 + k * gh, y0 + k * gh + 1.2, 0, 0.3, k === n - 1 ? beton : bronze);
         for (let u = 0; u <= F2.L + 0.01; u += 2.6) fb(S, F2, u - 0.35, u + 0.35, y0, H, 0, 0.6, beton);
         fb(S, F2, -0.1, F2.L + 0.1, H - 0.2, H + 2.2, 0, 0.65, beton);
@@ -91356,9 +91963,9 @@
       flachdach2(S, tx, tz, tw, tw, H + 2.2, null, null, "#9e9b94");
       S.quader(tx + 5, H + 2.2, tz + 5, tx + tw - 5, H + 6, tz + tw - 5, beton);
       zyl5(S, 0.12, 0.12, 12, tx + tw / 2, H + 6, tz + tw / 2, "#9aa1a7", 4);
-      const firma = p.name ?? waehle2(r, ["MONTANBANK", "EMSCHERGLAS", "WESTKOHLE"]);
-      for (const F2 of sichtbar2(p, tx, tz, tw, tw)) ftext(scene2, F2, firma, tw / 2, H + 1, 0.68, 1.7, tw * 0.85, "#f4f2ec");
-      for (const F2 of sichtbar2(p, tx - 8, tz - 4, tw + 16, tw + 10)) if (F2.s === "+z") {
+      const firma = p2.name ?? waehle2(r, ["MONTANBANK", "EMSCHERGLAS", "WESTKOHLE"]);
+      for (const F2 of sichtbar2(p2, tx, tz, tw, tw)) ftext(scene2, F2, firma, tw / 2, H + 1, 0.68, 1.7, tw * 0.85, "#f4f2ec");
+      for (const F2 of sichtbar2(p2, tx - 8, tz - 4, tw + 16, tw + 10)) if (F2.s === "+z") {
         fb(S, F2, F2.L / 2 - 6, F2.L / 2 + 6, y0 - 1.6, y0 - 1, 0, 5, "#e9e7e1");
         for (const u of [F2.L / 2 - 5.5, F2.L / 2 + 5.5]) fb(S, F2, u - 0.15, u + 0.15, 0.3, y0 - 1.6, 4.6, 4.9, "#5a6168");
       }
@@ -91379,7 +91986,7 @@
       S.quader(bx, 0, bz, bx + bw, H, bz + bd, kl);
       S.quader(bx - 0.15, 0, bz - 0.15, bx + bw + 0.15, y0, bz + bd + 0.15, stein);
       const tw = 12, tH = H + 14;
-      for (const F2 of sichtbar2(p, bx, bz, bw, bd)) {
+      for (const F2 of sichtbar2(p2, bx, bz, bw, bd)) {
         const ra = 2.4, na = Math.floor(F2.L / ra), off = (F2.L - na * ra) / 2;
         for (let i = 0; i <= na; i++) {
           const u = off + i * ra;
@@ -91397,12 +92004,12 @@
           const mu = F2.L / 2;
           for (let k = 0; k < 4; k++) fform(S, F2, bogenForm(mu - 3.4 + k * 0.6, 0.3, mu + 3.4 - k * 0.6, 6.2 - k * 0.5, "spitz"), 0.6 + (3 - k) * 0.25 - 1, 0.6 + (3 - k) * 0.25, k % 2 ? kl : stein);
           fform(S, F2, bogenForm(mu - 1.4, 0.3, mu + 1.4, 4, "spitz"), 0, 1.4, "#3a2e28");
-          ftext(scene2, F2, p.name ?? "Bergwerksgesellschaft Emscher", mu, y0 + 3 * gh + 0.6, 0.62, 0.9, F2.L * 0.5, gold);
+          ftext(scene2, F2, p2.name ?? "Bergwerksgesellschaft Emscher", mu, y0 + 3 * gh + 0.6, 0.62, 0.9, F2.L * 0.5, gold);
         }
       }
       const txx = bx + bw / 2 - tw / 2, tzz = bz + bd / 2 - tw / 2 + 2;
       S.quader(txx, H, tzz, txx + tw, tH, tzz + tw - 4, kl);
-      for (const F2 of sichtbar2(p, txx, tzz, tw, tw - 4)) {
+      for (const F2 of sichtbar2(p2, txx, tzz, tw, tw - 4)) {
         for (let u = 1.2; u < F2.L; u += 2) fb(S, F2, u - 0.35, u + 0.35, H, tH, 0, 0.45, kl2);
         for (let k = 0; k < 3; k++) fb(S, F2, 0.8, F2.L - 0.8, tH - 3 - k * 0.8, tH - 2.4 - k * 0.8, 0.45, 0.6, gold);
         fscheibeW(S, F2, F2.L / 2, tH - 7, 0.5, 0.7, 1.6, "#f4f0e4");
@@ -91480,7 +92087,7 @@
       S.add(f, "#5a6168");
     }
   }
-  function aufsteller2(S, scene2, p, x, z2, text3, y0 = 0.38) {
+  function aufsteller2(S, scene2, p2, x, z2, text3, y0 = 0.38) {
     for (const s2 of [-1, 1]) {
       const g = new three_module_exports.BoxGeometry(0.75, 1.15, 0.05);
       g.rotateX(s2 * 0.2);
@@ -91488,10 +92095,10 @@
       S.add(g, "#f4f2ec");
     }
     const Fs = { "+z": R2(x - 0.375, z2 + 0.25, 1, 0, 0.75, "+z"), "-z": R2(x + 0.375, z2 - 0.25, -1, 0, 0.75, "-z") };
-    for (const s2 of ["+z", "-z"]) if (istSicht(p, s2)) ftext(scene2, Fs[s2], text3, 0.375, y0 + 0.62, 0, 0.3, 0.68, "#c9483e");
-    if (istSicht(p, "+x") || istSicht(p, "-x")) S.box(0.06, 0.9, 0.5, x + (istSicht(p, "+x") ? 0.39 : -0.39), y0 + 0.5, z2, "#c9483e");
+    for (const s2 of ["+z", "-z"]) if (istSicht(p2, s2)) ftext(scene2, Fs[s2], text3, 0.375, y0 + 0.62, 0, 0.3, 0.68, "#c9483e");
+    if (istSicht(p2, "+x") || istSicht(p2, "-x")) S.box(0.06, 0.9, 0.5, x + (istSicht(p2, "+x") ? 0.39 : -0.39), y0 + 0.5, z2, "#c9483e");
   }
-  function kioskUmfeld(S, scene2, p, r, W3, D, y, o) {
+  function kioskUmfeld(S, scene2, p2, r, W3, D, y, o) {
     if (o.sitz) {
       bierzeltgarnitur(S, o.sitz[0], o.sitz[1], 0, y);
       schirmRund(S, o.sitz[0] + 1.6, o.sitz[1] - 0.2, y, waehle2(r, ["#c9483e", "#2f5f8f", "#f4f2ec"]));
@@ -91504,7 +92111,7 @@
       S.box(2.5, 0.05, 0.05, rx + 1.2, y + 0.7, rz - 0.6, "#59636b");
       for (let i = 0; i < 3; i++) fahrrad2(S, rx + 0.4 + i * 0.8, rz, PI5 / 2, waehle2(r, ["#c9483e", "#2f5f8f", "#3f7d56", "#2b2f33", "#e0b23a"]), y);
     }
-    if (o.aufsteller) aufsteller2(S, scene2, p, o.aufsteller[0], o.aufsteller[1], o.aufsteller[2], y);
+    if (o.aufsteller) aufsteller2(S, scene2, p2, o.aufsteller[0], o.aufsteller[1], o.aufsteller[2], y);
     if (o.zeitung) {
       S.box(0.9, 1, 0.4, o.zeitung[0], y + 0.5, o.zeitung[1], "#3b3f44");
       for (let k = 0; k < 3; k++) S.box(0.8, 0.04, 0.32, o.zeitung[0], y + 0.25 + k * 0.3, o.zeitung[1] + 0.06, waehle2(r, ["#f4f2ec", "#e9e2cf", "#d23c32"]));
@@ -91514,9 +92121,9 @@
       zyl5(S, 0.33, 0.33, 0.08, o.muell[0], y + 0.9, o.muell[1], "#2f3438", 8);
     }
   }
-  function budeRoh(S, scene2, p) {
-    const r = rng2(`bude:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function budeRoh(S, scene2, p2) {
+    const r = rng2(`bude:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, PFLASTER, 0.3, 0.08);
     const y = 0.38;
     let H = 4;
@@ -91526,7 +92133,7 @@
       S.quader(kx, 0.3, kz2, kx + kw2, Hk, kz2 + kd, wand2);
       S.quader(kx - 0.05, 0.3, kz2 - 0.05, kx + kw2 + 0.05, 0.8, kz2 + kd + 0.05, "#8a857b");
       flachdach2(S, kx, kz2, kw2, kd, Hk, trim, null, "#7d7a74", 0.5);
-      for (const F2 of sichtbar2(p, kx, kz2, kw2, kd)) {
+      for (const F2 of sichtbar2(p2, kx, kz2, kw2, kd)) {
         if (F2.s === "+z" || F2.L > 5.5) {
           fb(S, F2, 0.4, F2.L - 0.4, 1.1, 2.6, -0.1, 0.02, "#6f8696");
           for (let k = 0; k < 3; k++) for (let u = 0.6; u < F2.L - 0.6; u += 0.42) fb(S, F2, u, u + 0.32, 1.25 + k * 0.45, 1.55 + k * 0.45, -0.3, -0.12, waehle2(r, ["#e0b23a", "#c9483e", "#f4f2ec", "#2f5f8f", "#3f7d56", "#d97a3a", "#7a4a8c"]));
@@ -91550,7 +92157,7 @@
       figuren(S, r, kx - 1, kz2 + kd + 0.8, kx + kw2 + 2, kz2 + kd + 3, 5, y);
       baumRund(S, W3 * 0.82, D * 0.22, r, 1, y);
       bank2(S, W3 * 0.82, D * 0.22 + 2.4, 0, y);
-      kioskUmfeld(S, scene2, p, r, W3, D, y, { sitz: [W3 * 0.8, D * 0.62], raeder: [1.2, D - 2.4], aufsteller: [kx + kw2 * 0.3, kz2 + kd + 1.4, "Lotto \xB7 Toto"], zeitung: [kx + kw2 + 0.6, kz2 + kd + 0.6], muell: [W3 * 0.66, D * 0.5] });
+      kioskUmfeld(S, scene2, p2, r, W3, D, y, { sitz: [W3 * 0.8, D * 0.62], raeder: [1.2, D - 2.4], aufsteller: [kx + kw2 * 0.3, kz2 + kd + 1.4, "Lotto \xB7 Toto"], zeitung: [kx + kw2 + 0.6, kz2 + kd + 0.6], muell: [W3 * 0.66, D * 0.5] });
       westAuto(S, W3 * 0.62, D - 1.3, 0, "kombi", waehle2(r, AUTOFARBEN2), y);
       hecke(S, 0.4, 0.4, W3 - 0.4, 1.3, 1, y);
       pflanzkuebel(S, 1.4, D * 0.5, r, y);
@@ -91560,8 +92167,8 @@
       const wand2 = waehle2(r, ["#f2efe6", "#e9e2cf"]), farbe2 = waehle2(r, ["#c9483e", "#e0b23a", "#2f6f8f"]);
       S.quader(ix, 0.3, iz, ix + iw, Hi, iz + id, wand2);
       flachdach2(S, ix, iz, iw, id, Hi, farbe2, null, "#7d7a74", 0.7);
-      const name2 = p.name ?? waehle2(r, ["Imbiss Zum P\xFCtt", "Grill-Eck", "Imbiss Gl\xFCckauf", "Pommes-Paradies"]);
-      for (const F2 of sichtbar2(p, ix, iz, iw, id)) {
+      const name2 = p2.name ?? waehle2(r, ["Imbiss Zum P\xFCtt", "Grill-Eck", "Imbiss Gl\xFCckauf", "Pommes-Paradies"]);
+      for (const F2 of sichtbar2(p2, ix, iz, iw, id)) {
         fb(S, F2, -0.05, F2.L + 0.05, 0.3, 0.9, 0, 0.06, "#a8a196");
         if (F2.s === "+z") {
           fb(S, F2, 0.6, F2.L - 2.2, 1.1, 2.7, -0.1, 0.02, "#6f8696");
@@ -91596,7 +92203,7 @@
       zyl5(S, 1.4, 1.4, 0.1, W3 - 3, y + 2.2, D * 0.65, "#c9483e", 8);
       zyl5(S, 0.06, 0.06, 2.2, W3 - 3, y, D * 0.65, "#9aa1a7", 4);
       S.box(1.8, 0.7, 0.6, W3 - 3, y + 0.7, D * 0.65, "#8a6a4a");
-      kioskUmfeld(S, scene2, p, r, W3, D, y, { raeder: [W3 - 4.2, D - 2.2], aufsteller: [ix + iw * 0.25, iz + id + 1.2, "Pommes Schranke"], muell: [ix + iw + 1.1, iz + id + 1] });
+      kioskUmfeld(S, scene2, p2, r, W3, D, y, { raeder: [W3 - 4.2, D - 2.2], aufsteller: [ix + iw * 0.25, iz + id + 1.2, "Pommes Schranke"], muell: [ix + iw + 1.1, iz + id + 1] });
       westAuto(S, W3 * 0.5, D - 1.3, 0, "pkw", waehle2(r, AUTOFARBEN2), y);
       H = Hi + 1.6;
     } else {
@@ -91606,7 +92213,7 @@
       S.quader(0.5, 0, hz, 0.5 + hw, H, hz + hd, wand2);
       const laeden = mischListe([["Sportwetten", "#2f7d3f", "#ffffff", "#7fe08a"], ["Shisha Lounge", "#3a2a4a", "#f2a6ff", "#c45cff"], ["D\xF6ner Kebab", "#c9483e", "#ffd75a", "#ff8a2a"], ["Handy \xB7 Reparatur", "#1f4f8f", "#ffffff", "#4fc3ff"], ["Caf\xE9 Bistro", "#2b2f33", "#ffd75a", "#ffd75a"]], r).slice(0, 3);
       laeden.sort((a, b2) => a[0] === "Sportwetten" ? -1 : 0);
-      for (const F2 of sichtbar2(p, 0.5, hz, hw, hd)) {
+      for (const F2 of sichtbar2(p2, 0.5, hz, hw, hd)) {
         const traufe = F2.s[1] === "z";
         for (let k = 0; k < n; k++) {
           const yy = eg + k * gh;
@@ -91639,7 +92246,7 @@
         } else fb(S, F2, 0.3, F2.L - 0.3, 0.3, 1, 0, 0.05, "#a8a196");
         if (!traufe) fpoly(S, F2, [[0, H], [F2.L, H], [F2.L / 2, H + 3.2]], -0.3, 0.02, wand2);
       }
-      satteldach3(S, p, 0.5, hz, hw, hd, H, 3.6, "x", waehle2(r, ["#4f565c", "#a9523c", "#5a5450"]), wand2);
+      satteldach3(S, p2, 0.5, hz, hw, hd, H, 3.6, "x", waehle2(r, ["#4f565c", "#a9523c", "#5a5450"]), wand2);
       for (let i = 0; i < 2; i++) S.box(0.6, 1.4, 0.6, 3 + i * (hw - 6), H + 3.2, hz + hd / 2, "#8f4a37");
       const gz2 = hz + hd;
       for (let i = 0; i < 3; i++) {
@@ -91708,9 +92315,9 @@
     stab(S, [ex, ey - 1.2, ez + sg * 0.6], [ex, 3, ez + sg * 0.6], 0.05, "#2b2f33", 4);
     S.box(1.6, 0.8, 1.2, ex, 2.6, ez + sg * 0.6, "#3b3f44");
   }
-  function kanalRoh(S, scene2, p) {
-    const r = rng2(`kanal:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante, WY = p.wasserY ?? WEST_WASSER_Y;
+  function kanalRoh(S, scene2, p2) {
+    const r = rng2(`kanal:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante, WY = p2.wasserY ?? WEST_WASSER_Y;
     let H = 20;
     if (v === "hafen") {
       const kz2 = D - Math.round(D * 0.46);
@@ -91727,7 +92334,7 @@
       if (W3 > 70 && D - kz2 > 22) westSchiff(S, scene2, W3 * 0.72, kz2 + 16, WY, 0, "binnen", { ladung: "container", laenge: Math.min(50, W3 * 0.4) });
       const sz0 = 3, sz1 = kz2 - 13, sw = Math.min(40, W3 * 0.5);
       if (sz1 - sz0 > 8) {
-        backsteinHalle(S, scene2, p, {
+        backsteinHalle(S, scene2, p2, {
           x0: 3,
           z0: sz0,
           w: sw,
@@ -91742,13 +92349,13 @@
           fenster: { art: "segment", b: 1.4, h: 2, y: 1.8, raster: 3.4, zeilen: 3 },
           glas: GLAS6
         });
-        for (const F2 of sichtbar2(p, 3, sz0, sw, sz1 - sz0)) if (F2.L > 20) ftext(scene2, F2, "Lagerhaus 3", F2.L / 2, 12.6, 0.3, 1.2, F2.L * 0.4, "#f4f0e4");
+        for (const F2 of sichtbar2(p2, 3, sz0, sw, sz1 - sz0)) if (F2.L > 20) ftext(scene2, F2, "Lagerhaus 3", F2.L / 2, 12.6, 0.3, 1.2, F2.L * 0.4, "#f4f0e4");
         const six = 3 + sw + 4, siw = Math.min(16, W3 - six - 12);
         if (siw > 8) {
           const sn = Math.max(2, Math.floor(siw / 5)), sr = siw / sn / 2;
           for (let i = 0; i < sn; i++) for (let k = 0; k < 2; k++) zyl5(S, sr, sr, 30, six + sr + i * 2 * sr, 0.3, sz0 + sr + k * 2 * sr, "#d6d1c6", 14);
           S.quader(six, 30.3, sz0, six + siw, 36, sz0 + 4 * sr, "#cfcac0");
-          for (const F2 of sichtbar2(p, six, sz0, siw, 4 * sr)) {
+          for (const F2 of sichtbar2(p2, six, sz0, siw, 4 * sr)) {
             fb(S, F2, 1, F2.L - 1, 33, 35, 0, 0.1, GLAS6);
             ftext(scene2, F2, "Silo", F2.L / 2, 31.4, 0.12, 1.1, F2.L * 0.5, "#5a6168");
           }
@@ -91786,11 +92393,11 @@
       }
       const hx = ox1 - 2, Ht = 18;
       for (const zz of [z0 - 2.5, z0 + kb + mm / 2, zB - 6 + 2.5 - 1]) S.quader(hx - 2, 0.6, zz - 1.6, hx + 2, Ht, zz + 1.6, "#e2ddd2");
-      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS6);
+      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p2, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS6);
       S.quader(hx - 2.2, Ht, z0 - 4.3, hx + 2.2, Ht + 1, zB - 6 + 2.5 + 0.8, "#c9c4b8");
       S.quader(hx - 0.8, 7.5, z0 + 0.2, hx + 0.8, 11.5, z0 + kb - 0.2, "#2f5f8f");
       S.quader(hx - 0.8, 6.5, z0 + kb + mm + 0.2, hx + 0.8, 10, z0 + kb + mm + kb2 - 0.2, "#2f5f8f");
-      if (istSicht(p, "+x") || istSicht(p, "+z")) ftext(scene2, R2(hx + 2.25, z0 + kb + mm / 2 + 1.6, 0, -1, 3.2, "+x"), "Schleuse", 1.6, Ht - 6, 0.02, 0.9, 3, "#2f3438");
+      if (istSicht(p2, "+x") || istSicht(p2, "+z")) ftext(scene2, R2(hx + 2.25, z0 + kb + mm / 2 + 1.6, 0, -1, 3.2, "+x"), "Schleuse", 1.6, Ht - 6, 0.02, 0.9, 3, "#2f3438");
       const sx = ox0 + (ox1 - ox0) * 0.45, sz = zB + 3;
       S.quader(sx - 4, 0.3, sz, sx + 4, 4, sz + 5, "#e2ddd2");
       S.quader(sx - 3.4, 4, sz + 0.4, sx + 3.4, 6.6, sz + 4.6, "#6f8696");
@@ -91860,11 +92467,11 @@
     nenn: { strecke: [70, 50], hafen: [70, 56], schleuse: [90, 56] },
     roh: kanalRoh
   });
-  function parkhaus2(S, scene2, p, r, x0, z0, w, d, decks, o = {}) {
+  function parkhaus2(S, scene2, p2, r, x0, z0, w, d, decks, o = {}) {
     const gh = 2.9, H = decks * gh, band = o.band ?? "#d9d6cf", akzent = o.akzent ?? null;
     for (let k = 0; k <= decks; k++) S.quader(x0, k * gh, z0, x0 + w, k * gh + 0.35, z0 + d, "#bdb9b1");
     for (let x = x0 + 0.4; x <= x0 + w - 0.3; x += 7.5) for (const z2 of [z0 + 0.4, z0 + d - 0.4, z0 + d / 2]) S.box(0.6, H, 0.6, x, H / 2, z2, "#a9a59c");
-    for (const F2 of sichtbar2(p, x0, z0, w, d)) for (let k = 1; k <= decks; k++) {
+    for (const F2 of sichtbar2(p2, x0, z0, w, d)) for (let k = 1; k <= decks; k++) {
       fb(S, F2, -0.05, F2.L + 0.05, k * gh + 0.35, k * gh + 1.25, 0, 0.12, akzent && k % 2 ? akzent : band);
       if (k < decks) {
         for (let u = 3; u < F2.L - 2; u += zw(r, 3, 6)) if (r() < 0.6) {
@@ -91878,18 +92485,18 @@
     for (let x = x0 + 4; x < x0 + w; x += 14) laterne2(S, x, z0 + d / 2, 5, H + 0.35, "mast");
     return H + 1.3;
   }
-  function ekzRoh(S, scene2, p) {
-    const r = rng2(`ekz:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function ekzRoh(S, scene2, p2) {
+    const r = rng2(`ekz:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, ASPHALT, 0.3, 0.05);
-    const name2 = p.name ?? waehle2(r, v === "90er" ? ["Kanalpark-Center", "Haldenblick-Galerie", "Revier-Arkaden"] : v === "80er" ? ["Marktzentrum S\xFCd", "Einkaufspark West"] : ["Einkaufszentrum Nord", "City-Center Ost"]);
+    const name2 = p2.name ?? waehle2(r, v === "90er" ? ["Kanalpark-Center", "Haldenblick-Galerie", "Revier-Arkaden"] : v === "80er" ? ["Marktzentrum S\xFCd", "Einkaufspark West"] : ["Einkaufszentrum Nord", "City-Center Ost"]);
     const bz0 = 3, bz1 = Math.round(D * 0.62), bw = W3 - (v === "70er" ? 10 : 34), bx = 5;
     let H;
     if (v === "70er") {
       const c = wbFarben(r, "waschbeton");
       H = 12;
       S.quader(bx, 0, bz0, bx + bw, H, bz1, c.panel);
-      for (const F2 of sichtbar2(p, bx, bz0, bw, bz1 - bz0)) {
+      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
         for (let y = 1.2; y < H; y += 2.6) fb(S, F2, -0.05, F2.L + 0.05, y, y + 0.35, 0, 0.18, dunkler(c.panel, 0.08));
         for (let u = 4; u < F2.L - 2; u += 4.8) fb(S, F2, u - 0.12, u + 0.12, 0.3, H, 0, 0.12, dunkler(c.panel, 0.05));
         if (F2.s === "+z") {
@@ -91922,7 +92529,7 @@
       const kl = waehle2(r, ["#9b5a44", "#8f4f3c", "#a8664f"]), gruen = "#2f6f5a";
       H = 11;
       S.quader(bx, 0, bz0, bx + bw, H, bz1, kl);
-      for (const F2 of sichtbar2(p, bx, bz0, bw, bz1 - bz0)) {
+      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
         for (let u = 0; u <= F2.L + 0.01; u += 6) fb(S, F2, u - 0.35, u + 0.35, 0.3, H + 0.6, 0, 0.4, dunkler(kl, 0.06));
         fb(S, F2, -0.1, F2.L + 0.1, H - 0.4, H + 0.6, 0, 0.45, gruen);
         for (let u = 3; u < F2.L - 2; u += 6) fb(S, F2, u - 1.8, u + 1.8, 5.5, 8.5, 0, 0.06, "#5f7787");
@@ -91947,12 +92554,12 @@
       }
       flachdach2(S, bx, bz0, bw, bz1 - bz0, H, null, null, "#8f8a82");
       const phx = bx + bw + 3;
-      H = Math.max(H, parkhaus2(S, scene2, p, r, phx, bz0, W3 - phx - 2, bz1 - bz0 + 6, 4, { akzent: gruen }));
+      H = Math.max(H, parkhaus2(S, scene2, p2, r, phx, bz0, W3 - phx - 2, bz1 - bz0 + 6, 4, { akzent: gruen }));
     } else {
       const panel2 = "#e4e6e8", blau = "#1f5f9f";
       H = 14;
       S.quader(bx, 0, bz0, bx + bw, H, bz1, panel2);
-      for (const F2 of sichtbar2(p, bx, bz0, bw, bz1 - bz0)) {
+      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
         for (let u = 0; u <= F2.L + 0.01; u += 3) fb(S, F2, u - 0.05, u + 0.05, 0.3, H, 0, 0.1, "#cfd3d6");
         fb(S, F2, -0.1, F2.L + 0.1, H - 1.6, H, 0, 0.3, blau);
         fb(S, F2, -0.1, F2.L + 0.1, 4.8, 5.1, 0, 0.3, "#cfd3d6");
@@ -91977,15 +92584,15 @@
       }
       const tx = bx + 2, tz = bz1 - 8, tH = 28;
       S.quader(tx, 0, tz, tx + 8, tH, tz + 8, blau);
-      for (const F2 of sichtbar2(p, tx, tz, 8, 8)) {
+      for (const F2 of sichtbar2(p2, tx, tz, 8, 8)) {
         fb(S, F2, 0.8, F2.L - 0.8, tH - 6, tH - 1, 0, 0.1, "#f4f2ec");
         ftext(scene2, F2, name2.split("-")[0], F2.L / 2, tH - 3.5, 0.12, 1.6, F2.L - 2, blau);
         fb(S, F2, 1, F2.L - 1, 2, tH - 8, 0, 0.06, "#7aa2b8");
       }
       S.quader(tx - 0.5, tH, tz - 0.5, tx + 8.5, tH + 0.6, tz + 8.5, "#e4e6e8");
-      for (const F2 of sichtbar2(p, bx, bz0, bw, bz1 - bz0)) if (F2.s === "+z") ftext(scene2, F2, name2, F2.L * 0.5, H - 0.8, 0.32, 1.2, F2.L * 0.4, "#ffffff");
+      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) if (F2.s === "+z") ftext(scene2, F2, name2, F2.L * 0.5, H - 0.8, 0.32, 1.2, F2.L * 0.4, "#ffffff");
       const phx = bx + bw + 3;
-      H = Math.max(tH + 1, parkhaus2(S, scene2, p, r, phx, bz0, W3 - phx - 2, bz1 - bz0 + 10, 5, { akzent: blau }));
+      H = Math.max(tH + 1, parkhaus2(S, scene2, p2, r, phx, bz0, W3 - phx - 2, bz1 - bz0 + 10, 5, { akzent: blau }));
       vorplatzFahnen(S, r, bx + bw * 0.3, bz1 + 3, 6, [blau, "#f4f2ec", "#e0b23a"]);
     }
     const pz0 = bz1 + (v === "70er" ? 13 : 6), pz1 = D - 2;
@@ -92007,11 +92614,11 @@
     nenn: { "70er": [90, 70, 160, 120], "80er": [100, 70, 160, 120], "90er": [110, 76, 160, 120] },
     roh: ekzRoh
   });
-  function bahnhofRoh(S, scene2, p) {
-    const r = rng2(`bhf:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function bahnhofRoh(S, scene2, p2) {
+    const r = rng2(`bhf:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, PFLASTER, 0.3, 0.06);
-    const stadt = p.name ?? "Hauptbahnhof";
+    const stadt = p2.name ?? "Hauptbahnhof";
     const gz1 = 11;
     boden2(S, 0, 0, W3, gz1, "#9b958a", 0.3, 0.08);
     for (const zz of [2, 9]) gleis(S, 0, zz, W3, zz);
@@ -92028,7 +92635,7 @@
       const beton = waehle2(r, ["#cfc9bc", "#c6c0b2"]), bronze = "#5d544b";
       H = 13.5;
       S.quader(ex, 0, ez0, ex + ew, H, ez1, beton);
-      for (const F2 of sichtbar2(p, ex, ez0, ew, ed)) {
+      for (const F2 of sichtbar2(p2, ex, ez0, ew, ed)) {
         fb(S, F2, 0, F2.L, 5.2, 8.2, -0.2, 0.02, bronze);
         fb(S, F2, 0, F2.L, 9, 12, -0.2, 0.02, bronze);
         for (let u = 0; u <= F2.L + 0.01; u += 1.8) fb(S, F2, u - 0.25, u + 0.25, 4.6, H, 0, 0.35, beton);
@@ -92049,11 +92656,11 @@
       S.quader(ex, 0, ez0, ex + ew * 0.25, 8, ez1, stein);
       S.quader(ex + ew * 0.75, 0, ez0, ex + ew, 8, ez1, stein);
       S.quader(ex + ew * 0.25, 0, ez0 + 1, ex + ew * 0.75, H, ez1 - 1, "#7aa2b8");
-      for (const F2 of sichtbar2(p, ex + ew * 0.25, ez0 + 1, ew * 0.5, ed - 2)) {
+      for (const F2 of sichtbar2(p2, ex + ew * 0.25, ez0 + 1, ew * 0.5, ed - 2)) {
         for (let u = 0; u <= F2.L + 0.01; u += 1.2) fb(S, F2, u - 0.05, u + 0.05, 0.3, H, 0, 0.12, "#f4f2ec");
         for (let y = 2.8; y < H; y += 2.6) fb(S, F2, 0, F2.L, y - 0.05, y + 0.05, 0, 0.12, "#f4f2ec");
       }
-      for (const F2 of sichtbar2(p, ex, ez0, ew, ed)) for (let u = 1.5; u < F2.L * 0.25 - 0.5; u += 2.4) for (const y of [1.5, 4.8]) {
+      for (const F2 of sichtbar2(p2, ex, ez0, ew, ed)) for (let u = 1.5; u < F2.L * 0.25 - 0.5; u += 2.4) for (const y of [1.5, 4.8]) {
         fb(S, F2, u - 0.7, u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS6);
         fb(S, F2, F2.L - u - 0.7, F2.L - u + 0.7, y, y + 1.9, -0.02, 0.06, GLAS6);
       }
@@ -92063,7 +92670,7 @@
       S.add(g, "#bfc3c6");
       flachdach2(S, ex, ez0, ew * 0.25, ed, 8, null, null, "#9e9b94");
       flachdach2(S, ex + ew * 0.75, ez0, ew * 0.25, ed, 8, null, null, "#9e9b94");
-      if (istSicht(p, "+z")) {
+      if (istSicht(p2, "+z")) {
         const F2 = seitenRahmen(ex, ez0, ew, ed)["+z"];
         ftext(scene2, F2, stadt, ew / 2, H - 1.2, 0.15, 1.4, ew * 0.4, "#1f3a5f");
         fb(S, F2, ew / 2 - 8, ew / 2 + 8, 3.6, 3.9, 0, 4, "#f4f2ec");
@@ -92071,12 +92678,12 @@
     } else {
       const ziegel = waehle2(r, BACKSTEIN2), stein = "#e3d6bb";
       H = 12;
-      backsteinHalle(S, scene2, p, { x0: ex, z0: ez0, w: ew, d: ed, H: 9, wand: ziegel, orn: stein, dach: waehle2(r, SCHIEFER2), dachH: 4.5, achse: "x", r, fenster: { art: "rund", b: 1.8, h: 4, y: 1.8, raster: 3.6 } });
+      backsteinHalle(S, scene2, p2, { x0: ex, z0: ez0, w: ew, d: ed, H: 9, wand: ziegel, orn: stein, dach: waehle2(r, SCHIEFER2), dachH: 4.5, achse: "x", r, fenster: { art: "rund", b: 1.8, h: 4, y: 1.8, raster: 3.6 } });
       const hw = Math.min(20, ew * 0.34), hx = ex + (ew - hw) / 2;
-      backsteinHalle(S, scene2, p, { x0: hx, z0: ez0 - 1, w: hw, d: ed + 2, H: 15, wand: ziegel, orn: stein, dach: waehle2(r, SCHIEFER2), dachH: 6, achse: "z", r, fenster: { art: "rund", b: 7, h: 10, y: 2.2, raster: hw - 2 }, lisenen: false });
+      backsteinHalle(S, scene2, p2, { x0: hx, z0: ez0 - 1, w: hw, d: ed + 2, H: 15, wand: ziegel, orn: stein, dach: waehle2(r, SCHIEFER2), dachH: 6, achse: "z", r, fenster: { art: "rund", b: 7, h: 10, y: 2.2, raster: hw - 2 }, lisenen: false });
       const tx = hx + hw + 1, tz = ez1 - 6;
       S.quader(tx, 0, tz, tx + 6, 30, tz + 6, ziegel);
-      for (const F2 of sichtbar2(p, tx, tz, 6, 6)) {
+      for (const F2 of sichtbar2(p2, tx, tz, 6, 6)) {
         fscheibeW(S, F2, 3, 25.5, 0, 0.15, 1.8, "#f4f0e4");
         fscheibeW(S, F2, 3, 25.5, 0.15, 0.25, 0.25, "#2f3438");
         fb(S, F2, -0.2, 6.2, 22.8, 23.3, 0, 0.3, stein);
@@ -92085,13 +92692,13 @@
       const hm = walmdach(6.8, 6.8, 6);
       hm.translate(tx + 3, 30, tz + 3);
       S.add(hm, "#6f9a7d");
-      if (istSicht(p, "+z")) ftext(scene2, seitenRahmen(hx, ez0 - 1, hw, ed + 2)["+z"], stadt, hw / 2, 13.6, 0.3, 1.1, hw * 0.85, "#f4f0e4");
+      if (istSicht(p2, "+z")) ftext(scene2, seitenRahmen(hx, ez0 - 1, hw, ed + 2)["+z"], stadt, hw / 2, 13.6, 0.3, 1.1, hw * 0.85, "#f4f0e4");
       H = 37;
     }
     const vz0 = ez1 + 2;
     S.quader(ex, 0.36, vz0, ex + ew, 0.4, vz0 + 3, ASPHALT);
     for (let i = 0; i < Math.min(6, Math.floor(ew / 6)); i++) westAuto(S, ex + ew * 0.55 + i * 5.2, vz0 + 1.5, 0, "taxi", null, 0.4);
-    if (istSicht(p, "+z")) {
+    if (istSicht(p2, "+z")) {
       S.box(0.12, 2.6, 0.12, ex + ew * 0.53, 1.7, vz0 + 3.3, "#5a6168");
       S.box(1.4, 0.7, 0.1, ex + ew * 0.53, 3, vz0 + 3.3, "#f2c62e");
       ftext(scene2, R2(ex + ew * 0.53 - 0.7, vz0 + 3.36, 1, 0, 1.4, "+z"), "TAXI", 0.7, 3, 0, 0.5, 1.2, "#2b2f33");
@@ -92188,10 +92795,10 @@
     g2.translate(x, h + 1.8, z2);
     S.add(g2, "#f6f3d8");
   }
-  function stadionRoh(S, scene2, p) {
-    const r = rng2(`stadion:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
-    const ver = VEREINE2.find((q2) => q2.name === p.name) ?? waehle2(r, VEREINE2);
+  function stadionRoh(S, scene2, p2) {
+    const r = rng2(`stadion:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
+    const ver = VEREINE2.find((q2) => q2.name === p2.name) ?? waehle2(r, VEREINE2);
     boden2(S, 0, 0, W3, D, v === "kampfbahn" ? RASEN : ASPHALT, 0.3, 0.05);
     const cx = W3 / 2, cz = D / 2 - 2, L2 = Math.min(76, W3 - (v === "kampfbahn" ? 52 : 44)), B2 = Math.min(48, D - 40);
     const [f1, f2] = ver.farben;
@@ -92283,7 +92890,7 @@
         }
         const Gi = R2(...wp(G2, G2.L, -1.32), -G2.dx, -G2.dz, G2.L, "");
         ftext(scene2, Gi, ver.name, G2.L / 2, hoch + 6.1, 0, 0.7, G2.L * 0.4, "#ffffff");
-        if (istSicht(p, s2)) ftext(scene2, G2, ver.name, G2.L / 2, hoch + 3.5, tief2 + 0.62, 1.6, G2.L * 0.5, f1);
+        if (istSicht(p2, s2)) ftext(scene2, G2, ver.name, G2.L / 2, hoch + 3.5, tief2 + 0.62, 1.6, G2.L * 0.5, f1);
       }
       const [ax, az] = [cx + L2 / 2 + 6, cz + B2 / 2 + 6];
       S.box(0.5, 14, 0.5, ax, 7.3, az, "#5a6168");
@@ -92300,7 +92907,7 @@
       const Fi = seitenRahmen(cx - L2 / 2 - 3, cz - B2 / 2 - 3, L2 + 6, B2 + 6);
       for (const s2 of ["+z", "+x", "-z", "-x"]) tribuene(S, Fi[s2], -(s2[1] === "z" ? 12 : 12), Fi[s2].L + 12, 14, s2[1] === "z" ? (ad - B2 - 6) / 2 - 1.5 : (aw - L2 - 6) / 2 - 1.5, Ha - 5, [f1, f2, f1], { salz: s2 === "+z" ? 0 : 1 });
       for (const [x0, z0, x1, z1] of [[ax0, az0, ax0 + aw, az0 + 1.5], [ax0, az0 + ad - 1.5, ax0 + aw, az0 + ad], [ax0, az0, ax0 + 1.5, az0 + ad], [ax0 + aw - 1.5, az0, ax0 + aw, az0 + ad]]) S.quader(x0, 0, z0, x1, Ha, z1, "#d9dcdf");
-      for (const F2 of sichtbar2(p, ax0, az0, aw, ad)) {
+      for (const F2 of sichtbar2(p2, ax0, az0, aw, ad)) {
         for (let k = 0; k < 4; k++) fb(S, F2, -0.1, F2.L + 0.1, 3 + k * 5.5, 3 + k * 5.5 + 3.6, 0, 0.4, k % 2 ? f1 : heller(f1, 0.08));
         for (let u = 0; u <= F2.L; u += 6) fb(S, F2, u - 0.25, u + 0.25, 0.3, Ha, 0, 0.6, "#e9e7e1");
         fb(S, F2, 0, F2.L, 0.3, 3, -0.2, 0.02, "#5f7787");
@@ -92367,7 +92974,7 @@
       for (let q2 = u - fw / 2 - 0.5; q2 <= u + fw / 2 + 0.55; q2 += 0.25) fb(S, F2, q2 - 0.02, q2 + 0.02, y - 0.12, y + 0.7, 0.95, 0.99, "#2f3438");
     }
   }
-  function mansarde2(S, p, x0, z0, w, d, H, dach3, c, gauben2, r) {
+  function mansarde2(S, p2, x0, z0, w, d, H, dach3, c, gauben2, r) {
     const unten = dachProfil(w, d + 0.5, 3.4, d - 3.2, "x");
     unten.translate(x0 + w / 2, H, z0 + d / 2);
     S.add(unten, dach3);
@@ -92375,7 +92982,7 @@
     oben.translate(x0 + w / 2, H + 3.4, z0 + d / 2);
     S.add(oben, dunkler(dach3, 0.04));
     if (gauben2) {
-      for (const F2 of sichtbar2(p, x0, z0, w, d)) if (F2.s[1] === "z") {
+      for (const F2 of sichtbar2(p2, x0, z0, w, d)) if (F2.s[1] === "z") {
         const n = Math.max(1, Math.round(w / 3.4));
         for (let i = 0; i < n; i++) {
           const u = w * (i + 0.5) / n;
@@ -92387,12 +92994,12 @@
     }
     return H + 4.8;
   }
-  function gruenderzeitHaus(S, scene2, p, r, o) {
+  function gruenderzeitHaus(S, scene2, p2, r, o) {
     const { x0, z0, w, d, n } = o, egH = o.egH ?? 4.2, gh = o.gh ?? 3.5, H = egH + n * gh;
     const c = { wand: o.wand, orn: o.orn ?? heller(o.wand, 0.04), glas: GLAS6, sockel: o.sockel ?? dunkler(o.wand, 0.1) };
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, c.wand);
     const achsen7 = Math.max(2, Math.round(w / 2.6));
-    for (const F2 of sichtbar2(p, x0, z0, w, d)) {
+    for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const front2 = F2.s === "+z" || F2.s === "-z";
       if (!front2) {
         const bw = dunkler(c.wand, 0.12);
@@ -92458,9 +93065,9 @@
       fb(S, F2, -0.1, F2.L + 0.1, H - 0.5, H, 0, 0.55, c.orn);
       if (strasse3) for (let u = 0.4; u < F2.L; u += 0.8) fb(S, F2, u - 0.12, u + 0.12, H - 0.85, H - 0.5, 0, 0.35, c.orn);
     }
-    const top = o.dachForm === "flach" ? (flachdach2(S, x0, z0, w, d, H, c.orn, null), H + 0.6) : mansarde2(S, p, x0, z0, w, d, H, o.dach, c, true, r);
+    const top = o.dachForm === "flach" ? (flachdach2(S, x0, z0, w, d, H, c.orn, null), H + 0.6) : mansarde2(S, p2, x0, z0, w, d, H, o.dach, c, true, r);
     S.box(0.8, 2.4, 1.6, x0 + w - 0.6, top - 0.2, z0 + d / 2, dunkler(c.wand, 0.08));
-    if (o.zwerch && istSicht(p, "+z")) {
+    if (o.zwerch && istSicht(p2, "+z")) {
       const F2 = seitenRahmen(x0, z0, w, d)["+z"];
       fb(S, F2, w / 2 - 1.8, w / 2 + 1.8, H - 0.3, H + 3.2, -1.5, 0.1, c.wand);
       fpoly(S, F2, [[w / 2 - 2.1, H + 3.2], [w / 2 + 2.1, H + 3.2], [w / 2, H + 5]], -1.5, 0.2, c.orn);
@@ -92471,9 +93078,9 @@
     }
     return top;
   }
-  function rheinGruenderzeitRoh(S, scene2, p) {
-    const r = rng2(`rgz:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function rheinGruenderzeitRoh(S, scene2, p2) {
+    const r = rng2(`rgz:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, "#bdb8ad", 0.3, 0.05);
     boden2(S, 0, D - 4, W3, D, PFLASTER, 0.3, 0.08);
     const hd = Math.min(15, D - 6), hz = D - 4 - hd;
@@ -92490,7 +93097,7 @@
     breiten.forEach(([bx, bw], i) => {
       const eck = v === "eck" && i === breiten.length - 1;
       const wand2 = waehle2(r, RHEIN_PUTZ);
-      const h = gruenderzeitHaus(S, scene2, p, r, {
+      const h = gruenderzeitHaus(S, scene2, p2, r, {
         x0: bx,
         z0: hz,
         w: bw,
@@ -92539,9 +93146,9 @@
     nenn: { wohnen: [16, 20], laden: [16, 20], eck: [18, 20] },
     roh: rheinGruenderzeitRoh
   });
-  function rheinWiederaufbauRoh(S, scene2, p) {
-    const r = rng2(`rwa:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function rheinWiederaufbauRoh(S, scene2, p2) {
+    const r = rng2(`rwa:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, "#bdb8ad", 0.3, 0.05);
     boden2(S, 0, D - 4.5, W3, D, "#d9d2c2", 0.3, 0.08);
     const stein = waehle2(r, ["#e6dccb", "#e9e1d2", "#dfd6c4"]), glas2 = waehle2(r, ["#5f7c8a", "#56717e", "#6a8692"]), sprosse = "#f6f4ee";
@@ -92552,7 +93159,7 @@
       H = y0 + n * gh;
       S.quader(sx + 2, 0, sz + 1.5, sx + sw - 2, y0, sz + sd - 1.5, "#4e5c67");
       S.quader(sx, y0, sz, sx + sw, H, sz + sd, dunkler(glas2, 0.08));
-      for (const F2 of sichtbar2(p, sx, sz, sw, sd)) {
+      for (const F2 of sichtbar2(p2, sx, sz, sw, sd)) {
         if (F2.L > 20) {
           fb(S, F2, 0, F2.L, y0, H, -0.1, 0.02, glas2);
           for (let k = 0; k <= n; k++) fb(S, F2, -0.05, F2.L + 0.05, y0 + k * gh - 0.06, y0 + k * gh + 0.06, 0, 0.18, sprosse);
@@ -92576,7 +93183,7 @@
       vd.translate(sx + sw * 0.72, 3.6, sz + sd + 3);
       S.add(vd, "#f6f4ee");
       for (const dx of [-5, 5]) S.box(0.15, 3.3, 0.15, sx + sw * 0.72 + dx, 1.95, sz + sd + 5.5, "#3b3f44");
-      if (istSicht(p, "+z")) ftext(scene2, seitenRahmen(sx, sz, sw, sd)["+z"], waehle2(r, ["Niederrheinische R\xF6hrenwerke", "Haus Rheinblick", "Haus der Wirtschaft"]), sw / 2, y0 - 1, 0.1, 0.7, sw * 0.6, "#2f3438");
+      if (istSicht(p2, "+z")) ftext(scene2, seitenRahmen(sx, sz, sw, sd)["+z"], waehle2(r, ["Niederrheinische R\xF6hrenwerke", "Haus Rheinblick", "Haus der Wirtschaft"]), sw / 2, y0 - 1, 0.1, 0.7, sw * 0.6, "#2f3438");
       H += 3.4;
       figuren(S, r, 2, D - 4.4, W3 - 2, D - 0.4, 12, 0.38);
     } else if (v === "wohnhaus") {
@@ -92584,7 +93191,7 @@
       H = egH + n * gh;
       const wand2 = waehle2(r, ["#efe3c8", "#e9e2d4", "#f0dccf", "#dde6dd", "#e6e0ee"]);
       S.quader(1, 0, hz, W3 - 1, H, hz + hd, wand2);
-      for (const F2 of sichtbar2(p, 1, hz, W3 - 2, hd)) {
+      for (const F2 of sichtbar2(p2, 1, hz, W3 - 2, hd)) {
         if (F2.L < 14) {
           fb(S, F2, 0, F2.L, 0.3, H, 0, 0.04, wand2);
           for (let k = 0; k <= n; k++) fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, 1.4 + k * gh, 2.6 + k * gh, 0, 0.08, glas2);
@@ -92633,7 +93240,7 @@
       parts.forEach(([a, b2], pi) => {
         const bw = b2 - a, Hh = egH + n * gh, pst = waehle2(r, ["#b9d3d8", "#e8c9a6", "#c9d9b8", "#e6d7a6", "#bcc9df"]);
         S.quader(a, 0, hz, b2, Hh, hz + hd, stein);
-        for (const F2 of sichtbar2(p, a, hz, bw, hd)) {
+        for (const F2 of sichtbar2(p2, a, hz, bw, hd)) {
           if (F2.s === "+z" || F2.s === "-z") {
             fb(S, F2, 0.8, F2.L - 0.8, egH + 0.3, Hh - 0.5, -0.3, 0, glas2);
             for (let k = 0; k < n; k++) fb(S, F2, 0.8, F2.L - 0.8, egH + 0.3 + k * gh, egH + 0.3 + k * gh + 0.9, -0.25, -0.05, pst);
@@ -92649,7 +93256,7 @@
           } else fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.05, stein);
         }
         S.quader(a + 1.2, Hh, hz + 1.2, b2 - 1.2, Hh + 2.9, hz + hd - 2.4, "#7aa2b8");
-        for (const F2 of sichtbar2(p, a + 1.2, hz + 1.2, bw - 2.4, hd - 3.6)) for (let u = 0; u <= F2.L + 0.01; u += 1.4) fb(S, F2, u - 0.04, u + 0.04, Hh, Hh + 2.9, 0, 0.08, sprosse);
+        for (const F2 of sichtbar2(p2, a + 1.2, hz + 1.2, bw - 2.4, hd - 3.6)) for (let u = 0; u <= F2.L + 0.01; u += 1.4) fb(S, F2, u - 0.04, u + 0.04, Hh, Hh + 2.9, 0, 0.08, sprosse);
         S.quader(a + 0.6, Hh + 2.9, hz + 0.4, b2 - 0.6, Hh + 3.1, hz + hd - 1.4, "#b4b8bb");
         S.quader(a + 0.6, Hh + 2.75, hz + hd - 1.5, b2 - 0.6, Hh + 3.1, hz + hd - 1.3, "#9aa1a7");
         flachdach2(S, a, hz, bw, hd, Hh, null, null, "#a9adb0");
@@ -92667,9 +93274,9 @@
     roh: rheinWiederaufbauRoh
   });
   var RHEIN_WASSER_Y = -4.6;
-  function rheinPromenadeRoh(S, scene2, p) {
-    const r = rng2(`rpr:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante, WY = p.wasserY ?? RHEIN_WASSER_Y;
+  function rheinPromenadeRoh(S, scene2, p2) {
+    const r = rng2(`rpr:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante, WY = p2.wasserY ?? RHEIN_WASSER_Y;
     const zk = Math.round(D * 0.56);
     wasser(S, 0, zk, W3, D, WY);
     const stein = "#d9d0bd", stein2 = "#cbbfa8", fuge = "#b9ad95";
@@ -92732,7 +93339,7 @@
       S.quader(px2 - 14.6, WY + 0.9, pz4 - 2.3, px2 + 14.6, WY + 1, pz4 + 2.3, "#9aa1a7");
       S.quader(px2 - 4, WY + 1, pz4 - 1.5, px2 + 4, WY + 3.6, pz4 + 1.5, "#f4f2ec");
       S.quader(px2 - 4.3, WY + 3.6, pz4 - 1.8, px2 + 4.3, WY + 3.9, pz4 + 1.8, "#1f4f8f");
-      for (const F2 of sichtbar2(p, px2 - 4, pz4 - 1.5, 8, 3)) if (F2.L > 6) {
+      for (const F2 of sichtbar2(p2, px2 - 4, pz4 - 1.5, 8, 3)) if (F2.L > 6) {
         fb(S, F2, 0.6, F2.L - 0.6, WY + 1.8, WY + 3, 0, 0.06, "#6f8696");
         ftext(scene2, F2, "Rheinschifffahrt", F2.L / 2, WY + 4.3, 0.1, 0.55, F2.L * 0.9, "#1f4f8f");
       }
@@ -92846,9 +93453,9 @@
     s2.lineTo(u0, y);
     return s2;
   }
-  function giebelhausRoh(S, scene2, p) {
-    const r = rng2(`wgh:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function giebelhausRoh(S, scene2, p2) {
+    const r = rng2(`wgh:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, "#bdb8ad", 0.3, 0.05);
     boden2(S, 0, D - 4, W3, D, "#cfc6b4", 0.3, 0.08);
     const hd = Math.min(18, D - 6), hz = D - 4 - hd, bg = 4, egH = 4.8, gh = 3.3;
@@ -92871,11 +93478,11 @@
     while (x < W3 - 0.5) {
       let b2 = zw(r, 7.2, 9.6);
       if (W3 - x - b2 < 5.5) b2 = W3 - x;
-      const stein = waehle2(r, SANDSTEIN), orn = heller(stein, 0.05), art = arten[(i + p.seed % 3) % arten.length], n = 3;
+      const stein = waehle2(r, SANDSTEIN), orn = heller(stein, 0.05), art = arten[(i + p2.seed % 3) % arten.length], n = 3;
       const Hh = egH + n * gh, G2 = Math.min(b2 * 1.15, 10.5);
       S.quader(x, 0, hz, x + b2, Hh, hz + hd - bg, stein);
       S.quader(x, egH, hz + hd - bg, x + b2, Hh, hz + hd, stein);
-      for (const F2 of sichtbar2(p, x, hz, b2, hd)) {
+      for (const F2 of sichtbar2(p2, x, hz, b2, hd)) {
         if (F2.s === "+z") {
           const nb = b2 > 8.4 ? 3 : 2, bw = (b2 - 0.8) / nb;
           const loecher = [];
@@ -92988,21 +93595,21 @@
     }
     fb(S, F2, u - fb_ / 2 - 0.22, u + fb_ / 2 + 0.22, y - 0.24, y - 0.12, 0, 0.18, "#f4f2ec");
   }
-  function bergHausRoh(S, scene2, p) {
-    const r = rng2(`berg:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante, yb = p.sockelY ?? 0;
-    const n = Math.max(2, Math.min(4, p.geschosse ?? (W3 > 11 ? 3 : 2)));
-    const laden4 = !!p.laden, gh = 2.9, egH = laden4 ? 4 : 3.1, y0 = yb + 0.3, ys = y0 + 0.75;
+  function bergHausRoh(S, scene2, p2) {
+    const r = rng2(`berg:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante, yb = p2.sockelY ?? 0;
+    const n = Math.max(2, Math.min(4, p2.geschosse ?? (W3 > 11 ? 3 : 2)));
+    const laden4 = !!p2.laden, gh = 2.9, egH = laden4 ? 4 : 3.1, y0 = yb + 0.3, ys = y0 + 0.75;
     const Hw = ys + egH + (n - 1) * gh;
     const gruen = waehle2(r, BERG_GRUEN), schiefer = waehle2(r, SCHIEFER_W), weiss2 = "#f2f0e9", balkenF = "#2a2b2d";
     const stein = waehle2(r, ["#8f8a80", "#9a948a", "#857f76"]);
-    const traufe = p.traufe ?? (W3 >= 10.5 && r() < 0.7);
+    const traufe = p2.traufe ?? (W3 >= 10.5 && r() < 0.7);
     if (yb > 0.05) S.quader(0, 0, 0, W3, y0, D, stein);
     S.quader(-0.05, y0, -0.05, W3 + 0.05, ys, D + 0.05, stein);
     const wand2 = v === "fachwerk" ? weiss2 : v === "putz" ? waehle2(r, ["#f1ede2", "#ece6d6", "#f3efe6"]) : schiefer;
     S.quader(0, ys, 0, W3, Hw, D, wand2);
     if (v === "putz") S.quader(-0.02, ys + egH, -0.02, W3 + 0.02, Hw, D + 0.02, schiefer);
-    for (const F2 of sichtbar2(p, 0, 0, W3, D)) {
+    for (const F2 of sichtbar2(p2, 0, 0, W3, D)) {
       const vorn = F2.s === "+z";
       if (v !== "fachwerk") {
         for (const u of [0, F2.L - 0.22]) fb(S, F2, u, u + 0.22, ys, Hw, 0, 0.06, "#f4f2ec");
@@ -93048,9 +93655,9 @@
     let H;
     if (traufe) {
       const h = D * 0.42;
-      satteldach3(S, p, 0, 0, W3, D, Hw, h, "x", dachF, schiefer, 0.4, 0.25);
+      satteldach3(S, p2, 0, 0, W3, D, Hw, h, "x", dachF, schiefer, 0.4, 0.25);
       H = Hw + h;
-      if (istSicht(p, "+z") && W3 >= 9) {
+      if (istSicht(p2, "+z") && W3 >= 9) {
         const zw0 = W3 / 2 - 2.2, zb = 4.4, zh = 2.6;
         S.quader(zw0, Hw - 0.2, D - 1.6, zw0 + zb, Hw + zh, D, schiefer);
         const g = dachProfil(zb + 0.6, 3.6, 1.9, 0.15, "z");
@@ -93059,7 +93666,7 @@
         const Fz = R2(zw0, D, 1, 0, zb, "+z");
         fpoly(S, Fz, [[0, Hw + zh], [zb, Hw + zh], [zb / 2, Hw + zh + 1.6]], 0, 0.05, schiefer);
         bergFenster(S, Fz, zb / 2, Hw + 0.5, 0.9, 1.3, gruen, { laeden: true });
-      } else if (W3 >= 8 && istSicht(p, "+z")) {
+      } else if (W3 >= 8 && istSicht(p2, "+z")) {
         const g = dachProfil(2.2, 2, 1.3, 0.1, "z");
         g.translate(W3 * 0.5, Hw + h * 0.35 + 0.6, D - 1.6);
         S.add(g, dachF);
@@ -93068,8 +93675,8 @@
       }
     } else {
       const h = Math.min(W3 * 0.75, 7.5);
-      satteldach3(S, p, 0, 0, W3, D, Hw, h, "z", dachF, null, 0.35, 0.2);
-      for (const F2 of sichtbar2(p, 0, 0, W3, D)) if (F2.s === "+z" || F2.s === "-z") {
+      satteldach3(S, p2, 0, 0, W3, D, Hw, h, "z", dachF, null, 0.35, 0.2);
+      for (const F2 of sichtbar2(p2, 0, 0, W3, D)) if (F2.s === "+z" || F2.s === "-z") {
         fpoly(S, F2, [[0, Hw], [F2.L, Hw], [F2.L / 2 + 0.1, Hw + h - 0.2], [F2.L / 2 - 0.1, Hw + h - 0.2]], 0, 0.03, v === "fachwerk" ? weiss2 : schiefer);
         if (v === "fachwerk") {
           strebe(S, F2, 0, Hw, F2.L / 2, Hw + h - 0.2, 0.03, balkenF);
@@ -93094,9 +93701,9 @@
   });
   var SCHWEBE_F = "#4f7f78";
   var SCHWEBE_D = "#3f6660";
-  function schwebebahnRoh(S, scene2, p) {
-    const r = rng2(`schwebe:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante, ue = p.ueberhang ?? 0;
+  function schwebebahnRoh(S, scene2, p2) {
+    const r = rng2(`schwebe:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante, ue = p2.ueberhang ?? 0;
     const zm = D / 2, yT = 11.4, yO = 13;
     const x0 = -ue, x1 = W3 + ue;
     const abst2 = 17;
@@ -93137,7 +93744,7 @@
       S.quader(xs - 0.3, yO + 1.5, zm - 5.2, xs + L2 + 0.3, yO + 1.95, zm + 5.2, SCHWEBE_F);
       const Fn = R2(xs + L2 * 0.3, zm + 5.25, 1, 0, L2 * 0.4, "+z");
       fb(S, Fn, 0, L2 * 0.4, yO + 0.2, yO + 1.3, 0, 0.1, "#f4f2ec");
-      ftext(scene2, Fn, p.name ?? "Haltestelle Talbr\xFCcke", L2 * 0.2, yO + 0.75, 0.12, 0.8, L2 * 0.38, "#1f3a5f");
+      ftext(scene2, Fn, p2.name ?? "Haltestelle Talbr\xFCcke", L2 * 0.2, yO + 0.75, 0.12, 0.8, L2 * 0.38, "#1f3a5f");
       const tx = xs + L2 - 6;
       S.quader(tx, 0.3, D - 3.6, tx + 4.4, yB + 3, D - 0.4, "#d6d1c6");
       for (let k = 0; k < 4; k++) S.box(3.4, 1.2, 0.08, tx + 2.2, 1.2 + k * 1.6, D - 0.36, "#a8c8d3");
@@ -93182,9 +93789,9 @@
     "Brauhaus Zum \xD6lberg"
   ];
   var RHEIN_ALTPUTZ = ["#f2ece0", "#efe1c8", "#f0d9cc", "#e8e4d8", "#f3e6c4", "#e6d9c7", "#efe9e0"];
-  function brauhausRoh(S, scene2, p) {
-    const r = rng2(`brau:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p;
+  function brauhausRoh(S, scene2, p2) {
+    const r = rng2(`brau:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2;
     boden2(S, 0, 0, W3, D, "#c9c1b2", 0.3, 0.05);
     const hd = Math.min(16, D - 3.5), hz = D - 3.5 - hd, egH = 4.4, gh = 3.2;
     let x = 0, i = 0, H = 0;
@@ -93196,7 +93803,7 @@
       const n = 2 + (r() < 0.6 ? 1 : 0), putz2 = waehle2(r, RHEIN_ALTPUTZ), orn = "#f8f5ee";
       const Hh = egH + n * gh, G2 = Math.min(b2 * 0.95, 7.5), art = waehle2(r, ["treppe", "schlicht", "barock", "treppe"]);
       S.quader(x, 0.3, hz, x + b2, Hh, hz + hd, putz2);
-      for (const F2 of sichtbar2(p, x, hz, b2, hd)) {
+      for (const F2 of sichtbar2(p2, x, hz, b2, hd)) {
         if (F2.s === "+z") {
           const holz = brau ? waehle2(r, ["#4a2f24", "#3d4a2f", "#5a3a28"]) : waehle2(r, ["#2f3438", "#6b2e35", "#1f3a5f"]);
           fb(S, F2, 0.15, F2.L - 0.15, 0.3, egH - 0.3, 0, 0.16, holz);
@@ -93256,9 +93863,9 @@
     return { hoehe: H };
   }
   var rheinBrauhaus = slot("slot:rhein_brauhaus", { varianten: ["zeile"], nenn: { zeile: [12, 16] }, roh: brauhausRoh });
-  function medienhafenRoh(S, scene2, p) {
-    const r = rng2(`medien:${p.seed}:${p.variante}`);
-    const { w: W3, d: D } = p, v = p.variante;
+  function medienhafenRoh(S, scene2, p2) {
+    const r = rng2(`medien:${p2.seed}:${p2.variante}`);
+    const { w: W3, d: D } = p2, v = p2.variante;
     boden2(S, 0, 0, W3, D, "#d6d0c2", 0.3, 0.06);
     for (let x = 2; x < W3; x += 4) S.quader(x, 0.36, 0.5, x + 0.08, 0.37, D - 0.5, "#c8c1b1");
     let H = 20;
@@ -93316,9 +93923,9 @@
     nenn: { gehry: [44, 30], kranhaus: [56, 28], glas: [36, 34] },
     roh: medienhafenRoh
   });
-  function rheinTurmRoh(S, scene2, p) {
-    const r = rng2(`turm:${p.seed}`);
-    const { w: W3, d: D } = p, cx = W3 / 2, cz = D / 2;
+  function rheinTurmRoh(S, scene2, p2) {
+    const r = rng2(`turm:${p2.seed}`);
+    const { w: W3, d: D } = p2, cx = W3 / 2, cz = D / 2;
     boden2(S, 0, 0, W3, D, "#d6d0c2", 0.3, 0.06);
     const Hs = 118, beton = "#dcdad4";
     zyl5(S, 2.6, 5.2, Hs, cx, 0.3, cz, beton, 20);
@@ -93340,15 +93947,15 @@
     return { hoehe: Hs + 27 };
   }
   var rheinTurm = slot("slot:rhein_turm", { varianten: ["beton"], nenn: { beton: [20, 22] }, roh: rheinTurmRoh });
-  function pfalzdomRoh(S, scene2, p) {
-    const r = rng2(`pfalz:${p.seed}`);
-    const { w: W3, d: D } = p;
+  function pfalzdomRoh(S, scene2, p2) {
+    const r = rng2(`pfalz:${p2.seed}`);
+    const { w: W3, d: D } = p2;
     boden2(S, 0, 0, W3, D, "#ddd3c1", 0.3, 0.06);
     const stein = "#a9a79f", stein2 = "#bdb7a8", dach3 = "#4f5a62", gold = "#c9a24a";
     const cz = D / 2;
     const tx = 3, tw = 10, tH = 46;
     S.quader(tx, 0.3, cz - 5, tx + tw, tH, cz + 5, stein2);
-    for (const F2 of sichtbar2(p, tx, cz - 5, tw, 10)) for (let k = 0; k < 4; k++) fenster3(S, F2, F2.L / 2, 8 + k * 9, 1.6, 4.2, { art: "spitz", glas: GLAS6, laibung: heller(stein2, 0.05) });
+    for (const F2 of sichtbar2(p2, tx, cz - 5, tw, 10)) for (let k = 0; k < 4; k++) fenster3(S, F2, F2.L / 2, 8 + k * 9, 1.6, 4.2, { art: "spitz", glas: GLAS6, laibung: heller(stein2, 0.05) });
     const sp = new three_module_exports.ConeGeometry(4.2, 12, 4);
     sp.rotateY(PI5 / 4);
     sp.translate(tx + tw / 2, tH + 6, cz);
@@ -93378,7 +93985,7 @@
     zyl5(S, 0.12, 0.12, 2.6, ox, hO + 16, cz, gold, 4);
     const cx0 = ox + rO - 1, cL = W3 - cx0 - 4, cd = 14, hC = 30;
     S.quader(cx0, 0.3, cz - cd / 2, cx0 + cL, hC, cz + cd / 2, stein2);
-    for (const F2 of sichtbar2(p, cx0, cz - cd / 2, cL, cd)) {
+    for (const F2 of sichtbar2(p2, cx0, cz - cd / 2, cL, cd)) {
       const n = Math.max(2, Math.round(F2.L / 4.2));
       for (let k = 0; k < n; k++) {
         const u = F2.L * (k + 0.5) / n;
@@ -93401,14 +94008,14 @@
     return { hoehe: hO + 18 };
   }
   var westPfalzdom = slot("slot:west_pfalzdom", { varianten: ["dom"], nenn: { dom: [76, 34] }, roh: pfalzdomRoh });
-  function brauturmRoh(S, scene2, p) {
-    const r = rng2(`brau2:${p.seed}`);
-    const { w: W3, d: D } = p;
+  function brauturmRoh(S, scene2, p2) {
+    const r = rng2(`brau2:${p2.seed}`);
+    const { w: W3, d: D } = p2;
     boden2(S, 0, 0, W3, D, "#d6d0c2", 0.3, 0.06);
     const tw = Math.min(18, W3 * 0.5), td = Math.min(18, D - 6), tx = W3 - tw - 3, tz = 2, Ht = 50;
     const wand2 = "#c99f78", orn = "#e9dcc4";
     S.quader(tx, 0.3, tz, tx + tw, Ht, tz + td, wand2);
-    for (const F2 of sichtbar2(p, tx, tz, tw, td)) {
+    for (const F2 of sichtbar2(p2, tx, tz, tw, td)) {
       for (let u = 1.4; u < F2.L - 1; u += 3.2) fb(S, F2, u - 0.35, u + 0.35, 0.3, Ht - 2, 0, 0.35, orn);
       for (let y = 6; y < Ht - 4; y += 4.4) for (let u = 3; u < F2.L - 2; u += 3.2) fb(S, F2, u - 0.55, u + 0.55, y, y + 1.6, 0, 0.12, "#3f4a53");
       fb(S, F2, -0.1, F2.L + 0.1, Ht - 2, Ht, 0, 0.5, orn);
@@ -93417,7 +94024,7 @@
     for (const [x, z2] of [[tx + 1, tz + 1], [tx + tw - 1, tz + 1], [tx + 1, tz + td - 1], [tx + tw - 1, tz + td - 1]]) S.box(0.5, lh, 0.5, x, Ht + lh / 2, z2, "#3b3f44");
     S.quader(tx + 0.6, Ht + lh - 0.6, tz + 0.6, tx + tw - 0.6, Ht + lh, tz + td - 0.6, "#3b3f44");
     S.quader(tx + 1.5, Ht + 0.3, tz + 1.5, tx + tw - 1.5, Ht + lh - 1, tz + td - 1.5, "#e9c46a");
-    for (const F2 of sichtbar2(p, tx + 1.5, tz + 1.5, tw - 3, td - 3)) ftext(scene2, F2, "BR\xC4U", F2.L / 2, Ht + lh / 2, 0.08, lh * 0.6, F2.L * 0.86, "#c9483e");
+    for (const F2 of sichtbar2(p2, tx + 1.5, tz + 1.5, tw - 3, td - 3)) ftext(scene2, F2, "BR\xC4U", F2.L / 2, Ht + lh / 2, 0.08, lh * 0.6, F2.L * 0.86, "#c9483e");
     const hw = tx - 4, hd = Math.min(Math.max(16, D * 0.42), 26);
     const bg0 = 2 + hd + 3, bg1 = D - 3, bw = W3 - 4;
     for (let x = 4; x < bw - 1; x += 5) for (let z2 = bg0 + 1; z2 < bg1 - 1; z2 += 5) {
@@ -93432,7 +94039,7 @@
     }
     hecke(S, 2, bg1, W3 - 2, bg1 + 0.8, 1, 0.36);
     if (hw > 10) {
-      backsteinHalle(S, scene2, p, {
+      backsteinHalle(S, scene2, p2, {
         x0: 2,
         z0: 2,
         w: hw,
@@ -93447,7 +94054,7 @@
         fenster: { art: "rund", b: 1.6, h: 2.6, y: 2, raster: 3.6, zeilen: 2 },
         glas: GLAS6
       });
-      for (const F2 of sichtbar2(p, 2, 2, hw, hd)) if (F2.s === "+z" && F2.L > 16) ftext(scene2, F2, "Westfalia-Br\xE4u", F2.L / 2, 11.2, 0.3, 1.3, F2.L * 0.7, "#f4f0e4");
+      for (const F2 of sichtbar2(p2, 2, 2, hw, hd)) if (F2.s === "+z" && F2.L > 16) ftext(scene2, F2, "Westfalia-Br\xE4u", F2.L / 2, 11.2, 0.3, 1.3, F2.L * 0.7, "#f4f0e4");
     }
     figuren(S, r, 1, D - 3, W3 - 1, D - 0.6, Math.round(W3 / 4), 0.36);
     return { hoehe: Ht + lh };
@@ -94435,9 +95042,9 @@
     })
   });
   function ladeProfil(profil) {
-    const p = typeof profil === "string" ? FORMAT_PROFILE[profil] : profil;
-    if (!p || !p.id || !p.boden || !p.gondel || !p.kasse) throw new Error("Unbekanntes Ladenbau-Profil: " + String(profil));
-    return p;
+    const p2 = typeof profil === "string" ? FORMAT_PROFILE[profil] : profil;
+    if (!p2 || !p2.id || !p2.boden || !p2.gondel || !p2.kasse) throw new Error("Unbekanntes Ladenbau-Profil: " + String(profil));
+    return p2;
   }
   function gangZellen(meter, raster4 = LADENBAU.raster) {
     return Math.ceil((meter - 1e-8) / raster4);
@@ -94475,9 +95082,9 @@
     const breite = down(num(f.breite ?? f.bw ?? f.w ?? f.B)), tiefe = down(num(f.tiefe ?? f.bd ?? f.d ?? f.T));
     if (breite < 15 || tiefe < 15) throw new Error("Laden f\xFCr das 1,25-m-Raster zu klein");
     const es = f.eingaenge ?? (f.eingang ? [f.eingang] : []);
-    const eingaenge = (es.length ? es : [{ x: breite / 2, z: tiefe }]).map((p) => ({
-      x: clamp7(snap(num(p.x, breite / 2)), U, breite - U),
-      z: clamp7(snap(num(p.z, tiefe)), 0, tiefe)
+    const eingaenge = (es.length ? es : [{ x: breite / 2, z: tiefe }]).map((p2) => ({
+      x: clamp7(snap(num(p2.x, breite / 2)), U, breite - U),
+      z: clamp7(snap(num(p2.z, tiefe)), 0, tiefe)
     }));
     const hindernisse = (f.hindernisse ?? []).map((h, i) => ({
       id: h.id ?? "hindernis_" + i,
@@ -94497,7 +95104,7 @@
       for (let x = 2 * U; x + w <= b2 - 2 * U; x += U) {
         const lauf = quadrat(x, z2, w, t - z2);
         if (hindernisse.some((h) => schneidet(lauf, h))) continue;
-        const dist2 = e.reduce((s2, p) => s2 + Math.abs(p.x - (x + w / 2)), 0);
+        const dist2 = e.reduce((s2, p2) => s2 + Math.abs(p2.x - (x + w / 2)), 0);
         kandidaten2.push({ ...lauf, typ: "haupt", score: z2 * 0.3 + dist2 * 0.8 + Math.abs(x + w / 2 - b2 / 2) });
       }
     kandidaten2.sort((a, b3) => a.score - b3.score || a.z - b3.z || a.x - b3.x);
@@ -94810,12 +95417,12 @@
     }
   }
   function ladenplan(flaeche5, profil, abteilungen, seed = 1) {
-    const p = ladeProfil(profil), a = sortiment(abteilungen ?? []), f = normiereFlaeche(flaeche5);
+    const p2 = ladeProfil(profil), a = sortiment(abteilungen ?? []), f = normiereFlaeche(flaeche5);
     if (!a.length) throw new Error("Ladenplan braucht Abteilungsfl\xE4chen");
     const haupt = hauptgangWaehlen(f.breite, f.tiefe, f.eingaenge, f.hindernisse);
     const plan2 = {
       version: 1,
-      profil: p.id,
+      profil: p2.id,
       seed,
       breite: f.breite,
       tiefe: f.tiefe,
@@ -94859,23 +95466,23 @@
         }
       }
     }
-    kassenPlatz(plan2, p);
-    wandband(plan2, p);
-    for (const raum of plan2.abteilungen) inszenierung(plan2, p, raum);
-    for (const raum of plan2.abteilungen) warenReihen(plan2, p, raum);
-    verdichteLadenplan(plan2, p);
+    kassenPlatz(plan2, p2);
+    wandband(plan2, p2);
+    for (const raum of plan2.abteilungen) inszenierung(plan2, p2, raum);
+    for (const raum of plan2.abteilungen) warenReihen(plan2, p2, raum);
+    verdichteLadenplan(plan2, p2);
     sichereSportMix(plan2);
-    plan2.boeden.push({ ...quadrat(0, 0, plan2.breite, plan2.tiefe), typ: "flaeche", farbe: p.boden.flaeche });
-    if (p.id === "sport") for (const a2 of plan2.abteilungen)
-      plan2.boeden.push({ ...quadrat(a2.x, a2.z, a2.w, a2.d), typ: "flaeche", abteilung: a2.id, farbe: SPORT_BOEDEN[a2.id] ?? p.boden.flaeche });
-    for (const g of plan2.gaenge) plan2.boeden.push({ ...g, typ: "gang", farbe: p.boden.gang });
+    plan2.boeden.push({ ...quadrat(0, 0, plan2.breite, plan2.tiefe), typ: "flaeche", farbe: p2.boden.flaeche });
+    if (p2.id === "sport") for (const a2 of plan2.abteilungen)
+      plan2.boeden.push({ ...quadrat(a2.x, a2.z, a2.w, a2.d), typ: "flaeche", abteilung: a2.id, farbe: SPORT_BOEDEN[a2.id] ?? p2.boden.flaeche });
+    for (const g of plan2.gaenge) plan2.boeden.push({ ...g, typ: "gang", farbe: p2.boden.gang });
     for (const i of plan2.moebel.filter((m) => m.inszenierung).slice(0, Math.floor(plan2.breite * plan2.tiefe * LADENBAU.akzentAnteilMax / (2.5 * 2.5))))
-      if (p.boden.akzent) plan2.boeden.push({ ...quadrat(i.x, i.z, i.w, i.d), typ: "akzent", farbe: p.boden.akzent, unter: i.id });
+      if (p2.boden.akzent) plan2.boeden.push({ ...quadrat(i.x, i.z, i.w, i.d), typ: "akzent", farbe: p2.boden.akzent, unter: i.id });
     delete plan2.mixIndex;
     return plan2;
   }
   function baueLadenplan(S, scene2, plan2, o = {}) {
-    const p = ladeProfil(plan2.profil), y = o.y ?? 0, dichte = o.dichte ?? 1;
+    const p2 = ladeProfil(plan2.profil), y = o.y ?? 0, dichte = o.dichte ?? 1;
     if (o.vorbereiten !== false) vorbereiten(S, scene2);
     const n0 = S.anzahl;
     const sicht3 = o.ausschnitt ?? null;
@@ -94928,7 +95535,7 @@
         lokal2(S, ox, y, oz, winkel),
         rng2(String(plan2.seed) + ":" + j + ":" + m.id),
         dichte,
-        { seed: String(plan2.seed) + ":" + j, bestueckung: o.bestueckung ?? 1, profil: p.id }
+        { seed: String(plan2.seed) + ":" + j, bestueckung: o.bestueckung ?? 1, profil: p2.id }
       );
     }
     return { teile: S.anzahl - n0, moebel: plan2.moebel.length, abteilungen: plan2.abteilungen.length };
@@ -95201,18 +95808,18 @@
     const zn = sportZonen(haus2, etageNr, ra);
     const plan2 = o.altbestand ? null : (() => {
       const eingabe = sportLadenEingabe(haus2, etageNr, o, ra);
-      const p = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr);
-      p.variante = ra.box ? "halle" : "flaeche";
-      for (const b2 of p.boeden) if (b2.typ === "gang") b2.farbe = STIL[ra.fam].gang.a;
+      const p2 = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr);
+      p2.variante = ra.box ? "halle" : "flaeche";
+      for (const b2 of p2.boeden) if (b2.typ === "gang") b2.farbe = STIL[ra.fam].gang.a;
       if (ra.abverkauf) {
         let n = 0;
-        for (const m of p.moebel) if (m.typ === "gondel" && m.w === 5 && m.d === 1.25) {
+        for (const m of p2.moebel) if (m.typ === "gondel" && m.w === 5 && m.d === 1.25) {
           if (n++ % 3 === 0) m.id = "sport_abverkauf_tisch";
           else if (n % 3 === 2) m.id = "sport_abverkauf_gitter";
         }
-        p.abverkauf = true;
+        p2.abverkauf = true;
       }
-      return p;
+      return p2;
     })();
     const { B: B2, T, nx, nz } = ra;
     let ax0 = 0, az0 = 0, ax1 = B2, az1 = T;
@@ -96145,8 +96752,8 @@
       res.belegt.push([cx - 1.1, zb, cx + 1.1, zb + 0.7]);
       if (scene2 && n % 2 === 0 && Z2.sicht(cx, za)) haengeschild(S, scene2, `Gang ${i + 1}`, cx, 4, (za + zb) / 2, { farbe: G2.farbe, schrift: G2.schrift, hoehe: 0.4, seile: false });
       for (let q2 = 0; q2 < Math.max(2, Math.round(len / 3)); q2++) for (const s2 of [-1, 1]) {
-        const p = [cx + s2 * 1.85, zw(r, za + 0.5, zb - 0.3)];
-        if (Z2.sicht(...p)) res.frei.push(p);
+        const p2 = [cx + s2 * 1.85, zw(r, za + 0.5, zb - 0.3)];
+        if (Z2.sicht(...p2)) res.frei.push(p2);
       }
       n++;
     }
@@ -97264,10 +97871,10 @@
   }
   function deko(L2, art, r) {
     const pal = { damen: PAL_D, herren: ["#1f2a3a", "#2b3a55", "#3a3f47", "#e8e4dc", "#6d2f3a"], kinder: ["#ef5b5b", "#ffc145", "#5bc0eb", "#9bc53d"], waesche: ["#f4d4dc", "#e8b4c4", "#ffffff", "#b0475f"] };
-    const p = pal[art] ?? (art === "baby" || art === "schulranzen" ? pal.kinder : art?.startsWith("herren") ? pal.herren : null);
-    if (p || art === "sport" || art === "offprice") {
-      const typ = art === "waesche" ? "waesche" : art?.startsWith("herren") ? "herren" : p === pal.kinder ? "kind" : art === "sport" ? "sport" : "damen";
-      for (let k = 0; k < 3; k++) puppe3(L2, -1.3 + k * 1.3, zw(r, -0.15, 0.15), r, typ, p ?? ["#1f6fd1", "#e8403a", "#1f1f1f", "#ffcc00"], zw(r, -0.4, 0.4));
+    const p2 = pal[art] ?? (art === "baby" || art === "schulranzen" ? pal.kinder : art?.startsWith("herren") ? pal.herren : null);
+    if (p2 || art === "sport" || art === "offprice") {
+      const typ = art === "waesche" ? "waesche" : art?.startsWith("herren") ? "herren" : p2 === pal.kinder ? "kind" : art === "sport" ? "sport" : "damen";
+      for (let k = 0; k < 3; k++) puppe3(L2, -1.3 + k * 1.3, zw(r, -0.15, 0.15), r, typ, p2 ?? ["#1f6fd1", "#e8403a", "#1f1f1f", "#ffcc00"], zw(r, -0.4, 0.4));
       L2.box(0.9, 0.06, 0.6, 1.6, 0, 0.2, "#d23c32");
       return;
     }
@@ -97467,8 +98074,8 @@
   var PROPORTION = { altbau: 2.4, nachkrieg: 4, buero70: 2, glas: 1.4, loft: 2.2, campus: 2 };
   var r25 = (v) => Math.round(v / 2.5) * 2.5;
   function grundflaeche(typ, qm, n = 1) {
-    const A = Math.max(200, qm) / 0.85, p = n >= 9 ? Math.min(2.6, PROPORTION[typ] ?? 2) : PROPORTION[typ] ?? 2;
-    const d = Math.max(12, r25(Math.sqrt(A / p)));
+    const A = Math.max(200, qm) / 0.85, p2 = n >= 9 ? Math.min(2.6, PROPORTION[typ] ?? 2) : PROPORTION[typ] ?? 2;
+    const d = Math.max(12, r25(Math.sqrt(A / p2)));
     return { w: Math.max(d * 0.8, r25(A / d)), d };
   }
   function hqMasse(g) {
@@ -98079,11 +98686,11 @@
   var adresse = (g) => (g.name ?? "").trim().split(/\s+/).pop() || g.id;
   function hqEinplanen(plan2, hq, stadt) {
     const r = rng2(hashText("hq:" + stadt) ^ plan2.seed >>> 0);
-    const pz4 = new Map(plan2.parzellen.map((p) => [p.id, p]));
-    const imBlock = (b2) => plan2.parzellen.filter((p) => p.block === b2.id);
+    const pz4 = new Map(plan2.parzellen.map((p2) => [p2.id, p2]));
+    const imBlock = (b2) => plan2.parzellen.filter((p2) => p2.block === b2.id);
     const L2 = plan2.einkaufslage, mx = L2 ? L2.xF : plan2.breite / 2, mz = L2 ? L2.zF : plan2.tiefe / 2;
     const benutzt = /* @__PURE__ */ new Set();
-    const frei6 = plan2.bloecke.filter((b2) => b2.art === "bebaut" && imBlock(b2).length > 4 && imBlock(b2).every((p) => ERSETZBAR.has(p.typ) && !p.standort && !p.leer));
+    const frei6 = plan2.bloecke.filter((b2) => b2.art === "bebaut" && imBlock(b2).length > 4 && imBlock(b2).every((p2) => ERSETZBAR.has(p2.typ) && !p2.standort && !p2.leer));
     const punkte2 = (b2, W3, D) => {
       if (benutzt.has(b2.id) || b2.w < W3 + 12 || b2.d < D + 10) return Infinity;
       const dd = Math.hypot(b2.x + b2.w / 2 - mx, b2.z + b2.d / 2 - mz);
@@ -98101,23 +98708,23 @@
       const m = hqMasse(eintrag2.g);
       const R9 = { x: ecke.includes("+x") ? b2.x + b2.w - m.w : b2.x, z: b2.z + b2.d - m.d, w: m.w, d: m.d };
       const vorlage2 = imBlock(b2)[0];
-      for (const p2 of imBlock(b2)) {
-        if (!(p2.x < R9.x + R9.w - 0.01 && p2.x + p2.w > R9.x + 0.01 && p2.z < R9.z + R9.d - 0.01 && p2.z + p2.d > R9.z + 0.01)) continue;
+      for (const p3 of imBlock(b2)) {
+        if (!(p3.x < R9.x + R9.w - 0.01 && p3.x + p3.w > R9.x + 0.01 && p3.z < R9.z + R9.d - 0.01 && p3.z + p3.d > R9.z + 0.01)) continue;
         const stuecke = [
-          { x: p2.x, z: p2.z, w: R9.x - p2.x, d: p2.d },
-          { x: R9.x + R9.w, z: p2.z, w: p2.x + p2.w - R9.x - R9.w, d: p2.d },
-          { x: p2.x, z: p2.z, w: p2.w, d: R9.z - p2.z }
+          { x: p3.x, z: p3.z, w: R9.x - p3.x, d: p3.d },
+          { x: R9.x + R9.w, z: p3.z, w: p3.x + p3.w - R9.x - R9.w, d: p3.d },
+          { x: p3.x, z: p3.z, w: p3.w, d: R9.z - p3.z }
         ].filter((q2) => q2.w >= 5 && q2.d >= 5).sort((a, c) => c.w * c.d - a.w * a.d);
-        if (stuecke.length) Object.assign(p2, stuecke[0]);
+        if (stuecke.length) Object.assign(p3, stuecke[0]);
         else {
-          plan2.parzellen.splice(plan2.parzellen.indexOf(p2), 1);
-          b2.parzellen = (b2.parzellen ?? []).filter((id2) => id2 !== p2.id);
-          pz4.delete(p2.id);
+          plan2.parzellen.splice(plan2.parzellen.indexOf(p3), 1);
+          b2.parzellen = (b2.parzellen ?? []).filter((id2) => id2 !== p3.id);
+          pz4.delete(p3.id);
         }
       }
       const id = "hq-" + eintrag2.g.id;
       const standort2 = { id: eintrag2.g.id, rolle: "hq", art: "hq", lage: "b", w: m.w, d: m.d, hq: eintrag2.g, angebot: eintrag2.angebot, ...extra };
-      const p = {
+      const p2 = {
         id,
         typ: "slot:hq",
         block: b2.id,
@@ -98138,12 +98745,12 @@
         lage: "b",
         nachbar: null
       };
-      plan2.parzellen.push(p);
+      plan2.parzellen.push(p2);
       b2.parzellen = [...b2.parzellen ?? [], id];
       plan2.standorte.push({ ...standort2, parzelle: id, typ: "slot:hq", block: b2.id });
       benutzt.add(b2.id);
       gesetzt.push({ id: eintrag2.g.id, parzelle: id, angebot: eintrag2.angebot });
-      return p;
+      return p2;
     };
     for (const [, liste] of gruppen) {
       if (liste.length >= 2) {
@@ -98221,15 +98828,15 @@
     return sp;
   }
   registriereSlots({
-    "slot:hq": (S, scene2, p) => {
-      const g = p.standort?.hq;
+    "slot:hq": (S, scene2, p2) => {
+      const g = p2.standort?.hq;
       if (!g) return { hoehe: 0 };
       const m = hqMasse(g);
-      const ecke = p.ecke ?? "+x+z";
-      const x = ecke === "block" ? p.x + (p.w - m.w) / 2 : ecke.includes("+x") ? p.x + p.w - m.w : p.x;
-      const z2 = ecke === "block" ? p.z + (p.d - m.d) / 2 : ecke.includes("+z") ? p.z + p.d - m.d : p.z;
-      const e = hqGebaeude(S, scene2, g, { x, z: z2, angebot: !!p.standort.angebot });
-      const br = p.standort.bruecke;
+      const ecke = p2.ecke ?? "+x+z";
+      const x = ecke === "block" ? p2.x + (p2.w - m.w) / 2 : ecke.includes("+x") ? p2.x + p2.w - m.w : p2.x;
+      const z2 = ecke === "block" ? p2.z + (p2.d - m.d) / 2 : ecke.includes("+z") ? p2.z + p2.d - m.d : p2.z;
+      const e = hqGebaeude(S, scene2, g, { x, z: z2, angebot: !!p2.standort.angebot });
+      const br = p2.standort.bruecke;
       if (br) {
         const h = 6.4, len = br.x1 - br.x0 + 1;
         S.box(len, 0.5, br.z1 - br.z0, (br.x0 + br.x1) / 2, br.y0, (br.z0 + br.z1) / 2, "#eef1f2");
@@ -99109,7 +99716,7 @@
       liste.push({ art: "frei", w: 4.2, d: 3, bau: lounge });
     }
     const rang = { raum: 0, wand: 1, frei: 2 };
-    liste.sort((p, q2) => rang[p.art] - rang[q2.art] || (q2.vorrang ? 1 : 0) - (p.vorrang ? 1 : 0));
+    liste.sort((p2, q2) => rang[p2.art] - rang[q2.art] || (q2.vorrang ? 1 : 0) - (p2.vorrang ? 1 : 0));
     for (const s2 of liste) {
       const pos = G2.suche(B2, s2.w, s2.d, s2.art === "wand" ? 0.3 : 0.6, { nurHinten: s2.art === "wand" });
       if (!pos) continue;
@@ -99136,8 +99743,8 @@
     const dr = G2.suche(B2, 1.6, 0.8, 0.3);
     if (dr) druckerecke(lokal2(S, dr.x + 0.8, 0.06, dr.z + 0.4, 0), r);
     for (let k = 0; k < [0, 1, 3, 5][st]; k++) {
-      const p = G2.suche(B2, 0.6, 0.6, 0.4);
-      if (p) pflanze4(lokal2(S, p.x + 0.3, 0.06, p.z + 0.3, 0), 0, 0, r, st >= 2);
+      const p2 = G2.suche(B2, 0.6, 0.6, 0.4);
+      if (p2) pflanze4(lokal2(S, p2.x + 0.3, 0.06, p2.z + 0.3, 0), 0, 0, r, st >= 2);
     }
     const sitzend = Math.min(platz.length, Math.round(a.fte * 0.55));
     for (let k = 0; k < sitzend; k++) {
@@ -99148,9 +99755,9 @@
     }
     const stehend = Math.round(a.fte * 0.08);
     for (let k = 0; k < stehend; k++) {
-      const p = G2.suche({ x0: B2.x0, x1: B2.x1, z0: T - 2.6, z1: T - 0.4 }, 0.6, 0.6, 0.6) ?? G2.suche(B2, 0.6, 0.6, 0.6);
-      if (!p) break;
-      figur2(S, p.x + 0.3, p.z + 0.3, Math.floor(r() * 1e5), "kunde", { pose: waehle2(r, ["gehen", "stehen", "telefon", "schauen"]), ry: r() * PI7 * 2 });
+      const p2 = G2.suche({ x0: B2.x0, x1: B2.x1, z0: T - 2.6, z1: T - 0.4 }, 0.6, 0.6, 0.6) ?? G2.suche(B2, 0.6, 0.6, 0.6);
+      if (!p2) break;
+      figur2(S, p2.x + 0.3, p2.z + 0.3, Math.floor(r() * 1e5), "kunde", { pose: waehle2(r, ["gehen", "stehen", "telefon", "schauen"]), ry: r() * PI7 * 2 });
       figuren2.n++;
     }
   }
@@ -99399,7 +100006,7 @@
     "gr\xFCn": "#6fae6a",
     rot: "#b8423a"
   };
-  var kleidFarbe = (p) => KLEID_HEX[p?.kleidungFarbe] ?? (/^#/.test(String(p?.kleidungFarbe ?? "")) ? p.kleidungFarbe : "#2a3558");
+  var kleidFarbe = (p2) => KLEID_HEX[p2?.kleidungFarbe] ?? (/^#/.test(String(p2?.kleidungFarbe ?? "")) ? p2.kleidungFarbe : "#2a3558");
   function namensschild(scene2, t, x, y, z2, maxB, hg, fg = "#ffffff", hMax = 0.4) {
     if (!scene2) return;
     const { mat: mat2, seitenverhaeltnis } = textMaterial(t, fg, { groesse: 100, hintergrund: hg, versatz: -2 });
@@ -99668,26 +100275,26 @@
   }
   var DREHUNG = { "+z": 0, "+x": PI8 / 2, "-z": PI8, "-x": -PI8 / 2 };
   var SICHTBAR = { "+z": ["+z", "+x"], "+x": ["+z", "-x"], "-z": ["-z", "-x"], "-x": ["+x", "-z"] };
-  function ausrichtungVon(p) {
-    if (p.drehung !== void 0) return ["+z", "+x", "-z", "-x"][(p.drehung % 4 + 4) % 4];
-    const f = Array.isArray(p.front) ? p.front.length === 1 ? p.front[0] : "+z" : p.front;
+  function ausrichtungVon(p2) {
+    if (p2.drehung !== void 0) return ["+z", "+x", "-z", "-x"][(p2.drehung % 4 + 4) % 4];
+    const f = Array.isArray(p2.front) ? p2.front.length === 1 ? p2.front[0] : "+z" : p2.front;
     return DREHUNG[f] !== void 0 ? f : "+z";
   }
   function gedreht(bau2) {
-    return (S, scene2, p) => {
-      const f = ausrichtungVon(p);
-      if (f === "+z") return bau2(S, scene2, { ...p, sichtbar: p.sichtbar ?? SICHTBAR["+z"] });
+    return (S, scene2, p2) => {
+      const f = ausrichtungVon(p2);
+      if (f === "+z") return bau2(S, scene2, { ...p2, sichtbar: p2.sichtbar ?? SICHTBAR["+z"] });
       const quer2 = f === "+x" || f === "-x";
-      const lw = quer2 ? p.d : p.w, ld = quer2 ? p.w : p.d;
+      const lw = quer2 ? p2.d : p2.w, ld = quer2 ? p2.w : p2.d;
       const T = new Sammler(), grp = new three_module_exports.Group();
-      const erg = bau2(T, grp, { ...p, x: 0, z: 0, w: lw, d: ld, sichtbar: SICHTBAR[f], ausrichtung: f });
+      const erg = bau2(T, grp, { ...p2, x: 0, z: 0, w: lw, d: ld, sichtbar: SICHTBAR[f], ausrichtung: f });
       const th = DREHUNG[f], c = Math.cos(th), sn = Math.sin(th);
       let mx = Infinity, mz = Infinity;
       for (const [u, v] of [[0, 0], [lw, 0], [0, ld], [lw, ld]]) {
         mx = Math.min(mx, u * c + v * sn);
         mz = Math.min(mz, -u * sn + v * c);
       }
-      const ox = p.x - mx, oz = p.z - mz;
+      const ox = p2.x - mx, oz = p2.z - mz;
       for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.rotateY(th);
         g.translate(ox, 0, oz);
@@ -99707,8 +100314,8 @@
   };
   var RUNDUM = ["+z", "+x", "-z", "-x"];
   var naechsteSeite = (s2) => RUNDUM[(RUNDUM.indexOf(s2) + 1) % 4];
-  var sicht = (p) => {
-    const s2 = p.sichtbar ?? SICHTBAR["+z"];
+  var sicht = (p2) => {
+    const s2 = p2.sichtbar ?? SICHTBAR["+z"];
     return { vorn: s2.includes("+z"), rechts: s2.includes("+x"), links: s2.includes("-x"), hinten: s2.includes("-z") };
   };
   function rechteck3(u0, v0, u1, v1) {
@@ -99720,28 +100327,28 @@
     s2.lineTo(u0, v0);
     return s2;
   }
-  function oeffnung2(p, u0, v0, u1, v1, art) {
-    p.moveTo(u0, v0);
-    p.lineTo(u1, v0);
+  function oeffnung2(p2, u0, v0, u1, v1, art) {
+    p2.moveTo(u0, v0);
+    p2.lineTo(u1, v0);
     const b2 = u1 - u0;
     if (art === "kreis") {
-      p = p;
+      p2 = p2;
     }
     if (art === "spitz") {
       const vs2 = v1 - b2 * 0.866;
-      p.lineTo(u1, vs2);
-      p.absarc(u0, vs2, b2, 0, PI8 / 3, false);
-      p.absarc(u1, vs2, b2, 2 * PI8 / 3, PI8, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc(u0, vs2, b2, 0, PI8 / 3, false);
+      p2.absarc(u1, vs2, b2, 2 * PI8 / 3, PI8, false);
     } else if (art) {
       const vs2 = v1 - b2 / 2;
-      p.lineTo(u1, vs2);
-      p.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI8, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI8, false);
     } else {
-      p.lineTo(u1, v1);
-      p.lineTo(u0, v1);
+      p2.lineTo(u1, v1);
+      p2.lineTo(u0, v1);
     }
-    p.lineTo(u0, v0);
-    return p;
+    p2.lineTo(u0, v0);
+    return p2;
   }
   function fform2(S, F2, shape, t0, t1, c, seg = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg });
@@ -99752,9 +100359,9 @@
     const s2 = rechteck3(u0, y0, u1, y1);
     for (const l of loecher) {
       if (l.kreis) {
-        const p = new three_module_exports.Path();
-        p.absarc(l.kreis[0], l.kreis[1], l.kreis[2], 0, 2 * PI8, true);
-        s2.holes.push(p);
+        const p2 = new three_module_exports.Path();
+        p2.absarc(l.kreis[0], l.kreis[1], l.kreis[2], 0, 2 * PI8, true);
+        s2.holes.push(p2);
       } else s2.holes.push(oeffnung2(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
     }
     fform2(S, F2, s2, t0, t1, c);
@@ -99865,7 +100472,7 @@
   function boden3(S, x0, z0, x1, z1, c, y = 0.3, h = 0.06) {
     if (x1 > x0 && z1 > z0) S.quader(x0, y, z0, x1, y + h, z1, c);
   }
-  function hash2(a, b2, c = 0) {
+  function hash3(a, b2, c = 0) {
     let h = a * 374761393 + b2 * 668265263 + c * 1274126177 >>> 0;
     h = Math.imul(h ^ h >>> 13, 1274126177) >>> 0;
     return (h ^ h >>> 16) >>> 0;
@@ -100200,7 +100807,7 @@
           if (k === n - 1) fb2(S, F2, c.u0, c.u1, y + gh - 0.22, y + gh, ti, tv, fa.panel[0]);
           continue;
         }
-        const ton = c.typ === "T" && fa.saniert && o.treppeFarbig ? fa.akzent2 : fa.panel[hash2(ci, k, o.salz ?? 0) % fa.panel.length];
+        const ton = c.typ === "T" && fa.saniert && o.treppeFarbig ? fa.akzent2 : fa.panel[hash3(ci, k, o.salz ?? 0) % fa.panel.length];
         fb2(S, F2, c.u0 + j / 2, c.u1 - j / 2, y + j / 2, y + gh - j / 2, ti, tv, ton);
         const u = (c.u0 + c.u1) / 2;
         if (c.typ === "T") {
@@ -100268,7 +100875,7 @@
     const nc = Math.max(2, Math.round(L2 / 3)), b2 = (L2 + 0.15) / nc;
     fb2(S, F2, -0.15, L2, 0, y0, -0.3, 0.24, fa.sockel);
     for (let k = 0; k < n; k++) for (let i = 0; i < nc; i++) {
-      const ton = fa.panel[hash2(i + 31, k, 5) % fa.panel.length];
+      const ton = fa.panel[hash3(i + 31, k, 5) % fa.panel.length];
       fb2(S, F2, -0.15 + i * b2 + j / 2, -0.15 + (i + 1) * b2 - j / 2, y0 + k * gh + j / 2, y0 + (k + 1) * gh - j / 2, -0.3, 0.12, ton);
     }
     const fg = dunkler(fa.panel[0], fa.saniert ? 0.08 : 0.15);
@@ -100484,12 +101091,12 @@
   };
   var PLATTE_VARIANTEN = ["wbs70_6", "wbs70_11", "p2", "q3a", "ph16", "scheibe", "wuerfel", "winkel", "kurve"];
   var PLATTE_MIN = { wbs70_6: [30, 19], wbs70_11: [36, 20], p2: [32, 19], q3a: [28, 17], ph16: [32, 32], scheibe: [56, 20], wuerfel: [26, 26], winkel: [52, 46], kurve: [70, 44] };
-  function platteWohnRoh(S, scene2, p) {
-    const r = rng2(`pw:${p.seed}`);
-    const v = p.variante ?? waehle2(r, PLATTE_VARIANTEN);
-    const zustand = p.zustand ?? (r() < 0.55 ? "saniert" : "unsaniert");
+  function platteWohnRoh(S, scene2, p2) {
+    const r = rng2(`pw:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, PLATTE_VARIANTEN);
+    const zustand = p2.zustand ?? (r() < 0.55 ? "saniert" : "unsaniert");
     const fa = plattenFarben(r, zustand);
-    const { x: x0, z: z0, w, d } = p;
+    const { x: x0, z: z0, w, d } = p2;
     const sv = 5, T = 12;
     const zf = z0 + d - sv;
     const mod = fa.saniert ? 0.6 : 0.05;
@@ -100499,7 +101106,7 @@
       boden3(S, xa, zf + 2.2, xb, z0 + d, ASPHALT2, 0.3, 0.05);
       parkreihe2(S, r, xa + 1, xb - 1, zf + 3.6, { modern: mod, dichte: 0.55 });
     };
-    const base = { fa, r, salz: p.seed % 7 };
+    const base = { fa, r, salz: p2.seed % 7 };
     if (v === "ph16" || v === "wuerfel") {
       const a = v === "ph16" ? 22 : 17.5, n = v === "ph16" ? 16 : 6;
       const px2 = x0 + w - a - sv, pz4 = zf - a;
@@ -100512,7 +101119,7 @@
       for (let i = 0; i < anz3; i++) {
         const qx = px2 - i * abst2;
         if (qx < x0 + 1) break;
-        const hh = punkthaus(S, qx, pz4, a, a, { ...base, n, treppe: "links", breit: v === "wuerfel", salz: i, sichtbar: p.sichtbar });
+        const hh = punkthaus(S, qx, pz4, a, a, { ...base, n, treppe: "links", breit: v === "wuerfel", salz: i, sichtbar: p2.sichtbar });
         H = Math.max(H, hh);
         if (v === "wuerfel" && fa.saniert && i % 2 === 0) {
           const g = walmdach(a + 0.4, a + 0.4, 2.6);
@@ -100533,7 +101140,7 @@
       const FA = R5(x0 + 3, zf, 1, 0, xf - T - x0 - 3);
       const FB = R5(xf, zf, 0, -1, zf - z0 - 3);
       const o = { ...base, n, aufsatz: fa.saniert && r() < 0.4, balkone: fa.saniert, treppeFarbig: fa.saniert };
-      const sk2 = sicht(p);
+      const sk2 = sicht(p2);
       H = plattenBlock(S, FA, T, { ...o, cols: spalten(FA.L, MUSTER.wbs70), vorn: sk2.vorn, rueck: sk2.hinten, giebel: { links: sk2.links } });
       H = Math.max(H, plattenBlock(S, FB, T, { ...o, cols: spalten(FB.L, MUSTER.wbs70b), vorn: sk2.rechts, rueck: sk2.links, giebel: { links: sk2.vorn, rechts: sk2.hinten }, salz: 4 }));
       if (sk2.hinten || sk2.links) wohnweg(S, r, x0 + 3, z0 + 3, xf - T, zf - T, sk2);
@@ -100550,7 +101157,7 @@
       vorne(x0, x0 + w);
       const ext = T * Math.tan(dphi / 2) + 0.1;
       const o = { ...base, n, aufsatz: false, balkone: fa.saniert, treppeFarbig: fa.saniert };
-      const sk2 = sicht(p);
+      const sk2 = sicht(p2);
       for (let i = 0; i < m; i++) {
         const a = -Phi / 2 + i * dphi, b2 = a + dphi;
         const Pa = [cx + Rr * Math.sin(a), cz - Rr * Math.cos(a)], Pb = [cx + Rr * Math.sin(b2), cz - Rr * Math.cos(b2)];
@@ -100570,7 +101177,7 @@
       q3a: { n: 4 + (r() < 0.4 ? 1 : 0) }
     }[v] ?? { n: 6, muster: MUSTER.wbs70 };
     const Tz = v === "q3a" ? 10.5 : T;
-    const sk = sicht(p);
+    const sk = sicht(p2);
     hofGruen(S, r, x0, z0, x0 + w, zf - Tz, { weg: !sk.hinten });
     if (sk.hinten && zf - Tz - z0 > 4) {
       boden3(S, x0 + 1, zf - Tz - 3.2, x0 + w - 1, zf - Tz - 1.2, WEG2, 0.3, 0.1);
@@ -100601,7 +101208,7 @@
         baender: cfg.baender,
         aufzug: cfg.aufzug,
         durchgang: dgU,
-        salz: bI + p.seed % 5,
+        salz: bI + p2.seed % 5,
         balkone: fa.saniert && !cfg.baender && cfg.n < 9,
         treppeFarbig: fa.saniert,
         aufsatz: fa.saniert && cfg.n < 9 && r() < 0.45,
@@ -100623,17 +101230,17 @@
       for (let u = z0 + 6; u < z1 - 4; u += 15) S.box(0.55, 0.45, 1.8, x1 - 3, 0.62, u, "#8a6a4a");
     }
   }
-  function platteWohnLokal(S, scene2, p) {
-    const v = p.variante;
+  function platteWohnLokal(S, scene2, p2) {
+    const v = p2.variante;
     const [mw, md] = PLATTE_MIN[v] ?? [36, 26];
-    if (p.w >= mw && p.d >= md) return platteWohnRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(mw, p.w), Math.max(md, p.d), platteWohnRoh);
+    if (p2.w >= mw && p2.d >= md) return platteWohnRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(mw, p2.w), Math.max(md, p2.d), platteWohnRoh);
   }
   var platteWohnGedreht = gedreht(platteWohnLokal);
-  function platteWohn(S, scene2, p) {
-    const r = rng2(`pw:${p.seed}`);
-    const v = p.variante ?? waehle2(r, PLATTE_VARIANTEN);
-    return platteWohnGedreht(S, scene2, { ...p, variante: v });
+  function platteWohn(S, scene2, p2) {
+    const r = rng2(`pw:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, PLATTE_VARIANTEN);
+    return platteWohnGedreht(S, scene2, { ...p2, variante: v });
   }
   var MAG = {
     berlin: { wand: "#eee4cd", orn: "#f9f5ec", sockel: "#cbb894", dach: "#9b968d", egH: 5.4, gh: 3.15, n: [6, 7], ra: 3.3 },
@@ -100726,7 +101333,7 @@
       fb2(S, FL, u - 0.06, u + 0.06, 0.3, egH - 1.1, 0, 0.12, STAHL3);
       fb2(S, FL, u - ra / 2 + 0.2, u + ra / 2 - 0.2, egH - 1.1, egH - 0.6, 0, 0.1, "#3a3f44");
     }
-    for (let i = 1; i < ax.length - 1; i += 3) ftext2(scene2, FL, LAEDEN[hash2(i, o.salz ?? 1) % LAEDEN.length], ax[i] - u0, egH - 0.85, 0.12, 0.42, ra * 2.6, "#f2e7c9");
+    for (let i = 1; i < ax.length - 1; i += 3) ftext2(scene2, FL, LAEDEN[hash3(i, o.salz ?? 1) % LAEDEN.length], ax[i] - u0, egH - 0.85, 0.12, 0.42, ra * 2.6, "#f2e7c9");
   }
   function magTurm(S, scene2, xa, za, tw, c, r, o) {
     const { egH, gh, orn, wand: wand2 } = c;
@@ -100858,16 +101465,16 @@
     if (o.schild) ftext2(scene2, F2, o.schild, ax[0] + 2, egH - 0.5, 0.05, 0.38, 6, "#5a4a3a");
     return H;
   }
-  function magistraleRoh(S, scene2, p) {
-    const r = rng2(`mg:${p.seed}`);
-    const v = p.variante ?? ({ Nord: "rostock", Mitte: "dresden", S\u00FCd: "dresden", Ost: "berlin" }[p.region] ?? waehle2(r, ["berlin", "rostock", "dresden"]));
+  function magistraleRoh(S, scene2, p2) {
+    const r = rng2(`mg:${p2.seed}`);
+    const v = p2.variante ?? ({ Nord: "rostock", Mitte: "dresden", S\u00FCd: "dresden", Ost: "berlin" }[p2.region] ?? waehle2(r, ["berlin", "rostock", "dresden"]));
     const c = { ...MAG[v] };
     c.n = c.n[0] + (r() < 0.5 ? 0 : c.n[1] - c.n[0]);
     if (v === "berlin") Object.assign(c, { lisenen: true, balkone: true, arkade: "pfeiler", dreieck: r() < 0.5 });
     if (v === "rostock") Object.assign(c, { arkade: "bogen", faschen: c.orn, kranz: false, fw: 0.6 });
     if (v === "dresden") Object.assign(c, { arkade: "bogen", rustika: true, balkone: r() < 0.5, bogenOben: true, dreieck: true });
-    const { x: x0, z: z0, w, d } = p;
-    const sk = sicht(p), gedrehtGebaut = !(sk.vorn && sk.rechts);
+    const { x: x0, z: z0, w, d } = p2;
+    const sk = sicht(p2), gedrehtGebaut = !(sk.vorn && sk.rechts);
     const T = Math.min(15, d), zA = z0 + d - T;
     const fluegel2 = d >= T + 10 && !gedrehtGebaut;
     const H = c.egH + c.n * c.gh;
@@ -100892,7 +101499,7 @@
     let top = H + 1;
     const fassaden = [[FZ, zonenZ, sk.vorn], [FX, zonenX, sk.rechts], [FL, {}, !!FL]].filter(([F2, , an]) => F2 && an);
     for (const [F2, z2] of fassaden) {
-      magArkade(S, scene2, F2, c, r, { A, salz: p.seed + F2.L });
+      magArkade(S, scene2, F2, c, r, { A, salz: p2.seed + F2.L });
       magFassade(S, scene2, F2, c, r, z2);
     }
     const traufe = [...fassaden.map(([F2, z2]) => [F2, z2]), ...FR2 ? [[FR2, {}]] : []];
@@ -100965,9 +101572,9 @@
     }
     return { hoehe: top };
   }
-  function magistraleLokal(S, scene2, p) {
-    if (p.w >= 40 && p.d >= 15) return magistraleRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(40, p.w), Math.max(15, p.d), magistraleRoh);
+  function magistraleLokal(S, scene2, p2) {
+    if (p2.w >= 40 && p2.d >= 15) return magistraleRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(40, p2.w), Math.max(15, p2.d), magistraleRoh);
   }
   var magistrale = gedreht(magistraleLokal);
   function bandFassade(S, F2, o) {
@@ -101015,13 +101622,13 @@
     return H + 1.4;
   }
   var ZENTRUM_LAEDEN = ["Mode f\xFCr Sie", "Gastst\xE4tte", "Spielwaren", "Schuhhaus", "Uhren \xB7 Schmuck", "Caf\xE9", "Haushaltwaren", "B\xFCcher", "Sportartikel", "Blumen", "Delikatessen", "Foto \xB7 Kino"];
-  function platteZentrumRoh(S, scene2, p) {
-    const r = rng2(`pz:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["prager", "arkade", "ensemble"]);
-    const zustand = p.zustand ?? (r() < 0.5 ? "saniert" : "unsaniert");
+  function platteZentrumRoh(S, scene2, p2) {
+    const r = rng2(`pz:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["prager", "arkade", "ensemble"]);
+    const zustand = p2.zustand ?? (r() < 0.5 ? "saniert" : "unsaniert");
     const fa = plattenFarben(r, zustand);
-    const { x: x0, z: z0, w, d } = p;
-    const namen = [...ZENTRUM_LAEDEN].sort((a, b2) => hash2(a.length, p.seed) % 7 - hash2(b2.length, p.seed) % 7);
+    const { x: x0, z: z0, w, d } = p2;
+    const namen = [...ZENTRUM_LAEDEN].sort((a, b2) => hash3(a.length, p2.seed) % 7 - hash3(b2.length, p2.seed) % 7);
     boden3(S, x0, z0, x0 + w, z0 + d, PFLASTER2, 0.3, 0.07);
     let top = 0;
     if (v === "prager") {
@@ -101029,12 +101636,12 @@
       const F2 = R5(x0 + 4, zf, 1, 0, L2);
       const cols = spalten(L2, [["F", 3.6], ["F", 3.6], ["F", 3.6], ["F", 3.6], ["T", 2.4]]);
       const mitte = cols[Math.floor(cols.length / 2)];
-      const sk = sicht(p);
+      const sk = sicht(p2);
       top = plattenBlock(S, F2, T, { fa, r, n: 12, cols, baender: true, aufzug: true, durchgang: [mitte.u0 - 4, mitte.u1 + 4], giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", salz: 2, treppeFarbig: fa.saniert, vorn: sk.vorn, rueck: sk.hinten });
       const G2 = sk.rechts ? endeRechts(F2, T) : endeLinks(F2, T), Hs = 1.1 + 12 * 2.8;
       mosaik2(S, G2, 1.5, T - 1.5, Hs * 0.35, Hs - 3, 0.12, r, { motiv: "sonne" });
       const px0 = x0 + w * 0.38, pz0 = zf + 7;
-      if (z0 + d - 5 - pz0 > 8) top = Math.max(top, ladenpavillon(S, scene2, px0, pz0, x0 + w - 5 - px0, z0 + d - 5 - pz0, r, { geschosse: 2, namen, mosaik: true, sichtbar: p.sichtbar }));
+      if (z0 + d - 5 - pz0 > 8) top = Math.max(top, ladenpavillon(S, scene2, px0, pz0, x0 + w - 5 - px0, z0 + d - 5 - pz0, r, { geschosse: 2, namen, mosaik: true, sichtbar: p2.sichtbar }));
       const bx = x0 + w * 0.2, bz = zf + (z0 + d - zf) / 2 + 1;
       brunnen(S, bx, bz, Math.min(6, (z0 + d - zf) / 3), { duesen: 7, hoch: 4 });
       brunnen(S, bx + 13, bz + 2, 3, { duesen: 4 });
@@ -101061,8 +101668,8 @@
       const T = 12, zf = z0 + d - 4, L2 = w - 8;
       const F2 = R5(x0 + 2, zf, 1, 0, L2);
       const cols = spalten(L2, MUSTER.wbs70b);
-      const sk = sicht(p);
-      top = plattenBlock(S, F2, T, { fa, r, n: p.geschosse && p.geschosse > 5 ? Math.min(14, p.geschosse) : 5, cols, y0: 4.6, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: fa.saniert ? "feld" : "rippen", balkone: false, salz: 1, rueck: sk.hinten, aufzug: (p.geschosse ?? 5) > 8 });
+      const sk = sicht(p2);
+      top = plattenBlock(S, F2, T, { fa, r, n: p2.geschosse && p2.geschosse > 5 ? Math.min(14, p2.geschosse) : 5, cols, y0: 4.6, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: fa.saniert ? "feld" : "rippen", balkone: false, salz: 1, rueck: sk.hinten, aufzug: (p2.geschosse ?? 5) > 8 });
       fb2(S, F2, 0, L2, 0, 4.6, -T, -3.6, "#3f4a53");
       fb2(S, F2, 0, L2, 0.3, 3.6, -3.62, -3.5, GLAS_HELL4);
       for (let u = 3; u < L2; u += 6) {
@@ -101087,10 +101694,10 @@
         mosaik2(S, GL, 1.5, T - 1.5, 6.5, top - 3, 0.12, r, { motiv: "sonne" });
       }
     } else if (v === "luecke") {
-      const T = Math.min(12, d - 1), zf = z0 + d, L2 = w - 0.4, sk = sicht(p);
+      const T = Math.min(12, d - 1), zf = z0 + d, L2 = w - 0.4, sk = sicht(p2);
       const F2 = R5(x0 + 0.2, zf, 1, 0, L2);
       const cols = spalten(L2, [["F", 3.6], ["L", 3], ["F", 3.6]], 0.6);
-      const n = p.geschosse ?? 5;
+      const n = p2.geschosse ?? 5;
       top = plattenBlock(S, F2, T, { fa, r, n, cols, y0: 4.2, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", balkone: false, salz: 4, rueck: sk.hinten, aufsatz: fa.saniert ? "flach" : false });
       fb2(S, F2, 0, L2, 0, 4.2, -T, -2, "#3f4a53");
       fb2(S, F2, 0.3, L2 - 0.3, 0.3, 3.4, -2.02, -1.9, GLAS_HELL4);
@@ -101100,9 +101707,9 @@
       if (d > T + 2) hofGruen(S, r, x0, z0, x0 + w, zf - T, { spiel: false, waesche: false, teppich: false, weg: false, maxBaeume: 2 });
     } else {
       const a = 20, px2 = x0 + w - a - 6, pz4 = z0 + 4;
-      top = punkthaus(S, px2, pz4, a, a, { fa, r, n: 17, treppe: "links", sichtbar: p.sichtbar });
+      top = punkthaus(S, px2, pz4, a, a, { fa, r, n: 17, treppe: "links", sichtbar: p2.sichtbar });
       const pz0 = pz4 + a + 6, pw = w - 10;
-      if (z0 + d - 4 - pz0 > 7) ladenpavillon(S, scene2, x0 + 4, pz0, Math.min(pw * 0.6, 34), z0 + d - 4 - pz0, r, { geschosse: 2, namen, mosaik: true, blende: "#efe9dc", sichtbar: p.sichtbar });
+      if (z0 + d - 4 - pz0 > 7) ladenpavillon(S, scene2, x0 + 4, pz0, Math.min(pw * 0.6, 34), z0 + d - 4 - pz0, r, { geschosse: 2, namen, mosaik: true, blende: "#efe9dc", sichtbar: p2.sichtbar });
       brunnen(S, x0 + w - 12, z0 + d - 10, 4.5, { duesen: 6, hoch: 3.6, schale: true });
       formsteinwand(S, R5(x0 + 4, pz4 + a - 2, 1, 0, 14), 0, 14, 0.36, 3.2, -0.15, 0.15, "#d8d3c6", "raute");
       for (let i = 0; i < 4; i++) baum(S, x0 + 6 + i * 7, pz4 + 6, r, 1);
@@ -101111,23 +101718,23 @@
     return { hoehe: top };
   }
   var ZENTRUM_MIN = { prager: [70, 46], arkade: [30, 22], ensemble: [50, 48], luecke: [12, 12] };
-  function platteZentrumLokal(S, scene2, p) {
-    const min = ZENTRUM_MIN[p.variante];
-    if (p.w >= min[0] && p.d >= min[1]) return platteZentrumRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(min[0], p.w), Math.max(min[1], p.d), platteZentrumRoh);
+  function platteZentrumLokal(S, scene2, p2) {
+    const min = ZENTRUM_MIN[p2.variante];
+    if (p2.w >= min[0] && p2.d >= min[1]) return platteZentrumRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(min[0], p2.w), Math.max(min[1], p2.d), platteZentrumRoh);
   }
   var platteZentrumGedreht = gedreht(platteZentrumLokal);
-  function platteZentrum(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`pz:${p.seed}`), ["prager", "arkade", "ensemble"]);
-    return platteZentrumGedreht(S, scene2, { ...p, variante: v });
+  function platteZentrum(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`pz:${p2.seed}`), ["prager", "arkade", "ensemble"]);
+    return platteZentrumGedreht(S, scene2, { ...p2, variante: v });
   }
   function freitreppe(S, F2, u0, u1, hoehe, stufen, tiefe, farbe2) {
     for (let i = 0; i < stufen; i++) fb2(S, F2, u0, u1, 0, hoehe * (stufen - i) / stufen + 0.3, 0, tiefe * (i + 1) / stufen, i % 2 ? farbe2 : dunkler(farbe2, 0.03));
   }
-  function kulturRoh(S, scene2, p) {
-    const r = rng2(`kh:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["palast", "stadthalle", "kulturhaus50"]);
-    const { x: x0, z: z0, w, d } = p;
+  function kulturRoh(S, scene2, p2) {
+    const r = rng2(`kh:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["palast", "stadthalle", "kulturhaus50"]);
+    const { x: x0, z: z0, w, d } = p2;
     boden3(S, x0, z0, x0 + w, z0 + d, PFLASTER2, 0.3, 0.07);
     if (v === "palast") {
       const bw = Math.min(w - 8, 76), bd = Math.min(d - 14, 46), bx = x0 + (w - bw) / 2, bz = z0 + 4, H = 15, pl3 = 1.5;
@@ -101148,7 +101755,7 @@
       S.quader(bx + bw * 0.35, H + 0.6, bz + 4, bx + bw * 0.72, H + 9, bz + bd * 0.62, "#e6e1d4");
       S.quader(bx + bw * 0.35 - 0.3, H + 9, bz + 3.7, bx + bw * 0.72 + 0.3, H + 9.6, bz + bd * 0.62 + 0.3, "#6f9a7d");
       const FB = RZ(bx + bw * 0.35, bz + 4, bw * 0.37, bd * 0.62 - 4);
-      ftext2(scene2, teil2(FZ, 0, bw, 3.62), p.name ?? "Kulturpalast", bw / 2, H + 0.1, 0.05, 0.8, bw * 0.5, "#f4f1e8");
+      ftext2(scene2, teil2(FZ, 0, bw, 3.62), p2.name ?? "Kulturpalast", bw / 2, H + 0.1, 0.05, 0.8, bw * 0.5, "#f4f1e8");
       for (let i = 0; i < 6; i++) {
         const fx = x0 + 6 + i * (w - 12) / 5;
         S.box(0.15, 9, 0.15, fx, 4.8, z0 + d - 2.5, "#d9dcdf");
@@ -101184,7 +101791,7 @@
         fb2(S, F2, 0, F2.L, 4.3, 4.45, -1, -0.8, "#d9dcdf");
         fb2(S, F2, -2.5, F2.L + 0.5, Hf - 1, Hf + 0.2, -1, 2.5, "#f1efe9");
       }
-      ftext2(scene2, FF, p.name ?? "Stadthalle", bw * 0.5, Hf - 0.4, 2.55, 0.9, bw * 0.4, "#c8463c");
+      ftext2(scene2, FF, p2.name ?? "Stadthalle", bw * 0.5, Hf - 0.4, 2.55, 0.9, bw * 0.4, "#c8463c");
       freitreppe(S, R5(bx + bw * 0.25, bz + bd, 1, 0, bw * 0.5), 0, bw * 0.5, 0.6, 3, 2.4, "#d8d2c4");
       for (let i = 0; i < 5; i++) {
         const fx = bx + 4 + i * 3.2;
@@ -101237,7 +101844,7 @@
     fpoly2(S, FG, [[-0.3, Hm - 0.1], [mb + 1.1, Hm - 0.1], [(mb + 0.8) / 2, Hm + 4.5]], -0.6, 0.2, orn);
     fpoly2(S, FG, [[1.2, Hm + 0.5], [mb - 0.4, Hm + 0.5], [(mb + 0.8) / 2, Hm + 3.5]], -0.5, 0.25, putz2);
     fscheibe(S, FG, (mb + 0.8) / 2, Hm + 1.7, 0.2, 0.35, 0.9, "#d8b45a", 16);
-    ftext2(scene2, FG, p.name ?? "Haus der Kultur", (mb + 0.8) / 2, Hm - 0.8, 0.05, 0.75, mb * 0.8, "#7a5a2e");
+    ftext2(scene2, FG, p2.name ?? "Haus der Kultur", (mb + 0.8) / 2, Hm - 0.8, 0.05, 0.75, mb * 0.8, "#7a5a2e");
     const gd = dachProfil(md + pt - 1, mb + 0.8, 4.2, 0.2, "z");
     gd.translate(cx, Hm, mz0 + (md + pt - 1) / 2);
     S.add(gd, dach3);
@@ -101253,20 +101860,20 @@
     hofGruen(S, r, x0, z0, x0 + w, mz0 - 1, { spiel: false, waesche: false, teppich: false, weg: false, maxBaeume: 6 });
     return { hoehe: dy + 12 };
   }
-  function kulturhaus(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`kh:${p.seed}`), ["palast", "stadthalle", "kulturhaus50"]);
+  function kulturhaus(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`kh:${p2.seed}`), ["palast", "stadthalle", "kulturhaus50"]);
     const min = { palast: [64, 50], stadthalle: [54, 44], kulturhaus50: [50, 38] }[v];
-    if (p.w >= min[0] && p.d >= min[1]) return kulturRoh(S, scene2, { ...p, variante: v });
-    return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), kulturRoh);
+    if (p2.w >= min[0] && p2.d >= min[1]) return kulturRoh(S, scene2, { ...p2, variante: v });
+    return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), kulturRoh);
   }
   function antennenSpitze(S, x, y, z2, h, r0 = 0.9) {
     const n = 6;
     for (let i = 0; i < n; i++) zyl6(S, r0 * (1 - (i + 1) / (n + 1.5)), r0 * (1 - i / (n + 1.5)), h / n, x, y + i * h / n, z2, i % 2 ? "#f2f1ec" : "#c8463c", 8);
   }
-  function dominanteRoh(S, scene2, p) {
-    const r = rng2(`dm:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["fernsehturm", "kanzel", "uni", "interhotel"]);
-    const { x: x0, z: z0, w, d } = p;
+  function dominanteRoh(S, scene2, p2) {
+    const r = rng2(`dm:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["fernsehturm", "kanzel", "uni", "interhotel"]);
+    const { x: x0, z: z0, w, d } = p2;
     const cx = x0 + w / 2, cz = z0 + d / 2;
     boden3(S, x0, z0, x0 + w, z0 + d, PFLASTER2, 0.3, 0.07);
     const beton = "#dcd9d1";
@@ -101384,7 +101991,7 @@
       for (let i = 0; i < 6; i++) baum(S, x0 + 3 + i * (w - 6) / 5, z0 + d - 2.5, r, 1);
       return { hoehe: Ht + 18 };
     }
-    const name2 = p.name ?? `Hotel Stadt ${waehle2(r, ["Lindenau", "Seeberg", "Neuburg", "Altenwerda", "Gr\xFCnau", "Bergen"])}`;
+    const name2 = p2.name ?? `Hotel Stadt ${waehle2(r, ["Lindenau", "Seeberg", "Neuburg", "Altenwerda", "Gr\xFCnau", "Bergen"])}`;
     const pw = w - 6, pd = Math.min(d - 10, 32), px2 = x0 + 3, pz4 = z0 + 3, Hp = 8.4;
     S.quader(px2, 0, pz4, px2 + pw - 1, Hp, pz4 + pd - 1, "#33404a");
     S.quader(px2, Hp - 0.05, pz4, px2 + pw - 1, Hp + 0.3, pz4 + pd - 1, "#b3afa5");
@@ -101423,11 +102030,11 @@
     }
     return { hoehe: Hs + 7 };
   }
-  function dominante(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`dm:${p.seed}`), ["fernsehturm", "kanzel", "uni", "interhotel"]);
+  function dominante(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`dm:${p2.seed}`), ["fernsehturm", "kanzel", "uni", "interhotel"]);
     const min = { fernsehturm: [34, 34], kanzel: [26, 26], uni: [44, 36], rund: [40, 36], interhotel: [56, 36] }[v] ?? [40, 36];
-    if (p.w >= min[0] && p.d >= min[1]) return dominanteRoh(S, scene2, { ...p, variante: v });
-    return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), dominanteRoh);
+    if (p2.w >= min[0] && p2.d >= min[1]) return dominanteRoh(S, scene2, { ...p2, variante: v });
+    return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), dominanteRoh);
   }
   function schirm(S, x, z2, rad2, farbe2) {
     S.box(0.1, 2.4, 0.1, x, 1.5, z2, "#e9e6de");
@@ -101445,10 +102052,10 @@
     }
   }
   var GASTNAMEN = ["Gastst\xE4tte Kranich", "Gastst\xE4tte Seeblick", "Gastst\xE4tte M\xF6we", "Gastst\xE4tte Stadtpark", "Gastst\xE4tte Am Teich"];
-  function pavillonRoh(S, scene2, p) {
-    const r = rng2(`pv:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["hp", "faltdach", "eisbar", "brunnen"]);
-    const { x: x0, z: z0, w, d } = p;
+  function pavillonRoh(S, scene2, p2) {
+    const r = rng2(`pv:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["hp", "faltdach", "eisbar", "brunnen"]);
+    const { x: x0, z: z0, w, d } = p2;
     boden3(S, x0, z0, x0 + w, z0 + d, PFLASTER2, 0.3, 0.07);
     if (v === "hp") {
       hofGruen(S, r, x0, z0, x0 + w, z0 + 5, { spiel: false, waesche: false, teppich: false, weg: false, maxBaeume: 4 });
@@ -101487,7 +102094,7 @@
       for (let i = 0; i < 4; i++) schirm(S, x0 + 4 + i * 4, z0 + d - 3.2, 1.5, ["#c8463c", "#f4efe2", "#2f6fa8", "#e8c547"][i % 4]);
       const FS = R5(xb - 12, z0 + d - 1.2, 1, 0, 11);
       fb2(S, FS, 0, 11, 0.3, 1.5, -0.4, 0, "#d8d3c6");
-      ftext2(scene2, FS, p.name ?? waehle2(r, GASTNAMEN), 5.5, 1, 0.05, 0.75, 10.5, "#b8322a");
+      ftext2(scene2, FS, p2.name ?? waehle2(r, GASTNAMEN), 5.5, 1, 0.05, 0.75, 10.5, "#b8322a");
       return { hoehe: hi + 0.5 };
     }
     if (v === "faltdach") {
@@ -101541,7 +102148,7 @@
       }
       S.quader(ux - 0.5, h1 + h2, uz - 0.5, ux + uw + 0.5, h1 + h2 + 0.35, uz + ud + 0.5, "#f3f1ec");
       const FT = teil2(RZ(ux, uz, uw, ud), 0, uw, -ud * 0.4);
-      const bt = ftext2(scene2, FT, p.name ?? "Milch \xB7 Mokka \xB7 Eis", uw / 2, h1 + h2 + 1.6, 0.1, 1.3, uw * 0.95, "#e8467a");
+      const bt = ftext2(scene2, FT, p2.name ?? "Milch \xB7 Mokka \xB7 Eis", uw / 2, h1 + h2 + 1.6, 0.1, 1.3, uw * 0.95, "#e8467a");
       for (let u = uw / 2 - bt / 2 + 0.5; u < uw / 2 + bt / 2; u += 3) fb2(S, FT, u - 0.06, u + 0.06, h1 + h2 + 0.35, h1 + h2 + 2.3, -0.15, 0, STAHL3);
       for (let i = 0; i < 4; i++) for (let k = 0; k < 2; k++) {
         const tx = ux + 2 + i * 4.2, tz = uz + ud + 2 + k * 3.5;
@@ -101563,7 +102170,7 @@
     fb2(S, FZ, -0.8, gw + 0.4, H - 0.6, H, -0.6, 1.4, "#f3f1ec");
     fb2(S, FX, -1.4, gd + 0.8, H - 0.6, H, -0.6, 1.4, "#f3f1ec");
     fb2(S, FZ, -0.8, gw + 0.4, H, H + 0.15, -0.6, 1.45, "#c8463c");
-    ftext2(scene2, FZ, p.name ?? waehle2(r, GASTNAMEN), gw * 0.35, H - 0.3, 1.47, 0.45, gw * 0.6, "#b8322a");
+    ftext2(scene2, FZ, p2.name ?? waehle2(r, GASTNAMEN), gw * 0.35, H - 0.3, 1.47, 0.45, gw * 0.6, "#b8322a");
     const bx = x0 + w * 0.62, bz = z0 + d * 0.62, br = Math.min(w, d) * 0.22;
     brunnen(S, bx, bz, br, { duesen: 9, hoch: 4.5, schale: true });
     for (let i = 0; i < 8; i++) {
@@ -101575,16 +102182,16 @@
     for (const lx of [x0 + w * 0.4, x0 + w - 3]) laterne3(S, lx, z0 + d - 2, 5, 0.36, "kugel");
     return { hoehe: H + 4.5 };
   }
-  function pavillon(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`pv:${p.seed}`), ["hp", "faltdach", "eisbar", "brunnen"]);
+  function pavillon(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`pv:${p2.seed}`), ["hp", "faltdach", "eisbar", "brunnen"]);
     const min = { hp: [28, 28], faltdach: [24, 20], eisbar: [28, 26], brunnen: [32, 28] }[v];
-    if (p.w >= min[0] && p.d >= min[1]) return pavillonRoh(S, scene2, { ...p, variante: v });
-    return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), pavillonRoh);
+    if (p2.w >= min[0] && p2.d >= min[1]) return pavillonRoh(S, scene2, { ...p2, variante: v });
+    return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), pavillonRoh);
   }
-  function kaufhalleRoh(S, scene2, p) {
-    const r = rng2(`kf:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["typ", "waschbeton", "discounter"]);
-    const { x: x0, z: z0, w, d } = p;
+  function kaufhalleRoh(S, scene2, p2) {
+    const r = rng2(`kf:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["typ", "waschbeton", "discounter"]);
+    const { x: x0, z: z0, w, d } = p2;
     const bw = Math.min(w - 10, 46), bd = Math.min(d - 18, 30), bx = x0 + 3, bz = z0 + 3, H = 5.4;
     boden3(S, x0, z0, x0 + w, z0 + d, "#a9a69f", 0.3, 0.05);
     const disc = v === "discounter";
@@ -101666,9 +102273,9 @@
     }
     return { hoehe: H + 3 };
   }
-  function kaufhalle(S, scene2, p) {
-    if (p.w >= 40 && p.d >= 36) return kaufhalleRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(40, p.w), Math.max(36, p.d), kaufhalleRoh);
+  function kaufhalle(S, scene2, p2) {
+    if (p2.w >= 40 && p2.d >= 36) return kaufhalleRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(40, p2.w), Math.max(36, p2.d), kaufhalleRoh);
   }
   function fernwaerme(S, punkte2, y, o = {}) {
     const farbe2 = o.farbe ?? "#c9cdd0", rr = o.r ?? 0.45;
@@ -101708,10 +102315,10 @@
     if (o.ringe) for (let i = 0; i < 3; i++) zyl6(S, rO + 0.06 + i * 0.03, rO + 0.06 + i * 0.03, 2.4, x, h - 3.4 - i * 4.8, z2, i % 2 ? "#f2f1ec" : "#c8463c", 16, true);
     if (o.leiter) S.box(0.5, h - 4, 0.15, x + rO + 0.15, h / 2, z2, "#59636b");
   }
-  function heizwerkRoh(S, scene2, p) {
-    const r = rng2(`hw:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["kohle", "gas", "umformer"]);
-    const { x: x0, z: z0, w, d } = p;
+  function heizwerkRoh(S, scene2, p2) {
+    const r = rng2(`hw:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["kohle", "gas", "umformer"]);
+    const { x: x0, z: z0, w, d } = p2;
     boden3(S, x0, z0, x0 + w, z0 + d, "#b3afa5", 0.3, 0.05);
     const ziegel = "#a8664f";
     if (v === "kohle") {
@@ -101803,11 +102410,11 @@
     ftext2(scene2, RZ(ux, uz, uw, ud), "Fernw\xE4rme", uw / 2, H - 1.7, 0.2, 0.6, uw * 0.6, "#ffffff");
     return { hoehe: H + 5 };
   }
-  function heizwerk(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`hw:${p.seed}`), ["kohle", "gas", "umformer"]);
+  function heizwerk(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`hw:${p2.seed}`), ["kohle", "gas", "umformer"]);
     const min = { kohle: [60, 48], gas: [50, 40], umformer: [40, 30] }[v];
-    if (p.w >= min[0] && p.d >= min[1]) return heizwerkRoh(S, scene2, { ...p, variante: v });
-    return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), heizwerkRoh);
+    if (p2.w >= min[0] && p2.d >= min[1]) return heizwerkRoh(S, scene2, { ...p2, variante: v });
+    return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), heizwerkRoh);
   }
   function schulTrakt(S, scene2, F2, T, o) {
     const { n, r } = o, gh = 3.3, y0 = 0.9, L2 = F2.L, H = y0 + n * gh;
@@ -101869,13 +102476,13 @@
     S.box(0.05, 1.1, 1.8, x0 + 2, y + 9.2, z1 - 1.05, "#2f6fa8");
     for (let i = 0; i < 6; i++) S.box(0.06, 0.7, 1.6, x0 + 6 + i * 0.6, y + 0.4, z1 - 1.5, "#59636b");
   }
-  function schuleRoh(S, scene2, p) {
-    const r = rng2(`sc:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["erfurt", "winkel", "kita"]);
-    const { x: x0, z: z0, w, d } = p;
+  function schuleRoh(S, scene2, p2) {
+    const r = rng2(`sc:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["erfurt", "winkel", "kita"]);
+    const { x: x0, z: z0, w, d } = p2;
     boden3(S, x0, z0, x0 + w, z0 + d, RASEN3, 0.3, 0.06);
     const farben = waehle2(r, [["#e07a3f", "#e8b53c", "#3f7d9a", "#7fae5a"], ["#c9483e", "#e9e5da", "#2f6f8f", "#e9e5da"], ["#b9ae98", "#c4b9a3", "#b9ae98", "#c4b9a3"], ["#3f8f7a", "#e8c547", "#e07a3f", "#5a7fae"]]);
-    const name2 = p.name ?? `${1 + Math.floor(r() * 12)}. Oberschule`;
+    const name2 = p2.name ?? `${1 + Math.floor(r() * 12)}. Oberschule`;
     if (v === "kita") {
       const H2 = 7.4, bw = Math.min(w - 16, 40), bx = x0 + 4, bz = z0 + 6;
       for (const [fx, fz, fw, fd] of [[bx, bz, 14, 26], [bx + bw - 14, bz, 14, 26], [bx + 14, bz + 8, bw - 28, 10]]) {
@@ -101923,16 +102530,16 @@
     hofGruen(S, r, x0 + 2, z0 + 2, x0 + 4 + L2, zf - T - 1, { spiel: false, waesche: false, teppich: false, maxBaeume: 6 });
     return { hoehe: H };
   }
-  function schule(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`sc:${p.seed}`), ["erfurt", "winkel", "kita"]);
+  function schule(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`sc:${p2.seed}`), ["erfurt", "winkel", "kita"]);
     const min = { erfurt: [80, 52], winkel: [60, 54], kita: [52, 46] }[v];
-    if (p.w >= min[0] && p.d >= min[1]) return schuleRoh(S, scene2, { ...p, variante: v });
-    return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), schuleRoh);
+    if (p2.w >= min[0] && p2.d >= min[1]) return schuleRoh(S, scene2, { ...p2, variante: v });
+    return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), schuleRoh);
   }
-  function wendebauRoh(S, scene2, p) {
-    const r = rng2(`wb:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["bullauge", "passage", "sparkasse"]);
-    const { x: x0, z: z0, w, d } = p;
+  function wendebauRoh(S, scene2, p2) {
+    const r = rng2(`wb:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["bullauge", "passage", "sparkasse"]);
+    const { x: x0, z: z0, w, d } = p2;
     boden3(S, x0, z0, x0 + w, z0 + d, "#d3cfc6", 0.3, 0.07);
     if (v === "bullauge") {
       const bw2 = Math.min(w - 4, 36), bd2 = Math.min(d - 4, 24), bx2 = x0 + 2, bz2 = z0 + 2, n2 = 6, gh2 = 3.4, y0 = 4.2, H2 = y0 + n2 * gh2;
@@ -101963,7 +102570,7 @@
       S.quader(bx2 + bw2 - rr - 0.01, H2, bz2 + 0.5, bx2 + bw2 - 1, H2 + 0.6, bz2 + bd2 - rr, "#e9e4dc");
       zyl6(S, rr - 1, rr - 1, 0.6, bx2 + bw2 - rr, H2, bz2 + bd2 - rr, "#e9e4dc", 20);
       fb2(S, FZ2, FZ2.L * 0.55, FZ2.L * 0.9, y0 - 0.2, y0 + 0.1, 0, 3, alu);
-      ftext2(scene2, FZ2, p.name ?? "B\xFCrocenter am Ring", FZ2.L * 0.72, y0 - 0.9, 0.25, 0.7, FZ2.L * 0.4, "#1f3a5f");
+      ftext2(scene2, FZ2, p2.name ?? "B\xFCrocenter am Ring", FZ2.L * 0.72, y0 - 0.9, 0.25, 0.7, FZ2.L * 0.4, "#1f3a5f");
       for (let i = 0; i < 3; i++) {
         const fx = x0 + w - 3 - i * 2.4;
         S.box(0.12, 9, 0.12, fx, 4.8, z0 + d - 1, "#d9dcdf");
@@ -102007,7 +102614,7 @@
         S.add(ring, "#e9ecee");
       }
       const FZ2 = RZ(bx2, bz2, bw2, bd2);
-      ftext2(scene2, FZ2, p.name ?? "Markt-Passage", mitte, H2 - 0.6, 0.65, 1, pb * 2.2, "#1f3a5f");
+      ftext2(scene2, FZ2, p2.name ?? "Markt-Passage", mitte, H2 - 0.6, 0.65, 1, pb * 2.2, "#1f3a5f");
       fb2(S, FZ2, mitte - pb / 2, mitte + pb / 2, 0.3, H2 - 1.2, -0.29, -0.2, GLAS_HELL4);
       for (let i = 0; i < 4; i++) {
         const fx = x0 + 4 + i * 2.5;
@@ -102042,11 +102649,11 @@
     parkreihe2(S, r, x0 + 2, x0 + w - 2, z0 + d - 1.4, { modern: 0.9, dichte: 0.5 });
     return { hoehe: H + 5.3 };
   }
-  function wendebau(S, scene2, p) {
-    const v = p.variante ?? waehle2(rng2(`wb:${p.seed}`), ["bullauge", "passage", "sparkasse"]);
+  function wendebau(S, scene2, p2) {
+    const v = p2.variante ?? waehle2(rng2(`wb:${p2.seed}`), ["bullauge", "passage", "sparkasse"]);
     const min = { bullauge: [30, 24], passage: [40, 28], sparkasse: [26, 22] }[v];
-    if (p.w >= min[0] && p.d >= min[1]) return wendebauRoh(S, scene2, { ...p, variante: v });
-    return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), wendebauRoh);
+    if (p2.w >= min[0] && p2.d >= min[1]) return wendebauRoh(S, scene2, { ...p2, variante: v });
+    return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), wendebauRoh);
   }
   function altFassade(S, scene2, F2, c, r, o) {
     const { n, eg, gh, wand: wand2, orn, zustand } = c, L2 = F2.L, H = eg + n * gh;
@@ -102060,7 +102667,7 @@
     ax.forEach((u, i) => {
       for (let k = -1; k < n; k++) {
         const y = k < 0 ? 0.9 : eg + k * gh + 0.9, hh = k < 0 ? eg - 1.5 : 2.1, b2 = k < 0 ? 2 : 1.24;
-        const h = hash2(i, k, o.salz ?? 0) % 100;
+        const h = hash3(i, k, o.salz ?? 0) % 100;
         if (zustand === "leer" && (k < 0 || h < 45)) {
           fb2(S, F2, u - b2 / 2 + 0.05, u + b2 / 2 - 0.05, y, y + hh - 0.05, -0.3, -0.22, "#8a6a4a");
           fb2(S, F2, u - b2 / 2, u + b2 / 2, y + hh * 0.45, y + hh * 0.55, -0.22, -0.16, "#7a5a3e");
@@ -102141,12 +102748,12 @@
       ftext2(scene2, F2, t, L2 / 2, H - 3, 0.1, 1.2, L2 * 0.66, "#d8cfba");
     }
   }
-  function altbauRoh(S, scene2, p) {
-    const r = rng2(`ab:${p.seed}`);
-    const zustand = p.zustand ?? waehle2(r, ["unsaniert", "unsaniert", "leer", "saniert"]);
-    const eck = p.variante === "eck";
-    const { x: x0, z: z0, w, d } = p;
-    const n = p.geschosse ?? 4 + (r() < 0.3 ? 1 : r() < 0.25 ? -1 : 0), eg = 4.2, gh = zw(r, 3.3, 3.55), H = eg + n * gh, T = Math.min(d, 15);
+  function altbauRoh(S, scene2, p2) {
+    const r = rng2(`ab:${p2.seed}`);
+    const zustand = p2.zustand ?? waehle2(r, ["unsaniert", "unsaniert", "leer", "saniert"]);
+    const eck = p2.variante === "eck";
+    const { x: x0, z: z0, w, d } = p2;
+    const n = p2.geschosse ?? 4 + (r() < 0.3 ? 1 : r() < 0.25 ? -1 : 0), eg = 4.2, gh = zw(r, 3.3, 3.55), H = eg + n * gh, T = Math.min(d, 15);
     const wand2 = zustand === "saniert" ? waehle2(r, ["#e9c46a", "#e6b8a2", "#c9d6b5", "#b9cbd8", "#f1e2c0", "#d9a68e", "#efd8c0"]) : zustand === "leer" ? waehle2(r, ["#8f8a81", "#99938a"]) : waehle2(r, ["#a39e94", "#9d978c", "#aaa498", "#a49d8e"]);
     const c = { n, eg, gh, wand: wand2, orn: zustand === "saniert" ? "#fbf7ee" : heller(wand2, 0.05), sockel: zustand === "saniert" ? dunkler(wand2, 0.15) : dunkler(wand2, 0.1), zustand, ra: 3.1, bogen: r() < 0.5 };
     const zb = z0 + d - T;
@@ -102192,27 +102799,27 @@
     if (d > T + 3) hofGruen(S, r, x0, z0, x0 + w, zb, { spiel: false, teppich: zustand !== "saniert", maxBaeume: 3, rasen: zustand === "saniert" ? RASEN3 : "#a8b98a" });
     return { hoehe: H + dh + 2 };
   }
-  function altbau2(S, scene2, p) {
-    if (p.w > 34 && p.d >= 12) {
-      const r = rng2(`abz:${p.seed}`), teile = [];
-      let rest = p.w;
+  function altbau2(S, scene2, p2) {
+    if (p2.w > 34 && p2.d >= 12) {
+      const r = rng2(`abz:${p2.seed}`), teile = [];
+      let rest = p2.w;
       while (rest > 34) {
         const b2 = Math.round(zw(r, 15, 22));
         teile.push(b2);
         rest -= b2;
       }
       teile.push(rest);
-      let x = p.x, H = 0;
+      let x = p2.x, H = 0;
       teile.forEach((b2, i) => {
         const letzt = i === teile.length - 1;
-        const zst = p.zustand && r() < 0.6 ? p.zustand : waehle2(r, ["unsaniert", "unsaniert", "leer", "saniert"]);
-        H = Math.max(H, altbauRoh(S, scene2, { ...p, x, w: b2, seed: p.seed * 31 + i, zustand: zst, variante: letzt ? p.variante : "zeile" }).hoehe);
+        const zst = p2.zustand && r() < 0.6 ? p2.zustand : waehle2(r, ["unsaniert", "unsaniert", "leer", "saniert"]);
+        H = Math.max(H, altbauRoh(S, scene2, { ...p2, x, w: b2, seed: p2.seed * 31 + i, zustand: zst, variante: letzt ? p2.variante : "zeile" }).hoehe);
         x += b2;
       });
       return { hoehe: H };
     }
-    if (p.w >= 14 && p.d >= 12) return altbauRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(14, p.w), Math.max(12, p.d), altbauRoh);
+    if (p2.w >= 14 && p2.d >= 12) return altbauRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(14, p2.w), Math.max(12, p2.d), altbauRoh);
   }
   function plakatwand(S, scene2, x, z2, b2, h, text3, farbe2, ry = 0) {
     const F2 = R5(x, z2, Math.cos(ry), -Math.sin(ry), b2);
@@ -102222,12 +102829,12 @@
     const sc = scene2;
     ftext2(sc, F2, text3, b2 / 2, 2.2 + h / 2, 0.06, h * 0.32, b2 * 0.86, "#ffffff");
   }
-  function bracheRoh(S, scene2, p) {
-    const r = rng2(`br:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ["wiese", "parkplatz", "kiosk", "bauzaun"]);
-    const { x: x0, z: z0, w, d } = p;
-    const Hn = p.nachbarHoehe ?? zw(r, 17, 21);
-    const links = p.brandwand ?? true, hinten = p.brandwandHinten ?? false;
+  function bracheRoh(S, scene2, p2) {
+    const r = rng2(`br:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ["wiese", "parkplatz", "kiosk", "bauzaun"]);
+    const { x: x0, z: z0, w, d } = p2;
+    const Hn = p2.nachbarHoehe ?? zw(r, 17, 21);
+    const links = p2.brandwand ?? true, hinten = p2.brandwandHinten ?? false;
     if (links) {
       brandwand2(S, scene2, R5(x0 + 0.4, z0 + d, 0, -1, d), Hn, r, { wand: waehle2(r, ["#9b958b", "#a39c90", "#8f8a81"]), reklame: r() < 0.6 });
       S.quader(x0, 0, z0, x0 + 0.4, Hn + 0.3, z0 + d, "#8f8a81");
@@ -102297,9 +102904,9 @@
     }
     return { hoehe: Hn };
   }
-  function brache(S, scene2, p) {
-    if (p.w >= 16 && p.d >= 14) return bracheRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(16, p.w), Math.max(14, p.d), bracheRoh);
+  function brache(S, scene2, p2) {
+    if (p2.w >= 16 && p2.d >= 14) return bracheRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(16, p2.w), Math.max(14, p2.d), bracheRoh);
   }
   var MESSE_NAMEN = ["Messehof", "Handelshof", "Musterhaus", "St\xE4dtisches Kaufhaus", "Messepalast", "Specks Hof", "Zentralmessehaus", "Passage am Markt", "Ringmessehaus", "Hansahaus"];
   var MESSE_FIRMEN = ["Musterlager", "Spielwaren", "Porzellan", "Glas \xB7 Keramik", "Uhren", "Optik", "Lederwaren", "Messeamt", "B\xFCrobedarf", "Pelze"];
@@ -102338,16 +102945,16 @@
       fb2(S, F2, u0, u1, 0.3, 0.42, -6, 0.4, "#e3dccb");
       ftext2(scene2, F2, c.name.toUpperCase(), (u0 + u1) / 2, hp + 0.7, 0.4, 0.55, u1 - u0 + 4, "#7a5a2e");
     }
-    for (let i = 1; i < na; i += 2) if (i !== pmitte && i + 1 !== pmitte) ftext2(scene2, F2, MESSE_FIRMEN[hash2(i, o.salz ?? 0) % MESSE_FIRMEN.length], (i + 0.5) * rb, eg - 0.25, 0.62, 0.36, rb * 0.9, "#f2e7c9", "#3a3f44");
+    for (let i = 1; i < na; i += 2) if (i !== pmitte && i + 1 !== pmitte) ftext2(scene2, F2, MESSE_FIRMEN[hash3(i, o.salz ?? 0) % MESSE_FIRMEN.length], (i + 0.5) * rb, eg - 0.25, 0.62, 0.36, rb * 0.9, "#f2e7c9", "#3a3f44");
     fb2(S, F2, -0.6, L2 + 0.6, H - 0.3, H + 0.5, -0.6, 1, orn);
     return H;
   }
-  function messehausRoh(S, scene2, p) {
-    const r = rng2(`mh:${p.seed}`);
-    const { x: x0, z: z0, w, d } = p;
+  function messehausRoh(S, scene2, p2) {
+    const r = rng2(`mh:${p2.seed}`);
+    const { x: x0, z: z0, w, d } = p2;
     const stein = waehle2(r, ["#d9cdb4", "#cfc2a6", "#e2d6bf", "#d6c3a3", "#c9bba0"]);
     const c = {
-      n: p.geschosse ?? 5 + Math.floor(r() * 2.6),
+      n: p2.geschosse ?? 5 + Math.floor(r() * 2.6),
       gh: 3.7,
       eg: 6.4,
       stein,
@@ -102355,14 +102962,14 @@
       bruest: dunkler(stein, 0.06),
       pfeiler: zw(r, 0.45, 0.8),
       ra: zw(r, 4.4, 5.6),
-      name: p.name ?? waehle2(r, MESSE_NAMEN)
+      name: p2.name ?? waehle2(r, MESSE_NAMEN)
     };
     const H = c.eg + c.n * c.gh, T = Math.min(d, 22);
     const zb = z0 + d - T;
     S.quader(x0, 0, zb, x0 + w - 0.6, H, z0 + d - 0.6, GLAS7);
     const FZ = RZ(x0, z0, w, d), FX = R5(x0 + w, z0 + d, 0, -1, T);
     messeFassade(S, scene2, FZ, c, r, { passage: w >= 18, salz: 1 });
-    const eck = p.ecke ? p.ecke.includes("+x") : p.variante === "eck";
+    const eck = p2.ecke ? p2.ecke.includes("+x") : p2.variante === "eck";
     if (eck) messeFassade(S, scene2, FX, c, r, { passage: false, salz: 2 });
     else {
       fb2(S, FX, 0, T, 0, H, -0.6, -0.1, dunkler(stein, 0.04));
@@ -102399,9 +103006,9 @@
     if (d > T + 3) boden3(S, x0, z0, x0 + w, zb, "#d6cfc0", 0.3, 0.07);
     return { hoehe: top };
   }
-  function messehaus(S, scene2, p) {
-    if (p.w >= 16 && p.d >= 16) return messehausRoh(S, scene2, p);
-    return skaliert(S, scene2, p, Math.max(16, p.w), Math.max(16, p.d), messehausRoh);
+  function messehaus(S, scene2, p2) {
+    if (p2.w >= 16 && p2.d >= 16) return messehausRoh(S, scene2, p2);
+    return skaliert(S, scene2, p2, Math.max(16, p2.w), Math.max(16, p2.d), messehausRoh);
   }
   function platzRest(S, r, P2, o = {}) {
     if (P2.w < 3 || P2.d < 3) return;
@@ -102432,17 +103039,17 @@
     if (A > 200) laterne3(S, P2.x + 1.2, P2.z + P2.d - 1.2, 6, 0.38, "kugel");
   }
   function eingefasst(bau2, natVon) {
-    return (S, scene2, p) => {
-      const [nw, nd] = natVon(p);
-      if (p.w <= nw * 1.25 && p.d <= nd * 1.25) return bau2(S, scene2, p);
-      const w = Math.min(p.w, nw), d = Math.min(p.d, nd);
-      const r = rng2(`ef:${p.seed}`);
-      const x = p.x + Math.round((p.w - w) * 0.5), z2 = p.z + Math.min(p.d - d, Math.max(0, (p.d - d) * 0.35));
-      const erg = bau2(S, scene2, { ...p, x, z: z2, w, d });
-      if (z2 + d < p.z + p.d - 1) platzRest(S, r, { x: p.x, z: z2 + d, w: p.w, d: p.z + p.d - z2 - d });
-      if (z2 > p.z + 1) platzRest(S, r, { x: p.x, z: p.z, w: p.w, d: z2 - p.z }, { belag: "#d3cdbf" });
-      if (x > p.x + 1) platzRest(S, r, { x: p.x, z: z2, w: x - p.x, d }, { belag: "#d3cdbf" });
-      if (x + w < p.x + p.w - 1) platzRest(S, r, { x: x + w, z: z2, w: p.x + p.w - x - w, d });
+    return (S, scene2, p2) => {
+      const [nw, nd] = natVon(p2);
+      if (p2.w <= nw * 1.25 && p2.d <= nd * 1.25) return bau2(S, scene2, p2);
+      const w = Math.min(p2.w, nw), d = Math.min(p2.d, nd);
+      const r = rng2(`ef:${p2.seed}`);
+      const x = p2.x + Math.round((p2.w - w) * 0.5), z2 = p2.z + Math.min(p2.d - d, Math.max(0, (p2.d - d) * 0.35));
+      const erg = bau2(S, scene2, { ...p2, x, z: z2, w, d });
+      if (z2 + d < p2.z + p2.d - 1) platzRest(S, r, { x: p2.x, z: z2 + d, w: p2.w, d: p2.z + p2.d - z2 - d });
+      if (z2 > p2.z + 1) platzRest(S, r, { x: p2.x, z: p2.z, w: p2.w, d: z2 - p2.z }, { belag: "#d3cdbf" });
+      if (x > p2.x + 1) platzRest(S, r, { x: p2.x, z: z2, w: x - p2.x, d }, { belag: "#d3cdbf" });
+      if (x + w < p2.x + p2.w - 1) platzRest(S, r, { x: x + w, z: z2, w: p2.x + p2.w - x - w, d });
       return erg;
     };
   }
@@ -102450,11 +103057,11 @@
   var NAT_WENDEBAU = { bullauge: [40, 30], passage: [58, 36], sparkasse: [36, 28] };
   var NAT_DOMINANTE = { fernsehturm: [48, 48], kanzel: [36, 34], uni: [62, 46], rund: [56, 46], interhotel: [72, 46] };
   var NAT_KULTUR = { palast: [88, 64], stadthalle: [74, 58], kulturhaus50: [78, 52] };
-  var varVon = (praefix, liste) => (p) => p.variante ?? waehle2(rng2(`${praefix}:${p.seed}`), liste);
-  var pavillonE = eingefasst(pavillon, (p) => NAT_PAVILLON[varVon("pv", ["hp", "faltdach", "eisbar", "brunnen"])(p)] ?? [34, 30]);
-  var wendebauE = eingefasst(wendebau, (p) => NAT_WENDEBAU[varVon("wb", ["bullauge", "passage", "sparkasse"])(p)] ?? [40, 30]);
-  var dominanteE = eingefasst(dominante, (p) => NAT_DOMINANTE[varVon("dm", ["fernsehturm", "kanzel", "uni", "interhotel"])(p)] ?? [56, 46]);
-  var kulturhausE = eingefasst(kulturhaus, (p) => NAT_KULTUR[varVon("kh", ["palast", "stadthalle", "kulturhaus50"])(p)] ?? [80, 56]);
+  var varVon = (praefix, liste) => (p2) => p2.variante ?? waehle2(rng2(`${praefix}:${p2.seed}`), liste);
+  var pavillonE = eingefasst(pavillon, (p2) => NAT_PAVILLON[varVon("pv", ["hp", "faltdach", "eisbar", "brunnen"])(p2)] ?? [34, 30]);
+  var wendebauE = eingefasst(wendebau, (p2) => NAT_WENDEBAU[varVon("wb", ["bullauge", "passage", "sparkasse"])(p2)] ?? [40, 30]);
+  var dominanteE = eingefasst(dominante, (p2) => NAT_DOMINANTE[varVon("dm", ["fernsehturm", "kanzel", "uni", "interhotel"])(p2)] ?? [56, 46]);
+  var kulturhausE = eingefasst(kulturhaus, (p2) => NAT_KULTUR[varVon("kh", ["palast", "stadthalle", "kulturhaus50"])(p2)] ?? [80, 56]);
   var OST_SLOTS = {
     "slot:magistrale": magistrale,
     "slot:platte_wohn": platteWohn,
@@ -102747,43 +103354,43 @@
         const g = hoch ? prager ? 12 : E.typ === "metropole" ? 14 : 10 : 5;
         if (!mergeRand2(ctx, "slot:platte_zentrum", ctx.ostEinkauf ? [24, 80] : [40, 80], 26, ["+z", "+x", "-z", "-x"], { variante: "arkade", geschosse: g, zustand: rb() < 0.65 ? "saniert" : "unsaniert", landmarke: false })) break;
       }
-      for (const p of meine()) if (p.typ === "eck" && p.ecke === "+x+z" && p.w >= 20 && p.d >= 18 && rb() < (ctx.ostEinkauf ? 0.8 : 0.5)) Object.assign(p, { typ: "slot:pavillon", sonder: "pavillon", stil: null, variante: "faltdach", geschosse: 1, landmarke: false });
+      for (const p2 of meine()) if (p2.typ === "eck" && p2.ecke === "+x+z" && p2.w >= 20 && p2.d >= 18 && rb() < (ctx.ostEinkauf ? 0.8 : 0.5)) Object.assign(p2, { typ: "slot:pavillon", sonder: "pavillon", stil: null, variante: "faltdach", geschosse: 1, landmarke: false });
       if (rb() < (ctx.ostEinkauf ? 0.5 : 0.22)) mergeRand2(ctx, "slot:wendebau", [26, 44], 24, ["+z", "+x"], { landmarke: false });
-      for (const p of meine()) {
-        if (p.typ !== "stadthaus" && p.typ !== "eck") continue;
-        const L2 = p.seite === "+z" || p.seite === "-z" ? p.w : p.d;
-        if (p.typ === "stadthaus" && L2 >= 12 && L2 <= 24 && rb() < (ctx.ostEinkauf ? 0.6 : 0.3)) Object.assign(p, { typ: "slot:platte_zentrum", sonder: "platte_zentrum", stil: null, variante: "luecke", geschosse: rb() < 0.5 ? 5 : 6, zustand: rb() < 0.6 ? "saniert" : "unsaniert", landmarke: false });
-        else p.viertel = "ostzentrum";
+      for (const p2 of meine()) {
+        if (p2.typ !== "stadthaus" && p2.typ !== "eck") continue;
+        const L2 = p2.seite === "+z" || p2.seite === "-z" ? p2.w : p2.d;
+        if (p2.typ === "stadthaus" && L2 >= 12 && L2 <= 24 && rb() < (ctx.ostEinkauf ? 0.6 : 0.3)) Object.assign(p2, { typ: "slot:platte_zentrum", sonder: "platte_zentrum", stil: null, variante: "luecke", geschosse: rb() < 0.5 ? 5 : 6, zustand: rb() < 0.6 ? "saniert" : "unsaniert", landmarke: false });
+        else p2.viertel = "ostzentrum";
       }
       return;
     }
     if (art === "messe") {
       let n = 0;
       for (let k = 0; k < 5; k++) if (mergeRand2(ctx, "slot:messehaus", [18, 64], 22, ["+z", "+x", "-z", "-x"], { geschosse: 5 + Math.floor(rb() * 2.6), landmarke: false })) n++;
-      for (const p of meine()) if (p.typ === "eck" && p.w >= 16 && p.d >= 16 && rb() < 0.6) Object.assign(p, { typ: "slot:messehaus", sonder: "messehaus", stil: null, variante: "eck", geschosse: 6, landmarke: false });
+      for (const p2 of meine()) if (p2.typ === "eck" && p2.w >= 16 && p2.d >= 16 && rb() < 0.6) Object.assign(p2, { typ: "slot:messehaus", sonder: "messehaus", stil: null, variante: "eck", geschosse: 6, landmarke: false });
       if (n && b2.hof) b2.hof.art = "pflaster";
-      for (const p of meine()) if (p.typ === "stadthaus" || p.typ === "eck") p.viertel = "messe";
+      for (const p2 of meine()) if (p2.typ === "stadthaus" || p2.typ === "eck") p2.viertel = "messe";
       if (!ctx.ostEinkauf) unsaniert(ctx, E, b2, "messe");
       return;
     }
     unsaniert(ctx, E, b2, art, ctx.ostEinkauf ? 1.6 : 1);
     if (ctx.ostEinkauf) {
-      const l = meine().filter((p) => p.typ === "stadthaus" && (p.seite === "+z" || p.seite === "+x") && (p.seite === "+z" ? p.w : p.d) >= 12);
+      const l = meine().filter((p2) => p2.typ === "stadthaus" && (p2.seite === "+z" || p2.seite === "+x") && (p2.seite === "+z" ? p2.w : p2.d) >= 12);
       for (let k = 0; k < Math.min(2, l.length); k++) {
-        const p = l.splice(Math.floor(rb() * l.length), 1)[0];
-        Object.assign(p, { typ: "slot:platte_zentrum", sonder: "platte_zentrum", stil: null, variante: "luecke", geschosse: p.geschosse && p.geschosse > 3 ? Math.min(6, p.geschosse + 1) : 5, zustand: rb() < 0.5 ? "saniert" : "unsaniert", landmarke: false });
+        const p2 = l.splice(Math.floor(rb() * l.length), 1)[0];
+        Object.assign(p2, { typ: "slot:platte_zentrum", sonder: "platte_zentrum", stil: null, variante: "luecke", geschosse: p2.geschosse && p2.geschosse > 3 ? Math.min(6, p2.geschosse + 1) : 5, zustand: rb() < 0.5 ? "saniert" : "unsaniert", landmarke: false });
       }
       if (rb() < 0.3) mergeRand2(ctx, "slot:wendebau", [26, 40], 24, ["+z", "+x"], { landmarke: false });
       return;
     }
     if (art === "gruenderzeit" && rb() < 0.14) mergeRand2(ctx, "slot:wendebau", [26, 40], 24, ["+z", "+x"], { landmarke: false });
     if ((art === "gruenderzeit" || art === "altstadt") && rb() < 0.12 && PLAN_HILFE.bracheErlaubt(E)) {
-      const l = meine().filter((p) => p.typ === "stadthaus" && (p.seite === "+z" || p.seite === "+x"));
+      const l = meine().filter((p2) => p2.typ === "stadthaus" && (p2.seite === "+z" || p2.seite === "+x"));
       if (l.length) {
-        const p = l[Math.floor(rb() * l.length)];
+        const p2 = l[Math.floor(rb() * l.length)];
         const alle = meine();
-        const links = alle.some((q2) => q2 !== p && q2.seite === p.seite && (p.seite === "+z" ? Math.abs(q2.x + q2.w - p.x) < 0.2 : Math.abs(q2.z + q2.d - p.z) < 0.2) && (q2.typ === "stadthaus" || q2.typ === "eck" || q2.typ.startsWith("slot:altbau")));
-        Object.assign(p, { typ: "slot:brache", sonder: "brache", stil: null, variante: waehle2(rb, ["wiese", "kiosk", "bauzaun"]), landmarke: false, brandwand: links, brandwandHinten: false });
+        const links = alle.some((q2) => q2 !== p2 && q2.seite === p2.seite && (p2.seite === "+z" ? Math.abs(q2.x + q2.w - p2.x) < 0.2 : Math.abs(q2.z + q2.d - p2.z) < 0.2) && (q2.typ === "stadthaus" || q2.typ === "eck" || q2.typ.startsWith("slot:altbau")));
+        Object.assign(p2, { typ: "slot:brache", sonder: "brache", stil: null, variante: waehle2(rb, ["wiese", "kiosk", "bauzaun"]), landmarke: false, brandwand: links, brandwandHinten: false });
         PLAN_HILFE.bracheZaehlen(E);
       }
     }
@@ -102791,9 +103398,9 @@
   function unsaniert(ctx, E, b2, art, faktor = 1) {
     const { rb } = ctx;
     const q2 = (E.unsaniert?.[art] ?? 0) * (rb() < 0.5 ? 0.3 : 1.7) * faktor;
-    for (const p of parzellenVon(ctx)) if ((p.typ === "stadthaus" || p.typ === "eck") && rb() < q2) {
-      const variante2 = p.typ === "eck" ? "eck" : "reihe";
-      Object.assign(p, { typ: "slot:altbau_unsaniert", sonder: "altbau_unsaniert", zustand: "unsaniert", variante: variante2, stilAlt: p.stil, stil: null, landmarke: false });
+    for (const p2 of parzellenVon(ctx)) if ((p2.typ === "stadthaus" || p2.typ === "eck") && rb() < q2) {
+      const variante2 = p2.typ === "eck" ? "eck" : "reihe";
+      Object.assign(p2, { typ: "slot:altbau_unsaniert", sonder: "altbau_unsaniert", zustand: "unsaniert", variante: variante2, stilAlt: p2.stil, stil: null, landmarke: false });
     }
   }
   function ostMagistrale(ctx, E, b2, seiten4) {
@@ -102892,9 +103499,9 @@
     const zustand = () => rb() < (E.saniert ?? 0.55) ? "saniert" : "unsaniert";
     const belegt2 = [];
     const setze = (typ, x, z2, w, d, front2, ex) => {
-      const p = neueParzelle2(ctx, typ, x, z2, w, d, Array.isArray(front2) ? front2 : [front2], "frei", { klasse: 4, landmarke: false, ...ex });
-      belegt2.push(p);
-      return p;
+      const p2 = neueParzelle2(ctx, typ, x, z2, w, d, Array.isArray(front2) ? front2 : [front2], "frei", { klasse: 4, landmarke: false, ...ex });
+      belegt2.push(p2);
+      return p2;
     };
     const gewichte = [["wbs70_6", 3], ["p2", 1.4], ["q3a", klein ? 1.6 : 0.6], ["wbs70_11", metro ? 2 : klein ? 0.2 : 0.9], ["scheibe", metro ? 1 : 0.25]];
     const geschosse2 = (v) => /11|scheibe/.test(v) ? 11 : v === "q3a" ? 5 : 6;
@@ -103066,7 +103673,7 @@
     const dist2 = (b3) => Math.hypot((b3.i0 + b3.i1) / 2 - E.zentrum.i, (b3.j0 + b3.j1) / 2 - E.zentrum.j);
     const pl2 = bloecke.filter((b3) => b3.art === "platte").sort((a, c) => dist2(c) - dist2(a));
     for (const b3 of pl2.slice(0, 6)) {
-      const rects = b3.parzellen.map((id) => parzellen.find((p2) => p2.id === id)).filter(Boolean);
+      const rects = b3.parzellen.map((id) => parzellen.find((p3) => p3.id === id)).filter(Boolean);
       const rb = rng2(b3.seed + 4242);
       const q2 = freiePosition2({ x: b3.x + 3, z: b3.z + 3, w: b3.w - 6, d: b3.d - 6 }, rects, 50, 40, 2, rb, false);
       if (!q2) continue;
@@ -103077,21 +103684,21 @@
     }
     const b2 = pl2[0];
     if (!b2) return;
-    const p = b2.parzellen.map((id) => parzellen.find((q2) => q2.id === id)).find((q2) => q2 && q2.typ === "slot:platte_wohn");
-    if (p) Object.assign(p, { typ: "slot:heizwerk", sonder: "heizwerk", variante: p.w >= 60 && p.d >= 48 ? "kohle" : p.w >= 50 && p.d >= 40 ? "gas" : "umformer", zustand: void 0, front: ["+z", "+x"] });
+    const p2 = b2.parzellen.map((id) => parzellen.find((q2) => q2.id === id)).find((q2) => q2 && q2.typ === "slot:platte_wohn");
+    if (p2) Object.assign(p2, { typ: "slot:heizwerk", sonder: "heizwerk", variante: p2.w >= 60 && p2.d >= 48 ? "kohle" : p2.w >= 50 && p2.d >= 40 ? "gas" : "umformer", zustand: void 0, front: ["+z", "+x"] });
   }
   function bracheParzelle(ctx, E, b2) {
     if (b2.w > 90 || b2.d > 70) {
       ostPlatte(ctx, E, b2);
       const W3 = Math.min(64, b2.w * 0.45), D = Math.min(46, b2.d * 0.5), R9 = { x: b2.x + b2.w - W3, z: b2.z + b2.d - D, w: W3, d: D };
-      const ueber = (p) => p.x < R9.x + R9.w && p.x + p.w > R9.x && p.z < R9.z + R9.d && p.z + p.d > R9.z;
+      const ueber = (p2) => p2.x < R9.x + R9.w && p2.x + p2.w > R9.x && p2.z < R9.z + R9.d && p2.z + p2.d > R9.z;
       const weg = new Set(b2.parzellen.filter((id) => {
-        const p = ctx.parzellen.find((q2) => q2.id === id);
-        return p && ueber(p);
+        const p2 = ctx.parzellen.find((q2) => q2.id === id);
+        return p2 && ueber(p2);
       }));
       for (let k = ctx.parzellen.length - 1; k >= 0; k--) if (weg.has(ctx.parzellen[k].id)) ctx.parzellen.splice(k, 1);
       b2.parzellen = b2.parzellen.filter((id) => !weg.has(id));
-      for (const L2 of ["wege", "parkplaetze", "spiel"]) if (b2[L2]) b2[L2] = b2[L2].filter((p) => !ueber(p));
+      for (const L2 of ["wege", "parkplaetze", "spiel"]) if (b2[L2]) b2[L2] = b2[L2].filter((p2) => !ueber(p2));
       neueParzelle2(ctx, "slot:brache", R9.x + 2, R9.z + 2, R9.w - 4, R9.d - 4, ["+z", "+x"], "block", { klasse: 1, variante: waehle2(ctx.rb, ["wiese", "parkplatz", "bauzaun", "kiosk"]), brandwand: false, brandwandHinten: false });
       return;
     }
@@ -103102,7 +103709,7 @@
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
     const hinder = [...teile, ...b2.parkplaetze ?? [], ...b2.spiel ?? []];
-    const frei6 = (x, z2, rad2, auch = []) => ![...hinder, ...auch].some((p) => B2.imRechteck(x, z2, p, rad2)) && x > b2.x + 1 && x < b2.x + b2.w - 1 && z2 > b2.z + 1 && z2 < b2.z + b2.d - 1;
+    const frei6 = (x, z2, rad2, auch = []) => ![...hinder, ...auch].some((p2) => B2.imRechteck(x, z2, p2, rad2)) && x > b2.x + 1 && x < b2.x + b2.w - 1 && z2 > b2.z + 1 && z2 < b2.z + b2.d - 1;
     for (const P2 of b2.wege ?? []) S.quader(P2.x, y, P2.z, P2.x + P2.w, y + 0.05, P2.z + P2.d, "#ddd5c3");
     for (const P2 of b2.parkplaetze ?? []) {
       if (P2.w < 6 || P2.d < 6) continue;
@@ -103144,7 +103751,7 @@
     const { S, I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, "#dcd6ca", 6);
-    const frei6 = (x, z2, rad2) => !teile.some((p) => B2.imRechteck(x, z2, p, rad2));
+    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     for (const [x0, z0, x1, z1, entlangX] of [[P2.x + 1, P2.z + P2.d - 6, P2.x + P2.w - 1, P2.z + P2.d - 1.5, true], [P2.x + P2.w - 6, P2.z + 1, P2.x + P2.w - 1.5, P2.z + P2.d - 1, false]]) {
       S.quader(x0, y, z0, x1, y + 0.05, z1, B2.F.rasen);
       if (entlangX) {
@@ -103229,22 +103836,22 @@
     bauhaus: [3, 5],
     wiederaufbau: [3, 4]
   };
-  function ostStil(p, nachbar) {
-    const r = rng2((p.seed ?? 1) * 2654435761 + 977 >>> 0);
-    const v = OST_STILE[p.viertel] ? p.viertel : "gruenderzeit";
+  function ostStil(p2, nachbar) {
+    const r = rng2((p2.seed ?? 1) * 2654435761 + 977 >>> 0);
+    const v = OST_STILE[p2.viertel] ? p2.viertel : "gruenderzeit";
     const basis2 = { ...OST_STILE[v] };
-    if (p.region === "nord" && v !== "ostzentrum") {
+    if (p2.region === "nord" && v !== "ostzentrum") {
       basis2.backstein = v === "zentrum" ? 1.2 : 2.6;
       basis2.barock = (basis2.barock ?? 0) * 0.3;
     }
-    if (p.ostFachwerk && v === "altstadt") basis2.fachwerk = 2.4;
-    if (p.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis2.barock = 2.5;
+    if (p2.ostFachwerk && v === "altstadt") basis2.fachwerk = 2.4;
+    if (p2.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis2.barock = 2.5;
     const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.25;
-      if (st === "fachwerk" && p.w > 18) w *= 0.3;
-      if (st === "ddr_platte" && p.w < 14 && v !== "ostzentrum") w *= 0.3;
-      if (st === "barock" && p.w > 22) w *= 0.4;
+      if (st === "fachwerk" && p2.w > 18) w *= 0.3;
+      if (st === "ddr_platte" && p2.w < 14 && v !== "ostzentrum") w *= 0.3;
+      if (st === "barock" && p2.w > 22) w *= 0.4;
       return [st, w];
     });
     const stil = wahlGewichtet2(r, liste);
@@ -103253,28 +103860,28 @@
       a += 1;
       b2 += 2;
     }
-    if (p.cluster === "metropole") {
+    if (p2.cluster === "metropole") {
       a += 1;
       b2 += 1;
-    } else if (p.cluster === "mittelstadt") b2 -= 1;
+    } else if (p2.cluster === "mittelstadt") b2 -= 1;
     let g = Math.round(a + (b2 - a) * r());
     if (nachbar?.geschosse && r() < 0.35) g = nachbar.geschosse + waehle2(r, [-1, 1]);
     const geschosse2 = Math.max(2, Math.min(7, Math.max(a - 1, Math.min(b2, g))));
-    const region = p.region === "nord" ? stil === "backstein" ? "Nord" : "Ost" : "Ost";
+    const region = p2.region === "nord" ? stil === "backstein" ? "Nord" : "Ost" : "Ost";
     return { stil, geschosse: geschosse2, region };
   }
-  registriereStilProfil("ost", (p, nachbar) => ostStil(p, nachbar));
-  registriereStilProfil("west_berlin", (p, nachbar, B2) => ({ bau: (S, scene2, q2) => B2.zufallsStadthaus(S, scene2, { ...q2, region: "West" }) }));
-  function parzelleMarkieren(p, bl, E) {
+  registriereStilProfil("ost", (p2, nachbar) => ostStil(p2, nachbar));
+  registriereStilProfil("west_berlin", (p2, nachbar, B2) => ({ bau: (S, scene2, q2) => B2.zufallsStadthaus(S, scene2, { ...q2, region: "West" }) }));
+  function parzelleMarkieren(p2, bl, E) {
     if (E.westTeil && bl && E.westTeil(bl.i0, bl.j0)) {
-      p.westBerlin = true;
-      p.stilProfil = "west_berlin";
+      p2.westBerlin = true;
+      p2.stilProfil = "west_berlin";
       return;
     }
-    p.ddr = true;
-    p.ostTyp = E.ost ?? null;
-    p.stilProfil = "ost";
-    if (E.ostFachwerk) p.ostFachwerk = true;
+    p2.ddr = true;
+    p2.ostTyp = E.ost ?? null;
+    p2.stilProfil = "ost";
+    if (E.ostFachwerk) p2.ostFachwerk = true;
   }
   registriereSlots(OST_SLOTS);
   var GEMEINSAM = {
@@ -103448,7 +104055,7 @@
   function boden4(S, x0, z0, x1, z1, c, y = 0.3, h = 0.06) {
     if (x1 > x0 + 0.01 && z1 > z0 + 0.01) S.quader(x0, y, z0, x1, y + h, z1, c);
   }
-  function hash3(a, b2, c = 0) {
+  function hash4(a, b2, c = 0) {
     let h = a * 374761393 + b2 * 668265263 + c * 1274126177 >>> 0;
     h = Math.imul(h ^ h >>> 13, 1274126177) >>> 0;
     return (h ^ h >>> 16) >>> 0;
@@ -103530,7 +104137,7 @@
   function wandStreifen(umr, oeff) {
     const ausd = (l, ach) => l.kreis ? [l.kreis[ach] - l.kreis[2], l.kreis[ach] + l.kreis[2]] : ach === 0 ? [l.u0, l.u1] : [l.v0, l.v1];
     const schnitte = (liste, a, b2, ach) => {
-      const iv = liste.map((l) => ausd(l, ach)).sort((p, q2) => p[0] - q2[0]);
+      const iv = liste.map((l) => ausd(l, ach)).sort((p2, q2) => p2[0] - q2[0]);
       const cut = [];
       let ende = -Infinity;
       for (const [c, d] of iv) {
@@ -103573,7 +104180,7 @@
     };
     for (let k = 0; k + 1 < vs2.length; k++) {
       const a = vs2[k], b2 = vs2[k + 1], m = (a + b2) / 2;
-      const weg = oeff.filter((l) => l.v0 <= m && l.v1 >= m).map((l) => [Math.max(U0, l.u0), Math.min(U1, l.u1)]).sort((p, q2) => p[0] - q2[0]);
+      const weg = oeff.filter((l) => l.v0 <= m && l.v1 >= m).map((l) => [Math.max(U0, l.u0), Math.min(U1, l.u1)]).sort((p2, q2) => p2[0] - q2[0]);
       let u = U0;
       for (const [c, d] of weg) {
         if (c > u) box(u, a, c, b2);
@@ -103711,13 +104318,13 @@
   }
   var RAND_TOLERANZ = 0.5;
   var FRONT_TOLERANZ = 2;
-  function gedreht2(S, scene2, p, bau2, min = [0, 0]) {
-    const front2 = WINKEL[p.front] !== void 0 ? p.front : "+z";
+  function gedreht2(S, scene2, p2, bau2, min = [0, 0]) {
+    const front2 = WINKEL[p2.front] !== void 0 ? p2.front : "+z";
     const a = WINKEL[front2], quer2 = front2[1] === "x";
-    const W3 = quer2 ? p.d : p.w, D = quer2 ? p.w : p.d;
+    const W3 = quer2 ? p2.d : p2.w, D = quer2 ? p2.w : p2.d;
     const c = Math.round(Math.cos(a)), s2 = Math.round(Math.sin(a));
     const sieht3 = (nx, nz) => nx * c + nz * s2 + (-nx * s2 + nz * c) > 0.05;
-    const q2 = { ...p, x: 0, z: 0, front: front2, sieht: sieht3 };
+    const q2 = { ...p2, x: 0, z: 0, front: front2, sieht: sieht3 };
     let l = 0, rr = 0, h = 0, v = 0, bau1;
     for (let i = 0; i < 3; i++) {
       bau1 = lokalBauen(bau2, q2, W3 - l - rr, D - h - v, l, h, min);
@@ -103731,7 +104338,7 @@
     }
     const { T, grp, erg } = bau1;
     const ecken = [[0, 0], [W3, 0], [0, D], [W3, D]].map(([x, z2]) => [x * c + z2 * s2, -x * s2 + z2 * c]);
-    const ox = p.x - Math.min(...ecken.map((e) => e[0])), oz = p.z - Math.min(...ecken.map((e) => e[1]));
+    const ox = p2.x - Math.min(...ecken.map((e) => e[0])), oz = p2.z - Math.min(...ecken.map((e) => e[1]));
     for (const [farbe2, gs] of T.teile) for (const g of gs) {
       if (a) g.rotateY(a);
       g.translate(ox, 0, oz);
@@ -103748,7 +104355,7 @@
     }
     return erg;
   }
-  var sieht = (p, F2) => p.sieht(F2.nx, F2.nz);
+  var sieht = (p2, F2) => p2.sieht(F2.nx, F2.nz);
   function baumN(S, r, x, z2, s2 = 1, art = "laub") {
     S.box(0.45 * s2, 2.4 * s2, 0.45 * s2, x, 1.5 * s2, z2, "#7a5d43");
     if (art === "kegel") {
@@ -103825,7 +104432,7 @@
     pk.push([0, H]);
     return pk.filter((q2, i) => i === 0 || Math.hypot(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
   }
-  function giebelHaus(S, scene2, p, r, o) {
+  function giebelHaus(S, scene2, p2, r, o) {
     const { a, b: b2, T, D, typ, wand: wand2, orn, dach: dach3, n, eg, gh } = o;
     const bw = b2 - a, H = eg + n * gh, c = bw / 2;
     const putz2 = o.putz;
@@ -103834,8 +104441,8 @@
     const m = bw < 7.2 ? 2 : bw < 9.6 ? 3 : 4;
     const G2 = traufe ? 0 : typ === "dreieck" ? bw * zw(r, 0.55, 0.7) : bw * zw(r, 0.95, 1.2);
     const Gr = typ === "dreieck" ? G2 : typ === "volute" ? G2 * 0.66 : G2 * (2 * m + 1) / (2 * m + 2) * 0.93;
-    const zR = D - T, zH = sieht(p, R6(b2, zR, -1, 0, bw)) ? zR + 0.4 : zR;
-    const links = o.erster && sieht(p, R6(a, zR, 0, 1, T)), rechts = o.letzter && sieht(p, R6(b2, D, 0, -1, T));
+    const zR = D - T, zH = sieht(p2, R6(b2, zR, -1, 0, bw)) ? zR + 0.4 : zR;
+    const links = o.erster && sieht(p2, R6(a, zR, 0, 1, T)), rechts = o.letzter && sieht(p2, R6(b2, D, 0, -1, T));
     S.quader(a + (links ? 0.4 : 0), 0, zH, b2 - (rechts ? 0.4 : 0), H, D - 0.4, wand2);
     const umr = [[0, 0], [bw, 0], ...traufe ? (() => {
       const zb = Math.min(bw * 0.5, 4.2);
@@ -103988,7 +104595,7 @@
         fpolyR(S, F2, [[0.1, H], [T - 0.1, H], [T / 2, H + dh - 0.35]], -0.45, -0.05, wand2);
       }
       const FRt = R6(b2, zR, -1, 0, bw);
-      if (sieht(p, FRt)) {
+      if (sieht(p2, FRt)) {
         const ro = [];
         for (let k = 0; k < n; k++) for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7));
         for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, 1.1, 1, 1.9));
@@ -104005,7 +104612,7 @@
       g.translate(a + c, H, (D - 0.35 + zR - 0.25) / 2);
       S.add(g, dach3);
       const FR2 = R6(b2, zR, -1, 0, bw);
-      if (sieht(p, FR2)) {
+      if (sieht(p2, FR2)) {
         const ro = [];
         for (let k = 0; k < n; k++) for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7));
         for (const u of achsen4(0, bw, 2.4, 0.5)) ro.push(fenster4(u, 1.1, 1, 1.9));
@@ -104036,7 +104643,7 @@
       if (!an) continue;
       const so = [];
       const hS = traufe ? [[0, 0], [T, 0], [T, H], [T / 2, H + T * 0.42 - 0.2], [0, H]] : [0, 0, T, H];
-      for (let k = 0; k < n; k++) for (const u of achsen4(1, T - 1, 3.2, 0.3)) if (hash3(k, Math.round(u * 10), o.salz) % 3 !== 0) so.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7, art));
+      for (let k = 0; k < n; k++) for (const u of achsen4(1, T - 1, 3.2, 0.3)) if (hash4(k, Math.round(u * 10), o.salz) % 3 !== 0) so.push(fenster4(u, eg + k * gh + 0.7, 1, 1.7, art));
       if (traufe) so.push(fenster4(T / 2, H + 0.6, 0.9, 1.5));
       lochwand3(S, F2, hS, so, dunkler(wand2, 0.03), { rahmen: WEISS, bank: putz2 ? orn : null });
       if (!putz2) platten(S, F2, [[0, 0, T, 0.55]], 0, 0.05, o.band);
@@ -104046,10 +104653,10 @@
   function fpolyR(S, F2, pk, t0, t1, c) {
     formen(S, F2, [umrissForm(pk)], t0, t1, c);
   }
-  function giebelZeileRoh(S, scene2, p) {
-    const r = rng2(`ngh:${p.seed}`);
-    const v = GIEBEL_POOL[p.variante] ? p.variante : waehle2(r, Object.keys(GIEBEL_POOL));
-    const W3 = p.w, D = p.d;
+  function giebelZeileRoh(S, scene2, p2) {
+    const r = rng2(`ngh:${p2.seed}`);
+    const v = GIEBEL_POOL[p2.variante] ? p2.variante : waehle2(r, Object.keys(GIEBEL_POOL));
+    const W3 = p2.w, D = p2.d;
     const teile = [];
     let rest = W3;
     while (rest > 13) {
@@ -104072,9 +104679,9 @@
       const stein = v === "lueneburg" ? waehle2(r, NF.hell) : v === "stralsund" ? waehle2(r, [...NF.backstein, ...NF.dunkel]) : waehle2(r, NF.backstein);
       const wand2 = putz2 ? waehle2(r, NF.pastell) : stein;
       const n = v === "lueneburg" ? 2 + Math.floor(r() * 2) : 2 + Math.floor(r() * 3);
-      const laden4 = r() < (p.laden ?? (v === "pastell" ? 0.45 : 0.35));
+      const laden4 = r() < (p2.laden ?? (v === "pastell" ? 0.45 : 0.35));
       const nischenFarbe = v === "stralsund" || v === "luebeck" && r() < 0.35 ? "#eee8db" : dunkler(stein, 0.12);
-      H = Math.max(H, giebelHaus(S, scene2, p, r, {
+      H = Math.max(H, giebelHaus(S, scene2, p2, r, {
         a: x,
         b: x + b2,
         T: T + (r() < 0.3 ? -1 : 0),
@@ -104105,13 +104712,13 @@
     });
     if (D - T > 2) {
       boden4(S, 0, 0, W3, D - T, PFLASTER3, 0.3, 0.05);
-      const hr = rng2(`ngh-hof:${p.seed}`);
+      const hr = rng2(`ngh-hof:${p2.seed}`);
       for (let i = 0; i < Math.min(5, Math.floor(W3 / 10)); i++) if (D - T > 5) baumN(S, hr, zw(hr, 2, W3 - 2), zw(hr, 1.8, D - T - 2), 0.8);
     }
     return { hoehe: H };
   }
-  function nordGiebelhaus(S, scene2, p) {
-    return gedreht2(S, scene2, p, giebelZeileRoh, [7, 11]);
+  function nordGiebelhaus(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, giebelZeileRoh, [7, 11]);
   }
   function frontUmriss(L2, H, giebel3 = []) {
     const pk = [[0, 0], [L2, 0], [L2, H]];
@@ -104152,9 +104759,9 @@
     for (let k = 0; k < n; k++) for (const u of achsen4(u0, u1, ra, rand)) oe.push(fenster4(u, y0 + k * gh + sockel, b2, h, art, x));
     return oe;
   }
-  function koerper2(S, p, x0, z0, x1, z1, y0, y1, kern, fass, tw = 0.4) {
+  function koerper2(S, p2, x0, z0, x1, z1, y0, y1, kern, fass, tw = 0.4) {
     const sz = seiten(x0, z0, x1, z1), vis = {};
-    for (const k of Object.keys(sz)) vis[k] = sieht(p, sz[k]);
+    for (const k of Object.keys(sz)) vis[k] = sieht(p2, sz[k]);
     S.quader(x0 + (vis["-x"] ? tw : 0), y0, z0 + (vis["-z"] ? tw : 0), x1 - (vis["+x"] ? tw : 0), y1, z1 - (vis["+z"] ? tw : 0), kern);
     for (const k of Object.keys(sz)) if (vis[k]) fass(sz[k], k);
     return { sz, vis };
@@ -104268,7 +104875,7 @@
     S.quader(fx - 1.4, y0 + 13.5, fz - 1.4, fx + 1.4, y0 + 17.5, fz + 1.4, "#d23c32");
     S.quader(fx - 1.45, y0 + 16.8, fz - 1.45, fx + 1.45, y0 + 17.6, fz + 1.45, "#2b2f33");
     const kc = ["#c9483e", "#2f6f8f", "#3f7d56", "#d39a2b", "#e9e6de", "#6b4f8f"];
-    for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 2; k++) if (hash3(i, j, k + Math.round(x)) % 4) fb3(S, F2, -13 + i * 6.4, -13 + i * 6.4 + 6, y0 + 5.3 + k * 2.6, y0 + 5.3 + (k + 1) * 2.6 - 0.05, -3.9 + j * 2.6, -3.9 + j * 2.6 + 2.5, kc[hash3(i, j, k) % kc.length]);
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 2; k++) if (hash4(i, j, k + Math.round(x)) % 4) fb3(S, F2, -13 + i * 6.4, -13 + i * 6.4 + 6, y0 + 5.3 + k * 2.6, y0 + 5.3 + (k + 1) * 2.6 - 0.05, -3.9 + j * 2.6, -3.9 + j * 2.6 + 2.5, kc[hash4(i, j, k) % kc.length]);
     stab3(S, P3(F2, 24, y0 + 5.3, 0), P3(F2, 24, y0 + 12, 0), 0.2, "#e8e6e0");
   }
   function wippkran(S, F0, u, yK, farbe2, ausleger = 16, winkel = 0.62) {
@@ -104375,18 +104982,18 @@
       fb3(S, F2, um - 0.05, um + 0.05, 0.3, o.eg - 1.6, -0.3, -0.18, "#c9a24a");
       fb3(S, F2, u0 - 1.3, u1 + 1.3, 0.3, 0.45, 0, 0.5, GRANIT);
     }
-    for (let i = 0; i < nb; i++) if (i !== pi && hash3(i, o.salz) % 2 === 0) ftext3(scene2, F2, KONTOR_LAEDEN[hash3(i, o.salz, 3) % KONTOR_LAEDEN.length], (i + 0.5) * ra, o.eg - 0.72, 0.05, 0.36, ra - 1.4, "#f4ead2");
-    for (let i = 0; i < nb; i++) if (i !== pi && hash3(i, o.salz, 9) % 3 === 0) markiseF2(S, F2, i * ra + 0.5, (i + 1) * ra - 0.5, o.eg - 1.15, waehle2(rng2(o.salz + i), NF.markise), 0.45, 0.5);
+    for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o.salz) % 2 === 0) ftext3(scene2, F2, KONTOR_LAEDEN[hash4(i, o.salz, 3) % KONTOR_LAEDEN.length], (i + 0.5) * ra, o.eg - 0.72, 0.05, 0.36, ra - 1.4, "#f4ead2");
+    for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o.salz, 9) % 3 === 0) markiseF2(S, F2, i * ra + 0.5, (i + 1) * ra - 0.5, o.eg - 1.15, waehle2(rng2(o.salz + i), NF.markise), 0.45, 0.5);
   }
   var KONTOR_STIL = {
     spitz: { stein: ["#5e2d26", "#58291f", "#64302a"], akzent: "#d8c7a3", akzentAlle: 3, zier: "#c9a24a", kappe: "#c9a24a", spitz: true, baender: false, spitzFarbe: "#c9a24a" },
     block: { stein: ["#8a3d2d", "#93432f", "#7f3829"], akzent: "#e6dcc6", akzentAlle: 0, zier: "#c9a24a", kappe: "#6fa58a", spitz: false, baender: true },
     turm: { stein: ["#a3724a", "#9a6b45", "#ab7b52"], akzent: "#6b3a28", akzentAlle: 2, zier: "#e6dcc6", kappe: "#6fa58a", spitz: true, baender: false, spitzFarbe: "#e6dcc6" }
   };
-  function kontorRoh(S, scene2, p) {
-    const r = rng2(`nkh:${p.seed}`);
-    const v = KONTOR_STIL[p.variante] ? p.variante : waehle2(r, Object.keys(KONTOR_STIL));
-    const W3 = p.w, D = p.d, st0 = KONTOR_STIL[v];
+  function kontorRoh(S, scene2, p2) {
+    const r = rng2(`nkh:${p2.seed}`);
+    const v = KONTOR_STIL[p2.variante] ? p2.variante : waehle2(r, Object.keys(KONTOR_STIL));
+    const W3 = p2.w, D = p2.d, st0 = KONTOR_STIL[v];
     const stein = waehle2(r, st0.stein), gold = "#c9a24a", kupf = waehle2(r, NF.kupfer);
     const o = { ...st0, stein, pfeiler: heller(stein, 0.035), gold, ra: 1.85 };
     const eg = 5.2, gh = 3.4, n = v === "turm" ? 6 : 6 + Math.floor(r() * 2), st = v === "turm" ? 1 : 3;
@@ -104400,7 +105007,7 @@
     } else poly = rechteck4(0, 0, W3, D);
     const hof2 = v !== "spitz" && W3 > 34 && D > 30 ? rechteck4(W3 * 0.3, D * 0.28, W3 * 0.66, D * 0.6) : null;
     const H0 = eg + n * gh;
-    const name2 = KONTOR_NAMEN[p.seed * 3 % KONTOR_NAMEN.length];
+    const name2 = KONTOR_NAMEN[p2.seed * 3 % KONTOR_NAMEN.length];
     let top = 0;
     for (let s2 = 0; s2 <= st; s2++) {
       const pl2 = s2 === 0 ? poly : einruecken(poly, s2 * 2.4);
@@ -104408,9 +105015,9 @@
       prisma2(S, einruecken(pl2, 0.4), yb, yt, dunkler(stein, 0.06), s2 === 0 && hof2 ? [hof2] : []);
       prisma2(S, einruecken(pl2, 0.4), yt, yt + 0.12, s2 === st ? "#5f666c" : "#9aa0a3", s2 === 0 && hof2 ? [hof2] : []);
       kanten(pl2).forEach((F2, i) => {
-        if (!sieht(p, F2) || F2.L < 1) return;
+        if (!sieht(p2, F2) || F2.L < 1) return;
         if (s2 === 0) {
-          kontorEG(S, scene2, F2, { eg, stein, gold, zier: o.akzent, portal: F2.L > 20 && i === 0, salz: p.seed * 10 + i });
+          kontorEG(S, scene2, F2, { eg, stein, gold, zier: o.akzent, portal: F2.L > 20 && i === 0, salz: p2.seed * 10 + i });
           top = Math.max(top, pfeilerWand(S, scene2, F2, { ...o, y0: eg, n, gh }));
           if (i === 0 && F2.L > 24) ftext3(scene2, F2, name2, F2.L / 2, H0 + 0.48, 0.47, 0.62, F2.L * 0.5, "#2a1a14");
         } else top = Math.max(top, pfeilerWand(S, scene2, F2, { ...o, y0: yb, n: 1, gh, attika: 0.9, akzentAlle: o.akzentAlle ? o.akzentAlle : 0 }));
@@ -104456,12 +105063,12 @@
       const sq = rechteck4(x0, z0, W3, D);
       prisma2(S, einruecken(sq, 0.4), H0, Ht, dunkler(stein, 0.06));
       kanten(sq).forEach((F2) => {
-        if (sieht(p, F2)) pfeilerWand(S, scene2, F2, { ...o, y0: H0 + 0.01, n: nt, gh, attika: 1.2 });
+        if (sieht(p2, F2)) pfeilerWand(S, scene2, F2, { ...o, y0: H0 + 0.01, n: nt, gh, attika: 1.2 });
       });
       const sq2 = einruecken(sq, 2), y2 = Ht + 1.2;
       prisma2(S, einruecken(sq2, 0.4), y2, y2 + gh, dunkler(stein, 0.06));
       kanten(sq2).forEach((F2) => {
-        if (sieht(p, F2)) pfeilerWand(S, scene2, F2, { ...o, y0: y2, n: 1, gh, attika: 0.8, spitz: false });
+        if (sieht(p2, F2)) pfeilerWand(S, scene2, F2, { ...o, y0: y2, n: 1, gh, attika: 0.8, spitz: false });
       });
       const cxT = x0 + tw / 2, czT = z0 + tw / 2, y3 = y2 + gh + 0.8, rk = (tw - 4) * 0.5;
       zyl7(S, rk * 0.92, rk * 0.92, 1.6, cxT, y3, czT, o.zier, 16);
@@ -104476,8 +105083,8 @@
     }
     return { hoehe: top };
   }
-  function nordKontorhaus(S, scene2, p) {
-    return gedreht2(S, scene2, p, kontorRoh, [36, 26]);
+  function nordKontorhaus(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, kontorRoh, [36, 26]);
   }
   function windenErker(S, F2, u, y, holz, dachF) {
     fb3(S, F2, u - 1.05, u + 1.05, y, y + 2.3, 0, 1.4, holz);
@@ -104489,11 +105096,11 @@
     fb3(S, F2, u - 0.03, u + 0.03, y - 4.2, y - 0.3, 1.55, 1.6, "#2b2f33");
     fb3(S, F2, u - 0.25, u + 0.25, y - 4.5, y - 4.2, 1.35, 1.8, "#3a3f44");
   }
-  function speicherRoh(S, scene2, p) {
-    const r = rng2(`nsp:${p.seed}`);
-    const v = ["speicherstadt", "giebel", "schlicht"].includes(p.variante) ? p.variante : waehle2(r, ["speicherstadt", "giebel", "schlicht"]);
-    const um = p.zustand === "umgenutzt";
-    const W3 = p.w, D = p.d, Wc = Math.min(14, Math.max(8, D * 0.3)), zF = D - Wc, T = Math.min(zF, 22), zB = zF - T;
+  function speicherRoh(S, scene2, p2) {
+    const r = rng2(`nsp:${p2.seed}`);
+    const v = ["speicherstadt", "giebel", "schlicht"].includes(p2.variante) ? p2.variante : waehle2(r, ["speicherstadt", "giebel", "schlicht"]);
+    const um = p2.zustand === "umgenutzt";
+    const W3 = p2.w, D = p2.d, Wc = Math.min(14, Math.max(8, D * 0.3)), zF = D - Wc, T = Math.min(zF, 22), zB = zF - T;
     const stein = v === "giebel" ? waehle2(r, NF.backstein) : waehle2(r, [...NF.backstein, ...NF.dunkel]);
     const kupf = waehle2(r, NF.kupfer), holz = um ? "#3f4a52" : waehle2(r, ["#2f5243", "#3d4f45", "#5a3a2c"]);
     const glas2 = um ? GLAS_HELL5 : GLAS8, rahm = um ? "#3a3f44" : "#ece6da";
@@ -104508,7 +105115,7 @@
     const sock = 2.6, gh = 3, n = v === "schlicht" ? 5 : 5 + Math.floor(r() * 2), H = sock + n * gh;
     let top = H;
     const FF = R6(0, zF, 1, 0, W3), FX = R6(W3, zF, 0, -1, T), FXm = R6(0, zB, 0, 1, T), FR2 = R6(W3, zB, -1, 0, W3);
-    const vis = { f: sieht(p, FF), x: sieht(p, FX), xm: sieht(p, FXm), r: sieht(p, FR2) };
+    const vis = { f: sieht(p2, FF), x: sieht(p2, FX), xm: sieht(p2, FXm), r: sieht(p2, FR2) };
     const nl = Math.max(1, Math.round(W3 / 17)), luken = Array.from({ length: nl }, (_, i) => (i + 0.5) * W3 / nl);
     const nahLuke = (u) => luken.some((l) => Math.abs(l - u) < 1.6);
     const fensterArt = v === "schlicht" ? "segment" : "rund";
@@ -104634,8 +105241,8 @@
     } else if (W3 > 24) boot(S, scene2, W3 * 0.3, zF + Wc * 0.45, "barkasse", 0, null, YW + 0.06);
     return { hoehe: top, wasser: [0, zF, W3, D - 1.8] };
   }
-  function nordSpeicher(S, scene2, p) {
-    return gedreht2(S, scene2, p, speicherRoh, [24, 26]);
+  function nordSpeicher(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, speicherRoh, [24, 26]);
   }
   var WA_LAEDEN = ["Textilhaus M\xF6ller", "Radio Kr\xFCger", "Konditorei Witt", "Schuhhaus Brandt", "Eisdiele Venezia", "Lichtspiele", "Lederwaren", "Foto Hansen", "M\xF6bel Petersen", "Drogerie", "Optik Clau\xDFen", "Bettenhaus"];
   function rasterFassade(S, scene2, F2, o) {
@@ -104676,10 +105283,10 @@
     fb3(S, F2, -0.2, L2 + 0.2, o.eg - 0.7, o.eg - 0.3, 1.7, 1.85, o.akzent);
     for (let i = 0; i < nb; i += 2) ftext3(scene2, teil3(F2, 0, L2, 1.86), WA_LAEDEN[(o.salz + i) % WA_LAEDEN.length], (i + (i + 2 <= nb ? 1 : 0.5)) * ra, o.eg - 0.02, 0, 0.5, Math.min(2, nb - i) * ra - 0.8, o.schrift);
   }
-  function wiederaufbauRoh(S, scene2, p) {
-    const r = rng2(`nwa:${p.seed}`);
-    const v = ["kiel", "hannover", "laubengang", "geschaeft"].includes(p.variante) ? p.variante : waehle2(r, ["kiel", "hannover", "laubengang", "geschaeft"]);
-    const W3 = p.w, D = v === "laubengang" ? p.d - 1.8 : p.d, T = Math.min(D, v === "geschaeft" ? 18 : 13), z0 = D - T;
+  function wiederaufbauRoh(S, scene2, p2) {
+    const r = rng2(`nwa:${p2.seed}`);
+    const v = ["kiel", "hannover", "laubengang", "geschaeft"].includes(p2.variante) ? p2.variante : waehle2(r, ["kiel", "hannover", "laubengang", "geschaeft"]);
+    const W3 = p2.w, D = v === "laubengang" ? p2.d - 1.8 : p2.d, T = Math.min(D, v === "geschaeft" ? 18 : 13), z0 = D - T;
     const klinker = v === "hannover" ? waehle2(r, NF.gelbklinker) : waehle2(r, NF.rotklinker);
     const rast = v === "hannover" ? "#f1ede4" : "#e7e2d6", akzent = waehle2(r, ["#2f6f8f", "#c9483e", "#3f7d56", "#1f3a5f", "#d39a2b"]);
     const laden4 = v !== "laubengang";
@@ -104687,9 +105294,9 @@
     const H = eg + n * gh;
     let top = H;
     const o = { y0: eg, n, gh, ra: v === "geschaeft" ? 4.2 : 3.1, klinker, raster: rast, bruest: v === "hannover" ? "#d9cfb6" : akzent, balkon: v === "hannover" };
-    koerper2(S, p, 0, z0, W3, D, 0, H, dunkler(klinker, 0.08), (F2, s2) => {
+    koerper2(S, p2, 0, z0, W3, D, 0, H, dunkler(klinker, 0.08), (F2, s2) => {
       const front2 = s2 === "+z";
-      if (laden4 && (front2 || r() < 0)) ladenEG(S, scene2, F2, { eg, wand: rast, raster: rast, akzent, schrift: v === "geschaeft" ? "#c9483e" : "#1f3a5f", salz: p.seed * 3 });
+      if (laden4 && (front2 || r() < 0)) ladenEG(S, scene2, F2, { eg, wand: rast, raster: rast, akzent, schrift: v === "geschaeft" ? "#c9483e" : "#1f3a5f", salz: p2.seed * 3 });
       else if (laden4) lochwand3(S, F2, [0, 0, F2.L, eg], achsen4(0, F2.L, 3.1, 0.6).map((u) => fenster4(u, 1.2, 1.8, 2.2)), klinker, { rahmen: WEISS });
       if (v === "laubengang" && (front2 || s2 === "-z")) {
         const oe = [];
@@ -104710,7 +105317,7 @@
         fb3(S, F2, -0.3, F2.L + 0.3, H - 0.2, H + 0.05, 0, 1.7, rast);
         for (let u = 0; u <= F2.L; u += 3.6 * 3) fb3(S, F2, u - 0.12, u + 0.12, 0.3, H, 1.5, 1.74, rast);
       } else rasterFassade(S, scene2, F2, { ...o, attika: v === "kiel" ? 0.25 : 0.6 });
-      if (front2 && v === "geschaeft") ftext3(scene2, F2, WA_LAEDEN[p.seed * 5 % WA_LAEDEN.length], F2.L / 2, H + 1.6, 0.4, 1.4, F2.L * 0.7, "#c9483e");
+      if (front2 && v === "geschaeft") ftext3(scene2, F2, WA_LAEDEN[p2.seed * 5 % WA_LAEDEN.length], F2.L / 2, H + 1.6, 0.4, 1.4, F2.L * 0.7, "#c9483e");
     });
     if (v === "kiel" || v === "laubengang" && r() < 0.5) {
       walm(S, -0.4, z0 - 0.4, W3 + 0.4, D + 0.4, H + 0.25, Math.min(3.2, T * 0.22), waehle2(r, NF.ziegel), { achse: "x", kv: T * 0.5 + 0.4, kh: T * 0.5 + 0.4 });
@@ -104750,8 +105357,8 @@
     }
     return { hoehe: top };
   }
-  function nordWiederaufbau(S, scene2, p) {
-    return gedreht2(S, scene2, p, wiederaufbauRoh, [16, 11]);
+  function nordWiederaufbau(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, wiederaufbauRoh, [16, 11]);
   }
   function hecke2(S, x0, z0, x1, z1, c = "#5d9450") {
     S.quader(x0, 0.3, z0, x1, 1.25, z1, c);
@@ -104763,8 +105370,8 @@
     for (let u = u0 + 0.1; u < u1; u += 0.22) st.push([u - 0.04, 0.3, u + 0.04, 0.3 + h + 0.08]);
     platten(S, teil3(F2, 0, F2.L, t), st, -0.03, 0.03, c);
   }
-  function schumacherRoh(S, scene2, p, r) {
-    const W3 = p.w, D = p.d, T = Math.min(D - 1, 12.5), vor = Math.min(3, D - T), zv = D - vor, z0 = zv - T;
+  function schumacherRoh(S, scene2, p2, r) {
+    const W3 = p2.w, D = p2.d, T = Math.min(D - 1, 12.5), vor = Math.min(3, D - T), zv = D - vor, z0 = zv - T;
     const stein = waehle2(r, NF.rotklinker), band = dunkler(stein, 0.06), n = 3 + Math.floor(r() * 2), sock = 1.1, gh = 2.9, H = sock + n * gh;
     const flach = r() < 0.5;
     const ne = Math.max(1, Math.round(W3 / 16)), eing = Array.from({ length: ne }, (_, i) => (i + 0.5) * W3 / ne);
@@ -104805,7 +105412,7 @@
         if (flach) fpolyF(S, F2, [[e - 1.9, H + 1.5], [e + 1.9, H + 1.5], [e, H + 2.6]], -0.4, 0.3, stein);
       }
     };
-    koerper2(S, p, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), fass);
+    koerper2(S, p2, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), fass);
     let top = H + 1;
     if (flach) S.quader(0.4, H, z0 + 0.4, W3 - 0.4, H + 0.15, zv - 0.4, "#7c8288");
     else {
@@ -104830,8 +105437,8 @@
     }
     return { hoehe: top };
   }
-  function bremerRoh(S, scene2, p, r) {
-    const W3 = p.w, D = p.d, vor = Math.min(3.6, D * 0.3), zv = D - vor, T = Math.min(zv, 12), z0 = zv - T;
+  function bremerRoh(S, scene2, p2, r) {
+    const W3 = p2.w, D = p2.d, vor = Math.min(3.6, D * 0.3), zv = D - vor, T = Math.min(zv, 12), z0 = zv - T;
     const teile = [];
     let rest = W3;
     while (rest > 9.5) {
@@ -104847,7 +105454,7 @@
       const sout = 1.8, eg = 3.5, gh = 3.2, H = sout + eg + (n - 1) * gh + (n > 1 ? 0 : 0), Ha = H + 1.3;
       const FF = R6(x, zv, 1, 0, b2), ax = [b2 / 6, b2 / 2, 5 * b2 / 6], tA = i % 2 ? 0 : 2, eA = tA === 0 ? 2 : 0;
       const erst = i === 0, letzt = i === teile.length - 1;
-      const sz = seiten(x, z0, x + b2, zv), visL = erst && sieht(p, sz["-x"]), visR = letzt && sieht(p, sz["+x"]), visB = sieht(p, sz["-z"]);
+      const sz = seiten(x, z0, x + b2, zv), visL = erst && sieht(p2, sz["-x"]), visR = letzt && sieht(p2, sz["+x"]), visB = sieht(p2, sz["-z"]);
       S.quader(x + (visL ? 0.4 : 0), 0, z0 + (visB ? 0.4 : 0), x + b2 - (visR ? 0.4 : 0), Ha, zv - 0.4, dunkler(wand2, 0.1));
       const oe = [];
       ax.forEach((u, j) => {
@@ -104909,15 +105516,15 @@
   function fpolyF(S, F2, pk, t0, t1, c) {
     formen(S, F2, [umrissForm(pk)], t0, t1, c);
   }
-  function siedlungRoh2(S, scene2, p, r) {
-    const W3 = p.w, D = p.d, vor = Math.min(4.5, D * 0.35), zv = D - vor, T = Math.min(zv, 9.5), z0 = zv - T;
+  function siedlungRoh2(S, scene2, p2, r) {
+    const W3 = p2.w, D = p2.d, vor = Math.min(4.5, D * 0.35), zv = D - vor, T = Math.min(zv, 9.5), z0 = zv - T;
     const stein = waehle2(r, [...NF.rotklinker, ...NF.backstein]), nh = Math.max(1, Math.round(W3 / 6.2)), b2 = W3 / nh, H = 0.4 + 2 * 2.8, dh = 4.8;
     const dach3 = waehle2(r, NF.ziegel);
-    koerper2(S, p, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), (F2, s2) => {
+    koerper2(S, p2, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), (F2, s2) => {
       const oe = [], L2 = F2.L;
       if (s2 === "+z") for (let i = 0; i < nh; i++) {
         const u0 = i * b2, sp = i % 2, ut = u0 + (sp ? b2 - 1.3 : 1.3), uf = u0 + (sp ? 2 : b2 - 2);
-        oe.push({ u0: ut - 0.55, u1: ut + 0.55, v0: 0.3, v1: 2.5, typ: "tuer", fuell: waehle2(rng2(i + p.seed), NF.tuer) });
+        oe.push({ u0: ut - 0.55, u1: ut + 0.55, v0: 0.3, v1: 2.5, typ: "tuer", fuell: waehle2(rng2(i + p2.seed), NF.tuer) });
         oe.push(fenster4(uf, 0.95, 1.5, 1.3));
         oe.push(fenster4(ut, 3.6, 0.9, 1.2));
         oe.push(fenster4(uf, 3.5, 1.3, 1.3));
@@ -104958,13 +105565,13 @@
     }
     return { hoehe: H + dh };
   }
-  function reihenhausRoh(S, scene2, p) {
-    const r = rng2(`nrh:${p.seed}`);
-    const v = ["schumacher", "bremer", "siedlung"].includes(p.variante) ? p.variante : waehle2(r, ["schumacher", "bremer", "siedlung"]);
-    return (v === "bremer" ? bremerRoh : v === "siedlung" ? siedlungRoh2 : schumacherRoh)(S, scene2, p, r);
+  function reihenhausRoh(S, scene2, p2) {
+    const r = rng2(`nrh:${p2.seed}`);
+    const v = ["schumacher", "bremer", "siedlung"].includes(p2.variante) ? p2.variante : waehle2(r, ["schumacher", "bremer", "siedlung"]);
+    return (v === "bremer" ? bremerRoh : v === "siedlung" ? siedlungRoh2 : schumacherRoh)(S, scene2, p2, r);
   }
-  function nordReihenhaus(S, scene2, p) {
-    return gedreht2(S, scene2, p, reihenhausRoh, [12, 12]);
+  function nordReihenhaus(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, reihenhausRoh, [12, 12]);
   }
   function kirchWand(S, F2, L2, Hw, o) {
     const nb = Math.max(1, Math.round(L2 / o.joch)), j = L2 / nb, oe = [];
@@ -104982,12 +105589,12 @@
       fbalken(S, F2, u - 0.6, Hw * 0.62 + 0.3, u + 0.6, Hw * 0.62 + 0.3, 0.6, 0.6, 1.45, dunkler(o.stein, 0.06));
     }
   }
-  function turm2(S, scene2, p, x0, z0, tw, Ht, o) {
+  function turm2(S, scene2, p2, x0, z0, tw, Ht, o) {
     const sz = seiten(x0, z0, x0 + tw, z0 + tw);
     S.quader(x0 + 0.4, 0, z0 + 0.4, x0 + tw - 0.4, Ht, z0 + tw - 0.4, dunkler(o.stein, 0.06));
     const zonen2 = Math.max(1, Math.floor((Ht - 12) / 7.5)), zh = (Ht - 12) / zonen2;
     for (const [s2, F2] of Object.entries(sz)) {
-      if (!sieht(p, F2)) continue;
+      if (!sieht(p2, F2)) continue;
       const oe = [];
       if (s2 === "+z" && o.portal) oe.push({ u0: tw / 2 - tw * 0.18, u1: tw / 2 + tw * 0.18, v0: 0.3, v1: Math.min(8, Ht * 0.18), art: "spitz", typ: "tuer", fuell: "#4a3326" });
       const nn = tw > 9 ? 3 : 2, nw = tw / nn;
@@ -105017,7 +105624,7 @@
     }
     const cx = x0 + tw / 2, cz = z0 + tw / 2;
     if (o.helm === "ruine") {
-      const sr = rng2(`nki-tr:${p.seed}`);
+      const sr = rng2(`nki-tr:${p2.seed}`);
       for (let k = 0; k < 7; k++) {
         const a = zw(sr, 0.8, tw - 2.2), b2 = Math.min(tw - 0.4, a + zw(sr, 1.2, 3)), h = zw(sr, 0.6, 2.6);
         for (const [u0, u1, w0, w1] of [[a, b2, 0.4, 1.3], [a, b2, tw - 1.3, tw - 0.4]]) S.quader(x0 + u0, Ht, z0 + w0, x0 + u1, Ht + h, z0 + w1, o.stein);
@@ -105037,7 +105644,7 @@
       const g2 = dachProfil(tw + 0.4, tw + 0.4, o.hs, 0.1, "x");
       g2.translate(cx, Ht, cz);
       S.add(g2, o.dach);
-      for (const F2 of [sz["+x"], sz["-x"]]) if (sieht(p, F2)) fpolyF(S, F2, [[0, Ht], [tw, Ht], [tw / 2, Ht + o.hs]], -0.4, 0, o.stein);
+      for (const F2 of [sz["+x"], sz["-x"]]) if (sieht(p2, F2)) fpolyF(S, F2, [[0, Ht], [tw, Ht], [tw / 2, Ht + o.hs]], -0.4, 0, o.stein);
       return Ht + o.hs;
     }
     const g = walmdach(tw + 0.6, tw + 0.6, o.hs);
@@ -105046,11 +105653,11 @@
     zyl7(S, 0.05, 0.12, 2, cx, Ht + o.hs - 0.1, cz, "#c9a24a", 6);
     return Ht + o.hs + 2;
   }
-  function kircheRoh(S, scene2, p) {
-    const r = rng2(`nki:${p.seed}`);
-    const ruine = p.zustand === "ruine";
-    const v = ruine ? "hallen" : ["marien", "hallen", "doppelturm", "dorf"].includes(p.variante) ? p.variante : waehle2(r, ["marien", "hallen", "doppelturm", "dorf"]);
-    const W3 = p.w, D = p.d, dorf = v === "dorf", basilika = v === "marien" || v === "doppelturm";
+  function kircheRoh(S, scene2, p2) {
+    const r = rng2(`nki:${p2.seed}`);
+    const ruine = p2.zustand === "ruine";
+    const v = ruine ? "hallen" : ["marien", "hallen", "doppelturm", "dorf"].includes(p2.variante) ? p2.variante : waehle2(r, ["marien", "hallen", "doppelturm", "dorf"]);
+    const W3 = p2.w, D = p2.d, dorf = v === "dorf", basilika = v === "marien" || v === "doppelturm";
     const stein = waehle2(r, [...NF.backstein, ...NF.dunkel]), putz2 = "#ece6da", kupfer = waehle2(r, NF.kupfer);
     const dach3 = v === "marien" ? kupfer : waehle2(r, NF.ziegel), sockel = dorf ? "#9d978c" : GRANIT_D;
     const o = { stein, putz: putz2, sockel, joch: dorf ? 5 : 6.5, fu: dorf ? 2.2 : 3.2, fo: dorf ? 1.6 : 2.6, glas: ruine ? "#2c3034" : void 0 };
@@ -105064,10 +105671,10 @@
       for (const [a, b2, sx] of [[x0, xm0, -1], [xm1, x1, 1]]) {
         S.quader(a + (sx < 0 ? 0.4 : 0), 0, zC, b2 - (sx > 0 ? 0.4 : 0), Hn, zT, dunkler(stein, 0.06));
         const F2 = sx > 0 ? R6(x1, zT, 0, -1, zT - zC) : R6(x0, zC, 0, 1, zT - zC);
-        if (sieht(p, F2)) kirchWand(S, F2, F2.L, Hn, o);
+        if (sieht(p2, F2)) kirchWand(S, F2, F2.L, Hn, o);
         const yA = Hn + 4.2, hi = sx > 0 ? [xm1, x1 + 0.4] : [x0 - 0.4, xm0];
         huelle(S, [[[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zC], [hi[1], sx > 0 ? Hn : yA, zT]], [[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zT], [hi[0], sx > 0 ? yA : Hn, zT]]], [cx, 0, (zC + zT) / 2], dach3 === kupfer ? dunkler(kupfer, 0.02) : dach3);
-        if (sieht(p, F2)) for (let i = 1; i < Math.round(F2.L / o.joch); i++) {
+        if (sieht(p2, F2)) for (let i = 1; i < Math.round(F2.L / o.joch); i++) {
           const z2 = sx > 0 ? zT - i * (F2.L / Math.round(F2.L / o.joch)) : zC + i * (F2.L / Math.round(F2.L / o.joch));
           balken4(S, [sx > 0 ? x1 - 0.2 : x0 + 0.2, Hn + 1.5, z2], [sx > 0 ? xm1 + 0.2 : xm0 - 0.2, Hm - 4, z2], 0.7, 0.8, stein);
           S.box(1.1, 3.2, 1.1, sx > 0 ? x1 - 0.2 : x0 + 0.2, Hn + 1.4, z2, stein);
@@ -105075,7 +105682,7 @@
       }
     }
     if (!ruine) S.quader(xm0 + 0.4, 0, zC, xm1 - 0.4, Hm, zT, dunkler(stein, 0.06));
-    for (const F2 of [R6(xm1, zT, 0, -1, Lsch - 0.4), R6(xm0, zC, 0, 1, Lsch - 0.4)]) if (sieht(p, F2)) {
+    for (const F2 of [R6(xm1, zT, 0, -1, Lsch - 0.4), R6(xm0, zC, 0, 1, Lsch - 0.4)]) if (sieht(p2, F2)) {
       if (basilika) {
         const y0 = Hn + 4.2;
         const nb = Math.max(1, Math.round(F2.L / o.joch)), j = F2.L / nb, oe = [];
@@ -105099,7 +105706,7 @@
       const innen = einruecken(aussen, 1);
       prisma2(S, aussen, 0, Hm, dunkler(stein, 0.06), [innen]);
       boden4(S, cx - ra + 1.5, zC, cx + ra - 1.5, zT - 1, RASEN23, 0.32, 0.05);
-      const sr = rng2(`nki-ru:${p.seed}`);
+      const sr = rng2(`nki-ru:${p2.seed}`);
       for (const F2 of kanten(aussen)) for (let u = 0.5; u < F2.L - 1; u += zw(sr, 2.5, 5)) {
         const b2 = Math.min(F2.L - 0.2, u + zw(sr, 1, 3));
         if (sr() < 0.45) fb3(S, F2, u, b2, Hm, Hm + zw(sr, 0.5, 2.2), -1, 0, stein);
@@ -105111,14 +105718,14 @@
     for (let k = 0; k < 4; k++) {
       const [ax, az] = chor[k], [bx, bz] = chor[k + 1], L2 = Math.hypot(bx - ax, bz - az);
       const F2 = R6(ax, az, (bx - ax) / L2, (bz - az) / L2, L2);
-      if (sieht(p, F2)) kirchWand(S, F2, L2, Hm, { ...o, joch: L2 + 1, pfeiler: false, fb: Math.min(2.6, L2 - 1.4), fries: true });
+      if (sieht(p2, F2)) kirchWand(S, F2, L2, Hm, { ...o, joch: L2 + 1, pfeiler: false, fb: Math.min(2.6, L2 - 1.4), fries: true });
       tris.push([[ax + (ax - cx) * 0.06, Hm, az + (az - zC) * 0.06], [bx + (bx - cx) * 0.06, Hm, bz + (bz - zC) * 0.06], [cx, Hm + hR, zC]]);
       const a = k * PI9 / 4;
       if (k > 0) S.box(1.8, Hm * 0.7, 1.1, cx + (ra + 0.6) * Math.cos(a), Hm * 0.35, zC - (ra + 0.6) * Math.sin(a), stein, a);
     }
     if (!ruine) huelle(S, tris, [cx, Hm - 1, zC], dach3);
     const FW = R6(x0, zT + 0.4, 1, 0, Wn);
-    if (sieht(p, FW) && !basilika) {
+    if (sieht(p2, FW) && !basilika) {
       const m = 4, G2 = hR / ((2 * m + 1) / (2 * m + 2) * 0.93) + 0.3;
       const oe = giebelNischen(0, Wn, Hn, G2, m, "spitz", putz2);
       oe.push({ u0: Wn * 0.12, u1: Wn * 0.12 + 2.2, v0: o.fu, v1: Hn - 2.5, art: "spitz", typ: "fenster" }, { u0: Wn * 0.88 - 2.2, u1: Wn * 0.88, v0: o.fu, v1: Hn - 2.5, art: "spitz", typ: "fenster" });
@@ -105129,7 +105736,7 @@
         giebelDeckel(S, FW, 0, Wn, Hn, G2, m, "#d9d3c8");
       }
     }
-    if (basilika && sieht(p, FW)) {
+    if (basilika && sieht(p2, FW)) {
       for (const [a, b2] of [[0, xm0 - x0], [xm1 - x0, Wn]]) {
         const F2 = teil3(FW, a, b2);
         lochwand3(S, F2, [[0, 0], [F2.L, 0], ...a === 0 ? [[F2.L, Hn + 4.2], [0, Hn]] : [[F2.L, Hn], [0, Hn + 4.2]]], [{ u0: F2.L / 2 - 1.2, u1: F2.L / 2 + 1.2, v0: o.fu, v1: Hn - 2.2, art: "spitz", typ: "fenster" }], stein, { rahmen: "#d9d3c8", glas: "#536676" });
@@ -105137,21 +105744,21 @@
     }
     let top = Hm + hR;
     if (v === "doppelturm") {
-      for (const xt of [x0 - 0.5, x1 + 0.5 - tw]) top = Math.max(top, turm2(S, scene2, p, xt, zT, tw, Hm + 16, { ...o, kupfer, dach: dach3, helm: "nadel", hs: 24, wimperg: 3.5, portal: true, uhr: xt > cx }));
+      for (const xt of [x0 - 0.5, x1 + 0.5 - tw]) top = Math.max(top, turm2(S, scene2, p2, xt, zT, tw, Hm + 16, { ...o, kupfer, dach: dach3, helm: "nadel", hs: 24, wimperg: 3.5, portal: true, uhr: xt > cx }));
       const FM = R6(x0 - 0.5 + tw, D - 0.6, 1, 0, x1 + 0.5 - tw - (x0 - 0.5 + tw));
       S.quader(FM.ox, 0, zT + 0.4, FM.ox + FM.L, Hm + 2, D - 1, dunkler(stein, 0.06));
-      if (sieht(p, FM)) {
+      if (sieht(p2, FM)) {
         const L2 = FM.L;
         lochwand3(S, FM, [[0, 0], [L2, 0], [L2, Hm + 2], [L2 / 2, Hm + 2 + L2 * 0.45], [0, Hm + 2]], [{ u0: L2 / 2 - 1.8, u1: L2 / 2 + 1.8, v0: 0.3, v1: 9, art: "spitz", typ: "tuer", fuell: "#4a3326" }, { kreis: [L2 / 2, Hm - 5, Math.min(4, L2 * 0.3)], typ: "fenster" }, { u0: L2 / 2 - 2, u1: L2 / 2 + 2, v0: 12, v1: Hm - 10, art: "spitz", typ: "fenster" }], stein, { rahmen: "#d9d3c8", glas: "#536676" });
       }
     } else {
       const Ht = dorf ? 14 : ruine ? Hm + 12 : v === "marien" ? Hm + 20 : Hm + 22;
-      top = Math.max(top, turm2(S, scene2, p, cx - tw / 2, zT, tw, Ht, { ...o, kupfer, dach: dach3, helm: ruine ? "ruine" : dorf ? r() < 0.5 ? "sattel" : "walm" : "nadel", hs: dorf ? 6 : v === "marien" ? 42 : 34, wimperg: dorf || ruine ? 0 : 4.5, portal: true, uhr: !ruine }));
+      top = Math.max(top, turm2(S, scene2, p2, cx - tw / 2, zT, tw, Ht, { ...o, kupfer, dach: dach3, helm: ruine ? "ruine" : dorf ? r() < 0.5 ? "sattel" : "walm" : "nadel", hs: dorf ? 6 : v === "marien" ? 42 : 34, wimperg: dorf || ruine ? 0 : 4.5, portal: true, uhr: !ruine }));
     }
     if (dorf) {
       const FZ = R6(0, D - 0.2, 1, 0, W3), FX = R6(W3 - 0.2, D, 0, -1, D);
       for (const F2 of [FZ, FX, R6(W3, 0.2, -1, 0, W3), R6(0.2, 0, 0, 1, D)]) fb3(S, F2, 0, F2.L, 0.3, 1.2, -0.5, 0, "#a39d92");
-      const sr = rng2(`nki-st:${p.seed}`);
+      const sr = rng2(`nki-st:${p2.seed}`);
       for (let i = 0; i < 18; i++) {
         const x = zw(sr, 1.2, W3 - 1.2), z2 = zw(sr, 1.2, D - 1.2);
         if (x > x0 - 1 && x < x1 + 1 && z2 < D - 0.5) continue;
@@ -105159,7 +105766,7 @@
       }
       for (let i = 0; i < 4; i++) baumN(S, sr, i % 2 ? W3 - 2.2 : 2.2, 3 + i * (D - 6) / 3, 1.1);
     } else {
-      const sr = rng2(`nki-b:${p.seed}`);
+      const sr = rng2(`nki-b:${p2.seed}`);
       if (x0 > 4) for (let z2 = 5; z2 < D - 4; z2 += 9) {
         baumN(S, sr, x0 / 2, z2, 1);
         baumN(S, sr, W3 - x0 / 2, z2, 1);
@@ -105168,17 +105775,17 @@
     return { hoehe: top };
   }
   var KIRCHE_MIN = { marien: [38, 72], hallen: [32, 62], doppelturm: [38, 72], dorf: [18, 32] };
-  function nordKirche(S, scene2, p) {
-    const v = KIRCHE_MIN[p.variante] ? p.variante : waehle2(rng2(`nki:${p.seed}`), Object.keys(KIRCHE_MIN));
-    return gedreht2(S, scene2, { ...p, variante: v }, kircheRoh, KIRCHE_MIN[v]);
+  function nordKirche(S, scene2, p2) {
+    const v = KIRCHE_MIN[p2.variante] ? p2.variante : waehle2(rng2(`nki:${p2.seed}`), Object.keys(KIRCHE_MIN));
+    return gedreht2(S, scene2, { ...p2, variante: v }, kircheRoh, KIRCHE_MIN[v]);
   }
-  function rathausRoh(S, scene2, p) {
-    const r = rng2(`nrt:${p.seed}`);
-    const v = ["schauwand", "laube", "renaissance"].includes(p.variante) ? p.variante : waehle2(r, ["schauwand", "laube", "renaissance"]);
-    const W3 = p.w, D = p.d, T = Math.min(D - 2, 18), z0 = D - T;
+  function rathausRoh(S, scene2, p2) {
+    const r = rng2(`nrt:${p2.seed}`);
+    const v = ["schauwand", "laube", "renaissance"].includes(p2.variante) ? p2.variante : waehle2(r, ["schauwand", "laube", "renaissance"]);
+    const W3 = p2.w, D = p2.d, T = Math.min(D - 2, 18), z0 = D - T;
     const stein = waehle2(r, [...NF.backstein, ...NF.dunkel]), putz2 = "#ece6da", kupfer = waehle2(r, NF.kupfer), dach3 = waehle2(r, [...NF.ziegel, NF.dunkelziegel[0]]);
     const FF = R6(0, D, 1, 0, W3), FX = R6(W3, D, 0, -1, T), FXm = R6(0, z0, 0, 1, T), FR2 = R6(W3, z0, -1, 0, W3);
-    const vis = { f: sieht(p, FF), x: sieht(p, FX), xm: sieht(p, FXm), r: sieht(p, FR2) };
+    const vis = { f: sieht(p2, FF), x: sieht(p2, FX), xm: sieht(p2, FXm), r: sieht(p2, FR2) };
     const eg = 6.2, H = v === "laube" ? 11 : 12.5, dh = T * 0.55, m = 3, Gend = dh / ((2 * m + 1) / (2 * m + 2) * 0.93) + 0.3;
     const rueckLaube = v === "laube" && !vis.f && vis.r;
     S.quader(vis.xm ? 0.4 : 0, 0, rueckLaube ? z0 + 3.4 : vis.r ? z0 + 0.4 : z0, W3 - (vis.x ? 0.4 : 0), H, D - (v === "laube" ? 3.4 : 0.4), dunkler(stein, 0.06));
@@ -105329,8 +105936,8 @@
     }
     return { hoehe: top };
   }
-  function nordRathaus(S, scene2, p) {
-    return gedreht2(S, scene2, p, rathausRoh, [30, 20]);
+  function nordRathaus(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, rathausRoh, [30, 20]);
   }
   function bude(S, scene2, F2, u, y0, farbe2, text3) {
     fb3(S, F2, u - 2.2, u + 2.2, y0, y0 + 2.7, -3, 0, "#f3efe6");
@@ -105345,9 +105952,9 @@
       tisch(S, x, z2, y0);
     }
   }
-  function schuppen(S, scene2, p, x0, z0, x1, z1, y0, o) {
+  function schuppen(S, scene2, p2, x0, z0, x1, z1, y0, o) {
     const H = o.h ?? 8, wand2 = o.wand, dh = (z1 - z0) * 0.14;
-    koerper2(S, p, x0, z0, x1, z1, y0, y0 + H, dunkler(wand2, 0.1), (F2, s2) => {
+    koerper2(S, p2, x0, z0, x1, z1, y0, y0 + H, dunkler(wand2, 0.1), (F2, s2) => {
       const L2 = F2.L, oe = [];
       if (s2[1] === "z") for (const u of achsen4(0, L2, 7, 1)) {
         oe.push({ u0: u - 2.2, u1: u + 2.2, v0: y0 + 0.02, v1: y0 + 4.6, typ: "tuer", fuell: o.tor });
@@ -105390,10 +105997,10 @@
     S.box(1.1, 2.2, 0.2, x + rU * 0.71, y0 + 1.1, z2 + rU * 0.71, "#2f5243", -PI9 / 4);
     return y0 + h + 5;
   }
-  function hafenRoh(S, scene2, p) {
-    const r = rng2(`nhf:${p.seed}`);
-    const v = ["kai", "anleger", "leuchtturm", "fischmarkt"].includes(p.variante) ? p.variante : waehle2(r, ["kai", "anleger", "leuchtturm", "fischmarkt"]);
-    const W3 = p.w, D = p.d, Wa = v === "leuchtturm" ? D * 0.62 : D * 0.44, zK = D - Wa, yK = 0.3;
+  function hafenRoh(S, scene2, p2) {
+    const r = rng2(`nhf:${p2.seed}`);
+    const v = ["kai", "anleger", "leuchtturm", "fischmarkt"].includes(p2.variante) ? p2.variante : waehle2(r, ["kai", "anleger", "leuchtturm", "fischmarkt"]);
+    const W3 = p2.w, D = p2.d, Wa = v === "leuchtturm" ? D * 0.62 : D * 0.44, zK = D - Wa, yK = 0.3;
     becken(S, 0, zK, W3, D, W3, D, Math.floor(W3 / 6), r);
     let top = 8;
     const FK = R6(0, zK, 1, 0, W3);
@@ -105410,7 +106017,7 @@
     if (v === "kai") {
       for (const t of [-1, -6.2]) fb3(S, FK, 0, W3, yK + 0.05, yK + 0.14, t - 0.1, t + 0.1, "#5a6168");
       const zs = Math.max(2, zK - 9 - 16);
-      top = Math.max(top, schuppen(S, scene2, p, 3, zs, W3 - 3, zK - 9.5, yK, { wand: waehle2(r, ["#c9cfc9", "#b8c4c0", "#a9583f"]), tor: waehle2(r, ["#2f5243", "#3f4a52", "#7a2e2e"]), dach: "#7d848a", nr: `Schuppen ${10 + p.seed % 70}` }));
+      top = Math.max(top, schuppen(S, scene2, p2, 3, zs, W3 - 3, zK - 9.5, yK, { wand: waehle2(r, ["#c9cfc9", "#b8c4c0", "#a9583f"]), tor: waehle2(r, ["#2f5243", "#3f4a52", "#7a2e2e"]), dach: "#7d848a", nr: `Schuppen ${10 + p2.seed % 70}` }));
       const nk = Math.max(1, Math.min(3, Math.floor(W3 / 28))), kf = waehle2(r, ["#c8463c", "#e2b83b", "#2f6f8f"]);
       for (let i = 0; i < nk; i++) top = Math.max(top, yK + 8.4 + Math.sin(0.62) * Math.min(16, Wa - 2) + 1);
       for (let i = 0; i < nk; i++) wippkran(S, FK, (i + 0.5) * W3 / nk + zw(r, -3, 3), yK + 0.1, kf, Math.min(16, Wa - 2) / Math.cos(0.62) * 0.95, 0.62);
@@ -105455,7 +106062,7 @@
         bank3(S, 9 + i * 14, zK - 3.2, 0, yK);
       }
       const ax0 = W3 * 0.12, ax1 = W3 * 0.88, az1 = zK - 6, az0 = Math.max(1.5, az1 - 9), stn = "#e3d6bb";
-      koerper2(S, p, ax0, az0, ax1, az1, yK, yK + 7, dunkler(stn, 0.12), (F2, s2) => {
+      koerper2(S, p2, ax0, az0, ax1, az1, yK, yK + 7, dunkler(stn, 0.12), (F2, s2) => {
         const oe = [];
         for (const u of achsen4(0, F2.L, 4.2, 0.6)) oe.push({ u0: u - 1.5, u1: u + 1.5, v0: yK + 0.05, v1: yK + 4.6, art: "rund", typ: s2 === "+z" ? "nische" : "fenster", fuell: "#6b5a4a", tief: 1.8 }, fenster4(u, yK + 5.2, 1.6, 1.2, "rund"));
         lochwand3(S, F2, [0, yK, F2.L, yK + 7.6], oe, stn, { rahmen: WEISS });
@@ -105466,7 +106073,7 @@
       for (const [tx, kk] of [[ax0 + 3, 0], [ax1 - 3, 1], [(ax0 + ax1) / 2, 2]]) {
         const th = kk === 2 ? 15 : 11;
         S.quader(tx - 2.6, yK, az1 - 5.4, tx + 2.6, yK + th, az1 + 0.2, stn);
-        for (const F2 of seitenListe(p, tx - 2.6, az1 - 5.4, tx + 2.6, az1 + 0.2)) {
+        for (const F2 of seitenListe(p2, tx - 2.6, az1 - 5.4, tx + 2.6, az1 + 0.2)) {
           lochwand3(S, F2.F, [0, yK + 7.7, 5.2, yK + th], [fenster4(2.6, yK + th - 3.4, 1.2, 2.2, "rund")], stn, { rahmen: WEISS });
           if (kk === 2) fscheibe2(S, F2.F, 2.6, yK + 9.6, 0, 0.15, 1, "#f2efe6", 16);
         }
@@ -105499,7 +106106,7 @@
       const nh = Math.max(2, Math.floor(W3 * 0.55 / 8.5));
       for (let i = 0; i < nh; i++) {
         const hx = 3 + i * 8.5, hz0 = 2, hz1 = Math.min(zK - 6, hz0 + 7), wf = waehle2(r, ["#c9483e", "#2f6f8f", "#e2b83b", "#3f7d56", "#f2efe6"]), hw = 5.5;
-        koerper2(S, p, hx, hz0, hx + hw, hz1, yK, yK + 3, dunkler(wf, 0.1), (F2, s2) => {
+        koerper2(S, p2, hx, hz0, hx + hw, hz1, yK, yK + 3, dunkler(wf, 0.1), (F2, s2) => {
           const st = [];
           for (let u = 0.15; u < F2.L; u += 0.3) st.push([u - 0.03, yK + 0.1, u + 0.03, yK + 2.9]);
           lochwand3(S, F2, s2[1] === "z" ? [[0, yK], [F2.L, yK], [F2.L, yK + 3], [F2.L / 2, yK + 5.2], [0, yK + 3]] : [0, yK, F2.L, yK + 3], [s2 === "+z" ? { u0: F2.L / 2 - 0.6, u1: F2.L / 2 + 0.6, v0: yK + 0.05, v1: yK + 2.2, typ: "tuer", fuell: "#3a3f44" } : fenster4(F2.L / 2, yK + 1, 0.9, 0.9)], wf, { rahmen: WEISS });
@@ -105515,7 +106122,7 @@
       }
     } else {
       const stein = waehle2(r, NF.backstein), hx0 = 4, hx1 = W3 - 4, hz0 = 2, hz1 = Math.max(hz0 + 12, zK - 10), H = 9;
-      koerper2(S, p, hx0, hz0, hx1, hz1, yK, yK + H, dunkler(stein, 0.08), (F2, s2) => {
+      koerper2(S, p2, hx0, hz0, hx1, hz1, yK, yK + H, dunkler(stein, 0.08), (F2, s2) => {
         const L2 = F2.L, oe = [];
         for (const u of achsen4(0, L2, 5.5, 0.8)) oe.push({ u0: u - 1.8, u1: u + 1.8, v0: yK + 1, v1: yK + H - 1.2, art: "rund", typ: "fenster", sprosse: true });
         lochwand3(S, F2, s2[1] === "x" ? [[0, yK], [L2, yK], [L2, yK + H], [L2 / 2, yK + H + 4.5], [0, yK + H]] : [0, yK, L2, yK + H], oe, stein, { rahmen: WEISS });
@@ -105539,8 +106146,8 @@
     }
     return { hoehe: top, wasser: [0, zK, W3, D] };
   }
-  function nordHafen(S, scene2, p) {
-    return gedreht2(S, scene2, p, hafenRoh, [32, 30]);
+  function nordHafen(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, hafenRoh, [32, 30]);
   }
   function fluegel(S, F2, y, nab, laenge, phi, holz, gitter) {
     for (let k = 0; k < 4; k++) {
@@ -105552,14 +106159,14 @@
     }
     fscheibe2(S, F2, nab[0], y, -0.4, 0.3, 0.55, holz, 10);
   }
-  function muehleRoh(S, scene2, p) {
-    const r = rng2(`nwm:${p.seed}`);
-    const v = ["galerie", "erd", "bock"].includes(p.variante) ? p.variante : waehle2(r, ["galerie", "erd", "bock"]);
-    const W3 = p.w, D = p.d, cx = W3 / 2, cz = D * 0.48;
+  function muehleRoh(S, scene2, p2) {
+    const r = rng2(`nwm:${p2.seed}`);
+    const v = ["galerie", "erd", "bock"].includes(p2.variante) ? p2.variante : waehle2(r, ["galerie", "erd", "bock"]);
+    const W3 = p2.w, D = p2.d, cx = W3 / 2, cz = D * 0.48;
     boden4(S, 0, 0, W3, D, RASEN4, 0.3, 0.05);
     const holz = "#6b5640", gitter = "#e9e3d6", reet = waehle2(r, NF.reet), phi = zw(r, 0.1, 0.7);
     let top = 0;
-    const vorn = p.sieht(0, 1) ? 1 : -1;
+    const vorn = p2.sieht(0, 1) ? 1 : -1;
     if (v === "bock") {
       const by = 3.2, bh = 7, bw = 5, bd = 4.2;
       for (const [dx, dz] of [[-2.2, 0], [2.2, 0], [0, -2.2], [0, 2.2]]) balken4(S, [cx + dx, 0.3, cz + dz], [cx, by - 0.5, cz], 0.35, 0.35, holz);
@@ -105624,10 +106231,10 @@
       const g = dachProfil(10.4, 7.8, 3.6, 0.15, "x");
       g.translate(mx + 5, 3.4, 5.5);
       S.add(g, waehle2(r, NF.ziegel));
-      for (const s2 of seitenListe(p, mx, 2, mx + 10, 9)) lochwand3(S, s2.F, [0, 0, s2.F.L, 3.4], achsen4(0, s2.F.L, 2.6, 0.6).map((u, i) => i === 1 && s2.k === "+z" ? { u0: u - 0.5, u1: u + 0.5, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f5243" } : fenster4(u, 1, 0.9, 1.2)), waehle2(r, NF.backstein), { rahmen: WEISS });
+      for (const s2 of seitenListe(p2, mx, 2, mx + 10, 9)) lochwand3(S, s2.F, [0, 0, s2.F.L, 3.4], achsen4(0, s2.F.L, 2.6, 0.6).map((u, i) => i === 1 && s2.k === "+z" ? { u0: u - 0.5, u1: u + 0.5, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f5243" } : fenster4(u, 1, 0.9, 1.2)), waehle2(r, NF.backstein), { rahmen: WEISS });
     }
     boden4(S, cx - 1.1, cz, cx + 1.1, D, "#cbb88e", 0.3, 0.08);
-    for (const F2 of [R6(0.3, D - 0.3, 1, 0, W3 - 0.6), R6(W3 - 0.3, D - 0.3, 0, -1, D - 0.6)]) if (sieht(p, F2)) for (let u = 0.5; u < F2.L; u += 2.5) {
+    for (const F2 of [R6(0.3, D - 0.3, 1, 0, W3 - 0.6), R6(W3 - 0.3, D - 0.3, 0, -1, D - 0.6)]) if (sieht(p2, F2)) for (let u = 0.5; u < F2.L; u += 2.5) {
       const [x, z2] = wp3(F2, u, 0);
       S.box(0.15, 1.1, 0.15, x, 0.85, z2, "#7a5d43");
       if (u + 2.5 < F2.L) {
@@ -105645,12 +106252,12 @@
     for (let i = 0; i < 3; i++) baumN(S, r, i % 2 ? zw(r, 2, 6) : W3 - zw(r, 2, 6), zw(r, 3, D * 0.5), 0.9);
     return { hoehe: top };
   }
-  function seitenListe(p, x0, z0, x1, z1) {
+  function seitenListe(p2, x0, z0, x1, z1) {
     const sz = seiten(x0, z0, x1, z1);
-    return Object.entries(sz).filter(([, F2]) => sieht(p, F2)).map(([k, F2]) => ({ k, F: F2 }));
+    return Object.entries(sz).filter(([, F2]) => sieht(p2, F2)).map(([k, F2]) => ({ k, F: F2 }));
   }
-  function nordWindmuehle(S, scene2, p) {
-    return gedreht2(S, scene2, p, muehleRoh, [24, 24]);
+  function nordWindmuehle(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, muehleRoh, [24, 24]);
   }
   function fachwerk2(S, F2, L2, y0, y1, holz, o = {}) {
     const st = [], ri = [];
@@ -105660,15 +106267,15 @@
     platten(S, F2, [...st, ...ri], 0, 0.1, holz);
     if (o.streben) for (let u = 0; u + (o.raster ?? 1.25) <= L2; u += (o.raster ?? 1.25) * 3) fbalken(S, F2, u + 0.1, y0 + 0.2, u + (o.raster ?? 1.25) - 0.1, y1 - 0.2, 0.16, 0, 0.1, holz);
   }
-  function bauernhausRoh(S, scene2, p) {
-    const r = rng2(`nbh:${p.seed}`);
-    const v = ["fachhalle", "backstein", "friesen", "hof"].includes(p.variante) ? p.variante : waehle2(r, ["fachhalle", "backstein", "friesen", "hof"]);
-    const W3 = p.w, D = p.d, reet = waehle2(r, NF.reet), holz = "#4a3526", stein = waehle2(r, NF.backstein), first = "#6b5a45";
+  function bauernhausRoh(S, scene2, p2) {
+    const r = rng2(`nbh:${p2.seed}`);
+    const v = ["fachhalle", "backstein", "friesen", "hof"].includes(p2.variante) ? p2.variante : waehle2(r, ["fachhalle", "backstein", "friesen", "hof"]);
+    const W3 = p2.w, D = p2.d, reet = waehle2(r, NF.reet), holz = "#4a3526", stein = waehle2(r, NF.backstein), first = "#6b5a45";
     boden4(S, 0, 0, W3, D, RASEN4, 0.3, 0.05);
     let top = 0;
     if (v === "friesen") {
       const L2 = Math.min(W3 - 4, 24), B2 = Math.min(D - 6, 9), x0 = (W3 - L2) / 2, z1 = D - 4, z0 = z1 - B2, hw = 3, dh = B2 * 0.85, wand2 = "#f2eee5";
-      koerper2(S, p, x0, z0, x0 + L2, z1, 0, hw, dunkler(wand2, 0.1), (F2, s2) => {
+      koerper2(S, p2, x0, z0, x0 + L2, z1, 0, hw, dunkler(wand2, 0.1), (F2, s2) => {
         const oe = [];
         for (const [i, u] of achsen4(0, F2.L, 2.4, 0.8).entries()) oe.push(s2 === "+z" && i === Math.floor(F2.L / 2.4 / 2) ? { u0: u - 0.6, u1: u + 0.6, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f6f8f" } : fenster4(u, 0.9, 1.1, 1.3, null, { rahmen: WEISS }));
         lochwand3(S, F2, [0, 0, F2.L, hw], oe, wand2, { rahmen: "#3f7d56", bank: WEISS });
@@ -105713,7 +106320,7 @@
           fbalken(S, FG, B2 - 0.3, 2, B2 - 1.2, hw - 0.2, 0.15, 0, 0.1, holz);
         }
         fb3(S, FF, B2 / 2 - 1.8, B2 / 2 + 1.8, 4.5, 4.75, 0.1, 0.16, "#3a2a1e");
-        ftext3(scene2, FF, `Anno ${1720 + p.seed * 37 % 160}`, B2 / 2, 4.62, 0.17, 0.2, 3.2, "#f2e7c9");
+        ftext3(scene2, FF, `Anno ${1720 + p2.seed * 37 % 160}`, B2 / 2, 4.62, 0.17, 0.2, 3.2, "#f2e7c9");
         fb3(S, FF, B2 / 2 - 0.04, B2 / 2 + 0.04, 0.4, 4.3, 0.1, 0.14, "#e9e3d6");
         const yF = y0 + dh, uF = B2 / 2;
         const [px2, pz4] = wp3(FF, uF, -2.2 + 0.6);
@@ -105723,7 +106330,7 @@
       }
       for (const k of ["+x", "-x", "-z"]) {
         const F2 = sz[k];
-        if (!sieht(p, F2)) continue;
+        if (!sieht(p2, F2)) continue;
         const L2 = F2.L, oe = [];
         if (k !== "-z") {
           for (const [i, u] of achsen4(0.5, L2 - 0.5, 2.5, 0.3).entries()) oe.push(i === 3 ? { u0: u - 0.7, u1: u + 0.7, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#3c5a46" } : u < L2 * 0.45 ? fenster4(u, 1, 0.9, 1.1) : fenster4(u, 1.4, 0.7, 0.6, null, { sprosse: false }));
@@ -105735,7 +106342,7 @@
       S.quader(xh + B2 / 2 - 0.55, y0 + dh - 0.45, zb + B2 / 2, xh + B2 / 2 + 0.55, y0 + dh + 0.12, zf - 1.6, first);
       for (const sx of [-1, 1]) {
         const F2 = sx > 0 ? sz["+x"] : sz["-x"];
-        if (!sieht(p, F2)) continue;
+        if (!sieht(p2, F2)) continue;
         const neig = Math.atan2(dh, B2 / 2 + 0.7);
         for (let i = 0; i < Math.floor(Lh / 9); i++) {
           const zc = zb + 6 + i * 9, q2 = 0.4, xr = xh + B2 / 2 + sx * (B2 / 2 + 0.7) * (1 - q2), yr = y0 + dh * q2;
@@ -105756,7 +106363,7 @@
       if (v === "hof") {
         const sx0 = xh + B2 + 6, sx1 = W3 - 2, szb = 3, szf = Math.min(zf - 6, szb + 14);
         if (sx1 - sx0 > 6) {
-          koerper2(S, p, sx0, szb, sx1, szf, 0, 4.5, "#4a3a2c", (F2, s2) => {
+          koerper2(S, p2, sx0, szb, sx1, szf, 0, 4.5, "#4a3a2c", (F2, s2) => {
             const st = [];
             for (let u = 0.2; u < F2.L; u += 0.45) st.push([u - 0.04, 0.3, u + 0.04, 4.4]);
             lochwand3(S, F2, [0, 0, F2.L, 4.5], s2[1] === "z" ? [{ u0: F2.L / 2 - 1.8, u1: F2.L / 2 + 1.8, v0: 0.3, v1: 3.8, typ: "tuer", fuell: "#2e2620" }] : [], "#5b4636");
@@ -105782,9 +106389,9 @@
     }
     return { hoehe: top };
   }
-  function nordBauernhaus(S, scene2, p) {
-    const v = ["fachhalle", "backstein", "friesen", "hof"].includes(p.variante) ? p.variante : waehle2(rng2(`nbh:${p.seed}`), ["fachhalle", "backstein", "friesen", "hof"]);
-    return gedreht2(S, scene2, { ...p, variante: v }, bauernhausRoh, v === "friesen" ? [22, 16] : v === "hof" ? [34, 30] : [18, 26]);
+  function nordBauernhaus(S, scene2, p2) {
+    const v = ["fachhalle", "backstein", "friesen", "hof"].includes(p2.variante) ? p2.variante : waehle2(rng2(`nbh:${p2.seed}`), ["fachhalle", "backstein", "friesen", "hof"]);
+    return gedreht2(S, scene2, { ...p2, variante: v }, bauernhausRoh, v === "friesen" ? [22, 16] : v === "hof" ? [34, 30] : [18, 26]);
   }
   var VILLEN = ["Villa Seeblick", "Haus M\xF6we", "Villa Strandperle", "Pension Meeresrauschen", "Haus Ostseegru\xDF", "Villa D\xFCnenruh", "Haus Seestern", "Villa Bernstein", "Pension Strandgut"];
   function veranda(S, F2, u0, u1, y0, n, gh, t, holz, o = {}) {
@@ -105807,9 +106414,9 @@
       fgeo3(S, F2, g, o.dach);
     }
   }
-  function villa(S, scene2, p, r, x0, z0, x1, z1, o) {
+  function villa(S, scene2, p2, r, x0, z0, x1, z1, o) {
     const wand2 = o.wand, n = o.n, eg = 0.9, gh = 3.2, H = eg + n * gh, holz = o.holz, dach3 = o.dach, L2 = x1 - x0, T = z1 - z0;
-    const vis = koerper2(S, p, x0, z0, x1, z1, 0, H, dunkler(wand2, 0.08), (F2, s2) => {
+    const vis = koerper2(S, p2, x0, z0, x1, z1, 0, H, dunkler(wand2, 0.08), (F2, s2) => {
       const oe = [], front2 = s2 === "+z";
       for (let k = 0; k < n; k++) for (const [i, u] of achsen4(0, F2.L, 2.4, 0.6).entries()) oe.push(front2 && k === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL5, art: "segment" } : fenster4(u, eg + k * gh + 0.55, 1.1, 2, "segment"));
       lochwand3(S, F2, [0, 0, F2.L, H], oe, wand2, { rahmen: WEISS, bank: WEISS });
@@ -105861,10 +106468,10 @@
     for (const s2 of [-1, 1]) fb3(S, F2, s2 * 0.7 - 0.06, s2 * 0.7 + 0.06, y0 + 0.75, y0 + 1.25, -0.55, 0.3, "#e3d3a8");
     fb3(S, F2, -0.72, 0.72, y0 + 1.42, y0 + 1.55, -0.62, 0.17, "#f4f1ea");
   }
-  function strandRoh(S, scene2, p) {
-    const r = rng2(`nst:${p.seed}`);
-    const v = ["villen", "kurhaus", "seebruecke"].includes(p.variante) ? p.variante : waehle2(r, ["villen", "kurhaus", "seebruecke"]);
-    const W3 = p.w, D = p.d, Dv = Math.min(D * 0.46, 22), zP = Dv + 1, zS = zP + 6, zW = D - Math.max(4, D * 0.16);
+  function strandRoh(S, scene2, p2) {
+    const r = rng2(`nst:${p2.seed}`);
+    const v = ["villen", "kurhaus", "seebruecke"].includes(p2.variante) ? p2.variante : waehle2(r, ["villen", "kurhaus", "seebruecke"]);
+    const W3 = p2.w, D = p2.d, Dv = Math.min(D * 0.46, 22), zP = Dv + 1, zS = zP + 6, zW = D - Math.max(4, D * 0.16);
     boden4(S, 0, 0, W3, Dv + 1, RASEN23, 0.3, 0.05);
     boden4(S, 0, zP, W3, zS, "#d9d2c2", 0.3, 0.1);
     S.quader(0, 0.3, zS - 0.4, W3, 0.7, zS, "#e9e6de");
@@ -105879,7 +106486,7 @@
     let top = 6;
     if (v === "kurhaus") {
       const L2 = Math.min(W3 - 6, 70), x0 = (W3 - L2) / 2, z0 = 2, z1 = Dv - 1, H = 0.9 + 3 * 3.6, wand2 = "#f6f4ee";
-      koerper2(S, p, x0, z0, x0 + L2, z1, 0, H, "#d9d6cf", (F2, s2) => {
+      koerper2(S, p2, x0, z0, x0 + L2, z1, 0, H, "#d9d6cf", (F2, s2) => {
         const oe = raster2(0, F2.L, 3, 0.9, 3, 3.6, 1.4, 2.4, "rund", 0.8, 0.5);
         lochwand3(S, F2, [0, 0, F2.L, H + 1.2], oe, wand2, { rahmen: WEISS, bank: WEISS });
         platten(S, F2, [[0, 0, F2.L, 0.9], [-0.2, H - 0.3, F2.L + 0.2, H + 0.1], [-0.1, 0.9 + 3.6 - 0.15, F2.L + 0.1, 0.9 + 3.6 + 0.1]], 0, 0.2, "#e9e3d6");
@@ -105918,7 +106525,7 @@
       for (let i = 0; i < nvil; i++) {
         if (v === "seebruecke" && nvil > 2 && i === Math.floor(nvil / 2)) continue;
         const L2 = Math.min(bv - 3, 16), x0 = i * bv + (bv - L2) / 2, z1 = Dv - 2.5, z0 = Math.max(1, z1 - 13);
-        top = Math.max(top, villa(S, scene2, p, r, x0, z0, x0 + L2, z1, { wand: r() < 0.7 ? "#f7f5ef" : waehle2(r, ["#f3e8cf", "#e3edf1", "#f1e1df"]), n: 2 + Math.floor(r() * 2), holz: r() < 0.6 ? "#f7f5ef" : waehle2(r, ["#cfe0e6", "#d9e7d2"]), dach: waehle2(r, dachN), turm: r() < 0.45, name: VILLEN[(p.seed + i * 3) % VILLEN.length] }));
+        top = Math.max(top, villa(S, scene2, p2, r, x0, z0, x0 + L2, z1, { wand: r() < 0.7 ? "#f7f5ef" : waehle2(r, ["#f3e8cf", "#e3edf1", "#f1e1df"]), n: 2 + Math.floor(r() * 2), holz: r() < 0.6 ? "#f7f5ef" : waehle2(r, ["#cfe0e6", "#d9e7d2"]), dach: waehle2(r, dachN), turm: r() < 0.45, name: VILLEN[(p2.seed + i * 3) % VILLEN.length] }));
         zaun2(S, R6(i * bv + 0.5, Dv + 0.6, 1, 0, bv - 1), 0, bv - 1, 0, WEISS, 0.9);
         busch4(S, r, i * bv + 2, Dv - 1, 0.9);
         busch4(S, r, (i + 1) * bv - 2, Dv - 1.2, 1);
@@ -105946,8 +106553,8 @@
     const kf = ["#2f6f8f", "#c9483e", "#3f7d56", "#e2b83b", "#1f3a5f", "#e07a3f"];
     for (let z2 = zS + 2.5; z2 < zW - 2; z2 += 3.4) for (let x = 3 + z2 * 7 % 3; x < W3 - 2; x += 3.2) {
       if (v === "seebruecke" && Math.abs(x - W3 / 2) < 4.5) continue;
-      if (hash3(Math.round(x * 10), Math.round(z2 * 10), p.seed) % 5 < 2) continue;
-      strandkorb(S, x, z2, 0.36, kf[hash3(Math.round(x), Math.round(z2)) % kf.length], 0);
+      if (hash4(Math.round(x * 10), Math.round(z2 * 10), p2.seed) % 5 < 2) continue;
+      strandkorb(S, x, z2, 0.36, kf[hash4(Math.round(x), Math.round(z2)) % kf.length], 0);
     }
     if (W3 > 30) {
       const tx = v === "seebruecke" ? W3 * 0.2 : W3 * 0.5, tz = zW - 3;
@@ -105964,8 +106571,8 @@
     }
     return { hoehe: top, wasser: wasserR };
   }
-  function nordStrandpromenade(S, scene2, p) {
-    return gedreht2(S, scene2, p, strandRoh, [36, 44]);
+  function nordStrandpromenade(S, scene2, p2) {
+    return gedreht2(S, scene2, p2, strandRoh, [36, 44]);
   }
   var NORD_SLOTS = {
     "slot:nord_giebelhaus": nordGiebelhaus,
@@ -106323,39 +106930,39 @@
     }
     if (art === "giebel" && b2.hof && b2.hof.art === "gruen" && rb() < 0.4) b2.hof.art = "pflaster";
   }
-  function parzelleMarkieren2(p, bl, E) {
-    p.stilProfil = "nord";
-    p.nordArt = bl?.nordArt ?? (bl && E.nordArt ? E.nordArt(bl.i0, bl.j0) : null) ?? "rand";
-    p.nordEinkauf = !!bl?.nordEinkauf;
-    p.nordTyp = E.nord;
-    p.giebelV = E.giebelV;
-    p.reihenV = E.reihenV;
-    p.waV = E.waV;
-    if (p.typ === "slot:rathaus") Object.assign(p, { typ: "slot:nord_rathaus", sonder: "nord_rathaus", variante: E.rathausV, front: [p.front?.[0] ?? "+z"] });
+  function parzelleMarkieren2(p2, bl, E) {
+    p2.stilProfil = "nord";
+    p2.nordArt = bl?.nordArt ?? (bl && E.nordArt ? E.nordArt(bl.i0, bl.j0) : null) ?? "rand";
+    p2.nordEinkauf = !!bl?.nordEinkauf;
+    p2.nordTyp = E.nord;
+    p2.giebelV = E.giebelV;
+    p2.reihenV = E.reihenV;
+    p2.waV = E.waV;
+    if (p2.typ === "slot:rathaus") Object.assign(p2, { typ: "slot:nord_rathaus", sonder: "nord_rathaus", variante: E.rathausV, front: [p2.front?.[0] ?? "+z"] });
   }
-  function nordBau(p, typ, variante2, stil, geschosse2, extra = {}) {
+  function nordBau(p2, typ, variante2, stil, geschosse2, extra = {}) {
     return {
       bau: (S, scene2, q2) => {
-        const e = NORD_SLOTS[typ](S, scene2, { ...q2, front: p.front?.[0] ?? "+z", variante: variante2, ...extra });
+        const e = NORD_SLOTS[typ](S, scene2, { ...q2, front: p2.front?.[0] ?? "+z", variante: variante2, ...extra });
         return { hoehe: e.hoehe, stil, geschosse: geschosse2, farbe: null };
       }
     };
   }
-  function nordStil(p) {
-    const r = rng2((p.seed ?? 1) * 2654435761 + 4243 >>> 0);
-    const art = p.nordArt ?? "rand";
-    const eck = p.typ === "eck", hof2 = p.typ === "hofhaus";
-    const f = p.front?.[0] ?? "+z";
-    const L2 = f[1] === "x" ? p.d : p.w, T = f[1] === "x" ? p.w : p.d;
-    const metro = p.cluster === "metropole", klein = p.cluster === "mittelstadt";
+  function nordStil(p2) {
+    const r = rng2((p2.seed ?? 1) * 2654435761 + 4243 >>> 0);
+    const art = p2.nordArt ?? "rand";
+    const eck = p2.typ === "eck", hof2 = p2.typ === "hofhaus";
+    const f = p2.front?.[0] ?? "+z";
+    const L2 = f[1] === "x" ? p2.d : p2.w, T = f[1] === "x" ? p2.w : p2.d;
+    const metro = p2.cluster === "metropole", klein = p2.cluster === "mittelstadt";
     const g = (a, b2) => Math.round(a + (b2 - a) * r()) + (metro ? 1 : 0) - (klein && b2 > 3 ? 1 : 0);
     const haus2 = (stil, geschosse2) => ({ stil, geschosse: Math.max(2, Math.min(7, geschosse2)), region: "Nord" });
     if (hof2) return haus2(r() < 0.7 ? "backstein" : "fuenfziger", 2);
-    const zeile2 = !eck && p.front?.length === 1 && T >= 10;
+    const zeile2 = !eck && p2.front?.length === 1 && T >= 10;
     if (art === "giebel" || art === "fachwerk") {
       if (zeile2 && L2 >= 6.5) {
         if (art === "fachwerk" && r() < 0.55) return haus2("fachwerk", g(2, 3));
-        return nordBau(p, "slot:nord_giebelhaus", art === "fachwerk" ? "pastell" : r() < 0.18 ? "pastell" : p.giebelV, "nordgiebel", 3, { laden: p.nordEinkauf ? 0.85 : void 0 });
+        return nordBau(p2, "slot:nord_giebelhaus", art === "fachwerk" ? "pastell" : r() < 0.18 ? "pastell" : p2.giebelV, "nordgiebel", 3, { laden: p2.nordEinkauf ? 0.85 : void 0 });
       }
       return haus2(art === "fachwerk" && r() < 0.5 ? "fachwerk" : "backstein", g(3, 4));
     }
@@ -106366,25 +106973,25 @@
     if (art === "wiederaufbau") {
       if (eck) return haus2(r() < 0.8 ? "backstein" : "fuenfziger", g(4, 5));
       if (zeile2 && L2 >= 12 && r() < 0.9) {
-        const v = p.nordEinkauf && r() < 0.6 ? "geschaeft" : waehle2(r, p.waV ?? ["kiel", "hannover"]);
-        return nordBau(p, "slot:nord_wiederaufbau", v, "nordwa", 4);
+        const v = p2.nordEinkauf && r() < 0.6 ? "geschaeft" : waehle2(r, p2.waV ?? ["kiel", "hannover"]);
+        return nordBau(p2, "slot:nord_wiederaufbau", v, "nordwa", 4);
       }
       return haus2(wahlGewichtet3(r, [["backstein", 3], ["fuenfziger", 0.8], ["wiederaufbau", 0.5]]), g(3, 5));
     }
     if (art === "klinker") {
-      if (zeile2 && L2 >= 10 && r() < 0.8) return nordBau(p, "slot:nord_reihenhaus", waehle2(r, p.reihenV ?? ["schumacher"]), "nordklinker", 3);
+      if (zeile2 && L2 >= 10 && r() < 0.8) return nordBau(p2, "slot:nord_reihenhaus", waehle2(r, p2.reihenV ?? ["schumacher"]), "nordklinker", 3);
       if (eck) return haus2(r() < 0.7 ? "backstein" : "gruenderzeit", g(3, 5));
       return haus2(wahlGewichtet3(r, [["backstein", 3], ["gruenderzeit", 1.4], ["jugendstil", 0.5], ["fuenfziger", 0.6]]), g(3, 5));
     }
-    if (zeile2 && L2 >= 10 && r() < 0.75) return nordBau(p, "slot:nord_reihenhaus", r() < 0.6 ? "siedlung" : waehle2(r, p.reihenV ?? ["schumacher"]), "nordklinker", 2);
+    if (zeile2 && L2 >= 10 && r() < 0.75) return nordBau(p2, "slot:nord_reihenhaus", r() < 0.6 ? "siedlung" : waehle2(r, p2.reihenV ?? ["schumacher"]), "nordklinker", 2);
     return haus2(wahlGewichtet3(r, [["backstein", 2.2], ["fuenfziger", 1.2], ["siebziger", 0.5], ["neubau", 0.6], ["wiederaufbau", 0.6]]), g(2, 4));
   }
-  registriereStilProfil("nord", (p) => nordStil(p));
+  registriereStilProfil("nord", (p2) => nordStil(p2));
   function ohne(R9, L2) {
     const [x0, z0, x1, z1] = R9;
     const a0 = Math.max(L2[0], x0), a1 = Math.min(L2[2], x1), b0 = Math.max(L2[1], z0), b1 = Math.min(L2[3], z1);
     if (a0 >= a1 - 0.01 || b0 >= b1 - 0.01) return [R9];
-    return [[x0, z0, x1, b0], [x0, b1, x1, z1], [x0, b0, a0, b1], [a1, b0, x1, b1]].filter(([p, q2, s2, t]) => s2 - p > 0.01 && t - q2 > 0.01);
+    return [[x0, z0, x1, b0], [x0, b1, x1, z1], [x0, b0, a0, b1], [a1, b0, x1, b1]].filter(([p2, q2, s2, t]) => s2 - p2 > 0.01 && t - q2 > 0.01);
   }
   function plattePlusWasser(ctx, b2, wasser2, B2, farbe2) {
     const { S } = ctx;
@@ -106459,7 +107066,7 @@
     if (b2.art === "speicherzeile") {
       for (let i = 0, n = Math.round((b2.w + b2.d) / 10 * ctx.dichte); i < n; i++) {
         const x = B2.zw(r, b2.x + 1, b2.x + b2.w - 1), z2 = B2.zw(r, b2.z + 1, b2.z + b2.d - 1);
-        if (!(ctx.proBlock.get(b2.id) ?? []).some((p) => B2.imRechteck(x, z2, p, 0.6))) B2.figur(I, x, 0.32, z2, r);
+        if (!(ctx.proBlock.get(b2.id) ?? []).some((p2) => B2.imRechteck(x, z2, p2, 0.6))) B2.figur(I, x, 0.32, z2, r);
       }
       return;
     }
@@ -106496,8 +107103,8 @@
     const { I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, "#d8d0c0", 5);
-    const k = teile.find((p) => p.typ === "slot:nord_kirche");
-    const frei6 = (x, z2, rad2) => !teile.some((p) => B2.imRechteck(x, z2, p, rad2));
+    const k = teile.find((p2) => p2.typ === "slot:nord_kirche");
+    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     for (let x = P2.x + 4; x < P2.x + P2.w - 3; x += 8.5) {
       const z2 = P2.z + P2.d - 3.2;
       if (frei6(x, z2, 2.6)) B2.baumSetzen(I, "linde", x, y, z2, r, 0.85, true);
@@ -106523,7 +107130,7 @@
   function bodenMuehle(ctx, b2, r, teile, B2) {
     const { S, I } = ctx;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.36, b2.z + b2.d, "#a9cc8c");
-    const zf = Math.min(...teile.map((p) => p.z), b2.z + b2.d) - 2;
+    const zf = Math.min(...teile.map((p2) => p2.z), b2.z + b2.d) - 2;
     const farben = ["#d9c87a", "#b9cf7e", "#c9b46a", "#9fc27a"];
     let x = b2.x + 2, k = 0;
     while (x < b2.x + b2.w - 6 && zf - b2.z > 8) {
@@ -106532,11 +107139,11 @@
       for (let q2 = x + 1.5; q2 < x + w - 2; q2 += 2.4) S.quader(q2, 0.42, b2.z + 2.5, q2 + 0.5, 0.46, zf - 0.5, "#c2ad5e");
       x += w;
     }
-    for (let u = b2.x + 2; u < b2.x + b2.w - 2; u += 2.2) if (!teile.some((p) => B2.imRechteck(u, b2.z + b2.d - 1, p, 1))) I.setze("busch", u, 0.36, b2.z + b2.d - 1, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
-    for (let u = b2.z + 2; u < b2.z + b2.d - 2; u += 2.2) if (!teile.some((p) => B2.imRechteck(b2.x + b2.w - 1, u, p, 1))) I.setze("busch", b2.x + b2.w - 1, 0.36, u, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
+    for (let u = b2.x + 2; u < b2.x + b2.w - 2; u += 2.2) if (!teile.some((p2) => B2.imRechteck(u, b2.z + b2.d - 1, p2, 1))) I.setze("busch", u, 0.36, b2.z + b2.d - 1, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
+    for (let u = b2.z + 2; u < b2.z + b2.d - 2; u += 2.2) if (!teile.some((p2) => B2.imRechteck(b2.x + b2.w - 1, u, p2, 1))) I.setze("busch", b2.x + b2.w - 1, 0.36, u, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
     for (let i = 0; i < 5; i++) {
       const xx = B2.zw(r, b2.x + 3, b2.x + b2.w - 3), zz = B2.zw(r, b2.z + 3, b2.z + b2.d - 3);
-      if (!teile.some((p) => B2.imRechteck(xx, zz, p, 3))) B2.baumSetzen(I, waehle2(r, ["linde", "kastanie", "pappel"]), xx, 0.36, zz, r, 1);
+      if (!teile.some((p2) => B2.imRechteck(xx, zz, p2, 3))) B2.baumSetzen(I, waehle2(r, ["linde", "kastanie", "pappel"]), xx, 0.36, zz, r, 1);
     }
   }
   registriereSlots(NORD_SLOTS);
@@ -106622,25 +107229,25 @@
     s2.lineTo(u0, v0);
     return s2;
   }
-  function oeffnung3(p, u0, v0, u1, v1, art) {
-    p.moveTo(u0, v0);
-    p.lineTo(u1, v0);
+  function oeffnung3(p2, u0, v0, u1, v1, art) {
+    p2.moveTo(u0, v0);
+    p2.lineTo(u1, v0);
     const b2 = u1 - u0;
     if (art === "spitz") {
       const vs2 = v1 - b2 * 0.866;
-      p.lineTo(u1, vs2);
-      p.absarc(u0, vs2, b2, 0, PI10 / 3, false);
-      p.absarc(u1, vs2, b2, 2 * PI10 / 3, PI10, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc(u0, vs2, b2, 0, PI10 / 3, false);
+      p2.absarc(u1, vs2, b2, 2 * PI10 / 3, PI10, false);
     } else if (art) {
       const vs2 = v1 - b2 / 2;
-      p.lineTo(u1, vs2);
-      p.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI10, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI10, false);
     } else {
-      p.lineTo(u1, v1);
-      p.lineTo(u0, v1);
+      p2.lineTo(u1, v1);
+      p2.lineTo(u0, v1);
     }
-    p.lineTo(u0, v0);
-    return p;
+    p2.lineTo(u0, v0);
+    return p2;
   }
   function fform3(S, F2, shape, t0, t1, c, seg = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg });
@@ -106651,9 +107258,9 @@
     const s2 = rechteck5(u0, y0, u1, y1);
     for (const l of loecher) {
       if (l.kreis) {
-        const p = new three_module_exports.Path();
-        p.absarc(l.kreis[0], l.kreis[1], l.kreis[2], 0, 2 * PI10, true);
-        s2.holes.push(p);
+        const p2 = new three_module_exports.Path();
+        p2.absarc(l.kreis[0], l.kreis[1], l.kreis[2], 0, 2 * PI10, true);
+        s2.holes.push(p2);
       } else s2.holes.push(oeffnung3(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
     }
     fform3(S, F2, s2, t0, t1, c);
@@ -106750,11 +107357,11 @@
     const st = (u1 - u0 - 2 * rand) / n;
     return Array.from({ length: n }, (_, i) => u0 + rand + st * (i + 0.5));
   }
-  function sieht2(p, nx, nz) {
-    const b2 = p.blick ?? [1, 1];
+  function sieht2(p2, nx, nz) {
+    const b2 = p2.blick ?? [1, 1];
     return nx * b2[0] + nz * b2[1] > 0.05;
   }
-  var sichtF = (p, F2) => sieht2(p, F2.nx, F2.nz);
+  var sichtF = (p2, F2) => sieht2(p2, F2.nx, F2.nz);
   function vierSeiten(x0, z0, w, d) {
     return {
       "+z": R7(x0, z0 + d, 1, 0, w),
@@ -106763,8 +107370,8 @@
       "-x": R7(x0, z0, 0, 1, d)
     };
   }
-  function seiten2(p, x0, z0, w, d, nur = null) {
-    return Object.entries(vierSeiten(x0, z0, w, d)).filter(([k, F2]) => (!nur || nur.includes(k)) && sichtF(p, F2));
+  function seiten2(p2, x0, z0, w, d, nur = null) {
+    return Object.entries(vierSeiten(x0, z0, w, d)).filter(([k, F2]) => (!nur || nur.includes(k)) && sichtF(p2, F2));
   }
   function satteldach4(S, x0, z0, x1, z1, y, hg, achse, dachF, wandF, ue = 0.45) {
     const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
@@ -106888,18 +107495,18 @@
   }
   var WINKEL2 = { "+z": 0, "+x": PI10 / 2, "-z": PI10, "-x": -PI10 / 2 };
   function slot2(name2, varianten, masse3, bau2) {
-    return (S, scene2, p) => {
-      const v = varianten.includes(p.variante) ? p.variante : waehle2(rng2(`${name2}:${p.seed ?? 1}`), varianten);
-      const front2 = WINKEL2[p.front] !== void 0 ? p.front : "+z", th = WINKEL2[front2];
+    return (S, scene2, p2) => {
+      const v = varianten.includes(p2.variante) ? p2.variante : waehle2(rng2(`${name2}:${p2.seed ?? 1}`), varianten);
+      const front2 = WINKEL2[p2.front] !== void 0 ? p2.front : "+z", th = WINKEL2[front2];
       const quer2 = front2 === "+x" || front2 === "-x";
-      const LW = quer2 ? p.d : p.w, LD = quer2 ? p.w : p.d;
+      const LW = quer2 ? p2.d : p2.w, LD = quer2 ? p2.w : p2.d;
       const m = masse3[v] ?? masse3.alle;
       const s2 = Math.min(1, LW / m.min[0], LD / m.min[1]);
       const nw = Math.min(Math.max(LW / s2, m.min[0]), m.max[0]), nd = Math.min(Math.max(LD / s2, m.min[1]), m.max[1]);
       const c = Math.cos(th), sn = Math.sin(th);
       const T = new Sammler(), innen = new three_module_exports.Group(), aussen = new three_module_exports.Group();
-      const erg = bau2(T, innen, { ...p, x: 0, z: 0, w: nw, d: nd, variante: v, front: "+z", blick: [c - sn, sn + c], skala: s2 });
-      const cx = p.x + p.w / 2, cz = p.z + p.d / 2;
+      const erg = bau2(T, innen, { ...p2, x: 0, z: 0, w: nw, d: nd, variante: v, front: "+z", blick: [c - sn, sn + c], skala: s2 });
+      const cx = p2.x + p2.w / 2, cz = p2.z + p2.d / 2;
       for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.translate(-nw / 2, -0.3, -nd / 2);
         g.scale(s2, s2, s2);
@@ -106907,7 +107514,7 @@
         g.translate(cx, 0.3, cz);
         S.add(g, farbe2);
       }
-      if (nw * s2 < LW - 0.5 || nd * s2 < LD - 0.5) S.quader(p.x, 0.3, p.z, p.x + p.w, 0.34, p.z + p.d, PFLASTER4);
+      if (nw * s2 < LW - 0.5 || nd * s2 < LD - 0.5) S.quader(p2.x, 0.3, p2.z, p2.x + p2.w, 0.34, p2.z + p2.d, PFLASTER4);
       innen.position.set(-nw / 2, -0.3, -nd / 2);
       aussen.add(innen);
       aussen.scale.setScalar(s2);
@@ -106925,12 +107532,12 @@
     ["Bankhaus Feldberg", "#4f6b3a", "monogramm"],
     ["Kaiserhof Invest", "#5a3f6f", "monogramm"]
   ];
-  function podium(S, scene2, p, x0, z0, w, d, h, o = {}) {
+  function podium(S, scene2, p2, x0, z0, w, d, h, o = {}) {
     const stein = o.stein ?? "#d7d2c8";
     S.quader(x0, 0, z0, x0 + w, h, z0 + d, GLAS_HELL6);
     S.quader(x0 - 0.3, h, z0 - 0.3, x0 + w + 0.3, h + 1, z0 + d + 0.3, stein);
     S.quader(x0 + 1, h + 1, z0 + 1, x0 + w - 1, h + 1.2, z0 + d - 1, "#b9b6ae");
-    for (const [k, F2] of seiten2(p, x0, z0, w, d)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, w, d)) {
       for (const u of achsen5(0, F2.L, 3, 0)) fb4(S, F2, u - 0.15, u + 0.15, 0.3, h, 0, 0.25, stein);
       fb4(S, F2, 0, F2.L, h * 0.5 - 0.1, h * 0.5 + 0.1, 0, 0.2, stein);
       if (k === "+z") {
@@ -106940,16 +107547,16 @@
       }
     }
   }
-  function turmRaster(S, scene2, p, r, cx, cz, o = {}) {
+  function turmRaster(S, scene2, p2, r, cx, cz, o = {}) {
     const a = o.a ?? 28, b2 = o.b ?? 24, n = o.n ?? 34, gh = 3.6, pod = 8;
     const pal = o.pal ?? waehle2(r, ["weiss", "bronze"]);
     const glas2 = pal === "weiss" ? "#3f4c57" : "#4a4a45", band = pal === "weiss" ? "#ecebe6" : "#7a6650", fin = pal === "weiss" ? "#e2e1dc" : "#6b5a48";
     const x0 = cx - a / 2, z0 = cz - b2 / 2, H = pod + n * gh;
-    if (o.podium !== false) podium(S, scene2, p, x0 - 6, z0 - 4, a + 12, b2 + 10, pod - 1, { stein: pal === "weiss" ? "#e3e1db" : "#c9b9a3" });
+    if (o.podium !== false) podium(S, scene2, p2, x0 - 6, z0 - 4, a + 12, b2 + 10, pod - 1, { stein: pal === "weiss" ? "#e3e1db" : "#c9b9a3" });
     const f = 2.2, pts = [[x0 + f, z0 + b2], [x0 + a - f, z0 + b2], [x0 + a, z0 + b2 - f], [x0 + a, z0 + f], [x0 + a - f, z0], [x0 + f, z0], [x0, z0 + f], [x0, z0 + b2 - f]];
     prisma3(S, pts, 0, H, glas2);
     for (const F2 of kanten2(pts)) {
-      if (!sichtF(p, F2)) continue;
+      if (!sichtF(p2, F2)) continue;
       if (F2.L > 4) {
         for (let y = pod + gh, i = 0; y < H - 2 * gh; y += gh, i++) fb4(S, F2, 0, F2.L, y - 1, y, 0, 0.35, band);
         for (const u of achsen5(0, F2.L, 3, 0.2)) fb4(S, F2, u - 0.2, u + 0.2, pod, H - 2 * gh, 0, 0.55, fin);
@@ -106960,27 +107567,27 @@
     S.quader(cx - a * 0.32, H + 4.5, cz - b2 * 0.32, cx + a * 0.32, H + 4.9, cz + b2 * 0.32, dunkler(band, 0.1));
     zyl8(S, 0.3, 0.5, 16, cx + a * 0.15, H + 4.9, cz, "#d9dcdf", 6);
     const [name2, farbe2] = o.bank ?? waehle2(r, BANKEN);
-    for (const [k, F2] of seiten2(p, x0, z0, a, b2)) logo(S, scene2, teil4(F2, f, F2.L - f), (F2.L - 2 * f) / 2, H - gh, 0.45, 4.2, farbe2, null);
-    if (o.podium !== false) for (const [k, F2] of seiten2(p, x0 - 6, z0 - 4, a + 12, b2 + 10)) ftext4(scene2, F2, name2, F2.L / 2, pod - 1.9, 0.42, 1.6, F2.L * 0.7, "#ffffff", farbe2);
+    for (const [k, F2] of seiten2(p2, x0, z0, a, b2)) logo(S, scene2, teil4(F2, f, F2.L - f), (F2.L - 2 * f) / 2, H - gh, 0.45, 4.2, farbe2, null);
+    if (o.podium !== false) for (const [k, F2] of seiten2(p2, x0 - 6, z0 - 4, a + 12, b2 + 10)) ftext4(scene2, F2, name2, F2.L / 2, pod - 1.9, 0.42, 1.6, F2.L * 0.7, "#ffffff", farbe2);
     return H + 21;
   }
-  function turmZwilling(S, scene2, p, r, cx, cz, o = {}) {
+  function turmZwilling(S, scene2, p2, r, cx, cz, o = {}) {
     const n = o.n ?? 40, gh = 3.75, pod = 9, H = pod + n * gh, a = o.a ?? 17, b2 = o.b ?? 26, sp = o.abstand ?? 6;
     const glas2 = ["#80928a", "#768a83"], linie2 = "#c3cbc4", stein = "#e2ded4";
     const [name2, farbe2] = o.bank ?? BANKEN[0];
-    if (o.podium !== false) podium(S, scene2, p, cx - a - sp / 2 - 4, cz - b2 / 2 - 4, 2 * a + sp + 8, b2 + 8, pod - 1, { stein: "#dcdcd8" });
+    if (o.podium !== false) podium(S, scene2, p2, cx - a - sp / 2 - 4, cz - b2 / 2 - 4, 2 * a + sp + 8, b2 + 8, pod - 1, { stein: "#dcdcd8" });
     const turm4 = (x0, z0, ht, i) => {
       const st = 3 * gh, e = 1.6, Hs = ht - st;
       S.quader(x0, 0, z0, x0 + a, Hs, z0 + b2, glas2[i]);
       S.quader(x0 + e, Hs, z0 + e, x0 + a - e, ht, z0 + b2 - e, glas2[i]);
-      for (const [k, F2] of seiten2(p, x0, z0, a, b2)) {
+      for (const [k, F2] of seiten2(p2, x0, z0, a, b2)) {
         for (let y = pod + gh; y < Hs - 1; y += gh) fb4(S, F2, 0, F2.L, y - 0.22, y, 0, 0.08, linie2);
         for (const u of achsen5(1.2, F2.L - 1.2, 3, 0)) fb4(S, F2, u - 0.07, u + 0.07, pod, Hs, 0, 0.12, dunkler(glas2[i], 0.12));
         fb4(S, F2, -0.05, 1.2, pod - 1, Hs + 0.6, 0, 0.35, stein);
         fb4(S, F2, F2.L - 1.2, F2.L + 0.05, pod - 1, Hs + 0.6, 0, 0.35, stein);
         fb4(S, F2, -0.05, F2.L + 0.05, Hs, Hs + 0.6, 0, 0.35, stein);
       }
-      for (const [k, F2] of seiten2(p, x0 + e, z0 + e, a - 2 * e, b2 - 2 * e)) {
+      for (const [k, F2] of seiten2(p2, x0 + e, z0 + e, a - 2 * e, b2 - 2 * e)) {
         for (let y = Hs + gh; y < ht; y += gh) fb4(S, F2, 0, F2.L, y - 0.22, y, 0, 0.08, linie2);
         fb4(S, F2, -0.05, F2.L + 0.05, ht - 0.5, ht, 0, 0.3, stein);
       }
@@ -106991,22 +107598,22 @@
     turm4(cx + sp / 2, cz - b2 / 2, H2, 1);
     S.quader(cx - sp / 2 - 0.1, pod, cz - b2 * 0.3, cx + sp / 2 + 0.1, pod + 3 * gh, cz + b2 * 0.3, GLAS_HELL6);
     for (let y = pod + gh; y <= pod + 3 * gh; y += gh) S.quader(cx - sp / 2, y - 0.3, cz - b2 * 0.3 - 0.05, cx + sp / 2, y, cz + b2 * 0.3 + 0.05, stein);
-    for (const [k, F2] of seiten2(p, cx - sp / 2 - a, cz - b2 / 2, a, b2, ["+z", "-z"])) logo(S, scene2, F2, F2.L / 2, H - 3 * gh - 3, 0.36, 4, farbe2, null);
-    for (const [k, F2] of seiten2(p, cx + sp / 2, cz - b2 / 2, a, b2, ["+x", "-x"])) logo(S, scene2, F2, F2.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe2, null);
-    for (const [k, F2] of seiten2(p, cx - a - sp / 2 - 4, cz - b2 / 2 - 4, 2 * a + sp + 8, b2 + 8, ["+z", "-z"])) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.6, 26, "#ffffff", farbe2);
+    for (const [k, F2] of seiten2(p2, cx - sp / 2 - a, cz - b2 / 2, a, b2, ["+z", "-z"])) logo(S, scene2, F2, F2.L / 2, H - 3 * gh - 3, 0.36, 4, farbe2, null);
+    for (const [k, F2] of seiten2(p2, cx + sp / 2, cz - b2 / 2, a, b2, ["+x", "-x"])) logo(S, scene2, F2, F2.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe2, null);
+    for (const [k, F2] of seiten2(p2, cx - a - sp / 2 - 4, cz - b2 / 2 - 4, 2 * a + sp + 8, b2 + 8, ["+z", "-z"])) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.6, 26, "#ffffff", farbe2);
     return H + 3;
   }
-  function turmKrone(S, scene2, p, r, cx, cz, o = {}) {
+  function turmKrone(S, scene2, p2, r, cx, cz, o = {}) {
     const a = o.a ?? 30, n = o.n ?? 50, gh = 3.8, pod = 10, Hs = pod + n * gh;
     const stein = o.stein ?? waehle2(r, ["#cfc8b8", "#bfc2bd", "#d6cdb6"]), glas2 = "#3e4d5a", hell4 = heller(stein, 0.08);
     const x0 = cx - a / 2, z0 = cz - a / 2, f = 4.5;
-    if (o.podium !== false) podium(S, scene2, p, x0 - 5, z0 - 5, a + 10, a + 10, pod - 2, { stein: hell4 });
+    if (o.podium !== false) podium(S, scene2, p2, x0 - 5, z0 - 5, a + 10, a + 10, pod - 2, { stein: hell4 });
     const pts = [[x0 + f, z0 + a], [x0 + a - f, z0 + a], [x0 + a, z0 + a - f], [x0 + a, z0 + f], [x0 + a - f, z0], [x0 + f, z0], [x0, z0 + f], [x0, z0 + a - f]];
     prisma3(S, pts, 0, Hs, glas2);
     if (o.kern !== false) {
       const kb = 9, kt = a * 0.5, kx0 = x0 - kb + 1, kz0 = cz - kt / 2, Hk2 = Hs * 0.62;
       S.quader(kx0, 0, kz0, kx0 + kb, Hk2, kz0 + kt, hell4);
-      for (const [k, F2] of seiten2(p, kx0, kz0, kb, kt)) {
+      for (const [k, F2] of seiten2(p2, kx0, kz0, kb, kt)) {
         for (const u of achsen5(0, F2.L, 2.6, 0.8)) fb4(S, F2, u - 0.5, u + 0.5, pod, Hk2 - 2, 0, 0.05, glas2);
         for (let y = pod + 4 * gh; y < Hk2 - 2; y += 4 * gh) fb4(S, F2, 0, F2.L, y - 0.4, y, 0, 0.2, stein);
         fb4(S, F2, -0.1, F2.L + 0.1, Hk2 - 1.2, Hk2, 0, 0.25, stein);
@@ -107014,7 +107621,7 @@
       S.quader(kx0 + 2, Hk2, kz0 + 2, kx0 + kb - 2, Hk2 + 2.5, kz0 + kt - 2, "#c9cdd0");
     }
     for (const F2 of kanten2(pts)) {
-      if (!sichtF(p, F2)) continue;
+      if (!sichtF(p2, F2)) continue;
       if (F2.L > 10) {
         for (const u of achsen5(0, F2.L, 2.6, 0.4)) fb4(S, F2, u - 0.85, u + 0.85, pod - 2, Hs, 0, 0.4, stein);
         fb4(S, F2, F2.L / 2 - 2.2, F2.L / 2 + 2.2, pod - 2, Hs, 0, 0.9, hell4);
@@ -107031,7 +107638,7 @@
     for (let i = 0; i < 16; i++) {
       const w = i / 16 * 2 * PI10;
       const nx = Math.cos(w), nz = Math.sin(w);
-      if (sieht2(p, nx, nz)) S.box(0.5, 12, 0.5, cx + nx * (rr + 0.1), Hs + 8, cz + nz * (rr + 0.1), hell4, -w);
+      if (sieht2(p2, nx, nz)) S.box(0.5, 12, 0.5, cx + nx * (rr + 0.1), Hs + 8, cz + nz * (rr + 0.1), hell4, -w);
     }
     zyl8(S, rr + 1, rr + 1, 1.4, cx, Hk, cz, stein, 24);
     zyl8(S, rr * 0.78, rr * 0.82, 3.2, cx, Hk + 1.4, cz, hell4, 24);
@@ -107040,17 +107647,17 @@
     zyl8(S, rr * 0.56, rr * 0.56, 0.6, cx, Hk + 8.1, cz, stein, 16);
     zyl8(S, 0.12, 0.35, 9, cx, Hk + 8.7, cz, "#d9dcdf", 6);
     const [name2, farbe2] = o.bank ?? BANKEN[2];
-    for (const [k, F2] of seiten2(p, x0 - 5, z0 - 5, a + 10, a + 10)) if (k === "+z" || k === "+x" || k === "-z" || k === "-x") ftext4(scene2, F2, name2, F2.L / 2, pod - 3.5, 0.42, 1.5, 24, "#ffffff", farbe2);
-    for (const [k, F2] of seiten2(p, x0, z0, a, a)) logo(S, scene2, teil4(F2, f, a - f, 0.9), (a - 2 * f) / 2, Hs - 4, 0, 3.6, farbe2, null);
+    for (const [k, F2] of seiten2(p2, x0 - 5, z0 - 5, a + 10, a + 10)) if (k === "+z" || k === "+x" || k === "-z" || k === "-x") ftext4(scene2, F2, name2, F2.L / 2, pod - 3.5, 0.42, 1.5, 24, "#ffffff", farbe2);
+    for (const [k, F2] of seiten2(p2, x0, z0, a, a)) logo(S, scene2, teil4(F2, f, a - f, 0.9), (a - 2 * f) / 2, Hs - 4, 0, 3.6, farbe2, null);
     return Hk + 18;
   }
-  function turmRund(S, scene2, p, r, cx, cz, o = {}) {
+  function turmRund(S, scene2, p2, r, cx, cz, o = {}) {
     const rr = o.rad ?? 14, n = o.n ?? 52, gh = 3.6, pod = 7, H = pod + n * gh;
     const glas2 = waehle2(r, ["#5f8f9a", "#5d7f99", "#6a8fa6"]), ring = "#c9d6dc", stein = "#d6d0c4";
     const kb = 16, kd = 20, kx0 = cx - rr * 0.2 - kb, kz0 = cz - kd / 2, Hk = H * 0.86;
-    if (o.podium !== false) podium(S, scene2, p, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8, pod - 1, { stein });
+    if (o.podium !== false) podium(S, scene2, p2, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8, pod - 1, { stein });
     S.quader(kx0, 0, kz0, kx0 + kb, Hk, kz0 + kd, stein);
-    for (const [k, F2] of seiten2(p, kx0, kz0, kb, kd)) {
+    for (const [k, F2] of seiten2(p2, kx0, kz0, kb, kd)) {
       for (const u of achsen5(0, F2.L, 2.4, 0.8)) fb4(S, F2, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS9);
       for (let y = pod + 2 * gh; y < Hk - 3; y += 2 * gh) fb4(S, F2, 0, F2.L, y - 0.3, y, 0, 0.12, heller(stein, 0.05));
       fb4(S, F2, -0.1, F2.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
@@ -107059,7 +107666,7 @@
     for (let y = pod + gh; y < H - 1; y += gh) zyl8(S, rr + 0.12, rr + 0.12, 0.26, cx, y, cz, ring, 32);
     for (let i = 0; i < 24; i++) {
       const w = i / 24 * 2 * PI10, nx = Math.cos(w), nz = Math.sin(w);
-      if (sieht2(p, nx, nz)) S.box(0.18, H - pod, 0.18, cx + nx * (rr + 0.1), pod + (H - pod) / 2, cz + nz * (rr + 0.1), dunkler(glas2, 0.1), -w);
+      if (sieht2(p2, nx, nz)) S.box(0.18, H - pod, 0.18, cx + nx * (rr + 0.1), pod + (H - pod) / 2, cz + nz * (rr + 0.1), dunkler(glas2, 0.1), -w);
     }
     zyl8(S, rr + 0.4, rr + 0.4, 2.5, cx, H, cz, ring, 32);
     zyl8(S, rr * 0.7, rr * 0.7, 0.3, cx, H + 2.5, cz, "#8d939a", 24);
@@ -107067,39 +107674,39 @@
     zyl8(S, rr * 0.48, rr * 0.48, 0.34, cx, H + 2.54, cz, "#8d939a", 24);
     for (let i = 0; i < 6; i++) zyl8(S, 0.45 - i * 0.05, 0.5 - i * 0.05, 4, cx - rr * 0.5, H + 2.5 + i * 4, cz + rr * 0.3, i % 2 ? "#f2f1ec" : "#c8463c", 8);
     const [name2, farbe2] = o.bank ?? BANKEN[1];
-    for (const [k, F2] of seiten2(p, kx0, kz0, kb, kd, ["+z", "-z", "-x"])) logo(S, scene2, F2, F2.L / 2 - (k === "-x" ? 0 : 3), Hk - 1.5, 0.2, 2.4, farbe2, null);
-    for (const [k, F2] of seiten2(p, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8)) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.4, 22, "#ffffff", farbe2);
+    for (const [k, F2] of seiten2(p2, kx0, kz0, kb, kd, ["+z", "-z", "-x"])) logo(S, scene2, F2, F2.L / 2 - (k === "-x" ? 0 : 3), Hk - 1.5, 0.2, 2.4, farbe2, null);
+    for (const [k, F2] of seiten2(p2, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8)) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.4, 22, "#ffffff", farbe2);
     return H + 27;
   }
-  function platzUmfeld(S, r, p, frei6) {
-    const { x: x0, z: z0, w, d } = p;
+  function platzUmfeld(S, r, p2, frei6) {
+    const { x: x0, z: z0, w, d } = p2;
     boden5(S, x0, z0, x0 + w, z0 + d, PLATZ, 0.3, 0.07);
     for (let x = x0 + 4; x < x0 + w - 2; x += 8) for (const z2 of [z0 + d - 3, z0 + 3]) if (frei6(x, z2)) {
       baum(S, x, z2, r, 0.95);
     }
     for (let z2 = z0 + 11; z2 < z0 + d - 8; z2 += 8) for (const x of [x0 + w - 3, x0 + 3]) if (frei6(x, z2)) baum(S, x, z2, r, 0.95);
   }
-  function skylineRoh(S, scene2, p) {
-    const r = rng2(`sky:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function skylineRoh(S, scene2, p2) {
+    const r = rng2(`sky:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     const bank6 = BANKEN[Math.floor(r() * BANKEN.length)];
     const cx = x0 + w / 2, cz = z0 + d / 2;
     if (v === "ensemble") {
       boden5(S, x0, z0, x0 + w, z0 + d, PLATZ, 0.3, 0.07);
-      const h1 = turmKrone(S, scene2, p, r, x0 + 22, z0 + 21, { a: 24, n: 44, bank: BANKEN[2], podium: false, kern: false });
-      const h2 = turmRund(S, scene2, p, r, x0 + w - 16, z0 + 19, { rad: 11, n: 40, bank: BANKEN[1], podium: false });
-      const h3 = turmRaster(S, scene2, p, r, x0 + w * 0.5, z0 + d - 17, { a: 26, b: 18, n: 24, bank: BANKEN[3], podium: false });
-      podium(S, scene2, p, x0 + 6, z0 + 6, w - 12, 16, 6, { stein: "#dedad2" });
+      const h1 = turmKrone(S, scene2, p2, r, x0 + 22, z0 + 21, { a: 24, n: 44, bank: BANKEN[2], podium: false, kern: false });
+      const h2 = turmRund(S, scene2, p2, r, x0 + w - 16, z0 + 19, { rad: 11, n: 40, bank: BANKEN[1], podium: false });
+      const h3 = turmRaster(S, scene2, p2, r, x0 + w * 0.5, z0 + d - 17, { a: 26, b: 18, n: 24, bank: BANKEN[3], podium: false });
+      podium(S, scene2, p2, x0 + 6, z0 + 6, w - 12, 16, 6, { stein: "#dedad2" });
       brunnenRund(S, x0 + 12, z0 + d - 8, 3.2);
       for (let x = x0 + 4; x < x0 + w - 2; x += 8) baum(S, x, z0 + d - 2.5, r, 0.9);
       return { hoehe: Math.max(h1, h2, h3) };
     }
     const R0 = { raster: 26, zwilling: 30, krone: 26, rund: 26 }[v];
-    platzUmfeld(S, r, p, (x, z2) => Math.abs(x - cx) > R0 || Math.abs(z2 - cz) > R0 - 4);
+    platzUmfeld(S, r, p2, (x, z2) => Math.abs(x - cx) > R0 || Math.abs(z2 - cz) > R0 - 4);
     let h;
-    if (v === "raster") h = turmRaster(S, scene2, p, r, cx, cz - 1, { bank: bank6, n: 30 + Math.floor(r() * 8) });
-    else if (v === "zwilling") h = turmZwilling(S, scene2, p, r, cx, cz, { bank: bank6, versatz: r() < 0.5 ? 0 : 7.5 });
-    else if (v === "krone") h = turmKrone(S, scene2, p, r, cx, cz, { bank: bank6 });
-    else h = turmRund(S, scene2, p, r, cx + 6, cz, { bank: bank6 });
+    if (v === "raster") h = turmRaster(S, scene2, p2, r, cx, cz - 1, { bank: bank6, n: 30 + Math.floor(r() * 8) });
+    else if (v === "zwilling") h = turmZwilling(S, scene2, p2, r, cx, cz, { bank: bank6, versatz: r() < 0.5 ? 0 : 7.5 });
+    else if (v === "krone") h = turmKrone(S, scene2, p2, r, cx, cz, { bank: bank6 });
+    else h = turmRund(S, scene2, p2, r, cx + 6, cz, { bank: bank6 });
     brunnenRund(S, x0 + 7, z0 + d - 8, 2.6, { schale: false });
     return { hoehe: h };
   }
@@ -107201,7 +107808,7 @@
     }
   }
   var LADEN_ALT = ["B\xE4ckerei Hessler", "Apfelwein Stube", "Buchhandlung Lahn", "Konditorei Weck", "Eisenwaren Rau", "Weinhaus Ohm", "Metzgerei Fink", "Caf\xE9 Rosenhof", "Antiquit\xE4ten Kuhl", "Goldschmiede Kraft", "T\xF6pferei Eder", "Drogerie Hain"];
-  function fwHaus(S, scene2, p, r, x0, z0, b2, t, o = {}) {
+  function fwHaus(S, scene2, p2, r, x0, z0, b2, t, o = {}) {
     const n = o.n ?? 2 + Math.floor(r() * 2), eg = o.eg ?? zw(r, 3, 3.4), gh = o.gh ?? zw(r, 2.6, 2.85), vk = o.vk ?? zw(r, 0.25, 0.45);
     const holz = o.holz ?? waehle2(r, HOLZ4), wand2 = o.wand ?? waehle2(r, GEFACH), stein = o.stein ?? waehle2(r, ["#d9c4a8", "#cdb79a", "#c9a58c", "#e3d3bd"]);
     const art = o.art ?? (r() < 0.35 ? "zier" : "mann"), schiefer = o.schiefer ?? (r() < 0.35 ? "giebel" : null);
@@ -107209,13 +107816,13 @@
     const frei6 = o.frei ?? [];
     const sicht3 = (k) => k === "+z" || k === "-z" || frei6.includes(k);
     S.quader(x0, 0, z0, x0 + b2, eg, z0 + t, stein);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) if (sicht3(k)) egZone(S, scene2, F2, eg, { stein, laden: k === "+z" && o.laden ? o.laden : null, name: o.name, markise: o.markise }, r);
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) if (sicht3(k)) egZone(S, scene2, F2, eg, { stein, laden: k === "+z" && o.laden ? o.laden : null, name: o.name, markise: o.markise }, r);
     let y = eg, e = 0;
     for (let k = 1; k <= n; k++) {
       e = k * vk;
       const za2 = z0 - e, zb2 = z0 + t + e, ganz2 = schiefer === "ganz" && k > 1;
       S.quader(x0, y, za2, x0 + b2, y + gh, zb2, ganz2 ? SCHIEFER3 : wand2);
-      for (const [kk, F2] of seiten2(p, x0, za2, b2, zb2 - za2)) {
+      for (const [kk, F2] of seiten2(p2, x0, za2, b2, zb2 - za2)) {
         if (!sicht3(kk)) continue;
         if (kk === "+z" || kk === "-z") {
           for (const u of achsen5(0, F2.L, 1.2, 0.2)) fstrebe(S, F2, u, y - 0.6, u, y, 0.16, -vk, 0.02, holz);
@@ -107231,22 +107838,22 @@
     }
     const H = y, za = z0 - e, zb = z0 + t + e;
     const giebel3 = o.giebel ?? b2 <= 10;
-    for (const [k, F2] of seiten2(p, x0, za, b2, zb - za, ["+x", "-x"])) if (!frei6.includes(k)) fb4(S, F2, e, F2.L - e, eg, H, 0, 0.04, SCHIEFER3);
+    for (const [k, F2] of seiten2(p2, x0, za, b2, zb - za, ["+x", "-x"])) if (!frei6.includes(k)) fb4(S, F2, e, F2.L - e, eg, H, 0, 0.04, SCHIEFER3);
     if (giebel3) {
       const hg2 = b2 * zw(r, 0.75, 0.9);
       satteldach4(S, x0, za, x0 + b2, zb, H, hg2, "z", dachF, schiefer ? SCHIEFER3 : wand2, 0.5);
-      for (const [k, F2] of seiten2(p, x0, za, b2, zb - za, ["+z", "-z"])) fwGiebel(S, F2, H, hg2, { holz, schiefer: !!schiefer, laeden });
+      for (const [k, F2] of seiten2(p2, x0, za, b2, zb - za, ["+z", "-z"])) fwGiebel(S, F2, H, hg2, { holz, schiefer: !!schiefer, laeden });
       return H + hg2;
     }
     const hg = (zb - za) * zw(r, 0.62, 0.75);
     satteldach4(S, x0, za, x0 + b2, zb, H, hg, "x", dachF, wand2, 0.5);
-    for (const [k, F2] of seiten2(p, x0, za, b2, zb - za, ["+x", "-x"])) {
+    for (const [k, F2] of seiten2(p2, x0, za, b2, zb - za, ["+x", "-x"])) {
       if (frei6.includes(k)) fwGiebel(S, F2, H, hg, { holz, schiefer: !!schiefer, laeden });
       else fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
     }
     if (o.zwerch !== false && b2 > 9) {
       const zb2 = 3.6, u = x0 + b2 / 2;
-      for (const [k, F2] of seiten2(p, x0, za, b2, zb - za, ["+z", "-z"])) {
+      for (const [k, F2] of seiten2(p2, x0, za, b2, zb - za, ["+z", "-z"])) {
         const uF = k === "+z" ? u - x0 : x0 + b2 - u;
         fb4(S, F2, uF - zb2 / 2, uF + zb2 / 2, H, H + gh, -2.6, 0, wand2);
         const FZ = teil4(F2, uF - zb2 / 2, uF + zb2 / 2);
@@ -107261,10 +107868,10 @@
     S.quader(x0 + b2 * 0.7, H + hg * 0.5, z0 + t / 2 - 0.4, x0 + b2 * 0.7 + 0.8, H + hg + 1, z0 + t / 2 + 0.4, "#a46a52");
     return H + hg;
   }
-  function steinGiebelHaus(S, scene2, p, r, x0, z0, b2, t, o) {
+  function steinGiebelHaus(S, scene2, p2, r, x0, z0, b2, t, o) {
     const n = o.n ?? 3, eg = 4.4, gh = 3.4, H = eg + n * gh, wand2 = o.wand, orn = o.orn ?? "#efe3cc";
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, wand2);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t, ["+z", "-z"])) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t, ["+z", "-z"])) {
       const nb = Math.max(2, Math.round(b2 / 3.4)), bb = F2.L / nb, L2 = [];
       for (let i = 0; i < nb; i++) L2.push({ u0: i * bb + 0.45, u1: (i + 1) * bb - 0.45, v0: 0.3, v1: eg - 0.4, bogen: true });
       lochwand4(S, F2, 0, F2.L, 0, eg, o.stein ?? "#c9a58c", L2, { glas: "#5a4f48", dick: 0.4 });
@@ -107294,15 +107901,15 @@
     }
     const hg = b2 * 0.95;
     satteldach4(S, x0 + 0.2, z0 + 0.3, x0 + b2 - 0.2, z0 + t - 0.3, H, hg * 0.92, "z", SCHIEFER3, wand2, 0.2);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t, ["+x", "-x"])) if (o.frei?.includes(k)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t, ["+x", "-x"])) if (o.frei?.includes(k)) {
       for (const u of achsen5(0, F2.L, 2.4, 0.8)) for (let k2 = 0; k2 < n; k2++) fenster5(S, F2, u, eg + 0.9 + k2 * gh, 1, 1.8, { kreuz: true });
     }
     return H + hg;
   }
-  function fwRathaus(S, scene2, p, r, x0, z0, b2, t) {
+  function fwRathaus(S, scene2, p2, r, x0, z0, b2, t) {
     const holz = "#6a2f2a", wand2 = "#f4efe2", stein = "#c9a58c", eg = 4.2, gh = 2.9, n = 2, vk = 0.4;
     S.quader(x0, 0, z0, x0 + b2, eg, z0 + t, stein);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const nb = Math.max(2, Math.round(F2.L / 3.6)), bb = F2.L / nb, L2 = [];
       for (let i = 0; i < nb; i++) L2.push({ u0: i * bb + 0.5, u1: (i + 1) * bb - 0.5, v0: 0.3, v1: eg - 0.5, bogen: "spitz" });
       lochwand4(S, F2, 0, F2.L, 0, eg, stein, L2, { glas: "#4a403a", dick: 0.5 });
@@ -107311,7 +107918,7 @@
     for (let k = 1; k <= n; k++) {
       const e2 = k * vk;
       S.quader(x0 - e2, y, z0 - e2, x0 + b2 + e2, y + gh, z0 + t + e2, wand2);
-      for (const [kk, F2] of seiten2(p, x0 - e2, z0 - e2, b2 + 2 * e2, t + 2 * e2)) {
+      for (const [kk, F2] of seiten2(p2, x0 - e2, z0 - e2, b2 + 2 * e2, t + 2 * e2)) {
         for (const u of achsen5(0, F2.L, 1, 0.3)) fstrebe(S, F2, u, y - 0.6, u, y, 0.18, -vk, 0.02, holz);
         fwGeschoss(S, F2, y, gh, { holz, art: k === 2 ? "zier" : "mann", laeden: null, k, ra: 2.1 });
       }
@@ -107319,13 +107926,13 @@
     }
     const e = n * vk, H = y, hg = (t + 2 * e) * 0.95;
     satteldach4(S, x0 - e, z0 - e, x0 + b2 + e, z0 + t + e, H, hg, "x", SCHIEFER3, wand2, 0.5);
-    for (const [k, F2] of seiten2(p, x0 - e, z0 - e, b2 + 2 * e, t + 2 * e, ["+x", "-x"])) fwGiebel(S, F2, H, hg, { holz });
+    for (const [k, F2] of seiten2(p2, x0 - e, z0 - e, b2 + 2 * e, t + 2 * e, ["+x", "-x"])) fwGiebel(S, F2, H, hg, { holz });
     for (const s2 of [0, 1]) {
       const ex = s2 ? x0 + b2 + e : x0 - e, ez = z0 + t + e, rr = 1.3;
       zyl8(S, rr, rr, gh * 2 + 0.5, ex, eg + 0.2, ez, wand2, 8);
       for (let i = 0; i < 8; i++) {
         const w = i / 8 * 2 * PI10;
-        if (sieht2(p, Math.cos(w), Math.sin(w))) {
+        if (sieht2(p2, Math.cos(w), Math.sin(w))) {
           S.box(0.18, gh * 2 + 0.5, 0.18, ex + Math.cos(w) * rr, eg + 0.2 + gh + 0.25, ez + Math.sin(w) * rr, holz);
         }
       }
@@ -107338,7 +107945,7 @@
     }
     const cx = x0 + b2 / 2, cz = z0 + t / 2;
     S.quader(cx - 1.1, H + hg - 1, cz - 1.1, cx + 1.1, H + hg + 2.4, cz + 1.1, SCHIEFER3);
-    for (const [k, F2] of seiten2(p, cx - 1.1, cz - 1.1, 2.2, 2.2)) fwand2(S, F2, 0.2, 2, H + hg + 0.4, H + hg + 2.2, 0, 0.06, SCHIEFER22, [{ u0: 0.5, u1: 1.7, v0: H + hg + 0.6, v1: H + hg + 2, bogen: true }]);
+    for (const [k, F2] of seiten2(p2, cx - 1.1, cz - 1.1, 2.2, 2.2)) fwand2(S, F2, 0.2, 2, H + hg + 0.4, H + hg + 2.2, 0, 0.06, SCHIEFER22, [{ u0: 0.5, u1: 1.7, v0: H + hg + 0.6, v1: H + hg + 2, bogen: true }]);
     const g = new three_module_exports.ConeGeometry(1.7, 5, 8);
     g.translate(cx, H + hg + 4.9, cz);
     S.add(g, SCHIEFER3);
@@ -107363,8 +107970,8 @@
     S.add(g, f);
     for (let i = 0; i < 3; i++) S.box(0.8, 0.3, 0.6, x - 1 + i, 1.35, z2 + 0.3, waehle2(r, ["#e07a3f", "#7fae5a", "#c8463c", "#e8c547"]));
   }
-  function fachwerkRoh(S, scene2, p) {
-    const r = rng2(`fw:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function fachwerkRoh(S, scene2, p2) {
+    const r = rng2(`fw:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     boden5(S, x0, z0, x0 + w, z0 + d, PFLASTER4, 0.3, 0.07);
     let hmax = 0;
     const namen = mischen2(LADEN_ALT, r);
@@ -107381,18 +107988,18 @@
       if (v === "roemer") {
         const sb2 = Math.min(9.5, (w - 18) / 3), mitte = x0 + (w - 3 * sb2) / 2;
         const steinFarben = ["#c98d7a", "#e3c2a2", "#d4a48a"];
-        for (let i = 0; i < 3; i++) hmax = Math.max(hmax, steinGiebelHaus(S, scene2, p, r, mitte + i * sb2, zt, sb2, t2, { wand: steinFarben[i], n: 3, balkon: i === 1, uhr: i === 1, frei: i === 0 ? ["-x"] : i === 2 ? ["+x"] : [] }));
+        for (let i = 0; i < 3; i++) hmax = Math.max(hmax, steinGiebelHaus(S, scene2, p2, r, mitte + i * sb2, zt, sb2, t2, { wand: steinFarben[i], n: 3, balkon: i === 1, uhr: i === 1, frei: i === 0 ? ["-x"] : i === 2 ? ["+x"] : [] }));
         let xl = mitte, xr = mitte + 3 * sb2;
         while (xl - x0 > 6) {
           const bb = Math.min(xl - x0, zw(r, 6.5, 8.5));
           const b2 = xl - x0 - bb < 5 ? xl - x0 : bb;
-          hmax = Math.max(hmax, fwHaus(S, scene2, p, r, xl - b2, zt + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : null, laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xl - b2 - x0 < 0.5 ? ["-x"] : [] }));
+          hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xl - b2, zt + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : null, laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xl - b2 - x0 < 0.5 ? ["-x"] : [] }));
           xl -= b2;
         }
         while (x0 + w - xr > 6) {
           const bb = Math.min(x0 + w - xr, zw(r, 6.5, 8.5));
           const b2 = x0 + w - xr - bb < 5 ? x0 + w - xr : bb;
-          hmax = Math.max(hmax, fwHaus(S, scene2, p, r, xr, zt + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : "ganz", laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xr + b2 > x0 + w - 0.5 ? ["+x"] : [] }));
+          hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xr, zt + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : "ganz", laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xr + b2 > x0 + w - 0.5 ? ["+x"] : [] }));
           xr += b2;
         }
         marktbrunnen(S, x0 + w / 2, z0 + d - 4.5, r);
@@ -107405,7 +108012,7 @@
         const frei6 = [];
         if (i === 0) frei6.push("-x");
         if (i === breiten.length - 1) frei6.push("+x");
-        const hz = fwHaus(S, scene2, p, r, x2, zt, bb, t2, { giebel: giebel3, frei: frei6, laden: r() < 0.6 ? waehle2(r, LAEDEN2) : null, name: namen.pop(), markise: r() < 0.3 ? waehle2(r, ["#c9483e", "#3f7d56", "#2f6f8f"]) : null });
+        const hz = fwHaus(S, scene2, p2, r, x2, zt, bb, t2, { giebel: giebel3, frei: frei6, laden: r() < 0.6 ? waehle2(r, LAEDEN2) : null, name: namen.pop(), markise: r() < 0.3 ? waehle2(r, ["#c9483e", "#3f7d56", "#2f6f8f"]) : null });
         hmax = Math.max(hmax, hz);
         x2 += bb;
       });
@@ -107416,8 +108023,8 @@
     if (v === "rathaus") {
       const b2 = Math.min(w - 12, 22), t2 = Math.min(d - 12, 13);
       const rx = x0 + 3, rz = z0 + 3;
-      hmax = fwRathaus(S, scene2, p, r, rx, rz, b2, t2);
-      hmax = Math.max(hmax, fwHaus(S, scene2, p, r, rx + b2 + 2.5, rz, w - b2 - 8.5, t2, { giebel: true, n: 2, schiefer: "ganz", frei: ["+x", "-x"], laden: waehle2(r, LAEDEN2), name: namen.pop() }));
+      hmax = fwRathaus(S, scene2, p2, r, rx, rz, b2, t2);
+      hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, rx + b2 + 2.5, rz, w - b2 - 8.5, t2, { giebel: true, n: 2, schiefer: "ganz", frei: ["+x", "-x"], laden: waehle2(r, LAEDEN2), name: namen.pop() }));
       marktbrunnen(S, x0 + w * 0.35, z0 + d - 5, r);
       baum(S, x0 + w - 4, z0 + d - 4, r, 1.1);
       for (let i = 0; i < 2; i++) marktstand(S, x0 + w * 0.6 + i * 4.5, z0 + d - 4.5, r);
@@ -107433,13 +108040,13 @@
       x += bb;
     }
     xs.forEach(([xx, bb], i) => {
-      hmax = Math.max(hmax, fwHaus(S, scene2, p, r, xx, z0 + 1, bb, t, { giebel: r() < 0.7, frei: i === xs.length - 1 ? ["+x"] : [], laden: r() < 0.5 ? waehle2(r, LAEDEN2) : null, name: namen.pop() }));
+      hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xx, z0 + 1, bb, t, { giebel: r() < 0.7, frei: i === xs.length - 1 ? ["+x"] : [], laden: r() < 0.5 ? waehle2(r, LAEDEN2) : null, name: namen.pop() }));
     });
     let z2 = z0 + 1 + t + 0.5;
     while (z2 < z0 + d - 6) {
       let bb = zw(r, 6.5, 9);
       if (z0 + d - z2 - bb < 6) bb = z0 + d - z2 - 0.5;
-      const pp = { ...p, blick: [-(p.blick ?? [1, 1])[1], (p.blick ?? [1, 1])[0]] };
+      const pp = { ...p2, blick: [-(p2.blick ?? [1, 1])[1], (p2.blick ?? [1, 1])[0]] };
       const T = new Sammler(), grp = new three_module_exports.Group();
       const hz = fwHaus(T, grp, pp, r, 0, 0, bb, t, { giebel: r() < 0.7, frei: z2 + bb > z0 + d - 7 ? ["-x"] : [], laden: r() < 0.5 ? waehle2(r, LAEDEN2) : null, name: namen.pop() });
       for (const [farbe2, gs] of T.teile) for (const g of gs) {
@@ -107495,10 +108102,10 @@
     zyl8(S, 0.05, 0.12, 1.4, x, yl + rad2 * 0.45, z2, "#d8b45a", 4);
     return yl + rad2 * 0.45 + 1.4;
   }
-  function unterbau(S, scene2, p, front2, ox, oz, b2, t, fn) {
+  function unterbau(S, scene2, p2, front2, ox, oz, b2, t, fn) {
     const th = WINKEL2[front2];
-    const bl = p.blick ?? [1, 1], c = Math.cos(th), sn = Math.sin(th);
-    const pp = { ...p, blick: [bl[0] * c - bl[1] * sn, bl[0] * sn + bl[1] * c] };
+    const bl = p2.blick ?? [1, 1], c = Math.cos(th), sn = Math.sin(th);
+    const pp = { ...p2, blick: [bl[0] * c - bl[1] * sn, bl[0] * sn + bl[1] * c] };
     const T = new Sammler(), grp = new three_module_exports.Group();
     const erg = fn(T, grp, pp);
     const quer2 = front2 === "+x" || front2 === "-x", W3 = quer2 ? t : b2, D = quer2 ? b2 : t;
@@ -107520,10 +108127,10 @@
     return erg;
   }
   var KUR_PUTZ = ["#f1e9d8", "#efe4cc", "#ece6da", "#f3ecdc"];
-  function kurFluegel(S, scene2, p, x0, z0, b2, t, H, o) {
+  function kurFluegel(S, scene2, p2, x0, z0, b2, t, H, o) {
     const { wand: wand2, orn } = o;
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, wand2);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const ax = achsen5(0, F2.L, o.ra ?? 4, 1.2), L2 = [];
       for (const u of ax) {
         L2.push({ u0: u - 0.9, u1: u + 0.9, v0: 1.6, v1: H * 0.5, bogen: true });
@@ -107543,7 +108150,7 @@
     S.quader(x0 + 0.5, H, z0 + 0.5, x0 + b2 - 0.5, H + 0.25, z0 + t - 0.5, "#a9a59c");
     if (o.dach) walm2(S, x0 + 1, z0 + 1, x0 + b2 - 1, z0 + t - 1, H + 0.25, o.dach, SCHIEFER3);
   }
-  function kolonnade(S, scene2, p, r, x0, z0, b2, t, seite, o) {
+  function kolonnade(S, scene2, p2, r, x0, z0, b2, t, seite, o) {
     const H = 7.5, wand2 = o.wand, orn = o.orn;
     const xw = seite === "+x" ? x0 : x0 + b2 - 2.5;
     S.quader(xw, 0, z0, xw + 2.5, H, z0 + t, wand2);
@@ -107554,7 +108161,7 @@
     const n = Math.max(3, Math.round(t / 3.6));
     for (let i = 0; i <= n; i++) saeule2(S, xs, 0.5, z0 + 0.9 + i * (t - 1.8) / n, H - 0.5, 0.42, WEISS2, orn);
     const FR2 = vierSeiten(xw, z0, 2.5, t)[seite];
-    if (sichtF(p, FR2)) {
+    if (sichtF(p2, FR2)) {
       const L2 = achsen5(0, t, 3.6, 0.5).map((u) => ({ u0: u - 1.2, u1: u + 1.2, v0: 0.5, v1: 4.6, bogen: true }));
       lochwand4(S, FR2, 0, t, 0.3, H, "#8a826f", L2, { glas: "#3e4850", dick: 0.2 });
       for (const l of L2) fb4(S, FR2, l.u0 - 0.2, l.u1 + 0.2, 0.3, 0.6, 0, 0.3, "#857d6e");
@@ -107564,8 +108171,8 @@
       }
     }
     const FA = vierSeiten(xw, z0, 2.5, t)[seite === "+x" ? "-x" : "+x"];
-    if (sichtF(p, FA)) for (const u of achsen5(0, t, 3.6, 0.5)) fenster5(S, FA, u, 2.2, 1.2, 2.4, { rahmen: orn });
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t, ["+z", "-z"])) fb4(S, F2, 0, F2.L, H, H + 1.2, 0.3, 0.45, orn);
+    if (sichtF(p2, FA)) for (const u of achsen5(0, t, 3.6, 0.5)) fenster5(S, FA, u, 2.2, 1.2, 2.4, { rahmen: orn });
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t, ["+z", "-z"])) fb4(S, F2, 0, F2.L, H, H + 1.2, 0.3, 0.45, orn);
   }
   function blumenbeet(S, r, x0, z0, x1, z1) {
     boden5(S, x0, z0, x1, z1, "#7fae5a", 0.36, 0.08);
@@ -107589,13 +108196,13 @@
     zyl8(S, rr * 0.45, rr * 0.45, 1.02, x, 1.32, z2, FARBEN3.wasser, 12);
     return 11;
   }
-  function villa2(S, scene2, p, r, x0, z0, b2, t, o = {}) {
+  function villa2(S, scene2, p2, r, x0, z0, b2, t, o = {}) {
     const wand2 = o.wand ?? waehle2(r, ["#f1e6cf", "#ead7c0", "#e9e2d4", "#f0dcc8", "#e2d9c3", "#dfe3e0"]), orn = o.orn ?? WEISS2, stein = waehle2(r, ["#c9b292", "#d4c1a3", "#b9a283"]);
     const gh = 3.8, n = 2, H = 1.2 + n * gh, dach3 = waehle2(r, [SCHIEFER3, "#5d646b"]);
     S.quader(x0, 0, z0, x0 + b2, 1.2, z0 + t, stein);
     S.quader(x0 + 0.1, 1.2, z0 + 0.1, x0 + b2 - 0.1, H, z0 + t - 0.1, wand2);
     const risB = Math.min(5.5, b2 * 0.35), risU = waehle2(r, [b2 * 0.62, b2 * 0.38]);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       for (let kk = 0; kk < n; kk++) for (const u of achsen5(0, F2.L, 2.8, 0.9)) {
         if (k === "+z" && Math.abs(u - risU) < risB / 2 + 0.6) continue;
         const y = 1.2 + kk * gh + 0.9;
@@ -107610,7 +108217,7 @@
     walm2(S, x0 - 0.3, z0 - 0.3, x0 + b2 + 0.3, z0 + t + 0.3, H, Math.min(b2, t) * 0.38, dach3);
     const rx0 = x0 + risU - risB / 2;
     S.quader(rx0, 1.2, z0 + t - 1, rx0 + risB, H + 0.5, z0 + t + 1.2, wand2);
-    for (const [k, F2] of seiten2(p, rx0, z0 + t - 1, risB, 2.2, ["+z"])) {
+    for (const [k, F2] of seiten2(p2, rx0, z0 + t - 1, risB, 2.2, ["+z"])) {
       fenster5(S, F2, risB / 2, 2, 1.6, 2.4, { kreuz: true, rahmen: orn });
       fb4(S, F2, 0.4, risB - 0.4, 1.2 + gh - 0.1, 1.2 + gh + 0.25, 0, 1.1, orn);
       for (let u = 0.6; u < risB - 0.5; u += 0.35) fb4(S, F2, u - 0.05, u + 0.05, 1.2 + gh + 0.25, 1.2 + gh + 1.1, 0.95, 1.05, "#3b3f44");
@@ -107624,7 +108231,7 @@
     S.add(gd, dach3);
     const ts = 4.2, tx0 = o.turmLinks ? x0 - 1.2 : x0 + b2 - ts + 1.2, tz0 = z0 + t - ts + 1.2, Ht = H + 4.2;
     S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, wand2);
-    for (const [k, F2] of seiten2(p, tx0, tz0, ts, ts)) {
+    for (const [k, F2] of seiten2(p2, tx0, tz0, ts, ts)) {
       for (let kk = 0; kk < n; kk++) fenster5(S, F2, ts / 2, 1.2 + kk * gh + 0.9, 1, 2.1, { kreuz: true, rahmen: orn, sims: orn });
       fwand2(S, F2, 0, ts, H, Ht - 0.6, 0, 0.1, wand2, [{ u0: ts / 2 - 0.9, u1: ts / 2 - 0.15, v0: H + 0.6, v1: Ht - 1, bogen: true }, { u0: ts / 2 + 0.15, u1: ts / 2 + 0.9, v0: H + 0.6, v1: Ht - 1, bogen: true }]);
       fb4(S, F2, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS9);
@@ -107649,26 +108256,26 @@
     const vx0 = o.turmLinks ? x0 + b2 : x0 - 3.6;
     S.quader(vx0, 0.3, z0 + 2, vx0 + 3.6, 1, z0 + t - 3, stein);
     S.quader(vx0 + 0.2, 1, z0 + 2.2, vx0 + 3.4, 4, z0 + t - 3.2, GLAS_HELL6);
-    for (const [k, F2] of seiten2(p, vx0 + 0.2, z0 + 2.2, 3.2, t - 5.4)) for (const u of achsen5(0, F2.L, 1, 0)) fb4(S, F2, u - 0.06, u + 0.06, 1, 4, 0, 0.08, WEISS2);
+    for (const [k, F2] of seiten2(p2, vx0 + 0.2, z0 + 2.2, 3.2, t - 5.4)) for (const u of achsen5(0, F2.L, 1, 0)) fb4(S, F2, u - 0.06, u + 0.06, 1, 4, 0, 0.08, WEISS2);
     S.quader(vx0, 4, z0 + 2, vx0 + 3.6, 4.3, z0 + t - 3, WEISS2);
     return Ht + 7;
   }
-  function zaun3(S, p, x0, z0, x1, z1, farbe2 = "#3b3f44") {
-    for (const [k, F2] of seiten2(p, x0, z0, x1 - x0, z1 - z0)) {
+  function zaun3(S, p2, x0, z0, x1, z1, farbe2 = "#3b3f44") {
+    for (const [k, F2] of seiten2(p2, x0, z0, x1 - x0, z1 - z0)) {
       fb4(S, F2, 0, F2.L, 0.3, 0.9, -0.3, 0, "#d8d0c0");
       for (let u = 0.3; u < F2.L; u += 0.6) fb4(S, F2, u - 0.03, u + 0.03, 0.9, 2, -0.18, -0.12, farbe2);
       fb4(S, F2, 0, F2.L, 1.9, 2, -0.2, -0.1, farbe2);
       for (const u of achsen5(0, F2.L, 6, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, 2.2, -0.45, 0.15, "#e2dccf");
     }
   }
-  function kurstadtRoh(S, scene2, p) {
-    const r = rng2(`kur:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function kurstadtRoh(S, scene2, p2) {
+    const r = rng2(`kur:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     const wand2 = waehle2(r, KUR_PUTZ), orn = WEISS2;
     boden5(S, x0, z0, x0 + w, z0 + d, KIES4, 0.3, 0.07);
     if (v === "kurhaus") {
       const mb = 34, md = 22, mz0 = z0 + 4, cx = x0 + w / 2, Hm = 17, fbw = Math.min(26, (w - mb - 6) / 2), fd = 17, Hf = 12.5;
-      for (const s2 of [-1, 1]) kurFluegel(S, scene2, p, s2 < 0 ? cx - mb / 2 - fbw : cx + mb / 2, mz0 + 2, fbw, fd, Hf, { wand: wand2, orn, ra: 4.2 });
-      kurFluegel(S, scene2, p, cx - mb / 2, mz0, mb, md, Hm, { wand: wand2, orn, ra: 4.6 });
+      for (const s2 of [-1, 1]) kurFluegel(S, scene2, p2, s2 < 0 ? cx - mb / 2 - fbw : cx + mb / 2, mz0 + 2, fbw, fd, Hf, { wand: wand2, orn, ra: 4.2 });
+      kurFluegel(S, scene2, p2, cx - mb / 2, mz0, mb, md, Hm, { wand: wand2, orn, ra: 4.6 });
       const hk = kuppel3(S, cx, Hm + 0.25, mz0 + md / 2, 9, { tambour: 3.5, wand: wand2, orn, hoch: 0.6 });
       const pt = 7, FP = R7(cx - 13, mz0 + md + pt, 1, 0, 26);
       S.quader(cx - 14, 0.3, mz0 + md, cx + 14, 1.4, mz0 + md + pt + 1.5, "#e2dccf");
@@ -107677,15 +108284,15 @@
       S.quader(cx - 13.5, Hm - 2.8, mz0 + md - 0.5, cx + 13.5, Hm - 2, mz0 + md + pt + 0.2, orn);
       S.quader(cx - 13.5, Hm - 2, mz0 + md - 0.5, cx + 13.5, Hm + 1.6, mz0 + md + pt, wand2);
       S.quader(cx - 13.8, Hm + 1.6, mz0 + md - 0.5, cx + 13.8, Hm + 2.1, mz0 + md + pt + 0.3, orn);
-      if (sichtF(p, FP)) ftext4(scene2, FP, "KURHAUS", 13, Hm - 0.2, 0.04, 2.2, 18, "#7a6a4a");
+      if (sichtF(p2, FP)) ftext4(scene2, FP, "KURHAUS", 13, Hm - 0.2, 0.04, 2.2, 18, "#7a6a4a");
       for (const u of [2, 13, 24]) {
         const [sx, sz] = wp4(FP, u, -0.8);
         zyl8(S, 0.4, 0.5, 2.4, sx, Hm + 2.1, sz, WEISS2, 8);
         S.add(new three_module_exports.SphereGeometry(0.42, 8, 6).translate(sx, Hm + 4.9, sz), WEISS2);
       }
       const kz0 = mz0 + md + 4, kt = d - (kz0 - z0) - 4, kb = 8;
-      kolonnade(S, scene2, p, r, x0 + 3, kz0, kb, kt, "+x", { wand: wand2, orn });
-      kolonnade(S, scene2, p, r, x0 + w - 3 - kb, kz0, kb, kt, "-x", { wand: wand2, orn });
+      kolonnade(S, scene2, p2, r, x0 + 3, kz0, kb, kt, "+x", { wand: wand2, orn });
+      kolonnade(S, scene2, p2, r, x0 + w - 3 - kb, kz0, kb, kt, "-x", { wand: wand2, orn });
       const gx0 = x0 + 3 + kb + 4, gx1 = x0 + w - 3 - kb - 4, gz0 = kz0 + 9, gz1 = z0 + d - 3;
       const mx = (gx0 + gx1) / 2, mz = (gz0 + gz1) / 2, wb = 3.6;
       boden5(S, gx0, gz0, gx1, gz1, RASEN5, 0.3, 0.08);
@@ -107736,7 +108343,7 @@
     if (v === "wandelhalle") {
       const hz0 = z0 + 4, ht = 12, hb = w - 10, hx0 = x0 + 5, H = 9.5;
       S.quader(hx0, 0, hz0, hx0 + hb, H, hz0 + ht, wand2);
-      for (const [k, F2] of seiten2(p, hx0, hz0, hb, ht)) {
+      for (const [k, F2] of seiten2(p2, hx0, hz0, hb, ht)) {
         const L2 = achsen5(0, F2.L, 4.2, 1).map((u) => ({ u0: u - 1.5, u1: u + 1.5, v0: 1.2, v1: H - 1.6, bogen: true }));
         lochwand4(S, F2, 0, F2.L, 0.3, H - 0.9, wand2, L2, { glas: GLAS_HELL6, dick: 0.3 });
         for (const l of L2) {
@@ -107752,7 +108359,7 @@
       S.quader(hx0 + 2, H + 3.2, hz0 + ht / 2 - 0.5, hx0 + hb - 2, H + 3.9, hz0 + ht / 2 + 0.5, GLAS_HELL6);
       const cx = hx0 + hb / 2, pb = 14;
       S.quader(cx - pb / 2, 0, hz0 - 1, cx + pb / 2, H + 4, hz0 + ht + 1.5, wand2);
-      for (const [k, F2] of seiten2(p, cx - pb / 2, hz0 - 1, pb, ht + 2.5)) {
+      for (const [k, F2] of seiten2(p2, cx - pb / 2, hz0 - 1, pb, ht + 2.5)) {
         lochwand4(S, F2, 0, F2.L, 0.3, H + 3, wand2, [{ u0: F2.L / 2 - 3, u1: F2.L / 2 + 3, v0: 0.3, v1: H + 1.5, bogen: true }], { glas: GLAS_HELL6 });
         for (let u = F2.L / 2 - 2.4; u < F2.L / 2 + 2.5; u += 1.2) fb4(S, F2, u - 0.05, u + 0.05, 0.3, H + 0.5, 0.02, 0.1, WEISS2);
         fb4(S, F2, -0.4, F2.L + 0.4, H + 3, H + 4, 0, 0.6, orn);
@@ -107801,9 +108408,9 @@
     for (let i = 0; i < n; i++) {
       const gx0 = x0 + 2 + i * bb, vb = Math.min(15, bb - 9), vt = Math.min(13, d - 18);
       const vx = gx0 + (bb - vb) / 2 + (i % 2 ? 1.5 : -0.5), vz = z0 + 5;
-      hmax = Math.max(hmax, villa2(S, scene2, p, r, vx, vz, vb, vt, { turmLinks: i % 2 === 1 }));
+      hmax = Math.max(hmax, villa2(S, scene2, p2, r, vx, vz, vb, vt, { turmLinks: i % 2 === 1 }));
       boden5(S, vx + vb / 2 - 1.5, vz + vt + 1.2, vx + vb / 2 + 1.5, z0 + d - 1, KIES4, 0.3, 0.1);
-      zaun3(S, p, gx0 + 0.5, z0 + 1, gx0 + bb - 0.5, z0 + d - 1);
+      zaun3(S, p2, gx0 + 0.5, z0 + 1, gx0 + bb - 0.5, z0 + d - 1);
       for (let k = 0; k < 4; k++) {
         const tx = gx0 + (k % 2 ? bb - 3 : 3), tz = z0 + d - 6 - Math.floor(k / 2) * (d * 0.5);
         baum(S, tx, tz, r, zw(r, 1.1, 1.5));
@@ -107835,7 +108442,7 @@
     bogenfries(S, teil4(F2, 0, F2.L, 0.4), u0, u1, y1, dunkler(c, 0.03));
     fb4(S, F2, u0 - 0.2, u1 + 0.2, y1 - 0.05, y1 + 0.35, 0, 0.75, heller(c, 0.06));
   }
-  function romTurm(S, p, cx, cz, a, H, o) {
+  function romTurm(S, p2, cx, cz, a, H, o) {
     const c = o.stein, hell4 = heller(c, 0.06), dach3 = o.dach;
     const x0 = cx - a / 2, z0 = cz - a / 2;
     if (o.rund) {
@@ -107843,7 +108450,7 @@
       for (let y = H * 0.25; y < H - 1; y += H * 0.18) zyl8(S, a / 2 + 0.15, a / 2 + 0.15, 0.45, cx, y, cz, hell4, 16);
       for (let k = 0; k < 4; k++) for (let i = 0; i < 6; i++) {
         const w = i / 6 * 2 * PI10 + k * 0.5;
-        if (sieht2(p, Math.cos(w), Math.sin(w))) S.box(0.12, 1.3, 0.6, cx + Math.cos(w) * (a / 2 + 0.02), H * (0.33 + k * 0.18), cz + Math.sin(w) * (a / 2 + 0.02), "#3d3a3c", -w);
+        if (sieht2(p2, Math.cos(w), Math.sin(w))) S.box(0.12, 1.3, 0.6, cx + Math.cos(w) * (a / 2 + 0.02), H * (0.33 + k * 0.18), cz + Math.sin(w) * (a / 2 + 0.02), "#3d3a3c", -w);
       }
       const g2 = new three_module_exports.ConeGeometry(a / 2 + 0.4, a * 1.8, 16);
       g2.translate(cx, H + a * 0.9, cz);
@@ -107856,7 +108463,7 @@
       zyl8(S, a / 2 + 0.2, a / 2 + 0.2, 0.5, cx, H - 0.5, cz, hell4, 8);
       for (let i = 0; i < 8; i++) {
         const w = i / 8 * 2 * PI10 + PI10 / 8, nx = Math.cos(w), nz = Math.sin(w);
-        if (!sieht2(p, nx, nz)) continue;
+        if (!sieht2(p2, nx, nz)) continue;
         const sl = a * Math.tan(PI10 / 8), rr = a / 2 * Math.cos(PI10 / 8);
         const F2 = R7(cx + nx * rr + nz * sl / 2, cz + nz * rr - nx * sl / 2, -nz, nx, sl);
         lochwand4(S, F2, 0.2, sl - 0.2, o.y0 ?? H - 6, H - 0.6, c, [{ u0: sl / 2 - 0.9, u1: sl / 2 - 0.1, v0: H - 4.6, v1: H - 1.4, bogen: true }, { u0: sl / 2 + 0.1, u1: sl / 2 + 0.9, v0: H - 4.6, v1: H - 1.4, bogen: true }], { glas: "#3d3a3c", dick: 0.25 });
@@ -107870,7 +108477,7 @@
     }
     S.quader(x0, 0, z0, x0 + a, H, z0 + a, c);
     const geschosse2 = o.geschosse ?? 5, gh = (H - 4) / geschosse2;
-    for (const [k, F2] of seiten2(p, x0, z0, a, a)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, a, a)) {
       fb4(S, F2, -0.05, 0.6, 0, H, 0, 0.3, dunkler(c, 0.03));
       fb4(S, F2, a - 0.6, a + 0.05, 0, H, 0, 0.3, dunkler(c, 0.03));
       for (let i = 1; i <= geschosse2; i++) bogenfries(S, teil4(F2, 0.6, a - 0.6, 0.1), 0, a - 1.2, 4 + i * gh, hell4, 0.8);
@@ -107890,7 +108497,7 @@
     }
     const helm3 = o.helm ?? "raute";
     if (helm3 === "raute") {
-      for (const [k, F2] of seiten2(p, x0, z0, a, a)) fpoly3(S, F2, [[0, H], [a, H], [a / 2, H + a * 0.6]], -0.3, 0, c);
+      for (const [k, F2] of seiten2(p2, x0, z0, a, a)) fpoly3(S, F2, [[0, H], [a, H], [a / 2, H + a * 0.6]], -0.3, 0, c);
       const g2 = new three_module_exports.ConeGeometry(a * 0.72, a * 1.6, 4);
       g2.translate(cx, H + a * 0.8, cz);
       S.add(g2, dach3);
@@ -107919,7 +108526,7 @@
     zyl8(S, 0.05, 0.12, 2, cx, H + a * (helm3 === "kegel" ? 2.2 : 1.3), cz, "#d8b45a", 4);
     return H + a * 1.3 + 2;
   }
-  function apsis(S, p, x, cz, rad2, H, s2, c, dach3) {
+  function apsis(S, p2, x, cz, rad2, H, s2, c, dach3) {
     const t0 = s2 > 0 ? 0 : PI10;
     const g = new three_module_exports.CylinderGeometry(rad2, rad2, H, 12, 1, false, t0, PI10);
     g.translate(x, H / 2, cz);
@@ -107932,7 +108539,7 @@
     S.add(zr, heller(c, 0.06));
     for (let i = 0; i <= 12; i++) {
       const w = t0 + i / 12 * PI10, nx = Math.sin(w), nz = Math.cos(w);
-      if (!sieht2(p, nx, nz)) continue;
+      if (!sieht2(p2, nx, nz)) continue;
       S.box(0.3, 1.8, 0.3, x + nx * (rad2 + 0.15), H - 1.6, cz + nz * (rad2 + 0.15), heller(c, 0.06));
       if (i % 3 === 1) S.box(0.5, H * 0.35, 1, x + nx * (rad2 + 0.02), H * 0.45, cz + nz * (rad2 + 0.02), "#3d3a3c", Math.atan2(-nz, nx) + PI10 / 2);
       if (i % 3 === 0) S.box(0.6, H - 3, 0.6, x + nx * (rad2 + 0.2), (H - 3) / 2, cz + nz * (rad2 + 0.2), dunkler(c, 0.03));
@@ -107943,15 +108550,15 @@
     const deckel = new three_module_exports.BoxGeometry(0.4, rad2 * 0.7, 2 * rad2 + 0.8);
     deckel.translate(x, H + rad2 * 0.35, cz);
   }
-  function domRoh(S, scene2, p) {
-    const r = rng2(`dom:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function domRoh(S, scene2, p2) {
+    const r = rng2(`dom:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     const c = waehle2(r, ROTSTEIN), hell4 = heller(c, 0.06), dach3 = waehle2(r, [SCHIEFER3, "#5d646b", KUPFER3]);
     boden5(S, x0, z0, x0 + w, z0 + d, PLATZ, 0.3, 0.07);
     const cz = z0 + d / 2 - 3, ms = 14, sb2 = 7, Hm = 26, Hs = 13;
     const ex = v === "kaiserdom" ? 16 : 18;
     const lx0 = x0 + ex, lx1 = x0 + w - ex;
     S.quader(lx0, 0, cz - ms / 2, lx1, Hm, cz + ms / 2, c);
-    for (const [k, F2] of seiten2(p, lx0, cz - ms / 2, lx1 - lx0, ms, ["+z", "-z"])) {
+    for (const [k, F2] of seiten2(p2, lx0, cz - ms / 2, lx1 - lx0, ms, ["+z", "-z"])) {
       romWand(S, F2, 0, F2.L, Hs + 2, Hm - 2.4, c, { ra: 5, fw: 0.9, fy: 2.2, oben: 1.4 });
       if (v === "kaiserdom") zwerggalerie(S, F2, 0, F2.L, Hm - 2.4, 2.4, c);
       else fb4(S, F2, -0.2, F2.L + 0.2, Hm - 2.4, Hm, 0, 0.3, c);
@@ -107960,7 +108567,7 @@
     for (const s2 of [-1, 1]) {
       const zA = s2 > 0 ? cz + ms / 2 : cz - ms / 2 - sb2;
       S.quader(lx0 + 1, 0, zA, lx1 - 1, Hs, zA + sb2, c);
-      for (const [k, F2] of seiten2(p, lx0 + 1, zA, lx1 - lx0 - 2, sb2, [s2 > 0 ? "+z" : "-z"])) {
+      for (const [k, F2] of seiten2(p2, lx0 + 1, zA, lx1 - lx0 - 2, sb2, [s2 > 0 ? "+z" : "-z"])) {
         romWand(S, F2, 0, F2.L, 0.3, Hs, c, { ra: 5, fw: 0.75, fy: 4.2, oben: 2 });
         fb4(S, F2, -0.1, F2.L + 0.1, 0.3, 1.2, 0, 0.8, dunkler(c, 0.05));
         if (k === "+z") {
@@ -107980,7 +108587,7 @@
     let hmax = Hm + 8;
     if (v !== "doppelchor") {
       S.quader(qx0, 0, qz0, qx0 + qb, Hm, qz0 + qd, c);
-      for (const [k, F2] of seiten2(p, qx0, qz0, qb, qd)) {
+      for (const [k, F2] of seiten2(p2, qx0, qz0, qb, qd)) {
         if (k === "+z" || k === "-z") {
           romWand(S, F2, 0, F2.L, 0.3, Hm - 2.4, c, { ra: 5.5, fw: 1, fy: 8, oben: 3 });
           fpoly3(S, F2, [[0, Hm - 0.5], [F2.L, Hm - 0.5], [F2.L / 2, Hm + 6.5]], -0.5, 0.4, c);
@@ -107989,22 +108596,22 @@
         } else romWand(S, F2, 0, F2.L, Hs + 1, Hm - 0.5, c, { ra: 5, fw: 0.8, fy: 2.5 });
       }
       satteldach4(S, qx0 - 0.3, qz0, qx0 + qb + 0.3, qz0 + qd, Hm - 0.5, 7, "z", dach3, c, 0.3);
-      hmax = Math.max(hmax, romTurm(S, p, qx0 + qb / 2, cz, 13, Hm + 9, { stein: c, dach: dach3, acht: true, helmH: v === "kaiserdom" ? 10 : 9, y0: Hm + 2 }));
+      hmax = Math.max(hmax, romTurm(S, p2, qx0 + qb / 2, cz, 13, Hm + 9, { stein: c, dach: dach3, acht: true, helmH: v === "kaiserdom" ? 10 : 9, y0: Hm + 2 }));
     }
     const ende = (s2, art) => {
       const xe = s2 > 0 ? lx1 : lx0;
       if (art === "apsis" || art === "doppel") {
         S.quader(s2 > 0 ? xe : xe - 6, 0, cz - ms / 2, s2 > 0 ? xe + 6 : xe, Hm - 1, cz + ms / 2, c);
-        for (const [k, F2] of seiten2(p, s2 > 0 ? xe : xe - 6, cz - ms / 2, 6, ms, ["+z", "-z"])) romWand(S, F2, 0, F2.L, 6, Hm - 1, c, { ra: 4, fw: 0.8, fy: 4 });
+        for (const [k, F2] of seiten2(p2, s2 > 0 ? xe : xe - 6, cz - ms / 2, 6, ms, ["+z", "-z"])) romWand(S, F2, 0, F2.L, 6, Hm - 1, c, { ra: 4, fw: 0.8, fy: 4 });
         satteldach4(S, s2 > 0 ? xe : xe - 6, cz - ms / 2 - 0.3, s2 > 0 ? xe + 6 : xe, cz + ms / 2 + 0.3, Hm - 1, 7, "x", dach3, c, 0.3);
-        apsis(S, p, xe + s2 * 6, cz, ms / 2 - 0.5, Hm - 6, s2, c, dach3);
+        apsis(S, p2, xe + s2 * 6, cz, ms / 2 - 0.5, Hm - 6, s2, c, dach3);
         const ta = art === "doppel" ? 6.5 : 8.5, th = art === "doppel" ? 36 : 44;
-        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p, xe + s2 * 1.5, cz + sz * (ms / 2 + ta / 2 + 0.3), ta, th, { stein: c, dach: dach3, rund: art === "doppel", helm: "raute", geschosse: 6 }));
-        if (art === "doppel") hmax = Math.max(hmax, romTurm(S, p, xe - s2 * 6, cz, 12, Hm + 8, { stein: c, dach: dach3, acht: true, helmH: 12, y0: Hm + 1 }));
+        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p2, xe + s2 * 1.5, cz + sz * (ms / 2 + ta / 2 + 0.3), ta, th, { stein: c, dach: dach3, rund: art === "doppel", helm: "raute", geschosse: 6 }));
+        if (art === "doppel") hmax = Math.max(hmax, romTurm(S, p2, xe - s2 * 6, cz, 12, Hm + 8, { stein: c, dach: dach3, acht: true, helmH: 12, y0: Hm + 1 }));
       } else if (art === "westbau") {
         const wb = 14, wx0 = s2 > 0 ? xe : xe - wb;
         S.quader(wx0, 0, cz - ms / 2 - sb2, wx0 + wb, Hm + 4, cz + ms / 2 + sb2, c);
-        for (const [k, F2] of seiten2(p, wx0, cz - ms / 2 - sb2, wb, ms + 2 * sb2)) {
+        for (const [k, F2] of seiten2(p2, wx0, cz - ms / 2 - sb2, wb, ms + 2 * sb2)) {
           romWand(S, F2, 0, F2.L, 0.3, Hm + 4, c, { ra: 6, fw: 1.1, fy: 9, oben: 3 });
           if (k === "-x" && s2 < 0 || k === "+x" && s2 > 0) {
             fwand2(S, F2, F2.L / 2 - 3.6, F2.L / 2 + 3.6, 0.3, 9, 0, 1.4, hell4, [{ u0: F2.L / 2 - 2.2, u1: F2.L / 2 + 2.2, v0: 0.29, v1: 8, bogen: true }]);
@@ -108015,8 +108622,8 @@
           }
         }
         S.quader(wx0 - 0.2, Hm + 4, cz - ms / 2 - sb2 - 0.2, wx0 + wb + 0.2, Hm + 4.6, cz + ms / 2 + sb2 + 0.2, hell4);
-        hmax = Math.max(hmax, romTurm(S, p, wx0 + wb / 2, cz, 12, Hm + 22, { stein: c, dach: dach3, helm: v === "westturm" ? "stufen" : "raute", geschosse: 7 }));
-        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p, wx0 + wb / 2 + s2 * 3, cz + sz * (ms / 2 + sb2 + 2.6), 5, Hm + 12, { stein: c, dach: dach3, rund: true }));
+        hmax = Math.max(hmax, romTurm(S, p2, wx0 + wb / 2, cz, 12, Hm + 22, { stein: c, dach: dach3, helm: v === "westturm" ? "stufen" : "raute", geschosse: 7 }));
+        for (const sz of [-1, 1]) hmax = Math.max(hmax, romTurm(S, p2, wx0 + wb / 2 + s2 * 3, cz + sz * (ms / 2 + sb2 + 2.6), 5, Hm + 12, { stein: c, dach: dach3, rund: true }));
       }
     };
     if (v === "kaiserdom") {
@@ -108037,12 +108644,12 @@
   }
   var PASTELL = ["#e9d79e", "#d9b9a4", "#c9d6b5", "#b9cbd8", "#e5c2b5", "#f0e6cf", "#d8d2c2", "#e2cfa8"];
   var LADEN50 = ["Moden Kessler", "Schuhhaus Brede", "Radio Lindner", "Caf\xE9 Lohmann", "Juwelier Sauer", "Foto Kr\xE4mer", "Str\xFCmpfe Weidner", "Lederwaren Fuhr", "B\xFCcherstube Holl", "Eiscaf\xE9 Venezia", "Drogerie Albers", "Tabak Henkel", "Optik Brill", "Uhren Engel", "Schallplatten Ton", "Konditorei Lenz"];
-  function bau50(S, scene2, p, r, x0, z0, b2, t, o) {
+  function bau50(S, scene2, p2, r, x0, z0, b2, t, o) {
     const n = o.n ?? 3, eg = 4.2, gh = 3.1, H = eg + n * gh, y0 = o.y0 ?? 0;
     const putz2 = o.putz ?? waehle2(r, PASTELL), raster4 = o.raster ?? waehle2(r, ["#f2efe6", "#e7e3d8", "#cfcac0"]), kachel2 = o.kachel ?? waehle2(r, ["#7fa3b8", "#d98a6a", "#e8c547", "#8fb58a", "#c9d6dc", "#b5523f"]);
     const art = o.art ?? waehle2(r, ["raster", "band", "lochputz"]);
     S.quader(x0, y0, z0, x0 + b2, y0 + H, z0 + t, putz2);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const laden4 = o.strasse.includes(k);
       if (laden4) {
         fb4(S, F2, 0.2, F2.L - 0.2, y0 + 0.3, y0 + eg - 0.6, 0, 0.05, GLAS_HELL6);
@@ -108086,7 +108693,7 @@
     S.quader(x0 + 0.5, y0 + H, z0 + 0.5, x0 + b2 - 0.5, y0 + H + 0.1, z0 + t - 0.5, "#a9a59c");
     if (o.staffel) {
       S.quader(x0 + 1.5, y0 + H, z0 + 1.5, x0 + b2 - 1.5, y0 + H + 2.8, z0 + t - 2.5, raster4);
-      for (const [k, F2] of seiten2(p, x0 + 1.5, z0 + 1.5, b2 - 3, t - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS9);
+      for (const [k, F2] of seiten2(p2, x0 + 1.5, z0 + 1.5, b2 - 3, t - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS9);
       S.quader(x0 + 1, y0 + H + 2.8, z0 + 1, x0 + b2 - 1, y0 + H + 3.1, z0 + t - 2, "#f4f2ec");
     }
     return y0 + H + (o.staffel ? 3.1 : 0);
@@ -108107,8 +108714,8 @@
     zyl8(S, 3.4, 0.6, 0.9, x, y0 + 2.6, z2, farbe2, 16);
     zyl8(S, 3.45, 3.45, 0.2, x, y0 + 3.4, z2, "#f4f2ec", 16);
   }
-  function wiederaufbauRoh2(S, scene2, p) {
-    const r = rng2(`wa:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function wiederaufbauRoh2(S, scene2, p2) {
+    const r = rng2(`wa:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     const namen = mischen2(LADEN50, r);
     boden5(S, x0, z0, x0 + w, z0 + d, "#d4cdbf", 0.3, 0.07);
     let hmax = 0;
@@ -108135,7 +108742,7 @@
           let t2 = zw(r, 11, 16);
           if (z0 + d - z2 - t2 < 8) t2 = z0 + d - z2;
           const stufe2 = Math.min(stufen - 1, Math.floor((z0 + d - (z2 + t2 / 2)) / tl));
-          const hz = bau50(S, scene2, p, r, bx0, z2, bb, t2 - 0.3, { strasse: [seite < 0 ? "+x" : "-x"], n: 1 + i % 2 + (r() < 0.35 ? 1 : 0), y0: stufe2 * 0.9, namen, staffel: r() < 0.35, akzent: waehle2(r, FARBEN3.markise) });
+          const hz = bau50(S, scene2, p2, r, bx0, z2, bb, t2 - 0.3, { strasse: [seite < 0 ? "+x" : "-x"], n: 1 + i % 2 + (r() < 0.35 ? 1 : 0), y0: stufe2 * 0.9, namen, staffel: r() < 0.35, akzent: waehle2(r, FARBEN3.markise) });
           hmax = Math.max(hmax, hz);
           z2 += t2;
           i++;
@@ -108151,7 +108758,7 @@
       S.quader(gx0 + b2 - rr, 0, gz0, gx0 + b2, H, gz0 + t2 - rr, putz2);
       zyl8(S, rr, rr, H, gx0 + b2 - rr, 0, gz0 + t2 - rr, putz2, 20);
       for (const [k, F2] of [["+z", R7(gx0, gz0 + t2, 1, 0, b2 - rr)], ["+x", R7(gx0 + b2, gz0 + t2 - rr, 0, -1, t2 - rr)]]) {
-        if (!sichtF(p, F2)) continue;
+        if (!sichtF(p2, F2)) continue;
         fb4(S, F2, 0, F2.L, 0.3, eg - 0.4, -2.2, -2.15, GLAS_HELL6);
         for (const u of achsen5(0, F2.L, 3.4, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, eg, -2.2, 0, raster4);
         fb4(S, F2, 0, F2.L, eg - 0.6, eg, -2.2, 0.05, raster4);
@@ -108165,7 +108772,7 @@
         for (const u of [0, ...ax.map((u2) => u2 + 0.9)]) fb4(S, F2, u - 0.1, u + 0.1, eg, H - 0.4, 0, 0.3, raster4);
         ftext4(scene2, F2, namen.pop(), F2.L / 2, eg - 0.3, 0.1, 0.5, F2.L * 0.6, "#2a3036");
       }
-      for (const [k, F2] of seiten2(p, gx0, gz0, b2, t2, ["-x", "-z"])) {
+      for (const [k, F2] of seiten2(p2, gx0, gz0, b2, t2, ["-x", "-z"])) {
         fb4(S, F2, 0, F2.L, 0, eg, 0, 0.05, dunkler(putz2, 0.06));
         for (const u of achsen5(0, F2.L, 3.4, 1)) {
           fb4(S, F2, u - 1.2, u + 1.2, 0.3, 3, 0, 0.08, GLAS_HELL6);
@@ -108186,7 +108793,7 @@
       S.quader(gx0 - 0.6, H - 0.4, gz0 - 0.6, gx0 + b2 - rr, H, gz0 + t2 + 0.6, raster4);
       S.quader(gx0 + b2 - rr, H - 0.4, gz0 - 0.6, gx0 + b2 + 0.6, H, gz0 + t2 - rr, raster4);
       S.quader(gx0 + 2, H, gz0 + 2, gx0 + b2 - 8, H + 3, gz0 + t2 - 3, raster4);
-      for (const [k, F2] of seiten2(p, gx0 + 2, gz0 + 2, b2 - 10, t2 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS9);
+      for (const [k, F2] of seiten2(p2, gx0 + 2, gz0 + 2, b2 - 10, t2 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS9);
       const g4 = new three_module_exports.BoxGeometry(b2 - 6, 0.25, t2 - 2);
       g4.rotateX(-0.08);
       g4.translate(gx0 + b2 / 2 - 3, H + 3.4, gz0 + t2 / 2 - 0.5);
@@ -108194,16 +108801,16 @@
       hmax = H + 3.6;
       const px0 = gx0 + b2 + 3;
       if (x0 + w - px0 > 8) {
-        hmax = Math.max(hmax, bau50(S, scene2, p, r, px0, gz0, x0 + w - px0 - 2, 12, { strasse: ["+z", "+x"], n: 1, namen, art: "lochputz", mosaik: false }));
-        bau50(S, scene2, p, r, px0, gz0 + 14, x0 + w - px0 - 2, Math.max(6, d - 18), { strasse: ["+z", "+x"], n: 0, namen, akzent: "#2f8f8a" });
+        hmax = Math.max(hmax, bau50(S, scene2, p2, r, px0, gz0, x0 + w - px0 - 2, 12, { strasse: ["+z", "+x"], n: 1, namen, art: "lochputz", mosaik: false }));
+        bau50(S, scene2, p2, r, px0, gz0 + 14, x0 + w - px0 - 2, Math.max(6, d - 18), { strasse: ["+z", "+x"], n: 0, namen, akzent: "#2f8f8a" });
       }
       for (let i = 0; i < 3; i++) lampe50(S, gx0 + 4 + i * 11, z0 + d - 1.6);
       autoReihe(S, r, x0 + 2, x0 + w * 0.6, z0 + d - 0.2, 0, 0);
       return { hoehe: hmax };
     }
     const t = 13;
-    hmax = bau50(S, scene2, p, r, x0 + 1, z0 + 1, w - 2, t, { strasse: ["+z"], n: 4, namen, staffel: true, art: "raster" });
-    hmax = Math.max(hmax, unterbau(S, scene2, p, "+x", x0 + 1, z0 + t + 3, d - t - 4, 12, (S2, sc2, p2) => bau50(S2, sc2, p2, r, 0, 0, d - t - 4, 12, { strasse: ["+z"], n: 2, namen, art: "band" })));
+    hmax = bau50(S, scene2, p2, r, x0 + 1, z0 + 1, w - 2, t, { strasse: ["+z"], n: 4, namen, staffel: true, art: "raster" });
+    hmax = Math.max(hmax, unterbau(S, scene2, p2, "+x", x0 + 1, z0 + t + 3, d - t - 4, 12, (S2, sc2, p22) => bau50(S2, sc2, p22, r, 0, 0, d - t - 4, 12, { strasse: ["+z"], n: 2, namen, art: "band" })));
     const cx = x0 + 13 + (w - 13) / 2, cz = z0 + t + (d - t) / 2;
     const g = new three_module_exports.CylinderGeometry(1, 1, 0.5, 24);
     g.scale(7, 1, 4);
@@ -108248,16 +108855,16 @@
     for (let k = 1; k < reihen; k++) fb4(S, F2, u0, u1, y0 + k * hr - 0.1, y0 + k * hr + 0.15, 0, 0.4, hell4);
     fb4(S, F2, u0 - 0.2, u1 + 0.2, y1 - 0.4, y1, 0, 0.6, hell4);
   }
-  function universitaetRoh(S, scene2, p) {
-    const r = rng2(`uni:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function universitaetRoh(S, scene2, p2) {
+    const r = rng2(`uni:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     boden5(S, x0, z0, x0 + w, z0 + d, PFLASTER4, 0.3, 0.07);
     if (v === "alte_uni") {
       const c = waehle2(r, ["#b5735e", "#c9b89a", "#bf8a6e"]), hell4 = heller(c, 0.07), dach3 = SCHIEFER3;
       const mx0 = x0 + 3, mz0 = z0 + 4, mb = w - 24, mt = 14, H2 = 15;
       S.quader(mx0, 0, mz0, mx0 + mb, H2, mz0 + mt, c);
-      for (const [k, F3] of seiten2(p, mx0, mz0, mb, mt, ["+z", "-z", "-x"])) gotWand(S, F3, 0, F3.L, 0.3, H2, c, { ra: 3.4, fialen: true });
+      for (const [k, F3] of seiten2(p2, mx0, mz0, mb, mt, ["+z", "-z", "-x"])) gotWand(S, F3, 0, F3.L, 0.3, H2, c, { ra: 3.4, fialen: true });
       satteldach4(S, mx0, mz0 - 0.3, mx0 + mb, mz0 + mt + 0.3, H2, 8, "x", dach3, c, 0.3);
-      for (const [k, F3] of seiten2(p, mx0, mz0, mb, mt, ["+z", "-z"])) for (const u of achsen5(0, F3.L, 11, 3)) {
+      for (const [k, F3] of seiten2(p2, mx0, mz0, mb, mt, ["+z", "-z"])) for (const u of achsen5(0, F3.L, 11, 3)) {
         fb4(S, F3, u - 2.6, u + 2.6, H2 - 0.4, H2 + 3.4, -3, 0.35, c);
         fpoly3(S, F3, [[u - 2.6, H2 + 3.4], [u + 2.6, H2 + 3.4], [u, H2 + 7.2]], -3, 0.35, c);
         fstrebe(S, F3, u - 2.9, H2 + 3.2, u + 0.1, H2 + 7.4, 0.35, -3.2, 0.5, hell4);
@@ -108270,7 +108877,7 @@
       }
       const ab2 = 16, ax02 = mx0 + mb, az02 = mz0, at2 = d - 9, Ha = 17;
       S.quader(ax02, 0, az02, ax02 + ab2, Ha, az02 + at2, c);
-      for (const [k, F3] of seiten2(p, ax02, az02, ab2, at2)) {
+      for (const [k, F3] of seiten2(p2, ax02, az02, ab2, at2)) {
         if (k === "+x" || k === "-x") gotWand(S, F3, 0, F3.L, 0.3, Ha, c, { ra: 4.4, reihen: 1, fw: 1.2, fialen: true });
         else {
           lochwand4(S, F3, 0, F3.L, 0.3, Ha, c, [{ u0: F3.L / 2 - 3, u1: F3.L / 2 + 3, v0: 6, v1: Ha - 1.4, bogen: "spitz" }, { u0: F3.L / 2 - 1.5, u1: F3.L / 2 + 1.5, v0: 0.3, v1: 4.2, bogen: "spitz" }], { glas: "#3e4650" });
@@ -108294,7 +108901,7 @@
       satteldach4(S, ax02 - 0.3, az02, ax02 + ab2 + 0.3, az02 + at2, Ha, 10, "z", dach3, c, 0.3);
       const ts = 7.5, tx0 = ax02 - ts - 1, tz0 = mz0 + mt - 2, Ht = 34;
       S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, c);
-      for (const [k, F3] of seiten2(p, tx0, tz0, ts, ts)) {
+      for (const [k, F3] of seiten2(p2, tx0, tz0, ts, ts)) {
         lochwand4(S, F3, 0, ts, 0.3, Ht - 1, c, [{ u0: ts / 2 - 1.2, u1: ts / 2 + 1.2, v0: 0.3, v1: 4.2, bogen: "spitz" }, { u0: ts / 2 - 0.5, u1: ts / 2 + 0.5, v0: 8, v1: 11, bogen: "spitz" }, { u0: ts / 2 - 0.5, u1: ts / 2 + 0.5, v0: 14, v1: 17, bogen: "spitz" }, { u0: ts / 2 - 1.8, u1: ts / 2 - 0.2, v0: Ht - 8, v1: Ht - 2.5, bogen: "spitz" }, { u0: ts / 2 + 0.2, u1: ts / 2 + 1.8, v0: Ht - 8, v1: Ht - 2.5, bogen: "spitz" }], { glas: "#3e4650" });
         fscheibe3(S, F3, ts / 2, Ht - 11, 0.35, 0.45, 1.2, "#f6f1e2");
         fscheibe3(S, F3, ts / 2, Ht - 11, 0.45, 0.5, 1, "#2b3036");
@@ -108316,7 +108923,7 @@
       S.box(1.6, 2.2, 1.6, x0 + w * 0.42, 1.4, z0 + d - 9, "#d8d0c0");
       zyl8(S, 0.35, 0.45, 2.2, x0 + w * 0.42, 2.5, z0 + d - 9, "#6f7d78", 8);
       S.add(new three_module_exports.SphereGeometry(0.4, 8, 6).translate(x0 + w * 0.42, 5, z0 + d - 9), "#6f7d78");
-      for (const [k, F3] of seiten2(p, mx0, mz0 - 0.3, mb, mt + 0.6, ["+z", "-z"])) {
+      for (const [k, F3] of seiten2(p2, mx0, mz0 - 0.3, mb, mt + 0.6, ["+z", "-z"])) {
         const zw2 = achsen5(0, F3.L, 11, 3);
         for (const u of achsen5(0, F3.L, 4.2, 2)) {
           if (zw2.some((q2) => Math.abs(q2 - u) < 4.2)) continue;
@@ -108341,7 +108948,7 @@
       const be = waehle2(r, ["#b9b5ad", "#c2bdb2", "#aeaaa1"]), hell4 = heller(be, 0.06), dk = "#3a434b";
       const hx0 = x0 + 4, hz0 = z0 + 4, hb = 34, ht = 14, n = 14, gh = 3.4, Hh = 4 + n * gh;
       S.quader(hx0, 0, hz0, hx0 + hb, Hh, hz0 + ht, dk);
-      for (const [k, F3] of seiten2(p, hx0, hz0, hb, ht)) {
+      for (const [k, F3] of seiten2(p2, hx0, hz0, hb, ht)) {
         const lang = F3.L > 20;
         for (let i = 0; i <= n; i++) fb4(S, F3, 0, F3.L, 4 + i * gh - 0.9, 4 + i * gh, 0, 0.45, be);
         for (const u of achsen5(0, F3.L, lang ? 1.7 : 2.2, 0)) fb4(S, F3, u - 0.2, u + 0.2, 4, Hh - 2, 0, 0.7, be);
@@ -108354,7 +108961,7 @@
       for (let k = 0; k < 3; k++) {
         const zA = tz0, zB = tz0 + tt - k * 4.5, xA = tx0 + k * 3, y = k * 3.8;
         S.quader(xA, y, zA, tx0 + tb, y + 3.8, zB, dk);
-        for (const [kk, F3] of seiten2(p, xA, zA, tx0 + tb - xA, zB - zA)) {
+        for (const [kk, F3] of seiten2(p2, xA, zA, tx0 + tb - xA, zB - zA)) {
           fb4(S, F3, -0.1, F3.L + 0.1, y + 2.6, y + 3.8, 0, 0.4, be);
           fb4(S, F3, -0.1, F3.L + 0.1, y + 3.8, y + 4.3, 0, 0.6, k === 2 ? be : "#7a9a5a");
           for (const u of achsen5(0, F3.L, 3.6, 0)) fb4(S, F3, u - 0.15, u + 0.15, y, y + 2.6, 0, 0.3, be);
@@ -108367,7 +108974,7 @@
         pts.push([cx + Math.cos(a) * ra, cz + Math.sin(a) * ra]);
       }
       prisma3(S, pts, 0, 10, be);
-      for (const F3 of kanten2(pts)) if (sichtF(p, F3)) {
+      for (const F3 of kanten2(pts)) if (sichtF(p2, F3)) {
         fb4(S, F3, 0.3, F3.L - 0.3, 0.3, 3.2, 0, 0.05, GLAS_HELL6);
         for (const u of achsen5(0, F3.L, 1.4, 0)) fb4(S, F3, u - 0.15, u + 0.15, 3.2, 10, 0, 0.3, hell4);
         fb4(S, F3, -0.1, F3.L + 0.1, 9.2, 10.2, 0, 0.5, hell4);
@@ -108375,7 +108982,7 @@
       zyl8(S, ra * 0.55, ra * 0.7, 2.5, cx, 10, cz, hell4, 8);
       ftext4(scene2, R7(cx - 4, cz + ra * 0.93 + 0.1, 1, 0, 8), "H\xF6rsaalzentrum", 4, 8.4, 0.5, 0.7, 7.5, "#2a3036");
       S.quader(hx0 + hb - 2, 7, hz0 + ht, hx0 + hb + 2, 10, tz0, be);
-      for (const [k, F3] of seiten2(p, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS9);
+      for (const [k, F3] of seiten2(p2, hx0 + hb - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS9);
       for (const z2 of [hz0 + ht + 3, tz0 - 3]) S.box(0.8, 7, 0.8, hx0 + hb, 3.65, z2, be);
       for (let i = 0; i < 5; i++) pflanzkuebel2(S, r, x0 + 6 + i * 3.2, z0 + d - 4, 0.3, i % 2 === 0);
       for (let i = 0; i < 10; i++) {
@@ -108384,7 +108991,7 @@
       }
       baumreiheZ(S, r, tz0, z0 + d - 4, x0 + 5, 7, 1);
       S.quader(hx0 + 2, 0, hz0 + ht, hx0 + 6.5, Hh + 2, hz0 + ht + 4, be);
-      for (const [k, F3] of seiten2(p, hx0 + 2, hz0 + ht, 4.5, 4)) for (let y = 3; y < Hh; y += 3.4) fb4(S, F3, F3.L / 2 - 0.25, F3.L / 2 + 0.25, y, y + 2.2, 0, 0.05, dk);
+      for (const [k, F3] of seiten2(p2, hx0 + 2, hz0 + ht, 4.5, 4)) for (let y = 3; y < Hh; y += 3.4) fb4(S, F3, F3.L / 2 - 0.25, F3.L / 2 + 0.25, y, y + 2.2, 0, 0.05, dk);
       for (let i = 0; i < 3; i++) S.quader(hx0 + 17 + i * 5, Hh, hz0 + 3, hx0 + 20 + i * 5, Hh + 2.2, hz0 + 7, "#c9cdd0");
       for (let i = 0; i < 3; i++) zyl8(S, 0.8, 0.8, 0.6, hx0 + 18.5 + i * 5, Hh + 2.2, hz0 + 5, "#5d656c", 10);
       zyl8(S, 0.15, 0.2, 9, hx0 + 30, Hh, hz0 + 10, "#d9dcdf", 6);
@@ -108415,14 +109022,14 @@
       }
       const FS = R7(x0 + 6, hz0 + ht + 10.2, 1, 0, 3);
       S.quader(x0 + 6, 0.3, hz0 + ht + 9.8, x0 + 9, 4.3, hz0 + ht + 10.2, "#2f6f8f");
-      if (sichtF(p, FS)) ftext4(scene2, FS, "Universit\xE4t", 1.5, 3.4, 0.02, 0.5, 2.8, "#ffffff");
+      if (sichtF(p2, FS)) ftext4(scene2, FS, "Universit\xE4t", 1.5, 3.4, 0.02, 0.5, 2.8, "#ffffff");
       for (let i = 0; i < 4; i++) bank4(S, x0 + 34 + i * 6, z0 + d - 5);
       return { hoehe: Hh + 4 };
     }
     const putz2 = waehle2(r, ["#ead7a2", "#ecdcae", "#e6cf9a"]), orn = WEISS2;
     const ab = Math.min(30, w - 18), at = 18, ax0 = x0 + (w - ab) / 2, az0 = z0 + 4, H = 13;
     S.quader(ax0, 0, az0, ax0 + ab, H, az0 + at, putz2);
-    for (const [k, F3] of seiten2(p, ax0, az0, ab, at)) {
+    for (const [k, F3] of seiten2(p2, ax0, az0, ab, at)) {
       const L2 = achsen5(0, F3.L, 3.6, 1).map((u) => ({ u0: u - 0.85, u1: u + 0.85, v0: 3.2, v1: H - 2.2, bogen: true }));
       lochwand4(S, F3, 0, F3.L, 0.3, H - 1.2, putz2, L2, { dick: 0.25 });
       for (const u of achsen5(0, F3.L, 3.6, 1)) {
@@ -108439,7 +109046,7 @@
     saeulenreihe(S, F2, 1, 15, 4, 1.6, H - 2.8, -0.6, 0.6, WEISS2, orn);
     S.quader(ax0 + ab / 2 - 8.3, H - 1.2, az0 + at - 0.5, ax0 + ab / 2 + 8.3, H, az0 + at + 5.8, orn);
     dreiecksgiebel(S, F2, -0.3, 16.3, H, 3.8, -6.4, 0.2, putz2, orn);
-    if (sichtF(p, F2)) ftext4(scene2, F2, "Aula", 8, H - 0.6, 0.35, 0.8, 6, "#7a6a4a");
+    if (sichtF(p2, F2)) ftext4(scene2, F2, "Aula", 8, H - 0.6, 0.35, 0.8, 6, "#7a6a4a");
     const g = dachProfil(6.2, 16.6, 3.8, 0.1, "z");
     g.translate(ax0 + ab / 2, H, az0 + at + 2.8);
     S.add(g, SCHIEFER3);
@@ -108447,7 +109054,7 @@
       const bx0 = s2 < 0 ? x0 + 2 : ax0 + ab + 3, bb = s2 < 0 ? ax0 - x0 - 5 : x0 + w - ax0 - ab - 5;
       if (bb < 5) continue;
       S.quader(bx0, 0, az0 + 2, bx0 + bb, 8, az0 + at - 2, putz2);
-      for (const [k, F22] of seiten2(p, bx0, az0 + 2, bb, at - 4)) {
+      for (const [k, F22] of seiten2(p2, bx0, az0 + 2, bb, at - 4)) {
         for (let kk = 0; kk < 2; kk++) for (const u of achsen5(0, F22.L, 3, 0.8)) fenster5(S, F22, u, 1.2 + kk * 3.6, 1.1, 1.9, { kreuz: true, rahmen: orn, sims: orn });
         fb4(S, F22, -0.2, F22.L + 0.2, 7.5, 8, 0, 0.4, orn);
       }
@@ -108461,7 +109068,7 @@
       zyl8(S, 0.3, 0.4, 1.6, sx, H + hh, sz, WEISS2, 8);
       S.add(new three_module_exports.SphereGeometry(0.35, 8, 6).translate(sx, H + hh + 1.9, sz), WEISS2);
     }
-    for (const [k, F22] of seiten2(p, ax0, az0, ab, at)) {
+    for (const [k, F22] of seiten2(p2, ax0, az0, ab, at)) {
       for (let u = 0.4; u < F22.L - 0.3; u += 0.5) fb4(S, F22, u - 0.08, u + 0.08, H, H + 0.8, 0.1, 0.3, orn);
       fb4(S, F22, 0, F22.L, H + 0.8, H + 1, 0, 0.4, orn);
     }
@@ -108496,8 +109103,8 @@
     }
     prisma3(S, pts, y0, h, c);
   }
-  function roemischRoh(S, scene2, p) {
-    const r = rng2(`roem:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function roemischRoh(S, scene2, p2) {
+    const r = rng2(`roem:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     boden5(S, x0, z0, x0 + w, z0 + d, RASEN5, 0.3, 0.07);
     if (v === "tor") {
       const c = waehle2(r, ROEM_DUNKEL), hell4 = heller(c, 0.07), dk = "#2a2724";
@@ -108517,7 +109124,7 @@
         });
         return L2;
       };
-      for (const [k, F3] of seiten2(p, cx2 - B2 / 2, cz2 - T / 2, B2, T, ["-z", "-x", "+x"])) {
+      for (const [k, F3] of seiten2(p2, cx2 - B2 / 2, cz2 - T / 2, B2, T, ["-z", "-x", "+x"])) {
         const geschosse2 = k === "-z" ? ze : ze.slice(0, 3);
         const L2 = arkaden2(F3, 0, F3.L, geschosse2, k === "-z" ? [F3.L / 2 - 2.4, F3.L / 2 + 2.4] : null);
         lochwand4(S, F3, 0, F3.L, 0, H - 2.5, c, L2, { glas: dk, dick: 0.6 });
@@ -108529,7 +109136,7 @@
         for (const u of achsen5(0, F3.L, 2.9, 0.4)) fb4(S, F3, u + 1.15, u + 1.6, ze[0], H - 3, 0.6, 0.95, c);
       }
       const FM = R7(cx2 - ex, cz2 + T / 2, 1, 0, 2 * ex);
-      if (sichtF(p, FM)) {
+      if (sichtF(p2, FM)) {
         lochwand4(S, FM, 0, 2 * ex, 0, H - 2.5, c, arkaden2(FM, 0, 2 * ex, ze.slice(0, 3), [2 * ex / 2 - 2.4, 2 * ex / 2 + 2.4]), { glas: dk, dick: 0.6 });
         let y = 0;
         for (const gh of ze.slice(0, 3)) {
@@ -108552,7 +109159,7 @@
           if (k === 0) return;
           for (let i = 0; i < 7; i++) {
             const a = -PI10 / 2 + (i + 0.5) / 7 * PI10, nx = Math.sin(a), nz = Math.cos(a);
-            if (!sieht2(p, nx, nz)) continue;
+            if (!sieht2(p2, nx, nz)) continue;
             const F3 = R7(tx2 + nx * (tr + 0.02) + nz * 0.9, cz2 + T / 2 + nz * (tr + 0.02) - nx * 0.9, -nz, nx, 1.8);
             fwand2(S, F3, 0, 1.8, y - gh + 0.5, y - 0.5, 0, 0.12, hell4, [{ u0: 0.35, u1: 1.45, v0: y - gh + 0.7, v1: y - 0.7, bogen: true }]);
             fb4(S, F3, 0.36, 1.44, y - gh + 0.7, y - 1, 0, 0.06, dk);
@@ -108561,7 +109168,7 @@
         if (s2 > 0) ruinenKrone(S, R7(tx2 - tr, cz2 + T / 2, 1, 0, 2 * tr), 0.5, 2 * tr - 0.5, Ht, r, c, -4, 0, 1.8);
       }
       ruinenKrone(S, R7(cx2 + 3, cz2 + T / 2 - 0.2, 1, 0, B2 / 2 - 3), 0, B2 / 2 - 3, H - 2.5, r, c, -T + 0.4, 0, 1.6);
-      for (const [k, F3] of seiten2(p, cx2 - B2 / 2, cz2 - T / 2, B2, T, ["-z", "-x", "+x"])) for (let i = 0; i < 10; i++) {
+      for (const [k, F3] of seiten2(p2, cx2 - B2 / 2, cz2 - T / 2, B2, T, ["-z", "-x", "+x"])) for (let i = 0; i < 10; i++) {
         const u = zw(r, 0.5, F3.L - 1.5), y = zw(r, 1, H - 4);
         fb4(S, F3, u, u + zw(r, 0.6, 1.4), y, y + 0.55, 0.6, 0.66, r() < 0.5 ? hell4 : dunkler(c, 0.05));
       }
@@ -108575,9 +109182,9 @@
       S.box(0.1, 0.8, 0.1, cx2 + 7, 0.6, z0 + d - 3, "#3b3f44");
       for (let i = 0; i < 4; i++) baum(S, x0 + 4 + i * (w - 8) / 3, z0 + d - 3 - i % 2 * 2, r, 1);
       const FX = vierSeiten(cx2 - B2 / 2, cz2 - T / 2, B2, T)["+x"];
-      if (sichtF(p, FX)) geruest3(S, FX, 0.3, T - 0.3, 0.3, H - 3, { netz: null });
+      if (sichtF(p2, FX)) geruest3(S, FX, 0.3, T - 0.3, 0.3, H - 3, { netz: null });
       const FB = vierSeiten(cx2 - B2 / 2, cz2 - T / 2, B2, T)["-z"];
-      if (sichtF(p, FB)) geruest3(S, FB, 1, 9, 0.3, 14, {});
+      if (sichtF(p2, FB)) geruest3(S, FB, 1, 9, 0.3, 14, {});
       for (let z2 = cz2 - T / 2 - 1; z2 < cz2 + T / 2 + 1; z2 += 3.4) S.box(0.06, 2, 3.3, cx2 + B2 / 2 + 2.6, 1.3, z2 + 1.7, "#c9cdd0");
       S.quader(cx2 + B2 / 2 + 3.5, 0.3, cz2 - T / 2 - 4, cx2 + B2 / 2 + 6, 2.9, cz2 - T / 2 + 2, "#e8c547");
       S.quader(cx2 + B2 / 2 + 3.5, 0.3, cz2 - T / 2 + 2.3, cx2 + B2 / 2 + 6, 2.9, cz2 - T / 2 + 5, "#e9e6de");
@@ -108667,7 +109274,7 @@
       zelt2.translate(sx0 + 4, 2.9, sz0 + 3.5);
       S.add(zelt2, "#f2efe6");
       steinbloecke(S, r, x0 + 4, z0 + 42, 8, c);
-      if (sichtF(p, FW)) geruest3(S, FW, 1.5, 11.5, 0.3, H - 2, {});
+      if (sichtF(p2, FW)) geruest3(S, FW, 1.5, 11.5, 0.3, H - 2, {});
       S.quader(x0 + 3, 0.3, z0 + d - 9, x0 + w - 3, 0.9, z0 + d - 7, "#a9875e");
       gelaender(S, [x0 + 3, z0 + d - 9], [x0 + w - 3, z0 + d - 9], 0.9, "#5d656c", 2.2);
       gelaender(S, [x0 + 3, z0 + d - 7], [x0 + w - 3, z0 + d - 7], 0.9, "#5d656c", 2.2);
@@ -108678,7 +109285,7 @@
       const zg = waehle2(r, ["#9c5240", "#a35a44", "#93503f"]), hell4 = heller(zg, 0.06), dk = "#2f2a28";
       const bb = 26, bt = 46, bx0 = x0 + w - bb - 6, bz0 = z0 + 10, H = 30;
       S.quader(bx0, 0, bz0, bx0 + bb, H, bz0 + bt, zg);
-      for (const [k, F3] of seiten2(p, bx0, bz0, bb, bt)) {
+      for (const [k, F3] of seiten2(p2, bx0, bz0, bb, bt)) {
         const joch = k === "+x" || k === "-x" ? 5.1 : 6.2, ax = achsen5(0, F3.L, joch, 0.6), L2 = [], B2 = [];
         for (const u of ax) {
           L2.push({ u0: u - 1, u1: u + 1, v0: 4, v1: 13, bogen: true }, { u0: u - 1, u1: u + 1, v0: 16, v1: 25.5, bogen: true });
@@ -108689,7 +109296,7 @@
         fb4(S, F3, -0.2, F3.L + 0.2, H - 0.6, H, 0, 1.4, hell4);
         if (k === "+z") {
           S.quader(bx0 + 5, 0, bz0 + bt, bx0 + bb - 5, 8, bz0 + bt + 5, zg);
-          for (const [k2, F22] of seiten2(p, bx0 + 5, bz0 + bt, bb - 10, 5, ["+z", "+x"])) lochwand4(S, F22, 0, F22.L, 0, 8, zg, achsen5(0, F22.L, 3.2, 0.5).map((u) => ({ u0: u - 1, u1: u + 1, v0: 0.29, v1: 6, bogen: true })), { glas: dk });
+          for (const [k2, F22] of seiten2(p2, bx0 + 5, bz0 + bt, bb - 10, 5, ["+z", "+x"])) lochwand4(S, F22, 0, F22.L, 0, 8, zg, achsen5(0, F22.L, 3.2, 0.5).map((u) => ({ u0: u - 1, u1: u + 1, v0: 0.29, v1: 6, bogen: true })), { glas: dk });
         }
       }
       satteldach4(S, bx0 - 0.3, bz0, bx0 + bb + 0.3, bz0 + bt, H, 4.5, "z", "#6d7276", zg, 0.4);
@@ -108701,7 +109308,7 @@
       S.add(ak, "#6d7276");
       const pw = 18, px0 = x0 + 3, pz0 = z0 + 6, pt = Math.min(48, d - 14), Hp = 15, rosa = waehle2(r, ["#e6aca2", "#e9b8a8", "#e3a596"]);
       S.quader(px0, 0, pz0, px0 + pw, Hp, pz0 + pt, rosa);
-      for (const [k, F3] of seiten2(p, px0, pz0, pw, pt)) {
+      for (const [k, F3] of seiten2(p2, px0, pz0, pw, pt)) {
         for (let kk = 0; kk < 3; kk++) for (const u of achsen5(0, F3.L, 3, 1.2)) fenster5(S, F3, u, 1.2 + kk * 4.5, 1.2, kk === 1 ? 2.8 : 2.2, { kreuz: true, rahmen: WEISS2, sims: WEISS2 });
         for (const u of achsen5(0, F3.L, 9, 0)) fb4(S, F3, u - 0.4, u + 0.4, 0.3, Hp - 0.8, 0, 0.3, WEISS2);
         fb4(S, F3, -0.2, F3.L + 0.2, Hp - 0.8, Hp, 0, 0.5, WEISS2);
@@ -108725,7 +109332,7 @@
       for (let i = 0; i < 3; i++) bank4(S, bx0 + 5 + i * 8, bz0 + bt + 12);
       fahrradReihe(S, r, bx0 - 6, bx0 - 1, bz0 + bt + 4, false);
       infotafel(S, bx0 + bb + 2, bz0 + bt + 6, PI10 / 2);
-      for (const [k, F3] of seiten2(p, px0, pz0, pw, pt, ["+x", "-x"])) for (const u of achsen5(0, F3.L, 6, 2)) {
+      for (const [k, F3] of seiten2(p2, px0, pz0, pw, pt, ["+x", "-x"])) for (const u of achsen5(0, F3.L, 6, 2)) {
         fb4(S, F3, u - 0.6, u + 0.6, Hp + 0.4, Hp + 2.2, -2.4, -0.6, rosa);
         fb4(S, F3, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS9);
         fpoly3(S, teil4(F3, u - 0.75, u + 0.75, -0.6), [[0, Hp + 2.2], [1.5, Hp + 2.2], [0.75, Hp + 2.9]], -1.8, 0.1, "#5d646b");
@@ -108753,7 +109360,7 @@
       const a = i / 20 * 2 * PI10;
       if (Math.abs(Math.sin(a)) < Math.sin(spalt) + 0.08) continue;
       const nx = -Math.cos(a) / ar[0], nz = -Math.sin(a) / ar[1];
-      if (!sieht2(p, nx, nz)) continue;
+      if (!sieht2(p2, nx, nz)) continue;
       S.box(1.4, 2, 1.4, cx + Math.cos(a) * (ar[0] + 0.5), 1.3, cz + Math.sin(a) * (ar[1] + 0.5), "#3d3833", -a);
     }
     for (const s2 of [-1, 1]) for (const sz of [-1, 1]) S.quader(Math.min(cx + s2 * ar[0], cx + s2 * (oR[0] + 2)), 0, cz + sz * (Math.sin(spalt) * ar[1] + 0.3) - 0.5, Math.max(cx + s2 * ar[0], cx + s2 * (oR[0] + 2)), 3.2, cz + sz * (Math.sin(spalt) * ar[1] + 0.3) + 0.5, stein);
@@ -108853,10 +109460,10 @@
       else stab4(S, [q2 + off, y + 0.55 + rr, a0], [q2 + off, y + 0.55 + rr, a1], rr, f, 8);
     });
   }
-  function shedhalle(S, scene2, p, x0, z0, b2, t, H, o = {}) {
+  function shedhalle(S, scene2, p2, x0, z0, b2, t, H, o = {}) {
     const zg = o.ziegel ?? "#a8664f", hell4 = "#e4d8c4";
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, zg);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       lochwand4(S, F2, 0, F2.L, 0.3, H - 0.6, zg, achsen5(0, F2.L, 4.2, 0.8).map((u) => ({ u0: u - 1.3, u1: u + 1.3, v0: 1.6, v1: H - 1.6, bogen: true })), { glas: "#5d6f7a", dick: 0.3 });
       fb4(S, F2, -0.1, F2.L + 0.1, H - 0.6, H, 0, 0.4, hell4);
       for (const u of achsen5(0, F2.L, 4.2, 0.8)) fb4(S, F2, u + 1.75, u + 2.35, 0.3, H - 0.6, 0, 0.45, dunkler(zg, 0.05));
@@ -108886,16 +109493,16 @@
     for (let i = 0; i < 4; i++) S.quader(x + 12 + i * (L2 - 14) / 4, 2.9, z2 - 2.5, x + 11 + (i + 1) * (L2 - 14) / 4, 3.6, z2 + 2.5, "#5d656c");
     stab4(S, [x + 11, 4, z2], [x + L2 - 1, 4, z2], 0.3, "#9aa1a7");
   }
-  function fluss(S, p, x0, z0, w, d, uferZ) {
+  function fluss(S, p2, x0, z0, w, d, uferZ) {
     S.quader(x0, 0, uferZ, x0 + w, 0.28, z0 + d, FARBEN3.wasser);
     S.quader(x0, 0, uferZ - 1.2, x0 + w, 0.62, uferZ, "#b9b1a1");
     S.quader(x0, 0.62, uferZ - 1.2, x0 + w, 0.75, uferZ - 0.2, "#d4cdbd");
   }
-  function hochofen(S, p, r, x, z2, o) {
+  function hochofen(S, p2, r, x, z2, o) {
     const c = o.stahl, rost = o.rost, H = 34;
     S.quader(x - 11, 0, z2 - 6, x + 11, 9, z2 + 8, o.halle);
     S.add(dachProfil(22, 14, 3, 0.3, "x").translate(x, 9, z2 + 1), dunkler(o.halle, 0.12));
-    for (const [k, F2] of seiten2(p, x - 11, z2 - 6, 22, 14)) for (const u of achsen5(0, F2.L, 3.2, 0.5)) fb4(S, F2, u - 0.8, u + 0.8, 4, 8, 0, 0.05, "#3a3634");
+    for (const [k, F2] of seiten2(p2, x - 11, z2 - 6, 22, 14)) for (const u of achsen5(0, F2.L, 3.2, 0.5)) fb4(S, F2, u - 0.8, u + 0.8, 4, 8, 0, 0.05, "#3a3634");
     zyl8(S, 4.2, 5.4, 18, x, 9, z2, rost, 14);
     zyl8(S, 3.2, 4.2, 8, x, 27, z2, rost, 14);
     for (const [sx2, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) S.box(0.8, H, 0.8, x + sx2 * 6, 0.3 + H / 2, z2 + sz * 6, c);
@@ -108933,11 +109540,11 @@
     }
     return H + 11;
   }
-  function industrieRoh(S, scene2, p) {
-    const r = rng2(`ind:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function industrieRoh(S, scene2, p2) {
+    const r = rng2(`ind:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     const ufer = z0 + d - 14;
     boden5(S, x0, z0, x0 + w, ufer - 1.2, "#c4c0b6", 0.3, 0.06);
-    fluss(S, p, x0, z0, w, d, ufer);
+    fluss(S, p2, x0, z0, w, d, ufer);
     let hmax = 0;
     if (v === "chemie" || v === "tanklager") {
       const tl = v === "tanklager";
@@ -108970,7 +109577,7 @@
         for (let i = 0; i < 4; i++) kolonne(S, x0 + w * 0.56 + i * 5.5, z0 + 14 + i % 2 * 6, 1.4 + i % 2 * 0.6, 28 + i * 6);
         kuehlturm(S, x0 + w * 0.88, z0 + 18, 11, 38);
         kuehlturm(S, x0 + w * 0.66, z0 + 40, 9, 30);
-        shedhalle(S, scene2, p, x0 + 6, ufer - 34, 40, 18, 9);
+        shedhalle(S, scene2, p2, x0 + 6, ufer - 34, 40, 18, 9);
         schlot2(S, x0 + 50, ufer - 26, 52, 2.4, 1.6, "#a8664f");
         zyl8(S, 0.4, 0.5, 40, x0 + w - 8, 0.3, z0 + 6, "#c8463c", 6);
         const fl = new three_module_exports.ConeGeometry(1.2, 4, 6);
@@ -108978,7 +109585,7 @@
         S.add(fl, "#f0a03a");
         const vx0 = x0 + w * 0.58, vz0 = ufer - 28, vb = 30, vt = 12;
         S.quader(vx0, 0, vz0, vx0 + vb, 14, vz0 + vt, "#e9e3d6");
-        for (const [k, F2] of seiten2(p, vx0, vz0, vb, vt)) {
+        for (const [k, F2] of seiten2(p2, vx0, vz0, vb, vt)) {
           for (let i = 0; i < 3; i++) fb4(S, F2, 0.5, F2.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS9);
           fb4(S, F2, -0.1, F2.L + 0.1, 13.4, 14, 0, 0.3, "#c9c3b6");
           if (k === "+z") {
@@ -109008,7 +109615,7 @@
       for (let x = x0 + 6; x < x0 + w * 0.76 - 2; x += 6) S.quader(x, 0.39, z0 + 49.15, x + 3, 0.41, z0 + 49.35, "#f2f1ec");
       autoReihe(S, r, x0 + w * 0.58, x0 + w * 0.8, ufer - 13.5, 0, 0.75);
       S.quader(x0 + w - 26, 0.3, ufer - 24, x0 + w - 18, 3.6, ufer - 18, "#e9e3d6");
-      for (const [k, F2] of seiten2(p, x0 + w - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS9);
+      for (const [k, F2] of seiten2(p2, x0 + w - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS9);
       S.quader(x0 + w - 26.5, 3.6, ufer - 24.5, x0 + w - 17.5, 3.9, ufer - 17.5, "#c8463c");
       S.box(6, 0.15, 0.15, x0 + w - 21, 1.3, ufer - 15.5, "#c8463c");
       const ux0 = x0 + w - 14, uz0 = ufer - 30;
@@ -109023,7 +109630,7 @@
         S.quader(x0 + w - 30, 6, ufer - 46, x0 + w - 16, 6.3, ufer - 30, "#e8c547");
         for (const [xx, zz] of [[x0 + w - 29.5, ufer - 45.5], [x0 + w - 16.5, ufer - 45.5], [x0 + w - 29.5, ufer - 30.5], [x0 + w - 16.5, ufer - 30.5]]) S.box(0.3, 5.7, 0.3, xx, 3.15, zz, "#5d656c");
         for (let i = 0; i < 3; i++) tankwagen(S, x0 + w - 23, ufer - 43 + i * 4.6, 0);
-        ziegelbau(S, p, x0 + w - 48, ufer - 46, 14, 10, 7.5, "#a8664f", {});
+        ziegelbau(S, p2, x0 + w - 48, ufer - 46, 14, 10, 7.5, "#a8664f", {});
         for (let i = 0; i < 3; i++) leiter2(S, x0 + w * 0.56 + i * 14 + 6.1, z0 + 34, 0.3, 14, PI10 / 2);
         hmax = Math.max(hmax, 18);
       } else {
@@ -109035,9 +109642,9 @@
           S.quader(zx, 0.3, z0 + 38, zx + 5.6, 6, z0 + 45, "#c9cdd0");
           zyl8(S, 2.2, 2.4, 1.6, zx + 2.8, 6, z0 + 41.5, "#7d858c", 14);
           zyl8(S, 2, 2, 0.2, zx + 2.8, 7.5, z0 + 41.5, "#3b4046", 14);
-          for (const [k, F2] of seiten2(p, zx, z0 + 38, 5.6, 7, ["+z", "-z"])) for (const u of [1.2, 2.8, 4.4]) fb4(S, F2, u - 0.5, u + 0.5, 1, 5, 0, 0.05, "#7d858c");
+          for (const [k, F2] of seiten2(p2, zx, z0 + 38, 5.6, 7, ["+z", "-z"])) for (const u of [1.2, 2.8, 4.4]) fb4(S, F2, u - 0.5, u + 0.5, 1, 5, 0, 0.05, "#7d858c");
         }
-        ziegelbau(S, p, x0 + 70, ufer - 34, 9, 10, 11, "#a8664f", {});
+        ziegelbau(S, p2, x0 + 70, ufer - 34, 9, 10, 11, "#a8664f", {});
         gelaender(S, [x0 + 81, ufer - 28], [x0 + 111, ufer - 28], 14, "#9aa1a7", 2);
         hmax = Math.max(hmax, 52);
       }
@@ -109045,11 +109652,11 @@
     }
     const denkmal2 = v === "denkmal";
     const o = denkmal2 ? { stahl: "#6b4a3a", rost: "#8a5a3c", halle: "#7a5040", cowper: "#7a4e36" } : { stahl: "#4f5358", rost: "#6d6258", halle: "#8a6a58", cowper: "#5d6268" };
-    hmax = hochofen(S, p, r, x0 + 32, z0 + 34, o);
-    hmax = Math.max(hmax, hochofen(S, p, r, x0 + 78, z0 + 34, o));
+    hmax = hochofen(S, p2, r, x0 + 32, z0 + 34, o);
+    hmax = Math.max(hmax, hochofen(S, p2, r, x0 + 78, z0 + 34, o));
     const gx0 = x0 + w - 36, gz0 = z0 + 8, gb = 30, gt = 16, Hg = 14, zg = denkmal2 ? "#9a5a44" : "#a8664f";
     S.quader(gx0, 0, gz0, gx0 + gb, Hg, gz0 + gt, zg);
-    for (const [k, F2] of seiten2(p, gx0, gz0, gb, gt)) lochwand4(S, F2, 0, F2.L, 0.3, Hg, zg, achsen5(0, F2.L, 4, 0.8).map((u) => ({ u0: u - 1.2, u1: u + 1.2, v0: 2, v1: Hg - 2, bogen: true })), { glas: "#4d5a62" });
+    for (const [k, F2] of seiten2(p2, gx0, gz0, gb, gt)) lochwand4(S, F2, 0, F2.L, 0.3, Hg, zg, achsen5(0, F2.L, 4, 0.8).map((u) => ({ u0: u - 1.2, u1: u + 1.2, v0: 2, v1: Hg - 2, bogen: true })), { glas: "#4d5a62" });
     satteldach4(S, gx0, gz0, gx0 + gb, gz0 + gt, Hg, 4, "x", "#6d7276", zg, 0.4);
     for (let i = 0; i < 2; i++) schlot2(S, gx0 + 6 + i * 18, gz0 + gt + 6, 46, 2.2, 1.5, zg, denkmal2 ? "#c9b9a0" : "#e9e3d8");
     S.quader(x0 + 6, 0, z0 + 2, x0 + 100, 8, z0 + 10, o.stahl);
@@ -109085,7 +109692,7 @@
     zyl8(S, gr, gr, gH, gx, 0.3, gz2, denkmal2 ? "#7a6a5a" : "#6f777e", 16);
     for (let i = 0; i < 16; i++) {
       const a = i / 16 * 2 * PI10 + PI10 / 16, nx = Math.cos(a), nz = Math.sin(a);
-      if (sieht2(p, nx, nz)) S.box(0.5, gH, 0.5, gx + nx * (gr + 0.2), 0.3 + gH / 2, gz2 + nz * (gr + 0.2), o.stahl);
+      if (sieht2(p2, nx, nz)) S.box(0.5, gH, 0.5, gx + nx * (gr + 0.2), 0.3 + gH / 2, gz2 + nz * (gr + 0.2), o.stahl);
     }
     for (const y of [gH * 0.33, gH * 0.66]) zyl8(S, gr + 0.4, gr + 0.4, 0.5, gx, y, gz2, o.stahl, 16);
     const gd = new three_module_exports.ConeGeometry(gr + 0.3, 3, 16);
@@ -109114,8 +109721,8 @@
       S.box(0.5, yy, 0.5, x0 + 92.8, 0.3 + yy / 2, z2, o.stahl);
       S.box(0.5, yy, 0.5, x0 + 95.2, 0.3 + yy / 2, z2, o.stahl);
     }
-    ziegelbau(S, p, x0 + 102, z0 + 66, 32, 10, 11, denkmal2 ? "#9a5a44" : "#a8664f", {});
-    for (const [k, F2] of seiten2(p, x0 + 102, z0 + 66, 32, 10, ["+z"])) ftext4(scene2, F2, denkmal2 ? "Besucherzentrum" : "Saarwald H\xFCtte", 16, 11.9, 0.2, 1.4, 22, denkmal2 ? "#e8c547" : "#f2efe6", denkmal2 ? null : "#5a3a2e");
+    ziegelbau(S, p2, x0 + 102, z0 + 66, 32, 10, 11, denkmal2 ? "#9a5a44" : "#a8664f", {});
+    for (const [k, F2] of seiten2(p2, x0 + 102, z0 + 66, 32, 10, ["+z"])) ftext4(scene2, F2, denkmal2 ? "Besucherzentrum" : "Saarwald H\xFCtte", 16, 11.9, 0.2, 1.4, 22, denkmal2 ? "#e8c547" : "#f2efe6", denkmal2 ? null : "#5a3a2e");
     for (let i = 0; i < 4; i++) {
       const sx = x0 + 74 + i * 6;
       S.quader(sx - 2, 0.6, ufer - 5.6, sx + 2, 1.4, ufer - 3.4, "#3b4046");
@@ -109150,11 +109757,11 @@
     }
     return { hoehe: hmax + 8 };
   }
-  function winzerhaus(S, scene2, p, r, x0, z0, b2, t, o = {}) {
+  function winzerhaus(S, scene2, p2, r, x0, z0, b2, t, o = {}) {
     const n = o.n ?? 2, eg = 3.2, gh = 2.9, H = eg + n * gh, wand2 = o.wand ?? waehle2(r, ["#f1e6cf", "#efd9b8", "#e9e2d4", "#f0dcc8", "#e8d6a8", "#f3ece0"]);
     const stein = waehle2(r, ["#c9b292", "#b9a283", "#a89a88"]), laeden = waehle2(r, LAEDEN2);
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, wand2);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const frei6 = k === "+z" || k === "-z" || o.frei?.includes(k);
       if (!frei6) {
         fb4(S, F2, 0, F2.L, eg, H, 0, 0.04, SCHIEFER3);
@@ -109178,13 +109785,13 @@
     }
     const hg = t * 0.62;
     satteldach4(S, x0, z0 - 0.2, x0 + b2, z0 + t + 0.2, H, hg, "x", SCHIEFER3, wand2, 0.4);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t, ["+x", "-x"])) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t, ["+x", "-x"])) {
       if (o.frei?.includes(k)) {
         fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
         fenster5(S, F2, F2.L / 2, H + 0.6, 0.7, 1, { t: 0.05 });
       } else fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
     }
-    for (const [k, F2] of seiten2(p, x0, z0 - 0.2, b2, t + 0.4, ["+z", "-z"])) for (const u of achsen5(0, F2.L, 3.6, 1.6)) {
+    for (const [k, F2] of seiten2(p2, x0, z0 - 0.2, b2, t + 0.4, ["+z", "-z"])) for (const u of achsen5(0, F2.L, 3.6, 1.6)) {
       const ys = H + 0.9;
       fb4(S, F2, u - 0.7, u + 0.7, ys - 0.5, ys + 1.2, -2.4, -0.7, wand2);
       fb4(S, F2, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS9);
@@ -109195,17 +109802,17 @@
     }
     return H + hg;
   }
-  function dorfkirche(S, p, r, x0, z0, b2, t) {
+  function dorfkirche(S, p2, r, x0, z0, b2, t) {
     const wand2 = "#efe8da", H = 9;
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, wand2);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       lochwand4(S, F2, 0, F2.L, 0.3, H, wand2, achsen5(0, F2.L, 3.6, 1).map((u) => ({ u0: u - 0.6, u1: u + 0.6, v0: 2.5, v1: 7.2, bogen: "spitz" })), { dick: 0.2 });
       fb4(S, F2, -0.05, F2.L + 0.05, 0.3, 0.9, 0, 0.15, "#c9b292");
     }
     satteldach4(S, x0, z0 - 0.3, x0 + b2, z0 + t + 0.3, H, 6, "x", SCHIEFER3, wand2, 0.3);
     const ts = 4.6, tx0 = x0 + b2 - 1, tz0 = z0 + (t - ts) / 2, Ht = 19;
     S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, wand2);
-    for (const [k, F2] of seiten2(p, tx0, tz0, ts, ts)) {
+    for (const [k, F2] of seiten2(p2, tx0, tz0, ts, ts)) {
       lochwand4(S, F2, 0, ts, Ht - 4, Ht, wand2, [{ u0: ts / 2 - 0.6, u1: ts / 2 + 0.6, v0: Ht - 3.5, v1: Ht - 0.6, bogen: "spitz" }], { dick: 0.15 });
       fscheibe3(S, F2, ts / 2, Ht - 5.2, 0, 0.12, 0.7, "#2b3036");
       fb4(S, F2, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS9);
@@ -109217,7 +109824,7 @@
     zyl8(S, 0.04, 0.1, 1.6, tx0 + ts / 2, Ht + 13, tz0 + ts / 2, "#d8b45a", 4);
     return Ht + 14.6;
   }
-  function burgruine(S, p, r, cx, cz, y0, o = {}) {
+  function burgruine(S, p2, r, cx, cz, y0, o = {}) {
     const c = o.stein ?? "#b8ab95", hell4 = heller(c, 0.06);
     const rund = o.rund ?? r() < 0.5, Hb = 20;
     if (rund) {
@@ -109228,7 +109835,7 @@
       }
     } else {
       S.quader(cx - 3.2, y0, cz - 3.2, cx + 3.2, y0 + Hb, cz + 3.2, c);
-      for (const [k, F2] of seiten2(p, cx - 3.2, cz - 3.2, 6.4, 6.4)) {
+      for (const [k, F2] of seiten2(p2, cx - 3.2, cz - 3.2, 6.4, 6.4)) {
         ruinenKrone(S, F2, 0, 6.4, y0 + Hb, r, c, -0.8, 0, 1.6);
         fb4(S, F2, 2.8, 3.6, y0 + 12, y0 + 13.6, 0, 0.05, "#2f2a28");
       }
@@ -109237,7 +109844,7 @@
     for (const [k, F2] of Object.entries(vierSeiten(mx0, mz0, mb, mt))) {
       const h = k === "-z" ? 7 : 5;
       fb4(S, F2, 0, F2.L, y0, y0 + h, -1.2, 0, c);
-      if (sichtF(p, F2)) {
+      if (sichtF(p2, F2)) {
         ruinenKrone(S, F2, 0, F2.L, y0 + h, r, c, -1.2, 0, 1.4);
         for (const u of achsen5(0, F2.L, 6, 1)) fb4(S, F2, u - 0.15, u + 0.15, y0 + 1.5, y0 + 2.5, 0, 0.05, "#2f2a28");
       }
@@ -109253,13 +109860,13 @@
     }
     return y0 + Hb + 5;
   }
-  function weinortRoh(S, scene2, p) {
-    const r = rng2(`wein:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function weinortRoh(S, scene2, p2) {
+    const r = rng2(`wein:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     const mosel = v === "mosel", hof2 = v === "winzerhof";
     const ufer = hof2 ? z0 + d : z0 + d - 12, prom = hof2 ? z0 + d - 3 : ufer - 8, ht = 13, hz0 = prom - ht - 1;
     boden5(S, x0, z0, x0 + w, ufer, PFLASTER4, 0.3, 0.07);
     if (!hof2) {
-      fluss(S, p, x0, z0, w, d, ufer);
+      fluss(S, p2, x0, z0, w, d, ufer);
       boden5(S, x0, prom, x0 + w, ufer - 1.2, "#d6d0c2", 0.3, 0.1);
       baumreihe(S, r, x0 + 2, x0 + w - 2, prom + 3.5, 9, 0.95);
       for (let i2 = 0; i2 < 3; i2++) bank4(S, x0 + 8 + i2 * 26, prom + 5.5);
@@ -109287,13 +109894,13 @@
     walm2(S, whx - 0.3, whz - 2.3, whx + 3.5, whz + 1.3, why + 3, 1.8, mosel ? SCHIEFER3 : ZIEGEL2);
     if (mosel) {
       const zL = hangZ1 - 2 * tt, yL = hang2(x0 + w * 0.7, zL), FL = R7(x0, zL, 1, 0, w);
-      if (sichtF(p, FL)) {
+      if (sichtF(p2, FL)) {
         fb4(S, FL, w * 0.7 - 9, w * 0.7 + 9, yL + 0.6, yL + 4.4, -0.3, -0.1, "#f2efe6");
         for (const u of [w * 0.7 - 7, w * 0.7 + 7]) fb4(S, FL, u - 0.15, u + 0.15, yL - 1, yL + 0.6, -0.3, -0.1, "#3b3f44");
         ftext4(scene2, FL, "KESSELBERG", w * 0.7, yL + 2.5, 0, 3, 16.5, "#5a2a24");
       }
     }
-    const hmaxBurg = burgruine(S, p, r, x0 + w * (mosel ? 0.62 : 0.3), z0 + 12, Htop + 0.3, { stein: mosel ? "#8f8a84" : "#b8ab95", rund: !mosel });
+    const hmaxBurg = burgruine(S, p2, r, x0 + w * (mosel ? 0.62 : 0.3), z0 + 12, Htop + 0.3, { stein: mosel ? "#8f8a84" : "#b8ab95", rund: !mosel });
     for (let i2 = 0; i2 < 6; i2++) {
       const bx = zw(r, x0 + 8, x0 + w - 8), bz = zw(r, z0 + 10, plateau - 2);
       if (Math.abs(bx - (x0 + w * (mosel ? 0.62 : 0.3)) - 6) > 14) baumAuf(S, bx, hang2(bx, bz), bz, r, zw(r, 0.9, 1.2));
@@ -109301,11 +109908,11 @@
     let hmax = hmaxBurg;
     if (hof2) {
       const hx0 = x0 + w * 0.2, hb = w * 0.6, hzv = z0 + d - 32, hd = 26;
-      hmax = Math.max(hmax, winzerhaus(S, scene2, p, r, hx0, hzv, hb, 11, { n: 2, schild: "Weingut Kellerhals", frei: ["+x", "-x"] }));
-      for (const s2 of [0, 1]) hmax = Math.max(hmax, unterbau(S, scene2, p, s2 ? "-x" : "+x", s2 ? hx0 + hb - 10 : hx0, hzv + 11.5, hd - 15, 10, (S2, sc2, p2) => fwHaus(S2, sc2, p2, r, 0, 0, hd - 15, 10, { giebel: false, n: 1, zwerch: false, frei: ["+x", "-x"] })));
+      hmax = Math.max(hmax, winzerhaus(S, scene2, p2, r, hx0, hzv, hb, 11, { n: 2, schild: "Weingut Kellerhals", frei: ["+x", "-x"] }));
+      for (const s2 of [0, 1]) hmax = Math.max(hmax, unterbau(S, scene2, p2, s2 ? "-x" : "+x", s2 ? hx0 + hb - 10 : hx0, hzv + 11.5, hd - 15, 10, (S2, sc2, p22) => fwHaus(S2, sc2, p22, r, 0, 0, hd - 15, 10, { giebel: false, n: 1, zwerch: false, frei: ["+x", "-x"] })));
       const F2 = R7(hx0 + 10, hzv + hd, 1, 0, hb - 20);
       fwand2(S, F2, 0, hb - 20, 0, 4.2, -0.6, 0, "#c9b292", [{ u0: (hb - 20) / 2 - 1.8, u1: (hb - 20) / 2 + 1.8, v0: -0.1, v1: 3.6, bogen: true }]);
-      if (sichtF(p, F2)) ftext4(scene2, F2, "Weingut Kellerhals", (hb - 20) / 2, 3.95, 0.05, 0.36, 6, "#5a2a24");
+      if (sichtF(p2, F2)) ftext4(scene2, F2, "Weingut Kellerhals", (hb - 20) / 2, 3.95, 0.05, 0.36, 6, "#5a2a24");
       for (let i2 = 0; i2 < 5; i2++) {
         const g = new three_module_exports.CylinderGeometry(0.6, 0.6, 1.5, 10);
         g.rotateZ(PI10 / 2);
@@ -109323,7 +109930,7 @@
     const kircheBei = Math.floor(zw(r, 0.35, 0.6) * w);
     while (x < x0 + w - 6) {
       if (Math.abs(x - x0 - kircheBei) < 4 && i > 0) {
-        hmax = Math.max(hmax, dorfkirche(S, p, r, x, hz0, 14, ht - 2));
+        hmax = Math.max(hmax, dorfkirche(S, p2, r, x, hz0, 14, ht - 2));
         x += 20;
         i++;
         continue;
@@ -109334,8 +109941,8 @@
       if (i === 0) frei6.push("-x");
       if (x + b2 > x0 + w - 1.5) frei6.push("+x");
       let hh;
-      if (!mosel && r() < 0.45) hh = fwHaus(S, scene2, p, r, x, hz0, b2, ht, { giebel: r() < 0.5, frei: frei6, laden: null, n: 2, schiefer: r() < 0.4 ? "giebel" : null });
-      else hh = winzerhaus(S, scene2, p, r, x, hz0, b2, ht, { n: mosel ? 2 + (r() < 0.4 ? 1 : 0) : 2, frei: frei6, schild: r() < 0.5 ? namen.pop() : null });
+      if (!mosel && r() < 0.45) hh = fwHaus(S, scene2, p2, r, x, hz0, b2, ht, { giebel: r() < 0.5, frei: frei6, laden: null, n: 2, schiefer: r() < 0.4 ? "giebel" : null });
+      else hh = winzerhaus(S, scene2, p2, r, x, hz0, b2, ht, { n: mosel ? 2 + (r() < 0.4 ? 1 : 0) : 2, frei: frei6, schild: r() < 0.5 ? namen.pop() : null });
       hmax = Math.max(hmax, hh);
       x += b2;
       i++;
@@ -109362,7 +109969,7 @@
     }
     return { s: s2, R0, cy, a };
   }
-  function halle(S, p, cx, z0, z1, B2, y0, f, o) {
+  function halle(S, p2, cx, z0, z1, B2, y0, f, o) {
     const L2 = z1 - z0, { s: s2, R0, cy, a } = bogenForm2(B2, y0, f, 0.35);
     const g = new three_module_exports.ExtrudeGeometry(s2, { depth: L2, bevelEnabled: false, curveSegments: 4 });
     g.translate(cx, 0, z0);
@@ -109381,7 +109988,7 @@
     S.quader(cx - B2 / 2 - 0.4, y0 - 0.8, z0, cx - B2 / 2 + 0.4, y0, z1, o.binderF);
     S.quader(cx + B2 / 2 - 0.4, y0 - 0.8, z0, cx + B2 / 2 + 0.4, y0, z1, o.binderF);
     for (const [zz, nz] of [[z1, 1], [z0, -1]]) {
-      if (!sieht2(p, 0, nz)) continue;
+      if (!sieht2(p2, 0, nz)) continue;
       const sh = new three_module_exports.Shape();
       const n = 14;
       for (let i = 0; i <= n; i++) {
@@ -109420,10 +110027,10 @@
     g.translate(x, 2.65, z0);
     S.add(g, art === "fern" ? "#f2f1ec" : "#c8463c");
   }
-  function empfangAlt(S, scene2, p, r, x0, z0, b2, t, H, o) {
+  function empfangAlt(S, scene2, p2, r, x0, z0, b2, t, H, o) {
     const st = o.stein, orn = o.orn, dach3 = o.dach, cx = x0 + b2 / 2;
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, st);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const L2 = [];
       for (const u of achsen5(0, F2.L, 4.2, 1)) {
         if (k === "+z" && Math.abs(u - F2.L / 2) < 15) continue;
@@ -109438,7 +110045,7 @@
     S.add(dachProfil(b2, t, 3.5, t * 0.45, "x").translate(cx, H, z0 + t / 2), dach3);
     const mb = 30, mz1 = z0 + t + 2, Hm = H + 9;
     S.quader(cx - mb / 2, 0, z0 - 2, cx + mb / 2, Hm, mz1, st);
-    for (const [k, F2] of seiten2(p, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
+    for (const [k, F2] of seiten2(p2, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
       if (k === "+z" || k === "-z") {
         lochwand4(S, F2, 0, F2.L, 0.3, Hm - 2, st, [{ u0: 5.5, u1: F2.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL6, dick: 0.6 });
         for (let u = 7.5; u < F2.L - 6; u += 2.4) fb4(S, F2, u - 0.08, u + 0.08, 6.5, Hm - 4, 0.02, 0.15, "#4a525a");
@@ -109463,7 +110070,7 @@
     for (const s2 of [-1, 1]) {
       const px0 = s2 < 0 ? x0 - 2 : x0 + b2 - 10, pw = 12;
       S.quader(px0, 0, z0 - 1, px0 + pw, H + 4, z0 + t + 1.5, st);
-      for (const [k, F2] of seiten2(p, px0, z0 - 1, pw, t + 2.5)) {
+      for (const [k, F2] of seiten2(p2, px0, z0 - 1, pw, t + 2.5)) {
         lochwand4(S, F2, 0, F2.L, 0.3, H + 3, st, achsen5(0, F2.L, 4, 1.4).map((u) => ({ u0: u - 1, u1: u + 1, v0: 2, v1: H + 1, bogen: true })), { dick: 0.3 });
         for (const u of [0.6, F2.L - 0.6]) fb4(S, F2, u - 0.6, u + 0.6, 0, H + 3, 0, 0.6, orn);
         fb4(S, F2, -0.3, F2.L + 0.3, H + 3, H + 4, 0, 0.7, orn);
@@ -109473,10 +110080,10 @@
     }
     return Hm + 13;
   }
-  function empfang50(S, scene2, p, r, x0, z0, b2, t, H, o) {
+  function empfang50(S, scene2, p2, r, x0, z0, b2, t, H, o) {
     const be = "#e9e6de", cx = x0 + b2 / 2;
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, GLAS_HELL6);
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       for (const u of achsen5(0, F2.L, 2.4, 0)) fb4(S, F2, u - 0.08, u + 0.08, 0.3, H, 0, 0.15, "#f2f1ec");
       for (const y of [4.2, 8.4]) fb4(S, F2, 0, F2.L, y, y + 0.2, 0, 0.15, "#f2f1ec");
       if (k === "+z") ftext4(scene2, F2, o.name ?? "Hauptbahnhof", F2.L / 2, H + 1.4, 3, 1.5, 30, "#2a3036");
@@ -109487,7 +110094,7 @@
     for (const s2 of [-1, 1]) {
       const fx0 = s2 < 0 ? x0 - 14 : x0 + b2, fb22 = 14;
       S.quader(fx0, 0, z0 + 1, fx0 + fb22, H + 3, z0 + t - 1, "#d9d2c2");
-      for (const [k, F2] of seiten2(p, fx0, z0 + 1, fb22, t - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS9);
+      for (const [k, F2] of seiten2(p2, fx0, z0 + 1, fb22, t - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS9);
       S.quader(fx0 - 0.4, H + 3, z0 + 0.6, fx0 + fb22 + 0.4, H + 3.4, z0 + t - 0.6, be);
     }
     const ux = x0 + b2 + 4;
@@ -109497,8 +110104,8 @@
     fscheibe3(S, FU, 1.5, H + 13.5, 0.15, 0.2, 1.05, "#2b3036");
     return H + 16;
   }
-  function bahnhofRoh2(S, scene2, p) {
-    const r = rng2(`bf:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function bahnhofRoh2(S, scene2, p2) {
+    const r = rng2(`bf:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     boden5(S, x0, z0, x0 + w, z0 + d, "#c9c3b6", 0.3, 0.06);
     const et = v === "nachkrieg" ? 16 : 20, ez1 = z0 + d - 8, ez0 = ez1 - et, hz1 = ez0 - 0.5, hz0 = z0 + 26;
     const hallen = v === "gross" ? [[0.5, 34], [0.24, 26], [0.76, 26], [0.06, 18], [0.94, 18]] : v === "drei" ? [[0.5, 32], [0.2, 28], [0.8, 28]] : [[0.32, 30], [0.68, 30]];
@@ -109524,17 +110131,17 @@
     let hmax = 0;
     for (const [f, B2] of hallen) {
       const cx = x0 + 4 + f * (w - 8), y0 = v === "nachkrieg" ? 9 : 10, st = B2 * (v === "nachkrieg" ? 0.25 : 0.42);
-      halle(S, p, cx, hz0, hz1, B2 - 0.6, y0, st, o);
+      halle(S, p2, cx, hz0, hz1, B2 - 0.6, y0, st, o);
       hmax = Math.max(hmax, y0 + st);
     }
     for (const s2 of [-1, 1]) {
       const xa = s2 < 0 ? x0 + 2 : x0 + w - 3.4;
       S.quader(xa, 0, hz0, xa + 1.4, 9.4, hz1, "#cdbb9e");
-      for (const [k, F2] of seiten2(p, xa, hz0, 1.4, hz1 - hz0, ["+x", "-x"])) lochwand4(S, F2, 0, F2.L, 0.3, 9.4, "#cdbb9e", achsen5(0, F2.L, 5, 1).map((u) => ({ u0: u - 1.4, u1: u + 1.4, v0: 1.5, v1: 7.5, bogen: true })), { glas: "#3e4650", dick: 0.25 });
+      for (const [k, F2] of seiten2(p2, xa, hz0, 1.4, hz1 - hz0, ["+x", "-x"])) lochwand4(S, F2, 0, F2.L, 0.3, 9.4, "#cdbb9e", achsen5(0, F2.L, 5, 1).map((u) => ({ u0: u - 1.4, u1: u + 1.4, v0: 1.5, v1: 7.5, bogen: true })), { glas: "#3e4650", dick: 0.25 });
     }
     const ex0 = x0 + 4, eb = w - 8;
-    if (v === "nachkrieg") hmax = Math.max(hmax, empfang50(S, scene2, p, r, ex0 + 16, ez0, eb - 32, et, 12, {}));
-    else hmax = Math.max(hmax, empfangAlt(S, scene2, p, r, ex0 + 4, ez0, eb - 8, et, v === "gross" ? 16 : 14, { stein: waehle2(r, ["#d8c6a5", "#cdbb9e", "#d9cdb5"]), orn: "#efe6d2", dach: v === "gross" ? KUPFER3 : SCHIEFER3 }));
+    if (v === "nachkrieg") hmax = Math.max(hmax, empfang50(S, scene2, p2, r, ex0 + 16, ez0, eb - 32, et, 12, {}));
+    else hmax = Math.max(hmax, empfangAlt(S, scene2, p2, r, ex0 + 4, ez0, eb - 8, et, v === "gross" ? 16 : 14, { stein: waehle2(r, ["#d8c6a5", "#cdbb9e", "#d9cdb5"]), orn: "#efe6d2", dach: v === "gross" ? KUPFER3 : SCHIEFER3 }));
     boden5(S, x0, ez1, x0 + w, z0 + d, "#d6d0c2", 0.3, 0.1);
     for (let x = x0 + 10; x < x0 + w * 0.4; x += 5) ostFahrzeug(S, x, ez1 + 4.5, "modern", 0, "#efd25c");
     baumreihe(S, r, x0 + w * 0.6, x0 + w - 4, ez1 + 5, 9, 0.9);
@@ -109637,10 +110244,10 @@
   function steinbloecke(S, r, x, z2, n, c) {
     for (let i = 0; i < n; i++) S.box(zw(r, 0.8, 1.8), zw(r, 0.5, 1), zw(r, 0.6, 1.2), x + i % 4 * 2.1, 0.3 + 0.4 + Math.floor(i / 4) * 0.9, z2 + i % 2 * 0.4, i % 3 ? c : dunkler(c, 0.06), zw(r, -0.2, 0.2));
   }
-  function ziegelbau(S, p, x0, z0, b2, t, H, zg = "#a8664f", o = {}) {
+  function ziegelbau(S, p2, x0, z0, b2, t, H, zg = "#a8664f", o = {}) {
     S.quader(x0, 0, z0, x0 + b2, H, z0 + t, zg);
     const n = Math.max(1, Math.round((H - 1) / 3.6));
-    for (const [k, F2] of seiten2(p, x0, z0, b2, t)) {
+    for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const L2 = [];
       for (let i = 0; i < n; i++) for (const u of achsen5(0, F2.L, 2.8, 0.8)) L2.push({ u0: u - 0.7, u1: u + 0.7, v0: 1 + i * 3.6, v1: 2.9 + i * 3.6, bogen: o.bogen ?? true });
       lochwand4(S, F2, 0, F2.L, 0.3, H - 0.5, zg, L2, { glas: "#5d6f7a", dick: 0.25 });
@@ -109653,12 +110260,12 @@
     const c = Math.cos(ry), sn = Math.sin(ry);
     stab4(S, [x - c * 3, 2.6, z2 + sn * 3], [x + c * 1.4, 2.6, z2 - sn * 1.4], 1.1, "#e6e8e8", 10);
   }
-  function hangSchloss(S, p, r, x0, z0, b2, t, y) {
+  function hangSchloss(S, p2, r, x0, z0, b2, t, y) {
     const putz2 = "#ece4d3", stein = "#c9b9a0", dach3 = SCHIEFER3;
     const pb = Math.min(58, b2 * 0.72), pt = 13, px2 = x0 + (b2 - pb) / 2 - 4, pz4 = z0 + 3, H = 15;
     S.quader(px2, y, pz4, px2 + pb, y + H, pz4 + pt, putz2);
     S.quader(px2 - 0.2, y, pz4 - 0.2, px2 + pb + 0.2, y + 2.2, pz4 + pt + 0.2, stein);
-    for (const [k, F2] of seiten2(p, px2, pz4, pb, pt)) {
+    for (const [k, F2] of seiten2(p2, px2, pz4, pb, pt)) {
       for (const u of achsen5(0, F2.L, 3.4, 1.2)) {
         fenster5(S, F2, u, y + 4.2, 1.2, 2.4, { kreuz: true, rahmen: stein });
         fenster5(S, F2, u, y + 9.4, 1.2, 2.4, { kreuz: true, rahmen: stein });
@@ -109675,7 +110282,7 @@
     }
     const kx = px2 + pb, kb = 12, kt = Math.min(t - 6, 26);
     S.quader(kx, y, pz4, kx + kb, y + H + 2, pz4 + kt, stein);
-    for (const [k, F2] of seiten2(p, kx, pz4, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y + 4, y + H - 1, 0, 0.06, GLAS9);
+    for (const [k, F2] of seiten2(p2, kx, pz4, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y + 4, y + H - 1, 0, 0.06, GLAS9);
     satteldach4(S, kx, pz4, kx + kb, pz4 + kt, y + H + 2, 8, "z", dach3, stein, 0.4);
     S.box(1.2, 6, 1.2, kx + kb / 2, y + H + 13, pz4 + kt * 0.5, dach3);
     zyl8(S, 0, 0.9, 4, kx + kb / 2, y + H + 16, pz4 + kt * 0.5, KUPFER3, 8);
@@ -109683,7 +110290,7 @@
     zyl8(S, 3.6, 3.8, H + 12, tx, y, tz, stein, 16);
     zyl8(S, 0, 4.4, 9, tx, y + H + 12, tz, dach3, 16);
     S.quader(px2 + pb * 0.42 - 3, y, pz4 + pt, px2 + pb * 0.42 + 3, y + H + 8, pz4 + pt + 6, putz2);
-    for (const [k, F2] of seiten2(p, px2 + pb * 0.42 - 3, pz4 + pt, 6, 6)) {
+    for (const [k, F2] of seiten2(p2, px2 + pb * 0.42 - 3, pz4 + pt, 6, 6)) {
       fb4(S, F2, 1.8, 4.2, y, y + 4.2, 0, 0.08, "#4a3b33");
       fenster5(S, F2, 3, y + H + 2, 1, 2.2, { rahmen: stein });
     }
@@ -109693,8 +110300,8 @@
     for (let i = 0; i < 4; i++) baumAuf(S, x0 + 4 + i * 6, y, z0 + t - 4, r, 0.8);
     return y + H + 26;
   }
-  function oberstadtRoh(S, scene2, p) {
-    const r = rng2(`ob:${p.seed}`), v = p.variante, { x: x0, z: z0, w, d } = p;
+  function oberstadtRoh(S, scene2, p2) {
+    const r = rng2(`ob:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w, d } = p2;
     boden5(S, x0, z0, x0 + w, z0 + d, PFLASTER4, 0.3, 0.06);
     const tf = 11, zF = z0 + d - 1 - tf, xS = x0 + w - 1 - tf;
     let hmax = 0;
@@ -109705,7 +110312,7 @@
       const frei6 = [];
       if (x === x0 + 1) frei6.push("-x");
       if (x + b2 >= x0 + w - 1.01) frei6.push("+x");
-      hmax = Math.max(hmax, fwHaus(S, scene2, p, r, x, zF, b2, tf, { n: 2 + (r() < 0.35 ? 1 : 0), giebel: r() < 0.5, frei: frei6, zwerch: false, laden: r() < 0.4 ? waehle2(r, LAEDEN2) : null }));
+      hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, x, zF, b2, tf, { n: 2 + (r() < 0.35 ? 1 : 0), giebel: r() < 0.5, frei: frei6, zwerch: false, laden: r() < 0.4 ? waehle2(r, LAEDEN2) : null }));
       x += b2;
     }
     let z2 = z0 + 1;
@@ -109713,17 +110320,17 @@
       let b2 = zw(r, 8, 11.5);
       if (zF - z2 - b2 < 6.5) b2 = zF - z2;
       const zz = z2, bb = b2, erst = z2 === z0 + 1;
-      hmax = Math.max(hmax, unterbau(S, scene2, p, "+x", xS, zz, bb, tf, (T2, g2, p2) => fwHaus(T2, g2, p2, r, 0, 0, bb, tf, { n: 2, giebel: r() < 0.5, frei: erst ? ["+x"] : [], zwerch: false })));
+      hmax = Math.max(hmax, unterbau(S, scene2, p2, "+x", xS, zz, bb, tf, (T2, g2, p22) => fwHaus(T2, g2, p22, r, 0, 0, bb, tf, { n: 2, giebel: r() < 0.5, frei: erst ? ["+x"] : [], zwerch: false })));
       z2 += b2;
     }
     const ia = x0 + 2, ib = xS - 2, ja = z0 + 2, jb = zF - 2;
     if (v === "dom") {
       const kw2 = Math.min(54, ib - ia - 6), kd = Math.min(22, jb - ja - 10);
-      const e = kirche(S, scene2, { x: ia + (ib - ia - kw2) / 2, z: ja + 2, w: kw2, d: kd, seed: p.seed, stil: "hallenkirche", typ: "stadt", stein: "#b9634f", dach: SCHIEFER3, turm: "west", region: "Mitte" });
+      const e = kirche(S, scene2, { x: ia + (ib - ia - kw2) / 2, z: ja + 2, w: kw2, d: kd, seed: p2.seed, stil: "hallenkirche", typ: "stadt", stein: "#b9634f", dach: SCHIEFER3, turm: "west", region: "Mitte" });
       hmax = Math.max(hmax, e?.hoehe ?? 30);
       for (let i = 0; i < 5; i++) baum(S, ia + 4 + i * ((ib - ia - 8) / 4), jb - 3, r, 0.85);
     } else {
-      hmax = Math.max(hmax, hangSchloss(S, p, r, ia, ja, ib - ia, jb - ja, 0.3));
+      hmax = Math.max(hmax, hangSchloss(S, p2, r, ia, ja, ib - ia, jb - ja, 0.3));
     }
     const pz0 = jb - Math.min(22, (jb - ja) * 0.45), pzm = (pz0 + jb) / 2, pxm = (ia + ib) / 2;
     boden5(S, ia + 2, pz0, ib - 2, jb - 1, PLATZ, 0.3, 0.08);
@@ -109739,17 +110346,17 @@
     }
     return { hoehe: hmax };
   }
-  function fwStadthausRoh(S, scene2, p) {
-    const r = rng2(`fwh:${p.seed ?? 1}`);
-    const n = Math.max(1, Math.min(3, p.geschosse ?? 2));
-    const h = fwHaus(S, scene2, p, r, 0, 0, p.w, p.d, {
+  function fwStadthausRoh(S, scene2, p2) {
+    const r = rng2(`fwh:${p2.seed ?? 1}`);
+    const n = Math.max(1, Math.min(3, p2.geschosse ?? 2));
+    const h = fwHaus(S, scene2, p2, r, 0, 0, p2.w, p2.d, {
       n,
-      giebel: p.w <= 11 ? r() < 0.75 : r() < 0.2,
-      frei: p.eck ? ["+x", "-x"] : [],
-      zwerch: p.w > 11 && r() < 0.6,
-      laden: p.laden || r() < 0.3 ? waehle2(r, LAEDEN2) : null,
-      name: p.laden && r() < 0.7 ? waehle2(r, LADEN_ALT) : null,
-      markise: p.laden && r() < 0.35 ? waehle2(r, ["#c9483e", "#3f7d56", "#2f6f8f", "#d39a2b"]) : null
+      giebel: p2.w <= 11 ? r() < 0.75 : r() < 0.2,
+      frei: p2.eck ? ["+x", "-x"] : [],
+      zwerch: p2.w > 11 && r() < 0.6,
+      laden: p2.laden || r() < 0.3 ? waehle2(r, LAEDEN2) : null,
+      name: p2.laden && r() < 0.7 ? waehle2(r, LADEN_ALT) : null,
+      markise: p2.laden && r() < 0.35 ? waehle2(r, ["#c9483e", "#3f7d56", "#2f6f8f", "#d39a2b"]) : null
     });
     return { hoehe: h, stil: "fachwerk", geschosse: n };
   }
@@ -109813,7 +110420,7 @@
       alle: { min: [130, 96], max: [160, 110] }
     }, industrieRoh),
     // Der Hang liegt immer auf der kameraabgewandten Seite (Welt -x oder -z): Front -z wird zu +x, Front -x zu +z
-    "slot:mitte_weinort": /* @__PURE__ */ ((f) => (S, scene2, p) => f(S, scene2, { ...p, front: { "-z": "+x", "-x": "+z" }[p.front] ?? p.front }))(slot2("wein", MITTE_VARIANTEN["slot:mitte_weinort"], {
+    "slot:mitte_weinort": /* @__PURE__ */ ((f) => (S, scene2, p2) => f(S, scene2, { ...p2, front: { "-z": "+x", "-x": "+z" }[p2.front] ?? p2.front }))(slot2("wein", MITTE_VARIANTEN["slot:mitte_weinort"], {
       rhein: { min: [80, 76], max: [100, 90] },
       mosel: { min: [76, 84], max: [96, 96] },
       winzerhof: { min: [70, 72], max: [90, 84] }
@@ -109824,7 +110431,7 @@
       nachkrieg: { min: [100, 100], max: [130, 120] }
     }, bahnhofRoh2),
     // Wie beim Weinort liegt der Hang immer kameraabgewandt: Front -z wird zu +x, Front -x zu +z
-    "slot:mitte_oberstadt": /* @__PURE__ */ ((f) => (S, scene2, p) => f(S, scene2, { ...p, front: { "-z": "+x", "-x": "+z" }[p.front] ?? p.front }))(slot2("ob", MITTE_VARIANTEN["slot:mitte_oberstadt"], {
+    "slot:mitte_oberstadt": /* @__PURE__ */ ((f) => (S, scene2, p2) => f(S, scene2, { ...p2, front: { "-z": "+x", "-x": "+z" }[p2.front] ?? p2.front }))(slot2("ob", MITTE_VARIANTEN["slot:mitte_oberstadt"], {
       schloss: { min: [86, 80], max: [120, 100] },
       dom: { min: [86, 80], max: [120, 100] }
     }, oberstadtRoh))
@@ -110230,7 +110837,7 @@
         if (rb() < 0.3) gh50();
       }
       if (art === "mosel" && rb() < 0.3) fwZeile();
-      for (const p of parzellenVon3(ctx)) if (p.typ === "stadthaus" || p.typ === "eck") p.laden = true;
+      for (const p2 of parzellenVon3(ctx)) if (p2.typ === "stadthaus" || p2.typ === "eck") p2.laden = true;
       return;
     }
     if (v === "mitte_fachwerk" && rb() < (E.typ === "metropole" ? 0.4 : 0.22)) fwZeile();
@@ -110243,8 +110850,8 @@
       if (!b2.mitteKirche) continue;
       const { dom, form, ...k } = b2.mitteKirche;
       for (const id of b2.parzellen) {
-        const p = parzellen.find((q2) => q2.id === id);
-        if (p && p.typ === "slot:kirche") Object.assign(p, { stein: "#b0574a", ...k, region: "Mitte" });
+        const p2 = parzellen.find((q2) => q2.id === id);
+        if (p2 && p2.typ === "slot:kirche") Object.assign(p2, { stein: "#b0574a", ...k, region: "Mitte" });
       }
     }
   }
@@ -110288,7 +110895,7 @@
     if (art === "gruen") S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
     else if (art === "werk") S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#bcb7ad");
     else B2.pflasterFlaeche(ctx, b2, y, "#ddd6c8", 5);
-    const frei6 = (x, z2, rad2) => !teile.some((p) => B2.imRechteck(x, z2, p, rad2));
+    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     if (art === "werk") {
       for (let x = b2.x + 6; x < b2.x + b2.w - 26; x += 34) for (let z2 = b2.z + 6; z2 < b2.z + b2.d - 20; z2 += 26) {
         const w = 26 + (r() * 6 | 0), d = 16 + (r() * 4 | 0);
@@ -110298,7 +110905,7 @@
           const kw2 = Math.min(q2.w, quer2 ? 110 : 160), kd = Math.min(q2.d, quer2 ? 160 : 110);
           return { x: q2.x + (q2.w - kw2) / 2, z: q2.z + (q2.d - kd) / 2, w: kw2, d: kd };
         };
-        if (teile.map(kern).some((p) => x < p.x + p.w + 3 && x + w > p.x - 3 && z2 < p.z + p.d + 3 && z2 + d > p.z - 3)) continue;
+        if (teile.map(kern).some((p2) => x < p2.x + p2.w + 3 && x + w > p2.x - 3 && z2 < p2.z + p2.d + 3 && z2 + d > p2.z - 3)) continue;
         const h = 7 + r() * 5, f = waehle2(r, ["#8e8a82", "#9a8f7f", "#7f8a8e", "#a0968a"]);
         S.quader(x, y, z2, x + w, y + h, z2 + d, f);
         for (let u = x + 1; u < x + w - 1; u += 4) S.quader(u, y + h, z2 + 1, u + 3.2, y + h + 1.4, z2 + d - 1, "#6f6a63");
@@ -110315,8 +110922,8 @@
     for (let x = b2.x + 4; x < b2.x + b2.w - 3; x += 8) if (frei6(x, b2.z + b2.d - 2.5, 3)) B2.baumSetzen(I, ba, x, y, b2.z + b2.d - 2.5, r, 0.85);
     for (let z2 = b2.z + 4; z2 < b2.z + b2.d - 3; z2 += 8) if (frei6(b2.x + b2.w - 2.5, z2, 3)) B2.baumSetzen(I, ba, b2.x + b2.w - 2.5, y, z2, r, 0.85);
     if (b2.markt) {
-      const p = teile[0];
-      const z0 = p ? p.z + p.d + 4 : b2.z + b2.d * 0.6;
+      const p2 = teile[0];
+      const z0 = p2 ? p2.z + p2.d + 4 : b2.z + b2.d * 0.6;
       for (let x = b2.x + 8; x < b2.x + b2.w - 10; x += 7) for (let z2 = z0; z2 < b2.z + b2.d - 8; z2 += 8) {
         if (r() < 0.3 || !frei6(x, z2, 2)) continue;
         S.quader(x - 1.6, y, z2 - 1.1, x + 1.6, y + 1, z2 + 1.1, "#e9e3d6");
@@ -110399,7 +111006,7 @@
     }
     for (let i = 0, n = Math.round(b2.w * b2.d / 60 * ctx.dichte); i < n; i++) {
       const x = B2.zw(r, b2.x + 1, b2.x + b2.w * 0.55), z2 = B2.zw(r, b2.z + 1, b2.z + b2.d * 0.55);
-      if (!teile.some((p) => B2.imRechteck(x, z2, p, 0.8))) B2.figur(I, x, y + 0.02, z2, r);
+      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 0.8))) B2.figur(I, x, y + 0.02, z2, r);
     }
   }
   function bodenWeinberg(ctx, b2, r, teile, B2) {
@@ -110445,14 +111052,14 @@
     e_sechziger: { siebziger: 2.6, fuenfziger: 1.6, neubau: 1.4, wiederaufbau: 0.6 }
   };
   var GESCH_M = { gruenderzeit: [3, 5], jugendstil: [3, 5], backstein: [3, 4], fachwerk: [2, 3], fuenfziger: [3, 5], siebziger: [4, 7], neubau: [4, 6], barock: [2, 4], wiederaufbau: [3, 4] };
-  function mitteStil(p, nachbar) {
-    const r = rng2((p.seed ?? 1) * 2654435761 + 1231 >>> 0);
-    const key = p.mitteEinkauf ? "e_" + p.mitteEinkauf : STILE_M[p.viertel] ? p.viertel : "gruenderzeit";
+  function mitteStil(p2, nachbar) {
+    const r = rng2((p2.seed ?? 1) * 2654435761 + 1231 >>> 0);
+    const key = p2.mitteEinkauf ? "e_" + p2.mitteEinkauf : STILE_M[p2.viertel] ? p2.viertel : "gruenderzeit";
     const basis2 = STILE_M[key];
-    const L2 = p.seite === "+x" || p.seite === "-x" ? p.d : p.w;
+    const L2 = p2.seite === "+x" || p2.seite === "-x" ? p2.d : p2.w;
     const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
-      if (st === "fachwerk") w *= p.mitteFw ?? 1;
+      if (st === "fachwerk") w *= p2.mitteFw ?? 1;
       if (nachbar?.stil === st && st !== "fachwerk") w *= 0.3;
       if (st === "fachwerk" && L2 > 16) w *= 0.25;
       if ((st === "siebziger" || st === "neubau") && L2 < 10) w *= 0.4;
@@ -110460,11 +111067,11 @@
     });
     const stil = wahlGewichtet4(r, liste);
     let [a, b2] = GESCH_M[stil];
-    if (p.cluster === "metropole") {
+    if (p2.cluster === "metropole") {
       a += 1;
       b2 += 1;
-    } else if (p.cluster === "mittelstadt") b2 -= 1;
-    if (p.viertel === "mitte_banken" && stil !== "gruenderzeit") {
+    } else if (p2.cluster === "mittelstadt") b2 -= 1;
+    if (p2.viertel === "mitte_banken" && stil !== "gruenderzeit") {
       a += 1;
       b2 += 2;
     }
@@ -110472,31 +111079,31 @@
     if (nachbar?.geschosse && r() < 0.35) g = nachbar.geschosse + waehle2(r, [-1, 1]);
     const geschosse2 = Math.max(stil === "fachwerk" ? 1 : 2, Math.min(stil === "fachwerk" ? 3 : 7, Math.max(a - 1, Math.min(b2, g))));
     if (stil === "fachwerk") {
-      const front2 = (p.front?.length === 1 ? p.front[0] : p.front?.includes("+z") ? "+z" : p.front?.[0]) ?? "+z";
-      return { bau: (S, scene2, q2) => ({ ...MITTE_HAUS.fachwerk(S, scene2, { ...q2, front: front2, geschosse: geschosse2, laden: !!p.laden, eck: q2.eck }), stil: "fachwerk", geschosse: geschosse2 }) };
+      const front2 = (p2.front?.length === 1 ? p2.front[0] : p2.front?.includes("+z") ? "+z" : p2.front?.[0]) ?? "+z";
+      return { bau: (S, scene2, q2) => ({ ...MITTE_HAUS.fachwerk(S, scene2, { ...q2, front: front2, geschosse: geschosse2, laden: !!p2.laden, eck: q2.eck }), stil: "fachwerk", geschosse: geschosse2 }) };
     }
     return { stil, geschosse: geschosse2, region: "Mitte" };
   }
-  registriereStilProfil("mitte", (p, nachbar) => mitteStil(p, nachbar));
-  function parzelleMarkieren3(p, bl, E) {
-    p.stilProfil = "mitte";
-    p.mitteTyp = E.mitte ?? null;
-    p.mitteFw = E.fwAnteil ?? 1;
-    if (bl && (bl.art === "warenhaus" || E.einkaufKern?.(bl.i0, bl.j0))) p.mitteEinkauf = E.mitteEinkauf;
+  registriereStilProfil("mitte", (p2, nachbar) => mitteStil(p2, nachbar));
+  function parzelleMarkieren3(p2, bl, E) {
+    p2.stilProfil = "mitte";
+    p2.mitteTyp = E.mitte ?? null;
+    p2.mitteFw = E.fwAnteil ?? 1;
+    if (bl && (bl.art === "warenhaus" || E.einkaufKern?.(bl.i0, bl.j0))) p2.mitteEinkauf = E.mitteEinkauf;
   }
   registriereSlots(MITTE_SLOTS);
-  registriereSlots({ "slot:werkhalle": (S, scene2, p) => {
-    const r = rng2(p.seed ?? 1), y = 0.36;
+  registriereSlots({ "slot:werkhalle": (S, scene2, p2) => {
+    const r = rng2(p2.seed ?? 1), y = 0.36;
     let hmax = 0;
-    for (let z2 = p.z + 2; z2 < p.z + p.d - 12; z2 += 22) {
-      const d = Math.min(18, p.z + p.d - 2 - z2), h = 8 + r() * 4, f = waehle2(r, ["#8e8a82", "#9a8f7f", "#7f8a8e"]);
-      S.quader(p.x + 2, y, z2, p.x + p.w - 2, y + h, z2 + d, f);
-      for (let u = p.x + 3; u < p.x + p.w - 3; u += 3.6) {
+    for (let z2 = p2.z + 2; z2 < p2.z + p2.d - 12; z2 += 22) {
+      const d = Math.min(18, p2.z + p2.d - 2 - z2), h = 8 + r() * 4, f = waehle2(r, ["#8e8a82", "#9a8f7f", "#7f8a8e"]);
+      S.quader(p2.x + 2, y, z2, p2.x + p2.w - 2, y + h, z2 + d, f);
+      for (let u = p2.x + 3; u < p2.x + p2.w - 3; u += 3.6) {
         S.quader(u, y + h, z2 + 0.5, u + 2.6, y + h + 1.4, z2 + d - 0.5, "#6f6a63");
         S.quader(u + 2.6, y + h, z2 + 0.5, u + 3, y + h + 1.4, z2 + d - 0.5, "#b9c4c9");
       }
-      for (let u = p.x + 6; u < p.x + p.w - 5; u += 7) S.box(3, 4, 0.1, u, y + 2, z2 + d + 0.05, "#4c5359");
-      for (let v = z2 + 4; v < z2 + d - 3; v += 7) S.box(0.1, 4, 3, p.x + p.w - 1.95, y + 2, v, "#4c5359");
+      for (let u = p2.x + 6; u < p2.x + p2.w - 5; u += 7) S.box(3, 4, 0.1, u, y + 2, z2 + d + 0.05, "#4c5359");
+      for (let v = z2 + 4; v < z2 + d - 3; v += 7) S.box(0.1, 4, 3, p2.x + p2.w - 1.95, y + 2, v, "#4c5359");
       hmax = Math.max(hmax, h + 1.4);
     }
     return { hoehe: hmax };
@@ -111221,25 +111828,25 @@
     s2.lineTo(u0, v0);
     return s2;
   }
-  function oeffnung4(p, u0, v0, u1, v1, art) {
-    p.moveTo(u0, v0);
-    p.lineTo(u1, v0);
+  function oeffnung4(p2, u0, v0, u1, v1, art) {
+    p2.moveTo(u0, v0);
+    p2.lineTo(u1, v0);
     const b2 = u1 - u0;
     if (art === "spitz") {
       const vs2 = v1 - b2 * 0.866;
-      p.lineTo(u1, vs2);
-      p.absarc(u0, vs2, b2, 0, PI11 / 3, false);
-      p.absarc(u1, vs2, b2, 2 * PI11 / 3, PI11, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc(u0, vs2, b2, 0, PI11 / 3, false);
+      p2.absarc(u1, vs2, b2, 2 * PI11 / 3, PI11, false);
     } else if (art) {
       const vs2 = v1 - b2 / 2;
-      p.lineTo(u1, vs2);
-      p.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI11, false);
+      p2.lineTo(u1, vs2);
+      p2.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI11, false);
     } else {
-      p.lineTo(u1, v1);
-      p.lineTo(u0, v1);
+      p2.lineTo(u1, v1);
+      p2.lineTo(u0, v1);
     }
-    p.lineTo(u0, v0);
-    return p;
+    p2.lineTo(u0, v0);
+    return p2;
   }
   function fform4(S, F2, shape, t0, t1, c, seg = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg });
@@ -111250,9 +111857,9 @@
     const s2 = rechteck6(u0, y0, u1, y1);
     for (const l of loecher) {
       if (l.kreis) {
-        const p = new three_module_exports.Path();
-        p.absarc(l.kreis[0], l.kreis[1], l.kreis[2], 0, 2 * PI11, true);
-        s2.holes.push(p);
+        const p2 = new three_module_exports.Path();
+        p2.absarc(l.kreis[0], l.kreis[1], l.kreis[2], 0, 2 * PI11, true);
+        s2.holes.push(p2);
       } else s2.holes.push(oeffnung4(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
     }
     fform4(S, F2, s2, t0, t1, c);
@@ -111309,7 +111916,7 @@
   }
   function konvex(faces) {
     const all = faces.flat();
-    const c = [0, 1, 2].map((i) => all.reduce((a, p) => a + p[i], 0) / all.length);
+    const c = [0, 1, 2].map((i) => all.reduce((a, p2) => a + p2[i], 0) / all.length);
     const pos = [];
     for (const f of faces) for (let i = 1; i < f.length - 1; i++) {
       const a = f[0];
@@ -111380,11 +111987,11 @@
     fdiag(S, F2, u, yb + 1.95, u + bw / 2 + 0.2, yb + 1.3, 0.16, -a - 2.6, -a + 0.25, dachF);
   }
   var DREH2 = { "+z": 0, "+x": PI11 / 2, "-z": PI11, "-x": -PI11 / 2 };
-  function sicht2(p, nx, nz) {
-    const c = Math.cos(p.dreh ?? 0), s2 = Math.sin(p.dreh ?? 0);
+  function sicht2(p2, nx, nz) {
+    const c = Math.cos(p2.dreh ?? 0), s2 = Math.sin(p2.dreh ?? 0);
     return nx * c + nz * s2 + (-nx * s2 + nz * c) > 0.05;
   }
-  var sichtF2 = (p, F2) => sicht2(p, F2.nx, F2.nz);
+  var sichtF2 = (p2, F2) => sicht2(p2, F2.nx, F2.nz);
   function ausgeblichen(c) {
     const k = new three_module_exports.Color(c), hsl = {};
     k.getHSL(hsl);
@@ -111392,26 +111999,26 @@
     return "#" + k.getHexString();
   }
   function slot3(roh2, min, max = null, opt = {}) {
-    const fn = (S, scene2, p) => {
-      let front2 = DREH2[p.front] !== void 0 ? p.front : "+z";
+    const fn = (S, scene2, p2) => {
+      let front2 = DREH2[p2.front] !== void 0 ? p2.front : "+z";
       let gewendet = false;
-      if (opt.hang && opt.hang(p) && (front2 === "-x" || front2 === "-z")) {
+      if (opt.hang && opt.hang(p2) && (front2 === "-x" || front2 === "-z")) {
         front2 = front2 === "-x" ? "+x" : "+z";
         gewendet = true;
       }
       const th = DREH2[front2], quer2 = front2 === "+x" || front2 === "-x";
-      const W3 = quer2 ? p.d : p.w, D = quer2 ? p.w : p.d;
+      const W3 = quer2 ? p2.d : p2.w, D = quer2 ? p2.w : p2.d;
       const bw = max ? Math.min(W3, max[0]) : W3, bd = max ? Math.min(D, max[1]) : D;
-      const mn = p.minMass ?? min;
+      const mn = p2.minMass ?? min;
       const nw = Math.max(mn[0], bw), nd = Math.max(mn[1], bd);
       const s2 = Math.min(1, bw / nw, bd / nd);
       const ox = (W3 - nw * s2) / 2, oz = D - nd * s2;
       const T = new Sammler(), inner = new three_module_exports.Group();
-      const erg = roh2(T, inner, { ...p, x: 0, z: 0, w: nw, d: nd, front: front2, dreh: th });
+      const erg = roh2(T, inner, { ...p2, x: 0, z: 0, w: nw, d: nd, front: front2, dreh: th });
       const c = Math.cos(th), sn = Math.sin(th);
       const ecken = [[0, 0], [W3, 0], [0, D], [W3, D]].map(([x, z2]) => [x * c + z2 * sn, -x * sn + z2 * c]);
-      const tx = p.x - Math.min(...ecken.map((e) => e[0])), tz = p.z - Math.min(...ecken.map((e) => e[1]));
-      const verw = p.zustand === "verwittert";
+      const tx = p2.x - Math.min(...ecken.map((e) => e[0])), tz = p2.z - Math.min(...ecken.map((e) => e[1]));
+      const verw = p2.zustand === "verwittert";
       for (const [farbe2, gs] of T.teile) {
         const f = verw ? ausgeblichen(farbe2) : farbe2;
         for (const g of gs) {
@@ -111610,8 +112217,8 @@
       fgeo5(S, F2, g, o.markise);
     }
   }
-  function leerPlane(S, scene2, p, F2, y, hMax = 5.5) {
-    if (p.zustand !== "leerstand" || !sichtF2(p, F2)) return;
+  function leerPlane(S, scene2, p2, F2, y, hMax = 5.5) {
+    if (p2.zustand !== "leerstand" || !sichtF2(p2, F2)) return;
     const L2 = F2.L * 0.86, h = Math.min(hMax, L2 / 6.2), u0 = (F2.L - L2) / 2;
     fb5(S, F2, u0, u0 + L2, y, y + h, 0.25, 0.35, "#c8322a");
     fb5(S, F2, u0 + 0.25, u0 + L2 - 0.25, y + 0.25, y + 0.33, 0.35, 0.38, "#f4efe2");
@@ -111874,7 +112481,7 @@
     }
   }
   var BUERGER_V = ["rosenheim", "landshut", "passau", "wasserburg"];
-  function buergerHaus(S, scene2, r, v, x0, z0, b2, T, p, erster, letzter) {
+  function buergerHaus(S, scene2, r, v, x0, z0, b2, T, p2, erster, letzter) {
     const wand2 = v === "passau" || v === "wasserburg" ? waehle2(r, r() < 0.5 ? KRAEFTIG : PASTELL2) : waehle2(r, PASTELL2);
     const orn = ORN2, sockelF = dunkler(wand2, 0.14);
     const eg = v === "passau" ? 4.6 : 4.2, gh = v === "passau" ? 3.35 : 3.15;
@@ -111898,8 +112505,8 @@
     const nAx = Math.max(2, Math.round(b2 / 2.9));
     const us = Array.from({ length: nAx }, (_, i) => b2 / nAx * (i + 0.5));
     const erker3 = (v === "wasserburg" || v === "passau" || v === "rosenheim") && b2 > 8 && r() < (v === "wasserburg" ? 0.6 : 0.35) && n >= 2;
-    const leer3 = p.zustand === "leerstand";
-    if (sichtF2(p, F2.v)) {
+    const leer3 = p2.zustand === "leerstand";
+    if (sichtF2(p2, F2.v)) {
       const Fv = F2.v;
       if (arkade2) {
         const nB = Math.max(2, Math.round(b2 / 3.6)), bb = b2 / nB, holes = [];
@@ -111936,13 +112543,13 @@
       }
     }
     const nebenFen = { ...fen, laeden: null, blumen: null, verdachung: null, fasche: v === "passau" ? null : fen.fasche };
-    if (sichtF2(p, F2.h)) {
+    if (sichtF2(p2, F2.h)) {
       lochfassade(S, F2.h, 0, b2, eg, n, gh, { ...nebenFen, ra: 3, fw: 1, fh: 1.5 });
       haustuer2(S, F2.h, b2 * 0.3, 0.3, 1.1, 2.3, waehle2(r, HOLZ5), orn);
       fenster6(S, F2.h, b2 * 0.7, 1.4, 1, 1.3, nebenFen);
     }
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
-      if (!ok5 || !sichtF2(p, F2[k])) continue;
+      if (!ok5 || !sichtF2(p2, F2[k])) continue;
       lochfassade(S, F2[k], 0.5, T - 0.5, eg, n, gh, { ...nebenFen, ra: 3.3, fw: 1, fh: 1.5 });
       fb5(S, F2[k], 0, T - tA, 0.3, 0.8, 0, 0.1, sockelF);
       if (arkade2) fwand3(S, F2[k], 0, tA, 0.3, eg, -0.5, 0, wand2, [{ u0: 0.5, u1: tA - 0.4, v0: 0.3, v1: eg - 0.45, bogen: true }]);
@@ -111958,12 +112565,12 @@
         if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2) fb5(S, F2.v, Math.min(a0, b0) - 0.1, Math.max(a0, b0) + 0.1, a1 - 0.05, a1 + 0.18, -0.6, 0.14, orn);
       }
       fb5(S, F2.v, -0.05, b2 + 0.05, H - 0.15, H + 0.12, 0, 0.22, orn);
-      if (sichtF2(p, F2.v)) {
+      if (sichtF2(p2, F2.v)) {
         for (const u of [b2 * 0.3, b2 * 0.7]) fenster6(S, F2.v, u, H + 0.9, 0.95, 1.4, { ...fen, laeden: null, blumen: null });
         fenster6(S, F2.v, b2 / 2, H + hg * 0.52, 0.8, 1.1, { ...fen, laeden: null, blumen: null, kreuz: false });
         if (hg > 7) fscheibe4(S, F2.v, b2 / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS10);
       }
-      if (sichtF2(p, F2.h)) fpoly4(S, F2.h, giebelUmriss2(0, b2, H, hg * 0.9, "spitz"), -0.3, 0, dunkler(wand2, 0.03));
+      if (sichtF2(p2, F2.h)) fpoly4(S, F2.h, giebelUmriss2(0, b2, H, hg * 0.9, "spitz"), -0.3, 0, dunkler(wand2, 0.03));
       return { top: H + hg, H };
     }
     const hv = v === "passau" ? zw(r, 1.6, 2.2) : zw(r, 1.9, 2.8);
@@ -111981,7 +112588,7 @@
         const [a0, a1] = umriss[i], [b0, b1] = umriss[i + 1];
         if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2 && a1 > H + 0.5) fb5(S, F2.v, Math.min(a0, b0) - 0.08, Math.max(a0, b0) + 0.08, a1 - 0.02, a1 + 0.16, -0.65, 0.1, orn);
       }
-      if (art === "aufsatz" && sichtF2(p, F2.v)) fscheibe4(S, F2.v, b2 / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS10);
+      if (art === "aufsatz" && sichtF2(p2, F2.v)) fscheibe4(S, F2.v, b2 / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS10);
     }
     const fm = dunkler(wand2, 0.04);
     S.quader(x0, H, z0, x0 + 0.45, top - 0.35, z0 + T - 0.3, fm);
@@ -111991,28 +112598,28 @@
       S.quader(x0 + b2 - 0.5, top - 0.35, z0, x0 + b2 + 0.05, top - 0.2, z0 + T - 0.3, orn);
     }
     const nGr = Math.max(1, Math.round(b2 / 5.2)), bg = b2 / nGr;
-    for (let i = 0; i < nGr; i++) dachGiebel(S, F2.v, i * bg + 0.2, (i + 1) * bg - 0.2, -T, -0.6, H, Math.min(hv - 0.45, bg * 0.42), dachF, sichtF2(p, F2.h) ? dunkler(wand2, 0.03) : null, { ue: 0, uf: 0, ub: 0.35, dick: 0.25 });
+    for (let i = 0; i < nGr; i++) dachGiebel(S, F2.v, i * bg + 0.2, (i + 1) * bg - 0.2, -T, -0.6, H, Math.min(hv - 0.45, bg * 0.42), dachF, sichtF2(p2, F2.h) ? dunkler(wand2, 0.03) : null, { ue: 0, uf: 0, ub: 0.35, dick: 0.25 });
     if (nGr > 1) for (let i = 1; i < nGr; i++) S.quader(x0 + i * bg - 0.3, H, z0, x0 + i * bg + 0.3, H + 0.25, z0 + T - 0.6, "#8f8a82");
     return { top, H };
   }
-  function buergerRoh(S, scene2, p) {
-    const r = rng2(`bb:${p.seed}`);
-    const v = p.variante ?? waehle2(r, BUERGER_V);
-    const { w, d } = p, vz = 2.4, zf = d - vz, T = Math.min(14, zf - 1);
+  function buergerRoh(S, scene2, p2) {
+    const r = rng2(`bb:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, BUERGER_V);
+    const { w, d } = p2, vz = 2.4, zf = d - vz, T = Math.min(14, zf - 1);
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     hof(S, r, 0, 0, w, zf - T);
     const br = teileBreite(r, w, v === "passau" ? 8.5 : 7.2, v === "passau" ? 12 : 10.5);
     let xa = 0, H = 0;
     br.forEach((b2, i) => {
-      H = Math.max(H, buergerHaus(S, scene2, r, v, xa, zf - T, b2, T, p, i === 0, i === br.length - 1).top);
+      H = Math.max(H, buergerHaus(S, scene2, r, v, xa, zf - T, b2, T, p2, i === 0, i === br.length - 1).top);
       xa += b2;
     });
-    leerPlane(S, scene2, p, R8(0, zf + (v === "passau" ? 0.5 : 0.2), 1, 0, w), 4.6, 4.8);
+    leerPlane(S, scene2, p2, R8(0, zf + (v === "passau" ? 0.5 : 0.2), 1, 0, w), 4.6, 4.8);
     return { hoehe: H };
   }
   var MUENCHEN_V = ["neorenaissance", "neubarock", "wiederaufbau", "zeile"];
-  function muenchenHaus(S, scene2, r, stil, x0, z0, b2, T, p, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
+  function muenchenHaus(S, scene2, r, stil, x0, z0, b2, T, p2, erster, letzter) {
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p2.zustand === "leerstand";
     let wand2, orn, dachF, n, eg, gh;
     if (stil === "neorenaissance") {
       wand2 = waehle2(r, ["#d9c3a0", "#cdb898", "#e3d2b4", "#c9c2ad", "#bdb79f", "#d8c8b0"]);
@@ -112087,7 +112694,7 @@
       }
     };
     const erker3 = stil === "neubarock" && b2 > 11 && r() < 0.6;
-    if (sichtF2(p, F2.v)) {
+    if (sichtF2(p2, F2.v)) {
       ladenFront3(F2.v, b2);
       obergeschosse2(F2.v, b2, true);
       if (erker3) {
@@ -112098,10 +112705,10 @@
         fb5(S, F2.v, e0 + 0.3, e1 - 0.3, eg + 2 * gh + 0.3, eg + 2 * gh + 1.2, 0.6, 1.2, "#3b4046");
       }
     }
-    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b2, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS10, simsF: "#cfc9bd" });
-    if (sichtF2(p, F2.h)) fb5(S, F2.h, 0, b2, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
+    if (sichtF2(p2, F2.h)) lochfassade(S, F2.h, 0, b2, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS10, simsF: "#cfc9bd" });
+    if (sichtF2(p2, F2.h)) fb5(S, F2.h, 0, b2, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
     for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
-      if (!ok5 || !sichtF2(p, F2[k])) continue;
+      if (!ok5 || !sichtF2(p2, F2[k])) continue;
       if (stil === "wiederaufbau") {
         ladenFront3(teil5(F2[k], 0, 7), 7);
         lochfassade(S, F2[k], 0, T, eg, n, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS10, simsF: "#c9c3b6" });
@@ -112118,7 +112725,7 @@
       fpoly4(S, Q, [[-0.4, H], [T + 0.4, H], [T - k, H + h1], [k, H + h1]], -0.05, b2 + 0.05, dachF);
       fpoly4(S, Q, [[k, H + h1], [T - k, H + h1], [T / 2, H + h1 + 1.6]], -0.05, b2 + 0.05, dunkler(dachF, 0.06));
       top = H + h1 + 1.6;
-      if (sichtF2(p, F2.v)) for (const u of achsen6(0, b2, ra, 0.6)) {
+      if (sichtF2(p2, F2.v)) for (const u of achsen6(0, b2, ra, 0.6)) {
         fb5(S, F2.v, u - 0.7, u + 0.7, H + 0.4, H + 2.6, -1.4, -0.5, orn);
         fb5(S, F2.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS10);
         fbogen(S, F2.v, u, H + 2.4, 1.6, 0.8, -1.5, -0.45, dachF);
@@ -112126,7 +112733,7 @@
       if (b2 > 10) {
         const gb = Math.min(7.5, b2 * 0.5), g0 = b2 / 2 - gb / 2;
         fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, 5.2, "geschweift"), -0.5, 0, wand2);
-        if (sichtF2(p, F2.v)) {
+        if (sichtF2(p2, F2.v)) {
           fenster6(S, F2.v, b2 / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS10, fasche: orn });
           fscheibe4(S, F2.v, b2 / 2, H + 3.9, 0, 0.06, 0.45, GLAS10);
         }
@@ -112138,7 +112745,7 @@
       dachTrauf(S, F2.v, 0, b2, T, H, h, dachF, wand2, { ue: stil === "wiederaufbau" ? 0.5 : 0.3, us: letzter || erster ? 0.3 : 0.02 });
       top = H + h;
       const s2 = 2 * h / T;
-      if (sichtF2(p, F2.v)) {
+      if (sichtF2(p2, F2.v)) {
         if (stil === "neorenaissance" && b2 > 13 && r() < 0.7) {
           const gb = 5.6, g0 = b2 / 2 - gb / 2, hg = 6.2;
           fb5(S, F2.v, g0, g0 + gb, H, H + hg * 0.55, -2.2, 0, wand2);
@@ -112153,7 +112760,7 @@
           for (let i = 0; i < ng; i++) gaube2(S, F2.v, (i + 0.5) * b2 / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS10, 1);
         }
       }
-      if (letzter && stil === "neorenaissance" && sichtF2(p, F2.r) && r() < 0.7) {
+      if (letzter && stil === "neorenaissance" && sichtF2(p2, F2.r) && r() < 0.7) {
         const cx = x0 + b2 - 0.2, cz = z0 + T - 0.2, rr = 2;
         zyl9(S, rr, rr, H - eg - 0.6, cx, eg + 0.6, cz, wand2, 8);
         for (let k = 0; k < n; k++) zyl9(S, rr + 0.12, rr + 0.12, 0.18, cx, eg + (k + 1) * gh - 0.1, cz, orn, 8);
@@ -112170,34 +112777,34 @@
     for (const u of [b2 * 0.3, b2 * 0.75]) if (r() < 0.6) S.quader(x0 + u - 0.4, H + 1, z0 + T * 0.4, x0 + u + 0.4, top + 0.5, z0 + T * 0.4 + 0.8, "#b9a89a");
     return { top };
   }
-  function muenchenRoh(S, scene2, p) {
-    const r = rng2(`mu:${p.seed}`);
-    const v = p.variante ?? waehle2(r, MUENCHEN_V);
-    const { w, d } = p, vz = 3.2, zf = d - vz, T = Math.min(17, zf - 1);
+  function muenchenRoh(S, scene2, p2) {
+    const r = rng2(`mu:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, MUENCHEN_V);
+    const { w, d } = p2, vz = 3.2, zf = d - vz, T = Math.min(17, zf - 1);
     boden6(S, 0, zf, w, d, "#d6d0c2", 0.3, 0.06);
     hof(S, r, 0, 0, w, zf - T);
     const br = teileBreite(r, w, 11, 17);
     let xa = 0, H = 0;
     br.forEach((b2, i) => {
       const stil = v === "zeile" ? waehle2(r, ["neorenaissance", "neubarock", "wiederaufbau", "wiederaufbau"]) : v;
-      H = Math.max(H, muenchenHaus(S, scene2, r, stil, xa, zf - T, b2, T, p, i === 0, i === br.length - 1).top);
+      H = Math.max(H, muenchenHaus(S, scene2, r, stil, xa, zf - T, b2, T, p2, i === 0, i === br.length - 1).top);
       xa += b2;
     });
     for (let x = 4; x < w - 2; x += 9) {
       S.box(0.18, 4.6, 0.18, x, 2.6, d - 0.8, "#3b4046");
       S.box(0.9, 0.3, 0.4, x, 4.9, d - 0.8, "#3b4046");
     }
-    leerPlane(S, scene2, p, R8(0, zf + 0.5, 1, 0, w), 5.4, 6);
+    leerPlane(S, scene2, p2, R8(0, zf + 0.5, 1, 0, w), 5.4, 6);
     return { hoehe: H };
   }
   var KIRCHE_V = ["doppelturm", "wallfahrt", "dorf", "stadtpfarr"];
-  function kirchturm(S, scene2, p, x0, z0, b2, H, c) {
+  function kirchturm(S, scene2, p2, x0, z0, b2, H, c) {
     const F2 = seiten3(x0, z0, b2, b2);
     S.quader(x0, 0, z0, x0 + b2, H, z0 + b2, c.wand);
     const gs = [H * 0.38, H * 0.68, H - 0.4];
     for (const y of gs) S.quader(x0 - 0.15, y, z0 - 0.15, x0 + b2 + 0.15, y + 0.35, z0 + b2 + 0.15, c.orn);
     for (const k of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const Fk = F2[k];
       for (const [a, e] of [[0, 0.6], [b2 - 0.6, b2]]) {
         fb5(S, Fk, a, e, 0.3, H, 0, 0.14, c.lisene);
@@ -112237,13 +112844,13 @@
       uhr: waehle2(r, ["#2f4f6f", "#3b4046", "#7a2f2f"])
     };
   }
-  function langhaus(S, scene2, p, c, x0, x1, zb, zf, Hn, o = {}) {
+  function langhaus(S, scene2, p2, c, x0, x1, zb, zf, Hn, o = {}) {
     const B2 = x1 - x0, L2 = zf - zb, F2 = seiten3(x0, zb, B2, L2);
     S.quader(x0, 0, zb, x1, Hn, zf, c.wand);
     S.quader(x0 - 0.2, Hn - 0.5, zb - 0.2, x1 + 0.2, Hn, zf + 0.2, c.orn);
     const joch = o.joch ?? 5.2;
     for (const k of ["r", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const us = achsen6(0, L2, joch, o.randFront ?? 0.6);
       for (const u of us) {
         barockFenster(S, F2[k], u, Hn * 0.38, 1.7, Hn * 0.42, c.orn);
@@ -112272,12 +112879,12 @@
       zyl9(S, 1.05, 1.05, 0.2, cx, yr + 2.2, cz, c.orn, 8);
       for (let i = 0; i < 8; i += 2) {
         const a = i * PI11 / 4;
-        if (sicht2(p, Math.cos(a), Math.sin(a))) S.box(0.35, 1.2, 0.35, cx + Math.cos(a) * 0.82, yr + 1.1, cz + Math.sin(a) * 0.82, GLAS_DUNKEL);
+        if (sicht2(p2, Math.cos(a), Math.sin(a))) S.box(0.35, 1.2, 0.35, cx + Math.cos(a) * 0.82, yr + 1.1, cz + Math.sin(a) * 0.82, GLAS_DUNKEL);
       }
       zwiebel(S, cx, yr + 2.4, cz, 0.95, 2.6, c.helm ?? KUPFER4[0], 10);
       kreuz2(S, cx, yr + 4.6, cz, 1);
     }
-    for (const k of ["r", "l"]) if (sichtF2(p, F2[k]) && L2 > 20) {
+    for (const k of ["r", "l"]) if (sichtF2(p2, F2[k]) && L2 > 20) {
       const u = L2 * 0.62;
       fb5(S, F2[k], u - 1.6, u + 1.6, 0.3, 4.2, 0, 1.4, c.wand);
       haustuer2(S, teil5(F2[k], 0, L2, 1.4), u, 0.3, 1.4, 2.6, HOLZ5[0], c.orn, true);
@@ -112285,7 +112892,7 @@
     }
     return F2;
   }
-  function chorApsis(S, p, c, xm, z1, Bc, Lc, Hc) {
+  function chorApsis(S, p2, c, xm, z1, Bc, Lc, Hc) {
     const x0 = xm - Bc / 2, F2 = seiten3(x0, z1 - Lc, Bc, Lc);
     S.quader(x0, 0, z1 - Lc, x0 + Bc, Hc, z1, c.wand);
     const g = new three_module_exports.CylinderGeometry(Bc / 2, Bc / 2, Hc, 10, 1, false, PI11 / 2, PI11);
@@ -112295,20 +112902,20 @@
     k.translate(xm, Hc + Bc * 0.25, z1 - Lc);
     S.add(k, c.dach);
     dachGiebel(S, F2.v, 0, Bc, -Lc, 0, Hc, Bc * 0.5, c.dach, null, { ue: 0.4, uf: 0, ub: 0 });
-    for (const kk of ["r", "l"]) if (sichtF2(p, F2[kk])) fbogen(S, F2[kk], Lc / 2, Hc * 0.35, 1.5, Hc * 0.45, -0.1, 0.06, GLAS_DUNKEL);
+    for (const kk of ["r", "l"]) if (sichtF2(p2, F2[kk])) fbogen(S, F2[kk], Lc / 2, Hc * 0.35, 1.5, Hc * 0.45, -0.1, 0.06, GLAS_DUNKEL);
     for (let i = 0; i < 5; i++) {
       const a = PI11 + (i + 0.5) * (PI11 / 5), nx = Math.cos(a), nz = Math.sin(a);
-      if (!sicht2(p, nx, nz)) continue;
+      if (!sicht2(p2, nx, nz)) continue;
       const ax = xm + nx * (Bc / 2), az = z1 - Lc + nz * (Bc / 2);
       const Fa = R8(ax - nz * 0.8, az + nx * 0.8, nz, -nx, 1.6);
       fbogen(S, Fa, 0.8, Hc * 0.35, 1.3, Hc * 0.42, -0.1, 0.08, GLAS_DUNKEL);
     }
   }
-  function kircheRoh2(S, scene2, p) {
-    const r = rng2(`ki:${p.seed}`);
-    const v = p.variante ?? waehle2(r, KIRCHE_V);
+  function kircheRoh2(S, scene2, p2) {
+    const r = rng2(`ki:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, KIRCHE_V);
     const c = kirchenFarben(r, v);
-    const { w, d } = p, xm = w / 2;
+    const { w, d } = p2, xm = w / 2;
     let top = 0;
     if (v === "dorf") {
       const zf2 = d - 4, B3 = 10, L3 = Math.min(22, d - 14), Hn2 = 8.5, tb2 = 5.2;
@@ -112326,21 +112933,21 @@
       S.quader(xm - 1.8, 0.3, d - 1.7, xm - 1.4, 2.8, d - 0.9, WEISS3);
       S.quader(xm + 1.4, 0.3, d - 1.7, xm + 1.8, 2.8, d - 0.9, WEISS3);
       const zt = zf2 - tb2 - 1, zn = zt - L3;
-      langhaus(S, scene2, p, c, xm - B3 / 2, xm + B3 / 2, zn, zt, Hn2, { joch: 4.6, ovale: false });
-      chorApsis(S, p, c, xm, zn + 0.01, B3 * 0.72, 4, Hn2 * 0.85);
-      top = kirchturm(S, scene2, p, xm - tb2 / 2, zt, tb2, 19 + r() * 4, { ...c, hoch: 1.25 });
+      langhaus(S, scene2, p2, c, xm - B3 / 2, xm + B3 / 2, zn, zt, Hn2, { joch: 4.6, ovale: false });
+      chorApsis(S, p2, c, xm, zn + 0.01, B3 * 0.72, 4, Hn2 * 0.85);
+      top = kirchturm(S, scene2, p2, xm - tb2 / 2, zt, tb2, 19 + r() * 4, { ...c, hoch: 1.25 });
       const FT = seiten3(xm - tb2 / 2, zt, tb2, tb2);
-      if (sichtF2(p, FT.v)) haustuer2(S, FT.v, tb2 / 2, 0.3, 1.6, 2.6, HOLZ5[0], c.orn, true);
+      if (sichtF2(p2, FT.v)) haustuer2(S, FT.v, tb2 / 2, 0.3, 1.6, 2.6, HOLZ5[0], c.orn, true);
       friedhof(S, r, 1.8, 1.8, w - 1.8, zf2 - 1, (gx, gz2) => !(Math.abs(gx - xm) < B3 / 2 + 2.2 && gz2 > zn - 7) && !(gx > w - 9 && gz2 < 9));
       const lx = w - 8.5, lz = 2.2;
       S.quader(lx, 0.3, lz, lx + 6, 3.4, lz + 4.5, WEISS3);
       dachGiebel(S, R8(lx, lz + 4.5, 1, 0, 6), 0, 6, -4.5, 0, 3.4, 2.4, c.dach, WEISS3, { ue: 0.3, uf: 0.3, ub: 0.3 });
       const FL = seiten3(lx, lz, 6, 4.5);
-      if (sichtF2(p, FL.v)) {
+      if (sichtF2(p2, FL.v)) {
         haustuer2(S, FL.v, 3, 0.3, 1.4, 2.2, HOLZ5[0], c.orn, true);
         kreuz2(S, lx + 3, 6, lz + 4.6, 0.9, "#3b4046");
       }
-      if (sichtF2(p, FL.l)) fbogen(S, FL.l, 2.25, 1.4, 0.8, 1.4, -0.1, 0.06, GLAS_DUNKEL);
+      if (sichtF2(p2, FL.l)) fbogen(S, FL.l, 2.25, 1.4, 0.8, 1.4, -0.1, 0.06, GLAS_DUNKEL);
       S.box(1.6, 0.6, 1.6, xm + B3 / 2 + 3.5, 0.6, zf2 - 1.2, "#c9c3b6");
       S.box(0.9, 2.2, 0.9, xm + B3 / 2 + 3.5, 2, zf2 - 1.2, "#c9c3b6");
       S.box(0.5, 0.9, 0.5, xm + B3 / 2 + 3.5, 3.55, zf2 - 1.2, "#7a8288");
@@ -112357,7 +112964,7 @@
       for (let i = 0; i < 7; i++) S.quader(xm - 5 + 0, 0.3 + i * (ter - 0.3) / 7, zf2 + 1 + (7 - i) * 0.55 - 0.55, xm + 5, 0.3 + (i + 1) * (ter - 0.3) / 7, zf2 + 1 + (7 - i) * 0.55, "#e3dccd");
       for (const [x, Fa] of [[4.2, R8(8.2, zf2 + 0.6, 0, -1, zf2 - 5)], [w - 8.2, R8(w - 8.2, 5.6, 0, 1, zf2 - 5)]]) {
         S.quader(x, ter, 4.6, x + 4, ter + 4.2, zf2 + 0.6, "#efe9dc");
-        if (sichtF2(p, Fa)) {
+        if (sichtF2(p2, Fa)) {
           const nB = Math.floor((zf2 - 5) / 3.2);
           fwand3(S, Fa, 0, zf2 - 5, ter, ter + 4.2, 0, 0.12, "#f4efe4", Array.from({ length: nB }, (_, i) => ({ u0: i * 3.2 + 0.6, u1: (i + 1) * 3.2 - 0.3, v0: ter, v1: ter + 3.4, bogen: true })));
           fb5(S, Fa, 0, zf2 - 5, ter + 0.1, ter + 3.2, -3.6, -3.5, "#d8cfbd");
@@ -112377,7 +112984,7 @@
         zyl9(T, Rz + 0.25, Rz + 0.25, 0.5, xm, Hz - 0.5, zc, c.orn, 8);
         for (let i = 0; i < 8; i++) {
           const a = i * (PI11 / 4), nx = Math.cos(a), nz = Math.sin(a);
-          if (!sicht2(p, nx, nz)) continue;
+          if (!sicht2(p2, nx, nz)) continue;
           const kante = 2 * Rz * Math.sin(PI11 / 8);
           const mx = xm + nx * Rz * Math.cos(PI11 / 8), mz = zc + nz * Rz * Math.cos(PI11 / 8);
           const dx = nz, dz = -nx;
@@ -112398,29 +113005,29 @@
         }
         zyl9(T, Rz * 0.7, Rz * 0.7, 0.3, xm, Hz + 3, zc, c.orn, 8);
         for (const { F: Ft, nx, nz, kante } of oktoRahmen(xm, zc, Rz * 0.62 * Math.cos(PI11 / 8))) {
-          if (!sicht2(p, nx, nz)) continue;
+          if (!sicht2(p2, nx, nz)) continue;
           fscheibe4(T, teil5(Ft, 0, kante), kante / 2, Hz + 1.6, 0, 0.06, 0.95, c.orn, 12);
           fscheibe4(T, teil5(Ft, 0, kante), kante / 2, Hz + 1.6, -0.1, 0.09, 0.68, GLAS_DUNKEL, 12);
           fb5(T, Ft, -0.05, 0.35, Hz, Hz + 3.2, 0, 0.12, c.lisene);
         }
         for (let i = 0; i < 8; i++) {
           const a = i * PI11 / 4;
-          if (sicht2(p, Math.cos(a), Math.sin(a))) T.box(0.45, 1.3, 0.45, xm + Math.cos(a) * 1.15, Hz + 3.2 + Rz * 0.6 + 1.2, zc + Math.sin(a) * 1.15, GLAS_DUNKEL);
+          if (sicht2(p2, Math.cos(a), Math.sin(a))) T.box(0.45, 1.3, 0.45, xm + Math.cos(a) * 1.15, Hz + 3.2 + Rz * 0.6 + 1.2, zc + Math.sin(a) * 1.15, GLAS_DUNKEL);
         }
         const yl = Hz + 3.2 + Rz * 0.6;
         zyl9(T, 1.2, 1.2, 2.4, xm, yl, zc, c.wand, 8);
         zwiebel(T, xm, yl + 2.4, zc, 1.25, 3, c.helm, 10);
         kreuz2(T, xm, yl + 5, zc, 1.4);
-        chorApsis(T, p, c, xm, zc - Rz + 1.5, Rz * 0.8, 6, Hz * 0.85);
+        chorApsis(T, p2, c, xm, zc - Rz + 1.5, Rz * 0.8, 6, Hz * 0.85);
         const Fv = seiten3(xm - 3.5, zc + Rz - 1, 7, 3.2);
         T.quader(xm - 3.5, 0, zc + Rz - 1, xm + 3.5, 8, zc + Rz + 2.2, c.wand);
         fpoly4(T, Fv.v, giebelUmriss2(0, 7, 8, 3.6, "geschweift"), -0.4, 0, c.wand);
-        if (sichtF2(p, Fv.v)) {
+        if (sichtF2(p2, Fv.v)) {
           haustuer2(T, Fv.v, 3.5, 0, 2, 3.6, HOLZ5[0], c.orn, true);
           fscheibe4(T, Fv.v, 3.5, 6.3, 0, 0.08, 0.7, GLAS_DUNKEL);
           fb5(T, Fv.v, -0.1, 7.1, 7.8, 8.15, 0, 0.3, c.orn);
         }
-        top = kirchturm(T, g, p, xm + Rz * 0.55, zc - Rz - 1.5, 5.4, 26, { ...c, hoch: 1.2 });
+        top = kirchturm(T, g, p2, xm + Rz * 0.55, zc - Rz - 1.5, 5.4, 26, { ...c, hoch: 1.2 });
         return null;
       });
       kastanie(S, 8, zf2 + 4.5, r, 0.8);
@@ -112434,13 +113041,13 @@
     boden6(S, 0, 0, w, zf - 2, PFLASTER22, 0.3, 0.05);
     const x0 = xm - B2 / 2, x1 = xm + B2 / 2;
     const zn1 = dt ? zf : zf - tb + 0.5, zn0 = zn1 - L2;
-    const Fl = langhaus(S, scene2, p, c, x0, x1, zn0, zn1, Hn, { randFront: dt ? 0.6 : 0.6 });
-    chorApsis(S, p, c, xm, zn0 + 0.01, B2 * 0.7, 8, Hn * 0.88);
+    const Fl = langhaus(S, scene2, p2, c, x0, x1, zn0, zn1, Hn, { randFront: dt ? 0.6 : 0.6 });
+    chorApsis(S, p2, c, xm, zn0 + 0.01, B2 * 0.7, 8, Hn * 0.88);
     if (dt) {
       const hg = 8.5;
       fpoly4(S, Fl.v, giebelUmriss2(tb - 1.2, B2 - tb + 1.2, Hn, hg, "geschweift"), -0.5, 0.25, c.wand);
       fb5(S, Fl.v, -0.2, B2 + 0.2, Hn - 0.5, Hn, 0, 0.5, c.orn);
-      if (sichtF2(p, Fl.v)) {
+      if (sichtF2(p2, Fl.v)) {
         haustuer2(S, Fl.v, B2 / 2, 0.3, 2.4, 4.4, HOLZ5[0], c.orn, true);
         fpoly4(S, Fl.v, [[B2 / 2 - 2.4, 5.4], [B2 / 2 + 2.4, 5.4], [B2 / 2, 6.6]], 0, 0.4, c.orn);
         fbogen(S, Fl.v, B2 / 2, 8, 2.2, 5, -0.1, 0.3, GLAS_DUNKEL);
@@ -112449,7 +113056,7 @@
       }
       S.box(0.5, 2.2, 0.5, xm, Hn + hg + 0.6, zf, c.orn);
       kreuz2(S, xm, Hn + hg + 1.7, zf, 1.4);
-      if (sichtF2(p, Fl.v)) {
+      if (sichtF2(p2, Fl.v)) {
         for (const u of [B2 / 2 - 3.3, B2 / 2 + 3.3]) {
           fbogen(S, Fl.v, u, 5.6, 1, 2.6, -0.1, 0.06, dunkler(c.wand, 0.2));
           zyl9(S, 0.25, 0.3, 1.9, ...wp5(Fl.v, u, 0.1).flatMap((q2, i) => i === 0 ? [q2, 5.7] : [q2]), c.orn, 6);
@@ -112467,15 +113074,15 @@
           S.add(new three_module_exports.SphereGeometry(0.3, 6, 5).translate(qx, um[i][1] + 1.1, qz), GOLD);
         }
       }
-      top = Math.max(kirchturm(S, scene2, p, x0 - tb / 2 + 1.2, zf - tb + 0.6, tb, Ht, c), kirchturm(S, scene2, p, x1 - tb / 2 - 1.2, zf - tb + 0.6, tb, Ht, c));
+      top = Math.max(kirchturm(S, scene2, p2, x0 - tb / 2 + 1.2, zf - tb + 0.6, tb, Ht, c), kirchturm(S, scene2, p2, x1 - tb / 2 - 1.2, zf - tb + 0.6, tb, Ht, c));
     } else {
-      top = kirchturm(S, scene2, p, xm - tb / 2, zf - tb + 0.5, tb, Ht, { ...c, hoch: 1.3 });
+      top = kirchturm(S, scene2, p2, xm - tb / 2, zf - tb + 0.5, tb, Ht, { ...c, hoch: 1.3 });
       const FT = seiten3(xm - tb / 2, zf - tb + 0.5, tb, tb);
-      if (sichtF2(p, FT.v)) haustuer2(S, FT.v, tb / 2, 0.3, 2, 3.6, HOLZ5[0], c.orn, true);
+      if (sichtF2(p2, FT.v)) haustuer2(S, FT.v, tb / 2, 0.3, 2, 3.6, HOLZ5[0], c.orn, true);
       S.quader(x1, 0, zn0 + L2 * 0.45, x1 + 4, Hn * 0.55, zn0 + L2 * 0.7, c.wand);
       walm3(S, x1, zn0 + L2 * 0.45, x1 + 4, zn0 + L2 * 0.7, Hn * 0.55, 2.6, c.dach, 0.3);
       const Fk = R8(x1 + 4, zn0 + L2 * 0.7, 0, -1, L2 * 0.25);
-      if (sichtF2(p, Fk)) barockFenster(S, Fk, L2 * 0.125, 2.2, 1.2, 3, c.orn);
+      if (sichtF2(p2, Fk)) barockFenster(S, Fk, L2 * 0.125, 2.2, 1.2, 3, c.orn);
       const fx0 = x1 + 5.5, fx1 = w - 1.5;
       if (fx1 - fx0 > 7) {
         friedhof(S, r, fx0, 2, fx1, zf - 3);
@@ -112524,10 +113131,10 @@
       ftext5(scene2, Fa, "Ausschank", 2.25, 2.68, 0.06, 0.32, 4, "#f7f2e6", "#3f6b4a");
     }
   }
-  function wirtshausRoh(S, scene2, p) {
-    const r = rng2(`wi:${p.seed}`);
-    const v = p.variante ?? waehle2(r, WIRT_V);
-    const { w, d } = p, zf = d - 2.6, leer3 = p.zustand === "leerstand";
+  function wirtshausRoh(S, scene2, p2) {
+    const r = rng2(`wi:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, WIRT_V);
+    const { w, d } = p2, zf = d - 2.6, leer3 = p2.zustand === "leerstand";
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     boden6(S, 0, 0, w, zf, PFLASTER22, 0.3, 0.05);
     if (v === "brauerei") {
@@ -112536,7 +113143,7 @@
       S.quader(sx, 0, sz, sx + sb2, sH, zf, klinker);
       const Fs = seiten3(sx, sz, sb2, st);
       for (const k of ["v", "r", "h", "l"]) {
-        if (!sichtF2(p, Fs[k])) continue;
+        if (!sichtF2(p2, Fs[k])) continue;
         const L2 = Fs[k].L;
         for (const u of achsen6(0, L2, 3.6, 0.8)) {
           fbogen(S, Fs[k], u, 1.6, 2, 5.4, -0.1, 0.06, GLAS10);
@@ -112550,7 +113157,7 @@
       dachTrauf(S, Fs.v, 0, sb2, st, sH, 5.2, dach3, klinker, { ue: 0.4, us: 0.4 });
       zyl9(S, 2, 2.4, 3.2, sx + sb2 / 2, sH + 2.2, sz + st / 2, kup, 8);
       zwiebel(S, sx + sb2 / 2, sH + 5.4, sz + st / 2, 1.9, 3.6, kup, 10);
-      if (sichtF2(p, Fs.v)) ftext5(scene2, Fs.v, waehle2(r, ["Brauerei Wei\xDFbr\xE4u", "Brauerei Moosbr\xE4u", "Brauerei Hollerer", "Klosterbrauerei"]), sb2 / 2, 13.6, 0.1, 1, sb2 * 0.86, "#f4efe2");
+      if (sichtF2(p2, Fs.v)) ftext5(scene2, Fs.v, waehle2(r, ["Brauerei Wei\xDFbr\xE4u", "Brauerei Moosbr\xE4u", "Brauerei Hollerer", "Klosterbrauerei"]), sb2 / 2, 13.6, 0.1, 1, sb2 * 0.86, "#f4efe2");
       const kx = sx + sb2 + 4, kz2 = sz + 3;
       zyl9(S, 1.9, 1.9, 4, kx, 0, kz2, klinker, 8);
       zyl9(S, 1, 1.5, 30, kx, 4, kz2, klinker, 12);
@@ -112566,10 +113173,10 @@
       if (lb > 8) {
         S.quader(lx, 0, lz, lx + lb, 7, zf, putz2);
         const Fl = seiten3(lx, lz, lb, lt);
-        for (const k of ["v", "r"]) if (sichtF2(p, Fl[k])) {
+        for (const k of ["v", "r"]) if (sichtF2(p2, Fl[k])) {
           lochfassade(S, Fl[k], 0, Fl[k].L, 1.5, 1, 4.5, { ra: 3.2, fw: 1.4, fh: 1.4, rahmen: ORN2, glas: GLAS10, simsF: "#d8cfbd" });
         }
-        if (sichtF2(p, Fl.v)) {
+        if (sichtF2(p2, Fl.v)) {
           fbogen(S, Fl.v, lb - 3, 0.3, 3.2, 4.2, -0.1, 0.06, "#5a4636");
         }
         dachTrauf(S, Fl.v, 0, lb, lt, 7, 3.2, waehle2(r, BIBER), putz2, { ue: 0.5, us: 0.4 });
@@ -112604,7 +113211,7 @@
     const F2 = seiten3(0.5, hz, hb, ht);
     const name2 = brau ? waehle2(r, BRAEU) : waehle2(r, WIRTSNAMEN);
     for (const k of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L, front2 = k === "v";
       fb5(S, Fk, 0, L2, 0.3, 0.9, -0.1, 0.12, dunkler(wand2, 0.12));
       const us = achsen6(0, L2, brau ? 3.2 : 2.9, 0.8);
@@ -112627,7 +113234,7 @@
     }
     if (brau) {
       dachTrauf(S, F2.v, 0, hb, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
-      if (sichtF2(p, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
+      if (sichtF2(p2, F2.v)) for (const u of achsen6(0, hb, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
       S.quader(0.5 + hb * 0.4, H + 4, hz + ht / 2 - 0.5, 0.5 + hb * 0.4 + 1, H + ht * 0.52 + 1, hz + ht / 2 + 0.5, "#b9a89a");
     } else if (r() < 0.5) {
       walm3(S, 0.5, hz, 0.5 + hb, zf, H, ht * 0.4, dachF, 0.7);
@@ -112636,7 +113243,7 @@
     }
     const bx0 = hb + 2.5;
     if (w - bx0 > 10) biergarten(S, scene2, r, bx0, 2, w - 0.5, zf - 0.5);
-    if (sichtF2(p, { nx: 0, nz: 1 })) ftext5(scene2, R8(bx0, zf - 0.3, 1, 0, 10), "Biergarten", 3.2, 1.75, 0.2, 0.7, 6, "#f7f2e6", "#3f6b4a");
+    if (sichtF2(p2, { nx: 0, nz: 1 })) ftext5(scene2, R8(bx0, zf - 0.3, 1, 0, 10), "Biergarten", 3.2, 1.75, 0.2, 0.7, 6, "#f7f2e6", "#3f6b4a");
     if (hz > 10) biergarten(S, scene2, r, 0.5, 1, hb, hz - 1.5, { zaun: false, ausschank: false });
     return { hoehe: H + ht * 0.55 };
   }
@@ -112689,14 +113296,14 @@
     S.box(1.2, 0.18, 0.1, x + 3, y0 + 1.85, z2 + 2.6, "#2f6fb0");
     return H + 3;
   }
-  function maibaumRoh(S, scene2, p) {
-    const r = rng2(`mb:${p.seed}`);
-    const v = p.variante ?? waehle2(r, MAI_V);
-    const { w, d } = p, xm = w / 2, zm = d / 2;
+  function maibaumRoh(S, scene2, p2) {
+    const r = rng2(`mb:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, MAI_V);
+    const { w, d } = p2, xm = w / 2, zm = d / 2;
     boden6(S, 0, 0, w, d, v === "dorf" ? KIES5 : PFLASTER5, 0.3, 0.06);
     if (v === "markt") for (let i = 0; i < 6; i++) boden6(S, 0, i * d / 6, w, i * d / 6 + 0.25, PFLASTER22, 0.36, 0.01);
     const basisH = { dorf: 20, markt: 25, fest: 22 }[v] ?? 22;
-    const H = p.nachbarHoehe ? Math.max(16, Math.min(30, p.nachbarHoehe * 1.6)) : basisH * Math.max(0.85, Math.min(1.1, Math.min(w, d) / 28));
+    const H = p2.nachbarHoehe ? Math.max(16, Math.min(30, p2.nachbarHoehe * 1.6)) : basisH * Math.max(0.85, Math.min(1.1, Math.min(w, d) / 28));
     let top = 0;
     const rand = (x, z2, i) => {
       if (i % 2) {
@@ -112827,8 +113434,8 @@
     fdiag(S, F2, u0 + 0.1, y + 0.1, um, y + hg - 0.15, 0.22, t, t + 0.09, holz);
     fdiag(S, F2, um, y + hg - 0.15, u1 - 0.1, y + 0.1, 0.22, t, t + 0.09, holz);
   }
-  function fachwerkHaus(S, scene2, r, p, x0, z0, b2, T, o, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
+  function fachwerkHaus(S, scene2, r, p2, x0, z0, b2, T, o, erster, letzter) {
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p2.zustand === "leerstand";
     const { n, eg, gh } = o, kr = o.kr ?? 0.3;
     const H = eg + n * gh + kr * 0;
     const fen = { rahmen: ORN2, glas: GLAS10, laeden: o.laedenF, blumen: o.blumen };
@@ -112863,9 +113470,9 @@
         } else fwGeschoss2(S, Fk, front2 ? 0 : kVersatz ? kr * (k + 1) : 0, L2, y, gh, t, o.holz, ua, 1, Math.min(1.5, gh * 0.5), o.art, fen);
       }
     };
-    if (sichtF2(p, F2.v)) seite(F2.v, b2, true, false);
-    if (sichtF2(p, F2.h)) seite(F2.h, b2, false, false);
-    for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) {
+    if (sichtF2(p2, F2.v)) seite(F2.v, b2, true, false);
+    if (sichtF2(p2, F2.h)) seite(F2.h, b2, false, false);
+    for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) {
       seite(F2[k], T, false, false);
       for (let kk = 0; kk < n; kk++) {
         const y = eg + kk * gh;
@@ -112878,11 +113485,11 @@
     if (o.giebelstaendig) {
       const hg = b2 * (o.neig ?? 1);
       dachGiebel(S, F2.v, 0, b2, -T, tTop, H, hg, o.dach, null, { ue: 0.35, uf: 0.45, ub: 0.4 });
-      if (sichtF2(p, F2.v)) fwGiebel2(S, F2.v, 0, b2, H, hg - 0.15, tTop + 0, o.holz, o.wand, fen, hg > 8 ? 3 : 2);
+      if (sichtF2(p2, F2.v)) fwGiebel2(S, F2.v, 0, b2, H, hg - 0.15, tTop + 0, o.holz, o.wand, fen, hg > 8 ? 3 : 2);
       else fpoly4(S, F2.v, [[0, H], [b2, H], [b2 / 2, H + hg - 0.2]], -0.4, tTop, o.wand);
-      if (sichtF2(p, F2.h)) fwGiebel2(S, F2.h, 0, b2, H, hg - 0.15, 0, o.holz, o.wand, fen, 2);
+      if (sichtF2(p2, F2.h)) fwGiebel2(S, F2.h, 0, b2, H, hg - 0.15, 0, o.holz, o.wand, fen, 2);
       else fpoly4(S, F2.h, [[0, H], [b2, H], [b2 / 2, H + hg - 0.2]], -0.4, 0, o.wand);
-      for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) {
+      for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) {
         const s2 = 2 * hg / b2;
         for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k], u, H, s2, 1.6, o.wand, o.dach, GLAS10, 1);
       }
@@ -112893,7 +113500,7 @@
       dachTrauf(S, teil5(F2.v, 0, b2, tTop), 0, b2, Td, H, hd, o.dach, o.wand, { ue: 0.5, us: erster || letzter ? 0.4 : 0.02 });
       const s2 = 2 * hd / Td;
       top = H + hd;
-      if (sichtF2(p, F2.v)) {
+      if (sichtF2(p2, F2.v)) {
         const Fd = teil5(F2.v, 0, b2, tTop);
         if (o.zwerch && b2 > 7) {
           const zb = Math.min(4.4, b2 * 0.45), z0u = b2 / 2 - zb / 2, hz = gh * 1.25;
@@ -112917,7 +113524,7 @@
           fgeo5(S, F2.v, g, o.dach);
         }
       }
-      for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) {
+      for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) {
         const Fk = k === "r" ? R8(x0 + b2, z0 + Td, 0, -1, Td) : R8(x0, z0, 0, 1, Td);
         if (o.art) fwGiebel2(S, Fk, 0, Td, H, hd - 0.2, 0.01, o.holz, o.wand, fen, 2);
       }
@@ -112926,7 +113533,7 @@
     return { top };
   }
   var FRANKEN_V = ["nuernberg", "bamberg", "stadtmauer"];
-  function frankenZeile(S, scene2, r, p, v, x0, zf, w, T) {
+  function frankenZeile(S, scene2, r, p2, v, x0, zf, w, T) {
     const br = teileBreite(r, w, 7.5, 11);
     let xa = x0, H = 0;
     br.forEach((b2, i) => {
@@ -112960,19 +113567,19 @@
         o.art = "franken";
         o.steinAlle = true;
       }
-      const erg = ganzStein ? sandsteinHaus(S, scene2, r, p, xa, zf - T, b2, T, o, i === 0, i === br.length - 1) : fachwerkHaus(S, scene2, r, p, xa, zf - T, b2, T, o, i === 0, i === br.length - 1);
+      const erg = ganzStein ? sandsteinHaus(S, scene2, r, p2, xa, zf - T, b2, T, o, i === 0, i === br.length - 1) : fachwerkHaus(S, scene2, r, p2, xa, zf - T, b2, T, o, i === 0, i === br.length - 1);
       H = Math.max(H, erg.top);
       xa += b2;
     });
     return H;
   }
-  function sandsteinHaus(S, scene2, r, p, x0, z0, b2, T, o, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
+  function sandsteinHaus(S, scene2, r, p2, x0, z0, b2, T, o, erster, letzter) {
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p2.zustand === "leerstand";
     const H = o.eg + o.n * o.gh, st = o.stein, hst = heller(st, 0.08);
     S.quader(x0, 0, z0, x0 + b2, H, z0 + T, st);
     const fen = { rahmen: ORN2, glas: GLAS10, fasche: hst, simsF: hst };
     for (const [k, ok5] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
-      if (!ok5 || !sichtF2(p, F2[k])) continue;
+      if (!ok5 || !sichtF2(p2, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       if (k === "v") {
         laden(S, scene2, Fk, 0.5, L2 - 2.2, o.eg - 0.3, r, { leer: leer3, rahmen: waehle2(r, ["#3f4a53", "#5a4636"]) });
@@ -112988,7 +113595,7 @@
     dachTrauf(S, F2.v, 0, b2, T, H, hd, o.dach, st, { ue: 0.35, us: erster || letzter ? 0.35 : 0.02 });
     let top = H + hd;
     const s2 = 2 * hd / T;
-    if (sichtF2(p, F2.v)) {
+    if (sichtF2(p2, F2.v)) {
       const zb = Math.min(4.6, b2 * 0.5), zu = b2 / 2 - zb / 2, hz = 3.2;
       fb5(S, F2.v, zu, zu + zb, H, H + hz, -3, 0, st);
       fpoly4(S, F2.v, giebelUmriss2(zu, zu + zb, H + hz, 3.4, "treppe"), -3, 0.02, st);
@@ -113011,15 +113618,15 @@
     }
     return { top };
   }
-  function stadtmauerRoh(S, scene2, p, r) {
-    const { w, d } = p, stein = waehle2(r, ROT_SANDSTEIN), st2 = dunkler(stein, 0.05), dach3 = waehle2(r, BIBER);
+  function stadtmauerRoh(S, scene2, p2, r) {
+    const { w, d } = p2, stein = waehle2(r, ROT_SANDSTEIN), st2 = dunkler(stein, 0.05), dach3 = waehle2(r, BIBER);
     const zg = d - 9, zm = zg - 2.2, Hm = 8.5;
     S.quader(0, 0, zg, w, 0.2, d - 1.2, "#93b97a");
     for (let x = 4; x < w; x += 9) baumRund2(S, x + zw(r, -1, 1), zg + 3.8, r, 0.8, LAUB, 0.2);
     boden6(S, 0, d - 1.2, w, d, PFLASTER5, 0.3, 0.06);
     S.quader(0, 0, zm, w, Hm, zg, stein);
     const Fm = R8(0, zg, 1, 0, w);
-    if (sichtF2(p, Fm)) {
+    if (sichtF2(p2, Fm)) {
       for (let i = 0; i < 7; i++) fb5(S, Fm, 0, w, 0.6 + i * 1.2, 0.66 + i * 1.2, 0, 0.03, st2);
       for (const u of achsen6(0, w, 3.2, 1)) fb5(S, Fm, u - 0.12, u + 0.12, Hm - 2.2, Hm - 1, -0.1, 0.02, GLAS_DUNKEL);
     }
@@ -113035,7 +113642,7 @@
         const tb = 9, Ht = 24, x0 = tx - tb / 2, z0 = zm - 3;
         S.quader(x0, 0, z0, x0 + tb, Ht, z0 + tb + 1, stein);
         const Ft = seiten3(x0, z0, tb, tb + 1);
-        for (const k of ["v", "r", "h", "l"]) if (sichtF2(p, Ft[k])) {
+        for (const k of ["v", "r", "h", "l"]) if (sichtF2(p2, Ft[k])) {
           const L2 = Ft[k].L;
           if (k === "v" || k === "h") {
             fbogen(S, Ft[k], L2 / 2, 0.3, 4.2, 6.4, -0.3, 0.05, GLAS_DUNKEL);
@@ -113063,7 +113670,7 @@
         zyl9(S, rr + 0.25, rr + 0.25, 0.4, tx, Ht - 0.4, cz, heller(stein, 0.06), 14);
         for (let j = 0; j < 4; j++) {
           const a = PI11 / 4 + j * PI11 / 8, nx = Math.cos(a), nz = Math.sin(a);
-          if (sicht2(p, nx, nz)) S.box(0.5, 1.4, 0.5, tx + nx * rr, 9 + j % 2 * 4, cz + nz * rr, GLAS_DUNKEL);
+          if (sicht2(p2, nx, nz)) S.box(0.5, 1.4, 0.5, tx + nx * rr, 9 + j % 2 * 4, cz + nz * rr, GLAS_DUNKEL);
         }
         const g = new three_module_exports.ConeGeometry(rr + 0.5, 8.5, 14);
         g.translate(tx, Ht + 4.25, cz);
@@ -113074,7 +113681,7 @@
         const tb = 6.4, Ht = 15 + r() * 4, x0 = tx - tb / 2, z0 = zm - 2.6;
         S.quader(x0, 0, z0, x0 + tb, Ht, z0 + tb, stein);
         const Ft = seiten3(x0, z0, tb, tb);
-        for (const k of ["v", "r", "l", "h"]) if (sichtF2(p, Ft[k])) {
+        for (const k of ["v", "r", "l", "h"]) if (sichtF2(p2, Ft[k])) {
           for (const y of [7, 11.5]) fb5(S, Ft[k], tb / 2 - 0.15, tb / 2 + 0.15, y, y + 1.4, -0.1, 0.03, GLAS_DUNKEL);
           fb5(S, Ft[k], -0.08, tb + 0.08, Ht - 0.5, Ht, 0, 0.25, heller(stein, 0.06));
         }
@@ -113089,22 +113696,22 @@
       let xa = 0;
       br.forEach((b2, i) => {
         const o = { art: "franken", n: 2, eg: 3.6, gh: 2.9, kr: 0.2, wand: waehle2(r, ["#f2ead8", "#efe3cc", "#f4efe2"]), holz: waehle2(r, FW_FRANKEN), stein: waehle2(r, ROT_SANDSTEIN), steinEG: true, dach: waehle2(r, BIBER), giebelstaendig: r() < 0.4, neig: 1, laden: false };
-        top = Math.max(top, fachwerkHaus(S, scene2, r, { ...p, dreh: p.dreh }, xa, zh - T, b2, T, o, i === 0, i === br.length - 1).top);
+        top = Math.max(top, fachwerkHaus(S, scene2, r, { ...p2, dreh: p2.dreh }, xa, zh - T, b2, T, o, i === 0, i === br.length - 1).top);
         xa += b2;
       });
     }
     return top;
   }
-  function frankenRoh(S, scene2, p) {
-    const r = rng2(`fr:${p.seed}`);
-    const v = p.variante ?? waehle2(r, FRANKEN_V);
-    const { w, d } = p;
-    if (v === "stadtmauer") return { hoehe: stadtmauerRoh(S, scene2, p, r) };
+  function frankenRoh(S, scene2, p2) {
+    const r = rng2(`fr:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, FRANKEN_V);
+    const { w, d } = p2;
+    if (v === "stadtmauer") return { hoehe: stadtmauerRoh(S, scene2, p2, r) };
     const zf = d - 2.4, T = Math.min(12.5, zf - 1);
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     hof(S, r, 0, 0, w, zf - T - 1);
-    const Hf = frankenZeile(S, scene2, r, p, v, 0, zf, w, T);
-    leerPlane(S, scene2, p, R8(0, zf + 1, 1, 0, w), 4.3, 4.6);
+    const Hf = frankenZeile(S, scene2, r, p2, v, 0, zf, w, T);
+    leerPlane(S, scene2, p2, R8(0, zf + 1, 1, 0, w), 4.3, 4.6);
     return { hoehe: Hf };
   }
   var ALPEN_V = ["panorama", "voralpenhaus", "gasthof", "ortsrand"];
@@ -113155,7 +113762,7 @@
     }
     return top;
   }
-  function voralpenhaus(S, scene2, r, p, x0, z0, b2, T, o = {}) {
+  function voralpenhaus(S, scene2, r, p2, x0, z0, b2, T, o = {}) {
     const F2 = seiten3(x0, z0, b2, T);
     const eg = 3.1, og = 2.9, H = eg + og * (o.n ?? 1);
     const putz2 = waehle2(r, [WEISS3, "#f3efe4", "#f4ead6"]), holz = waehle2(r, HOLZ5), holzH = HOLZ_HELL;
@@ -113169,7 +113776,7 @@
     const lfarben = ["#d8a64a", "#b85a4a", "#5f8f6a", "#5a7fa8"];
     const lf = waehle2(r, lfarben);
     for (const k of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L, front2 = k === "v";
       fb5(S, Fk, 0, L2, 0.3, 0.8, -0.05, 0.1, "#c9c3b6");
       const us = achsen6(0, L2, 2.8, 0.8);
@@ -113206,7 +113813,7 @@
     }
     const hg = b2 * 0.27;
     dachGiebel(S, F2.v, 0, b2, -T, 0, H, hg, o.dach ?? waehle2(r, ["#7d6a5a", "#6f5f52", "#8b939b", "#a85440"]), holz, { ue: 1.3, uf: 1.6, ub: 1.2, dick: 0.4 });
-    for (const k of ["v", "h"]) if (sichtF2(p, F2[k])) {
+    for (const k of ["v", "h"]) if (sichtF2(p2, F2[k])) {
       const Fk = F2[k];
       for (let u = 0.6; u < b2; u += 0.6) {
         const yy = H + Math.min(u, b2 - u) * (2 * hg / b2) - 0.25;
@@ -113223,10 +113830,10 @@
     S.quader(x0 + b2 * 0.65, H + hg * 0.3, z0 + T * 0.5, x0 + b2 * 0.65 + 0.8, H + hg + 0.8, z0 + T * 0.5 + 0.8, "#efe9dc");
     return { top: H + hg + 0.8, H };
   }
-  function alpenRoh(S, scene2, p) {
-    const r = rng2(`al:${p.seed}`);
-    const v = p.variante ?? waehle2(r, ALPEN_V);
-    const { w, d } = p;
+  function alpenRoh(S, scene2, p2) {
+    const r = rng2(`al:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, ALPEN_V);
+    const { w, d } = p2;
     if (v === "panorama") {
       boden6(S, 0, 0, w, d, "#9cc27e", 0.3, 0.05);
       const top2 = bergkette(S, r, 0, 0, w, d * 0.82, Math.min(95, Math.max(40, d * 1.2)));
@@ -113239,7 +113846,7 @@
     let top = 0;
     if (v === "voralpenhaus") {
       const b2 = Math.min(14, w - 8), T = Math.min(13, d - 10), x0 = 3, z0 = zf - T - 3;
-      top = voralpenhaus(S, scene2, r, p, x0, z0, b2, T).top;
+      top = voralpenhaus(S, scene2, r, p2, x0, z0, b2, T).top;
       for (let x = 1; x < w - 1; x += 1.2) S.box(0.12, 1, 0.12, x, 0.8, zf - 0.4, "#8a6a48");
       S.quader(1, 0.95, zf - 0.45, w - 1, 1.05, zf - 0.35, "#8a6a48");
       S.quader(x0 + b2 + 1.2, 0.3, z0 + 1, x0 + b2 + 2.4, 2.2, z0 + T - 1, "#a2754a");
@@ -113250,10 +113857,10 @@
       for (let i = 0; i < 4; i++) S.box(1.4, 0.4, 0.8, x0 + b2 + 4 + i % 2 * 2, 0.5, 4 + i * 1.6, waehle2(r, ["#7aa865", "#d0453a", "#e8b53c"]));
     } else if (v === "gasthof") {
       const b2 = Math.min(20, w - 6), T = Math.min(14, d - 10), x0 = 2, z0 = zf - T - 2.5;
-      const erg = voralpenhaus(S, scene2, r, p, x0, z0, b2, T, { n: 2, holzOG: false });
+      const erg = voralpenhaus(S, scene2, r, p2, x0, z0, b2, T, { n: 2, holzOG: false });
       top = erg.top;
       const F2 = seiten3(x0, z0, b2, T);
-      if (sichtF2(p, F2.v)) ftext5(scene2, F2.v, waehle2(r, ["Alpengasthof Edelwei\xDF", "Gasthof Almrausch", "Berggasthof Enzian"]), b2 / 2, 2.75, 0.12, 0.45, b2 * 0.6, "#5a3a2a");
+      if (sichtF2(p2, F2.v)) ftext5(scene2, F2.v, waehle2(r, ["Alpengasthof Edelwei\xDF", "Gasthof Almrausch", "Berggasthof Enzian"]), b2 / 2, 2.75, 0.12, 0.45, b2 * 0.6, "#5a3a2a");
       if (w - b2 - 6 > 8) biergarten(S, scene2, r, x0 + b2 + 2, 2, w - 1, zf - 1, { ausschank: false });
     } else {
       const zb = d * 0.42;
@@ -113261,7 +113868,7 @@
       const nH = Math.max(1, Math.floor(w / 18));
       for (let i = 0; i < nH; i++) {
         const b2 = Math.min(13, w / nH - 4), T = Math.min(12, d - zb - 6), x0 = i * (w / nH) + 2;
-        top = Math.max(top, voralpenhaus(S, scene2, r, p, x0, zf - T - 2, b2, T, { n: r() < 0.4 ? 2 : 1 }).top);
+        top = Math.max(top, voralpenhaus(S, scene2, r, p2, x0, zf - T - 2, b2, T, { n: r() < 0.4 ? 2 : 1 }).top);
       }
       for (let i = 0; i < 6; i++) nadelbaum(S, zw(r, 2, w - 2), zw(r, zb, zb + 4), r, zw(r, 6, 10));
     }
@@ -113291,16 +113898,16 @@
       ra: 2.4
     };
   }
-  function bwZeile(S, scene2, r, p, v, x0, zf, w, T, extra = {}) {
+  function bwZeile(S, scene2, r, p2, v, x0, zf, w, T, extra = {}) {
     const br = teileBreite(r, w, v === "esslingen" ? 9 : 7, v === "esslingen" ? 13 : 10);
     let xa = x0, H = 0;
     br.forEach((b2, i) => {
       const o = { ...bwHausO(r, v), ...extra.o ?? {} };
       if (extra.rathaus === i) Object.assign(o, { giebelstaendig: true, n: 3, laden: false, wand: "#f3ead6", holz: "#7a3a2a", neig: 1.1, steinEG: true, stein: "#d9cdb4" });
-      const erg = fachwerkHaus(S, scene2, r, p, xa, zf - T, b2, T, o, i === 0, i === br.length - 1);
+      const erg = fachwerkHaus(S, scene2, r, p2, xa, zf - T, b2, T, o, i === 0, i === br.length - 1);
       if (extra.rathaus === i) {
         const F2 = seiten3(xa, zf - T, b2, T), Hh = o.eg + o.n * o.gh;
-        if (sichtF2(p, F2.v)) {
+        if (sichtF2(p2, F2.v)) {
           const nB = Math.max(2, Math.round(b2 / 3.2));
           fwand3(S, F2.v, 0, b2, 0.3, o.eg, 0, 0.12, o.stein, Array.from({ length: nB }, (_, k) => ({ u0: k * b2 / nB + 0.4, u1: (k + 1) * b2 / nB - 0.4, v0: 0.3, v1: o.eg - 0.4, bogen: true })));
           fb5(S, F2.v, 0.3, b2 - 0.3, 0.3, o.eg - 0.5, -0.8, -0.7, GLAS_DUNKEL);
@@ -113323,16 +113930,16 @@
     });
     return H;
   }
-  function bwFachwerkRoh(S, scene2, p) {
-    const r = rng2(`bf:${p.seed}`);
-    const v = p.variante ?? waehle2(r, BWFW_V);
-    const { w, d } = p;
+  function bwFachwerkRoh(S, scene2, p2) {
+    const r = rng2(`bf:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, BWFW_V);
+    const { w, d } = p2;
     if (v === "marktplatz") {
       const T2 = 12, zf2 = Math.max(T2 + 2, d * 0.5);
       boden6(S, 0, zf2, w, d, PFLASTER5, 0.3, 0.06);
       for (let i = 1; i < 5; i++) boden6(S, i * w / 5 - 0.15, zf2, i * w / 5 + 0.15, d, PFLASTER22, 0.36, 0.01);
       hof(S, r, 0, 0, w, zf2 - T2);
-      const H = bwZeile(S, scene2, r, p, "tuebingen", 0, zf2, w, T2, { rathaus: Math.floor(teileBreite(rng2(`bf:${p.seed}:n`), w, 7, 10).length / 2) });
+      const H = bwZeile(S, scene2, r, p2, "tuebingen", 0, zf2, w, T2, { rathaus: Math.floor(teileBreite(rng2(`bf:${p2.seed}:n`), w, 7, 10).length / 2) });
       const bx = w * 0.42, bz = zf2 + (d - zf2) * 0.5;
       brunnen2(S, bx, bz, Math.min(3, (d - zf2) * 0.22), { figurF: waehle2(r, ["#c9483e", GOLD, "#2f6f8f"]), stein: "#d9cdb4" });
       for (let i = 0; i < 2; i++) {
@@ -113352,20 +113959,20 @@
     const zf = d - 2.4, T = Math.min(12.5, zf - 1);
     boden6(S, 0, zf, w, d, PFLASTER5, 0.3, 0.06);
     hof(S, r, 0, 0, w, zf - T - 1);
-    const Hb = bwZeile(S, scene2, r, p, v, 0, zf, w, T);
-    leerPlane(S, scene2, p, R8(0, zf + 1.2, 1, 0, w), 4, 4.6);
+    const Hb = bwZeile(S, scene2, r, p2, v, 0, zf, w, T);
+    leerPlane(S, scene2, p2, R8(0, zf + 1.2, 1, 0, w), 4, 4.6);
     return { hoehe: Hb };
   }
   var STUTT_V = ["staeffele", "geschaeft50", "halbhoehe", "kessel"];
   var MAUER = ["#cfc6b2", "#c9bfa8", "#d6cdb8"];
-  function stufe(S, x0, z0, x1, z1, y, mauer, oben = RASEN6, p = null) {
+  function stufe(S, x0, z0, x1, z1, y, mauer, oben = RASEN6, p2 = null) {
     S.quader(x0, 0, z0, x1, y, z1, mauer);
     S.quader(x0, y, z0, x1, y + 0.08, z1, oben);
     S.quader(x0, y - 0.05, z1 - 0.45, x1, y + 0.2, z1 + 0.05, heller(mauer, 0.05));
-    if (!p) return;
+    if (!p2) return;
     const F2 = seiten3(x0, z0, x1 - x0, z1 - z0), fu = dunkler(mauer, 0.07), kap = heller(mauer, 0.05);
     for (const k of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const L2 = F2[k].L;
       for (let yy = 1.1; yy < y - 0.4; yy += 1.1) fb5(S, F2[k], 0, L2, yy, yy + 0.06, 0, 0.03, fu);
       for (let yy = 0.3, j = 0; yy < y - 0.6; yy += 1.1, j++) for (let u = j % 2 * 1.6 + 0.8; u < L2 - 0.3; u += 3.2) fb5(S, F2[k], u, u + 0.06, yy, Math.min(y - 0.2, yy + 1.1), 0, 0.03, fu);
@@ -113396,7 +114003,7 @@
   function huelle2(S, pkt, c) {
     S.add(new ConvexGeometry(pkt.map(([x, y, z2]) => new three_module_exports.Vector3(x, y, z2))), c);
   }
-  function hanghaus(S, scene2, r, p, x0, z0, b2, T, o = {}) {
+  function hanghaus(S, scene2, r, p2, x0, z0, b2, T, o = {}) {
     const F2 = seiten3(x0, z0, b2, T);
     const n = o.n ?? 3, eg = 3.2, gh = 3, H = eg + (n - 1) * gh;
     const wand2 = o.wand ?? waehle2(r, ["#efe6d2", "#e8dcc8", "#f1e2c4", "#e3e6dc", "#f0d8c4", "#dfe3e6", "#f3ede0"]);
@@ -113404,7 +114011,7 @@
     S.quader(x0, 0, z0, x0 + b2, H, z0 + T, wand2);
     const fen = { rahmen: ORN2, glas: GLAS10, laeden: o.laeden ?? (r() < 0.5 ? waehle2(r, ["#3f6b4a", "#5a6168", "#2f5d7a"]) : null), simsF: "#e9e3d6" };
     for (const k of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0.3, 1, -0.05, 0.1, dunkler(wand2, 0.12));
       const us = lochfassade(S, Fk, 0, L2, 0.3, n, gh, { ...fen, ra: 2.9, fw: 1.15, fh: 1.55, br: 1.1 });
@@ -113426,7 +114033,7 @@
       dachTrauf(S, F2.v, 0, b2, T, H, T * 0.45, dachF, wand2, { ue: 0.6, us: 0.5 });
       top = H + T * 0.45;
     }
-    if (sichtF2(p, F2.v) && b2 > 8) gaube2(S, F2.v, b2 / 2, H, 0.9, 1.6, wand2, dachF, GLAS10, 1.4);
+    if (sichtF2(p2, F2.v) && b2 > 8) gaube2(S, F2.v, b2 / 2, H, 0.9, 1.6, wand2, dachF, GLAS10, 1.4);
     S.quader(x0 + b2 * 0.3, H + 1, z0 + T * 0.5, x0 + b2 * 0.3 + 0.7, top + 0.4, z0 + T * 0.5 + 0.7, "#b9a89a");
     return { top };
   }
@@ -113452,8 +114059,8 @@
     S.quader(x - 0.45, y, z2 + b2 / 2, x + 0.45, y + 1.9 * s2, z2 + b2 / 2 + 0.06, HOLZ5[0]);
     S.quader(x + b2 / 2, y + 1.2, z2 - 0.35, x + b2 / 2 + 0.05, y + 1.9, z2 + 0.35, GLAS_DUNKEL);
   }
-  function fuenfzigerHaus(S, scene2, r, p, x0, z0, b2, T, typ, erster, letzter) {
-    const F2 = seiten3(x0, z0, b2, T), leer3 = p.zustand === "leerstand";
+  function fuenfzigerHaus(S, scene2, r, p2, x0, z0, b2, T, typ, erster, letzter) {
+    const F2 = seiten3(x0, z0, b2, T), leer3 = p2.zustand === "leerstand";
     const n = 4 + (r() < 0.5 ? 1 : 0), eg = 4.6, gh = 3.2, H = eg + n * gh;
     const wand2 = waehle2(r, ["#f2f0ea", "#e9e6de", "#ece3cf", "#e2e6e3", "#efe9dc"]);
     const akz = waehle2(r, ["#7fa6b8", "#d9a35a", "#c96a54", "#8fb09a", "#e2c56b", "#6f8fb5"]);
@@ -113495,13 +114102,13 @@
       }
       if (haupt) ftext5(scene2, Fk, waehle2(r, ["Kaufhaus W\xF6rner", "Modehaus Bleyle", "Schuh-Haug", "Radio Fischer", "M\xF6bel Kienzle", "Sport-Scheck"]), L2 / 2, H - 0.9, 0.4, 0.9, L2 * 0.7, akz);
     };
-    if (sichtF2(p, F2.v)) front2(F2.v, b2, true);
-    if (sichtF2(p, F2.h)) lochfassade(S, F2.h, 0, b2, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS10, sims: false });
-    for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p, F2[k])) front2(F2[k], T, false);
+    if (sichtF2(p2, F2.v)) front2(F2.v, b2, true);
+    if (sichtF2(p2, F2.h)) lochfassade(S, F2.h, 0, b2, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS10, sims: false });
+    for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) front2(F2[k], T, false);
     const sb2 = Math.max(6, b2 * 0.62), st0 = x0 + (b2 - sb2) * (typ === "band" ? 0.2 : 0.6), sT = T - 5.5;
     S.quader(st0, H, z0 + 2, st0 + sb2, H + 2.9, z0 + 2 + sT, "#e2e6e8");
     const Fs = seiten3(st0, z0 + 2, sb2, sT);
-    for (const k of ["v", "r", "l"]) if (sichtF2(p, Fs[k])) {
+    for (const k of ["v", "r", "l"]) if (sichtF2(p2, Fs[k])) {
       fb5(S, Fs[k], 0.2, Fs[k].L - 0.2, H + 0.3, H + 2.6, -0.05, 0.04, GLAS_LADEN2);
       for (let u = 1.2; u < Fs[k].L - 0.5; u += 1.2) fb5(S, Fs[k], u - 0.04, u + 0.04, H + 0.3, H + 2.6, 0, 0.07, "#f4f3ef");
     }
@@ -113513,14 +114120,14 @@
     S.quader(x0, H + 1.1, z0 + T - 0.25, x0 + b2, H + 1.16, z0 + T - 0.15, "#3b4046");
     return { top: H + 3.25 };
   }
-  function villa3(S, scene2, r, p, x0, z0, b2, T) {
+  function villa3(S, scene2, r, p2, x0, z0, b2, T) {
     const F2 = seiten3(x0, z0, b2, T);
     const wand2 = waehle2(r, ["#f1e6c8", "#efe0d6", "#e6eadf", "#f2efe6", "#e9d9c3"]), orn = ORN2, dachF = waehle2(r, [...BIBER, ...SCHIEFER4]);
     const eg = 3.8, og = 3.4, H = eg + og;
     S.quader(x0, 0, z0, x0 + b2, H, z0 + T, wand2);
     const fen = { rahmen: orn, glas: GLAS10, fasche: orn, laeden: waehle2(r, ["#3f6b4a", "#5a6168"]) };
     for (const k of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k])) continue;
+      if (!sichtF2(p2, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0, 1, -0.05, 0.12, dunkler(wand2, 0.15));
       const us = achsen6(0, L2, 3.1, 0.8);
@@ -113544,14 +114151,14 @@
       }
     }
     walm3(S, x0, z0, x0 + b2, z0 + T, H, Math.min(b2, T) * 0.45, dachF, 0.7, 2);
-    if (sichtF2(p, F2.v)) gaube2(S, F2.v, b2 * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS10, 1.5);
+    if (sichtF2(p2, F2.v)) gaube2(S, F2.v, b2 * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS10, 1.5);
     S.quader(x0 + b2 * 0.4, H + 2, z0 + T * 0.5, x0 + b2 * 0.4 + 0.8, H + Math.min(b2, T) * 0.45 + 1, z0 + T * 0.5 + 0.8, "#b9a89a");
     return { top: H + Math.min(b2, T) * 0.45 + 1 };
   }
-  function stuttgartRoh(S, scene2, p) {
-    const r = rng2(`st:${p.seed}`);
-    const v = p.variante ?? waehle2(r, STUTT_V);
-    const { w, d } = p;
+  function stuttgartRoh(S, scene2, p2) {
+    const r = rng2(`st:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, STUTT_V);
+    const { w, d } = p2;
     const mauer = waehle2(r, MAUER);
     if (v === "geschaeft50") {
       const zf = d - 4, T2 = Math.min(16, zf - 1);
@@ -113560,10 +114167,10 @@
       const br = teileBreite(r, w, 12, 18), typen = ["raster", "loch", "band"];
       let xa = 0, H = 0;
       br.forEach((b3, i) => {
-        H = Math.max(H, fuenfzigerHaus(S, scene2, r, p, xa, zf - T2, b3, T2, typen[(i + p.seed) % 3], i === 0, i === br.length - 1).top);
+        H = Math.max(H, fuenfzigerHaus(S, scene2, r, p2, xa, zf - T2, b3, T2, typen[(i + p2.seed) % 3], i === 0, i === br.length - 1).top);
         xa += b3;
       });
-      leerPlane(S, scene2, p, R8(0, zf + 2.3, 1, 0, w), 5, 6);
+      leerPlane(S, scene2, p2, R8(0, zf + 2.3, 1, 0, w), 5, 6);
       for (let x = 5; x < w - 2; x += 10) {
         S.box(0.14, 5, 0.14, x, 2.8, d - 1, "#5a6168");
         S.box(1.4, 0.2, 0.3, x + 0.6, 5.3, d - 1, "#5a6168");
@@ -113576,7 +114183,7 @@
       const n = v === "kessel" ? 5 : 3, hs = v === "kessel" ? 3.6 : 4.6;
       const dz = (zs - 2) / n;
       let top2 = 0;
-      for (let k = n - 1; k >= 1; k--) stufe(S, 0, 0, w, zs - k * dz, 0.3 + k * hs, mauer, v === "kessel" && k >= 2 ? "#b8a37a" : RASEN6, p);
+      for (let k = n - 1; k >= 1; k--) stufe(S, 0, 0, w, zs - k * dz, 0.3 + k * hs, mauer, v === "kessel" && k >= 2 ? "#b8a37a" : RASEN6, p2);
       const sx = w - 3.4;
       for (let k = 1; k < n; k++) {
         const lauf = staffel(S, sx, 2.4, zs - k * dz, 0.3 + (k - 1) * hs, 0.3 + k * hs, "#ebe6da", dz - 3);
@@ -113601,7 +114208,7 @@
         for (const [hx, hb] of plaetze) {
           if (hb < 8) continue;
           const z0 = zv - (k === 0 ? 1.5 : 3) - T2;
-          top2 = Math.max(top2, versetzt3(S, scene2, 0, y - 0.3, 0, (T22, g) => hanghaus(T22, g, r, p, hx, z0, hb, T2, { n: k === 0 ? 4 : 3 }).top) + y - 0.3);
+          top2 = Math.max(top2, versetzt3(S, scene2, 0, y - 0.3, 0, (T22, g) => hanghaus(T22, g, r, p2, hx, z0, hb, T2, { n: k === 0 ? 4 : 3 }).top) + y - 0.3);
           if (k > 0) {
             baumRund2(S, hx + hb + 1.2, zv - 2, r, 0.7, LAUB, y);
             for (let x = hx; x < hx + hb; x += 1.6) busch6(S, x + 0.8, zv - 1.1, r, 0.5, y);
@@ -113611,9 +114218,9 @@
       return { hoehe: Math.max(top2, n * hs) };
     }
     const yo = 6, zm = zs - 4;
-    stufe(S, 0, 0, w, zm, yo, mauer, RASEN6, p);
+    stufe(S, 0, 0, w, zm, yo, mauer, RASEN6, p2);
     const Fm = R8(0, zm, 1, 0, w);
-    if (sichtF2(p, Fm)) {
+    if (sichtF2(p2, Fm)) {
       for (let i = 0; i < 2; i++) {
         const u = 3 + i * 3.6;
         fb5(S, Fm, u, u + 3, 0.3, 2.7, -0.1, 0.04, waehle2(r, ["#7d8288", "#9a6e45", "#e9e4da"]));
@@ -113623,7 +114230,7 @@
     }
     staffelX(S, w * 0.62, zm, zm + 1.8, 0.3, yo);
     const T = Math.min(14, zm - 10), b2 = Math.min(18, w - 14);
-    const top = versetzt3(S, scene2, 0, yo - 0.3, 0, (T2, g) => villa3(T2, g, r, p, 4, zm - 7 - T, b2, T).top) + yo - 0.3;
+    const top = versetzt3(S, scene2, 0, yo - 0.3, 0, (T2, g) => villa3(T2, g, r, p2, 4, zm - 7 - T, b2, T).top) + yo - 0.3;
     for (let x = 1; x < w - 1; x += 1.4) busch6(S, x, zm - 1.2, r, 0.55, yo);
     for (let i = 0; i < 4; i++) baumRund2(S, zw(r, b2 + 6, w - 2), zw(r, 3, zm - 4), r, zw(r, 0.9, 1.2), LAUB, yo);
     nadelbaum(S, 2.5, 3, r, 11, yo);
@@ -113634,12 +114241,12 @@
   function schlossFarben(r) {
     return { wand: waehle2(r, ["#f1e6c8", "#efe2d2", "#f2ecdf", "#eadfc6", "#f0dccd"]), orn: ORN2, lis: waehle2(r, ["#e2cf9e", "#ddc8a8", "#e8dcc0", "#d9c39a"]), dach: waehle2(r, ["#5d6a72", "#56636c", "#a85440"]), dach2: "#4d585f", rust: "#e3d8c0" };
   }
-  function barockFluegel(S, scene2, p, c, x0, z0, x1, z1, o = {}) {
+  function barockFluegel(S, scene2, p2, c, x0, z0, x1, z1, o = {}) {
     const eg = o.eg ?? 5, gh = o.gh ?? 4.4, n = o.n ?? 2, H = eg + n * gh;
     const F2 = seiten3(x0, z0, x1 - x0, z1 - z0);
     S.quader(x0, 0, z0, x1, H, z1, c.wand);
     for (const k2 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[k2])) continue;
+      if (!sichtF2(p2, F2[k2])) continue;
       const Fk = F2[k2], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0.3, eg, 0, 0.1, c.rust);
       for (let i = 1; i < 4; i++) fb5(S, Fk, 0, L2, 0.3 + i * (eg / 4), 0.36 + i * (eg / 4), 0.1, 0.14, dunkler(c.rust, 0.08));
@@ -113674,7 +114281,7 @@
     const T = Math.min(x1 - x0, z1 - z0), h1 = Math.min(4.2, T * 0.3), k = h1 * 0.38;
     mansardWalm(S, x0, z0, x1, z1, H, h1, k, Math.min(2.4, (T / 2 - k) * 0.4), c.dach, c.dach2, 0.4);
     for (const kk of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p, F2[kk])) continue;
+      if (!sichtF2(p2, F2[kk])) continue;
       for (const u of achsen6(0, F2[kk].L, (o.ra ?? 3.4) * 2, 1.2)) {
         fb5(S, F2[kk], u - 0.6, u + 0.6, H + 0.3, H + 2.4, -1.6, -0.5, c.orn);
         fb5(S, F2[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS10);
@@ -113708,22 +114315,22 @@
       zyl9(S, 0.1, 0.3, 3.5, cx, 0.9, cz, "#e3f3f5", 6);
     }
   }
-  function schlossRoh(S, scene2, p) {
-    const r = rng2(`sc:${p.seed}`);
-    const v = p.variante ?? waehle2(r, SCHLOSS_V);
+  function schlossRoh(S, scene2, p2) {
+    const r = rng2(`sc:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, SCHLOSS_V);
     const c = schlossFarben(r);
-    const { w, d } = p;
+    const { w, d } = p2;
     boden6(S, 0, 0, w, d, "#d8d1c0", 0.3, 0.05);
     if (v === "residenz") {
       const xa = w * 0.1, xb = w * 0.9, fl = Math.min(16, w * 0.13), zc0 = 6, zc1 = zc0 + 16, zw1 = d - 18;
-      let top = barockFluegel(S, scene2, p, c, xa, zc0, xb, zc1, { n: 2, risalit: "v" });
-      for (const [x0, x1] of [[xa, xa + fl], [xb - fl, xb]]) top = Math.max(top, barockFluegel(S, scene2, p, c, x0, zc1, x1, zw1, { n: 2 }));
-      for (const [x0, x1] of [[xa - 1, xa + fl + 1], [xb - fl - 1, xb + 1]]) barockFluegel(S, scene2, p, c, x0, zw1 - 14, x1, zw1 + 1, { n: 2, eg: 5.4, gh: 4.8, risalit: "v", ra: 3.6 });
+      let top = barockFluegel(S, scene2, p2, c, xa, zc0, xb, zc1, { n: 2, risalit: "v" });
+      for (const [x0, x1] of [[xa, xa + fl], [xb - fl, xb]]) top = Math.max(top, barockFluegel(S, scene2, p2, c, x0, zc1, x1, zw1, { n: 2 }));
+      for (const [x0, x1] of [[xa - 1, xa + fl + 1], [xb - fl - 1, xb + 1]]) barockFluegel(S, scene2, p2, c, x0, zw1 - 14, x1, zw1 + 1, { n: 2, eg: 5.4, gh: 4.8, risalit: "v", ra: 3.6 });
       const tx = w / 2, tz = zc0 + 8, Hb = 5 + 2 * 4.4;
       zyl9(S, 4.6, 4.6, 12, tx, Hb, tz, c.wand, 8);
       zyl9(S, 4.9, 4.9, 0.5, tx, Hb + 12, tz, c.orn, 8);
       for (const { F: Fo, nx, nz, kante } of oktoRahmen(tx, tz, 4.6 * Math.cos(PI11 / 8))) {
-        if (!sicht2(p, nx, nz)) continue;
+        if (!sicht2(p2, nx, nz)) continue;
         fbogen(S, Fo, kante / 2, Hb + 3, 1.3, 4.5, -0.1, 0.08, GLAS10);
         fscheibe4(S, Fo, kante / 2, Hb + 9.5, 0, 0.1, 0.9, "#f4efe0");
         fb5(S, Fo, -0.05, 0.4, Hb, Hb + 12, 0, 0.15, c.lis);
@@ -113751,8 +114358,8 @@
     }
     if (v === "lustschloss") {
       const b2 = Math.min(56, w - 16), x0 = (w - b2) / 2, z0 = 6, T2 = 16;
-      let top = barockFluegel(S, scene2, p, c, x0, z0, x0 + b2, z0 + T2, { n: 1, eg: 5.2, gh: 4.6 });
-      for (const xx of [x0 - 2, x0 + b2 - 10]) top = Math.max(top, barockFluegel(S, scene2, p, c, xx, z0 - 1, xx + 12, z0 + T2 + 2, { n: 1, eg: 5.6, gh: 5, risalit: "v" }));
+      let top = barockFluegel(S, scene2, p2, c, x0, z0, x0 + b2, z0 + T2, { n: 1, eg: 5.2, gh: 4.6 });
+      for (const xx of [x0 - 2, x0 + b2 - 10]) top = Math.max(top, barockFluegel(S, scene2, p2, c, xx, z0 - 1, xx + 12, z0 + T2 + 2, { n: 1, eg: 5.6, gh: 5, risalit: "v" }));
       const cx = w / 2, cz = z0 + T2, rr = 7.5, Hs = 12.5;
       const g = new three_module_exports.CylinderGeometry(rr, rr, Hs, 16, 1, false, -PI11 / 2, PI11);
       g.scale(1, 1, 0.75);
@@ -113765,7 +114372,7 @@
       S.add(new three_module_exports.SphereGeometry(0.5, 8, 6).translate(cx, Hs + 6.6, cz - 1.5), GOLD);
       for (let i = 0; i < 5; i++) {
         const a = -PI11 / 2 + (i + 0.5) * PI11 / 5, nx = Math.sin(a), nz = Math.cos(a) / 0.75;
-        if (!sicht2(p, nx, nz)) continue;
+        if (!sicht2(p2, nx, nz)) continue;
         const px2 = cx + Math.sin(a) * rr, pz4 = cz + Math.cos(a) * rr * 0.75, L2 = Math.hypot(nx, nz);
         const Fo = R8(px2 - nz / L2 * 1.2, pz4 + nx / L2 * 1.2, nz / L2, -nx / L2, 2.4);
         fbogen(S, Fo, 1.2, 1, 1.6, 4, -0.2, 0.1, GLAS10);
@@ -113794,7 +114401,7 @@
         const F2 = R8(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
         const wand2 = i % 2 ? c.wand : heller(c.wand, 0.02);
         fb5(S, F2, -ext, Ls + ext, 0, H2, -T2, 0, wand2);
-        if (sichtF2(p, F2)) {
+        if (sichtF2(p2, F2)) {
           fb5(S, F2, 0, Ls, 0.3, eg2, 0, 0.08, c.rust);
           for (const u of achsen6(0, Ls, 3, 0.4)) {
             fenster6(S, F2, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS10, bogen: true, sims: false, t: 0.08 });
@@ -113805,11 +114412,11 @@
           fb5(S, F2, 0, 0.6, eg2, H2 - 0.4, 0, 0.15, c.lis);
         }
         const Fr = R8(...wp5(F2, Ls, -T2), -F2.dx, -F2.dz, Ls);
-        if (sichtF2(p, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n2, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS10 });
+        if (sichtF2(p2, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n2, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS10 });
         const Q = quer(F2, T2);
         fpoly4(S, Q, [[-0.4, H2], [T2 + 0.4, H2], [T2 - 1.4, H2 + 3.6], [1.4, H2 + 3.6]], -ext, Ls + ext, c.dach);
         fpoly4(S, Q, [[1.4, H2 + 3.6], [T2 - 1.4, H2 + 3.6], [T2 / 2, H2 + 5]], -ext, Ls + ext, c.dach2);
-        if (sichtF2(p, F2)) for (const u of achsen6(0, Ls, 4.5, 0.6)) {
+        if (sichtF2(p2, F2)) for (const u of achsen6(0, Ls, 4.5, 0.6)) {
           fb5(S, F2, u - 0.55, u + 0.55, H2 + 0.3, H2 + 2.3, -1.5, -0.5, c.orn);
           fb5(S, F2, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS10);
         }
@@ -113837,9 +114444,9 @@
         fb5(S, Fh, 0, b2, 0, H, -T, 0, wand2);
         const innen = R8(...wp5(Fh, b2, -T), -Fh.dx, -Fh.dz, b2);
         for (const [Fk, haupt] of [[Fh, true], [innen, false]]) {
-          if (!sichtF2(p, Fk)) continue;
+          if (!sichtF2(p2, Fk)) continue;
           if (haupt) {
-            laden(S, scene2, Fk, 0.5, b2 - 0.5, eg - 0.4, r, { leer: p.zustand === "leerstand", namen: LAEDEN_BW });
+            laden(S, scene2, Fk, 0.5, b2 - 0.5, eg - 0.4, r, { leer: p2.zustand === "leerstand", namen: LAEDEN_BW });
             fb5(S, Fk, -0.03, b2 + 0.03, eg - 0.1, eg + 0.15, 0, 0.2, ORN2);
           }
           for (let k = 0; k < n; k++) for (const uu of achsen6(0, b2, 2.9, 0.5)) fenster6(S, Fk, uu, eg + k * gh + 0.8, 1.2, 1.9, { rahmen: ORN2, glas: GLAS10, fasche: haupt ? ORN2 : null, verdachung: haupt && k === 0 ? "gerade" : null });
@@ -113849,7 +114456,7 @@
         const Q = quer(Fh, T);
         fpoly4(S, Q, [[-0.3, H], [T + 0.3, H], [T - 1.3, H + 3.4], [1.3, H + 3.4]], 0, b2, c.dach);
         fpoly4(S, Q, [[1.3, H + 3.4], [T - 1.3, H + 3.4], [T / 2, H + 4.6]], 0, b2, c.dach2);
-        if (sichtF2(p, Fh)) for (const uu of achsen6(0, b2, 4.4, 0.8)) {
+        if (sichtF2(p2, Fh)) for (const uu of achsen6(0, b2, 4.4, 0.8)) {
           fb5(S, Fh, uu - 0.55, uu + 0.55, H + 0.3, H + 2.2, -1.4, -0.5, ORN2);
           fb5(S, Fh, uu - 0.35, uu + 0.35, H + 0.6, H + 1.8, -0.55, -0.46, GLAS10);
         }
@@ -113869,7 +114476,7 @@
     }
     return out;
   }
-  function maasswerkHelm(S, p, cx, cz, y0, ri, h, st, dunkel3) {
+  function maasswerkHelm(S, p2, cx, cz, y0, ri, h, st, dunkel3) {
     const Rv = ri / Math.cos(PI11 / 8);
     const g = new three_module_exports.ConeGeometry(Rv * 0.9, h, 8);
     g.rotateY(PI11 / 8);
@@ -113879,7 +114486,7 @@
     for (let i = 0; i < 8; i++) {
       const a = i * PI11 / 4 + PI11 / 8, vx = cx + Math.cos(a) * Rv, vz = cz + Math.sin(a) * Rv;
       stab5(S, [vx, y0, vz], spitze2, 0.32, st, 4);
-      if (sicht2(p, Math.cos(a), Math.sin(a))) for (let k = 1; k < 7; k++) {
+      if (sicht2(p2, Math.cos(a), Math.sin(a))) for (let k = 1; k < 7; k++) {
         const t = k / 7;
         S.box(0.55, 0.55, 0.55, vx + (cx - vx) * t + Math.cos(a) * 0.3, y0 + h * t, vz + (cz - vz) * t + Math.sin(a) * 0.3, st);
       }
@@ -113892,7 +114499,7 @@
       S.add(ring, st);
     }
     for (const { F: F2, nx, nz, kante } of oktoRahmen(cx, cz, ri * 0.88)) {
-      if (!sicht2(p, nx, nz)) continue;
+      if (!sicht2(p2, nx, nz)) continue;
       for (let k = 0; k < 3; k++) {
         const t = 0.12 + k * 0.22, sc = 1 - t;
         fscheibe4(S, teil5(F2, kante / 2 - 0.1, kante / 2 + 0.1, -ri * 0.88 * t), 0.1, y0 + h * t + 1.2, 0, 0.2, Math.max(0.3, kante * sc * 0.28), st, 8);
@@ -113902,10 +114509,10 @@
     S.box(0.3, 2.4, 0.3, cx, y0 + h + 1.6, cz, st);
     S.box(1.6, 0.3, 0.3, cx, y0 + h + 2, cz, st);
   }
-  function muensterRoh(S, scene2, p) {
-    const r = rng2(`ms:${p.seed}`);
-    const v = p.variante ?? waehle2(r, MUENSTER_V);
-    const { w, d } = p, xm = w / 2;
+  function muensterRoh(S, scene2, p2) {
+    const r = rng2(`ms:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, MUENSTER_V);
+    const { w, d } = p2, xm = w / 2;
     const st = v === "ulm" ? "#c48e78" : v === "freiburg" ? "#a9584a" : "#b5634f", st2 = dunkler(st, 0.07), hst = heller(st, 0.07);
     const dach3 = v === "freiburg" ? "#6b5a52" : v === "ulm" ? "#5d6a72" : waehle2(r, BIBER), dunkel3 = "#3c3434";
     boden6(S, 0, 0, w, d, PFLASTER5, 0.3, 0.06);
@@ -113922,7 +114529,7 @@
     for (const sg of [1, -1]) {
       const Fa = sg > 0 ? R8(xg0 + Bg, zn1, 0, -1, L2) : R8(xg0, zn0, 0, 1, L2);
       const Fo = sg > 0 ? R8(xm + Bn / 2, zn1, 0, -1, L2) : R8(xm - Bn / 2, zn0, 0, 1, L2);
-      if (!sichtF2(p, Fa)) continue;
+      if (!sichtF2(p2, Fa)) continue;
       for (let i = 0; i < nj; i++) {
         const u = (i + 0.5) * jl;
         gotFenster(S, Fa, u, 2.6, Math.min(3, jl * 0.45), Ha - 4.2, hst);
@@ -113989,7 +114596,7 @@
       S.quader(xg0 - qb, 0, qz0, xg0 + Bg + qb, Hn, qz1, st);
       for (const sg of [1, -1]) {
         const Fq = sg > 0 ? R8(xg0 + Bg + qb, qz1, 0, -1, 11) : R8(xg0 - qb, qz0, 0, 1, 11);
-        if (!sichtF2(p, Fq)) continue;
+        if (!sichtF2(p2, Fq)) continue;
         fscheibe4(S, Fq, 5.5, Hn - 6, 0, 0.12, 3.2, hst, 16);
         fscheibe4(S, Fq, 5.5, Hn - 6, 0.12, 0.2, 2.6, GLAS_DUNKEL, 16);
         for (let k = 0; k < 8; k++) {
@@ -114037,7 +114644,7 @@
       dachGiebel(S, R8(xm - Bc / 2, zc, 1, 0, Bc), 0, Bc, -8, 0, Hc, Bc * 0.8, dach3, null, { ue: 0.3, uf: 0, ub: 0 });
       for (let i = 0; i < 5; i++) {
         const a = PI11 + (i + 0.5) * (PI11 / 5), nx = Math.cos(a), nz = Math.sin(a);
-        if (!sicht2(p, nx, nz)) continue;
+        if (!sicht2(p2, nx, nz)) continue;
         const ax = xm + nx * Bc / 2, az = zc - 8 + nz * Bc / 2;
         gotFenster(S, R8(ax - nz * 1.4, az + nx * 1.4, nz, -nx, 2.8), 1.4, Ha + 1.5, 1.8, Hc - Ha - 3, hst, 0.05);
         const bx = xm + nx * Bg / 2, bz = zc - 8 + nz * Bg / 2;
@@ -114066,7 +114673,7 @@
     S.quader(tx0, 0, zt0, tx0 + tb, Hq, zf, st);
     const Ft = seiten3(tx0, zt0, tb, tb);
     for (const k of ["v", "r", "l", "h"]) {
-      if (!sichtF2(p, Ft[k])) continue;
+      if (!sichtF2(p2, Ft[k])) continue;
       const Fk = Ft[k];
       for (const u of [0.6, tb - 0.6]) for (let s2 = 0; s2 < 3; s2++) fb5(S, Fk, u - 0.9 + s2 * 0.15 * (u < 1 ? 1 : -1) * 0, u + 0.9, 0.3, Hq * (0.45 + s2 * 0.27), 0, 1.6 - s2 * 0.45, st2);
       if (k === "v") {
@@ -114100,7 +114707,7 @@
     const ri = tb * 0.42;
     zyl9(S, ri / Math.cos(PI11 / 8), ri / Math.cos(PI11 / 8), Ho - Hq, xm, Hq, zt0 + tb / 2, st, 8);
     for (const { F: F2, nx, nz, kante } of oktoRahmen(xm, zt0 + tb / 2, ri)) {
-      if (!sicht2(p, nx, nz)) continue;
+      if (!sicht2(p2, nx, nz)) continue;
       gotFenster(S, F2, kante / 2, Hq + 2.5, kante * 0.5, Ho - Hq - 5, hst);
       for (let j = 1; j <= 3; j++) fb5(S, F2, kante * 0.27, kante * 0.73, Hq + 2.5 + j * (Ho - Hq - 7) / 4, Hq + 2.6 + j * (Ho - Hq - 7) / 4, -0.12, -0.04, "#5a4636");
       fpoly4(S, F2, [[0, Ho - 0.5], [kante, Ho - 0.5], [kante / 2, Ho + 3.6]], -0.2, 0.25, st);
@@ -114116,8 +114723,8 @@
       S.add(g, st2);
       S.box(0.3, 2.2, 0.3, xm, Ht + 1.1, zt0 + tb / 2, GOLD);
       S.box(1.4, 0.3, 0.3, xm, Ht + 1.5, zt0 + tb / 2, GOLD);
-    } else maasswerkHelm(S, p, xm, zt0 + tb / 2, Ho, ri, Ht - Ho, st, dunkel3);
-    if (sichtF2(p, Fv)) {
+    } else maasswerkHelm(S, p2, xm, zt0 + tb / 2, Ho, ri, Ht - Ho, st, dunkel3);
+    if (sichtF2(p2, Fv)) {
       for (const [u0, u1] of [[0, Bg / 2 - tb / 2], [Bg / 2 + tb / 2, Bg]]) if (u1 - u0 > 2) {
         fbogen(S, Fv, (u0 + u1) / 2, 2.6, (u1 - u0) * 0.4, Ha - 4.5, -0.1, 0.06, GLAS_DUNKEL, "spitz");
       }
@@ -114138,10 +114745,10 @@
     return { hoehe: Ht + 3.4 };
   }
   var WEIN_V = ["terrassen", "hang", "weingut", "kapelle"];
-  function weinbergRoh(S, scene2, p) {
-    const r = rng2(`wb:${p.seed}`);
-    const v = p.variante ?? waehle2(r, WEIN_V);
-    const { w, d } = p, mauer = waehle2(r, ["#d9cfb4", "#cfc3a5", "#d6c9a8"]), erde = "#bda97f";
+  function weinbergRoh(S, scene2, p2) {
+    const r = rng2(`wb:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, WEIN_V);
+    const { w, d } = p2, mauer = waehle2(r, ["#d9cfb4", "#cfc3a5", "#d6c9a8"]), erde = "#bda97f";
     boden6(S, 0, d - 2, w, d, "#cfc6b4", 0.3, 0.07);
     let top = 0;
     const n = v === "hang" ? 9 : v === "kapelle" ? 5 : 6, hs = v === "hang" ? 1.1 : 2.6, z1 = d - 2.5, dz = z1 / n, Htop = n * hs;
@@ -114163,7 +114770,7 @@
         T2.quader(kx2 - B2 / 2, 0, kz3 - L2 / 2, kx2 + B2 / 2, Hk, kz3 + L2 / 2, c.wand);
         const F3 = seiten3(kx2 - B2 / 2, kz3 - L2 / 2, B2, L2);
         dachGiebel(T2, F3.v, 0, B2, -L2, 0, Hk, B2 * 0.7, c.dach, c.wand, { ue: 0.4, uf: 0.4, ub: 0.4 });
-        for (const k of ["v", "r", "l", "h"]) if (sichtF2(p, F3[k])) {
+        for (const k of ["v", "r", "l", "h"]) if (sichtF2(p2, F3[k])) {
           if (k === "v") {
             haustuer2(T2, F3.v, B2 / 2, 0, 1.4, 2.6, HOLZ5[0], ORN2, true);
             fscheibe4(T2, F3.v, B2 / 2, Hk + 1.6, 0, 0.08, 0.5, GLAS_DUNKEL);
@@ -114204,14 +114811,14 @@
     boden6(S, 0, zh, w, d - 2, PFLASTER22, 0.3, 0.06);
     const T = 11, b2 = Math.min(16, w * 0.4);
     const o = { ...bwHausO(r, "tuebingen"), giebelstaendig: false, laden: false, n: 1, eg: 3.8, gh: 3, neig: 0.75, steinEG: true, stein: mauer, zwerch: false };
-    top = fachwerkHaus(S, scene2, r, p, 2, d - 2.5 - T, b2, T, o, true, false).top;
+    top = fachwerkHaus(S, scene2, r, p2, 2, d - 2.5 - T, b2, T, o, true, false).top;
     const F2 = seiten3(2, d - 2.5 - T, b2, T);
-    if (sichtF2(p, F2.v)) ftext5(scene2, F2.v, waehle2(r, ["Weingut K\xF6gel", "Weingut H\xE4gele", "Weingut Sonnenhalde", "Weinbau Rapp"]), b2 / 2, 3.25, 0.12, 0.5, b2 * 0.7, "#5a3a2a");
+    if (sichtF2(p2, F2.v)) ftext5(scene2, F2.v, waehle2(r, ["Weingut K\xF6gel", "Weingut H\xE4gele", "Weingut Sonnenhalde", "Weinbau Rapp"]), b2 / 2, 3.25, 0.12, 0.5, b2 * 0.7, "#5a3a2a");
     const kx = b2 + 6, kb = Math.min(16, w - kx - 2), kt = 12, kz2 = zh + 1;
     if (kb > 8) {
       S.quader(kx, 0, kz2, kx + kb, 5.2, kz2 + kt, mauer);
       const Fk = seiten3(kx, kz2, kb, kt);
-      for (const k of ["v", "r"]) if (sichtF2(p, Fk[k])) {
+      for (const k of ["v", "r"]) if (sichtF2(p2, Fk[k])) {
         fbogen(S, Fk[k], Fk[k].L / 2, 0.3, 3.4, 4.2, -0.1, 0.08, "#6b4a32");
         fbogen(S, Fk[k], Fk[k].L / 2, 0.3, 4, 4.6, 0, 0.06, heller(mauer, 0.06));
       }
@@ -114239,16 +114846,16 @@
     S.box(L2 - 0.4, 0.1, 1.2, x, y + 0.56, z2, "#8a6a48");
     huelle2(S, [[x + L2 / 2, y, z2 - 0.75], [x + L2 / 2, y, z2 + 0.75], [x + L2 / 2, y + 0.55, z2 - 0.75], [x + L2 / 2, y + 0.55, z2 + 0.75], [x + L2 / 2 + 1.2, y + 0.75, z2]], farbe2);
   }
-  function flussRoh(S, scene2, p) {
-    const r = rng2(`fl:${p.seed}`);
-    const v = p.variante ?? waehle2(r, FLUSS_V);
-    const { w, d } = p;
+  function flussRoh(S, scene2, p2) {
+    const r = rng2(`fl:${p2.seed}`);
+    const v = p2.variante ?? waehle2(r, FLUSS_V);
+    const { w, d } = p2;
     const Y = v === "fischer" ? 1.6 : v === "kai" ? 3.6 : 4.2, zq = d * (v === "fischer" ? 0.6 : 0.55);
     const stein = waehle2(r, ["#cfc4ac", "#c9bda3", "#d6cdb8"]);
     S.quader(0, 0.05, zq, w, 0.42, d, WASSER2);
-    stufe(S, 0, 0, w, zq, Y, stein, PFLASTER5, p);
+    stufe(S, 0, 0, w, zq, Y, stein, PFLASTER5, p2);
     const Fq = R8(0, zq, 1, 0, w);
-    if (sichtF2(p, Fq)) {
+    if (sichtF2(p2, Fq)) {
       for (let y = 0.9; y < Y; y += 0.7) fb5(S, Fq, 0, w, y, y + 0.05, 0, 0.03, dunkler(stein, 0.06));
       fb5(S, Fq, 0, w, 0.42, 0.9, 0, 0.05, "#7f8a6a");
     }
@@ -114262,8 +114869,8 @@
         let xa = x0;
         br.forEach((b2, i) => {
           let erg;
-          if (art === "fachwerk") erg = fachwerkHaus(T2, g2, r, p, xa, zq - 6 - T, b2, T, { ...bwHausO(r, "tuebingen"), laden: false, n: 2 }, i === 0, i === br.length - 1);
-          else erg = buergerHaus(T2, g2, r, art, xa, zq - 6 - T, b2, T, p, i === 0, i === br.length - 1);
+          if (art === "fachwerk") erg = fachwerkHaus(T2, g2, r, p2, xa, zq - 6 - T, b2, T, { ...bwHausO(r, "tuebingen"), laden: false, n: 2 }, i === 0, i === br.length - 1);
+          else erg = buergerHaus(T2, g2, r, art, xa, zq - 6 - T, b2, T, p2, i === 0, i === br.length - 1);
           top = Math.max(top, erg.top + Y - 0.3);
           xa += b2;
         });
@@ -114293,7 +114900,7 @@
       S.quader(bx + bb - 0.8, Y, tz0, bx + bb + 1.2, Y + 6.5, tz1, stein);
       S.quader(bx - 1.2, Y + 6.5, tz0, bx + bb + 1.2, Ht, tz1, stein);
       const Ft = seiten3(bx - 1.2, tz0, bb + 2.4, tz1 - tz0);
-      for (const k of ["v", "h", "r", "l"]) if (sichtF2(p, Ft[k])) {
+      for (const k of ["v", "h", "r", "l"]) if (sichtF2(p2, Ft[k])) {
         const L2 = Ft[k].L;
         if (k === "v" || k === "h") fbogen(S, Ft[k], L2 / 2, Y + 4, bb + 0.4, 3.2, -0.1, 0.12, heller(stein, 0.06));
         for (const u of achsen6(0, L2, 3.6, 1)) fenster6(S, Ft[k], u, Y + 9.5, 1, 1.6, { rahmen: heller(stein, 0.08), glas: GLAS10, sims: false });
@@ -114318,10 +114925,10 @@
       versetzt3(S, scene2, 0, Y - 0.3, 0, (T2, g2) => {
         br.forEach((b2, i) => {
           const o = { ...bwHausO(r, "tuebingen"), laden: false, n: 1 + (r() < 0.6 ? 1 : 0), eg: 3.2, gh: 2.8, giebelstaendig: r() < 0.7, steinEG: true, stein, kr: 0.25 };
-          const erg = fachwerkHaus(T2, g2, r, p, xa, zq - T + 0.3, b2, T - 0.3, o, i === 0, i === br.length - 1);
+          const erg = fachwerkHaus(T2, g2, r, p2, xa, zq - T + 0.3, b2, T - 0.3, o, i === 0, i === br.length - 1);
           top = Math.max(top, erg.top + Y - 0.3);
           const F2 = seiten3(xa, zq - T + 0.3, b2, T - 0.3);
-          if (sichtF2(p, F2.v) && r() < 0.7) {
+          if (sichtF2(p2, F2.v) && r() < 0.7) {
             const y = o.eg + 0.1, tb = 1.4;
             fb5(T2, F2.v, 0.4, b2 - 0.4, y - 0.15, y, 0, tb + o.kr, HOLZ5[0]);
             fwand3(T2, F2.v, 0.4, b2 - 0.4, y, y + 1, tb + o.kr - 0.08, tb + o.kr, HOLZ_HELL, Array.from({ length: Math.floor((b2 - 1) / 0.55) }, (_, k) => ({ u0: 0.6 + k * 0.55, u1: 0.78 + k * 0.55, v0: y + 0.3, v1: y + 0.75 })));
@@ -114351,7 +114958,7 @@
     stab5(S, [kx + 0.5, Y + 9.5, kz2 + 8.5], [kx + 0.5, Y + 3, kz2 + 8.5], 0.05, "#3b4046", 4);
     S.box(0.8, 0.6, 0.8, kx + 0.5, Y + 2.7, kz2 + 8.5, "#8a5a3a");
     const Fk = R8(kx - 1.5, kz2 + 3.5, 1, 0, 3);
-    if (sichtF2(p, Fk)) {
+    if (sichtF2(p2, Fk)) {
       fbogen(S, Fk, 1.5, Y, 1.4, 2.4, -0.2, 0.1, "#5a4636");
       fenster6(S, Fk, 1.5, Y + 4, 0.8, 1, { rahmen: ORN2, glas: GLAS10, sims: false });
     }
@@ -114376,21 +114983,21 @@
   var SUED_SLOTS = {
     "slot:bay_buergerhaus": slot3(buergerRoh, [24, 18]),
     "slot:bay_muenchen": slot3(muenchenRoh, [26, 22]),
-    "slot:bay_zwiebelkirche": (S, scene2, p) => {
-      const v = p.variante ?? waehle2(rng2(`ki:${p.seed}`), KIRCHE_V);
+    "slot:bay_zwiebelkirche": (S, scene2, p2) => {
+      const v = p2.variante ?? waehle2(rng2(`ki:${p2.seed}`), KIRCHE_V);
       const m = { doppelturm: [[36, 56], [60, 80]], stadtpfarr: [[32, 52], [56, 74]], wallfahrt: [[44, 48], [64, 64]], dorf: [[30, 40], [48, 52]] }[v];
-      return slot3(kircheRoh2, m[0], m[1])(S, scene2, { ...p, variante: v });
+      return slot3(kircheRoh2, m[0], m[1])(S, scene2, { ...p2, variante: v });
     },
     "slot:bay_wirtshaus": slot3(wirtshausRoh, [40, 30], [70, 50]),
     "slot:bay_maibaum": slot3(maibaumRoh, [22, 22], [44, 44]),
     "slot:franken_fachwerk": slot3(frankenRoh, [24, 20]),
-    "slot:bay_alpen": slot3(alpenRoh, [30, 28], null, { hang: (p) => ["panorama", "ortsrand"].includes(p.variante ?? waehle2(rng2(`al:${p.seed}`), ALPEN_V)) }),
-    "slot:bw_fachwerk": (S, scene2, p) => slot3(bwFachwerkRoh, (p.variante ?? waehle2(rng2(`bf:${p.seed}`), BWFW_V)) === "marktplatz" ? [30, 34] : [24, 20])(S, scene2, p),
-    "slot:bw_stuttgart": slot3(stuttgartRoh, [30, 32], null, { hang: (p) => (p.variante ?? waehle2(rng2(`st:${p.seed}`), STUTT_V)) !== "geschaeft50" }),
-    "slot:bw_schloss_barock": (S, scene2, p) => {
-      const v = p.variante ?? waehle2(rng2(`sc:${p.seed}`), SCHLOSS_V);
+    "slot:bay_alpen": slot3(alpenRoh, [30, 28], null, { hang: (p2) => ["panorama", "ortsrand"].includes(p2.variante ?? waehle2(rng2(`al:${p2.seed}`), ALPEN_V)) }),
+    "slot:bw_fachwerk": (S, scene2, p2) => slot3(bwFachwerkRoh, (p2.variante ?? waehle2(rng2(`bf:${p2.seed}`), BWFW_V)) === "marktplatz" ? [30, 34] : [24, 20])(S, scene2, p2),
+    "slot:bw_stuttgart": slot3(stuttgartRoh, [30, 32], null, { hang: (p2) => (p2.variante ?? waehle2(rng2(`st:${p2.seed}`), STUTT_V)) !== "geschaeft50" }),
+    "slot:bw_schloss_barock": (S, scene2, p2) => {
+      const v = p2.variante ?? waehle2(rng2(`sc:${p2.seed}`), SCHLOSS_V);
       const m = { residenz: [[100, 80], [150, 110]], lustschloss: [[70, 60], [100, 80]], zirkel: [[60, 40], [140, 70]], quadrat: [[50, 50], [90, 90]] }[v];
-      return slot3(schlossRoh, m[0], m[1])(S, scene2, { ...p, variante: v });
+      return slot3(schlossRoh, m[0], m[1])(S, scene2, { ...p2, variante: v });
     },
     "slot:bw_muenster": slot3(muensterRoh, [44, 96], [64, 120]),
     "slot:sued_weinberg": slot3(weinbergRoh, [30, 30], null, { hang: () => true }),
@@ -114427,9 +115034,9 @@
     g.translate(x, y + 1.2 * s2 + h / 2, z2);
     S.add(g, waehle2(r, NADELF));
   }
-  function kiesbank(S, scene2, p) {
-    const r = rng2(`kb:${p.seed}`);
-    const { x, z: z2, w, d } = p, entlangX = w >= d, L2 = entlangX ? w : d, B2 = entlangX ? d : w;
+  function kiesbank(S, scene2, p2) {
+    const r = rng2(`kb:${p2.seed}`);
+    const { x, z: z2, w, d } = p2, entlangX = w >= d, L2 = entlangX ? w : d, B2 = entlangX ? d : w;
     const y0 = -2.25;
     const n = Math.max(2, Math.round(L2 / 22));
     for (let k = 0; k < n; k++) {
@@ -114495,12 +115102,12 @@
     P2.hoehe = h;
     return P2;
   }
-  function berg2(S, scene2, p) {
-    const r = rng2(`sb:${p.seed}`);
-    const { x, z: z2, w, d } = p, v = p.variante ?? "wald";
+  function berg2(S, scene2, p2) {
+    const r = rng2(`sb:${p2.seed}`);
+    const { x, z: z2, w, d } = p2, v = p2.variante ?? "wald";
     S.quader(x, 0, z2, x + w, 0.3, z2 + d, waehle2(r, WIESE2));
     const Hm = Math.min(46, Math.max(16, Math.min(w, d) * zw(r, 0.38, 0.5)));
-    const P2 = huegel(S, r, x, z2, x + w, z2 + d, { berg: p.berg, hoehe: Hm, plateau: 0.55, wald: v === "wiese" ? 0.25 : 1.1, nadel: v === "wald" || v === "alpen" ? 0.75 : 0.3 });
+    const P2 = huegel(S, r, x, z2, x + w, z2 + d, { berg: p2.berg, hoehe: Hm, plateau: 0.55, wald: v === "wiese" ? 0.25 : 1.1, nadel: v === "wald" || v === "alpen" ? 0.75 : 0.3 });
     const nb = Math.round((P2.x1 - P2.x0) * (P2.z1 - P2.z0) / 60);
     for (let q2 = 0; q2 < nb; q2++) {
       const tx = zw(r, P2.x0 + 1, P2.x1 - 1), tz = zw(r, P2.z0 + 1, P2.z1 - 1);
@@ -114512,12 +115119,12 @@
     }
     return { hoehe: P2.y + 9 };
   }
-  function hang(S, scene2, p) {
-    const r = rng2(`ha:${p.seed}`);
-    const { x, z: z2, w, d } = p, v = p.variante ?? "kessel";
+  function hang(S, scene2, p2) {
+    const r = rng2(`ha:${p2.seed}`);
+    const { x, z: z2, w, d } = p2, v = p2.variante ?? "kessel";
     S.quader(x, 0, z2, x + w, 0.3, z2 + d, "#9cc27e");
-    const Hm = Math.min(p.niedrig ? 22 : 52, Math.max(p.niedrig ? 14 : 26, Math.min(w, d) * zw(r, 0.5, 0.62)));
-    const P2 = huegel(S, r, x, z2, x + w, z2 + d, { berg: p.berg, hoehe: Hm, plateau: 0.42, wald: v === "wein" ? 0.9 : 1.1, nadel: 0.4, wiese: "#8fb873", reben: v !== "haeuser" });
+    const Hm = Math.min(p2.niedrig ? 22 : 52, Math.max(p2.niedrig ? 14 : 26, Math.min(w, d) * zw(r, 0.5, 0.62)));
+    const P2 = huegel(S, r, x, z2, x + w, z2 + d, { berg: p2.berg, hoehe: Hm, plateau: 0.42, wald: v === "wein" ? 0.9 : 1.1, nadel: 0.4, wiese: "#8fb873", reben: v !== "haeuser" });
     return { hoehe: P2.y + 8 };
   }
   function fensterReihe(S, x0, z0, x1, z1, y0, y1, seite, ab, fw, fh, c = "#3f4850", bogen2 = false) {
@@ -114572,15 +115179,15 @@
     for (let a = 0.2; a < PI12 / 2; a += 0.55) S.box(0.5, 1.4, 0.5, x + Math.cos(a) * rad2, y + h * 0.7, z2 + Math.sin(a) * rad2, "#3f4850");
     return y + h + kh;
   }
-  function burg(S, scene2, p) {
-    const r = rng2(`bu:${p.seed}`);
-    const { x, z: z2, w, d } = p, v = p.variante ?? "kaiserburg";
+  function burg(S, scene2, p2) {
+    const r = rng2(`bu:${p2.seed}`);
+    const { x, z: z2, w, d } = p2, v = p2.variante ?? "kaiserburg";
     S.quader(x, 0, z2, x + w, 0.3, z2 + d, waehle2(r, WIESE2));
     const stein = v === "ruine" ? "#a8584a" : v === "kaiserburg" ? "#c79a78" : "#e9e2d2";
     const fels2 = v === "ruine" ? "#9a5546" : v === "kaiserburg" ? "#b88c6c" : "#b5ad98";
     const Hm = Math.min(v === "festung" ? 18 : 16, Math.max(10, Math.min(w, d) * 0.22));
     const P2 = huegel(S, r, x, z2, x + w, z2 + d, {
-      berg: p.berg,
+      berg: p2.berg,
       hoehe: Hm,
       plateau: v === "festung" ? 0.6 : 0.58,
       wald: 0.6,
@@ -114664,11 +115271,11 @@
     }
     return { hoehe: top };
   }
-  function turm3(S, scene2, p) {
-    const r = rng2(`tu:${p.seed}`);
-    const { x, z: z2, w, d } = p;
+  function turm3(S, scene2, p2) {
+    const r = rng2(`tu:${p2.seed}`);
+    const { x, z: z2, w, d } = p2;
     S.quader(x, 0, z2, x + w, 0.3, z2 + d, waehle2(r, WIESE2));
-    const P2 = huegel(S, r, x, z2, x + w, z2 + d, { berg: p.berg, hoehe: Math.min(30, Math.min(w, d) * 0.4), plateau: 0.55, wald: 1.2, nadel: 0.3 });
+    const P2 = huegel(S, r, x, z2, x + w, z2 + d, { berg: p2.berg, hoehe: Math.min(30, Math.min(w, d) * 0.4), plateau: 0.55, wald: 1.2, nadel: 0.3 });
     const cx = (P2.x0 + P2.x1) / 2, cz = (P2.z0 + P2.z1) / 2, y = P2.y;
     const H = 120, schaft = new three_module_exports.CylinderGeometry(2, 4.2, H, 16);
     schaft.translate(cx, y + H / 2, cz);
@@ -114691,9 +115298,9 @@
     }
     return { hoehe: y + H + 44 };
   }
-  function alpenFern(S, scene2, p) {
-    const r = rng2(`af:${p.seed}`);
-    const { x, z: z2, w, d } = p;
+  function alpenFern(S, scene2, p2) {
+    const r = rng2(`af:${p2.seed}`);
+    const { x, z: z2, w, d } = p2;
     S.quader(x, 0, z2, x + w, 0.46, z2 + d, "#9cc27e");
     for (let u = x; u < x + w - 4; ) {
       const l = zw(r, 28, 60), e = Math.min(x + w, u + l);
@@ -114710,8 +115317,8 @@
     }
     return { hoehe: 12 };
   }
-  function pyramide2(S, scene2, p) {
-    const { x, z: z2, w, d } = p, cx = x + w / 2, cz = z2 + d / 2, s2 = Math.min(w, d) - 1;
+  function pyramide2(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2, cx = x + w / 2, cz = z2 + d / 2, s2 = Math.min(w, d) - 1;
     S.quader(cx - s2 / 2, 0.3, cz - s2 / 2, cx + s2 / 2, 1.1, cz + s2 / 2, "#cbb894");
     S.add(new three_module_exports.ConeGeometry(s2 * 0.52, s2 * 1.05, 4).rotateY(PI12 / 4).translate(cx, 1.1 + s2 * 0.525, cz), "#c9a27a");
     for (const [dx, dz] of [[-1, 1], [1, 1], [1, -1]]) S.box(0.3, 1.2, 0.3, cx + dx * (s2 / 2 + 1), 0.9, cz + dz * (s2 / 2 + 1), "#3b4046");
@@ -114724,24 +115331,24 @@
     if (f.length === 1) return f[0];
     return f.find((s2) => s2 === "+z") ?? f.find((s2) => s2 === "+x") ?? f[0];
   }
-  function baechle(S, p) {
-    const s2 = frontVon(p.front);
+  function baechle(S, p2) {
+    const s2 = frontVon(p2.front);
     if (!SICHT2.includes(s2)) return;
     const st = "#bdb3a0", wa = "#5aa9c0";
     if (s2 === "+z") {
-      const z2 = p.z + p.d - 0.95;
-      S.quader(p.x + 0.4, 0.3, z2 - 0.35, p.x + p.w - 0.4, 0.4, z2 + 0.35, st);
-      S.quader(p.x + 0.5, 0.36, z2 - 0.2, p.x + p.w - 0.5, 0.42, z2 + 0.2, wa);
+      const z2 = p2.z + p2.d - 0.95;
+      S.quader(p2.x + 0.4, 0.3, z2 - 0.35, p2.x + p2.w - 0.4, 0.4, z2 + 0.35, st);
+      S.quader(p2.x + 0.5, 0.36, z2 - 0.2, p2.x + p2.w - 0.5, 0.42, z2 + 0.2, wa);
     } else {
-      const x = p.x + p.w - 0.95;
-      S.quader(x - 0.35, 0.3, p.z + 0.4, x + 0.35, 0.4, p.z + p.d - 0.4, st);
-      S.quader(x - 0.2, 0.36, p.z + 0.5, x + 0.2, 0.42, p.z + p.d - 0.5, wa);
+      const x = p2.x + p2.w - 0.95;
+      S.quader(x - 0.35, 0.3, p2.z + 0.4, x + 0.35, 0.4, p2.z + p2.d - 0.4, st);
+      S.quader(x - 0.2, 0.36, p2.z + 0.5, x + 0.2, 0.42, p2.z + p2.d - 0.5, wa);
     }
   }
   var SLOTS2 = {};
-  for (const [typ, f] of Object.entries(SUED_SLOTS)) SLOTS2[typ] = (S, scene2, p) => {
-    const e = f(S, scene2, { ...p, front: frontVon(p.front) });
-    if (p.baechle) baechle(S, p);
+  for (const [typ, f] of Object.entries(SUED_SLOTS)) SLOTS2[typ] = (S, scene2, p2) => {
+    const e = f(S, scene2, { ...p2, front: frontVon(p2.front) });
+    if (p2.baechle) baechle(S, p2);
     return e;
   };
   Object.assign(SLOTS2, { "slot:sued_hang": hang, "slot:sued_alpen": alpenFern, "slot:sued_kiesbank": kiesbank, "slot:sued_berg": berg2, "slot:sued_burg": burg, "slot:sued_turm": turm3, "slot:sued_pyramide": pyramide2 });
@@ -114829,17 +115436,17 @@
   }
   function zeilenUmwandeln(ctx, E, b2, v) {
     const { rb } = ctx;
-    for (const p of parzellenVon4(ctx)) {
-      let front2 = p.front;
-      if (p.typ === "eck") {
-        if (rb() > 0.92 || p.w < 14 || p.d < 12) continue;
-        front2 = [p.front.find((s2) => s2 === "+z") ?? p.front.find((s2) => s2 === "+x") ?? p.front[0]];
-      } else if (p.typ !== "stadthaus" || !["+z", "-z", "+x", "-x"].includes(p.seite)) continue;
+    for (const p2 of parzellenVon4(ctx)) {
+      let front2 = p2.front;
+      if (p2.typ === "eck") {
+        if (rb() > 0.92 || p2.w < 14 || p2.d < 12) continue;
+        front2 = [p2.front.find((s2) => s2 === "+z") ?? p2.front.find((s2) => s2 === "+x") ?? p2.front[0]];
+      } else if (p2.typ !== "stadthaus" || !["+z", "-z", "+x", "-x"].includes(p2.seite)) continue;
       const ax = front2[0][1];
-      const L2 = ax === "z" ? p.w : p.d, T = ax === "z" ? p.d : p.w;
+      const L2 = ax === "z" ? p2.w : p2.d, T = ax === "z" ? p2.d : p2.w;
       if (L2 < 14 || T < 11) continue;
       const [typ, variante2] = zeileWahl(E, v, rb);
-      Object.assign(p, { typ, sonder: typ.slice(5), variante: variante2, front: front2, stil: null, leer: false, landmarke: false, minMass: [14, 12], ...E.baechle && gruppe(v) !== "rand" ? { baechle: true } : {} });
+      Object.assign(p2, { typ, sonder: typ.slice(5), variante: variante2, front: front2, stil: null, leer: false, landmarke: false, minMass: [14, 12], ...E.baechle && gruppe(v) !== "rand" ? { baechle: true } : {} });
     }
   }
   var ZEILEN_TIEFE = { muenchen: [22, 24], franken: [20, 22], schwaben: [20, 22], stuttgart: [21, 23], faecher_quadrate: [21, 23] };
@@ -114903,7 +115510,7 @@
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.3, b2.z + b2.d, b2.boden ?? "#93bd76");
     for (let k = 0, n = Math.round((b2.w + b2.d) / 12); k < n; k++) {
       const x = B2.zw(r, b2.x + 1, b2.x + b2.w - 1), z2 = B2.zw(r, b2.z + 1, b2.z + b2.d - 1);
-      if (!teile.some((p) => B2.imRechteck(x, z2, p, 1.5))) B2.baumSetzen(I, waehle2(r, ["nadel", "linde", "nadel"]), x, 0.3, z2, r, 0.9);
+      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 1.5))) B2.baumSetzen(I, waehle2(r, ["nadel", "linde", "nadel"]), x, 0.3, z2, r, 0.9);
     }
   }
   function burgbergParzelliere(ctx, E, b2) {
@@ -114970,8 +115577,8 @@
     const { S, I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, b2.form === "strasse" ? "#e2d8c4" : "#ded5c2", 4.5);
-    const hinder = teile.filter((p) => p.seite === "frei");
-    const frei6 = (x, z2, rad2) => !hinder.some((p) => B2.imRechteck(x, z2, p, rad2)) && x > P2.x + 2 && x < P2.x + P2.w - 2 && z2 > P2.z + 2 && z2 < P2.z + P2.d - 2;
+    const hinder = teile.filter((p2) => p2.seite === "frei");
+    const frei6 = (x, z2, rad2) => !hinder.some((p2) => B2.imRechteck(x, z2, p2, rad2)) && x > P2.x + 2 && x < P2.x + P2.w - 2 && z2 > P2.z + 2 && z2 < P2.z + P2.d - 2;
     const cx = P2.x + P2.w * 0.5, cz = P2.z + P2.d * 0.55;
     if (b2.brunnen === "gotisch" && frei6(cx, cz, 5)) gotBrunnen(S, cx, cz, y);
     else if (b2.saeule && frei6(cx, cz, 3)) mariensaeule2(S, cx, cz, y);
@@ -115031,8 +115638,8 @@
     const { S, I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, "#e2dacb", 5);
-    const hinder = teile.filter((p) => p.seite === "frei");
-    const frei6 = (x, z2, rad2) => !hinder.some((p) => B2.imRechteck(x, z2, p, rad2));
+    const hinder = teile.filter((p2) => p2.seite === "frei");
+    const frei6 = (x, z2, rad2) => !hinder.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     const offen = ["+z", "+x", "-z", "-x"].filter((s2) => !(b2.seiten ?? ["-z", "-x"]).includes(s2));
     for (const s2 of offen) {
       if (s2[1] === "z") {
@@ -115064,7 +115671,7 @@
     const { S, I } = ctx;
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#a7c98b");
-    const frei6 = (x, z2, rad2) => !teile.some((p) => B2.imRechteck(x, z2, p, rad2));
+    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     S.quader(b2.x + 1, y, b2.z + b2.d - 4.5, b2.x + b2.w - 1, y + 0.05, b2.z + b2.d - 1.5, "#e3dccb");
     S.quader(b2.x + b2.w - 4.5, y, b2.z + 1, b2.x + b2.w - 1.5, y + 0.05, b2.z + b2.d - 1, "#e3dccb");
     for (let x = b2.x + 5; x < b2.x + b2.w - 3; x += 8) if (frei6(x, b2.z + b2.d - 6.5, 2)) B2.baumSetzen(I, "kugel", x, y, b2.z + b2.d - 6.5, r, 0.7);
@@ -115086,16 +115693,16 @@
     for (let k = 0; k < 32; k++) {
       const a = k / 32 * 2 * PI12 + PI12 / 32, dx = Math.cos(a), dz = Math.sin(a);
       let t0 = 0, t1 = 2e3;
-      for (const [p, q2] of [[-dx, C2.x - b2.x], [dx, b2.x + b2.w - C2.x], [-dz, C2.z - b2.z], [dz, b2.z + b2.d - C2.z]]) {
-        if (Math.abs(p) < 1e-9) {
+      for (const [p2, q2] of [[-dx, C2.x - b2.x], [dx, b2.x + b2.w - C2.x], [-dz, C2.z - b2.z], [dz, b2.z + b2.d - C2.z]]) {
+        if (Math.abs(p2) < 1e-9) {
           if (q2 < 0) {
             t0 = 1;
             t1 = 0;
           }
           continue;
         }
-        const t = q2 / p;
-        if (p < 0) t0 = Math.max(t0, t);
+        const t = q2 / p2;
+        if (p2 < 0) t0 = Math.max(t0, t);
         else t1 = Math.min(t1, t);
       }
       if (t1 - t0 < 4) continue;
@@ -115105,7 +115712,7 @@
       S.box(L2, 0.06, teil6 === "wald" ? 6.5 : 2.6, mx, y + 0.03, mz, teil6 === "platz" ? "#d9d0bd" : "#efe8d6", -a);
       if (teil6 !== "wald") for (let t = t0 + 5; t < t1 - 3; t += 12) for (const s2 of [-2.6, 2.6]) {
         const x = C2.x + dx * t - dz * s2, z2 = C2.z + dz * t + dx * s2;
-        if (!teile.some((p) => B2.imRechteck(x, z2, p, 2))) B2.baumSetzen(I, teil6 === "platz" ? "kugel" : "linde", x, y, z2, r, 0.75);
+        if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 2))) B2.baumSetzen(I, teil6 === "platz" ? "kugel" : "linde", x, y, z2, r, 0.75);
       }
     }
     const naheStrahl = (x, z2) => strahlen.some(({ dx, dz }) => {
@@ -115115,7 +115722,7 @@
     const n = Math.round(b2.w * b2.d / (teil6 === "wald" ? 34 : teil6 === "platz" ? 160 : 400));
     for (let k = 0; k < n; k++) {
       const x = B2.zw(r, b2.x + 1.5, b2.x + b2.w - 1.5), z2 = B2.zw(r, b2.z + 1.5, b2.z + b2.d - 1.5);
-      if (naheStrahl(x, z2) || teile.some((p) => B2.imRechteck(x, z2, p, 2))) continue;
+      if (naheStrahl(x, z2) || teile.some((p2) => B2.imRechteck(x, z2, p2, 2))) continue;
       B2.baumSetzen(I, teil6 === "wald" ? waehle2(r, ["nadel", "linde", "kastanie", "nadel"]) : "linde", x, y, z2, r, zw(r, 0.85, 1.1));
     }
     for (let i = 0, m = Math.round((b2.w + b2.d) / (teil6 === "wald" ? 30 : 5) * ctx.dichte); i < m; i++) {
@@ -115672,9 +116279,9 @@
     }
     if (E.nachkrieg && b2.zeilen && (gruppe(v) === "zentrum" || slots && gruppe(v) !== "alt") && rb() < 0.55) mergeRand5(ctx, ST2, [30, 64], 32, ["+z", "+x", "-z"], { variante: "geschaeft50", landmarke: false });
     if (["muenchen", "altbayern", "alpenrand"].includes(E.sued) && !E.maibaumEinkauf && !slots && E.einkaufKern?.(b2.i0, b2.j0)) {
-      const p = parzellenVon4(ctx).find((q2) => q2.typ === "eck" && q2.ecke === "+x+z" && q2.w >= 17 && q2.d >= 17);
-      if (p) {
-        Object.assign(p, { typ: "slot:bay_maibaum", sonder: "bay_maibaum", variante: "markt", stil: null, landmarke: false, front: ["+z"], seite: "frei" });
+      const p2 = parzellenVon4(ctx).find((q2) => q2.typ === "eck" && q2.ecke === "+x+z" && q2.w >= 17 && q2.d >= 17);
+      if (p2) {
+        Object.assign(p2, { typ: "slot:bay_maibaum", sonder: "bay_maibaum", variante: "markt", stil: null, landmarke: false, front: ["+z"], seite: "frei" });
         E.maibaumEinkauf = true;
       }
     }
@@ -115701,7 +116308,7 @@
     for (const b2 of bloecke) {
       if (b2.art !== "park" || !b2.biergarten) continue;
       const rb = rng2(b2.seed + 616);
-      const q2 = freiePosition3({ x: b2.x + 6, z: b2.z + 6, w: b2.w - 12, d: b2.d - 12 }, b2.parzellen.map((id) => parzellen.find((p) => p.id === id)).filter(Boolean), 48, 34, 3, rb, true);
+      const q2 = freiePosition3({ x: b2.x + 6, z: b2.z + 6, w: b2.w - 12, d: b2.d - 12 }, b2.parzellen.map((id) => parzellen.find((p2) => p2.id === id)).filter(Boolean), 48, 34, 3, rb, true);
       if (q2) neueParzelle5(ctxVon(b2, rb), "slot:bay_wirtshaus", q2.x, q2.z, q2.w, q2.d, ["+z"], "frei", { klasse: 3, landmarke: false, variante: "wirtshaus" });
     }
   }
@@ -115751,33 +116358,33 @@
     alpenrand: { alt: { barock: 3, gruenderzeit: 0.8 }, zentrum: { barock: 2, gruenderzeit: 1.2, fuenfziger: 0.7 }, gruen: { gruenderzeit: 2, barock: 1.2 }, rand: { fuenfziger: 1, barock: 1, neubau: 0.8 } }
   };
   var GESCHOSSE2 = { gruenderzeit: [3, 5], jugendstil: [3, 5], barock: [3, 4], fachwerk: [2, 3], fuenfziger: [3, 6], siebziger: [4, 7], neubau: [4, 6], wiederaufbau: [3, 5] };
-  function suedStil(p, nachbar) {
-    const r = rng2((p.seed ?? 1) * 2654435761 + 4111 >>> 0);
-    const tab = STILE2[p.suedTyp] ?? STILE2.altbayern;
-    const basis2 = tab[gruppe(p.viertel)] ?? tab.alt;
+  function suedStil(p2, nachbar) {
+    const r = rng2((p2.seed ?? 1) * 2654435761 + 4111 >>> 0);
+    const tab = STILE2[p2.suedTyp] ?? STILE2.altbayern;
+    const basis2 = tab[gruppe(p2.viertel)] ?? tab.alt;
     const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.35;
-      if (st === "fachwerk" && p.w > 18 && p.d > 18) w *= 0.2;
-      if (p.typ === "hofhaus" && st !== "fachwerk") w *= 0.6;
+      if (st === "fachwerk" && p2.w > 18 && p2.d > 18) w *= 0.2;
+      if (p2.typ === "hofhaus" && st !== "fachwerk") w *= 0.6;
       return [st, w];
     });
     const stil = wahlGewichtet5(r, liste);
     let [a, b2] = GESCHOSSE2[stil] ?? [3, 5];
-    if (p.cluster === "metropole") {
+    if (p2.cluster === "metropole") {
       a += 1;
       b2 += 1;
-    } else if (p.cluster === "mittelstadt") b2 -= 1;
-    if (p.typ === "hofhaus") b2 = Math.min(b2, 3);
+    } else if (p2.cluster === "mittelstadt") b2 -= 1;
+    if (p2.typ === "hofhaus") b2 = Math.min(b2, 3);
     let g = Math.round(a + (b2 - a) * r());
     if (nachbar?.geschosse && r() < 0.4) g = nachbar.geschosse + waehle2(r, [-1, 0, 1]);
     return { stil, geschosse: klemm6(g, 2, 7), region: "S\xFCd" };
   }
-  registriereStilProfil("sued", (p, nachbar) => suedStil(p, nachbar));
-  function parzelleMarkieren4(p, bl, E) {
-    p.stilProfil = "sued";
-    p.suedTyp = E.sued;
-    p.suedStadt = E.stadt;
+  registriereStilProfil("sued", (p2, nachbar) => suedStil(p2, nachbar));
+  function parzelleMarkieren4(p2, bl, E) {
+    p2.stilProfil = "sued";
+    p2.suedTyp = E.sued;
+    p2.suedStadt = E.stadt;
   }
   var GEMEINSAM4 = {
     gewicht: [0, 0, 0],
@@ -116278,8 +116885,8 @@
         }
       } else if (v === "stadtteil") m("slot:ruhr_innenstadt60", [26, 56], 26, vorn, { variante: "zeile" }, 2);
       else if (v === "nachkrieg" && rb() < 0.55) m("slot:rhein_wiederaufbau", [28, 48], 22, ["+z", "+x", "-z"], { variante: "wohnhaus" }, 2);
-      for (const p of meine()) if (p.typ === "eck" && (p.ecke === "+x+z" || einkauf && p.ecke !== "-x-z") && p.w >= 12 && p.d >= 11 && rb() < (einkauf ? 0.45 : v === "gruenderzeit" || v === "stadtteil" || v === "ruhr60" ? 0.6 : 0.35)) {
-        Object.assign(p, { typ: "slot:ruhr_bude", sonder: "ruhr_bude", stil: null, landmarke: false, front: [p.ecke.includes("+z") ? "+z" : "+x"], variante: wahlGewichtet6(rb, [["trinkhalle", 3], ["imbiss", 1.5], ["zeile", p.w >= 18 ? 1.2 : 0]]) });
+      for (const p2 of meine()) if (p2.typ === "eck" && (p2.ecke === "+x+z" || einkauf && p2.ecke !== "-x-z") && p2.w >= 12 && p2.d >= 11 && rb() < (einkauf ? 0.45 : v === "gruenderzeit" || v === "stadtteil" || v === "ruhr60" ? 0.6 : 0.35)) {
+        Object.assign(p2, { typ: "slot:ruhr_bude", sonder: "ruhr_bude", stil: null, landmarke: false, front: [p2.ecke.includes("+z") ? "+z" : "+x"], variante: wahlGewichtet6(rb, [["trinkhalle", 3], ["imbiss", 1.5], ["zeile", p2.w >= 18 ? 1.2 : 0]]) });
       }
     } else if (t === "rhein") {
       if (einkauf || v === "rhein50" || v === "zentrum") {
@@ -116294,7 +116901,7 @@
         m("slot:rhein_brauhaus", [12, 30], 18, vorn, {}, rb() < 0.6 ? 2 : 1);
       } else if (v === "rheingruender") {
         m("slot:rhein_gruenderzeit", [16, 46], 20, ["+z", "+x"], { variante: rb() < 0.65 ? "wohnen" : "laden" }, E.typ === "metropole" ? 1 : 2);
-        for (const p of meine()) if (p.typ === "eck" && p.ecke === "+x+z" && p.w >= 15 && p.d >= 15 && rb() < 0.45) Object.assign(p, { typ: "slot:rhein_gruenderzeit", sonder: "rhein_gruenderzeit", stil: null, landmarke: false, front: ["+z"], variante: "eck" });
+        for (const p2 of meine()) if (p2.typ === "eck" && p2.ecke === "+x+z" && p2.w >= 15 && p2.d >= 15 && rb() < 0.45) Object.assign(p2, { typ: "slot:rhein_gruenderzeit", sonder: "rhein_gruenderzeit", stil: null, landmarke: false, front: ["+z"], variante: "eck" });
       } else if (v === "nachkrieg" && rb() < (E.typ === "metropole" ? 0.85 : 0.5)) m("slot:rhein_wiederaufbau", [28, 48], 22, ["+z", "+x", "-z", "-x"], { variante: "wohnhaus" }, E.typ === "metropole" ? 4 : 2);
     } else if (t === "westf") {
       if (einkauf || v === "westfalt") {
@@ -116315,14 +116922,14 @@
     }
     return 1;
   })();
-  function parzelleMarkieren5(p, bl, E) {
-    if (bl?.westDom && p.typ === "slot:kirche") p.seed = DOM_SEED;
-    if (p.typ === "slot:rathaus" && E.o.rathausStil) p.stil = E.o.rathausStil;
-    p.stilProfil = "west";
-    p.westTyp = E.westTyp;
-    if (bl?.westEinkauf) p.westEinkauf = true;
-    if (E.westTyp === "berg" && (p.typ === "stadthaus" || p.typ === "eck") && bl?.sockelY) p.sockelY = bl.sockelY;
-    if (E.o.backstein) p.westBackstein = true;
+  function parzelleMarkieren5(p2, bl, E) {
+    if (bl?.westDom && p2.typ === "slot:kirche") p2.seed = DOM_SEED;
+    if (p2.typ === "slot:rathaus" && E.o.rathausStil) p2.stil = E.o.rathausStil;
+    p2.stilProfil = "west";
+    p2.westTyp = E.westTyp;
+    if (bl?.westEinkauf) p2.westEinkauf = true;
+    if (E.westTyp === "berg" && (p2.typ === "stadthaus" || p2.typ === "eck") && bl?.sockelY) p2.sockelY = bl.sockelY;
+    if (E.o.backstein) p2.westBackstein = true;
   }
   function nachPlan4(E, _H, g) {
     const { bloecke, parzellen, T, typ, strassen } = g;
@@ -116336,20 +116943,20 @@
     const ctxVon = (b2, seed) => ({ T, rb: rng2(b2.seed + seed), b: b2, parzellen, region: E.region, typ });
     for (const b2 of bloecke) {
       if (b2.art !== "bahn" || !b2.westBahnhof) continue;
-      const p = parzellen.find((q2) => q2.block === b2.id && q2.typ === "slot:bahnhof");
-      if (!p) continue;
+      const p2 = parzellen.find((q2) => q2.block === b2.id && q2.typ === "slot:bahnhof");
+      if (!p2) continue;
       if (b2.achse === "z") {
         const W4 = Math.min(b2.d - 8, 86), D2 = Math.min(b2.w - 30, 58);
-        const cz = p.z + p.d / 2, z3 = klemm7(cz - W4 / 2, b2.z + 4, b2.z + b2.d - W4 - 4);
+        const cz = p2.z + p2.d / 2, z3 = klemm7(cz - W4 / 2, b2.z + 4, b2.z + b2.d - W4 - 4);
         const x2 = b2.oben ? b2.x + b2.w - D2 - 1 : b2.x + 1;
-        Object.assign(p, { x: x2, z: z3, w: D2, d: W4, front: [b2.oben ? "+x" : "-x"], westBahnhof: b2.westBahnhof, landmarke: true });
+        Object.assign(p2, { x: x2, z: z3, w: D2, d: W4, front: [b2.oben ? "+x" : "-x"], westBahnhof: b2.westBahnhof, landmarke: true });
         b2.gleise = { x0: b2.x + 3, x1: b2.x + b2.w - 3, achse: "z" };
         continue;
       }
       const W3 = Math.min(b2.w - 8, 86), D = Math.min(b2.d - 30, 58);
-      const cx = p.x + p.w / 2, x = klemm7(cx - W3 / 2, b2.x + 4, b2.x + b2.w - W3 - 4);
+      const cx = p2.x + p2.w / 2, x = klemm7(cx - W3 / 2, b2.x + 4, b2.x + b2.w - W3 - 4);
       const z2 = b2.oben ? b2.z + b2.d - D - 1 : b2.z + 1;
-      Object.assign(p, { x, z: z2, w: W3, d: D, front: [b2.oben ? "+z" : "-z"], westBahnhof: b2.westBahnhof, landmarke: true });
+      Object.assign(p2, { x, z: z2, w: W3, d: D, front: [b2.oben ? "+z" : "-z"], westBahnhof: b2.westBahnhof, landmarke: true });
       b2.gleise = { z0: b2.z + 3, z1: b2.z + b2.d - 3, achse: "x" };
     }
     for (const s2 of strassen) if (s2.art === "schnellweg") Object.assign(s2, { leitwand: true, baeume: false, tram: false, parken: 0 });
@@ -116417,7 +117024,7 @@
     for (const b2 of bloecke) {
       if (b2.art !== "bebaut" || E.einkaufKern?.(b2.i0, b2.j0)) continue;
       const ps = b2.parzellen.map((id) => parzellen.find((q2) => q2.id === id)).filter(Boolean);
-      if (ps.some((p) => p.standort || p.typ.startsWith("slot:") && p.typ !== "slot:ruhr_bude" && p.typ !== "slot:ruhr_innenstadt60" && p.typ !== "slot:rhein_wiederaufbau")) continue;
+      if (ps.some((p2) => p2.standort || p2.typ.startsWith("slot:") && p2.typ !== "slot:ruhr_bude" && p2.typ !== "slot:ruhr_innenstadt60" && p2.typ !== "slot:rhein_wiederaufbau")) continue;
       const u = b2.i0 + 0.5 - L2.kF, v = b2.j0 + 0.5 - L2.lF;
       if (Math.abs(u - v) > 1.6 || Math.abs(u + v) < 1.5 || Math.abs(u + v) > 3.6) continue;
       kand.push({ b: b2, u, v });
@@ -116504,7 +117111,7 @@
     const n = Math.round(b2.w * b2.d / 400);
     for (let k = 0; k < n; k++) {
       const x = B2.zw(r, b2.x + 2, b2.x + b2.w - 2), z2 = B2.zw(r, b2.z + 2, b2.z + b2.d - 2);
-      if (!teile.some((p) => B2.imRechteck(x, z2, p, 2.5))) B2.baumSetzen(ctx.I, waehle2(r, ["linde", "kastanie", "birke", "pappel"]), x, 0.33, z2, r, B2.zw(r, 0.8, 1.05));
+      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 2.5))) B2.baumSetzen(ctx.I, waehle2(r, ["linde", "kastanie", "birke", "pappel"]), x, 0.33, z2, r, B2.zw(r, 0.8, 1.05));
     }
   }
   var KONZERN_MASS = { glas60: [[52, 90], 44], turm70: [[42, 66], 48], backstein20: [[44, 80], 34] };
@@ -116519,7 +117126,7 @@
   }
   function bodenKonzern(ctx, b2, r, teile, B2) {
     B2.pflasterFlaeche(ctx, b2, 0.34, "#ddd6c8", 5);
-    const frei6 = (x, z2) => !teile.some((p) => B2.imRechteck(x, z2, p, 2.5));
+    const frei6 = (x, z2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, 2.5));
     for (let x = b2.x + 5; x < b2.x + b2.w - 3; x += 10) if (frei6(x, b2.z + b2.d - 3)) B2.baumSetzen(ctx.I, "platane", x, 0.34, b2.z + b2.d - 3, r, 0.85, true);
     for (let z2 = b2.z + 5; z2 < b2.z + b2.d - 6; z2 += 10) if (frei6(b2.x + b2.w - 3, z2)) B2.baumSetzen(ctx.I, "platane", b2.x + b2.w - 3, 0.34, z2, r, 0.85, true);
     for (let i = 0, n = Math.round(b2.w / 6 * ctx.dichte); i < n; i++) {
@@ -116534,8 +117141,8 @@
   }
   function bodenBahnhof(ctx, b2, r, teile, B2) {
     B2.pflasterFlaeche(ctx, b2, 0.34, "#ddd6c8", 5);
-    const p = teile[0];
-    if (!p) return;
+    const p2 = teile[0];
+    if (!p2) return;
     const frei6 = (x, z2) => !teile.some((q2) => B2.imRechteck(x, z2, q2, 2));
     if (b2.front === "+z") for (let x = b2.x + 5; x < b2.x + b2.w - 3; x += 9) {
       if (frei6(x, b2.z + b2.d - 4)) B2.baumSetzen(ctx.I, "platane", x, 0.34, b2.z + b2.d - 4, r, 0.85, true);
@@ -116588,7 +117195,7 @@
     const [x0, z0, x1, z1] = R9;
     const a0 = Math.max(L2[0], x0), a1 = Math.min(L2[2], x1), b0 = Math.max(L2[1], z0), b1 = Math.min(L2[3], z1);
     if (a0 >= a1 - 0.01 || b0 >= b1 - 0.01) return [R9];
-    return [[x0, z0, x1, b0], [x0, b1, x1, z1], [x0, b0, a0, b1], [a1, b0, x1, b1]].filter(([p, q2, u, v]) => u - p > 0.01 && v - q2 > 0.01);
+    return [[x0, z0, x1, b0], [x0, b1, x1, z1], [x0, b0, a0, b1], [a1, b0, x1, b1]].filter(([p2, q2, u, v]) => u - p2 > 0.01 && v - q2 > 0.01);
   }
   function nachBauHafenkai(ctx, b2, wasser2, B2) {
     const { S } = ctx;
@@ -116620,7 +117227,7 @@
     S.quader(Math.min(fx, gx), y, Math.min(fz, gz2), Math.max(fx, gx), y + 0.05, Math.max(fz, gz2), "#e3dccb");
     for (const q2 of [qm - 6.5, qm + 6.5]) if (q2 > Q0 + 1.5 && q2 < Q1 - 1.5) for (let u = L0 + 5; u < L1 - 3; u += 8) {
       const [x, z2] = P2(u, q2);
-      if (!teile.some((p) => B2.imRechteck(x, z2, p, 2))) B2.baumSetzen(I, "linde", x, y, z2, r, 0.95);
+      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 2))) B2.baumSetzen(I, "linde", x, y, z2, r, 0.95);
     }
     const farben = ["#c9483e", "#2f5f8f", "#3f7d56", "#2b2f33", "#e0b23a", "#f4f2ec", "#6b4f8f"];
     const ry = entlangX ? 0 : Math.PI / 2;
@@ -116678,7 +117285,7 @@
       const dichte = b2.wald ? 1 / 55 : 1 / 170;
       for (let k = 0, n = Math.round(b2.w * (st.z1 - st.z0) * dichte); k < n; k++) {
         const x = B2.zw(r, b2.x + 2, b2.x + b2.w - 2), z2 = B2.zw(r, st.z0 + 2, st.z1 - 2);
-        if (teile.some((p) => B2.imRechteck(x, z2, p, 3)) || b2.treppeX && Math.abs(x - b2.treppeX) < 3) continue;
+        if (teile.some((p2) => B2.imRechteck(x, z2, p2, 3)) || b2.treppeX && Math.abs(x - b2.treppeX) < 3) continue;
         B2.baumSetzen(I, waehle2(r, b2.wald ? ["nadel", "nadel", "linde", "birke", "kastanie"] : ["linde", "kastanie", "birke", "kugel"]), x, st.y + 0.07, z2, r, B2.zw(r, 0.75, 1.1));
       }
     }
@@ -116733,23 +117340,23 @@
   var STILE_FLACH = /* @__PURE__ */ new Set(["fuenfziger", "siebziger", "neubau", "bauhaus"]);
   var STILE_STEIL = /* @__PURE__ */ new Set(["gruenderzeit", "jugendstil", "backstein", "wiederaufbau", "fachwerk", "barock"]);
   var BERG_ANTEIL = { bergkern: 0.45, bergtal: 0.55, berghang: 0.9 };
-  function westStil(p, nachbar) {
-    const r = rng2((p.seed ?? 1) * 2654435761 + 4111 >>> 0);
-    const t = p.westTyp ?? "ruhr";
-    if (t === "berg" && p.w <= 15 && r() < (BERG_ANTEIL[p.viertel] ?? 0.4) * (nachbar?.stil === "bergisch" ? 1 : 1.15)) {
-      const variante2 = wahlGewichtet6(r, [["schiefer", 3], ["putz", p.westEinkauf ? 2 : 1], ["fachwerk", p.viertel === "berghang" ? 1.6 : 0.9]]);
-      const laden4 = !!p.westEinkauf && r() < 0.8;
-      const front2 = p.front?.[0] ?? "+z";
-      const geschosse2 = 2 + (r() < (p.viertel === "bergkern" ? 0.6 : 0.35) ? 1 : 0);
-      return { bau: (S, scene2, q2) => WEST_SLOTS["slot:berg_haus"](S, scene2, { ...q2, front: front2, variante: variante2, laden: laden4, sockelY: p.sockelY ?? 0, geschosse: geschosse2, traufe: p.w >= 10.5 ? void 0 : false }) };
+  function westStil(p2, nachbar) {
+    const r = rng2((p2.seed ?? 1) * 2654435761 + 4111 >>> 0);
+    const t = p2.westTyp ?? "ruhr";
+    if (t === "berg" && p2.w <= 15 && r() < (BERG_ANTEIL[p2.viertel] ?? 0.4) * (nachbar?.stil === "bergisch" ? 1 : 1.15)) {
+      const variante2 = wahlGewichtet6(r, [["schiefer", 3], ["putz", p2.westEinkauf ? 2 : 1], ["fachwerk", p2.viertel === "berghang" ? 1.6 : 0.9]]);
+      const laden4 = !!p2.westEinkauf && r() < 0.8;
+      const front2 = p2.front?.[0] ?? "+z";
+      const geschosse2 = 2 + (r() < (p2.viertel === "bergkern" ? 0.6 : 0.35) ? 1 : 0);
+      return { bau: (S, scene2, q2) => WEST_SLOTS["slot:berg_haus"](S, scene2, { ...q2, front: front2, variante: variante2, laden: laden4, sockelY: p2.sockelY ?? 0, geschosse: geschosse2, traufe: p2.w >= 10.5 ? void 0 : false }) };
     }
     const tab = STILE_WEST[t] ?? STILE_WEST.ruhr;
-    let basis2 = { ...tab[p.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
-    if (p.westBackstein) basis2.backstein = (basis2.backstein ?? 0) + 2.2;
+    let basis2 = { ...tab[p2.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
+    if (p2.westBackstein) basis2.backstein = (basis2.backstein ?? 0) + 2.2;
     let dachRegime = null;
     if (t === "ruhr") {
-      const rb = rng2(`dach:${p.block}`);
-      dachRegime = rb() < (RUHR_FLACH[p.viertel] ?? 0.5) ? "flach" : "steil";
+      const rb = rng2(`dach:${p2.block}`);
+      dachRegime = rb() < (RUHR_FLACH[p2.viertel] ?? 0.5) ? "flach" : "steil";
       const erlaubt = dachRegime === "flach" ? STILE_FLACH : STILE_STEIL;
       const f = Object.fromEntries(Object.entries(basis2).filter(([st]) => erlaubt.has(st)));
       if (Object.keys(f).length) basis2 = f;
@@ -116757,24 +117364,24 @@
     const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.3;
-      if (st === "fachwerk" && p.w > 16) w *= 0.2;
-      if (st === "barock" && p.w > 20) w *= 0.4;
+      if (st === "fachwerk" && p2.w > 16) w *= 0.2;
+      if (st === "barock" && p2.w > 20) w *= 0.4;
       return [st, w];
     });
     const stil = wahlGewichtet6(r, liste);
     let [a, b2] = GESCHOSSE_W[stil] ?? [3, 5];
-    if (p.cluster === "metropole") {
+    if (p2.cluster === "metropole") {
       a += 1;
       b2 += 1;
-    } else if (p.cluster === "mittelstadt") b2 -= 1;
-    if (p.viertel === "rheinalt" || p.viertel === "westfalt") b2 = Math.min(b2, 4);
+    } else if (p2.cluster === "mittelstadt") b2 -= 1;
+    if (p2.viertel === "rheinalt" || p2.viertel === "westfalt") b2 = Math.min(b2, 4);
     let g = Math.round(a + (b2 - a) * r());
     if (nachbar?.geschosse && r() < 0.35) g = nachbar.geschosse + waehle2(r, [-1, 1]);
     return { stil, geschosse: Math.max(2, Math.min(7, Math.max(a - 1, Math.min(b2, g)))), region: "West", dachRegime };
   }
-  registriereStilProfil("west", (p, nachbar) => westStil(p, nachbar));
+  registriereStilProfil("west", (p2, nachbar) => westStil(p2, nachbar));
   registriereSlots(WEST_SLOTS);
-  registriereSlots({ "slot:bahnhof": (S, scene2, p) => p.westBahnhof ? WEST_SLOTS["slot:ruhr_bahnhof"](S, scene2, { ...p, variante: p.westBahnhof }) : SLOTS["slot:bahnhof"](S, scene2, p) });
+  registriereSlots({ "slot:bahnhof": (S, scene2, p2) => p2.westBahnhof ? WEST_SLOTS["slot:ruhr_bahnhof"](S, scene2, { ...p2, variante: p2.westBahnhof }) : SLOTS["slot:bahnhof"](S, scene2, p2) });
   var GEMEINSAM5 = {
     gewicht: [0, 0, 0],
     parzellierung: parzellierung5,
@@ -116943,21 +117550,21 @@
     /** s: Zahl oder [sx, sy, sz]; farben: Array für die Slots 0, 1, 2 … */
     setze(name2, x, y, z2, ry = 0, s2 = 1, farben = null) {
       if (LOD2.stufe === "fern" && FERN_WEG.has(name2)) return;
-      const p = this.protos.get(name2);
-      if (!p) throw new Error("Prop fehlt: " + name2);
-      p.inst.push([x, y, z2, ry, s2, farben]);
+      const p2 = this.protos.get(name2);
+      if (!p2) throw new Error("Prop fehlt: " + name2);
+      p2.inst.push([x, y, z2, ry, s2, farben]);
       this.n++;
     }
     bauen(scene2) {
       const m4 = new three_module_exports.Matrix4(), q2 = new three_module_exports.Quaternion(), v = new three_module_exports.Vector3(), sc = new three_module_exports.Vector3(), achse = new three_module_exports.Vector3(0, 1, 0), col = new three_module_exports.Color();
       let calls = 0;
-      for (const p of this.protos.values()) {
-        if (!p.inst.length) continue;
-        for (const t of p.teile) {
+      for (const p2 of this.protos.values()) {
+        if (!p2.inst.length) continue;
+        for (const t of p2.teile) {
           const variabel = t.k[0] === "\xA7";
           const slot4 = variabel ? +t.k.slice(1) : -1;
-          const im = new three_module_exports.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), p.inst.length);
-          p.inst.forEach(([x, y, z2, ry, s2, f], i) => {
+          const im = new three_module_exports.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), p2.inst.length);
+          p2.inst.forEach(([x, y, z2, ry, s2, f], i) => {
             q2.setFromAxisAngle(achse, ry);
             v.set(x, y, z2);
             if (Array.isArray(s2)) sc.set(s2[0], s2[1], s2[2]);
@@ -116966,7 +117573,7 @@
             im.setMatrixAt(i, m4);
             if (variabel) im.setColorAt(i, col.set(f?.[slot4] ?? "#ff00ff"));
           });
-          im.castShadow = p.schatten;
+          im.castShadow = p2.schatten;
           im.receiveShadow = true;
           im.instanceMatrix.needsUpdate = true;
           if (im.instanceColor) im.instanceColor.needsUpdate = true;
@@ -117202,9 +117809,9 @@
     const I = o.instanzer ?? new Instanzer();
     const ctx = { S, I, scene: scene2, plan: plan2, r: rng2(plan2.seed * 31 + 5), dichte: TYPEN[plan2.typ].dichte * (o.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr };
     ostVerkehr = !!plan2.ddr;
-    for (const p of plan2.parzellen) {
-      if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []);
-      ctx.proBlock.get(p.block).push(p);
+    for (const p2 of plan2.parzellen) {
+      if (!ctx.proBlock.has(p2.block)) ctx.proBlock.set(p2.block, []);
+      ctx.proBlock.get(p2.block).push(p2);
     }
     const t0 = S.anzahl;
     for (const s2 of plan2.strassen) (s2.bruecke ? baueBruecke : baueSegment)(ctx, s2);
@@ -117221,16 +117828,16 @@
     const t1 = S.anzahl;
     const hoehen = /* @__PURE__ */ new Map();
     let maxH = 20;
-    if (!o.ohneHaeuser) for (const p of plan2.parzellen) {
-      const f = bauerFuer(bauer, p.typ);
-      const e = f(S, scene2, p) ?? {};
+    if (!o.ohneHaeuser) for (const p2 of plan2.parzellen) {
+      const f = bauerFuer(bauer, p2.typ);
+      const e = f(S, scene2, p2) ?? {};
       if (e.wasser) {
         if (!ctx.slotWasser) ctx.slotWasser = /* @__PURE__ */ new Map();
-        if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []);
-        ctx.slotWasser.get(p.block).push(e.wasser);
+        if (!ctx.slotWasser.has(p2.block)) ctx.slotWasser.set(p2.block, []);
+        ctx.slotWasser.get(p2.block).push(e.wasser);
       }
       const h = e.hoehe ?? 12;
-      hoehen.set(p.id, h);
+      hoehen.set(p2.id, h);
       maxH = Math.max(maxH, h);
     }
     if (plan2.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q2 of plan2.aussen.bauten ?? []) {
@@ -117275,8 +117882,8 @@
       const a = h + (fb6 / 2 - h) / 4, c = h + (fb6 / 2 - h) * 3 / 4;
       return [{ v: plusSeite * a, dir: 1 }, { v: plusSeite * c, dir: 1 }, { v: -plusSeite * a, dir: -1 }, { v: -plusSeite * c, dir: -1 }];
     }
-    const p = s2.parken;
-    const lo = -fb6 / 2 + (p < 0 ? 2.2 : 0), hi = fb6 / 2 - (p > 0 ? 2.2 : 0);
+    const p2 = s2.parken;
+    const lo = -fb6 / 2 + (p2 < 0 ? 2.2 : 0), hi = fb6 / 2 - (p2 > 0 ? 2.2 : 0);
     const m = (lo + hi) / 2, q2 = (hi - lo) / 4;
     return [{ v: m + plusSeite * q2, dir: 1 }, { v: m - plusSeite * q2, dir: -1 }];
   }
@@ -117637,8 +118244,8 @@
       const vx = x - d.C.x, vz = z2 - d.C.z, t = vx * d.dx + vz * d.dz;
       return t > d.t0 - 1 && t < d.t1 + 1 && Math.abs(vx * d.dz - vz * d.dx) < d.breite / 2 + rand;
     });
-    for (const p of I.protos.values()) p.inst = p.inst.filter(([x, , z2]) => !aufDiag(x, z2));
-    I.n = [...I.protos.values()].reduce((a, p) => a + p.inst.length, 0);
+    for (const p2 of I.protos.values()) p2.inst = p2.inst.filter(([x, , z2]) => !aufDiag(x, z2));
+    I.n = [...I.protos.values()].reduce((a, p2) => a + p2.inst.length, 0);
     const land = plan2.bloecke.filter((b2) => b2.art !== "wasser");
     const imBlock = (x, z2) => land.some((b2) => x > b2.x - 3 && x < b2.x + b2.w + 3 && z2 > b2.z - 3 && z2 < b2.z + b2.d + 3);
     for (const d of D) {
@@ -117692,12 +118299,12 @@
     for (const zk of plan2.zwickel ?? []) {
       const P2 = zk.poly;
       polyPlatte(S, P2, Y - 0.02, 1, F.bord);
-      const cx = P2.reduce((a, p) => a + p[0], 0) / P2.length, cz = P2.reduce((a, p) => a + p[1], 0) / P2.length;
+      const cx = P2.reduce((a, p2) => a + p2[0], 0) / P2.length, cz = P2.reduce((a, p2) => a + p2[1], 0) / P2.length;
       const k = 0.82, inn = P2.map(([x, z2]) => [cx + (x - cx) * k, cz + (z2 - cz) * k]);
       polyPlatte(S, inn, Y + 0.03, 0.06, zk.art === "pflaster" ? F.pflaster : F.rasen);
-      const fl = Math.abs(P2.reduce((a, p, i) => {
+      const fl = Math.abs(P2.reduce((a, p2, i) => {
         const q2 = P2[(i + 1) % P2.length];
-        return a + p[0] * q2[1] - q2[0] * p[1];
+        return a + p2[0] * q2[1] - q2[0] * p2[1];
       }, 0)) / 2;
       if (fl > 30 && !aufDiag(cx, cz, 2)) baumSetzen(I, zk.art === "pflaster" ? "kugel" : waehle2(r, ["linde", "kastanie", "kugel"]), cx, Y + 0.03, cz, r, fl > 120 ? 1 : 0.8, zk.art === "pflaster");
       else if (fl > 8) I.setze("busch", cx, Y + 0.03, cz, 0, 0.8, [waehle2(r, KRONE.busch)]);
@@ -117752,18 +118359,18 @@
     if (b2.art === "bebaut" || b2.art === "warenhaus") {
       baueHof(ctx, b2, r, teile);
       if (b2.art === "warenhaus") {
-        for (const p of teile.filter((q2) => EINKAUF_SLOTS.has(q2.typ))) for (const s2 of p.front) {
+        for (const p2 of teile.filter((q2) => EINKAUF_SLOTS.has(q2.typ))) for (const s2 of p2.front) {
           if (s2 !== "+z" && s2 !== "+x") continue;
           const g = b2.rand[s2].gehweg;
           if (s2 === "+z") {
-            I.setze("fahrradstaender", p.x + 6, YG, b2.z + b2.d + g * 0.5, 0, 1, [waehle2(r, AUTOFARBEN3), waehle2(r, AUTOFARBEN3), waehle2(r, AUTOFARBEN3)]);
-            for (let i = 0; i < 18 * ctx.dichte; i++) figur4(I, zw(r, p.x, p.x + p.w), YG, b2.z + b2.d + zw(r, 0.3, g - 0.3), r);
-          } else for (let i = 0; i < 12 * ctx.dichte; i++) figur4(I, b2.x + b2.w + zw(r, 0.3, g - 0.3), YG, zw(r, p.z, p.z + p.d), r);
+            I.setze("fahrradstaender", p2.x + 6, YG, b2.z + b2.d + g * 0.5, 0, 1, [waehle2(r, AUTOFARBEN3), waehle2(r, AUTOFARBEN3), waehle2(r, AUTOFARBEN3)]);
+            for (let i = 0; i < 18 * ctx.dichte; i++) figur4(I, zw(r, p2.x, p2.x + p2.w), YG, b2.z + b2.d + zw(r, 0.3, g - 0.3), r);
+          } else for (let i = 0; i < 12 * ctx.dichte; i++) figur4(I, b2.x + b2.w + zw(r, 0.3, g - 0.3), YG, zw(r, p2.z, p2.z + p2.d), r);
         }
       }
       return;
     }
-    const hinder = teile.filter((p) => p.seite === "frei");
+    const hinder = teile.filter((p2) => p2.seite === "frei");
     if (FLAECHEN[b2.art]?.boden) {
       FLAECHEN[b2.art].boden(ctx, b2, r, teile, BODEN_HILFE);
       return;
@@ -117836,8 +118443,8 @@
     const { S, I } = ctx;
     const y = 0.33;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#9a9fa4");
-    const bau2 = teile.filter((p) => p.seite === "frei");
-    const zv = Math.max(...bau2.map((p) => p.z + p.d), b2.z + 10);
+    const bau2 = teile.filter((p2) => p2.seite === "frei");
+    const zv = Math.max(...bau2.map((p2) => p2.z + p2.d), b2.z + 10);
     pflasterFlaeche(ctx, { x: b2.x + 1.5, z: zv, w: b2.w - 3, d: 7 }, y + 0.02, "#e2dacb", 3.5);
     for (let x = b2.x + 6; x < b2.x + b2.w - 4; x += 11) {
       baumSetzen(I, "kugel", x, y + 0.02, zv + 5.2, r, 0.75, true);
@@ -117853,7 +118460,7 @@
     S.quader(b2.x + 2.5, y, b2.z + b2.d - 3.4, b2.x + 3.3, y + 9, b2.z + b2.d - 2.6, "#5c6268");
     S.quader(b2.x + 1.4, y + 6, b2.z + b2.d - 3.6, b2.x + 4.4, y + 9.4, b2.z + b2.d - 2.4, b2.art === "center" ? "#e9e5dc" : "#d8dde1");
   }
-  var imRechteck = (x, z2, p, rad2 = 0) => x > p.x - rad2 && x < p.x + p.w + rad2 && z2 > p.z - rad2 && z2 < p.z + p.d + rad2;
+  var imRechteck = (x, z2, p2, rad2 = 0) => x > p2.x - rad2 && x < p2.x + p2.w + rad2 && z2 > p2.z - rad2 && z2 < p2.z + p2.d + rad2;
   function baueHof(ctx, b2, r, teile) {
     const { S, I } = ctx;
     const h = b2.hof;
@@ -117861,8 +118468,8 @@
     const art = h.art ?? "gruen";
     const farbe2 = { gruen: F.hof, kies: F.kies, parkplatz: "#a3a7ab", spielplatz: F.hof, pflaster: "#cbc4b7" }[art] ?? F.hof;
     S.quader(h.x - 1, 0, h.z - 1, h.x + h.w + 1, 0.36, h.z + h.d + 1, farbe2);
-    const hinder = teile.filter((p) => p.seite === "hof" || p.seite === "frei" || p.typ.startsWith("slot:"));
-    const frei6 = (x, z2, rad2) => !hinder.some((p) => imRechteck(x, z2, p, rad2));
+    const hinder = teile.filter((p2) => p2.seite === "hof" || p2.seite === "frei" || p2.typ.startsWith("slot:"));
+    const frei6 = (x, z2, rad2) => !hinder.some((p2) => imRechteck(x, z2, p2, rad2));
     const y = 0.36;
     if (art === "parkplatz" && h.w > 12 && h.d > 12) {
       baueParkplatz(ctx, { x: h.x + 1, z: h.z + 1, w: h.w - 2, d: h.d - 2 }, y, r, hinder);
@@ -117908,7 +118515,7 @@
       if (v > kurz - 1) continue;
       for (let u = 1.5; u < lang - 1.5; u += 2.6) {
         const [x, z2] = quer2 ? [P2.x + u, P2.z + v] : [P2.x + v, P2.z + u];
-        if (hinder.some((p) => imRechteck(x, z2, p, 1.5))) continue;
+        if (hinder.some((p2) => imRechteck(x, z2, p2, 1.5))) continue;
         I.setze("strich", quer2 ? x - 1.3 : x, y, quer2 ? z2 : z2 - 1.3, quer2 ? 0 : Math.PI / 2, [0.12, 1, 4.6]);
         if (r() < 0.68) auto3(I, x, y, z2, (quer2 ? Math.PI / 2 : 0) + (r() < 0.5 ? 0 : Math.PI), r);
       }
@@ -117950,7 +118557,7 @@
   function baumraster(ctx, P2, y, r, hinder, cx, cz, frei0 = 9, ab = 8) {
     if (P2.w * P2.d < 1200) return;
     for (let x = P2.x + 5; x < P2.x + P2.w - 4; x += ab) for (let z2 = P2.z + 5; z2 < P2.z + P2.d - 4; z2 += ab) {
-      if (Math.hypot(x - cx, z2 - cz) < frei0 || hinder.some((p) => imRechteck(x, z2, p, 3.5))) continue;
+      if (Math.hypot(x - cx, z2 - cz) < frei0 || hinder.some((p2) => imRechteck(x, z2, p2, 3.5))) continue;
       baumSetzen(ctx.I, "kugel", x, y, z2, r, 0.75, true);
     }
   }
@@ -117960,9 +118567,9 @@
     const y = 0.34;
     pflasterFlaeche(ctx, P2, y, waehle2(r, ["#e9e1d1", "#e4dccb", "#ece6da"]));
     const cx = P2.x + P2.w * 0.5, cz = P2.z + P2.d * 0.5;
-    const denkmalMitte = hinder.some((p) => imRechteck(cx, cz, p, 6));
+    const denkmalMitte = hinder.some((p2) => imRechteck(cx, cz, p2, 6));
     if (!denkmalMitte) brunnen3(S, cx, cz, y, P2.w < 40 ? 0.8 : 1);
-    const frei6 = (x, z2, rad2) => !hinder.some((p) => imRechteck(x, z2, p, rad2)) && Math.hypot(x - cx, z2 - cz) > 7;
+    const frei6 = (x, z2, rad2) => !hinder.some((p2) => imRechteck(x, z2, p2, rad2)) && Math.hypot(x - cx, z2 - cz) > 7;
     const quer2 = P2.w >= P2.d;
     const lang = quer2 ? P2.w : P2.d, kurz = quer2 ? P2.d : P2.w;
     const reihen = kurz > 34 ? [5, kurz - 9] : [5];
@@ -117981,7 +118588,7 @@
     for (let i = 0; i < n; i++) {
       const x = zw(r, P2.x + 1, P2.x + P2.w - 1), z2 = zw(r, P2.z + 1, P2.z + P2.d - 1);
       if (!denkmalMitte && Math.hypot(x - cx, z2 - cz) < 4.6) continue;
-      if (hinder.some((p) => imRechteck(x, z2, p, 0.4))) continue;
+      if (hinder.some((p2) => imRechteck(x, z2, p2, 0.4))) continue;
       figur4(I, x, y, z2, r);
     }
   }
@@ -117990,7 +118597,7 @@
     const P2 = b2.platz ?? b2, y = 0.34;
     pflasterFlaeche(ctx, P2, y, waehle2(r, ["#e6dfd2", "#ddd5c6", "#e9e3d6"]), 3);
     const cx = P2.x + P2.w / 2, cz = P2.z + P2.d / 2;
-    const mitteFrei = !hinder.some((p) => imRechteck(cx, cz, p, 5));
+    const mitteFrei = !hinder.some((p2) => imRechteck(cx, cz, p2, 5));
     const variante2 = r();
     if (mitteFrei && variante2 < 0.4) brunnen3(S, cx, cz, y, 0.7);
     else if (mitteFrei) {
@@ -118000,36 +118607,36 @@
     platzRand(ctx, b2, P2, y, r, "kugel", 8);
     baumraster(ctx, P2, y, r, hinder, cx, cz);
     if (variante2 > 0.7) {
-      for (let x = P2.x + 5; x < P2.x + P2.w - 5; x += 4.2) if (r() < 0.6 && !hinder.some((p) => imRechteck(x, P2.z + 5, p, 2.5))) I.setze("marktstand", x, y, P2.z + 5, 0, 1, [waehle2(r, FARBEN3.markise), waehle2(r, ["#d9493a", "#e0b23c", "#7cb369"])]);
+      for (let x = P2.x + 5; x < P2.x + P2.w - 5; x += 4.2) if (r() < 0.6 && !hinder.some((p2) => imRechteck(x, P2.z + 5, p2, 2.5))) I.setze("marktstand", x, y, P2.z + 5, 0, 1, [waehle2(r, FARBEN3.markise), waehle2(r, ["#d9493a", "#e0b23c", "#7cb369"])]);
     }
     for (let i = 0; i < 8; i++) I.setze("bank", P2.x + zw(r, 3, P2.w - 3), y, P2.z + zw(r, 3, P2.d - 3), Math.floor(r() * 4) * Math.PI / 2);
     for (let i = 0, n = Math.round(P2.w * P2.d / 45 * ctx.dichte); i < n; i++) {
       const x = zw(r, P2.x + 1, P2.x + P2.w - 1), z2 = zw(r, P2.z + 1, P2.z + P2.d - 1);
-      if (!hinder.some((p) => imRechteck(x, z2, p, 0.4))) figur4(I, x, y, z2, r);
+      if (!hinder.some((p2) => imRechteck(x, z2, p2, 0.4))) figur4(I, x, y, z2, r);
     }
   }
   function baueKirchplatz(ctx, b2, r, teile) {
     const { S, I } = ctx;
     const P2 = b2.platz, y = 0.34;
     pflasterFlaeche(ctx, P2, y, b2.art === "domplatz" ? "#ddd3c1" : "#e4dccc", 5);
-    const k = teile.find((p) => p.typ === "slot:kirche");
-    const hinder = teile.filter((p) => p.seite === "frei");
+    const k = teile.find((p2) => p2.typ === "slot:kirche");
+    const hinder = teile.filter((p2) => p2.seite === "frei");
     for (const s2 of offeneSeiten(b2)) {
       if (s2[1] === "z") {
         const z0 = s2 === "+z" ? P2.z + P2.d - 6 : P2.z + 1.5;
         S.quader(P2.x + 1, y, z0, P2.x + P2.w - 1, y + 0.04, z0 + 4.5, F.rasen);
-        for (let x = P2.x + 4; x < P2.x + P2.w - 4; x += 8) if (!hinder.some((p) => imRechteck(x, z0 + 2.2, p, 2))) baumSetzen(I, b2.art === "domplatz" ? "platane" : "kastanie", x, y + 0.04, z0 + 2.2, r, 0.8);
+        for (let x = P2.x + 4; x < P2.x + P2.w - 4; x += 8) if (!hinder.some((p2) => imRechteck(x, z0 + 2.2, p2, 2))) baumSetzen(I, b2.art === "domplatz" ? "platane" : "kastanie", x, y + 0.04, z0 + 2.2, r, 0.8);
       } else {
         const x0 = s2 === "+x" ? P2.x + P2.w - 6 : P2.x + 1.5;
         S.quader(x0, y, P2.z + 1, x0 + 4.5, y + 0.04, P2.z + P2.d - 1, F.rasen);
-        for (let z2 = P2.z + 4; z2 < P2.z + P2.d - 4; z2 += 8) if (!hinder.some((p) => imRechteck(x0 + 2.2, z2, p, 2))) baumSetzen(I, b2.art === "domplatz" ? "platane" : "kastanie", x0 + 2.2, y + 0.04, z2, r, 0.8);
+        for (let z2 = P2.z + 4; z2 < P2.z + P2.d - 4; z2 += 8) if (!hinder.some((p2) => imRechteck(x0 + 2.2, z2, p2, 2))) baumSetzen(I, b2.art === "domplatz" ? "platane" : "kastanie", x0 + 2.2, y + 0.04, z2, r, 0.8);
       }
     }
     if (k) for (let x = k.x + 4; x < k.x + k.w - 2; x += 7) I.setze("bank", x, y, k.z + k.d + 3, Math.PI);
     if (b2.art !== "domplatz") baumraster(ctx, P2, y, r, hinder, P2.x + P2.w / 2, P2.z + P2.d / 2, 0, 9);
     for (let i = 0, n = Math.round(P2.w * P2.d / (b2.art === "domplatz" ? 40 : 70) * ctx.dichte); i < n; i++) {
       const x = zw(r, P2.x + 1, P2.x + P2.w - 1), z2 = zw(r, P2.z + 1, P2.z + P2.d - 1);
-      if (teile.some((p) => p.seite === "frei" && imRechteck(x, z2, p, 1))) continue;
+      if (teile.some((p2) => p2.seite === "frei" && imRechteck(x, z2, p2, 1))) continue;
       figur4(I, x, y, z2, r);
     }
   }
@@ -118062,13 +118669,13 @@
     const art = waehle2(r, arten);
     for (const vv of [2.2, kurz - 2.2]) for (let u = 4; u < lang - 2; u += 8) {
       const [x, z2] = W3(u, vv);
-      if (!hinder.some((p) => imRechteck(x, z2, p, 2.5))) baumSetzen(I, art, x, y, z2, r, 0.85);
+      if (!hinder.some((p2) => imRechteck(x, z2, p2, 2.5))) baumSetzen(I, art, x, y, z2, r, 0.85);
     }
     for (let i = 0, nb = Math.max(lang / 10, lang * kurz / 110); i < nb; i++) {
       const u = zw(r, 4, lang - 4), vv = zw(r, 5, kurz - 5);
       if (Math.abs(vv - v) < 3) continue;
       const [x, z2] = W3(u, vv);
-      if (hinder.some((p) => imRechteck(x, z2, p, 3))) continue;
+      if (hinder.some((p2) => imRechteck(x, z2, p2, 3))) continue;
       if (graben) {
         const [gx, gz2] = W3(lang / 2, v < kurz / 2 ? kurz * 0.75 : kurz * 0.25);
         if (Math.abs(entlangZ ? z2 - gz2 : x - gx) < lang * 0.36 && Math.abs(entlangZ ? x - gx : z2 - gz2) < 7) continue;
@@ -118101,7 +118708,7 @@
       }
       I.setze("kuebel", x0 + fw / 2, y + 0.06, z0 + fd / 2, 0, 1, [waehle2(r, ["#d96a8a", "#e0b23c", "#f2e6c8"])]);
     }
-    if (!hinder.some((p) => imRechteck(cx, cz, p, 5))) brunnen3(S, cx, cz, y, 0.9);
+    if (!hinder.some((p2) => imRechteck(cx, cz, p2, 5))) brunnen3(S, cx, cz, y, 0.9);
     for (const x of [b2.x + 4, b2.x + b2.w - 4]) for (let z2 = b2.z + 6; z2 < b2.z + b2.d - 3; z2 += 8) baumSetzen(I, "kastanie", x, y, z2, r, 0.8);
     for (let x = E.x; x < E.x + E.w; x += 8) baumSetzen(I, "kugel", x, y, b2.z + b2.d - 2.5, r, 0.8, true);
     for (let i = 0, n = Math.round(E.w * E.d / 60 * ctx.dichte); i < n; i++) {
@@ -118140,7 +118747,7 @@
     }
     for (let i = 0; i < b2.w * b2.d / 500; i++) {
       const x = zw(r, b2.x + 8, b2.x + b2.w - 8), z2 = zw(r, b2.z + 8, b2.z + b2.d - 8);
-      if (Math.abs(x - cx) > 6 && Math.abs(z2 - cz) > 6 && !hinder.some((p) => imRechteck(x, z2, p, 3))) I.setze("kuebel", x, y, z2, 0, 1, [waehle2(r, ["#d96a8a", "#e0b23c"])]);
+      if (Math.abs(x - cx) > 6 && Math.abs(z2 - cz) > 6 && !hinder.some((p2) => imRechteck(x, z2, p2, 3))) I.setze("kuebel", x, y, z2, 0, 1, [waehle2(r, ["#d96a8a", "#e0b23c"])]);
     }
     for (let i = 0, n = Math.round((b2.w + b2.d) / 8 * ctx.dichte); i < n; i++) {
       const t = r();
@@ -118159,7 +118766,7 @@
       for (const zz of [z2, z2 + pd + weg]) for (let x = b2.x + 2; x + pw < b2.x + b2.w - 1; x += pw) {
         if (zz + pd > b2.z + b2.d - 1) continue;
         const cx = x + pw / 2, cz = zz + pd / 2;
-        if (hinder.some((p) => imRechteck(cx, cz, p, 3))) continue;
+        if (hinder.some((p2) => imRechteck(cx, cz, p2, 3))) continue;
         S.quader(x + 0.4, y, zz + 0.4, x + pw - 0.4, y + 0.05, zz + pd - 0.4, waehle2(r, ["#9cc58a", "#b2d39b", "#93bd7f"]));
         for (let k = 0; k < 3; k++) S.quader(x + 1, y + 0.05, zz + 1.5 + k * 1.6, x + pw * 0.45, y + 0.12, zz + 2.3 + k * 1.6, waehle2(r, ["#8a6a4a", "#7a9f55", "#c5a36a"]));
         const hf = waehle2(r, ["#c9a77c", "#8fa9b5", "#d9c49a", "#b56b4f", "#e8e4dc", "#7c9a6a"]);
@@ -118510,17 +119117,17 @@
     const ri = 5;
     const ring = new three_module_exports.Shape();
     const rr = (s2, a0, b0, a1, b1, rad2, loch) => {
-      const p = loch ? new three_module_exports.Path() : s2;
-      p.moveTo(a0 + rad2, b0);
-      p.lineTo(a1 - rad2, b0);
-      p.quadraticCurveTo(a1, b0, a1, b0 + rad2);
-      p.lineTo(a1, b1 - rad2);
-      p.quadraticCurveTo(a1, b1, a1 - rad2, b1);
-      p.lineTo(a0 + rad2, b1);
-      p.quadraticCurveTo(a0, b1, a0, b1 - rad2);
-      p.lineTo(a0, b0 + rad2);
-      p.quadraticCurveTo(a0, b0, a0 + rad2, b0);
-      if (loch) s2.holes.push(p);
+      const p2 = loch ? new three_module_exports.Path() : s2;
+      p2.moveTo(a0 + rad2, b0);
+      p2.lineTo(a1 - rad2, b0);
+      p2.quadraticCurveTo(a1, b0, a1, b0 + rad2);
+      p2.lineTo(a1, b1 - rad2);
+      p2.quadraticCurveTo(a1, b1, a1 - rad2, b1);
+      p2.lineTo(a0 + rad2, b1);
+      p2.quadraticCurveTo(a0, b1, a0, b1 - rad2);
+      p2.lineTo(a0, b0 + rad2);
+      p2.quadraticCurveTo(a0, b0, a0 + rad2, b0);
+      if (loch) s2.holes.push(p2);
     };
     rr(ring, x0 + ri, z0 + ri, x1 - ri, z1 - ri, 8, false);
     rr(ring, x0 + ri + 3, z0 + ri + 3, x1 - ri - 3, z1 - ri - 3, 6, true);
@@ -118534,7 +119141,7 @@
       S.box(len, 0.05, 3, (ex + cx) / 2, y + 0.025, (ez + cz) / 2, F.weg, Math.atan2(-(cz - ez), cx - ex));
     }
     ellipse2(S, cx, cz, 7, 7, y, y + 0.06, F.weg);
-    if (!hinder.some((p) => imRechteck(cx, cz, p, 4))) {
+    if (!hinder.some((p2) => imRechteck(cx, cz, p2, 4))) {
       ellipse2(S, cx, cz, 3.5, 3.5, y, y + 0.5, "#c9b98f");
       baumSetzen(I, "busch", cx, y + 0.5, cz, r, 1.2);
     }
@@ -118562,7 +119169,7 @@
       if (Math.hypot(x - cx, z2 - cz) < 9) return true;
       if (((x - tx) / (trx + 3)) ** 2 + ((z2 - tz) / (trz + 3)) ** 2 < 1) return true;
       if (Math.abs(x - sx) < 7 && Math.abs(z2 - sz) < 6) return true;
-      if (hinder.some((p) => imRechteck(x, z2, p, 3))) return true;
+      if (hinder.some((p2) => imRechteck(x, z2, p2, 3))) return true;
       return false;
     };
     const n = Math.round(b2.w * b2.d / 110);
@@ -118599,7 +119206,7 @@
     const { S, I } = ctx;
     const SW = { quader: (x0, y0, z0, x1, y1, z1, f) => S.quader(z0, y0, x0, z1, y1, x1, f), box: (w, h, d, x, y, z2, f, ry = 0) => S.box(d, h, w, z2, y, x, f, ry), add: (g, f) => S.add(g, f) };
     const IW = { setze: (name2, x, y, z2, ry = 0, s2 = 1, farben = null) => I.setze(name2, z2, y, x, Math.PI / 2 - ry, s2, farben) };
-    const bh = ctx.plan.parzellen.find((p) => p.block === b2.id && p.typ === "slot:bahnhof");
+    const bh = ctx.plan.parzellen.find((p2) => p2.block === b2.id && p2.typ === "slot:bahnhof");
     const gl = b2.gleise;
     const vp = b2.vorplatz;
     const b22 = { ...b2, x: b2.z, z: b2.x, w: b2.d, d: b2.w, achse: "x", gleise: gl && { z0: gl.x0, z1: gl.x1, achse: "x" }, _bh: bh ? { x: bh.z, z: bh.x, w: bh.d, d: bh.w } : null, vorplatz: vp ? { x: vp.z, z: vp.x, w: vp.d, d: vp.w } : null, bahnParken: (b2.bahnParken ?? []).map((q2) => ({ x: q2.z, z: q2.x, w: q2.d, d: q2.w })) };
@@ -118615,7 +119222,7 @@
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#a29d93");
     if (b2.oben) S.quader(b2.x, 0, b2.z, b2.x + b2.w, 1.6, b2.z + 0.5, "#bdb5a8");
     else S.quader(b2.x, 0, b2.z + b2.d - 0.5, b2.x + b2.w, 1.6, b2.z + b2.d, "#bdb5a8");
-    const bh = b2._bh !== void 0 ? b2._bh : ctx.plan.parzellen.find((p) => p.block === b2.id && p.typ === "slot:bahnhof");
+    const bh = b2._bh !== void 0 ? b2._bh : ctx.plan.parzellen.find((p2) => p2.block === b2.id && p2.typ === "slot:bahnhof");
     const gl = b2.gleise ?? { z0: b2.z + 4, z1: b2.z + b2.d - 3 };
     const V = b2.vorplatz;
     if (V && V.d > 3) {
@@ -118682,7 +119289,7 @@
     const frei6 = [...gleisZ].sort(() => r() - 0.5).slice(0, zuege);
     for (const gz2 of frei6) {
       const wagen2 = Math.floor(zw(r, 3, 6.9));
-      const [ga, gb] = abschnitte(gz2).sort((p, q2) => q2[1] - q2[0] - (p[1] - p[0]))[0] ?? [xa, xb];
+      const [ga, gb] = abschnitte(gz2).sort((p2, q2) => q2[1] - q2[0] - (p2[1] - p2[0]))[0] ?? [xa, xb];
       if (gb - ga < 40) continue;
       let x = zw(r, ga + 6, Math.max(ga + 7, gb - wagen2 * 26.5 - 2));
       const xEnde = gb;
@@ -118762,21 +119369,21 @@
     return (plan2.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? "hartwig", groesse: st.rolle === "wettbewerber" ? (groesse2 ?? 10) * 0.8 : groesse2 }));
   }
   function setzeMarker(scene2, plan2, ergebnis, liste = [], o = {}) {
-    const pz4 = new Map(plan2.parzellen.map((p) => [p.id, p]));
-    for (const p of plan2.aussen?.bauten ?? []) if (p.typ === "slot:outlet") pz4.set(p.id, p);
+    const pz4 = new Map(plan2.parzellen.map((p2) => [p2.id, p2]));
+    for (const p2 of plan2.aussen?.bauten ?? []) if (p2.typ === "slot:outlet") pz4.set(p2.id, p2);
     if (liste === "standorte") liste = standortMarker(plan2, o.markerGroesse);
     for (const e of liste) {
       if (e.parzelle) {
-        const p = pz4.get(e.parzelle);
-        if (p) kartenMarker(scene2, p, e.art, { hoehe: ergebnis?.hoehen?.get(p.id) ?? 20, groesse: e.groesse });
+        const p2 = pz4.get(e.parzelle);
+        if (p2) kartenMarker(scene2, p2, e.art, { hoehe: ergebnis?.hoehen?.get(p2.id) ?? 20, groesse: e.groesse });
       } else kartenMarker(scene2, e, e.art, { groesse: e.groesse });
     }
     if (o.leerstand) {
-      for (const p of plan2.parzellen) if (p.leer) zuVermieten(scene2, p.x + p.w / 2, (ergebnis?.hoehen?.get(p.id) ?? 15) + 3, p.z + p.d / 2, o.groesse ?? 8);
+      for (const p2 of plan2.parzellen) if (p2.leer) zuVermieten(scene2, p2.x + p2.w / 2, (ergebnis?.hoehen?.get(p2.id) ?? 15) + 3, p2.z + p2.d / 2, o.groesse ?? 8);
     }
   }
-  function laden2(S, p, seite, eg, r, farbe2) {
-    const { x, z: z2, w, d } = p;
+  function laden2(S, p2, seite, eg, r, farbe2) {
+    const { x, z: z2, w, d } = p2;
     if (seite === "+z") {
       S.box(w - 1, eg - 1.3, 0.16, x + w / 2, (eg - 1.3) / 2 + 0.5, z2 + d + 0.04, farbe2);
       S.box(w - 0.6, 0.35, 0.3, x + w / 2, eg - 0.6, z2 + d + 0.1, heller(farbe2, 0.4));
@@ -118787,18 +119394,18 @@
       if (r() < 0.5) markise(S, x, z2, w, d, "+x", eg - 1.1, z2 + 0.6, d - 1.2, waehle2(r, FARBEN3.markise));
     }
   }
-  function platzhalterHaus(S, scene2, p, eck = false) {
-    const r = rng2(p.seed);
-    const st = p.stil ?? "gruenderzeit";
+  function platzhalterHaus(S, scene2, p2, eck = false) {
+    const r = rng2(p2.seed);
+    const st = p2.stil ?? "gruenderzeit";
     const fw = st === "fachwerk";
-    const g = p.geschosse, gh = fw ? 2.9 : 3.35, eg = fw ? 3.4 : 4.2;
+    const g = p2.geschosse, gh = fw ? 2.9 : 3.35, eg = fw ? 3.4 : 4.2;
     const H = eg + g * gh;
-    const { x, z: z2, w, d } = p;
+    const { x, z: z2, w, d } = p2;
     const f = st === "nachkrieg" ? waehle2(r, [...FARBEN3.fassadeKuehl, ...FARBEN3.fassadeWarm, ...FARBEN3.putzBunt]) : st === "modern" ? waehle2(r, ["#d9dde0", "#c9cfd4", "#e6e3dc", "#bfc7cc"]) : fw ? waehle2(r, ["#f1ebdf", "#efe3cf", "#f3eee4"]) : waehle2(r, [...FARBEN3.fassadeHell, ...FARBEN3.fassadeHell, ...FARBEN3.backstein.slice(0, 2), ...FARBEN3.fassadeWarm]);
     const hell4 = heller(f, 0.06);
     S.quader(x, 0, z2, x + w, H, z2 + d, f);
     const sicht3 = ["+z", "+x"];
-    for (const s2 of sicht3) if (p.front.includes(s2)) laden2(S, p, s2, eg, r, st === "modern" ? F.glas : FARBEN3.laden);
+    for (const s2 of sicht3) if (p2.front.includes(s2)) laden2(S, p2, s2, eg, r, st === "modern" ? F.glas : FARBEN3.laden);
     gesims(S, x, z2, w, d, eg, 0.3, 0.12, hell4);
     if (st === "modern") {
       for (let k = 0; k < g; k++) {
@@ -118829,7 +119436,7 @@
       }
     }
     let dh = 0;
-    const achse0 = p.seite === "+x" || p.seite === "-x" ? "z" : p.seite === "ecke" ? w >= d ? "x" : "z" : "x";
+    const achse0 = p2.seite === "+x" || p2.seite === "-x" ? "z" : p2.seite === "ecke" ? w >= d ? "x" : "z" : "x";
     if (fw) {
       const giebel3 = w < 10 && r() < 0.6;
       const achse = giebel3 ? achse0 === "x" ? "z" : "x" : achse0;
@@ -118864,7 +119471,7 @@
       }
       if (r() < 0.6) S.box(1.8, 1.2, 1.8, x + zw(r, 2, w - 2), H + 0.9, z2 + zw(r, 2, d - 2), "#bdb8ae");
     }
-    if (eck && p.front.includes("+z") && p.front.includes("+x") && st === "gruenderzeit") {
+    if (eck && p2.front.includes("+z") && p2.front.includes("+x") && st === "gruenderzeit") {
       S.quader(x + w - 3.2, eg + 0.6, z2 + d - 3.2, x + w + 0.7, H, z2 + d + 0.7, hell4);
       fensterRaster(S, x + w - 3.2, z2 + d - 3.2, 3.9, 3.9, "+z", { y0: eg, geschosse: g, gh, raster: 3 });
       fensterRaster(S, x + w - 3.2, z2 + d - 3.2, 3.9, 3.9, "+x", { y0: eg, geschosse: g, gh, raster: 3 });
@@ -118873,8 +119480,8 @@
     }
     return { hoehe: H + dh };
   }
-  function phWarenhaus(S, scene2, p) {
-    const { x, z: z2, w, d } = p;
+  function phWarenhaus(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2;
     const eg = 5.5, gh = 4.5, g = 4, H = eg + g * gh;
     S.quader(x + 0.4, 0, z2 + 0.4, x + w - 0.4, eg, z2 + d - 0.4, "#3e505c");
     S.quader(x, eg, z2, x + w, H, z2 + d, "#efe7d6");
@@ -118893,8 +119500,8 @@
     schild(scene2, "HARTWIG", "+x", z2 + d / 2, H - 4, x + w, 4, FARBEN3.marke);
     return { hoehe: H + 4 };
   }
-  function phMall(S, scene2, p) {
-    const { x, z: z2, w, d } = p;
+  function phMall(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2;
     const H = 16;
     S.quader(x + 2, 0, z2 + 2, x + w - 2, H, z2 + d - 2, "#e2e5e7");
     S.quader(x + 2, 0.3, z2 + d - 2.2, x + w - 2, 5, z2 + d - 1.8, FARBEN3.glas);
@@ -118905,8 +119512,8 @@
     S.box(w - 4, 1.2, 0.3, x + w / 2, 6, z2 + d - 1.8, "#2f6f8f");
     return { hoehe: H + 4 };
   }
-  function phBahnhof(S, scene2, p) {
-    const { x, z: z2, w, d } = p;
+  function phBahnhof(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2;
     S.quader(x, 0, z2, x + w, 9, z2 + d, "#e6d5bf");
     fensterRaster(S, x, z2, w, d, "+z", { y0: 1, geschosse: 2, gh: 4, raster: 4, fh: 2.6, farbe: FARBEN3.glas });
     const g = new three_module_exports.CylinderGeometry(d * 0.5, d * 0.5, w * 0.7, 16, 1, false, 0, Math.PI);
@@ -118925,8 +119532,8 @@
     g.translate(0, h / 2, 0);
     return g;
   }
-  function phKirche(S, scene2, p) {
-    const { x, z: z2, w, d } = p;
+  function phKirche(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2;
     const H = 15, tb = Math.min(9, d * 0.45);
     const stein = "#c9a98e";
     S.quader(x + tb, 0, z2, x + w - d * 0.4, H, z2 + d, stein);
@@ -118943,11 +119550,11 @@
     S.box(0.3, 2.6, 0.3, x + tb / 2, 55, z2 + d / 2, "#c9a24a");
     return { hoehe: 56 };
   }
-  function phSonder(S, scene2, p) {
-    const { x, z: z2, w, d } = p;
-    const r = rng2(p.seed);
-    if (p.sonder === "hochhaus") {
-      const g = p.geschosse ?? 16, gh = 3.6, H2 = 5 + g * gh;
+  function phSonder(S, scene2, p2) {
+    const { x, z: z2, w, d } = p2;
+    const r = rng2(p2.seed);
+    if (p2.sonder === "hochhaus") {
+      const g = p2.geschosse ?? 16, gh = 3.6, H2 = 5 + g * gh;
       const f = waehle2(r, ["#cfd6dc", "#bfc8cf", "#dde1e4", "#e4dccd"]);
       S.quader(x + 0.5, 0, z2 + 0.5, x + w - 0.5, H2, z2 + d - 0.5, f);
       for (let k = 0; k < g; k++) {
@@ -118973,194 +119580,194 @@
     S.add(new three_module_exports.CylinderGeometry(1.4, 1.4, 0.2, 16).rotateX(Math.PI / 2).translate(x + w / 2, H + 10, z2 + d / 2 + 3.05), "#f4f1ea");
     return { hoehe: H + 23 };
   }
-  function korpus(S, p, H, farbe2, rand = 0.4) {
-    S.quader(p.x + rand, 0, p.z + rand, p.x + p.w - rand, H, p.z + p.d - rand, farbe2);
+  function korpus(S, p2, H, farbe2, rand = 0.4) {
+    S.quader(p2.x + rand, 0, p2.z + rand, p2.x + p2.w - rand, H, p2.z + p2.d - rand, farbe2);
   }
-  function fensterBand(S, p, y0, n, gh, farbe2 = FARBEN3.glas, rand = 1.4) {
+  function fensterBand(S, p2, y0, n, gh, farbe2 = FARBEN3.glas, rand = 1.4) {
     for (let k = 0; k < n; k++) {
       const y = y0 + k * gh + gh * 0.5;
-      S.box(p.w - 2 * rand, gh * 0.5, 0.12, p.x + p.w / 2, y, p.z + p.d - 0.35, farbe2);
-      S.box(0.12, gh * 0.5, p.d - 2 * rand, p.x + p.w - 0.35, y, p.z + p.d / 2, farbe2);
+      S.box(p2.w - 2 * rand, gh * 0.5, 0.12, p2.x + p2.w / 2, y, p2.z + p2.d - 0.35, farbe2);
+      S.box(0.12, gh * 0.5, p2.d - 2 * rand, p2.x + p2.w - 0.35, y, p2.z + p2.d / 2, farbe2);
     }
   }
-  function phSchloss(S, scene2, p) {
-    const r = rng2(p.seed), f = waehle2(r, ["#efe3c8", "#f1e9d8", "#e9d6b4", "#f3efe6"]), H = 16;
-    korpus(S, p, H, f, 0);
-    fensterRaster(S, p.x, p.z, p.w, p.d, "+z", { y0: 1.5, geschosse: 3, gh: 4.6, raster: 3.4, fh: 2.6, sims: "#ffffff", rahmen: "#ffffff" });
-    fensterRaster(S, p.x, p.z, p.w, p.d, "+x", { y0: 1.5, geschosse: 3, gh: 4.6, raster: 3.4, fh: 2.6, sims: "#ffffff" });
-    const dg = dachProfil(p.w, p.d, 5, p.d * 0.45, "x");
-    dg.translate(p.x + p.w / 2, H, p.z + p.d / 2);
+  function phSchloss(S, scene2, p2) {
+    const r = rng2(p2.seed), f = waehle2(r, ["#efe3c8", "#f1e9d8", "#e9d6b4", "#f3efe6"]), H = 16;
+    korpus(S, p2, H, f, 0);
+    fensterRaster(S, p2.x, p2.z, p2.w, p2.d, "+z", { y0: 1.5, geschosse: 3, gh: 4.6, raster: 3.4, fh: 2.6, sims: "#ffffff", rahmen: "#ffffff" });
+    fensterRaster(S, p2.x, p2.z, p2.w, p2.d, "+x", { y0: 1.5, geschosse: 3, gh: 4.6, raster: 3.4, fh: 2.6, sims: "#ffffff" });
+    const dg = dachProfil(p2.w, p2.d, 5, p2.d * 0.45, "x");
+    dg.translate(p2.x + p2.w / 2, H, p2.z + p2.d / 2);
     S.add(dg, "#6f7f8a");
-    const rw = Math.min(26, p.w * 0.22);
-    S.quader(p.x + p.w / 2 - rw / 2, 0, p.z + p.d - 2, p.x + p.w / 2 + rw / 2, H + 3, p.z + p.d + 2.5, heller(f, 0.04));
-    for (let u = -rw / 2 + 2; u <= rw / 2 - 2; u += 3.3) S.box(1, 9, 1, p.x + p.w / 2 + u, 4.5, p.z + p.d + 3.1, "#ffffff");
-    S.add(new three_module_exports.SphereGeometry(6, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2).translate(p.x + p.w / 2, H + 3, p.z + p.d / 2 + 1), FARBEN3.kupfer[0]);
-    for (const sx of [0, 1]) S.quader(p.x + (sx ? p.w - 14 : 0), 0, p.z - 0.5, p.x + (sx ? p.w : 14), H + 2, p.z + p.d + 1, heller(f, 0.02));
+    const rw = Math.min(26, p2.w * 0.22);
+    S.quader(p2.x + p2.w / 2 - rw / 2, 0, p2.z + p2.d - 2, p2.x + p2.w / 2 + rw / 2, H + 3, p2.z + p2.d + 2.5, heller(f, 0.04));
+    for (let u = -rw / 2 + 2; u <= rw / 2 - 2; u += 3.3) S.box(1, 9, 1, p2.x + p2.w / 2 + u, 4.5, p2.z + p2.d + 3.1, "#ffffff");
+    S.add(new three_module_exports.SphereGeometry(6, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2).translate(p2.x + p2.w / 2, H + 3, p2.z + p2.d / 2 + 1), FARBEN3.kupfer[0]);
+    for (const sx of [0, 1]) S.quader(p2.x + (sx ? p2.w - 14 : 0), 0, p2.z - 0.5, p2.x + (sx ? p2.w : 14), H + 2, p2.z + p2.d + 1, heller(f, 0.02));
     return { hoehe: H + 9 };
   }
-  function phTheater(S, scene2, p) {
-    const r = rng2(p.seed), f = waehle2(r, ["#e8dcc4", "#ded2bd", "#ece4d3"]), H = 15;
-    korpus(S, p, H, f);
-    S.quader(p.x + p.w * 0.3, H, p.z + p.d * 0.15, p.x + p.w * 0.85, H + 9, p.z + p.d * 0.75, dunkler(f, 0.05));
-    const sp = Math.min(p.w - 4, 18);
-    S.quader(p.x + p.w / 2 - sp / 2, 0.3, p.z + p.d - 0.4, p.x + p.w / 2 + sp / 2, 1, p.z + p.d + 3.5, "#d8d0c0");
-    for (let u = -sp / 2 + 1; u <= sp / 2 - 1; u += 2.6) S.box(0.9, 9, 0.9, p.x + p.w / 2 + u, 5.5, p.z + p.d + 2.8, "#ffffff");
+  function phTheater(S, scene2, p2) {
+    const r = rng2(p2.seed), f = waehle2(r, ["#e8dcc4", "#ded2bd", "#ece4d3"]), H = 15;
+    korpus(S, p2, H, f);
+    S.quader(p2.x + p2.w * 0.3, H, p2.z + p2.d * 0.15, p2.x + p2.w * 0.85, H + 9, p2.z + p2.d * 0.75, dunkler(f, 0.05));
+    const sp = Math.min(p2.w - 4, 18);
+    S.quader(p2.x + p2.w / 2 - sp / 2, 0.3, p2.z + p2.d - 0.4, p2.x + p2.w / 2 + sp / 2, 1, p2.z + p2.d + 3.5, "#d8d0c0");
+    for (let u = -sp / 2 + 1; u <= sp / 2 - 1; u += 2.6) S.box(0.9, 9, 0.9, p2.x + p2.w / 2 + u, 5.5, p2.z + p2.d + 2.8, "#ffffff");
     const g = dachProfil(sp + 1, 4.5, 3, 0.2, "x");
-    g.translate(p.x + p.w / 2, 10, p.z + p.d + 2.2);
+    g.translate(p2.x + p2.w / 2, 10, p2.z + p2.d + 2.2);
     S.add(g, f);
-    fensterBand(S, p, 4, 2, 4.5, "#5e7383", 2.5);
+    fensterBand(S, p2, 4, 2, 4.5, "#5e7383", 2.5);
     return { hoehe: H + 9 };
   }
-  function phMuseum(S, scene2, p) {
-    const r = rng2(p.seed), f = waehle2(r, ["#e6dcc8", "#dcd6cc", "#efe9de"]), H = 13;
-    korpus(S, p, H, f);
-    for (let u = p.x + 2; u < p.x + p.w - 1; u += 2.8) S.box(0.8, H - 2, 0.8, u, (H - 2) / 2 + 0.5, p.z + p.d + 0.3, "#ffffff");
-    gesims(S, p.x, p.z, p.w, p.d, H, 0.8, 0.5, "#ffffff");
-    S.add(new three_module_exports.SphereGeometry(Math.min(p.w, p.d) * 0.22, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2).translate(p.x + p.w / 2, H + 0.4, p.z + p.d / 2), FARBEN3.kupfer[1]);
-    return { hoehe: H + Math.min(p.w, p.d) * 0.22 };
+  function phMuseum(S, scene2, p2) {
+    const r = rng2(p2.seed), f = waehle2(r, ["#e6dcc8", "#dcd6cc", "#efe9de"]), H = 13;
+    korpus(S, p2, H, f);
+    for (let u = p2.x + 2; u < p2.x + p2.w - 1; u += 2.8) S.box(0.8, H - 2, 0.8, u, (H - 2) / 2 + 0.5, p2.z + p2.d + 0.3, "#ffffff");
+    gesims(S, p2.x, p2.z, p2.w, p2.d, H, 0.8, 0.5, "#ffffff");
+    S.add(new three_module_exports.SphereGeometry(Math.min(p2.w, p2.d) * 0.22, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2).translate(p2.x + p2.w / 2, H + 0.4, p2.z + p2.d / 2), FARBEN3.kupfer[1]);
+    return { hoehe: H + Math.min(p2.w, p2.d) * 0.22 };
   }
-  function phTor(S, scene2, p) {
-    const stein = "#b98a6e", H = 18, cx = p.x + p.w / 2, cz = p.z + p.d / 2;
-    S.quader(p.x, 0, p.z, p.x + p.w * 0.32, H, p.z + p.d, stein);
-    S.quader(p.x + p.w * 0.68, 0, p.z, p.x + p.w, H, p.z + p.d, stein);
-    S.quader(p.x, 6, p.z, p.x + p.w, H, p.z + p.d, stein);
-    S.add(new three_module_exports.CylinderGeometry(p.w * 0.18, p.w * 0.18, p.d + 0.2, 10, 1, false, 0, Math.PI).rotateX(Math.PI / 2).rotateZ(Math.PI / 2).translate(cx, 6, cz), "#3c3530");
-    for (let u = p.x + 0.8; u < p.x + p.w; u += 1.8) S.box(1, 1.2, p.d + 0.3, u, H + 0.6, cz, stein);
-    S.add(walmPyramide(p.w * 0.45, 7).translate(cx, H + 1.2, cz), FARBEN3.ziegel[0]);
+  function phTor(S, scene2, p2) {
+    const stein = "#b98a6e", H = 18, cx = p2.x + p2.w / 2, cz = p2.z + p2.d / 2;
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w * 0.32, H, p2.z + p2.d, stein);
+    S.quader(p2.x + p2.w * 0.68, 0, p2.z, p2.x + p2.w, H, p2.z + p2.d, stein);
+    S.quader(p2.x, 6, p2.z, p2.x + p2.w, H, p2.z + p2.d, stein);
+    S.add(new three_module_exports.CylinderGeometry(p2.w * 0.18, p2.w * 0.18, p2.d + 0.2, 10, 1, false, 0, Math.PI).rotateX(Math.PI / 2).rotateZ(Math.PI / 2).translate(cx, 6, cz), "#3c3530");
+    for (let u = p2.x + 0.8; u < p2.x + p2.w; u += 1.8) S.box(1, 1.2, p2.d + 0.3, u, H + 0.6, cz, stein);
+    S.add(walmPyramide(p2.w * 0.45, 7).translate(cx, H + 1.2, cz), FARBEN3.ziegel[0]);
     return { hoehe: H + 8 };
   }
-  function phDenkmal(S, scene2, p) {
-    const cx = p.x + p.w / 2, cz = p.z + p.d / 2, s2 = Math.min(p.w, p.d);
+  function phDenkmal(S, scene2, p2) {
+    const cx = p2.x + p2.w / 2, cz = p2.z + p2.d / 2, s2 = Math.min(p2.w, p2.d);
     S.box(s2 * 0.8, 0.6, s2 * 0.8, cx, 0.6, cz, "#d6cfc1");
     S.box(s2 * 0.4, 3.2, s2 * 0.4, cx, 2.5, cz, "#cfc7b6");
     S.box(0.9, 2.2, 0.7, cx, 5.2, cz, "#6f9a7d");
     S.box(0.5, 0.5, 0.5, cx, 6.6, cz, "#6f9a7d");
     return { hoehe: 7 };
   }
-  function phMarkthalle(S, scene2, p) {
+  function phMarkthalle(S, scene2, p2) {
     const H = 9;
-    korpus(S, p, H, "#c4876a");
-    const g = new three_module_exports.CylinderGeometry(p.d * 0.45, p.d * 0.45, p.w - 1, 14, 1, false, 0, Math.PI);
+    korpus(S, p2, H, "#c4876a");
+    const g = new three_module_exports.CylinderGeometry(p2.d * 0.45, p2.d * 0.45, p2.w - 1, 14, 1, false, 0, Math.PI);
     g.rotateZ(Math.PI / 2);
     g.scale(1, 0.55, 1);
-    g.translate(p.x + p.w / 2, H, p.z + p.d / 2);
+    g.translate(p2.x + p2.w / 2, H, p2.z + p2.d / 2);
     S.add(g, F.glasHell);
-    for (let u = p.x + 2; u < p.x + p.w - 1; u += 4) S.box(2.4, 5, 0.14, u + 1, 3.5, p.z + p.d - 0.33, "#5e7383");
-    return { hoehe: H + p.d * 0.25 };
+    for (let u = p2.x + 2; u < p2.x + p2.w - 1; u += 4) S.box(2.4, 5, 0.14, u + 1, 3.5, p2.z + p2.d - 0.33, "#5e7383");
+    return { hoehe: H + p2.d * 0.25 };
   }
-  function phHotel(S, scene2, p) {
-    const r = rng2(p.seed), g = Math.round(zw(r, 7, 12)), H = 5 + g * 3.2;
-    korpus(S, p, H, waehle2(r, ["#e2e5e7", "#e8dfcf", "#cfd6dc"]));
-    fensterBand(S, p, 5, g, 3.2);
-    S.box(p.w * 0.5, 0.4, 3, p.x + p.w / 2, 4.2, p.z + p.d + 1.2, "#2f3b44");
-    S.box(p.w * 0.45, 1.6, 0.3, p.x + p.w / 2, H - 1.5, p.z + p.d + 0.1, "#c9a24a");
+  function phHotel(S, scene2, p2) {
+    const r = rng2(p2.seed), g = Math.round(zw(r, 7, 12)), H = 5 + g * 3.2;
+    korpus(S, p2, H, waehle2(r, ["#e2e5e7", "#e8dfcf", "#cfd6dc"]));
+    fensterBand(S, p2, 5, g, 3.2);
+    S.box(p2.w * 0.5, 0.4, 3, p2.x + p2.w / 2, 4.2, p2.z + p2.d + 1.2, "#2f3b44");
+    S.box(p2.w * 0.45, 1.6, 0.3, p2.x + p2.w / 2, H - 1.5, p2.z + p2.d + 0.1, "#c9a24a");
     return { hoehe: H + 1 };
   }
-  function phParkhaus(S, scene2, p) {
+  function phParkhaus(S, scene2, p2) {
     const n = 5;
     for (let k = 0; k < n; k++) {
-      S.quader(p.x + 0.3, k * 3, p.z + 0.3, p.x + p.w - 0.3, k * 3 + 0.5, p.z + p.d - 0.3, "#c9ccd0");
-      S.quader(p.x + 1, k * 3 + 0.5, p.z + 1, p.x + p.w - 1, k * 3 + 3, p.z + p.d - 1, "#4a5258");
-      S.quader(p.x + 0.3, k * 3 + 0.5, p.z + p.d - 0.6, p.x + p.w - 0.3, k * 3 + 1.4, p.z + p.d - 0.3, "#b9bdc1");
-      S.quader(p.x + p.w - 0.6, k * 3 + 0.5, p.z + 0.3, p.x + p.w - 0.3, k * 3 + 1.4, p.z + p.d - 0.3, "#b9bdc1");
+      S.quader(p2.x + 0.3, k * 3, p2.z + 0.3, p2.x + p2.w - 0.3, k * 3 + 0.5, p2.z + p2.d - 0.3, "#c9ccd0");
+      S.quader(p2.x + 1, k * 3 + 0.5, p2.z + 1, p2.x + p2.w - 1, k * 3 + 3, p2.z + p2.d - 1, "#4a5258");
+      S.quader(p2.x + 0.3, k * 3 + 0.5, p2.z + p2.d - 0.6, p2.x + p2.w - 0.3, k * 3 + 1.4, p2.z + p2.d - 0.3, "#b9bdc1");
+      S.quader(p2.x + p2.w - 0.6, k * 3 + 0.5, p2.z + 0.3, p2.x + p2.w - 0.3, k * 3 + 1.4, p2.z + p2.d - 0.3, "#b9bdc1");
     }
-    S.quader(p.x + 0.3, n * 3, p.z + 0.3, p.x + p.w - 0.3, n * 3 + 0.4, p.z + p.d - 0.3, "#c9ccd0");
-    S.box(3, 2.4, 0.3, p.x + p.w - 3, n * 3 - 1.5, p.z + p.d, "#2f63b5");
+    S.quader(p2.x + 0.3, n * 3, p2.z + 0.3, p2.x + p2.w - 0.3, n * 3 + 0.4, p2.z + p2.d - 0.3, "#c9ccd0");
+    S.box(3, 2.4, 0.3, p2.x + p2.w - 3, n * 3 - 1.5, p2.z + p2.d, "#2f63b5");
     return { hoehe: n * 3 + 0.4 };
   }
-  function phKonkurrenz(S, scene2, p) {
+  function phKonkurrenz(S, scene2, p2) {
     const H = 20;
-    korpus(S, p, H, "#e6e8ea", 0.3);
-    S.quader(p.x + 0.4, 0.3, p.z + 0.4, p.x + p.w - 0.4, 5, p.z + p.d - 0.4, "#3e505c");
-    fensterBand(S, p, 6, 3, 4.5);
-    S.box(p.w + 0.6, 1.2, p.d + 0.6, p.x + p.w / 2, H + 0.2, p.z + p.d / 2, "#2f5f8f");
+    korpus(S, p2, H, "#e6e8ea", 0.3);
+    S.quader(p2.x + 0.4, 0.3, p2.z + 0.4, p2.x + p2.w - 0.4, 5, p2.z + p2.d - 0.4, "#3e505c");
+    fensterBand(S, p2, 6, 3, 4.5);
+    S.box(p2.w + 0.6, 1.2, p2.d + 0.6, p2.x + p2.w / 2, H + 0.2, p2.z + p2.d / 2, "#2f5f8f");
     return { hoehe: H + 1 };
   }
-  function phWasserturm(S, scene2, p) {
-    const cx = p.x + p.w / 2, cz = p.z + p.d / 2, rr = Math.min(p.w, p.d) / 2;
+  function phWasserturm(S, scene2, p2) {
+    const cx = p2.x + p2.w / 2, cz = p2.z + p2.d / 2, rr = Math.min(p2.w, p2.d) / 2;
     S.add(new three_module_exports.CylinderGeometry(rr * 0.55, rr * 0.7, 24, 12).translate(cx, 12, cz), "#b9785e");
     S.add(new three_module_exports.CylinderGeometry(rr, rr * 0.9, 7, 12).translate(cx, 27, cz), "#c4876a");
     S.add(new three_module_exports.ConeGeometry(rr * 1.05, 4, 12).translate(cx, 32.5, cz), FARBEN3.kupfer[0]);
     return { hoehe: 35 };
   }
-  function phTankstelle(S, scene2, p) {
-    S.quader(p.x, 0, p.z, p.x + p.w, 0.34, p.z + p.d, "#a3a7ab");
-    const cx = p.x + p.w * 0.6, cz = p.z + p.d * 0.6;
-    S.box(p.w * 0.55, 0.6, p.d * 0.45, cx, 5.2, cz, "#f2f1ec");
-    S.box(p.w * 0.55 + 0.1, 0.3, p.d * 0.45 + 0.1, cx, 4.8, cz, "#3f7d56");
-    for (const dx of [-1, 1]) for (const dz of [-1, 1]) S.box(0.3, 4.8, 0.3, cx + dx * p.w * 0.2, 2.6, cz + dz * p.d * 0.15, "#c9ccd0");
-    for (const dx of [-1, 1]) S.box(0.6, 1.6, 1, cx + dx * p.w * 0.12, 1.1, cz, "#3f7d56");
-    S.quader(p.x + 1, 0.3, p.z + 1, p.x + p.w * 0.35, 3.8, p.z + p.d * 0.4, "#e8e4dc");
-    S.box(0.4, 7, 0.4, p.x + p.w - 1.5, 3.8, p.z + p.d - 1.5, "#c9ccd0");
-    S.box(1.8, 1.8, 0.4, p.x + p.w - 1.5, 7.6, p.z + p.d - 1.5, "#3f7d56");
+  function phTankstelle(S, scene2, p2) {
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.34, p2.z + p2.d, "#a3a7ab");
+    const cx = p2.x + p2.w * 0.6, cz = p2.z + p2.d * 0.6;
+    S.box(p2.w * 0.55, 0.6, p2.d * 0.45, cx, 5.2, cz, "#f2f1ec");
+    S.box(p2.w * 0.55 + 0.1, 0.3, p2.d * 0.45 + 0.1, cx, 4.8, cz, "#3f7d56");
+    for (const dx of [-1, 1]) for (const dz of [-1, 1]) S.box(0.3, 4.8, 0.3, cx + dx * p2.w * 0.2, 2.6, cz + dz * p2.d * 0.15, "#c9ccd0");
+    for (const dx of [-1, 1]) S.box(0.6, 1.6, 1, cx + dx * p2.w * 0.12, 1.1, cz, "#3f7d56");
+    S.quader(p2.x + 1, 0.3, p2.z + 1, p2.x + p2.w * 0.35, 3.8, p2.z + p2.d * 0.4, "#e8e4dc");
+    S.box(0.4, 7, 0.4, p2.x + p2.w - 1.5, 3.8, p2.z + p2.d - 1.5, "#c9ccd0");
+    S.box(1.8, 1.8, 0.4, p2.x + p2.w - 1.5, 7.6, p2.z + p2.d - 1.5, "#3f7d56");
     return { hoehe: 8.5 };
   }
-  function phDiscounter(S, scene2, p) {
-    korpus(S, p, 6.5, "#e2e0dc", 0.3);
-    S.box(p.w - 0.4, 1.2, p.d - 0.4, p.x + p.w / 2, 6.1, p.z + p.d / 2, "#d36b2a");
-    S.quader(p.x + p.w * 0.6, 0.3, p.z + p.d - 0.5, p.x + p.w - 2, 4, p.z + p.d - 0.2, FARBEN3.glas);
+  function phDiscounter(S, scene2, p2) {
+    korpus(S, p2, 6.5, "#e2e0dc", 0.3);
+    S.box(p2.w - 0.4, 1.2, p2.d - 0.4, p2.x + p2.w / 2, 6.1, p2.z + p2.d / 2, "#d36b2a");
+    S.quader(p2.x + p2.w * 0.6, 0.3, p2.z + p2.d - 0.5, p2.x + p2.w - 2, 4, p2.z + p2.d - 0.2, FARBEN3.glas);
     return { hoehe: 7 };
   }
-  function phLuecke(S, scene2, p) {
-    const r = rng2(p.seed);
-    S.quader(p.x, 0, p.z, p.x + p.w, 0.38, p.z + p.d, waehle2(r, ["#b9b19f", "#a9bf8f", "#c2b9a5"]));
-    for (let i = 0; i < 4; i++) S.box(zw(r, 0.6, 1.4), 0.4, zw(r, 0.6, 1.4), p.x + zw(r, 1, p.w - 1), 0.5, p.z + zw(r, 1, p.d - 1), "#7f9c62");
-    if (p.front.includes("+z") && p.w > 6) {
-      S.box(0.2, 2.4, 0.2, p.x + 1.5, 1.4, p.z + p.d - 0.6, "#5c6268");
-      S.box(0.2, 2.4, 0.2, p.x + p.w - 1.5, 1.4, p.z + p.d - 0.6, "#5c6268");
-      S.box(p.w - 2.4, 2.2, 0.15, p.x + p.w / 2, 3.6, p.z + p.d - 0.6, waehle2(r, ["#e0b23c", "#2f6f8f", "#c9483e"]));
+  function phLuecke(S, scene2, p2) {
+    const r = rng2(p2.seed);
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.38, p2.z + p2.d, waehle2(r, ["#b9b19f", "#a9bf8f", "#c2b9a5"]));
+    for (let i = 0; i < 4; i++) S.box(zw(r, 0.6, 1.4), 0.4, zw(r, 0.6, 1.4), p2.x + zw(r, 1, p2.w - 1), 0.5, p2.z + zw(r, 1, p2.d - 1), "#7f9c62");
+    if (p2.front.includes("+z") && p2.w > 6) {
+      S.box(0.2, 2.4, 0.2, p2.x + 1.5, 1.4, p2.z + p2.d - 0.6, "#5c6268");
+      S.box(0.2, 2.4, 0.2, p2.x + p2.w - 1.5, 1.4, p2.z + p2.d - 0.6, "#5c6268");
+      S.box(p2.w - 2.4, 2.2, 0.15, p2.x + p2.w / 2, 3.6, p2.z + p2.d - 0.6, waehle2(r, ["#e0b23c", "#2f6f8f", "#c9483e"]));
     }
     return { hoehe: 1 };
   }
-  function phBaustelle(S, scene2, p) {
-    const r = rng2(p.seed);
-    S.quader(p.x, 0, p.z, p.x + p.w, 0.36, p.z + p.d, "#b49a7a");
-    S.quader(p.x + 1.5, -0.8, p.z + 1.5, p.x + p.w - 1.5, 0.38, p.z + p.d - 1.5, "#8f7759");
-    for (const [x0, z0, x1, z1] of [[p.x, p.z + p.d - 0.2, p.x + p.w, p.z + p.d], [p.x + p.w - 0.2, p.z, p.x + p.w, p.z + p.d]]) S.quader(x0, 0.3, z0, x1, 2.2, z1, "#f2f1ec");
-    const H = 4 + p.geschosse * 3.3, cx = p.x + p.w * 0.3, cz = p.z + p.d * 0.4;
+  function phBaustelle(S, scene2, p2) {
+    const r = rng2(p2.seed);
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.36, p2.z + p2.d, "#b49a7a");
+    S.quader(p2.x + 1.5, -0.8, p2.z + 1.5, p2.x + p2.w - 1.5, 0.38, p2.z + p2.d - 1.5, "#8f7759");
+    for (const [x0, z0, x1, z1] of [[p2.x, p2.z + p2.d - 0.2, p2.x + p2.w, p2.z + p2.d], [p2.x + p2.w - 0.2, p2.z, p2.x + p2.w, p2.z + p2.d]]) S.quader(x0, 0.3, z0, x1, 2.2, z1, "#f2f1ec");
+    const H = 4 + p2.geschosse * 3.3, cx = p2.x + p2.w * 0.3, cz = p2.z + p2.d * 0.4;
     S.box(0.8, H + 6, 0.8, cx, (H + 6) / 2, cz, "#e0b23c");
-    S.box(Math.max(14, p.w), 0.6, 0.6, cx + Math.max(14, p.w) * 0.3, H + 6, cz, "#e0b23c");
+    S.box(Math.max(14, p2.w), 0.6, 0.6, cx + Math.max(14, p2.w) * 0.3, H + 6, cz, "#e0b23c");
     S.box(2, 1.2, 1.2, cx - 2, H + 6, cz, "#5c6268");
-    if (r() < 0.6) S.quader(p.x + 2, 0.38, p.z + 2, p.x + p.w - 2, 0.38 + 3.3 * Math.max(1, Math.floor(p.geschosse / 2)), p.z + p.d - 2, "#b9b4ab");
+    if (r() < 0.6) S.quader(p2.x + 2, 0.38, p2.z + 2, p2.x + p2.w - 2, 0.38 + 3.3 * Math.max(1, Math.floor(p2.geschosse / 2)), p2.z + p2.d - 2, "#b9b4ab");
     return { hoehe: H + 6 };
   }
-  function phParkplatzParzelle(S, scene2, p) {
-    S.quader(p.x, 0, p.z, p.x + p.w, 0.34, p.z + p.d, "#a3a7ab");
-    const r = rng2(p.seed);
-    const quer2 = p.w >= p.d;
-    for (let u = 1.3; u < (quer2 ? p.w : p.d) - 1; u += 2.6) {
-      if (quer2) S.box(0.12, 0.02, 4.4, p.x + u, 0.35, p.z + 3, F.markierung);
-      else S.box(4.4, 0.02, 0.12, p.x + 3, 0.35, p.z + u, F.markierung);
+  function phParkplatzParzelle(S, scene2, p2) {
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.34, p2.z + p2.d, "#a3a7ab");
+    const r = rng2(p2.seed);
+    const quer2 = p2.w >= p2.d;
+    for (let u = 1.3; u < (quer2 ? p2.w : p2.d) - 1; u += 2.6) {
+      if (quer2) S.box(0.12, 0.02, 4.4, p2.x + u, 0.35, p2.z + 3, F.markierung);
+      else S.box(4.4, 0.02, 0.12, p2.x + 3, 0.35, p2.z + u, F.markierung);
       if (r() < 0.6) {
         const c = waehle2(r, AUTOFARBEN3);
         if (quer2) {
-          S.box(1.7, 0.9, 4.2, p.x + u + 1.3, 0.85, p.z + 3, c);
-          S.box(1.5, 0.6, 2.2, p.x + u + 1.3, 1.6, p.z + 3, F.glas);
+          S.box(1.7, 0.9, 4.2, p2.x + u + 1.3, 0.85, p2.z + 3, c);
+          S.box(1.5, 0.6, 2.2, p2.x + u + 1.3, 1.6, p2.z + 3, F.glas);
         } else {
-          S.box(4.2, 0.9, 1.7, p.x + 3, 0.85, p.z + u + 1.3, c);
-          S.box(2.2, 0.6, 1.5, p.x + 3, 1.6, p.z + u + 1.3, F.glas);
+          S.box(4.2, 0.9, 1.7, p2.x + 3, 0.85, p2.z + u + 1.3, c);
+          S.box(2.2, 0.6, 1.5, p2.x + 3, 1.6, p2.z + u + 1.3, F.glas);
         }
       }
     }
     return { hoehe: 1 };
   }
-  function phPlatzParzelle(S, scene2, p) {
-    const r = rng2(p.seed);
-    S.quader(p.x, 0, p.z, p.x + p.w, 0.36, p.z + p.d, "#e4ddcf");
-    baum(S, p.x + p.w / 2, p.z + p.d / 2, r, 1.1);
-    S.box(1.8, 0.45, 0.5, p.x + p.w / 2 + 2.5, 0.6, p.z + p.d / 2, F.holz);
+  function phPlatzParzelle(S, scene2, p2) {
+    const r = rng2(p2.seed);
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.36, p2.z + p2.d, "#e4ddcf");
+    baum(S, p2.x + p2.w / 2, p2.z + p2.d / 2, r, 1.1);
+    S.box(1.8, 0.45, 0.5, p2.x + p2.w / 2 + 2.5, 0.6, p2.z + p2.d / 2, F.holz);
     return { hoehe: 6 };
   }
-  function phDurchgang(S, scene2, p) {
-    S.quader(p.x, 0, p.z, p.x + p.w, 0.36, p.z + p.d, "#d6ccba");
-    const H = 4 + (p.geschosse ?? 3) * 3.3;
-    if (p.seite === "+z" || p.seite === "-z") S.quader(p.x, 4.2, p.z, p.x + p.w, H, p.z + p.d, "#e8dfcf");
-    else S.quader(p.x, 4.2, p.z, p.x + p.w, H, p.z + p.d, "#e8dfcf");
+  function phDurchgang(S, scene2, p2) {
+    S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.36, p2.z + p2.d, "#d6ccba");
+    const H = 4 + (p2.geschosse ?? 3) * 3.3;
+    if (p2.seite === "+z" || p2.seite === "-z") S.quader(p2.x, 4.2, p2.z, p2.x + p2.w, H, p2.z + p2.d, "#e8dfcf");
+    else S.quader(p2.x, 4.2, p2.z, p2.x + p2.w, H, p2.z + p2.d, "#e8dfcf");
     return { hoehe: H };
   }
   var platzhalterBauer = {
-    stadthaus: (S, scene2, p) => platzhalterHaus(S, scene2, p, false),
-    eck: (S, scene2, p) => platzhalterHaus(S, scene2, p, true),
+    stadthaus: (S, scene2, p2) => platzhalterHaus(S, scene2, p2, false),
+    eck: (S, scene2, p2) => platzhalterHaus(S, scene2, p2, true),
     "slot:warenhaus": phWarenhaus,
     "slot:sport": phWarenhaus,
     "slot:wettbewerber": phKonkurrenz,
@@ -119755,10 +120362,10 @@
     }));
     return { ...d, standorte: [...eigene, ...alt, ...reserve] };
   }
-  function imSlot2(p, W3, D) {
-    const ecke = p.ecke ?? "+x+z";
-    if (ecke === "block") return { x: p.x + Math.max(0, (p.w - W3) / 2), z: p.z + Math.max(0, (p.d - D) / 2) };
-    return { x: ecke.includes("+x") ? p.x + p.w - W3 : p.x, z: ecke.includes("+z") ? p.z + p.d - D : p.z };
+  function imSlot2(p2, W3, D) {
+    const ecke = p2.ecke ?? "+x+z";
+    if (ecke === "block") return { x: p2.x + Math.max(0, (p2.w - W3) / 2), z: p2.z + Math.max(0, (p2.d - D) / 2) };
+    return { x: ecke.includes("+x") ? p2.x + p2.w - W3 : p2.x, z: ecke.includes("+z") ? p2.z + p2.d - D : p2.z };
   }
   function spielBauer(s2, o = {}) {
     const basis2 = echterBauer(o.bauerOpt ?? {});
@@ -119785,11 +120392,11 @@
       }
       return zust.get(h.id);
     };
-    const baueWarenhaus = (S, scene2, p, h) => {
+    const baueWarenhaus = (S, scene2, p2, h) => {
       const f = fussabdruck(h);
-      const { x, z: z2 } = imSlot2(p, f.w, f.d);
+      const { x, z: z2 } = imSlot2(p2, f.w, f.d);
       if (h.klasse === "premium") {
-        p.haus = h;
+        p2.haus = h;
         return premiumhaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
       }
       if (!wahl3.has(h.id)) {
@@ -119803,25 +120410,25 @@
         wahl3.set(h.id, { fam: fam2, fassade: fassade4 });
       }
       const { fam, fassade: fassade3 } = wahl3.get(h.id);
-      p.haus = h;
+      p2.haus = h;
       const roh2 = fassade3 === h.fassade ? h : { ...h, fassade: fassade3 };
       const nutzer = nachnutzer(h);
       return nutzer ? nachnutzung(S, scene2, roh2, nutzer, { x, z: z2, familie: fam }) : warenhaus(S, scene2, roh2, { x, z: z2, familie: fam, ...bauZustand(zustand(h)) });
     };
-    const baueSport = (S, scene2, p, h) => {
+    const baueSport = (S, scene2, p2, h) => {
       const f = fussabdruck(h);
-      const { x, z: z2 } = imSlot2(p, f.w, f.d);
-      p.haus = h;
+      const { x, z: z2 } = imSlot2(p2, f.w, f.d);
+      p2.haus = h;
       const nutzer = nachnutzer(h);
       return nutzer ? nachnutzungSport(S, scene2, h, nutzer, { x, z: z2 }) : sporthaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
     };
-    const baueOutlet = (S, scene2, p, h) => {
-      const f = fussabdruck(h), { x, z: z2 } = imSlot2(p, f.w, f.d);
-      p.haus = h;
+    const baueOutlet = (S, scene2, p2, h) => {
+      const f = fussabdruck(h), { x, z: z2 } = imSlot2(p2, f.w, f.d);
+      p2.haus = h;
       return outlet(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
     };
-    const bau2 = (S, scene2, p, h) => (h.format === "outlet" ? baueOutlet : h.format === "sport" ? baueSport : baueWarenhaus)(S, scene2, p, h);
-    const getrennt = (p, h) => {
+    const bau2 = (S, scene2, p2, h) => (h.format === "outlet" ? baueOutlet : h.format === "sport" ? baueSport : baueWarenhaus)(S, scene2, p2, h);
+    const getrennt = (p2, h) => {
       const gruppe2 = new three_module_exports.Group();
       gruppe2.userData.hausId = h.id;
       const S = new Sammler();
@@ -119829,7 +120436,7 @@
       setzeLod(o.hausLod ?? "nah");
       let e;
       try {
-        e = bau2(S, gruppe2, p, h);
+        e = bau2(S, gruppe2, p2, h);
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
@@ -119838,36 +120445,36 @@
         m.userData.hausId = h.id;
       });
       (o.wurzel ?? null)?.add(gruppe2);
-      haeuser.set(h.id, { p, gruppe: gruppe2, e, schluessel: zustand(h).schluessel });
+      haeuser.set(h.id, { p: p2, gruppe: gruppe2, e, schluessel: zustand(h).schluessel });
       return e;
     };
-    const hqDaten = (p) => {
+    const hqDaten = (p2) => {
       const j = typeof o.hq === "function" ? o.hq() : o.hq;
-      const id = p.standort.id;
+      const id = p2.standort.id;
       const g = j?.gebaeude?.find((q2) => q2.id === id), a = j?.angebote?.find((q2) => q2.id === id);
-      return { ...p, standort: { ...p.standort, hq: g ?? a ?? p.standort.hq, angebot: !g && !!(a ?? p.standort.angebot) } };
+      return { ...p2, standort: { ...p2.standort, hq: g ?? a ?? p2.standort.hq, angebot: !g && !!(a ?? p2.standort.angebot) } };
     };
-    const hqSchluessel = (p) => {
-      const q2 = hqDaten(p).standort;
+    const hqSchluessel = (p2) => {
+      const q2 = hqDaten(p2).standort;
       return JSON.stringify([q2.angebot, q2.hq?.etagen]);
     };
-    const baueHq = (p) => {
+    const baueHq = (p2) => {
       const gruppe2 = new three_module_exports.Group();
-      gruppe2.userData.hqId = p.standort.id;
+      gruppe2.userData.hqId = p2.standort.id;
       const S = new Sammler(), alt = LOD2.stufe;
       setzeLod(o.hausLod ?? "nah");
       let e;
       try {
-        e = basis2["slot:hq"](S, gruppe2, hqDaten(p));
+        e = basis2["slot:hq"](S, gruppe2, hqDaten(p2));
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
       }
       gruppe2.traverse((m) => {
-        m.userData.hqId = p.standort.id;
+        m.userData.hqId = p2.standort.id;
       });
       (o.wurzel ?? null)?.add(gruppe2);
-      hqs.set(p.standort.id, { p, gruppe: gruppe2, e, teile: S.anzahl, schluessel: hqSchluessel(p) });
+      hqs.set(p2.standort.id, { p: p2, gruppe: gruppe2, e, teile: S.anzahl, schluessel: hqSchluessel(p2) });
       return e;
     };
     const hqs = /* @__PURE__ */ new Map();
@@ -119889,22 +120496,22 @@
         }
       }
     }
-    const wbBau = (S, scene2, p, w) => {
-      if (!w) return basis2.stadthaus(S, scene2, { ...p, typ: "stadthaus", standort: void 0 });
+    const wbBau = (S, scene2, p2, w) => {
+      if (!w) return basis2.stadthaus(S, scene2, { ...p2, typ: "stadthaus", standort: void 0 });
       const breite = Math.max(20, Math.round(Math.sqrt(Math.max(400, w.grundflaecheQm) * 1.5) / 5) * 5);
       const tiefe = Math.max(16, Math.round(w.grundflaecheQm / breite / 5) * 5);
-      const W3 = Math.min(p.w - 1, breite);
-      const D = Math.min(p.d - 1, tiefe);
-      const pos = imSlot2(p, W3, D);
+      const W3 = Math.min(p2.w - 1, breite);
+      const D = Math.min(p2.d - 1, tiefe);
+      const pos = imSlot2(p2, W3, D);
       return wettbewerber(S, scene2, {
         ...pos,
         w: W3,
         d: D,
-        seed: p.seed,
+        seed: p2.seed,
         art: w.art,
         name: w.name,
         form: w.form,
-        region: p.region,
+        region: p2.region,
         zustand: { status: w.status, rabatt: w.rabatt }
       });
     };
@@ -119927,33 +120534,33 @@
       if (x.wbId) wettbewerber2.set(x.wbId, x);
       return e;
     }
-    const wbSlot = (S, scene2, p) => {
-      const id = p.standort?.id ?? p.id;
+    const wbSlot = (S, scene2, p2) => {
+      const id = p2.standort?.id ?? p2.id;
       let x = wbSlots.get(id);
       if (!x) {
         const gebraucht = new Set([...wbSlots.values()].map((q2) => q2.wbId).filter(Boolean));
         const erste = wbDaten().filter((w) => !w.inHartwigGebaeude).sort((a, b2) => Number(a.status === "geschlossen") - Number(b2.status === "geschlossen") || b2.seit - a.seit).find((w) => !gebraucht.has(w.id));
-        x = { p, wbId: erste?.id ?? null, gruppe: null, schluessel: null };
+        x = { p: p2, wbId: erste?.id ?? null, gruppe: null, schluessel: null };
         wbSlots.set(id, x);
       }
       if (o.getrennt) return baueWbGruppe(x);
-      const e = wbBau(S, scene2, p, wbVon(x.wbId));
+      const e = wbBau(S, scene2, p2, wbVon(x.wbId));
       Object.assign(x, { e, schluessel: wbSchluessel(wbVon(x.wbId)) });
       if (x.wbId) wettbewerber2.set(x.wbId, x);
       return e;
     };
-    const hqSlot = (S, scene2, p) => {
-      if (!basis2["slot:hq"] || !p.standort) return { hoehe: 0 };
-      if (o.getrennt) return baueHq(p);
-      return basis2["slot:hq"](S, scene2, hqDaten(p));
+    const hqSlot = (S, scene2, p2) => {
+      if (!basis2["slot:hq"] || !p2.standort) return { hoehe: 0 };
+      if (o.getrennt) return baueHq(p2);
+      return basis2["slot:hq"](S, scene2, hqDaten(p2));
     };
-    const slot4 = (typ) => (S, scene2, p) => {
-      if (p.standort?.rolle === "hq") return hqSlot(S, scene2, p);
-      const h = p.standort?.id && hausVon(p.standort.id);
-      if (!h) return basis2[typ](S, scene2, p);
-      if (o.getrennt) return getrennt(p, h);
-      const e = bau2(S, scene2, p, h);
-      haeuser.set(h.id, { p, gruppe: null, e, schluessel: zustand(h).schluessel });
+    const slot4 = (typ) => (S, scene2, p2) => {
+      if (p2.standort?.rolle === "hq") return hqSlot(S, scene2, p2);
+      const h = p2.standort?.id && hausVon(p2.standort.id);
+      if (!h) return basis2[typ](S, scene2, p2);
+      if (o.getrennt) return getrennt(p2, h);
+      const e = bau2(S, scene2, p2, h);
+      haeuser.set(h.id, { p: p2, gruppe: null, e, schluessel: zustand(h).schluessel });
       return e;
     };
     const bauer = {
@@ -120079,14 +120686,14 @@
   var REGIONEN4 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var alterText = (a) => ALTER.find((x) => x[0] === a)?.[1] ?? a;
   var zielText = (z2) => `${GESCHLECHT.find((g) => g[0] === z2.geschlecht)?.[1] ?? ""} ${alterText(z2.alter)}`;
-  var preisText = (p) => PREIS2.find((x) => x[0] === p)?.[1] ?? p;
+  var preisText = (p2) => PREIS2.find((x) => x[0] === p2)?.[1] ?? p2;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
   var punkte = (x) => `+${(x * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Punkte`;
   function balken6(wert, farbe2 = "#2f63b5") {
     return `<span class="mbalken"><span style="width:${Math.max(0, Math.min(100, wert)).toFixed(0)}%;background:${farbe2}"></span></span>`;
   }
-  function passungZeile(p, p0) {
-    return `<div class="passung">${REGIONEN4.filter((r) => p[r] !== void 0).map((r) => `<div><span class="psaeule"><span style="height:${p[r]}%"></span></span><b${p0 ? ` data-p="${p0}:${r}"` : ""}>${p[r]}</b><i>${r}</i></div>`).join("")}</div>`;
+  function passungZeile(p2, p0) {
+    return `<div class="passung">${REGIONEN4.filter((r) => p2[r] !== void 0).map((r) => `<div><span class="psaeule"><span style="height:${p2[r]}%"></span></span><b${p0 ? ` data-p="${p0}:${r}"` : ""}>${p2[r]}</b><i>${r}</i></div>`).join("")}</div>`;
   }
   function eigenmarkenSeite(ctx, ui, tabs) {
     if (ui.seite === "gruenden" && ui.em.assistent) return assistent(ctx, ui, tabs);
@@ -120124,8 +120731,8 @@
     return { name: nameFuer(s2, "herren"), farbe: FARBEN5[(s2.woche + 4) % FARBEN5.length], zielgruppe: { alter: "50+", geschlecht: "herren" }, kategorie: "Bekleidung", preislage: "mitte", stil: "modern", qualitaet: 3, beschaffung: "nahost", budgetWoche: 15e3, wgAnteile: {} };
   }
   function wgVorschlag(ctx, s2, e) {
-    const p = ctx.q.vorschau(s2, { ...e, wgAnteile: {} }).passendeWgs;
-    return Object.fromEntries([...p].sort((a, b2) => b2.passung - a.passung).slice(0, 4).map((w) => [w.wg, 0.25]));
+    const p2 = ctx.q.vorschau(s2, { ...e, wgAnteile: {} }).passendeWgs;
+    return Object.fromEntries([...p2].sort((a, b2) => b2.passung - a.passung).slice(0, 4).map((w) => [w.wg, 0.25]));
   }
   function assistent(ctx, ui, tabs) {
     const s2 = ctx.s(), A = ui.em.assistent, m = A.daten, u = ctx.q.marken(s2);
@@ -120179,9 +120786,9 @@
     const a = el.dataset.a, v = el.dataset.v, s2 = ctx.s();
     const A = ui.em.assistent, m = A?.daten;
     const oben = () => {
-      const p = document.getElementById("pinhalt");
+      const p2 = document.getElementById("pinhalt");
       setTimeout(() => {
-        p.scrollTop = 0;
+        p2.scrollTop = 0;
       }, 0);
       return "oben";
     };
@@ -120359,7 +120966,7 @@
     const text3 = (id, k) => formatiere(SP().get(id)?.format ?? "eur", k[id] ?? 0);
     const dot = (a) => a ? `<span class="ampel a-${a}" title="${AMPEL_TEXT[a]}"></span>` : '<span class="ampel ohne"></span>';
     const seg = (act, wert, optionen, extra = "") => `<div class="seg">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
-    const zahl3 = (titel, inhalt2, p, ton = "", a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
+    const zahl3 = (titel, inhalt2, p2, ton = "", a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
     function tabs() {
       const n = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
@@ -120382,7 +120989,7 @@
       }).join("")}</div>`;
       const kopf = (key, t, klasse) => `<button class="${klasse} ${ui.sort.key === key ? "an" : ""}" data-a="sort" data-v="${key}">${t}${ui.sort.key === key ? ui.sort.dir < 0 ? " \u25BC" : " \u25B2" : ""}</button>`;
       h += `<div class="karte liste"><div class="lkopf">${kopf("name", "Bereich und WG", "lname")}${ui.spalten.map((k) => kopf(k, KOPF[k] ?? SP().get(k)?.name, "lwert")).join("")}</div>`;
-      const werte = (k, a, p) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p}:${c}">${text3(c, k)}</i>${dot(a[c])}</span>`).join("");
+      const werte = (k, a, p2) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p2}:${c}">${text3(c, k)}</i>${dot(a[c])}</span>`).join("");
       for (const b2 of sortiere(u.bereiche)) {
         const auf = ui.offen.has(b2.bereich);
         h += `<div class="lzeile bereich" data-a="bereich" data-v="${b2.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc(b2.name)} <i>${b2.wgs.length} WG</i></span>${werte(b2.kennzahlen, b2.ampeln, `b:${b2.bereich}`)}</div>`;
@@ -120393,15 +121000,15 @@
       h += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a, b2) => a + b2.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h };
     }
-    function kurve4(titel, wochen, werte, fmtW, p, farbe2) {
+    function kurve4(titel, wochen, werte, fmtW, p2, farbe2) {
       const W3 = 340, H = 64, n = werte.length;
-      if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${n ? fmtW(werte[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
+      if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${n ? fmtW(werte[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
       const min = Math.min(...werte), max = Math.max(...werte);
       const lo = min - (max - min) * 0.1, hi = max + (max - min) * 0.1 || max + 1;
       const X = (i) => 4 + i / (n - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
       const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
       const daten = esc(JSON.stringify(werte.map((v, i) => [kwVon2(wochen[i]), fmtW(v)])));
-      return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${fmtW(werte[n - 1])}</b><small class="khover"></small></div>
+      return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${fmtW(werte[n - 1])}</b><small class="khover"></small></div>
       <svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none" data-reihe="${daten}" data-x0="4" data-dx="${(W3 - 8) / (n - 1)}">
         <line x1="0" x2="${W3}" y1="${H - 4}" y2="${H - 4}" stroke="#e7e3dc" stroke-width="1"/>
         <polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe2}" opacity="0.10"/>
@@ -120470,12 +121077,12 @@
         <div class="ochips"><span class="chip ${o.art === "nos" ? "" : "blau"}">${ART[o.art]}</span>${frist}<span class="chip grau">danach ${o.modus === "auto" ? "automatisch frei" : "verf\xE4llt"}</span>${o.ueberLimit ? '<span class="chip warn">\xFCber Limit gek\xFCrzt</span>' : ""}</div>
         <div class="owerte"><div><span>Wert EK</span><b data-p="f:${o.id}:wert">${geld(o.wert)}</b></div><div><span>Erw. Abverkauf 8 Wo.</span><b data-p="f:${o.id}:abverkauf">${geld(o.erwarteterAbverkauf)}</b></div><div><span>Reichweite danach</span><b data-p="f:${o.id}:reichweite">${dez(o.reichweiteDanach, 1)} Wo.</b></div></div>
         <div class="olief">${esc(o.lieferant)} \xB7 erste Lieferung KW ${kwVon2(o.ersteLieferung)}${o.lieferungen.length > 1 ? ` in ${o.lieferungen.length} Teilen` : ""}${o.hinweis ? ` \xB7 ${esc(o.hinweis)}` : ""}</div>`;
-        if (ui.kuerzen === o.id) h += `<div class="oknoepfe">${[10, 25, 50].map((p2) => `<button data-a="kuerzen" data-v="${o.id}" data-p2="${p2}">\u2212${p2} % und frei</button>`).join("")}<button data-a="kuerzenZu" class="leise">Zur\xFCck</button></div>`;
+        if (ui.kuerzen === o.id) h += `<div class="oknoepfe">${[10, 25, 50].map((p3) => `<button data-a="kuerzen" data-v="${o.id}" data-p2="${p3}">\u2212${p3} % und frei</button>`).join("")}<button data-a="kuerzenZu" class="leise">Zur\xFCck</button></div>`;
         else h += `<div class="oknoepfe"><button class="gruen" data-a="frei" data-v="${o.id}">Freigeben</button><button data-a="kuerzenAuf" data-v="${o.id}">K\xFCrzen</button><button class="rot" data-a="ablehnen" data-v="${o.id}">Ablehnen</button></div>`;
         h += "</div>";
       }
-      const p = alle.protokoll[alle.protokoll.length - 1];
-      if (p) h += `<div class="legende">Letzte Woche: ${p.neu} neue Orders, ${p.direkt} direkt unter der Grenze, ${p.freigegeben} freigegeben, ${p.auto} automatisch, ${p.verfallen} verfallen${p.verfallenWert ? ` (${geld(p.verfallenWert)})` : ""}, ${p.abgelehnt} abgelehnt</div>`;
+      const p2 = alle.protokoll[alle.protokoll.length - 1];
+      if (p2) h += `<div class="legende">Letzte Woche: ${p2.neu} neue Orders, ${p2.direkt} direkt unter der Grenze, ${p2.freigegeben} freigegeben, ${p2.auto} automatisch, ${p2.verfallen} verfallen${p2.verfallenWert ? ` (${geld(p2.verfallenWert)})` : ""}, ${p2.abgelehnt} abgelehnt</div>`;
       return { titel: "Freigaben", unter: `${alle.anzahl} Orders offen \xB7 ${geld(alle.wert)} EK \xB7 KW ${kwVon2(s2().woche)}`, html: h };
     }
     function zeigen(scrollHalten = false) {
@@ -120645,8 +121252,8 @@
       const d = ui.seite === "wg" ? q2.wg(s2(), ui.wg) : null;
       const fl = q2.freigaben(s2()), fg = new Map(fl.liste.map((o) => [o.id, o]));
       const ex = new Map(DETAIL_EXTRA.map(([id, , f]) => [id, f]));
-      const soll = (p) => {
-        const t = p.split(":");
+      const soll = (p2) => {
+        const t = p2.split(":");
         if (t[0] === "g") return text3(t[1], u.summe.kennzahlen);
         if (t[0] === "b") return text3(t[2], bs.get(t[1]).kennzahlen);
         if (t[0] === "w") return text3(t[2], ws.get(t[1]).kennzahlen);
@@ -120714,13 +121321,13 @@
     const E = erweitert(G2), e = ausdehnung2(halb, a);
     return { x0: Math.max(G2.x0, E.x0 + e), x1: Math.min(G2.x1, E.x1 - e), z0: Math.max(G2.z0, E.z0 + e), z1: Math.min(G2.z1, E.z1 - e) };
   }
-  function erreichbar(p, G2, halb, a, rand = 0) {
+  function erreichbar(p2, G2, halb, a, rand = 0) {
     const A = mittelBereich(G2, halb, a);
     if (A.x0 > A.x1 || A.z0 > A.z1) return false;
     const n = 48;
     for (let i = 0; i <= n; i++) for (let j = 0; j <= n; j++) {
       const cx = A.x0 + (A.x1 - A.x0) * i / n, cz = A.z0 + (A.z1 - A.z0) * j / n;
-      const x = p.x - cx, z2 = p.z - cz, r = (x - z2) / W2, v = -(x + z2) / (2 * W2);
+      const x = p2.x - cx, z2 = p2.z - cz, r = (x - z2) / W2, v = -(x + z2) / (2 * W2);
       if (Math.abs(r) <= halb * a - rand && Math.abs(v) <= halb - rand) return true;
     }
     return false;
@@ -120731,7 +121338,7 @@
     let lo = min, hi = Math.max(min * 2, halb3 * 2);
     for (let k = 0; k < 28; k++) {
       const m = (lo + hi) / 2;
-      if (ecken.every((p) => erreichbar(p, G2, m, a))) lo = m;
+      if (ecken.every((p2) => erreichbar(p2, G2, m, a))) lo = m;
       else hi = m;
     }
     const halbReich = lo;
@@ -120774,11 +121381,11 @@
       const [a, b2] = [...zeiger.values()];
       return { x: (a.x + b2.x) / 2, y: (a.y + b2.y) / 2, d: Math.hypot(a.x - b2.x, a.y - b2.y) };
     };
-    const festhalten = (p, px2, py2) => {
+    const festhalten = (p2, px2, py2) => {
       const q2 = o.aufBoden(px2, py2);
-      if (p && q2) {
-        K3.x += p.x - q2.x;
-        K3.z += p.z - q2.z;
+      if (p2 && q2) {
+        K3.x += p2.x - q2.x;
+        K3.z += p2.z - q2.z;
       }
     };
     canvas2.addEventListener("pointerdown", (e) => {
@@ -120862,10 +121469,10 @@
     canvas2.addEventListener("wheel", (e) => {
       e.preventDefault();
       stopp();
-      const p = o.aufBoden(e.clientX, e.clientY);
+      const p2 = o.aufBoden(e.clientX, e.clientY);
       K3.halb *= Math.exp(e.deltaY * 15e-4);
       o.setzen();
-      festhalten(p, e.clientX, e.clientY);
+      festhalten(p2, e.clientX, e.clientY);
       o.setzen();
     }, { passive: false });
     return { stopp, schwung, info, get laeuft() {
@@ -120921,7 +121528,7 @@
     kleidung: ["anzug", "blazer", "kostuem", "hemd", "pullover", "rollkragen", "bluse", "strick"],
     bart: ["keiner", "drei", "voll", "schnauz"]
   };
-  function hash4(s2) {
+  function hash5(s2) {
     if (typeof s2 === "number") return s2 * 2654435761 >>> 0;
     let h = 2166136261;
     for (const c of String(s2)) {
@@ -120931,7 +121538,7 @@
     return h >>> 0;
   }
   function zufall3(seed) {
-    let a = hash4(seed) || 1;
+    let a = hash5(seed) || 1;
     return () => {
       a = a + 1831565813 | 0;
       let t = Math.imul(a ^ a >>> 15, 1 | a);
@@ -120974,7 +121581,7 @@
     const kf = m.kleidungFarbe ?? m.kleidungsfarbe;
     const kleidungFarbe = KLEIDUNG_FARBEN[kf] ?? (/^#[0-9a-f]{3,6}$/i.test(String(kf ?? "")) ? kf : KLEIDUNG_FARBEN.marine);
     const bart = MERKMAL_WERTE.bart.includes(m.bart) && geschlecht === "m" ? m.bart : "keiner";
-    const seed = m.seed ?? hash4(JSON.stringify([geschlecht, haar, haarfarbe, hautton, alter, kleidung]));
+    const seed = m.seed ?? hash5(JSON.stringify([geschlecht, haar, haarfarbe, hautton, alter, kleidung]));
     return { geschlecht, haar, haarfarbe, brille, hautton, alter, kleidung, kleidungFarbe, bart, seed };
   }
   var P = (d, f, extra = "") => `<path d="${d}" fill="${f}"${extra}/>`;
@@ -121217,7 +121824,7 @@
   var segment = (act, wert, optionen, extra = "") => `<div class="seg${optionen.length > 5 || optionen.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? " umbruch" : ""}">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
   var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
   var stepper = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
-  var faehigkeit = (name2, wert, p) => `<div class="faehig"><span>${name2}</span><span class="fbalken"><span style="width:${Math.max(0, Math.min(100, wert))}%"></span><i></i><i></i><i></i><i></i></span>${p}</div>`;
+  var faehigkeit = (name2, wert, p2) => `<div class="faehig"><span>${name2}</span><span class="fbalken"><span style="width:${Math.max(0, Math.min(100, wert))}%"></span><i></i><i></i><i></i><i></i></span>${p2}</div>`;
   var kz = (titel, inhalt, ton = "") => `<div class="kz ${ton}"><span>${titel}</span>${inhalt}</div>`;
   var wocheText = (s2, w) => `KW ${kwVon2(w)} / ${s2.startJahr + Math.floor(w / 52)}`;
   var karussell = (id, karten, idx, act) => `<div class="karussell" data-k="${id}">${karten.map((k, i) => `<div class="kslot" data-i="${i}">${k}</div>`).join("")}</div><div class="punkte">${karten.map((_, i) => `<button class="${i === idx ? "an" : ""}" data-a="${act}" data-v="${i}" aria-label="Karte ${i + 1}"></button>`).join("")}</div>`;
@@ -121253,9 +121860,9 @@
       }
       h += '<div class="vgitter">';
       for (const r of u.ressorts) {
-        const p = r.person;
-        h += `<button class="vkarte ${p ? "" : "leer"}" data-a="profil" data-v="${r.id}"><span class="vbild">${portraet(p?.portraet, 64)}</span><span class="vtext"><b>${r.kurz}</b><small>${esc(r.titel)}</small>${p ? P2(`r:${r.id}:name`, p.name, "em") : '<em class="frei">unbesetzt</em>'}</span>`;
-        if (p) h += `<span class="vmini"><span title="F\xFChrung"><i style="width:${p.fuehrung}%"></i></span><span title="Fachwissen"><i style="width:${p.fachwissen}%"></i></span><span title="Loyalit\xE4t"><i style="width:${p.loyalitaet}%"></i></span></span><span class="ampel a-${r.risikoAmpel}" title="Abwerberisiko ${RISIKO[r.risikoAmpel]}"></span>`;
+        const p2 = r.person;
+        h += `<button class="vkarte ${p2 ? "" : "leer"}" data-a="profil" data-v="${r.id}"><span class="vbild">${portraet(p2?.portraet, 64)}</span><span class="vtext"><b>${r.kurz}</b><small>${esc(r.titel)}</small>${p2 ? P2(`r:${r.id}:name`, p2.name, "em") : '<em class="frei">unbesetzt</em>'}</span>`;
+        if (p2) h += `<span class="vmini"><span title="F\xFChrung"><i style="width:${p2.fuehrung}%"></i></span><span title="Fachwissen"><i style="width:${p2.fachwissen}%"></i></span><span title="Loyalit\xE4t"><i style="width:${p2.loyalitaet}%"></i></span></span><span class="ampel a-${r.risikoAmpel}" title="Abwerberisiko ${RISIKO[r.risikoAmpel]}"></span>`;
         else h += '<span class="chip warn">einstellen</span>';
         h += "</button>";
       }
@@ -121276,27 +121883,27 @@
         ui.seite = "uebersicht";
         return uebersicht(P2);
       }
-      const p = r.person, id = r.id;
+      const p2 = r.person, id = r.id;
       let h = '<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 Vorstand</button>';
-      if (!p) {
+      if (!p2) {
         h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(null, 120)}</span><div><b class="vname">${r.kurz} unbesetzt</b><small>${esc(r.titel)}</small><div class="olief">${esc(r.zustaendig)}</div>${r.vakantSeit !== void 0 ? `<div class="olief warnung">vakant seit ${wocheText(st, r.vakantSeit)}</div>` : ""}</div></div>`;
         h += `<div class="olief">Ohne ${r.kurz} wirken die Abteilungen schw\xE4cher: ${r.abteilungen.map((a) => `${esc(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")}. Keine Delegation m\xF6glich.</div></div>`;
         h += `<button class="breit gruen" data-a="einstellen" data-v="${id}">${P2(`p:${id}:kandidaten`, `${r.kandidatenAnzahl} Kandidaten ansehen`, "span")}</button>`;
         return { titel: `${r.kurz} einstellen`, unter: esc(r.zustaendig), html: h };
       }
-      h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(p.portraet, 120)}</span><div><b class="vname">${P2(`p:${id}:name`, p.name, "span")}</b><small>${esc(r.titel)}</small>`;
-      h += `<div class="vseit"><span>${r.kurz} seit</span>${P2(`p:${id}:seit`, wocheText(st, p.seitWoche))}</div>${p.gewachsen ? '<span class="chip grau">aus dem Haus gewachsen</span>' : ""}${p.gehtWoche !== void 0 ? `<span class="chip warn">geht ${wocheText(st, p.gehtWoche)}</span>` : ""}</div></div>`;
-      h += `<div class="faehigkeiten"><div class="vtitel">F\xE4higkeiten</div>${faehigkeit("F\xFChrung", p.fuehrung, P2(`p:${id}:fuehrung`, String(p.fuehrung)))}${faehigkeit("Fachwissen", p.fachwissen, P2(`p:${id}:fachwissen`, String(p.fachwissen)))}${faehigkeit("Loyalit\xE4t", p.loyalitaet, P2(`p:${id}:loyalitaet`, String(p.loyalitaet)))}</div>`;
+      h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(p2.portraet, 120)}</span><div><b class="vname">${P2(`p:${id}:name`, p2.name, "span")}</b><small>${esc(r.titel)}</small>`;
+      h += `<div class="vseit"><span>${r.kurz} seit</span>${P2(`p:${id}:seit`, wocheText(st, p2.seitWoche))}</div>${p2.gewachsen ? '<span class="chip grau">aus dem Haus gewachsen</span>' : ""}${p2.gehtWoche !== void 0 ? `<span class="chip warn">geht ${wocheText(st, p2.gehtWoche)}</span>` : ""}</div></div>`;
+      h += `<div class="faehigkeiten"><div class="vtitel">F\xE4higkeiten</div>${faehigkeit("F\xFChrung", p2.fuehrung, P2(`p:${id}:fuehrung`, String(p2.fuehrung)))}${faehigkeit("Fachwissen", p2.fachwissen, P2(`p:${id}:fachwissen`, String(p2.fachwissen)))}${faehigkeit("Loyalit\xE4t", p2.loyalitaet, P2(`p:${id}:loyalitaet`, String(p2.loyalitaet)))}</div>`;
       if (r.vorgeschichte) h += `<div class="olief">${esc(r.vorgeschichte)}</div>`;
       h += `<div class="olief">Wirkung auf ${r.abteilungen.map((a) => `${esc(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")} \xB7 Abwerberisiko im Jahr ${P2(`p:${id}:risiko`, pz3(r.risiko), "b")}<span class="ampel a-${r.risikoAmpel}"></span></div></div>`;
       h += '<div class="karte"><div class="khead">Delegation<small>die Ressort-KI entscheidet in der G\xFCte des Fachwissens</small></div>';
       for (const d of r.delegationen) h += schalter(d.an, `data-a="delegation" data-v="${d.id}"`, esc(d.label), esc(d.beschreibung));
       h += "</div>";
       h += '<div class="karte steuerung"><div class="khead">Verg\xFCtung</div>';
-      h += regler("Jahresgehalt", stepper("gehalt", P2(`p:${id}:gehalt`, geld(p.gehalt)), P2(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p.gehaltsforderung)}`, "i")), `Schritt ${geld(r.gehaltsSchritt)}`);
-      const halteAnteil = p.haltebonus > 0 ? Math.round(p.haltebonus / Math.max(1, p.gehalt) * 4) / 4 : 0;
-      h += regler("Haltebonus \xFCber 52 Wochen", segment("haltebonus", halteAnteil, HALTE) + `<small class="rfuss">${p.haltebonus > 0 ? `${P2(`p:${id}:haltebonus`, geld(p.haltebonus), "i")} bis ${p.halteBis !== void 0 ? wocheText(st, p.halteBis) : "offen"}, senkt das Abwerberisiko` : "Anteil vom Jahresgehalt, in Raten ausgezahlt"}</small>`, "vom Jahresgehalt");
-      h += regler("Erfolgsbonus bei Planerf\xFCllung", segment("erfolgsbonus", Math.round(p.erfolgsbonus * 10) / 10, ERFOLG), "vom Jahresgehalt je Jahr");
+      h += regler("Jahresgehalt", stepper("gehalt", P2(`p:${id}:gehalt`, geld(p2.gehalt)), P2(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p2.gehaltsforderung)}`, "i")), `Schritt ${geld(r.gehaltsSchritt)}`);
+      const halteAnteil = p2.haltebonus > 0 ? Math.round(p2.haltebonus / Math.max(1, p2.gehalt) * 4) / 4 : 0;
+      h += regler("Haltebonus \xFCber 52 Wochen", segment("haltebonus", halteAnteil, HALTE) + `<small class="rfuss">${p2.haltebonus > 0 ? `${P2(`p:${id}:haltebonus`, geld(p2.haltebonus), "i")} bis ${p2.halteBis !== void 0 ? wocheText(st, p2.halteBis) : "offen"}, senkt das Abwerberisiko` : "Anteil vom Jahresgehalt, in Raten ausgezahlt"}</small>`, "vom Jahresgehalt");
+      h += regler("Erfolgsbonus bei Planerf\xFCllung", segment("erfolgsbonus", Math.round(p2.erfolgsbonus * 10) / 10, ERFOLG), "vom Jahresgehalt je Jahr");
       h += "</div>";
       if (r.protokoll.length) {
         h += '<div class="karte"><div class="khead">Entscheidungen im Ressort</div>';
@@ -121388,13 +121995,13 @@
           return zeigen(true);
         }
         case "gehalt": {
-          const p = prof();
-          tun({ typ: "vorstandGehalt", ressort: ui.ressort, gehalt: Math.max(0, p.person.gehalt + Number(v) * p.gehaltsSchritt) });
+          const p2 = prof();
+          tun({ typ: "vorstandGehalt", ressort: ui.ressort, gehalt: Math.max(0, p2.person.gehalt + Number(v) * p2.gehaltsSchritt) });
           return zeigen(true);
         }
         case "haltebonus": {
-          const p = prof();
-          tun({ typ: "vorstandBonus", ressort: ui.ressort, haltebonus: Math.round(p.person.gehalt * Number(v)), halteWochen: 52 });
+          const p2 = prof();
+          tun({ typ: "vorstandBonus", ressort: ui.ressort, haltebonus: Math.round(p2.person.gehalt * Number(v)), halteWochen: 52 });
           return zeigen(true);
         }
         case "erfolgsbonus":
@@ -121474,9 +122081,9 @@
     const name2 = (st) => st?.person ? esc(st.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
     const profil = (stelle2, titel, ebene, id) => {
       if (!stelle2) return "";
-      const p = stelle2.person;
+      const p2 = stelle2.person;
       let h = '<button data-org="zurueck" class="zurueck">\u2039 Organigramm</button><div class="karte org-profil"><h3>' + esc(titel) + "</h3>";
-      if (p) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p.portraet, 110) + "</span><div><b>" + esc(p.name) + "</b><small>" + geld(p.gehalt) + " / Jahr</small>" + bar(p.qualitaet) + "<small>Qualit\xE4t " + Math.round(p.qualitaet * 100) + "% \xB7 Stimmung " + Math.round(p.stimmung) + "% \xB7 Wechselwille " + Math.round(p.wechselwille * 100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Haltepr\xE4mie 10.000 \u20AC</button></div>';
+      if (p2) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p2.portraet, 110) + "</span><div><b>" + esc(p2.name) + "</b><small>" + geld(p2.gehalt) + " / Jahr</small>" + bar(p2.qualitaet) + "<small>Qualit\xE4t " + Math.round(p2.qualitaet * 100) + "% \xB7 Stimmung " + Math.round(p2.stimmung) + "% \xB7 Wechselwille " + Math.round(p2.wechselwille * 100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Haltepr\xE4mie 10.000 \u20AC</button></div>';
       else h += '<div class="olief">Vakante Leitungsstelle \u2013 berichtet unmittelbar nach oben.</div>';
       h += "<h4>Kandidaten</h4>";
       for (const k of stelle2.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet, 56) + '</span><span class="was"><b>' + esc(k.name) + "</b><small>Qualit\xE4t " + Math.round(k.qualitaet * 100) + "% \xB7 Jahresgehalt " + geld(k.gehalt) + "</small>" + bar(k.qualitaet) + '</span><button data-org="besetzen" data-kandidat="' + esc(k.id) + '">Einstellen</button></div>';
@@ -121588,12 +122195,12 @@
     function handeln(D) {
       if (ui.verhandlung) return verhandeln();
       if (!D.handeln.length) return leer3("Keine offenen Angebote oder Entscheidungen.");
-      return D.handeln.map((p) => {
-        const rest = '<span class="chip ' + (p.dringend ? "warn" : "grau") + '">' + wochen(p.restWochen) + "</span>";
-        const wert = p.wert ? '<div class="postwert"><b>' + esc(geld(p.wert.betrag)) + "</b><span>" + esc(p.wert.einheit) + "</span></div>" : "";
-        const buttons = p.optionen.map((o) => '<button class="' + (o.id === "ablehnen" ? "rot" : o.id === "annehmen" ? "gruen" : "") + '" data-po-a="option" data-id="' + esc(p.id) + '" data-v="' + esc(o.id) + '">' + esc(o.label) + "</button>").join("");
-        const ort = p.bezug && (p.bezug.hausIds?.length || p.bezug.stadt || p.bezug.modul) ? '<button class="postort" data-po-a="ort" data-id="' + esc(p.id) + '">Zum Ort \u2192</button>' : "";
-        return '<article class="karte postkarte" data-post-id="' + esc(p.id) + '"><div class="postkopf"><div class="posttyp">' + (p.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p.woche) + "</div><h3>" + esc(p.titel) + '</h3><div class="postchips">' + rest + ort + '</div></div><details class="postdetail"><summary>Details anzeigen</summary><p>' + esc(p.text) + "</p></details>" + wert + '<p class="poststandard">Ohne Entscheidung: ' + esc(p.standard) + '</p><div class="postaktionen">' + buttons + "</div></article>";
+      return D.handeln.map((p2) => {
+        const rest = '<span class="chip ' + (p2.dringend ? "warn" : "grau") + '">' + wochen(p2.restWochen) + "</span>";
+        const wert = p2.wert ? '<div class="postwert"><b>' + esc(geld(p2.wert.betrag)) + "</b><span>" + esc(p2.wert.einheit) + "</span></div>" : "";
+        const buttons = p2.optionen.map((o) => '<button class="' + (o.id === "ablehnen" ? "rot" : o.id === "annehmen" ? "gruen" : "") + '" data-po-a="option" data-id="' + esc(p2.id) + '" data-v="' + esc(o.id) + '">' + esc(o.label) + "</button>").join("");
+        const ort = p2.bezug && (p2.bezug.hausIds?.length || p2.bezug.stadt || p2.bezug.modul) ? '<button class="postort" data-po-a="ort" data-id="' + esc(p2.id) + '">Zum Ort \u2192</button>' : "";
+        return '<article class="karte postkarte" data-post-id="' + esc(p2.id) + '"><div class="postkopf"><div class="posttyp">' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</div><h3>" + esc(p2.titel) + '</h3><div class="postchips">' + rest + ort + '</div></div><details class="postdetail"><summary>Details anzeigen</summary><p>' + esc(p2.text) + "</p></details>" + wert + '<p class="poststandard">Ohne Entscheidung: ' + esc(p2.standard) + '</p><div class="postaktionen">' + buttons + "</div></article>";
       }).join("");
     }
     function verhandeln() {
@@ -121621,7 +122228,7 @@
     }
     function erledigt(D) {
       if (!D.erledigt.length) return leer3("In den letzten 13 Wochen wurde noch nichts erledigt.");
-      return D.erledigt.map((p) => '<div class="karte posterledigt" data-post-id="' + esc(p.id) + '"><small>' + (p.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p.woche) + "</small><b>" + esc(p.titel) + "</b><span>" + esc(p.ergebnis) + (p.standard ? " \xB7 Automatisch bei Fristablauf" : "") + "</span></div>").join("");
+      return D.erledigt.map((p2) => '<div class="karte posterledigt" data-post-id="' + esc(p2.id) + '"><small>' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</small><b>" + esc(p2.titel) + "</b><span>" + esc(p2.ergebnis) + (p2.standard ? " \xB7 Automatisch bei Fristablauf" : "") + "</span></div>").join("");
     }
     function zeigen(scrollHalten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop, D = daten();
@@ -121680,8 +122287,8 @@
         return;
       }
       if (a === "ort") {
-        const p = daten().handeln.find((x) => x.id === id);
-        if (p?.bezug) ctx.springe(p.bezug);
+        const p2 = daten().handeln.find((x) => x.id === id);
+        if (p2?.bezug) ctx.springe(p2.bezug);
         return;
       }
       if (a === "zurueck") {
@@ -121694,7 +122301,7 @@
         return zeigen();
       }
       let aktion2;
-      if (a === "option") aktion2 = id && v ? daten().handeln.some((p) => p.id === id && p.art === "entscheidung") ? { typ: "entscheiden", id, option: v } : { typ: v === "annehmen" ? "angebotAnnehmen" : "angebotAblehnen", angebot: id } : null;
+      if (a === "option") aktion2 = id && v ? daten().handeln.some((p2) => p2.id === id && p2.art === "entscheidung") ? { typ: "entscheiden", id, option: v } : { typ: v === "annehmen" ? "angebotAnnehmen" : "angebotAblehnen", angebot: id } : null;
       if (a === "verhandeln" && ui.verhandlung) aktion2 = { typ: "angebotVerhandeln", angebot: ui.verhandlung.id, haeuser: [...ui.verhandlung.haeuser] };
       if (!aktion2) return;
       const r = E.fuehreAus(s2(), aktion2);
@@ -121750,15 +122357,15 @@
   var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
   var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
   var KANAL2 = [["mail", "Mail"], ["push", "Push"], ["brief", "Brief"]];
-  function kurve2(titel, werte, fmtW, p, P2, farbe2) {
+  function kurve2(titel, werte, fmtW, p2, P2, farbe2) {
     const W3 = 340, H = 56, n = werte.length;
-    if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, n ? fmtW(werte[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
+    if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p2, n ? fmtW(werte[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
     let min = Math.min(...werte), max = Math.max(...werte);
     const flach = max - min < 1e-9 * Math.max(1, Math.abs(max));
     const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
     const X = (i) => 4 + i / (n - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
     const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe2}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe2}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
+    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p2, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe2}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe2}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
   }
   function marketingModul(ctx) {
     const E = ctx.E, s2 = () => ctx.s();
@@ -121902,16 +122509,16 @@
       return { titel: "Aktionskalender", unter: `${K3.jahr} \xB7 ${K3.eintraege.filter((a) => a.status !== "abgesagt").length} Aktionen \xB7 KW ${K3.kw}`, html: h };
     }
     function planenKarte(K3) {
-      const p = ui.planen, an = K3.anlaesse.find((x) => x.id === p.anlass);
+      const p2 = ui.planen, an = K3.anlaesse.find((x) => x.id === p2.anlass);
       let h = '<div class="karte steuerung"><div class="khead">Neue Aktion</div>';
-      h += regler("Anlass", `<select class="ort gross" data-a="planAnlass">${K3.anlaesse.filter((x) => x.id !== "raeumung").map((x) => `<option value="${x.id}"${x.id === p.anlass ? " selected" : ""}>${esc(x.name)} (KW ${x.kw})</option>`).join("")}</select>`);
-      h += regler("Mechanik", `<select class="ort gross" data-a="planMechanik">${K3.mechaniken.map((m) => `<option value="${m.id}"${m.id === p.mechanik ? " selected" : ""}>${esc(m.text)}</option>`).join("")}</select>`, an?.bereiche ? `Bereiche: ${an.bereiche.length}` : "");
-      if (!["punkte", "staffel"].includes(p.mechanik)) h += regler("Rabatt", segment("planRabatt", p.rabatt, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.3, "30 %"], [0.4, "40 %"]]));
-      if (p.mechanik === "punkte") h += regler("Punkte", segment("planPunkte", p.punkteFaktor, [[3, "3-fach"], [5, "5-fach"], [10, "10-fach"]]));
-      h += regler("Start", stepper("planKw", `<b>KW ${p.kw} / ${p.jahr}</b>`), "Kalenderwoche");
-      h += regler("Dauer", segment("planWochen", p.wochen, [[1, "1 Woche"], [2, "2 Wochen"], [3, "3 Wochen"], [4, "4 Wochen"]]));
-      h += regler("Sonderwerbung", segment("planWerbung", p.sonderwerbung, [[0, "keine"], [25e4, "250 Tsd. \u20AC"], [75e4, "750 Tsd. \u20AC"], [15e5, "1,5 Mio. \u20AC"]]), "Beilage, Spots");
-      h += schalter(p.kontrolle, 'data-a="planKontrolle"', "5 Kontrollh\xE4user ohne Aktion", "genauere Auswertung, etwas weniger Umsatz");
+      h += regler("Anlass", `<select class="ort gross" data-a="planAnlass">${K3.anlaesse.filter((x) => x.id !== "raeumung").map((x) => `<option value="${x.id}"${x.id === p2.anlass ? " selected" : ""}>${esc(x.name)} (KW ${x.kw})</option>`).join("")}</select>`);
+      h += regler("Mechanik", `<select class="ort gross" data-a="planMechanik">${K3.mechaniken.map((m) => `<option value="${m.id}"${m.id === p2.mechanik ? " selected" : ""}>${esc(m.text)}</option>`).join("")}</select>`, an?.bereiche ? `Bereiche: ${an.bereiche.length}` : "");
+      if (!["punkte", "staffel"].includes(p2.mechanik)) h += regler("Rabatt", segment("planRabatt", p2.rabatt, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.3, "30 %"], [0.4, "40 %"]]));
+      if (p2.mechanik === "punkte") h += regler("Punkte", segment("planPunkte", p2.punkteFaktor, [[3, "3-fach"], [5, "5-fach"], [10, "10-fach"]]));
+      h += regler("Start", stepper("planKw", `<b>KW ${p2.kw} / ${p2.jahr}</b>`), "Kalenderwoche");
+      h += regler("Dauer", segment("planWochen", p2.wochen, [[1, "1 Woche"], [2, "2 Wochen"], [3, "3 Wochen"], [4, "4 Wochen"]]));
+      h += regler("Sonderwerbung", segment("planWerbung", p2.sonderwerbung, [[0, "keine"], [25e4, "250 Tsd. \u20AC"], [75e4, "750 Tsd. \u20AC"], [15e5, "1,5 Mio. \u20AC"]]), "Beilage, Spots");
+      h += schalter(p2.kontrolle, 'data-a="planKontrolle"', "5 Kontrollh\xE4user ohne Aktion", "genauere Auswertung, etwas weniger Umsatz");
       h += '<div class="oknoepfe"><button class="gruen" data-a="planFertig">Aktion einplanen</button><button class="leise" data-a="planZu">Abbrechen</button></div></div>';
       return h;
     }
@@ -122060,8 +122667,8 @@
           ui.planen.kontrolle = !ui.planen.kontrolle;
           return zeigen(true);
         case "planKw": {
-          const p = ui.planen;
-          let kw2 = p.kw + Number(v), j = p.jahr;
+          const p2 = ui.planen;
+          let kw2 = p2.kw + Number(v), j = p2.jahr;
           if (kw2 > 52) {
             kw2 = 1;
             j++;
@@ -122070,15 +122677,15 @@
             kw2 = 52;
             j--;
           }
-          p.kw = kw2;
-          p.jahr = j;
+          p2.kw = kw2;
+          p2.jahr = j;
           return zeigen(true);
         }
         case "planFertig": {
-          const p = ui.planen, an = E.aktionskalender(st, p.jahr).anlaesse.find((x) => x.id === p.anlass);
-          const r = tun({ typ: "aktionPlanen", anlass: p.anlass, name: an?.name, mechanik: p.mechanik, ...p.mechanik === "punkte" ? { punkteFaktor: p.punkteFaktor } : { rabatt: p.rabatt }, ...an?.bereiche ? { bereiche: an.bereiche } : {}, kw: p.kw, jahr: p.jahr, wochen: p.wochen, sonderwerbung: p.sonderwerbung, ...p.kontrolle ? { kontrollHaeuser: kontrollHaeuser() } : {} });
+          const p2 = ui.planen, an = E.aktionskalender(st, p2.jahr).anlaesse.find((x) => x.id === p2.anlass);
+          const r = tun({ typ: "aktionPlanen", anlass: p2.anlass, name: an?.name, mechanik: p2.mechanik, ...p2.mechanik === "punkte" ? { punkteFaktor: p2.punkteFaktor } : { rabatt: p2.rabatt }, ...an?.bereiche ? { bereiche: an.bereiche } : {}, kw: p2.kw, jahr: p2.jahr, wochen: p2.wochen, sonderwerbung: p2.sonderwerbung, ...p2.kontrolle ? { kontrollHaeuser: kontrollHaeuser() } : {} });
           if (r?.ok) {
-            ui.jahr = p.jahr;
+            ui.jahr = p2.jahr;
             ui.planen = null;
             zeigen(true);
           }
@@ -122774,11 +123381,11 @@
     }
     return h + "</span>";
   }
-  function donut(marge, p) {
+  function donut(marge, p2) {
     const r = 26, u = 2 * Math.PI * r, m = Math.max(0, Math.min(1, marge));
-    return `<div class="donut"><svg viewBox="0 0 64 64" width="84" height="84"><circle cx="32" cy="32" r="${r}" fill="none" stroke="#d2603a" stroke-width="9"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="#efc27a" stroke-width="9" stroke-dasharray="${(u * m).toFixed(1)} ${u.toFixed(1)}" transform="rotate(-90 32 32)"/></svg><span><small>Marge</small>${p}</span></div>`;
+    return `<div class="donut"><svg viewBox="0 0 64 64" width="84" height="84"><circle cx="32" cy="32" r="${r}" fill="none" stroke="#d2603a" stroke-width="9"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="#efc27a" stroke-width="9" stroke-dasharray="${(u * m).toFixed(1)} ${u.toFixed(1)}" transform="rotate(-90 32 32)"/></svg><span><small>Marge</small>${p2}</span></div>`;
   }
-  var preisSchritt = (p) => p < 20 ? 1 : p < 100 ? 5 : 10;
+  var preisSchritt = (p2) => p2 < 20 ? 1 : p2 < 100 ? 5 : 10;
   function produkteModul(ctx) {
     const E = ctx.E, s2 = () => ctx.s();
     const da = typeof E.produkte === "function";
@@ -122798,26 +123405,26 @@
       h += markenwahl(L2);
       h += `<div class="raster">${kz("Team Produktentwicklung", P2("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P2("l:kosten", geld(L2.kostenWoche)))}</div>`;
       const kats = M2.kategorien.filter((k2) => k2.kapazitaet > 0 || k2.belegt > 0);
-      if (!kats.some((k2) => k2.id === ui.kategorie)) ui.kategorie = (kats.find((k2) => M2.produkte.some((p) => p.kategorie === k2.id && p.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
+      if (!kats.some((k2) => k2.id === ui.kategorie)) ui.kategorie = (kats.find((k2) => M2.produkte.some((p2) => p2.kategorie === k2.id && p2.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
       h += `<div class="seg umbruch kats">${kats.map((k2) => `<button class="${k2.id === ui.kategorie ? "an" : ""}" data-a="kategorie" data-v="${k2.id}">${esc(k2.name)} ${P2(`l:kat:${k2.id}`, `${k2.belegt} / ${k2.kapazitaet}`, "i")}</button>`).join("")}</div>`;
-      const prod = M2.produkte.filter((p) => p.kategorie === ui.kategorie && p.status !== "ausgelistet");
+      const prod = M2.produkte.filter((p2) => p2.kategorie === ui.kategorie && p2.status !== "ausgelistet");
       ui.k = Math.min(ui.k, Math.max(0, prod.length - 1));
       if (M2.hinweis) h += `<div class="olief warnung">${esc(M2.hinweis)}</div>`;
       if (!prod.length) h += '<div class="karte"><div class="zeile grau">In dieser Kategorie gibt es noch kein Produkt.</div></div>';
       else {
-        const karten = prod.map((p) => {
-          const ent = p.status === "entwicklung";
-          let c = `<div class="karte produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(p.typ, p.farbe, p.material, 150)}</div>`;
-          if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
-          c += `<div class="pname">${P2(`p:${p.id}:name`, p.name, "b")}<small>${esc(p.typ)} \xB7 ${esc(p.farbe)} \xB7 ${esc(p.material)} \xB7 ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
+        const karten = prod.map((p2) => {
+          const ent = p2.status === "entwicklung";
+          let c = `<div class="karte produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(p2.typ, p2.farbe, p2.material, 150)}</div>`;
+          if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
+          c += `<div class="pname">${P2(`p:${p2.id}:name`, p2.name, "b")}<small>${esc(p2.typ)} \xB7 ${esc(p2.farbe)} \xB7 ${esc(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
           if (ent) {
-            c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P2(`p:${p.id}:fertig`, `fertig ${wocheText(st, p.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P2(`p:${p.id}:fortschritt`, pz3(p.fortschritt), "i")} \xB7 ${geld(p.budgetWoche)} je Woche \xFCber ${p.dauer} Wochen</small></div>`;
+            c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P2(`p:${p2.id}:fertig`, `fertig ${wocheText(st, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P2(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
           } else {
-            c += `<div class="mitte" title="${dez(p.sterne, 1)} Sterne">${sterne(p.sterne, 24)}<span class="sternzahl">${P2(`p:${p.id}:sterne`, dez(p.sterne, 1), "span")}</span></div>`;
-            const ver = `${p.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p.veraenderungProzent))})`;
-            c += `<div class="pmitte">${schalter(p.status === "sortiment", `data-a="sortiment" data-v="${p.id}"`, "Im Sortiment")}<div class="verkauf"><small>Verkauf letzte Woche</small>${P2(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), "b")}${P2(`p:${p.id}:veraenderung`, ver, "i", p.veraenderung < 0 ? ' class="rotwert"' : "")}</div></div>`;
-            c += `<div class="pmitte">${donut(p.marge, P2(`p:${p.id}:marge`, pz3(p.marge), "b"))}<div class="preis"><small class="rotwert">EK je St\xFCck ${P2(`p:${p.id}:ek`, euro(p.ekStueck), "span")}</small><small>Preis</small>${stepper("preis", P2(`p:${p.id}:preis`, euro(p.preis)), `Normpreis ${euro(p.normpreis)}`, ` data-p2="${p.id}"`)}</div></div>`;
-            if (ui.auslisten === p.id) c += `<div class="oknoepfe"><button class="rot" data-a="auslistenJa" data-v="${p.id}">Wirklich auslisten</button><button data-a="auslistenNein">Behalten</button></div>`;
+            c += `<div class="mitte" title="${dez(p2.sterne, 1)} Sterne">${sterne(p2.sterne, 24)}<span class="sternzahl">${P2(`p:${p2.id}:sterne`, dez(p2.sterne, 1), "span")}</span></div>`;
+            const ver = `${p2.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p2.veraenderung))} (${p2.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p2.veraenderungProzent))})`;
+            c += `<div class="pmitte">${schalter(p2.status === "sortiment", `data-a="sortiment" data-v="${p2.id}"`, "Im Sortiment")}<div class="verkauf"><small>Verkauf letzte Woche</small>${P2(`p:${p2.id}:verkauf`, fmt.format(p2.verkaufLetzteWoche), "b")}${P2(`p:${p2.id}:veraenderung`, ver, "i", p2.veraenderung < 0 ? ' class="rotwert"' : "")}</div></div>`;
+            c += `<div class="pmitte">${donut(p2.marge, P2(`p:${p2.id}:marge`, pz3(p2.marge), "b"))}<div class="preis"><small class="rotwert">EK je St\xFCck ${P2(`p:${p2.id}:ek`, euro(p2.ekStueck), "span")}</small><small>Preis</small>${stepper("preis", P2(`p:${p2.id}:preis`, euro(p2.preis)), `Normpreis ${euro(p2.normpreis)}`, ` data-p2="${p2.id}"`)}</div></div>`;
+            if (ui.auslisten === p2.id) c += `<div class="oknoepfe"><button class="rot" data-a="auslistenJa" data-v="${p2.id}">Wirklich auslisten</button><button data-a="auslistenNein">Behalten</button></div>`;
           }
           return c + "</div>";
         });
@@ -122848,7 +123455,7 @@
       h += '</div><div class="karte steuerung">';
       h += regler("Farbe", `<div class="farben klein">${K3.farben.map((f) => `<button class="${f.name === e.farbe ? "an" : ""}" style="background:${f.hex}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}"></button>`).join("")}</div>`, esc(e.farbe));
       h += regler("Material", segment("material", e.material, (T?.materialien ?? []).map((m) => [m, m])));
-      h += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p) => [p.id, PREISLAGE[p.id] ?? p.id])));
+      h += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p2) => [p2.id, PREISLAGE[p2.id] ?? p2.id])));
       h += regler("Qualit\xE4t", segment("qualitaet", e.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, "\u2605".repeat(x)])));
       h += regler("Entwicklungsdauer", segment("dauer", e.dauer, K3.dauer.map((d) => [d, String(d)])), "Wochen");
       h += regler("Budget je Woche", stepper("budget", P2("n:budget", geld(e.budgetWoche))), `Schritt ${geld(K3.budgetSchritt)}`);
@@ -122915,7 +123522,7 @@
     };
     function klick(el) {
       const a = el.dataset.a, v = el.dataset.v, st = s2();
-      const karte = (id) => E.produkte(st).marken.flatMap((m) => m.produkte).find((p) => p.id === id);
+      const karte = (id) => E.produkte(st).marken.flatMap((m) => m.produkte).find((p2) => p2.id === id);
       switch (a) {
         case "marke":
           ui.marke = v;
@@ -122943,13 +123550,13 @@
           ui.neu = neuerEntwurf3();
           return zeigen();
         case "sortiment": {
-          const p = karte(v);
-          tun({ typ: "produktSortiment", produkt: v, an: p.status !== "sortiment" });
+          const p2 = karte(v);
+          tun({ typ: "produktSortiment", produkt: v, an: p2.status !== "sortiment" });
           return zeigen(true);
         }
         case "preis": {
-          const id = el.dataset.p2, p = karte(id), d = preisSchritt(p.preis);
-          tun({ typ: "produktPreis", produkt: id, preis: Math.max(1, Math.round((p.preis + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) });
+          const id = el.dataset.p2, p2 = karte(id), d = preisSchritt(p2.preis);
+          tun({ typ: "produktPreis", produkt: id, preis: Math.max(1, Math.round((p2.preis + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) });
           return zeigen(true);
         }
         case "auslisten":
@@ -122989,11 +123596,11 @@
           const e = ui.neu, r = tun({ typ: "produktEntwickeln", entwurf: { marke: ui.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
           if (r?.ok) {
             ui.seite = "liste";
-            const p = E.produkte(s2()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === "entwicklung").pop();
-            if (p) {
-              ui.kategorie = p.kategorie;
-              const l = E.produkte(s2()).marken.find((m) => m.marke === ui.marke).produkte.filter((x) => x.kategorie === p.kategorie && x.status !== "ausgelistet");
-              ui.k = l.findIndex((x) => x.id === p.id);
+            const p2 = E.produkte(s2()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === "entwicklung").pop();
+            if (p2) {
+              ui.kategorie = p2.kategorie;
+              const l = E.produkte(s2()).marken.find((m) => m.marke === ui.marke).produkte.filter((x) => x.kategorie === p2.kategorie && x.status !== "ausgelistet");
+              ui.k = l.findIndex((x) => x.id === p2.id);
             }
           }
           return zeigen(!r?.ok);
@@ -123028,7 +123635,7 @@
   }
 
   // src/ui/speicher.js
-  var NAME = "hartwig-spielstand";
+  var NAME2 = "hartwig-spielstand";
   var STORE = "staende";
   var KEY = "autosave";
   var FORMAT = 1;
@@ -123039,7 +123646,7 @@
         reject(new Error("IndexedDB ist auf diesem Geraet nicht verfuegbar."));
         return;
       }
-      const r = indexedDB.open(NAME, 1);
+      const r = indexedDB.open(NAME2, 1);
       r.onupgradeneeded = () => r.result.createObjectStore(STORE);
       r.onerror = () => reject(r.error ?? new Error("Datenbank konnte nicht geoeffnet werden."));
       r.onsuccess = () => {
@@ -123102,7 +123709,7 @@
 
   // src/ui/diagnose.js
   var runde = (x) => Math.round(x * 10) / 10;
-  var perzentil = (a, p) => a[Math.min(a.length - 1, Math.ceil(a.length * p) - 1)];
+  var perzentil = (a, p2) => a[Math.min(a.length - 1, Math.ceil(a.length * p2) - 1)];
   async function messen({ renderer, scene: scene2, camera, info }) {
     if (!scene2 || !camera) throw new Error("Bitte zuerst ein Spiel starten.");
     const renderMs = [], frameMs = [];
@@ -123186,15 +123793,15 @@
   };
   function deutschlandPunkte(staedte, hier) {
     const punkte2 = staedte.map((stadt) => {
-      const hash5 = [...stadt.name].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7);
+      const hash6 = [...stadt.name].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7);
       const [x, y] = MAP_FELDER[String(stadt.region ?? "mitte").toLocaleLowerCase("de")] ?? MAP_FELDER.mitte;
-      const dx = hash5 % 29 - 14, dy = Math.floor(hash5 / 37) % 35 - 17;
+      const dx = hash6 % 29 - 14, dy = Math.floor(hash6 / 37) % 35 - 17;
       return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier, hauscluster: stadt.hauscluster };
     });
-    return punkte2.sort((a, b2) => Number(a.aktuell) - Number(b2.aktuell)).map((p) => {
+    return punkte2.sort((a, b2) => Number(a.aktuell) - Number(b2.aktuell)).map((p2) => {
       const farben = ["#597fa2", "#9b7954", "#638d70", "#8875a7", "#ac705e", "#718b9b"];
-      const gruppe2 = p.hauscluster ? [...p.hauscluster].reduce((a, c) => a + c.charCodeAt(0), 0) : 0;
-      return '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (p.aktuell ? 4 : 1.8) + '" fill="' + (p.aktuell ? "#d23c32" : farben[gruppe2 % farben.length]) + '"><title>' + esc(p.name) + "</title></circle>";
+      const gruppe2 = p2.hauscluster ? [...p2.hauscluster].reduce((a, c) => a + c.charCodeAt(0), 0) : 0;
+      return '<circle cx="' + p2.x + '" cy="' + p2.y + '" r="' + (p2.aktuell ? 4 : 1.8) + '" fill="' + (p2.aktuell ? "#d23c32" : farben[gruppe2 % farben.length]) + '"><title>' + esc(p2.name) + "</title></circle>";
     }).join("");
   }
   function reiseModul(ctx) {
@@ -123217,15 +123824,15 @@
       document.body.classList.remove("reise-aktiv");
     }
     function ortPunkt() {
-      const p = ctx.pinPunkt(), w = innerWidth, h = innerHeight;
-      if (p && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h) return { x: Math.round(p.x), y: Math.round(p.y) };
+      const p2 = ctx.pinPunkt(), w = innerWidth, h = innerHeight;
+      if (p2 && p2.x >= 0 && p2.x <= w && p2.y >= 0 && p2.y <= h) return { x: Math.round(p2.x), y: Math.round(p2.y) };
       const chip = document.getElementById("stadt-reise")?.getBoundingClientRect();
       return chip ? { x: Math.round(chip.left + chip.width / 2), y: Math.round(chip.top + chip.height / 2) } : { x: Math.round(w * 0.5), y: Math.round(h * 0.65) };
     }
-    function kreis(p) {
-      const w = innerWidth, h = innerHeight, r = Math.ceil(Math.hypot(Math.max(p.x, w - p.x), Math.max(p.y, h - p.y))) + 2;
-      z2.style.setProperty("--rx", p.x + "px");
-      z2.style.setProperty("--ry", p.y + "px");
+    function kreis(p2) {
+      const w = innerWidth, h = innerHeight, r = Math.ceil(Math.hypot(Math.max(p2.x, w - p2.x), Math.max(p2.y, h - p2.y))) + 2;
+      z2.style.setProperty("--rx", p2.x + "px");
+      z2.style.setProperty("--ry", p2.y + "px");
       z2.style.setProperty("--rr", r + "px");
     }
     function ziele(gesucht = "") {
@@ -123265,8 +123872,8 @@
       zielStart = null;
       protokoll2.length = 0;
       messen2("Pin angetippt");
-      const hier = ctx.stadt(), p = ortPunkt();
-      kreis(p);
+      const hier = ctx.stadt(), p2 = ortPunkt();
+      kreis(p2);
       z2.hidden = false;
       z2.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug3 + '</div><button class="reise-zu" aria-label="Schlie\xDFen" data-reisezu>\xD7</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + "</span><strong>" + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen \u2026" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
       document.body.classList.add("reise-aktiv");
@@ -123293,8 +123900,8 @@
       const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert2 = bewegungReduziert() || ohneAnimation();
       zielStart = start;
       messen2("Reiseziel gew\xE4hlt");
-      const p = ortPunkt();
-      kreis(p);
+      const p2 = ortPunkt();
+      kreis(p2);
       z2.classList.remove("offen", "ziele-offen");
       z2.classList.add("faehrt");
       z2.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild2(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc(kode(von)) + " <span>\u{1F686}</span> " + esc(kode(ziel)) + "</div><small>" + esc(von) + " \u2192 " + esc(ziel) + "</small></div></section>";
@@ -123744,17 +124351,17 @@
       }
       return h;
     }
-    function projektKarte(p, d) {
-      let h = '<div class="karte"><div class="khead">' + esc(E.SYSTEME[p.system].name) + "<small>Generation " + p.zielGeneration + " \xB7 " + esc(artName[p.art]) + "</small></div>";
-      h += '<div class="it-werte"><b>' + esc(phasen[p.phase]) + "</b><b>" + prozent2(p.fortschritt) + "</b></div>" + balken7(p.fortschritt);
-      h += zeile2("Kosten Ist / Plan", geld(p.kostenIst) + " / " + geld(p.kostenPlan));
-      h += zeile2("Mehrwochen durch Verzug", p.verzug);
-      h += zeile2("Rollout", p.erledigteCluster.length + " / " + p.clusterIds.length + " Cluster");
+    function projektKarte(p2, d) {
+      let h = '<div class="karte"><div class="khead">' + esc(E.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc(artName[p2.art]) + "</small></div>";
+      h += '<div class="it-werte"><b>' + esc(phasen[p2.phase]) + "</b><b>" + prozent2(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
+      h += zeile2("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
+      h += zeile2("Mehrwochen durch Verzug", p2.verzug);
+      h += zeile2("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
       const alle = new Map(d.cluster.map((c) => [c.id, c]));
-      if (p.phase === "rollout" || p.phase === "umsetzung" || p.phase === "konzept") {
-        const ausgabe = p.clusterIds.map((id, i) => {
-          const c = alle.get(id), fertig = p.erledigteCluster.includes(id);
-          return '<div class="it-cluster ' + (fertig ? "fertig" : "") + '"><span>' + (fertig ? "\u2713 " : "") + esc(c?.name ?? id) + "</span>" + (fertig ? "<b>Generation " + p.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig && p.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p.id + '" data-i="' + i + '" ' + (i === p.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
+      if (p2.phase === "rollout" || p2.phase === "umsetzung" || p2.phase === "konzept") {
+        const ausgabe = p2.clusterIds.map((id, i) => {
+          const c = alle.get(id), fertig = p2.erledigteCluster.includes(id);
+          return '<div class="it-cluster ' + (fertig ? "fertig" : "") + '"><span>' + (fertig ? "\u2713 " : "") + esc(c?.name ?? id) + "</span>" + (fertig ? "<b>Generation " + p2.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig && p2.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === p2.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
         });
         h += '<details class="it-details"><summary>Rollout-Reihenfolge und Clusterkarte</summary>' + ausgabe.join("") + "</details>";
       }
@@ -123764,9 +124371,9 @@
       let h = '<div class="olief">Projekte durchlaufen Konzept, Umsetzung und einen sequenziellen Rollout. Vier Wochen nach jedem Wechsel sind lokale Startprobleme m\xF6glich.</div>';
       const aktiv2 = d.projekte.filter((x) => x.phase !== "abgeschlossen");
       if (!aktiv2.length) h += '<div class="karte"><div class="zeile">Keine laufenden Projekte.</div></div>';
-      h += aktiv2.map((p) => projektKarte(p, d)).join("");
+      h += aktiv2.map((p2) => projektKarte(p2, d)).join("");
       const alt = d.projekte.filter((x) => x.phase === "abgeschlossen").slice(-8).reverse();
-      if (alt.length) h += '<div class="vtitel">Abgeschlossene Projekte</div>' + alt.map((p) => projektKarte(p, d)).join("");
+      if (alt.length) h += '<div class="vtitel">Abgeschlossene Projekte</div>' + alt.map((p2) => projektKarte(p2, d)).join("");
       h += '<div class="oknoepfe"><button data-it="reiter" data-v="neu">Neues Projekt planen</button></div>';
       return h;
     }
@@ -123859,13 +124466,13 @@
         }
         case "hoch":
         case "runter": {
-          const p = d.projekte.find((x) => x.id === el.dataset.p);
-          if (!p) return;
+          const p2 = d.projekte.find((x) => x.id === el.dataset.p);
+          if (!p2) return;
           const i = Number(el.dataset.i), j = i + (el.dataset.it === "hoch" ? -1 : 1);
-          if (j < 0 || j >= p.clusterIds.length) return;
-          const ids = [...p.clusterIds];
+          if (j < 0 || j >= p2.clusterIds.length) return;
+          const ids = [...p2.clusterIds];
           [ids[i], ids[j]] = [ids[j], ids[i]];
-          const result = E.fuehreAus(s2(), { typ: "itRolloutPlan", projekt: p.id, clusterIds: ids });
+          const result = E.fuehreAus(s2(), { typ: "itRolloutPlan", projekt: p2.id, clusterIds: ids });
           ctx.meldung(result.text, !result.ok);
           if (result.ok) ctx.nachAktion?.();
           break;
@@ -124063,6 +124670,72 @@
     };
   }
 
+  // src/ui/haus.js
+  var PROZENT = (x) => (Number(x) * 100).toFixed(1).replace(".", ",") + " %";
+  var REITER = [["ueberblick", "\xDCberblick"], ["leitung", "Leitung"], ["personal", "Personal"], ["ware", "Ware"], ["partner", "Fl\xE4che & Partner"], ["kosten", "Kosten"], ["kommentare", "Kommentare"]];
+  var SCHWERPUNKT = { personal: "Personal", ware: "Ware", kunde: "Kunde", kosten: "Kosten" };
+  var SERVICE = { kundendienst: "Kundendienst", schneiderei: "\xC4nderungsschneiderei", geschenkverpackung: "Geschenkverpackung", abholstation: "Abholstation" };
+  var POSTEN2 = { energie: "Energie", reinigung: "Reinigung", sicherheit: "Sicherheit", instandhaltung: "Instandhaltung", versicherung: "Versicherung" };
+  var GRUENDE = { wetter: "Wetter", baustelle: "Baustelle vor dem Haus", ware: "Warenverf\xFCgbarkeit", personal: "Personaldeckung", konkurrenz: "Konkurrenzaktion", kasse: "Kassenausfall", stadtereignis: "Stadtereignis", sonstiges: "Sonstiges" };
+  var MASS = { aktion: "Aktion vor Ort", springer: "Springer anfordern", umlagerung: "Ware umlagern", oeffnungszeit: "\xD6ffnungszeit anpassen" };
+  var p = (n, stell = 0) => Number(n ?? 0).toFixed(stell).replace(".", ",");
+  var line = (a, b2) => '<div class="zeile"><span class="was">' + esc(a) + "</span><b>" + esc(String(b2)) + "</b></div>";
+  var button = (label, action, disabled = false) => '<button class="mini" ' + (disabled ? "disabled" : 'onclick="' + action + '"') + ">" + esc(label) + "</button>";
+  function hausSteckbrief(d, ueberblick, reiter, woche2) {
+    const h = d.haus, b2 = d.betrieb, l = b2?.leitungsdaten, k = h.kpi;
+    const id = esc(h.id), r = REITER.some((x) => x[0] === reiter) ? reiter : "ueberblick";
+    let inhalt = "";
+    if (r === "ueberblick") {
+      const tr = b2?.treiberAktuell;
+      inhalt = '<div class="karte"><div class="khead">Kunden und Standort</div>' + line("Mystery Shopping", (b2?.kundenScore ?? "\u2013") + " / 100") + line("Hauscluster", b2?.hauscluster ?? h.region) + line("Stadtgr\xF6\xDFe", h.cluster === "metropole" ? "Metropole" : h.cluster === "grossstadt" ? "Gro\xDFstadt" : "Mittelstadt") + (Number.isFinite(b2?.planWoche) ? line("Umsatzplan aktuelle Woche", geld(b2.planWoche)) : "") + (tr ? line("Frequenz Vorwoche", fmt.format(Math.round(tr.frequenz))) + line("Kaufquote Vorwoche", PROZENT(tr.kaufquote)) + line("Bon Vorwoche", geld(tr.bon)) : line("Umsatztreiber", "Nach 1. Wochenabschluss verf\xFCgbar")) + "</div>" + ueberblick;
+    }
+    if (r === "leitung") {
+      inhalt = '<div class="karte"><div class="khead">Hausleitung</div>' + line("Name", l?.name ?? "Nicht besetzt") + line("Gehalt j\xE4hrlich", geld(l?.gehalt ?? 0)) + line("Bonusanteil", PROZENT(l?.bonusAnteil ?? 0)) + line("Stimmung", p(l?.moral) + " / 100") + line("Wechselwille", PROZENT(l?.wechselwille ?? 0)) + line("Ehrlichkeit", PROZENT(l?.ehrlichkeit ?? 0)) + line("Stellvertretung", (l?.stellvertretung?.name ?? "\u2013") + " \xB7 " + PROZENT(l?.stellvertretung?.qualitaet ?? 0)) + Object.entries(l?.staerken ?? {}).map(([key, v]) => line(SCHWERPUNKT[key] ?? key, PROZENT(v))).join("") + '<div class="zeile">' + Object.keys(SCHWERPUNKT).map((key) => button("F\xF6rdern: " + SCHWERPUNKT[key], "hausTun('foerdern','" + id + "','" + key + "')")).join(" ") + '</div><div class="zeile">' + button("Haltepr\xE4mie 10.000 \u20AC", "hausTun('praemie','" + id + "')") + button("Zur Clusterleitung bef\xF6rdern", "hausTun('befoerdern','" + id + "')") + "</div></div>";
+      inhalt += '<div class="karte"><div class="khead">Kandidaten \xFCber die Clusterleitung</div>' + (b2?.kandidaten ?? []).map((k2, i) => '<div class="zeile"><span class="was">' + esc(k2.name) + " <i>Kompetenz " + PROZENT(k2.qualitaet) + " \xB7 " + geld(k2.gehalt) + "/Jahr</i></span>" + button("Einstellen", "hausTun('ersetzen','" + id + "'," + i + ")") + "</div>").join("") + "</div>";
+    }
+    if (r === "personal") {
+      const v = h.personal;
+      inhalt = '<div class="karte"><div class="khead">Personaleinsatz \xB7 Grundlage O04</div>' + line("Vollzeit", p(v.vollzeit, 1) + " FTE") + line("Teilzeit", p(v.teilzeit, 1) + " FTE") + line("Aushilfen", p(v.aushilfen, 1) + " FTE") + line("Bedarf", p(k?.fteBedarf, 1) + " FTE") + line("Ist", p(k?.fteIst, 1) + " FTE") + line("Personalkosten", geld(k?.personal ?? 0)) + "</div>";
+    }
+    if (r === "ware") {
+      inhalt = '<div class="karte"><div class="khead">Ware \xB7 Grundlage O05</div>' + Object.entries(k?.umsatzJeGruppe ?? {}).sort((a, b3) => b3[1] - a[1]).map(([key, wert]) => line(key, geld(wert))).join("") + "</div>";
+    }
+    if (r === "partner") {
+      const std = b2?.standard;
+      const standardZeilen = ["sauberkeit", "praesentation", "kasse"].map(
+        (key) => '<div class="zeile"><span class="was">' + esc({ sauberkeit: "Sauberkeit", praesentation: "Warenpr\xE4sentation", kasse: "Kassenstandard" }[key]) + " \xB7 " + p(std?.[key]) + "/3</span>" + button("\u2212", "hausTun('standard','" + id + "','" + key + "',-1)") + button("+", "hausTun('standard','" + id + "','" + key + "',1)") + "</div>"
+      ).join("");
+      const serviceZeilen = Object.entries(b2?.services ?? {}).map(
+        ([key, an]) => '<div class="zeile"><span class="was">' + esc(SERVICE[key] ?? key) + "</span>" + button(an ? "Lokal ausschalten" : "Lokal aktivieren", "hausTun('service','" + id + "','" + key + "'," + !an + ")") + button(an ? "Clusterweit aus" : "Clusterweit an", "hausTun('clusterservice','" + id + "','" + key + "'," + !an + ")") + "</div>"
+      ).join("");
+      const stundenZeilen = [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(
+        ([feld, titel]) => '<div class="zeile"><span class="was">' + titel + ": " + p(std?.oeffnung?.[feld]) + " Uhr</span>" + button("\u2212 1h", "hausTun('stunden','" + id + "','" + feld + "',-1)") + button("+ 1h", "hausTun('stunden','" + id + "','" + feld + "',1)") + "</div>"
+      ).join("");
+      const partnerZeilen = (b2?.flaechen ?? []).map((f) => {
+        const bezeichnung = f.konzept === "konzession" ? "Konzession: " : "Untermiete: ";
+        const info = b2?.konzessionen?.[f.id];
+        return line(
+          bezeichnung + (f.gruppe ?? f.mieter?.name ?? f.id),
+          p(f.qm) + " qm" + (info ? " \xB7 " + PROZENT(info.quote) + " Umsatzmiete" : "")
+        );
+      }).join("");
+      inhalt = '<div class="karte"><div class="khead">Hausstandards und Services</div>' + line("\xD6ffnungszeiten Mo\u2013Fr", p(std?.oeffnung?.von) + "\u2013" + p(std?.oeffnung?.bis) + " Uhr") + line("Samstag bis", p(std?.oeffnung?.samstagBis) + " Uhr") + standardZeilen + stundenZeilen + serviceZeilen + (b2?.ausnahmeGrund ? line("Haus-Ausnahme", b2.ausnahmeGrund) : "") + '</div><div class="karte"><div class="khead">Gastronomie</div>' + line("Restaurantfl\xE4che", p(b2?.restaurantQm) + " qm") + line("Betriebsform", b2?.gastro === "selbst" ? "Eigenbetrieb" : b2?.gastro === "pacht" ? "Verpachtet" : "Noch keine") + line("Vertrag bis Woche", b2?.gastroVertragBis ?? "\u2013") + '<div class="zeile">' + button("Selbst betreiben", "hausTun('gastro','" + id + "','selbst')") + button("Verpachten", "hausTun('gastro','" + id + "','pacht')") + '</div></div><div class="karte"><div class="khead">Stadt und Sonntagsverkauf</div>' + line("Umfeld", b2?.umfeld?.ereignis ?? "Regul\xE4r") + line("Innenstadtfrequenz", PROZENT(b2?.umfeld?.trend ?? 1)) + '<div class="zeile">' + button("Verkaufsoffenen Sonntag beantragen (in 2 Wochen)", "hausTun('sonntag','" + id + "')") + '</div></div><div class="karte"><div class="khead">Fl\xE4che, Konzession\xE4re und Untermieter</div>' + (partnerZeilen || '<div class="zeile">Keine Vertr\xE4ge hinterlegt</div>') + "</div>";
+    }
+    if (r === "kosten") {
+      inhalt = '<div class="karte"><div class="khead">Betriebskosten je Woche</div>' + line("Sonstige Hauskosten gesamt", geld(k?.sonstige ?? 0)) + Object.entries(POSTEN2).map(([key, bezeichnung]) => '<div class="zeile"><span class="was">' + esc(bezeichnung) + " \xB7 " + PROZENT(b2?.kosten?.[key] ?? 1) + " Budget</span>" + button("\u2212 10 %", "hausTun('kosten','" + id + "','" + key + "',-0.1)") + button("+ 10 %", "hausTun('kosten','" + id + "','" + key + "',0.1)") + "</div>").join("") + '<div class="zeile grau">Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.</div></div>';
+    }
+    if (r === "kommentare") {
+      inhalt = '<div class="karte"><div class="khead">Wochenkommentierung</div>' + (b2?.kommentare?.length ? b2.kommentare.map((c) => '<div class="zeile"><span class="was"><b>KW ' + (c.woche % 52 + 1) + " \xB7 " + PROZENT(c.abweichung) + "</b><i>" + esc(GRUENDE[c.grund] ?? c.grund) + " \xB7 " + esc(MASS[c.massnahme] ?? c.massnahme) + "</i><small>" + esc(c.pruefung) + "</small></span></div>").join("") : '<div class="zeile">Noch keine Abweichung unter \u22125 % mit Vorjahres- oder Planvergleich.</div>') + '<div class="zeile">' + Object.entries(MASS).map(([key, name2]) => button(name2, "hausTun('massnahme','" + id + "','" + key + "')")).join(" ") + "</div></div>";
+    }
+    return '<nav class="haus-reiter">' + REITER.map(([key, name2]) => '<button class="' + (key === r ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
+  }
+  function hausBeobachtungHtml(liste) {
+    return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste.length ? liste.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc(x.id) + `')"><span class="was"><b>` + esc(x.name) + "</b><i>" + esc(x.stadt) + " \xB7 " + esc(x.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
+  }
+  function hausReportingHtml(kommentare, ranking2) {
+    return '<div class="karte"><div class="khead">Kommentare der Woche</div>' + (kommentare.length ? kommentare.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc(x.id) + `')"><span class="was"><b>` + esc(x.name) + " \xB7 " + PROZENT(x.abweichung) + "</b><i>" + esc(GRUENDE[x.grund] ?? x.grund) + " / " + esc(MASS[x.massnahme] ?? x.massnahme) + "</i><small>" + esc(x.pruefung) + "</small></span><span>\u2192</span></button>").join("") : '<div class="zeile">Noch keine kommentierungspflichtigen Abweichungen.</div>') + '</div><div class="karte"><div class="khead">Mystery Shopping \xB7 Top 20</div>' + ranking2.slice(0, 20).map((x, i) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc(x.id) + `')"><span class="was">` + (i + 1) + ". " + esc(x.name) + "</span><b>" + x.score + "/100</b></button>").join("") + "</div>";
+  }
+
   // src/spiel.js
   var param = new URLSearchParams(location.search);
   var $ = (id) => document.getElementById(id);
@@ -124185,8 +124858,8 @@
   function aufBoden(px2, py2) {
     const r = canvas.getBoundingClientRect();
     ray.setFromCamera(new three_module_exports.Vector2((px2 - r.left) / r.width * 2 - 1, -((py2 - r.top) / r.height) * 2 + 1), cam);
-    const p = new three_module_exports.Vector3();
-    return ray.ray.intersectPlane(boden7, p) ? p : null;
+    const p2 = new three_module_exports.Vector3();
+    return ray.ray.intersectPlane(boden7, p2) ? p2 : null;
   }
   function hausUnter(px2, py2) {
     const r = canvas.getBoundingClientRect();
@@ -124256,10 +124929,10 @@
     bahnhofOrt = null;
     clearInterval(wettbewerbPinTimer);
     wettbewerbPinTimer = null;
-    for (const p of wettbewerbPins) {
-      scene.remove(p);
-      p.material?.map?.dispose();
-      p.material?.dispose();
+    for (const p2 of wettbewerbPins) {
+      scene.remove(p2);
+      p2.material?.map?.dispose();
+      p2.material?.dispose();
     }
     wettbewerbPins = [];
     const texs = /* @__PURE__ */ new Set();
@@ -124278,17 +124951,17 @@
   }
   function angebotsPinsAktualisieren() {
     if (!scene || !sb || !s) return;
-    for (const p of angebotPins) {
-      scene.remove(p);
-      p.material?.dispose();
+    for (const p2 of angebotPins) {
+      scene.remove(p2);
+      p2.material?.dispose();
     }
     angebotPins = [];
     for (const a of posteingang(s).handeln.filter((x) => x.art === "angebot")) {
       for (const id of a.bezug?.hausIds ?? []) {
         const h = sb.haeuser.get(id);
         if (!h?.p) continue;
-        const p = h.p;
-        const pin = angebotMarker(scene, p.x + p.w / 2, Math.max(20, (h.e?.hoehe ?? 30) + 3), p.z + p.d / 2, 8);
+        const p2 = h.p;
+        const pin = angebotMarker(scene, p2.x + p2.w / 2, Math.max(20, (h.e?.hoehe ?? 30) + 3), p2.z + p2.d / 2, 8);
         pin.userData.angebotId = a.id;
         angebotPins.push(pin);
       }
@@ -124298,10 +124971,10 @@
     if (!scene || !sb || !s) return;
     clearInterval(wettbewerbPinTimer);
     wettbewerbPinTimer = null;
-    for (const p of wettbewerbPins) {
-      scene.remove(p);
-      p.material?.map?.dispose();
-      p.material?.dispose();
+    for (const p2 of wettbewerbPins) {
+      scene.remove(p2);
+      p2.material?.map?.dispose();
+      p2.material?.dispose();
     }
     wettbewerbPins = [];
     const liste = wettbewerbFuerGrafik(s, stadtName);
@@ -124309,7 +124982,7 @@
       let x = sb.wettbewerber.get(w.id);
       if (!x && w.inHartwigGebaeude && w.status !== "geschlossen") x = sb.haeuser.get(w.inHartwigGebaeude);
       if (!x?.p) continue;
-      const p = x.p;
+      const p2 = x.p;
       const c = document.createElement("canvas");
       c.width = 96;
       c.height = 96;
@@ -124343,7 +125016,7 @@
         g.stroke();
       }
       const pin = new three_module_exports.Sprite(new three_module_exports.SpriteMaterial({ map: new three_module_exports.CanvasTexture(c), transparent: true, depthTest: false }));
-      pin.position.set(p.x + p.w / 2, Math.max(20, (x.e?.hoehe ?? 28) + 5), p.z + p.d / 2);
+      pin.position.set(p2.x + p2.w / 2, Math.max(20, (x.e?.hoehe ?? 28) + 5), p2.z + p2.d / 2);
       pin.scale.set(10.5, 10.5, 1);
       pin.userData.wbId = w.id;
       pin.userData.puls = neu;
@@ -124351,20 +125024,20 @@
       scene.add(pin);
       wettbewerbPins.push(pin);
     }
-    const puls = wettbewerbPins.filter((p) => p.userData.puls);
+    const puls = wettbewerbPins.filter((p2) => p2.userData.puls);
     if (puls.length) wettbewerbPinTimer = setInterval(() => {
       const t = performance.now() * 7e-3;
-      for (const p of puls) {
+      for (const p2 of puls) {
         const k = 10.5 + 2 * (1 + Math.sin(t));
-        p.scale.set(k, k, 1);
+        p2.scale.set(k, k, 1);
       }
       zeichnen();
     }, 260);
   }
   function bahnhofPinErstellen() {
-    const p = plan.parzellen.find((q2) => q2.typ === "slot:bahnhof") ?? plan.bloecke?.find((b2) => b2.art === "bahn" && !b2.ohneBahnhof);
-    if (!p) return;
-    const x = p.x + p.w / 2, z2 = p.z + p.d / 2;
+    const p2 = plan.parzellen.find((q2) => q2.typ === "slot:bahnhof") ?? plan.bloecke?.find((b2) => b2.art === "bahn" && !b2.ohneBahnhof);
+    if (!p2) return;
+    const x = p2.x + p2.w / 2, z2 = p2.z + p2.d / 2;
     bahnhofOrt = { x, z: z2 };
     const c = document.createElement("canvas");
     c.width = 128;
@@ -124416,14 +125089,14 @@
     const T = new KompaktSammler();
     const offen = [];
     const zahl3 = /* @__PURE__ */ new Map();
-    for (const p of plan.parzellen) zahl3.set(p.typ, (zahl3.get(p.typ) ?? 0) + 1);
-    const kachelTyp = (p) => !p.standort && !IMMER_GRUND.has(p.typ) && (HAUSTYPEN.has(p.typ) || p.typ.startsWith("slot:") && zahl3.get(p.typ) >= 5);
+    for (const p2 of plan.parzellen) zahl3.set(p2.typ, (zahl3.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl3.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z2, typ) {
       const f = bauerFuer(z2, typ);
-      return (S, sc, p) => {
-        if (!kachelTyp(p)) return f(S, sc, p);
-        if (!p.leer) offen.push(p);
-        return { hoehe: klotzHoehe(p) };
+      return (S, sc, p2) => {
+        if (!kachelTyp(p2)) return f(S, sc, p2);
+        if (!p2.leer) offen.push(p2);
+        return { hoehe: klotzHoehe(p2) };
       };
     } });
     setzeLod("fern");
@@ -124470,8 +125143,8 @@
   var KA = { liste: [], teileGrund: 0, laeuft: false };
   var HAUSTYPEN = /* @__PURE__ */ new Set(["stadthaus", "eck", "hofhaus"]);
   var IMMER_GRUND = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:premium", "slot:sport", "slot:wettbewerber", "slot:hq", "slot:dominante", "slot:kirche", "slot:hochhaus", "slot:rathaus", "slot:heizwerk", "slot:dom", "slot:fernsehturm", "slot:wasserturm", "slot:nord_kirche", "slot:nord_kontorhaus", "slot:nord_speicher", "slot:nord_hafen", "slot:center_passage"]);
-  function klotzHoehe(p) {
-    const g = p.hofbau ? 2 : p.typ === "hofhaus" ? Math.max(2, (p.geschosse ?? 4) - 1) : p.geschosse ?? 4;
+  function klotzHoehe(p2) {
+    const g = p2.hofbau ? 2 : p2.typ === "hofhaus" ? Math.max(2, (p2.geschosse ?? 4) - 1) : p2.geschosse ?? 4;
     return 4.2 + g * 3.3;
   }
   function kachelnAnlegen(parzellen) {
@@ -124479,13 +125152,13 @@
     KA.liste = [];
     const bl = new Map(plan.bloecke.map((b2) => [b2.id, b2]));
     const m = /* @__PURE__ */ new Map();
-    for (const p of parzellen) {
-      const b2 = bl.get(p.block), cx = b2 ? b2.x + b2.w / 2 : p.x, cz = b2 ? b2.z + b2.d / 2 : p.z;
+    for (const p2 of parzellen) {
+      const b2 = bl.get(p2.block), cx = b2 ? b2.x + b2.w / 2 : p2.x, cz = b2 ? b2.z + b2.d / 2 : p2.z;
       const key = `${Math.floor(cx / KACHEL)}:${Math.floor(cz / KACHEL)}`;
       if (!m.has(key)) m.set(key, { key, parz: [], box: new three_module_exports.Box3(), stufe: null, gruppe: null, teile: 0 });
       const k = m.get(key);
-      k.parz.push(p);
-      k.box.expandByPoint(new three_module_exports.Vector3(p.x, 0, p.z)).expandByPoint(new three_module_exports.Vector3(p.x + p.w, klotzHoehe(p) + 4, p.z + p.d));
+      k.parz.push(p2);
+      k.box.expandByPoint(new three_module_exports.Vector3(p2.x, 0, p2.z)).expandByPoint(new three_module_exports.Vector3(p2.x + p2.w, klotzHoehe(p2) + 4, p2.z + p2.d));
     }
     KA.liste = [...m.values()];
     for (const k of KA.liste) klotzBauen(k);
@@ -124499,18 +125172,18 @@
   function klotzBauen(k) {
     entsorge(k);
     const S = new KompaktSammler(), g = new three_module_exports.Group();
-    for (const p of k.parz) {
-      const r = rng2((p.seed ?? 1) * 13 + 7 >>> 0), H = klotzHoehe(p);
+    for (const p2 of k.parz) {
+      const r = rng2((p2.seed ?? 1) * 13 + 7 >>> 0), H = klotzHoehe(p2);
       const f = waehle2(r, [...FARBEN3.fassadeHell, ...FARBEN3.fassadeHell, ...FARBEN3.fassadeWarm, ...FARBEN3.fassadeKuehl, ...FARBEN3.backstein.slice(0, 2), ...FARBEN3.putzBunt]);
-      S.quader(p.x, 0, p.z, p.x + p.w, H, p.z + p.d, f);
-      S.quader(p.x - 0.1, 4, p.z - 0.1, p.x + p.w + 0.1, 4.4, p.z + p.d + 0.1, dunkler(f, 0.08));
-      const steil = !p.hofbau && p.typ !== "hofhaus" && (p.geschosse ?? 4) <= 5 && r() < 0.75;
+      S.quader(p2.x, 0, p2.z, p2.x + p2.w, H, p2.z + p2.d, f);
+      S.quader(p2.x - 0.1, 4, p2.z - 0.1, p2.x + p2.w + 0.1, 4.4, p2.z + p2.d + 0.1, dunkler(f, 0.08));
+      const steil = !p2.hofbau && p2.typ !== "hofhaus" && (p2.geschosse ?? 4) <= 5 && r() < 0.75;
       if (steil) {
-        const ax = p.w >= p.d ? "x" : "z", L2 = Math.max(p.w, p.d), T2 = Math.min(p.w, p.d);
+        const ax = p2.w >= p2.d ? "x" : "z", L2 = Math.max(p2.w, p2.d), T2 = Math.min(p2.w, p2.d);
         const dg = dachProfil(L2, T2 + 0.4, Math.min(5, T2 * 0.4), 0.4, ax);
-        dg.translate(p.x + p.w / 2, H, p.z + p.d / 2);
+        dg.translate(p2.x + p2.w / 2, H, p2.z + p2.d / 2);
         S.add(dg, waehle2(r, [...FARBEN3.dach, ...FARBEN3.ziegel]));
-      } else S.quader(p.x + 0.3, H, p.z + 0.3, p.x + p.w - 0.3, H + 0.4, p.z + p.d - 0.3, waehle2(r, FARBEN3.dach));
+      } else S.quader(p2.x + 0.3, H, p2.z + 0.3, p2.x + p2.w - 0.3, H + 0.4, p2.z + p2.d - 0.3, waehle2(r, FARBEN3.dach));
     }
     S.bauen(g);
     scene.add(g);
@@ -124521,7 +125194,7 @@
     const S = new KompaktSammler(), g = new three_module_exports.Group(), b2 = echterBauer();
     setzeLod("fern");
     try {
-      for (const p of k.parz) bauerFuer(b2, p.typ)(S, g, p);
+      for (const p2 of k.parz) bauerFuer(b2, p2.typ)(S, g, p2);
       S.bauen(g);
       entferneKleineSchilder(g);
     } finally {
@@ -124631,6 +125304,8 @@
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
+    const ausnahmen = hausBeobachtung(s, 30).length;
+    $("hausbeobachtung").textContent = ausnahmen ? ausnahmen + " H\xE4user beobachten \u2192" : "Hausbetrieb: keine Ausnahmen";
     $("kw").textContent = `KW ${c.kw} / ${c.jahr}`;
     $("phase").textContent = c.phase === "insolvenz" ? "Insolvenzverfahren" : c.phase === "zerschlagen" ? "Zerschlagen" : "";
     $("phase").style.display = c.phase === "regulaer" ? "none" : "";
@@ -124712,6 +125387,7 @@
     kameraSetzen();
   }
   $("pzu").addEventListener("click", schliessePanel);
+  var hausReiter = "ueberblick";
   var hausEtageWahl = null;
   var letztesInnenbild = null;
   window.hausKlick = (art, id, nr) => {
@@ -124740,6 +125416,8 @@
     const d = hausDetail(s, id);
     if (!d) return;
     const neu = offenesHaus !== id;
+    if (neu) hausReiter = "ueberblick";
+    d.betrieb = hausUebersicht(s, id);
     offenesHaus = id;
     offenesHq = null;
     offenerWettbewerber = null;
@@ -124752,10 +125430,10 @@
     html += `<div class="raster">${zahl3("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl3("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl3("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl3("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
     html += hausTreiberZeile(src_exports, s, id);
     if (h.klasse === "premium") {
-      const p = premiumUebersicht(s).find((q2) => q2.id === id);
-      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl3("Premium-Image", Math.round(p?.image ?? 80) + " / 100")}${zahl3("Immobilien- & Marktwert", geld(p?.marktwert ?? 0))}${zahl3("EBITDA-Marge (DB)", ((p?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl3("Aktionsschutz", p?.schutz ? "Aktiv" : "Aus")}</div>`;
+      const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
+      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl3("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl3("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl3("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl3("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
       if (h.premiumEigentuemer) html += `<div class="zeile">Eigent\xFCmer: ${h.premiumEigentuemer}</div>`;
-      else if (h.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
+      else if (h.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p2?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
       const an = s.angebote.find((a) => a.status === "offen" && a.typ === "premiumVerkauf" && a.wunschHaeuser?.includes(id));
       if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || "Investor"} \xB7 ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
       html += "</div>";
@@ -124787,8 +125465,46 @@
       html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' + esc(w.name) + "</b> <i>" + esc(WB_ART[w.art] ?? w.art) + " \xB7 " + esc(WB_STATUS[w.status] ?? w.status) + "</i>" + (wirkung ? "<small>" + wirkung + "</small>" : "") + "</span><span>\u2192</span></button>";
     }
     html += "</div>";
+    html = hausSteckbrief(d, html, hausReiter, s.woche);
     panel(h.name, `${h.stadt} \xB7 ${h.klasse === "premium" ? "Premiumhaus" : h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
     if (neu) hausZeigen(id);
+  }
+  window.hausReiterWahl = (reiter) => {
+    hausReiter = reiter;
+    if (offenesHaus) oeffneHaus(offenesHaus);
+  };
+  window.hausTun = (art, id, key, wert) => {
+    const h = s.haeuser.find((x) => x.id === id);
+    if (!h) return;
+    const b2 = hausUebersicht(s, id);
+    const a = art === "foerdern" ? { typ: "hausLeitungFoerdern", haus: id, staerke: key } : art === "ersetzen" ? { typ: "hausLeitungErsetzen", haus: id, kandidat: key } : art === "praemie" ? { typ: "hausHaltepraemie", haus: id, betrag: 1e4 } : art === "befoerdern" ? { typ: "hausLeitungBefordern", haus: id } : art === "service" ? { typ: "hausServiceSetzen", haus: id, service: key, an: wert } : art === "kosten" ? { typ: "hausKostenSetzen", haus: id, posten: key, faktor: Math.round(((b2?.kosten?.[key] ?? 1) + wert) * 100) / 100 } : art === "gastro" ? { typ: "hausGastronomie", haus: id, modus: key } : art === "massnahme" ? { typ: "hausMassnahme", haus: id, massnahme: key } : art === "standard" ? { typ: "hausStandardSetzen", cluster: b2.hauscluster, feld: key, wert: Math.max(1, Math.min(3, b2.standard[key] + wert)) } : art === "stunden" ? { typ: "hausStandardSetzen", cluster: b2.hauscluster, feld: key, wert: Math.max(7, Math.min(22, b2.standard.oeffnung[key] + wert)) } : art === "clusterservice" ? { typ: "hausClusterServiceSetzen", cluster: b2.hauscluster, service: key, an: wert } : art === "sonntag" ? { typ: "hausSonntag", stadt: h.stadt, woche: s.woche + 2 } : null;
+    if (!a) return;
+    const ergebnis = fuehreAus(s, a);
+    meldung(ergebnis.text, ergebnis.ok);
+    if (ergebnis.ok) {
+      grafikNachziehen();
+      nachAktion();
+      if (offenesHaus) oeffneHaus(offenesHaus);
+    }
+  };
+  window.hausSpringen = (id) => {
+    const h = s.haeuser.find((x) => x.id === id);
+    if (!h) return;
+    if (stadtName !== h.stadt) {
+      baueStadtAusSpiel(h.stadt);
+      wahl2.value = h.stadt;
+    }
+    oeffneHaus(id);
+  };
+  function oeffneBeobachtung() {
+    offenesHaus = null;
+    offenesHq = null;
+    panel("Beobachtungsliste", "Ausnahmen im Filialnetz", hausBeobachtungHtml(hausBeobachtung(s, 30)));
+  }
+  function oeffneHausReporting() {
+    offenesHaus = null;
+    offenesHq = null;
+    panel("Reporting", "Wochenkommentare und Mystery Shopping", hausReportingHtml(hausKommentareDerWoche(s), hausKundenRanking(s)));
   }
   function oeffneWettbewerber(id) {
     const w = wettbewerbFuerGrafik(s, stadtName).find((q2) => q2.id === id);
@@ -125037,14 +125753,14 @@
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
       const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== "geschlossen");
-      const zahl3 = (rolle3) => d.standorte.filter((p) => p.rolle === rolle3).length;
+      const zahl3 = (rolle3) => d.standorte.filter((p2) => p2.rolle === rolle3).length;
       const formate = [["Hartwig", hs.filter((h) => h.format === "warenhaus").length], ["Volkskauf", zahl3("schwester")], ["Sport", hs.filter((h) => h.format === "sport").length], ["FUNDUS", zahl3("outlet")]];
       return {
         name: d.name,
         region: d.region,
         hauscluster: hs[0]?.hauscluster,
         umsatz: hs.reduce((sum2, h) => sum2 + (h.kpi?.umsatz ?? 0), 0),
-        formate: formate.filter((p) => p[1]).map((p) => p[0] + " " + p[1]).join(" \xB7 ")
+        formate: formate.filter((p2) => p2[1]).map((p2) => p2[0] + " " + p2[1]).join(" \xB7 ")
       };
     }),
     pinPunkt: bahnhofBildpunkt,
@@ -125105,6 +125821,9 @@
   $("produkte").addEventListener("click", () => oeffneModul(pr));
   $("planung").addEventListener("click", () => oeffneModul(pl));
   $("posteingang").addEventListener("click", () => oeffneModul(po));
+  $("beobachtung").addEventListener("click", oeffneBeobachtung);
+  $("haus-reporting").addEventListener("click", oeffneHausReporting);
+  $("hausbeobachtung").addEventListener("click", oeffneBeobachtung);
   $("postdirekt").addEventListener("click", () => oeffneModul(po));
   $("wochenstreifen").addEventListener("click", () => {
     $("wochenstreifen").classList.remove("an");
@@ -125131,9 +125850,9 @@
   });
   function menueBadge() {
     const n = s ? freigaben(s).anzahl : 0, v = vs?.badge() ?? 0, b2 = $("menuebadge");
-    const p = po?.badge() ?? 0;
-    b2.textContent = n + p;
-    b2.style.display = n + p ? "" : "none";
+    const p2 = po?.badge() ?? 0;
+    b2.textContent = n + p2;
+    b2.style.display = n + p2 ? "" : "none";
     const vb = $("vsbadge");
     vb.textContent = v;
     vb.style.display = v ? "" : "none";
@@ -125262,10 +125981,34 @@
     wochenbericht,
     bahnhofFokussieren,
     bahnhofBildpunkt,
+    // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
+    oeffneBeobachtung,
+    oeffneHausReporting,
+    oeffneHausReiter: (id, reiter) => {
+      oeffneHaus(id);
+      hausReiter = reiter;
+      oeffneHaus(id);
+    },
+    pruefeHaus: (id) => {
+      const d = hausUebersicht(s, id);
+      hausReiter = "ueberblick";
+      oeffneHaus(id);
+      const text3 = $("pinhalt").textContent;
+      const fehler5 = [];
+      if (!text3.includes(String(d.kundenScore))) fehler5.push("Kundenscore fehlt");
+      for (const [reiter, wort] of [["leitung", d.leitungsdaten.name], ["kosten", "Betriebskosten"], ["kommentare", "Wochenkommentierung"]]) {
+        hausReiter = reiter;
+        oeffneHaus(id);
+        if (!$("pinhalt").textContent.includes(wort)) fehler5.push(reiter + " nicht korrekt");
+      }
+      hausReiter = "ueberblick";
+      oeffneHaus(id);
+      return { id, score: d.kundenScore, reiter: 7, fehler: fehler5 };
+    },
     pruefeWettbewerber: () => {
       const soll = wettbewerbFuerGrafik(s, stadtName);
       const gezeigt = /* @__PURE__ */ new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== "geschlossen" && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
-      const pinIds = new Set(wettbewerbPins.map((p) => p.userData.wbId));
+      const pinIds = new Set(wettbewerbPins.map((p2) => p2.userData.wbId));
       const fehler5 = soll.filter((w) => w.status !== "geschlossen" && !gezeigt.has(w.id)).map((w) => "Fehlt: " + w.id);
       for (const id of gezeigt) if (!pinIds.has(id)) fehler5.push("Pin fehlt: " + id);
       return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler: fehler5 };
@@ -125315,7 +126058,7 @@
       /** Messwerte der Kartengrenze: Zoomgrenzen, Bildbreite, Anteil an der Stadtbreite, Bildecken gegen G plus Gürtel. */
       messen: () => {
         const [w, h] = groesse(), a = w / h, G2 = K2.G, E = erweitert(G2), ecken = bildecken(K2, a);
-        const drin = ecken.every((p) => p.x >= E.x0 - 0.01 && p.x <= E.x1 + 0.01 && p.z >= E.z0 - 0.01 && p.z <= E.z1 + 0.01);
+        const drin = ecken.every((p2) => p2.x >= E.x0 - 0.01 && p2.x <= E.x1 + 0.01 && p2.z >= E.z0 - 0.01 && p2.z <= E.z1 + 0.01);
         const bildbreite = 2 * K2.halb * a;
         return { stadt: stadtName, G: G2, E, halb: K2.halb, min: K2.min, max: K2.max, zoom: K2.zoom, mitte: { x: K2.x, z: K2.z }, mitteInG: K2.x >= G2.x0 && K2.x <= G2.x1 && K2.z >= G2.z0 && K2.z <= G2.z1, bildbreite, anteilBreite: bildbreite / (G2.x1 - G2.x0), anteilProjiziert: bildbreite / ((G2.x1 - G2.x0 + G2.z1 - G2.z0) / Math.SQRT2), ecken, eckenInE: drin };
       },
