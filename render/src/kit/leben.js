@@ -109,12 +109,13 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
   let meshes = {}, raf = 0, zuletzt = 0, letzterKontakt = 0, letzteAuswahl = -1, pause = false;
   let frameKosten = [], limitFaktor = 1, langsameFrames = 0, aufnahme = false;
   const farbe = (c) => new THREE.Color(c);
+  const projektion = new THREE.Vector3();
   const sichtbar = (p, rand = 1.35) => {
     const k = zoom(); if (!k) return false;
     // Grobe Sichtbarkeitsprüfung vor dem exakten Projektions-Test spart CPU.
     if (Math.abs(p.x - k.x) + Math.abs(p.z - k.z) > k.halb * 5) return false;
     const c = kamera(); if (!c) return false;
-    const v = new THREE.Vector3(p.x, 0.5, p.z).project(c);
+    const v = projektion.set(p.x, 0.5, p.z).project(c);
     return Math.abs(v.x) < rand && Math.abs(v.y) < rand;
   };
   function waehle(liste) { return liste[Math.floor(r() * liste.length)]; }
@@ -141,7 +142,6 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
   function hausStandorte() {
     const s = spiel();
     if (!s || !plan) return [];
-    const ids = new Map((s.haeuser ?? []).filter((h) => h.stadt === s.stadt || h.stadt === s?.stadt).map((h) => [h.id, h]));
     // GameState enthält keinen ausgewählten Städtenamen, deshalb Zuordnung über plan.standorte.
     const punkte = [];
     for (const st of plan.standorte ?? []) {
@@ -302,7 +302,10 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     fertig(meshes.rumpf, n); fertig(meshes.kopf, n); fertig(meshes.tuete, n);
     n = 0;
     for (const a of lkw) {
-      const p = a.p;
+      const t = clamp(a.fort / 4.5, 0, 1);
+      if (a.fort > 12) continue; // Lkw hat nach der Entladung die Anlieferung wieder verlassen.
+      const ein = a.fort < 4.5 ? t : a.fort < 8 ? 1 : 1 - clamp((a.fort - 8) / 4, 0, 1);
+      const p = { x: a.start.x + (a.ziel.x - a.start.x) * ein, z: a.start.z + (a.ziel.z - a.start.z) * ein };
       if (!sichtbar(p)) continue;
       matrix(meshes.lkw, n++, { ...p, y: 1.7 }, a.winkel, [1, 1, 1], farbe('#e1ddd1'));
     }
@@ -313,6 +316,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     aktualisiereAuswahl();
     bewegungWagen(autos, dt); bewegungWagen(busse, dt); bewegungWagen(bahnen, dt);
     fussBewegen(dt);
+    for (const a of lkw) a.fort += dt;
     zeichneInstanzen();
     const ms = performance.now() - t0;
     frameKosten.push(ms); if (frameKosten.length > 60) frameKosten.shift();
@@ -358,7 +362,8 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
         .sort((a, b) => abstand(punkt(a, laenge(a) / 2), h.mitte) - abstand(punkt(b, laenge(b) / 2), h.mitte))[0];
       const p = s ? koordinate(s.s, clamp(s.s.achse === 'z' ? h.mitte.z : h.mitte.x, s.s.von + 4, s.s.bis - 4),
         Math.sign((s.s.achse === 'z' ? h.mitte.x : h.mitte.z) - s.s.mitte) * (s.s.breite / 2 - .8)) : h.weg;
-      return { p, winkel: s?.s.achse === 'z' ? -Math.PI / 2 : 0, hausId: h.h.id };
+      const ziel = h.weg; // Vom Fahrbahnrand bis zur Hausanlieferung und zurück.
+      return { start: p, ziel, fort: 0, winkel: s?.s.achse === 'z' ? -Math.PI / 2 : 0, hausId: h.h.id };
     });
     letzteAuswahl = -1; zeichneInstanzen();
     if (modus !== 'aus') zeichnen();
@@ -385,7 +390,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     pause: (an) => { pause = !!an; if (pause) anhalten(); else starten(); },
     kontakt, zu: loeschen,
     /** Debug-API und Abnahme: 10 Zeitpunkte im 100-ms-Abstand mit externen Canvas-Screenshots. */
-    schritt: (dt = .1) => { schritt(dt); zeichnen(); },
+    schritt: (dt = .1, bild = true) => { const ms = schritt(dt); if (bild) zeichnen(); return ms; },
     status: () => ({ modus, autos: autos.length, passanten: fuss.length, busse: busse.length,
       strassenbahnen: bahnen.length, lieferwagen: lkw.length,
       netzSpuren: netz?.spuren.length ?? 0, budget: limitFaktor,
