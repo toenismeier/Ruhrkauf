@@ -5,6 +5,8 @@ import { warenhaus, FAMILIEN } from '../kit/warenhaus.js';
 import haeuser from '../../haeuser.json';
 import hauserSchwester from '../../haeuser-schwester.json';
 import { schwesterhaus } from '../kit/schwesterhaus.js';
+import haeuserOutlet from '../../haeuser-outlet.json';
+import { outlet, NAME_OUTLET } from '../kit/outlet.js';
 
 const stat = [];
 const t0 = performance.now();
@@ -38,10 +40,24 @@ for (const h of hauserSchwester) eintraege.push({
     return new THREE.Box3(new THREE.Vector3(-4, 0, -4), new THREE.Vector3(erg.w + 4, erg.hoehe, erg.d + 4));
   },
 });
+// Eigenständiger FUNDUS-Block ergänzend zu Hartwig und Volkskauf.
+for (const h of haeuserOutlet) eintraege.push({
+  titel: NAME_OUTLET + ' ' + h.stadt,
+  unter: NAME_OUTLET + ' · ' + h.lage + ' · ' + h.grundflaecheQm + ' m²',
+  bau(S, scene) {
+    if (letzteSonne?.shadow.map) { letzteSonne.shadow.map.dispose(); letzteSonne.shadow.map = null; }
+    letzteSonne = scene.userData.sonne;
+    const t = performance.now();
+    const e = outlet(S, scene, h, { x: 0, z: 0 });
+    stat.push({ id: h.id, fam: e.familie, teile: e.teile, w: e.w, d: e.d, h: +e.hoehe.toFixed(1), ms: +(performance.now() - t).toFixed(1) });
+    sockel(S, 0, 0, e.w, e.d, 4);
+    return new THREE.Box3(new THREE.Vector3(-4, 0, -4), new THREE.Vector3(e.w + 4, e.hoehe, e.d + 4));
+  },
+});
 // Erst nach dem load-Ereignis rechnen, sonst läuft page.goto des Renderers in sein 30-s-Limit.
 setTimeout(() => {
   const t1 = performance.now();
-  zeigeKatalog(eintraege, { titel: 'Hartwig und Schwesterkette – 204 Häuser', spalten: 10, kachel: [300, 300] });
+  zeigeKatalog(eintraege, { titel: 'Hartwig und Konzernformate – ' + eintraege.length + ' Häuser', spalten: 10, kachel: [300, 300] });
   const bauMs = stat.reduce((a, s) => a + s.ms, 0);
   console.log(`STAT gesamt ${(performance.now() - t1).toFixed(0)} ms, davon Geometrie ${bauMs.toFixed(0)} ms, max Teile ${Math.max(...stat.map((s) => s.teile))}`);
   console.log('STATJSON ' + JSON.stringify(stat));

@@ -6,6 +6,9 @@ import { THREE, kameraFuer } from './kit/basis.js';
 import { stadtplan, streifenSchneidet } from './kit/stadtplan.js';
 import { stadtDaten, nachbarStaedte } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
+import outletHaeuser from '../haeuser-outlet.json';
+import hartwigHaeuser from '../haeuser.json';
+import { familieOutlet, masseOutlet } from './kit/outlet.js';
 
 const arg = process.argv.slice(2);
 const opt = (n, d) => { const i = arg.indexOf(n); return i >= 0 ? arg[i + 1] : d; };
@@ -288,12 +291,23 @@ function pruefe(name) {
   )).length;
   const gross = [...grossNah.values()].filter((g) => g.n > 50);
   const grossInnen = gross.filter((g) => g.innen > 0.25 * g.n);
+  const oh = outletHaeuser.find((h) => h.stadt === name);
+  const op = oh ? [...plan.parzellen, ...(plan.aussen?.bauten ?? [])].find((q) => q.standort?.id === oh.id) : null;
+  const maxHartwig = Math.max(0, ...hartwigHaeuser.filter((h) => h.stadt === name && h.format === 'warenhaus').map((h) => h.grundflaecheQm));
+  const anders = oh ? nachbarStaedte(name).filter((stadt) => outletHaeuser.some((q) => q.stadt === stadt && familieOutlet(q) === familieOutlet(oh) && q.fassade === oh.fassade)) : [];
+  const opp = plan.standorte.filter((q) => q.rolle === 'wettbewerber' && q.art === 'offprice');
+  const gleicheParzelle = op && opp.some((q) => q.parzelle === op.id || q.block === op.block);
+  const ringFehler = oh?.lage === 'rand' && !(plan.aussen?.bauten ?? []).includes(op);
+  const innenFehler = oh?.lage === 'b' && (!plan.parzellen.includes(op) || masseOutlet(oh).bw * masseOutlet(oh).bd > maxHartwig * 0.8 + 1e-9);
   return {
     name, plan,
     werte: {
       'Schwester: gleicher Hartwig-Block': schwesterBlock,
       'Schwester: mehr als 80 % Hartwig': schwesterGross,
       'Schwester: gleiche Nachbar-Variante': schwesterGleich,
+      'FUNDUS Platzierung/Flächenlimit': Number(!!ringFehler) + Number(!!innenFehler),
+      'FUNDUS gleicher Block wie Offprice': Number(!!gleicheParzelle),
+      'FUNDUS gleiche Bauform bei Nachbarn': anders.length,
       'Grün in Blöcken Stadt %': pz(stadt.gruenBlock ?? 0, blockFl(stadt)),
       'Grün in Blöcken nah %': pz(nah.gruenBlock ?? 0, blockFl(nah)),
       'Blockrand unbebaut Stadt %': pz(randLeer, randL),
@@ -335,6 +349,7 @@ const GRENZE = {
   'Gleisfläche nah %': 2, 'Bahnhof nah %': 3, 'Wasser nah %': 15, 'Außerhalb Karte nah %': 0, 'Wasserkante nackt nah m': 0,
   'Wasserkante nackt Stadt m': 0, 'Wasserkante Kartenrand nah m': 0, 'Großbauten nah (Anzahl)': 1, 'Großbauten nah innen': 0,
   'Freie Rasenfläche nah m': 26, 'Freie Rasenfläche Rand m': 26, 'Versatz Ufer an Brücken m': 0, 'Versatz Uferlinie ganze Länge m': 0,
+  'FUNDUS Platzierung/Flächenlimit': 0, 'FUNDUS gleicher Block wie Offprice': 0, 'FUNDUS gleiche Bauform bei Nachbarn': 0,
 };
 const erg = namen.map(pruefe);
 const zeilen = Object.keys(erg[0].werte);

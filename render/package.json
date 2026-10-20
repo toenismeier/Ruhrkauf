@@ -12,7 +12,13 @@
     "smoke:start": "node spiel-render.js --nur-start",
     "smoke:wettbewerber": "node spiel-render.js --nur-wettbewerber",
     "wettbewerb:beispiel": "node -e \"require('esbuild').buildSync({entryPoints:['../engine/scripts/wettbewerb-beispiel.ts'],bundle:true,platform:'node',outfile:'out/wettbewerb-beispiel.cjs'});require('./out/wettbewerb-beispiel.cjs')\"",
-    "iphone": "node spiel-render.js --bundle && node dev-server.js"
+    "iphone": "node spiel-render.js --bundle && node dev-server.js",
+    "moebel:pruefen": "node pruef-moebel.js",
+    "moebel:kataloge": "node render-katalog.js moebel-sport && node render-katalog.js moebel-outlet && node render-katalog.js moebel-allgemein && node render-katalog.js moebel-reihen",
+    "ladenbau:pruefen": "node pruef-ladenbau.js",
+    "ladenbau:pruefen:teile": "node pruef-ladenbau.js --teile",
+    "ladenbau:smoke": "node tests/ladenbau-smoke.cjs",
+    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose"
   },
   "keywords": [],
   "author": "",

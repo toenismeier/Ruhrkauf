@@ -13,6 +13,8 @@ import { NAMEN as WB_NAMEN } from './wettbewerber.js';
 import haeuser from '../../haeuser.json';
 import schwesterHauser from '../../haeuser-schwester.json';
 import { NAME_SCHWESTER, masseSchwester, familieSchwester } from './schwesterhaus.js';
+import haeuserOutlet from '../../haeuser-outlet.json';
+import { NAME_OUTLET } from './outlet.js';
 
 /** Region aus der echten Lage der Stadt (grob: Nord, Ost, West = NRW, Mitte = Hessen/RLP/Saar/Südniedersachsen, Süd = BW/BY). */
 const REGION_VON = {
@@ -100,6 +102,12 @@ function baueEintrag(name, liste) {
     standorte.push({ id: schwester.id, name: NAME_SCHWESTER, rolle: 'schwester',
       lage: schwester.lage, grundflaecheQm: schwester.grundflaecheQm,
       w: f.w, d: f.d, familie: familieSchwester(schwester), variante: schwester.fassade });
+  }
+  // FUNDUS: eigene grafische Standorte unabhängig vom Engine-Portfolio.
+  for (const h of haeuserOutlet.filter((q) => q.stadt === name)) {
+    const m = fussabdruck(h);
+    standorte.push({ id: h.id, name: NAME_OUTLET + ' ' + h.stadt, rolle: 'outlet',
+      lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: m.w, d: m.d });
   }
   const [a, b] = WETTBEWERBER[typ];
   const n = Math.min(b, a + Math.floor(r() * (b - a + 1)));

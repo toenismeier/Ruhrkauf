@@ -16,8 +16,10 @@ import { wahlGewichtet } from './stadtplan.js';
 import { warenhaus, masse, familieVon } from './warenhaus.js';
 import { SLOTS } from './sonderbauten.js';
 import { sporthaus, masseSport } from './sporthaus.js';
+import { outlet, masseOutlet } from './outlet.js';
 import { schwesterhaus, masseSchwester } from './schwesterhaus.js';
 import schwesterHauser from '../../haeuser-schwester.json';
+import haeuserOutlet from '../../haeuser-outlet.json';
 import { wettbewerber as wettbewerberBau } from './wettbewerber.js';
 import haeuser from '../../haeuser.json';
 
@@ -26,6 +28,7 @@ const regionVon = (p) => REGION[p.region] ?? p.region ?? 'Mitte';
 const regionLang = { Nord: 'nord', Ost: 'ost', West: 'west', Mitte: 'mitte', 'Süd': 'sued' };
 const HAUS = new Map(haeuser.map((h) => [h.id, h]));
 const SCHWESTER = new Map(schwesterHauser.map((h) => [h.id, h]));
+const OUTLETS = new Map(haeuserOutlet.map((h) => [h.id, h]));
 
 /**
  * Belegte Grundfläche eines Hauses aus haeuser.json (wie warenhaus() sie baut): Center-Häuser bekommen links
@@ -33,6 +36,7 @@ const SCHWESTER = new Map(schwesterHauser.map((h) => [h.id, h]));
  */
 export function fussabdruck(haus, familie = null) {
   if (haus.format === 'schwester') { const m = masseSchwester(haus); return { w: m.w, d: m.d, mall: 0 }; }
+  if (haus.format === 'outlet') { const m = masseOutlet(haus); return { w: m.w, d: m.d, mall: 0 }; }
   if (haus.format === 'sport' && familie !== 7) { const ms = masseSport(haus); return { w: ms.w, d: ms.d, mall: 0 }; }
   const m = masse(haus);
   const fam = familie ?? (haus.format === 'sport' ? 7 : haus.lage === 'center' ? 6 : 0);
@@ -272,5 +276,12 @@ export function echterBauer(o = {}) {
     },
     'slot:wettbewerber': (S, scene, p) => wettbewerber(S, scene, p),
     'slot:schwester': (S, scene, p) => ERSATZ.schwester(S, scene, p),
+    'slot:outlet': (S, scene, p) => {
+      const h = OUTLETS.get(p.standort?.id);
+      if (!h) return { hoehe: 0 };
+      const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
+      p.haus = h;
+      return outlet(S, scene, h, { x, z, ...zustandFuer(h) });
+    },
   };
 }

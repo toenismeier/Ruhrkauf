@@ -364,10 +364,10 @@
     s2.zaehler += 1;
     return `${prefix}${s2.zaehler}`;
   }
-  function melde(s2, typ, text2, bezug) {
+  function melde(s2, typ, text3, bezug) {
     if (s2.prognose) return;
     const nummer = s2.meldungen.filter((m) => m.woche === s2.woche).length;
-    s2.meldungen.push({ id: `m-${s2.woche}-${nummer}`, woche: s2.woche, typ, text: text2, ...bezug ? { bezug } : {} });
+    s2.meldungen.push({ id: `m-${s2.woche}-${nummer}`, woche: s2.woche, typ, text: text3, ...bezug ? { bezug } : {} });
     if (s2.meldungen.length > 400) s2.meldungen.splice(0, s2.meldungen.length - 400);
   }
   var kw = (woche2) => woche2 % 52 + 1;
@@ -845,8 +845,8 @@
       m.stilAktualitaet = clamp(m.stilAktualitaet - EM_PARAM.stilVerfall * pflege * einkauf * (1 + 0.25 * ueber), 0, 100);
     }
   }
-  var ok = (text2) => ({ ok: true, text: text2 });
-  var fehler = (text2) => ({ ok: false, text: text2 });
+  var ok = (text3) => ({ ok: true, text: text3 });
+  var fehler = (text3) => ({ ok: false, text: text3 });
   function marke(s2, id) {
     return s2.eigenmarken.marken.find((m) => m.id === id);
   }
@@ -1577,8 +1577,8 @@
     return { m, t, wg, preislage, qualitaet, stil, kapFrei };
   }
   function produktAktion(s2, a) {
-    const ok5 = (text2) => ({ ok: true, text: text2 });
-    const fehler5 = (text2) => ({ ok: false, text: text2 });
+    const ok5 = (text3) => ({ ok: true, text: text3 });
+    const fehler5 = (text3) => ({ ok: false, text: text3 });
     if (a.typ === "produktEntwickeln") {
       const e = a.entwurf;
       const c = pruefe(s2, e);
@@ -1703,9 +1703,9 @@
       basis: !!p.basis
     };
   }
-  function produkte(s2, marke3) {
+  function produkte(s2, marke4) {
     const kap = kapazitaet(s2);
-    const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke3 || m.id === marke3)).map((m) => {
+    const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
       const liste = s2.produkte.liste.filter((p) => p.marke === m.id && p.status !== "ausgelistet");
       const kats = [...new Set(liste.map((p) => p.kategorie))];
       const ent = liste.filter((p) => p.status === "entwicklung").length;
@@ -2678,8 +2678,8 @@
     }
   }
   var MARKETING_AKTIONEN = /* @__PURE__ */ new Set(["kanalBudget", "kundenkarteSetzen", "appSetzen", "crmKampagneAnlegen", "crmKampagneStoppen", "aktionPlanen", "aktionAendern", "aktionAbsagen"]);
-  var ok2 = (text2, id) => ({ ok: true, text: text2, id });
-  var fehler2 = (text2) => ({ ok: false, text: text2 });
+  var ok2 = (text3, id) => ({ ok: true, text: text3, id });
+  var fehler2 = (text3) => ({ ok: false, text: text3 });
   var pz = (x, d = 0) => `${(x * 100).toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d })} %`;
   function umsatzBezug(s2) {
     const h = s2.historie.slice(-13);
@@ -4346,8 +4346,8 @@
     return true;
   }
   function einkaufAktion(s2, a, einmalKosten2) {
-    const ok5 = (text2) => ({ ok: true, text: text2 });
-    const fehler5 = (text2) => ({ ok: false, text: text2 });
+    const ok5 = (text3) => ({ ok: true, text: text3 });
+    const fehler5 = (text3) => ({ ok: false, text: text3 });
     const pr2 = protokoll(s2);
     const wgOp = (sel, fn, was) => {
       const ds = wgAuswahl(s2, sel);
@@ -5175,8 +5175,8 @@
   }
 
   // ../engine/src/aktionen.ts
-  var ok3 = (text2) => ({ ok: true, text: text2 });
-  var fehler3 = (text2) => ({ ok: false, text: text2 });
+  var ok3 = (text3) => ({ ok: true, text: text3 });
+  var fehler3 = (text3) => ({ ok: false, text: text3 });
   function haus(s2, id) {
     return s2.haeuser.find((h) => h.id === id);
   }
@@ -5628,12 +5628,12 @@
     const hs = [...new Set(ids)].map((id) => s2.haeuser.find((h) => h.id === id)).filter((h) => !!h);
     return hs.length ? { stadt: hs[0].stadt, hausIds: hs.map((h) => h.id), ...modul ? { modul } : {} } : modul ? { modul } : void 0;
   }
-  function meldungKategorie(typ, text2) {
+  function meldungKategorie(typ, text3) {
     if (typ === "eigentuemer") return "Eigent\xFCmer";
-    if (/konkurrenz|wettbewerb|mitbewerber|discounter|konkurrent|abwerb/i.test(text2)) return "Konkurrenz";
-    if (/filialleiter|personal|beschäftig|mitarbeiter|betriebsrat|streik|verdi|tarif/i.test(text2)) return "Personal";
-    if (/haus|häuser|standort|filiale|miete|vermieter|umbau|schließ|schliess|rolltreppe|brandschutz/i.test(text2)) return "H\xE4user";
-    if (/kredit|liquid|kasse|bank|cash|kosten|zuschuss|insolvenz|euro|€|umsatz|ertrag|kapital/i.test(text2) || typ === "insolvenz") return "Finanzen";
+    if (/konkurrenz|wettbewerb|mitbewerber|discounter|konkurrent|abwerb/i.test(text3)) return "Konkurrenz";
+    if (/filialleiter|personal|beschäftig|mitarbeiter|betriebsrat|streik|verdi|tarif/i.test(text3)) return "Personal";
+    if (/haus|häuser|standort|filiale|miete|vermieter|umbau|schließ|schliess|rolltreppe|brandschutz/i.test(text3)) return "H\xE4user";
+    if (/kredit|liquid|kasse|bank|cash|kosten|zuschuss|insolvenz|euro|€|umsatz|ertrag|kapital/i.test(text3) || typ === "insolvenz") return "Finanzen";
     return "Presse";
   }
   function posteingang(s2) {
@@ -6082,9 +6082,9 @@
     const p = 0.45 + 3 * (gehalt / ford - 1) + 0.5 * Math.min(1, haltebonus / ford) * 0.5 + 0.12 * Math.min(1, erfolgsbonus) + (s2.stakeholder.image - 45) / 250 + lage + 0.25 * (k.wechselwille - 0.5);
     return clamp(p, 0.02, 0.97);
   }
-  function protokolliere(s2, r, text2) {
+  function protokolliere(s2, r, text3) {
     if (s2.prognose) return;
-    s2.vorstand.protokoll.push({ woche: s2.woche, ressort: r, text: text2 });
+    s2.vorstand.protokoll.push({ woche: s2.woche, ressort: r, text: text3 });
     if (s2.vorstand.protokoll.length > 200) s2.vorstand.protokoll.splice(0, s2.vorstand.protokoll.length - 200);
   }
   function loyalitaetsZiel(s2, r, p) {
@@ -6316,9 +6316,9 @@
     }
   }
   var trifft2 = (r, guete) => chance(r, 0.3 + 0.65 * guete);
-  function tu(s2, r, a, text2) {
+  function tu(s2, r, a, text3) {
     const e = fuehreAus(s2, a);
-    if (e.ok) protokolliere(s2, r, text2 ?? e.text);
+    if (e.ok) protokolliere(s2, r, text3 ?? e.text);
     return e.ok;
   }
   var KI = {
@@ -6445,8 +6445,8 @@
     return eur(p.gehalt * f + offenBonus);
   }
   function vorstandAktion(s2, a) {
-    const ok5 = (text2) => ({ ok: true, text: text2 });
-    const fehler5 = (text2) => ({ ok: false, text: text2 });
+    const ok5 = (text3) => ({ ok: true, text: text3 });
+    const fehler5 = (text3) => ({ ok: false, text: text3 });
     const res = s2.vorstand.ressorts[a.ressort];
     if (!res) return fehler5("Unbekanntes Ressort.");
     const info = RESSORT_INFO[a.ressort];
@@ -7199,8 +7199,8 @@
     }
     hqAktualisiere(s2);
   }
-  var ok4 = (text2) => ({ ok: true, text: text2 });
-  var fehler4 = (text2) => ({ ok: false, text: text2 });
+  var ok4 = (text3) => ({ ok: true, text: text3 });
+  var fehler4 = (text3) => ({ ok: false, text: text3 });
   function einmal(s2, betrag) {
     s2.cash -= eur(betrag);
     s2.einmalkostenWoche += eur(betrag);
@@ -34505,9 +34505,9 @@
           case "blob":
             return response.blob();
           case "document":
-            return response.text().then((text2) => {
+            return response.text().then((text3) => {
               const parser = new DOMParser();
-              return parser.parseFromString(text2, mimeType);
+              return parser.parseFromString(text3, mimeType);
             });
           case "json":
             return response.json();
@@ -34566,9 +34566,9 @@
       loader.setPath(this.path);
       loader.setRequestHeader(this.requestHeader);
       loader.setWithCredentials(this.withCredentials);
-      loader.load(url, function(text2) {
+      loader.load(url, function(text3) {
         try {
-          onLoad(scope.parse(JSON.parse(text2)));
+          onLoad(scope.parse(JSON.parse(text3)));
         } catch (e) {
           if (onError) {
             onError(e);
@@ -35321,9 +35321,9 @@
       loader.setPath(scope.path);
       loader.setRequestHeader(scope.requestHeader);
       loader.setWithCredentials(scope.withCredentials);
-      loader.load(url, function(text2) {
+      loader.load(url, function(text3) {
         try {
-          onLoad(scope.parse(JSON.parse(text2)));
+          onLoad(scope.parse(JSON.parse(text3)));
         } catch (e) {
           if (onError) {
             onError(e);
@@ -35601,9 +35601,9 @@
       loader.setPath(scope.path);
       loader.setRequestHeader(scope.requestHeader);
       loader.setWithCredentials(scope.withCredentials);
-      loader.load(url, function(text2) {
+      loader.load(url, function(text3) {
         try {
-          onLoad(scope.parse(JSON.parse(text2)));
+          onLoad(scope.parse(JSON.parse(text3)));
         } catch (e) {
           if (onError) {
             onError(e);
@@ -35715,10 +35715,10 @@
       loader.setPath(this.path);
       loader.setRequestHeader(this.requestHeader);
       loader.setWithCredentials(this.withCredentials);
-      loader.load(url, function(text2) {
+      loader.load(url, function(text3) {
         let json = null;
         try {
-          json = JSON.parse(text2);
+          json = JSON.parse(text3);
         } catch (error) {
           if (onError !== void 0) onError(error);
           console.error("THREE:ObjectLoader: Can't parse " + url + ".", error.message);
@@ -35741,8 +35741,8 @@
       loader.setPath(this.path);
       loader.setRequestHeader(this.requestHeader);
       loader.setWithCredentials(this.withCredentials);
-      const text2 = await loader.loadAsync(url, onProgress);
-      const json = JSON.parse(text2);
+      const text3 = await loader.loadAsync(url, onProgress);
+      const json = JSON.parse(text3);
       const metadata = json.metadata;
       if (metadata === void 0 || metadata.type === void 0 || metadata.type.toLowerCase() === "geometry") {
         throw new Error("THREE.ObjectLoader: Can't load " + url);
@@ -40042,16 +40042,16 @@
     TEXTMAT_CACHE.clear();
     textPixel = 0;
   }
-  function textTextur(text2, farbe, groesse2 = 120, hintergrund = null, schrift2 = '"DejaVu Sans", Arial', fett = true) {
+  function textTextur(text3, farbe, groesse2 = 120, hintergrund = null, schrift2 = '"DejaVu Sans", Arial', fett = true) {
     const g = Math.max(8, Math.min(groesse2, SCHRIFT_LOD.maxGroesse));
-    const k = `${text2}|${farbe}|${g}|${hintergrund}|${schrift2}|${fett}`;
+    const k = `${text3}|${farbe}|${g}|${hintergrund}|${schrift2}|${fett}`;
     const alt = TEXT_CACHE.get(k);
     if (alt) return alt;
     const c = document.createElement("canvas");
     const ctx = c.getContext("2d");
     const font = `${fett ? "bold " : ""}${g}px ${schrift2}`;
     ctx.font = font;
-    c.width = Math.ceil(ctx.measureText(text2).width + g * 0.8);
+    c.width = Math.ceil(ctx.measureText(text3).width + g * 0.8);
     c.height = Math.ceil(g * 1.5);
     const kk = c.getContext("2d");
     if (hintergrund) {
@@ -40062,7 +40062,7 @@
     kk.fillStyle = farbe;
     kk.textAlign = "center";
     kk.textBaseline = "middle";
-    kk.fillText(text2, c.width / 2, c.height / 2 + g * 0.05);
+    kk.fillText(text3, c.width / 2, c.height / 2 + g * 0.05);
     const t = new CanvasTexture(c);
     t.colorSpace = SRGBColorSpace;
     t.anisotropy = 8;
@@ -40071,9 +40071,9 @@
     TEXT_CACHE.set(k, e);
     return e;
   }
-  function textMaterial(text2, farbe, o = {}) {
-    const tt = textTextur(text2, farbe, o.groesse ?? 140, o.hintergrund ?? null, o.schrift, o.fett ?? true);
-    const k = `${text2}|${farbe}|${o.groesse ?? 140}|${o.hintergrund ?? null}|${o.schrift}|${o.fett ?? true}|${o.lit ?? false}|${o.alphaTest ?? 0}|${o.versatz ?? 0}|${SCHRIFT_LOD.maxGroesse}`;
+  function textMaterial(text3, farbe, o = {}) {
+    const tt = textTextur(text3, farbe, o.groesse ?? 140, o.hintergrund ?? null, o.schrift, o.fett ?? true);
+    const k = `${text3}|${farbe}|${o.groesse ?? 140}|${o.hintergrund ?? null}|${o.schrift}|${o.fett ?? true}|${o.lit ?? false}|${o.alphaTest ?? 0}|${o.versatz ?? 0}|${SCHRIFT_LOD.maxGroesse}`;
     let m = TEXTMAT_CACHE.get(k);
     if (!m || m.map !== tt.t) {
       const opt = o.hintergrund ? { map: tt.t } : o.alphaTest ? { map: tt.t, alphaTest: o.alphaTest } : { map: tt.t, transparent: true };
@@ -40083,8 +40083,8 @@
     }
     return { mat: m, seitenverhaeltnis: tt.seitenverhaeltnis, t: tt.t };
   }
-  function schild(scene2, text2, seite, u, y, fassade3, hoehe, farbe, hintergrund = null) {
-    const { mat: m0, seitenverhaeltnis } = textMaterial(text2, farbe, { groesse: 140, hintergrund });
+  function schild(scene2, text3, seite, u, y, fassade3, hoehe, farbe, hintergrund = null) {
+    const { mat: m0, seitenverhaeltnis } = textMaterial(text3, farbe, { groesse: 140, hintergrund });
     const m = new Mesh(new PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), m0);
     if (seite === "+z") m.position.set(u, y, fassade3 + 0.35);
     else {
@@ -43542,6 +43542,51 @@
     return { x, z: z2, zoom: Math.min(zoom, Math.min(plan2.breite, plan2.tiefe) / 6.5) };
   }
 
+  // src/kit/outlet-standorte.js
+  function outletImAussenring(plan2, standorte = []) {
+    const gesucht = standorte.filter((s2) => s2.rolle === "outlet" && s2.lage === "rand");
+    if (!gesucht.length) return [];
+    const platziert = [];
+    const benutzt = /* @__PURE__ */ new Set();
+    for (const st of gesucht) {
+      const bl = (plan2.aussen?.bloecke ?? []).filter(
+        (b2) => !benutzt.has(b2.id) && ["gewerbe", "sonder", "dicht", "siedlung"].includes(b2.zone) && b2.w >= st.w + 6 && b2.d >= st.d + 6 && Object.values(b2.rand ?? {}).some((r) => r.strasse)
+      );
+      bl.sort(
+        (a, b2) => (a.zone === "gewerbe" ? 0 : a.zone === "sonder" ? 1 : 2) - (b2.zone === "gewerbe" ? 0 : b2.zone === "sonder" ? 1 : 2) || a.w * a.d - st.w * st.d - (b2.w * b2.d - st.w * st.d) || a.id.localeCompare(b2.id)
+      );
+      const b = bl[0];
+      if (!b) continue;
+      benutzt.add(b.id);
+      b.zone = "gewerbe";
+      b.bauten = [];
+      b.flaechen = [];
+      b.hecken = [];
+      b.baeume = [];
+      const p = {
+        id: "aussen-" + st.id,
+        typ: "slot:outlet",
+        x: b.x + (b.w - st.w) / 2,
+        z: b.z + (b.d - st.d) / 2,
+        w: st.w,
+        d: st.d,
+        seed: plan2.seed + st.id.length * 103,
+        region: plan2.region,
+        cluster: plan2.typ,
+        ecke: "block",
+        lage: "rand",
+        standort: st,
+        front: ["+z", "+x"],
+        block: b.id
+      };
+      plan2.aussen.bauten.push(p);
+      plan2.standorte.push({ ...st, parzelle: p.id, typ: p.typ, block: b.id, lage: "rand" });
+      platziert.push(p.id);
+    }
+    plan2.aussen.outletStandorte = platziert;
+    return platziert;
+  }
+
   // src/kit/stadtplan.js
   var klemm = (v, a, b) => Math.max(a, Math.min(b, v));
   var ganz = (r) => Math.floor(r() * 1e9);
@@ -44164,11 +44209,11 @@
     const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
     return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
   }
-  var SLOT_ROLLE = { warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester" };
+  var SLOT_ROLLE = { warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester", outlet: "slot:outlet" };
   function einkaufslage(E, standorte) {
     const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? "1a", rolle: st.rolle ?? "warenhaus" }));
     const innen = liste.filter((e) => e.lage === "1a" || e.lage === "b");
-    E.randStandorte = liste.filter((e) => e.lage === "center" || e.lage === "rand");
+    E.randStandorte = liste.filter((e) => (e.lage === "center" || e.lage === "rand") && e.rolle !== "outlet");
     E.einkauf = [];
     E.einkaufZellen = /* @__PURE__ */ new Set();
     const kerne = E.zweiKerne ?? [E.zentrum];
@@ -45020,6 +45065,7 @@
       marktVariante: E.marktVariante ?? null
     };
     Object.assign(plan2, stadtrandPlan(plan2, { kueste: E.o?.kueste, seeArt: E.o?.seeArt, berge: E.berge }));
+    if (E.o?.standorte) outletImAussenring(plan2, E.o.standorte);
     return plan2;
   }
   function neueParzelle(ctx, typ, x, z2, w, d, front2, seite, extra = {}) {
@@ -45898,13 +45944,13 @@
       }
     }
   };
-  var tex = (text2, fg, bg = null) => textTextur(text2, fg, 120, bg);
-  var texMat = (text2, fg, bg) => textMaterial(text2, fg, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45 }).mat;
-  var breiteVon2 = (text2, ph) => tex(text2, "#000", "#fff").seitenverhaeltnis * ph;
-  function plakat(Z2, s2, text2, u, y, t, ph, fg, bg, maxB = Infinity, rz = 0) {
-    const sv = tex(text2, fg, bg).seitenverhaeltnis;
+  var tex = (text3, fg, bg = null) => textTextur(text3, fg, 120, bg);
+  var texMat = (text3, fg, bg) => textMaterial(text3, fg, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45 }).mat;
+  var breiteVon2 = (text3, ph) => tex(text3, "#000", "#fff").seitenverhaeltnis * ph;
+  function plakat(Z2, s2, text3, u, y, t, ph, fg, bg, maxB = Infinity, rz = 0) {
+    const sv = tex(text3, fg, bg).seitenverhaeltnis;
     ph = Math.min(ph, maxB / sv);
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat(text2, fg, bg));
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat(text3, fg, bg));
     s2.flaeche(m, u, y, t, rz);
     Z2.scene.add(m);
     return { b: sv * ph, h: ph };
@@ -46036,11 +46082,11 @@
       s2.kipp(Math.hypot(ub - ua, yb - ya), 0.05, 0.05, (ua + ub) / 2, (ya + yb) / 2, t + 0.02, "#4a4f55", Math.atan2(yb - ya, ub - ua));
     }
   }
-  function aufsteller(Z2, s2, u, t, text2, fg, bg) {
+  function aufsteller(Z2, s2, u, t, text3, fg, bg) {
     s2.q(u - 0.55, u - 0.48, 0.3, 1.5, t - 0.3, t + 0.3, "#3a3f44");
     s2.q(u + 0.48, u + 0.55, 0.3, 1.5, t - 0.3, t + 0.3, "#3a3f44");
     s2.q(u - 0.5, u + 0.5, 0.4, 1.5, t, t + 0.06, bg);
-    plakat(Z2, s2, text2, u, 0.95, t + 0.08, 0.5, fg, bg, 0.95);
+    plakat(Z2, s2, text3, u, 0.95, t + 0.08, 0.5, fg, bg, 0.95);
   }
   function bauzaun(Z2, s2, u0, u1, t, banner = null) {
     const n = Math.max(1, Math.round(Math.abs(u1 - u0) / 3.5)), du = (u1 - u0) / n;
@@ -46176,11 +46222,11 @@
   function merke(S, scene2) {
     return { teile: new Map([...S.teile].map(([k, a]) => [k, a.length])), kinder: scene2.children.length };
   }
-  function abschneiden(S, scene2, marke3, R9) {
+  function abschneiden(S, scene2, marke4, R9) {
     if (typeof R9 === "number") R9 = { x0: R9, z0: -Infinity, x1: Infinity, z1: Infinity };
     const e = 0.02;
     for (const [k, arr] of [...S.teile]) {
-      const ab = marke3.teile.get(k) ?? 0;
+      const ab = marke4.teile.get(k) ?? 0;
       const neu = [];
       arr.forEach((g, i) => {
         if (i < ab) {
@@ -46228,7 +46274,7 @@
       if (neu.length) S.teile.set(k, neu);
       else S.teile.delete(k);
     }
-    for (const o of scene2.children.slice(marke3.kinder)) if (o.isMesh && o.position.x > R9.x0 - 0.3 && o.position.z > R9.z0 - 0.3 && o.position.x < R9.x1 + 1 && o.position.z < R9.z1 + 1) scene2.remove(o);
+    for (const o of scene2.children.slice(marke4.kinder)) if (o.isMesh && o.position.x > R9.x0 - 0.3 && o.position.z > R9.z0 - 0.3 && o.position.x < R9.x1 + 1 && o.position.z < R9.z1 + 1) scene2.remove(o);
   }
   function etagenY(k, e) {
     return k.egHoehe + (e - 1) * k.geschossHoehe;
@@ -46358,7 +46404,7 @@
     Z2.top = Math.max(Z2.top, best.y + erg.h / 2 + rand);
     return { ...erg, y: best.y, u: best.u };
   }
-  function bahnen(Z2, s2, us, text2, fg, bg, o = {}) {
+  function bahnen(Z2, s2, us, text3, fg, bg, o = {}) {
     const k = Z2.k, t = (k.tBanner ?? tFront(k)) + 0.2;
     const Y1 = o.y1 ?? k.hoehe - 0.6, Y0 = o.y0 ?? k.egHoehe + 0.5;
     us.forEach((u, i) => {
@@ -46367,7 +46413,7 @@
       const c = Array.isArray(bg) ? bg[i % bg.length] : bg, cf = Array.isArray(fg) ? fg[i % fg.length] : fg;
       s2.q(u - 1.1, u + 1.1, y0, y1, t - 0.08, t - 0.02, c);
       s2.q(u - 1.2, u + 1.2, y1 - 0.15, y1 + 0.1, t - 0.12, t + 0.05, "#4a4f55");
-      plakat(Z2, s2, text2, u, (y0 + y1) / 2, t, 1.5, cf, c, y1 - y0 - 0.8, Math.PI / 2 * s2.lese);
+      plakat(Z2, s2, text3, u, (y0 + y1) / 2, t, 1.5, cf, c, y1 - y0 - 0.8, Math.PI / 2 * s2.lese);
       sperre(Z2, s2, u - 1.2, u + 1.2, y0, y1 + 0.1, "bahn");
     });
   }
@@ -47196,26 +47242,26 @@
     g.translate(x0, y, 0);
     S.add(g, f);
   }
-  function tex2(text2, farbe, bg = null, schrift2) {
-    return schrift2 ? textTextur(text2, farbe, 120, bg, schrift2, !schrift2.includes("Serif")) : textTextur(text2, farbe, 120, bg);
+  function tex2(text3, farbe, bg = null, schrift2) {
+    return schrift2 ? textTextur(text3, farbe, 120, bg, schrift2, !schrift2.includes("Serif")) : textTextur(text3, farbe, 120, bg);
   }
-  function texMat2(text2, farbe, bg, schrift2, lit) {
-    return textMaterial(text2, farbe, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45, lit: !!lit, ...schrift2 ? { schrift: schrift2, fett: !schrift2.includes("Serif") } : {} }).mat;
+  function texMat2(text3, farbe, bg, schrift2, lit) {
+    return textMaterial(text3, farbe, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45, lit: !!lit, ...schrift2 ? { schrift: schrift2, fett: !schrift2.includes("Serif") } : {} }).mat;
   }
-  var plakatBreite = (text2, ph, schrift2) => tex2(text2, "#000", "#fff", schrift2).seitenverhaeltnis * ph;
-  function plakat2(scene2, s2, text2, u, y, t, ph, farbe, bg = null, o = {}) {
-    const sv = tex2(text2, farbe, bg, o.schrift).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat2(text2, farbe, bg, o.schrift, !!o.lit));
+  var plakatBreite = (text3, ph, schrift2) => tex2(text3, "#000", "#fff", schrift2).seitenverhaeltnis * ph;
+  function plakat2(scene2, s2, text3, u, y, t, ph, farbe, bg = null, o = {}) {
+    const sv = tex2(text3, farbe, bg, o.schrift).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat2(text3, farbe, bg, o.schrift, !!o.lit));
     s2.flaeche(m, u, y, t, o.rz ?? 0);
     scene2.add(m);
     return sv * ph;
   }
-  function passend(text2, maxB, maxH, schrift2) {
-    return Math.min(maxH, maxB / tex2(text2, "#000", null, schrift2).seitenverhaeltnis);
+  function passend(text3, maxB, maxH, schrift2) {
+    return Math.min(maxH, maxB / tex2(text3, "#000", null, schrift2).seitenverhaeltnis);
   }
-  function bodenText(scene2, text2, x, y, z2, h, farbe, drehung = 0) {
-    const sv = tex2(text2, farbe).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * h, h), texMat2(text2, farbe, null, void 0, false));
+  function bodenText(scene2, text3, x, y, z2, h, farbe, drehung = 0) {
+    const sv = tex2(text3, farbe).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * h, h), texMat2(text3, farbe, null, void 0, false));
     m.rotation.set(-Math.PI / 2, 0, drehung);
     m.position.set(x, y, z2);
     scene2.add(m);
@@ -47459,12 +47505,12 @@
     }
     if (r() < 0.6) s2.kipp((b - a) * 0.7, 0.35, 0.03, (a + b) / 2, y0 + zw(r, 0.6, 1.4), t + 0.08, waehle2(r, ["#e8336d", "#3a7bd5", "#2b2b2b", "#4caf50"]), zw(r, -0.15, 0.15));
   }
-  function kastenBreite(text2, hb) {
-    const z2 = [...text2];
+  function kastenBreite(text3, hb) {
+    const z2 = [...text3];
     return z2.reduce((a, c) => a + (c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62), 0) + hb * 0.12 * (z2.length - 1);
   }
-  function kastenSchrift(K3, s2, text2, um, y, t, hb, fg, bg) {
-    const z2 = [...text2];
+  function kastenSchrift(K3, s2, text3, um, y, t, hb, fg, bg) {
+    const z2 = [...text3];
     const br = z2.map((c) => c === " " ? hb * 0.4 : plakatBreite(c, hb) * 0.62);
     const gap = hb * 0.12;
     const total = br.reduce((a, b) => a + b, 0) + gap * (z2.length - 1);
@@ -48225,18 +48271,18 @@
     g.translate(x, y0 + h / 2, z2);
     S.add(g, f);
   }
-  var tex3 = (text2, farbe, bg = null) => textTextur(text2, farbe, 120, bg);
-  var texMat3 = (text2, farbe, bg = null, lit = false) => textMaterial(text2, farbe, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
+  var tex3 = (text3, farbe, bg = null) => textTextur(text3, farbe, 120, bg);
+  var texMat3 = (text3, farbe, bg = null, lit = false) => textMaterial(text3, farbe, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
   var PH = 2.05;
   function buchstabenBreite(c, hb) {
     return c === " " ? hb * 0.45 : (tex3(c, "#000").seitenverhaeltnis * 180 - 96) / 180 * hb * PH;
   }
-  function schriftBreite(text2, hb) {
-    const z2 = [...text2];
+  function schriftBreite(text3, hb) {
+    const z2 = [...text3];
     return z2.reduce((a, c) => a + buchstabenBreite(c, hb), 0) + hb * 0.16 * (z2.length - 1);
   }
-  function leuchtschrift(K3, s2, text2, um, y, t, hb, farbe, o = {}) {
-    const z2 = [...text2];
+  function leuchtschrift(K3, s2, text3, um, y, t, hb, farbe, o = {}) {
+    const z2 = [...text3];
     const br = z2.map((c) => buchstabenBreite(c, hb));
     const gap = hb * 0.16;
     const total = br.reduce((a, b) => a + b, 0) + gap * (z2.length - 1);
@@ -48282,14 +48328,14 @@
     });
     return total;
   }
-  function plakat3(K3, s2, text2, u, y, t, ph, farbe, bg, lit = false) {
-    const sv = tex3(text2, farbe, bg).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat3(text2, farbe, bg, lit));
+  function plakat3(K3, s2, text3, u, y, t, ph, farbe, bg, lit = false) {
+    const sv = tex3(text3, farbe, bg).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat3(text3, farbe, bg, lit));
     s2.flaeche(m, u, y, t);
     K3.scene.add(m);
     return sv * ph;
   }
-  var plakatBreite2 = (text2, ph) => tex3(text2, "#000", "#fff").seitenverhaeltnis * ph;
+  var plakatBreite2 = (text3, ph) => tex3(text3, "#000", "#fff").seitenverhaeltnis * ph;
   function puppe2(s2, u, y, t, oben, unten, sk = 1) {
     s2.q(u - 0.28 * sk, u + 0.28 * sk, y, y + 0.08, t - 0.22, t + 0.22, "#d9d4cc");
     s2.q(u - 0.17 * sk, u + 0.17 * sk, y + 0.08, y + 0.95 * sk, t - 0.1, t + 0.1, unten);
@@ -48648,10 +48694,10 @@
     for (const s2 of K3.seiten) {
       const z2 = K3.zonen[s2.seite];
       if (!z2) continue;
-      const text2 = z2.text ?? "HARTWIG";
-      if (K3.fam !== 1 && !z2.sport && !z2.dach && !z2.wand && (K3.n === 1 || Math.min(z2.hb, z2.max / schriftBreite(text2, 1)) < Math.max(2.4, s2.L * 0.035))) {
-        const hbD = Math.min(clamp5(s2.L * 0.06, 2.2, 3.6), s2.L * 0.6 / schriftBreite(text2, 1));
-        const br = schriftBreite(text2, hbD), yB = K3.Hw + 0.6;
+      const text3 = z2.text ?? "HARTWIG";
+      if (K3.fam !== 1 && !z2.sport && !z2.dach && !z2.wand && (K3.n === 1 || Math.min(z2.hb, z2.max / schriftBreite(text3, 1)) < Math.max(2.4, s2.L * 0.035))) {
+        const hbD = Math.min(clamp5(s2.L * 0.06, 2.2, 3.6), s2.L * 0.6 / schriftBreite(text3, 1));
+        const br = schriftBreite(text3, hbD), yB = K3.Hw + 0.6;
         for (let k = 0; k <= 4; k++) {
           const uu = z2.u - br / 2 + k * br / 4;
           s2.q(uu - 0.07, uu + 0.07, K3.Hw, yB + hbD * 1.3, -1, -0.85, "#4a4f55");
@@ -48659,25 +48705,25 @@
         s2.q(z2.u - br / 2, z2.u + br / 2, yB, yB + 0.12, -1, -0.85, "#4a4f55");
         Object.assign(z2, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: s2.L * 0.6, dach: true });
       }
-      const hb = Math.min(z2.hb, z2.max / schriftBreite(text2, 1));
+      const hb = Math.min(z2.hb, z2.max / schriftBreite(text3, 1));
       z2.hbIst = hb;
       if (z2.sport) {
-        const br = schriftBreite(text2, hb);
+        const br = schriftBreite(text3, hb);
         if (!K3.ohneLogo) {
           s2.q(z2.u - br / 2 - hb * 0.6, z2.u + br / 2 + hb * 0.6, z2.y - hb * 0.95, z2.y + hb * 0.95, z2.t - 0.25, z2.t - 0.05, K3.alt ? dunkler(ROT2, 0.1) : ROT2);
-          leuchtschrift(K3, s2, text2, z2.u, z2.y, z2.t + 0.02, hb, "#ffffff", { kaputt: K3.alt });
+          leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t + 0.02, hb, "#ffffff", { kaputt: K3.alt });
         } else s2.q(z2.u - br / 2 - hb * 0.6, z2.u + br / 2 + hb * 0.6, z2.y - hb * 0.95, z2.y + hb * 0.95, z2.t - 0.25, z2.t - 0.2, dunkler(z2.grund, 0.05));
         if (K3.abbau) K3.abbauPos[s2.seite] = { u: z2.u, y: z2.y, t: z2.t };
         continue;
       }
       if (K3.abbau) {
         const aus = {};
-        const tot = leuchtschrift(K3, s2, text2, z2.u, z2.y, z2.t, hb, dunkler(z2.farbe ?? ROT2, 0.14), { abbau: 0.45, aus });
+        const tot = leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t, hb, dunkler(z2.farbe ?? ROT2, 0.14), { abbau: 0.45, aus });
         const anf = z2.u - s2.lese * tot / 2, ende = aus.u ?? z2.u;
         K3.abbauPos[s2.seite] = { u: ende, y: z2.y, t: z2.t, rest: { u: (anf + ende) / 2, breite: Math.abs(ende - anf) + hb * 0.6, hb } };
       } else if (K3.ohneLogo) {
-        if (!z2.dach) leuchtschrift(K3, s2, text2, z2.u, z2.y, z2.t - 0.25, hb, ROT2, { geist: dunkler(z2.grund, 0.045) });
-      } else leuchtschrift(K3, s2, text2, z2.u, z2.y, z2.t, hb, z2.farbe ?? ROT2, { kaputt: K3.alt });
+        if (!z2.dach) leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t - 0.25, hb, ROT2, { geist: dunkler(z2.grund, 0.045) });
+      } else leuchtschrift(K3, s2, text3, z2.u, z2.y, z2.t, hb, z2.farbe ?? ROT2, { kaputt: K3.alt });
     }
   }
   function familie1(K3) {
@@ -50130,7 +50176,7 @@
   }
   function warenhaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
-    const marke3 = merke(S, scene2);
+    const marke4 = merke(S, scene2);
     const fam = opt.familie ?? familieVon(haus2);
     const m = masse(haus2);
     const x = opt.x ?? 0, z2 = opt.z ?? 0;
@@ -50232,7 +50278,7 @@
       baujahr: haus2.baujahr,
       jahr: opt.jahr,
       flaecheQm: sumQm || (haus2.grundflaecheQm ?? 0) * m.n,
-      marke: marke3,
+      marke: marke4,
       seed: `${haus2.id}:${Z2.status}`
     };
     const dek = zustandsDekor(S, scene2, koerper3, Z2, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite });
@@ -50385,10 +50431,10 @@
     S.box(0.25 * s2, 0.25 * s2, 1.2 * s2, x, y + 1.45 * s2, z2, farbe);
     S.box(1.2 * s2, 0.25 * s2, 0.25 * s2, x, y + 1.45 * s2, z2, farbe);
   }
-  function schildPasst(scene2, text2, seite, u, y, f, hMax, bMax, farbe, bg = null) {
-    const { seitenverhaeltnis } = textTextur(text2, farbe, 140, bg);
+  function schildPasst(scene2, text3, seite, u, y, f, hMax, bMax, farbe, bg = null) {
+    const { seitenverhaeltnis } = textTextur(text3, farbe, 140, bg);
     const h = Math.min(hMax, bMax / seitenverhaeltnis);
-    return schild(scene2, text2, seite, u, y, f, h, farbe, bg);
+    return schild(scene2, text3, seite, u, y, f, h, farbe, bg);
   }
   var AUTOFARBEN = ["#f4f3ef", "#2b2f33", "#a3abb2", "#c84a3c", "#2f5f8f", "#d9cfb4", "#3d6b4f", "#e3b23c", "#f4f3ef", "#6b7680"];
   function auto2(S, x, z2, ry, farbe, y0 = 0.3) {
@@ -51831,11 +51877,11 @@
   function konkurrenzAlt(S, scene2, p) {
     const { x, z: z2, seed = 1 } = p;
     const r = rng2(seed);
-    const marke3 = p.marke ?? "kaufstadt";
-    const m = KONKURRENZ[marke3];
-    if (marke3 === "kaufstadt" || marke3 === "ostermann") {
+    const marke4 = p.marke ?? "kaufstadt";
+    const m = KONKURRENZ[marke4];
+    if (marke4 === "kaufstadt" || marke4 === "ostermann") {
       const w2 = p.w ?? 52, d2 = p.d ?? 40, G2 = p.geschosse ?? 4, eg = 6, gh = 4.6, H2 = eg + G2 * gh;
-      const kachel2 = marke3 === "kaufstadt" ? "#eef0f1" : "#e9e3d6", fuge = marke3 === "kaufstadt" ? "#c3cbd2" : "#cfc6b5";
+      const kachel2 = marke4 === "kaufstadt" ? "#eef0f1" : "#e9e3d6", fuge = marke4 === "kaufstadt" ? "#c3cbd2" : "#cfc6b5";
       S.quader(x, 0, z2, x + w2 - 1.4, eg, z2 + d2 - 1.4, "#4b5965");
       S.quader(x, eg, z2, x + w2, H2, z2 + d2, fuge);
       const k = 2;
@@ -51845,7 +51891,7 @@
         for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) {
           const u = u0 + off + (i + 0.5) * k, y = eg + 0.4 + (j + 0.5) * k;
           const tief2 = (i + j) % 2 ? 0.45 : 0.25;
-          if (marke3 === "ostermann") {
+          if (marke4 === "ostermann") {
             if (seite === "+z") S.box(1.2, 1.7, tief2, u, y, f + tief2 / 2, kachel2);
             else S.box(tief2, 1.7, 1.2, f + tief2 / 2, y, u, kachel2);
           } else {
@@ -51876,7 +51922,7 @@
       schild(scene2, m.name[0], "+x", z2 + d2 - 6, H2 + 3, x + w2 - 3.3, 4.5, "#ffffff");
       return { hoehe: H2 + 6, teile: S.anzahl };
     }
-    if (marke3 === "brenner") {
+    if (marke4 === "brenner") {
       const w2 = p.w ?? 32, d2 = p.d ?? 26, G2 = p.geschosse ?? 3, eg = 6, gh = 4.2, H2 = eg + G2 * gh;
       const stein = p.farbe ?? waehle2(r, ["#e3d3bd", "#e8dcc6", "#ece5d7"]), hell4 = heller(stein, 0.05);
       const ob = { y0: eg, geschosse: G2, gh, raster: 3.4, fw: 1.5, fh: 2.6, bogen: (k) => k === G2 - 1, tiefe: 0.6 };
@@ -53479,9 +53525,9 @@
     }
   }
   function hsLogo(K3, s2, u, y, t, h, o = {}) {
-    const text2 = o.text ?? "HARTWIG SPORT";
+    const text3 = o.text ?? "HARTWIG SPORT";
     const q2 = h * 1.3, ph = h * 0.58;
-    const tw = plakatBreite(text2, ph) * 0.92;
+    const tw = plakatBreite(text3, ph) * 0.92;
     const total = q2 + tw + h * 0.35;
     const P2 = (k) => u + s2.lese * k;
     const ua = P2(-total / 2), uq = P2(-total / 2 + q2), ue = P2(total / 2);
@@ -53506,7 +53552,7 @@
     const qm = (ua + uq) / 2;
     plakat2(K3.scene, s2, "H", qm, y + q2 * 0.06, t + 0.42, q2 * 0.82, "#ffffff");
     s2.kipp(q2 * 0.62, q2 * 0.07, 0.04, qm, y - q2 * 0.36, t + 0.42, "#ffffff", s2.lese * 0.12);
-    plakat2(K3.scene, s2, text2, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? "#d1d3d1" : o.schrift ?? "#ffffff");
+    plakat2(K3.scene, s2, text3, (uq + ue) / 2, y, t + 0.27, ph, lichtAus ? "#d1d3d1" : o.schrift ?? "#ffffff");
     return total;
   }
   function hsLogoSenkrecht(K3, s2, u, yOben, t, breite, laenge) {
@@ -54549,7 +54595,7 @@
   }
   function sporthaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
-    const marke3 = merke(S, scene2);
+    const marke4 = merke(S, scene2);
     const fam = opt.familie ?? familieSport(haus2);
     const m = masseSport(haus2, fam);
     const x = opt.x ?? 0, z2 = opt.z ?? 0;
@@ -54655,7 +54701,7 @@
       baujahr: haus2.baujahr,
       jahr: opt.jahr,
       flaecheQm: sumQm || (haus2.grundflaecheQm ?? 0) * m.n,
-      marke: marke3,
+      marke: marke4,
       seed: `${haus2.id}:${Z2.status}`,
       planeText: "DAS NEUE HARTWIG SPORT"
     };
@@ -54674,12 +54720,2419 @@
     return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
+  // src/kit/innen.js
+  var innen_exports = {};
+  __export(innen_exports, {
+    BODEN: () => BODEN2,
+    GLAS: () => GLAS3,
+    HOLZ: () => HOLZ,
+    KONZEPTE: () => KONZEPTE,
+    MARKEN: () => MARKEN2,
+    MIETER: () => MIETER3,
+    MODUL: () => MODUL,
+    PAL: () => PAL,
+    PREISE: () => PREISE,
+    RASTER: () => RASTER,
+    UNTERMIETE: () => UNTERMIETE,
+    WANDHOEHE: () => WANDHOEHE,
+    WARENGRUPPEN: () => WARENGRUPPEN,
+    abgedeckt: () => abgedeckt,
+    absperrung: () => absperrung,
+    abteilungsname: () => abteilungsname,
+    abtrennung: () => abtrennung,
+    anz: () => anz,
+    aufzug: () => aufzug,
+    ballkorb: () => ballkorb,
+    bauzaun: () => bauzaun2,
+    beimoebel: () => beimoebel,
+    bettInsel: () => bettInsel,
+    bildtafel: () => bildtafel,
+    boden: () => boden,
+    bunt: () => bunt,
+    cafeEcke: () => cafeEcke,
+    fahrrad: () => fahrrad,
+    feinkosttheke: () => feinkosttheke,
+    figur: () => figur2,
+    flakonFlaeche: () => flakonFlaeche,
+    flakonTurm: () => flakonTurm,
+    gangMoebel: () => gangMoebel,
+    geschirrAufTisch: () => geschirrAufTisch,
+    gitterbox: () => gitterbox,
+    gondel: () => gondel,
+    haengeschild: () => haengeschild,
+    hantelbank: () => hantelbank,
+    helme: () => helme,
+    infoCounter: () => infoCounter,
+    kartons: () => kartons,
+    kassentresen: () => kassentresen,
+    kleiderReihe: () => kleiderReihe,
+    lager: () => lager,
+    laufband: () => laufband,
+    leiter: () => leiter,
+    lokal: () => lokal2,
+    marke: () => marke2,
+    markenwand: () => markenwand,
+    material: () => material,
+    obstStand: () => obstStand,
+    pluschBerg: () => pluschBerg,
+    pouf: () => pouf,
+    preisschild: () => preisschild,
+    prodFlaschen: () => prodFlaschen,
+    prodGefaltet: () => prodGefaltet,
+    prodGeschirr: () => prodGeschirr,
+    prodPackungen: () => prodPackungen,
+    prodSchuhe: () => prodSchuhe,
+    prodTaschen: () => prodTaschen,
+    puppe: () => puppe3,
+    puppenPodest: () => puppenPodest,
+    radwand: () => radwand,
+    raumKachel: () => raumKachel,
+    rolltreppe: () => rolltreppe,
+    rolltreppenKern: () => rolltreppenKern,
+    rucksackTurm: () => rucksackTurm,
+    rucksackwand: () => rucksackwand,
+    rueckwand: () => rueckwand,
+    rundstaender: () => rundstaender,
+    schminkplatz: () => schminkplatz,
+    schrift: () => schrift,
+    schubkarre: () => schubkarre,
+    schuhtisch: () => schuhtisch,
+    schuhwand: () => schuhwand,
+    schutt: () => schutt2,
+    skistaender: () => skistaender,
+    skiwand: () => skiwand,
+    snowboardInsel: () => snowboardInsel,
+    sofaInsel: () => sofaInsel,
+    spiegelSaeule: () => spiegelSaeule,
+    spieltisch: () => spieltisch,
+    staender: () => staender,
+    standspiegel: () => standspiegel,
+    stapel: () => stapel,
+    stehlampe: () => stehlampe,
+    stuetze: () => stuetze,
+    stuhl: () => stuhl,
+    taschenWuerfel: () => taschenWuerfel,
+    teddy: () => teddy,
+    tor: () => tor,
+    treppenhaus: () => treppenhaus,
+    trikotwand: () => trikotwand,
+    uhrenvitrine: () => uhrenvitrine,
+    umkleiden: () => umkleiden,
+    vitrine: () => vitrine2,
+    vorbereiten: () => vorbereiten,
+    wandKleider: () => wandKleider,
+    wandRegal: () => wandRegal,
+    wandschild: () => wandschild,
+    warenTisch: () => warenTisch,
+    weinregal: () => weinregal,
+    wuehltisch: () => wuehltisch,
+    zelle: () => zelle,
+    zelt: () => zelt
+  });
+  var RASTER = 5;
+  var WANDHOEHE = 4.6;
+  var GLAS3 = "#cfe8f1";
+  var PI2 = Math.PI;
+  function vorbereiten(S, scene2) {
+    S.szene = scene2;
+    const g = mat(GLAS3);
+    g.transparent = true;
+    g.opacity = 0.3;
+    g.depthWrite = false;
+    if (scene2 && !scene2.userData.glasFix) {
+      scene2.userData.glasFix = true;
+      scene2.onBeforeRender = () => scene2.traverse((o) => {
+        if (o.isMesh && o.material === g) o.castShadow = false;
+      });
+    }
+  }
+  function lokal2(S, ox, oy, oz, rot = 0) {
+    const c = Math.cos(rot), s2 = Math.sin(rot);
+    const P2 = (lx, lz) => [ox + lx * c + lz * s2, oz - lx * s2 + lz * c];
+    return {
+      S,
+      rot,
+      oy,
+      P: P2,
+      /** Quader, ly = Unterkante. */
+      box(w, h, d, lx, ly, lz, f, ry = 0) {
+        const [X, Z2] = P2(lx, lz);
+        S.box(w, h, d, X, oy + ly + h / 2, Z2, f, rot + ry);
+      },
+      geo(g, lx, ly, lz, f, ry = 0) {
+        if (rot + ry) g.rotateY(rot + ry);
+        const [X, Z2] = P2(lx, lz);
+        g.translate(X, oy + ly, Z2);
+        S.add(g, f);
+      },
+      zyl(rt, rb, h, lx, ly, lz, f, seg = 8) {
+        this.geo(new three_module_exports.CylinderGeometry(rt, rb, h, seg).translate(0, h / 2, 0), lx, ly, lz, f);
+      },
+      kugel(rad2, lx, ly, lz, f, det = 0) {
+        this.geo(new three_module_exports.IcosahedronGeometry(rad2, det), lx, ly, lz, f);
+      },
+      sub(lx, lz, ry = 0) {
+        const [X, Z2] = P2(lx, lz);
+        return lokal2(S, X, oy, Z2, rot + ry);
+      },
+      hoch(dy) {
+        return lokal2(S, ox, oy + dy, oz, rot);
+      }
+    };
+  }
+  var anz = (n, d, f = 0.5) => Math.max(1, Math.floor(n * (d < 0.5 ? f : 1)));
+  var bunt = (r, pal) => pal[Math.floor(r() * pal.length)];
+  var PAL = {
+    damen: ["#d65a6f", "#f2c6d2", "#e8dcc6", "#2b2b2b", "#7d97b8", "#c9483e", "#f4f0ea", "#9b6fb0", "#e9b44c", "#5f8f7a", "#e88a6a"],
+    herren: ["#2b3a55", "#3a3f47", "#6b5a48", "#e8e4dc", "#8c9aa6", "#4a5a3e", "#1f2328", "#a67c52", "#d9dee3", "#6d2f3a"],
+    kinder: ["#ef5b5b", "#ffc145", "#5bc0eb", "#9bc53d", "#f78fb3", "#7b6cf6", "#ff8c42", "#ffffff"],
+    waesche: ["#f4d4dc", "#e8b4c4", "#ffffff", "#2b2b2b", "#c9a3d4", "#f0e2d0", "#b0475f", "#8a2f45"],
+    sport: ["#1f6fd1", "#e8403a", "#1f1f1f", "#f2f2f2", "#38b86b", "#ffcc00", "#ff6a2b", "#7a3cd1", "#20b5c9"],
+    outdoor: ["#3f6b3a", "#c25b2a", "#e0a33a", "#2f5f8a", "#6d4c3d", "#8a9a5b", "#d14a3a", "#30343a"],
+    winter: ["#e8403a", "#1f6fd1", "#ffffff", "#1f1f1f", "#ffcc00", "#20b5c9", "#ff6a2b", "#7a3cd1"],
+    beautyMarke: ["#1f1f1f", "#e9a3b8", "#d8b25a", "#f7f3ec", "#b5162b", "#2c4a6e", "#6c8f86", "#3b2a4a"],
+    flakon: ["#f2c6d2", "#d8b25a", "#ffffff", "#b5162b", "#9bc6d8", "#2b2b2b", "#e9a3b8", "#c3a6d8"],
+    waren: ["#e8403a", "#f2c14e", "#3c8dd9", "#5bb36a", "#f4f0e6", "#e97b3c", "#9b5fc0", "#2f5f8a", "#c9a26b"],
+    taschen: ["#5a3b22", "#2b2b2b", "#c9483e", "#e8dcc6", "#2f6f8f", "#8b5a3c", "#d8b25a", "#6b2737"],
+    schuhe: ["#2b2b2b", "#8b5a3c", "#e8e4dc", "#c9483e", "#5a3b22", "#2f4a6e", "#d8b25a"],
+    geschirr: ["#ffffff", "#f4f0e6", "#9bc6d8", "#2f5f8a", "#e8d6b0", "#d97a5a", "#3f6b5a"]
+  };
+  var HOLZ = { hell: "#d8bf98", mittel: "#b98d61", dunkel: "#7b5a40", weiss: "#f6f3ee", schwarz: "#2a2d31", metall: "#9aa3aa", chrom: "#c9d2d8" };
+  var BODEN2 = {
+    damen: { a: "#e3cfb1", b: "#dcc6a6", m: "dielen" },
+    herren: { a: "#a98463", b: "#9f7a59", m: "dielen" },
+    kinder: { a: "#d8e8f0", b: "#cfe0ea", m: "karo" },
+    waesche: { a: "#efdde2", b: "#e8d3d9", m: "teppich" },
+    beauty: { a: "#f7f4ef", b: "#e9e3da", m: "karo" },
+    accessoires: { a: "#c9a27a", b: "#bf966d", m: "dielen" },
+    wohnen: { a: "#d6c3a3", b: "#cdb999", m: "dielen" },
+    spielwaren: { a: "#f3e6b8", b: "#bfe0f0", m: "karo" },
+    food: { a: "#d6a47c", b: "#c99470", m: "karo" },
+    sport: { a: "#c9cdd1", b: "#bfc4c9", m: "fliese" },
+    sportschuhe: { a: "#cfd2d6", b: "#c3c7cc", m: "fliese" },
+    sporttextil: { a: "#d3d6da", b: "#c8ccd1", m: "fliese" },
+    outdoor: { a: "#b79e78", b: "#ab926d", m: "dielen" },
+    rad: { a: "#a3a9ae", b: "#989ea4", m: "beton" },
+    wintersport: { a: "#e3ecf2", b: "#d5e1ea", m: "karo" },
+    teamsport: { a: "#6fae5c", b: "#67a454", m: "rasen" },
+    offprice: { a: "#bdb8ad", b: "#b2ada2", m: "fliese" },
+    konzession: { a: "#e9e4dc", b: "#ddd6cb", m: "karo" },
+    untermiete: { a: "#d4d0c8", b: "#c9c4bb", m: "fliese" },
+    leer: { a: "#6b6e72", b: "#63666a", m: "beton" },
+    umbau: { a: "#8f8b84", b: "#85817a", m: "beton" },
+    gang: { a: "#efebe4", b: "#e4dfd6", m: "fliese" },
+    kasse: { a: "#efebe4", b: "#e4dfd6", m: "fliese" },
+    lager: { a: "#a7a49d", b: "#9d9a93", m: "beton" }
+  };
+  function boden(S, x, z2, w, d, y, typ, dichte = 1) {
+    const b = typeof typ === "string" ? BODEN2[typ] ?? BODEN2.gang : typ;
+    S.box(w, 0.05, d, x + w / 2, y + 0.025, z2 + d / 2, b.a);
+    if (dichte < 0.35) return;
+    if (b.m === "dielen") {
+      for (let i = 1; i < w / 1; i += 2) S.box(1, 0.012, d, x + i + 0.5, y + 0.055, z2 + d / 2, b.b);
+    } else if (b.m === "karo") {
+      const k = dichte > 0.6 ? 1.25 : 2.5;
+      for (let i = 0; i < w / k - 0.01; i++) for (let j = 0; j < d / k - 0.01; j++) if ((i + j) % 2) S.box(k, 0.012, k, x + (i + 0.5) * k, y + 0.055, z2 + (j + 0.5) * k, b.b);
+    } else if (b.m === "fliese") {
+      for (let i = 1; i < w / 2.5; i++) S.box(0.05, 0.012, d, x + i * 2.5, y + 0.055, z2 + d / 2, b.b);
+      for (let j = 1; j < d / 2.5; j++) S.box(w, 0.012, 0.05, x + w / 2, y + 0.055, z2 + j * 2.5, b.b);
+    } else if (b.m === "rasen") {
+      S.box(w, 0.012, 0.08, x + w / 2, y + 0.055, z2 + d / 2, "#f2f2ee");
+    } else if (b.m === "beton") {
+      S.box(w * 0.35, 0.012, d * 0.3, x + w * 0.3, y + 0.055, z2 + d * 0.65, b.b);
+    } else if (b.m === "marmor") {
+      for (let i = 0; i < w / 2.5 - 0.01; i++) for (let j = 0; j < d / 2.5 - 0.01; j++) {
+        const px2 = x + (i + 0.5) * 2.5, pz4 = z2 + (j + 0.5) * 2.5;
+        if ((i + j) % 2) S.box(2.46, 0.012, 2.46, px2, y + 0.055, pz4, b.b);
+        if (dichte > 0.6 && (i * 3 + j) % 4 === 1) S.box(1.7, 0.014, 0.05, px2, y + 0.058, pz4, b.c ?? dunkler(b.b, 0.05), 0.6);
+      }
+    } else if (b.m === "teppich") {
+      for (let i = 0; i < w / 2.5 - 0.01; i++) for (let j = 0; j < d / 2.5 - 0.01; j++) if ((i + j) % 2) S.box(2.5, 0.01, 2.5, x + (i + 0.5) * 2.5, y + 0.053, z2 + (j + 0.5) * 2.5, b.b);
+    } else if (b.m === "parkett") {
+      for (let i = 0; i < w / 0.5 - 0.01; i++) if (i % 2) S.box(0.5, 0.012, d, x + (i + 0.5) * 0.5, y + 0.055, z2 + d / 2, b.b);
+      if (dichte > 0.6) for (let i = 0; i < w / 0.5 - 0.01; i++) S.box(0.48, 0.014, 0.03, x + (i + 0.5) * 0.5, y + 0.056, z2 + i * 1.7 % d, b.c ?? dunkler(b.b, 0.06));
+    } else if (b.m === "punkte") {
+      const fs = b.punkte ?? ["#ffd166", "#5bc0eb", "#ef5b5b", "#9bc53d"];
+      const k = Math.round((x * 7 + z2 * 3) / 5);
+      S.add(new three_module_exports.CylinderGeometry(1.1, 1.1, 0.012, 14).translate(x + 1.4, y + 0.056, z2 + 1.5), fs[Math.abs(k) % fs.length]);
+      if (dichte > 0.5) S.add(new three_module_exports.CylinderGeometry(0.7, 0.7, 0.012, 12).translate(x + 3.7, y + 0.056, z2 + 3.6), fs[Math.abs(k + 2) % fs.length]);
+    } else if (b.m === "platten") {
+      for (let i = 1; i < w / 2.5; i++) S.box(0.04, 0.012, d, x + i * 2.5, y + 0.055, z2 + d / 2, b.b);
+      for (let j = 1; j < d / 2.5; j++) S.box(w, 0.012, 0.04, x + w / 2, y + 0.055, z2 + j * 2.5, b.b);
+      if (b.c && dichte > 0.5) {
+        S.box(w, 0.013, 0.22, x + w / 2, y + 0.056, z2 + 0.11, b.c);
+        S.box(0.22, 0.013, d, x + 0.11, y + 0.056, z2 + d / 2, b.c);
+      }
+    } else if (b.m === "streifen") {
+      S.box(w, 0.012, 0.12, x + w / 2, y + 0.055, z2 + d * 0.3, b.b);
+      if (b.c) S.box(w, 0.012, 0.12, x + w / 2, y + 0.055, z2 + d * 0.3 + 0.2, b.c);
+    }
+  }
+  function kleiderReihe(L2, a, b, y, lz, pal, r, d, o = {}) {
+    const seitlich = o.seitlich ?? true;
+    const hMin = o.hMin ?? 0.65, hMax = o.hMax ?? 1.05;
+    const breit2 = o.breit ?? 0.44;
+    if (d < 0.55) {
+      const n = Math.max(1, Math.round((b - a) / 0.5));
+      const s2 = (b - a) / n;
+      for (let i = 0; i < n; i++) {
+        const h2 = zw(r, hMin, hMax);
+        L2.box(s2 * 0.92, h2, seitlich ? breit2 : 0.1, a + s2 * (i + 0.5), y - h2 - 0.03, lz, bunt(r, pal));
+      }
+      return;
+    }
+    const abst2 = o.abstand ?? 0.12;
+    let farbe = bunt(r, pal), h = zw(r, hMin, hMax);
+    for (let u = a + abst2 / 2; u < b - 0.02; u += abst2) {
+      if (r() < 0.28) {
+        farbe = bunt(r, pal);
+        h = zw(r, hMin, hMax);
+      }
+      if (seitlich) L2.box(0.065, h, breit2, u, y - h - 0.03, lz, farbe);
+      else L2.box(breit2, h, 0.06, u, y - h - 0.03, lz, farbe);
+    }
+  }
+  function stapel(L2, lx, lz, w, t, y, pal, r, d, n = null) {
+    const sx = 0.36, sz = 0.3;
+    const nx = Math.max(1, Math.floor(w / (sx + 0.06))), nz = Math.max(1, Math.floor(t / (sz + 0.06)));
+    if (d < 0.5) {
+      for (let j = 0; j < nz; j++) L2.box(w * 0.92, zw(r, 0.12, 0.3), sz, lx, y, lz - t / 2 + (j + 0.5) * (t / nz), bunt(r, pal));
+      return;
+    }
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const h = zw(r, 0.1, 0.32);
+      const px2 = lx - w / 2 + (i + 0.5) * (w / nx), pz4 = lz - t / 2 + (j + 0.5) * (t / nz);
+      L2.box(sx, h, sz, px2, y, pz4, bunt(r, pal), zw(r, -0.06, 0.06));
+    }
+  }
+  function wandKleider(L2, w, pal, r, d, o = {}) {
+    const panel2 = o.panel ?? HOLZ.weiss;
+    L2.box(w, 2.7, 0.1, 0, 0, 0.05, panel2);
+    L2.box(w, 0.1, 0.12, 0, 2.7, 0.06, dunkler(panel2, 0.08));
+    const zweiReihen = o.zwei ?? r() < 0.5;
+    L2.box(0.06, 2.4, 0.5, -w / 2 + 0.05, 0, 0.35, HOLZ.chrom);
+    L2.box(0.06, 2.4, 0.5, w / 2 - 0.05, 0, 0.35, HOLZ.chrom);
+    if (zweiReihen) {
+      L2.box(w - 0.1, 0.04, 0.04, 0, 1, 0.35, HOLZ.chrom);
+      L2.box(w - 0.1, 0.04, 0.04, 0, 1.95, 0.35, HOLZ.chrom);
+      kleiderReihe(L2, -w / 2 + 0.1, w / 2 - 0.1, 1.95, 0.35, pal, r, d, { hMin: 0.55, hMax: 0.8, breit: o.breit });
+      kleiderReihe(L2, -w / 2 + 0.1, w / 2 - 0.1, 1, 0.35, pal, r, d, { hMin: 0.45, hMax: 0.7, breit: o.breit });
+    } else {
+      L2.box(w - 0.1, 0.04, 0.04, 0, 1.75, 0.35, HOLZ.chrom);
+      kleiderReihe(L2, -w / 2 + 0.1, w / 2 - 0.1, 1.75, 0.35, pal, r, d, { hMin: o.hMin ?? 0.8, hMax: o.hMax ?? 1.3, breit: o.breit });
+    }
+    L2.box(w - 0.1, 0.05, 0.4, 0, 2.2, 0.25, panel2 === HOLZ.weiss ? HOLZ.hell : HOLZ.weiss);
+    stapel(L2, 0, 0.25, w - 0.4, 0.32, 2.25, pal, r, d);
+    if (o.bild !== false && d > 0.4) bildtafel(L2, 0, 3.15, 0.11, Math.min(2.6, w * 0.6), 1, r, pal);
+  }
+  function bildtafel(L2, lx, y, lz, w, h, r, pal) {
+    L2.box(w, h, 0.05, lx, y, lz, "#f8f6f2");
+    L2.box(w - 0.12, h - 0.12, 0.03, lx, y + 0.06, lz + 0.03, bunt(r, ["#e9c9b5", "#bcd3df", "#d6c6e0", "#e4d7b8", "#c9dcc4"]));
+    L2.box(w * 0.18, h * 0.62, 0.02, lx - w * 0.15, y + 0.12, lz + 0.05, bunt(r, pal));
+    L2.box(w * 0.08, w * 0.08, 0.02, lx - w * 0.15, y + 0.12 + h * 0.62, lz + 0.05, "#d9a77f");
+    L2.box(w * 0.32, 0.08, 0.02, lx + w * 0.18, y + h * 0.3, lz + 0.05, "#ffffff");
+  }
+  function rundstaender(L2, lx, lz, pal, r, d, rad2 = 0.5) {
+    L2.zyl(0.3, 0.34, 0.06, lx, 0, lz, HOLZ.chrom, 10);
+    L2.zyl(0.03, 0.03, 1.4, lx, 0, lz, HOLZ.chrom, 6);
+    L2.geo(new three_module_exports.TorusGeometry(rad2, 0.022, 4, 16).rotateX(PI2 / 2), lx, 1.32, lz, HOLZ.chrom);
+    const n = d < 0.55 ? 6 : 11;
+    const farben = [bunt(r, pal), bunt(r, pal), bunt(r, pal)];
+    for (let i = 0; i < n; i++) {
+      const a = i / n * PI2 * 2 + 0.3, h = zw(r, 0.7, 0.95);
+      L2.box(d < 0.55 ? 0.14 : 0.06, h, 0.36, lx + Math.cos(a) * rad2, 1.3 - h, lz + Math.sin(a) * rad2, farben[Math.floor(i / n * 3)], -a);
+    }
+    L2.box(0.3, 0.12, 0.3, lx, 1.4, lz, "#f4f2ee");
+  }
+  function staender(L2, lx, lz, w, pal, r, d, hoch = 1.55) {
+    L2.box(0.05, hoch, 0.5, lx - w / 2, 0, lz, HOLZ.chrom);
+    L2.box(0.05, hoch, 0.5, lx + w / 2, 0, lz, HOLZ.chrom);
+    L2.box(w, 0.04, 0.04, lx, hoch, lz, HOLZ.chrom);
+    kleiderReihe(L2, lx - w / 2 + 0.05, lx + w / 2 - 0.05, hoch, lz, pal, r, d, { hMin: 0.7, hMax: 1.1 });
+  }
+  function warenTisch(L2, lx, lz, w, t, pal, r, d, farbe = HOLZ.hell, h = 0.82) {
+    L2.box(w, h - 0.06, t, lx, 0, lz, farbe);
+    L2.box(w + 0.08, 0.06, t + 0.08, lx, h - 0.06, lz, dunkler(farbe, 0.05));
+    stapel(L2, lx, lz, w - 0.15, t - 0.12, h, pal, r, d);
+  }
+  function puppe3(L2, lx, lz, r, typ = "damen", pal = PAL.damen, ry = 0) {
+    const P2 = L2.sub(lx, lz, ry);
+    const koerper3 = r() < 0.75 ? "#f1eee8" : "#3a3a3c";
+    const s2 = typ === "kind" ? 0.65 : 1;
+    const k1 = bunt(r, pal), k2 = bunt(r, pal);
+    P2.zyl(0.2 * s2, 0.22 * s2, 0.05, 0, 0, 0, "#2a2d31", 8);
+    P2.box(0.03, 0.2 * s2, 0.03, 0, 0.05, 0, HOLZ.chrom);
+    if (typ === "waesche") {
+      P2.box(0.13 * s2, 0.85 * s2, 0.15 * s2, -0.08 * s2, 0.25 * s2, 0, koerper3);
+      P2.box(0.13 * s2, 0.85 * s2, 0.15 * s2, 0.08 * s2, 0.25 * s2, 0, koerper3);
+      P2.box(0.34 * s2, 0.6 * s2, 0.22 * s2, 0, 1.1 * s2, 0, koerper3);
+      P2.box(0.36 * s2, 0.14 * s2, 0.24 * s2, 0, 1.06 * s2, 0, k1);
+      P2.box(0.36 * s2, 0.13 * s2, 0.24 * s2, 0, 1.45 * s2, 0, k1);
+    } else if (typ === "damen" && r() < 0.55) {
+      P2.box(0.1 * s2, 0.6 * s2, 0.12 * s2, -0.07 * s2, 0.25 * s2, 0, koerper3);
+      P2.box(0.1 * s2, 0.6 * s2, 0.12 * s2, 0.07 * s2, 0.25 * s2, 0, koerper3);
+      P2.geo(new three_module_exports.CylinderGeometry(0.17 * s2, 0.3 * s2, 0.75 * s2, 6).translate(0, 0.375 * s2, 0), 0, 0.72 * s2, 0, k1);
+      P2.box(0.36 * s2, 0.55 * s2, 0.22 * s2, 0, 1.15 * s2, 0, k1);
+    } else {
+      P2.box(0.14 * s2, 0.9 * s2, 0.16 * s2, -0.09 * s2, 0.25 * s2, 0, k2);
+      P2.box(0.14 * s2, 0.9 * s2, 0.16 * s2, 0.09 * s2, 0.25 * s2, 0, k2);
+      P2.box(typ === "herren" ? 0.44 * s2 : 0.38 * s2, 0.6 * s2, 0.24 * s2, 0, 1.12 * s2, 0, k1);
+      if (typ === "herren") P2.box(0.12 * s2, 0.4 * s2, 0.02, 0, 1.25 * s2, 0.13 * s2, "#f4f2ee");
+    }
+    P2.box(0.1 * s2, 0.6 * s2, 0.11 * s2, -0.24 * s2, 1.1 * s2, 0, typ === "waesche" ? koerper3 : k1, 0);
+    P2.box(0.1 * s2, 0.6 * s2, 0.11 * s2, 0.24 * s2, 1.1 * s2, 0, typ === "waesche" ? koerper3 : k1, 0);
+    P2.box(0.08 * s2, 0.1 * s2, 0.08 * s2, 0, 1.7 * s2, 0, koerper3);
+    P2.geo(new three_module_exports.SphereGeometry(0.12 * s2, 8, 6).scale(1, 1.2, 1), 0, 1.92 * s2, 0, koerper3);
+  }
+  function puppenPodest(L2, lx, lz, typ, pal, r, w = 2.2) {
+    L2.box(w, 0.25, 1.1, lx, 0, lz, HOLZ.weiss);
+    L2.box(w + 0.06, 0.04, 1.16, lx, 0.25, lz, "#d9d3c9");
+    const n = w > 1.8 ? 3 : 2;
+    for (let i = 0; i < n; i++) puppe3(L2.hoch(0.29), lx - w / 2 + (i + 0.5) * (w / n), lz + (i % 2 ? 0.15 : -0.1), r, typ, pal, zw(r, -0.4, 0.4));
+  }
+  function umkleiden(L2, w, n, r, vorhang = "#7b2f3a") {
+    const kb = w / n, t = 1.2, h = 2.3;
+    L2.box(w, h, 0.08, 0, 0, 0.04, "#efe9df");
+    for (let i = 0; i <= n; i++) L2.box(0.08, h, t, -w / 2 + i * kb, 0, t / 2, "#efe9df");
+    L2.box(w, 0.12, 0.08, 0, h - 0.12, t, "#d9d1c4");
+    for (let i = 0; i < n; i++) {
+      const cx = -w / 2 + (i + 0.5) * kb;
+      const offen = r() < 0.4;
+      L2.box(offen ? kb * 0.3 : kb - 0.12, 2, 0.05, offen ? cx - kb * 0.32 : cx, 0.15, t - 0.05, vorhang);
+      L2.box(0.6, 1.4, 0.03, cx, 0.6, 0.1, "#dfe9ee");
+      L2.box(0.5, 0.45, 0.3, cx + kb * 0.25, 0, 0.3, HOLZ.mittel);
+    }
+  }
+  function standspiegel(L2, lx, lz, ry = 0) {
+    const P2 = L2.sub(lx, lz, ry);
+    P2.box(0.7, 0.05, 0.4, 0, 0, 0, "#2a2d31");
+    P2.box(0.7, 1.9, 0.06, 0, 0.05, 0, "#d8b25a");
+    P2.box(0.58, 1.75, 0.02, 0, 0.12, 0.035, "#e3edf1");
+  }
+  function wandRegal(L2, w, h, boeden, korpus2, prod, r, d, tiefe = 0.5) {
+    L2.box(w, h, 0.06, 0, 0, 0.03, korpus2);
+    L2.box(0.06, h, tiefe, -w / 2 + 0.03, 0, tiefe / 2, dunkler(korpus2, 0.05));
+    L2.box(0.06, h, tiefe, w / 2 - 0.03, 0, tiefe / 2, dunkler(korpus2, 0.05));
+    L2.box(w, 0.08, tiefe, 0, h - 0.08, tiefe / 2, dunkler(korpus2, 0.05));
+    L2.box(w, 0.25, tiefe, 0, 0, tiefe / 2, dunkler(korpus2, 0.12));
+    for (let i = 0; i < boeden; i++) {
+      const y = 0.25 + i * (h - 0.4) / boeden;
+      if (i) L2.box(w - 0.1, 0.04, tiefe - 0.04, 0, y, tiefe / 2, heller(korpus2, 0.04));
+      prod(L2, 0, y + 0.04, tiefe / 2, w - 0.16, r, d, (h - 0.4) / boeden - 0.08);
+    }
+  }
+  function prodPackungen(pal) {
+    return (L2, lx, y, lz, w, r, d, hMax) => {
+      if (d < 0.5) {
+        const n = 3;
+        for (let i = 0; i < n; i++) L2.box(w / n - 0.04, zw(r, 0.5, 0.85) * hMax, 0.3, lx - w / 2 + (i + 0.5) * (w / n), y, lz, bunt(r, pal));
+        return;
+      }
+      let u = lx - w / 2;
+      while (u < lx + w / 2 - 0.12) {
+        const b = zw(r, 0.14, 0.32) / Math.min(1, d + 0.1), h = zw(r, 0.45, 0.95) * hMax;
+        if (u + b > lx + w / 2) break;
+        L2.box(b - 0.03, h, 0.3, u + b / 2, y, lz, bunt(r, pal));
+        u += b;
+      }
+    };
+  }
+  function prodFlaschen(pal, rad2 = 0.04, hoch = 0.32) {
+    return (L2, lx, y, lz, w, r, d, hMax) => {
+      const n = anz(Math.floor(w / (rad2 * 4.5)), d, 0.4);
+      for (let i = 0; i < n; i++) {
+        const u = lx - w / 2 + (i + 0.5) * (w / n);
+        const h = Math.min(hoch * zw(r, 0.8, 1.1), hMax);
+        L2.box(rad2 * 2, h, rad2 * 2, u, y, lz + (i % 2 ? 0.08 : -0.04), bunt(r, pal));
+      }
+    };
+  }
+  function prodGeschirr(L2, lx, y, lz, w, r, d, hMax) {
+    const n = anz(Math.floor(w / 0.38), d, 0.5);
+    for (let i = 0; i < n; i++) {
+      const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, PAL.geschirr);
+      if (i % 3 === 1) {
+        L2.zyl(0.07, 0.06, 0.12, u - 0.07, y, lz, f, 6);
+        L2.zyl(0.07, 0.06, 0.12, u + 0.09, y, lz + 0.05, f, 6);
+      } else L2.zyl(0.15, 0.15, Math.min(hMax, zw(r, 0.08, 0.3)), u, y, lz, f, 10);
+    }
+  }
+  function prodGefaltet(pal) {
+    return (L2, lx, y, lz, w, r, d, hMax) => {
+      const n = anz(Math.floor(w / 0.42), d, 0.5);
+      for (let i = 0; i < n; i++) L2.box(0.36, Math.min(hMax, zw(r, 0.15, 0.32)), 0.32, lx - w / 2 + (i + 0.5) * (w / n), y, lz, bunt(r, pal));
+    };
+  }
+  function prodSchuhe(pal) {
+    return (L2, lx, y, lz, w, r, d, hMax) => {
+      const n = anz(Math.floor(w / 0.36), d, 0.5);
+      for (let i = 0; i < n; i++) {
+        const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, pal), hoch = r() < 0.3;
+        L2.box(0.1, hoch ? 0.2 : 0.09, 0.27, u - 0.06, y, lz, f, 0.15);
+        L2.box(0.1, hoch ? 0.2 : 0.09, 0.27, u + 0.07, y, lz, f, 0.15);
+      }
+    };
+  }
+  function prodTaschen(L2, lx, y, lz, w, r, d, hMax) {
+    const n = Math.max(1, anz(Math.floor(w / 0.45), d, 0.5));
+    for (let i = 0; i < n; i++) {
+      const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, PAL.taschen), h = Math.min(hMax * 0.8, zw(r, 0.22, 0.34));
+      L2.box(0.34, h, 0.16, u, y, lz, f);
+      L2.box(0.2, 0.06, 0.02, u, y + h, lz, dunkler(f, 0.1));
+    }
+  }
+  function vitrine2(L2, lx, lz, w, t, h, sockel, inhalt, r, d) {
+    L2.box(w, h, t, lx, 0, lz, sockel);
+    L2.box(w + 0.04, 0.04, t + 0.04, lx, h, lz, "#e8e4dc");
+    inhalt(L2, lx, h + 0.04, lz, w - 0.2, t - 0.14, r, d);
+    L2.box(w, 0.42, t, lx, h + 0.04, lz, GLAS3);
+    L2.box(w + 0.04, 0.03, t + 0.04, lx, h + 0.46, lz, HOLZ.chrom);
+  }
+  var MODUL = {
+    damen: {
+      wand: [
+        (L2, w, r, d) => wandKleider(L2, w, PAL.damen, r, d),
+        (L2, w, r, d) => wandKleider(L2, w, PAL.damen, r, d, { panel: "#e9d6cf", zwei: false }),
+        (L2, w, r, d) => {
+          umkleiden(L2.sub(-w / 4, 0), w / 2, 2, r);
+          wandKleider(L2.sub(w / 4, 0), w / 2 - 0.1, PAL.damen, r, d, { bild: false });
+        }
+      ],
+      insel: [
+        (L2, r, d) => {
+          rundstaender(L2, -0.9, -0.8, PAL.damen, r, d);
+          rundstaender(L2, 0.9, 0.7, PAL.damen, r, d);
+          puppe3(L2, 0.9, -0.9, r, "damen", PAL.damen, 0.3);
+          puppe3(L2, -0.9, 0.9, r, "damen", PAL.damen, -0.4);
+        },
+        (L2, r, d) => {
+          staender(L2, 0, -0.9, 2.4, PAL.damen, r, d);
+          warenTisch(L2, 0, 0.6, 1.8, 0.9, PAL.damen, r, d);
+          puppe3(L2, 1.3, 0.6, r, "damen", PAL.damen);
+        },
+        (L2, r, d) => {
+          puppenPodest(L2, 0, -0.5, "damen", PAL.damen, r, 2.6);
+          rundstaender(L2, -0.8, 1, PAL.damen, r, d);
+          standspiegel(L2, 1, 1, -0.5);
+        },
+        (L2, r, d) => {
+          staender(L2, -0.7, -0.6, 1.4, PAL.damen, r, d);
+          staender(L2, 0.8, 0.4, 1.4, PAL.damen, r, d);
+          warenTisch(L2, -0.6, 1, 1.2, 0.7, PAL.damen, r, d, HOLZ.weiss);
+        }
+      ]
+    },
+    herren: {
+      wand: [
+        (L2, w, r, d) => wandKleider(L2, w, PAL.herren, r, d, { panel: "#6f5442", zwei: true }),
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.6, 4, "#7b5a40", prodGefaltet(PAL.herren), r, d);
+          bildtafel(L2, 0, 3.1, 0.07, 2.2, 1, r, PAL.herren);
+        },
+        (L2, w, r, d) => {
+          umkleiden(L2.sub(-w / 4, 0), w / 2, 2, r, "#2b3a55");
+          wandKleider(L2.sub(w / 4, 0), w / 2 - 0.1, PAL.herren, r, d, { panel: "#6f5442", bild: false });
+        }
+      ],
+      insel: [
+        (L2, r, d) => {
+          staender(L2, 0, -1, 2.4, PAL.herren.slice(0, 4), r, d, 1.75);
+          warenTisch(L2, -0.6, 0.6, 1.4, 0.9, PAL.herren, r, d, HOLZ.dunkel);
+          puppe3(L2, 1.1, 0.6, r, "herren", PAL.herren);
+        },
+        (L2, r, d) => {
+          vitrine2(L2, 0, -0.6, 2, 0.8, 0.85, HOLZ.dunkel, (L22, x, y, z2, w, t, r22) => {
+            for (let i = 0; i < 8; i++) L22.box(0.08, 0.02, 0.4, x - w / 2 + (i + 0.5) * (w / 8), y, z2, bunt(r22, ["#6d2f3a", "#2b3a55", "#a67c52", "#4a5a3e", "#c9483e"]));
+          }, r, d);
+          puppenPodest(L2, 0, 0.9, "herren", PAL.herren, r, 2.2);
+        },
+        (L2, r, d) => {
+          rundstaender(L2, -0.8, -0.7, PAL.herren, r, d);
+          rundstaender(L2, 0.8, 0.8, PAL.herren, r, d);
+          warenTisch(L2, 0.8, -0.8, 1.1, 0.7, ["#ffffff", "#d9dee3", "#9bb7d1", "#f2efe8"], r, d, HOLZ.dunkel);
+        }
+      ]
+    },
+    kinder: {
+      wand: [
+        (L2, w, r, d) => wandKleider(L2, w, PAL.kinder, r, d, { panel: "#cfe6f2", zwei: true, breit: 0.32 }),
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.2, 3, "#f7d26a", prodGefaltet(PAL.kinder), r, d);
+          bildtafel(L2, 0, 2.7, 0.07, 2, 0.9, r, PAL.kinder);
+        }
+      ],
+      insel: [
+        (L2, r, d) => {
+          L2.zyl(1.5, 1.5, 0.02, 0, 0, 0, "#ffd166", 16);
+          staender(L2, 0, -0.8, 1.8, PAL.kinder, r, d, 1.15);
+          puppe3(L2, -0.6, 0.6, r, "kind", PAL.kinder);
+          puppe3(L2, 0.2, 0.8, r, "kind", PAL.kinder);
+          warenTisch(L2, 0.9, 0.6, 0.9, 0.7, PAL.kinder, r, d, "#ffffff", 0.6);
+        },
+        (L2, r, d) => {
+          rundstaender(L2, -0.8, -0.6, PAL.kinder, r, d, 0.45);
+          rundstaender(L2, 0.8, 0.6, PAL.kinder, r, d, 0.45);
+          L2.box(1, 0.45, 1, 0.8, 0, -0.8, "#5bc0eb");
+          L2.box(0.7, 0.3, 0.7, -0.8, 0, 0.8, "#ef5b5b");
+        }
+      ]
+    },
+    waesche: {
+      wand: [
+        (L2, w, r, d) => {
+          umkleiden(L2.sub(-w / 4, 0), w / 2, 2, r, "#b0475f");
+          wandKleider(L2.sub(w / 4, 0), w / 2 - 0.1, PAL.waesche, r, d, { panel: "#f2dfe4", bild: false, hMin: 0.3, hMax: 0.5, zwei: true, breit: 0.3 });
+        },
+        (L2, w, r, d) => {
+          wandKleider(L2, w, PAL.waesche, r, d, { panel: "#f2dfe4", zwei: true, breit: 0.3 });
+        },
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.4, 4, "#f7eef0", prodPackungen(PAL.waesche), r, d, 0.4);
+          bildtafel(L2, 0, 2.9, 0.07, 2.2, 1, r, PAL.waesche);
+        }
+      ],
+      insel: [
+        (L2, r, d) => {
+          staender(L2, -0.6, -0.9, 1.6, PAL.waesche, r, d, 1.3);
+          staender(L2, 0.6, 0.1, 1.6, PAL.waesche, r, d, 1.3);
+          puppe3(L2, -0.9, 0.9, r, "waesche", PAL.waesche);
+          puppe3(L2, 1.1, -1, r, "waesche", PAL.waesche);
+        },
+        (L2, r, d) => {
+          warenTisch(L2, 0, -0.6, 2.2, 1, PAL.waesche, r, d, "#f7eef0", 0.75);
+          puppe3(L2, -0.6, 0.9, r, "waesche", PAL.waesche);
+          puppe3(L2, 0.6, 0.9, r, "waesche", PAL.waesche);
+          L2.zyl(0.35, 0.35, 0.42, 1.3, 0, 0.6, "#c9a3d4", 10);
+        }
+      ]
+    },
+    beauty: {
+      wand: [
+        (L2, w, r, d) => markenwand(L2, w, r, d),
+        (L2, w, r, d) => {
+          markenwand(L2.sub(-w / 4, 0), w / 2 - 0.05, r, d);
+          markenwand(L2.sub(w / 4, 0), w / 2 - 0.05, r, d);
+        }
+      ],
+      insel: [
+        (L2, r, d) => tresenU(L2, 0, 0, r, d),
+        (L2, r, d) => {
+          vitrine2(L2, -0.5, -0.5, 1.6, 0.9, 0.95, "#f7f3ec", flakonFlaeche, r, d);
+          spiegelSaeule(L2, 1.2, 0.9);
+          schminkplatz(L2, -0.6, 1, r);
+        },
+        (L2, r, d) => {
+          flakonTurm(L2, -0.8, -0.8, r, d);
+          flakonTurm(L2, 0.8, 0.8, r, d);
+          vitrine2(L2, 0.8, -0.8, 1, 0.8, 0.95, "#1f1f1f", flakonFlaeche, r, d);
+          spiegelSaeule(L2, -0.9, 0.9);
+        }
+      ]
+    },
+    accessoires: {
+      wand: [
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.6, 5, "#f4efe7", prodSchuhe(PAL.schuhe), r, d, 0.4);
+        },
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.6, 4, "#c79f74", prodTaschen, r, d, 0.45);
+          bildtafel(L2, 0, 3.1, 0.07, 2.2, 1, r, PAL.taschen);
+        }
+      ],
+      insel: [
+        (L2, r, d) => {
+          schuhtisch(L2, -0.7, -0.8, r, d);
+          schuhtisch(L2, 0.7, 0.7, r, d);
+          pouf(L2, 0.9, -0.9);
+          pouf(L2, -0.9, 0.9, "#c9a26b");
+        },
+        (L2, r, d) => {
+          uhrenvitrine(L2, 0, -0.7, r, d);
+          taschenWuerfel(L2, -0.6, 0.9, r, d);
+          pouf(L2, 1.1, 0.9, "#2f6f8f");
+        },
+        (L2, r, d) => {
+          schuhtisch(L2, 0, -0.9, r, d, 2.6);
+          L2.box(2.2, 0.42, 0.5, 0, 0, 0.5, "#7d8f9c");
+          L2.box(2.2, 0.06, 0.5, 0, 0.42, 0.5, "#6c7d8a");
+          standspiegel(L2, 1.4, 1.1, -0.6);
+          taschenWuerfel(L2, -1, 1.2, r, d, 1);
+        }
+      ]
+    },
+    wohnen: {
+      wand: [
+        (L2, w, r, d) => wandRegal(L2, w, 2.4, 4, "#ece6dc", prodGeschirr, r, d, 0.45),
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.4, 4, "#b98d61", prodPackungen(["#f4f0e6", "#d8c6a8", "#9bc6d8", "#3f6b5a", "#d97a5a", "#2f5f8a"]), r, d, 0.45);
+        }
+      ],
+      insel: [
+        (L2, r, d) => sofaInsel(L2, r, d),
+        (L2, r, d) => bettInsel(L2, r, d),
+        (L2, r, d) => {
+          L2.box(2.4, 0.74, 1.1, 0, 0, -0.6, "#ece6dc");
+          L2.box(2.48, 0.06, 1.18, 0, 0.74, -0.6, "#d9d1c4");
+          geschirrAufTisch(L2, 0, -0.6, 2.2, 0.9, 0.8, r, d);
+          stehlampe(L2, 1.3, 0.9, r);
+          stehlampe(L2, -1.3, 0.9, r);
+          L2.box(1.4, 0.75, 0.7, 0, 0, 0.9, "#b98d61");
+          geschirrAufTisch(L2, 0, 0.9, 1.2, 0.5, 0.75, r, d);
+        }
+      ]
+    },
+    spielwaren: {
+      wand: [
+        (L2, w, r, d) => wandRegal(L2, w, 2.3, 4, "#ffffff", prodPackungen(PAL.kinder), r, d, 0.45),
+        (L2, w, r, d) => {
+          wandRegal(L2, w, 2.3, 4, "#5bc0eb", prodPackungen(PAL.kinder), r, d, 0.45);
+          for (let i = 0; i < 3; i++) teddy(L2, -w / 2 + 0.8 + i * (w - 1.6) / 2, 2.32, 0.25, r, 0.8);
+        }
+      ],
+      insel: [
+        (L2, r, d) => {
+          gondel(L2, 0, -0.5, 2.6, 1.6, "#ffffff", prodPackungen(PAL.kinder), r, d);
+          pluschBerg(L2, 0.4, 1, r, d);
+        },
+        (L2, r, d) => spieltisch(L2, r, d),
+        (L2, r, d) => {
+          pluschBerg(L2, -0.6, -0.6, r, d);
+          gondel(L2, 0.4, 0.9, 2.2, 1.4, "#ffd166", prodPackungen(PAL.kinder), r, d, PI2 / 2);
+        }
+      ]
+    },
+    food: {
+      wand: [
+        (L2, w, r, d) => weinregal(L2, w, r, d),
+        (L2, w, r, d) => wandRegal(L2, w, 2.3, 4, "#7b5a40", prodPackungen(["#c9483e", "#f2c14e", "#5a3b22", "#e8dcc6", "#3f6b3a", "#d97a5a", "#2b2b2b"]), r, d, 0.45)
+      ],
+      insel: [
+        (L2, r, d) => feinkosttheke(L2, r, d),
+        (L2, r, d) => cafeEcke(L2, r, d),
+        (L2, r, d) => {
+          gondel(L2, 0, -0.6, 2.6, 1.3, "#7b5a40", prodFlaschen(["#6d1f2a", "#3a5a2a", "#d8b25a", "#2b2b2b", "#a8452f"], 0.045, 0.34), r, d);
+          obstStand(L2, 0, 1, r, d);
+        }
+      ]
+    },
+    sport: {
+      wand: [
+        (L2, w, r, d) => wandRegal(L2, w, 2.5, 5, "#2a2d31", prodSchuhe(PAL.sport), r, d, 0.4),
+        (L2, w, r, d) => wandKleider(L2, w, PAL.sport, r, d, { panel: "#2a2d31", zwei: true })
+      ],
+      insel: [
+        (L2, r, d) => {
+          staender(L2, 0, -0.9, 2.2, PAL.sport, r, d);
+          ballkorb(L2, -0.8, 0.8, r, d);
+          puppe3(L2, 0.6, 0.6, r, "sport", PAL.sport);
+        },
+        (L2, r, d) => {
+          schuhtisch(L2, 0, -0.6, r, d, 2.4, "#2a2d31", PAL.sport);
+          fahrrad(L2, -0.5, 1, r, 0);
+          ballkorb(L2, 1.1, 1, r, d);
+        },
+        (L2, r, d) => {
+          rundstaender(L2, -0.8, -0.8, PAL.sport, r, d);
+          staender(L2, 0.6, 0, 1.6, PAL.sport, r, d);
+          puppe3(L2, -0.9, 0.9, r, "sport", PAL.sport);
+          warenTisch(L2, 0.7, 1.1, 1, 0.6, PAL.sport, r, d, "#2a2d31");
+        }
+      ]
+    },
+    // ------------------------- Sporthaus
+    sportschuhe: {
+      wand: [(L2, w, r, d) => schuhwand(L2, w, r, d)],
+      insel: [
+        (L2, r, d) => {
+          schuhtisch(L2, 0, -0.9, r, d, 2.6, "#2a2d31", PAL.sport);
+          L2.box(2.4, 0.45, 0.5, 0, 0, 0.4, "#38b86b");
+          L2.box(2.4, 0.06, 0.5, 0, 0.45, 0.4, "#2f9e5c");
+          L2.box(0.5, 0.25, 0.7, 0, 0, 1.2, "#e8403a");
+        },
+        (L2, r, d) => {
+          schuhtisch(L2, -0.6, -0.8, r, d, 1.6, "#ffffff", PAL.sport);
+          schuhtisch(L2, 0.7, 0.6, r, d, 1.6, "#ffffff", PAL.sport);
+          L2.box(1.4, 0.08, 0.5, -0.7, 0, 0.9, "#1f1f1f");
+          L2.box(1.4, 0.012, 0.06, -0.7, 0.08, 0.9, "#ffcc00");
+          pouf(L2, 1.2, -0.8, "#e8403a");
+          pouf(L2, -1.3, 0.2, "#1f6fd1");
+        },
+        (L2, r, d) => {
+          gondel(L2, 0, -0.4, 2.8, 1.5, "#2a2d31", prodSchuhe(PAL.sport), r, d);
+          L2.box(2.4, 0.42, 0.5, 0, 0, 1, "#e8403a");
+        }
+      ]
+    },
+    sporttextil: {
+      wand: [(L2, w, r, d) => wandKleider(L2, w, PAL.sport, r, d, { panel: "#1f6fd1", zwei: true })],
+      insel: [
+        (L2, r, d) => {
+          rundstaender(L2, -0.8, -0.8, PAL.sport, r, d);
+          staender(L2, 0.6, 0.2, 1.6, PAL.sport, r, d);
+          puppe3(L2, -0.9, 0.9, r, "sport", PAL.sport);
+          puppe3(L2, 1.2, -1, r, "sport", PAL.sport);
+        },
+        (L2, r, d) => {
+          puppenPodest(L2, 0, -0.6, "sport", PAL.sport, r, 2.6);
+          warenTisch(L2, 0, 0.9, 2, 0.8, PAL.sport, r, d, "#2a2d31");
+        }
+      ]
+    },
+    outdoor: {
+      wand: [
+        (L2, w, r, d) => rucksackwand(L2, w, r, d),
+        (L2, w, r, d) => wandKleider(L2, w, PAL.outdoor, r, d, { panel: "#7b5a40", zwei: false })
+      ],
+      insel: [
+        (L2, r, d) => {
+          zelt(L2, -0.3, -0.3, r, 2.6);
+          L2.box(0.8, 0.4, 0.4, 1.3, 0, 1.2, "#7b5a40");
+          L2.kugel(0.35, -1.3, 0.2, 1.2, "#9a9a94");
+        },
+        (L2, r, d) => {
+          staender(L2, 0, -0.9, 2.2, PAL.outdoor, r, d);
+          puppe3(L2, -0.8, 0.7, r, "herren", PAL.outdoor);
+          warenTisch(L2, 0.7, 0.8, 1.2, 0.8, PAL.outdoor, r, d, "#7b5a40");
+        },
+        (L2, r, d) => {
+          zelt(L2, 0.4, 0.2, r, 2);
+          rucksackTurm(L2, -1.1, -1, r, d);
+        }
+      ]
+    },
+    rad: {
+      wand: [(L2, w, r, d) => radwand(L2, w, r, d)],
+      insel: [
+        (L2, r, d) => {
+          for (let i = 0; i < 3; i++) fahrrad(L2, 0, -1.1 + i * 1, r, 0);
+        },
+        (L2, r, d) => {
+          L2.box(2.6, 0.2, 1.4, 0, 0, -0.4, "#2a2d31");
+          fahrrad(L2, -0.4, -0.6, r, 0, 0.2);
+          fahrrad(L2, 0.4, -0.2, r, 0, 0.2);
+          wandRegal(L2.sub(0, 0.6), 2.4, 1.2, 2, "#9aa3aa", prodPackungen(PAL.sport), r, d, 0.5);
+        }
+      ]
+    },
+    wintersport: {
+      wand: [(L2, w, r, d) => skiwand(L2, w, r, d)],
+      insel: [
+        (L2, r, d) => {
+          skistaender(L2, 0, -0.6, r, d);
+          rundstaender(L2, 0.8, 0.9, PAL.winter, r, d);
+          L2.box(0.8, 0.5, 0.6, -0.9, 0, 1, "#e8f0f5");
+          helme(L2, -0.9, 0.5, 1, r);
+        },
+        (L2, r, d) => {
+          snowboardInsel(L2, r, d);
+          puppe3(L2, 1.1, 1, r, "sport", PAL.winter);
+        }
+      ]
+    },
+    teamsport: {
+      wand: [(L2, w, r, d) => trikotwand(L2, w, r, d)],
+      insel: [
+        (L2, r, d) => {
+          ballkorb(L2, -0.8, -0.7, r, d);
+          ballkorb(L2, 0.8, -0.7, r, d);
+          tor(L2, 0, 0.8);
+        },
+        (L2, r, d) => {
+          puppenPodest(L2, 0, -0.7, "sport", ["#e8403a", "#ffffff", "#1f6fd1", "#ffcc00"], r, 2.4);
+          ballkorb(L2, 0.9, 0.9, r, d);
+          warenTisch(L2, -0.6, 0.9, 1.2, 0.7, PAL.sport, r, d, "#ffffff");
+        }
+      ]
+    }
+  };
+  function flakonFlaeche(L2, x, y, z2, w, t, r, d) {
+    const nx = d < 0.5 ? 3 : 6, nz = 2;
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const f = bunt(r, PAL.flakon), h = zw(r, 0.12, 0.24);
+      L2.box(0.09, h, 0.09, x - w / 2 + (i + 0.5) * (w / nx), y, z2 - t / 2 + (j + 0.5) * (t / nz), f);
+      if (d > 0.7 && (i + j) % 2) L2.box(0.05, 0.05, 0.05, x - w / 2 + (i + 0.5) * (w / nx), y + h, z2 - t / 2 + (j + 0.5) * (t / nz), "#d8b25a");
+    }
+  }
+  function markenwand(L2, w, r, d) {
+    const marke4 = bunt(r, PAL.beautyMarke);
+    const hellm = new three_module_exports.Color(marke4).getHSL({}).l > 0.6;
+    L2.box(w, 3.2, 0.12, 0, 0, 0.06, marke4);
+    L2.box(w - 0.3, 0.5, 0.04, 0, 2.6, 0.14, hellm ? "#1f1f1f" : "#f7f3ec");
+    L2.box(w * 0.4, 0.14, 0.02, 0, 2.78, 0.17, hellm ? "#f7f3ec" : marke4);
+    for (let i = 0; i < 4; i++) {
+      const y = 0.9 + i * 0.42;
+      L2.box(w - 0.4, 0.03, 0.28, 0, y, 0.26, hellm ? "#ffffff" : "#e9e4dc");
+      if (d < 0.5 && i % 2) continue;
+      const n = Math.floor((w - 0.6) / 0.18);
+      for (let k = 0; k < n; k++) L2.box(0.1, zw(r, 0.14, 0.26), 0.1, -w / 2 + 0.4 + k * 0.18, y + 0.03, 0.26, bunt(r, PAL.flakon));
+    }
+    L2.box(w - 0.3, 0.85, 0.5, 0, 0, 0.35, hellm ? "#ffffff" : dunkler(marke4, 0.05));
+    L2.box(w - 0.3, 0.04, 0.52, 0, 0.85, 0.35, "#d8b25a");
+  }
+  function tresenU(L2, lx, lz, r, d) {
+    const marke4 = bunt(r, ["#f7f3ec", "#1f1f1f", "#e9a3b8", "#ffffff"]);
+    const teile = [[0, -1.1, 2.8, 0.7], [-1.05, 0.15, 0.7, 1.8], [1.05, 0.15, 0.7, 1.8]];
+    for (const [dx, dz, ww, dd] of teile) {
+      L2.box(ww, 0.92, dd, lx + dx, 0, lz + dz, marke4);
+      L2.box(ww + 0.04, 0.04, dd + 0.04, lx + dx, 0.92, lz + dz, "#d8b25a");
+      flakonFlaeche(L2, lx + dx, 0.96, lz + dz, ww - 0.15, dd - 0.15, r, d);
+      L2.box(ww, 0.3, dd, lx + dx, 0.96, lz + dz, GLAS3);
+    }
+    L2.box(1.4, 1.9, 0.12, lx, 0, lz - 1.55, marke4 === "#1f1f1f" ? "#2b2b2b" : "#e9e4dc");
+    L2.box(0.8, 0.8, 0.03, lx, 1, lz - 1.48, "#e3edf1");
+    L2.box(1.4, 0.12, 0.14, lx, 1.9, lz - 1.55, "#d8b25a");
+    figur2(L2.S, ...L2.P(lx, lz - 0.5), r() * 1e9 | 0, "beauty", { y: L2.oy, ry: L2.rot });
+  }
+  function flakonTurm(L2, lx, lz, r, d) {
+    L2.zyl(0.45, 0.5, 0.9, lx, 0, lz, "#f7f3ec", 8);
+    L2.zyl(0.47, 0.47, 0.04, lx, 0.9, lz, "#d8b25a", 8);
+    const n = d < 0.5 ? 4 : 8;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * PI2 * 2;
+      L2.box(0.09, zw(r, 0.14, 0.26), 0.09, lx + Math.cos(a) * 0.3, 0.94, lz + Math.sin(a) * 0.3, bunt(r, PAL.flakon));
+    }
+    L2.box(0.14, 0.38, 0.14, lx, 0.94, lz, bunt(r, PAL.flakon));
+  }
+  function spiegelSaeule(L2, lx, lz) {
+    L2.box(0.6, 2.6, 0.6, lx, 0, lz, "#e9e4dc");
+    L2.box(0.5, 1.6, 0.02, lx, 0.6, lz + 0.31, "#e3edf1");
+    L2.box(0.02, 1.6, 0.5, lx + 0.31, 0.6, lz, "#e3edf1");
+  }
+  function schminkplatz(L2, lx, lz, r) {
+    L2.box(1.2, 0.8, 0.5, lx, 0, lz, "#ffffff");
+    L2.box(0.9, 0.7, 0.04, lx, 1, lz - 0.2, "#e3edf1");
+    L2.box(1, 0.05, 0.06, lx, 1.72, lz - 0.2, "#f6e8b0");
+    L2.zyl(0.2, 0.2, 0.62, lx, 0, lz + 0.55, "#e9a3b8", 8);
+    for (let i = 0; i < 4; i++) L2.box(0.06, 0.12, 0.06, lx - 0.4 + i * 0.25, 0.8, lz + 0.05, bunt(r, PAL.flakon));
+  }
+  function schuhtisch(L2, lx, lz, r, d, w = 1.6, farbe = "#f4efe7", pal = PAL.schuhe) {
+    L2.box(w, 0.7, 0.8, lx, 0, lz, farbe);
+    L2.box(w + 0.05, 0.05, 0.85, lx, 0.7, lz, dunkler(farbe, 0.1));
+    const n = anz(Math.floor(w / 0.42), d, 0.5);
+    for (let i = 0; i < n; i++) for (const j of [-0.18, 0.18]) {
+      if (d < 0.7 && j > 0) continue;
+      const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, pal);
+      L2.box(0.1, 0.1, 0.26, u - 0.06, 0.75, lz + j, f, 0.3);
+      L2.box(0.1, 0.1, 0.26, u + 0.07, 0.75, lz + j, f, 0.3);
+    }
+  }
+  function pouf(L2, lx, lz, farbe = "#7d8f9c") {
+    L2.zyl(0.32, 0.32, 0.45, lx, 0, lz, farbe, 10);
+    L2.zyl(0.28, 0.32, 0.04, lx, 0.45, lz, dunkler(farbe, 0.06), 10);
+  }
+  function uhrenvitrine(L2, lx, lz, r, d) {
+    vitrine2(L2, lx, lz, 2.4, 0.9, 0.95, "#2a2d31", (L22, x, y, z2, w, t, r22) => {
+      L22.box(w, 0.04, t, x, y, z2, "#efe3cf");
+      const n = d < 0.5 ? 4 : 9;
+      for (let i = 0; i < n; i++) {
+        const u = x - w / 2 + (i + 0.5) * (w / n);
+        L22.box(0.08, 0.12, 0.08, u, y + 0.04, z2, "#d8d0bc");
+        L22.zyl(0.06, 0.06, 0.03, u, y + 0.16, z2, bunt(r22, ["#d8b25a", "#c9d2d8", "#2b2b2b", "#e8e4dc"]), 8);
+      }
+    }, r, d);
+    L2.box(2.4, 0.5, 0.08, lx, 1.4, lz - 0.5, "#2a2d31");
+  }
+  function taschenWuerfel(L2, lx, lz, r, d, w = 1.5) {
+    const h = 1.6, f = "#e8e2d8";
+    L2.box(w, h, 0.5, lx, 0, lz, f);
+    for (let i = 0; i < 3; i++) {
+      const y = 0.1 + i * 0.5;
+      L2.box(w - 0.08, 0.04, 0.04, lx, y + 0.42, lz + 0.26, "#c9bfae");
+      prodTaschen(L2, lx, y + 0.04, lz + 0.18, w - 0.2, r, d, 0.4);
+    }
+  }
+  function sofaInsel(L2, r, d) {
+    const stoff = bunt(r, ["#5f7f8c", "#b5745a", "#7a8a5c", "#9a8fbf", "#d3b48a", "#4b5a6b"]);
+    L2.box(3, 0.02, 2.2, 0, 0, 0.1, bunt(r, ["#e6d9c3", "#c9b8a6", "#d8dfe4", "#e2c9b8"]));
+    L2.box(2.4, 0.42, 0.95, 0, 0, -0.75, stoff);
+    L2.box(2.4, 0.5, 0.25, 0, 0.42, -1.1, dunkler(stoff, 0.04));
+    L2.box(0.22, 0.25, 0.95, -1.1, 0.42, -0.75, dunkler(stoff, 0.04));
+    L2.box(0.22, 0.25, 0.95, 1.1, 0.42, -0.75, dunkler(stoff, 0.04));
+    for (const x of [-0.6, 0.55]) L2.box(0.45, 0.35, 0.14, x, 0.48, -0.88, bunt(r, ["#f2e6d0", "#e9b44c", "#d65a6f", "#ffffff"]), zw(r, -0.2, 0.2));
+    L2.box(1.2, 0.42, 0.6, 0, 0, 0.35, HOLZ.mittel);
+    L2.box(0.12, 0.2, 0.12, -0.3, 0.42, 0.35, "#3f6b5a");
+    L2.kugel(0.18, -0.3, 0.72, 0.35, "#6fa860");
+    L2.box(0.3, 0.05, 0.22, 0.25, 0.42, 0.3, "#f4f0e6");
+    L2.box(0.8, 0.45, 0.75, 1.1, 0, 0.95, stoff, -0.5);
+    L2.box(0.8, 0.45, 0.2, 1.25, 0.45, 0.7, dunkler(stoff, 0.04), -0.5);
+    stehlampe(L2, -1.35, 0.9, r);
+  }
+  function bettInsel(L2, r, d) {
+    const bezug = bunt(r, ["#f4f0e6", "#d8e3ea", "#e9d6cf", "#ffffff"]);
+    L2.box(2, 0.45, 2.4, 0, 0, -0.1, HOLZ.mittel);
+    L2.box(1.9, 0.25, 2.3, 0, 0.45, -0.1, "#ffffff");
+    L2.box(1.92, 0.08, 1.6, 0, 0.7, 0.25, bezug);
+    L2.box(2, 1.1, 0.12, 0, 0, -1.35, dunkler(HOLZ.mittel, 0.05));
+    L2.box(0.75, 0.18, 0.45, -0.45, 0.7, -0.95, "#ffffff", 0.05);
+    L2.box(0.75, 0.18, 0.45, 0.45, 0.7, -0.95, "#ffffff", -0.05);
+    L2.box(1.92, 0.04, 0.5, 0, 0.78, 0.8, bunt(r, ["#b5745a", "#5f7f8c", "#7a8a5c", "#9a8fbf"]));
+    for (const x of [-1.35, 1.35]) {
+      L2.box(0.5, 0.5, 0.45, x, 0, -1, HOLZ.weiss);
+      L2.zyl(0.04, 0.06, 0.3, x, 0.5, -1, "#2a2d31", 6);
+      L2.zyl(0.12, 0.16, 0.18, x, 0.8, -1, "#f6e8b0", 8);
+    }
+  }
+  function stehlampe(L2, lx, lz, r) {
+    L2.zyl(0.18, 0.2, 0.04, lx, 0, lz, "#2a2d31", 8);
+    L2.zyl(0.02, 0.02, 1.5, lx, 0.04, lz, "#2a2d31", 4);
+    L2.zyl(0.16, 0.26, 0.3, lx, 1.5, lz, bunt(r, ["#f6e8b0", "#ffffff", "#e9b44c", "#d8c6a8"]), 8);
+  }
+  function geschirrAufTisch(L2, lx, lz, w, t, y, r, d) {
+    const nx = d < 0.5 ? 3 : 5;
+    for (let i = 0; i < nx; i++) for (const j of [-0.25, 0.2]) {
+      const u = lx - w / 2 + (i + 0.5) * (w / nx), f = bunt(r, PAL.geschirr);
+      if ((i + (j > 0)) % 2) L2.zyl(0.16, 0.16, zw(r, 0.06, 0.2), u, y, lz + j * t, f, 10);
+      else {
+        L2.zyl(0.06, 0.05, 0.11, u - 0.08, y, lz + j * t, f, 6);
+        L2.zyl(0.06, 0.05, 0.11, u + 0.08, y, lz + j * t + 0.06, f, 6);
+      }
+    }
+  }
+  function teddy(L2, lx, y, lz, r, s2 = 1) {
+    const f = bunt(r, ["#b5835a", "#e9c79a", "#f78fb3", "#ffffff", "#8c6a4f", "#7b6cf6", "#5bc0eb"]);
+    L2.kugel(0.2 * s2, lx, y + 0.18 * s2, lz, f);
+    L2.kugel(0.15 * s2, lx, y + 0.48 * s2, lz + 0.02, f);
+    L2.kugel(0.06 * s2, lx - 0.11 * s2, y + 0.6 * s2, lz, f);
+    L2.kugel(0.06 * s2, lx + 0.11 * s2, y + 0.6 * s2, lz, f);
+  }
+  function pluschBerg(L2, lx, lz, r, d) {
+    L2.zyl(0.9, 1, 0.45, lx, 0, lz, "#ffd166", 10);
+    L2.zyl(0.92, 0.92, 0.04, lx, 0.45, lz, "#ef5b5b", 10);
+    const n = d < 0.5 ? 4 : 8;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * PI2 * 2, rr = i < 5 ? 0.55 : 0.15;
+      teddy(L2, lx + Math.cos(a) * rr, 0.48 + (i >= 5 ? 0.3 : 0), lz + Math.sin(a) * rr, r, zw(r, 0.75, 1.1));
+    }
+  }
+  function gondel(L2, lx, lz, w, h, farbe, prod, r, d, ry = 0) {
+    const G2 = L2.sub(lx, lz, ry);
+    G2.box(w, h, 0.06, 0, 0, 0, farbe);
+    G2.box(w, 0.08, 0.9, 0, h, 0, dunkler(farbe, 0.1));
+    G2.box(w, 0.2, 0.9, 0, 0, 0, dunkler(farbe, 0.12));
+    const boeden = Math.max(2, Math.round(h / 0.5));
+    for (const seite of [1, -1]) {
+      const S2 = G2.sub(0, 0, seite > 0 ? 0 : PI2);
+      for (let i = 0; i < boeden; i++) {
+        const y = 0.2 + i * (h - 0.25) / boeden;
+        if (i) S2.box(w - 0.06, 0.03, 0.4, 0, y, 0.23, "#e9e4dc");
+        if (d < 0.5 && i % 2) continue;
+        prod(S2, 0, y + 0.03, 0.25, w - 0.12, r, d, (h - 0.25) / boeden - 0.06);
+      }
+    }
+    G2.box(0.06, h + 0.08, 0.9, -w / 2, 0, 0, dunkler(farbe, 0.15));
+    G2.box(0.06, h + 0.08, 0.9, w / 2, 0, 0, dunkler(farbe, 0.15));
+  }
+  function spieltisch(L2, r, d) {
+    L2.box(2.4, 0.55, 1.6, 0, 0, -0.2, "#5bc0eb");
+    L2.box(2.5, 0.05, 1.7, 0, 0.55, -0.2, "#ffffff");
+    L2.box(2.2, 0.02, 1.4, 0, 0.6, -0.2, "#9bc53d");
+    L2.geo(new three_module_exports.TorusGeometry(0.5, 0.03, 3, 16).rotateX(PI2 / 2).scale(1.6, 1, 1), 0, 0.63, -0.2, "#7a5d43");
+    for (let i = 0; i < 4; i++) L2.box(0.22, 0.14, 0.12, -0.6 + i * 0.25, 0.64, 0.3, ["#ef5b5b", "#ffc145", "#5bc0eb", "#9bc53d"][i]);
+    for (let i = 0; i < (d < 0.5 ? 4 : 9); i++) L2.box(zw(r, 0.15, 0.3), zw(r, 0.1, 0.35), zw(r, 0.15, 0.3), zw(r, -0.9, 0.9), 0.62, zw(r, -0.7, 0), bunt(r, PAL.kinder));
+    for (const [x, z2] of [[-0.7, 0.95], [0.6, 1]]) figur2(L2.S, ...L2.P(x, z2), r() * 1e9 | 0, "kind", { y: L2.oy, ry: L2.rot + PI2 });
+    L2.box(0.6, 0.4, 0.6, 1.3, 0, 1.1, "#ef5b5b");
+    teddy(L2, 1.3, 0.4, 1.1, r, 0.9);
+  }
+  function weinregal(L2, w, r, d) {
+    L2.box(w, 2.5, 0.08, 0, 0, 0.04, "#5a3b2a");
+    const nx = Math.floor(w / 1.2);
+    for (let i = 0; i <= nx; i++) L2.box(0.06, 2.4, 0.45, -w / 2 + 0.05 + i * ((w - 0.1) / nx), 0, 0.25, "#7b5a40");
+    const reihen = d < 0.5 ? 4 : 6;
+    for (let j = 0; j < reihen; j++) {
+      const y = 0.15 + j * (2.2 / reihen);
+      L2.box(w - 0.1, 0.03, 0.42, 0, y, 0.25, "#7b5a40");
+      L2.box(w - 0.15, 0.09, 0.26, 0, y + 0.04, 0.2, "#3a2420");
+      const n = Math.floor((w - 0.2) / (d < 0.5 ? 0.45 : 0.27 / Math.min(1, d + 0.1)));
+      for (let k = 0; k < n; k++) L2.box(0.085, 0.085, 0.12, -w / 2 + 0.2 + k * ((w - 0.3) / n), y + 0.045, 0.39, bunt(r, ["#4a1a22", "#6d1f2a", "#2f4a22", "#d8b25a", "#e8dcc0"]));
+    }
+    L2.box(w, 0.5, 0.04, 0, 2.6, 0.06, "#2a1f1a");
+    L2.box(1.4, 0.95, 0.6, w / 2 - 1, 0, 0.9, "#7b5a40");
+    for (let i = 0; i < 6; i++) L2.box(0.08, 0.3, 0.08, w / 2 - 1.5 + i * 0.2, 0.95, 0.9, bunt(r, ["#4a1a22", "#6d1f2a", "#2f4a22"]));
+  }
+  function feinkosttheke(L2, r, d) {
+    const w = 3.2;
+    L2.box(w, 0.9, 0.9, 0, 0, -0.2, "#ffffff");
+    L2.box(w, 0.06, 0.1, 0, 0.2, 0.27, "#d23c32");
+    L2.box(w, 0.05, 0.95, 0, 0.9, -0.2, "#c9d2d8");
+    const waren = ["#e9b44c", "#d97a5a", "#f4e1c0", "#b5162b", "#9bc53d", "#f2c6d2", "#c9a26b", "#ffffff", "#6d1f2a"];
+    const n = d < 0.5 ? 5 : 10;
+    for (let i = 0; i < n; i++) {
+      const u = -w / 2 + 0.2 + (i + 0.5) * ((w - 0.4) / n), f = bunt(r, waren);
+      L2.box((w - 0.5) / n - 0.05, 0.03, 0.5, u, 0.95, -0.2, "#f4f4f2");
+      L2.box((w - 0.5) / n - 0.12, zw(r, 0.06, 0.16), 0.38, u, 0.98, -0.2, f);
+    }
+    L2.box(w, 0.06, 0.6, 0, 1.45, -0.35, "#c9d2d8");
+    const g = new three_module_exports.BoxGeometry(w, 0.55, 0.04);
+    g.rotateX(-0.45);
+    L2.geo(g, 0, 1.2, 0.12, GLAS3);
+    L2.box(w, 0.04, 0.04, 0, 1.44, 0, "#c9d2d8");
+    L2.box(w, 2, 0.5, 0, 0, -1.55, "#e9e4dc");
+    for (let j = 0; j < 3; j++) for (let k = 0; k < (d < 0.5 ? 4 : 9); k++) L2.box(0.25, 0.25, 0.25, -w / 2 + 0.3 + k * 0.33, 0.6 + j * 0.45, -1.28, bunt(r, waren));
+    figur2(L2.S, ...L2.P(-0.6, -0.95), r() * 1e9 | 0, "theke", { y: L2.oy, ry: L2.rot });
+    figur2(L2.S, ...L2.P(0.9, -0.95), r() * 1e9 | 0, "theke", { y: L2.oy, ry: L2.rot + 0.3 });
+  }
+  function cafeEcke(L2, r, d, n = 2) {
+    for (const [x, z2] of [[-0.85, -0.8], [0.85, 0.8], [0.9, -0.85], [-0.9, 0.85]].slice(0, d < 0.5 ? 2 : 4)) {
+      L2.zyl(0.4, 0.4, 0.04, x, 0.74, z2, "#f4f0ea", 12);
+      L2.zyl(0.04, 0.04, 0.74, x, 0, z2, "#2a2d31", 4);
+      L2.zyl(0.22, 0.22, 0.03, x, 0, z2, "#2a2d31", 8);
+      L2.zyl(0.05, 0.04, 0.09, x + 0.1, 0.78, z2, "#ffffff", 6);
+      for (const a of [0, PI2]) {
+        const cx = x + Math.cos(a) * 0.62, cz = z2 + Math.sin(a) * 0.62;
+        stuhl(L2, cx, cz, -a - PI2 / 2, "#3a4a5a");
+        if (r() < 0.55) figur2(L2.S, ...L2.P(cx, cz), r() * 1e9 | 0, "kunde", { y: L2.oy, ry: L2.rot - a - PI2 / 2, pose: "sitzen", y: L2.oy });
+      }
+    }
+  }
+  function stuhl(L2, lx, lz, ry, farbe) {
+    const P2 = L2.sub(lx, lz, ry);
+    P2.box(0.45, 0.06, 0.45, 0, 0.42, 0, farbe);
+    P2.box(0.45, 0.45, 0.06, 0, 0.48, -0.2, farbe);
+    P2.box(0.04, 0.42, 0.04, -0.2, 0, 0.2, "#2a2d31");
+    P2.box(0.04, 0.42, 0.04, 0.2, 0, 0.2, "#2a2d31");
+    P2.box(0.04, 0.42, 0.04, -0.2, 0, -0.2, "#2a2d31");
+    P2.box(0.04, 0.42, 0.04, 0.2, 0, -0.2, "#2a2d31");
+  }
+  function obstStand(L2, lx, lz, r, d) {
+    const w = 2.4;
+    L2.box(w, 0.7, 1, lx, 0, lz, "#a07b5a");
+    const korb = ["#e8403a", "#f2c14e", "#9bc53d", "#ff8c42", "#7b2f5a", "#f4e1c0"];
+    for (let i = 0; i < 4; i++) for (const j of [-0.22, 0.22]) {
+      const u = lx - w / 2 + (i + 0.5) * (w / 4), f = bunt(r, korb);
+      const g = new three_module_exports.BoxGeometry(0.52, 0.2, 0.4);
+      g.rotateX(j > 0 ? 0.25 : 0.1);
+      L2.geo(g, u, 0.8 + (j < 0 ? 0.12 : 0), lz + j, "#c9a26b");
+      L2.box(0.46, 0.08, 0.34, u, 0.9 + (j < 0 ? 0.12 : 0), lz + j, f);
+    }
+  }
+  function schuhwand(L2, w, r, d) {
+    L2.box(w, 3, 0.08, 0, 0, 0.04, "#1f1f1f");
+    L2.box(w, 0.5, 0.04, 0, 3, 0.06, "#e8403a");
+    const reihen = d < 0.5 ? 3 : 6;
+    for (let j = 0; j < reihen; j++) {
+      const y = 0.4 + j * (2.4 / reihen);
+      const n = Math.floor((w - 0.3) / 0.38);
+      L2.box(w - 0.3, 0.03, 0.22, 0, y - 0.03, 0.15, "#c9d2d8");
+      for (let k = 0; k < n; k++) {
+        const u = -w / 2 + 0.3 + k * 0.38, f = bunt(r, PAL.sport);
+        L2.box(0.28, 0.11, 0.12, u, y, 0.15, f);
+        L2.box(0.28, 0.03, 0.13, u, y, 0.15, "#ffffff");
+      }
+    }
+    L2.box(1.6, 0.42, 0.45, -w / 4, 0, 0.9, "#2a2d31");
+    L2.box(1.6, 0.06, 0.45, -w / 4, 0.42, 0.9, "#e8403a");
+  }
+  function rucksackwand(L2, w, r, d) {
+    L2.box(w, 2.8, 0.08, 0, 0, 0.04, "#7b5a40");
+    for (let j = 0; j < 3; j++) {
+      const y = 0.4 + j * 0.85;
+      L2.box(w - 0.2, 0.04, 0.06, 0, y + 0.55, 0.1, "#9aa3aa");
+      const n = anz(Math.floor((w - 0.3) / 0.55), d, 0.5);
+      for (let k = 0; k < n; k++) {
+        const u = -w / 2 + 0.4 + (k + 0.5) * ((w - 0.8) / n), f = bunt(r, PAL.outdoor);
+        L2.box(0.38, 0.55, 0.22, u, y, 0.2, f);
+        L2.box(0.3, 0.2, 0.06, u, y + 0.08, 0.33, dunkler(f, 0.08));
+      }
+    }
+  }
+  function rucksackTurm(L2, lx, lz, r, d) {
+    L2.box(0.8, 1.6, 0.8, lx, 0, lz, "#7b5a40");
+    for (let j = 0; j < 3; j++) for (const s2 of [0, 1]) {
+      const f = bunt(r, PAL.outdoor);
+      s2 ? L2.box(0.36, 0.42, 0.18, lx + 0.49, 0.15 + j * 0.5, lz, f) : L2.box(0.36, 0.42, 0.18, lx, 0.15 + j * 0.5, lz + 0.49, f);
+    }
+  }
+  function zelt(L2, lx, lz, r, w = 2.6) {
+    const f = bunt(r, ["#e0a33a", "#3f6b3a", "#c25b2a", "#2f5f8a"]);
+    L2.box(w + 0.6, 0.04, w * 0.9, lx, 0, lz, "#8a9a5b");
+    const g = new three_module_exports.ConeGeometry(w * 0.72, 1.6, 4, 1);
+    g.rotateY(PI2 / 4);
+    g.scale(1, 1, 0.72);
+    g.translate(0, 0.8, 0);
+    L2.geo(g, lx, 0.04, lz, f);
+    L2.box(0.5, 0.9, 0.04, lx, 0.04, lz + w * 0.33, "#30343a");
+    L2.box(0.04, 1.7, 0.04, lx, 0.04, lz, "#9aa3aa");
+  }
+  function fahrrad(L2, lx, lz, r, ry = 0, y = 0) {
+    const P2 = L2.sub(lx, lz, ry);
+    const f = bunt(r, ["#e8403a", "#1f6fd1", "#1f1f1f", "#38b86b", "#ffcc00", "#f2f2f2", "#7a3cd1"]);
+    const rad2 = 0.33;
+    for (const x of [-0.52, 0.52]) P2.geo(new three_module_exports.TorusGeometry(rad2, 0.035, 4, 14), x, y + rad2, 0, "#1f1f1f");
+    P2.geo(new three_module_exports.BoxGeometry(0.75, 0.05, 0.05).rotateZ(-0.15), 0, y + 0.66, 0, f);
+    P2.geo(new three_module_exports.BoxGeometry(0.7, 0.05, 0.05).rotateZ(0.75), -0.1, y + 0.5, 0, f);
+    P2.geo(new three_module_exports.BoxGeometry(0.55, 0.05, 0.05).rotateZ(-0.65), 0.3, y + 0.5, 0, f);
+    P2.box(0.05, 0.42, 0.05, 0.42, y + 0.4, 0, f);
+    P2.box(0.22, 0.04, 0.1, -0.22, y + 0.82, 0, "#1f1f1f");
+    P2.box(0.05, 0.05, 0.42, 0.44, y + 0.85, 0, "#1f1f1f");
+  }
+  function radwand(L2, w, r, d) {
+    L2.box(w, 3.2, 0.08, 0, 0, 0.04, "#d9dde0");
+    L2.box(w, 0.06, 0.1, 0, 2.95, 0.08, "#9aa3aa");
+    const n = Math.max(1, Math.floor(w / 1.3));
+    for (let i = 0; i < n; i++) {
+      const u = -w / 2 + (i + 0.5) * (w / n);
+      L2.box(0.05, 0.05, 0.4, u, 2.3, 0.25, "#2a2d31");
+      fahrrad(L2, u, 0.35, r, 0, 1.25);
+    }
+    for (let i = 0; i < (d < 0.5 ? 3 : 6); i++) L2.box(0.3, 0.3, 0.3, -w / 2 + 0.4 + i * 0.4, 0, 0.3, bunt(r, PAL.sport));
+  }
+  function skiwand(L2, w, r, d) {
+    L2.box(w, 3, 0.08, 0, 0, 0.04, "#e8f0f5");
+    L2.box(w, 0.06, 0.24, 0, 1.8, 0.14, "#9aa3aa");
+    const n = anz(Math.floor((w - 0.3) / 0.24), d, 0.5);
+    for (let i = 0; i < n; i++) L2.box(0.1, 1.75, 0.03, -w / 2 + 0.3 + i * ((w - 0.6) / n), 0.15, 0.12, bunt(r, PAL.winter), 0);
+    L2.box(w - 0.4, 0.04, 0.35, 0, 2.3, 0.2, "#c9d2d8");
+    helme(L2, 0, 2.34, 0.2, r, w - 0.6);
+  }
+  function helme(L2, lx, y, lz, r, w = 0.6) {
+    const n = Math.max(1, Math.floor(w / 0.35));
+    for (let i = 0; i < n; i++) L2.geo(new three_module_exports.SphereGeometry(0.13, 8, 4, 0, PI2 * 2, 0, PI2 / 2), lx - w / 2 + (i + 0.5) * (w / n), y, lz, bunt(r, PAL.winter));
+  }
+  function skistaender(L2, lx, lz, r, d) {
+    L2.box(2.4, 0.15, 0.6, lx, 0, lz, "#9aa3aa");
+    L2.box(2.4, 0.06, 0.1, lx, 1.2, lz - 0.2, "#9aa3aa");
+    L2.box(0.06, 1.2, 0.06, lx - 1.15, 0, lz - 0.2, "#9aa3aa");
+    L2.box(0.06, 1.2, 0.06, lx + 1.15, 0, lz - 0.2, "#9aa3aa");
+    const n = d < 0.5 ? 7 : 14;
+    for (let i = 0; i < n; i++) L2.geo(new three_module_exports.BoxGeometry(0.09, 1.7, 0.03).rotateX(-0.12), lx - 1.05 + i * (2.1 / (n - 1)), 0.95, lz - 0.05, bunt(r, PAL.winter));
+  }
+  function snowboardInsel(L2, r, d) {
+    L2.box(2.6, 0.2, 1, 0, 0, -0.8, "#e8f0f5");
+    L2.box(2.6, 1.8, 0.08, 0, 0.2, -1.25, "#1f6fd1");
+    for (let i = 0; i < (d < 0.5 ? 3 : 6); i++) L2.geo(new three_module_exports.BoxGeometry(0.28, 1.5, 0.04).rotateX(-0.15), -1.05 + i * 0.42, 0.95, -1.05, bunt(r, PAL.winter));
+    rundstaender(L2, -0.5, 0.8, PAL.winter, r, d);
+  }
+  function trikotwand(L2, w, r, d) {
+    L2.box(w, 3, 0.08, 0, 0, 0.04, "#1f1f1f");
+    const vereine = [["#e8403a", "#ffffff"], ["#1f6fd1", "#ffffff"], ["#ffcc00", "#1f1f1f"], ["#38b86b", "#ffffff"], ["#ffffff", "#e8403a"], ["#7a3cd1", "#ffcc00"]];
+    const n = Math.floor(w / 0.75);
+    for (let j = 0; j < (d < 0.5 ? 2 : 3); j++) for (let i = 0; i < n; i++) {
+      const [a, b] = vereine[(i + j * 2) % vereine.length];
+      const u = -w / 2 + (i + 0.5) * (w / n), y = 0.5 + j * 0.85;
+      L2.box(0.42, 0.55, 0.04, u, y, 0.1, a);
+      L2.box(0.66, 0.16, 0.04, u, y + 0.4, 0.1, a);
+      L2.box(0.12, 0.2, 0.02, u, y + 0.25, 0.13, b);
+    }
+  }
+  function ballkorb(L2, lx, lz, r, d) {
+    L2.box(0.9, 0.55, 0.9, lx, 0, lz, "#c9d2d8");
+    L2.box(0.8, 0.5, 0.8, lx, 0.06, lz, "#4b5560");
+    const n = d < 0.5 ? 4 : 9;
+    for (let i = 0; i < n; i++) L2.geo(new three_module_exports.IcosahedronGeometry(0.15, 1), lx - 0.27 + i % 3 * 0.27, 0.62 + (i > 5 ? 0.18 : 0), lz - 0.27 + Math.floor(i / 3) % 3 * 0.27, bunt(r, ["#ffffff", "#ff6a2b", "#ffcc00", "#ffffff", "#e8403a"]));
+  }
+  function tor(L2, lx, lz) {
+    L2.box(2.4, 0.08, 0.08, lx, 1.3, lz, "#ffffff");
+    L2.box(0.08, 1.3, 0.08, lx - 1.16, 0, lz, "#ffffff");
+    L2.box(0.08, 1.3, 0.08, lx + 1.16, 0, lz, "#ffffff");
+    L2.box(2.4, 1.3, 0.02, lx, 0, lz - 0.6, "#dfe5e8");
+  }
+  var MARKEN2 = [
+    { name: "Lindqvist", farbe: "#2c3e50", schrift: "#f4efe6", boden: "#e8e1d6", gruppe: "damen" },
+    { name: "Casa Orvieto", farbe: "#b5745a", schrift: "#ffffff", boden: "#efe3d2", gruppe: "wohnen" },
+    { name: "NORDKAMM", farbe: "#1f1f1f", schrift: "#ffffff", boden: "#d9d9d9", gruppe: "outdoor" },
+    { name: "Maison Belrose", farbe: "#e9c9cf", schrift: "#6b2737", boden: "#f7efe9", gruppe: "beauty" },
+    { name: "Kordel & Co.", farbe: "#3f6b5a", schrift: "#f4efe6", boden: "#e4ddd0", gruppe: "herren" },
+    { name: "P\xFCnktchen", farbe: "#ffd166", schrift: "#7b2f5a", boden: "#fdf3d6", gruppe: "kinder" }
+  ];
+  var MIETER3 = {
+    discounter: { name: "Frischmarkt Kolb", farbe: "#1f5fa8", schrift: "#ffd400" },
+    fitness: { name: "Kraftwerk Fitness", farbe: "#1f1f1f", schrift: "#ff6a2b" },
+    arzt: { name: "Praxis am Markt", farbe: "#e9f1f4", schrift: "#2f6f8f" },
+    gastro: { name: "Caf\xE9 Sole", farbe: "#4f8a5b", schrift: "#fff8e6" }
+  };
+  function marke2(seed) {
+    return MARKEN2[Math.abs(seed | 0) % MARKEN2.length];
+  }
+  function schrift(L2, text3, lx, ly, lz, hoehe, farbe, hg = null, liegend = false) {
+    const scene2 = L2.S.szene;
+    if (!scene2) return;
+    const { mat: mat2, seitenverhaeltnis } = textMaterial(text3, farbe, { groesse: 120, hintergrund: hg, versatz: -2 });
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), mat2);
+    const [X, Z2] = L2.P(lx, lz);
+    m.position.set(X, L2.oy + ly, Z2);
+    m.rotation.order = "YXZ";
+    m.rotation.y = L2.rot;
+    if (liegend) m.rotation.x = -PI2 / 2;
+    scene2.add(m);
+    return m;
+  }
+  function preisschild(L2, lx, lz, text3, hoch = 1.9) {
+    L2.box(0.04, hoch, 0.04, lx, 0, lz, "#9aa3aa");
+    L2.box(0.9, 0.5, 0.04, lx, hoch, lz, "#ffd400");
+    schrift(L2, text3, lx, hoch + 0.25, lz + 0.03, 0.38, "#d4212a");
+  }
+  function wuehltisch(L2, lx, lz, r, d, w = 2.2) {
+    L2.box(w, 0.75, 1.1, lx, 0, lz, "#c9d2d8");
+    L2.box(w, 0.25, 1.1, lx, 0.75, lz, "#9aa3aa");
+    L2.box(w - 0.1, 0.1, 1, lx, 0.8, lz, "#5a636b");
+    const n = d < 0.5 ? 6 : 14;
+    for (let i = 0; i < n; i++) L2.box(zw(r, 0.3, 0.5), zw(r, 0.08, 0.2), zw(r, 0.25, 0.4), lx + zw(r, -w / 2 + 0.3, w / 2 - 0.3), 0.88, lz + zw(r, -0.35, 0.35), bunt(r, PAL.damen.concat(PAL.kinder)), zw(r, -1, 1));
+  }
+  function gitterbox(L2, lx, lz, r, d) {
+    const w = 1.2, t = 1, h = 0.95;
+    L2.box(w, 0.12, t, lx, 0, lz, "#7b5a40");
+    const n = d < 0.5 ? 4 : 8;
+    for (let i = 0; i < n; i++) L2.box(zw(r, 0.3, 0.5), zw(r, 0.2, 0.4), zw(r, 0.3, 0.5), lx + zw(r, -0.35, 0.35), 0.12 + (i > 4 ? 0.35 : 0), lz + zw(r, -0.3, 0.3), bunt(r, PAL.waren), zw(r, -1, 1));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) L2.box(0.04, h, 0.04, lx + sx * w / 2, 0.12, lz + sz * t / 2, "#8c959b");
+    for (const y of [0.45, h + 0.1]) {
+      L2.box(w, 0.03, 0.03, lx, y, lz + t / 2, "#8c959b");
+      L2.box(w, 0.03, 0.03, lx, y, lz - t / 2, "#8c959b");
+      L2.box(0.03, 0.03, t, lx + w / 2, y, lz, "#8c959b");
+      L2.box(0.03, 0.03, t, lx - w / 2, y, lz, "#8c959b");
+    }
+    if (d > 0.6) for (let i = 1; i < 5; i++) {
+      L2.box(0.02, h, 0.02, lx - w / 2 + i * w / 5, 0.12, lz + t / 2, "#8c959b");
+      L2.box(0.02, h, 0.02, lx + w / 2, 0.12, lz - t / 2 + i * t / 5, "#8c959b");
+    }
+  }
+  var PREISE = ["\u221230 %", "\u221250 %", "ab 5 \u20AC", "\u221270 %", "9,99 \u20AC", "ab 2 \u20AC"];
+  function abgedeckt(L2, lx, lz, w, h, t, ry = 0) {
+    const P2 = L2.sub(lx, lz, ry);
+    P2.box(w, h, t, 0, 0, 0, "#e6e3dc");
+    P2.box(w + 0.1, 0.12, t + 0.1, 0, 0, 0, "#d9d5cc");
+    P2.geo(new three_module_exports.BoxGeometry(w * 0.6, 0.15, t * 0.7).rotateZ(0.1), 0, h, 0, "#ebe8e2");
+  }
+  function kartons(L2, lx, lz, r, n = 4) {
+    for (let i = 0; i < n; i++) {
+      const w = zw(r, 0.4, 0.7), h = zw(r, 0.3, 0.55);
+      const stapelY = i >= 3 ? 0.5 : 0;
+      L2.box(w, h, w * zw(r, 0.7, 1), lx + i % 3 * 0.55 - 0.5, stapelY, lz + i % 2 * 0.3, bunt(r, ["#c9a26b", "#b8925e", "#d6b27c"]), zw(r, -0.3, 0.3));
+    }
+  }
+  function absperrung(L2, a, b, lz) {
+    const n = Math.max(1, Math.round((b - a) / 1.6));
+    for (let i = 0; i <= n; i++) {
+      const u = a + i * (b - a) / n;
+      L2.zyl(0.15, 0.17, 0.05, u, 0, lz, "#2a2d31", 6);
+      L2.box(0.06, 1, 0.06, u, 0, lz, "#e8403a");
+    }
+    const s2 = (b - a) / 10;
+    for (let i = 0; i < 10; i++) L2.box(s2, 0.07, 0.02, a + (i + 0.5) * s2, 0.92, lz, i % 2 ? "#ffffff" : "#e8403a");
+  }
+  function bauzaun2(L2, a, b, lz) {
+    const n = Math.max(1, Math.round((b - a) / 2.2));
+    const s2 = (b - a) / n;
+    for (let i = 0; i < n; i++) {
+      const u = a + (i + 0.5) * s2;
+      L2.box(s2 - 0.04, 0.05, 0.05, u, 1.95, lz, "#9aa3aa");
+      L2.box(s2 - 0.04, 0.05, 0.05, u, 0.15, lz, "#9aa3aa");
+      L2.box(s2 - 0.1, 1.75, 0.02, u, 0.2, lz, "#dfe5e8");
+      for (let k = 1; k < 5; k++) L2.box(0.02, 1.75, 0.03, u - s2 / 2 + k * s2 / 5, 0.2, lz, "#b9c2c8");
+      L2.box(s2 * 0.6, 0.35, 0.03, u, 1.2, lz + 0.02, i % 2 ? "#d23c32" : "#ffffff");
+    }
+    for (let i = 0; i <= n; i++) {
+      L2.box(0.6, 0.14, 0.22, a + i * s2, 0, lz, "#c9483e");
+      L2.box(0.05, 2, 0.05, a + i * s2, 0.1, lz, "#9aa3aa");
+    }
+  }
+  function leiter(L2, lx, lz, ry = 0) {
+    const P2 = L2.sub(lx, lz, ry);
+    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(0.25), -0.25, 0.97, 0.24, "#d39a2b");
+    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(0.25), 0.25, 0.97, 0.24, "#d39a2b");
+    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(-0.25), -0.25, 0.97, -0.24, "#d39a2b");
+    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(-0.25), 0.25, 0.97, -0.24, "#d39a2b");
+    for (let i = 1; i < 5; i++) P2.box(0.5, 0.04, 0.06, 0, i * 0.38, 0.48 - i * 0.095, "#c4891f");
+    P2.box(0.56, 0.06, 0.2, 0, 1.92, 0, "#c4891f");
+  }
+  function material(L2, lx, lz, r) {
+    for (let i = 0; i < 5; i++) L2.box(2.4, 0.04, 1.2, lx, i * 0.045, lz, i % 2 ? "#ebe9e4" : "#e0ddd6");
+    for (let i = 0; i < 4; i++) L2.box(2.6, 0.1, 0.12, lx, 0.25 + Math.floor(i / 2) * 0.1, lz + 0.8 + i % 2 * 0.14, "#c9a26b");
+    L2.box(0.8, 0.12, 0.8, lx + 1.6, 0, lz - 0.2, "#7b5a40");
+    for (let i = 0; i < 3; i++) L2.zyl(0.16, 0.16, 0.36, lx + 1.4 + i % 2 * 0.35, 0.12, lz - 0.4 + i * 0.22, bunt(r, ["#e8e4dc", "#9aa3aa", "#2f6f8f"]), 8);
+  }
+  function schutt2(L2, lx, lz, r, n = 10) {
+    for (let i = 0; i < n; i++) L2.box(zw(r, 0.15, 0.4), zw(r, 0.1, 0.25), zw(r, 0.15, 0.4), lx + zw(r, -0.6, 0.6), 0, lz + zw(r, -0.5, 0.5), bunt(r, ["#8d8a84", "#a7a49d", "#b9785e", "#6b6e72"]), zw(r, 0, 3));
+    L2.box(1, 0.25, 0.9, lx, 0, lz, "#9d9a93");
+  }
+  function schubkarre(L2, lx, lz, ry = 0) {
+    const P2 = L2.sub(lx, lz, ry);
+    P2.geo(new three_module_exports.CylinderGeometry(0.5, 0.36, 0.4, 4).rotateY(PI2 / 4).scale(1.2, 1, 0.8), 0, 0.6, 0, "#2f8f5a");
+    P2.geo(new three_module_exports.TorusGeometry(0.18, 0.06, 4, 10).rotateY(PI2 / 2), 0.62, 0.2, 0, "#1f1f1f");
+    P2.box(1.2, 0.04, 0.04, -0.2, 0.5, 0.25, "#2a2d31");
+    P2.box(1.2, 0.04, 0.04, -0.2, 0.5, -0.25, "#2a2d31");
+  }
+  var UNTERMIETE = {
+    discounter: {
+      boden: { a: "#e3e6e8", b: "#d6dade", m: "fliese" },
+      wand: (L2, w, r, d) => wandRegal(L2, w, 2.2, 5, "#f4f4f2", prodPackungen(PAL.waren), r, d, 0.5),
+      insel: [
+        (L2, r, d) => {
+          gondel(L2, 0, -0.9, 3, 1.6, "#f4f4f2", prodPackungen(PAL.waren), r, d);
+          gondel(L2, 0, 0.9, 3, 1.6, "#f4f4f2", prodPackungen(PAL.waren), r, d);
+        },
+        (L2, r, d) => {
+          for (const z2 of [-0.9, 0.8]) {
+            L2.box(1.8, 0.9, 0.7, 0, 0, z2, "#3f4a53");
+            L2.box(0.4, 0.05, 0.7, -0.4, 0.9, z2, "#1f1f1f");
+            L2.box(0.3, 0.3, 0.06, 0.6, 0.9, z2 - 0.2, "#1e2328");
+            figur2(L2.S, ...L2.P(0.5, z2 - 0.6), r() * 1e9 | 0, "fremd", { y: L2.oy, ry: L2.rot, farbe: "#1f5fa8" });
+          }
+          L2.box(0.6, 0.9, 0.9, 1.4, 0, 0, "#c9d2d8");
+        },
+        (L2, r, d) => {
+          L2.box(2.6, 0.9, 1, 0, 0, -0.6, "#e9eef2");
+          for (let i = 0; i < 6; i++) L2.box(0.36, 0.2, 0.7, -1.1 + i * 0.44, 0.9, -0.6, bunt(r, ["#9bc53d", "#e8403a", "#f2c14e", "#ff8c42", "#7b2f5a"]));
+          L2.box(2.6, 1.9, 0.6, 0, 0, 1.1, "#e3edf1");
+          for (let j = 0; j < 3; j++) for (let k = 0; k < 6; k++) L2.box(0.3, 0.3, 0.06, -1.05 + k * 0.42, 0.3 + j * 0.5, 0.78, bunt(r, ["#ffffff", "#f4e1c0", "#3c8dd9", "#e8403a"]));
+        }
+      ]
+    },
+    fitness: {
+      boden: { a: "#3a3f45", b: "#33383d", m: "fliese" },
+      wand: (L2, w, r, d) => {
+        L2.box(w, 2.4, 0.06, 0, 0.1, 0.03, "#d9e6ec");
+        L2.box(w, 0.1, 0.1, 0, 2.5, 0.05, "#ff6a2b");
+        for (let i = 0; i < Math.floor(w / 0.6); i++) L2.box(0.3, 0.12, 0.3, -w / 2 + 0.4 + i * 0.6, 0, 0.6, "#1f1f1f");
+      },
+      insel: [
+        (L2, r, d) => {
+          for (const x of [-1, 0.1, 1.2]) laufband(L2, x, -0.4, r);
+        },
+        (L2, r, d) => {
+          hantelbank(L2, -0.6, -0.6, r);
+          hantelbank(L2, 0.8, 0.8, r);
+          L2.box(2.6, 0.02, 0.8, 0, 0, 1.4, "#6b2fa8");
+        },
+        (L2, r, d) => {
+          for (let i = 0; i < 4; i++) {
+            L2.box(0.7, 0.03, 1.6, -1.1 + i * 0.75, 0, 0, bunt(r, ["#6b2fa8", "#20b5c9", "#ff6a2b", "#38b86b"]));
+            if (i % 2 === 0) figur2(L2.S, ...L2.P(-1.1 + i * 0.75, 0), r() * 1e9 | 0, "fitness", { y: L2.oy, ry: L2.rot });
+          }
+        }
+      ]
+    },
+    arzt: {
+      boden: { a: "#e9f1f4", b: "#dbe7ec", m: "karo" },
+      wand: (L2, w, r, d) => {
+        for (let i = 0; i < Math.floor(w / 0.6); i++) stuhl(L2, -w / 2 + 0.4 + i * 0.6, 0.45, 0, "#2f6f8f");
+        L2.box(w, 1.1, 0.06, 0, 0, 0.03, "#ffffff");
+        bildtafel(L2, 0, 1.6, 0.07, 1.4, 0.9, r, ["#2f6f8f"]);
+        for (let i = 0; i < Math.floor(w / 1.2); i++) if (r() < 0.6) figur2(L2.S, ...L2.P(-w / 2 + 0.4 + i * 1.2, 0.45), r() * 1e9 | 0, "kunde", { y: L2.oy, ry: L2.rot, pose: "sitzen", y: L2.oy });
+      },
+      insel: [
+        (L2, r, d) => {
+          L2.box(2.4, 1.1, 0.5, 0, 0, -0.2, "#ffffff");
+          L2.box(0.5, 1.1, 1.4, -0.95, 0, 0.45, "#ffffff");
+          L2.box(2.5, 0.05, 0.6, 0, 1.1, -0.2, "#2f6f8f");
+          L2.box(0.45, 0.3, 0.05, 0.4, 1.15, -0.1, "#1e2328");
+          L2.box(1.6, 0.85, 0.06, 0, 0, 0.06, "#2f6f8f");
+          figur2(L2.S, ...L2.P(0.3, -0.85), r() * 1e9 | 0, "arzt", { y: L2.oy, ry: L2.rot });
+          L2.box(0.4, 0.6, 0.4, 1.4, 0, 1, "#7b5a40");
+          L2.kugel(0.45, 1.4, 1, 1, "#6fa860");
+        },
+        (L2, r, d) => {
+          for (const x of [-0.8, 0.8]) {
+            L2.box(1.4, 2.4, 0.08, x, 0, -1.4, "#ffffff");
+            L2.box(0.08, 2.4, 2.4, x - 0.7, 0, -0.2, "#ffffff");
+            L2.box(0.6, 0.65, 1.8, x, 0, -0.4, "#cfe3ea");
+            L2.box(0.6, 0.12, 0.3, x, 0.65, -1.15, "#ffffff");
+          }
+        }
+      ]
+    },
+    gastro: {
+      boden: { a: "#e3cfae", b: "#d9c39f", m: "dielen" },
+      wand: (L2, w, r, d) => {
+        L2.box(w, 1.05, 0.7, 0, 0, 0.35, "#b98d61");
+        L2.box(w, 0.06, 0.75, 0, 1.05, 0.35, "#f4f0ea");
+        L2.box(w, 2.6, 0.06, 0, 0, 0.03, "#f2e6d0");
+        L2.box(w, 0.5, 0.5, 0, 2.6, 0.25, "#4f8a5b");
+        for (let i = 0; i < Math.floor(w / 0.5) - 2; i++) {
+          L2.zyl(0.12, 0.12, 0.1, -w / 2 + 0.6 + i * 0.5, 1.11, 0.35, bunt(r, ["#f2c6d2", "#5a3b22", "#f2c14e", "#ffffff", "#e8403a"]), 8);
+        }
+        L2.box(0.5, 0.45, 0.4, w / 2 - 0.6, 1.11, 0.3, "#c9d2d8");
+        figur2(L2.S, ...L2.P(-0.4, 1), r() * 1e9 | 0, "theke", { y: L2.oy, ry: L2.rot + PI2 });
+      },
+      insel: [
+        (L2, r, d) => cafeEcke(L2, r, 1),
+        (L2, r, d) => {
+          for (const x of [-0.8, 0.8]) {
+            L2.box(0.8, 0.74, 1.6, x, 0, 0, "#7b5a40");
+            L2.box(0.9, 0.04, 1.7, x, 0.74, 0, "#f4f0ea");
+            for (const z2 of [-0.5, 0.5]) for (const s2 of [-1, 1]) {
+              stuhl(L2, x + s2 * 0.6, z2, s2 > 0 ? -PI2 / 2 : PI2 / 2, "#3f6b3a");
+              if (r() < 0.5) figur2(L2.S, ...L2.P(x + s2 * 0.6, z2), r() * 1e9 | 0, "kunde", { y: L2.oy, ry: L2.rot + (s2 > 0 ? PI2 / 2 : -PI2 / 2) + PI2, pose: "sitzen", y: L2.oy });
+            }
+          }
+        }
+      ]
+    }
+  };
+  function laufband(L2, lx, lz, r) {
+    L2.box(0.7, 0.22, 1.8, lx, 0, lz, "#2a2d31");
+    L2.box(0.56, 0.03, 1.6, lx, 0.22, lz, "#1a1c1f");
+    L2.box(0.05, 1.2, 0.05, lx - 0.3, 0.2, lz - 0.7, "#9aa3aa");
+    L2.box(0.05, 1.2, 0.05, lx + 0.3, 0.2, lz - 0.7, "#9aa3aa");
+    L2.box(0.7, 0.25, 0.25, lx, 1.3, lz - 0.75, "#1f1f1f");
+    L2.box(0.3, 0.12, 0.02, lx, 1.4, lz - 0.62, "#20b5c9");
+    if (r() < 0.6) figur2(L2.S, ...L2.P(lx, lz), r() * 1e9 | 0, "fitness", { y: L2.oy, ry: L2.rot + PI2, pose: "gehen", y: L2.oy + 0.25 });
+  }
+  function hantelbank(L2, lx, lz, r) {
+    L2.box(0.35, 0.45, 1.3, lx, 0, lz, "#2a2d31");
+    L2.box(0.35, 0.08, 1.3, lx, 0.45, lz, "#ff6a2b");
+    L2.box(0.06, 1.3, 0.06, lx - 0.55, 0, lz - 0.5, "#9aa3aa");
+    L2.box(0.06, 1.3, 0.06, lx + 0.55, 0, lz - 0.5, "#9aa3aa");
+    L2.geo(new three_module_exports.CylinderGeometry(0.025, 0.025, 1.7, 4).rotateZ(PI2 / 2), lx, 1.25, lz - 0.5, "#c9d2d8");
+    for (const s2 of [-1, 1]) L2.geo(new three_module_exports.CylinderGeometry(0.22, 0.22, 0.08, 10).rotateZ(PI2 / 2), lx + s2 * 0.75, 1.25, lz - 0.5, "#1f1f1f");
+  }
+  function gangMoebel(L2, nachbar, r, d) {
+    if (["leer", "umbau", "untermiete"].includes(nachbar)) {
+      if (r() < 0.5) {
+        L2.box(0.7, 0.7, 0.7, 1.2, 0, 0, "#ece6dc");
+        L2.kugel(0.55, 1.2, 1.15, 0, "#6fa860");
+      }
+      return;
+    }
+    const pal = PAL[nachbar] ?? (nachbar === "beauty" ? PAL.flakon : nachbar === "wohnen" ? PAL.geschirr : PAL.waren);
+    const mode = ["damen", "herren", "kinder", "waesche", "sporttextil", "sport", "outdoor", "wintersport", "teamsport"].includes(nachbar);
+    const v = r();
+    if (mode && v < 0.45) {
+      L2.box(3, 0.25, 0.9, 0, 0, 0, HOLZ.weiss);
+      for (let i = 0; i < 3; i++) puppe3(L2.hoch(0.25), -1 + i, zw(r, -0.1, 0.1), r, nachbar === "herren" ? "herren" : nachbar === "kinder" ? "kind" : nachbar === "waesche" ? "waesche" : PAL[nachbar] === PAL.sport ? "sport" : "damen", pal, PI2 + zw(r, -0.5, 0.5));
+    } else if (mode && v < 0.7) staender(L2, 0, 0, 2.6, pal, r, d);
+    else if (v < 0.85) {
+      warenTisch(L2, -0.5, 0, 1.6, 0.8, pal, r, d, r() < 0.3 ? "#d23c32" : waehle2(r, [HOLZ.weiss, HOLZ.hell, HOLZ.mittel]), 0.8);
+      L2.box(0.8, 0.6, 0.6, 1.2, 0, 0, "#ece6dc");
+      L2.kugel(0.45, 1.2, 1, 0, "#5f9a56");
+    } else {
+      L2.box(1.8, 0.45, 0.5, -0.4, 0, 0, HOLZ.mittel);
+      L2.box(0.7, 0.7, 0.7, 1.2, 0, 0, "#ece6dc");
+      L2.kugel(0.55, 1.2, 1.15, 0, "#6fa860");
+      L2.kugel(0.35, 1.35, 1.65, 0.1, "#7cb369");
+    }
+  }
+  function beimoebel(L2, gruppe2, r, d) {
+    const pal = PAL[gruppe2] ?? PAL.waren;
+    const v = r();
+    if (["damen", "herren", "kinder", "waesche", "sporttextil", "outdoor"].includes(gruppe2)) {
+      if (v < 0.5) puppe3(L2, 0, 0, r, gruppe2 === "herren" ? "herren" : gruppe2 === "kinder" ? "kind" : gruppe2 === "waesche" ? "waesche" : "damen", pal, zw(r, -1, 1));
+      else standspiegel(L2, 0, 0, zw(r, -1, 1));
+    } else if (gruppe2 === "beauty") L2.box(0.4, 1.1, 0.4, 0, 0, 0, "#f7f3ec"), L2.box(0.12, 0.25, 0.12, 0, 1.1, 0, bunt(r, PAL.flakon));
+    else if (gruppe2 === "accessoires") pouf(L2, 0, 0, bunt(r, ["#7d8f9c", "#c9a26b", "#2f6f8f", "#b5745a"]));
+    else if (gruppe2 === "spielwaren") teddy(L2, 0, 0, 0, r, 1.6);
+    else if (["sport", "teamsport", "sportschuhe"].includes(gruppe2)) ballkorb(L2, 0, 0, r, d * 0.5);
+    else if (gruppe2 === "wohnen") stehlampe(L2, 0, 0, r);
+    else if (gruppe2 === "rad") fahrrad(L2, 0, 0, r, zw(r, -0.4, 0.4));
+    else {
+      L2.box(0.6, 0.6, 0.6, 0, 0, 0, "#ece6dc");
+      L2.kugel(0.45, 0, 1, 0, "#5f9a56");
+    }
+  }
+  var WG_NAMEN = {
+    damen: "Damenmode",
+    herren: "Herrenmode",
+    kinder: "Kindermode",
+    waesche: "W\xE4sche & Dessous",
+    beauty: "Beauty & Parf\xFCmerie",
+    accessoires: "Schuhe & Accessoires",
+    wohnen: "Wohnen & Haushalt",
+    spielwaren: "Spielwaren",
+    food: "Feinkost",
+    sport: "Sport",
+    sportschuhe: "Sportschuhe",
+    sporttextil: "Sportbekleidung",
+    outdoor: "Outdoor",
+    rad: "Fahrrad",
+    wintersport: "Wintersport",
+    teamsport: "Teamsport",
+    offprice: "Rote Preise",
+    leer: "Fl\xE4che frei",
+    umbau: "Wir bauen f\xFCr Sie um"
+  };
+  function abteilungsname(gruppe2) {
+    return WG_NAMEN[gruppe2] ?? gruppe2;
+  }
+  var WARENGRUPPEN = Object.keys(MODUL);
+  var KONZEPTE = ["offprice", "konzession", "untermiete", "leer", "umbau"];
+  function zelle(S, gruppe2, x, z2, seed = 1, dichte = 1, o = {}) {
+    const r = rng2(seed);
+    const y = o.y ?? 0;
+    const d = Math.max(0.2, Math.min(1, dichte));
+    const R9 = RASTER;
+    const frei6 = [];
+    const wx = !!o.wandX, wz2 = !!o.wandZ;
+    let bodenTyp = gruppe2;
+    if (gruppe2 === "konzession") bodenTyp = { a: (o.marke ?? marke2(seed)).boden, b: dunkler((o.marke ?? marke2(seed)).boden, 0.04), m: "karo" };
+    else if (gruppe2 === "untermiete") bodenTyp = UNTERMIETE[o.mieter ?? "discounter"].boden;
+    if (o.boden !== false) boden(S, x, z2, R9, R9, y, bodenTyp, d);
+    const yb = y + 0.06;
+    const wandL = (seite, len, off) => seite === "z" ? lokal2(S, x + off + len / 2, yb, z2 + 0.02, 0) : lokal2(S, x + 0.02, yb, z2 + R9 - off - len / 2, PI2 / 2);
+    const wandStuecke = [];
+    if (wz2) wandStuecke.push(["z", wx ? R9 - 0.75 : R9 - 0.1, wx ? 0.75 : 0.05]);
+    if (wx) wandStuecke.push(["x", R9 - 0.1, 0.05]);
+    const ix = x + R9 / 2 + (wx ? 0.45 : 0), iz = z2 + R9 / 2 + (wz2 ? 0.45 : 0);
+    const iRot = r() < 0.5 ? 0 : PI2 / 2;
+    const inselL = () => lokal2(S, ix, yb, iz, iRot);
+    const fr = (fx, fz) => frei6.push([x + fx, z2 + fz]);
+    fr(R9 - 0.35, R9 / 2 + zw(r, -1, 1));
+    fr(R9 / 2 + zw(r, -1, 1), R9 - 0.35);
+    fr(R9 - 0.4, R9 - 0.4);
+    if (!wx) fr(0.4, R9 / 2 + zw(r, -1, 1));
+    else fr(1.15, R9 / 2 + zw(r, -1.5, 1.5));
+    if (!wz2) fr(R9 / 2 + zw(r, -1, 1), 0.4);
+    else fr(R9 / 2 + zw(r, -1.5, 1.5), 1.15);
+    if (gruppe2 === "gang" || gruppe2 === "kasse") {
+      frei6.length = 0;
+      if (gruppe2 === "kasse") {
+        kassentresen(S, x + 2.5, z2 + 2.3, seed, { y: yb, rot: o.rot ?? 0 });
+        for (let i = 0; i < 3; i++) fr(zw(r, 0.6, 4.4), 4.5);
+        return { frei: frei6 };
+      }
+      const achse = o.achse;
+      if (achse && o.moebel !== false) {
+        for (const [seite, nachbar] of [[-1, o.nachbarA], [1, o.nachbarB]]) {
+          if (r() > 0.25 + 0.6 * d) continue;
+          const L2 = achse === "x" ? lokal2(S, x + 2.5, yb, z2 + 2.5 + seite * 1.95, seite < 0 ? PI2 : 0) : lokal2(S, x + 2.5 + seite * 1.95, yb, z2 + 2.5, seite < 0 ? -PI2 / 2 : PI2 / 2);
+          gangMoebel(L2, nachbar, r, d);
+        }
+        for (let i = 0; i < 6; i++) achse === "x" ? fr(zw(r, 0.4, 4.6), zw(r, 1.7, 3.3)) : fr(zw(r, 1.7, 3.3), zw(r, 0.4, 4.6));
+      } else {
+        for (let i = 0; i < 6; i++) fr(zw(r, 0.6, 4.4), zw(r, 0.6, 4.4));
+        if (o.moebel !== false && r() < 0.35 * d) {
+          const L2 = lokal2(S, x + 2.5, yb, z2 + 2.5, iRot);
+          L2.box(0.8, 0.8, 0.8, 0, 0, 0, "#ece6dc");
+          L2.kugel(0.6, 0, 1.3, 0, "#5f9a56");
+          L2.kugel(0.4, 0.2, 1.8, 0.1, "#6fa860");
+        }
+      }
+      return { frei: frei6 };
+    }
+    if (gruppe2 === "leer") {
+      if (wz2) {
+        const L3 = wandL("z", R9 - 0.1, 0.05);
+        abgedeckt(L3, 0, 0.35, R9 - 0.6, 2.2, 0.6);
+      }
+      if (wx) {
+        const L3 = wandL("x", R9 - 0.1, 0.05);
+        abgedeckt(L3, wz2 ? 0.5 : 0, 0.35, wz2 ? R9 - 1.6 : R9 - 0.6, 2.2, 0.6);
+      }
+      const L2 = inselL();
+      const v = Math.floor(r() * 3);
+      if (v === 0) {
+        abgedeckt(L2, -0.6, -0.5, 1.8, 0.9, 1, 0.2);
+        kartons(L2, 0.9, 0.9, r, 5);
+      } else if (v === 1) {
+        abgedeckt(L2, 0.4, 0.2, 1.2, 1.6, 0.6, -0.4);
+        abgedeckt(L2, -1, -0.8, 0.8, 1.1, 0.8);
+      } else {
+        kartons(L2, -0.5, -0.4, r, 6);
+        L2.box(1.2, 0.12, 1, 0.8, 0, 0.9, "#b8925e");
+      }
+      if (o.absperrung !== false && (o.index === 0 || r() < 0.25)) absperrung(lokal2(S, x + R9 / 2, yb, z2 + R9 - 0.25, 0), -2.2, 2.2, 0);
+      return { frei: frei6.slice(0, 2) };
+    }
+    if (gruppe2 === "umbau") {
+      const L2 = inselL();
+      const v = (o.index ?? Math.floor(r() * 3)) % 3;
+      if (v === 0) {
+        material(L2, -0.3, -0.6, r);
+        leiter(L2, 1.2, 1, 0.5);
+      } else if (v === 1) {
+        schutt2(L2, -0.6, -0.4, r, d < 0.5 ? 5 : 10);
+        schubkarre(L2, 0.9, 0.9, 0.6);
+        leiter(L2, -1.2, 1.1, -0.3);
+      } else {
+        L2.box(2.6, 2.2, 0.12, 0, 0, -1.2, "#ebe9e4");
+        for (let i = 0; i < 5; i++) L2.box(0.06, 2.6, 0.1, -1.2 + i * 0.6, 0, -1.05, "#c9d2d8");
+        leiter(L2, 0.6, 0);
+        L2.box(0.6, 0.5, 0.4, -0.9, 0, 0.6, "#d39a2b");
+      }
+      if (wz2) {
+        const W3 = wandL("z", R9 - 0.1, 0.05);
+        W3.box(R9 - 0.2, 0.6, 0.05, 0, 0.3, 0.06, "#c9c4bb");
+        W3.box(1.2, 1.4, 0.04, -0.8, 1.2, 0.07, "#9aa3aa");
+      }
+      if (wx) {
+        const W3 = wandL("x", R9 - 0.1, 0.05);
+        W3.box(R9 - 0.2, 0.6, 0.05, 0, 0.3, 0.06, "#c9c4bb");
+      }
+      if (r() < 0.8) figur2(S, x + zw(r, 1, 4), z2 + zw(r, 1, 4), seed + 7, "handwerker", { y: yb });
+      return { frei: [] };
+    }
+    if (gruppe2 === "untermiete") {
+      const typ = UNTERMIETE[o.mieter ?? "discounter"];
+      for (const [s2, len, off] of wandStuecke) typ.wand(wandL(s2, len, off), len, r, d);
+      waehle2(r, typ.insel)(inselL(), r, d);
+      return { frei: frei6 };
+    }
+    if (gruppe2 === "offprice") {
+      const basis = o.basis ?? "damen";
+      const pal = PAL[basis] ?? PAL.damen;
+      for (const [s2, len, off] of wandStuecke) {
+        const L3 = wandL(s2, len, off);
+        if (r() < 0.5) staender(L3, 0, 0.4, len - 0.4, pal, r, d, 1.6);
+        else wandRegal(L3, len, 2, 4, "#c9d2d8", prodPackungen(PAL.waren), r, d, 0.5);
+      }
+      const L2 = inselL();
+      const v = Math.floor(r() * 3);
+      if (v === 0) {
+        wuehltisch(L2, 0, -0.7, r, d);
+        gitterbox(L2, -0.7, 0.9, r, d);
+        preisschild(L2, 0.6, -0.7, waehle2(r, PREISE));
+      } else if (v === 1) {
+        gitterbox(L2, -0.8, -0.8, r, d);
+        gitterbox(L2, 0.7, -0.8, r, d);
+        wuehltisch(L2, 0, 0.9, r, d, 2.6);
+        preisschild(L2, -0.8, -0.8, waehle2(r, PREISE), 1.6);
+      } else {
+        staender(L2, 0, -0.9, 2.4, pal, r, d);
+        wuehltisch(L2, 0, 0.7, r, d);
+        preisschild(L2, 1.1, 0.7, waehle2(r, PREISE));
+      }
+      return { frei: frei6 };
+    }
+    if (gruppe2 === "konzession") {
+      const m = o.marke ?? marke2(seed);
+      const basis = o.basis ?? m.gruppe;
+      const mod2 = MODUL[basis] ?? MODUL.damen;
+      for (const [s2, len, off] of wandStuecke) {
+        const L2 = wandL(s2, len, off);
+        L2.box(len, 3.6, 0.1, 0, 0, 0.05, m.farbe);
+        waehle2(r, mod2.wand)(L2.sub(0, 0.1), len - 0.2, r, d);
+      }
+      waehle2(r, mod2.insel)(inselL(), r, d);
+      return { frei: frei6 };
+    }
+    const mod = MODUL[gruppe2] ?? MODUL.damen;
+    const dw = wx && wz2 ? d * 0.72 : d;
+    for (const [s2, len, off] of wandStuecke) waehle2(r, mod.wand)(wandL(s2, len, off), len, r, dw);
+    const n = mod.insel.length;
+    mod.insel[((o.index ?? 0) + Math.floor(r() * n)) % n](inselL(), r, d);
+    if (r() < 0.55 * d) {
+      beimoebel(lokal2(S, x + R9 - 0.45, yb, z2 + R9 - 0.45, 0), gruppe2, r, d);
+      frei6.splice(2, 1);
+    }
+    if (o.personal ?? r() < 0.18) figur2(S, x + zw(r, 1, 4), z2 + R9 - 0.6, seed + 3, "verkauf", { y: yb });
+    return { frei: frei6 };
+  }
+  function rueckwand(S, achse, a, b, pos, y = 0, h = WANDHOEHE, o = {}) {
+    const putz2 = o.putz ?? "#ece4d8", pilaster = o.pilaster ?? "#ddd2c2", sockelF = o.sockel ?? "#cfc5b6";
+    const L2 = achse === "x" ? lokal2(S, (a + b) / 2, y, pos, 0) : lokal2(S, pos, y, (a + b) / 2, PI2 / 2);
+    const len = b - a;
+    L2.box(len + 0.6, h, 0.6, 0, 0, -0.3, putz2);
+    L2.box(len + 0.6, 0.25, 0.06, 0, 0, 0.02, sockelF);
+    L2.box(len + 0.6, 0.3, 0.12, 0, h - 0.3, 0.04, "#f6f1e9");
+    for (let u = -len / 2 + (o.pilasterVersatz ?? 0); u <= len / 2 + 0.01; u += o.pilasterAbstand ?? 5) L2.box(0.7, h - 0.3, 0.22, u, 0, 0.1, pilaster);
+  }
+  function stuetze(S, x, z2, y = 0, h = WANDHOEHE, farbe = "#e6e0d6") {
+    S.box(0.7, h, 0.7, x, y + h / 2, z2, farbe);
+    S.box(0.84, 0.25, 0.84, x, y + 0.125, z2, dunkler(farbe, 0.1));
+    S.box(0.84, 0.2, 0.84, x, y + h - 0.1, z2, heller(farbe, 0.03));
+  }
+  function rolltreppe(S, x0, z2, laenge, hub, y = 0, d = 1, t0 = 0) {
+    const neig = Math.atan2(hub, laenge);
+    const lang = Math.hypot(laenge, hub) * (1 - t0);
+    const breit2 = 1.15;
+    const cx = x0 - laenge * (1 + t0) / 2, cy = y + hub * (1 + t0) / 2;
+    const schraeg = (w, h, t, dy, dz, f) => {
+      const g = new three_module_exports.BoxGeometry(lang, h, t);
+      g.rotateZ(-neig);
+      g.translate(cx, cy + dy, z2 + dz);
+      S.add(g, f);
+    };
+    schraeg(lang, 0.7, breit2 + 0.2, -0.45, 0, "#a7b0b6");
+    schraeg(lang, 0.06, breit2 - 0.1, -0.06, 0, "#4b5560");
+    const stufen = d < 0.5 ? 6 : 14;
+    for (let i = 0; i < stufen; i++) {
+      const t = t0 + (1 - t0) * (i + 0.5) / stufen;
+      S.box(lang / stufen * 0.5, 0.04, breit2 - 0.15, x0 - t * laenge, y + t * hub - 0.02, z2, "#c3cbd1");
+    }
+    for (const s2 of [-1, 1]) {
+      schraeg(lang, 0.9, 0.04, 0.5, s2 * (breit2 / 2 + 0.02), GLAS3);
+      schraeg(lang, 0.1, 0.12, 0.98, s2 * (breit2 / 2 + 0.02), "#1f2328");
+      schraeg(lang, 0.35, 0.16, -0.05, s2 * (breit2 / 2 + 0.06), "#d5dbdf");
+    }
+    if (!t0) {
+      S.box(1.2, 0.03, breit2, x0 + 0.5, y + 0.02, z2, "#9aa3aa");
+      S.box(0.8, 1.05, 0.16, x0 + 0.3, y + 0.52, z2 - breit2 / 2 - 0.06, "#d5dbdf");
+    }
+    S.box(1.2, 0.03, breit2, x0 - laenge - 0.5, y + hub + 0.02, z2, "#9aa3aa");
+  }
+  function rolltreppenKern(S, x, z2, o = {}) {
+    const y = o.y ?? 0, hub = o.hub ?? WANDHOEHE, d = o.dichte ?? 1;
+    const auf = o.auf ?? true, ab = o.ab ?? true;
+    const lang = hub / Math.tan(0.52);
+    const fl = { a: "#ece8e1", b: "#dcd6cc", m: "fliese" };
+    const lx0 = x + 0.9, lx1 = x + 9.3, lz0 = z2 + 5.5, lz1 = z2 + 8.7;
+    if (ab) {
+      boden(S, x, z2, 10, lz0 - z2, y, fl, 0.3);
+      boden(S, x, lz1, 10, z2 + 10 - lz1, y, fl, 0.3);
+      boden(S, x, lz0, lx0 - x, lz1 - lz0, y, fl, 0.3);
+      boden(S, lx1, lz0, x + 10 - lx1, lz1 - lz0, y, fl, 0.3);
+      const tief2 = 1.8, dunkel3 = "#2b3238";
+      S.box(lx1 - lx0, 0.1, lz1 - lz0, (lx0 + lx1) / 2, y - tief2, (lz0 + lz1) / 2, "#4d565e");
+      S.box(0.1, tief2, lz1 - lz0, lx0, y - tief2 / 2, (lz0 + lz1) / 2, "#3a424a");
+      S.box(lx1 - lx0, tief2, 0.1, (lx0 + lx1) / 2, y - tief2 / 2, lz0, "#444d55");
+      S.box(0.1, tief2, lz1 - lz0, lx1, y - tief2 / 2, (lz0 + lz1) / 2, dunkel3);
+      S.box(lx1 - lx0, tief2, 0.1, (lx0 + lx1) / 2, y - tief2 / 2, lz1, dunkel3);
+      S.box(lx1 - lx0 + 0.2, 0.5, 0.25, (lx0 + lx1) / 2, y - 0.25, lz1, "#d5dbdf");
+      S.box(0.25, 0.5, lz1 - lz0, lx1, y - 0.25, (lz0 + lz1) / 2, "#d5dbdf");
+      for (const zz of [lz0 + 0.85, lz1 - 0.85]) rolltreppe(S, lx0 + 0.15 + lang, zz, lang, hub, y - hub + 0.06, d, 1 - (tief2 - 0.2) / hub);
+      const gl = (w, t, cx, cz) => {
+        S.box(w, 1.05, t, cx, y + 0.6, cz, GLAS3);
+        S.box(w + 0.04, 0.07, t + 0.08, cx, y + 1.15, cz, "#c9d2d8");
+        S.box(w + 0.04, 0.08, t + 0.08, cx, y + 0.1, cz, "#c9d2d8");
+      };
+      gl(lx1 - lx0 - 1.4, 0.04, (lx0 + lx1) / 2 + 0.7, lz0);
+      gl(lx1 - lx0 - 1.4, 0.04, (lx0 + lx1) / 2 + 0.7, lz1);
+      gl(0.04, lz1 - lz0, lx1, (lz0 + lz1) / 2);
+    } else boden(S, x, z2, 10, 10, y, fl, 0.3);
+    if (auf) {
+      rolltreppe(S, x + 9.3, z2 + 1.6, lang, hub, y + 0.06, d);
+      rolltreppe(S, x + 9.3, z2 + 3, lang, hub, y + 0.06, d);
+    }
+    for (const [px2, pz4] of [[x + 0.55, z2 + 0.6], [x + 0.55, z2 + 4.6]]) {
+      S.box(0.7, 0.6, 0.7, px2, y + 0.36, pz4, "#ece6dc");
+      S.add(new three_module_exports.IcosahedronGeometry(0.55, 0).translate(px2, y + 1.15, pz4), "#5f9a56");
+    }
+  }
+  function aufzug(S, x, z2, y = 0, h = WANDHOEHE, rot = 0) {
+    const L2 = lokal2(S, x + 1.3, y + 0.06, z2 + 1.3, rot);
+    L2.box(2.6, h, 2.4, 0, 0, -0.1, "#c9c4bb");
+    L2.box(2, 2.6, 2, 0, 0, -0.1, "#3f4a53");
+    L2.box(1.5, 2.3, 0.06, 0, 0, 1.12, "#c9d2d8");
+    L2.box(0.04, 2.3, 0.07, 0, 0, 1.13, "#8c959b");
+    L2.box(1.8, 0.2, 0.08, 0, 2.3, 1.12, "#8c959b");
+    L2.box(0.5, 0.18, 0.04, 0, 2.6, 1.13, "#1e2328");
+    L2.box(0.08, 0.16, 0.04, 0.95, 1.1, 1.13, "#e9c46a");
+    L2.box(2.8, 0.3, 2.6, 0, h - 0.3, -0.1, "#b4ada2");
+  }
+  function treppenhaus(S, x, z2, w = 5, t = 10, y = 0, h = WANDHOEHE, o = {}) {
+    const yb = y + 0.06;
+    if (o.wandNX) S.box(0.25, h, t, x + 0.125, y + h / 2, z2 + t / 2, "#d6cfc3");
+    if (o.wandNZ) S.box(w, h, 0.25, x + w / 2, y + h / 2, z2 + 0.125, "#e0d9cd");
+    S.box(w, 0.05, t, x + w / 2, yb - 0.02, z2 + t / 2, "#b9b4aa");
+    const fh = 1.3;
+    S.box(0.25, fh, t, x + w - 0.125, y + fh / 2, z2 + t / 2, "#ddd6ca");
+    S.box(w, fh, 0.25, x + w / 2, y + fh / 2, z2 + t - 0.125, "#e6dfd3");
+    S.box(0.3, 2.5, 0.3, x + w - 0.15, y + 1.25, z2 + t - 0.15, "#cfc6b8");
+    S.box(1.1, 2.3, 0.08, x + w - 1.3, yb + 1.15, z2 + t + 0, "#6c7d6f");
+    S.box(1.3, 0.2, 0.3, x + w - 1.3, yb + 2.4, z2 + t - 0.12, "#cfc6b8");
+    S.box(0.08, 2.3, 0.3, x + w - 1.95, yb + 1.15, z2 + t - 0.12, "#cfc6b8");
+    S.box(0.5, 0.25, 0.04, x + w - 1.3, yb + 2.75, z2 + t + 0.02, "#2f9e5c");
+    const lauf = (x0, z0, z1, hoch, abw) => {
+      const n = 9;
+      for (let i = 0; i < n; i++) {
+        const zz = z0 + (z1 - z0) * (i + 0.5) / n;
+        const hh = hoch ? (i + 1) / n * h * 0.5 : (n - i) / n * h * 0.5;
+        S.box(abw, hh, Math.abs(z1 - z0) / n + 0.01, x0, yb + hh / 2, zz, "#cfc8bc");
+      }
+    };
+    lauf(x + 1.2, z2 + 2, z2 + t - 2.2, true, 1.6);
+    lauf(x + w - 1.6, z2 + 2, z2 + t - 2.2, false, 1.6);
+    S.box(w - 0.5, h * 0.5, 1.8, x + w / 2 - 0.1, yb + h * 0.25, z2 + 1.15, "#d6cfc3");
+    S.box(0.12, 1, t - 4.2, x + w / 2 - 0.2, yb + h * 0.5, z2 + t / 2 - 0.1, "#8c959b");
+  }
+  function lager(S, x, z2, w, t, y = 0, seed = 5, h = WANDHOEHE, d = 1) {
+    const r = rng2(seed);
+    const yb = y + 0.06;
+    boden(S, x, z2, w, t, y, "lager", 0.3);
+    S.box(w * 0.7 - 0.9, 1.3, 0.2, x + (w * 0.7 - 0.9) / 2, y + 0.65, z2 + t - 0.1, "#e6dfd3");
+    S.box(w * 0.3 - 0.9, 1.3, 0.2, x + w - (w * 0.3 - 0.9) / 2, y + 0.65, z2 + t - 0.1, "#e6dfd3");
+    for (const sx of [-0.9, 0.9]) S.box(0.2, 2.6, 0.24, x + w * 0.7 + sx, y + 1.3, z2 + t - 0.1, "#cfc6b8");
+    S.box(0.2, 1.3, t, x + w - 0.1, y + 0.65, z2 + t / 2, "#ddd6ca");
+    S.box(2, 0.3, 0.24, x + w * 0.7, y + 2.6, z2 + t - 0.1, "#c9483e");
+    for (let i = 0; i < 6; i++) S.box(0.28, 2.4, 0.02, x + w * 0.7 - 0.7 + i * 0.28, yb + 1.2, z2 + t - 0.05, i % 2 ? "#d9dee2" : "#c6ccd1");
+    const reihen = Math.max(1, Math.floor((t - 1.4) / 1.6));
+    for (let j = 0; j < reihen; j++) {
+      const zz = z2 + 0.5 + j * 1.6;
+      for (let k = 0; k < 3; k++) S.box(w - 1.2, 0.05, 0.9, x + w / 2, yb + 0.3 + k * 1, zz + 0.45, "#d07a2e");
+      for (let k = 0; k <= Math.floor(w / 2.5); k++) S.box(0.07, 2.8, 0.9, x + 0.6 + k * ((w - 1.2) / Math.floor(w / 2.5)), yb + 1.4, zz + 0.45, "#2f5f8a");
+      const n = anz(Math.floor((w - 1.4) / 0.6), d, 0.4);
+      for (let k = 0; k < 3; k++) for (let i = 0; i < n; i++) if (r() < 0.8) S.box(0.5, zw(r, 0.3, 0.7), 0.6, x + 0.95 + i * ((w - 1.6) / n), yb + 0.33 + k * 1 + 0.2, zz + 0.45, bunt(r, ["#c9a26b", "#b8925e", "#d6b27c", "#e8e4dc"]));
+    }
+    S.box(0.7, 0.15, 1.2, x + 1.2, yb + 0.1, z2 + t - 0.9, "#e0b23c");
+    S.box(0.12, 1, 0.12, x + 1.2, yb + 0.6, z2 + t - 0.35, "#2a2d31");
+  }
+  function kassentresen(S, x, z2, seed = 3, o = {}) {
+    const r = rng2(seed);
+    const L2 = lokal2(S, x, o.y ?? 0.06, z2, o.rot ?? 0);
+    L2.box(3.6, 1, 0.8, 0, 0, 0, "#3f4a53");
+    L2.box(3.7, 0.06, 0.9, 0, 1, 0, "#f4f0ea");
+    L2.box(0.8, 1, 1.6, 1.4, 0, -1, "#3f4a53");
+    L2.box(0.9, 0.06, 1.7, 1.4, 1, -1, "#f4f0ea");
+    L2.box(3.6, 0.3, 0.04, 0, 0.55, 0.42, "#d23c32");
+    for (const kx of [-0.9, 0.5]) {
+      L2.box(0.35, 0.08, 0.3, kx, 1.06, -0.1, "#1e2328");
+      L2.box(0.32, 0.25, 0.04, kx, 1.14, -0.2, "#2b3640");
+      L2.box(0.2, 0.08, 0.15, kx + 0.3, 1.06, 0.05, "#9aa3aa");
+      figur2(S, ...L2.P(kx, -0.75), seed + kx * 10, "kasse", { y: L2.oy, ry: L2.rot, y: L2.oy });
+    }
+    for (let i = 0; i < 3; i++) L2.box(0.32, 0.4, 0.12, -1.55 + i * 0.12, 1.06, -0.15, "#d23c32");
+    if (o.schlange !== false) for (let i = 0; i < 2 + Math.floor(r() * 2); i++) figur2(S, ...L2.P(-0.9 + i % 2 * 1.4, 0.8 + Math.floor(i / 2) * 0.8), seed + 20 + i, "kunde", { y: L2.oy, ry: L2.rot + PI2, y: L2.oy, pose: "tasche" });
+  }
+  function infoCounter(S, x, z2, seed = 4, o = {}) {
+    const y = (o.y ?? 0) + 0.06;
+    S.add(new three_module_exports.CylinderGeometry(1.3, 1.3, 1.05, 8).translate(x, y + 0.52, z2), "#f4f0ea");
+    S.add(new three_module_exports.CylinderGeometry(1.36, 1.36, 0.06, 8).translate(x, y + 1.08, z2), "#d23c32");
+    S.add(new three_module_exports.CylinderGeometry(0.7, 0.7, 1.1, 8).translate(x, y + 0.55, z2), "#e9e4dc");
+    S.box(0.06, 2.4, 0.06, x, y + 1.6, z2, "#9aa3aa");
+    S.box(0.4, 0.07, 0.3, x + 0.8, y + 1.1, z2 + 0.4, "#1e2328");
+    figur2(S, x - 0.9, z2 - 0.3, seed, "info", { y, ry: PI2 / 4 });
+    if (S.szene) haengeschild(S, S.szene, "Information", x, y + 2.9, z2, { farbe: "#d23c32", hoehe: 0.55 });
+  }
+  function haengeschild(S, scene2, text3, x, y, z2, o = {}) {
+    const hg = o.farbe ?? "#2a3540", schriftF = o.schrift ?? "#ffffff";
+    const hoehe = o.hoehe ?? 0.75;
+    const { t, seitenverhaeltnis } = textTextur(text3, schriftF, 120, hg);
+    const breite = hoehe * seitenverhaeltnis;
+    const zweiseitig = o.zweiseitig ?? true;
+    S.box(breite + 0.12, hoehe + 0.12, 0.12, x, y, z2, dunkler(hg, 0.06));
+    if (o.seile !== false) {
+      S.box(0.03, 1.2, 0.03, x - breite * 0.35, y + hoehe / 2 + 0.6, z2, "#5a636b");
+      S.box(0.03, 1.2, 0.03, x + breite * 0.35, y + hoehe / 2 + 0.6, z2, "#5a636b");
+    }
+    const matT = new three_module_exports.MeshBasicMaterial({ map: t, polygonOffset: true, polygonOffsetFactor: -2 });
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(breite, hoehe), matT);
+    m.position.set(x, y, z2 + 0.065);
+    scene2.add(m);
+    if (zweiseitig && o.quer) {
+      S.box(0.12, hoehe + 0.12, breite + 0.12, x, y, z2, dunkler(hg, 0.06));
+      const m2 = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(breite, hoehe), matT);
+      m2.rotation.y = PI2 / 2;
+      m2.position.set(x + 0.065, y, z2);
+      scene2.add(m2);
+    }
+    return breite;
+  }
+  function wandschild(S, scene2, text3, achse, u, y, pos, o = {}) {
+    const hoehe = o.hoehe ?? 0.8;
+    const { mat: mat2, seitenverhaeltnis } = textMaterial(text3, o.schrift ?? "#ffffff", { groesse: 120, hintergrund: o.farbe ?? null, versatz: -2 });
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), mat2);
+    if (achse === "x") m.position.set(u, y, pos + 0.02);
+    else {
+      m.rotation.y = PI2 / 2;
+      m.position.set(pos + 0.02, y, u);
+    }
+    scene2.add(m);
+    return hoehe * seitenverhaeltnis;
+  }
+  function abtrennung(S, scene2, x0, z0, x1, z1, o = {}) {
+    const y = o.y ?? 0, h = o.h ?? 3.4;
+    const farbe = o.farbe ?? "#e9e4dc";
+    const kanten3 = o.kanten ?? { nx: true, nz: true, px: true, pz: true };
+    const niedrig = o.niedrig ?? 1.1;
+    if (kanten3.nz) S.box(x1 - x0, h, 0.15, (x0 + x1) / 2, y + h / 2, z0 + 0.075, farbe);
+    if (kanten3.nx) S.box(0.15, h, z1 - z0, x0 + 0.075, y + h / 2, (z0 + z1) / 2, dunkler(farbe, 0.03));
+    const oeff = o.oeffnung ?? 3;
+    const vorne = (achse, a, b, pos) => {
+      const m = (a + b) / 2, l = (b - a - oeff) / 2;
+      if (l <= 0.2) return;
+      for (const c of [a + l / 2, b - l / 2]) {
+        if (achse === "x") {
+          S.box(l, niedrig, 0.15, c, y + niedrig / 2, pos, farbe);
+          if (o.glas) S.box(l, h - niedrig - 0.4, 0.04, c, y + niedrig + (h - niedrig - 0.4) / 2, pos, GLAS3);
+        } else {
+          S.box(0.15, niedrig, l, pos, y + niedrig / 2, c, farbe);
+          if (o.glas) S.box(0.04, h - niedrig - 0.4, l, pos, y + niedrig + (h - niedrig - 0.4) / 2, c, GLAS3);
+        }
+      }
+      if (o.glas) {
+        if (achse === "x") S.box(b - a, 0.12, 0.18, m, y + h - 0.35, pos, farbe);
+        else S.box(0.18, 0.12, b - a, pos, y + h - 0.35, m, farbe);
+      }
+    };
+    if (kanten3.pz) vorne("x", x0, x1, z1 - 0.075);
+    if (kanten3.px) vorne("z", z0, z1, x1 - 0.075);
+    if (o.name && scene2) {
+      if (kanten3.nz) {
+        S.box(Math.min(x1 - x0 - 0.6, 4.5), 0.8, 0.08, (x0 + x1) / 2, y + h - 0.6, z0 + 0.19, o.schildFarbe ?? farbe);
+        wandschild(S, scene2, o.name, "x", (x0 + x1) / 2, y + h - 0.6, z0 + 0.24, { farbe: o.schildFarbe ?? null, schrift: o.schrift ?? "#1f1f1f", hoehe: 0.6 });
+      } else if (kanten3.nx) {
+        wandschild(S, scene2, o.name, "z", (z0 + z1) / 2, y + h - 0.6, x0 + 0.17, { farbe: o.schildFarbe ?? null, schrift: o.schrift ?? "#1f1f1f", hoehe: 0.6 });
+      }
+    }
+  }
+  var HAUT2 = ["#f1c9a5", "#e8b88f", "#d9a77f", "#b98462", "#8d5a3b", "#6b4430"];
+  var HAAR = ["#2b211b", "#4a3222", "#7a4f2e", "#c9a35a", "#e0c27a", "#1a1a1a", "#8a8a8a", "#b5532f", "#d9d4cc"];
+  var OBEN = ["#d04a3f", "#2f63b5", "#e8e4dc", "#e0b23c", "#5b8f5a", "#8d5fbf", "#ef8b4c", "#2b2b2b", "#f4f2ee", "#3c7d8f", "#c96f8f", "#7b8a99"];
+  var UNTEN = ["#2b3a55", "#3a3a3a", "#6b5a48", "#20304a", "#5c6670", "#c9b48f", "#1f1f1f", "#4a5a7a"];
+  var ROLLEN = {
+    verkauf: { oben: "#2a2f38", unten: "#2a2f38", hemd: "#ffffff", tuch: "#d23c32", schild: "#e9c46a" },
+    kasse: { oben: "#2a2f38", unten: "#2a2f38", hemd: "#ffffff", tuch: "#d23c32", schild: "#3ab27a" },
+    info: { oben: "#d23c32", unten: "#2a2f38", hemd: "#ffffff", tuch: "#ffffff", schild: "#ffffff" },
+    leitung: { oben: "#1f2a3a", unten: "#1f2a3a", hemd: "#ffffff", tuch: "#d23c32", schild: "#4f8fe0" },
+    beauty: { oben: "#1f1f1f", unten: "#1f1f1f", hemd: "#1f1f1f", tuch: "#d8b25a", schild: "#e9a3b8" },
+    theke: { oben: "#f4f4f2", unten: "#2a2f38", hemd: "#f4f4f2", tuch: "#d23c32", schild: "#e9c46a", schuerze: "#d23c32", muetze: "#ffffff" },
+    lager: { oben: "#4a5560", unten: "#2a2f38", hemd: "#4a5560", tuch: "#e0b23c", schild: "#e0b23c" },
+    security: { oben: "#1a1a1a", unten: "#1a1a1a", hemd: "#1a1a1a", tuch: "#1a1a1a", schild: "#c9d2d8", muetze: "#1a1a1a" },
+    handwerker: { oben: "#ef8b2c", unten: "#2f4a6e", hemd: "#ef8b2c", helm: "#f2c14e" },
+    arzt: { oben: "#ffffff", unten: "#9bb7c7", hemd: "#9bb7c7" },
+    fitness: { oben: "#ff6a2b", unten: "#1f1f1f", hemd: "#ff6a2b" }
+  };
+  function figur2(S, x, z2, seed = 1, rolle2 = "kunde", o = {}) {
+    const r = rng2(Math.floor(seed * 7919) >>> 0);
+    const kind = rolle2 === "kind";
+    const kunde = rolle2 === "kunde" || kind;
+    const s2 = kind ? zw(r, 0.55, 0.7) : zw(r, 0.94, 1.06);
+    const ry = o.ry ?? r() * PI2 * 2;
+    const L2 = lokal2(S, x, o.y ?? 0.06, z2, ry);
+    const rol = ROLLEN[rolle2] ?? (rolle2 === "fremd" ? { oben: o.farbe ?? "#1f5fa8", unten: "#2a2f38", hemd: o.farbe ?? "#1f5fa8", schild: "#ffffff" } : null);
+    const haut = bunt(r, HAUT2);
+    const frau = r() < 0.55;
+    const oben = rol ? rol.oben : bunt(r, OBEN);
+    const unten = rol ? rol.unten : bunt(r, UNTEN);
+    const schuh2 = bunt(r, ["#1f1f1f", "#3a2a20", "#f2f2f2", "#6b4a32"]);
+    const pose = o.pose ?? (rol ? r() < 0.3 ? "schauen" : "stehen" : waehle2(r, ["stehen", "gehen", "gehen", "tasche", "tasche", "schauen", "telefon", "tragen"]));
+    const sitzt = pose === "sitzen";
+    const geht = pose === "gehen" || pose === "tasche" || pose === "tragen";
+    const schritt = geht ? zw(r, 0.25, 0.4) : 0;
+    const rock = kunde && frau && !kind && r() < 0.35;
+    const glied = (w, h, t, gx, gy, gz2, ax, f, az = 0, dy = 0) => {
+      const g = new three_module_exports.BoxGeometry(w * s2, h * s2, t * s2);
+      g.translate(0, -h * s2 / 2 + dy * s2, 0);
+      if (ax) g.rotateX(ax);
+      if (az) g.rotateZ(az);
+      L2.geo(g, gx * s2, gy * s2, gz2 * s2, f);
+    };
+    const huefte = sitzt ? 0.47 / s2 : 0.9;
+    if (sitzt) {
+      for (const sx of [-0.09, 0.09]) {
+        L2.box(0.15 * s2, 0.15 * s2, 0.46 * s2, sx * s2, huefte * s2 - 0.08 * s2, 0.2 * s2, unten);
+        L2.box(0.14 * s2, (huefte - 0.04) * s2 - 0.06, 0.15 * s2, sx * s2, 0.04, 0.42 * s2, unten);
+        L2.box(0.13 * s2, 0.07 * s2, 0.25 * s2, sx * s2, 0, 0.47 * s2, schuh2);
+      }
+    } else if (rock) {
+      L2.geo(new three_module_exports.CylinderGeometry(0.17 * s2, 0.27 * s2, 0.5 * s2, 6).translate(0, -0.25 * s2, 0), 0, 0.95 * s2, 0, oben === unten ? bunt(r, UNTEN) : unten);
+      for (const [sx, a] of [[-0.08, schritt], [0.08, -schritt]]) {
+        glied(0.1, 0.5, 0.11, sx, 0.52, 0, a, haut);
+        glied(0.12, 0.07, 0.24, sx, 0.52, 0, a, schuh2, 0, -0.47);
+      }
+    } else {
+      for (const [sx, a] of [[-0.09, schritt], [0.09, -schritt]]) {
+        glied(0.15, 0.82, 0.17, sx, huefte, 0, a, unten);
+        glied(0.14, 0.08, 0.27, sx, huefte, 0.04, a, schuh2, 0, -0.8);
+      }
+    }
+    const y0 = sitzt ? huefte - 0.9 : 0;
+    const rumpf2 = new three_module_exports.CylinderGeometry(0.29 * s2, 0.22 * s2, 0.6 * s2, 4);
+    rumpf2.rotateY(PI2 / 4);
+    rumpf2.scale(1, 1, 0.62);
+    L2.geo(rumpf2, 0, (1.18 + y0) * s2, 0, oben);
+    if (rol && rol.hemd && rol.hemd !== oben) L2.box(0.13 * s2, 0.34 * s2, 0.02, 0, (1.18 + y0) * s2, 0.12 * s2, rol.hemd);
+    if (rol && rol.tuch) L2.box(0.08 * s2, 0.2 * s2, 0.025, 0, (1.24 + y0) * s2, 0.135 * s2, rol.tuch);
+    if (rol && rol.schild) L2.box(0.1 * s2, 0.05 * s2, 0.025, 0.12 * s2, (1.33 + y0) * s2, 0.13 * s2, rol.schild);
+    if (rol && rol.schuerze) L2.box(0.36 * s2, 0.75 * s2, 0.03, 0, (0.55 + y0) * s2, 0.13 * s2, rol.schuerze);
+    if (rolle2 === "handwerker") {
+      L2.box(0.4 * s2, 0.06 * s2, 0.03, 0, (1.05 + y0) * s2, 0.13 * s2, "#e8e8e2");
+      L2.box(0.4 * s2, 0.06 * s2, 0.03, 0, (1.25 + y0) * s2, 0.13 * s2, "#e8e8e2");
+    }
+    if (rolle2 === "arzt") L2.box(0.46 * s2, 0.6 * s2, 0.24 * s2, 0, (0.7 + y0) * s2, 0, "#ffffff");
+    if (!rol && r() < 0.35) L2.box(0.4 * s2, 0.1 * s2, 0.24 * s2, 0, (1.42 + y0) * s2, 0, bunt(r, OBEN));
+    const sh = 1.46 + y0;
+    let aL = -schritt * 0.8, aR = schritt * 0.8, zL = -0.08, zR = 0.08;
+    if (pose === "schauen") aR = -1.1;
+    if (pose === "telefon") {
+      aR = -2.5;
+      zR = 0.35;
+    }
+    if (pose === "tragen") {
+      aL = -0.9;
+      aR = -0.9;
+      zL = 0;
+      zR = 0;
+    }
+    if (sitzt) {
+      aL = -0.9;
+      aR = -0.9;
+    }
+    glied(0.1, 0.6, 0.12, -0.26, sh, 0, aL, oben, zL);
+    glied(0.1, 0.6, 0.12, 0.26, sh, 0, aR, oben, zR);
+    glied(0.08, 0.1, 0.09, -0.26, sh, 0, aL, haut, zL, -0.6);
+    glied(0.08, 0.1, 0.09, 0.26, sh, 0, aR, haut, zR, -0.6);
+    if (pose === "telefon") glied(0.06, 0.14, 0.03, 0.26, sh, 0, aR, "#1e2328", zR, -0.62);
+    L2.box(0.09 * s2, 0.08 * s2, 0.09 * s2, 0, (1.48 + y0) * s2, 0, haut);
+    const kopfY = (1.68 + y0) * s2;
+    L2.geo(new three_module_exports.SphereGeometry(0.125 * s2, 8, 6).scale(0.95, 1.12, 1), 0, kopfY, 0, haut);
+    const haar = bunt(r, kind ? HAAR.slice(0, 5) : HAAR);
+    if (rol && rol.helm) L2.geo(new three_module_exports.SphereGeometry(0.15 * s2, 8, 4, 0, PI2 * 2, 0, PI2 / 2), 0, kopfY + 0.03 * s2, 0, rol.helm);
+    else if (rol && rol.muetze) L2.box(0.25 * s2, 0.1 * s2, 0.25 * s2, 0, kopfY + 0.1 * s2, 0, rol.muetze);
+    else {
+      const stil = frau ? waehle2(r, ["lang", "lang", "zopf", "bob", "kurz"]) : waehle2(r, ["kurz", "kurz", "kurz", "glatze", "muetze"]);
+      if (stil !== "glatze") L2.geo(new three_module_exports.SphereGeometry(0.135 * s2, 8, 4, 0, PI2 * 2, 0, PI2 * 0.55).scale(1, 1.05, 1.02), 0, kopfY + 0.015 * s2, -8e-3, stil === "muetze" ? bunt(r, OBEN) : haar);
+      if (stil === "lang") L2.box(0.26 * s2, 0.36 * s2, 0.09 * s2, 0, kopfY - 0.3 * s2, -0.08 * s2, haar);
+      if (stil === "bob") L2.box(0.28 * s2, 0.17 * s2, 0.24 * s2, 0, kopfY - 0.13 * s2, -0.025 * s2, haar);
+      if (stil === "zopf") L2.geo(new three_module_exports.SphereGeometry(0.07 * s2, 6, 4), 0, kopfY + 0.08 * s2, -0.13 * s2, haar);
+    }
+    if (kunde && !sitzt) {
+      if (pose === "tasche") {
+        const f = r() < 0.6 ? "#d23c32" : bunt(r, ["#f4f2ee", "#c9a26b", "#2b2b2b"]);
+        L2.box(0.3 * s2, 0.34 * s2, 0.11 * s2, -0.31 * s2, 0.55 * s2, 0, f);
+        L2.box(0.16 * s2, 0.1 * s2, 0.02, -0.31 * s2, 0.89 * s2, 0, dunkler(f, 0.1));
+        if (f === "#d23c32") L2.box(0.02, 0.1 * s2, 0.07 * s2, -0.31 * s2 - 0.155 * s2, 0.7 * s2, 0, "#ffffff");
+      } else if (pose === "tragen") {
+        L2.box(0.42 * s2, 0.3 * s2, 0.32 * s2, 0, 0.95 * s2, 0.38 * s2, bunt(r, ["#c9a26b", "#ffffff", "#d23c32"]));
+      } else if (!kind && r() < 0.45) {
+        if (frau) L2.box(0.08 * s2, 0.24 * s2, 0.26 * s2, 0.33 * s2, 0.98 * s2, 0, bunt(r, PAL.taschen));
+        else L2.box(0.32 * s2, 0.4 * s2, 0.14 * s2, 0, 1 * s2, -0.19 * s2, bunt(r, ["#2b2b2b", "#3f6b3a", "#2f5f8a", "#c25b2a"]));
+      }
+    }
+  }
+  function raumKachel(S, scene2, gruppe2, o = {}) {
+    vorbereiten(S, scene2);
+    const nx = o.nx ?? 2, nz = o.nz ?? 2, seed = o.seed ?? 1, d = o.dichte ?? 1;
+    const r = rng2(seed * 13 + 1);
+    const W3 = nx * RASTER, T = nz * RASTER;
+    S.box(W3 + 0.6, 0.5, T + 0.6, W3 / 2 - 0.3, -0.25, T / 2 - 0.3, "#3a434b");
+    S.box(W3, 0.06, T, W3 / 2, -0.03, T / 2, "#d9d4cb");
+    const frei6 = [];
+    const m = gruppe2 === "konzession" ? o.marke ?? marke2(seed) : null;
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const res = zelle(S, gruppe2, i * RASTER, j * RASTER, seed * 100 + i * 10 + j, d, { wandX: i === 0, wandZ: j === 0, index: i + j * nx, basis: o.basis, mieter: o.mieter, marke: m, personal: i === nx - 1 && j === 0 });
+      frei6.push(...res.frei);
+    }
+    rueckwand(S, "x", 0, W3, 0, 0, WANDHOEHE);
+    rueckwand(S, "z", 0, T, 0, 0, WANDHOEHE);
+    if (m) abtrennung(S, scene2, 0.6, 0.6, W3, T, { farbe: m.farbe, name: m.name, schrift: m.schrift, kanten: { nx: false, nz: true, px: true, pz: true }, glas: true, h: 3.8, oeffnung: 3.5 });
+    if (gruppe2 === "untermiete") {
+      const mt = MIETER3[o.mieter ?? "discounter"];
+      abtrennung(S, scene2, 0.6, 0.6, W3, T, { farbe: "#e9e4dc", name: mt.name, schrift: mt.schrift, schildFarbe: mt.farbe, kanten: { nx: false, nz: true, px: true, pz: true }, glas: o.mieter !== "fitness", h: 3.8, oeffnung: 3 });
+    }
+    if (gruppe2 === "umbau") {
+      const L2 = lokal2(S, 0, 0.06, 0, 0);
+      bauzaun2(L2, 0.3, W3 - 0.3, T - 0.3);
+      bauzaun2(lokal2(S, W3 - 0.3, 0.06, T / 2, PI2 / 2), -T / 2 + 0.4, T / 2 - 0.6, 0);
+    }
+    const name2 = o.name ?? (gruppe2 === "konzession" || gruppe2 === "untermiete" ? null : abteilungsname(gruppe2));
+    if (name2 && scene2) haengeschild(S, scene2, name2, W3 * 0.55, 3.6, T * 0.45, { farbe: gruppe2 === "offprice" ? "#ffd400" : "#2a3540", schrift: gruppe2 === "offprice" ? "#d4212a" : "#ffffff" });
+    const kunden = o.kunden ?? (gruppe2 === "leer" || gruppe2 === "umbau" ? 0 : Math.round(nx * nz * 1.6));
+    for (let k = 0; k < kunden && frei6.length; k++) {
+      const idx = Math.floor(r() * frei6.length);
+      const [fx, fz] = frei6.splice(idx, 1)[0];
+      figur2(S, fx, fz, seed * 1e3 + k, r() < 0.12 ? "kind" : "kunde", { ry: Math.atan2(W3 / 2 - fx, T / 2 - fz) + zw(r, -0.8, 0.8) });
+    }
+    return new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.5, -0.6), new three_module_exports.Vector3(W3, WANDHOEHE, T));
+  }
+
+  // src/kit/outlet.js
+  var NAME_OUTLET = "FUNDUS";
+  var FARBE_OUTLET = "#8c1d40";
+  var WAREN = ["#263b53", "#c67e73", "#e0c7a3", "#748d74", "#d8dce0", "#b88b56", "#a7a0ba"];
+  function familieOutlet(haus2) {
+    if (haus2.lage === "b") return 3;
+    return Number.parseInt(String(haus2.id).replace(/\D/g, ""), 10) % 2 ? 1 : 2;
+  }
+  function masseOutlet(haus2) {
+    const familie = familieOutlet(haus2);
+    const variante = Number(haus2.fassade ?? 0);
+    const n = familie === 3 ? clamp4((haus2.etagen ?? [0, 1]).filter((e) => e >= 0).length, 2, 3) : familie === 2 ? 2 : 1;
+    const buero = familie === 3 ? 1 + variante % 2 : 0;
+    const A = clamp4(haus2.grundflaecheQm ?? 1700, 650, 3100);
+    const bw = Math.round(clamp4(Math.sqrt(A * (1.4 + variante % 3 * 0.11)), 26, 68) / 2) * 2;
+    const bd = Math.round(clamp4(A / bw, 19, 55) / 2) * 2;
+    const park = familie === 3 ? 0 : 18 + variante % 3 * 2;
+    const H = familie === 1 ? 6.65 + variante % 3 * 0.1 : familie === 2 ? 10.35 + variante % 3 * 0.18 : 5 + (n - 1) * 3.9 + buero * 3.5;
+    return { w: bw, d: bd + park, bw, bd, n, H, familie, park, buero, variante };
+  }
+  function text(scene2, s2, inhalt, u, y, t, breite, hoehe, farbe = "#ffffff", bg = null) {
+    if (breite < 1) return;
+    plakat2(scene2, s2, inhalt, u, y, t, passend(inhalt, breite, hoehe), farbe, bg);
+  }
+  function marke3(scene2, s2, H, bandUnterkante, zusatz = false) {
+    const y = bandUnterkante;
+    s2.q(0, s2.L, y, y + 3.5, 0.45, 0.9, FARBE_OUTLET);
+    s2.q(0, s2.L, y + 3.38, y + 3.55, 0.91, 1.05, "#64152d");
+    const city = H > 11.5;
+    text(scene2, s2, NAME_OUTLET, s2.L / 2, y + 1.88, 1.1, s2.L - 2.2, city ? 2.35 : 2.7);
+    const claim = zusatz ? "Neue Ware jede Woche" : "Marken. Bis zu 60 % unter dem empfohlenen Preis.";
+    s2.q(0.3, s2.L - 0.3, y - 1.14, y - 0.08, 0.48, 0.88, "#f3ede3");
+    text(scene2, s2, claim, s2.L / 2, y - 0.61, 1.07, s2.L - 1.5, 0.69, FARBE_OUTLET);
+    return { u0: 0, u1: s2.L, y0: y - 1.16, y1: y + 3.56, art: "logo" };
+  }
+  function wareHinterGlas(S, scene2, x, z2, w, d, r, n) {
+    const breite = Math.min(28, w - 7);
+    for (let reihe = 0; reihe < (n > 1 ? 3 : 4); reihe++) {
+      const z0 = z2 + d - 4.5 - reihe * 2.5;
+      if (z0 < z2 + 2) break;
+      const links = x + 3;
+      const rw = breite;
+      S.box(rw, 0.09, 0.1, links + rw / 2, 2.55, z0, "#8d979d");
+      for (let u = links; u < links + rw; u += 1.15) {
+        if (Math.abs(u - (x + w * 0.52)) < 2) continue;
+        S.box(0.6, 0.74, 0.29, u, 1.95, z0, waehle2(r, WAREN));
+      }
+      for (const u of [links, links + rw]) S.box(0.08, 2.25, 0.08, u, 1.4, z0, "#889299");
+      const schild2 = ["XS", "S", "M", "L", "XL"][reihe % 5];
+      const schildSeite = new Seite2(S, links, z0 - 0.05, rw, 0.12, "+z");
+      for (const pos of [rw * 0.25, rw * 0.75]) {
+        schildSeite.q(pos - 0.7, pos + 0.7, 3.13, 3.67, 0.1, 0.22, "#f5f5f2");
+        text(scene2, schildSeite, schild2, pos, 3.42, 0.27, 1.3, 0.48, FARBE_OUTLET);
+      }
+    }
+    for (let k = 0; k < 5; k++) {
+      const xx = x + w - 4, zz = z2 + 5 + 2.2 * k;
+      S.box(3.4, 0.07, 1.4, xx, 0.8 + k * 0.22, zz, "#e5e1d9");
+      for (let b = 0; b < 3; b++) S.box(0.8, 0.44, 0.55, xx - 1 + b, 1.1 + k * 0.22, zz, waehle2(r, WAREN));
+    }
+    for (let k = 0; k < 3; k++) {
+      const xx = x + 3 + k * 2.1, zz = z2 + 5;
+      S.box(1.65, 1.05, 2.5, xx, 0.85, zz, "#e2dfd6");
+      for (let j = 0; j < 3; j++) S.box(0.48, 0.38, 0.53, xx + (j - 1) * 0.52, 1.6, zz, waehle2(r, WAREN));
+    }
+    S.box(7, 1.1, 1.45, x + w * 0.53, 0.85, z2 + d - 6, "#e2e1de");
+    for (let k = 0; k < 4; k++) S.box(0.8, 0.32, 0.5, x + w * 0.53 - 2.4 + k * 1.6, 1.55, z2 + d - 6, "#3d4246");
+    for (let k = 0; k < 4; k++) S.box(0.05, 0.95, 0.05, x + w * 0.53 - 3 + k * 1.8, 0.78, z2 + d - 2.6, "#8c1d40");
+  }
+  function innenOutlet(S, scene2, haus2, opt = {}) {
+    const { w, bd, H } = masseOutlet(haus2);
+    const x = opt.x ?? 0, z2 = opt.z ?? 0, r = rng2(String(haus2.id) + "/innen");
+    S.quader(x, 0, z2, x + w, 0.3, z2 + bd, "#e7e6e1");
+    for (let ix = x + 2.5; ix < x + w - 2; ix += 5) for (let iz = z2 + 2.5; iz < z2 + bd - 2; iz += 5)
+      S.box(2.5, 0.08, 0.5, ix, H - 0.4, iz, "#fff6dc");
+    wareHinterGlas(S, scene2, x, z2, w, bd, r, 1);
+    const zStart = z2 + bd * 0.35;
+    for (let k = 0; k < 4; k++) {
+      const L2 = lokal2(S, x + w - 5.5, 0.32, zStart + k * 3.2);
+      L2.box(2.8, 1.35, 0.9, 0, 0, 0, "#eeece6");
+      L2.box(3, 0.12, 1.1, 0, 1.25, 0, "#bfc2c0");
+      for (let j = 0; j < 4; j++) L2.box(0.53, 0.42, 0.6, -1 + j * 0.68, 1.38, 0, waehle2(r, WAREN));
+    }
+    for (let k = 0; k < 3; k++) {
+      const L2 = lokal2(S, x + 7 + k * 4.7, 0.32, z2 + 4.7);
+      puppe3(L2, 0, 0, r, k === 2 ? "kind" : k === 1 ? "herren" : "damen", WAREN);
+    }
+    const nah = LOD2.stufe !== "fern";
+    const gangBreite = Math.min(w - 10, 38);
+    for (let gang = 0; gang < 7; gang++) {
+      const zz = z2 + 3.7 + gang % 4 * 3.05;
+      const xx = x + 4.2 + Math.floor(gang / 4) * 6;
+      if (zz > z2 + bd - 3.5 || xx > x + w - 8) continue;
+      const laenge = Math.min(gangBreite - gang % 3 * 2, w - (xx - x) - 5);
+      S.box(laenge, 0.12, 0.15, xx + laenge / 2, 2.35, zz, "#7f8589");
+      for (const ex of [xx + 0.2, xx + laenge - 0.2])
+        S.box(0.13, 2.1, 0.13, ex, 1.32, zz, "#81878d");
+      if (nah) for (let i = 0; i < Math.floor(laenge / 0.85); i++) {
+        const bx = xx + 0.55 + i * 0.85;
+        if (Math.abs(bx - (x + w * 0.52)) < 2.25) continue;
+        S.box(0.53, 0.84, 0.34, bx, 1.65, zz, waehle2(r, WAREN));
+        S.box(0.37, 0.25, 0.34, bx, 2.17, zz, waehle2(r, WAREN));
+      }
+      const schild2 = ["DAMEN", "HERREN", "KINDER", "SPORT", "ACCESSOIRES", "SCHUHE", "HOME"][gang];
+      const seite = new Seite2(S, xx, zz - 0.2, laenge, 0.2, "+z");
+      seite.q(laenge * 0.3, laenge * 0.7, 2.85, 3.4, 0.1, 0.23, "#f3f0e8");
+      text(scene2, seite, schild2, laenge / 2, 3.12, 0.27, laenge * 0.4 - 0.4, 0.4, FARBE_OUTLET);
+    }
+    for (let regal2 = 0; regal2 < 16; regal2++) {
+      const rx = x + 3.5 + regal2 % 8 * Math.max(2.35, (w - 7) / 9);
+      const rz = z2 + Math.min(bd - 4.2, 3 + Math.floor(regal2 / 8) * 3.5);
+      S.box(1.9, 2.75, 0.23, rx, 1.67, rz, "#e7e6df");
+      for (let ebenen = 0; ebenen < 4; ebenen++) {
+        const yy = 0.65 + ebenen * 0.61;
+        S.box(1.9, 0.09, 0.95, rx, yy, rz + 0.35, "#d1d0ca");
+        if (nah) for (let st = 0; st < 3; st++) {
+          S.box(0.49, 0.34, 0.48, rx - 0.57 + st * 0.57, yy + 0.22, rz + 0.3, waehle2(r, WAREN));
+          S.box(0.45, 0.07, 0.49, rx - 0.57 + st * 0.57, yy + 0.42, rz + 0.3, "#eeece6");
+        }
+      }
+    }
+    const mx = x + w - 6, mz = z2 + bd - 8;
+    mensch(S, r, mx, 0.34, mz);
+    S.box(1.6, 1.05, 1, mx + 1.3, 0.85, mz + 0.5, "#8d969d");
+    for (let k = 0; k < 3; k++) S.box(1.4, 0.2, 0.9, mx + 1.3, 0.5 + k * 0.4, mz + 0.5, "#e3ddd2");
+    return { hoehe: H, w, d: bd };
+  }
+  function glasfront(S, scene2, s2, maxY, offen, r, oben = false, eingangU = 0.52) {
+    const y0 = 0.48, y1 = Math.max(3.2, Math.min(maxY, oben ? 7.05 : 4.25));
+    s2.q(0.25, s2.L - 0.25, 0.35, 0.6, 0.1, 0.27, "#bfc2c3");
+    s2.q(0.25, s2.L - 0.25, y1 - 0.18, y1, 0.1, 0.3, "#e0e1dc");
+    for (let u = 0.6; u < s2.L; u += 3.3) {
+      s2.q(u, u + 0.12, y0, y1, 0.11, 0.28, "#a9b6bd");
+      if (offen && u > 2 && u < s2.L - 3 && Math.abs(u - s2.L * 0.52) > 4.5) {
+        const farbe = waehle2(r, WAREN);
+        puppe(s2, u + 1.05, 0.85, -0.42, farbe, waehle2(r, KLEID2), 1.12);
+        s2.q(u + 0.38, u + 2.5, 0.42, 0.62, -1.3, -0.9, "#dedacf");
+        s2.q(u + 0.45, u + 0.95, 1.18, 1.55, -1.35, -0.87, waehle2(r, WAREN));
+        s2.q(u + 1.62, u + 2.13, 0.83, 1.13, -1.35, -0.87, waehle2(r, WAREN));
+        s2.q(u + 1.58, u + 2.44, 1.85, 2.03, -1.35, -0.95, "#dedacf");
+        s2.q(u + 1.68, u + 2.32, 2.03, 2.53, -1.32, -0.98, waehle2(r, WAREN));
+      }
+    }
+    if (!offen) s2.q(0.55, s2.L - 0.55, y0, y1 - 0.2, -0.01, 0.09, "#93999a");
+    const tuer = s2.L * eingangU;
+    s2.q(tuer - 1.9, tuer + 1.9, 0.4, 3.1, 0.15, 0.31, "#b1d1dc");
+    s2.q(tuer - 0.07, tuer + 0.07, 0.4, 3.1, 0.32, 0.39, "#d6dde1");
+    if (oben) {
+      s2.q(0.6, s2.L - 0.6, 4.95, 7.75, 0.02, 0.12, "#91b9ca");
+      for (let u = 0.7; u < s2.L - 1; u += 3.4)
+        s2.q(u, u + 0.16, 4.95, 7.75, 0.15, 0.31, "#e1e3e3");
+      s2.q(0, s2.L, 4.72, 4.98, 0.17, 0.36, "#e3e3de");
+      for (let i = 0; i < 12; i++) {
+        const u = Math.min(s2.L - 3, s2.L * 0.3 + i * 0.51);
+        s2.q(u, u + 0.8, 1.1 + i * 0.45, 1.22 + i * 0.45, -1.7, -0.75, "#bdc5c8");
+        s2.q(u, u + 0.1, 1.1 + i * 0.45, 2 + i * 0.45, -0.8, -0.65, "#788994");
+      }
+    }
+  }
+  function pylon2(S, scene2, x, z2) {
+    S.box(0.34, 9.3, 0.34, x, 4.95, z2, "#697178");
+    S.box(8.2, 2.95, 0.85, x, 9.8, z2, FARBE_OUTLET);
+    const s2 = new Seite2(S, x - 4.1, z2 - 0.43, 8.2, 0.86, "+z");
+    text(scene2, s2, NAME_OUTLET, 4.1, 10, 0.6, 7.75, 1.76);
+    s2.q(0.2, 8, 7.85, 8.28, 0.4, 0.48, "#f3ede3");
+  }
+  function outlet(S, scene2, haus2, opt = {}) {
+    const start = S.anzahl, mark = merke(S, scene2);
+    const m = masseOutlet(haus2), x = opt.x ?? 0, z2 = opt.z ?? 0;
+    const r = rng2(String(haus2.id) + "/outlet/" + String(haus2.fassade ?? 0));
+    const Z2 = zustandNormal({ ...opt, status: opt.status ?? haus2.status ?? "offen", seed: haus2.id });
+    const F2 = zustandFlags(Z2), H = m.H, { bw, bd } = m;
+    const stadt = m.familie === 3, zweigeschossig = m.familie === 2;
+    const paneele = ["#d9dbdd", "#c4cbd0", "#e2dfd8"];
+    const farbe = stadt ? m.variante % 2 ? "#c3bdb5" : "#cbd0ce" : paneele[m.variante % paneele.length];
+    const egTop = 5, ladenTop = stadt ? 5 + (m.n - 1) * 3.9 : H;
+    const bandY = stadt ? ladenTop - 3.5 : H - 3.5;
+    const eingang = 0.38 + m.variante % 4 * 0.075;
+    const werbung = Z2.hat("aktion") || Z2.hat("offprice");
+    const seiten4 = seitenVon(S, x, z2, bw, bd), logos2 = [];
+    S.quader(x, 0.3, z2, x + bw, H, z2 + 0.38, farbe);
+    S.quader(x, 0.3, z2, x + 0.38, H, z2 + bd, farbe);
+    S.quader(x, 0.28, z2, x + bw, 0.46, z2 + bd, "#ece9e2");
+    S.quader(x, H - 0.22, z2, x + bw, H + 0.17, z2 + bd, "#c5c7c4");
+    if (stadt) {
+      S.quader(x + 0.1, ladenTop, z2 + bd - 0.42, x + bw, H, z2 + bd, farbe);
+      S.quader(x + bw - 0.42, ladenTop, z2 + 0.1, x + bw, H, z2 + bd, farbe);
+      for (const s2 of seiten4) for (let et = 0; et < m.buero; et++) {
+        const y0 = ladenTop + 0.78 + et * 3.5, y1 = Math.min(H - 0.45, y0 + 1.74);
+        for (let u = 1.8; u < s2.L - 1.5; u += 3.7) {
+          s2.q(u, u + 2, y0, y1, 0.24, 0.52, "#7d99a6");
+          s2.q(u + 0.9, u + 1.02, y0, y1, 0.53, 0.59, "#e8e5dc");
+          s2.q(u - 0.17, u + 2.17, y0 - 0.19, y0, 0.43, 0.62, "#d9d6ce");
+        }
+        s2.q(0.35, s2.L - 0.35, ladenTop + et * 3.5, ladenTop + et * 3.5 + 0.27, 0.53, 0.69, "#aca9a3");
+      }
+      if (m.variante % 2 === 0) {
+        for (const s2 of seiten4) for (let u = 2.2; u < s2.L - 1.8; u += 7.5)
+          s2.q(u, u + 0.54, ladenTop, H, 0.67, 0.91, "#b2b0ab");
+      }
+      for (const s2 of seiten4) s2.q(0, s2.L, ladenTop - 0.14, ladenTop + 0.19, 0.61, 0.95, "#9f9d9a");
+    } else if (zweigeschossig) {
+      S.quader(x + 0.35, 7.65, z2 + bd - 0.36, x + bw, H, z2 + bd, farbe);
+      S.quader(x + bw - 0.36, 7.65, z2 + 0.35, x + bw, H, z2 + bd, farbe);
+      S.quader(x + 0.35, 4.72, z2 + 0.4, x + bw, 4.98, z2 + bd, "#929ca4");
+      S.quader(x + bw - 0.5, 0.45, z2 + bd - 7.6, x + bw, 7.8, z2 + bd, "#bbcbd1");
+      for (let et = 0; et < 4; et++) {
+        const y = 1.2 + et * 1.45;
+        S.box(1.15, 0.16, 2.3, x + bw - 2.65 - et * 0.43, y, z2 + bd - 3.4 - et * 0.3, "#adb9bf");
+        S.box(0.15, 1, 2.5, x + bw - 2 - et * 0.43, y + 0.5, z2 + bd - 3.4 - et * 0.3, "#727e87");
+      }
+    } else {
+      S.quader(x + 0.3, H - 0.55, z2 + bd - 0.45, x + bw, H, z2 + bd, farbe);
+      S.quader(x + bw - 0.45, H - 0.55, z2 + 0.3, x + bw, H, z2 + bd, farbe);
+    }
+    if (!F2.zu) {
+      vorbereiten(S, scene2);
+      innenOutlet(S, scene2, haus2, { x, z: z2 });
+    }
+    for (const [i, s2] of seiten4.entries()) {
+      glasfront(S, scene2, s2, stadt ? bandY - 0.07 : zweigeschossig ? 7.65 : bandY + 0.4, !F2.zu, r, zweigeschossig, eingang);
+      if (stadt) {
+        s2.q(0.1, s2.L - 0.1, 4.6, 4.93, 0.33, 0.56, "#e5e0d5");
+        for (let u = 3; u < s2.L - 2; u += 4)
+          s2.q(u, u + 0.13, 0.42, 4.65, 0.16, 0.32, "#b5b9b9");
+      }
+      logos2.push(marke3(scene2, s2, H, bandY, werbung));
+    }
+    if (!stadt) {
+      const vordach2 = zweigeschossig ? 4.45 : 3.18;
+      S.box(bw + 1.2, 0.23, 3.25, x + bw / 2, vordach2, z2 + bd + 1.55, "#aac4d0");
+      S.box(bw + 1.1, 0.12, 0.18, x + bw / 2, vordach2 + 0.06, z2 + bd + 3.12, "#efeee9");
+      for (let xx = x + 2.5; xx < x + bw - 1.5; xx += 7.4)
+        S.box(0.18, vordach2 - 0.55, 0.18, xx, (vordach2 + 0.55) / 2, z2 + bd + 2.95, "#b2bac1");
+    }
+    const ex = x + bw * eingang, portalH = stadt ? 5.85 : 5.95;
+    const pz4 = z2 + bd + (stadt ? 1.25 : 1.8);
+    for (const dx of [-4.05, 4.05])
+      S.box(0.7, portalH - 0.3, 3.9, ex + dx, portalH / 2, pz4, FARBE_OUTLET);
+    S.box(8.8, 0.95, 4.15, ex, portalH - 0.45, pz4, FARBE_OUTLET);
+    S.box(7.1, 3.55, 0.24, ex, 2.35, pz4 + 2, "#aacbd7");
+    const portalSeite = new Seite2(S, ex - 4.4, pz4 - 2.1, 8.8, 4.2, "+z");
+    text(scene2, portalSeite, NAME_OUTLET, 4.4, portalH - 0.46, 0.69, 7.6, 0.78);
+    technik(S, r, x + 2.5, z2 + 3, x + bw - 2, z2 + bd - 3, H + 0.18, { max: stadt ? 5 : 10, farbe: "#b9bfc2" });
+    for (let i = 0; i < (stadt ? 2 : 5 + m.variante % 3); i++) {
+      const xx = x + 4 + i * Math.max(4, (bw - 8) / 7);
+      if (xx > x + bw - 3) continue;
+      S.box(2.25, 0.28, Math.min(8, bd * 0.35), xx, H + 0.22, z2 + bd * 0.47, "#8fb7c7");
+      S.box(2.47, 0.13, Math.min(8, bd * 0.35) + 0.18, xx, H + 0.08, z2 + bd * 0.47, "#e9ece9");
+    }
+    if (m.park) {
+      const parkz = z2 + bd + 1.2, parkTiefe = m.park - 2.2;
+      S.quader(x + 1, 0.3, parkz, x + bw - 1, 0.36, z2 + m.d - 0.8, "#8d9399");
+      parkreihe(S, r, x + 2, x + bw - 2, parkz + 3.2, 5.3, 0.36, 0.94);
+      if (parkTiefe >= 17) parkreihe(S, r, x + 2, x + bw - 2, parkz + 10.1, 4.8, 0.36, 0.88);
+      for (let i = 0; i < 8; i++) {
+        const xx = x + 2.5 + i * (bw - 5) / 8;
+        S.box(0.55, 0.27, 1.9, xx, 0.45, parkz + 9, "#c7cbba");
+      }
+      S.box(5.8, 0.25, 3.5, x + bw - 5.4, 2.52, z2 + m.d - 3.1, FARBE_OUTLET);
+      for (let i = 0; i < 5; i++) {
+        S.box(0.11, 2, 0.11, x + bw - 8.1 + i * 1.25, 1.38, z2 + m.d - 3.1, "#d7dee3");
+        S.box(0.7, 0.56, 0.7, x + bw - 8 + i * 1.25, 0.6, z2 + m.d - 3, "#a4b2bb");
+      }
+      if (opt.pylon !== false) pylon2(S, scene2, x + 6.6, z2 + m.d - 2.4);
+    } else {
+      S.box(bw + 3.5, 0.2, 5.3, x + bw / 2, 0.31, z2 + bd + 2.4, "#c9c9c5");
+      for (let i = 0; i < 10; i++) S.box(0.15, 0.04, 1.6, x + 2 + i * (bw - 3) / 10, 0.44, z2 + bd + 3.2, "#ededed");
+    }
+    if (!F2.zu && opt.passanten !== false) {
+      const anz3 = Z2.status === "neueroeffnung" ? 22 : 14;
+      for (let i = 0; i < anz3; i++) {
+        const xx = x + 3 + r() * (bw - 6), zz = z2 + bd + 2.4 + r() * (m.park ? 6 : 2.1);
+        mensch(S, r, xx, 0.32, zz);
+        S.box(0.62, 0.78, 0.27, xx + 0.45, 0.73, zz + 0.08, FARBE_OUTLET);
+        S.box(0.58, 0.08, 0.04, xx + 0.45, 1.17, zz + 0.22, "#e0d7cb");
+      }
+    }
+    if (Z2.status === "neueroeffnung") {
+      const bz = z2 + bd + 3.1;
+      for (let i = 0; i < 10; i++) mensch(S, r, ex - 4.1 + i * 0.85, 0.32, bz + 2.6);
+      for (const dz of [1.5, 3.7]) {
+        S.box(9.5, 0.07, 0.07, ex, 1.02, bz + dz, FARBE_OUTLET);
+        for (let j = -2; j <= 2; j++) S.box(0.08, 1.05, 0.08, ex + j * 2.25, 0.63, bz + dz, "#666f76");
+      }
+      for (let i = 0; i < 16; i++) {
+        const xx = ex - 3 + i / 15 * 6, yy = 3 + Math.sin(i / 15 * Math.PI) * 2.5;
+        const g = new three_module_exports.IcosahedronGeometry(0.45, 1);
+        g.translate(xx, yy, bz);
+        S.add(g, i % 3 ? FARBE_OUTLET : "#f8ede4");
+      }
+    }
+    const koerper3 = {
+      x,
+      z: z2,
+      w: bw,
+      d: bd,
+      hoehe: H,
+      egHoehe: 5,
+      geschossHoehe: 3.9,
+      n: m.n,
+      tRelief: 1.15,
+      raster: 4.1,
+      fensterBand: false,
+      seiten: {
+        "+z": { u1: bw, sperren: [logos2[0]], abbau: { u: bw * 0.53, y: bandY + 1.6, t: 1.15 } },
+        "+x": { u1: bd, sperren: [logos2[1]], abbau: { u: bd * 0.53, y: bandY + 1.6, t: 1.15 } }
+      },
+      eingaenge: [{ seite: "+z", u: bw * eingang, breite: 7.4, t: 2.2, haupt: true }],
+      fensterEG: [{ seite: "+z", a: 0.6, b: bw - 0.6, y0: 0.5, y1: 3.2, t: 0.3 }],
+      farbe,
+      baujahr: haus2.baujahr,
+      jahr: opt.jahr,
+      flaecheQm: haus2.grundflaecheQm * m.n,
+      marke: mark,
+      seed: String(haus2.id) + "/outlet",
+      planeText: "HIER ENTSTEHT " + NAME_OUTLET
+    };
+    const dekZ = werbung ? zustandNormal({ status: "offen", seed: haus2.id }) : Z2;
+    const dekor = zustandsDekor(S, scene2, koerper3, dekZ, { pylon: false, passanten: false, logosAbdecken: true, abrissSeite: opt.abrissSeite });
+    return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status };
+  }
+
   // src/kit/schwesterhaus.js
   var NAME_SCHWESTER = "Volkskauf";
   var FARBE_SCHWESTER = "#2f6f73";
   var EG3 = 4.9;
   var GH2 = 3.65;
-  var GLAS3 = "#647078";
+  var GLAS4 = "#647078";
   var BLIND = "#42494e";
   var PALETTEN = [
     ["#d5c3a9", "#c7b396", "#bca58b", "#ded0bb"],
@@ -54731,7 +57184,7 @@
         const y = EG3 + k * GH2 + 0.75;
         for (let j = 0; j < achsen7; j++) {
           const u = 1 + (j + 0.5) * ab;
-          fenster2(S, s2, u - 0.74, u + 0.74, y, y + 1.75, j % 11 === v ? "#667079" : GLAS3, K3.rahmen, alt && (j + 3 * k + v) % 6 === 0);
+          fenster2(S, s2, u - 0.74, u + 0.74, y, y + 1.75, j % 11 === v ? "#667079" : GLAS4, K3.rahmen, alt && (j + 3 * k + v) % 6 === 0);
           if (LOD2.stufe !== "fern") s2.q(u - 1.02, u + 1.02, y - 0.18, y - 0.08, 0.25, 0.53, K3.gesims);
         }
       }
@@ -54744,7 +57197,7 @@
           const ua = 1 + j * ab, ub = ua + ab - 0.18;
           s2.q(ua, ua + 0.42, y, y + GH2 - 0.28, 0.19, 0.56, K3.gesims);
           s2.q(ub - 0.42, ub, y, y + GH2 - 0.28, 0.19, 0.56, K3.gesims);
-          fenster2(S, s2, ua + 0.59, ub - 0.58, y + 0.58, y + 2.25, GLAS3, K3.rahmen, alt && (k * 5 + j + v) % 7 === 0);
+          fenster2(S, s2, ua + 0.59, ub - 0.58, y + 0.58, y + 2.25, GLAS4, K3.rahmen, alt && (k * 5 + j + v) % 7 === 0);
           s2.q(ua + 0.56, ub - 0.5, y + 0.17, y + 0.53, 0.26, 0.52, (j + k) % 2 ? K3.gesims : K3.fleck);
         }
       }
@@ -54754,7 +57207,7 @@
         s2.q(0.65, L2 - 0.65, y + 0.65, y + 2.5, 0.15, 0.4, K3.rahmen);
         for (let j = 0; j < achsen7; j++) {
           const ua = 0.85 + j * ((L2 - 1.7) / achsen7), ub = 0.85 + (j + 1) * ((L2 - 1.7) / achsen7) - 0.1;
-          s2.q(ua, ub, y + 0.82, y + 2.33, 0.41, 0.5, alt && (j + k * 2 + v) % 7 === 0 ? BLIND : GLAS3);
+          s2.q(ua, ub, y + 0.82, y + 2.33, 0.41, 0.5, alt && (j + k * 2 + v) % 7 === 0 ? BLIND : GLAS4);
           s2.q(ub - 0.1, ub, y + 0.72, y + 2.42, 0.5, 0.61, K3.gesims);
           s2.q(ua, ub + 0.1, y + 2.52, y + 2.7, 0.22, 0.53, K3.fleck);
         }
@@ -54922,11 +57375,11 @@
   }
   function beschriftung(scene2, s2, K3, y, hb) {
     if (K3.zu) return;
-    const text2 = (K3.haus.substanz ?? 50) < 30 ? NAME_SCHWESTER.toUpperCase().replace("KAUF", " AUF") : NAME_SCHWESTER.toUpperCase();
+    const text3 = (K3.haus.substanz ?? 50) < 30 ? NAME_SCHWESTER.toUpperCase().replace("KAUF", " AUF") : NAME_SCHWESTER.toUpperCase();
     const u = s2.L / 2, [wx, wz2] = s2.welt(u, 0);
     const weltU = s2.seite === "+z" ? wx : wz2;
-    schild(scene2, text2, s2.seite, weltU + 0.1, y - 0.07, s2.ebene + 0.87, hb, "#1d4c50");
-    schild(scene2, text2, s2.seite, weltU, y, s2.ebene + 1.02, hb, "#e4e5db");
+    schild(scene2, text3, s2.seite, weltU + 0.1, y - 0.07, s2.ebene + 0.87, hb, "#1d4c50");
+    schild(scene2, text3, s2.seite, weltU, y, s2.ebene + 1.02, hb, "#e4e5db");
   }
   function dach2(S, K3) {
     const { x, z: z2, w, d, H, arch } = K3;
@@ -55032,7 +57485,7 @@
   }
   function schwesterhaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
-    const marke3 = merke(S, scene2);
+    const marke4 = merke(S, scene2);
     const m = masseSchwester(haus2);
     const x = opt.x ?? 0, z2 = opt.z ?? 0;
     const fam = opt.familie ?? m.familie;
@@ -55106,7 +57559,7 @@
       farbe: K3.farbe,
       baujahr: haus2.baujahr,
       flaecheQm: (haus2.grundflaecheQm || K3.w * K3.d) * K3.n,
-      marke: marke3,
+      marke: marke4,
       seed: haus2.id + ":" + Z2.status,
       planeText: NAME_SCHWESTER.toUpperCase() + " WIRD MODERNISIERT",
       kettenFarbe: FARBE_SCHWESTER,
@@ -57198,6 +59651,1365 @@
     }
   ];
 
+  // haeuser-outlet.json
+  var haeuser_outlet_default = [
+    {
+      id: "O001",
+      name: "FUNDUS Essen",
+      stadt: "Essen",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1500,
+      etagen: [
+        0
+      ],
+      baujahr: 1998,
+      fassade: 0,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O001-f1",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O001-f2",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O001-f3",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O001-f4",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O001-f5",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O001-f6",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O001-f7",
+          etage: 0,
+          qm: 214,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O002",
+      name: "FUNDUS Duisburg",
+      stadt: "Duisburg",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1637,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2005,
+      fassade: 1,
+      substanz: 57,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O002-f1",
+          etage: 0,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O002-f2",
+          etage: 1,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O002-f3",
+          etage: 0,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O002-f4",
+          etage: 1,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O002-f5",
+          etage: 0,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O002-f6",
+          etage: 1,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O002-f7",
+          etage: 0,
+          qm: 468,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O003",
+      name: "FUNDUS Dortmund",
+      stadt: "Dortmund",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1774,
+      etagen: [
+        0
+      ],
+      baujahr: 2012,
+      fassade: 2,
+      substanz: 74,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O003-f1",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O003-f2",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O003-f3",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O003-f4",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O003-f5",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O003-f6",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O003-f7",
+          etage: 0,
+          qm: 253,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O004",
+      name: "FUNDUS Bochum",
+      stadt: "Bochum",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1911,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2e3,
+      fassade: 3,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O004-f1",
+          etage: 0,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O004-f2",
+          etage: 1,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O004-f3",
+          etage: 0,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O004-f4",
+          etage: 1,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O004-f5",
+          etage: 0,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O004-f6",
+          etage: 1,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O004-f7",
+          etage: 0,
+          qm: 546,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O005",
+      name: "FUNDUS Oberhausen",
+      stadt: "Oberhausen",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 2048,
+      etagen: [
+        0
+      ],
+      baujahr: 2007,
+      fassade: 4,
+      substanz: 62,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O005-f1",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O005-f2",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O005-f3",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O005-f4",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O005-f5",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O005-f6",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O005-f7",
+          etage: 0,
+          qm: 293,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O006",
+      name: "FUNDUS Gelsenkirchen",
+      stadt: "Gelsenkirchen",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 2185,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2014,
+      fassade: 5,
+      substanz: 79,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O006-f1",
+          etage: 0,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O006-f2",
+          etage: 1,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O006-f3",
+          etage: 0,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O006-f4",
+          etage: 1,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O006-f5",
+          etage: 0,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O006-f6",
+          etage: 1,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O006-f7",
+          etage: 0,
+          qm: 624,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O007",
+      name: "FUNDUS Wuppertal",
+      stadt: "Wuppertal",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 2322,
+      etagen: [
+        0
+      ],
+      baujahr: 2002,
+      fassade: 6,
+      substanz: 50,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O007-f1",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O007-f2",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O007-f3",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O007-f4",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O007-f5",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O007-f6",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O007-f7",
+          etage: 0,
+          qm: 332,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O008",
+      name: "FUNDUS Bielefeld",
+      stadt: "Bielefeld",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1609,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2009,
+      fassade: 7,
+      substanz: 67,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O008-f1",
+          etage: 0,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O008-f2",
+          etage: 1,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O008-f3",
+          etage: 0,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O008-f4",
+          etage: 1,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O008-f5",
+          etage: 0,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O008-f6",
+          etage: 1,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O008-f7",
+          etage: 0,
+          qm: 460,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O009",
+      name: "FUNDUS M\xF6nchengladbach",
+      stadt: "M\xF6nchengladbach",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1746,
+      etagen: [
+        0
+      ],
+      baujahr: 2016,
+      fassade: 0,
+      substanz: 84,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O009-f1",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O009-f2",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O009-f3",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O009-f4",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O009-f5",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O009-f6",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O009-f7",
+          etage: 0,
+          qm: 249,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O010",
+      name: "FUNDUS M\xFCnster",
+      stadt: "M\xFCnster",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 1883,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2004,
+      fassade: 1,
+      substanz: 55,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O010-f1",
+          etage: 0,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O010-f2",
+          etage: 1,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O010-f3",
+          etage: 0,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O010-f4",
+          etage: 1,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O010-f5",
+          etage: 0,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O010-f6",
+          etage: 1,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O010-f7",
+          etage: 0,
+          qm: 538,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O011",
+      name: "FUNDUS Bonn",
+      stadt: "Bonn",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 2020,
+      etagen: [
+        0
+      ],
+      baujahr: 2011,
+      fassade: 2,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O011-f1",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O011-f2",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O011-f3",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O011-f4",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O011-f5",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O011-f6",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O011-f7",
+          etage: 0,
+          qm: 289,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O012",
+      name: "FUNDUS Hannover",
+      stadt: "Hannover",
+      format: "outlet",
+      lage: "rand",
+      cluster: "grossstadt",
+      grundflaecheQm: 2157,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1999,
+      fassade: 3,
+      substanz: 43,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O012-f1",
+          etage: 0,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O012-f2",
+          etage: 1,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O012-f3",
+          etage: 0,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O012-f4",
+          etage: 1,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O012-f5",
+          etage: 0,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O012-f6",
+          etage: 1,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O012-f7",
+          etage: 0,
+          qm: 616,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O013",
+      name: "FUNDUS Frankfurt",
+      stadt: "Frankfurt",
+      format: "outlet",
+      lage: "rand",
+      cluster: "metropole",
+      grundflaecheQm: 2294,
+      etagen: [
+        0
+      ],
+      baujahr: 2006,
+      fassade: 4,
+      substanz: 60,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O013-f1",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O013-f2",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O013-f3",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O013-f4",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O013-f5",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O013-f6",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O013-f7",
+          etage: 0,
+          qm: 328,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O014",
+      name: "FUNDUS Stuttgart",
+      stadt: "Stuttgart",
+      format: "outlet",
+      lage: "rand",
+      cluster: "metropole",
+      grundflaecheQm: 1581,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2013,
+      fassade: 5,
+      substanz: 77,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O014-f1",
+          etage: 0,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O014-f2",
+          etage: 1,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O014-f3",
+          etage: 0,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O014-f4",
+          etage: 1,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O014-f5",
+          etage: 0,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O014-f6",
+          etage: 1,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O014-f7",
+          etage: 0,
+          qm: 452,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O015",
+      name: "FUNDUS D\xFCsseldorf",
+      stadt: "D\xFCsseldorf",
+      format: "outlet",
+      lage: "b",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2001,
+      fassade: 6,
+      substanz: 48,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O015-f1",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O015-f2",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O015-f3",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O015-f4",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O015-f5",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O015-f6",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O015-f7",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O016",
+      name: "FUNDUS K\xF6ln",
+      stadt: "K\xF6ln",
+      format: "outlet",
+      lage: "b",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2008,
+      fassade: 7,
+      substanz: 65,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O016-f1",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O016-f2",
+          etage: 1,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O016-f3",
+          etage: 2,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O016-f4",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O016-f5",
+          etage: 1,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O016-f6",
+          etage: 2,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O016-f7",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O017",
+      name: "FUNDUS Berlin",
+      stadt: "Berlin",
+      format: "outlet",
+      lage: "b",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2015,
+      fassade: 0,
+      substanz: 82,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O017-f1",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O017-f2",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O017-f3",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O017-f4",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O017-f5",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O017-f6",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O017-f7",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O018",
+      name: "FUNDUS Hamburg",
+      stadt: "Hamburg",
+      format: "outlet",
+      lage: "b",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2003,
+      fassade: 1,
+      substanz: 53,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O018-f1",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O018-f2",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O018-f3",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O018-f4",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O018-f5",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O018-f6",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O018-f7",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O019",
+      name: "FUNDUS Leipzig",
+      stadt: "Leipzig",
+      format: "outlet",
+      lage: "b",
+      cluster: "grossstadt",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 2010,
+      fassade: 2,
+      substanz: 70,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O019-f1",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O019-f2",
+          etage: 1,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O019-f3",
+          etage: 2,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O019-f4",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O019-f5",
+          etage: 1,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O019-f6",
+          etage: 2,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O019-f7",
+          etage: 0,
+          qm: 900,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O020",
+      name: "FUNDUS M\xFCnchen",
+      stadt: "M\xFCnchen",
+      format: "outlet",
+      lage: "b",
+      cluster: "metropole",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1998,
+      fassade: 3,
+      substanz: 41,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O020-f1",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O020-f2",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O020-f3",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O020-f4",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O020-f5",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O020-f6",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O020-f7",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    }
+  ];
+
   // haeuser.json
   var haeuser_default = [{ id: "W001", name: "Hartwig Berlin", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1932, fassade: 4, substanz: 65, status: "offen", flaechen: [{ id: "W001-f1", etage: 0, qm: 816, konzept: "eigen", gruppe: "food" }, { id: "W001-f2", etage: 0, qm: 827, konzept: "eigen", gruppe: "beauty" }, { id: "W001-f3", etage: 0, qm: 690, konzept: "eigen", gruppe: "accessoires" }, { id: "W001-f4", etage: 1, qm: 712, konzept: "eigen", gruppe: "accessoires" }, { id: "W001-f5", etage: 1, qm: 1621, konzept: "eigen", gruppe: "damen" }, { id: "W001-f6", etage: 2, qm: 1510, konzept: "eigen", gruppe: "damen" }, { id: "W001-f7", etage: 2, qm: 809, konzept: "eigen", gruppe: "waesche" }, { id: "W001-f8", etage: 2, qm: 15, konzept: "eigen", gruppe: "herren" }, { id: "W001-f9", etage: 3, qm: 1614, konzept: "eigen", gruppe: "herren" }, { id: "W001-f10", etage: 3, qm: 719, konzept: "eigen", gruppe: "kinder" }, { id: "W001-f11", etage: 4, qm: 512, konzept: "eigen", gruppe: "kinder" }, { id: "W001-f12", etage: 4, qm: 1402, konzept: "eigen", gruppe: "sport" }, { id: "W001-f13", etage: 4, qm: 419, konzept: "eigen", gruppe: "spielwaren" }, { id: "W001-f14", etage: 5, qm: 320, konzept: "eigen", gruppe: "spielwaren" }, { id: "W001-f15", etage: 5, qm: 2013, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 459926, rohertrag: 194319, konzessionserloes: 0, untermiete: 0, personal: 95905, miete: 62501, nebenkosten: 0, sonstige: 25157, db: 10756, fteBedarf: 84.40254506016997, fteIst: 98.82583318279478, umsatzJeGruppe: { food: 37385, beauty: 75986, accessoires: 79466, damen: 80130, waesche: 23873, herren: 49876, kinder: 28367, sport: 31525, spielwaren: 11849, wohnen: 41468 } } }, { id: "W002", name: "Hartwig Berlin Marktplatz", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3900, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1983, fassade: 1, substanz: 69, status: "offen", flaechen: [{ id: "W002-f1", etage: -1, qm: 1599, konzept: "eigen", gruppe: "food" }, { id: "W002-f2", etage: -1, qm: 2301, konzept: "eigen", gruppe: "wohnen" }, { id: "W002-f3", etage: 0, qm: 1476, konzept: "eigen", gruppe: "beauty" }, { id: "W002-f4", etage: 0, qm: 2424, konzept: "eigen", gruppe: "accessoires" }, { id: "W002-f5", etage: 1, qm: 839, konzept: "eigen", gruppe: "accessoires" }, { id: "W002-f6", etage: 1, qm: 3061, konzept: "eigen", gruppe: "damen" }, { id: "W002-f7", etage: 2, qm: 1365, konzept: "eigen", gruppe: "damen" }, { id: "W002-f8", etage: 2, qm: 1928, konzept: "eigen", gruppe: "waesche" }, { id: "W002-f9", etage: 2, qm: 606, konzept: "eigen", gruppe: "herren" }, { id: "W002-f10", etage: 3, qm: 1925, konzept: "eigen", gruppe: "herren" }, { id: "W002-f11", etage: 3, qm: 1975, konzept: "eigen", gruppe: "kinder" }, { id: "W002-f12", etage: 4, qm: 298, konzept: "eigen", gruppe: "kinder" }, { id: "W002-f13", etage: 4, qm: 2983, konzept: "eigen", gruppe: "sport" }, { id: "W002-f14", etage: 4, qm: 619, konzept: "eigen", gruppe: "spielwaren" }, { id: "W002-f15", etage: 5, qm: 1194, konzept: "eigen", gruppe: "spielwaren" }, { id: "W002-f16", etage: 5, qm: 2706, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 852216, rohertrag: 361304, konzessionserloes: 0, untermiete: 0, personal: 175041, miete: 146077, nebenkosten: 40835, sonstige: 47225, db: -47874, fteBedarf: 159.1439244982958, fteIst: 179.8138710299985, umsatzJeGruppe: { food: 65845, wohnen: 110516, beauty: 120255, accessoires: 161460, damen: 139119, waesche: 61707, herren: 75383, kinder: 46997, sport: 45468, spielwaren: 25465 } } }, { id: "W003", name: "Hartwig Berlin Am Markt", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 5600, etagen: [0, 1, 2, 3, 4], baujahr: 1997, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W003-f1", etage: 0, qm: 1688, konzept: "eigen", gruppe: "food" }, { id: "W003-f2", etage: 0, qm: 1393, konzept: "eigen", gruppe: "beauty" }, { id: "W003-f3", etage: 0, qm: 2154, konzept: "eigen", gruppe: "accessoires" }, { id: "W003-f4", etage: 0, qm: 325, konzept: "eigen", gruppe: "damen" }, { id: "W003-f5", etage: 1, qm: 5560, konzept: "eigen", gruppe: "damen" }, { id: "W003-f6", etage: 2, qm: 509, konzept: "eigen", gruppe: "damen" }, { id: "W003-f7", etage: 2, qm: 1557, konzept: "eigen", gruppe: "waesche" }, { id: "W003-f8", etage: 2, qm: 3494, konzept: "eigen", gruppe: "herren" }, { id: "W003-f9", etage: 3, qm: 222, konzept: "eigen", gruppe: "herren" }, { id: "W003-f10", etage: 3, qm: 2164, konzept: "eigen", gruppe: "kinder" }, { id: "W003-f11", etage: 3, qm: 3173, konzept: "eigen", gruppe: "sport" }, { id: "W003-f12", etage: 4, qm: 44, konzept: "eigen", gruppe: "sport" }, { id: "W003-f13", etage: 4, qm: 1653, konzept: "eigen", gruppe: "spielwaren" }, { id: "W003-f14", etage: 4, qm: 3863, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 979603, rohertrag: 415245, konzessionserloes: 0, untermiete: 0, personal: 208278, miete: 154580, nebenkosten: 36778, sonstige: 52673, db: -37064, fteBedarf: 175.8039877202085, fteIst: 210.91327047161073, umsatzJeGruppe: { food: 94423, beauty: 140977, accessoires: 111199, damen: 199727, waesche: 63883, herren: 130601, kinder: 68480, sport: 65416, spielwaren: 29282, wohnen: 75616 } } }, { id: "W004", name: "Hartwig Berlin Marktplatz", stadt: "Berlin", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1967, fassade: 1, substanz: 33, status: "offen", flaechen: [{ id: "W004-f1", etage: -1, qm: 1430, konzept: "eigen", gruppe: "food" }, { id: "W004-f2", etage: -1, qm: 1737, konzept: "eigen", gruppe: "wohnen" }, { id: "W004-f3", etage: 0, qm: 898, konzept: "eigen", gruppe: "beauty" }, { id: "W004-f4", etage: 0, qm: 2207, konzept: "eigen", gruppe: "accessoires" }, { id: "W004-f5", etage: 0, qm: 61, konzept: "eigen", gruppe: "damen" }, { id: "W004-f6", etage: 1, qm: 3167, konzept: "eigen", gruppe: "damen" }, { id: "W004-f7", etage: 2, qm: 716, konzept: "eigen", gruppe: "damen" }, { id: "W004-f8", etage: 2, qm: 1096, konzept: "eigen", gruppe: "waesche" }, { id: "W004-f9", etage: 2, qm: 1355, konzept: "eigen", gruppe: "herren" }, { id: "W004-f10", etage: 3, qm: 1097, konzept: "eigen", gruppe: "herren" }, { id: "W004-f11", etage: 3, qm: 1084, konzept: "eigen", gruppe: "kinder" }, { id: "W004-f12", etage: 3, qm: 985, konzept: "eigen", gruppe: "sport" }, { id: "W004-f13", etage: 4, qm: 725, konzept: "eigen", gruppe: "sport" }, { id: "W004-f14", etage: 4, qm: 1016, konzept: "eigen", gruppe: "spielwaren" }, { id: "W004-f15", etage: 4, qm: 1425, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 585065, rohertrag: 247893, konzessionserloes: 0, untermiete: 0, personal: 145415, miete: 55456, nebenkosten: 19182, sonstige: 32537, db: -4696, fteBedarf: 109.66479703142903, fteIst: 148.2748420327744, umsatzJeGruppe: { food: 57737, wohnen: 82827, beauty: 65046, accessoires: 102715, damen: 114541, waesche: 35235, herren: 57287, kinder: 23377, sport: 31891, spielwaren: 14410 } } }, { id: "S001", name: "Hartwig Sport Berlin Einkaufszentrum", stadt: "Berlin", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2400, etagen: [0, 1], baujahr: 2007, fassade: 7, substanz: 41, status: "offen", flaechen: [{ id: "S001-f1", etage: 0, qm: 1137, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S001-f2", etage: 0, qm: 1213, konzept: "eigen", gruppe: "sporttextil" }, { id: "S001-f3", etage: 1, qm: 267, konzept: "eigen", gruppe: "sporttextil" }, { id: "S001-f4", etage: 1, qm: 667, konzept: "eigen", gruppe: "outdoor" }, { id: "S001-f5", etage: 1, qm: 451, konzept: "eigen", gruppe: "teamsport" }, { id: "S001-f6", etage: 1, qm: 609, konzept: "eigen", gruppe: "rad" }, { id: "S001-f7", etage: 1, qm: 357, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 179903, rohertrag: 75386, konzessionserloes: 0, untermiete: 0, personal: 38549, miete: 21292, nebenkosten: 6841, sonstige: 9491, db: -788, fteBedarf: 30.239009917290254, fteIst: 38.696345666978516, umsatzJeGruppe: { sportschuhe: 65271, sporttextil: 47575, outdoor: 26034, teamsport: 10307, rad: 7255, wintersport: 23461 } } }, { id: "S002", name: "Hartwig Sport Berlin Altstadt", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2300, etagen: [0], baujahr: 2006, fassade: 5, substanz: 77, status: "offen", flaechen: [{ id: "S002-f1", etage: 0, qm: 544, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S002-f2", etage: 0, qm: 690, konzept: "eigen", gruppe: "sporttextil" }, { id: "S002-f3", etage: 0, qm: 391, konzept: "eigen", gruppe: "outdoor" }, { id: "S002-f4", etage: 0, qm: 209, konzept: "eigen", gruppe: "teamsport" }, { id: "S002-f5", etage: 0, qm: 234, konzept: "eigen", gruppe: "rad" }, { id: "S002-f6", etage: 0, qm: 232, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 108474, rohertrag: 45890, konzessionserloes: 0, untermiete: 0, personal: 18775, miete: 10820, nebenkosten: 3327, sonstige: 5482, db: 7486, fteBedarf: 17.019141900564524, fteIst: 19.161316769992233, umsatzJeGruppe: { sportschuhe: 34264, sporttextil: 29933, outdoor: 19753, teamsport: 6942, rad: 2798, wintersport: 14784 } } }, { id: "S003", name: "Hartwig Sport Berlin Hauptstra\xDFe", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 2e3, fassade: 4, substanz: 66, status: "offen", flaechen: [{ id: "S003-f1", etage: 0, qm: 323, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S003-f2", etage: 0, qm: 327, konzept: "eigen", gruppe: "sporttextil" }, { id: "S003-f3", etage: 1, qm: 295, konzept: "eigen", gruppe: "sporttextil" }, { id: "S003-f4", etage: 1, qm: 355, konzept: "eigen", gruppe: "outdoor" }, { id: "S003-f5", etage: 2, qm: 89, konzept: "eigen", gruppe: "outdoor" }, { id: "S003-f6", etage: 2, qm: 218, konzept: "eigen", gruppe: "teamsport" }, { id: "S003-f7", etage: 2, qm: 201, konzept: "eigen", gruppe: "rad" }, { id: "S003-f8", etage: 2, qm: 142, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 82058, rohertrag: 35014, konzessionserloes: 0, untermiete: 0, personal: 15293, miete: 10457, nebenkosten: 0, sonstige: 4242, db: 5022, fteBedarf: 13.390945213639425, fteIst: 15.77817675309605, umsatzJeGruppe: { sportschuhe: 18870, sporttextil: 22575, outdoor: 22976, teamsport: 6380, rad: 2597, wintersport: 8659 } } }, { id: "W005", name: "Hartwig Hamburg", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3500, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1976, fassade: 0, substanz: 67, status: "offen", flaechen: [{ id: "W005-f1", etage: 0, qm: 1496, konzept: "eigen", gruppe: "food" }, { id: "W005-f2", etage: 0, qm: 1318, konzept: "eigen", gruppe: "beauty" }, { id: "W005-f3", etage: 0, qm: 686, konzept: "eigen", gruppe: "accessoires" }, { id: "W005-f4", etage: 1, qm: 1332, konzept: "eigen", gruppe: "accessoires" }, { id: "W005-f5", etage: 1, qm: 2168, konzept: "eigen", gruppe: "damen" }, { id: "W005-f6", etage: 2, qm: 1977, konzept: "eigen", gruppe: "damen" }, { id: "W005-f7", etage: 2, qm: 1523, konzept: "eigen", gruppe: "waesche" }, { id: "W005-f8", etage: 3, qm: 333, konzept: "eigen", gruppe: "waesche" }, { id: "W005-f9", etage: 3, qm: 2181, konzept: "eigen", gruppe: "herren" }, { id: "W005-f10", etage: 3, qm: 986, konzept: "eigen", gruppe: "kinder" }, { id: "W005-f11", etage: 4, qm: 563, konzept: "eigen", gruppe: "kinder" }, { id: "W005-f12", etage: 4, qm: 1659, konzept: "eigen", gruppe: "sport" }, { id: "W005-f13", etage: 4, qm: 1278, konzept: "eigen", gruppe: "spielwaren" }, { id: "W005-f14", etage: 5, qm: 24, konzept: "eigen", gruppe: "spielwaren" }, { id: "W005-f15", etage: 5, qm: 3476, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 680628, rohertrag: 286925, konzessionserloes: 0, untermiete: 0, personal: 149721, miete: 77503, nebenkosten: 0, sonstige: 37356, db: 22345, fteBedarf: 125.4791372076569, fteIst: 151.3347673572255, umsatzJeGruppe: { food: 63679, beauty: 124070, accessoires: 90919, damen: 119082, waesche: 59093, herren: 61736, kinder: 36364, sport: 29704, spielwaren: 18269, wohnen: 77713 } } }, { id: "W006", name: "Hartwig Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1974, fassade: 4, substanz: 48, status: "offen", flaechen: [{ id: "W006-f1", etage: -1, qm: 2198, konzept: "eigen", gruppe: "food" }, { id: "W006-f2", etage: -1, qm: 1773, konzept: "eigen", gruppe: "wohnen" }, { id: "W006-f3", etage: 0, qm: 1498, konzept: "eigen", gruppe: "beauty" }, { id: "W006-f4", etage: 0, qm: 2473, konzept: "eigen", gruppe: "accessoires" }, { id: "W006-f5", etage: 1, qm: 689, konzept: "eigen", gruppe: "accessoires" }, { id: "W006-f6", etage: 1, qm: 3282, konzept: "eigen", gruppe: "damen" }, { id: "W006-f7", etage: 2, qm: 1473, konzept: "eigen", gruppe: "damen" }, { id: "W006-f8", etage: 2, qm: 2234, konzept: "eigen", gruppe: "waesche" }, { id: "W006-f9", etage: 2, qm: 264, konzept: "eigen", gruppe: "herren" }, { id: "W006-f10", etage: 3, qm: 3676, konzept: "eigen", gruppe: "herren" }, { id: "W006-f11", etage: 3, qm: 295, konzept: "eigen", gruppe: "kinder" }, { id: "W006-f12", etage: 4, qm: 1171, konzept: "eigen", gruppe: "kinder" }, { id: "W006-f13", etage: 4, qm: 2800, konzept: "eigen", gruppe: "sport" }, { id: "W006-f14", etage: 5, qm: 72, konzept: "eigen", gruppe: "sport" }, { id: "W006-f15", etage: 5, qm: 1830, konzept: "eigen", gruppe: "spielwaren" }, { id: "W006-f16", etage: 5, qm: 2069, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 1178083, rohertrag: 495107, konzessionserloes: 0, untermiete: 0, personal: 238157, miete: 99040, nebenkosten: 37651, sonstige: 60810, db: 59449, fteBedarf: 200.11818584531616, fteIst: 239.41977394155487, umsatzJeGruppe: { food: 133383, wohnen: 111208, beauty: 179962, accessoires: 219673, damen: 162609, waesche: 102807, herren: 125207, kinder: 43506, sport: 63011, spielwaren: 36717 } } }, { id: "W007", name: "Hartwig Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 2600, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1994, fassade: 0, substanz: 55, status: "offen", flaechen: [{ id: "W007-f1", etage: -1, qm: 867, konzept: "eigen", gruppe: "food" }, { id: "W007-f2", etage: -1, qm: 1700, konzept: "eigen", gruppe: "wohnen" }, { id: "W007-f3", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W007-f4", etage: 0, qm: 1456, konzept: "eigen", gruppe: "accessoires" }, { id: "W007-f5", etage: 0, qm: 346, konzept: "eigen", gruppe: "damen" }, { id: "W007-f6", etage: 1, qm: 2567, konzept: "eigen", gruppe: "damen" }, { id: "W007-f7", etage: 2, qm: 608, konzept: "eigen", gruppe: "damen" }, { id: "W007-f8", etage: 2, qm: 999, konzept: "eigen", gruppe: "waesche" }, { id: "W007-f9", etage: 2, qm: 960, konzept: "eigen", gruppe: "herren" }, { id: "W007-f10", etage: 3, qm: 1351, konzept: "eigen", gruppe: "herren" }, { id: "W007-f11", etage: 3, qm: 1216, konzept: "eigen", gruppe: "kinder" }, { id: "W007-f12", etage: 4, qm: 38, konzept: "eigen", gruppe: "kinder" }, { id: "W007-f13", etage: 4, qm: 1254, konzept: "eigen", gruppe: "sport" }, { id: "W007-f14", etage: 4, qm: 972, konzept: "eigen", gruppe: "spielwaren" }, { id: "W007-f15", etage: 4, qm: 303, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 548568, rohertrag: 234303, konzessionserloes: 0, untermiete: 0, personal: 128534, miete: 89059, nebenkosten: 21860, sonstige: 29422, db: -34572, fteBedarf: 98.09131739332074, fteIst: 130.37834865459325, umsatzJeGruppe: { food: 42747, wohnen: 46575, beauty: 82472, accessoires: 95294, damen: 108453, waesche: 34915, herren: 65480, kinder: 29978, sport: 27247, spielwaren: 15408 } } }, { id: "S004", name: "Hartwig Sport Hamburg City-Center", stadt: "Hamburg", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 1700, etagen: [0], baujahr: 1978, fassade: 1, substanz: 63, status: "offen", flaechen: [{ id: "S004-f1", etage: 0, qm: 458, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S004-f2", etage: 0, qm: 414, konzept: "eigen", gruppe: "sporttextil" }, { id: "S004-f3", etage: 0, qm: 328, konzept: "eigen", gruppe: "outdoor" }, { id: "S004-f4", etage: 0, qm: 190, konzept: "eigen", gruppe: "teamsport" }, { id: "S004-f5", etage: 0, qm: 161, konzept: "eigen", gruppe: "rad" }, { id: "S004-f6", etage: 0, qm: 148, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 71451, rohertrag: 29891, konzessionserloes: 0, untermiete: 0, personal: 13130, miete: 10970, nebenkosten: 1816, sonstige: 3694, db: 281, fteBedarf: 11.600725058482464, fteIst: 13.178316073396308, umsatzJeGruppe: { sportschuhe: 29938, sporttextil: 12697, outdoor: 13057, teamsport: 4484, rad: 1691, wintersport: 9585 } } }, { id: "S005", name: "Hartwig Sport Hamburg Hauptstra\xDFe", stadt: "Hamburg", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2900, etagen: [0], baujahr: 2004, fassade: 7, substanz: 72, status: "offen", flaechen: [{ id: "S005-f1", etage: 0, qm: 555, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S005-f2", etage: 0, qm: 934, konzept: "eigen", gruppe: "sporttextil" }, { id: "S005-f3", etage: 0, qm: 599, konzept: "eigen", gruppe: "outdoor" }, { id: "S005-f4", etage: 0, qm: 227, konzept: "eigen", gruppe: "teamsport" }, { id: "S005-f5", etage: 0, qm: 306, konzept: "eigen", gruppe: "rad" }, { id: "S005-f6", etage: 0, qm: 279, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 105833, rohertrag: 45107, konzessionserloes: 0, untermiete: 0, personal: 19463, miete: 7685, nebenkosten: 2932, sonstige: 5644, db: 9382, fteBedarf: 17.82897189599727, fteIst: 20.084530607437635, umsatzJeGruppe: { sportschuhe: 26258, sporttextil: 31012, outdoor: 24526, teamsport: 4568, rad: 3267, wintersport: 16202 } } }, { id: "W008", name: "Hartwig M\xFCnchen", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3100, etagen: [-1, 0, 1, 2, 3], baujahr: 1962, fassade: 3, substanz: 81, status: "offen", flaechen: [{ id: "W008-f1", etage: -1, qm: 1304, konzept: "eigen", gruppe: "food" }, { id: "W008-f2", etage: -1, qm: 1836, konzept: "eigen", gruppe: "wohnen" }, { id: "W008-f3", etage: 0, qm: 1084, konzept: "eigen", gruppe: "beauty" }, { id: "W008-f4", etage: 0, qm: 1913, konzept: "eigen", gruppe: "accessoires" }, { id: "W008-f5", etage: 0, qm: 143, konzept: "eigen", gruppe: "damen" }, { id: "W008-f6", etage: 1, qm: 2487, konzept: "eigen", gruppe: "damen" }, { id: "W008-f7", etage: 1, qm: 653, konzept: "eigen", gruppe: "waesche" }, { id: "W008-f8", etage: 2, qm: 490, konzept: "eigen", gruppe: "waesche" }, { id: "W008-f9", etage: 2, qm: 1625, konzept: "eigen", gruppe: "herren" }, { id: "W008-f10", etage: 2, qm: 1024, konzept: "eigen", gruppe: "kinder" }, { id: "W008-f11", etage: 3, qm: 1297, konzept: "eigen", gruppe: "sport" }, { id: "W008-f12", etage: 3, qm: 1235, konzept: "eigen", gruppe: "spielwaren" }, { id: "W008-f13", etage: 3, qm: 608, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 634710, rohertrag: 264730, konzessionserloes: 0, untermiete: 0, personal: 141836, miete: 67430, nebenkosten: 19695, sonstige: 33088, db: 2681, fteBedarf: 109.37454007714577, fteIst: 142.05388052311054, umsatzJeGruppe: { food: 76793, wohnen: 56825, beauty: 107775, accessoires: 124104, damen: 105929, waesche: 38824, herren: 47022, kinder: 27713, sport: 25323, spielwaren: 24403 } } }, { id: "W009", name: "Hartwig M\xFCnchen Marktplatz", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4700, etagen: [0, 1, 2, 3, 4], baujahr: 1945, fassade: 2, substanz: 32, status: "offen", flaechen: [{ id: "W009-f1", etage: 0, qm: 1302, konzept: "eigen", gruppe: "food" }, { id: "W009-f2", etage: 0, qm: 1456, konzept: "eigen", gruppe: "beauty" }, { id: "W009-f3", etage: 0, qm: 1962, konzept: "eigen", gruppe: "accessoires" }, { id: "W009-f4", etage: 1, qm: 218, konzept: "eigen", gruppe: "accessoires" }, { id: "W009-f5", etage: 1, qm: 4502, konzept: "eigen", gruppe: "damen" }, { id: "W009-f6", etage: 2, qm: 829, konzept: "eigen", gruppe: "damen" }, { id: "W009-f7", etage: 2, qm: 1915, konzept: "eigen", gruppe: "waesche" }, { id: "W009-f8", etage: 2, qm: 1976, konzept: "eigen", gruppe: "herren" }, { id: "W009-f9", etage: 3, qm: 910, konzept: "eigen", gruppe: "herren" }, { id: "W009-f10", etage: 3, qm: 1191, konzept: "eigen", gruppe: "kinder" }, { id: "W009-f11", etage: 3, qm: 2495, konzept: "eigen", gruppe: "sport" }, { id: "W009-f12", etage: 3, qm: 123, konzept: "eigen", gruppe: "spielwaren" }, { id: "W009-f13", etage: 4, qm: 1293, konzept: "eigen", gruppe: "spielwaren" }, { id: "W009-f14", etage: 4, qm: 3427, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 720317, rohertrag: 305682, konzessionserloes: 0, untermiete: 0, personal: 152859, miete: 89731, nebenkosten: 24126, sonstige: 40153, db: -1188, fteBedarf: 135.57209511125842, fteIst: 156.51258713771043, umsatzJeGruppe: { food: 61885, beauty: 124020, accessoires: 101640, damen: 147043, waesche: 55782, herren: 74935, kinder: 23748, sport: 41749, spielwaren: 21705, wohnen: 67810 } } }, { id: "W010", name: "Hartwig M\xFCnchen Am Markt", stadt: "M\xFCnchen", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1931, fassade: 2, substanz: 37, status: "offen", flaechen: [{ id: "W010-f1", etage: -1, qm: 2019, konzept: "eigen", gruppe: "food" }, { id: "W010-f2", etage: -1, qm: 1152, konzept: "eigen", gruppe: "wohnen" }, { id: "W010-f3", etage: 0, qm: 1271, konzept: "eigen", gruppe: "beauty" }, { id: "W010-f4", etage: 0, qm: 1901, konzept: "eigen", gruppe: "accessoires" }, { id: "W010-f5", etage: 1, qm: 147, konzept: "eigen", gruppe: "accessoires" }, { id: "W010-f6", etage: 1, qm: 3025, konzept: "eigen", gruppe: "damen" }, { id: "W010-f7", etage: 2, qm: 2194, konzept: "eigen", gruppe: "damen" }, { id: "W010-f8", etage: 2, qm: 977, konzept: "eigen", gruppe: "waesche" }, { id: "W010-f9", etage: 3, qm: 773, konzept: "eigen", gruppe: "waesche" }, { id: "W010-f10", etage: 3, qm: 2399, konzept: "eigen", gruppe: "herren" }, { id: "W010-f11", etage: 4, qm: 17, konzept: "eigen", gruppe: "herren" }, { id: "W010-f12", etage: 4, qm: 1422, konzept: "eigen", gruppe: "kinder" }, { id: "W010-f13", etage: 4, qm: 1733, konzept: "eigen", gruppe: "sport" }, { id: "W010-f14", etage: 5, qm: 502, konzept: "eigen", gruppe: "sport" }, { id: "W010-f15", etage: 5, qm: 1216, konzept: "eigen", gruppe: "spielwaren" }, { id: "W010-f16", etage: 5, qm: 1453, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 806829, rohertrag: 339765, konzessionserloes: 0, untermiete: 0, personal: 153763, miete: 68917, nebenkosten: 30518, sonstige: 43070, db: 43496, fteBedarf: 143.31180767469192, fteIst: 157.84199784570941, umsatzJeGruppe: { food: 87138, wohnen: 60440, beauty: 143798, accessoires: 122653, damen: 157112, waesche: 57139, herren: 77158, kinder: 35745, sport: 45807, spielwaren: 19840 } } }, { id: "S006", name: "Hartwig Sport M\xFCnchen", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1986, fassade: 3, substanz: 71, status: "offen", flaechen: [{ id: "S006-f1", etage: 0, qm: 1098, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S006-f2", etage: 0, qm: 1577, konzept: "eigen", gruppe: "sporttextil" }, { id: "S006-f3", etage: 1, qm: 21, konzept: "eigen", gruppe: "sporttextil" }, { id: "S006-f4", etage: 1, qm: 1072, konzept: "eigen", gruppe: "outdoor" }, { id: "S006-f5", etage: 1, qm: 449, konzept: "eigen", gruppe: "teamsport" }, { id: "S006-f6", etage: 1, qm: 664, konzept: "eigen", gruppe: "rad" }, { id: "S006-f7", etage: 1, qm: 469, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 231121, rohertrag: 97740, konzessionserloes: 0, untermiete: 0, personal: 40916, miete: 22361, nebenkosten: 6540, sonstige: 11883, db: 16040, fteBedarf: 37.16834450392001, fteIst: 41.18710472301602, umsatzJeGruppe: { sportschuhe: 67499, sporttextil: 66855, outdoor: 42458, teamsport: 11189, rad: 8634, wintersport: 34486 } } }, { id: "S007", name: "Hartwig Sport M\xFCnchen Am Wall", stadt: "M\xFCnchen", format: "sport", lage: "b", cluster: "metropole", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 1975, fassade: 7, substanz: 38, status: "offen", flaechen: [{ id: "S007-f1", etage: 0, qm: 474, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S007-f2", etage: 0, qm: 259, konzept: "eigen", gruppe: "sporttextil" }, { id: "S007-f3", etage: 1, qm: 283, konzept: "eigen", gruppe: "sporttextil" }, { id: "S007-f4", etage: 1, qm: 444, konzept: "eigen", gruppe: "outdoor" }, { id: "S007-f5", etage: 1, qm: 6, konzept: "eigen", gruppe: "teamsport" }, { id: "S007-f6", etage: 2, qm: 198, konzept: "eigen", gruppe: "teamsport" }, { id: "S007-f7", etage: 2, qm: 331, konzept: "eigen", gruppe: "rad" }, { id: "S007-f8", etage: 2, qm: 204, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 80683, rohertrag: 33793, konzessionserloes: 0, untermiete: 0, personal: 14890, miete: 9125, nebenkosten: 2845, sonstige: 4298, db: 2635, fteBedarf: 13.668988032611951, fteIst: 15.396758071949431, umsatzJeGruppe: { sportschuhe: 26124, sporttextil: 16787, outdoor: 16323, teamsport: 4204, rad: 4006, wintersport: 13239 } } }, { id: "S008", name: "Hartwig Sport M\xFCnchen Altstadt", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1500, etagen: [0, 1, 2], baujahr: 2012, fassade: 4, substanz: 60, status: "offen", flaechen: [{ id: "S008-f1", etage: 0, qm: 1156, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S008-f2", etage: 0, qm: 311, konzept: "eigen", gruppe: "sporttextil" }, { id: "S008-f3", etage: 1, qm: 789, konzept: "eigen", gruppe: "sporttextil" }, { id: "S008-f4", etage: 1, qm: 678, konzept: "eigen", gruppe: "outdoor" }, { id: "S008-f5", etage: 2, qm: 107, konzept: "eigen", gruppe: "outdoor" }, { id: "S008-f6", etage: 2, qm: 472, konzept: "eigen", gruppe: "teamsport" }, { id: "S008-f7", etage: 2, qm: 491, konzept: "eigen", gruppe: "rad" }, { id: "S008-f8", etage: 2, qm: 396, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 204261, rohertrag: 85772, konzessionserloes: 0, untermiete: 0, personal: 35739, miete: 24774, nebenkosten: 5223, sonstige: 10355, db: 9682, fteBedarf: 32.2807452085907, fteIst: 36.230434659385594, umsatzJeGruppe: { sportschuhe: 79692, sporttextil: 49890, outdoor: 32164, teamsport: 9822, rad: 5738, wintersport: 26955 } } }, { id: "W011", name: "Hartwig K\xF6ln City-Center", stadt: "K\xF6ln", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 3700, etagen: [0, 1, 2, 3, 4], baujahr: 1974, fassade: 3, substanz: 54, status: "offen", flaechen: [{ id: "W011-f1", etage: 0, qm: 1289, konzept: "eigen", gruppe: "food" }, { id: "W011-f2", etage: 0, qm: 1367, konzept: "eigen", gruppe: "beauty" }, { id: "W011-f3", etage: 0, qm: 1024, konzept: "eigen", gruppe: "accessoires" }, { id: "W011-f4", etage: 1, qm: 362, konzept: "eigen", gruppe: "accessoires" }, { id: "W011-f5", etage: 1, qm: 3318, konzept: "eigen", gruppe: "damen" }, { id: "W011-f6", etage: 2, qm: 1066, konzept: "eigen", gruppe: "damen" }, { id: "W011-f7", etage: 2, qm: 1438, konzept: "eigen", gruppe: "waesche" }, { id: "W011-f8", etage: 2, qm: 1176, konzept: "eigen", gruppe: "herren" }, { id: "W011-f9", etage: 3, qm: 1364, konzept: "eigen", gruppe: "herren" }, { id: "W011-f10", etage: 3, qm: 1391, konzept: "eigen", gruppe: "kinder" }, { id: "W011-f11", etage: 3, qm: 925, konzept: "eigen", gruppe: "sport" }, { id: "W011-f12", etage: 4, qm: 665, konzept: "eigen", gruppe: "sport" }, { id: "W011-f13", etage: 4, qm: 914, konzept: "eigen", gruppe: "spielwaren" }, { id: "W011-f14", etage: 4, qm: 2101, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 470422, rohertrag: 199054, konzessionserloes: 0, untermiete: 0, personal: 118997, miete: 70819, nebenkosten: 26008, sonstige: 27567, db: -44337, fteBedarf: 94.52113235739775, fteIst: 121.51666383366833, umsatzJeGruppe: { food: 39701, beauty: 95717, accessoires: 55926, damen: 100455, waesche: 29755, herren: 51254, kinder: 24955, sport: 24217, spielwaren: 12823, wohnen: 35620 } } }, { id: "W012", name: "Hartwig K\xF6ln Arkaden", stadt: "K\xF6ln", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 4500, etagen: [-1, 0, 1, 2, 3], baujahr: 1924, fassade: 1, substanz: 37, status: "offen", flaechen: [{ id: "W012-f1", etage: -1, qm: 1611, konzept: "eigen", gruppe: "food" }, { id: "W012-f2", etage: -1, qm: 2909, konzept: "eigen", gruppe: "wohnen" }, { id: "W012-f3", etage: 0, qm: 1617, konzept: "eigen", gruppe: "beauty" }, { id: "W012-f4", etage: 0, qm: 2083, konzept: "eigen", gruppe: "accessoires" }, { id: "W012-f5", etage: 0, qm: 820, konzept: "eigen", gruppe: "damen" }, { id: "W012-f6", etage: 1, qm: 4202, konzept: "eigen", gruppe: "damen" }, { id: "W012-f7", etage: 1, qm: 318, konzept: "eigen", gruppe: "waesche" }, { id: "W012-f8", etage: 2, qm: 1232, konzept: "eigen", gruppe: "waesche" }, { id: "W012-f9", etage: 2, qm: 2675, konzept: "eigen", gruppe: "herren" }, { id: "W012-f10", etage: 2, qm: 613, konzept: "eigen", gruppe: "kinder" }, { id: "W012-f11", etage: 3, qm: 1015, konzept: "eigen", gruppe: "kinder" }, { id: "W012-f12", etage: 3, qm: 2267, konzept: "eigen", gruppe: "sport" }, { id: "W012-f13", etage: 3, qm: 1298, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 651290, rohertrag: 273778, konzessionserloes: 0, untermiete: 0, personal: 138764, miete: 56433, nebenkosten: 31429, sonstige: 36900, db: 10253, fteBedarf: 125.30892118053129, fteIst: 141.94311506493966, umsatzJeGruppe: { food: 59767, wohnen: 43604, beauty: 137372, accessoires: 101936, damen: 115606, waesche: 43876, herren: 62814, kinder: 30657, sport: 34197, spielwaren: 21460 } } }, { id: "S009", name: "Hartwig Sport K\xF6ln Galerie am Fluss", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 900, etagen: [0, 1, 2], baujahr: 2007, fassade: 6, substanz: 79, status: "offen", flaechen: [{ id: "S009-f1", etage: 0, qm: 585, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S009-f2", etage: 0, qm: 349, konzept: "eigen", gruppe: "sporttextil" }, { id: "S009-f3", etage: 1, qm: 491, konzept: "eigen", gruppe: "sporttextil" }, { id: "S009-f4", etage: 1, qm: 442, konzept: "eigen", gruppe: "outdoor" }, { id: "S009-f5", etage: 2, qm: 150, konzept: "eigen", gruppe: "outdoor" }, { id: "S009-f6", etage: 2, qm: 250, konzept: "eigen", gruppe: "teamsport" }, { id: "S009-f7", etage: 2, qm: 342, konzept: "eigen", gruppe: "rad" }, { id: "S009-f8", etage: 2, qm: 191, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 105889, rohertrag: 44857, konzessionserloes: 0, untermiete: 0, personal: 19904, miete: 11623, nebenkosten: 4145, sonstige: 5601, db: 3584, fteBedarf: 17.942361818663294, fteIst: 20.210898954929757, umsatzJeGruppe: { sportschuhe: 36485, sporttextil: 32969, outdoor: 19833, teamsport: 4540, rad: 3167, wintersport: 8896 } } }, { id: "S010", name: "Hartwig Sport K\xF6ln Arkaden", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 600, etagen: [0, 1, 2], baujahr: 1994, fassade: 0, substanz: 67, status: "offen", flaechen: [{ id: "S010-f1", etage: 0, qm: 339, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S010-f2", etage: 0, qm: 211, konzept: "eigen", gruppe: "sporttextil" }, { id: "S010-f3", etage: 1, qm: 196, konzept: "eigen", gruppe: "sporttextil" }, { id: "S010-f4", etage: 1, qm: 354, konzept: "eigen", gruppe: "outdoor" }, { id: "S010-f5", etage: 2, qm: 24, konzept: "eigen", gruppe: "outdoor" }, { id: "S010-f6", etage: 2, qm: 141, konzept: "eigen", gruppe: "teamsport" }, { id: "S010-f7", etage: 2, qm: 241, konzept: "eigen", gruppe: "rad" }, { id: "S010-f8", etage: 2, qm: 144, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 49425, rohertrag: 20827, konzessionserloes: 0, untermiete: 0, personal: 10455, miete: 9964, nebenkosten: 2257, sonstige: 2769, db: -4619, fteBedarf: 9.003018787165358, fteIst: 10.5564706810127, umsatzJeGruppe: { sportschuhe: 15321, sporttextil: 10691, outdoor: 12072, teamsport: 2432, rad: 2164, wintersport: 6745 } } }, { id: "W013", name: "Hartwig Frankfurt", stadt: "Frankfurt", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3900, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1984, fassade: 1, substanz: 32, status: "offen", flaechen: [{ id: "W013-f1", etage: -1, qm: 1937, konzept: "eigen", gruppe: "food" }, { id: "W013-f2", etage: -1, qm: 1948, konzept: "eigen", gruppe: "wohnen" }, { id: "W013-f3", etage: 0, qm: 1610, konzept: "eigen", gruppe: "beauty" }, { id: "W013-f4", etage: 0, qm: 2276, konzept: "eigen", gruppe: "accessoires" }, { id: "W013-f5", etage: 1, qm: 214, konzept: "eigen", gruppe: "accessoires" }, { id: "W013-f6", etage: 1, qm: 3672, konzept: "eigen", gruppe: "damen" }, { id: "W013-f7", etage: 2, qm: 2280, konzept: "eigen", gruppe: "damen" }, { id: "W013-f8", etage: 2, qm: 1605, konzept: "eigen", gruppe: "waesche" }, { id: "W013-f9", etage: 3, qm: 123, konzept: "eigen", gruppe: "waesche" }, { id: "W013-f10", etage: 3, qm: 3252, konzept: "eigen", gruppe: "herren" }, { id: "W013-f11", etage: 3, qm: 511, konzept: "eigen", gruppe: "kinder" }, { id: "W013-f12", etage: 4, qm: 1471, konzept: "eigen", gruppe: "kinder" }, { id: "W013-f13", etage: 4, qm: 2415, konzept: "eigen", gruppe: "sport" }, { id: "W013-f14", etage: 5, qm: 35, konzept: "eigen", gruppe: "sport" }, { id: "W013-f15", etage: 5, qm: 1449, konzept: "eigen", gruppe: "spielwaren" }, { id: "W013-f16", etage: 5, qm: 2402, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 776164, rohertrag: 326020, konzessionserloes: 0, untermiete: 0, personal: 179406, miete: 83657, nebenkosten: 37419, sonstige: 44063, db: -18524, fteBedarf: 149.61121766248164, fteIst: 183.57388462592328, umsatzJeGruppe: { food: 79441, wohnen: 63469, beauty: 147742, accessoires: 99784, damen: 147390, waesche: 46343, herren: 84336, kinder: 47607, sport: 39539, spielwaren: 20513 } } }, { id: "W014", name: "Hartwig Frankfurt Hauptstra\xDFe", stadt: "Frankfurt", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2, 3, 4, 5], baujahr: 1981, fassade: 7, substanz: 56, status: "offen", flaechen: [{ id: "W014-f1", etage: -1, qm: 1472, konzept: "eigen", gruppe: "food" }, { id: "W014-f2", etage: -1, qm: 1799, konzept: "eigen", gruppe: "wohnen" }, { id: "W014-f3", etage: 0, qm: 1283, konzept: "eigen", gruppe: "beauty" }, { id: "W014-f4", etage: 0, qm: 1988, konzept: "eigen", gruppe: "accessoires" }, { id: "W014-f5", etage: 1, qm: 9, konzept: "eigen", gruppe: "accessoires" }, { id: "W014-f6", etage: 1, qm: 3262, konzept: "eigen", gruppe: "damen" }, { id: "W014-f7", etage: 2, qm: 1102, konzept: "eigen", gruppe: "damen" }, { id: "W014-f8", etage: 2, qm: 1310, konzept: "eigen", gruppe: "waesche" }, { id: "W014-f9", etage: 2, qm: 859, konzept: "eigen", gruppe: "herren" }, { id: "W014-f10", etage: 3, qm: 1406, konzept: "eigen", gruppe: "herren" }, { id: "W014-f11", etage: 3, qm: 1596, konzept: "eigen", gruppe: "kinder" }, { id: "W014-f12", etage: 3, qm: 270, konzept: "eigen", gruppe: "sport" }, { id: "W014-f13", etage: 4, qm: 2508, konzept: "eigen", gruppe: "sport" }, { id: "W014-f14", etage: 4, qm: 764, konzept: "eigen", gruppe: "spielwaren" }, { id: "W014-f15", etage: 5, qm: 905, konzept: "eigen", gruppe: "spielwaren" }, { id: "W014-f16", etage: 5, qm: 2366, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 841120, rohertrag: 352675, konzessionserloes: 0, untermiete: 0, personal: 185385, miete: 63203, nebenkosten: 26921, sonstige: 44790, db: 32376, fteBedarf: 149.26307186005968, fteIst: 189.37930208572513, umsatzJeGruppe: { food: 66645, wohnen: 83922, beauty: 149843, accessoires: 122577, damen: 147543, waesche: 41271, herren: 82452, kinder: 52063, sport: 58557, spielwaren: 36246 } } }, { id: "S011", name: "Hartwig Sport Frankfurt", stadt: "Frankfurt", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2e3, etagen: [0, 1], baujahr: 2011, fassade: 2, substanz: 56, status: "offen", flaechen: [{ id: "S011-f1", etage: 0, qm: 1116, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S011-f2", etage: 0, qm: 884, konzept: "eigen", gruppe: "sporttextil" }, { id: "S011-f3", etage: 1, qm: 144, konzept: "eigen", gruppe: "sporttextil" }, { id: "S011-f4", etage: 1, qm: 678, konzept: "eigen", gruppe: "outdoor" }, { id: "S011-f5", etage: 1, qm: 481, konzept: "eigen", gruppe: "teamsport" }, { id: "S011-f6", etage: 1, qm: 413, konzept: "eigen", gruppe: "rad" }, { id: "S011-f7", etage: 1, qm: 283, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 204272, rohertrag: 85965, konzessionserloes: 0, untermiete: 0, personal: 38043, miete: 14902, nebenkosten: 4291, sonstige: 10175, db: 18554, fteBedarf: 31.55101315478689, fteIst: 38.59533266697779, umsatzJeGruppe: { sportschuhe: 74193, sporttextil: 53406, outdoor: 32356, teamsport: 14173, rad: 5289, wintersport: 24855 } } }, { id: "S012", name: "Hartwig Sport Frankfurt Am Markt", stadt: "Frankfurt", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 3500, etagen: [0], baujahr: 1995, fassade: 5, substanz: 60, status: "offen", flaechen: [{ id: "S012-f1", etage: 0, qm: 835, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S012-f2", etage: 0, qm: 863, konzept: "eigen", gruppe: "sporttextil" }, { id: "S012-f3", etage: 0, qm: 754, konzept: "eigen", gruppe: "outdoor" }, { id: "S012-f4", etage: 0, qm: 346, konzept: "eigen", gruppe: "teamsport" }, { id: "S012-f5", etage: 0, qm: 407, konzept: "eigen", gruppe: "rad" }, { id: "S012-f6", etage: 0, qm: 295, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 160296, rohertrag: 67764, konzessionserloes: 0, untermiete: 0, personal: 31372, miete: 23987, nebenkosten: 3708, sonstige: 8147, db: 550, fteBedarf: 25.499037707470766, fteIst: 31.851320333159077, umsatzJeGruppe: { sportschuhe: 47350, sporttextil: 38706, outdoor: 38331, teamsport: 9307, rad: 6155, wintersport: 20446 } } }, { id: "W015", name: "Hartwig D\xFCsseldorf City-Center", stadt: "D\xFCsseldorf", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 4100, etagen: [-1, 0, 1, 2, 3], baujahr: 1978, fassade: 5, substanz: 44, status: "offen", flaechen: [{ id: "W015-f1", etage: -1, qm: 1397, konzept: "eigen", gruppe: "food" }, { id: "W015-f2", etage: -1, qm: 2723, konzept: "eigen", gruppe: "wohnen" }, { id: "W015-f3", etage: 0, qm: 1047, konzept: "eigen", gruppe: "beauty" }, { id: "W015-f4", etage: 0, qm: 1851, konzept: "eigen", gruppe: "accessoires" }, { id: "W015-f5", etage: 0, qm: 1222, konzept: "eigen", gruppe: "damen" }, { id: "W015-f6", etage: 1, qm: 2653, konzept: "eigen", gruppe: "damen" }, { id: "W015-f7", etage: 1, qm: 1457, konzept: "eigen", gruppe: "waesche" }, { id: "W015-f8", etage: 1, qm: 11, konzept: "eigen", gruppe: "herren" }, { id: "W015-f9", etage: 2, qm: 2058, konzept: "eigen", gruppe: "herren" }, { id: "W015-f10", etage: 2, qm: 1548, konzept: "eigen", gruppe: "kinder" }, { id: "W015-f11", etage: 2, qm: 514, konzept: "eigen", gruppe: "sport" }, { id: "W015-f12", etage: 3, qm: 1792, konzept: "eigen", gruppe: "sport" }, { id: "W015-f13", etage: 3, qm: 1321, konzept: "eigen", gruppe: "spielwaren" }, { id: "W015-f14", etage: 3, qm: 1007, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 681687, rohertrag: 286212, konzessionserloes: 0, untermiete: 0, personal: 154921, miete: 97006, nebenkosten: 0, sonstige: 37220, db: -2935, fteBedarf: 124.86729317467515, fteIst: 157.28323075819483, umsatzJeGruppe: { food: 66200, wohnen: 81001, beauty: 113343, accessoires: 93807, damen: 113845, waesche: 51182, herren: 65435, kinder: 37839, sport: 37424, spielwaren: 21611 } } }, { id: "W016", name: "Hartwig D\xFCsseldorf Hauptstra\xDFe", stadt: "D\xFCsseldorf", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1975, fassade: 4, substanz: 36, status: "offen", flaechen: [{ id: "W016-f1", etage: -1, qm: 1548, konzept: "eigen", gruppe: "food" }, { id: "W016-f2", etage: -1, qm: 2486, konzept: "eigen", gruppe: "wohnen" }, { id: "W016-f3", etage: 0, qm: 1563, konzept: "eigen", gruppe: "beauty" }, { id: "W016-f4", etage: 0, qm: 2170, konzept: "eigen", gruppe: "accessoires" }, { id: "W016-f5", etage: 0, qm: 301, konzept: "eigen", gruppe: "damen" }, { id: "W016-f6", etage: 1, qm: 4033, konzept: "eigen", gruppe: "damen" }, { id: "W016-f7", etage: 2, qm: 533, konzept: "eigen", gruppe: "damen" }, { id: "W016-f8", etage: 2, qm: 1943, konzept: "eigen", gruppe: "waesche" }, { id: "W016-f9", etage: 2, qm: 1558, konzept: "eigen", gruppe: "herren" }, { id: "W016-f10", etage: 3, qm: 1816, konzept: "eigen", gruppe: "herren" }, { id: "W016-f11", etage: 3, qm: 1734, konzept: "eigen", gruppe: "kinder" }, { id: "W016-f12", etage: 3, qm: 484, konzept: "eigen", gruppe: "sport" }, { id: "W016-f13", etage: 4, qm: 1904, konzept: "eigen", gruppe: "sport" }, { id: "W016-f14", etage: 4, qm: 1290, konzept: "eigen", gruppe: "spielwaren" }, { id: "W016-f15", etage: 4, qm: 840, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 989132, rohertrag: 419154, konzessionserloes: 0, untermiete: 0, personal: 211005, miete: 79198, nebenkosten: 27906, sonstige: 51446, db: 49599, fteBedarf: 169.60885016905962, fteIst: 219.54370796368428, umsatzJeGruppe: { food: 96531, wohnen: 70471, beauty: 183498, accessoires: 138198, damen: 186702, waesche: 74598, herren: 125288, kinder: 41422, sport: 51355, spielwaren: 21068 } } }, { id: "S013", name: "Hartwig Sport D\xFCsseldorf Einkaufszentrum", stadt: "D\xFCsseldorf", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 2015, fassade: 1, substanz: 35, status: "offen", flaechen: [{ id: "S013-f1", etage: 0, qm: 1032, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S013-f2", etage: 0, qm: 1093, konzept: "eigen", gruppe: "sporttextil" }, { id: "S013-f3", etage: 1, qm: 143, konzept: "eigen", gruppe: "sporttextil" }, { id: "S013-f4", etage: 1, qm: 841, konzept: "eigen", gruppe: "outdoor" }, { id: "S013-f5", etage: 1, qm: 297, konzept: "eigen", gruppe: "teamsport" }, { id: "S013-f6", etage: 1, qm: 493, konzept: "eigen", gruppe: "rad" }, { id: "S013-f7", etage: 1, qm: 351, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 141487, rohertrag: 59654, konzessionserloes: 0, untermiete: 0, personal: 27950, miete: 13866, nebenkosten: 5805, sonstige: 7713, db: 4319, fteBedarf: 24.701643702090895, fteIst: 28.54927540580955, umsatzJeGruppe: { sportschuhe: 44774, sporttextil: 39674, outdoor: 23638, teamsport: 6333, rad: 5398, wintersport: 21670 } } }, { id: "S014", name: "Hartwig Sport D\xFCsseldorf Galerie am Fluss", stadt: "D\xFCsseldorf", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2200, etagen: [0], baujahr: 1981, fassade: 2, substanz: 64, status: "offen", flaechen: [{ id: "S014-f1", etage: 0, qm: 584, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S014-f2", etage: 0, qm: 531, konzept: "eigen", gruppe: "sporttextil" }, { id: "S014-f3", etage: 0, qm: 458, konzept: "eigen", gruppe: "outdoor" }, { id: "S014-f4", etage: 0, qm: 186, konzept: "eigen", gruppe: "teamsport" }, { id: "S014-f5", etage: 0, qm: 237, konzept: "eigen", gruppe: "rad" }, { id: "S014-f6", etage: 0, qm: 204, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 92903, rohertrag: 38898, konzessionserloes: 0, untermiete: 0, personal: 17743, miete: 13086, nebenkosten: 2692, sonstige: 4799, db: 578, fteBedarf: 15.099560843823076, fteIst: 18.383528103935355, umsatzJeGruppe: { sportschuhe: 37227, sporttextil: 19399, outdoor: 16025, teamsport: 5155, rad: 2804, wintersport: 12293 } } }, { id: "W017", name: "Hartwig Stuttgart", stadt: "Stuttgart", format: "warenhaus", lage: "1a", cluster: "metropole", grundflaecheQm: 3e3, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1973, fassade: 4, substanz: 86, status: "offen", flaechen: [{ id: "W017-f1", etage: -1, qm: 1135, konzept: "eigen", gruppe: "food" }, { id: "W017-f2", etage: -1, qm: 1815, konzept: "eigen", gruppe: "wohnen" }, { id: "W017-f3", etage: 0, qm: 921, konzept: "eigen", gruppe: "beauty" }, { id: "W017-f4", etage: 0, qm: 1471, konzept: "eigen", gruppe: "accessoires" }, { id: "W017-f5", etage: 0, qm: 558, konzept: "eigen", gruppe: "damen" }, { id: "W017-f6", etage: 1, qm: 2779, konzept: "eigen", gruppe: "damen" }, { id: "W017-f7", etage: 1, qm: 171, konzept: "eigen", gruppe: "waesche" }, { id: "W017-f8", etage: 2, qm: 1357, konzept: "eigen", gruppe: "waesche" }, { id: "W017-f9", etage: 2, qm: 1593, konzept: "eigen", gruppe: "herren" }, { id: "W017-f10", etage: 3, qm: 897, konzept: "eigen", gruppe: "herren" }, { id: "W017-f11", etage: 3, qm: 1513, konzept: "eigen", gruppe: "kinder" }, { id: "W017-f12", etage: 3, qm: 540, konzept: "eigen", gruppe: "sport" }, { id: "W017-f13", etage: 4, qm: 1271, konzept: "eigen", gruppe: "sport" }, { id: "W017-f14", etage: 4, qm: 861, konzept: "eigen", gruppe: "spielwaren" }, { id: "W017-f15", etage: 4, qm: 818, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 795476, rohertrag: 338444, konzessionserloes: 0, untermiete: 0, personal: 139952, miete: 106668, nebenkosten: 18061, sonstige: 40580, db: 33183, fteBedarf: 132.95607663611813, fteIst: 144.1291221195617, umsatzJeGruppe: { food: 76105, wohnen: 58379, beauty: 125048, accessoires: 95350, damen: 155112, waesche: 68833, herren: 102773, kinder: 50330, sport: 42703, spielwaren: 20843 } } }, { id: "W018", name: "Hartwig Stuttgart Arkaden", stadt: "Stuttgart", format: "warenhaus", lage: "center", cluster: "metropole", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4, 5, 6], baujahr: 1935, fassade: 2, substanz: 78, status: "offen", flaechen: [{ id: "W018-f1", etage: 0, qm: 904, konzept: "eigen", gruppe: "food" }, { id: "W018-f2", etage: 0, qm: 765, konzept: "eigen", gruppe: "beauty" }, { id: "W018-f3", etage: 0, qm: 531, konzept: "eigen", gruppe: "accessoires" }, { id: "W018-f4", etage: 1, qm: 926, konzept: "eigen", gruppe: "accessoires" }, { id: "W018-f5", etage: 1, qm: 1274, konzept: "eigen", gruppe: "damen" }, { id: "W018-f6", etage: 2, qm: 2198, konzept: "eigen", gruppe: "damen" }, { id: "W018-f7", etage: 2, qm: 2, konzept: "eigen", gruppe: "waesche" }, { id: "W018-f8", etage: 3, qm: 1203, konzept: "eigen", gruppe: "waesche" }, { id: "W018-f9", etage: 3, qm: 997, konzept: "eigen", gruppe: "herren" }, { id: "W018-f10", etage: 4, qm: 910, konzept: "eigen", gruppe: "herren" }, { id: "W018-f11", etage: 4, qm: 1153, konzept: "eigen", gruppe: "kinder" }, { id: "W018-f12", etage: 4, qm: 137, konzept: "eigen", gruppe: "sport" }, { id: "W018-f13", etage: 5, qm: 1276, konzept: "eigen", gruppe: "sport" }, { id: "W018-f14", etage: 5, qm: 801, konzept: "eigen", gruppe: "spielwaren" }, { id: "W018-f15", etage: 5, qm: 123, konzept: "eigen", gruppe: "wohnen" }, { id: "W018-f16", etage: 6, qm: 2200, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 438669, rohertrag: 186053, konzessionserloes: 0, untermiete: 0, personal: 99460, miete: 100316, nebenkosten: 19697, sonstige: 24915, db: -58336, fteBedarf: 84.61337809168313, fteIst: 101.37414919327071, umsatzJeGruppe: { food: 38633, beauty: 72609, accessoires: 56318, damen: 85133, waesche: 33529, herren: 51791, kinder: 19557, sport: 22764, spielwaren: 12806, wohnen: 45529 } } }, { id: "S015", name: "Hartwig Sport Stuttgart City-Center", stadt: "Stuttgart", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2900, etagen: [0], baujahr: 1988, fassade: 1, substanz: 34, status: "offen", flaechen: [{ id: "S015-f1", etage: 0, qm: 534, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S015-f2", etage: 0, qm: 821, konzept: "eigen", gruppe: "sporttextil" }, { id: "S015-f3", etage: 0, qm: 674, konzept: "eigen", gruppe: "outdoor" }, { id: "S015-f4", etage: 0, qm: 291, konzept: "eigen", gruppe: "teamsport" }, { id: "S015-f5", etage: 0, qm: 293, konzept: "eigen", gruppe: "rad" }, { id: "S015-f6", etage: 0, qm: 237, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 118007, rohertrag: 49797, konzessionserloes: 0, untermiete: 0, personal: 22713, miete: 15088, nebenkosten: 2858, sonstige: 6121, db: 3017, fteBedarf: 19.209130891754945, fteIst: 23.462436092808183, umsatzJeGruppe: { sportschuhe: 38479, sporttextil: 31215, outdoor: 21413, teamsport: 5938, rad: 3804, wintersport: 17157 } } }, { id: "S016", name: "Hartwig Sport Stuttgart Am Markt", stadt: "Stuttgart", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1992, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "S016-f1", etage: 0, qm: 913, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S016-f2", etage: 0, qm: 387, konzept: "eigen", gruppe: "sporttextil" }, { id: "S016-f3", etage: 1, qm: 888, konzept: "eigen", gruppe: "sporttextil" }, { id: "S016-f4", etage: 1, qm: 412, konzept: "eigen", gruppe: "outdoor" }, { id: "S016-f5", etage: 2, qm: 263, konzept: "eigen", gruppe: "outdoor" }, { id: "S016-f6", etage: 2, qm: 377, konzept: "eigen", gruppe: "teamsport" }, { id: "S016-f7", etage: 2, qm: 434, konzept: "eigen", gruppe: "rad" }, { id: "S016-f8", etage: 2, qm: 226, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 187941, rohertrag: 79919, konzessionserloes: 0, untermiete: 0, personal: 33215, miete: 28226, nebenkosten: 0, sonstige: 9461, db: 9017, fteBedarf: 29.657375862347894, fteIst: 33.668931300002356, umsatzJeGruppe: { sportschuhe: 58606, sporttextil: 65164, outdoor: 33445, teamsport: 9593, rad: 5086, wintersport: 16047 } } }, { id: "W019", name: "Hartwig Essen", stadt: "Essen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1916, fassade: 1, substanz: 44, status: "offen", flaechen: [{ id: "W019-f1", etage: -1, qm: 588, konzept: "eigen", gruppe: "food" }, { id: "W019-f2", etage: -1, qm: 1262, konzept: "eigen", gruppe: "wohnen" }, { id: "W019-f3", etage: 0, qm: 807, konzept: "eigen", gruppe: "beauty" }, { id: "W019-f4", etage: 0, qm: 854, konzept: "eigen", gruppe: "accessoires" }, { id: "W019-f5", etage: 0, qm: 189, konzept: "eigen", gruppe: "damen" }, { id: "W019-f6", etage: 1, qm: 1850, konzept: "eigen", gruppe: "damen" }, { id: "W019-f7", etage: 2, qm: 47, konzept: "eigen", gruppe: "damen" }, { id: "W019-f8", etage: 2, qm: 908, konzept: "eigen", gruppe: "waesche" }, { id: "W019-f9", etage: 2, qm: 895, konzept: "eigen", gruppe: "herren" }, { id: "W019-f10", etage: 3, qm: 644, konzept: "eigen", gruppe: "herren" }, { id: "W019-f11", etage: 3, qm: 672, konzept: "eigen", gruppe: "kinder" }, { id: "W019-f12", etage: 3, qm: 534, konzept: "eigen", gruppe: "sport" }, { id: "W019-f13", etage: 4, qm: 804, konzept: "eigen", gruppe: "sport" }, { id: "W019-f14", etage: 4, qm: 553, konzept: "eigen", gruppe: "spielwaren" }, { id: "W019-f15", etage: 4, qm: 493, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 361363, rohertrag: 152958, konzessionserloes: 0, untermiete: 0, personal: 78812, miete: 59149, nebenkosten: 11715, sonstige: 19811, db: -16529, fteBedarf: 66.52777079567127, fteIst: 79.68751270938957, umsatzJeGruppe: { food: 27681, wohnen: 33716, beauty: 65262, accessoires: 49358, damen: 53796, waesche: 28774, herren: 48521, kinder: 20384, sport: 24219, spielwaren: 9650 } } }, { id: "W020", name: "Hartwig Essen Ring", stadt: "Essen", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2], baujahr: 1958, fassade: 2, substanz: 54, status: "offen", flaechen: [{ id: "W020-f1", etage: -1, qm: 828, konzept: "eigen", gruppe: "food" }, { id: "W020-f2", etage: -1, qm: 1847, konzept: "eigen", gruppe: "wohnen" }, { id: "W020-f3", etage: 0, qm: 516, konzept: "eigen", gruppe: "beauty" }, { id: "W020-f4", etage: 0, qm: 1107, konzept: "eigen", gruppe: "accessoires" }, { id: "W020-f5", etage: 0, qm: 1052, konzept: "eigen", gruppe: "damen" }, { id: "W020-f6", etage: 1, qm: 1070, konzept: "eigen", gruppe: "damen" }, { id: "W020-f7", etage: 1, qm: 711, konzept: "eigen", gruppe: "waesche" }, { id: "W020-f8", etage: 1, qm: 894, konzept: "eigen", gruppe: "herren" }, { id: "W020-f9", etage: 2, qm: 338, konzept: "eigen", gruppe: "herren" }, { id: "W020-f10", etage: 2, qm: 668, konzept: "eigen", gruppe: "kinder" }, { id: "W020-f11", etage: 2, qm: 1351, konzept: "eigen", gruppe: "sport" }, { id: "W020-f12", etage: 2, qm: 818, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 244289, rohertrag: 101830, konzessionserloes: 0, untermiete: 0, personal: 57783, miete: 35624, nebenkosten: 0, sonstige: 15056, db: -6633, fteBedarf: 52.42723191788461, fteIst: 58.52095393627797, umsatzJeGruppe: { food: 27382, wohnen: 23518, beauty: 36048, accessoires: 35462, damen: 41552, waesche: 14093, herren: 25691, kinder: 9826, sport: 20267, spielwaren: 10450 } } }, { id: "S017", name: "Hartwig Sport Essen", stadt: "Essen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 5100, etagen: [0], baujahr: 2010, fassade: 2, substanz: 50, status: "offen", flaechen: [{ id: "S017-f1", etage: 0, qm: 827, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S017-f2", etage: 0, qm: 1647, konzept: "eigen", gruppe: "sporttextil" }, { id: "S017-f3", etage: 0, qm: 1189, konzept: "eigen", gruppe: "outdoor" }, { id: "S017-f4", etage: 0, qm: 503, konzept: "eigen", gruppe: "teamsport" }, { id: "S017-f5", etage: 0, qm: 598, konzept: "eigen", gruppe: "rad" }, { id: "S017-f6", etage: 0, qm: 336, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 203026, rohertrag: 86622, konzessionserloes: 0, untermiete: 0, personal: 42337, miete: 37024, nebenkosten: 5990, sonstige: 10619, db: -9348, fteBedarf: 33.82178552279264, fteIst: 43.13466579059574, umsatzJeGruppe: { sportschuhe: 52408, sporttextil: 65762, outdoor: 48625, teamsport: 11735, rad: 6651, wintersport: 17845 } } }, { id: "W021", name: "Hartwig Dortmund", stadt: "Dortmund", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1956, fassade: 1, substanz: 53, status: "offen", flaechen: [{ id: "W021-f1", etage: -1, qm: 1352, konzept: "eigen", gruppe: "food" }, { id: "W021-f2", etage: -1, qm: 1431, konzept: "eigen", gruppe: "wohnen" }, { id: "W021-f3", etage: 0, qm: 981, konzept: "eigen", gruppe: "beauty" }, { id: "W021-f4", etage: 0, qm: 1482, konzept: "eigen", gruppe: "accessoires" }, { id: "W021-f5", etage: 0, qm: 320, konzept: "eigen", gruppe: "damen" }, { id: "W021-f6", etage: 1, qm: 2783, konzept: "eigen", gruppe: "damen" }, { id: "W021-f7", etage: 2, qm: 656, konzept: "eigen", gruppe: "damen" }, { id: "W021-f8", etage: 2, qm: 1257, konzept: "eigen", gruppe: "waesche" }, { id: "W021-f9", etage: 2, qm: 870, konzept: "eigen", gruppe: "herren" }, { id: "W021-f10", etage: 3, qm: 959, konzept: "eigen", gruppe: "herren" }, { id: "W021-f11", etage: 3, qm: 1242, konzept: "eigen", gruppe: "kinder" }, { id: "W021-f12", etage: 3, qm: 583, konzept: "eigen", gruppe: "sport" }, { id: "W021-f13", etage: 4, qm: 1340, konzept: "eigen", gruppe: "sport" }, { id: "W021-f14", etage: 4, qm: 858, konzept: "eigen", gruppe: "spielwaren" }, { id: "W021-f15", etage: 4, qm: 585, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 464194, rohertrag: 194944, konzessionserloes: 0, untermiete: 0, personal: 99075, miete: 45771, nebenkosten: 19012, sonstige: 26546, db: 4538, fteBedarf: 90.30579582824927, fteIst: 101.98513821558086, umsatzJeGruppe: { food: 52001, wohnen: 31836, beauty: 81123, accessoires: 60128, damen: 100750, waesche: 33269, herren: 34529, kinder: 25651, sport: 33689, spielwaren: 11218 } } }, { id: "W022", name: "Hartwig Dortmund Neustadt", stadt: "Dortmund", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3, 4], baujahr: 2002, fassade: 4, substanz: 42, status: "offen", flaechen: [{ id: "W022-f1", etage: 0, qm: 682, konzept: "eigen", gruppe: "food" }, { id: "W022-f2", etage: 0, qm: 414, konzept: "eigen", gruppe: "beauty" }, { id: "W022-f3", etage: 0, qm: 784, konzept: "eigen", gruppe: "accessoires" }, { id: "W022-f4", etage: 1, qm: 255, konzept: "eigen", gruppe: "accessoires" }, { id: "W022-f5", etage: 1, qm: 1625, konzept: "eigen", gruppe: "damen" }, { id: "W022-f6", etage: 2, qm: 485, konzept: "eigen", gruppe: "damen" }, { id: "W022-f7", etage: 2, qm: 711, konzept: "eigen", gruppe: "waesche" }, { id: "W022-f8", etage: 2, qm: 684, konzept: "eigen", gruppe: "herren" }, { id: "W022-f9", etage: 3, qm: 209, konzept: "eigen", gruppe: "herren" }, { id: "W022-f10", etage: 3, qm: 620, konzept: "eigen", gruppe: "kinder" }, { id: "W022-f11", etage: 3, qm: 942, konzept: "eigen", gruppe: "sport" }, { id: "W022-f12", etage: 3, qm: 109, konzept: "eigen", gruppe: "spielwaren" }, { id: "W022-f13", etage: 4, qm: 379, konzept: "eigen", gruppe: "spielwaren" }, { id: "W022-f14", etage: 4, qm: 1501, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 230370, rohertrag: 98399, konzessionserloes: 0, untermiete: 0, personal: 51442, miete: 18361, nebenkosten: 12578, sonstige: 13675, db: 2344, fteBedarf: 47.05700663771704, fteIst: 51.770796778870405, umsatzJeGruppe: { food: 21219, beauty: 23767, accessoires: 41835, damen: 46772, waesche: 20717, herren: 19395, kinder: 10178, sport: 12422, spielwaren: 7393, wohnen: 26673 } } }, { id: "S018", name: "Hartwig Sport Dortmund", stadt: "Dortmund", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1978, fassade: 2, substanz: 36, status: "offen", flaechen: [{ id: "S018-f1", etage: 0, qm: 718, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S018-f2", etage: 0, qm: 757, konzept: "eigen", gruppe: "sporttextil" }, { id: "S018-f3", etage: 1, qm: 152, konzept: "eigen", gruppe: "sporttextil" }, { id: "S018-f4", etage: 1, qm: 515, konzept: "eigen", gruppe: "outdoor" }, { id: "S018-f5", etage: 1, qm: 258, konzept: "eigen", gruppe: "teamsport" }, { id: "S018-f6", etage: 1, qm: 264, konzept: "eigen", gruppe: "rad" }, { id: "S018-f7", etage: 1, qm: 286, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 130598, rohertrag: 54884, konzessionserloes: 0, untermiete: 0, personal: 23701, miete: 29278, nebenkosten: 4225, sonstige: 6682, db: -9002, fteBedarf: 20.899984269574617, fteIst: 24.323003700029545, umsatzJeGruppe: { sportschuhe: 50764, sporttextil: 31443, outdoor: 21584, teamsport: 6129, rad: 3500, wintersport: 17179 } } }, { id: "W023", name: "Hartwig Bremen", stadt: "Bremen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1933, fassade: 5, substanz: 30, status: "offen", flaechen: [{ id: "W023-f1", etage: -1, qm: 594, konzept: "eigen", gruppe: "food" }, { id: "W023-f2", etage: -1, qm: 1506, konzept: "eigen", gruppe: "wohnen" }, { id: "W023-f3", etage: 0, qm: 665, konzept: "eigen", gruppe: "beauty" }, { id: "W023-f4", etage: 0, qm: 1012, konzept: "eigen", gruppe: "accessoires" }, { id: "W023-f5", etage: 0, qm: 423, konzept: "eigen", gruppe: "damen" }, { id: "W023-f6", etage: 1, qm: 1966, konzept: "eigen", gruppe: "damen" }, { id: "W023-f7", etage: 1, qm: 134, konzept: "eigen", gruppe: "waesche" }, { id: "W023-f8", etage: 2, qm: 574, konzept: "eigen", gruppe: "waesche" }, { id: "W023-f9", etage: 2, qm: 1254, konzept: "eigen", gruppe: "herren" }, { id: "W023-f10", etage: 2, qm: 272, konzept: "eigen", gruppe: "kinder" }, { id: "W023-f11", etage: 3, qm: 607, konzept: "eigen", gruppe: "kinder" }, { id: "W023-f12", etage: 3, qm: 1237, konzept: "eigen", gruppe: "sport" }, { id: "W023-f13", etage: 3, qm: 582, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 371271, rohertrag: 158160, konzessionserloes: 0, untermiete: 0, personal: 81087, miete: 66364, nebenkosten: 16102, sonstige: 20094, db: -25486, fteBedarf: 67.16796810504911, fteIst: 83.66840168021653, umsatzJeGruppe: { food: 28898, wohnen: 31631, beauty: 57253, accessoires: 59594, damen: 71063, waesche: 28359, herren: 37604, kinder: 23921, sport: 24096, spielwaren: 8851 } } }, { id: "W024", name: "Hartwig Bremen Altstadt", stadt: "Bremen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1, 2, 3, 4, 5], baujahr: 2002, fassade: 1, substanz: 36, status: "offen", flaechen: [{ id: "W024-f1", etage: 0, qm: 1021, konzept: "eigen", gruppe: "food" }, { id: "W024-f2", etage: 0, qm: 1113, konzept: "eigen", gruppe: "beauty" }, { id: "W024-f3", etage: 0, qm: 500, konzept: "eigen", gruppe: "accessoires" }, { id: "W024-f4", etage: 1, qm: 927, konzept: "eigen", gruppe: "accessoires" }, { id: "W024-f5", etage: 1, qm: 1707, konzept: "eigen", gruppe: "damen" }, { id: "W024-f6", etage: 2, qm: 1262, konzept: "eigen", gruppe: "damen" }, { id: "W024-f7", etage: 2, qm: 1196, konzept: "eigen", gruppe: "waesche" }, { id: "W024-f8", etage: 2, qm: 175, konzept: "eigen", gruppe: "herren" }, { id: "W024-f9", etage: 3, qm: 1488, konzept: "eigen", gruppe: "herren" }, { id: "W024-f10", etage: 3, qm: 944, konzept: "eigen", gruppe: "kinder" }, { id: "W024-f11", etage: 3, qm: 201, konzept: "eigen", gruppe: "sport" }, { id: "W024-f12", etage: 4, qm: 1748, konzept: "eigen", gruppe: "sport" }, { id: "W024-f13", etage: 4, qm: 757, konzept: "eigen", gruppe: "spielwaren" }, { id: "W024-f14", etage: 4, qm: 128, konzept: "eigen", gruppe: "wohnen" }, { id: "W024-f15", etage: 5, qm: 2633, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 480978, rohertrag: 202465, konzessionserloes: 0, untermiete: 0, personal: 114937, miete: 41851, nebenkosten: 22948, sonstige: 26830, db: -4101, fteBedarf: 90.58082781498368, fteIst: 115.57645553816583, umsatzJeGruppe: { food: 44595, beauty: 82375, accessoires: 72179, damen: 86215, waesche: 40058, herren: 37388, kinder: 19548, sport: 34418, spielwaren: 13025, wohnen: 51177 } } }, { id: "S019", name: "Hartwig Sport Bremen", stadt: "Bremen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [0, 1], baujahr: 2001, fassade: 1, substanz: 52, status: "offen", flaechen: [{ id: "S019-f1", etage: 0, qm: 709, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S019-f2", etage: 0, qm: 946, konzept: "eigen", gruppe: "sporttextil" }, { id: "S019-f3", etage: 0, qm: 95, konzept: "eigen", gruppe: "outdoor" }, { id: "S019-f4", etage: 1, qm: 608, konzept: "eigen", gruppe: "outdoor" }, { id: "S019-f5", etage: 1, qm: 353, konzept: "eigen", gruppe: "teamsport" }, { id: "S019-f6", etage: 1, qm: 448, konzept: "eigen", gruppe: "rad" }, { id: "S019-f7", etage: 1, qm: 340, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 117691, rohertrag: 49420, konzessionserloes: 0, untermiete: 0, personal: 26819, miete: 9556, nebenkosten: 5078, sonstige: 6400, db: 1567, fteBedarf: 20.593128359090677, fteIst: 26.97408982811513, umsatzJeGruppe: { sportschuhe: 36860, sporttextil: 29101, outdoor: 21584, teamsport: 8042, rad: 5270, wintersport: 16833 } } }, { id: "W025", name: "Hartwig Leipzig", stadt: "Leipzig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3400, etagen: [-1, 0, 1, 2, 3], baujahr: 1997, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "W025-f1", etage: -1, qm: 1061, konzept: "eigen", gruppe: "food" }, { id: "W025-f2", etage: -1, qm: 2299, konzept: "eigen", gruppe: "wohnen" }, { id: "W025-f3", etage: 0, qm: 1082, konzept: "eigen", gruppe: "beauty" }, { id: "W025-f4", etage: 0, qm: 2090, konzept: "eigen", gruppe: "accessoires" }, { id: "W025-f5", etage: 0, qm: 188, konzept: "eigen", gruppe: "damen" }, { id: "W025-f6", etage: 1, qm: 2856, konzept: "eigen", gruppe: "damen" }, { id: "W025-f7", etage: 1, qm: 504, konzept: "eigen", gruppe: "waesche" }, { id: "W025-f8", etage: 2, qm: 719, konzept: "eigen", gruppe: "waesche" }, { id: "W025-f9", etage: 2, qm: 1710, konzept: "eigen", gruppe: "herren" }, { id: "W025-f10", etage: 2, qm: 931, konzept: "eigen", gruppe: "kinder" }, { id: "W025-f11", etage: 3, qm: 313, konzept: "eigen", gruppe: "kinder" }, { id: "W025-f12", etage: 3, qm: 1687, konzept: "eigen", gruppe: "sport" }, { id: "W025-f13", etage: 3, qm: 869, konzept: "eigen", gruppe: "spielwaren" }, { id: "W025-f14", etage: 3, qm: 491, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 527405, rohertrag: 221405, konzessionserloes: 0, untermiete: 0, personal: 114080, miete: 64037, nebenkosten: 0, sonstige: 29184, db: 14104, fteBedarf: 98.32372246832225, fteIst: 117.92613794454667, umsatzJeGruppe: { food: 44142, wohnen: 66748, beauty: 95868, accessoires: 99545, damen: 81810, waesche: 34268, herren: 37777, kinder: 25268, sport: 25825, spielwaren: 16155 } } }, { id: "W026", name: "Hartwig Leipzig K\xF6nigstra\xDFe", stadt: "Leipzig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3400, etagen: [-1, 0, 1, 2], baujahr: 1937, fassade: 7, substanz: 43, status: "offen", flaechen: [{ id: "W026-f1", etage: -1, qm: 1052, konzept: "eigen", gruppe: "food" }, { id: "W026-f2", etage: -1, qm: 2323, konzept: "eigen", gruppe: "wohnen" }, { id: "W026-f3", etage: 0, qm: 625, konzept: "eigen", gruppe: "beauty" }, { id: "W026-f4", etage: 0, qm: 1419, konzept: "eigen", gruppe: "accessoires" }, { id: "W026-f5", etage: 0, qm: 1331, konzept: "eigen", gruppe: "damen" }, { id: "W026-f6", etage: 1, qm: 1354, konzept: "eigen", gruppe: "damen" }, { id: "W026-f7", etage: 1, qm: 1045, konzept: "eigen", gruppe: "waesche" }, { id: "W026-f8", etage: 1, qm: 975, konzept: "eigen", gruppe: "herren" }, { id: "W026-f9", etage: 2, qm: 555, konzept: "eigen", gruppe: "herren" }, { id: "W026-f10", etage: 2, qm: 1159, konzept: "eigen", gruppe: "kinder" }, { id: "W026-f11", etage: 2, qm: 1338, konzept: "eigen", gruppe: "sport" }, { id: "W026-f12", etage: 2, qm: 820, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 423322, rohertrag: 178779, konzessionserloes: 0, untermiete: 0, personal: 104783, miete: 46719, nebenkosten: 18036, sonstige: 23654, db: -14414, fteBedarf: 79.95537714608625, fteIst: 106.9272495788456, umsatzJeGruppe: { food: 39939, wohnen: 44292, beauty: 55588, accessoires: 72472, damen: 66508, waesche: 33160, herren: 43220, kinder: 26473, sport: 27456, spielwaren: 14214 } } }, { id: "S020", name: "Hartwig Sport Leipzig Galerie am Fluss", stadt: "Leipzig", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [0], baujahr: 1999, fassade: 1, substanz: 54, status: "offen", flaechen: [{ id: "S020-f1", etage: 0, qm: 632, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S020-f2", etage: 0, qm: 842, konzept: "eigen", gruppe: "sporttextil" }, { id: "S020-f3", etage: 0, qm: 684, konzept: "eigen", gruppe: "outdoor" }, { id: "S020-f4", etage: 0, qm: 313, konzept: "eigen", gruppe: "teamsport" }, { id: "S020-f5", etage: 0, qm: 469, konzept: "eigen", gruppe: "rad" }, { id: "S020-f6", etage: 0, qm: 309, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 108355, rohertrag: 45708, konzessionserloes: 0, untermiete: 0, personal: 24165, miete: 13070, nebenkosten: 3271, sonstige: 5905, db: -704, fteBedarf: 18.98898544290149, fteIst: 24.601704377963856, umsatzJeGruppe: { sportschuhe: 30768, sporttextil: 31632, outdoor: 19148, teamsport: 6327, rad: 4859, wintersport: 15623 } } }, { id: "W027", name: "Hartwig Dresden Einkaufszentrum", stadt: "Dresden", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4], baujahr: 1997, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W027-f1", etage: 0, qm: 533, konzept: "eigen", gruppe: "food" }, { id: "W027-f2", etage: 0, qm: 503, konzept: "eigen", gruppe: "beauty" }, { id: "W027-f3", etage: 0, qm: 704, konzept: "eigen", gruppe: "accessoires" }, { id: "W027-f4", etage: 1, qm: 115, konzept: "eigen", gruppe: "accessoires" }, { id: "W027-f5", etage: 1, qm: 1625, konzept: "eigen", gruppe: "damen" }, { id: "W027-f6", etage: 2, qm: 287, konzept: "eigen", gruppe: "damen" }, { id: "W027-f7", etage: 2, qm: 735, konzept: "eigen", gruppe: "waesche" }, { id: "W027-f8", etage: 2, qm: 718, konzept: "eigen", gruppe: "herren" }, { id: "W027-f9", etage: 3, qm: 544, konzept: "eigen", gruppe: "herren" }, { id: "W027-f10", etage: 3, qm: 523, konzept: "eigen", gruppe: "kinder" }, { id: "W027-f11", etage: 3, qm: 673, konzept: "eigen", gruppe: "sport" }, { id: "W027-f12", etage: 4, qm: 13, konzept: "eigen", gruppe: "sport" }, { id: "W027-f13", etage: 4, qm: 450, konzept: "eigen", gruppe: "spielwaren" }, { id: "W027-f14", etage: 4, qm: 1277, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 258403, rohertrag: 110539, konzessionserloes: 0, untermiete: 0, personal: 63506, miete: 31490, nebenkosten: 10557, sonstige: 14510, db: -9524, fteBedarf: 49.098192250090236, fteIst: 64.17475409089238, umsatzJeGruppe: { food: 23600, beauty: 36727, accessoires: 40697, damen: 50300, waesche: 26482, herren: 27994, kinder: 9768, sport: 9633, spielwaren: 7933, wohnen: 25269 } } }, { id: "W028", name: "Hartwig Dresden K\xF6nigstra\xDFe", stadt: "Dresden", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3100, etagen: [0, 1, 2, 3, 4], baujahr: 1989, fassade: 1, substanz: 72, status: "offen", flaechen: [{ id: "W028-f1", etage: 0, qm: 937, konzept: "eigen", gruppe: "food" }, { id: "W028-f2", etage: 0, qm: 1131, konzept: "eigen", gruppe: "beauty" }, { id: "W028-f3", etage: 0, qm: 1071, konzept: "eigen", gruppe: "accessoires" }, { id: "W028-f4", etage: 1, qm: 628, konzept: "eigen", gruppe: "accessoires" }, { id: "W028-f5", etage: 1, qm: 2512, konzept: "eigen", gruppe: "damen" }, { id: "W028-f6", etage: 2, qm: 207, konzept: "eigen", gruppe: "damen" }, { id: "W028-f7", etage: 2, qm: 1092, konzept: "eigen", gruppe: "waesche" }, { id: "W028-f8", etage: 2, qm: 1841, konzept: "eigen", gruppe: "herren" }, { id: "W028-f9", etage: 3, qm: 228, konzept: "eigen", gruppe: "herren" }, { id: "W028-f10", etage: 3, qm: 863, konzept: "eigen", gruppe: "kinder" }, { id: "W028-f11", etage: 3, qm: 1409, konzept: "eigen", gruppe: "sport" }, { id: "W028-f12", etage: 3, qm: 641, konzept: "eigen", gruppe: "spielwaren" }, { id: "W028-f13", etage: 4, qm: 350, konzept: "eigen", gruppe: "spielwaren" }, { id: "W028-f14", etage: 4, qm: 2790, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 554426, rohertrag: 232498, konzessionserloes: 0, untermiete: 0, personal: 118577, miete: 52017, nebenkosten: 18147, sonstige: 29796, db: 13960, fteBedarf: 99.46032703433085, fteIst: 121.49490900491055, umsatzJeGruppe: { food: 48963, beauty: 107719, accessoires: 95944, damen: 74307, waesche: 40348, herren: 59003, kinder: 19117, sport: 30385, spielwaren: 18075, wohnen: 60566 } } }, { id: "S021", name: "Hartwig Sport Dresden Galerie am Fluss", stadt: "Dresden", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [0, 1], baujahr: 1983, fassade: 7, substanz: 36, status: "offen", flaechen: [{ id: "S021-f1", etage: 0, qm: 1097, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S021-f2", etage: 0, qm: 1391, konzept: "eigen", gruppe: "sporttextil" }, { id: "S021-f3", etage: 0, qm: 12, konzept: "eigen", gruppe: "outdoor" }, { id: "S021-f4", etage: 1, qm: 1019, konzept: "eigen", gruppe: "outdoor" }, { id: "S021-f5", etage: 1, qm: 555, konzept: "eigen", gruppe: "teamsport" }, { id: "S021-f6", etage: 1, qm: 529, konzept: "eigen", gruppe: "rad" }, { id: "S021-f7", etage: 1, qm: 397, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 161780, rohertrag: 68472, konzessionserloes: 0, untermiete: 0, personal: 29711, miete: 19214, nebenkosten: 0, sonstige: 8883, db: 10664, fteBedarf: 28.691107359331617, fteIst: 30.29475567515675, umsatzJeGruppe: { sportschuhe: 51295, sporttextil: 47712, outdoor: 29187, teamsport: 10903, rad: 4490, wintersport: 18193 } } }, { id: "W029", name: "Hartwig Hannover Lindenstra\xDFe", stadt: "Hannover", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2, 3], baujahr: 1957, fassade: 4, substanz: 62, status: "offen", flaechen: [{ id: "W029-f1", etage: -1, qm: 971, konzept: "eigen", gruppe: "food" }, { id: "W029-f2", etage: -1, qm: 2329, konzept: "eigen", gruppe: "wohnen" }, { id: "W029-f3", etage: 0, qm: 897, konzept: "eigen", gruppe: "beauty" }, { id: "W029-f4", etage: 0, qm: 1595, konzept: "eigen", gruppe: "accessoires" }, { id: "W029-f5", etage: 0, qm: 807, konzept: "eigen", gruppe: "damen" }, { id: "W029-f6", etage: 1, qm: 2833, konzept: "eigen", gruppe: "damen" }, { id: "W029-f7", etage: 1, qm: 467, konzept: "eigen", gruppe: "waesche" }, { id: "W029-f8", etage: 2, qm: 743, konzept: "eigen", gruppe: "waesche" }, { id: "W029-f9", etage: 2, qm: 1748, konzept: "eigen", gruppe: "herren" }, { id: "W029-f10", etage: 2, qm: 809, konzept: "eigen", gruppe: "kinder" }, { id: "W029-f11", etage: 3, qm: 501, konzept: "eigen", gruppe: "kinder" }, { id: "W029-f12", etage: 3, qm: 1791, konzept: "eigen", gruppe: "sport" }, { id: "W029-f13", etage: 3, qm: 739, konzept: "eigen", gruppe: "spielwaren" }, { id: "W029-f14", etage: 3, qm: 269, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 369570, rohertrag: 157042, konzessionserloes: 0, untermiete: 0, personal: 90487, miete: 44129, nebenkosten: 19243, sonstige: 22577, db: -19393, fteBedarf: 78.32268793198118, fteIst: 91.26172466077023, umsatzJeGruppe: { food: 32053, wohnen: 31655, beauty: 59254, accessoires: 52502, damen: 73809, waesche: 29597, herren: 36315, kinder: 23737, sport: 21014, spielwaren: 9634 } } }, { id: "W030", name: "Hartwig Hannover Neustadt", stadt: "Hannover", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1979, fassade: 7, substanz: 80, status: "offen", flaechen: [{ id: "W030-f1", etage: 0, qm: 837, konzept: "eigen", gruppe: "food" }, { id: "W030-f2", etage: 0, qm: 774, konzept: "eigen", gruppe: "beauty" }, { id: "W030-f3", etage: 0, qm: 855, konzept: "eigen", gruppe: "accessoires" }, { id: "W030-f4", etage: 1, qm: 449, konzept: "eigen", gruppe: "accessoires" }, { id: "W030-f5", etage: 1, qm: 2018, konzept: "eigen", gruppe: "damen" }, { id: "W030-f6", etage: 2, qm: 968, konzept: "eigen", gruppe: "damen" }, { id: "W030-f7", etage: 2, qm: 1275, konzept: "eigen", gruppe: "waesche" }, { id: "W030-f8", etage: 2, qm: 223, konzept: "eigen", gruppe: "herren" }, { id: "W030-f9", etage: 3, qm: 1797, konzept: "eigen", gruppe: "herren" }, { id: "W030-f10", etage: 3, qm: 670, konzept: "eigen", gruppe: "kinder" }, { id: "W030-f11", etage: 4, qm: 622, konzept: "eigen", gruppe: "kinder" }, { id: "W030-f12", etage: 4, qm: 1451, konzept: "eigen", gruppe: "sport" }, { id: "W030-f13", etage: 4, qm: 393, konzept: "eigen", gruppe: "spielwaren" }, { id: "W030-f14", etage: 5, qm: 382, konzept: "eigen", gruppe: "spielwaren" }, { id: "W030-f15", etage: 5, qm: 2084, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 323160, rohertrag: 137747, konzessionserloes: 0, untermiete: 0, personal: 83859, miete: 55671, nebenkosten: 0, sonstige: 19909, db: -21691, fteBedarf: 69.25963413621675, fteIst: 84.3049846266934, umsatzJeGruppe: { food: 23364, beauty: 53748, accessoires: 50694, damen: 53748, waesche: 27061, herren: 40934, kinder: 17539, sport: 18316, spielwaren: 9917, wohnen: 27837 } } }, { id: "S022", name: "Hartwig Sport Hannover", stadt: "Hannover", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1], baujahr: 2006, fassade: 5, substanz: 34, status: "offen", flaechen: [{ id: "S022-f1", etage: 0, qm: 1072, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S022-f2", etage: 0, qm: 1203, konzept: "eigen", gruppe: "sporttextil" }, { id: "S022-f3", etage: 1, qm: 82, konzept: "eigen", gruppe: "sporttextil" }, { id: "S022-f4", etage: 1, qm: 948, konzept: "eigen", gruppe: "outdoor" }, { id: "S022-f5", etage: 1, qm: 405, konzept: "eigen", gruppe: "teamsport" }, { id: "S022-f6", etage: 1, qm: 457, konzept: "eigen", gruppe: "rad" }, { id: "S022-f7", etage: 1, qm: 383, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 172534, rohertrag: 72813, konzessionserloes: 0, untermiete: 0, personal: 31274, miete: 20649, nebenkosten: 0, sonstige: 9121, db: 11769, fteBedarf: 28.991555686271752, fteIst: 32.10267404781496, umsatzJeGruppe: { sportschuhe: 61329, sporttextil: 46840, outdoor: 29943, teamsport: 9867, rad: 4422, wintersport: 20133 } } }, { id: "W031", name: "Hartwig N\xFCrnberg", stadt: "N\xFCrnberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [0, 1, 2, 3], baujahr: 1957, fassade: 7, substanz: 34, status: "offen", flaechen: [{ id: "W031-f1", etage: 0, qm: 1216, konzept: "eigen", gruppe: "food" }, { id: "W031-f2", etage: 0, qm: 689, konzept: "eigen", gruppe: "beauty" }, { id: "W031-f3", etage: 0, qm: 1370, konzept: "eigen", gruppe: "accessoires" }, { id: "W031-f4", etage: 1, qm: 18, konzept: "eigen", gruppe: "accessoires" }, { id: "W031-f5", etage: 1, qm: 2388, konzept: "eigen", gruppe: "damen" }, { id: "W031-f6", etage: 1, qm: 869, konzept: "eigen", gruppe: "waesche" }, { id: "W031-f7", etage: 2, qm: 351, konzept: "eigen", gruppe: "waesche" }, { id: "W031-f8", etage: 2, qm: 1509, konzept: "eigen", gruppe: "herren" }, { id: "W031-f9", etage: 2, qm: 841, konzept: "eigen", gruppe: "kinder" }, { id: "W031-f10", etage: 2, qm: 574, konzept: "eigen", gruppe: "sport" }, { id: "W031-f11", etage: 3, qm: 525, konzept: "eigen", gruppe: "sport" }, { id: "W031-f12", etage: 3, qm: 1034, konzept: "eigen", gruppe: "spielwaren" }, { id: "W031-f13", etage: 3, qm: 1715, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 435944, rohertrag: 182826, konzessionserloes: 0, untermiete: 0, personal: 91474, miete: 109262, nebenkosten: 17956, sonstige: 23768, db: -59634, fteBedarf: 79.68273664668298, fteIst: 92.0915964104501, umsatzJeGruppe: { food: 63392, beauty: 56162, accessoires: 73656, damen: 75393, waesche: 35381, herren: 46948, kinder: 20629, sport: 16286, spielwaren: 14287, wohnen: 33810 } } }, { id: "W032", name: "Hartwig N\xFCrnberg K\xF6nigstra\xDFe", stadt: "N\xFCrnberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [0, 1, 2, 3, 4], baujahr: 1937, fassade: 4, substanz: 50, status: "offen", flaechen: [{ id: "W032-f1", etage: 0, qm: 602, konzept: "eigen", gruppe: "food" }, { id: "W032-f2", etage: 0, qm: 682, konzept: "eigen", gruppe: "beauty" }, { id: "W032-f3", etage: 0, qm: 716, konzept: "eigen", gruppe: "accessoires" }, { id: "W032-f4", etage: 1, qm: 214, konzept: "eigen", gruppe: "accessoires" }, { id: "W032-f5", etage: 1, qm: 1786, konzept: "eigen", gruppe: "damen" }, { id: "W032-f6", etage: 2, qm: 164, konzept: "eigen", gruppe: "damen" }, { id: "W032-f7", etage: 2, qm: 748, konzept: "eigen", gruppe: "waesche" }, { id: "W032-f8", etage: 2, qm: 1088, konzept: "eigen", gruppe: "herren" }, { id: "W032-f9", etage: 3, qm: 249, konzept: "eigen", gruppe: "herren" }, { id: "W032-f10", etage: 3, qm: 750, konzept: "eigen", gruppe: "kinder" }, { id: "W032-f11", etage: 3, qm: 1001, konzept: "eigen", gruppe: "sport" }, { id: "W032-f12", etage: 4, qm: 49, konzept: "eigen", gruppe: "sport" }, { id: "W032-f13", etage: 4, qm: 702, konzept: "eigen", gruppe: "spielwaren" }, { id: "W032-f14", etage: 4, qm: 1249, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 352181, rohertrag: 148496, konzessionserloes: 0, untermiete: 0, personal: 68125, miete: 34966, nebenkosten: 11106, sonstige: 18939, db: 15360, fteBedarf: 63.25510820727785, fteIst: 70.41773503920322, umsatzJeGruppe: { food: 29253, beauty: 70306, accessoires: 51913, damen: 57769, waesche: 22868, herren: 44079, kinder: 18244, sport: 20676, spielwaren: 11710, wohnen: 25361 } } }, { id: "S023", name: "Hartwig Sport N\xFCrnberg", stadt: "N\xFCrnberg", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1400, etagen: [0, 1], baujahr: 1993, fassade: 6, substanz: 80, status: "offen", flaechen: [{ id: "S023-f1", etage: 0, qm: 517, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S023-f2", etage: 0, qm: 740, konzept: "eigen", gruppe: "sporttextil" }, { id: "S023-f3", etage: 0, qm: 119, konzept: "eigen", gruppe: "outdoor" }, { id: "S023-f4", etage: 1, qm: 526, konzept: "eigen", gruppe: "outdoor" }, { id: "S023-f5", etage: 1, qm: 303, konzept: "eigen", gruppe: "teamsport" }, { id: "S023-f6", etage: 1, qm: 359, konzept: "eigen", gruppe: "rad" }, { id: "S023-f7", etage: 1, qm: 187, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 111693, rohertrag: 47444, konzessionserloes: 0, untermiete: 0, personal: 19631, miete: 16446, nebenkosten: 0, sonstige: 5817, db: 5549, fteBedarf: 18.421358816515944, fteIst: 20.263031981652187, umsatzJeGruppe: { sportschuhe: 27803, sporttextil: 30053, outdoor: 29382, teamsport: 6152, rad: 4759, wintersport: 13544 } } }, { id: "W033", name: "Hartwig Duisburg Am Wall", stadt: "Duisburg", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3300, etagen: [-1, 0, 1, 2], baujahr: 1949, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W033-f1", etage: -1, qm: 1115, konzept: "eigen", gruppe: "food" }, { id: "W033-f2", etage: -1, qm: 2160, konzept: "eigen", gruppe: "wohnen" }, { id: "W033-f3", etage: 0, qm: 915, konzept: "eigen", gruppe: "beauty" }, { id: "W033-f4", etage: 0, qm: 1434, konzept: "eigen", gruppe: "accessoires" }, { id: "W033-f5", etage: 0, qm: 926, konzept: "eigen", gruppe: "damen" }, { id: "W033-f6", etage: 1, qm: 1570, konzept: "eigen", gruppe: "damen" }, { id: "W033-f7", etage: 1, qm: 1044, konzept: "eigen", gruppe: "waesche" }, { id: "W033-f8", etage: 1, qm: 661, konzept: "eigen", gruppe: "herren" }, { id: "W033-f9", etage: 2, qm: 1002, konzept: "eigen", gruppe: "herren" }, { id: "W033-f10", etage: 2, qm: 733, konzept: "eigen", gruppe: "kinder" }, { id: "W033-f11", etage: 2, qm: 1142, konzept: "eigen", gruppe: "sport" }, { id: "W033-f12", etage: 2, qm: 919, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 260360, rohertrag: 108688, konzessionserloes: 0, untermiete: 0, personal: 70962, miete: 60988, nebenkosten: 15429, sonstige: 16804, db: -55495, fteBedarf: 59.22994531188261, fteIst: 71.18333910064324, umsatzJeGruppe: { food: 29415, wohnen: 25276, beauty: 43881, accessoires: 38796, damen: 44268, waesche: 16772, herren: 24941, kinder: 12470, sport: 14541, spielwaren: 10001 } } }, { id: "S024", name: "Hartwig Sport Duisburg Galerie am Fluss", stadt: "Duisburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 4700, etagen: [0], baujahr: 1979, fassade: 2, substanz: 51, status: "offen", flaechen: [{ id: "S024-f1", etage: 0, qm: 1146, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S024-f2", etage: 0, qm: 1471, konzept: "eigen", gruppe: "sporttextil" }, { id: "S024-f3", etage: 0, qm: 785, konzept: "eigen", gruppe: "outdoor" }, { id: "S024-f4", etage: 0, qm: 449, konzept: "eigen", gruppe: "teamsport" }, { id: "S024-f5", etage: 0, qm: 399, konzept: "eigen", gruppe: "rad" }, { id: "S024-f6", etage: 0, qm: 399, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 155916, rohertrag: 65775, konzessionserloes: 0, untermiete: 0, personal: 31941, miete: 16397, nebenkosten: 6745, sonstige: 8485, db: 2207, fteBedarf: 27.191699657864234, fteIst: 33.09545457497372, umsatzJeGruppe: { sportschuhe: 52579, sporttextil: 45956, outdoor: 22157, teamsport: 10065, rad: 4172, wintersport: 20988 } } }, { id: "W034", name: "Hartwig Bochum", stadt: "Bochum", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1961, fassade: 6, substanz: 57, status: "offen", flaechen: [{ id: "W034-f1", etage: 0, qm: 643, konzept: "eigen", gruppe: "food" }, { id: "W034-f2", etage: 0, qm: 744, konzept: "eigen", gruppe: "beauty" }, { id: "W034-f3", etage: 0, qm: 330, konzept: "eigen", gruppe: "accessoires" }, { id: "W034-f4", etage: 1, qm: 609, konzept: "eigen", gruppe: "accessoires" }, { id: "W034-f5", etage: 1, qm: 1108, konzept: "eigen", gruppe: "damen" }, { id: "W034-f6", etage: 2, qm: 972, konzept: "eigen", gruppe: "damen" }, { id: "W034-f7", etage: 2, qm: 744, konzept: "eigen", gruppe: "waesche" }, { id: "W034-f8", etage: 3, qm: 46, konzept: "eigen", gruppe: "waesche" }, { id: "W034-f9", etage: 3, qm: 1005, konzept: "eigen", gruppe: "herren" }, { id: "W034-f10", etage: 3, qm: 666, konzept: "eigen", gruppe: "kinder" }, { id: "W034-f11", etage: 4, qm: 56, konzept: "eigen", gruppe: "kinder" }, { id: "W034-f12", etage: 4, qm: 1081, konzept: "eigen", gruppe: "sport" }, { id: "W034-f13", etage: 4, qm: 492, konzept: "eigen", gruppe: "spielwaren" }, { id: "W034-f14", etage: 4, qm: 88, konzept: "eigen", gruppe: "wohnen" }, { id: "W034-f15", etage: 5, qm: 1717, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 280054, rohertrag: 118599, konzessionserloes: 0, untermiete: 0, personal: 67076, miete: 40524, nebenkosten: 11647, sonstige: 16118, db: -16766, fteBedarf: 54.95014665336467, fteIst: 68.55277813391183, umsatzJeGruppe: { food: 23935, beauty: 48206, accessoires: 39572, damen: 48731, waesche: 26512, herren: 26531, kinder: 12544, sport: 15721, spielwaren: 7729, wohnen: 30573 } } }, { id: "S025", name: "Hartwig Sport Bochum", stadt: "Bochum", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1], baujahr: 2002, fassade: 5, substanz: 62, status: "offen", flaechen: [{ id: "S025-f1", etage: 0, qm: 1027, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S025-f2", etage: 0, qm: 1542, konzept: "eigen", gruppe: "sporttextil" }, { id: "S025-f3", etage: 0, qm: 56, konzept: "eigen", gruppe: "outdoor" }, { id: "S025-f4", etage: 1, qm: 1150, konzept: "eigen", gruppe: "outdoor" }, { id: "S025-f5", etage: 1, qm: 487, konzept: "eigen", gruppe: "teamsport" }, { id: "S025-f6", etage: 1, qm: 482, konzept: "eigen", gruppe: "rad" }, { id: "S025-f7", etage: 1, qm: 505, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 195484, rohertrag: 82616, konzessionserloes: 0, untermiete: 0, personal: 40749, miete: 33704, nebenkosten: 7790, sonstige: 10377, db: -10003, fteBedarf: 33.05019124380917, fteIst: 41.85979119116115, umsatzJeGruppe: { sportschuhe: 64501, sporttextil: 49001, outdoor: 41618, teamsport: 11806, rad: 5661, wintersport: 22897 } } }, { id: "W035", name: "Hartwig Wuppertal", stadt: "Wuppertal", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2400, etagen: [0, 1, 2, 3, 4], baujahr: 2007, fassade: 6, substanz: 85, status: "offen", flaechen: [{ id: "W035-f1", etage: 0, qm: 1037, konzept: "eigen", gruppe: "food" }, { id: "W035-f2", etage: 0, qm: 677, konzept: "eigen", gruppe: "beauty" }, { id: "W035-f3", etage: 0, qm: 646, konzept: "eigen", gruppe: "accessoires" }, { id: "W035-f4", etage: 1, qm: 395, konzept: "eigen", gruppe: "accessoires" }, { id: "W035-f5", etage: 1, qm: 1965, konzept: "eigen", gruppe: "damen" }, { id: "W035-f6", etage: 2, qm: 635, konzept: "eigen", gruppe: "damen" }, { id: "W035-f7", etage: 2, qm: 941, konzept: "eigen", gruppe: "waesche" }, { id: "W035-f8", etage: 2, qm: 784, konzept: "eigen", gruppe: "herren" }, { id: "W035-f9", etage: 3, qm: 343, konzept: "eigen", gruppe: "herren" }, { id: "W035-f10", etage: 3, qm: 1058, konzept: "eigen", gruppe: "kinder" }, { id: "W035-f11", etage: 3, qm: 960, konzept: "eigen", gruppe: "sport" }, { id: "W035-f12", etage: 4, qm: 132, konzept: "eigen", gruppe: "sport" }, { id: "W035-f13", etage: 4, qm: 682, konzept: "eigen", gruppe: "spielwaren" }, { id: "W035-f14", etage: 4, qm: 1546, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 411442, rohertrag: 172760, konzessionserloes: 0, untermiete: 0, personal: 95075, miete: 54936, nebenkosten: 12128, sonstige: 22180, db: -11557, fteBedarf: 74.08847483876315, fteIst: 97.59371172510765, umsatzJeGruppe: { food: 51835, beauty: 53890, accessoires: 57549, damen: 82794, waesche: 30963, herren: 33006, kinder: 31866, sport: 23295, spielwaren: 12686, wohnen: 33557 } } }, { id: "S026", name: "Hartwig Sport Wuppertal", stadt: "Wuppertal", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0], baujahr: 2009, fassade: 3, substanz: 48, status: "offen", flaechen: [{ id: "S026-f1", etage: 0, qm: 433, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S026-f2", etage: 0, qm: 688, konzept: "eigen", gruppe: "sporttextil" }, { id: "S026-f3", etage: 0, qm: 300, konzept: "eigen", gruppe: "outdoor" }, { id: "S026-f4", etage: 0, qm: 227, konzept: "eigen", gruppe: "teamsport" }, { id: "S026-f5", etage: 0, qm: 259, konzept: "eigen", gruppe: "rad" }, { id: "S026-f6", etage: 0, qm: 193, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 85293, rohertrag: 35867, konzessionserloes: 0, untermiete: 0, personal: 17078, miete: 7723, nebenkosten: 2891, sonstige: 4442, db: 3732, fteBedarf: 14.034670714758327, fteIst: 17.212563034533623, umsatzJeGruppe: { sportschuhe: 28872, sporttextil: 24396, outdoor: 11683, teamsport: 6121, rad: 2825, wintersport: 11396 } } }, { id: "W036", name: "Hartwig Bielefeld", stadt: "Bielefeld", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1926, fassade: 4, substanz: 54, status: "offen", flaechen: [{ id: "W036-f1", etage: -1, qm: 1106, konzept: "eigen", gruppe: "food" }, { id: "W036-f2", etage: -1, qm: 1661, konzept: "eigen", gruppe: "wohnen" }, { id: "W036-f3", etage: 0, qm: 1171, konzept: "eigen", gruppe: "beauty" }, { id: "W036-f4", etage: 0, qm: 1596, konzept: "eigen", gruppe: "accessoires" }, { id: "W036-f5", etage: 1, qm: 195, konzept: "eigen", gruppe: "accessoires" }, { id: "W036-f6", etage: 1, qm: 2572, konzept: "eigen", gruppe: "damen" }, { id: "W036-f7", etage: 2, qm: 681, konzept: "eigen", gruppe: "damen" }, { id: "W036-f8", etage: 2, qm: 913, konzept: "eigen", gruppe: "waesche" }, { id: "W036-f9", etage: 2, qm: 1173, konzept: "eigen", gruppe: "herren" }, { id: "W036-f10", etage: 3, qm: 382, konzept: "eigen", gruppe: "herren" }, { id: "W036-f11", etage: 3, qm: 1121, konzept: "eigen", gruppe: "kinder" }, { id: "W036-f12", etage: 3, qm: 1264, konzept: "eigen", gruppe: "sport" }, { id: "W036-f13", etage: 4, qm: 532, konzept: "eigen", gruppe: "sport" }, { id: "W036-f14", etage: 4, qm: 985, konzept: "eigen", gruppe: "spielwaren" }, { id: "W036-f15", etage: 4, qm: 1250, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 511698, rohertrag: 214081, konzessionserloes: 0, untermiete: 0, personal: 101773, miete: 47862, nebenkosten: 23231, sonstige: 28451, db: 12764, fteBedarf: 95.98759390249725, fteIst: 104.27841530887343, umsatzJeGruppe: { food: 42130, wohnen: 56668, beauty: 105207, accessoires: 78563, damen: 91392, waesche: 24475, herren: 39429, kinder: 29167, sport: 30742, spielwaren: 13924 } } }, { id: "S027", name: "Hartwig Sport Bielefeld Einkaufszentrum", stadt: "Bielefeld", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 700, etagen: [0, 1, 2], baujahr: 2014, fassade: 6, substanz: 33, status: "offen", flaechen: [{ id: "S027-f1", etage: 0, qm: 549, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S027-f2", etage: 0, qm: 184, konzept: "eigen", gruppe: "sporttextil" }, { id: "S027-f3", etage: 1, qm: 477, konzept: "eigen", gruppe: "sporttextil" }, { id: "S027-f4", etage: 1, qm: 256, konzept: "eigen", gruppe: "outdoor" }, { id: "S027-f5", etage: 2, qm: 85, konzept: "eigen", gruppe: "outdoor" }, { id: "S027-f6", etage: 2, qm: 233, konzept: "eigen", gruppe: "teamsport" }, { id: "S027-f7", etage: 2, qm: 283, konzept: "eigen", gruppe: "rad" }, { id: "S027-f8", etage: 2, qm: 133, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 70660, rohertrag: 29738, konzessionserloes: 0, untermiete: 0, personal: 14396, miete: 7922, nebenkosten: 2709, sonstige: 3887, db: 824, fteBedarf: 12.669226029267431, fteIst: 14.781855370757716, umsatzJeGruppe: { sportschuhe: 27156, sporttextil: 20210, outdoor: 11431, teamsport: 3773, rad: 2247, wintersport: 5843 } } }, { id: "W037", name: "Hartwig Bonn Bahnhofstra\xDFe", stadt: "Bonn", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1927, fassade: 3, substanz: 61, status: "offen", flaechen: [{ id: "W037-f1", etage: -1, qm: 570, konzept: "eigen", gruppe: "food" }, { id: "W037-f2", etage: -1, qm: 930, konzept: "eigen", gruppe: "wohnen" }, { id: "W037-f3", etage: 0, qm: 660, konzept: "eigen", gruppe: "beauty" }, { id: "W037-f4", etage: 0, qm: 840, konzept: "eigen", gruppe: "accessoires" }, { id: "W037-f5", etage: 1, qm: 53, konzept: "eigen", gruppe: "accessoires" }, { id: "W037-f6", etage: 1, qm: 1447, konzept: "eigen", gruppe: "damen" }, { id: "W037-f7", etage: 2, qm: 297, konzept: "eigen", gruppe: "damen" }, { id: "W037-f8", etage: 2, qm: 612, konzept: "eigen", gruppe: "waesche" }, { id: "W037-f9", etage: 2, qm: 590, konzept: "eigen", gruppe: "herren" }, { id: "W037-f10", etage: 3, qm: 694, konzept: "eigen", gruppe: "herren" }, { id: "W037-f11", etage: 3, qm: 499, konzept: "eigen", gruppe: "kinder" }, { id: "W037-f12", etage: 3, qm: 307, konzept: "eigen", gruppe: "sport" }, { id: "W037-f13", etage: 4, qm: 829, konzept: "eigen", gruppe: "sport" }, { id: "W037-f14", etage: 4, qm: 464, konzept: "eigen", gruppe: "spielwaren" }, { id: "W037-f15", etage: 4, qm: 207, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 272634, rohertrag: 115282, konzessionserloes: 0, untermiete: 0, personal: 53430, miete: 34520, nebenkosten: 12728, sonstige: 15228, db: -625, fteBedarf: 51.408625112435445, fteIst: 54.780311309823475, umsatzJeGruppe: { food: 25094, wohnen: 23726, beauty: 48708, accessoires: 41629, damen: 50370, waesche: 20050, herren: 30078, kinder: 8496, sport: 18156, spielwaren: 6327 } } }, { id: "S028", name: "Hartwig Sport Bonn", stadt: "Bonn", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 2010, fassade: 7, substanz: 55, status: "offen", flaechen: [{ id: "S028-f1", etage: 0, qm: 1107, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S028-f2", etage: 0, qm: 993, konzept: "eigen", gruppe: "sporttextil" }, { id: "S028-f3", etage: 1, qm: 75, konzept: "eigen", gruppe: "sporttextil" }, { id: "S028-f4", etage: 1, qm: 979, konzept: "eigen", gruppe: "outdoor" }, { id: "S028-f5", etage: 1, qm: 331, konzept: "eigen", gruppe: "teamsport" }, { id: "S028-f6", etage: 1, qm: 386, konzept: "eigen", gruppe: "rad" }, { id: "S028-f7", etage: 1, qm: 329, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 164552, rohertrag: 69733, konzessionserloes: 0, untermiete: 0, personal: 31754, miete: 12148, nebenkosten: 4898, sonstige: 8637, db: 12296, fteBedarf: 27.3400796208445, fteIst: 32.412390244375956, umsatzJeGruppe: { sportschuhe: 58665, sporttextil: 38878, outdoor: 39343, teamsport: 6627, rad: 3498, wintersport: 17541 } } }, { id: "W038", name: "Hartwig M\xFCnster", stadt: "M\xFCnster", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1990, fassade: 1, substanz: 49, status: "offen", flaechen: [{ id: "W038-f1", etage: 0, qm: 1041, konzept: "eigen", gruppe: "food" }, { id: "W038-f2", etage: 0, qm: 616, konzept: "eigen", gruppe: "beauty" }, { id: "W038-f3", etage: 0, qm: 493, konzept: "eigen", gruppe: "accessoires" }, { id: "W038-f4", etage: 1, qm: 643, konzept: "eigen", gruppe: "accessoires" }, { id: "W038-f5", etage: 1, qm: 1507, konzept: "eigen", gruppe: "damen" }, { id: "W038-f6", etage: 2, qm: 1363, konzept: "eigen", gruppe: "damen" }, { id: "W038-f7", etage: 2, qm: 787, konzept: "eigen", gruppe: "waesche" }, { id: "W038-f8", etage: 3, qm: 89, konzept: "eigen", gruppe: "waesche" }, { id: "W038-f9", etage: 3, qm: 1507, konzept: "eigen", gruppe: "herren" }, { id: "W038-f10", etage: 3, qm: 554, konzept: "eigen", gruppe: "kinder" }, { id: "W038-f11", etage: 4, qm: 357, konzept: "eigen", gruppe: "kinder" }, { id: "W038-f12", etage: 4, qm: 1491, konzept: "eigen", gruppe: "sport" }, { id: "W038-f13", etage: 4, qm: 301, konzept: "eigen", gruppe: "spielwaren" }, { id: "W038-f14", etage: 5, qm: 495, konzept: "eigen", gruppe: "spielwaren" }, { id: "W038-f15", etage: 5, qm: 1655, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 445823, rohertrag: 188618, konzessionserloes: 0, untermiete: 0, personal: 87151, miete: 34095, nebenkosten: 14541, sonstige: 24083, db: 28748, fteBedarf: 80.5172683086623, fteIst: 88.62350484133029, umsatzJeGruppe: { food: 44886, beauty: 66206, accessoires: 65666, damen: 99971, waesche: 27742, herren: 41196, kinder: 23383, sport: 29087, spielwaren: 14457, wohnen: 33230 } } }, { id: "S029", name: "Hartwig Sport M\xFCnster", stadt: "M\xFCnster", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 1982, fassade: 2, substanz: 34, status: "offen", flaechen: [{ id: "S029-f1", etage: 0, qm: 1115, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S029-f2", etage: 0, qm: 502, konzept: "eigen", gruppe: "sporttextil" }, { id: "S029-f3", etage: 1, qm: 865, konzept: "eigen", gruppe: "sporttextil" }, { id: "S029-f4", etage: 1, qm: 752, konzept: "eigen", gruppe: "outdoor" }, { id: "S029-f5", etage: 2, qm: 180, konzept: "eigen", gruppe: "outdoor" }, { id: "S029-f6", etage: 2, qm: 463, konzept: "eigen", gruppe: "teamsport" }, { id: "S029-f7", etage: 2, qm: 614, konzept: "eigen", gruppe: "rad" }, { id: "S029-f8", etage: 2, qm: 360, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 174153, rohertrag: 73555, konzessionserloes: 0, untermiete: 0, personal: 32956, miete: 18835, nebenkosten: 0, sonstige: 9323, db: 12440, fteBedarf: 29.938185954086208, fteIst: 33.37451432170405, umsatzJeGruppe: { sportschuhe: 52261, sporttextil: 43572, outdoor: 41505, teamsport: 9303, rad: 7588, wintersport: 19925 } } }, { id: "W039", name: "Hartwig Mannheim", stadt: "Mannheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2, 3], baujahr: 1939, fassade: 0, substanz: 62, status: "offen", flaechen: [{ id: "W039-f1", etage: -1, qm: 755, konzept: "eigen", gruppe: "food" }, { id: "W039-f2", etage: -1, qm: 1265, konzept: "eigen", gruppe: "wohnen" }, { id: "W039-f3", etage: 0, qm: 514, konzept: "eigen", gruppe: "beauty" }, { id: "W039-f4", etage: 0, qm: 785, konzept: "eigen", gruppe: "accessoires" }, { id: "W039-f5", etage: 0, qm: 721, konzept: "eigen", gruppe: "damen" }, { id: "W039-f6", etage: 1, qm: 1207, konzept: "eigen", gruppe: "damen" }, { id: "W039-f7", etage: 1, qm: 738, konzept: "eigen", gruppe: "waesche" }, { id: "W039-f8", etage: 1, qm: 75, konzept: "eigen", gruppe: "herren" }, { id: "W039-f9", etage: 2, qm: 1196, konzept: "eigen", gruppe: "herren" }, { id: "W039-f10", etage: 2, qm: 807, konzept: "eigen", gruppe: "kinder" }, { id: "W039-f11", etage: 2, qm: 18, konzept: "eigen", gruppe: "sport" }, { id: "W039-f12", etage: 3, qm: 951, konzept: "eigen", gruppe: "sport" }, { id: "W039-f13", etage: 3, qm: 692, konzept: "eigen", gruppe: "spielwaren" }, { id: "W039-f14", etage: 3, qm: 377, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 282958, rohertrag: 118014, konzessionserloes: 0, untermiete: 0, personal: 71787, miete: 61779, nebenkosten: 0, sonstige: 16147, db: -31699, fteBedarf: 54.95752546154688, fteIst: 72.87446584447383, umsatzJeGruppe: { food: 34766, wohnen: 30446, beauty: 40104, accessoires: 28698, damen: 50241, waesche: 18093, herren: 33957, kinder: 18023, sport: 17987, spielwaren: 10643 } } }, { id: "S030", name: "Hartwig Sport Mannheim Galerie am Fluss", stadt: "Mannheim", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 4800, etagen: [0], baujahr: 1993, fassade: 1, substanz: 60, status: "offen", flaechen: [{ id: "S030-f1", etage: 0, qm: 1147, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S030-f2", etage: 0, qm: 1092, konzept: "eigen", gruppe: "sporttextil" }, { id: "S030-f3", etage: 0, qm: 1064, konzept: "eigen", gruppe: "outdoor" }, { id: "S030-f4", etage: 0, qm: 567, konzept: "eigen", gruppe: "teamsport" }, { id: "S030-f5", etage: 0, qm: 515, konzept: "eigen", gruppe: "rad" }, { id: "S030-f6", etage: 0, qm: 364, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 144810, rohertrag: 60744, konzessionserloes: 0, untermiete: 0, personal: 27770, miete: 14047, nebenkosten: 5251, sonstige: 8074, db: 5602, fteBedarf: 26.272606857762057, fteIst: 28.554078733226028, umsatzJeGruppe: { sportschuhe: 54964, sporttextil: 29333, outdoor: 28422, teamsport: 11814, rad: 3942, wintersport: 16335 } } }, { id: "W040", name: "Hartwig Karlsruhe", stadt: "Karlsruhe", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1983, fassade: 4, substanz: 32, status: "offen", flaechen: [{ id: "W040-f1", etage: -1, qm: 856, konzept: "eigen", gruppe: "food" }, { id: "W040-f2", etage: -1, qm: 1860, konzept: "eigen", gruppe: "wohnen" }, { id: "W040-f3", etage: 0, qm: 810, konzept: "eigen", gruppe: "beauty" }, { id: "W040-f4", etage: 0, qm: 1263, konzept: "eigen", gruppe: "accessoires" }, { id: "W040-f5", etage: 0, qm: 643, konzept: "eigen", gruppe: "damen" }, { id: "W040-f6", etage: 1, qm: 2717, konzept: "eigen", gruppe: "damen" }, { id: "W040-f7", etage: 2, qm: 261, konzept: "eigen", gruppe: "damen" }, { id: "W040-f8", etage: 2, qm: 1095, konzept: "eigen", gruppe: "waesche" }, { id: "W040-f9", etage: 2, qm: 1360, konzept: "eigen", gruppe: "herren" }, { id: "W040-f10", etage: 3, qm: 911, konzept: "eigen", gruppe: "herren" }, { id: "W040-f11", etage: 3, qm: 1246, konzept: "eigen", gruppe: "kinder" }, { id: "W040-f12", etage: 3, qm: 560, konzept: "eigen", gruppe: "sport" }, { id: "W040-f13", etage: 4, qm: 750, konzept: "eigen", gruppe: "sport" }, { id: "W040-f14", etage: 4, qm: 932, konzept: "eigen", gruppe: "spielwaren" }, { id: "W040-f15", etage: 4, qm: 1035, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 517585, rohertrag: 220251, konzessionserloes: 0, untermiete: 0, personal: 106474, miete: 73744, nebenkosten: 20465, sonstige: 28556, db: -8987, fteBedarf: 96.14209753147138, fteIst: 107.95207219423338, umsatzJeGruppe: { food: 37358, wohnen: 64894, beauty: 83511, accessoires: 55371, damen: 110861, waesche: 35058, herren: 62261, kinder: 25237, sport: 25611, spielwaren: 17422 } } }, { id: "S031", name: "Hartwig Sport Karlsruhe", stadt: "Karlsruhe", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1988, fassade: 2, substanz: 61, status: "offen", flaechen: [{ id: "S031-f1", etage: 0, qm: 930, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S031-f2", etage: 0, qm: 320, konzept: "eigen", gruppe: "sporttextil" }, { id: "S031-f3", etage: 1, qm: 711, konzept: "eigen", gruppe: "sporttextil" }, { id: "S031-f4", etage: 1, qm: 539, konzept: "eigen", gruppe: "outdoor" }, { id: "S031-f5", etage: 2, qm: 332, konzept: "eigen", gruppe: "outdoor" }, { id: "S031-f6", etage: 2, qm: 292, konzept: "eigen", gruppe: "teamsport" }, { id: "S031-f7", etage: 2, qm: 351, konzept: "eigen", gruppe: "rad" }, { id: "S031-f8", etage: 2, qm: 276, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 151911, rohertrag: 64148, konzessionserloes: 0, untermiete: 0, personal: 28413, miete: 34324, nebenkosten: 0, sonstige: 7916, db: -6506, fteBedarf: 24.908923516066512, fteIst: 29.329654828011094, umsatzJeGruppe: { sportschuhe: 49687, sporttextil: 33500, outdoor: 35371, teamsport: 7412, rad: 4826, wintersport: 21115 } } }, { id: "W041", name: "Hartwig Augsburg", stadt: "Augsburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2], baujahr: 1960, fassade: 0, substanz: 73, status: "offen", flaechen: [{ id: "W041-f1", etage: -1, qm: 585, konzept: "eigen", gruppe: "food" }, { id: "W041-f2", etage: -1, qm: 2165, konzept: "eigen", gruppe: "wohnen" }, { id: "W041-f3", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W041-f4", etage: 0, qm: 1315, konzept: "eigen", gruppe: "accessoires" }, { id: "W041-f5", etage: 0, qm: 670, konzept: "eigen", gruppe: "damen" }, { id: "W041-f6", etage: 1, qm: 1551, konzept: "eigen", gruppe: "damen" }, { id: "W041-f7", etage: 1, qm: 846, konzept: "eigen", gruppe: "waesche" }, { id: "W041-f8", etage: 1, qm: 353, konzept: "eigen", gruppe: "herren" }, { id: "W041-f9", etage: 2, qm: 1159, konzept: "eigen", gruppe: "herren" }, { id: "W041-f10", etage: 2, qm: 613, konzept: "eigen", gruppe: "kinder" }, { id: "W041-f11", etage: 2, qm: 899, konzept: "eigen", gruppe: "sport" }, { id: "W041-f12", etage: 2, qm: 518, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 397194, rohertrag: 168492, konzessionserloes: 0, untermiete: 0, personal: 79380, miete: 83738, nebenkosten: 12194, sonstige: 21432, db: -28253, fteBedarf: 71.58712868852105, fteIst: 79.97857104541941, umsatzJeGruppe: { food: 27883, wohnen: 50055, beauty: 69970, accessoires: 67508, damen: 64413, waesche: 25802, herren: 46682, kinder: 16132, sport: 18008, spielwaren: 10741 } } }, { id: "S032", name: "Hartwig Sport Augsburg City-Center", stadt: "Augsburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1994, fassade: 7, substanz: 90, status: "offen", flaechen: [{ id: "S032-f1", etage: 0, qm: 522, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S032-f2", etage: 0, qm: 1003, konzept: "eigen", gruppe: "sporttextil" }, { id: "S032-f3", etage: 1, qm: 41, konzept: "eigen", gruppe: "sporttextil" }, { id: "S032-f4", etage: 1, qm: 541, konzept: "eigen", gruppe: "outdoor" }, { id: "S032-f5", etage: 1, qm: 324, konzept: "eigen", gruppe: "teamsport" }, { id: "S032-f6", etage: 1, qm: 422, konzept: "eigen", gruppe: "rad" }, { id: "S032-f7", etage: 1, qm: 198, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 96253, rohertrag: 41037, konzessionserloes: 0, untermiete: 0, personal: 20839, miete: 23516, nebenkosten: 4333, sonstige: 5319, db: -12970, fteBedarf: 17.317565258921988, fteIst: 21.10772516462578, umsatzJeGruppe: { sportschuhe: 21677, sporttextil: 36559, outdoor: 18014, teamsport: 6787, rad: 3807, wintersport: 9409 } } }, { id: "W042", name: "Hartwig Wiesbaden Bahnhofstra\xDFe", stadt: "Wiesbaden", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [-1, 0, 1, 2], baujahr: 1975, fassade: 7, substanz: 34, status: "offen", flaechen: [{ id: "W042-f1", etage: -1, qm: 833, konzept: "eigen", gruppe: "food" }, { id: "W042-f2", etage: -1, qm: 1792, konzept: "eigen", gruppe: "wohnen" }, { id: "W042-f3", etage: 0, qm: 596, konzept: "eigen", gruppe: "beauty" }, { id: "W042-f4", etage: 0, qm: 1049, konzept: "eigen", gruppe: "accessoires" }, { id: "W042-f5", etage: 0, qm: 981, konzept: "eigen", gruppe: "damen" }, { id: "W042-f6", etage: 1, qm: 916, konzept: "eigen", gruppe: "damen" }, { id: "W042-f7", etage: 1, qm: 608, konzept: "eigen", gruppe: "waesche" }, { id: "W042-f8", etage: 1, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W042-f9", etage: 2, qm: 281, konzept: "eigen", gruppe: "herren" }, { id: "W042-f10", etage: 2, qm: 656, konzept: "eigen", gruppe: "kinder" }, { id: "W042-f11", etage: 2, qm: 1194, konzept: "eigen", gruppe: "sport" }, { id: "W042-f12", etage: 2, qm: 557, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 270011, rohertrag: 112707, konzessionserloes: 0, untermiete: 0, personal: 61330, miete: 29751, nebenkosten: 0, sonstige: 15824, db: 5801, fteBedarf: 54.22578098147522, fteIst: 61.63350767894528, umsatzJeGruppe: { food: 33886, wohnen: 23691, beauty: 44655, accessoires: 39980, damen: 47374, waesche: 15858, herren: 30110, kinder: 10033, sport: 17406, spielwaren: 7019 } } }, { id: "S033", name: "Hartwig Sport Wiesbaden City-Center", stadt: "Wiesbaden", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1986, fassade: 6, substanz: 63, status: "offen", flaechen: [{ id: "S033-f1", etage: 0, qm: 1376, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S033-f2", etage: 0, qm: 1274, konzept: "eigen", gruppe: "sporttextil" }, { id: "S033-f3", etage: 1, qm: 356, konzept: "eigen", gruppe: "sporttextil" }, { id: "S033-f4", etage: 1, qm: 783, konzept: "eigen", gruppe: "outdoor" }, { id: "S033-f5", etage: 1, qm: 460, konzept: "eigen", gruppe: "teamsport" }, { id: "S033-f6", etage: 1, qm: 669, konzept: "eigen", gruppe: "rad" }, { id: "S033-f7", etage: 1, qm: 382, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 179688, rohertrag: 75303, konzessionserloes: 0, untermiete: 0, personal: 34796, miete: 39708, nebenkosten: 0, sonstige: 9752, db: -8953, fteBedarf: 31.47617613749901, fteIst: 35.28392768198496, umsatzJeGruppe: { sportschuhe: 67828, sporttextil: 50838, outdoor: 23196, teamsport: 9365, rad: 7029, wintersport: 21432 } } }, { id: "W043", name: "Hartwig M\xF6nchengladbach", stadt: "M\xF6nchengladbach", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1959, fassade: 0, substanz: 72, status: "offen", flaechen: [{ id: "W043-f1", etage: 0, qm: 654, konzept: "eigen", gruppe: "food" }, { id: "W043-f2", etage: 0, qm: 667, konzept: "eigen", gruppe: "beauty" }, { id: "W043-f3", etage: 0, qm: 412, konzept: "eigen", gruppe: "accessoires" }, { id: "W043-f4", etage: 1, qm: 858, konzept: "eigen", gruppe: "accessoires" }, { id: "W043-f5", etage: 1, qm: 875, konzept: "eigen", gruppe: "damen" }, { id: "W043-f6", etage: 2, qm: 1281, konzept: "eigen", gruppe: "damen" }, { id: "W043-f7", etage: 2, qm: 452, konzept: "eigen", gruppe: "waesche" }, { id: "W043-f8", etage: 3, qm: 307, konzept: "eigen", gruppe: "waesche" }, { id: "W043-f9", etage: 3, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W043-f10", etage: 3, qm: 326, konzept: "eigen", gruppe: "kinder" }, { id: "W043-f11", etage: 4, qm: 439, konzept: "eigen", gruppe: "kinder" }, { id: "W043-f12", etage: 4, qm: 956, konzept: "eigen", gruppe: "sport" }, { id: "W043-f13", etage: 4, qm: 339, konzept: "eigen", gruppe: "spielwaren" }, { id: "W043-f14", etage: 5, qm: 266, konzept: "eigen", gruppe: "spielwaren" }, { id: "W043-f15", etage: 5, qm: 1467, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 346337, rohertrag: 146719, konzessionserloes: 0, untermiete: 0, personal: 72901, miete: 69278, nebenkosten: 14693, sonstige: 18880, db: -29033, fteBedarf: 63.30560755819009, fteIst: 73.93711858209177, umsatzJeGruppe: { food: 27014, beauty: 62637, accessoires: 65467, damen: 58495, waesche: 27448, herren: 27374, kinder: 20173, sport: 18549, spielwaren: 10171, wohnen: 29010 } } }, { id: "W044", name: "Hartwig Gelsenkirchen", stadt: "Gelsenkirchen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1, 2], baujahr: 2005, fassade: 5, substanz: 74, status: "offen", flaechen: [{ id: "W044-f1", etage: -1, qm: 1010, konzept: "eigen", gruppe: "food" }, { id: "W044-f2", etage: -1, qm: 1965, konzept: "eigen", gruppe: "wohnen" }, { id: "W044-f3", etage: 0, qm: 663, konzept: "eigen", gruppe: "beauty" }, { id: "W044-f4", etage: 0, qm: 1087, konzept: "eigen", gruppe: "accessoires" }, { id: "W044-f5", etage: 0, qm: 1225, konzept: "eigen", gruppe: "damen" }, { id: "W044-f6", etage: 1, qm: 908, konzept: "eigen", gruppe: "damen" }, { id: "W044-f7", etage: 1, qm: 959, konzept: "eigen", gruppe: "waesche" }, { id: "W044-f8", etage: 1, qm: 1108, konzept: "eigen", gruppe: "herren" }, { id: "W044-f9", etage: 2, qm: 512, konzept: "eigen", gruppe: "herren" }, { id: "W044-f10", etage: 2, qm: 669, konzept: "eigen", gruppe: "kinder" }, { id: "W044-f11", etage: 2, qm: 1275, konzept: "eigen", gruppe: "sport" }, { id: "W044-f12", etage: 2, qm: 722, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 434384, rohertrag: 181455, konzessionserloes: 0, untermiete: 0, personal: 91555, miete: 78802, nebenkosten: 12824, sonstige: 23256, db: -24982, fteBedarf: 77.49945946670631, fteIst: 92.5254157643862, umsatzJeGruppe: { food: 54490, wohnen: 41144, beauty: 65404, accessoires: 63330, damen: 67806, waesche: 32312, herren: 51481, kinder: 15525, sport: 28898, spielwaren: 13995 } } }, { id: "W045", name: "Hartwig Aachen", stadt: "Aachen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 2006, fassade: 6, substanz: 49, status: "offen", flaechen: [{ id: "W045-f1", etage: -1, qm: 1025, konzept: "eigen", gruppe: "food" }, { id: "W045-f2", etage: -1, qm: 1425, konzept: "eigen", gruppe: "wohnen" }, { id: "W045-f3", etage: 0, qm: 758, konzept: "eigen", gruppe: "beauty" }, { id: "W045-f4", etage: 0, qm: 1102, konzept: "eigen", gruppe: "accessoires" }, { id: "W045-f5", etage: 0, qm: 590, konzept: "eigen", gruppe: "damen" }, { id: "W045-f6", etage: 1, qm: 2325, konzept: "eigen", gruppe: "damen" }, { id: "W045-f7", etage: 1, qm: 125, konzept: "eigen", gruppe: "waesche" }, { id: "W045-f8", etage: 2, qm: 1091, konzept: "eigen", gruppe: "waesche" }, { id: "W045-f9", etage: 2, qm: 1359, konzept: "eigen", gruppe: "herren" }, { id: "W045-f10", etage: 3, qm: 427, konzept: "eigen", gruppe: "herren" }, { id: "W045-f11", etage: 3, qm: 1210, konzept: "eigen", gruppe: "kinder" }, { id: "W045-f12", etage: 3, qm: 813, konzept: "eigen", gruppe: "sport" }, { id: "W045-f13", etage: 4, qm: 931, konzept: "eigen", gruppe: "sport" }, { id: "W045-f14", etage: 4, qm: 1070, konzept: "eigen", gruppe: "spielwaren" }, { id: "W045-f15", etage: 4, qm: 449, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 427240, rohertrag: 180211, konzessionserloes: 0, untermiete: 0, personal: 102341, miete: 62686, nebenkosten: 17005, sonstige: 24132, db: -25953, fteBedarf: 81.9113128034242, fteIst: 102.91160433753704, umsatzJeGruppe: { food: 42660, wohnen: 41798, beauty: 57778, accessoires: 51041, damen: 69680, waesche: 41522, herren: 46903, kinder: 30239, sport: 28363, spielwaren: 17256 } } }, { id: "S034", name: "Hartwig Sport Aachen", stadt: "Aachen", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [0], baujahr: 2013, fassade: 4, substanz: 60, status: "offen", flaechen: [{ id: "S034-f1", etage: 0, qm: 615, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S034-f2", etage: 0, qm: 901, konzept: "eigen", gruppe: "sporttextil" }, { id: "S034-f3", etage: 0, qm: 443, konzept: "eigen", gruppe: "outdoor" }, { id: "S034-f4", etage: 0, qm: 339, konzept: "eigen", gruppe: "teamsport" }, { id: "S034-f5", etage: 0, qm: 408, konzept: "eigen", gruppe: "rad" }, { id: "S034-f6", etage: 0, qm: 245, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 92764, rohertrag: 39024, konzessionserloes: 0, untermiete: 0, personal: 20778, miete: 12968, nebenkosten: 4114, sonstige: 5131, db: -3968, fteBedarf: 16.570085352990063, fteIst: 21.12856542377301, umsatzJeGruppe: { sportschuhe: 28305, sporttextil: 26279, outdoor: 13511, teamsport: 7487, rad: 3458, wintersport: 13723 } } }, { id: "W046", name: "Hartwig Braunschweig", stadt: "Braunschweig", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4], baujahr: 1972, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W046-f1", etage: 0, qm: 996, konzept: "eigen", gruppe: "food" }, { id: "W046-f2", etage: 0, qm: 643, konzept: "eigen", gruppe: "beauty" }, { id: "W046-f3", etage: 0, qm: 681, konzept: "eigen", gruppe: "accessoires" }, { id: "W046-f4", etage: 1, qm: 711, konzept: "eigen", gruppe: "accessoires" }, { id: "W046-f5", etage: 1, qm: 1609, konzept: "eigen", gruppe: "damen" }, { id: "W046-f6", etage: 2, qm: 294, konzept: "eigen", gruppe: "damen" }, { id: "W046-f7", etage: 2, qm: 840, konzept: "eigen", gruppe: "waesche" }, { id: "W046-f8", etage: 2, qm: 1186, konzept: "eigen", gruppe: "herren" }, { id: "W046-f9", etage: 3, qm: 291, konzept: "eigen", gruppe: "herren" }, { id: "W046-f10", etage: 3, qm: 695, konzept: "eigen", gruppe: "kinder" }, { id: "W046-f11", etage: 3, qm: 1334, konzept: "eigen", gruppe: "sport" }, { id: "W046-f12", etage: 4, qm: 12, konzept: "eigen", gruppe: "sport" }, { id: "W046-f13", etage: 4, qm: 703, konzept: "eigen", gruppe: "spielwaren" }, { id: "W046-f14", etage: 4, qm: 1605, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 393643, rohertrag: 163648, konzessionserloes: 0, untermiete: 0, personal: 80571, miete: 52073, nebenkosten: 14530, sonstige: 21359, db: -4886, fteBedarf: 71.54075862173269, fteIst: 82.92838601566278, umsatzJeGruppe: { food: 50322, beauty: 52905, accessoires: 76824, damen: 55127, waesche: 24222, herren: 35633, kinder: 20486, sport: 27974, spielwaren: 14747, wohnen: 35403 } } }, { id: "S035", name: "Hartwig Sport Braunschweig", stadt: "Braunschweig", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1100, etagen: [0, 1, 2], baujahr: 1992, fassade: 2, substanz: 62, status: "offen", flaechen: [{ id: "S035-f1", etage: 0, qm: 797, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S035-f2", etage: 0, qm: 253, konzept: "eigen", gruppe: "sporttextil" }, { id: "S035-f3", etage: 1, qm: 612, konzept: "eigen", gruppe: "sporttextil" }, { id: "S035-f4", etage: 1, qm: 438, konzept: "eigen", gruppe: "outdoor" }, { id: "S035-f5", etage: 2, qm: 223, konzept: "eigen", gruppe: "outdoor" }, { id: "S035-f6", etage: 2, qm: 265, konzept: "eigen", gruppe: "teamsport" }, { id: "S035-f7", etage: 2, qm: 278, konzept: "eigen", gruppe: "rad" }, { id: "S035-f8", etage: 2, qm: 284, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 114523, rohertrag: 48221, konzessionserloes: 0, untermiete: 0, personal: 22348, miete: 9147, nebenkosten: 4262, sonstige: 6113, db: 6352, fteBedarf: 19.464251966026293, fteIst: 23.10104433546691, umsatzJeGruppe: { sportschuhe: 43495, sporttextil: 22867, outdoor: 25612, teamsport: 5399, rad: 2960, wintersport: 14191 } } }, { id: "W047", name: "Hartwig Kiel Einkaufszentrum", stadt: "Kiel", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1981, fassade: 4, substanz: 40, status: "offen", flaechen: [{ id: "W047-f1", etage: -1, qm: 717, konzept: "eigen", gruppe: "food" }, { id: "W047-f2", etage: -1, qm: 1433, konzept: "eigen", gruppe: "wohnen" }, { id: "W047-f3", etage: 0, qm: 795, konzept: "eigen", gruppe: "beauty" }, { id: "W047-f4", etage: 0, qm: 1355, konzept: "eigen", gruppe: "accessoires" }, { id: "W047-f5", etage: 1, qm: 134, konzept: "eigen", gruppe: "accessoires" }, { id: "W047-f6", etage: 1, qm: 2016, konzept: "eigen", gruppe: "damen" }, { id: "W047-f7", etage: 2, qm: 684, konzept: "eigen", gruppe: "damen" }, { id: "W047-f8", etage: 2, qm: 708, konzept: "eigen", gruppe: "waesche" }, { id: "W047-f9", etage: 2, qm: 758, konzept: "eigen", gruppe: "herren" }, { id: "W047-f10", etage: 3, qm: 1193, konzept: "eigen", gruppe: "herren" }, { id: "W047-f11", etage: 3, qm: 782, konzept: "eigen", gruppe: "kinder" }, { id: "W047-f12", etage: 3, qm: 174, konzept: "eigen", gruppe: "sport" }, { id: "W047-f13", etage: 4, qm: 1248, konzept: "eigen", gruppe: "sport" }, { id: "W047-f14", etage: 4, qm: 839, konzept: "eigen", gruppe: "spielwaren" }, { id: "W047-f15", etage: 4, qm: 63, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 377293, rohertrag: 160119, konzessionserloes: 0, untermiete: 0, personal: 82325, miete: 54279, nebenkosten: 0, sonstige: 21274, db: 2241, fteBedarf: 72.08823264454394, fteIst: 84.64631588618568, umsatzJeGruppe: { food: 31206, wohnen: 34042, beauty: 61623, accessoires: 68778, damen: 64873, waesche: 24613, herren: 44899, kinder: 15173, sport: 20759, spielwaren: 11327 } } }, { id: "S036", name: "Hartwig Sport Kiel", stadt: "Kiel", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1100, etagen: [0, 1, 2], baujahr: 2013, fassade: 5, substanz: 72, status: "offen", flaechen: [{ id: "S036-f1", etage: 0, qm: 763, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S036-f2", etage: 0, qm: 321, konzept: "eigen", gruppe: "sporttextil" }, { id: "S036-f3", etage: 1, qm: 564, konzept: "eigen", gruppe: "sporttextil" }, { id: "S036-f4", etage: 1, qm: 519, konzept: "eigen", gruppe: "outdoor" }, { id: "S036-f5", etage: 2, qm: 208, konzept: "eigen", gruppe: "outdoor" }, { id: "S036-f6", etage: 2, qm: 251, konzept: "eigen", gruppe: "teamsport" }, { id: "S036-f7", etage: 2, qm: 334, konzept: "eigen", gruppe: "rad" }, { id: "S036-f8", etage: 2, qm: 290, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 129498, rohertrag: 54750, konzessionserloes: 0, untermiete: 0, personal: 25364, miete: 17566, nebenkosten: 3961, sonstige: 6772, db: 1088, fteBedarf: 21.368605856959235, fteIst: 26.147810965136394, umsatzJeGruppe: { sportschuhe: 46401, sporttextil: 31962, outdoor: 27382, teamsport: 4567, rad: 3337, wintersport: 15850 } } }, { id: "W048", name: "Hartwig Chemnitz Neustadt", stadt: "Chemnitz", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3600, etagen: [-1, 0, 1, 2], baujahr: 2e3, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W048-f1", etage: -1, qm: 1164, konzept: "eigen", gruppe: "food" }, { id: "W048-f2", etage: -1, qm: 2461, konzept: "eigen", gruppe: "wohnen" }, { id: "W048-f3", etage: 0, qm: 701, konzept: "eigen", gruppe: "beauty" }, { id: "W048-f4", etage: 0, qm: 1169, konzept: "eigen", gruppe: "accessoires" }, { id: "W048-f5", etage: 0, qm: 1755, konzept: "eigen", gruppe: "damen" }, { id: "W048-f6", etage: 1, qm: 1144, konzept: "eigen", gruppe: "damen" }, { id: "W048-f7", etage: 1, qm: 1155, konzept: "eigen", gruppe: "waesche" }, { id: "W048-f8", etage: 1, qm: 1325, konzept: "eigen", gruppe: "herren" }, { id: "W048-f9", etage: 2, qm: 190, konzept: "eigen", gruppe: "herren" }, { id: "W048-f10", etage: 2, qm: 1188, konzept: "eigen", gruppe: "kinder" }, { id: "W048-f11", etage: 2, qm: 1565, konzept: "eigen", gruppe: "sport" }, { id: "W048-f12", etage: 2, qm: 769, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 346429, rohertrag: 145267, konzessionserloes: 0, untermiete: 0, personal: 84148, miete: 30786, nebenkosten: 17619, sonstige: 20767, db: -8053, fteBedarf: 71.67318065692153, fteIst: 86.63676289336188, umsatzJeGruppe: { food: 42584, wohnen: 41395, beauty: 40046, accessoires: 46025, damen: 60997, waesche: 26580, herren: 34917, kinder: 22089, sport: 20660, spielwaren: 11136 } } }, { id: "S037", name: "Hartwig Sport Chemnitz", stadt: "Chemnitz", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1], baujahr: 1985, fassade: 5, substanz: 61, status: "offen", flaechen: [{ id: "S037-f1", etage: 0, qm: 561, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S037-f2", etage: 0, qm: 714, konzept: "eigen", gruppe: "sporttextil" }, { id: "S037-f3", etage: 1, qm: 54, konzept: "eigen", gruppe: "sporttextil" }, { id: "S037-f4", etage: 1, qm: 485, konzept: "eigen", gruppe: "outdoor" }, { id: "S037-f5", etage: 1, qm: 242, konzept: "eigen", gruppe: "teamsport" }, { id: "S037-f6", etage: 1, qm: 297, konzept: "eigen", gruppe: "rad" }, { id: "S037-f7", etage: 1, qm: 197, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 89813, rohertrag: 37961, konzessionserloes: 0, untermiete: 0, personal: 19107, miete: 14358, nebenkosten: 0, sonstige: 4830, db: -334, fteBedarf: 15.549604821386373, fteIst: 19.379036831414552, umsatzJeGruppe: { sportschuhe: 30681, sporttextil: 27203, outdoor: 15645, teamsport: 4937, rad: 2784, wintersport: 8563 } } }, { id: "W049", name: "Hartwig Halle Am Wall", stadt: "Halle", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2600, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1990, fassade: 5, substanz: 70, status: "offen", flaechen: [{ id: "W049-f1", etage: 0, qm: 1090, konzept: "eigen", gruppe: "food" }, { id: "W049-f2", etage: 0, qm: 889, konzept: "eigen", gruppe: "beauty" }, { id: "W049-f3", etage: 0, qm: 587, konzept: "eigen", gruppe: "accessoires" }, { id: "W049-f4", etage: 1, qm: 661, konzept: "eigen", gruppe: "accessoires" }, { id: "W049-f5", etage: 1, qm: 1906, konzept: "eigen", gruppe: "damen" }, { id: "W049-f6", etage: 2, qm: 1760, konzept: "eigen", gruppe: "damen" }, { id: "W049-f7", etage: 2, qm: 807, konzept: "eigen", gruppe: "waesche" }, { id: "W049-f8", etage: 3, qm: 439, konzept: "eigen", gruppe: "waesche" }, { id: "W049-f9", etage: 3, qm: 1532, konzept: "eigen", gruppe: "herren" }, { id: "W049-f10", etage: 3, qm: 596, konzept: "eigen", gruppe: "kinder" }, { id: "W049-f11", etage: 4, qm: 507, konzept: "eigen", gruppe: "kinder" }, { id: "W049-f12", etage: 4, qm: 1407, konzept: "eigen", gruppe: "sport" }, { id: "W049-f13", etage: 4, qm: 652, konzept: "eigen", gruppe: "spielwaren" }, { id: "W049-f14", etage: 5, qm: 188, konzept: "eigen", gruppe: "spielwaren" }, { id: "W049-f15", etage: 5, qm: 2379, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 444572, rohertrag: 188076, konzessionserloes: 0, untermiete: 0, personal: 102455, miete: 62638, nebenkosten: 16204, sonstige: 25157, db: -18378, fteBedarf: 85.32397064138165, fteIst: 104.26081803912479, umsatzJeGruppe: { food: 49229, beauty: 62532, accessoires: 55077, damen: 90964, waesche: 42649, herren: 38283, kinder: 26289, sport: 22302, spielwaren: 12692, wohnen: 44555 } } }, { id: "W050", name: "Hartwig Magdeburg Arkaden", stadt: "Magdeburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1983, fassade: 1, substanz: 42, status: "offen", flaechen: [{ id: "W050-f1", etage: -1, qm: 652, konzept: "eigen", gruppe: "food" }, { id: "W050-f2", etage: -1, qm: 848, konzept: "eigen", gruppe: "wohnen" }, { id: "W050-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W050-f4", etage: 0, qm: 763, konzept: "eigen", gruppe: "accessoires" }, { id: "W050-f5", etage: 0, qm: 306, konzept: "eigen", gruppe: "damen" }, { id: "W050-f6", etage: 1, qm: 1500, konzept: "eigen", gruppe: "damen" }, { id: "W050-f7", etage: 2, qm: 153, konzept: "eigen", gruppe: "damen" }, { id: "W050-f8", etage: 2, qm: 692, konzept: "eigen", gruppe: "waesche" }, { id: "W050-f9", etage: 2, qm: 655, konzept: "eigen", gruppe: "herren" }, { id: "W050-f10", etage: 3, qm: 531, konzept: "eigen", gruppe: "herren" }, { id: "W050-f11", etage: 3, qm: 725, konzept: "eigen", gruppe: "kinder" }, { id: "W050-f12", etage: 3, qm: 244, konzept: "eigen", gruppe: "sport" }, { id: "W050-f13", etage: 4, qm: 565, konzept: "eigen", gruppe: "sport" }, { id: "W050-f14", etage: 4, qm: 625, konzept: "eigen", gruppe: "spielwaren" }, { id: "W050-f15", etage: 4, qm: 309, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 199260, rohertrag: 84120, konzessionserloes: 0, untermiete: 0, personal: 49234, miete: 22754, nebenkosten: 10455, sonstige: 12219, db: -10542, fteBedarf: 42.51892501333179, fteIst: 49.59452388162267, umsatzJeGruppe: { food: 19029, wohnen: 16290, beauty: 28474, accessoires: 25067, damen: 39770, waesche: 15323, herren: 18874, kinder: 15166, sport: 11997, spielwaren: 9272 } } }, { id: "S038", name: "Hartwig Sport Magdeburg Galerie am Fluss", stadt: "Magdeburg", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 800, etagen: [0, 1], baujahr: 1989, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "S038-f1", etage: 0, qm: 296, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S038-f2", etage: 0, qm: 479, konzept: "eigen", gruppe: "sporttextil" }, { id: "S038-f3", etage: 1, qm: 63, konzept: "eigen", gruppe: "sporttextil" }, { id: "S038-f4", etage: 1, qm: 298, konzept: "eigen", gruppe: "outdoor" }, { id: "S038-f5", etage: 1, qm: 121, konzept: "eigen", gruppe: "teamsport" }, { id: "S038-f6", etage: 1, qm: 175, konzept: "eigen", gruppe: "rad" }, { id: "S038-f7", etage: 1, qm: 117, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 54142, rohertrag: 23024, konzessionserloes: 0, untermiete: 0, personal: 11487, miete: 7880, nebenkosten: 1646, sonstige: 2917, db: -906, fteBedarf: 9.323675282137211, fteIst: 11.735136837466078, umsatzJeGruppe: { sportschuhe: 15363, sporttextil: 19120, outdoor: 8832, teamsport: 2494, rad: 1646, wintersport: 6688 } } }, { id: "W051", name: "Hartwig Freiburg", stadt: "Freiburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1923, fassade: 4, substanz: 68, status: "offen", flaechen: [{ id: "W051-f1", etage: -1, qm: 522, konzept: "eigen", gruppe: "food" }, { id: "W051-f2", etage: -1, qm: 1318, konzept: "eigen", gruppe: "wohnen" }, { id: "W051-f3", etage: 0, qm: 524, konzept: "eigen", gruppe: "beauty" }, { id: "W051-f4", etage: 0, qm: 1090, konzept: "eigen", gruppe: "accessoires" }, { id: "W051-f5", etage: 0, qm: 226, konzept: "eigen", gruppe: "damen" }, { id: "W051-f6", etage: 1, qm: 1533, konzept: "eigen", gruppe: "damen" }, { id: "W051-f7", etage: 1, qm: 307, konzept: "eigen", gruppe: "waesche" }, { id: "W051-f8", etage: 2, qm: 193, konzept: "eigen", gruppe: "waesche" }, { id: "W051-f9", etage: 2, qm: 1147, konzept: "eigen", gruppe: "herren" }, { id: "W051-f10", etage: 2, qm: 499, konzept: "eigen", gruppe: "kinder" }, { id: "W051-f11", etage: 3, qm: 90, konzept: "eigen", gruppe: "kinder" }, { id: "W051-f12", etage: 3, qm: 971, konzept: "eigen", gruppe: "sport" }, { id: "W051-f13", etage: 3, qm: 634, konzept: "eigen", gruppe: "spielwaren" }, { id: "W051-f14", etage: 3, qm: 144, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 294645, rohertrag: 124365, konzessionserloes: 0, untermiete: 0, personal: 59586, miete: 28162, nebenkosten: 12373, sonstige: 16220, db: 8025, fteBedarf: 54.57246764348757, fteIst: 59.836159162032736, umsatzJeGruppe: { food: 23905, wohnen: 27778, beauty: 50119, accessoires: 56791, damen: 51327, waesche: 15705, herren: 28345, kinder: 12797, sport: 17924, spielwaren: 9952 } } }, { id: "S039", name: "Hartwig Sport Freiburg", stadt: "Freiburg", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 600, etagen: [0, 1, 2], baujahr: 2012, fassade: 5, substanz: 85, status: "offen", flaechen: [{ id: "S039-f1", etage: 0, qm: 304, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S039-f2", etage: 0, qm: 212, konzept: "eigen", gruppe: "sporttextil" }, { id: "S039-f3", etage: 1, qm: 279, konzept: "eigen", gruppe: "sporttextil" }, { id: "S039-f4", etage: 1, qm: 238, konzept: "eigen", gruppe: "outdoor" }, { id: "S039-f5", etage: 2, qm: 51, konzept: "eigen", gruppe: "outdoor" }, { id: "S039-f6", etage: 2, qm: 171, konzept: "eigen", gruppe: "teamsport" }, { id: "S039-f7", etage: 2, qm: 197, konzept: "eigen", gruppe: "rad" }, { id: "S039-f8", etage: 2, qm: 98, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 52523, rohertrag: 22315, konzessionserloes: 0, untermiete: 0, personal: 10185, miete: 6087, nebenkosten: 2062, sonstige: 2851, db: 1130, fteBedarf: 9.243032444303095, fteIst: 10.234731895337532, umsatzJeGruppe: { sportschuhe: 15678, sporttextil: 17787, outdoor: 10228, teamsport: 2923, rad: 1777, wintersport: 4131 } } }, { id: "W052", name: "Hartwig Krefeld Bahnhofstra\xDFe", stadt: "Krefeld", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1982, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "W052-f1", etage: -1, qm: 745, konzept: "eigen", gruppe: "food" }, { id: "W052-f2", etage: -1, qm: 638, konzept: "eigen", gruppe: "wohnen" }, { id: "W052-f3", etage: 0, qm: 580, konzept: "eigen", gruppe: "beauty" }, { id: "W052-f4", etage: 0, qm: 804, konzept: "eigen", gruppe: "accessoires" }, { id: "W052-f5", etage: 1, qm: 127, konzept: "eigen", gruppe: "accessoires" }, { id: "W052-f6", etage: 1, qm: 1256, konzept: "eigen", gruppe: "damen" }, { id: "W052-f7", etage: 2, qm: 194, konzept: "eigen", gruppe: "damen" }, { id: "W052-f8", etage: 2, qm: 550, konzept: "eigen", gruppe: "waesche" }, { id: "W052-f9", etage: 2, qm: 640, konzept: "eigen", gruppe: "herren" }, { id: "W052-f10", etage: 3, qm: 198, konzept: "eigen", gruppe: "herren" }, { id: "W052-f11", etage: 3, qm: 638, konzept: "eigen", gruppe: "kinder" }, { id: "W052-f12", etage: 3, qm: 547, konzept: "eigen", gruppe: "sport" }, { id: "W052-f13", etage: 4, qm: 365, konzept: "eigen", gruppe: "sport" }, { id: "W052-f14", etage: 4, qm: 400, konzept: "eigen", gruppe: "spielwaren" }, { id: "W052-f15", etage: 4, qm: 618, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 208175, rohertrag: 86112, konzessionserloes: 0, untermiete: 0, personal: 52990, miete: 29555, nebenkosten: 8948, sonstige: 12270, db: -17651, fteBedarf: 42.138195499237554, fteIst: 53.14615030069136, umsatzJeGruppe: { food: 26893, wohnen: 18138, beauty: 39983, accessoires: 31398, damen: 29728, waesche: 14123, herren: 17024, kinder: 14144, sport: 11098, spielwaren: 5645 } } }, { id: "W053", name: "Hartwig Mainz", stadt: "Mainz", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [-1, 0, 1, 2], baujahr: 2004, fassade: 2, substanz: 50, status: "offen", flaechen: [{ id: "W053-f1", etage: -1, qm: 1201, konzept: "eigen", gruppe: "food" }, { id: "W053-f2", etage: -1, qm: 2449, konzept: "eigen", gruppe: "wohnen" }, { id: "W053-f3", etage: 0, qm: 777, konzept: "eigen", gruppe: "beauty" }, { id: "W053-f4", etage: 0, qm: 1264, konzept: "eigen", gruppe: "accessoires" }, { id: "W053-f5", etage: 0, qm: 1609, konzept: "eigen", gruppe: "damen" }, { id: "W053-f6", etage: 1, qm: 748, konzept: "eigen", gruppe: "damen" }, { id: "W053-f7", etage: 1, qm: 861, konzept: "eigen", gruppe: "waesche" }, { id: "W053-f8", etage: 1, qm: 2041, konzept: "eigen", gruppe: "herren" }, { id: "W053-f9", etage: 2, qm: 136, konzept: "eigen", gruppe: "herren" }, { id: "W053-f10", etage: 2, qm: 1234, konzept: "eigen", gruppe: "kinder" }, { id: "W053-f11", etage: 2, qm: 1258, konzept: "eigen", gruppe: "sport" }, { id: "W053-f12", etage: 2, qm: 900, konzept: "eigen", gruppe: "spielwaren" }, { id: "W053-f13", etage: 2, qm: 122, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 493354, rohertrag: 205888, konzessionserloes: 0, untermiete: 0, personal: 111195, miete: 54943, nebenkosten: 18190, sonstige: 26798, db: -5237, fteBedarf: 89.75461299441628, fteIst: 112.49641862829989, umsatzJeGruppe: { food: 61907, wohnen: 55365, beauty: 69458, accessoires: 64774, damen: 64335, waesche: 34368, herren: 73631, kinder: 26208, sport: 26377, spielwaren: 16933 } } }, { id: "S040", name: "Hartwig Sport Mainz Lindenstra\xDFe", stadt: "Mainz", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 1300, etagen: [0, 1, 2], baujahr: 1992, fassade: 0, substanz: 45, status: "offen", flaechen: [{ id: "S040-f1", etage: 0, qm: 922, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S040-f2", etage: 0, qm: 328, konzept: "eigen", gruppe: "sporttextil" }, { id: "S040-f3", etage: 1, qm: 459, konzept: "eigen", gruppe: "sporttextil" }, { id: "S040-f4", etage: 1, qm: 791, konzept: "eigen", gruppe: "outdoor" }, { id: "S040-f5", etage: 2, qm: 138, konzept: "eigen", gruppe: "outdoor" }, { id: "S040-f6", etage: 2, qm: 321, konzept: "eigen", gruppe: "teamsport" }, { id: "S040-f7", etage: 2, qm: 487, konzept: "eigen", gruppe: "rad" }, { id: "S040-f8", etage: 2, qm: 304, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 119753, rohertrag: 50286, konzessionserloes: 0, untermiete: 0, personal: 22058, miete: 17436, nebenkosten: 5553, sonstige: 6597, db: -1359, fteBedarf: 21.344614123859888, fteIst: 22.89930007547081, umsatzJeGruppe: { sportschuhe: 42329, sporttextil: 22203, outdoor: 29362, teamsport: 5186, rad: 5058, wintersport: 15614 } } }, { id: "W054", name: "Hartwig L\xFCbeck", stadt: "L\xFCbeck", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2], baujahr: 1992, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W054-f1", etage: -1, qm: 1044, konzept: "eigen", gruppe: "food" }, { id: "W054-f2", etage: -1, qm: 2981, konzept: "eigen", gruppe: "wohnen" }, { id: "W054-f3", etage: 0, qm: 1021, konzept: "eigen", gruppe: "beauty" }, { id: "W054-f4", etage: 0, qm: 1868, konzept: "eigen", gruppe: "accessoires" }, { id: "W054-f5", etage: 0, qm: 1136, konzept: "eigen", gruppe: "damen" }, { id: "W054-f6", etage: 1, qm: 2345, konzept: "eigen", gruppe: "damen" }, { id: "W054-f7", etage: 1, qm: 1204, konzept: "eigen", gruppe: "waesche" }, { id: "W054-f8", etage: 1, qm: 476, konzept: "eigen", gruppe: "herren" }, { id: "W054-f9", etage: 2, qm: 1627, konzept: "eigen", gruppe: "herren" }, { id: "W054-f10", etage: 2, qm: 947, konzept: "eigen", gruppe: "kinder" }, { id: "W054-f11", etage: 2, qm: 2272, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 552353, rohertrag: 234883, konzessionserloes: 0, untermiete: 0, personal: 112295, miete: 105490, nebenkosten: 18393, sonstige: 30261, db: -31556, fteBedarf: 101.25734101968146, fteIst: 113.80977676792214, umsatzJeGruppe: { food: 53714, wohnen: 54849, beauty: 87579, accessoires: 104260, damen: 100771, waesche: 38380, herren: 59319, kinder: 21725, sport: 31756 } } }, { id: "S041", name: "Hartwig Sport L\xFCbeck Ring", stadt: "L\xFCbeck", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [0, 1], baujahr: 1998, fassade: 3, substanz: 69, status: "offen", flaechen: [{ id: "S041-f1", etage: 0, qm: 921, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S041-f2", etage: 0, qm: 1161, konzept: "eigen", gruppe: "sporttextil" }, { id: "S041-f3", etage: 0, qm: 42, konzept: "eigen", gruppe: "outdoor" }, { id: "S041-f4", etage: 1, qm: 953, konzept: "eigen", gruppe: "outdoor" }, { id: "S041-f5", etage: 1, qm: 352, konzept: "eigen", gruppe: "teamsport" }, { id: "S041-f6", etage: 1, qm: 390, konzept: "eigen", gruppe: "rad" }, { id: "S041-f7", etage: 1, qm: 429, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 133301, rohertrag: 56536, konzessionserloes: 0, untermiete: 0, personal: 27340, miete: 10430, nebenkosten: 4806, sonstige: 7377, db: 6582, fteBedarf: 23.852386020383413, fteIst: 27.735516106171353, umsatzJeGruppe: { sportschuhe: 41943, sporttextil: 36381, outdoor: 29217, teamsport: 6733, rad: 3704, wintersport: 15323 } } }, { id: "W055", name: "Hartwig Erfurt", stadt: "Erfurt", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3], baujahr: 1957, fassade: 7, substanz: 78, status: "offen", flaechen: [{ id: "W055-f1", etage: -1, qm: 973, konzept: "eigen", gruppe: "food" }, { id: "W055-f2", etage: -1, qm: 1527, konzept: "eigen", gruppe: "wohnen" }, { id: "W055-f3", etage: 0, qm: 739, konzept: "eigen", gruppe: "beauty" }, { id: "W055-f4", etage: 0, qm: 998, konzept: "eigen", gruppe: "accessoires" }, { id: "W055-f5", etage: 0, qm: 763, konzept: "eigen", gruppe: "damen" }, { id: "W055-f6", etage: 1, qm: 1322, konzept: "eigen", gruppe: "damen" }, { id: "W055-f7", etage: 1, qm: 691, konzept: "eigen", gruppe: "waesche" }, { id: "W055-f8", etage: 1, qm: 488, konzept: "eigen", gruppe: "herren" }, { id: "W055-f9", etage: 2, qm: 1184, konzept: "eigen", gruppe: "herren" }, { id: "W055-f10", etage: 2, qm: 935, konzept: "eigen", gruppe: "kinder" }, { id: "W055-f11", etage: 2, qm: 381, konzept: "eigen", gruppe: "sport" }, { id: "W055-f12", etage: 3, qm: 1190, konzept: "eigen", gruppe: "sport" }, { id: "W055-f13", etage: 3, qm: 639, konzept: "eigen", gruppe: "spielwaren" }, { id: "W055-f14", etage: 3, qm: 671, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 339183, rohertrag: 140078, konzessionserloes: 0, untermiete: 0, personal: 80693, miete: 33011, nebenkosten: 14914, sonstige: 19532, db: -8072, fteBedarf: 66.61228005145064, fteIst: 83.79886769625847, umsatzJeGruppe: { food: 41467, wohnen: 45347, beauty: 54443, accessoires: 36596, damen: 49086, waesche: 18827, herren: 35346, kinder: 24602, sport: 23599, spielwaren: 9870 } } }, { id: "S042", name: "Hartwig Sport Erfurt Einkaufszentrum", stadt: "Erfurt", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 2010, fassade: 4, substanz: 58, status: "offen", flaechen: [{ id: "S042-f1", etage: 0, qm: 1039, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S042-f2", etage: 0, qm: 528, konzept: "eigen", gruppe: "sporttextil" }, { id: "S042-f3", etage: 1, qm: 669, konzept: "eigen", gruppe: "sporttextil" }, { id: "S042-f4", etage: 1, qm: 898, konzept: "eigen", gruppe: "outdoor" }, { id: "S042-f5", etage: 2, qm: 171, konzept: "eigen", gruppe: "outdoor" }, { id: "S042-f6", etage: 2, qm: 471, konzept: "eigen", gruppe: "teamsport" }, { id: "S042-f7", etage: 2, qm: 639, konzept: "eigen", gruppe: "rad" }, { id: "S042-f8", etage: 2, qm: 286, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 131311, rohertrag: 55369, konzessionserloes: 0, untermiete: 0, personal: 26013, miete: 29563, nebenkosten: 0, sonstige: 7499, db: -7706, fteBedarf: 24.774700318339345, fteIst: 26.161759234308235, umsatzJeGruppe: { sportschuhe: 47461, sporttextil: 31715, outdoor: 29748, teamsport: 7459, rad: 4391, wintersport: 10536 } } }, { id: "W056", name: "Hartwig Oberhausen", stadt: "Oberhausen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1933, fassade: 3, substanz: 48, status: "offen", flaechen: [{ id: "W056-f1", etage: -1, qm: 513, konzept: "eigen", gruppe: "food" }, { id: "W056-f2", etage: -1, qm: 1267, konzept: "eigen", gruppe: "wohnen" }, { id: "W056-f3", etage: 0, qm: 611, konzept: "eigen", gruppe: "beauty" }, { id: "W056-f4", etage: 0, qm: 950, konzept: "eigen", gruppe: "accessoires" }, { id: "W056-f5", etage: 0, qm: 219, konzept: "eigen", gruppe: "damen" }, { id: "W056-f6", etage: 1, qm: 1703, konzept: "eigen", gruppe: "damen" }, { id: "W056-f7", etage: 1, qm: 77, konzept: "eigen", gruppe: "waesche" }, { id: "W056-f8", etage: 2, qm: 539, konzept: "eigen", gruppe: "waesche" }, { id: "W056-f9", etage: 2, qm: 916, konzept: "eigen", gruppe: "herren" }, { id: "W056-f10", etage: 2, qm: 325, konzept: "eigen", gruppe: "kinder" }, { id: "W056-f11", etage: 3, qm: 156, konzept: "eigen", gruppe: "kinder" }, { id: "W056-f12", etage: 3, qm: 984, konzept: "eigen", gruppe: "sport" }, { id: "W056-f13", etage: 3, qm: 490, konzept: "eigen", gruppe: "spielwaren" }, { id: "W056-f14", etage: 3, qm: 149, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 311485, rohertrag: 131374, konzessionserloes: 0, untermiete: 0, personal: 60336, miete: 40751, nebenkosten: 13339, sonstige: 16775, db: 172, fteBedarf: 56.005128184916984, fteIst: 61.12087493713988, umsatzJeGruppe: { food: 27299, wohnen: 28440, beauty: 52832, accessoires: 50478, damen: 52532, waesche: 23588, herren: 29183, kinder: 15969, sport: 22564, spielwaren: 8601 } } }, { id: "S043", name: "Hartwig Sport Oberhausen Galerie am Fluss", stadt: "Oberhausen", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 5200, etagen: [0], baujahr: 1986, fassade: 5, substanz: 44, status: "offen", flaechen: [{ id: "S043-f1", etage: 0, qm: 1314, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S043-f2", etage: 0, qm: 1204, konzept: "eigen", gruppe: "sporttextil" }, { id: "S043-f3", etage: 0, qm: 1137, konzept: "eigen", gruppe: "outdoor" }, { id: "S043-f4", etage: 0, qm: 432, konzept: "eigen", gruppe: "teamsport" }, { id: "S043-f5", etage: 0, qm: 684, konzept: "eigen", gruppe: "rad" }, { id: "S043-f6", etage: 0, qm: 380, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 164828, rohertrag: 69491, konzessionserloes: 0, untermiete: 0, personal: 36435, miete: 18056, nebenkosten: 0, sonstige: 9076, db: 5924, fteBedarf: 29.558171121462824, fteIst: 37.600396150871944, umsatzJeGruppe: { sportschuhe: 56638, sporttextil: 39022, outdoor: 38675, teamsport: 8923, rad: 6306, wintersport: 15263 } } }, { id: "W057", name: "Hartwig Rostock Am Wall", stadt: "Rostock", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1962, fassade: 6, substanz: 81, status: "offen", flaechen: [{ id: "W057-f1", etage: -1, qm: 999, konzept: "eigen", gruppe: "food" }, { id: "W057-f2", etage: -1, qm: 1485, konzept: "eigen", gruppe: "wohnen" }, { id: "W057-f3", etage: 0, qm: 1149, konzept: "eigen", gruppe: "beauty" }, { id: "W057-f4", etage: 0, qm: 1335, konzept: "eigen", gruppe: "accessoires" }, { id: "W057-f5", etage: 1, qm: 138, konzept: "eigen", gruppe: "accessoires" }, { id: "W057-f6", etage: 1, qm: 2345, konzept: "eigen", gruppe: "damen" }, { id: "W057-f7", etage: 2, qm: 560, konzept: "eigen", gruppe: "damen" }, { id: "W057-f8", etage: 2, qm: 1009, konzept: "eigen", gruppe: "waesche" }, { id: "W057-f9", etage: 2, qm: 914, konzept: "eigen", gruppe: "herren" }, { id: "W057-f10", etage: 3, qm: 998, konzept: "eigen", gruppe: "herren" }, { id: "W057-f11", etage: 3, qm: 963, konzept: "eigen", gruppe: "kinder" }, { id: "W057-f12", etage: 3, qm: 523, konzept: "eigen", gruppe: "sport" }, { id: "W057-f13", etage: 4, qm: 979, konzept: "eigen", gruppe: "sport" }, { id: "W057-f14", etage: 4, qm: 1014, konzept: "eigen", gruppe: "spielwaren" }, { id: "W057-f15", etage: 4, qm: 491, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 428406, rohertrag: 179742, konzessionserloes: 0, untermiete: 0, personal: 86931, miete: 37333, nebenkosten: 15692, sonstige: 24271, db: 15515, fteBedarf: 82.39433344045942, fteIst: 90.0649736045208, umsatzJeGruppe: { food: 39782, wohnen: 35604, beauty: 86417, accessoires: 64067, damen: 68579, waesche: 30122, herren: 44060, kinder: 22213, sport: 24452, spielwaren: 13109 } } }, { id: "S044", name: "Hartwig Sport Rostock", stadt: "Rostock", format: "sport", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [0, 1], baujahr: 1999, fassade: 7, substanz: 63, status: "offen", flaechen: [{ id: "S044-f1", etage: 0, qm: 1391, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S044-f2", etage: 0, qm: 1138, konzept: "eigen", gruppe: "sporttextil" }, { id: "S044-f3", etage: 0, qm: 122, konzept: "eigen", gruppe: "outdoor" }, { id: "S044-f4", etage: 1, qm: 1146, konzept: "eigen", gruppe: "outdoor" }, { id: "S044-f5", etage: 1, qm: 453, konzept: "eigen", gruppe: "teamsport" }, { id: "S044-f6", etage: 1, qm: 656, konzept: "eigen", gruppe: "rad" }, { id: "S044-f7", etage: 1, qm: 395, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 220780, rohertrag: 92105, konzessionserloes: 0, untermiete: 0, personal: 43059, miete: 20994, nebenkosten: 7122, sonstige: 11437, db: 9493, fteBedarf: 36.289872381666, fteIst: 44.29044951899844, umsatzJeGruppe: { sportschuhe: 94682, sporttextil: 38819, outdoor: 42367, teamsport: 13077, rad: 7524, wintersport: 24310 } } }, { id: "W058", name: "Hartwig Kassel", stadt: "Kassel", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4], baujahr: 2001, fassade: 5, substanz: 38, status: "offen", flaechen: [{ id: "W058-f1", etage: 0, qm: 619, konzept: "eigen", gruppe: "food" }, { id: "W058-f2", etage: 0, qm: 706, konzept: "eigen", gruppe: "beauty" }, { id: "W058-f3", etage: 0, qm: 975, konzept: "eigen", gruppe: "accessoires" }, { id: "W058-f4", etage: 1, qm: 311, konzept: "eigen", gruppe: "accessoires" }, { id: "W058-f5", etage: 1, qm: 1989, konzept: "eigen", gruppe: "damen" }, { id: "W058-f6", etage: 2, qm: 607, konzept: "eigen", gruppe: "damen" }, { id: "W058-f7", etage: 2, qm: 666, konzept: "eigen", gruppe: "waesche" }, { id: "W058-f8", etage: 2, qm: 1027, konzept: "eigen", gruppe: "herren" }, { id: "W058-f9", etage: 3, qm: 601, konzept: "eigen", gruppe: "herren" }, { id: "W058-f10", etage: 3, qm: 808, konzept: "eigen", gruppe: "kinder" }, { id: "W058-f11", etage: 3, qm: 891, konzept: "eigen", gruppe: "sport" }, { id: "W058-f12", etage: 4, qm: 158, konzept: "eigen", gruppe: "sport" }, { id: "W058-f13", etage: 4, qm: 675, konzept: "eigen", gruppe: "spielwaren" }, { id: "W058-f14", etage: 4, qm: 1466, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 386018, rohertrag: 163456, konzessionserloes: 0, untermiete: 0, personal: 84931, miete: 49209, nebenkosten: 11727, sonstige: 21001, db: -3413, fteBedarf: 70.38013826468638, fteIst: 87.73621738146602, umsatzJeGruppe: { food: 32939, beauty: 70716, accessoires: 59318, damen: 79825, waesche: 21863, herren: 39463, kinder: 21758, sport: 19741, spielwaren: 11681, wohnen: 28714 } } }, { id: "S045", name: "Hartwig Sport Kassel Galerie am Fluss", stadt: "Kassel", format: "sport", lage: "center", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [0, 1, 2], baujahr: 2005, fassade: 4, substanz: 64, status: "offen", flaechen: [{ id: "S045-f1", etage: 0, qm: 1114, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S045-f2", etage: 0, qm: 653, konzept: "eigen", gruppe: "sporttextil" }, { id: "S045-f3", etage: 1, qm: 744, konzept: "eigen", gruppe: "sporttextil" }, { id: "S045-f4", etage: 1, qm: 1022, konzept: "eigen", gruppe: "outdoor" }, { id: "S045-f5", etage: 2, qm: 112, konzept: "eigen", gruppe: "outdoor" }, { id: "S045-f6", etage: 2, qm: 463, konzept: "eigen", gruppe: "teamsport" }, { id: "S045-f7", etage: 2, qm: 708, konzept: "eigen", gruppe: "rad" }, { id: "S045-f8", etage: 2, qm: 483, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 156368, rohertrag: 65804, konzessionserloes: 0, untermiete: 0, personal: 29140, miete: 15580, nebenkosten: 0, sonstige: 8796, db: 12289, fteBedarf: 28.48920296329611, fteIst: 29.50626515089279, umsatzJeGruppe: { sportschuhe: 51739, sporttextil: 38488, outdoor: 28692, teamsport: 7157, rad: 5901, wintersport: 24391 } } }, { id: "W059", name: "Hartwig Hagen Arkaden", stadt: "Hagen", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2400, etagen: [-1, 0, 1, 2], baujahr: 1928, fassade: 4, substanz: 71, status: "offen", flaechen: [{ id: "W059-f1", etage: -1, qm: 730, konzept: "eigen", gruppe: "food" }, { id: "W059-f2", etage: -1, qm: 1695, konzept: "eigen", gruppe: "wohnen" }, { id: "W059-f3", etage: 0, qm: 663, konzept: "eigen", gruppe: "beauty" }, { id: "W059-f4", etage: 0, qm: 973, konzept: "eigen", gruppe: "accessoires" }, { id: "W059-f5", etage: 0, qm: 789, konzept: "eigen", gruppe: "damen" }, { id: "W059-f6", etage: 1, qm: 1393, konzept: "eigen", gruppe: "damen" }, { id: "W059-f7", etage: 1, qm: 613, konzept: "eigen", gruppe: "waesche" }, { id: "W059-f8", etage: 1, qm: 419, konzept: "eigen", gruppe: "herren" }, { id: "W059-f9", etage: 2, qm: 483, konzept: "eigen", gruppe: "herren" }, { id: "W059-f10", etage: 2, qm: 682, konzept: "eigen", gruppe: "kinder" }, { id: "W059-f11", etage: 2, qm: 848, konzept: "eigen", gruppe: "sport" }, { id: "W059-f12", etage: 2, qm: 674, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 223223, rohertrag: 93248, konzessionserloes: 0, untermiete: 0, personal: 49926, miete: 29860, nebenkosten: 12726, sonstige: 13635, db: -12899, fteBedarf: 47.34049843643294, fteIst: 51.097237782158786, umsatzJeGruppe: { food: 23368, wohnen: 24387, beauty: 38725, accessoires: 36377, damen: 40151, waesche: 13964, herren: 15368, kinder: 10677, sport: 12120, spielwaren: 8086 } } }, { id: "W060", name: "Hartwig Potsdam Bahnhofstra\xDFe", stadt: "Potsdam", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [0, 1, 2, 3, 4], baujahr: 1987, fassade: 4, substanz: 78, status: "offen", flaechen: [{ id: "W060-f1", etage: 0, qm: 563, konzept: "eigen", gruppe: "food" }, { id: "W060-f2", etage: 0, qm: 764, konzept: "eigen", gruppe: "beauty" }, { id: "W060-f3", etage: 0, qm: 893, konzept: "eigen", gruppe: "accessoires" }, { id: "W060-f4", etage: 1, qm: 82, konzept: "eigen", gruppe: "accessoires" }, { id: "W060-f5", etage: 1, qm: 2138, konzept: "eigen", gruppe: "damen" }, { id: "W060-f6", etage: 2, qm: 414, konzept: "eigen", gruppe: "damen" }, { id: "W060-f7", etage: 2, qm: 640, konzept: "eigen", gruppe: "waesche" }, { id: "W060-f8", etage: 2, qm: 1166, konzept: "eigen", gruppe: "herren" }, { id: "W060-f9", etage: 3, qm: 268, konzept: "eigen", gruppe: "herren" }, { id: "W060-f10", etage: 3, qm: 583, konzept: "eigen", gruppe: "kinder" }, { id: "W060-f11", etage: 3, qm: 1012, konzept: "eigen", gruppe: "sport" }, { id: "W060-f12", etage: 3, qm: 357, konzept: "eigen", gruppe: "spielwaren" }, { id: "W060-f13", etage: 4, qm: 340, konzept: "eigen", gruppe: "spielwaren" }, { id: "W060-f14", etage: 4, qm: 1880, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 293259, rohertrag: 124668, konzessionserloes: 0, untermiete: 0, personal: 63524, miete: 47938, nebenkosten: 0, sonstige: 17019, db: -3812, fteBedarf: 58.21452959194201, fteIst: 65.62847515777923, umsatzJeGruppe: { food: 21236, beauty: 57168, accessoires: 40026, damen: 64249, waesche: 16313, herren: 34031, kinder: 11014, sport: 12251, spielwaren: 9963, wohnen: 27007 } } }, { id: "W061", name: "Hartwig Saarbr\xFCcken Galerie am Fluss", stadt: "Saarbr\xFCcken", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1971, fassade: 2, substanz: 65, status: "offen", flaechen: [{ id: "W061-f1", etage: 0, qm: 578, konzept: "eigen", gruppe: "food" }, { id: "W061-f2", etage: 0, qm: 636, konzept: "eigen", gruppe: "beauty" }, { id: "W061-f3", etage: 0, qm: 453, konzept: "eigen", gruppe: "accessoires" }, { id: "W061-f4", etage: 1, qm: 623, konzept: "eigen", gruppe: "accessoires" }, { id: "W061-f5", etage: 1, qm: 1043, konzept: "eigen", gruppe: "damen" }, { id: "W061-f6", etage: 2, qm: 913, konzept: "eigen", gruppe: "damen" }, { id: "W061-f7", etage: 2, qm: 753, konzept: "eigen", gruppe: "waesche" }, { id: "W061-f8", etage: 3, qm: 63, konzept: "eigen", gruppe: "waesche" }, { id: "W061-f9", etage: 3, qm: 1236, konzept: "eigen", gruppe: "herren" }, { id: "W061-f10", etage: 3, qm: 368, konzept: "eigen", gruppe: "kinder" }, { id: "W061-f11", etage: 4, qm: 266, konzept: "eigen", gruppe: "kinder" }, { id: "W061-f12", etage: 4, qm: 993, konzept: "eigen", gruppe: "sport" }, { id: "W061-f13", etage: 4, qm: 408, konzept: "eigen", gruppe: "spielwaren" }, { id: "W061-f14", etage: 5, qm: 193, konzept: "eigen", gruppe: "spielwaren" }, { id: "W061-f15", etage: 5, qm: 1474, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 247117, rohertrag: 104077, konzessionserloes: 0, untermiete: 0, personal: 57268, miete: 44221, nebenkosten: 0, sonstige: 14632, db: -12044, fteBedarf: 50.34145186039213, fteIst: 57.73996380669992, umsatzJeGruppe: { food: 20684, beauty: 47345, accessoires: 38208, damen: 37480, waesche: 17642, herren: 28132, kinder: 13054, sport: 13050, spielwaren: 7943, wohnen: 23579 } } }, { id: "S046", name: "Hartwig Sport Saarbr\xFCcken Bahnhofstra\xDFe", stadt: "Saarbr\xFCcken", format: "sport", lage: "b", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [0, 1], baujahr: 1989, fassade: 0, substanz: 54, status: "offen", flaechen: [{ id: "S046-f1", etage: 0, qm: 557, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S046-f2", etage: 0, qm: 918, konzept: "eigen", gruppe: "sporttextil" }, { id: "S046-f3", etage: 1, qm: 18, konzept: "eigen", gruppe: "sporttextil" }, { id: "S046-f4", etage: 1, qm: 555, konzept: "eigen", gruppe: "outdoor" }, { id: "S046-f5", etage: 1, qm: 279, konzept: "eigen", gruppe: "teamsport" }, { id: "S046-f6", etage: 1, qm: 354, konzept: "eigen", gruppe: "rad" }, { id: "S046-f7", etage: 1, qm: 268, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 84061, rohertrag: 35415, konzessionserloes: 0, untermiete: 0, personal: 18913, miete: 11269, nebenkosten: 0, sonstige: 4774, db: 460, fteBedarf: 15.58681695248675, fteIst: 19.278873529770344, umsatzJeGruppe: { sportschuhe: 27685, sporttextil: 22107, outdoor: 15199, teamsport: 4968, rad: 2971, wintersport: 11132 } } }, { id: "W062", name: "Hartwig Hamm Am Wall", stadt: "Hamm", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3200, etagen: [-1, 0, 1, 2], baujahr: 1994, fassade: 1, substanz: 87, status: "offen", flaechen: [{ id: "W062-f1", etage: -1, qm: 976, konzept: "eigen", gruppe: "food" }, { id: "W062-f2", etage: -1, qm: 2199, konzept: "eigen", gruppe: "wohnen" }, { id: "W062-f3", etage: 0, qm: 735, konzept: "eigen", gruppe: "beauty" }, { id: "W062-f4", etage: 0, qm: 1265, konzept: "eigen", gruppe: "accessoires" }, { id: "W062-f5", etage: 0, qm: 1175, konzept: "eigen", gruppe: "damen" }, { id: "W062-f6", etage: 1, qm: 1551, konzept: "eigen", gruppe: "damen" }, { id: "W062-f7", etage: 1, qm: 841, konzept: "eigen", gruppe: "waesche" }, { id: "W062-f8", etage: 1, qm: 783, konzept: "eigen", gruppe: "herren" }, { id: "W062-f9", etage: 2, qm: 669, konzept: "eigen", gruppe: "herren" }, { id: "W062-f10", etage: 2, qm: 982, konzept: "eigen", gruppe: "kinder" }, { id: "W062-f11", etage: 2, qm: 1243, konzept: "eigen", gruppe: "sport" }, { id: "W062-f12", etage: 2, qm: 581, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 284883, rohertrag: 120260, konzessionserloes: 0, untermiete: 0, personal: 71571, miete: 41062, nebenkosten: 15693, sonstige: 17530, db: -25597, fteBedarf: 60.91138640509787, fteIst: 72.01398634010162, umsatzJeGruppe: { food: 30366, wohnen: 28274, beauty: 38282, accessoires: 45102, damen: 57705, waesche: 16188, herren: 26283, kinder: 20729, sport: 15397, spielwaren: 6557 } } }, { id: "W063", name: "Hartwig Ludwigshafen", stadt: "Ludwigshafen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1950, fassade: 0, substanz: 53, status: "offen", flaechen: [{ id: "W063-f1", etage: -1, qm: 754, konzept: "eigen", gruppe: "food" }, { id: "W063-f2", etage: -1, qm: 1313, konzept: "eigen", gruppe: "wohnen" }, { id: "W063-f3", etage: 0, qm: 924, konzept: "eigen", gruppe: "beauty" }, { id: "W063-f4", etage: 0, qm: 1143, konzept: "eigen", gruppe: "accessoires" }, { id: "W063-f5", etage: 1, qm: 230, konzept: "eigen", gruppe: "accessoires" }, { id: "W063-f6", etage: 1, qm: 1836, konzept: "eigen", gruppe: "damen" }, { id: "W063-f7", etage: 2, qm: 848, konzept: "eigen", gruppe: "damen" }, { id: "W063-f8", etage: 2, qm: 974, konzept: "eigen", gruppe: "waesche" }, { id: "W063-f9", etage: 2, qm: 245, konzept: "eigen", gruppe: "herren" }, { id: "W063-f10", etage: 3, qm: 1037, konzept: "eigen", gruppe: "herren" }, { id: "W063-f11", etage: 3, qm: 692, konzept: "eigen", gruppe: "kinder" }, { id: "W063-f12", etage: 3, qm: 338, konzept: "eigen", gruppe: "sport" }, { id: "W063-f13", etage: 4, qm: 1066, konzept: "eigen", gruppe: "sport" }, { id: "W063-f14", etage: 4, qm: 837, konzept: "eigen", gruppe: "spielwaren" }, { id: "W063-f15", etage: 4, qm: 164, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 429755, rohertrag: 180621, konzessionserloes: 0, untermiete: 0, personal: 87780, miete: 37935, nebenkosten: 18442, sonstige: 23200, db: 13264, fteBedarf: 77.54743115596361, fteIst: 91.16634127729695, umsatzJeGruppe: { food: 41883, wohnen: 37748, beauty: 80829, accessoires: 61286, damen: 76363, waesche: 39585, herren: 33505, kinder: 15590, sport: 29430, spielwaren: 13537 } } }, { id: "W064", name: "Hartwig Oldenburg Neustadt", stadt: "Oldenburg", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [0, 1, 2, 3, 4, 5], baujahr: 1896, fassade: 2, substanz: 35, status: "offen", flaechen: [{ id: "W064-f1", etage: 0, qm: 868, konzept: "eigen", gruppe: "food" }, { id: "W064-f2", etage: 0, qm: 677, konzept: "eigen", gruppe: "beauty" }, { id: "W064-f3", etage: 0, qm: 772, konzept: "eigen", gruppe: "accessoires" }, { id: "W064-f4", etage: 1, qm: 860, konzept: "eigen", gruppe: "accessoires" }, { id: "W064-f5", etage: 1, qm: 1457, konzept: "eigen", gruppe: "damen" }, { id: "W064-f6", etage: 2, qm: 882, konzept: "eigen", gruppe: "damen" }, { id: "W064-f7", etage: 2, qm: 801, konzept: "eigen", gruppe: "waesche" }, { id: "W064-f8", etage: 2, qm: 634, konzept: "eigen", gruppe: "herren" }, { id: "W064-f9", etage: 3, qm: 717, konzept: "eigen", gruppe: "herren" }, { id: "W064-f10", etage: 3, qm: 1096, konzept: "eigen", gruppe: "kinder" }, { id: "W064-f11", etage: 3, qm: 504, konzept: "eigen", gruppe: "sport" }, { id: "W064-f12", etage: 4, qm: 1163, konzept: "eigen", gruppe: "sport" }, { id: "W064-f13", etage: 4, qm: 861, konzept: "eigen", gruppe: "spielwaren" }, { id: "W064-f14", etage: 4, qm: 292, konzept: "eigen", gruppe: "wohnen" }, { id: "W064-f15", etage: 5, qm: 2317, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 356155, rohertrag: 149968, konzessionserloes: 0, untermiete: 0, personal: 82294, miete: 55149, nebenkosten: 15587, sonstige: 20858, db: -23921, fteBedarf: 71.52217944618246, fteIst: 84.80035505442447, umsatzJeGruppe: { food: 27680, beauty: 47875, accessoires: 68908, damen: 55230, waesche: 19569, herren: 29868, kinder: 23068, sport: 27371, spielwaren: 11881, wohnen: 44705 } } }, { id: "W065", name: "Hartwig M\xFClheim", stadt: "M\xFClheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1918, fassade: 5, substanz: 40, status: "offen", flaechen: [{ id: "W065-f1", etage: -1, qm: 739, konzept: "eigen", gruppe: "food" }, { id: "W065-f2", etage: -1, qm: 1341, konzept: "eigen", gruppe: "wohnen" }, { id: "W065-f3", etage: 0, qm: 606, konzept: "eigen", gruppe: "beauty" }, { id: "W065-f4", etage: 0, qm: 1209, konzept: "eigen", gruppe: "accessoires" }, { id: "W065-f5", etage: 0, qm: 265, konzept: "eigen", gruppe: "damen" }, { id: "W065-f6", etage: 1, qm: 1965, konzept: "eigen", gruppe: "damen" }, { id: "W065-f7", etage: 1, qm: 115, konzept: "eigen", gruppe: "waesche" }, { id: "W065-f8", etage: 2, qm: 465, konzept: "eigen", gruppe: "waesche" }, { id: "W065-f9", etage: 2, qm: 1345, konzept: "eigen", gruppe: "herren" }, { id: "W065-f10", etage: 2, qm: 269, konzept: "eigen", gruppe: "kinder" }, { id: "W065-f11", etage: 3, qm: 423, konzept: "eigen", gruppe: "kinder" }, { id: "W065-f12", etage: 3, qm: 1073, konzept: "eigen", gruppe: "sport" }, { id: "W065-f13", etage: 3, qm: 597, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 316375, rohertrag: 134279, konzessionserloes: 0, untermiete: 0, personal: 67142, miete: 54606, nebenkosten: 13807, sonstige: 17657, db: -18934, fteBedarf: 59.64358699227566, fteIst: 67.85518485173044, umsatzJeGruppe: { food: 27951, wohnen: 28104, beauty: 44505, accessoires: 60498, damen: 61490, waesche: 19179, herren: 30825, kinder: 14238, sport: 19617, spielwaren: 9969 } } }, { id: "W066", name: "Hartwig Osnabr\xFCck", stadt: "Osnabr\xFCck", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [-1, 0, 1, 2], baujahr: 1977, fassade: 2, substanz: 72, status: "offen", flaechen: [{ id: "W066-f1", etage: -1, qm: 874, konzept: "eigen", gruppe: "food" }, { id: "W066-f2", etage: -1, qm: 2851, konzept: "eigen", gruppe: "wohnen" }, { id: "W066-f3", etage: 0, qm: 722, konzept: "eigen", gruppe: "beauty" }, { id: "W066-f4", etage: 0, qm: 1601, konzept: "eigen", gruppe: "accessoires" }, { id: "W066-f5", etage: 0, qm: 1402, konzept: "eigen", gruppe: "damen" }, { id: "W066-f6", etage: 1, qm: 1183, konzept: "eigen", gruppe: "damen" }, { id: "W066-f7", etage: 1, qm: 973, konzept: "eigen", gruppe: "waesche" }, { id: "W066-f8", etage: 1, qm: 1569, konzept: "eigen", gruppe: "herren" }, { id: "W066-f9", etage: 2, qm: 277, konzept: "eigen", gruppe: "herren" }, { id: "W066-f10", etage: 2, qm: 952, konzept: "eigen", gruppe: "kinder" }, { id: "W066-f11", etage: 2, qm: 1777, konzept: "eigen", gruppe: "sport" }, { id: "W066-f12", etage: 2, qm: 1060, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 452760, rohertrag: 190236, konzessionserloes: 0, untermiete: 0, personal: 110866, miete: 58880, nebenkosten: 18043, sonstige: 25422, db: -22974, fteBedarf: 86.07514731670713, fteIst: 111.88550443860093, umsatzJeGruppe: { food: 41026, wohnen: 57852, beauty: 57020, accessoires: 80125, damen: 65399, waesche: 29617, herren: 45570, kinder: 25091, sport: 34565, spielwaren: 16494 } } }, { id: "W067", name: "Hartwig Leverkusen Bahnhofstra\xDFe", stadt: "Leverkusen", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1, 2], baujahr: 1964, fassade: 4, substanz: 68, status: "offen", flaechen: [{ id: "W067-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W067-f2", etage: -1, qm: 1680, konzept: "eigen", gruppe: "wohnen" }, { id: "W067-f3", etage: 0, qm: 461, konzept: "eigen", gruppe: "beauty" }, { id: "W067-f4", etage: 0, qm: 1007, konzept: "eigen", gruppe: "accessoires" }, { id: "W067-f5", etage: 0, qm: 731, konzept: "eigen", gruppe: "damen" }, { id: "W067-f6", etage: 1, qm: 1124, konzept: "eigen", gruppe: "damen" }, { id: "W067-f7", etage: 1, qm: 688, konzept: "eigen", gruppe: "waesche" }, { id: "W067-f8", etage: 1, qm: 388, konzept: "eigen", gruppe: "herren" }, { id: "W067-f9", etage: 2, qm: 501, konzept: "eigen", gruppe: "herren" }, { id: "W067-f10", etage: 2, qm: 488, konzept: "eigen", gruppe: "kinder" }, { id: "W067-f11", etage: 2, qm: 1101, konzept: "eigen", gruppe: "sport" }, { id: "W067-f12", etage: 2, qm: 454, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 224449, rohertrag: 95642, konzessionserloes: 0, untermiete: 0, personal: 49163, miete: 23070, nebenkosten: 10523, sonstige: 13317, db: -431, fteBedarf: 45.781792677381304, fteIst: 50.48617987985613, umsatzJeGruppe: { food: 19010, wohnen: 26605, beauty: 28815, accessoires: 39303, damen: 43722, waesche: 20339, herren: 16897, kinder: 10255, sport: 14350, spielwaren: 5154 } } }, { id: "W068", name: "Hartwig Darmstadt Bahnhofstra\xDFe", stadt: "Darmstadt", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 2004, fassade: 6, substanz: 39, status: "offen", flaechen: [{ id: "W068-f1", etage: -1, qm: 995, konzept: "eigen", gruppe: "food" }, { id: "W068-f2", etage: -1, qm: 1088, konzept: "eigen", gruppe: "wohnen" }, { id: "W068-f3", etage: 0, qm: 888, konzept: "eigen", gruppe: "beauty" }, { id: "W068-f4", etage: 0, qm: 1195, konzept: "eigen", gruppe: "accessoires" }, { id: "W068-f5", etage: 1, qm: 218, konzept: "eigen", gruppe: "accessoires" }, { id: "W068-f6", etage: 1, qm: 1865, konzept: "eigen", gruppe: "damen" }, { id: "W068-f7", etage: 2, qm: 674, konzept: "eigen", gruppe: "damen" }, { id: "W068-f8", etage: 2, qm: 722, konzept: "eigen", gruppe: "waesche" }, { id: "W068-f9", etage: 2, qm: 687, konzept: "eigen", gruppe: "herren" }, { id: "W068-f10", etage: 3, qm: 925, konzept: "eigen", gruppe: "herren" }, { id: "W068-f11", etage: 3, qm: 994, konzept: "eigen", gruppe: "kinder" }, { id: "W068-f12", etage: 3, qm: 165, konzept: "eigen", gruppe: "sport" }, { id: "W068-f13", etage: 4, qm: 838, konzept: "eigen", gruppe: "sport" }, { id: "W068-f14", etage: 4, qm: 762, konzept: "eigen", gruppe: "spielwaren" }, { id: "W068-f15", etage: 4, qm: 483, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 348945, rohertrag: 147547, konzessionserloes: 0, untermiete: 0, personal: 72635, miete: 74721, nebenkosten: 0, sonstige: 19931, db: -19740, fteBedarf: 67.7948143550212, fteIst: 74.05785589868562, umsatzJeGruppe: { food: 33914, wohnen: 23045, beauty: 60922, accessoires: 64821, damen: 60287, waesche: 20902, herren: 40183, kinder: 19575, sport: 16183, spielwaren: 9114 } } }, { id: "W069", name: "Hartwig Heidelberg", stadt: "Heidelberg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 4200, etagen: [-1, 0, 1, 2], baujahr: 1901, fassade: 3, substanz: 58, status: "offen", flaechen: [{ id: "W069-f1", etage: -1, qm: 1297, konzept: "eigen", gruppe: "food" }, { id: "W069-f2", etage: -1, qm: 2853, konzept: "eigen", gruppe: "wohnen" }, { id: "W069-f3", etage: 0, qm: 914, konzept: "eigen", gruppe: "beauty" }, { id: "W069-f4", etage: 0, qm: 1727, konzept: "eigen", gruppe: "accessoires" }, { id: "W069-f5", etage: 0, qm: 1509, konzept: "eigen", gruppe: "damen" }, { id: "W069-f6", etage: 1, qm: 1118, konzept: "eigen", gruppe: "damen" }, { id: "W069-f7", etage: 1, qm: 1169, konzept: "eigen", gruppe: "waesche" }, { id: "W069-f8", etage: 1, qm: 1863, konzept: "eigen", gruppe: "herren" }, { id: "W069-f9", etage: 2, qm: 132, konzept: "eigen", gruppe: "herren" }, { id: "W069-f10", etage: 2, qm: 1401, konzept: "eigen", gruppe: "kinder" }, { id: "W069-f11", etage: 2, qm: 1725, konzept: "eigen", gruppe: "sport" }, { id: "W069-f12", etage: 2, qm: 949, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 489213, rohertrag: 203933, konzessionserloes: 0, untermiete: 0, personal: 116365, miete: 47545, nebenkosten: 19745, sonstige: 27553, db: -7275, fteBedarf: 93.33639216198918, fteIst: 116.9917581155009, umsatzJeGruppe: { food: 62227, wohnen: 51711, beauty: 73859, accessoires: 66061, damen: 81319, waesche: 36801, herren: 44298, kinder: 31624, sport: 26390, spielwaren: 14923 } } }, { id: "W070", name: "Hartwig Solingen", stadt: "Solingen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2900, etagen: [-1, 0, 1, 2], baujahr: 2002, fassade: 1, substanz: 47, status: "offen", flaechen: [{ id: "W070-f1", etage: -1, qm: 697, konzept: "eigen", gruppe: "food" }, { id: "W070-f2", etage: -1, qm: 2228, konzept: "eigen", gruppe: "wohnen" }, { id: "W070-f3", etage: 0, qm: 863, konzept: "eigen", gruppe: "beauty" }, { id: "W070-f4", etage: 0, qm: 1203, konzept: "eigen", gruppe: "accessoires" }, { id: "W070-f5", etage: 0, qm: 859, konzept: "eigen", gruppe: "damen" }, { id: "W070-f6", etage: 1, qm: 1617, konzept: "eigen", gruppe: "damen" }, { id: "W070-f7", etage: 1, qm: 725, konzept: "eigen", gruppe: "waesche" }, { id: "W070-f8", etage: 1, qm: 584, konzept: "eigen", gruppe: "herren" }, { id: "W070-f9", etage: 2, qm: 854, konzept: "eigen", gruppe: "herren" }, { id: "W070-f10", etage: 2, qm: 624, konzept: "eigen", gruppe: "kinder" }, { id: "W070-f11", etage: 2, qm: 1442, konzept: "eigen", gruppe: "sport" }, { id: "W070-f12", etage: 2, qm: 591, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 423994, rohertrag: 178474, konzessionserloes: 0, untermiete: 0, personal: 88030, miete: 54382, nebenkosten: 15780, sonstige: 22913, db: -2631, fteBedarf: 76.50796448447498, fteIst: 90.63549154864674, umsatzJeGruppe: { food: 31403, wohnen: 52470, beauty: 84324, accessoires: 64934, damen: 72150, waesche: 21564, herren: 45840, kinder: 14711, sport: 28503, spielwaren: 8094 } } }, { id: "W071", name: "Hartwig Regensburg Einkaufszentrum", stadt: "Regensburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1951, fassade: 6, substanz: 51, status: "offen", flaechen: [{ id: "W071-f1", etage: -1, qm: 1099, konzept: "eigen", gruppe: "food" }, { id: "W071-f2", etage: -1, qm: 1385, konzept: "eigen", gruppe: "wohnen" }, { id: "W071-f3", etage: 0, qm: 821, konzept: "eigen", gruppe: "beauty" }, { id: "W071-f4", etage: 0, qm: 1636, konzept: "eigen", gruppe: "accessoires" }, { id: "W071-f5", etage: 0, qm: 26, konzept: "eigen", gruppe: "damen" }, { id: "W071-f6", etage: 1, qm: 2483, konzept: "eigen", gruppe: "damen" }, { id: "W071-f7", etage: 2, qm: 292, konzept: "eigen", gruppe: "damen" }, { id: "W071-f8", etage: 2, qm: 958, konzept: "eigen", gruppe: "waesche" }, { id: "W071-f9", etage: 2, qm: 1233, konzept: "eigen", gruppe: "herren" }, { id: "W071-f10", etage: 3, qm: 624, konzept: "eigen", gruppe: "herren" }, { id: "W071-f11", etage: 3, qm: 908, konzept: "eigen", gruppe: "kinder" }, { id: "W071-f12", etage: 3, qm: 951, konzept: "eigen", gruppe: "sport" }, { id: "W071-f13", etage: 4, qm: 876, konzept: "eigen", gruppe: "sport" }, { id: "W071-f14", etage: 4, qm: 852, konzept: "eigen", gruppe: "spielwaren" }, { id: "W071-f15", etage: 4, qm: 755, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 408117, rohertrag: 171541, konzessionserloes: 0, untermiete: 0, personal: 92220, miete: 67021, nebenkosten: 15793, sonstige: 23437, db: -26930, fteBedarf: 79.91215555938443, fteIst: 93.53863691089289, umsatzJeGruppe: { food: 36513, wohnen: 31591, beauty: 72069, accessoires: 70223, damen: 71295, waesche: 24339, herren: 37018, kinder: 21424, sport: 30023, spielwaren: 13621 } } }, { id: "W072", name: "Hartwig Paderborn", stadt: "Paderborn", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2, 3], baujahr: 1955, fassade: 0, substanz: 43, status: "offen", flaechen: [{ id: "W072-f1", etage: -1, qm: 664, konzept: "eigen", gruppe: "food" }, { id: "W072-f2", etage: -1, qm: 1296, konzept: "eigen", gruppe: "wohnen" }, { id: "W072-f3", etage: 0, qm: 579, konzept: "eigen", gruppe: "beauty" }, { id: "W072-f4", etage: 0, qm: 819, konzept: "eigen", gruppe: "accessoires" }, { id: "W072-f5", etage: 0, qm: 562, konzept: "eigen", gruppe: "damen" }, { id: "W072-f6", etage: 1, qm: 1845, konzept: "eigen", gruppe: "damen" }, { id: "W072-f7", etage: 1, qm: 115, konzept: "eigen", gruppe: "waesche" }, { id: "W072-f8", etage: 2, qm: 467, konzept: "eigen", gruppe: "waesche" }, { id: "W072-f9", etage: 2, qm: 1070, konzept: "eigen", gruppe: "herren" }, { id: "W072-f10", etage: 2, qm: 424, konzept: "eigen", gruppe: "kinder" }, { id: "W072-f11", etage: 3, qm: 433, konzept: "eigen", gruppe: "kinder" }, { id: "W072-f12", etage: 3, qm: 814, konzept: "eigen", gruppe: "sport" }, { id: "W072-f13", etage: 3, qm: 677, konzept: "eigen", gruppe: "spielwaren" }, { id: "W072-f14", etage: 3, qm: 35, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 281185, rohertrag: 118448, konzessionserloes: 0, untermiete: 0, personal: 66941, miete: 40041, nebenkosten: 12390, sonstige: 15939, db: -16863, fteBedarf: 54.1175509102335, fteIst: 67.31589840966596, umsatzJeGruppe: { food: 28931, wohnen: 26886, beauty: 46607, accessoires: 38166, damen: 62745, waesche: 15865, herren: 22942, kinder: 18242, sport: 11806, spielwaren: 8995 } } }, { id: "W073", name: "Hartwig Ingolstadt", stadt: "Ingolstadt", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1927, fassade: 7, substanz: 76, status: "offen", flaechen: [{ id: "W073-f1", etage: -1, qm: 506, konzept: "eigen", gruppe: "food" }, { id: "W073-f2", etage: -1, qm: 1028, konzept: "eigen", gruppe: "wohnen" }, { id: "W073-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W073-f4", etage: 0, qm: 1102, konzept: "eigen", gruppe: "accessoires" }, { id: "W073-f5", etage: 1, qm: 48, konzept: "eigen", gruppe: "accessoires" }, { id: "W073-f6", etage: 1, qm: 1486, konzept: "eigen", gruppe: "damen" }, { id: "W073-f7", etage: 2, qm: 492, konzept: "eigen", gruppe: "damen" }, { id: "W073-f8", etage: 2, qm: 569, konzept: "eigen", gruppe: "waesche" }, { id: "W073-f9", etage: 2, qm: 473, konzept: "eigen", gruppe: "herren" }, { id: "W073-f10", etage: 3, qm: 536, konzept: "eigen", gruppe: "herren" }, { id: "W073-f11", etage: 3, qm: 652, konzept: "eigen", gruppe: "kinder" }, { id: "W073-f12", etage: 3, qm: 345, konzept: "eigen", gruppe: "sport" }, { id: "W073-f13", etage: 4, qm: 739, konzept: "eigen", gruppe: "sport" }, { id: "W073-f14", etage: 4, qm: 597, konzept: "eigen", gruppe: "spielwaren" }, { id: "W073-f15", etage: 4, qm: 198, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 278999, rohertrag: 119002, konzessionserloes: 0, untermiete: 0, personal: 59699, miete: 40530, nebenkosten: 10068, sonstige: 15580, db: -6874, fteBedarf: 52.62232814910955, fteIst: 60.036515679849245, umsatzJeGruppe: { food: 21256, wohnen: 27519, beauty: 37271, accessoires: 55365, damen: 59546, waesche: 16506, herren: 22860, kinder: 12681, sport: 17894, spielwaren: 8100 } } }, { id: "W074", name: "Hartwig W\xFCrzburg", stadt: "W\xFCrzburg", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1, 2], baujahr: 1973, fassade: 2, substanz: 33, status: "offen", flaechen: [{ id: "W074-f1", etage: -1, qm: 771, konzept: "eigen", gruppe: "food" }, { id: "W074-f2", etage: -1, qm: 2054, konzept: "eigen", gruppe: "wohnen" }, { id: "W074-f3", etage: 0, qm: 536, konzept: "eigen", gruppe: "beauty" }, { id: "W074-f4", etage: 0, qm: 1383, konzept: "eigen", gruppe: "accessoires" }, { id: "W074-f5", etage: 0, qm: 906, konzept: "eigen", gruppe: "damen" }, { id: "W074-f6", etage: 1, qm: 920, konzept: "eigen", gruppe: "damen" }, { id: "W074-f7", etage: 1, qm: 782, konzept: "eigen", gruppe: "waesche" }, { id: "W074-f8", etage: 1, qm: 1123, konzept: "eigen", gruppe: "herren" }, { id: "W074-f9", etage: 2, qm: 600, konzept: "eigen", gruppe: "herren" }, { id: "W074-f10", etage: 2, qm: 649, konzept: "eigen", gruppe: "kinder" }, { id: "W074-f11", etage: 2, qm: 939, konzept: "eigen", gruppe: "sport" }, { id: "W074-f12", etage: 2, qm: 625, konzept: "eigen", gruppe: "spielwaren" }, { id: "W074-f13", etage: 2, qm: 12, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 398689, rohertrag: 167046, konzessionserloes: 0, untermiete: 0, personal: 93523, miete: 53333, nebenkosten: 14173, sonstige: 21431, db: -15414, fteBedarf: 71.46526933716856, fteIst: 96.58136190461292, umsatzJeGruppe: { food: 46650, wohnen: 57506, beauty: 51054, accessoires: 73003, damen: 51051, waesche: 26957, herren: 47584, kinder: 18034, sport: 15927, spielwaren: 10923 } } }, { id: "W075", name: "Hartwig Ulm", stadt: "Ulm", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2800, etagen: [0, 1, 2, 3], baujahr: 1952, fassade: 0, substanz: 85, status: "offen", flaechen: [{ id: "W075-f1", etage: 0, qm: 753, konzept: "eigen", gruppe: "food" }, { id: "W075-f2", etage: 0, qm: 802, konzept: "eigen", gruppe: "beauty" }, { id: "W075-f3", etage: 0, qm: 1022, konzept: "eigen", gruppe: "accessoires" }, { id: "W075-f4", etage: 0, qm: 198, konzept: "eigen", gruppe: "damen" }, { id: "W075-f5", etage: 1, qm: 2367, konzept: "eigen", gruppe: "damen" }, { id: "W075-f6", etage: 1, qm: 408, konzept: "eigen", gruppe: "waesche" }, { id: "W075-f7", etage: 2, qm: 356, konzept: "eigen", gruppe: "waesche" }, { id: "W075-f8", etage: 2, qm: 1210, konzept: "eigen", gruppe: "herren" }, { id: "W075-f9", etage: 2, qm: 717, konzept: "eigen", gruppe: "kinder" }, { id: "W075-f10", etage: 2, qm: 492, konzept: "eigen", gruppe: "sport" }, { id: "W075-f11", etage: 3, qm: 706, konzept: "eigen", gruppe: "sport" }, { id: "W075-f12", etage: 3, qm: 642, konzept: "eigen", gruppe: "spielwaren" }, { id: "W075-f13", etage: 3, qm: 1427, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 455098, rohertrag: 189230, konzessionserloes: 0, untermiete: 0, personal: 91561, miete: 61925, nebenkosten: 12620, sonstige: 23654, db: -530, fteBedarf: 78.05033022258182, fteIst: 92.93549910869459, umsatzJeGruppe: { food: 50651, beauty: 104436, accessoires: 58055, damen: 79877, waesche: 28632, herren: 41437, kinder: 21212, sport: 24775, spielwaren: 12803, wohnen: 33220 } } }, { id: "W076", name: "Hartwig Wolfsburg Galerie am Fluss", stadt: "Wolfsburg", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 4e3, etagen: [-1, 0, 1, 2], baujahr: 1989, fassade: 3, substanz: 72, status: "offen", flaechen: [{ id: "W076-f1", etage: -1, qm: 875, konzept: "eigen", gruppe: "food" }, { id: "W076-f2", etage: -1, qm: 3100, konzept: "eigen", gruppe: "wohnen" }, { id: "W076-f3", etage: 0, qm: 976, konzept: "eigen", gruppe: "beauty" }, { id: "W076-f4", etage: 0, qm: 1563, konzept: "eigen", gruppe: "accessoires" }, { id: "W076-f5", etage: 0, qm: 1436, konzept: "eigen", gruppe: "damen" }, { id: "W076-f6", etage: 1, qm: 1480, konzept: "eigen", gruppe: "damen" }, { id: "W076-f7", etage: 1, qm: 1227, konzept: "eigen", gruppe: "waesche" }, { id: "W076-f8", etage: 1, qm: 1269, konzept: "eigen", gruppe: "herren" }, { id: "W076-f9", etage: 2, qm: 371, konzept: "eigen", gruppe: "herren" }, { id: "W076-f10", etage: 2, qm: 1278, konzept: "eigen", gruppe: "kinder" }, { id: "W076-f11", etage: 2, qm: 1992, konzept: "eigen", gruppe: "sport" }, { id: "W076-f12", etage: 2, qm: 1193, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 500430, rohertrag: 210142, konzessionserloes: 0, untermiete: 0, personal: 112735, miete: 113290, nebenkosten: 0, sonstige: 28060, db: -43942, fteBedarf: 94.97014585477983, fteIst: 116.22600399086899, umsatzJeGruppe: { food: 38263, wohnen: 62165, beauty: 85447, accessoires: 67165, damen: 84024, waesche: 32809, herren: 46465, kinder: 27122, sport: 39927, spielwaren: 17042 } } }, { id: "W077", name: "Hartwig G\xF6ttingen", stadt: "G\xF6ttingen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2, 3], baujahr: 1921, fassade: 3, substanz: 76, status: "offen", flaechen: [{ id: "W077-f1", etage: -1, qm: 599, konzept: "eigen", gruppe: "food" }, { id: "W077-f2", etage: -1, qm: 1181, konzept: "eigen", gruppe: "wohnen" }, { id: "W077-f3", etage: 0, qm: 626, konzept: "eigen", gruppe: "beauty" }, { id: "W077-f4", etage: 0, qm: 671, konzept: "eigen", gruppe: "accessoires" }, { id: "W077-f5", etage: 0, qm: 484, konzept: "eigen", gruppe: "damen" }, { id: "W077-f6", etage: 1, qm: 1669, konzept: "eigen", gruppe: "damen" }, { id: "W077-f7", etage: 1, qm: 111, konzept: "eigen", gruppe: "waesche" }, { id: "W077-f8", etage: 2, qm: 622, konzept: "eigen", gruppe: "waesche" }, { id: "W077-f9", etage: 2, qm: 1004, konzept: "eigen", gruppe: "herren" }, { id: "W077-f10", etage: 2, qm: 154, konzept: "eigen", gruppe: "kinder" }, { id: "W077-f11", etage: 3, qm: 349, konzept: "eigen", gruppe: "kinder" }, { id: "W077-f12", etage: 3, qm: 908, konzept: "eigen", gruppe: "sport" }, { id: "W077-f13", etage: 3, qm: 638, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 285471, rohertrag: 120762, konzessionserloes: 0, untermiete: 0, personal: 61588, miete: 27672, nebenkosten: 13224, sonstige: 15762, db: 2516, fteBedarf: 53.1335837797041, fteIst: 61.905744077275685, umsatzJeGruppe: { food: 23655, wohnen: 21458, beauty: 56779, accessoires: 32804, damen: 57099, waesche: 24209, herren: 28817, kinder: 14630, sport: 14564, spielwaren: 11456 } } }, { id: "W078", name: "Hartwig Pforzheim Bahnhofstra\xDFe", stadt: "Pforzheim", format: "warenhaus", lage: "b", cluster: "grossstadt", grundflaecheQm: 3e3, etagen: [0, 1, 2, 3, 4], baujahr: 1937, fassade: 5, substanz: 55, status: "offen", flaechen: [{ id: "W078-f1", etage: 0, qm: 1249, konzept: "eigen", gruppe: "food" }, { id: "W078-f2", etage: 0, qm: 937, konzept: "eigen", gruppe: "beauty" }, { id: "W078-f3", etage: 0, qm: 814, konzept: "eigen", gruppe: "accessoires" }, { id: "W078-f4", etage: 1, qm: 770, konzept: "eigen", gruppe: "accessoires" }, { id: "W078-f5", etage: 1, qm: 2230, konzept: "eigen", gruppe: "damen" }, { id: "W078-f6", etage: 2, qm: 395, konzept: "eigen", gruppe: "damen" }, { id: "W078-f7", etage: 2, qm: 1213, konzept: "eigen", gruppe: "waesche" }, { id: "W078-f8", etage: 2, qm: 1392, konzept: "eigen", gruppe: "herren" }, { id: "W078-f9", etage: 3, qm: 390, konzept: "eigen", gruppe: "herren" }, { id: "W078-f10", etage: 3, qm: 1097, konzept: "eigen", gruppe: "kinder" }, { id: "W078-f11", etage: 3, qm: 1379, konzept: "eigen", gruppe: "sport" }, { id: "W078-f12", etage: 3, qm: 134, konzept: "eigen", gruppe: "spielwaren" }, { id: "W078-f13", etage: 4, qm: 683, konzept: "eigen", gruppe: "spielwaren" }, { id: "W078-f14", etage: 4, qm: 2317, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 372646, rohertrag: 156116, konzessionserloes: 0, untermiete: 0, personal: 96991, miete: 33109, nebenkosten: 20184, sonstige: 22028, db: -16197, fteBedarf: 75.67169598181093, fteIst: 99.54701479934208, umsatzJeGruppe: { food: 45996, beauty: 56948, accessoires: 55192, damen: 55630, waesche: 34948, herren: 37144, kinder: 16910, sport: 18595, spielwaren: 9502, wohnen: 41782 } } }, { id: "W079", name: "Hartwig Offenbach", stadt: "Offenbach", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1, 2, 3], baujahr: 1913, fassade: 0, substanz: 44, status: "offen", flaechen: [{ id: "W079-f1", etage: -1, qm: 944, konzept: "eigen", gruppe: "food" }, { id: "W079-f2", etage: -1, qm: 1756, konzept: "eigen", gruppe: "wohnen" }, { id: "W079-f3", etage: 0, qm: 768, konzept: "eigen", gruppe: "beauty" }, { id: "W079-f4", etage: 0, qm: 1349, konzept: "eigen", gruppe: "accessoires" }, { id: "W079-f5", etage: 0, qm: 583, konzept: "eigen", gruppe: "damen" }, { id: "W079-f6", etage: 1, qm: 2058, konzept: "eigen", gruppe: "damen" }, { id: "W079-f7", etage: 1, qm: 642, konzept: "eigen", gruppe: "waesche" }, { id: "W079-f8", etage: 2, qm: 420, konzept: "eigen", gruppe: "waesche" }, { id: "W079-f9", etage: 2, qm: 1670, konzept: "eigen", gruppe: "herren" }, { id: "W079-f10", etage: 2, qm: 609, konzept: "eigen", gruppe: "kinder" }, { id: "W079-f11", etage: 3, qm: 161, konzept: "eigen", gruppe: "kinder" }, { id: "W079-f12", etage: 3, qm: 1228, konzept: "eigen", gruppe: "sport" }, { id: "W079-f13", etage: 3, qm: 749, konzept: "eigen", gruppe: "spielwaren" }, { id: "W079-f14", etage: 3, qm: 561, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 419800, rohertrag: 177495, konzessionserloes: 0, untermiete: 0, personal: 93625, miete: 53294, nebenkosten: 19738, sonstige: 23286, db: -12448, fteBedarf: 78.44626198751102, fteIst: 96.0801887770173, umsatzJeGruppe: { food: 42524, wohnen: 45556, beauty: 63123, accessoires: 69221, damen: 71773, waesche: 34081, herren: 44802, kinder: 15911, sport: 22153, spielwaren: 10656 } } }, { id: "W080", name: "Hartwig Heilbronn", stadt: "Heilbronn", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2300, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1914, fassade: 0, substanz: 41, status: "offen", flaechen: [{ id: "W080-f1", etage: -1, qm: 966, konzept: "eigen", gruppe: "food" }, { id: "W080-f2", etage: -1, qm: 1368, konzept: "eigen", gruppe: "wohnen" }, { id: "W080-f3", etage: 0, qm: 767, konzept: "eigen", gruppe: "beauty" }, { id: "W080-f4", etage: 0, qm: 1425, konzept: "eigen", gruppe: "accessoires" }, { id: "W080-f5", etage: 0, qm: 142, konzept: "eigen", gruppe: "damen" }, { id: "W080-f6", etage: 1, qm: 2333, konzept: "eigen", gruppe: "damen" }, { id: "W080-f7", etage: 2, qm: 711, konzept: "eigen", gruppe: "damen" }, { id: "W080-f8", etage: 2, qm: 1006, konzept: "eigen", gruppe: "waesche" }, { id: "W080-f9", etage: 2, qm: 617, konzept: "eigen", gruppe: "herren" }, { id: "W080-f10", etage: 3, qm: 756, konzept: "eigen", gruppe: "herren" }, { id: "W080-f11", etage: 3, qm: 1124, konzept: "eigen", gruppe: "kinder" }, { id: "W080-f12", etage: 3, qm: 454, konzept: "eigen", gruppe: "sport" }, { id: "W080-f13", etage: 4, qm: 788, konzept: "eigen", gruppe: "sport" }, { id: "W080-f14", etage: 4, qm: 788, konzept: "eigen", gruppe: "spielwaren" }, { id: "W080-f15", etage: 4, qm: 757, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 433089, rohertrag: 182690, konzessionserloes: 0, untermiete: 0, personal: 103956, miete: 42353, nebenkosten: 18088, sonstige: 24058, db: -5765, fteBedarf: 81.0949679501219, fteIst: 106.9578032767022, umsatzJeGruppe: { food: 45379, wohnen: 47137, beauty: 70071, accessoires: 59859, damen: 94847, waesche: 30915, herren: 31432, kinder: 22918, sport: 19648, spielwaren: 10882 } } }, { id: "W081", name: "Hartwig Bremerhaven", stadt: "Bremerhaven", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2900, etagen: [0, 1, 2, 3, 4], baujahr: 1984, fassade: 1, substanz: 39, status: "offen", flaechen: [{ id: "W081-f1", etage: 0, qm: 1100, konzept: "eigen", gruppe: "food" }, { id: "W081-f2", etage: 0, qm: 867, konzept: "eigen", gruppe: "beauty" }, { id: "W081-f3", etage: 0, qm: 913, konzept: "eigen", gruppe: "accessoires" }, { id: "W081-f4", etage: 1, qm: 461, konzept: "eigen", gruppe: "accessoires" }, { id: "W081-f5", etage: 1, qm: 2419, konzept: "eigen", gruppe: "damen" }, { id: "W081-f6", etage: 2, qm: 630, konzept: "eigen", gruppe: "damen" }, { id: "W081-f7", etage: 2, qm: 893, konzept: "eigen", gruppe: "waesche" }, { id: "W081-f8", etage: 2, qm: 1357, konzept: "eigen", gruppe: "herren" }, { id: "W081-f9", etage: 3, qm: 332, konzept: "eigen", gruppe: "herren" }, { id: "W081-f10", etage: 3, qm: 892, konzept: "eigen", gruppe: "kinder" }, { id: "W081-f11", etage: 3, qm: 1406, konzept: "eigen", gruppe: "sport" }, { id: "W081-f12", etage: 3, qm: 250, konzept: "eigen", gruppe: "spielwaren" }, { id: "W081-f13", etage: 4, qm: 590, konzept: "eigen", gruppe: "spielwaren" }, { id: "W081-f14", etage: 4, qm: 2290, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 364211, rohertrag: 152969, konzessionserloes: 0, untermiete: 0, personal: 85323, miete: 37193, nebenkosten: 19313, sonstige: 21413, db: -10272, fteBedarf: 73.47684547615721, fteIst: 86.1167648364924, umsatzJeGruppe: { food: 40885, beauty: 49273, accessoires: 43350, damen: 76049, waesche: 25636, herren: 32417, kinder: 15573, sport: 22949, spielwaren: 11556, wohnen: 46521 } } }, { id: "W082", name: "Hartwig Trier", stadt: "Trier", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1600, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1994, fassade: 6, substanz: 61, status: "offen", flaechen: [{ id: "W082-f1", etage: -1, qm: 584, konzept: "eigen", gruppe: "food" }, { id: "W082-f2", etage: -1, qm: 983, konzept: "eigen", gruppe: "wohnen" }, { id: "W082-f3", etage: 0, qm: 531, konzept: "eigen", gruppe: "beauty" }, { id: "W082-f4", etage: 0, qm: 833, konzept: "eigen", gruppe: "accessoires" }, { id: "W082-f5", etage: 0, qm: 203, konzept: "eigen", gruppe: "damen" }, { id: "W082-f6", etage: 1, qm: 1526, konzept: "eigen", gruppe: "damen" }, { id: "W082-f7", etage: 1, qm: 41, konzept: "eigen", gruppe: "waesche" }, { id: "W082-f8", etage: 2, qm: 654, konzept: "eigen", gruppe: "waesche" }, { id: "W082-f9", etage: 2, qm: 913, konzept: "eigen", gruppe: "herren" }, { id: "W082-f10", etage: 3, qm: 406, konzept: "eigen", gruppe: "herren" }, { id: "W082-f11", etage: 3, qm: 671, konzept: "eigen", gruppe: "kinder" }, { id: "W082-f12", etage: 3, qm: 490, konzept: "eigen", gruppe: "sport" }, { id: "W082-f13", etage: 4, qm: 610, konzept: "eigen", gruppe: "sport" }, { id: "W082-f14", etage: 4, qm: 615, konzept: "eigen", gruppe: "spielwaren" }, { id: "W082-f15", etage: 4, qm: 342, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 296021, rohertrag: 125326, konzessionserloes: 0, untermiete: 0, personal: 65086, miete: 46347, nebenkosten: 12142, sonstige: 16368, db: -14618, fteBedarf: 55.139067866867336, fteIst: 66.78537801156742, umsatzJeGruppe: { food: 24957, wohnen: 25470, beauty: 44139, accessoires: 40878, damen: 49387, waesche: 20987, herren: 40429, kinder: 16345, sport: 23884, spielwaren: 9546 } } }, { id: "W083", name: "Hartwig Koblenz Arkaden", stadt: "Koblenz", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 4100, etagen: [0, 1, 2, 3], baujahr: 1931, fassade: 2, substanz: 87, status: "offen", flaechen: [{ id: "W083-f1", etage: 0, qm: 1175, konzept: "eigen", gruppe: "food" }, { id: "W083-f2", etage: 0, qm: 1163, konzept: "eigen", gruppe: "beauty" }, { id: "W083-f3", etage: 0, qm: 1364, konzept: "eigen", gruppe: "accessoires" }, { id: "W083-f4", etage: 0, qm: 348, konzept: "eigen", gruppe: "damen" }, { id: "W083-f5", etage: 1, qm: 2606, konzept: "eigen", gruppe: "damen" }, { id: "W083-f6", etage: 1, qm: 1444, konzept: "eigen", gruppe: "waesche" }, { id: "W083-f7", etage: 2, qm: 90, konzept: "eigen", gruppe: "waesche" }, { id: "W083-f8", etage: 2, qm: 1740, konzept: "eigen", gruppe: "herren" }, { id: "W083-f9", etage: 2, qm: 1007, konzept: "eigen", gruppe: "kinder" }, { id: "W083-f10", etage: 2, qm: 1212, konzept: "eigen", gruppe: "sport" }, { id: "W083-f11", etage: 3, qm: 308, konzept: "eigen", gruppe: "sport" }, { id: "W083-f12", etage: 3, qm: 1197, konzept: "eigen", gruppe: "spielwaren" }, { id: "W083-f13", etage: 3, qm: 2545, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 421035, rohertrag: 176174, konzessionserloes: 0, untermiete: 0, personal: 89750, miete: 54354, nebenkosten: 22496, sonstige: 24552, db: -14977, fteBedarf: 84.15255396038125, fteIst: 90.7486162454476, umsatzJeGruppe: { food: 42371, beauty: 78329, accessoires: 53733, damen: 67432, waesche: 37867, herren: 36625, kinder: 20950, sport: 22065, spielwaren: 16905, wohnen: 44757 } } }, { id: "W084", name: "Hartwig Jena", stadt: "Jena", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 3700, etagen: [0, 1, 2, 3], baujahr: 1977, fassade: 5, substanz: 40, status: "offen", flaechen: [{ id: "W084-f1", etage: 0, qm: 1066, konzept: "eigen", gruppe: "food" }, { id: "W084-f2", etage: 0, qm: 849, konzept: "eigen", gruppe: "beauty" }, { id: "W084-f3", etage: 0, qm: 1341, konzept: "eigen", gruppe: "accessoires" }, { id: "W084-f4", etage: 0, qm: 444, konzept: "eigen", gruppe: "damen" }, { id: "W084-f5", etage: 1, qm: 2418, konzept: "eigen", gruppe: "damen" }, { id: "W084-f6", etage: 1, qm: 1080, konzept: "eigen", gruppe: "waesche" }, { id: "W084-f7", etage: 1, qm: 202, konzept: "eigen", gruppe: "herren" }, { id: "W084-f8", etage: 2, qm: 1620, konzept: "eigen", gruppe: "herren" }, { id: "W084-f9", etage: 2, qm: 833, konzept: "eigen", gruppe: "kinder" }, { id: "W084-f10", etage: 2, qm: 1247, konzept: "eigen", gruppe: "sport" }, { id: "W084-f11", etage: 3, qm: 580, konzept: "eigen", gruppe: "sport" }, { id: "W084-f12", etage: 3, qm: 880, konzept: "eigen", gruppe: "spielwaren" }, { id: "W084-f13", etage: 3, qm: 2240, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 418729, rohertrag: 175387, konzessionserloes: 0, untermiete: 0, personal: 104315, miete: 62750, nebenkosten: 21111, sonstige: 23828, db: -36617, fteBedarf: 80.99693141011863, fteIst: 104.49131323756708, umsatzJeGruppe: { food: 43526, beauty: 63348, accessoires: 54755, damen: 71303, waesche: 31802, herren: 40826, kinder: 21322, sport: 34673, spielwaren: 13968, wohnen: 43207 } } }, { id: "W085", name: "Hartwig Siegen", stadt: "Siegen", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2, 3], baujahr: 1927, fassade: 4, substanz: 55, status: "offen", flaechen: [{ id: "W085-f1", etage: -1, qm: 675, konzept: "eigen", gruppe: "food" }, { id: "W085-f2", etage: -1, qm: 1385, konzept: "eigen", gruppe: "wohnen" }, { id: "W085-f3", etage: 0, qm: 613, konzept: "eigen", gruppe: "beauty" }, { id: "W085-f4", etage: 0, qm: 1088, konzept: "eigen", gruppe: "accessoires" }, { id: "W085-f5", etage: 0, qm: 359, konzept: "eigen", gruppe: "damen" }, { id: "W085-f6", etage: 1, qm: 1511, konzept: "eigen", gruppe: "damen" }, { id: "W085-f7", etage: 1, qm: 549, konzept: "eigen", gruppe: "waesche" }, { id: "W085-f8", etage: 2, qm: 227, konzept: "eigen", gruppe: "waesche" }, { id: "W085-f9", etage: 2, qm: 1321, konzept: "eigen", gruppe: "herren" }, { id: "W085-f10", etage: 2, qm: 512, konzept: "eigen", gruppe: "kinder" }, { id: "W085-f11", etage: 3, qm: 56, konzept: "eigen", gruppe: "kinder" }, { id: "W085-f12", etage: 3, qm: 1107, konzept: "eigen", gruppe: "sport" }, { id: "W085-f13", etage: 3, qm: 553, konzept: "eigen", gruppe: "spielwaren" }, { id: "W085-f14", etage: 3, qm: 345, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 328902, rohertrag: 138900, konzessionserloes: 0, untermiete: 0, personal: 70885, miete: 25961, nebenkosten: 13307, sonstige: 18120, db: 10626, fteBedarf: 60.97082378608198, fteIst: 72.54402763085625, umsatzJeGruppe: { food: 24956, wohnen: 32419, beauty: 59712, accessoires: 52275, damen: 59393, waesche: 21314, herren: 30981, kinder: 15624, sport: 22106, spielwaren: 10122 } } }, { id: "W086", name: "Hartwig Hildesheim", stadt: "Hildesheim", format: "warenhaus", lage: "1a", cluster: "grossstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1915, fassade: 0, substanz: 66, status: "offen", flaechen: [{ id: "W086-f1", etage: -1, qm: 726, konzept: "eigen", gruppe: "food" }, { id: "W086-f2", etage: -1, qm: 740, konzept: "eigen", gruppe: "wohnen" }, { id: "W086-f3", etage: 0, qm: 496, konzept: "eigen", gruppe: "beauty" }, { id: "W086-f4", etage: 0, qm: 971, konzept: "eigen", gruppe: "accessoires" }, { id: "W086-f5", etage: 1, qm: 25, konzept: "eigen", gruppe: "accessoires" }, { id: "W086-f6", etage: 1, qm: 1441, konzept: "eigen", gruppe: "damen" }, { id: "W086-f7", etage: 2, qm: 129, konzept: "eigen", gruppe: "damen" }, { id: "W086-f8", etage: 2, qm: 634, konzept: "eigen", gruppe: "waesche" }, { id: "W086-f9", etage: 2, qm: 704, konzept: "eigen", gruppe: "herren" }, { id: "W086-f10", etage: 3, qm: 562, konzept: "eigen", gruppe: "herren" }, { id: "W086-f11", etage: 3, qm: 507, konzept: "eigen", gruppe: "kinder" }, { id: "W086-f12", etage: 3, qm: 398, konzept: "eigen", gruppe: "sport" }, { id: "W086-f13", etage: 4, qm: 298, konzept: "eigen", gruppe: "sport" }, { id: "W086-f14", etage: 4, qm: 593, konzept: "eigen", gruppe: "spielwaren" }, { id: "W086-f15", etage: 4, qm: 575, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 258981, rohertrag: 109383, konzessionserloes: 0, untermiete: 0, personal: 52326, miete: 27654, nebenkosten: 9449, sonstige: 14578, db: 5376, fteBedarf: 49.39765951548749, fteIst: 54.17215499352276, umsatzJeGruppe: { food: 28225, wohnen: 26267, beauty: 35041, accessoires: 41065, damen: 43253, waesche: 17866, herren: 35669, kinder: 10911, sport: 11096, spielwaren: 9588 } } }, { id: "W087", name: "Hartwig Cottbus Arkaden", stadt: "Cottbus", format: "warenhaus", lage: "center", cluster: "grossstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1, 2, 3, 4], baujahr: 1988, fassade: 5, substanz: 78, status: "offen", flaechen: [{ id: "W087-f1", etage: -1, qm: 782, konzept: "eigen", gruppe: "food" }, { id: "W087-f2", etage: -1, qm: 1085, konzept: "eigen", gruppe: "wohnen" }, { id: "W087-f3", etage: 0, qm: 823, konzept: "eigen", gruppe: "beauty" }, { id: "W087-f4", etage: 0, qm: 980, konzept: "eigen", gruppe: "accessoires" }, { id: "W087-f5", etage: 0, qm: 64, konzept: "eigen", gruppe: "damen" }, { id: "W087-f6", etage: 1, qm: 1867, konzept: "eigen", gruppe: "damen" }, { id: "W087-f7", etage: 2, qm: 225, konzept: "eigen", gruppe: "damen" }, { id: "W087-f8", etage: 2, qm: 883, konzept: "eigen", gruppe: "waesche" }, { id: "W087-f9", etage: 2, qm: 759, konzept: "eigen", gruppe: "herren" }, { id: "W087-f10", etage: 3, qm: 654, konzept: "eigen", gruppe: "herren" }, { id: "W087-f11", etage: 3, qm: 647, konzept: "eigen", gruppe: "kinder" }, { id: "W087-f12", etage: 3, qm: 565, konzept: "eigen", gruppe: "sport" }, { id: "W087-f13", etage: 4, qm: 658, konzept: "eigen", gruppe: "sport" }, { id: "W087-f14", etage: 4, qm: 840, konzept: "eigen", gruppe: "spielwaren" }, { id: "W087-f15", etage: 4, qm: 369, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 292077, rohertrag: 121734, konzessionserloes: 0, untermiete: 0, personal: 63346, miete: 34167, nebenkosten: 12408, sonstige: 17016, db: -5202, fteBedarf: 58.30877635131459, fteIst: 63.996752599812204, umsatzJeGruppe: { food: 29834, wohnen: 23616, beauty: 65222, accessoires: 33631, damen: 43836, waesche: 22175, herren: 35370, kinder: 10584, sport: 16282, spielwaren: 11528 } } }, { id: "W088", name: "Hartwig G\xFCtersloh Am Wall", stadt: "G\xFCtersloh", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [-1, 0, 1], baujahr: 1993, fassade: 0, substanz: 56, status: "offen", flaechen: [{ id: "W088-f1", etage: -1, qm: 322, konzept: "eigen", gruppe: "food" }, { id: "W088-f2", etage: -1, qm: 1611, konzept: "eigen", gruppe: "wohnen" }, { id: "W088-f3", etage: 0, qm: 392, konzept: "eigen", gruppe: "beauty" }, { id: "W088-f4", etage: 0, qm: 695, konzept: "eigen", gruppe: "accessoires" }, { id: "W088-f5", etage: 0, qm: 846, konzept: "eigen", gruppe: "damen" }, { id: "W088-f6", etage: 1, qm: 269, konzept: "eigen", gruppe: "damen" }, { id: "W088-f7", etage: 1, qm: 374, konzept: "eigen", gruppe: "waesche" }, { id: "W088-f8", etage: 1, qm: 842, konzept: "eigen", gruppe: "herren" }, { id: "W088-f9", etage: 1, qm: 351, konzept: "eigen", gruppe: "kinder" }, { id: "W088-f10", etage: 1, qm: 904, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 124671, rohertrag: 52928, konzessionserloes: 0, untermiete: 0, personal: 29053, miete: 18298, nebenkosten: 9018, sonstige: 8084, db: -11525, fteBedarf: 28.428846813084405, fteIst: 29.48714567675355, umsatzJeGruppe: { food: 7495, wohnen: 21073, beauty: 20934, accessoires: 18818, damen: 19281, waesche: 7905, herren: 14991, kinder: 4697, sport: 9477 } } }, { id: "W089", name: "Hartwig Recklinghausen Bahnhofstra\xDFe", stadt: "Recklinghausen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2e3, etagen: [-1, 0, 1, 2], baujahr: 1996, fassade: 7, substanz: 39, status: "offen", flaechen: [{ id: "W089-f1", etage: -1, qm: 494, konzept: "eigen", gruppe: "food" }, { id: "W089-f2", etage: -1, qm: 1456, konzept: "eigen", gruppe: "wohnen" }, { id: "W089-f3", etage: 0, qm: 606, konzept: "eigen", gruppe: "beauty" }, { id: "W089-f4", etage: 0, qm: 727, konzept: "eigen", gruppe: "accessoires" }, { id: "W089-f5", etage: 0, qm: 617, konzept: "eigen", gruppe: "damen" }, { id: "W089-f6", etage: 1, qm: 1068, konzept: "eigen", gruppe: "damen" }, { id: "W089-f7", etage: 1, qm: 483, konzept: "eigen", gruppe: "waesche" }, { id: "W089-f8", etage: 1, qm: 399, konzept: "eigen", gruppe: "herren" }, { id: "W089-f9", etage: 2, qm: 361, konzept: "eigen", gruppe: "herren" }, { id: "W089-f10", etage: 2, qm: 566, konzept: "eigen", gruppe: "kinder" }, { id: "W089-f11", etage: 2, qm: 1004, konzept: "eigen", gruppe: "sport" }, { id: "W089-f12", etage: 2, qm: 515, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 203447, rohertrag: 85087, konzessionserloes: 0, untermiete: 0, personal: 43783, miete: 49672, nebenkosten: 0, sonstige: 12075, db: -20443, fteBedarf: 41.56703944462395, fteIst: 45.29348812867737, umsatzJeGruppe: { food: 17434, wohnen: 24610, beauty: 36363, accessoires: 30622, damen: 35222, waesche: 12592, herren: 14835, kinder: 9197, sport: 15897, spielwaren: 6676 } } }, { id: "W090", name: "Hartwig Bottrop", stadt: "Bottrop", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1962, fassade: 4, substanz: 45, status: "offen", flaechen: [{ id: "W090-f1", etage: 0, qm: 455, konzept: "eigen", gruppe: "food" }, { id: "W090-f2", etage: 0, qm: 366, konzept: "eigen", gruppe: "beauty" }, { id: "W090-f3", etage: 0, qm: 300, konzept: "eigen", gruppe: "accessoires" }, { id: "W090-f4", etage: 1, qm: 133, konzept: "eigen", gruppe: "accessoires" }, { id: "W090-f5", etage: 1, qm: 985, konzept: "eigen", gruppe: "damen" }, { id: "W090-f6", etage: 1, qm: 2, konzept: "eigen", gruppe: "waesche" }, { id: "W090-f7", etage: 2, qm: 464, konzept: "eigen", gruppe: "waesche" }, { id: "W090-f8", etage: 2, qm: 509, konzept: "eigen", gruppe: "herren" }, { id: "W090-f9", etage: 2, qm: 147, konzept: "eigen", gruppe: "kinder" }, { id: "W090-f10", etage: 3, qm: 324, konzept: "eigen", gruppe: "kinder" }, { id: "W090-f11", etage: 3, qm: 639, konzept: "eigen", gruppe: "sport" }, { id: "W090-f12", etage: 3, qm: 158, konzept: "eigen", gruppe: "spielwaren" }, { id: "W090-f13", etage: 4, qm: 103, konzept: "eigen", gruppe: "spielwaren" }, { id: "W090-f14", etage: 4, qm: 1017, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 138992, rohertrag: 57510, konzessionserloes: 0, untermiete: 0, personal: 34268, miete: 22132, nebenkosten: 6819, sonstige: 8220, db: -13928, fteBedarf: 28.257745128797616, fteIst: 34.92298984870858, umsatzJeGruppe: { food: 15425, beauty: 27777, accessoires: 17366, damen: 19928, waesche: 10777, herren: 9110, kinder: 10219, sport: 9114, spielwaren: 3768, wohnen: 15506 } } }, { id: "W091", name: "Hartwig Reutlingen", stadt: "Reutlingen", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1, 2], baujahr: 1961, fassade: 4, substanz: 70, status: "offen", flaechen: [{ id: "W091-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W091-f2", etage: -1, qm: 1305, konzept: "eigen", gruppe: "wohnen" }, { id: "W091-f3", etage: 0, qm: 346, konzept: "eigen", gruppe: "beauty" }, { id: "W091-f4", etage: 0, qm: 658, konzept: "eigen", gruppe: "accessoires" }, { id: "W091-f5", etage: 0, qm: 821, konzept: "eigen", gruppe: "damen" }, { id: "W091-f6", etage: 1, qm: 812, konzept: "eigen", gruppe: "damen" }, { id: "W091-f7", etage: 1, qm: 548, konzept: "eigen", gruppe: "waesche" }, { id: "W091-f8", etage: 1, qm: 465, konzept: "eigen", gruppe: "herren" }, { id: "W091-f9", etage: 2, qm: 217, konzept: "eigen", gruppe: "herren" }, { id: "W091-f10", etage: 2, qm: 595, konzept: "eigen", gruppe: "kinder" }, { id: "W091-f11", etage: 2, qm: 638, konzept: "eigen", gruppe: "sport" }, { id: "W091-f12", etage: 2, qm: 438, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 184099, rohertrag: 77623, konzessionserloes: 0, untermiete: 0, personal: 45978, miete: 15699, nebenkosten: 9841, sonstige: 10861, db: -4756, fteBedarf: 37.29137562435482, fteIst: 47.13499948950924, umsatzJeGruppe: { food: 21031, wohnen: 20202, beauty: 25356, accessoires: 26480, damen: 36289, waesche: 15953, herren: 14126, kinder: 10446, sport: 9486, spielwaren: 4730 } } }, { id: "W092", name: "Hartwig Erlangen Am Wall", stadt: "Erlangen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [-1, 0, 1], baujahr: 2001, fassade: 0, substanz: 60, status: "offen", flaechen: [{ id: "W092-f1", etage: -1, qm: 432, konzept: "eigen", gruppe: "food" }, { id: "W092-f2", etage: -1, qm: 2102, konzept: "eigen", gruppe: "wohnen" }, { id: "W092-f3", etage: 0, qm: 366, konzept: "eigen", gruppe: "beauty" }, { id: "W092-f4", etage: 0, qm: 851, konzept: "eigen", gruppe: "accessoires" }, { id: "W092-f5", etage: 0, qm: 1316, konzept: "eigen", gruppe: "damen" }, { id: "W092-f6", etage: 1, qm: 507, konzept: "eigen", gruppe: "damen" }, { id: "W092-f7", etage: 1, qm: 392, konzept: "eigen", gruppe: "waesche" }, { id: "W092-f8", etage: 1, qm: 1113, konzept: "eigen", gruppe: "herren" }, { id: "W092-f9", etage: 1, qm: 1617, konzept: "eigen", gruppe: "kinder" }], kpi: { woche: 2, umsatz: 176118, rohertrag: 75385, konzessionserloes: 0, untermiete: 0, personal: 45543, miete: 18490, nebenkosten: 10572, sonstige: 11134, db: -10354, fteBedarf: 38.91110942200965, fteIst: 46.02220199007599, umsatzJeGruppe: { food: 12785, wohnen: 26662, beauty: 22441, accessoires: 27921, damen: 33587, waesche: 7411, herren: 18684, kinder: 26626 } } }, { id: "W093", name: "Hartwig F\xFCrth Fachmarktzentrum", stadt: "F\xFCrth", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [-1, 0, 1, 2], baujahr: 1900, fassade: 1, substanz: 53, status: "offen", flaechen: [{ id: "W093-f1", etage: -1, qm: 495, konzept: "eigen", gruppe: "food" }, { id: "W093-f2", etage: -1, qm: 1130, konzept: "eigen", gruppe: "wohnen" }, { id: "W093-f3", etage: 0, qm: 430, konzept: "eigen", gruppe: "beauty" }, { id: "W093-f4", etage: 0, qm: 537, konzept: "eigen", gruppe: "accessoires" }, { id: "W093-f5", etage: 0, qm: 659, konzept: "eigen", gruppe: "damen" }, { id: "W093-f6", etage: 1, qm: 359, konzept: "eigen", gruppe: "damen" }, { id: "W093-f7", etage: 1, qm: 405, konzept: "eigen", gruppe: "waesche" }, { id: "W093-f8", etage: 1, qm: 861, konzept: "eigen", gruppe: "herren" }, { id: "W093-f9", etage: 2, qm: 88, konzept: "eigen", gruppe: "herren" }, { id: "W093-f10", etage: 2, qm: 539, konzept: "eigen", gruppe: "kinder" }, { id: "W093-f11", etage: 2, qm: 822, konzept: "eigen", gruppe: "sport" }, { id: "W093-f12", etage: 2, qm: 381, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 115943, rohertrag: 48298, konzessionserloes: 0, untermiete: 0, personal: 34094, miete: 21965, nebenkosten: 0, sonstige: 7771, db: -15532, fteBedarf: 27.641040197921114, fteIst: 34.87133638586731, umsatzJeGruppe: { food: 12466, wohnen: 12492, beauty: 19041, accessoires: 15480, damen: 16212, waesche: 8012, herren: 12194, kinder: 8236, sport: 8286, spielwaren: 3523 } } }, { id: "W094", name: "Hartwig Bamberg", stadt: "Bamberg", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1920, fassade: 1, substanz: 85, status: "offen", flaechen: [{ id: "W094-f1", etage: 0, qm: 568, konzept: "eigen", gruppe: "food" }, { id: "W094-f2", etage: 0, qm: 443, konzept: "eigen", gruppe: "beauty" }, { id: "W094-f3", etage: 0, qm: 628, konzept: "eigen", gruppe: "accessoires" }, { id: "W094-f4", etage: 1, qm: 400, konzept: "eigen", gruppe: "accessoires" }, { id: "W094-f5", etage: 1, qm: 1240, konzept: "eigen", gruppe: "damen" }, { id: "W094-f6", etage: 2, qm: 291, konzept: "eigen", gruppe: "damen" }, { id: "W094-f7", etage: 2, qm: 529, konzept: "eigen", gruppe: "waesche" }, { id: "W094-f8", etage: 2, qm: 820, konzept: "eigen", gruppe: "herren" }, { id: "W094-f9", etage: 3, qm: 128, konzept: "eigen", gruppe: "herren" }, { id: "W094-f10", etage: 3, qm: 537, konzept: "eigen", gruppe: "kinder" }, { id: "W094-f11", etage: 3, qm: 731, konzept: "eigen", gruppe: "sport" }, { id: "W094-f12", etage: 3, qm: 244, konzept: "eigen", gruppe: "spielwaren" }, { id: "W094-f13", etage: 4, qm: 177, konzept: "eigen", gruppe: "spielwaren" }, { id: "W094-f14", etage: 4, qm: 1463, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 268299, rohertrag: 112783, konzessionserloes: 0, untermiete: 0, personal: 52968, miete: 16609, nebenkosten: 8892, sonstige: 14690, db: 19625, fteBedarf: 49.296812978589855, fteIst: 54.445077070060776, umsatzJeGruppe: { food: 24438, beauty: 44625, accessoires: 47129, damen: 39335, waesche: 20350, herren: 23296, kinder: 13532, sport: 14160, spielwaren: 7136, wohnen: 34299 } } }, { id: "W095", name: "Hartwig Bayreuth Gewerbepark", stadt: "Bayreuth", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1956, fassade: 1, substanz: 79, status: "offen", flaechen: [{ id: "W095-f1", etage: 0, qm: 640, konzept: "eigen", gruppe: "food" }, { id: "W095-f2", etage: 0, qm: 439, konzept: "eigen", gruppe: "beauty" }, { id: "W095-f3", etage: 0, qm: 604, konzept: "eigen", gruppe: "accessoires" }, { id: "W095-f4", etage: 0, qm: 166, konzept: "eigen", gruppe: "damen" }, { id: "W095-f5", etage: 1, qm: 1425, konzept: "eigen", gruppe: "damen" }, { id: "W095-f6", etage: 1, qm: 425, konzept: "eigen", gruppe: "waesche" }, { id: "W095-f7", etage: 2, qm: 209, konzept: "eigen", gruppe: "waesche" }, { id: "W095-f8", etage: 2, qm: 881, konzept: "eigen", gruppe: "herren" }, { id: "W095-f9", etage: 2, qm: 640, konzept: "eigen", gruppe: "kinder" }, { id: "W095-f10", etage: 2, qm: 120, konzept: "eigen", gruppe: "sport" }, { id: "W095-f11", etage: 3, qm: 481, konzept: "eigen", gruppe: "sport" }, { id: "W095-f12", etage: 3, qm: 422, konzept: "eigen", gruppe: "spielwaren" }, { id: "W095-f13", etage: 3, qm: 947, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 150166, rohertrag: 62717, konzessionserloes: 0, untermiete: 0, personal: 36268, miete: 15556, nebenkosten: 0, sonstige: 9486, db: 1407, fteBedarf: 33.20495126750215, fteIst: 36.81777817173233, umsatzJeGruppe: { food: 20323, beauty: 22858, accessoires: 19239, damen: 25232, waesche: 12923, herren: 14402, kinder: 9990, sport: 7719, spielwaren: 3720, wohnen: 13761 } } }, { id: "W096", name: "Hartwig Landshut Am Wall", stadt: "Landshut", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2], baujahr: 1995, fassade: 5, substanz: 35, status: "offen", flaechen: [{ id: "W096-f1", etage: -1, qm: 405, konzept: "eigen", gruppe: "food" }, { id: "W096-f2", etage: -1, qm: 1070, konzept: "eigen", gruppe: "wohnen" }, { id: "W096-f3", etage: 0, qm: 426, konzept: "eigen", gruppe: "beauty" }, { id: "W096-f4", etage: 0, qm: 673, konzept: "eigen", gruppe: "accessoires" }, { id: "W096-f5", etage: 0, qm: 376, konzept: "eigen", gruppe: "damen" }, { id: "W096-f6", etage: 1, qm: 768, konzept: "eigen", gruppe: "damen" }, { id: "W096-f7", etage: 1, qm: 339, konzept: "eigen", gruppe: "waesche" }, { id: "W096-f8", etage: 1, qm: 368, konzept: "eigen", gruppe: "herren" }, { id: "W096-f9", etage: 2, qm: 471, konzept: "eigen", gruppe: "herren" }, { id: "W096-f10", etage: 2, qm: 452, konzept: "eigen", gruppe: "kinder" }, { id: "W096-f11", etage: 2, qm: 908, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 135608, rohertrag: 57181, konzessionserloes: 0, untermiete: 0, personal: 35675, miete: 16341, nebenkosten: 7692, sonstige: 8375, db: -10902, fteBedarf: 29.070348033675355, fteIst: 36.679922151243574, umsatzJeGruppe: { food: 12259, wohnen: 12068, beauty: 25503, accessoires: 22572, damen: 22486, waesche: 7059, herren: 16129, kinder: 6548, sport: 10984 } } }, { id: "W097", name: "Hartwig Rosenheim Bahnhofstra\xDFe", stadt: "Rosenheim", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [0, 1, 2, 3], baujahr: 1964, fassade: 1, substanz: 56, status: "offen", flaechen: [{ id: "W097-f1", etage: 0, qm: 458, konzept: "eigen", gruppe: "food" }, { id: "W097-f2", etage: 0, qm: 599, konzept: "eigen", gruppe: "beauty" }, { id: "W097-f3", etage: 0, qm: 745, konzept: "eigen", gruppe: "accessoires" }, { id: "W097-f4", etage: 0, qm: 249, konzept: "eigen", gruppe: "damen" }, { id: "W097-f5", etage: 1, qm: 1369, konzept: "eigen", gruppe: "damen" }, { id: "W097-f6", etage: 1, qm: 498, konzept: "eigen", gruppe: "waesche" }, { id: "W097-f7", etage: 1, qm: 183, konzept: "eigen", gruppe: "herren" }, { id: "W097-f8", etage: 2, qm: 1010, konzept: "eigen", gruppe: "herren" }, { id: "W097-f9", etage: 2, qm: 651, konzept: "eigen", gruppe: "kinder" }, { id: "W097-f10", etage: 2, qm: 390, konzept: "eigen", gruppe: "sport" }, { id: "W097-f11", etage: 3, qm: 413, konzept: "eigen", gruppe: "sport" }, { id: "W097-f12", etage: 3, qm: 536, konzept: "eigen", gruppe: "spielwaren" }, { id: "W097-f13", etage: 3, qm: 1100, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 172862, rohertrag: 72518, konzessionserloes: 0, untermiete: 0, personal: 42004, miete: 25166, nebenkosten: 0, sonstige: 10778, db: -5429, fteBedarf: 37.627392734685365, fteIst: 43.04955422287533, umsatzJeGruppe: { food: 12442, beauty: 40203, accessoires: 20760, damen: 27829, waesche: 10676, herren: 19312, kinder: 9360, sport: 9508, spielwaren: 5179, wohnen: 17593 } } }, { id: "W098", name: "Hartwig Kempten Am Stadtrand", stadt: "Kempten", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1966, fassade: 7, substanz: 32, status: "offen", flaechen: [{ id: "W098-f1", etage: 0, qm: 477, konzept: "eigen", gruppe: "food" }, { id: "W098-f2", etage: 0, qm: 441, konzept: "eigen", gruppe: "beauty" }, { id: "W098-f3", etage: 0, qm: 702, konzept: "eigen", gruppe: "accessoires" }, { id: "W098-f4", etage: 1, qm: 100, konzept: "eigen", gruppe: "accessoires" }, { id: "W098-f5", etage: 1, qm: 1520, konzept: "eigen", gruppe: "damen" }, { id: "W098-f6", etage: 2, qm: 313, konzept: "eigen", gruppe: "damen" }, { id: "W098-f7", etage: 2, qm: 641, konzept: "eigen", gruppe: "waesche" }, { id: "W098-f8", etage: 2, qm: 666, konzept: "eigen", gruppe: "herren" }, { id: "W098-f9", etage: 3, qm: 309, konzept: "eigen", gruppe: "herren" }, { id: "W098-f10", etage: 3, qm: 580, konzept: "eigen", gruppe: "kinder" }, { id: "W098-f11", etage: 3, qm: 635, konzept: "eigen", gruppe: "sport" }, { id: "W098-f12", etage: 3, qm: 97, konzept: "eigen", gruppe: "spielwaren" }, { id: "W098-f13", etage: 4, qm: 340, konzept: "eigen", gruppe: "spielwaren" }, { id: "W098-f14", etage: 4, qm: 1280, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 151465, rohertrag: 64572, konzessionserloes: 0, untermiete: 0, personal: 39328, miete: 23412, nebenkosten: 11264, sonstige: 9856, db: -19288, fteBedarf: 34.75651464344672, fteIst: 39.397004033886304, umsatzJeGruppe: { food: 13541, beauty: 24116, accessoires: 21104, damen: 32554, waesche: 11366, herren: 16363, kinder: 7130, sport: 5118, spielwaren: 3195, wohnen: 16979 } } }, { id: "W099", name: "Hartwig Passau", stadt: "Passau", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1700, etagen: [0, 1, 2, 3], baujahr: 1983, fassade: 0, substanz: 75, status: "offen", flaechen: [{ id: "W099-f1", etage: 0, qm: 436, konzept: "eigen", gruppe: "food" }, { id: "W099-f2", etage: 0, qm: 364, konzept: "eigen", gruppe: "beauty" }, { id: "W099-f3", etage: 0, qm: 619, konzept: "eigen", gruppe: "accessoires" }, { id: "W099-f4", etage: 0, qm: 306, konzept: "eigen", gruppe: "damen" }, { id: "W099-f5", etage: 1, qm: 1222, konzept: "eigen", gruppe: "damen" }, { id: "W099-f6", etage: 1, qm: 482, konzept: "eigen", gruppe: "waesche" }, { id: "W099-f7", etage: 1, qm: 20, konzept: "eigen", gruppe: "herren" }, { id: "W099-f8", etage: 2, qm: 1049, konzept: "eigen", gruppe: "herren" }, { id: "W099-f9", etage: 2, qm: 531, konzept: "eigen", gruppe: "kinder" }, { id: "W099-f10", etage: 2, qm: 145, konzept: "eigen", gruppe: "sport" }, { id: "W099-f11", etage: 3, qm: 476, konzept: "eigen", gruppe: "sport" }, { id: "W099-f12", etage: 3, qm: 406, konzept: "eigen", gruppe: "spielwaren" }, { id: "W099-f13", etage: 3, qm: 843, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 168057, rohertrag: 71352, konzessionserloes: 0, untermiete: 0, personal: 38638, miete: 20763, nebenkosten: 7255, sonstige: 9995, db: -5300, fteBedarf: 34.41694374425633, fteIst: 39.66429120620631, umsatzJeGruppe: { food: 16196, beauty: 25378, accessoires: 23952, damen: 32460, waesche: 13067, herren: 19659, kinder: 10357, sport: 9127, spielwaren: 4915, wohnen: 12947 } } }, { id: "W100", name: "Hartwig Konstanz Neustadt", stadt: "Konstanz", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1908, fassade: 4, substanz: 51, status: "offen", flaechen: [{ id: "W100-f1", etage: 0, qm: 460, konzept: "eigen", gruppe: "food" }, { id: "W100-f2", etage: 0, qm: 385, konzept: "eigen", gruppe: "beauty" }, { id: "W100-f3", etage: 0, qm: 622, konzept: "eigen", gruppe: "accessoires" }, { id: "W100-f4", etage: 0, qm: 432, konzept: "eigen", gruppe: "damen" }, { id: "W100-f5", etage: 1, qm: 1254, konzept: "eigen", gruppe: "damen" }, { id: "W100-f6", etage: 1, qm: 520, konzept: "eigen", gruppe: "waesche" }, { id: "W100-f7", etage: 1, qm: 126, konzept: "eigen", gruppe: "herren" }, { id: "W100-f8", etage: 2, qm: 708, konzept: "eigen", gruppe: "herren" }, { id: "W100-f9", etage: 2, qm: 584, konzept: "eigen", gruppe: "kinder" }, { id: "W100-f10", etage: 2, qm: 607, konzept: "eigen", gruppe: "sport" }, { id: "W100-f11", etage: 3, qm: 82, konzept: "eigen", gruppe: "sport" }, { id: "W100-f12", etage: 3, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W100-f13", etage: 3, qm: 1393, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 171450, rohertrag: 72427, konzessionserloes: 0, untermiete: 0, personal: 43520, miete: 24528, nebenkosten: 9868, sonstige: 10449, db: -15938, fteBedarf: 36.25351399451973, fteIst: 45.03906490261539, umsatzJeGruppe: { food: 13776, beauty: 30009, accessoires: 19457, damen: 34149, waesche: 11361, herren: 18758, kinder: 9128, sport: 10612, spielwaren: 5991, wohnen: 18209 } } }, { id: "W101", name: "Hartwig Esslingen", stadt: "Esslingen", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1], baujahr: 1966, fassade: 6, substanz: 66, status: "offen", flaechen: [{ id: "W101-f1", etage: -1, qm: 520, konzept: "eigen", gruppe: "food" }, { id: "W101-f2", etage: -1, qm: 2513, konzept: "eigen", gruppe: "wohnen" }, { id: "W101-f3", etage: 0, qm: 626, konzept: "eigen", gruppe: "beauty" }, { id: "W101-f4", etage: 0, qm: 1087, konzept: "eigen", gruppe: "accessoires" }, { id: "W101-f5", etage: 0, qm: 1320, konzept: "eigen", gruppe: "damen" }, { id: "W101-f6", etage: 1, qm: 444, konzept: "eigen", gruppe: "damen" }, { id: "W101-f7", etage: 1, qm: 769, konzept: "eigen", gruppe: "waesche" }, { id: "W101-f8", etage: 1, qm: 874, konzept: "eigen", gruppe: "herren" }, { id: "W101-f9", etage: 1, qm: 789, konzept: "eigen", gruppe: "kinder" }, { id: "W101-f10", etage: 1, qm: 1251, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 268700, rohertrag: 113360, konzessionserloes: 0, untermiete: 0, personal: 60361, miete: 28560, nebenkosten: 11774, sonstige: 15604, db: -2938, fteBedarf: 53.19083552355613, fteIst: 61.93458171953874, umsatzJeGruppe: { food: 19027, wohnen: 45331, beauty: 48759, accessoires: 46243, damen: 36138, waesche: 21425, herren: 20922, kinder: 14119, sport: 16737 } } }, { id: "W102", name: "Hartwig Ludwigsburg Bahnhofstra\xDFe", stadt: "Ludwigsburg", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1992, fassade: 6, substanz: 81, status: "offen", flaechen: [{ id: "W102-f1", etage: 0, qm: 511, konzept: "eigen", gruppe: "food" }, { id: "W102-f2", etage: 0, qm: 486, konzept: "eigen", gruppe: "beauty" }, { id: "W102-f3", etage: 0, qm: 423, konzept: "eigen", gruppe: "accessoires" }, { id: "W102-f4", etage: 1, qm: 301, konzept: "eigen", gruppe: "accessoires" }, { id: "W102-f5", etage: 1, qm: 1119, konzept: "eigen", gruppe: "damen" }, { id: "W102-f6", etage: 2, qm: 206, konzept: "eigen", gruppe: "damen" }, { id: "W102-f7", etage: 2, qm: 419, konzept: "eigen", gruppe: "waesche" }, { id: "W102-f8", etage: 2, qm: 795, konzept: "eigen", gruppe: "herren" }, { id: "W102-f9", etage: 3, qm: 127, konzept: "eigen", gruppe: "herren" }, { id: "W102-f10", etage: 3, qm: 484, konzept: "eigen", gruppe: "kinder" }, { id: "W102-f11", etage: 3, qm: 616, konzept: "eigen", gruppe: "sport" }, { id: "W102-f12", etage: 3, qm: 192, konzept: "eigen", gruppe: "spielwaren" }, { id: "W102-f13", etage: 4, qm: 187, konzept: "eigen", gruppe: "spielwaren" }, { id: "W102-f14", etage: 4, qm: 1233, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 142135, rohertrag: 59992, konzessionserloes: 0, untermiete: 0, personal: 39428, miete: 16603, nebenkosten: 9144, sonstige: 9022, db: -14205, fteBedarf: 31.62373885682738, fteIst: 40.51818469564541, umsatzJeGruppe: { food: 13624, beauty: 25358, accessoires: 19871, damen: 25542, waesche: 8860, herren: 17460, kinder: 7348, sport: 5467, spielwaren: 3507, wohnen: 15100 } } }, { id: "W103", name: "Hartwig T\xFCbingen Gewerbepark", stadt: "T\xFCbingen", format: "warenhaus", lage: "rand", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [-1, 0, 1], baujahr: 1985, fassade: 7, substanz: 42, status: "offen", flaechen: [{ id: "W103-f1", etage: -1, qm: 459, konzept: "eigen", gruppe: "food" }, { id: "W103-f2", etage: -1, qm: 1374, konzept: "eigen", gruppe: "wohnen" }, { id: "W103-f3", etage: 0, qm: 329, konzept: "eigen", gruppe: "beauty" }, { id: "W103-f4", etage: 0, qm: 616, konzept: "eigen", gruppe: "accessoires" }, { id: "W103-f5", etage: 0, qm: 888, konzept: "eigen", gruppe: "damen" }, { id: "W103-f6", etage: 1, qm: 477, konzept: "eigen", gruppe: "damen" }, { id: "W103-f7", etage: 1, qm: 393, konzept: "eigen", gruppe: "waesche" }, { id: "W103-f8", etage: 1, qm: 589, konzept: "eigen", gruppe: "herren" }, { id: "W103-f9", etage: 1, qm: 325, konzept: "eigen", gruppe: "kinder" }, { id: "W103-f10", etage: 1, qm: 778, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 132568, rohertrag: 55834, konzessionserloes: 0, untermiete: 0, personal: 32193, miete: 16625, nebenkosten: 7770, sonstige: 8238, db: -8993, fteBedarf: 28.63271004794145, fteIst: 33.015858727339364, umsatzJeGruppe: { food: 12932, wohnen: 21452, beauty: 21428, accessoires: 19338, damen: 23366, waesche: 10401, herren: 10385, kinder: 4764, sport: 8500 } } }, { id: "W104", name: "Hartwig Gie\xDFen Am Wall", stadt: "Gie\xDFen", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2], baujahr: 2003, fassade: 6, substanz: 55, status: "offen", flaechen: [{ id: "W104-f1", etage: -1, qm: 358, konzept: "eigen", gruppe: "food" }, { id: "W104-f2", etage: -1, qm: 917, konzept: "eigen", gruppe: "wohnen" }, { id: "W104-f3", etage: 0, qm: 359, konzept: "eigen", gruppe: "beauty" }, { id: "W104-f4", etage: 0, qm: 493, konzept: "eigen", gruppe: "accessoires" }, { id: "W104-f5", etage: 0, qm: 423, konzept: "eigen", gruppe: "damen" }, { id: "W104-f6", etage: 1, qm: 476, konzept: "eigen", gruppe: "damen" }, { id: "W104-f7", etage: 1, qm: 374, konzept: "eigen", gruppe: "waesche" }, { id: "W104-f8", etage: 1, qm: 425, konzept: "eigen", gruppe: "herren" }, { id: "W104-f9", etage: 2, qm: 171, konzept: "eigen", gruppe: "herren" }, { id: "W104-f10", etage: 2, qm: 361, konzept: "eigen", gruppe: "kinder" }, { id: "W104-f11", etage: 2, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W104-f12", etage: 2, qm: 357, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 113296, rohertrag: 47363, konzessionserloes: 0, untermiete: 0, personal: 26641, miete: 25935, nebenkosten: 0, sonstige: 7061, db: -12274, fteBedarf: 24.638005707066768, fteIst: 27.111889263397853, umsatzJeGruppe: { food: 10242, wohnen: 14637, beauty: 18883, accessoires: 16279, damen: 17994, waesche: 7895, herren: 8934, kinder: 6255, sport: 8739, spielwaren: 3439 } } }, { id: "W105", name: "Hartwig Marburg Bahnhofstra\xDFe", stadt: "Marburg", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 3e3, etagen: [-1, 0, 1], baujahr: 1993, fassade: 1, substanz: 69, status: "offen", flaechen: [{ id: "W105-f1", etage: -1, qm: 811, konzept: "eigen", gruppe: "food" }, { id: "W105-f2", etage: -1, qm: 2189, konzept: "eigen", gruppe: "wohnen" }, { id: "W105-f3", etage: 0, qm: 653, konzept: "eigen", gruppe: "beauty" }, { id: "W105-f4", etage: 0, qm: 970, konzept: "eigen", gruppe: "accessoires" }, { id: "W105-f5", etage: 0, qm: 1377, konzept: "eigen", gruppe: "damen" }, { id: "W105-f6", etage: 1, qm: 256, konzept: "eigen", gruppe: "damen" }, { id: "W105-f7", etage: 1, qm: 497, konzept: "eigen", gruppe: "waesche" }, { id: "W105-f8", etage: 1, qm: 1277, konzept: "eigen", gruppe: "herren" }, { id: "W105-f9", etage: 1, qm: 697, konzept: "eigen", gruppe: "kinder" }, { id: "W105-f10", etage: 1, qm: 1385, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 232639, rohertrag: 96259, konzessionserloes: 0, untermiete: 0, personal: 54606, miete: 42301, nebenkosten: 13243, sonstige: 14089, db: -27980, fteBedarf: 48.61394990938224, fteIst: 55.60839542009545, umsatzJeGruppe: { food: 30929, wohnen: 33251, beauty: 35676, accessoires: 32234, damen: 34786, waesche: 11022, herren: 23098, kinder: 13222, sport: 18419 } } }, { id: "W106", name: "Hartwig Fulda Lindenstra\xDFe", stadt: "Fulda", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [0, 1, 2], baujahr: 1963, fassade: 0, substanz: 55, status: "offen", flaechen: [{ id: "W106-f1", etage: 0, qm: 584, konzept: "eigen", gruppe: "food" }, { id: "W106-f2", etage: 0, qm: 458, konzept: "eigen", gruppe: "beauty" }, { id: "W106-f3", etage: 0, qm: 776, konzept: "eigen", gruppe: "accessoires" }, { id: "W106-f4", etage: 0, qm: 715, konzept: "eigen", gruppe: "damen" }, { id: "W106-f5", etage: 1, qm: 696, konzept: "eigen", gruppe: "damen" }, { id: "W106-f6", etage: 1, qm: 546, konzept: "eigen", gruppe: "waesche" }, { id: "W106-f7", etage: 1, qm: 968, konzept: "eigen", gruppe: "herren" }, { id: "W106-f8", etage: 1, qm: 323, konzept: "eigen", gruppe: "kinder" }, { id: "W106-f9", etage: 2, qm: 301, konzept: "eigen", gruppe: "kinder" }, { id: "W106-f10", etage: 2, qm: 670, konzept: "eigen", gruppe: "sport" }, { id: "W106-f11", etage: 2, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W106-f12", etage: 2, qm: 1138, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 161788, rohertrag: 67372, konzessionserloes: 0, untermiete: 0, personal: 37421, miete: 20102, nebenkosten: 9683, sonstige: 10053, db: -9887, fteBedarf: 35.03601353250928, fteIst: 38.30472747897493, umsatzJeGruppe: { food: 20050, beauty: 26395, accessoires: 24546, damen: 23090, waesche: 11676, herren: 16069, kinder: 9006, sport: 7148, spielwaren: 4286, wohnen: 19522 } } }, { id: "W107", name: "Hartwig Hanau Am Wall", stadt: "Hanau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2], baujahr: 1986, fassade: 3, substanz: 85, status: "offen", flaechen: [{ id: "W107-f1", etage: 0, qm: 311, konzept: "eigen", gruppe: "food" }, { id: "W107-f2", etage: 0, qm: 371, konzept: "eigen", gruppe: "beauty" }, { id: "W107-f3", etage: 0, qm: 529, konzept: "eigen", gruppe: "accessoires" }, { id: "W107-f4", etage: 0, qm: 689, konzept: "eigen", gruppe: "damen" }, { id: "W107-f5", etage: 1, qm: 410, konzept: "eigen", gruppe: "damen" }, { id: "W107-f6", etage: 1, qm: 472, konzept: "eigen", gruppe: "waesche" }, { id: "W107-f7", etage: 1, qm: 686, konzept: "eigen", gruppe: "herren" }, { id: "W107-f8", etage: 1, qm: 331, konzept: "eigen", gruppe: "kinder" }, { id: "W107-f9", etage: 2, qm: 28, konzept: "eigen", gruppe: "kinder" }, { id: "W107-f10", etage: 2, qm: 591, konzept: "eigen", gruppe: "sport" }, { id: "W107-f11", etage: 2, qm: 273, konzept: "eigen", gruppe: "spielwaren" }, { id: "W107-f12", etage: 2, qm: 1007, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 130679, rohertrag: 55327, konzessionserloes: 0, untermiete: 0, personal: 32301, miete: 19071, nebenkosten: 8230, sonstige: 7922, db: -12196, fteBedarf: 27.404696713077392, fteIst: 33.009344199434615, umsatzJeGruppe: { food: 12470, beauty: 23904, accessoires: 16921, damen: 25485, waesche: 12274, herren: 11806, kinder: 5151, sport: 6282, spielwaren: 2702, wohnen: 13684 } } }, { id: "W108", name: "Hartwig Wetzlar Neustadt", stadt: "Wetzlar", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1929, fassade: 2, substanz: 89, status: "offen", flaechen: [{ id: "W108-f1", etage: -1, qm: 432, konzept: "eigen", gruppe: "food" }, { id: "W108-f2", etage: -1, qm: 808, konzept: "eigen", gruppe: "wohnen" }, { id: "W108-f3", etage: 0, qm: 303, konzept: "eigen", gruppe: "beauty" }, { id: "W108-f4", etage: 0, qm: 714, konzept: "eigen", gruppe: "accessoires" }, { id: "W108-f5", etage: 0, qm: 223, konzept: "eigen", gruppe: "damen" }, { id: "W108-f6", etage: 1, qm: 832, konzept: "eigen", gruppe: "damen" }, { id: "W108-f7", etage: 1, qm: 371, konzept: "eigen", gruppe: "waesche" }, { id: "W108-f8", etage: 1, qm: 37, konzept: "eigen", gruppe: "herren" }, { id: "W108-f9", etage: 2, qm: 843, konzept: "eigen", gruppe: "herren" }, { id: "W108-f10", etage: 2, qm: 397, konzept: "eigen", gruppe: "kinder" }, { id: "W108-f11", etage: 3, qm: 103, konzept: "eigen", gruppe: "kinder" }, { id: "W108-f12", etage: 3, qm: 809, konzept: "eigen", gruppe: "sport" }, { id: "W108-f13", etage: 3, qm: 298, konzept: "eigen", gruppe: "spielwaren" }, { id: "W108-f14", etage: 3, qm: 29, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 138196, rohertrag: 58235, konzessionserloes: 0, untermiete: 0, personal: 36626, miete: 9469, nebenkosten: 8240, sonstige: 8456, db: -4557, fteBedarf: 29.324977527408173, fteIst: 37.26392954841004, umsatzJeGruppe: { food: 15379, wohnen: 12081, beauty: 17155, accessoires: 28179, damen: 18571, waesche: 10009, herren: 16322, kinder: 7504, sport: 9968, spielwaren: 3028 } } }, { id: "W109", name: "Hartwig L\xFCneburg City-Center", stadt: "L\xFCneburg", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2200, etagen: [-1, 0, 1], baujahr: 1910, fassade: 2, substanz: 85, status: "offen", flaechen: [{ id: "W109-f1", etage: -1, qm: 512, konzept: "eigen", gruppe: "food" }, { id: "W109-f2", etage: -1, qm: 1722, konzept: "eigen", gruppe: "wohnen" }, { id: "W109-f3", etage: 0, qm: 357, konzept: "eigen", gruppe: "beauty" }, { id: "W109-f4", etage: 0, qm: 712, konzept: "eigen", gruppe: "accessoires" }, { id: "W109-f5", etage: 0, qm: 1165, konzept: "eigen", gruppe: "damen" }, { id: "W109-f6", etage: 1, qm: 205, konzept: "eigen", gruppe: "damen" }, { id: "W109-f7", etage: 1, qm: 589, konzept: "eigen", gruppe: "waesche" }, { id: "W109-f8", etage: 1, qm: 773, konzept: "eigen", gruppe: "herren" }, { id: "W109-f9", etage: 1, qm: 454, konzept: "eigen", gruppe: "kinder" }, { id: "W109-f10", etage: 1, qm: 1146, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 170160, rohertrag: 71429, konzessionserloes: 0, untermiete: 0, personal: 44227, miete: 32689, nebenkosten: 0, sonstige: 10412, db: -15900, fteBedarf: 36.03153607851873, fteIst: 45.667466054187166, umsatzJeGruppe: { food: 18596, wohnen: 25781, beauty: 23257, accessoires: 25451, damen: 25213, waesche: 16003, herren: 13352, kinder: 7878, sport: 14630 } } }, { id: "W110", name: "Hartwig Celle", stadt: "Celle", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 2001, fassade: 7, substanz: 59, status: "offen", flaechen: [{ id: "W110-f1", etage: 0, qm: 477, konzept: "eigen", gruppe: "food" }, { id: "W110-f2", etage: 0, qm: 445, konzept: "eigen", gruppe: "beauty" }, { id: "W110-f3", etage: 0, qm: 518, konzept: "eigen", gruppe: "accessoires" }, { id: "W110-f4", etage: 1, qm: 320, konzept: "eigen", gruppe: "accessoires" }, { id: "W110-f5", etage: 1, qm: 1120, konzept: "eigen", gruppe: "damen" }, { id: "W110-f6", etage: 2, qm: 421, konzept: "eigen", gruppe: "damen" }, { id: "W110-f7", etage: 2, qm: 559, konzept: "eigen", gruppe: "waesche" }, { id: "W110-f8", etage: 2, qm: 460, konzept: "eigen", gruppe: "herren" }, { id: "W110-f9", etage: 3, qm: 182, konzept: "eigen", gruppe: "herren" }, { id: "W110-f10", etage: 3, qm: 579, konzept: "eigen", gruppe: "kinder" }, { id: "W110-f11", etage: 3, qm: 661, konzept: "eigen", gruppe: "sport" }, { id: "W110-f12", etage: 3, qm: 18, konzept: "eigen", gruppe: "spielwaren" }, { id: "W110-f13", etage: 4, qm: 319, konzept: "eigen", gruppe: "spielwaren" }, { id: "W110-f14", etage: 4, qm: 1121, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 182052, rohertrag: 77144, konzessionserloes: 0, untermiete: 0, personal: 46445, miete: 27904, nebenkosten: 10692, sonstige: 10704, db: -18602, fteBedarf: 36.712401339758976, fteIst: 48.04042953192403, umsatzJeGruppe: { food: 15054, beauty: 32807, accessoires: 28184, damen: 34544, waesche: 14e3, herren: 14883, kinder: 11038, sport: 7664, spielwaren: 3945, wohnen: 19932 } } }, { id: "W111", name: "Hartwig Flensburg", stadt: "Flensburg", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2500, etagen: [0, 1, 2], baujahr: 1918, fassade: 6, substanz: 86, status: "offen", flaechen: [{ id: "W111-f1", etage: 0, qm: 431, konzept: "eigen", gruppe: "food" }, { id: "W111-f2", etage: 0, qm: 476, konzept: "eigen", gruppe: "beauty" }, { id: "W111-f3", etage: 0, qm: 684, konzept: "eigen", gruppe: "accessoires" }, { id: "W111-f4", etage: 0, qm: 909, konzept: "eigen", gruppe: "damen" }, { id: "W111-f5", etage: 1, qm: 709, konzept: "eigen", gruppe: "damen" }, { id: "W111-f6", etage: 1, qm: 442, konzept: "eigen", gruppe: "waesche" }, { id: "W111-f7", etage: 1, qm: 1101, konzept: "eigen", gruppe: "herren" }, { id: "W111-f8", etage: 1, qm: 249, konzept: "eigen", gruppe: "kinder" }, { id: "W111-f9", etage: 2, qm: 296, konzept: "eigen", gruppe: "kinder" }, { id: "W111-f10", etage: 2, qm: 631, konzept: "eigen", gruppe: "sport" }, { id: "W111-f11", etage: 2, qm: 480, konzept: "eigen", gruppe: "spielwaren" }, { id: "W111-f12", etage: 2, qm: 1093, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 220657, rohertrag: 93663, konzessionserloes: 0, untermiete: 0, personal: 50720, miete: 26179, nebenkosten: 10981, sonstige: 12422, db: -6639, fteBedarf: 42.090746407091515, fteIst: 50.91814237491502, umsatzJeGruppe: { food: 19106, beauty: 39593, accessoires: 32186, damen: 42335, waesche: 14837, herren: 28404, kinder: 9050, sport: 9281, spielwaren: 7214, wohnen: 18652 } } }, { id: "W112", name: "Hartwig Neum\xFCnster Ring", stadt: "Neum\xFCnster", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1959, fassade: 7, substanz: 52, status: "offen", flaechen: [{ id: "W112-f1", etage: -1, qm: 522, konzept: "eigen", gruppe: "food" }, { id: "W112-f2", etage: -1, qm: 1018, konzept: "eigen", gruppe: "wohnen" }, { id: "W112-f3", etage: 0, qm: 445, konzept: "eigen", gruppe: "beauty" }, { id: "W112-f4", etage: 0, qm: 654, konzept: "eigen", gruppe: "accessoires" }, { id: "W112-f5", etage: 0, qm: 441, konzept: "eigen", gruppe: "damen" }, { id: "W112-f6", etage: 1, qm: 1330, konzept: "eigen", gruppe: "damen" }, { id: "W112-f7", etage: 1, qm: 210, konzept: "eigen", gruppe: "waesche" }, { id: "W112-f8", etage: 2, qm: 433, konzept: "eigen", gruppe: "waesche" }, { id: "W112-f9", etage: 2, qm: 759, konzept: "eigen", gruppe: "herren" }, { id: "W112-f10", etage: 2, qm: 348, konzept: "eigen", gruppe: "kinder" }, { id: "W112-f11", etage: 3, qm: 286, konzept: "eigen", gruppe: "kinder" }, { id: "W112-f12", etage: 3, qm: 917, konzept: "eigen", gruppe: "sport" }, { id: "W112-f13", etage: 3, qm: 447, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 134600, rohertrag: 57144, konzessionserloes: 0, untermiete: 0, personal: 38224, miete: 20427, nebenkosten: 9839, sonstige: 9033, db: -20378, fteBedarf: 32.150787234537454, fteIst: 38.7976552495561, umsatzJeGruppe: { food: 11377, wohnen: 12998, beauty: 19827, accessoires: 16697, damen: 29307, waesche: 12496, herren: 9154, kinder: 9116, sport: 8923, spielwaren: 4705 } } }, { id: "W113", name: "Hartwig Stralsund", stadt: "Stralsund", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1957, fassade: 5, substanz: 89, status: "offen", flaechen: [{ id: "W113-f1", etage: 0, qm: 451, konzept: "eigen", gruppe: "food" }, { id: "W113-f2", etage: 0, qm: 301, konzept: "eigen", gruppe: "beauty" }, { id: "W113-f3", etage: 0, qm: 447, konzept: "eigen", gruppe: "accessoires" }, { id: "W113-f4", etage: 1, qm: 227, konzept: "eigen", gruppe: "accessoires" }, { id: "W113-f5", etage: 1, qm: 973, konzept: "eigen", gruppe: "damen" }, { id: "W113-f6", etage: 2, qm: 238, konzept: "eigen", gruppe: "damen" }, { id: "W113-f7", etage: 2, qm: 504, konzept: "eigen", gruppe: "waesche" }, { id: "W113-f8", etage: 2, qm: 458, konzept: "eigen", gruppe: "herren" }, { id: "W113-f9", etage: 3, qm: 206, konzept: "eigen", gruppe: "herren" }, { id: "W113-f10", etage: 3, qm: 495, konzept: "eigen", gruppe: "kinder" }, { id: "W113-f11", etage: 3, qm: 499, konzept: "eigen", gruppe: "sport" }, { id: "W113-f12", etage: 4, qm: 163, konzept: "eigen", gruppe: "sport" }, { id: "W113-f13", etage: 4, qm: 296, konzept: "eigen", gruppe: "spielwaren" }, { id: "W113-f14", etage: 4, qm: 741, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 163894, rohertrag: 69621, konzessionserloes: 0, untermiete: 0, personal: 40625, miete: 16371, nebenkosten: 6019, sonstige: 9419, db: -2813, fteBedarf: 32.07715791461758, fteIst: 40.82268437451354, umsatzJeGruppe: { food: 16665, beauty: 21002, accessoires: 29219, damen: 32240, waesche: 13882, herren: 13477, kinder: 8825, sport: 10603, spielwaren: 3730, wohnen: 14251 } } }, { id: "W114", name: "Hartwig Schwerin", stadt: "Schwerin", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1600, etagen: [0, 1, 2, 3, 4], baujahr: 1983, fassade: 4, substanz: 70, status: "offen", flaechen: [{ id: "W114-f1", etage: 0, qm: 543, konzept: "eigen", gruppe: "food" }, { id: "W114-f2", etage: 0, qm: 602, konzept: "eigen", gruppe: "beauty" }, { id: "W114-f3", etage: 0, qm: 495, konzept: "eigen", gruppe: "accessoires" }, { id: "W114-f4", etage: 1, qm: 471, konzept: "eigen", gruppe: "accessoires" }, { id: "W114-f5", etage: 1, qm: 1169, konzept: "eigen", gruppe: "damen" }, { id: "W114-f6", etage: 2, qm: 112, konzept: "eigen", gruppe: "damen" }, { id: "W114-f7", etage: 2, qm: 514, konzept: "eigen", gruppe: "waesche" }, { id: "W114-f8", etage: 2, qm: 823, konzept: "eigen", gruppe: "herren" }, { id: "W114-f9", etage: 2, qm: 192, konzept: "eigen", gruppe: "kinder" }, { id: "W114-f10", etage: 3, qm: 462, konzept: "eigen", gruppe: "kinder" }, { id: "W114-f11", etage: 3, qm: 788, konzept: "eigen", gruppe: "sport" }, { id: "W114-f12", etage: 3, qm: 389, konzept: "eigen", gruppe: "spielwaren" }, { id: "W114-f13", etage: 4, qm: 86, konzept: "eigen", gruppe: "spielwaren" }, { id: "W114-f14", etage: 4, qm: 1554, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 242307, rohertrag: 101995, konzessionserloes: 0, untermiete: 0, personal: 54044, miete: 20752, nebenkosten: 9732, sonstige: 13625, db: 3842, fteBedarf: 46.12401705766281, fteIst: 54.68752297695232, umsatzJeGruppe: { food: 20071, beauty: 42312, accessoires: 39948, damen: 36396, waesche: 18056, herren: 21326, kinder: 13867, sport: 11010, spielwaren: 6784, wohnen: 32538 } } }, { id: "W115", name: "Hartwig Zwickau Neustadt", stadt: "Zwickau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1918, fassade: 5, substanz: 42, status: "offen", flaechen: [{ id: "W115-f1", etage: 0, qm: 461, konzept: "eigen", gruppe: "food" }, { id: "W115-f2", etage: 0, qm: 371, konzept: "eigen", gruppe: "beauty" }, { id: "W115-f3", etage: 0, qm: 668, konzept: "eigen", gruppe: "accessoires" }, { id: "W115-f4", etage: 1, qm: 96, konzept: "eigen", gruppe: "accessoires" }, { id: "W115-f5", etage: 1, qm: 1404, konzept: "eigen", gruppe: "damen" }, { id: "W115-f6", etage: 2, qm: 140, konzept: "eigen", gruppe: "damen" }, { id: "W115-f7", etage: 2, qm: 435, konzept: "eigen", gruppe: "waesche" }, { id: "W115-f8", etage: 2, qm: 925, konzept: "eigen", gruppe: "herren" }, { id: "W115-f9", etage: 3, qm: 88, konzept: "eigen", gruppe: "herren" }, { id: "W115-f10", etage: 3, qm: 701, konzept: "eigen", gruppe: "kinder" }, { id: "W115-f11", etage: 3, qm: 710, konzept: "eigen", gruppe: "sport" }, { id: "W115-f12", etage: 4, qm: 181, konzept: "eigen", gruppe: "sport" }, { id: "W115-f13", etage: 4, qm: 391, konzept: "eigen", gruppe: "spielwaren" }, { id: "W115-f14", etage: 4, qm: 928, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 135987, rohertrag: 57321, konzessionserloes: 0, untermiete: 0, personal: 39126, miete: 25960, nebenkosten: 8991, sonstige: 8950, db: -25706, fteBedarf: 31.69334209857719, fteIst: 40.26825628480668, umsatzJeGruppe: { food: 12e3, beauty: 20004, accessoires: 21152, damen: 21948, waesche: 8453, herren: 15178, kinder: 10264, sport: 8932, spielwaren: 4423, wohnen: 13631 } } }, { id: "W116", name: "Hartwig G\xF6rlitz Neustadt", stadt: "G\xF6rlitz", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1962, fassade: 7, substanz: 32, status: "offen", flaechen: [{ id: "W116-f1", etage: 0, qm: 439, konzept: "eigen", gruppe: "food" }, { id: "W116-f2", etage: 0, qm: 324, konzept: "eigen", gruppe: "beauty" }, { id: "W116-f3", etage: 0, qm: 517, konzept: "eigen", gruppe: "accessoires" }, { id: "W116-f4", etage: 1, qm: 27, konzept: "eigen", gruppe: "accessoires" }, { id: "W116-f5", etage: 1, qm: 1253, konzept: "eigen", gruppe: "damen" }, { id: "W116-f6", etage: 2, qm: 545, konzept: "eigen", gruppe: "waesche" }, { id: "W116-f7", etage: 2, qm: 735, konzept: "eigen", gruppe: "herren" }, { id: "W116-f8", etage: 3, qm: 48, konzept: "eigen", gruppe: "herren" }, { id: "W116-f9", etage: 3, qm: 543, konzept: "eigen", gruppe: "kinder" }, { id: "W116-f10", etage: 3, qm: 625, konzept: "eigen", gruppe: "sport" }, { id: "W116-f11", etage: 3, qm: 63, konzept: "eigen", gruppe: "spielwaren" }, { id: "W116-f12", etage: 4, qm: 373, konzept: "eigen", gruppe: "spielwaren" }, { id: "W116-f13", etage: 4, qm: 907, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 111334, rohertrag: 46987, konzessionserloes: 0, untermiete: 0, personal: 29518, miete: 13145, nebenkosten: 9244, sonstige: 7444, db: -12364, fteBedarf: 26.476304085586563, fteIst: 29.653068201935838, umsatzJeGruppe: { food: 11123, beauty: 14615, accessoires: 14563, damen: 19915, waesche: 8447, herren: 12787, kinder: 7226, sport: 6562, spielwaren: 4319, wohnen: 11778 } } }, { id: "W117", name: "Hartwig Dessau Ring", stadt: "Dessau", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [0, 1, 2, 3, 4], baujahr: 1993, fassade: 7, substanz: 53, status: "offen", flaechen: [{ id: "W117-f1", etage: 0, qm: 383, konzept: "eigen", gruppe: "food" }, { id: "W117-f2", etage: 0, qm: 390, konzept: "eigen", gruppe: "beauty" }, { id: "W117-f3", etage: 0, qm: 467, konzept: "eigen", gruppe: "accessoires" }, { id: "W117-f4", etage: 1, qm: 94, konzept: "eigen", gruppe: "accessoires" }, { id: "W117-f5", etage: 1, qm: 1146, konzept: "eigen", gruppe: "damen" }, { id: "W117-f6", etage: 2, qm: 275, konzept: "eigen", gruppe: "damen" }, { id: "W117-f7", etage: 2, qm: 327, konzept: "eigen", gruppe: "waesche" }, { id: "W117-f8", etage: 2, qm: 638, konzept: "eigen", gruppe: "herren" }, { id: "W117-f9", etage: 3, qm: 166, konzept: "eigen", gruppe: "herren" }, { id: "W117-f10", etage: 3, qm: 502, konzept: "eigen", gruppe: "kinder" }, { id: "W117-f11", etage: 3, qm: 572, konzept: "eigen", gruppe: "sport" }, { id: "W117-f12", etage: 4, qm: 73, konzept: "eigen", gruppe: "sport" }, { id: "W117-f13", etage: 4, qm: 401, konzept: "eigen", gruppe: "spielwaren" }, { id: "W117-f14", etage: 4, qm: 766, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 124090, rohertrag: 52439, konzessionserloes: 0, untermiete: 0, personal: 34531, miete: 15509, nebenkosten: 7810, sonstige: 7878, db: -13288, fteBedarf: 27.63489178230885, fteIst: 35.41967988039547, umsatzJeGruppe: { food: 11276, beauty: 21149, accessoires: 15289, damen: 27505, waesche: 6286, herren: 13045, kinder: 8891, sport: 6826, spielwaren: 3889, wohnen: 9934 } } }, { id: "W118", name: "Hartwig Gera Bahnhofstra\xDFe", stadt: "Gera", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1700, etagen: [-1, 0, 1, 2], baujahr: 1959, fassade: 1, substanz: 80, status: "offen", flaechen: [{ id: "W118-f1", etage: -1, qm: 467, konzept: "eigen", gruppe: "food" }, { id: "W118-f2", etage: -1, qm: 1208, konzept: "eigen", gruppe: "wohnen" }, { id: "W118-f3", etage: 0, qm: 464, konzept: "eigen", gruppe: "beauty" }, { id: "W118-f4", etage: 0, qm: 740, konzept: "eigen", gruppe: "accessoires" }, { id: "W118-f5", etage: 0, qm: 470, konzept: "eigen", gruppe: "damen" }, { id: "W118-f6", etage: 1, qm: 638, konzept: "eigen", gruppe: "damen" }, { id: "W118-f7", etage: 1, qm: 487, konzept: "eigen", gruppe: "waesche" }, { id: "W118-f8", etage: 1, qm: 550, konzept: "eigen", gruppe: "herren" }, { id: "W118-f9", etage: 2, qm: 281, konzept: "eigen", gruppe: "herren" }, { id: "W118-f10", etage: 2, qm: 556, konzept: "eigen", gruppe: "kinder" }, { id: "W118-f11", etage: 2, qm: 780, konzept: "eigen", gruppe: "sport" }, { id: "W118-f12", etage: 2, qm: 421, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 127654, rohertrag: 53638, konzessionserloes: 0, untermiete: 0, personal: 32715, miete: 17690, nebenkosten: 8815, sonstige: 8412, db: -13993, fteBedarf: 29.78830284208975, fteIst: 33.84594612605813, umsatzJeGruppe: { food: 11876, wohnen: 15828, beauty: 19681, accessoires: 19148, damen: 17799, waesche: 10501, herren: 13650, kinder: 6855, sport: 8321, spielwaren: 3994 } } }, { id: "W119", name: "Hartwig Weimar Lindenstra\xDFe", stadt: "Weimar", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1900, etagen: [0, 1, 2, 3], baujahr: 1918, fassade: 0, substanz: 32, status: "offen", flaechen: [{ id: "W119-f1", etage: 0, qm: 368, konzept: "eigen", gruppe: "food" }, { id: "W119-f2", etage: 0, qm: 465, konzept: "eigen", gruppe: "beauty" }, { id: "W119-f3", etage: 0, qm: 775, konzept: "eigen", gruppe: "accessoires" }, { id: "W119-f4", etage: 0, qm: 243, konzept: "eigen", gruppe: "damen" }, { id: "W119-f5", etage: 1, qm: 1442, konzept: "eigen", gruppe: "damen" }, { id: "W119-f6", etage: 1, qm: 408, konzept: "eigen", gruppe: "waesche" }, { id: "W119-f7", etage: 2, qm: 179, konzept: "eigen", gruppe: "waesche" }, { id: "W119-f8", etage: 2, qm: 972, konzept: "eigen", gruppe: "herren" }, { id: "W119-f9", etage: 2, qm: 401, konzept: "eigen", gruppe: "kinder" }, { id: "W119-f10", etage: 2, qm: 298, konzept: "eigen", gruppe: "sport" }, { id: "W119-f11", etage: 3, qm: 367, konzept: "eigen", gruppe: "sport" }, { id: "W119-f12", etage: 3, qm: 402, konzept: "eigen", gruppe: "spielwaren" }, { id: "W119-f13", etage: 3, qm: 1080, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 159937, rohertrag: 68613, konzessionserloes: 0, untermiete: 0, personal: 43028, miete: 19780, nebenkosten: 9941, sonstige: 9887, db: -14024, fteBedarf: 34.442610275942585, fteIst: 44.425974740154246, umsatzJeGruppe: { food: 9868, beauty: 26194, accessoires: 25713, damen: 34500, waesche: 11744, herren: 17739, kinder: 6921, sport: 8548, spielwaren: 5600, wohnen: 13110 } } }, { id: "W120", name: "Hartwig Neuss", stadt: "Neuss", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2600, etagen: [0, 1, 2], baujahr: 1958, fassade: 6, substanz: 69, status: "offen", flaechen: [{ id: "W120-f1", etage: 0, qm: 667, konzept: "eigen", gruppe: "food" }, { id: "W120-f2", etage: 0, qm: 422, konzept: "eigen", gruppe: "beauty" }, { id: "W120-f3", etage: 0, qm: 900, konzept: "eigen", gruppe: "accessoires" }, { id: "W120-f4", etage: 0, qm: 579, konzept: "eigen", gruppe: "damen" }, { id: "W120-f5", etage: 1, qm: 674, konzept: "eigen", gruppe: "damen" }, { id: "W120-f6", etage: 1, qm: 653, konzept: "eigen", gruppe: "waesche" }, { id: "W120-f7", etage: 1, qm: 1109, konzept: "eigen", gruppe: "herren" }, { id: "W120-f8", etage: 1, qm: 131, konzept: "eigen", gruppe: "kinder" }, { id: "W120-f9", etage: 2, qm: 486, konzept: "eigen", gruppe: "kinder" }, { id: "W120-f10", etage: 2, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W120-f11", etage: 2, qm: 528, konzept: "eigen", gruppe: "spielwaren" }, { id: "W120-f12", etage: 2, qm: 899, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 199121, rohertrag: 83647, konzessionserloes: 0, untermiete: 0, personal: 41494, miete: 31831, nebenkosten: 11208, sonstige: 11630, db: -12516, fteBedarf: 39.832093686319794, fteIst: 43.054497310622246, umsatzJeGruppe: { food: 22440, beauty: 30852, accessoires: 32326, damen: 25986, waesche: 19152, herren: 21098, kinder: 12952, sport: 9904, spielwaren: 5782, wohnen: 18628 } } }, { id: "W121", name: "Hartwig D\xFCren Lindenstra\xDFe", stadt: "D\xFCren", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2400, etagen: [0, 1, 2], baujahr: 1978, fassade: 7, substanz: 57, status: "offen", flaechen: [{ id: "W121-f1", etage: 0, qm: 488, konzept: "eigen", gruppe: "food" }, { id: "W121-f2", etage: 0, qm: 361, konzept: "eigen", gruppe: "beauty" }, { id: "W121-f3", etage: 0, qm: 741, konzept: "eigen", gruppe: "accessoires" }, { id: "W121-f4", etage: 0, qm: 810, konzept: "eigen", gruppe: "damen" }, { id: "W121-f5", etage: 1, qm: 688, konzept: "eigen", gruppe: "damen" }, { id: "W121-f6", etage: 1, qm: 537, konzept: "eigen", gruppe: "waesche" }, { id: "W121-f7", etage: 1, qm: 773, konzept: "eigen", gruppe: "herren" }, { id: "W121-f8", etage: 1, qm: 401, konzept: "eigen", gruppe: "kinder" }, { id: "W121-f9", etage: 2, qm: 112, konzept: "eigen", gruppe: "kinder" }, { id: "W121-f10", etage: 2, qm: 628, konzept: "eigen", gruppe: "sport" }, { id: "W121-f11", etage: 2, qm: 425, konzept: "eigen", gruppe: "spielwaren" }, { id: "W121-f12", etage: 2, qm: 1235, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 157044, rohertrag: 66834, konzessionserloes: 0, untermiete: 0, personal: 40858, miete: 41287, nebenkosten: 0, sonstige: 9678, db: -24989, fteBedarf: 33.676305073393294, fteIst: 41.63853731486583, umsatzJeGruppe: { food: 13443, beauty: 19925, accessoires: 25252, damen: 31051, waesche: 14105, herren: 12621, kinder: 7108, sport: 7179, spielwaren: 5596, wohnen: 20764 } } }, { id: "W122", name: "Hartwig Wesel", stadt: "Wesel", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1800, etagen: [0, 1, 2], baujahr: 1960, fassade: 2, substanz: 79, status: "offen", flaechen: [{ id: "W122-f1", etage: 0, qm: 411, konzept: "eigen", gruppe: "food" }, { id: "W122-f2", etage: 0, qm: 283, konzept: "eigen", gruppe: "beauty" }, { id: "W122-f3", etage: 0, qm: 420, konzept: "eigen", gruppe: "accessoires" }, { id: "W122-f4", etage: 0, qm: 719, konzept: "eigen", gruppe: "damen" }, { id: "W122-f5", etage: 1, qm: 485, konzept: "eigen", gruppe: "damen" }, { id: "W122-f6", etage: 1, qm: 286, konzept: "eigen", gruppe: "waesche" }, { id: "W122-f7", etage: 1, qm: 761, konzept: "eigen", gruppe: "herren" }, { id: "W122-f8", etage: 1, qm: 302, konzept: "eigen", gruppe: "kinder" }, { id: "W122-f9", etage: 2, qm: 61, konzept: "eigen", gruppe: "kinder" }, { id: "W122-f10", etage: 2, qm: 666, konzept: "eigen", gruppe: "sport" }, { id: "W122-f11", etage: 2, qm: 349, konzept: "eigen", gruppe: "spielwaren" }, { id: "W122-f12", etage: 2, qm: 757, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 137008, rohertrag: 56920, konzessionserloes: 0, untermiete: 0, personal: 33717, miete: 16290, nebenkosten: 7134, sonstige: 8092, db: -8313, fteBedarf: 27.82440931157522, fteIst: 34.81144363920361, umsatzJeGruppe: { food: 17327, beauty: 21948, accessoires: 18380, damen: 24407, waesche: 7359, herren: 14163, kinder: 6876, sport: 10096, spielwaren: 4917, wohnen: 11534 } } }, { id: "W123", name: "Hartwig Iserlohn", stadt: "Iserlohn", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1989, fassade: 3, substanz: 40, status: "offen", flaechen: [{ id: "W123-f1", etage: -1, qm: 355, konzept: "eigen", gruppe: "food" }, { id: "W123-f2", etage: -1, qm: 825, konzept: "eigen", gruppe: "wohnen" }, { id: "W123-f3", etage: 0, qm: 367, konzept: "eigen", gruppe: "beauty" }, { id: "W123-f4", etage: 0, qm: 600, konzept: "eigen", gruppe: "accessoires" }, { id: "W123-f5", etage: 0, qm: 214, konzept: "eigen", gruppe: "damen" }, { id: "W123-f6", etage: 1, qm: 852, konzept: "eigen", gruppe: "damen" }, { id: "W123-f7", etage: 1, qm: 328, konzept: "eigen", gruppe: "waesche" }, { id: "W123-f8", etage: 2, qm: 65, konzept: "eigen", gruppe: "waesche" }, { id: "W123-f9", etage: 2, qm: 839, konzept: "eigen", gruppe: "herren" }, { id: "W123-f10", etage: 2, qm: 276, konzept: "eigen", gruppe: "kinder" }, { id: "W123-f11", etage: 3, qm: 150, konzept: "eigen", gruppe: "kinder" }, { id: "W123-f12", etage: 3, qm: 654, konzept: "eigen", gruppe: "sport" }, { id: "W123-f13", etage: 3, qm: 278, konzept: "eigen", gruppe: "spielwaren" }, { id: "W123-f14", etage: 3, qm: 98, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 190165, rohertrag: 80440, konzessionserloes: 0, untermiete: 0, personal: 43231, miete: 51396, nebenkosten: 0, sonstige: 10452, db: -24640, fteBedarf: 35.111149363542914, fteIst: 44.22610112222914, umsatzJeGruppe: { food: 16970, wohnen: 17543, beauty: 30471, accessoires: 33297, damen: 29663, waesche: 12254, herren: 23973, kinder: 9861, sport: 11596, spielwaren: 4538 } } }, { id: "W124", name: "Hartwig L\xFCdenscheid", stadt: "L\xFCdenscheid", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [-1, 0, 1, 2], baujahr: 2e3, fassade: 2, substanz: 52, status: "offen", flaechen: [{ id: "W124-f1", etage: -1, qm: 558, konzept: "eigen", gruppe: "food" }, { id: "W124-f2", etage: -1, qm: 1492, konzept: "eigen", gruppe: "wohnen" }, { id: "W124-f3", etage: 0, qm: 590, konzept: "eigen", gruppe: "beauty" }, { id: "W124-f4", etage: 0, qm: 916, konzept: "eigen", gruppe: "accessoires" }, { id: "W124-f5", etage: 0, qm: 544, konzept: "eigen", gruppe: "damen" }, { id: "W124-f6", etage: 1, qm: 1106, konzept: "eigen", gruppe: "damen" }, { id: "W124-f7", etage: 1, qm: 488, konzept: "eigen", gruppe: "waesche" }, { id: "W124-f8", etage: 1, qm: 457, konzept: "eigen", gruppe: "herren" }, { id: "W124-f9", etage: 2, qm: 467, konzept: "eigen", gruppe: "herren" }, { id: "W124-f10", etage: 2, qm: 481, konzept: "eigen", gruppe: "kinder" }, { id: "W124-f11", etage: 2, qm: 883, konzept: "eigen", gruppe: "sport" }, { id: "W124-f12", etage: 2, qm: 532, konzept: "eigen", gruppe: "spielwaren" }], kpi: { woche: 2, umsatz: 248141, rohertrag: 103588, konzessionserloes: 0, untermiete: 0, personal: 53257, miete: 23557, nebenkosten: 9506, sonstige: 14005, db: 3263, fteBedarf: 47.48653790856885, fteIst: 54.8025435906923, umsatzJeGruppe: { food: 21718, wohnen: 33491, beauty: 47380, accessoires: 41780, damen: 36313, waesche: 14103, herren: 21645, kinder: 10138, sport: 13585, spielwaren: 7987 } } }, { id: "W125", name: "Hartwig Witten", stadt: "Witten", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2400, etagen: [-1, 0, 1], baujahr: 1965, fassade: 5, substanz: 50, status: "offen", flaechen: [{ id: "W125-f1", etage: -1, qm: 379, konzept: "eigen", gruppe: "food" }, { id: "W125-f2", etage: -1, qm: 1988, konzept: "eigen", gruppe: "wohnen" }, { id: "W125-f3", etage: 0, qm: 341, konzept: "eigen", gruppe: "beauty" }, { id: "W125-f4", etage: 0, qm: 697, konzept: "eigen", gruppe: "accessoires" }, { id: "W125-f5", etage: 0, qm: 1329, konzept: "eigen", gruppe: "damen" }, { id: "W125-f6", etage: 1, qm: 90, konzept: "eigen", gruppe: "damen" }, { id: "W125-f7", etage: 1, qm: 503, konzept: "eigen", gruppe: "waesche" }, { id: "W125-f8", etage: 1, qm: 926, konzept: "eigen", gruppe: "herren" }, { id: "W125-f9", etage: 1, qm: 479, konzept: "eigen", gruppe: "kinder" }, { id: "W125-f10", etage: 1, qm: 1178, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 207897, rohertrag: 88137, konzessionserloes: 0, untermiete: 0, personal: 42822, miete: 23077, nebenkosten: 11283, sonstige: 12083, db: -1128, fteBedarf: 41.178571941445384, fteIst: 43.482234344412205, umsatzJeGruppe: { food: 17058, wohnen: 41192, beauty: 22815, accessoires: 30698, damen: 39444, waesche: 13545, herren: 17832, kinder: 8832, sport: 16482 } } }, { id: "W126", name: "Hartwig Marl Arkaden", stadt: "Marl", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2800, etagen: [-1, 0, 1], baujahr: 1991, fassade: 6, substanz: 49, status: "offen", flaechen: [{ id: "W126-f1", etage: -1, qm: 557, konzept: "eigen", gruppe: "food" }, { id: "W126-f2", etage: -1, qm: 2209, konzept: "eigen", gruppe: "wohnen" }, { id: "W126-f3", etage: 0, qm: 503, konzept: "eigen", gruppe: "beauty" }, { id: "W126-f4", etage: 0, qm: 814, konzept: "eigen", gruppe: "accessoires" }, { id: "W126-f5", etage: 0, qm: 1449, konzept: "eigen", gruppe: "damen" }, { id: "W126-f6", etage: 1, qm: 333, konzept: "eigen", gruppe: "damen" }, { id: "W126-f7", etage: 1, qm: 499, konzept: "eigen", gruppe: "waesche" }, { id: "W126-f8", etage: 1, qm: 1159, konzept: "eigen", gruppe: "herren" }, { id: "W126-f9", etage: 1, qm: 609, konzept: "eigen", gruppe: "kinder" }, { id: "W126-f10", etage: 1, qm: 1390, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 200125, rohertrag: 84686, konzessionserloes: 0, untermiete: 0, personal: 50420, miete: 24264, nebenkosten: 13558, sonstige: 12490, db: -16046, fteBedarf: 43.46300279849733, fteIst: 51.07734507627857, umsatzJeGruppe: { food: 17253, wohnen: 30489, beauty: 25610, accessoires: 27266, damen: 34223, waesche: 13139, herren: 23512, kinder: 9647, sport: 18985 } } }, { id: "W127", name: "Hartwig Moers City-Center", stadt: "Moers", format: "warenhaus", lage: "center", cluster: "mittelstadt", grundflaecheQm: 2100, etagen: [0, 1, 2, 3], baujahr: 2002, fassade: 1, substanz: 39, status: "offen", flaechen: [{ id: "W127-f1", etage: 0, qm: 486, konzept: "eigen", gruppe: "food" }, { id: "W127-f2", etage: 0, qm: 640, konzept: "eigen", gruppe: "beauty" }, { id: "W127-f3", etage: 0, qm: 949, konzept: "eigen", gruppe: "accessoires" }, { id: "W127-f4", etage: 1, qm: 118, konzept: "eigen", gruppe: "accessoires" }, { id: "W127-f5", etage: 1, qm: 1329, konzept: "eigen", gruppe: "damen" }, { id: "W127-f6", etage: 1, qm: 628, konzept: "eigen", gruppe: "waesche" }, { id: "W127-f7", etage: 2, qm: 37, konzept: "eigen", gruppe: "waesche" }, { id: "W127-f8", etage: 2, qm: 877, konzept: "eigen", gruppe: "herren" }, { id: "W127-f9", etage: 2, qm: 704, konzept: "eigen", gruppe: "kinder" }, { id: "W127-f10", etage: 2, qm: 458, konzept: "eigen", gruppe: "sport" }, { id: "W127-f11", etage: 3, qm: 539, konzept: "eigen", gruppe: "sport" }, { id: "W127-f12", etage: 3, qm: 401, konzept: "eigen", gruppe: "spielwaren" }, { id: "W127-f13", etage: 3, qm: 1135, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 190560, rohertrag: 80211, konzessionserloes: 0, untermiete: 0, personal: 46830, miete: 27102, nebenkosten: 0, sonstige: 11548, db: -5270, fteBedarf: 39.96069300195375, fteIst: 47.16919069182678, umsatzJeGruppe: { food: 13937, beauty: 38615, accessoires: 36760, damen: 22481, waesche: 15427, herren: 17476, kinder: 10852, sport: 13278, spielwaren: 4023, wohnen: 17709 } } }, { id: "W128", name: "Hartwig Kaiserslautern Neustadt", stadt: "Kaiserslautern", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 1500, etagen: [-1, 0, 1, 2, 3], baujahr: 1971, fassade: 0, substanz: 81, status: "offen", flaechen: [{ id: "W128-f1", etage: -1, qm: 644, konzept: "eigen", gruppe: "food" }, { id: "W128-f2", etage: -1, qm: 896, konzept: "eigen", gruppe: "wohnen" }, { id: "W128-f3", etage: 0, qm: 506, konzept: "eigen", gruppe: "beauty" }, { id: "W128-f4", etage: 0, qm: 668, konzept: "eigen", gruppe: "accessoires" }, { id: "W128-f5", etage: 0, qm: 365, konzept: "eigen", gruppe: "damen" }, { id: "W128-f6", etage: 1, qm: 1138, konzept: "eigen", gruppe: "damen" }, { id: "W128-f7", etage: 1, qm: 402, konzept: "eigen", gruppe: "waesche" }, { id: "W128-f8", etage: 2, qm: 51, konzept: "eigen", gruppe: "waesche" }, { id: "W128-f9", etage: 2, qm: 1079, konzept: "eigen", gruppe: "herren" }, { id: "W128-f10", etage: 2, qm: 410, konzept: "eigen", gruppe: "kinder" }, { id: "W128-f11", etage: 3, qm: 58, konzept: "eigen", gruppe: "kinder" }, { id: "W128-f12", etage: 3, qm: 695, konzept: "eigen", gruppe: "sport" }, { id: "W128-f13", etage: 3, qm: 478, konzept: "eigen", gruppe: "spielwaren" }, { id: "W128-f14", etage: 3, qm: 309, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 159536, rohertrag: 66721, konzessionserloes: 0, untermiete: 0, personal: 38665, miete: 29785, nebenkosten: 0, sonstige: 10006, db: -11735, fteBedarf: 34.98472410817196, fteIst: 39.94232786450628, umsatzJeGruppe: { food: 18573, wohnen: 15270, beauty: 28326, accessoires: 22532, damen: 29331, waesche: 9381, herren: 17218, kinder: 6428, sport: 6990, spielwaren: 5485 } } }, { id: "W129", name: "Hartwig Worms Neustadt", stadt: "Worms", format: "warenhaus", lage: "b", cluster: "mittelstadt", grundflaecheQm: 2700, etagen: [-1, 0, 1], baujahr: 1919, fassade: 4, substanz: 31, status: "offen", flaechen: [{ id: "W129-f1", etage: -1, qm: 478, konzept: "eigen", gruppe: "food" }, { id: "W129-f2", etage: -1, qm: 2255, konzept: "eigen", gruppe: "wohnen" }, { id: "W129-f3", etage: 0, qm: 431, konzept: "eigen", gruppe: "beauty" }, { id: "W129-f4", etage: 0, qm: 798, konzept: "eigen", gruppe: "accessoires" }, { id: "W129-f5", etage: 0, qm: 1505, konzept: "eigen", gruppe: "damen" }, { id: "W129-f6", etage: 1, qm: 50, konzept: "eigen", gruppe: "damen" }, { id: "W129-f7", etage: 1, qm: 503, konzept: "eigen", gruppe: "waesche" }, { id: "W129-f8", etage: 1, qm: 1175, konzept: "eigen", gruppe: "herren" }, { id: "W129-f9", etage: 1, qm: 652, konzept: "eigen", gruppe: "kinder" }, { id: "W129-f10", etage: 1, qm: 1128, konzept: "eigen", gruppe: "sport" }], kpi: { woche: 2, umsatz: 179713, rohertrag: 75668, konzessionserloes: 0, untermiete: 0, personal: 46503, miete: 21992, nebenkosten: 10631, sonstige: 11407, db: -14865, fteBedarf: 39.88357256127091, fteIst: 47.20129659805884, umsatzJeGruppe: { food: 13033, wohnen: 37324, beauty: 27586, accessoires: 23784, damen: 25896, waesche: 11236, herren: 18495, kinder: 10138, sport: 12221 } } }, { id: "W130", name: "Hartwig Speyer", stadt: "Speyer", format: "warenhaus", lage: "1a", cluster: "mittelstadt", grundflaecheQm: 2800, etagen: [0, 1, 2], baujahr: 1910, fassade: 4, substanz: 74, status: "offen", flaechen: [{ id: "W130-f1", etage: 0, qm: 597, konzept: "eigen", gruppe: "food" }, { id: "W130-f2", etage: 0, qm: 505, konzept: "eigen", gruppe: "beauty" }, { id: "W130-f3", etage: 0, qm: 862, konzept: "eigen", gruppe: "accessoires" }, { id: "W130-f4", etage: 0, qm: 837, konzept: "eigen", gruppe: "damen" }, { id: "W130-f5", etage: 1, qm: 1152, konzept: "eigen", gruppe: "damen" }, { id: "W130-f6", etage: 1, qm: 604, konzept: "eigen", gruppe: "waesche" }, { id: "W130-f7", etage: 1, qm: 912, konzept: "eigen", gruppe: "herren" }, { id: "W130-f8", etage: 1, qm: 131, konzept: "eigen", gruppe: "kinder" }, { id: "W130-f9", etage: 2, qm: 405, konzept: "eigen", gruppe: "kinder" }, { id: "W130-f10", etage: 2, qm: 826, konzept: "eigen", gruppe: "sport" }, { id: "W130-f11", etage: 2, qm: 602, konzept: "eigen", gruppe: "spielwaren" }, { id: "W130-f12", etage: 2, qm: 967, konzept: "eigen", gruppe: "wohnen" }], kpi: { woche: 2, umsatz: 263398, rohertrag: 111518, konzessionserloes: 0, untermiete: 0, personal: 57092, miete: 27771, nebenkosten: 11762, sonstige: 14579, db: 313, fteBedarf: 49.13564139890457, fteIst: 57.834649496069126, umsatzJeGruppe: { food: 27849, beauty: 40839, accessoires: 42141, damen: 48508, waesche: 23018, herren: 27824, kinder: 11101, sport: 12354, spielwaren: 9041, wohnen: 20723 } } }, { id: "S047", name: "Hartwig Sport Berlin Am Markt", stadt: "Berlin", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 2100, etagen: [0], baujahr: 2012, fassade: 1, substanz: 68, status: "offen", flaechen: [{ id: "S047-f1", etage: 0, qm: 446, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S047-f2", etage: 0, qm: 549, konzept: "eigen", gruppe: "sporttextil" }, { id: "S047-f3", etage: 0, qm: 467, konzept: "eigen", gruppe: "outdoor" }, { id: "S047-f4", etage: 0, qm: 223, konzept: "eigen", gruppe: "teamsport" }, { id: "S047-f5", etage: 0, qm: 202, konzept: "eigen", gruppe: "rad" }, { id: "S047-f6", etage: 0, qm: 163, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 81535, rohertrag: 34571, konzessionserloes: 0, untermiete: 0, personal: 16540, miete: 6703, nebenkosten: 2333, sonstige: 4265, db: 4729, fteBedarf: 13.467695526262736, fteIst: 16.73675352368738, umsatzJeGruppe: { sportschuhe: 23993, sporttextil: 20420, outdoor: 19364, teamsport: 5069, rad: 2385, wintersport: 10304 } } }, { id: "S048", name: "Hartwig Sport Hamburg Galerie am Fluss", stadt: "Hamburg", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2600, etagen: [0, 1], baujahr: 1986, fassade: 7, substanz: 55, status: "offen", flaechen: [{ id: "S048-f1", etage: 0, qm: 1345, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S048-f2", etage: 0, qm: 1139, konzept: "eigen", gruppe: "sporttextil" }, { id: "S048-f3", etage: 0, qm: 66, konzept: "eigen", gruppe: "outdoor" }, { id: "S048-f4", etage: 1, qm: 884, konzept: "eigen", gruppe: "outdoor" }, { id: "S048-f5", etage: 1, qm: 443, konzept: "eigen", gruppe: "teamsport" }, { id: "S048-f6", etage: 1, qm: 765, konzept: "eigen", gruppe: "rad" }, { id: "S048-f7", etage: 1, qm: 457, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 244892, rohertrag: 102350, konzessionserloes: 0, untermiete: 0, personal: 45741, miete: 29218, nebenkosten: 7145, sonstige: 12335, db: 7911, fteBedarf: 38.55786679293943, fteIst: 46.992706440506666, umsatzJeGruppe: { sportschuhe: 96681, sporttextil: 51925, outdoor: 43637, teamsport: 10221, rad: 10277, wintersport: 32151 } } }, { id: "S049", name: "Hartwig Sport M\xFCnchen Am Markt", stadt: "M\xFCnchen", format: "sport", lage: "1a", cluster: "metropole", grundflaecheQm: 1600, etagen: [0, 1, 2], baujahr: 1997, fassade: 0, substanz: 38, status: "offen", flaechen: [{ id: "S049-f1", etage: 0, qm: 1012, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S049-f2", etage: 0, qm: 555, konzept: "eigen", gruppe: "sporttextil" }, { id: "S049-f3", etage: 1, qm: 984, konzept: "eigen", gruppe: "sporttextil" }, { id: "S049-f4", etage: 1, qm: 583, konzept: "eigen", gruppe: "outdoor" }, { id: "S049-f5", etage: 2, qm: 216, konzept: "eigen", gruppe: "outdoor" }, { id: "S049-f6", etage: 2, qm: 528, konzept: "eigen", gruppe: "teamsport" }, { id: "S049-f7", etage: 2, qm: 446, konzept: "eigen", gruppe: "rad" }, { id: "S049-f8", etage: 2, qm: 377, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 239768, rohertrag: 101653, konzessionserloes: 0, untermiete: 0, personal: 40472, miete: 30764, nebenkosten: 6681, sonstige: 11946, db: 11790, fteBedarf: 37.16889344552324, fteIst: 41.33673937946676, umsatzJeGruppe: { sportschuhe: 71817, sporttextil: 78570, outdoor: 40188, teamsport: 16449, rad: 7060, wintersport: 25685 } } }, { id: "S050", name: "Hartwig Sport K\xF6ln City-Center", stadt: "K\xF6ln", format: "sport", lage: "center", cluster: "metropole", grundflaecheQm: 2100, etagen: [0], baujahr: 1992, fassade: 6, substanz: 90, status: "offen", flaechen: [{ id: "S050-f1", etage: 0, qm: 375, konzept: "eigen", gruppe: "sportschuhe" }, { id: "S050-f2", etage: 0, qm: 673, konzept: "eigen", gruppe: "sporttextil" }, { id: "S050-f3", etage: 0, qm: 333, konzept: "eigen", gruppe: "outdoor" }, { id: "S050-f4", etage: 0, qm: 217, konzept: "eigen", gruppe: "teamsport" }, { id: "S050-f5", etage: 0, qm: 285, konzept: "eigen", gruppe: "rad" }, { id: "S050-f6", etage: 0, qm: 167, konzept: "eigen", gruppe: "wintersport" }], kpi: { woche: 2, umsatz: 78252, rohertrag: 33027, konzessionserloes: 0, untermiete: 0, personal: 16086, miete: 9263, nebenkosten: 0, sonstige: 4131, db: 3548, fteBedarf: 13.159530268777383, fteIst: 16.35596187631147, umsatzJeGruppe: { sportschuhe: 24276, sporttextil: 25834, outdoor: 10617, teamsport: 5070, rad: 2874, wintersport: 9581 } } }];
 
@@ -57207,9 +61019,14 @@
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
   var HAUS = new Map(haeuser_default.map((h) => [h.id, h]));
   var SCHWESTER = new Map(haeuser_schwester_default.map((h) => [h.id, h]));
+  var OUTLETS = new Map(haeuser_outlet_default.map((h) => [h.id, h]));
   function fussabdruck(haus2, familie = null) {
     if (haus2.format === "schwester") {
       const m2 = masseSchwester(haus2);
+      return { w: m2.w, d: m2.d, mall: 0 };
+    }
+    if (haus2.format === "outlet") {
+      const m2 = masseOutlet(haus2);
       return { w: m2.w, d: m2.d, mall: 0 };
     }
     if (haus2.format === "sport" && familie !== 7) {
@@ -57368,2092 +61185,15 @@
         return sport(S, scene2, { ...p, zustand: zustandFuer(h) }, h);
       },
       "slot:wettbewerber": (S, scene2, p) => wettbewerber2(S, scene2, p),
-      "slot:schwester": (S, scene2, p) => ERSATZ.schwester(S, scene2, p)
-    };
-  }
-
-  // src/kit/innen.js
-  var innen_exports = {};
-  __export(innen_exports, {
-    BODEN: () => BODEN2,
-    GLAS: () => GLAS4,
-    HOLZ: () => HOLZ,
-    KONZEPTE: () => KONZEPTE,
-    MARKEN: () => MARKEN2,
-    MIETER: () => MIETER3,
-    MODUL: () => MODUL,
-    PAL: () => PAL,
-    PREISE: () => PREISE,
-    RASTER: () => RASTER,
-    UNTERMIETE: () => UNTERMIETE,
-    WANDHOEHE: () => WANDHOEHE,
-    WARENGRUPPEN: () => WARENGRUPPEN,
-    abgedeckt: () => abgedeckt,
-    absperrung: () => absperrung,
-    abteilungsname: () => abteilungsname,
-    abtrennung: () => abtrennung,
-    anz: () => anz,
-    aufzug: () => aufzug,
-    ballkorb: () => ballkorb,
-    bauzaun: () => bauzaun2,
-    beimoebel: () => beimoebel,
-    bettInsel: () => bettInsel,
-    bildtafel: () => bildtafel,
-    boden: () => boden,
-    bunt: () => bunt,
-    cafeEcke: () => cafeEcke,
-    fahrrad: () => fahrrad,
-    feinkosttheke: () => feinkosttheke,
-    figur: () => figur2,
-    flakonFlaeche: () => flakonFlaeche,
-    flakonTurm: () => flakonTurm,
-    gangMoebel: () => gangMoebel,
-    geschirrAufTisch: () => geschirrAufTisch,
-    gitterbox: () => gitterbox,
-    gondel: () => gondel,
-    haengeschild: () => haengeschild,
-    hantelbank: () => hantelbank,
-    helme: () => helme,
-    infoCounter: () => infoCounter,
-    kartons: () => kartons,
-    kassentresen: () => kassentresen,
-    kleiderReihe: () => kleiderReihe,
-    lager: () => lager,
-    laufband: () => laufband,
-    leiter: () => leiter,
-    lokal: () => lokal2,
-    marke: () => marke2,
-    markenwand: () => markenwand,
-    material: () => material,
-    obstStand: () => obstStand,
-    pluschBerg: () => pluschBerg,
-    pouf: () => pouf,
-    preisschild: () => preisschild,
-    prodFlaschen: () => prodFlaschen,
-    prodGefaltet: () => prodGefaltet,
-    prodGeschirr: () => prodGeschirr,
-    prodPackungen: () => prodPackungen,
-    prodSchuhe: () => prodSchuhe,
-    prodTaschen: () => prodTaschen,
-    puppe: () => puppe3,
-    puppenPodest: () => puppenPodest,
-    radwand: () => radwand,
-    raumKachel: () => raumKachel,
-    rolltreppe: () => rolltreppe,
-    rolltreppenKern: () => rolltreppenKern,
-    rucksackTurm: () => rucksackTurm,
-    rucksackwand: () => rucksackwand,
-    rueckwand: () => rueckwand,
-    rundstaender: () => rundstaender,
-    schminkplatz: () => schminkplatz,
-    schrift: () => schrift,
-    schubkarre: () => schubkarre,
-    schuhtisch: () => schuhtisch,
-    schuhwand: () => schuhwand,
-    schutt: () => schutt2,
-    skistaender: () => skistaender,
-    skiwand: () => skiwand,
-    snowboardInsel: () => snowboardInsel,
-    sofaInsel: () => sofaInsel,
-    spiegelSaeule: () => spiegelSaeule,
-    spieltisch: () => spieltisch,
-    staender: () => staender,
-    standspiegel: () => standspiegel,
-    stapel: () => stapel,
-    stehlampe: () => stehlampe,
-    stuetze: () => stuetze,
-    stuhl: () => stuhl,
-    taschenWuerfel: () => taschenWuerfel,
-    teddy: () => teddy,
-    tor: () => tor,
-    treppenhaus: () => treppenhaus,
-    trikotwand: () => trikotwand,
-    uhrenvitrine: () => uhrenvitrine,
-    umkleiden: () => umkleiden,
-    vitrine: () => vitrine2,
-    vorbereiten: () => vorbereiten,
-    wandKleider: () => wandKleider,
-    wandRegal: () => wandRegal,
-    wandschild: () => wandschild,
-    warenTisch: () => warenTisch,
-    weinregal: () => weinregal,
-    wuehltisch: () => wuehltisch,
-    zelle: () => zelle,
-    zelt: () => zelt
-  });
-  var RASTER = 5;
-  var WANDHOEHE = 4.6;
-  var GLAS4 = "#cfe8f1";
-  var PI2 = Math.PI;
-  function vorbereiten(S, scene2) {
-    S.szene = scene2;
-    const g = mat(GLAS4);
-    g.transparent = true;
-    g.opacity = 0.3;
-    g.depthWrite = false;
-    if (scene2 && !scene2.userData.glasFix) {
-      scene2.userData.glasFix = true;
-      scene2.onBeforeRender = () => scene2.traverse((o) => {
-        if (o.isMesh && o.material === g) o.castShadow = false;
-      });
-    }
-  }
-  function lokal2(S, ox, oy, oz, rot = 0) {
-    const c = Math.cos(rot), s2 = Math.sin(rot);
-    const P2 = (lx, lz) => [ox + lx * c + lz * s2, oz - lx * s2 + lz * c];
-    return {
-      S,
-      rot,
-      oy,
-      P: P2,
-      /** Quader, ly = Unterkante. */
-      box(w, h, d, lx, ly, lz, f, ry = 0) {
-        const [X, Z2] = P2(lx, lz);
-        S.box(w, h, d, X, oy + ly + h / 2, Z2, f, rot + ry);
-      },
-      geo(g, lx, ly, lz, f, ry = 0) {
-        if (rot + ry) g.rotateY(rot + ry);
-        const [X, Z2] = P2(lx, lz);
-        g.translate(X, oy + ly, Z2);
-        S.add(g, f);
-      },
-      zyl(rt, rb, h, lx, ly, lz, f, seg = 8) {
-        this.geo(new three_module_exports.CylinderGeometry(rt, rb, h, seg).translate(0, h / 2, 0), lx, ly, lz, f);
-      },
-      kugel(rad2, lx, ly, lz, f, det = 0) {
-        this.geo(new three_module_exports.IcosahedronGeometry(rad2, det), lx, ly, lz, f);
-      },
-      sub(lx, lz, ry = 0) {
-        const [X, Z2] = P2(lx, lz);
-        return lokal2(S, X, oy, Z2, rot + ry);
-      },
-      hoch(dy) {
-        return lokal2(S, ox, oy + dy, oz, rot);
+      "slot:schwester": (S, scene2, p) => ERSATZ.schwester(S, scene2, p),
+      "slot:outlet": (S, scene2, p) => {
+        const h = OUTLETS.get(p.standort?.id);
+        if (!h) return { hoehe: 0 };
+        const f = fussabdruck(h), { x, z: z2 } = imSlot(p, f.w, f.d);
+        p.haus = h;
+        return outlet(S, scene2, h, { x, z: z2, ...zustandFuer(h) });
       }
     };
-  }
-  var anz = (n, d, f = 0.5) => Math.max(1, Math.floor(n * (d < 0.5 ? f : 1)));
-  var bunt = (r, pal) => pal[Math.floor(r() * pal.length)];
-  var PAL = {
-    damen: ["#d65a6f", "#f2c6d2", "#e8dcc6", "#2b2b2b", "#7d97b8", "#c9483e", "#f4f0ea", "#9b6fb0", "#e9b44c", "#5f8f7a", "#e88a6a"],
-    herren: ["#2b3a55", "#3a3f47", "#6b5a48", "#e8e4dc", "#8c9aa6", "#4a5a3e", "#1f2328", "#a67c52", "#d9dee3", "#6d2f3a"],
-    kinder: ["#ef5b5b", "#ffc145", "#5bc0eb", "#9bc53d", "#f78fb3", "#7b6cf6", "#ff8c42", "#ffffff"],
-    waesche: ["#f4d4dc", "#e8b4c4", "#ffffff", "#2b2b2b", "#c9a3d4", "#f0e2d0", "#b0475f", "#8a2f45"],
-    sport: ["#1f6fd1", "#e8403a", "#1f1f1f", "#f2f2f2", "#38b86b", "#ffcc00", "#ff6a2b", "#7a3cd1", "#20b5c9"],
-    outdoor: ["#3f6b3a", "#c25b2a", "#e0a33a", "#2f5f8a", "#6d4c3d", "#8a9a5b", "#d14a3a", "#30343a"],
-    winter: ["#e8403a", "#1f6fd1", "#ffffff", "#1f1f1f", "#ffcc00", "#20b5c9", "#ff6a2b", "#7a3cd1"],
-    beautyMarke: ["#1f1f1f", "#e9a3b8", "#d8b25a", "#f7f3ec", "#b5162b", "#2c4a6e", "#6c8f86", "#3b2a4a"],
-    flakon: ["#f2c6d2", "#d8b25a", "#ffffff", "#b5162b", "#9bc6d8", "#2b2b2b", "#e9a3b8", "#c3a6d8"],
-    waren: ["#e8403a", "#f2c14e", "#3c8dd9", "#5bb36a", "#f4f0e6", "#e97b3c", "#9b5fc0", "#2f5f8a", "#c9a26b"],
-    taschen: ["#5a3b22", "#2b2b2b", "#c9483e", "#e8dcc6", "#2f6f8f", "#8b5a3c", "#d8b25a", "#6b2737"],
-    schuhe: ["#2b2b2b", "#8b5a3c", "#e8e4dc", "#c9483e", "#5a3b22", "#2f4a6e", "#d8b25a"],
-    geschirr: ["#ffffff", "#f4f0e6", "#9bc6d8", "#2f5f8a", "#e8d6b0", "#d97a5a", "#3f6b5a"]
-  };
-  var HOLZ = { hell: "#d8bf98", mittel: "#b98d61", dunkel: "#7b5a40", weiss: "#f6f3ee", schwarz: "#2a2d31", metall: "#9aa3aa", chrom: "#c9d2d8" };
-  var BODEN2 = {
-    damen: { a: "#e3cfb1", b: "#dcc6a6", m: "dielen" },
-    herren: { a: "#a98463", b: "#9f7a59", m: "dielen" },
-    kinder: { a: "#d8e8f0", b: "#cfe0ea", m: "karo" },
-    waesche: { a: "#efdde2", b: "#e8d3d9", m: "teppich" },
-    beauty: { a: "#f7f4ef", b: "#e9e3da", m: "karo" },
-    accessoires: { a: "#c9a27a", b: "#bf966d", m: "dielen" },
-    wohnen: { a: "#d6c3a3", b: "#cdb999", m: "dielen" },
-    spielwaren: { a: "#f3e6b8", b: "#bfe0f0", m: "karo" },
-    food: { a: "#d6a47c", b: "#c99470", m: "karo" },
-    sport: { a: "#c9cdd1", b: "#bfc4c9", m: "fliese" },
-    sportschuhe: { a: "#cfd2d6", b: "#c3c7cc", m: "fliese" },
-    sporttextil: { a: "#d3d6da", b: "#c8ccd1", m: "fliese" },
-    outdoor: { a: "#b79e78", b: "#ab926d", m: "dielen" },
-    rad: { a: "#a3a9ae", b: "#989ea4", m: "beton" },
-    wintersport: { a: "#e3ecf2", b: "#d5e1ea", m: "karo" },
-    teamsport: { a: "#6fae5c", b: "#67a454", m: "rasen" },
-    offprice: { a: "#bdb8ad", b: "#b2ada2", m: "fliese" },
-    konzession: { a: "#e9e4dc", b: "#ddd6cb", m: "karo" },
-    untermiete: { a: "#d4d0c8", b: "#c9c4bb", m: "fliese" },
-    leer: { a: "#6b6e72", b: "#63666a", m: "beton" },
-    umbau: { a: "#8f8b84", b: "#85817a", m: "beton" },
-    gang: { a: "#efebe4", b: "#e4dfd6", m: "fliese" },
-    kasse: { a: "#efebe4", b: "#e4dfd6", m: "fliese" },
-    lager: { a: "#a7a49d", b: "#9d9a93", m: "beton" }
-  };
-  function boden(S, x, z2, w, d, y, typ, dichte = 1) {
-    const b = typeof typ === "string" ? BODEN2[typ] ?? BODEN2.gang : typ;
-    S.box(w, 0.05, d, x + w / 2, y + 0.025, z2 + d / 2, b.a);
-    if (dichte < 0.35) return;
-    if (b.m === "dielen") {
-      for (let i = 1; i < w / 1; i += 2) S.box(1, 0.012, d, x + i + 0.5, y + 0.055, z2 + d / 2, b.b);
-    } else if (b.m === "karo") {
-      const k = dichte > 0.6 ? 1.25 : 2.5;
-      for (let i = 0; i < w / k - 0.01; i++) for (let j = 0; j < d / k - 0.01; j++) if ((i + j) % 2) S.box(k, 0.012, k, x + (i + 0.5) * k, y + 0.055, z2 + (j + 0.5) * k, b.b);
-    } else if (b.m === "fliese") {
-      for (let i = 1; i < w / 2.5; i++) S.box(0.05, 0.012, d, x + i * 2.5, y + 0.055, z2 + d / 2, b.b);
-      for (let j = 1; j < d / 2.5; j++) S.box(w, 0.012, 0.05, x + w / 2, y + 0.055, z2 + j * 2.5, b.b);
-    } else if (b.m === "rasen") {
-      S.box(w, 0.012, 0.08, x + w / 2, y + 0.055, z2 + d / 2, "#f2f2ee");
-    } else if (b.m === "beton") {
-      S.box(w * 0.35, 0.012, d * 0.3, x + w * 0.3, y + 0.055, z2 + d * 0.65, b.b);
-    } else if (b.m === "marmor") {
-      for (let i = 0; i < w / 2.5 - 0.01; i++) for (let j = 0; j < d / 2.5 - 0.01; j++) {
-        const px2 = x + (i + 0.5) * 2.5, pz4 = z2 + (j + 0.5) * 2.5;
-        if ((i + j) % 2) S.box(2.46, 0.012, 2.46, px2, y + 0.055, pz4, b.b);
-        if (dichte > 0.6 && (i * 3 + j) % 4 === 1) S.box(1.7, 0.014, 0.05, px2, y + 0.058, pz4, b.c ?? dunkler(b.b, 0.05), 0.6);
-      }
-    } else if (b.m === "teppich") {
-      for (let i = 0; i < w / 2.5 - 0.01; i++) for (let j = 0; j < d / 2.5 - 0.01; j++) if ((i + j) % 2) S.box(2.5, 0.01, 2.5, x + (i + 0.5) * 2.5, y + 0.053, z2 + (j + 0.5) * 2.5, b.b);
-    } else if (b.m === "parkett") {
-      for (let i = 0; i < w / 0.5 - 0.01; i++) if (i % 2) S.box(0.5, 0.012, d, x + (i + 0.5) * 0.5, y + 0.055, z2 + d / 2, b.b);
-      if (dichte > 0.6) for (let i = 0; i < w / 0.5 - 0.01; i++) S.box(0.48, 0.014, 0.03, x + (i + 0.5) * 0.5, y + 0.056, z2 + i * 1.7 % d, b.c ?? dunkler(b.b, 0.06));
-    } else if (b.m === "punkte") {
-      const fs = b.punkte ?? ["#ffd166", "#5bc0eb", "#ef5b5b", "#9bc53d"];
-      const k = Math.round((x * 7 + z2 * 3) / 5);
-      S.add(new three_module_exports.CylinderGeometry(1.1, 1.1, 0.012, 14).translate(x + 1.4, y + 0.056, z2 + 1.5), fs[Math.abs(k) % fs.length]);
-      if (dichte > 0.5) S.add(new three_module_exports.CylinderGeometry(0.7, 0.7, 0.012, 12).translate(x + 3.7, y + 0.056, z2 + 3.6), fs[Math.abs(k + 2) % fs.length]);
-    } else if (b.m === "platten") {
-      for (let i = 1; i < w / 2.5; i++) S.box(0.04, 0.012, d, x + i * 2.5, y + 0.055, z2 + d / 2, b.b);
-      for (let j = 1; j < d / 2.5; j++) S.box(w, 0.012, 0.04, x + w / 2, y + 0.055, z2 + j * 2.5, b.b);
-      if (b.c && dichte > 0.5) {
-        S.box(w, 0.013, 0.22, x + w / 2, y + 0.056, z2 + 0.11, b.c);
-        S.box(0.22, 0.013, d, x + 0.11, y + 0.056, z2 + d / 2, b.c);
-      }
-    } else if (b.m === "streifen") {
-      S.box(w, 0.012, 0.12, x + w / 2, y + 0.055, z2 + d * 0.3, b.b);
-      if (b.c) S.box(w, 0.012, 0.12, x + w / 2, y + 0.055, z2 + d * 0.3 + 0.2, b.c);
-    }
-  }
-  function kleiderReihe(L2, a, b, y, lz, pal, r, d, o = {}) {
-    const seitlich = o.seitlich ?? true;
-    const hMin = o.hMin ?? 0.65, hMax = o.hMax ?? 1.05;
-    const breit2 = o.breit ?? 0.44;
-    if (d < 0.55) {
-      const n = Math.max(1, Math.round((b - a) / 0.5));
-      const s2 = (b - a) / n;
-      for (let i = 0; i < n; i++) {
-        const h2 = zw(r, hMin, hMax);
-        L2.box(s2 * 0.92, h2, seitlich ? breit2 : 0.1, a + s2 * (i + 0.5), y - h2 - 0.03, lz, bunt(r, pal));
-      }
-      return;
-    }
-    const abst2 = o.abstand ?? 0.12;
-    let farbe = bunt(r, pal), h = zw(r, hMin, hMax);
-    for (let u = a + abst2 / 2; u < b - 0.02; u += abst2) {
-      if (r() < 0.28) {
-        farbe = bunt(r, pal);
-        h = zw(r, hMin, hMax);
-      }
-      if (seitlich) L2.box(0.065, h, breit2, u, y - h - 0.03, lz, farbe);
-      else L2.box(breit2, h, 0.06, u, y - h - 0.03, lz, farbe);
-    }
-  }
-  function stapel(L2, lx, lz, w, t, y, pal, r, d, n = null) {
-    const sx = 0.36, sz = 0.3;
-    const nx = Math.max(1, Math.floor(w / (sx + 0.06))), nz = Math.max(1, Math.floor(t / (sz + 0.06)));
-    if (d < 0.5) {
-      for (let j = 0; j < nz; j++) L2.box(w * 0.92, zw(r, 0.12, 0.3), sz, lx, y, lz - t / 2 + (j + 0.5) * (t / nz), bunt(r, pal));
-      return;
-    }
-    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-      const h = zw(r, 0.1, 0.32);
-      const px2 = lx - w / 2 + (i + 0.5) * (w / nx), pz4 = lz - t / 2 + (j + 0.5) * (t / nz);
-      L2.box(sx, h, sz, px2, y, pz4, bunt(r, pal), zw(r, -0.06, 0.06));
-    }
-  }
-  function wandKleider(L2, w, pal, r, d, o = {}) {
-    const panel2 = o.panel ?? HOLZ.weiss;
-    L2.box(w, 2.7, 0.1, 0, 0, 0.05, panel2);
-    L2.box(w, 0.1, 0.12, 0, 2.7, 0.06, dunkler(panel2, 0.08));
-    const zweiReihen = o.zwei ?? r() < 0.5;
-    L2.box(0.06, 2.4, 0.5, -w / 2 + 0.05, 0, 0.35, HOLZ.chrom);
-    L2.box(0.06, 2.4, 0.5, w / 2 - 0.05, 0, 0.35, HOLZ.chrom);
-    if (zweiReihen) {
-      L2.box(w - 0.1, 0.04, 0.04, 0, 1, 0.35, HOLZ.chrom);
-      L2.box(w - 0.1, 0.04, 0.04, 0, 1.95, 0.35, HOLZ.chrom);
-      kleiderReihe(L2, -w / 2 + 0.1, w / 2 - 0.1, 1.95, 0.35, pal, r, d, { hMin: 0.55, hMax: 0.8, breit: o.breit });
-      kleiderReihe(L2, -w / 2 + 0.1, w / 2 - 0.1, 1, 0.35, pal, r, d, { hMin: 0.45, hMax: 0.7, breit: o.breit });
-    } else {
-      L2.box(w - 0.1, 0.04, 0.04, 0, 1.75, 0.35, HOLZ.chrom);
-      kleiderReihe(L2, -w / 2 + 0.1, w / 2 - 0.1, 1.75, 0.35, pal, r, d, { hMin: o.hMin ?? 0.8, hMax: o.hMax ?? 1.3, breit: o.breit });
-    }
-    L2.box(w - 0.1, 0.05, 0.4, 0, 2.2, 0.25, panel2 === HOLZ.weiss ? HOLZ.hell : HOLZ.weiss);
-    stapel(L2, 0, 0.25, w - 0.4, 0.32, 2.25, pal, r, d);
-    if (o.bild !== false && d > 0.4) bildtafel(L2, 0, 3.15, 0.11, Math.min(2.6, w * 0.6), 1, r, pal);
-  }
-  function bildtafel(L2, lx, y, lz, w, h, r, pal) {
-    L2.box(w, h, 0.05, lx, y, lz, "#f8f6f2");
-    L2.box(w - 0.12, h - 0.12, 0.03, lx, y + 0.06, lz + 0.03, bunt(r, ["#e9c9b5", "#bcd3df", "#d6c6e0", "#e4d7b8", "#c9dcc4"]));
-    L2.box(w * 0.18, h * 0.62, 0.02, lx - w * 0.15, y + 0.12, lz + 0.05, bunt(r, pal));
-    L2.box(w * 0.08, w * 0.08, 0.02, lx - w * 0.15, y + 0.12 + h * 0.62, lz + 0.05, "#d9a77f");
-    L2.box(w * 0.32, 0.08, 0.02, lx + w * 0.18, y + h * 0.3, lz + 0.05, "#ffffff");
-  }
-  function rundstaender(L2, lx, lz, pal, r, d, rad2 = 0.5) {
-    L2.zyl(0.3, 0.34, 0.06, lx, 0, lz, HOLZ.chrom, 10);
-    L2.zyl(0.03, 0.03, 1.4, lx, 0, lz, HOLZ.chrom, 6);
-    L2.geo(new three_module_exports.TorusGeometry(rad2, 0.022, 4, 16).rotateX(PI2 / 2), lx, 1.32, lz, HOLZ.chrom);
-    const n = d < 0.55 ? 6 : 11;
-    const farben = [bunt(r, pal), bunt(r, pal), bunt(r, pal)];
-    for (let i = 0; i < n; i++) {
-      const a = i / n * PI2 * 2 + 0.3, h = zw(r, 0.7, 0.95);
-      L2.box(d < 0.55 ? 0.14 : 0.06, h, 0.36, lx + Math.cos(a) * rad2, 1.3 - h, lz + Math.sin(a) * rad2, farben[Math.floor(i / n * 3)], -a);
-    }
-    L2.box(0.3, 0.12, 0.3, lx, 1.4, lz, "#f4f2ee");
-  }
-  function staender(L2, lx, lz, w, pal, r, d, hoch = 1.55) {
-    L2.box(0.05, hoch, 0.5, lx - w / 2, 0, lz, HOLZ.chrom);
-    L2.box(0.05, hoch, 0.5, lx + w / 2, 0, lz, HOLZ.chrom);
-    L2.box(w, 0.04, 0.04, lx, hoch, lz, HOLZ.chrom);
-    kleiderReihe(L2, lx - w / 2 + 0.05, lx + w / 2 - 0.05, hoch, lz, pal, r, d, { hMin: 0.7, hMax: 1.1 });
-  }
-  function warenTisch(L2, lx, lz, w, t, pal, r, d, farbe = HOLZ.hell, h = 0.82) {
-    L2.box(w, h - 0.06, t, lx, 0, lz, farbe);
-    L2.box(w + 0.08, 0.06, t + 0.08, lx, h - 0.06, lz, dunkler(farbe, 0.05));
-    stapel(L2, lx, lz, w - 0.15, t - 0.12, h, pal, r, d);
-  }
-  function puppe3(L2, lx, lz, r, typ = "damen", pal = PAL.damen, ry = 0) {
-    const P2 = L2.sub(lx, lz, ry);
-    const koerper3 = r() < 0.75 ? "#f1eee8" : "#3a3a3c";
-    const s2 = typ === "kind" ? 0.65 : 1;
-    const k1 = bunt(r, pal), k2 = bunt(r, pal);
-    P2.zyl(0.2 * s2, 0.22 * s2, 0.05, 0, 0, 0, "#2a2d31", 8);
-    P2.box(0.03, 0.2 * s2, 0.03, 0, 0.05, 0, HOLZ.chrom);
-    if (typ === "waesche") {
-      P2.box(0.13 * s2, 0.85 * s2, 0.15 * s2, -0.08 * s2, 0.25 * s2, 0, koerper3);
-      P2.box(0.13 * s2, 0.85 * s2, 0.15 * s2, 0.08 * s2, 0.25 * s2, 0, koerper3);
-      P2.box(0.34 * s2, 0.6 * s2, 0.22 * s2, 0, 1.1 * s2, 0, koerper3);
-      P2.box(0.36 * s2, 0.14 * s2, 0.24 * s2, 0, 1.06 * s2, 0, k1);
-      P2.box(0.36 * s2, 0.13 * s2, 0.24 * s2, 0, 1.45 * s2, 0, k1);
-    } else if (typ === "damen" && r() < 0.55) {
-      P2.box(0.1 * s2, 0.6 * s2, 0.12 * s2, -0.07 * s2, 0.25 * s2, 0, koerper3);
-      P2.box(0.1 * s2, 0.6 * s2, 0.12 * s2, 0.07 * s2, 0.25 * s2, 0, koerper3);
-      P2.geo(new three_module_exports.CylinderGeometry(0.17 * s2, 0.3 * s2, 0.75 * s2, 6).translate(0, 0.375 * s2, 0), 0, 0.72 * s2, 0, k1);
-      P2.box(0.36 * s2, 0.55 * s2, 0.22 * s2, 0, 1.15 * s2, 0, k1);
-    } else {
-      P2.box(0.14 * s2, 0.9 * s2, 0.16 * s2, -0.09 * s2, 0.25 * s2, 0, k2);
-      P2.box(0.14 * s2, 0.9 * s2, 0.16 * s2, 0.09 * s2, 0.25 * s2, 0, k2);
-      P2.box(typ === "herren" ? 0.44 * s2 : 0.38 * s2, 0.6 * s2, 0.24 * s2, 0, 1.12 * s2, 0, k1);
-      if (typ === "herren") P2.box(0.12 * s2, 0.4 * s2, 0.02, 0, 1.25 * s2, 0.13 * s2, "#f4f2ee");
-    }
-    P2.box(0.1 * s2, 0.6 * s2, 0.11 * s2, -0.24 * s2, 1.1 * s2, 0, typ === "waesche" ? koerper3 : k1, 0);
-    P2.box(0.1 * s2, 0.6 * s2, 0.11 * s2, 0.24 * s2, 1.1 * s2, 0, typ === "waesche" ? koerper3 : k1, 0);
-    P2.box(0.08 * s2, 0.1 * s2, 0.08 * s2, 0, 1.7 * s2, 0, koerper3);
-    P2.geo(new three_module_exports.SphereGeometry(0.12 * s2, 8, 6).scale(1, 1.2, 1), 0, 1.92 * s2, 0, koerper3);
-  }
-  function puppenPodest(L2, lx, lz, typ, pal, r, w = 2.2) {
-    L2.box(w, 0.25, 1.1, lx, 0, lz, HOLZ.weiss);
-    L2.box(w + 0.06, 0.04, 1.16, lx, 0.25, lz, "#d9d3c9");
-    const n = w > 1.8 ? 3 : 2;
-    for (let i = 0; i < n; i++) puppe3(L2.hoch(0.29), lx - w / 2 + (i + 0.5) * (w / n), lz + (i % 2 ? 0.15 : -0.1), r, typ, pal, zw(r, -0.4, 0.4));
-  }
-  function umkleiden(L2, w, n, r, vorhang = "#7b2f3a") {
-    const kb = w / n, t = 1.2, h = 2.3;
-    L2.box(w, h, 0.08, 0, 0, 0.04, "#efe9df");
-    for (let i = 0; i <= n; i++) L2.box(0.08, h, t, -w / 2 + i * kb, 0, t / 2, "#efe9df");
-    L2.box(w, 0.12, 0.08, 0, h - 0.12, t, "#d9d1c4");
-    for (let i = 0; i < n; i++) {
-      const cx = -w / 2 + (i + 0.5) * kb;
-      const offen = r() < 0.4;
-      L2.box(offen ? kb * 0.3 : kb - 0.12, 2, 0.05, offen ? cx - kb * 0.32 : cx, 0.15, t - 0.05, vorhang);
-      L2.box(0.6, 1.4, 0.03, cx, 0.6, 0.1, "#dfe9ee");
-      L2.box(0.5, 0.45, 0.3, cx + kb * 0.25, 0, 0.3, HOLZ.mittel);
-    }
-  }
-  function standspiegel(L2, lx, lz, ry = 0) {
-    const P2 = L2.sub(lx, lz, ry);
-    P2.box(0.7, 0.05, 0.4, 0, 0, 0, "#2a2d31");
-    P2.box(0.7, 1.9, 0.06, 0, 0.05, 0, "#d8b25a");
-    P2.box(0.58, 1.75, 0.02, 0, 0.12, 0.035, "#e3edf1");
-  }
-  function wandRegal(L2, w, h, boeden, korpus2, prod, r, d, tiefe = 0.5) {
-    L2.box(w, h, 0.06, 0, 0, 0.03, korpus2);
-    L2.box(0.06, h, tiefe, -w / 2 + 0.03, 0, tiefe / 2, dunkler(korpus2, 0.05));
-    L2.box(0.06, h, tiefe, w / 2 - 0.03, 0, tiefe / 2, dunkler(korpus2, 0.05));
-    L2.box(w, 0.08, tiefe, 0, h - 0.08, tiefe / 2, dunkler(korpus2, 0.05));
-    L2.box(w, 0.25, tiefe, 0, 0, tiefe / 2, dunkler(korpus2, 0.12));
-    for (let i = 0; i < boeden; i++) {
-      const y = 0.25 + i * (h - 0.4) / boeden;
-      if (i) L2.box(w - 0.1, 0.04, tiefe - 0.04, 0, y, tiefe / 2, heller(korpus2, 0.04));
-      prod(L2, 0, y + 0.04, tiefe / 2, w - 0.16, r, d, (h - 0.4) / boeden - 0.08);
-    }
-  }
-  function prodPackungen(pal) {
-    return (L2, lx, y, lz, w, r, d, hMax) => {
-      if (d < 0.5) {
-        const n = 3;
-        for (let i = 0; i < n; i++) L2.box(w / n - 0.04, zw(r, 0.5, 0.85) * hMax, 0.3, lx - w / 2 + (i + 0.5) * (w / n), y, lz, bunt(r, pal));
-        return;
-      }
-      let u = lx - w / 2;
-      while (u < lx + w / 2 - 0.12) {
-        const b = zw(r, 0.14, 0.32) / Math.min(1, d + 0.1), h = zw(r, 0.45, 0.95) * hMax;
-        if (u + b > lx + w / 2) break;
-        L2.box(b - 0.03, h, 0.3, u + b / 2, y, lz, bunt(r, pal));
-        u += b;
-      }
-    };
-  }
-  function prodFlaschen(pal, rad2 = 0.04, hoch = 0.32) {
-    return (L2, lx, y, lz, w, r, d, hMax) => {
-      const n = anz(Math.floor(w / (rad2 * 4.5)), d, 0.4);
-      for (let i = 0; i < n; i++) {
-        const u = lx - w / 2 + (i + 0.5) * (w / n);
-        const h = Math.min(hoch * zw(r, 0.8, 1.1), hMax);
-        L2.box(rad2 * 2, h, rad2 * 2, u, y, lz + (i % 2 ? 0.08 : -0.04), bunt(r, pal));
-      }
-    };
-  }
-  function prodGeschirr(L2, lx, y, lz, w, r, d, hMax) {
-    const n = anz(Math.floor(w / 0.38), d, 0.5);
-    for (let i = 0; i < n; i++) {
-      const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, PAL.geschirr);
-      if (i % 3 === 1) {
-        L2.zyl(0.07, 0.06, 0.12, u - 0.07, y, lz, f, 6);
-        L2.zyl(0.07, 0.06, 0.12, u + 0.09, y, lz + 0.05, f, 6);
-      } else L2.zyl(0.15, 0.15, Math.min(hMax, zw(r, 0.08, 0.3)), u, y, lz, f, 10);
-    }
-  }
-  function prodGefaltet(pal) {
-    return (L2, lx, y, lz, w, r, d, hMax) => {
-      const n = anz(Math.floor(w / 0.42), d, 0.5);
-      for (let i = 0; i < n; i++) L2.box(0.36, Math.min(hMax, zw(r, 0.15, 0.32)), 0.32, lx - w / 2 + (i + 0.5) * (w / n), y, lz, bunt(r, pal));
-    };
-  }
-  function prodSchuhe(pal) {
-    return (L2, lx, y, lz, w, r, d, hMax) => {
-      const n = anz(Math.floor(w / 0.36), d, 0.5);
-      for (let i = 0; i < n; i++) {
-        const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, pal), hoch = r() < 0.3;
-        L2.box(0.1, hoch ? 0.2 : 0.09, 0.27, u - 0.06, y, lz, f, 0.15);
-        L2.box(0.1, hoch ? 0.2 : 0.09, 0.27, u + 0.07, y, lz, f, 0.15);
-      }
-    };
-  }
-  function prodTaschen(L2, lx, y, lz, w, r, d, hMax) {
-    const n = Math.max(1, anz(Math.floor(w / 0.45), d, 0.5));
-    for (let i = 0; i < n; i++) {
-      const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, PAL.taschen), h = Math.min(hMax * 0.8, zw(r, 0.22, 0.34));
-      L2.box(0.34, h, 0.16, u, y, lz, f);
-      L2.box(0.2, 0.06, 0.02, u, y + h, lz, dunkler(f, 0.1));
-    }
-  }
-  function vitrine2(L2, lx, lz, w, t, h, sockel, inhalt, r, d) {
-    L2.box(w, h, t, lx, 0, lz, sockel);
-    L2.box(w + 0.04, 0.04, t + 0.04, lx, h, lz, "#e8e4dc");
-    inhalt(L2, lx, h + 0.04, lz, w - 0.2, t - 0.14, r, d);
-    L2.box(w, 0.42, t, lx, h + 0.04, lz, GLAS4);
-    L2.box(w + 0.04, 0.03, t + 0.04, lx, h + 0.46, lz, HOLZ.chrom);
-  }
-  var MODUL = {
-    damen: {
-      wand: [
-        (L2, w, r, d) => wandKleider(L2, w, PAL.damen, r, d),
-        (L2, w, r, d) => wandKleider(L2, w, PAL.damen, r, d, { panel: "#e9d6cf", zwei: false }),
-        (L2, w, r, d) => {
-          umkleiden(L2.sub(-w / 4, 0), w / 2, 2, r);
-          wandKleider(L2.sub(w / 4, 0), w / 2 - 0.1, PAL.damen, r, d, { bild: false });
-        }
-      ],
-      insel: [
-        (L2, r, d) => {
-          rundstaender(L2, -0.9, -0.8, PAL.damen, r, d);
-          rundstaender(L2, 0.9, 0.7, PAL.damen, r, d);
-          puppe3(L2, 0.9, -0.9, r, "damen", PAL.damen, 0.3);
-          puppe3(L2, -0.9, 0.9, r, "damen", PAL.damen, -0.4);
-        },
-        (L2, r, d) => {
-          staender(L2, 0, -0.9, 2.4, PAL.damen, r, d);
-          warenTisch(L2, 0, 0.6, 1.8, 0.9, PAL.damen, r, d);
-          puppe3(L2, 1.3, 0.6, r, "damen", PAL.damen);
-        },
-        (L2, r, d) => {
-          puppenPodest(L2, 0, -0.5, "damen", PAL.damen, r, 2.6);
-          rundstaender(L2, -0.8, 1, PAL.damen, r, d);
-          standspiegel(L2, 1, 1, -0.5);
-        },
-        (L2, r, d) => {
-          staender(L2, -0.7, -0.6, 1.4, PAL.damen, r, d);
-          staender(L2, 0.8, 0.4, 1.4, PAL.damen, r, d);
-          warenTisch(L2, -0.6, 1, 1.2, 0.7, PAL.damen, r, d, HOLZ.weiss);
-        }
-      ]
-    },
-    herren: {
-      wand: [
-        (L2, w, r, d) => wandKleider(L2, w, PAL.herren, r, d, { panel: "#6f5442", zwei: true }),
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.6, 4, "#7b5a40", prodGefaltet(PAL.herren), r, d);
-          bildtafel(L2, 0, 3.1, 0.07, 2.2, 1, r, PAL.herren);
-        },
-        (L2, w, r, d) => {
-          umkleiden(L2.sub(-w / 4, 0), w / 2, 2, r, "#2b3a55");
-          wandKleider(L2.sub(w / 4, 0), w / 2 - 0.1, PAL.herren, r, d, { panel: "#6f5442", bild: false });
-        }
-      ],
-      insel: [
-        (L2, r, d) => {
-          staender(L2, 0, -1, 2.4, PAL.herren.slice(0, 4), r, d, 1.75);
-          warenTisch(L2, -0.6, 0.6, 1.4, 0.9, PAL.herren, r, d, HOLZ.dunkel);
-          puppe3(L2, 1.1, 0.6, r, "herren", PAL.herren);
-        },
-        (L2, r, d) => {
-          vitrine2(L2, 0, -0.6, 2, 0.8, 0.85, HOLZ.dunkel, (L22, x, y, z2, w, t, r22) => {
-            for (let i = 0; i < 8; i++) L22.box(0.08, 0.02, 0.4, x - w / 2 + (i + 0.5) * (w / 8), y, z2, bunt(r22, ["#6d2f3a", "#2b3a55", "#a67c52", "#4a5a3e", "#c9483e"]));
-          }, r, d);
-          puppenPodest(L2, 0, 0.9, "herren", PAL.herren, r, 2.2);
-        },
-        (L2, r, d) => {
-          rundstaender(L2, -0.8, -0.7, PAL.herren, r, d);
-          rundstaender(L2, 0.8, 0.8, PAL.herren, r, d);
-          warenTisch(L2, 0.8, -0.8, 1.1, 0.7, ["#ffffff", "#d9dee3", "#9bb7d1", "#f2efe8"], r, d, HOLZ.dunkel);
-        }
-      ]
-    },
-    kinder: {
-      wand: [
-        (L2, w, r, d) => wandKleider(L2, w, PAL.kinder, r, d, { panel: "#cfe6f2", zwei: true, breit: 0.32 }),
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.2, 3, "#f7d26a", prodGefaltet(PAL.kinder), r, d);
-          bildtafel(L2, 0, 2.7, 0.07, 2, 0.9, r, PAL.kinder);
-        }
-      ],
-      insel: [
-        (L2, r, d) => {
-          L2.zyl(1.5, 1.5, 0.02, 0, 0, 0, "#ffd166", 16);
-          staender(L2, 0, -0.8, 1.8, PAL.kinder, r, d, 1.15);
-          puppe3(L2, -0.6, 0.6, r, "kind", PAL.kinder);
-          puppe3(L2, 0.2, 0.8, r, "kind", PAL.kinder);
-          warenTisch(L2, 0.9, 0.6, 0.9, 0.7, PAL.kinder, r, d, "#ffffff", 0.6);
-        },
-        (L2, r, d) => {
-          rundstaender(L2, -0.8, -0.6, PAL.kinder, r, d, 0.45);
-          rundstaender(L2, 0.8, 0.6, PAL.kinder, r, d, 0.45);
-          L2.box(1, 0.45, 1, 0.8, 0, -0.8, "#5bc0eb");
-          L2.box(0.7, 0.3, 0.7, -0.8, 0, 0.8, "#ef5b5b");
-        }
-      ]
-    },
-    waesche: {
-      wand: [
-        (L2, w, r, d) => {
-          umkleiden(L2.sub(-w / 4, 0), w / 2, 2, r, "#b0475f");
-          wandKleider(L2.sub(w / 4, 0), w / 2 - 0.1, PAL.waesche, r, d, { panel: "#f2dfe4", bild: false, hMin: 0.3, hMax: 0.5, zwei: true, breit: 0.3 });
-        },
-        (L2, w, r, d) => {
-          wandKleider(L2, w, PAL.waesche, r, d, { panel: "#f2dfe4", zwei: true, breit: 0.3 });
-        },
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.4, 4, "#f7eef0", prodPackungen(PAL.waesche), r, d, 0.4);
-          bildtafel(L2, 0, 2.9, 0.07, 2.2, 1, r, PAL.waesche);
-        }
-      ],
-      insel: [
-        (L2, r, d) => {
-          staender(L2, -0.6, -0.9, 1.6, PAL.waesche, r, d, 1.3);
-          staender(L2, 0.6, 0.1, 1.6, PAL.waesche, r, d, 1.3);
-          puppe3(L2, -0.9, 0.9, r, "waesche", PAL.waesche);
-          puppe3(L2, 1.1, -1, r, "waesche", PAL.waesche);
-        },
-        (L2, r, d) => {
-          warenTisch(L2, 0, -0.6, 2.2, 1, PAL.waesche, r, d, "#f7eef0", 0.75);
-          puppe3(L2, -0.6, 0.9, r, "waesche", PAL.waesche);
-          puppe3(L2, 0.6, 0.9, r, "waesche", PAL.waesche);
-          L2.zyl(0.35, 0.35, 0.42, 1.3, 0, 0.6, "#c9a3d4", 10);
-        }
-      ]
-    },
-    beauty: {
-      wand: [
-        (L2, w, r, d) => markenwand(L2, w, r, d),
-        (L2, w, r, d) => {
-          markenwand(L2.sub(-w / 4, 0), w / 2 - 0.05, r, d);
-          markenwand(L2.sub(w / 4, 0), w / 2 - 0.05, r, d);
-        }
-      ],
-      insel: [
-        (L2, r, d) => tresenU(L2, 0, 0, r, d),
-        (L2, r, d) => {
-          vitrine2(L2, -0.5, -0.5, 1.6, 0.9, 0.95, "#f7f3ec", flakonFlaeche, r, d);
-          spiegelSaeule(L2, 1.2, 0.9);
-          schminkplatz(L2, -0.6, 1, r);
-        },
-        (L2, r, d) => {
-          flakonTurm(L2, -0.8, -0.8, r, d);
-          flakonTurm(L2, 0.8, 0.8, r, d);
-          vitrine2(L2, 0.8, -0.8, 1, 0.8, 0.95, "#1f1f1f", flakonFlaeche, r, d);
-          spiegelSaeule(L2, -0.9, 0.9);
-        }
-      ]
-    },
-    accessoires: {
-      wand: [
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.6, 5, "#f4efe7", prodSchuhe(PAL.schuhe), r, d, 0.4);
-        },
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.6, 4, "#c79f74", prodTaschen, r, d, 0.45);
-          bildtafel(L2, 0, 3.1, 0.07, 2.2, 1, r, PAL.taschen);
-        }
-      ],
-      insel: [
-        (L2, r, d) => {
-          schuhtisch(L2, -0.7, -0.8, r, d);
-          schuhtisch(L2, 0.7, 0.7, r, d);
-          pouf(L2, 0.9, -0.9);
-          pouf(L2, -0.9, 0.9, "#c9a26b");
-        },
-        (L2, r, d) => {
-          uhrenvitrine(L2, 0, -0.7, r, d);
-          taschenWuerfel(L2, -0.6, 0.9, r, d);
-          pouf(L2, 1.1, 0.9, "#2f6f8f");
-        },
-        (L2, r, d) => {
-          schuhtisch(L2, 0, -0.9, r, d, 2.6);
-          L2.box(2.2, 0.42, 0.5, 0, 0, 0.5, "#7d8f9c");
-          L2.box(2.2, 0.06, 0.5, 0, 0.42, 0.5, "#6c7d8a");
-          standspiegel(L2, 1.4, 1.1, -0.6);
-          taschenWuerfel(L2, -1, 1.2, r, d, 1);
-        }
-      ]
-    },
-    wohnen: {
-      wand: [
-        (L2, w, r, d) => wandRegal(L2, w, 2.4, 4, "#ece6dc", prodGeschirr, r, d, 0.45),
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.4, 4, "#b98d61", prodPackungen(["#f4f0e6", "#d8c6a8", "#9bc6d8", "#3f6b5a", "#d97a5a", "#2f5f8a"]), r, d, 0.45);
-        }
-      ],
-      insel: [
-        (L2, r, d) => sofaInsel(L2, r, d),
-        (L2, r, d) => bettInsel(L2, r, d),
-        (L2, r, d) => {
-          L2.box(2.4, 0.74, 1.1, 0, 0, -0.6, "#ece6dc");
-          L2.box(2.48, 0.06, 1.18, 0, 0.74, -0.6, "#d9d1c4");
-          geschirrAufTisch(L2, 0, -0.6, 2.2, 0.9, 0.8, r, d);
-          stehlampe(L2, 1.3, 0.9, r);
-          stehlampe(L2, -1.3, 0.9, r);
-          L2.box(1.4, 0.75, 0.7, 0, 0, 0.9, "#b98d61");
-          geschirrAufTisch(L2, 0, 0.9, 1.2, 0.5, 0.75, r, d);
-        }
-      ]
-    },
-    spielwaren: {
-      wand: [
-        (L2, w, r, d) => wandRegal(L2, w, 2.3, 4, "#ffffff", prodPackungen(PAL.kinder), r, d, 0.45),
-        (L2, w, r, d) => {
-          wandRegal(L2, w, 2.3, 4, "#5bc0eb", prodPackungen(PAL.kinder), r, d, 0.45);
-          for (let i = 0; i < 3; i++) teddy(L2, -w / 2 + 0.8 + i * (w - 1.6) / 2, 2.32, 0.25, r, 0.8);
-        }
-      ],
-      insel: [
-        (L2, r, d) => {
-          gondel(L2, 0, -0.5, 2.6, 1.6, "#ffffff", prodPackungen(PAL.kinder), r, d);
-          pluschBerg(L2, 0.4, 1, r, d);
-        },
-        (L2, r, d) => spieltisch(L2, r, d),
-        (L2, r, d) => {
-          pluschBerg(L2, -0.6, -0.6, r, d);
-          gondel(L2, 0.4, 0.9, 2.2, 1.4, "#ffd166", prodPackungen(PAL.kinder), r, d, PI2 / 2);
-        }
-      ]
-    },
-    food: {
-      wand: [
-        (L2, w, r, d) => weinregal(L2, w, r, d),
-        (L2, w, r, d) => wandRegal(L2, w, 2.3, 4, "#7b5a40", prodPackungen(["#c9483e", "#f2c14e", "#5a3b22", "#e8dcc6", "#3f6b3a", "#d97a5a", "#2b2b2b"]), r, d, 0.45)
-      ],
-      insel: [
-        (L2, r, d) => feinkosttheke(L2, r, d),
-        (L2, r, d) => cafeEcke(L2, r, d),
-        (L2, r, d) => {
-          gondel(L2, 0, -0.6, 2.6, 1.3, "#7b5a40", prodFlaschen(["#6d1f2a", "#3a5a2a", "#d8b25a", "#2b2b2b", "#a8452f"], 0.045, 0.34), r, d);
-          obstStand(L2, 0, 1, r, d);
-        }
-      ]
-    },
-    sport: {
-      wand: [
-        (L2, w, r, d) => wandRegal(L2, w, 2.5, 5, "#2a2d31", prodSchuhe(PAL.sport), r, d, 0.4),
-        (L2, w, r, d) => wandKleider(L2, w, PAL.sport, r, d, { panel: "#2a2d31", zwei: true })
-      ],
-      insel: [
-        (L2, r, d) => {
-          staender(L2, 0, -0.9, 2.2, PAL.sport, r, d);
-          ballkorb(L2, -0.8, 0.8, r, d);
-          puppe3(L2, 0.6, 0.6, r, "sport", PAL.sport);
-        },
-        (L2, r, d) => {
-          schuhtisch(L2, 0, -0.6, r, d, 2.4, "#2a2d31", PAL.sport);
-          fahrrad(L2, -0.5, 1, r, 0);
-          ballkorb(L2, 1.1, 1, r, d);
-        },
-        (L2, r, d) => {
-          rundstaender(L2, -0.8, -0.8, PAL.sport, r, d);
-          staender(L2, 0.6, 0, 1.6, PAL.sport, r, d);
-          puppe3(L2, -0.9, 0.9, r, "sport", PAL.sport);
-          warenTisch(L2, 0.7, 1.1, 1, 0.6, PAL.sport, r, d, "#2a2d31");
-        }
-      ]
-    },
-    // ------------------------- Sporthaus
-    sportschuhe: {
-      wand: [(L2, w, r, d) => schuhwand(L2, w, r, d)],
-      insel: [
-        (L2, r, d) => {
-          schuhtisch(L2, 0, -0.9, r, d, 2.6, "#2a2d31", PAL.sport);
-          L2.box(2.4, 0.45, 0.5, 0, 0, 0.4, "#38b86b");
-          L2.box(2.4, 0.06, 0.5, 0, 0.45, 0.4, "#2f9e5c");
-          L2.box(0.5, 0.25, 0.7, 0, 0, 1.2, "#e8403a");
-        },
-        (L2, r, d) => {
-          schuhtisch(L2, -0.6, -0.8, r, d, 1.6, "#ffffff", PAL.sport);
-          schuhtisch(L2, 0.7, 0.6, r, d, 1.6, "#ffffff", PAL.sport);
-          L2.box(1.4, 0.08, 0.5, -0.7, 0, 0.9, "#1f1f1f");
-          L2.box(1.4, 0.012, 0.06, -0.7, 0.08, 0.9, "#ffcc00");
-          pouf(L2, 1.2, -0.8, "#e8403a");
-          pouf(L2, -1.3, 0.2, "#1f6fd1");
-        },
-        (L2, r, d) => {
-          gondel(L2, 0, -0.4, 2.8, 1.5, "#2a2d31", prodSchuhe(PAL.sport), r, d);
-          L2.box(2.4, 0.42, 0.5, 0, 0, 1, "#e8403a");
-        }
-      ]
-    },
-    sporttextil: {
-      wand: [(L2, w, r, d) => wandKleider(L2, w, PAL.sport, r, d, { panel: "#1f6fd1", zwei: true })],
-      insel: [
-        (L2, r, d) => {
-          rundstaender(L2, -0.8, -0.8, PAL.sport, r, d);
-          staender(L2, 0.6, 0.2, 1.6, PAL.sport, r, d);
-          puppe3(L2, -0.9, 0.9, r, "sport", PAL.sport);
-          puppe3(L2, 1.2, -1, r, "sport", PAL.sport);
-        },
-        (L2, r, d) => {
-          puppenPodest(L2, 0, -0.6, "sport", PAL.sport, r, 2.6);
-          warenTisch(L2, 0, 0.9, 2, 0.8, PAL.sport, r, d, "#2a2d31");
-        }
-      ]
-    },
-    outdoor: {
-      wand: [
-        (L2, w, r, d) => rucksackwand(L2, w, r, d),
-        (L2, w, r, d) => wandKleider(L2, w, PAL.outdoor, r, d, { panel: "#7b5a40", zwei: false })
-      ],
-      insel: [
-        (L2, r, d) => {
-          zelt(L2, -0.3, -0.3, r, 2.6);
-          L2.box(0.8, 0.4, 0.4, 1.3, 0, 1.2, "#7b5a40");
-          L2.kugel(0.35, -1.3, 0.2, 1.2, "#9a9a94");
-        },
-        (L2, r, d) => {
-          staender(L2, 0, -0.9, 2.2, PAL.outdoor, r, d);
-          puppe3(L2, -0.8, 0.7, r, "herren", PAL.outdoor);
-          warenTisch(L2, 0.7, 0.8, 1.2, 0.8, PAL.outdoor, r, d, "#7b5a40");
-        },
-        (L2, r, d) => {
-          zelt(L2, 0.4, 0.2, r, 2);
-          rucksackTurm(L2, -1.1, -1, r, d);
-        }
-      ]
-    },
-    rad: {
-      wand: [(L2, w, r, d) => radwand(L2, w, r, d)],
-      insel: [
-        (L2, r, d) => {
-          for (let i = 0; i < 3; i++) fahrrad(L2, 0, -1.1 + i * 1, r, 0);
-        },
-        (L2, r, d) => {
-          L2.box(2.6, 0.2, 1.4, 0, 0, -0.4, "#2a2d31");
-          fahrrad(L2, -0.4, -0.6, r, 0, 0.2);
-          fahrrad(L2, 0.4, -0.2, r, 0, 0.2);
-          wandRegal(L2.sub(0, 0.6), 2.4, 1.2, 2, "#9aa3aa", prodPackungen(PAL.sport), r, d, 0.5);
-        }
-      ]
-    },
-    wintersport: {
-      wand: [(L2, w, r, d) => skiwand(L2, w, r, d)],
-      insel: [
-        (L2, r, d) => {
-          skistaender(L2, 0, -0.6, r, d);
-          rundstaender(L2, 0.8, 0.9, PAL.winter, r, d);
-          L2.box(0.8, 0.5, 0.6, -0.9, 0, 1, "#e8f0f5");
-          helme(L2, -0.9, 0.5, 1, r);
-        },
-        (L2, r, d) => {
-          snowboardInsel(L2, r, d);
-          puppe3(L2, 1.1, 1, r, "sport", PAL.winter);
-        }
-      ]
-    },
-    teamsport: {
-      wand: [(L2, w, r, d) => trikotwand(L2, w, r, d)],
-      insel: [
-        (L2, r, d) => {
-          ballkorb(L2, -0.8, -0.7, r, d);
-          ballkorb(L2, 0.8, -0.7, r, d);
-          tor(L2, 0, 0.8);
-        },
-        (L2, r, d) => {
-          puppenPodest(L2, 0, -0.7, "sport", ["#e8403a", "#ffffff", "#1f6fd1", "#ffcc00"], r, 2.4);
-          ballkorb(L2, 0.9, 0.9, r, d);
-          warenTisch(L2, -0.6, 0.9, 1.2, 0.7, PAL.sport, r, d, "#ffffff");
-        }
-      ]
-    }
-  };
-  function flakonFlaeche(L2, x, y, z2, w, t, r, d) {
-    const nx = d < 0.5 ? 3 : 6, nz = 2;
-    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-      const f = bunt(r, PAL.flakon), h = zw(r, 0.12, 0.24);
-      L2.box(0.09, h, 0.09, x - w / 2 + (i + 0.5) * (w / nx), y, z2 - t / 2 + (j + 0.5) * (t / nz), f);
-      if (d > 0.7 && (i + j) % 2) L2.box(0.05, 0.05, 0.05, x - w / 2 + (i + 0.5) * (w / nx), y + h, z2 - t / 2 + (j + 0.5) * (t / nz), "#d8b25a");
-    }
-  }
-  function markenwand(L2, w, r, d) {
-    const marke3 = bunt(r, PAL.beautyMarke);
-    const hellm = new three_module_exports.Color(marke3).getHSL({}).l > 0.6;
-    L2.box(w, 3.2, 0.12, 0, 0, 0.06, marke3);
-    L2.box(w - 0.3, 0.5, 0.04, 0, 2.6, 0.14, hellm ? "#1f1f1f" : "#f7f3ec");
-    L2.box(w * 0.4, 0.14, 0.02, 0, 2.78, 0.17, hellm ? "#f7f3ec" : marke3);
-    for (let i = 0; i < 4; i++) {
-      const y = 0.9 + i * 0.42;
-      L2.box(w - 0.4, 0.03, 0.28, 0, y, 0.26, hellm ? "#ffffff" : "#e9e4dc");
-      if (d < 0.5 && i % 2) continue;
-      const n = Math.floor((w - 0.6) / 0.18);
-      for (let k = 0; k < n; k++) L2.box(0.1, zw(r, 0.14, 0.26), 0.1, -w / 2 + 0.4 + k * 0.18, y + 0.03, 0.26, bunt(r, PAL.flakon));
-    }
-    L2.box(w - 0.3, 0.85, 0.5, 0, 0, 0.35, hellm ? "#ffffff" : dunkler(marke3, 0.05));
-    L2.box(w - 0.3, 0.04, 0.52, 0, 0.85, 0.35, "#d8b25a");
-  }
-  function tresenU(L2, lx, lz, r, d) {
-    const marke3 = bunt(r, ["#f7f3ec", "#1f1f1f", "#e9a3b8", "#ffffff"]);
-    const teile = [[0, -1.1, 2.8, 0.7], [-1.05, 0.15, 0.7, 1.8], [1.05, 0.15, 0.7, 1.8]];
-    for (const [dx, dz, ww, dd] of teile) {
-      L2.box(ww, 0.92, dd, lx + dx, 0, lz + dz, marke3);
-      L2.box(ww + 0.04, 0.04, dd + 0.04, lx + dx, 0.92, lz + dz, "#d8b25a");
-      flakonFlaeche(L2, lx + dx, 0.96, lz + dz, ww - 0.15, dd - 0.15, r, d);
-      L2.box(ww, 0.3, dd, lx + dx, 0.96, lz + dz, GLAS4);
-    }
-    L2.box(1.4, 1.9, 0.12, lx, 0, lz - 1.55, marke3 === "#1f1f1f" ? "#2b2b2b" : "#e9e4dc");
-    L2.box(0.8, 0.8, 0.03, lx, 1, lz - 1.48, "#e3edf1");
-    L2.box(1.4, 0.12, 0.14, lx, 1.9, lz - 1.55, "#d8b25a");
-    figur2(L2.S, ...L2.P(lx, lz - 0.5), r() * 1e9 | 0, "beauty", { y: L2.oy, ry: L2.rot });
-  }
-  function flakonTurm(L2, lx, lz, r, d) {
-    L2.zyl(0.45, 0.5, 0.9, lx, 0, lz, "#f7f3ec", 8);
-    L2.zyl(0.47, 0.47, 0.04, lx, 0.9, lz, "#d8b25a", 8);
-    const n = d < 0.5 ? 4 : 8;
-    for (let i = 0; i < n; i++) {
-      const a = i / n * PI2 * 2;
-      L2.box(0.09, zw(r, 0.14, 0.26), 0.09, lx + Math.cos(a) * 0.3, 0.94, lz + Math.sin(a) * 0.3, bunt(r, PAL.flakon));
-    }
-    L2.box(0.14, 0.38, 0.14, lx, 0.94, lz, bunt(r, PAL.flakon));
-  }
-  function spiegelSaeule(L2, lx, lz) {
-    L2.box(0.6, 2.6, 0.6, lx, 0, lz, "#e9e4dc");
-    L2.box(0.5, 1.6, 0.02, lx, 0.6, lz + 0.31, "#e3edf1");
-    L2.box(0.02, 1.6, 0.5, lx + 0.31, 0.6, lz, "#e3edf1");
-  }
-  function schminkplatz(L2, lx, lz, r) {
-    L2.box(1.2, 0.8, 0.5, lx, 0, lz, "#ffffff");
-    L2.box(0.9, 0.7, 0.04, lx, 1, lz - 0.2, "#e3edf1");
-    L2.box(1, 0.05, 0.06, lx, 1.72, lz - 0.2, "#f6e8b0");
-    L2.zyl(0.2, 0.2, 0.62, lx, 0, lz + 0.55, "#e9a3b8", 8);
-    for (let i = 0; i < 4; i++) L2.box(0.06, 0.12, 0.06, lx - 0.4 + i * 0.25, 0.8, lz + 0.05, bunt(r, PAL.flakon));
-  }
-  function schuhtisch(L2, lx, lz, r, d, w = 1.6, farbe = "#f4efe7", pal = PAL.schuhe) {
-    L2.box(w, 0.7, 0.8, lx, 0, lz, farbe);
-    L2.box(w + 0.05, 0.05, 0.85, lx, 0.7, lz, dunkler(farbe, 0.1));
-    const n = anz(Math.floor(w / 0.42), d, 0.5);
-    for (let i = 0; i < n; i++) for (const j of [-0.18, 0.18]) {
-      if (d < 0.7 && j > 0) continue;
-      const u = lx - w / 2 + (i + 0.5) * (w / n), f = bunt(r, pal);
-      L2.box(0.1, 0.1, 0.26, u - 0.06, 0.75, lz + j, f, 0.3);
-      L2.box(0.1, 0.1, 0.26, u + 0.07, 0.75, lz + j, f, 0.3);
-    }
-  }
-  function pouf(L2, lx, lz, farbe = "#7d8f9c") {
-    L2.zyl(0.32, 0.32, 0.45, lx, 0, lz, farbe, 10);
-    L2.zyl(0.28, 0.32, 0.04, lx, 0.45, lz, dunkler(farbe, 0.06), 10);
-  }
-  function uhrenvitrine(L2, lx, lz, r, d) {
-    vitrine2(L2, lx, lz, 2.4, 0.9, 0.95, "#2a2d31", (L22, x, y, z2, w, t, r22) => {
-      L22.box(w, 0.04, t, x, y, z2, "#efe3cf");
-      const n = d < 0.5 ? 4 : 9;
-      for (let i = 0; i < n; i++) {
-        const u = x - w / 2 + (i + 0.5) * (w / n);
-        L22.box(0.08, 0.12, 0.08, u, y + 0.04, z2, "#d8d0bc");
-        L22.zyl(0.06, 0.06, 0.03, u, y + 0.16, z2, bunt(r22, ["#d8b25a", "#c9d2d8", "#2b2b2b", "#e8e4dc"]), 8);
-      }
-    }, r, d);
-    L2.box(2.4, 0.5, 0.08, lx, 1.4, lz - 0.5, "#2a2d31");
-  }
-  function taschenWuerfel(L2, lx, lz, r, d, w = 1.5) {
-    const h = 1.6, f = "#e8e2d8";
-    L2.box(w, h, 0.5, lx, 0, lz, f);
-    for (let i = 0; i < 3; i++) {
-      const y = 0.1 + i * 0.5;
-      L2.box(w - 0.08, 0.04, 0.04, lx, y + 0.42, lz + 0.26, "#c9bfae");
-      prodTaschen(L2, lx, y + 0.04, lz + 0.18, w - 0.2, r, d, 0.4);
-    }
-  }
-  function sofaInsel(L2, r, d) {
-    const stoff = bunt(r, ["#5f7f8c", "#b5745a", "#7a8a5c", "#9a8fbf", "#d3b48a", "#4b5a6b"]);
-    L2.box(3, 0.02, 2.2, 0, 0, 0.1, bunt(r, ["#e6d9c3", "#c9b8a6", "#d8dfe4", "#e2c9b8"]));
-    L2.box(2.4, 0.42, 0.95, 0, 0, -0.75, stoff);
-    L2.box(2.4, 0.5, 0.25, 0, 0.42, -1.1, dunkler(stoff, 0.04));
-    L2.box(0.22, 0.25, 0.95, -1.1, 0.42, -0.75, dunkler(stoff, 0.04));
-    L2.box(0.22, 0.25, 0.95, 1.1, 0.42, -0.75, dunkler(stoff, 0.04));
-    for (const x of [-0.6, 0.55]) L2.box(0.45, 0.35, 0.14, x, 0.48, -0.88, bunt(r, ["#f2e6d0", "#e9b44c", "#d65a6f", "#ffffff"]), zw(r, -0.2, 0.2));
-    L2.box(1.2, 0.42, 0.6, 0, 0, 0.35, HOLZ.mittel);
-    L2.box(0.12, 0.2, 0.12, -0.3, 0.42, 0.35, "#3f6b5a");
-    L2.kugel(0.18, -0.3, 0.72, 0.35, "#6fa860");
-    L2.box(0.3, 0.05, 0.22, 0.25, 0.42, 0.3, "#f4f0e6");
-    L2.box(0.8, 0.45, 0.75, 1.1, 0, 0.95, stoff, -0.5);
-    L2.box(0.8, 0.45, 0.2, 1.25, 0.45, 0.7, dunkler(stoff, 0.04), -0.5);
-    stehlampe(L2, -1.35, 0.9, r);
-  }
-  function bettInsel(L2, r, d) {
-    const bezug = bunt(r, ["#f4f0e6", "#d8e3ea", "#e9d6cf", "#ffffff"]);
-    L2.box(2, 0.45, 2.4, 0, 0, -0.1, HOLZ.mittel);
-    L2.box(1.9, 0.25, 2.3, 0, 0.45, -0.1, "#ffffff");
-    L2.box(1.92, 0.08, 1.6, 0, 0.7, 0.25, bezug);
-    L2.box(2, 1.1, 0.12, 0, 0, -1.35, dunkler(HOLZ.mittel, 0.05));
-    L2.box(0.75, 0.18, 0.45, -0.45, 0.7, -0.95, "#ffffff", 0.05);
-    L2.box(0.75, 0.18, 0.45, 0.45, 0.7, -0.95, "#ffffff", -0.05);
-    L2.box(1.92, 0.04, 0.5, 0, 0.78, 0.8, bunt(r, ["#b5745a", "#5f7f8c", "#7a8a5c", "#9a8fbf"]));
-    for (const x of [-1.35, 1.35]) {
-      L2.box(0.5, 0.5, 0.45, x, 0, -1, HOLZ.weiss);
-      L2.zyl(0.04, 0.06, 0.3, x, 0.5, -1, "#2a2d31", 6);
-      L2.zyl(0.12, 0.16, 0.18, x, 0.8, -1, "#f6e8b0", 8);
-    }
-  }
-  function stehlampe(L2, lx, lz, r) {
-    L2.zyl(0.18, 0.2, 0.04, lx, 0, lz, "#2a2d31", 8);
-    L2.zyl(0.02, 0.02, 1.5, lx, 0.04, lz, "#2a2d31", 4);
-    L2.zyl(0.16, 0.26, 0.3, lx, 1.5, lz, bunt(r, ["#f6e8b0", "#ffffff", "#e9b44c", "#d8c6a8"]), 8);
-  }
-  function geschirrAufTisch(L2, lx, lz, w, t, y, r, d) {
-    const nx = d < 0.5 ? 3 : 5;
-    for (let i = 0; i < nx; i++) for (const j of [-0.25, 0.2]) {
-      const u = lx - w / 2 + (i + 0.5) * (w / nx), f = bunt(r, PAL.geschirr);
-      if ((i + (j > 0)) % 2) L2.zyl(0.16, 0.16, zw(r, 0.06, 0.2), u, y, lz + j * t, f, 10);
-      else {
-        L2.zyl(0.06, 0.05, 0.11, u - 0.08, y, lz + j * t, f, 6);
-        L2.zyl(0.06, 0.05, 0.11, u + 0.08, y, lz + j * t + 0.06, f, 6);
-      }
-    }
-  }
-  function teddy(L2, lx, y, lz, r, s2 = 1) {
-    const f = bunt(r, ["#b5835a", "#e9c79a", "#f78fb3", "#ffffff", "#8c6a4f", "#7b6cf6", "#5bc0eb"]);
-    L2.kugel(0.2 * s2, lx, y + 0.18 * s2, lz, f);
-    L2.kugel(0.15 * s2, lx, y + 0.48 * s2, lz + 0.02, f);
-    L2.kugel(0.06 * s2, lx - 0.11 * s2, y + 0.6 * s2, lz, f);
-    L2.kugel(0.06 * s2, lx + 0.11 * s2, y + 0.6 * s2, lz, f);
-  }
-  function pluschBerg(L2, lx, lz, r, d) {
-    L2.zyl(0.9, 1, 0.45, lx, 0, lz, "#ffd166", 10);
-    L2.zyl(0.92, 0.92, 0.04, lx, 0.45, lz, "#ef5b5b", 10);
-    const n = d < 0.5 ? 4 : 8;
-    for (let i = 0; i < n; i++) {
-      const a = i / n * PI2 * 2, rr = i < 5 ? 0.55 : 0.15;
-      teddy(L2, lx + Math.cos(a) * rr, 0.48 + (i >= 5 ? 0.3 : 0), lz + Math.sin(a) * rr, r, zw(r, 0.75, 1.1));
-    }
-  }
-  function gondel(L2, lx, lz, w, h, farbe, prod, r, d, ry = 0) {
-    const G2 = L2.sub(lx, lz, ry);
-    G2.box(w, h, 0.06, 0, 0, 0, farbe);
-    G2.box(w, 0.08, 0.9, 0, h, 0, dunkler(farbe, 0.1));
-    G2.box(w, 0.2, 0.9, 0, 0, 0, dunkler(farbe, 0.12));
-    const boeden = Math.max(2, Math.round(h / 0.5));
-    for (const seite of [1, -1]) {
-      const S2 = G2.sub(0, 0, seite > 0 ? 0 : PI2);
-      for (let i = 0; i < boeden; i++) {
-        const y = 0.2 + i * (h - 0.25) / boeden;
-        if (i) S2.box(w - 0.06, 0.03, 0.4, 0, y, 0.23, "#e9e4dc");
-        if (d < 0.5 && i % 2) continue;
-        prod(S2, 0, y + 0.03, 0.25, w - 0.12, r, d, (h - 0.25) / boeden - 0.06);
-      }
-    }
-    G2.box(0.06, h + 0.08, 0.9, -w / 2, 0, 0, dunkler(farbe, 0.15));
-    G2.box(0.06, h + 0.08, 0.9, w / 2, 0, 0, dunkler(farbe, 0.15));
-  }
-  function spieltisch(L2, r, d) {
-    L2.box(2.4, 0.55, 1.6, 0, 0, -0.2, "#5bc0eb");
-    L2.box(2.5, 0.05, 1.7, 0, 0.55, -0.2, "#ffffff");
-    L2.box(2.2, 0.02, 1.4, 0, 0.6, -0.2, "#9bc53d");
-    L2.geo(new three_module_exports.TorusGeometry(0.5, 0.03, 3, 16).rotateX(PI2 / 2).scale(1.6, 1, 1), 0, 0.63, -0.2, "#7a5d43");
-    for (let i = 0; i < 4; i++) L2.box(0.22, 0.14, 0.12, -0.6 + i * 0.25, 0.64, 0.3, ["#ef5b5b", "#ffc145", "#5bc0eb", "#9bc53d"][i]);
-    for (let i = 0; i < (d < 0.5 ? 4 : 9); i++) L2.box(zw(r, 0.15, 0.3), zw(r, 0.1, 0.35), zw(r, 0.15, 0.3), zw(r, -0.9, 0.9), 0.62, zw(r, -0.7, 0), bunt(r, PAL.kinder));
-    for (const [x, z2] of [[-0.7, 0.95], [0.6, 1]]) figur2(L2.S, ...L2.P(x, z2), r() * 1e9 | 0, "kind", { y: L2.oy, ry: L2.rot + PI2 });
-    L2.box(0.6, 0.4, 0.6, 1.3, 0, 1.1, "#ef5b5b");
-    teddy(L2, 1.3, 0.4, 1.1, r, 0.9);
-  }
-  function weinregal(L2, w, r, d) {
-    L2.box(w, 2.5, 0.08, 0, 0, 0.04, "#5a3b2a");
-    const nx = Math.floor(w / 1.2);
-    for (let i = 0; i <= nx; i++) L2.box(0.06, 2.4, 0.45, -w / 2 + 0.05 + i * ((w - 0.1) / nx), 0, 0.25, "#7b5a40");
-    const reihen = d < 0.5 ? 4 : 6;
-    for (let j = 0; j < reihen; j++) {
-      const y = 0.15 + j * (2.2 / reihen);
-      L2.box(w - 0.1, 0.03, 0.42, 0, y, 0.25, "#7b5a40");
-      L2.box(w - 0.15, 0.09, 0.26, 0, y + 0.04, 0.2, "#3a2420");
-      const n = Math.floor((w - 0.2) / (d < 0.5 ? 0.45 : 0.27 / Math.min(1, d + 0.1)));
-      for (let k = 0; k < n; k++) L2.box(0.085, 0.085, 0.12, -w / 2 + 0.2 + k * ((w - 0.3) / n), y + 0.045, 0.39, bunt(r, ["#4a1a22", "#6d1f2a", "#2f4a22", "#d8b25a", "#e8dcc0"]));
-    }
-    L2.box(w, 0.5, 0.04, 0, 2.6, 0.06, "#2a1f1a");
-    L2.box(1.4, 0.95, 0.6, w / 2 - 1, 0, 0.9, "#7b5a40");
-    for (let i = 0; i < 6; i++) L2.box(0.08, 0.3, 0.08, w / 2 - 1.5 + i * 0.2, 0.95, 0.9, bunt(r, ["#4a1a22", "#6d1f2a", "#2f4a22"]));
-  }
-  function feinkosttheke(L2, r, d) {
-    const w = 3.2;
-    L2.box(w, 0.9, 0.9, 0, 0, -0.2, "#ffffff");
-    L2.box(w, 0.06, 0.1, 0, 0.2, 0.27, "#d23c32");
-    L2.box(w, 0.05, 0.95, 0, 0.9, -0.2, "#c9d2d8");
-    const waren = ["#e9b44c", "#d97a5a", "#f4e1c0", "#b5162b", "#9bc53d", "#f2c6d2", "#c9a26b", "#ffffff", "#6d1f2a"];
-    const n = d < 0.5 ? 5 : 10;
-    for (let i = 0; i < n; i++) {
-      const u = -w / 2 + 0.2 + (i + 0.5) * ((w - 0.4) / n), f = bunt(r, waren);
-      L2.box((w - 0.5) / n - 0.05, 0.03, 0.5, u, 0.95, -0.2, "#f4f4f2");
-      L2.box((w - 0.5) / n - 0.12, zw(r, 0.06, 0.16), 0.38, u, 0.98, -0.2, f);
-    }
-    L2.box(w, 0.06, 0.6, 0, 1.45, -0.35, "#c9d2d8");
-    const g = new three_module_exports.BoxGeometry(w, 0.55, 0.04);
-    g.rotateX(-0.45);
-    L2.geo(g, 0, 1.2, 0.12, GLAS4);
-    L2.box(w, 0.04, 0.04, 0, 1.44, 0, "#c9d2d8");
-    L2.box(w, 2, 0.5, 0, 0, -1.55, "#e9e4dc");
-    for (let j = 0; j < 3; j++) for (let k = 0; k < (d < 0.5 ? 4 : 9); k++) L2.box(0.25, 0.25, 0.25, -w / 2 + 0.3 + k * 0.33, 0.6 + j * 0.45, -1.28, bunt(r, waren));
-    figur2(L2.S, ...L2.P(-0.6, -0.95), r() * 1e9 | 0, "theke", { y: L2.oy, ry: L2.rot });
-    figur2(L2.S, ...L2.P(0.9, -0.95), r() * 1e9 | 0, "theke", { y: L2.oy, ry: L2.rot + 0.3 });
-  }
-  function cafeEcke(L2, r, d, n = 2) {
-    for (const [x, z2] of [[-0.85, -0.8], [0.85, 0.8], [0.9, -0.85], [-0.9, 0.85]].slice(0, d < 0.5 ? 2 : 4)) {
-      L2.zyl(0.4, 0.4, 0.04, x, 0.74, z2, "#f4f0ea", 12);
-      L2.zyl(0.04, 0.04, 0.74, x, 0, z2, "#2a2d31", 4);
-      L2.zyl(0.22, 0.22, 0.03, x, 0, z2, "#2a2d31", 8);
-      L2.zyl(0.05, 0.04, 0.09, x + 0.1, 0.78, z2, "#ffffff", 6);
-      for (const a of [0, PI2]) {
-        const cx = x + Math.cos(a) * 0.62, cz = z2 + Math.sin(a) * 0.62;
-        stuhl(L2, cx, cz, -a - PI2 / 2, "#3a4a5a");
-        if (r() < 0.55) figur2(L2.S, ...L2.P(cx, cz), r() * 1e9 | 0, "kunde", { y: L2.oy, ry: L2.rot - a - PI2 / 2, pose: "sitzen", y: L2.oy });
-      }
-    }
-  }
-  function stuhl(L2, lx, lz, ry, farbe) {
-    const P2 = L2.sub(lx, lz, ry);
-    P2.box(0.45, 0.06, 0.45, 0, 0.42, 0, farbe);
-    P2.box(0.45, 0.45, 0.06, 0, 0.48, -0.2, farbe);
-    P2.box(0.04, 0.42, 0.04, -0.2, 0, 0.2, "#2a2d31");
-    P2.box(0.04, 0.42, 0.04, 0.2, 0, 0.2, "#2a2d31");
-    P2.box(0.04, 0.42, 0.04, -0.2, 0, -0.2, "#2a2d31");
-    P2.box(0.04, 0.42, 0.04, 0.2, 0, -0.2, "#2a2d31");
-  }
-  function obstStand(L2, lx, lz, r, d) {
-    const w = 2.4;
-    L2.box(w, 0.7, 1, lx, 0, lz, "#a07b5a");
-    const korb = ["#e8403a", "#f2c14e", "#9bc53d", "#ff8c42", "#7b2f5a", "#f4e1c0"];
-    for (let i = 0; i < 4; i++) for (const j of [-0.22, 0.22]) {
-      const u = lx - w / 2 + (i + 0.5) * (w / 4), f = bunt(r, korb);
-      const g = new three_module_exports.BoxGeometry(0.52, 0.2, 0.4);
-      g.rotateX(j > 0 ? 0.25 : 0.1);
-      L2.geo(g, u, 0.8 + (j < 0 ? 0.12 : 0), lz + j, "#c9a26b");
-      L2.box(0.46, 0.08, 0.34, u, 0.9 + (j < 0 ? 0.12 : 0), lz + j, f);
-    }
-  }
-  function schuhwand(L2, w, r, d) {
-    L2.box(w, 3, 0.08, 0, 0, 0.04, "#1f1f1f");
-    L2.box(w, 0.5, 0.04, 0, 3, 0.06, "#e8403a");
-    const reihen = d < 0.5 ? 3 : 6;
-    for (let j = 0; j < reihen; j++) {
-      const y = 0.4 + j * (2.4 / reihen);
-      const n = Math.floor((w - 0.3) / 0.38);
-      L2.box(w - 0.3, 0.03, 0.22, 0, y - 0.03, 0.15, "#c9d2d8");
-      for (let k = 0; k < n; k++) {
-        const u = -w / 2 + 0.3 + k * 0.38, f = bunt(r, PAL.sport);
-        L2.box(0.28, 0.11, 0.12, u, y, 0.15, f);
-        L2.box(0.28, 0.03, 0.13, u, y, 0.15, "#ffffff");
-      }
-    }
-    L2.box(1.6, 0.42, 0.45, -w / 4, 0, 0.9, "#2a2d31");
-    L2.box(1.6, 0.06, 0.45, -w / 4, 0.42, 0.9, "#e8403a");
-  }
-  function rucksackwand(L2, w, r, d) {
-    L2.box(w, 2.8, 0.08, 0, 0, 0.04, "#7b5a40");
-    for (let j = 0; j < 3; j++) {
-      const y = 0.4 + j * 0.85;
-      L2.box(w - 0.2, 0.04, 0.06, 0, y + 0.55, 0.1, "#9aa3aa");
-      const n = anz(Math.floor((w - 0.3) / 0.55), d, 0.5);
-      for (let k = 0; k < n; k++) {
-        const u = -w / 2 + 0.4 + (k + 0.5) * ((w - 0.8) / n), f = bunt(r, PAL.outdoor);
-        L2.box(0.38, 0.55, 0.22, u, y, 0.2, f);
-        L2.box(0.3, 0.2, 0.06, u, y + 0.08, 0.33, dunkler(f, 0.08));
-      }
-    }
-  }
-  function rucksackTurm(L2, lx, lz, r, d) {
-    L2.box(0.8, 1.6, 0.8, lx, 0, lz, "#7b5a40");
-    for (let j = 0; j < 3; j++) for (const s2 of [0, 1]) {
-      const f = bunt(r, PAL.outdoor);
-      s2 ? L2.box(0.36, 0.42, 0.18, lx + 0.49, 0.15 + j * 0.5, lz, f) : L2.box(0.36, 0.42, 0.18, lx, 0.15 + j * 0.5, lz + 0.49, f);
-    }
-  }
-  function zelt(L2, lx, lz, r, w = 2.6) {
-    const f = bunt(r, ["#e0a33a", "#3f6b3a", "#c25b2a", "#2f5f8a"]);
-    L2.box(w + 0.6, 0.04, w * 0.9, lx, 0, lz, "#8a9a5b");
-    const g = new three_module_exports.ConeGeometry(w * 0.72, 1.6, 4, 1);
-    g.rotateY(PI2 / 4);
-    g.scale(1, 1, 0.72);
-    g.translate(0, 0.8, 0);
-    L2.geo(g, lx, 0.04, lz, f);
-    L2.box(0.5, 0.9, 0.04, lx, 0.04, lz + w * 0.33, "#30343a");
-    L2.box(0.04, 1.7, 0.04, lx, 0.04, lz, "#9aa3aa");
-  }
-  function fahrrad(L2, lx, lz, r, ry = 0, y = 0) {
-    const P2 = L2.sub(lx, lz, ry);
-    const f = bunt(r, ["#e8403a", "#1f6fd1", "#1f1f1f", "#38b86b", "#ffcc00", "#f2f2f2", "#7a3cd1"]);
-    const rad2 = 0.33;
-    for (const x of [-0.52, 0.52]) P2.geo(new three_module_exports.TorusGeometry(rad2, 0.035, 4, 14), x, y + rad2, 0, "#1f1f1f");
-    P2.geo(new three_module_exports.BoxGeometry(0.75, 0.05, 0.05).rotateZ(-0.15), 0, y + 0.66, 0, f);
-    P2.geo(new three_module_exports.BoxGeometry(0.7, 0.05, 0.05).rotateZ(0.75), -0.1, y + 0.5, 0, f);
-    P2.geo(new three_module_exports.BoxGeometry(0.55, 0.05, 0.05).rotateZ(-0.65), 0.3, y + 0.5, 0, f);
-    P2.box(0.05, 0.42, 0.05, 0.42, y + 0.4, 0, f);
-    P2.box(0.22, 0.04, 0.1, -0.22, y + 0.82, 0, "#1f1f1f");
-    P2.box(0.05, 0.05, 0.42, 0.44, y + 0.85, 0, "#1f1f1f");
-  }
-  function radwand(L2, w, r, d) {
-    L2.box(w, 3.2, 0.08, 0, 0, 0.04, "#d9dde0");
-    L2.box(w, 0.06, 0.1, 0, 2.95, 0.08, "#9aa3aa");
-    const n = Math.max(1, Math.floor(w / 1.3));
-    for (let i = 0; i < n; i++) {
-      const u = -w / 2 + (i + 0.5) * (w / n);
-      L2.box(0.05, 0.05, 0.4, u, 2.3, 0.25, "#2a2d31");
-      fahrrad(L2, u, 0.35, r, 0, 1.25);
-    }
-    for (let i = 0; i < (d < 0.5 ? 3 : 6); i++) L2.box(0.3, 0.3, 0.3, -w / 2 + 0.4 + i * 0.4, 0, 0.3, bunt(r, PAL.sport));
-  }
-  function skiwand(L2, w, r, d) {
-    L2.box(w, 3, 0.08, 0, 0, 0.04, "#e8f0f5");
-    L2.box(w, 0.06, 0.24, 0, 1.8, 0.14, "#9aa3aa");
-    const n = anz(Math.floor((w - 0.3) / 0.24), d, 0.5);
-    for (let i = 0; i < n; i++) L2.box(0.1, 1.75, 0.03, -w / 2 + 0.3 + i * ((w - 0.6) / n), 0.15, 0.12, bunt(r, PAL.winter), 0);
-    L2.box(w - 0.4, 0.04, 0.35, 0, 2.3, 0.2, "#c9d2d8");
-    helme(L2, 0, 2.34, 0.2, r, w - 0.6);
-  }
-  function helme(L2, lx, y, lz, r, w = 0.6) {
-    const n = Math.max(1, Math.floor(w / 0.35));
-    for (let i = 0; i < n; i++) L2.geo(new three_module_exports.SphereGeometry(0.13, 8, 4, 0, PI2 * 2, 0, PI2 / 2), lx - w / 2 + (i + 0.5) * (w / n), y, lz, bunt(r, PAL.winter));
-  }
-  function skistaender(L2, lx, lz, r, d) {
-    L2.box(2.4, 0.15, 0.6, lx, 0, lz, "#9aa3aa");
-    L2.box(2.4, 0.06, 0.1, lx, 1.2, lz - 0.2, "#9aa3aa");
-    L2.box(0.06, 1.2, 0.06, lx - 1.15, 0, lz - 0.2, "#9aa3aa");
-    L2.box(0.06, 1.2, 0.06, lx + 1.15, 0, lz - 0.2, "#9aa3aa");
-    const n = d < 0.5 ? 7 : 14;
-    for (let i = 0; i < n; i++) L2.geo(new three_module_exports.BoxGeometry(0.09, 1.7, 0.03).rotateX(-0.12), lx - 1.05 + i * (2.1 / (n - 1)), 0.95, lz - 0.05, bunt(r, PAL.winter));
-  }
-  function snowboardInsel(L2, r, d) {
-    L2.box(2.6, 0.2, 1, 0, 0, -0.8, "#e8f0f5");
-    L2.box(2.6, 1.8, 0.08, 0, 0.2, -1.25, "#1f6fd1");
-    for (let i = 0; i < (d < 0.5 ? 3 : 6); i++) L2.geo(new three_module_exports.BoxGeometry(0.28, 1.5, 0.04).rotateX(-0.15), -1.05 + i * 0.42, 0.95, -1.05, bunt(r, PAL.winter));
-    rundstaender(L2, -0.5, 0.8, PAL.winter, r, d);
-  }
-  function trikotwand(L2, w, r, d) {
-    L2.box(w, 3, 0.08, 0, 0, 0.04, "#1f1f1f");
-    const vereine = [["#e8403a", "#ffffff"], ["#1f6fd1", "#ffffff"], ["#ffcc00", "#1f1f1f"], ["#38b86b", "#ffffff"], ["#ffffff", "#e8403a"], ["#7a3cd1", "#ffcc00"]];
-    const n = Math.floor(w / 0.75);
-    for (let j = 0; j < (d < 0.5 ? 2 : 3); j++) for (let i = 0; i < n; i++) {
-      const [a, b] = vereine[(i + j * 2) % vereine.length];
-      const u = -w / 2 + (i + 0.5) * (w / n), y = 0.5 + j * 0.85;
-      L2.box(0.42, 0.55, 0.04, u, y, 0.1, a);
-      L2.box(0.66, 0.16, 0.04, u, y + 0.4, 0.1, a);
-      L2.box(0.12, 0.2, 0.02, u, y + 0.25, 0.13, b);
-    }
-  }
-  function ballkorb(L2, lx, lz, r, d) {
-    L2.box(0.9, 0.55, 0.9, lx, 0, lz, "#c9d2d8");
-    L2.box(0.8, 0.5, 0.8, lx, 0.06, lz, "#4b5560");
-    const n = d < 0.5 ? 4 : 9;
-    for (let i = 0; i < n; i++) L2.geo(new three_module_exports.IcosahedronGeometry(0.15, 1), lx - 0.27 + i % 3 * 0.27, 0.62 + (i > 5 ? 0.18 : 0), lz - 0.27 + Math.floor(i / 3) % 3 * 0.27, bunt(r, ["#ffffff", "#ff6a2b", "#ffcc00", "#ffffff", "#e8403a"]));
-  }
-  function tor(L2, lx, lz) {
-    L2.box(2.4, 0.08, 0.08, lx, 1.3, lz, "#ffffff");
-    L2.box(0.08, 1.3, 0.08, lx - 1.16, 0, lz, "#ffffff");
-    L2.box(0.08, 1.3, 0.08, lx + 1.16, 0, lz, "#ffffff");
-    L2.box(2.4, 1.3, 0.02, lx, 0, lz - 0.6, "#dfe5e8");
-  }
-  var MARKEN2 = [
-    { name: "Lindqvist", farbe: "#2c3e50", schrift: "#f4efe6", boden: "#e8e1d6", gruppe: "damen" },
-    { name: "Casa Orvieto", farbe: "#b5745a", schrift: "#ffffff", boden: "#efe3d2", gruppe: "wohnen" },
-    { name: "NORDKAMM", farbe: "#1f1f1f", schrift: "#ffffff", boden: "#d9d9d9", gruppe: "outdoor" },
-    { name: "Maison Belrose", farbe: "#e9c9cf", schrift: "#6b2737", boden: "#f7efe9", gruppe: "beauty" },
-    { name: "Kordel & Co.", farbe: "#3f6b5a", schrift: "#f4efe6", boden: "#e4ddd0", gruppe: "herren" },
-    { name: "P\xFCnktchen", farbe: "#ffd166", schrift: "#7b2f5a", boden: "#fdf3d6", gruppe: "kinder" }
-  ];
-  var MIETER3 = {
-    discounter: { name: "Frischmarkt Kolb", farbe: "#1f5fa8", schrift: "#ffd400" },
-    fitness: { name: "Kraftwerk Fitness", farbe: "#1f1f1f", schrift: "#ff6a2b" },
-    arzt: { name: "Praxis am Markt", farbe: "#e9f1f4", schrift: "#2f6f8f" },
-    gastro: { name: "Caf\xE9 Sole", farbe: "#4f8a5b", schrift: "#fff8e6" }
-  };
-  function marke2(seed) {
-    return MARKEN2[Math.abs(seed | 0) % MARKEN2.length];
-  }
-  function schrift(L2, text2, lx, ly, lz, hoehe, farbe, hg = null, liegend = false) {
-    const scene2 = L2.S.szene;
-    if (!scene2) return;
-    const { mat: mat2, seitenverhaeltnis } = textMaterial(text2, farbe, { groesse: 120, hintergrund: hg, versatz: -2 });
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), mat2);
-    const [X, Z2] = L2.P(lx, lz);
-    m.position.set(X, L2.oy + ly, Z2);
-    m.rotation.order = "YXZ";
-    m.rotation.y = L2.rot;
-    if (liegend) m.rotation.x = -PI2 / 2;
-    scene2.add(m);
-    return m;
-  }
-  function preisschild(L2, lx, lz, text2, hoch = 1.9) {
-    L2.box(0.04, hoch, 0.04, lx, 0, lz, "#9aa3aa");
-    L2.box(0.9, 0.5, 0.04, lx, hoch, lz, "#ffd400");
-    schrift(L2, text2, lx, hoch + 0.25, lz + 0.03, 0.38, "#d4212a");
-  }
-  function wuehltisch(L2, lx, lz, r, d, w = 2.2) {
-    L2.box(w, 0.75, 1.1, lx, 0, lz, "#c9d2d8");
-    L2.box(w, 0.25, 1.1, lx, 0.75, lz, "#9aa3aa");
-    L2.box(w - 0.1, 0.1, 1, lx, 0.8, lz, "#5a636b");
-    const n = d < 0.5 ? 6 : 14;
-    for (let i = 0; i < n; i++) L2.box(zw(r, 0.3, 0.5), zw(r, 0.08, 0.2), zw(r, 0.25, 0.4), lx + zw(r, -w / 2 + 0.3, w / 2 - 0.3), 0.88, lz + zw(r, -0.35, 0.35), bunt(r, PAL.damen.concat(PAL.kinder)), zw(r, -1, 1));
-  }
-  function gitterbox(L2, lx, lz, r, d) {
-    const w = 1.2, t = 1, h = 0.95;
-    L2.box(w, 0.12, t, lx, 0, lz, "#7b5a40");
-    const n = d < 0.5 ? 4 : 8;
-    for (let i = 0; i < n; i++) L2.box(zw(r, 0.3, 0.5), zw(r, 0.2, 0.4), zw(r, 0.3, 0.5), lx + zw(r, -0.35, 0.35), 0.12 + (i > 4 ? 0.35 : 0), lz + zw(r, -0.3, 0.3), bunt(r, PAL.waren), zw(r, -1, 1));
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) L2.box(0.04, h, 0.04, lx + sx * w / 2, 0.12, lz + sz * t / 2, "#8c959b");
-    for (const y of [0.45, h + 0.1]) {
-      L2.box(w, 0.03, 0.03, lx, y, lz + t / 2, "#8c959b");
-      L2.box(w, 0.03, 0.03, lx, y, lz - t / 2, "#8c959b");
-      L2.box(0.03, 0.03, t, lx + w / 2, y, lz, "#8c959b");
-      L2.box(0.03, 0.03, t, lx - w / 2, y, lz, "#8c959b");
-    }
-    if (d > 0.6) for (let i = 1; i < 5; i++) {
-      L2.box(0.02, h, 0.02, lx - w / 2 + i * w / 5, 0.12, lz + t / 2, "#8c959b");
-      L2.box(0.02, h, 0.02, lx + w / 2, 0.12, lz - t / 2 + i * t / 5, "#8c959b");
-    }
-  }
-  var PREISE = ["\u221230 %", "\u221250 %", "ab 5 \u20AC", "\u221270 %", "9,99 \u20AC", "ab 2 \u20AC"];
-  function abgedeckt(L2, lx, lz, w, h, t, ry = 0) {
-    const P2 = L2.sub(lx, lz, ry);
-    P2.box(w, h, t, 0, 0, 0, "#e6e3dc");
-    P2.box(w + 0.1, 0.12, t + 0.1, 0, 0, 0, "#d9d5cc");
-    P2.geo(new three_module_exports.BoxGeometry(w * 0.6, 0.15, t * 0.7).rotateZ(0.1), 0, h, 0, "#ebe8e2");
-  }
-  function kartons(L2, lx, lz, r, n = 4) {
-    for (let i = 0; i < n; i++) {
-      const w = zw(r, 0.4, 0.7), h = zw(r, 0.3, 0.55);
-      const stapelY = i >= 3 ? 0.5 : 0;
-      L2.box(w, h, w * zw(r, 0.7, 1), lx + i % 3 * 0.55 - 0.5, stapelY, lz + i % 2 * 0.3, bunt(r, ["#c9a26b", "#b8925e", "#d6b27c"]), zw(r, -0.3, 0.3));
-    }
-  }
-  function absperrung(L2, a, b, lz) {
-    const n = Math.max(1, Math.round((b - a) / 1.6));
-    for (let i = 0; i <= n; i++) {
-      const u = a + i * (b - a) / n;
-      L2.zyl(0.15, 0.17, 0.05, u, 0, lz, "#2a2d31", 6);
-      L2.box(0.06, 1, 0.06, u, 0, lz, "#e8403a");
-    }
-    const s2 = (b - a) / 10;
-    for (let i = 0; i < 10; i++) L2.box(s2, 0.07, 0.02, a + (i + 0.5) * s2, 0.92, lz, i % 2 ? "#ffffff" : "#e8403a");
-  }
-  function bauzaun2(L2, a, b, lz) {
-    const n = Math.max(1, Math.round((b - a) / 2.2));
-    const s2 = (b - a) / n;
-    for (let i = 0; i < n; i++) {
-      const u = a + (i + 0.5) * s2;
-      L2.box(s2 - 0.04, 0.05, 0.05, u, 1.95, lz, "#9aa3aa");
-      L2.box(s2 - 0.04, 0.05, 0.05, u, 0.15, lz, "#9aa3aa");
-      L2.box(s2 - 0.1, 1.75, 0.02, u, 0.2, lz, "#dfe5e8");
-      for (let k = 1; k < 5; k++) L2.box(0.02, 1.75, 0.03, u - s2 / 2 + k * s2 / 5, 0.2, lz, "#b9c2c8");
-      L2.box(s2 * 0.6, 0.35, 0.03, u, 1.2, lz + 0.02, i % 2 ? "#d23c32" : "#ffffff");
-    }
-    for (let i = 0; i <= n; i++) {
-      L2.box(0.6, 0.14, 0.22, a + i * s2, 0, lz, "#c9483e");
-      L2.box(0.05, 2, 0.05, a + i * s2, 0.1, lz, "#9aa3aa");
-    }
-  }
-  function leiter(L2, lx, lz, ry = 0) {
-    const P2 = L2.sub(lx, lz, ry);
-    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(0.25), -0.25, 0.97, 0.24, "#d39a2b");
-    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(0.25), 0.25, 0.97, 0.24, "#d39a2b");
-    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(-0.25), -0.25, 0.97, -0.24, "#d39a2b");
-    P2.geo(new three_module_exports.BoxGeometry(0.06, 2, 0.06).rotateX(-0.25), 0.25, 0.97, -0.24, "#d39a2b");
-    for (let i = 1; i < 5; i++) P2.box(0.5, 0.04, 0.06, 0, i * 0.38, 0.48 - i * 0.095, "#c4891f");
-    P2.box(0.56, 0.06, 0.2, 0, 1.92, 0, "#c4891f");
-  }
-  function material(L2, lx, lz, r) {
-    for (let i = 0; i < 5; i++) L2.box(2.4, 0.04, 1.2, lx, i * 0.045, lz, i % 2 ? "#ebe9e4" : "#e0ddd6");
-    for (let i = 0; i < 4; i++) L2.box(2.6, 0.1, 0.12, lx, 0.25 + Math.floor(i / 2) * 0.1, lz + 0.8 + i % 2 * 0.14, "#c9a26b");
-    L2.box(0.8, 0.12, 0.8, lx + 1.6, 0, lz - 0.2, "#7b5a40");
-    for (let i = 0; i < 3; i++) L2.zyl(0.16, 0.16, 0.36, lx + 1.4 + i % 2 * 0.35, 0.12, lz - 0.4 + i * 0.22, bunt(r, ["#e8e4dc", "#9aa3aa", "#2f6f8f"]), 8);
-  }
-  function schutt2(L2, lx, lz, r, n = 10) {
-    for (let i = 0; i < n; i++) L2.box(zw(r, 0.15, 0.4), zw(r, 0.1, 0.25), zw(r, 0.15, 0.4), lx + zw(r, -0.6, 0.6), 0, lz + zw(r, -0.5, 0.5), bunt(r, ["#8d8a84", "#a7a49d", "#b9785e", "#6b6e72"]), zw(r, 0, 3));
-    L2.box(1, 0.25, 0.9, lx, 0, lz, "#9d9a93");
-  }
-  function schubkarre(L2, lx, lz, ry = 0) {
-    const P2 = L2.sub(lx, lz, ry);
-    P2.geo(new three_module_exports.CylinderGeometry(0.5, 0.36, 0.4, 4).rotateY(PI2 / 4).scale(1.2, 1, 0.8), 0, 0.6, 0, "#2f8f5a");
-    P2.geo(new three_module_exports.TorusGeometry(0.18, 0.06, 4, 10).rotateY(PI2 / 2), 0.62, 0.2, 0, "#1f1f1f");
-    P2.box(1.2, 0.04, 0.04, -0.2, 0.5, 0.25, "#2a2d31");
-    P2.box(1.2, 0.04, 0.04, -0.2, 0.5, -0.25, "#2a2d31");
-  }
-  var UNTERMIETE = {
-    discounter: {
-      boden: { a: "#e3e6e8", b: "#d6dade", m: "fliese" },
-      wand: (L2, w, r, d) => wandRegal(L2, w, 2.2, 5, "#f4f4f2", prodPackungen(PAL.waren), r, d, 0.5),
-      insel: [
-        (L2, r, d) => {
-          gondel(L2, 0, -0.9, 3, 1.6, "#f4f4f2", prodPackungen(PAL.waren), r, d);
-          gondel(L2, 0, 0.9, 3, 1.6, "#f4f4f2", prodPackungen(PAL.waren), r, d);
-        },
-        (L2, r, d) => {
-          for (const z2 of [-0.9, 0.8]) {
-            L2.box(1.8, 0.9, 0.7, 0, 0, z2, "#3f4a53");
-            L2.box(0.4, 0.05, 0.7, -0.4, 0.9, z2, "#1f1f1f");
-            L2.box(0.3, 0.3, 0.06, 0.6, 0.9, z2 - 0.2, "#1e2328");
-            figur2(L2.S, ...L2.P(0.5, z2 - 0.6), r() * 1e9 | 0, "fremd", { y: L2.oy, ry: L2.rot, farbe: "#1f5fa8" });
-          }
-          L2.box(0.6, 0.9, 0.9, 1.4, 0, 0, "#c9d2d8");
-        },
-        (L2, r, d) => {
-          L2.box(2.6, 0.9, 1, 0, 0, -0.6, "#e9eef2");
-          for (let i = 0; i < 6; i++) L2.box(0.36, 0.2, 0.7, -1.1 + i * 0.44, 0.9, -0.6, bunt(r, ["#9bc53d", "#e8403a", "#f2c14e", "#ff8c42", "#7b2f5a"]));
-          L2.box(2.6, 1.9, 0.6, 0, 0, 1.1, "#e3edf1");
-          for (let j = 0; j < 3; j++) for (let k = 0; k < 6; k++) L2.box(0.3, 0.3, 0.06, -1.05 + k * 0.42, 0.3 + j * 0.5, 0.78, bunt(r, ["#ffffff", "#f4e1c0", "#3c8dd9", "#e8403a"]));
-        }
-      ]
-    },
-    fitness: {
-      boden: { a: "#3a3f45", b: "#33383d", m: "fliese" },
-      wand: (L2, w, r, d) => {
-        L2.box(w, 2.4, 0.06, 0, 0.1, 0.03, "#d9e6ec");
-        L2.box(w, 0.1, 0.1, 0, 2.5, 0.05, "#ff6a2b");
-        for (let i = 0; i < Math.floor(w / 0.6); i++) L2.box(0.3, 0.12, 0.3, -w / 2 + 0.4 + i * 0.6, 0, 0.6, "#1f1f1f");
-      },
-      insel: [
-        (L2, r, d) => {
-          for (const x of [-1, 0.1, 1.2]) laufband(L2, x, -0.4, r);
-        },
-        (L2, r, d) => {
-          hantelbank(L2, -0.6, -0.6, r);
-          hantelbank(L2, 0.8, 0.8, r);
-          L2.box(2.6, 0.02, 0.8, 0, 0, 1.4, "#6b2fa8");
-        },
-        (L2, r, d) => {
-          for (let i = 0; i < 4; i++) {
-            L2.box(0.7, 0.03, 1.6, -1.1 + i * 0.75, 0, 0, bunt(r, ["#6b2fa8", "#20b5c9", "#ff6a2b", "#38b86b"]));
-            if (i % 2 === 0) figur2(L2.S, ...L2.P(-1.1 + i * 0.75, 0), r() * 1e9 | 0, "fitness", { y: L2.oy, ry: L2.rot });
-          }
-        }
-      ]
-    },
-    arzt: {
-      boden: { a: "#e9f1f4", b: "#dbe7ec", m: "karo" },
-      wand: (L2, w, r, d) => {
-        for (let i = 0; i < Math.floor(w / 0.6); i++) stuhl(L2, -w / 2 + 0.4 + i * 0.6, 0.45, 0, "#2f6f8f");
-        L2.box(w, 1.1, 0.06, 0, 0, 0.03, "#ffffff");
-        bildtafel(L2, 0, 1.6, 0.07, 1.4, 0.9, r, ["#2f6f8f"]);
-        for (let i = 0; i < Math.floor(w / 1.2); i++) if (r() < 0.6) figur2(L2.S, ...L2.P(-w / 2 + 0.4 + i * 1.2, 0.45), r() * 1e9 | 0, "kunde", { y: L2.oy, ry: L2.rot, pose: "sitzen", y: L2.oy });
-      },
-      insel: [
-        (L2, r, d) => {
-          L2.box(2.4, 1.1, 0.5, 0, 0, -0.2, "#ffffff");
-          L2.box(0.5, 1.1, 1.4, -0.95, 0, 0.45, "#ffffff");
-          L2.box(2.5, 0.05, 0.6, 0, 1.1, -0.2, "#2f6f8f");
-          L2.box(0.45, 0.3, 0.05, 0.4, 1.15, -0.1, "#1e2328");
-          L2.box(1.6, 0.85, 0.06, 0, 0, 0.06, "#2f6f8f");
-          figur2(L2.S, ...L2.P(0.3, -0.85), r() * 1e9 | 0, "arzt", { y: L2.oy, ry: L2.rot });
-          L2.box(0.4, 0.6, 0.4, 1.4, 0, 1, "#7b5a40");
-          L2.kugel(0.45, 1.4, 1, 1, "#6fa860");
-        },
-        (L2, r, d) => {
-          for (const x of [-0.8, 0.8]) {
-            L2.box(1.4, 2.4, 0.08, x, 0, -1.4, "#ffffff");
-            L2.box(0.08, 2.4, 2.4, x - 0.7, 0, -0.2, "#ffffff");
-            L2.box(0.6, 0.65, 1.8, x, 0, -0.4, "#cfe3ea");
-            L2.box(0.6, 0.12, 0.3, x, 0.65, -1.15, "#ffffff");
-          }
-        }
-      ]
-    },
-    gastro: {
-      boden: { a: "#e3cfae", b: "#d9c39f", m: "dielen" },
-      wand: (L2, w, r, d) => {
-        L2.box(w, 1.05, 0.7, 0, 0, 0.35, "#b98d61");
-        L2.box(w, 0.06, 0.75, 0, 1.05, 0.35, "#f4f0ea");
-        L2.box(w, 2.6, 0.06, 0, 0, 0.03, "#f2e6d0");
-        L2.box(w, 0.5, 0.5, 0, 2.6, 0.25, "#4f8a5b");
-        for (let i = 0; i < Math.floor(w / 0.5) - 2; i++) {
-          L2.zyl(0.12, 0.12, 0.1, -w / 2 + 0.6 + i * 0.5, 1.11, 0.35, bunt(r, ["#f2c6d2", "#5a3b22", "#f2c14e", "#ffffff", "#e8403a"]), 8);
-        }
-        L2.box(0.5, 0.45, 0.4, w / 2 - 0.6, 1.11, 0.3, "#c9d2d8");
-        figur2(L2.S, ...L2.P(-0.4, 1), r() * 1e9 | 0, "theke", { y: L2.oy, ry: L2.rot + PI2 });
-      },
-      insel: [
-        (L2, r, d) => cafeEcke(L2, r, 1),
-        (L2, r, d) => {
-          for (const x of [-0.8, 0.8]) {
-            L2.box(0.8, 0.74, 1.6, x, 0, 0, "#7b5a40");
-            L2.box(0.9, 0.04, 1.7, x, 0.74, 0, "#f4f0ea");
-            for (const z2 of [-0.5, 0.5]) for (const s2 of [-1, 1]) {
-              stuhl(L2, x + s2 * 0.6, z2, s2 > 0 ? -PI2 / 2 : PI2 / 2, "#3f6b3a");
-              if (r() < 0.5) figur2(L2.S, ...L2.P(x + s2 * 0.6, z2), r() * 1e9 | 0, "kunde", { y: L2.oy, ry: L2.rot + (s2 > 0 ? PI2 / 2 : -PI2 / 2) + PI2, pose: "sitzen", y: L2.oy });
-            }
-          }
-        }
-      ]
-    }
-  };
-  function laufband(L2, lx, lz, r) {
-    L2.box(0.7, 0.22, 1.8, lx, 0, lz, "#2a2d31");
-    L2.box(0.56, 0.03, 1.6, lx, 0.22, lz, "#1a1c1f");
-    L2.box(0.05, 1.2, 0.05, lx - 0.3, 0.2, lz - 0.7, "#9aa3aa");
-    L2.box(0.05, 1.2, 0.05, lx + 0.3, 0.2, lz - 0.7, "#9aa3aa");
-    L2.box(0.7, 0.25, 0.25, lx, 1.3, lz - 0.75, "#1f1f1f");
-    L2.box(0.3, 0.12, 0.02, lx, 1.4, lz - 0.62, "#20b5c9");
-    if (r() < 0.6) figur2(L2.S, ...L2.P(lx, lz), r() * 1e9 | 0, "fitness", { y: L2.oy, ry: L2.rot + PI2, pose: "gehen", y: L2.oy + 0.25 });
-  }
-  function hantelbank(L2, lx, lz, r) {
-    L2.box(0.35, 0.45, 1.3, lx, 0, lz, "#2a2d31");
-    L2.box(0.35, 0.08, 1.3, lx, 0.45, lz, "#ff6a2b");
-    L2.box(0.06, 1.3, 0.06, lx - 0.55, 0, lz - 0.5, "#9aa3aa");
-    L2.box(0.06, 1.3, 0.06, lx + 0.55, 0, lz - 0.5, "#9aa3aa");
-    L2.geo(new three_module_exports.CylinderGeometry(0.025, 0.025, 1.7, 4).rotateZ(PI2 / 2), lx, 1.25, lz - 0.5, "#c9d2d8");
-    for (const s2 of [-1, 1]) L2.geo(new three_module_exports.CylinderGeometry(0.22, 0.22, 0.08, 10).rotateZ(PI2 / 2), lx + s2 * 0.75, 1.25, lz - 0.5, "#1f1f1f");
-  }
-  function gangMoebel(L2, nachbar, r, d) {
-    if (["leer", "umbau", "untermiete"].includes(nachbar)) {
-      if (r() < 0.5) {
-        L2.box(0.7, 0.7, 0.7, 1.2, 0, 0, "#ece6dc");
-        L2.kugel(0.55, 1.2, 1.15, 0, "#6fa860");
-      }
-      return;
-    }
-    const pal = PAL[nachbar] ?? (nachbar === "beauty" ? PAL.flakon : nachbar === "wohnen" ? PAL.geschirr : PAL.waren);
-    const mode = ["damen", "herren", "kinder", "waesche", "sporttextil", "sport", "outdoor", "wintersport", "teamsport"].includes(nachbar);
-    const v = r();
-    if (mode && v < 0.45) {
-      L2.box(3, 0.25, 0.9, 0, 0, 0, HOLZ.weiss);
-      for (let i = 0; i < 3; i++) puppe3(L2.hoch(0.25), -1 + i, zw(r, -0.1, 0.1), r, nachbar === "herren" ? "herren" : nachbar === "kinder" ? "kind" : nachbar === "waesche" ? "waesche" : PAL[nachbar] === PAL.sport ? "sport" : "damen", pal, PI2 + zw(r, -0.5, 0.5));
-    } else if (mode && v < 0.7) staender(L2, 0, 0, 2.6, pal, r, d);
-    else if (v < 0.85) {
-      warenTisch(L2, -0.5, 0, 1.6, 0.8, pal, r, d, r() < 0.3 ? "#d23c32" : waehle2(r, [HOLZ.weiss, HOLZ.hell, HOLZ.mittel]), 0.8);
-      L2.box(0.8, 0.6, 0.6, 1.2, 0, 0, "#ece6dc");
-      L2.kugel(0.45, 1.2, 1, 0, "#5f9a56");
-    } else {
-      L2.box(1.8, 0.45, 0.5, -0.4, 0, 0, HOLZ.mittel);
-      L2.box(0.7, 0.7, 0.7, 1.2, 0, 0, "#ece6dc");
-      L2.kugel(0.55, 1.2, 1.15, 0, "#6fa860");
-      L2.kugel(0.35, 1.35, 1.65, 0.1, "#7cb369");
-    }
-  }
-  function beimoebel(L2, gruppe2, r, d) {
-    const pal = PAL[gruppe2] ?? PAL.waren;
-    const v = r();
-    if (["damen", "herren", "kinder", "waesche", "sporttextil", "outdoor"].includes(gruppe2)) {
-      if (v < 0.5) puppe3(L2, 0, 0, r, gruppe2 === "herren" ? "herren" : gruppe2 === "kinder" ? "kind" : gruppe2 === "waesche" ? "waesche" : "damen", pal, zw(r, -1, 1));
-      else standspiegel(L2, 0, 0, zw(r, -1, 1));
-    } else if (gruppe2 === "beauty") L2.box(0.4, 1.1, 0.4, 0, 0, 0, "#f7f3ec"), L2.box(0.12, 0.25, 0.12, 0, 1.1, 0, bunt(r, PAL.flakon));
-    else if (gruppe2 === "accessoires") pouf(L2, 0, 0, bunt(r, ["#7d8f9c", "#c9a26b", "#2f6f8f", "#b5745a"]));
-    else if (gruppe2 === "spielwaren") teddy(L2, 0, 0, 0, r, 1.6);
-    else if (["sport", "teamsport", "sportschuhe"].includes(gruppe2)) ballkorb(L2, 0, 0, r, d * 0.5);
-    else if (gruppe2 === "wohnen") stehlampe(L2, 0, 0, r);
-    else if (gruppe2 === "rad") fahrrad(L2, 0, 0, r, zw(r, -0.4, 0.4));
-    else {
-      L2.box(0.6, 0.6, 0.6, 0, 0, 0, "#ece6dc");
-      L2.kugel(0.45, 0, 1, 0, "#5f9a56");
-    }
-  }
-  var WG_NAMEN = {
-    damen: "Damenmode",
-    herren: "Herrenmode",
-    kinder: "Kindermode",
-    waesche: "W\xE4sche & Dessous",
-    beauty: "Beauty & Parf\xFCmerie",
-    accessoires: "Schuhe & Accessoires",
-    wohnen: "Wohnen & Haushalt",
-    spielwaren: "Spielwaren",
-    food: "Feinkost",
-    sport: "Sport",
-    sportschuhe: "Sportschuhe",
-    sporttextil: "Sportbekleidung",
-    outdoor: "Outdoor",
-    rad: "Fahrrad",
-    wintersport: "Wintersport",
-    teamsport: "Teamsport",
-    offprice: "Rote Preise",
-    leer: "Fl\xE4che frei",
-    umbau: "Wir bauen f\xFCr Sie um"
-  };
-  function abteilungsname(gruppe2) {
-    return WG_NAMEN[gruppe2] ?? gruppe2;
-  }
-  var WARENGRUPPEN = Object.keys(MODUL);
-  var KONZEPTE = ["offprice", "konzession", "untermiete", "leer", "umbau"];
-  function zelle(S, gruppe2, x, z2, seed = 1, dichte = 1, o = {}) {
-    const r = rng2(seed);
-    const y = o.y ?? 0;
-    const d = Math.max(0.2, Math.min(1, dichte));
-    const R9 = RASTER;
-    const frei6 = [];
-    const wx = !!o.wandX, wz2 = !!o.wandZ;
-    let bodenTyp = gruppe2;
-    if (gruppe2 === "konzession") bodenTyp = { a: (o.marke ?? marke2(seed)).boden, b: dunkler((o.marke ?? marke2(seed)).boden, 0.04), m: "karo" };
-    else if (gruppe2 === "untermiete") bodenTyp = UNTERMIETE[o.mieter ?? "discounter"].boden;
-    if (o.boden !== false) boden(S, x, z2, R9, R9, y, bodenTyp, d);
-    const yb = y + 0.06;
-    const wandL = (seite, len, off) => seite === "z" ? lokal2(S, x + off + len / 2, yb, z2 + 0.02, 0) : lokal2(S, x + 0.02, yb, z2 + R9 - off - len / 2, PI2 / 2);
-    const wandStuecke = [];
-    if (wz2) wandStuecke.push(["z", wx ? R9 - 0.75 : R9 - 0.1, wx ? 0.75 : 0.05]);
-    if (wx) wandStuecke.push(["x", R9 - 0.1, 0.05]);
-    const ix = x + R9 / 2 + (wx ? 0.45 : 0), iz = z2 + R9 / 2 + (wz2 ? 0.45 : 0);
-    const iRot = r() < 0.5 ? 0 : PI2 / 2;
-    const inselL = () => lokal2(S, ix, yb, iz, iRot);
-    const fr = (fx, fz) => frei6.push([x + fx, z2 + fz]);
-    fr(R9 - 0.35, R9 / 2 + zw(r, -1, 1));
-    fr(R9 / 2 + zw(r, -1, 1), R9 - 0.35);
-    fr(R9 - 0.4, R9 - 0.4);
-    if (!wx) fr(0.4, R9 / 2 + zw(r, -1, 1));
-    else fr(1.15, R9 / 2 + zw(r, -1.5, 1.5));
-    if (!wz2) fr(R9 / 2 + zw(r, -1, 1), 0.4);
-    else fr(R9 / 2 + zw(r, -1.5, 1.5), 1.15);
-    if (gruppe2 === "gang" || gruppe2 === "kasse") {
-      frei6.length = 0;
-      if (gruppe2 === "kasse") {
-        kassentresen(S, x + 2.5, z2 + 2.3, seed, { y: yb, rot: o.rot ?? 0 });
-        for (let i = 0; i < 3; i++) fr(zw(r, 0.6, 4.4), 4.5);
-        return { frei: frei6 };
-      }
-      const achse = o.achse;
-      if (achse && o.moebel !== false) {
-        for (const [seite, nachbar] of [[-1, o.nachbarA], [1, o.nachbarB]]) {
-          if (r() > 0.25 + 0.6 * d) continue;
-          const L2 = achse === "x" ? lokal2(S, x + 2.5, yb, z2 + 2.5 + seite * 1.95, seite < 0 ? PI2 : 0) : lokal2(S, x + 2.5 + seite * 1.95, yb, z2 + 2.5, seite < 0 ? -PI2 / 2 : PI2 / 2);
-          gangMoebel(L2, nachbar, r, d);
-        }
-        for (let i = 0; i < 6; i++) achse === "x" ? fr(zw(r, 0.4, 4.6), zw(r, 1.7, 3.3)) : fr(zw(r, 1.7, 3.3), zw(r, 0.4, 4.6));
-      } else {
-        for (let i = 0; i < 6; i++) fr(zw(r, 0.6, 4.4), zw(r, 0.6, 4.4));
-        if (o.moebel !== false && r() < 0.35 * d) {
-          const L2 = lokal2(S, x + 2.5, yb, z2 + 2.5, iRot);
-          L2.box(0.8, 0.8, 0.8, 0, 0, 0, "#ece6dc");
-          L2.kugel(0.6, 0, 1.3, 0, "#5f9a56");
-          L2.kugel(0.4, 0.2, 1.8, 0.1, "#6fa860");
-        }
-      }
-      return { frei: frei6 };
-    }
-    if (gruppe2 === "leer") {
-      if (wz2) {
-        const L3 = wandL("z", R9 - 0.1, 0.05);
-        abgedeckt(L3, 0, 0.35, R9 - 0.6, 2.2, 0.6);
-      }
-      if (wx) {
-        const L3 = wandL("x", R9 - 0.1, 0.05);
-        abgedeckt(L3, wz2 ? 0.5 : 0, 0.35, wz2 ? R9 - 1.6 : R9 - 0.6, 2.2, 0.6);
-      }
-      const L2 = inselL();
-      const v = Math.floor(r() * 3);
-      if (v === 0) {
-        abgedeckt(L2, -0.6, -0.5, 1.8, 0.9, 1, 0.2);
-        kartons(L2, 0.9, 0.9, r, 5);
-      } else if (v === 1) {
-        abgedeckt(L2, 0.4, 0.2, 1.2, 1.6, 0.6, -0.4);
-        abgedeckt(L2, -1, -0.8, 0.8, 1.1, 0.8);
-      } else {
-        kartons(L2, -0.5, -0.4, r, 6);
-        L2.box(1.2, 0.12, 1, 0.8, 0, 0.9, "#b8925e");
-      }
-      if (o.absperrung !== false && (o.index === 0 || r() < 0.25)) absperrung(lokal2(S, x + R9 / 2, yb, z2 + R9 - 0.25, 0), -2.2, 2.2, 0);
-      return { frei: frei6.slice(0, 2) };
-    }
-    if (gruppe2 === "umbau") {
-      const L2 = inselL();
-      const v = (o.index ?? Math.floor(r() * 3)) % 3;
-      if (v === 0) {
-        material(L2, -0.3, -0.6, r);
-        leiter(L2, 1.2, 1, 0.5);
-      } else if (v === 1) {
-        schutt2(L2, -0.6, -0.4, r, d < 0.5 ? 5 : 10);
-        schubkarre(L2, 0.9, 0.9, 0.6);
-        leiter(L2, -1.2, 1.1, -0.3);
-      } else {
-        L2.box(2.6, 2.2, 0.12, 0, 0, -1.2, "#ebe9e4");
-        for (let i = 0; i < 5; i++) L2.box(0.06, 2.6, 0.1, -1.2 + i * 0.6, 0, -1.05, "#c9d2d8");
-        leiter(L2, 0.6, 0);
-        L2.box(0.6, 0.5, 0.4, -0.9, 0, 0.6, "#d39a2b");
-      }
-      if (wz2) {
-        const W3 = wandL("z", R9 - 0.1, 0.05);
-        W3.box(R9 - 0.2, 0.6, 0.05, 0, 0.3, 0.06, "#c9c4bb");
-        W3.box(1.2, 1.4, 0.04, -0.8, 1.2, 0.07, "#9aa3aa");
-      }
-      if (wx) {
-        const W3 = wandL("x", R9 - 0.1, 0.05);
-        W3.box(R9 - 0.2, 0.6, 0.05, 0, 0.3, 0.06, "#c9c4bb");
-      }
-      if (r() < 0.8) figur2(S, x + zw(r, 1, 4), z2 + zw(r, 1, 4), seed + 7, "handwerker", { y: yb });
-      return { frei: [] };
-    }
-    if (gruppe2 === "untermiete") {
-      const typ = UNTERMIETE[o.mieter ?? "discounter"];
-      for (const [s2, len, off] of wandStuecke) typ.wand(wandL(s2, len, off), len, r, d);
-      waehle2(r, typ.insel)(inselL(), r, d);
-      return { frei: frei6 };
-    }
-    if (gruppe2 === "offprice") {
-      const basis = o.basis ?? "damen";
-      const pal = PAL[basis] ?? PAL.damen;
-      for (const [s2, len, off] of wandStuecke) {
-        const L3 = wandL(s2, len, off);
-        if (r() < 0.5) staender(L3, 0, 0.4, len - 0.4, pal, r, d, 1.6);
-        else wandRegal(L3, len, 2, 4, "#c9d2d8", prodPackungen(PAL.waren), r, d, 0.5);
-      }
-      const L2 = inselL();
-      const v = Math.floor(r() * 3);
-      if (v === 0) {
-        wuehltisch(L2, 0, -0.7, r, d);
-        gitterbox(L2, -0.7, 0.9, r, d);
-        preisschild(L2, 0.6, -0.7, waehle2(r, PREISE));
-      } else if (v === 1) {
-        gitterbox(L2, -0.8, -0.8, r, d);
-        gitterbox(L2, 0.7, -0.8, r, d);
-        wuehltisch(L2, 0, 0.9, r, d, 2.6);
-        preisschild(L2, -0.8, -0.8, waehle2(r, PREISE), 1.6);
-      } else {
-        staender(L2, 0, -0.9, 2.4, pal, r, d);
-        wuehltisch(L2, 0, 0.7, r, d);
-        preisschild(L2, 1.1, 0.7, waehle2(r, PREISE));
-      }
-      return { frei: frei6 };
-    }
-    if (gruppe2 === "konzession") {
-      const m = o.marke ?? marke2(seed);
-      const basis = o.basis ?? m.gruppe;
-      const mod2 = MODUL[basis] ?? MODUL.damen;
-      for (const [s2, len, off] of wandStuecke) {
-        const L2 = wandL(s2, len, off);
-        L2.box(len, 3.6, 0.1, 0, 0, 0.05, m.farbe);
-        waehle2(r, mod2.wand)(L2.sub(0, 0.1), len - 0.2, r, d);
-      }
-      waehle2(r, mod2.insel)(inselL(), r, d);
-      return { frei: frei6 };
-    }
-    const mod = MODUL[gruppe2] ?? MODUL.damen;
-    const dw = wx && wz2 ? d * 0.72 : d;
-    for (const [s2, len, off] of wandStuecke) waehle2(r, mod.wand)(wandL(s2, len, off), len, r, dw);
-    const n = mod.insel.length;
-    mod.insel[((o.index ?? 0) + Math.floor(r() * n)) % n](inselL(), r, d);
-    if (r() < 0.55 * d) {
-      beimoebel(lokal2(S, x + R9 - 0.45, yb, z2 + R9 - 0.45, 0), gruppe2, r, d);
-      frei6.splice(2, 1);
-    }
-    if (o.personal ?? r() < 0.18) figur2(S, x + zw(r, 1, 4), z2 + R9 - 0.6, seed + 3, "verkauf", { y: yb });
-    return { frei: frei6 };
-  }
-  function rueckwand(S, achse, a, b, pos, y = 0, h = WANDHOEHE, o = {}) {
-    const putz2 = o.putz ?? "#ece4d8", pilaster = o.pilaster ?? "#ddd2c2", sockelF = o.sockel ?? "#cfc5b6";
-    const L2 = achse === "x" ? lokal2(S, (a + b) / 2, y, pos, 0) : lokal2(S, pos, y, (a + b) / 2, PI2 / 2);
-    const len = b - a;
-    L2.box(len + 0.6, h, 0.6, 0, 0, -0.3, putz2);
-    L2.box(len + 0.6, 0.25, 0.06, 0, 0, 0.02, sockelF);
-    L2.box(len + 0.6, 0.3, 0.12, 0, h - 0.3, 0.04, "#f6f1e9");
-    for (let u = -len / 2 + (o.pilasterVersatz ?? 0); u <= len / 2 + 0.01; u += o.pilasterAbstand ?? 5) L2.box(0.7, h - 0.3, 0.22, u, 0, 0.1, pilaster);
-  }
-  function stuetze(S, x, z2, y = 0, h = WANDHOEHE, farbe = "#e6e0d6") {
-    S.box(0.7, h, 0.7, x, y + h / 2, z2, farbe);
-    S.box(0.84, 0.25, 0.84, x, y + 0.125, z2, dunkler(farbe, 0.1));
-    S.box(0.84, 0.2, 0.84, x, y + h - 0.1, z2, heller(farbe, 0.03));
-  }
-  function rolltreppe(S, x0, z2, laenge, hub, y = 0, d = 1, t0 = 0) {
-    const neig = Math.atan2(hub, laenge);
-    const lang = Math.hypot(laenge, hub) * (1 - t0);
-    const breit2 = 1.15;
-    const cx = x0 - laenge * (1 + t0) / 2, cy = y + hub * (1 + t0) / 2;
-    const schraeg = (w, h, t, dy, dz, f) => {
-      const g = new three_module_exports.BoxGeometry(lang, h, t);
-      g.rotateZ(-neig);
-      g.translate(cx, cy + dy, z2 + dz);
-      S.add(g, f);
-    };
-    schraeg(lang, 0.7, breit2 + 0.2, -0.45, 0, "#a7b0b6");
-    schraeg(lang, 0.06, breit2 - 0.1, -0.06, 0, "#4b5560");
-    const stufen = d < 0.5 ? 6 : 14;
-    for (let i = 0; i < stufen; i++) {
-      const t = t0 + (1 - t0) * (i + 0.5) / stufen;
-      S.box(lang / stufen * 0.5, 0.04, breit2 - 0.15, x0 - t * laenge, y + t * hub - 0.02, z2, "#c3cbd1");
-    }
-    for (const s2 of [-1, 1]) {
-      schraeg(lang, 0.9, 0.04, 0.5, s2 * (breit2 / 2 + 0.02), GLAS4);
-      schraeg(lang, 0.1, 0.12, 0.98, s2 * (breit2 / 2 + 0.02), "#1f2328");
-      schraeg(lang, 0.35, 0.16, -0.05, s2 * (breit2 / 2 + 0.06), "#d5dbdf");
-    }
-    if (!t0) {
-      S.box(1.2, 0.03, breit2, x0 + 0.5, y + 0.02, z2, "#9aa3aa");
-      S.box(0.8, 1.05, 0.16, x0 + 0.3, y + 0.52, z2 - breit2 / 2 - 0.06, "#d5dbdf");
-    }
-    S.box(1.2, 0.03, breit2, x0 - laenge - 0.5, y + hub + 0.02, z2, "#9aa3aa");
-  }
-  function rolltreppenKern(S, x, z2, o = {}) {
-    const y = o.y ?? 0, hub = o.hub ?? WANDHOEHE, d = o.dichte ?? 1;
-    const auf = o.auf ?? true, ab = o.ab ?? true;
-    const lang = hub / Math.tan(0.52);
-    const fl = { a: "#ece8e1", b: "#dcd6cc", m: "fliese" };
-    const lx0 = x + 0.9, lx1 = x + 9.3, lz0 = z2 + 5.5, lz1 = z2 + 8.7;
-    if (ab) {
-      boden(S, x, z2, 10, lz0 - z2, y, fl, 0.3);
-      boden(S, x, lz1, 10, z2 + 10 - lz1, y, fl, 0.3);
-      boden(S, x, lz0, lx0 - x, lz1 - lz0, y, fl, 0.3);
-      boden(S, lx1, lz0, x + 10 - lx1, lz1 - lz0, y, fl, 0.3);
-      const tief2 = 1.8, dunkel3 = "#2b3238";
-      S.box(lx1 - lx0, 0.1, lz1 - lz0, (lx0 + lx1) / 2, y - tief2, (lz0 + lz1) / 2, "#4d565e");
-      S.box(0.1, tief2, lz1 - lz0, lx0, y - tief2 / 2, (lz0 + lz1) / 2, "#3a424a");
-      S.box(lx1 - lx0, tief2, 0.1, (lx0 + lx1) / 2, y - tief2 / 2, lz0, "#444d55");
-      S.box(0.1, tief2, lz1 - lz0, lx1, y - tief2 / 2, (lz0 + lz1) / 2, dunkel3);
-      S.box(lx1 - lx0, tief2, 0.1, (lx0 + lx1) / 2, y - tief2 / 2, lz1, dunkel3);
-      S.box(lx1 - lx0 + 0.2, 0.5, 0.25, (lx0 + lx1) / 2, y - 0.25, lz1, "#d5dbdf");
-      S.box(0.25, 0.5, lz1 - lz0, lx1, y - 0.25, (lz0 + lz1) / 2, "#d5dbdf");
-      for (const zz of [lz0 + 0.85, lz1 - 0.85]) rolltreppe(S, lx0 + 0.15 + lang, zz, lang, hub, y - hub + 0.06, d, 1 - (tief2 - 0.2) / hub);
-      const gl = (w, t, cx, cz) => {
-        S.box(w, 1.05, t, cx, y + 0.6, cz, GLAS4);
-        S.box(w + 0.04, 0.07, t + 0.08, cx, y + 1.15, cz, "#c9d2d8");
-        S.box(w + 0.04, 0.08, t + 0.08, cx, y + 0.1, cz, "#c9d2d8");
-      };
-      gl(lx1 - lx0 - 1.4, 0.04, (lx0 + lx1) / 2 + 0.7, lz0);
-      gl(lx1 - lx0 - 1.4, 0.04, (lx0 + lx1) / 2 + 0.7, lz1);
-      gl(0.04, lz1 - lz0, lx1, (lz0 + lz1) / 2);
-    } else boden(S, x, z2, 10, 10, y, fl, 0.3);
-    if (auf) {
-      rolltreppe(S, x + 9.3, z2 + 1.6, lang, hub, y + 0.06, d);
-      rolltreppe(S, x + 9.3, z2 + 3, lang, hub, y + 0.06, d);
-    }
-    for (const [px2, pz4] of [[x + 0.55, z2 + 0.6], [x + 0.55, z2 + 4.6]]) {
-      S.box(0.7, 0.6, 0.7, px2, y + 0.36, pz4, "#ece6dc");
-      S.add(new three_module_exports.IcosahedronGeometry(0.55, 0).translate(px2, y + 1.15, pz4), "#5f9a56");
-    }
-  }
-  function aufzug(S, x, z2, y = 0, h = WANDHOEHE, rot = 0) {
-    const L2 = lokal2(S, x + 1.3, y + 0.06, z2 + 1.3, rot);
-    L2.box(2.6, h, 2.4, 0, 0, -0.1, "#c9c4bb");
-    L2.box(2, 2.6, 2, 0, 0, -0.1, "#3f4a53");
-    L2.box(1.5, 2.3, 0.06, 0, 0, 1.12, "#c9d2d8");
-    L2.box(0.04, 2.3, 0.07, 0, 0, 1.13, "#8c959b");
-    L2.box(1.8, 0.2, 0.08, 0, 2.3, 1.12, "#8c959b");
-    L2.box(0.5, 0.18, 0.04, 0, 2.6, 1.13, "#1e2328");
-    L2.box(0.08, 0.16, 0.04, 0.95, 1.1, 1.13, "#e9c46a");
-    L2.box(2.8, 0.3, 2.6, 0, h - 0.3, -0.1, "#b4ada2");
-  }
-  function treppenhaus(S, x, z2, w = 5, t = 10, y = 0, h = WANDHOEHE, o = {}) {
-    const yb = y + 0.06;
-    if (o.wandNX) S.box(0.25, h, t, x + 0.125, y + h / 2, z2 + t / 2, "#d6cfc3");
-    if (o.wandNZ) S.box(w, h, 0.25, x + w / 2, y + h / 2, z2 + 0.125, "#e0d9cd");
-    S.box(w, 0.05, t, x + w / 2, yb - 0.02, z2 + t / 2, "#b9b4aa");
-    const fh = 1.3;
-    S.box(0.25, fh, t, x + w - 0.125, y + fh / 2, z2 + t / 2, "#ddd6ca");
-    S.box(w, fh, 0.25, x + w / 2, y + fh / 2, z2 + t - 0.125, "#e6dfd3");
-    S.box(0.3, 2.5, 0.3, x + w - 0.15, y + 1.25, z2 + t - 0.15, "#cfc6b8");
-    S.box(1.1, 2.3, 0.08, x + w - 1.3, yb + 1.15, z2 + t + 0, "#6c7d6f");
-    S.box(1.3, 0.2, 0.3, x + w - 1.3, yb + 2.4, z2 + t - 0.12, "#cfc6b8");
-    S.box(0.08, 2.3, 0.3, x + w - 1.95, yb + 1.15, z2 + t - 0.12, "#cfc6b8");
-    S.box(0.5, 0.25, 0.04, x + w - 1.3, yb + 2.75, z2 + t + 0.02, "#2f9e5c");
-    const lauf = (x0, z0, z1, hoch, abw) => {
-      const n = 9;
-      for (let i = 0; i < n; i++) {
-        const zz = z0 + (z1 - z0) * (i + 0.5) / n;
-        const hh = hoch ? (i + 1) / n * h * 0.5 : (n - i) / n * h * 0.5;
-        S.box(abw, hh, Math.abs(z1 - z0) / n + 0.01, x0, yb + hh / 2, zz, "#cfc8bc");
-      }
-    };
-    lauf(x + 1.2, z2 + 2, z2 + t - 2.2, true, 1.6);
-    lauf(x + w - 1.6, z2 + 2, z2 + t - 2.2, false, 1.6);
-    S.box(w - 0.5, h * 0.5, 1.8, x + w / 2 - 0.1, yb + h * 0.25, z2 + 1.15, "#d6cfc3");
-    S.box(0.12, 1, t - 4.2, x + w / 2 - 0.2, yb + h * 0.5, z2 + t / 2 - 0.1, "#8c959b");
-  }
-  function lager(S, x, z2, w, t, y = 0, seed = 5, h = WANDHOEHE, d = 1) {
-    const r = rng2(seed);
-    const yb = y + 0.06;
-    boden(S, x, z2, w, t, y, "lager", 0.3);
-    S.box(w * 0.7 - 0.9, 1.3, 0.2, x + (w * 0.7 - 0.9) / 2, y + 0.65, z2 + t - 0.1, "#e6dfd3");
-    S.box(w * 0.3 - 0.9, 1.3, 0.2, x + w - (w * 0.3 - 0.9) / 2, y + 0.65, z2 + t - 0.1, "#e6dfd3");
-    for (const sx of [-0.9, 0.9]) S.box(0.2, 2.6, 0.24, x + w * 0.7 + sx, y + 1.3, z2 + t - 0.1, "#cfc6b8");
-    S.box(0.2, 1.3, t, x + w - 0.1, y + 0.65, z2 + t / 2, "#ddd6ca");
-    S.box(2, 0.3, 0.24, x + w * 0.7, y + 2.6, z2 + t - 0.1, "#c9483e");
-    for (let i = 0; i < 6; i++) S.box(0.28, 2.4, 0.02, x + w * 0.7 - 0.7 + i * 0.28, yb + 1.2, z2 + t - 0.05, i % 2 ? "#d9dee2" : "#c6ccd1");
-    const reihen = Math.max(1, Math.floor((t - 1.4) / 1.6));
-    for (let j = 0; j < reihen; j++) {
-      const zz = z2 + 0.5 + j * 1.6;
-      for (let k = 0; k < 3; k++) S.box(w - 1.2, 0.05, 0.9, x + w / 2, yb + 0.3 + k * 1, zz + 0.45, "#d07a2e");
-      for (let k = 0; k <= Math.floor(w / 2.5); k++) S.box(0.07, 2.8, 0.9, x + 0.6 + k * ((w - 1.2) / Math.floor(w / 2.5)), yb + 1.4, zz + 0.45, "#2f5f8a");
-      const n = anz(Math.floor((w - 1.4) / 0.6), d, 0.4);
-      for (let k = 0; k < 3; k++) for (let i = 0; i < n; i++) if (r() < 0.8) S.box(0.5, zw(r, 0.3, 0.7), 0.6, x + 0.95 + i * ((w - 1.6) / n), yb + 0.33 + k * 1 + 0.2, zz + 0.45, bunt(r, ["#c9a26b", "#b8925e", "#d6b27c", "#e8e4dc"]));
-    }
-    S.box(0.7, 0.15, 1.2, x + 1.2, yb + 0.1, z2 + t - 0.9, "#e0b23c");
-    S.box(0.12, 1, 0.12, x + 1.2, yb + 0.6, z2 + t - 0.35, "#2a2d31");
-  }
-  function kassentresen(S, x, z2, seed = 3, o = {}) {
-    const r = rng2(seed);
-    const L2 = lokal2(S, x, o.y ?? 0.06, z2, o.rot ?? 0);
-    L2.box(3.6, 1, 0.8, 0, 0, 0, "#3f4a53");
-    L2.box(3.7, 0.06, 0.9, 0, 1, 0, "#f4f0ea");
-    L2.box(0.8, 1, 1.6, 1.4, 0, -1, "#3f4a53");
-    L2.box(0.9, 0.06, 1.7, 1.4, 1, -1, "#f4f0ea");
-    L2.box(3.6, 0.3, 0.04, 0, 0.55, 0.42, "#d23c32");
-    for (const kx of [-0.9, 0.5]) {
-      L2.box(0.35, 0.08, 0.3, kx, 1.06, -0.1, "#1e2328");
-      L2.box(0.32, 0.25, 0.04, kx, 1.14, -0.2, "#2b3640");
-      L2.box(0.2, 0.08, 0.15, kx + 0.3, 1.06, 0.05, "#9aa3aa");
-      figur2(S, ...L2.P(kx, -0.75), seed + kx * 10, "kasse", { y: L2.oy, ry: L2.rot, y: L2.oy });
-    }
-    for (let i = 0; i < 3; i++) L2.box(0.32, 0.4, 0.12, -1.55 + i * 0.12, 1.06, -0.15, "#d23c32");
-    if (o.schlange !== false) for (let i = 0; i < 2 + Math.floor(r() * 2); i++) figur2(S, ...L2.P(-0.9 + i % 2 * 1.4, 0.8 + Math.floor(i / 2) * 0.8), seed + 20 + i, "kunde", { y: L2.oy, ry: L2.rot + PI2, y: L2.oy, pose: "tasche" });
-  }
-  function infoCounter(S, x, z2, seed = 4, o = {}) {
-    const y = (o.y ?? 0) + 0.06;
-    S.add(new three_module_exports.CylinderGeometry(1.3, 1.3, 1.05, 8).translate(x, y + 0.52, z2), "#f4f0ea");
-    S.add(new three_module_exports.CylinderGeometry(1.36, 1.36, 0.06, 8).translate(x, y + 1.08, z2), "#d23c32");
-    S.add(new three_module_exports.CylinderGeometry(0.7, 0.7, 1.1, 8).translate(x, y + 0.55, z2), "#e9e4dc");
-    S.box(0.06, 2.4, 0.06, x, y + 1.6, z2, "#9aa3aa");
-    S.box(0.4, 0.07, 0.3, x + 0.8, y + 1.1, z2 + 0.4, "#1e2328");
-    figur2(S, x - 0.9, z2 - 0.3, seed, "info", { y, ry: PI2 / 4 });
-    if (S.szene) haengeschild(S, S.szene, "Information", x, y + 2.9, z2, { farbe: "#d23c32", hoehe: 0.55 });
-  }
-  function haengeschild(S, scene2, text2, x, y, z2, o = {}) {
-    const hg = o.farbe ?? "#2a3540", schriftF = o.schrift ?? "#ffffff";
-    const hoehe = o.hoehe ?? 0.75;
-    const { t, seitenverhaeltnis } = textTextur(text2, schriftF, 120, hg);
-    const breite = hoehe * seitenverhaeltnis;
-    const zweiseitig = o.zweiseitig ?? true;
-    S.box(breite + 0.12, hoehe + 0.12, 0.12, x, y, z2, dunkler(hg, 0.06));
-    if (o.seile !== false) {
-      S.box(0.03, 1.2, 0.03, x - breite * 0.35, y + hoehe / 2 + 0.6, z2, "#5a636b");
-      S.box(0.03, 1.2, 0.03, x + breite * 0.35, y + hoehe / 2 + 0.6, z2, "#5a636b");
-    }
-    const matT = new three_module_exports.MeshBasicMaterial({ map: t, polygonOffset: true, polygonOffsetFactor: -2 });
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(breite, hoehe), matT);
-    m.position.set(x, y, z2 + 0.065);
-    scene2.add(m);
-    if (zweiseitig && o.quer) {
-      S.box(0.12, hoehe + 0.12, breite + 0.12, x, y, z2, dunkler(hg, 0.06));
-      const m2 = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(breite, hoehe), matT);
-      m2.rotation.y = PI2 / 2;
-      m2.position.set(x + 0.065, y, z2);
-      scene2.add(m2);
-    }
-    return breite;
-  }
-  function wandschild(S, scene2, text2, achse, u, y, pos, o = {}) {
-    const hoehe = o.hoehe ?? 0.8;
-    const { mat: mat2, seitenverhaeltnis } = textMaterial(text2, o.schrift ?? "#ffffff", { groesse: 120, hintergrund: o.farbe ?? null, versatz: -2 });
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), mat2);
-    if (achse === "x") m.position.set(u, y, pos + 0.02);
-    else {
-      m.rotation.y = PI2 / 2;
-      m.position.set(pos + 0.02, y, u);
-    }
-    scene2.add(m);
-    return hoehe * seitenverhaeltnis;
-  }
-  function abtrennung(S, scene2, x0, z0, x1, z1, o = {}) {
-    const y = o.y ?? 0, h = o.h ?? 3.4;
-    const farbe = o.farbe ?? "#e9e4dc";
-    const kanten3 = o.kanten ?? { nx: true, nz: true, px: true, pz: true };
-    const niedrig = o.niedrig ?? 1.1;
-    if (kanten3.nz) S.box(x1 - x0, h, 0.15, (x0 + x1) / 2, y + h / 2, z0 + 0.075, farbe);
-    if (kanten3.nx) S.box(0.15, h, z1 - z0, x0 + 0.075, y + h / 2, (z0 + z1) / 2, dunkler(farbe, 0.03));
-    const oeff = o.oeffnung ?? 3;
-    const vorne = (achse, a, b, pos) => {
-      const m = (a + b) / 2, l = (b - a - oeff) / 2;
-      if (l <= 0.2) return;
-      for (const c of [a + l / 2, b - l / 2]) {
-        if (achse === "x") {
-          S.box(l, niedrig, 0.15, c, y + niedrig / 2, pos, farbe);
-          if (o.glas) S.box(l, h - niedrig - 0.4, 0.04, c, y + niedrig + (h - niedrig - 0.4) / 2, pos, GLAS4);
-        } else {
-          S.box(0.15, niedrig, l, pos, y + niedrig / 2, c, farbe);
-          if (o.glas) S.box(0.04, h - niedrig - 0.4, l, pos, y + niedrig + (h - niedrig - 0.4) / 2, c, GLAS4);
-        }
-      }
-      if (o.glas) {
-        if (achse === "x") S.box(b - a, 0.12, 0.18, m, y + h - 0.35, pos, farbe);
-        else S.box(0.18, 0.12, b - a, pos, y + h - 0.35, m, farbe);
-      }
-    };
-    if (kanten3.pz) vorne("x", x0, x1, z1 - 0.075);
-    if (kanten3.px) vorne("z", z0, z1, x1 - 0.075);
-    if (o.name && scene2) {
-      if (kanten3.nz) {
-        S.box(Math.min(x1 - x0 - 0.6, 4.5), 0.8, 0.08, (x0 + x1) / 2, y + h - 0.6, z0 + 0.19, o.schildFarbe ?? farbe);
-        wandschild(S, scene2, o.name, "x", (x0 + x1) / 2, y + h - 0.6, z0 + 0.24, { farbe: o.schildFarbe ?? null, schrift: o.schrift ?? "#1f1f1f", hoehe: 0.6 });
-      } else if (kanten3.nx) {
-        wandschild(S, scene2, o.name, "z", (z0 + z1) / 2, y + h - 0.6, x0 + 0.17, { farbe: o.schildFarbe ?? null, schrift: o.schrift ?? "#1f1f1f", hoehe: 0.6 });
-      }
-    }
-  }
-  var HAUT2 = ["#f1c9a5", "#e8b88f", "#d9a77f", "#b98462", "#8d5a3b", "#6b4430"];
-  var HAAR = ["#2b211b", "#4a3222", "#7a4f2e", "#c9a35a", "#e0c27a", "#1a1a1a", "#8a8a8a", "#b5532f", "#d9d4cc"];
-  var OBEN = ["#d04a3f", "#2f63b5", "#e8e4dc", "#e0b23c", "#5b8f5a", "#8d5fbf", "#ef8b4c", "#2b2b2b", "#f4f2ee", "#3c7d8f", "#c96f8f", "#7b8a99"];
-  var UNTEN = ["#2b3a55", "#3a3a3a", "#6b5a48", "#20304a", "#5c6670", "#c9b48f", "#1f1f1f", "#4a5a7a"];
-  var ROLLEN = {
-    verkauf: { oben: "#2a2f38", unten: "#2a2f38", hemd: "#ffffff", tuch: "#d23c32", schild: "#e9c46a" },
-    kasse: { oben: "#2a2f38", unten: "#2a2f38", hemd: "#ffffff", tuch: "#d23c32", schild: "#3ab27a" },
-    info: { oben: "#d23c32", unten: "#2a2f38", hemd: "#ffffff", tuch: "#ffffff", schild: "#ffffff" },
-    leitung: { oben: "#1f2a3a", unten: "#1f2a3a", hemd: "#ffffff", tuch: "#d23c32", schild: "#4f8fe0" },
-    beauty: { oben: "#1f1f1f", unten: "#1f1f1f", hemd: "#1f1f1f", tuch: "#d8b25a", schild: "#e9a3b8" },
-    theke: { oben: "#f4f4f2", unten: "#2a2f38", hemd: "#f4f4f2", tuch: "#d23c32", schild: "#e9c46a", schuerze: "#d23c32", muetze: "#ffffff" },
-    lager: { oben: "#4a5560", unten: "#2a2f38", hemd: "#4a5560", tuch: "#e0b23c", schild: "#e0b23c" },
-    security: { oben: "#1a1a1a", unten: "#1a1a1a", hemd: "#1a1a1a", tuch: "#1a1a1a", schild: "#c9d2d8", muetze: "#1a1a1a" },
-    handwerker: { oben: "#ef8b2c", unten: "#2f4a6e", hemd: "#ef8b2c", helm: "#f2c14e" },
-    arzt: { oben: "#ffffff", unten: "#9bb7c7", hemd: "#9bb7c7" },
-    fitness: { oben: "#ff6a2b", unten: "#1f1f1f", hemd: "#ff6a2b" }
-  };
-  function figur2(S, x, z2, seed = 1, rolle2 = "kunde", o = {}) {
-    const r = rng2(Math.floor(seed * 7919) >>> 0);
-    const kind = rolle2 === "kind";
-    const kunde = rolle2 === "kunde" || kind;
-    const s2 = kind ? zw(r, 0.55, 0.7) : zw(r, 0.94, 1.06);
-    const ry = o.ry ?? r() * PI2 * 2;
-    const L2 = lokal2(S, x, o.y ?? 0.06, z2, ry);
-    const rol = ROLLEN[rolle2] ?? (rolle2 === "fremd" ? { oben: o.farbe ?? "#1f5fa8", unten: "#2a2f38", hemd: o.farbe ?? "#1f5fa8", schild: "#ffffff" } : null);
-    const haut = bunt(r, HAUT2);
-    const frau = r() < 0.55;
-    const oben = rol ? rol.oben : bunt(r, OBEN);
-    const unten = rol ? rol.unten : bunt(r, UNTEN);
-    const schuh2 = bunt(r, ["#1f1f1f", "#3a2a20", "#f2f2f2", "#6b4a32"]);
-    const pose = o.pose ?? (rol ? r() < 0.3 ? "schauen" : "stehen" : waehle2(r, ["stehen", "gehen", "gehen", "tasche", "tasche", "schauen", "telefon", "tragen"]));
-    const sitzt = pose === "sitzen";
-    const geht = pose === "gehen" || pose === "tasche" || pose === "tragen";
-    const schritt = geht ? zw(r, 0.25, 0.4) : 0;
-    const rock = kunde && frau && !kind && r() < 0.35;
-    const glied = (w, h, t, gx, gy, gz2, ax, f, az = 0, dy = 0) => {
-      const g = new three_module_exports.BoxGeometry(w * s2, h * s2, t * s2);
-      g.translate(0, -h * s2 / 2 + dy * s2, 0);
-      if (ax) g.rotateX(ax);
-      if (az) g.rotateZ(az);
-      L2.geo(g, gx * s2, gy * s2, gz2 * s2, f);
-    };
-    const huefte = sitzt ? 0.47 / s2 : 0.9;
-    if (sitzt) {
-      for (const sx of [-0.09, 0.09]) {
-        L2.box(0.15 * s2, 0.15 * s2, 0.46 * s2, sx * s2, huefte * s2 - 0.08 * s2, 0.2 * s2, unten);
-        L2.box(0.14 * s2, (huefte - 0.04) * s2 - 0.06, 0.15 * s2, sx * s2, 0.04, 0.42 * s2, unten);
-        L2.box(0.13 * s2, 0.07 * s2, 0.25 * s2, sx * s2, 0, 0.47 * s2, schuh2);
-      }
-    } else if (rock) {
-      L2.geo(new three_module_exports.CylinderGeometry(0.17 * s2, 0.27 * s2, 0.5 * s2, 6).translate(0, -0.25 * s2, 0), 0, 0.95 * s2, 0, oben === unten ? bunt(r, UNTEN) : unten);
-      for (const [sx, a] of [[-0.08, schritt], [0.08, -schritt]]) {
-        glied(0.1, 0.5, 0.11, sx, 0.52, 0, a, haut);
-        glied(0.12, 0.07, 0.24, sx, 0.52, 0, a, schuh2, 0, -0.47);
-      }
-    } else {
-      for (const [sx, a] of [[-0.09, schritt], [0.09, -schritt]]) {
-        glied(0.15, 0.82, 0.17, sx, huefte, 0, a, unten);
-        glied(0.14, 0.08, 0.27, sx, huefte, 0.04, a, schuh2, 0, -0.8);
-      }
-    }
-    const y0 = sitzt ? huefte - 0.9 : 0;
-    const rumpf2 = new three_module_exports.CylinderGeometry(0.29 * s2, 0.22 * s2, 0.6 * s2, 4);
-    rumpf2.rotateY(PI2 / 4);
-    rumpf2.scale(1, 1, 0.62);
-    L2.geo(rumpf2, 0, (1.18 + y0) * s2, 0, oben);
-    if (rol && rol.hemd && rol.hemd !== oben) L2.box(0.13 * s2, 0.34 * s2, 0.02, 0, (1.18 + y0) * s2, 0.12 * s2, rol.hemd);
-    if (rol && rol.tuch) L2.box(0.08 * s2, 0.2 * s2, 0.025, 0, (1.24 + y0) * s2, 0.135 * s2, rol.tuch);
-    if (rol && rol.schild) L2.box(0.1 * s2, 0.05 * s2, 0.025, 0.12 * s2, (1.33 + y0) * s2, 0.13 * s2, rol.schild);
-    if (rol && rol.schuerze) L2.box(0.36 * s2, 0.75 * s2, 0.03, 0, (0.55 + y0) * s2, 0.13 * s2, rol.schuerze);
-    if (rolle2 === "handwerker") {
-      L2.box(0.4 * s2, 0.06 * s2, 0.03, 0, (1.05 + y0) * s2, 0.13 * s2, "#e8e8e2");
-      L2.box(0.4 * s2, 0.06 * s2, 0.03, 0, (1.25 + y0) * s2, 0.13 * s2, "#e8e8e2");
-    }
-    if (rolle2 === "arzt") L2.box(0.46 * s2, 0.6 * s2, 0.24 * s2, 0, (0.7 + y0) * s2, 0, "#ffffff");
-    if (!rol && r() < 0.35) L2.box(0.4 * s2, 0.1 * s2, 0.24 * s2, 0, (1.42 + y0) * s2, 0, bunt(r, OBEN));
-    const sh = 1.46 + y0;
-    let aL = -schritt * 0.8, aR = schritt * 0.8, zL = -0.08, zR = 0.08;
-    if (pose === "schauen") aR = -1.1;
-    if (pose === "telefon") {
-      aR = -2.5;
-      zR = 0.35;
-    }
-    if (pose === "tragen") {
-      aL = -0.9;
-      aR = -0.9;
-      zL = 0;
-      zR = 0;
-    }
-    if (sitzt) {
-      aL = -0.9;
-      aR = -0.9;
-    }
-    glied(0.1, 0.6, 0.12, -0.26, sh, 0, aL, oben, zL);
-    glied(0.1, 0.6, 0.12, 0.26, sh, 0, aR, oben, zR);
-    glied(0.08, 0.1, 0.09, -0.26, sh, 0, aL, haut, zL, -0.6);
-    glied(0.08, 0.1, 0.09, 0.26, sh, 0, aR, haut, zR, -0.6);
-    if (pose === "telefon") glied(0.06, 0.14, 0.03, 0.26, sh, 0, aR, "#1e2328", zR, -0.62);
-    L2.box(0.09 * s2, 0.08 * s2, 0.09 * s2, 0, (1.48 + y0) * s2, 0, haut);
-    const kopfY = (1.68 + y0) * s2;
-    L2.geo(new three_module_exports.SphereGeometry(0.125 * s2, 8, 6).scale(0.95, 1.12, 1), 0, kopfY, 0, haut);
-    const haar = bunt(r, kind ? HAAR.slice(0, 5) : HAAR);
-    if (rol && rol.helm) L2.geo(new three_module_exports.SphereGeometry(0.15 * s2, 8, 4, 0, PI2 * 2, 0, PI2 / 2), 0, kopfY + 0.03 * s2, 0, rol.helm);
-    else if (rol && rol.muetze) L2.box(0.25 * s2, 0.1 * s2, 0.25 * s2, 0, kopfY + 0.1 * s2, 0, rol.muetze);
-    else {
-      const stil = frau ? waehle2(r, ["lang", "lang", "zopf", "bob", "kurz"]) : waehle2(r, ["kurz", "kurz", "kurz", "glatze", "muetze"]);
-      if (stil !== "glatze") L2.geo(new three_module_exports.SphereGeometry(0.135 * s2, 8, 4, 0, PI2 * 2, 0, PI2 * 0.55).scale(1, 1.05, 1.02), 0, kopfY + 0.015 * s2, -8e-3, stil === "muetze" ? bunt(r, OBEN) : haar);
-      if (stil === "lang") L2.box(0.26 * s2, 0.36 * s2, 0.09 * s2, 0, kopfY - 0.3 * s2, -0.08 * s2, haar);
-      if (stil === "bob") L2.box(0.28 * s2, 0.17 * s2, 0.24 * s2, 0, kopfY - 0.13 * s2, -0.025 * s2, haar);
-      if (stil === "zopf") L2.geo(new three_module_exports.SphereGeometry(0.07 * s2, 6, 4), 0, kopfY + 0.08 * s2, -0.13 * s2, haar);
-    }
-    if (kunde && !sitzt) {
-      if (pose === "tasche") {
-        const f = r() < 0.6 ? "#d23c32" : bunt(r, ["#f4f2ee", "#c9a26b", "#2b2b2b"]);
-        L2.box(0.3 * s2, 0.34 * s2, 0.11 * s2, -0.31 * s2, 0.55 * s2, 0, f);
-        L2.box(0.16 * s2, 0.1 * s2, 0.02, -0.31 * s2, 0.89 * s2, 0, dunkler(f, 0.1));
-        if (f === "#d23c32") L2.box(0.02, 0.1 * s2, 0.07 * s2, -0.31 * s2 - 0.155 * s2, 0.7 * s2, 0, "#ffffff");
-      } else if (pose === "tragen") {
-        L2.box(0.42 * s2, 0.3 * s2, 0.32 * s2, 0, 0.95 * s2, 0.38 * s2, bunt(r, ["#c9a26b", "#ffffff", "#d23c32"]));
-      } else if (!kind && r() < 0.45) {
-        if (frau) L2.box(0.08 * s2, 0.24 * s2, 0.26 * s2, 0.33 * s2, 0.98 * s2, 0, bunt(r, PAL.taschen));
-        else L2.box(0.32 * s2, 0.4 * s2, 0.14 * s2, 0, 1 * s2, -0.19 * s2, bunt(r, ["#2b2b2b", "#3f6b3a", "#2f5f8a", "#c25b2a"]));
-      }
-    }
-  }
-  function raumKachel(S, scene2, gruppe2, o = {}) {
-    vorbereiten(S, scene2);
-    const nx = o.nx ?? 2, nz = o.nz ?? 2, seed = o.seed ?? 1, d = o.dichte ?? 1;
-    const r = rng2(seed * 13 + 1);
-    const W3 = nx * RASTER, T = nz * RASTER;
-    S.box(W3 + 0.6, 0.5, T + 0.6, W3 / 2 - 0.3, -0.25, T / 2 - 0.3, "#3a434b");
-    S.box(W3, 0.06, T, W3 / 2, -0.03, T / 2, "#d9d4cb");
-    const frei6 = [];
-    const m = gruppe2 === "konzession" ? o.marke ?? marke2(seed) : null;
-    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-      const res = zelle(S, gruppe2, i * RASTER, j * RASTER, seed * 100 + i * 10 + j, d, { wandX: i === 0, wandZ: j === 0, index: i + j * nx, basis: o.basis, mieter: o.mieter, marke: m, personal: i === nx - 1 && j === 0 });
-      frei6.push(...res.frei);
-    }
-    rueckwand(S, "x", 0, W3, 0, 0, WANDHOEHE);
-    rueckwand(S, "z", 0, T, 0, 0, WANDHOEHE);
-    if (m) abtrennung(S, scene2, 0.6, 0.6, W3, T, { farbe: m.farbe, name: m.name, schrift: m.schrift, kanten: { nx: false, nz: true, px: true, pz: true }, glas: true, h: 3.8, oeffnung: 3.5 });
-    if (gruppe2 === "untermiete") {
-      const mt = MIETER3[o.mieter ?? "discounter"];
-      abtrennung(S, scene2, 0.6, 0.6, W3, T, { farbe: "#e9e4dc", name: mt.name, schrift: mt.schrift, schildFarbe: mt.farbe, kanten: { nx: false, nz: true, px: true, pz: true }, glas: o.mieter !== "fitness", h: 3.8, oeffnung: 3 });
-    }
-    if (gruppe2 === "umbau") {
-      const L2 = lokal2(S, 0, 0.06, 0, 0);
-      bauzaun2(L2, 0.3, W3 - 0.3, T - 0.3);
-      bauzaun2(lokal2(S, W3 - 0.3, 0.06, T / 2, PI2 / 2), -T / 2 + 0.4, T / 2 - 0.6, 0);
-    }
-    const name2 = o.name ?? (gruppe2 === "konzession" || gruppe2 === "untermiete" ? null : abteilungsname(gruppe2));
-    if (name2 && scene2) haengeschild(S, scene2, name2, W3 * 0.55, 3.6, T * 0.45, { farbe: gruppe2 === "offprice" ? "#ffd400" : "#2a3540", schrift: gruppe2 === "offprice" ? "#d4212a" : "#ffffff" });
-    const kunden = o.kunden ?? (gruppe2 === "leer" || gruppe2 === "umbau" ? 0 : Math.round(nx * nz * 1.6));
-    for (let k = 0; k < kunden && frei6.length; k++) {
-      const idx = Math.floor(r() * frei6.length);
-      const [fx, fz] = frei6.splice(idx, 1)[0];
-      figur2(S, fx, fz, seed * 1e3 + k, r() < 0.12 ? "kind" : "kunde", { ry: Math.atan2(W3 / 2 - fx, T / 2 - fz) + zw(r, -0.8, 0.8) });
-    }
-    return new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.5, -0.6), new three_module_exports.Vector3(W3, WANDHOEHE, T));
   }
 
   // src/kit/abteilung.js
@@ -59497,10 +61237,10 @@
     herren_casual: { name: "Kordel & Co.", kopf: "#3f6b5a", schrift: "#f4efe6" },
     herren_schuhe: { name: "Herrenschuhe", kopf: "#4a3324", schrift: "#f2e6d0" }
   };
-  function kopfband(ctx, L2, w, text2, farbe, schriftF, y = 3.25, h = 0.62) {
+  function kopfband(ctx, L2, w, text3, farbe, schriftF, y = 3.25, h = 0.62) {
     L2.box(w, h, 0.1, 0, y, 0.06, farbe);
-    const fries = !ctx.A?.rahmen && text2 === (ctx.marke?.name ?? ctx.A?.name);
-    if (ctx.scene && text2 && !fries) schrift(L2, text2, 0, y + h / 2, 0.13, h * 0.6, schriftF);
+    const fries = !ctx.A?.rahmen && text3 === (ctx.marke?.name ?? ctx.A?.name);
+    if (ctx.scene && text3 && !fries) schrift(L2, text3, 0, y + h / 2, 0.13, h * 0.6, schriftF);
   }
   function pflanze2(L2, lx, lz, gross2 = 1) {
     L2.box(0.62 * gross2, 0.6 * gross2, 0.62 * gross2, lx, 0, lz, "#ece6dc");
@@ -59526,7 +61266,7 @@
       L2.box(ww, 0.9, dd, dx, 0, dz, korpus2);
       L2.box(ww + 0.04, 0.05, dd + 0.04, dx, 0.9, dz, akz);
       flakonFlaeche(L2, dx, 0.95, dz, ww - 0.15, dd - 0.15, r, d);
-      L2.box(ww, 0.28, dd, dx, 0.95, dz, GLAS4);
+      L2.box(ww, 0.28, dd, dx, 0.95, dz, GLAS3);
       L2.box(ww - 0.1, 0.06, 0.04, dx, 0.25, dz + dd / 2 + 0.01, akz);
     }
     L2.box(2.6, 2.5, 0.16, 0, 0, -1.55, korpus2);
@@ -59936,7 +61676,7 @@
       L2.box(ww, 0.92, dd, dx, 0, dz, "#1f2a3a");
       L2.box(ww + 0.04, 0.04, dd + 0.04, dx, 0.92, dz, "#d8b25a");
       inhalt(L2, dx, 0.96, dz, ww - 0.2, dd - 0.2, r);
-      L2.box(ww, 0.3, dd, dx, 0.96, dz, GLAS4);
+      L2.box(ww, 0.3, dd, dx, 0.96, dz, GLAS3);
     }
     stehFigur(ctx, L2, 0, -0.35, 0, "beauty");
   }
@@ -59957,7 +61697,7 @@
       for (const y of [1, 1.7]) {
         L2.box(0.8, 0.5, 0.25, u, y, 0.2, "#fdf6e6");
         for (let k = 0; k < 3; k++) L2.zyl(0.06, 0.06, 0.03, u - 0.22 + k * 0.22, y + 0.2, 0.25, bunt2(r, ["#d8b25a", "#c9d2d8", "#2b2b2b"]), 8);
-        L2.box(0.8, 0.5, 0.02, u, y, 0.33, GLAS4);
+        L2.box(0.8, 0.5, 0.02, u, y, 0.33, GLAS3);
       }
     }
     L2.box(w - 0.2, 0.85, 0.5, 0, 0, 0.35, "#141c28");
@@ -60095,7 +61835,7 @@
     for (const x of [-0.6, 0, 0.6]) for (const s2 of [-1, 1]) {
       stuhl(L2, x, s2 * 0.75, s2 > 0 ? PI3 : 0, "#3a4a5a");
       L2.zyl(0.13, 0.13, 0.02, x, 0.77, s2 * 0.3, "#ffffff", 10);
-      L2.zyl(0.03, 0.03, 0.14, x + 0.15, 0.77, s2 * 0.32, GLAS4, 6);
+      L2.zyl(0.03, 0.03, 0.14, x + 0.15, 0.77, s2 * 0.32, GLAS3, 6);
     }
     L2.zyl(0.05, 0.05, 0.25, 0, 0.77, 0, "#f6e8b0", 6);
   }
@@ -60301,7 +62041,7 @@
     }
     const g = new three_module_exports.BoxGeometry(w, 0.5, 0.04);
     g.rotateX(-0.45);
-    L2.geo(g, 0, 1.2, 2.08, GLAS4);
+    L2.geo(g, 0, 1.2, 2.08, GLAS3);
     L2.box(w, 0.04, 0.5, 0, 1.42, 1.6, "#c9d2d8");
     for (let k = 0; k < Math.max(1, Math.round(w / 2.4)); k++) stehFigur(ctx, L2, -w / 2 + (k + 0.5) * (w / Math.max(1, Math.round(w / 2.4))), 0.85, 0, "theke");
     L2.box(w, 0.06, 0.08, 0, 1.44, 2.1, "#e8edf0");
@@ -60314,7 +62054,7 @@
     for (let i = 0; i < n; i++) {
       const u = -w / 2 + (i + 0.5) * (w / n);
       for (let j = 0; j < 4; j++) for (let k = 0; k < (d < 0.5 ? 2 : 3); k++) L2.box(0.18, 0.28, 0.06, u - 0.22 + k * 0.22, 0.25 + j * 0.48, 0.74, bunt2(r, ["#ffffff", "#3c8dd9", "#f2c14e", "#e8403a", "#9bc53d", "#f4e1c0"]));
-      L2.box(0.74, 2, 0.03, u, 0.15, 0.78, GLAS4);
+      L2.box(0.74, 2, 0.03, u, 0.15, 0.78, GLAS3);
       L2.box(0.03, 2, 0.05, u + 0.38, 0.15, 0.78, "#9aa3aa");
     }
     L2.box(w, 0.3, 0.8, 0, 2.3, 0.4, "#2f5d3a");
@@ -60398,7 +62138,7 @@
     for (let k = 0; k < 6; k++) L2.box(0.45, 0.03, 0.34, 1.75, 0.9 + k * 0.04, 0.45, k % 2 ? "#d23c32" : "#5a636b");
     const g = new three_module_exports.BoxGeometry(3, 0.45, 0.03);
     g.rotateX(-0.35);
-    L2.geo(g, 0, 1.15, 0.12, GLAS4);
+    L2.geo(g, 0, 1.15, 0.12, GLAS3);
     L2.box(0.04, 0.55, 0.04, -1.45, 0.9, -0.5, "#9aa3aa");
     L2.box(0.04, 0.55, 0.04, 1.45, 0.9, -0.5, "#9aa3aa");
     stehFigur(ctx, L2, zw(ctx.r, -0.8, 0.8), -1, 0, "theke");
@@ -61002,7 +62742,7 @@
     }
     if (art === "truhe") {
       L2.box(w, 0.85, 0.9, 0, 0, 0.45, "#f4f4f2");
-      L2.box(w - 0.1, 0.05, 0.8, 0, 0.85, 0.45, GLAS4);
+      L2.box(w - 0.1, 0.05, 0.8, 0, 0.85, 0.45, GLAS3);
       const n = Math.floor(w / (d < 0.5 ? 0.6 : 0.32));
       for (let k = 0; k < n; k++) L2.box(0.26, 0.12, 0.6, -w / 2 + 0.3 + k * ((w - 0.4) / n), 0.72, 0.45, bunt2(r, ["#ffffff", "#3c8dd9", "#e8403a", "#f2c14e", "#9bc6d8"]));
       return;
@@ -61096,7 +62836,7 @@
     const d = klemm2(o.dichte ?? 1, 0.2, 1);
     const y = Z2.y ?? 0, yb = y + 0.06;
     const ctx = { S, scene: scene2, r, d, y, yb, A, art, marke: o.marke, o, basisSeed, zaehler: { wand: 0, insel: 0 } };
-    const marke3 = o.marke;
+    const marke4 = o.marke;
     const cols = /* @__PURE__ */ new Map(), rows = /* @__PURE__ */ new Map();
     for (const c of alle) {
       const a = cols.get(c.i) ?? { jmin: c.j, jmax: c.j };
@@ -61121,7 +62861,7 @@
     }
     const bandP = (k) => k === "front" ? o.eg ? 2.6 : 1.4 : BAND_P[k] ?? 1;
     const bandN = (k) => k === "wand" ? A.wandTiefe ?? BAND_N.wand : BAND_N[k] ?? 1;
-    const bodenTyp = marke3?.boden ?? A.boden;
+    const bodenTyp = marke4?.boden ?? A.boden;
     for (const c of alle) if (sicht3(c.i * R + 2.5, c.j * R + 2.5)) boden(S, c.i * R, c.j * R, R, R, y, bodenTyp, d);
     const kf = A.kante ?? "#8a8378";
     for (const i of ci) {
@@ -61351,7 +63091,7 @@
       const [fx, fz] = res.frei.splice(Math.floor(r() * res.frei.length), 1)[0];
       figur2(S, fx, fz, r() * 1e9 | 0, A.rolle ?? MODE_ROLLE, { y: yb, ry: r() * PI3 * 2 });
     }
-    if (o.schild !== false) deckenschild(S, scene2, A, alle, sicht3, y, o.name, marke3);
+    if (o.schild !== false) deckenschild(S, scene2, A, alle, sicht3, y, o.name, marke4);
     return res;
   }
   function oberfries(L2, w, r, ctx, k) {
@@ -61440,21 +63180,21 @@
     for (const yy of [y, y - 0.6]) for (const zz of zs) for (const xx of xs) out.push({ x: xx, y: yy, z: zz });
     return out;
   }
-  function deckenschild(S, scene2, A, zellen, sicht3, y, name2, marke3) {
+  function deckenschild(S, scene2, A, zellen, sicht3, y, name2, marke4) {
     if (!scene2) return;
     const vis = zellen.filter((c) => sicht3(c.i * R + 2.5, c.j * R + 2.5));
     if (!vis.length) return;
-    const text2 = name2 ?? A.name;
+    const text3 = name2 ?? A.name;
     const x0 = Math.min(...vis.map((c) => c.i)) * R, x1 = (Math.max(...vis.map((c) => c.i)) + 1) * R;
     const z0 = Math.min(...vis.map((c) => c.j)) * R, z1 = (Math.max(...vis.map((c) => c.j)) + 1) * R;
-    const hg = marke3?.eigenmarke ? marke3.kopf : A.schild.farbe, sf = marke3?.eigenmarke ? marke3.schrift : A.schild.schrift;
-    const { seitenverhaeltnis } = textTextur(text2, sf, 120, hg);
+    const hg = marke4?.eigenmarke ? marke4.kopf : A.schild.farbe, sf = marke4?.eigenmarke ? marke4.schrift : A.schild.schrift;
+    const { seitenverhaeltnis } = textTextur(text3, sf, 120, hg);
     const hoehe = klemm2((x1 - x0 - 1.2) / seitenverhaeltnis, 0.55, 1.15);
     const breite = hoehe * seitenverhaeltnis;
     const sx = klemm2((x0 + x1) / 2, x0 + breite / 2 + 0.3, x1 - breite / 2 - 0.3);
     const sz = z0 + (z1 - z0) * 0.55;
     const k = schildPlatz(scene2, schildKandidaten(sx, y + 3.75, sz, x0, x1, z0, z1, breite), breite, hoehe);
-    haengeschild(S, scene2, text2, k.x, k.y, k.z, { farbe: hg, schrift: sf, hoehe: hoehe * k.k });
+    haengeschild(S, scene2, text3, k.x, k.y, k.z, { farbe: hg, schrift: sf, hoehe: hoehe * k.k });
   }
   function obstStand2(L2, r, d) {
     const WARE = ["#e8403a", "#9bc53d", "#f2c14e", "#ff8c42", "#7b2f5a", "#5f9a3a", "#f4e04d", "#c0392b"];
@@ -61541,13 +63281,13 @@
           if (dj !== 0) {
             S.box(lenS, h0, 0.15, mid, y + h0 / 2, pos, farbe);
             if (vorne) {
-              S.box(lenS, hoch - 1.4, 0.04, mid, y + 1 + (hoch - 1.4) / 2, pos, GLAS4);
+              S.box(lenS, hoch - 1.4, 0.04, mid, y + 1 + (hoch - 1.4) / 2, pos, GLAS3);
               S.box(lenS, 0.4, 0.18, mid, y + hoch - 0.2, pos, farbe);
             }
           } else {
             S.box(0.15, h0, lenS, pos, y + h0 / 2, mid, farbe);
             if (vorne) {
-              S.box(0.04, hoch - 1.4, lenS, pos, y + 1 + (hoch - 1.4) / 2, mid, GLAS4);
+              S.box(0.04, hoch - 1.4, lenS, pos, y + 1 + (hoch - 1.4) / 2, mid, GLAS3);
               S.box(0.18, 0.4, lenS, pos, y + hoch - 0.2, mid, farbe);
             }
           }
@@ -61608,9 +63348,9 @@
   var OUT = ["#3f6b3a", "#c25b2a", "#e0a33a", "#2f5f8a", "#6d4c3d", "#8a9a5b", "#d14a3a", "#30343a", "#9a3b2b"];
   var WINTER = ["#e8403a", "#1f6fd1", "#ffffff", "#1f1f1f", "#ffcc00", "#20b5c9", "#ff6a2b", "#7a3cd1", "#2b3a55"];
   var VEREINE = [["#e8403a", "#ffffff"], ["#1f6fd1", "#ffffff"], ["#ffcc00", "#1f1f1f"], ["#38b86b", "#ffffff"], ["#ffffff", "#1f1f1f"], ["#7a3cd1", "#ffcc00"], ["#1f1f1f", "#e8403a"], ["#20b5c9", "#1f2a3a"]];
-  function kopfband2(ctx, L2, w, text2, farbe, schriftF, y = 3.2, h = 0.6) {
+  function kopfband2(ctx, L2, w, text3, farbe, schriftF, y = 3.2, h = 0.6) {
     L2.box(w, h, 0.1, 0, y, 0.06, farbe);
-    if (ctx.scene && text2 && w > 1.6) schrift(L2, text2, 0, y + h / 2, 0.13, h * 0.58, schriftF);
+    if (ctx.scene && text3 && w > 1.6) schrift(L2, text3, 0, y + h / 2, 0.13, h * 0.58, schriftF);
   }
   function sitz(ctx, L2, lx, lz, ry, rolle2 = "kunde") {
     figur2(ctx.S, ...L2.P(lx, lz), ctx.r() * 1e9 | 0, rolle2, { y: L2.oy, ry: L2.rot + ry, pose: "sitzen" });
@@ -62062,7 +63802,7 @@
     for (let k = 0; k < Math.min(3, Math.floor(w / 1.6)); k++) radMontage(L2, -w / 2 + 1 + k * 1.6, 1.7, r);
     for (let k = 0; k < 4; k++) L2.geo(new three_module_exports.TorusGeometry(0.32, 0.04, 4, 12), -w / 2 + 0.5 + k * 0.7, 2.55, 0.12, "#1f1f1f");
     steh(ctx, L2, -w / 4, 1.2, PI4, "handwerker");
-    L2.box(w, 1.1, 0.04, 0, 0, 2.4, GLAS4);
+    L2.box(w, 1.1, 0.04, 0, 0, 2.4, GLAS3);
     L2.box(w, 0.06, 0.08, 0, 1.1, 2.4, "#9aa3aa");
     kopfband2(ctx, L2, w, "Radservice", "#e8403a", "#ffffff");
   }
@@ -62140,7 +63880,7 @@
     L2.box(0.3, 0.2, 0.2, 0.9, 0.96, 0.25, "#ffcc00");
     for (let k = 0; k < Math.floor((w - 3.6) / 0.25); k++) L2.box(0.1, 1.7, 0.03, w / 2 - 0.4 - k * 0.25, 0.05, 0.18, bunt3(r, WINTER));
     steh(ctx, L2, 0.4, 1.2, PI4, "handwerker");
-    L2.box(w, 1.1, 0.04, 0, 0, 2.2, GLAS4);
+    L2.box(w, 1.1, 0.04, 0, 0, 2.2, GLAS3);
     L2.box(w, 0.06, 0.08, 0, 1.1, 2.2, "#9aa3aa");
     kopfband2(ctx, L2, w, "Skiservice", "#20b5c9", "#ffffff");
   }
@@ -62454,9 +64194,9 @@
     s2.lineTo(u0, v0);
     return s2;
   }
-  var textGecacht = (text2, farbe, bg) => textMaterial(text2, farbe, { groesse: 140, hintergrund: bg });
-  function ftext(scene2, F2, text2, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textGecacht(text2, farbe, bg);
+  var textGecacht = (text3, farbe, bg) => textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
+  function ftext(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textGecacht(text3, farbe, bg);
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp(F2, u, t);
@@ -64206,8 +65946,8 @@
     nenn: { zeile: [30, 26], kaufhaus: [48, 34], hochhaus: [44, 34] },
     roh: innenstadtRoh
   });
-  function logoGeruest(S, scene2, p, x0, z0, w, y, text2, farbe, emblem) {
-    const bw = Math.min(w, text2.length * 2.2 + 6), x = x0 + (w - bw) / 2, h = 4.2;
+  function logoGeruest(S, scene2, p, x0, z0, w, y, text3, farbe, emblem) {
+    const bw = Math.min(w, text3.length * 2.2 + 6), x = x0 + (w - bw) / 2, h = 4.2;
     for (const xx of [x + 0.4, x + bw / 2, x + bw - 0.4]) {
       S.box(0.25, h + 1.2, 0.25, xx, y + (h + 1.2) / 2, z0, "#5a6168");
       stab(S, [xx, y, z0 - 2], [xx, y + h, z0], 0.1, "#5a6168", 4);
@@ -64216,7 +65956,7 @@
     S.quader(x, y + h + 0.9, z0 - 0.15, x + bw, y + h + 1.15, z0 + 0.15, "#5a6168");
     const F1 = R2(x, z0 + 0.2, 1, 0, bw, "+z"), F2 = R2(x + bw, z0 - 0.2, -1, 0, bw, "-z");
     for (const F3 of [F1, F2]) if (istSicht(p, F3.s)) {
-      ftext(scene2, F3, text2, bw / 2 + (emblem ? 2.4 : 0), y + 1.2 + h / 2, 0.02, h * 0.62, bw - (emblem ? 6.4 : 1.2), farbe);
+      ftext(scene2, F3, text3, bw / 2 + (emblem ? 2.4 : 0), y + 1.2 + h / 2, 0.02, h * 0.62, bw - (emblem ? 6.4 : 1.2), farbe);
       if (emblem) {
         const [ex, ez] = wp(F3, 2.6, 0.08);
         const g = new three_module_exports.TorusGeometry(1.6, 0.4, 6, 20);
@@ -64380,13 +66120,13 @@
   function getraenkekisten(S, x, z2, r, y0 = 0.38) {
     for (let i = 0; i < 4; i++) for (let k = 0; k < 2 + i % 2; k++) S.box(0.42, 0.32, 0.32, x + i % 2 * 0.45, y0 + 0.16 + k * 0.33, z2 + Math.floor(i / 2) * 0.34, waehle2(r, ["#c9483e", "#2f5f8f", "#e0b23a", "#3f7d56"]));
   }
-  function leuchtschild(S, scene2, F2, u, y, t, b, h, text2, bg, fg, o = {}) {
+  function leuchtschild(S, scene2, F2, u, y, t, b, h, text3, bg, fg, o = {}) {
     fb(S, F2, u - b / 2, u + b / 2, y - h / 2, y + h / 2, t, t + 0.3, bg);
     if (o.rand) {
       fb(S, F2, u - b / 2 - 0.1, u + b / 2 + 0.1, y + h / 2, y + h / 2 + 0.1, t, t + 0.34, o.rand);
       fb(S, F2, u - b / 2 - 0.1, u + b / 2 + 0.1, y - h / 2 - 0.1, y - h / 2, t, t + 0.34, o.rand);
     }
-    ftext(scene2, F2, text2, u, y, t + 0.32, h * 0.7, b * 0.92, fg);
+    ftext(scene2, F2, text3, u, y, t + 0.32, h * 0.7, b * 0.92, fg);
   }
   function fahrrad2(S, x, z2, ry, farbe, y0 = 0.38) {
     const c = Math.cos(ry), sn = Math.sin(ry), P2 = (u) => [x + c * u, z2 - sn * u];
@@ -64423,7 +66163,7 @@
       S.add(f, "#5a6168");
     }
   }
-  function aufsteller2(S, scene2, p, x, z2, text2, y0 = 0.38) {
+  function aufsteller2(S, scene2, p, x, z2, text3, y0 = 0.38) {
     for (const s2 of [-1, 1]) {
       const g = new three_module_exports.BoxGeometry(0.75, 1.15, 0.05);
       g.rotateX(s2 * 0.2);
@@ -64431,7 +66171,7 @@
       S.add(g, "#f4f2ec");
     }
     const Fs = { "+z": R2(x - 0.375, z2 + 0.25, 1, 0, 0.75, "+z"), "-z": R2(x + 0.375, z2 - 0.25, -1, 0, 0.75, "-z") };
-    for (const s2 of ["+z", "-z"]) if (istSicht(p, s2)) ftext(scene2, Fs[s2], text2, 0.375, y0 + 0.62, 0, 0.3, 0.68, "#c9483e");
+    for (const s2 of ["+z", "-z"]) if (istSicht(p, s2)) ftext(scene2, Fs[s2], text3, 0.375, y0 + 0.62, 0, 0.3, 0.68, "#c9483e");
     if (istSicht(p, "+x") || istSicht(p, "-x")) S.box(0.06, 0.9, 0.5, x + (istSicht(p, "+x") ? 0.39 : -0.39), y0 + 0.5, z2, "#c9483e");
   }
   function kioskUmfeld(S, scene2, p, r, W3, D, y, o) {
@@ -64572,12 +66312,12 @@
         }
         if (F2.s === "+z") {
           const lb = (F2.L - 0.6) / 3;
-          laeden.forEach(([text2, bg, fg, licht], i) => {
+          laeden.forEach(([text3, bg, fg, licht], i) => {
             const u0 = 0.3 + i * lb + 0.15, u1 = 0.3 + (i + 1) * lb - 0.15;
-            fb(S, F2, u0, u1, 0.3, eg - 1.2, -0.4, -0.3, text2.startsWith("Sport") ? "#3c4852" : text2.startsWith("Shisha") ? "#2a2230" : "#6f8696");
+            fb(S, F2, u0, u1, 0.3, eg - 1.2, -0.4, -0.3, text3.startsWith("Sport") ? "#3c4852" : text3.startsWith("Shisha") ? "#2a2230" : "#6f8696");
             fb(S, F2, (u0 + u1) / 2 - 0.6, (u0 + u1) / 2 + 0.6, 0.3, 2.5, -0.3, -0.22, "#3c4852");
-            leuchtschild(S, scene2, F2, (u0 + u1) / 2, eg - 0.6, 0.02, u1 - u0, 0.95, text2, bg, fg, { rand: licht });
-            if (text2.startsWith("Shisha")) for (const uu of [u0 + 0.3, u1 - 0.3]) fb(S, F2, uu - 0.06, uu + 0.06, 0.6, eg - 1.2, -0.28, -0.16, licht);
+            leuchtschild(S, scene2, F2, (u0 + u1) / 2, eg - 0.6, 0.02, u1 - u0, 0.95, text3, bg, fg, { rand: licht });
+            if (text3.startsWith("Shisha")) for (const uu of [u0 + 0.3, u1 - 0.3]) fb(S, F2, uu - 0.06, uu + 0.06, 0.6, eg - 1.2, -0.28, -0.16, licht);
           });
         } else fb(S, F2, 0.3, F2.L - 0.3, 0.3, 1, 0, 0.05, "#a8a196");
         if (!traufe) fpoly(S, F2, [[0, H], [F2.L, H], [F2.L / 2, H + 3.2]], -0.3, 0.02, wand2);
@@ -67187,7 +68927,7 @@
       const g2 = new three_module_exports.BoxGeometry(Math.hypot(lauf, hoch), 0.9, 0.04);
       g2.rotateZ(Math.atan2(hoch, lauf));
       g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74);
-      S.add(g2, GLAS4);
+      S.add(g2, GLAS3);
     };
     if (ab) {
       const tief2 = 1.8;
@@ -67199,7 +68939,7 @@
       if (treppe) treppeLauf((lz0 + lz1) / 2, -HUB, Math.min(lang, 8.2), HUB, 0);
       else rolltreppe(S, lx0 + 0.15 + lang, (lz0 + lz1) / 2, lang, HUB, -HUB + 0.06, d, 1 - (tief2 - 0.2) / HUB);
       const gl = (w, tt, cx, cz) => {
-        S.box(w, 1.05, tt, cx, 0.6, cz, GLAS4);
+        S.box(w, 1.05, tt, cx, 0.6, cz, GLAS3);
         S.box(w + 0.04, 0.07, tt + 0.08, cx, 1.15, cz, "#c9d2d8");
       };
       gl(lx1 - lx0 - 1.4, 0.04, (lx0 + lx1) / 2 + 0.7, lz0);
@@ -67258,7 +68998,7 @@
     }
     for (let q2 = 0; q2 < 2; q2++) figur2(S, x + 2.3 + q2 * 3.1, z2 + 3.4, 950 + q2, "kunde", { y: mattenY + 0.31 + (unten ? 0 : 0.06), ry: PI6, pose: "schauen" });
     const gl = (w, t, cx, cz) => {
-      S.box(w, 1.05, t, cx, 0.6, cz, GLAS4);
+      S.box(w, 1.05, t, cx, 0.6, cz, GLAS3);
       S.box(w + 0.04, 0.07, t + 0.08, cx, 1.15, cz, "#c9d2d8");
     };
     if (unten) {
@@ -67664,7 +69404,7 @@
     if (fam === 1) {
       const F2 = 3.4, ende = b > (achse === "z" ? ra.B : ra.T) - F2 - 0.01 ? b - F2 : b;
       box(ende - a, 0.3, 0.3, (a + ende) / 2, 0.15, "#59636b");
-      box(ende - a, WH2 - 0.35, 0.04, (a + ende) / 2, 0.3 + (WH2 - 0.35) / 2, GLAS4);
+      box(ende - a, WH2 - 0.35, 0.04, (a + ende) / 2, 0.3 + (WH2 - 0.35) / 2, GLAS3);
       box(ende - a, 0.32, 0.36, (a + ende) / 2, WH2 - 0.16, "#e3e8ea");
       for (let u = a; u <= ende + 0.01; u += 1.55) if (!istTuer(u)) box(0.1, WH2, 0.14, u, WH2 / 2, "#e6ebed");
       if (ende < b) {
@@ -67677,7 +69417,7 @@
         Lv.box(6.4, 0.12, 0.06, 0, 4, 1.52, HS_ROT);
       }
       if (!eg) {
-        box(ende - a, 1.05, 0.04, (a + ende) / 2, 0.6, GLAS4);
+        box(ende - a, 1.05, 0.04, (a + ende) / 2, 0.6, GLAS3);
         box(ende - a, 0.06, 0.1, (a + ende) / 2, 1.12, "#c9d2d8");
       }
       return;
@@ -67697,16 +69437,16 @@
           box(0.6, WH2 + 0.6, 0.6, u + R3, (WH2 + 0.6) / 2, HS_ROT);
           box(R3 + 0.6, 0.6, 0.6, m, WH2 + 0.3, HS_ROT);
           const Lw = L2(m, -1.6);
-          Lw.box(4.2, 3, 0.06, 0, 0, 1.6, GLAS4);
-          Lw.box(0.06, 3, 3.2, -2.1, 0, 0, GLAS4);
-          Lw.box(0.06, 3, 3.2, 2.1, 0, 0, GLAS4);
+          Lw.box(4.2, 3, 0.06, 0, 0, 1.6, GLAS3);
+          Lw.box(0.06, 3, 3.2, -2.1, 0, 0, GLAS3);
+          Lw.box(0.06, 3, 3.2, 2.1, 0, 0, GLAS3);
           Lw.box(4.4, 0.3, 3.4, 0, 3, 0, "#f4f3ef");
           Lw.box(1.8, 2.6, 0.04, 0, 0, 1.64, "#2f3d48");
           continue;
         }
         box(0.2, WH2, 0.4, u, WH2 / 2, "#59636b");
         box(R3, 0.6, 0.3, m, 0.3, "#7c838a");
-        box(R3 - 0.2, 3.3, 0.04, m, 2.25, GLAS4);
+        box(R3 - 0.2, 3.3, 0.04, m, 2.25, GLAS3);
         box(R3, WH2 - 3.9, 0.3, m, 3.9 + (WH2 - 3.9) / 2, blech);
         box(R3, 0.12, 0.36, m, 3.95, HS_ROT);
       }
@@ -67717,7 +69457,7 @@
       if (!eg) {
         box(b - a, 1.35, 0.3, (a + b) / 2, 0.675, brF);
         for (let u = a + 1.25; u < b; u += 1.25) box(0.05, 1.3, 0.34, u, 0.67, dunkler(brF, 0.08));
-        box(b - a, 2.5, 0.04, (a + b) / 2, 1.35 + 1.25, GLAS4);
+        box(b - a, 2.5, 0.04, (a + b) / 2, 1.35 + 1.25, GLAS3);
         for (let u = a + 0.8; u < b; u += 1.6) box(0.1, 2.5, 0.1, u, 2.6, rF);
         for (let u = a + 0.8; u < b - 1.6; u += 1.6) if (r() < 0.35) {
           const hh = zw(r, 0.5, 1.6);
@@ -67736,7 +69476,7 @@
         }
         box(R3 - 0.4, 0.55, 1.7, m, 0.275, "#2b3036");
         box(R3 - 0.4, 0.04, 1.6, m, 0.57, "#e9e3d8");
-        box(R3 - 0.4, 3.1, 0.04, m, 0.55 + 1.55, GLAS4);
+        box(R3 - 0.4, 3.1, 0.04, m, 0.55 + 1.55, GLAS3);
         deko2(m, artAn(m), 0.85);
       }
       box(0.4, WH2, 0.5, b, WH2 / 2, HS_BLAU);
@@ -67747,7 +69487,7 @@
       if (!eg) {
         for (let u = a + 0.2; u < b; u += 0.42) box(0.26, 1.1, 0.12, u, 0.55, r() < 0.5 ? holz : dunkler(holz, 0.05));
         box(b - a, 0.12, 0.3, (a + b) / 2, 1.16, "#3b3f44");
-        box(b - a, 2.2, 0.04, (a + b) / 2, 2.3, GLAS4);
+        box(b - a, 2.2, 0.04, (a + b) / 2, 2.3, GLAS3);
         box(b - a, WH2 - 3.4, 0.3, (a + b) / 2, 3.4 + (WH2 - 3.4) / 2, holz);
         return;
       }
@@ -67757,7 +69497,7 @@
         const m = u + R3 / 2;
         if (portal && m > portal[0] && m < portal[1]) {
           box(R3, 0.45, 0.2, m, 0.22, "#c9b08a");
-          box(R3, WH2 - 0.5, 0.04, m, 0.45 + (WH2 - 0.5) / 2, GLAS4);
+          box(R3, WH2 - 0.5, 0.04, m, 0.45 + (WH2 - 0.5) / 2, GLAS3);
           box(0.18, WH2, 0.18, u, WH2 / 2, "#3b3f44");
           box(R3, 0.3, 0.3, m, WH2 - 0.15, "#3b3f44");
           continue;
@@ -67775,7 +69515,7 @@
         box(R3 - 1.1, 0.12, 0.7, m + 0.55, 0.62, heller(stein, 0.06));
         box(R3 - 1.1, WH2 - 3.9, 0.6, m + 0.55, 3.9 + (WH2 - 3.9) / 2, stein);
         box(R3 - 1.1, 0.04, 0.62, m + 0.55, 4.2, dunkler(stein, 0.08));
-        box(R3 - 1.1, 3.2, 0.04, m + 0.55, 0.68 + 1.6, GLAS4);
+        box(R3 - 1.1, 3.2, 0.04, m + 0.55, 0.68 + 1.6, GLAS3);
         box(0.08, 3.2, 0.1, m + 0.55, 2.28, "#3b3f44");
         box(R3 - 1.1, 0.5, 1.4, m + 0.55, 0.25, "#c9b08a");
         deko2(m + 0.55, artAn(m), 0.75);
@@ -67787,7 +69527,7 @@
       if (!eg) {
         box(b2 - a, 0.9, 0.3, (a + b2) / 2, 0.45, putz2);
         for (let u = a + 1.5; u < b2 - 0.5; u += 3) {
-          box(1.7, 2, 0.04, u, 1.9, GLAS4);
+          box(1.7, 2, 0.04, u, 1.9, GLAS3);
           box(2, 0.15, 0.34, u, 0.83, akz);
           box(2, 0.15, 0.34, u, 2.97, akz);
           box(0.1, 2, 0.08, u, 1.9, "#eef1f2");
@@ -67803,14 +69543,14 @@
           eingangTuer(m, akz);
           continue;
         }
-        box(uE - u - 0.45, 3.4, 0.04, (u + uE) / 2, 0.6 + 1.7, GLAS4);
+        box(uE - u - 0.45, 3.4, 0.04, (u + uE) / 2, 0.6 + 1.7, GLAS3);
         if (uE - u > 3) deko2((u + uE) / 2, artAn(m), 0.75);
       }
       if (achse === "z" && b2 < b && ra.zylR) {
         const Rz = ra.zylR, cx = ra.B - Rz, cz = ra.T - Rz;
         const g = new three_module_exports.CylinderGeometry(Rz - 0.05, Rz - 0.05, WH2 - 0.3, 16, 1, true, 0, PI6 / 2);
         g.translate(cx, 0.3 + (WH2 - 0.3) / 2, cz);
-        S.add(g, GLAS4);
+        S.add(g, GLAS3);
         const sockel = new three_module_exports.CylinderGeometry(Rz, Rz, 0.3, 16, 1, false, 0, PI6 / 2);
         sockel.translate(cx, 0.15, cz);
         S.add(sockel, "#b8ab98");
@@ -67849,7 +69589,7 @@
         continue;
       }
       box(R3 - 0.35, 0.3, 0.3, m, 0.15, "#3a4148");
-      box(R3 - 0.35, 3.3, 0.04, m, 0.3 + 1.65, GLAS4);
+      box(R3 - 0.35, 3.3, 0.04, m, 0.3 + 1.65, GLAS3);
       if ((u / R3 | 0) % 2 === 0) {
         box(R3 - 0.6, 0.35, 1.2, m, 0.32, "#ffffff");
         deko2(m, artAn(m), 0.6);
@@ -68008,9 +69748,9 @@
       const G2 = 4;
       flaecheP(ax0, az1, ax1 + G2, az1 + G2);
       flaecheP(ax1, az0, ax1 + G2, az1);
-      S.box(ax1 - ax0 + G2, 1.05, 0.05, (ax0 + ax1 + G2) / 2, 0.58, az1 + G2 - 0.1, GLAS4);
+      S.box(ax1 - ax0 + G2, 1.05, 0.05, (ax0 + ax1 + G2) / 2, 0.58, az1 + G2 - 0.1, GLAS3);
       S.box(ax1 - ax0 + G2, 0.07, 0.12, (ax0 + ax1 + G2) / 2, 1.12, az1 + G2 - 0.1, "#c9d2d8");
-      S.box(0.05, 1.05, az1 - az0 + G2, ax1 + G2 - 0.1, 0.58, (az0 + az1 + G2) / 2, GLAS4);
+      S.box(0.05, 1.05, az1 - az0 + G2, ax1 + G2 - 0.1, 0.58, (az0 + az1 + G2) / 2, GLAS3);
       S.box(0.12, 0.07, az1 - az0 + G2, ax1 + G2 - 0.1, 1.12, (az0 + az1 + G2) / 2, "#c9d2d8");
       S.box(ax1 - ax0 + G2, 0.6, 0.2, (ax0 + ax1 + G2) / 2, -0.3, az1 + G2 + 0, "#e9e4dc");
       S.box(0.2, 0.6, az1 - az0 + G2, ax1 + G2, -0.3, (az0 + az1 + G2) / 2, "#e9e4dc");
@@ -68043,7 +69783,7 @@
       L2.box(wl, WH2, 0.3, 0, 0, -t, "#ece8e1");
       L2.box(0.3, WH2, t, achse === "z" ? -wl / 2 + 0.15 : wl / 2 - 0.15, 0, -t / 2, "#e6e2da");
       L2.box(wl, WH2 - 3.4, 0.4, 0, 3.4, -0.2, f);
-      L2.box(wl - 0.4, 3.1, 0.04, 0, 0.3, -0.2, GLAS4);
+      L2.box(wl - 0.4, 3.1, 0.04, 0, 0.3, -0.2, GLAS3);
       L2.box(wl, 0.3, 0.3, 0, 0, -0.2, "#3a4148");
       for (let q2 = 0; q2 < 2; q2++) L2.box(1.4, 1.7, 0.5, -1.6 + q2 * 3, 0, -t + 0.5, waehle2(r, ["#c9d2d8", "#e8dcc6", "#b98d61"]));
       L2.box(1.6, 0.9, 0.8, 0, 0, -3.5, "#ffffff");
@@ -68760,7 +70500,7 @@
         box(R4 - 0.4, 0.04, tief2 - 0.1, m, 0.52, "#e9e3d8");
         if (achse === "z") S.box(R4 - 0.4, 1.5, 0.12, m, 1.25, pos - tief2, dunkler(fassade3, 0.06));
         else S.box(0.12, 1.5, R4 - 0.4, pos - tief2, 1.25, m, dunkler(fassade3, 0.06));
-        box(R4 - 0.4, 2.6, 0.04, m, 1.85, GLAS4);
+        box(R4 - 0.4, 2.6, 0.04, m, 1.85, GLAS3);
         box(R4 - 0.4, 0.08, 0.1, m, 3.15, "#c9d2d8");
         const i = achse === "z" ? Math.floor(m / R4) : nx - 1, j = achse === "z" ? nz - 1 : Math.floor(m / R4);
         const L2 = achse === "z" ? lokal2(S, m, 0.56, pos - tief2 / 2, 0) : lokal2(S, pos - tief2 / 2, 0.56, m, Math.PI / 2);
@@ -68773,14 +70513,14 @@
     } else if (!eg && echteFront) {
       box(b - a, 0.9, 0.25, (a + b) / 2, 0.45, fassade3);
       box(b - a + 0.1, 0.06, 0.32, (a + b) / 2, 0.93, heller(fassade3, 0.05));
-      box(b - a, 0.7, 0.04, (a + b) / 2, 1.3, GLAS4);
+      box(b - a, 0.7, 0.04, (a + b) / 2, 1.3, GLAS3);
       box(b - a, 0.05, 0.08, (a + b) / 2, 1.67, "#c9d2d8");
     } else {
       box(b - a, 0.08, 0.5, (a + b) / 2, 0.04, "#59626a");
     }
   }
-  function schriftLiegend(scene2, text2, L2, lx, ly, lz, hoehe) {
-    const { mat: mat2, seitenverhaeltnis } = textMaterial(text2, "#d23c32", { groesse: 120, versatz: -2 });
+  function schriftLiegend(scene2, text3, L2, lx, ly, lz, hoehe) {
+    const { mat: mat2, seitenverhaeltnis } = textMaterial(text3, "#d23c32", { groesse: 120, versatz: -2 });
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), mat2);
     const [X, Z2] = L2.P(lx, lz);
     m.position.set(X, L2.oy + ly, Z2);
@@ -68904,10 +70644,10 @@
     const L2 = pz4 ? lokal2(S, x + w / 2, 0, z2 + d, 0) : lokal2(S, x + w, 0, z2 + d / 2, PI7 / 2);
     L2.len = len;
     L2.seite = seite;
-    L2.schild = (text2, u, y, h, farbe, hg = null, t = 0) => {
+    L2.schild = (text3, u, y, h, farbe, hg = null, t = 0) => {
       const fass = (pz4 ? z2 + d : x + w) + t - 0.3;
       const uw = pz4 ? x + w / 2 + u : z2 + d / 2 - u;
-      return schild(scene2, text2, seite, uw, y + (S.y0 ?? 0), fass, h, farbe, hg);
+      return schild(scene2, text3, seite, uw, y + (S.y0 ?? 0), fass, h, farbe, hg);
     };
     return L2;
   }
@@ -69706,8 +71446,8 @@
       const teile = tuer ? [[0, L2 * 0.55], [L2 * 0.55 + 1, L2]] : [[0, L2]];
       for (const [a, b] of teile) {
         if (b - a < 0.2) continue;
-        if (langX) S.box(b - a, h - 0.1, 0.05, x0 + (a + b) / 2, 0.06 + (h - 0.1) / 2, z0, GLAS4);
-        else S.box(0.05, h - 0.1, b - a, x0, 0.06 + (h - 0.1) / 2, z0 + (a + b) / 2, GLAS4);
+        if (langX) S.box(b - a, h - 0.1, 0.05, x0 + (a + b) / 2, 0.06 + (h - 0.1) / 2, z0, GLAS3);
+        else S.box(0.05, h - 0.1, b - a, x0, 0.06 + (h - 0.1) / 2, z0 + (a + b) / 2, GLAS3);
       }
       if (langX) S.box(lx, 0.1, 0.1, x0 + lx / 2, h, z0, rahmen2);
       else S.box(0.1, 0.1, lz, x0, h, z0 + lz / 2, rahmen2);
@@ -69790,7 +71530,7 @@
     L2.kugel(gross2 ? 0.6 : 0.42, lx, gross2 ? 1.05 : 0.85, lz, waehle2(r, FARBEN3.baum));
     if (gross2) L2.kugel(0.4, lx + 0.1, 1.6, lz - 0.05, waehle2(r, FARBEN3.baum));
   }
-  function text(L2, t, lx, ly, lz, h, farbe, hg = null) {
+  function text2(L2, t, lx, ly, lz, h, farbe, hg = null) {
     const scene2 = L2.S.szene;
     if (!scene2) return;
     const { mat: mat2, seitenverhaeltnis } = textMaterial(t, farbe, { groesse: 100, hintergrund: hg, versatz: -2 });
@@ -69843,7 +71583,7 @@
           if (k === 1) linie(L2, u, 0.9, 0.09, w / 3 - 0.5, 1.3, r);
           else balken2(L2, u, 0.85, 0.09, w / 3 - 0.5, 1.4, r);
         }
-        text(L2, "KPI Woche", 0, 2.75, 0.08, 0.28, "#ffffff", "#2f6fb3");
+        text2(L2, "KPI Woche", 0, 2.75, 0.08, 0.28, "#ffffff", "#2f6fb3");
         L2.box(0.5, 0.7, 0.4, -w / 2 + 0.4, 0, 0.3, "#3a3f45");
       } },
       { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
@@ -69884,7 +71624,7 @@
         regal(L2, 0, 0, w, 2.2, "#f2efe8", (lx, y, lz, ww, hh, k) => {
           for (let u = lx - ww / 2 + 0.2; u < lx + ww / 2 - 0.1; u += 0.38) L2.box(0.32, k === 3 ? 0.18 : 0.08 + r() * 0.12, 0.32, u, y, lz, k === 3 ? "#c9a26b" : waehle2(r, PAL.damen.concat(PAL.herren)));
         }, r);
-        text(L2, "Muster Herbst/Winter", 0, 2.5, 0.05, 0.24, "#ffffff", "#c0832f");
+        text2(L2, "Muster Herbst/Winter", 0, 2.5, 0.05, 0.24, "#ffffff", "#c0832f");
       } },
       { art: "frei", w: 3.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -69938,7 +71678,7 @@
           L2.box(1.1, 1.6, 0.04, u, 0.9, 0, "#f8f6f2");
           L2.box(1, 1, 0.02, u, 1.4, 0.03, f);
           L2.box(0.6, 0.12, 0.02, u, 1.05, 0.03, "#2a2d31");
-          text(L2, t, u, 1.9, 0.05, 0.26, "#ffffff");
+          text2(L2, t, u, 1.9, 0.05, 0.26, "#ffffff");
         });
       } },
       { art: "frei", w: 3.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
@@ -69979,14 +71719,14 @@
           L2.box(0.02, 1.8, 0.02, u, 0.05, 0.26, "#8c959b");
           L2.box(0.06, 0.12, 0.03, u + 0.1, 1, 0.26, "#3a3f45");
         }
-        text(L2, "Personalakten", 0, 2.15, 0.27, 0.22, "#ffffff", "#3f9a6a");
+        text2(L2, "Personalakten", 0, 2.15, 0.27, 0.22, "#ffffff", "#3f9a6a");
       } },
       { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st, r, farbe) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(0.04, 1.6, 0.04, -0.3, 0, -1.2, "#5a636b");
         L2.box(0.04, 1.6, 0.04, 0.3, 0, -1.2, "#5a636b");
         L2.box(0.8, 1, 0.03, 0, 1, -1.15, "#ffffff");
-        text(L2, "Willkommen", 0, 1.7, -1.13, 0.12, "#3f9a6a");
+        text2(L2, "Willkommen", 0, 1.7, -1.13, 0.12, "#3f9a6a");
         L2.box(0.5, 0.03, 0.01, 0, 1.35, -1.13, "#2f6fb3");
         for (let k = 0; k < 6; k++) {
           const u = -1.2 + k % 3 * 1.2, v = Math.floor(k / 3) * 1;
@@ -69999,7 +71739,7 @@
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.06, 0);
         L2.box(2.2, 1.2, 0.04, 0, 0.9, 0, "#c9a26b");
         for (let k = 0; k < 10; k++) L2.box(0.32, 0.22, 0.02, -0.85 + k % 5 * 0.42, 1 + Math.floor(k / 5) * 0.5, 0.03, waehle2(r, ["#ffffff", "#f2c14e", "#9bc53d", "#bcd3df"]));
-        text(L2, "Wir suchen dich", 0, 2.3, 0.04, 0.2, "#ffffff", "#3f9a6a");
+        text2(L2, "Wir suchen dich", 0, 2.3, 0.04, 0.2, "#ffffff", "#3f9a6a");
       } }
     ],
     immobilien: [
@@ -70012,7 +71752,7 @@
           for (let i = 0; i < 4; i++) L2.box(0.02, 0.75, 0.01, u - 0.5 + i * 0.33, 1.2, 0.02, "#2f5f8a");
           L2.box(0.3, 0.2, 0.01, u + 0.25, 1.45, 0.025, "#d23c32");
         }
-        text(L2, "Standortplanung", 0, 2.35, 0.04, 0.22, "#ffffff", "#8a6440");
+        text2(L2, "Standortplanung", 0, 2.35, 0.04, 0.22, "#ffffff", "#8a6440");
       } },
       { art: "frei", w: 3, d: 2.4, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -70022,7 +71762,7 @@
           const mitte = i === 1 && j === 1;
           L2.box(0.32, mitte ? 0.32 : zw(r, 0.12, 0.42), 0.28, -0.75 + i * 0.5, 0.88, -0.42 + j * 0.42, mitte ? "#d23c32" : "#ffffff");
         }
-        L2.box(2.15, 0.6, 1.45, 0, 0.88, 0, GLAS4);
+        L2.box(2.15, 0.6, 1.45, 0, 0.88, 0, GLAS3);
         figur2(S, x + w / 2 + 0.9, z2 + d / 2 + 1.1, 501, "leitung", { ry: PI7 + 0.5, pose: "schauen" });
       } },
       { art: "frei", w: 2.2, d: 1.3, bau(S, sc, x, z2, w, d, st, r) {
@@ -70054,7 +71794,7 @@
           const l = Math.hypot(a2 - a1, b2 - b1);
           L2.geo(new three_module_exports.BoxGeometry(l, 0.025, 0.01).rotateZ(Math.atan2(b2 - b1, a2 - a1)), (a1 + a2) / 2, (b1 + b2) / 2, 0.06, "#e07b2a");
         }
-        text(L2, "Leitstand Filialbelieferung", 0, 2.95, 0.07, 0.22, "#ffffff", "#e07b2a");
+        text2(L2, "Leitstand Filialbelieferung", 0, 2.95, 0.07, 0.22, "#ffffff", "#e07b2a");
       } },
       { art: "frei", w: 4.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 1, 0);
@@ -70085,7 +71825,7 @@
           L2.box(2.2, 0.02, 0.01, 0, 0.95 + i * 0.22, 0.03, "#c9cdd0");
           for (let k = 0; k < 4; k++) if (r() < 0.7) L2.box(0.25, 0.12, 0.02, -0.9 + k * 0.55 + zw(r, 0, 0.2), 1 + i * 0.22, 0.035, waehle2(r, ["#e07b2a", "#2f6fb3", "#3ab27a", "#d23c32"]));
         }
-        text(L2, "Tourenplan", 0, 2.25, 0.04, 0.2, "#ffffff", "#e07b2a");
+        text2(L2, "Tourenplan", 0, 2.25, 0.04, 0.2, "#ffffff", "#e07b2a");
       } }
     ],
     ecommerce: [
@@ -70102,7 +71842,7 @@
         }
         L2.box(0.04, 1.2, 0.04, 0, 0, 1.2, "#2a2d31");
         L2.box(0.25, 0.18, 0.3, 0, 1.2, 1.2, "#1e2328");
-        text(L2, "Produktfotos", 0, 2.2, -0.95, 0.2, "#ffffff", "#7a4fc0");
+        text2(L2, "Produktfotos", 0, 2.2, -0.95, 0.2, "#ffffff", "#7a4fc0");
       } },
       { art: "frei", w: 4, d: 2.4, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -70128,21 +71868,21 @@
         L2.box(1.1, 0.7, 0.05, 0, 1.2, -0.3, "#22272c");
         L2.box(1, 0.6, 0.01, 0, 1.25, -0.27, "#f4f6f8");
         linie(L2, 0, 1.3, -0.26, 0.8, 0.45, r, "#7a4fc0");
-        text(L2, "Bestellungen live", 0, 2.05, -0.27, 0.15, "#ffffff", "#7a4fc0");
+        text2(L2, "Bestellungen live", 0, 2.05, -0.27, 0.15, "#ffffff", "#7a4fc0");
       } },
       { art: "wand", w: 3, d: 0.7, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.35, 0);
         regal(L2, 0, 0, w, 2, "#9aa3aa", (lx, y, lz, ww) => {
           for (let u = lx - ww / 2 + 0.25; u < lx + ww / 2 - 0.15; u += 0.45) L2.box(0.4, zw(r, 0.2, 0.35), 0.4, u, y, lz, waehle2(r, ["#c9a26b", "#d6b27c", "#b8925e", "#f4f2ee"]));
         }, r, 0.6);
-        text(L2, "Retouren", 0, 2.2, 0.32, 0.2, "#ffffff", "#7a4fc0");
+        text2(L2, "Retouren", 0, 2.2, 0.32, 0.2, "#ffffff", "#7a4fc0");
       } }
     ],
     recht: [
       { art: "wand", w: 5.4, d: 0.5, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.25, 0);
         regal(L2, 0, 0, w, 2.6, "#7b5a40", ordner(L2, r, ["#8a2f3a", "#2b3a55", "#3a3f47", "#6b5a48", "#e8e4dc"]), r, 0.45, 6);
-        text(L2, "Vertr\xE4ge", 0, 2.85, 0.24, 0.22, "#ffffff", "#8a2f3a");
+        text2(L2, "Vertr\xE4ge", 0, 2.85, 0.24, 0.22, "#ffffff", "#8a2f3a");
       } },
       { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r) {
         for (let k = 0; k < 2; k++) {
@@ -70193,7 +71933,7 @@
           for (let u = lx - ww / 2 + 0.25; u < lx + ww / 2 - 0.15; u += 0.45) if (k % 2) L2.kugel(0.15, u, y + 0.15, lz, waehle2(r, ["#d23c32", "#e9b44c", "#1f9aa8", "#ffffff"]));
           else L2.box(0.4, 0.28, 0.38, u, y, lz, waehle2(r, ["#1f9aa8", "#e9e4da", "#d65a6f"]));
         }, r);
-        text(L2, "Deko Saison", 0, 2.45, 0.32, 0.22, "#ffffff", "#1f9aa8");
+        text2(L2, "Deko Saison", 0, 2.45, 0.32, 0.22, "#ffffff", "#1f9aa8");
       } },
       { art: "frei", w: 3.6, d: 2.2, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -70202,14 +71942,14 @@
         for (const s2 of [-1, 1]) L2.box(0.15, 2.6, 0.15, s2 * 1.6, 0, 0.8, "#3a4048");
         L2.box(3.35, 0.15, 0.15, 0, 2.6, 0.8, "#3a4048");
         for (const s2 of [-0.6, 0.6]) puppe3(L2.hoch(0.25), s2, -0.1, r, "damen", PAL.damen, s2 * 0.4);
-        text(L2, "Probeaufbau", 0, 2, -0.76, 0.24, "#ffffff");
+        text2(L2, "Probeaufbau", 0, 2, -0.76, 0.24, "#ffffff");
       } }
     ],
     verwaltung: [
       { art: "wand", w: 5, d: 0.5, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.25, 0);
         regal(L2, 0, 0, w, 2.2, "#c9cdd0", ordner(L2, r, ["#2f5f8a", "#5f6b78", "#9aa3aa", "#2b3a55"]), r, 0.45, 5);
-        text(L2, "Buchhaltung", 0, 2.45, 0.24, 0.22, "#ffffff", "#5f6b78");
+        text2(L2, "Buchhaltung", 0, 2.45, 0.24, 0.22, "#ffffff", "#5f6b78");
       } },
       { art: "frei", w: 3, d: 1.8, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4, 0);
@@ -70218,7 +71958,7 @@
           L2.box(0.36, 0.32, 0.02, -1 + i * 0.4, 0.15 + j * 0.37, 0.23, "#b98d61");
           if (r() < 0.6) L2.box(0.28, 0.06, 0.2, -1 + i * 0.4, 0.2 + j * 0.37, 0.15, "#ffffff");
         }
-        text(L2, "Poststelle", 0, 1.8, 0.24, 0.2, "#ffffff", "#5f6b78");
+        text2(L2, "Poststelle", 0, 1.8, 0.24, 0.2, "#ffffff", "#5f6b78");
         const W3 = L2.sub(0.6, 1, 0);
         W3.box(0.9, 0.6, 0.6, 0, 0.2, 0, "#9aa3aa");
         W3.box(0.8, 0.3, 0.5, 0, 0.8, 0, "#f2c14e");
@@ -70275,7 +72015,7 @@
       L2.box(1.2, 2.3, 0.08, 0, 0, -0.55, farbe);
       for (const s2 of [-1, 1]) L2.box(0.08, 2.3, 1.1, s2 * 0.56, 0, 0, dunkler(farbe, 0.08));
       L2.box(1.2, 0.1, 1.2, 0, 2.3, 0, dunkler(farbe, 0.1));
-      L2.box(1.04, 2.2, 0.04, 0, 0.05, 0.56, GLAS4);
+      L2.box(1.04, 2.2, 0.04, 0, 0.05, 0.56, GLAS3);
       L2.box(0.9, 0.45, 0.45, 0, 0, -0.25, "#e9e4da");
       L2.box(0.5, 0.04, 0.3, 0, 0.75, 0.15, "#f2f0ea");
     }
@@ -70385,7 +72125,7 @@
   }
   function trennwand(S, x, T) {
     const tuer0 = T * 0.62, tuer1 = tuer0 + 1.6;
-    for (const [a, b] of [[0.6, tuer0], [tuer1, T - 0.2]]) S.box(0.05, WH3 - 0.5, b - a, x, 0.06 + (WH3 - 0.5) / 2, (a + b) / 2, GLAS4);
+    for (const [a, b] of [[0.6, tuer0], [tuer1, T - 0.2]]) S.box(0.05, WH3 - 0.5, b - a, x, 0.06 + (WH3 - 0.5) / 2, (a + b) / 2, GLAS3);
     S.box(0.1, 0.12, T - 0.8, x, WH3 - 0.4, T / 2 + 0.2, "#3a4048");
     for (const z2 of [0.6, tuer0, tuer1, T - 0.2]) S.box(0.1, WH3 - 0.4, 0.1, x, (WH3 - 0.4) / 2, z2, "#3a4048");
   }
@@ -70562,7 +72302,7 @@
     }
     L2.box(w, h, 0.06, lx, 0.5, lz, "#f8f8f6");
     L2.box(w, 0.05, 0.08, lx, 0.5 + h, lz, "#9aa3aa");
-    if (titel) text(L2, titel, lx, 0.5 + h - 0.2, lz + 0.04, 0.22, "#ffffff", farbe);
+    if (titel) text2(L2, titel, lx, 0.5 + h - 0.2, lz + 0.04, 0.22, "#ffffff", farbe);
     inhalt?.(lx, 0.5, lz + 0.04, w, h);
   }
   var SIGNATUR = {
@@ -70618,7 +72358,7 @@
           const P2 = L2.sub(-1.1 + k * 1.1, 0, (k - 1) * 0.3);
           P2.geo(new three_module_exports.BoxGeometry(0.9, 1.6, 0.05).rotateX(-0.12), 0, 0.8, 0.1, f);
           P2.geo(new three_module_exports.BoxGeometry(0.9, 1.6, 0.05).rotateX(0.12), 0, 0.8, -0.1, "#f8f6f2");
-          text(P2, t, 0, 1.15, 0.24, 0.25, "#ffffff");
+          text2(P2, t, 0, 1.15, 0.24, 0.25, "#ffffff");
         });
       } }
     ],
@@ -70751,7 +72491,7 @@
         L2.box(2.6, 1.1, 0.7, 0, 0, 0.2, "#f4f2ee");
         L2.box(2.7, 0.06, 0.8, 0, 1.1, 0.2, "#3a4048");
         L2.box(2.6, 0.22, 0.04, 0, 0.8, 0.57, farbe);
-        text(L2, "Empfang Verwaltung", 0, 0.45, 0.58, 0.22, "#3a4048");
+        text2(L2, "Empfang Verwaltung", 0, 0.45, 0.58, 0.22, "#3a4048");
         monitor(L2.sub(-0.5, 0.1, PI7), 0, 0, 1, r);
         figur2(S, x + w / 2 - 0.4, z2 + d / 2 - 0.5, Math.floor(r() * 1e4), "info", { ry: 0, pose: "stehen" });
       } },
@@ -70852,7 +72592,7 @@
       L2.box(2.4, 1.3, 0.02, 0, 1, -d / 2 + 0.2, "#f4f6f8");
       balken2(L2, -0.6, 1.15, -d / 2 + 0.22, 1, 0.9, r);
       linie(L2, 0.6, 1.15, -d / 2 + 0.22, 1, 0.9, r);
-      text(L2, "Vorstandssitzung", 0, 2.05, -d / 2 + 0.23, 0.2, "#ffffff", VORSTAND_FARBE);
+      text2(L2, "Vorstandssitzung", 0, 2.05, -d / 2 + 0.23, 0.2, "#ffffff", VORSTAND_FARBE);
       for (const s2 of [-1, 1]) pflanze4(L2, s2 * (w / 2 - 0.5), -d / 2 + 0.5, r, true);
       for (let k = 0; k < Math.min(4, n); k++) {
         const u = (k - 1.5) * 0.95 * (proSeite > 2 ? 1 : 0.6);
@@ -70867,7 +72607,7 @@
     L2.box(2.8, 1.1, 0.7, 0, 0, -0.6, "#f4f2ee");
     L2.box(2.9, 0.06, 0.8, 0, 1.1, -0.6, "#3a2a20");
     L2.box(2.8, 0.22, 0.04, 0, 0.8, -0.23, VORSTAND_FARBE);
-    text(L2, "Vorstand", 0, 0.42, -0.22, 0.24, "#3a4048");
+    text2(L2, "Vorstand", 0, 0.42, -0.22, 0.24, "#3a4048");
     monitor(L2.sub(-0.6, -0.75, PI7), 0, 0, 2, r);
     figur2(S, x + w / 2 - 0.2, z2 + d / 2 - 1.35, 7201, "info", { pose: "stehen", ry: 0 });
     L2.box(2, 0.42, 0.8, 0, 0, d / 2 - 0.7, "#5f6f7c");
@@ -70928,7 +72668,7 @@
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.12, 0);
       L2.box(w, 1.9, 0.06, 0, 0.55, 0, "#d8c6a4");
       for (let i = 0; i < 9; i++) for (let j = 0; j < 4; j++) L2.box(0.42, 0.34, 0.02, -w / 2 + 0.38 + i * 0.5, 0.68 + j * 0.42, 0.04, waehle2(r, STOFFE));
-      text(L2, "Stoffmuster", 0, 2.6, 0.05, 0.24, "#ffffff", ABTEILUNGEN2.produkt.farbe);
+      text2(L2, "Stoffmuster", 0, 2.6, 0.05, 0.24, "#ffffff", ABTEILUNGEN2.produkt.farbe);
     } },
     { art: "frei", w: 3.8, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2 - 0.2, 0);
@@ -70964,7 +72704,7 @@
       basis.forEach((c, i) => {
         for (let j = 0; j < 6; j++) L2.box(0.34, 0.22, 0.02, -w / 2 + 0.3 + i * 0.4, 0.72 + j * 0.27, 0.035, j < 3 ? heller(c, (3 - j) * 0.12) : dunkler(c, (j - 3) * 0.12));
       });
-      text(L2, "Farbkarten Saison", 0, 2.55, 0.05, 0.22, "#ffffff", ABTEILUNGEN2.produkt.farbe);
+      text2(L2, "Farbkarten Saison", 0, 2.55, 0.05, 0.22, "#ffffff", ABTEILUNGEN2.produkt.farbe);
     } }
   ];
   SIGNATUR.produkt = [
@@ -70989,7 +72729,7 @@
           if (r() < 0.4) P2.box(0.02, 0.1, 0.07, u + 0.04, 1.55, 0.24, "#ffffff");
         }
       }
-      text(L2, "Musterkollektion", 0, 2.15, 0.03, 0.2, "#ffffff", farbe);
+      text2(L2, "Musterkollektion", 0, 2.15, 0.03, 0.2, "#ffffff", farbe);
     } },
     { w: 3.2, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -71009,7 +72749,7 @@
       const u = -1.6 + i % 3 * 1.6, y = 0.95 + Math.floor(i / 3) * 0.95;
       L2.box(1.55, 0.9, 0.08, u, y, 0, "#1b2026");
       L2.box(1.45, 0.8, 0.01, u, y + 0.05, 0.045, "#10161c");
-      text(L2, t, u, y + 0.72, 0.056, 0.13, "#ffffff", f);
+      text2(L2, t, u, y + 0.72, 0.056, 0.13, "#ffffff", f);
       if (i === 3) {
         for (let k = 0; k < 5; k++) L2.box(0.22, 0.22, 0.01, u - 0.5 + k * 0.25, y + 0.25, 0.055, waehle2(r, ["#e9b44c", "#d65a6f", "#5bc0eb", "#9bc53d", "#f2f2f2"]));
       } else if (i % 2) balken2(L2, u, y + 0.1, 0.055, 1.2, 0.45, r, [f, "#f2f2f2"]);
@@ -71026,7 +72766,7 @@
     }
     for (let k = -1; k <= 1; k += 2) figur2(S, x + w / 2 + k * 1.25, z2 + 0.4 + 1.5 + 0.7, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: PI7 });
     L2.box(4.6, 0.36, 0.08, 0, 2.86, 0, farbe);
-    text(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe);
+    text2(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe);
   } });
 
   // src/kit/ostbauten.js
@@ -71228,8 +72968,8 @@
     g.translate(u, y, (t0 + t1) / 2);
     fgeo2(S, F2, g, c);
   }
-  function ftext2(scene2, F2, text2, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text2, farbe, { groesse: 140, hintergrund: bg });
+  function ftext2(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp2(F2, u, t);
@@ -73612,13 +75352,13 @@
     if (p.w >= 14 && p.d >= 12) return altbauRoh(S, scene2, p);
     return skaliert(S, scene2, p, Math.max(14, p.w), Math.max(12, p.d), altbauRoh);
   }
-  function plakatwand(S, scene2, x, z2, b, h, text2, farbe, ry = 0) {
+  function plakatwand(S, scene2, x, z2, b, h, text3, farbe, ry = 0) {
     const F2 = R5(x, z2, Math.cos(ry), -Math.sin(ry), b);
     for (const u of [b * 0.2, b * 0.8]) fb2(S, F2, u - 0.12, u + 0.12, 0.3, 2.2, -0.3, -0.06, "#59636b");
     fb2(S, F2, -0.1, b + 0.1, 2.2, 2.2 + h, -0.12, 0, "#3f474e");
     fb2(S, F2, 0.1, b - 0.1, 2.3, 2.1 + h, 0, 0.04, farbe);
     const sc = scene2;
-    ftext2(sc, F2, text2, b / 2, 2.2 + h / 2, 0.06, h * 0.32, b * 0.86, "#ffffff");
+    ftext2(sc, F2, text3, b / 2, 2.2 + h / 2, 0.06, h * 0.32, b * 0.86, "#ffffff");
   }
   function bracheRoh(S, scene2, p) {
     const r = rng2(`br:${p.seed}`);
@@ -74855,8 +76595,8 @@
     const na = Math.max(1, Math.floor((u1 - u0 - 2 * rand) / ra + 0.15)), off = u0 + (u1 - u0 - na * ra) / 2;
     return Array.from({ length: na }, (_, i) => off + (i + 0.5) * ra);
   }
-  function ftext3(scene2, F2, text2, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text2, farbe, { groesse: 140, hintergrund: bg });
+  function ftext3(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp3(F2, u, t);
@@ -76730,14 +78470,14 @@
   function nordRathaus(S, scene2, p) {
     return gedreht2(S, scene2, p, rathausRoh, [30, 20]);
   }
-  function bude(S, scene2, F2, u, y0, farbe, text2) {
+  function bude(S, scene2, F2, u, y0, farbe, text3) {
     fb3(S, F2, u - 2.2, u + 2.2, y0, y0 + 2.7, -3, 0, "#f3efe6");
     fb3(S, F2, u - 1.8, u + 1.8, y0 + 1.05, y0 + 2.15, 0, 0.05, GLAS_HELL4);
     fb3(S, F2, u - 1.95, u + 1.95, y0 + 0.95, y0 + 1.08, 0, 0.55, "#d8d3c6");
     streifenMarkise(S, F2, u - 2.3, u + 2.3, y0 + 2.35, farbe, "#f4f1ea", 6, 1.4);
     fb3(S, F2, u - 2.4, u + 2.4, y0 + 2.7, y0 + 2.9, -3.2, 0.15, farbe);
     fb3(S, F2, u - 2.2, u + 2.2, y0 + 2.9, y0 + 3.75, -0.12, 0.06, farbe);
-    ftext3(scene2, F2, text2, u, y0 + 3.32, 0.08, 0.55, 4.2, "#ffffff");
+    ftext3(scene2, F2, text3, u, y0 + 3.32, 0.08, 0.55, 4.2, "#ffffff");
     for (const s2 of [-1, 1]) {
       const [x, z2] = wp3(F2, u + s2 * 1.4, 2.4);
       tisch(S, x, z2, y0);
@@ -78080,8 +79820,8 @@
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
     fgeo4(S, F2, g, c);
   }
-  function ftext4(scene2, F2, text2, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text2, farbe, { groesse: 140, hintergrund: bg });
+  function ftext4(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp4(F2, u, t);
@@ -78257,7 +79997,7 @@
     if (o.laeden) for (const s2 of [-1, 1]) fb4(S, F2, u + s2 * (fw / 2 + 0.14), u + s2 * (fw / 2 + 0.14 + fw * 0.48), y, y + fh, t, t + 0.09, o.laeden);
     if (o.sims) fb4(S, F2, u - fw / 2 - 0.25, u + fw / 2 + 0.25, y - 0.2, y - 0.04, t, t + 0.22, o.sims);
   }
-  function logo(S, scene2, F2, u, y, t, h, farbe, text2, schrift2 = "#ffffff", bg = null) {
+  function logo(S, scene2, F2, u, y, t, h, farbe, text3, schrift2 = "#ffffff", bg = null) {
     const bank6 = BANKEN.find((b2) => b2[1] === farbe), form = bank6?.[2] ?? "saeulen";
     const q2 = h / 2, t1 = t + 0.2, t2 = t + 0.28, P2 = "#f3f1ec";
     fb4(S, F2, u - q2 * 1.15, u + q2 * 1.15, y - q2 * 0.85, y + q2 * 0.85, t, t1, P2);
@@ -78279,9 +80019,9 @@
       b(-0.6, 0.6, -0.15, 0.15);
       b(-0.25, 0.95, -0.6, -0.3);
     } else ftext4(scene2, F2, (bank6?.[0] ?? "B").split(" ").pop()[0], u, y, t2, h * 0.75, h * 0.9, farbe, null);
-    if (text2) {
-      const u0 = u + h * 0.75, bw = Math.min(text2.length * h * 0.45, F2.L - u0 - 0.6);
-      if (bw > 2) ftext4(scene2, F2, text2, u0 + bw / 2, y, t + 0.12, h * 0.55, bw, schrift2, bg);
+    if (text3) {
+      const u0 = u + h * 0.75, bw = Math.min(text3.length * h * 0.45, F2.L - u0 - 0.6);
+      if (bw > 2) ftext4(scene2, F2, text3, u0 + bw / 2, y, t + 0.12, h * 0.55, bw, schrift2, bg);
     }
   }
   var WINKEL2 = { "+z": 0, "+x": PI10 / 2, "-z": PI10, "-x": -PI10 / 2 };
@@ -82678,8 +84418,8 @@
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
     fgeo5(S, F2, g, c);
   }
-  function ftext5(scene2, F2, text2, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { seitenverhaeltnis: a, mat: mat2 } = textMaterial(text2, farbe, { groesse: 140, hintergrund: bg });
+  function ftext5(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
+    const { seitenverhaeltnis: a, mat: mat2 } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp5(F2, u, t);
@@ -89229,7 +90969,7 @@
     baueParkplatz: (...a) => baueParkplatz(...a),
     imRechteck: (...a) => imRechteck(...a)
   };
-  var EINKAUF_SLOTS = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:sport", "slot:wettbewerber"]);
+  var EINKAUF_SLOTS = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:sport", "slot:wettbewerber", "slot:outlet"]);
   function baueCenterFlaeche(ctx, b, r, teile) {
     const { S, I } = ctx;
     const y = 0.33;
@@ -90155,11 +91895,12 @@
     k.closePath();
   }
   function standortMarker(plan2, groesse2) {
-    const art = { warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber" };
+    const art = { warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber", outlet: "wettbewerber" };
     return (plan2.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? "hartwig", groesse: st.rolle === "wettbewerber" ? (groesse2 ?? 10) * 0.8 : groesse2 }));
   }
   function setzeMarker(scene2, plan2, ergebnis, liste = [], o = {}) {
     const pz4 = new Map(plan2.parzellen.map((p) => [p.id, p]));
+    for (const p of plan2.aussen?.bauten ?? []) if (p.typ === "slot:outlet") pz4.set(p.id, p);
     if (liste === "standorte") liste = standortMarker(plan2, o.markerGroesse);
     for (const e of liste) {
       if (e.parzelle) {
@@ -90560,6 +92301,7 @@
     "slot:warenhaus": phWarenhaus,
     "slot:sport": phWarenhaus,
     "slot:wettbewerber": phKonkurrenz,
+    "slot:outlet": phKonkurrenz,
     "slot:mall": phMall,
     "slot:bahnhof": phBahnhof,
     "slot:kirche": phKirche,
@@ -90855,6 +92597,18 @@
         variante: schwester.fassade
       });
     }
+    for (const h of haeuser_outlet_default.filter((q2) => q2.stadt === name2)) {
+      const m = fussabdruck(h);
+      standorte.push({
+        id: h.id,
+        name: NAME_OUTLET + " " + h.stadt,
+        rolle: "outlet",
+        lage: h.lage,
+        grundflaecheQm: h.grundflaecheQm,
+        w: m.w,
+        d: m.d
+      });
+    }
     const [a, b] = WETTBEWERBER[typ];
     const n = Math.min(b, a + Math.floor(r() * (b - a + 1)));
     const ARTEN_1A = ["modehaus", "fastfashion", "premium", "leer_ehemals", "modehaus", "fastfashion"];
@@ -91113,7 +92867,7 @@
       const f = fussabdruck(h);
       return { id: h.id, name: h.name, rolle: h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
     });
-    const alt = d.standorte.filter((q2) => q2.rolle === "wettbewerber" || q2.rolle === "schwester");
+    const alt = d.standorte.filter((q2) => q2.rolle === "wettbewerber" || q2.rolle === "schwester" || q2.rolle === "outlet");
     const reserve = Array.from({ length: 2 }, (_, i) => ({
       id: "KR-" + name2 + "-" + (i + 1),
       name: "",
@@ -91181,7 +92935,12 @@
       const nutzer = nachnutzer(h);
       return nutzer ? nachnutzungSport(S, scene2, h, nutzer, { x, z: z2 }) : sporthaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
     };
-    const bau2 = (S, scene2, p, h) => (h.format === "sport" ? baueSport : baueWarenhaus)(S, scene2, p, h);
+    const baueOutlet = (S, scene2, p, h) => {
+      const f = fussabdruck(h), { x, z: z2 } = imSlot2(p, f.w, f.d);
+      p.haus = h;
+      return outlet(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
+    };
+    const bau2 = (S, scene2, p, h) => (h.format === "outlet" ? baueOutlet : h.format === "sport" ? baueSport : baueWarenhaus)(S, scene2, p, h);
     const getrennt = (p, h) => {
       const gruppe2 = new three_module_exports.Group();
       gruppe2.userData.hausId = h.id;
@@ -91322,6 +93081,7 @@
       "slot:warenhaus": slot4("slot:warenhaus"),
       "slot:sport": slot4("slot:sport"),
       "slot:schwester": slot4("slot:schwester"),
+      "slot:outlet": basis["slot:outlet"],
       "slot:hq": hqSlot,
       "slot:wettbewerber": wbSlot,
       "slot:wettbewerber_reserve": wbSlot
@@ -91715,7 +93475,7 @@
     };
     const s2 = () => ctx.s();
     const SP = () => new Map(q2.spalten().map((c) => [c.id, c]));
-    const text2 = (id, k) => formatiere(SP().get(id)?.format ?? "eur", k[id] ?? 0);
+    const text3 = (id, k) => formatiere(SP().get(id)?.format ?? "eur", k[id] ?? 0);
     const dot = (a) => a ? `<span class="ampel a-${a}" title="${AMPEL_TEXT[a]}"></span>` : '<span class="ampel ohne"></span>';
     const seg = (act, wert, optionen, extra = "") => `<div class="seg">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
     const zahl2 = (titel, inhalt2, p, ton = "", a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
@@ -91741,7 +93501,7 @@
       }).join("")}</div>`;
       const kopf = (key, t, klasse) => `<button class="${klasse} ${ui.sort.key === key ? "an" : ""}" data-a="sort" data-v="${key}">${t}${ui.sort.key === key ? ui.sort.dir < 0 ? " \u25BC" : " \u25B2" : ""}</button>`;
       h += `<div class="karte liste"><div class="lkopf">${kopf("name", "Bereich und WG", "lname")}${ui.spalten.map((k) => kopf(k, KOPF[k] ?? SP().get(k)?.name, "lwert")).join("")}</div>`;
-      const werte = (k, a, p) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p}:${c}">${text2(c, k)}</i>${dot(a[c])}</span>`).join("");
+      const werte = (k, a, p) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p}:${c}">${text3(c, k)}</i>${dot(a[c])}</span>`).join("");
       for (const b of sortiere(u.bereiche)) {
         const auf = ui.offen.has(b.bereich);
         h += `<div class="lzeile bereich" data-a="bereich" data-v="${b.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc(b.name)} <i>${b.wgs.length} WG</i></span>${werte(b.kennzahlen, b.ampeln, `b:${b.bereich}`)}</div>`;
@@ -91778,7 +93538,7 @@
       const k = d.kennzahlen, st = d.steuerung, a = d.ampeln;
       let h = tabs();
       h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc(d.bereichName)}</button>`;
-      h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl2(c.name, text2(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl2(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
+      h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl2(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl2(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
       const v = d.verlauf;
       h += kurve3("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
       h += kurve3("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
@@ -92006,9 +93766,9 @@
       const ex = new Map(DETAIL_EXTRA.map(([id, , f]) => [id, f]));
       const soll = (p) => {
         const t = p.split(":");
-        if (t[0] === "g") return text2(t[1], u.summe.kennzahlen);
-        if (t[0] === "b") return text2(t[2], bs.get(t[1]).kennzahlen);
-        if (t[0] === "w") return text2(t[2], ws.get(t[1]).kennzahlen);
+        if (t[0] === "g") return text3(t[1], u.summe.kennzahlen);
+        if (t[0] === "b") return text3(t[2], bs.get(t[1]).kennzahlen);
+        if (t[0] === "w") return text3(t[2], ws.get(t[1]).kennzahlen);
         if (t[0] === "badge") return String(fl.anzahl);
         if (t[0] === "grenze") return geld(fl.grenze);
         if (t[0] === "sammel") return geld(gefiltert().reduce((a, o) => a + o.wert, 0));
@@ -92022,7 +93782,7 @@
           if (t[1] === "limitFrei2") return geld(k.limitFrei);
           if (t[1] === "limit" || t[1] === "limitVerbraucht") return geld(k[t[1]]);
           if (t[1] === "eigenmarkenMarge" && !k.eigenmarkenAnteil) return "keine";
-          return ex.has(t[1]) ? formatiere(ex.get(t[1]), k[t[1]]) : text2(t[1], k);
+          return ex.has(t[1]) ? formatiere(ex.get(t[1]), k[t[1]]) : text3(t[1], k);
         }
         if (t[0] === "k") {
           const r = d.verlauf[t[1]], l = r[r.length - 1];
@@ -92552,9 +94312,9 @@
   }
   function werteSammler() {
     const W3 = /* @__PURE__ */ new Map();
-    const P2 = (k, text2, tag = "b", extra = "") => {
-      W3.set(k, String(text2));
-      return `<${tag} data-p="${esc(k)}"${extra}>${esc(text2)}</${tag}>`;
+    const P2 = (k, text3, tag = "b", extra = "") => {
+      W3.set(k, String(text3));
+      return `<${tag} data-p="${esc(k)}"${extra}>${esc(text3)}</${tag}>`;
     };
     return { W: W3, P: P2 };
   }
@@ -92572,7 +94332,7 @@
     }
     return { werte: n, fehler: fehler5 };
   }
-  var schalter = (an, attr, text2, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text2}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
+  var schalter = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
   var segment = (act, wert, optionen, extra = "") => `<div class="seg${optionen.length > 5 || optionen.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? " umbruch" : ""}">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
   var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
   var stepper = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
@@ -94266,9 +96026,9 @@
     return {
       ui,
       da,
-      oeffne: (seite = "liste", marke3) => {
+      oeffne: (seite = "liste", marke4) => {
         ui.seite = seite;
-        if (marke3) ui.marke = marke3;
+        if (marke4) ui.marke = marke4;
         ui.k = 0;
         ui.auslisten = null;
         if (seite === "neu") ui.neu = neuerEntwurf3();
@@ -94933,9 +96693,9 @@
     const danach = posteingang(s), alte = new Set(davor.handeln.map((x) => x.id)), meldungenVorher = new Set(davor.meldungen.map((x) => x.id));
     const neu = danach.handeln.filter((x) => !alte.has(x.id));
     const neueMeldungen = danach.meldungen.filter((x) => !meldungenVorher.has(x.id)).length;
-    const text2 = "KW " + (s.woche % 52 + 1) + ": " + neu.filter((x) => x.art === "angebot").length + " neue Angebote, " + neu.filter((x) => x.art === "entscheidung").length + " Entscheidungen, " + neueMeldungen + " Meldungen";
+    const text3 = "KW " + (s.woche % 52 + 1) + ": " + neu.filter((x) => x.art === "angebot").length + " neue Angebote, " + neu.filter((x) => x.art === "entscheidung").length + " Entscheidungen, " + neueMeldungen + " Meldungen";
     const streifen = $("wochenstreifen");
-    streifen.textContent = text2;
+    streifen.textContent = text3;
     streifen.classList.add("an");
     clearTimeout(streifenTimer);
     streifenTimer = setTimeout(() => streifen.classList.remove("an"), 6e3);
@@ -95129,9 +96889,9 @@
     oeffneHq(offenesHq === true ? void 0 : offenesHq, true);
   }
   var meldungTimer = null;
-  function meldung(text2, ok5 = true) {
+  function meldung(text3, ok5 = true) {
     const m = $("meldung");
-    m.textContent = text2;
+    m.textContent = text3;
     m.className = ok5 ? "an" : "an rot";
     clearTimeout(meldungTimer);
     meldungTimer = setTimeout(() => {
@@ -95162,7 +96922,7 @@
     const u = hqUebersicht(s), j = hqGrafik();
     const zahl2 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
     const pz4 = (x) => `${Math.round((x ?? 0) * 100)} %`;
-    const knopf = (text2, args, art = "") => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text2}</button>`;
+    const knopf = (text3, args, art = "") => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
     let html = `<div class="raster">${zahl2("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl2("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl2("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl2("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
