@@ -49,7 +49,9 @@ function hauptgangWaehlen(b,t,e,hindernisse) {
   // Das rückwärtige Treppen-/Lagerraster darf den Hauptgang nicht blockieren.
   // Der Lauf endet hinter diesem Funktionsband, bleibt aber bis zum Eingang durchgehend.
   const maxRueckversatz=Math.min(10*U,t-8*U);
-  for(let z=0;z<=maxRueckversatz+1e-8;z+=U)
+  // Hinter dem rückwärtigen Wandband mindestens 1,9 m nutzbare Tiefe lassen.
+  // Sonst durchstößt der Hauptgang die Verkaufswand, obwohl sie im Plan als belegt gilt.
+  for(let z=2*U;z<=maxRueckversatz+1e-8;z+=U)
     for(let x=2*U;x+w<=b-2*U;x+=U) {
       const lauf=quadrat(x,z,w,t-z);
       if(hindernisse.some(h=>schneidet(lauf,h)))continue;
@@ -103,7 +105,8 @@ function passeIn(m,raum) {
   return m.x>=raum.x-1e-8&&m.z>=raum.z-1e-8&&m.x+m.w<=raum.x+raum.w+1e-8&&m.z+m.d<=raum.z+raum.d+1e-8;
 }
 function wandband(plan,profil) {
-  const ziel=plan.moebel,verbote=plan.hindernisse;
+  // Wandmodule dürfen weder Gänge noch Kassen oder deren Vorfelder schneiden.
+  const ziel=plan.moebel,verbote=[...plan.hindernisse,...plan.gaenge,...plan.kassenVorfeld,...plan.moebel];
   const halb=profil.id==='sport'?'sport_schuh_halb':profil.id==='schwester'?'alt_holz_wand_halb':null;
   const module=[profil.wand,halb].filter(Boolean);
   // Erst Fünfmetersegmente versuchen, bei Kollision auf 2,5 m teilen:
@@ -312,8 +315,6 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
     const x=Math.min(e.x,haupt.x),x2=Math.max(e.x,haupt.x+haupt.w),d=haupt.w;
     plan.gaenge.push({...quadrat(x,plan.tiefe-d,x2-x,d),typ:'haupt'});
   }
-  kassenPlatz(plan,p);
-  wandband(plan,p);
   // Flächen links und rechts des Hauptgangs mit reservierter Hinterwandzone.
   const links=quadrat(U,U,haupt.x-U,plan.tiefe-2*U);
   const rechts=quadrat(haupt.x+haupt.w,U,plan.breite-haupt.x-haupt.w-U,plan.tiefe-2*U);
@@ -335,6 +336,10 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
       }
     }
   }
+  // Erst die vollständige Erschließung, dann Kasse und Wandband setzen:
+  // nachträglich erzeugte Quergänge dürfen keine bereits gebauten Möbel überfahren.
+  kassenPlatz(plan,p);
+  wandband(plan,p);
   for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
   for(const raum of plan.abteilungen)inszenierung(plan,p,raum);
   verdichteLadenplan(plan,p);
