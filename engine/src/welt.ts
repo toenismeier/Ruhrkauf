@@ -13,6 +13,8 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+// O03 IT
+import { initialisiereIt } from './it';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -342,6 +344,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
+  initialisiereIt(s);
   return s;
 }
 
