@@ -51,7 +51,7 @@ export const SYSTEME: Record<ItSystemId, { name: string; start: Generation; alte
   preisschilder: { name: 'Elektronische Preisschilder', start: 0, alter: 0, kosten: 0, bereiche: ['preis_reduzierung','store_operations','allokation'] },
   app: { name: 'App & Kundenkarte', start: 2, alter: 6, kosten: 39000, bereiche: ['crm','marketing'] },
   ecommerce: { name: 'E-Commerce-Plattform', start: 2, alter: 8, kosten: 60000, bereiche: ['ecommerce'] },
-  datenplattform: { name: 'Datenplattform (BI)', start: 1, alter: 11, kosten: 47000, bereiche: ['bi_daten','merchandise_planning','konzerncontrolling','vertriebscontrolling','allokation'] },
+  datenplattform: { name: 'Datenplattform (BI)', start: 1, alter: 11, kosten: 47000, bereiche: ['bi_daten'] },
 };
 export const IT_IDS = Object.keys(SYSTEME) as ItSystemId[];
 
