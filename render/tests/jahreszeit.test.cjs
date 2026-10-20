@@ -22,9 +22,10 @@ assert.equal(jahreszeit(spiel(46)).anlaesse.has('weihnachten'), false);
 const laufend = { name: 'Winterschlussverkauf', anlass: 'wsv', start: 0, ende: 2 };
 assert.equal(jahreszeit(spiel(1, 1, { marketing: { aktionen: [laufend] } })).anlaesse.has('wsv'), true);
 assert.equal(jahreszeit(spiel(3, 1, { marketing: { aktionen: [laufend] } })).anlaesse.has('wsv'), false);
-const vor = JSON.stringify(spiel(13, 3));
-jahreszeit(spiel(13, 3));
-assert.equal(JSON.stringify(spiel(13, 3)), vor, 'saisonale Abfrage bleibt rein');
+const unveraendert = spiel(13, 3);
+const vor = JSON.stringify(unveraendert);
+jahreszeit(unveraendert);
+assert.equal(JSON.stringify(unveraendert), vor, 'saisonale Abfrage bleibt rein');
 let schnee = 0;
 for (let seed = 0; seed < 1000; seed++) {
   const a = jahreszeit(spiel(4, seed));
