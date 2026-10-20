@@ -18,6 +18,8 @@ export const TEST_EREIGNISSE = [
   { id: 'ereignis:instandhaltung', name: 'Ereignis: Instandhaltung' },
   { id: 'ereignis:mietende', name: 'Ereignis: Mietende' },
   { id: 'ereignis:jahresgespraech', name: 'Ereignis: Lieferantengespräch' },
+  { id: 'ereignis:nordline_dtc', name: 'Ereignis: Lieferant geht direkt' },
+  { id: 'ereignis:arvel_rueckkehr', name: 'Ereignis: Lieferant kehrt zurück' },
   { id: 'ereignis:lieferantenausfall', name: 'Ereignis: Lieferantenausfall' },
   { id: 'ereignis:containerstau', name: 'Ereignis: Containerstau' },
   { id: 'ereignis:konjunktur', name: 'Ereignis: Konjunkturschock' },
