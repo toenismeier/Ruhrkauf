@@ -241,6 +241,7 @@ function stelleKommentar(s: GameState, h: Haus, vergleich: 'vorjahr' | 'plan', d
 /** Ein Aufruf vor jeder Woche, ohne zusätzliche Ziehungen aus s.rng. */
 export function hausWoche(s: GameState): void {
   if (!s.hausbetrieb) initialisiereHausbetrieb(s);
+  hausAbschluss(s);
   if (s.prognose) return;
   // Die Ausgangslage im ersten Geschäftsjahr bleibt exakt unverändert.
   if (s.woche >= 52) for (const [stadt, u] of Object.entries(s.hausbetrieb!.staedte)) {
@@ -249,7 +250,7 @@ export function hausWoche(s: GameState): void {
       if (hash(s.seed+':stadt:'+stadt+':'+s.woche) < 0.0018) {
         const typ = ['stadtfest', 'baustelle', 'parkhaus', 'oepnv'] as const;
         u.ereignis = typ[Math.floor(hash(stadt+':art:'+s.woche) * typ.length)];
-        u.ereignisBis = s.woche + (u.ereignis === 'baustelle' ? 4 + Math.floor(hash(stadt+':dauer:'+s.woche) * 17) : 1);
+        u.ereignisBis = s.woche + 1 + (u.ereignis === 'baustelle' ? 4 + Math.floor(hash(stadt+':dauer:'+s.woche) * 17) : 1);
         melde(s, 'ereignis', stadt + ': ' + ({stadtfest:'Stadtfest',baustelle:'Baustelle vor dem Haus',parkhaus:'Parkhaus geschlossen',oepnv:'ÖPNV-Streik'}[u.ereignis]) + '.', { stadt, modul: 'haus' });
       }
     }
