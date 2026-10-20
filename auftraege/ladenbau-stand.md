@@ -192,6 +192,6 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 
 ### Offene Freigabebedingungen
 1. In echtem Repository-Checkout ausführen: `cd engine && npm ci && npm run typecheck && npx jest`, `cd render && npm ci && npm run build && npm run ladenbau:smoke && npm run ladenbau:pruefen:teile && node spiel-render.js`.
-2. Diagnose-/Sport-Innenkatalog für mindestens sechs Häuser rendern und Vorher-/Nachher-Bilder in `bilder/` ablegen; PNGs ansehen. Das bisherige Diagnosekatalog-Modul enthält nur **fünf** Haus/Etagen-Paare und ist daher noch zu erweitern.
+2. Diagnose-/Sport-Innenkatalog für mindestens sechs Häuser rendern und Vorher-/Nachher-Bilder in `bilder/` ablegen; PNGs ansehen. Der Diagnosekatalog wurde auf **sechs** Sporthäuser (S017, S041, S024, S011, S012, S032) erweitert; der tatsächliche PNG-Render und die visuelle Abnahme bleiben offen.
 3. PR #6, dann #8, dann #9 nach Rebase gegen den jeweils aktualisierten Hauptzweig und grüner lokaler Abnahme mergen. Keinen PR vorziehen.
 4. Ein vollständiger Checkout des privaten Repositories ist hier weiter blockiert (Netzwerkauflösung von `github.com` in der Shell); weder `npm ci` noch lokale Bilderzeugung war möglich. Der isolierte Test ist ein Teilnachweis, **keine Mergefreigabe**.
