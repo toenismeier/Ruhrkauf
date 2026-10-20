@@ -1350,34 +1350,52 @@ function baueVorortBlock(ctx, b, r) {
   for (const [x, z, art] of b.baeume ?? []) baumSetzen(I, art, x, y, z, r, zw(r, 0.65, 0.95));
 }
 
-/** Acker und Wiesen: Schläge in wechselnder Richtung und Frucht, Hecken und Pappelreihen an den Rändern. */
+/** Unterschiedliche Fruchtstreifen pro Jahreszeit statt identischer Ackertexturen. */
+export const Q02_FELDFARBEN = {
+  fruehling: ['#86ae67', '#aac67a', '#8eaf73', '#b2b47b', '#7caa67', '#9aa76d'],
+  sommer: ['#d4c27c', '#c9b26a', '#b8c97a', '#e0cf8f', '#9fc078', '#c7a66a'],
+  herbst: ['#bb915d', '#d3b46d', '#bd9e74', '#8c9d5c', '#d8c48b', '#a88954'],
+  winter: ['#9ca28d', '#b0ad9b', '#a8aa95', '#c5c0b0', '#929d8a', '#b5af9b'],
+};
 function baueFeld(ctx, b, r) {
   const { S, I } = ctx;
+  const farben = Q02_FELDFARBEN[ctx.plan?.jahreszeit ?? 'sommer'] ?? Q02_FELDFARBEN.sommer;
   const quer = r() < 0.5;
   const L = quer ? b.d : b.w;
-  const n = L > 70 ? 1 + Math.floor(r() * 3) : 1;
+  // Mehrere landwirtschaftliche Schläge mit variabler Breite; Randweg und Hofzufahrt.
+  const n = Math.max(1, Math.min(8, Math.floor(L / 26) + 1));
+  const gewichte = Array.from({ length: n }, () => zw(r, 0.65, 1.65));
+  const summe = gewichte.reduce((a, q) => a + q, 0);
   let a = 0;
   for (let k = 0; k < n; k++) {
-    const len = k === n - 1 ? L - a : L * zw(r, 0.25, 0.55);
-    const x0 = quer ? b.x : b.x + a, z0 = quer ? b.z + a : b.z, w = quer ? b.w : len, d = quer ? len : b.d;
+    const len = k === n - 1 ? L - a : L * gewichte[k] / summe;
+    const x0 = quer ? b.x : b.x + a, z0 = quer ? b.z + a : b.z;
+    const w = quer ? b.w : len, d = quer ? len : b.d;
     a += len;
     if (w < 3 || d < 3) continue;
-    const wiese = r() < 0.3;
-    S.quader(x0 + 0.6, -0.08, z0 + 0.6, x0 + w - 0.6, 0.0, z0 + d - 0.6, wiese ? waehle(r, WIESE) : waehle(r, FELDER));
+    const wiese = r() < 0.17, farbe = wiese ? waehle(r, WIESE) : farben[(k + Math.floor(r() * farben.length)) % farben.length];
+    S.quader(x0 + 0.3, -0.08, z0 + 0.3, x0 + w - 0.3, 0.0, z0 + d - 0.3, farbe);
     if (!wiese) {
-      const furchenX = r() < 0.5, ab = zw(r, 1.8, 3.2);
-      if (furchenX) for (let q = z0 + 1.6; q < z0 + d - 1; q += ab) I.setze('fugeDunkel', x0 + w / 2, 0.0, q, 0, [w - 1.6, 1, 0.22]);
-      else for (let q = x0 + 1.6; q < x0 + w - 1; q += ab) I.setze('fugeDunkel', q, 0.0, z0 + d / 2, 0, [0.22, 1, d - 1.6]);
-    } else for (let i = 0; i < (w * d) / 900; i++) baumSetzen(I, waehle(r, ['linde', 'kastanie']), x0 + zw(r, 4, w - 4), -0.05, z0 + zw(r, 4, d - 4), r, zw(r, 0.9, 1.2));
+      const entlangX = r() < 0.5, ab = zw(r, 2.1, 4.6);
+      if (entlangX) for (let z = z0 + 1.1; z < z0 + d - 1; z += ab) I.setze('fugeDunkel', x0 + w / 2, 0, z, 0, [w - 1, 1, 0.14]);
+      else for (let x = x0 + 1.1; x < x0 + w - 1; x += ab) I.setze('fugeDunkel', x, 0, z0 + d / 2, 0, [0.14, 1, d - 1]);
+    } else for (let i = 0; i < (w * d) / 1800; i++) if (w > 10 && d > 10) baumSetzen(I, waehle(r, ['linde', 'kastanie']), x0 + zw(r, 4, w - 4), -0.05, z0 + zw(r, 4, d - 4), r, zw(r, 0.8, 1.1));
+    if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: x0 + w / 2, z: z0 + d / 2, muster: 'feld/' + farbe + '/' + Math.round(len) + '/' + Number(wiese) + '/' + k % 3 });
+    if (k > 0 && len > 6 && r() < 0.5) {
+      // Feldweg zwischen Nutzflächen, kein großflächiger Parkplatz.
+      if (quer) S.quader(b.x + 0.3, 0, z0 - 0.9, b.x + b.w - 0.3, 0.04, z0 + 0.9, '#c6b89b');
+      else S.quader(x0 - 0.9, 0, b.z + 0.3, x0 + 0.9, 0.04, b.z + b.d - 0.3, '#c6b89b');
+    }
   }
-  // Hecke oder Pappelreihe an einer Seite
+  // Baumreihe oder Hecke als Grenze. Die Felder werden durch echte Höfe aus stadtrand.js ergänzt.
   const h = waehle(r, ['-x', '+x', '-z', '+z', null]);
   if (h) {
-    const pap = r() < 0.4;
-    const entlangX = h[1] === 'z', len = entlangX ? b.w : b.d;
-    for (let u = 2; u < len - 2; u += pap ? 8 : 3.2) {
-      const x = entlangX ? b.x + u : h === '+x' ? b.x + b.w - 1 : b.x + 1, z = entlangX ? (h === '+z' ? b.z + b.d - 1 : b.z + 1) : b.z + u;
-      if (pap) baumSetzen(I, 'pappel', x, -0.05, z, r, 0.9); else I.setze('busch', x, -0.05, z, 0, [1, 0.9, 1], [waehle(r, KRONE.busch)]);
+    const pap = r() < 0.4, entlangX = h[1] === 'z', len = entlangX ? b.w : b.d;
+    for (let u = 2; u < len - 2; u += pap ? 8 : 3.8) {
+      const x = entlangX ? b.x + u : h === '+x' ? b.x + b.w - 1 : b.x + 1;
+      const z = entlangX ? (h === '+z' ? b.z + b.d - 1 : b.z + 1) : b.z + u;
+      if (pap) baumSetzen(I, 'pappel', x, -0.05, z, r, 0.9);
+      else I.setze('busch', x, -0.05, z, 0, [0.8, 0.8, 0.8], [waehle(r, KRONE.busch)]);
     }
   }
 }
