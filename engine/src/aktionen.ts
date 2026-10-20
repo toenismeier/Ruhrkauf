@@ -19,7 +19,7 @@ import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingA
 import { uebernehmeWettbewerber } from './wettbewerb';
 
 export type SpielerAktion =
-  | { typ: 'schliessen'; haus: string }
+  | { typ: 'schliessen'; haus?: string; haeuser?: string[] }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
   | { typ: 'flaecheTeilen'; haus: string; flaeche: string; qm: number }
   | { typ: 'geschaeftsmodell'; haeuser: string[] | 'alle'; gruppe: GruppeId; modell: 'eigen' | 'kommission' | 'konzession' }
@@ -34,7 +34,7 @@ export type SpielerAktion =
   | { typ: 'kundenkarte' }
   | { typ: 'orderLevel'; gruppe: GruppeId | 'alle'; level: number }
   | { typ: 'vorkasse'; erlaubt: boolean }
-  | { typ: 'mieteVerhandeln'; haus: string; reduktion: number; tripleNet?: boolean }
+  | { typ: 'mieteVerhandeln'; haus?: string; haeuser?: string[]; reduktion: number; tripleNet?: boolean }
   | { typ: 'angebotVerhandeln'; angebot: string; haeuser: string[] }
   | { typ: 'angebotAnnehmen'; angebot: string }
   | { typ: 'angebotUebernehmen'; angebot: string; modus: 'outlet' | 'erweiterung' }
@@ -115,6 +115,21 @@ function letzterUmsatz(s: GameState): number {
 }
 
 export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+  // Sammelaktionen rufen für jede ID ausschließlich den bestehenden Engine-Aktionspfad auf.
+  // Keine UI-eigene Mutation, doppelte IDs werden nur einmal angewendet.
+  if ((a.typ === 'schliessen' || a.typ === 'mieteVerhandeln') && a.haeuser) {
+    const ids = [...new Set(a.haeuser)];
+    if (!ids.length) return fehler('Keine Häuser ausgewählt.');
+    const ergebnisse = ids.map((id) => fuehreAus(s, a.typ === 'schliessen'
+      ? { typ: 'schliessen', haus: id }
+      : { typ: 'mieteVerhandeln', haus: id, reduktion: a.reduktion, tripleNet: a.tripleNet }));
+    const gelungen = ergebnisse.filter((e) => e.ok).length;
+    return { ok: gelungen > 0 && gelungen === ids.length,
+      text: `${gelungen} von ${ids.length} Häusern bearbeitet. ${ergebnisse.filter((e) => !e.ok).slice(0, 5).map((e) => e.text).join(' · ')}` };
+  }
+  if ((a.typ === 'schliessen' || a.typ === 'mieteVerhandeln') && !a.haus)
+    return fehler('Kein Haus angegeben.');
+
   if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
@@ -124,7 +139,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
   switch (a.typ) {
     case 'schliessen': {
-      const h = haus(s, a.haus);
+      const h = haus(s, a.haus ?? '');
       if (!h) return fehler('Haus nicht gefunden.');
       const f = starteSchliessung(s, h);
       return f ? fehler(f) : ok(`Schließung von ${h.name} eingeleitet.`);
