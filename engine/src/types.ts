@@ -427,6 +427,8 @@ export interface GameState {
   haeuser: Haus[];
   // O04 Personal
   personaleinsatz?: PersonalStand;
+  /** O04 ausschließlich A/B-Laufzeitmessung: überspringt die wöchentliche Neuplanung. */
+  personaleinsatzDeaktiviert?: boolean;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
