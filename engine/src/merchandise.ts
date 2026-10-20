@@ -4,6 +4,8 @@ import type { GameState, GruppeId, Haus, Kohorte } from './types';
 import { WG_DEF, WG_JE_BEREICH, EK_PARAM, saisonId, saisonName, limitFuer } from './einkauf';
 import { GRUPPEN } from './daten';
 import { clamp, eur, melde } from './util';
+// O01: Leitung, Delegation und Posteingang.
+import { bereichsQualitaet, istDelegiert, neueVorlage } from './organisation';
 
 export interface WarenPlan {
   wg: string;
@@ -37,6 +39,8 @@ export interface WareStand {
   fundusFremd: number;
   inventur: Record<string, { woche: number; differenz: number; quote: number }>;
   letzterInventurverlust: number;
+  /** O01-Leitungsqualität auf den Startwert normiert. */
+  allokationStart?: number;
 }
 export type WareAktion =
   | { typ: 'allokationQualitaet'; qualitaet: number }
@@ -76,7 +80,9 @@ export function clusterListe(s: GameState): { id: string; name: string; haeuser:
     xs.push(h);
     map.set(id, xs);
   }
-  return Array.from(map, ([id, haeuser]) => ({ id, name: id, haeuser })).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  const namen = new Map(s.organisation?.hauscluster.map(c => [c.id, c.name]) ?? []);
+  return Array.from(map, ([id, haeuser]) => ({ id, name: namen.get(id) ?? id, haeuser }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'de'));
 }
 function basis(h: Haus, g: GruppeId): number {
   const qm = h.flaechen.filter(f => f.gruppe === g && f.konzept === 'eigen').reduce((a, f) => a + f.qm, 0);
@@ -118,7 +124,13 @@ export function verteileZugang(s: GameState): void {
   for (const k of s.bestand) {
     if (k.hauscluster) { neu.push(k); continue; }
     let g = gesamt.get(k.gruppe);
-    if (!g) { g = schiefe(gewichte(s, k.gruppe), s.ware.allokationQualitaet); gesamt.set(k.gruppe, g); }
+    if (!g) {
+      const ist = bereichsQualitaet(s, 'allokation');
+      const basis = s.ware.allokationStart ?? ist;
+      const faktor = basis > 0 ? clamp(ist / basis, 0, 1) : 1;
+      g = schiefe(gewichte(s, k.gruppe), s.ware.allokationQualitaet * faktor);
+      gesamt.set(k.gruppe, g);
+    }
     neu.push(...verteile(s, k, g));
   }
   s.bestand = neu;
@@ -129,6 +141,7 @@ export function initialisiereWare(s: GameState): void {
     allokationQualitaet: 1, steuerungAktiv: false, bedarf: {}, umlagerungen: [],
     zentral: {}, lokal: {}, plaene: {}, vorlagen: [], fundusEigen: 0,
     fundusFremd: 60_000_000, inventur: {}, letzterInventurverlust: 0,
+    allokationStart: bereichsQualitaet(s, 'allokation'),
   };
   verteileZugang(s);
 }
@@ -141,21 +154,38 @@ export function wareWoche(s: GameState): void {
   }
   w.umlagerungen = w.umlagerungen.filter(t => t.ankunft > s.woche);
   verteileZugang(s);
-  // Eine Saisonvorlage zur Orderrunde: 30 Wochen vor der nächsten Saison.
+  // 30 Wochen vor Saison: eine gebündelte Vorlage im O01-Posteingang.
+  // Bei Delegation wird die Planqualität wirksam; ohne Eingriff bleibt die Startrechnung neutral.
   if (s.woche % 26 === 0 && !s.prognose) {
     const sid = saisonId(s.woche + 30);
-    for (const d of WG_DEF) {
-      if (!s.einkauf.wgs[d.id] || w.vorlagen.some(v => v.wg === d.id && v.saison === sid)) continue;
-      const id = `ware-${sid}-${d.id}`;
-      w.vorlagen.push({ id, wg: d.id, saison: sid, frist: s.woche + 2, erledigt: false });
+    if (!w.vorlagen.some(v => v.saison === sid)) {
+      w.vorlagen.push({ id: `ware-${sid}`, wg: 'alle', saison: sid, frist: s.woche + 2, erledigt: false });
+      neueVorlage(s, {
+        bereich: 'merchandise_planning', titel: `Saisonbudget ${saisonName(s, sid)}`,
+        text: `Open-to-Buy, Zielmarge, Sortimentsbreite und Vororder für ${WG_DEF.length} Warengruppen zur Freigabe. Die Einzelbudgets stehen im Einkaufsreiter Merchandise.`,
+        frist: 2,
+      });
+      melde(s, 'info', `Merchandise Planning: Saisonplanung ${saisonName(s, sid)} bereit.`, { modul: 'einkauf' });
+      if (istDelegiert(s, 'merchandise_planning')) {
+        const q = bereichsQualitaet(s, 'merchandise_planning');
+        for (const d of WG_DEF) {
+          const st = s.einkauf.wgs[d.id];
+          if (!st) continue;
+          const l = limitFuer(s, st, sid);
+          const delta = (1 - q) * 0.5 * (0.2 - d.anteil);
+          const faktor = clamp(1 + delta, 0.8, 1.2);
+          const budget = eur(l.plan * st.st.limitFaktor * faktor);
+          st.st.limitEuro = budget;
+          w.plaene[`${d.id}|${sid}`] = {
+            wg: d.id, saison: sid, budget,
+            zielmarge: st.margeSaison, zielabverkauf: 0.75,
+            breite: 0.5, vororderquote: st.st.vororderquote,
+          };
+        }
+      }
     }
-    melde(s, 'info', `Merchandise Planning: Saisonplanung für ${saisonName(s, sid)} liegt vor. Frist zwei Wochen.`, { modul: 'einkauf' });
   }
-  for (const v of w.vorlagen) {
-    if (v.erledigt || s.woche <= v.frist) continue;
-    // Delegierter Standard: übernimmt nur die bisherige Steuerung, damit die Ausgangslage unverändert bleibt.
-    v.erledigt = true;
-  }
+  for (const v of w.vorlagen) if (!v.erledigt && s.woche > v.frist) v.erledigt = true;
   w.vorlagen = w.vorlagen.filter(v => !v.erledigt || v.frist > s.woche - 26);
   // Inventur in KW 6: voraggregierte Clustergruppen statt wiederholter Vollscans.
   if (s.woche % 52 === 5 && !s.prognose) {
