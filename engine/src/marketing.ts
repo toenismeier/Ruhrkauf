@@ -1052,7 +1052,7 @@ export function umsatzBezug(s: GameState): number {
   return h.length ? h.reduce((a, b) => a + b.umsatz, 0) / h.length : 3_084_000_000 / 52;
 }
 
-function offeneHaeuserIds(s: GameState): Haus[] { return s.haeuser.filter((h) => h.status === 'offen'); }
+function offeneHaeuserIds(s: GameState): Haus[] { return s.haeuser.filter((h) => !h.nurDaten && h.status === 'offen'); }
 
 function scopeHaeuser(s: GameState, sc: AktionsScope): Haus[] {
   return offeneHaeuserIds(s).filter((h) =>

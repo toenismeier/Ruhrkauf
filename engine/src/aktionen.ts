@@ -64,12 +64,12 @@ const ok = (text: string): Ergebnis => ({ ok: true, text });
 const fehler = (text: string): Ergebnis => ({ ok: false, text });
 
 function haus(s: GameState, id: string): Haus | undefined {
-  return s.haeuser.find((h) => h.id === id);
+  return s.haeuser.find((h) => h.id === id && !h.nurDaten);
 }
 
 function auswahl(s: GameState, ids: string[] | 'alle'): Haus[] {
   if (ids === 'alle') return offeneHaeuser(s);
-  return ids.map((id) => haus(s, id)).filter((h): h is Haus => !!h && h.status === 'offen');
+  return ids.map((id) => haus(s, id)).filter((h): h is Haus => !!h && !h.nurDaten && h.status === 'offen');
 }
 
 const etageName = (e: number) => (e === -1 ? 'UG' : e === 0 ? 'EG' : `${e}. OG`);

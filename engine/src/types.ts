@@ -9,7 +9,7 @@ import type { SchwierigkeitId } from './schwierigkeit';
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
 
-export type Format = 'warenhaus' | 'sport';
+export type Format = 'warenhaus' | 'sport' | 'schwester' | 'outlet';
 export type WettbewerberArt = 'modehaus' | 'offprice' | 'textildiscounter' | 'elektronik' | 'premium' | 'fastfashion' | 'leer_ehemals';
 
 export interface Wettbewerber {
@@ -129,6 +129,13 @@ export interface Haus {
   cluster: Cluster;
   lage: Lage;
   format: Format;
+  /** A/B/C ist nur für reguläre Hartwig-Häuser definiert. */
+  hausklasse?: 'A' | 'B' | 'C';
+  /** Premium bleibt wirtschaftlich ein Warenhaus. */
+  klasse?: 'premium';
+  premiumSchluessel?: string;
+  /** Volkskauf und FUNDUS sind bis Engine-Formate reine Bestandsdaten. */
+  nurDaten?: boolean;
   einzug: Einzugsgebiet;
   wettbewerbStart: number;
   /** Unveränderliche historische Nachfragebasis je Warengruppe. */
@@ -394,7 +401,7 @@ export interface Quartal {
 }
 
 export interface GameState {
-  version: 1;
+  version: 2;
   /** Schwierigkeit beim Spielstart (src/schwierigkeit.ts), fehlt = mittel. */
   schwierigkeit?: SchwierigkeitId;
   seed: number;

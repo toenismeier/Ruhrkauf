@@ -24,19 +24,19 @@ Hausklassen Hartwig (aus der Ruhrkauf-Warenhaus-Anatomie):
 Die EBITDA-Quote der Ausgangslage bleibt die heutige Spielkalibrierung (rund −4 %, Q4 positiv), nicht der Ruhrkauf-Wert. Sie ist Spielbalance.
 
 ## Phase 1: Standortnetz (1 Chat, zuerst)
-1. **Städte:** `engine/src/daten.ts STAEDTE` (heute 112 Einträge `[name, region, cluster, kaufkraft, nWarenhaus, nSport]`) auf rund 180 Städte ausbauen, höchstens 220. Echte deutsche Städte, `KOORDINATEN` in `engine/src/standorte.ts` ergänzen (viele sind schon da). Neuer Cluster nur, wenn nötig; sonst `mittelstadt` für alles unter 100.000 Einwohner.
+1. **Städte:** `engine/src/daten.ts STAEDTE` auf höchstens 220 Städte ausbauen (Phase 1: 220). Genau sieben `metropole`: Berlin, Hamburg, München, Köln, Frankfurt, Düsseldorf, Stuttgart; übrige Orte ab 100.000 Einwohnern `grossstadt`, sonst `mittelstadt`. Echte deutsche Städte, `KOORDINATEN` in `engine/src/standorte.ts` ergänzen (viele sind schon da). Neuer Cluster nur, wenn nötig; sonst `mittelstadt` für alles unter 100.000 Einwohner.
 2. **Format des Eintrags erweitern:** `[name, region, cluster, kaufkraft, { hartwig, premium, volkskauf, sport, fundus }]`.
-3. **Mischung je Stadt, harte Obergrenzen** (ersetzt durch die Tabelle in `nachbesserung-massstab.md`, dort gelten genau 7 Metropolen):
+3. **Mischung je Stadt, harte Obergrenzen** (verbindliche Fassung aus `nachbesserung-massstab.md`):
 
    | Cluster | alle Häuser zusammen | davon Hartwig | Volkskauf | Sport | FUNDUS | Premium |
    |---|---:|---:|---:|---:|---:|---:|
-   | Metropole | höchstens 8 | höchstens 4 | höchstens 2 | höchstens 2 | höchstens 2 | höchstens 1 |
-   | Großstadt | höchstens 5 | höchstens 2 | höchstens 1 | höchstens 1 | höchstens 1 | 0 |
-   | Mittelstadt | höchstens 2 | höchstens 1 | höchstens 1 | höchstens 1 | höchstens 1 | 0 |
+   | Metropole | höchstens 9 | höchstens 5 | höchstens 2 | höchstens 2 | höchstens 2 | höchstens 1 |
+   | Großstadt | höchstens 6 | höchstens 3 | höchstens 1 | höchstens 1 | höchstens 1 | 0 |
+   | Mittelstadt | höchstens 2 | höchstens 1 | höchstens 1 | höchstens 1 | 0 | 0 |
 
-   - Hartwig und Volkskauf zusammen in einer Mittelstadt nur ausnahmsweise (historische Doppelstandorte, höchstens 10 Fälle).
-   - Volkskauf mit Schwerpunkt NRW und Mittelstädte, Hartwig A-Häuser nur in Metropolen und großen Großstädten, C-Häuser überwiegend in Mittelstädten.
-   - FUNDUS in Groß- und Metropolstädten.
+   - Hartwig und Volkskauf zusammen in einer Mittelstadt nur ausnahmsweise (historische Doppelstandorte, höchstens 15 Fälle).
+   - Volkskauf mit Schwerpunkt NRW und Mittelstädte, Hartwig A-Häuser nur in Metropolen und den 20 größten Großstädten, B-Häuser nur in Großstädten, C-Häuser überwiegend in Mittelstädten oder als Zweit-/Dritthaus in Großstädten.
+   - FUNDUS ausschließlich in Groß- und Metropolstädten; mehrere Hartwig-Häuser je Stadt mit genau einem 1a-Standort, weitere in b-Lage oder Stadtteilzentrum.
    - Premium in Berlin, München, Hamburg, Düsseldorf.
 4. **Daten statt Simulation:** In dieser Phase entstehen die Häuser aller Formate als Daten (`bauHaus` mit Format, Lage, Klasse, Grundfläche, Etagen, Baujahr, Fassade, Substanz). Simuliert werden wie bisher nur `warenhaus` und `sport`; `schwester` und `outlet` bekommen ihre Wirtschaft im Auftrag `engine-formate.md`. Bis dahin laufen sie mit Status `offen`, aber ohne Umsatz und ohne Kosten (eigenes Kennzeichen `nurDaten: true`), damit die Kalibrierung dieser Phase nur Hartwig und Sport betrifft.
 5. **Export:** Skript `engine/scripts/haeuser-export.ts` (anlegen, falls nicht vorhanden) schreibt `render/haeuser.json` (Hartwig inklusive Premium und Sport), `render/haeuser-schwester.json` (Volkskauf) und `render/haeuser-outlet.json` (FUNDUS) aus `neueWelt(1)`. Die bisherigen Ids bleiben für bestehende Häuser erhalten, neue Ids fortlaufend (W…, S…, K…, O…).

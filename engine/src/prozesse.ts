@@ -26,6 +26,7 @@ function fteAnteil(s: GameState, h: Haus): number {
 
 /** Startet Interessenausgleich und Sozialplanverhandlung, danach Räumungsverkauf und Schließung. */
 export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEndetMit?: boolean } = {}): string | null {
+  if (h.nurDaten) return `${h.name} wird erst mit Aktivierung seines Formats steuerbar.`;
   if (h.status !== 'offen') return `${h.name} ist nicht offen.`;
   if (h.standortgarantie) return `${h.name} steht unter Standortgarantie aus dem Sanierungstarifvertrag.`;
   const br = s.stakeholder.betriebsrat;

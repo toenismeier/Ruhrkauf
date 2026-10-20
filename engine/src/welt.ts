@@ -1,6 +1,6 @@
 import {
   CLUSTER_FAKTOR, GRUPPEN, LAGE_FAKTOR, LIEFERANTEN, NACHNAMEN, STAEDTE, STANDORT_ZUSATZ, VERMIETER, VORNAMEN,
-  BERATER, gruppenFuer,
+  BERATER, PREMIUM_HAEUSER, gruppenFuer,
 } from './daten';
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
@@ -12,10 +12,14 @@ import { erzeugeProdukte } from './produkte';
 import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
+import { ALT_WARENHAUS_STAEDTE, ALT_SPORT_STAEDTE } from './massstab-alt';
 
 export interface Szenario {
   warenhaeuser: number;
   sporthaeuser: number;
+  premiumhaeuser?: number;
+  schwesterhaeuser?: number;
+  outlethaeuser?: number;
   startCash: number;
   kreditlinie: number;
   firma: string;
@@ -26,8 +30,11 @@ export interface Szenario {
 }
 
 export const STANDARD_SZENARIO: Szenario = {
-  warenhaeuser: 130,
-  sporthaeuser: 50,
+  warenhaeuser: 360,
+  sporthaeuser: 44,
+  premiumhaeuser: 4,
+  schwesterhaeuser: 86,
+  outlethaeuser: 66,
   startCash: 120_000_000,
   kreditlinie: 90_000_000,
   firma: 'Hartwig & Brehm Warenhaus AG',
@@ -57,7 +64,13 @@ export const PARAM = {
   abfindungInsolvenz: 7_500,
 };
 
-function grossFuerCluster(h: RngHalter, c: Cluster, f: Format): number {
+function grossFuerCluster(h: RngHalter, c: Cluster, f: Format, hausklasse?: 'A' | 'B' | 'C' | 'premium'): number {
+  if (hausklasse === 'premium') return Math.round(zwischen(h, 18000, 28000) / 100) * 100;
+  if (hausklasse === 'A') return Math.round(zwischen(h, 15000, 25000) / 100) * 100;
+  if (hausklasse === 'B') return Math.round(zwischen(h, 8000, 15000) / 100) * 100;
+  if (hausklasse === 'C') return Math.round(zwischen(h, 3500, 8000) / 100) * 100;
+  if (f === 'outlet') return Math.round(zwischen(h, 1800, 5000) / 100) * 100;
+  if (f === 'schwester') return Math.round(zwischen(h, 4000, 10000) / 100) * 100;
   if (f === 'sport') return Math.round(zwischen(h, 1500, 5500) / 50) * 50;
   if (c === 'metropole') return Math.round(zwischen(h, 14000, 28000) / 100) * 100;
   if (c === 'grossstadt') return Math.round(zwischen(h, 8000, 17000) / 100) * 100;
@@ -67,6 +80,8 @@ function grossFuerCluster(h: RngHalter, c: Cluster, f: Format): number {
 function lageFuer(h: RngHalter, c: Cluster, f: Format): Lage {
   const r = zwischen(h, 0, 1);
   if (f === 'sport') return r < 0.55 ? '1a' : r < 0.85 ? 'center' : 'b';
+  if (f === 'outlet') return r < 0.7 ? 'rand' : 'b';
+  if (f === 'schwester') return r < 0.65 ? '1a' : r < 0.9 ? 'b' : 'center';
   if (c === 'metropole') return r < 0.75 ? '1a' : 'center';
   if (c === 'grossstadt') return r < 0.6 ? '1a' : r < 0.85 ? 'b' : 'center';
   return r < 0.4 ? '1a' : r < 0.8 ? 'b' : r < 0.9 ? 'center' : 'rand';
@@ -80,6 +95,7 @@ function fit(g: GruppeId, kaufkraft: number, alter: number, wettbewerb: number):
 export const gruppenFit = fit;
 
 function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: number[]): Flaeche[] {
+  if (f === 'schwester' || f === 'outlet') return [{ id: `${id}-f1`, etage: 0, qm: vkQm, konzept: 'leer' }];
   const gruppen = gruppenFuer(f);
   // Anteile leicht variieren
   const roh = gruppen.map((g) => GRUPPEN[g].anteilFlaeche * zwischen(h, 0.75, 1.25));
@@ -140,14 +156,16 @@ function name(h: RngHalter): string {
   return `${waehle(h, VORNAMEN)} ${waehle(h, NACHNAMEN)}`;
 }
 
-function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, cluster: Cluster, kk: number, f: Format, sz: Szenario, nr: number): Haus {
-  const id = `${f === 'warenhaus' ? 'W' : 'S'}${String(idx).padStart(3, '0')}`;
-  const lage = lageFuer(h, cluster, f);
-  const vkQm = grossFuerCluster(h, cluster, f);
+function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, cluster: Cluster, kk: number, f: Format, sz: Szenario, nr: number, option: { hausklasse?: 'A' | 'B' | 'C'; premiumSchluessel?: string; outletLage?: Lage; lage?: Lage } = {}): Haus {
+  const id = `${({ warenhaus: 'W', sport: 'S', schwester: 'K', outlet: 'O' } as Record<Format, string>)[f]}${String(idx).padStart(3, '0')}`;
+  const nurDaten = f === 'schwester' || f === 'outlet';
+  const lage = option.lage ?? option.outletLage ?? lageFuer(h, cluster, f);
+  const vkQm = grossFuerCluster(h, cluster, f, option.premiumSchluessel ? 'premium' : option.hausklasse);
   // Etagenzahl nach Stadtgröße; die Grundfläche folgt daraus (Warenhäuser haben 3 bis 7 Ebenen)
-  const nEtagen = f === 'sport' ? ganzZwischen(h, 1, 3)
+  const nEtagen = f === 'sport' || f === 'outlet' ? ganzZwischen(h, 1, 3)
+    : option.hausklasse === 'C' ? ganzZwischen(h, 3, 5)
     : cluster === 'metropole' ? ganzZwischen(h, 5, 7) : cluster === 'grossstadt' ? ganzZwischen(h, 4, 6) : ganzZwischen(h, 3, 5);
-  const grundflaeche = Math.max(f === 'sport' ? 600 : 1500, Math.round(vkQm / nEtagen / 100) * 100);
+  const grundflaeche = Math.max(f === 'sport' || f === 'outlet' ? 600 : 1000, Math.round(vkQm / nEtagen / 100) * 100);
   const hatUG = f === 'warenhaus' && nEtagen >= 3 && chance(h, 0.7);
   const etagen: number[] = [];
   if (hatUG) etagen.push(-1);
@@ -180,15 +198,20 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   if (netTyp === 'net') mietQuote += 0.02;
   if (netTyp === 'triple') mietQuote -= 0.012;
   const fteBedarf = vkQm / PARAM.qmJeFte + basisUmsatz / PARAM.umsatzJeFte;
-  const fteIst = fteBedarf * zwischen(h, 1.0, 1.22);
+  const fteIst = nurDaten ? 0 : fteBedarf * zwischen(h, 1.0, 1.22);
   const vz = fteIst * zwischen(h, 0.42, 0.58);
   const ah = fteIst * zwischen(h, 0.06, 0.14);
   const substanz = Math.round(zwischen(h, 30, 90));
   const zusatz = waehle(h, STANDORT_ZUSATZ[lage]);
+  const premiumName = PREMIUM_HAEUSER.find((p) => p.schluessel === option.premiumSchluessel)?.name;
+  const formatName = f === 'schwester' ? 'Volkskauf' : f === 'outlet' ? 'FUNDUS' : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
   return {
     id,
-    name: `${f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`,
+    name: premiumName ?? `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`,
     stadt, region, cluster, lage, format: f, einzug, wettbewerbStart: einzug.wettbewerb, etagen,
+    ...(option.hausklasse ? { hausklasse: option.hausklasse } : {}),
+    ...(option.premiumSchluessel ? { klasse: 'premium' as const, premiumSchluessel: option.premiumSchluessel } : {}),
+    ...(nurDaten ? { nurDaten: true } : {}),
     grundflaecheQm: grundflaeche,
     baujahr: (() => { const r = zwischen(h, 0, 1); return f === 'sport' ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008); })(),
     fassade: ganzZwischen(h, 0, 7),
@@ -219,24 +242,78 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
 export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameState {
   const h: RngHalter = { rng: seed >>> 0 };
   const haeuser: Haus[] = [];
-  let wh = 0;
-  let sp = 0;
-  // Erst Mehrfachstandorte, dann einfache Städte, bis die Zielzahl erreicht ist
-  for (const [stadt, region, cluster, kk, nWh, nSp] of STAEDTE) {
-    for (let i = 1; i <= nWh && wh < sz.warenhaeuser; i++) {
-      haeuser.push(bauHaus(h, ++wh, stadt, region, cluster, kk, 'warenhaus', sz, i));
-    }
-    for (let i = 1; i <= nSp && sp < sz.sporthaeuser; i++) {
-      haeuser.push(bauHaus(h, ++sp, stadt, region, cluster, kk, 'sport', sz, i));
-    }
+  // Jeder Standort ist explizit zugewiesen. Keine Rundlauf-Auffüllung über die Stadtliste.
+  const stadtVon = new Map(STAEDTE.map((st) => [st[0], st] as const));
+  const belegung = new Map<string, { hartwig: number; sport: number }>(STAEDTE.map((st) => [st[0], { hartwig: 0, sport: 0 }]));
+  const regulare: { stadt: string; nr: number }[] = [];
+  const sport: { stadt: string; nr: number }[] = [];
+  const fuegeRegulaerEin = (stadt: string) => {
+    const b = belegung.get(stadt)!;
+    b.hartwig++;
+    regulare.push({ stadt, nr: b.hartwig });
+  };
+  // Erste 130 Warenhaus-IDs behalten ihren historischen Ort.
+  for (const stadt of ALT_WARENHAUS_STAEDTE.slice(0, sz.warenhaeuser)) fuegeRegulaerEin(stadt);
+  // S001-S044 bleiben in derselben Reihenfolge: nur zwei historische dritte
+  // Sporthäuser (Berlin/München) werden wegen der Grenze von 2 umverlegt.
+  const alteSport = ALT_SPORT_STAEDTE.slice(0, sz.sporthaeuser);
+  const sportHistorisch = new Map<string, number>();
+  for (const stadt of alteSport) sportHistorisch.set(stadt, (sportHistorisch.get(stadt) ?? 0) + 1);
+  for (const stadt of alteSport) {
+    const b = belegung.get(stadt)!;
+    const st = stadtVon.get(stadt)!;
+    const ziel = b.sport < st[4].sport ? stadt : STAEDTE.find(([ort, , , , menge]) =>
+      belegung.get(ort)!.sport < menge.sport && menge.sport > (sportHistorisch.get(ort) ?? 0))?.[0];
+    if (!ziel) throw new Error('Kein Ersatzstandort für bestehendes Sporthaus');
+    const bz = belegung.get(ziel)!;
+    bz.sport++;
+    sport.push({ stadt: ziel, nr: bz.sport });
   }
-  // Auffüllen, falls die Städteliste nicht reicht
-  let k = 0;
-  while (wh < sz.warenhaeuser || sp < sz.sporthaeuser) {
-    const [stadt, region, cluster, kk] = STAEDTE[k % STAEDTE.length];
-    if (wh < sz.warenhaeuser) haeuser.push(bauHaus(h, ++wh, stadt, region, cluster, kk, 'warenhaus', sz, 2));
-    else haeuser.push(bauHaus(h, ++sp, stadt, region, cluster, kk, 'sport', sz, 2));
-    k++;
+  for (const [stadt, , , , menge] of STAEDTE) {
+    const b = belegung.get(stadt)!;
+    while (sport.length < sz.sporthaeuser && b.sport < menge.sport) { b.sport++; sport.push({ stadt, nr: b.sport }); }
+  }
+  if (sport.length !== sz.sporthaeuser) throw new Error('Sport-Standortnetz inkonsistent');
+  for (const [stadt, , , , menge] of STAEDTE) {
+    const b = belegung.get(stadt)!;
+    while (regulare.length < sz.warenhaeuser && b.hartwig < menge.hartwig) fuegeRegulaerEin(stadt);
+  }
+  if (regulare.length !== sz.warenhaeuser) throw new Error('Hartwig-Standortnetz inkonsistent');
+  // A: Metropolen und die 20 größten Großstädte; B: ausschließlich Großstädte.
+  // Die verbleibenden Häuser werden C, überwiegend in Mittelstädten.
+  const top20 = new Set(STAEDTE.filter((st) => st[2] === 'grossstadt').slice(0, 20).map((st) => st[0]));
+  const a = new Set(regulare.filter((r) => stadtVon.get(r.stadt)![2] === 'metropole'));
+  for (const r of regulare) {
+    if (a.size >= 45) break;
+    if (top20.has(r.stadt)) a.add(r);
+  }
+  if (a.size !== 45) throw new Error('Nicht genügend A-Standorte in den 20 größten Großstädten');
+  const b = new Set(regulare.filter((r) => !a.has(r) && stadtVon.get(r.stadt)![2] === 'grossstadt').slice(0, 115));
+  if (b.size !== 115) throw new Error('Nicht genügend B-Standorte in Großstädten');
+  for (const r of regulare) {
+    const [stadt, region, cluster, kk] = stadtVon.get(r.stadt)!;
+    const premiumInStadt = PREMIUM_HAEUSER.some((p) => p.stadt === stadt);
+    const lage: Lage = r.nr === 1 && !premiumInStadt ? '1a' : r.nr % 2 === 0 ? 'b' : 'center';
+    haeuser.push(bauHaus(h, haeuser.filter((x) => x.format === 'warenhaus').length + 1, stadt, region, cluster, kk, 'warenhaus', sz, r.nr, { hausklasse: a.has(r) ? 'A' : b.has(r) ? 'B' : 'C', lage }));
+  }
+  // Premium bildet vier eigenständige Warenhäuser außerhalb der 360 regulären.
+  let p = 0;
+  for (const premium of PREMIUM_HAEUSER) {
+    if (p >= (sz.premiumhaeuser ?? 0)) break;
+    const [stadt, region, cluster, kk] = stadtVon.get(premium.stadt)!;
+    haeuser.push(bauHaus(h, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
+  }
+  let si = 0;
+  for (const r of sport) {
+    const [stadt, region, cluster, kk] = stadtVon.get(r.stadt)!;
+    haeuser.push(bauHaus(h, ++si, stadt, region, cluster, kk, 'sport', sz, r.nr));
+  }
+  let ki = 0; let oi = 0;
+  for (const [stadt, region, cluster, kk, menge] of STAEDTE) {
+    for (let i = 1; i <= menge.volkskauf && ki < (sz.schwesterhaeuser ?? 0); i++)
+      haeuser.push(bauHaus(h, ++ki, stadt, region, cluster, kk, 'schwester', sz, i));
+    for (let i = 1; i <= menge.fundus && oi < (sz.outlethaeuser ?? 0); i++)
+      haeuser.push(bauHaus(h, ++oi, stadt, region, cluster, kk, 'outlet', sz, i, { outletLage: oi <= 46 ? 'rand' : 'b' }));
   }
 
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
@@ -266,7 +343,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   const zentrale = eur(umsatzWoche * PARAM.zentraleQuote);
 
   const s: GameState = {
-    version: 1,
+    version: 2,
     seed,
     rng: h.rng,
     woche: 0,

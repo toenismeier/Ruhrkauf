@@ -85,7 +85,7 @@ export function saettigung(qm: number, Q: number): number {
 export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   const w = s.woche;
   const roh: HausRoh = { haus: h, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
-  if (!istAktiv(h)) return roh;
+  if (!istAktiv(h) || h.nurDaten) return roh;
   const hf = hausFaktor(s, h);
   const fl = aktiveFlaeche(h, w);
   const raeumung = h.status === 'raeumung';

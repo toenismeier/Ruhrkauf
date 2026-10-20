@@ -46,7 +46,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   wareneingang(s, lohn * 2);
 
   // 1. Nachfrage aller Häuser; Eigenmarken und Sortimentsmix je Warengruppe wirken auf die Bruttonachfrage
-  const roh: HausRoh[] = s.haeuser.map((h) => simuliereHaus(s, h));
+  // Volkskauf und FUNDUS erst in Phase 3 wirtschaftlich aktivieren.
+  const roh: HausRoh[] = s.haeuser.filter((h) => !h.nurDaten).map((h) => simuliereHaus(s, h));
   const nachfrage = einkaufNachfrage(s, roh);
 
   // 2. Bestand begrenzt den Abverkauf eigener Ware
@@ -69,11 +70,13 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   const { verfuegbar, einsatz } = einkaufVerbrauch(s, nachfrage);
 
   // Offprice je Format
-  const offUmsatz: Record<Format, number> = { warenhaus: 0, sport: 0 };
+  const offUmsatz: Record<Format, number> = { warenhaus: 0, sport: 0, schwester: 0, outlet: 0 };
   for (const r of roh) offUmsatz[r.haus.format] += r.offprice;
   const offEinsatz: Record<Format, { gebucht: number; zukauf: number }> = {
     warenhaus: verbraucheAltwareWg(s, 'warenhaus', offUmsatz.warenhaus * 0.7),
     sport: verbraucheAltwareWg(s, 'sport', offUmsatz.sport * 0.7),
+    schwester: { gebucht: 0, zukauf: 0 },
+    outlet: { gebucht: 0, zukauf: 0 },
   };
 
   // 4. Hausergebnisse

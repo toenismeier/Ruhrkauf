@@ -3,7 +3,7 @@
 const NAME = 'hartwig-spielstand';
 const STORE = 'staende';
 const KEY = 'autosave';
-export const FORMAT = 1;
+export const FORMAT = 2;
 let queue = Promise.resolve();
 
 function oeffneDb() {
@@ -39,8 +39,8 @@ async function aktion(modus, ausfuehren) {
 
 function pruefen(datensatz) {
   if (!datensatz) return null;
-  if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 1) {
-    throw new Error('Dieser Spielstand stammt aus einer nicht unterstuetzten Version. Er wurde nicht geaendert.');
+  if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 2) {
+    throw new Error('Dieser Spielstand hat ein altes, nicht mehr unterstütztes Format (Maßstab-Version 2 erforderlich). Der alte Stand wurde nicht verändert. Bitte ein neues Spiel starten oder den Stand löschen.');
   }
   const s = datensatz.spiel;
   if (!Number.isInteger(s.woche) || s.woche < 0 ||
@@ -58,7 +58,7 @@ export async function laden() {
 }
 
 export function speichern(spiel, stadt, ui = {}) {
-  if (!spiel || spiel.version !== 1) return Promise.reject(new Error('Kein gueltiges Spiel gestartet.'));
+  if (!spiel || spiel.version !== 2) return Promise.reject(new Error('Kein gueltiges Spiel gestartet.'));
   // Wichtig: Zustand jetzt einfrieren. Eine laufende Simulation darf die wartende Transaktion nicht veraendern.
   const datensatz = { format: FORMAT, datum: new Date().toISOString(), stadt, spiel: structuredClone(spiel), ui: structuredClone(ui) };
   const naechste = queue.then(() => aktion('readwrite', (store) => store.put(datensatz, KEY)));

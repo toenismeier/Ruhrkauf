@@ -180,7 +180,7 @@ const wochenMiete = (qm: number, qmMonat: number): number => (qm * qmMonat * 12)
 
 function hausGewicht(h: Haus): number {
   const aktiv = h.status === 'offen' || h.status === 'schliessung_verhandlung' || h.status === 'raeumung';
-  return aktiv ? (h.format === 'warenhaus' ? 1 : 0.3) : 0;
+  return aktiv && !h.nurDaten ? (h.format === 'warenhaus' ? 1 : 0.3) : 0;
 }
 
 /** Größenfaktor: eine kleinere Kette braucht eine kleinere Zentrale (Fixanteil 45 %). */
@@ -539,7 +539,7 @@ export function neueHqAngebote(s: GameState): void {
   const hq = s.hq;
   const r: RngHalter = hq;
   const staedte = new Map<string, Haus['cluster']>();
-  for (const h of s.haeuser) if (h.status === 'offen' && !staedte.has(h.stadt)) staedte.set(h.stadt, h.cluster);
+  for (const h of s.haeuser) if (h.status === 'offen' && !h.nurDaten && !staedte.has(h.stadt)) staedte.set(h.stadt, h.cluster);
   const liste = [...staedte.keys()];
   if (!liste.length) return;
   const anzahl = ganzZwischen(r, 2, 4);
