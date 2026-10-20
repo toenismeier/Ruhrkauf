@@ -203,18 +203,24 @@ function kassenPlatz(plan,profil) {
 }
 function inszenierung(plan,profil,raum) {
   if(!profil.inszenierung)return;
-  const a=profil.abteilungsMoebel[raum.id]??{};
-  if(!a.insel)return;
-  const m=moebel(a.insel),w=m.rasterB*U,d=m.rasterT*U;
-  const xs=[raum.x+U,raum.x+raum.w-w-U],zs=[raum.z+U,raum.z+raum.d-d-U];
-  // Erst die bevorzugten Eckpositionen, danach bei kleinen/verbauten Bereichen
-  // auch freie 1,25-m-Positionen prüfen. Pro Abteilung höchstens eine Bühne.
-  for(let z=raum.z;z+d<=raum.z+raum.d+1e-8;z+=U)zs.push(z);
-  for(let x=raum.x;x+w<=raum.x+raum.w+1e-8;x+=U)xs.push(x);
-  for(const z of new Set(zs))for(const x of new Set(xs)) {
-    const i=item(a.insel,x,z,0,raum.id,{inszenierung:true});
-    if(passeIn(i,raum)&&passe(i,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld],0)) {
-      plan.moebel.push(i);return;
+  const art=profil.abteilungsMoebel[raum.id]??{};
+  if(!art.insel)return;
+  const varianten=[art.insel];
+  if(profil.id==='sport'&&raum.id==='outdoor'&&art.insel==='sport_insel_zelt')
+    varianten.push('sport_insel_zelt_klein');
+  // Große Themenbühne bevorzugen, bei knappen Randflächen in dasselbe
+  // 1,25-m-Raster auf eine kompakte, aber sortimentsbezogene Bühne ausweichen.
+  for(const id of varianten) {
+    const def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
+    const xs=[raum.x+U,raum.x+raum.w-w-U],zs=[raum.z+U,raum.z+raum.d-d-U];
+    for(let z=raum.z;z+d<=raum.z+raum.d+1e-8;z+=U)zs.push(z);
+    for(let x=raum.x;x+w<=raum.x+raum.w+1e-8;x+=U)xs.push(x);
+    for(const z of new Set(zs))for(const x of new Set(xs)) {
+      const i=item(id,x,z,0,raum.id,{inszenierung:true});
+      if(passeIn(i,raum)&&passe(i,plan,
+        [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld],0)){
+        plan.moebel.push(i);return;
+      }
     }
   }
 }
