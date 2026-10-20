@@ -75,6 +75,17 @@ export function unternehmensWert(s: GameState): number {
   return eur(Math.max(0, s.cash) + immobiliensumme + Math.max(0, hochrechnung) * 5);
 }
 
+/** Umsatz der stärksten aktiven Konkurrenzkette (Schätzung aus Verkaufsfläche und Marktstärke). */
+export function groessterWettbewerberUmsatz(s: GameState): number {
+  const ketten = new Map<string, number>();
+  for (const w of s.wettbewerber) {
+    if (w.status === 'geschlossen' || w.art === 'leer_ehemals') continue;
+    const umsatz = Math.round(w.grundflaecheQm * (125 + 90 * w.staerke));
+    ketten.set(w.kette, (ketten.get(w.kette) ?? 0) + umsatz);
+  }
+  return Math.max(0, ...ketten.values());
+}
+
 export function szenarioStart(s: GameState, sz: Szenario): void {
   if (!sz.szenarioId || sz.szenarioId === 'standard') return;
   const regeln = structuredClone(sz.szenarioRegeln ?? {});
@@ -87,7 +98,7 @@ export function szenarioStart(s: GameState, sz: Szenario): void {
   }
   if (regeln.aufbruchKonkurrenz) {
     const umsatz = Object.values(s.basisUmsatz).reduce((sum, wert) => sum + (wert ?? 0), 0);
-    lauf.umsatzZiel = Math.round(umsatz * 1.2);
+    lauf.umsatzZiel = Math.round(Math.max(umsatz * 1.2, groessterWettbewerberUmsatz(s) * 1.05));
   }
   if (regeln.schutzschirmFrist) {
     eroeffneInsolvenz(s, 'Schutzschirm zum Spielstart');
@@ -199,9 +210,10 @@ export function szenarioZiel(s: GameState): SzenarioZiel {
       const ziel = s.szenario?.umsatzZiel ?? 1;
       const ist = s.historie.length ? s.historie.slice(-13).reduce((a, k) => a + k.umsatz, 0) / Math.min(13, s.historie.length) : 0;
       fortschritt = Math.min(1, ist / ziel);
-      erreicht = w >= 156 && ist >= ziel && !gescheitert;
+      erreicht = w >= 156 && ist >= ziel && ist >= groessterWettbewerberUmsatz(s) && !gescheitert;
       gescheitert ||= w >= 156 && !erreicht;
-      details = 'Wochenumsatz ' + Math.round(ist / 1_000_000) + ' / ' + Math.round(ziel / 1_000_000) + ' Mio. €'; break;
+      details = 'Wochenumsatz ' + Math.round(ist / 1_000_000) + ' / Ziel ' + Math.round(ziel / 1_000_000) +
+        ' Mio. € · größte Konkurrenzkette ca. ' + Math.round(groessterWettbewerberUmsatz(s) / 1_000_000) + ' Mio. €'; break;
     }
     case 'sandkasten':
       return { id, name: karte.name, text: karte.ziel, fortschritt: 0, erreicht: false, gescheitert: false, wertung: false, details: 'Freies Spiel ohne Punktwertung' };
@@ -211,6 +223,7 @@ export function szenarioZiel(s: GameState): SzenarioZiel {
 
 export function szenarioNachWoche(s: GameState): void {
   if (!s.szenario || s.prognose || s.szenario.erreicht || s.szenario.gescheitert) return;
+  if (s.szenario.fusionHausIds?.length && s.haeuser.some((h) => h.streikBis !== undefined && h.streikBis >= s.woche)) s.szenario.streikErlebt = true;
   const ziel = szenarioZiel(s);
   s.szenario.erreicht = ziel.erreicht;
   s.szenario.gescheitert = ziel.gescheitert;
