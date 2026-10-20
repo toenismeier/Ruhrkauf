@@ -103,7 +103,7 @@ describe('O07 Haus als Betrieb', () => {
     expect(pacht.personal).toBe(0);
   });
   test('Hausstandard gilt je Cluster und Einzelabweichung benötigt eine Begründung',()=>{
-    const s=neuesSpiel(8), h=s.haeuser.find(x=>x.klasse!=='premium')!, cluster=h.region;
+    const s=neuesSpiel(8), h=s.haeuser.find(x=>x.klasse!=='premium')!, cluster=String(h.hauscluster ?? h.region);
     const start=hausStandard(s,h).sauberkeit;
     expect(fuehreAus(s,{typ:'hausStandardSetzen',cluster,feld:'sauberkeit',wert:3}).ok).toBe(true);
     expect(hausStandard(s,h).sauberkeit).toBe(3);
@@ -111,7 +111,7 @@ describe('O07 Haus als Betrieb', () => {
     expect(hausStandard(s,h).sauberkeit).toBe(3);
     expect(fuehreAus(s,{typ:'hausStandardSetzen',haus:h.id,cluster,feld:'sauberkeit',wert:1,begruendung:'Lokale Reinigungslage'}).ok).toBe(true);
     expect(hausStandard(s,h).sauberkeit).toBe(1);
-    expect(hausStandard(s,s.haeuser.find(x=>x.region===h.region && x.id!==h.id && x.klasse!=='premium')!).sauberkeit).toBe(3);
+    expect(hausStandard(s,s.haeuser.find(x=>(x.hauscluster ?? x.region)===(h.hauscluster ?? h.region) && x.id!==h.id && x.klasse!=='premium')!).sauberkeit).toBe(3);
     expect(start).toBe(2);
   });
   test('Beobachtung, Kandidaten und Kundenscore sind deterministisch',()=>{

@@ -267,12 +267,18 @@ function stelleKommentar(s: GameState, h: Haus, vergleich: 'vorjahr' | 'plan', d
   const pruefung = pruefeKommentar(s, h, wahr, grund);
   h.betrieb.kommentare.unshift({ woche: s.woche, abweichung: delta, vergleich, grund, wahrerGrund: wahr, massnahme, ...pruefung });
   h.betrieb.kommentare.length = Math.min(h.betrieb.kommentare.length, 26);
+  // Im ersten Geschäftsjahr nur Kommentar gegen den Vorgängerplan, Maßnahmen wirken erst mit Vorjahresvergleich (Ausgangslage neutral).
+  if (vergleich !== 'vorjahr' && s.woche < 52) return;
   // Clusterleitung setzt ihre Routineempfehlung um. O01 kann hier die Qualität übersteuern.
   const organisation = (s as GameState & { organisation?: { hauscluster: { id:string; stelle:{ person?:{ qualitaet:number } } }[] } }).organisation;
   const qualitaet = clamp(organisation?.hauscluster.find(x => x.id === steuerungscluster(s,h))?.stelle.person?.qualitaet ?? h.clusterleitungQualitaet ?? 0.55, 0, 1);
-  if (hash(s.seed+':massnahme:'+h.id+':'+s.woche) < qualitaet) {
+  // Normiert auf die Clusterleitung beim Start: Ausgangslage bleibt neutral, nur Wechsel der Leitung wirken (README Regel 1).
+  const b0 = h.betrieb as typeof h.betrieb & { clusterQStart?: number };
+  if (b0.clusterQStart === undefined) b0.clusterQStart = qualitaet;
+  const qRel = clamp(0.55 * qualitaet / Math.max(0.05, b0.clusterQStart), 0, 1);
+  if (hash(s.seed+':massnahme:'+h.id+':'+s.woche) < qRel) {
     h.betrieb.massnahmeBis = s.woche + 3;
-    h.betrieb.massnahmeFaktor = 1 + 0.006 + 0.008 * qualitaet;
+    h.betrieb.massnahmeFaktor = 1 + 0.006 + 0.008 * qRel;
   }
 }
 
