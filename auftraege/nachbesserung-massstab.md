@@ -133,3 +133,6 @@ Befund aus TestFlight-Wurf 1 und Claudes Nachrechnung (Seed 1, Leicht, ohne Eing
 - Ursachenanalyse in die PR: Saisonkurve Januar/Februar, Personal- und Mietkosten je Woche, Wareneinsatz/Abschriften nach Weihnachten.
 - Ausrichtung (Ummo, 20.10.2026): Turnaround und Management stehen im Fokus, die Insolvenz steht ganz am Ende. Der Standardverlauf ohne Eingriffe darf im ersten Jahr nicht in die Insolvenz zwingen.
 - Prüfung: Wochenverlauf 13 und 52 Wochen je Schwierigkeit als Tabelle in `massstab-stand.md`; Bot C überlebt weiter 5 Jahre.
+
+## 12. Spielende-Kriterium Seed 3 (Claude, 20.10. abends)
+Mit N02 Spielende gilt „saniert“ nur bei positivem EBITDA der letzten 52 Wochen. Bot C erreicht auf `main` Seed 1 und 2, Seed 3 endet in W260 mit rund −15 Mio. € EBITDA-52 (schon vor der Integration der Nice-to-haves). Der Test `tests/spielende.test.ts` prüft deshalb vorerst nur Seeds 1 und 2. Mit der Kalibrierung aus Abschnitt 11 Seed 3 wieder aufnehmen: Bot C muss auf Seeds 1 bis 3 saniert enden.

@@ -11,9 +11,9 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Maßstab Städte (220 Städte, Standortverteilung) | `feat/massstab-staedte` #31 | in Arbeit (WIP) | fertigstellen; Voraussetzung für Q01 |
 | Q01 Städte aus Kartendaten (Essen zuerst) | – | offen | Kartendaten Essen liegen in `render/karten/` (Phase 0 erledigt); Start nach Merge Maßstab Städte |
 | Maßstab Leistung (iPhone-Ziele, Ausgangswert Berlin) | – | offen | Start nach Städte Phase 2 |
-| N07 Belebte Stadt (fließender Verkehr, Passanten) | `feat/nice-belebt` #29 | abnahmefähig | Prüfung im Nice-Chat; Bildrate mit/ohne Leben auf dem iPhone messen |
-| N06 Jahreszeiten (Weihnachtsdeko, Fassaden) | `feat/nice-jahreszeiten` #24 | abnahmefähig | Prüfung im Nice-Chat |
-| N10 Hausbesuch (Innenraum) | `feat/nice-hausbesuch` #27 | abnahmefähig | Prüfung im Nice-Chat |
+| N07 Belebte Stadt (fließender Verkehr, Passanten) | – | gemergt | Bildrate mit/ohne Leben auf dem iPhone messen |
+| N06 Jahreszeiten (Weihnachtsdeko, Fassaden) | – | gemergt | – |
+| N10 Hausbesuch (Innenraum) | – | gemergt | – |
 | Ladenbau Phase 1 bis 5 | – | gemergt | – |
 
 ## Spiel, Oberfläche, Engine
@@ -24,7 +24,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | `feat/engine-massstab` #7 | abnahmefähig (Phase 1), Phase 2 offen | Abnahme; neu Abschnitt 11 in `nachbesserung-massstab.md`: Q1-Verlauf abschwächen (Ummo 20.10.) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | `feat/massstab-oberflaeche` #23 | abnahmefähig | Prüfung; Voraussetzung für Q07 |
 | Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | – | offen | Start nach #7 Phase 2 |
-| Q06 Marktbeobachtung (Meldungen filtern) | – | offen | Start nach Merge N08 |
+| Q06 Marktbeobachtung (Meldungen filtern) | – | offen | startklar (N08 gemergt) |
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | – | offen | Start nach Merge Maßstab Oberfläche |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |
 
@@ -34,10 +34,10 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O05 Ware, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
 | O09 E-Commerce | `feat/op-ecommerce` | in Arbeit | GPT fertigstellen, PR öffnen |
 
-## Nice-to-haves (Prüfung läuft im Nice-Chat)
+## Nice-to-haves
 | N | PR | Status |
 |---|---|---|
-| N01 Statistik #26, N02 Spielende #20, N03 Erfolge #21, N04 Einführung #19, N05 Ton #18, N08 Zeitung #28, N09 Szenarien #30, N11 App #33, N12 Chronik #25, N13 Einstellungen #16, N14 Werkzeuge #22 | offen | abnahmefähig |
+| N01 Statistik #26, N02 Spielende #20, N03 Erfolge #21, N04 Einführung #19, N05 Ton #18, N06 Jahreszeiten #24, N07 Belebte Stadt #29, N08 Zeitung #28, N09 Szenarien #30, N10 Hausbesuch #27, N11 App #33, N12 Chronik #25, N13 Einstellungen #16, N14 Werkzeuge #22 | – | gemergt (alle 14) |
 
 ## App und Auslieferung
 | Punkt | Status |
