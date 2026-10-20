@@ -9,14 +9,24 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hartwig">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./app-icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="./app-icon-180.png" sizes="180x180">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="./startbilder/start-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1206x2622.png">
 <link rel="stylesheet" href="./src/ui/reise-woche.css">
 <style>
   :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #4fb6c2; font-family: -apple-system, "SF Pro Text", "DejaVu Sans", Arial, sans-serif; color: var(--text); }
-  #karte { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
-  .oben { position: fixed; left: 10px; right: 10px; top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  #karte { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: block; touch-action: none; }
+  .oben { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
   .leiste { display: flex; gap: 8px; align-items: center; }
   .marke { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
   .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 17px; flex: none; }
@@ -31,7 +41,7 @@
   .kz span { display: block; color: var(--leise); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kz b { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
-  .unten { position: fixed; left: 10px; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
   #postdirekt { min-width: 46px; position: relative; font-size: 21px; padding: 0 9px; }
   #postbadge.dringend, #postmenubadge.dringend { background: #a92120; }
   #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: 12px; right: 12px; z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
@@ -82,7 +92,7 @@
   #ptitel { font-size: 17px; font-weight: 800; }
   #punter { color: var(--leise); font-size: 12px; margin-top: 2px; }
   #pzu { position: absolute; right: 12px; top: 16px; width: 30px; height: 30px; border-radius: 15px; background: #eeebe5; font-size: 17px; color: var(--leise); }
-  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 12px calc(18px + env(safe-area-inset-bottom)); }
+  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px calc(12px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
   .chip { background: #e4f2ea; color: var(--gruen); border-radius: 10px; padding: 4px 9px; font-size: 12px; font-weight: 700; }
   .chip.warn { background: #fbe3e1; color: var(--rot); } .chip.grau { background: #ebe8e2; color: var(--leise); }
@@ -113,7 +123,7 @@
   .wirk { color: var(--leise) !important; }
   .klickbar { cursor: pointer; } .zeile.gewaehlt { background: #fdf3e6; }
   .schnitt img { display: block; width: 100%; background: #26313a; }
-  #meldung { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: 13px; box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
+  #meldung { position: fixed; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: 13px; box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
   #meldung.an { opacity: 1; transform: none; } #meldung.rot { background: var(--rot); }
   #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: 16px; }
   #lade.an { display: grid; }
@@ -226,7 +236,7 @@
   .badge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
   #menue { position: fixed; inset: 0; background: rgba(20, 30, 40, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 4; }
   #menue.offen { opacity: 1; pointer-events: auto; }
-  .menuekarte { position: absolute; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; transform: translateY(12px); transition: transform 0.18s; }
+  .menuekarte { position: absolute; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; transform: translateY(12px); transition: transform 0.18s; }
   #menue.offen .menuekarte { transform: none; }
   .menuetitel { font-weight: 800; font-size: 15px; margin: 2px 4px 10px; }
   .kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -287,7 +297,7 @@
   .farben.klein { gap: 8px; } .farben.klein button { width: 34px; height: 34px; border-radius: 17px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
   .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: 13px; } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: 11.5px; margin-right: 6px; } .trend .olief { padding: 0; }
   /* Startbildschirm */
-  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
+  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   #start.an { display: grid; place-items: center; }
   .startkarte { width: 100%; max-width: 420px; background: var(--grund); border-radius: 22px; box-shadow: 0 8px 32px rgba(20, 30, 40, 0.3); padding: 18px 16px 14px; }
   .startkopf { display: flex; align-items: center; gap: 12px; } .startkopf b { display: block; font-size: 24px; font-weight: 800; } .startkopf small { color: var(--leise); font-size: 12px; }
@@ -313,6 +323,28 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+
+  /* N11: Speicherverwaltung und Aktualisierung */
+  .app-plaetze { display: grid; gap: 10px; margin: 8px 0 12px; }
+  .app-platz { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 11px; }
+  .app-platzkopf { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .app-platzkopf b { font-size: 14px; } .app-platzkopf span { font-size: 11px; color: var(--leise); }
+  .app-platzinhalt { display: flex; align-items: center; gap: 11px; margin: 9px 0; }
+  .app-vorschau { width: 106px; height: 62px; flex: none; object-fit: cover; border-radius: 9px; background: #4fb6c2; }
+  .app-vorschau.leer { background: var(--rot); color: #fff; display: grid; place-items: center; font-size: 28px; font-weight: 800; }
+  .app-daten { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .app-daten strong, .app-daten small { display: block; }
+  .app-daten strong { font-size: 13px; } .app-daten small { font-size: 11px; color: var(--leise); line-height: 1.4; }
+  .app-namenswahl { display: block; font-size: 11px; color: var(--leise); margin: 8px 0; }
+  .app-namenswahl input { width: 100%; min-height: 44px; border: 1px solid var(--linie); border-radius: 9px; font: inherit; font-size: 16px; padding: 8px; color: var(--text); }
+  .app-aktionen { display: flex; flex-wrap: wrap; gap: 6px; }
+  .app-aktionen button { background: #eeebe5; color: var(--text); min-height: 44px; padding: 6px 10px; border-radius: 9px; font-size: 12px; font-weight: 750; }
+  .app-aktionen button:first-child { background: #e4f2ea; color: var(--gruen); }
+  .app-aktionen button:disabled { opacity: 0.5; }
+  #app-plaetze-start { margin-top: 12px; max-height: 46dvh; overflow-y: auto; overscroll-behavior: contain; }
+  #app-plaetze-start .app-platz { padding: 9px; }
+  #app-update { position: fixed; z-index: 9; left: calc(14px + env(safe-area-inset-left)); right: calc(14px + env(safe-area-inset-right)); top: calc(12px + env(safe-area-inset-top)); border-radius: 14px; box-shadow: var(--schatten); background: var(--text); color: white; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; }
+  #app-update button { background: white; color: var(--text); padding: 10px 12px; border-radius: 8px; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -342,6 +374,7 @@
       <button class="mkachel" id="marketing"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l7 4V6L6 10zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg><b>Marketing</b><small>Kanäle, Karte, CRM, Aktionen</small></button>
       <button class="mkachel" id="produkte"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c-1 0-2 .8-2 2v.5L3 17h18l-9-6.5"/></svg><b>Produkte</b><small>Eigenmarken entwickeln</small></button>
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>
+      <button class="mkachel" id="app-oeffnen" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8M8 12h8M8 17h4"/></svg><b>Spielstände</b><small>3 Plätze, Import, Export</small></button>
       <button class="mkachel" id="performance" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18a9 9 0 1 1 18 0M12 17l5-7M7 18h10"/></svg><b>Performance</b><small>iPhone messen</small></button>
     </div>
     <label id="postwarnungswahl"><input type="checkbox" id="postwarnung" checked> Vor Fristablauf beim Wochenwechsel warnen</label>
@@ -370,14 +403,12 @@
     <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
     <button id="fortsetzen" class="breit" type="button" hidden>Fortsetzen</button>
     <div id="speicherhinweis" role="status"></div>
+    <div class="vtitel">Gespeicherte Partien</div>
+    <div id="app-plaetze-start" class="app-plaetze" aria-label="Gespeicherte Spielstände"></div>
     <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
   </div>
 </div>
 <script src="spiel-bundle.js"></script>
-<script>
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
-  }
-</script>
+
 </body>
 </html>
