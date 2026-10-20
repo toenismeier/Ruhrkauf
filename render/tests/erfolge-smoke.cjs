@@ -10,7 +10,7 @@ const path = require('node:path');
   const bilder = path.resolve(root, '..', 'bilder', 'nice', 'erfolge');
   mkdirSync(bilder, { recursive: true });
   execFileSync(process.execPath, [path.join(root, 'spiel-render.js'), '--bundle'], { cwd: root, stdio: 'inherit' });
-  const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
+  const browser = await chromium.launch({ headless: true, args: ['--headless=new'], ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const fehler = [];
   page.on('pageerror', err => fehler.push(err.message));

@@ -36,7 +36,8 @@
   .marke { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
   .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: calc(17px * var(--schrift)); flex: none; }
   .marke b { display: block; font-size: calc(14px * var(--schrift)); }
-  .marke small { color: var(--leise); font-size: calc(11px * var(--schrift)); }
+  .marke small { color: var(--leise); font-size: calc(11px * var(--schrift)); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .marke > div:last-child { min-width: 0; }
   .datum { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; text-align: right; flex: none; }
   .datum b { display: block; font-size: calc(14px * var(--schrift)); }
   #stufe { display: block; color: var(--leise); font-size: calc(11px * var(--schrift)); }

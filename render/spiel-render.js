@@ -685,7 +685,7 @@ async function buendeln() {
     pruefe(!!w.kapitalflussText && !w.kapitalflussText.includes('nicht separat erfasst') &&
       ['Cash operativ', 'Investitionen', 'Finanzierung', 'Sonstiges', 'Cash netto', 'Cash-Bestand']
         .every((x) => w.kapitalflussText.includes(x)), 'Kapitalfluss wird vollständig angezeigt');
-    pruefe((w.bericht?.meldungstexte ?? []).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche');
+    pruefe((w.bericht?.meldungstexte ?? []).slice(1).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche (Aufmacher aus N08)');
     await p.screenshot({ path: path.join(ordnerWoche, '99-wochenbericht.png') });
     await p.screenshot({ path: path.join(abnahme, '02-kapitalfluss.png') });
     if (w.bericht?.vorgaenge > 0) {
@@ -811,7 +811,8 @@ async function buendeln() {
         const spiel = window.spiel;
         spiel.fokusHaeuser();
         const haus = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen')
-          .map((h) => spiel.tippPunkt(h.id)).find((q) => q && q.y < 620);
+          .map((h) => spiel.tippPunkt(h.id)).filter((q) => q && q.y < 620 && q.x > 30 && q.x < innerWidth - 30 && document.elementFromPoint(q.x, q.y)?.id === 'karte')
+          .sort((a, b) => Math.abs(a.x - innerWidth / 2) - Math.abs(b.x - innerWidth / 2))[0];
         return haus;
       });
       if (!punkt) throw new Error('Kein antippbares Haus für Schritt 3');

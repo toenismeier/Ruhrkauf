@@ -391,7 +391,7 @@ function baueStadtAusSpiel(name) {
   // O01: geografische Zuordnung im Stadtchip anzeigen.
   const hausHier = s.haeuser.find((h) => h.stadt === name && h.hauscluster);
   const geoCluster = s.organisation?.hauscluster.find((c) => c.id === hausHier?.hauscluster);
-  const chipCluster = $('stadtcluster'); if (chipCluster) chipCluster.textContent = geoCluster?.name ?? '';
+  const chipCluster = $('stadtcluster'); if (chipCluster) chipCluster.textContent = geoCluster && !geoCluster.name.startsWith('Raum ' + name) ? geoCluster.name : '';
   return ms;
 }
 // Für Bahnreisen wird derselbe Szenenaufbau in Animationsbilder aufgeteilt; Detailkacheln folgen bei Ankunft.
@@ -1144,8 +1144,7 @@ async function testStandLaden(d) {
   s.testGenutzt = true;
   postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
   if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
-  $('postwarnung').checked = !!postUi.warnen;
-  $('wochenbericht-modus').value = ['voll', 'kurz', 'aus'].includes(postUi.wochenbericht) ? postUi.wochenbericht : 'voll';
+  // Warnung und Wochenberichtsmodus liegen seit N13 in den Einstellungen (geräteweit).
   schwierigkeitId = s.schwierigkeit ?? 'mittel';
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();

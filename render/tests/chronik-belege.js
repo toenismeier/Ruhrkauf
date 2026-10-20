@@ -29,6 +29,8 @@ const server = http.createServer((req, res) => {
     page.on('pageerror', err => errors.push(err.message));
     await page.goto('http://127.0.0.1:' + server.address().port + '/spiel.html');
     await page.locator('#start.an').waitFor();
+    // N09: zuerst Szenario wählen, danach Schwierigkeit und Start.
+    await page.locator('.sz-karte[data-szenario=standard]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length > 0);
     await page.evaluate(() => window.spiel.oeffneChronik());

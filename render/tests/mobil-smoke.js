@@ -36,6 +36,8 @@ const server = http.createServer((req, res) => {
     await page.goto(url, { waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
     assert.equal(await page.locator('.stufe-karte').count(), 3, 'Startbildschirm hat drei Schwierigkeitsgrade');
+    // N09: zuerst Szenario wählen, danach Schwierigkeit und Start.
+    await page.locator('.sz-karte[data-szenario=standard]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length > 0);
     const vorher = await page.evaluate(() => {

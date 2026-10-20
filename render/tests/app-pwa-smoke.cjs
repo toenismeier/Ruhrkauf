@@ -57,8 +57,13 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.evaluate(async () => (await fetch('./app-icon-512.png')).ok), true);
     assert.equal(await page.evaluate(async () => (await fetch('./app-icon-180.png')).ok), true);
 
+    // N09: zuerst Szenario wählen, danach Schwierigkeit und Start.
+    await page.locator('.sz-karte[data-szenario=standard]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.haeuser?.length > 0);
+    // N04: Die Einführungsfrage beim ersten Start schließen, damit die Spielstände bedienbar sind.
+    const nie = page.locator('[data-ein="nie"]');
+    if (await nie.isVisible().catch(() => false)) await nie.click();
     const soll = await page.evaluate(() => {
       window.spiel.woche(false);
       const roh = JSON.stringify(window.spiel.s);
@@ -70,15 +75,15 @@ const server = http.createServer((req, res) => {
     });
     await page.evaluate(() => window.spiel.speichern());
     await page.evaluate(() => window.spiel.app.oeffne());
-    const platz1 = page.locator('[data-platz="platz-1"]');
+    const platz1 = page.locator('#pinhalt [data-platz="platz-1"]');
     await platz1.locator('[data-name]').fill('Essen Sanierung');
     await platz1.locator('[data-app-aktion="speichern"]').click();
-    await page.waitForFunction(() => !!document.querySelector('[data-platz="platz-1"] .app-daten strong')?.textContent.includes('Essen Sanierung'));
-    const vorschau = await page.locator('[data-platz="platz-1"] .app-vorschau').getAttribute('src');
+    await page.waitForFunction(() => !!document.querySelector('#pinhalt [data-platz="platz-1"] .app-daten strong')?.textContent.includes('Essen Sanierung'));
+    const vorschau = await page.locator('#pinhalt [data-platz="platz-1"] .app-vorschau').getAttribute('src');
     assert.ok(vorschau.startsWith('data:image/jpeg;base64,'), 'Vorschau ist JPEG');
 
     const downloadPromise = page.waitForEvent('download');
-    await page.locator('[data-platz="platz-1"] [data-app-aktion="export"]').click();
+    await page.locator('#pinhalt [data-platz="platz-1"] [data-app-aktion="export"]').click();
     const download = await downloadPromise;
     assert.ok(download.suggestedFilename().endsWith('.hartwig'));
     const gzipBytes = fs.readFileSync(await download.path());
@@ -86,15 +91,15 @@ const server = http.createServer((req, res) => {
     assert.equal(gzipBytes[1], 0x8b);
 
     // Import auf einen anderen Platz, dann vollständige Wiederaufnahme im selben Browser.
-    const datei = page.locator('[data-platz="platz-2"] [data-app-datei]');
+    const datei = page.locator('#pinhalt [data-platz="platz-2"] [data-app-datei]');
     await datei.setInputFiles({ name: 'backup.hartwig', mimeType: 'application/gzip', buffer: gzipBytes });
-    await page.waitForFunction(() => !!document.querySelector('[data-platz="platz-2"] .app-daten strong'));
+    await page.waitForFunction(() => !!document.querySelector('#pinhalt [data-platz="platz-2"] .app-daten strong'));
     const platz2 = await page.evaluate(() => {
-      const k = document.querySelector('[data-platz="platz-2"]');
+      const k = document.querySelector('#pinhalt [data-platz="platz-2"]');
       return { name: k.querySelector('strong')?.textContent, wo: k.querySelector('.app-daten')?.textContent };
     });
     assert.equal(platz2.name, 'Essen Sanierung');
-    await page.locator('[data-platz="platz-2"] [data-app-aktion="laden"]').click();
+    await page.locator('#pinhalt [data-platz="platz-2"] [data-app-aktion="laden"]').click();
     await page.waitForFunction(() => window.spiel.s.woche === 1 && window.bereit);
     let ist = await page.evaluate(() => {
       const roh = JSON.stringify(window.spiel.s);
@@ -108,7 +113,7 @@ const server = http.createServer((req, res) => {
 
     await page.reload({ waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
-    await page.locator('[data-platz="platz-1"] [data-app-aktion="laden"]').click();
+    await page.locator('#start [data-platz="platz-1"] [data-app-aktion="laden"]').click();
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.woche === 1);
     ist = await page.evaluate(() => {
       const roh = JSON.stringify(window.spiel.s);
@@ -126,8 +131,8 @@ const server = http.createServer((req, res) => {
     await page.reload({ waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
     assert.equal(await page.evaluate(() => navigator.onLine), false);
-    assert.equal(await page.locator('#startknopf').isVisible(), true);
-    await page.locator('[data-platz="platz-1"] [data-app-aktion="laden"]').click();
+    assert.equal(await page.locator('.sz-karte[data-szenario=standard]').isVisible(), true);
+    await page.locator('#start [data-platz="platz-1"] [data-app-aktion="laden"]').click();
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.woche === 1);
     assert.equal(await page.evaluate(() => window.spiel.s.cash), soll.cash);
 
