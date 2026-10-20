@@ -6,7 +6,7 @@ import { STANDARD_SZENARIO } from '../src/welt';
 
 type Messung = { seed: number; an: boolean; umsatz: number; ebitda: number; ms: number; wochen: number };
 function simulation(seed: number, an: boolean, massstab = false): Messung {
-  const s = neuesSpiel(seed, massstab ? { ...STANDARD_SZENARIO, warenhaeuser: 360, sporthaeuser: 44 } : STANDARD_SZENARIO);
+  const s = neuesSpiel(seed, massstab ? { ...STANDARD_SZENARIO, warenhaeuser: 510, sporthaeuser: 50 } : STANDARD_SZENARIO);
   s.hausbetriebAbnahmeAus = !an;
   s.cash = 5_000_000_000; // Für den Baseline-Vergleich Liquidität neutralisieren.
   let umsatz = 0, ebitda = 0, ms = 0, wochen = 0;
@@ -22,11 +22,13 @@ function simulation(seed: number, an: boolean, massstab = false): Messung {
   return { seed, an, umsatz, ebitda, ms: ms/Math.max(1,wochen), wochen };
 }
 const prozent = (a:number,b:number) => Math.abs(a-b)/Math.max(1,Math.abs(b))*100;
+// Bis zum Merge von feat/engine-massstab wird die 560-Häuser-Last synthetisch
+// mit den zwei auf main verfügbaren Formaten durchgespielt.
 const gross = process.argv.includes('--massstab');
 const zeilen = [1,2,3].map(seed => {
   const alt = simulation(seed, false, gross);
   const neu = simulation(seed, true, gross);
-  return { seed, hauszahl: gross ? 404 : 180, umsatzAbweichungProzent: prozent(neu.umsatz,alt.umsatz),
+  return { seed, hauszahl: gross ? 560 : 180, umsatzAbweichungProzent: prozent(neu.umsatz,alt.umsatz),
     ebitdaAbweichungProzent: prozent(neu.ebitda,alt.ebitda), vorherMs: alt.ms, nachherMs: neu.ms,
     mehrMsProWoche: neu.ms - alt.ms, wochenAlt:alt.wochen, wochenNeu:neu.wochen };
 });
