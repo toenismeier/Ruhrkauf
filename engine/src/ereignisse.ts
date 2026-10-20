@@ -421,3 +421,109 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
 }
 
 export { neuesAngebot };
+
+
+// N14: Manuell reproduzierbare Ereignisse; normale Wochenläufe rufen diese Funktionen nie auf.
+export function testAngebotErzeugen(s: GameState, art: import('./types').AngebotTyp): boolean {
+  const vorher = s.angebote.length;
+  switch (art) {
+    case 'untermiete': untermietAnfrage(s); break;
+    case 'paket': paketDeal(s); break;
+    case 'stadt': stadtAngebot(s); break;
+    case 'sportverkauf': sportVerkauf(s); break;
+    case 'sonderposten': sonderposten(s); break;
+    case 'premiumVerkauf': {
+      const h = s.haeuser.find((x) => x.klasse === 'premium' && x.status === 'offen');
+      if (!h) return false;
+      neuesAngebot(s, {
+        typ: 'premiumVerkauf', frist: s.woche + 10,
+        titel: 'Testangebot für ' + h.name, text: 'Ein fiktiver Investor bietet für das Premiumhaus.',
+        kaufpreis: Math.round((h.kpi?.umsatz ?? 2_000_000) * 40),
+        wunschHaeuser: [h.id], premiumKaeuferTyp: 'Family Office', premiumKaeuferName: 'Testinvestor',
+      });
+      break;
+    }
+    // Übernahmen entstehen aus Räumungen in wettbewerb.ts (testWettbewerbEreignis).
+    case 'uebernahme': return false;
+  }
+  return s.angebote.length > vorher;
+}
+
+export function testZufallsereignis(s: GameState, art: string): boolean {
+  const h = offeneHaeuser(s).find((x) => x.miete.netTyp === 'triple') ?? offeneHaeuser(s)[0];
+  switch (art) {
+    case 'instandhaltung':
+      if (!h) return false;
+      instandhaltung(s, h);
+      return true;
+    case 'mietende':
+      if (!h) return false;
+      mietende(s, h);
+      return true;
+    case 'jahresgespraech': {
+      const l = s.lieferanten.find((x) => x.aktiv);
+      if (!l) return false;
+      neueEntscheidung(s, {
+        typ: 'jahresgespraech', frist: s.woche + 2,
+        titel: 'Jahresgespräch mit ' + l.name, text: l.beschreibung,
+        optionen: [{ id: 'mengenzusage', label: 'Mengenzusage' }, { id: 'platzierung', label: 'Platzierung' }, { id: 'hart', label: 'Hart verhandeln' }],
+        standard: 'platzierung', daten: { lieferant: l.id },
+      });
+      return true;
+    }
+    case 'nordline_dtc':
+      neueEntscheidung(s, {
+        typ: 'nordline_dtc', frist: s.woche + 4, titel: 'Nordline stellt auf Direktvertrieb um',
+        text: 'Nordline kürzt die Zuteilung für den Handel. Gegen eine Investition in Markenflächen bleibt Hartwig A-Partner.',
+        optionen: [
+          { id: 'akzeptieren', label: 'Kürzung akzeptieren' },
+          { id: 'investieren', label: 'Markenflächen finanzieren (3,5 Mio. €)' },
+        ],
+        standard: 'akzeptieren', daten: {},
+      });
+      return true;
+    case 'arvel_rueckkehr': {
+      const l = s.lieferanten.find((x) => x.id === 'arvel');
+      if (!l) return false;
+      l.aktiv = true; l.rueckzug = false;
+      melde(s, 'info', 'Test: Maison Arvel kehrt in die B-Lagen zurück.');
+      return true;
+    }
+    case 'lieferantenausfall': {
+      const l = s.lieferanten.find((x) => x.aktiv);
+      if (!l) return false;
+      l.aktiv = false; l.ausfallBis = s.woche + 12;
+      melde(s, 'warnung', 'Test: Lieferant ' + l.name + ' fällt 12 Wochen aus.', { modul: 'einkauf' });
+      return true;
+    }
+    case 'containerstau': {
+      const b = s.bestellungen.find((x) => x.wert > 0);
+      if (!b) return false;
+      b.ankunft += 6;
+      melde(s, 'warnung', 'Test: Containerstau verzögert ' + b.gruppe + ' um 6 Wochen.', { modul: 'einkauf' });
+      return true;
+    }
+    case 'konjunktur':
+      s.makro.schockStaerke = 0.08 * schwierigkeit(s).ereignisse;
+      s.makro.schockBis = s.woche + 26;
+      s.makro.konjunktur = 1 - s.makro.schockStaerke;
+      melde(s, 'presse', 'Test: Konjunkturschock trifft den Einzelhandel.');
+      return true;
+    case 'streik': {
+      const hs = offeneHaeuser(s).slice(0, 4);
+      if (!hs.length) return false;
+      for (const haus of hs) haus.streikBis = s.woche + 2;
+      melde(s, 'presse', 'Test: Streik in ' + hs.length + ' Häusern.');
+      return true;
+    }
+    case 'filialleiter':
+      if (!h) return false;
+      h.personal.filialleiter = { name: 'Interimleitung', skill: 0.35, moral: 50, interimBis: s.woche + 4 };
+      melde(s, 'warnung', 'Test: Filialleitung in ' + h.name + ' ausgefallen.', { stadt: h.stadt, hausId: h.id });
+      return true;
+    case 'presse':
+      melde(s, 'presse', SATIRE[0]);
+      return true;
+    default: return false;
+  }
+}

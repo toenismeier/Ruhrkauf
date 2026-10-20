@@ -1,4 +1,4 @@
-// Aufruf: node spiel-render.js [--bundle] [--nur-haus] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
+// Aufruf: node spiel-render.js [--bundle] [--nur-haus] [--nur-werkzeuge] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
 // Bündelt src/spiel.js (Engine-TS direkt aus /home/claude/turnaround/src) nach spiel-bundle.js. Mit --bundle nur bündeln.
 // Sonst headless im Hochformat 390 × 844: Woche 0, 26 und 52 mit Bot-Strategie C, dazu ein Bild mit offenem Hauspanel
 // (out/spiel-w00.png, out/spiel-w26.png, out/spiel-w52.png, out/spiel-haus.png, out/spiel-hq-w00.png, out/spiel-hq.png, out/spiel-essen.png, out/spiel-essen-hq.png, out/spiel-hq-abteilungen.png), Messwerte nach out/spiel-messung.json.
@@ -800,6 +800,74 @@ async function buendeln() {
     try { await hausPruefen(); } finally { await b.close(); }
     return;
   }
+  // N14: Testpanel im iPhone-Viewport, 13 Wochen und Fehlerbericht-Roundtrip.
+  async function werkzeugePruefen() {
+    const ausgabe = path.join(__dirname, '..', 'bilder', 'nice', 'werkzeuge');
+    fs.mkdirSync(ausgabe, { recursive: true });
+    await p.evaluate(() => window.spiel.neuesSpiel(1, 'Essen'));
+    const zuerst = await p.evaluate(() => ({
+      verborgen: document.getElementById('werkzeuge').hidden,
+      menue: getComputedStyle(document.getElementById('werkzeuge')).display,
+      sichtbar: document.querySelector('.testwerkzeuge') !== null,
+      markiert: !!window.spiel.s.testGenutzt,
+    }));
+    if (!zuerst.verborgen || zuerst.menue !== 'none' || zuerst.sichtbar || zuerst.markiert)
+      throw new Error('Testwerkzeuge sind vor Freischaltung sichtbar: ' + JSON.stringify(zuerst));
+    await p.evaluate(() => {
+      const datum = document.querySelector('.datum');
+      for (let i = 0; i < 5; i++) datum.click();
+    });
+    const offen = await p.evaluate(() => ({
+      entsperrt: window.spiel.werkzeuge.freigeschaltet,
+      kachel: !document.getElementById('werkzeuge').hidden,
+      panel: !!document.querySelector('.testwerkzeuge'),
+    }));
+    if (!offen.entsperrt || !offen.kachel || !offen.panel)
+      throw new Error('Fünffach-Tipp hat Werkzeuge nicht geöffnet: ' + JSON.stringify(offen));
+    await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge.png') });
+    const sprung = await p.evaluate(() => window.spiel.werkzeuge.springen(13, true));
+    const snapshot = await p.evaluate(() => ({
+      woche: window.spiel.s.woche, cash: window.spiel.s.cash,
+      test: window.spiel.s.testGenutzt, label: document.getElementById('phase').textContent,
+    }));
+    if (sprung.fertig !== 13 || snapshot.woche !== 13 || !snapshot.test || !snapshot.label.includes('Testspiel'))
+      throw new Error('Zeitsprung nicht korrekt: ' + JSON.stringify({ sprung, snapshot }));
+    await p.evaluate(() => console.error('N14 Fehlerprobe'));
+    const fehlerpunkt = await p.evaluate(() => document.querySelector('.datum').classList.contains('testfehler'));
+    if (!fehlerpunkt) throw new Error('Fehlerpunkt nach Konsolenfehler fehlt.');
+    const bericht = await p.evaluate(() => window.spiel.werkzeuge.erstelleBericht());
+    if (!bericht.startsWith('RUHRKAUF-TEST-1:gzip:')) throw new Error('Fehlerbericht nicht gzip/Base64.');
+    const archiv = await p.evaluate(async (b) => {
+      const roh = atob(b.slice('RUHRKAUF-TEST-1:gzip:'.length));
+      const bytes = Uint8Array.from(roh, (c) => c.charCodeAt(0));
+      const text = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+      const daten = JSON.parse(text);
+      return {
+        woche: daten.woche, cash: daten.spiel.cash, seed: daten.seed,
+        fehler: daten.fehler.some((e) => e.text.includes('N14 Fehlerprobe')),
+        userAgent: !!daten.userAgent, version: daten.version,
+      };
+    }, bericht);
+    if (!archiv.fehler || !archiv.userAgent || archiv.version !== 1 || archiv.woche !== 13 || archiv.cash !== snapshot.cash)
+      throw new Error('Komprimierter Fehlerbericht unvollständig: ' + JSON.stringify(archiv));
+    await p.evaluate(() => window.spiel.neuesSpiel(3, 'Essen'));
+    const wieder = await p.evaluate((b) => window.spiel.werkzeuge.berichtLaden(b), bericht);
+    if (wieder.woche !== snapshot.woche || wieder.cash !== snapshot.cash || wieder.seed !== 1)
+      throw new Error('Fehlerbericht verändert Spielstand: ' + JSON.stringify({ snapshot, wieder }));
+    await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge-geladen.png') });
+    await p.goto(url + '&werkzeuge=1', { waitUntil: 'load', timeout: 0 });
+    await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
+    const urlFreischaltung = await p.evaluate(() => ({
+      entsperrt: window.spiel.werkzeuge.freigeschaltet,
+      geoeffnet: !!document.querySelector('.testwerkzeuge'),
+    }));
+    if (!urlFreischaltung.entsperrt || !urlFreischaltung.geoeffnet)
+      throw new Error('URL-Freischaltung fehlgeschlagen: ' + JSON.stringify(urlFreischaltung));
+    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, archiv, urlFreischaltung, berichtZeichen: bericht.length }, null, 2));
+    console.log('N14 Testwerkzeuge: beide Freischaltungen, 13 Wochen, gzip-Bericht und Wiederherstellung identisch.');
+    return { sprung, snapshot, wieder, urlFreischaltung };
+  }
+  if (process.argv.includes('--nur-werkzeuge')) { try { await werkzeugePruefen(); } finally { await b.close(); } return; }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
     return;

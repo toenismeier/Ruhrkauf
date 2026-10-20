@@ -42,6 +42,7 @@ import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml } from './ui/hau
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
 import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
+import { werkzeugeModul } from './ui/werkzeuge.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -562,17 +563,20 @@ function cockpitZeigen() {
   const ausnahmen = E.hausBeobachtung(s, 30).length;
   $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
   $('kw').textContent = `KW ${c.kw} / ${c.jahr}`;
-  $('phase').textContent = c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '';
-  $('phase').style.display = c.phase === 'regulaer' ? 'none' : '';
+  $('phase').textContent = [c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '', s.testGenutzt ? 'Testspiel' : ''].filter(Boolean).join(' · ');
+  $('phase').style.display = c.phase === 'regulaer' && !s.testGenutzt ? 'none' : '';
 }
 
 // ─────────────────────────────────────────── Woche weiter
-function woche(mitBot = false) {
+function woche(mitBot = false, test = false) {
   if (s.phase === 'zerschlagen') return null;
   const davor = E.posteingang(s);
   const t0 = performance.now();
   if (mitBot) botSchritt(s);
-  E.wocheAbspielen(s);
+  if (test) {
+    const ergebnis = E.fuehreAus(s, { typ: 'testWoche' });
+    if (!ergebnis.ok) { meldung(ergebnis.text, false); return null; }
+  } else E.wocheAbspielen(s);
   const t1 = performance.now();
   const geaendert = grafikNachziehen();
   const t2 = performance.now();
@@ -610,8 +614,9 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es].filter(Boolean);
+let wk = null;
 let vorherigerFokus = null;
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -1034,6 +1039,37 @@ wochenbericht = wochenberichtModul({
   oeffneVorgang: (id) => oeffneModul(po, 'handeln', id),
   fehler: (e) => { console.error('Wochenabschluss fehlgeschlagen:', e); meldung('Woche konnte nicht abgeschlossen werden', false); },
 });
+// ─────────────────────────────────────────── N14: verborgene Testwerkzeuge
+async function testStandLaden(d) {
+  clearTimeout(speicherTimer);
+  s = structuredClone(d.spiel);
+  s.testGenutzt = true;
+  postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
+  if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
+  $('postwarnung').checked = !!postUi.warnen;
+  $('wochenbericht-modus').value = ['voll', 'kurz', 'aus'].includes(postUi.wochenbericht) ? postUi.wochenbericht : 'voll';
+  schwierigkeitId = s.schwierigkeit ?? 'mittel';
+  $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+  MERK.clear();
+  schliessePanel();
+  const ziel = STADTLISTE.some((x) => x.name === d.stadt) ? d.stadt : 'Essen';
+  wahl.value = ziel;
+  cockpitZeigen();
+  baueStadtAusSpiel(ziel);
+  ek.badge(); menueBadge();
+  window.spiel.s = s;
+  automatischSpeichern();
+  wk.oeffne();
+}
+wk = werkzeugeModul({
+  E, s: () => s, ui: () => postUi, stadt: () => stadtName, panel, meldung,
+  nachAktion: () => {
+    schwierigkeitId = s.schwierigkeit ?? 'mittel';
+    $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+    nachAktion();
+  },
+  teileStand, messung, renderFrame: jetztZeichnen, testWoche: (bot) => woche(bot, true), standLaden: testStandLaden,
+});
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
 window.addEventListener('einstellung', (e) => {
   if (e.detail.schluessel === 'autospeichern' && !e.detail.wert) clearTimeout(speicherTimer);
@@ -1127,6 +1163,7 @@ function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) 
   baueStadtAusSpiel(stadt);
   ek.badge(); menueBadge();
   window.spiel.s = s;
+  wk?.nachStart();
   automatischSpeichern();
   return s;
 }
@@ -1143,7 +1180,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
@@ -1271,6 +1308,7 @@ async function spielFortsetzen() {
     baueStadtAusSpiel(wahl.value);
     ek.badge(); menueBadge();
     window.spiel.s = s;
+    wk?.nachStart();
     window.bereit = true;
     $('lade').classList.remove('an');
     meldung('Spielstand fortgesetzt.');

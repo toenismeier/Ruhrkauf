@@ -452,6 +452,8 @@ export interface Quartal {
 
 export interface GameState {
   version: 1;
+  /** N14: Testwerkzeuge wurden in diesem Spielstand genutzt. */
+  testGenutzt?: boolean;
   /** Schwierigkeit beim Spielstart (src/schwierigkeit.ts), fehlt = mittel. */
   schwierigkeit?: SchwierigkeitId;
   seed: number;

@@ -48,6 +48,7 @@
     STANDARD_SZENARIO: () => STANDARD_SZENARIO,
     STARTKALENDER: () => STARTKALENDER,
     SYSTEME: () => SYSTEME,
+    TEST_EREIGNISSE: () => TEST_EREIGNISSE,
     TREND_GRUPPEN: () => TREND_GRUPPEN,
     UMBAU_STUFEN: () => UMBAU_STUFEN,
     VORSTAND_PARAM: () => VORSTAND_PARAM,
@@ -3733,6 +3734,50 @@
     melde(s2, "presse", "Hartwig \xFCbernimmt den Standort " + wb.name + " in " + wb.stadt + " als " + (modus === "outlet" ? "Outlet" : "Erweiterungsfl\xE4che") + ".");
     return null;
   }
+  function testWettbewerbEreignis(s2, art) {
+    const h = s2.haeuser.find((x) => x.status === "offen" && x.format === "warenhaus");
+    if (!h) return false;
+    const w = s2.wettbewerber.find((x) => x.stadt === h.stadt && x.status === "offen" && x.art !== "leer_ehemals") ?? s2.wettbewerber.find((x) => x.status === "offen" && x.art !== "leer_ehemals");
+    switch (art) {
+      case "eroeffnung":
+        neuEroeffnet(s2, h.stadt, "modehaus");
+        return true;
+      case "raeumung":
+        if (!w) return false;
+        raeumung(s2, w);
+        return true;
+      case "aktion":
+        if (!w) return false;
+        w.aktionVon = s2.woche;
+        w.aktionBis = s2.woche + 3;
+        w.preisdruck = 0.3;
+        melde(s2, "ereignis", "Test: Rabattaktion von " + w.name + " in " + w.stadt + ".");
+        return true;
+      case "konter":
+        if (!w) return false;
+        w.konterVon = s2.woche + 1;
+        w.konterBis = s2.woche + 4;
+        w.konterDruck = 0.45;
+        melde(s2, "ereignis", "Test: Konteraktion von " + w.name + " ab kommender Woche.");
+        return true;
+      case "standortwechsel":
+        if (!w) return false;
+        w.lage = w.lage === "1a" ? "center" : "1a";
+        w.status = "eroeffnung";
+        w.seit = s2.woche;
+        w.bis = s2.woche + 4;
+        melde(s2, "presse", "Test: " + w.name + " verlegt den Standort in " + w.stadt + ".");
+        return true;
+      case "nachnutzung": {
+        const geschlossen = s2.haeuser.find((x) => x.status === "geschlossen");
+        if (!geschlossen) return false;
+        neuEroeffnet(s2, geschlossen.stadt, "offprice", geschlossen.id);
+        return true;
+      }
+      default:
+        return false;
+    }
+  }
 
   // ../engine/src/premium.ts
   var PREMIUM_PROFIL = {
@@ -5952,9 +5997,9 @@
       const tage = p2.map((anteil3, i) => {
         const bedarf2 = basis3 * anteil3 / (1 - aus.krank - aus.urlaub);
         const richtung2 = Math.sin((h.id.length * 13 + h.id.charCodeAt(1) * 7 + i * 11 + s2.woche % 52) * 0.41);
-        const fehler5 = richtung2 * 0.19;
-        const bezug = 1 + fehler5 * (1 - st.basisQualitaet);
-        const genau = 1 + fehler5 * (1 - q2);
+        const fehler6 = richtung2 * 0.19;
+        const bezug = 1 + fehler6 * (1 - st.basisQualitaet);
+        const genau = 1 + fehler6 * (1 - q2);
         let plan4 = bedarf2 * relativ * st.faktor[g] * genau * (1 + st.training * 0.035);
         if (g === "kasse" && i === 5) plan4 *= st.samstagKasse;
         if (g === "kasse" && dezember && weihnachten === "sparsam") plan4 *= 0.88;
@@ -6288,9 +6333,75 @@
     }));
   }
 
-  // ../engine/src/aktionen.ts
+  // ../engine/src/testwerkzeuge.ts
+  var TEST_EREIGNISSE = [
+    { id: "angebot:untermiete", name: "Angebot: Untermiete" },
+    { id: "angebot:paket", name: "Angebot: Mietpaket" },
+    { id: "angebot:stadt", name: "Angebot: Stadt\xFCbernahme" },
+    { id: "angebot:sportverkauf", name: "Angebot: Sportverkauf" },
+    { id: "angebot:sonderposten", name: "Angebot: Sonderposten" },
+    { id: "angebot:uebernahme", name: "Angebot: Wettbewerber\xFCbernahme" },
+    { id: "angebot:premiumVerkauf", name: "Angebot: Premiumverkauf" },
+    { id: "ereignis:instandhaltung", name: "Ereignis: Instandhaltung" },
+    { id: "ereignis:mietende", name: "Ereignis: Mietende" },
+    { id: "ereignis:jahresgespraech", name: "Ereignis: Lieferantengespr\xE4ch" },
+    { id: "ereignis:nordline_dtc", name: "Ereignis: Lieferant geht direkt" },
+    { id: "ereignis:arvel_rueckkehr", name: "Ereignis: Lieferant kehrt zur\xFCck" },
+    { id: "ereignis:lieferantenausfall", name: "Ereignis: Lieferantenausfall" },
+    { id: "ereignis:containerstau", name: "Ereignis: Containerstau" },
+    { id: "ereignis:konjunktur", name: "Ereignis: Konjunkturschock" },
+    { id: "ereignis:streik", name: "Ereignis: Streik" },
+    { id: "ereignis:filialleiter", name: "Ereignis: Filialleiterabgang" },
+    { id: "ereignis:presse", name: "Ereignis: Pressemeldung" },
+    { id: "wettbewerb:eroeffnung", name: "Konkurrenz: Neuer\xF6ffnung" },
+    { id: "wettbewerb:raeumung", name: "Konkurrenz: R\xE4umungsverkauf" },
+    { id: "wettbewerb:aktion", name: "Konkurrenz: Rabattaktion" },
+    { id: "wettbewerb:konter", name: "Konkurrenz: Konteraktion" },
+    { id: "wettbewerb:standortwechsel", name: "Konkurrenz: Standortwechsel" },
+    { id: "wettbewerb:nachnutzung", name: "Konkurrenz: Nachnutzung" }
+  ];
   var ok3 = (text3) => ({ ok: true, text: text3 });
   var fehler3 = (text3) => ({ ok: false, text: text3 });
+  function testAktion(s2, a) {
+    if (s2.prognose) return fehler3("Im Vorschauklon sind Testaktionen gesperrt.");
+    if (s2.phase === "zerschlagen") return fehler3("Das Spiel ist beendet.");
+    if (a.typ === "testCash" && (!Number.isSafeInteger(a.betrag) || Math.abs(a.betrag) > 1e15))
+      return fehler3("Cash muss ein ganzer Eurobetrag sein.");
+    if (a.typ === "testStakeholder" && (!(a.feld in s2.stakeholder) || !Number.isFinite(a.wert)))
+      return fehler3("Ung\xFCltiger Stakeholder oder Wert.");
+    if (a.typ === "testSchwierigkeit" && !["leicht", "mittel", "schwer"].includes(a.stufe))
+      return fehler3("Ung\xFCltige Schwierigkeit.");
+    if (a.typ === "testEreignis" && !TEST_EREIGNISSE.some((e) => e.id === a.ereignis))
+      return fehler3("Unbekanntes Testereignis.");
+    s2.testGenutzt = true;
+    switch (a.typ) {
+      case "testWoche":
+        wocheAbspielen(s2);
+        return ok3("Testwoche " + s2.woche + " abgeschlossen.");
+      case "testCash":
+        s2.cash = a.betrag;
+        return ok3("Cash auf " + a.betrag + " \u20AC gesetzt.");
+      case "testInsolvenz":
+        if (s2.phase === "insolvenz") return ok3("Das Insolvenzverfahren l\xE4uft bereits.");
+        eroeffneInsolvenz(s2, "Test: Insolvenz manuell er\xF6ffnet");
+        return ok3("Insolvenzverfahren testweise er\xF6ffnet.");
+      case "testStakeholder":
+        s2.stakeholder[a.feld] = clamp(a.wert, 0, 100);
+        return ok3("Stakeholder " + a.feld + " = " + s2.stakeholder[a.feld] + ".");
+      case "testSchwierigkeit":
+        s2.schwierigkeit = a.stufe;
+        return ok3("Schwierigkeit ab sofort: " + a.stufe + ". Startwerte werden nicht r\xFCckwirkend ge\xE4ndert.");
+      case "testEreignis": {
+        const [quelle2, art] = a.ereignis.split(":");
+        const erzeugt = quelle2 === "angebot" ? art === "uebernahme" ? testWettbewerbEreignis(s2, "raeumung") : testAngebotErzeugen(s2, art) : quelle2 === "ereignis" ? testZufallsereignis(s2, art) : testWettbewerbEreignis(s2, art);
+        return erzeugt ? ok3("Testereignis ausgel\xF6st: " + a.ereignis + ".") : fehler3("F\xFCr dieses Ereignis fehlen geeignete Standorte oder Voraussetzungen.");
+      }
+    }
+  }
+
+  // ../engine/src/aktionen.ts
+  var ok4 = (text3) => ({ ok: true, text: text3 });
+  var fehler4 = (text3) => ({ ok: false, text: text3 });
   function haus(s2, id) {
     return s2.haeuser.find((h) => h.id === id);
   }
@@ -6328,7 +6439,8 @@
     return out;
   }
   function fuehreAus(s2, a) {
-    if (s2.phase === "zerschlagen") return fehler3("Die Kette ist zerschlagen.");
+    if (a.typ.startsWith("test")) return testAktion(s2, a);
+    if (s2.phase === "zerschlagen") return fehler4("Die Kette ist zerschlagen.");
     const w = s2.woche;
     const inso = s2.phase === "insolvenz";
     if (IT_AKTIONEN.has(a.typ)) return itAktion(s2, a);
@@ -6342,31 +6454,31 @@
     if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s2, a, (x) => einmalKosten(s2, x));
     if (PLANUNG_AKTIONEN.has(a.typ)) {
       const fehlerText = planungAktion(s2, a);
-      return fehlerText ? fehler3(fehlerText) : ok3("Planung aktualisiert.");
+      return fehlerText ? fehler4(fehlerText) : ok4("Planung aktualisiert.");
     }
     if (HAUS_AKTIONEN.has(a.typ)) return hausAktion(s2, a);
     switch (a.typ) {
       case "premiumSchuetzen":
         s2.premiumSchuetzen = a.an;
-        return ok3(a.an ? "Premiumh\xE4user sind vor pauschalen Rabattaktionen gesch\xFCtzt." : "Premiumschutz deaktiviert.");
+        return ok4(a.an ? "Premiumh\xE4user sind vor pauschalen Rabattaktionen gesch\xFCtzt." : "Premiumschutz deaktiviert.");
       case "premiumInvestition": {
         const fehlerText = premiumInvestieren(s2, a.haus, a.betrag);
-        return fehlerText ? fehler3(fehlerText) : ok3("Premium-Investition gestartet (26 Wochen).");
+        return fehlerText ? fehler4(fehlerText) : ok4("Premium-Investition gestartet (26 Wochen).");
       }
       case "schliessen": {
         const h = haus(s2, a.haus);
-        if (!h) return fehler3("Haus nicht gefunden.");
+        if (!h) return fehler4("Haus nicht gefunden.");
         const f = starteSchliessung(s2, h);
-        return f ? fehler3(f) : ok3(`Schlie\xDFung von ${h.name} eingeleitet.`);
+        return f ? fehler4(f) : ok4(`Schlie\xDFung von ${h.name} eingeleitet.`);
       }
       case "flaecheUmbauen": {
         const h = haus(s2, a.haus);
         const f = h?.flaechen.find((x) => x.id === a.flaeche);
-        if (!h || !f || h.status !== "offen") return fehler3("Fl\xE4che nicht gefunden oder Haus nicht offen.");
-        if (f.umbauBis !== void 0) return fehler3("Die Fl\xE4che ist bereits im Umbau.");
-        if (a.konzept === "untermiete" || a.konzept === "konzession" || a.konzept === "kommission") return fehler3("Untermiete l\xE4uft \xFCber Angebote, Konzession und Kommission \xFCber das Gesch\xE4ftsmodell.");
+        if (!h || !f || h.status !== "offen") return fehler4("Fl\xE4che nicht gefunden oder Haus nicht offen.");
+        if (f.umbauBis !== void 0) return fehler4("Die Fl\xE4che ist bereits im Umbau.");
+        if (a.konzept === "untermiete" || a.konzept === "konzession" || a.konzept === "kommission") return fehler4("Untermiete l\xE4uft \xFCber Angebote, Konzession und Kommission \xFCber das Gesch\xE4ftsmodell.");
         if (a.konzept === "eigen") {
-          if (!a.gruppe || GRUPPEN[a.gruppe].format !== h.format) return fehler3("Bitte eine passende Warengruppe angeben.");
+          if (!a.gruppe || GRUPPEN[a.gruppe].format !== h.format) return fehler4("Bitte eine passende Warengruppe angeben.");
           if (h.potenzial[a.gruppe] === void 0) {
             const ref = GRUPPEN[a.gruppe].qmUmsatz * hausAttraktivitaet(h);
             h.saettigungQm[a.gruppe] = f.qm * 0.8;
@@ -6380,23 +6492,23 @@
         s2.kapitalflussOffen.investitionen -= kosten;
         f.umbauBis = w + p2.wochen;
         f.umbauZiel = { konzept: a.konzept, gruppe: a.konzept === "eigen" ? a.gruppe : void 0 };
-        return ok3(`Umbau ${etageName(f.etage)} in ${h.name}: ${f.qm} qm zu ${a.konzept === "eigen" ? GRUPPEN[a.gruppe].name : a.konzept}, ${mio(kosten)}, ${p2.wochen} Wochen.`);
+        return ok4(`Umbau ${etageName(f.etage)} in ${h.name}: ${f.qm} qm zu ${a.konzept === "eigen" ? GRUPPEN[a.gruppe].name : a.konzept}, ${mio(kosten)}, ${p2.wochen} Wochen.`);
       }
       case "flaecheTeilen": {
         const h = haus(s2, a.haus);
         const f = h?.flaechen.find((x) => x.id === a.flaeche);
-        if (!h || !f) return fehler3("Fl\xE4che nicht gefunden.");
-        if (a.qm < 100 || a.qm >= f.qm - 100) return fehler3("Teilfl\xE4che muss mindestens 100 qm gro\xDF sein und 100 qm Rest lassen.");
+        if (!h || !f) return fehler4("Fl\xE4che nicht gefunden.");
+        if (a.qm < 100 || a.qm >= f.qm - 100) return fehler4("Teilfl\xE4che muss mindestens 100 qm gro\xDF sein und 100 qm Rest lassen.");
         const n = { ...f, id: `${h.id}-f${neueId(s2, "")}`, qm: Math.round(a.qm), mieter: f.mieter ? { ...f.mieter } : void 0 };
         f.qm -= Math.round(a.qm);
         h.flaechen.push(n);
-        return ok3(`Fl\xE4che geteilt: ${f.qm} qm und ${n.qm} qm (${n.id}).`);
+        return ok4(`Fl\xE4che geteilt: ${f.qm} qm und ${n.qm} qm (${n.id}).`);
       }
       case "geschaeftsmodell": {
         const g = a.gruppe;
         const partner = s2.lieferanten.find((l) => l.aktiv && (l.gruppen[g] ?? 0) > 0);
         const vertrauen = partner ? partner.vertrauen : s2.restLieferantenVertrauen;
-        if (a.modell !== "eigen" && vertrauen < 35) return fehler3(`${partner ? partner.name : "Die Lieferanten"} lehnen ab: Vertrauen zu gering.`);
+        if (a.modell !== "eigen" && vertrauen < 35) return fehler4(`${partner ? partner.name : "Die Lieferanten"} lehnen ab: Vertrauen zu gering.`);
         const hs = auswahl3(s2, a.haeuser).filter((h) => h.format === GRUPPEN[g].format);
         const gesamtG = s2.haeuser.reduce((x, h) => x + (h.kpi?.umsatzJeGruppe[g] ?? 0), 0);
         let umgestellt = 0;
@@ -6437,8 +6549,8 @@
         }
         s2.cash += eur(erloes);
         s2.einmalErloeseWoche += eur(erloes);
-        if (!umgestellt) return fehler3(abgelehnt ? `Der Partner lehnt alle ${abgelehnt} Standorte ab.` : "Keine passenden Fl\xE4chen gefunden.");
-        return ok3(`${GRUPPEN[g].name} in ${umgestellt} H\xE4usern auf ${a.modell} umgestellt${abgelehnt ? `, ${abgelehnt} Standorte abgelehnt` : ""}. Ware f\xFCr ${mio(erloes)} \xFCbernommen${fteWeg > 0 ? `, ${Math.round(fteWeg)} FTE wechseln per Betriebs\xFCbergang` : ""}.`);
+        if (!umgestellt) return fehler4(abgelehnt ? `Der Partner lehnt alle ${abgelehnt} Standorte ab.` : "Keine passenden Fl\xE4chen gefunden.");
+        return ok4(`${GRUPPEN[g].name} in ${umgestellt} H\xE4usern auf ${a.modell} umgestellt${abgelehnt ? `, ${abgelehnt} Standorte abgelehnt` : ""}. Ware f\xFCr ${mio(erloes)} \xFCbernommen${fteWeg > 0 ? `, ${Math.round(fteWeg)} FTE wechseln per Betriebs\xFCbergang` : ""}.`);
       }
       case "aushilfen": {
         const q2 = clamp(a.quote, 0, 0.5);
@@ -6448,10 +6560,10 @@
           h.personal.aushilfen = q2 / (1 - q2) * fest;
         }
         if (q2 > 0.25) s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 3, 0, 100);
-        return ok3(`Aushilfenquote in ${hs.length} H\xE4usern auf ${Math.round(q2 * 100)} % gesetzt.`);
+        return ok4(`Aushilfenquote in ${hs.length} H\xE4usern auf ${Math.round(q2 * 100)} % gesetzt.`);
       }
       case "personalabbau": {
-        if (s2.tarif === "sanierung" && s2.standortgarantieBis !== void 0) return fehler3("Der Sanierungstarifvertrag schlie\xDFt betriebsbedingte K\xFCndigungen aus.");
+        if (s2.tarif === "sanierung" && s2.standortgarantieBis !== void 0) return fehler4("Der Sanierungstarifvertrag schlie\xDFt betriebsbedingte K\xFCndigungen aus.");
         const p2 = clamp(a.prozent, 0, 0.4);
         const hs = auswahl3(s2, a.haeuser);
         let fte2 = 0;
@@ -6467,7 +6579,7 @@
         einmalKosten(s2, abf);
         s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - Math.min(20, fte2 / 60), 0, 100);
         melde(s2, "presse", `${s2.firma.name} streicht ${Math.round(fte2)} Stellen in den Filialen.`);
-        return ok3(`${Math.round(fte2)} FTE abgebaut, Abfindungen ${mio(abf)}.`);
+        return ok4(`${Math.round(fte2)} FTE abgebaut, Abfindungen ${mio(abf)}.`);
       }
       case "personalaufbau": {
         const p2 = clamp(a.prozent, 0, 0.5);
@@ -6483,18 +6595,18 @@
           }
         }
         einmalKosten(s2, fte2 * 1500);
-        return ok3(`${Math.round(fte2)} FTE Teilzeit eingestellt.`);
+        return ok4(`${Math.round(fte2)} FTE Teilzeit eingestellt.`);
       }
       case "haltepr\xE4mie": {
         const hs = auswahl3(s2, a.haeuser);
         const betrag = Math.max(0, a.betrag);
         for (const h of hs) h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral + Math.min(35, betrag / 1e3), 0, 100);
         einmalKosten(s2, betrag * hs.length);
-        return ok3(`Haltepr\xE4mie f\xFCr ${hs.length} Filialleitungen, gesamt ${mio(betrag * hs.length)}.`);
+        return ok4(`Haltepr\xE4mie f\xFCr ${hs.length} Filialleitungen, gesamt ${mio(betrag * hs.length)}.`);
       }
       case "tarif": {
         if (a.ziel === "ohne") {
-          if (s2.tarif === "ohne") return fehler3("Bereits ohne Tarifbindung.");
+          if (s2.tarif === "ohne") return fehler4("Bereits ohne Tarifbindung.");
           s2.tarif = "ohne";
           s2.tarifAusstiegSeit = w;
           s2.standortgarantieBis = void 0;
@@ -6502,23 +6614,23 @@
           s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 30, 0, 100);
           s2.stakeholder.image = clamp(s2.stakeholder.image - 5, 0, 100);
           melde(s2, "presse", `Tarifflucht: ${s2.firma.name} verl\xE4sst den Fl\xE4chentarif. Verdi k\xFCndigt Widerstand an.`);
-          return ok3("Tarifbindung beendet.");
+          return ok4("Tarifbindung beendet.");
         }
-        if (s2.tarif === "sanierung") return fehler3("Sanierungstarif l\xE4uft bereits.");
-        if (s2.tarifVersuch !== void 0 && w - s2.tarifVersuch < 13) return fehler3("Die Gewerkschaft verhandelt fr\xFChestens 13 Wochen nach dem letzten Versuch erneut.");
+        if (s2.tarif === "sanierung") return fehler4("Sanierungstarif l\xE4uft bereits.");
+        if (s2.tarifVersuch !== void 0 && w - s2.tarifVersuch < 13) return fehler4("Die Gewerkschaft verhandelt fr\xFChestens 13 Wochen nach dem letzten Versuch erneut.");
         s2.tarifVersuch = w;
         const garantie = clamp(a.garantieWochen ?? 52, 26, 156);
         const p2 = s2.stakeholder.betriebsrat / 100 + (runwayWochen(s2) < 20 ? 0.2 : 0) + garantie / 52 * 0.12 + (inso ? 0.15 : 0);
         if (!chance(s2, clamp(p2, 0.05, 0.95))) {
           s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 3, 0, 100);
-          return ok3("Die Gewerkschaft lehnt den Sanierungstarifvertrag ab.");
+          return ok4("Die Gewerkschaft lehnt den Sanierungstarifvertrag ab.");
         }
         s2.tarif = "sanierung";
         s2.standortgarantieBis = w + garantie;
         for (const h of s2.haeuser) h.standortgarantie = h.status === "offen";
         s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat + 5, 0, 100);
         melde(s2, "presse", `Einigung: Besch\xE4ftigte verzichten auf Teile von Urlaubs- und Weihnachtsgeld, im Gegenzug Standortgarantie f\xFCr ${garantie} Wochen.`);
-        return ok3(`Sanierungstarif vereinbart: Personalkosten -7 %, Standortgarantie ${garantie} Wochen f\xFCr alle offenen H\xE4user.`);
+        return ok4(`Sanierungstarif vereinbart: Personalkosten -7 %, Standortgarantie ${garantie} Wochen f\xFCr alle offenen H\xE4user.`);
       }
       case "zentrale":
         return zentraleKuerzen(s2, a.prozent);
@@ -6543,15 +6655,15 @@
         const lv = clamp(a.level, 0, 1.5);
         const gs = a.gruppe === "alle" ? Object.keys(s2.orderLevel) : [a.gruppe];
         for (const g of gs) s2.orderLevel[g] = lv;
-        return ok3(`Einkaufsregler ${a.gruppe === "alle" ? "aller Gruppen" : GRUPPEN[a.gruppe].name} auf ${Math.round(lv * 100)} %.`);
+        return ok4(`Einkaufsregler ${a.gruppe === "alle" ? "aller Gruppen" : GRUPPEN[a.gruppe].name} auf ${Math.round(lv * 100)} %.`);
       }
       case "vorkasse":
         s2.vorkasseAkzeptieren = a.erlaubt;
-        return ok3(a.erlaubt ? "Ware wird bei Bedarf gegen Vorkasse bezogen." : "Keine Vorkasse: Lieferungen \xFCber dem Limit entfallen.");
+        return ok4(a.erlaubt ? "Ware wird bei Bedarf gegen Vorkasse bezogen." : "Keine Vorkasse: Lieferungen \xFCber dem Limit entfallen.");
       case "mieteVerhandeln": {
         const h = haus(s2, a.haus);
-        if (!h || h.status !== "offen") return fehler3("Haus nicht offen.");
-        if (h.miete.verhandeltWoche !== void 0 && w - h.miete.verhandeltWoche < 26) return fehler3("Mit diesem Vermieter wurde vor weniger als 26 Wochen verhandelt.");
+        if (!h || h.status !== "offen") return fehler4("Haus nicht offen.");
+        if (h.miete.verhandeltWoche !== void 0 && w - h.miete.verhandeltWoche < 26) return fehler4("Mit diesem Vermieter wurde vor weniger als 26 Wochen verhandelt.");
         h.miete.verhandeltWoche = w;
         const r = clamp(a.reduktion, 0, 0.5);
         const db = h.kpi?.db ?? 0;
@@ -6571,69 +6683,69 @@
           }
           s2.stakeholder.vermieter = clamp(s2.stakeholder.vermieter - 1.5, 0, 100);
         }
-        if (erreicht <= 0) return ok3(`${h.miete.vermieterName} lehnt eine Mietsenkung f\xFCr ${h.name} ab.`);
+        if (erreicht <= 0) return ok4(`${h.miete.vermieterName} lehnt eine Mietsenkung f\xFCr ${h.name} ab.`);
         h.miete.mieteWoche = eur(h.miete.mieteWoche * (1 - erreicht));
         if (triple) {
           h.miete.netTyp = "triple";
           if (h.miete.nebenkostenQmWoche === 0) h.miete.nebenkostenQmWoche = 1.2;
         }
-        return ok3(`${h.miete.vermieterName} akzeptiert ${Math.round(erreicht * 100)} % Mietsenkung f\xFCr ${h.name}${triple ? " gegen Umstellung auf Triple-Net" : ""}. Neue Jahresmiete ${mio(h.miete.mieteWoche * 52)}.`);
+        return ok4(`${h.miete.vermieterName} akzeptiert ${Math.round(erreicht * 100)} % Mietsenkung f\xFCr ${h.name}${triple ? " gegen Umstellung auf Triple-Net" : ""}. Neue Jahresmiete ${mio(h.miete.mieteWoche * 52)}.`);
       }
       case "angebotVerhandeln": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen");
         if (an?.typ === "premiumVerkauf") {
-          if (s2.phase !== "insolvenz") return fehler3("Premiumverkauf nur in Insolvenz.");
-          if (an.vorschlagHaeuser?.length) return fehler3("Dieses Angebot wurde bereits verhandelt.");
+          if (s2.phase !== "insolvenz") return fehler4("Premiumverkauf nur in Insolvenz.");
+          if (an.vorschlagHaeuser?.length) return fehler4("Dieses Angebot wurde bereits verhandelt.");
           an.kaufpreis = eur((an.kaufpreis ?? 0) * 1.04);
           an.vorschlagHaeuser = [...an.wunschHaeuser ?? []];
-          return ok3(`Nachverhandelt: ${mio(an.kaufpreis)} Kaufpreis.`);
+          return ok4(`Nachverhandelt: ${mio(an.kaufpreis)} Kaufpreis.`);
         }
-        if (!an || an.typ !== "paket") return fehler3("Nur Paket- und Premiumangebote lassen sich verhandeln.");
+        if (!an || an.typ !== "paket") return fehler4("Nur Paket- und Premiumangebote lassen sich verhandeln.");
         const hs = a.haeuser.map((id) => haus(s2, id)).filter((h) => !!h && h.status === "offen" && h.etagen.includes(an.etage ?? 0));
-        if (hs.length < (an.minHaeuser ?? 1)) return ok3(`${an.mieterName}: \u201EUnter ${an.minHaeuser} Standorten lohnt sich das f\xFCr uns nicht.\u201C`);
+        if (hs.length < (an.minHaeuser ?? 1)) return ok4(`${an.mieterName}: \u201EUnter ${an.minHaeuser} Standorten lohnt sich das f\xFCr uns nicht.\u201C`);
         const wunsch = (an.wunschHaeuser ?? []).map((id) => haus(s2, id)).filter((h) => !!h);
         const wert = (xs) => xs.reduce((x, h) => x + hausAttraktivitaet(h), 0);
         const ratio = wert(hs) / Math.max(0.01, wert(wunsch.slice(0, hs.length)));
         const flex = an.flexibilitaet ?? 0.2;
         an.vorschlagHaeuser = hs.map((h) => h.id);
-        if (ratio >= 1 - flex) return ok3(`${an.mieterName} ist mit der Standortliste einverstanden (${hs.length} H\xE4user).`);
+        if (ratio >= 1 - flex) return ok4(`${an.mieterName} ist mit der Standortliste einverstanden (${hs.length} H\xE4user).`);
         if (ratio >= 1 - flex - 0.08) {
           an.mieteQmMonat = Math.round((an.mieteQmMonat ?? 0) * 0.9 * 10) / 10;
           an.flexibilitaet = Math.max(0, flex - 0.03);
-          return ok3(`${an.mieterName} akzeptiert die Liste nur mit 10 % weniger Miete: ${an.mieteQmMonat?.toFixed(2)} \u20AC/qm.`);
+          return ok4(`${an.mieterName} akzeptiert die Liste nur mit 10 % weniger Miete: ${an.mieteQmMonat?.toFixed(2)} \u20AC/qm.`);
         }
         an.flexibilitaet = Math.max(0, flex - 0.03);
         an.vorschlagHaeuser = [...an.wunschHaeuser ?? []];
-        return ok3(`${an.mieterName}: \u201EDas sind nicht die Standorte, \xFCber die wir gesprochen haben.\u201C Die Wunschliste gilt weiter.`);
+        return ok4(`${an.mieterName}: \u201EDas sind nicht die Standorte, \xFCber die wir gesprochen haben.\u201C Die Wunschliste gilt weiter.`);
       }
       case "angebotUebernehmen": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen" && x.typ === "uebernahme");
-        if (!an || !an.wettbewerberId) return fehler3("Kein offenes \xDCbernahmeangebot gefunden.");
+        if (!an || !an.wettbewerberId) return fehler4("Kein offenes \xDCbernahmeangebot gefunden.");
         const grund2 = uebernehmeWettbewerber(s2, an.wettbewerberId, a.modus, an.mieteQmMonat);
-        if (grund2) return fehler3(grund2);
+        if (grund2) return fehler4(grund2);
         an.status = "angenommen";
-        return ok3("Wettbewerberstandort \xFCbernommen als " + (a.modus === "outlet" ? "Outlet." : "Erweiterung."));
+        return ok4("Wettbewerberstandort \xFCbernommen als " + (a.modus === "outlet" ? "Outlet." : "Erweiterung."));
       }
       case "angebotAblehnen": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen");
-        if (!an) return fehler3("Angebot nicht gefunden.");
+        if (!an) return fehler4("Angebot nicht gefunden.");
         an.status = "abgelehnt";
         an.erledigtWoche = w;
-        return ok3(`${an.titel}: abgelehnt.`);
+        return ok4(`${an.titel}: abgelehnt.`);
       }
       case "angebotAnnehmen": {
         const an = s2.angebote.find((x) => x.id === a.angebot && x.status === "offen");
-        if (!an) return fehler3("Angebot nicht gefunden oder abgelaufen.");
+        if (!an) return fehler4("Angebot nicht gefunden oder abgelaufen.");
         if (an.typ === "premiumVerkauf") {
           const grund2 = premiumVerkaufen(s2, an);
-          return grund2 ? fehler3(grund2) : ok3(`Premiumhaus verkauft: ${mio(an.kaufpreis ?? 0)} flie\xDFen zu.`);
+          return grund2 ? fehler4(grund2) : ok4(`Premiumhaus verkauft: ${mio(an.kaufpreis ?? 0)} flie\xDFen zu.`);
         }
         if (an.typ === "uebernahme") {
-          if (!an.wettbewerberId) return fehler3("Wettbewerber fehlt.");
+          if (!an.wettbewerberId) return fehler4("Wettbewerber fehlt.");
           const grund2 = uebernehmeWettbewerber(s2, an.wettbewerberId, "outlet", an.mieteQmMonat);
-          if (grund2) return fehler3(grund2);
+          if (grund2) return fehler4(grund2);
           an.status = "angenommen";
-          return ok3("Konkurrenzfl\xE4che als eigenes Outlet \xFCbernommen.");
+          return ok4("Konkurrenzfl\xE4che als eigenes Outlet \xFCbernommen.");
         }
         if (an.typ === "untermiete" || an.typ === "paket") {
           const def = MIETER.find((m) => m.typ === an.mieterTyp);
@@ -6675,22 +6787,22 @@
           s2.kapitalflussOffen.investitionen -= kostenGesamt;
           an.status = erfolgreich ? "angenommen" : "abgelehnt";
           an.erledigtWoche = w;
-          if (!erfolgreich) return fehler3(`Kein Standort umsetzbar. ${ergebnisse.join("; ")}`);
+          if (!erfolgreich) return fehler4(`Kein Standort umsetzbar. ${ergebnisse.join("; ")}`);
           melde(s2, "presse", `${an.mieterName} zieht in ${erfolgreich} H\xE4user von ${s2.firma.name} ein.`);
-          return ok3(`${an.mieterName} in ${erfolgreich} H\xE4usern, Umbau ${mio(kostenGesamt)}. ${ergebnisse.join("; ")}`);
+          return ok4(`${an.mieterName} in ${erfolgreich} H\xE4usern, Umbau ${mio(kostenGesamt)}. ${ergebnisse.join("; ")}`);
         }
         if (an.typ === "stadt") {
           const h = haus(s2, an.wunschHaeuser?.[0] ?? "");
-          if (!h) return fehler3("Haus nicht gefunden.");
+          if (!h) return fehler4("Haus nicht gefunden.");
           const f = starteSchliessung(s2, h, { mietvertragEndetMit: true });
-          if (f) return fehler3(f);
+          if (f) return fehler4(f);
           s2.cash += an.einmalzahlung ?? 0;
           s2.einmalErloeseWoche += an.einmalzahlung ?? 0;
           s2.stakeholder.image = clamp(s2.stakeholder.image + 3, 0, 100);
           an.status = "angenommen";
           an.erledigtWoche = w;
           melde(s2, "presse", `Neues Leben f\xFCr ${h.name}: Die Stadt \xFCbernimmt das Haus.`);
-          return ok3(`Die Stadt \xFCbernimmt ${h.name}. Keine Restmiete, Abl\xF6se ${mio(an.einmalzahlung ?? 0)}.`);
+          return ok4(`Die Stadt \xFCbernimmt ${h.name}. Keine Restmiete, Abl\xF6se ${mio(an.einmalzahlung ?? 0)}.`);
         }
         if (an.typ === "sportverkauf") {
           const preis = an.kaufpreis ?? 0;
@@ -6713,64 +6825,64 @@
           an.status = "angenommen";
           an.erledigtWoche = w;
           melde(s2, "presse", `${s2.firma.sportName} geht f\xFCr ${mio(preis)} an einen Finanzinvestor.`);
-          return ok3(`Sportkette verkauft: ${mio(preis)} flie\xDFen zu.`);
+          return ok4(`Sportkette verkauft: ${mio(preis)} flie\xDFen zu.`);
         }
         if (an.typ === "sonderposten") {
           const wert = an.wert ?? 0;
-          if (s2.cash + s2.kreditlinie < wert) return fehler3("Nicht genug Liquidit\xE4t f\xFCr die Vorkasse.");
+          if (s2.cash + s2.kreditlinie < wert) return fehler4("Nicht genug Liquidit\xE4t f\xFCr die Vorkasse.");
           s2.cash -= wert;
           const g = an.gruppe;
           s2.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });
           an.status = "angenommen";
           an.erledigtWoche = w;
-          return ok3(`Sonderposten ${GRUPPEN[g].name} f\xFCr ${mio(wert)} gekauft.`);
+          return ok4(`Sonderposten ${GRUPPEN[g].name} f\xFCr ${mio(wert)} gekauft.`);
         }
-        return fehler3("Unbekannter Angebotstyp.");
+        return fehler4("Unbekannter Angebotstyp.");
       }
       case "berater": {
         const def = BERATER.find((b2) => b2.typ === a.beraterTyp);
-        if (!def) return fehler3("Unbekannte Beratung.");
-        if (s2.berater.some((b2) => b2.typ === a.beraterTyp && b2.ende > w)) return fehler3("Diese Art Mandat l\xE4uft bereits.");
+        if (!def) return fehler4("Unbekannte Beratung.");
+        if (s2.berater.some((b2) => b2.typ === a.beraterTyp && b2.ende > w)) return fehler4("Diese Art Mandat l\xE4uft bereits.");
         const name2 = waehle(s2, def.haeuser);
         const projekt = zufallsProjektname(s2);
         s2.berater.push({ id: neueId(s2, "c"), typ: a.beraterTyp, haus: name2, projektname: projekt, start: w, ende: w + def.dauer, wochenSatz: def.wochenSatz, _qualitaet: s2.beraterQualitaet[name2] ?? 0.5 });
         s2.stakeholder.bank = clamp(s2.stakeholder.bank + def.bankBonus, 0, 100);
         s2.stakeholder.eigentuemer = clamp(s2.stakeholder.eigentuemer + def.eigentuemerBonus, 0, 100);
         melde(s2, "presse", `${name2} soll ${s2.firma.name} retten: Projekt \u201E${projekt}\u201C startet.`);
-        return ok3(`${name2} beauftragt (Projekt ${projekt}), ${mio(def.wochenSatz)} pro Woche f\xFCr ${def.dauer} Wochen.`);
+        return ok4(`${name2} beauftragt (Projekt ${projekt}), ${mio(def.wochenSatz)} pro Woche f\xFCr ${def.dauer} Wochen.`);
       }
       case "controlling": {
         const r = abteilungStufe(s2, "controlling", a.stufe);
         if (!r.ok) return r;
-        return ok3(`${["Controlling auf Minimalbesetzung: billig, aber ungenau.", "Controlling in Normalbesetzung.", "Controlling ausgebaut: pr\xE4zise Sch\xE4tzungen, h\xF6here Kosten."][a.stufe]} ${r.text}`);
+        return ok4(`${["Controlling auf Minimalbesetzung: billig, aber ungenau.", "Controlling in Normalbesetzung.", "Controlling ausgebaut: pr\xE4zise Sch\xE4tzungen, h\xF6here Kosten."][a.stufe]} ${r.text}`);
       }
       case "plan": {
         const q2 = s2.quartale[s2.quartale.length - 1];
-        if (!q2 || w - q2.start > 3) return fehler3("Der Quartalsplan kann nur in den ersten vier Wochen eines Quartals eingereicht werden.");
+        if (!q2 || w - q2.start > 3) return fehler4("Der Quartalsplan kann nur in den ersten vier Wochen eines Quartals eingereicht werden.");
         q2.plan = eur(a.ebitda);
-        return ok3(`Plan f\xFCr Quartal ${q2.nr + 1} eingereicht: EBITDA ${mio(q2.plan)} (Prognose ${mio(q2.planStandard)}).`);
+        return ok4(`Plan f\xFCr Quartal ${q2.nr + 1} eingereicht: EBITDA ${mio(q2.plan)} (Prognose ${mio(q2.planStandard)}).`);
       }
       case "insolvenzAntrag": {
-        if (inso) return fehler3("Das Verfahren l\xE4uft bereits.");
+        if (inso) return fehler4("Das Verfahren l\xE4uft bereits.");
         const frueh = runwayWochen(s2) > 8;
         eroeffneInsolvenz(s2, frueh ? "Eigenantrag im Schutzschirmverfahren" : "Eigenantrag");
         if (frueh) {
           s2.stakeholder.image = clamp(s2.stakeholder.image + 5, 0, 100);
           s2.stakeholder.bank = clamp(s2.stakeholder.bank + 5, 0, 100);
         }
-        return ok3("Insolvenzantrag gestellt.");
+        return ok4("Insolvenzantrag gestellt.");
       }
       case "insolvenzplanQuote": {
-        if (!s2.insolvenz) return fehler3("Kein laufendes Verfahren.");
+        if (!s2.insolvenz) return fehler4("Kein laufendes Verfahren.");
         s2.insolvenz.quote = clamp(a.quote, 0.02, 0.5);
-        return ok3(`Insolvenzplan mit Quote ${Math.round(s2.insolvenz.quote * 100)} % = ${mio(s2.insolvenz.quote * s2.insolvenz.altVerbindlichkeiten)}.`);
+        return ok4(`Insolvenzplan mit Quote ${Math.round(s2.insolvenz.quote * 100)} % = ${mio(s2.insolvenz.quote * s2.insolvenz.altVerbindlichkeiten)}.`);
       }
       case "entscheiden": {
         const f = loeseEntscheidung(s2, a.id, a.option);
-        return f ? fehler3(f) : ok3("Entschieden.");
+        return f ? fehler4(f) : ok4("Entschieden.");
       }
     }
-    return fehler3("Unbekannte Aktion.");
+    return fehler4("Unbekannte Aktion.");
   }
 
   // ../engine/src/abfragen.ts
@@ -7610,16 +7722,16 @@
     return eur(p2.gehalt * f + offenBonus);
   }
   function vorstandAktion(s2, a) {
-    const ok5 = (text3) => ({ ok: true, text: text3 });
-    const fehler5 = (text3) => ({ ok: false, text: text3 });
+    const ok6 = (text3) => ({ ok: true, text: text3 });
+    const fehler6 = (text3) => ({ ok: false, text: text3 });
     const res = s2.vorstand.ressorts[a.ressort];
-    if (!res) return fehler5("Unbekanntes Ressort.");
+    if (!res) return fehler6("Unbekanntes Ressort.");
     const info = RESSORT_INFO[a.ressort];
     switch (a.typ) {
       case "vorstandEinstellen": {
-        if (res.person) return fehler5(`${info.kurz} ist besetzt. Erst entlassen, dann neu besetzen.`);
+        if (res.person) return fehler6(`${info.kurz} ist besetzt. Erst entlassen, dann neu besetzen.`);
         const k = res.kandidaten.find((x) => x.id === a.kandidat);
-        if (!k) return fehler5("Kandidat nicht gefunden.");
+        if (!k) return fehler6("Kandidat nicht gefunden.");
         const gehalt = Math.max(0, Math.round(a.gehalt / 5e3) * 5e3);
         const hb = Math.max(0, eur(a.haltebonus ?? 0));
         const eb = clamp(a.erfolgsbonus ?? 0, 0, 1);
@@ -7627,7 +7739,7 @@
         if (!chance(rng(s2), p2)) {
           const ford = gehaltsforderung(s2, a.ressort, k);
           if (zufall(rng(s2)) < 0.5) res.kandidaten = res.kandidaten.filter((x) => x.id !== k.id);
-          return fehler5(`${k.name} lehnt ab (Chance war ${Math.round(p2 * 100)} %). Forderung liegt bei ${Math.round(ford / 1e3)} Tsd. \u20AC.`);
+          return fehler6(`${k.name} lehnt ab (Chance war ${Math.round(p2 * 100)} %). Forderung liegt bei ${Math.round(ford / 1e3)} Tsd. \u20AC.`);
         }
         const person2 = {
           id: k.id,
@@ -7650,11 +7762,11 @@
         res.kandidaten = res.kandidaten.filter((x) => x.id !== k.id);
         hqAktualisiere(s2);
         melde(s2, "presse", `${s2.firma.name} beruft ${k.name} zum ${info.titel} (${info.kurz}).`);
-        return ok5(`${k.name} sagt zu: ${info.kurz} ab sofort, Gehalt ${Math.round(gehalt / 1e3)} Tsd. \u20AC im Jahr. Volle Wirkung nach ${VORSTAND_PARAM.einarbeitungWochen} Wochen.`);
+        return ok6(`${k.name} sagt zu: ${info.kurz} ab sofort, Gehalt ${Math.round(gehalt / 1e3)} Tsd. \u20AC im Jahr. Volle Wirkung nach ${VORSTAND_PARAM.einarbeitungWochen} Wochen.`);
       }
       case "vorstandEntlassen": {
         const p2 = res.person;
-        if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
+        if (!p2) return fehler6(`${info.kurz} ist unbesetzt.`);
         const abf = abfindung(s2, p2);
         einmalKosten(s2, abf);
         for (const r of RESSORTS) {
@@ -7664,21 +7776,21 @@
         vakant(s2, a.ressort);
         hqAktualisiere(s2);
         melde(s2, "presse", `${p2.name} verl\xE4sst den Vorstand von ${s2.firma.name}.`);
-        return ok5(`${p2.name} entlassen, Abfindung ${mio(abf)}. ${info.kurz} ist unbesetzt, Delegation aus.`);
+        return ok6(`${p2.name} entlassen, Abfindung ${mio(abf)}. ${info.kurz} ist unbesetzt, Delegation aus.`);
       }
       case "vorstandGehalt": {
         const p2 = res.person;
-        if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
+        if (!p2) return fehler6(`${info.kurz} ist unbesetzt.`);
         const neu = Math.max(0, Math.round(a.gehalt / 5e3) * 5e3);
         const alt = p2.gehalt;
         if (neu < alt) p2.loyalitaet = clamp(p2.loyalitaet - 150 * (1 - neu / alt), 0, 100);
         else p2.loyalitaet = clamp(p2.loyalitaet + 40 * (neu / alt - 1), 0, 100);
         p2.gehalt = neu;
-        return ok5(`${p2.name}: Gehalt ${Math.round(neu / 1e3)} Tsd. \u20AC im Jahr (${neu >= alt ? "+" : ""}${Math.round((neu / alt - 1) * 100)} %). Loyalit\xE4t ${Math.round(p2.loyalitaet)}.`);
+        return ok6(`${p2.name}: Gehalt ${Math.round(neu / 1e3)} Tsd. \u20AC im Jahr (${neu >= alt ? "+" : ""}${Math.round((neu / alt - 1) * 100)} %). Loyalit\xE4t ${Math.round(p2.loyalitaet)}.`);
       }
       case "vorstandBonus": {
         const p2 = res.person;
-        if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
+        if (!p2) return fehler6(`${info.kurz} ist unbesetzt.`);
         const teile2 = [];
         if (a.haltebonus !== void 0) {
           const hb = Math.max(0, eur(a.haltebonus));
@@ -7694,15 +7806,15 @@
           teile2.push(`Erfolgsbonus ${Math.round(p2.erfolgsbonus * 100)} % vom Jahresgehalt bei Planerf\xFCllung`);
         }
         hqAktualisiere(s2);
-        return ok5(`${p2.name}: ${teile2.join(", ") || "unver\xE4ndert"}.`);
+        return ok6(`${p2.name}: ${teile2.join(", ") || "unver\xE4ndert"}.`);
       }
       case "vorstandDelegation": {
-        if (!DELEGATIONEN[a.ressort].some((d2) => d2.id === a.bereich)) return fehler5("Diesen Bereich gibt es im Ressort nicht.");
-        if (a.an && !res.person) return fehler5(`${info.kurz} ist unbesetzt, ohne Vorstand keine Delegation.`);
+        if (!DELEGATIONEN[a.ressort].some((d2) => d2.id === a.bereich)) return fehler6("Diesen Bereich gibt es im Ressort nicht.");
+        if (a.an && !res.person) return fehler6(`${info.kurz} ist unbesetzt, ohne Vorstand keine Delegation.`);
         res.delegation[a.bereich] = a.an;
         hqAktualisiere(s2);
         const d = DELEGATIONEN[a.ressort].find((x) => x.id === a.bereich);
-        return ok5(`${d.beschreibung}: ${a.an ? `entscheidet ab jetzt ${res.person.name}` : "entscheidet wieder der CEO"}.`);
+        return ok6(`${d.beschreibung}: ${a.an ? `entscheidet ab jetzt ${res.person.name}` : "entscheidet wieder der CEO"}.`);
       }
     }
   }
@@ -8365,8 +8477,8 @@
     }
     hqAktualisiere(s2);
   }
-  var ok4 = (text3) => ({ ok: true, text: text3 });
-  var fehler4 = (text3) => ({ ok: false, text: text3 });
+  var ok5 = (text3) => ({ ok: true, text: text3 });
+  var fehler5 = (text3) => ({ ok: false, text: text3 });
   function einmal(s2, betrag) {
     s2.cash -= eur(betrag);
     s2.einmalkostenWoche += eur(betrag);
@@ -8407,12 +8519,12 @@
     const an = hq.angebote.find((a) => a.id === angebotId);
     const vorhanden = an ? void 0 : hq.gebaeude.find((g2) => g2.id === angebotId);
     const g = an?.gebaeude ?? vorhanden;
-    if (!g) return fehler4("Angebot nicht gefunden oder abgelaufen.");
+    if (!g) return fehler5("Angebot nicht gefunden oder abgelaufen.");
     const nrs = [...new Set(etagen)];
-    if (!nrs.length) return fehler4("Bitte mindestens eine Etage w\xE4hlen.");
+    if (!nrs.length) return fehler5("Bitte mindestens eine Etage w\xE4hlen.");
     const ziel = nrs.map((nr) => g.etagen.find((e) => e.nr === nr));
-    if (ziel.some((e) => !e)) return fehler4("Diese Etage gibt es in dem Geb\xE4ude nicht.");
-    if (ziel.some((e) => e.gemietet)) return fehler4("Mindestens eine Etage ist bereits gemietet.");
+    if (ziel.some((e) => !e)) return fehler5("Diese Etage gibt es in dem Geb\xE4ude nicht.");
+    if (ziel.some((e) => e.gemietet)) return fehler5("Mindestens eine Etage ist bereits gemietet.");
     const qm = ziel.reduce((x, e) => x + e.qm, 0);
     const ausbau = qm * HQ_TYPEN[g.typ].ausbau;
     einmal(s2, ausbau);
@@ -8426,7 +8538,7 @@
     }
     hqAktualisiere(s2);
     const jahr2 = wochenMiete(qm, g.mieteQmMonat + g.nebenkostenQmMonat) * 52;
-    return ok4(`${g.name} (${g.stadt}): ${nrs.length} Etage${nrs.length > 1 ? "n" : ""} mit ${qm.toLocaleString("de-DE")} qm gemietet, ${mio(jahr2)} im Jahr warm, Herrichtung ${mio(ausbau)}${an ? `, Laufzeit ${an.laufzeitJahre} Jahre` : ""}.`);
+    return ok5(`${g.name} (${g.stadt}): ${nrs.length} Etage${nrs.length > 1 ? "n" : ""} mit ${qm.toLocaleString("de-DE")} qm gemietet, ${mio(jahr2)} im Jahr warm, Herrichtung ${mio(ausbau)}${an ? `, Laufzeit ${an.laufzeitJahre} Jahre` : ""}.`);
   }
   function kuendigeEtagen(s2, g, es2) {
     const qm = es2.reduce((x, e) => x + e.qm, 0);
@@ -8443,38 +8555,38 @@
   function hqEtageKuendigen(s2, gebaeudeId, nr) {
     const g = gebaeude(s2, gebaeudeId);
     const e = g?.etagen.find((x) => x.nr === nr);
-    if (!g || !e) return fehler4("Etage nicht gefunden.");
-    if (!e.gemietet) return fehler4("Die Etage ist nicht gemietet.");
+    if (!g || !e) return fehler5("Etage nicht gefunden.");
+    if (!e.gemietet) return fehler5("Die Etage ist nicht gemietet.");
     const r = kuendigeEtagen(s2, g, [e]);
     if (!g.etagen.some((x) => x.gemietet)) s2.hq.gebaeude = s2.hq.gebaeude.filter((x) => x !== g);
     pruefeSitz(s2);
     hqAktualisiere(s2);
-    return ok4(`${etageText(nr)} im ${g.name} gek\xFCndigt. Restmiete ${mio(r.rest * r.wochen)} \xFCber ${r.wochen} Wochen${r.ohnePlatz.length ? `. Fl\xE4che verloren und damit weniger Wirkung: ${r.ohnePlatz.map((id) => ABTEILUNG_NAME[id]).join(", ")}` : ""}.`);
+    return ok5(`${etageText(nr)} im ${g.name} gek\xFCndigt. Restmiete ${mio(r.rest * r.wochen)} \xFCber ${r.wochen} Wochen${r.ohnePlatz.length ? `. Fl\xE4che verloren und damit weniger Wirkung: ${r.ohnePlatz.map((id) => ABTEILUNG_NAME[id]).join(", ")}` : ""}.`);
   }
   function hqGebaeudeKuendigen(s2, gebaeudeId) {
     const g = gebaeude(s2, gebaeudeId);
-    if (!g) return fehler4("Geb\xE4ude nicht gefunden.");
+    if (!g) return fehler5("Geb\xE4ude nicht gefunden.");
     const es2 = g.etagen.filter((e) => e.gemietet);
     const r = kuendigeEtagen(s2, g, es2);
     s2.hq.gebaeude = s2.hq.gebaeude.filter((x) => x !== g);
     pruefeSitz(s2);
     hqAktualisiere(s2);
-    return ok4(`${g.name} (${g.stadt}) gek\xFCndigt. Restmiete ${mio(r.rest * r.wochen)} \xFCber ${r.wochen} Wochen${r.ohnePlatz.length ? `. Ohne Platz und damit ohne Wirkung: ${r.ohnePlatz.map((id) => ABTEILUNG_NAME[id]).join(", ")}` : ""}.`);
+    return ok5(`${g.name} (${g.stadt}) gek\xFCndigt. Restmiete ${mio(r.rest * r.wochen)} \xFCber ${r.wochen} Wochen${r.ohnePlatz.length ? `. Ohne Platz und damit ohne Wirkung: ${r.ohnePlatz.map((id) => ABTEILUNG_NAME[id]).join(", ")}` : ""}.`);
   }
   function abteilungSetzen(s2, id, gebaeudeId, nr) {
-    if (!ABTEILUNGEN.includes(id)) return fehler4("Unbekannte Abteilung.");
+    if (!ABTEILUNGEN.includes(id)) return fehler5("Unbekannte Abteilung.");
     const a = abteilung(s2, id);
     const g = gebaeude(s2, gebaeudeId);
     const e = g?.etagen.find((x) => x.nr === nr);
-    if (!g || !e) return fehler4("Etage nicht gefunden.");
-    if (!e.gemietet) return fehler4("Die Etage ist nicht gemietet.");
+    if (!g || !e) return fehler5("Etage nicht gefunden.");
+    if (!e.gemietet) return fehler5("Die Etage ist nicht gemietet.");
     const bedarf = qmBedarf(a);
-    if (a.gebaeudeId === gebaeudeId && a.etage === nr && platzQm(s2, a) >= bedarf) return fehler4(`${ABTEILUNG_NAME[id]} sitzt bereits dort.`);
+    if (a.gebaeudeId === gebaeudeId && a.etage === nr && platzQm(s2, a) >= bedarf) return fehler5(`${ABTEILUNG_NAME[id]} sitzt bereits dort.`);
     const gleichesHaus = a.gebaeudeId === gebaeudeId;
     const plan2 = planeBelegung(s2, g, nr, bedarf, gleichesHaus ? id : void 0);
     if (!plan2) {
       const frei6 = g.etagen.reduce((x, y) => x + freiQm(s2, g, y, gleichesHaus ? id : void 0), 0);
-      return fehler4(`Zu wenig Platz: ${ABTEILUNG_NAME[id]} braucht ${Math.round(bedarf)} qm, in ${g.name} sind ${Math.round(frei6)} qm frei.`);
+      return fehler5(`Zu wenig Platz: ${ABTEILUNG_NAME[id]} braucht ${Math.round(bedarf)} qm, in ${g.name} sind ${Math.round(frei6)} qm frei.`);
     }
     const kosten = a.fte * (gleichesHaus ? HQ_PARAM.umzugJeFteEtage : HQ_PARAM.umzugJeFteGebaeude);
     einmal(s2, kosten);
@@ -8485,10 +8597,10 @@
     pruefeSitz(s2);
     hqAktualisiere(s2);
     const n = plan2.length;
-    return ok4(`${ABTEILUNG_NAME[id]} zieht ins ${etageText(plan2[0].etage)} von ${g.name} (${g.stadt})${n > 1 ? `, verteilt auf ${n} Etagen` : ""}. Umzug ${mio(kosten)}, ${HQ_PARAM.umzugWochen} Wochen halbe Wirkung.`);
+    return ok5(`${ABTEILUNG_NAME[id]} zieht ins ${etageText(plan2[0].etage)} von ${g.name} (${g.stadt})${n > 1 ? `, verteilt auf ${n} Etagen` : ""}. Umzug ${mio(kosten)}, ${HQ_PARAM.umzugWochen} Wochen halbe Wirkung.`);
   }
   function abteilungStufe(s2, id, stufe2) {
-    if (!ABTEILUNGEN.includes(id)) return fehler4("Unbekannte Abteilung.");
+    if (!ABTEILUNGEN.includes(id)) return fehler5("Unbekannte Abteilung.");
     const st = clamp(Math.round(stufe2), 0, 3);
     const a = abteilung(s2, id);
     const ziel = Math.round(sollFte(s2, id, st));
@@ -8505,7 +8617,7 @@
       schrumpfe(a, qmBedarf(a));
       s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - weg / Math.max(1, gesamt) * 30, 0, 100);
       hqAktualisiere(s2);
-      return ok4(`${name2} auf Stufe ${st}: ${weg} FTE abgebaut, Abfindungen ${mio(abf)}. Neue Kosten ${mio(a.fte * (HQ_PARAM.lohn[id] + s2.hq.sachJeFte) * 52)} im Jahr.`);
+      return ok5(`${name2} auf Stufe ${st}: ${weg} FTE abgebaut, Abfindungen ${mio(abf)}. Neue Kosten ${mio(a.fte * (HQ_PARAM.lohn[id] + s2.hq.sachJeFte) * 52)} im Jahr.`);
     }
     if (ziel > a.fte) {
       const neu = ziel - a.fte;
@@ -8514,7 +8626,7 @@
       if (g && a.etage !== void 0) {
         const fehlt = ziel * HQ_PARAM.qmJeFte - platzQm(s2, a);
         if (fehlt > 0) zusatz = planeBelegung(s2, g, a.etage, fehlt);
-        if (!zusatz) return fehler4(`In ${g.name} ist kein Platz f\xFCr ${ziel} FTE (${Math.round(ziel * HQ_PARAM.qmJeFte)} qm n\xF6tig). Erst Etagen mieten oder umziehen.`);
+        if (!zusatz) return fehler5(`In ${g.name} ist kein Platz f\xFCr ${ziel} FTE (${Math.round(ziel * HQ_PARAM.qmJeFte)} qm n\xF6tig). Erst Etagen mieten oder umziehen.`);
       }
       const kosten = neu * HQ_PARAM.einarbeitungJeFte * standort(s2, abteilungsStadt(s2, a)).recruitingFaktor;
       einmal(s2, kosten);
@@ -8524,11 +8636,11 @@
       a.neuFte = (a.einarbeitungBis !== void 0 && a.einarbeitungBis > s2.woche ? a.neuFte ?? 0 : 0) + neu;
       a.einarbeitungBis = s2.woche + HQ_PARAM.einarbeitungWochen;
       hqAktualisiere(s2);
-      return ok4(`${name2} auf Stufe ${st}: ${neu} FTE eingestellt, Recruiting ${mio(kosten)}. Volle Wirkung nach ${HQ_PARAM.einarbeitungWochen} Wochen Einarbeitung.`);
+      return ok5(`${name2} auf Stufe ${st}: ${neu} FTE eingestellt, Recruiting ${mio(kosten)}. Volle Wirkung nach ${HQ_PARAM.einarbeitungWochen} Wochen Einarbeitung.`);
     }
     a.stufe = st;
     hqAktualisiere(s2);
-    return ok4(alteStufe === st ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st}.`);
+    return ok5(alteStufe === st ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st}.`);
   }
   function zentraleKuerzen(s2, prozent2) {
     const p2 = clamp(prozent2, 0, 0.3);
@@ -8546,7 +8658,7 @@
     hqAktualisiere(s2);
     const gesamt = 1 - s2.zentrale.kostenWoche / s2.zentrale.kostenStart;
     const unterSoll = s2.hq.abteilungen.filter((a) => s2.hq.wirkung[a.id] < a.stufe - 0.05).map((a) => ABTEILUNG_NAME[a.id]);
-    return ok4(`Zentrale um ${Math.round(p2 * 100)} % verkleinert (${fte2} FTE, Abfindungen ${mio(abf)}). Kumuliert ${Math.round(gesamt * 100)} % unter Start${unterSoll.length ? `. Unter Soll und damit schw\xE4cher: ${unterSoll.join(", ")}` : ""}${gesamt > 0.3 ? ", die Organisation wird sp\xFCrbar d\xFCnn" : ""}.`);
+    return ok5(`Zentrale um ${Math.round(p2 * 100)} % verkleinert (${fte2} FTE, Abfindungen ${mio(abf)}). Kumuliert ${Math.round(gesamt * 100)} % unter Start${unterSoll.length ? `. Unter Soll und damit schw\xE4cher: ${unterSoll.join(", ")}` : ""}${gesamt > 0.3 ? ", die Organisation wird sp\xFCrbar d\xFCnn" : ""}.`);
   }
   function wirkungText(s2, id) {
     const Lx = s2.hq.wirkung[id];
@@ -8865,9 +8977,9 @@
     return clamp(0.6 * Math.min(1, produktStufe(s2) / 2) + 0.4 * (cpo ? cpo.fachwissen / 100 : 0.2), 0, 1);
   }
   function wgFuer(s2, m, t, wunsch) {
-    const ok5 = (wg) => !!WG[wg] && s2.basisUmsatz[WG[wg].bereich] !== void 0 && passungWg(m, wg) > 0;
-    if (wunsch) return t.wgs.includes(wunsch) && ok5(wunsch) ? wunsch : void 0;
-    return t.wgs.find((wg) => ok5(wg) && (m.wgAnteile[wg] ?? 0) > 0) ?? t.wgs.find(ok5);
+    const ok6 = (wg) => !!WG[wg] && s2.basisUmsatz[WG[wg].bereich] !== void 0 && passungWg(m, wg) > 0;
+    if (wunsch) return t.wgs.includes(wunsch) && ok6(wunsch) ? wunsch : void 0;
+    return t.wgs.find((wg) => ok6(wg) && (m.wgAnteile[wg] ?? 0) > 0) ?? t.wgs.find(ok6);
   }
   function bewerte(s2, m, e, team, trend, trendOhne = 0.4) {
     const t = TYP[e.typ];
@@ -9171,46 +9283,46 @@
     return { m, t, wg, preislage, qualitaet: qualitaet3, stil, kapFrei };
   }
   function produktAktion(s2, a) {
-    const ok5 = (text3) => ({ ok: true, text: text3 });
-    const fehler5 = (text3) => ({ ok: false, text: text3 });
+    const ok6 = (text3) => ({ ok: true, text: text3 });
+    const fehler6 = (text3) => ({ ok: false, text: text3 });
     if (a.typ === "produktEntwickeln") {
       const e = a.entwurf;
       const c = pruefe(s2, e);
-      if (c.fehler || !c.m || !c.wg) return fehler5(c.fehler ?? "Ung\xFCltiger Entwurf.");
-      if (s2.phase === "insolvenz" && e.budgetWoche * e.dauer > 15e5) return fehler5("Im Verfahren gibt der Sachwalter h\xF6chstens 1,5 Mio. \u20AC je Entwicklung frei.");
+      if (c.fehler || !c.m || !c.wg) return fehler6(c.fehler ?? "Ung\xFCltiger Entwurf.");
+      if (s2.phase === "insolvenz" && e.budgetWoche * e.dauer > 15e5) return fehler6("Im Verfahren gibt der Sachwalter h\xF6chstens 1,5 Mio. \u20AC je Entwicklung frei.");
       const p3 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, teamStaerke(s2));
       s2.produkte.liste.push(p3);
       hqAktualisiere(s2);
-      return ok5(`${c.m.name}: ${p3.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p3.fertig + 1}.`);
+      return ok6(`${c.m.name}: ${p3.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p3.fertig + 1}.`);
     }
     const p2 = s2.produkte.liste.find((x) => x.id === a.produkt);
-    if (!p2 || p2.status === "ausgelistet") return fehler5("Produkt nicht gefunden.");
+    if (!p2 || p2.status === "ausgelistet") return fehler6("Produkt nicht gefunden.");
     switch (a.typ) {
       case "produktPreis": {
         const neu = Math.round(clamp(a.preis, p2.normpreis * 0.4, p2.normpreis * 2.5) * 100) / 100;
         p2.preis = neu;
         const marge = 1 - p2.ekStueck / neu;
-        return ok5(`${p2.name}: Preis ${neu.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} \u20AC, Marge ${Math.round(marge * 100)} %.`);
+        return ok6(`${p2.name}: Preis ${neu.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} \u20AC, Marge ${Math.round(marge * 100)} %.`);
       }
       case "produktAuslisten": {
         const warEnt = p2.status === "entwicklung";
         p2.status = "ausgelistet";
         if (warEnt) hqAktualisiere(s2);
-        return ok5(`${p2.name} ausgelistet${warEnt ? ", die Entwicklung ist gestoppt" : ""}.`);
+        return ok6(`${p2.name} ausgelistet${warEnt ? ", die Entwicklung ist gestoppt" : ""}.`);
       }
       case "produktSortiment": {
-        if (p2.status === "entwicklung") return fehler5("Das Produkt ist noch in Entwicklung.");
+        if (p2.status === "entwicklung") return fehler6("Das Produkt ist noch in Entwicklung.");
         if (a.an) {
-          if (p2.status === "sortiment") return ok5(`${p2.name} ist im Sortiment.`);
-          if (belegt(s2, p2.marke, p2.kategorie) >= kapazitaet(s2)) return fehler5(`Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[p2.kategorie]} erreicht.`);
+          if (p2.status === "sortiment") return ok6(`${p2.name} ist im Sortiment.`);
+          if (belegt(s2, p2.marke, p2.kategorie) >= kapazitaet(s2)) return fehler6(`Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[p2.kategorie]} erreicht.`);
           p2.status = "sortiment";
-          return ok5(`${p2.name} wieder im Sortiment.`);
+          return ok6(`${p2.name} wieder im Sortiment.`);
         }
         p2.status = "pausiert";
-        return ok5(`${p2.name} vor\xFCbergehend aus dem Sortiment.`);
+        return ok6(`${p2.name} vor\xFCbergehend aus dem Sortiment.`);
       }
     }
-    return fehler5("Unbekannte Aktion.");
+    return fehler6("Unbekannte Aktion.");
   }
   function produktKi(s2, guete, r) {
     if (s2.woche % 4 !== 2) return void 0;
@@ -10071,8 +10183,8 @@
       k.wert -= x;
       const y = x * k.kostenFaktor;
       ab += y;
-      const wk = WOCHE[k.wg];
-      if (wk) wk.ab += y;
+      const wk2 = WOCHE[k.wg];
+      if (wk2) wk2.ab += y;
     }
     s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
     return ab;
@@ -10417,18 +10529,18 @@
     return true;
   }
   function einkaufAktion(s2, a, einmalKosten2) {
-    const ok5 = (text3) => ({ ok: true, text: text3 });
-    const fehler5 = (text3) => ({ ok: false, text: text3 });
+    const ok6 = (text3) => ({ ok: true, text: text3 });
+    const fehler6 = (text3) => ({ ok: false, text: text3 });
     const pr2 = protokoll(s2);
     const wgOp = (sel, fn, was) => {
       const ds = wgAuswahl(s2, sel);
-      if (!ds.length) return fehler5("Keine passende Warengruppe.");
+      if (!ds.length) return fehler6("Keine passende Warengruppe.");
       for (const d of ds) fn(s2.einkauf.wgs[d.id], d);
-      return ok5(`${was} f\xFCr ${auswahlText(sel, ds.length)}.`);
+      return ok6(`${was} f\xFCr ${auswahlText(sel, ds.length)}.`);
     };
     switch (a.typ) {
       case "wgLimit": {
-        if (a.euro !== void 0 && a.euro !== null && a.euro < 0) return fehler5("Limit kann nicht negativ sein.");
+        if (a.euro !== void 0 && a.euro !== null && a.euro < 0) return fehler6("Limit kann nicht negativ sein.");
         const fk = a.faktor !== void 0 ? clamp(a.faktor, 0.3, 2) : void 0;
         return wgOp(a.wg, (st) => {
           if (fk !== void 0) st.st.limitFaktor = fk;
@@ -10443,7 +10555,7 @@
         }, `NOS-Anteil Ziel ${Math.round(z2 * 100)} %`);
       }
       case "wgServicegrad": {
-        if (![0.9, 0.95, 0.98].includes(a.ziel)) return fehler5("Servicegrad 90, 95 oder 98 %.");
+        if (![0.9, 0.95, 0.98].includes(a.ziel)) return fehler6("Servicegrad 90, 95 oder 98 %.");
         return wgOp(a.wg, (st) => {
           st.st.servicegrad = a.ziel;
         }, `NOS-Servicegrad ${Math.round(a.ziel * 100)} %`);
@@ -10455,7 +10567,7 @@
         }, `Vororderquote ${Math.round(q2 * 100)} %`);
       }
       case "wgReduzierung": {
-        if (!EK_PARAM.abschrift[a.strategie]) return fehler5("Reduzierung fr\xFCh, normal oder sp\xE4t.");
+        if (!EK_PARAM.abschrift[a.strategie]) return fehler6("Reduzierung fr\xFCh, normal oder sp\xE4t.");
         return wgOp(a.wg, (st) => {
           st.st.reduzierung = a.strategie;
         }, `Reduzierung ${a.strategie === "frueh" ? "fr\xFCh" : a.strategie === "spaet" ? "sp\xE4t" : "normal"}`);
@@ -10470,45 +10582,45 @@
       case "freigabeAblehnen": {
         const ids = new Set(a.ids);
         const treffer = s2.einkauf.freigaben.filter((f) => ids.has(f.id));
-        if (!treffer.length) return fehler5("Keine offene Order gefunden.");
+        if (!treffer.length) return fehler6("Keine offene Order gefunden.");
         s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => !ids.has(f.id));
         const wert = treffer.reduce((x, f) => x + f.wert, 0);
         if (a.typ === "freigeben") {
           for (const f of treffer) gebeFrei(s2, f);
           pr2.freigegeben += treffer.length;
-          return ok5(`${treffer.length} Orders \xFCber ${mio(wert)} freigegeben.`);
+          return ok6(`${treffer.length} Orders \xFCber ${mio(wert)} freigegeben.`);
         }
         pr2.abgelehnt += treffer.length;
-        return ok5(`${treffer.length} Orders \xFCber ${mio(wert)} abgelehnt.`);
+        return ok6(`${treffer.length} Orders \xFCber ${mio(wert)} abgelehnt.`);
       }
       case "freigabeKuerzen": {
         const f = s2.einkauf.freigaben.find((x) => x.id === a.id);
-        if (!f) return fehler5("Order nicht gefunden.");
+        if (!f) return fehler6("Order nicht gefunden.");
         const p2 = clamp(a.prozent, 0, 0.95);
         f.lieferungen = f.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p2)) }));
         f.wert = f.lieferungen.reduce((x, l) => x + l.wert, 0);
         f.reichweiteDanach = Math.round(f.reichweiteDanach * (1 - p2) * 10) / 10;
         f.erwarteterAbverkauf = eur(f.erwarteterAbverkauf);
         f.hinweis = [f.hinweis, `um ${Math.round(p2 * 100)} % gek\xFCrzt`].filter(Boolean).join(", ");
-        if (a.freigeben === false) return ok5(`Order ${WG[f.wg].name} auf ${mio(f.wert)} gek\xFCrzt.`);
+        if (a.freigeben === false) return ok6(`Order ${WG[f.wg].name} auf ${mio(f.wert)} gek\xFCrzt.`);
         s2.einkauf.freigaben = s2.einkauf.freigaben.filter((x) => x.id !== f.id);
         gebeFrei(s2, f);
         pr2.freigegeben++;
-        return ok5(`Order ${WG[f.wg].name} um ${Math.round(p2 * 100)} % gek\xFCrzt und \xFCber ${mio(f.wert)} freigegeben.`);
+        return ok6(`Order ${WG[f.wg].name} um ${Math.round(p2 * 100)} % gek\xFCrzt und \xFCber ${mio(f.wert)} freigegeben.`);
       }
       case "sammelfreigabe": {
         const treffer = s2.einkauf.freigaben.filter((f) => passtFilter(f, a.filter));
-        if (!treffer.length) return ok5("Keine offenen Orders im Filter.");
+        if (!treffer.length) return ok6("Keine offenen Orders im Filter.");
         const ids = new Set(treffer.map((f) => f.id));
         s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => !ids.has(f.id));
         for (const f of treffer) gebeFrei(s2, f);
         pr2.freigegeben += treffer.length;
-        return ok5(`Sammelfreigabe: ${treffer.length} Orders \xFCber ${mio(treffer.reduce((x, f) => x + f.wert, 0))}.`);
+        return ok6(`Sammelfreigabe: ${treffer.length} Orders \xFCber ${mio(treffer.reduce((x, f) => x + f.wert, 0))}.`);
       }
       case "freigabeGrenze": {
-        if (!(a.euro >= 0)) return fehler5("Grenze in Euro angeben.");
+        if (!(a.euro >= 0)) return fehler6("Grenze in Euro angeben.");
         s2.einkauf.grenze = eur(a.euro);
-        return ok5(`Freigabegrenze ${Math.round(s2.einkauf.grenze).toLocaleString("de-DE")} \u20AC EK je Order.`);
+        return ok6(`Freigabegrenze ${Math.round(s2.einkauf.grenze).toLocaleString("de-DE")} \u20AC EK je Order.`);
       }
       case "eigenmarkeGruenden":
         return eigenmarkeGruenden(s2, a.entwurf, einmalKosten2);
@@ -10830,9 +10942,9 @@
     if (qualitaet3 >= 1) return g;
     const ids = Object.keys(g).sort();
     if (ids.length < 2) return g;
-    const fehler5 = (1 - qualitaet3) * 0.5;
+    const fehler6 = (1 - qualitaet3) * 0.5;
     const soll = ids.map((id) => g[id]);
-    const verschoben = soll.map((x, i) => x * (1 - fehler5) + soll[(i + ids.length - 1) % ids.length] * fehler5);
+    const verschoben = soll.map((x, i) => x * (1 - fehler6) + soll[(i + ids.length - 1) % ids.length] * fehler6);
     return Object.fromEntries(ids.map((id, i) => [id, verschoben[i]]));
   }
   function aufteilen(s2) {
@@ -11149,11 +11261,11 @@
   function wareAktion(s2, a) {
     if (!s2.ware) initialisiereWare(s2);
     const w = s2.ware;
-    const fehler5 = (text3) => ({ ok: false, text: text3 });
-    const ok5 = (text3) => ({ ok: true, text: text3 });
+    const fehler6 = (text3) => ({ ok: false, text: text3 });
+    const ok6 = (text3) => ({ ok: true, text: text3 });
     switch (a.typ) {
       case "allokationQualitaet":
-        if (!Number.isFinite(a.qualitaet) || a.qualitaet < 0 || a.qualitaet > 1) return fehler5("Qualit\xE4t muss zwischen 0 und 1 liegen.");
+        if (!Number.isFinite(a.qualitaet) || a.qualitaet < 0 || a.qualitaet > 1) return fehler6("Qualit\xE4t muss zwischen 0 und 1 liegen.");
         w.allokationQualitaet = a.qualitaet;
         w.steuerungAktiv = true;
         const gruppiert = /* @__PURE__ */ new Map();
@@ -11164,14 +11276,14 @@
           else gruppiert.set(key, { ...k, wert: k.wert });
         }
         s2.bestand = [...gruppiert.values()].flatMap((k) => verteile(s2, k, schiefe(gewichte(s2, k.gruppe), a.qualitaet)));
-        return ok5("Allokation und Nachschub angepasst.");
+        return ok6("Allokation und Nachschub angepasst.");
       case "umlagerung": {
         const cl = clusterListe(s2).map((x) => x.id);
-        if (!cl.includes(a.von) || !cl.includes(a.nach) || a.von === a.nach) return fehler5("Ung\xFCltiges Quell- oder Zielcluster.");
-        if (!GRUPPEN[a.gruppe] || !Number.isSafeInteger(a.wert) || a.wert <= 0) return fehler5("Ung\xFCltiger Warenwert.");
+        if (!cl.includes(a.von) || !cl.includes(a.nach) || a.von === a.nach) return fehler6("Ung\xFCltiges Quell- oder Zielcluster.");
+        if (!GRUPPEN[a.gruppe] || !Number.isSafeInteger(a.wert) || a.wert <= 0) return fehler6("Ung\xFCltiger Warenwert.");
         steuerungUebernehmen(s2);
         const pool = s2.bestand.filter((k) => k.gruppe === a.gruppe && k.hauscluster === a.von && k.wert > 0).sort((x, y) => y.alter - x.alter);
-        if (pool.reduce((x, k) => x + k.wert, 0) < a.wert) return fehler5("Zu wenig Ware im Quellcluster.");
+        if (pool.reduce((x, k) => x + k.wert, 0) < a.wert) return fehler6("Zu wenig Ware im Quellcluster.");
         let rest = a.wert;
         const kohorten = [];
         for (const k of pool) {
@@ -11186,12 +11298,12 @@
         s2.einmalkostenWoche += kosten;
         w.umlagerungen.push({ gruppe: a.gruppe, von: a.von, nach: a.nach, kohorten, kosten, ankunft: s2.woche + (a.wert > 25e4 ? 2 : 1) });
         w.steuerungAktiv = true;
-        return ok5("Umlagerung beauftragt; Ankunft in ein bis zwei Wochen.");
+        return ok6("Umlagerung beauftragt; Ankunft in ein bis zwei Wochen.");
       }
       case "reduzierungZentral": {
         const key = `${a.gruppe ?? "*"}|${a.hauscluster ?? "*"}`;
-        if (a.gruppe && !GRUPPEN[a.gruppe]) return fehler5("Warengruppe nicht gefunden.");
-        if (a.hauscluster && !clusterListe(s2).some((c) => c.id === a.hauscluster)) return fehler5("Hauscluster nicht gefunden.");
+        if (a.gruppe && !GRUPPEN[a.gruppe]) return fehler6("Warengruppe nicht gefunden.");
+        if (a.hauscluster && !clusterListe(s2).some((c) => c.id === a.hauscluster)) return fehler6("Hauscluster nicht gefunden.");
         if (a.an) w.zentral[key] = true;
         else delete w.zentral[key];
         if (a.an) for (const c of clusterListe(s2)) {
@@ -11200,18 +11312,18 @@
           const leitung2 = leitungen?.find((x) => x.id === c.id)?.stelle.person;
           if (leitung2) leitung2.stimmung = Math.max(0, leitung2.stimmung - (leitung2.qualitaet >= 0.7 ? 10 : 5));
         }
-        return ok5(a.an ? "Zentraler Reduzierungskalender durchgesetzt." : "Lokaler Reduzierungsspielraum freigegeben.");
+        return ok6(a.an ? "Zentraler Reduzierungskalender durchgesetzt." : "Lokaler Reduzierungsspielraum freigegeben.");
       }
       case "reduzierungLokal":
-        if (!GRUPPEN[a.gruppe] || !clusterListe(s2).some((c) => c.id === a.hauscluster)) return fehler5("Bereich oder Hauscluster unbekannt.");
-        if (reduzierungGesperrt(s2, a.gruppe, a.hauscluster)) return fehler5("Der zentrale Reduzierungskalender sperrt lokale Nachl\xE4sse.");
-        if (!Number.isFinite(a.punkte) || a.punkte < 0 || a.punkte > 10) return fehler5("Maximal zehn zus\xE4tzliche Prozentpunkte.");
+        if (!GRUPPEN[a.gruppe] || !clusterListe(s2).some((c) => c.id === a.hauscluster)) return fehler6("Bereich oder Hauscluster unbekannt.");
+        if (reduzierungGesperrt(s2, a.gruppe, a.hauscluster)) return fehler6("Der zentrale Reduzierungskalender sperrt lokale Nachl\xE4sse.");
+        if (!Number.isFinite(a.punkte) || a.punkte < 0 || a.punkte > 10) return fehler6("Maximal zehn zus\xE4tzliche Prozentpunkte.");
         w.lokal[`${a.gruppe}|${a.hauscluster}`] = a.punkte / 100;
         steuerungUebernehmen(s2);
-        return ok5("Lokaler Reduzierungsspielraum aktualisiert.");
+        return ok6("Lokaler Reduzierungsspielraum aktualisiert.");
       case "merchandisePlan": {
         const st = s2.einkauf.wgs[a.wg];
-        if (!st || !Number.isSafeInteger(a.saison) || a.saison < saisonId(s2.woche)) return fehler5("Saison oder Warengruppe nicht g\xFCltig.");
+        if (!st || !Number.isSafeInteger(a.saison) || a.saison < saisonId(s2.woche)) return fehler6("Saison oder Warengruppe nicht g\xFCltig.");
         const alt = w.plaene[`${a.wg}|${a.saison}`];
         const soll = limitFuer(s2, st, a.saison);
         const p2 = {
@@ -11223,17 +11335,17 @@
           breite: a.breite ?? alt?.breite ?? 0.5,
           vororderquote: a.vororderquote ?? alt?.vororderquote ?? st.st.vororderquote
         };
-        if (!Number.isSafeInteger(p2.budget) || p2.budget < 0 || p2.zielmarge < 0 || p2.zielmarge > 1 || p2.zielabverkauf < 0 || p2.zielabverkauf > 1 || p2.breite < 0 || p2.breite > 1 || p2.vororderquote < 0 || p2.vororderquote > 1) return fehler5("Ung\xFCltige Planparameter.");
+        if (!Number.isSafeInteger(p2.budget) || p2.budget < 0 || p2.zielmarge < 0 || p2.zielmarge > 1 || p2.zielabverkauf < 0 || p2.zielabverkauf > 1 || p2.breite < 0 || p2.breite > 1 || p2.vororderquote < 0 || p2.vororderquote > 1) return fehler6("Ung\xFCltige Planparameter.");
         w.plaene[`${a.wg}|${a.saison}`] = p2;
         st.st.limitEuro = p2.budget;
         st.st.vororderquote = p2.vororderquote;
         for (const v of w.vorlagen) if (v.wg === a.wg && v.saison === a.saison) v.erledigt = true;
-        return ok5("Saisonbudget und Vororderquote \xFCbernommen.");
+        return ok6("Saisonbudget und Vororderquote \xFCbernommen.");
       }
       case "fundusAbfluss": {
-        if (!GRUPPEN[a.gruppe] || !Number.isSafeInteger(a.wert) || a.wert <= 0) return fehler5("Ung\xFCltiger Warenwert.");
+        if (!GRUPPEN[a.gruppe] || !Number.isSafeInteger(a.wert) || a.wert <= 0) return fehler6("Ung\xFCltiger Warenwert.");
         const ks = s2.bestand.filter((k) => k.gruppe === a.gruppe && k.wert > 0 && (k.ladenhueter || k.alter > (k.art === "nos" ? EK_PARAM.altNos : EK_PARAM.altSaison))).sort((x, y) => y.alter - x.alter);
-        if (ks.reduce((x, k) => x + k.wert, 0) < a.wert) return fehler5("Nicht genug Altware vorhanden.");
+        if (ks.reduce((x, k) => x + k.wert, 0) < a.wert) return fehler6("Nicht genug Altware vorhanden.");
         let rest = a.wert, ek2 = 0;
         for (const k of ks) {
           const x = Math.min(k.wert, rest);
@@ -11247,14 +11359,14 @@
         const erloes = eur(a.wert * 0.7);
         s2.einmalErloeseWoche += erloes;
         s2.einmalkostenWoche += eur(ek2);
-        return ok5(`${erloes.toLocaleString("de-DE")} \u20AC Erl\xF6s durch Abfluss an FUNDUS gebucht.`);
+        return ok6(`${erloes.toLocaleString("de-DE")} \u20AC Erl\xF6s durch Abfluss an FUNDUS gebucht.`);
       }
       case "flaechenZuteilung": {
         const h = s2.haeuser.find((h2) => h2.id === a.haus);
-        if (!h || h.status !== "offen") return fehler5("Haus nicht verf\xFCgbar.");
-        if (a.von === a.nach || !GRUPPEN[a.nach] || GRUPPEN[a.nach].format !== h.format || !Number.isSafeInteger(a.qm) || a.qm < 50) return fehler5("Unzul\xE4ssige Fl\xE4chen\xE4nderung.");
+        if (!h || h.status !== "offen") return fehler6("Haus nicht verf\xFCgbar.");
+        if (a.von === a.nach || !GRUPPEN[a.nach] || GRUPPEN[a.nach].format !== h.format || !Number.isSafeInteger(a.qm) || a.qm < 50) return fehler6("Unzul\xE4ssige Fl\xE4chen\xE4nderung.");
         const f = h.flaechen.find((f2) => f2.gruppe === a.von && f2.konzept === "eigen" && f2.umbauBis === void 0 && f2.qm >= a.qm);
-        if (!f) return fehler5("Nicht gen\xFCgend freie Eigenfl\xE4che.");
+        if (!f) return fehler6("Nicht gen\xFCgend freie Eigenfl\xE4che.");
         const wochen = clamp(Math.ceil(a.qm / 200) + 1, 2, 6);
         const kosten = eur(a.qm * 180);
         f.qm -= a.qm;
@@ -11268,18 +11380,18 @@
           umbauZiel: { konzept: "eigen", gruppe: a.nach }
         });
         s2.einmalkostenWoche += kosten;
-        return ok5(`${a.qm} qm umgeplant, Umbauzeit ${wochen} Wochen.`);
+        return ok6(`${a.qm} qm umgeplant, Umbauzeit ${wochen} Wochen.`);
       }
       case "warensicherung": {
         const h = s2.haeuser.find((h2) => h2.id === a.haus);
-        if (!h) return fehler5("Haus nicht gefunden.");
+        if (!h) return fehler6("Haus nicht gefunden.");
         h.warensicherung = a.an;
         if (a.an) s2.einmalkostenWoche += 25e3;
         steuerungUebernehmen(s2);
-        return ok5(a.an ? "Warensicherung installiert." : "Warensicherung deaktiviert.");
+        return ok6(a.an ? "Warensicherung installiert." : "Warensicherung deaktiviert.");
       }
     }
-    return fehler5("Unbekannte Warenaktion.");
+    return fehler6("Unbekannte Warenaktion.");
   }
 
   // ../engine/src/welt.ts
@@ -12477,6 +12589,132 @@
       }
       default:
         return null;
+    }
+  }
+  function testAngebotErzeugen(s2, art) {
+    const vorher = s2.angebote.length;
+    switch (art) {
+      case "untermiete":
+        untermietAnfrage(s2);
+        break;
+      case "paket":
+        paketDeal(s2);
+        break;
+      case "stadt":
+        stadtAngebot(s2);
+        break;
+      case "sportverkauf":
+        sportVerkauf(s2);
+        break;
+      case "sonderposten":
+        sonderposten(s2);
+        break;
+      case "premiumVerkauf": {
+        const h = s2.haeuser.find((x) => x.klasse === "premium" && x.status === "offen");
+        if (!h) return false;
+        neuesAngebot(s2, {
+          typ: "premiumVerkauf",
+          frist: s2.woche + 10,
+          titel: "Testangebot f\xFCr " + h.name,
+          text: "Ein fiktiver Investor bietet f\xFCr das Premiumhaus.",
+          kaufpreis: Math.round((h.kpi?.umsatz ?? 2e6) * 40),
+          wunschHaeuser: [h.id],
+          premiumKaeuferTyp: "Family Office",
+          premiumKaeuferName: "Testinvestor"
+        });
+        break;
+      }
+      // Übernahmen entstehen aus Räumungen in wettbewerb.ts (testWettbewerbEreignis).
+      case "uebernahme":
+        return false;
+    }
+    return s2.angebote.length > vorher;
+  }
+  function testZufallsereignis(s2, art) {
+    const h = offeneHaeuser(s2).find((x) => x.miete.netTyp === "triple") ?? offeneHaeuser(s2)[0];
+    switch (art) {
+      case "instandhaltung":
+        if (!h) return false;
+        instandhaltung(s2, h);
+        return true;
+      case "mietende":
+        if (!h) return false;
+        mietende(s2, h);
+        return true;
+      case "jahresgespraech": {
+        const l = s2.lieferanten.find((x) => x.aktiv);
+        if (!l) return false;
+        neueEntscheidung(s2, {
+          typ: "jahresgespraech",
+          frist: s2.woche + 2,
+          titel: "Jahresgespr\xE4ch mit " + l.name,
+          text: l.beschreibung,
+          optionen: [{ id: "mengenzusage", label: "Mengenzusage" }, { id: "platzierung", label: "Platzierung" }, { id: "hart", label: "Hart verhandeln" }],
+          standard: "platzierung",
+          daten: { lieferant: l.id }
+        });
+        return true;
+      }
+      case "nordline_dtc":
+        neueEntscheidung(s2, {
+          typ: "nordline_dtc",
+          frist: s2.woche + 4,
+          titel: "Nordline stellt auf Direktvertrieb um",
+          text: "Nordline k\xFCrzt die Zuteilung f\xFCr den Handel. Gegen eine Investition in Markenfl\xE4chen bleibt Hartwig A-Partner.",
+          optionen: [
+            { id: "akzeptieren", label: "K\xFCrzung akzeptieren" },
+            { id: "investieren", label: "Markenfl\xE4chen finanzieren (3,5 Mio. \u20AC)" }
+          ],
+          standard: "akzeptieren",
+          daten: {}
+        });
+        return true;
+      case "arvel_rueckkehr": {
+        const l = s2.lieferanten.find((x) => x.id === "arvel");
+        if (!l) return false;
+        l.aktiv = true;
+        l.rueckzug = false;
+        melde(s2, "info", "Test: Maison Arvel kehrt in die B-Lagen zur\xFCck.");
+        return true;
+      }
+      case "lieferantenausfall": {
+        const l = s2.lieferanten.find((x) => x.aktiv);
+        if (!l) return false;
+        l.aktiv = false;
+        l.ausfallBis = s2.woche + 12;
+        melde(s2, "warnung", "Test: Lieferant " + l.name + " f\xE4llt 12 Wochen aus.", { modul: "einkauf" });
+        return true;
+      }
+      case "containerstau": {
+        const b2 = s2.bestellungen.find((x) => x.wert > 0);
+        if (!b2) return false;
+        b2.ankunft += 6;
+        melde(s2, "warnung", "Test: Containerstau verz\xF6gert " + b2.gruppe + " um 6 Wochen.", { modul: "einkauf" });
+        return true;
+      }
+      case "konjunktur":
+        s2.makro.schockStaerke = 0.08 * schwierigkeit(s2).ereignisse;
+        s2.makro.schockBis = s2.woche + 26;
+        s2.makro.konjunktur = 1 - s2.makro.schockStaerke;
+        melde(s2, "presse", "Test: Konjunkturschock trifft den Einzelhandel.");
+        return true;
+      case "streik": {
+        const hs = offeneHaeuser(s2).slice(0, 4);
+        if (!hs.length) return false;
+        for (const haus2 of hs) haus2.streikBis = s2.woche + 2;
+        melde(s2, "presse", "Test: Streik in " + hs.length + " H\xE4usern.");
+        return true;
+      }
+      case "filialleiter":
+        if (!h) return false;
+        h.personal.filialleiter = { name: "Interimleitung", skill: 0.35, moral: 50, interimBis: s2.woche + 4 };
+        melde(s2, "warnung", "Test: Filialleitung in " + h.name + " ausgefallen.", { stadt: h.stadt, hausId: h.id });
+        return true;
+      case "presse":
+        melde(s2, "presse", SATIRE[0]);
+        return true;
+      default:
+        return false;
     }
   }
 
@@ -44172,12 +44410,12 @@
   function versetzt(poly, ins) {
     for (let f = 1; f > 0.05; f -= 0.08) {
       const q2 = versetztRoh(poly, ins.map((v) => v > 0 ? v * f : v));
-      let ok5 = true;
-      for (let i = 0; i < poly.length && ok5; i++) {
+      let ok6 = true;
+      for (let i = 0; i < poly.length && ok6; i++) {
         const a = poly[i], b2 = poly[(i + 1) % poly.length], c = q2[i], d = q2[(i + 1) % q2.length];
-        if ((b2[0] - a[0]) * (d[0] - c[0]) + (b2[1] - a[1]) * (d[1] - c[1]) < -1e-6) ok5 = false;
+        if ((b2[0] - a[0]) * (d[0] - c[0]) + (b2[1] - a[1]) * (d[1] - c[1]) < -1e-6) ok6 = false;
       }
-      if (ok5) return q2;
+      if (ok6) return q2;
     }
     return poly.slice();
   }
@@ -48454,21 +48692,21 @@
         }
         const xc = (von + bis) / 2;
         const cO = cellOf(spanneBei(l - 1, xc)), cU = cellOf(spanneBei(l, xc));
-        let ok5 = false, bruecke = false;
+        let ok6 = false, bruecke = false;
         if (cO.f && cO.f === cU.f) {
           if (cO.f.art === "wasser" && !cO.f.quer) {
             if (!HAUPTLICH.has(xL[l].typ)) r();
             if (brueckeErlaubt(cO.f, l)) {
-              ok5 = true;
+              ok6 = true;
               bruecke = true;
             }
           }
         } else if (l === 0 || l === nz) {
           const c = l === 0 ? cU : cO;
-          ok5 = land(c) && c.f?.art !== "kulisse" || !!(c.f && c.f.art === "wasser" && c.f.quer && !c.f.keineBruecke);
-        } else if (land(cO) || land(cU)) ok5 = true;
+          ok6 = land(c) && c.f?.art !== "kulisse" || !!(c.f && c.f.art === "wasser" && c.f.quer && !c.f.keineBruecke);
+        } else if (land(cO) || land(cU)) ok6 = true;
         const i = spalteBei(xc);
-        stuecke.push(ok5 ? neuesSeg(xL[l], i, `x${l}:${i}`, xL[l].z, von, bis, bruecke) : null);
+        stuecke.push(ok6 ? neuesSeg(xL[l], i, `x${l}:${i}`, xL[l].z, von, bis, bruecke) : null);
       }
       knoten.forEach((n, q2) => {
         if (n.virt) return;
@@ -49093,12 +49331,12 @@
           n1++;
         }
         if (summe2 < bmin || summe2 > bmax * 1.4) continue;
-        let ok5 = true;
+        let ok6 = true;
         for (let q2 = n0 + 1; q2 < n1; q2++) {
           const a = liste[q2 - 1], c = liste[q2];
-          if (entlangX ? Math.abs(a.x + a.w - c.x) > 0.1 : Math.abs(a.z + a.d - c.z) > 0.1) ok5 = false;
+          if (entlangX ? Math.abs(a.x + a.w - c.x) > 0.1 : Math.abs(a.z + a.d - c.z) > 0.1) ok6 = false;
         }
-        if (!ok5) continue;
+        if (!ok6) continue;
         const erste = liste[n0], letzte = liste[n1 - 1];
         const maxT = (entlangX ? b2.d - (b2.tiefen?.[seite === "+z" ? "-z" : "+z"] ?? 0) : b2.w - (b2.tiefen?.[seite === "+x" ? "-x" : "+x"] ?? 0)) - 6;
         const T_ = Math.max(entlangX ? erste.d : erste.w, Math.min(tiefe, maxT));
@@ -97091,11 +97329,11 @@
     const n = haus2.etagen.filter((x) => x >= 0).length;
     const oben = haus2.etagen.includes(e + 1), unten = haus2.etagen.includes(e - 1);
     const typ = Array.from({ length: nx }, () => Array(nz).fill(null));
-    const ok5 = (i, j) => i >= 0 && j >= 0 && i < nx && j < nz;
+    const ok6 = (i, j) => i >= 0 && j >= 0 && i < nx && j < nz;
     const setz = (i, j, t) => {
-      if (ok5(i, j) && !typ[i][j]) typ[i][j] = t;
+      if (ok6(i, j) && !typ[i][j]) typ[i][j] = t;
     };
-    const frei6 = (i, j) => ok5(i, j) && !typ[i][j];
+    const frei6 = (i, j) => ok6(i, j) && !typ[i][j];
     const box = fam === 3;
     const ra = { fam, v, mall, B: B2, T, nx, nz, n, oben, unten, typ, box, eg: e === 0, e, sonder: [] };
     const rtTyp = fam === 2 ? "treppe_offen" : fam === 5 ? "treppe_holz" : "rt";
@@ -97114,9 +97352,9 @@
         setz(0, 0, "treppe");
         setz(0, 1, "treppe2");
       }
-      const wk = e === 0 && nx >= 8;
-      for (let i = 1; i < nx - (wk ? 3 : 1); i++) setz(i, 0, "lager");
-      if (wk) {
+      const wk2 = e === 0 && nx >= 8;
+      for (let i = 1; i < nx - (wk2 ? 3 : 1); i++) setz(i, 0, "lager");
+      if (wk2) {
         setz(nx - 3, 0, "werkstatt");
         setz(nx - 2, 0, "werkstatt2");
       }
@@ -97159,7 +97397,7 @@
     for (let j = gz2 + 1; j < nz; j++) setz(gx, j, "gang");
     if (fam === 6 && nx >= 5 && nz >= 4) {
       ra.zylR = Math.max(4, Math.min(7, Math.min(B2, T) * 0.2));
-      for (const [i, j] of [[nx - 1, nz - 1], [nx - 2, nz - 1], [nx - 1, nz - 2], [nx - 2, nz - 2]]) if (ok5(i, j) && typ[i][j] !== "gang") typ[i][j] = "buehne";
+      for (const [i, j] of [[nx - 1, nz - 1], [nx - 2, nz - 1], [nx - 1, nz - 2], [nx - 2, nz - 2]]) if (ok6(i, j) && typ[i][j] !== "gang") typ[i][j] = "buehne";
       ra.sonder.push("buehne");
     }
     if (fam === 1 && n >= 2 && nx >= 8 && nz >= 5) {
@@ -106667,8 +106905,8 @@
           platten(S, FF, fl, -0.3, 0.22, stein);
         }
       }
-      for (const [cx, ok5] of [[0.9, vis.xm || vis.f], [W3 - 0.9, vis.x || vis.f]]) {
-        if (!ok5 || W3 < 26) continue;
+      for (const [cx, ok6] of [[0.9, vis.xm || vis.f], [W3 - 0.9, vis.x || vis.f]]) {
+        if (!ok6 || W3 < 26) continue;
         zyl7(S, 1.7, 1.7, 9, cx, H - 5, zF - 0.9, stein, 8);
         zyl7(S, 1.85, 1.85, 0.35, cx, H - 0.2, zF - 0.9, "#c98a63", 8);
         zyl7(S, 1.7, 0.4, 1.5, cx, H - 6.5, zF - 0.9, stein, 8);
@@ -114028,8 +114266,8 @@
       haustuer2(S, F2.h, b2 * 0.3, 0.3, 1.1, 2.3, waehle2(r, HOLZ5), orn);
       fenster6(S, F2.h, b2 * 0.7, 1.4, 1, 1.3, nebenFen);
     }
-    for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
-      if (!ok5 || !sichtF2(p2, F2[k])) continue;
+    for (const [k, ok6] of [["r", letzter], ["l", erster]]) {
+      if (!ok6 || !sichtF2(p2, F2[k])) continue;
       lochfassade(S, F2[k], 0.5, T - 0.5, eg, n, gh, { ...nebenFen, ra: 3.3, fw: 1, fh: 1.5 });
       fb5(S, F2[k], 0, T - tA, 0.3, 0.8, 0, 0.1, sockelF);
       if (arkade2) fwand3(S, F2[k], 0, tA, 0.3, eg, -0.5, 0, wand2, [{ u0: 0.5, u1: tA - 0.4, v0: 0.3, v1: eg - 0.45, bogen: true }]);
@@ -114187,8 +114425,8 @@
     }
     if (sichtF2(p2, F2.h)) lochfassade(S, F2.h, 0, b2, eg, n, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS10, simsF: "#cfc9bd" });
     if (sichtF2(p2, F2.h)) fb5(S, F2.h, 0, b2, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
-    for (const [k, ok5] of [["r", letzter], ["l", erster]]) {
-      if (!ok5 || !sichtF2(p2, F2[k])) continue;
+    for (const [k, ok6] of [["r", letzter], ["l", erster]]) {
+      if (!ok6 || !sichtF2(p2, F2[k])) continue;
       if (stil === "wiederaufbau") {
         ladenFront3(teil5(F2[k], 0, 7), 7);
         lochfassade(S, F2[k], 0, T, eg, n, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS10, simsF: "#c9c3b6" });
@@ -114952,7 +115190,7 @@
     };
     if (sichtF2(p2, F2.v)) seite(F2.v, b2, true, false);
     if (sichtF2(p2, F2.h)) seite(F2.h, b2, false, false);
-    for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) {
+    for (const [k, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k])) {
       seite(F2[k], T, false, false);
       for (let kk = 0; kk < n; kk++) {
         const y = eg + kk * gh;
@@ -114969,7 +115207,7 @@
       else fpoly4(S, F2.v, [[0, H], [b2, H], [b2 / 2, H + hg - 0.2]], -0.4, tTop, o.wand);
       if (sichtF2(p2, F2.h)) fwGiebel2(S, F2.h, 0, b2, H, hg - 0.15, 0, o.holz, o.wand, fen, 2);
       else fpoly4(S, F2.h, [[0, H], [b2, H], [b2 / 2, H + hg - 0.2]], -0.4, 0, o.wand);
-      for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) {
+      for (const [k, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k])) {
         const s2 = 2 * hg / b2;
         for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k], u, H, s2, 1.6, o.wand, o.dach, GLAS10, 1);
       }
@@ -115004,7 +115242,7 @@
           fgeo5(S, F2.v, g, o.dach);
         }
       }
-      for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) {
+      for (const [k, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k])) {
         const Fk = k === "r" ? R8(x0 + b2, z0 + Td, 0, -1, Td) : R8(x0, z0, 0, 1, Td);
         if (o.art) fwGiebel2(S, Fk, 0, Td, H, hd - 0.2, 0.01, o.holz, o.wand, fen, 2);
       }
@@ -115058,8 +115296,8 @@
     const H = o.eg + o.n * o.gh, st = o.stein, hst = heller(st, 0.08);
     S.quader(x0, 0, z0, x0 + b2, H, z0 + T, st);
     const fen = { rahmen: ORN2, glas: GLAS10, fasche: hst, simsF: hst };
-    for (const [k, ok5] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
-      if (!ok5 || !sichtF2(p2, F2[k])) continue;
+    for (const [k, ok6] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
+      if (!ok6 || !sichtF2(p2, F2[k])) continue;
       const Fk = F2[k], L2 = Fk.L;
       if (k === "v") {
         laden(S, scene2, Fk, 0.5, L2 - 2.2, o.eg - 0.3, r, { leer: leer3, rahmen: waehle2(r, ["#3f4a53", "#5a4636"]) });
@@ -115584,7 +115822,7 @@
     };
     if (sichtF2(p2, F2.v)) front2(F2.v, b2, true);
     if (sichtF2(p2, F2.h)) lochfassade(S, F2.h, 0, b2, eg, n, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS10, sims: false });
-    for (const [k, ok5] of [["r", letzter], ["l", erster]]) if (ok5 && sichtF2(p2, F2[k])) front2(F2[k], T, false);
+    for (const [k, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k])) front2(F2[k], T, false);
     const sb2 = Math.max(6, b2 * 0.62), st0 = x0 + (b2 - sb2) * (typ === "band" ? 0.2 : 0.6), sT = T - 5.5;
     S.quader(st0, H, z0 + 2, st0 + sb2, H + 2.9, z0 + 2 + sT, "#e2e6e8");
     const Fs = seiten3(st0, z0 + 2, sb2, sT);
@@ -122289,7 +122527,7 @@
   for (const d of einstellungen) meldeSchalter(d);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "bdbd57e" : "Entwicklung";
+  var version = () => true ? "d53247d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv3 = false;
     function feld(d) {
@@ -123089,7 +123327,7 @@
       svg.parentElement.querySelector(".khover").textContent = `KW ${reihe[i][0]}: ${reihe[i][1]}`;
     });
     function pruefe2() {
-      const fehler5 = [];
+      const fehler6 = [];
       let n = 0;
       const u = q2.uebersicht(s2(), { format: ui.format });
       const bs = new Map(u.bereiche.map((b2) => [b2.bereich, b2])), ws = new Map(u.bereiche.flatMap((b2) => b2.wgs.map((w) => [w.id, w])));
@@ -123131,9 +123369,9 @@
         } catch (x) {
           e = `Fehler ${x.message}`;
         }
-        if (e !== el.textContent) fehler5.push(`${el.dataset.p}: ${el.textContent} statt ${e}`);
+        if (e !== el.textContent) fehler6.push(`${el.dataset.p}: ${el.textContent} statt ${e}`);
       }
-      return { seite: ui.seite, werte: n, fehler: fehler5 };
+      return { seite: ui.seite, werte: n, fehler: fehler6 };
     }
     return {
       ui,
@@ -123652,18 +123890,18 @@
     return { W: W3, P: P2 };
   }
   function vergleiche(W3) {
-    const fehler5 = [];
+    const fehler6 = [];
     let n = 0;
     for (const el of document.querySelectorAll("#pinhalt [data-p]")) {
       n++;
       const k = el.dataset.p;
       if (!W3.has(k)) {
-        fehler5.push(`${k}: angezeigt ${el.textContent}, Engine kennt den Wert nicht mehr`);
+        fehler6.push(`${k}: angezeigt ${el.textContent}, Engine kennt den Wert nicht mehr`);
         continue;
       }
-      if (W3.get(k) !== el.textContent) fehler5.push(`${k}: ${el.textContent} statt ${W3.get(k)}`);
+      if (W3.get(k) !== el.textContent) fehler6.push(`${k}: ${el.textContent} statt ${W3.get(k)}`);
     }
-    return { werte: n, fehler: fehler5 };
+    return { werte: n, fehler: fehler6 };
   }
   var schalter = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
   var segment = (act, wert, optionen2, extra = "") => `<div class="seg${optionen2.length > 5 || optionen2.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? " umbruch" : ""}">${optionen2.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
@@ -126857,6 +127095,285 @@
     };
   }
 
+  // src/ui/werkzeuge.js
+  var WERKZEUGE_AKTIV = true;
+  var BERICHT_FORMAT = "RUHRKAUF-TEST-1:gzip:";
+  var MAX_FEHLER = 50;
+  function base64(bytes) {
+    let s2 = "";
+    for (let i = 0; i < bytes.length; i += 16384)
+      s2 += String.fromCharCode(...bytes.subarray(i, i + 16384));
+    return btoa(s2);
+  }
+  function bytesAusBase64(s2) {
+    const bin = atob(s2);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr;
+  }
+  async function gzip(text3) {
+    if (typeof CompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt CompressionStream nicht.");
+    const rohr = new Blob([new TextEncoder().encode(text3)]).stream().pipeThrough(new CompressionStream("gzip"));
+    return base64(new Uint8Array(await new Response(rohr).arrayBuffer()));
+  }
+  async function ungzip(base64Text) {
+    if (typeof DecompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt DecompressionStream nicht.");
+    const daten = bytesAusBase64(base64Text);
+    const rohr = new Blob([daten]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Response(rohr).text();
+  }
+  async function kopiereText(text3) {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text3);
+        return;
+      } catch (_) {
+      }
+    }
+    const feld = document.createElement("textarea");
+    feld.value = text3;
+    feld.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(feld);
+    feld.select();
+    const ok6 = document.execCommand("copy");
+    feld.remove();
+    if (!ok6) throw new Error("Kopieren nicht erlaubt. Bitte den Text im Berichtsfeld manuell kopieren.");
+  }
+  function werkzeugeModul(ctx) {
+    const datum = document.querySelector(".datum");
+    const menu = document.getElementById("werkzeuge");
+    const inhalt = document.getElementById("pinhalt");
+    const fehler6 = [];
+    const frames = [];
+    const einmal2 = new URLSearchParams(location.search).get("werkzeuge") === "1";
+    let freigeschaltet = false, aktiv3 = false, beschaeftigt = false;
+    let messTimer = null, raf = null;
+    let berichteingabe = "";
+    let letzterBericht = "";
+    const klicks = [];
+    const num2 = (x) => Number.isFinite(x) ? Math.round(x * 10) / 10 : null;
+    function eintrag2(art, text3) {
+      fehler6.push({ zeit: (/* @__PURE__ */ new Date()).toISOString(), art, text: String(text3).slice(0, 3e3) });
+      if (fehler6.length > MAX_FEHLER) fehler6.shift();
+      if (freigeschaltet) datum.classList.add("testfehler");
+    }
+    window.addEventListener("error", (e) => eintrag2("error", e.message || e.error?.stack || "Unbekannter Fehler"));
+    window.addEventListener("unhandledrejection", (e) => eintrag2("unhandledrejection", e.reason?.stack || e.reason || "Unbehandeltes Promise"));
+    const originalConsoleError = console.error.bind(console);
+    console.error = (...args) => {
+      eintrag2("console.error", args.map((x) => x?.stack || String(x)).join(" "));
+      originalConsoleError(...args);
+    };
+    function entsperren() {
+      if (!WERKZEUGE_AKTIV) return false;
+      freigeschaltet = true;
+      menu.hidden = false;
+      menu.style.display = "";
+      datum.classList.toggle("testfehler", fehler6.length > 0);
+      return true;
+    }
+    datum.addEventListener("click", () => {
+      if (!WERKZEUGE_AKTIV) return;
+      const jetzt = performance.now();
+      klicks.push(jetzt);
+      while (klicks.length && jetzt - klicks[0] > 1800) klicks.shift();
+      if (klicks.length >= 5) {
+        klicks.length = 0;
+        if (entsperren() && ctx.s()) oeffne();
+      }
+    });
+    menu.addEventListener("click", () => oeffne());
+    function fenster7() {
+      const seit = performance.now() - 2e3;
+      while (frames.length && frames[0] < seit) frames.shift();
+      const abstaende = frames.slice(1).map((x, i) => x - frames[i]).filter((x) => x > 0);
+      return {
+        fpsMittel: abstaende.length ? num2(1e3 * abstaende.length / abstaende.reduce((a, b2) => a + b2, 0)) : null,
+        fpsSchlechteste: abstaende.length ? num2(1e3 / Math.max(...abstaende)) : null
+      };
+    }
+    function animation(t) {
+      if (!aktiv3) return;
+      ctx.renderFrame();
+      frames.push(t);
+      fenster7();
+      raf = requestAnimationFrame(animation);
+    }
+    function metriken() {
+      const m = fenster7();
+      const teile2 = ctx.teileStand()?.teile ?? 0;
+      const ende = ctx.messung.wocheMs.at(-1);
+      const speicher = performance.memory?.usedJSHeapSize;
+      return { ...m, teile: teile2, engineMs: ende?.engineMs ?? null, speicherMiB: speicher === void 0 ? null : num2(speicher / 1048576) };
+    }
+    function metrikZeigen() {
+      if (!aktiv3) return;
+      const m = metriken();
+      for (const [id, wert] of Object.entries(m)) {
+        const el = document.getElementById("test-" + id);
+        if (el) el.textContent = wert === null ? "Nicht verf\xFCgbar" : String(wert);
+      }
+    }
+    function zeigeMetrik(name2, id, einheit) {
+      return '<div class="zeile"><span>' + name2 + '</span><b><span id="test-' + id + '">\u2013</span>' + (einheit || "") + "</b></div>";
+    }
+    function zeigen(scroll = false) {
+      if (!freigeschaltet || !ctx.s()) return;
+      const sc = scroll ? inhalt.scrollTop : 0, s2 = ctx.s();
+      const stakeholder = Object.entries(s2.stakeholder).map(([feld, wert]) => '<label class="test-eingabe">' + esc2(feld) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld) + '" value="' + Math.round(wert) + '"></label>').join("");
+      const angebot = ctx.E.TEST_EREIGNISSE.filter((e) => e.id.startsWith("angebot:"));
+      const ereignis = ctx.E.TEST_EREIGNISSE.filter((e) => !e.id.startsWith("angebot:"));
+      const knoepfe = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
+      const html = '<div class="testwerkzeuge"><div class="karte"><h3>Teststeuerung</h3><p class="leise">Nur f\xFCr Tests. \xC4nderungen markieren den Spielstand dauerhaft als Testspiel.</p><label><input id="test-bot" type="checkbox"' + (document.getElementById("test-bot")?.checked ? " checked" : "") + '> Bot C f\xFCr den Zeitsprung einsetzen</label><div class="test-tasten">' + [1, 4, 13, 52].map((n) => '<button type="button" data-test-wochen="' + n + '">' + n + " Woche" + (n > 1 ? "n" : "") + "</button>").join("") + '</div><progress id="test-fortschritt" max="1" value="0" hidden></progress><div id="test-status" role="status"></div><label class="test-eingabe">Cash (\u20AC) <input id="test-cash" type="number" step="1" value="' + s2.cash + '"></label><button type="button" data-test-a="cash">Cash setzen</button> <button type="button" class="rot" data-test-a="insolvenz">Insolvenz er\xF6ffnen</button><h3>Stakeholder</h3><div class="test-felder">' + stakeholder + '</div><label class="test-eingabe">Schwierigkeit <select id="test-schwierigkeit">' + ["leicht", "mittel", "schwer"].map((v) => '<option value="' + v + '"' + ((s2.schwierigkeit ?? "mittel") === v ? " selected" : "") + ">" + v + "</option>").join("") + '</select></label><button type="button" data-test-a="schwierigkeit">Schwierigkeit setzen</button></div><div class="karte"><h3>Angebote ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(angebot) + '</div><h3>Ereignisse ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(ereignis) + '</div></div><div class="karte"><h3>Live-Messung (letzte 2 Sekunden)</h3>' + zeigeMetrik("Bildrate Mittel", "fpsMittel", " FPS") + zeigeMetrik("Schlechteste Bildrate", "fpsSchlechteste", " FPS") + zeigeMetrik("Szenenteile", "teile", "") + zeigeMetrik("Engine letzte Woche", "engineMs", " ms") + zeigeMetrik("JS-Speicher", "speicherMiB", " MiB") + '</div><div class="karte"><h3>Fehlerbericht</h3><p class="leise">Enth\xE4lt den vollst\xE4ndigen Spielstand und Ger\xE4teinformationen. Nur an vertrauensw\xFCrdige Empf\xE4nger weitergeben.</p><button type="button" data-test-a="kopieren">Bericht kopieren</button> <button type="button" data-test-a="laden">Bericht laden</button><textarea id="test-bericht" rows="4" placeholder="Komprimierten Fehlerbericht hier einf\xFCgen" spellcheck="false"></textarea><small>' + fehler6.length + " Konsolenfehler gespeichert, 20 im Bericht</small></div></div>";
+      ctx.panel("Testwerkzeuge", "Seed " + s2.seed + " \xB7 Woche " + s2.woche + " \xB7 Version " + s2.version, html, "gross");
+      aktiv3 = true;
+      inhalt.scrollTop = sc;
+      document.getElementById("test-bericht").value = berichteingabe;
+      metrikZeigen();
+      if (!messTimer) messTimer = setInterval(metrikZeigen, 400);
+      if (!raf) raf = requestAnimationFrame(animation);
+    }
+    function oeffne() {
+      if (!freigeschaltet || !ctx.s()) return false;
+      zeigen();
+      return true;
+    }
+    function zu() {
+      aktiv3 = false;
+      clearInterval(messTimer);
+      messTimer = null;
+      if (raf !== null) cancelAnimationFrame(raf);
+      raf = null;
+      frames.length = 0;
+    }
+    const sende = (a) => {
+      const r = ctx.E.fuehreAus(ctx.s(), a);
+      ctx.meldung(r.text, r.ok);
+      if (r.ok) ctx.nachAktion();
+      if (aktiv3) zeigen(true);
+      return r;
+    };
+    async function springen(n, bot) {
+      if (!aktiv3 || beschaeftigt || ![1, 4, 13, 52].includes(n)) return { fertig: 0 };
+      beschaeftigt = true;
+      const bar = document.getElementById("test-fortschritt");
+      const status = document.getElementById("test-status");
+      bar.hidden = false;
+      bar.max = n;
+      bar.value = 0;
+      let fertig = 0;
+      try {
+        for (let i = 0; i < n; i++) {
+          if (ctx.s().phase === "zerschlagen") break;
+          const m = ctx.testWoche(bot);
+          if (!m) break;
+          fertig++;
+          bar.value = fertig;
+          status.textContent = fertig + " / " + n + " Wochen";
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+        status.textContent = "Zeitsprung: " + fertig + " von " + n + " Wochen abgeschlossen.";
+        if (fertig !== n) ctx.meldung("Zeitsprung beendet: Spielende erreicht.", false);
+        return { fertig };
+      } catch (e) {
+        ctx.meldung("Zeitsprung fehlgeschlagen: " + e.message, false);
+        throw e;
+      } finally {
+        beschaeftigt = false;
+        if (aktiv3) zeigen();
+      }
+    }
+    async function erstelleBericht() {
+      if (!freigeschaltet || !ctx.s()) throw new Error("Testwerkzeuge nicht freigeschaltet.");
+      const s2 = ctx.s();
+      const daten = {
+        format: 1,
+        erzeugt: (/* @__PURE__ */ new Date()).toISOString(),
+        seed: s2.seed,
+        woche: s2.woche,
+        version: s2.version,
+        userAgent: navigator.userAgent,
+        fehler: fehler6.slice(-20),
+        stadt: ctx.stadt(),
+        spiel: structuredClone(s2),
+        ui: structuredClone(ctx.ui())
+      };
+      letzterBericht = BERICHT_FORMAT + await gzip(JSON.stringify(daten));
+      return letzterBericht;
+    }
+    async function berichtKopieren() {
+      const bericht2 = await erstelleBericht();
+      berichteingabe = bericht2;
+      const feld = document.getElementById("test-bericht");
+      if (feld) feld.value = bericht2;
+      await kopiereText(bericht2);
+      ctx.meldung("Fehlerbericht kopiert (" + bericht2.length + " Zeichen).");
+      return bericht2;
+    }
+    async function berichtLaden(text3) {
+      if (!freigeschaltet) throw new Error("Testwerkzeuge nicht freigeschaltet.");
+      const input = String(text3 || "").trim();
+      if (!input.startsWith(BERICHT_FORMAT)) throw new Error("Unbekanntes Berichtsformat.");
+      const datensatz = JSON.parse(await ungzip(input.slice(BERICHT_FORMAT.length)));
+      if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 1 || !Number.isInteger(datensatz.spiel.woche) || !Number.isInteger(datensatz.spiel.seed) || !Array.isArray(datensatz.spiel.haeuser) || !Array.isArray(datensatz.spiel.historie) || !datensatz.spiel.hq || !datensatz.spiel.einkauf || !datensatz.spiel.vorstand || !datensatz.spiel.produkte || !datensatz.spiel.marketing?.stand)
+        throw new Error("Bericht enth\xE4lt keinen g\xFCltigen Spielstand.");
+      await ctx.standLaden(datensatz);
+      ctx.meldung("Testbericht geladen: Seed " + datensatz.spiel.seed + ", Woche " + datensatz.spiel.woche + ".");
+      if (aktiv3) zeigen();
+      return { seed: ctx.s().seed, woche: ctx.s().woche, cash: ctx.s().cash };
+    }
+    inhalt.addEventListener("input", (e) => {
+      if (aktiv3 && e.target.id === "test-bericht") berichteingabe = e.target.value;
+    });
+    inhalt.addEventListener("change", (e) => {
+      if (!aktiv3) return;
+      const feld = e.target.dataset.testStake;
+      if (feld && e.target.validity.valid && e.target.value !== "")
+        sende({ typ: "testStakeholder", feld, wert: Number(e.target.value) });
+    });
+    inhalt.addEventListener("click", async (e) => {
+      if (!aktiv3 || beschaeftigt) return;
+      const button2 = e.target.closest("[data-test-a],[data-test-wochen],[data-test-ereignis]");
+      if (!button2) return;
+      const a = button2.dataset.testA;
+      try {
+        if (button2.dataset.testWochen) return springen(Number(button2.dataset.testWochen), document.getElementById("test-bot").checked);
+        if (button2.dataset.testEreignis) return sende({ typ: "testEreignis", ereignis: button2.dataset.testEreignis });
+        if (a === "cash") return sende({ typ: "testCash", betrag: Number(document.getElementById("test-cash").value) });
+        if (a === "insolvenz") return sende({ typ: "testInsolvenz" });
+        if (a === "schwierigkeit") return sende({ typ: "testSchwierigkeit", stufe: document.getElementById("test-schwierigkeit").value });
+        if (a === "kopieren") return await berichtKopieren();
+        if (a === "laden") return await berichtLaden(document.getElementById("test-bericht").value);
+      } catch (err) {
+        eintrag2("werkzeuge", err.stack || err.message);
+        ctx.meldung("Testwerkzeuge: " + err.message, false);
+      }
+    });
+    return {
+      oeffne,
+      zu,
+      aktiv: () => aktiv3,
+      neuZeichnen: () => {
+        if (aktiv3 && !beschaeftigt) zeigen(true);
+      },
+      nachStart: () => {
+        if (einmal2 && entsperren()) oeffne();
+      },
+      freischalten: entsperren,
+      get freigeschaltet() {
+        return freigeschaltet;
+      },
+      springen,
+      erstelleBericht,
+      berichtKopieren,
+      berichtLaden,
+      metriken,
+      get fehler() {
+        return [...fehler6];
+      }
+    };
+  }
+
   // src/spiel.js
   var param = new URLSearchParams(location.search);
   var $ = (id) => document.getElementById(id);
@@ -127509,15 +128026,21 @@
     const ausnahmen = hausBeobachtung(s, 30).length;
     $("hausbeobachtung").textContent = ausnahmen ? ausnahmen + " H\xE4user beobachten \u2192" : "Hausbetrieb: keine Ausnahmen";
     $("kw").textContent = `KW ${c.kw} / ${c.jahr}`;
-    $("phase").textContent = c.phase === "insolvenz" ? "Insolvenzverfahren" : c.phase === "zerschlagen" ? "Zerschlagen" : "";
-    $("phase").style.display = c.phase === "regulaer" ? "none" : "";
+    $("phase").textContent = [c.phase === "insolvenz" ? "Insolvenzverfahren" : c.phase === "zerschlagen" ? "Zerschlagen" : "", s.testGenutzt ? "Testspiel" : ""].filter(Boolean).join(" \xB7 ");
+    $("phase").style.display = c.phase === "regulaer" && !s.testGenutzt ? "none" : "";
   }
-  function woche(mitBot = false) {
+  function woche(mitBot = false, test = false) {
     if (s.phase === "zerschlagen") return null;
     const davor = posteingang(s);
     const t0 = performance.now();
     if (mitBot) botSchritt(s);
-    wocheAbspielen(s);
+    if (test) {
+      const ergebnis = fuehreAus(s, { typ: "testWoche" });
+      if (!ergebnis.ok) {
+        meldung(ergebnis.text, false);
+        return null;
+      }
+    } else wocheAbspielen(s);
     const t1 = performance.now();
     const geaendert = grafikNachziehen();
     const t2 = performance.now();
@@ -127550,8 +128073,9 @@
     if (st.woche === 24) fuehreAus(st, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
     if (st.woche === 50) fuehreAus(st, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es].filter(Boolean);
+  var wk = null;
   var vorherigerFokus = null;
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -127807,10 +128331,10 @@
     oeffneHq(offenesHq === true ? void 0 : offenesHq, true);
   }
   var meldungTimer = null;
-  function meldung(text3, ok5 = true) {
+  function meldung(text3, ok6 = true) {
     const m = $("meldung");
     m.textContent = text3;
-    m.className = ok5 ? "an" : "an rot";
+    m.className = ok6 ? "an" : "an rot";
     clearTimeout(meldungTimer);
     meldungTimer = setTimeout(() => {
       m.className = "";
@@ -128054,6 +128578,46 @@
       meldung("Woche konnte nicht abgeschlossen werden", false);
     }
   });
+  async function testStandLaden(d) {
+    clearTimeout(speicherTimer);
+    s = structuredClone(d.spiel);
+    s.testGenutzt = true;
+    postUi = { ...neuerPostUi(), ...d.ui ?? {} };
+    if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
+    $("postwarnung").checked = !!postUi.warnen;
+    $("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
+    schwierigkeitId = s.schwierigkeit ?? "mittel";
+    $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+    MERK.clear();
+    schliessePanel();
+    const ziel = STADTLISTE.some((x) => x.name === d.stadt) ? d.stadt : "Essen";
+    wahl2.value = ziel;
+    cockpitZeigen();
+    baueStadtAusSpiel(ziel);
+    ek.badge();
+    menueBadge();
+    window.spiel.s = s;
+    automatischSpeichern();
+    wk.oeffne();
+  }
+  wk = werkzeugeModul({
+    E: src_exports,
+    s: () => s,
+    ui: () => postUi,
+    stadt: () => stadtName,
+    panel,
+    meldung,
+    nachAktion: () => {
+      schwierigkeitId = s.schwierigkeit ?? "mittel";
+      $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+      nachAktion();
+    },
+    teileStand,
+    messung,
+    renderFrame: jetztZeichnen,
+    testWoche: (bot) => woche(bot, true),
+    standLaden: testStandLaden
+  });
   $("stadt-reise").addEventListener("click", () => {
     schliessePanel();
     menueZu();
@@ -128164,6 +128728,7 @@
     ek.badge();
     menueBadge();
     window.spiel.s = s;
+    wk?.nachStart();
     automatischSpeichern();
     return s;
   }
@@ -128196,6 +128761,8 @@
   if (typeof hqUebersicht === "function") $("hq").addEventListener("click", () => oeffneHq());
   else $("hq").style.display = "none";
   window.spiel = {
+    werkzeuge: wk,
+    oeffneWerkzeuge: () => wk.oeffne(),
     einstellungen: es,
     oeffneEinstellungen: () => oeffneModul(es),
     personaleinsatz: pe,
@@ -128251,24 +128818,24 @@
       hausReiter = "ueberblick";
       oeffneHaus(id);
       const text3 = $("pinhalt").textContent;
-      const fehler5 = [];
-      if (!text3.includes(String(d.kundenScore))) fehler5.push("Kundenscore fehlt");
+      const fehler6 = [];
+      if (!text3.includes(String(d.kundenScore))) fehler6.push("Kundenscore fehlt");
       for (const [reiter, wort] of [["leitung", d.leitungsdaten.name], ["kosten", "Betriebskosten"], ["kommentare", "Wochenkommentierung"]]) {
         hausReiter = reiter;
         oeffneHaus(id);
-        if (!$("pinhalt").textContent.includes(wort)) fehler5.push(reiter + " nicht korrekt");
+        if (!$("pinhalt").textContent.includes(wort)) fehler6.push(reiter + " nicht korrekt");
       }
       hausReiter = "ueberblick";
       oeffneHaus(id);
-      return { id, score: d.kundenScore, reiter: 7, fehler: fehler5 };
+      return { id, score: d.kundenScore, reiter: 7, fehler: fehler6 };
     },
     pruefeWettbewerber: () => {
       const soll = wettbewerbFuerGrafik(s, stadtName);
       const gezeigt = /* @__PURE__ */ new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== "geschlossen" && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
       const pinIds = new Set(wettbewerbPins.map((p2) => p2.userData.wbId));
-      const fehler5 = soll.filter((w) => w.status !== "geschlossen" && !gezeigt.has(w.id)).map((w) => "Fehlt: " + w.id);
-      for (const id of gezeigt) if (!pinIds.has(id)) fehler5.push("Pin fehlt: " + id);
-      return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler: fehler5 };
+      const fehler6 = soll.filter((w) => w.status !== "geschlossen" && !gezeigt.has(w.id)).map((w) => "Fehlt: " + w.id);
+      for (const id of gezeigt) if (!pinIds.has(id)) fehler6.push("Pin fehlt: " + id);
+      return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler: fehler6 };
     },
     stadt: (n) => {
       wahl2.value = n;
@@ -128283,30 +128850,30 @@
     jetztZeichnen,
     /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
     pruefeAnzeigen: () => {
-      const fehler5 = [], c = cockpit(s);
+      const fehler6 = [], c = cockpit(s);
       const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k) => [k.querySelector("span").textContent, k.querySelector("b").textContent]));
       const ck = kz2($("cockpit"));
       const soll = { Cash: geld(c.cash), "Kreditrahmen frei": geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
       if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), "Umsatz Woche": geld(c.umsatzWoche) });
-      for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler5.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
-      if ($("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler5.push(`KW: ${$("kw").textContent}`);
+      for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler6.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
+      if ($("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$("kw").textContent}`);
       if (offenesHaus) {
         const d = hausTreiber(s, offenesHaus);
         const el = $("pinhalt").querySelector(".o02-haus");
         if (d && el) {
           for (const [schluessel, sollWert] of Object.entries({ umsatz: d.aktuell.umsatz, frequenz: d.aktuell.frequenz, kaufquote: d.aktuell.kaufquote, bon: d.aktuell.bon }))
-            if (Number(el.dataset["o02" + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler5.push("O02 " + schluessel + ": Hausanzeige ungleich Engine");
+            if (Number(el.dataset["o02" + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler6.push("O02 " + schluessel + ": Hausanzeige ungleich Engine");
           const br = el.querySelector(".o02-bruecke");
-          if (br && Number(br.dataset.o02Summe) !== Number(br.dataset.o02Diff)) fehler5.push("O02 Br\xFCcke summiert nicht exakt");
-        } else if (d) fehler5.push("O02 Haus-Treiberzeile fehlt");
+          if (br && Number(br.dataset.o02Summe) !== Number(br.dataset.o02Diff)) fehler6.push("O02 Br\xFCcke summiert nicht exakt");
+        } else if (d) fehler6.push("O02 Haus-Treiberzeile fehlt");
       }
-      if (rg?.aktiv?.() && !rg.pruefe()) fehler5.push("O02 Reporting-Br\xFCcke summiert nicht exakt");
+      if (rg?.aktiv?.() && !rg.pruefe()) fehler6.push("O02 Reporting-Br\xFCcke summiert nicht exakt");
       if (offenesHq && typeof hqUebersicht === "function") {
         const u = hqUebersicht(s), hk = kz2($("pinhalt"));
         const sollHq = { "Kosten Zentrale je Woche": geld(u.kostenWoche), "Besch\xE4ftigte": fmt.format(Math.round(u.fte)) + " FTE" };
-        for (const [k, v] of Object.entries(sollHq)) if (hk.get(k) !== v) fehler5.push(`HQ ${k}: ${hk.get(k)} statt ${v}`);
+        for (const [k, v] of Object.entries(sollHq)) if (hk.get(k) !== v) fehler6.push(`HQ ${k}: ${hk.get(k)} statt ${v}`);
       }
-      return { woche: s.woche, kw: c.kw, jahr: c.jahr, cockpit: c, hq: typeof hqUebersicht === "function" ? { kostenWoche: hqUebersicht(s).kostenWoche, fte: hqUebersicht(s).fte } : null, fehler: fehler5 };
+      return { woche: s.woche, kw: c.kw, jahr: c.jahr, cockpit: c, hq: typeof hqUebersicht === "function" ? { kostenWoche: hqUebersicht(s).kostenWoche, fte: hqUebersicht(s).fte } : null, fehler: fehler6 };
     },
     teileStand: () => teileStand(),
     kachelInfo: () => KA.liste.filter((k) => k.stufe !== "voll" && sichtbar3(k, 1)).map((k) => `${k.key}:${k.parz.length}`).join(" "),
@@ -128423,6 +128990,7 @@
       ek.badge();
       menueBadge();
       window.spiel.s = s;
+      wk?.nachStart();
       window.bereit = true;
       $("lade").classList.remove("an");
       meldung("Spielstand fortgesetzt.");

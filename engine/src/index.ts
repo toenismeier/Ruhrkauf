@@ -73,3 +73,4 @@ export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from
 // O04 Personal
 export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
 export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';
+export { TEST_EREIGNISSE, type TestAktion, type TestEreignisId } from './testwerkzeuge';

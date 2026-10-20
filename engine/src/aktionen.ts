@@ -30,6 +30,7 @@ import { HAUS_AKTIONEN, hausAktion, type HausAktion } from './haus';
 import { UMBAU_AKTIONEN, umbauAktion, type UmbauAktion } from './umbau';
 // O04 Personal
 import { PERSONAL_AKTIONEN, personalAktion, type PersonalAktion } from './personaleinsatz';
+import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -86,7 +87,8 @@ export type SpielerAktion =
   // O08 Umbau
   | UmbauAktion
   // O04 Personal
-  | PersonalAktion;
+  | PersonalAktion
+  | TestAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -144,6 +146,7 @@ function letzterUmsatz(s: GameState): number {
 }
 
 export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+  if (a.typ.startsWith('test')) return testAktion(s, a as TestAktion);
   if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';

@@ -419,6 +419,24 @@
   body.farbschwach .kz.gruen b, body.farbschwach .gruenwert { color: #245ea8; }
   :root[data-animation="reduziert"] *, :root[data-animation="reduziert"] *::before, :root[data-animation="reduziert"] *::after { animation-duration: 0.15s !important; transition-duration: 0.08s !important; }
   :root[data-animation="aus"] *, :root[data-animation="aus"] *::before, :root[data-animation="aus"] *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+
+  /* N14: Testwerkzeuge bleiben ohne Entsperrung vollständig verborgen. */
+  .datum.testfehler { position: relative; }
+  .datum.testfehler::after { content: ''; position: absolute; right: 1px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: #c52b35; box-shadow: 0 0 0 2px #fff; }
+  .testwerkzeuge { display: flex; flex-direction: column; gap: 10px; padding: 10px 0 30px; }
+  .testwerkzeuge .karte { padding: 12px; }
+  .testwerkzeuge h3 { font-size: calc(14px * var(--schrift)); margin: 8px 0; }
+  .testwerkzeuge .test-tasten { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .testwerkzeuge .test-tasten button, .testwerkzeuge button[data-test-a] { border: 1px solid #ccd3d8; border-radius: 9px; padding: 8px 10px; min-height: 40px; background: #fff; color: #26323c; }
+  .testwerkzeuge .test-eingabe { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: calc(12px * var(--schrift)); margin: 8px 0; }
+  .testwerkzeuge input[type=number], .testwerkzeuge select { max-width: 130px; padding: 8px; border: 1px solid #c7cbd0; border-radius: 8px; font-size: calc(14px * var(--schrift)); }
+  .testwerkzeuge .test-felder { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; }
+  .testwerkzeuge progress { display: block; width: 100%; height: 16px; margin: 10px 0; }
+  .testwerkzeuge progress[hidden] { display: none; }
+  .testwerkzeuge #test-status { font-size: calc(12px * var(--schrift)); margin-bottom: 8px; }
+  .testwerkzeuge #test-bericht { display: block; width: 100%; min-height: 95px; margin-top: 10px; padding: 8px; border: 1px solid #c7cbd0; border-radius: 9px; font-size: calc(11px * var(--schrift)); }
+  #werkzeuge[hidden] { display: none !important; }
+
 </style>
 </head>
 <body>
@@ -463,6 +481,7 @@
       <!-- O04 Personal -->
       <button class="mkachel" id="personaleinsatz"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-2a6 6 0 0 1 12 0v2M14 13a5 5 0 0 1 8 4v4M3 11h10"/></svg><b>Personaleinsatz</b><small>Dienstplan, Aushilfen, Springer</small></button>
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>
+      <button class="mkachel" id="werkzeuge" type="button" hidden style="display:none"><b>Testwerkzeuge</b><small>Diagnose und Fehlerberichte</small></button>
       <button class="mkachel" id="performance" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18a9 9 0 1 1 18 0M12 17l5-7M7 18h10"/></svg><b>Performance</b><small>iPhone messen</small></button>
       <button class="mkachel" id="einstellungen" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19 13 2-1-2-1-.5-2 1-2-2-2-2 1-2-.5-1-2-1 2-2 .5-2-1-2 2 1 2-.5 2-2 1 2 1 .5 2-1 2 2 2 2-1 2 .5 1 2 1-2 2-.5 2 1 2-2-1-2z"/></svg><b>Einstellungen</b><small>Anzeige und Bedienung</small></button>
     </div>
