@@ -127,6 +127,17 @@ export function posteingang(s: GameState): Posteingang {
   return { handeln, meldungen, erledigt };
 }
 
+/** Letzter tatsächlich verbuchter Wochenkapitalfluss, auch für ältere Spielstände lesbar. */
+export function kapitalfluss(s: GameState) {
+  const k = s.historie[s.historie.length - 1];
+  if (!k) return { woche: s.woche - 1, operativ: 0, investitionen: 0, finanzierung: 0, sonstiges: 0, netto: 0, bestand: s.cash };
+  if (k.kapitalfluss) return k.kapitalfluss;
+  // Alte Spielstände haben keinen Zahlungsarten-Nachweis. Nichts als operativ ausweisen, was nicht belegt ist.
+  const vorher = s.historie[s.historie.length - 2]?.cash ?? k.cash;
+  return { woche: k.woche, operativ: 0, investitionen: 0, finanzierung: 0,
+    sonstiges: k.cash - vorher, netto: k.cash - vorher, bestand: k.cash };
+}
+
 export interface Cockpit {
   kw: number;
   jahr: number;
