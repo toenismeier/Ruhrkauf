@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "sim": "tsx scripts/headless.ts",
     "export:haeuser": "tsx scripts/haeuser-export.ts",
-    "check:premium": "tsx scripts/premium-kalibrierung.ts"
+    "check:premium": "tsx scripts/premium-kalibrierung.ts",
+    "check:personal": "tsx scripts/personaleinsatz-abnahme.ts",
+    "perf:personal": "tsx scripts/personaleinsatz-leistung.ts"
   },
   "keywords": [],
   "author": "",
