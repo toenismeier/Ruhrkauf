@@ -48,5 +48,5 @@ export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
 
 // O04 Personal
-export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
+export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
 export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';
