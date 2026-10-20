@@ -23,6 +23,18 @@ describe('Kapitalfluss im Wochenabschluss', () => {
     }
   });
 
+  test('Investition vor der ersten Spielwoche ist in der Cash-Brücke enthalten', () => {
+    const s = neuesSpiel(1);
+    const start = s.cash;
+    s.cash -= 750_000;
+    s.kapitalflussOffen = { investitionen: -750_000, finanzierung: 0 };
+    wocheAbspielen(s);
+    const f = kapitalfluss(s);
+    expect(f.netto).toBe(s.cash - start);
+    expect(f.investitionen).toBe(-750_000);
+    expect(f.operativ + f.investitionen + f.finanzierung + f.sonstiges).toBe(f.netto);
+  });
+
   test('alte Spielstände ohne Kapitalfluss bleiben lesbar, ohne fiktive Kategorien', () => {
     const s = neuesSpiel(1);
     s.historie.push({ woche: 0, cash: 3_000_000 } as typeof s.historie[number]);
