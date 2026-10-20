@@ -16,6 +16,8 @@ import type { ItStand } from './it';
 import type { HausBetrieb, HausbetriebStand } from './haus';
 // O04 Personal
 import type { PersonalHausStand, PersonalStand } from './personaleinsatz';
+// O05 Ware
+import type { WareStand } from './merchandise';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -215,6 +217,8 @@ export interface Kohorte {
   art?: Art;
   marke?: string;
   saisonId?: number;
+  // O05 Ware: physischer Warenbestand je Hauscluster
+  hauscluster?: string;
 }
 
 export interface Bestellung {
@@ -509,6 +513,8 @@ export interface GameState {
   organisation?: OrganisationsStand;
   /** Einkauf: Warengruppen, Steuerung, Freigabe-Eingang, Kennzahlenverlauf. */
   einkauf: Einkauf;
+  // O05 Ware
+  ware?: WareStand;
   /** Eigenmarken. */
   eigenmarken: EigenmarkenStand;
   /** Vorstand (C-Level): Ressorts, Personen, Delegation, Kandidaten, Sitzungen. */

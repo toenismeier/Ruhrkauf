@@ -18,6 +18,8 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+// O05 Ware
+import { WARE_AKTIONEN, wareAktion, type WareAktion } from './merchandise';
 // O01 Organisation
 import { ORGANISATION_AKTIONEN, organisationAktion, type OrganisationAktion } from './organisation';
 // O03 IT
@@ -66,6 +68,8 @@ export type SpielerAktion =
   | { typ: 'abteilungStufe'; abteilung: AbteilungId; stufe: Stufe }
   // Einkauf, Freigaben, Eigenmarken (src/einkauf.ts)
   | EinkaufAktion
+  // O05 Ware
+  | WareAktion
   // Vorstand (src/vorstand.ts) und Produktentwicklung (src/produkte.ts)
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
@@ -149,6 +153,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (UMBAU_AKTIONEN.has(a.typ)) return umbauAktion(s, a as UmbauAktion);
   if (PERSONAL_AKTIONEN.has(a.typ)) return personalAktion(s, a as PersonalAktion);
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
+  // O05 Ware
+  if (WARE_AKTIONEN.has(a.typ)) return wareAktion(s, a as WareAktion);
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
   // O01 Organisation
   if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s, a as OrganisationAktion);

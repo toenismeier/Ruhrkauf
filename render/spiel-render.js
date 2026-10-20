@@ -132,6 +132,8 @@ async function buendeln() {
     const nosDanach = await ev(() => window.spiel.E.freigaben(window.spiel.s, { art: 'nos' }).anzahl);
     pruefSoll('Sammelfreigabe NOS', nosDanach === 0, `${nos} NOS-Orders freigegeben, offen ${nosDanach}`);
     await pruef('Freigaben nach Aktionen');
+    // O05 Ware: Merchandise, Allokation und Reduzierung öffnen sich und zeigen Engine-Werte.
+    for (const reiter of ['Merchandise', 'Allokation', 'Reduzierung']) { await tippe('.tab', reiter); await pruef(reiter); }
     // Eigenmarken und Gründen über den Assistenten (Vorlage Young Adults)
     await tippe('.tab', 'Eigenmarken');
     await pruef('Eigenmarken');

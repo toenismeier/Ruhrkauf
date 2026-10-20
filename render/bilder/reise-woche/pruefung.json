@@ -8,26 +8,26 @@
       },
       {
         "schritt": "Panel offen",
-        "ms": 2746
+        "ms": 3924
       },
       {
         "schritt": "Ziele sichtbar",
-        "ms": 2747
+        "ms": 3924
       },
       {
         "schritt": "Reiseziel gewählt",
-        "ms": 4556,
+        "ms": 5747,
         "reiseMs": 0
       },
       {
         "schritt": "Kreis-Schließen",
-        "ms": 7255,
-        "reiseMs": 2698
+        "ms": 8484,
+        "reiseMs": 2736
       },
       {
         "schritt": "Reise abgeschlossen",
-        "ms": 7405,
-        "reiseMs": 2849
+        "ms": 8635,
+        "reiseMs": 2887
       }
     ],
     "wochenbericht": [
@@ -37,28 +37,28 @@
       },
       {
         "ereignis": "Ja gewählt",
-        "ms": 749,
+        "ms": 801,
         "jaMs": 0
       },
       {
         "ereignis": "Wochenberechnung",
-        "ms": 760,
-        "jaMs": 11
+        "ms": 814,
+        "jaMs": 14
       },
       {
         "ereignis": "Engine abgeschlossen",
-        "ms": 1181,
-        "jaMs": 432
+        "ms": 1266,
+        "jaMs": 465
       },
       {
         "ereignis": "Zählung beendet",
-        "ms": 1185,
-        "jaMs": 436
+        "ms": 1268,
+        "jaMs": 468
       },
       {
         "ereignis": "Vorfall 1",
-        "ms": 1200,
-        "jaMs": 451
+        "ms": 1285,
+        "jaMs": 484
       }
     ]
   },
@@ -88,7 +88,7 @@
     "umsatzWoche": 73246974,
     "vertrauen": 56,
     "image": 45,
-    "offeneEntscheidungen": 1,
+    "offeneEntscheidungen": 2,
     "offeneAngebote": 0
   }
 }

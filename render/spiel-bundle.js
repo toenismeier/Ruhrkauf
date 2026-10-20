@@ -64,6 +64,7 @@
     berichtetAn: () => berichtetAn,
     bildeHauscluster: () => bildeHauscluster,
     clusterBerichtetAn: () => clusterBerichtetAn,
+    clusterListe: () => clusterListe,
     clusterleitungQualitaet: () => clusterleitungQualitaet,
     cockpit: () => cockpit,
     crmKampagnen: () => crmKampagnen,
@@ -73,6 +74,7 @@
     forecastVertrauensDelta: () => forecastVertrauensDelta,
     freigaben: () => freigaben,
     fuehreAus: () => fuehreAus,
+    fundusFrequenzFaktor: () => fundusFrequenzFaktor,
     gehaltsforderung: () => gehaltsforderung,
     generationInCluster: () => generationInCluster,
     gruppenFuer: () => gruppenFuer,
@@ -85,6 +87,7 @@
     hausTreiber: () => hausTreiber,
     hausUebersicht: () => hausUebersicht,
     hausclusterFaktor: () => hausclusterFaktor,
+    hausclusterId: () => hausclusterId,
     hausclusterVon: () => hausclusterVon,
     hqFuerGrafik: () => hqFuerGrafik,
     hqUebersicht: () => hqUebersicht,
@@ -148,6 +151,8 @@
     vorstandProfil: () => vorstandProfil,
     vorstandUebersicht: () => vorstandUebersicht,
     vorstandWirkung: () => vorstandWirkung,
+    warenHaus: () => warenHaus,
+    warenUebersicht: () => warenUebersicht,
     warenwirtschaft: () => warenwirtschaft,
     wettbewerbAus: () => wettbewerbAus,
     wettbewerbAusGruppe: () => wettbewerbAusGruppe,
@@ -159,8 +164,8 @@
 
   // ../engine/src/daten.ts
   var WH = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
-  function mit(basis2, over) {
-    return basis2.map((x, i) => over[i] !== void 0 ? over[i] : x);
+  function mit(basis3, over) {
+    return basis3.map((x, i) => over[i] !== void 0 ? over[i] : x);
   }
   var ROH = [
     { id: "damen", name: "Damen", format: "warenhaus", marge: 0.48, saisonAnteil: 0.7, vorlauf: 14, beratung: 0.5, kkElast: 0.5, alterElast: 0.1, qmUmsatz: 35, anteilFlaeche: 0.2, saison: WH },
@@ -477,8 +482,8 @@
     };
   }
   function startZiele(s2) {
-    const basis2 = jahresVorschlag(s2, s2.startJahr);
-    return { ...basis2, umsatz: eur(basis2.umsatz * 1.03), ebitda: eur(basis2.ebitda + basis2.umsatz * 0.03 * 0.25) };
+    const basis3 = jahresVorschlag(s2, s2.startJahr);
+    return { ...basis3, umsatz: eur(basis3.umsatz * 1.03), ebitda: eur(basis3.ebitda + basis3.umsatz * 0.03 * 0.25) };
   }
   function verteileBetrag(total, kinder, gewicht2, fix) {
     const out = {};
@@ -605,12 +610,12 @@
     const wg = {};
     for (const h of s2.haeuser.filter(aktiv)) {
       const betrag = knoten["haus:" + h.id]?.umsatz ?? 0;
-      const basis2 = basisHaus(h);
+      const basis3 = basisHaus(h);
       const eintraege = Object.entries(h.potenzial);
       let verteilt = 0;
       for (let i = 0; i < eintraege.length; i++) {
         const [g, b2] = eintraege[i];
-        const wert = i === eintraege.length - 1 ? betrag - verteilt : eur(betrag * b2 / basis2);
+        const wert = i === eintraege.length - 1 ? betrag - verteilt : eur(betrag * b2 / basis3);
         verteilt += wert;
         wg[g] = (wg[g] ?? 0) + wert;
       }
@@ -618,12 +623,12 @@
     return wg;
   }
   function budgetWarengruppen(s2, knoten, overrides = {}) {
-    const basis2 = warengruppenZiel(s2, knoten);
-    const ids = Object.keys(basis2);
+    const basis3 = warengruppenZiel(s2, knoten);
+    const ids = Object.keys(basis3);
     return verteileBetrag(
-      sum(Object.values(basis2).map((v) => v ?? 0)),
+      sum(Object.values(basis3).map((v) => v ?? 0)),
       ids,
-      basis2,
+      basis3,
       overrides
     );
   }
@@ -782,9 +787,9 @@
       }
     }
   }
-  function entscheidung(s2, typ, titel, text3, optionen, standard, frist, daten) {
+  function entscheidung(s2, typ, titel, text3, optionen2, standard, frist, daten) {
     if (s2.entscheidungen.some((e) => e.typ === typ && e.daten.jahr === daten.jahr && e.daten.quartal === daten.quartal)) return;
-    s2.entscheidungen.push({ id: neueId(s2, "pl"), typ, titel, text: text3, woche: s2.woche, frist, optionen, standard, daten });
+    s2.entscheidungen.push({ id: neueId(s2, "pl"), typ, titel, text: text3, woche: s2.woche, frist, optionen: optionen2, standard, daten });
   }
   function forecastErstellen(s2, q2) {
     const p2 = planJahr(s2);
@@ -999,291 +1004,6 @@
       ebitdaSensitivitaet: e ? eur(vorschlag.ebitda + (e.ziele.umsatz - vorschlag.umsatz) * 0.25) : vorschlag.ebitda,
       bericht: planungBericht(s2)
     };
-  }
-
-  // ../engine/src/standorte.ts
-  var KOORDINATEN = {
-    Berlin: [52.52, 13.4],
-    Hamburg: [53.55, 10],
-    M\u00FCnchen: [48.14, 11.58],
-    K\u00F6ln: [50.94, 6.96],
-    Frankfurt: [50.11, 8.68],
-    D\u00FCsseldorf: [51.23, 6.78],
-    Stuttgart: [48.78, 9.18],
-    Essen: [51.46, 7.01],
-    Dortmund: [51.51, 7.47],
-    Bremen: [53.08, 8.8],
-    Leipzig: [51.34, 12.37],
-    Dresden: [51.05, 13.74],
-    Hannover: [52.37, 9.73],
-    N\u00FCrnberg: [49.45, 11.08],
-    Duisburg: [51.43, 6.76],
-    Bochum: [51.48, 7.22],
-    Wuppertal: [51.26, 7.15],
-    Bielefeld: [52.02, 8.53],
-    Bonn: [50.74, 7.1],
-    M\u00FCnster: [51.96, 7.63],
-    Mannheim: [49.49, 8.47],
-    Karlsruhe: [49.01, 8.4],
-    Augsburg: [48.37, 10.9],
-    Wiesbaden: [50.08, 8.24],
-    M\u00F6nchengladbach: [51.19, 6.44],
-    Gelsenkirchen: [51.51, 7.1],
-    Aachen: [50.78, 6.08],
-    Braunschweig: [52.27, 10.52],
-    Kiel: [54.32, 10.13],
-    Chemnitz: [50.83, 12.92],
-    Halle: [51.48, 11.97],
-    Magdeburg: [52.13, 11.63],
-    Freiburg: [47.99, 7.85],
-    Krefeld: [51.33, 6.56],
-    Mainz: [49.99, 8.25],
-    L\u00FCbeck: [53.87, 10.69],
-    Erfurt: [50.98, 11.03],
-    Oberhausen: [51.47, 6.85],
-    Rostock: [54.09, 12.1],
-    Kassel: [51.31, 9.48],
-    Hagen: [51.36, 7.47],
-    Potsdam: [52.39, 13.06],
-    Saarbr\u00FCcken: [49.24, 6.99],
-    Hamm: [51.68, 7.82],
-    Ludwigshafen: [49.48, 8.44],
-    Oldenburg: [53.14, 8.21],
-    M\u00FClheim: [51.43, 6.88],
-    Osnabr\u00FCck: [52.28, 8.05],
-    Leverkusen: [51.03, 6.98],
-    Darmstadt: [49.87, 8.65],
-    Heidelberg: [49.4, 8.69],
-    Solingen: [51.17, 7.08],
-    Regensburg: [49.01, 12.1],
-    Paderborn: [51.72, 8.75],
-    Ingolstadt: [48.77, 11.43],
-    W\u00FCrzburg: [49.79, 9.95],
-    Ulm: [48.4, 9.99],
-    Wolfsburg: [52.42, 10.79],
-    G\u00F6ttingen: [51.54, 9.92],
-    Pforzheim: [48.89, 8.7],
-    Offenbach: [50.1, 8.77],
-    Heilbronn: [49.14, 9.22],
-    Bremerhaven: [53.55, 8.58],
-    Trier: [49.75, 6.64],
-    Koblenz: [50.36, 7.59],
-    Jena: [50.93, 11.59],
-    Siegen: [50.87, 8.02],
-    Hildesheim: [52.15, 9.95],
-    Cottbus: [51.76, 14.33],
-    G\u00FCtersloh: [51.91, 8.38],
-    Recklinghausen: [51.61, 7.2],
-    Bottrop: [51.52, 6.93],
-    Reutlingen: [48.49, 9.21],
-    Erlangen: [49.6, 11],
-    F\u00FCrth: [49.48, 10.99],
-    Bamberg: [49.89, 10.89],
-    Bayreuth: [49.95, 11.58],
-    Landshut: [48.54, 12.15],
-    Rosenheim: [47.86, 12.12],
-    Kempten: [47.73, 10.31],
-    Passau: [48.57, 13.43],
-    Konstanz: [47.66, 9.18],
-    Esslingen: [48.74, 9.31],
-    Ludwigsburg: [48.9, 9.19],
-    T\u00FCbingen: [48.52, 9.06],
-    Gie\u00DFen: [50.58, 8.68],
-    Marburg: [50.81, 8.77],
-    Fulda: [50.55, 9.68],
-    Hanau: [50.13, 8.92],
-    Wetzlar: [50.56, 8.5],
-    L\u00FCneburg: [53.25, 10.41],
-    Celle: [52.62, 10.08],
-    Flensburg: [54.79, 9.44],
-    Neum\u00FCnster: [54.07, 9.98],
-    Stralsund: [54.31, 13.09],
-    Schwerin: [53.63, 11.41],
-    Zwickau: [50.72, 12.5],
-    G\u00F6rlitz: [51.15, 14.99],
-    Dessau: [51.84, 12.24],
-    Gera: [50.88, 12.08],
-    Weimar: [50.98, 11.33],
-    Neuss: [51.2, 6.69],
-    D\u00FCren: [50.8, 6.48],
-    Wesel: [51.66, 6.62],
-    Iserlohn: [51.38, 7.7],
-    L\u00FCdenscheid: [51.22, 7.63],
-    Witten: [51.44, 7.34],
-    Marl: [51.66, 7.09],
-    Moers: [51.45, 6.63],
-    Kaiserslautern: [49.44, 7.77],
-    Worms: [49.63, 8.36],
-    Speyer: [49.32, 8.43],
-    Offenburg: [48.47, 7.94],
-    L\u00F6rrach: [47.61, 7.66],
-    Ravensburg: [47.78, 9.61],
-    Aschaffenburg: [49.98, 9.15],
-    Schweinfurt: [50.05, 10.23],
-    Hof: [50.32, 11.92],
-    Amberg: [49.44, 11.86],
-    Straubing: [48.88, 12.57],
-    Neubrandenburg: [53.56, 13.26],
-    "Frankfurt (Oder)": [52.35, 14.55],
-    Wilhelmshaven: [53.53, 8.11],
-    Emden: [53.37, 7.21],
-    Herford: [52.11, 8.67],
-    Detmold: [51.94, 8.88],
-    Minden: [52.29, 8.92]
-  };
-  var KNOTEN = /* @__PURE__ */ new Set([
-    "Berlin",
-    "Hamburg",
-    "M\xFCnchen",
-    "K\xF6ln",
-    "Frankfurt",
-    "D\xFCsseldorf",
-    "Stuttgart",
-    "Hannover",
-    "Leipzig",
-    "N\xFCrnberg",
-    "Dortmund",
-    "Essen",
-    "Duisburg",
-    "Bremen",
-    "Dresden",
-    "Mannheim"
-  ]);
-  var BALLUNGSRAUM = /* @__PURE__ */ new Set([
-    "Essen",
-    "Dortmund",
-    "Duisburg",
-    "Bochum",
-    "Gelsenkirchen",
-    "Oberhausen",
-    "M\xFClheim",
-    "Hagen",
-    "Hamm",
-    "Recklinghausen",
-    "Bottrop",
-    "Witten",
-    "Marl",
-    "Moers",
-    "D\xFCsseldorf",
-    "K\xF6ln",
-    "Bonn",
-    "Wuppertal",
-    "Solingen",
-    "Leverkusen",
-    "Krefeld",
-    "Neuss",
-    "M\xF6nchengladbach",
-    "Frankfurt",
-    "Wiesbaden",
-    "Mainz",
-    "Darmstadt",
-    "Offenbach",
-    "Hanau",
-    "Stuttgart",
-    "Esslingen",
-    "Ludwigsburg",
-    "M\xFCnchen",
-    "Berlin",
-    "Potsdam",
-    "Hamburg"
-  ]);
-  function abstand100(a, b2) {
-    const p2 = KOORDINATEN[a];
-    const q2 = KOORDINATEN[b2];
-    if (!p2 || !q2) return 3;
-    const dy = (p2[0] - q2[0]) * 111;
-    const dx = (p2[1] - q2[1]) * 111 * Math.cos((p2[0] + q2[0]) / 2 * (Math.PI / 180));
-    return Math.sqrt(dx * dx + dy * dy) / 100;
-  }
-
-  // ../engine/src/schwierigkeit.ts
-  var SCHWIERIGKEIT = {
-    leicht: {
-      name: "Leicht",
-      beschreibung: "Mehr Kasse und Kreditlinie, geduldige Lieferanten und Kreditversicherer, seltener Pech, Schlie\xDFungswellen kosten wenig Image.",
-      imageDaempfung: 0.9,
-      startCash: 1.15,
-      kreditlinie: 1.15,
-      lieferantenGeduld: 0.1,
-      kvZiel: 4,
-      ereignisse: 0.6,
-      versammlungSchwelle: -35e6
-    },
-    mittel: {
-      name: "Mittel",
-      beschreibung: "Die \xFCbliche Lage einer Warenhauskette in der Krise.",
-      imageDaempfung: 0.955,
-      startCash: 1,
-      kreditlinie: 1,
-      lieferantenGeduld: 0,
-      kvZiel: 0,
-      ereignisse: 1,
-      versammlungSchwelle: -25e6
-    },
-    schwer: {
-      name: "Schwer",
-      beschreibung: "Knappe Kasse, nerv\xF6se Lieferanten und Kreditversicherer, mehr Pech, jede Schlie\xDFung kostet voll Image, strenge Gl\xE4ubiger.",
-      imageDaempfung: 1,
-      startCash: 0.9,
-      kreditlinie: 0.9,
-      lieferantenGeduld: -0.1,
-      kvZiel: -4,
-      ereignisse: 1.4,
-      versammlungSchwelle: -17e6
-    }
-  };
-  var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
-  var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
-
-  // ../engine/src/stakeholder.ts
-  function freieLiquiditaet(s2) {
-    return s2.cash + s2.kreditlinie;
-  }
-  var PRIOR_EBITDA_WOCHE = -22e5;
-  function runwayWochen(s2) {
-    const h = s2.historie.slice(-52);
-    const summe2 = h.reduce((a, b2) => a + b2.ebitda + b2.sondereffekte, 0) + (52 - h.length) * PRIOR_EBITDA_WOCHE;
-    const burn = -summe2 / 52;
-    if (burn <= 0) return 52;
-    return clamp(freieLiquiditaet(s2) / burn, 0, 52);
-  }
-  function annaehern(ist, ziel, rate) {
-    return clamp(ist + (ziel - ist) * rate, 0, 100);
-  }
-  function aktualisiereStakeholder(s2) {
-    const st = s2.stakeholder;
-    const runway = runwayWochen(s2);
-    const ueberfaellig = s2.verbindlichkeiten.some((v) => v.ueberfaelligSeit !== void 0);
-    const h = s2.historie.slice(-8);
-    const h0 = s2.historie.slice(-16, -8);
-    const avg = (xs) => xs.length ? xs.reduce((a, b2) => a + b2.ebitda, 0) / xs.length : 0;
-    const trend = h.length && h0.length ? clamp((avg(h) - avg(h0)) / 2e6, -1, 1) : 0;
-    const ebitdaGut = avg(h) > 0 ? 8 : 0;
-    const inso = s2.phase === "insolvenz";
-    const beraterBonus = s2.berater.filter((b2) => b2.ende > s2.woche - 26).length > 0 ? 6 : 0;
-    const reporting2 = (hqControllingExzellenz(s2) ? 3 : 0) - hqVerwaltungMalus(s2);
-    const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0) + schwierigkeit(s2).kvZiel;
-    st.kreditversicherer = annaehern(st.kreditversicherer, kvZiel, 0.05);
-    const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting2;
-    st.bank = annaehern(st.bank, bankZiel, 0.03);
-    st.betriebsrat = annaehern(st.betriebsrat, (s2.tarif === "ohne" ? 25 : 50) + hqBetriebsratZiel(s2), 0.01);
-    st.image = annaehern(st.image, 50, 0.01);
-    st.vermieter = annaehern(st.vermieter, 50 - (ueberfaellig ? 15 : 0), 0.01);
-    for (const l of s2.lieferanten) {
-      if (!l.aktiv) continue;
-      l.verspaetungen *= 0.97;
-      const eigene = 72 - 14 * Math.min(4, l.verspaetungen) - (inso ? 15 : 0);
-      const ziel = (l.kvSensitivitaet * st.kreditversicherer + eigene) / (1 + l.kvSensitivitaet);
-      l.vertrauen = annaehern(l.vertrauen, ziel, 0.03 + 0.06 * (1 - l.geduld));
-    }
-    const restZiel = (st.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
-    s2.restLieferantenVertrauen = annaehern(s2.restLieferantenVertrauen, restZiel, 0.05);
-    if (s2.phase === "regulaer") {
-      const ziel = s2.kreditlinieBasis * clamp((st.bank - 15) / 40, 0, 1.25);
-      const alt = s2.kreditlinie;
-      s2.kreditlinie = Math.round(alt + (ziel - alt) * 0.25);
-      if (alt - s2.kreditlinie > 5e6) melde(s2, "warnung", `Die Hausbank reduziert die Kreditlinie auf ${(s2.kreditlinie / 1e6).toFixed(0)} Mio. \u20AC.`);
-    }
   }
 
   // ../engine/src/eigenmarken.ts
@@ -1578,21 +1298,21 @@
   function eigenmarkeSetzen(s2, id, w) {
     const m = marke(s2, id);
     if (!m || m.status === "eingestellt") return fehler("Marke nicht gefunden.");
-    const teile = [];
+    const teile2 = [];
     if (w.budgetWoche !== void 0) {
       m.budgetWoche = Math.max(0, eur(w.budgetWoche));
-      teile.push(`Budget ${Math.round(m.budgetWoche / 1e3)} Tsd. \u20AC je Woche`);
+      teile2.push(`Budget ${Math.round(m.budgetWoche / 1e3)} Tsd. \u20AC je Woche`);
     }
     if (w.qualitaet !== void 0) {
       m.qualitaet = clamp(Math.round(w.qualitaet), 1, 5);
-      teile.push(`Qualit\xE4t ${m.qualitaet}`);
+      teile2.push(`Qualit\xE4t ${m.qualitaet}`);
     }
     if (w.beschaffung !== void 0) {
       if (!BESCHAFFUNG[w.beschaffung]) return fehler("Unbekannte Beschaffung.");
       m.beschaffung = w.beschaffung;
-      teile.push(`Beschaffung ${BESCHAFFUNG[w.beschaffung].name}`);
+      teile2.push(`Beschaffung ${BESCHAFFUNG[w.beschaffung].name}`);
     }
-    return ok(`${m.name}: ${teile.join(", ") || "unver\xE4ndert"}.`);
+    return ok(`${m.name}: ${teile2.join(", ") || "unver\xE4ndert"}.`);
   }
   var FARBEN = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#7a3e3e", "#3e7a74", "#b5953f", "#5b4b8a", "#a64d79", "#4d7ea6"];
   function passungSchnitt(s2, m) {
@@ -1733,685 +1453,371 @@
     };
   }
 
-  // ../engine/src/produkte.ts
-  var PRODUKT_KATEGORIEN = {
-    oberteile: "Oberteile",
-    unterteile: "Hosen, R\xF6cke, Kleider",
-    jacken: "Jacken und M\xE4ntel",
-    schuhe: "Schuhe",
-    waesche: "W\xE4sche und Nacht",
-    accessoires: "Accessoires",
-    home: "Home",
-    beauty: "Beauty",
-    kinder: "Baby und Kind"
+  // ../engine/src/standorte.ts
+  var KOORDINATEN = {
+    Berlin: [52.52, 13.4],
+    Hamburg: [53.55, 10],
+    M\u00FCnchen: [48.14, 11.58],
+    K\u00F6ln: [50.94, 6.96],
+    Frankfurt: [50.11, 8.68],
+    D\u00FCsseldorf: [51.23, 6.78],
+    Stuttgart: [48.78, 9.18],
+    Essen: [51.46, 7.01],
+    Dortmund: [51.51, 7.47],
+    Bremen: [53.08, 8.8],
+    Leipzig: [51.34, 12.37],
+    Dresden: [51.05, 13.74],
+    Hannover: [52.37, 9.73],
+    N\u00FCrnberg: [49.45, 11.08],
+    Duisburg: [51.43, 6.76],
+    Bochum: [51.48, 7.22],
+    Wuppertal: [51.26, 7.15],
+    Bielefeld: [52.02, 8.53],
+    Bonn: [50.74, 7.1],
+    M\u00FCnster: [51.96, 7.63],
+    Mannheim: [49.49, 8.47],
+    Karlsruhe: [49.01, 8.4],
+    Augsburg: [48.37, 10.9],
+    Wiesbaden: [50.08, 8.24],
+    M\u00F6nchengladbach: [51.19, 6.44],
+    Gelsenkirchen: [51.51, 7.1],
+    Aachen: [50.78, 6.08],
+    Braunschweig: [52.27, 10.52],
+    Kiel: [54.32, 10.13],
+    Chemnitz: [50.83, 12.92],
+    Halle: [51.48, 11.97],
+    Magdeburg: [52.13, 11.63],
+    Freiburg: [47.99, 7.85],
+    Krefeld: [51.33, 6.56],
+    Mainz: [49.99, 8.25],
+    L\u00FCbeck: [53.87, 10.69],
+    Erfurt: [50.98, 11.03],
+    Oberhausen: [51.47, 6.85],
+    Rostock: [54.09, 12.1],
+    Kassel: [51.31, 9.48],
+    Hagen: [51.36, 7.47],
+    Potsdam: [52.39, 13.06],
+    Saarbr\u00FCcken: [49.24, 6.99],
+    Hamm: [51.68, 7.82],
+    Ludwigshafen: [49.48, 8.44],
+    Oldenburg: [53.14, 8.21],
+    M\u00FClheim: [51.43, 6.88],
+    Osnabr\u00FCck: [52.28, 8.05],
+    Leverkusen: [51.03, 6.98],
+    Darmstadt: [49.87, 8.65],
+    Heidelberg: [49.4, 8.69],
+    Solingen: [51.17, 7.08],
+    Regensburg: [49.01, 12.1],
+    Paderborn: [51.72, 8.75],
+    Ingolstadt: [48.77, 11.43],
+    W\u00FCrzburg: [49.79, 9.95],
+    Ulm: [48.4, 9.99],
+    Wolfsburg: [52.42, 10.79],
+    G\u00F6ttingen: [51.54, 9.92],
+    Pforzheim: [48.89, 8.7],
+    Offenbach: [50.1, 8.77],
+    Heilbronn: [49.14, 9.22],
+    Bremerhaven: [53.55, 8.58],
+    Trier: [49.75, 6.64],
+    Koblenz: [50.36, 7.59],
+    Jena: [50.93, 11.59],
+    Siegen: [50.87, 8.02],
+    Hildesheim: [52.15, 9.95],
+    Cottbus: [51.76, 14.33],
+    G\u00FCtersloh: [51.91, 8.38],
+    Recklinghausen: [51.61, 7.2],
+    Bottrop: [51.52, 6.93],
+    Reutlingen: [48.49, 9.21],
+    Erlangen: [49.6, 11],
+    F\u00FCrth: [49.48, 10.99],
+    Bamberg: [49.89, 10.89],
+    Bayreuth: [49.95, 11.58],
+    Landshut: [48.54, 12.15],
+    Rosenheim: [47.86, 12.12],
+    Kempten: [47.73, 10.31],
+    Passau: [48.57, 13.43],
+    Konstanz: [47.66, 9.18],
+    Esslingen: [48.74, 9.31],
+    Ludwigsburg: [48.9, 9.19],
+    T\u00FCbingen: [48.52, 9.06],
+    Gie\u00DFen: [50.58, 8.68],
+    Marburg: [50.81, 8.77],
+    Fulda: [50.55, 9.68],
+    Hanau: [50.13, 8.92],
+    Wetzlar: [50.56, 8.5],
+    L\u00FCneburg: [53.25, 10.41],
+    Celle: [52.62, 10.08],
+    Flensburg: [54.79, 9.44],
+    Neum\u00FCnster: [54.07, 9.98],
+    Stralsund: [54.31, 13.09],
+    Schwerin: [53.63, 11.41],
+    Zwickau: [50.72, 12.5],
+    G\u00F6rlitz: [51.15, 14.99],
+    Dessau: [51.84, 12.24],
+    Gera: [50.88, 12.08],
+    Weimar: [50.98, 11.33],
+    Neuss: [51.2, 6.69],
+    D\u00FCren: [50.8, 6.48],
+    Wesel: [51.66, 6.62],
+    Iserlohn: [51.38, 7.7],
+    L\u00FCdenscheid: [51.22, 7.63],
+    Witten: [51.44, 7.34],
+    Marl: [51.66, 7.09],
+    Moers: [51.45, 6.63],
+    Kaiserslautern: [49.44, 7.77],
+    Worms: [49.63, 8.36],
+    Speyer: [49.32, 8.43],
+    Offenburg: [48.47, 7.94],
+    L\u00F6rrach: [47.61, 7.66],
+    Ravensburg: [47.78, 9.61],
+    Aschaffenburg: [49.98, 9.15],
+    Schweinfurt: [50.05, 10.23],
+    Hof: [50.32, 11.92],
+    Amberg: [49.44, 11.86],
+    Straubing: [48.88, 12.57],
+    Neubrandenburg: [53.56, 13.26],
+    "Frankfurt (Oder)": [52.35, 14.55],
+    Wilhelmshaven: [53.53, 8.11],
+    Emden: [53.37, 7.21],
+    Herford: [52.11, 8.67],
+    Detmold: [51.94, 8.88],
+    Minden: [52.29, 8.92]
   };
-  var TREND_GRUPPEN = { kinder: "Kinder", jung: "Junge Kundschaft bis 29", mitte: "30 bis 49", reif: "50 plus und 70 plus" };
-  var FARBEN2 = {
-    "wei\xDF": "#f7f5f0",
-    creme: "#efe6d2",
-    sand: "#d8c6a3",
-    beige: "#cdb894",
-    camel: "#b98a53",
-    cognac: "#9a5a2c",
-    braun: "#6b4a32",
-    grau: "#9a9a9a",
-    anthrazit: "#3f4247",
-    schwarz: "#1f1f22",
-    marine: "#1f2f4f",
-    hellblau: "#a9c8e6",
-    jeansblau: "#4f6f9a",
-    petrol: "#1f5f68",
-    "mintgr\xFCn": "#a8dcc4",
-    salbei: "#9cae8f",
-    olive: "#6f7040",
-    "flaschengr\xFCn": "#1f4a35",
-    senf: "#c9a13a",
-    gelb: "#f0d04a",
-    orange: "#e8843a",
-    koralle: "#ec7d6a",
-    rot: "#c8323a",
-    bordeaux: "#6e1f2e",
-    rosa: "#f2b8c6",
-    altrosa: "#c99a9a",
-    flieder: "#c4b0d8",
-    lila: "#7a4f9a"
-  };
-  var FARBLISTE = Object.keys(FARBEN2);
-  var MATERIALIEN = {
-    Baumwolle: { preis: 1, kosten: 1, wertig: 0.45 },
-    "Bio-Baumwolle": { preis: 1.12, kosten: 1.14, wertig: 0.6 },
-    Leinen: { preis: 1.2, kosten: 1.2, wertig: 0.6 },
-    Kaschmir: { preis: 2.3, kosten: 2.36, wertig: 1 },
-    Merino: { preis: 1.5, kosten: 1.52, wertig: 0.8 },
-    Denim: { preis: 1, kosten: 1, wertig: 0.45 },
-    Leder: { preis: 1.6, kosten: 1.62, wertig: 0.8 },
-    Polyester: { preis: 0.75, kosten: 0.68, wertig: 0.1 },
-    Seide: { preis: 1.9, kosten: 1.94, wertig: 0.95 },
-    Viskose: { preis: 0.9, kosten: 0.86, wertig: 0.3 }
-  };
-  var MATERIALLISTE = Object.keys(MATERIALIEN);
-  var G = (kinder, jung, mitte, reif) => ({ kinder, jung, mitte, reif });
-  var ARTIKELTYPEN = [
-    { typ: "Jeans-Shorts", kategorie: "unterteile", wgs: ["damen.denim", "damen.young", "herren.casual", "kinder.maedchen", "kinder.jungen", "sporttextil.freizeit"], saison: "sommer", preis: 35, materialien: ["Denim", "Bio-Baumwolle", "Baumwolle"], gruppe: G(0.9, 0.95, 0.55, 0.15), aufwand: 1 },
-    { typ: "Kaschmirpullover", kategorie: "oberteile", wgs: ["damen.strick", "herren.strick", "damen.gg"], saison: "winter", preis: 79, materialien: ["Kaschmir"], gruppe: G(0.1, 0.45, 0.8, 0.95), aufwand: 2 },
-    { typ: "Strickjacke", kategorie: "oberteile", wgs: ["damen.strick", "herren.strick", "damen.gg", "kinder.maedchen", "kinder.jungen"], saison: "winter", preis: 55, materialien: ["Merino", "Baumwolle", "Kaschmir", "Viskose", "Polyester"], gruppe: G(0.6, 0.4, 0.7, 0.9), aufwand: 1 },
-    { typ: "Bluse", kategorie: "oberteile", wgs: ["damen.blusen", "damen.gg", "damen.young"], saison: "ganz", preis: 45, materialien: ["Viskose", "Seide", "Baumwolle", "Leinen", "Polyester"], gruppe: G(0.1, 0.55, 0.85, 0.85), aufwand: 1 },
-    { typ: "Hemd", kategorie: "oberteile", wgs: ["herren.hemden", "herren.business", "herren.casual"], saison: "ganz", preis: 45, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Polyester"], gruppe: G(0.2, 0.55, 0.9, 0.85), aufwand: 1 },
-    { typ: "T-Shirt", kategorie: "oberteile", wgs: ["damen.blusen", "herren.casual", "damen.young", "kinder.jungen", "kinder.maedchen", "sporttextil.freizeit", "sport.bekleidung"], saison: "sommer", preis: 19, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Polyester", "Leinen"], gruppe: G(0.95, 0.95, 0.7, 0.45), aufwand: 1 },
-    { typ: "Poloshirt", kategorie: "oberteile", wgs: ["herren.casual", "herren.hemden", "damen.blusen", "sport.bekleidung"], saison: "sommer", preis: 35, materialien: ["Baumwolle", "Bio-Baumwolle", "Polyester"], gruppe: G(0.5, 0.45, 0.8, 0.85), aufwand: 1 },
-    { typ: "Kleid", kategorie: "unterteile", wgs: ["damen.kleider", "damen.young", "damen.gg"], saison: "sommer", preis: 59, materialien: ["Viskose", "Baumwolle", "Leinen", "Seide", "Polyester"], gruppe: G(0.2, 0.9, 0.85, 0.6), aufwand: 2 },
-    { typ: "Rock", kategorie: "unterteile", wgs: ["damen.hosen", "damen.gg", "damen.young"], saison: "ganz", preis: 45, materialien: ["Viskose", "Baumwolle", "Denim", "Leder", "Polyester"], gruppe: G(0.2, 0.6, 0.75, 0.7), aufwand: 1 },
-    { typ: "Chino", kategorie: "unterteile", wgs: ["herren.hosen", "damen.hosen", "herren.casual"], saison: "ganz", preis: 55, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen"], gruppe: G(0.3, 0.6, 0.9, 0.85), aufwand: 1 },
-    { typ: "Jeans", kategorie: "unterteile", wgs: ["damen.denim", "herren.casual", "herren.hosen", "kinder.jungen", "kinder.maedchen", "damen.young"], saison: "ganz", preis: 59, materialien: ["Denim", "Bio-Baumwolle"], gruppe: G(0.85, 0.95, 0.85, 0.55), aufwand: 2 },
-    { typ: "Mantel", kategorie: "jacken", wgs: ["damen.jacken", "herren.jacken"], saison: "winter", preis: 149, materialien: ["Merino", "Kaschmir", "Polyester", "Baumwolle", "Leder"], gruppe: G(0.2, 0.5, 0.8, 0.95), aufwand: 3 },
-    { typ: "Steppjacke", kategorie: "jacken", wgs: ["damen.jacken", "herren.jacken", "outdoor.bekleidung", "kinder.jungen", "kinder.maedchen"], saison: "winter", preis: 99, materialien: ["Polyester", "Baumwolle"], gruppe: G(0.9, 0.85, 0.8, 0.6), aufwand: 2 },
-    { typ: "Blazer", kategorie: "jacken", wgs: ["damen.jacken", "herren.business", "damen.blusen"], saison: "ganz", preis: 99, materialien: ["Merino", "Leinen", "Viskose", "Polyester", "Baumwolle"], gruppe: G(0.05, 0.55, 0.9, 0.8), aufwand: 2 },
-    { typ: "Sneaker", kategorie: "schuhe", wgs: ["accessoires.damenschuhe", "accessoires.herrenschuhe", "kinder.schuhe"], saison: "ganz", preis: 69, materialien: ["Leder", "Baumwolle", "Polyester"], gruppe: G(0.9, 0.95, 0.8, 0.55), aufwand: 2 },
-    { typ: "Pumps", kategorie: "schuhe", wgs: ["accessoires.damenschuhe"], saison: "ganz", preis: 79, materialien: ["Leder", "Polyester"], gruppe: G(0, 0.55, 0.8, 0.5), aufwand: 2 },
-    { typ: "Stiefel", kategorie: "schuhe", wgs: ["accessoires.damenschuhe", "accessoires.herrenschuhe", "kinder.schuhe"], saison: "winter", preis: 119, materialien: ["Leder", "Polyester"], gruppe: G(0.6, 0.7, 0.8, 0.75), aufwand: 2 },
-    { typ: "Pyjama", kategorie: "waesche", wgs: ["waesche.nacht"], saison: "ganz", preis: 39, materialien: ["Baumwolle", "Bio-Baumwolle", "Seide", "Viskose", "Polyester"], gruppe: G(0.8, 0.5, 0.75, 0.9), aufwand: 1 },
-    { typ: "Unterw\xE4sche", kategorie: "waesche", wgs: ["waesche.tag", "waesche.herren"], saison: "ganz", preis: 19, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Polyester", "Seide"], gruppe: G(0.6, 0.8, 0.85, 0.8), aufwand: 1 },
-    { typ: "BH", kategorie: "waesche", wgs: ["waesche.tag"], saison: "ganz", preis: 35, materialien: ["Polyester", "Baumwolle", "Seide", "Viskose"], gruppe: G(0, 0.8, 0.85, 0.75), aufwand: 2 },
-    { typ: "Socken", kategorie: "waesche", wgs: ["waesche.struempfe"], saison: "ganz", preis: 9, materialien: ["Baumwolle", "Bio-Baumwolle", "Merino", "Polyester"], gruppe: G(0.8, 0.75, 0.8, 0.8), aufwand: 1 },
-    { typ: "Schal", kategorie: "accessoires", wgs: ["accessoires.lederwaren"], saison: "winter", preis: 29, materialien: ["Kaschmir", "Merino", "Viskose", "Seide", "Polyester", "Baumwolle"], gruppe: G(0.3, 0.6, 0.8, 0.9), aufwand: 1 },
-    { typ: "M\xFCtze", kategorie: "accessoires", wgs: ["accessoires.lederwaren", "kinder.baby"], saison: "winter", preis: 19, materialien: ["Merino", "Baumwolle", "Kaschmir", "Polyester"], gruppe: G(0.85, 0.8, 0.6, 0.6), aufwand: 1 },
-    { typ: "Handtasche", kategorie: "accessoires", wgs: ["accessoires.lederwaren"], saison: "ganz", preis: 89, materialien: ["Leder", "Polyester", "Baumwolle"], gruppe: G(0, 0.7, 0.85, 0.8), aufwand: 2 },
-    { typ: "G\xFCrtel", kategorie: "accessoires", wgs: ["accessoires.lederwaren"], saison: "ganz", preis: 29, materialien: ["Leder", "Polyester"], gruppe: G(0.2, 0.6, 0.8, 0.8), aufwand: 1 },
-    { typ: "Bettw\xE4sche", kategorie: "home", wgs: ["wohnen.bett"], saison: "ganz", preis: 49, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Seide", "Polyester"], gruppe: G(0.6, 0.6, 0.9, 0.85), aufwand: 1 },
-    { typ: "Handtuch", kategorie: "home", wgs: ["wohnen.heimtextil"], saison: "ganz", preis: 15, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen"], gruppe: G(0.5, 0.6, 0.85, 0.85), aufwand: 1 },
-    { typ: "Kissen", kategorie: "home", wgs: ["wohnen.heimtextil", "wohnen.deko"], saison: "ganz", preis: 25, materialien: ["Baumwolle", "Leinen", "Viskose", "Polyester", "Seide"], gruppe: G(0.5, 0.75, 0.85, 0.75), aufwand: 1 },
-    { typ: "Tasse", kategorie: "home", wgs: ["wohnen.tisch"], saison: "ganz", preis: 9, materialien: ["Polyester"], gruppe: G(0.5, 0.8, 0.8, 0.7), aufwand: 1 },
-    { typ: "Vase", kategorie: "home", wgs: ["wohnen.deko"], saison: "ganz", preis: 29, materialien: ["Polyester"], gruppe: G(0.1, 0.6, 0.85, 0.85), aufwand: 1 },
-    { typ: "Lippenstift", kategorie: "beauty", wgs: ["beauty.pflege"], saison: "ganz", preis: 15, materialien: ["Polyester"], gruppe: G(0, 0.9, 0.8, 0.6), aufwand: 2 },
-    { typ: "Creme", kategorie: "beauty", wgs: ["beauty.pflege", "beauty.drogerie"], saison: "ganz", preis: 19, materialien: ["Polyester"], gruppe: G(0.3, 0.7, 0.85, 0.9), aufwand: 2 },
-    { typ: "Parfum", kategorie: "beauty", wgs: ["beauty.pflege"], saison: "ganz", preis: 45, materialien: ["Polyester"], gruppe: G(0, 0.85, 0.85, 0.75), aufwand: 3 },
-    { typ: "Kinderbody", kategorie: "kinder", wgs: ["kinder.baby"], saison: "ganz", preis: 12, materialien: ["Baumwolle", "Bio-Baumwolle", "Merino"], gruppe: G(1, 0, 0, 0), aufwand: 1 },
-    { typ: "Kinderkleid", kategorie: "kinder", wgs: ["kinder.maedchen", "kinder.baby"], saison: "sommer", preis: 25, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Leinen"], gruppe: G(1, 0, 0, 0), aufwand: 1 },
-    { typ: "Pl\xFCschtier", kategorie: "kinder", wgs: ["kinder.baby"], saison: "ganz", preis: 19, materialien: ["Polyester", "Bio-Baumwolle", "Baumwolle"], gruppe: G(1, 0, 0, 0), aufwand: 1 }
-  ];
-  var TYP = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
-  var FARB_BASIS = {
-    kinder: ["gelb", "rot", "hellblau", "rosa", "mintgr\xFCn", "orange", "jeansblau", "wei\xDF", "koralle"],
-    jung: ["schwarz", "wei\xDF", "jeansblau", "rosa", "lila", "olive", "grau", "koralle"],
-    mitte: ["marine", "wei\xDF", "olive", "salbei", "schwarz", "cognac", "sand", "petrol", "grau"],
-    reif: ["marine", "camel", "grau", "bordeaux", "creme", "sand", "anthrazit", "flaschengr\xFCn", "beige"]
-  };
-  var PREISLAGE_FAKTOR = { einstieg: 0.65, mitte: 1, gehoben: 1.7 };
-  var DAUER_STUFEN = [4, 8, 12, 24, 48];
-  var PRODUKT_PARAM = {
-    /** Kapazität je Marke und Produktkategorie nach wirksamer Stufe der Produktentwicklung 0..3. */
-    kapazitaet: [3, 5, 6, 8],
-    /** Entwicklungsbudget, das ein Artikel je Aufwandspunkt bei Preislage mitte braucht (Sättigung). */
-    budgetBedarf: 6e4,
-    /** Sterne verlieren nach einem Jahr im Sortiment bis zu 0,75 (über zwei weitere Jahre). */
-    alterung: 0.75,
-    /** Nachfragegewicht eines Produkts: 0,375 + 0,25 × Sterne (2,5 Sterne = 1, 5 Sterne = 1,6). */
-    gewichtBasis: 0.375,
-    gewichtJeStern: 0.25,
-    /** Preiselastizität des Umsatzes gegen den Normpreis. */
-    preisElastizitaet: 1.1,
-    /** Faktor auf die Markennachfrage je WG, begrenzt. */
-    faktorMin: 0.5,
-    faktorMax: 2,
-    /** Startanteil, wenn ein Produkt in eine WG ohne Markenanteil kommt. */
-    anteilNeu: 0.1
-  };
-  function hashRng(seed, sid, g) {
-    return { rng: (Math.imul(seed + 40503, 2654435761) ^ Math.imul(sid + 1013, 40503) ^ Math.imul(g + 7, 668265261)) >>> 0 };
+  var KNOTEN = /* @__PURE__ */ new Set([
+    "Berlin",
+    "Hamburg",
+    "M\xFCnchen",
+    "K\xF6ln",
+    "Frankfurt",
+    "D\xFCsseldorf",
+    "Stuttgart",
+    "Hannover",
+    "Leipzig",
+    "N\xFCrnberg",
+    "Dortmund",
+    "Essen",
+    "Duisburg",
+    "Bremen",
+    "Dresden",
+    "Mannheim"
+  ]);
+  var BALLUNGSRAUM = /* @__PURE__ */ new Set([
+    "Essen",
+    "Dortmund",
+    "Duisburg",
+    "Bochum",
+    "Gelsenkirchen",
+    "Oberhausen",
+    "M\xFClheim",
+    "Hagen",
+    "Hamm",
+    "Recklinghausen",
+    "Bottrop",
+    "Witten",
+    "Marl",
+    "Moers",
+    "D\xFCsseldorf",
+    "K\xF6ln",
+    "Bonn",
+    "Wuppertal",
+    "Solingen",
+    "Leverkusen",
+    "Krefeld",
+    "Neuss",
+    "M\xF6nchengladbach",
+    "Frankfurt",
+    "Wiesbaden",
+    "Mainz",
+    "Darmstadt",
+    "Offenbach",
+    "Hanau",
+    "Stuttgart",
+    "Esslingen",
+    "Ludwigsburg",
+    "M\xFCnchen",
+    "Berlin",
+    "Potsdam",
+    "Hamburg"
+  ]);
+  function abstand100(a, b2) {
+    const p2 = KOORDINATEN[a];
+    const q2 = KOORDINATEN[b2];
+    if (!p2 || !q2) return 3;
+    const dy = (p2[0] - q2[0]) * 111;
+    const dx = (p2[1] - q2[1]) * 111 * Math.cos((p2[0] + q2[0]) / 2 * (Math.PI / 180));
+    return Math.sqrt(dx * dx + dy * dy) / 100;
   }
-  function ziehe(r, liste, n) {
-    const pool = [...liste];
-    const out = [];
-    while (out.length < n && pool.length) out.push(pool.splice(Math.floor(zufall(r) * pool.length), 1)[0]);
-    return out;
-  }
-  function trendFuer(s2, sid) {
-    const sommer = (sid % 2 + 2) % 2 === 0;
-    const gruppen = {};
-    Object.keys(TREND_GRUPPEN).forEach((g, i) => {
-      const r = hashRng(s2.seed, sid, i);
-      const typen = ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
-      const artikel = ziehe(r, typen.map((t) => t.typ), 5);
-      const basis2 = FARB_BASIS[g];
-      const farben = [...ziehe(r, basis2, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis2.includes(f)), 2)];
-      const out = ziehe(r, FARBLISTE.filter((f) => !farben.includes(f)), 3);
-      const mats = ziehe(r, MATERIALLISTE.filter((m) => m !== "Polyester" || g === "kinder"), 3);
-      gruppen[g] = { farben, artikel, materialien: mats, out };
-    });
-    return { saison: sid, name: saisonName(s2, sid), gruppen };
-  }
-  function trendGruppe(m) {
-    if (m.zielgruppe.geschlecht === "kinder") return "kinder";
-    const a = m.zielgruppe.alter;
-    return a === "50+" || a === "70+" ? "reif" : a === "30-49" ? "mitte" : "jung";
-  }
-  var PREIS_STUFE = { einstieg: 0, mitte: 1, gehoben: 2 };
-  function normpreis(typ, preislage, material2, qualitaet3) {
-    const p2 = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet3);
-    return Math.max(3, Math.round(p2) - 0.01);
-  }
-  var produktStufe = (s2) => clamp(s2.hq?.wirkung.produkt ?? 1, 0, 3);
-  function teamStaerke(s2) {
-    const cpo = s2.vorstand?.ressorts.cpo.person;
-    return clamp(0.6 * Math.min(1, produktStufe(s2) / 2) + 0.4 * (cpo ? cpo.fachwissen / 100 : 0.2), 0, 1);
-  }
-  function wgFuer(s2, m, t, wunsch) {
-    const ok5 = (wg) => !!WG[wg] && s2.basisUmsatz[WG[wg].bereich] !== void 0 && passungWg(m, wg) > 0;
-    if (wunsch) return t.wgs.includes(wunsch) && ok5(wunsch) ? wunsch : void 0;
-    return t.wgs.find((wg) => ok5(wg) && (m.wgAnteile[wg] ?? 0) > 0) ?? t.wgs.find(ok5);
-  }
-  function bewerte(s2, m, e, team, trend, trendOhne = 0.4) {
-    const t = TYP[e.typ];
-    const g = trendGruppe(m);
-    const mat2 = MATERIALIEN[e.material];
-    const farbBasis = FARB_BASIS[g].includes(e.farbe) ? 1 : 0.35;
-    const matZiel = g === "reif" ? mat2.wertig : g === "mitte" ? 0.4 + 0.6 * mat2.wertig : g === "jung" ? 1 - 0.5 * mat2.wertig : e.material === "Bio-Baumwolle" || e.material === "Baumwolle" || e.material === "Merino" ? 1 : 0.4;
-    const zielgruppe = 0.55 * t.gruppe[g] + 0.25 * farbBasis + 0.2 * matZiel;
-    let tr = trendOhne;
-    if (trend) {
-      const x = trend.gruppen[g];
-      tr = 0.1 + (x.artikel.includes(e.typ) ? 0.4 : 0) + (x.farben.includes(e.farbe) ? 0.35 : 0) + (x.materialien.includes(e.material) ? 0.15 : 0) - (x.out.includes(e.farbe) ? 0.25 : 0);
-      const sommer = (trend.saison % 2 + 2) % 2 === 0;
-      if (t.saison !== "ganz" && t.saison === "sommer" !== sommer) tr -= 0.15;
+
+  // ../engine/src/schwierigkeit.ts
+  var SCHWIERIGKEIT = {
+    leicht: {
+      name: "Leicht",
+      beschreibung: "Mehr Kasse und Kreditlinie, geduldige Lieferanten und Kreditversicherer, seltener Pech, Schlie\xDFungswellen kosten wenig Image.",
+      imageDaempfung: 0.9,
+      startCash: 1.15,
+      kreditlinie: 1.15,
+      lieferantenGeduld: 0.1,
+      kvZiel: 4,
+      ereignisse: 0.6,
+      versammlungSchwelle: -35e6
+    },
+    mittel: {
+      name: "Mittel",
+      beschreibung: "Die \xFCbliche Lage einer Warenhauskette in der Krise.",
+      imageDaempfung: 0.955,
+      startCash: 1,
+      kreditlinie: 1,
+      lieferantenGeduld: 0,
+      kvZiel: 0,
+      ereignisse: 1,
+      versammlungSchwelle: -25e6
+    },
+    schwer: {
+      name: "Schwer",
+      beschreibung: "Knappe Kasse, nerv\xF6se Lieferanten und Kreditversicherer, mehr Pech, jede Schlie\xDFung kostet voll Image, strenge Gl\xE4ubiger.",
+      imageDaempfung: 1,
+      startCash: 0.9,
+      kreditlinie: 0.9,
+      lieferantenGeduld: -0.1,
+      kvZiel: -4,
+      ereignisse: 1.4,
+      versammlungSchwelle: -17e6
     }
-    const trendW = clamp(tr, 0, 1);
-    const dp = Math.abs(PREIS_STUFE[e.preislage] - PREIS_STUFE[m.preislage]);
-    const qZiel = [2.5, 3.2, 4.3][PREIS_STUFE[e.preislage]];
-    const mZiel = [0.3, 0.55, 0.85][PREIS_STUFE[e.preislage]];
-    const preisQualitaet = clamp((dp === 0 ? 1 : dp === 1 ? 0.6 : 0.25) * (1 - 0.18 * Math.abs(e.qualitaet - qZiel)) * (1 - 0.5 * Math.abs(mat2.wertig - mZiel)), 0, 1);
-    const bedarf = PRODUKT_PARAM.budgetBedarf * t.aufwand * Math.sqrt(PREISLAGE_FAKTOR[e.preislage]);
-    const eff = e.budgetWoche * e.dauer * Math.min(1, Math.pow(e.dauer / 12, 0.35));
-    const entwicklung = clamp(1 - Math.exp(-eff / bedarf), 0, 1);
-    return { zielgruppe: r2(zielgruppe), trend: r2(trendW), preisQualitaet: r2(preisQualitaet), entwicklung: r2(entwicklung), team: r2(team) };
-  }
-  var r2 = (x) => Math.round(x * 100) / 100;
-  function scoreAus(t) {
-    return 0.28 * t.zielgruppe + 0.25 * t.trend + 0.15 * t.preisQualitaet + 0.2 * t.entwicklung + 0.12 * t.team;
-  }
-  var halbe = (x) => clamp(Math.round(x * 2) / 2, 0.5, 5);
-  var sterneAus = (score) => halbe(0.5 + 4.5 * score);
-  function sterneWirksam(s2, p2) {
-    if (p2.sterne === void 0) return 0;
-    const alter = s2.woche - (p2.seit ?? s2.woche);
-    return Math.max(0.5, p2.sterne - PRODUKT_PARAM.alterung * clamp((alter - 52) / 104, 0, 1));
-  }
-  var imSortiment = (p2) => p2.status === "sortiment";
-  function gewicht(s2, p2) {
-    const st = sterneWirksam(s2, p2);
-    return (PRODUKT_PARAM.gewichtBasis + PRODUKT_PARAM.gewichtJeStern * st) * Math.pow(p2.normpreis / Math.max(0.5, p2.preis), PRODUKT_PARAM.preisElastizitaet);
-  }
-  function rohFaktor(s2, markeId, wg) {
-    let sum2 = 0;
-    let n = 0;
-    for (const p2 of s2.produkte.liste) if (p2.marke === markeId && p2.wg === wg && imSortiment(p2)) {
-      sum2 += gewicht(s2, p2);
-      n++;
-    }
-    if (!n) return 0.6;
-    return sum2 / n * Math.min(1.12, 0.7 + 0.15 * n);
-  }
-  function rohMarge(s2, markeId, wg) {
-    let sum2 = 0;
-    let gw = 0;
-    for (const p2 of s2.produkte.liste) if (p2.marke === markeId && p2.wg === wg && imSortiment(p2)) {
-      const x = gewicht(s2, p2);
-      sum2 += x * (1 - p2.ekStueck / Math.max(0.5, p2.preis) - p2.margeErwartet);
-      gw += x;
-    }
-    return gw > 0 ? sum2 / gw : 0;
-  }
-  function produktNachfrageFaktor(s2, markeId, wg) {
-    const pr2 = s2.produkte;
-    if (!pr2) return 1;
-    const key = `${markeId}|${wg}`;
-    const f = rohFaktor(s2, markeId, wg) / (pr2.basisF[key] ?? 1);
-    return clamp(f, PRODUKT_PARAM.faktorMin, PRODUKT_PARAM.faktorMax);
-  }
-  function produktMargeDelta(s2, markeId, wg) {
-    const pr2 = s2.produkte;
-    if (!pr2) return 0;
-    return clamp(rohMarge(s2, markeId, wg) - (pr2.basisM[`${markeId}|${wg}`] ?? 0), -0.25, 0.25);
-  }
-  function margeErwartet(s2, m, wg) {
-    const st = s2.einkauf?.wgs[wg];
-    return (st?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
-  }
-  function ekStueck(normp, me, material2, qualitaet3) {
-    const mat2 = MATERIALIEN[material2];
-    return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet3 - 3)) * 100) / 100;
-  }
-  function produktName(typ, farbe3, material2) {
-    const t = TYP[typ];
-    const matWort = t.materialien.length > 1 && material2 !== t.materialien[0] ? ` aus ${material2}` : "";
-    return `${typ} ${farbe3}${matWort}`;
-  }
-  function neuesProdukt(s2, m, e, wg, team) {
-    const t = TYP[e.typ];
-    const np = normpreis(t, e.preislage, e.material, e.qualitaet);
-    const me = margeErwartet(s2, m, wg);
-    s2.produkte.zaehler += 1;
-    return {
-      id: `pr${s2.produkte.zaehler}`,
-      marke: m.id,
-      typ: e.typ,
-      name: e.name?.trim() || produktName(e.typ, e.farbe, e.material),
-      farbe: e.farbe,
-      material: e.material,
-      stil: e.stil,
-      preislage: e.preislage,
-      qualitaet: e.qualitaet,
-      wg,
-      kategorie: t.kategorie,
-      normpreis: np,
-      preis: np,
-      ekStueck: ekStueck(np, me, e.material, e.qualitaet),
-      margeErwartet: me,
-      status: "entwicklung",
-      start: s2.woche,
-      dauer: e.dauer,
-      budgetWoche: e.budgetWoche,
-      fertig: s2.woche + e.dauer,
-      team,
-      verkauf: [],
-      umsatz: [],
-      saison: saisonId(s2.woche + e.dauer)
-    };
-  }
-  function einfuehren(s2, p2, rauschen2) {
-    const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
-    if (!m) return;
-    const teile = bewerte(s2, m, p2, p2.team, trendFuer(s2, saisonId(s2.woche)));
-    const r = s2.produkte;
-    const noise = rauschen2 ? clamp(normal(r) * 0.25, -0.5, 0.5) : 0;
-    p2.teile = teile;
-    p2.sterne = sterneAus(scoreAus(teile) + noise / 4.5);
-    p2.status = "sortiment";
-    p2.seit = s2.woche;
-    p2.saison = saisonId(s2.woche);
-  }
-  var START = {
-    em1: [
-      ["Bluse", "beige", "Polyester", "damen.blusen", 0.15],
-      ["Bluse", "flieder", "Viskose", "damen.blusen", 0.15],
-      ["Strickjacke", "altrosa", "Polyester", "damen.strick", 0.15],
-      ["Strickjacke", "grau", "Viskose", "damen.strick", 0.2],
-      ["Rock", "marine", "Polyester", "damen.hosen", 0.15],
-      ["Chino", "beige", "Baumwolle", "damen.hosen", 0.15],
-      ["Bluse", "altrosa", "Polyester", "damen.gg", 0.1],
-      ["Mantel", "camel", "Polyester", "damen.jacken", 0.25],
-      ["Kleid", "bordeaux", "Viskose", "damen.kleider", 0.15]
-    ],
-    em2: [
-      ["Hemd", "hellblau", "Baumwolle", "herren.hemden", 0.55],
-      ["Hemd", "wei\xDF", "Baumwolle", "herren.hemden", 0.5],
-      ["Blazer", "marine", "Merino", "herren.business", 0.55],
-      ["Chino", "sand", "Baumwolle", "herren.hosen", 0.5],
-      ["Strickjacke", "anthrazit", "Merino", "herren.strick", 0.5],
-      ["Poloshirt", "marine", "Baumwolle", "herren.casual", 0.45]
-    ],
-    em3: [
-      ["Kissen", "salbei", "Leinen", "wohnen.heimtextil", 0.6],
-      ["Handtuch", "wei\xDF", "Baumwolle", "wohnen.heimtextil", 0.55],
-      ["Bettw\xE4sche", "grau", "Baumwolle", "wohnen.bett", 0.55],
-      ["Bettw\xE4sche", "creme", "Bio-Baumwolle", "wohnen.bett", 0.6],
-      ["Tasse", "olive", "Polyester", "wohnen.tisch", 0.5],
-      ["Vase", "sand", "Polyester", "wohnen.deko", 0.5]
-    ],
-    em4: [
-      ["Kinderbody", "wei\xDF", "Baumwolle", "kinder.baby", 0.45],
-      ["Pl\xFCschtier", "braun", "Polyester", "kinder.baby", 0.4],
-      ["Kinderkleid", "rosa", "Baumwolle", "kinder.maedchen", 0.45],
-      ["T-Shirt", "gelb", "Baumwolle", "kinder.jungen", 0.45],
-      ["Jeans", "jeansblau", "Denim", "kinder.jungen", 0.4],
-      ["T-Shirt", "rosa", "Baumwolle", "kinder.maedchen", 0.4]
-    ]
   };
-  function erzeugeProdukte(s2) {
-    const pr2 = { liste: [], zaehler: 0, rng: s2.seed * 3266489917 + 32269 >>> 0, basisF: {}, basisM: {} };
-    s2.produkte = pr2;
-    for (const m of s2.eigenmarken.marken) {
-      for (const [typ, farbe3, material2, wg, budgetAnteil] of START[m.id] ?? []) {
-        const t = TYP[typ];
-        const p2 = neuesProdukt(s2, m, { typ, farbe: farbe3, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
-        p2.start = -300;
-        p2.fertig = -288;
-        p2.teile = bewerte(s2, m, p2, p2.team, void 0, m.id === "em1" ? 0.1 : 0.4);
-        p2.sterne = sterneAus(scoreAus(p2.teile));
-        p2.status = "sortiment";
-        p2.seit = -260;
-        p2.saison = saisonId(-260);
-        pr2.liste.push(p2);
-      }
-    }
-    setzeBasis(s2);
-    return pr2;
+  var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
+  var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
+
+  // ../engine/src/stakeholder.ts
+  function freieLiquiditaet(s2) {
+    return s2.cash + s2.kreditlinie;
   }
-  function setzeBasis(s2) {
-    const pr2 = s2.produkte;
-    for (const m of s2.eigenmarken.marken) for (const wg of /* @__PURE__ */ new Set([...Object.keys(m.wgAnteile), ...Object.keys(m.wgIst), ...pr2.liste.filter((p2) => p2.marke === m.id).map((p2) => p2.wg)])) {
-      const key = `${m.id}|${wg}`;
-      pr2.basisF[key] = rohFaktor(s2, m.id, wg);
-      pr2.basisM[key] = rohMarge(s2, m.id, wg);
+  var PRIOR_EBITDA_WOCHE = -22e5;
+  function runwayWochen(s2) {
+    const h = s2.historie.slice(-52);
+    const summe2 = h.reduce((a, b2) => a + b2.ebitda + b2.sondereffekte, 0) + (52 - h.length) * PRIOR_EBITDA_WOCHE;
+    const burn = -summe2 / 52;
+    if (burn <= 0) return 52;
+    return clamp(freieLiquiditaet(s2) / burn, 0, 52);
+  }
+  function annaehern(ist, ziel, rate) {
+    return clamp(ist + (ziel - ist) * rate, 0, 100);
+  }
+  function aktualisiereStakeholder(s2) {
+    const st = s2.stakeholder;
+    const runway = runwayWochen(s2);
+    const ueberfaellig = s2.verbindlichkeiten.some((v) => v.ueberfaelligSeit !== void 0);
+    const h = s2.historie.slice(-8);
+    const h0 = s2.historie.slice(-16, -8);
+    const avg = (xs) => xs.length ? xs.reduce((a, b2) => a + b2.ebitda, 0) / xs.length : 0;
+    const trend = h.length && h0.length ? clamp((avg(h) - avg(h0)) / 2e6, -1, 1) : 0;
+    const ebitdaGut = avg(h) > 0 ? 8 : 0;
+    const inso = s2.phase === "insolvenz";
+    const beraterBonus = s2.berater.filter((b2) => b2.ende > s2.woche - 26).length > 0 ? 6 : 0;
+    const reporting2 = (hqControllingExzellenz(s2) ? 3 : 0) - hqVerwaltungMalus(s2);
+    const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0) + schwierigkeit(s2).kvZiel;
+    st.kreditversicherer = annaehern(st.kreditversicherer, kvZiel, 0.05);
+    const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting2;
+    st.bank = annaehern(st.bank, bankZiel, 0.03);
+    st.betriebsrat = annaehern(st.betriebsrat, (s2.tarif === "ohne" ? 25 : 50) + hqBetriebsratZiel(s2), 0.01);
+    st.image = annaehern(st.image, 50, 0.01);
+    st.vermieter = annaehern(st.vermieter, 50 - (ueberfaellig ? 15 : 0), 0.01);
+    for (const l of s2.lieferanten) {
+      if (!l.aktiv) continue;
+      l.verspaetungen *= 0.97;
+      const eigene = 72 - 14 * Math.min(4, l.verspaetungen) - (inso ? 15 : 0);
+      const ziel = (l.kvSensitivitaet * st.kreditversicherer + eigene) / (1 + l.kvSensitivitaet);
+      l.vertrauen = annaehern(l.vertrauen, ziel, 0.03 + 0.06 * (1 - l.geduld));
+    }
+    const restZiel = (st.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
+    s2.restLieferantenVertrauen = annaehern(s2.restLieferantenVertrauen, restZiel, 0.05);
+    if (s2.phase === "regulaer") {
+      const ziel = s2.kreditlinieBasis * clamp((st.bank - 15) / 40, 0, 1.25);
+      const alt = s2.kreditlinie;
+      s2.kreditlinie = Math.round(alt + (ziel - alt) * 0.25);
+      if (alt - s2.kreditlinie > 5e6) melde(s2, "warnung", `Die Hausbank reduziert die Kreditlinie auf ${(s2.kreditlinie / 1e6).toFixed(0)} Mio. \u20AC.`);
     }
   }
-  function kapazitaet(s2) {
-    const L2 = produktStufe(s2);
-    const k = PRODUKT_PARAM.kapazitaet;
-    return Math.floor(k[Math.min(3, Math.floor(L2 + 1e-9))]);
+
+  // ../engine/src/ware.ts
+  function bestandWert(s2, g) {
+    let x = 0;
+    for (const k of s2.bestand) if (!g || k.gruppe === g) x += k.wert;
+    return x;
   }
-  function belegt(s2, markeId, kat, ohne2) {
-    return s2.produkte.liste.filter((p2) => p2.marke === markeId && p2.kategorie === kat && p2.id !== ohne2 && (p2.status === "sortiment" || p2.status === "entwicklung")).length;
-  }
-  function produktKostenWoche(s2) {
-    return s2.produkte ? s2.produkte.liste.reduce((a, p2) => a + (p2.status === "entwicklung" ? p2.budgetWoche : 0), 0) : 0;
-  }
-  function produkteWoche(s2) {
-    var _a2, _b, _c, _d;
-    const pr2 = s2.produkte;
-    if (!pr2) return;
-    let kosten = false;
-    for (const p2 of pr2.liste) {
-      if (p2.status === "entwicklung" && s2.woche >= p2.fertig) {
-        einfuehren(s2, p2, !s2.prognose);
-        kosten = true;
-        const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
-        if (m && (m.wgAnteile[p2.wg] ?? 0) <= 0 && m.status !== "eingestellt") eigenmarkeAnteil(s2, m.id, p2.wg, PRODUKT_PARAM.anteilNeu);
-        melde(s2, "info", `${m?.name ?? "Eigenmarke"}: ${p2.name} ist im Sortiment (${(p2.sterne ?? 0).toLocaleString("de-DE")} Sterne).`);
-      }
+  function zielWochen(s2, g) {
+    if (s2.phase === "insolvenz" && s2.insolvenz) return s2.woche < s2.insolvenz.seit + 4 ? 0 : 3;
+    const ziel = (v) => v >= 60 ? 9 : v >= 45 ? 7 : v >= 32 ? 4 : v >= 22 ? 2 : 0;
+    let rest = 1;
+    let w = 0;
+    for (const l of s2.lieferanten) {
+      const a = l.gruppen[g];
+      if (!a || !l.aktiv) continue;
+      w += a * ziel(l.vertrauen);
+      rest -= a;
     }
-    for (const m of s2.eigenmarken.marken) {
-      if (m.status === "eingestellt") {
-        for (const p2 of pr2.liste) if (p2.marke === m.id && p2.status !== "ausgelistet") {
-          if (p2.status === "entwicklung") kosten = true;
-          p2.status = "ausgelistet";
+    w += Math.max(0, rest) * ziel(s2.restLieferantenVertrauen);
+    return Math.round(w);
+  }
+  function kvLimit(s2) {
+    if (s2.phase === "insolvenz") return Math.max(0, 0.6 * (s2.cash + s2.kreditlinie)) + 3e7;
+    return s2.kvLimitBasis * clamp((s2.stakeholder.kreditversicherer - 20) / 45, 0, 1.25);
+  }
+  function offeneWarenverbindlichkeiten(s2) {
+    let x = 0;
+    for (const v of s2.verbindlichkeiten) if (v.art === "ware") x += v.wert;
+    return x;
+  }
+  function wareneingang(s2, liquiditaetsReserve) {
+    const w = s2.woche;
+    let vorkasse = 0;
+    let gekuerzt = 0;
+    const limit = kvLimit(s2);
+    let exposure = offeneWarenverbindlichkeiten(s2);
+    const heute = s2.bestellungen.filter((b2) => b2.ankunft <= w);
+    s2.bestellungen = s2.bestellungen.filter((b2) => b2.ankunft > w);
+    for (const b2 of heute) {
+      let wert = b2.wert;
+      if (!b2.vorkasse) {
+        const ziel = zielWochen(s2, b2.gruppe);
+        const frei6 = Math.max(0, limit - exposure);
+        const aufZiel = ziel > 0 ? Math.min(wert, frei6) : 0;
+        let rest = wert - aufZiel;
+        if (rest > 0) {
+          const liquide = s2.cash + s2.kreditlinie - liquiditaetsReserve;
+          if (s2.vorkasseAkzeptieren && liquide > 0) {
+            const zahlbar = Math.min(rest, liquide);
+            s2.cash -= zahlbar;
+            vorkasse += zahlbar;
+            rest -= zahlbar;
+          }
+          if (rest > 0) {
+            wert -= rest;
+            gekuerzt += rest;
+          }
         }
-        continue;
-      }
-      for (const wg of Object.keys(m.wgAnteile)) {
-        if (pr2.liste.some((p3) => p3.marke === m.id && p3.wg === wg && p3.status !== "ausgelistet")) continue;
-        const t = ARTIKELTYPEN.find((x) => x.wgs.includes(wg) && x.gruppe[trendGruppe(m)] >= 0.5) ?? ARTIKELTYPEN.find((x) => x.wgs.includes(wg));
-        if (!t) continue;
-        const farbe3 = FARB_BASIS[trendGruppe(m)][0];
-        const p2 = neuesProdukt(s2, m, { typ: t.typ, farbe: farbe3, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
-        p2.basis = true;
-        p2.budgetWoche = 0;
-        p2.teile = bewerte(s2, m, p2, 0.4, void 0);
-        p2.sterne = sterneAus(scoreAus(p2.teile));
-        p2.status = "sortiment";
-        p2.seit = s2.woche;
-        (_a2 = pr2.basisF)[_b = `${m.id}|${wg}`] ?? (_a2[_b] = 1);
-        (_c = pr2.basisM)[_d = `${m.id}|${wg}`] ?? (_c[_d] = 0);
-        pr2.liste.push(p2);
-      }
-    }
-    if (kosten) hqAktualisiere(s2);
-  }
-  function produkteBuchen(s2) {
-    const pr2 = s2.produkte;
-    if (!pr2) return;
-    const jeKey = /* @__PURE__ */ new Map();
-    for (const p2 of pr2.liste) if (imSortiment(p2)) {
-      const k = `${p2.marke}|${p2.wg}`;
-      const l = jeKey.get(k);
-      if (l) l.push(p2);
-      else jeKey.set(k, [p2]);
-    }
-    for (const [k, liste] of jeKey) {
-      const [m, wg] = k.split("|");
-      const st = s2.einkauf.wgs[wg];
-      const u = st?.v?.u?.length ? st.v.u[st.v.u.length - 1] * (st.pool[m] ?? 0) : 0;
-      const gw = liste.map((p2) => gewicht(s2, p2));
-      const sum2 = gw.reduce((a, b2) => a + b2, 0) || 1;
-      liste.forEach((p2, i) => {
-        const x = u * gw[i] / sum2;
-        p2.umsatz.push(eur(x));
-        p2.verkauf.push(Math.round(x / Math.max(0.5, p2.preis)));
-        if (p2.umsatz.length > 13) {
-          p2.umsatz.shift();
-          p2.verkauf.shift();
-        }
-      });
-    }
-    for (const p2 of pr2.liste) if (!imSortiment(p2) && p2.verkauf.length && p2.verkauf[p2.verkauf.length - 1] !== 0) {
-      p2.umsatz.push(0);
-      p2.verkauf.push(0);
-      if (p2.umsatz.length > 13) {
-        p2.umsatz.shift();
-        p2.verkauf.shift();
-      }
-    }
-  }
-  var PRODUKT_AKTIONEN = /* @__PURE__ */ new Set(["produktEntwickeln", "produktPreis", "produktAuslisten", "produktSortiment"]);
-  function pruefe(s2, e) {
-    const m = s2.eigenmarken.marken.find((x) => x.id === e.marke);
-    const preislage = e.preislage ?? m?.preislage ?? "mitte";
-    const qualitaet3 = clamp(Math.round(e.qualitaet ?? m?.qualitaet ?? 3), 1, 5);
-    const stil = e.stil ?? m?.stil ?? "klassisch";
-    const leer3 = { preislage, qualitaet: qualitaet3, stil, kapFrei: 0 };
-    if (!m || m.status === "eingestellt") return { ...leer3, fehler: "Marke nicht gefunden." };
-    const t = TYP[e.typ];
-    if (!t) return { ...leer3, m, fehler: "Unbekannter Artikeltyp." };
-    if (!FARBEN2[e.farbe]) return { ...leer3, m, t, fehler: "Unbekannte Farbe." };
-    if (!t.materialien.includes(e.material)) return { ...leer3, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. M\xF6glich: ${t.materialien.join(", ")}.` };
-    if (!DAUER_STUFEN.includes(e.dauer)) return { ...leer3, m, t, fehler: "Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen." };
-    if (!(e.budgetWoche >= 0)) return { ...leer3, m, t, fehler: "Budget je Woche angeben." };
-    const wg = wgFuer(s2, m, t, e.wg);
-    if (!wg) return { ...leer3, m, t, fehler: `${e.typ} passt nicht zu ${m.name} (Kategorie oder Zielgruppe).` };
-    const kapFrei = kapazitaet(s2) - belegt(s2, m.id, t.kategorie);
-    if (kapFrei <= 0) return { ...leer3, m, t, wg, kapFrei, fehler: `Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[t.kategorie]} bei ${m.name} erreicht. Bitte erst Produkte auslisten.` };
-    return { m, t, wg, preislage, qualitaet: qualitaet3, stil, kapFrei };
-  }
-  function produktAktion(s2, a) {
-    const ok5 = (text3) => ({ ok: true, text: text3 });
-    const fehler5 = (text3) => ({ ok: false, text: text3 });
-    if (a.typ === "produktEntwickeln") {
-      const e = a.entwurf;
-      const c = pruefe(s2, e);
-      if (c.fehler || !c.m || !c.wg) return fehler5(c.fehler ?? "Ung\xFCltiger Entwurf.");
-      if (s2.phase === "insolvenz" && e.budgetWoche * e.dauer > 15e5) return fehler5("Im Verfahren gibt der Sachwalter h\xF6chstens 1,5 Mio. \u20AC je Entwicklung frei.");
-      const p3 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, teamStaerke(s2));
-      s2.produkte.liste.push(p3);
-      hqAktualisiere(s2);
-      return ok5(`${c.m.name}: ${p3.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p3.fertig + 1}.`);
-    }
-    const p2 = s2.produkte.liste.find((x) => x.id === a.produkt);
-    if (!p2 || p2.status === "ausgelistet") return fehler5("Produkt nicht gefunden.");
-    switch (a.typ) {
-      case "produktPreis": {
-        const neu = Math.round(clamp(a.preis, p2.normpreis * 0.4, p2.normpreis * 2.5) * 100) / 100;
-        p2.preis = neu;
-        const marge = 1 - p2.ekStueck / neu;
-        return ok5(`${p2.name}: Preis ${neu.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} \u20AC, Marge ${Math.round(marge * 100)} %.`);
-      }
-      case "produktAuslisten": {
-        const warEnt = p2.status === "entwicklung";
-        p2.status = "ausgelistet";
-        if (warEnt) hqAktualisiere(s2);
-        return ok5(`${p2.name} ausgelistet${warEnt ? ", die Entwicklung ist gestoppt" : ""}.`);
-      }
-      case "produktSortiment": {
-        if (p2.status === "entwicklung") return fehler5("Das Produkt ist noch in Entwicklung.");
-        if (a.an) {
-          if (p2.status === "sortiment") return ok5(`${p2.name} ist im Sortiment.`);
-          if (belegt(s2, p2.marke, p2.kategorie) >= kapazitaet(s2)) return fehler5(`Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[p2.kategorie]} erreicht.`);
-          p2.status = "sortiment";
-          return ok5(`${p2.name} wieder im Sortiment.`);
-        }
-        p2.status = "pausiert";
-        return ok5(`${p2.name} vor\xFCbergehend aus dem Sortiment.`);
-      }
-    }
-    return fehler5("Unbekannte Aktion.");
-  }
-  function produktKi(s2, guete, r) {
-    if (s2.woche % 4 !== 2) return void 0;
-    const texte = [];
-    const trifft3 = () => zufall(r) < 0.3 + 0.65 * guete;
-    const kap = kapazitaet(s2);
-    for (const m of s2.eigenmarken.marken.filter(istVerkaufsaktiv)) {
-      if (s2.produkte.liste.some((p2) => p2.marke === m.id && p2.status === "entwicklung")) continue;
-      const eigene = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status === "sortiment");
-      const kats = [...new Set(eigene.map((p2) => p2.kategorie))];
-      if (!kats.length) continue;
-      const gut = trifft3();
-      for (const k of kats) {
-        if (belegt(s2, m.id, k) < kap) continue;
-        const liste = eigene.filter((p2) => p2.kategorie === k).sort((a, b2) => sterneWirksam(s2, a) - sterneWirksam(s2, b2));
-        const weg = gut ? liste[0] : waehle(r, liste);
-        if (weg && (!gut || sterneWirksam(s2, weg) <= 3)) {
-          produktAktion(s2, { typ: "produktAuslisten", produkt: weg.id });
-          texte.push(`${m.name}: ${weg.name} ausgelistet`);
+        if (aufZiel > 0) {
+          s2.verbindlichkeiten.push({ id: neueId(s2, "v"), art: "ware", gruppe: b2.gruppe, wert: eur(aufZiel), faellig: w + ziel });
+          exposure += aufZiel;
         }
       }
-      const frei6 = kats.filter((k) => belegt(s2, m.id, k) < kap);
-      if (!frei6.length) continue;
-      const g = trendGruppe(m);
-      const trend = trendFuer(s2, saisonId(s2.woche + 12)).gruppen[g];
-      const kand = ARTIKELTYPEN.filter((t) => frei6.includes(t.kategorie) && wgFuer(s2, m, t));
-      if (!kand.length) continue;
-      let e;
-      if (gut) {
-        const bewertet = kand.flatMap((t) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe3) => t.materialien.map((material2) => ({ t, farbe: farbe3, material: material2 })))).map((x) => ({ ...x, sc: scoreAus(bewerte(s2, m, { typ: x.t.typ, farbe: x.farbe, material: x.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a, b3) => b3.sc - a.sc);
-        const b2 = bewertet[0];
-        e = { marke: m.id, typ: b2.t.typ, farbe: b2.farbe, material: b2.material, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * b2.t.aufwand * 1.6 / 12 / 1e3) * 1e3 };
-      } else {
-        const t = waehle(r, kand);
-        e = { marke: m.id, typ: t.typ, farbe: waehle(r, FARBLISTE), material: waehle(r, t.materialien), dauer: waehle(r, [4, 8]), budgetWoche: 5e3 };
-      }
-      const res = produktAktion(s2, { typ: "produktEntwickeln", entwurf: e });
-      if (res.ok) texte.push(res.text);
+      if (wert > 0) einbuchen(s2, b2, wert);
     }
-    return texte.length ? texte.join(" ") : void 0;
+    if (gekuerzt > 1e6) melde(s2, "warnung", `Lieferanten halten Ware \xFCber ${(gekuerzt / 1e6).toFixed(1)} Mio. \u20AC zur\xFCck: Limit des Kreditversicherers ausgesch\xF6pft.`);
+    return { vorkasse: eur(vorkasse), gekuerzt: eur(gekuerzt) };
   }
-  function produktKarte(s2, p2) {
-    const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
-    const n = p2.verkauf.length;
-    const a = n ? p2.verkauf[n - 1] : 0;
-    const b2 = n > 1 ? p2.verkauf[n - 2] : a;
-    const ent = p2.status === "entwicklung";
-    return {
-      id: p2.id,
-      marke: p2.marke,
-      markeName: m?.name ?? p2.marke,
-      typ: p2.typ,
-      name: p2.name,
-      farbe: p2.farbe,
-      farbeHex: FARBEN2[p2.farbe],
-      material: p2.material,
-      stil: p2.stil,
-      preislage: p2.preislage,
-      qualitaet: p2.qualitaet,
-      wg: p2.wg,
-      wgName: WG[p2.wg]?.name ?? p2.wg,
-      bereich: WG[p2.wg]?.bereich,
-      kategorie: p2.kategorie,
-      kategorieName: PRODUKT_KATEGORIEN[p2.kategorie],
-      status: p2.status,
-      normpreis: p2.normpreis,
-      preis: p2.preis,
-      ekStueck: p2.ekStueck,
-      marge: Math.round((1 - p2.ekStueck / Math.max(0.5, p2.preis)) * 1e3) / 1e3,
-      sterne: ent ? 0 : halbe(sterneWirksam(s2, p2)),
-      sterneEinfuehrung: p2.sterne,
-      sterneTeile: p2.teile,
-      verkaufLetzteWoche: a,
-      verkaufVorwoche: b2,
-      veraenderung: a - b2,
-      veraenderungProzent: b2 > 0 ? Math.round((a - b2) / b2 * 1e3) / 1e3 : 0,
-      umsatzLetzteWoche: p2.umsatz.length ? p2.umsatz[p2.umsatz.length - 1] : 0,
-      start: p2.start,
-      fertigWoche: p2.fertig,
-      dauer: p2.dauer,
-      budgetWoche: p2.budgetWoche,
-      fortschritt: ent ? clamp((s2.woche - p2.start) / Math.max(1, p2.dauer), 0, 1) : 1,
-      seit: p2.seit,
-      basis: !!p2.basis
-    };
-  }
-  function produkte(s2, marke4) {
-    const kap = kapazitaet(s2);
-    const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
-      const liste = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
-      const kats = [...new Set(liste.map((p2) => p2.kategorie))];
-      const ent = liste.filter((p2) => p2.status === "entwicklung").length;
-      const voll2 = kats.filter((k) => belegt(s2, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
-      return {
-        marke: m.id,
-        name: m.name,
-        farbe: m.farbe,
-        zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`,
-        trendGruppe: trendGruppe(m),
-        kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s2, m.id, k) })),
-        produkte: liste.map((p2) => produktKarte(s2, p2)),
-        inEntwicklung: ent,
-        hinweis: ent ? `Wir entwickeln gerade ${ent === 1 ? "ein neues Produkt" : `${ent} neue Produkte`}.` : voll2.length ? `Kapazit\xE4t erreicht bei ${voll2.join(", ")}. F\xFCr Neues bitte erst auslisten.` : "Wir entwickeln gerade keine neuen Produkte. Zeit zu investieren."
-      };
-    });
-    return { woche: s2.woche, kapazitaet: kap, stufe: Math.round(produktStufe(s2) * 100) / 100, team: Math.round(teamStaerke(s2) * 100) / 100, kostenWoche: eur(produktKostenWoche(s2)), marken: marken2 };
-  }
-  function produktKatalog(_s) {
-    return {
-      kategorien: Object.keys(PRODUKT_KATEGORIEN).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
-      typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
-      farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN2[f] })),
-      materialien: MATERIALLISTE.map((m) => ({ name: m, ...MATERIALIEN[m] })),
-      preislagen: Object.keys(PREISLAGE_FAKTOR).map((id) => ({ id, faktor: PREISLAGE_FAKTOR[id] })),
-      dauer: [...DAUER_STUFEN],
-      budgetSchritt: 5e3
-    };
-  }
-  function trendbericht(s2) {
-    const sid = saisonId(s2.woche);
-    return {
-      woche: s2.woche,
-      aktuell: trendFuer(s2, sid),
-      naechste: trendFuer(s2, sid + 1),
-      zielgruppen: Object.keys(TREND_GRUPPEN).map((id) => ({ id, name: TREND_GRUPPEN[id], grundfarben: [...FARB_BASIS[id]] })),
-      hinweis: "Was zur Einf\xFChrung angesagt ist, z\xE4hlt. Lange Entwicklungen landen in der n\xE4chsten Saison."
-    };
-  }
-  function produktVorschau(s2, e) {
-    const c = pruefe(s2, e);
-    const fertig = s2.woche + (e.dauer || 0);
-    const sid = saisonId(fertig);
-    const bekannt = sid <= saisonId(s2.woche) + 1;
-    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
-    if (!c.m || !c.t || !c.wg) return leer3;
-    const team = teamStaerke(s2);
-    const teile = bewerte(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
-    const st = sterneAus(scoreAus(teile));
-    const cpo = s2.vorstand?.ressorts.cpo.person;
-    const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
-    const np = normpreis(c.t, c.preislage, e.material, c.qualitaet);
-    const me = margeErwartet(s2, c.m, c.wg);
-    const ek2 = ekStueck(np, me, e.material, c.qualitaet);
-    const hinweise = [];
-    if (teile.trend < 0.3 && bekannt) hinweise.push("Trifft den Trend der Einf\xFChrungssaison kaum");
-    if (teile.zielgruppe < 0.5) hinweise.push(`Passt wenig zur Zielgruppe von ${c.m.name}`);
-    if (teile.entwicklung < 0.5) hinweise.push("Budget oder Dauer knapp f\xFCr diesen Artikel");
-    if (!bekannt) hinweise.push("Trend der Einf\xFChrungssaison noch unbekannt");
-    if ((c.m.wgAnteile[c.wg] ?? 0) <= 0) hinweise.push(`${c.m.name} bekommt daf\xFCr einen Anteil von ${Math.round(PRODUKT_PARAM.anteilNeu * 100)} % in ${WG[c.wg].name}`);
-    return {
-      ok: !c.fehler,
-      fehler: c.fehler,
-      wg: c.wg,
-      wgName: WG[c.wg].name,
-      kategorie: c.t.kategorie,
-      name: e.name?.trim() || produktName(e.typ, e.farbe, e.material),
-      normpreis: np,
-      ekStueck: ek2,
-      marge: Math.round((1 - ek2 / np) * 1e3) / 1e3,
-      kosten: eur(e.budgetWoche * e.dauer),
-      fertigWoche: fertig,
-      saisonEinfuehrung: saisonName(s2, sid),
-      sterneErwartet: st,
-      sterneVon: halbe(st - spanne / 2),
-      sterneBis: halbe(st + spanne / 2),
-      teile,
-      trendBekannt: bekannt,
-      kapazitaetFrei: c.kapFrei,
-      hinweise
-    };
+  function verbrauche(s2, g, wertVoll) {
+    let rest = wertVoll;
+    let gebucht = 0;
+    const ks = s2.bestand.filter((k) => k.gruppe === g && !k.ladenhueter).sort((a, b2) => b2.alter - a.alter);
+    for (const k of ks) {
+      if (rest <= 0) break;
+      const nimm9 = Math.min(k.wert, rest);
+      k.wert -= nimm9;
+      rest -= nimm9;
+      gebucht += nimm9 * k.kostenFaktor;
+    }
+    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
+    return gebucht;
   }
 
   // ../engine/src/marketing.ts
@@ -2826,18 +2232,18 @@
     }
     return { u, d: Math.min(0.6, d), nu, sieger: ws[0], alle: ws };
   }
-  function marketingGruppen(s2, h, basis2, tE, mess) {
+  function marketingGruppen(s2, h, basis3, tE, mess) {
     const m = s2.marketing.stand;
     const out = {};
     if (!m) {
-      for (const g of Object.keys(basis2)) out[g] = { nachfrage: 1, preis: 1 };
+      for (const g of Object.keys(basis3)) out[g] = { nachfrage: 1, preis: 1 };
       return out;
     }
     const w = s2.woche;
     const ist = s2.marketing.aktionen.filter((a) => laeuft(a, w) && trifft(a, h, s2));
     const plan2 = m.referenz.filter((a) => laeuft(a, w) && trifft(a, h, s2));
     const A = m.woche;
-    const gruppen = Object.keys(basis2);
+    const gruppen = Object.keys(basis3);
     const eI = {};
     const eP = {};
     let sumB = 0;
@@ -2845,7 +2251,7 @@
     let promU = { ist: 0, plan: 0 };
     const breit2 = (e) => e.sieger && (mech(e.sieger.a) === "rabatt_bereich" || mech(e.sieger.a) === "rabatt_wg" || mech(e.sieger.a) === "staffel" || (mech(e.sieger.a) === "coupon" || mech(e.sieger.a) === "reduzierung" || mech(e.sieger.a) === "punkte") && !!gruppenVon(e.sieger.a));
     for (const g of gruppen) {
-      const b2 = basis2[g] ?? 0;
+      const b2 = basis3[g] ?? 0;
       sumB += b2;
       eI[g] = gruppenEffekt(s2, ist, h, g, m.ist, A.sigma.ist, A.komm.ist);
       eP[g] = gruppenEffekt(s2, plan2, h, g, m.plan, A.sigma.plan, A.komm.plan);
@@ -2877,7 +2283,7 @@
     const DI = A.druck.ist;
     const DP = A.druck.plan;
     for (const g of gruppen) {
-      const b2 = basis2[g] ?? 0;
+      const b2 = basis3[g] ?? 0;
       const ei = eI[g];
       const ep = eP[g];
       const kanniI = ei.u === 0 && kanI > 0 ? -kanI : 0;
@@ -3436,10 +2842,10 @@
       }
       case "kundenkarteSetzen": {
         const k = I.karte;
-        const teile = [];
+        const teile2 = [];
         if (a.punkteSatz !== void 0) {
           k.punkteSatz = clamp(a.punkteSatz, 0, 0.03);
-          teile.push(`Punkte ${pz(k.punkteSatz, 1)} vom Umsatz`);
+          teile2.push(`Punkte ${pz(k.punkteSatz, 1)} vom Umsatz`);
         }
         if (a.stufen !== void 0 && a.stufen !== k.stufen) {
           if (a.stufen) {
@@ -3447,42 +2853,42 @@
             s2.marketing.kundenkarte = true;
           }
           k.stufen = a.stufen;
-          teile.push(a.stufen ? "Statusstufen Silber und Gold eingef\xFChrt" : "Statusstufen abgeschafft");
+          teile2.push(a.stufen ? "Statusstufen Silber und Gold eingef\xFChrt" : "Statusstufen abgeschafft");
           if (!a.stufen) s2.stakeholder.image = clamp(s2.stakeholder.image - 1, 0, 100);
         }
         if (a.kartenrabatt !== void 0) {
           k.kartenrabatt = clamp(a.kartenrabatt, 0, 0.1);
-          teile.push(`Kartenrabatt ${pz(k.kartenrabatt)}`);
+          teile2.push(`Kartenrabatt ${pz(k.kartenrabatt)}`);
         }
         if (a.anmeldepraemie !== void 0) {
           k.anmeldepraemie = clamp(a.anmeldepraemie, 0, 50);
           k.anmeldeBis = k.anmeldepraemie > 0 ? w + clamp(Math.round(a.anmeldeWochen ?? 8), 1, 52) : void 0;
-          teile.push(k.anmeldepraemie > 0 ? `Anmeldeaktion mit ${k.anmeldepraemie} \u20AC Willkommensgutschein bis KW ${kw(k.anmeldeBis)}` : "Anmeldeaktion beendet");
+          teile2.push(k.anmeldepraemie > 0 ? `Anmeldeaktion mit ${k.anmeldepraemie} \u20AC Willkommensgutschein bis KW ${kw(k.anmeldeBis)}` : "Anmeldeaktion beendet");
         }
         if (a.datenBudgetWoche !== void 0) {
           k.datenBudgetWoche = clamp(a.datenBudgetWoche, 0, 2e5);
-          teile.push(`Datenpflege ${mio(k.datenBudgetWoche * 52)} im Jahr`);
+          teile2.push(`Datenpflege ${mio(k.datenBudgetWoche * 52)} im Jahr`);
         }
-        return teile.length ? ok2(`Hartwig Karte: ${teile.join(", ")}.`) : fehler2("Keine \xC4nderung angegeben.");
+        return teile2.length ? ok2(`Hartwig Karte: ${teile2.join(", ")}.`) : fehler2("Keine \xC4nderung angegeben.");
       }
       case "appSetzen": {
         const app = I.karte.app;
-        const teile = [];
+        const teile2 = [];
         if (a.budgetWoche !== void 0) {
           app.budgetWoche = clamp(a.budgetWoche, 0, 3e5);
-          teile.push(`Weiterentwicklung ${mio(app.budgetWoche * 52)} im Jahr`);
+          teile2.push(`Weiterentwicklung ${mio(app.budgetWoche * 52)} im Jahr`);
         }
         if (a.appCoupons !== void 0) {
           app.appCoupons = a.appCoupons;
-          teile.push(a.appCoupons ? "Aktionscoupons in der App" : "keine Coupons in der App");
+          teile2.push(a.appCoupons ? "Aktionscoupons in der App" : "keine Coupons in der App");
         }
         if (a.relaunch) {
           if (app.relaunchBis !== void 0) return fehler2("Der Relaunch der App l\xE4uft schon.");
           einmalKosten2(MK.appRelaunch);
           app.relaunchBis = w + 16;
-          teile.push(`Relaunch beauftragt (${mio(MK.appRelaunch)}, fertig KW ${kw(app.relaunchBis)})`);
+          teile2.push(`Relaunch beauftragt (${mio(MK.appRelaunch)}, fertig KW ${kw(app.relaunchBis)})`);
         }
-        return teile.length ? ok2(`Hartwig App: ${teile.join(", ")}.`) : fehler2("Keine \xC4nderung angegeben.");
+        return teile2.length ? ok2(`Hartwig App: ${teile2.join(", ")}.`) : fehler2("Keine \xC4nderung angegeben.");
       }
       case "crmKampagneAnlegen": {
         if (a.segment.typ === "affinitaet" && (!a.segment.gruppe || !GRUPPEN[a.segment.gruppe])) return fehler2("Das Segment braucht einen Bereich.");
@@ -3861,8 +3267,8 @@
     const a = s2.marketing.aktionen.find((x) => x.id === id);
     if (!a) return void 0;
     const st = statusVon(a, s2.woche);
-    const basis2 = eintrag(s2, a);
-    if (!a.ausgewertet) return { ...basis2, gemessen: false, text: st === "laufend" ? "Die Aktion l\xE4uft noch. Controlling wertet nach dem Ende aus." : st === "geplant" ? "Die Aktion ist geplant." : "Keine Auswertung vorhanden." };
+    const basis3 = eintrag(s2, a);
+    if (!a.ausgewertet) return { ...basis3, gemessen: false, text: st === "laufend" ? "Die Aktion l\xE4uft noch. Controlling wertet nach dem Ende aus." : st === "geplant" ? "Die Aktion ist geplant." : "Keine Auswertung vorhanden." };
     const e = a.ausgewertet;
     const kontrolle = a.kontrollHaeuser.length >= 5;
     const b2 = breiteVon(s2, kontrolle);
@@ -3872,7 +3278,7 @@
     const roh2 = kontrolliert(s2, a._rohertragseffektWahr * f, a.id + "r", b2);
     const vorzieh = kontrolliert(s2, vorziehSchaetzung(s2, a), a.id + "v", b2 * 1.5);
     return {
-      ...basis2,
+      ...basis3,
       gemessen: true,
       marketingBericht: e.marketingBericht,
       mehrumsatzVon: e.schaetzungVon,
@@ -3943,1478 +3349,6 @@
       verlauf: v.slice(-13),
       hinweise
     };
-  }
-
-  // ../engine/src/einkauf.ts
-  var JACKE = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
-  var STRICK = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
-  var ROH2 = {
-    damen: [
-      ["jacken", "Jacken und M\xE4ntel", 0.17, 0.1, 0.01, 26, 8, 4, 40, "Bekleidung", "Lanberg Outerwear", JACKE],
-      ["kleider", "Kleider", 0.11, 0.15, 0.02, 22, 6, 4, 25, "Bekleidung", "Costa Viva Moden", { 3: 1.3, 4: 1.5, 5: 1.5, 6: 1.2, 10: 0.8, 11: 0.8, 0: 0.6 }],
-      ["blusen", "Blusen und Shirts", 0.14, 0.35, 0, 20, 6, 3, 25, "Bekleidung", "Weberei Kaltenbach"],
-      ["strick", "Strick", 0.11, 0.3, 0, 22, 6, 3, 25, "Bekleidung", "Strickhaus Ammerland", STRICK],
-      ["hosen", "Hosen und R\xF6cke", 0.13, 0.45, -0.01, 20, 6, 3, 25, "Bekleidung", "Brandauer Hosenmanufaktur"],
-      ["denim", "Denim", 0.09, 0.55, -0.02, 18, 6, 3, 20, "Bekleidung", "Bluefield Denim"],
-      ["young", "Young Fashion", 0.1, 0.1, 0.01, 14, 4, 3, 20, "Bekleidung", "Urbanrise", void 0, { jung: true }],
-      ["gg", "Gro\xDFe Gr\xF6\xDFen", 0.1, 0.4, 0, 20, 6, 3, 20, "Bekleidung", "Ellmann Moden", void 0, { reif: true }],
-      ["trachten", "Trachten", 0.05, 0.15, 0.03, 26, 8, 4, 15, "", "Alpenhof Trachten", { 7: 1.5, 8: 2.6, 9: 1.2, 0: 0.5, 1: 0.5, 2: 0.6 }]
-    ],
-    herren: [
-      ["business", "Business und Anz\xFCge", 0.2, 0.35, 0.02, 22, 8, 4, 30, "Bekleidung", "Hallberg & S\xF6hne", void 0, { reif: true }],
-      ["casual", "Casual", 0.2, 0.3, 0, 20, 6, 3, 25, "Bekleidung", "Nordkap Menswear"],
-      ["hemden", "Hemden", 0.18, 0.6, -0.01, 18, 6, 3, 25, "Bekleidung", "Hallberg & S\xF6hne"],
-      ["hosen", "Hosen", 0.16, 0.5, -0.01, 18, 6, 3, 25, "Bekleidung", "Brandauer Hosenmanufaktur"],
-      ["strick", "Strick und Sweat", 0.12, 0.3, 0, 22, 6, 3, 20, "Bekleidung", "Strickhaus Ammerland", STRICK],
-      ["jacken", "Jacken und M\xE4ntel", 0.14, 0.1, 0.01, 26, 8, 4, 30, "Bekleidung", "Lanberg Outerwear", JACKE]
-    ],
-    waesche: [
-      ["tag", "Tagw\xE4sche", 0.3, 0.8, 0, 16, 6, 2, 20, "W\xE4sche", "Lindauer W\xE4schefabrik", void 0, { geschlecht: "damen" }],
-      ["nacht", "Nachtw\xE4sche", 0.2, 0.6, 0.01, 18, 6, 3, 15, "W\xE4sche", "Lindauer W\xE4schefabrik", { 10: 1.3, 11: 1.5 }, { geschlecht: "unisex" }],
-      ["mieder", "Miederwaren", 0.17, 0.8, 0.01, 16, 6, 2, 15, "", "Corsina", void 0, { geschlecht: "damen" }],
-      ["herren", "Herrenw\xE4sche", 0.15, 0.85, -0.01, 16, 6, 2, 15, "W\xE4sche", "Lindauer W\xE4schefabrik", void 0, { geschlecht: "herren" }],
-      ["struempfe", "Str\xFCmpfe und Strumpfhosen", 0.18, 0.7, 0, 14, 4, 2, 10, "W\xE4sche", "Feinstrick Plauen", { 9: 1.3, 10: 1.3, 11: 1.2, 5: 0.7, 6: 0.7 }, { geschlecht: "unisex" }]
-    ],
-    accessoires: [
-      ["damenschuhe", "Damenschuhe", 0.3, 0.35, 0, 22, 6, 4, 25, "Schuhe", "Pirmasenser Schuhwerk", void 0, { geschlecht: "damen" }],
-      ["herrenschuhe", "Herrenschuhe", 0.18, 0.55, 0, 22, 6, 4, 20, "Schuhe", "Pirmasenser Schuhwerk", void 0, { geschlecht: "herren" }],
-      ["lederwaren", "Lederwaren und Taschen", 0.2, 0.6, 0.02, 18, 6, 3, 15, "Accessoires", "Offenbacher Lederwerk"],
-      ["schmuck", "Schmuck und Uhren", 0.22, 0.75, 0.01, 12, 4, 2, 15, "", "Goldbach Schmuck", { 10: 1.3, 11: 1.9 }],
-      ["reise", "Reisegep\xE4ck", 0.1, 0.8, -0.02, 16, 6, 3, 15, "Accessoires", "Travelline", { 4: 1.3, 5: 1.4, 6: 1.4, 11: 1.2, 0: 0.7, 1: 0.7 }]
-    ],
-    kinder: [
-      ["baby", "Baby", 0.25, 0.7, 0.01, 18, 6, 3, 15, "Bekleidung", "Wolkenweich"],
-      ["maedchen", "M\xE4dchen", 0.3, 0.4, 0, 20, 6, 3, 20, "Bekleidung", "Kinderland Textil"],
-      ["jungen", "Jungen", 0.27, 0.45, 0, 20, 6, 3, 20, "Bekleidung", "Kinderland Textil"],
-      ["schuhe", "Kinderschuhe", 0.18, 0.4, -0.01, 18, 6, 3, 15, "Schuhe", "Pirmasenser Schuhwerk", { 2: 1.3, 3: 1.3, 7: 1.3, 8: 1.3 }]
-    ],
-    wohnen: [
-      ["tisch", "Tisch und K\xFCche", 0.3, 0.85, 0, 16, 6, 3, 20, "Home", "Kessler Haushalt"],
-      ["heimtextil", "Heimtextilien", 0.2, 0.7, 0.02, 18, 6, 3, 15, "Home", "Webhaus Nordhorn"],
-      ["bett", "Bettwaren", 0.17, 0.85, 0.01, 16, 6, 3, 15, "Home", "Daunenwerk Allg\xE4u", { 9: 1.2, 10: 1.3, 11: 1.2 }],
-      ["deko", "Leuchten und Deko", 0.15, 0.4, 0.03, 20, 6, 3, 15, "Home", "Lichtform", { 10: 1.5, 11: 1.7, 0: 0.6 }],
-      ["elektro", "Elektrokleinger\xE4te", 0.18, 0.9, -0.08, 8, 4, 2, 20, "", "Kessler Haushalt", { 11: 1.6 }]
-    ],
-    beauty: [
-      ["parfuem", "Parf\xFCm", 0.45, 0.85, 0.01, 8, 4, 2, 20, "", "Maison Arvel"],
-      ["pflege", "Pflege und Kosmetik", 0.35, 0.95, 0.01, 6, 3, 2, 15, "Beauty", "Maison Arvel"],
-      ["drogerie", "Drogerie", 0.2, 0.98, -0.05, 4, 2, 1, 10, "Beauty", "Rheinpharm Vertrieb"]
-    ],
-    food: [
-      ["deli", "Delikatessen", 0.45, 0.95, 0, 4, 2, 1, 5, "", "Hanseatische Feinkost"],
-      ["wein", "Wein und Spirituosen", 0.3, 0.95, -0.02, 6, 3, 1, 10, "", "Weinkontor Rheingau", { 11: 1.6 }],
-      ["suess", "S\xFC\xDFwaren", 0.25, 0.9, 0.02, 8, 3, 1, 5, "", "Confiserie Lauenstein", { 2: 1.3, 3: 1.2, 11: 1.7 }]
-    ],
-    spielwaren: [
-      ["klein", "Kleinspielwaren", 0.35, 0.85, 0.02, 12, 4, 2, 10, "", "Spielwerk F\xFCrth"],
-      ["lizenz", "Lizenzartikel", 0.35, 0.6, -0.03, 16, 6, 3, 20, "", "Kinderwelt Lizenz"],
-      ["saison", "Saisonspielwaren", 0.3, 0.45, 0.01, 20, 6, 3, 15, "", "Spielwerk F\xFCrth", { 10: 1.2, 11: 1.4, 4: 1.2, 5: 1.3 }]
-    ],
-    sport: [
-      ["bekleidung", "Sportbekleidung", 0.6, 0.4, 0.01, 16, 6, 3, 20, "Bekleidung", "Nordline"],
-      ["geraete", "Sportger\xE4te und Fitness", 0.4, 0.65, -0.02, 14, 6, 3, 15, "", "Fitwerk Sportger\xE4te", { 0: 1.5, 1: 1.2 }]
-    ],
-    sportschuhe: [
-      ["lauf", "Laufschuhe", 0.55, 0.75, 0, 16, 6, 3, 25, "", "Nordline"],
-      ["sneaker", "Freizeit-Sneaker", 0.45, 0.6, 0, 14, 6, 3, 25, "", "Nordline"]
-    ],
-    sporttextil: [
-      ["funktion", "Funktionsbekleidung", 0.55, 0.45, 0, 16, 6, 3, 20, "Bekleidung", "Nordline"],
-      ["freizeit", "Freizeit und Athleisure", 0.45, 0.35, 0, 14, 4, 3, 20, "Bekleidung", "Urbanrise", void 0, { jung: true }]
-    ],
-    outdoor: [
-      ["bekleidung", "Outdoorbekleidung", 0.6, 0.35, 0.01, 22, 6, 3, 25, "Bekleidung", "Fjellmark", { 9: 1.3, 10: 1.3 }],
-      ["ausruestung", "Ausr\xFCstung und Zelte", 0.4, 0.5, -0.01, 18, 6, 3, 20, "", "Fjellmark", { 4: 1.4, 5: 1.4, 6: 1.3, 0: 0.6, 1: 0.6 }]
-    ],
-    rad: [
-      ["raeder", "Fahrr\xE4der und E-Bikes", 0.6, 0.55, -0.02, 24, 8, 4, 40, "", "Velowerk"],
-      ["zubehoer", "Radzubeh\xF6r", 0.4, 0.7, 0.03, 12, 4, 2, 10, "", "Velowerk"]
-    ],
-    wintersport: [
-      ["ski", "Ski und Snowboard", 0.45, 0.1, -0.01, 26, 8, 4, 40, "", "Alpin Sport Vertrieb"],
-      ["bekleidung", "Skibekleidung", 0.55, 0.1, 0.01, 26, 8, 4, 30, "Bekleidung", "Alpin Sport Vertrieb"]
-    ],
-    teamsport: [
-      ["fussball", "Fu\xDFball", 0.65, 0.65, 0, 14, 6, 3, 20, "", "Nordline", { 6: 1.4, 7: 1.3 }],
-      ["verein", "Vereinsbedarf", 0.35, 0.8, 0.01, 12, 4, 2, 10, "", "Teamline Vereinsausstatter"]
-    ]
-  };
-  var GESCHLECHT_BEREICH = { damen: "damen", herren: "herren", kinder: "kinder" };
-  function baueWgDef() {
-    const out = [];
-    for (const [g, liste] of Object.entries(ROH2)) {
-      const G2 = GRUPPEN[g];
-      const saisonRoh = liste.reduce((a, r) => a + r[2] * (1 - r[3]), 0);
-      const k = G2.saisonAnteil / Math.max(1e-3, saisonRoh);
-      const sum2 = liste.reduce((a, r) => a + r[2], 0);
-      for (const r of liste) {
-        const [kurz, name2, anteil3, nos, md, vv, vn, vnos, mk2, em, lief, sai, extra] = r;
-        const m = G2.marge + md;
-        const kurve4 = G2.saison.map((x, i) => x * (sai?.[i] ?? 1));
-        const mittel = kurve4.reduce((a, b2) => a + b2, 0) / 12;
-        out.push({
-          id: `${g}.${kurz}`,
-          name: name2,
-          bereich: g,
-          anteil: anteil3 / sum2,
-          nosAnteil: clamp(1 - (1 - nos) * k, 0.02, 0.98),
-          margeNos: m - 0.03,
-          margeSaison: m + 0.04,
-          vorlaufVor: vv,
-          vorlaufNach: vn,
-          vorlaufNos: vnos,
-          saison: kurve4.map((x) => x / mittel),
-          mindestabnahme: mk2 * 1e3,
-          eigenmarkenfaehig: em !== "",
-          kategorie: em || void 0,
-          geschlecht: extra?.geschlecht ?? GESCHLECHT_BEREICH[g] ?? "unisex",
-          jung: extra?.jung,
-          reif: extra?.reif,
-          lieferant: lief
-        });
-      }
-    }
-    return out;
-  }
-  var WG_DEF = baueWgDef();
-  var WG = Object.fromEntries(WG_DEF.map((d) => [d.id, d]));
-  var WG_JE_BEREICH = {};
-  var _a;
-  for (const d of WG_DEF) (WG_JE_BEREICH[_a = d.bereich] ?? (WG_JE_BEREICH[_a] = [])).push(d);
-  function wgKurve(d, woche2) {
-    const pos = (woche2 % 52 + 52) % 52 / 52 * 12 - 0.5;
-    const i = Math.floor(pos);
-    const t = pos - i;
-    const a = d.saison[(i + 12) % 12];
-    const b2 = d.saison[(i + 13) % 12];
-    return a + (b2 - a) * t;
-  }
-  var OMEGA = {};
-  for (const [, liste] of Object.entries(WG_JE_BEREICH)) {
-    for (let t = 0; t < 52; t++) {
-      const roh2 = liste.map((d) => d.anteil * wgKurve(d, t));
-      const sum2 = roh2.reduce((a, b2) => a + b2, 0);
-      liste.forEach((d, i) => {
-        var _a2;
-        (OMEGA[_a2 = d.id] ?? (OMEGA[_a2] = []))[t] = roh2[i] / sum2;
-      });
-    }
-  }
-  var omega = (wg, t) => OMEGA[wg][(t % 52 + 52) % 52];
-  var wgSaison = (d, t) => saisonFaktor(d.bereich, t) * omega(d.id, t) / d.anteil;
-  var saisonId = (t) => Math.floor((t - 6) / 26);
-  var saisonStart = (id) => 6 + 26 * id;
-  var saisonVon = (t) => saisonId(t + 6);
-  function saisonName(s2, id) {
-    const j = s2.startJahr + Math.floor(saisonStart(id) / 52);
-    return id % 2 === 0 ? `Fr\xFChjahr/Sommer ${j}` : `Herbst/Winter ${j}/${String((j + 1) % 100).padStart(2, "0")}`;
-  }
-  var EK_PARAM = {
-    grenze: 5e4,
-    verfRef: 0.95,
-    // NOS-Verfügbarkeit, auf die die Ausgangsnachfrage kalibriert ist
-    saisonRef: 0.9875,
-    // mittlere Saisonverfügbarkeit der Ausgangslage (Fehlmengen bei Standardsteuerung)
-    servicegrad: { 0.9: { basis: 0.905, cover: 7 }, 0.95: { basis: 0.95, cover: 10 }, 0.98: { basis: 0.975, cover: 13 } },
-    prognoseSd: [0.14, 0.07, 0.04, 0.025],
-    // Prognosefehler nach Einkauf-Stufe 0..3
-    verfBonus: [-0.02, 0, 5e-3, 0.01],
-    abschrift: {
-      // ab: Woche, ab der reduziert wird; Sätze je Woche; cap: Anteil des Saisonbedarfs, den Altware decken darf;
-      // nachfrage: frühe Reduzierung hält die Fläche frisch (mehr Saisonnachfrage), späte lässt sie altern
-      frueh: { ab: 5, frisch: 0.015, alt: 0.034, spaet: 0.034, cap: 0.45, nachfrage: 1.02 },
-      normal: { ab: 8, frisch: 0.012, alt: 0.03, spaet: 0.03, cap: 0.3, nachfrage: 1 },
-      spaet: { ab: 12, frisch: 8e-3, alt: 0.022, spaet: 0.04, cap: 0.2, nachfrage: 0.98 }
-    },
-    optimismus: [0.14, 0.07, 0.035, 0.015],
-    // Mehrmenge der Saisondisposition nach Einkauf-Stufe 0..3 (Planoptimismus der Einkäufer)
-    abschriftK: 0.457,
-    // Kalibrierfaktor auf alle Abschriftsätze
-    praesentation: 12,
-    // Wochen Saisonbestand, ab denen das Sortiment voll verkauft (Größen, Farben, Fläche)
-    saisonCover: 14,
-    // Zielreichweite der Nachorder in Wochen
-    altSaison: 16,
-    altNos: 52,
-    substitution: 0.5,
-    // fehlende Eigenmarkenware: Anteil, der auf Fremdware ausweicht
-    vororderSpanne: [-4, 9],
-    // Liefertermine der Vororder relativ zum Saisonstart
-    frist: { vororder: 3, nachorder: 2, nos: 1 },
-    orderrunde: 30,
-    // Orderrunde: Wochen vor Saisonstart
-    nosGrenzeFaktor: 5,
-    // NOS-Sonderorder erst ab dem 5-fachen der Freigabegrenze im Eingang
-    nosSonder: 2.1,
-    // NOS-Order über dem 2,1-fachen Wochenbedarf ist eine Sonderorder (freigabepflichtig)
-    nosMindest: 5e3,
-    nosTempo: 0.01,
-    // Umbau des NOS-Anteils je Woche
-    verlauf: 52
-  };
-  var STANDARD_STEUERUNG = (d) => ({
-    limitFaktor: 1.2,
-    nosZiel: d.nosAnteil,
-    servicegrad: 0.95,
-    vororderquote: 0.6,
-    reduzierung: "normal",
-    modus: { nos: "auto", saison: "verfall" }
-  });
-  var leererVerlauf = () => ({ w: [], u: [], r: [], e: [], b: [], a: [], f: [], n: [], eu: [], er: [], nd: [] });
-  var rngHalter = (s2) => s2.einkauf;
-  var einkaufStufe = (s2) => clamp(s2.hq?.wirkung.einkauf ?? 1, 0, 3);
-  function interpol(arr, L2) {
-    const i = Math.min(arr.length - 2, Math.floor(L2));
-    return arr[i] + (arr[i + 1] - arr[i]) * (L2 - i);
-  }
-  var aktiveWg = (s2) => WG_DEF.filter((d) => s2.basisUmsatz[d.bereich] !== void 0);
-  var FREMD = "fremd";
-  var poolVon = (k) => k.marke ?? FREMD;
-  function margeVon(s2, wg, art, pool) {
-    const m = art === "nos" ? wg.margeNos : wg.margeSaison;
-    if (pool === FREMD) return m;
-    const mk2 = s2.eigenmarken.marken.find((x) => x.id === pool);
-    return mk2 ? m + mehrmarge(mk2) + produktMargeDelta(s2, pool, wg.id) : m;
-  }
-  function vorlaufPool(s2, d, art, typ, pool) {
-    if (pool !== FREMD) {
-      const m = s2.eigenmarken.marken.find((x) => x.id === pool);
-      const v = m ? BESCHAFFUNG[m.beschaffung].vorlauf : 10;
-      return typ === "vororder" ? v + 2 : v;
-    }
-    return typ === "vororder" ? d.vorlaufVor : typ === "nachorder" ? d.vorlaufNach : d.vorlaufNos;
-  }
-  function mindestPool(s2, d, art, pool) {
-    if (pool !== FREMD) {
-      const m = s2.eigenmarken.marken.find((x) => x.id === pool);
-      return m ? BESCHAFFUNG[m.beschaffung].mindestabnahme : 0;
-    }
-    return art === "nos" ? EK_PARAM.nosMindest : d.mindestabnahme;
-  }
-  function lieferantPool(s2, d, pool) {
-    if (pool === FREMD) return d.lieferant;
-    const m = s2.eigenmarken.marken.find((x) => x.id === pool);
-    return m ? BESCHAFFUNG[m.beschaffung].produzent : d.lieferant;
-  }
-  function markenInWg(s2, wg) {
-    return s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && ((m.wgAnteile[wg] ?? 0) > 0 || (m.wgIst[wg] ?? 0) > 0));
-  }
-  function poolAnteilPlan(s2, st, pool) {
-    const marken2 = markenInWg(s2, st.id);
-    const anteil3 = (m) => {
-      const ist = st.pool[m.id] ?? 0;
-      const eIst = m.wgIst[st.id] ?? 0;
-      const eZiel = istVerkaufsaktiv(m) || m.status === "aufbau" ? m.wgAnteile[st.id] ?? 0 : 0;
-      if (eIst > 1e-3) return ist * (eZiel / eIst);
-      return eZiel * 0.9;
-    };
-    if (pool !== FREMD) {
-      const m = marken2.find((x) => x.id === pool);
-      return m ? anteil3(m) : 0;
-    }
-    return Math.max(0, 1 - marken2.reduce((a, m) => a + anteil3(m), 0));
-  }
-  var artAnteil = (st, art) => art === "nos" ? st.nosAnteil : 1 - st.nosAnteil;
-  var brutto = (art) => art === "nos" ? 1 / EK_PARAM.verfRef : 1 / EK_PARAM.saisonRef;
-  function prognoseEk(s2, st, art, pool, t) {
-    const d = WG[st.id];
-    return st.basisVK * wgSaison(d, t) * poolAnteilPlan(s2, st, pool) * artAnteil(st, art) * brutto(art) * (1 - margeVon(s2, st, art, pool)) * (1 + st.fehler);
-  }
-  function prognoseEkMittel(s2, st, art, pool) {
-    return st.basisVK * poolAnteilPlan(s2, st, pool) * artAnteil(st, art) * brutto(art) * (1 - margeVon(s2, st, art, pool));
-  }
-  var bezugsBedarf = (s2, st, art, pool, t) => 0.5 * (prognoseEk(s2, st, art, pool, t) / (1 + st.fehler) + prognoseEkMittel(s2, st, art, pool));
-  function prognoseVk(s2, st, art, pool, t) {
-    return prognoseEk(s2, st, art, pool, t) / Math.max(0.05, 1 - margeVon(s2, st, art, pool));
-  }
-  function nosAttraktivitaet(d, st) {
-    const x = st.nosAnteil - d.nosAnteil;
-    return 1 - 0.3 * Math.pow(Math.max(0, x), 1.3) - 0.2 * Math.pow(Math.max(0, -x), 1.3);
-  }
-  function erzeugeEinkauf(s2) {
-    const e = { grenze: EK_PARAM.grenze, wgs: {}, freigaben: [], rng: s2.seed * 2654435761 + 97 >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
-    for (const d of WG_DEF) {
-      e.wgs[d.id] = {
-        id: d.id,
-        st: STANDARD_STEUERUNG(d),
-        nosAnteil: d.nosAnteil,
-        margeNos: d.margeNos,
-        margeSaison: d.margeSaison,
-        norm: 1,
-        basisVK: 0,
-        fehler: 0,
-        pool: { [FREMD]: 1 },
-        limits: {},
-        saisons: {},
-        vororder: {},
-        v: leererVerlauf()
-      };
-    }
-    return e;
-  }
-  function initialisiereEinkauf(s2) {
-    var _a2;
-    const e = s2.einkauf;
-    const gewicht2 = {};
-    const x = {};
-    const poolSum = {};
-    for (const h of s2.haeuser) {
-      for (const [g, P2] of Object.entries(h.potenzial)) {
-        const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === "eigen").reduce((a, b3) => a + b3.qm, 0);
-        if (qm <= 0) continue;
-        const b2 = P2 * (1 - Math.exp(-qm / h.saettigungQm[g]));
-        gewicht2[g] = (gewicht2[g] ?? 0) + b2;
-        for (const d of WG_JE_BEREICH[g] ?? []) {
-          const marken2 = markenInWg(s2, d.id).filter(istVerkaufsaktiv);
-          let rest = 1;
-          const ps = poolSum[_a2 = d.id] ?? (poolSum[_a2] = {});
-          for (const m of marken2) {
-            const em = m.wgIst[d.id] ?? 0;
-            const a = em * Math.sqrt(attraktivitaet(s2, m, h) * passungWg(m, d.id));
-            ps[m.id] = (ps[m.id] ?? 0) + b2 * a;
-            rest -= em;
-          }
-          ps[FREMD] = (ps[FREMD] ?? 0) + b2 * rest;
-        }
-      }
-    }
-    for (const d of WG_DEF) {
-      const g = gewicht2[d.bereich] ?? 0;
-      const ps = poolSum[d.id] ?? { [FREMD]: 1 };
-      const X = g > 0 ? Object.values(ps).reduce((a, b2) => a + b2, 0) / g : 1;
-      x[d.id] = X;
-      const st = e.wgs[d.id];
-      st.norm = X;
-      const sum2 = Object.values(ps).reduce((a, b2) => a + b2, 0) || 1;
-      st.pool = Object.fromEntries(Object.entries(ps).map(([k, v]) => [k, v / sum2]));
-    }
-    for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
-      let m = 0;
-      for (const d of liste) {
-        const st = e.wgs[d.id];
-        const n = st.nosAnteil;
-        let mm = n * d.margeNos + (1 - n) * d.margeSaison;
-        for (const [pool, a] of Object.entries(st.pool)) if (pool !== FREMD) {
-          const mk2 = s2.eigenmarken.marken.find((y) => y.id === pool);
-          if (mk2) mm += a * mehrmarge(mk2);
-        }
-        m += d.anteil * mm;
-      }
-      const c = GRUPPEN[g].marge - m;
-      for (const d of liste) {
-        e.wgs[d.id].margeNos = d.margeNos + c;
-        e.wgs[d.id].margeSaison = d.margeSaison + c;
-      }
-      let em = 0;
-      const je = {};
-      for (const d of liste) for (const [pool, a] of Object.entries(e.wgs[d.id].pool)) if (pool !== FREMD) {
-        em += d.anteil * a;
-        je[pool] = (je[pool] ?? 0) + d.anteil * a;
-      }
-      e.emStart[g] = em;
-      e.emJeBereich[g] = je;
-    }
-    const alter = [1, 5, 9, 14, 20, 30];
-    const verteilung = [0.24, 0.22, 0.2, 0.15, 0.11, 0.08];
-    const bestand = [];
-    const bestellungen = [];
-    const aktS = saisonId(0);
-    const naechste = aktS + 1;
-    for (const d of WG_DEF) {
-      const st = e.wgs[d.id];
-      st.basisVK = (s2.basisUmsatz[d.bereich] ?? 0) * d.anteil;
-      if (st.basisVK <= 0) continue;
-      const ref = s2.basisUmsatz[d.bereich] ?? 0;
-      for (const art of ["nos", "saison"]) {
-        for (const pool of Object.keys(st.pool)) {
-          const wochenEk = ref * d.anteil * st.pool[pool] * artAnteil(st, art) * (1 - margeVon(s2, st, art, pool));
-          const rw = art === "nos" ? 11 : EK_PARAM.praesentation + 1;
-          let vorne = 0;
-          for (let t = 0; t < rw; t++) vorne += wochenEk * wgSaison(d, t);
-          const gesamt = Math.max(wochenEk * rw, vorne);
-          verteilung.forEach((v, i) => bestand.push({
-            gruppe: d.bereich,
-            wg: d.id,
-            art,
-            marke: pool === FREMD ? void 0 : pool,
-            saisonId: art === "saison" ? saisonVon(-alter[i]) : void 0,
-            wert: eur(gesamt * v),
-            alter: alter[i],
-            saisonAnteil: art === "saison" ? 1 : 0,
-            kostenFaktor: 1
-          }));
-          if (art === "saison") verteilung.forEach((v, i) => {
-            saisonTally(st, saisonVon(-alter[i])).eingang += gesamt * v;
-          });
-          if (art === "nos") {
-            const L2 = vorlaufPool(s2, d, art, "nos", pool);
-            for (let t = 0; t < L2; t++) bestellungen.push({ id: `b0-${d.id}-${pool}-n${t}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(prognoseEk(s2, st, art, pool, t)), ankunft: t, vorkasse: false });
-          } else {
-            const P2 = vororderWoche(s2, d, pool, naechste);
-            if (P2 < 0) {
-              const f = vororderVorschlag(s2, d, st, pool, naechste);
-              for (const l of f) if (l.woche >= 0 && l.wert > 0) bestellungen.push({ id: `b0-${d.id}-${pool}-v${l.woche}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(l.wert), ankunft: l.woche, vorkasse: false, saisonId: naechste });
-              st.vororder[pool] = naechste;
-              limitFuer(s2, st, naechste).verbraucht += f.reduce((a, l) => a + l.wert, 0);
-            }
-            st.vororder[pool] = Math.max(st.vororder[pool] ?? aktS, aktS);
-          }
-        }
-      }
-    }
-    s2.bestand = bestand;
-    s2.bestellungen = bestellungen;
-  }
-  function limitFuer(s2, st, sid) {
-    const key = String(sid);
-    let l = st.limits[key];
-    if (!l) {
-      l = st.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
-      for (const k of Object.keys(st.limits)) if (Number(k) < sid - 2) delete st.limits[k];
-    }
-    if (l.stand !== s2.woche) {
-      let plan2 = 0;
-      const a = saisonStart(sid);
-      const pools = poolsDerWg(s2, st);
-      for (let t = a; t < a + 26; t++) for (const art of ["nos", "saison"]) for (const pool of pools) plan2 += prognoseEk(s2, st, art, pool, t) / (1 + st.fehler);
-      l.plan = eur(plan2);
-      l.stand = s2.woche;
-    }
-    return l;
-  }
-  var limitWert = (st, l) => eur(st.st.limitEuro ?? l.plan * st.st.limitFaktor);
-  function poolsDerWg(s2, st) {
-    return [FREMD, ...markenInWg(s2, st.id).map((m) => m.id)];
-  }
-  function offenImLimit(s2, st, sid) {
-    let x = 0;
-    for (const f of s2.einkauf.freigaben) if (f.wg === st.id) {
-      for (const l of f.lieferungen) if (saisonId(l.woche) === sid) x += l.wert;
-    }
-    return x;
-  }
-  function einkaufNachfrage(s2, roh2) {
-    var _a2;
-    const w = s2.woche;
-    const vk = {};
-    const bruttoBereich = {};
-    const markenJeWg = {};
-    for (const d of WG_DEF) {
-      markenJeWg[d.id] = s2.eigenmarken.marken.filter((m) => istVerkaufsaktiv(m) && (m.wgIst[d.id] ?? 0) > 0).map((m) => ({ m, e: m.wgIst[d.id] ?? 0, fit: passungWg(m, d.id) * produktNachfrageFaktor(s2, m.id, d.id) }));
-    }
-    const attrCache = /* @__PURE__ */ new Map();
-    for (const r of roh2) {
-      const h = r.haus;
-      for (const [g, v] of Object.entries(r.eigen)) {
-        const liste = WG_JE_BEREICH[g];
-        if (!liste) continue;
-        let F2 = 0;
-        const tilt = marketingWgTilt(s2, h.id, g);
-        const teile = tilt ? [] : void 0;
-        let F0 = 0;
-        for (const d of liste) {
-          const st = s2.einkauf.wgs[d.id];
-          const tl = tilt?.[d.id] ?? 1;
-          const om = omega(d.id, w) * tl;
-          const nAttr = nosAttraktivitaet(d, st);
-          let rest = 1;
-          const ziel = vk[_a2 = d.id] ?? (vk[_a2] = {});
-          for (const x of markenJeWg[d.id]) {
-            const key = `${x.m.id}|${h.id}`;
-            let A = attrCache.get(key);
-            if (A === void 0) {
-              A = attraktivitaet(s2, x.m, h);
-              attrCache.set(key, A);
-            }
-            const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr / st.norm;
-            if (teile) teile.push([ziel, x.m.id, t2]);
-            else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t2;
-            F2 += t2;
-            F0 += t2 / tl;
-            rest -= x.e;
-          }
-          const t = v.brutto * om * Math.max(0, rest) * nAttr / st.norm;
-          if (teile) teile.push([ziel, FREMD, t]);
-          else ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
-          F2 += t;
-          F0 += t / tl;
-        }
-        if (teile) {
-          const c = F2 > 0 ? F0 / F2 : 1;
-          for (const [z2, k, t] of teile) z2[k] = (z2[k] ?? 0) + t * c;
-          F2 = F0;
-        }
-        const f = v.brutto > 0 ? F2 / v.brutto : 1;
-        v.brutto *= f;
-        v.umsatz *= f;
-        bruttoBereich[g] = (bruttoBereich[g] ?? 0) + v.brutto;
-      }
-    }
-    const L2 = einkaufStufe(s2);
-    const sd = interpol(EK_PARAM.prognoseSd, L2);
-    for (const d of aktiveWg(s2)) {
-      const st = s2.einkauf.wgs[d.id];
-      const p2 = vk[d.id] ?? {};
-      const D = Object.values(p2).reduce((a, b2) => a + b2, 0);
-      const S = Math.max(0.05, wgSaison(d, w));
-      st.basisVK = 0.85 * st.basisVK + 0.15 * (D / S);
-      if (D > 0) st.pool = Object.fromEntries(Object.entries(p2).map(([k, x]) => [k, x / D]));
-      if (!s2.prognose) st.fehler = clamp(0.9 * st.fehler + sd * Math.sqrt(0.19) * normal(rngHalter(s2)), -0.4, 0.4);
-      const z2 = st.st.nosZiel;
-      st.nosAnteil = st.nosAnteil < z2 ? Math.min(z2, st.nosAnteil + EK_PARAM.nosTempo) : Math.max(z2, st.nosAnteil - EK_PARAM.nosTempo);
-    }
-    return { vk, bruttoBereich };
-  }
-  var WOCHE = {};
-  function toepfe(s2) {
-    const m = /* @__PURE__ */ new Map();
-    for (const k of s2.bestand) {
-      if (!k.wg) normalisiereKohorte(k);
-      const key = `${k.wg}|${k.art}|${poolVon(k)}`;
-      let t = m.get(key);
-      if (!t) {
-        t = [];
-        m.set(key, t);
-      }
-      t.push(k);
-    }
-    for (const t of m.values()) t.sort((a, b2) => b2.alter - a.alter);
-    return m;
-  }
-  function normalisiereKohorte(k) {
-    if (k.wg && k.art) return;
-    const liste = WG_JE_BEREICH[k.gruppe] ?? [];
-    const d = liste.reduce((a, b2) => b2.anteil > a.anteil ? b2 : a, liste[0]);
-    k.wg = d?.id ?? `${k.gruppe}.?`;
-    k.art = k.saisonAnteil >= 0.5 || !d ? "saison" : "saison";
-  }
-  var istAlt = (k) => !!k.ladenhueter || (k.art === "nos" ? k.alter > EK_PARAM.altNos : k.alter > EK_PARAM.altSaison);
-  function saisonTally(st, sid) {
-    const key = String(sid);
-    let x = st.saisons[key];
-    if (!x) {
-      x = st.saisons[key] = { eingang: 0, abverkauf: 0 };
-      for (const k of Object.keys(st.saisons)) if (Number(k) < sid - 1) delete st.saisons[k];
-    }
-    return x;
-  }
-  function nimm(topf, menge2, altMax, saisonAkt, st) {
-    let voll2 = 0;
-    let gebucht = 0;
-    let altG = 0;
-    if (!topf || menge2 <= 0) return { voll: voll2, gebucht, alt: 0 };
-    let altRest = altMax;
-    for (const k of topf) {
-      if (voll2 >= menge2) break;
-      if (k.ladenhueter || k.wert <= 0) continue;
-      const alt = istAlt(k);
-      let x = Math.min(k.wert, menge2 - voll2);
-      if (alt) {
-        x = Math.min(x, altRest);
-        altRest -= x;
-        altG += Math.max(0, x);
-      }
-      if (x <= 0) continue;
-      k.wert -= x;
-      voll2 += x;
-      gebucht += x * k.kostenFaktor;
-      if (st && k.art === "saison" && k.saisonId !== void 0 && k.saisonId >= saisonAkt) saisonTally(st, k.saisonId).abverkauf += x;
-    }
-    return { voll: voll2, gebucht, alt: altG };
-  }
-  function verfuegbar(topf) {
-    let frisch = 0;
-    let alt = 0;
-    for (const k of topf ?? []) {
-      if (k.ladenhueter) continue;
-      if (istAlt(k)) alt += k.wert;
-      else frisch += k.wert;
-    }
-    return { frisch, alt };
-  }
-  function einkaufVerbrauch(s2, n) {
-    const w = s2.woche;
-    const toepfeMap = toepfe(s2);
-    const verf = {};
-    const einsatz = {};
-    const vkReal = {};
-    const Lst = einkaufStufe(s2);
-    const bonus = interpol(EK_PARAM.verfBonus, Lst);
-    const sAkt = saisonId(w);
-    WOCHE = {};
-    for (const d of aktiveWg(s2)) {
-      const st = s2.einkauf.wgs[d.id];
-      const p2 = n.vk[d.id] ?? {};
-      const r = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
-      const red = EK_PARAM.abschrift[st.st.reduzierung];
-      const capM = Math.min(1, red.cap * marketingAltwareFaktor(s2, d.bereich, d.id));
-      const sg = EK_PARAM.servicegrad[st.st.servicegrad];
-      for (const art of ["nos", "saison"]) {
-        const pools = Object.keys(p2).sort((a, b2) => a === FREMD ? 1 : b2 === FREMD ? -1 : a.localeCompare(b2));
-        let ausweichVk = 0;
-        for (const pool of pools) {
-          const m = margeVon(s2, st, art, pool);
-          const vkBedarf = (p2[pool] ?? 0) * artAnteil(st, art) * brutto(art) * (art === "saison" ? red.nachfrage : 1);
-          const ekBedarf = vkBedarf * (1 - m);
-          const topf = toepfeMap.get(`${d.id}|${art}|${pool}`);
-          const v = verfuegbar(topf);
-          let quote;
-          if (art === "nos") {
-            const bedarfW = Math.max(1, bezugsBedarf(s2, st, art, pool, w));
-            const x2 = (v.frisch + v.alt) / (bedarfW * sg.cover);
-            const g = x2 >= 1 ? 1 : (1 - Math.exp(-3 * x2)) / (1 - Math.exp(-3));
-            const rausch = s2.prognose ? 0 : zwischen(rngHalter(s2), -0.01, 0.01);
-            quote = clamp((sg.basis + bonus + rausch) * g, 0, 1);
-          } else {
-            const nutzbar = v.frisch + Math.min(v.alt, ekBedarf * capM);
-            const rw = nutzbar / Math.max(1, bezugsBedarf(s2, st, art, pool, w));
-            quote = Math.min(1, Math.sqrt(clamp(rw / EK_PARAM.praesentation, 0, 1)));
-          }
-          let ziel = ekBedarf * quote;
-          let extraVk = 0;
-          if (pool === FREMD && ausweichVk > 0) {
-            extraVk = ausweichVk;
-            ziel += ausweichVk * (1 - m) * quote;
-          }
-          const x = nimm(topf, ziel, ekBedarf * (art === "saison" ? capM : 1), sAkt, st);
-          if (art === "saison" && x.alt > 0) marketingAltVerkauf(s2, d.bereich, x.alt, d.id);
-          const vkR = x.voll / Math.max(0.05, 1 - m);
-          if (pool !== FREMD) {
-            ausweichVk += Math.max(0, vkBedarf * quote - vkR) * EK_PARAM.substitution + vkBedarf * (1 - quote) * 0;
-            r.emVk += vkR;
-            r.emEk += x.gebucht;
-            r.markenVk[pool] = (r.markenVk[pool] ?? 0) + vkR;
-            r.markenEk[pool] = (r.markenEk[pool] ?? 0) + x.gebucht;
-          }
-          r.vkReal += vkR;
-          r.ekVoll += x.voll;
-          r.ekGebucht += x.gebucht;
-          r.brutto += vkBedarf + extraVk * 0;
-          if (art === "nos") {
-            r.nosBrutto += vkBedarf;
-            r.nosReal += vkR;
-          }
-        }
-      }
-      WOCHE[d.id] = r;
-      einsatz[d.bereich] = (einsatz[d.bereich] ?? 0) + r.ekGebucht;
-      vkReal[d.bereich] = (vkReal[d.bereich] ?? 0) + r.vkReal;
-    }
-    for (const [g, b2] of Object.entries(n.bruttoBereich)) verf[g] = b2 > 0 ? (vkReal[g] ?? 0) / b2 : 1;
-    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
-    return { verfuegbar: verf, einsatz };
-  }
-  function einkaufAltern(s2) {
-    let ab = 0;
-    const K3 = EK_PARAM.abschriftK;
-    for (const k of s2.bestand) {
-      if (!k.wg) normalisiereKohorte(k);
-      k.alter += 1;
-      let q2 = 0;
-      if (k.ladenhueter) q2 = 0.06;
-      else if (k.art === "nos") q2 = k.alter > EK_PARAM.altNos ? 0.04 : 0;
-      else {
-        const st = s2.einkauf.wgs[k.wg];
-        const r = EK_PARAM.abschrift[st?.st.reduzierung ?? "normal"];
-        if (k.alter > 39) q2 = 0.08;
-        else if (k.alter > 26) q2 = r.spaet;
-        else if (k.alter > EK_PARAM.altSaison) q2 = r.alt;
-        else if (k.alter > r.ab) q2 = r.frisch;
-        q2 *= K3;
-      }
-      const x = k.wert * q2;
-      k.wert -= x;
-      const y = x * k.kostenFaktor;
-      ab += y;
-      const wk = WOCHE[k.wg];
-      if (wk) wk.ab += y;
-    }
-    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
-    return ab;
-  }
-  function verbraucheAltwareWg(s2, f, wertVoll) {
-    let rest = wertVoll;
-    let gebucht = 0;
-    const ks = s2.bestand.filter((k) => GRUPPEN[k.gruppe].format === f && istAlt(k)).sort((a, b2) => b2.alter - a.alter);
-    for (const k of ks) {
-      if (rest <= 0) break;
-      const nimmX = Math.min(k.wert, rest);
-      k.wert -= nimmX;
-      rest -= nimmX;
-      gebucht += nimmX * k.kostenFaktor;
-    }
-    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
-    return { gebucht, zukauf: rest };
-  }
-  function einkaufBuchen(s2, umsatzEigen) {
-    var _a2, _b, _c;
-    const e = s2.einkauf;
-    const vkBereich = {};
-    for (const d of WG_DEF) {
-      const r = WOCHE[d.id];
-      if (r) vkBereich[d.bereich] = (vkBereich[d.bereich] ?? 0) + r.vkReal;
-    }
-    const best = {};
-    for (const k of s2.bestand) if (k.wg) best[k.wg] = (best[k.wg] ?? 0) + k.wert;
-    const markenU = {};
-    const markenR = {};
-    const emBereich = {};
-    let gesamt = 0;
-    for (const d of aktiveWg(s2)) {
-      const st = e.wgs[d.id];
-      const r = WOCHE[d.id] ?? { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
-      const vb = vkBereich[d.bereich] ?? 0;
-      const k = vb > 0 ? (umsatzEigen[d.bereich] ?? 0) / vb : 0;
-      const u = r.vkReal * k;
-      gesamt += u;
-      const v = st.v;
-      v.w.push(s2.woche);
-      v.u.push(eur(u));
-      v.e.push(eur(r.ekGebucht));
-      v.a.push(eur(r.ab));
-      v.r.push(eur(u - r.ekGebucht - r.ab));
-      v.b.push(eur(best[d.id] ?? 0));
-      v.f.push(eur(Math.max(0, r.brutto - r.vkReal) * k));
-      v.n.push(r.nosBrutto > 0 ? Math.round(r.nosReal / r.nosBrutto * 1e3) / 1e3 : 1);
-      v.eu.push(eur(r.emVk * k));
-      v.er.push(eur(r.emVk * k - r.emEk));
-      v.nd.push(eur(r.brutto * k));
-      for (const key of Object.keys(v)) if (v[key].length > EK_PARAM.verlauf) v[key].splice(0, v[key].length - EK_PARAM.verlauf);
-      const je = emBereich[_a2 = d.bereich] ?? (emBereich[_a2] = {});
-      for (const [m, x] of Object.entries(r.markenVk)) {
-        markenU[m] = (markenU[m] ?? 0) + x * k;
-        markenR[m] = (markenR[m] ?? 0) + x * k - (r.markenEk[m] ?? 0);
-        je[m] = (je[m] ?? 0) + x * k;
-      }
-    }
-    for (const [g, je] of Object.entries(emBereich)) {
-      const ub = umsatzEigen[g] ?? 0;
-      e.emJeBereich[g] = Object.fromEntries(Object.entries(je).map(([m, x]) => [m, ub > 0 ? x / ub : 0]));
-    }
-    e.eigenUmsatz.push(eur(gesamt));
-    if (e.eigenUmsatz.length > 52) e.eigenUmsatz.splice(0, e.eigenUmsatz.length - 52);
-    for (const m of s2.eigenmarken.marken) {
-      const kz2 = (_b = e.markenKpi)[_c = m.id] ?? (_b[_c] = { u: [], r: [] });
-      kz2.u.push(eur(markenU[m.id] ?? 0));
-      kz2.r.push(eur(markenR[m.id] ?? 0));
-      if (kz2.u.length > 52) {
-        kz2.u.splice(0, kz2.u.length - 52);
-        kz2.r.splice(0, kz2.r.length - 52);
-      }
-    }
-    return markenU;
-  }
-  function kannibalisierung(s2, g) {
-    const je = s2.einkauf.emJeBereich[g] ?? {};
-    const em = Object.values(je).reduce((a, b2) => a + b2, 0);
-    return Math.max(0, em - (s2.einkauf.emStart[g] ?? 0));
-  }
-  function einbuchen(s2, b2, wert) {
-    const wg = b2.wg ?? WG_JE_BEREICH[b2.gruppe]?.[0]?.id;
-    const art = b2.art ?? "saison";
-    const sid = art === "saison" ? saisonVon(s2.woche) : void 0;
-    const kf = b2.kostenFaktor ?? 1;
-    const vorh = s2.bestand.find((k) => k.alter === 0 && k.wg === wg && k.art === art && k.marke === b2.marke && k.kostenFaktor === kf && !k.ladenhueter && k.saisonId === sid);
-    const em = b2.marke ? s2.eigenmarken.marken.find((m) => m.id === b2.marke) : void 0;
-    if (vorh) vorh.wert += eur(wert);
-    else s2.bestand.push({ gruppe: b2.gruppe, wg, art, marke: b2.marke, saisonId: sid, wert: eur(wert), alter: 0, saisonAnteil: art === "saison" ? 1 : 0, kostenFaktor: kf, ladenhueter: em?.status === "eingestellt" ? true : void 0 });
-    const st = wg ? s2.einkauf.wgs[wg] : void 0;
-    if (st && art === "saison" && sid !== void 0) saisonTally(st, sid).eingang += wert;
-  }
-  function bestandPool(s2, wg, art, pool, nurNutzbar) {
-    let x = 0;
-    for (const k of s2.bestand) if (k.wg === wg && k.art === art && poolVon(k) === pool && !k.ladenhueter) {
-      if (nurNutzbar && art === "saison" && istAlt(k)) x += k.wert * 0.3;
-      else x += k.wert;
-    }
-    return x;
-  }
-  function pipelinePool(s2, wg, art, pool, bis = Infinity) {
-    let x = 0;
-    for (const b2 of s2.bestellungen) if (b2.wg === wg && b2.art === art && (b2.marke ?? FREMD) === pool && b2.ankunft <= bis) x += b2.wert;
-    for (const f of s2.einkauf.freigaben) if (f.wg === wg && f.art === art && (f.marke ?? FREMD) === pool) {
-      for (const l of f.lieferungen) if (l.woche <= bis) x += l.wert;
-    }
-    return x;
-  }
-  var ZWEIT = {
-    damen: ["Moda Lucca", "Hanse Fashion Group", "Vestis Textil", "Rieger & Kolb"],
-    herren: ["Nordkap Menswear", "Castell Herrenmode", "Bergmann Konfektion"],
-    waesche: ["Corsina", "Nachtfalter W\xE4sche", "Feinstrick Plauen"],
-    accessoires: ["Riva Calzature", "Lederwerk Hanau", "Chronos Uhrenvertrieb"],
-    kinder: ["Wolkenweich", "Rasselbande Kids", "Golden Thread"],
-    wohnen: ["Porzellanmanufaktur Selbtal", "Webhaus Nordhorn", "Lichtform"],
-    beauty: ["Belcourt Paris", "Rheinpharm Vertrieb", "Aurelia Cosmetics"],
-    food: ["Kaffeer\xF6sterei Hafenblick", "Hanseatische Feinkost", "Weinkontor Rheingau"],
-    spielwaren: ["Kl\xF6tzchen & Co.", "Kinderwelt Lizenz", "Spielwerk F\xFCrth"],
-    sport: ["Fitwerk Sportger\xE4te", "Athletika", "Nordline"],
-    sportschuhe: ["Athletika", "Stridewell"],
-    sporttextil: ["Athletika", "Stridewell"],
-    outdoor: ["Bergpfad Outdoor", "Nordline"],
-    rad: ["Kettenblatt Parts", "Velo Rheinland"],
-    wintersport: ["Gipfelwerk", "Nordline"],
-    teamsport: ["Athletika", "Stridewell"]
-  };
-  function lieferantenSplit(d) {
-    const z2 = (ZWEIT[d.bereich] ?? []).filter((n) => n !== d.lieferant);
-    const i = WG_DEF.indexOf(d);
-    if (z2.length < 2) return [[d.lieferant, 1]];
-    return [[d.lieferant, 0.55], [z2[i % z2.length], 0.3], [z2[(i + 1) % z2.length], 0.15]];
-  }
-  function vororderWoche(s2, d, pool, sid) {
-    const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
-    const spaetestens = saisonStart(sid) + EK_PARAM.vororderSpanne[0] - lead;
-    const runde2 = saisonStart(sid) - EK_PARAM.orderrunde + WG_DEF.indexOf(d) % 4;
-    return Math.min(runde2, spaetestens);
-  }
-  function vororderVorschlag(s2, d, st, pool, sid) {
-    const a = saisonStart(sid);
-    const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
-    let vq = st.st.vororderquote;
-    if (pool !== FREMD && lead > 12) vq = Math.max(vq, 0.95);
-    const level = s2.orderLevel[d.bereich] ?? 1;
-    let saisonBedarf = 0;
-    for (let t = a; t < a + 26; t++) saisonBedarf += prognoseEk(s2, st, "saison", pool, t);
-    const gesamt = vq * saisonBedarf * level * (1 + interpol(EK_PARAM.optimismus, einkaufStufe(s2)));
-    const [v0, v1] = EK_PARAM.vororderSpanne;
-    const gew = [];
-    for (let t = a + v0; t <= a + v1; t++) gew.push(Math.max(0.01, prognoseEk(s2, st, "saison", pool, t + 2)));
-    const sum2 = gew.reduce((x, y) => x + y, 0);
-    return gew.map((g, i) => ({ woche: a + v0 + i, wert: gesamt * g / sum2 }));
-  }
-  function vorschlaege(s2) {
-    const w = s2.woche;
-    const out = [];
-    const idx = new Map(WG_DEF.map((d, i) => [d.id, i]));
-    const sAkt = saisonId(w);
-    for (const d of aktiveWg(s2)) {
-      const st = s2.einkauf.wgs[d.id];
-      if (st.basisVK <= 1) continue;
-      const level = s2.orderLevel[d.bereich] ?? 1;
-      const sg = EK_PARAM.servicegrad[st.st.servicegrad];
-      const sdZusatz = interpol(EK_PARAM.prognoseSd, einkaufStufe(s2)) / 0.07 - 1;
-      for (const pool of poolsDerWg(s2, st)) {
-        const m = pool === FREMD ? void 0 : s2.eigenmarken.marken.find((x) => x.id === pool);
-        const bereit = (L2) => !m || istVerkaufsaktiv(m) || m.status === "aufbau" && (m.bis ?? 0) <= w + L2;
-        {
-          const L2 = vorlaufPool(s2, d, "nos", "nos", pool);
-          if (bereit(L2) && artAnteil(st, "nos") > 5e-3) {
-            let ziel = 0;
-            for (let t = w + 1; t <= w + L2; t++) ziel += prognoseEk(s2, st, "nos", pool, t);
-            const wb = prognoseEk(s2, st, "nos", pool, w + L2);
-            const bez = 0.5 * (wb + prognoseEkMittel(s2, st, "nos", pool) * (1 + st.fehler));
-            ziel += wb + (sg.cover + Math.max(0, sdZusatz) * 0.5 + (L2 > 8 ? 0.08 * L2 : 0)) * bez;
-            const order = ziel * (1 + (level - 1) * 0.3) - bestandPool(s2, d.id, "nos", pool, false) - pipelinePool(s2, d.id, "nos", pool);
-            const min = mindestPool(s2, d, "nos", pool);
-            if (order > Math.max(1e3, min) || order > 0 && order > 0.3 * min && bestandPool(s2, d.id, "nos", pool, false) < 0.7 * ziel) {
-              out.push({ d, st, art: "nos", typ: "nos", pool, lieferungen: [{ woche: w + L2, wert: Math.max(order, min) }], wochenBedarf: wb });
-            }
-          }
-        }
-        if (artAnteil(st, "saison") <= 5e-3) continue;
-        for (const sid of [sAkt + 2, sAkt + 1, sAkt]) {
-          if ((st.vororder[pool] ?? -99) >= sid) continue;
-          const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
-          const P2 = vororderWoche(s2, d, pool, sid);
-          const spaet = w > P2;
-          if (w < P2) continue;
-          if (spaet && w - saisonStart(sid) > 10) {
-            st.vororder[pool] = sid;
-            continue;
-          }
-          if (!bereit(lead)) continue;
-          let lief = vororderVorschlag(s2, d, st, pool, sid);
-          if (spaet) lief = lief.filter((l) => l.woche >= w + lead).map((l) => l);
-          if (spaet && lief.length === 0) {
-            st.vororder[pool] = sid;
-            continue;
-          }
-          const min = mindestPool(s2, d, "saison", pool);
-          const sum2 = lief.reduce((a, l) => a + l.wert, 0);
-          if (sum2 < min && sum2 > 0) lief = lief.map((l) => ({ ...l, wert: l.wert * min / sum2 }));
-          st.vororder[pool] = sid;
-          if (sum2 > 0) {
-            const wb = prognoseEk(s2, st, "saison", pool, saisonStart(sid));
-            const hinweis = spaet ? "Erstausstattung" : `Orderrunde ${saisonName(s2, sid)}`;
-            const split = pool === FREMD ? lieferantenSplit(d) : [[void 0, 1]];
-            for (const [lieferant, a] of split) out.push({ d, st, art: "saison", typ: "vororder", pool, lieferungen: lief.map((l) => ({ woche: l.woche, wert: l.wert * a })), wochenBedarf: wb * a, hinweis, lieferant });
-          }
-        }
-        if ((w + (idx.get(d.id) ?? 0)) % 4 === 0) {
-          const L2 = vorlaufPool(s2, d, "saison", "nachorder", pool);
-          const a = w + L2;
-          if (bereit(L2) && L2 <= 12) {
-            let ziel = 0;
-            for (let t = w + 1; t <= a + 4; t++) ziel += prognoseEk(s2, st, "saison", pool, t);
-            for (let t = a + 5; t <= a + 4 + EK_PARAM.saisonCover; t++) ziel += prognoseEk(s2, st, "saison", pool, t);
-            const order = ziel * level * (1 + interpol(EK_PARAM.optimismus, einkaufStufe(s2))) - bestandPool(s2, d.id, "saison", pool, true) - pipelinePool(s2, d.id, "saison", pool, a + 4);
-            if (order > mindestPool(s2, d, "saison", pool)) out.push({ d, st, art: "saison", typ: "nachorder", pool, lieferungen: [{ woche: a, wert: order }], wochenBedarf: prognoseEk(s2, st, "saison", pool, a) });
-          }
-        }
-      }
-    }
-    return out;
-  }
-  var neueFreigabeId = (s2) => `o${++s2.einkauf.zaehler}`;
-  function protokoll(s2) {
-    const p2 = s2.einkauf.protokoll;
-    let x = p2[p2.length - 1];
-    if (!x || x.woche !== s2.woche) {
-      x = { woche: s2.woche, neu: 0, direkt: 0, freigegeben: 0, auto: 0, verfallen: 0, verfallenWert: 0, abgelehnt: 0 };
-      p2.push(x);
-      if (p2.length > 26) p2.splice(0, p2.length - 26);
-    }
-    return x;
-  }
-  function einkaufDispo(s2) {
-    const w = s2.woche;
-    const pr2 = protokoll(s2);
-    for (const v of vorschlaege(s2)) {
-      let lief = v.lieferungen.filter((l) => l.wert > 0);
-      let ueber = false;
-      const jeSaison = /* @__PURE__ */ new Map();
-      for (const l of lief) jeSaison.set(saisonId(l.woche), (jeSaison.get(saisonId(l.woche)) ?? 0) + l.wert);
-      if (v.typ !== "nos") for (const [sid, x] of jeSaison) {
-        const L2 = limitFuer(s2, v.st, sid);
-        const frei6 = Math.max(0, limitWert(v.st, L2) - L2.verbraucht - offenImLimit(s2, v.st, sid));
-        if (x > frei6 + 1) {
-          ueber = true;
-          const k = frei6 / x;
-          lief = lief.map((l) => saisonId(l.woche) === sid ? { ...l, wert: l.wert * k } : l);
-        }
-      }
-      lief = lief.filter((l) => l.wert >= 1).map((l) => ({ woche: l.woche, wert: eur(l.wert) }));
-      const wert = lief.reduce((a, l) => a + l.wert, 0);
-      if (wert < 1e3) continue;
-      const f = {
-        id: neueFreigabeId(s2),
-        wg: v.d.id,
-        art: v.art,
-        typ: v.typ,
-        lieferant: v.lieferant ?? lieferantPool(s2, v.d, v.pool),
-        marke: v.pool === FREMD ? void 0 : v.pool,
-        wert,
-        lieferungen: lief,
-        erwarteterAbverkauf: 0,
-        reichweiteDanach: 0,
-        erstellt: w,
-        frist: w + EK_PARAM.frist[v.typ],
-        ueberLimit: ueber,
-        hinweis: [v.hinweis, ueber ? "vom Limit gek\xFCrzt" : void 0].filter(Boolean).join(", ") || void 0
-      };
-      const ab = lief[0].woche;
-      let vk8 = 0;
-      let ek8 = 0;
-      for (let t = ab; t < ab + 8; t++) {
-        vk8 += prognoseVk(s2, v.st, v.art, v.pool, t);
-        ek8 += prognoseEk(s2, v.st, v.art, v.pool, t);
-      }
-      f.erwarteterAbverkauf = eur(vk8);
-      f.reichweiteDanach = Math.round((bestandPool(s2, v.d.id, v.art, v.pool, false) + pipelinePool(s2, v.d.id, v.art, v.pool) + wert) / Math.max(1, ek8 / 8) * 10) / 10;
-      const pflichtig = v.typ === "nos" ? wert >= EK_PARAM.nosGrenzeFaktor * s2.einkauf.grenze && wert > EK_PARAM.nosSonder * v.wochenBedarf : wert >= s2.einkauf.grenze;
-      pr2.neu++;
-      if (pflichtig) s2.einkauf.freigaben.push(f);
-      else {
-        pr2.direkt++;
-        gebeFrei(s2, f);
-      }
-    }
-  }
-  function gebeFrei(s2, f) {
-    const st = s2.einkauf.wgs[f.wg];
-    const d = WG[f.wg];
-    const lid = LIEFERANTEN.find((l) => l.name === f.lieferant)?.id;
-    for (const l of f.lieferungen) {
-      const woche2 = Math.max(l.woche, s2.woche + 1);
-      s2.bestellungen.push({ id: `b${f.id}-${woche2}`, gruppe: d.bereich, wg: f.wg, art: f.art, marke: f.marke, wert: l.wert, ankunft: woche2, vorkasse: false, lieferantId: lid, saisonId: saisonVon(woche2) });
-      limitFuer(s2, st, saisonId(woche2)).verbraucht += l.wert;
-    }
-  }
-  function einkaufFristen(s2) {
-    const w = s2.woche;
-    const pr2 = protokoll(s2);
-    s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => s2.basisUmsatz[WG[f.wg].bereich] !== void 0);
-    const faellig = s2.einkauf.freigaben.filter((f) => f.frist < w);
-    if (!faellig.length) return;
-    s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => f.frist >= w);
-    let verfallen = 0;
-    let wert = 0;
-    for (const f of faellig) {
-      const modus = s2.einkauf.wgs[f.wg].st.modus[f.art];
-      if (modus === "auto" || s2.prognose) {
-        gebeFrei(s2, f);
-        pr2.auto++;
-      } else {
-        verfallen++;
-        wert += f.wert;
-        pr2.verfallen++;
-        pr2.verfallenWert += f.wert;
-      }
-    }
-    if (verfallen) melde(s2, "warnung", `${verfallen} Orders \xFCber ${mio(wert)} sind ohne Freigabe verfallen. Die Ware fehlt in den H\xE4usern.`);
-  }
-  var EINKAUF_AKTIONEN = /* @__PURE__ */ new Set(["wgLimit", "wgNosZiel", "wgServicegrad", "wgVororderquote", "wgReduzierung", "wgFreigabeModus", "freigeben", "freigabeAblehnen", "freigabeKuerzen", "sammelfreigabe", "freigabeGrenze", "eigenmarkeGruenden", "eigenmarkeNeupositionieren", "eigenmarkeEinstellen", "eigenmarkeAnteil", "eigenmarkeSetzen"]);
-  function wgAuswahl(s2, a) {
-    if (a === "alle") return aktiveWg(s2);
-    if (WG[a]) return [WG[a]];
-    return (WG_JE_BEREICH[a] ?? []).filter((d) => s2.basisUmsatz[d.bereich] !== void 0);
-  }
-  var auswahlText = (a, n) => a === "alle" ? `alle ${n} Warengruppen` : WG[a] ? WG[a].name : `${GRUPPEN[a]?.name ?? a} (${n} Warengruppen)`;
-  function passtFilter(f, x) {
-    if (!x) return true;
-    if (x.bereich && WG[f.wg].bereich !== x.bereich) return false;
-    if (x.wg && f.wg !== x.wg) return false;
-    if (x.art && f.art !== x.art) return false;
-    if (x.typ && f.typ !== x.typ) return false;
-    if (x.marke !== void 0 && (f.marke ?? "") !== x.marke) return false;
-    if (x.bisWert !== void 0 && f.wert > x.bisWert) return false;
-    if (x.fristBis !== void 0 && f.frist > x.fristBis) return false;
-    return true;
-  }
-  function einkaufAktion(s2, a, einmalKosten2) {
-    const ok5 = (text3) => ({ ok: true, text: text3 });
-    const fehler5 = (text3) => ({ ok: false, text: text3 });
-    const pr2 = protokoll(s2);
-    const wgOp = (sel, fn, was) => {
-      const ds = wgAuswahl(s2, sel);
-      if (!ds.length) return fehler5("Keine passende Warengruppe.");
-      for (const d of ds) fn(s2.einkauf.wgs[d.id], d);
-      return ok5(`${was} f\xFCr ${auswahlText(sel, ds.length)}.`);
-    };
-    switch (a.typ) {
-      case "wgLimit": {
-        if (a.euro !== void 0 && a.euro !== null && a.euro < 0) return fehler5("Limit kann nicht negativ sein.");
-        const fk = a.faktor !== void 0 ? clamp(a.faktor, 0.3, 2) : void 0;
-        return wgOp(a.wg, (st) => {
-          if (fk !== void 0) st.st.limitFaktor = fk;
-          if (a.euro === null) st.st.limitEuro = void 0;
-          else if (a.euro !== void 0) st.st.limitEuro = eur(a.euro);
-        }, a.euro !== void 0 && a.euro !== null ? `Limit ${mio(a.euro)} je Saison` : `Limit ${Math.round((fk ?? 1) * 100)} % vom Saisonplan`);
-      }
-      case "wgNosZiel": {
-        const z2 = clamp(a.anteil, 0.02, 0.98);
-        return wgOp(a.wg, (st) => {
-          st.st.nosZiel = z2;
-        }, `NOS-Anteil Ziel ${Math.round(z2 * 100)} %`);
-      }
-      case "wgServicegrad": {
-        if (![0.9, 0.95, 0.98].includes(a.ziel)) return fehler5("Servicegrad 90, 95 oder 98 %.");
-        return wgOp(a.wg, (st) => {
-          st.st.servicegrad = a.ziel;
-        }, `NOS-Servicegrad ${Math.round(a.ziel * 100)} %`);
-      }
-      case "wgVororderquote": {
-        const q2 = clamp(a.quote, 0.2, 1);
-        return wgOp(a.wg, (st) => {
-          st.st.vororderquote = q2;
-        }, `Vororderquote ${Math.round(q2 * 100)} %`);
-      }
-      case "wgReduzierung": {
-        if (!EK_PARAM.abschrift[a.strategie]) return fehler5("Reduzierung fr\xFCh, normal oder sp\xE4t.");
-        return wgOp(a.wg, (st) => {
-          st.st.reduzierung = a.strategie;
-        }, `Reduzierung ${a.strategie === "frueh" ? "fr\xFCh" : a.strategie === "spaet" ? "sp\xE4t" : "normal"}`);
-      }
-      case "wgFreigabeModus": {
-        const arten = a.art === "beide" ? ["nos", "saison"] : [a.art];
-        return wgOp(a.wg, (st) => {
-          for (const x of arten) st.st.modus[x] = a.modus;
-        }, `Ohne Freigabe: ${a.modus === "auto" ? "automatisch bestellen" : "Order verf\xE4llt"} (${arten.map((x) => x === "nos" ? "NOS" : "Saison").join(", ")})`);
-      }
-      case "freigeben":
-      case "freigabeAblehnen": {
-        const ids = new Set(a.ids);
-        const treffer = s2.einkauf.freigaben.filter((f) => ids.has(f.id));
-        if (!treffer.length) return fehler5("Keine offene Order gefunden.");
-        s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => !ids.has(f.id));
-        const wert = treffer.reduce((x, f) => x + f.wert, 0);
-        if (a.typ === "freigeben") {
-          for (const f of treffer) gebeFrei(s2, f);
-          pr2.freigegeben += treffer.length;
-          return ok5(`${treffer.length} Orders \xFCber ${mio(wert)} freigegeben.`);
-        }
-        pr2.abgelehnt += treffer.length;
-        return ok5(`${treffer.length} Orders \xFCber ${mio(wert)} abgelehnt.`);
-      }
-      case "freigabeKuerzen": {
-        const f = s2.einkauf.freigaben.find((x) => x.id === a.id);
-        if (!f) return fehler5("Order nicht gefunden.");
-        const p2 = clamp(a.prozent, 0, 0.95);
-        f.lieferungen = f.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p2)) }));
-        f.wert = f.lieferungen.reduce((x, l) => x + l.wert, 0);
-        f.reichweiteDanach = Math.round(f.reichweiteDanach * (1 - p2) * 10) / 10;
-        f.erwarteterAbverkauf = eur(f.erwarteterAbverkauf);
-        f.hinweis = [f.hinweis, `um ${Math.round(p2 * 100)} % gek\xFCrzt`].filter(Boolean).join(", ");
-        if (a.freigeben === false) return ok5(`Order ${WG[f.wg].name} auf ${mio(f.wert)} gek\xFCrzt.`);
-        s2.einkauf.freigaben = s2.einkauf.freigaben.filter((x) => x.id !== f.id);
-        gebeFrei(s2, f);
-        pr2.freigegeben++;
-        return ok5(`Order ${WG[f.wg].name} um ${Math.round(p2 * 100)} % gek\xFCrzt und \xFCber ${mio(f.wert)} freigegeben.`);
-      }
-      case "sammelfreigabe": {
-        const treffer = s2.einkauf.freigaben.filter((f) => passtFilter(f, a.filter));
-        if (!treffer.length) return ok5("Keine offenen Orders im Filter.");
-        const ids = new Set(treffer.map((f) => f.id));
-        s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => !ids.has(f.id));
-        for (const f of treffer) gebeFrei(s2, f);
-        pr2.freigegeben += treffer.length;
-        return ok5(`Sammelfreigabe: ${treffer.length} Orders \xFCber ${mio(treffer.reduce((x, f) => x + f.wert, 0))}.`);
-      }
-      case "freigabeGrenze": {
-        if (!(a.euro >= 0)) return fehler5("Grenze in Euro angeben.");
-        s2.einkauf.grenze = eur(a.euro);
-        return ok5(`Freigabegrenze ${Math.round(s2.einkauf.grenze).toLocaleString("de-DE")} \u20AC EK je Order.`);
-      }
-      case "eigenmarkeGruenden":
-        return eigenmarkeGruenden(s2, a.entwurf, einmalKosten2);
-      case "eigenmarkeNeupositionieren":
-        return eigenmarkeNeupositionieren(s2, a.marke, a.neu, einmalKosten2);
-      case "eigenmarkeEinstellen":
-        return eigenmarkeEinstellen(s2, a.marke);
-      case "eigenmarkeAnteil":
-        return eigenmarkeAnteil(s2, a.marke, a.wg, a.anteil);
-      case "eigenmarkeSetzen":
-        return eigenmarkeSetzen(s2, a.marke, a);
-    }
-  }
-  var EINKAUF_SPALTEN = [
-    { id: "umsatz", name: "Umsatz 13 Wo.", format: "eur", standard: true },
-    { id: "rohertragsquote", name: "Rohertragsquote", format: "prozent", standard: true },
-    { id: "lagerumschlag", name: "Umschlag", format: "faktor", standard: true },
-    { id: "reichweite", name: "Reichweite", format: "wochen", standard: true },
-    { id: "abverkaufsquote", name: "Abverkauf", format: "prozent", standard: true },
-    { id: "altwarenanteil", name: "Altware", format: "prozent", standard: true },
-    { id: "nosVerfuegbarkeit", name: "NOS-Verf\xFCgbarkeit", format: "prozent", standard: true },
-    { id: "limitFrei", name: "Limit frei", format: "eur", standard: true },
-    { id: "rohertrag", name: "Rohertrag 13 Wo.", format: "eur", standard: false },
-    { id: "bestandEk", name: "Bestand EK", format: "eur", standard: false },
-    { id: "abschriften", name: "Abschriften 13 Wo.", format: "eur", standard: false },
-    { id: "reduzierungsquote", name: "Reduzierungsquote", format: "prozent", standard: false },
-    { id: "entgangenerUmsatz", name: "Fehlmengen 13 Wo.", format: "eur", standard: false },
-    { id: "offeneOrders", name: "Offene Orders", format: "eur", standard: false },
-    { id: "offeneFreigaben", name: "Freigaben offen", format: "anzahl", standard: false },
-    { id: "eigenmarkenAnteil", name: "Eigenmarkenanteil", format: "prozent", standard: false },
-    { id: "eigenmarkenMarge", name: "Eigenmarkenmarge", format: "prozent", standard: false }
-  ];
-  var leer = () => ({ u13: 0, uW: 0, r13: 0, best: 0, e52: 0, bSum52: 0, n52: 0, e13: 0, bSum13: 0, n13: 0, ab13: 0, fehl13: 0, nosZ: 0, nosN: 0, eu13: 0, er13: 0, alt: 0, sEin: 0, sAb: 0, limit: 0, limitV: 0, pipe: 0, offenN: 0, offenW: 0, bedarf4: 0, plMarge: 0, sollAbverkauf: 0 });
-  function rauschen(s2, wg, feld, woche2 = s2.woche) {
-    const stufe2 = s2.hq?.wirkung.controlling ?? 1;
-    const r = stufe2 >= 2.5 ? 0 : [0.12, 0.04, 0][s2.controllingStufe];
-    if (r === 0) return 1;
-    let h = 2166136261;
-    const t = `${wg}|${woche2}|${feld}`;
-    for (let i = 0; i < t.length; i++) {
-      h ^= t.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return 1 + r * ((h >>> 0) % 1e4 / 1e4 * 2 - 1);
-  }
-  var summe = (x, n) => {
-    let a = 0;
-    for (let i = Math.max(0, x.length - n); i < x.length; i++) a += x[i];
-    return a;
-  };
-  function basisWg(s2, d, bestandJe) {
-    const st = s2.einkauf.wgs[d.id];
-    const v = st.v;
-    const R9 = (f) => rauschen(s2, d.id, f);
-    const b2 = leer();
-    const n52 = Math.min(52, v.w.length);
-    const n13 = Math.min(13, v.w.length);
-    b2.u13 = summe(v.u, 13) * R9("u");
-    b2.uW = (v.u[v.u.length - 1] ?? 0) * R9("u");
-    b2.r13 = summe(v.r, 13) + Math.abs(summe(v.u, 13)) * (R9("r") - 1) * 0.5;
-    const bj = bestandJe.get(d.id) ?? { best: 0, alt: 0 };
-    b2.best = bj.best * R9("b");
-    b2.alt = bj.alt * R9("b") * R9("alt");
-    b2.e52 = summe(v.e, 52) * R9("e");
-    b2.bSum52 = summe(v.b, 52) * R9("b");
-    b2.n52 = n52;
-    b2.e13 = summe(v.e, 13) * R9("e");
-    b2.bSum13 = summe(v.b, 13) * R9("b");
-    b2.n13 = n13;
-    b2.ab13 = summe(v.a, 13) * R9("a");
-    b2.fehl13 = summe(v.f, 13) * R9("f");
-    const nN = Math.min(4, v.n.length);
-    for (let i = v.n.length - nN; i < v.n.length; i++) {
-      const g = v.nd[i] * st.nosAnteil;
-      b2.nosZ += v.n[i] * g;
-      b2.nosN += g;
-    }
-    b2.nosZ *= 1 + (R9("n") - 1) * 0.25;
-    b2.eu13 = summe(v.eu, 13) * R9("u");
-    b2.er13 = summe(v.er, 13) * R9("u");
-    const sz = st.saisons[String(saisonId(s2.woche))] ?? { eingang: 0, abverkauf: 0 };
-    b2.sEin = sz.eingang;
-    b2.sAb = sz.abverkauf * R9("s");
-    const sid = saisonId(s2.woche);
-    const L2 = limitFuer(s2, st, sid);
-    b2.limit = limitWert(st, L2);
-    b2.limitV = L2.verbraucht;
-    for (const x of s2.bestellungen) if (x.wg === d.id) b2.pipe += x.wert;
-    for (const f of s2.einkauf.freigaben) if (f.wg === d.id) {
-      b2.offenN++;
-      b2.offenW += f.wert;
-    }
-    for (let t = s2.woche; t < s2.woche + 4; t++) for (const art of ["nos", "saison"]) for (const pool of poolsDerWg(s2, st)) b2.bedarf4 += prognoseEk(s2, st, art, pool, t) / (1 + st.fehler);
-    b2.plMarge = (st.nosAnteil * st.margeNos + (1 - st.nosAnteil) * st.margeSaison) * b2.u13;
-    const rel = s2.woche - saisonStart(sid);
-    b2.sollAbverkauf = clamp(0.7 * (rel + 1) / 26, 0, 0.7) * b2.sEin;
-    return b2;
-  }
-  function addiere2(a, b2) {
-    const o = { ...a };
-    for (const k of Object.keys(o)) o[k] = a[k] + b2[k];
-    o.n52 = Math.max(a.n52, b2.n52);
-    o.n13 = Math.max(a.n13, b2.n13);
-    return o;
-  }
-  function kennzahlen(b2) {
-    const avg52 = b2.n52 > 0 ? b2.bSum52 / b2.n52 : b2.best;
-    const avg13 = b2.n13 > 0 ? b2.bSum13 / b2.n13 : b2.best;
-    return {
-      umsatz: eur(b2.u13),
-      umsatzWoche: eur(b2.uW),
-      rohertrag: eur(b2.r13),
-      rohertragsquote: b2.u13 > 0 ? b2.r13 / b2.u13 : 0,
-      bestandEk: eur(b2.best),
-      lagerumschlag: avg52 > 0 && b2.n52 > 0 ? Math.round(b2.e52 * 52 / b2.n52 / avg52 * 100) / 100 : 0,
-      lagerumschlag13: avg13 > 0 && b2.n13 > 0 ? Math.round(b2.e13 * 52 / b2.n13 / avg13 * 100) / 100 : 0,
-      reichweite: b2.bedarf4 > 0 ? Math.round(b2.best / (b2.bedarf4 / 4) * 10) / 10 : 0,
-      abverkaufsquote: b2.sEin > 0 ? Math.min(1, b2.sAb / b2.sEin) : 0,
-      altwarenanteil: b2.best > 0 ? b2.alt / b2.best : 0,
-      abschriften: eur(b2.ab13),
-      reduzierungsquote: b2.u13 > 0 ? b2.ab13 / b2.u13 : 0,
-      nosVerfuegbarkeit: b2.nosN > 0 ? Math.min(1, b2.nosZ / b2.nosN) : 1,
-      entgangenerUmsatz: eur(b2.fehl13),
-      limit: eur(b2.limit),
-      limitVerbraucht: eur(b2.limitV),
-      limitFrei: eur(b2.limit - b2.limitV),
-      offeneOrders: eur(b2.pipe),
-      offeneFreigaben: b2.offenN,
-      offeneFreigabenWert: eur(b2.offenW),
-      eigenmarkenAnteil: b2.u13 > 0 ? b2.eu13 / b2.u13 : 0,
-      eigenmarkenMarge: b2.eu13 > 0 ? b2.er13 / b2.eu13 : 0
-    };
-  }
-  function ampeln(k, b2) {
-    const a = (gut, mittel) => gut ? "gruen" : mittel ? "gelb" : "rot";
-    const plan2 = b2.u13 > 0 ? b2.plMarge / b2.u13 : 0;
-    const soll = b2.sEin > 0 ? b2.sollAbverkauf / b2.sEin : 0;
-    return {
-      rohertragsquote: a(k.rohertragsquote >= plan2 - 0.03, k.rohertragsquote >= plan2 - 0.06),
-      // Plan vor Abschriften, 3 Punkte Reduzierung sind normal
-      lagerumschlag: a(k.lagerumschlag >= 3, k.lagerumschlag >= 2),
-      reichweite: a(k.reichweite >= 3 && k.reichweite <= 12, k.reichweite >= 2 && k.reichweite <= 18),
-      abverkaufsquote: a(k.abverkaufsquote >= soll - 0.1, k.abverkaufsquote >= soll - 0.2),
-      altwarenanteil: a(k.altwarenanteil <= 0.1, k.altwarenanteil <= 0.2),
-      reduzierungsquote: a(k.reduzierungsquote <= 0.03, k.reduzierungsquote <= 0.06),
-      nosVerfuegbarkeit: a(k.nosVerfuegbarkeit >= 0.945, k.nosVerfuegbarkeit >= 0.9),
-      entgangenerUmsatz: a(k.umsatz > 0 && k.entgangenerUmsatz / k.umsatz <= 0.04, k.umsatz > 0 && k.entgangenerUmsatz / k.umsatz <= 0.08),
-      limitFrei: a(k.limit > 0 && k.limitFrei / k.limit >= 0.1, k.limitFrei > 0)
-    };
-  }
-  function bestandJeWg(s2) {
-    const m = /* @__PURE__ */ new Map();
-    for (const k of s2.bestand) {
-      if (!k.wg) continue;
-      let x = m.get(k.wg);
-      if (!x) {
-        x = { best: 0, alt: 0 };
-        m.set(k.wg, x);
-      }
-      x.best += k.wert;
-      if (istAlt(k)) x.alt += k.wert;
-    }
-    return m;
-  }
-  var genauigkeit = (s2) => (s2.hq?.wirkung.controlling ?? 1) >= 2.5 || s2.controllingStufe === 2 ? "exakt" : s2.controllingStufe === 1 ? "normal" : "grob";
-  function einkaufUebersicht(s2, filter = {}) {
-    const bj = bestandJeWg(s2);
-    const bereiche = [];
-    let gesamt = leer();
-    for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
-      if (s2.basisUmsatz[g] === void 0) continue;
-      if (filter.bereich && filter.bereich !== g) continue;
-      if (filter.format && GRUPPEN[g].format !== filter.format) continue;
-      let sum2 = leer();
-      const wgs = [];
-      for (const d of liste) {
-        const b2 = basisWg(s2, d, bj);
-        sum2 = addiere2(sum2, b2);
-        const k2 = kennzahlen(b2);
-        wgs.push({ id: d.id, name: d.name, kennzahlen: k2, ampeln: ampeln(k2, b2), eigenmarken: markenInWg(s2, d.id).map((m) => m.name) });
-      }
-      gesamt = addiere2(gesamt, sum2);
-      const k = kennzahlen(sum2);
-      bereiche.push({ bereich: g, name: GRUPPEN[g].name, format: GRUPPEN[g].format, kennzahlen: k, ampeln: ampeln(k, sum2), wgs });
-    }
-    const sid = saisonId(s2.woche);
-    const kg = kennzahlen(gesamt);
-    return {
-      woche: s2.woche,
-      saison: { id: sid, name: saisonName(s2, sid), woche: s2.woche - saisonStart(sid) + 1, wochen: 26 },
-      grenze: s2.einkauf.grenze,
-      offeneFreigaben: s2.einkauf.freigaben.length,
-      offeneFreigabenWert: eur(s2.einkauf.freigaben.reduce((a, f) => a + f.wert, 0)),
-      genauigkeit: genauigkeit(s2),
-      einkaufStufe: Math.round(einkaufStufe(s2) * 100) / 100,
-      summe: { kennzahlen: kg, ampeln: ampeln(kg, gesamt) },
-      bereiche,
-      spalten: EINKAUF_SPALTEN
-    };
-  }
-  function freigabeZeile(s2, f) {
-    const d = WG[f.wg];
-    return {
-      ...f,
-      lieferungen: f.lieferungen.map((l) => ({ ...l })),
-      wgName: d.name,
-      bereich: d.bereich,
-      bereichName: GRUPPEN[d.bereich].name,
-      markeName: f.marke ? s2.eigenmarken.marken.find((m) => m.id === f.marke)?.name : void 0,
-      restWochen: f.frist - s2.woche,
-      modus: s2.einkauf.wgs[f.wg].st.modus[f.art],
-      ersteLieferung: f.lieferungen[0]?.woche ?? f.erstellt
-    };
-  }
-  function freigaben(s2, filter) {
-    const liste = s2.einkauf.freigaben.filter((f) => passtFilter(f, filter)).map((f) => freigabeZeile(s2, f)).sort((a, b2) => a.frist - b2.frist || b2.wert - a.wert);
-    return { woche: s2.woche, grenze: s2.einkauf.grenze, anzahl: liste.length, wert: eur(liste.reduce((a, f) => a + f.wert, 0)), liste, protokoll: s2.einkauf.protokoll.map((p2) => ({ ...p2 })) };
-  }
-  function wgDetail(s2, wgId) {
-    const d = WG[wgId];
-    if (!d) return void 0;
-    const st = s2.einkauf.wgs[wgId];
-    const b2 = basisWg(s2, d, bestandJeWg(s2));
-    const k = kennzahlen(b2);
-    const v = st.v;
-    const n = Math.min(26, v.w.length);
-    const ab = v.w.length - n;
-    const verlauf = { woche: [], bestand: [], umsatz: [], reichweite: [], nosVerfuegbarkeit: [], abschriften: [] };
-    for (let i = ab; i < v.w.length; i++) {
-      const w = v.w[i];
-      const best2 = v.b[i] * rauschen(s2, wgId, "b", w);
-      const e4 = v.e.slice(Math.max(0, i - 3), i + 1).reduce((x, y) => x + y, 0) / Math.min(4, i + 1) || 1;
-      verlauf.woche.push(w);
-      verlauf.bestand.push(eur(best2));
-      verlauf.umsatz.push(eur(v.u[i] * rauschen(s2, wgId, "u", w)));
-      verlauf.reichweite.push(Math.round(best2 / e4 * 10) / 10);
-      verlauf.nosVerfuegbarkeit.push(v.n[i]);
-      verlauf.abschriften.push(eur(v.a[i] * rauschen(s2, wgId, "a", w)));
-    }
-    const sid = saisonId(s2.woche);
-    const limits = [sid, sid + 1].map((x) => {
-      const L2 = limitFuer(s2, st, x);
-      const lw = limitWert(st, L2);
-      return { saison: x, name: saisonName(s2, x), limit: lw, verbraucht: eur(L2.verbraucht), frei: eur(lw - L2.verbraucht) };
-    });
-    const best = /* @__PURE__ */ new Map();
-    for (const x of s2.bestellungen) if (x.wg === wgId) {
-      const key = `${x.ankunft}|${x.art}|${x.marke ?? ""}`;
-      const y = best.get(key) ?? { ankunft: x.ankunft, art: x.art ?? "saison", marke: x.marke, wert: 0 };
-      y.wert += x.wert;
-      best.set(key, y);
-    }
-    return {
-      id: d.id,
-      name: d.name,
-      bereich: d.bereich,
-      bereichName: GRUPPEN[d.bereich].name,
-      format: GRUPPEN[d.bereich].format,
-      lieferant: d.lieferant,
-      kennzahlen: k,
-      ampeln: ampeln(k, b2),
-      steuerung: { ...st.st, modus: { ...st.st.modus }, nosAnteil: Math.round(st.nosAnteil * 1e3) / 1e3 },
-      stammdaten: { margeNos: st.margeNos, margeSaison: st.margeSaison, vorlaufVor: d.vorlaufVor, vorlaufNach: d.vorlaufNach, vorlaufNos: d.vorlaufNos, mindestabnahme: d.mindestabnahme, eigenmarkenfaehig: d.eigenmarkenfaehig, kategorie: d.kategorie, saison: d.saison.map((x) => Math.round(x * 100) / 100) },
-      eigenmarken: markenInWg(s2, wgId).map((m) => ({ marke: m.id, name: m.name, farbe: m.farbe, anteilZiel: m.wgAnteile[wgId] ?? 0, anteilIst: Math.round((m.wgIst[wgId] ?? 0) * 1e3) / 1e3, mehrmarge: mehrmarge(m) })),
-      verlauf,
-      limits,
-      bestellungen: [...best.values()].sort((a, c) => a.ankunft - c.ankunft).map((x) => ({ ...x, wert: eur(x.wert) })),
-      freigaben: s2.einkauf.freigaben.filter((f) => f.wg === wgId).map((f) => freigabeZeile(s2, f))
-    };
-  }
-
-  // ../engine/src/ware.ts
-  function bestandWert(s2, g) {
-    let x = 0;
-    for (const k of s2.bestand) if (!g || k.gruppe === g) x += k.wert;
-    return x;
-  }
-  function zielWochen(s2, g) {
-    if (s2.phase === "insolvenz" && s2.insolvenz) return s2.woche < s2.insolvenz.seit + 4 ? 0 : 3;
-    const ziel = (v) => v >= 60 ? 9 : v >= 45 ? 7 : v >= 32 ? 4 : v >= 22 ? 2 : 0;
-    let rest = 1;
-    let w = 0;
-    for (const l of s2.lieferanten) {
-      const a = l.gruppen[g];
-      if (!a || !l.aktiv) continue;
-      w += a * ziel(l.vertrauen);
-      rest -= a;
-    }
-    w += Math.max(0, rest) * ziel(s2.restLieferantenVertrauen);
-    return Math.round(w);
-  }
-  function kvLimit(s2) {
-    if (s2.phase === "insolvenz") return Math.max(0, 0.6 * (s2.cash + s2.kreditlinie)) + 3e7;
-    return s2.kvLimitBasis * clamp((s2.stakeholder.kreditversicherer - 20) / 45, 0, 1.25);
-  }
-  function offeneWarenverbindlichkeiten(s2) {
-    let x = 0;
-    for (const v of s2.verbindlichkeiten) if (v.art === "ware") x += v.wert;
-    return x;
-  }
-  function wareneingang(s2, liquiditaetsReserve) {
-    const w = s2.woche;
-    let vorkasse = 0;
-    let gekuerzt = 0;
-    const limit = kvLimit(s2);
-    let exposure = offeneWarenverbindlichkeiten(s2);
-    const heute = s2.bestellungen.filter((b2) => b2.ankunft <= w);
-    s2.bestellungen = s2.bestellungen.filter((b2) => b2.ankunft > w);
-    for (const b2 of heute) {
-      let wert = b2.wert;
-      if (!b2.vorkasse) {
-        const ziel = zielWochen(s2, b2.gruppe);
-        const frei6 = Math.max(0, limit - exposure);
-        const aufZiel = ziel > 0 ? Math.min(wert, frei6) : 0;
-        let rest = wert - aufZiel;
-        if (rest > 0) {
-          const liquide = s2.cash + s2.kreditlinie - liquiditaetsReserve;
-          if (s2.vorkasseAkzeptieren && liquide > 0) {
-            const zahlbar = Math.min(rest, liquide);
-            s2.cash -= zahlbar;
-            vorkasse += zahlbar;
-            rest -= zahlbar;
-          }
-          if (rest > 0) {
-            wert -= rest;
-            gekuerzt += rest;
-          }
-        }
-        if (aufZiel > 0) {
-          s2.verbindlichkeiten.push({ id: neueId(s2, "v"), art: "ware", gruppe: b2.gruppe, wert: eur(aufZiel), faellig: w + ziel });
-          exposure += aufZiel;
-        }
-      }
-      if (wert > 0) einbuchen(s2, b2, wert);
-    }
-    if (gekuerzt > 1e6) melde(s2, "warnung", `Lieferanten halten Ware \xFCber ${(gekuerzt / 1e6).toFixed(1)} Mio. \u20AC zur\xFCck: Limit des Kreditversicherers ausgesch\xF6pft.`);
-    return { vorkasse: eur(vorkasse), gekuerzt: eur(gekuerzt) };
-  }
-  function verbrauche(s2, g, wertVoll) {
-    let rest = wertVoll;
-    let gebucht = 0;
-    const ks = s2.bestand.filter((k) => k.gruppe === g && !k.ladenhueter).sort((a, b2) => b2.alter - a.alter);
-    for (const k of ks) {
-      if (rest <= 0) break;
-      const nimm9 = Math.min(k.wert, rest);
-      k.wert -= nimm9;
-      rest -= nimm9;
-      gebucht += nimm9 * k.kostenFaktor;
-    }
-    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
-    return gebucht;
   }
 
   // ../engine/src/wettbewerb.ts
@@ -5757,8 +3691,8 @@
   function uebernehmeWettbewerber(s2, id, modus, mieteQmMonat = 11) {
     const wb = s2.wettbewerber.find((w) => w.id === id);
     if (!wb || wb.status === "geschlossen") return "Wettbewerber-Standort nicht verf\xFCgbar.";
-    const basis2 = s2.haeuser.find((h) => h.stadt === wb.stadt && h.format === "warenhaus" && h.status === "offen");
-    if (!basis2) return "Kein offenes Hartwig-Warenhaus am Standort.";
+    const basis3 = s2.haeuser.find((h) => h.stadt === wb.stadt && h.format === "warenhaus" && h.status === "offen");
+    if (!basis3) return "Kein offenes Hartwig-Warenhaus am Standort.";
     const qm = wb.grundflaecheQm;
     const kosten = eur(qm * (modus === "erweiterung" ? 250 : 200));
     if (s2.cash + s2.kreditlinie < kosten) return "Nicht genug Liquidit\xE4t f\xFCr die Umbaukosten.";
@@ -5766,12 +3700,12 @@
     s2.einmalkostenWoche += kosten;
     if (modus === "erweiterung") {
       const g = "damen";
-      const idF = basis2.id + "-wb-" + wb.id;
-      basis2.flaechen.push({ id: idF, etage: 0, qm, konzept: "eigen", gruppe: g, umbauBis: s2.woche + 8 });
-      basis2.potenzial[g] = (basis2.potenzial[g] ?? 0) + qm * GRUPPEN[g].qmUmsatz;
-      basis2.miete.mieteWoche += eur(qm * mieteQmMonat * 12 / 52);
+      const idF = basis3.id + "-wb-" + wb.id;
+      basis3.flaechen.push({ id: idF, etage: 0, qm, konzept: "eigen", gruppe: g, umbauBis: s2.woche + 8 });
+      basis3.potenzial[g] = (basis3.potenzial[g] ?? 0) + qm * GRUPPEN[g].qmUmsatz;
+      basis3.miete.mieteWoche += eur(qm * mieteQmMonat * 12 / 52);
     } else {
-      const neu = structuredClone(basis2);
+      const neu = structuredClone(basis3);
       neu.id = "O" + wb.id;
       neu.name = "Hartwig Outlet " + wb.stadt;
       neu.etagen = [0];
@@ -5787,7 +3721,7 @@
       neu.status = "offen";
       neu.statusBis = void 0;
       neu.transferBonus = 0;
-      neu.wettbewerbStart = basis2.einzug.wettbewerb;
+      neu.wettbewerbStart = basis3.einzug.wettbewerb;
       neu.wettbewerbRohStart = roh(s2, neu);
       neu.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(neu.format).map((g) => [g, roh(s2, neu, g)]));
       neu.wettbewerbLeerStart = leerzahl(s2, neu.stadt);
@@ -7195,11 +5129,11 @@
       case "hausStandardSetzen": {
         if (a.haus && !a.begruendung?.trim()) return { ok: false, text: "Einzelabweichungen ben\xF6tigen eine Begr\xFCndung." };
         if (h && a.cluster !== steuerungscluster(s2, h)) return { ok: false, text: "Haus geh\xF6rt nicht zum angegebenen Hauscluster." };
-        const basis2 = h ? hausStandard(s2, h) : s2.hausbetrieb.standards[a.cluster];
-        if (!basis2) return { ok: false, text: "Hauscluster nicht gefunden." };
+        const basis3 = h ? hausStandard(s2, h) : s2.hausbetrieb.standards[a.cluster];
+        if (!basis3) return { ok: false, text: "Hauscluster nicht gefunden." };
         const n = Number(a.wert);
         if (!Number.isInteger(n)) break;
-        const stand = { ...basis2, oeffnung: { ...basis2.oeffnung } };
+        const stand = { ...basis3, oeffnung: { ...basis3.oeffnung } };
         if (a.feld === "von" || a.feld === "bis" || a.feld === "samstagBis") {
           if (n < 7 || n > 22) break;
           stand.oeffnung[a.feld] = n;
@@ -7370,8 +5304,8 @@
     const etagen = stufe2 === "komplett" ? [...h.etagen] : [nr], qm = etagen.reduce((v, e) => v + flaechenQm(h, e), 0);
     const q2 = clamp(bereichsQualitaet(s2, "ladenbau"), 0, 1);
     const kosten = eur(qm * p2.qm * (1 + 0.4 * (1 - q2)));
-    const basis2 = p2.min + (p2.max - p2.min) * Math.min(1, qm / Math.max(1, h.grundflaecheQm * 5));
-    const wochen = Math.ceil(basis2 * (1 + 0.5 * (1 - q2)));
+    const basis3 = p2.min + (p2.max - p2.min) * Math.min(1, qm / Math.max(1, h.grundflaecheQm * 5));
+    const wochen = Math.ceil(basis3 * (1 + 0.5 * (1 - q2)));
     const plus = stufe2 === "ladenbau" ? 0.08 : stufe2 === "komplett" ? 0.1 : stufe2 === "auffrischung" ? 0.02 : 0.01;
     return {
       etagen,
@@ -7597,7 +5531,7 @@
     wintersport: 115,
     teamsport: 37
   };
-  var leer2 = () => ({
+  var leer = () => ({
     von: 0,
     bis: 0,
     umsatz: 0,
@@ -7716,12 +5650,12 @@
         gruppe2.push(p2);
         bloecke.set(block, gruppe2);
       }
-      const archiv = [...bloecke.entries()].sort((a, b2) => a[0] - b2[0]).map(([, teile]) => summiere(teile));
+      const archiv = [...bloecke.entries()].sort((a, b2) => a[0] - b2[0]).map(([, teile2]) => summiere(teile2));
       h.treiberVerlauf = [...archiv, ...jung];
     }
   }
   function summiere(eintraege) {
-    if (!eintraege.length) return leer2();
+    if (!eintraege.length) return leer();
     return komplett(
       Math.min(...eintraege.map((e) => e.von)),
       Math.max(...eintraege.map((e) => e.bis)),
@@ -7734,14 +5668,14 @@
   function zeitraum(h, von, bis) {
     const messungen = h.treiberVerlauf ?? [];
     if (von < 0 || bis < von) return { geschaetzt: false };
-    const teile = [];
+    const teile2 = [];
     let abgedeckt2 = 0, geschaetzt = false;
     for (const m of messungen) {
       const gemeinsam = Math.max(0, Math.min(bis, m.bis) - Math.max(von, m.von) + 1);
       if (!gemeinsam) continue;
       const laenge = m.bis - m.von + 1, anteil3 = gemeinsam / laenge;
       if (anteil3 !== 1) geschaetzt = true;
-      teile.push(komplett(
+      teile2.push(komplett(
         Math.max(von, m.von),
         Math.min(bis, m.bis),
         m.umsatz * anteil3,
@@ -7752,7 +5686,7 @@
       abgedeckt2 += gemeinsam;
     }
     if (abgedeckt2 !== bis - von + 1) return { geschaetzt };
-    const wert = summiere(teile);
+    const wert = summiere(teile2);
     wert.umsatz = eur(wert.umsatz);
     wert.preis = wert.artikel ? wert.umsatz / wert.artikel : 0;
     wert.bon = wert.kaeufe ? wert.umsatz / wert.kaeufe : 0;
@@ -7806,7 +5740,7 @@
     const q2 = eur(a.frequenz * a.kaufquote * v.teile * v.preis);
     const t = eur(a.frequenz * a.kaufquote * a.teile * v.preis);
     const u = eur(a.umsatz), vorher = eur(v.umsatz);
-    const teile = t - q2, preis = u - t;
+    const teile2 = t - q2, preis = u - t;
     return {
       status: "ok",
       vorher,
@@ -7814,9 +5748,9 @@
       differenz: u - vorher,
       frequenz: f - vorher,
       kaufquote: q2 - f,
-      teile,
+      teile: teile2,
       preis,
-      bon: teile + preis,
+      bon: teile2 + preis,
       vorjahrGeschaetzt: geschaetzt
     };
   }
@@ -8014,9 +5948,9 @@
     for (const g of PERSONAL_GRUPPEN) {
       const p2 = profil(s2, g);
       const last = g === "kasse" ? frequenzFaktor : g === "verkauf" ? 0.6 * frequenzFaktor + 0.4 * umsatzFaktor : g === "logistik" ? logistikFaktor : 1;
-      const basis2 = st.basisFte * 40 * PERSONAL_ANTEILE[g] * saison2 * last;
+      const basis3 = st.basisFte * 40 * PERSONAL_ANTEILE[g] * saison2 * last;
       const tage = p2.map((anteil3, i) => {
-        const bedarf2 = basis2 * anteil3 / (1 - aus.krank - aus.urlaub);
+        const bedarf2 = basis3 * anteil3 / (1 - aus.krank - aus.urlaub);
         const richtung2 = Math.sin((h.id.length * 13 + h.id.charCodeAt(1) * 7 + i * 11 + s2.woche % 52) * 0.41);
         const fehler5 = richtung2 * 0.19;
         const bezug = 1 + fehler5 * (1 - st.basisQualitaet);
@@ -8401,6 +6335,7 @@
     if (UMBAU_AKTIONEN.has(a.typ)) return umbauAktion(s2, a);
     if (PERSONAL_AKTIONEN.has(a.typ)) return personalAktion(s2, a);
     if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s2, a, (x) => einmalKosten(s2, x));
+    if (WARE_AKTIONEN.has(a.typ)) return wareAktion(s2, a);
     if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s2, a);
     if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s2, a);
     if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s2, a);
@@ -9013,7 +6948,7 @@
         umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b2) => a + b2.qm, 0)) : 0
       }))
     }));
-    return { haus: h, etagen, wettbewerber: wettbewerbUebersicht(s2, h.stadt) };
+    return { haus: h, etagen, waren: warenHaus(s2, h), wettbewerber: wettbewerbUebersicht(s2, h.stadt) };
   }
   function warenwirtschaft(s2) {
     return Object.keys(s2.basisUmsatz).map((g) => ({
@@ -9744,7 +7679,7 @@
       case "vorstandBonus": {
         const p2 = res.person;
         if (!p2) return fehler5(`${info.kurz} ist unbesetzt.`);
-        const teile = [];
+        const teile2 = [];
         if (a.haltebonus !== void 0) {
           const hb = Math.max(0, eur(a.haltebonus));
           const wochen = clamp(Math.round(a.halteWochen ?? 52), 13, 156);
@@ -9752,14 +7687,14 @@
           p2.halteBis = hb > 0 ? s2.woche + wochen : void 0;
           p2.halteStart = s2.woche;
           if (hb > 0) p2.loyalitaet = clamp(p2.loyalitaet + 6, 0, 100);
-          teile.push(hb > 0 ? `Haltebonus ${Math.round(hb / 1e3)} Tsd. \u20AC \xFCber ${wochen} Wochen` : "kein Haltebonus");
+          teile2.push(hb > 0 ? `Haltebonus ${Math.round(hb / 1e3)} Tsd. \u20AC \xFCber ${wochen} Wochen` : "kein Haltebonus");
         }
         if (a.erfolgsbonus !== void 0) {
           p2.erfolgsbonus = clamp(a.erfolgsbonus, 0, 1);
-          teile.push(`Erfolgsbonus ${Math.round(p2.erfolgsbonus * 100)} % vom Jahresgehalt bei Planerf\xFCllung`);
+          teile2.push(`Erfolgsbonus ${Math.round(p2.erfolgsbonus * 100)} % vom Jahresgehalt bei Planerf\xFCllung`);
         }
         hqAktualisiere(s2);
-        return ok5(`${p2.name}: ${teile.join(", ") || "unver\xE4ndert"}.`);
+        return ok5(`${p2.name}: ${teile2.join(", ") || "unver\xE4ndert"}.`);
       }
       case "vorstandDelegation": {
         if (!DELEGATIONEN[a.ressort].some((d2) => d2.id === a.bereich)) return fehler5("Diesen Bereich gibt es im Ressort nicht.");
@@ -10441,8 +8376,8 @@
     return (s2.phase === "insolvenz" ? HQ_PARAM.abfindungInsolvenz : HQ_PARAM.abfindungRegulaer) * hqRechtFaktor(s2);
   }
   function restmietWochen(s2, g) {
-    const basis2 = s2.phase === "insolvenz" ? 13 : 52;
-    return Math.max(0, Math.min(basis2, g.bisWoche - s2.woche));
+    const basis3 = s2.phase === "insolvenz" ? 13 : 52;
+    return Math.max(0, Math.min(basis3, g.bisWoche - s2.woche));
   }
   function raeumeEtage(s2, g, e) {
     const betroffen = [];
@@ -10624,7 +8559,7 @@
       const r = Math.round(x);
       return r === 0 ? NULL2 : `${r > 0 ? "+" : ""}${r} ${Math.abs(r) === 1 ? "Punkt" : "Punkte"}`;
     };
-    const teile = (...l) => l.every(([, v]) => v === NULL2) ? "Marktstandard, Ausbau bringt mehr" : l.map(([k, v]) => `${k} ${v}`).join(", ");
+    const teile2 = (...l) => l.every(([, v]) => v === NULL2) ? "Marktstandard, Ausbau bringt mehr" : l.map(([k, v]) => `${k} ${v}`).join(", ");
     const W3 = HQ_WIRKUNG;
     switch (id) {
       case "controlling": {
@@ -10633,21 +8568,21 @@
         return hqControllingExzellenz(s2) ? `${t}, Exzellenz: Bank und Kreditversicherer vertrauen dem Reporting mehr` : t;
       }
       case "einkauf":
-        return teile(["Einkaufskonditionen (Anteil am Wareneinsatz)", pz4(kurve(Lx, W3.einkaufKonditionen), 2)], ["Werbekostenzusch\xFCsse", pz4(kurve(Lx, W3.einkaufWkz), 0)]);
+        return teile2(["Einkaufskonditionen (Anteil am Wareneinsatz)", pz4(kurve(Lx, W3.einkaufKonditionen), 2)], ["Werbekostenzusch\xFCsse", pz4(kurve(Lx, W3.einkaufWkz), 0)]);
       case "marketing":
-        return teile(["Wirkung des Marketingbudgets", pz4(kurve(Lx, W3.marketing), 0)]);
+        return teile2(["Wirkung des Marketingbudgets", pz4(kurve(Lx, W3.marketing), 0)]);
       case "personal":
-        return teile(["Personalbedarf der Filialen", pz4(kurve(Lx, W3.personalBesetzung) / 0.92)], ["Betriebsrat", pkt(kurve(Lx, W3.personalBetriebsrat))], ["Moral der Filialleitungen", pkt(kurve(Lx, W3.personalMoral))]);
+        return teile2(["Personalbedarf der Filialen", pz4(kurve(Lx, W3.personalBesetzung) / 0.92)], ["Betriebsrat", pkt(kurve(Lx, W3.personalBetriebsrat))], ["Moral der Filialleitungen", pkt(kurve(Lx, W3.personalMoral))]);
       case "immobilien":
-        return teile(["Erfolgschance bei Mietverhandlungen", pz4(kurve(Lx, W3.immobilienVerhandlung), 0)], ["Anschlussmieten", pz4(kurve(Lx, W3.immobilienMietende), 0)], ["Untermietanfragen", pz4(kurve(Lx, W3.immobilienAnfragen), 0)], ["Preis von B\xFCroangeboten", pz4(kurve(Lx, W3.immobilienBuero), 0)]);
+        return teile2(["Erfolgschance bei Mietverhandlungen", pz4(kurve(Lx, W3.immobilienVerhandlung), 0)], ["Anschlussmieten", pz4(kurve(Lx, W3.immobilienMietende), 0)], ["Untermietanfragen", pz4(kurve(Lx, W3.immobilienAnfragen), 0)], ["Preis von B\xFCroangeboten", pz4(kurve(Lx, W3.immobilienBuero), 0)]);
       case "logistik":
-        return teile(["Logistikkosten", pz4(kurve(Lx, W3.logistik))]);
+        return teile2(["Logistikkosten", pz4(kurve(Lx, W3.logistik))]);
       case "ecommerce":
-        return teile(["Umsatz \xFCber Online und Click and Collect", pz4(kurve(Lx, W3.ecommerce))]);
+        return teile2(["Umsatz \xFCber Online und Click and Collect", pz4(kurve(Lx, W3.ecommerce))]);
       case "recht":
-        return teile(["Sozialplan, Abfindungen und Restmieten", pz4(kurve(Lx, W3.recht), 0)]);
+        return teile2(["Sozialplan, Abfindungen und Restmieten", pz4(kurve(Lx, W3.recht), 0)]);
       case "vm":
-        return teile(["Fl\xE4chenproduktivit\xE4t", pz4(kurve(Lx, W3.vm))]);
+        return teile2(["Fl\xE4chenproduktivit\xE4t", pz4(kurve(Lx, W3.vm))]);
       case "produkt":
         return Lx < 0.95 ? "Wenig Kapazit\xE4t und schw\xE4chere Produkte bei den Eigenmarken" : Lx > 1.5 ? "Mehr Sortimentspl\xE4tze und bessere Produkte bei den Eigenmarken" : "Marktstandard, Ausbau bringt mehr Sortimentspl\xE4tze und bessere Produkte";
       case "verwaltung": {
@@ -10765,6 +8700,2586 @@
     const g = s2.hq.gebaeude.find((x) => x.stadt === s2.hq.sitz && x.etagen.some((e2) => e2.gemietet)) ?? s2.hq.gebaeude.find((x) => x.etagen.some((e2) => e2.gemietet));
     const e = g ? [...g.etagen].reverse().find((x) => x.gemietet) : void 0;
     return g && e ? { gebaeudeId: g.id, nr: e.nr } : void 0;
+  }
+
+  // ../engine/src/produkte.ts
+  var PRODUKT_KATEGORIEN = {
+    oberteile: "Oberteile",
+    unterteile: "Hosen, R\xF6cke, Kleider",
+    jacken: "Jacken und M\xE4ntel",
+    schuhe: "Schuhe",
+    waesche: "W\xE4sche und Nacht",
+    accessoires: "Accessoires",
+    home: "Home",
+    beauty: "Beauty",
+    kinder: "Baby und Kind"
+  };
+  var TREND_GRUPPEN = { kinder: "Kinder", jung: "Junge Kundschaft bis 29", mitte: "30 bis 49", reif: "50 plus und 70 plus" };
+  var FARBEN2 = {
+    "wei\xDF": "#f7f5f0",
+    creme: "#efe6d2",
+    sand: "#d8c6a3",
+    beige: "#cdb894",
+    camel: "#b98a53",
+    cognac: "#9a5a2c",
+    braun: "#6b4a32",
+    grau: "#9a9a9a",
+    anthrazit: "#3f4247",
+    schwarz: "#1f1f22",
+    marine: "#1f2f4f",
+    hellblau: "#a9c8e6",
+    jeansblau: "#4f6f9a",
+    petrol: "#1f5f68",
+    "mintgr\xFCn": "#a8dcc4",
+    salbei: "#9cae8f",
+    olive: "#6f7040",
+    "flaschengr\xFCn": "#1f4a35",
+    senf: "#c9a13a",
+    gelb: "#f0d04a",
+    orange: "#e8843a",
+    koralle: "#ec7d6a",
+    rot: "#c8323a",
+    bordeaux: "#6e1f2e",
+    rosa: "#f2b8c6",
+    altrosa: "#c99a9a",
+    flieder: "#c4b0d8",
+    lila: "#7a4f9a"
+  };
+  var FARBLISTE = Object.keys(FARBEN2);
+  var MATERIALIEN = {
+    Baumwolle: { preis: 1, kosten: 1, wertig: 0.45 },
+    "Bio-Baumwolle": { preis: 1.12, kosten: 1.14, wertig: 0.6 },
+    Leinen: { preis: 1.2, kosten: 1.2, wertig: 0.6 },
+    Kaschmir: { preis: 2.3, kosten: 2.36, wertig: 1 },
+    Merino: { preis: 1.5, kosten: 1.52, wertig: 0.8 },
+    Denim: { preis: 1, kosten: 1, wertig: 0.45 },
+    Leder: { preis: 1.6, kosten: 1.62, wertig: 0.8 },
+    Polyester: { preis: 0.75, kosten: 0.68, wertig: 0.1 },
+    Seide: { preis: 1.9, kosten: 1.94, wertig: 0.95 },
+    Viskose: { preis: 0.9, kosten: 0.86, wertig: 0.3 }
+  };
+  var MATERIALLISTE = Object.keys(MATERIALIEN);
+  var G = (kinder, jung, mitte, reif) => ({ kinder, jung, mitte, reif });
+  var ARTIKELTYPEN = [
+    { typ: "Jeans-Shorts", kategorie: "unterteile", wgs: ["damen.denim", "damen.young", "herren.casual", "kinder.maedchen", "kinder.jungen", "sporttextil.freizeit"], saison: "sommer", preis: 35, materialien: ["Denim", "Bio-Baumwolle", "Baumwolle"], gruppe: G(0.9, 0.95, 0.55, 0.15), aufwand: 1 },
+    { typ: "Kaschmirpullover", kategorie: "oberteile", wgs: ["damen.strick", "herren.strick", "damen.gg"], saison: "winter", preis: 79, materialien: ["Kaschmir"], gruppe: G(0.1, 0.45, 0.8, 0.95), aufwand: 2 },
+    { typ: "Strickjacke", kategorie: "oberteile", wgs: ["damen.strick", "herren.strick", "damen.gg", "kinder.maedchen", "kinder.jungen"], saison: "winter", preis: 55, materialien: ["Merino", "Baumwolle", "Kaschmir", "Viskose", "Polyester"], gruppe: G(0.6, 0.4, 0.7, 0.9), aufwand: 1 },
+    { typ: "Bluse", kategorie: "oberteile", wgs: ["damen.blusen", "damen.gg", "damen.young"], saison: "ganz", preis: 45, materialien: ["Viskose", "Seide", "Baumwolle", "Leinen", "Polyester"], gruppe: G(0.1, 0.55, 0.85, 0.85), aufwand: 1 },
+    { typ: "Hemd", kategorie: "oberteile", wgs: ["herren.hemden", "herren.business", "herren.casual"], saison: "ganz", preis: 45, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Polyester"], gruppe: G(0.2, 0.55, 0.9, 0.85), aufwand: 1 },
+    { typ: "T-Shirt", kategorie: "oberteile", wgs: ["damen.blusen", "herren.casual", "damen.young", "kinder.jungen", "kinder.maedchen", "sporttextil.freizeit", "sport.bekleidung"], saison: "sommer", preis: 19, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Polyester", "Leinen"], gruppe: G(0.95, 0.95, 0.7, 0.45), aufwand: 1 },
+    { typ: "Poloshirt", kategorie: "oberteile", wgs: ["herren.casual", "herren.hemden", "damen.blusen", "sport.bekleidung"], saison: "sommer", preis: 35, materialien: ["Baumwolle", "Bio-Baumwolle", "Polyester"], gruppe: G(0.5, 0.45, 0.8, 0.85), aufwand: 1 },
+    { typ: "Kleid", kategorie: "unterteile", wgs: ["damen.kleider", "damen.young", "damen.gg"], saison: "sommer", preis: 59, materialien: ["Viskose", "Baumwolle", "Leinen", "Seide", "Polyester"], gruppe: G(0.2, 0.9, 0.85, 0.6), aufwand: 2 },
+    { typ: "Rock", kategorie: "unterteile", wgs: ["damen.hosen", "damen.gg", "damen.young"], saison: "ganz", preis: 45, materialien: ["Viskose", "Baumwolle", "Denim", "Leder", "Polyester"], gruppe: G(0.2, 0.6, 0.75, 0.7), aufwand: 1 },
+    { typ: "Chino", kategorie: "unterteile", wgs: ["herren.hosen", "damen.hosen", "herren.casual"], saison: "ganz", preis: 55, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen"], gruppe: G(0.3, 0.6, 0.9, 0.85), aufwand: 1 },
+    { typ: "Jeans", kategorie: "unterteile", wgs: ["damen.denim", "herren.casual", "herren.hosen", "kinder.jungen", "kinder.maedchen", "damen.young"], saison: "ganz", preis: 59, materialien: ["Denim", "Bio-Baumwolle"], gruppe: G(0.85, 0.95, 0.85, 0.55), aufwand: 2 },
+    { typ: "Mantel", kategorie: "jacken", wgs: ["damen.jacken", "herren.jacken"], saison: "winter", preis: 149, materialien: ["Merino", "Kaschmir", "Polyester", "Baumwolle", "Leder"], gruppe: G(0.2, 0.5, 0.8, 0.95), aufwand: 3 },
+    { typ: "Steppjacke", kategorie: "jacken", wgs: ["damen.jacken", "herren.jacken", "outdoor.bekleidung", "kinder.jungen", "kinder.maedchen"], saison: "winter", preis: 99, materialien: ["Polyester", "Baumwolle"], gruppe: G(0.9, 0.85, 0.8, 0.6), aufwand: 2 },
+    { typ: "Blazer", kategorie: "jacken", wgs: ["damen.jacken", "herren.business", "damen.blusen"], saison: "ganz", preis: 99, materialien: ["Merino", "Leinen", "Viskose", "Polyester", "Baumwolle"], gruppe: G(0.05, 0.55, 0.9, 0.8), aufwand: 2 },
+    { typ: "Sneaker", kategorie: "schuhe", wgs: ["accessoires.damenschuhe", "accessoires.herrenschuhe", "kinder.schuhe"], saison: "ganz", preis: 69, materialien: ["Leder", "Baumwolle", "Polyester"], gruppe: G(0.9, 0.95, 0.8, 0.55), aufwand: 2 },
+    { typ: "Pumps", kategorie: "schuhe", wgs: ["accessoires.damenschuhe"], saison: "ganz", preis: 79, materialien: ["Leder", "Polyester"], gruppe: G(0, 0.55, 0.8, 0.5), aufwand: 2 },
+    { typ: "Stiefel", kategorie: "schuhe", wgs: ["accessoires.damenschuhe", "accessoires.herrenschuhe", "kinder.schuhe"], saison: "winter", preis: 119, materialien: ["Leder", "Polyester"], gruppe: G(0.6, 0.7, 0.8, 0.75), aufwand: 2 },
+    { typ: "Pyjama", kategorie: "waesche", wgs: ["waesche.nacht"], saison: "ganz", preis: 39, materialien: ["Baumwolle", "Bio-Baumwolle", "Seide", "Viskose", "Polyester"], gruppe: G(0.8, 0.5, 0.75, 0.9), aufwand: 1 },
+    { typ: "Unterw\xE4sche", kategorie: "waesche", wgs: ["waesche.tag", "waesche.herren"], saison: "ganz", preis: 19, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Polyester", "Seide"], gruppe: G(0.6, 0.8, 0.85, 0.8), aufwand: 1 },
+    { typ: "BH", kategorie: "waesche", wgs: ["waesche.tag"], saison: "ganz", preis: 35, materialien: ["Polyester", "Baumwolle", "Seide", "Viskose"], gruppe: G(0, 0.8, 0.85, 0.75), aufwand: 2 },
+    { typ: "Socken", kategorie: "waesche", wgs: ["waesche.struempfe"], saison: "ganz", preis: 9, materialien: ["Baumwolle", "Bio-Baumwolle", "Merino", "Polyester"], gruppe: G(0.8, 0.75, 0.8, 0.8), aufwand: 1 },
+    { typ: "Schal", kategorie: "accessoires", wgs: ["accessoires.lederwaren"], saison: "winter", preis: 29, materialien: ["Kaschmir", "Merino", "Viskose", "Seide", "Polyester", "Baumwolle"], gruppe: G(0.3, 0.6, 0.8, 0.9), aufwand: 1 },
+    { typ: "M\xFCtze", kategorie: "accessoires", wgs: ["accessoires.lederwaren", "kinder.baby"], saison: "winter", preis: 19, materialien: ["Merino", "Baumwolle", "Kaschmir", "Polyester"], gruppe: G(0.85, 0.8, 0.6, 0.6), aufwand: 1 },
+    { typ: "Handtasche", kategorie: "accessoires", wgs: ["accessoires.lederwaren"], saison: "ganz", preis: 89, materialien: ["Leder", "Polyester", "Baumwolle"], gruppe: G(0, 0.7, 0.85, 0.8), aufwand: 2 },
+    { typ: "G\xFCrtel", kategorie: "accessoires", wgs: ["accessoires.lederwaren"], saison: "ganz", preis: 29, materialien: ["Leder", "Polyester"], gruppe: G(0.2, 0.6, 0.8, 0.8), aufwand: 1 },
+    { typ: "Bettw\xE4sche", kategorie: "home", wgs: ["wohnen.bett"], saison: "ganz", preis: 49, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Seide", "Polyester"], gruppe: G(0.6, 0.6, 0.9, 0.85), aufwand: 1 },
+    { typ: "Handtuch", kategorie: "home", wgs: ["wohnen.heimtextil"], saison: "ganz", preis: 15, materialien: ["Baumwolle", "Bio-Baumwolle", "Leinen"], gruppe: G(0.5, 0.6, 0.85, 0.85), aufwand: 1 },
+    { typ: "Kissen", kategorie: "home", wgs: ["wohnen.heimtextil", "wohnen.deko"], saison: "ganz", preis: 25, materialien: ["Baumwolle", "Leinen", "Viskose", "Polyester", "Seide"], gruppe: G(0.5, 0.75, 0.85, 0.75), aufwand: 1 },
+    { typ: "Tasse", kategorie: "home", wgs: ["wohnen.tisch"], saison: "ganz", preis: 9, materialien: ["Polyester"], gruppe: G(0.5, 0.8, 0.8, 0.7), aufwand: 1 },
+    { typ: "Vase", kategorie: "home", wgs: ["wohnen.deko"], saison: "ganz", preis: 29, materialien: ["Polyester"], gruppe: G(0.1, 0.6, 0.85, 0.85), aufwand: 1 },
+    { typ: "Lippenstift", kategorie: "beauty", wgs: ["beauty.pflege"], saison: "ganz", preis: 15, materialien: ["Polyester"], gruppe: G(0, 0.9, 0.8, 0.6), aufwand: 2 },
+    { typ: "Creme", kategorie: "beauty", wgs: ["beauty.pflege", "beauty.drogerie"], saison: "ganz", preis: 19, materialien: ["Polyester"], gruppe: G(0.3, 0.7, 0.85, 0.9), aufwand: 2 },
+    { typ: "Parfum", kategorie: "beauty", wgs: ["beauty.pflege"], saison: "ganz", preis: 45, materialien: ["Polyester"], gruppe: G(0, 0.85, 0.85, 0.75), aufwand: 3 },
+    { typ: "Kinderbody", kategorie: "kinder", wgs: ["kinder.baby"], saison: "ganz", preis: 12, materialien: ["Baumwolle", "Bio-Baumwolle", "Merino"], gruppe: G(1, 0, 0, 0), aufwand: 1 },
+    { typ: "Kinderkleid", kategorie: "kinder", wgs: ["kinder.maedchen", "kinder.baby"], saison: "sommer", preis: 25, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Leinen"], gruppe: G(1, 0, 0, 0), aufwand: 1 },
+    { typ: "Pl\xFCschtier", kategorie: "kinder", wgs: ["kinder.baby"], saison: "ganz", preis: 19, materialien: ["Polyester", "Bio-Baumwolle", "Baumwolle"], gruppe: G(1, 0, 0, 0), aufwand: 1 }
+  ];
+  var TYP = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
+  var FARB_BASIS = {
+    kinder: ["gelb", "rot", "hellblau", "rosa", "mintgr\xFCn", "orange", "jeansblau", "wei\xDF", "koralle"],
+    jung: ["schwarz", "wei\xDF", "jeansblau", "rosa", "lila", "olive", "grau", "koralle"],
+    mitte: ["marine", "wei\xDF", "olive", "salbei", "schwarz", "cognac", "sand", "petrol", "grau"],
+    reif: ["marine", "camel", "grau", "bordeaux", "creme", "sand", "anthrazit", "flaschengr\xFCn", "beige"]
+  };
+  var PREISLAGE_FAKTOR = { einstieg: 0.65, mitte: 1, gehoben: 1.7 };
+  var DAUER_STUFEN = [4, 8, 12, 24, 48];
+  var PRODUKT_PARAM = {
+    /** Kapazität je Marke und Produktkategorie nach wirksamer Stufe der Produktentwicklung 0..3. */
+    kapazitaet: [3, 5, 6, 8],
+    /** Entwicklungsbudget, das ein Artikel je Aufwandspunkt bei Preislage mitte braucht (Sättigung). */
+    budgetBedarf: 6e4,
+    /** Sterne verlieren nach einem Jahr im Sortiment bis zu 0,75 (über zwei weitere Jahre). */
+    alterung: 0.75,
+    /** Nachfragegewicht eines Produkts: 0,375 + 0,25 × Sterne (2,5 Sterne = 1, 5 Sterne = 1,6). */
+    gewichtBasis: 0.375,
+    gewichtJeStern: 0.25,
+    /** Preiselastizität des Umsatzes gegen den Normpreis. */
+    preisElastizitaet: 1.1,
+    /** Faktor auf die Markennachfrage je WG, begrenzt. */
+    faktorMin: 0.5,
+    faktorMax: 2,
+    /** Startanteil, wenn ein Produkt in eine WG ohne Markenanteil kommt. */
+    anteilNeu: 0.1
+  };
+  function hashRng(seed, sid, g) {
+    return { rng: (Math.imul(seed + 40503, 2654435761) ^ Math.imul(sid + 1013, 40503) ^ Math.imul(g + 7, 668265261)) >>> 0 };
+  }
+  function ziehe(r, liste, n) {
+    const pool = [...liste];
+    const out = [];
+    while (out.length < n && pool.length) out.push(pool.splice(Math.floor(zufall(r) * pool.length), 1)[0]);
+    return out;
+  }
+  function trendFuer(s2, sid) {
+    const sommer = (sid % 2 + 2) % 2 === 0;
+    const gruppen = {};
+    Object.keys(TREND_GRUPPEN).forEach((g, i) => {
+      const r = hashRng(s2.seed, sid, i);
+      const typen = ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
+      const artikel = ziehe(r, typen.map((t) => t.typ), 5);
+      const basis3 = FARB_BASIS[g];
+      const farben = [...ziehe(r, basis3, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis3.includes(f)), 2)];
+      const out = ziehe(r, FARBLISTE.filter((f) => !farben.includes(f)), 3);
+      const mats = ziehe(r, MATERIALLISTE.filter((m) => m !== "Polyester" || g === "kinder"), 3);
+      gruppen[g] = { farben, artikel, materialien: mats, out };
+    });
+    return { saison: sid, name: saisonName(s2, sid), gruppen };
+  }
+  function trendGruppe(m) {
+    if (m.zielgruppe.geschlecht === "kinder") return "kinder";
+    const a = m.zielgruppe.alter;
+    return a === "50+" || a === "70+" ? "reif" : a === "30-49" ? "mitte" : "jung";
+  }
+  var PREIS_STUFE = { einstieg: 0, mitte: 1, gehoben: 2 };
+  function normpreis(typ, preislage, material2, qualitaet3) {
+    const p2 = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet3);
+    return Math.max(3, Math.round(p2) - 0.01);
+  }
+  var produktStufe = (s2) => clamp(s2.hq?.wirkung.produkt ?? 1, 0, 3);
+  function teamStaerke(s2) {
+    const cpo = s2.vorstand?.ressorts.cpo.person;
+    return clamp(0.6 * Math.min(1, produktStufe(s2) / 2) + 0.4 * (cpo ? cpo.fachwissen / 100 : 0.2), 0, 1);
+  }
+  function wgFuer(s2, m, t, wunsch) {
+    const ok5 = (wg) => !!WG[wg] && s2.basisUmsatz[WG[wg].bereich] !== void 0 && passungWg(m, wg) > 0;
+    if (wunsch) return t.wgs.includes(wunsch) && ok5(wunsch) ? wunsch : void 0;
+    return t.wgs.find((wg) => ok5(wg) && (m.wgAnteile[wg] ?? 0) > 0) ?? t.wgs.find(ok5);
+  }
+  function bewerte(s2, m, e, team, trend, trendOhne = 0.4) {
+    const t = TYP[e.typ];
+    const g = trendGruppe(m);
+    const mat2 = MATERIALIEN[e.material];
+    const farbBasis = FARB_BASIS[g].includes(e.farbe) ? 1 : 0.35;
+    const matZiel = g === "reif" ? mat2.wertig : g === "mitte" ? 0.4 + 0.6 * mat2.wertig : g === "jung" ? 1 - 0.5 * mat2.wertig : e.material === "Bio-Baumwolle" || e.material === "Baumwolle" || e.material === "Merino" ? 1 : 0.4;
+    const zielgruppe = 0.55 * t.gruppe[g] + 0.25 * farbBasis + 0.2 * matZiel;
+    let tr = trendOhne;
+    if (trend) {
+      const x = trend.gruppen[g];
+      tr = 0.1 + (x.artikel.includes(e.typ) ? 0.4 : 0) + (x.farben.includes(e.farbe) ? 0.35 : 0) + (x.materialien.includes(e.material) ? 0.15 : 0) - (x.out.includes(e.farbe) ? 0.25 : 0);
+      const sommer = (trend.saison % 2 + 2) % 2 === 0;
+      if (t.saison !== "ganz" && t.saison === "sommer" !== sommer) tr -= 0.15;
+    }
+    const trendW = clamp(tr, 0, 1);
+    const dp = Math.abs(PREIS_STUFE[e.preislage] - PREIS_STUFE[m.preislage]);
+    const qZiel = [2.5, 3.2, 4.3][PREIS_STUFE[e.preislage]];
+    const mZiel = [0.3, 0.55, 0.85][PREIS_STUFE[e.preislage]];
+    const preisQualitaet = clamp((dp === 0 ? 1 : dp === 1 ? 0.6 : 0.25) * (1 - 0.18 * Math.abs(e.qualitaet - qZiel)) * (1 - 0.5 * Math.abs(mat2.wertig - mZiel)), 0, 1);
+    const bedarf = PRODUKT_PARAM.budgetBedarf * t.aufwand * Math.sqrt(PREISLAGE_FAKTOR[e.preislage]);
+    const eff = e.budgetWoche * e.dauer * Math.min(1, Math.pow(e.dauer / 12, 0.35));
+    const entwicklung = clamp(1 - Math.exp(-eff / bedarf), 0, 1);
+    return { zielgruppe: r2(zielgruppe), trend: r2(trendW), preisQualitaet: r2(preisQualitaet), entwicklung: r2(entwicklung), team: r2(team) };
+  }
+  var r2 = (x) => Math.round(x * 100) / 100;
+  function scoreAus(t) {
+    return 0.28 * t.zielgruppe + 0.25 * t.trend + 0.15 * t.preisQualitaet + 0.2 * t.entwicklung + 0.12 * t.team;
+  }
+  var halbe = (x) => clamp(Math.round(x * 2) / 2, 0.5, 5);
+  var sterneAus = (score) => halbe(0.5 + 4.5 * score);
+  function sterneWirksam(s2, p2) {
+    if (p2.sterne === void 0) return 0;
+    const alter = s2.woche - (p2.seit ?? s2.woche);
+    return Math.max(0.5, p2.sterne - PRODUKT_PARAM.alterung * clamp((alter - 52) / 104, 0, 1));
+  }
+  var imSortiment = (p2) => p2.status === "sortiment";
+  function gewicht(s2, p2) {
+    const st = sterneWirksam(s2, p2);
+    return (PRODUKT_PARAM.gewichtBasis + PRODUKT_PARAM.gewichtJeStern * st) * Math.pow(p2.normpreis / Math.max(0.5, p2.preis), PRODUKT_PARAM.preisElastizitaet);
+  }
+  function rohFaktor(s2, markeId, wg) {
+    let sum2 = 0;
+    let n = 0;
+    for (const p2 of s2.produkte.liste) if (p2.marke === markeId && p2.wg === wg && imSortiment(p2)) {
+      sum2 += gewicht(s2, p2);
+      n++;
+    }
+    if (!n) return 0.6;
+    return sum2 / n * Math.min(1.12, 0.7 + 0.15 * n);
+  }
+  function rohMarge(s2, markeId, wg) {
+    let sum2 = 0;
+    let gw = 0;
+    for (const p2 of s2.produkte.liste) if (p2.marke === markeId && p2.wg === wg && imSortiment(p2)) {
+      const x = gewicht(s2, p2);
+      sum2 += x * (1 - p2.ekStueck / Math.max(0.5, p2.preis) - p2.margeErwartet);
+      gw += x;
+    }
+    return gw > 0 ? sum2 / gw : 0;
+  }
+  function produktNachfrageFaktor(s2, markeId, wg) {
+    const pr2 = s2.produkte;
+    if (!pr2) return 1;
+    const key = `${markeId}|${wg}`;
+    const f = rohFaktor(s2, markeId, wg) / (pr2.basisF[key] ?? 1);
+    return clamp(f, PRODUKT_PARAM.faktorMin, PRODUKT_PARAM.faktorMax);
+  }
+  function produktMargeDelta(s2, markeId, wg) {
+    const pr2 = s2.produkte;
+    if (!pr2) return 0;
+    return clamp(rohMarge(s2, markeId, wg) - (pr2.basisM[`${markeId}|${wg}`] ?? 0), -0.25, 0.25);
+  }
+  function margeErwartet(s2, m, wg) {
+    const st = s2.einkauf?.wgs[wg];
+    return (st?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
+  }
+  function ekStueck(normp, me, material2, qualitaet3) {
+    const mat2 = MATERIALIEN[material2];
+    return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet3 - 3)) * 100) / 100;
+  }
+  function produktName(typ, farbe3, material2) {
+    const t = TYP[typ];
+    const matWort = t.materialien.length > 1 && material2 !== t.materialien[0] ? ` aus ${material2}` : "";
+    return `${typ} ${farbe3}${matWort}`;
+  }
+  function neuesProdukt(s2, m, e, wg, team) {
+    const t = TYP[e.typ];
+    const np = normpreis(t, e.preislage, e.material, e.qualitaet);
+    const me = margeErwartet(s2, m, wg);
+    s2.produkte.zaehler += 1;
+    return {
+      id: `pr${s2.produkte.zaehler}`,
+      marke: m.id,
+      typ: e.typ,
+      name: e.name?.trim() || produktName(e.typ, e.farbe, e.material),
+      farbe: e.farbe,
+      material: e.material,
+      stil: e.stil,
+      preislage: e.preislage,
+      qualitaet: e.qualitaet,
+      wg,
+      kategorie: t.kategorie,
+      normpreis: np,
+      preis: np,
+      ekStueck: ekStueck(np, me, e.material, e.qualitaet),
+      margeErwartet: me,
+      status: "entwicklung",
+      start: s2.woche,
+      dauer: e.dauer,
+      budgetWoche: e.budgetWoche,
+      fertig: s2.woche + e.dauer,
+      team,
+      verkauf: [],
+      umsatz: [],
+      saison: saisonId(s2.woche + e.dauer)
+    };
+  }
+  function einfuehren(s2, p2, rauschen2) {
+    const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
+    if (!m) return;
+    const teile2 = bewerte(s2, m, p2, p2.team, trendFuer(s2, saisonId(s2.woche)));
+    const r = s2.produkte;
+    const noise = rauschen2 ? clamp(normal(r) * 0.25, -0.5, 0.5) : 0;
+    p2.teile = teile2;
+    p2.sterne = sterneAus(scoreAus(teile2) + noise / 4.5);
+    p2.status = "sortiment";
+    p2.seit = s2.woche;
+    p2.saison = saisonId(s2.woche);
+  }
+  var START = {
+    em1: [
+      ["Bluse", "beige", "Polyester", "damen.blusen", 0.15],
+      ["Bluse", "flieder", "Viskose", "damen.blusen", 0.15],
+      ["Strickjacke", "altrosa", "Polyester", "damen.strick", 0.15],
+      ["Strickjacke", "grau", "Viskose", "damen.strick", 0.2],
+      ["Rock", "marine", "Polyester", "damen.hosen", 0.15],
+      ["Chino", "beige", "Baumwolle", "damen.hosen", 0.15],
+      ["Bluse", "altrosa", "Polyester", "damen.gg", 0.1],
+      ["Mantel", "camel", "Polyester", "damen.jacken", 0.25],
+      ["Kleid", "bordeaux", "Viskose", "damen.kleider", 0.15]
+    ],
+    em2: [
+      ["Hemd", "hellblau", "Baumwolle", "herren.hemden", 0.55],
+      ["Hemd", "wei\xDF", "Baumwolle", "herren.hemden", 0.5],
+      ["Blazer", "marine", "Merino", "herren.business", 0.55],
+      ["Chino", "sand", "Baumwolle", "herren.hosen", 0.5],
+      ["Strickjacke", "anthrazit", "Merino", "herren.strick", 0.5],
+      ["Poloshirt", "marine", "Baumwolle", "herren.casual", 0.45]
+    ],
+    em3: [
+      ["Kissen", "salbei", "Leinen", "wohnen.heimtextil", 0.6],
+      ["Handtuch", "wei\xDF", "Baumwolle", "wohnen.heimtextil", 0.55],
+      ["Bettw\xE4sche", "grau", "Baumwolle", "wohnen.bett", 0.55],
+      ["Bettw\xE4sche", "creme", "Bio-Baumwolle", "wohnen.bett", 0.6],
+      ["Tasse", "olive", "Polyester", "wohnen.tisch", 0.5],
+      ["Vase", "sand", "Polyester", "wohnen.deko", 0.5]
+    ],
+    em4: [
+      ["Kinderbody", "wei\xDF", "Baumwolle", "kinder.baby", 0.45],
+      ["Pl\xFCschtier", "braun", "Polyester", "kinder.baby", 0.4],
+      ["Kinderkleid", "rosa", "Baumwolle", "kinder.maedchen", 0.45],
+      ["T-Shirt", "gelb", "Baumwolle", "kinder.jungen", 0.45],
+      ["Jeans", "jeansblau", "Denim", "kinder.jungen", 0.4],
+      ["T-Shirt", "rosa", "Baumwolle", "kinder.maedchen", 0.4]
+    ]
+  };
+  function erzeugeProdukte(s2) {
+    const pr2 = { liste: [], zaehler: 0, rng: s2.seed * 3266489917 + 32269 >>> 0, basisF: {}, basisM: {} };
+    s2.produkte = pr2;
+    for (const m of s2.eigenmarken.marken) {
+      for (const [typ, farbe3, material2, wg, budgetAnteil] of START[m.id] ?? []) {
+        const t = TYP[typ];
+        const p2 = neuesProdukt(s2, m, { typ, farbe: farbe3, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
+        p2.start = -300;
+        p2.fertig = -288;
+        p2.teile = bewerte(s2, m, p2, p2.team, void 0, m.id === "em1" ? 0.1 : 0.4);
+        p2.sterne = sterneAus(scoreAus(p2.teile));
+        p2.status = "sortiment";
+        p2.seit = -260;
+        p2.saison = saisonId(-260);
+        pr2.liste.push(p2);
+      }
+    }
+    setzeBasis(s2);
+    return pr2;
+  }
+  function setzeBasis(s2) {
+    const pr2 = s2.produkte;
+    for (const m of s2.eigenmarken.marken) for (const wg of /* @__PURE__ */ new Set([...Object.keys(m.wgAnteile), ...Object.keys(m.wgIst), ...pr2.liste.filter((p2) => p2.marke === m.id).map((p2) => p2.wg)])) {
+      const key = `${m.id}|${wg}`;
+      pr2.basisF[key] = rohFaktor(s2, m.id, wg);
+      pr2.basisM[key] = rohMarge(s2, m.id, wg);
+    }
+  }
+  function kapazitaet(s2) {
+    const L2 = produktStufe(s2);
+    const k = PRODUKT_PARAM.kapazitaet;
+    return Math.floor(k[Math.min(3, Math.floor(L2 + 1e-9))]);
+  }
+  function belegt(s2, markeId, kat, ohne2) {
+    return s2.produkte.liste.filter((p2) => p2.marke === markeId && p2.kategorie === kat && p2.id !== ohne2 && (p2.status === "sortiment" || p2.status === "entwicklung")).length;
+  }
+  function produktKostenWoche(s2) {
+    return s2.produkte ? s2.produkte.liste.reduce((a, p2) => a + (p2.status === "entwicklung" ? p2.budgetWoche : 0), 0) : 0;
+  }
+  function produkteWoche(s2) {
+    var _a2, _b, _c, _d;
+    const pr2 = s2.produkte;
+    if (!pr2) return;
+    let kosten = false;
+    for (const p2 of pr2.liste) {
+      if (p2.status === "entwicklung" && s2.woche >= p2.fertig) {
+        einfuehren(s2, p2, !s2.prognose);
+        kosten = true;
+        const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
+        if (m && (m.wgAnteile[p2.wg] ?? 0) <= 0 && m.status !== "eingestellt") eigenmarkeAnteil(s2, m.id, p2.wg, PRODUKT_PARAM.anteilNeu);
+        melde(s2, "info", `${m?.name ?? "Eigenmarke"}: ${p2.name} ist im Sortiment (${(p2.sterne ?? 0).toLocaleString("de-DE")} Sterne).`);
+      }
+    }
+    for (const m of s2.eigenmarken.marken) {
+      if (m.status === "eingestellt") {
+        for (const p2 of pr2.liste) if (p2.marke === m.id && p2.status !== "ausgelistet") {
+          if (p2.status === "entwicklung") kosten = true;
+          p2.status = "ausgelistet";
+        }
+        continue;
+      }
+      for (const wg of Object.keys(m.wgAnteile)) {
+        if (pr2.liste.some((p3) => p3.marke === m.id && p3.wg === wg && p3.status !== "ausgelistet")) continue;
+        const t = ARTIKELTYPEN.find((x) => x.wgs.includes(wg) && x.gruppe[trendGruppe(m)] >= 0.5) ?? ARTIKELTYPEN.find((x) => x.wgs.includes(wg));
+        if (!t) continue;
+        const farbe3 = FARB_BASIS[trendGruppe(m)][0];
+        const p2 = neuesProdukt(s2, m, { typ: t.typ, farbe: farbe3, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
+        p2.basis = true;
+        p2.budgetWoche = 0;
+        p2.teile = bewerte(s2, m, p2, 0.4, void 0);
+        p2.sterne = sterneAus(scoreAus(p2.teile));
+        p2.status = "sortiment";
+        p2.seit = s2.woche;
+        (_a2 = pr2.basisF)[_b = `${m.id}|${wg}`] ?? (_a2[_b] = 1);
+        (_c = pr2.basisM)[_d = `${m.id}|${wg}`] ?? (_c[_d] = 0);
+        pr2.liste.push(p2);
+      }
+    }
+    if (kosten) hqAktualisiere(s2);
+  }
+  function produkteBuchen(s2) {
+    const pr2 = s2.produkte;
+    if (!pr2) return;
+    const jeKey = /* @__PURE__ */ new Map();
+    for (const p2 of pr2.liste) if (imSortiment(p2)) {
+      const k = `${p2.marke}|${p2.wg}`;
+      const l = jeKey.get(k);
+      if (l) l.push(p2);
+      else jeKey.set(k, [p2]);
+    }
+    for (const [k, liste] of jeKey) {
+      const [m, wg] = k.split("|");
+      const st = s2.einkauf.wgs[wg];
+      const u = st?.v?.u?.length ? st.v.u[st.v.u.length - 1] * (st.pool[m] ?? 0) : 0;
+      const gw = liste.map((p2) => gewicht(s2, p2));
+      const sum2 = gw.reduce((a, b2) => a + b2, 0) || 1;
+      liste.forEach((p2, i) => {
+        const x = u * gw[i] / sum2;
+        p2.umsatz.push(eur(x));
+        p2.verkauf.push(Math.round(x / Math.max(0.5, p2.preis)));
+        if (p2.umsatz.length > 13) {
+          p2.umsatz.shift();
+          p2.verkauf.shift();
+        }
+      });
+    }
+    for (const p2 of pr2.liste) if (!imSortiment(p2) && p2.verkauf.length && p2.verkauf[p2.verkauf.length - 1] !== 0) {
+      p2.umsatz.push(0);
+      p2.verkauf.push(0);
+      if (p2.umsatz.length > 13) {
+        p2.umsatz.shift();
+        p2.verkauf.shift();
+      }
+    }
+  }
+  var PRODUKT_AKTIONEN = /* @__PURE__ */ new Set(["produktEntwickeln", "produktPreis", "produktAuslisten", "produktSortiment"]);
+  function pruefe(s2, e) {
+    const m = s2.eigenmarken.marken.find((x) => x.id === e.marke);
+    const preislage = e.preislage ?? m?.preislage ?? "mitte";
+    const qualitaet3 = clamp(Math.round(e.qualitaet ?? m?.qualitaet ?? 3), 1, 5);
+    const stil = e.stil ?? m?.stil ?? "klassisch";
+    const leer3 = { preislage, qualitaet: qualitaet3, stil, kapFrei: 0 };
+    if (!m || m.status === "eingestellt") return { ...leer3, fehler: "Marke nicht gefunden." };
+    const t = TYP[e.typ];
+    if (!t) return { ...leer3, m, fehler: "Unbekannter Artikeltyp." };
+    if (!FARBEN2[e.farbe]) return { ...leer3, m, t, fehler: "Unbekannte Farbe." };
+    if (!t.materialien.includes(e.material)) return { ...leer3, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. M\xF6glich: ${t.materialien.join(", ")}.` };
+    if (!DAUER_STUFEN.includes(e.dauer)) return { ...leer3, m, t, fehler: "Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen." };
+    if (!(e.budgetWoche >= 0)) return { ...leer3, m, t, fehler: "Budget je Woche angeben." };
+    const wg = wgFuer(s2, m, t, e.wg);
+    if (!wg) return { ...leer3, m, t, fehler: `${e.typ} passt nicht zu ${m.name} (Kategorie oder Zielgruppe).` };
+    const kapFrei = kapazitaet(s2) - belegt(s2, m.id, t.kategorie);
+    if (kapFrei <= 0) return { ...leer3, m, t, wg, kapFrei, fehler: `Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[t.kategorie]} bei ${m.name} erreicht. Bitte erst Produkte auslisten.` };
+    return { m, t, wg, preislage, qualitaet: qualitaet3, stil, kapFrei };
+  }
+  function produktAktion(s2, a) {
+    const ok5 = (text3) => ({ ok: true, text: text3 });
+    const fehler5 = (text3) => ({ ok: false, text: text3 });
+    if (a.typ === "produktEntwickeln") {
+      const e = a.entwurf;
+      const c = pruefe(s2, e);
+      if (c.fehler || !c.m || !c.wg) return fehler5(c.fehler ?? "Ung\xFCltiger Entwurf.");
+      if (s2.phase === "insolvenz" && e.budgetWoche * e.dauer > 15e5) return fehler5("Im Verfahren gibt der Sachwalter h\xF6chstens 1,5 Mio. \u20AC je Entwicklung frei.");
+      const p3 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, teamStaerke(s2));
+      s2.produkte.liste.push(p3);
+      hqAktualisiere(s2);
+      return ok5(`${c.m.name}: ${p3.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p3.fertig + 1}.`);
+    }
+    const p2 = s2.produkte.liste.find((x) => x.id === a.produkt);
+    if (!p2 || p2.status === "ausgelistet") return fehler5("Produkt nicht gefunden.");
+    switch (a.typ) {
+      case "produktPreis": {
+        const neu = Math.round(clamp(a.preis, p2.normpreis * 0.4, p2.normpreis * 2.5) * 100) / 100;
+        p2.preis = neu;
+        const marge = 1 - p2.ekStueck / neu;
+        return ok5(`${p2.name}: Preis ${neu.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} \u20AC, Marge ${Math.round(marge * 100)} %.`);
+      }
+      case "produktAuslisten": {
+        const warEnt = p2.status === "entwicklung";
+        p2.status = "ausgelistet";
+        if (warEnt) hqAktualisiere(s2);
+        return ok5(`${p2.name} ausgelistet${warEnt ? ", die Entwicklung ist gestoppt" : ""}.`);
+      }
+      case "produktSortiment": {
+        if (p2.status === "entwicklung") return fehler5("Das Produkt ist noch in Entwicklung.");
+        if (a.an) {
+          if (p2.status === "sortiment") return ok5(`${p2.name} ist im Sortiment.`);
+          if (belegt(s2, p2.marke, p2.kategorie) >= kapazitaet(s2)) return fehler5(`Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[p2.kategorie]} erreicht.`);
+          p2.status = "sortiment";
+          return ok5(`${p2.name} wieder im Sortiment.`);
+        }
+        p2.status = "pausiert";
+        return ok5(`${p2.name} vor\xFCbergehend aus dem Sortiment.`);
+      }
+    }
+    return fehler5("Unbekannte Aktion.");
+  }
+  function produktKi(s2, guete, r) {
+    if (s2.woche % 4 !== 2) return void 0;
+    const texte = [];
+    const trifft3 = () => zufall(r) < 0.3 + 0.65 * guete;
+    const kap = kapazitaet(s2);
+    for (const m of s2.eigenmarken.marken.filter(istVerkaufsaktiv)) {
+      if (s2.produkte.liste.some((p2) => p2.marke === m.id && p2.status === "entwicklung")) continue;
+      const eigene = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status === "sortiment");
+      const kats = [...new Set(eigene.map((p2) => p2.kategorie))];
+      if (!kats.length) continue;
+      const gut = trifft3();
+      for (const k of kats) {
+        if (belegt(s2, m.id, k) < kap) continue;
+        const liste = eigene.filter((p2) => p2.kategorie === k).sort((a, b2) => sterneWirksam(s2, a) - sterneWirksam(s2, b2));
+        const weg = gut ? liste[0] : waehle(r, liste);
+        if (weg && (!gut || sterneWirksam(s2, weg) <= 3)) {
+          produktAktion(s2, { typ: "produktAuslisten", produkt: weg.id });
+          texte.push(`${m.name}: ${weg.name} ausgelistet`);
+        }
+      }
+      const frei6 = kats.filter((k) => belegt(s2, m.id, k) < kap);
+      if (!frei6.length) continue;
+      const g = trendGruppe(m);
+      const trend = trendFuer(s2, saisonId(s2.woche + 12)).gruppen[g];
+      const kand = ARTIKELTYPEN.filter((t) => frei6.includes(t.kategorie) && wgFuer(s2, m, t));
+      if (!kand.length) continue;
+      let e;
+      if (gut) {
+        const bewertet = kand.flatMap((t) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe3) => t.materialien.map((material2) => ({ t, farbe: farbe3, material: material2 })))).map((x) => ({ ...x, sc: scoreAus(bewerte(s2, m, { typ: x.t.typ, farbe: x.farbe, material: x.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a, b3) => b3.sc - a.sc);
+        const b2 = bewertet[0];
+        e = { marke: m.id, typ: b2.t.typ, farbe: b2.farbe, material: b2.material, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * b2.t.aufwand * 1.6 / 12 / 1e3) * 1e3 };
+      } else {
+        const t = waehle(r, kand);
+        e = { marke: m.id, typ: t.typ, farbe: waehle(r, FARBLISTE), material: waehle(r, t.materialien), dauer: waehle(r, [4, 8]), budgetWoche: 5e3 };
+      }
+      const res = produktAktion(s2, { typ: "produktEntwickeln", entwurf: e });
+      if (res.ok) texte.push(res.text);
+    }
+    return texte.length ? texte.join(" ") : void 0;
+  }
+  function produktKarte(s2, p2) {
+    const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
+    const n = p2.verkauf.length;
+    const a = n ? p2.verkauf[n - 1] : 0;
+    const b2 = n > 1 ? p2.verkauf[n - 2] : a;
+    const ent = p2.status === "entwicklung";
+    return {
+      id: p2.id,
+      marke: p2.marke,
+      markeName: m?.name ?? p2.marke,
+      typ: p2.typ,
+      name: p2.name,
+      farbe: p2.farbe,
+      farbeHex: FARBEN2[p2.farbe],
+      material: p2.material,
+      stil: p2.stil,
+      preislage: p2.preislage,
+      qualitaet: p2.qualitaet,
+      wg: p2.wg,
+      wgName: WG[p2.wg]?.name ?? p2.wg,
+      bereich: WG[p2.wg]?.bereich,
+      kategorie: p2.kategorie,
+      kategorieName: PRODUKT_KATEGORIEN[p2.kategorie],
+      status: p2.status,
+      normpreis: p2.normpreis,
+      preis: p2.preis,
+      ekStueck: p2.ekStueck,
+      marge: Math.round((1 - p2.ekStueck / Math.max(0.5, p2.preis)) * 1e3) / 1e3,
+      sterne: ent ? 0 : halbe(sterneWirksam(s2, p2)),
+      sterneEinfuehrung: p2.sterne,
+      sterneTeile: p2.teile,
+      verkaufLetzteWoche: a,
+      verkaufVorwoche: b2,
+      veraenderung: a - b2,
+      veraenderungProzent: b2 > 0 ? Math.round((a - b2) / b2 * 1e3) / 1e3 : 0,
+      umsatzLetzteWoche: p2.umsatz.length ? p2.umsatz[p2.umsatz.length - 1] : 0,
+      start: p2.start,
+      fertigWoche: p2.fertig,
+      dauer: p2.dauer,
+      budgetWoche: p2.budgetWoche,
+      fortschritt: ent ? clamp((s2.woche - p2.start) / Math.max(1, p2.dauer), 0, 1) : 1,
+      seit: p2.seit,
+      basis: !!p2.basis
+    };
+  }
+  function produkte(s2, marke4) {
+    const kap = kapazitaet(s2);
+    const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
+      const liste = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
+      const kats = [...new Set(liste.map((p2) => p2.kategorie))];
+      const ent = liste.filter((p2) => p2.status === "entwicklung").length;
+      const voll2 = kats.filter((k) => belegt(s2, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
+      return {
+        marke: m.id,
+        name: m.name,
+        farbe: m.farbe,
+        zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`,
+        trendGruppe: trendGruppe(m),
+        kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s2, m.id, k) })),
+        produkte: liste.map((p2) => produktKarte(s2, p2)),
+        inEntwicklung: ent,
+        hinweis: ent ? `Wir entwickeln gerade ${ent === 1 ? "ein neues Produkt" : `${ent} neue Produkte`}.` : voll2.length ? `Kapazit\xE4t erreicht bei ${voll2.join(", ")}. F\xFCr Neues bitte erst auslisten.` : "Wir entwickeln gerade keine neuen Produkte. Zeit zu investieren."
+      };
+    });
+    return { woche: s2.woche, kapazitaet: kap, stufe: Math.round(produktStufe(s2) * 100) / 100, team: Math.round(teamStaerke(s2) * 100) / 100, kostenWoche: eur(produktKostenWoche(s2)), marken: marken2 };
+  }
+  function produktKatalog(_s) {
+    return {
+      kategorien: Object.keys(PRODUKT_KATEGORIEN).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
+      typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
+      farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN2[f] })),
+      materialien: MATERIALLISTE.map((m) => ({ name: m, ...MATERIALIEN[m] })),
+      preislagen: Object.keys(PREISLAGE_FAKTOR).map((id) => ({ id, faktor: PREISLAGE_FAKTOR[id] })),
+      dauer: [...DAUER_STUFEN],
+      budgetSchritt: 5e3
+    };
+  }
+  function trendbericht(s2) {
+    const sid = saisonId(s2.woche);
+    return {
+      woche: s2.woche,
+      aktuell: trendFuer(s2, sid),
+      naechste: trendFuer(s2, sid + 1),
+      zielgruppen: Object.keys(TREND_GRUPPEN).map((id) => ({ id, name: TREND_GRUPPEN[id], grundfarben: [...FARB_BASIS[id]] })),
+      hinweis: "Was zur Einf\xFChrung angesagt ist, z\xE4hlt. Lange Entwicklungen landen in der n\xE4chsten Saison."
+    };
+  }
+  function produktVorschau(s2, e) {
+    const c = pruefe(s2, e);
+    const fertig = s2.woche + (e.dauer || 0);
+    const sid = saisonId(fertig);
+    const bekannt = sid <= saisonId(s2.woche) + 1;
+    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
+    if (!c.m || !c.t || !c.wg) return leer3;
+    const team = teamStaerke(s2);
+    const teile2 = bewerte(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
+    const st = sterneAus(scoreAus(teile2));
+    const cpo = s2.vorstand?.ressorts.cpo.person;
+    const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
+    const np = normpreis(c.t, c.preislage, e.material, c.qualitaet);
+    const me = margeErwartet(s2, c.m, c.wg);
+    const ek2 = ekStueck(np, me, e.material, c.qualitaet);
+    const hinweise = [];
+    if (teile2.trend < 0.3 && bekannt) hinweise.push("Trifft den Trend der Einf\xFChrungssaison kaum");
+    if (teile2.zielgruppe < 0.5) hinweise.push(`Passt wenig zur Zielgruppe von ${c.m.name}`);
+    if (teile2.entwicklung < 0.5) hinweise.push("Budget oder Dauer knapp f\xFCr diesen Artikel");
+    if (!bekannt) hinweise.push("Trend der Einf\xFChrungssaison noch unbekannt");
+    if ((c.m.wgAnteile[c.wg] ?? 0) <= 0) hinweise.push(`${c.m.name} bekommt daf\xFCr einen Anteil von ${Math.round(PRODUKT_PARAM.anteilNeu * 100)} % in ${WG[c.wg].name}`);
+    return {
+      ok: !c.fehler,
+      fehler: c.fehler,
+      wg: c.wg,
+      wgName: WG[c.wg].name,
+      kategorie: c.t.kategorie,
+      name: e.name?.trim() || produktName(e.typ, e.farbe, e.material),
+      normpreis: np,
+      ekStueck: ek2,
+      marge: Math.round((1 - ek2 / np) * 1e3) / 1e3,
+      kosten: eur(e.budgetWoche * e.dauer),
+      fertigWoche: fertig,
+      saisonEinfuehrung: saisonName(s2, sid),
+      sterneErwartet: st,
+      sterneVon: halbe(st - spanne / 2),
+      sterneBis: halbe(st + spanne / 2),
+      teile: teile2,
+      trendBekannt: bekannt,
+      kapazitaetFrei: c.kapFrei,
+      hinweise
+    };
+  }
+
+  // ../engine/src/einkauf.ts
+  var JACKE = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
+  var STRICK = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
+  var ROH2 = {
+    damen: [
+      ["jacken", "Jacken und M\xE4ntel", 0.17, 0.1, 0.01, 26, 8, 4, 40, "Bekleidung", "Lanberg Outerwear", JACKE],
+      ["kleider", "Kleider", 0.11, 0.15, 0.02, 22, 6, 4, 25, "Bekleidung", "Costa Viva Moden", { 3: 1.3, 4: 1.5, 5: 1.5, 6: 1.2, 10: 0.8, 11: 0.8, 0: 0.6 }],
+      ["blusen", "Blusen und Shirts", 0.14, 0.35, 0, 20, 6, 3, 25, "Bekleidung", "Weberei Kaltenbach"],
+      ["strick", "Strick", 0.11, 0.3, 0, 22, 6, 3, 25, "Bekleidung", "Strickhaus Ammerland", STRICK],
+      ["hosen", "Hosen und R\xF6cke", 0.13, 0.45, -0.01, 20, 6, 3, 25, "Bekleidung", "Brandauer Hosenmanufaktur"],
+      ["denim", "Denim", 0.09, 0.55, -0.02, 18, 6, 3, 20, "Bekleidung", "Bluefield Denim"],
+      ["young", "Young Fashion", 0.1, 0.1, 0.01, 14, 4, 3, 20, "Bekleidung", "Urbanrise", void 0, { jung: true }],
+      ["gg", "Gro\xDFe Gr\xF6\xDFen", 0.1, 0.4, 0, 20, 6, 3, 20, "Bekleidung", "Ellmann Moden", void 0, { reif: true }],
+      ["trachten", "Trachten", 0.05, 0.15, 0.03, 26, 8, 4, 15, "", "Alpenhof Trachten", { 7: 1.5, 8: 2.6, 9: 1.2, 0: 0.5, 1: 0.5, 2: 0.6 }]
+    ],
+    herren: [
+      ["business", "Business und Anz\xFCge", 0.2, 0.35, 0.02, 22, 8, 4, 30, "Bekleidung", "Hallberg & S\xF6hne", void 0, { reif: true }],
+      ["casual", "Casual", 0.2, 0.3, 0, 20, 6, 3, 25, "Bekleidung", "Nordkap Menswear"],
+      ["hemden", "Hemden", 0.18, 0.6, -0.01, 18, 6, 3, 25, "Bekleidung", "Hallberg & S\xF6hne"],
+      ["hosen", "Hosen", 0.16, 0.5, -0.01, 18, 6, 3, 25, "Bekleidung", "Brandauer Hosenmanufaktur"],
+      ["strick", "Strick und Sweat", 0.12, 0.3, 0, 22, 6, 3, 20, "Bekleidung", "Strickhaus Ammerland", STRICK],
+      ["jacken", "Jacken und M\xE4ntel", 0.14, 0.1, 0.01, 26, 8, 4, 30, "Bekleidung", "Lanberg Outerwear", JACKE]
+    ],
+    waesche: [
+      ["tag", "Tagw\xE4sche", 0.3, 0.8, 0, 16, 6, 2, 20, "W\xE4sche", "Lindauer W\xE4schefabrik", void 0, { geschlecht: "damen" }],
+      ["nacht", "Nachtw\xE4sche", 0.2, 0.6, 0.01, 18, 6, 3, 15, "W\xE4sche", "Lindauer W\xE4schefabrik", { 10: 1.3, 11: 1.5 }, { geschlecht: "unisex" }],
+      ["mieder", "Miederwaren", 0.17, 0.8, 0.01, 16, 6, 2, 15, "", "Corsina", void 0, { geschlecht: "damen" }],
+      ["herren", "Herrenw\xE4sche", 0.15, 0.85, -0.01, 16, 6, 2, 15, "W\xE4sche", "Lindauer W\xE4schefabrik", void 0, { geschlecht: "herren" }],
+      ["struempfe", "Str\xFCmpfe und Strumpfhosen", 0.18, 0.7, 0, 14, 4, 2, 10, "W\xE4sche", "Feinstrick Plauen", { 9: 1.3, 10: 1.3, 11: 1.2, 5: 0.7, 6: 0.7 }, { geschlecht: "unisex" }]
+    ],
+    accessoires: [
+      ["damenschuhe", "Damenschuhe", 0.3, 0.35, 0, 22, 6, 4, 25, "Schuhe", "Pirmasenser Schuhwerk", void 0, { geschlecht: "damen" }],
+      ["herrenschuhe", "Herrenschuhe", 0.18, 0.55, 0, 22, 6, 4, 20, "Schuhe", "Pirmasenser Schuhwerk", void 0, { geschlecht: "herren" }],
+      ["lederwaren", "Lederwaren und Taschen", 0.2, 0.6, 0.02, 18, 6, 3, 15, "Accessoires", "Offenbacher Lederwerk"],
+      ["schmuck", "Schmuck und Uhren", 0.22, 0.75, 0.01, 12, 4, 2, 15, "", "Goldbach Schmuck", { 10: 1.3, 11: 1.9 }],
+      ["reise", "Reisegep\xE4ck", 0.1, 0.8, -0.02, 16, 6, 3, 15, "Accessoires", "Travelline", { 4: 1.3, 5: 1.4, 6: 1.4, 11: 1.2, 0: 0.7, 1: 0.7 }]
+    ],
+    kinder: [
+      ["baby", "Baby", 0.25, 0.7, 0.01, 18, 6, 3, 15, "Bekleidung", "Wolkenweich"],
+      ["maedchen", "M\xE4dchen", 0.3, 0.4, 0, 20, 6, 3, 20, "Bekleidung", "Kinderland Textil"],
+      ["jungen", "Jungen", 0.27, 0.45, 0, 20, 6, 3, 20, "Bekleidung", "Kinderland Textil"],
+      ["schuhe", "Kinderschuhe", 0.18, 0.4, -0.01, 18, 6, 3, 15, "Schuhe", "Pirmasenser Schuhwerk", { 2: 1.3, 3: 1.3, 7: 1.3, 8: 1.3 }]
+    ],
+    wohnen: [
+      ["tisch", "Tisch und K\xFCche", 0.3, 0.85, 0, 16, 6, 3, 20, "Home", "Kessler Haushalt"],
+      ["heimtextil", "Heimtextilien", 0.2, 0.7, 0.02, 18, 6, 3, 15, "Home", "Webhaus Nordhorn"],
+      ["bett", "Bettwaren", 0.17, 0.85, 0.01, 16, 6, 3, 15, "Home", "Daunenwerk Allg\xE4u", { 9: 1.2, 10: 1.3, 11: 1.2 }],
+      ["deko", "Leuchten und Deko", 0.15, 0.4, 0.03, 20, 6, 3, 15, "Home", "Lichtform", { 10: 1.5, 11: 1.7, 0: 0.6 }],
+      ["elektro", "Elektrokleinger\xE4te", 0.18, 0.9, -0.08, 8, 4, 2, 20, "", "Kessler Haushalt", { 11: 1.6 }]
+    ],
+    beauty: [
+      ["parfuem", "Parf\xFCm", 0.45, 0.85, 0.01, 8, 4, 2, 20, "", "Maison Arvel"],
+      ["pflege", "Pflege und Kosmetik", 0.35, 0.95, 0.01, 6, 3, 2, 15, "Beauty", "Maison Arvel"],
+      ["drogerie", "Drogerie", 0.2, 0.98, -0.05, 4, 2, 1, 10, "Beauty", "Rheinpharm Vertrieb"]
+    ],
+    food: [
+      ["deli", "Delikatessen", 0.45, 0.95, 0, 4, 2, 1, 5, "", "Hanseatische Feinkost"],
+      ["wein", "Wein und Spirituosen", 0.3, 0.95, -0.02, 6, 3, 1, 10, "", "Weinkontor Rheingau", { 11: 1.6 }],
+      ["suess", "S\xFC\xDFwaren", 0.25, 0.9, 0.02, 8, 3, 1, 5, "", "Confiserie Lauenstein", { 2: 1.3, 3: 1.2, 11: 1.7 }]
+    ],
+    spielwaren: [
+      ["klein", "Kleinspielwaren", 0.35, 0.85, 0.02, 12, 4, 2, 10, "", "Spielwerk F\xFCrth"],
+      ["lizenz", "Lizenzartikel", 0.35, 0.6, -0.03, 16, 6, 3, 20, "", "Kinderwelt Lizenz"],
+      ["saison", "Saisonspielwaren", 0.3, 0.45, 0.01, 20, 6, 3, 15, "", "Spielwerk F\xFCrth", { 10: 1.2, 11: 1.4, 4: 1.2, 5: 1.3 }]
+    ],
+    sport: [
+      ["bekleidung", "Sportbekleidung", 0.6, 0.4, 0.01, 16, 6, 3, 20, "Bekleidung", "Nordline"],
+      ["geraete", "Sportger\xE4te und Fitness", 0.4, 0.65, -0.02, 14, 6, 3, 15, "", "Fitwerk Sportger\xE4te", { 0: 1.5, 1: 1.2 }]
+    ],
+    sportschuhe: [
+      ["lauf", "Laufschuhe", 0.55, 0.75, 0, 16, 6, 3, 25, "", "Nordline"],
+      ["sneaker", "Freizeit-Sneaker", 0.45, 0.6, 0, 14, 6, 3, 25, "", "Nordline"]
+    ],
+    sporttextil: [
+      ["funktion", "Funktionsbekleidung", 0.55, 0.45, 0, 16, 6, 3, 20, "Bekleidung", "Nordline"],
+      ["freizeit", "Freizeit und Athleisure", 0.45, 0.35, 0, 14, 4, 3, 20, "Bekleidung", "Urbanrise", void 0, { jung: true }]
+    ],
+    outdoor: [
+      ["bekleidung", "Outdoorbekleidung", 0.6, 0.35, 0.01, 22, 6, 3, 25, "Bekleidung", "Fjellmark", { 9: 1.3, 10: 1.3 }],
+      ["ausruestung", "Ausr\xFCstung und Zelte", 0.4, 0.5, -0.01, 18, 6, 3, 20, "", "Fjellmark", { 4: 1.4, 5: 1.4, 6: 1.3, 0: 0.6, 1: 0.6 }]
+    ],
+    rad: [
+      ["raeder", "Fahrr\xE4der und E-Bikes", 0.6, 0.55, -0.02, 24, 8, 4, 40, "", "Velowerk"],
+      ["zubehoer", "Radzubeh\xF6r", 0.4, 0.7, 0.03, 12, 4, 2, 10, "", "Velowerk"]
+    ],
+    wintersport: [
+      ["ski", "Ski und Snowboard", 0.45, 0.1, -0.01, 26, 8, 4, 40, "", "Alpin Sport Vertrieb"],
+      ["bekleidung", "Skibekleidung", 0.55, 0.1, 0.01, 26, 8, 4, 30, "Bekleidung", "Alpin Sport Vertrieb"]
+    ],
+    teamsport: [
+      ["fussball", "Fu\xDFball", 0.65, 0.65, 0, 14, 6, 3, 20, "", "Nordline", { 6: 1.4, 7: 1.3 }],
+      ["verein", "Vereinsbedarf", 0.35, 0.8, 0.01, 12, 4, 2, 10, "", "Teamline Vereinsausstatter"]
+    ]
+  };
+  var GESCHLECHT_BEREICH = { damen: "damen", herren: "herren", kinder: "kinder" };
+  function baueWgDef() {
+    const out = [];
+    for (const [g, liste] of Object.entries(ROH2)) {
+      const G2 = GRUPPEN[g];
+      const saisonRoh = liste.reduce((a, r) => a + r[2] * (1 - r[3]), 0);
+      const k = G2.saisonAnteil / Math.max(1e-3, saisonRoh);
+      const sum2 = liste.reduce((a, r) => a + r[2], 0);
+      for (const r of liste) {
+        const [kurz, name2, anteil3, nos, md, vv, vn, vnos, mk2, em, lief, sai, extra] = r;
+        const m = G2.marge + md;
+        const kurve4 = G2.saison.map((x, i) => x * (sai?.[i] ?? 1));
+        const mittel = kurve4.reduce((a, b2) => a + b2, 0) / 12;
+        out.push({
+          id: `${g}.${kurz}`,
+          name: name2,
+          bereich: g,
+          anteil: anteil3 / sum2,
+          nosAnteil: clamp(1 - (1 - nos) * k, 0.02, 0.98),
+          margeNos: m - 0.03,
+          margeSaison: m + 0.04,
+          vorlaufVor: vv,
+          vorlaufNach: vn,
+          vorlaufNos: vnos,
+          saison: kurve4.map((x) => x / mittel),
+          mindestabnahme: mk2 * 1e3,
+          eigenmarkenfaehig: em !== "",
+          kategorie: em || void 0,
+          geschlecht: extra?.geschlecht ?? GESCHLECHT_BEREICH[g] ?? "unisex",
+          jung: extra?.jung,
+          reif: extra?.reif,
+          lieferant: lief
+        });
+      }
+    }
+    return out;
+  }
+  var WG_DEF = baueWgDef();
+  var WG = Object.fromEntries(WG_DEF.map((d) => [d.id, d]));
+  var WG_JE_BEREICH = {};
+  var _a;
+  for (const d of WG_DEF) (WG_JE_BEREICH[_a = d.bereich] ?? (WG_JE_BEREICH[_a] = [])).push(d);
+  function wgKurve(d, woche2) {
+    const pos = (woche2 % 52 + 52) % 52 / 52 * 12 - 0.5;
+    const i = Math.floor(pos);
+    const t = pos - i;
+    const a = d.saison[(i + 12) % 12];
+    const b2 = d.saison[(i + 13) % 12];
+    return a + (b2 - a) * t;
+  }
+  var OMEGA = {};
+  for (const [, liste] of Object.entries(WG_JE_BEREICH)) {
+    for (let t = 0; t < 52; t++) {
+      const roh2 = liste.map((d) => d.anteil * wgKurve(d, t));
+      const sum2 = roh2.reduce((a, b2) => a + b2, 0);
+      liste.forEach((d, i) => {
+        var _a2;
+        (OMEGA[_a2 = d.id] ?? (OMEGA[_a2] = []))[t] = roh2[i] / sum2;
+      });
+    }
+  }
+  var omega = (wg, t) => OMEGA[wg][(t % 52 + 52) % 52];
+  var wgSaison = (d, t) => saisonFaktor(d.bereich, t) * omega(d.id, t) / d.anteil;
+  var saisonId = (t) => Math.floor((t - 6) / 26);
+  var saisonStart = (id) => 6 + 26 * id;
+  var saisonVon = (t) => saisonId(t + 6);
+  function saisonName(s2, id) {
+    const j = s2.startJahr + Math.floor(saisonStart(id) / 52);
+    return id % 2 === 0 ? `Fr\xFChjahr/Sommer ${j}` : `Herbst/Winter ${j}/${String((j + 1) % 100).padStart(2, "0")}`;
+  }
+  var EK_PARAM = {
+    grenze: 5e4,
+    verfRef: 0.95,
+    // NOS-Verfügbarkeit, auf die die Ausgangsnachfrage kalibriert ist
+    saisonRef: 0.9875,
+    // mittlere Saisonverfügbarkeit der Ausgangslage (Fehlmengen bei Standardsteuerung)
+    servicegrad: { 0.9: { basis: 0.905, cover: 7 }, 0.95: { basis: 0.95, cover: 10 }, 0.98: { basis: 0.975, cover: 13 } },
+    prognoseSd: [0.14, 0.07, 0.04, 0.025],
+    // Prognosefehler nach Einkauf-Stufe 0..3
+    verfBonus: [-0.02, 0, 5e-3, 0.01],
+    abschrift: {
+      // ab: Woche, ab der reduziert wird; Sätze je Woche; cap: Anteil des Saisonbedarfs, den Altware decken darf;
+      // nachfrage: frühe Reduzierung hält die Fläche frisch (mehr Saisonnachfrage), späte lässt sie altern
+      frueh: { ab: 5, frisch: 0.015, alt: 0.034, spaet: 0.034, cap: 0.45, nachfrage: 1.02 },
+      normal: { ab: 8, frisch: 0.012, alt: 0.03, spaet: 0.03, cap: 0.3, nachfrage: 1 },
+      spaet: { ab: 12, frisch: 8e-3, alt: 0.022, spaet: 0.04, cap: 0.2, nachfrage: 0.98 }
+    },
+    optimismus: [0.14, 0.07, 0.035, 0.015],
+    // Mehrmenge der Saisondisposition nach Einkauf-Stufe 0..3 (Planoptimismus der Einkäufer)
+    abschriftK: 0.457,
+    // Kalibrierfaktor auf alle Abschriftsätze
+    praesentation: 12,
+    // Wochen Saisonbestand, ab denen das Sortiment voll verkauft (Größen, Farben, Fläche)
+    saisonCover: 14,
+    // Zielreichweite der Nachorder in Wochen
+    altSaison: 16,
+    altNos: 52,
+    substitution: 0.5,
+    // fehlende Eigenmarkenware: Anteil, der auf Fremdware ausweicht
+    vororderSpanne: [-4, 9],
+    // Liefertermine der Vororder relativ zum Saisonstart
+    frist: { vororder: 3, nachorder: 2, nos: 1 },
+    orderrunde: 30,
+    // Orderrunde: Wochen vor Saisonstart
+    nosGrenzeFaktor: 5,
+    // NOS-Sonderorder erst ab dem 5-fachen der Freigabegrenze im Eingang
+    nosSonder: 2.1,
+    // NOS-Order über dem 2,1-fachen Wochenbedarf ist eine Sonderorder (freigabepflichtig)
+    nosMindest: 5e3,
+    nosTempo: 0.01,
+    // Umbau des NOS-Anteils je Woche
+    verlauf: 52
+  };
+  var STANDARD_STEUERUNG = (d) => ({
+    limitFaktor: 1.2,
+    nosZiel: d.nosAnteil,
+    servicegrad: 0.95,
+    vororderquote: 0.6,
+    reduzierung: "normal",
+    modus: { nos: "auto", saison: "verfall" }
+  });
+  var leererVerlauf = () => ({ w: [], u: [], r: [], e: [], b: [], a: [], f: [], n: [], eu: [], er: [], nd: [] });
+  var rngHalter = (s2) => s2.einkauf;
+  var einkaufStufe = (s2) => clamp(s2.hq?.wirkung.einkauf ?? 1, 0, 3);
+  function interpol(arr, L2) {
+    const i = Math.min(arr.length - 2, Math.floor(L2));
+    return arr[i] + (arr[i + 1] - arr[i]) * (L2 - i);
+  }
+  var aktiveWg = (s2) => WG_DEF.filter((d) => s2.basisUmsatz[d.bereich] !== void 0);
+  var FREMD = "fremd";
+  var poolVon = (k) => k.marke ?? FREMD;
+  function margeVon(s2, wg, art, pool) {
+    const m = art === "nos" ? wg.margeNos : wg.margeSaison;
+    if (pool === FREMD) return m;
+    const mk2 = s2.eigenmarken.marken.find((x) => x.id === pool);
+    return mk2 ? m + mehrmarge(mk2) + produktMargeDelta(s2, pool, wg.id) : m;
+  }
+  function vorlaufPool(s2, d, art, typ, pool) {
+    if (pool !== FREMD) {
+      const m = s2.eigenmarken.marken.find((x) => x.id === pool);
+      const v = m ? BESCHAFFUNG[m.beschaffung].vorlauf : 10;
+      return typ === "vororder" ? v + 2 : v;
+    }
+    return typ === "vororder" ? d.vorlaufVor : typ === "nachorder" ? d.vorlaufNach : d.vorlaufNos;
+  }
+  function mindestPool(s2, d, art, pool) {
+    if (pool !== FREMD) {
+      const m = s2.eigenmarken.marken.find((x) => x.id === pool);
+      return m ? BESCHAFFUNG[m.beschaffung].mindestabnahme : 0;
+    }
+    return art === "nos" ? EK_PARAM.nosMindest : d.mindestabnahme;
+  }
+  function lieferantPool(s2, d, pool) {
+    if (pool === FREMD) return d.lieferant;
+    const m = s2.eigenmarken.marken.find((x) => x.id === pool);
+    return m ? BESCHAFFUNG[m.beschaffung].produzent : d.lieferant;
+  }
+  function markenInWg(s2, wg) {
+    return s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && ((m.wgAnteile[wg] ?? 0) > 0 || (m.wgIst[wg] ?? 0) > 0));
+  }
+  function poolAnteilPlan(s2, st, pool) {
+    const marken2 = markenInWg(s2, st.id);
+    const anteil3 = (m) => {
+      const ist = st.pool[m.id] ?? 0;
+      const eIst = m.wgIst[st.id] ?? 0;
+      const eZiel = istVerkaufsaktiv(m) || m.status === "aufbau" ? m.wgAnteile[st.id] ?? 0 : 0;
+      if (eIst > 1e-3) return ist * (eZiel / eIst);
+      return eZiel * 0.9;
+    };
+    if (pool !== FREMD) {
+      const m = marken2.find((x) => x.id === pool);
+      return m ? anteil3(m) : 0;
+    }
+    return Math.max(0, 1 - marken2.reduce((a, m) => a + anteil3(m), 0));
+  }
+  var artAnteil = (st, art) => art === "nos" ? st.nosAnteil : 1 - st.nosAnteil;
+  var brutto = (art) => art === "nos" ? 1 / EK_PARAM.verfRef : 1 / EK_PARAM.saisonRef;
+  function prognoseEk(s2, st, art, pool, t) {
+    const d = WG[st.id];
+    return st.basisVK * wgSaison(d, t) * poolAnteilPlan(s2, st, pool) * artAnteil(st, art) * brutto(art) * (1 - margeVon(s2, st, art, pool)) * (1 + st.fehler);
+  }
+  function prognoseEkMittel(s2, st, art, pool) {
+    return st.basisVK * poolAnteilPlan(s2, st, pool) * artAnteil(st, art) * brutto(art) * (1 - margeVon(s2, st, art, pool));
+  }
+  var bezugsBedarf = (s2, st, art, pool, t) => 0.5 * (prognoseEk(s2, st, art, pool, t) / (1 + st.fehler) + prognoseEkMittel(s2, st, art, pool));
+  function prognoseVk(s2, st, art, pool, t) {
+    return prognoseEk(s2, st, art, pool, t) / Math.max(0.05, 1 - margeVon(s2, st, art, pool));
+  }
+  function nosAttraktivitaet(d, st) {
+    const x = st.nosAnteil - d.nosAnteil;
+    return 1 - 0.3 * Math.pow(Math.max(0, x), 1.3) - 0.2 * Math.pow(Math.max(0, -x), 1.3);
+  }
+  function erzeugeEinkauf(s2) {
+    const e = { grenze: EK_PARAM.grenze, wgs: {}, freigaben: [], rng: s2.seed * 2654435761 + 97 >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
+    for (const d of WG_DEF) {
+      e.wgs[d.id] = {
+        id: d.id,
+        st: STANDARD_STEUERUNG(d),
+        nosAnteil: d.nosAnteil,
+        margeNos: d.margeNos,
+        margeSaison: d.margeSaison,
+        norm: 1,
+        basisVK: 0,
+        fehler: 0,
+        pool: { [FREMD]: 1 },
+        limits: {},
+        saisons: {},
+        vororder: {},
+        v: leererVerlauf()
+      };
+    }
+    return e;
+  }
+  function initialisiereEinkauf(s2) {
+    var _a2;
+    const e = s2.einkauf;
+    const gewicht2 = {};
+    const x = {};
+    const poolSum = {};
+    for (const h of s2.haeuser) {
+      for (const [g, P2] of Object.entries(h.potenzial)) {
+        const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === "eigen").reduce((a, b3) => a + b3.qm, 0);
+        if (qm <= 0) continue;
+        const b2 = P2 * (1 - Math.exp(-qm / h.saettigungQm[g]));
+        gewicht2[g] = (gewicht2[g] ?? 0) + b2;
+        for (const d of WG_JE_BEREICH[g] ?? []) {
+          const marken2 = markenInWg(s2, d.id).filter(istVerkaufsaktiv);
+          let rest = 1;
+          const ps = poolSum[_a2 = d.id] ?? (poolSum[_a2] = {});
+          for (const m of marken2) {
+            const em = m.wgIst[d.id] ?? 0;
+            const a = em * Math.sqrt(attraktivitaet(s2, m, h) * passungWg(m, d.id));
+            ps[m.id] = (ps[m.id] ?? 0) + b2 * a;
+            rest -= em;
+          }
+          ps[FREMD] = (ps[FREMD] ?? 0) + b2 * rest;
+        }
+      }
+    }
+    for (const d of WG_DEF) {
+      const g = gewicht2[d.bereich] ?? 0;
+      const ps = poolSum[d.id] ?? { [FREMD]: 1 };
+      const X = g > 0 ? Object.values(ps).reduce((a, b2) => a + b2, 0) / g : 1;
+      x[d.id] = X;
+      const st = e.wgs[d.id];
+      st.norm = X;
+      const sum2 = Object.values(ps).reduce((a, b2) => a + b2, 0) || 1;
+      st.pool = Object.fromEntries(Object.entries(ps).map(([k, v]) => [k, v / sum2]));
+    }
+    for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
+      let m = 0;
+      for (const d of liste) {
+        const st = e.wgs[d.id];
+        const n = st.nosAnteil;
+        let mm = n * d.margeNos + (1 - n) * d.margeSaison;
+        for (const [pool, a] of Object.entries(st.pool)) if (pool !== FREMD) {
+          const mk2 = s2.eigenmarken.marken.find((y) => y.id === pool);
+          if (mk2) mm += a * mehrmarge(mk2);
+        }
+        m += d.anteil * mm;
+      }
+      const c = GRUPPEN[g].marge - m;
+      for (const d of liste) {
+        e.wgs[d.id].margeNos = d.margeNos + c;
+        e.wgs[d.id].margeSaison = d.margeSaison + c;
+      }
+      let em = 0;
+      const je = {};
+      for (const d of liste) for (const [pool, a] of Object.entries(e.wgs[d.id].pool)) if (pool !== FREMD) {
+        em += d.anteil * a;
+        je[pool] = (je[pool] ?? 0) + d.anteil * a;
+      }
+      e.emStart[g] = em;
+      e.emJeBereich[g] = je;
+    }
+    const alter = [1, 5, 9, 14, 20, 30];
+    const verteilung = [0.24, 0.22, 0.2, 0.15, 0.11, 0.08];
+    const bestand = [];
+    const bestellungen = [];
+    const aktS = saisonId(0);
+    const naechste = aktS + 1;
+    for (const d of WG_DEF) {
+      const st = e.wgs[d.id];
+      st.basisVK = (s2.basisUmsatz[d.bereich] ?? 0) * d.anteil;
+      if (st.basisVK <= 0) continue;
+      const ref = s2.basisUmsatz[d.bereich] ?? 0;
+      for (const art of ["nos", "saison"]) {
+        for (const pool of Object.keys(st.pool)) {
+          const wochenEk = ref * d.anteil * st.pool[pool] * artAnteil(st, art) * (1 - margeVon(s2, st, art, pool));
+          const rw = art === "nos" ? 11 : EK_PARAM.praesentation + 1;
+          let vorne = 0;
+          for (let t = 0; t < rw; t++) vorne += wochenEk * wgSaison(d, t);
+          const gesamt = Math.max(wochenEk * rw, vorne);
+          verteilung.forEach((v, i) => bestand.push({
+            gruppe: d.bereich,
+            wg: d.id,
+            art,
+            marke: pool === FREMD ? void 0 : pool,
+            saisonId: art === "saison" ? saisonVon(-alter[i]) : void 0,
+            wert: eur(gesamt * v),
+            alter: alter[i],
+            saisonAnteil: art === "saison" ? 1 : 0,
+            kostenFaktor: 1
+          }));
+          if (art === "saison") verteilung.forEach((v, i) => {
+            saisonTally(st, saisonVon(-alter[i])).eingang += gesamt * v;
+          });
+          if (art === "nos") {
+            const L2 = vorlaufPool(s2, d, art, "nos", pool);
+            for (let t = 0; t < L2; t++) bestellungen.push({ id: `b0-${d.id}-${pool}-n${t}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(prognoseEk(s2, st, art, pool, t)), ankunft: t, vorkasse: false });
+          } else {
+            const P2 = vororderWoche(s2, d, pool, naechste);
+            if (P2 < 0) {
+              const f = vororderVorschlag(s2, d, st, pool, naechste);
+              for (const l of f) if (l.woche >= 0 && l.wert > 0) bestellungen.push({ id: `b0-${d.id}-${pool}-v${l.woche}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(l.wert), ankunft: l.woche, vorkasse: false, saisonId: naechste });
+              st.vororder[pool] = naechste;
+              limitFuer(s2, st, naechste).verbraucht += f.reduce((a, l) => a + l.wert, 0);
+            }
+            st.vororder[pool] = Math.max(st.vororder[pool] ?? aktS, aktS);
+          }
+        }
+      }
+    }
+    s2.bestand = bestand;
+    s2.bestellungen = bestellungen;
+  }
+  function limitFuer(s2, st, sid) {
+    const key = String(sid);
+    let l = st.limits[key];
+    if (!l) {
+      l = st.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
+      for (const k of Object.keys(st.limits)) if (Number(k) < sid - 2) delete st.limits[k];
+    }
+    if (l.stand !== s2.woche) {
+      let plan2 = 0;
+      const a = saisonStart(sid);
+      const pools = poolsDerWg(s2, st);
+      for (let t = a; t < a + 26; t++) for (const art of ["nos", "saison"]) for (const pool of pools) plan2 += prognoseEk(s2, st, art, pool, t) / (1 + st.fehler);
+      l.plan = eur(plan2);
+      l.stand = s2.woche;
+    }
+    return l;
+  }
+  var limitWert = (st, l) => eur(st.st.limitEuro ?? l.plan * st.st.limitFaktor);
+  function poolsDerWg(s2, st) {
+    return [FREMD, ...markenInWg(s2, st.id).map((m) => m.id)];
+  }
+  function offenImLimit(s2, st, sid) {
+    let x = 0;
+    for (const f of s2.einkauf.freigaben) if (f.wg === st.id) {
+      for (const l of f.lieferungen) if (saisonId(l.woche) === sid) x += l.wert;
+    }
+    return x;
+  }
+  function einkaufNachfrage(s2, roh2) {
+    var _a2;
+    const w = s2.woche;
+    const vk = {};
+    const bruttoBereich = {};
+    const markenJeWg = {};
+    for (const d of WG_DEF) {
+      markenJeWg[d.id] = s2.eigenmarken.marken.filter((m) => istVerkaufsaktiv(m) && (m.wgIst[d.id] ?? 0) > 0).map((m) => ({ m, e: m.wgIst[d.id] ?? 0, fit: passungWg(m, d.id) * produktNachfrageFaktor(s2, m.id, d.id) }));
+    }
+    const attrCache = /* @__PURE__ */ new Map();
+    for (const r of roh2) {
+      const h = r.haus;
+      for (const [g, v] of Object.entries(r.eigen)) {
+        const liste = WG_JE_BEREICH[g];
+        if (!liste) continue;
+        let F2 = 0;
+        const tilt = marketingWgTilt(s2, h.id, g);
+        const teile2 = tilt ? [] : void 0;
+        let F0 = 0;
+        for (const d of liste) {
+          const st = s2.einkauf.wgs[d.id];
+          const tl = tilt?.[d.id] ?? 1;
+          const om = omega(d.id, w) * tl;
+          const nAttr = nosAttraktivitaet(d, st);
+          let rest = 1;
+          const ziel = vk[_a2 = d.id] ?? (vk[_a2] = {});
+          for (const x of markenJeWg[d.id]) {
+            const key = `${x.m.id}|${h.id}`;
+            let A = attrCache.get(key);
+            if (A === void 0) {
+              A = attraktivitaet(s2, x.m, h);
+              attrCache.set(key, A);
+            }
+            const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr / st.norm;
+            if (teile2) teile2.push([ziel, x.m.id, t2]);
+            else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t2;
+            F2 += t2;
+            F0 += t2 / tl;
+            rest -= x.e;
+          }
+          const t = v.brutto * om * Math.max(0, rest) * nAttr / st.norm;
+          if (teile2) teile2.push([ziel, FREMD, t]);
+          else ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
+          F2 += t;
+          F0 += t / tl;
+        }
+        if (teile2) {
+          const c = F2 > 0 ? F0 / F2 : 1;
+          for (const [z2, k, t] of teile2) z2[k] = (z2[k] ?? 0) + t * c;
+          F2 = F0;
+        }
+        const f = v.brutto > 0 ? F2 / v.brutto : 1;
+        v.brutto *= f;
+        v.umsatz *= f;
+        bruttoBereich[g] = (bruttoBereich[g] ?? 0) + v.brutto;
+      }
+    }
+    const L2 = einkaufStufe(s2);
+    const sd = interpol(EK_PARAM.prognoseSd, L2);
+    for (const d of aktiveWg(s2)) {
+      const st = s2.einkauf.wgs[d.id];
+      const p2 = vk[d.id] ?? {};
+      const D = Object.values(p2).reduce((a, b2) => a + b2, 0);
+      const S = Math.max(0.05, wgSaison(d, w));
+      st.basisVK = 0.85 * st.basisVK + 0.15 * (D / S);
+      if (D > 0) st.pool = Object.fromEntries(Object.entries(p2).map(([k, x]) => [k, x / D]));
+      if (!s2.prognose) st.fehler = clamp(0.9 * st.fehler + sd * Math.sqrt(0.19) * normal(rngHalter(s2)), -0.4, 0.4);
+      const z2 = st.st.nosZiel;
+      st.nosAnteil = st.nosAnteil < z2 ? Math.min(z2, st.nosAnteil + EK_PARAM.nosTempo) : Math.max(z2, st.nosAnteil - EK_PARAM.nosTempo);
+    }
+    return { vk, bruttoBereich };
+  }
+  var WOCHE = {};
+  function toepfe(s2) {
+    const m = /* @__PURE__ */ new Map();
+    for (const k of s2.bestand) {
+      if (!k.wg) normalisiereKohorte(k);
+      const key = `${k.wg}|${k.art}|${poolVon(k)}`;
+      let t = m.get(key);
+      if (!t) {
+        t = [];
+        m.set(key, t);
+      }
+      t.push(k);
+    }
+    for (const t of m.values()) t.sort((a, b2) => b2.alter - a.alter);
+    return m;
+  }
+  function normalisiereKohorte(k) {
+    if (k.wg && k.art) return;
+    const liste = WG_JE_BEREICH[k.gruppe] ?? [];
+    const d = liste.reduce((a, b2) => b2.anteil > a.anteil ? b2 : a, liste[0]);
+    k.wg = d?.id ?? `${k.gruppe}.?`;
+    k.art = k.saisonAnteil >= 0.5 || !d ? "saison" : "saison";
+  }
+  var istAlt = (k) => !!k.ladenhueter || (k.art === "nos" ? k.alter > EK_PARAM.altNos : k.alter > EK_PARAM.altSaison);
+  function saisonTally(st, sid) {
+    const key = String(sid);
+    let x = st.saisons[key];
+    if (!x) {
+      x = st.saisons[key] = { eingang: 0, abverkauf: 0 };
+      for (const k of Object.keys(st.saisons)) if (Number(k) < sid - 1) delete st.saisons[k];
+    }
+    return x;
+  }
+  function nimm(topf, menge2, altMax, saisonAkt, st) {
+    let voll2 = 0;
+    let gebucht = 0;
+    let altG = 0;
+    if (!topf || menge2 <= 0) return { voll: voll2, gebucht, alt: 0 };
+    let altRest = altMax;
+    for (const k of topf) {
+      if (voll2 >= menge2) break;
+      if (k.ladenhueter || k.wert <= 0) continue;
+      const alt = istAlt(k);
+      let x = Math.min(k.wert, menge2 - voll2);
+      if (alt) {
+        x = Math.min(x, altRest);
+        altRest -= x;
+        altG += Math.max(0, x);
+      }
+      if (x <= 0) continue;
+      k.wert -= x;
+      voll2 += x;
+      gebucht += x * k.kostenFaktor;
+      if (st && k.art === "saison" && k.saisonId !== void 0 && k.saisonId >= saisonAkt) saisonTally(st, k.saisonId).abverkauf += x;
+    }
+    return { voll: voll2, gebucht, alt: altG };
+  }
+  function verfuegbar(topf) {
+    let frisch = 0;
+    let alt = 0;
+    for (const k of topf ?? []) {
+      if (k.ladenhueter) continue;
+      if (istAlt(k)) alt += k.wert;
+      else frisch += k.wert;
+    }
+    return { frisch, alt };
+  }
+  function einkaufVerbrauch(s2, n) {
+    const w = s2.woche;
+    const toepfeMap = toepfe(s2);
+    const verf = {};
+    const einsatz = {};
+    const vkReal = {};
+    const Lst = einkaufStufe(s2);
+    const bonus = interpol(EK_PARAM.verfBonus, Lst);
+    const sAkt = saisonId(w);
+    WOCHE = {};
+    for (const d of aktiveWg(s2)) {
+      const st = s2.einkauf.wgs[d.id];
+      const p2 = n.vk[d.id] ?? {};
+      const r = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
+      const red = EK_PARAM.abschrift[st.st.reduzierung];
+      const capM = Math.min(1, red.cap * marketingAltwareFaktor(s2, d.bereich, d.id));
+      const sg = EK_PARAM.servicegrad[st.st.servicegrad];
+      for (const art of ["nos", "saison"]) {
+        const pools = Object.keys(p2).sort((a, b2) => a === FREMD ? 1 : b2 === FREMD ? -1 : a.localeCompare(b2));
+        let ausweichVk = 0;
+        for (const pool of pools) {
+          const m = margeVon(s2, st, art, pool);
+          const vkBedarf = (p2[pool] ?? 0) * artAnteil(st, art) * brutto(art) * (art === "saison" ? red.nachfrage : 1);
+          const ekBedarf = vkBedarf * (1 - m);
+          const topf = toepfeMap.get(`${d.id}|${art}|${pool}`);
+          const v = verfuegbar(topf);
+          let quote;
+          if (art === "nos") {
+            const bedarfW = Math.max(1, bezugsBedarf(s2, st, art, pool, w));
+            const x2 = (v.frisch + v.alt) / (bedarfW * sg.cover);
+            const g = x2 >= 1 ? 1 : (1 - Math.exp(-3 * x2)) / (1 - Math.exp(-3));
+            const rausch = s2.prognose ? 0 : zwischen(rngHalter(s2), -0.01, 0.01);
+            quote = clamp((sg.basis + bonus + rausch) * g, 0, 1);
+          } else {
+            const nutzbar = v.frisch + Math.min(v.alt, ekBedarf * capM);
+            const rw = nutzbar / Math.max(1, bezugsBedarf(s2, st, art, pool, w));
+            quote = Math.min(1, Math.sqrt(clamp(rw / EK_PARAM.praesentation, 0, 1)));
+          }
+          let ziel = ekBedarf * quote;
+          let extraVk = 0;
+          if (pool === FREMD && ausweichVk > 0) {
+            extraVk = ausweichVk;
+            ziel += ausweichVk * (1 - m) * quote;
+          }
+          const x = verbraucheCluster(
+            s2,
+            topf,
+            ziel,
+            ekBedarf * (art === "saison" ? capM : 1),
+            d.bereich,
+            (ks, wert, alt) => nimm(ks, wert, alt, sAkt, st)
+          );
+          if (art === "saison" && x.alt > 0) marketingAltVerkauf(s2, d.bereich, x.alt, d.id);
+          const vkR = x.voll / Math.max(0.05, 1 - m);
+          if (pool !== FREMD) {
+            ausweichVk += Math.max(0, vkBedarf * quote - vkR) * EK_PARAM.substitution + vkBedarf * (1 - quote) * 0;
+            r.emVk += vkR;
+            r.emEk += x.gebucht;
+            r.markenVk[pool] = (r.markenVk[pool] ?? 0) + vkR;
+            r.markenEk[pool] = (r.markenEk[pool] ?? 0) + x.gebucht;
+          }
+          r.vkReal += vkR;
+          r.ekVoll += x.voll;
+          r.ekGebucht += x.gebucht;
+          r.brutto += vkBedarf + extraVk * 0;
+          if (art === "nos") {
+            r.nosBrutto += vkBedarf;
+            r.nosReal += vkR;
+          }
+        }
+      }
+      WOCHE[d.id] = r;
+      einsatz[d.bereich] = (einsatz[d.bereich] ?? 0) + r.ekGebucht;
+      vkReal[d.bereich] = (vkReal[d.bereich] ?? 0) + r.vkReal;
+    }
+    for (const [g, b2] of Object.entries(n.bruttoBereich)) verf[g] = b2 > 0 ? (vkReal[g] ?? 0) / b2 : 1;
+    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
+    return { verfuegbar: verf, einsatz };
+  }
+  function einkaufAltern(s2) {
+    let ab = 0;
+    const K3 = EK_PARAM.abschriftK;
+    for (const k of s2.bestand) {
+      if (!k.wg) normalisiereKohorte(k);
+      k.alter += 1;
+      let q2 = 0;
+      if (k.ladenhueter) q2 = 0.06;
+      else if (k.art === "nos") q2 = k.alter > EK_PARAM.altNos ? 0.04 : 0;
+      else {
+        const st = s2.einkauf.wgs[k.wg];
+        const r = EK_PARAM.abschrift[st?.st.reduzierung ?? "normal"];
+        if (k.alter > 39) q2 = 0.08;
+        else if (k.alter > 26) q2 = r.spaet;
+        else if (k.alter > EK_PARAM.altSaison) q2 = r.alt;
+        else if (k.alter > r.ab) q2 = r.frisch;
+        q2 *= K3;
+      }
+      const x = k.wert * q2;
+      k.wert -= x;
+      const y = x * k.kostenFaktor;
+      ab += y;
+      const wk = WOCHE[k.wg];
+      if (wk) wk.ab += y;
+    }
+    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
+    return ab;
+  }
+  function verbraucheAltwareWg(s2, f, wertVoll) {
+    let rest = wertVoll;
+    let gebucht = 0;
+    const ks = s2.bestand.filter((k) => GRUPPEN[k.gruppe].format === f && istAlt(k)).sort((a, b2) => b2.alter - a.alter);
+    for (const k of ks) {
+      if (rest <= 0) break;
+      const nimmX = Math.min(k.wert, rest);
+      k.wert -= nimmX;
+      rest -= nimmX;
+      gebucht += nimmX * k.kostenFaktor;
+    }
+    s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
+    return { gebucht, zukauf: rest };
+  }
+  function einkaufBuchen(s2, umsatzEigen) {
+    var _a2, _b, _c;
+    const e = s2.einkauf;
+    const vkBereich = {};
+    for (const d of WG_DEF) {
+      const r = WOCHE[d.id];
+      if (r) vkBereich[d.bereich] = (vkBereich[d.bereich] ?? 0) + r.vkReal;
+    }
+    const best = {};
+    for (const k of s2.bestand) if (k.wg) best[k.wg] = (best[k.wg] ?? 0) + k.wert;
+    const markenU = {};
+    const markenR = {};
+    const emBereich = {};
+    let gesamt = 0;
+    for (const d of aktiveWg(s2)) {
+      const st = e.wgs[d.id];
+      const r = WOCHE[d.id] ?? { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
+      const vb = vkBereich[d.bereich] ?? 0;
+      const k = vb > 0 ? (umsatzEigen[d.bereich] ?? 0) / vb : 0;
+      const u = r.vkReal * k;
+      gesamt += u;
+      const v = st.v;
+      v.w.push(s2.woche);
+      v.u.push(eur(u));
+      v.e.push(eur(r.ekGebucht));
+      v.a.push(eur(r.ab));
+      v.r.push(eur(u - r.ekGebucht - r.ab));
+      v.b.push(eur(best[d.id] ?? 0));
+      v.f.push(eur(Math.max(0, r.brutto - r.vkReal) * k));
+      v.n.push(r.nosBrutto > 0 ? Math.round(r.nosReal / r.nosBrutto * 1e3) / 1e3 : 1);
+      v.eu.push(eur(r.emVk * k));
+      v.er.push(eur(r.emVk * k - r.emEk));
+      v.nd.push(eur(r.brutto * k));
+      for (const key of Object.keys(v)) if (v[key].length > EK_PARAM.verlauf) v[key].splice(0, v[key].length - EK_PARAM.verlauf);
+      const je = emBereich[_a2 = d.bereich] ?? (emBereich[_a2] = {});
+      for (const [m, x] of Object.entries(r.markenVk)) {
+        markenU[m] = (markenU[m] ?? 0) + x * k;
+        markenR[m] = (markenR[m] ?? 0) + x * k - (r.markenEk[m] ?? 0);
+        je[m] = (je[m] ?? 0) + x * k;
+      }
+    }
+    for (const [g, je] of Object.entries(emBereich)) {
+      const ub = umsatzEigen[g] ?? 0;
+      e.emJeBereich[g] = Object.fromEntries(Object.entries(je).map(([m, x]) => [m, ub > 0 ? x / ub : 0]));
+    }
+    e.eigenUmsatz.push(eur(gesamt));
+    if (e.eigenUmsatz.length > 52) e.eigenUmsatz.splice(0, e.eigenUmsatz.length - 52);
+    for (const m of s2.eigenmarken.marken) {
+      const kz2 = (_b = e.markenKpi)[_c = m.id] ?? (_b[_c] = { u: [], r: [] });
+      kz2.u.push(eur(markenU[m.id] ?? 0));
+      kz2.r.push(eur(markenR[m.id] ?? 0));
+      if (kz2.u.length > 52) {
+        kz2.u.splice(0, kz2.u.length - 52);
+        kz2.r.splice(0, kz2.r.length - 52);
+      }
+    }
+    return markenU;
+  }
+  function kannibalisierung(s2, g) {
+    const je = s2.einkauf.emJeBereich[g] ?? {};
+    const em = Object.values(je).reduce((a, b2) => a + b2, 0);
+    return Math.max(0, em - (s2.einkauf.emStart[g] ?? 0));
+  }
+  function einbuchen(s2, b2, wert) {
+    const wg = b2.wg ?? WG_JE_BEREICH[b2.gruppe]?.[0]?.id;
+    const art = b2.art ?? "saison";
+    const sid = art === "saison" ? saisonVon(s2.woche) : void 0;
+    const kf = b2.kostenFaktor ?? 1;
+    const vorh = s2.bestand.find((k) => k.alter === 0 && !k.hauscluster && k.wg === wg && k.art === art && k.marke === b2.marke && k.kostenFaktor === kf && !k.ladenhueter && k.saisonId === sid);
+    const em = b2.marke ? s2.eigenmarken.marken.find((m) => m.id === b2.marke) : void 0;
+    if (vorh) vorh.wert += eur(wert);
+    else s2.bestand.push({ gruppe: b2.gruppe, wg, art, marke: b2.marke, saisonId: sid, wert: eur(wert), alter: 0, saisonAnteil: art === "saison" ? 1 : 0, kostenFaktor: kf, ladenhueter: em?.status === "eingestellt" ? true : void 0 });
+    const st = wg ? s2.einkauf.wgs[wg] : void 0;
+    if (st && art === "saison" && sid !== void 0) saisonTally(st, sid).eingang += wert;
+  }
+  function bestandPool(s2, wg, art, pool, nurNutzbar) {
+    let x = 0;
+    for (const k of s2.bestand) if (k.wg === wg && k.art === art && poolVon(k) === pool && !k.ladenhueter) {
+      if (nurNutzbar && art === "saison" && istAlt(k)) x += k.wert * 0.3;
+      else x += k.wert;
+    }
+    return x;
+  }
+  function pipelinePool(s2, wg, art, pool, bis = Infinity) {
+    let x = 0;
+    for (const b2 of s2.bestellungen) if (b2.wg === wg && b2.art === art && (b2.marke ?? FREMD) === pool && b2.ankunft <= bis) x += b2.wert;
+    for (const f of s2.einkauf.freigaben) if (f.wg === wg && f.art === art && (f.marke ?? FREMD) === pool) {
+      for (const l of f.lieferungen) if (l.woche <= bis) x += l.wert;
+    }
+    return x;
+  }
+  var ZWEIT = {
+    damen: ["Moda Lucca", "Hanse Fashion Group", "Vestis Textil", "Rieger & Kolb"],
+    herren: ["Nordkap Menswear", "Castell Herrenmode", "Bergmann Konfektion"],
+    waesche: ["Corsina", "Nachtfalter W\xE4sche", "Feinstrick Plauen"],
+    accessoires: ["Riva Calzature", "Lederwerk Hanau", "Chronos Uhrenvertrieb"],
+    kinder: ["Wolkenweich", "Rasselbande Kids", "Golden Thread"],
+    wohnen: ["Porzellanmanufaktur Selbtal", "Webhaus Nordhorn", "Lichtform"],
+    beauty: ["Belcourt Paris", "Rheinpharm Vertrieb", "Aurelia Cosmetics"],
+    food: ["Kaffeer\xF6sterei Hafenblick", "Hanseatische Feinkost", "Weinkontor Rheingau"],
+    spielwaren: ["Kl\xF6tzchen & Co.", "Kinderwelt Lizenz", "Spielwerk F\xFCrth"],
+    sport: ["Fitwerk Sportger\xE4te", "Athletika", "Nordline"],
+    sportschuhe: ["Athletika", "Stridewell"],
+    sporttextil: ["Athletika", "Stridewell"],
+    outdoor: ["Bergpfad Outdoor", "Nordline"],
+    rad: ["Kettenblatt Parts", "Velo Rheinland"],
+    wintersport: ["Gipfelwerk", "Nordline"],
+    teamsport: ["Athletika", "Stridewell"]
+  };
+  function lieferantenSplit(d) {
+    const z2 = (ZWEIT[d.bereich] ?? []).filter((n) => n !== d.lieferant);
+    const i = WG_DEF.indexOf(d);
+    if (z2.length < 2) return [[d.lieferant, 1]];
+    return [[d.lieferant, 0.55], [z2[i % z2.length], 0.3], [z2[(i + 1) % z2.length], 0.15]];
+  }
+  function vororderWoche(s2, d, pool, sid) {
+    const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
+    const spaetestens = saisonStart(sid) + EK_PARAM.vororderSpanne[0] - lead;
+    const runde2 = saisonStart(sid) - EK_PARAM.orderrunde + WG_DEF.indexOf(d) % 4;
+    return Math.min(runde2, spaetestens);
+  }
+  function vororderVorschlag(s2, d, st, pool, sid) {
+    const a = saisonStart(sid);
+    const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
+    let vq = st.st.vororderquote;
+    if (pool !== FREMD && lead > 12) vq = Math.max(vq, 0.95);
+    const level = s2.orderLevel[d.bereich] ?? 1;
+    let saisonBedarf = 0;
+    for (let t = a; t < a + 26; t++) saisonBedarf += prognoseEk(s2, st, "saison", pool, t);
+    const gesamt = vq * saisonBedarf * level * (1 + interpol(EK_PARAM.optimismus, einkaufStufe(s2)));
+    const [v0, v1] = EK_PARAM.vororderSpanne;
+    const gew = [];
+    for (let t = a + v0; t <= a + v1; t++) gew.push(Math.max(0.01, prognoseEk(s2, st, "saison", pool, t + 2)));
+    const sum2 = gew.reduce((x, y) => x + y, 0);
+    return gew.map((g, i) => ({ woche: a + v0 + i, wert: gesamt * g / sum2 }));
+  }
+  function vorschlaege(s2) {
+    const w = s2.woche;
+    const out = [];
+    const idx = new Map(WG_DEF.map((d, i) => [d.id, i]));
+    const sAkt = saisonId(w);
+    for (const d of aktiveWg(s2)) {
+      const st = s2.einkauf.wgs[d.id];
+      if (st.basisVK <= 1) continue;
+      const level = s2.orderLevel[d.bereich] ?? 1;
+      const sg = EK_PARAM.servicegrad[st.st.servicegrad];
+      const sdZusatz = interpol(EK_PARAM.prognoseSd, einkaufStufe(s2)) / 0.07 - 1;
+      for (const pool of poolsDerWg(s2, st)) {
+        const m = pool === FREMD ? void 0 : s2.eigenmarken.marken.find((x) => x.id === pool);
+        const bereit = (L2) => !m || istVerkaufsaktiv(m) || m.status === "aufbau" && (m.bis ?? 0) <= w + L2;
+        {
+          const L2 = vorlaufPool(s2, d, "nos", "nos", pool);
+          if (bereit(L2) && artAnteil(st, "nos") > 5e-3) {
+            let ziel = 0;
+            for (let t = w + 1; t <= w + L2; t++) ziel += prognoseEk(s2, st, "nos", pool, t);
+            const wb = prognoseEk(s2, st, "nos", pool, w + L2);
+            const bez = 0.5 * (wb + prognoseEkMittel(s2, st, "nos", pool) * (1 + st.fehler));
+            ziel += wb + (sg.cover + Math.max(0, sdZusatz) * 0.5 + (L2 > 8 ? 0.08 * L2 : 0)) * bez;
+            const order = ziel * (1 + (level - 1) * 0.3) - bestandPool(s2, d.id, "nos", pool, false) - pipelinePool(s2, d.id, "nos", pool);
+            const min = mindestPool(s2, d, "nos", pool);
+            if (order > Math.max(1e3, min) || order > 0 && order > 0.3 * min && bestandPool(s2, d.id, "nos", pool, false) < 0.7 * ziel) {
+              out.push({ d, st, art: "nos", typ: "nos", pool, lieferungen: [{ woche: w + L2, wert: Math.max(order, min) }], wochenBedarf: wb });
+            }
+          }
+        }
+        if (artAnteil(st, "saison") <= 5e-3) continue;
+        for (const sid of [sAkt + 2, sAkt + 1, sAkt]) {
+          if ((st.vororder[pool] ?? -99) >= sid) continue;
+          const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
+          const P2 = vororderWoche(s2, d, pool, sid);
+          const spaet = w > P2;
+          if (w < P2) continue;
+          if (spaet && w - saisonStart(sid) > 10) {
+            st.vororder[pool] = sid;
+            continue;
+          }
+          if (!bereit(lead)) continue;
+          let lief = vororderVorschlag(s2, d, st, pool, sid);
+          if (spaet) lief = lief.filter((l) => l.woche >= w + lead).map((l) => l);
+          if (spaet && lief.length === 0) {
+            st.vororder[pool] = sid;
+            continue;
+          }
+          const min = mindestPool(s2, d, "saison", pool);
+          const sum2 = lief.reduce((a, l) => a + l.wert, 0);
+          if (sum2 < min && sum2 > 0) lief = lief.map((l) => ({ ...l, wert: l.wert * min / sum2 }));
+          st.vororder[pool] = sid;
+          if (sum2 > 0) {
+            const wb = prognoseEk(s2, st, "saison", pool, saisonStart(sid));
+            const hinweis = spaet ? "Erstausstattung" : `Orderrunde ${saisonName(s2, sid)}`;
+            const split = pool === FREMD ? lieferantenSplit(d) : [[void 0, 1]];
+            for (const [lieferant, a] of split) out.push({ d, st, art: "saison", typ: "vororder", pool, lieferungen: lief.map((l) => ({ woche: l.woche, wert: l.wert * a })), wochenBedarf: wb * a, hinweis, lieferant });
+          }
+        }
+        if ((w + (idx.get(d.id) ?? 0)) % 4 === 0) {
+          const L2 = vorlaufPool(s2, d, "saison", "nachorder", pool);
+          const a = w + L2;
+          if (bereit(L2) && L2 <= 12) {
+            let ziel = 0;
+            for (let t = w + 1; t <= a + 4; t++) ziel += prognoseEk(s2, st, "saison", pool, t);
+            for (let t = a + 5; t <= a + 4 + EK_PARAM.saisonCover; t++) ziel += prognoseEk(s2, st, "saison", pool, t);
+            const order = ziel * level * (1 + interpol(EK_PARAM.optimismus, einkaufStufe(s2))) - bestandPool(s2, d.id, "saison", pool, true) - pipelinePool(s2, d.id, "saison", pool, a + 4);
+            if (order > mindestPool(s2, d, "saison", pool)) out.push({ d, st, art: "saison", typ: "nachorder", pool, lieferungen: [{ woche: a, wert: order }], wochenBedarf: prognoseEk(s2, st, "saison", pool, a) });
+          }
+        }
+      }
+    }
+    return out;
+  }
+  var neueFreigabeId = (s2) => `o${++s2.einkauf.zaehler}`;
+  function protokoll(s2) {
+    const p2 = s2.einkauf.protokoll;
+    let x = p2[p2.length - 1];
+    if (!x || x.woche !== s2.woche) {
+      x = { woche: s2.woche, neu: 0, direkt: 0, freigegeben: 0, auto: 0, verfallen: 0, verfallenWert: 0, abgelehnt: 0 };
+      p2.push(x);
+      if (p2.length > 26) p2.splice(0, p2.length - 26);
+    }
+    return x;
+  }
+  function einkaufDispo(s2) {
+    const w = s2.woche;
+    const pr2 = protokoll(s2);
+    for (const v of vorschlaege(s2)) {
+      let lief = v.lieferungen.filter((l) => l.wert > 0);
+      let ueber = false;
+      const jeSaison = /* @__PURE__ */ new Map();
+      for (const l of lief) jeSaison.set(saisonId(l.woche), (jeSaison.get(saisonId(l.woche)) ?? 0) + l.wert);
+      if (v.typ !== "nos") for (const [sid, x] of jeSaison) {
+        const L2 = limitFuer(s2, v.st, sid);
+        const frei6 = Math.max(0, limitWert(v.st, L2) - L2.verbraucht - offenImLimit(s2, v.st, sid));
+        if (x > frei6 + 1) {
+          ueber = true;
+          const k = frei6 / x;
+          lief = lief.map((l) => saisonId(l.woche) === sid ? { ...l, wert: l.wert * k } : l);
+        }
+      }
+      lief = lief.filter((l) => l.wert >= 1).map((l) => ({ woche: l.woche, wert: eur(l.wert) }));
+      const wert = lief.reduce((a, l) => a + l.wert, 0);
+      if (wert < 1e3) continue;
+      const f = {
+        id: neueFreigabeId(s2),
+        wg: v.d.id,
+        art: v.art,
+        typ: v.typ,
+        lieferant: v.lieferant ?? lieferantPool(s2, v.d, v.pool),
+        marke: v.pool === FREMD ? void 0 : v.pool,
+        wert,
+        lieferungen: lief,
+        erwarteterAbverkauf: 0,
+        reichweiteDanach: 0,
+        erstellt: w,
+        frist: w + EK_PARAM.frist[v.typ],
+        ueberLimit: ueber,
+        hinweis: [v.hinweis, ueber ? "vom Limit gek\xFCrzt" : void 0].filter(Boolean).join(", ") || void 0
+      };
+      const ab = lief[0].woche;
+      let vk8 = 0;
+      let ek8 = 0;
+      for (let t = ab; t < ab + 8; t++) {
+        vk8 += prognoseVk(s2, v.st, v.art, v.pool, t);
+        ek8 += prognoseEk(s2, v.st, v.art, v.pool, t);
+      }
+      f.erwarteterAbverkauf = eur(vk8);
+      f.reichweiteDanach = Math.round((bestandPool(s2, v.d.id, v.art, v.pool, false) + pipelinePool(s2, v.d.id, v.art, v.pool) + wert) / Math.max(1, ek8 / 8) * 10) / 10;
+      const pflichtig = v.typ === "nos" ? wert >= EK_PARAM.nosGrenzeFaktor * s2.einkauf.grenze && wert > EK_PARAM.nosSonder * v.wochenBedarf : wert >= s2.einkauf.grenze;
+      pr2.neu++;
+      if (pflichtig) s2.einkauf.freigaben.push(f);
+      else {
+        pr2.direkt++;
+        gebeFrei(s2, f);
+      }
+    }
+  }
+  function gebeFrei(s2, f) {
+    const st = s2.einkauf.wgs[f.wg];
+    const d = WG[f.wg];
+    const lid = LIEFERANTEN.find((l) => l.name === f.lieferant)?.id;
+    for (const l of f.lieferungen) {
+      const woche2 = Math.max(l.woche, s2.woche + 1);
+      s2.bestellungen.push({ id: `b${f.id}-${woche2}`, gruppe: d.bereich, wg: f.wg, art: f.art, marke: f.marke, wert: l.wert, ankunft: woche2, vorkasse: false, lieferantId: lid, saisonId: saisonVon(woche2) });
+      limitFuer(s2, st, saisonId(woche2)).verbraucht += l.wert;
+    }
+  }
+  function einkaufFristen(s2) {
+    const w = s2.woche;
+    const pr2 = protokoll(s2);
+    s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => s2.basisUmsatz[WG[f.wg].bereich] !== void 0);
+    const faellig = s2.einkauf.freigaben.filter((f) => f.frist < w);
+    if (!faellig.length) return;
+    s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => f.frist >= w);
+    let verfallen = 0;
+    let wert = 0;
+    for (const f of faellig) {
+      const modus = s2.einkauf.wgs[f.wg].st.modus[f.art];
+      if (modus === "auto" || s2.prognose) {
+        gebeFrei(s2, f);
+        pr2.auto++;
+      } else {
+        verfallen++;
+        wert += f.wert;
+        pr2.verfallen++;
+        pr2.verfallenWert += f.wert;
+      }
+    }
+    if (verfallen) melde(s2, "warnung", `${verfallen} Orders \xFCber ${mio(wert)} sind ohne Freigabe verfallen. Die Ware fehlt in den H\xE4usern.`);
+  }
+  var EINKAUF_AKTIONEN = /* @__PURE__ */ new Set(["wgLimit", "wgNosZiel", "wgServicegrad", "wgVororderquote", "wgReduzierung", "wgFreigabeModus", "freigeben", "freigabeAblehnen", "freigabeKuerzen", "sammelfreigabe", "freigabeGrenze", "eigenmarkeGruenden", "eigenmarkeNeupositionieren", "eigenmarkeEinstellen", "eigenmarkeAnteil", "eigenmarkeSetzen"]);
+  function wgAuswahl(s2, a) {
+    if (a === "alle") return aktiveWg(s2);
+    if (WG[a]) return [WG[a]];
+    return (WG_JE_BEREICH[a] ?? []).filter((d) => s2.basisUmsatz[d.bereich] !== void 0);
+  }
+  var auswahlText = (a, n) => a === "alle" ? `alle ${n} Warengruppen` : WG[a] ? WG[a].name : `${GRUPPEN[a]?.name ?? a} (${n} Warengruppen)`;
+  function passtFilter(f, x) {
+    if (!x) return true;
+    if (x.bereich && WG[f.wg].bereich !== x.bereich) return false;
+    if (x.wg && f.wg !== x.wg) return false;
+    if (x.art && f.art !== x.art) return false;
+    if (x.typ && f.typ !== x.typ) return false;
+    if (x.marke !== void 0 && (f.marke ?? "") !== x.marke) return false;
+    if (x.bisWert !== void 0 && f.wert > x.bisWert) return false;
+    if (x.fristBis !== void 0 && f.frist > x.fristBis) return false;
+    return true;
+  }
+  function einkaufAktion(s2, a, einmalKosten2) {
+    const ok5 = (text3) => ({ ok: true, text: text3 });
+    const fehler5 = (text3) => ({ ok: false, text: text3 });
+    const pr2 = protokoll(s2);
+    const wgOp = (sel, fn, was) => {
+      const ds = wgAuswahl(s2, sel);
+      if (!ds.length) return fehler5("Keine passende Warengruppe.");
+      for (const d of ds) fn(s2.einkauf.wgs[d.id], d);
+      return ok5(`${was} f\xFCr ${auswahlText(sel, ds.length)}.`);
+    };
+    switch (a.typ) {
+      case "wgLimit": {
+        if (a.euro !== void 0 && a.euro !== null && a.euro < 0) return fehler5("Limit kann nicht negativ sein.");
+        const fk = a.faktor !== void 0 ? clamp(a.faktor, 0.3, 2) : void 0;
+        return wgOp(a.wg, (st) => {
+          if (fk !== void 0) st.st.limitFaktor = fk;
+          if (a.euro === null) st.st.limitEuro = void 0;
+          else if (a.euro !== void 0) st.st.limitEuro = eur(a.euro);
+        }, a.euro !== void 0 && a.euro !== null ? `Limit ${mio(a.euro)} je Saison` : `Limit ${Math.round((fk ?? 1) * 100)} % vom Saisonplan`);
+      }
+      case "wgNosZiel": {
+        const z2 = clamp(a.anteil, 0.02, 0.98);
+        return wgOp(a.wg, (st) => {
+          st.st.nosZiel = z2;
+        }, `NOS-Anteil Ziel ${Math.round(z2 * 100)} %`);
+      }
+      case "wgServicegrad": {
+        if (![0.9, 0.95, 0.98].includes(a.ziel)) return fehler5("Servicegrad 90, 95 oder 98 %.");
+        return wgOp(a.wg, (st) => {
+          st.st.servicegrad = a.ziel;
+        }, `NOS-Servicegrad ${Math.round(a.ziel * 100)} %`);
+      }
+      case "wgVororderquote": {
+        const q2 = clamp(a.quote, 0.2, 1);
+        return wgOp(a.wg, (st) => {
+          st.st.vororderquote = q2;
+        }, `Vororderquote ${Math.round(q2 * 100)} %`);
+      }
+      case "wgReduzierung": {
+        if (!EK_PARAM.abschrift[a.strategie]) return fehler5("Reduzierung fr\xFCh, normal oder sp\xE4t.");
+        return wgOp(a.wg, (st) => {
+          st.st.reduzierung = a.strategie;
+        }, `Reduzierung ${a.strategie === "frueh" ? "fr\xFCh" : a.strategie === "spaet" ? "sp\xE4t" : "normal"}`);
+      }
+      case "wgFreigabeModus": {
+        const arten = a.art === "beide" ? ["nos", "saison"] : [a.art];
+        return wgOp(a.wg, (st) => {
+          for (const x of arten) st.st.modus[x] = a.modus;
+        }, `Ohne Freigabe: ${a.modus === "auto" ? "automatisch bestellen" : "Order verf\xE4llt"} (${arten.map((x) => x === "nos" ? "NOS" : "Saison").join(", ")})`);
+      }
+      case "freigeben":
+      case "freigabeAblehnen": {
+        const ids = new Set(a.ids);
+        const treffer = s2.einkauf.freigaben.filter((f) => ids.has(f.id));
+        if (!treffer.length) return fehler5("Keine offene Order gefunden.");
+        s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => !ids.has(f.id));
+        const wert = treffer.reduce((x, f) => x + f.wert, 0);
+        if (a.typ === "freigeben") {
+          for (const f of treffer) gebeFrei(s2, f);
+          pr2.freigegeben += treffer.length;
+          return ok5(`${treffer.length} Orders \xFCber ${mio(wert)} freigegeben.`);
+        }
+        pr2.abgelehnt += treffer.length;
+        return ok5(`${treffer.length} Orders \xFCber ${mio(wert)} abgelehnt.`);
+      }
+      case "freigabeKuerzen": {
+        const f = s2.einkauf.freigaben.find((x) => x.id === a.id);
+        if (!f) return fehler5("Order nicht gefunden.");
+        const p2 = clamp(a.prozent, 0, 0.95);
+        f.lieferungen = f.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p2)) }));
+        f.wert = f.lieferungen.reduce((x, l) => x + l.wert, 0);
+        f.reichweiteDanach = Math.round(f.reichweiteDanach * (1 - p2) * 10) / 10;
+        f.erwarteterAbverkauf = eur(f.erwarteterAbverkauf);
+        f.hinweis = [f.hinweis, `um ${Math.round(p2 * 100)} % gek\xFCrzt`].filter(Boolean).join(", ");
+        if (a.freigeben === false) return ok5(`Order ${WG[f.wg].name} auf ${mio(f.wert)} gek\xFCrzt.`);
+        s2.einkauf.freigaben = s2.einkauf.freigaben.filter((x) => x.id !== f.id);
+        gebeFrei(s2, f);
+        pr2.freigegeben++;
+        return ok5(`Order ${WG[f.wg].name} um ${Math.round(p2 * 100)} % gek\xFCrzt und \xFCber ${mio(f.wert)} freigegeben.`);
+      }
+      case "sammelfreigabe": {
+        const treffer = s2.einkauf.freigaben.filter((f) => passtFilter(f, a.filter));
+        if (!treffer.length) return ok5("Keine offenen Orders im Filter.");
+        const ids = new Set(treffer.map((f) => f.id));
+        s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f) => !ids.has(f.id));
+        for (const f of treffer) gebeFrei(s2, f);
+        pr2.freigegeben += treffer.length;
+        return ok5(`Sammelfreigabe: ${treffer.length} Orders \xFCber ${mio(treffer.reduce((x, f) => x + f.wert, 0))}.`);
+      }
+      case "freigabeGrenze": {
+        if (!(a.euro >= 0)) return fehler5("Grenze in Euro angeben.");
+        s2.einkauf.grenze = eur(a.euro);
+        return ok5(`Freigabegrenze ${Math.round(s2.einkauf.grenze).toLocaleString("de-DE")} \u20AC EK je Order.`);
+      }
+      case "eigenmarkeGruenden":
+        return eigenmarkeGruenden(s2, a.entwurf, einmalKosten2);
+      case "eigenmarkeNeupositionieren":
+        return eigenmarkeNeupositionieren(s2, a.marke, a.neu, einmalKosten2);
+      case "eigenmarkeEinstellen":
+        return eigenmarkeEinstellen(s2, a.marke);
+      case "eigenmarkeAnteil":
+        return eigenmarkeAnteil(s2, a.marke, a.wg, a.anteil);
+      case "eigenmarkeSetzen":
+        return eigenmarkeSetzen(s2, a.marke, a);
+    }
+  }
+  var EINKAUF_SPALTEN = [
+    { id: "umsatz", name: "Umsatz 13 Wo.", format: "eur", standard: true },
+    { id: "rohertragsquote", name: "Rohertragsquote", format: "prozent", standard: true },
+    { id: "lagerumschlag", name: "Umschlag", format: "faktor", standard: true },
+    { id: "reichweite", name: "Reichweite", format: "wochen", standard: true },
+    { id: "abverkaufsquote", name: "Abverkauf", format: "prozent", standard: true },
+    { id: "altwarenanteil", name: "Altware", format: "prozent", standard: true },
+    { id: "nosVerfuegbarkeit", name: "NOS-Verf\xFCgbarkeit", format: "prozent", standard: true },
+    { id: "limitFrei", name: "Limit frei", format: "eur", standard: true },
+    { id: "rohertrag", name: "Rohertrag 13 Wo.", format: "eur", standard: false },
+    { id: "bestandEk", name: "Bestand EK", format: "eur", standard: false },
+    { id: "abschriften", name: "Abschriften 13 Wo.", format: "eur", standard: false },
+    { id: "reduzierungsquote", name: "Reduzierungsquote", format: "prozent", standard: false },
+    { id: "entgangenerUmsatz", name: "Fehlmengen 13 Wo.", format: "eur", standard: false },
+    { id: "offeneOrders", name: "Offene Orders", format: "eur", standard: false },
+    { id: "offeneFreigaben", name: "Freigaben offen", format: "anzahl", standard: false },
+    { id: "eigenmarkenAnteil", name: "Eigenmarkenanteil", format: "prozent", standard: false },
+    { id: "eigenmarkenMarge", name: "Eigenmarkenmarge", format: "prozent", standard: false }
+  ];
+  var leer2 = () => ({ u13: 0, uW: 0, r13: 0, best: 0, e52: 0, bSum52: 0, n52: 0, e13: 0, bSum13: 0, n13: 0, ab13: 0, fehl13: 0, nosZ: 0, nosN: 0, eu13: 0, er13: 0, alt: 0, sEin: 0, sAb: 0, limit: 0, limitV: 0, pipe: 0, offenN: 0, offenW: 0, bedarf4: 0, plMarge: 0, sollAbverkauf: 0 });
+  function rauschen(s2, wg, feld, woche2 = s2.woche) {
+    const stufe2 = s2.hq?.wirkung.controlling ?? 1;
+    const r = stufe2 >= 2.5 ? 0 : [0.12, 0.04, 0][s2.controllingStufe];
+    if (r === 0) return 1;
+    let h = 2166136261;
+    const t = `${wg}|${woche2}|${feld}`;
+    for (let i = 0; i < t.length; i++) {
+      h ^= t.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return 1 + r * ((h >>> 0) % 1e4 / 1e4 * 2 - 1);
+  }
+  var summe = (x, n) => {
+    let a = 0;
+    for (let i = Math.max(0, x.length - n); i < x.length; i++) a += x[i];
+    return a;
+  };
+  function basisWg(s2, d, bestandJe) {
+    const st = s2.einkauf.wgs[d.id];
+    const v = st.v;
+    const R9 = (f) => rauschen(s2, d.id, f);
+    const b2 = leer2();
+    const n52 = Math.min(52, v.w.length);
+    const n13 = Math.min(13, v.w.length);
+    b2.u13 = summe(v.u, 13) * R9("u");
+    b2.uW = (v.u[v.u.length - 1] ?? 0) * R9("u");
+    b2.r13 = summe(v.r, 13) + Math.abs(summe(v.u, 13)) * (R9("r") - 1) * 0.5;
+    const bj = bestandJe.get(d.id) ?? { best: 0, alt: 0 };
+    b2.best = bj.best * R9("b");
+    b2.alt = bj.alt * R9("b") * R9("alt");
+    b2.e52 = summe(v.e, 52) * R9("e");
+    b2.bSum52 = summe(v.b, 52) * R9("b");
+    b2.n52 = n52;
+    b2.e13 = summe(v.e, 13) * R9("e");
+    b2.bSum13 = summe(v.b, 13) * R9("b");
+    b2.n13 = n13;
+    b2.ab13 = summe(v.a, 13) * R9("a");
+    b2.fehl13 = summe(v.f, 13) * R9("f");
+    const nN = Math.min(4, v.n.length);
+    for (let i = v.n.length - nN; i < v.n.length; i++) {
+      const g = v.nd[i] * st.nosAnteil;
+      b2.nosZ += v.n[i] * g;
+      b2.nosN += g;
+    }
+    b2.nosZ *= 1 + (R9("n") - 1) * 0.25;
+    b2.eu13 = summe(v.eu, 13) * R9("u");
+    b2.er13 = summe(v.er, 13) * R9("u");
+    const sz = st.saisons[String(saisonId(s2.woche))] ?? { eingang: 0, abverkauf: 0 };
+    b2.sEin = sz.eingang;
+    b2.sAb = sz.abverkauf * R9("s");
+    const sid = saisonId(s2.woche);
+    const L2 = limitFuer(s2, st, sid);
+    b2.limit = limitWert(st, L2);
+    b2.limitV = L2.verbraucht;
+    for (const x of s2.bestellungen) if (x.wg === d.id) b2.pipe += x.wert;
+    for (const f of s2.einkauf.freigaben) if (f.wg === d.id) {
+      b2.offenN++;
+      b2.offenW += f.wert;
+    }
+    for (let t = s2.woche; t < s2.woche + 4; t++) for (const art of ["nos", "saison"]) for (const pool of poolsDerWg(s2, st)) b2.bedarf4 += prognoseEk(s2, st, art, pool, t) / (1 + st.fehler);
+    b2.plMarge = (st.nosAnteil * st.margeNos + (1 - st.nosAnteil) * st.margeSaison) * b2.u13;
+    const rel = s2.woche - saisonStart(sid);
+    b2.sollAbverkauf = clamp(0.7 * (rel + 1) / 26, 0, 0.7) * b2.sEin;
+    return b2;
+  }
+  function addiere2(a, b2) {
+    const o = { ...a };
+    for (const k of Object.keys(o)) o[k] = a[k] + b2[k];
+    o.n52 = Math.max(a.n52, b2.n52);
+    o.n13 = Math.max(a.n13, b2.n13);
+    return o;
+  }
+  function kennzahlen(b2) {
+    const avg52 = b2.n52 > 0 ? b2.bSum52 / b2.n52 : b2.best;
+    const avg13 = b2.n13 > 0 ? b2.bSum13 / b2.n13 : b2.best;
+    return {
+      umsatz: eur(b2.u13),
+      umsatzWoche: eur(b2.uW),
+      rohertrag: eur(b2.r13),
+      rohertragsquote: b2.u13 > 0 ? b2.r13 / b2.u13 : 0,
+      bestandEk: eur(b2.best),
+      lagerumschlag: avg52 > 0 && b2.n52 > 0 ? Math.round(b2.e52 * 52 / b2.n52 / avg52 * 100) / 100 : 0,
+      lagerumschlag13: avg13 > 0 && b2.n13 > 0 ? Math.round(b2.e13 * 52 / b2.n13 / avg13 * 100) / 100 : 0,
+      reichweite: b2.bedarf4 > 0 ? Math.round(b2.best / (b2.bedarf4 / 4) * 10) / 10 : 0,
+      abverkaufsquote: b2.sEin > 0 ? Math.min(1, b2.sAb / b2.sEin) : 0,
+      altwarenanteil: b2.best > 0 ? b2.alt / b2.best : 0,
+      abschriften: eur(b2.ab13),
+      reduzierungsquote: b2.u13 > 0 ? b2.ab13 / b2.u13 : 0,
+      nosVerfuegbarkeit: b2.nosN > 0 ? Math.min(1, b2.nosZ / b2.nosN) : 1,
+      entgangenerUmsatz: eur(b2.fehl13),
+      limit: eur(b2.limit),
+      limitVerbraucht: eur(b2.limitV),
+      limitFrei: eur(b2.limit - b2.limitV),
+      offeneOrders: eur(b2.pipe),
+      offeneFreigaben: b2.offenN,
+      offeneFreigabenWert: eur(b2.offenW),
+      eigenmarkenAnteil: b2.u13 > 0 ? b2.eu13 / b2.u13 : 0,
+      eigenmarkenMarge: b2.eu13 > 0 ? b2.er13 / b2.eu13 : 0
+    };
+  }
+  function ampeln(k, b2) {
+    const a = (gut, mittel) => gut ? "gruen" : mittel ? "gelb" : "rot";
+    const plan2 = b2.u13 > 0 ? b2.plMarge / b2.u13 : 0;
+    const soll = b2.sEin > 0 ? b2.sollAbverkauf / b2.sEin : 0;
+    return {
+      rohertragsquote: a(k.rohertragsquote >= plan2 - 0.03, k.rohertragsquote >= plan2 - 0.06),
+      // Plan vor Abschriften, 3 Punkte Reduzierung sind normal
+      lagerumschlag: a(k.lagerumschlag >= 3, k.lagerumschlag >= 2),
+      reichweite: a(k.reichweite >= 3 && k.reichweite <= 12, k.reichweite >= 2 && k.reichweite <= 18),
+      abverkaufsquote: a(k.abverkaufsquote >= soll - 0.1, k.abverkaufsquote >= soll - 0.2),
+      altwarenanteil: a(k.altwarenanteil <= 0.1, k.altwarenanteil <= 0.2),
+      reduzierungsquote: a(k.reduzierungsquote <= 0.03, k.reduzierungsquote <= 0.06),
+      nosVerfuegbarkeit: a(k.nosVerfuegbarkeit >= 0.945, k.nosVerfuegbarkeit >= 0.9),
+      entgangenerUmsatz: a(k.umsatz > 0 && k.entgangenerUmsatz / k.umsatz <= 0.04, k.umsatz > 0 && k.entgangenerUmsatz / k.umsatz <= 0.08),
+      limitFrei: a(k.limit > 0 && k.limitFrei / k.limit >= 0.1, k.limitFrei > 0)
+    };
+  }
+  function bestandJeWg(s2) {
+    const m = /* @__PURE__ */ new Map();
+    for (const k of s2.bestand) {
+      if (!k.wg) continue;
+      let x = m.get(k.wg);
+      if (!x) {
+        x = { best: 0, alt: 0 };
+        m.set(k.wg, x);
+      }
+      x.best += k.wert;
+      if (istAlt(k)) x.alt += k.wert;
+    }
+    return m;
+  }
+  var genauigkeit = (s2) => (s2.hq?.wirkung.controlling ?? 1) >= 2.5 || s2.controllingStufe === 2 ? "exakt" : s2.controllingStufe === 1 ? "normal" : "grob";
+  function einkaufUebersicht(s2, filter = {}) {
+    const bj = bestandJeWg(s2);
+    const bereiche = [];
+    let gesamt = leer2();
+    for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
+      if (s2.basisUmsatz[g] === void 0) continue;
+      if (filter.bereich && filter.bereich !== g) continue;
+      if (filter.format && GRUPPEN[g].format !== filter.format) continue;
+      let sum2 = leer2();
+      const wgs = [];
+      for (const d of liste) {
+        const b2 = basisWg(s2, d, bj);
+        sum2 = addiere2(sum2, b2);
+        const k2 = kennzahlen(b2);
+        wgs.push({ id: d.id, name: d.name, kennzahlen: k2, ampeln: ampeln(k2, b2), eigenmarken: markenInWg(s2, d.id).map((m) => m.name) });
+      }
+      gesamt = addiere2(gesamt, sum2);
+      const k = kennzahlen(sum2);
+      bereiche.push({ bereich: g, name: GRUPPEN[g].name, format: GRUPPEN[g].format, kennzahlen: k, ampeln: ampeln(k, sum2), wgs });
+    }
+    const sid = saisonId(s2.woche);
+    const kg = kennzahlen(gesamt);
+    return {
+      woche: s2.woche,
+      saison: { id: sid, name: saisonName(s2, sid), woche: s2.woche - saisonStart(sid) + 1, wochen: 26 },
+      grenze: s2.einkauf.grenze,
+      offeneFreigaben: s2.einkauf.freigaben.length,
+      offeneFreigabenWert: eur(s2.einkauf.freigaben.reduce((a, f) => a + f.wert, 0)),
+      genauigkeit: genauigkeit(s2),
+      einkaufStufe: Math.round(einkaufStufe(s2) * 100) / 100,
+      summe: { kennzahlen: kg, ampeln: ampeln(kg, gesamt) },
+      bereiche,
+      spalten: EINKAUF_SPALTEN
+    };
+  }
+  function freigabeZeile(s2, f) {
+    const d = WG[f.wg];
+    return {
+      ...f,
+      lieferungen: f.lieferungen.map((l) => ({ ...l })),
+      wgName: d.name,
+      bereich: d.bereich,
+      bereichName: GRUPPEN[d.bereich].name,
+      markeName: f.marke ? s2.eigenmarken.marken.find((m) => m.id === f.marke)?.name : void 0,
+      restWochen: f.frist - s2.woche,
+      modus: s2.einkauf.wgs[f.wg].st.modus[f.art],
+      ersteLieferung: f.lieferungen[0]?.woche ?? f.erstellt
+    };
+  }
+  function freigaben(s2, filter) {
+    const liste = s2.einkauf.freigaben.filter((f) => passtFilter(f, filter)).map((f) => freigabeZeile(s2, f)).sort((a, b2) => a.frist - b2.frist || b2.wert - a.wert);
+    return { woche: s2.woche, grenze: s2.einkauf.grenze, anzahl: liste.length, wert: eur(liste.reduce((a, f) => a + f.wert, 0)), liste, protokoll: s2.einkauf.protokoll.map((p2) => ({ ...p2 })) };
+  }
+  function wgDetail(s2, wgId) {
+    const d = WG[wgId];
+    if (!d) return void 0;
+    const st = s2.einkauf.wgs[wgId];
+    const b2 = basisWg(s2, d, bestandJeWg(s2));
+    const k = kennzahlen(b2);
+    const v = st.v;
+    const n = Math.min(26, v.w.length);
+    const ab = v.w.length - n;
+    const verlauf = { woche: [], bestand: [], umsatz: [], reichweite: [], nosVerfuegbarkeit: [], abschriften: [] };
+    for (let i = ab; i < v.w.length; i++) {
+      const w = v.w[i];
+      const best2 = v.b[i] * rauschen(s2, wgId, "b", w);
+      const e4 = v.e.slice(Math.max(0, i - 3), i + 1).reduce((x, y) => x + y, 0) / Math.min(4, i + 1) || 1;
+      verlauf.woche.push(w);
+      verlauf.bestand.push(eur(best2));
+      verlauf.umsatz.push(eur(v.u[i] * rauschen(s2, wgId, "u", w)));
+      verlauf.reichweite.push(Math.round(best2 / e4 * 10) / 10);
+      verlauf.nosVerfuegbarkeit.push(v.n[i]);
+      verlauf.abschriften.push(eur(v.a[i] * rauschen(s2, wgId, "a", w)));
+    }
+    const sid = saisonId(s2.woche);
+    const limits = [sid, sid + 1].map((x) => {
+      const L2 = limitFuer(s2, st, x);
+      const lw = limitWert(st, L2);
+      return { saison: x, name: saisonName(s2, x), limit: lw, verbraucht: eur(L2.verbraucht), frei: eur(lw - L2.verbraucht) };
+    });
+    const best = /* @__PURE__ */ new Map();
+    for (const x of s2.bestellungen) if (x.wg === wgId) {
+      const key = `${x.ankunft}|${x.art}|${x.marke ?? ""}`;
+      const y = best.get(key) ?? { ankunft: x.ankunft, art: x.art ?? "saison", marke: x.marke, wert: 0 };
+      y.wert += x.wert;
+      best.set(key, y);
+    }
+    return {
+      id: d.id,
+      name: d.name,
+      bereich: d.bereich,
+      bereichName: GRUPPEN[d.bereich].name,
+      format: GRUPPEN[d.bereich].format,
+      lieferant: d.lieferant,
+      kennzahlen: k,
+      ampeln: ampeln(k, b2),
+      steuerung: { ...st.st, modus: { ...st.st.modus }, nosAnteil: Math.round(st.nosAnteil * 1e3) / 1e3 },
+      stammdaten: { margeNos: st.margeNos, margeSaison: st.margeSaison, vorlaufVor: d.vorlaufVor, vorlaufNach: d.vorlaufNach, vorlaufNos: d.vorlaufNos, mindestabnahme: d.mindestabnahme, eigenmarkenfaehig: d.eigenmarkenfaehig, kategorie: d.kategorie, saison: d.saison.map((x) => Math.round(x * 100) / 100) },
+      eigenmarken: markenInWg(s2, wgId).map((m) => ({ marke: m.id, name: m.name, farbe: m.farbe, anteilZiel: m.wgAnteile[wgId] ?? 0, anteilIst: Math.round((m.wgIst[wgId] ?? 0) * 1e3) / 1e3, mehrmarge: mehrmarge(m) })),
+      verlauf,
+      limits,
+      bestellungen: [...best.values()].sort((a, c) => a.ankunft - c.ankunft).map((x) => ({ ...x, wert: eur(x.wert) })),
+      freigaben: s2.einkauf.freigaben.filter((f) => f.wg === wgId).map((f) => freigabeZeile(s2, f))
+    };
+  }
+
+  // ../engine/src/merchandise.ts
+  var WARE_AKTIONEN = /* @__PURE__ */ new Set(["allokationQualitaet", "umlagerung", "reduzierungZentral", "reduzierungLokal", "merchandisePlan", "fundusAbfluss", "flaechenZuteilung", "warensicherung"]);
+  var hausclusterId = (h) => h.hauscluster || h.region;
+  function ersatzHauscluster(s2) {
+    const regionen = [...new Set(s2.haeuser.map((h) => h.region))].sort();
+    for (const region of regionen) {
+      const hs = s2.haeuser.filter((h) => h.region === region && !h.hauscluster).sort((a, b2) => a.id.localeCompare(b2.id));
+      for (let i = 0, n = 1; i < hs.length; n++) {
+        const rest = hs.length - i;
+        const count = rest > 12 && rest - 9 < 6 ? rest - 6 : Math.min(9, rest);
+        for (const h of hs.slice(i, i + count)) h.hauscluster = `ware-${region}-${n}`;
+        i += count;
+      }
+    }
+  }
+  function clusterListe(s2) {
+    const map = /* @__PURE__ */ new Map();
+    for (const h of s2.haeuser) {
+      const id = hausclusterId(h);
+      const xs = map.get(id) ?? [];
+      xs.push(h);
+      map.set(id, xs);
+    }
+    const namen = new Map(s2.organisation?.hauscluster.map((c) => [c.id, c.name]) ?? []);
+    return Array.from(map, ([id, haeuser]) => ({ id, name: namen.get(id) ?? id, haeuser })).sort((a, b2) => a.name.localeCompare(b2.name, "de"));
+  }
+  function basis(h, g) {
+    const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === "eigen").reduce((a, f) => a + f.qm, 0);
+    return h.status === "geschlossen" || h.status === "verkauft" ? 0 : (h.potenzial[g] ?? 0) * (1 - Math.exp(-qm / Math.max(1, h.saettigungQm[g] ?? 1)));
+  }
+  function gewichte(s2, g) {
+    const c = clusterListe(s2);
+    const v = c.map((x) => x.haeuser.reduce((a, h) => a + basis(h, g), 0));
+    const total = v.reduce((a, b2) => a + b2, 0);
+    return Object.fromEntries(c.map((x, i) => [x.id, total > 0 ? v[i] / total : 1 / Math.max(1, c.length)]));
+  }
+  function verteile(s2, k, gewicht2) {
+    const ids = Object.keys(gewicht2).sort();
+    if (!ids.length) return [k];
+    let rest = k.wert;
+    return ids.map((id, i) => {
+      const wert = i === ids.length - 1 ? rest : Math.min(rest, eur(k.wert * gewicht2[id]));
+      rest -= wert;
+      return { ...k, hauscluster: id, wert };
+    }).filter((k2) => k2.wert > 0);
+  }
+  function schiefe(g, qualitaet3) {
+    if (qualitaet3 >= 1) return g;
+    const ids = Object.keys(g).sort();
+    if (ids.length < 2) return g;
+    const fehler5 = (1 - qualitaet3) * 0.5;
+    const soll = ids.map((id) => g[id]);
+    const verschoben = soll.map((x, i) => x * (1 - fehler5) + soll[(i + ids.length - 1) % ids.length] * fehler5);
+    return Object.fromEntries(ids.map((id, i) => [id, verschoben[i]]));
+  }
+  function aufteilen(s2) {
+    const gesamt = /* @__PURE__ */ new Map();
+    const neu = [];
+    for (const k of s2.bestand) {
+      if (k.hauscluster) {
+        neu.push(k);
+        continue;
+      }
+      let g = gesamt.get(k.gruppe);
+      if (!g) {
+        const ist = bereichsQualitaet(s2, "allokation");
+        const basis3 = s2.ware.allokationStart ?? ist;
+        const faktor = basis3 > 0 ? clamp(ist / basis3, 0, 1) : 1;
+        g = schiefe(gewichte(s2, k.gruppe), s2.ware.allokationQualitaet * faktor);
+        gesamt.set(k.gruppe, g);
+      }
+      neu.push(...verteile(s2, k, g));
+    }
+    return neu;
+  }
+  function verteileZugang(s2) {
+    if (!s2.ware?.steuerungAktiv) return;
+    if (!s2.bestand.some((k) => !k.hauscluster)) return;
+    s2.bestand = aufteilen(s2);
+  }
+  function clusterSicht(s2) {
+    if (!s2.ware || !s2.bestand.some((k) => !k.hauscluster)) return s2.bestand;
+    return aufteilen(s2);
+  }
+  function steuerungUebernehmen(s2) {
+    s2.ware.steuerungAktiv = true;
+    verteileZugang(s2);
+  }
+  function initialisiereWare(s2) {
+    ersatzHauscluster(s2);
+    s2.ware = {
+      allokationQualitaet: 1,
+      steuerungAktiv: false,
+      bedarf: {},
+      umlagerungen: [],
+      zentral: {},
+      lokal: {},
+      plaene: {},
+      vorlagen: [],
+      fundusEigen: 0,
+      fundusFremd: 6e7,
+      inventur: {},
+      letzterInventurverlust: 0,
+      allokationStart: bereichsQualitaet(s2, "allokation"),
+      inventurAufwandWoche: 0,
+      saisonAbschlag: {}
+    };
+    verteileZugang(s2);
+  }
+  function wareWoche(s2) {
+    if (!s2.ware) initialisiereWare(s2);
+    const w = s2.ware;
+    w.inventurAufwandWoche = 0;
+    w.saisonAbschlag = saisonabschlag(s2);
+    for (const t of w.umlagerungen.filter((t2) => t2.ankunft <= s2.woche)) {
+      s2.bestand.push(...t.kohorten.map((k) => ({ ...k, hauscluster: t.nach })));
+    }
+    w.umlagerungen = w.umlagerungen.filter((t) => t.ankunft > s2.woche);
+    verteileZugang(s2);
+    if (s2.woche % 26 === 0 && !s2.prognose) {
+      const sid = saisonId(s2.woche + 30);
+      if (!w.vorlagen.some((v) => v.saison === sid)) {
+        w.vorlagen.push({ id: `ware-${sid}`, wg: "alle", saison: sid, frist: s2.woche + 2, erledigt: false });
+        neueVorlage(s2, {
+          bereich: "merchandise_planning",
+          titel: `Saisonbudget ${saisonName(s2, sid)}`,
+          text: `Open-to-Buy, Zielmarge, Sortimentsbreite und Vororder f\xFCr ${WG_DEF.length} Warengruppen zur Freigabe. Die Einzelbudgets stehen im Einkaufsreiter Merchandise.`,
+          frist: 2
+        });
+        melde(s2, "info", `Merchandise Planning: Saisonplanung ${saisonName(s2, sid)} bereit.`, { modul: "einkauf" });
+        if (istDelegiert(s2, "merchandise_planning")) {
+          const q2 = bereichsQualitaet(s2, "merchandise_planning");
+          for (const d of WG_DEF) {
+            const st = s2.einkauf.wgs[d.id];
+            if (!st) continue;
+            const l = limitFuer(s2, st, sid);
+            const delta = (1 - q2) * 0.5 * (0.2 - d.anteil);
+            const faktor = clamp(1 + delta, 0.8, 1.2);
+            const budget = eur(l.plan * st.st.limitFaktor * faktor);
+            st.st.limitEuro = budget;
+            w.plaene[`${d.id}|${sid}`] = {
+              wg: d.id,
+              saison: sid,
+              budget,
+              zielmarge: st.margeSaison,
+              zielabverkauf: 0.75,
+              breite: 0.5,
+              vororderquote: st.st.vororderquote
+            };
+          }
+        }
+      }
+    }
+    for (const v of w.vorlagen) if (!v.erledigt && s2.woche > v.frist) v.erledigt = true;
+    w.vorlagen = w.vorlagen.filter((v) => !v.erledigt || v.frist > s2.woche - 26);
+    if (s2.woche % 52 === 5 && !s2.prognose) {
+      const rang = [];
+      const stand = /* @__PURE__ */ new Map();
+      const basisCluster = /* @__PURE__ */ new Map();
+      const schadenCluster = /* @__PURE__ */ new Map();
+      for (const k of clusterSicht(s2)) {
+        const key = `${k.hauscluster}|${k.gruppe}`;
+        stand.set(key, (stand.get(key) ?? 0) + k.wert);
+      }
+      const offene = s2.haeuser.filter((h) => h.status === "offen");
+      for (const h of offene) for (const g of Object.keys(h.potenzial)) {
+        const volumen = basis(h, g), key = `${hausclusterId(h)}|${g}`;
+        basisCluster.set(key, (basisCluster.get(key) ?? 0) + volumen);
+        schadenCluster.set(key, (schadenCluster.get(key) ?? 0) + volumen * (h.warensicherung ? 3e-3 : 6e-3));
+      }
+      let summe2 = 0;
+      for (const h of offene) {
+        const hc = hausclusterId(h);
+        let differenz = 0;
+        for (const g of Object.keys(h.potenzial)) {
+          const key = `${hc}|${g}`;
+          const anteil3 = basis(h, g) / Math.max(1, basisCluster.get(key) ?? 0);
+          const verwaltung = clamp((h.personal.vollzeit + h.personal.teilzeit) / Math.max(1, h.grundflaecheQm / 80), 0.5, 1.4);
+          const rate = h.warensicherung ? 3e-3 : 6e-3;
+          differenz += (stand.get(key) ?? 0) * anteil3 * rate / verwaltung;
+        }
+        const wert = eur(differenz);
+        h.letzteInventur = wert;
+        w.inventur[h.id] = { woche: s2.woche, differenz: wert, quote: wert / Math.max(1, h.kpi?.umsatz ?? 1) };
+        rang.push({ haus: h, differenz: wert });
+        summe2 += wert;
+      }
+      w.letzterInventurverlust = eur(summe2);
+      rang.sort((a, b2) => b2.differenz - a.differenz);
+      melde(s2, "info", `Inventur KW 6: ${eur(summe2).toLocaleString("de-DE")} \u20AC rechnerische Differenz. H\xF6chste Werte: ${rang.slice(0, 5).map((x) => x.haus.name).join(", ")}.`, { modul: "einkauf" });
+      if (w.steuerungAktiv) for (const k of s2.bestand) {
+        const key = `${k.hauscluster}|${k.gruppe}`, volumen = basisCluster.get(key) ?? 0;
+        const rate = volumen > 0 ? (schadenCluster.get(key) ?? 0) / volumen : 0;
+        const alt = k.wert;
+        k.wert = eur(k.wert * (1 - rate));
+        w.inventurAufwandWoche = (w.inventurAufwandWoche ?? 0) + eur((alt - k.wert) * k.kostenFaktor);
+      }
+    }
+  }
+  function wareBedarf(s2, roh2) {
+    if (!s2.ware) return;
+    const basisJe = {};
+    for (const r of roh2) for (const [g, b2] of Object.entries(r.eigen)) {
+      const hc = hausclusterId(r.haus);
+      const v = basisJe[g] ?? (basisJe[g] = {});
+      v[hc] = (v[hc] ?? 0) + b2.brutto;
+    }
+    for (const [g, x] of Object.entries(basisJe)) {
+      const summe2 = Object.values(x).reduce((a, b2) => a + b2, 0);
+      s2.ware.bedarf[g] = Object.fromEntries(Object.keys(x).map((k) => [k, summe2 > 0 ? x[k] / summe2 : 0]));
+    }
+  }
+  function verbraucheCluster(s2, kohorten, wert, altMax, gruppe2, verbrauch) {
+    if (!s2.ware?.steuerungAktiv || !kohorten) return verbrauch(kohorten ?? [], wert, altMax);
+    const soll = s2.ware.bedarf[gruppe2] ?? gewichte(s2, gruppe2);
+    const ids = Object.keys(soll).sort();
+    const jeCluster = /* @__PURE__ */ new Map();
+    for (const k of kohorten) {
+      const id = k.hauscluster ?? "";
+      const x = jeCluster.get(id) ?? [];
+      x.push(k);
+      jeCluster.set(id, x);
+    }
+    let voll2 = 0, gebucht = 0, alt = 0;
+    for (const id of ids) {
+      const r = verbrauch(jeCluster.get(id) ?? [], wert * soll[id], altMax * soll[id]);
+      voll2 += r.voll;
+      gebucht += r.gebucht;
+      alt += r.alt;
+    }
+    return { voll: voll2, gebucht, alt };
+  }
+  function verdichteWare(s2) {
+    if (!s2.ware) return;
+    const map = /* @__PURE__ */ new Map();
+    for (const k of s2.bestand) {
+      if (k.wert <= 0.5) continue;
+      const key = [k.hauscluster, k.gruppe, k.wg, k.art, k.marke, k.saisonId, k.alter, k.kostenFaktor, k.ladenhueter].join("|");
+      const alt = map.get(key);
+      if (alt) alt.wert += k.wert;
+      else map.set(key, k);
+    }
+    s2.bestand = Array.from(map.values());
+  }
+  function reduzierungGesperrt(s2, gruppe2, cluster) {
+    const x = s2.ware?.zentral ?? {};
+    return !!(x["*|*"] || x[`${gruppe2}|*`] || x[`*|${cluster}`] || x[`${gruppe2}|${cluster}`]);
+  }
+  function saisonabschlag(s2) {
+    const ergebnis = {};
+    const sid = saisonId(s2.woche);
+    const q2 = bereichsQualitaet(s2, "preis_reduzierung");
+    for (const d of WG_DEF) {
+      const st = s2.einkauf.wgs[d.id];
+      if (!st) continue;
+      const lauf = st.saisons[String(sid)];
+      const quote = lauf ? lauf.abverkauf / Math.max(1, lauf.eingang) : 0;
+      const stufe2 = quote < 0.35 ? 0 : quote < 0.55 ? 0.2 : quote < 0.75 ? 0.3 : quote < 0.9 ? 0.5 : 0.7;
+      const takt = clamp(0.75 + q2 * 0.25, 0.75, 1);
+      const altQuote = d.anteil * (1 - st.nosAnteil);
+      ergebnis[d.bereich] = (ergebnis[d.bereich] ?? 0) + stufe2 * altQuote * takt;
+    }
+    return ergebnis;
+  }
+  function preisFaktorHaus(s2, h, g) {
+    const hc = hausclusterId(h);
+    const gesperrt2 = reduzierungGesperrt(s2, g, hc);
+    const pp = gesperrt2 ? 0 : s2.ware?.lokal[`${g}|${hc}`] ?? 0;
+    if (!gesperrt2 && pp <= 0) return 1;
+    const saison2 = s2.ware?.saisonAbschlag?.[g] ?? 0;
+    return clamp(1 - saison2 * 0.08 - pp * 0.25, 0.85, 1);
+  }
+  function fundusFrequenzFaktor(s2) {
+    const w = s2.ware;
+    if (!w) return 1;
+    const eigenquote = w.fundusEigen / Math.max(1, w.fundusEigen + w.fundusFremd);
+    return 1 - 0.15 * clamp((eigenquote - 0.25) / 0.25, 0, 1);
+  }
+  function warenUebersicht(s2) {
+    const w = s2.ware;
+    const sicht3 = clusterSicht(s2);
+    const cluster = clusterListe(s2).map((c) => {
+      const bestand = sicht3.filter((k) => k.hauscluster === c.id);
+      const wert = bestand.reduce((a, k) => a + k.wert, 0);
+      const alt = bestand.filter((k) => k.ladenhueter || k.alter > (k.art === "nos" ? EK_PARAM.altNos : EK_PARAM.altSaison)).reduce((a, k) => a + k.wert, 0);
+      const umsatz = c.haeuser.reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0);
+      return {
+        id: c.id,
+        name: c.name,
+        haeuser: c.haeuser.length,
+        bestand: eur(wert),
+        altware: wert > 0 ? alt / wert : 0,
+        reichweite: umsatz > 0 ? wert / (umsatz * 0.6) : null,
+        fehlmenge: Math.max(0, umsatz * 0.6 * 8 - wert),
+        umsatz: eur(umsatz)
+      };
+    });
+    const plaene = WG_DEF.filter((d) => !!s2.einkauf.wgs[d.id]).map((d) => {
+      const st = s2.einkauf.wgs[d.id];
+      const sid = saisonId(s2.woche + 30);
+      const limit = limitFuer(s2, st, sid);
+      const plan2 = w?.plaene[`${d.id}|${sid}`];
+      return {
+        wg: d.id,
+        name: d.name,
+        saison: sid,
+        saisonName: saisonName(s2, sid),
+        budget: plan2?.budget ?? eur(limit.plan * st.st.limitFaktor),
+        verbraucht: eur(limit.verbraucht),
+        zielmarge: plan2?.zielmarge ?? st.nosAnteil * st.margeNos + (1 - st.nosAnteil) * st.margeSaison,
+        zielabverkauf: plan2?.zielabverkauf ?? 0.75,
+        breite: plan2?.breite ?? 0.5,
+        vororderquote: plan2?.vororderquote ?? st.st.vororderquote
+      };
+    });
+    const kalender = WG_DEF.filter((d) => !!s2.einkauf.wgs[d.id]).map((d) => {
+      const st = s2.einkauf.wgs[d.id];
+      const sid = saisonId(s2.woche);
+      const lauf = st.saisons[String(sid)];
+      const quote = lauf ? lauf.abverkauf / Math.max(1, lauf.eingang) : 0;
+      const stufe2 = quote < 0.35 ? 0 : quote < 0.55 ? 0.2 : quote < 0.75 ? 0.3 : quote < 0.9 ? 0.5 : 1;
+      return {
+        wg: d.id,
+        name: d.name,
+        saison: sid,
+        abverkauf: quote,
+        stufe: stufe2,
+        strategie: st.st.reduzierung,
+        lokal: cluster.map((c) => ({
+          cluster: c.id,
+          punkte: w?.lokal[`${d.bereich}|${c.id}`] ?? 0,
+          gesperrt: reduzierungGesperrt(s2, d.bereich, c.id)
+        }))
+      };
+    });
+    return {
+      cluster,
+      plaene,
+      kalender,
+      allokationQualitaet: w?.allokationQualitaet ?? 1,
+      konzernbestand: eur(s2.bestand.reduce((a, k) => a + k.wert, 0)),
+      clusterbestand: eur(s2.bestand.reduce((a, k) => a + k.wert, 0)),
+      umlagerungen: w?.umlagerungen.map((t) => ({ gruppe: t.gruppe, von: t.von, nach: t.nach, wert: eur(t.kohorten.reduce((a, k) => a + k.wert, 0)), ankunft: t.ankunft })) ?? [],
+      fundus: {
+        eigen: w?.fundusEigen ?? 0,
+        fremd: w?.fundusFremd ?? 0,
+        quote: (w?.fundusEigen ?? 0) / Math.max(1, (w?.fundusEigen ?? 0) + (w?.fundusFremd ?? 0)),
+        frequenzFaktor: fundusFrequenzFaktor(s2)
+      },
+      vorlagen: w?.vorlagen.filter((v) => !v.erledigt) ?? []
+    };
+  }
+  function warenHaus(s2, h) {
+    const c = hausclusterId(h);
+    const bs = clusterSicht(s2).filter((k) => k.hauscluster === c);
+    const wert = bs.reduce((a, k) => a + k.wert, 0);
+    const alt = bs.filter((k) => k.ladenhueter || k.alter > (k.art === "nos" ? EK_PARAM.altNos : EK_PARAM.altSaison)).reduce((a, k) => a + k.wert, 0);
+    const betr = h.flaechen.filter((f) => f.konzept === "eigen" && !(f.umbauBis && f.umbauBis > s2.woche)).reduce((a, f) => a + f.qm, 0);
+    return {
+      hauscluster: c,
+      verfuegbarkeit: wert ? clamp(wert / Math.max(1, (h.kpi?.umsatz ?? 1) * 7), 0, 1) : 0,
+      altwareanteil: wert ? alt / wert : 0,
+      inventur: s2.ware?.inventur[h.id],
+      flaechenproduktivitaet: (h.kpi?.umsatz ?? 0) / Math.max(1, betr)
+    };
+  }
+  function wareAktion(s2, a) {
+    if (!s2.ware) initialisiereWare(s2);
+    const w = s2.ware;
+    const fehler5 = (text3) => ({ ok: false, text: text3 });
+    const ok5 = (text3) => ({ ok: true, text: text3 });
+    switch (a.typ) {
+      case "allokationQualitaet":
+        if (!Number.isFinite(a.qualitaet) || a.qualitaet < 0 || a.qualitaet > 1) return fehler5("Qualit\xE4t muss zwischen 0 und 1 liegen.");
+        w.allokationQualitaet = a.qualitaet;
+        w.steuerungAktiv = true;
+        const gruppiert = /* @__PURE__ */ new Map();
+        for (const k of s2.bestand) {
+          const key = [k.gruppe, k.wg, k.art, k.marke, k.alter, k.saisonId, k.kostenFaktor, k.ladenhueter].join("|");
+          const x = gruppiert.get(key);
+          if (x) x.wert += k.wert;
+          else gruppiert.set(key, { ...k, wert: k.wert });
+        }
+        s2.bestand = [...gruppiert.values()].flatMap((k) => verteile(s2, k, schiefe(gewichte(s2, k.gruppe), a.qualitaet)));
+        return ok5("Allokation und Nachschub angepasst.");
+      case "umlagerung": {
+        const cl = clusterListe(s2).map((x) => x.id);
+        if (!cl.includes(a.von) || !cl.includes(a.nach) || a.von === a.nach) return fehler5("Ung\xFCltiges Quell- oder Zielcluster.");
+        if (!GRUPPEN[a.gruppe] || !Number.isSafeInteger(a.wert) || a.wert <= 0) return fehler5("Ung\xFCltiger Warenwert.");
+        steuerungUebernehmen(s2);
+        const pool = s2.bestand.filter((k) => k.gruppe === a.gruppe && k.hauscluster === a.von && k.wert > 0).sort((x, y) => y.alter - x.alter);
+        if (pool.reduce((x, k) => x + k.wert, 0) < a.wert) return fehler5("Zu wenig Ware im Quellcluster.");
+        let rest = a.wert;
+        const kohorten = [];
+        for (const k of pool) {
+          if (rest <= 0) break;
+          const x = Math.min(rest, k.wert);
+          k.wert -= x;
+          rest -= x;
+          kohorten.push({ ...k, wert: x });
+        }
+        s2.bestand = s2.bestand.filter((k) => k.wert > 0);
+        const kosten = eur(Math.max(1500, a.wert * 0.015));
+        s2.einmalkostenWoche += kosten;
+        w.umlagerungen.push({ gruppe: a.gruppe, von: a.von, nach: a.nach, kohorten, kosten, ankunft: s2.woche + (a.wert > 25e4 ? 2 : 1) });
+        w.steuerungAktiv = true;
+        return ok5("Umlagerung beauftragt; Ankunft in ein bis zwei Wochen.");
+      }
+      case "reduzierungZentral": {
+        const key = `${a.gruppe ?? "*"}|${a.hauscluster ?? "*"}`;
+        if (a.gruppe && !GRUPPEN[a.gruppe]) return fehler5("Warengruppe nicht gefunden.");
+        if (a.hauscluster && !clusterListe(s2).some((c) => c.id === a.hauscluster)) return fehler5("Hauscluster nicht gefunden.");
+        if (a.an) w.zentral[key] = true;
+        else delete w.zentral[key];
+        if (a.an) for (const c of clusterListe(s2)) {
+          if (a.hauscluster && a.hauscluster !== c.id) continue;
+          const leitungen = s2.organisation?.hauscluster;
+          const leitung2 = leitungen?.find((x) => x.id === c.id)?.stelle.person;
+          if (leitung2) leitung2.stimmung = Math.max(0, leitung2.stimmung - (leitung2.qualitaet >= 0.7 ? 10 : 5));
+        }
+        return ok5(a.an ? "Zentraler Reduzierungskalender durchgesetzt." : "Lokaler Reduzierungsspielraum freigegeben.");
+      }
+      case "reduzierungLokal":
+        if (!GRUPPEN[a.gruppe] || !clusterListe(s2).some((c) => c.id === a.hauscluster)) return fehler5("Bereich oder Hauscluster unbekannt.");
+        if (reduzierungGesperrt(s2, a.gruppe, a.hauscluster)) return fehler5("Der zentrale Reduzierungskalender sperrt lokale Nachl\xE4sse.");
+        if (!Number.isFinite(a.punkte) || a.punkte < 0 || a.punkte > 10) return fehler5("Maximal zehn zus\xE4tzliche Prozentpunkte.");
+        w.lokal[`${a.gruppe}|${a.hauscluster}`] = a.punkte / 100;
+        steuerungUebernehmen(s2);
+        return ok5("Lokaler Reduzierungsspielraum aktualisiert.");
+      case "merchandisePlan": {
+        const st = s2.einkauf.wgs[a.wg];
+        if (!st || !Number.isSafeInteger(a.saison) || a.saison < saisonId(s2.woche)) return fehler5("Saison oder Warengruppe nicht g\xFCltig.");
+        const alt = w.plaene[`${a.wg}|${a.saison}`];
+        const soll = limitFuer(s2, st, a.saison);
+        const p2 = {
+          wg: a.wg,
+          saison: a.saison,
+          budget: a.budget ?? alt?.budget ?? eur(soll.plan * st.st.limitFaktor),
+          zielmarge: a.zielmarge ?? alt?.zielmarge ?? st.margeSaison,
+          zielabverkauf: a.zielabverkauf ?? alt?.zielabverkauf ?? 0.75,
+          breite: a.breite ?? alt?.breite ?? 0.5,
+          vororderquote: a.vororderquote ?? alt?.vororderquote ?? st.st.vororderquote
+        };
+        if (!Number.isSafeInteger(p2.budget) || p2.budget < 0 || p2.zielmarge < 0 || p2.zielmarge > 1 || p2.zielabverkauf < 0 || p2.zielabverkauf > 1 || p2.breite < 0 || p2.breite > 1 || p2.vororderquote < 0 || p2.vororderquote > 1) return fehler5("Ung\xFCltige Planparameter.");
+        w.plaene[`${a.wg}|${a.saison}`] = p2;
+        st.st.limitEuro = p2.budget;
+        st.st.vororderquote = p2.vororderquote;
+        for (const v of w.vorlagen) if (v.wg === a.wg && v.saison === a.saison) v.erledigt = true;
+        return ok5("Saisonbudget und Vororderquote \xFCbernommen.");
+      }
+      case "fundusAbfluss": {
+        if (!GRUPPEN[a.gruppe] || !Number.isSafeInteger(a.wert) || a.wert <= 0) return fehler5("Ung\xFCltiger Warenwert.");
+        const ks = s2.bestand.filter((k) => k.gruppe === a.gruppe && k.wert > 0 && (k.ladenhueter || k.alter > (k.art === "nos" ? EK_PARAM.altNos : EK_PARAM.altSaison))).sort((x, y) => y.alter - x.alter);
+        if (ks.reduce((x, k) => x + k.wert, 0) < a.wert) return fehler5("Nicht genug Altware vorhanden.");
+        let rest = a.wert, ek2 = 0;
+        for (const k of ks) {
+          const x = Math.min(k.wert, rest);
+          k.wert -= x;
+          rest -= x;
+          ek2 += x * k.kostenFaktor;
+          if (rest <= 0) break;
+        }
+        s2.bestand = s2.bestand.filter((k) => k.wert > 0.5);
+        w.fundusEigen += a.wert;
+        const erloes = eur(a.wert * 0.7);
+        s2.einmalErloeseWoche += erloes;
+        s2.einmalkostenWoche += eur(ek2);
+        return ok5(`${erloes.toLocaleString("de-DE")} \u20AC Erl\xF6s durch Abfluss an FUNDUS gebucht.`);
+      }
+      case "flaechenZuteilung": {
+        const h = s2.haeuser.find((h2) => h2.id === a.haus);
+        if (!h || h.status !== "offen") return fehler5("Haus nicht verf\xFCgbar.");
+        if (a.von === a.nach || !GRUPPEN[a.nach] || GRUPPEN[a.nach].format !== h.format || !Number.isSafeInteger(a.qm) || a.qm < 50) return fehler5("Unzul\xE4ssige Fl\xE4chen\xE4nderung.");
+        const f = h.flaechen.find((f2) => f2.gruppe === a.von && f2.konzept === "eigen" && f2.umbauBis === void 0 && f2.qm >= a.qm);
+        if (!f) return fehler5("Nicht gen\xFCgend freie Eigenfl\xE4che.");
+        const wochen = clamp(Math.ceil(a.qm / 200) + 1, 2, 6);
+        const kosten = eur(a.qm * 180);
+        f.qm -= a.qm;
+        h.flaechen.push({
+          id: `${h.id}-ware-${++s2.zaehler}`,
+          etage: f.etage,
+          qm: a.qm,
+          konzept: "eigen",
+          gruppe: a.von,
+          umbauBis: s2.woche + wochen,
+          umbauZiel: { konzept: "eigen", gruppe: a.nach }
+        });
+        s2.einmalkostenWoche += kosten;
+        return ok5(`${a.qm} qm umgeplant, Umbauzeit ${wochen} Wochen.`);
+      }
+      case "warensicherung": {
+        const h = s2.haeuser.find((h2) => h2.id === a.haus);
+        if (!h) return fehler5("Haus nicht gefunden.");
+        h.warensicherung = a.an;
+        if (a.an) s2.einmalkostenWoche += 25e3;
+        steuerungUebernehmen(s2);
+        return ok5(a.an ? "Warensicherung installiert." : "Warensicherung deaktiviert.");
+      }
+    }
+    return fehler5("Unbekannte Warenaktion.");
   }
 
   // ../engine/src/welt.ts
@@ -11082,6 +11597,7 @@
     initialisiereUmbau(s2);
     s2.kapitalflussStartCash = s2.cash;
     initialisierePersonaleinsatz(s2);
+    initialisiereWare(s2);
     return s2;
   }
   function initialeVerbindlichkeiten(s2) {
@@ -11204,9 +11720,9 @@
     const mw = raeumung2 ? void 0 : marketingGruppen(s2, h, basisJe, tEJe, mess);
     if (mess.length) roh2.aktionsMessung = mess;
     for (const g of alleGruppen) {
-      const basis2 = basisJe[g] ?? 0;
+      const basis3 = basisJe[g] ?? 0;
       const e = mw?.[g];
-      const brutto2 = basis2 * (e ? e.nachfrage : 1);
+      const brutto2 = basis3 * (e ? e.nachfrage : 1);
       const umsatz = raeumung2 ? brutto2 * (1 - 0.35) : brutto2 * (e ? e.preis : 1);
       const qe = qmEigen[g] ?? 0;
       const qk = qmKomm[g] ?? 0;
@@ -11533,9 +12049,9 @@
     return x;
   }
   function attraktivitaet2(h) {
-    const basis2 = 1 - 0.2 * h.wettbewerbStart;
-    const relativ = (1 - 0.2 * h.einzug.wettbewerb) / basis2;
-    return h.einzug.kaufkraft * LAGE_FAKTOR[h.lage] * CLUSTER_FAKTOR[h.cluster] * basis2 * relativ;
+    const basis3 = 1 - 0.2 * h.wettbewerbStart;
+    const relativ = (1 - 0.2 * h.einzug.wettbewerb) / basis3;
+    return h.einzug.kaufkraft * LAGE_FAKTOR[h.lage] * CLUSTER_FAKTOR[h.cluster] * basis3 * relativ;
   }
   var hausAttraktivitaet = attraktivitaet2;
   function qmAufEtage2(h, etage2) {
@@ -11994,7 +12510,9 @@
     const vorWareneingang = s2.cash;
     wareneingang(s2, lohn * 2);
     const warenVorkasse = s2.cash - vorWareneingang;
+    wareWoche(s2);
     const roh2 = s2.haeuser.map((h) => simuliereHaus(s2, h));
+    wareBedarf(s2, roh2);
     const nachfrage = einkaufNachfrage(s2, roh2);
     const bedarf = {};
     const bruttoSumme = {};
@@ -12051,7 +12569,7 @@
       let umsatzEigen = 0;
       for (const [g, v] of Object.entries(r.eigen)) {
         const f = verfuegbar2[g] ?? 1;
-        const u = v.umsatz * f;
+        const u = v.umsatz * f * preisFaktorHaus(s2, h, g);
         const anteil3 = (bruttoSumme[g] ?? 0) > 0 ? v.brutto / (bruttoSumme[g] ?? 1) : 0;
         const e = (einsatz[g] ?? 0) * anteil3;
         umsatzEigen += u;
@@ -12120,7 +12638,8 @@
     const mk2 = marketingKosten(s2, k.umsatz);
     k.marketing = mk2.netto + markenBudget;
     k.beratung = s2.berater.filter((b2) => w >= b2.start && w < b2.ende).reduce((x, b2) => x + b2.wochenSatz, 0);
-    k.abschriften = einkaufAltern(s2);
+    k.abschriften = einkaufAltern(s2) + (s2.ware?.inventurAufwandWoche ?? 0);
+    verdichteWare(s2);
     k.rohertrag -= k.abschriften;
     eigenmarkenWoche(s2, einkaufBuchen(s2, umsatzEigenJe));
     produkteBuchen(s2);
@@ -46111,11 +46630,11 @@
     wiederaufbau: [2, 4]
   };
   function stilProfil(region = "Mitte", cluster = "grossstadt") {
-    const basis2 = PROFIL[region] ?? PROFIL.Mitte, mod = CLUSTER[cluster] ?? {};
+    const basis3 = PROFIL[region] ?? PROFIL.Mitte, mod = CLUSTER[cluster] ?? {};
     const out = {};
     let s2 = 0;
     for (const st of STILE) {
-      out[st] = (basis2[st] ?? 0) * (mod[st] ?? 1);
+      out[st] = (basis3[st] ?? 0) * (mod[st] ?? 1);
       s2 += out[st];
     }
     for (const st of STILE) out[st] = out[st] / s2;
@@ -48154,8 +48673,8 @@
         for (const s2 of Object.values(markt.rand)) if (s2.seg && r() < 0.5) nimmSeg(strassen.find((q2) => q2.id === s2.seg));
       }
       for (let it = 0; it < n; it++) {
-        const basis2 = strassen.filter((s2) => gewaehlt.has(s2.id));
-        const weiter = strassen.filter((s2) => !gewaehlt.has(s2.id) && s2.typ !== "haupt" && !s2.bruecke && basis2.some((q2) => q2.achse === s2.achse && Math.abs(q2.mitte - s2.mitte) < 0.6 && (Math.abs(q2.bis - s2.von) < 40 || Math.abs(s2.bis - q2.von) < 40)));
+        const basis3 = strassen.filter((s2) => gewaehlt.has(s2.id));
+        const weiter = strassen.filter((s2) => !gewaehlt.has(s2.id) && s2.typ !== "haupt" && !s2.bruecke && basis3.some((q2) => q2.achse === s2.achse && Math.abs(q2.mitte - s2.mitte) < 0.6 && (Math.abs(q2.bis - s2.von) < 40 || Math.abs(s2.bis - q2.von) < 40)));
         if (weiter.length && r() < 0.75) nimmSeg(waehle2(r, weiter));
       }
       for (const b2 of bloecke) if (b2.rand) for (const s2 of Object.keys(b2.rand)) {
@@ -52840,13 +53359,13 @@
     return g;
   }
   function rautenFeld(s2, u0, u1, y0, y1, a, b2, h, farbe3, o = {}) {
-    const basis2 = raute(a, b2, h);
+    const basis3 = raute(a, b2, h);
     const rows = Math.floor((y1 - y0) / b2) - 1;
     for (let j = 0; j < rows; j++) {
       const yc = y0 + b2 * (j + 1), off = j % 2 ? a : 0;
       for (let uc = u0 + a + off; uc <= u1 - a + 1e-3; uc += 2 * a) {
         if (o.skip && o.skip(uc, yc)) continue;
-        const g = basis2.clone();
+        const g = basis3.clone();
         g.translate(uc, yc, o.t ?? 0.02);
         s2.geo(g, o.farbe ? o.farbe(uc, yc) : farbe3);
       }
@@ -52854,14 +53373,14 @@
   }
   function rautenBogen(K3, cx, cz, R9, y0, y1, a, b2, h, farbe3) {
     const bogenL = Math.PI / 2 * R9, nA = Math.max(2, Math.round(bogenL / (2 * a))), dth = Math.PI / 2 / nA;
-    const basis2 = raute(bogenL / nA / 2, b2, h);
+    const basis3 = raute(bogenL / nA / 2, b2, h);
     const rows = Math.floor((y1 - y0) / b2) - 1;
     for (let j = 0; j < rows; j++) {
       const yc = y0 + b2 * (j + 1), off = j % 2 ? 0.5 : 0;
       for (let i = 0; i < nA; i++) {
         const th = (i + 0.5 + off) * dth;
         if (th > Math.PI / 2) continue;
-        const g = basis2.clone();
+        const g = basis3.clone();
         g.rotateY(th);
         g.translate(cx + Math.sin(th) * R9, yc, cz + Math.cos(th) * R9);
         K3.S.add(g, typeof farbe3 === "function" ? farbe3() : farbe3);
@@ -53476,9 +53995,9 @@
   }
   function nachnutzung(S, scene2, haus2, wettbewerber2, opt = {}) {
     const start = S.anzahl;
-    const basis2 = warenhaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, vorplatz: false, passanten: false });
+    const basis3 = warenhaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, vorplatz: false, passanten: false });
     const farbe3 = WETTBEWERBER_FARBEN[wettbewerber2.art] ?? "#526477";
-    const m = masse(haus2), breite = basis2.w, tiefe = basis2.d;
+    const m = masse(haus2), breite = basis3.w, tiefe = basis3.d;
     const x = opt.x ?? 0, z2 = opt.z ?? 0;
     for (const seite of seitenVon(S, x, z2, breite, tiefe)) {
       seite.q(0.5, seite.L - 0.5, 0.6, 4.1, 0.4, 0.5, "#779bab");
@@ -53490,7 +54009,7 @@
         seite.q(a, a + (seite.L - 3) / 3, 5.7, Math.min(m.H - 0.6, 9), 0.25, 0.33, "#78848a");
       }
     }
-    return { ...basis2, teile: S.anzahl - start, nachnutzung: wettbewerber2.id };
+    return { ...basis3, teile: S.anzahl - start, nachnutzung: wettbewerber2.id };
   }
   function warenhaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
@@ -53725,13 +54244,13 @@
   }
   function uhr(S, seite, u, y, f, rad2, o = {}) {
     const z2 = o.zeiger ?? "#1e2429";
-    const teile = [
+    const teile2 = [
       [new three_module_exports.CylinderGeometry(rad2, rad2, 0.3, 22).rotateX(PI / 2).translate(0, 0, 0.15), o.rahmen ?? "#2f3b44"],
       [new three_module_exports.CylinderGeometry(rad2 * 0.84, rad2 * 0.84, 0.3, 22).rotateX(PI / 2).translate(0, 0, 0.22), o.blatt ?? "#f7f2e6"],
       [new three_module_exports.BoxGeometry(rad2 * 0.1, rad2 * 0.7, 0.1).translate(0, rad2 * 0.3, 0.42), z2],
       [new three_module_exports.BoxGeometry(rad2 * 0.48, rad2 * 0.13, 0.1).rotateZ(-0.5).translate(rad2 * 0.19, rad2 * 0.1, 0.44), z2]
     ];
-    for (const [g, c] of teile) S.add(aufSeite(g, seite, u, y, f), c);
+    for (const [g, c] of teile2) S.add(aufSeite(g, seite, u, y, f), c);
   }
   function rosette(S, seite, u, y, f, rad2, stein, glas2 = "#46596a") {
     S.add(aufSeite(new three_module_exports.CylinderGeometry(rad2 * 1.12, rad2 * 1.12, 0.3, 24).rotateX(PI / 2).translate(0, 0, 0.12), seite, u, y, f), heller(stein, 0.05));
@@ -58889,8 +59408,8 @@
   }
   function tresenU(L2, lx, lz, r, d) {
     const marke4 = bunt(r, ["#f7f3ec", "#1f1f1f", "#e9a3b8", "#ffffff"]);
-    const teile = [[0, -1.1, 2.8, 0.7], [-1.05, 0.15, 0.7, 1.8], [1.05, 0.15, 0.7, 1.8]];
-    for (const [dx, dz, ww, dd] of teile) {
+    const teile2 = [[0, -1.1, 2.8, 0.7], [-1.05, 0.15, 0.7, 1.8], [1.05, 0.15, 0.7, 1.8]];
+    for (const [dx, dz, ww, dd] of teile2) {
       L2.box(ww, 0.92, dd, lx + dx, 0, lz + dz, marke4);
       L2.box(ww + 0.04, 0.04, dd + 0.04, lx + dx, 0.92, lz + dz, "#d8b25a");
       flakonFlaeche(L2, lx + dx, 0.96, lz + dz, ww - 0.15, dd - 0.15, r, d);
@@ -59674,8 +60193,8 @@
       return { frei: frei6 };
     }
     if (gruppe2 === "offprice") {
-      const basis2 = o.basis ?? "damen";
-      const pal = PAL[basis2] ?? PAL.damen;
+      const basis3 = o.basis ?? "damen";
+      const pal = PAL[basis3] ?? PAL.damen;
       for (const [s2, len, off] of wandStuecke) {
         const L3 = wandL(s2, len, off);
         if (r() < 0.5) staender(L3, 0, 0.4, len - 0.4, pal, r, d, 1.6);
@@ -59701,8 +60220,8 @@
     }
     if (gruppe2 === "konzession") {
       const m = o.marke ?? marke2(seed);
-      const basis2 = o.basis ?? m.gruppe;
-      const mod2 = MODUL[basis2] ?? MODUL.damen;
+      const basis3 = o.basis ?? m.gruppe;
+      const mod2 = MODUL[basis3] ?? MODUL.damen;
       for (const [s2, len, off] of wandStuecke) {
         const L2 = wandL(s2, len, off);
         L2.box(len, 3.6, 0.1, 0, 0, 0.05, m.farbe);
@@ -61628,14 +62147,14 @@
       n[idx] += diff > 0 ? 1 : -1;
       diff += diff > 0 ? -1 : 1;
     }
-    const teile = [];
+    const teile2 = [];
     let p2 = 0;
     anteile.forEach((a, k) => {
       const cs = new Set(cols.slice(p2, p2 + n[k]));
       p2 += n[k];
-      teile.push({ ...a, zellen: zellen.filter((c) => cs.has(c.i)) });
+      teile2.push({ ...a, zellen: zellen.filter((c) => cs.has(c.i)) });
     });
-    return teile.filter((t) => t.zellen.length);
+    return teile2.filter((t) => t.zellen.length);
   }
   function teilen(A, art, zellen, o) {
     const ncol = spaltenGruppen(zellen).length;
@@ -61767,11 +62286,11 @@
       return res;
     }
     if (A.teilen && !o.teil) {
-      const teile = teilen(A, art, alle, { basisSeed });
-      if (teile && teile.length) {
-        const kIdx = teile.reduce((b2, t, k) => t.zellen.length > teile[b2].zellen.length ? k : b2, 0);
+      const teile2 = teilen(A, art, alle, { basisSeed });
+      if (teile2 && teile2.length) {
+        const kIdx = teile2.reduce((b2, t, k) => t.zellen.length > teile2[b2].zellen.length ? k : b2, 0);
         if (o.schild !== false) deckenschild(S, scene2, A, alle, sicht3, Z2.y ?? 0, o.name);
-        teile.forEach((t, k) => {
+        teile2.forEach((t, k) => {
           const ts = new Set(t.zellen.map((c) => c.i + "," + c.j));
           const sub = { ...Z2, alle: t.zellen, kante: (i, j, di, dj) => {
             const n = i + di + "," + (j + dj);
@@ -62194,7 +62713,7 @@
     const typ = unter ? UNTERMIETE2[o.mieter ?? "discounter"] : null;
     const bt = unter ? typ.boden : { a: m.boden, b: dunkler(m.boden, 0.04), m: "karo" };
     for (const c of alle) if (sicht3(c.i * R + 2.5, c.j * R + 2.5)) boden(S, c.i * R, c.j * R, R, R, y, bt, d);
-    const basis2 = unter ? null : MODUL2[o.basis ?? m.gruppe] ?? MODUL2.damen;
+    const basis3 = unter ? null : MODUL2[o.basis ?? m.gruppe] ?? MODUL2.damen;
     let tuerGesetzt = false, schild2 = false;
     const frisch = unter && (o.mieter ?? "discounter") === "discounter";
     let frischNr = 0, wandNr = 0;
@@ -62209,7 +62728,7 @@
       const L2 = lokal2(S, zentrum[0], yb, zentrum[1], 0);
       if (unter && frisch) (frischNr++ % 2 === 0 ? obstStand2 : waehle2(r, typ.insel))(L2, r, d);
       else if (unter) waehle2(r, typ.insel)(L2, r, d);
-      else waehle2(r, basis2.insel)(L2, r, d);
+      else waehle2(r, basis3.insel)(L2, r, d);
       const wand2 = (seite) => seite === "z" ? lokal2(S, x + 2.5 + (wx ? 0.35 : 0), yb, z2 + 0.25, 0) : lokal2(S, x + 0.25, yb, z2 + 2.5, PI3 / 2);
       for (const [seite, ist] of [["z", wz2], ["x", wx]]) if (ist) {
         const len = seite === "z" ? wx ? R - 0.85 : R - 0.3 : R - 0.3;
@@ -62218,7 +62737,7 @@
         else if (unter) typ.wand(W3, len, r, d);
         else {
           W3.box(len, 3.6, 0.1, 0, 0, -0.1, m.farbe);
-          waehle2(r, basis2.wand)(W3, len - 0.2, r, d);
+          waehle2(r, basis3.wand)(W3, len - 0.2, r, d);
         }
       }
     }
@@ -62965,13 +63484,13 @@
       vorne: (L2, r, d, ctx) => puppenPodest(L2, 0, 0, "sport", mPal(ctx), r, 2.6),
       vorneTakt: 0,
       wandExtra: [{ len: 3.6, fn: (L2, w, r, d, ctx) => umkleiden(L2, w, 3, r, marken(ctx).kopf), seite: "nx", min: 6 }],
-      teilen(zellen, o, teile, ncol) {
+      teilen(zellen, o, teile2, ncol) {
         const s2 = o.basisSeed ?? 0;
         if (ncol < 2) return [{ art: "sporttextil", marke: SPORT_MARKEN[s2 % SPORT_MARKEN.length], zellen }];
         const k = Math.min(SPORT_MARKEN.length, Math.max(2, Math.ceil(ncol / 2.4)));
         const an = [];
         for (let q2 = 0; q2 < k; q2++) an.push({ art: "sporttextil", marke: SPORT_MARKEN[(s2 + q2) % SPORT_MARKEN.length], w: 1 });
-        return teile(zellen, an);
+        return teile2(zellen, an);
       }
     },
     outdoor: {
@@ -63317,13 +63836,13 @@
     wintersport: "winter",
     teamsport: "team"
   };
-  var basis = (L2, w, farbe3) => {
+  var basis2 = (L2, w, farbe3) => {
     L2.box(w - 0.18, 0.1, 1.06, 0, 0, 0.625, "#bfc9cc");
     L2.box(w - 0.24, 0.07, 0.94, 0, 0.12, 0.625, farbe3);
   };
   function baueMix(L2, r, d, art, stil, w) {
     const pal = palette(FARBEN4[art]), farbe3 = pal[Math.floor(r() * pal.length)];
-    basis(L2, w, farbe3);
+    basis2(L2, w, farbe3);
     if (LOD2.stufe === "fern") {
       L2.box(w - 0.4, 0.72, 0.72, 0, 0.23, 0.625, pal[1 % pal.length]);
       return;
@@ -64128,16 +64647,16 @@
     const { score, ...gang } = kandidaten2[0];
     return gang;
   }
-  function teilung(teile, abteile, schacht) {
-    if (!teile.length) return [];
-    const gangIndex = teile.length > 1 ? Math.floor((teile.length - 1) / 2) : -1;
+  function teilung(teile2, abteile, schacht) {
+    if (!teile2.length) return [];
+    const gangIndex = teile2.length > 1 ? Math.floor((teile2.length - 1) / 2) : -1;
     const verfuegbar2 = schacht.d - (gangIndex >= 0 ? 2 * U : 0);
-    const minZellen = Math.max(3, Math.min(7, Math.floor(verfuegbar2 / U / teile.length)));
-    if (verfuegbar2 < teile.length * minZellen * U) throw new Error("Zu viele Abteilungen f\xFCr Etagentiefe");
-    const summe2 = teile.reduce((s2, f) => s2 + f.qm, 0);
-    const laengen = teile.map((f) => Math.max(minZellen, Math.floor(f.qm / summe2 * verfuegbar2 / U)));
+    const minZellen = Math.max(3, Math.min(7, Math.floor(verfuegbar2 / U / teile2.length)));
+    if (verfuegbar2 < teile2.length * minZellen * U) throw new Error("Zu viele Abteilungen f\xFCr Etagentiefe");
+    const summe2 = teile2.reduce((s2, f) => s2 + f.qm, 0);
+    const laengen = teile2.map((f) => Math.max(minZellen, Math.floor(f.qm / summe2 * verfuegbar2 / U)));
     let rest = Math.round(verfuegbar2 / U) - laengen.reduce((a, b2) => a + b2, 0);
-    const groesste = teile.reduce((a, f, i) => f.qm > teile[a].qm ? i : a, 0);
+    const groesste = teile2.reduce((a, f, i) => f.qm > teile2[a].qm ? i : a, 0);
     if (rest >= 0) laengen[groesste] += rest;
     else for (const i of [...laengen.keys()].sort((a, b2) => laengen[b2] - laengen[a])) {
       const weg = Math.min(-rest, Math.max(0, laengen[i] - minZellen));
@@ -64148,8 +64667,8 @@
     if (rest < 0) throw new Error("Abteilungen nicht aufteilbar");
     let z2 = schacht.z;
     const out = [];
-    for (let i = 0; i < teile.length; i++) {
-      const f = teile[i], d = laengen[i] * U;
+    for (let i = 0; i < teile2.length; i++) {
+      const f = teile2[i], d = laengen[i] * U;
       out.push({ ...quadrat(schacht.x, z2, schacht.w, d), id: f.id, titel: f.titel, qmSoll: f.qm });
       z2 += d + (i === gangIndex ? 2 * U : 0);
     }
@@ -65463,9 +65982,9 @@
       kettenName: NAME_SCHWESTER
     };
     const dek = zustandsDekor(S, scene2, k, Z2, { passanten: opt.passanten === false ? false : void 0, logosAbdecken: true, pylon: false });
-    const teile = S.anzahl - start;
-    if (teile > 8e3) throw new Error("Schwesterhaus " + haus2.id + ": Teilebudget " + teile + " > 8000");
-    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile, status };
+    const teile2 = S.anzahl - start;
+    if (teile2 > 8e3) throw new Error("Schwesterhaus " + haus2.id + ": Teilebudget " + teile2 + " > 8000");
+    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status };
   }
 
   // haeuser-schwester.json
@@ -92735,16 +93254,16 @@
       box(kl + 0.05, 0.08, 1.6, ko, 1.57, f);
       if (typ === "taxi") box(0.5, 0.2, 0.8, ko, 1.71, "#f6d24a");
     } else if (typ === "bus" || typ === "gelenkbus") {
-      const teile = typ === "gelenkbus" ? [-6.2, 6.2] : [0];
+      const teile2 = typ === "gelenkbus" ? [-6.2, 6.2] : [0];
       const f = farbe3 ?? "#f2f0ea";
-      for (const o of teile) {
+      for (const o of teile2) {
         box(11.6, 1.2, 2.5, o, 1, f);
         box(11.4, 1.1, 2.52, o, 2.15, "#3c4852");
         box(11.5, 0.4, 2.46, o, 2.9, f);
         box(11.62, 0.35, 2.54, o, 0.75, "#d23c32");
       }
       if (typ === "gelenkbus") box(0.8, 2.6, 2.3, 0, 1.7, "#2b2f33");
-      box(0.1, 0.4, 1.8, teile[teile.length - 1] + 5.82, 2.8, "#f6a23a");
+      box(0.1, 0.4, 1.8, teile2[teile2.length - 1] + 5.82, 2.8, "#f6a23a");
     } else if (typ === "lkw" || typ === "transporter") {
       if (typ === "transporter") {
         box(4.6, 0.35, 1.8, 0, 0.25, "#2b2f33");
@@ -99608,8 +100127,8 @@
     const H = m.H, ruck = waehle2(v, [3, 5, 1.5]);
     const fuge = x + Math.round(w * waehle2(v, [0.45, 0.55, 0.62]) / 2.5) * 2.5;
     c.eingangU = fuge - x - w / 2;
-    const teile = [{ x0: x, x1: fuge - 1.5, z1: z2 + d }, { x0: fuge + 1.5, x1: x + w, z1: z2 + d - ruck }];
-    for (const T of teile) {
+    const teile2 = [{ x0: x, x1: fuge - 1.5, z1: z2 + d }, { x0: fuge + 1.5, x1: x + w, z1: z2 + d - ruck }];
+    for (const T of teile2) {
       const tw = T.x1 - T.x0, td = T.z1 - z2;
       S.quader(T.x0, 0, z2, T.x1, H, T.z1, "#d9dcdc");
       const Fs = [fassade2(S, c.scene, T.x0, z2, tw, td, "+z"), fassade2(S, c.scene, T.x0, z2, tw, td, "+x")];
@@ -99873,8 +100392,8 @@
     const kante = (x0, z0, x1, z1, tuer) => {
       const lx = x1 - x0, lz = z1 - z0, langX = lx > lz;
       const L2 = langX ? lx : lz;
-      const teile = tuer ? [[0, L2 * 0.55], [L2 * 0.55 + 1, L2]] : [[0, L2]];
-      for (const [a, b2] of teile) {
+      const teile2 = tuer ? [[0, L2 * 0.55], [L2 * 0.55 + 1, L2]] : [[0, L2]];
+      for (const [a, b2] of teile2) {
         if (b2 - a < 0.2) continue;
         if (langX) S.box(b2 - a, h - 0.1, 0.05, x0 + (a + b2) / 2, 0.06 + (h - 0.1) / 2, z0, GLAS3);
         else S.box(0.05, h - 0.1, b2 - a, x0, 0.06 + (h - 0.1) / 2, z0 + (a + b2) / 2, GLAS3);
@@ -101130,8 +101649,8 @@
     { art: "wand", w: 3, d: 0.4, vorrang: true, bau(S, sc, x, z2, w, d, st, r) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.12, 0);
       L2.box(w, 1.8, 0.05, 0, 0.6, 0, "#f6f4ef");
-      const basis2 = ["#a8dcc4", "#26355e", "#76263a", "#d8c39c", "#cc9f2e", "#ec7a6a", "#c4b0dc"];
-      basis2.forEach((c, i) => {
+      const basis3 = ["#a8dcc4", "#26355e", "#76263a", "#d8c39c", "#cc9f2e", "#ec7a6a", "#c4b0dc"];
+      basis3.forEach((c, i) => {
         for (let j = 0; j < 6; j++) L2.box(0.34, 0.22, 0.02, -w / 2 + 0.3 + i * 0.4, 0.72 + j * 0.27, 0.035, j < 3 ? heller(c, (3 - j) * 0.12) : dunkler(c, (j - 3) * 0.12));
       });
       text2(L2, "Farbkarten Saison", 0, 2.55, 0.05, 0.22, "#ffffff", ABTEILUNGEN2.produkt.farbe);
@@ -101683,12 +102202,12 @@
   }
   function plattenFarben(r, zustand) {
     if (zustand === "saniert") {
-      const basis2 = waehle2(r, ["#f1e6c4", "#ecd9c6", "#dfe8d6", "#d8e3ea", "#f3dccf", "#efeee8", "#f2e9d6", "#e6e0ee"]);
+      const basis3 = waehle2(r, ["#f1e6c4", "#ecd9c6", "#dfe8d6", "#d8e3ea", "#f3dccf", "#efeee8", "#f2e9d6", "#e6e0ee"]);
       const akzent = waehle2(r, ["#e07a3f", "#3f7d9a", "#7fae5a", "#c9483e", "#e8b53c", "#6b5a9a", "#2f8f8a", "#d0603f"]);
       return {
         saniert: true,
-        panel: [basis2, dunkler(basis2, 0.018)],
-        body: dunkler(basis2, 0.3),
+        panel: [basis3, dunkler(basis3, 0.018)],
+        body: dunkler(basis3, 0.3),
         glas: "#46596a",
         rahmen: "#fbfbf8",
         slab: "#ecebe6",
@@ -103762,17 +104281,17 @@
   }
   function altbau2(S, scene2, p2) {
     if (p2.w > 34 && p2.d >= 12) {
-      const r = rng2(`abz:${p2.seed}`), teile = [];
+      const r = rng2(`abz:${p2.seed}`), teile2 = [];
       let rest = p2.w;
       while (rest > 34) {
         const b2 = Math.round(zw(r, 15, 22));
-        teile.push(b2);
+        teile2.push(b2);
         rest -= b2;
       }
-      teile.push(rest);
+      teile2.push(rest);
       let x = p2.x, H = 0;
-      teile.forEach((b2, i) => {
-        const letzt = i === teile.length - 1;
+      teile2.forEach((b2, i) => {
+        const letzt = i === teile2.length - 1;
         const zst = p2.zustand && r() < 0.6 ? p2.zustand : waehle2(r, ["unsaniert", "unsaniert", "leer", "saniert"]);
         H = Math.max(H, altbauRoh(S, scene2, { ...p2, x, w: b2, seed: p2.seed * 31 + i, zustand: zst, variante: letzt ? p2.variante : "zeile" }).hoehe);
         x += b2;
@@ -104206,8 +104725,8 @@
     E.brachen = 1;
   }
   function ostAltstadt(E) {
-    const basis2 = E.o.basis && ["altstadt", "dom", "residenz", "ring", "flussknick"].includes(E.o.basis) ? E.o.basis : "altstadt";
-    PLAN_HILFE.entwurf(basis2, E);
+    const basis3 = E.o.basis && ["altstadt", "dom", "residenz", "ring", "flussknick"].includes(E.o.basis) ? E.o.basis : "altstadt";
+    PLAN_HILFE.entwurf(basis3, E);
     const v0 = E.viertel, zc = { ...E.zentrum };
     E.ostArt = (i, j) => {
       const dd = Math.hypot(i - zc.i, j - zc.j);
@@ -104223,7 +104742,7 @@
     };
     E.landmarkMax = 3;
     E.brachen = 1;
-    E.ostFachwerk = basis2 === "altstadt" || basis2 === "dom";
+    E.ostFachwerk = basis3 === "altstadt" || basis3 === "dom";
   }
   function ostseeHanse(E) {
     const { r } = E;
@@ -104464,15 +104983,15 @@
       belegt2.push(p2);
       return p2;
     };
-    const gewichte = [["wbs70_6", 3], ["p2", 1.4], ["q3a", klein ? 1.6 : 0.6], ["wbs70_11", metro ? 2 : klein ? 0.2 : 0.9], ["scheibe", metro ? 1 : 0.25]];
+    const gewichte2 = [["wbs70_6", 3], ["p2", 1.4], ["q3a", klein ? 1.6 : 0.6], ["wbs70_11", metro ? 2 : klein ? 0.2 : 0.9], ["scheibe", metro ? 1 : 0.25]];
     const geschosse2 = (v) => /11|scheibe/.test(v) ? 11 : v === "q3a" ? 5 : 6;
     const zeile2 = (x, z2, w, d, front2, vWunsch) => {
       const entlangX = front2[1] === "z", L2 = entlangX ? w : d;
       if (L2 < 26) return;
-      const v = vWunsch ?? wahlGewichtet2(rb, gewichte.filter(([q2]) => q2 !== "scheibe" || L2 >= 60));
+      const v = vWunsch ?? wahlGewichtet2(rb, gewichte2.filter(([q2]) => q2 !== "scheibe" || L2 >= 60));
       const n = Math.max(1, Math.ceil(L2 / 92)), gap = n > 1 ? 10 : 0, Ls = (L2 - gap * (n - 1)) / n;
       for (let k = 0; k < n; k++) {
-        const vv = k && rb() < 0.4 ? wahlGewichtet2(rb, gewichte.filter(([q2]) => q2 !== "scheibe" || Ls >= 60)) : v;
+        const vv = k && rb() < 0.4 ? wahlGewichtet2(rb, gewichte2.filter(([q2]) => q2 !== "scheibe" || Ls >= 60)) : v;
         const o = k * (Ls + gap);
         if (entlangX) setze("slot:platte_wohn", x + o, z2, Ls, d, front2, { variante: vv, zustand: zustand(), geschosse: geschosse2(vv) });
         else setze("slot:platte_wohn", x, z2 + o, w, Ls, front2, { variante: vv, zustand: zustand(), geschosse: geschosse2(vv) });
@@ -104665,11 +105184,11 @@
     }
     neueParzelle2(ctx, "slot:brache", b2.x + 2, b2.z + 2, b2.w - 4, b2.d - 4, ["+z", "+x"], "block", { klasse: 1, variante: waehle2(ctx.rb, ["wiese", "wiese", "parkplatz", "bauzaun", "kiosk"]), brandwand: false, brandwandHinten: false });
   }
-  function bodenPlatte(ctx, b2, r, teile, B2) {
+  function bodenPlatte(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
-    const hinder = [...teile, ...b2.parkplaetze ?? [], ...b2.spiel ?? []];
+    const hinder = [...teile2, ...b2.parkplaetze ?? [], ...b2.spiel ?? []];
     const frei6 = (x, z2, rad2, auch = []) => ![...hinder, ...auch].some((p2) => B2.imRechteck(x, z2, p2, rad2)) && x > b2.x + 1 && x < b2.x + b2.w - 1 && z2 > b2.z + 1 && z2 < b2.z + b2.d - 1;
     for (const P2 of b2.wege ?? []) S.quader(P2.x, y, P2.z, P2.x + P2.w, y + 0.05, P2.z + P2.d, "#ddd5c3");
     for (const P2 of b2.parkplaetze ?? []) {
@@ -104708,11 +105227,11 @@
     }
     for (const P2 of b2.wege ?? []) for (let i = 0, nf = Math.round((P2.w + P2.d) / 14 * ctx.dichte); i < nf; i++) B2.figur(I, B2.zw(r, P2.x + 0.4, P2.x + P2.w - 0.4), y + 0.05, B2.zw(r, P2.z + 0.4, P2.z + P2.d - 0.4), r);
   }
-  function bodenAufmarsch(ctx, b2, r, teile, B2) {
+  function bodenAufmarsch(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, "#dcd6ca", 6);
-    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
+    const frei6 = (x, z2, rad2) => !teile2.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     for (const [x0, z0, x1, z1, entlangX] of [[P2.x + 1, P2.z + P2.d - 6, P2.x + P2.w - 1, P2.z + P2.d - 1.5, true], [P2.x + P2.w - 6, P2.z + 1, P2.x + P2.w - 1.5, P2.z + P2.d - 1, false]]) {
       S.quader(x0, y, z0, x1, y + 0.05, z1, B2.F.rasen);
       if (entlangX) {
@@ -104736,7 +105255,7 @@
       if (frei6(x, z2, 0.5) && (!b2.brunnen || Math.hypot(x - b2.brunnen.x, z2 - b2.brunnen.z) > 7)) B2.figur(I, x, y, z2, r);
     }
   }
-  function bodenHafen(ctx, b2, r, teile, B2) {
+  function bodenHafen(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.34;
     B2.pflasterFlaeche(ctx, b2, y, "#cfc6b4", 5);
@@ -104771,7 +105290,7 @@
     for (let x = b2.x + 3; x < b2.x + b2.w - 2; x += 8) I.setze("poller", x, y, b2.z + b2.d - 1, 0);
     for (let i = 0, nf = Math.round(b2.w / 5 * ctx.dichte); i < nf; i++) B2.figur(I, B2.zw(r, b2.x + 2, b2.x + b2.w - 2), y, B2.zw(r, b2.z + b2.d - 12, b2.z + b2.d - 2), r);
   }
-  function bodenBrache(ctx, b2, r, teile, B2) {
+  function bodenBrache(ctx, b2, r, teile2, B2) {
     ctx.S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.3, b2.z + b2.d, "#a9b48e");
   }
   var OST_STILE = {
@@ -104800,14 +105319,14 @@
   function ostStil(p2, nachbar) {
     const r = rng2((p2.seed ?? 1) * 2654435761 + 977 >>> 0);
     const v = OST_STILE[p2.viertel] ? p2.viertel : "gruenderzeit";
-    const basis2 = { ...OST_STILE[v] };
+    const basis3 = { ...OST_STILE[v] };
     if (p2.region === "nord" && v !== "ostzentrum") {
-      basis2.backstein = v === "zentrum" ? 1.2 : 2.6;
-      basis2.barock = (basis2.barock ?? 0) * 0.3;
+      basis3.backstein = v === "zentrum" ? 1.2 : 2.6;
+      basis3.barock = (basis3.barock ?? 0) * 0.3;
     }
-    if (p2.ostFachwerk && v === "altstadt") basis2.fachwerk = 2.4;
-    if (p2.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis2.barock = 2.5;
-    const liste = Object.entries(basis2).map(([st, g2]) => {
+    if (p2.ostFachwerk && v === "altstadt") basis3.fachwerk = 2.4;
+    if (p2.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis3.barock = 2.5;
+    const liste = Object.entries(basis3).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.25;
       if (st === "fachwerk" && p2.w > 18) w *= 0.3;
@@ -105618,20 +106137,20 @@
     const r = rng2(`ngh:${p2.seed}`);
     const v = GIEBEL_POOL[p2.variante] ? p2.variante : waehle2(r, Object.keys(GIEBEL_POOL));
     const W3 = p2.w, D = p2.d;
-    const teile = [];
+    const teile2 = [];
     let rest = W3;
     while (rest > 13) {
       const b2 = Math.min(rest - 6.5, Math.round(zw(r, 6.4, 10.6) * 2) / 2);
-      teile.push(b2);
+      teile2.push(b2);
       rest -= b2;
     }
-    if (rest > 11) teile.push(rest / 2, rest / 2);
-    else teile.push(rest);
+    if (rest > 11) teile2.push(rest / 2, rest / 2);
+    else teile2.push(rest);
     const T = Math.min(D, zw(r, 12.5, 15));
     let x = 0, H = 0, vorher = null;
     const pool = GIEBEL_POOL[v];
     const salz = Math.floor(r() * 1e3);
-    teile.forEach((b2, i) => {
+    teile2.forEach((b2, i) => {
       let typ = waehle2(r, pool);
       if (typ === vorher) typ = waehle2(r, pool);
       if (b2 < 6.5 && typ === "trauf") typ = "treppe";
@@ -105656,7 +106175,7 @@
         eg: 4.2,
         gh: 3,
         erster: i === 0,
-        letzter: i === teile.length - 1,
+        letzter: i === teile2.length - 1,
         laden: laden4,
         ladenName: LADEN_NORD[(salz + i * 7) % LADEN_NORD.length],
         tuer: waehle2(r, NF.tuer),
@@ -106400,21 +106919,21 @@
   }
   function bremerRoh(S, scene2, p2, r) {
     const W3 = p2.w, D = p2.d, vor = Math.min(3.6, D * 0.3), zv = D - vor, T = Math.min(zv, 12), z0 = zv - T;
-    const teile = [];
+    const teile2 = [];
     let rest = W3;
     while (rest > 9.5) {
       const b2 = Math.min(rest - 5.6, zw(r, 5.8, 7.4));
-      teile.push(b2);
+      teile2.push(b2);
       rest -= b2;
     }
-    teile.push(rest);
+    teile2.push(rest);
     let x = 0, top = 0;
     const salz = Math.floor(r() * 100);
-    teile.forEach((b2, i) => {
+    teile2.forEach((b2, i) => {
       const wand2 = waehle2(r, [...NF.pastell, "#f3efe6", "#f3efe6"]), orn = WEISS, n = 1 + (r() < 0.6 ? 1 : 0);
       const sout = 1.8, eg = 3.5, gh = 3.2, H = sout + eg + (n - 1) * gh + (n > 1 ? 0 : 0), Ha = H + 1.3;
       const FF = R6(x, zv, 1, 0, b2), ax = [b2 / 6, b2 / 2, 5 * b2 / 6], tA = i % 2 ? 0 : 2, eA = tA === 0 ? 2 : 0;
-      const erst = i === 0, letzt = i === teile.length - 1;
+      const erst = i === 0, letzt = i === teile2.length - 1;
       const sz = seiten(x, z0, x + b2, zv), visL = erst && sieht(p2, sz["-x"]), visR = letzt && sieht(p2, sz["+x"]), visB = sieht(p2, sz["-z"]);
       S.quader(x + (visL ? 0.4 : 0), 0, z0 + (visB ? 0.4 : 0), x + b2 - (visR ? 0.4 : 0), Ha, zv - 0.4, dunkler(wand2, 0.1));
       const oe = [];
@@ -108060,12 +108579,12 @@
     const variante2 = b2.variante ?? (L2 >= 70 && Bk >= 36 ? "marien" : L2 >= 56 ? "hallen" : "dorf");
     neueParzelle3(ctx, "slot:nord_kirche", P2.x + (P2.w - L2) * 0.4, P2.z + (P2.d - Bk) * 0.4, L2, Bk, ["+x"], "frei", { klasse: 5, variante: variante2, zustand: b2.zustand, landmarke: true });
   }
-  function bodenKirche(ctx, b2, r, teile, B2) {
+  function bodenKirche(ctx, b2, r, teile2, B2) {
     const { I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, "#d8d0c0", 5);
-    const k = teile.find((p2) => p2.typ === "slot:nord_kirche");
-    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
+    const k = teile2.find((p2) => p2.typ === "slot:nord_kirche");
+    const frei6 = (x, z2, rad2) => !teile2.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     for (let x = P2.x + 4; x < P2.x + P2.w - 3; x += 8.5) {
       const z2 = P2.z + P2.d - 3.2;
       if (frei6(x, z2, 2.6)) B2.baumSetzen(I, "linde", x, y, z2, r, 0.85, true);
@@ -108088,10 +108607,10 @@
     const v = bw >= 36 && bd >= 32 ? "hof" : bd >= 30 && bw >= 20 ? waehle2(rb, ["fachhalle", "backstein"]) : "friesen";
     if (bw >= 18) neueParzelle3(ctx, "slot:nord_bauernhaus", b2.x + 3, b2.z + b2.d - bd - 2, bw, bd, ["+z"], "frei", { klasse: 2, variante: v, landmarke: false });
   }
-  function bodenMuehle(ctx, b2, r, teile, B2) {
+  function bodenMuehle(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.36, b2.z + b2.d, "#a9cc8c");
-    const zf = Math.min(...teile.map((p2) => p2.z), b2.z + b2.d) - 2;
+    const zf = Math.min(...teile2.map((p2) => p2.z), b2.z + b2.d) - 2;
     const farben = ["#d9c87a", "#b9cf7e", "#c9b46a", "#9fc27a"];
     let x = b2.x + 2, k = 0;
     while (x < b2.x + b2.w - 6 && zf - b2.z > 8) {
@@ -108100,11 +108619,11 @@
       for (let q2 = x + 1.5; q2 < x + w - 2; q2 += 2.4) S.quader(q2, 0.42, b2.z + 2.5, q2 + 0.5, 0.46, zf - 0.5, "#c2ad5e");
       x += w;
     }
-    for (let u = b2.x + 2; u < b2.x + b2.w - 2; u += 2.2) if (!teile.some((p2) => B2.imRechteck(u, b2.z + b2.d - 1, p2, 1))) I.setze("busch", u, 0.36, b2.z + b2.d - 1, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
-    for (let u = b2.z + 2; u < b2.z + b2.d - 2; u += 2.2) if (!teile.some((p2) => B2.imRechteck(b2.x + b2.w - 1, u, p2, 1))) I.setze("busch", b2.x + b2.w - 1, 0.36, u, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
+    for (let u = b2.x + 2; u < b2.x + b2.w - 2; u += 2.2) if (!teile2.some((p2) => B2.imRechteck(u, b2.z + b2.d - 1, p2, 1))) I.setze("busch", u, 0.36, b2.z + b2.d - 1, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
+    for (let u = b2.z + 2; u < b2.z + b2.d - 2; u += 2.2) if (!teile2.some((p2) => B2.imRechteck(b2.x + b2.w - 1, u, p2, 1))) I.setze("busch", b2.x + b2.w - 1, 0.36, u, 0, B2.zw(r, 0.8, 1.2), ["#5d9450"]);
     for (let i = 0; i < 5; i++) {
       const xx = B2.zw(r, b2.x + 3, b2.x + b2.w - 3), zz = B2.zw(r, b2.z + 3, b2.z + b2.d - 3);
-      if (!teile.some((p2) => B2.imRechteck(xx, zz, p2, 3))) B2.baumSetzen(I, waehle2(r, ["linde", "kastanie", "pappel"]), xx, 0.36, zz, r, 1);
+      if (!teile2.some((p2) => B2.imRechteck(xx, zz, p2, 3))) B2.baumSetzen(I, waehle2(r, ["linde", "kastanie", "pappel"]), xx, 0.36, zz, r, 1);
     }
   }
   registriereSlots(NORD_SLOTS);
@@ -111850,13 +112369,13 @@
     }
   }
   var BAUMARTEN = ["linde", "kastanie", "platane", "linde"];
-  function bodenBau(ctx, b2, r, teile, B2) {
+  function bodenBau(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.36, art = b2.boden ?? "pflaster";
     if (art === "gruen") S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
     else if (art === "werk") S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#bcb7ad");
     else B2.pflasterFlaeche(ctx, b2, y, "#ddd6c8", 5);
-    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
+    const frei6 = (x, z2, rad2) => !teile2.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     if (art === "werk") {
       for (let x = b2.x + 6; x < b2.x + b2.w - 26; x += 34) for (let z2 = b2.z + 6; z2 < b2.z + b2.d - 20; z2 += 26) {
         const w = 26 + (r() * 6 | 0), d = 16 + (r() * 4 | 0);
@@ -111866,7 +112385,7 @@
           const kw2 = Math.min(q2.w, quer2 ? 110 : 160), kd = Math.min(q2.d, quer2 ? 160 : 110);
           return { x: q2.x + (q2.w - kw2) / 2, z: q2.z + (q2.d - kd) / 2, w: kw2, d: kd };
         };
-        if (teile.map(kern).some((p2) => x < p2.x + p2.w + 3 && x + w > p2.x - 3 && z2 < p2.z + p2.d + 3 && z2 + d > p2.z - 3)) continue;
+        if (teile2.map(kern).some((p2) => x < p2.x + p2.w + 3 && x + w > p2.x - 3 && z2 < p2.z + p2.d + 3 && z2 + d > p2.z - 3)) continue;
         const h = 7 + r() * 5, f = waehle2(r, ["#8e8a82", "#9a8f7f", "#7f8a8e", "#a0968a"]);
         S.quader(x, y, z2, x + w, y + h, z2 + d, f);
         for (let u = x + 1; u < x + w - 1; u += 4) S.quader(u, y + h, z2 + 1, u + 3.2, y + h + 1.4, z2 + d - 1, "#6f6a63");
@@ -111883,7 +112402,7 @@
     for (let x = b2.x + 4; x < b2.x + b2.w - 3; x += 8) if (frei6(x, b2.z + b2.d - 2.5, 3)) B2.baumSetzen(I, ba, x, y, b2.z + b2.d - 2.5, r, 0.85);
     for (let z2 = b2.z + 4; z2 < b2.z + b2.d - 3; z2 += 8) if (frei6(b2.x + b2.w - 2.5, z2, 3)) B2.baumSetzen(I, ba, b2.x + b2.w - 2.5, y, z2, r, 0.85);
     if (b2.markt) {
-      const p2 = teile[0];
+      const p2 = teile2[0];
       const z0 = p2 ? p2.z + p2.d + 4 : b2.z + b2.d * 0.6;
       for (let x = b2.x + 8; x < b2.x + b2.w - 10; x += 7) for (let z2 = z0; z2 < b2.z + b2.d - 8; z2 += 8) {
         if (r() < 0.3 || !frei6(x, z2, 2)) continue;
@@ -111927,7 +112446,7 @@
     }
     for (let u = b2.x + 6; u < b2.x + b2.w - 4; u += 12) I.setze("bank", u, y + 0.04, cz + 2.4, Math.PI);
   }
-  function bodenUfer(ctx, b2, r, teile, B2) {
+  function bodenUfer(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
@@ -111949,7 +112468,7 @@
     const s2 = Math.min(24, b2.w * 0.4, b2.d * 0.4);
     neueParzelle4(ctx, "slot:denkmal", b2.x + 4, b2.z + 4, s2, s2, ["+z", "+x"], "frei", { klasse: 5, landmarke: true });
   }
-  function bodenEck(ctx, b2, r, teile, B2) {
+  function bodenEck(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
@@ -111967,10 +112486,10 @@
     }
     for (let i = 0, n = Math.round(b2.w * b2.d / 60 * ctx.dichte); i < n; i++) {
       const x = B2.zw(r, b2.x + 1, b2.x + b2.w * 0.55), z2 = B2.zw(r, b2.z + 1, b2.z + b2.d * 0.55);
-      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 0.8))) B2.figur(I, x, y + 0.02, z2, r);
+      if (!teile2.some((p2) => B2.imRechteck(x, z2, p2, 0.8))) B2.figur(I, x, y + 0.02, z2, r);
     }
   }
-  function bodenWeinberg(ctx, b2, r, teile, B2) {
+  function bodenWeinberg(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#b9a77a");
@@ -112016,9 +112535,9 @@
   function mitteStil(p2, nachbar) {
     const r = rng2((p2.seed ?? 1) * 2654435761 + 1231 >>> 0);
     const key = p2.mitteEinkauf ? "e_" + p2.mitteEinkauf : STILE_M[p2.viertel] ? p2.viertel : "gruenderzeit";
-    const basis2 = STILE_M[key];
+    const basis3 = STILE_M[key];
     const L2 = p2.seite === "+x" || p2.seite === "-x" ? p2.d : p2.w;
-    const liste = Object.entries(basis2).map(([st, g2]) => {
+    const liste = Object.entries(basis3).map(([st, g2]) => {
       let w = g2;
       if (st === "fachwerk") w *= p2.mitteFw ?? 1;
       if (nachbar?.stil === st && st !== "fachwerk") w *= 0.3;
@@ -116466,12 +116985,12 @@
       neueParzelle5(ctx, typ, R9.x, R9.z, R9.w, R9.d, front2, "frei", { klasse: 1, landmarke: false, variante: variante2, ...b2.inhalt === "halbhoehe" ? { niedrig: true } : {} });
     });
   }
-  function bodenGruen(ctx, b2, r, teile, B2) {
+  function bodenGruen(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.3, b2.z + b2.d, b2.boden ?? "#93bd76");
     for (let k = 0, n = Math.round((b2.w + b2.d) / 12); k < n; k++) {
       const x = B2.zw(r, b2.x + 1, b2.x + b2.w - 1), z2 = B2.zw(r, b2.z + 1, b2.z + b2.d - 1);
-      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 1.5))) B2.baumSetzen(I, waehle2(r, ["nadel", "linde", "nadel"]), x, 0.3, z2, r, 0.9);
+      if (!teile2.some((p2) => B2.imRechteck(x, z2, p2, 1.5))) B2.baumSetzen(I, waehle2(r, ["nadel", "linde", "nadel"]), x, 0.3, z2, r, 0.9);
     }
   }
   function burgbergParzelliere(ctx, E, b2) {
@@ -116534,11 +117053,11 @@
     S.box(0.6, 1.8, 0.6, x, y + 13.3, z2, "#d8b45a");
     for (const [dx, dz] of [[2.2, 2.2], [-2.2, 2.2], [2.2, -2.2]]) S.box(0.5, 2.2, 0.5, x + dx, y + 2.7, z2 + dz, "#d8b45a");
   }
-  function marktBoden(ctx, b2, r, teile, B2) {
+  function marktBoden(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, b2.form === "strasse" ? "#e2d8c4" : "#ded5c2", 4.5);
-    const hinder = teile.filter((p2) => p2.seite === "frei");
+    const hinder = teile2.filter((p2) => p2.seite === "frei");
     const frei6 = (x, z2, rad2) => !hinder.some((p2) => B2.imRechteck(x, z2, p2, rad2)) && x > P2.x + 2 && x < P2.x + P2.w - 2 && z2 > P2.z + 2 && z2 < P2.z + P2.d - 2;
     const cx = P2.x + P2.w * 0.5, cz = P2.z + P2.d * 0.55;
     if (b2.brunnen === "gotisch" && frei6(cx, cz, 5)) gotBrunnen(S, cx, cz, y);
@@ -116595,11 +117114,11 @@
       neueParzelle5(ctx, "slot:kirche", P2.x + 4 + (aw - L2) * 0.4, P2.z + 3 + (ad - Bk) * 0.3, L2, Bk, ["+z", "+x"], "frei", { klasse: 5, landmarke: true, dom, ...k, ...b2.turmHoehe ? { turmHoehe: b2.turmHoehe } : {}, ...b2.turm ? { turm: b2.turm } : {}, ...b2.stein ? { stein: b2.stein } : {} });
     }
   }
-  function kirchBoden(ctx, b2, r, teile, B2) {
+  function kirchBoden(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const P2 = b2.platz ?? b2, y = 0.34;
     B2.pflasterFlaeche(ctx, P2, y, "#e2dacb", 5);
-    const hinder = teile.filter((p2) => p2.seite === "frei");
+    const hinder = teile2.filter((p2) => p2.seite === "frei");
     const frei6 = (x, z2, rad2) => !hinder.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     const offen = ["+z", "+x", "-z", "-x"].filter((s2) => !(b2.seiten ?? ["-z", "-x"]).includes(s2));
     for (const s2 of offen) {
@@ -116628,11 +117147,11 @@
   function residenzParzelliere(ctx, E, b2) {
     neueParzelle5(ctx, "slot:bw_schloss_barock", b2.x + 3, b2.z + 3, b2.w - 6, b2.d - 6, ["+z"], "frei", { klasse: 5, landmarke: true, variante: b2.variante ?? "residenz" });
   }
-  function residenzBoden(ctx, b2, r, teile, B2) {
+  function residenzBoden(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.36;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#a7c98b");
-    const frei6 = (x, z2, rad2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, rad2));
+    const frei6 = (x, z2, rad2) => !teile2.some((p2) => B2.imRechteck(x, z2, p2, rad2));
     S.quader(b2.x + 1, y, b2.z + b2.d - 4.5, b2.x + b2.w - 1, y + 0.05, b2.z + b2.d - 1.5, "#e3dccb");
     S.quader(b2.x + b2.w - 4.5, y, b2.z + 1, b2.x + b2.w - 1.5, y + 0.05, b2.z + b2.d - 1, "#e3dccb");
     for (let x = b2.x + 5; x < b2.x + b2.w - 3; x += 8) if (frei6(x, b2.z + b2.d - 6.5, 2)) B2.baumSetzen(I, "kugel", x, y, b2.z + b2.d - 6.5, r, 0.7);
@@ -116643,7 +117162,7 @@
     }
     for (let i = 0, n = Math.round((b2.w + b2.d) / 6 * ctx.dichte); i < n; i++) B2.figur(I, B2.zw(r, b2.x + 1, b2.x + b2.w - 1), y + 0.05, b2.z + b2.d - B2.zw(r, 1.5, 4.5), r);
   }
-  function faecherBoden(ctx, b2, r, teile, B2) {
+  function faecherBoden(ctx, b2, r, teile2, B2) {
     const { S, I, plan: plan2 } = ctx;
     const y = 0.36;
     const res = plan2.bloecke.find((q2) => q2.art === "residenz");
@@ -116673,7 +117192,7 @@
       S.box(L2, 0.06, teil6 === "wald" ? 6.5 : 2.6, mx, y + 0.03, mz, teil6 === "platz" ? "#d9d0bd" : "#efe8d6", -a);
       if (teil6 !== "wald") for (let t = t0 + 5; t < t1 - 3; t += 12) for (const s2 of [-2.6, 2.6]) {
         const x = C2.x + dx * t - dz * s2, z2 = C2.z + dz * t + dx * s2;
-        if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 2))) B2.baumSetzen(I, teil6 === "platz" ? "kugel" : "linde", x, y, z2, r, 0.75);
+        if (!teile2.some((p2) => B2.imRechteck(x, z2, p2, 2))) B2.baumSetzen(I, teil6 === "platz" ? "kugel" : "linde", x, y, z2, r, 0.75);
       }
     }
     const naheStrahl = (x, z2) => strahlen.some(({ dx, dz }) => {
@@ -116683,7 +117202,7 @@
     const n = Math.round(b2.w * b2.d / (teil6 === "wald" ? 34 : teil6 === "platz" ? 160 : 400));
     for (let k = 0; k < n; k++) {
       const x = B2.zw(r, b2.x + 1.5, b2.x + b2.w - 1.5), z2 = B2.zw(r, b2.z + 1.5, b2.z + b2.d - 1.5);
-      if (naheStrahl(x, z2) || teile.some((p2) => B2.imRechteck(x, z2, p2, 2))) continue;
+      if (naheStrahl(x, z2) || teile2.some((p2) => B2.imRechteck(x, z2, p2, 2))) continue;
       B2.baumSetzen(I, teil6 === "wald" ? waehle2(r, ["nadel", "linde", "kastanie", "nadel"]) : "linde", x, y, z2, r, zw(r, 0.85, 1.1));
     }
     for (let i = 0, m = Math.round((b2.w + b2.d) / (teil6 === "wald" ? 30 : 5) * ctx.dichte); i < m; i++) {
@@ -117322,8 +117841,8 @@
   function suedStil(p2, nachbar) {
     const r = rng2((p2.seed ?? 1) * 2654435761 + 4111 >>> 0);
     const tab = STILE2[p2.suedTyp] ?? STILE2.altbayern;
-    const basis2 = tab[gruppe(p2.viertel)] ?? tab.alt;
-    const liste = Object.entries(basis2).map(([st, g2]) => {
+    const basis3 = tab[gruppe(p2.viertel)] ?? tab.alt;
+    const liste = Object.entries(basis3).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.35;
       if (st === "fachwerk" && p2.w > 18 && p2.d > 18) w *= 0.2;
@@ -117506,17 +118025,17 @@
       }
     }
     setzeReihe(E, jI, 92);
-    const teile = [];
-    if (o.stadion) teile.push({ art: "west_stadion", n: 2, variante: o.stadion });
-    if (o.zeche !== false) teile.push({ art: "west_zeche", n: 1, variante: o.zeche ?? waehle2(r, ["strebe", "doppelbock", "malakow"]), zustand: o.zechenZustand ?? waehle2(r, ["stillgelegt", "museum", "aktiv"]) });
-    teile.push({ art: "west_siedlung", n: 1 });
-    if (o.ekz !== false && !o.ekzGross) teile.push({ art: "west_ekz", n: 1, variante: o.ekz ?? waehle2(r, ["70er", "80er"]) });
-    if (o.huette) teile.push({ art: "west_kokerei", n: 1, variante: "huette", zustand: o.huettenZustand ?? "aktiv" });
-    if (o.kokerei) teile.push({ art: "west_kokerei", n: 1, variante: "kokerei", zustand: o.kokereiZustand ?? "aktiv" });
-    if (o.ekzGross) teile.push({ art: "west_ekz", n: 2, variante: "90er", gross: true });
-    if (o.gasometer) teile.push({ art: "west_kokerei", n: 1, variante: "gasometer", zustand: "museum" });
-    if (o.halde !== false) teile.push({ art: "west_halde", n: 1, variante: o.halde ?? waehle2(r, ["pyramide", "bramme", "treppe", "kreuz"]) });
-    teile.push({ art: "west_siedlung", n: 1 });
+    const teile2 = [];
+    if (o.stadion) teile2.push({ art: "west_stadion", n: 2, variante: o.stadion });
+    if (o.zeche !== false) teile2.push({ art: "west_zeche", n: 1, variante: o.zeche ?? waehle2(r, ["strebe", "doppelbock", "malakow"]), zustand: o.zechenZustand ?? waehle2(r, ["stillgelegt", "museum", "aktiv"]) });
+    teile2.push({ art: "west_siedlung", n: 1 });
+    if (o.ekz !== false && !o.ekzGross) teile2.push({ art: "west_ekz", n: 1, variante: o.ekz ?? waehle2(r, ["70er", "80er"]) });
+    if (o.huette) teile2.push({ art: "west_kokerei", n: 1, variante: "huette", zustand: o.huettenZustand ?? "aktiv" });
+    if (o.kokerei) teile2.push({ art: "west_kokerei", n: 1, variante: "kokerei", zustand: o.kokereiZustand ?? "aktiv" });
+    if (o.ekzGross) teile2.push({ art: "west_ekz", n: 2, variante: "90er", gross: true });
+    if (o.gasometer) teile2.push({ art: "west_kokerei", n: 1, variante: "gasometer", zustand: "museum" });
+    if (o.halde !== false) teile2.push({ art: "west_halde", n: 1, variante: o.halde ?? waehle2(r, ["pyramide", "bramme", "treppe", "kreuz"]) });
+    teile2.push({ art: "west_siedlung", n: 1 });
     const breiteVon3 = (t) => t.art === "west_zeche" || t.art === "west_kokerei" && t.variante !== "gasometer" ? 84 : t.art === "west_halde" ? 72 : t.art === "west_stadion" ? 66 : t.art === "west_ekz" ? t.n === 2 ? 66 : 84 : t.art === "west_kokerei" ? 62 : 0;
     const setze = (t, i) => {
       if (i < 0 || i + t.n > nx || !istFrei(E, i, i + t.n - 1, jI, jI)) return false;
@@ -117527,13 +118046,13 @@
       return true;
     };
     const V = klein ? nx - 1 : ci + 2;
-    let h = teile.findIndex((t) => t.art === "west_zeche");
-    if (h < 0) h = teile.findIndex((t) => t.art === "west_kokerei" && t.variante !== "gasometer");
-    if (h >= 0 && setze(teile[h], V)) teile.splice(h, 1);
+    let h = teile2.findIndex((t) => t.art === "west_zeche");
+    if (h < 0) h = teile2.findIndex((t) => t.art === "west_kokerei" && t.variante !== "gasometer");
+    if (h >= 0 && setze(teile2[h], V)) teile2.splice(h, 1);
     const spalten2 = [];
     for (let q2 = 0; q2 <= ci; q2++) spalten2.push(q2);
     for (let q2 = ci + (klein ? 4 : 5); q2 < nx; q2++) spalten2.push(q2);
-    for (const t of teile) for (const q2 of spalten2) if (setze(t, q2)) break;
+    for (const t of teile2) for (const q2 of spalten2) if (setze(t, q2)) break;
     if (!klein && o.schnellweg !== false && jR === null) E.xTyp[jI] = "schnellweg";
     E.zentrum = { i: ci, j: cj };
     const nKonzern = o.konzern ?? (klein ? 0 : 1);
@@ -118056,7 +118575,7 @@
     const v = b2.variante ?? "strecke";
     neueParzelle6(ctx, "slot:ruhr_kanal", b2.x, b2.z, b2.w, b2.d, [v === "hafen" ? "-z" : "+z"], "block", { klasse: 2, landmarke: false, variante: v });
   }
-  function bodenKanal(ctx, b2, r, teile, B2) {
+  function bodenKanal(ctx, b2, r, teile2, B2) {
     gehwegRing(ctx, b2, B2);
   }
   function siedlungParzellen(ctx, E, b2) {
@@ -118067,12 +118586,12 @@
     const sw = (b2.w - 2) / nxs, sd = (b2.d - 2) / nzs;
     for (let a = 0; a < nxs; a++) for (let c = 0; c < nzs; c++) neueParzelle6(ctx, "slot:ruhr_siedlung", b2.x + 1 + a * sw, b2.z + 1 + c * sd, sw - 1, sd - 1, [c === nzs - 1 ? "+z" : "+z"], "frei", { klasse: 2, landmarke: false, variante: c % 2 && v === "kolonie" ? "kreuz" : v, seed: Math.floor(rb() * 1e9) });
   }
-  function bodenRasen(ctx, b2, r, teile, B2) {
+  function bodenRasen(ctx, b2, r, teile2, B2) {
     ctx.S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.33, b2.z + b2.d, B2.F.rasen);
     const n = Math.round(b2.w * b2.d / 400);
     for (let k = 0; k < n; k++) {
       const x = B2.zw(r, b2.x + 2, b2.x + b2.w - 2), z2 = B2.zw(r, b2.z + 2, b2.z + b2.d - 2);
-      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 2.5))) B2.baumSetzen(ctx.I, waehle2(r, ["linde", "kastanie", "birke", "pappel"]), x, 0.33, z2, r, B2.zw(r, 0.8, 1.05));
+      if (!teile2.some((p2) => B2.imRechteck(x, z2, p2, 2.5))) B2.baumSetzen(ctx.I, waehle2(r, ["linde", "kastanie", "birke", "pappel"]), x, 0.33, z2, r, B2.zw(r, 0.8, 1.05));
     }
   }
   var KONZERN_MASS = { glas60: [[52, 90], 44], turm70: [[42, 66], 48], backstein20: [[44, 80], 34] };
@@ -118085,9 +118604,9 @@
     const [w, d] = { glas60: [Math.min(b2.w - 8, 76), Math.min(b2.d - 10, 54)], turm70: [Math.min(b2.w - 10, 56), Math.min(b2.d - 8, 56)], backstein20: [Math.min(b2.w - 6, 70), Math.min(b2.d - 14, 40)] }[v] ?? [b2.w - 8, b2.d - 8];
     neueParzelle6(ctx, "slot:ruhr_buero", b2.x + (b2.w - w) / 2, b2.z + b2.d - d - 3, w, d, ["+z"], "frei", { klasse: 5, landmarke: true, variante: v });
   }
-  function bodenKonzern(ctx, b2, r, teile, B2) {
+  function bodenKonzern(ctx, b2, r, teile2, B2) {
     B2.pflasterFlaeche(ctx, b2, 0.34, "#ddd6c8", 5);
-    const frei6 = (x, z2) => !teile.some((p2) => B2.imRechteck(x, z2, p2, 2.5));
+    const frei6 = (x, z2) => !teile2.some((p2) => B2.imRechteck(x, z2, p2, 2.5));
     for (let x = b2.x + 5; x < b2.x + b2.w - 3; x += 10) if (frei6(x, b2.z + b2.d - 3)) B2.baumSetzen(ctx.I, "platane", x, 0.34, b2.z + b2.d - 3, r, 0.85, true);
     for (let z2 = b2.z + 5; z2 < b2.z + b2.d - 6; z2 += 10) if (frei6(b2.x + b2.w - 3, z2)) B2.baumSetzen(ctx.I, "platane", b2.x + b2.w - 3, 0.34, z2, r, 0.85, true);
     for (let i = 0, n = Math.round(b2.w / 6 * ctx.dichte); i < n; i++) {
@@ -118100,11 +118619,11 @@
     const R9 = f === "+z" ? [b2.x + 1, b2.z + 1, b2.w - 2, Math.min(T_, b2.d - 2)] : f === "+x" ? [b2.x + 1, b2.z + 1, Math.min(T_, b2.w - 2), b2.d - 2] : [b2.x + b2.w - 1 - Math.min(T_, b2.w - 2), b2.z + 1, Math.min(T_, b2.w - 2), b2.d - 2];
     neueParzelle6(ctx, "slot:bahnhof", ...R9, [f], "block", { klasse: 4, landmarke: true, westBahnhof: b2.variante ?? "70er" });
   }
-  function bodenBahnhof(ctx, b2, r, teile, B2) {
+  function bodenBahnhof(ctx, b2, r, teile2, B2) {
     B2.pflasterFlaeche(ctx, b2, 0.34, "#ddd6c8", 5);
-    const p2 = teile[0];
+    const p2 = teile2[0];
     if (!p2) return;
-    const frei6 = (x, z2) => !teile.some((q2) => B2.imRechteck(x, z2, q2, 2));
+    const frei6 = (x, z2) => !teile2.some((q2) => B2.imRechteck(x, z2, q2, 2));
     if (b2.front === "+z") for (let x = b2.x + 5; x < b2.x + b2.w - 3; x += 9) {
       if (frei6(x, b2.z + b2.d - 4)) B2.baumSetzen(ctx.I, "platane", x, 0.34, b2.z + b2.d - 4, r, 0.85, true);
     }
@@ -118172,10 +118691,10 @@
         S.box(6, 2.5, 2.4, P2.x + a, 0.33 + 1.25 + k * 2.55, P2.z + 2 + q2 * 3.2 + 1.2, waehle2(r, ["#b5523f", "#2f6f8f", "#3f7d56", "#d9a33a", "#8c9aa6", "#e9e5dc"]));
     }
   }
-  function bodenPflaster(ctx, b2, r, teile, B2) {
+  function bodenPflaster(ctx, b2, r, teile2, B2) {
     B2.pflasterFlaeche(ctx, b2, 0.34, "#d9d2c3", 5);
   }
-  function bodenPromenade(ctx, b2, r, teile, B2) {
+  function bodenPromenade(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const y = 0.34;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, B2.F.rasen);
@@ -118188,7 +118707,7 @@
     S.quader(Math.min(fx, gx), y, Math.min(fz, gz2), Math.max(fx, gx), y + 0.05, Math.max(fz, gz2), "#e3dccb");
     for (const q2 of [qm - 6.5, qm + 6.5]) if (q2 > Q0 + 1.5 && q2 < Q1 - 1.5) for (let u = L0 + 5; u < L1 - 3; u += 8) {
       const [x, z2] = P2(u, q2);
-      if (!teile.some((p2) => B2.imRechteck(x, z2, p2, 2))) B2.baumSetzen(I, "linde", x, y, z2, r, 0.95);
+      if (!teile2.some((p2) => B2.imRechteck(x, z2, p2, 2))) B2.baumSetzen(I, "linde", x, y, z2, r, 0.95);
     }
     const farben = ["#c9483e", "#2f5f8f", "#3f7d56", "#2b2f33", "#e0b23a", "#f4f2ec", "#6b4f8f"];
     const ry = entlangX ? 0 : Math.PI / 2;
@@ -118236,7 +118755,7 @@
     }
     b2.treppeX = b2.x + zw(rb, 8, Math.max(9, b2.w - 8));
   }
-  function bodenHang(ctx, b2, r, teile, B2) {
+  function bodenHang(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const steinF = ["#8f8a80", "#99938a", "#878178"];
     for (const st of b2.stufen ?? []) {
@@ -118246,7 +118765,7 @@
       const dichte = b2.wald ? 1 / 55 : 1 / 170;
       for (let k = 0, n = Math.round(b2.w * (st.z1 - st.z0) * dichte); k < n; k++) {
         const x = B2.zw(r, b2.x + 2, b2.x + b2.w - 2), z2 = B2.zw(r, st.z0 + 2, st.z1 - 2);
-        if (teile.some((p2) => B2.imRechteck(x, z2, p2, 3)) || b2.treppeX && Math.abs(x - b2.treppeX) < 3) continue;
+        if (teile2.some((p2) => B2.imRechteck(x, z2, p2, 3)) || b2.treppeX && Math.abs(x - b2.treppeX) < 3) continue;
         B2.baumSetzen(I, waehle2(r, b2.wald ? ["nadel", "nadel", "linde", "birke", "kastanie"] : ["linde", "kastanie", "birke", "kugel"]), x, st.y + 0.07, z2, r, B2.zw(r, 0.75, 1.1));
       }
     }
@@ -118312,17 +118831,17 @@
       return { bau: (S, scene2, q2) => WEST_SLOTS["slot:berg_haus"](S, scene2, { ...q2, front: front2, variante: variante2, laden: laden4, sockelY: p2.sockelY ?? 0, geschosse: geschosse2, traufe: p2.w >= 10.5 ? void 0 : false }) };
     }
     const tab = STILE_WEST[t] ?? STILE_WEST.ruhr;
-    let basis2 = { ...tab[p2.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
-    if (p2.westBackstein) basis2.backstein = (basis2.backstein ?? 0) + 2.2;
+    let basis3 = { ...tab[p2.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
+    if (p2.westBackstein) basis3.backstein = (basis3.backstein ?? 0) + 2.2;
     let dachRegime = null;
     if (t === "ruhr") {
       const rb = rng2(`dach:${p2.block}`);
       dachRegime = rb() < (RUHR_FLACH[p2.viertel] ?? 0.5) ? "flach" : "steil";
       const erlaubt = dachRegime === "flach" ? STILE_FLACH : STILE_STEIL;
-      const f = Object.fromEntries(Object.entries(basis2).filter(([st]) => erlaubt.has(st)));
-      if (Object.keys(f).length) basis2 = f;
+      const f = Object.fromEntries(Object.entries(basis3).filter(([st]) => erlaubt.has(st)));
+      if (Object.keys(f).length) basis3 = f;
     }
-    const liste = Object.entries(basis2).map(([st, g2]) => {
+    const liste = Object.entries(basis3).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.3;
       if (st === "fachwerk" && p2.w > 16) w *= 0.2;
@@ -118497,9 +119016,9 @@
       this.n = 0;
       definiereProps(this);
     }
-    def(name2, teile, schatten = true) {
+    def(name2, teile2, schatten = true) {
       const gr = /* @__PURE__ */ new Map();
-      for (const [g0, f] of teile) {
+      for (const [g0, f] of teile2) {
         const g = g0.index ? g0.toNonIndexed() : g0;
         for (const a of Object.keys(g.attributes)) if (a !== "position" && a !== "normal") g.deleteAttribute(a);
         const k = typeof f === "number" ? "\xA7" + f : f.toLowerCase();
@@ -119388,11 +119907,11 @@
     const r = rng2(b2.seed + 99);
     if (b2.art === "wasser") return;
     if (!FLAECHEN[b2.art]?.ohneGehwegPlatte) gehwegPlatte(ctx, b2);
-    const teile = ctx.proBlock.get(b2.id) ?? [];
+    const teile2 = ctx.proBlock.get(b2.id) ?? [];
     if (b2.art === "bebaut" || b2.art === "warenhaus") {
-      baueHof(ctx, b2, r, teile);
+      baueHof(ctx, b2, r, teile2);
       if (b2.art === "warenhaus") {
-        for (const p2 of teile.filter((q2) => EINKAUF_SLOTS.has(q2.typ))) for (const s2 of p2.front) {
+        for (const p2 of teile2.filter((q2) => EINKAUF_SLOTS.has(q2.typ))) for (const s2 of p2.front) {
           if (s2 !== "+z" && s2 !== "+x") continue;
           const g = b2.rand[s2].gehweg;
           if (s2 === "+z") {
@@ -119403,9 +119922,9 @@
       }
       return;
     }
-    const hinder = teile.filter((p2) => p2.seite === "frei");
+    const hinder = teile2.filter((p2) => p2.seite === "frei");
     if (FLAECHEN[b2.art]?.boden) {
-      FLAECHEN[b2.art].boden(ctx, b2, r, teile, BODEN_HILFE);
+      FLAECHEN[b2.art].boden(ctx, b2, r, teile2, BODEN_HILFE);
       return;
     }
     if (b2.art === "markt") {
@@ -119413,7 +119932,7 @@
       return;
     }
     if (b2.art === "kirche" || b2.art === "domplatz") {
-      baueKirchplatz(ctx, b2, r, teile);
+      baueKirchplatz(ctx, b2, r, teile2);
       return;
     }
     if (b2.art === "platz") {
@@ -119454,7 +119973,7 @@
       S.quader(b2.x, 0, b2.z, b2.x + b2.w, 0.34, b2.z + b2.d, F.pflaster);
     }
     if (b2.art === "center" || b2.art === "fachmarkt") {
-      baueCenterFlaeche(ctx, b2, r, teile);
+      baueCenterFlaeche(ctx, b2, r, teile2);
     }
   }
   var BODEN_HILFE = {
@@ -119472,11 +119991,11 @@
     imRechteck: (...a) => imRechteck(...a)
   };
   var EINKAUF_SLOTS = /* @__PURE__ */ new Set(["slot:warenhaus", "slot:premium", "slot:sport", "slot:wettbewerber", "slot:outlet"]);
-  function baueCenterFlaeche(ctx, b2, r, teile) {
+  function baueCenterFlaeche(ctx, b2, r, teile2) {
     const { S, I } = ctx;
     const y = 0.33;
     S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#9a9fa4");
-    const bau2 = teile.filter((p2) => p2.seite === "frei");
+    const bau2 = teile2.filter((p2) => p2.seite === "frei");
     const zv = Math.max(...bau2.map((p2) => p2.z + p2.d), b2.z + 10);
     pflasterFlaeche(ctx, { x: b2.x + 1.5, z: zv, w: b2.w - 3, d: 7 }, y + 0.02, "#e2dacb", 3.5);
     for (let x = b2.x + 6; x < b2.x + b2.w - 4; x += 11) {
@@ -119494,14 +120013,14 @@
     S.quader(b2.x + 1.4, y + 6, b2.z + b2.d - 3.6, b2.x + 4.4, y + 9.4, b2.z + b2.d - 2.4, b2.art === "center" ? "#e9e5dc" : "#d8dde1");
   }
   var imRechteck = (x, z2, p2, rad2 = 0) => x > p2.x - rad2 && x < p2.x + p2.w + rad2 && z2 > p2.z - rad2 && z2 < p2.z + p2.d + rad2;
-  function baueHof(ctx, b2, r, teile) {
+  function baueHof(ctx, b2, r, teile2) {
     const { S, I } = ctx;
     const h = b2.hof;
     if (!h || h.w <= 4 || h.d <= 4) return;
     const art = h.art ?? "gruen";
     const farbe3 = { gruen: F.hof, kies: F.kies, parkplatz: "#a3a7ab", spielplatz: F.hof, pflaster: "#cbc4b7" }[art] ?? F.hof;
     S.quader(h.x - 1, 0, h.z - 1, h.x + h.w + 1, 0.36, h.z + h.d + 1, farbe3);
-    const hinder = teile.filter((p2) => p2.seite === "hof" || p2.seite === "frei" || p2.typ.startsWith("slot:"));
+    const hinder = teile2.filter((p2) => p2.seite === "hof" || p2.seite === "frei" || p2.typ.startsWith("slot:"));
     const frei6 = (x, z2, rad2) => !hinder.some((p2) => imRechteck(x, z2, p2, rad2));
     const y = 0.36;
     if (art === "parkplatz" && h.w > 12 && h.d > 12) {
@@ -119648,12 +120167,12 @@
       if (!hinder.some((p2) => imRechteck(x, z2, p2, 0.4))) figur4(I, x, y, z2, r);
     }
   }
-  function baueKirchplatz(ctx, b2, r, teile) {
+  function baueKirchplatz(ctx, b2, r, teile2) {
     const { S, I } = ctx;
     const P2 = b2.platz, y = 0.34;
     pflasterFlaeche(ctx, P2, y, b2.art === "domplatz" ? "#ddd3c1" : "#e4dccc", 5);
-    const k = teile.find((p2) => p2.typ === "slot:kirche");
-    const hinder = teile.filter((p2) => p2.seite === "frei");
+    const k = teile2.find((p2) => p2.typ === "slot:kirche");
+    const hinder = teile2.filter((p2) => p2.seite === "frei");
     for (const s2 of offeneSeiten(b2)) {
       if (s2[1] === "z") {
         const z0 = s2 === "+z" ? P2.z + P2.d - 6 : P2.z + 1.5;
@@ -119669,7 +120188,7 @@
     if (b2.art !== "domplatz") baumraster(ctx, P2, y, r, hinder, P2.x + P2.w / 2, P2.z + P2.d / 2, 0, 9);
     for (let i = 0, n = Math.round(P2.w * P2.d / (b2.art === "domplatz" ? 40 : 70) * ctx.dichte); i < n; i++) {
       const x = zw(r, P2.x + 1, P2.x + P2.w - 1), z2 = zw(r, P2.z + 1, P2.z + P2.d - 1);
-      if (teile.some((p2) => p2.seite === "frei" && imRechteck(x, z2, p2, 1))) continue;
+      if (teile2.some((p2) => p2.seite === "frei" && imRechteck(x, z2, p2, 1))) continue;
       figur4(I, x, y, z2, r);
     }
   }
@@ -119818,10 +120337,10 @@
   var FELDER = ["#d4c27c", "#c9b26a", "#b8c97a", "#e0cf8f", "#9fc078", "#c7a66a", "#b59a72", "#d9c98c", "#a9c47e"];
   var WIESE3 = ["#a9cf8f", "#a3c98a", "#b0d395"];
   function rechteckMinus(R0, loecher) {
-    let teile = [R0];
+    let teile2 = [R0];
     for (const [hx0, hz0, hx1, hz1] of loecher) {
       const neu = [];
-      for (const [x0, z0, x1, z1] of teile) {
+      for (const [x0, z0, x1, z1] of teile2) {
         if (hx1 <= x0 || hx0 >= x1 || hz1 <= z0 || hz0 >= z1) {
           neu.push([x0, z0, x1, z1]);
           continue;
@@ -119832,9 +120351,9 @@
         if (hx0 > x0) neu.push([x0, a, hx0, e]);
         if (hx1 < x1) neu.push([hx1, a, x1, e]);
       }
-      teile = neu;
+      teile2 = neu;
     }
-    return teile.filter(([x0, z0, x1, z1]) => x1 - x0 > 0.01 && z1 - z0 > 0.01);
+    return teile2.filter(([x0, z0, x1, z1]) => x1 - x0 > 0.01 && z1 - z0 > 0.01);
   }
   function baueStadtrand(ctx) {
     const { S, plan: plan2 } = ctx;
@@ -121418,7 +121937,7 @@
     return { x: ecke.includes("+x") ? p2.x + p2.w - W3 : p2.x, z: ecke.includes("+z") ? p2.z + p2.d - D : p2.z };
   }
   function spielBauer(s2, o = {}) {
-    const basis2 = echterBauer(o.bauerOpt ?? {});
+    const basis3 = echterBauer(o.bauerOpt ?? {});
     const merk2 = o.merk;
     const famBenutzt = /* @__PURE__ */ new Set();
     const wahl3 = /* @__PURE__ */ new Map();
@@ -121521,7 +122040,7 @@
       setzeLod(o.hausLod ?? "nah");
       let e;
       try {
-        e = basis2["slot:hq"](S, gruppe2, hqDaten(p2));
+        e = basis3["slot:hq"](S, gruppe2, hqDaten(p2));
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
@@ -121553,7 +122072,7 @@
       }
     }
     const wbBau = (S, scene2, p2, w) => {
-      if (!w) return basis2.stadthaus(S, scene2, { ...p2, typ: "stadthaus", standort: void 0 });
+      if (!w) return basis3.stadthaus(S, scene2, { ...p2, typ: "stadthaus", standort: void 0 });
       const breite = Math.max(20, Math.round(Math.sqrt(Math.max(400, w.grundflaecheQm) * 1.5) / 5) * 5);
       const tiefe = Math.max(16, Math.round(w.grundflaecheQm / breite / 5) * 5);
       const W3 = Math.min(p2.w - 1, breite);
@@ -121606,25 +122125,25 @@
       return e;
     };
     const hqSlot = (S, scene2, p2) => {
-      if (!basis2["slot:hq"] || !p2.standort) return { hoehe: 0 };
+      if (!basis3["slot:hq"] || !p2.standort) return { hoehe: 0 };
       if (o.getrennt) return baueHq(p2);
-      return basis2["slot:hq"](S, scene2, hqDaten(p2));
+      return basis3["slot:hq"](S, scene2, hqDaten(p2));
     };
     const slot4 = (typ) => (S, scene2, p2) => {
       if (p2.standort?.rolle === "hq") return hqSlot(S, scene2, p2);
       const h = p2.standort?.id && hausVon(p2.standort.id);
-      if (!h) return basis2[typ](S, scene2, p2);
+      if (!h) return basis3[typ](S, scene2, p2);
       if (o.getrennt) return getrennt(p2, h);
       const e = bau2(S, scene2, p2, h);
       haeuser.set(h.id, { p: p2, gruppe: null, e, schluessel: zustand(h).schluessel });
       return e;
     };
     const bauer = {
-      ...basis2,
+      ...basis3,
       "slot:warenhaus": slot4("slot:warenhaus"),
       "slot:sport": slot4("slot:sport"),
       "slot:schwester": slot4("slot:schwester"),
-      "slot:outlet": basis2["slot:outlet"],
+      "slot:outlet": basis3["slot:outlet"],
       "slot:premium": slot4("slot:premium"),
       "slot:hq": hqSlot,
       "slot:wettbewerber": wbSlot,
@@ -121990,6 +122509,107 @@
     return "?";
   }
 
+  // src/ui/ware.js
+  var reichweite = (r) => r == null ? "\u2013" : (r > 99 ? "> 99" : r.toFixed(1).replace(".", ",")) + (r == null ? "" : " Wo.");
+  var proz = (x) => pz3(Number.isFinite(x) ? x : 0, 1);
+  var knopf = (a, v, text3, extra = "") => `<button class="mini" data-a="${a}" data-v="${esc(String(v))}" ${extra}>${text3}</button>`;
+  var optionen = (werte, auswahl4) => werte.map(([id, name2]) => `<option value="${esc(id)}" ${id === auswahl4 ? "selected" : ""}>${esc(name2)}</option>`).join("");
+  var teile = (n) => fmt.format(Math.round(n));
+  function warenSeite(ctx, ui, tabs) {
+    const d = ctx.E.warenUebersicht(ctx.s());
+    const w = ui.ware ?? (ui.ware = { von: d.cluster[0]?.id ?? "", nach: d.cluster[1]?.id ?? "", gruppe: "damen", wert: 5e4, pp: 10 });
+    const cluster = d.cluster.map((c) => [c.id, c.name]), gruppen = Object.entries(ctx.E.GRUPPEN).map(([id, x]) => [id, x.name]);
+    let html = typeof tabs === "function" ? tabs() : tabs;
+    if (ui.seite === "merchandise") {
+      html += `<div class="raster"><div class="kz"><span>Bestand Konzern</span><b data-p="ware:bestand">${geld(d.konzernbestand)}</b></div><div class="kz"><span>Offene Saisonvorlagen</span><b data-p="ware:vorlagen">${teile(d.vorlagen.length)}</b></div></div>`;
+      html += `<div class="legende">Saisonplanung circa 30 Wochen vor dem Start. Budgets in Euro EK (Open-to-Buy), Zielmarge, Zielabverkauf, Breite und Vororderquote. Solange keine \xC4nderung erfolgt, gilt die bestehende Einkaufssteuerung.</div>`;
+      html += '<div class="karte liste"><div class="lkopf"><span class="lname">Warengruppe / Saison</span><span class="lwert">Budget EK</span><span class="lwert">Zielabverkauf</span></div>';
+      for (const p2 of d.plaene) {
+        html += `<div class="lzeile"><span class="lname">${esc(p2.name)}<i>${esc(p2.saisonName)} \xB7 Marge ${proz(p2.zielmarge)} \xB7 Breite ${proz(p2.breite)} \xB7 Vororder ${proz(p2.vororderquote)}</i><span class="lknoepfe">${knopf("warePlanMinus", p2.wg, "\u22125 %")} ${knopf("warePlanPlus", p2.wg, "+5 %")}</span></span><span class="lwert"><i data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</i></span><span class="lwert">${proz(p2.zielabverkauf)}</span></div>`;
+      }
+      html += "</div>";
+      return { titel: "Merchandise Planning", unter: `${d.plaene.length} Warengruppen \xB7 ${d.vorlagen.length} Vorlagen`, html };
+    }
+    if (ui.seite === "allokation") {
+      html += `<div class="raster"><div class="kz"><span>Clusterbestand</span><b data-p="ware:bestand">${geld(d.clusterbestand)}</b></div><div class="kz"><span>Steuerungsqualit\xE4t</span><b data-p="ware:qualitaet">${proz(d.allokationQualitaet)}</b></div></div>`;
+      html += `<div class="karte"><div class="khead">Allokation und Nachschub</div><div class="zeile">${knopf("wareQual", "1", "Bedarfsgerecht")} ${knopf("wareQual", "0.5", "Schwache Allokation")} ${knopf("wareQual", "0.8", "Verbessern")}</div><div class="legende">Schwache Allokation verschiebt Saisonware und NOS-Nachschub in die falschen Cluster. Reichweite: Bestand geteilt durch gesch\xE4tzten Wochenwareneinsatz.</div></div>`;
+      html += '<div class="karte liste"><div class="lkopf"><span class="lname">Hauscluster</span><span class="lwert">Reichweite</span><span class="lwert">Altware</span></div>';
+      for (const c of d.cluster) {
+        const ton = c.reichweite != null && c.reichweite < 6 ? "rot" : c.altware > 0.2 ? "warn" : "";
+        html += `<div class="lzeile ${ton}"><span class="lname">${esc(c.name)} <i>${c.haeuser} H\xE4user \xB7 Bestand <i data-p="ware:cluster:${c.id}:bestand">${geld(c.bestand)}</i> \xB7 Fehlmenge ${geld(c.fehlmenge)}</i></span><span class="lwert" data-p="ware:cluster:${c.id}:reichweite">${reichweite(c.reichweite)}</span><span class="lwert" data-p="ware:cluster:${c.id}:alt">${proz(c.altware)}</span></div>`;
+      }
+      html += "</div>";
+      html += `<div class="karte"><div class="khead">Umlagerung (1 bis 2 Wochen)</div>
+      <div class="zeile">Von <select data-a="wareVon">${optionen(cluster, w.von)}</select></div>
+      <div class="zeile">Nach <select data-a="wareNach">${optionen(cluster, w.nach)}</select></div>
+      <div class="zeile">Bereich <select data-a="wareGruppe">${optionen(gruppen, w.gruppe)}</select></div>
+      <div class="zeile">EK-Wert <input data-a="wareWert" type="number" min="1" step="10000" value="${w.wert}"></div>
+      <div class="zeile">${knopf("wareUmlagern", "ja", "Umlagerung beauftragen")}</div></div>`;
+      if (d.umlagerungen.length) {
+        html += '<div class="karte"><div class="khead">Unterwegs</div>';
+        for (const t of d.umlagerungen) html += `<div class="zeile">${esc(t.gruppe)}: ${esc(t.von)} \u2192 ${esc(t.nach)} \xB7 ${geld(t.wert)} \xB7 Woche ${t.ankunft + 1}</div>`;
+        html += "</div>";
+      }
+      html += `<div class="karte"><div class="khead">Abfluss an FUNDUS</div><div class="raster">
+      <div class="kz"><span>Eigenwarequote</span><b data-p="ware:fundusquote">${proz(d.fundus.quote)}</b></div>
+      <div class="kz"><span>Frequenzfaktor</span><b data-p="ware:fundusfaktor">${proz(d.fundus.frequenzFaktor)}</b></div></div>
+      <div class="legende">Bis 25 % Eigenware ohne Nachteil. Bei 50 % Eigenware sinkt die FUNDUS-Frequenz um 15 %.</div>
+      <div class="zeile">${knopf("wareFundus", "ja", "Altware abgeben")} <i>Ausgew\xE4hlter Bereich und EK-Wert von oben</i></div></div>`;
+      return { titel: "Allokation", unter: `${d.cluster.length} Hauscluster \xB7 ${d.umlagerungen.length} Umlagerungen unterwegs`, html };
+    }
+    const global = !!ctx.s().ware?.zentral?.["*|*"];
+    html += `<div class="karte"><div class="khead">Zentraler Reduzierungskalender</div><div class="zeile">${knopf("wareZentralGlobal", "ja", global ? "Durchsetzen aufheben" : "\xDCberall zentral durchsetzen")}</div>
+    <div class="legende">\u221220 % \u2192 \u221230 % \u2192 \u221250 % \u2192 R\xE4umung, bei \xDCberschreiten der jeweiligen Abverkaufsstufe. Der Standard entspricht der bisherigen Strategie. Mid-Season-Sales bleiben Bestandteil des Aktionskalenders.</div></div>`;
+    html += `<div class="karte"><div class="khead">Lokaler Spielraum</div>
+    <div class="zeile">Hauscluster <select data-a="wareVon">${optionen(cluster, w.von)}</select></div>
+    <div class="zeile">Bereich <select data-a="wareGruppe">${optionen(gruppen, w.gruppe)}</select></div>
+    <div class="zeile">${knopf("wareLokal10", "ja", "10 PP nachreduzieren")} ${knopf("wareLokal0", "ja", "Lokale Reduzierung zur\xFCcknehmen")} ${knopf("wareZentralCluster", "ja", "Cluster zentral steuern")}</div>
+    <div class="legende">Maximal zehn zus\xE4tzliche Prozentpunkte. Bei zentraler Durchsetzung ist der Spielraum gesperrt.</div></div>`;
+    html += '<div class="karte liste"><div class="lkopf"><span class="lname">Warengruppe</span><span class="lwert">Abverkauf</span><span class="lwert">Stufe</span></div>';
+    for (const k of d.kalender) {
+      const stufe2 = k.stufe === 1 ? "R\xE4umung" : k.stufe === 0 ? "Noch keine" : "\u2212" + Math.round(k.stufe * 100) + " %";
+      html += `<div class="lzeile"><span class="lname">${esc(k.name)} <i>Strategie: ${esc(k.strategie)} \xB7 Saison ${k.saison}</i></span><span class="lwert" data-p="ware:kal:${k.wg}">${proz(k.abverkauf)}</span><span class="lwert">${stufe2}</span></div>`;
+    }
+    html += "</div>";
+    return { titel: "Reduzierungskalender", unter: `${d.kalender.length} Warengruppen \xB7 lokale Abweichungen je Hauscluster`, html };
+  }
+  function warenAktion(ctx, ui, el, tun) {
+    const typ = el.dataset.a, v = el.dataset.v;
+    const w = ui.ware ?? (ui.ware = {});
+    const d = ctx.E.warenUebersicht(ctx.s());
+    const gruppen = Object.keys(ctx.E.GRUPPEN);
+    const plan2 = d.plaene.find((x) => x.wg === v);
+    if (typ === "warePlanPlus" || typ === "warePlanMinus") {
+      if (!plan2) return;
+      return tun({ typ: "merchandisePlan", wg: v, saison: plan2.saison, budget: Math.max(0, Math.round(plan2.budget * (typ === "warePlanPlus" ? 1.05 : 0.95))) });
+    }
+    if (typ === "wareQual") return tun({ typ: "allokationQualitaet", qualitaet: Number(v) });
+    if (typ === "wareUmlagern") return tun({ typ: "umlagerung", gruppe: w.gruppe ?? gruppen[0], von: w.von, nach: w.nach, wert: Math.round(Number(w.wert)) });
+    if (typ === "wareFundus") return tun({ typ: "fundusAbfluss", gruppe: w.gruppe ?? gruppen[0], wert: Math.round(Number(w.wert)) });
+    if (typ === "wareZentralGlobal") return tun({ typ: "reduzierungZentral", an: !ctx.s().ware?.zentral?.["*|*"] });
+    if (typ === "wareLokal10" || typ === "wareLokal0") return tun({ typ: "reduzierungLokal", gruppe: w.gruppe ?? gruppen[0], hauscluster: w.von, punkte: typ === "wareLokal10" ? 10 : 0 });
+    if (typ === "wareZentralCluster") {
+      const gruppe2 = w.gruppe ?? gruppen[0], hauscluster2 = w.von;
+      const an = !ctx.s().ware?.zentral?.[`${gruppe2}|${hauscluster2}`];
+      return tun({ typ: "reduzierungZentral", gruppe: gruppe2, hauscluster: hauscluster2, an });
+    }
+  }
+  function wareErwartet(s2, E, pfad2) {
+    const [basis3, art, id, wert] = pfad2;
+    if (basis3 !== "ware") return void 0;
+    const d = E.warenUebersicht(s2);
+    if (art === "bestand") return geld(d.clusterbestand);
+    if (art === "vorlagen") return teile(d.vorlagen.length);
+    if (art === "qualitaet") return proz(d.allokationQualitaet);
+    if (art === "fundusquote") return proz(d.fundus.quote);
+    if (art === "fundusfaktor") return proz(d.fundus.frequenzFaktor);
+    if (art === "plan") return geld(d.plaene.find((x) => x.wg === id)?.budget ?? 0);
+    const c = d.cluster.find((x) => x.id === id);
+    if (art === "cluster") return wert === "bestand" ? geld(c?.bestand ?? 0) : wert === "reichweite" ? reichweite(c?.reichweite) : proz(c?.altware ?? 0);
+    if (art === "kal") return proz(d.kalender.find((x) => x.wg === id)?.abverkauf ?? 0);
+    return void 0;
+  }
+
   // src/ui/einkauf.js
   var KOPF = { umsatz: "Umsatz 13 Wo.", rohertragsquote: "Rohertrag", lagerumschlag: "Umschlag", reichweite: "Reichweite", abverkaufsquote: "Abverkauf", altwarenanteil: "Altware", nosVerfuegbarkeit: "NOS", limitFrei: "Limit frei", rohertrag: "Rohertrag \u20AC", bestandEk: "Bestand", abschriften: "Abschriften", reduzierungsquote: "Reduzierung", entgangenerUmsatz: "Fehlmengen", offeneOrders: "Orders", offeneFreigaben: "Freigaben", eigenmarkenAnteil: "Eigenmarke", eigenmarkenMarge: "EM-Marge" };
   function formatiere(format, x) {
@@ -122021,13 +122641,13 @@
     const SP = () => new Map(q2.spalten().map((c) => [c.id, c]));
     const text3 = (id, k) => formatiere(SP().get(id)?.format ?? "eur", k[id] ?? 0);
     const dot = (a) => a ? `<span class="ampel a-${a}" title="${AMPEL_TEXT[a]}"></span>` : '<span class="ampel ohne"></span>';
-    const seg = (act, wert, optionen, extra = "") => `<div class="seg">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
+    const seg = (act, wert, optionen2, extra = "") => `<div class="seg">${optionen2.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
     const zahl3 = (titel, inhalt2, p2, ton = "", a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
     function tabs() {
       const n = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
       const t = (id, inhalt2) => `<button class="tab ${an(id) ? "an" : ""}" data-a="seite" data-v="${id}">${inhalt2}</button>`;
-      return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}</div>`;
+      return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}${t("merchandise", "Merchandise")}${t("allokation", "Allokation")}${t("reduzierungKalender", "Reduzierung")}</div>`;
     }
     function sortiere(liste) {
       const { key, dir } = ui.sort;
@@ -122143,10 +122763,12 @@
     }
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
-      const r = ui.seite === "wg" ? wgSeite() : ui.seite === "freigaben" ? freigabenSeite() : ui.seite === "eigenmarken" || ui.seite === "gruenden" ? eigenmarkenSeite(ctx, ui, tabs()) : uebersicht();
+      const r = ui.seite === "wg" ? wgSeite() : ui.seite === "freigaben" ? freigabenSeite() : ui.seite === "eigenmarken" || ui.seite === "gruenden" ? eigenmarkenSeite(ctx, ui, tabs()) : ["merchandise", "allokation", "reduzierungKalender"].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
       ctx.panel(r.titel, r.unter, r.html, "gross");
       ui.aktiv = true;
       if (scrollHalten) document.getElementById("pinhalt").scrollTop = sc;
+      const leiste = document.querySelector("#pinhalt .tabs"), an = leiste?.querySelector(".tab.an");
+      if (leiste && an) leiste.scrollLeft = an.offsetLeft - (leiste.clientWidth - an.offsetWidth) / 2;
       badge();
     }
     function badge() {
@@ -122168,6 +122790,10 @@
       if (a.startsWith("em")) {
         const r = eigenmarkenAktion(ctx, ui, el, ev, tun);
         if (r !== "nichts") zeigen(r !== "oben");
+        return;
+      }
+      if (a.startsWith("ware")) {
+        warenAktion(ctx, ui, el, tun);
         return;
       }
       switch (a) {
@@ -122257,6 +122883,10 @@
         if (r !== "nichts") zeigen(true);
         return;
       }
+      if (a.startsWith("ware")) {
+        (ui.ware ?? (ui.ware = {}))[{ wareVon: "von", wareNach: "nach", wareGruppe: "gruppe", wareWert: "wert" }[a]] = a === "wareWert" ? Number(el.value) : el.value;
+        return;
+      }
       if (a === "filterBereich") {
         ui.filter.bereich = el.value;
         zeigen(true);
@@ -122332,6 +122962,7 @@
           const r = d.verlauf[t[1]], l = r[r.length - 1];
           return r.length === 0 ? "noch keine Daten" : t[1] === "reichweite" ? `${dez(l, 1)} Wo.` : geld(l);
         }
+        if (t[0] === "ware") return wareErwartet(s2(), ctx.E, t);
         return eigenmarkenErwartet(ctx, t, ui);
       };
       for (const el of document.querySelectorAll("#pinhalt [data-p]")) {
@@ -122799,42 +123430,42 @@
     let hf = HAARFARBEN2[m.haarfarbe] ?? m.haarfarbe;
     const hfS = helligkeit(hf) > 0.5 ? dunkel(hf, 0.18) : helligkeit(hf) < 0.15 ? hell2(hf, 0.16) : dunkel(hf, 0.25);
     const H = HAARE[m.haar];
-    const teile = [];
-    if (opt.hintergrund) teile.push(`<rect width="100" height="100" fill="${opt.hintergrund}"/>`);
+    const teile2 = [];
+    if (opt.hintergrund) teile2.push(`<rect width="100" height="100" fill="${opt.hintergrund}"/>`);
     const umriss = ` stroke="${dunkel(hf, 0.35)}" stroke-width="0.6" stroke-linejoin="round"`;
-    for (const [x, y, rr] of H.wolke ?? []) teile.push(`<circle cx="${x}" cy="${y}" r="${rr}" fill="${hf}"${umriss}/>`);
-    for (const [x, y, rr] of H.wolke ?? []) teile.push(`<circle cx="${x}" cy="${y}" r="${rr - 0.4}" fill="${hf}"/>`);
-    if (H.hinten) teile.push(P(H.hinten, dunkel(hf, 0.1), umriss));
-    if (m.haar === "zopf") teile.push(`<circle cx="${H.band[0]}" cy="${H.band[1]}" r="${H.band[2] * 0.5}" fill="${dunkel(hf, 0.4)}"/>`);
-    teile.push(P(HALS, haut), P(HALS_SCHATTEN, hautS));
-    teile.push(kleidungSVG(m, r));
-    teile.push(P(KOPF2, haut));
-    teile.push(P("M56.6 42 C58.6 38.6 60 35 60.6 31 L63.4 31 C64.4 36 63 40 61.4 42.6 C59.6 46 57 48.6 53.6 50 C55.6 47.6 56.6 44.6 56.6 42 Z", hautS, ' opacity="0.55"'));
-    if (m.alter >= 58) teile.push(`<path d="M44 48.6 C46.6 50.6 50.6 50.8 53.2 49.8" stroke="${hautS}" stroke-width="0.7" fill="none"/>`);
-    if (m.bart === "drei") teile.push(P("M42.4 44 C44 49.6 52 51.4 57.6 45.6 L59.6 38.6 C58 42 55.6 44.4 52 45 C48.6 45.4 45.4 44.8 42.4 44 Z", dunkel(hf, 0.05), ' opacity="0.28"'));
-    if (m.bart === "voll") teile.push(P("M41.6 42 C41.4 47.4 44.6 51.6 49.6 51.6 C54.6 51.6 59 47.6 60.4 39.4 L59.4 36 C58.4 40 56 42.6 52.6 43.4 C49 44 45.6 42.6 44.4 41.4 Z", hf), P("M40.8 40.4 C42.4 39.6 44.4 40 45.6 41.2 C44 42.2 42.2 42 40.8 40.4 Z", hf));
-    if (m.bart === "schnauz") teile.push(P("M40.4 39.6 C42 38.6 44.8 38.8 46.2 40.4 C44.4 41.4 42 41.4 40.4 39.6 Z", hf));
-    const ohr = () => teile.push(`<ellipse cx="58.4" cy="35.4" rx="2.5" ry="3.9" fill="${haut}"/>`, `<path d="M58.4 32.6 C60 33.2 60.4 36.6 58.8 38" stroke="${hautS}" stroke-width="0.8" fill="none"/>`);
+    for (const [x, y, rr] of H.wolke ?? []) teile2.push(`<circle cx="${x}" cy="${y}" r="${rr}" fill="${hf}"${umriss}/>`);
+    for (const [x, y, rr] of H.wolke ?? []) teile2.push(`<circle cx="${x}" cy="${y}" r="${rr - 0.4}" fill="${hf}"/>`);
+    if (H.hinten) teile2.push(P(H.hinten, dunkel(hf, 0.1), umriss));
+    if (m.haar === "zopf") teile2.push(`<circle cx="${H.band[0]}" cy="${H.band[1]}" r="${H.band[2] * 0.5}" fill="${dunkel(hf, 0.4)}"/>`);
+    teile2.push(P(HALS, haut), P(HALS_SCHATTEN, hautS));
+    teile2.push(kleidungSVG(m, r));
+    teile2.push(P(KOPF2, haut));
+    teile2.push(P("M56.6 42 C58.6 38.6 60 35 60.6 31 L63.4 31 C64.4 36 63 40 61.4 42.6 C59.6 46 57 48.6 53.6 50 C55.6 47.6 56.6 44.6 56.6 42 Z", hautS, ' opacity="0.55"'));
+    if (m.alter >= 58) teile2.push(`<path d="M44 48.6 C46.6 50.6 50.6 50.8 53.2 49.8" stroke="${hautS}" stroke-width="0.7" fill="none"/>`);
+    if (m.bart === "drei") teile2.push(P("M42.4 44 C44 49.6 52 51.4 57.6 45.6 L59.6 38.6 C58 42 55.6 44.4 52 45 C48.6 45.4 45.4 44.8 42.4 44 Z", dunkel(hf, 0.05), ' opacity="0.28"'));
+    if (m.bart === "voll") teile2.push(P("M41.6 42 C41.4 47.4 44.6 51.6 49.6 51.6 C54.6 51.6 59 47.6 60.4 39.4 L59.4 36 C58.4 40 56 42.6 52.6 43.4 C49 44 45.6 42.6 44.4 41.4 Z", hf), P("M40.8 40.4 C42.4 39.6 44.4 40 45.6 41.2 C44 42.2 42.2 42 40.8 40.4 Z", hf));
+    if (m.bart === "schnauz") teile2.push(P("M40.4 39.6 C42 38.6 44.8 38.8 46.2 40.4 C44.4 41.4 42 41.4 40.4 39.6 Z", hf));
+    const ohr = () => teile2.push(`<ellipse cx="58.4" cy="35.4" rx="2.5" ry="3.9" fill="${haut}"/>`, `<path d="M58.4 32.6 C60 33.2 60.4 36.6 58.8 38" stroke="${hautS}" stroke-width="0.8" fill="none"/>`);
     if (!H.ohrVorn) ohr();
-    if (H.vorne) teile.push(P(H.vorne, hf, H.wolke ? "" : umriss));
-    for (const [x, y, rr] of H.boegen ?? []) teile.push(`<path d="M${x - rr} ${y + rr * 0.3} A${rr} ${rr} 0 0 1 ${x + rr * 0.6} ${y - rr * 0.5}" stroke="${hfS}" stroke-width="0.8" fill="none" stroke-linecap="round"/>`);
-    for (const [x, y, rr] of H.kringel ?? []) teile.push(`<circle cx="${x}" cy="${y}" r="${rr}" fill="${hf}"/>`, `<path d="M${x - rr * 0.6} ${y + rr * 0.1} A${rr * 0.7} ${rr * 0.7} 0 0 1 ${x + rr * 0.5} ${y - rr * 0.3}" stroke="${hfS}" stroke-width="0.7" fill="none"/>`);
-    for (const s2 of H.straehnen ?? []) teile.push(`<path d="${s2}" stroke="${hfS}" stroke-width="0.9" fill="none" stroke-linecap="round"/>`);
+    if (H.vorne) teile2.push(P(H.vorne, hf, H.wolke ? "" : umriss));
+    for (const [x, y, rr] of H.boegen ?? []) teile2.push(`<path d="M${x - rr} ${y + rr * 0.3} A${rr} ${rr} 0 0 1 ${x + rr * 0.6} ${y - rr * 0.5}" stroke="${hfS}" stroke-width="0.8" fill="none" stroke-linecap="round"/>`);
+    for (const [x, y, rr] of H.kringel ?? []) teile2.push(`<circle cx="${x}" cy="${y}" r="${rr}" fill="${hf}"/>`, `<path d="M${x - rr * 0.6} ${y + rr * 0.1} A${rr * 0.7} ${rr * 0.7} 0 0 1 ${x + rr * 0.5} ${y - rr * 0.3}" stroke="${hfS}" stroke-width="0.7" fill="none"/>`);
+    for (const s2 of H.straehnen ?? []) teile2.push(`<path d="${s2}" stroke="${hfS}" stroke-width="0.9" fill="none" stroke-linecap="round"/>`);
     if (H.ohrVorn) ohr();
-    if (H.scheitel) teile.push(`<path d="${H.scheitel}" stroke="${hfS}" stroke-width="0.6" fill="none"/>`);
-    if (H.glanz) teile.push(`<path d="M46 19 C49 16.4 53.4 15.6 57 16.4" stroke="${hell2(haut, 0.45)}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.8"/>`);
-    if (m.alter >= 50 && !["grau", "wei\xDF"].includes(m.haarfarbe) && ["kurz", "seitenscheitel", "halbglatze", "locken", "zopf", "dutt"].includes(m.haar)) teile.push(P("M56.6 31 C58.4 29.6 60.8 30.4 61.4 33.2 L62.6 39.4 C64 36.6 64.8 33.6 65 30.4 C62.4 26 58.6 26.6 56.6 31 Z", mische(hf, "#c9c7c2", 0.65), ' opacity="0.85"'));
+    if (H.scheitel) teile2.push(`<path d="${H.scheitel}" stroke="${hfS}" stroke-width="0.6" fill="none"/>`);
+    if (H.glanz) teile2.push(`<path d="M46 19 C49 16.4 53.4 15.6 57 16.4" stroke="${hell2(haut, 0.45)}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.8"/>`);
+    if (m.alter >= 50 && !["grau", "wei\xDF"].includes(m.haarfarbe) && ["kurz", "seitenscheitel", "halbglatze", "locken", "zopf", "dutt"].includes(m.haar)) teile2.push(P("M56.6 31 C58.4 29.6 60.8 30.4 61.4 33.2 L62.6 39.4 C64 36.6 64.8 33.6 65 30.4 C62.4 26 58.6 26.6 56.6 31 Z", mische(hf, "#c9c7c2", 0.65), ' opacity="0.85"'));
     if (m.brille !== "keine") {
       const fr = m.brille === "horn" ? "#3b2418" : m.brille === "rund" ? "#9a7a3a" : "#2e3440";
       const sw = m.brille === "horn" ? 1.3 : 0.7;
       const linse = m.brille === "rund" ? `<ellipse cx="45.2" cy="34.2" rx="3.6" ry="3.2"` : `<rect x="41.2" y="31.6" width="8" height="5" rx="${m.brille === "horn" ? 1.4 : 0.9}"`;
-      teile.push(`${linse} fill="#eef6fb" fill-opacity="0.55" stroke="${fr}" stroke-width="${sw}"/>`);
-      teile.push(`<path d="M37.4 33 L39.4 32.6 L39.4 36.2 L37.6 36" fill="#eef6fb" fill-opacity="0.55" stroke="${fr}" stroke-width="${sw * 0.8}"/>`);
-      teile.push(`<path d="M${m.brille === "rund" ? 48.8 : 49.2} 33.4 L57.6 33.6" stroke="${fr}" stroke-width="${sw * 0.8}" fill="none"/>`);
+      teile2.push(`${linse} fill="#eef6fb" fill-opacity="0.55" stroke="${fr}" stroke-width="${sw}"/>`);
+      teile2.push(`<path d="M37.4 33 L39.4 32.6 L39.4 36.2 L37.6 36" fill="#eef6fb" fill-opacity="0.55" stroke="${fr}" stroke-width="${sw * 0.8}"/>`);
+      teile2.push(`<path d="M${m.brille === "rund" ? 48.8 : 49.2} 33.4 L57.6 33.6" stroke="${fr}" stroke-width="${sw * 0.8}" fill="none"/>`);
     }
     if (m.geschlecht === "w") {
       const ohrring = r() < 0.6 && !["lang", "halblang", "bob", "pony"].includes(m.haar);
-      if (ohrring) teile.push(`<circle cx="58.4" cy="40" r="1" fill="#e2b13c"/>`, `<circle cx="58.4" cy="41.8" r="0.9" fill="#f0c95a"/>`);
+      if (ohrring) teile2.push(`<circle cx="58.4" cy="40" r="1" fill="#e2b13c"/>`, `<circle cx="58.4" cy="41.8" r="0.9" fill="#f0c95a"/>`);
       if (["kostuem", "bluse", "rollkragen"].includes(m.kleidung) ? r() < 0.55 : r() < 0.2) {
         const perlen = [];
         for (let i = 0; i <= 12; i++) {
@@ -122843,10 +123474,10 @@
           const y = 57.4 + Math.sin(t * Math.PI) * 4.4;
           perlen.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="0.75" fill="#f3e2b8" stroke="#c9a96a" stroke-width="0.2"/>`);
         }
-        if (m.kleidung !== "rollkragen") teile.push(perlen.join(""));
+        if (m.kleidung !== "rollkragen") teile2.push(perlen.join(""));
       }
     }
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}">${teile.join("")}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}">${teile2.join("")}</svg>`;
   }
 
   // src/ui/vorstand.js
@@ -122877,7 +123508,7 @@
     return { werte: n, fehler: fehler5 };
   }
   var schalter = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
-  var segment = (act, wert, optionen, extra = "") => `<div class="seg${optionen.length > 5 || optionen.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? " umbruch" : ""}">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
+  var segment = (act, wert, optionen2, extra = "") => `<div class="seg${optionen2.length > 5 || optionen2.reduce((a, [, t]) => a + String(t).length, 0) > 30 ? " umbruch" : ""}">${optionen2.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
   var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
   var stepper = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
   var faehigkeit = (name2, wert, p2) => `<div class="faehig"><span>${name2}</span><span class="fbalken"><span style="width:${Math.max(0, Math.min(100, wert))}%"></span><i></i><i></i><i></i><i></i></span>${p2}</div>`;
@@ -125375,8 +126006,8 @@
   var prozent = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl2 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
   var euro2 = (x) => zahl2(x, 2) + " \u20AC";
-  var abweichung = (wert, basis2) => basis2 == null ? "Kein Vorjahr" : (wert >= basis2 ? "\u2191 " : "\u2193 ") + prozent(basis2 ? wert / basis2 - 1 : 0);
-  var punkt = (wert, basis2) => basis2 == null ? "Kein Vorjahr" : (wert >= basis2 ? "\u2191 " : "\u2193 ") + zahl2((wert - basis2) * 100) + " Punkte";
+  var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent(basis3 ? wert / basis3 - 1 : 0);
+  var punkt = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl2((wert - basis3) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
@@ -125404,7 +126035,7 @@
     const karten = (werte) => sortiere(werte).map((z2) => zeile(z2, true)).join("");
     const leere = '<div class="zeile grau">Keine H\xE4user im gew\xE4hlten Filter.</div>';
     const tabelle = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b><b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + "</div></div>";
-    const auswahl4 = (name2, key, optionen) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen.map(([wert, titel]) => '<option value="' + esc(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc(titel) + "</option>").join("") + "</select></label>";
+    const auswahl4 = (name2, key, optionen2) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen2.map(([wert, titel]) => '<option value="' + esc(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc(titel) + "</option>").join("") + "</select></label>";
     function anzeigen() {
       const daten = E.reporting(ctx.s(), ui.wochen, ui.format);
       const hs = daten.zeilen;
@@ -125484,7 +126115,7 @@
   function itModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null };
-    const optionen = ["kaufen", "entwickeln", "dienstleister"];
+    const optionen2 = ["kaufen", "entwickeln", "dienstleister"];
     const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
     const prozent2 = (x) => Math.round(x * 100) + " %";
@@ -125571,9 +126202,9 @@
       const plan2 = E.itProjektPlan(s2(), ui.system, ui.art, ui.generation, ausgew.length);
       let h = '<div class="karte"><div class="khead">Projekt konfigurieren</div>';
       h += '<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">' + d.systeme.map((x) => '<option value="' + x.id + '" ' + (x.id === ui.system ? "selected" : "") + ">" + esc(x.name) + "</option>").join("") + "</select></div>";
-      h += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen.map((a) => '<button data-it="art" data-v="' + a + '" class="' + (ui.art === a ? "an" : "") + '">' + artName[a] + "</button>").join("") + "</div></div>";
+      h += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen2.map((a) => '<button data-it="art" data-v="' + a + '" class="' + (ui.art === a ? "an" : "") + '">' + artName[a] + "</button>").join("") + "</div></div>";
       h += '<div class="regler"><b>Zielgeneration</b><div class="seg">' + [1, 2, 3, 4].map((g) => '<button data-it="generation" data-v="' + g + '" ' + (ui.generation === g ? 'class="an"' : "") + " " + (ui.art !== "entwickeln" && g === 4 || ui.art === "dienstleister" && g !== 3 ? "disabled" : "") + ">" + g + "</button>").join("") + "</div></div>";
-      h += '<div class="it-vergleich">' + optionen.map((art) => {
+      h += '<div class="it-vergleich">' + optionen2.map((art) => {
         const g = art === "dienstleister" ? 3 : Math.min(ui.generation, art === "entwickeln" ? 4 : 3);
         const x = E.itProjektPlan(s2(), ui.system, art, g, ausgew.length);
         return '<div class="' + (ui.art === art ? "gewaehlt" : "") + '"><b>' + artName[art] + "</b><small>" + x.gesamt + " Wo.</small><small>" + geld(x.kosten) + "</small><small>" + (art === "entwickeln" ? "hohes" : art === "kaufen" ? "geringes" : "mittleres") + " Risiko</small></div>";
@@ -125720,11 +126351,11 @@
       let html = '<div class="tabs">' + steps.map((t, i) => '<button class="tab ' + (ui.schritt === i + 1 ? "an" : "") + '" data-pl-schritt="' + (i + 1) + '">' + (i + 1) + ". " + t + "</button>").join("") + "</div>";
       if (ui.schritt === 1) {
         html += '<div class="karte"><div class="khead">Zielsetzung ' + e.jahr + "<small>Vorschlag Konzerncontrolling \xB7 vom Vorjahr und Trend abgeleitet</small></div>";
-        const basis2 = D.vorschlag;
+        const basis3 = D.vorschlag;
         const reg = (id, titel, step, min, max) => '<div class="regler"><label for="pl-' + id + '"><b>' + titel + '</b></label><input id="pl-' + id + '" data-pl-regler="' + id + '" type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + e.ziele[id] + '"><div class="zeile"><small>' + mio3(min) + "</small><b>" + mio3(e.ziele[id]) + "</b><small>" + mio3(max) + "</small></div></div>";
-        html += reg("umsatz", "Umsatz", 1e6, Math.max(0, Math.round(basis2.umsatz * 0.75 / 1e6) * 1e6), Math.max(1e6, Math.round(basis2.umsatz * 1.25 / 1e6) * 1e6));
-        html += reg("ebitda", "EBITDA", 1e6, Math.round((basis2.ebitda - Math.abs(basis2.umsatz * 0.04)) / 1e6) * 1e6, Math.round((basis2.ebitda + Math.abs(basis2.umsatz * 0.04)) / 1e6) * 1e6);
-        html += reg("investitionen", "Investitionen", 1e5, 0, Math.max(1e6, Math.round(basis2.investitionen * 2 / 1e5) * 1e5));
+        html += reg("umsatz", "Umsatz", 1e6, Math.max(0, Math.round(basis3.umsatz * 0.75 / 1e6) * 1e6), Math.max(1e6, Math.round(basis3.umsatz * 1.25 / 1e6) * 1e6));
+        html += reg("ebitda", "EBITDA", 1e6, Math.round((basis3.ebitda - Math.abs(basis3.umsatz * 0.04)) / 1e6) * 1e6, Math.round((basis3.ebitda + Math.abs(basis3.umsatz * 0.04)) / 1e6) * 1e6);
+        html += reg("investitionen", "Investitionen", 1e5, 0, Math.max(1e6, Math.round(basis3.investitionen * 2 / 1e5) * 1e5));
         html += '<div class="olief">EBITDA-Effekt der Umsatzplanung (bei 25 % zus\xE4tzlichem Deckungsbeitrag): <b>' + mio3(D.ebitdaSensitivitaet) + "</b>. Budgetwerte \xE4ndern zun\xE4chst nicht den laufenden Umsatz.</div>";
         html += '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="2">Weiter zur Verteilung \u2192</button></div>';
       } else if (ui.schritt === 2) {
@@ -125876,7 +126507,7 @@
       inhalt = '<div class="karte"><div class="khead">Besetzung</div>' + line("Vollzeit", p(v.vollzeit, 1) + " FTE") + line("Teilzeit", p(v.teilzeit, 1) + " FTE") + line("Aushilfen", p(v.aushilfen, 1) + " FTE") + line("Bedarf", p(k?.fteBedarf, 1) + " FTE") + line("Ist", p(k?.fteIst, 1) + " FTE") + line("Personalkosten", geld(k?.personal ?? 0)) + "</div>";
     }
     if (r === "ware") {
-      inhalt = '<div class="karte"><div class="khead">Ware \xB7 Grundlage O05</div>' + Object.entries(k?.umsatzJeGruppe ?? {}).sort((a, b3) => b3[1] - a[1]).map(([key, wert]) => line(key, geld(wert))).join("") + "</div>";
+      inhalt = '<div class="karte"><div class="khead">Umsatz je Warengruppe</div>' + Object.entries(k?.umsatzJeGruppe ?? {}).sort((a, b3) => b3[1] - a[1]).map(([key, wert]) => line(key, geld(wert))).join("") + "</div>";
     }
     if (r === "partner") {
       const std = b2?.standard;
@@ -126878,6 +127509,7 @@
     html += "</div>";
     html = hausSteckbrief(d, html, hausReiter, s.woche);
     if (hausReiter === "personal" && pe) html += pe.hausBlock(id);
+    if (hausReiter === "ware" && d.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl3("Warenverf\xFCgbarkeit", (d.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl3("Altwareanteil", (d.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl3("Inventurdifferenz", d.waren.inventur ? geld(d.waren.inventur.differenz) : "Noch offen")}${zahl3("Fl\xE4chenproduktivit\xE4t", geld(d.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
     panel(h.name, `${h.stadt} \xB7 ${h.klasse === "premium" ? "Premiumhaus" : h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
     if (neu) hausZeigen(id);
   }
@@ -127033,7 +127665,7 @@
     const u = hqUebersicht(s), j = hqGrafik();
     const zahl3 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
     const pz4 = (x) => `${Math.round((x ?? 0) * 100)} %`;
-    const knopf = (text3, args, art = "") => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
+    const knopf2 = (text3, args, art = "") => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
     let html = `<div class="raster">${zahl3("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl3("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl3("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl3("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
@@ -127048,11 +127680,11 @@
     const ziele = [];
     for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name.replace("Hartwig-", "")}, ${e.nr === 0 ? "EG" : e.nr + ". Etage"} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
     for (const g of [...gs].sort((a, b2) => a.id === gebaeudeId ? -1 : b2.id === gebaeudeId ? 1 : 0)) {
-      html += `<div class="karte"><div class="khead">${g.name}<small>${g.stadt} \xB7 ${fmt.format(g.qmGemietet)} qm gemietet \xB7 ${pz4(g.auslastung)} belegt \xB7 ${geld(g.kostenWoche)} je Woche</small>${gs.length > 1 ? knopf("K\xFCndigen", ["kuendigenG", g.id], "rot") : ""}</div>`;
+      html += `<div class="karte"><div class="khead">${g.name}<small>${g.stadt} \xB7 ${fmt.format(g.qmGemietet)} qm gemietet \xB7 ${pz4(g.auslastung)} belegt \xB7 ${geld(g.kostenWoche)} je Woche</small>${gs.length > 1 ? knopf2("K\xFCndigen", ["kuendigenG", g.id], "rot") : ""}</div>`;
       for (const e of [...g.etagen ?? []].sort((x, y) => y.nr - x.nr)) {
         const ab = (e.abteilungen ?? []).map((a) => a.name).join(", ");
         const gewaehlt = gWahl?.id === g.id && (hqEtageWahl?.g === g.id ? hqEtageWahl.nr === e.nr : false);
-        html += `<div class="zeile klickbar ${e.gemietet ? "" : "grau"} ${gewaehlt ? "gewaehlt" : ""}" onclick="hqKlick('etage','${g.id}','${e.nr}')"><span class="dot ${e.gemietet ? ab ? "k-eigen" : "k-untermiete" : "k-leer"}"></span><span class="was">${e.nr === 0 ? "Erdgeschoss" : `${e.nr}. Etage`}${ab ? ` <i>${ab}</i>` : e.gemietet ? " <i>gemietet, frei</i>" : " <i>nicht gemietet</i>"}</span><span class="qm">${fmt.format(e.qm)} qm</span><span class="uq">${e.gemietet ? pz4(e.auslastung) : ""}</span>${e.gemietet && !ab ? knopf("K\xFCndigen", ["kuendigenE", g.id, e.nr], "rot") : ""}</div>`;
+        html += `<div class="zeile klickbar ${e.gemietet ? "" : "grau"} ${gewaehlt ? "gewaehlt" : ""}" onclick="hqKlick('etage','${g.id}','${e.nr}')"><span class="dot ${e.gemietet ? ab ? "k-eigen" : "k-untermiete" : "k-leer"}"></span><span class="was">${e.nr === 0 ? "Erdgeschoss" : `${e.nr}. Etage`}${ab ? ` <i>${ab}</i>` : e.gemietet ? " <i>gemietet, frei</i>" : " <i>nicht gemietet</i>"}</span><span class="qm">${fmt.format(e.qm)} qm</span><span class="uq">${e.gemietet ? pz4(e.auslastung) : ""}</span>${e.gemietet && !ab ? knopf2("K\xFCndigen", ["kuendigenE", g.id, e.nr], "rot") : ""}</div>`;
       }
       html += "</div>";
     }
@@ -127062,7 +127694,7 @@
         const um2 = a.umzugBis !== void 0 && a.umzugBis > s.woche ? ` \xB7 Umzug bis KW ${a.umzugBis % 52 + 1}` : "";
         const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : "";
         const wahl3 = `<select class="ort" onchange="hqKlick('setzen','${a.id}',this.value)">${ort ? "" : "<option selected>ohne Platz</option>"}${ziele.map((z2) => `<option value="${z2.v}"${z2.v === ort ? " selected" : ""}>${z2.t}</option>`).join("")}</select>`;
-        html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${ABTEILUNGEN2[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE \xB7 ${geld(a.kostenWoche)} je Woche${um2}</i><em class="wirk">${a.wirkung ?? ""}</em></span><span class="stufe">${knopf("\u2212", ["stufe", a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf("+", ["stufe", a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl3}</div></div>`;
+        html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${ABTEILUNGEN2[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE \xB7 ${geld(a.kostenWoche)} je Woche${um2}</i><em class="wirk">${a.wirkung ?? ""}</em></span><span class="stufe">${knopf2("\u2212", ["stufe", a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf2("+", ["stufe", a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl3}</div></div>`;
       }
       html += "</div>";
     }
@@ -127070,7 +127702,7 @@
       html += '<div class="karte"><div class="khead">Freie B\xFCrogeb\xE4ude</div>';
       for (const a of u.angebote) {
         const qm = a.etagen.reduce((x, e) => x + e.qm, 0), k = a.etagen.reduce((x, e) => x + e.kostenWoche, 0);
-        html += `<div class="zeile"><span class="dot k-leer"></span><span class="was">${a.name} <i>${a.stadt} \xB7 ${a.etagen.length} Etagen \xB7 ${fmt.format(qm)} qm \xB7 ${geld(k)} je Woche \xB7 Frist KW ${a.frist % 52 + 1}</i></span>${knopf("Mieten", ["mieten", a.id], "gruen")}</div>`;
+        html += `<div class="zeile"><span class="dot k-leer"></span><span class="was">${a.name} <i>${a.stadt} \xB7 ${a.etagen.length} Etagen \xB7 ${fmt.format(qm)} qm \xB7 ${geld(k)} je Woche \xB7 Frist KW ${a.frist % 52 + 1}</i></span>${knopf2("Mieten", ["mieten", a.id], "gruen")}</div>`;
       }
       html += "</div>";
     }
