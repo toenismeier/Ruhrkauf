@@ -18,6 +18,8 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+// O07 Haus
+import { HAUS_AKTIONEN, hausAktion, type HausAktion } from './haus';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -60,7 +62,9 @@ export type SpielerAktion =
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
-  | ProduktAktion;
+  | ProduktAktion
+  // O07 Haus
+  | HausAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -125,6 +129,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
+  // O07 Haus
+  if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
