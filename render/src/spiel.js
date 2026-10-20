@@ -1050,6 +1050,8 @@ async function spielFortsetzen() {
     if (!d) throw new Error('Kein Spielstand vorhanden.');
     clearTimeout(speicherTimer);
     s = d.spiel;
+    // O04: alte Spielstände ohne Personalplanung deterministisch migrieren.
+    if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) E.initialisierePersonaleinsatz(s);
     postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
     $('postwarnung').checked = postUi.warnen;
