@@ -167,6 +167,8 @@ export interface Haus {
   streikBis?: number;
   standortgarantie?: boolean;
   kpi?: HausKpi;
+  /** N01: Wochenhistorie des Hauses, höchstens 156 Wochen. */
+  verlauf?: { woche: number; umsatz: Eur; db: Eur; frequenz: number; personalFte: number }[];
 }
 
 export interface Kohorte {
@@ -469,6 +471,9 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** N01: Statistik ist optional und ändert keine Berechnung. */
+  statistikDeaktiviert?: boolean;
+  statistik?: { sparsam: boolean; stimmung: { woche: number; wert: number }[] };
   zaehler: number; // für IDs
   prognose?: boolean; // true in Vorschau-Klonen: keine Zufallsereignisse
   einmalkostenWoche: Eur; // Sondereffekte der laufenden Woche

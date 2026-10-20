@@ -46,3 +46,5 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './abfragen';

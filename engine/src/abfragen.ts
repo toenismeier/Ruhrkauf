@@ -250,3 +250,6 @@ export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+
+// N01: Verlauf je Ebene, Vorjahr und Eigentümer-Quartalsplan.
+export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './statistik';

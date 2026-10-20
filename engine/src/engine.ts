@@ -1,4 +1,5 @@
 import { GRUPPEN, saisonFaktor } from './daten';
+import { statistikHaus, statistikWoche } from './statistik';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
 import { wettbewerbWoche } from './wettbewerb';
@@ -128,6 +129,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     kpi.fteBedarf = r.fteBedarf;
     kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
     if (h.status !== 'geschlossen' && h.status !== 'verkauft') h.kpi = rundeKpi(kpi);
+    statistikHaus(s, h, rundeKpi(kpi));
 
     k.umsatz += kpi.umsatz;
     k.rohertrag += kpi.rohertrag;
@@ -210,6 +212,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.kreditFrei = eur(s.cash + s.kreditlinie);
   k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
   s.historie.push(k);
+  statistikWoche(s, k);
   if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
 
   if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
