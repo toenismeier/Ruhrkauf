@@ -40,6 +40,7 @@ const PHRASE = Object.freeze({
     'Das neue Sortiment ist gelungen.', 'Die Auswahl überrascht mich positiv.'
   ]
 });
+export const HAUSBESUCH_SAETZE = PHRASE;
 const hash = (str) => { let h = 2166136261; for (const c of String(str)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 const begrenze = (x, a, b) => Math.min(b, Math.max(a, x));
 const etageName = (e) => e < 0 ? 'UG' : e === 0 ? 'EG' : e + '. OG';
@@ -70,7 +71,7 @@ export function hausbesuchBesatz(haus, etageNr) {
   };
 }
 
-function zonenNormalisieren(zonen, haus) {
+export function zonenNormalisieren(zonen, haus) {
   return (zonen ?? []).map((z, i) => {
     const f = z.flaeche ?? haus.flaechen.find((f) => f.id === z.id || f.gruppe === z.id) ?? z;
     const punkte = z.zellen?.map((c) => ({ x: (c.i + 0.5) * 5, z: (c.j + 0.5) * 5 })) ??
