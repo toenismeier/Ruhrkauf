@@ -44,6 +44,9 @@ describe('O01 Organisation', () => {
     expect(hausclusterVon(s,h.id)?.id).toBe(geo);
     expect(s.organisation?.flagships).toHaveLength(0);
     expect(fuehreAus(s,{typ:'flagship',haus:s.haeuser.find((x)=>x.klasse==='premium')!.id,an:true}).ok).toBe(false);
+    const nachGroesse=s.haeuser.filter((x)=>x.format==='warenhaus'&&!x.klasse)
+      .sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length);
+    expect(fuehreAus(s,{typ:'flagship',haus:nachGroesse[nachGroesse.length-1].id,an:true}).ok).toBe(false);
   });
 
   test('Bereichs- und Clusterleitung, Kandidaten und Delegation', () => {

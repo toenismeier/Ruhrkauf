@@ -53,7 +53,7 @@ export function organisationModul(ctx) {
       if (x.sonder) {
         const c=x.sonder;
         h+='<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+name(c.stelle)+'</button></div><p>'+c.hausIds.length+' Häuser · '+x.flagships.length+' gewählte Flagships</p>';
-        for (const haus of st.haeuser.filter((v)=>v.format==='warenhaus'&&v.status==='offen').sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length).slice(0,20)) {
+        for (const haus of st.haeuser.filter((v)=>v.format==='warenhaus'&&v.status==='offen').sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length).slice(0,12)) {
           const an=x.flagships.includes(haus.id), premium=haus.klasse==='premium';
           h+='<div class="zeile"><span class="was">'+esc(haus.name)+(premium?' · Premium':'')+'</span><button '+(premium?'disabled':'')+' data-org="flagship" data-haus="'+esc(haus.id)+'" data-an="'+(!an)+'">'+(premium?'fest':an?'Flagship abwählen':'Flagship wählen')+'</button></div>';
         }

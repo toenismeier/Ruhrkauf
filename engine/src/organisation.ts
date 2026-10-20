@@ -174,8 +174,10 @@ export function organisationLeitungKostenWoche(s: GameState): number {
 export function hausclusterVon(s: GameState, hausId: string): Hauscluster | undefined {
   const o = s.organisation;
   if (!o) return undefined;
-  const h = s.haeuser.find((x) => x.id === hausId);
-  const id = h?.klasse === 'premium' || o.flagships.includes(hausId) ? 'premium-flagships' : o.geografisch[hausId];
+  // O(Clusterzahl) statt einer zusätzlichen Vollsuche durch alle Häuser je Wochenberechnung.
+  const sonder = o.hauscluster[o.hauscluster.length - 1];
+  const id = o.flagships.includes(hausId) || (sonder?.sonder && sonder.hausIds.includes(hausId))
+    ? 'premium-flagships' : o.geografisch[hausId];
   return o.hauscluster.find((x) => x.id === id);
 }
 export function clusterleitungQualitaet(s: GameState, hcId: string): number {
@@ -254,7 +256,7 @@ export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: b
     const h = s.haeuser.find((h) => h.id === a.haus);
     if (!h || h.status !== 'offen' || h.format !== 'warenhaus' || h.klasse === 'premium') return { ok:false,text:'Nur offene reguläre Hartwig-Warenhäuser sind auswählbar.' };
     const erlaubt = [...s.haeuser].filter((h) => h.format === 'warenhaus' && h.status === 'offen' && !h.klasse)
-      .sort((x,y) => (y.grundflaecheQm*y.etagen.length)-(x.grundflaecheQm*x.etagen.length)).slice(0,Math.max(12,Math.ceil(s.haeuser.length*0.1)));
+      .sort((x,y) => (y.grundflaecheQm*y.etagen.length)-(x.grundflaecheQm*x.etagen.length)).slice(0,12);
     if (a.an && !erlaubt.some((x) => x.id === h.id)) return { ok:false,text:'Flagships müssen zu den größten Warenhäusern gehören.' };
     if (a.an === o.flagships.includes(h.id)) return { ok:true,text:'Keine Änderung.' };
     if (a.an && o.flagships.length >= 12) return { ok:false,text:'Höchstens zwölf Flagships möglich.' };
