@@ -412,7 +412,7 @@ function bonusErmitteln(s: GameState, p: Jahresplan): void {
   s.planung.boni.push({ jahr: p.jahr, faellig: (p.jahr - s.startJahr + 1) * 52 + 5, betrag: sum(details.map((x) => x.betrag)), bezahlt: false, details });
 }
 export function planungBonusWoche(s: GameState, k: WochenKpi): number {
-  if (!s.planung || s.prognose) return 0;
+  if (!s.planung || s.prognose || s.planungDeaktiviert) return 0;
   let betrag = 0;
   for (const b of s.planung.boni) if (!b.bezahlt && s.woche >= b.faellig) {
     // Wird vor EBITDA und den Pflichtzahlungen gebucht, kein doppelter Cash-Abzug.
@@ -425,7 +425,7 @@ export function planungBonusWoche(s: GameState, k: WochenKpi): number {
 }
 /** Einmal je Woche nach dem Schreiben von s.historie aufrufen. */
 export function planungWoche(s: GameState): void {
-  if (s.prognose) return;
+  if (s.prognose || s.planungDeaktiviert) return;
   if (!s.planung) initialisierePlanung(s); // alte Spielstände
   const p = planJahr(s);
   const k = s.historie.at(-1);
