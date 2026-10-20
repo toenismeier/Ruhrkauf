@@ -43,6 +43,9 @@ export const SPORT_INSEL_PUPPEN_OUTDOOR = definition("sport_insel_puppen_outdoor
 export const SPORT_INSEL_PUPPEN_WINTER = definition("sport_insel_puppen_winter", "Winterpuppen", 'sport', 'insel', 4, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"puppen","pal":"winter","w":5}));
 export const SPORT_INSEL_LAUFANALYSE = definition("sport_insel_laufanalyse", "Laufanalyse", 'sport', 'insel', 2, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"laufanalyse","pal":"laufen","w":2.5}));
 export const SPORT_INSEL_FITNESS = definition("sport_insel_fitness", "Fitnessinsel", 'sport', 'insel', 4, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"fitness","pal":"fitness","w":5}));
+// Kompakte, maßhaltige Zeltpräsentation für kleine Outdoor-Randabteilungen.
+export const SPORT_INSEL_ZELT_KLEIN = definition("sport_insel_zelt_klein", "Outdoor-Zelt kompakt", 'sport', 'insel', 2, 2, 1.5, 260,
+  (L,r,d,ctx) => inselModul(L,r,d,ctx,{art:'zelt',pal:'outdoor',w:2.5}));
 export const SPORT_INSEL_ZELT = definition("sport_insel_zelt", "Zelt aufgebaut", 'sport', 'insel', 4, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"zelt","pal":"outdoor","w":5}));
 export const SPORT_INSEL_KANU = definition("sport_insel_kanu", "Kanu auf Ständer", 'sport', 'insel', 4, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"kanu","pal":"outdoor","w":5}));
 export const SPORT_INSEL_EBIKE = definition("sport_insel_ebike", "E-Bike-Podest", 'sport', 'insel', 4, 2, 1.5, 260, (L,r,d,ctx) => inselModul(L,r,d,ctx, {"art":"rad","pal":"rad","w":5}));
