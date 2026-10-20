@@ -213,3 +213,16 @@ Auftrag: `../auftraege/engine-wettbewerber.md`. Der Spielstand enthält die Wett
 - Abnahmetest: mittlerer Wettbewerbsfaktor 0,97 bis 1,00 über 260 Wochen (Seeds 1–3, Stichprobe alle 13 Wochen); Umsatz und EBITDA im ersten Jahr maximal ±0,2 % zum Altmodell; Bot C auf Seeds 1 bis 3 über 260 Wochen. CI von PR #5 maßgeblich.
 
 Lokale Abnahme: `npm run typecheck && npm test`, `npx tsx scripts/kalibrierung.ts 1`, sowie `npx tsx scripts/bot.ts <seed> 260 --tief` (Seeds 1, 2, 3).
+
+## Premiumhäuser (Branch feat/grafik-premium)
+
+Vier bestehende 1a-Häuser werden regelbasiert als Kronjuwelen gekennzeichnet (Warenhausformat und ID bleiben erhalten). Rang 1 Berlin/München, Rang 2 Hamburg, Rang 3 Düsseldorf. Der Nachfragebonus wird gegen die übrigen Häuser normalisiert, um die Start-Konzernumsatzbasis zu stabilisieren. Beauty/Accessoires erhalten +3 Prozentpunkte Rohmarge, Konzessionsanteil und Beratungs-FTE steigen. Premiumschutz ist standardmäßig aktiv, Investitionen wirken 26 Wochen. In Insolvenz sind getrennte Immobilien-/EBITDA-Verkäufe mit Nachverhandlung möglich. Über `premiumUebersicht` abrufbar.
+
+**Prüfskript:** `npm run check:premium` prüft Seed 1–3, Umsatzdelta vs. A/B-Basis, Premium-Margen und 260 Wochen Bot C; `npm run export:haeuser` aktualisiert die Grafikdaten.
+
+**Lokale Kalibrierung:** In dieser Umgebung ist kein ausführbarer Git-Checkout des privaten Repositories verfügbar. Daher sind die geforderten Typechecks, Jest-Tests, 52-Wochen-Kalibrierung und Bot-C-Simulationen für Seeds 1–3 noch offen; es werden keine ungeprüften Zahlen ausgewiesen.
+
+
+### Premium-Kronjuwelen – Nachbesserung 20.10.2026 (noch nicht verifiziert)
+
+Bot C nimmt Premiumhäuser bei der Schließungsauswahl in Woche 3 ausdrücklich aus. Die Ränge erhalten neue Flächenproduktivitätsfaktoren 1,98 / 1,67 / 1,42 (vorläufige Kalibrierung nach Wettbewerber-Merge). Der bestehende Test verlangt für die vier Häuser 11 / 11 / 9 / 6 % EBITDA-Marge mit unveränderter Toleranz von ±2 Prozentpunkten. Die A/B-Umsatzgrenze bleibt ±1,5 % im ersten Jahr; `npx tsx scripts/premium-kalibrierung.ts` protokolliert Umsatz, EBITDA, Margen und Insolvenzgründe pro Seed. Zahlen und Bot-C-Überleben sind erst nach lokalem Lauf zu bestätigen.

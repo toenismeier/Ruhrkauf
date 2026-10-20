@@ -9,7 +9,9 @@
   "scripts": {
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "sim": "tsx scripts/headless.ts"
+    "sim": "tsx scripts/headless.ts",
+    "export:haeuser": "tsx scripts/haeuser-export.ts",
+    "check:premium": "tsx scripts/premium-kalibrierung.ts"
   },
   "keywords": [],
   "author": "",

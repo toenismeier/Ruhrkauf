@@ -43,3 +43,6 @@ export { SCHWIERIGKEIT, SCHWIERIGKEITEN, schwierigkeit, type SchwierigkeitId, ty
 export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, PostKategorie } from './abfragen';
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
 export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
+
+export { PREMIUM_HAEUSER } from './daten';
+export { premiumUebersicht } from './abfragen';

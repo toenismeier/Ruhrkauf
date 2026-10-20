@@ -77,7 +77,10 @@ export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boole
     tu({ typ: 'marketingBudget', quote: 0.018 });
     tu({ typ: 'insolvenzAntrag' });
     if (zentralePauschal) tu({ typ: 'zentrale', prozent: 0.3 });
-    const p = portfolio(s).filter((x) => x.status === 'offen').sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
+    // Bot C: Premiumhäuser sind strategische Kronjuwelen; niemals automatisch schließen.
+    const premiumIds = new Set(s.haeuser.filter((h) => h.klasse === 'premium').map((h) => h.id));
+    const p = portfolio(s).filter((x) => x.status === 'offen' && !premiumIds.has(x.id))
+      .sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
     for (const x of p.slice(0, 50)) tu({ typ: 'schliessen', haus: x.id });
     for (const x of p.slice(50).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.2 });
     for (const h of s.haeuser.filter((x) => x.status === 'offen' && x.kpi)) {

@@ -414,8 +414,9 @@ export function registriereMarketingKi(): void {
 const rngM = (s: GameState): RngHalter => s.marketing.stand as unknown as RngHalter;
 export const marketingRng = rngM;
 
-function trifft(a: Aktion, h: Haus): boolean {
+function trifft(a: Aktion, h: Haus, s: GameState): boolean {
   if (a.kontrollHaeuser.includes(h.id)) return false;
+  if (h.klasse === 'premium' && a.scope.typ === 'alle' && s.premiumSchuetzen !== false) return false;
   const sc = a.scope;
   return sc.typ === 'alle' || (sc.typ === 'format' && sc.format === h.format) || (sc.typ === 'region' && sc.region === h.region) ||
     (sc.typ === 'cluster' && sc.cluster === h.cluster) || (sc.typ === 'haeuser' && sc.ids.includes(h.id));
@@ -552,8 +553,8 @@ export function marketingGruppen(s: GameState, h: Haus, basis: Partial<Record<Gr
   const out: Partial<Record<GruppeId, MarketingGruppe>> = {};
   if (!m) { for (const g of Object.keys(basis) as GruppeId[]) out[g] = { nachfrage: 1, preis: 1 }; return out; }
   const w = s.woche;
-  const ist = s.marketing.aktionen.filter((a) => laeuft(a, w) && trifft(a, h));
-  const plan = m.referenz.filter((a) => laeuft(a, w) && trifft(a, h));
+  const ist = s.marketing.aktionen.filter((a) => laeuft(a, w) && trifft(a, h, s));
+  const plan = m.referenz.filter((a) => laeuft(a, w) && trifft(a, h, s));
   const A = m.woche;
   const gruppen = Object.keys(basis) as GruppeId[];
   const eI: Partial<Record<GruppeId, GruppenEffekt>> = {};
@@ -821,7 +822,7 @@ function scopeAnteil(s: GameState, a: Aktion): number {
     const u = h.kpi && h.kpi.woche === s.woche - 1 ? h.kpi.umsatz : 0;
     if (u <= 0) continue;
     y += u;
-    if (trifft(a, h)) x += u;
+    if (trifft(a, h, s)) x += u;
   }
   return y > 0 ? x / y : 1;
 }

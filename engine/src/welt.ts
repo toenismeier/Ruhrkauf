@@ -12,6 +12,7 @@ import { erzeugeProdukte } from './produkte';
 import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
+import { kennzeichnePremium } from './premium';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -23,6 +24,8 @@ export interface Szenario {
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
+  /** A/B-Kalibrierung: normale Warenhäuser statt Premiumhäuser. */
+  premiumDeaktiviert?: boolean;
 }
 
 export const STANDARD_SZENARIO: Szenario = {
@@ -239,6 +242,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     k++;
   }
 
+  if (!sz.premiumDeaktiviert) kennzeichnePremium(haeuser);
+
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
   const bestand: Kohorte[] = [];
   const basisUmsatz: Partial<Record<GruppeId, number>> = {};
@@ -279,6 +284,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
+    premiumSchuetzen: true,
     wettbewerber: [],
     wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,
     wettbewerbNaechsteId: 0,

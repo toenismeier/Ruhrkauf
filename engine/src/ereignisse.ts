@@ -6,6 +6,7 @@ import { bestandWert } from './ware';
 import { loeseVorstandEntscheidung } from './vorstand';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
+import { premiumAngebote } from './premium';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
   return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
@@ -223,6 +224,7 @@ const SATIRE = [
 export function ereignisse(s: GameState): void {
   if (s.prognose) return;
   const w = s.woche;
+  premiumAngebote(s);
   // Makro
   const zyklus = 0.035 * Math.sin((2 * Math.PI * w) / 260 + s.makro.phase);
   if (s.makro.schockBis !== undefined && s.makro.schockBis <= w) { s.makro.schockBis = undefined; s.makro.schockStaerke = 0; }

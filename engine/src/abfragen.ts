@@ -247,3 +247,6 @@ export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalende
 
 /** Wettbewerbsübersicht und Übergabeobjekte für das spätere Stadtbild. */
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
+
+/** Kronjuwelen mit Marktwert, Image und operativer Performance. */
+export { premiumUebersicht } from './premium';
