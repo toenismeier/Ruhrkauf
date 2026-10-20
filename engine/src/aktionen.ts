@@ -18,7 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
-import { spielBeenden, spielendePruefen } from './spielende';
+import { spielBeenden } from './spielende';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -137,8 +137,9 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   switch (a.typ) {
     case 'ruhestand':
       if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
+      if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
       spielBeenden(s, 'ruhestand');
-      return s.ende?.art === 'ruhestand' ? ok('Der Ruhestand beginnt.') : fehler('Spielende ist deaktiviert.');
+      return ok('Der Ruhestand beginnt.');
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
       return ok(a.an ? 'Premiumhäuser sind vor pauschalen Rabattaktionen geschützt.' : 'Premiumschutz deaktiviert.');
@@ -415,6 +416,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
       if (an.typ === 'konzernVerkauf') {
         if (s.phase !== 'regulaer') return fehler('Konzernverkauf nur außerhalb der Insolvenz möglich.');
+        if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
         an.status = 'angenommen'; an.erledigtWoche = s.woche;
         spielBeenden(s, 'investor', an.konzernKaeuferName);
         melde(s, 'presse', `${s.firma.name} wird an ${an.konzernKaeuferName ?? 'einen Investor'} verkauft. Kaufpreis ${mio(an.kaufpreis ?? 0)}.`);
