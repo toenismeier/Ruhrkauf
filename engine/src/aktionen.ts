@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { PLANUNG_AKTIONEN, planungAktion, type PlanungAktion } from './planung';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -60,7 +61,9 @@ export type SpielerAktion =
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
-  | ProduktAktion;
+  | ProduktAktion
+  // O06 Planung
+  | PlanungAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -125,6 +128,11 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
+  // O06 Planung: alle Mutationen laufen über fuehreAus.
+  if (PLANUNG_AKTIONEN.has(a.typ as PlanungAktion['typ'])) {
+    const fehlerText = planungAktion(s, a as PlanungAktion);
+    return fehlerText ? fehler(fehlerText) : ok('Planung aktualisiert.');
+  }
   switch (a.typ) {
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
