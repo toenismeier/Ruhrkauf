@@ -88,7 +88,7 @@ export function wochenberichtModul(ctx) {
       zeile('Cash netto', eur(bericht.cashNetto)) + zeile('Cash-Bestand', eur(bericht.cash), 'wb-summe') +
       '<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>' +
       (bericht.phase === 'insolvenz' ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur(bericht.kredite) + ' · Liquiditätsreichweite: ' + bericht.runway + ' Wochen</span></div>' : '') +
-      '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.png)"></div><h4>' + esc(titel) + '</h4>' +
+      '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + '</h4>' +
       nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') + '</div></div><div id="wb-vorfall"></div></section>';
     node.hidden = false; node.className = 'bericht-ein'; document.body.classList.add('wochen-aktiv');
     requestAnimationFrame(() => node.classList.add('sichtbar'));
@@ -146,5 +146,5 @@ export function wochenberichtModul(ctx) {
       case 'ansehen': vorfallWeiter(true); break;
     }
   });
-  return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht && { ...bericht, vorgaenge: bericht.vorgaenge.length, meldungen: bericht.meldungen.length, meldungstexte: bericht.meldungen.map((m) => m.text) }, zeiten: [...zeiten] }), get status() { return status; } };
+  return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht && { ...bericht, vorgaenge: bericht.vorgaenge.length, meldungen: bericht.meldungen.length, meldungstexte: bericht.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() { return status; } };
 }

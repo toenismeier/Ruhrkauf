@@ -15,7 +15,7 @@ const kuerzel = { Essen: 'E', Düsseldorf: 'D', Dortmund: 'DO', Duisburg: 'DU', 
 const kode = (name) => kuerzel[name] ?? (name.replace(/[^A-ZÄÖÜ]/g, '').slice(0, 3) || name.slice(0, 2).toUpperCase());
 const typBild = (name) => /Hamburg|Bremen|Kiel|Lübeck|Rostock|Bremerhaven|Wismar|Wilhelmshaven/i.test(name)
   ? 'hafen' : /Köln|Dresden|Heidelberg|Bamberg|Erfurt|Münster|Aachen/i.test(name) ? 'altstadt' : 'ruhr';
-const bild = (name) => './bilder/reise-' + typBild(name) + '.png';
+const bild = (name) => './bilder/reise-' + typBild(name) + '.jpg';
 const zug = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
 
 // Schematische Deutschlandkarte: jedes Reiseziel als Punkt, die eigene Stadt rot.
@@ -41,12 +41,17 @@ export function reiseModul(ctx) {
   let aktiv = false, token = 0, gestartet = 0, zielStart = null, letzte = [];
   const messen = (schritt) => { const t = performance.now(); protokoll.push({ schritt, ms: Math.round(t - gestartet), ...(zielStart === null ? {} : { reiseMs: Math.round(t - zielStart) }) }); };
   function schliessen() { ++token; aktiv = false; z.hidden = true; z.innerHTML = ''; z.className = ''; document.body.classList.remove('reise-aktiv'); }
+  // Liegt der Bahnhofs-Pin außerhalb des Bildes, startet bzw. endet der Kreis am Stadtchip (dort wurde getippt).
   function ortPunkt() {
-    const p = ctx.pinPunkt();
-    return { x: Math.round(p?.x ?? innerWidth * .5), y: Math.round(p?.y ?? innerHeight * .65) };
+    const p = ctx.pinPunkt(), w = innerWidth, h = innerHeight;
+    if (p && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h) return { x: Math.round(p.x), y: Math.round(p.y) };
+    const chip = document.getElementById('stadt-reise')?.getBoundingClientRect();
+    return chip ? { x: Math.round(chip.left + chip.width / 2), y: Math.round(chip.top + chip.height / 2) } : { x: Math.round(w * .5), y: Math.round(h * .65) };
   }
+  // Radius bis zur entferntesten Bildecke, damit der offene Kreis das ganze Bild sicher deckt.
   function kreis(p) {
-    z.style.setProperty('--rx', p.x + 'px'); z.style.setProperty('--ry', p.y + 'px');
+    const w = innerWidth, h = innerHeight, r = Math.ceil(Math.hypot(Math.max(p.x, w - p.x), Math.max(p.y, h - p.y))) + 2;
+    z.style.setProperty('--rx', p.x + 'px'); z.style.setProperty('--ry', p.y + 'px'); z.style.setProperty('--rr', r + 'px');
   }
   function ziele(gesucht = '') {
     const hier = ctx.stadt();

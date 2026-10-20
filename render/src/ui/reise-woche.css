@@ -3,7 +3,7 @@
 #reise-overlay[hidden], #wochen-overlay[hidden] {display:none!important}
 body.reise-aktiv .unten, body.wochen-aktiv .unten {pointer-events:none}
 #reise-overlay { background:#263541; clip-path:circle(0px at var(--rx,50%) var(--ry,65%)); transition:clip-path 240ms ease-out; }
-#reise-overlay.offen, #reise-overlay.faehrt {clip-path:circle(150vmax at var(--rx,50%) var(--ry,65%))}
+#reise-overlay.offen, #reise-overlay.faehrt {clip-path:circle(var(--rr,150vmax) at var(--rx,50%) var(--ry,65%))}
 #reise-overlay.faehrt {transition:clip-path 150ms ease-in}
 #reise-overlay.faehrt .reise-panel {display:none}
 .reise-panel {height:100dvh; max-width:700px; margin:auto; display:flex; flex-direction:column; overflow:hidden; background:#f3f1ec; transform:scale(.55); opacity:.35; transition:transform 240ms ease-out,opacity 240ms ease-out}
