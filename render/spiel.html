@@ -313,6 +313,12 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+  /* O07 Haus */
+  .haus-reiter { display:flex; gap:6px; overflow-x:auto; padding:10px 2px; scrollbar-width:thin; }
+  .haus-reiter button { border:1px solid var(--linie); background:var(--karte); border-radius:10px; color:var(--text); padding:8px 11px; white-space:nowrap; font:600 12px inherit; }
+  .haus-reiter button.an { background:var(--text); color:white; }
+  .haus-sprung { width:100%; background:transparent; border:0; border-bottom:1px solid var(--linie); text-align:left; color:inherit; cursor:pointer; }
+  #hausbeobachtung { align-self:flex-start; margin:4px 10px; font-size:12px; border:1px solid var(--linie); padding:5px 9px; border-radius:10px; background:var(--karte); color:var(--text); }
 </style>
 </head>
 <body>
@@ -323,6 +329,8 @@
     <div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
+  <!-- O07 Haus: Beobachtungsliste auf dem Startbildschirm -->
+  <button id="hausbeobachtung" type="button">Hausbetrieb · Beobachtung</button>
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
 <div class="unten">
@@ -336,6 +344,9 @@
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
       <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
+      <!-- O07 Haus -->
+      <button class="mkachel" id="beobachtung"><b>Häuser</b><small>Beobachtungsliste und Ausnahmen</small></button>
+      <button class="mkachel" id="haus-reporting"><b>Reporting</b><small>Kommentare, Kundenscore, Rangliste</small></button>
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
