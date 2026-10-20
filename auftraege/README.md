@@ -21,6 +21,9 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | **gemergt 20.10.** Weiter: `nachbesserung-reise-woche.md` auf `feat/spiel-reise-woche-2` | allem |
 | `spiel-posteingang.md` | `feat/spiel-posteingang` | **gemergt 19.10.** Folgeschritt: Wettbewerbsmeldungen in die Kategorie Konkurrenz (kleiner Commit) | |
 
+## Operatives Paket
+Eigene Aufträge in `auftraege/operativ/` (Übersicht und Schnittstellen in `auftraege/operativ/README.md`). O01 und O02 zuerst, O03 nach O01, danach O04 bis O09 parallel.
+
 ## Nice-to-have
 Eigene Aufträge in `auftraege/nice/` (Übersicht in `auftraege/nice/README.md`). N13 Einstellungen und N14 Testwerkzeuge zuerst, danach alles parallel.
 
