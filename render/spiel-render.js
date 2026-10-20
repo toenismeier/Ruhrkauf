@@ -588,6 +588,20 @@ async function buendeln() {
     pruefe(r.stadt === 'Düsseldorf', 'Reiseziel und Stadtchip sind Düsseldorf');
     pruefe(!!r.ort && r.ort.x >= 0 && r.ort.x <= 390 && r.ort.y >= 0 && r.ort.y <= 844, 'Zielbahnhof im sichtbaren Kamerabereich');
     await p.screenshot({ path: path.join(ordnerReise, '99-angekommen.png') });
+    // Eine tatsächliche Engine-Woche mit neuem Vorgang suchen; keine Testmeldung erfinden.
+    const testWoche = await p.evaluate(() => {
+      const spiel = window.spiel, E = spiel.E;
+      for (let i = 0; i < 44; i++) {
+        const davor = new Set(E.posteingang(spiel.s).handeln.map((m) => m.id));
+        const probe = structuredClone(spiel.s);
+        E.wocheAbspielen(probe);
+        const neu = E.posteingang(probe).handeln.filter((m) => !davor.has(m.id));
+        if (neu.length) return { woche: spiel.s.woche, vorgaenge: neu.length };
+        spiel.woche(true);
+      }
+      return null;
+    });
+    pruefe(!!testWoche, 'Engine-Testwoche mit mindestens einem neuen Vorgang gefunden');
     await p.locator('#weiter').click();
     await p.waitForSelector('#wochen-overlay:not([hidden]) .wochen-frage');
     await p.screenshot({ path: path.join(ordnerWoche, '00-bestaetigung.png') });
