@@ -1,3 +1,4 @@
+import { initialisiereWare } from './merchandise';
 import {
   CLUSTER_FAKTOR, GRUPPEN, LAGE_FAKTOR, LIEFERANTEN, NACHNAMEN, STAEDTE, STANDORT_ZUSATZ, VERMIETER, VORNAMEN,
   BERATER, gruppenFuer,
@@ -344,6 +345,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
   bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
+  // O05 Ware
+  initialisiereWare(s);
   return s;
 }
 
