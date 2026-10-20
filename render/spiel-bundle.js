@@ -104,8 +104,8 @@
 
   // ../engine/src/daten.ts
   var WH = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
-  function mit(basis, over) {
-    return basis.map((x, i) => over[i] !== void 0 ? over[i] : x);
+  function mit(basis2, over) {
+    return basis2.map((x, i) => over[i] !== void 0 ? over[i] : x);
   }
   var ROH = [
     { id: "damen", name: "Damen", format: "warenhaus", marge: 0.48, saisonAnteil: 0.7, vorlauf: 14, beratung: 0.5, kkElast: 0.5, alterElast: 0.1, qmUmsatz: 35, anteilFlaeche: 0.2, saison: WH },
@@ -706,8 +706,8 @@
     { titel: "Teens und Tweens", entwurf: { zielgruppe: { alter: "13-17", geschlecht: "unisex" }, kategorie: "Bekleidung", preislage: "einstieg", stil: "trendig", qualitaet: 2, beschaffung: "fernost" }, wgs: ["damen.young", "kinder.maedchen", "kinder.jungen"] },
     { titel: "Young Adults", entwurf: { zielgruppe: { alter: "18-29", geschlecht: "unisex" }, kategorie: "Bekleidung", preislage: "einstieg", stil: "trendig", qualitaet: 2, beschaffung: "fernost" }, wgs: ["damen.young", "damen.denim", "herren.casual", "sporttextil.freizeit"] }
   ];
-  function startMarke(id, name2, farbe, z2, kategorie, preislage, stil, qualitaet, beschaffung, bekanntheit, stilAktualitaet, wg) {
-    return { id, name: name2, farbe, zielgruppe: z2, kategorie, preislage, stil, qualitaet, beschaffung, budgetWoche: 0, bekanntheit, stilAktualitaet, status: "aktiv", seit: -1040, gewachsen: true, wgAnteile: { ...wg }, wgIst: { ...wg } };
+  function startMarke(id, name2, farbe2, z2, kategorie, preislage, stil, qualitaet, beschaffung, bekanntheit, stilAktualitaet, wg) {
+    return { id, name: name2, farbe: farbe2, zielgruppe: z2, kategorie, preislage, stil, qualitaet, beschaffung, budgetWoche: 0, bekanntheit, stilAktualitaet, status: "aktiv", seit: -1040, gewachsen: true, wgAnteile: { ...wg }, wgIst: { ...wg } };
   }
   function erzeugeEigenmarken() {
     return {
@@ -1255,8 +1255,8 @@
       const r = hashRng(s2.seed, sid, i);
       const typen = ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
       const artikel = ziehe(r, typen.map((t) => t.typ), 5);
-      const basis = FARB_BASIS[g];
-      const farben = [...ziehe(r, basis, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis.includes(f)), 2)];
+      const basis2 = FARB_BASIS[g];
+      const farben = [...ziehe(r, basis2, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis2.includes(f)), 2)];
       const out = ziehe(r, FARBLISTE.filter((f) => !farben.includes(f)), 3);
       const mats = ziehe(r, MATERIALLISTE.filter((m) => m !== "Polyester" || g === "kinder"), 3);
       gruppen[g] = { farben, artikel, materialien: mats, out };
@@ -1363,10 +1363,10 @@
     const mat2 = MATERIALIEN[material2];
     return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet - 3)) * 100) / 100;
   }
-  function produktName(typ, farbe, material2) {
+  function produktName(typ, farbe2, material2) {
     const t = TYP[typ];
     const matWort = t.materialien.length > 1 && material2 !== t.materialien[0] ? ` aus ${material2}` : "";
-    return `${typ} ${farbe}${matWort}`;
+    return `${typ} ${farbe2}${matWort}`;
   }
   function neuesProdukt(s2, m, e, wg, team) {
     const t = TYP[e.typ];
@@ -1453,9 +1453,9 @@
     const pr2 = { liste: [], zaehler: 0, rng: s2.seed * 3266489917 + 32269 >>> 0, basisF: {}, basisM: {} };
     s2.produkte = pr2;
     for (const m of s2.eigenmarken.marken) {
-      for (const [typ, farbe, material2, wg, budgetAnteil] of START[m.id] ?? []) {
+      for (const [typ, farbe2, material2, wg, budgetAnteil] of START[m.id] ?? []) {
         const t = TYP[typ];
-        const p = neuesProdukt(s2, m, { typ, farbe, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
+        const p = neuesProdukt(s2, m, { typ, farbe: farbe2, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
         p.start = -300;
         p.fertig = -288;
         p.teile = bewerte(s2, m, p, p.team, void 0, m.id === "em1" ? 0.1 : 0.4);
@@ -1514,8 +1514,8 @@
         if (pr2.liste.some((p2) => p2.marke === m.id && p2.wg === wg && p2.status !== "ausgelistet")) continue;
         const t = ARTIKELTYPEN.find((x) => x.wgs.includes(wg) && x.gruppe[trendGruppe(m)] >= 0.5) ?? ARTIKELTYPEN.find((x) => x.wgs.includes(wg));
         if (!t) continue;
-        const farbe = FARB_BASIS[trendGruppe(m)][0];
-        const p = neuesProdukt(s2, m, { typ: t.typ, farbe, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
+        const farbe2 = FARB_BASIS[trendGruppe(m)][0];
+        const p = neuesProdukt(s2, m, { typ: t.typ, farbe: farbe2, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
         p.basis = true;
         p.budgetWoche = 0;
         p.teile = bewerte(s2, m, p, 0.4, void 0);
@@ -1654,7 +1654,7 @@
       if (!kand.length) continue;
       let e;
       if (gut) {
-        const bewertet = kand.flatMap((t) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe) => t.materialien.map((material2) => ({ t, farbe, material: material2 })))).map((x) => ({ ...x, sc: scoreAus(bewerte(s2, m, { typ: x.t.typ, farbe: x.farbe, material: x.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a, b2) => b2.sc - a.sc);
+        const bewertet = kand.flatMap((t) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe2) => t.materialien.map((material2) => ({ t, farbe: farbe2, material: material2 })))).map((x) => ({ ...x, sc: scoreAus(bewerte(s2, m, { typ: x.t.typ, farbe: x.farbe, material: x.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a, b2) => b2.sc - a.sc);
         const b = bewertet[0];
         e = { marke: m.id, typ: b.t.typ, farbe: b.farbe, material: b.material, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * b.t.aufwand * 1.6 / 12 / 1e3) * 1e3 };
       } else {
@@ -2209,18 +2209,18 @@
     }
     return { u, d: Math.min(0.6, d), nu, sieger: ws[0], alle: ws };
   }
-  function marketingGruppen(s2, h, basis, tE, mess) {
+  function marketingGruppen(s2, h, basis2, tE, mess) {
     const m = s2.marketing.stand;
     const out = {};
     if (!m) {
-      for (const g of Object.keys(basis)) out[g] = { nachfrage: 1, preis: 1 };
+      for (const g of Object.keys(basis2)) out[g] = { nachfrage: 1, preis: 1 };
       return out;
     }
     const w = s2.woche;
     const ist = s2.marketing.aktionen.filter((a) => laeuft(a, w) && trifft(a, h, s2));
     const plan2 = m.referenz.filter((a) => laeuft(a, w) && trifft(a, h, s2));
     const A = m.woche;
-    const gruppen = Object.keys(basis);
+    const gruppen = Object.keys(basis2);
     const eI = {};
     const eP = {};
     let sumB = 0;
@@ -2228,7 +2228,7 @@
     let promU = { ist: 0, plan: 0 };
     const breit2 = (e) => e.sieger && (mech(e.sieger.a) === "rabatt_bereich" || mech(e.sieger.a) === "rabatt_wg" || mech(e.sieger.a) === "staffel" || (mech(e.sieger.a) === "coupon" || mech(e.sieger.a) === "reduzierung" || mech(e.sieger.a) === "punkte") && !!gruppenVon(e.sieger.a));
     for (const g of gruppen) {
-      const b = basis[g] ?? 0;
+      const b = basis2[g] ?? 0;
       sumB += b;
       eI[g] = gruppenEffekt(s2, ist, h, g, m.ist, A.sigma.ist, A.komm.ist);
       eP[g] = gruppenEffekt(s2, plan2, h, g, m.plan, A.sigma.plan, A.komm.plan);
@@ -2260,7 +2260,7 @@
     const DI = A.druck.ist;
     const DP = A.druck.plan;
     for (const g of gruppen) {
-      const b = basis[g] ?? 0;
+      const b = basis2[g] ?? 0;
       const ei = eI[g];
       const ep = eP[g];
       const kanniI = ei.u === 0 && kanI > 0 ? -kanI : 0;
@@ -2444,7 +2444,7 @@
   function addiere(a, b) {
     for (const key of Object.keys(b)) a[key] += b[key];
   }
-  function crmWoche(s2, sc, wert, U) {
+  function crmWoche(s2, sc, wert, U2) {
     const w = s2.woche;
     const intens = { mail: 0, push: 0, brief: 0 };
     let kosten = 0;
@@ -2463,7 +2463,7 @@
       kosten += r.versandkosten;
       intens[c.kanal] += pool > 0 ? r.versendet / pool : 0;
       const key = c.segment.typ === "affinitaet" && c.segment.gruppe ? c.segment.gruppe : "_";
-      const bez = key === "_" ? U : U * clamp((s2.basisUmsatz[key] ?? 0) / Math.max(1, Object.values(s2.basisUmsatz).reduce((a, b) => a + (b ?? 0), 0)), 0.01, 1);
+      const bez = key === "_" ? U2 : U2 * clamp((s2.basisUmsatz[key] ?? 0) / Math.max(1, Object.values(s2.basisUmsatz).reduce((a, b) => a + (b ?? 0), 0)), 0.01, 1);
       wert.u[key] = (wert.u[key] ?? 0) + r.mehrumsatz / Math.max(1, bez);
       wert.d[key] = (wert.d[key] ?? 0) + r.rabattkosten / Math.max(1, bez);
       if (c.kanal === "mail") sc.karte.optInMail = Math.max(0, sc.karte.optInMail - r.abmeldungen);
@@ -2478,7 +2478,7 @@
     for (const key of Object.keys(wert.d)) wert.d[key] = clamp(wert.d[key] ?? 0, 0, 0.2);
     return kosten;
   }
-  function couponSigma(s2, sc, a, U) {
+  function couponSigma(s2, sc, a, U2) {
     const k = sc.karte;
     const netzRel = s2.marketing.stand.netzStart > 0 ? s2.marketing.stand.netzLetzt / s2.marketing.stand.netzStart : 1;
     const auflage = a.auflage ?? MK.prospektHaushalte * Math.sqrt(Math.max(0, kanalRel(sc, "prospekt"))) * netzRel + k.app.aktiveNutzer * (k.app.appCoupons ? 1 : 0.3) + k.mitglieder * k.aktivQuote * 0.4;
@@ -2492,7 +2492,7 @@
       const sum = Object.values(s2.basisUmsatz).reduce((x, y) => x + (y ?? 0), 0);
       anteil2 = clamp(gs.reduce((x, g) => x + (s2.basisUmsatz[g] ?? 0), 0) / Math.max(1, sum), 0.02, 1);
     }
-    return clamp(auflage * e * bon / Math.max(1, U * anteil2), 0, 0.6);
+    return clamp(auflage * e * bon / Math.max(1, U2 * anteil2), 0, 0.6);
   }
   function scopeAnteil(s2, a) {
     let x = 0;
@@ -2551,16 +2551,16 @@
       }
     }
   }
-  function szenarioBrutto(sc, U, crmVersand2, w) {
+  function szenarioBrutto(sc, U2, crmVersand2, w) {
     const kanaele2 = {};
     let ks = 0;
     for (const def of KANAELE) {
-      const x = sc.kanaele[def.id].quote * U;
+      const x = sc.kanaele[def.id].quote * U2;
       kanaele2[def.id] = x;
       ks += x;
     }
     const k = sc.karte;
-    const kartenUmsatz = k.umsatzAnteil * U;
+    const kartenUmsatz = k.umsatzAnteil * U2;
     const anmeldung = k.anmeldeBis !== void 0 && w < k.anmeldeBis && k.anmeldepraemie > 0 ? k.anmeldepraemie * Math.max(0, k.neuWoche - MK.neuBasis) * 0.6 : 0;
     const karte = {
       punkte: k.punkteSatz * kartenUmsatz * MK.punkteEinloesung,
@@ -2575,18 +2575,18 @@
     const pa = sc.kanaele.prospekt.quote + sc.kanaele.anzeigen.quote;
     return { kanaele: kanaele2, ks, karte, app, brutto: ks + karte.summe + app + crmVersand2, pa };
   }
-  function marketingKosten(s2, U) {
+  function marketingKosten(s2, U2) {
     const m = s2.marketing.stand;
     const w = s2.woche;
     const sonder = s2.marketing.aktionen.filter((a) => laeuft(a, w)).reduce((x, a) => x + a.kosten / Math.max(1, a.ende - a.start), 0);
     if (!m) {
-      const n = s2.marketing.budgetQuote * U + sonder;
+      const n = s2.marketing.budgetQuote * U2 + sonder;
       return { kanaele: {}, kanaeleSumme: n, karte: { punkte: 0, stufen: 0, betrieb: 0, daten: 0, anmeldung: 0, summe: 0 }, app: 0, crmVersand: 0, brutto: n, beteiligung: 0, sonderwerbung: sonder, netto: n };
     }
     const A = m.woche.woche === w ? m.woche : void 0;
-    const I = szenarioBrutto(m.ist, U, A?.crmKosten.ist ?? 0, w);
-    const P2 = szenarioBrutto(m.plan, U, A?.crmKosten.plan ?? 0, w);
-    const betPlan = Math.max(0, P2.brutto - PARAM.marketingQuote * U);
+    const I = szenarioBrutto(m.ist, U2, A?.crmKosten.ist ?? 0, w);
+    const P2 = szenarioBrutto(m.plan, U2, A?.crmKosten.plan ?? 0, w);
+    const betPlan = Math.max(0, P2.brutto - PARAM.marketingQuote * U2);
     const bet = P2.pa > 0 ? betPlan * (I.pa / P2.pa) : 0;
     return {
       kanaele: I.kanaele,
@@ -2777,10 +2777,10 @@
     const m = s2.marketing.stand;
     if (m) {
       for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote;
-      const U = umsatzBezug(s2);
-      const k = marketingKosten(s2, U);
+      const U2 = umsatzBezug(s2);
+      const k = marketingKosten(s2, U2);
       const rest = k.netto - k.sonderwerbung - k.kanaeleSumme + k.beteiligung;
-      const f = k.kanaeleSumme - k.beteiligung > 0 ? Math.max(0, (q2 * U - rest) / (k.kanaeleSumme - k.beteiligung)) : q2 / PARAM.marketingQuote;
+      const f = k.kanaeleSumme - k.beteiligung > 0 ? Math.max(0, (q2 * U2 - rest) / (k.kanaeleSumme - k.beteiligung)) : q2 / PARAM.marketingQuote;
       for (const def of KANAELE) m.ist.kanaele[def.id].quote = def.quote * f;
     }
     return ok2(`Marketingbudget auf ${(q2 * 100).toFixed(1)} % vom Umsatz gesetzt.`);
@@ -2987,10 +2987,10 @@
     const I = s2.marketing.stand.ist;
     const gut = zwischen(rng3, 0, 1) < 0.3 + 0.65 * guete;
     const ziel = gut ? s2.phase === "insolvenz" ? 0.02 : 0.024 : zwischen(rng3, 0, 1) < 0.5 ? 0.013 : 0.032;
-    const U = umsatzBezug(s2);
-    const k = marketingKosten(s2, U);
+    const U2 = umsatzBezug(s2);
+    const k = marketingKosten(s2, U2);
     const rest = k.netto - k.sonderwerbung - k.kanaeleSumme;
-    const f = k.kanaeleSumme > 0 ? clamp((ziel * U - rest) / k.kanaeleSumme, 0.3, 2) : 1;
+    const f = k.kanaeleSumme > 0 ? clamp((ziel * U2 - rest) / k.kanaeleSumme, 0.3, 2) : 1;
     for (const d of KANAELE) I.kanaele[d.id].quote = clamp(I.kanaele[d.id].quote * f, 0, d.quote * 4);
     s2.marketing.budgetQuote = ziel;
     const grenz = KANAELE.filter((d) => d.id !== "crm").map((d) => ({ d, x: d.e * Math.pow(Math.max(0.05, kanalRel(I, d.id)), d.e - 1) * (1 + d.marke * 0.3) * (1 - I.kanaele[d.id].abnutzung) }));
@@ -3044,8 +3044,8 @@
   var breiteVon = (s2, kontrolle) => [0.45, 0.25, 0.12][s2.controllingStufe] * (kontrolle ? 0.5 : 1);
   function kanaele(s2) {
     const m = s2.marketing.stand;
-    const U = umsatzBezug(s2);
-    const k = marketingKosten(s2, U);
+    const U2 = umsatzBezug(s2);
+    const k = marketingKosten(s2, U2);
     const summe2 = KANAELE.reduce((x, d) => x + m.ist.kanaele[d.id].quote, 0);
     return {
       kanaele: KANAELE.map((d) => {
@@ -3054,10 +3054,10 @@
           id: d.id,
           name: d.name,
           text: d.text,
-          budgetWoche: eur(st.quote * U),
-          budgetJahr: eur(st.quote * U * 52),
+          budgetWoche: eur(st.quote * U2),
+          budgetJahr: eur(st.quote * U2 * 52),
           quote: st.quote,
-          startBudgetWoche: eur(d.quote * U),
+          startBudgetWoche: eur(d.quote * U2),
           anteil: summe2 > 0 ? st.quote / summe2 : 0,
           wirkung: Math.pow(Math.max(0, kanalRel(m.ist, d.id)), d.e) * (1 - st.abnutzung),
           adstock: kanalRel(m.ist, d.id),
@@ -3069,24 +3069,24 @@
           regionen: { ...st.regionen }
         };
       }),
-      summeWoche: eur(summe2 * U),
+      summeWoche: eur(summe2 * U2),
       quote: summe2,
       beteiligungWoche: eur(k.beteiligung),
-      bezugUmsatzWoche: eur(U)
+      bezugUmsatzWoche: eur(U2)
     };
   }
   function kundenkarte(s2) {
     const m = s2.marketing.stand;
     const k = m.ist.karte;
-    const U = umsatzBezug(s2);
-    const c = marketingKosten(s2, U);
+    const U2 = umsatzBezug(s2);
+    const c = marketingKosten(s2, U2);
     return {
       name: "Hartwig Karte",
       mitglieder: Math.round(k.mitglieder),
       aktiveMitglieder: Math.round(k.mitglieder * k.aktivQuote),
       aktivQuote: k.aktivQuote,
       umsatzAnteil: k.umsatzAnteil,
-      kartenumsatzWoche: eur(k.umsatzAnteil * U),
+      kartenumsatzWoche: eur(k.umsatzAnteil * U2),
       punkteSatz: k.punkteSatz,
       punkteText: `1 Punkt je ${k.punkteSatz > 0 ? Math.round(0.01 / k.punkteSatz * 100) / 100 : 0} \u20AC (1 Punkt = 1 Cent)`,
       stufen: k.stufen,
@@ -3244,8 +3244,8 @@
     const a = s2.marketing.aktionen.find((x) => x.id === id);
     if (!a) return void 0;
     const st = statusVon(a, s2.woche);
-    const basis = eintrag(s2, a);
-    if (!a.ausgewertet) return { ...basis, gemessen: false, text: st === "laufend" ? "Die Aktion l\xE4uft noch. Controlling wertet nach dem Ende aus." : st === "geplant" ? "Die Aktion ist geplant." : "Keine Auswertung vorhanden." };
+    const basis2 = eintrag(s2, a);
+    if (!a.ausgewertet) return { ...basis2, gemessen: false, text: st === "laufend" ? "Die Aktion l\xE4uft noch. Controlling wertet nach dem Ende aus." : st === "geplant" ? "Die Aktion ist geplant." : "Keine Auswertung vorhanden." };
     const e = a.ausgewertet;
     const kontrolle = a.kontrollHaeuser.length >= 5;
     const b = breiteVon(s2, kontrolle);
@@ -3255,7 +3255,7 @@
     const roh2 = kontrolliert(s2, a._rohertragseffektWahr * f, a.id + "r", b);
     const vorzieh = kontrolliert(s2, vorziehSchaetzung(s2, a), a.id + "v", b * 1.5);
     return {
-      ...basis,
+      ...basis2,
       gemessen: true,
       marketingBericht: e.marketingBericht,
       mehrumsatzVon: e.schaetzungVon,
@@ -3283,8 +3283,8 @@
   }
   function marketingUebersicht(s2) {
     const m = s2.marketing.stand;
-    const U = umsatzBezug(s2);
-    const k = marketingKosten(s2, U);
+    const U2 = umsatzBezug(s2);
+    const k = marketingKosten(s2, U2);
     const v = m.verlauf;
     const letzte = v[v.length - 1];
     const vj = v.find((x) => x.woche === (letzte?.woche ?? -1) - 52);
@@ -3300,8 +3300,8 @@
     return {
       kw: kw(w),
       jahr: s2.startJahr + Math.floor(w / 52),
-      werbequoteBrutto: k.brutto / Math.max(1, U),
-      werbequoteNetto: (k.netto - k.sonderwerbung) / Math.max(1, U),
+      werbequoteBrutto: k.brutto / Math.max(1, U2),
+      werbequoteNetto: (k.netto - k.sonderwerbung) / Math.max(1, U2),
       wocheBrutto: eur(k.brutto),
       wocheBeteiligung: eur(k.beteiligung),
       wocheNetto: eur(k.netto),
@@ -5140,8 +5140,8 @@
   function uebernehmeWettbewerber(s2, id, modus, mieteQmMonat = 11) {
     const wb = s2.wettbewerber.find((w) => w.id === id);
     if (!wb || wb.status === "geschlossen") return "Wettbewerber-Standort nicht verf\xFCgbar.";
-    const basis = s2.haeuser.find((h) => h.stadt === wb.stadt && h.format === "warenhaus" && h.status === "offen");
-    if (!basis) return "Kein offenes Hartwig-Warenhaus am Standort.";
+    const basis2 = s2.haeuser.find((h) => h.stadt === wb.stadt && h.format === "warenhaus" && h.status === "offen");
+    if (!basis2) return "Kein offenes Hartwig-Warenhaus am Standort.";
     const qm = wb.grundflaecheQm;
     const kosten = eur(qm * (modus === "erweiterung" ? 250 : 200));
     if (s2.cash + s2.kreditlinie < kosten) return "Nicht genug Liquidit\xE4t f\xFCr die Umbaukosten.";
@@ -5149,12 +5149,12 @@
     s2.einmalkostenWoche += kosten;
     if (modus === "erweiterung") {
       const g = "damen";
-      const idF = basis.id + "-wb-" + wb.id;
-      basis.flaechen.push({ id: idF, etage: 0, qm, konzept: "eigen", gruppe: g, umbauBis: s2.woche + 8 });
-      basis.potenzial[g] = (basis.potenzial[g] ?? 0) + qm * GRUPPEN[g].qmUmsatz;
-      basis.miete.mieteWoche += eur(qm * mieteQmMonat * 12 / 52);
+      const idF = basis2.id + "-wb-" + wb.id;
+      basis2.flaechen.push({ id: idF, etage: 0, qm, konzept: "eigen", gruppe: g, umbauBis: s2.woche + 8 });
+      basis2.potenzial[g] = (basis2.potenzial[g] ?? 0) + qm * GRUPPEN[g].qmUmsatz;
+      basis2.miete.mieteWoche += eur(qm * mieteQmMonat * 12 / 52);
     } else {
-      const neu = structuredClone(basis);
+      const neu = structuredClone(basis2);
       neu.id = "O" + wb.id;
       neu.name = "Hartwig Outlet " + wb.stadt;
       neu.etagen = [0];
@@ -5170,7 +5170,7 @@
       neu.status = "offen";
       neu.statusBis = void 0;
       neu.transferBonus = 0;
-      neu.wettbewerbStart = basis.einzug.wettbewerb;
+      neu.wettbewerbStart = basis2.einzug.wettbewerb;
       neu.wettbewerbRohStart = roh(s2, neu);
       neu.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(neu.format).map((g) => [g, roh(s2, neu, g)]));
       neu.wettbewerbLeerStart = leerzahl(s2, neu.stadt);
@@ -7462,8 +7462,8 @@
     return (s2.phase === "insolvenz" ? HQ_PARAM.abfindungInsolvenz : HQ_PARAM.abfindungRegulaer) * hqRechtFaktor(s2);
   }
   function restmietWochen(s2, g) {
-    const basis = s2.phase === "insolvenz" ? 13 : 52;
-    return Math.max(0, Math.min(basis, g.bisWoche - s2.woche));
+    const basis2 = s2.phase === "insolvenz" ? 13 : 52;
+    return Math.max(0, Math.min(basis2, g.bisWoche - s2.woche));
   }
   function raeumeEtage(s2, g, e) {
     const betroffen = [];
@@ -8214,9 +8214,9 @@
     const mw = raeumung2 ? void 0 : marketingGruppen(s2, h, basisJe, tEJe, mess);
     if (mess.length) roh2.aktionsMessung = mess;
     for (const g of alleGruppen) {
-      const basis = basisJe[g] ?? 0;
+      const basis2 = basisJe[g] ?? 0;
       const e = mw?.[g];
-      const brutto2 = basis * (e ? e.nachfrage : 1);
+      const brutto2 = basis2 * (e ? e.nachfrage : 1);
       const umsatz = raeumung2 ? brutto2 * (1 - 0.35) : brutto2 * (e ? e.preis : 1);
       const qe = qmEigen[g] ?? 0;
       const qk = qmKomm[g] ?? 0;
@@ -8539,9 +8539,9 @@
     return x;
   }
   function attraktivitaet2(h) {
-    const basis = 1 - 0.2 * h.wettbewerbStart;
-    const relativ = (1 - 0.2 * h.einzug.wettbewerb) / basis;
-    return h.einzug.kaufkraft * LAGE_FAKTOR[h.lage] * CLUSTER_FAKTOR[h.cluster] * basis * relativ;
+    const basis2 = 1 - 0.2 * h.wettbewerbStart;
+    const relativ = (1 - 0.2 * h.einzug.wettbewerb) / basis2;
+    return h.einzug.kaufkraft * LAGE_FAKTOR[h.lage] * CLUSTER_FAKTOR[h.cluster] * basis2 * relativ;
   }
   var hausAttraktivitaet = attraktivitaet2;
   function qmAufEtage2(h, etage2) {
@@ -28801,12 +28801,12 @@
           z: -1
         });
       }
-      const item = pool[this.index];
-      list.push(item);
+      const item2 = pool[this.index];
+      list.push(item2);
       this.index++;
-      item.start = drawRange.start;
-      item.count = drawRange.count;
-      item.z = z2;
+      item2.start = drawRange.start;
+      item2.count = drawRange.count;
+      item2.z = z2;
     }
     reset() {
       this.list.length = 0;
@@ -29315,9 +29315,9 @@
           customSort.call(this, list, camera);
         }
         for (let i = 0, l = list.length; i < l; i++) {
-          const item = list[i];
-          multiDrawStarts[count] = item.start * bytesPerElement;
-          multiDrawCounts[count] = item.count;
+          const item2 = list[i];
+          multiDrawStarts[count] = item2.start * bytesPerElement;
+          multiDrawCounts[count] = item2.count;
           count++;
         }
         _renderList.reset();
@@ -31038,29 +31038,29 @@
     }
   };
   var PolyhedronGeometry = class _PolyhedronGeometry extends BufferGeometry {
-    constructor(vertices = [], indices = [], radius = 1, detail = 0) {
+    constructor(vertices = [], indices = [], radius = 1, detail2 = 0) {
       super();
       this.type = "PolyhedronGeometry";
       this.parameters = {
         vertices,
         indices,
         radius,
-        detail
+        detail: detail2
       };
       const vertexBuffer = [];
       const uvBuffer = [];
-      subdivide(detail);
+      subdivide(detail2);
       applyRadius(radius);
       generateUVs();
       this.setAttribute("position", new Float32BufferAttribute(vertexBuffer, 3));
       this.setAttribute("normal", new Float32BufferAttribute(vertexBuffer.slice(), 3));
       this.setAttribute("uv", new Float32BufferAttribute(uvBuffer, 2));
-      if (detail === 0) {
+      if (detail2 === 0) {
         this.computeVertexNormals();
       } else {
         this.normalizeNormals();
       }
-      function subdivide(detail2) {
+      function subdivide(detail3) {
         const a = new Vector3();
         const b = new Vector3();
         const c = new Vector3();
@@ -31068,11 +31068,11 @@
           getVertexByIndex(indices[i + 0], a);
           getVertexByIndex(indices[i + 1], b);
           getVertexByIndex(indices[i + 2], c);
-          subdivideFace(a, b, c, detail2);
+          subdivideFace(a, b, c, detail3);
         }
       }
-      function subdivideFace(a, b, c, detail2) {
-        const cols = detail2 + 1;
+      function subdivideFace(a, b, c, detail3) {
+        const cols = detail3 + 1;
         const v = [];
         for (let i = 0; i <= cols; i++) {
           v[i] = [];
@@ -31197,7 +31197,7 @@
     }
   };
   var DodecahedronGeometry = class _DodecahedronGeometry extends PolyhedronGeometry {
-    constructor(radius = 1, detail = 0) {
+    constructor(radius = 1, detail2 = 0) {
       const t = (1 + Math.sqrt(5)) / 2;
       const r = 1 / t;
       const vertices = [
@@ -31376,11 +31376,11 @@
         5,
         9
       ];
-      super(vertices, indices, radius, detail);
+      super(vertices, indices, radius, detail2);
       this.type = "DodecahedronGeometry";
       this.parameters = {
         radius,
-        detail
+        detail: detail2
       };
     }
     static fromJSON(data) {
@@ -31843,8 +31843,8 @@
   function onSegment(p, q2, r) {
     return q2.x <= Math.max(p.x, r.x) && q2.x >= Math.min(p.x, r.x) && q2.y <= Math.max(p.y, r.y) && q2.y >= Math.min(p.y, r.y);
   }
-  function sign(num) {
-    return num > 0 ? 1 : num < 0 ? -1 : 0;
+  function sign(num2) {
+    return num2 > 0 ? 1 : num2 < 0 ? -1 : 0;
   }
   function intersectsPolygon(a, b) {
     let p = a;
@@ -32347,7 +32347,7 @@
     return data;
   }
   var IcosahedronGeometry = class _IcosahedronGeometry extends PolyhedronGeometry {
-    constructor(radius = 1, detail = 0) {
+    constructor(radius = 1, detail2 = 0) {
       const t = (1 + Math.sqrt(5)) / 2;
       const vertices = [
         -1,
@@ -32449,11 +32449,11 @@
         8,
         1
       ];
-      super(vertices, indices, radius, detail);
+      super(vertices, indices, radius, detail2);
       this.type = "IcosahedronGeometry";
       this.parameters = {
         radius,
-        detail
+        detail: detail2
       };
     }
     static fromJSON(data) {
@@ -32461,7 +32461,7 @@
     }
   };
   var OctahedronGeometry = class _OctahedronGeometry extends PolyhedronGeometry {
-    constructor(radius = 1, detail = 0) {
+    constructor(radius = 1, detail2 = 0) {
       const vertices = [
         1,
         0,
@@ -32508,11 +32508,11 @@
         4,
         2
       ];
-      super(vertices, indices, radius, detail);
+      super(vertices, indices, radius, detail2);
       this.type = "OctahedronGeometry";
       this.parameters = {
         radius,
-        detail
+        detail: detail2
       };
     }
     static fromJSON(data) {
@@ -32745,7 +32745,7 @@
     }
   };
   var TetrahedronGeometry = class _TetrahedronGeometry extends PolyhedronGeometry {
-    constructor(radius = 1, detail = 0) {
+    constructor(radius = 1, detail2 = 0) {
       const vertices = [
         1,
         1,
@@ -32774,11 +32774,11 @@
         3,
         1
       ];
-      super(vertices, indices, radius, detail);
+      super(vertices, indices, radius, detail2);
       this.type = "TetrahedronGeometry";
       this.parameters = {
         radius,
-        detail
+        detail: detail2
       };
     }
     static fromJSON(data) {
@@ -40108,23 +40108,23 @@
       this.anzahl = 0;
     }
     /** Quader mit Mittelpunkt (x, y, z). ry dreht um die Hochachse. */
-    box(w, h, d, x, y, z2, farbe, ry = 0) {
+    box(w, h, d, x, y, z2, farbe2, ry = 0) {
       const g = new BoxGeometry(w, h, d);
       if (ry) g.rotateY(ry);
       g.translate(x, y, z2);
-      this.add(g, farbe);
+      this.add(g, farbe2);
     }
     /** Quader von Ecke (x0,y0,z0) bis (x1,y1,z1). Praktisch für Fassaden. */
-    quader(x0, y0, z0, x1, y1, z1, farbe) {
-      this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe);
+    quader(x0, y0, z0, x1, y1, z1, farbe2) {
+      this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe2);
     }
-    add(g, farbe) {
+    add(g, farbe2) {
       if (LOD2.stufe === "fern" && kleinteil(g)) {
         this.anzahl++;
         this.verworfen = (this.verworfen ?? 0) + 1;
         return;
       }
-      const k = (typeof farbe === "string" ? farbe : "#" + farbe.getHexString()).toLowerCase();
+      const k = (typeof farbe2 === "string" ? farbe2 : "#" + farbe2.getHexString()).toLowerCase();
       if (!this.teile.has(k)) this.teile.set(k, []);
       const gg = g.index ? g.toNonIndexed() : g;
       for (const a of Object.keys(gg.attributes)) if (a !== "position" && a !== "normal") gg.deleteAttribute(a);
@@ -40170,22 +40170,22 @@
       this.puffer = /* @__PURE__ */ new Map();
       this.verworfen = 0;
     }
-    box(w, h, d, x, y, z2, farbe, ry = 0) {
+    box(w, h, d, x, y, z2, farbe2, ry = 0) {
       const g = new BoxGeometry(w, h, d);
       if (ry) g.rotateY(ry);
       g.translate(x, y, z2);
-      this.add(g, farbe);
+      this.add(g, farbe2);
     }
-    quader(x0, y0, z0, x1, y1, z1, farbe) {
-      this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe);
+    quader(x0, y0, z0, x1, y1, z1, farbe2) {
+      this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe2);
     }
-    add(g, farbe) {
+    add(g, farbe2) {
       this.anzahl++;
       if (LOD2.stufe === "fern" && kleinteil(g)) {
         this.verworfen++;
         return;
       }
-      const k = (typeof farbe === "string" ? farbe : "#" + farbe.getHexString()).toLowerCase();
+      const k = (typeof farbe2 === "string" ? farbe2 : "#" + farbe2.getHexString()).toLowerCase();
       const gg = g.index ? g.toNonIndexed() : g;
       if (!gg.attributes.normal) gg.computeVertexNormals();
       if (this.statistik) {
@@ -40246,7 +40246,7 @@
   function fensterRaster(S, x0, z0, w, d, seite, o) {
     const raster4 = o.raster ?? 3.1;
     const fw = o.fw ?? 1.35, fh = o.fh ?? 1.9;
-    const farbe = o.farbe ?? FARBEN3.fenster;
+    const farbe2 = o.farbe ?? FARBEN3.fenster;
     const lauf0 = seite === "+z" ? x0 : z0;
     const laenge = seite === "+z" ? w : d;
     const von = o.von ?? lauf0, bis = o.bis ?? lauf0 + laenge;
@@ -40258,22 +40258,22 @@
         const u = von + rand + raster4 * (i + 0.5);
         if (seite === "+z") {
           const z2 = z0 + d;
-          S.box(fw, fh, 0.12, u, y, z2 + 0.02, farbe);
+          S.box(fw, fh, 0.12, u, y, z2 + 0.02, farbe2);
           if (o.sims) S.box(fw + 0.3, 0.16, 0.25, u, y - fh / 2 - 0.1, z2 + 0.05, o.sims);
           if (o.rahmen) S.box(fw + 0.2, 0.14, 0.18, u, y + fh / 2 + 0.12, z2 + 0.04, o.rahmen);
         } else {
           const x = x0 + w;
-          S.box(0.12, fh, fw, x + 0.02, y, u, farbe);
+          S.box(0.12, fh, fw, x + 0.02, y, u, farbe2);
           if (o.sims) S.box(0.25, 0.16, fw + 0.3, x + 0.05, y - fh / 2 - 0.1, u, o.sims);
           if (o.rahmen) S.box(0.18, 0.14, fw + 0.2, x + 0.04, y + fh / 2 + 0.12, u, o.rahmen);
         }
       }
     }
   }
-  function gesims(S, x0, z0, w, d, y, hoehe, ueberstand, farbe) {
-    S.box(w + 2 * ueberstand, hoehe, d + 2 * ueberstand, x0 + w / 2, y, z0 + d / 2, farbe);
+  function gesims(S, x0, z0, w, d, y, hoehe, ueberstand, farbe2) {
+    S.box(w + 2 * ueberstand, hoehe, d + 2 * ueberstand, x0 + w / 2, y, z0 + d / 2, farbe2);
   }
-  function markise(S, x0, z0, w, d, seite, y, von, laenge, farbe) {
+  function markise(S, x0, z0, w, d, seite, y, von, laenge, farbe2) {
     const g = new BoxGeometry(seite === "+z" ? laenge : 1.6, 0.15, seite === "+z" ? 1.6 : laenge);
     if (seite === "+z") {
       g.rotateX(0.35);
@@ -40282,7 +40282,7 @@
       g.rotateZ(-0.35);
       g.translate(x0 + w + 0.7, y, von + laenge / 2);
     }
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function baum(S, x, z2, r, s2 = 1) {
     S.box(0.5 * s2, 2.2 * s2, 0.5 * s2, x, 1.3 * s2, z2, FARBEN3.stamm);
@@ -40299,9 +40299,9 @@
     TEXTMAT_CACHE.clear();
     textPixel = 0;
   }
-  function textTextur(text3, farbe, groesse2 = 120, hintergrund = null, schrift2 = '"DejaVu Sans", Arial', fett = true) {
+  function textTextur(text3, farbe2, groesse2 = 120, hintergrund = null, schrift2 = '"DejaVu Sans", Arial', fett = true) {
     const g = Math.max(8, Math.min(groesse2, SCHRIFT_LOD.maxGroesse));
-    const k = `${text3}|${farbe}|${g}|${hintergrund}|${schrift2}|${fett}`;
+    const k = `${text3}|${farbe2}|${g}|${hintergrund}|${schrift2}|${fett}`;
     const alt = TEXT_CACHE.get(k);
     if (alt) return alt;
     const c = document.createElement("canvas");
@@ -40316,7 +40316,7 @@
       kk.fillRect(0, 0, c.width, c.height);
     }
     kk.font = font;
-    kk.fillStyle = farbe;
+    kk.fillStyle = farbe2;
     kk.textAlign = "center";
     kk.textBaseline = "middle";
     kk.fillText(text3, c.width / 2, c.height / 2 + g * 0.05);
@@ -40328,9 +40328,9 @@
     TEXT_CACHE.set(k, e);
     return e;
   }
-  function textMaterial(text3, farbe, o = {}) {
-    const tt = textTextur(text3, farbe, o.groesse ?? 140, o.hintergrund ?? null, o.schrift, o.fett ?? true);
-    const k = `${text3}|${farbe}|${o.groesse ?? 140}|${o.hintergrund ?? null}|${o.schrift}|${o.fett ?? true}|${o.lit ?? false}|${o.alphaTest ?? 0}|${o.versatz ?? 0}|${SCHRIFT_LOD.maxGroesse}`;
+  function textMaterial(text3, farbe2, o = {}) {
+    const tt = textTextur(text3, farbe2, o.groesse ?? 140, o.hintergrund ?? null, o.schrift, o.fett ?? true);
+    const k = `${text3}|${farbe2}|${o.groesse ?? 140}|${o.hintergrund ?? null}|${o.schrift}|${o.fett ?? true}|${o.lit ?? false}|${o.alphaTest ?? 0}|${o.versatz ?? 0}|${SCHRIFT_LOD.maxGroesse}`;
     let m = TEXTMAT_CACHE.get(k);
     if (!m || m.map !== tt.t) {
       const opt = o.hintergrund ? { map: tt.t } : o.alphaTest ? { map: tt.t, alphaTest: o.alphaTest } : { map: tt.t, transparent: true };
@@ -40340,8 +40340,8 @@
     }
     return { mat: m, seitenverhaeltnis: tt.seitenverhaeltnis, t: tt.t };
   }
-  function schild(scene2, text3, seite, u, y, fassade3, hoehe, farbe, hintergrund = null) {
-    const { mat: m0, seitenverhaeltnis } = textMaterial(text3, farbe, { groesse: 140, hintergrund });
+  function schild(scene2, text3, seite, u, y, fassade3, hoehe, farbe2, hintergrund = null) {
+    const { mat: m0, seitenverhaeltnis } = textMaterial(text3, farbe2, { groesse: 140, hintergrund });
     const m = new Mesh(new PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), m0);
     if (seite === "+z") m.position.set(u, y, fassade3 + 0.35);
     else {
@@ -40351,7 +40351,7 @@
     scene2.add(m);
     return m;
   }
-  function marker(scene2, x, y, z2, farbe, zeichen, groesse2 = 9) {
+  function marker(scene2, x, y, z2, farbe2, zeichen, groesse2 = 9) {
     const c = document.createElement("canvas");
     c.width = 256;
     c.height = 320;
@@ -40360,7 +40360,7 @@
     k.beginPath();
     k.ellipse(128, 306, 40, 10, 0, 0, Math.PI * 2);
     k.fill();
-    k.fillStyle = farbe;
+    k.fillStyle = farbe2;
     k.beginPath();
     k.moveTo(128, 300);
     k.lineTo(70, 190);
@@ -40371,7 +40371,7 @@
     k.beginPath();
     k.arc(128, 128, 74, 0, Math.PI * 2);
     k.fill();
-    k.fillStyle = farbe;
+    k.fillStyle = farbe2;
     k.font = 'bold 110px "DejaVu Sans", Arial';
     k.textAlign = "center";
     k.textBaseline = "middle";
@@ -40637,7 +40637,7 @@
     });
     return [x, z2];
   }
-  var schriftAusCache = (str, farbe) => textMaterial(str, farbe, { groesse: 96 });
+  var schriftAusCache = (str, farbe2) => textMaterial(str, farbe2, { groesse: 96 });
   var Fassade = class _Fassade {
     constructor(ctx, a, b, info = {}) {
       this.ctx = ctx;
@@ -40697,8 +40697,8 @@
       g.translate(u, y, t0);
       this.geo(g, f);
     }
-    text(str, u, y, h, farbe, t, maxB) {
-      const { mat: smat, seitenverhaeltnis: sv } = schriftAusCache(str, farbe);
+    text(str, u, y, h, farbe2, t, maxB) {
+      const { mat: smat, seitenverhaeltnis: sv } = schriftAusCache(str, farbe2);
       let hh = h, bw = h * sv;
       if (maxB && bw > maxB) {
         hh = h * maxB / bw;
@@ -40889,17 +40889,17 @@
     for (let uu = u0 + sp; uu < u1 - sp * 0.5; uu += sp) F2.box(uu - 0.016, uu + 0.016, y, y + hr, tf - 0.035, tf - 5e-3, gf);
     if (o.ornament) for (let uu = u0 + 0.5; uu < u1 - 0.3; uu += 0.6) F2.box(uu - 0.12, uu + 0.12, y + 0.42, y + 0.66, tf - 0.04, tf, gf);
   }
-  function markise2(F2, a, b, y, tiefe, farbe, streifen, tb) {
+  function markise2(F2, a, b, y, tiefe, farbe2, streifen, tb) {
     const al = 0.42, D = tiefe / Math.cos(al), len = b - a;
     const k = streifen ? Math.max(3, Math.round(len / 0.42)) : 1;
     for (let i = 0; i < k; i++) {
       const g = new three_module_exports.BoxGeometry(len / k, 0.05, D);
       g.rotateX(al);
       g.translate(a + (i + 0.5) * len / k, y - Math.sin(al) * D / 2, tb + Math.cos(al) * D / 2);
-      F2.geo(g, streifen && i % 2 ? "#f4efe6" : farbe);
+      F2.geo(g, streifen && i % 2 ? "#f4efe6" : farbe2);
     }
     const yv = y - Math.sin(al) * D;
-    F2.box(a, b, yv - 0.26, yv + 0.02, tb + tiefe - 0.04, tb + tiefe, farbe);
+    F2.box(a, b, yv - 0.26, yv + 0.02, tb + tiefe - 0.04, tb + tiefe, farbe2);
     F2.box(a - 0.02, a + 0.04, yv - 0.05, y, tb, tb + tiefe, "#8a8f94");
     F2.box(b - 0.04, b + 0.02, yv - 0.05, y, tb, tb + tiefe, "#8a8f94");
   }
@@ -41046,9 +41046,9 @@
     }
     F2.box(0, F2.L, 0, 0.16, tb, tb + 0.7, dunkler(wand2, 0.08));
   }
-  function schornstein(S, x, z2, y0, y1, farbe, r) {
+  function schornstein(S, x, z2, y0, y1, farbe2, r) {
     const w = zw(r, 0.55, 0.8), d = zw(r, 0.7, 1.2);
-    S.box(w, y1 - y0, d, x, (y0 + y1) / 2, z2, farbe);
+    S.box(w, y1 - y0, d, x, (y0 + y1) / 2, z2, farbe2);
     S.box(w + 0.16, 0.14, d + 0.16, x, y1, z2, "#d8d4cb");
     if (r() < 0.6) S.box(0.16, 0.35, 0.16, x - w * 0.2, y1 + 0.24, z2 - d * 0.2, "#7a7d80");
     if (r() < 0.4) S.box(0.16, 0.3, 0.16, x + w * 0.2, y1 + 0.2, z2 + d * 0.2, "#7a7d80");
@@ -41071,10 +41071,10 @@
   function dachkram(ctx, poly, yBase, yTop, o = {}) {
     const { S, r } = ctx;
     const n = o.schornsteine ?? 2;
-    const farbe = o.kaminFarbe ?? waehle2(r, ["#a8664f", "#b9785e", "#cfc6b8", "#9e5c47"]);
+    const farbe2 = o.kaminFarbe ?? waehle2(r, ["#a8664f", "#b9785e", "#cfc6b8", "#9e5c47"]);
     for (let i = 0; i < n; i++) {
       const [x, z2] = punktIn(poly, r);
-      schornstein(S, x, z2, yBase, yTop + zw(r, 0.9, 1.5), farbe, r);
+      schornstein(S, x, z2, yBase, yTop + zw(r, 0.9, 1.5), farbe2, r);
     }
     if (r() < (o.antenne ?? 0.5)) {
       const [x, z2] = punktIn(poly, r);
@@ -41140,11 +41140,11 @@
       antenne(S, x, z2, y, r);
     }
   }
-  function attika(ctx, poly, y, h, farbe, kappe = "#d9dcdf", dick = 0.3) {
+  function attika(ctx, poly, y, h, farbe2, kappe = "#d9dcdf", dick = 0.3) {
     const n = poly.length;
     for (let i = 0; i < n; i++) {
       const F2 = new Fassade(ctx, poly[i], poly[(i + 1) % n], { extL: true, extR: true });
-      F2.box(0, F2.L, y, y + h, -dick, 0.02, farbe);
+      F2.box(0, F2.L, y, y + h, -dick, 0.02, farbe2);
       F2.box(-0.02, F2.L + 0.02, y + h, y + h + 0.08, -dick - 0.04, 0.08, kappe);
     }
   }
@@ -41253,9 +41253,9 @@
     }
     return y + h;
   }
-  function rundkoerper(ctx, cx, cz, R9, seg, y0, y1, farbe) {
+  function rundkoerper(ctx, cx, cz, R9, seg, y0, y1, farbe2) {
     const poly = nGon(cx, cz, R9, seg);
-    ctx.S.add(prismoid(poly, y0, y1 - y0), farbe);
+    ctx.S.add(prismoid(poly, y0, y1 - y0), farbe2);
     const fac = [];
     for (let j = 0; j < seg; j++) {
       const F2 = new Fassade(ctx, poly[j], poly[(j + 1) % seg], { art: "turm", extL: true, extR: true });
@@ -41263,7 +41263,7 @@
     }
     return { poly, fac };
   }
-  function helm(ctx, poly, y, h, farbe, spitze2 = true) {
+  function helm(ctx, poly, y, h, farbe2, spitze2 = true) {
     const ap = poly.map(() => 0);
     let cx = 0, cz = 0;
     poly.forEach((p) => {
@@ -41274,13 +41274,13 @@
     cz /= poly.length;
     const big = poly.map((p) => [cx + (p[0] - cx) * 1.08, cz + (p[1] - cz) * 1.08]);
     const R9 = Math.hypot(big[0][0] - cx, big[0][1] - cz) * Math.cos(Math.PI / poly.length);
-    ctx.S.add(prismoid(big, y, h, ap.map(() => R9 - 2e-3)), farbe);
+    ctx.S.add(prismoid(big, y, h, ap.map(() => R9 - 2e-3)), farbe2);
     if (spitze2) {
       ctx.S.box(0.1, 1.2, 0.1, cx, y + h + 0.5, cz, "#5f646b");
       ctx.S.box(0.22, 0.22, 0.22, cx, y + h + 0.25, cz, "#c9a64a");
     }
   }
-  function kuppel(ctx, poly, y, h, farbe) {
+  function kuppel(ctx, poly, y, h, farbe2) {
     let cx = 0, cz = 0;
     poly.forEach((p) => {
       cx += p[0];
@@ -41290,12 +41290,12 @@
     cz /= poly.length;
     const ap = Math.hypot(poly[0][0] - cx, poly[0][1] - cz) * Math.cos(Math.PI / poly.length);
     const p1 = versetzt(poly, poly.map(() => ap * 0.12));
-    ctx.S.add(prismoid(poly, y, h * 0.42, poly.map(() => ap * 0.12)), farbe);
-    ctx.S.add(prismoid(p1, y + h * 0.42, h * 0.33, poly.map(() => ap * 0.33)), farbe);
+    ctx.S.add(prismoid(poly, y, h * 0.42, poly.map(() => ap * 0.12)), farbe2);
+    ctx.S.add(prismoid(p1, y + h * 0.42, h * 0.33, poly.map(() => ap * 0.33)), farbe2);
     const p2 = versetzt(p1, poly.map(() => ap * 0.33));
-    ctx.S.add(prismoid(p2, y + h * 0.75, h * 0.25, poly.map(() => ap * 0.55 - 2e-3)), farbe);
+    ctx.S.add(prismoid(p2, y + h * 0.75, h * 0.25, poly.map(() => ap * 0.55 - 2e-3)), farbe2);
     ctx.S.box(0.5, 0.7, 0.5, cx, y + h + 0.3, cz, ORN);
-    ctx.S.box(0.7, 0.12, 0.7, cx, y + h + 0.7, cz, farbe);
+    ctx.S.box(0.7, 0.12, 0.7, cx, y + h + 0.7, cz, farbe2);
     ctx.S.box(0.08, 1.2, 0.08, cx, y + h + 1.3, cz, "#5f646b");
   }
   var PUTZ = {
@@ -41397,11 +41397,11 @@
     const a = achsen(F2.L, c.raster, c.rand);
     return a;
   }
-  function balustrade(F2, u0, u1, y, farbe) {
-    F2.box(u0, u1, y, y + 0.18, -0.25, 0.1, farbe);
-    F2.box(u0 - 0.03, u1 + 0.03, y + 0.82, y + 0.95, -0.28, 0.13, farbe);
-    for (let u = u0 + 0.25; u < u1 - 0.1; u += 0.34) F2.box(u - 0.07, u + 0.07, y + 0.18, y + 0.82, -0.18, 0.04, farbe);
-    for (let u = u0; u <= u1 + 0.01; u += Math.max(2.5, (u1 - u0) / Math.max(1, Math.round((u1 - u0) / 3.2)))) F2.box(u - 0.2, u + 0.2, y, y + 0.95, -0.25, 0.12, farbe);
+  function balustrade(F2, u0, u1, y, farbe2) {
+    F2.box(u0, u1, y, y + 0.18, -0.25, 0.1, farbe2);
+    F2.box(u0 - 0.03, u1 + 0.03, y + 0.82, y + 0.95, -0.28, 0.13, farbe2);
+    for (let u = u0 + 0.25; u < u1 - 0.1; u += 0.34) F2.box(u - 0.07, u + 0.07, y + 0.18, y + 0.82, -0.18, 0.04, farbe2);
+    for (let u = u0; u <= u1 + 0.01; u += Math.max(2.5, (u1 - u0) / Math.max(1, Math.round((u1 - u0) / 3.2)))) F2.box(u - 0.2, u + 0.2, y, y + 0.95, -0.25, 0.12, farbe2);
   }
   function loggia(F2, u0, u1, yF, gh, c) {
     F2.box(u0, u1, yF + 0.05, yF + gh - 0.3, -0.02, 0.04, "#4d555c");
@@ -41713,7 +41713,7 @@
     if (ctx.eck && typ === "sattel" && ctx.form !== "gerade") typ = "walm";
     if (typ === "giebel" && span > 16) typ = "sattel";
     if (typ === "zelt" && Math.abs(ctx.w - ctx.d) > 5) typ = "walm";
-    const y = H + 0.12, farbe = o.farbe;
+    const y = H + 0.12, farbe2 = o.farbe;
     const gb = o.gaube ?? {};
     const gaubenAuf = (hu, a, F2, nur) => {
       if (!gb.form || gb.form === "keine") return;
@@ -41724,7 +41724,7 @@
         if (gesperrt(ctx, F2, u)) return;
         if (nur && !nur(u)) return;
         if (u < 1.4 || u > F2.L - 1.4) return;
-        gaube(F2, u, y, hu, a, { wand: gb.wand, dach: dunkler(farbe, 0.04), form: gb.form, breite: ax.paare ? 2.4 : void 0 });
+        gaube(F2, u, y, hu, a, { wand: gb.wand, dach: dunkler(farbe2, 0.04), form: gb.form, breite: ax.paare ? 2.4 : void 0 });
       });
     };
     const zwerche = (hu, a) => {
@@ -41734,7 +41734,7 @@
         if (F2.art !== "haupt" || F2.L < 8) continue;
         const ri = ctx.risalit?.get(F2);
         const uc = ri ? ri.uc : o.zwerch.uc ?? F2.L / 2, B2 = ri ? ri.B : clamp3(o.zwerch.B ?? F2.L * 0.3, 3.2, 6.5);
-        top = Math.max(top, zwerchhaus(ctx, F2, uc, B2, H, { ...o.zwerch, tiefe: ((o.zwerch.hz ?? 2.9) + 0.8) * (a / hu) + 0.6, dach: farbe }));
+        top = Math.max(top, zwerchhaus(ctx, F2, uc, B2, H, { ...o.zwerch, tiefe: ((o.zwerch.hz ?? 2.9) + 0.8) * (a / hu) + 0.6, dach: farbe2 }));
       }
       return top;
     };
@@ -41752,13 +41752,13 @@
         hu,
         b: o.b ?? 2,
         ho: o.ho ?? 0.9,
-        farbeU: farbe,
-        farbeO: o.farbe2 ?? heller(farbe, 0.07),
+        farbeU: farbe2,
+        farbeO: o.farbe2 ?? heller(farbe2, 0.07),
         kante: o.kante,
         achsen: ctx.achsenJe,
         jedeZweite: gb.jedeZweite,
         gauben: !!gb.form && gb.form !== "keine",
-        gaube: { wand: gb.wand, dach: dunkler(farbe, 0.04), form: gb.form },
+        gaube: { wand: gb.wand, dach: dunkler(farbe2, 0.04), form: gb.form },
         kram: o.kram
       });
       ctx.sperreGauben = null;
@@ -41769,7 +41769,7 @@
       const achse = ctx.eck ? "x" : strZ !== quer2 ? "x" : "z";
       const spanDach = achse === "x" ? ctx.d : ctx.w;
       const hz = clamp3(spanDach * (o.neigung ?? zw(r, 0.42, 0.62)) * (quer2 ? 1.25 : 1), 2.8, quer2 ? 10 : 7.5);
-      satteldach(ctx, ctx.x, ctx.z, ctx.x + ctx.w, ctx.z + ctx.d, y, hz, achse, { dach: farbe, wand: o.wand, ueberstand: o.ueberstand ?? 0.45, ortgang: quer2 ? 0.25 : sichtbar(ctx, achse === "x" ? "+x" : "+z") ? 0.3 : 0.02 });
+      satteldach(ctx, ctx.x, ctx.z, ctx.x + ctx.w, ctx.z + ctx.d, y, hz, achse, { dach: farbe2, wand: o.wand, ueberstand: o.ueberstand ?? 0.45, ortgang: quer2 ? 0.25 : sichtbar(ctx, achse === "x" ? "+x" : "+z") ? 0.3 : 0.02 });
       const gLabel = achse === "z" ? "+z" : "+x", tLabel = achse === "z" ? "+x" : "+z";
       for (const F2 of ctx.fassaden) {
         if (F2.label === gLabel && o.giebelDeko !== false) giebelFenster(F2, y, hz, o.giebel ?? {});
@@ -41802,7 +41802,7 @@
         ins = K3.map((k) => dachKante(ctx, k) ? s2 : sichtbar(ctx, k) ? Math.min(3.5, tiefe * 0.38) : 0);
         hz = clamp3(tiefe * (o.neigung ?? zw(r, 0.3, 0.45)), 2.2, 6.5);
       }
-      S.add(prismoid(Pov, y + 0.12, hz, ins), farbe);
+      S.add(prismoid(Pov, y + 0.12, hz, ins), farbe2);
       for (const F2 of ctx.fassaden) if (F2.art === "haupt") gaubenAuf(hz, ins[K3.indexOf(F2.label)] ?? tiefe / 2, F2, (u) => u > 2.6 && u < F2.L - 2.6);
       const zt = zwerche(hz, tiefe / 2);
       dachkram(ctx, versetzt(Pov, ins.map((v) => v * 0.85)), y, y + hz, o.kram);
@@ -42502,14 +42502,14 @@
     const { S, r, n } = ctx;
     const eg = zw(r, 4.5, 4.9), gh = zw(r, 3.15, 3.35);
     const variante2 = wz(r, [["platten", 3], ["glas", 0.8], ["weiss", 1.6], ["holz", 0.9], ["klinker", ctx.region === "Nord" ? 1.8 : 0.7]]);
-    const palette = {
+    const palette2 = {
       platten: waehle2(r, [["#4a4f55", "#5a6067"], ["#9aa0a6", "#8b9198"], ["#eceeee", "#dfe2e3"], ["#d8d0c2", "#cbc2b2"], ["#6b6f63", "#7a7e72"], ["#b9a68c", "#a99880"]]),
       glas: [waehle2(r, ["#e9ebec", "#cfd4d8", "#4a4f55"]), "#dfe2e3"],
       weiss: [waehle2(r, ["#f2f2ef", "#ebe8e1", "#e6e8e8"]), "#e8e8e4"],
       holz: [waehle2(r, ["#b08a62", "#9c7a56", "#c49e74"]), "#3b4046"],
       klinker: [ziegelstein(ctx, { dunkelrot: 2, braun: 2, rot: 1, gelb: 1 }), "#3b4046"]
     }[variante2];
-    const [pf, pf2] = palette;
+    const [pf, pf2] = palette2;
     const rahmen2 = variante2 === "platten" && pf === "#4a4f55" ? "#2b2f33" : variante2 === "holz" ? "#3b4046" : "#3b4046";
     const glas2 = waehle2(r, ["#6f8a9c", "#647f91", "#7a95a6"]);
     const staffel2 = n >= 3 && r() < 0.75;
@@ -43050,11 +43050,11 @@
     wiederaufbau: [2, 4]
   };
   function stilProfil(region = "Mitte", cluster = "grossstadt") {
-    const basis = PROFIL[region] ?? PROFIL.Mitte, mod = CLUSTER[cluster] ?? {};
+    const basis2 = PROFIL[region] ?? PROFIL.Mitte, mod = CLUSTER[cluster] ?? {};
     const out = {};
     let s2 = 0;
     for (const st of STILE) {
-      out[st] = (basis[st] ?? 0) * (mod[st] ?? 1);
+      out[st] = (basis2[st] ?? 0) * (mod[st] ?? 1);
       s2 += out[st];
     }
     for (const st of STILE) out[st] = out[st] / s2;
@@ -43120,7 +43120,7 @@
     }
     return h;
   }
-  function gelaende(S, x0, z0, x1, z1, hoehe, farbe, o = {}) {
+  function gelaende(S, x0, z0, x1, z1, hoehe, farbe2, o = {}) {
     const st = o.schritt ?? 6;
     const nx = Math.max(1, Math.ceil((x1 - x0) / st)), nz = Math.max(1, Math.ceil((z1 - z0) / st));
     const dx = (x1 - x0) / nx, dz = (z1 - z0) / nz;
@@ -43139,7 +43139,7 @@
       const yc = (a[1] + b[1] + c[1]) / 3;
       const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
       const nxx = uy * vz - uz * vy, nyy = uz * vx - ux * vz, nzz = ux * vy - uy * vx, L2 = Math.hypot(nxx, nyy, nzz) || 1;
-      const f = farbe((a[0] + b[0] + c[0]) / 3, yc, (a[2] + b[2] + c[2]) / 3, 1 - Math.abs(nyy) / L2);
+      const f = farbe2((a[0] + b[0] + c[0]) / 3, yc, (a[2] + b[2] + c[2]) / 3, 1 - Math.abs(nyy) / L2);
       if (!gruppen.has(f)) gruppen.set(f, { p: [], n: [] });
       const G2 = gruppen.get(f);
       for (const q2 of [a, b, c]) {
@@ -45093,8 +45093,8 @@
         for (const s2 of Object.values(markt.rand)) if (s2.seg && r() < 0.5) nimmSeg(strassen.find((q2) => q2.id === s2.seg));
       }
       for (let it = 0; it < n; it++) {
-        const basis = strassen.filter((s2) => gewaehlt.has(s2.id));
-        const weiter = strassen.filter((s2) => !gewaehlt.has(s2.id) && s2.typ !== "haupt" && !s2.bruecke && basis.some((q2) => q2.achse === s2.achse && Math.abs(q2.mitte - s2.mitte) < 0.6 && (Math.abs(q2.bis - s2.von) < 40 || Math.abs(s2.bis - q2.von) < 40)));
+        const basis2 = strassen.filter((s2) => gewaehlt.has(s2.id));
+        const weiter = strassen.filter((s2) => !gewaehlt.has(s2.id) && s2.typ !== "haupt" && !s2.bruecke && basis2.some((q2) => q2.achse === s2.achse && Math.abs(q2.mitte - s2.mitte) < 0.6 && (Math.abs(q2.bis - s2.von) < 40 || Math.abs(s2.bis - q2.von) < 40)));
         if (weiter.length && r() < 0.75) nimmSeg(waehle2(r, weiter));
       }
       for (const b of bloecke) if (b.rand) for (const s2 of Object.keys(b.rand)) {
@@ -46299,26 +46299,26 @@
       kugel(Z2.S, x, yy, z2, 0.55, farben[i % farben.length], 1);
     }
   }
-  function beachflag(Z2, x, z2, farbe, h = 4.6, farbe2 = "#ffffff") {
+  function beachflag(Z2, x, z2, farbe2, h = 4.6, farbe22 = "#ffffff") {
     const S = Z2.S;
     S.box(0.6, 0.12, 0.6, x, 0.36, z2, "#3a3f44");
     S.box(0.07, h, 0.07, x, 0.3 + h / 2, z2, "#d9dcde");
     const g = new three_module_exports.BoxGeometry(0.95, h * 0.72, 0.05);
     g.translate(0.5, 0.3 + h * 0.6, 0);
-    lokal(S, g, x, 0, z2, Math.PI / 4, farbe);
+    lokal(S, g, x, 0, z2, Math.PI / 4, farbe2);
     const g2 = new three_module_exports.BoxGeometry(0.95, h * 0.1, 0.06);
     g2.translate(0.5, 0.3 + h * 0.5, 0.01);
-    lokal(S, g2, x, 0, z2, Math.PI / 4, farbe2);
+    lokal(S, g2, x, 0, z2, Math.PI / 4, farbe22);
   }
-  function fahne(Z2, x, z2, farbe, h = 8, farbe2 = "#ffffff") {
+  function fahne(Z2, x, z2, farbe2, h = 8, farbe22 = "#ffffff") {
     const S = Z2.S;
     zyl(S, x, 0.3, z2, 0.09, h, "#e6e8ea", 6);
     const g = new three_module_exports.BoxGeometry(1.1, h * 0.45, 0.05);
     g.translate(0.62, 0.3 + h * 0.72, 0);
-    lokal(S, g, x, 0, z2, Math.PI / 4, farbe);
+    lokal(S, g, x, 0, z2, Math.PI / 4, farbe2);
     const g2 = new three_module_exports.BoxGeometry(1.12, h * 0.06, 0.06);
     g2.translate(0.62, 0.3 + h * 0.64, 0.01);
-    lokal(S, g2, x, 0, z2, Math.PI / 4, farbe2);
+    lokal(S, g2, x, 0, z2, Math.PI / 4, farbe22);
   }
   function wimpel(Z2, s2, u0, u1, y, t, farben, durch = 1.2) {
     const n = Math.max(3, Math.floor(Math.abs(u1 - u0) / 1.1));
@@ -46359,12 +46359,12 @@
       plakat(Z2, s2, banner.text, m, 1.4, t + 0.09, 0.9, banner.fg, banner.bg, Math.abs(u1 - u0) * 0.66);
     }
   }
-  function container(Z2, x, z2, ry, farbe, y = 0.3) {
+  function container(Z2, x, z2, ry, farbe2, y = 0.3) {
     const S = Z2.S;
-    lbox(S, 6, 2.6, 2.4, 0, y + 1.3, 0, x, z2, ry, farbe);
+    lbox(S, 6, 2.6, 2.4, 0, y + 1.3, 0, x, z2, ry, farbe2);
     for (const lx of [-2.95, 2.95]) lbox(S, 0.15, 2.7, 2.5, lx, y + 1.35, 0, x, z2, ry, "#e9ecee");
     lbox(S, 1.2, 0.8, 0.06, 1.2, y + 1.6, 1.22, x, z2, ry, "#9fc0d0");
-    lbox(S, 0.9, 2, 0.06, -1.6, y + 1.1, 1.22, x, z2, ry, dunkler(farbe, 0.12));
+    lbox(S, 0.9, 2, 0.06, -1.6, y + 1.1, 1.22, x, z2, ry, dunkler(farbe2, 0.12));
   }
   function kran(Z2, x, z2, H, L2, ry) {
     const S = Z2.S, m = 1.6, y0 = 0.9;
@@ -46817,13 +46817,13 @@
     S.quader(x0, y, z0, x1, y + 0.35, z1, "#b9875a");
     S.quader(x0, y + 0.35, z1 - 0.1, x1, y + 1.4, z1, "#cfe0e6");
     S.quader(x1 - 0.1, y + 0.35, z0, x1, y + 1.4, z1, "#cfe0e6");
-    const farbe = mi.bg === "#2b2b2b" ? "#f2b705" : mi.bg;
+    const farbe2 = mi.bg === "#2b2b2b" ? "#f2b705" : mi.bg;
     for (let x = x0 + 2.2; x < x1 - 1.5; x += 4.2) for (let z2 = z0 + 2.2; z2 < z1 - 1.5; z2 += 4.2) {
       S.box(1.2, 0.08, 1.2, x, y + 1.15, z2, "#f4f1ea");
       S.box(0.1, 2.6, 0.1, x, y + 1.6, z2, "#4a4f55");
       const g = new three_module_exports.ConeGeometry(1.9, 0.9, 6);
       g.translate(x, y + 3.2, z2);
-      S.add(g, r() < 0.5 ? farbe : "#f4f1ea");
+      S.add(g, r() < 0.5 ? farbe2 : "#f4f1ea");
     }
     for (let x = x0 + 1; x < x1; x += 3.5) {
       S.box(0.8, 0.7, 0.8, x, y + 0.7, z1 - 0.7, "#9a8f80");
@@ -46869,7 +46869,7 @@
       const xc = k.x + k.w * 0.56, zc = k.z + k.d * 0.5;
       const R9 = { x0: art === "+z" ? k.x : xc, z0: art === "+x" ? k.z : zc, x1: k.x + k.w, z1: k.z + k.d };
       if (k.marke) abschneiden(S, scene2, k.marke, { ...R9, x0: art === "+z" ? k.x - 1.2 : R9.x0, z0: art === "+x" ? k.z - 1.2 : R9.z0 });
-      const farbe = k.farbe ?? "#d9d3c7";
+      const farbe2 = k.farbe ?? "#d9d3c7";
       rest["+z"] = art === "+z" ? null : [0.3, xc - k.x - 0.4];
       rest["+x"] = art === "+x" ? null : [0.3, zc - k.z - 0.4];
       const drin = (s2, u) => {
@@ -46905,15 +46905,15 @@
       const tief2 = Math.max(k.w - (R9.x0 - k.x), k.d - (Math.max(k.z, R9.z0) - k.z));
       for (let x = R9.x0; x < k.x + k.w - 2; x += zw(r, 2.5, 4.5)) {
         const h = Math.max(1.2, hMax * (1 - abstand2(x, k.z + k.d) / tief2) * zw(r, 0.5, 1.1));
-        S.quader(x, 0, k.z + k.d - 0.6, x + zw(r, 1.5, 3), h, k.z + k.d, farbe);
+        S.quader(x, 0, k.z + k.d - 0.6, x + zw(r, 1.5, 3), h, k.z + k.d, farbe2);
       }
       for (let z2 = Math.max(k.z, R9.z0); z2 < k.z + k.d - 2; z2 += zw(r, 2.5, 4.5)) {
         const h = Math.max(1.2, hMax * 0.8 * (1 - abstand2(k.x + k.w, z2) / tief2) * zw(r, 0.4, 1));
-        S.quader(k.x + k.w - 0.6, 0, z2, k.x + k.w, h, z2 + zw(r, 1.5, 3), farbe);
+        S.quader(k.x + k.w - 0.6, 0, z2, k.x + k.w, h, z2 + zw(r, 1.5, 3), farbe2);
       }
       const rz0 = Math.max(k.z, R9.z0);
-      schutt(Z2, R9.x0 + 1, rz0 + 1, R9.x1 - 1, R9.z1 - 1, 26, [BETON, BETON_D, farbe, "#b9785e", "#8e8a82"], 4);
-      schutt(Z2, R9.x0 + (R9.x1 - R9.x0) * 0.2, rz0 + (R9.z1 - rz0) * 0.2, R9.x1 - (R9.x1 - R9.x0) * 0.2, R9.z1 - (R9.z1 - rz0) * 0.2, 6, [BETON, farbe], 9);
+      schutt(Z2, R9.x0 + 1, rz0 + 1, R9.x1 - 1, R9.z1 - 1, 26, [BETON, BETON_D, farbe2, "#b9785e", "#8e8a82"], 4);
+      schutt(Z2, R9.x0 + (R9.x1 - R9.x0) * 0.2, rz0 + (R9.z1 - rz0) * 0.2, R9.x1 - (R9.x1 - R9.x0) * 0.2, R9.z1 - (R9.z1 - rz0) * 0.2, 6, [BETON, farbe2], 9);
       bagger(Z2, R9.x0 + (R9.x1 - R9.x0) * 0.55, rz0 + (R9.z1 - rz0) * 0.55, Math.PI * 0.75, 1);
       bauzaun(Z2, sz, R9.x0 - k.x - 1, sz.L + 2, 3.6);
       bauzaun(Z2, sx, rz0 - k.z - 1, sx.L + 2, 3.6);
@@ -47499,16 +47499,16 @@
     g.translate(x0, y, 0);
     S.add(g, f);
   }
-  function tex2(text3, farbe, bg = null, schrift2) {
-    return schrift2 ? textTextur(text3, farbe, 120, bg, schrift2, !schrift2.includes("Serif")) : textTextur(text3, farbe, 120, bg);
+  function tex2(text3, farbe2, bg = null, schrift2) {
+    return schrift2 ? textTextur(text3, farbe2, 120, bg, schrift2, !schrift2.includes("Serif")) : textTextur(text3, farbe2, 120, bg);
   }
-  function texMat2(text3, farbe, bg, schrift2, lit) {
-    return textMaterial(text3, farbe, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45, lit: !!lit, ...schrift2 ? { schrift: schrift2, fett: !schrift2.includes("Serif") } : {} }).mat;
+  function texMat2(text3, farbe2, bg, schrift2, lit) {
+    return textMaterial(text3, farbe2, { groesse: 120, hintergrund: bg ?? null, alphaTest: 0.45, lit: !!lit, ...schrift2 ? { schrift: schrift2, fett: !schrift2.includes("Serif") } : {} }).mat;
   }
   var plakatBreite = (text3, ph, schrift2) => tex2(text3, "#000", "#fff", schrift2).seitenverhaeltnis * ph;
-  function plakat2(scene2, s2, text3, u, y, t, ph, farbe, bg = null, o = {}) {
-    const sv = tex2(text3, farbe, bg, o.schrift).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat2(text3, farbe, bg, o.schrift, !!o.lit));
+  function plakat2(scene2, s2, text3, u, y, t, ph, farbe2, bg = null, o = {}) {
+    const sv = tex2(text3, farbe2, bg, o.schrift).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat2(text3, farbe2, bg, o.schrift, !!o.lit));
     s2.flaeche(m, u, y, t, o.rz ?? 0);
     scene2.add(m);
     return sv * ph;
@@ -47516,9 +47516,9 @@
   function passend(text3, maxB, maxH, schrift2) {
     return Math.min(maxH, maxB / tex2(text3, "#000", null, schrift2).seitenverhaeltnis);
   }
-  function bodenText(scene2, text3, x, y, z2, h, farbe, drehung = 0) {
-    const sv = tex2(text3, farbe).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * h, h), texMat2(text3, farbe, null, void 0, false));
+  function bodenText(scene2, text3, x, y, z2, h, farbe2, drehung = 0) {
+    const sv = tex2(text3, farbe2).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * h, h), texMat2(text3, farbe2, null, void 0, false));
     m.rotation.set(-Math.PI / 2, 0, drehung);
     m.position.set(x, y, z2);
     scene2.add(m);
@@ -47534,13 +47534,13 @@
     S.box(0.5, 0.7, 0.34, x, y + 1.2, z2, c);
     S.box(0.24, 0.26, 0.24, x, y + 1.68, z2, "#e8cfb4");
   }
-  function rad(s2, u, y, t, farbe) {
+  function rad(s2, u, y, t, farbe2) {
     for (const du of [-0.6, 0.6]) {
       const g = new three_module_exports.TorusGeometry(0.4, 0.05, 4, 12);
       g.translate(u + du, y + 0.42, t);
       s2.geo(g, "#2b2b2b");
     }
-    s2.kipp(1.3, 0.09, 0.09, u, y + 0.72, t, farbe, 0.32);
+    s2.kipp(1.3, 0.09, 0.09, u, y + 0.72, t, farbe2, 0.32);
     s2.q(u - 0.08, u + 0.08, y + 0.42, y + 1, t - 0.04, t + 0.04, "#555555");
   }
   function auto(S, r, x, z2, y = 0.3, quer2 = false) {
@@ -48204,9 +48204,9 @@
     if (status === "offen" && !rabatt) return hoehe;
     const w = Math.max(16, Math.min(90, p.w ?? 40)), d = Math.max(16, Math.min(70, p.d ?? 30));
     const x = p.x ?? 0, zz = p.z ?? 0;
-    const farbe = WETTBEWERBER_FARBEN[art] ?? "#51677a";
+    const farbe2 = WETTBEWERBER_FARBEN[art] ?? "#51677a";
     const seiten4 = seitenVon(S, x, zz, w, d);
-    const banner = (s2, t, y, breite = 0.75, h = 1.4, bg = farbe) => {
+    const banner = (s2, t, y, breite = 0.75, h = 1.4, bg = farbe2) => {
       s2.q(s2.L * (1 - breite) / 2, s2.L * (1 + breite) / 2, y - h * 0.65, y + h * 0.65, 0.6, 0.86, bg);
       plakat2(scene2, s2, t, s2.L / 2, y, 1.02, passend(t, s2.L * breite * 0.88, h), "#ffffff");
     };
@@ -48216,7 +48216,7 @@
       const r = rng2("eroeffnung:" + (p.seed ?? 0));
       for (let i = 0; i < 10; i++) {
         const xx = x + 2 + i * (w - 4) / 9;
-        const farb = i % 3 === 0 ? "#f1c84a" : i % 2 ? farbe : "#f0f0e7";
+        const farb = i % 3 === 0 ? "#f1c84a" : i % 2 ? farbe2 : "#f0f0e7";
         S.box(0.05, 1.9, 0.05, xx, EG + 4.1, zz + d + 0.8, "#f1f0e8");
         zyl2(S, xx, EG + 5, zz + d + 0.8, 0.38, 0.6, farb, 8);
       }
@@ -48228,7 +48228,7 @@
       const t = Math.round(rabatt * 100) + " %";
       for (const s2 of seiten4) banner(s2, t, EG + 1.9, 0.28, 1.6);
       if (art === "offprice") {
-        S.box(4, 2, 0.3, x + 4, 1.2, zz + d + 2.3, farbe);
+        S.box(4, 2, 0.3, x + 4, 1.2, zz + d + 2.3, farbe2);
         banner(seiten4[0], "AKTION", EG + 4.3, 0.38, 1);
       }
     }
@@ -48528,8 +48528,8 @@
     g.translate(x, y0 + h / 2, z2);
     S.add(g, f);
   }
-  var tex3 = (text3, farbe, bg = null) => textTextur(text3, farbe, 120, bg);
-  var texMat3 = (text3, farbe, bg = null, lit = false) => textMaterial(text3, farbe, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
+  var tex3 = (text3, farbe2, bg = null) => textTextur(text3, farbe2, 120, bg);
+  var texMat3 = (text3, farbe2, bg = null, lit = false) => textMaterial(text3, farbe2, { groesse: 120, hintergrund: bg, alphaTest: 0.45, lit }).mat;
   var PH = 2.05;
   function buchstabenBreite(c, hb) {
     return c === " " ? hb * 0.45 : (tex3(c, "#000").seitenverhaeltnis * 180 - 96) / 180 * hb * PH;
@@ -48538,7 +48538,7 @@
     const z2 = [...text3];
     return z2.reduce((a, c) => a + buchstabenBreite(c, hb), 0) + hb * 0.16 * (z2.length - 1);
   }
-  function leuchtschrift(K3, s2, text3, um, y, t, hb, farbe, o = {}) {
+  function leuchtschrift(K3, s2, text3, um, y, t, hb, farbe2, o = {}) {
     const z2 = [...text3];
     const br = z2.map((c) => buchstabenBreite(c, hb));
     const gap = hb * 0.16;
@@ -48577,7 +48577,7 @@
         s2.q(uc + hb * 0.15, uc + hb * 0.25, y - hb * 0.3, y + hb * 0.3, t - 0.3, t - 0.05, "#6c6c6c");
         return;
       }
-      const f = o.geist ?? (df === "tot" ? TOT : farbe);
+      const f = o.geist ?? (df === "tot" ? TOT : farbe2);
       const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(tex3(c, f).seitenverhaeltnis * hb * PH, hb * PH), texMat3(c, f, null, !!o.geist));
       const rz = df === "schief" ? (r() < 0.5 ? -1 : 1) * zw(r, 0.18, 0.4) : 0;
       s2.flaeche(m, uc, y - (df === "schief" ? hb * 0.15 : 0), t, rz);
@@ -48585,9 +48585,9 @@
     });
     return total;
   }
-  function plakat3(K3, s2, text3, u, y, t, ph, farbe, bg, lit = false) {
-    const sv = tex3(text3, farbe, bg).seitenverhaeltnis;
-    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat3(text3, farbe, bg, lit));
+  function plakat3(K3, s2, text3, u, y, t, ph, farbe2, bg, lit = false) {
+    const sv = tex3(text3, farbe2, bg).seitenverhaeltnis;
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(sv * ph, ph), texMat3(text3, farbe2, bg, lit));
     s2.flaeche(m, u, y, t);
     K3.scene.add(m);
     return sv * ph;
@@ -48759,7 +48759,7 @@
   }
   function vordach(K3, s2, o = {}) {
     const y = o.y ?? 4.55, tief2 = o.tiefe ?? 2.2, tF = o.tF ?? 0, stil = o.stil ?? "platte";
-    const farbe = o.farbe ?? "#f4f1ea";
+    const farbe2 = o.farbe ?? "#f4f1ea";
     const u0 = o.u0 ?? 0;
     let u1 = o.u1 ?? s2.L;
     if (u1 >= s2.L - 0.01 && s2.seite === "+z" && o.ecke !== false) u1 = s2.L + tF + tief2;
@@ -48802,9 +48802,9 @@
         continue;
       }
       const dick = stil === "duenn" ? 0.24 : 0.5;
-      s2.q(a, b, y, y + dick, tF, tF + tief2, farbe);
+      s2.q(a, b, y, y + dick, tF, tF + tief2, farbe2);
       if (o.streifen !== false) s2.q(a, b, y + dick * 0.3, y + dick * 0.7, tF + tief2, tF + tief2 + 0.04, ROT2);
-      if (stil === "duenn") s2.q(a, b, y + dick, y + dick + 0.08, tF + tief2 - 0.12, tF + tief2, heller(farbe, 0.05));
+      if (stil === "duenn") s2.q(a, b, y + dick, y + dick + 0.08, tF + tief2 - 0.12, tF + tief2, heller(farbe2, 0.05));
       for (const u of o.stuetzen ?? []) if (u > a && u < b) {
         const [x, z2] = s2.welt(u, tF + tief2 - 0.35);
         zyl3(K3.S, x, 0.3, z2, 0.11, y - 0.3, "#5f676e", 8);
@@ -49778,32 +49778,32 @@
     g.computeVertexNormals();
     return g;
   }
-  function rautenFeld(s2, u0, u1, y0, y1, a, b, h, farbe, o = {}) {
-    const basis = raute(a, b, h);
+  function rautenFeld(s2, u0, u1, y0, y1, a, b, h, farbe2, o = {}) {
+    const basis2 = raute(a, b, h);
     const rows = Math.floor((y1 - y0) / b) - 1;
     for (let j = 0; j < rows; j++) {
       const yc = y0 + b * (j + 1), off = j % 2 ? a : 0;
       for (let uc = u0 + a + off; uc <= u1 - a + 1e-3; uc += 2 * a) {
         if (o.skip && o.skip(uc, yc)) continue;
-        const g = basis.clone();
+        const g = basis2.clone();
         g.translate(uc, yc, o.t ?? 0.02);
-        s2.geo(g, o.farbe ? o.farbe(uc, yc) : farbe);
+        s2.geo(g, o.farbe ? o.farbe(uc, yc) : farbe2);
       }
     }
   }
-  function rautenBogen(K3, cx, cz, R9, y0, y1, a, b, h, farbe) {
+  function rautenBogen(K3, cx, cz, R9, y0, y1, a, b, h, farbe2) {
     const bogenL = Math.PI / 2 * R9, nA = Math.max(2, Math.round(bogenL / (2 * a))), dth = Math.PI / 2 / nA;
-    const basis = raute(bogenL / nA / 2, b, h);
+    const basis2 = raute(bogenL / nA / 2, b, h);
     const rows = Math.floor((y1 - y0) / b) - 1;
     for (let j = 0; j < rows; j++) {
       const yc = y0 + b * (j + 1), off = j % 2 ? 0.5 : 0;
       for (let i = 0; i < nA; i++) {
         const th = (i + 0.5 + off) * dth;
         if (th > Math.PI / 2) continue;
-        const g = basis.clone();
+        const g = basis2.clone();
         g.rotateY(th);
         g.translate(cx + Math.sin(th) * R9, yc, cz + Math.cos(th) * R9);
-        K3.S.add(g, typeof farbe === "function" ? farbe() : farbe);
+        K3.S.add(g, typeof farbe2 === "function" ? farbe2() : farbe2);
       }
     }
   }
@@ -49946,7 +49946,7 @@
     S.quader(x0, 0, z0, x0 + w - ei, EG2, z0 + d - ei, dunkler(beton, 0.12));
     S.quader(x0, EG2, z0, x0 + w, Hw, z0 + d, beton);
     const nOG = n - 1, HA = 0.9;
-    const farbe = (i, k) => {
+    const farbe2 = (i, k) => {
       if (muster === "diagonal") return PAL4[(i + k) % 3];
       if (muster === "block") return Math.floor(i / 3) % 2 === 0 ? PAL4[0] : PAL4[k % 2 ? 1 : 2];
       if (muster === "schach") return i % 5 === 2 ? PAL4[1] : (i + k) % 2 ? PAL4[0] : PAL4[2];
@@ -49971,7 +49971,7 @@
             s2.q(0, uK, y0 + 0.05, y0 + 1.5, 0, 0.14, neu);
             for (let u = 3; u < uK; u += 3) s2.q(u - 0.03, u + 0.03, y0 + 0.05, y0 + 1.5, 0.14, 0.16, dunkler(neu, 0.08));
             s2.q(0, uK, y0 + 1.1, y0 + 1.3, 0.14, 0.18, PAL4[0]);
-          } else for (let i = 0; i < nc; i++) s2.q(i * cw + 0.05, (i + 1) * cw - 0.05, y0 + 0.08, y0 + 1.47, 0, 0.14, farbe(i, k));
+          } else for (let i = 0; i < nc; i++) s2.q(i * cw + 0.05, (i + 1) * cw - 0.05, y0 + 0.08, y0 + 1.47, 0, 0.14, farbe2(i, k));
           s2.q(0, uK, y0 + 1.47, y0 + 1.6, 0, 0.24, beton);
           s2.q(0, uK, y0 + 1.6, y0 + GH - 0.3, 0, 0.04, glas2);
           for (let i = 0; i <= nc; i += 2) s2.q(i * cw - 0.05, i * cw + 0.05, y0 + 1.6, y0 + GH - 0.3, 0, 0.1, sprosse);
@@ -49984,13 +49984,13 @@
             s2.q(uK, s2.L, EG2, Hw, 0, 0.16, neu);
             for (let y = EG2 + 3; y < Hw; y += 3) s2.q(uK, s2.L, y - 0.03, y + 0.03, 0.16, 0.18, dunkler(neu, 0.08));
             s2.q(uK + 0.6, uK + 1, EG2, Hw, 0.16, 0.2, PAL4[0]);
-          } else for (let j = 0; j < nr; j++) for (let i = 0; i < nk; i++) s2.q(uK + i * kw2 + 0.05, uK + (i + 1) * kw2 - 0.05, EG2 + j * kh + 0.05, EG2 + (j + 1) * kh - 0.05, 0, 0.16, farbe(i + j, j + 1));
+          } else for (let j = 0; j < nr; j++) for (let i = 0; i < nk; i++) s2.q(uK + i * kw2 + 0.05, uK + (i + 1) * kw2 - 0.05, EG2 + j * kh + 0.05, EG2 + (j + 1) * kh - 0.05, 0, 0.16, farbe2(i + j, j + 1));
           s2.q(uK - 0.3, uK + 0.05, EG2, Hw + HA, 0, 0.34, beton);
         }
         if (lisenen) for (let i = 0; i <= nc; i += 4) s2.q(i * cw - 0.18, i * cw + 0.18, EG2, Hw + HA, 0, 0.32, beton);
       } else {
         const nr = Math.max(1, Math.floor((Hw - EG2 - 0.2) / 1.2));
-        for (let j = 0; j < nr; j++) for (let i = 0; i < nc; i++) s2.q(i * cw + 0.05, (i + 1) * cw - 0.05, EG2 + 0.15 + j * 1.2, EG2 + 0.15 + (j + 1) * 1.2 - 0.1, 0, 0.14, san ? neu : farbe(i, j));
+        for (let j = 0; j < nr; j++) for (let i = 0; i < nc; i++) s2.q(i * cw + 0.05, (i + 1) * cw - 0.05, EG2 + 0.15 + j * 1.2, EG2 + 0.15 + (j + 1) * 1.2 - 0.1, 0, 0.14, san ? neu : farbe2(i, j));
       }
       s2.q(0, s2.L, Hw, Hw + HA, 0, 0.26, beton);
       s2.q(0, s2.L, Hw + HA, Hw + HA + 0.12, -0.05, 0.36, heller(beton, 0.04));
@@ -50415,13 +50415,13 @@
   }
   function nachnutzung(S, scene2, haus2, wettbewerber2, opt = {}) {
     const start = S.anzahl;
-    const basis = warenhaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, vorplatz: false, passanten: false });
-    const farbe = WETTBEWERBER_FARBEN[wettbewerber2.art] ?? "#526477";
-    const m = masse(haus2), breite = basis.w, tiefe = basis.d;
+    const basis2 = warenhaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, vorplatz: false, passanten: false });
+    const farbe2 = WETTBEWERBER_FARBEN[wettbewerber2.art] ?? "#526477";
+    const m = masse(haus2), breite = basis2.w, tiefe = basis2.d;
     const x = opt.x ?? 0, z2 = opt.z ?? 0;
     for (const seite of seitenVon(S, x, z2, breite, tiefe)) {
       seite.q(0.5, seite.L - 0.5, 0.6, 4.1, 0.4, 0.5, "#779bab");
-      seite.q(0.4, seite.L - 0.4, 4.1, 5.2, 0.45, 0.8, farbe);
+      seite.q(0.4, seite.L - 0.4, 4.1, 5.2, 0.45, 0.8, farbe2);
       const ph = passend(wettbewerber2.name, seite.L * 0.77, 1.25);
       plakat2(scene2, seite, wettbewerber2.name, seite.L / 2, 4.65, 0.94, ph, "#ffffff");
       if (m.n > 2) for (let i = 0; i < 3; i++) {
@@ -50429,7 +50429,7 @@
         seite.q(a, a + (seite.L - 3) / 3, 5.7, Math.min(m.H - 0.6, 9), 0.25, 0.33, "#78848a");
       }
     }
-    return { ...basis, teile: S.anzahl - start, nachnutzung: wettbewerber2.id };
+    return { ...basis2, teile: S.anzahl - start, nachnutzung: wettbewerber2.id };
   }
   function warenhaus(S, scene2, haus2, opt = {}) {
     const start = S.anzahl;
@@ -50546,37 +50546,37 @@
 
   // src/kit/sonderbauten.js
   var PI = Math.PI;
-  function zyl4(S, rO, rU, h, x, y0, z2, farbe, seg = 16, offen = false) {
+  function zyl4(S, rO, rU, h, x, y0, z2, farbe2, seg = 16, offen = false) {
     const g = new three_module_exports.CylinderGeometry(rO, rU, h, seg, 1, offen);
     g.translate(x, y0 + h / 2, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function haube(S, r, x, y0, z2, farbe, hoehe = 1, seg = 16) {
+  function haube(S, r, x, y0, z2, farbe2, hoehe = 1, seg = 16) {
     const g = new three_module_exports.SphereGeometry(r, seg, Math.max(4, seg / 2), 0, 2 * PI, 0, PI / 2);
     g.scale(1, hoehe, 1);
     g.translate(x, y0, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function drehform(S, profil, x, y0, z2, farbe, seg = 12) {
+  function drehform(S, profil, x, y0, z2, farbe2, seg = 12) {
     const g = new three_module_exports.LatheGeometry(profil.map(([r, y]) => new three_module_exports.Vector2(r, y)), seg);
     g.translate(x, y0, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function spitze(S, r, h, x, y0, z2, farbe, seg = 8) {
+  function spitze(S, r, h, x, y0, z2, farbe2, seg = 8) {
     const g = new three_module_exports.ConeGeometry(r, h, seg);
     g.rotateY(PI / seg);
     g.translate(x, y0 + h / 2, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function pyramide(S, w, d, h, x, y0, z2, farbe) {
+  function pyramide(S, w, d, h, x, y0, z2, farbe2) {
     const g = walmdach(w, d, h);
     g.translate(x, y0, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function satteldach2(S, x0, z0, w, d, y, h, farbe, achse = "x", oben = 0.25) {
+  function satteldach2(S, x0, z0, w, d, y, h, farbe2, achse = "x", oben = 0.25) {
     const g = dachProfil(achse === "x" ? w : d, achse === "x" ? d : w, h, oben, achse);
     g.translate(x0 + w / 2, y, z0 + d / 2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function aufSeite(g, seite, u, y, f) {
     if (seite === "+x") {
@@ -50585,14 +50585,14 @@
     } else g.translate(u, y, f);
     return g;
   }
-  function flaeche(S, seite, shape, f, tiefe, farbe) {
+  function flaeche(S, seite, shape, f, tiefe, farbe2) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: tiefe, bevelEnabled: false, curveSegments: 7 });
     if (seite === "+z") g.translate(0, 0, f - tiefe);
     else {
       g.rotateY(-PI / 2);
       g.translate(f, 0, 0);
     }
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function oeffnung(p, u0, v0, u1, v1, art) {
     p.moveTo(u0, v0);
@@ -50623,13 +50623,13 @@
     s2.lineTo(u0, v0);
     return s2;
   }
-  function lochwand(S, seite, u0, u1, y0, y1, f, tiefe, farbe, loecher = []) {
+  function lochwand(S, seite, u0, u1, y0, y1, f, tiefe, farbe2, loecher = []) {
     const s2 = rechteck2(u0, y0, u1, y1);
     for (const l of loecher) s2.holes.push(oeffnung(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
-    flaeche(S, seite, s2, f, tiefe, farbe);
+    flaeche(S, seite, s2, f, tiefe, farbe2);
   }
-  function platte(S, seite, u0, v0, u1, v1, f, farbe, art = null, dicke = 0.15) {
-    flaeche(S, seite, oeffnung(new three_module_exports.Shape(), u0, v0, u1, v1, art), f + dicke, dicke, farbe);
+  function platte(S, seite, u0, v0, u1, v1, f, farbe2, art = null, dicke = 0.15) {
+    flaeche(S, seite, oeffnung(new three_module_exports.Shape(), u0, v0, u1, v1, art), f + dicke, dicke, farbe2);
   }
   function rasterLoecher(u0, u1, o) {
     const L2 = u1 - u0, rand = o.rand ?? 0.6;
@@ -50645,21 +50645,21 @@
     }
     return out;
   }
-  function lochBlock(S, x0, z0, w, d, y0, y1, farbe, o) {
+  function lochBlock(S, x0, z0, w, d, y0, y1, farbe2, o) {
     const t = o.tiefe ?? 0.5;
     S.quader(x0, y0, z0, x0 + w - t * 0.5, y1, z0 + d - t * 0.5, o.innen ?? FARBEN3.fenster);
     for (const seite of o.seiten ?? ["+z", "+x"]) {
       const u0 = seite === "+z" ? x0 : z0, L2 = seite === "+z" ? w : d, f = seite === "+z" ? z0 + d : x0 + w;
       const lo = rasterLoecher(u0, u0 + L2, { y0, ...o, ohne: o.ohne ? (i, k, n) => o.ohne(i, k, n, seite) : null });
-      lochwand(S, seite, u0, u0 + L2, y0, y1, f, t, farbe, lo);
+      lochwand(S, seite, u0, u0 + L2, y0, y1, f, t, farbe2, lo);
     }
-    S.quader(x0, y1 - 0.05, z0, x0 + w, y1 + 0.02, z0 + d, o.deckel ?? farbe);
+    S.quader(x0, y1 - 0.05, z0, x0 + w, y1 + 0.02, z0 + d, o.deckel ?? farbe2);
   }
-  function baenke(S, seite, loecher, f, farbe) {
+  function baenke(S, seite, loecher, f, farbe2) {
     for (const l of loecher) {
       const u = (l.u0 + l.u1) / 2, b = l.u1 - l.u0 + 0.35;
-      if (seite === "+z") S.box(b, 0.16, 0.3, u, l.v0 - 0.08, f + 0.12, farbe);
-      else S.box(0.3, 0.16, b, f + 0.12, l.v0 - 0.08, u, farbe);
+      if (seite === "+z") S.box(b, 0.16, 0.3, u, l.v0 - 0.08, f + 0.12, farbe2);
+      else S.box(0.3, 0.16, b, f + 0.12, l.v0 - 0.08, u, farbe2);
     }
   }
   function uhr(S, seite, u, y, f, rad2, o = {}) {
@@ -50678,32 +50678,32 @@
     for (let i = 0; i < 4; i++) S.add(aufSeite(new three_module_exports.BoxGeometry(0.22, rad2 * 1.95, 0.12).rotateZ(i * PI / 4).translate(0, 0, 0.38), seite, u, y, f), stein);
     S.add(aufSeite(new three_module_exports.CylinderGeometry(rad2 * 0.3, rad2 * 0.3, 0.3, 14).rotateX(PI / 2).translate(0, 0, 0.32), seite, u, y, f), stein);
   }
-  function saeule(S, x, y0, z2, h, rad2, farbe) {
-    zyl4(S, rad2, rad2 * 1.08, h - 0.8, x, y0 + 0.4, z2, farbe, 10);
-    S.box(rad2 * 2.6, 0.4, rad2 * 2.6, x, y0 + 0.2, z2, farbe);
-    S.box(rad2 * 2.8, 0.42, rad2 * 2.8, x, y0 + h - 0.21, z2, farbe);
+  function saeule(S, x, y0, z2, h, rad2, farbe2) {
+    zyl4(S, rad2, rad2 * 1.08, h - 0.8, x, y0 + 0.4, z2, farbe2, 10);
+    S.box(rad2 * 2.6, 0.4, rad2 * 2.6, x, y0 + 0.2, z2, farbe2);
+    S.box(rad2 * 2.8, 0.42, rad2 * 2.8, x, y0 + h - 0.21, z2, farbe2);
   }
-  function kreuz(S, x, y, z2, s2 = 1, farbe = "#d8b45a") {
-    S.box(0.25 * s2, 2.2 * s2, 0.25 * s2, x, y + 1.1 * s2, z2, farbe);
-    S.box(0.25 * s2, 0.25 * s2, 1.2 * s2, x, y + 1.45 * s2, z2, farbe);
-    S.box(1.2 * s2, 0.25 * s2, 0.25 * s2, x, y + 1.45 * s2, z2, farbe);
+  function kreuz(S, x, y, z2, s2 = 1, farbe2 = "#d8b45a") {
+    S.box(0.25 * s2, 2.2 * s2, 0.25 * s2, x, y + 1.1 * s2, z2, farbe2);
+    S.box(0.25 * s2, 0.25 * s2, 1.2 * s2, x, y + 1.45 * s2, z2, farbe2);
+    S.box(1.2 * s2, 0.25 * s2, 0.25 * s2, x, y + 1.45 * s2, z2, farbe2);
   }
-  function schildPasst(scene2, text3, seite, u, y, f, hMax, bMax, farbe, bg = null) {
-    const { seitenverhaeltnis } = textTextur(text3, farbe, 140, bg);
+  function schildPasst(scene2, text3, seite, u, y, f, hMax, bMax, farbe2, bg = null) {
+    const { seitenverhaeltnis } = textTextur(text3, farbe2, 140, bg);
     const h = Math.min(hMax, bMax / seitenverhaeltnis);
-    return schild(scene2, text3, seite, u, y, f, h, farbe, bg);
+    return schild(scene2, text3, seite, u, y, f, h, farbe2, bg);
   }
   var AUTOFARBEN = ["#f4f3ef", "#2b2f33", "#a3abb2", "#c84a3c", "#2f5f8f", "#d9cfb4", "#3d6b4f", "#e3b23c", "#f4f3ef", "#6b7680"];
-  function auto2(S, x, z2, ry, farbe, y0 = 0.3) {
+  function auto2(S, x, z2, ry, farbe2, y0 = 0.3) {
     const c = Math.cos(ry), s2 = Math.sin(ry);
-    S.box(4.3, 0.75, 1.8, x, y0 + 0.62, z2, farbe, ry);
+    S.box(4.3, 0.75, 1.8, x, y0 + 0.62, z2, farbe2, ry);
     S.box(2.3, 0.62, 1.6, x - 0.25 * c, y0 + 1.3, z2 + 0.25 * s2, "#3c4852", ry);
-    S.box(2.1, 0.1, 1.62, x - 0.25 * c, y0 + 1.63, z2 + 0.25 * s2, farbe, ry);
+    S.box(2.1, 0.1, 1.62, x - 0.25 * c, y0 + 1.63, z2 + 0.25 * s2, farbe2, ry);
   }
-  function bus(S, x, z2, ry, farbe, y0 = 0.3) {
-    S.box(12, 2.6, 2.5, x, y0 + 1.75, z2, farbe, ry);
+  function bus(S, x, z2, ry, farbe2, y0 = 0.3) {
+    S.box(12, 2.6, 2.5, x, y0 + 1.75, z2, farbe2, ry);
     S.box(11.4, 1, 2.56, x, y0 + 2.2, z2, "#3c4852", ry);
-    S.box(11, 0.3, 2.2, x, y0 + 3.15, z2, heller(farbe, 0.06), ry);
+    S.box(11, 0.3, 2.2, x, y0 + 3.15, z2, heller(farbe2, 0.06), ry);
   }
   function laterne(S, x, z2, h = 6, y0 = 0.3) {
     S.box(0.22, h, 0.22, x, y0 + h / 2, z2, "#59636b");
@@ -50741,8 +50741,8 @@
       for (let lx = x0 + 10; lx < x0 + w - 5; lx += 22) laterne(S, lx, lz, 6, yt);
     }
   }
-  function belag(S, x0, z0, x1, z1, farbe, y = 0.3, h = 0.06) {
-    S.quader(x0, y, z0, x1, y + h, z1, farbe);
+  function belag(S, x0, z0, x1, z1, farbe2, y = 0.3, h = 0.06) {
+    S.quader(x0, y, z0, x1, y + h, z1, farbe2);
   }
   var MIETER2 = [
     ["Bijou", "#b0457a"],
@@ -50932,9 +50932,9 @@
     return { hoehe: H + 8.6, teile: S.anzahl };
   }
   var clamp6 = (v, a, b) => Math.max(a, Math.min(b, v));
-  function sbox(S, seite, u0, u1, y0, y1, f0, f1, farbe) {
-    if (seite === "+z") S.quader(u0, y0, f0, u1, y1, f1, farbe);
-    else S.quader(f0, y0, u0, f1, y1, u1, farbe);
+  function sbox(S, seite, u0, u1, y0, y1, f0, f1, farbe2) {
+    if (seite === "+z") S.quader(u0, y0, f0, u1, y1, f1, farbe2);
+    else S.quader(f0, y0, u0, f1, y1, u1, farbe2);
   }
   function volutenForm(u0, u1, y, h) {
     const s2 = new three_module_exports.Shape(), b = u1 - u0, um = (u0 + u1) / 2, q2 = b * 0.2;
@@ -50948,27 +50948,27 @@
     s2.quadraticCurveTo(u0 + b * 0.02, y + h * 0.5, u0, y);
     return s2;
   }
-  function giebel2(S, seite, u0, u1, y, h, f, farbe, art = "glatt", o = {}) {
+  function giebel2(S, seite, u0, u1, y, h, f, farbe2, art = "glatt", o = {}) {
     const um = (u0 + u1) / 2;
     if (art === "treppe") {
       const n = o.stufen ?? 5;
       for (let i = 0; i < n; i++) {
         const b = (u1 - u0) * (1 - i / n), y0 = y + i * h / n, y1 = y0 + h / n + 0.7;
-        sbox(S, seite, um - b / 2, um + b / 2, y0, y1, f - 0.8, f + 0.1, farbe);
-        sbox(S, seite, um - b / 2, um - b / 2 + 0.6, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe);
-        sbox(S, seite, um + b / 2 - 0.6, um + b / 2, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe);
+        sbox(S, seite, um - b / 2, um + b / 2, y0, y1, f - 0.8, f + 0.1, farbe2);
+        sbox(S, seite, um - b / 2, um - b / 2 + 0.6, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe2);
+        sbox(S, seite, um + b / 2 - 0.6, um + b / 2, y1, y1 + 0.9, f - 0.7, f + 0.12, o.hell ?? farbe2);
       }
     } else if (art === "volute") {
-      flaeche(S, seite, volutenForm(u0, u1, y, h), f + 0.1, 0.8, farbe);
-      sbox(S, seite, u0 - 0.2, u1 + 0.2, y - 0.25, y + 0.25, f - 0.6, f + 0.3, o.hell ?? farbe);
-      sbox(S, seite, um - (u1 - u0) * 0.22, um + (u1 - u0) * 0.22, y + h * 0.5, y + h * 0.56, f - 0.6, f + 0.3, o.hell ?? farbe);
+      flaeche(S, seite, volutenForm(u0, u1, y, h), f + 0.1, 0.8, farbe2);
+      sbox(S, seite, u0 - 0.2, u1 + 0.2, y - 0.25, y + 0.25, f - 0.6, f + 0.3, o.hell ?? farbe2);
+      sbox(S, seite, um - (u1 - u0) * 0.22, um + (u1 - u0) * 0.22, y + h * 0.5, y + h * 0.56, f - 0.6, f + 0.3, o.hell ?? farbe2);
     } else {
       const s2 = new three_module_exports.Shape();
       s2.moveTo(u0, y);
       s2.lineTo(u1, y);
       s2.lineTo(um, y + h);
       s2.lineTo(u0, y);
-      flaeche(S, seite, s2, f + 0.05, 0.6, farbe);
+      flaeche(S, seite, s2, f + 0.05, 0.6, farbe2);
     }
     if (o.blenden) {
       const n = 5, bb = (u1 - u0) / (n + 1);
@@ -50984,36 +50984,36 @@
     S.box(0.12 * s2, 2.4 * s2, 0.12 * s2, x, y + 1.6 * s2, z2, "#3a3f44");
     S.box(0.06, 0.8 * s2, 1.3 * s2, x, y + 2.3 * s2, z2 + 0.7 * s2, "#c9483e");
   }
-  function turmHelm(S, art, cx, y, cz, t, farbe, stein, abschluss = "kreuz") {
+  function turmHelm(S, art, cx, y, cz, t, farbe2, stein, abschluss = "kreuz") {
     const kreuzOderKugel = abschluss === "kugel" ? kugelFahne : kreuz;
     const a = t * 0.5;
     switch (art) {
       case "zwiebel":
-        drehform(S, [[0, 0], [a * 1.05, 0], [a * 1.05, 0.6], [a * 1.15, 1.6], [a * 1, 3.2], [a * 0.55, 4.6], [a * 0.26, 5.4], [a * 0.22, 5.8], [0, 5.8]], cx, y, cz, farbe, 12);
+        drehform(S, [[0, 0], [a * 1.05, 0], [a * 1.05, 0.6], [a * 1.15, 1.6], [a * 1, 3.2], [a * 0.55, 4.6], [a * 0.26, 5.4], [a * 0.22, 5.8], [0, 5.8]], cx, y, cz, farbe2, 12);
         zyl4(S, a * 0.32, a * 0.32, 2.4, cx, y + 5.8, cz, stein, 8);
-        drehform(S, [[0, 0], [a * 0.42, 0], [a * 0.48, 0.6], [a * 0.3, 1.5], [a * 0.06, 2.2], [0, 2.4]], cx, y + 8.2, cz, farbe, 10);
-        spitze(S, 0.18, 2.2, cx, y + 10.5, cz, farbe, 6);
+        drehform(S, [[0, 0], [a * 0.42, 0], [a * 0.48, 0.6], [a * 0.3, 1.5], [a * 0.06, 2.2], [0, 2.4]], cx, y + 8.2, cz, farbe2, 10);
+        spitze(S, 0.18, 2.2, cx, y + 10.5, cz, farbe2, 6);
         kreuzOderKugel(S, cx, y + 12.3, cz, 0.8);
         return y + 14;
       case "welsch":
-        drehform(S, [[0, 0], [a * 1.1, 0], [a * 1.05, 0.9], [a * 0.62, 2.8], [a * 0.3, 3.7], [0, 3.8]], cx, y, cz, farbe, 12);
+        drehform(S, [[0, 0], [a * 1.1, 0], [a * 1.05, 0.9], [a * 0.62, 2.8], [a * 0.3, 3.7], [0, 3.8]], cx, y, cz, farbe2, 12);
         zyl4(S, a * 0.34, a * 0.34, 2.8, cx, y + 3.6, cz, stein, 8);
-        drehform(S, [[0, 0], [a * 0.5, 0], [a * 0.42, 0.9], [a * 0.15, 1.9], [0, 2.1]], cx, y + 6.4, cz, farbe, 10);
-        spitze(S, 0.15, 2.4, cx, y + 8.4, cz, farbe, 6);
+        drehform(S, [[0, 0], [a * 0.5, 0], [a * 0.42, 0.9], [a * 0.15, 1.9], [0, 2.1]], cx, y + 6.4, cz, farbe2, 10);
+        spitze(S, 0.15, 2.4, cx, y + 8.4, cz, farbe2, 6);
         kreuzOderKugel(S, cx, y + 10.6, cz, 0.7);
         return y + 12.5;
       case "pyramide":
-        pyramide(S, t + 0.8, t + 0.8, t * 1.2, cx, y, cz, farbe);
-        spitze(S, t * 0.2, t * 1.4, cx, y + t * 1.1, cz, farbe, 8);
+        pyramide(S, t + 0.8, t + 0.8, t * 1.2, cx, y, cz, farbe2);
+        spitze(S, t * 0.2, t * 1.4, cx, y + t * 1.1, cz, farbe2, 8);
         kreuzOderKugel(S, cx, y + t * 2.45, cz, 0.8);
         return y + t * 2.45 + 2;
       case "pyramideFlach":
-        pyramide(S, t + 0.8, t + 0.8, t * 0.75, cx, y, cz, farbe);
+        pyramide(S, t + 0.8, t + 0.8, t * 0.75, cx, y, cz, farbe2);
         kreuzOderKugel(S, cx, y + t * 0.72, cz, 0.7);
         return y + t * 0.75 + 2;
       case "sattel": {
         const h = t * 1;
-        satteldach2(S, cx - t / 2 - 0.3, cz - t / 2 - 0.3, t + 0.6, t + 0.6, y, h, farbe, "x", 0);
+        satteldach2(S, cx - t / 2 - 0.3, cz - t / 2 - 0.3, t + 0.6, t + 0.6, y, h, farbe2, "x", 0);
         const s2 = new three_module_exports.Shape();
         s2.moveTo(cz - t / 2, y);
         s2.lineTo(cz + t / 2, y);
@@ -51026,7 +51026,7 @@
       }
       case "kuppel":
         zyl4(S, a * 0.85, a * 0.85, a * 0.8, cx, y, cz, stein, 12);
-        haube(S, a * 0.9, cx, y + a * 0.8, cz, farbe, 1, 14);
+        haube(S, a * 0.9, cx, y + a * 0.8, cz, farbe2, 1, 14);
         zyl4(S, a * 0.22, a * 0.22, 1.6, cx, y + a * 1.65, cz, stein, 8);
         kreuzOderKugel(S, cx, y + a * 1.65 + 1.6, cz, 0.6);
         return y + a * 1.65 + 3.8;
@@ -51036,11 +51036,11 @@
         return y + 3.6;
       case "spitzhoch": {
         const h = t * 3.5;
-        spitze(S, t * 0.6, h, cx, y, cz, farbe, 8);
+        spitze(S, t * 0.6, h, cx, y, cz, farbe2, 8);
         for (const [dx, dz] of [[1, 0], [0, 1]]) {
           const g = dachProfil(1.4, 1.8, 1.4, 0, dx ? "x" : "z");
           g.translate(cx + dx * t * 0.42, y + h * 0.18, cz + dz * t * 0.42);
-          S.add(g, farbe);
+          S.add(g, farbe2);
         }
         S.add(new three_module_exports.SphereGeometry(0.5, 8, 6).translate(cx, y + h, cz), "#d8b45a");
         kreuzOderKugel(S, cx, y + h + 0.3, cz, 0.8);
@@ -51048,10 +51048,10 @@
       }
       default: {
         const h = t * 2.8;
-        spitze(S, t * 0.6, h, cx, y, cz, farbe, 8);
+        spitze(S, t * 0.6, h, cx, y, cz, farbe2, 8);
         for (const [dx, dz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
           S.box(1.1, 1.6, 1.1, cx + dx * (t / 2 - 0.55), y + 0.8, cz + dz * (t / 2 - 0.55), stein);
-          spitze(S, 0.7, 3.4, cx + dx * (t / 2 - 0.55), y + 1.6, cz + dz * (t / 2 - 0.55), farbe, 6);
+          spitze(S, 0.7, 3.4, cx + dx * (t / 2 - 0.55), y + 1.6, cz + dz * (t / 2 - 0.55), farbe2, 6);
         }
         kreuzOderKugel(S, cx, y + h - 0.3, cz, 0.9);
         return y + h + 2;
@@ -51089,15 +51089,15 @@
     }
     if (o.portal) platte(S, "+x", z0 + t / 2 - Math.min(1.8, t * 0.2), 0.3, z0 + t / 2 + Math.min(1.8, t * 0.2), Math.min(6.5, Ht * 0.18), x0 + t, "#4a3a2e", bog, 0.2);
   }
-  function halbrund(S, xc, cz, rad2, h, farbe, seg, y0 = 0) {
+  function halbrund(S, xc, cz, rad2, h, farbe2, seg, y0 = 0) {
     const g = new three_module_exports.CylinderGeometry(rad2, rad2, h, seg, 1, false, PI, PI);
     g.translate(xc, y0 + h / 2, cz);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function halbkegel(S, xc, cz, rad2, h, y0, farbe, seg) {
+  function halbkegel(S, xc, cz, rad2, h, y0, farbe2, seg) {
     const g = new three_module_exports.ConeGeometry(rad2, h, seg, 1, false, PI, PI);
     g.translate(xc, y0 + h / 2, cz);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function langhausKirche(S, scene2, p, c) {
     const { x, z: z2 } = p, w = p.w, d = p.d;
@@ -51490,10 +51490,10 @@
     const T = new Sammler(), grp = new three_module_exports.Group();
     const erg = bau2(T, grp, { ...p, x: 0, z: 0, w: natW, d: natD });
     const ox = p.x + (p.w - natW * s2) / 2, oz = p.z + (p.d - natD * s2) / 2;
-    for (const [farbe, gs] of T.teile) for (const g of gs) {
+    for (const [farbe2, gs] of T.teile) for (const g of gs) {
       g.scale(s2, s2, s2);
       g.translate(ox, 0, oz);
-      S.add(g, farbe);
+      S.add(g, farbe2);
     }
     grp.scale.setScalar(s2);
     grp.position.set(ox, 0, oz);
@@ -51851,11 +51851,11 @@
       S.add(g, "#e8ecee");
     }
   }
-  function zug(S, x0, x1, zc, y0, farbe, streifen) {
+  function zug(S, x0, x1, zc, y0, farbe2, streifen) {
     const L2 = x1 - x0;
-    S.quader(x0, y0 + 0.5, zc - 1.45, x1 - 3, y0 + 4.1, zc + 1.45, farbe);
-    S.quader(x1 - 3, y0 + 0.5, zc - 1.45, x1 - 1, y0 + 3.4, zc + 1.45, farbe);
-    S.quader(x1 - 1, y0 + 0.5, zc - 1.2, x1, y0 + 2.4, zc + 1.2, farbe);
+    S.quader(x0, y0 + 0.5, zc - 1.45, x1 - 3, y0 + 4.1, zc + 1.45, farbe2);
+    S.quader(x1 - 3, y0 + 0.5, zc - 1.45, x1 - 1, y0 + 3.4, zc + 1.45, farbe2);
+    S.quader(x1 - 1, y0 + 0.5, zc - 1.2, x1, y0 + 2.4, zc + 1.2, farbe2);
     S.quader(x1 - 3, y0 + 3, zc - 1.3, x1 - 1.6, y0 + 3.9, zc + 1.3, "#2f3b44");
     S.quader(x0, y0 + 2.5, zc - 1.47, x1 - 3, y0 + 3.3, zc + 1.47, "#3c4852");
     S.quader(x0, y0 + 1.1, zc - 1.48, x1 - 1, y0 + 1.5, zc + 1.48, streifen);
@@ -52600,14 +52600,14 @@
     );
     return { hoehe: e.hoehe, teile: S.anzahl, stil };
   }
-  function verdachung(S, seite, loecher, f, farbe) {
+  function verdachung(S, seite, loecher, f, farbe2) {
     for (const l of loecher) {
       const u = (l.u0 + l.u1) / 2, b = l.u1 - l.u0 + 0.5;
-      if (seite === "+z") S.box(b, 0.22, 0.3, u, l.v1 + 0.2, f + 0.12, farbe);
-      else S.box(0.3, 0.22, b, f + 0.12, l.v1 + 0.2, u, farbe);
+      if (seite === "+z") S.box(b, 0.22, 0.3, u, l.v1 + 0.2, f + 0.12, farbe2);
+      else S.box(0.3, 0.22, b, f + 0.12, l.v1 + 0.2, u, farbe2);
     }
   }
-  function erker2(S, u, y0, y1, f, rad2, farbe, glas2, dachF, seite = "+z") {
+  function erker2(S, u, y0, y1, f, rad2, farbe2, glas2, dachF, seite = "+z") {
     const mk2 = (h, rr, yy, c) => {
       const g = new three_module_exports.CylinderGeometry(rr, rr, h, 6, 1, false, -PI / 2, PI);
       g.translate(0, yy + h / 2, 0);
@@ -52615,7 +52615,7 @@
       g.translate(seite === "+z" ? u : f, 0, seite === "+z" ? f : u);
       S.add(g, c);
     };
-    mk2(y1 - y0, rad2, y0, farbe);
+    mk2(y1 - y0, rad2, y0, farbe2);
     const n = Math.max(1, Math.round((y1 - y0) / 3.8));
     for (let k = 0; k < n; k++) mk2(1.9, rad2 + 0.04, y0 + 0.7 + k * ((y1 - y0) / n), glas2);
     const kg = new three_module_exports.ConeGeometry(rad2, 1.6, 6, 1, false, -PI / 2, PI);
@@ -52623,7 +52623,7 @@
     kg.translate(0, y0 - 0.8, 0);
     if (seite === "+x") kg.rotateY(PI / 2);
     kg.translate(seite === "+z" ? u : f, 0, seite === "+z" ? f : u);
-    S.add(kg, farbe);
+    S.add(kg, farbe2);
     const dg = new three_module_exports.ConeGeometry(rad2 + 0.3, 2.6, 6, 1, false, -PI / 2, PI);
     dg.translate(0, y1 + 1.3, 0);
     if (seite === "+x") dg.rotateY(PI / 2);
@@ -52915,8 +52915,8 @@
     }
     return { hoehe: top, teile: S.anzahl };
   }
-  function zinnen(S, seite, u0, u1, y, f, farbe, b = 0.9) {
-    for (let u = u0 + b / 2; u < u1 - b / 2; u += b * 2) sbox(S, seite, u, u + b, y, y + 1, f - 0.7, f, farbe);
+  function zinnen(S, seite, u0, u1, y, f, farbe2, b = 0.9) {
+    for (let u = u0 + b / 2; u < u1 - b / 2; u += b * 2) sbox(S, seite, u, u + b, y, y + 1, f - 0.7, f, farbe2);
   }
   function stadttor(S, scene2, p) {
     const { x, z: z2, seed = 1 } = p, r = rng2(`tor:${seed}`);
@@ -54842,10 +54842,10 @@
   function nachnutzungSport(S, scene2, haus2, w, opt = {}) {
     const start = S.anzahl;
     const b = sporthaus(S, scene2, haus2, { ...opt, status: "offen", hartwig: false, passanten: false });
-    const x = opt.x ?? 0, z2 = opt.z ?? 0, farbe = WETTBEWERBER_FARBEN[w.art] ?? "#596c76";
+    const x = opt.x ?? 0, z2 = opt.z ?? 0, farbe2 = WETTBEWERBER_FARBEN[w.art] ?? "#596c76";
     for (const seite of seitenVon(S, x, z2, b.w, b.d)) {
       seite.q(1, seite.L - 1, 0.8, 3.9, 0.55, 0.68, "#698999");
-      seite.q(1, seite.L - 1, 4, 5.4, 0.62, 0.82, farbe);
+      seite.q(1, seite.L - 1, 4, 5.4, 0.62, 0.82, farbe2);
       plakat2(scene2, seite, w.name, seite.L / 2, 4.7, 0.93, passend(w.name, seite.L * 0.75, 1.3), "#ffffff");
     }
     return { ...b, teile: S.anzahl - start, nachnutzung: w.id };
@@ -55239,14 +55239,14 @@
       return;
     }
     const abst2 = o.abstand ?? 0.12;
-    let farbe = bunt(r, pal), h = zw(r, hMin, hMax);
+    let farbe2 = bunt(r, pal), h = zw(r, hMin, hMax);
     for (let u = a + abst2 / 2; u < b - 0.02; u += abst2) {
       if (r() < 0.28) {
-        farbe = bunt(r, pal);
+        farbe2 = bunt(r, pal);
         h = zw(r, hMin, hMax);
       }
-      if (seitlich) L2.box(0.065, h, breit2, u, y - h - 0.03, lz, farbe);
-      else L2.box(breit2, h, 0.06, u, y - h - 0.03, lz, farbe);
+      if (seitlich) L2.box(0.065, h, breit2, u, y - h - 0.03, lz, farbe2);
+      else L2.box(breit2, h, 0.06, u, y - h - 0.03, lz, farbe2);
     }
   }
   function stapel(L2, lx, lz, w, t, y, pal, r, d, n = null) {
@@ -55307,9 +55307,9 @@
     L2.box(w, 0.04, 0.04, lx, hoch, lz, HOLZ.chrom);
     kleiderReihe(L2, lx - w / 2 + 0.05, lx + w / 2 - 0.05, hoch, lz, pal, r, d, { hMin: 0.7, hMax: 1.1 });
   }
-  function warenTisch(L2, lx, lz, w, t, pal, r, d, farbe = HOLZ.hell, h = 0.82) {
-    L2.box(w, h - 0.06, t, lx, 0, lz, farbe);
-    L2.box(w + 0.08, 0.06, t + 0.08, lx, h - 0.06, lz, dunkler(farbe, 0.05));
+  function warenTisch(L2, lx, lz, w, t, pal, r, d, farbe2 = HOLZ.hell, h = 0.82) {
+    L2.box(w, h - 0.06, t, lx, 0, lz, farbe2);
+    L2.box(w + 0.08, 0.06, t + 0.08, lx, h - 0.06, lz, dunkler(farbe2, 0.05));
     stapel(L2, lx, lz, w - 0.15, t - 0.12, h, pal, r, d);
   }
   function puppe3(L2, lx, lz, r, typ = "damen", pal = PAL.damen, ry = 0) {
@@ -55862,9 +55862,9 @@
     L2.zyl(0.2, 0.2, 0.62, lx, 0, lz + 0.55, "#e9a3b8", 8);
     for (let i = 0; i < 4; i++) L2.box(0.06, 0.12, 0.06, lx - 0.4 + i * 0.25, 0.8, lz + 0.05, bunt(r, PAL.flakon));
   }
-  function schuhtisch(L2, lx, lz, r, d, w = 1.6, farbe = "#f4efe7", pal = PAL.schuhe) {
-    L2.box(w, 0.7, 0.8, lx, 0, lz, farbe);
-    L2.box(w + 0.05, 0.05, 0.85, lx, 0.7, lz, dunkler(farbe, 0.1));
+  function schuhtisch(L2, lx, lz, r, d, w = 1.6, farbe2 = "#f4efe7", pal = PAL.schuhe) {
+    L2.box(w, 0.7, 0.8, lx, 0, lz, farbe2);
+    L2.box(w + 0.05, 0.05, 0.85, lx, 0.7, lz, dunkler(farbe2, 0.1));
     const n = anz(Math.floor(w / 0.42), d, 0.5);
     for (let i = 0; i < n; i++) for (const j of [-0.18, 0.18]) {
       if (d < 0.7 && j > 0) continue;
@@ -55873,9 +55873,9 @@
       L2.box(0.1, 0.1, 0.26, u + 0.07, 0.75, lz + j, f, 0.3);
     }
   }
-  function pouf(L2, lx, lz, farbe = "#7d8f9c") {
-    L2.zyl(0.32, 0.32, 0.45, lx, 0, lz, farbe, 10);
-    L2.zyl(0.28, 0.32, 0.04, lx, 0.45, lz, dunkler(farbe, 0.06), 10);
+  function pouf(L2, lx, lz, farbe2 = "#7d8f9c") {
+    L2.zyl(0.32, 0.32, 0.45, lx, 0, lz, farbe2, 10);
+    L2.zyl(0.28, 0.32, 0.04, lx, 0.45, lz, dunkler(farbe2, 0.06), 10);
   }
   function uhrenvitrine(L2, lx, lz, r, d) {
     vitrine2(L2, lx, lz, 2.4, 0.9, 0.95, "#2a2d31", (L22, x, y, z2, w, t, r22) => {
@@ -55961,11 +55961,11 @@
       teddy(L2, lx + Math.cos(a) * rr, 0.48 + (i >= 5 ? 0.3 : 0), lz + Math.sin(a) * rr, r, zw(r, 0.75, 1.1));
     }
   }
-  function gondel(L2, lx, lz, w, h, farbe, prod, r, d, ry = 0) {
+  function gondel(L2, lx, lz, w, h, farbe2, prod, r, d, ry = 0) {
     const G2 = L2.sub(lx, lz, ry);
-    G2.box(w, h, 0.06, 0, 0, 0, farbe);
-    G2.box(w, 0.08, 0.9, 0, h, 0, dunkler(farbe, 0.1));
-    G2.box(w, 0.2, 0.9, 0, 0, 0, dunkler(farbe, 0.12));
+    G2.box(w, h, 0.06, 0, 0, 0, farbe2);
+    G2.box(w, 0.08, 0.9, 0, h, 0, dunkler(farbe2, 0.1));
+    G2.box(w, 0.2, 0.9, 0, 0, 0, dunkler(farbe2, 0.12));
     const boeden = Math.max(2, Math.round(h / 0.5));
     for (const seite of [1, -1]) {
       const S2 = G2.sub(0, 0, seite > 0 ? 0 : PI2);
@@ -55976,8 +55976,8 @@
         prod(S2, 0, y + 0.03, 0.25, w - 0.12, r, d, (h - 0.25) / boeden - 0.06);
       }
     }
-    G2.box(0.06, h + 0.08, 0.9, -w / 2, 0, 0, dunkler(farbe, 0.15));
-    G2.box(0.06, h + 0.08, 0.9, w / 2, 0, 0, dunkler(farbe, 0.15));
+    G2.box(0.06, h + 0.08, 0.9, -w / 2, 0, 0, dunkler(farbe2, 0.15));
+    G2.box(0.06, h + 0.08, 0.9, w / 2, 0, 0, dunkler(farbe2, 0.15));
   }
   function spieltisch(L2, r, d) {
     L2.box(2.4, 0.55, 1.6, 0, 0, -0.2, "#5bc0eb");
@@ -56041,10 +56041,10 @@
       }
     }
   }
-  function stuhl(L2, lx, lz, ry, farbe) {
+  function stuhl(L2, lx, lz, ry, farbe2) {
     const P2 = L2.sub(lx, lz, ry);
-    P2.box(0.45, 0.06, 0.45, 0, 0.42, 0, farbe);
-    P2.box(0.45, 0.45, 0.06, 0, 0.48, -0.2, farbe);
+    P2.box(0.45, 0.06, 0.45, 0, 0.42, 0, farbe2);
+    P2.box(0.45, 0.45, 0.06, 0, 0.48, -0.2, farbe2);
     P2.box(0.04, 0.42, 0.04, -0.2, 0, 0.2, "#2a2d31");
     P2.box(0.04, 0.42, 0.04, 0.2, 0, 0.2, "#2a2d31");
     P2.box(0.04, 0.42, 0.04, -0.2, 0, -0.2, "#2a2d31");
@@ -56200,10 +56200,10 @@
   function marke2(seed) {
     return MARKEN2[Math.abs(seed | 0) % MARKEN2.length];
   }
-  function schrift(L2, text3, lx, ly, lz, hoehe, farbe, hg = null, liegend = false) {
+  function schrift(L2, text3, lx, ly, lz, hoehe, farbe2, hg = null, liegend = false) {
     const scene2 = L2.S.szene;
     if (!scene2) return;
-    const { mat: mat2, seitenverhaeltnis } = textMaterial(text3, farbe, { groesse: 120, hintergrund: hg, versatz: -2 });
+    const { mat: mat2, seitenverhaeltnis } = textMaterial(text3, farbe2, { groesse: 120, hintergrund: hg, versatz: -2 });
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(hoehe * seitenverhaeltnis, hoehe), mat2);
     const [X, Z2] = L2.P(lx, lz);
     m.position.set(X, L2.oy + ly, Z2);
@@ -56613,8 +56613,8 @@
       return { frei: frei6 };
     }
     if (gruppe2 === "offprice") {
-      const basis = o.basis ?? "damen";
-      const pal = PAL[basis] ?? PAL.damen;
+      const basis2 = o.basis ?? "damen";
+      const pal = PAL[basis2] ?? PAL.damen;
       for (const [s2, len, off] of wandStuecke) {
         const L3 = wandL(s2, len, off);
         if (r() < 0.5) staender(L3, 0, 0.4, len - 0.4, pal, r, d, 1.6);
@@ -56640,8 +56640,8 @@
     }
     if (gruppe2 === "konzession") {
       const m = o.marke ?? marke2(seed);
-      const basis = o.basis ?? m.gruppe;
-      const mod2 = MODUL[basis] ?? MODUL.damen;
+      const basis2 = o.basis ?? m.gruppe;
+      const mod2 = MODUL[basis2] ?? MODUL.damen;
       for (const [s2, len, off] of wandStuecke) {
         const L2 = wandL(s2, len, off);
         L2.box(len, 3.6, 0.1, 0, 0, 0.05, m.farbe);
@@ -56671,10 +56671,10 @@
     L2.box(len + 0.6, 0.3, 0.12, 0, h - 0.3, 0.04, "#f6f1e9");
     for (let u = -len / 2 + (o.pilasterVersatz ?? 0); u <= len / 2 + 0.01; u += o.pilasterAbstand ?? 5) L2.box(0.7, h - 0.3, 0.22, u, 0, 0.1, pilaster);
   }
-  function stuetze(S, x, z2, y = 0, h = WANDHOEHE, farbe = "#e6e0d6") {
-    S.box(0.7, h, 0.7, x, y + h / 2, z2, farbe);
-    S.box(0.84, 0.25, 0.84, x, y + 0.125, z2, dunkler(farbe, 0.1));
-    S.box(0.84, 0.2, 0.84, x, y + h - 0.1, z2, heller(farbe, 0.03));
+  function stuetze(S, x, z2, y = 0, h = WANDHOEHE, farbe2 = "#e6e0d6") {
+    S.box(0.7, h, 0.7, x, y + h / 2, z2, farbe2);
+    S.box(0.84, 0.25, 0.84, x, y + 0.125, z2, dunkler(farbe2, 0.1));
+    S.box(0.84, 0.2, 0.84, x, y + h - 0.1, z2, heller(farbe2, 0.03));
   }
   function rolltreppe(S, x0, z2, laenge, hub, y = 0, d = 1, t0 = 0) {
     const neig = Math.atan2(hub, laenge);
@@ -56866,34 +56866,34 @@
   }
   function abtrennung(S, scene2, x0, z0, x1, z1, o = {}) {
     const y = o.y ?? 0, h = o.h ?? 3.4;
-    const farbe = o.farbe ?? "#e9e4dc";
+    const farbe2 = o.farbe ?? "#e9e4dc";
     const kanten3 = o.kanten ?? { nx: true, nz: true, px: true, pz: true };
     const niedrig = o.niedrig ?? 1.1;
-    if (kanten3.nz) S.box(x1 - x0, h, 0.15, (x0 + x1) / 2, y + h / 2, z0 + 0.075, farbe);
-    if (kanten3.nx) S.box(0.15, h, z1 - z0, x0 + 0.075, y + h / 2, (z0 + z1) / 2, dunkler(farbe, 0.03));
+    if (kanten3.nz) S.box(x1 - x0, h, 0.15, (x0 + x1) / 2, y + h / 2, z0 + 0.075, farbe2);
+    if (kanten3.nx) S.box(0.15, h, z1 - z0, x0 + 0.075, y + h / 2, (z0 + z1) / 2, dunkler(farbe2, 0.03));
     const oeff = o.oeffnung ?? 3;
     const vorne = (achse, a, b, pos) => {
       const m = (a + b) / 2, l = (b - a - oeff) / 2;
       if (l <= 0.2) return;
       for (const c of [a + l / 2, b - l / 2]) {
         if (achse === "x") {
-          S.box(l, niedrig, 0.15, c, y + niedrig / 2, pos, farbe);
+          S.box(l, niedrig, 0.15, c, y + niedrig / 2, pos, farbe2);
           if (o.glas) S.box(l, h - niedrig - 0.4, 0.04, c, y + niedrig + (h - niedrig - 0.4) / 2, pos, GLAS3);
         } else {
-          S.box(0.15, niedrig, l, pos, y + niedrig / 2, c, farbe);
+          S.box(0.15, niedrig, l, pos, y + niedrig / 2, c, farbe2);
           if (o.glas) S.box(0.04, h - niedrig - 0.4, l, pos, y + niedrig + (h - niedrig - 0.4) / 2, c, GLAS3);
         }
       }
       if (o.glas) {
-        if (achse === "x") S.box(b - a, 0.12, 0.18, m, y + h - 0.35, pos, farbe);
-        else S.box(0.18, 0.12, b - a, pos, y + h - 0.35, m, farbe);
+        if (achse === "x") S.box(b - a, 0.12, 0.18, m, y + h - 0.35, pos, farbe2);
+        else S.box(0.18, 0.12, b - a, pos, y + h - 0.35, m, farbe2);
       }
     };
     if (kanten3.pz) vorne("x", x0, x1, z1 - 0.075);
     if (kanten3.px) vorne("z", z0, z1, x1 - 0.075);
     if (o.name && scene2) {
       if (kanten3.nz) {
-        S.box(Math.min(x1 - x0 - 0.6, 4.5), 0.8, 0.08, (x0 + x1) / 2, y + h - 0.6, z0 + 0.19, o.schildFarbe ?? farbe);
+        S.box(Math.min(x1 - x0 - 0.6, 4.5), 0.8, 0.08, (x0 + x1) / 2, y + h - 0.6, z0 + 0.19, o.schildFarbe ?? farbe2);
         wandschild(S, scene2, o.name, "x", (x0 + x1) / 2, y + h - 0.6, z0 + 0.24, { farbe: o.schildFarbe ?? null, schrift: o.schrift ?? "#1f1f1f", hoehe: 0.6 });
       } else if (kanten3.nx) {
         wandschild(S, scene2, o.name, "z", (z0 + z1) / 2, y + h - 0.6, x0 + 0.17, { farbe: o.schildFarbe ?? null, schrift: o.schrift ?? "#1f1f1f", hoehe: 0.6 });
@@ -57081,9 +57081,9 @@
     const H = familie === 1 ? 6.65 + variante2 % 3 * 0.1 : familie === 2 ? 10.35 + variante2 % 3 * 0.18 : 5 + (n - 1) * 3.9 + buero * 3.5;
     return { w: bw, d: bd + park, bw, bd, n, H, familie, park, buero, variante: variante2 };
   }
-  function text(scene2, s2, inhalt, u, y, t, breite, hoehe, farbe = "#ffffff", bg = null) {
+  function text(scene2, s2, inhalt, u, y, t, breite, hoehe, farbe2 = "#ffffff", bg = null) {
     if (breite < 1) return;
-    plakat2(scene2, s2, inhalt, u, y, t, passend(inhalt, breite, hoehe), farbe, bg);
+    plakat2(scene2, s2, inhalt, u, y, t, passend(inhalt, breite, hoehe), farbe2, bg);
   }
   function marke3(scene2, s2, H, bandUnterkante, zusatz = false) {
     const y = bandUnterkante;
@@ -57195,8 +57195,8 @@
     for (let u = 0.6; u < s2.L; u += 3.3) {
       s2.q(u, u + 0.12, y0, y1, 0.11, 0.28, "#a9b6bd");
       if (offen && u > 2 && u < s2.L - 3 && Math.abs(u - s2.L * 0.52) > 4.5) {
-        const farbe = waehle2(r, WAREN);
-        puppe(s2, u + 1.05, 0.85, -0.42, farbe, waehle2(r, KLEID2), 1.12);
+        const farbe2 = waehle2(r, WAREN);
+        puppe(s2, u + 1.05, 0.85, -0.42, farbe2, waehle2(r, KLEID2), 1.12);
         s2.q(u + 0.38, u + 2.5, 0.42, 0.62, -1.3, -0.9, "#dedacf");
         s2.q(u + 0.45, u + 0.95, 1.18, 1.55, -1.35, -0.87, waehle2(r, WAREN));
         s2.q(u + 1.62, u + 2.13, 0.83, 1.13, -1.35, -0.87, waehle2(r, WAREN));
@@ -57235,19 +57235,19 @@
     const F2 = zustandFlags(Z2), H = m.H, { bw, bd } = m;
     const stadt = m.familie === 3, zweigeschossig = m.familie === 2;
     const paneele = ["#d9dbdd", "#c4cbd0", "#e2dfd8"];
-    const farbe = stadt ? m.variante % 2 ? "#c3bdb5" : "#cbd0ce" : paneele[m.variante % paneele.length];
+    const farbe2 = stadt ? m.variante % 2 ? "#c3bdb5" : "#cbd0ce" : paneele[m.variante % paneele.length];
     const egTop = 5, ladenTop = stadt ? 5 + (m.n - 1) * 3.9 : H;
     const bandY = stadt ? ladenTop - 3.5 : H - 3.5;
     const eingang = 0.38 + m.variante % 4 * 0.075;
     const werbung = Z2.hat("aktion") || Z2.hat("offprice");
     const seiten4 = seitenVon(S, x, z2, bw, bd), logos2 = [];
-    S.quader(x, 0.3, z2, x + bw, H, z2 + 0.38, farbe);
-    S.quader(x, 0.3, z2, x + 0.38, H, z2 + bd, farbe);
+    S.quader(x, 0.3, z2, x + bw, H, z2 + 0.38, farbe2);
+    S.quader(x, 0.3, z2, x + 0.38, H, z2 + bd, farbe2);
     S.quader(x, 0.28, z2, x + bw, 0.46, z2 + bd, "#ece9e2");
     S.quader(x, H - 0.22, z2, x + bw, H + 0.17, z2 + bd, "#c5c7c4");
     if (stadt) {
-      S.quader(x + 0.1, ladenTop, z2 + bd - 0.42, x + bw, H, z2 + bd, farbe);
-      S.quader(x + bw - 0.42, ladenTop, z2 + 0.1, x + bw, H, z2 + bd, farbe);
+      S.quader(x + 0.1, ladenTop, z2 + bd - 0.42, x + bw, H, z2 + bd, farbe2);
+      S.quader(x + bw - 0.42, ladenTop, z2 + 0.1, x + bw, H, z2 + bd, farbe2);
       for (const s2 of seiten4) for (let et = 0; et < m.buero; et++) {
         const y0 = ladenTop + 0.78 + et * 3.5, y1 = Math.min(H - 0.45, y0 + 1.74);
         for (let u = 1.8; u < s2.L - 1.5; u += 3.7) {
@@ -57263,8 +57263,8 @@
       }
       for (const s2 of seiten4) s2.q(0, s2.L, ladenTop - 0.14, ladenTop + 0.19, 0.61, 0.95, "#9f9d9a");
     } else if (zweigeschossig) {
-      S.quader(x + 0.35, 7.65, z2 + bd - 0.36, x + bw, H, z2 + bd, farbe);
-      S.quader(x + bw - 0.36, 7.65, z2 + 0.35, x + bw, H, z2 + bd, farbe);
+      S.quader(x + 0.35, 7.65, z2 + bd - 0.36, x + bw, H, z2 + bd, farbe2);
+      S.quader(x + bw - 0.36, 7.65, z2 + 0.35, x + bw, H, z2 + bd, farbe2);
       S.quader(x + 0.35, 4.72, z2 + 0.4, x + bw, 4.98, z2 + bd, "#929ca4");
       S.quader(x + bw - 0.5, 0.45, z2 + bd - 7.6, x + bw, 7.8, z2 + bd, "#bbcbd1");
       for (let et = 0; et < 4; et++) {
@@ -57273,8 +57273,8 @@
         S.box(0.15, 1, 2.5, x + bw - 2 - et * 0.43, y + 0.5, z2 + bd - 3.4 - et * 0.3, "#727e87");
       }
     } else {
-      S.quader(x + 0.3, H - 0.55, z2 + bd - 0.45, x + bw, H, z2 + bd, farbe);
-      S.quader(x + bw - 0.45, H - 0.55, z2 + 0.3, x + bw, H, z2 + bd, farbe);
+      S.quader(x + 0.3, H - 0.55, z2 + bd - 0.45, x + bw, H, z2 + bd, farbe2);
+      S.quader(x + bw - 0.45, H - 0.55, z2 + 0.3, x + bw, H, z2 + bd, farbe2);
     }
     if (!F2.zu) {
       vorbereiten(S, scene2);
@@ -57371,7 +57371,7 @@
       },
       eingaenge: [{ seite: "+z", u: bw * eingang, breite: 7.4, t: 2.2, haupt: true }],
       fensterEG: [{ seite: "+z", a: 0.6, b: bw - 0.6, y0: 0.5, y1: 3.2, t: 0.3 }],
-      farbe,
+      farbe: farbe2,
       baujahr: haus2.baujahr,
       jahr: opt.jahr,
       flaecheQm: haus2.grundflaecheQm * m.n,
@@ -57656,8 +57656,8 @@
         if (!platz.some((p) => Math.abs(p.x - px2) < (p.w + ww) / 2 + 1.2 && Math.abs(p.z - pz4) < (p.d + dd) / 2 + 1.2)) break;
       }
       platz.push({ x: px2, z: pz4, w: ww, d: dd });
-      const farbe = waehle2(r, ["#a5a7a0", "#b3b0a8", "#959992", "#8d9493"]);
-      S.box(ww, hh, dd, px2, y + hh / 2, pz4, farbe);
+      const farbe2 = waehle2(r, ["#a5a7a0", "#b3b0a8", "#959992", "#8d9493"]);
+      S.box(ww, hh, dd, px2, y + hh / 2, pz4, farbe2);
       S.box(ww + 0.2, 0.13, dd + 0.2, px2, y + hh + 0.06, pz4, "#747a76");
       if (j % 2 === 0) for (let q2 = 0; q2 < 3; q2++) S.box(0.13, hh * 0.65, 0.12, px2 + ww / 2 + 0.1, y + hh * 0.5, pz4 + (q2 - 1) * dd * 0.23, "#5a6869");
     }
@@ -84862,8 +84862,8 @@
     herren_casual: { name: "Kordel & Co.", kopf: "#3f6b5a", schrift: "#f4efe6" },
     herren_schuhe: { name: "Herrenschuhe", kopf: "#4a3324", schrift: "#f2e6d0" }
   };
-  function kopfband(ctx, L2, w, text3, farbe, schriftF, y = 3.25, h = 0.62) {
-    L2.box(w, h, 0.1, 0, y, 0.06, farbe);
+  function kopfband(ctx, L2, w, text3, farbe2, schriftF, y = 3.25, h = 0.62) {
+    L2.box(w, h, 0.1, 0, y, 0.06, farbe2);
     const fries = !ctx.A?.rahmen && text3 === (ctx.marke?.name ?? ctx.A?.name);
     if (ctx.scene && text3 && !fries) schrift(L2, text3, 0, y + h / 2, 0.13, h * 0.6, schriftF);
   }
@@ -84881,8 +84881,8 @@
   function stehFigur(ctx, L2, lx, lz, ry, rolle2 = "verkauf", pose) {
     figur2(ctx.S, ...L2.P(lx, lz), ctx.r() * 1e9 | 0, rolle2, { y: L2.oy, ry: L2.rot + ry, pose });
   }
-  function niedrigTisch(L2, lx, lz, w, t, pal, r, d, farbe = HOLZ2.weiss, h = 0.72) {
-    warenTisch(L2, lx, lz, w, t, pal, r, d, farbe, h);
+  function niedrigTisch(L2, lx, lz, w, t, pal, r, d, farbe2 = HOLZ2.weiss, h = 0.72) {
+    warenTisch(L2, lx, lz, w, t, pal, r, d, farbe2, h);
   }
   function beautyCounter(L2, r, d, ctx, m) {
     const korpus2 = m.farbe, akz = m.akzent;
@@ -86570,7 +86570,7 @@
     const bNX = Math.min(...rj.map((j) => bandNx(rows.get(j)))), bPX = Math.min(...rj.map((j) => bandPx(rows.get(j))));
     const bNZ = Math.min(...ci.map((i) => bandNz(cols.get(i)))), bPZ = Math.min(...ci.map((i) => bandPz(cols.get(i))));
     const X0 = i0 * R + bNX, X1 = (i1 + 1) * R - bPX, Z0 = j0 * R + bNZ, Z1 = (j1 + 1) * R - bPZ;
-    const passe = (L2, w) => {
+    const passe2 = (L2, w) => {
       let n = Math.max(0, Math.round((L2 + gap) / (w + gap)));
       let e = n ? Math.min(w * 1.1, (L2 - (n - 1) * gap) / n) : 0;
       while (n > 0 && e < 2.2) {
@@ -86579,7 +86579,7 @@
       }
       return [n, e];
     };
-    const [nI, iwE] = passe(X1 - X0, iw), [nJ, itE] = passe(Z1 - Z0, it);
+    const [nI, iwE] = passe2(X1 - X0, iw), [nJ, itE] = passe2(Z1 - Z0, it);
     const pwE = iwE + gap, ptE = itE + gap;
     const offX = (X1 - X0 - (nI * pwE - gap)) / 2, offZ = (Z1 - Z0 - (nJ * ptE - gap)) / 2;
     const gueltig = (sx0, sz0, sx1, sz1) => {
@@ -86858,7 +86858,7 @@
     const typ = unter ? UNTERMIETE2[o.mieter ?? "discounter"] : null;
     const bt = unter ? typ.boden : { a: m.boden, b: dunkler(m.boden, 0.04), m: "karo" };
     for (const c of alle) if (sicht3(c.i * R + 2.5, c.j * R + 2.5)) boden(S, c.i * R, c.j * R, R, R, y, bt, d);
-    const basis = unter ? null : MODUL2[o.basis ?? m.gruppe] ?? MODUL2.damen;
+    const basis2 = unter ? null : MODUL2[o.basis ?? m.gruppe] ?? MODUL2.damen;
     let tuerGesetzt = false, schild2 = false;
     const frisch = unter && (o.mieter ?? "discounter") === "discounter";
     let frischNr = 0, wandNr = 0;
@@ -86873,7 +86873,7 @@
       const L2 = lokal2(S, zentrum[0], yb, zentrum[1], 0);
       if (unter && frisch) (frischNr++ % 2 === 0 ? obstStand2 : waehle2(r, typ.insel))(L2, r, d);
       else if (unter) waehle2(r, typ.insel)(L2, r, d);
-      else waehle2(r, basis.insel)(L2, r, d);
+      else waehle2(r, basis2.insel)(L2, r, d);
       const wand2 = (seite) => seite === "z" ? lokal2(S, x + 2.5 + (wx ? 0.35 : 0), yb, z2 + 0.25, 0) : lokal2(S, x + 0.25, yb, z2 + 2.5, PI3 / 2);
       for (const [seite, ist] of [["z", wz2], ["x", wx]]) if (ist) {
         const len = seite === "z" ? wx ? R - 0.85 : R - 0.3 : R - 0.3;
@@ -86882,7 +86882,7 @@
         else if (unter) typ.wand(W3, len, r, d);
         else {
           W3.box(len, 3.6, 0.1, 0, 0, -0.1, m.farbe);
-          waehle2(r, basis.wand)(W3, len - 0.2, r, d);
+          waehle2(r, basis2.wand)(W3, len - 0.2, r, d);
         }
       }
     }
@@ -86896,7 +86896,7 @@
         const pos = dj !== 0 ? dj > 0 ? z2 + R - 0.08 : z2 + 0.08 : di > 0 ? x + R - 0.08 : x + 0.08;
         const mx = dj !== 0 ? x + 2.5 : pos, mz = dj !== 0 ? pos : z2 + 2.5;
         if (!sicht3(mx, mz)) continue;
-        const farbe = unter ? "#e9e4dc" : m.farbe;
+        const farbe2 = unter ? "#e9e4dc" : m.farbe;
         const tuer = vorne && k === "gang" && !tuerGesetzt;
         if (tuer) tuerGesetzt = true;
         const seg = (a, b) => {
@@ -86904,16 +86904,16 @@
           const lenS = b - a, mid = (a + b) / 2;
           const h0 = vorne ? 1 : hoch;
           if (dj !== 0) {
-            S.box(lenS, h0, 0.15, mid, y + h0 / 2, pos, farbe);
+            S.box(lenS, h0, 0.15, mid, y + h0 / 2, pos, farbe2);
             if (vorne) {
               S.box(lenS, hoch - 1.4, 0.04, mid, y + 1 + (hoch - 1.4) / 2, pos, GLAS3);
-              S.box(lenS, 0.4, 0.18, mid, y + hoch - 0.2, pos, farbe);
+              S.box(lenS, 0.4, 0.18, mid, y + hoch - 0.2, pos, farbe2);
             }
           } else {
-            S.box(0.15, h0, lenS, pos, y + h0 / 2, mid, farbe);
+            S.box(0.15, h0, lenS, pos, y + h0 / 2, mid, farbe2);
             if (vorne) {
               S.box(0.04, hoch - 1.4, lenS, pos, y + 1 + (hoch - 1.4) / 2, mid, GLAS3);
-              S.box(0.18, 0.4, lenS, pos, y + hoch - 0.2, mid, farbe);
+              S.box(0.18, 0.4, lenS, pos, y + hoch - 0.2, mid, farbe2);
             }
           }
         };
@@ -86921,8 +86921,8 @@
         if (tuer) {
           seg(a0, a0 + 1.2);
           seg(a0 + 3.8, a0 + R);
-          if (dj !== 0) S.box(2.6, 0.4, 0.18, a0 + 2.5, y + hoch - 0.2, pos, farbe);
-          else S.box(0.18, 0.4, 2.6, pos, y + hoch - 0.2, a0 + 2.5, farbe);
+          if (dj !== 0) S.box(2.6, 0.4, 0.18, a0 + 2.5, y + hoch - 0.2, pos, farbe2);
+          else S.box(0.18, 0.4, 2.6, pos, y + hoch - 0.2, a0 + 2.5, farbe2);
         } else seg(a0, a0 + R);
         if (vorne && !schild2 && scene2 && k === "gang") {
           schild2 = true;
@@ -86973,8 +86973,8 @@
   var OUT = ["#3f6b3a", "#c25b2a", "#e0a33a", "#2f5f8a", "#6d4c3d", "#8a9a5b", "#d14a3a", "#30343a", "#9a3b2b"];
   var WINTER = ["#e8403a", "#1f6fd1", "#ffffff", "#1f1f1f", "#ffcc00", "#20b5c9", "#ff6a2b", "#7a3cd1", "#2b3a55"];
   var VEREINE = [["#e8403a", "#ffffff"], ["#1f6fd1", "#ffffff"], ["#ffcc00", "#1f1f1f"], ["#38b86b", "#ffffff"], ["#ffffff", "#1f1f1f"], ["#7a3cd1", "#ffcc00"], ["#1f1f1f", "#e8403a"], ["#20b5c9", "#1f2a3a"]];
-  function kopfband2(ctx, L2, w, text3, farbe, schriftF, y = 3.2, h = 0.6) {
-    L2.box(w, h, 0.1, 0, y, 0.06, farbe);
+  function kopfband2(ctx, L2, w, text3, farbe2, schriftF, y = 3.2, h = 0.6) {
+    L2.box(w, h, 0.1, 0, y, 0.06, farbe2);
     if (ctx.scene && text3 && w > 1.6) schrift(L2, text3, 0, y + h / 2, 0.13, h * 0.58, schriftF);
   }
   function sitz(ctx, L2, lx, lz, ry, rolle2 = "kunde") {
@@ -87718,6 +87718,8 @@
   });
   for (const g of SPORT_ARTEN) ABT[g].kante = ABT[g].kante ?? KANTE;
   var SPORT_NAMEN = Object.fromEntries(SPORT_ARTEN.map((g) => [g, ABT[g].name]));
+  var SPORT_BOEDEN = Object.freeze(Object.fromEntries(SPORT_ARTEN.map((g) => [g, ABT[g].boden.a])));
+  var SPORT_SCHILDER = Object.freeze(Object.fromEntries(SPORT_ARTEN.map((g) => [g, ABT[g].schild.farbe])));
   function sportErlebnis(L2, r, d, art, ctx) {
     if (art === "laufanalyse") laufanalyse(L2, r, d, ctx);
     else fitnessInsel(L2, r, d, ctx);
@@ -87819,9 +87821,9 @@
     s2.lineTo(u0, v0);
     return s2;
   }
-  var textGecacht = (text3, farbe, bg) => textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
-  function ftext(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textGecacht(text3, farbe, bg);
+  var textGecacht = (text3, farbe2, bg) => textMaterial(text3, farbe2, { groesse: 140, hintergrund: bg });
+  function ftext(scene2, F2, text3, u, y, t, hMax, bMax, farbe2, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textGecacht(text3, farbe2, bg);
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp(F2, u, t);
@@ -87908,9 +87910,9 @@
       const th = DREH[front2];
       const tw = { "+z": [p.x, p.z], "+x": [p.x, p.z + W3], "-z": [p.x + W3, p.z + D], "-x": [p.x + D, p.z] }[front2];
       const M2 = new three_module_exports.Matrix4().makeTranslation(tw[0], 0, tw[1]).multiply(new three_module_exports.Matrix4().makeRotationY(th)).multiply(new three_module_exports.Matrix4().makeTranslation(ox, 0, oz)).multiply(new three_module_exports.Matrix4().makeScale(s2, s2, s2));
-      for (const [farbe, gs] of T.teile) for (const g of gs) {
+      for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.applyMatrix4(M2);
-        S.add(g, farbe);
+        S.add(g, farbe2);
       }
       grp.applyMatrix4(M2);
       scene2.add(grp);
@@ -87992,27 +87994,27 @@
       for (const s2 of [-0.72, 0.72]) S.quader(x0 + s2 - 0.07, y0 + 0.15, z0, x0 + s2 + 0.07, y0 + 0.32, z1, "#6b6f73");
     }
   }
-  function kohlenwagen(S, x, z2, ry, voll2 = true, farbe = "#5b3a2e", y0 = 0.6) {
+  function kohlenwagen(S, x, z2, ry, voll2 = true, farbe2 = "#5b3a2e", y0 = 0.6) {
     const c = Math.cos(ry), s2 = Math.sin(ry);
     const box = (L2, h, B2, off, yc, f) => S.box(L2, h, B2, x + c * off, y0 + yc, z2 - s2 * off, f, ry);
     box(9, 0.6, 2.2, 0, 0.6, "#2b2f33");
-    box(9.6, 2.4, 2.9, 0, 2.1, farbe);
-    for (const o of [-3.2, 0, 3.2]) box(0.12, 2.5, 3, o, 2.1, dunkler(farbe, 0.06));
+    box(9.6, 2.4, 2.9, 0, 2.1, farbe2);
+    for (const o of [-3.2, 0, 3.2]) box(0.12, 2.5, 3, o, 2.1, dunkler(farbe2, 0.06));
     if (voll2) box(9.2, 0.4, 2.6, 0, 3.4, "#2a2a2c");
   }
-  function lok(S, x, z2, ry, farbe = "#c8463c", y0 = 0.6) {
+  function lok(S, x, z2, ry, farbe2 = "#c8463c", y0 = 0.6) {
     const c = Math.cos(ry), s2 = Math.sin(ry);
     const box = (L2, h, B2, off, yc, f) => S.box(L2, h, B2, x + c * off, y0 + yc, z2 - s2 * off, f, ry);
     box(10, 0.7, 2.4, 0, 0.6, "#2b2f33");
-    box(9.4, 2.2, 2.6, 0.6, 2, farbe);
-    box(2.6, 1.1, 2.7, -3.2, 3.6, farbe);
+    box(9.4, 2.2, 2.6, 0.6, 2, farbe2);
+    box(2.6, 1.1, 2.7, -3.2, 3.6, farbe2);
     box(2.4, 0.6, 2.72, -3.2, 3.5, "#3c4852");
     box(9.6, 0.3, 2.65, 0.4, 1, "#f2d24a");
   }
-  function westAuto(S, x, z2, ry = 0, typ = "pkw", farbe = null, y0 = 0.3) {
+  function westAuto(S, x, z2, ry = 0, typ = "pkw", farbe2 = null, y0 = 0.3) {
     const c = Math.cos(ry), s2 = Math.sin(ry);
     const box = (L2, h, B2, off, yc, f) => S.box(L2, h, B2, x + c * off, y0 + yc, z2 - s2 * off, f, ry);
-    const fz = farbe ?? AUTOFARBEN2[Math.floor(Math.abs(x * 7.3 + z2 * 3.1)) % AUTOFARBEN2.length];
+    const fz = farbe2 ?? AUTOFARBEN2[Math.floor(Math.abs(x * 7.3 + z2 * 3.1)) % AUTOFARBEN2.length];
     if (typ === "pkw" || typ === "kombi" || typ === "kompakt" || typ === "taxi") {
       const L2 = typ === "kompakt" ? 3.8 : 4.5, f = typ === "taxi" ? TAXI : fz;
       box(L2 - 0.6, 0.3, 1.55, 0, 0.2, "#2b2f33");
@@ -88023,7 +88025,7 @@
       if (typ === "taxi") box(0.5, 0.2, 0.8, ko, 1.71, "#f6d24a");
     } else if (typ === "bus" || typ === "gelenkbus") {
       const teile = typ === "gelenkbus" ? [-6.2, 6.2] : [0];
-      const f = farbe ?? "#f2f0ea";
+      const f = farbe2 ?? "#f2f0ea";
       for (const o of teile) {
         box(11.6, 1.2, 2.5, o, 1, f);
         box(11.4, 1.1, 2.52, o, 2.15, "#3c4852");
@@ -89043,9 +89045,9 @@
     fb(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y - 0.2, y - 0.08, 0, 0.18, o.bank ?? "#cfc8b8");
     if (o.laden) for (const sg of [-1, 1]) fb(S, F2, u + sg * (fw / 2 + 0.36) - 0.28, u + sg * (fw / 2 + 0.36) + 0.28, y, y + fh, 0, 0.1, o.laden);
   }
-  function haustuer(S, F2, u, b, h, farbe, o = {}) {
+  function haustuer(S, F2, u, b, h, farbe2, o = {}) {
     if (o.bogen) fform(S, F2, bogenForm(u - b / 2 - 0.2, 0.3, u + b / 2 + 0.2, h + 0.35, "rund"), -0.02, 0.06, o.laibung ?? "#efe9dc");
-    fform(S, F2, bogenForm(u - b / 2, 0.3, u + b / 2, h, o.bogen ? "rund" : null), 0, 0.1, farbe);
+    fform(S, F2, bogenForm(u - b / 2, 0.3, u + b / 2, h, o.bogen ? "rund" : null), 0, 0.1, farbe2);
     if (!o.bogen) fb(S, F2, u - b / 2 - 0.3, u + b / 2 + 0.3, h + 0.15, h + 0.3, 0, 0.8, o.vordach ?? "#5a5f63");
     fb(S, F2, u - b / 2 - 0.2, u + b / 2 + 0.2, 0.3, 0.5, 0, 0.7, "#bdb8ad");
   }
@@ -89571,7 +89573,7 @@
     nenn: { zeile: [30, 26], kaufhaus: [48, 34], hochhaus: [44, 34] },
     roh: innenstadtRoh
   });
-  function logoGeruest(S, scene2, p, x0, z0, w, y, text3, farbe, emblem) {
+  function logoGeruest(S, scene2, p, x0, z0, w, y, text3, farbe2, emblem) {
     const bw = Math.min(w, text3.length * 2.2 + 6), x = x0 + (w - bw) / 2, h = 4.2;
     for (const xx of [x + 0.4, x + bw / 2, x + bw - 0.4]) {
       S.box(0.25, h + 1.2, 0.25, xx, y + (h + 1.2) / 2, z0, "#5a6168");
@@ -89581,17 +89583,17 @@
     S.quader(x, y + h + 0.9, z0 - 0.15, x + bw, y + h + 1.15, z0 + 0.15, "#5a6168");
     const F1 = R2(x, z0 + 0.2, 1, 0, bw, "+z"), F2 = R2(x + bw, z0 - 0.2, -1, 0, bw, "-z");
     for (const F3 of [F1, F2]) if (istSicht(p, F3.s)) {
-      ftext(scene2, F3, text3, bw / 2 + (emblem ? 2.4 : 0), y + 1.2 + h / 2, 0.02, h * 0.62, bw - (emblem ? 6.4 : 1.2), farbe);
+      ftext(scene2, F3, text3, bw / 2 + (emblem ? 2.4 : 0), y + 1.2 + h / 2, 0.02, h * 0.62, bw - (emblem ? 6.4 : 1.2), farbe2);
       if (emblem) {
         const [ex, ez] = wp(F3, 2.6, 0.08);
         const g = new three_module_exports.TorusGeometry(1.6, 0.4, 6, 20);
         g.rotateY(F3.ry);
         g.translate(ex, y + 1.2 + h / 2, ez);
-        S.add(g, farbe);
+        S.add(g, farbe2);
         const g2 = new three_module_exports.BoxGeometry(0.5, 2.6, 0.2);
         g2.rotateY(F3.ry);
         g2.translate(ex, y + 1.2 + h / 2, ez);
-        S.add(g2, farbe);
+        S.add(g2, farbe2);
       }
     }
   }
@@ -89753,7 +89755,7 @@
     }
     ftext(scene2, F2, text3, u, y, t + 0.32, h * 0.7, b * 0.92, fg);
   }
-  function fahrrad2(S, x, z2, ry, farbe, y0 = 0.38) {
+  function fahrrad2(S, x, z2, ry, farbe2, y0 = 0.38) {
     const c = Math.cos(ry), sn = Math.sin(ry), P2 = (u) => [x + c * u, z2 - sn * u];
     for (const u of [-0.55, 0.55]) {
       const [px2, pz4] = P2(u);
@@ -89763,8 +89765,8 @@
       S.add(g, "#2b2f33");
     }
     const [ax, az] = P2(-0.55), [bx, bz] = P2(0.3), [cx2, cz2] = P2(0.55);
-    balken(S, [ax, y0 + 0.4, az], [bx, y0 + 0.75, bz], 0.06, 0.06, farbe);
-    balken(S, [bx, y0 + 0.75, bz], [cx2, y0 + 0.36, cz2], 0.06, 0.06, farbe);
+    balken(S, [ax, y0 + 0.4, az], [bx, y0 + 0.75, bz], 0.06, 0.06, farbe2);
+    balken(S, [bx, y0 + 0.75, bz], [cx2, y0 + 0.36, cz2], 0.06, 0.06, farbe2);
     const [sx, sz] = P2(-0.25);
     S.box(0.25, 0.06, 0.12, sx, y0 + 0.85, sz, "#2b2f33", ry);
   }
@@ -89865,9 +89867,9 @@
       H = Hk + 1.4;
     } else if (v === "imbiss") {
       const iw = Math.min(11, W3 * 0.62), id = 7, ix = 1.5, iz = D * 0.2, Hi = 3.6;
-      const wand2 = waehle2(r, ["#f2efe6", "#e9e2cf"]), farbe = waehle2(r, ["#c9483e", "#e0b23a", "#2f6f8f"]);
+      const wand2 = waehle2(r, ["#f2efe6", "#e9e2cf"]), farbe2 = waehle2(r, ["#c9483e", "#e0b23a", "#2f6f8f"]);
       S.quader(ix, 0.3, iz, ix + iw, Hi, iz + id, wand2);
-      flachdach2(S, ix, iz, iw, id, Hi, farbe, null, "#7d7a74", 0.7);
+      flachdach2(S, ix, iz, iw, id, Hi, farbe2, null, "#7d7a74", 0.7);
       const name2 = p.name ?? waehle2(r, ["Imbiss Zum P\xFCtt", "Grill-Eck", "Imbiss Gl\xFCckauf", "Pommes-Paradies"]);
       for (const F2 of sichtbar2(p, ix, iz, iw, id)) {
         fb(S, F2, -0.05, F2.L + 0.05, 0.3, 0.9, 0, 0.06, "#a8a196");
@@ -89875,13 +89877,13 @@
           fb(S, F2, 0.6, F2.L - 2.2, 1.1, 2.7, -0.1, 0.02, "#6f8696");
           fb(S, F2, 0.5, F2.L - 2.1, 1, 1.15, 0, 0.7, "#c9cdd0");
           fb(S, F2, F2.L - 1.8, F2.L - 0.8, 0.3, 2.4, 0, 0.08, "#3c4852");
-          fb(S, F2, -0.1, F2.L + 0.1, 2.8, 3, 0, 1.8, farbe);
-          leuchtschild(S, scene2, F2, F2.L / 2, Hi + 1, -1, Math.min(F2.L - 0.5, 8), 1, name2, farbe, "#ffffff");
+          fb(S, F2, -0.1, F2.L + 0.1, 2.8, 3, 0, 1.8, farbe2);
+          leuchtschild(S, scene2, F2, F2.L / 2, Hi + 1, -1, Math.min(F2.L - 0.5, 8), 1, name2, farbe2, "#ffffff");
           for (const u of [1.5, F2.L - 3]) fb(S, F2, u - 0.06, u + 0.06, Hi, Hi + 0.6, -1, -0.9, "#5a6168");
         } else {
           fb(S, F2, 0.6, F2.L - 0.6, 1.2, 2.6, -0.1, 0.02, "#6f8696");
           leuchtschild(S, scene2, F2, F2.L / 2, 2.2, 0.05, F2.L - 1.2, 0.9, "Currywurst \xB7 Pommes", "#f4f2ec", "#c9483e");
-          fb(S, F2, 0.4, F2.L - 0.4, 2.8, 2.95, 0, 1, farbe);
+          fb(S, F2, 0.4, F2.L - 0.4, 2.8, 2.95, 0, 1, farbe2);
         }
       }
       {
@@ -89995,8 +89997,8 @@
     g.translate(x, y0 + 5.6 * s2, z2);
     S.add(g, waehle2(r, ["#5f9a56", "#6aa35c", "#58904f"]));
   }
-  function portalkran(S, x, z2, r, farbe, dreh = 0, sg = -1) {
-    const sp = 7, c = farbe, Z2 = (a2, b) => [Math.min(z2 + sg * a2, z2 + sg * b), Math.max(z2 + sg * a2, z2 + sg * b)];
+  function portalkran(S, x, z2, r, farbe2, dreh = 0, sg = -1) {
+    const sp = 7, c = farbe2, Z2 = (a2, b) => [Math.min(z2 + sg * a2, z2 + sg * b), Math.max(z2 + sg * a2, z2 + sg * b)];
     for (const [dx, dz] of [[-2.4, -sp / 2], [2.4, -sp / 2], [-2.4, sp / 2], [2.4, sp / 2]]) S.box(0.7, 8, 0.7, x + dx, 4.3, z2 + dz, c);
     S.quader(x - 3, 8, z2 - sp / 2 - 0.5, x + 3, 9.2, z2 + sp / 2 + 0.5, c);
     zyl5(S, 2.2, 2.2, 0.8, x, 9.2, z2, dunkler(c, 0.1), 12);
@@ -91081,11 +91083,11 @@
     if (v === "doppelt" && W3 > 70 && D - zk > 30) westSchiff(S, scene2, W3 * 0.4, D - 6, WY, PI5, "binnen", { laenge: Math.min(54, W3 * 0.6), ladung: "kohle", name: "Niederrhein" });
     return { hoehe: 12 };
   }
-  function schirmRund(S, x, z2, y0, farbe) {
+  function schirmRund(S, x, z2, y0, farbe2) {
     zyl5(S, 0.05, 0.05, 2.4, x, y0, z2, "#9aa1a7", 4);
     const g = new three_module_exports.ConeGeometry(1.6, 0.6, 8);
     g.translate(x, y0 + 2.5, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   var rheinPromenade = slot("slot:rhein_promenade", {
     wasserZurKamera: () => true,
@@ -91456,17 +91458,17 @@
     }
     if (W3 > 22) {
       const L2 = 16, xc = v === "station" ? W3 / 2 : zw(r, Math.min(W3 - 9, 9), Math.max(9, W3 - 9));
-      const farbe = waehle2(r, ["#2f6fb0", "#d9622b", "#d9622b"]);
+      const farbe2 = waehle2(r, ["#2f6fb0", "#d9622b", "#d9622b"]);
       for (const dx of [-L2 * 0.3, L2 * 0.3]) {
         S.box(0.3, 2, 0.3, xc + dx, yT - 1.5, zm, "#3b3f44");
         S.box(1.6, 0.5, 0.6, xc + dx, yT - 0.6, zm, "#3b3f44");
       }
       const yW = yT - 2.6;
-      S.quader(xc - L2 / 2, yW - 3, zm - 1.2, xc + L2 / 2, yW, zm + 1.2, farbe);
+      S.quader(xc - L2 / 2, yW - 3, zm - 1.2, xc + L2 / 2, yW, zm + 1.2, farbe2);
       S.quader(xc - L2 / 2 + 0.4, yW - 1.7, zm + 1.2, xc + L2 / 2 - 0.4, yW - 0.5, zm + 1.26, "#2b3640");
       S.quader(xc - L2 / 2 + 0.4, yW - 2.4, zm + 1.2, xc + L2 / 2 - 0.4, yW - 2.15, zm + 1.26, "#f4f2ec");
-      S.quader(xc - L2 / 2 - 0.8, yW - 2.8, zm - 1, xc - L2 / 2, yW - 0.3, zm + 1, dunkler(farbe, 0.06));
-      S.quader(xc + L2 / 2, yW - 2.8, zm - 1, xc + L2 / 2 + 0.8, yW - 0.3, zm + 1, dunkler(farbe, 0.06));
+      S.quader(xc - L2 / 2 - 0.8, yW - 2.8, zm - 1, xc - L2 / 2, yW - 0.3, zm + 1, dunkler(farbe2, 0.06));
+      S.quader(xc + L2 / 2, yW - 2.8, zm - 1, xc + L2 / 2 + 0.8, yW - 0.3, zm + 1, dunkler(farbe2, 0.06));
       S.quader(xc + L2 / 2 + 0.75, yW - 1.8, zm - 0.8, xc + L2 / 2 + 0.82, yW - 0.6, zm + 0.8, "#2b3640");
       S.quader(xc - L2 / 2, yW, zm - 1, xc + L2 / 2, yW + 0.25, zm + 1, "#cfd3d6");
     }
@@ -91786,6 +91788,1489 @@
     "slot:ruhr_brauturm": ruhrBrauturm
   };
 
+  // src/kit/moebel/basis.js
+  var PALETTEN2 = Object.freeze({
+    laufen: ["#e8403a", "#1f6fd1", "#f4f4f0", "#26292e", "#ffcb30"],
+    kinder: ["#ff9e43", "#1e9ed0", "#f5dd67", "#e75067", "#58b66a"],
+    textil: ["#294c83", "#d83f43", "#30363b", "#e1ded6", "#52a47d", "#ca9f5d"],
+    outdoor: ["#526e42", "#c46c35", "#d7ab57", "#3c667e", "#454442"],
+    rad: ["#d63e34", "#343940", "#2f79ba", "#f0bc39", "#5a9b64"],
+    winter: ["#d94e3e", "#3b7fbb", "#f4f4ed", "#333e4b", "#50bfd0"],
+    team: ["#388e57", "#c23b3b", "#2a579b", "#f0be3d", "#f1eee5"],
+    fitness: ["#2a3239", "#db5b3f", "#68a6b8", "#b7c2c9"],
+    outlet: ["#d54b55", "#365b87", "#d8af5e", "#5b8b65", "#eee4d8", "#a56f9d", "#48494d"],
+    allgemein: ["#b68b5c", "#e4d8c3", "#384c5b", "#bd6a5b", "#7c654f"]
+  });
+  function definition(id, titel, bereich, typ, rasterB, rasterT, hoehe, budget, bau2) {
+    if (!["wand", "gondel", "insel", "kasse", "deko", "service"].includes(typ)) throw new Error("M\xF6beltyp unbekannt: " + typ);
+    if (![2, 3, 4, 6, 8].includes(rasterB) || !Number.isInteger(rasterT) || rasterT < 1) throw new Error("Ung\xFCltiges M\xF6belraster: " + id);
+    return Object.freeze({ id, titel, bereich, rasterB, rasterT, hoehe, typ, budget, bau: bau2 });
+  }
+  var farbe = (r, pal) => pal[Math.min(pal.length - 1, Math.floor(r() * pal.length))];
+  var palette = (art) => PALETTEN2[art] ?? PALETTEN2.allgemein;
+  var detail = (d) => LOD2.stufe !== "fern" && d >= 0.45;
+  function textAuf(L2, text3, x, y, z2, breite, hoehe, farbeText = "#ffffff", farbeGrund = "#343a40") {
+    if (!L2.S.szene || typeof document === "undefined" || LOD2.stufe === "fern") return;
+    const a = textMaterial(text3, farbeText, { groesse: 108, hintergrund: farbeGrund });
+    const h = Math.min(hoehe, breite / Math.max(0.1, a.seitenverhaeltnis));
+    const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a.seitenverhaeltnis, h), a.mat);
+    const [X, Z2] = L2.P(x, z2);
+    m.position.set(X, L2.oy + y, Z2);
+    m.rotation.y = L2.rot;
+    L2.S.szene.add(m);
+  }
+  function wandModul(L2, r, d, ctx = {}, o = {}) {
+    const w = o.w ?? 5, pal = palette(o.pal ?? "allgemein"), material2 = o.alt ? "#896b51" : "#e8ebea";
+    const rahmen2 = o.alt ? "#634833" : "#444c55";
+    L2.box(w, 0.12, 0.6, 0, 0, 0.3, rahmen2);
+    L2.box(w, 2.28, 0.08, 0, 0.12, 0.04, material2);
+    L2.box(w, 0.1, 0.6, 0, 2.3, 0.3, rahmen2);
+    L2.box(w, 0.6, 0.08, 0, 2.4, 0.04, o.akzent ?? rahmen2);
+    textAuf(L2, o.titel ?? "Sortiment", 0, 2.71, 0.095, Math.min(w - 0.2, 3.8), 0.4, "#ffffff", o.akzent ?? rahmen2);
+    if (LOD2.stufe === "fern") {
+      L2.box(w - 0.12, 1.55, 0.4, 0, 0.55, 0.31, pal[0]);
+      return;
+    }
+    const n = Math.max(2, Math.round(w / (d < 0.45 ? 0.75 : 0.45))), a = w / n;
+    const art = o.art ?? "ware";
+    if (["textil", "trikot", "jacken", "taschen", "trikotmix"].includes(art)) {
+      const y = art === "jacken" ? 2.08 : 1.82;
+      L2.box(w - 0.12, 0.045, 0.04, 0, y, 0.37, "#aab3b9");
+      for (let i = 0; i < n; i++) {
+        const f = farbe(r, pal), x = -w / 2 + (i + 0.5) * a;
+        L2.box(Math.max(0.045, a * 0.75), art === "jacken" ? 1.43 : 1.02, 0.22, x, art === "jacken" ? 0.54 : 0.69, 0.4, f);
+        if (d > 0.65 && i % 3 === 0) L2.box(a * 0.4, 0.06, 0.24, x, y - 0.03, 0.41, "#d9e0e2");
+      }
+    } else {
+      const ebene = art === "ski" || art === "board" || art === "rad" ? 2 : 3;
+      for (let j = 0; j < ebene; j++) {
+        const y = 0.46 + j * (art === "ski" ? 0.85 : 0.61);
+        L2.box(w - 0.08, 0.065, 0.52, 0, y, 0.32, rahmen2);
+        for (let i = 0; i < n; i++) {
+          const x = -w / 2 + (i + 0.5) * a, f = farbe(r, pal);
+          if (art === "schuhe" || art === "stollen") {
+            L2.box(a * 0.6, 0.12, 0.32, x, y + 0.09, 0.34, f);
+            if (d > 0.75) L2.box(a * 0.35, 0.065, 0.12, x + a * 0.18, y + 0.18, 0.43, f);
+            if (o.variante === "laufen" && i % 3 === 0) L2.box(a * 0.6, 0.035, 0.36, x, y + 0.23, 0.37, "#c7d6e2");
+            if (o.variante === "kinder" && i % 2 === 0) L2.box(a * 0.35, 0.08, 0.05, x, y + 0.26, 0.52, "#ffcc49");
+          } else if (art === "ball" || art === "helm") {
+            L2.zyl(Math.min(0.18, a * 0.35), Math.min(0.18, a * 0.35), 0.31, x, y + 0.04, 0.35, f, 8);
+          } else if (art === "rucksack") {
+            L2.box(a * 0.65, 0.47, 0.28, x, y + 0.05, 0.37, f);
+            if (detail(d)) L2.box(a * 0.5, 0.1, 0.32, x, y + 0.38, 0.39, "#343b42");
+          } else if (art === "ski" || art === "board") {
+            L2.box(a * 0.26, 0.77, 0.15, x, y + 0.08, 0.31, f);
+          } else {
+            const h = 0.13 + i % 3 * 0.065;
+            L2.box(a * 0.83, h, 0.3, x, y + 0.03, 0.36, f);
+          }
+        }
+      }
+    }
+  }
+  function gondelModul(L2, r, d, ctx = {}, o = {}) {
+    const w = o.w ?? 2.5, pal = palette(o.pal ?? "allgemein"), art = o.art ?? "pakete";
+    L2.box(w, 0.12, 1.25, 0, 0, 0.625, "#737e85");
+    L2.box(w, 1.1, 0.13, 0, 0.12, 0.625, "#dce1e1");
+    L2.box(w, 0.085, 1.25, 0, 1.25, 0.625, "#3b434b");
+    if (LOD2.stufe === "fern") {
+      L2.box(w - 0.12, 0.5, 1, 0, 0.55, 0.625, pal[0]);
+      return;
+    }
+    for (const z2 of [0.27, 0.98]) for (let j = 0; j < 2; j++) {
+      const y = 0.3 + 0.47 * j;
+      L2.box(w - 0.1, 0.06, 0.54, 0, y, z2, "#9ba5ad");
+      const n = Math.max(3, Math.floor(w / (art === "ball" ? 0.5 : 0.35)));
+      for (let i = 0; i < n; i++) {
+        const f = farbe(r, pal), x = -w / 2 + (i + 0.5) * w / n;
+        if (art === "ball") L2.zyl(0.15, 0.15, 0.28, x, y + 0.07, z2, f, 8);
+        else if (art === "textil") L2.box(w / n * 0.76, 0.18, 0.38, x, y + 0.07, z2, f);
+        else L2.box(w / n * 0.72, 0.28, 0.36, x, y + 0.06, z2, f);
+      }
+    }
+    L2.box(Math.min(0.6, w * 0.15), 0.12, 1.17, w / 2 - 0.3, 1.26, 0.625, o.akzent ?? "#d83f3f");
+  }
+  function inselModul(L2, r, d, ctx = {}, o = {}) {
+    const w = o.w ?? 2.5, t = 2.5, pal = palette(o.pal ?? "allgemein"), art = o.art ?? "ware";
+    L2.box(w, 0.2, t, 0, 0, t / 2, o.boden ?? "#e8e6e1");
+    if (LOD2.stufe === "fern") {
+      L2.box(w * 0.72, 0.6, 1.5, 0, 0.2, t / 2, pal[0]);
+      return;
+    }
+    if (["zelt", "kanu", "rad", "tor", "fitness", "laufanalyse"].includes(art)) {
+      if (art === "zelt") {
+        L2.box(2.2, 0.08, 1.8, 0, 0.21, 1.2, "#6b7d5d");
+        L2.geo(new three_module_exports.ConeGeometry(1.03, 1.07, 4).rotateY(Math.PI / 4).scale(1, 1, 0.85).translate(0, 0.82, 1.2), 0, 0, 0, pal[0]);
+      } else if (art === "kanu") {
+        L2.box(Math.min(w - 0.2, 4.5), 0.23, 0.75, 0, 0.58, 1.3, pal[0]);
+        L2.box(1.4, 0.42, 0.1, -0.6, 0.2, 1.3, "#5b5f64");
+        L2.box(1.4, 0.42, 0.1, 0.6, 0.2, 1.3, "#5b5f64");
+      } else if (art === "rad") {
+        const n = w > 3 ? 3 : 2;
+        for (let i = 0; i < n; i++) {
+          const x = -w / 2 + (i + 0.5) * w / n, z2 = 1.2;
+          L2.zyl(0.28, 0.28, 0.1, x, 0.24, z2 - 0.4, "#292c31", 12);
+          L2.box(0.06, 0.7, 0.08, x, 0.5, z2, pal[i % pal.length]);
+          L2.box(0.7, 0.1, 0.07, x, 1.16, z2, "#343b42");
+        }
+      } else if (art === "tor") {
+        L2.box(2.2, 0.1, 0.09, 0, 1.25, 0.8, "#f2f2ed");
+        for (const x of [-1.06, 1.06]) L2.box(0.09, 1.2, 0.09, x, 0.2, 0.8, "#f2f2ed");
+        L2.box(1.9, 0.04, 0.5, 0, 0.4, 1.05, "#9bc598");
+      } else if (art === "fitness") {
+        L2.box(1.5, 0.12, 0.65, 0, 0.36, 1.15, "#31363b");
+        L2.box(0.08, 0.8, 0.08, -0.5, 0.3, 1.15, "#5d666f");
+        L2.box(0.1, 0.7, 0.7, 0.6, 0.24, 1.15, pal[0]);
+      } else {
+        L2.box(1.8, 0.26, 0.62, 0, 0.25, 1.1, "#3e454e");
+        L2.box(0.1, 0.75, 0.12, 0.6, 0.4, 1.1, "#a8b4bf");
+        L2.box(0.45, 0.4, 0.07, 0.6, 1.1, 1.2, "#6fa6c8");
+      }
+    } else if (art === "puppen") {
+      const n = Math.min(3, w > 3 ? 3 : 2);
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + (i + 0.5) * w / n;
+        L2.box(0.34, 0.56, 0.25, x, 0.75, 1.22, pal[i % pal.length]);
+        L2.box(0.18, 0.2, 0.18, x, 1.29, 1.22, "#cfaf91");
+        L2.box(0.09, 0.5, 0.12, x - 0.09, 0.25, 1.22, "#353f49");
+        L2.box(0.09, 0.5, 0.12, x + 0.09, 0.25, 1.22 + (i % 3 === 0 ? 0.18 : 0), "#353f49");
+        L2.box(0.085, i % 3 === 2 ? 0.34 : 0.42, 0.11, x - 0.27, i % 3 === 2 ? 1.02 : 0.84, 1.22 + (i % 3 === 1 ? 0.16 : 0), pal[i % pal.length]);
+        L2.box(0.085, 0.4, 0.11, x + 0.27, i % 3 === 0 ? 1.02 : 0.84, 1.22 + (i % 3 === 0 ? 0.15 : 0), pal[i % pal.length]);
+      }
+    } else {
+      L2.box(w * 0.83, 0.65, 1.6, 0, 0.2, 1.25, "#f4f1ed");
+      const n = Math.max(3, Math.floor(w / 0.55));
+      for (let i = 0; i < n; i++) for (let j = 0; j < 2; j++) {
+        L2.box(w / n * 0.68, 0.2 + j % 2 * 0.1, 0.48, -w / 2 + (i + 0.5) * w / n, 0.85, 0.88 + j * 0.75, farbe(r, pal));
+      }
+    }
+  }
+  function dekoModul(L2, r, d, ctx = {}, o = {}) {
+    const art = o.art ?? "pflanze";
+    if (LOD2.stufe === "fern") {
+      L2.box(art === "pflanze" ? 0.9 : art === "banner" ? 1.5 : 2.3, art === "pflanze" ? 1.2 : 2.7, art === "pflanze" ? 0.9 : 0.3, 0, 0, art === "pflanze" ? 0.75 : 0.17, o.akzent ?? "#849da0");
+      return;
+    }
+    if (art === "pflanze") {
+      L2.box(0.9, 0.44, 0.9, 0, 0, 0.75, "#d7d1c7");
+      L2.kugel(0.42, 0, 0.85, 0.75, "#5d9563");
+    } else if (art === "klettern") {
+      L2.box(2.4, 2.7, 0.3, 0, 0, 0.17, "#d7d0c4");
+      if (LOD2.stufe !== "fern") for (let i = 0; i < 12; i++) L2.box(0.21, 0.14, 0.14, (i % 4 - 1.5) * 0.48, 0.3 + Math.floor(i / 4) * 0.7, 0.42, farbe(r, palette("outdoor")));
+    } else if (art === "bild") {
+      L2.box(2.3, 2.7, 0.3, 0, 0, 0.17, "#e8e3dc");
+      L2.box(1.9, 1.9, 0.06, 0, 0.4, 0.34, o.akzent ?? "#64879a");
+    } else if (art === "banner") {
+      L2.box(0.09, 2.8, 0.09, 0, 0, 0.6, "#8b939a");
+      L2.box(1.5, 0.8, 0.07, 0, 1.8, 0.6, o.akzent ?? "#ca5040");
+      textAuf(L2, o.titel ?? "Saison", 0, 2.24, 0.65, 1.3, 0.34);
+    } else {
+      L2.box(1.8, 0.36, 0.8, 0, 0, 0.7, "#b9b3aa");
+      L2.box(1.5, 0.55, 0.45, 0, 0.36, 0.7, o.akzent ?? "#b26a48");
+    }
+  }
+  function serviceModul(L2, r, d, ctx = {}, o = {}) {
+    const w = o.w ?? 2.5, art = o.art ?? "info";
+    if (art === "umkleide") {
+      if (LOD2.stufe === "fern") {
+        L2.box(w, 2.4, 0.08, 0, 0, 0.04, "#e0d9d0");
+        L2.box(w, 2.1, 0.06, 0, 0.18, 1.86, "#8b7581");
+        return;
+      }
+      const n = o.kabinen ?? 2, tiefe = 1.9;
+      L2.box(w, 2.4, 0.08, 0, 0, 0.04, "#e0d9d0");
+      for (let i = 0; i <= n; i++) L2.box(0.07, 2.4, tiefe, -w / 2 + i * w / n, 0, tiefe / 2, "#e0d9d0");
+      for (let i = 0; i < n; i++) L2.box(w / n - 0.15, 2.1, 0.06, -w / 2 + (i + 0.5) * w / n, 0.18, tiefe - 0.04, "#8b7581");
+      return;
+    }
+    const t = Math.min(1.85, o.tiefe ?? 1.2);
+    L2.box(w, 0.18, t, 0, 0, t / 2, "#333c45");
+    L2.box(w, 0.89, t * 0.63, 0, 0.18, t / 2, "#e8e6df");
+    L2.box(w, 0.12, t, 0, 1.07, t / 2, "#6a737b");
+    if (LOD2.stufe === "fern") return;
+    if (art === "werkstatt" || art === "skiwerkstatt") {
+      for (let i = 0; i < Math.floor(w); i++) L2.box(0.32, 0.28, 0.34, -w / 2 + (i + 0.5) * w / Math.floor(w), 1.19, t / 2, farbe(r, palette(art === "skiwerkstatt" ? "winter" : "rad")));
+      L2.box(w - 0.4, 0.14, 0.06, 0, 1.68, 0.11, "#5c6268");
+    } else if (art === "bank") {
+      L2.box(w - 0.25, 0.3, 0.62, 0, 1, t / 2, "#8e7358");
+    } else if (art === "beflockung") {
+      L2.box(0.48, 0.26, 0.44, 0, 1.19, t / 2, "#bd564a");
+    } else {
+      L2.box(0.32, 0.26, 0.14, 0, 1.19, t / 2, "#30383d");
+    }
+  }
+
+  // src/kit/moebel/sport-mix.js
+  var THEMEN2 = Object.freeze({
+    sportschuhe: ["sitzbank", "probiertisch", "spiegel", "schuhregal", "anprobebank", "schuhtisch"],
+    sporttextil: ["kleiderstange", "rundstaender", "puppen", "falttisch", "haengung", "saison"],
+    outdoor: ["rucksaecke", "zelt", "wanderware", "tisch", "jacken", "ausruestung"],
+    rad: ["radreihe", "helmstaender", "werkbank", "radzubehoer", "sattel", "radpodest"],
+    fitness: ["geraete", "hanteln", "matten", "training", "zubehoer", "ausstellung"],
+    wintersport: ["ski", "boards", "skijacken", "skischuhe", "ausruestung", "wintertisch"],
+    teamsport: ["ballkorb", "trikots", "tordisplay", "stollen", "vereinsware", "balltisch"]
+  });
+  var FARBEN4 = {
+    sportschuhe: "laufen",
+    sporttextil: "textil",
+    outdoor: "outdoor",
+    rad: "rad",
+    fitness: "fitness",
+    wintersport: "winter",
+    teamsport: "team"
+  };
+  var basis = (L2, w, farbe2) => {
+    L2.box(w - 0.18, 0.1, 1.06, 0, 0, 0.625, "#bfc9cc");
+    L2.box(w - 0.24, 0.07, 0.94, 0, 0.12, 0.625, farbe2);
+  };
+  function baueMix(L2, r, d, art, stil, w) {
+    const pal = palette(FARBEN4[art]), farbe2 = pal[Math.floor(r() * pal.length)];
+    basis(L2, w, farbe2);
+    if (LOD2.stufe === "fern") {
+      L2.box(w - 0.4, 0.72, 0.72, 0, 0.23, 0.625, pal[1 % pal.length]);
+      return;
+    }
+    const n = Math.max(2, Math.floor(w / 1.25));
+    const xx = (i) => (i - (n - 1) / 2) * (w - 0.7) / n;
+    if (/bank|sitz|matten|tisch|probier|falttisch|wintertisch|podest|ausstellung/.test(stil)) {
+      L2.box(w - 0.42, 0.14, 0.72, 0, 0.51, 0.625, "#ded8cf");
+      for (const x of [-w / 2 + 0.36, w / 2 - 0.36]) L2.box(0.1, 0.51, 0.1, x, 0.03, 0.625, "#525b64");
+      if (/bank|sitz|matten/.test(stil)) L2.box(w - 0.5, 0.22, 0.48, 0, 0.67, 0.6, pal[2 % pal.length]);
+      else for (let i = 0; i < n; i++) L2.box(0.42, 0.22, 0.4, xx(i), 0.69, 0.63, pal[i % pal.length]);
+    } else if (/spiegel/.test(stil)) {
+      for (let i = 0; i < n; i++) {
+        L2.box(0.14, 1.12, 0.12, xx(i), 0.16, 0.63, "#424c55");
+        L2.box(0.6, 1.02, 0.035, xx(i), 0.21, 0.71, "#9fc0ca");
+        L2.box(0.58, 0.06, 0.08, xx(i), 1.21, 0.7, "#586168");
+      }
+    } else if (/radreihe|radpodest|geraete|training/.test(stil)) {
+      for (let i = 0; i < n; i++) {
+        const x = xx(i);
+        L2.zyl(0.24, 0.24, 0.11, x - 0.21, 0.2, 0.65, "#283038", 10);
+        L2.zyl(0.24, 0.24, 0.11, x + 0.21, 0.2, 0.65, "#283038", 10);
+        L2.box(0.5, 0.1, 0.12, x, 0.55, 0.65, pal[i % pal.length]);
+        L2.box(0.06, 0.62, 0.07, x, 0.26, 0.65, "#727e87");
+        L2.box(0.48, 0.08, 0.09, x, 0.96, 0.65, "#333b42");
+      }
+    } else if (/puppen/.test(stil)) {
+      for (let i = 0; i < n; i++) {
+        const x = xx(i);
+        L2.box(0.32, 0.52, 0.22, x, 0.62, 0.62, pal[i % pal.length]);
+        L2.box(0.18, 0.2, 0.18, x, 1.13, 0.62, "#c6a68b");
+        for (const dx of [-0.11, 0.11]) L2.box(0.08, 0.48, 0.1, x + dx, 0.15, 0.62, "#343c44");
+        for (const dx of [-0.23, 0.23]) L2.box(0.07, 0.4, 0.1, x + dx, 0.72, 0.62, pal[i % pal.length]);
+      }
+    } else if (/rund|ballkorb|helm|hantel/.test(stil)) {
+      for (let i = 0; i < n; i++) {
+        const x = xx(i);
+        L2.zyl(0.46, 0.46, 0.09, x, 0.88, 0.65, "#737c83", 12);
+        L2.box(0.07, 0.84, 0.07, x, 0.15, 0.65, "#737c83");
+        for (let j = 0; j < 4; j++) L2.box(0.16, 0.25, 0.17, x + (j % 2 ? 0.21 : -0.21), 0.93, 0.65 + (j < 2 ? -0.21 : 0.21), pal[(i + j) % pal.length]);
+      }
+    } else if (/zelt|tor|board|ski/.test(stil)) {
+      for (let i = 0; i < n; i++) {
+        const x = xx(i);
+        L2.box(0.68, 0.65, 0.64, x, 0.28, 0.65, pal[i % pal.length]);
+        L2.box(0.08, 0.48, 0.08, x, 0.76, 0.65, "#e0e2e0");
+        L2.box(0.7, 0.08, 0.55, x, 1.21, 0.65, pal[(i + 1) % pal.length]);
+      }
+    } else if (/stange|haengung|jacken|trikot/.test(stil)) {
+      L2.box(w - 0.36, 0.07, 0.08, 0, 1.19, 0.62, "#5b6972");
+      for (const x of [-w / 2 + 0.28, w / 2 - 0.28]) L2.box(0.08, 1.15, 0.08, x, 0.08, 0.62, "#707f89");
+      for (let i = 0; i < n * 3; i++) {
+        const x = -w / 2 + 0.27 + (i + 0.5) * (w - 0.54) / (n * 3);
+        L2.box((w - 0.54) / (n * 3) * 0.72, 0.7, 0.26, x, 0.43, 0.65, pal[i % pal.length]);
+      }
+    } else {
+      L2.box(w - 0.28, 0.13, 0.66, 0, 0.75, 0.625, "#dfe5e5");
+      for (let i = 0; i < n * 2; i++) {
+        const x = -w / 2 + 0.3 + (i + 0.5) * (w - 0.6) / (n * 2);
+        L2.box((w - 0.6) / (n * 2) * 0.8, 0.37 + i % 2 * 0.1, 0.34, x, 0.85, 0.65, pal[i % pal.length]);
+      }
+    }
+    if (detail(d) && /werkbank|radzubehoer|ausruestung/.test(stil))
+      L2.box(w - 0.36, 0.06, 0.12, 0, 1.28, 0.65, "#e6e6df");
+  }
+  var definitionen = [];
+  for (const [art, stile] of Object.entries(THEMEN2))
+    for (const stil of stile)
+      for (const rasterB of [2, 4]) {
+        const w = rasterB * 1.25;
+        const id = "sport_mix_" + art + "_" + stil + "_" + rasterB;
+        definitionen.push(definition(
+          id,
+          art + " \xB7 " + stil,
+          "sport",
+          "gondel",
+          rasterB,
+          1,
+          1.4,
+          120,
+          (L2, r, d) => baueMix(L2, r, d, art, stil, w)
+        ));
+      }
+  var SPORT_MIX_MOEBEL = definitionen;
+  var SPORT_MIX_PROFILE = Object.freeze(Object.fromEntries(
+    Object.entries(THEMEN2).map(([art, stile]) => [art, Object.freeze(Object.fromEntries(
+      [2, 4].map((b) => [b, Object.freeze(stile.map((stil) => "sport_mix_" + art + "_" + stil + "_" + b))])
+    ))])
+  ));
+  var WANDWARE = Object.freeze({
+    sportschuhe: ["schuhe", "stollen", "ware", "schuhe"],
+    sporttextil: ["textil", "jacken", "trikot", "ware"],
+    outdoor: ["rucksack", "jacken", "ware", "schuhe"],
+    rad: ["rad", "helm", "ware", "rad"],
+    fitness: ["ware", "textil", "ware", "schuhe"],
+    wintersport: ["ski", "board", "jacken", "ware"],
+    teamsport: ["trikot", "ball", "stollen", "ware"]
+  });
+  var SPORT_MIX_WAENDE = Object.freeze(Object.fromEntries(
+    Object.entries(WANDWARE).map(([art, arten]) => [art, Object.freeze(arten.map((ware3, i) => {
+      const id = "sport_mix_wand_" + art + "_" + i;
+      const titel = (THEMEN2[art]?.[i] ?? art) + " \xB7 Wand";
+      definitionen.push(definition(
+        id,
+        titel,
+        "sport",
+        "wand",
+        2,
+        1,
+        3,
+        220,
+        (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { art: ware3, pal: FARBEN4[art], titel, w: 2.5 })
+      ));
+      return id;
+    }))])
+  ));
+  Object.freeze(SPORT_MIX_MOEBEL);
+
+  // src/kit/moebel/wand.js
+  var wand_exports = {};
+  __export(wand_exports, {
+    ALT_BETTWAREN: () => ALT_BETTWAREN,
+    ALT_BUCH_REGAL: () => ALT_BUCH_REGAL,
+    ALT_DAMEN_HAENGUNG: () => ALT_DAMEN_HAENGUNG,
+    ALT_FEINKOST: () => ALT_FEINKOST,
+    ALT_GESCHIRR: () => ALT_GESCHIRR,
+    ALT_HAUSHALT: () => ALT_HAUSHALT,
+    ALT_HERREN_HAENGUNG: () => ALT_HERREN_HAENGUNG,
+    ALT_HOLZ_REGAL: () => ALT_HOLZ_REGAL,
+    ALT_HOLZ_WAND_10: () => ALT_HOLZ_WAND_10,
+    ALT_HOLZ_WAND_HALB: () => ALT_HOLZ_WAND_HALB,
+    ALT_KINDER_MODE: () => ALT_KINDER_MODE,
+    ALT_KLEINKUNST: () => ALT_KLEINKUNST,
+    ALT_PARFUEM: () => ALT_PARFUEM,
+    ALT_SCHUH_KLASSIK: () => ALT_SCHUH_KLASSIK,
+    ALT_SPIELWAREN: () => ALT_SPIELWAREN,
+    ALT_TASCHEN_ALTHOLZ: () => ALT_TASCHEN_ALTHOLZ,
+    ALT_UHREN_VITRINE: () => ALT_UHREN_VITRINE,
+    ALT_WAESCHE: () => ALT_WAESCHE
+  });
+  var ALT_HOLZ_REGAL = definition("alt_holz_regal", "Holzregal klassisch", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "Holzregal klassisch", "alt": true, "w": 5 }));
+  var ALT_HOLZ_WAND_10 = definition("alt_holz_wand_10", "Holzregal 10 m", "allgemein", "wand", 8, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "Holzregal 10 m", "alt": true, "w": 10 }));
+  var ALT_HOLZ_WAND_HALB = definition("alt_holz_wand_halb", "Holzregal halb", "allgemein", "wand", 2, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "Holzregal halb", "alt": true, "w": 2.5 }));
+  var ALT_DAMEN_HAENGUNG = definition("alt_damen_haengung", "Damenh\xE4ngeware", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "outlet", "titel": "Damenh\xE4ngeware", "alt": true, "w": 5 }));
+  var ALT_HERREN_HAENGUNG = definition("alt_herren_haengung", "Herrenh\xE4ngeware", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "textil", "titel": "Herrenh\xE4ngeware", "alt": true, "w": 5 }));
+  var ALT_KINDER_MODE = definition("alt_kinder_mode", "Kindermode alt", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "kinder", "titel": "Kindermode alt", "alt": true, "w": 5 }));
+  var ALT_SCHUH_KLASSIK = definition("alt_schuh_klassik", "Schuhregal klassisch", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "schuhe", "pal": "allgemein", "titel": "Schuhregal klassisch", "alt": true, "w": 5 }));
+  var ALT_TASCHEN_ALTHOLZ = definition("alt_taschen_altholz", "Lederwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "taschen", "pal": "allgemein", "titel": "Lederwarenwand", "alt": true, "w": 5 }));
+  var ALT_UHREN_VITRINE = definition("alt_uhren_vitrine", "Uhrenvitrine", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "Uhrenvitrine", "alt": true, "w": 5 }));
+  var ALT_PARFUEM = definition("alt_parfuem", "Parf\xFCmregal", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "beauty", "pal": "outlet", "titel": "Parf\xFCmregal", "alt": true, "w": 5 }));
+  var ALT_WAESCHE = definition("alt_waesche", "W\xE4schewand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "outlet", "titel": "W\xE4schewand", "alt": true, "w": 5 }));
+  var ALT_KLEINKUNST = definition("alt_kleinkunst", "Geschenkartikel", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "Geschenkartikel", "alt": true, "w": 5 }));
+  var ALT_HAUSHALT = definition("alt_haushalt", "Haushaltswaren", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "Haushaltswaren", "alt": true, "w": 5 }));
+  var ALT_SPIELWAREN = definition("alt_spielwaren", "Spielwaren", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "kinder", "titel": "Spielwaren", "alt": true, "w": 5 }));
+  var ALT_BUCH_REGAL = definition("alt_buch_regal", "B\xFCcherwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "titel": "B\xFCcherwand", "alt": true, "w": 5 }));
+  var ALT_FEINKOST = definition("alt_feinkost", "Feinkostregal", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "outlet", "titel": "Feinkostregal", "alt": true, "w": 5 }));
+  var ALT_GESCHIRR = definition("alt_geschirr", "Geschirrwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "home", "pal": "allgemein", "titel": "Geschirrwand", "alt": true, "w": 5 }));
+  var ALT_BETTWAREN = definition("alt_bettwaren", "Bettwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "allgemein", "titel": "Bettwarenwand", "alt": true, "w": 5 }));
+
+  // src/kit/moebel/gondel.js
+  var gondel_exports = {};
+  __export(gondel_exports, {
+    GONDEL_BAELLE: () => GONDEL_BAELLE,
+    GONDEL_FITNESS: () => GONDEL_FITNESS,
+    GONDEL_GESCHENKE: () => GONDEL_GESCHENKE,
+    GONDEL_HELM: () => GONDEL_HELM,
+    GONDEL_KINDER: () => GONDEL_KINDER,
+    GONDEL_KURZWAREN: () => GONDEL_KURZWAREN,
+    GONDEL_OUTDOOR: () => GONDEL_OUTDOOR,
+    GONDEL_RAD: () => GONDEL_RAD,
+    GONDEL_RIEGEL: () => GONDEL_RIEGEL,
+    GONDEL_SCHUHE: () => GONDEL_SCHUHE,
+    GONDEL_SKI: () => GONDEL_SKI,
+    GONDEL_SOCKEN: () => GONDEL_SOCKEN,
+    GONDEL_SPIELZEUG: () => GONDEL_SPIELZEUG,
+    GONDEL_TEXTIL: () => GONDEL_TEXTIL,
+    GONDEL_TRIKOT: () => GONDEL_TRIKOT,
+    GONDEL_TRINKEN: () => GONDEL_TRINKEN,
+    GONDEL_WAESCHE: () => GONDEL_WAESCHE
+  });
+  var GONDEL_SCHUHE = definition("gondel_schuhe", "Schuhgondel", "sport", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "schuhe", "pal": "laufen", "w": 2.5 }));
+  var GONDEL_TEXTIL = definition("gondel_textil", "Faltgondel", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "textil", "pal": "textil", "w": 5 }));
+  var GONDEL_BAELLE = definition("gondel_baelle", "Ballgondel", "sport", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "ball", "pal": "team", "w": 2.5 }));
+  var GONDEL_TRINKEN = definition("gondel_trinken", "Trinkflaschen", "sport", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "ware", "pal": "fitness", "w": 2.5 }));
+  var GONDEL_RIEGEL = definition("gondel_riegel", "Sportnahrung", "sport", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "fitness", "w": 2.5 }));
+  var GONDEL_SOCKEN = definition("gondel_socken", "Sportsocken", "sport", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "textil", "pal": "textil", "w": 2.5 }));
+  var GONDEL_FITNESS = definition("gondel_fitness", "Fitnesskleinger\xE4te", "sport", "gondel", 3, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "fitness", "w": 3.75 }));
+  var GONDEL_RAD = definition("gondel_rad", "Radzubeh\xF6r", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "rad", "w": 5 }));
+  var GONDEL_SKI = definition("gondel_ski", "Skizubeh\xF6r", "sport", "gondel", 3, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "winter", "w": 3.75 }));
+  var GONDEL_OUTDOOR = definition("gondel_outdoor", "Outdoorzubeh\xF6r", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "outdoor", "w": 5 }));
+  var GONDEL_KINDER = definition("gondel_kinder", "Kindersport", "sport", "gondel", 3, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "textil", "pal": "kinder", "w": 3.75 }));
+  var GONDEL_TRIKOT = definition("gondel_trikot", "Trikotgondel", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "textil", "pal": "team", "w": 5 }));
+  var GONDEL_HELM = definition("gondel_helm", "Helmzubeh\xF6r", "sport", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "rad", "w": 2.5 }));
+  var GONDEL_KURZWAREN = definition("gondel_kurzwaren", "Kurzwaren klassisch", "allgemein", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "allgemein", "w": 5 }));
+  var GONDEL_GESCHENKE = definition("gondel_geschenke", "Geschenkgondel", "allgemein", "gondel", 3, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "outlet", "w": 3.75 }));
+  var GONDEL_WAESCHE = definition("gondel_waesche", "W\xE4schegondel", "allgemein", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "textil", "pal": "outlet", "w": 5 }));
+  var GONDEL_SPIELZEUG = definition("gondel_spielzeug", "Spielwarengondel", "allgemein", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { "art": "pakete", "pal": "kinder", "w": 2.5 }));
+
+  // src/kit/moebel/insel.js
+  var insel_exports = {};
+  __export(insel_exports, {
+    INSEL_ALT_BETTW: () => INSEL_ALT_BETTW,
+    INSEL_ALT_GESCHENK: () => INSEL_ALT_GESCHENK,
+    INSEL_ALT_KINDER: () => INSEL_ALT_KINDER,
+    INSEL_ALT_NEUHEIT: () => INSEL_ALT_NEUHEIT,
+    INSEL_ALT_OSTERN: () => INSEL_ALT_OSTERN,
+    INSEL_ALT_PUPPEN: () => INSEL_ALT_PUPPEN,
+    INSEL_ALT_SCHUHE: () => INSEL_ALT_SCHUHE,
+    VITRINE_ALT: () => VITRINE_ALT
+  });
+  var INSEL_ALT_PUPPEN = definition("insel_alt_puppen", "Puppengruppe klassisch", "allgemein", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "allgemein", "w": 5 }));
+  var INSEL_ALT_NEUHEIT = definition("insel_alt_neuheit", "Kaufhausneuheiten", "allgemein", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "w": 2.5 }));
+  var INSEL_ALT_BETTW = definition("insel_alt_bettw", "Bettw\xE4scheinsel", "allgemein", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "w": 5 }));
+  var INSEL_ALT_GESCHENK = definition("insel_alt_geschenk", "Geschenkpodest", "allgemein", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "w": 2.5 }));
+  var INSEL_ALT_SCHUHE = definition("insel_alt_schuhe", "Schuhprobierinsel", "allgemein", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "allgemein", "w": 2.5 }));
+  var INSEL_ALT_OSTERN = definition("insel_alt_ostern", "Saisoninsel", "allgemein", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "outlet", "w": 5 }));
+  var INSEL_ALT_KINDER = definition("insel_alt_kinder", "Kinderwelt", "allgemein", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "kinder", "w": 5 }));
+  var VITRINE_ALT = definition("vitrine_alt", "Glasvitrine Kaufhaus alt", "allgemein", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => {
+    L2.box(2.35, 0.2, 1.1, 0, 0, 1.25, "#765946");
+    L2.box(2.35, 0.12, 1.1, 0, 1.3, 1.25, "#765946");
+    if (LOD2.stufe === "fern" || d < 0.5) return;
+    L2.box(0.05, 1.1, 0.05, -1.08, 0.2, 0.72, "#80624a");
+    L2.box(0.05, 1.1, 0.05, 1.08, 0.2, 0.72, "#80624a");
+    L2.box(0.05, 1.1, 0.05, -1.08, 0.2, 1.78, "#80624a");
+    L2.box(0.05, 1.1, 0.05, 1.08, 0.2, 1.78, "#80624a");
+    L2.box(2.2, 0.045, 0.9, 0, 0.78, 1.25, "#cadbe1");
+    for (let i = 0; i < 5; i++) L2.box(0.3, 0.19, 0.2, (i - 2) * 0.4, 0.85, 1.25, "#b89a66");
+  });
+
+  // src/kit/moebel/kasse.js
+  var kasse_exports = {};
+  __export(kasse_exports, {
+    KASSE_ALT_INFO: () => KASSE_ALT_INFO,
+    KASSE_ALT_KASSE: () => KASSE_ALT_KASSE,
+    KASSE_ALT_KASSE_KLEIN: () => KASSE_ALT_KASSE_KLEIN,
+    KASSE_ALT_VITRINE: () => KASSE_ALT_VITRINE,
+    KASSE_SPORT_GROSS: () => KASSE_SPORT_GROSS,
+    KASSE_SPORT_INFO: () => KASSE_SPORT_INFO,
+    KASSE_SPORT_KLEIN: () => KASSE_SPORT_KLEIN
+  });
+  var KASSE_SPORT_KLEIN = definition("kasse_sport_klein", "Sportkasse klein", "sport", "kasse", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var KASSE_SPORT_GROSS = definition("kasse_sport_gross", "Sportkasse gro\xDF", "sport", "kasse", 4, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 5 }));
+  var KASSE_SPORT_INFO = definition("kasse_sport_info", "Sportinformation", "sport", "kasse", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var KASSE_ALT_KASSE = definition("kasse_alt_kasse", "Kassentisch alt", "allgemein", "kasse", 4, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 5 }));
+  var KASSE_ALT_KASSE_KLEIN = definition("kasse_alt_kasse_klein", "Kassentisch alt klein", "allgemein", "kasse", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var KASSE_ALT_INFO = definition("kasse_alt_info", "Information alt", "allgemein", "kasse", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var KASSE_ALT_VITRINE = definition("kasse_alt_vitrine", "Kassenvitrine", "allgemein", "kasse", 4, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 5 }));
+
+  // src/kit/moebel/deko.js
+  var deko_exports = {};
+  __export(deko_exports, {
+    DEKO_ALT_RASTERDECKE: () => DEKO_ALT_RASTERDECKE,
+    DEKO_ALT_SCHAUBILD: () => DEKO_ALT_SCHAUBILD,
+    DEKO_ALT_WEGWEISER: () => DEKO_ALT_WEGWEISER,
+    DEKO_KLETTERWAND: () => DEKO_KLETTERWAND,
+    DEKO_MOTIVWAND: () => DEKO_MOTIVWAND,
+    DEKO_PFLANZKUEBEL: () => DEKO_PFLANZKUEBEL,
+    DEKO_SAISONBANNER: () => DEKO_SAISONBANNER,
+    DEKO_SPORTBILD: () => DEKO_SPORTBILD
+  });
+  var DEKO_KLETTERWAND = definition("deko_kletterwand", "Kletterwand-Segment", "sport", "deko", 2, 1, 2.7, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "klettern", "titel": "Kletterwand-Segment", "w": 2.5 }));
+  var DEKO_MOTIVWAND = definition("deko_motivwand", "Sportmotiv-Bildwand", "sport", "deko", 2, 1, 2.7, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "bild", "titel": "Sportmotiv-Bildwand", "w": 2.5 }));
+  var DEKO_PFLANZKUEBEL = definition("deko_pflanzkuebel", "Pflanzk\xFCbel", "sport", "deko", 2, 1, 1.4, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "pflanze", "titel": "Pflanzk\xFCbel", "w": 2.5 }));
+  var DEKO_SAISONBANNER = definition("deko_saisonbanner", "Saisonbanner", "sport", "deko", 2, 1, 2.8, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "banner", "titel": "Saisonbanner", "w": 2.5 }));
+  var DEKO_SPORTBILD = definition("deko_sportbild", "Markenbildwand", "sport", "deko", 2, 1, 2.7, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "bild", "titel": "Markenbildwand", "w": 2.5 }));
+  var DEKO_ALT_WEGWEISER = definition("deko_alt_wegweiser", "Historischer Abteilungswegweiser", "allgemein", "deko", 2, 1, 2.8, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "banner", "titel": "Rasterleuchten-Deckenband", "w": 2.5 }));
+  var DEKO_ALT_SCHAUBILD = definition("deko_alt_schaubild", "Kaufhausbildwand", "allgemein", "deko", 2, 1, 2.7, 80, (L2, r, d, ctx) => dekoModul(L2, r, d, ctx, { "art": "bild", "titel": "Kaufhausbildwand", "w": 2.5 }));
+  var DEKO_ALT_RASTERDECKE = definition("deko_alt_rasterdecke", "Rasterleuchten-Deckenband", "allgemein", "deko", 4, 1, 3.3, 80, (L2, r, d, ctx) => {
+    L2.box(5, 0.17, 0.6, 0, 3, 0.3, "#9c9c96");
+    if (LOD2.stufe === "fern") return;
+    for (let i = 0; i < 5; i++) {
+      L2.box(0.78, 0.045, 0.46, -2 + i, 3.19, 0.3, "#f4f3e5");
+      L2.box(0.08, 0.06, 0.52, -2.4 + i, 3.17, 0.3, "#727d7d");
+    }
+  });
+
+  // src/kit/moebel/sport.js
+  var sport_exports = {};
+  __export(sport_exports, {
+    SPORT_ABVERKAUF_GITTER: () => SPORT_ABVERKAUF_GITTER,
+    SPORT_ABVERKAUF_TISCH: () => SPORT_ABVERKAUF_TISCH,
+    SPORT_BALL: () => SPORT_BALL,
+    SPORT_BOARD: () => SPORT_BOARD,
+    SPORT_FITNESS_ZUBEHOER: () => SPORT_FITNESS_ZUBEHOER,
+    SPORT_HELM: () => SPORT_HELM,
+    SPORT_HELM_KINDER: () => SPORT_HELM_KINDER,
+    SPORT_INSEL_ANPROBE: () => SPORT_INSEL_ANPROBE,
+    SPORT_INSEL_BEFLOCKUNG: () => SPORT_INSEL_BEFLOCKUNG,
+    SPORT_INSEL_EBIKE: () => SPORT_INSEL_EBIKE,
+    SPORT_INSEL_FITNESS: () => SPORT_INSEL_FITNESS,
+    SPORT_INSEL_KANU: () => SPORT_INSEL_KANU,
+    SPORT_INSEL_LAUFANALYSE: () => SPORT_INSEL_LAUFANALYSE,
+    SPORT_INSEL_NEUHEIT: () => SPORT_INSEL_NEUHEIT,
+    SPORT_INSEL_OUTDOOR_PODEST: () => SPORT_INSEL_OUTDOOR_PODEST,
+    SPORT_INSEL_PUPPEN_FUSSBALL: () => SPORT_INSEL_PUPPEN_FUSSBALL,
+    SPORT_INSEL_PUPPEN_LAUFEN: () => SPORT_INSEL_PUPPEN_LAUFEN,
+    SPORT_INSEL_PUPPEN_OUTDOOR: () => SPORT_INSEL_PUPPEN_OUTDOOR,
+    SPORT_INSEL_PUPPEN_WINTER: () => SPORT_INSEL_PUPPEN_WINTER,
+    SPORT_INSEL_RADREIHE: () => SPORT_INSEL_RADREIHE,
+    SPORT_INSEL_SKISCHUH: () => SPORT_INSEL_SKISCHUH,
+    SPORT_INSEL_TOR: () => SPORT_INSEL_TOR,
+    SPORT_INSEL_TRAINING: () => SPORT_INSEL_TRAINING,
+    SPORT_INSEL_TRIKOTPOD: () => SPORT_INSEL_TRIKOTPOD,
+    SPORT_INSEL_WINTERPOD: () => SPORT_INSEL_WINTERPOD,
+    SPORT_INSEL_ZELT: () => SPORT_INSEL_ZELT,
+    SPORT_ISOMATTE: () => SPORT_ISOMATTE,
+    SPORT_JACKEN: () => SPORT_JACKEN,
+    SPORT_JACKEN_OUTDOOR: () => SPORT_JACKEN_OUTDOOR,
+    SPORT_KANU_ZUBEHOER: () => SPORT_KANU_ZUBEHOER,
+    SPORT_KARTONWAND: () => SPORT_KARTONWAND,
+    SPORT_LAUFZUBEHOER: () => SPORT_LAUFZUBEHOER,
+    SPORT_MARKENBAND_10: () => SPORT_MARKENBAND_10,
+    SPORT_RAD: () => SPORT_RAD,
+    SPORT_RAD_EINSTIEG: () => SPORT_RAD_EINSTIEG,
+    SPORT_RAD_ZUBEHOER: () => SPORT_RAD_ZUBEHOER,
+    SPORT_RUCKSACK: () => SPORT_RUCKSACK,
+    SPORT_RUCKSACK_KLEIN: () => SPORT_RUCKSACK_KLEIN,
+    SPORT_SCHLAFSACK: () => SPORT_SCHLAFSACK,
+    SPORT_SCHUH_HALB: () => SPORT_SCHUH_HALB,
+    SPORT_SCHUH_KINDER: () => SPORT_SCHUH_KINDER,
+    SPORT_SCHUH_LAUFEN: () => SPORT_SCHUH_LAUFEN,
+    SPORT_SCHUH_MARKEN: () => SPORT_SCHUH_MARKEN,
+    SPORT_SKI: () => SPORT_SKI,
+    SPORT_SKIJACKEN: () => SPORT_SKIJACKEN,
+    SPORT_SKI_KINDER: () => SPORT_SKI_KINDER,
+    SPORT_STOLLEN: () => SPORT_STOLLEN,
+    SPORT_TEXTIL_FALT: () => SPORT_TEXTIL_FALT,
+    SPORT_TEXTIL_HAENGUNG: () => SPORT_TEXTIL_HAENGUNG,
+    SPORT_TEXTIL_MIX: () => SPORT_TEXTIL_MIX,
+    SPORT_TEXTIL_TRAINING: () => SPORT_TEXTIL_TRAINING,
+    SPORT_TRIKOT_LAENDER: () => SPORT_TRIKOT_LAENDER,
+    SPORT_TRIKOT_NATIONAL: () => SPORT_TRIKOT_NATIONAL,
+    SPORT_TRIKOT_VEREIN: () => SPORT_TRIKOT_VEREIN,
+    SPORT_TRINKFLASCHEN: () => SPORT_TRINKFLASCHEN,
+    SPORT_VEREINSARTIKEL: () => SPORT_VEREINSARTIKEL,
+    SPORT_WANDERSCHUH: () => SPORT_WANDERSCHUH,
+    SPORT_ZELTZUBEHOER: () => SPORT_ZELTZUBEHOER
+  });
+  var SPORT_SCHUH_MARKEN = definition("sport_schuh_marken", "Markenschuhe", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "schuhe", "pal": "laufen", "titel": "Markenschuhe", "alt": false, "akzent": "#bd393a", "variante": "marken", "w": 5 }));
+  var SPORT_SCHUH_LAUFEN = definition("sport_schuh_laufen", "Laufschuhe", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "schuhe", "pal": "laufen", "titel": "Laufschuhe", "alt": false, "akzent": "#2b79b8", "variante": "laufen", "w": 5 }));
+  var SPORT_SCHUH_KINDER = definition("sport_schuh_kinder", "Kindersportschuhe", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "schuhe", "pal": "kinder", "titel": "Kindersportschuhe", "alt": false, "akzent": "#ef9a32", "variante": "kinder", "w": 5 }));
+  var SPORT_SCHUH_HALB = definition("sport_schuh_halb", "Sportschuhe 2,5 m", "sport", "wand", 2, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "schuhe", "pal": "laufen", "titel": "Sportschuhe 2,5 m", "alt": false, "w": 2.5 }));
+  var SPORT_KARTONWAND = definition("sport_kartonwand", "Kartonwand Schuhe", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "kartons", "pal": "laufen", "titel": "Kartonwand Schuhe", "alt": false, "w": 5 }));
+  var SPORT_TEXTIL_HAENGUNG = definition("sport_textil_haengung", "Sporttextil H\xE4ngung", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "textil", "titel": "Sporttextil H\xE4ngung", "alt": false, "w": 5 }));
+  var SPORT_TEXTIL_FALT = definition("sport_textil_falt", "Sporttextil gefaltet", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "textil", "titel": "Sporttextil gefaltet", "alt": false, "w": 5 }));
+  var SPORT_TEXTIL_MIX = definition("sport_textil_mix", "Textilmix", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "textil", "titel": "Textilmix", "alt": false, "w": 5 }));
+  var SPORT_TEXTIL_TRAINING = definition("sport_textil_training", "Trainingsbekleidung", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "fitness", "titel": "Trainingsbekleidung", "alt": false, "w": 5 }));
+  var SPORT_TRIKOT_VEREIN = definition("sport_trikot_verein", "Vereinstrikots", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "trikot", "pal": "team", "titel": "Vereinstrikots", "alt": false, "w": 5 }));
+  var SPORT_TRIKOT_NATIONAL = definition("sport_trikot_national", "Nationaltrikots", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "trikot", "pal": "team", "titel": "Nationaltrikots", "alt": false, "w": 5 }));
+  var SPORT_TRIKOT_LAENDER = definition("sport_trikot_laender", "Internationale Trikots", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "trikot", "pal": "team", "titel": "Internationale Trikots", "alt": false, "w": 5 }));
+  var SPORT_JACKEN = definition("sport_jacken", "Sportjacken", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "jacken", "pal": "textil", "titel": "Sportjacken", "alt": false, "w": 5 }));
+  var SPORT_JACKEN_OUTDOOR = definition("sport_jacken_outdoor", "Outdoorjacken", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "jacken", "pal": "outdoor", "titel": "Outdoorjacken", "alt": false, "w": 5 }));
+  var SPORT_WANDERSCHUH = definition("sport_wanderschuh", "Wanderschuhe", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "schuhe", "pal": "outdoor", "titel": "Wanderschuhe", "alt": false, "w": 5 }));
+  var SPORT_RUCKSACK = definition("sport_rucksack", "Rucks\xE4cke", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "rucksack", "pal": "outdoor", "titel": "Rucks\xE4cke", "alt": false, "w": 5 }));
+  var SPORT_RUCKSACK_KLEIN = definition("sport_rucksack_klein", "Tagesrucks\xE4cke", "sport", "wand", 2, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "rucksack", "pal": "outdoor", "titel": "Tagesrucks\xE4cke", "alt": false, "w": 2.5 }));
+  var SPORT_SCHLAFSACK = definition("sport_schlafsack", "Schlafs\xE4cke", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "outdoor", "titel": "Schlafs\xE4cke", "alt": false, "w": 5 }));
+  var SPORT_ISOMATTE = definition("sport_isomatte", "Isomatten", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "outdoor", "titel": "Isomatten", "alt": false, "w": 5 }));
+  var SPORT_ZELTZUBEHOER = definition("sport_zeltzubehoer", "Zeltzubeh\xF6r", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "outdoor", "titel": "Zeltzubeh\xF6r", "alt": false, "w": 5 }));
+  var SPORT_KANU_ZUBEHOER = definition("sport_kanu_zubehoer", "Paddel und Zubeh\xF6r", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "outdoor", "titel": "Paddel und Zubeh\xF6r", "alt": false, "w": 5 }));
+  var SPORT_RAD = definition("sport_rad", "Fahrradwand", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "rad", "pal": "rad", "titel": "Fahrradwand", "alt": false, "w": 5 }));
+  var SPORT_RAD_EINSTIEG = definition("sport_rad_einstieg", "Einsteigerfahrr\xE4der", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "rad", "pal": "rad", "titel": "Einsteigerfahrr\xE4der", "alt": false, "w": 5 }));
+  var SPORT_HELM = definition("sport_helm", "Fahrradhelme", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "helm", "pal": "rad", "titel": "Fahrradhelme", "alt": false, "w": 5 }));
+  var SPORT_HELM_KINDER = definition("sport_helm_kinder", "Kinderhelme", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "helm", "pal": "kinder", "titel": "Kinderhelme", "alt": false, "w": 5 }));
+  var SPORT_RAD_ZUBEHOER = definition("sport_rad_zubehoer", "Radzubeh\xF6r", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "rad", "titel": "Radzubeh\xF6r", "alt": false, "w": 5 }));
+  var SPORT_SKI = definition("sport_ski", "Skiwand", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ski", "pal": "winter", "titel": "Skiwand", "alt": false, "w": 5 }));
+  var SPORT_SKI_KINDER = definition("sport_ski_kinder", "Kinderski", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ski", "pal": "winter", "titel": "Kinderski", "alt": false, "w": 5 }));
+  var SPORT_BOARD = definition("sport_board", "Snowboards", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "board", "pal": "winter", "titel": "Snowboards", "alt": false, "w": 5 }));
+  var SPORT_SKIJACKEN = definition("sport_skijacken", "Skijacken", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "jacken", "pal": "winter", "titel": "Skijacken", "alt": false, "w": 5 }));
+  var SPORT_BALL = definition("sport_ball", "B\xE4lle", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ball", "pal": "team", "titel": "B\xE4lle", "alt": false, "w": 5 }));
+  var SPORT_STOLLEN = definition("sport_stollen", "Stollenschuhe", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "stollen", "pal": "team", "titel": "Stollenschuhe", "alt": false, "w": 5 }));
+  var SPORT_FITNESS_ZUBEHOER = definition("sport_fitness_zubehoer", "Fitnesszubeh\xF6r", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "fitness", "titel": "Fitnesszubeh\xF6r", "alt": false, "w": 5 }));
+  var SPORT_TRINKFLASCHEN = definition("sport_trinkflaschen", "Trinkflaschen", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "fitness", "titel": "Trinkflaschen", "alt": false, "w": 5 }));
+  var SPORT_VEREINSARTIKEL = definition("sport_vereinsartikel", "Vereinsartikel", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "team", "titel": "Vereinsartikel", "alt": false, "w": 5 }));
+  var SPORT_LAUFZUBEHOER = definition("sport_laufzubehoer", "Laufzubeh\xF6r", "sport", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "ware", "pal": "laufen", "titel": "Laufzubeh\xF6r", "alt": false, "w": 5 }));
+  var SPORT_MARKENBAND_10 = definition("sport_markenband_10", "Markenwand 10 m", "sport", "wand", 8, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { "art": "textil", "pal": "textil", "titel": "Markenwand 10 m", "alt": false, "w": 10 }));
+  var SPORT_INSEL_NEUHEIT = definition("sport_insel_neuheit", "Neuheitenpodest", "sport", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "laufen", "w": 2.5 }));
+  var SPORT_INSEL_PUPPEN_LAUFEN = definition("sport_insel_puppen_laufen", "Laufpuppen", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "laufen", "w": 5 }));
+  var SPORT_INSEL_PUPPEN_FUSSBALL = definition("sport_insel_puppen_fussball", "Fu\xDFballpuppen", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "team", "w": 5 }));
+  var SPORT_INSEL_PUPPEN_OUTDOOR = definition("sport_insel_puppen_outdoor", "Outdoorpuppen", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "outdoor", "w": 5 }));
+  var SPORT_INSEL_PUPPEN_WINTER = definition("sport_insel_puppen_winter", "Winterpuppen", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "winter", "w": 5 }));
+  var SPORT_INSEL_LAUFANALYSE = definition("sport_insel_laufanalyse", "Laufanalyse", "sport", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "laufanalyse", "pal": "laufen", "w": 2.5 }));
+  var SPORT_INSEL_FITNESS = definition("sport_insel_fitness", "Fitnessinsel", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "fitness", "pal": "fitness", "w": 5 }));
+  var SPORT_INSEL_ZELT = definition("sport_insel_zelt", "Zelt aufgebaut", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "zelt", "pal": "outdoor", "w": 5 }));
+  var SPORT_INSEL_KANU = definition("sport_insel_kanu", "Kanu auf St\xE4nder", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "kanu", "pal": "outdoor", "w": 5 }));
+  var SPORT_INSEL_EBIKE = definition("sport_insel_ebike", "E-Bike-Podest", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "rad", "pal": "rad", "w": 5 }));
+  var SPORT_INSEL_RADREIHE = definition("sport_insel_radreihe", "Radreihe", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "rad", "pal": "rad", "w": 5 }));
+  var SPORT_INSEL_SKISCHUH = definition("sport_insel_skischuh", "Skischuh-Anprobe", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "winter", "w": 5 }));
+  var SPORT_INSEL_TOR = definition("sport_insel_tor", "Torinsel", "sport", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "tor", "pal": "team", "w": 2.5 }));
+  var SPORT_INSEL_BEFLOCKUNG = definition("sport_insel_beflockung", "Beflockungsinsel", "sport", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "team", "w": 2.5 }));
+  var SPORT_INSEL_ANPROBE = definition("sport_insel_anprobe", "Schuhanprobe", "sport", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "laufen", "w": 2.5 }));
+  var SPORT_INSEL_OUTDOOR_PODEST = definition("sport_insel_outdoor_podest", "Outdoor-Neuheiten", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "outdoor", "w": 5 }));
+  var SPORT_INSEL_TRIKOTPOD = definition("sport_insel_trikotpod", "Trikot-Podest", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "puppen", "pal": "team", "w": 5 }));
+  var SPORT_INSEL_TRAINING = definition("sport_insel_training", "Trainingsfl\xE4che", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "fitness", "pal": "fitness", "w": 5 }));
+  var SPORT_INSEL_WINTERPOD = definition("sport_insel_winterpod", "Wintersportpodest", "sport", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => inselModul(L2, r, d, ctx, { "art": "ware", "pal": "winter", "w": 5 }));
+  var SPORT_ABVERKAUF_TISCH = definition("sport_abverkauf_tisch", "Sport-Abverkaufstisch", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d) => {
+    L2.box(4.8, 0.16, 1.1, 0, 0.82, 0.625, "#cdd3d7");
+    for (const x of [-2.2, 2.2]) for (const z2 of [0.15, 1.1]) L2.box(0.09, 0.82, 0.09, x, 0, z2, "#727b83");
+    if (d < 0.3) return;
+    for (let i = 0; i < 12; i++) {
+      const x = -2.05 + i % 6 * 0.82, z2 = i < 6 ? 0.34 : 0.84;
+      L2.box(0.65, 0.2, 0.35, x, 1, z2, ["#b7474d", "#d5b86b", "#497b9f", "#7c8e62"][Math.floor(r() * 4)]);
+    }
+  });
+  var SPORT_ABVERKAUF_GITTER = definition("sport_abverkauf_gitter", "Sport-Abverkaufskorb", "sport", "gondel", 4, 1, 1.4, 120, (L2, r, d) => {
+    L2.box(4.8, 0.12, 1, 0, 0.25, 0.625, "#737f89");
+    for (const x of [-2.3, 2.3]) for (const z2 of [0.18, 1.07]) L2.box(0.06, 0.92, 0.06, x, 0.25, z2, "#a7b4bd");
+    if (d < 0.3) return;
+    for (let i = 0; i < 9; i++) L2.box(
+      0.42,
+      0.2,
+      0.55,
+      -1.9 + i * 0.47,
+      0.37,
+      0.625,
+      ["#c44743", "#4b83a4", "#dfbb67", "#566b53"][Math.floor(r() * 4)]
+    );
+  });
+
+  // src/kit/moebel/outlet.js
+  var outlet_exports = {};
+  __export(outlet_exports, {
+    OUTLET_ACCESSOIRES: () => OUTLET_ACCESSOIRES,
+    OUTLET_BEAUTY: () => OUTLET_BEAUTY,
+    OUTLET_DOPPELSTANGE: () => OUTLET_DOPPELSTANGE,
+    OUTLET_EINKAUFSWAGEN: () => OUTLET_EINKAUFSWAGEN,
+    OUTLET_HOME: () => OUTLET_HOME,
+    OUTLET_HOMEWAND: () => OUTLET_HOMEWAND,
+    OUTLET_KASSENZEILE: () => OUTLET_KASSENZEILE,
+    OUTLET_KORB: () => OUTLET_KORB,
+    OUTLET_ROLLWAGEN: () => OUTLET_ROLLWAGEN,
+    OUTLET_RUNDSTAENDER: () => OUTLET_RUNDSTAENDER,
+    OUTLET_SCHUH_KARTONS: () => OUTLET_SCHUH_KARTONS,
+    OUTLET_TASCHENWAND: () => OUTLET_TASCHENWAND,
+    OUTLET_UMKLEIDE: () => OUTLET_UMKLEIDE,
+    OUTLET_WANDSTANGE: () => OUTLET_WANDSTANGE,
+    OUTLET_WARTESCHLANGE: () => OUTLET_WARTESCHLANGE
+  });
+  function aufhaengung(L2, r, d, ctx, doppelt = false, anWand = false) {
+    const w = 5, hoehe = anWand ? 2.4 : 1.48, nr = anWand ? 1 : doppelt ? 2 : 1;
+    if (anWand) {
+      wandModul(L2, r, d, ctx, { w, art: "textil", pal: "outlet", titel: "Mode und Gr\xF6\xDFen" });
+      return;
+    }
+    const pal = palette("outlet");
+    for (let j = 0; j < nr; j++) {
+      const z2 = doppelt ? 0.52 + j * 1.36 : 1.2;
+      L2.box(0.07, hoehe, 0.08, -w / 2 + 0.1, 0, z2, "#999fa6");
+      L2.box(0.07, hoehe, 0.08, w / 2 - 0.1, 0, z2, "#999fa6");
+      L2.box(w - 0.22, 0.055, 0.07, 0, hoehe - 0.1, z2, "#8a959d");
+      if (LOD2.stufe === "fern") {
+        L2.box(w - 0.28, 0.8, 0.65, 0, 0.48, z2, pal[j]);
+        continue;
+      }
+      const f = Math.max(0.1, Math.min(1, ctx?.bestueckung ?? 1));
+      const n = Math.floor(36 * f);
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + 0.2 + (i + 0.5) * (w - 0.4) / 36;
+        L2.box(0.075, 0.7 + i % 5 * 0.055, 0.48, x, 0.12, z2, farbe(r, pal));
+      }
+      for (let i = 0; i < 5; i++) {
+        const x = -w / 2 + (i + 0.5);
+        L2.box(0.65, 0.24, 0.05, x, 1.24, z2 + 0.02, "#e8e5e0");
+        textAuf(L2, ["XS", "S", "M", "L", "XL"][i], x, 1.36, z2 + 0.06, 0.53, 0.16, "#313942", "#e8e5e0");
+      }
+    }
+  }
+  function rundstaender2(L2, r, d, ctx) {
+    const pal = palette("outlet");
+    L2.zyl(0.67, 0.67, 0.055, 0, 0, 1.25, "#aab4bc", 12);
+    L2.zyl(0.045, 0.045, 1.38, 0, 0, 1.25, "#929da6", 8);
+    L2.zyl(0.77, 0.77, 0.045, 0, 1.34, 1.25, "#999fa6", 18);
+    if (LOD2.stufe === "fern") {
+      L2.zyl(0.72, 0.72, 0.65, 0, 0.54, 1.25, "#bd6c78", 12);
+      return;
+    }
+    for (let i = 0; i < 14; i++) {
+      const a = i * Math.PI * 2 / 14, x = Math.cos(a) * 0.6, z2 = 1.25 + Math.sin(a) * 0.6;
+      L2.box(0.17, 0.69 + i % 3 * 0.08, 0.29, x, 0.51, z2, farbe(r, pal), a);
+    }
+  }
+  function kassenWeg(L2, r, d, art) {
+    L2.box(5, 0.1, 2.5, 0, 0, 1.25, "#e8e6e1");
+    if (LOD2.stufe === "fern") {
+      L2.box(4.5, 0.95, 0.7, 0, 0.12, 1, "#5b6570");
+      return;
+    }
+    if (art === "kasse") {
+      L2.box(4.8, 0.96, 0.73, 0, 0.1, 0.48, "#49515a");
+      L2.box(4.8, 0.1, 0.87, 0, 1.06, 0.48, "#c7c6c2");
+      for (let i = 0; i < 3; i++) {
+        const x = -1.55 + i * 1.55;
+        L2.box(0.4, 0.28, 0.12, x, 1.16, 0.48, "#30373d");
+        L2.box(0.7, 0.18, 0.2, x + 0.2, 1.16, 0.74, "#b7bdc1");
+      }
+    } else {
+      for (const z2 of [0.55, 1.2, 1.85]) {
+        for (const x of [-2.15, 0, 2.15]) L2.box(0.065, 0.94, 0.065, x, 0.1, z2, "#8c969f");
+        L2.box(4.3, 0.06, 0.045, 0, 0.87, z2, "#bf4a50");
+      }
+      L2.box(1, 0.85, 0.6, 0, 0.1, 2.06, "#ede2d3");
+      for (let i = 0; i < 5; i++) L2.box(0.12, 0.31, 0.2, (i - 2) * 0.17, 0.95, 2.06, farbe(r, palette("outlet")));
+    }
+  }
+  function wagen(L2, r, d, art) {
+    if (LOD2.stufe === "fern") {
+      L2.box(2, 0.6, 1.5, 0, 0, 1.25, "#9dabb5");
+      return;
+    }
+    const n = art === "wagen" ? 3 : 5;
+    for (let i = 0; i < n; i++) {
+      const x = n === 3 ? (i - 1) * 0.67 : (i - 2) * 0.42;
+      L2.box(n === 3 ? 0.55 : 0.35, 0.33, n === 3 ? 0.65 : 0.38, x, 0.37, 1.25, art === "wagen" ? "#9dabb5" : "#d8a451");
+      L2.box(n === 3 ? 0.55 : 0.34, 0.07, 0.07, x, 0.7, 0.95, "#454d54");
+      if (art === "wagen") for (const q2 of [-0.2, 0.2]) L2.zyl(0.08, 0.08, 0.055, x + q2, 0.07, 1.48, "#343c40", 8);
+    }
+  }
+  function rollwagen(L2, r, d) {
+    if (LOD2.stufe === "fern") {
+      L2.box(2.2, 1.3, 0.9, 0, 0.2, 1.25, "#9da7b0");
+      return;
+    }
+    L2.box(2.2, 0.12, 0.9, 0, 0.3, 1.25, "#9da7b0");
+    for (const x of [-0.95, 0.95]) for (const z2 of [0.92, 1.58]) L2.zyl(0.12, 0.12, 0.05, x, 0.1, z2, "#40464c", 8);
+    L2.box(0.07, 1.05, 0.08, -1, 0.42, 1.25, "#9da7b0");
+    L2.box(0.07, 1.05, 0.08, 1, 0.42, 1.25, "#9da7b0");
+    L2.box(1.95, 0.06, 0.08, 0, 1.41, 1.25, "#9da7b0");
+    for (let i = 0; i < 13; i++) L2.box(0.1, 0.5, 0.34, -0.85 + i * 0.14, 0.76, 1.25, farbe(r, palette("outlet")));
+  }
+  var OUTLET_DOPPELSTANGE = definition("outlet_doppelstange", "Doppel-Kleiderstange 5 m", "outlet", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => aufhaengung(L2, r, d, ctx, true));
+  var OUTLET_WANDSTANGE = definition("outlet_wandstange", "Wandkleiderstange", "outlet", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => aufhaengung(L2, r, d, ctx, false, true));
+  var OUTLET_RUNDSTAENDER = definition("outlet_rundstaender", "Rundst\xE4nder", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => rundstaender2(L2, r, d, ctx));
+  var OUTLET_HOME = definition("outlet_home", "Home-Gondel", "outlet", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { w: 5, pal: "outlet", art: "pakete" }));
+  var OUTLET_ACCESSOIRES = definition("outlet_accessoires", "Accessoires-Gondel", "outlet", "gondel", 4, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { w: 5, pal: "outlet", art: "pakete" }));
+  var OUTLET_BEAUTY = definition("outlet_beauty", "Beauty-Gondel", "outlet", "gondel", 2, 1, 1.4, 120, (L2, r, d, ctx) => gondelModul(L2, r, d, ctx, { w: 2.5, pal: "outlet", art: "pakete" }));
+  var OUTLET_SCHUH_KARTONS = definition("outlet_schuh_kartons", "Schuhe nach Gr\xF6\xDFen", "outlet", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { w: 5, art: "kartons", pal: "outlet", titel: "Schuhe und Gr\xF6\xDFen" }));
+  var OUTLET_TASCHENWAND = definition("outlet_taschenwand", "Taschenwand", "outlet", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { w: 5, art: "taschen", pal: "outlet", titel: "Taschen" }));
+  var OUTLET_HOMEWAND = definition("outlet_homewand", "Home-Wandregal", "outlet", "wand", 4, 1, 3, 220, (L2, r, d, ctx) => wandModul(L2, r, d, ctx, { w: 5, art: "ware", pal: "outlet", titel: "Wohnen" }));
+  var OUTLET_KASSENZEILE = definition("outlet_kassenzeile", "Kassenzeile", "outlet", "kasse", 4, 2, 1.5, 260, (L2, r, d, ctx) => kassenWeg(L2, r, d, "kasse"));
+  var OUTLET_WARTESCHLANGE = definition("outlet_warteschlange", "Kassen-Schlangenf\xFChrung", "outlet", "insel", 4, 2, 1.5, 260, (L2, r, d, ctx) => kassenWeg(L2, r, d, "schlange"));
+  var OUTLET_EINKAUFSWAGEN = definition("outlet_einkaufswagen", "Einkaufswagenstation", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => wagen(L2, r, d, "wagen"));
+  var OUTLET_KORB = definition("outlet_korb", "Korbstation", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => wagen(L2, r, d, "korb"));
+  var OUTLET_UMKLEIDE = definition("outlet_umkleide", "Umkleidereihe", "outlet", "service", 4, 2, 2.4, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { w: 5, art: "umkleide", kabinen: 4 }));
+  var OUTLET_ROLLWAGEN = definition("outlet_rollwagen", "Nachr\xE4um-Rollwagen", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d, ctx) => rollwagen(L2, r, d));
+
+  // src/kit/moebel/service.js
+  var service_exports = {};
+  __export(service_exports, {
+    ALT_FAHRSTUHL: () => ALT_FAHRSTUHL,
+    ALT_STUETZE_SPIEGEL: () => ALT_STUETZE_SPIEGEL,
+    ALT_TREPPE_OFFEN: () => ALT_TREPPE_OFFEN,
+    SERVICE_ALT_AUFZUG: () => SERVICE_ALT_AUFZUG,
+    SERVICE_ALT_BERATUNG: () => SERVICE_ALT_BERATUNG,
+    SERVICE_ALT_SPIEGEL: () => SERVICE_ALT_SPIEGEL,
+    SERVICE_ALT_TREPPE: () => SERVICE_ALT_TREPPE,
+    SERVICE_ALT_UMKLEIDE: () => SERVICE_ALT_UMKLEIDE,
+    SERVICE_ALT_WARENAUSGABE: () => SERVICE_ALT_WARENAUSGABE,
+    SERVICE_ANPROBEBANK: () => SERVICE_ANPROBEBANK,
+    SERVICE_LAUFBERATUNG: () => SERVICE_LAUFBERATUNG,
+    SERVICE_RADWERKSTATT: () => SERVICE_RADWERKSTATT,
+    SERVICE_REPARATUR: () => SERVICE_REPARATUR,
+    SERVICE_SERVICE_BEFL: () => SERVICE_SERVICE_BEFL,
+    SERVICE_SKISCHUHBANK: () => SERVICE_SKISCHUHBANK,
+    SERVICE_SKISERVICE: () => SERVICE_SKISERVICE,
+    SERVICE_UMKLEIDE_2: () => SERVICE_UMKLEIDE_2,
+    SERVICE_UMKLEIDE_4: () => SERVICE_UMKLEIDE_4
+  });
+  var SERVICE_RADWERKSTATT = definition("service_radwerkstatt", "Radwerkstatt", "sport", "service", 4, 2, 1.9, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "werkstatt", "w": 5 }));
+  var SERVICE_SKISERVICE = definition("service_skiservice", "Skiservice", "sport", "service", 4, 2, 1.9, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "skiwerkstatt", "w": 5 }));
+  var SERVICE_LAUFBERATUNG = definition("service_laufberatung", "Laufberatung", "sport", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var SERVICE_SKISCHUHBANK = definition("service_skischuhbank", "Sitzbank Skischuhe", "sport", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "bank", "w": 2.5 }));
+  var SERVICE_ANPROBEBANK = definition("service_anprobebank", "Sitzbank Sportschuhe", "sport", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "bank", "w": 2.5 }));
+  var SERVICE_UMKLEIDE_2 = definition("service_umkleide_2", "Umkleide 2 Kabinen", "sport", "service", 4, 2, 2.4, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "umkleide", "kabinen": 2, "w": 5 }));
+  var SERVICE_UMKLEIDE_4 = definition("service_umkleide_4", "Umkleide 4 Kabinen", "sport", "service", 4, 2, 2.4, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "umkleide", "kabinen": 4, "w": 5 }));
+  var SERVICE_REPARATUR = definition("service_reparatur", "Reparaturannahme", "sport", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var SERVICE_SERVICE_BEFL = definition("service_service_befl", "Trikotbeflockung", "sport", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "beflockung", "w": 2.5 }));
+  var SERVICE_ALT_TREPPE = definition("service_alt_treppe", "Treppe offen, Rezeption", "allgemein", "service", 4, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 5 }));
+  var SERVICE_ALT_SPIEGEL = definition("service_alt_spiegel", "St\xFCtze mit Spiegel", "allgemein", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var SERVICE_ALT_AUFZUG = definition("service_alt_aufzug", "Aufzug-Vorraum alt", "allgemein", "service", 4, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 5 }));
+  var SERVICE_ALT_UMKLEIDE = definition("service_alt_umkleide", "Umkleidereihe alt", "allgemein", "service", 4, 2, 2.4, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "umkleide", "kabinen": 4, "w": 5 }));
+  var SERVICE_ALT_BERATUNG = definition("service_alt_beratung", "Beratung klassisch", "allgemein", "service", 2, 2, 1.5, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "info", "w": 2.5 }));
+  var SERVICE_ALT_WARENAUSGABE = definition("service_alt_warenausgabe", "Warenausgabe", "allgemein", "service", 4, 2, 1.9, 260, (L2, r, d, ctx) => serviceModul(L2, r, d, ctx, { "art": "werkstatt", "w": 5 }));
+  var ALT_TREPPE_OFFEN = definition("alt_treppe_offen", "Offene Haupttreppe alt", "allgemein", "service", 4, 4, 3.8, 260, (L2, r, d, ctx) => {
+    if (LOD2.stufe === "fern") {
+      L2.box(5, 2.5, 5, 0, 0, 2.5, "#ad9377");
+      return;
+    }
+    L2.box(5, 0.14, 5, 0, 0, 2.5, "#ad9377");
+    for (let i = 0; i < 9; i++) {
+      L2.box(2.35, 0.1, 0.45, -1.2, 0.14 + i * 0.28, 0.35 + i * 0.5, "#c0a07b");
+      L2.box(0.12, 0.8 + i * 0.28, 0.12, 0.08, 0.14, 0.35 + i * 0.5, "#766049");
+    }
+    L2.box(0.12, 0.12, 4.8, 0.1, 3.1, 2.5, "#78624d");
+  });
+  var ALT_FAHRSTUHL = definition("alt_fahrstuhl", "Aufzug mit Gittert\xFCr", "allgemein", "service", 4, 2, 3.4, 260, (L2, r, d, ctx) => {
+    if (LOD2.stufe === "fern") {
+      L2.box(3.5, 3.2, 0.12, 0, 0, 0.06, "#8c8d8a");
+      return;
+    }
+    L2.box(3.5, 3.2, 0.12, 0, 0, 0.06, "#8c8d8a");
+    L2.box(3.25, 3, 0.12, 0, 0, 0.19, "#bbb4a5");
+    for (let i = 0; i < 9; i++) L2.box(0.055, 2.8, 0.09, -1.3 + i * 0.325, 0.15, 0.28, "#585f62");
+    L2.box(3.2, 0.12, 0.15, 0, 3.1, 0.23, "#695441");
+  });
+  var ALT_STUETZE_SPIEGEL = definition("alt_stuetze_spiegel", "Spiegelst\xFCtze", "allgemein", "service", 2, 2, 3.3, 260, (L2, r, d, ctx) => {
+    if (LOD2.stufe === "fern") {
+      L2.box(0.7, 3.3, 0.7, 0, 0, 1.25, "#a08b75");
+      return;
+    }
+    L2.box(0.7, 3.3, 0.7, 0, 0, 1.25, "#a08b75");
+    L2.box(0.58, 2, 0.025, 0, 0.65, 1.61, "#cadde3");
+    L2.box(0.07, 2.1, 0.08, -0.33, 0.6, 1.63, "#786651");
+    L2.box(0.07, 2.1, 0.08, 0.33, 0.6, 1.63, "#786651");
+  });
+
+  // src/kit/moebel/index.js
+  var ALLE_MOEBEL = Object.freeze(
+    [wand_exports, gondel_exports, insel_exports, kasse_exports, deko_exports, sport_exports, outlet_exports, service_exports].flatMap((m) => Object.values(m).filter((v) => v && typeof v === "object" && typeof v.bau === "function" && typeof v.id === "string")).concat(SPORT_MIX_MOEBEL).sort((a, b) => a.id.localeCompare(b.id, "de"))
+  );
+  if (new Set(ALLE_MOEBEL.map((m) => m.id)).size !== ALLE_MOEBEL.length) {
+    throw new Error("Doppelte M\xF6bel-IDs");
+  }
+  var MOEBEL = Object.freeze(Object.fromEntries(ALLE_MOEBEL.map((m) => [m.id, m])));
+  function moebel2(id) {
+    const eintrag2 = MOEBEL[id];
+    if (!eintrag2) throw new Error("Unbekanntes M\xF6bel: " + id);
+    return eintrag2;
+  }
+
+  // src/kit/ladenbau-regeln.js
+  var LADENBAU = Object.freeze({
+    raster: 1.25,
+    suchRaster: 0.625,
+    hauptgang: 3,
+    nebengang: 1.8,
+    kassenVorfeld: 2,
+    wandBelegungMin: 0.85,
+    wandTiefe: 0.6,
+    wandSockel: 0.12,
+    wandKorpusHoehe: 2.4,
+    wandSchildbandHoehe: 0.6,
+    gondelHoeheMax: 1.4,
+    inselHoeheMax: 1.5,
+    gondelGang: 1.8,
+    bodenArtenMax: 3,
+    akzentAnteilMax: 0.1,
+    dekoAnteilMax: 0.02,
+    inszenierungenJeAbteilungMax: 1,
+    moebelAnteilMin: 0.35,
+    moebelAnteilMax: 0.5,
+    leerflaecheMax: 6,
+    winkel: Object.freeze([0, 90, 180, 270]),
+    budgetEtage: 8e3
+  });
+  var FORMAT_PROFILE = Object.freeze({
+    sport: Object.freeze({
+      id: "sport",
+      titel: "Hartwig Sport",
+      boden: Object.freeze({ gang: "#efefea", flaeche: "#dadde0", akzent: "#c8c9c3" }),
+      wand: "sport_schuh_marken",
+      gondel: "gondel_textil",
+      insel: "sport_insel_neuheit",
+      kasse: "kasse_sport_klein",
+      inszenierung: true,
+      kunstrasenNurTorinsel: true,
+      treppe: "rolltreppe",
+      abteilungsMoebel: Object.freeze({
+        sportschuhe: Object.freeze({ wand: "sport_schuh_laufen", gondel: "gondel_schuhe", insel: "sport_insel_laufanalyse" }),
+        sporttextil: Object.freeze({ wand: "sport_textil_haengung", gondel: "gondel_textil", insel: "sport_insel_puppen_laufen" }),
+        outdoor: Object.freeze({ wand: "sport_rucksack", gondel: "gondel_outdoor", insel: "sport_insel_zelt" }),
+        rad: Object.freeze({ wand: "sport_rad", gondel: "gondel_rad", insel: "sport_insel_ebike" }),
+        wintersport: Object.freeze({ wand: "sport_ski", gondel: "gondel_ski", insel: "sport_insel_winterpod" }),
+        teamsport: Object.freeze({ wand: "sport_trikot_verein", gondel: "gondel_baelle", insel: "sport_insel_tor" })
+      })
+    }),
+    outlet: Object.freeze({
+      id: "outlet",
+      titel: "FUNDUS",
+      boden: Object.freeze({ gang: "#f1f0eb", flaeche: "#e2e0d9" }),
+      wand: "outlet_wandstange",
+      gondel: "outlet_doppelstange",
+      insel: null,
+      kasse: "outlet_kassenzeile",
+      inszenierung: false,
+      treppe: "treppe",
+      abteilungsMoebel: Object.freeze({
+        damen: Object.freeze({ wand: "outlet_wandstange", gondel: "outlet_doppelstange" }),
+        herren: Object.freeze({ wand: "outlet_wandstange", gondel: "outlet_doppelstange" }),
+        kinder: Object.freeze({ wand: "outlet_wandstange", gondel: "outlet_doppelstange" }),
+        schuhe: Object.freeze({ wand: "outlet_schuh_kartons", gondel: "outlet_doppelstange" }),
+        taschen: Object.freeze({ wand: "outlet_taschenwand", gondel: "outlet_accessoires" }),
+        accessoires: Object.freeze({ wand: "outlet_taschenwand", gondel: "outlet_accessoires" }),
+        home: Object.freeze({ wand: "outlet_homewand", gondel: "outlet_home" }),
+        beauty: Object.freeze({ wand: "outlet_homewand", gondel: "outlet_beauty" })
+      })
+    }),
+    schwester: Object.freeze({
+      id: "schwester",
+      titel: "Volkskauf",
+      boden: Object.freeze({ gang: "#e7e3d9", flaeche: "#cbbda9", akzent: "#b9a98f" }),
+      wand: "alt_holz_regal",
+      gondel: "gondel_kurzwaren",
+      insel: "insel_alt_neuheit",
+      kasse: "kasse_alt_kasse_klein",
+      inszenierung: false,
+      treppe: "alt_treppe_offen",
+      beleuchtung: "rasterleuchten",
+      abteilungsMoebel: Object.freeze({
+        damen: Object.freeze({ wand: "alt_damen_haengung", gondel: "gondel_waesche" }),
+        herren: Object.freeze({ wand: "alt_herren_haengung", gondel: "gondel_kurzwaren" }),
+        kinder: Object.freeze({ wand: "alt_kinder_mode", gondel: "gondel_spielzeug" }),
+        beauty: Object.freeze({ wand: "alt_parfuem", gondel: "gondel_geschenke" }),
+        accessoires: Object.freeze({ wand: "alt_taschen_altholz", gondel: "gondel_kurzwaren" }),
+        wohnen: Object.freeze({ wand: "alt_haushalt", gondel: "gondel_geschenke" }),
+        spielwaren: Object.freeze({ wand: "alt_spielwaren", gondel: "gondel_spielzeug" }),
+        food: Object.freeze({ wand: "alt_feinkost", gondel: "gondel_geschenke" })
+      })
+    })
+  });
+  function ladeProfil(profil) {
+    const p = typeof profil === "string" ? FORMAT_PROFILE[profil] : profil;
+    if (!p || !p.id || !p.boden || !p.gondel || !p.kasse) throw new Error("Unbekanntes Ladenbau-Profil: " + String(profil));
+    return p;
+  }
+  function gangZellen(meter, raster4 = LADENBAU.raster) {
+    return Math.ceil((meter - 1e-8) / raster4);
+  }
+  function rechteckFlaeche(r) {
+    return Math.max(0, r.w) * Math.max(0, r.d);
+  }
+  function schneidet(a, b, abstand2 = 0) {
+    return a.x < b.x + b.w + abstand2 - 1e-8 && a.x + a.w + abstand2 > b.x + 1e-8 && a.z < b.z + b.d + abstand2 - 1e-8 && a.z + a.d + abstand2 > b.z + 1e-8;
+  }
+
+  // src/kit/ladenplan.js
+  var U = LADENBAU.raster;
+  var snap = (n) => Math.round(n / U) * U;
+  var down = (n) => Math.floor(n / U + 1e-8) * U;
+  var clamp7 = (n, a, b) => Math.max(a, Math.min(b, n));
+  var num = (n, d = 0) => Number.isFinite(Number(n)) ? Number(n) : d;
+  var quadrat = (x, z2, w, d) => ({ x, z: z2, w, d });
+  var NORM = { sportschuhe: "sportschuhe", sporttextil: "sporttextil", outdoor: "outdoor", rad: "rad", fahrrad: "rad", fitness: "fitness", wintersport: "wintersport", teamsport: "teamsport", ballsport: "teamsport" };
+  function sortiment(a) {
+    const m = /* @__PURE__ */ new Map();
+    for (let i = 0; i < a.length; i++) {
+      const f = a[i];
+      const id = String(f.art ?? f.gruppe ?? f.id ?? f.name ?? "abteilung_" + i).toLowerCase();
+      const qm = Math.max(0, num(f.qm ?? f.flaecheQm ?? f.flaeche, 0));
+      if (qm <= 0) continue;
+      const k = NORM[id] ?? id;
+      if (m.has(k)) m.get(k).qm += qm;
+      else m.set(k, { id: k, titel: String(f.titel ?? f.name ?? k), qm });
+    }
+    return [...m.values()];
+  }
+  function normiereFlaeche(f) {
+    if (!f || typeof f !== "object") throw new Error("flaeche muss Au\xDFenma\xDFe und Eing\xE4nge enthalten");
+    const breite = down(num(f.breite ?? f.bw ?? f.w ?? f.B)), tiefe = down(num(f.tiefe ?? f.bd ?? f.d ?? f.T));
+    if (breite < 15 || tiefe < 15) throw new Error("Laden f\xFCr das 1,25-m-Raster zu klein");
+    const es = f.eingaenge ?? (f.eingang ? [f.eingang] : []);
+    const eingaenge = (es.length ? es : [{ x: breite / 2, z: tiefe }]).map((p) => ({
+      x: clamp7(snap(num(p.x, breite / 2)), U, breite - U),
+      z: clamp7(snap(num(p.z, tiefe)), 0, tiefe)
+    }));
+    const hindernisse = (f.hindernisse ?? []).map((h, i) => ({
+      id: h.id ?? "hindernis_" + i,
+      typ: h.typ ?? "stuetze",
+      x: down(num(h.x)),
+      z: down(num(h.z)),
+      w: Math.ceil(num(h.w ?? h.breite, U) / U) * U,
+      d: Math.ceil(num(h.d ?? h.tiefe, U) / U) * U
+    }));
+    return { breite, tiefe, eingaenge, hindernisse };
+  }
+  function hauptgangWaehlen(b, t, e, hindernisse) {
+    const w = gangZellen(LADENBAU.hauptgang) * U;
+    const kandidaten2 = [];
+    const maxRueckversatz = Math.min(10 * U, t - 8 * U);
+    for (let z2 = 2 * U; z2 <= maxRueckversatz + 1e-8; z2 += U)
+      for (let x = 2 * U; x + w <= b - 2 * U; x += U) {
+        const lauf = quadrat(x, z2, w, t - z2);
+        if (hindernisse.some((h) => schneidet(lauf, h))) continue;
+        const dist2 = e.reduce((s2, p) => s2 + Math.abs(p.x - (x + w / 2)), 0);
+        kandidaten2.push({ ...lauf, typ: "haupt", score: z2 * 0.3 + dist2 * 0.8 + Math.abs(x + w / 2 - b / 2) });
+      }
+    kandidaten2.sort((a, b2) => a.score - b2.score || a.z - b2.z || a.x - b2.x);
+    if (!kandidaten2.length) throw new Error("Kein hindernisfreier Hauptgang");
+    const { score, ...gang } = kandidaten2[0];
+    return gang;
+  }
+  function teilung(teile, abteile, schacht) {
+    if (!teile.length) return [];
+    const gangIndex = teile.length > 1 ? Math.floor((teile.length - 1) / 2) : -1;
+    const verfuegbar2 = schacht.d - (gangIndex >= 0 ? 2 * U : 0);
+    const minZellen = Math.max(3, Math.min(7, Math.floor(verfuegbar2 / U / teile.length)));
+    if (verfuegbar2 < teile.length * minZellen * U) throw new Error("Zu viele Abteilungen f\xFCr Etagentiefe");
+    const summe2 = teile.reduce((s2, f) => s2 + f.qm, 0);
+    const laengen = teile.map((f) => Math.max(minZellen, Math.floor(f.qm / summe2 * verfuegbar2 / U)));
+    let rest = Math.round(verfuegbar2 / U) - laengen.reduce((a, b) => a + b, 0);
+    const groesste = teile.reduce((a, f, i) => f.qm > teile[a].qm ? i : a, 0);
+    if (rest >= 0) laengen[groesste] += rest;
+    else for (const i of [...laengen.keys()].sort((a, b) => laengen[b] - laengen[a])) {
+      const weg = Math.min(-rest, Math.max(0, laengen[i] - minZellen));
+      laengen[i] -= weg;
+      rest += weg;
+      if (rest >= 0) break;
+    }
+    if (rest < 0) throw new Error("Abteilungen nicht aufteilbar");
+    let z2 = schacht.z;
+    const out = [];
+    for (let i = 0; i < teile.length; i++) {
+      const f = teile[i], d = laengen[i] * U;
+      out.push({ ...quadrat(schacht.x, z2, schacht.w, d), id: f.id, titel: f.titel, qmSoll: f.qm });
+      z2 += d + (i === gangIndex ? 2 * U : 0);
+    }
+    return out;
+  }
+  function item(id, x, z2, winkel, abteilung2 = null, extra = {}) {
+    const m = moebel2(id);
+    if (!LADENBAU.winkel.includes(winkel)) throw new Error("Ung\xFCltige Drehung: " + winkel);
+    const mb = m.rasterB * U, mt = m.typ === "wand" ? LADENBAU.wandTiefe : m.rasterT * U;
+    const gedreht3 = winkel === 90 || winkel === 270;
+    const w = gedreht3 ? mt : mb, d = gedreht3 ? mb : mt;
+    return { id, typ: m.typ, x, z: z2, w, d, winkel, abteilung: abteilung2, ...extra };
+  }
+  function passe(m, f, verbote, luft = 0) {
+    return m.x >= -1e-8 && m.z >= -1e-8 && m.x + m.w <= f.breite + 1e-8 && m.z + m.d <= f.tiefe + 1e-8 && !verbote.some((g) => schneidet(m, g, luft));
+  }
+  function passeIn(m, raum) {
+    return m.x >= raum.x - 1e-8 && m.z >= raum.z - 1e-8 && m.x + m.w <= raum.x + raum.w + 1e-8 && m.z + m.d <= raum.z + raum.d + 1e-8;
+  }
+  function sportMixId(plan2, raum, breite) {
+    const pool = SPORT_MIX_PROFILE[raum.id]?.[breite] ?? SPORT_MIX_PROFILE.sporttextil[breite];
+    const index2 = plan2.mixIndex[raum.id] ?? 0;
+    return pool[index2 % pool.length];
+  }
+  function mixGebaut(plan2, raum) {
+    plan2.mixIndex[raum.id] = (plan2.mixIndex[raum.id] ?? 0) + 1;
+  }
+  function wandband(plan2, profil) {
+    const ziel = plan2.moebel, verbote = [...plan2.hindernisse, ...plan2.gaenge, ...plan2.kassenVorfeld, ...plan2.moebel];
+    const halb = profil.id === "sport" ? "sport_schuh_halb" : profil.id === "schwester" ? "alt_holz_wand_halb" : null;
+    const moduleFuer = (raum) => [profil.id === "sport" && raum ? profil.abteilungsMoebel[raum.id]?.wand : profil.wand, halb].filter(Boolean);
+    for (let x = 0; x + 2.5 <= plan2.breite + 1e-8; ) {
+      const raum = plan2.abteilungen.find((a) => a.z <= U + 1e-8 && x + 1.25 >= a.x && x + 1.25 <= a.x + a.w);
+      let gesetzt = false;
+      for (const id of moduleFuer(raum)) {
+        const m = item(id, x, 0, 0, raum?.id ?? null, { band: "rueck", schildband: true });
+        if (x + m.w <= plan2.breite + 1e-8 && passe(m, plan2, verbote)) {
+          ziel.push(m);
+          x += m.w;
+          gesetzt = true;
+          break;
+        }
+      }
+      if (!gesetzt) x += 2.5;
+    }
+    for (let z2 = U; z2 + 2.5 <= plan2.tiefe + 1e-8; ) {
+      const raum = plan2.abteilungen.find((a) => a.x <= U + 1e-8 && z2 + 1.25 >= a.z && z2 + 1.25 <= a.z + a.d);
+      let gesetzt = false;
+      for (const id of moduleFuer(raum)) {
+        const m = item(id, 0, z2, 90, raum?.id ?? null, { band: "west", schildband: true });
+        if (z2 + m.d <= plan2.tiefe + 1e-8 && passe(m, plan2, verbote) && !ziel.some((w) => schneidet(w, m))) {
+          ziel.push(m);
+          z2 += m.d;
+          gesetzt = true;
+          break;
+        }
+      }
+      if (!gesetzt) z2 += U;
+    }
+  }
+  function warenReihen(plan2, profil, raum) {
+    const art = profil.abteilungsMoebel[raum.id] ?? {};
+    const idHaupt = art.gondel ?? profil.gondel;
+    const kurz = profil.id === "sport" ? "gondel_schuhe" : profil.id === "outlet" ? "outlet_beauty" : "gondel_spielzeug";
+    const module3 = profil.id === "sport" ? [{ breite: 4 }, { breite: 2 }] : [idHaupt, kurz].filter((id, i, a) => a.indexOf(id) === i).sort((a, b) => moebel2(b).rasterB - moebel2(a).rasterB).map((id) => ({ id, breite: moebel2(id).rasterB }));
+    const startX = raum.x + 0.625, endeX = raum.x + raum.w - 0.625;
+    const gang = Math.ceil(LADENBAU.gondelGang / LADENBAU.suchRaster) * LADENBAU.suchRaster;
+    const bankTiefe = 2 * U, schritt = bankTiefe + gang;
+    for (let z2 = raum.z + 0.625; z2 + bankTiefe + 0.625 <= raum.z + raum.d + 1e-8; z2 += schritt) {
+      let x = startX;
+      while (x + 2.5 <= endeX + 1e-8) {
+        let platziert = false;
+        for (const gruppe2 of module3) {
+          const w = gruppe2.breite * U;
+          if (x + w > endeX + 1e-8) continue;
+          const modelle = [0, 1].map((j) => {
+            const id = profil.id === "sport" ? (SPORT_MIX_PROFILE[raum.id] ?? SPORT_MIX_PROFILE.sporttextil)[gruppe2.breite][((plan2.mixIndex[raum.id] ?? 0) + j) % 6] : gruppe2.id;
+            const m = item(id, x, z2 + j * U, j ? 180 : 0, raum.id, { reihenGruppe: Math.round(z2 / U) });
+            if (profil.id === "sport") m.moebelart = id.slice(0, id.lastIndexOf("_"));
+            return m;
+          });
+          const frei6 = modelle.map((m) => passeIn(m, raum) && passe(
+            m,
+            plan2,
+            [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld]
+          ));
+          if (!frei6[0] && !frei6[1]) continue;
+          for (let j = 0; j < 2; j++) if (frei6[j]) {
+            plan2.moebel.push(modelle[j]);
+            if (profil.id === "sport") mixGebaut(plan2, raum);
+          }
+          x += w;
+          platziert = true;
+          break;
+        }
+        if (!platziert) x += U;
+      }
+    }
+  }
+  function kassenPlatz(plan2, profil) {
+    const id = profil.kasse, def = moebel2(id), w = def.rasterB * U, d = def.rasterT * U;
+    const main = plan2.gaenge[0], vorfeld = gangZellen(LADENBAU.kassenVorfeld) * U;
+    const xs = [main.x + main.w + U, main.x - w - U, main.x + main.w + 2 * U, main.x - w - 2 * U];
+    for (let x = U; x + w <= plan2.breite - U; x += U) xs.push(x);
+    const stellen = [...new Set(xs)].filter((x) => x >= U && x + w <= plan2.breite - U);
+    for (let z2 = plan2.tiefe - d - 3 * U; z2 >= U; z2 -= U)
+      for (const x of stellen) {
+        const k = item(id, x, z2, 0, null, { amAusgang: true });
+        const frei6 = quadrat(x, z2 + d, w, vorfeld);
+        const verbote = [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel];
+        if (passe(k, plan2, verbote) && passe(frei6, plan2, verbote)) {
+          plan2.kassenVorfeld.push(frei6);
+          plan2.moebel.push(k);
+          return;
+        }
+      }
+    plan2.hinweise.push("Kasse wegen Hindernissen nicht platzierbar");
+  }
+  function inszenierung(plan2, profil, raum) {
+    if (!profil.inszenierung) return;
+    const a = profil.abteilungsMoebel[raum.id] ?? {};
+    if (!a.insel) return;
+    const m = moebel2(a.insel), w = m.rasterB * U, d = m.rasterT * U;
+    const xs = [raum.x + U, raum.x + raum.w - w - U], zs = [raum.z + U, raum.z + raum.d - d - U];
+    for (const z2 of zs) for (const x of xs) {
+      const i = item(a.insel, x, z2, 0, raum.id, { inszenierung: true });
+      if (passeIn(i, raum) && passe(i, plan2, [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld], 0)) {
+        plan2.moebel.push(i);
+        return;
+      }
+    }
+  }
+  function schwerpunkte(plan2) {
+    const r = LADENBAU.suchRaster, nx = Math.round(plan2.breite / r), nz = Math.round(plan2.tiefe / r);
+    const block = new Uint8Array(nx * nz), prev = new Int16Array(nx + 1), jetzt = new Int16Array(nx + 1);
+    for (const m of [...plan2.hindernisse, ...plan2.moebel]) {
+      const x0 = Math.max(0, Math.floor((m.x + 1e-8) / r)), x1 = Math.min(nx, Math.ceil((m.x + m.w - 1e-8) / r));
+      const z0 = Math.max(0, Math.floor((m.z + 1e-8) / r)), z1 = Math.min(nz, Math.ceil((m.z + m.d - 1e-8) / r));
+      for (let z2 = z0; z2 < z1; z2++) for (let x = x0; x < x1; x++) block[z2 * nx + x] = 1;
+    }
+    const felder = [];
+    for (let z2 = 1; z2 <= nz; z2++) {
+      for (let x = 1; x <= nx; x++) if (!block[(z2 - 1) * nx + x - 1]) {
+        jetzt[x] = 1 + Math.min(jetzt[x - 1], prev[x], prev[x - 1]);
+        if (jetzt[x] >= 6) felder.push({ x: (x - jetzt[x]) * r, z: (z2 - jetzt[x]) * r, size: jetzt[x] * r });
+      }
+      prev.set(jetzt);
+      jetzt.fill(0);
+    }
+    felder.sort((a, b) => b.size - a.size || a.z - b.z || a.x - b.x);
+    return felder;
+  }
+  function verdichteLadenplan(plan2, profil) {
+    if (!profil.insel) return;
+    const kurz = profil.id === "sport" ? null : "gondel_spielzeug";
+    const varianten = [
+      { id: profil.insel, winkel: 0, gruppe: "insel" },
+      { id: kurz, winkel: 90, gruppe: "kopf" },
+      { id: kurz, winkel: 0, gruppe: "kopf" }
+    ];
+    const zaehler2 = /* @__PURE__ */ new Map();
+    const verfuegbar2 = plan2.breite * plan2.tiefe - plan2.hindernisse.reduce((s2, h) => s2 + rechteckFlaeche(h), 0);
+    let besetzt = plan2.moebel.reduce((s2, m) => s2 + rechteckFlaeche(m), 0);
+    for (let durchlauf = 0; durchlauf < 110; durchlauf++) {
+      const felder = schwerpunkte(plan2), gross2 = felder[0]?.size ?? 0;
+      if (gross2 <= LADENBAU.leerflaecheMax && besetzt >= LADENBAU.moebelAnteilMin * verfuegbar2) break;
+      let eingefuegt = false;
+      for (const f of felder) {
+        if (f.size < (gross2 > LADENBAU.leerflaecheMax ? 5 : 2.5)) break;
+        for (const art of varianten) {
+          const id = art.id ?? sportMixId(plan2, plan2.abteilungen.find((a) => f.x >= a.x && f.z >= a.z && f.x < a.x + a.w && f.z < a.z + a.d) ?? plan2.abteilungen[0], 2);
+          const def = moebel2(id), gedreht3 = art.winkel === 90;
+          const w = (gedreht3 ? def.rasterT : def.rasterB) * U;
+          const d = (gedreht3 ? def.rasterB : def.rasterT) * U;
+          if (besetzt + w * d > 0.49 * verfuegbar2) continue;
+          const x0 = Math.ceil((f.x - 1e-8) / U) * U, z0 = Math.ceil((f.z - 1e-8) / U) * U;
+          for (let z2 = z0; z2 + d <= f.z + f.size + 1e-8 && !eingefuegt; z2 += U)
+            for (let x = x0; x + w <= f.x + f.size + 1e-8 && !eingefuegt; x += U) {
+              const raum = plan2.abteilungen.find((r) => x >= r.x && z2 >= r.z && x + w <= r.x + r.w && z2 + d <= r.z + r.d);
+              if (!raum) continue;
+              const key = raum.id + ":" + art.gruppe;
+              if ((zaehler2.get(key) || 0) >= (art.gruppe === "insel" ? 6 : 12)) continue;
+              const moebelId = profil.id === "sport" && art.gruppe === "kopf" ? sportMixId(plan2, raum, 2) : id;
+              const m = item(moebelId, x, z2, art.winkel, raum.id, { ausgleich: true, kopf: art.gruppe === "kopf" });
+              if (profil.id === "sport" && art.gruppe === "kopf") m.moebelart = moebelId.slice(0, moebelId.lastIndexOf("_"));
+              if (!passeIn(m, raum) || !passe(
+                m,
+                plan2,
+                [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld]
+              )) continue;
+              const nah = plan2.moebel.some((q2) => q2.typ === "gondel" && q2.abteilung === raum.id && Math.hypot(
+                Math.max(0, q2.x - x - w, x - q2.x - q2.w),
+                Math.max(0, q2.z - z2 - d, z2 - q2.z - q2.d)
+              ) <= 3 * U);
+              const gangNah = plan2.gaenge.some((g) => schneidet(m, g, 2 * U));
+              if (!nah && !gangNah) continue;
+              if (m.typ === "gondel" && plan2.moebel.some((q2) => {
+                if (q2.typ !== "gondel" || q2.abteilung !== raum.id || q2.winkel !== m.winkel) return false;
+                const xO = m.x < q2.x + q2.w - 1e-8 && m.x + m.w > q2.x + 1e-8;
+                const zO = m.z < q2.z + q2.d - 1e-8 && m.z + m.d > q2.z + 1e-8;
+                const dist2 = m.winkel % 180 === 0 ? Math.max(q2.z - m.z - m.d, m.z - q2.z - q2.d) : Math.max(q2.x - m.x - m.w, m.x - q2.x - q2.w);
+                return (m.winkel % 180 === 0 ? xO : zO) && dist2 >= 0 && dist2 < LADENBAU.gondelGang - 1e-8;
+              })) continue;
+              plan2.moebel.push(m);
+              if (profil.id === "sport" && art.gruppe === "kopf") mixGebaut(plan2, raum);
+              zaehler2.set(key, (zaehler2.get(key) || 0) + 1);
+              besetzt += w * d;
+              eingefuegt = true;
+            }
+          if (eingefuegt) break;
+        }
+        if (eingefuegt) break;
+      }
+      if (!eingefuegt) break;
+    }
+    if (besetzt < LADENBAU.moebelAnteilMin * verfuegbar2) {
+      const def = moebel2(profil.id === "sport" ? SPORT_MIX_PROFILE.sporttextil[2][0] : kurz);
+      for (const raum of plan2.abteilungen) {
+        for (let z2 = raum.z; z2 + def.rasterT * U <= raum.z + raum.d + 1e-8; z2 += U)
+          for (let x = raum.x; x + def.rasterB * U <= raum.x + raum.w + 1e-8; x += U) {
+            if (besetzt >= LADENBAU.moebelAnteilMin * verfuegbar2) break;
+            const id = profil.id === "sport" ? sportMixId(plan2, raum, 2) : kurz;
+            const m = item(id, x, z2, 0, raum.id, { ausgleich: true, kopf: true });
+            if (profil.id === "sport") m.moebelart = id.slice(0, id.lastIndexOf("_"));
+            if (!passeIn(m, raum) || !passe(
+              m,
+              plan2,
+              [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld]
+            )) continue;
+            const nahe = plan2.moebel.some((q2) => q2.typ === "gondel" && q2.abteilung === raum.id && Math.hypot(
+              Math.max(0, q2.x - x - m.w, x - q2.x - q2.w),
+              Math.max(0, q2.z - z2 - m.d, z2 - q2.z - q2.d)
+            ) <= 3 * U);
+            if (!nahe) continue;
+            const zuEng = plan2.moebel.some((q2) => {
+              if (q2.typ !== "gondel" || q2.abteilung !== raum.id || q2.winkel !== 0) return false;
+              const xO = m.x < q2.x + q2.w - 1e-8 && m.x + m.w > q2.x + 1e-8;
+              const dist2 = Math.max(q2.z - m.z - m.d, m.z - q2.z - q2.d);
+              return xO && dist2 >= 0 && dist2 < LADENBAU.gondelGang - 1e-8;
+            });
+            if (zuEng) continue;
+            plan2.moebel.push(m);
+            if (profil.id === "sport") mixGebaut(plan2, raum);
+            besetzt += m.w * m.d;
+          }
+      }
+    }
+  }
+  function sichereSportMix(plan2) {
+    if (plan2.profil !== "sport") return;
+    const verbote = () => [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld];
+    for (const raum of plan2.abteilungen) {
+      const passend2 = () => plan2.moebel.filter((m) => m.abteilung === raum.id);
+      const gueltig = () => {
+        const ms = passend2(), t = /* @__PURE__ */ new Map();
+        for (const m of ms) {
+          const art = m.moebelart ?? m.id;
+          t.set(art, (t.get(art) ?? 0) + 1);
+        }
+        return t.size >= 4 && [...t.values()].every((n) => n <= 0.4 * ms.length + 1e-8);
+      };
+      if (gueltig()) continue;
+      const ids = SPORT_MIX_WAENDE[raum.id] ?? SPORT_MIX_WAENDE.sporttextil;
+      const kandidaten2 = [];
+      for (let z2 = raum.z; z2 + 2.5 <= raum.z + raum.d + 1e-8; z2 += U)
+        for (const x of [raum.x, raum.x + raum.w - LADENBAU.wandTiefe])
+          kandidaten2.push({ x, z: z2, winkel: 90 });
+      for (let x = raum.x; x + 2.5 <= raum.x + raum.w + 1e-8; x += U)
+        for (const z2 of [raum.z, raum.z + raum.d - LADENBAU.wandTiefe])
+          kandidaten2.push({ x, z: z2, winkel: 0 });
+      let gesetzt = 0;
+      for (const k of kandidaten2) {
+        if (gueltig() || gesetzt >= 8) break;
+        const id = ids[gesetzt % ids.length];
+        const m = item(id, k.x, k.z, k.winkel, raum.id, { innenwand: true, moebelart: id });
+        if (!passeIn(m, raum) || !passe(m, plan2, verbote())) continue;
+        plan2.moebel.push(m);
+        gesetzt++;
+      }
+      if (!gueltig()) plan2.hinweise.push("Sortimentsmix nicht erreichbar: " + raum.id);
+    }
+  }
+  function ladenplan(flaeche5, profil, abteilungen, seed = 1) {
+    const p = ladeProfil(profil), a = sortiment(abteilungen ?? []), f = normiereFlaeche(flaeche5);
+    if (!a.length) throw new Error("Ladenplan braucht Abteilungsfl\xE4chen");
+    const haupt = hauptgangWaehlen(f.breite, f.tiefe, f.eingaenge, f.hindernisse);
+    const plan2 = {
+      version: 1,
+      profil: p.id,
+      seed,
+      breite: f.breite,
+      tiefe: f.tiefe,
+      eingaenge: f.eingaenge,
+      hindernisse: f.hindernisse,
+      gaenge: [haupt],
+      abteilungen: [],
+      moebel: [],
+      kassenVorfeld: [],
+      boeden: [],
+      wandOeffnungen: [],
+      hinweise: [],
+      mixIndex: {}
+    };
+    for (const e of f.eingaenge) if (e.x < haupt.x || e.x > haupt.x + haupt.w) {
+      const x = Math.min(e.x, haupt.x), x2 = Math.max(e.x, haupt.x + haupt.w), d = haupt.w;
+      plan2.gaenge.push({ ...quadrat(x, plan2.tiefe - d, x2 - x, d), typ: "haupt" });
+    }
+    const links = quadrat(U, U, haupt.x - U, plan2.tiefe - 2 * U);
+    const rechts = quadrat(haupt.x + haupt.w, U, plan2.breite - haupt.x - haupt.w - U, plan2.tiefe - 2 * U);
+    const l = [], r = [];
+    let ql = 0, qr = 0;
+    for (const z2 of [...a].sort((u, v) => v.qm - u.qm || u.id.localeCompare(v.id, "de"))) {
+      if (ql / Math.max(U, links.w) <= qr / Math.max(U, rechts.w)) {
+        l.push(z2);
+        ql += z2.qm;
+      } else {
+        r.push(z2);
+        qr += z2.qm;
+      }
+    }
+    plan2.abteilungen.push(...teilung(l, a, links), ...teilung(r, a, rechts));
+    for (const [zone, grp] of [[links, l], [rechts, r]]) {
+      if (zone.w <= 0) continue;
+      const rs = plan2.abteilungen.filter((x) => x.x === zone.x);
+      for (let j = 0; j < rs.length - 1; j++) {
+        const x = rs[j], z2 = x.z + x.d;
+        if (rs[j + 1].z > z2 + 1e-8) {
+          const quer2 = { ...quadrat(zone.x, z2, zone.w, rs[j + 1].z - z2), typ: "neben" };
+          if (!plan2.hindernisse.some((h) => schneidet(h, quer2))) plan2.gaenge.push(quer2);
+        }
+      }
+    }
+    kassenPlatz(plan2, p);
+    wandband(plan2, p);
+    for (const raum of plan2.abteilungen) inszenierung(plan2, p, raum);
+    for (const raum of plan2.abteilungen) warenReihen(plan2, p, raum);
+    verdichteLadenplan(plan2, p);
+    sichereSportMix(plan2);
+    plan2.boeden.push({ ...quadrat(0, 0, plan2.breite, plan2.tiefe), typ: "flaeche", farbe: p.boden.flaeche });
+    if (p.id === "sport") for (const a2 of plan2.abteilungen)
+      plan2.boeden.push({ ...quadrat(a2.x, a2.z, a2.w, a2.d), typ: "flaeche", abteilung: a2.id, farbe: SPORT_BOEDEN[a2.id] ?? p.boden.flaeche });
+    for (const g of plan2.gaenge) plan2.boeden.push({ ...g, typ: "gang", farbe: p.boden.gang });
+    for (const i of plan2.moebel.filter((m) => m.inszenierung).slice(0, Math.floor(plan2.breite * plan2.tiefe * LADENBAU.akzentAnteilMax / (2.5 * 2.5))))
+      if (p.boden.akzent) plan2.boeden.push({ ...quadrat(i.x, i.z, i.w, i.d), typ: "akzent", farbe: p.boden.akzent, unter: i.id });
+    delete plan2.mixIndex;
+    return plan2;
+  }
+  function baueLadenplan(S, scene2, plan2, o = {}) {
+    const p = ladeProfil(plan2.profil), y = o.y ?? 0, dichte = o.dichte ?? 1;
+    if (o.vorbereiten !== false) vorbereiten(S, scene2);
+    const n0 = S.anzahl;
+    const sicht3 = o.ausschnitt ?? null;
+    const beschraenke = (r) => {
+      if (!sicht3) return r;
+      const x0 = Math.max(r.x, sicht3.x0), z0 = Math.max(r.z, sicht3.z0);
+      const x1 = Math.min(r.x + r.w, sicht3.x1), z1 = Math.min(r.z + r.d, sicht3.z1);
+      return x1 > x0 && z1 > z0 ? { x: x0, z: z0, w: x1 - x0, d: z1 - z0 } : null;
+    };
+    const ohneLoch = (b, h) => {
+      const x0 = Math.max(b.x, h.x), x1 = Math.min(b.x + b.w, h.x + h.w);
+      const z0 = Math.max(b.z, h.z), z1 = Math.min(b.z + b.d, h.z + h.d);
+      if (x1 <= x0 || z1 <= z0) return [b];
+      return [
+        { x: b.x, z: b.z, w: b.w, d: z0 - b.z },
+        { x: b.x, z: z1, w: b.w, d: b.z + b.d - z1 },
+        { x: b.x, z: z0, w: x0 - b.x, d: z1 - z0 },
+        { x: x1, z: z0, w: b.x + b.w - x1, d: z1 - z0 }
+      ].filter((q2) => q2.w > 1e-3 && q2.d > 1e-3);
+    };
+    for (const b of plan2.boeden) {
+      const hoehe = b.typ === "gang" ? 0.038 : b.typ === "akzent" ? 0.045 : 0.03;
+      let stuecke = [beschraenke(b)].filter(Boolean);
+      for (const h of o.bodenAussparungen ?? []) stuecke = stuecke.flatMap((q2) => ohneLoch(q2, h));
+      for (const q2 of stuecke) S.box(q2.w, hoehe, q2.d, q2.x + q2.w / 2, y - hoehe / 2 + (b.typ === "gang" ? 0.01 : b.typ === "akzent" ? 0.016 : b.abteilung ? 4e-3 : 0), q2.z + q2.d / 2, b.farbe);
+    }
+    if (plan2.profil === "sport" && scene2) for (const a of plan2.abteilungen) {
+      const raumbild = beschraenke(a);
+      if (!raumbild) continue;
+      const x = raumbild.x + (raumbild.w > 6 ? Math.min(3, raumbild.w / 2) : raumbild.w / 2);
+      const z2 = raumbild.z + raumbild.d / 2;
+      haengeschild(
+        S,
+        scene2,
+        SPORT_NAMEN[a.id] ?? a.titel,
+        x,
+        y + 3.35,
+        z2,
+        { farbe: SPORT_SCHILDER[a.id] ?? "#314754", hoehe: 0.48 }
+      );
+    }
+    for (let j = 0; j < plan2.moebel.length; j++) {
+      const m = plan2.moebel[j];
+      if (sicht3 && (m.x < sicht3.x0 - 1e-8 || m.z < sicht3.z0 - 1e-8 || m.x + m.w > sicht3.x1 + 1e-8 || m.z + m.d > sicht3.z1 + 1e-8)) continue;
+      const def = moebel2(m.id), w = def.rasterB * U;
+      const winkel = m.winkel * Math.PI / 180;
+      const ox = m.winkel === 90 ? m.x : m.winkel === 270 ? m.x + m.w : m.x + w / 2;
+      const oz = m.winkel === 90 ? m.z + m.d / 2 : m.winkel === 180 ? m.z + m.d : m.z;
+      def.bau(
+        lokal2(S, ox, y, oz, winkel),
+        rng2(String(plan2.seed) + ":" + j + ":" + m.id),
+        dichte,
+        { seed: String(plan2.seed) + ":" + j, bestueckung: o.bestueckung ?? 1, profil: p.id }
+      );
+    }
+    return { teile: S.anzahl - n0, moebel: plan2.moebel.length, abteilungen: plan2.abteilungen.length };
+  }
+
+  // src/kit/ladenbau-sport.js
+  function sportLadenEingabe(haus2, etage2, o = {}, raster4 = null) {
+    const fam = familieSport(haus2), masse3 = masseSport(haus2, fam), ra = raster4 ?? sportRaster(haus2, etage2, o);
+    const istHindernis = (t) => /^(treppe|rt|aufzug|lager|wc|werkstatt|luft|turm|buehne|szene|radbuehne|lauf|erlebnis)/.test(String(t));
+    const hindernisse = [];
+    for (let i = 0; i < ra.nx; i++) for (let j = 0; j < ra.nz; j++) {
+      const typ = ra.typ[i][j];
+      if (istHindernis(typ)) hindernisse.push({
+        id: typ + "-" + i + "-" + j,
+        typ: String(typ).startsWith("treppe") ? "treppe" : typ,
+        x: i * 5,
+        z: j * 5,
+        w: 5,
+        d: 5
+      });
+    }
+    const abteilungen = (haus2.flaechen ?? []).filter((f) => f.etage === etage2 && f.qm >= 10);
+    const eingaenge = [{ x: Math.min(masse3.bw - 2.5, Math.max(2.5, ra.gx * 5 + 2.5)), z: masse3.bd }];
+    return {
+      flaeche: { breite: masse3.bw, tiefe: masse3.bd, hindernisse, eingaenge },
+      abteilungen,
+      familie: fam,
+      etage: etage2,
+      id: haus2.id
+    };
+  }
+
   // src/kit/sportgrundriss.js
   var R3 = RASTER;
   var WH2 = WANDHOEHE;
@@ -92024,6 +93509,21 @@
     vorbereiten(S, scene2);
     const ra = sportRaster(haus2, etageNr, o);
     const zn = sportZonen(haus2, etageNr, ra);
+    const plan2 = o.altbestand ? null : (() => {
+      const eingabe = sportLadenEingabe(haus2, etageNr, o, ra);
+      const p = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr);
+      p.variante = ra.box ? "halle" : "flaeche";
+      for (const b of p.boeden) if (b.typ === "gang") b.farbe = STIL[ra.fam].gang.a;
+      if (ra.abverkauf) {
+        let n = 0;
+        for (const m of p.moebel) if (m.typ === "gondel" && m.w === 5 && m.d === 1.25) {
+          if (n++ % 3 === 0) m.id = "sport_abverkauf_tisch";
+          else if (n % 3 === 2) m.id = "sport_abverkauf_gitter";
+        }
+        p.abverkauf = true;
+      }
+      return p;
+    })();
     const { B: B2, T, nx, nz } = ra;
     let ax0 = 0, az0 = 0, ax1 = B2, az1 = T;
     if (o.ausschnitt) {
@@ -92050,7 +93550,7 @@
       tmp2.szene = gruppe2;
       vorbereiten(tmp2, gruppe2);
       kk = { ax0, az0, ax1, az1, drin, d, kunden, o };
-      bauen(tmp2, gruppe2, haus2, etageNr, ra, zn, kk);
+      bauen(tmp2, gruppe2, haus2, etageNr, ra, zn, kk, plan2);
       if (tmp2.anzahl <= budget || versuch > 8) break;
       versuch++;
       const f = Math.max(0.5, Math.min(0.92, budget * 0.97 / tmp2.anzahl));
@@ -92069,9 +93569,9 @@
     const eg = etageNr === 0;
     const aussen = eg ? ra.mall ? 9.5 : ra.box ? 19 : 7 : ra.mall ? 9.5 : 0.4;
     const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new three_module_exports.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH2 + (ra.hochpunkt ?? 0), az1 + aussen));
-    return { box, breite: B2, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam };
+    return { box, breite: B2, tiefe: T, zonen: plan2?.abteilungen ?? zn, anzahl: tmp2.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan2 };
   }
-  function bauen(S, scene2, haus2, e, ra, zn, k) {
+  function bauen(S, scene2, haus2, e, ra, zn, k, plan2 = null) {
     const { B: B2, T, nx, nz, typ, fam } = ra;
     const { ax0, az0, ax1, az1, drin, d } = k;
     const hid = (haus2.id ?? "S").split("").reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
@@ -92086,6 +93586,10 @@
     ra.ausschnitt = [ax0, az0, ax1, az1];
     ra.drin = drin;
     ra.artAn = (i, j) => {
+      if (plan2) {
+        const x = (i + 0.5) * R3, z2 = (j + 0.5) * R3;
+        return plan2.abteilungen.find((a) => x >= a.x && x < a.x + a.w && z2 >= a.z && z2 < a.z + a.d)?.id ?? null;
+      }
       const q2 = zoneVon[i]?.[j];
       return q2 >= 0 ? zn[q2].art : null;
     };
@@ -92114,7 +93618,19 @@
       return "nachbar";
     };
     const egFront = eg && [2, 3, 5, 6].includes(fam) && !ra.mall;
-    zn.forEach((z2, zi) => {
+    if (plan2) {
+      baueLadenplan(S, scene2, plan2, {
+        vorbereiten: false,
+        dichte: d,
+        ausschnitt: { x0: ax0, z0: az0, x1: ax1, z1: az1 },
+        bodenAussparungen: loecher.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 }))
+      });
+      belegt2.push(...plan2.moebel.map((m) => [m.x, m.z, m.x + m.w, m.z + m.d]));
+      belegt2.push(...plan2.hindernisse.map((h) => [h.x, h.z, h.x + h.w, h.z + h.d]));
+      for (const g of plan2.gaenge) for (let z2 = g.z + 0.7; z2 < g.z + g.d - 0.3; z2 += 2.5)
+        for (let x = g.x + 0.7; x < g.x + g.w - 0.3; x += 2.5)
+          if (x >= ax0 && x <= ax1 && z2 >= az0 && z2 <= az1) frei6.push([x, z2]);
+    } else zn.forEach((z2, zi) => {
       if (!z2.zellen.some((c) => drin(c.i, c.j))) return;
       const f = z2.flaeche, art = z2.art;
       const Z2 = { alle: z2.zellen.filter((c) => drin(c.i, c.j)), kante, sicht: sicht3, y: 0, bereich: [ax0, az0, ax1, az1] };
@@ -92140,6 +93656,7 @@
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       if (!drin(i, j)) continue;
       const t = typ[i][j], x = i * R3, z2 = j * R3, sd = (i * 131 + j * 17 + e * 7 + 1) * 3, rr = rng2(sd);
+      if (plan2 && ["gang", "neben", "kasse", "wagen", "eingang", "aktion"].includes(t)) continue;
       const zu = (x0, z0, x1, z1) => belegt2.push([x0, z0, x1, z1]);
       switch (t) {
         case "gang":
@@ -92250,7 +93767,7 @@
       }
     }
     if (ra.sonder.includes("buehne")) rundbuehne(S, scene2, ra, d, r, frei6, drin);
-    if (ra.szene) inszenierung(S, scene2, ra, d, r, frei6, drin);
+    if (ra.szene) inszenierung2(S, scene2, ra, d, r, frei6, drin);
     const ohne2 = /* @__PURE__ */ new Set(["lager", "treppe", "treppe2", "aufzug", "wc", "luft", "rt", "rt2", "treppe_offen", "treppe_offen2", "treppe_holz", "treppe_holz2", "lauf", "buehne", "szene", "turm", "werkstatt", "werkstatt2", "radbuehne", "radbuehne2", "kasse", "wagen"]);
     for (let i = 2; i < nx; i += 2) for (let j = 2; j < nz; j += 2) {
       const x = i * R3, z2 = j * R3;
@@ -92283,7 +93800,7 @@
       const t = typ[i][j], zi = zoneVon[i][j];
       if (["lager", "treppe", "treppe2", "wc", "aufzug", "luft", "buehne", "szene", "werkstatt", "werkstatt2"].includes(t) || zi >= 0 && ["leer", "umbau", "untermiete", "konzession"].includes(zn[zi].art)) belegt2.push([i * R3, j * R3, (i + 1) * R3, (j + 1) * R3]);
     }
-    const quadrat = () => {
+    const quadrat2 = () => {
       const q2 = 0.5, gw = Math.round((ax1 - ax0) / q2), gh = Math.round((az1 - az0) / q2);
       const voll2 = Array.from({ length: gw }, () => new Uint8Array(gh));
       for (const b of belegt2) {
@@ -92302,12 +93819,12 @@
       }
       return { m: best * q2, wo };
     };
-    let lf = quadrat();
-    for (let n2 = 0; n2 < 4 && lf.m > 5.5; n2++) {
+    let lf = quadrat2();
+    for (let n2 = 0; !plan2 && n2 < 4 && lf.m > 5.5; n2++) {
       const cx = lf.wo[0] + lf.m / 2, cz = lf.wo[1] + lf.m / 2;
       aktionsinsel(S, scene2, cx, cz, ra.artAn(Math.floor(cx / R3), Math.floor(cz / R3)), rng2(n2 * 31 + e), d, frei6);
       belegt2.push([cx - 1.7, cz - 1.7, cx + 1.7, cz + 1.7]);
-      lf = quadrat();
+      lf = quadrat2();
     }
     k.leer = lf;
     const n = Math.min(k.kunden, frei6.length);
@@ -92734,7 +94251,7 @@
     ra.belegt.push([cx - Rz, cz - Rz, B2, T]);
     frei6.push([cx - Rz - 0.5, cz + 0.5], [cx + 0.5, cz - Rz - 0.4]);
   }
-  function inszenierung(S, scene2, ra, d, r, frei6, drin) {
+  function inszenierung2(S, scene2, ra, d, r, frei6, drin) {
     const zellen = [];
     for (let i = 0; i < ra.nx; i++) for (let j = 0; j < ra.nz; j++) if (ra.typ[i][j] === "szene") zellen.push([i, j]);
     if (!zellen.length) return;
@@ -93014,10 +94531,10 @@
       for (let q2 = 0; q2 < 3; q2++) puppe3(Ld.hoch(0.5), -1.3 + q2 * 1.3, zw(r, -0.15, 0.15), r, grp === "outdoor" ? "herren" : "sport", pal, zw(r, -0.4, 0.4));
     };
     const artAn = (m) => achse === "z" ? ra.artAn(Math.floor(m / R3), ra.nz - 1) : ra.artAn(ra.nx - 1, Math.floor(m / R3));
-    const eingangTuer = (m, farbe = HS_BLAU) => {
+    const eingangTuer = (m, farbe2 = HS_BLAU) => {
       const Lt = L2(m, 0.15);
-      Lt.box(4.4, 0.25, 0.4, 0, WH2 - 0.5, 0, farbe);
-      for (const s2 of [-2.1, 2.1]) Lt.box(0.25, WH2 - 0.5, 0.3, s2, 0, 0, farbe);
+      Lt.box(4.4, 0.25, 0.4, 0, WH2 - 0.5, 0, farbe2);
+      for (const s2 of [-2.1, 2.1]) Lt.box(0.25, WH2 - 0.5, 0.3, s2, 0, 0, farbe2);
       Lt.box(1.9, 2.9, 0.05, -1, 0, -0.05, "#2f3d48");
       Lt.box(1.9, 2.9, 0.05, 1.3, 0, 0.05, "#2f3d48");
       Lt.box(3.6, 0.02, 2, 0, 0, -1.1, "#3a3f45");
@@ -93639,9 +95156,9 @@
       });
     }
     for (const [k, gs] of tmp2.teile) {
-      const farbe = haus2.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k) ? FARBE_SCHWESTER : k;
-      if (!S.teile.has(farbe)) S.teile.set(farbe, []);
-      S.teile.get(farbe).push(...gs);
+      const farbe2 = haus2.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k) ? FARBE_SCHWESTER : k;
+      if (!S.teile.has(farbe2)) S.teile.set(farbe2, []);
+      S.teile.get(farbe2).push(...gs);
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe2.children.length) scene2.add(gruppe2.children[0]);
@@ -94299,10 +95816,10 @@
     const L2 = pz4 ? lokal2(S, x + w / 2, 0, z2 + d, 0) : lokal2(S, x + w, 0, z2 + d / 2, PI7 / 2);
     L2.len = len;
     L2.seite = seite;
-    L2.schild = (text3, u, y, h, farbe, hg = null, t = 0) => {
+    L2.schild = (text3, u, y, h, farbe2, hg = null, t = 0) => {
       const fass = (pz4 ? z2 + d : x + w) + t - 0.3;
       const uw = pz4 ? x + w / 2 + u : z2 + d / 2 - u;
-      return schild(scene2, text3, seite, uw, y + (S.y0 ?? 0), fass, h, farbe, hg);
+      return schild(scene2, text3, seite, uw, y + (S.y0 ?? 0), fass, h, farbe2, hg);
     };
     return L2;
   }
@@ -95122,9 +96639,9 @@
     }
     inhalt(lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0), w, d);
   }
-  function buerostuhl(L2, lx, lz, ry, st, farbe) {
+  function buerostuhl(L2, lx, lz, ry, st, farbe2) {
     const P2 = L2.sub(lx, lz, ry);
-    const f = st === 0 ? "#7b5a40" : st === 1 ? "#4a525a" : st === 2 ? "#2a2d31" : farbe;
+    const f = st === 0 ? "#7b5a40" : st === 1 ? "#4a525a" : st === 2 ? "#2a2d31" : farbe2;
     if (st === 0) {
       P2.box(0.42, 0.05, 0.42, 0, 0.42, 0, f);
       P2.box(0.42, 0.42, 0.05, 0, 0.47, -0.19, f);
@@ -95150,7 +96667,7 @@
       L2.box(0.48, 0.28, 0.01, u, 0.98, lz + 0.025, inhalt ?? waehle2(r, ["#9cc9e0", "#cfe3ec", "#b7d7c4", "#e6edf1"]));
     }
   }
-  function insel(S, x, z2, n, st, r, farbe, chartBild) {
+  function insel(S, x, z2, n, st, r, farbe2, chartBild) {
     const L2 = lokal2(S, x, 0.06, z2, 0);
     const tisch3 = ["#b7b09d", "#d9d6cf", "#f2f0ea", "#efe4cf"][st], bein = st === 0 ? "#6b6f72" : "#9aa3aa";
     const plaetze = [];
@@ -95168,14 +96685,14 @@
         if (st >= 1 && r() < 0.5) L2.box(0.22, 0.12, 0.3, u + 0.45, 0.76, tz, waehle2(r, ["#f4f2ee", "#e9c46a", "#cfd6dc"]));
         if (st === 0 && r() < 0.6) L2.box(0.3, 0.25, 0.22, u + 0.45, 0.76, tz - 0.15, waehle2(r, ["#2f5f8a", "#8a2f3a", "#3f6b3a"]));
         const sz = z2 + tz + s2 * 0.85;
-        buerostuhl(lokal2(S, x + u, 0.06, sz, 0), 0, 0, s2 > 0 ? PI7 : 0, st, farbe);
+        buerostuhl(lokal2(S, x + u, 0.06, sz, 0), 0, 0, s2 > 0 ? PI7 : 0, st, farbe2);
         plaetze.push([x + u, sz, s2 > 0 ? PI7 : 0]);
       }
     }
     const lang = n * breit2;
     if (st === 1) L2.box(lang - 0.2, 0.42, 0.05, 0, 0.76, 0, "#7f8a92");
     if (st >= 2) {
-      L2.box(lang - 0.2, 0.28, 0.3, 0, 0.76, 0, st === 3 ? farbe : "#6b5a48");
+      L2.box(lang - 0.2, 0.28, 0.3, 0, 0.76, 0, st === 3 ? farbe2 : "#6b5a48");
       for (let u = -lang / 2 + 0.35; u < lang / 2 - 0.2; u += 0.42) L2.kugel(0.2, u, 1.12, 0, waehle2(r, FARBEN3.baum));
     }
     return plaetze;
@@ -95185,10 +96702,10 @@
     L2.kugel(gross2 ? 0.6 : 0.42, lx, gross2 ? 1.05 : 0.85, lz, waehle2(r, FARBEN3.baum));
     if (gross2) L2.kugel(0.4, lx + 0.1, 1.6, lz - 0.05, waehle2(r, FARBEN3.baum));
   }
-  function text2(L2, t, lx, ly, lz, h, farbe, hg = null) {
+  function text2(L2, t, lx, ly, lz, h, farbe2, hg = null) {
     const scene2 = L2.S.szene;
     if (!scene2) return;
-    const { mat: mat2, seitenverhaeltnis } = textMaterial(t, farbe, { groesse: 100, hintergrund: hg, versatz: -2 });
+    const { mat: mat2, seitenverhaeltnis } = textMaterial(t, farbe2, { groesse: 100, hintergrund: hg, versatz: -2 });
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * seitenverhaeltnis, h), mat2);
     const [X, Z2] = L2.P(lx, lz);
     m.position.set(X, L2.oy + ly, Z2);
@@ -95202,12 +96719,12 @@
       L2.box(s2 * 0.6, hh, 0.02, lx - w / 2 + s2 * (i + 0.5), ly, lz, farben[i % farben.length]);
     }
   }
-  function linie(L2, lx, ly, lz, w, h, r, farbe = "#d23c32") {
+  function linie(L2, lx, ly, lz, w, h, r, farbe2 = "#d23c32") {
     let y0 = ly + h * zw(r, 0.2, 0.5);
     const n = 5, s2 = w / n;
     for (let i = 0; i < n; i++) {
       const y1 = ly + h * zw(r, 0.15, 0.95), dx = s2, dy = y1 - y0, l = Math.hypot(dx, dy);
-      L2.geo(new three_module_exports.BoxGeometry(l, 0.04, 0.02).rotateZ(Math.atan2(dy, dx)), lx - w / 2 + s2 * (i + 0.5), (y0 + y1) / 2 - 0.02, lz, farbe);
+      L2.geo(new three_module_exports.BoxGeometry(l, 0.04, 0.02).rotateZ(Math.atan2(dy, dx)), lx - w / 2 + s2 * (i + 0.5), (y0 + y1) / 2 - 0.02, lz, farbe2);
       y0 = y1;
     }
   }
@@ -95241,7 +96758,7 @@
         text2(L2, "KPI Woche", 0, 2.75, 0.08, 0.28, "#ffffff", "#2f6fb3");
         L2.box(0.5, 0.7, 0.4, -w / 2 + 0.4, 0, 0.3, "#3a3f45");
       } },
-      { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.9, 0);
         L2.box(w, 0.04, 0.9, 0, 0.72, 0, "#e9e6df");
         for (const s2 of [-1, 1]) L2.box(0.05, 0.72, 0.8, s2 * (w / 2 - 0.1), 0, 0, "#9aa3aa");
@@ -95251,18 +96768,18 @@
           balken2(L2, u, 0.99, -0.27, 0.4, 0.26, r);
           L2.box(0.06, 0.2, 0.06, u, 0.76, -0.33, "#2a2d31");
         }
-        for (let k = 0; k < 3; k++) buerostuhl(L2, -w / 3 + k * (w / 3), 0.85, PI7, Math.max(1, st), farbe);
+        for (let k = 0; k < 3; k++) buerostuhl(L2, -w / 3 + k * (w / 3), 0.85, PI7, Math.max(1, st), farbe2);
       } },
-      { art: "raum", w: 5, d: 4, name: "Forecast-Runde", bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 5, d: 4, name: "Forecast-Runde", bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.8, 0.05, 1.2, 0, 0.72, 0.2, "#f4f2ee");
           L2.box(0.2, 0.72, 0.8, 0, 0, 0.2, "#9aa3aa");
-          for (const s2 of [-1, 1]) for (let k = 0; k < 3; k++) buerostuhl(L2, (k - 1) * 0.9, 0.2 + s2 * 0.95, s2 > 0 ? PI7 : 0, 2, farbe);
+          for (const s2 of [-1, 1]) for (let k = 0; k < 3; k++) buerostuhl(L2, (k - 1) * 0.9, 0.2 + s2 * 0.95, s2 > 0 ? PI7 : 0, 2, farbe2);
           L2.box(2.2, 1.3, 0.08, 0, 1, -d / 2 + 0.15, "#22272c");
           L2.box(2, 1.1, 0.02, 0, 1.1, -d / 2 + 0.2, "#f4f6f8");
           balken2(L2, -0.5, 1.2, -d / 2 + 0.22, 0.9, 0.8, r);
           linie(L2, 0.5, 1.2, -d / 2 + 0.22, 0.8, 0.8, r);
-        }, { name: "Forecast-Runde", farbe });
+        }, { name: "Forecast-Runde", farbe: farbe2 });
       } },
       { art: "frei", w: 1.4, d: 1.2, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -95281,7 +96798,7 @@
         }, r);
         text2(L2, "Muster Herbst/Winter", 0, 2.5, 0.05, 0.24, "#ffffff", "#c0832f");
       } },
-      { art: "frei", w: 3.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "frei", w: 3.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.8, 0.06, 1.3, 0, 0.84, 0, "#d8bf98");
         for (const s2 of [-1.2, 1.2]) L2.box(0.08, 0.84, 1.1, s2, 0, 0, "#7b5a40");
@@ -95289,7 +96806,7 @@
         for (let k = 0; k < 3; k++) {
           L2.box(0.3, 0.08, 0.4, -0.9 + k * 0.9, 0.9, -0.35, waehle2(r, ["#2b3a55", "#6b2737", "#3f6b3a"]));
         }
-        for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.7, 1.15, PI7, Math.max(1, st), farbe);
+        for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.7, 1.15, PI7, Math.max(1, st), farbe2);
       } },
       { art: "frei", w: 3, d: 1.2, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -95300,14 +96817,14 @@
         L2.box(2.7, 0.04, 0.04, 0, 1.7, 0, "#9aa3aa");
         for (let u = -1.2; u < 1.2; u += 0.16) L2.box(0.05, zw(r, 0.7, 1), 0.42, u, 1.66 - 0.85, 0, waehle2(r, PAL.damen.concat(PAL.herren)));
       } },
-      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.4, 0.05, 1.1, 0, 0.72, 0.4, "#f4f2ee");
           L2.box(0.2, 0.72, 0.8, 0, 0, 0.4, "#9aa3aa");
-          for (const s2 of [-1, 1]) for (let k = 0; k < 2; k++) buerostuhl(L2, (k - 0.5) * 1.1, 0.4 + s2 * 0.9, s2 > 0 ? PI7 : 0, 2, farbe);
+          for (const s2 of [-1, 1]) for (let k = 0; k < 2; k++) buerostuhl(L2, (k - 0.5) * 1.1, 0.4 + s2 * 0.9, s2 > 0 ? PI7 : 0, 2, farbe2);
           L2.box(3, 0.04, 0.04, 0, 1.75, -d / 2 + 0.6, "#9aa3aa");
           for (let u = -1.4; u < 1.4; u += 0.18) L2.box(0.05, zw(r, 0.7, 1), 0.4, u, 0.85, -d / 2 + 0.6, waehle2(r, PAL.damen));
-        }, { name: "Lieferantengespr\xE4ch", farbe });
+        }, { name: "Lieferantengespr\xE4ch", farbe: farbe2 });
       } }
     ],
     marketing: [
@@ -95336,35 +96853,35 @@
           text2(L2, t, u, 1.9, 0.05, 0.26, "#ffffff");
         });
       } },
-      { art: "frei", w: 3.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "frei", w: 3.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.6, 0.05, 1.2, 0, 0.9, 0, "#f4f2ee");
         for (const s2 of [-1.2, 1.2]) L2.box(0.06, 0.9, 1.1, s2, 0, 0, "#2a2d31");
         for (let k = 0; k < 8; k++) L2.box(0.3, 0.01, 0.4, zw(r, -1.1, 1.1), 0.96, zw(r, -0.4, 0.4), waehle2(r, ["#ffffff", "#f2c6d2", "#bcd3df", "#e9b44c"]), zw(r, -0.5, 0.5));
         L2.box(1.6, 1.2, 0.05, -0.4, 0.7, -1, "#c9a26b");
         for (let k = 0; k < 9; k++) L2.box(0.3, 0.25, 0.02, -1 + k % 3 * 0.55, 0.95 + Math.floor(k / 3) * 0.35, -0.97, waehle2(r, PAL.damen));
-        for (const s2 of [-1, 1]) L2.box(0.45, 0.75, 0.45, s2 * 0.7, 0, 0.85, farbe);
+        for (const s2 of [-1, 1]) L2.box(0.45, 0.75, 0.45, s2 * 0.7, 0, 0.85, farbe2);
       } },
-      { art: "raum", w: 4.6, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 4.6, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           for (let k = 0; k < 4; k++) L2.kugel(0.45, -1.2 + k * 0.8, 0.3, 0.3 + k % 2 * 0.6, waehle2(r, ["#e9b44c", "#d65a6f", "#5bc0eb", "#9bc53d"]));
           L2.box(1.8, 1.2, 0.05, 0, 0.8, -d / 2 + 0.3, "#ffffff");
           for (let k = 0; k < 6; k++) L2.box(0.3, 0.2, 0.02, -0.6 + k % 3 * 0.6, 1.2 + Math.floor(k / 3) * 0.4, -d / 2 + 0.34, waehle2(r, ["#f2c14e", "#f78fb3", "#9bc53d"]));
-        }, { name: "Ideenraum", farbe });
+        }, { name: "Ideenraum", farbe: farbe2 });
       } }
     ],
     personal: [
-      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.zyl(0.5, 0.5, 0.04, 0, 0.72, 0, "#f4f2ee", 16);
           L2.zyl(0.06, 0.06, 0.72, 0, 0, 0, "#5a636b");
-          buerostuhl(L2, 0, -0.8, 0, 2, farbe);
-          buerostuhl(L2, 0, 0.8, PI7, 2, farbe);
+          buerostuhl(L2, 0, -0.8, 0, 2, farbe2);
+          buerostuhl(L2, 0, 0.8, PI7, 2, farbe2);
           L2.box(0.3, 0.03, 0.22, 0, 0.77, 0, "#3f9a6a");
           figur2(S, x + w / 2, z2 + d / 2 - 0.8, 401, "leitung", { pose: "sitzen", ry: 0 });
           figur2(S, x + w / 2, z2 + d / 2 + 0.8, 402, "kunde", { pose: "sitzen", ry: PI7 });
           pflanze4(L2, w / 2 - 0.5, -d / 2 + 0.5, r, true);
-        }, { name: "Bewerbung", farbe });
+        }, { name: "Bewerbung", farbe: farbe2 });
       } },
       { art: "wand", w: 4, d: 0.6, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.3, 0);
@@ -95376,7 +96893,7 @@
         }
         text2(L2, "Personalakten", 0, 2.15, 0.27, 0.22, "#ffffff", "#3f9a6a");
       } },
-      { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(0.04, 1.6, 0.04, -0.3, 0, -1.2, "#5a636b");
         L2.box(0.04, 1.6, 0.04, 0.3, 0, -1.2, "#5a636b");
@@ -95385,8 +96902,8 @@
         L2.box(0.5, 0.03, 0.01, 0, 1.35, -1.13, "#2f6fb3");
         for (let k = 0; k < 6; k++) {
           const u = -1.2 + k % 3 * 1.2, v = Math.floor(k / 3) * 1;
-          L2.box(0.42, 0.05, 0.42, u, 0.44, v, farbe);
-          L2.box(0.42, 0.45, 0.05, u, 0.49, v + 0.2, farbe);
+          L2.box(0.42, 0.05, 0.42, u, 0.44, v, farbe2);
+          L2.box(0.42, 0.45, 0.05, u, 0.49, v + 0.2, farbe2);
           L2.box(0.04, 0.44, 0.04, u, 0, v, "#2a2d31");
         }
       } },
@@ -95426,13 +96943,13 @@
         for (let k = 0; k < 5; k++) L2.box(1.7, 0.02, 0.02, 0, 0.15 + k * 0.16, 0.51, "#5a636b");
         for (let k = 0; k < 5; k++) L2.geo(new three_module_exports.CylinderGeometry(0.05, 0.05, 0.8, 6).rotateZ(PI7 / 2), -0.5 + k * 0.05, 0.98 + k % 2 * 0.08, -0.2 + k * 0.1, waehle2(r, ["#ffffff", "#e8e4dc", "#bcd3df"]));
       } },
-      { art: "raum", w: 4.8, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 4.8, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.6, 0.05, 1.1, 0, 0.72, 0.2, "#7b5a40");
           L2.box(0.2, 0.72, 0.8, 0, 0, 0.2, "#2a2d31");
-          for (const s2 of [-1, 1]) for (let k = 0; k < 2; k++) buerostuhl(L2, (k - 0.5) * 1.2, 0.2 + s2 * 0.9, s2 > 0 ? PI7 : 0, 2, farbe);
+          for (const s2 of [-1, 1]) for (let k = 0; k < 2; k++) buerostuhl(L2, (k - 0.5) * 1.2, 0.2 + s2 * 0.9, s2 > 0 ? PI7 : 0, 2, farbe2);
           L2.box(1, 0.02, 0.7, 0.2, 0.78, 0.2, "#ffffff");
-        }, { name: "Mietverhandlung", farbe });
+        }, { name: "Mietverhandlung", farbe: farbe2 });
       } }
     ],
     logistik: [
@@ -95451,7 +96968,7 @@
         }
         text2(L2, "Leitstand Filialbelieferung", 0, 2.95, 0.07, 0.22, "#ffffff", "#e07b2a");
       } },
-      { art: "frei", w: 4.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "frei", w: 4.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 1, 0);
         for (let k = -2; k <= 2; k++) {
           const P2 = L2.sub(k * 0.95, Math.abs(k) * 0.25, -k * 0.22);
@@ -95463,7 +96980,7 @@
           }
           P2.box(0.85, 0.3, 0.04, 0, 1.3, -0.3, "#22272c");
           P2.box(0.8, 0.25, 0.01, 0, 1.32, -0.275, "#9cc9e0");
-          if (k % 2 === 0) buerostuhl(P2, 0, 0.75, PI7, Math.max(1, st), farbe);
+          if (k % 2 === 0) buerostuhl(P2, 0, 0.75, PI7, Math.max(1, st), farbe2);
         }
       } },
       { art: "frei", w: 2.6, d: 1.6, bau(S, sc, x, z2, w, d, st, r) {
@@ -95545,7 +97062,7 @@
           regal(L2, 0, 0, w - 0.4, 2, "#c9cdd0", ordner(L2, r, ["#8a2f3a", "#2b3a55", "#c9b48f", "#e8e4dc"]), r, 0.5, 5);
         }
       } },
-      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.6, 0.06, 1.2, 0, 0.72, 0.3, "#5a3b22");
           L2.box(0.25, 0.72, 0.9, 0, 0, 0.3, "#3a2a20");
@@ -95555,7 +97072,7 @@
             L2.box(0.25, 0.08, 0.15, s2, 1.06, 0.3, "#2f6f4f");
           }
           regal(L2, 0, -d / 2 + 0.35, w - 0.8, 2.2, "#5a3b22", ordner(L2, r, ["#6b2737", "#2b3a55", "#3a2a20"]), r, 0.4, 5);
-        }, { name: "Rechtsabteilung", farbe });
+        }, { name: "Rechtsabteilung", farbe: farbe2 });
       } },
       { art: "frei", w: 1.6, d: 1.2, bau(S, sc, x, z2, w, d, st, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
@@ -95626,61 +97143,61 @@
         L2.box(0.3, 0.15, 0.04, -0.6, 0.95, 0.41, "#3a3f45");
         for (let k = 0; k < 4; k++) L2.box(0.32, 0.12, 0.45, 0.6, k * 0.13, 0, "#ffffff");
       } },
-      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(1.8, 0.05, 0.8, 0, 0.72, 0.1, "#f2f0ea");
           L2.box(1.7, 0.72, 0.05, 0, 0, -0.25, "#9aa3aa");
           monitor(L2.sub(0, -0.1), 0, 0, 2, r);
-          buerostuhl(L2, 0, 0.8, PI7, 2, farbe);
+          buerostuhl(L2, 0, 0.8, PI7, 2, farbe2);
           L2.box(0.5, 1.2, 0.5, -1.6, 0, -1.3, "#5a636b");
           L2.zyl(0.1, 0.1, 0.04, -1.6, 0.8, -1.05, "#c9d2d8", 8);
           figur2(S, x + w / 2, z2 + d / 2 + 0.8, 801, "leitung", { pose: "sitzen", ry: PI7 });
-        }, { name: "Kasse und Tresor", farbe });
+        }, { name: "Kasse und Tresor", farbe: farbe2 });
       } }
     ]
   };
-  function leitungsbuero(S, sc, x, z2, w, d, st, r, farbe) {
+  function leitungsbuero(S, sc, x, z2, w, d, st, r, farbe2) {
     glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
       L2.box(1.8, 0.05, 0.85, 0, 0.72, -0.2, st === 3 ? "#7b5a40" : "#f2f0ea");
       L2.box(1.7, 0.72, 0.05, 0, 0, -0.6, "#9aa3aa");
       monitor(L2.sub(0, -0.45), 0, 0, st, r);
-      buerostuhl(L2, 0, 0.4, PI7, st, farbe);
-      for (const s2 of [-0.5, 0.5]) buerostuhl(L2, s2, -1.25, 0, 1, farbe);
+      buerostuhl(L2, 0, 0.4, PI7, st, farbe2);
+      for (const s2 of [-0.5, 0.5]) buerostuhl(L2, s2, -1.25, 0, 1, farbe2);
       pflanze4(L2, w / 2 - 0.45, d / 2 - 0.45, r, true);
       if (st === 3) {
         L2.box(1.6, 0.4, 0.7, -w / 2 + 1, 0, d / 2 - 0.5, "#5f7f8c");
       }
       figur2(S, x + w / 2, z2 + d / 2 + 0.4, Math.floor(r() * 1e4), "leitung", { pose: "sitzen", ry: PI7 });
-    }, { name: "Leitung", farbe });
+    }, { name: "Leitung", farbe: farbe2 });
   }
-  function besprechung(S, sc, x, z2, w, d, st, r, farbe) {
+  function besprechung(S, sc, x, z2, w, d, st, r, farbe2) {
     glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
       const n = Math.max(2, Math.floor((w - 1.2) / 0.85));
       L2.box(n * 0.85, 0.05, 1.1, 0, 0.72, 0.1, st >= 2 ? "#d8bf98" : "#e9e6df");
       L2.box(0.2, 0.72, 0.8, 0, 0, 0.1, "#9aa3aa");
-      for (const s2 of [-1, 1]) for (let k = 0; k < n; k++) buerostuhl(L2, (k - (n - 1) / 2) * 0.85, 0.1 + s2 * 0.9, s2 > 0 ? PI7 : 0, Math.max(1, st), farbe);
+      for (const s2 of [-1, 1]) for (let k = 0; k < n; k++) buerostuhl(L2, (k - (n - 1) / 2) * 0.85, 0.1 + s2 * 0.9, s2 > 0 ? PI7 : 0, Math.max(1, st), farbe2);
       L2.box(1.6, 0.95, 0.06, 0, 1, -d / 2 + 0.12, "#22272c");
       L2.box(1.5, 0.85, 0.01, 0, 1.05, -d / 2 + 0.16, "#cfe3ec");
       for (let k = 0; k < Math.min(3, n); k++) figur2(S, x + w / 2 + (k - 1) * 0.85, z2 + d / 2 + 0.1 + (k % 2 ? 0.9 : -0.9), Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: k % 2 ? PI7 : 0 });
-    }, { name: "Besprechung", farbe });
+    }, { name: "Besprechung", farbe: farbe2 });
   }
-  function telefonboxen(S, sc, x, z2, w, d, st, r, farbe) {
+  function telefonboxen(S, sc, x, z2, w, d, st, r, farbe2) {
     for (let k = 0; k < 2; k++) {
       const L2 = lokal2(S, x + 0.65 + k * 1.3, 0.06, z2 + d / 2, 0);
-      L2.box(1.2, 2.3, 0.08, 0, 0, -0.55, farbe);
-      for (const s2 of [-1, 1]) L2.box(0.08, 2.3, 1.1, s2 * 0.56, 0, 0, dunkler(farbe, 0.08));
-      L2.box(1.2, 0.1, 1.2, 0, 2.3, 0, dunkler(farbe, 0.1));
+      L2.box(1.2, 2.3, 0.08, 0, 0, -0.55, farbe2);
+      for (const s2 of [-1, 1]) L2.box(0.08, 2.3, 1.1, s2 * 0.56, 0, 0, dunkler(farbe2, 0.08));
+      L2.box(1.2, 0.1, 1.2, 0, 2.3, 0, dunkler(farbe2, 0.1));
       L2.box(1.04, 2.2, 0.04, 0, 0.05, 0.56, GLAS3);
       L2.box(0.9, 0.45, 0.45, 0, 0, -0.25, "#e9e4da");
       L2.box(0.5, 0.04, 0.3, 0, 0.75, 0.15, "#f2f0ea");
     }
   }
-  function lounge(S, sc, x, z2, w, d, st, r, farbe) {
+  function lounge(S, sc, x, z2, w, d, st, r, farbe2) {
     const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
     L2.box(w - 0.4, 0.02, d - 0.4, 0, 0, 0, "#e2c9b8");
     L2.box(2.4, 0.42, 0.9, 0, 0, -d / 2 + 0.7, "#5f7f8c");
     L2.box(2.4, 0.45, 0.25, 0, 0.42, -d / 2 + 0.35, "#536f7a");
-    L2.box(0.9, 0.42, 0.9, -1.4, 0, 0.3, farbe);
+    L2.box(0.9, 0.42, 0.9, -1.4, 0, 0.3, farbe2);
     L2.zyl(0.45, 0.45, 0.4, 0.2, 0, 0.3, "#d8bf98", 12);
     pflanze4(L2, w / 2 - 0.5, -d / 2 + 0.5, r, true);
     figur2(S, x + w / 2 - 0.4, z2 + 0.85, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: 0 });
@@ -95853,14 +97370,14 @@
   }
   function abteilungsZone(S, scene2, Z2, T, G2, r, figuren2, g) {
     const { a } = Z2, st = Math.max(0, Math.min(3, a.stufe ?? 1));
-    const info = ABTEILUNGEN2[a.id] ?? { name: a.id, farbe: "#5f6b78" }, farbe = info.farbe;
+    const info = ABTEILUNGEN2[a.id] ?? { name: a.id, farbe: "#5f6b78" }, farbe2 = info.farbe;
     const w = Z2.x1 - Z2.x0;
     boden(S, Z2.x0, 0, w, T, 0, BELAG[st], 1);
     if (st === 3) S.box(Math.min(w - 2, 6), 0.02, 3.2, Z2.x0 + w * 0.6, 0.08, T - 2.6, "#e2c9b8");
-    S.box(w - 0.4, 0.35, 0.06, Z2.x0 + w / 2, WH3 - 0.55, 0.28, farbe);
+    S.box(w - 0.4, 0.35, 0.06, Z2.x0 + w / 2, WH3 - 0.55, 0.28, farbe2);
     if (scene2) {
       wandschild(S, scene2, info.name, "x", Z2.x0 + w / 2, WH3 - 0.55, 0.31, { schrift: "#ffffff", hoehe: 0.32 });
-      haengeschild(S, scene2, info.name, Z2.x0 + w / 2, WH3 - 0.8, T * 0.55, { farbe, hoehe: 0.75 });
+      haengeschild(S, scene2, info.name, Z2.x0 + w / 2, WH3 - 0.8, T * 0.55, { farbe: farbe2, hoehe: 0.75 });
       const sterne2 = "\u2605".repeat(st) + "\u2606".repeat(3 - st);
       haengeschild(S, scene2, `Stufe ${st} ${sterne2}`, Z2.x0 + w / 2, WH3 - 1.55, T * 0.55, { farbe: "#2a3540", hoehe: 0.42, seile: false });
     }
@@ -95868,9 +97385,9 @@
     const sp = SPEZIAL[a.id] ?? [];
     const Rx0 = w < 12 ? B2.x0 : Z2.x0 + Math.round(w * 0.4 * 2) / 2, Rz0 = B2.z0 + Math.round((B2.z1 - B2.z0) * 0.3 * 2) / 2;
     const R9 = { x0: Rx0 + 0.3, x1: B2.x1, z0: Rz0 + 0.4, z1: B2.z1 };
-    S.box(R9.x1 - R9.x0 + 0.8, 0.02, R9.z1 - R9.z0 + 1.2, (R9.x0 + R9.x1) / 2, 0.08, (R9.z0 + R9.z1) / 2 + 0.2, "#" + new three_module_exports.Color(farbe).lerp(new three_module_exports.Color("#e6e2da"), st === 0 ? 0.72 : 0.62).getHexString());
-    S.box(R9.x1 - R9.x0 + 0.8, 0.025, 0.15, (R9.x0 + R9.x1) / 2, 0.085, R9.z0 - 0.35, farbe);
-    S.box(0.15, 0.025, R9.z1 - R9.z0 + 1.2, R9.x0 - 0.4, 0.085, (R9.z0 + R9.z1) / 2 + 0.2, farbe);
+    S.box(R9.x1 - R9.x0 + 0.8, 0.02, R9.z1 - R9.z0 + 1.2, (R9.x0 + R9.x1) / 2, 0.08, (R9.z0 + R9.z1) / 2 + 0.2, "#" + new three_module_exports.Color(farbe2).lerp(new three_module_exports.Color("#e6e2da"), st === 0 ? 0.72 : 0.62).getHexString());
+    S.box(R9.x1 - R9.x0 + 0.8, 0.025, 0.15, (R9.x0 + R9.x1) / 2, 0.085, R9.z0 - 0.35, farbe2);
+    S.box(0.15, 0.025, R9.z1 - R9.z0 + 1.2, R9.x0 - 0.4, 0.085, (R9.z0 + R9.z1) / 2 + 0.2, farbe2);
     const pool = [...SIGNATUR[a.id] ?? [], ...sp.filter((q2) => q2.art === "frei")];
     const nTypen = Math.min(pool.length, [2, 3, 4, 99][st]);
     const flR = (R9.x1 - R9.x0) * (R9.z1 - R9.z0);
@@ -95888,7 +97405,7 @@
       }
       fehl = 0;
       belegtR += s2.w * s2.d;
-      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st, r, farbe);
+      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st, r, farbe2);
       if (s2.einmal) s2._zone = Z2;
     }
     G2.setze(R9.x0 - 0.4, R9.z0 - 0.4, R9.x1, R9.z1);
@@ -95906,7 +97423,7 @@
     for (const s2 of liste) {
       const pos = G2.suche(B2, s2.w, s2.d, s2.art === "wand" ? 0.3 : 0.6, { nurHinten: s2.art === "wand" });
       if (!pos) continue;
-      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st, r, farbe);
+      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st, r, farbe2);
     }
     const proSeite = 3, iw = proSeite * 1.4, id = st === 0 ? 1.9 : 3.3;
     let platz = [];
@@ -95919,12 +97436,12 @@
     for (let k = 0; k < noetig && k * schritt < kand.length; k++) {
       const pos = kand[Math.floor(k * schritt)];
       G2.setze(pos.x - 0.3, pos.z - 0.3, pos.x + iw + 0.3, pos.z + id + 0.3);
-      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st === 0 ? 0.6 : id / 2), proSeite, st, r, farbe, chart));
+      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st === 0 ? 0.6 : id / 2), proSeite, st, r, farbe2, chart));
     }
     while (platz.length < a.fte) {
       const pos = G2.suche(B2, iw, id, 0.5);
       if (!pos) break;
-      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st === 0 ? 0.6 : id / 2), proSeite, st, r, farbe, chart));
+      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st === 0 ? 0.6 : id / 2), proSeite, st, r, farbe2, chart));
     }
     const dr = G2.suche(B2, 1.6, 0.8, 0.3);
     if (dr) druckerecke(lokal2(S, dr.x + 0.8, 0.06, dr.z + 0.4, 0), r);
@@ -95947,22 +97464,22 @@
       figuren2.n++;
     }
   }
-  function rolle(L2, lx, ly, lz, len, rad2, farbe) {
-    L2.geo(new three_module_exports.CylinderGeometry(rad2, rad2, len, 10).rotateZ(PI7 / 2), lx, ly, lz, farbe);
+  function rolle(L2, lx, ly, lz, len, rad2, farbe2) {
+    L2.geo(new three_module_exports.CylinderGeometry(rad2, rad2, len, 10).rotateZ(PI7 / 2), lx, ly, lz, farbe2);
   }
-  function tafel2(L2, lx, lz, w, h, titel, farbe, r, inhalt) {
+  function tafel2(L2, lx, lz, w, h, titel, farbe2, r, inhalt) {
     for (const s2 of [-1, 1]) {
       L2.box(0.06, h + 0.5, 0.06, lx + s2 * (w / 2 - 0.05), 0, lz, "#9aa3aa");
       L2.box(0.5, 0.04, 0.4, lx + s2 * (w / 2 - 0.05), 0, lz, "#5a636b");
     }
     L2.box(w, h, 0.06, lx, 0.5, lz, "#f8f8f6");
     L2.box(w, 0.05, 0.08, lx, 0.5 + h, lz, "#9aa3aa");
-    if (titel) text2(L2, titel, lx, 0.5 + h - 0.2, lz + 0.04, 0.22, "#ffffff", farbe);
+    if (titel) text2(L2, titel, lx, 0.5 + h - 0.2, lz + 0.04, 0.22, "#ffffff", farbe2);
     inhalt?.(lx, 0.5, lz + 0.04, w, h);
   }
   var SIGNATUR = {
     controlling: [
-      { w: 4.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { w: 4.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.5, 0);
         for (let k = -1; k <= 1; k++) {
           const P2 = L2.sub(k * 1.45, Math.abs(k) * 0.25, -k * 0.3);
@@ -95977,12 +97494,12 @@
         T2.box(3.2, 0.72, 0.05, 0, 0, -0.35, "#3a3f45");
         for (let k = -1; k <= 1; k++) {
           monitor(T2.sub(k * 1.1, -0.15), 0, 0, 2, r, "#f2d29a");
-          buerostuhl(T2, k * 1.1, 0.7, PI7, Math.max(1, st), farbe);
+          buerostuhl(T2, k * 1.1, 0.7, PI7, Math.max(1, st), farbe2);
         }
       } },
-      { w: 3.6, d: 1.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { w: 3.6, d: 1.4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4, 0);
-        tafel2(L2, 0, 0, 3.2, 1.6, "Monatsabschluss", farbe, r, (lx, y, lz, ww, hh) => {
+        tafel2(L2, 0, 0, 3.2, 1.6, "Monatsabschluss", farbe2, r, (lx, y, lz, ww, hh) => {
           for (let c = 0; c < 4; c++) {
             L2.box(0.02, hh - 0.45, 0.01, lx - ww / 2 + (c + 1) * (ww / 4), y + 0.08, lz, "#c9cdd0");
             for (let k = 0; k < 4; k++) if (r() < 0.8 - c * 0.12) L2.box(0.6, 0.22, 0.015, lx - ww / 2 + (c + 0.5) * (ww / 4), y + 0.15 + k * 0.28, lz + 0.01, c === 3 ? "#3ab27a" : waehle2(r, ["#f2c14e", "#9cc9e0", "#f78fb3"]));
@@ -96018,26 +97535,26 @@
       } }
     ],
     personal: [
-      { w: 6, d: 4.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { w: 6, d: 4.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.6, 1.5, 0.04, 0, 0.8, -d / 2 + 0.2, "#ffffff");
           L2.box(2.4, 1.3, 0.01, 0, 0.9, -d / 2 + 0.23, "#cfe3ec");
-          balken2(L2, 0, 1.05, -d / 2 + 0.25, 1.4, 0.8, r, [farbe, "#e9b44c"]);
+          balken2(L2, 0, 1.05, -d / 2 + 0.25, 1.4, 0.8, r, [farbe2, "#e9b44c"]);
           L2.box(0.4, 0.15, 0.35, 0, 2.5, 0.4, "#2a2d31");
           L2.box(0.04, 0.4, 0.04, 0, 2.65, 0.4, "#5a636b");
           for (let i = 0; i < 3; i++) for (let k = 0; k < 4; k++) {
             const u = -1.5 + k * 1, v = -0.4 + i * 1;
-            L2.box(0.42, 0.05, 0.42, u, 0.44, v, farbe);
-            L2.box(0.42, 0.42, 0.05, u, 0.49, v + 0.2, farbe);
+            L2.box(0.42, 0.05, 0.42, u, 0.44, v, farbe2);
+            L2.box(0.42, 0.42, 0.05, u, 0.49, v + 0.2, farbe2);
             L2.box(0.04, 0.44, 0.04, u, 0, v, "#2a2d31");
             if (r() < 0.5) figur2(S, x + w / 2 + u, z2 + d / 2 + v, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: PI7 });
           }
           figur2(S, x + w / 2 + 1.6, z2 + 0.9, Math.floor(r() * 1e4), "leitung", { ry: 0.3, pose: "schauen" });
-        }, { name: "Schulung", farbe });
+        }, { name: "Schulung", farbe: farbe2 });
       } },
-      { w: 3.8, d: 3.2, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { w: 3.8, d: 3.2, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
-        L2.box(3.4, 0.02, 2.8, 0, 0, 0, heller(farbe, 0.35));
+        L2.box(3.4, 0.02, 2.8, 0, 0, 0, heller(farbe2, 0.35));
         for (const s2 of [-1, 1]) {
           L2.box(2, 0.42, 0.8, 0, 0, s2 * 1, "#5f7f8c");
           L2.box(2, 0.4, 0.22, 0, 0.42, s2 * 1.3, "#536f7a");
@@ -96118,7 +97635,7 @@
         }
         figur2(S, x + w / 2 - 0.3, z2 + d - 0.2, Math.floor(r() * 1e4), "leitung", { pose: "sitzen", ry: PI7 });
       } },
-      { w: 3.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { w: 3.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.6, 0.05, 1.1, 0, 0.72, 0, "#7b5a40");
         L2.box(0.25, 0.72, 0.8, 0, 0, 0, "#3a2a20");
@@ -96141,11 +97658,11 @@
       } }
     ],
     verwaltung: [
-      { w: 3.4, d: 2, bau(S, sc, x, z2, w, d, st, r, farbe) {
+      { w: 3.4, d: 2, bau(S, sc, x, z2, w, d, st, r, farbe2) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.6, 1.1, 0.7, 0, 0, 0.2, "#f4f2ee");
         L2.box(2.7, 0.06, 0.8, 0, 1.1, 0.2, "#3a4048");
-        L2.box(2.6, 0.22, 0.04, 0, 0.8, 0.57, farbe);
+        L2.box(2.6, 0.22, 0.04, 0, 0.8, 0.57, farbe2);
         text2(L2, "Empfang Verwaltung", 0, 0.45, 0.58, 0.22, "#3a4048");
         monitor(L2.sub(-0.5, 0.1, PI7), 0, 0, 1, r);
         figur2(S, x + w / 2 - 0.4, z2 + d / 2 - 0.5, Math.floor(r() * 1e4), "info", { ry: 0, pose: "stehen" });
@@ -96325,7 +97842,7 @@
       for (let i = 0; i < 9; i++) for (let j = 0; j < 4; j++) L2.box(0.42, 0.34, 0.02, -w / 2 + 0.38 + i * 0.5, 0.68 + j * 0.42, 0.04, waehle2(r, STOFFE));
       text2(L2, "Stoffmuster", 0, 2.6, 0.05, 0.24, "#ffffff", ABTEILUNGEN2.produkt.farbe);
     } },
-    { art: "frei", w: 3.8, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+    { art: "frei", w: 3.8, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2 - 0.2, 0);
       L2.box(3.4, 0.06, 1.4, 0, 0.88, 0, "#e9e6df");
       for (const s2 of [-1.55, 1.55]) L2.box(0.1, 0.88, 1.2, s2, 0, 0, "#5a636b");
@@ -96337,11 +97854,11 @@
       L2.box(0.22, 0.02, 0.06, 1.25, 0.95, 0.4, "#9aa3aa");
       L2.box(0.08, 0.02, 0.08, 1.38, 0.95, 0.42, "#d23c32");
       L2.box(1.2, 0.01, 0.04, -0.3, 0.955, -0.55, "#e9c46a");
-      L2.zyl(0.2, 0.2, 0.05, -0.8, 0.62, 1.05, farbe, 10);
+      L2.zyl(0.2, 0.2, 0.05, -0.8, 0.62, 1.05, farbe2, 10);
       L2.zyl(0.03, 0.03, 0.62, -0.8, 0, 1.05, "#5a636b", 6);
       figur2(S, x + w / 2 + 0.2, z2 + d / 2 + 0.75, Math.floor(r() * 1e4), "kunde", { ry: PI7, pose: "schauen" });
     } },
-    { art: "raum", w: 4.2, d: 3.4, vorrang: true, bau(S, sc, x, z2, w, d, st, r, farbe) {
+    { art: "raum", w: 4.2, d: 3.4, vorrang: true, bau(S, sc, x, z2, w, d, st, r, farbe2) {
       glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
         L2.box(w - 0.6, 0.02, d - 0.6, 0, 0, 0, "#e6dccb");
         for (let k = 0; k < 3; k++) schneiderpuppe(L2, -1.2 + k * 0.95, -0.2, r, waehle2(r, STOFFE), 0.2);
@@ -96350,13 +97867,13 @@
         L2.box(2.4, 0.04, 0.04, -0.4, 1.7, -d / 2 + 0.45, "#9aa3aa");
         for (let u = -1.5; u < 0.7; u += 0.16) L2.box(0.05, zw(r, 0.6, 0.95), 0.36, u, 1.66 - 0.8, -d / 2 + 0.45, waehle2(r, STOFFE));
         figur2(S, x + w / 2 + 0.8, z2 + d / 2 + 0.8, Math.floor(r() * 1e4), "kunde", { ry: PI7 + 0.4, pose: "schauen" });
-      }, { name: "Anprobe", farbe });
+      }, { name: "Anprobe", farbe: farbe2 });
     } },
     { art: "wand", w: 3, d: 0.4, vorrang: true, bau(S, sc, x, z2, w, d, st, r) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.12, 0);
       L2.box(w, 1.8, 0.05, 0, 0.6, 0, "#f6f4ef");
-      const basis = ["#a8dcc4", "#26355e", "#76263a", "#d8c39c", "#cc9f2e", "#ec7a6a", "#c4b0dc"];
-      basis.forEach((c, i) => {
+      const basis2 = ["#a8dcc4", "#26355e", "#76263a", "#d8c39c", "#cc9f2e", "#ec7a6a", "#c4b0dc"];
+      basis2.forEach((c, i) => {
         for (let j = 0; j < 6; j++) L2.box(0.34, 0.22, 0.02, -w / 2 + 0.3 + i * 0.4, 0.72 + j * 0.27, 0.035, j < 3 ? heller(c, (3 - j) * 0.12) : dunkler(c, (j - 3) * 0.12));
       });
       text2(L2, "Farbkarten Saison", 0, 2.55, 0.05, 0.22, "#ffffff", ABTEILUNGEN2.produkt.farbe);
@@ -96368,7 +97885,7 @@
       for (let k = 0; k < 3; k++) schneiderpuppe(L2, -1 + k * 1, k % 2 * 0.25, r, k === 1 ? null : waehle2(r, STOFFE), -0.3);
       figur2(S, x + w / 2 + 0.5, z2 + d / 2 + 0.6, Math.floor(r() * 1e4), "kunde", { ry: PI7 + 0.5, pose: "schauen" });
     } },
-    { w: 4.4, d: 1.6, bau(S, sc, x, z2, w, d, st, r, farbe) {
+    { w: 4.4, d: 1.6, bau(S, sc, x, z2, w, d, st, r, farbe2) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
       for (const s2 of [-1, 1]) {
         const P2 = L2.sub(s2 * 1.1, 0);
@@ -96384,19 +97901,19 @@
           if (r() < 0.4) P2.box(0.02, 0.1, 0.07, u + 0.04, 1.55, 0.24, "#ffffff");
         }
       }
-      text2(L2, "Musterkollektion", 0, 2.15, 0.03, 0.2, "#ffffff", farbe);
+      text2(L2, "Musterkollektion", 0, 2.15, 0.03, 0.2, "#ffffff", farbe2);
     } },
-    { w: 3.2, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe) {
+    { w: 3.2, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe2) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
       L2.box(2.6, 0.05, 1.2, 0, 0.74, 0, "#f2f0ea");
       for (const s2 of [-1.2, 1.2]) L2.box(0.06, 0.74, 1, s2, 0, 0, "#2a2d31");
       for (let k = 0; k < 7; k++) L2.geo(new three_module_exports.BoxGeometry(0.42, 0.01, 0.08).translate(0.2, 0, 0).rotateY(-0.9 + k * 0.3), -0.6, 0.8 + k * 4e-3, 0.1, STOFFE[k]);
       for (let k = 0; k < 6; k++) L2.box(0.22, 0.012, 0.22, 0.2 + k % 3 * 0.3, 0.8, -0.25 + Math.floor(k / 3) * 0.32, waehle2(r, STOFFE), zw(r, -0.3, 0.3));
-      for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.6, 0.95, PI7, Math.max(1, st), farbe);
+      for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.6, 0.95, PI7, Math.max(1, st), farbe2);
       figur2(S, x + w / 2 - 0.6, z2 + d / 2 + 0.95, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: PI7 });
     } }
   ];
-  SIGNATUR.marketing.unshift({ w: 5, d: 2.8, einmal: true, bau(S, sc, x, z2, w, d, st, r, farbe) {
+  SIGNATUR.marketing.unshift({ w: 5, d: 2.8, einmal: true, bau(S, sc, x, z2, w, d, st, r, farbe2) {
     const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4, 0);
     L2.box(4.8, 0.08, 0.3, 0, 0, 0, "#2a2d31");
     const kacheln = [["Hartwig Karte", "#d23c32"], ["\xD6ffnungen", "#2f6fb3"], ["Einl\xF6sungen", "#3ab27a"], ["Segmente", "#e9b44c"], ["App aktiv", "#7a4fc0"], ["Push", "#d0457a"]];
@@ -96417,11 +97934,11 @@
     T2.box(3.8, 0.72, 0.05, 0, 0, -0.35, "#3a3f45");
     for (let k = -1; k <= 1; k++) {
       monitor(T2.sub(k * 1.25, -0.15), 0, 0, 2, r, "#f2c6d2");
-      buerostuhl(T2, k * 1.25, 0.7, PI7, Math.max(1, st), farbe);
+      buerostuhl(T2, k * 1.25, 0.7, PI7, Math.max(1, st), farbe2);
     }
     for (let k = -1; k <= 1; k += 2) figur2(S, x + w / 2 + k * 1.25, z2 + 0.4 + 1.5 + 0.7, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: PI7 });
-    L2.box(4.6, 0.36, 0.08, 0, 2.86, 0, farbe);
-    text2(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe);
+    L2.box(4.6, 0.36, 0.08, 0, 2.86, 0, farbe2);
+    text2(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe2);
   } });
 
   // src/kit/ostbauten.js
@@ -96481,10 +97998,10 @@
         mz = Math.min(mz, -u * sn + v * c);
       }
       const ox = p.x - mx, oz = p.z - mz;
-      for (const [farbe, gs] of T.teile) for (const g of gs) {
+      for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.rotateY(th);
         g.translate(ox, 0, oz);
-        S.add(g, farbe);
+        S.add(g, farbe2);
       }
       grp.rotation.y = th;
       grp.position.set(ox, 0, oz);
@@ -96556,13 +98073,13 @@
     const kreise = loecher.filter((l) => l.kreis);
     if (kreise.length) return fwandPoly(S, F2, u0, u1, y0, y1, t0, t1, c, loecher);
     const H = loecher.map((l) => ({ ...l, u0: Math.max(u0, l.u0), u1: Math.min(u1, l.u1), v0: Math.max(y0, l.v0), v1: Math.min(y1, l.v1) })).filter((l) => l.u1 - l.u0 > 0.01 && l.v1 - l.v0 > 0.01);
-    const U = [...new Set([u0, u1, ...H.flatMap((l) => [l.u0, l.u1])].map((u) => Math.round(u * 1e3) / 1e3))].sort((x, y) => x - y);
+    const U2 = [...new Set([u0, u1, ...H.flatMap((l) => [l.u0, l.u1])].map((u) => Math.round(u * 1e3) / 1e3))].sort((x, y) => x - y);
     let lauf = null;
     const ausgeben = () => {
       if (lauf) for (const [a, b] of lauf.iv) fb2(S, F2, lauf.a, lauf.b, a, b, t0, t1, c);
     };
-    for (let i = 0; i < U.length - 1; i++) {
-      const a = U[i], b = U[i + 1];
+    for (let i = 0; i < U2.length - 1; i++) {
+      const a = U2[i], b = U2[i + 1];
       if (b - a < 1e-3) continue;
       const akt = H.filter((l) => l.u0 <= a + 5e-4 && l.u1 >= b - 5e-4).map((l) => [l.v0, l.v1]).sort((x, y) => x[0] - y[0]);
       const iv = [];
@@ -96623,8 +98140,8 @@
     g.translate(u, y, (t0 + t1) / 2);
     fgeo2(S, F2, g, c);
   }
-  function ftext2(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
+  function ftext2(scene2, F2, text3, u, y, t, hMax, bMax, farbe2, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe2, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp2(F2, u, t);
@@ -96663,7 +98180,7 @@
     h = Math.imul(h ^ h >>> 13, 1274126177) >>> 0;
     return (h ^ h >>> 16) >>> 0;
   }
-  function bilinear(S, a, b, c, d, farbe, n = 10, dicke = 0.3, unten = null) {
+  function bilinear(S, a, b, c, d, farbe2, n = 10, dicke = 0.3, unten = null) {
     const pos = [];
     const P2 = (s2, t) => [0, 1, 2].map((i) => (1 - s2) * (1 - t) * a[i] + s2 * (1 - t) * b[i] + s2 * t * c[i] + (1 - s2) * t * d[i]);
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
@@ -96687,7 +98204,7 @@
       oben.setAttribute("position", new three_module_exports.Float32BufferAttribute(pos, 3));
       oben.computeVertexNormals();
     }
-    S.add(oben, farbe);
+    S.add(oben, farbe2);
     const pu = pos.slice();
     for (let i = 0; i < pu.length; i += 9) for (let k = 0; k < 3; k++) {
       const t = pu[i + 3 + k];
@@ -96698,7 +98215,7 @@
     const u = new three_module_exports.BufferGeometry();
     u.setAttribute("position", new three_module_exports.Float32BufferAttribute(pu, 3));
     u.computeVertexNormals();
-    S.add(u, unten ?? dunkler(farbe, 0.08));
+    S.add(u, unten ?? dunkler(farbe2, 0.08));
   }
   var RASEN3 = "#9dc283";
   var RASEN22 = "#a6c88a";
@@ -96713,14 +98230,14 @@
   var MOSAIK_FARBEN = [["#d9482e", "#f0b23a", "#2f6fa8", "#f4efe2", "#3b8a5a", "#1e2c44"], ["#c43a2c", "#e8c547", "#4f9fc9", "#efe8d8", "#7a4a8c", "#2a3a2e"], ["#e46b2e", "#f6d36b", "#2c7c8c", "#f2ece0", "#b8322a", "#26384f"]];
   var OST_AUTOFARBEN = ["#e8e3cf", "#9fb7a8", "#c9b98c", "#7f9fba", "#d9d4c3", "#b5523f", "#e3c35e", "#8aa36b", "#f2efe6", "#6e8090", "#c7865a", "#a7b4b9", "#7d9a6a", "#d8c9a4"];
   var WESTAUTOS = ["#2b2f33", "#a3abb2", "#c84a3c", "#2f5f8f", "#f4f3ef", "#3d6b4f", "#6b7680", "#1f3a5f"];
-  function ostFahrzeug(S, x, z2, typ = "kleinwagen", ry = 0, farbe = null, y0 = 0.3) {
+  function ostFahrzeug(S, x, z2, typ = "kleinwagen", ry = 0, farbe2 = null, y0 = 0.3) {
     const c = Math.cos(ry), s2 = Math.sin(ry);
     const P2 = (off, q2 = 0) => [x + c * off + s2 * q2, z2 - s2 * off + c * q2];
     const box = (L2, h, B2, off, yc, f, q2 = 0) => {
       const [px2, pz4] = P2(off, q2);
       S.box(L2, h, B2, px2, y0 + yc, pz4, f, ry);
     };
-    const fz = farbe ?? OST_AUTOFARBEN[Math.floor(Math.abs(x * 7.3 + z2 * 3.1) % OST_AUTOFARBEN.length)];
+    const fz = farbe2 ?? OST_AUTOFARBEN[Math.floor(Math.abs(x * 7.3 + z2 * 3.1) % OST_AUTOFARBEN.length)];
     if (typ === "kleinwagen") {
       box(3.1, 0.3, 1.36, 0, 0.2, "#2b2f33");
       box(3.5, 0.6, 1.5, 0, 0.62, fz);
@@ -96739,15 +98256,15 @@
       box(0.12, 0.8, 2, 3.42, 2.1, "#3c4852");
       box(4.4, 2.4, 2.4, -0.85, 2.2, "#7d8a6a");
     } else if (typ === "bus") {
-      const f = farbe ?? "#d9672f";
+      const f = farbe2 ?? "#d9672f";
       box(11.4, 1.3, 2.5, 0, 1, f);
       box(11.2, 1.05, 2.52, 0, 2.15, "#3c4852");
       box(11.3, 0.45, 2.46, 0, 2.9, "#f1ede2");
       box(0.1, 1.2, 2.2, 5.72, 2.1, "#2f3a42");
     } else if (typ === "tram" || typ === "tram2") {
-      const wagen = typ === "tram2" ? [7.6, -7.6] : [0];
-      const unten = farbe ?? "#efe2b8", band = "#c8463c";
-      for (const o of wagen) {
+      const wagen2 = typ === "tram2" ? [7.6, -7.6] : [0];
+      const unten = farbe2 ?? "#efe2b8", band = "#c8463c";
+      for (const o of wagen2) {
         const L2 = 14.6;
         box(L2 - 1.6, 0.25, 2.2, o, 0.45, "#2b2f33");
         box(L2 - 1.8, 1.25, 2.4, o, 1.2, unten);
@@ -96893,7 +98410,7 @@
       fb2(S, F2, u0 + i * bu + 0.06, u0 + (i + 1) * bu - 0.06, y0 + k * bv + 0.06, y0 + (k + 1) * bv - 0.06, t, t + 0.12, pal[ci]);
     }
   }
-  function formsteinwand(S, F2, u0, u1, y0, y1, t0, t1, farbe, art = "kreis") {
+  function formsteinwand(S, F2, u0, u1, y0, y1, t0, t1, farbe2, art = "kreis") {
     const L2 = [], st = 0.8;
     const nu = Math.floor((u1 - u0) / st), nv = Math.floor((y1 - y0) / st);
     const ou = u0 + (u1 - u0 - nu * st) / 2, ov = y0 + (y1 - y0 - nv * st) / 2;
@@ -96904,16 +98421,16 @@
         L2.push({ u0: cu - 0.22, u1: cu + 0.22, v0: cv - 0.22, v1: cv + 0.22 });
       } else L2.push({ u0: cu - 0.28, u1: cu - 0.04, v0: cv - 0.28, v1: cv + 0.28 }, { u0: cu + 0.04, u1: cu + 0.28, v0: cv - 0.28, v1: cv + 0.28 });
     }
-    fwandPoly(S, F2, u0, u1, y0, y1, t0, t1, farbe, L2);
+    fwandPoly(S, F2, u0, u1, y0, y1, t0, t1, farbe2, L2);
   }
   function plattenFarben(r, zustand) {
     if (zustand === "saniert") {
-      const basis = waehle2(r, ["#f1e6c4", "#ecd9c6", "#dfe8d6", "#d8e3ea", "#f3dccf", "#efeee8", "#f2e9d6", "#e6e0ee"]);
+      const basis2 = waehle2(r, ["#f1e6c4", "#ecd9c6", "#dfe8d6", "#d8e3ea", "#f3dccf", "#efeee8", "#f2e9d6", "#e6e0ee"]);
       const akzent = waehle2(r, ["#e07a3f", "#3f7d9a", "#7fae5a", "#c9483e", "#e8b53c", "#6b5a9a", "#2f8f8a", "#d0603f"]);
       return {
         saniert: true,
-        panel: [basis, dunkler(basis, 0.018)],
-        body: dunkler(basis, 0.3),
+        panel: [basis2, dunkler(basis2, 0.018)],
+        body: dunkler(basis2, 0.3),
         glas: "#46596a",
         rahmen: "#fbfbf8",
         slab: "#ecebe6",
@@ -97438,10 +98955,10 @@
     const na = Math.max(1, Math.floor((u1 - u0 - 2 * rand) / ra)), off = u0 + (u1 - u0 - na * ra) / 2;
     return Array.from({ length: na }, (_, i) => off + (i + 0.5) * ra);
   }
-  function balustrade2(S, F2, u0, u1, y0, y1, t0, t1, farbe, schritt = 0.32) {
+  function balustrade2(S, F2, u0, u1, y0, y1, t0, t1, farbe2, schritt = 0.32) {
     const L2 = [];
     for (let u = u0 + schritt * 0.75; u < u1 - schritt * 0.5; u += schritt) L2.push({ u0: u - schritt * 0.28, u1: u + schritt * 0.28, v0: y0 + 0.18, v1: y1 - 0.16, bogen: false });
-    fwand(S, F2, u0, u1, y0, y1, t0, t1, farbe, L2);
+    fwand(S, F2, u0, u1, y0, y1, t0, t1, farbe2, L2);
   }
   function magFassade(S, scene2, F2, c, r, o) {
     const { egH, gh, n, ra, wand: wand2, orn } = c, H = egH + n * gh;
@@ -97914,8 +99431,8 @@
     const v = p.variante ?? waehle2(rng2(`pz:${p.seed}`), ["prager", "arkade", "ensemble"]);
     return platteZentrumGedreht(S, scene2, { ...p, variante: v });
   }
-  function freitreppe(S, F2, u0, u1, hoehe, stufen, tiefe, farbe) {
-    for (let i = 0; i < stufen; i++) fb2(S, F2, u0, u1, 0, hoehe * (stufen - i) / stufen + 0.3, 0, tiefe * (i + 1) / stufen, i % 2 ? farbe : dunkler(farbe, 0.03));
+  function freitreppe(S, F2, u0, u1, hoehe, stufen, tiefe, farbe2) {
+    for (let i = 0; i < stufen; i++) fb2(S, F2, u0, u1, 0, hoehe * (stufen - i) / stufen + 0.3, 0, tiefe * (i + 1) / stufen, i % 2 ? farbe2 : dunkler(farbe2, 0.03));
   }
   function kulturRoh(S, scene2, p) {
     const r = rng2(`kh:${p.seed}`);
@@ -98222,11 +99739,11 @@
     if (p.w >= min[0] && p.d >= min[1]) return dominanteRoh(S, scene2, { ...p, variante: v });
     return skaliert(S, scene2, { ...p, variante: v }, Math.max(min[0], p.w), Math.max(min[1], p.d), dominanteRoh);
   }
-  function schirm(S, x, z2, rad2, farbe) {
+  function schirm(S, x, z2, rad2, farbe2) {
     S.box(0.1, 2.4, 0.1, x, 1.5, z2, "#e9e6de");
     const g = new three_module_exports.ConeGeometry(rad2, 0.7, 8);
     g.translate(x, 2.9, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function plastik(S, x, z2, r) {
     S.box(1.6, 0.8, 1.6, x, 0.8, z2, "#cfc8b8");
@@ -98260,12 +99777,12 @@
       for (const [ex, ez] of [[cx + a / 2, cz], [cx - a / 2, cz], [cx, cz + a / 2], [cx, cz - a / 2]]) S.box(0.8, lo, 0.8, ex, lo / 2, ez, "#d6d1c4");
       const e = a * 0.36, xi0 = cx - e, xi1 = cx + e, zi0 = cz - e, zi1 = cz + e;
       S.quader(xi0, 0.3, zi0, xi1, 0.5, zi1, "#d9d4c8");
-      const wand2 = (pa, pb, farbe) => {
+      const wand2 = (pa, pb, farbe2) => {
         for (const [q0, q1] of [[0, 0.5], [0.5, 1]]) {
           const A = [pa[0] + (pb[0] - pa[0]) * q0, pa[1] + (pb[1] - pa[1]) * q0], B2 = [pa[0] + (pb[0] - pa[0]) * q1, pa[1] + (pb[1] - pa[1]) * q1];
           const L2 = Math.hypot(B2[0] - A[0], B2[1] - A[1]), F2 = R5(A[0], A[1], (B2[0] - A[0]) / L2, (B2[1] - A[1]) / L2, L2);
           const ya = h(A[0], A[1]) - 0.35, yb = h(B2[0], B2[1]) - 0.35;
-          fpoly2(S, F2, [[0, 0.5], [L2, 0.5], [L2, yb], [0, ya]], -0.08, 0, farbe);
+          fpoly2(S, F2, [[0, 0.5], [L2, 0.5], [L2, yb], [0, ya]], -0.08, 0, farbe2);
           const n = Math.max(1, Math.round(L2 / 1.8));
           for (let i = 1; i < n; i++) {
             const u = i * L2 / n;
@@ -98464,11 +99981,11 @@
     return skaliert(S, scene2, p, Math.max(40, p.w), Math.max(36, p.d), kaufhalleRoh);
   }
   function fernwaerme(S, punkte2, y, o = {}) {
-    const farbe = o.farbe ?? "#c9cdd0", rr = o.r ?? 0.45;
+    const farbe2 = o.farbe ?? "#c9cdd0", rr = o.r ?? 0.45;
     for (let i = 0; i < punkte2.length - 1; i++) {
       const [ax, az] = punkte2[i], [bx, bz] = punkte2[i + 1];
       const L2 = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / L2, nz = (bx - ax) / L2;
-      for (const s2 of [-0.6, 0.6]) stab2(S, [ax + nx * s2, y, az + nz * s2], [bx + nx * s2, y, bz + nz * s2], rr, farbe, 8);
+      for (const s2 of [-0.6, 0.6]) stab2(S, [ax + nx * s2, y, az + nz * s2], [bx + nx * s2, y, bz + nz * s2], rr, farbe2, 8);
       const n = Math.max(1, Math.round(L2 / 7));
       for (let k = 0; k <= n; k++) {
         const px2 = ax + (bx - ax) * k / n, pz4 = az + (bz - az) * k / n;
@@ -98495,9 +100012,9 @@
       S.box(0.5, y + hoch, 0.5, q2[0], (y + hoch) / 2 + 0.3, q2[2], "#8a8f94");
     }
   }
-  function schornstein2(S, x, z2, h, rU, rO, farbe, o = {}) {
-    zyl6(S, rO, rU, h, x, 0, z2, farbe, 16);
-    zyl6(S, rO + 0.25, rO + 0.25, 1, x, h - 1, z2, dunkler(farbe, 0.15), 16);
+  function schornstein2(S, x, z2, h, rU, rO, farbe2, o = {}) {
+    zyl6(S, rO, rU, h, x, 0, z2, farbe2, 16);
+    zyl6(S, rO + 0.25, rO + 0.25, 1, x, h - 1, z2, dunkler(farbe2, 0.15), 16);
     if (o.ringe) for (let i = 0; i < 3; i++) zyl6(S, rO + 0.06 + i * 0.03, rO + 0.06 + i * 0.03, 2.4, x, h - 3.4 - i * 4.8, z2, i % 2 ? "#f2f1ec" : "#c8463c", 16, true);
     if (o.leiter) S.box(0.5, h - 4, 0.15, x + rO + 0.15, h / 2, z2, "#59636b");
   }
@@ -98909,11 +100426,11 @@
     }
     return H;
   }
-  function markiseF(S, F2, u0, u1, y, farbe) {
+  function markiseF(S, F2, u0, u1, y, farbe2) {
     const g = new three_module_exports.BoxGeometry(u1 - u0, 0.12, 1.5);
     g.rotateX(0.35);
     g.translate((u0 + u1) / 2, y, 0.75);
-    fgeo2(S, F2, g, farbe);
+    fgeo2(S, F2, g, farbe2);
   }
   function brandwand2(S, scene2, F2, H, r, o = {}) {
     const L2 = F2.L, wand2 = o.wand ?? "#9b958b";
@@ -98958,11 +100475,11 @@
       S.add(pyr, dach3);
     } else fpoly2(S, endeRechts(FZ, T), [[-0.3, H + 0.6], [T + 0.3, H + 0.6], [T / 2, H + 0.6 + dh]], -0.4, 0.02, dunkler(wand2, 0.03));
     const neig = Math.atan2(dh, T / 2);
-    const aufDach = (u, s2, bb, tt, farbe) => {
+    const aufDach = (u, s2, bb, tt, farbe2) => {
       const gg = new three_module_exports.BoxGeometry(bb, 0.08, tt);
       gg.rotateX(neig);
       gg.translate(x0 + u, H + 0.6 + s2 * dh + 0.06, z0 + d - s2 * T / 2);
-      S.add(gg, farbe);
+      S.add(gg, farbe2);
     };
     if (zustand !== "saniert") for (let i = 0; i < (zustand === "leer" ? 7 : 4); i++) aufDach(zw(r, 1.5, w - 2), zw(r, 0.15, 0.75), zw(r, 0.8, 2.2), zw(r, 0.6, 1.6), zustand === "leer" ? "#2a2c2f" : waehle2(r, ["#4c4f53", "#7d7f80", "#2a2c2f"]));
     const ng = Math.floor(w / 6);
@@ -99007,11 +100524,11 @@
     if (p.w >= 14 && p.d >= 12) return altbauRoh(S, scene2, p);
     return skaliert(S, scene2, p, Math.max(14, p.w), Math.max(12, p.d), altbauRoh);
   }
-  function plakatwand(S, scene2, x, z2, b, h, text3, farbe, ry = 0) {
+  function plakatwand(S, scene2, x, z2, b, h, text3, farbe2, ry = 0) {
     const F2 = R5(x, z2, Math.cos(ry), -Math.sin(ry), b);
     for (const u of [b * 0.2, b * 0.8]) fb2(S, F2, u - 0.12, u + 0.12, 0.3, 2.2, -0.3, -0.06, "#59636b");
     fb2(S, F2, -0.1, b + 0.1, 2.2, 2.2 + h, -0.12, 0, "#3f474e");
-    fb2(S, F2, 0.1, b - 0.1, 2.3, 2.1 + h, 0, 0.04, farbe);
+    fb2(S, F2, 0.1, b - 0.1, 2.3, 2.1 + h, 0, 0.04, farbe2);
     const sc = scene2;
     ftext2(sc, F2, text3, b / 2, 2.2 + h / 2, 0.06, h * 0.32, b * 0.86, "#ffffff");
   }
@@ -99431,8 +100948,8 @@
     E.brachen = 1;
   }
   function ostAltstadt(E) {
-    const basis = E.o.basis && ["altstadt", "dom", "residenz", "ring", "flussknick"].includes(E.o.basis) ? E.o.basis : "altstadt";
-    PLAN_HILFE.entwurf(basis, E);
+    const basis2 = E.o.basis && ["altstadt", "dom", "residenz", "ring", "flussknick"].includes(E.o.basis) ? E.o.basis : "altstadt";
+    PLAN_HILFE.entwurf(basis2, E);
     const v0 = E.viertel, zc = { ...E.zentrum };
     E.ostArt = (i, j) => {
       const dd = Math.hypot(i - zc.i, j - zc.j);
@@ -99448,7 +100965,7 @@
     };
     E.landmarkMax = 3;
     E.brachen = 1;
-    E.ostFachwerk = basis === "altstadt" || basis === "dom";
+    E.ostFachwerk = basis2 === "altstadt" || basis2 === "dom";
   }
   function ostseeHanse(E) {
     const { r } = E;
@@ -100025,14 +101542,14 @@
   function ostStil(p, nachbar) {
     const r = rng2((p.seed ?? 1) * 2654435761 + 977 >>> 0);
     const v = OST_STILE[p.viertel] ? p.viertel : "gruenderzeit";
-    const basis = { ...OST_STILE[v] };
+    const basis2 = { ...OST_STILE[v] };
     if (p.region === "nord" && v !== "ostzentrum") {
-      basis.backstein = v === "zentrum" ? 1.2 : 2.6;
-      basis.barock = (basis.barock ?? 0) * 0.3;
+      basis2.backstein = v === "zentrum" ? 1.2 : 2.6;
+      basis2.barock = (basis2.barock ?? 0) * 0.3;
     }
-    if (p.ostFachwerk && v === "altstadt") basis.fachwerk = 2.4;
-    if (p.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis.barock = 2.5;
-    const liste = Object.entries(basis).map(([st, g2]) => {
+    if (p.ostFachwerk && v === "altstadt") basis2.fachwerk = 2.4;
+    if (p.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis2.barock = 2.5;
+    const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.25;
       if (st === "fachwerk" && p.w > 18) w *= 0.3;
@@ -100250,8 +101767,8 @@
     const na = Math.max(1, Math.floor((u1 - u0 - 2 * rand) / ra + 0.15)), off = u0 + (u1 - u0 - na * ra) / 2;
     return Array.from({ length: na }, (_, i) => off + (i + 0.5) * ra);
   }
-  function ftext3(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
+  function ftext3(scene2, F2, text3, u, y, t, hMax, bMax, farbe2, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe2, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp3(F2, u, t);
@@ -100353,7 +101870,7 @@
     }
     return formenListe;
   }
-  function rasterWand(S, F2, umr, oeff, t0, t1, farbe) {
+  function rasterWand(S, F2, umr, oeff, t0, t1, farbe2) {
     const [U0, V0, U1, V1] = umr;
     const vs2 = [.../* @__PURE__ */ new Set([V0, V1, ...oeff.flatMap((l) => [l.v0, l.v1]).filter((v) => v > V0 && v < V1)])].sort((a, b) => a - b);
     const gs = [];
@@ -100374,16 +101891,16 @@
       }
       if (U1 > u) box(u, a, U1, b);
     }
-    if (gs.length) fgeo3(S, F2, mergeGeometries(gs), farbe);
+    if (gs.length) fgeo3(S, F2, mergeGeometries(gs), farbe2);
   }
-  function lochwand3(S, F2, umr, oeff, farbe, o = {}) {
+  function lochwand3(S, F2, umr, oeff, farbe2, o = {}) {
     const tw = o.tw ?? 0.4;
-    if (typeof umr[0] === "number" && oeff.length >= 3 && oeff.every((l) => !l.kreis && !l.art)) rasterWand(S, F2, umr, oeff, -tw, o.t1 ?? 0, farbe);
-    else if (typeof umr[0] === "number" && oeff.length > 8) formen(S, F2, wandStreifen(umr, oeff), -tw, o.t1 ?? 0, farbe, o.seg ?? 6);
+    if (typeof umr[0] === "number" && oeff.length >= 3 && oeff.every((l) => !l.kreis && !l.art)) rasterWand(S, F2, umr, oeff, -tw, o.t1 ?? 0, farbe2);
+    else if (typeof umr[0] === "number" && oeff.length > 8) formen(S, F2, wandStreifen(umr, oeff), -tw, o.t1 ?? 0, farbe2, o.seg ?? 6);
     else {
       const s2 = umrissForm(umr);
       for (const l of oeff) s2.holes.push(pfad(new three_module_exports.Path(), l));
-      formen(S, F2, [s2], -tw, o.t1 ?? 0, farbe, o.seg ?? 6);
+      formen(S, F2, [s2], -tw, o.t1 ?? 0, farbe2, o.seg ?? 6);
     }
     const fuell = /* @__PURE__ */ new Map(), ringe = [], sprossen = [], baenke2 = [];
     const add = (c, tief2, sh) => {
@@ -100394,7 +101911,7 @@
     for (const l of oeff) {
       if (l.typ === "offen") continue;
       const tief2 = l.tief ?? (l.typ === "nische" ? 0.2 : 0.26);
-      const c = l.fuell ?? (l.typ === "nische" ? o.nische ?? dunkler(farbe, 0.08) : l.typ === "tuer" ? o.tuer ?? "#3a4a3c" : o.glas ?? GLAS8);
+      const c = l.fuell ?? (l.typ === "nische" ? o.nische ?? dunkler(farbe2, 0.08) : l.typ === "tuer" ? o.tuer ?? "#3a4a3c" : o.glas ?? GLAS8);
       add(c, tief2, pfad(new three_module_exports.Shape(), l, 0.07));
       const rahmen2 = l.rahmen ?? o.rahmen;
       if ((l.typ === "fenster" || l.typ === "laden") && rahmen2 && LOD2.stufe !== "fern") {
@@ -100472,10 +101989,10 @@
       const T2 = new Sammler(), g2 = new three_module_exports.Group();
       erg = bau2(T2, g2, { ...q2, w: nw, d: nd });
       const ox0 = (w - nw * sk) / 2, oz0 = (d - nd * sk) / 2, oy = 0.3 * (1 - sk);
-      for (const [farbe, gs] of T2.teile) for (const g of gs) {
+      for (const [farbe2, gs] of T2.teile) for (const g of gs) {
         g.scale(sk, sk, sk);
         g.translate(ox0, oy, oz0);
-        T.add(g, farbe);
+        T.add(g, farbe2);
       }
       g2.scale.setScalar(sk);
       g2.position.set(ox0, oy, oz0);
@@ -100525,10 +102042,10 @@
     const { T, grp, erg } = bau1;
     const ecken = [[0, 0], [W3, 0], [0, D], [W3, D]].map(([x, z2]) => [x * c + z2 * s2, -x * s2 + z2 * c]);
     const ox = p.x - Math.min(...ecken.map((e) => e[0])), oz = p.z - Math.min(...ecken.map((e) => e[1]));
-    for (const [farbe, gs] of T.teile) for (const g of gs) {
+    for (const [farbe2, gs] of T.teile) for (const g of gs) {
       if (a) g.rotateY(a);
       g.translate(ox, 0, oz);
-      S.add(g, farbe);
+      S.add(g, farbe2);
     }
     const huelleGrp = new three_module_exports.Group();
     huelleGrp.add(grp);
@@ -100572,9 +102089,9 @@
     zyl7(S, 0.22, 0.28, 0.6, x, y0, z2, "#2e3236", 8);
     zyl7(S, 0.34, 0.34, 0.1, x, y0 + 0.6, z2, "#2e3236", 8);
   }
-  function fahne2(S, x, z2, y0, h, farbe) {
+  function fahne2(S, x, z2, y0, h, farbe2) {
     S.box(0.1, h, 0.1, x, y0 + h / 2, z2, "#e8e6e0");
-    S.box(0.05, 0.9, 1.4, x, y0 + h - 0.6, z2 + 0.72, farbe);
+    S.box(0.05, 0.9, 1.4, x, y0 + h - 0.6, z2 + 0.72, farbe2);
   }
   var GIEBEL_POOL = {
     luebeck: ["treppe", "treppe", "fialen", "volute", "trauf", "treppe", "dreieck"],
@@ -100956,21 +102473,21 @@
     const [x, z2] = wp3(F2, u, t);
     return [x, y, z2];
   }
-  function markiseF2(S, F2, u0, u1, y, farbe, tiefe = 1.5, neig = 0.38) {
+  function markiseF2(S, F2, u0, u1, y, farbe2, tiefe = 1.5, neig = 0.38) {
     const g = new three_module_exports.BoxGeometry(u1 - u0, 0.1, tiefe);
     g.rotateX(neig);
     g.translate((u0 + u1) / 2, y, tiefe / 2);
-    fgeo3(S, F2, g, farbe);
+    fgeo3(S, F2, g, farbe2);
   }
   function streifenMarkise(S, F2, u0, u1, y, f1, f2 = "#f4f1ea", n = 6, tiefe = 1.5) {
     const b = (u1 - u0) / n;
     for (let i = 0; i < n; i++) markiseF2(S, F2, u0 + i * b, u0 + (i + 1) * b, y, i % 2 ? f2 : f1, tiefe);
   }
-  function schirm2(S, x, z2, y0, rad2, farbe) {
+  function schirm2(S, x, z2, y0, rad2, farbe2) {
     S.box(0.08, 2.3, 0.08, x, y0 + 1.15, z2, "#e8e6e0");
     const g = new three_module_exports.ConeGeometry(rad2, 0.6, 8);
     g.translate(x, y0 + 2.4, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function tisch(S, x, z2, y0) {
     zyl7(S, 0.45, 0.45, 0.06, x, y0 + 0.72, z2, "#e9e6de", 8);
@@ -100989,12 +102506,12 @@
     g.translate(0, y0, 0);
     fgeo3(S, F2, g, c);
   }
-  function boot(S, scene2, x, z2, typ, ry = 0, farbe = null, y0 = 0.36, name2 = null) {
+  function boot(S, scene2, x, z2, typ, ry = 0, farbe2 = null, y0 = 0.36, name2 = null) {
     const F2 = R6(x, z2, Math.cos(ry), -Math.sin(ry), 0);
     if (typ === "barkasse") {
       const L3 = 13, B3 = 3.6;
       rumpf(S, F2, L3, B3, y0 - 0.3, y0 + 0.25, "#b8352c");
-      rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.25, y0 + 1, farbe ?? "#2d3338");
+      rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.25, y0 + 1, farbe2 ?? "#2d3338");
       rumpf(S, F2, L3 - 0.6, B3 - 0.5, y0 + 1, y0 + 1.06, "#a07a52");
       fb3(S, F2, -4.6, 2.4, y0 + 1, y0 + 2.1, -1.25, 1.25, "#efe9dc");
       fb3(S, F2, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS8);
@@ -101006,7 +102523,7 @@
       return;
     }
     if (typ === "kutter") {
-      const L3 = 15, B3 = 4.6, c2 = farbe ?? "#2f6f8f";
+      const L3 = 15, B3 = 4.6, c2 = farbe2 ?? "#2f6f8f";
       rumpf(S, F2, L3, B3, y0 - 0.3, y0 + 0.3, "#b8352c", 0.3);
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.3, y0 + 1.6, c2, 0.3);
       rumpf(S, F2, L3 - 0.5, B3 - 0.5, y0 + 1.6, y0 + 1.66, "#9a8d78", 0.3);
@@ -101021,7 +102538,7 @@
       return;
     }
     if (typ === "dampfer") {
-      const L3 = 30, B3 = 7, c2 = farbe ?? "#1f3a5f";
+      const L3 = 30, B3 = 7, c2 = farbe2 ?? "#1f3a5f";
       rumpf(S, F2, L3, B3, y0 - 0.3, y0 + 0.5, c2, 0.22, 0.9);
       rumpf(S, F2, L3 + 0.1, B3 + 0.1, y0 + 0.5, y0 + 2.1, "#f6f4ee", 0.22, 0.9);
       rumpf(S, F2, L3 - 0.6, B3 - 0.5, y0 + 2.1, y0 + 2.16, "#b08a62", 0.22, 0.9);
@@ -101036,7 +102553,7 @@
       fb3(S, F2, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS8);
       fb3(S, F2, -6.2, 4.7, y0 + 6.6, y0 + 6.8, -2.6, 2.6, "#e9e6de");
       const [fx2, fz2] = wp3(F2, -1, 0);
-      zyl7(S, 0.9, 1, 3.2, fx2, y0 + 6.8, fz2, farbe ?? "#d23c32", 12);
+      zyl7(S, 0.9, 1, 3.2, fx2, y0 + 6.8, fz2, farbe2 ?? "#d23c32", 12);
       zyl7(S, 0.92, 0.92, 0.7, fx2, y0 + 9.6, fz2, "#2b2f33", 12);
       for (let i = 0; i < 4; i++) {
         const [sx, sz] = wp3(F2, -10 + i * 4.5, 0);
@@ -101049,7 +102566,7 @@
       }
       return;
     }
-    const L2 = 58, B2 = 11, c = farbe ?? "#2a3a4a";
+    const L2 = 58, B2 = 11, c = farbe2 ?? "#2a3a4a";
     rumpf(S, F2, L2, B2, y0 - 0.3, y0 + 1.2, "#a6342b", 0.16, 0.95);
     rumpf(S, F2, L2 + 0.1, B2 + 0.1, y0 + 1.2, y0 + 5.2, c, 0.16, 0.95);
     rumpf(S, F2, L2 - 1, B2 - 0.8, y0 + 5.2, y0 + 5.3, "#7d6a58", 0.16, 0.95);
@@ -101064,19 +102581,19 @@
     for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 2; k++) if (hash2(i, j, k + Math.round(x)) % 4) fb3(S, F2, -13 + i * 6.4, -13 + i * 6.4 + 6, y0 + 5.3 + k * 2.6, y0 + 5.3 + (k + 1) * 2.6 - 0.05, -3.9 + j * 2.6, -3.9 + j * 2.6 + 2.5, kc[hash2(i, j, k) % kc.length]);
     stab3(S, P3(F2, 24, y0 + 5.3, 0), P3(F2, 24, y0 + 12, 0), 0.2, "#e8e6e0");
   }
-  function wippkran(S, F0, u, yK, farbe, ausleger = 16, winkel = 0.62) {
+  function wippkran(S, F0, u, yK, farbe2, ausleger = 16, winkel = 0.62) {
     const F2 = teil3(F0, u, u, 0);
-    for (const uu of [-2.7, 2.7]) for (const tt of [-3.2, 1.2]) fb3(S, F2, uu - 0.25, uu + 0.25, yK, yK + 6, tt - 0.25, tt + 0.25, farbe);
-    for (const tt of [-3.2, 1.2]) fbalken(S, F2, -2.7, yK + 1.5, 2.7, yK + 5.5, 0.25, tt - 0.1, tt + 0.1, farbe);
-    fb3(S, F2, -3.1, 3.1, yK + 6, yK + 6.6, -3.6, 1.6, farbe);
-    fb3(S, F2, -1.9, 1.9, yK + 6.6, yK + 10, -3.4, 0.9, farbe);
+    for (const uu of [-2.7, 2.7]) for (const tt of [-3.2, 1.2]) fb3(S, F2, uu - 0.25, uu + 0.25, yK, yK + 6, tt - 0.25, tt + 0.25, farbe2);
+    for (const tt of [-3.2, 1.2]) fbalken(S, F2, -2.7, yK + 1.5, 2.7, yK + 5.5, 0.25, tt - 0.1, tt + 0.1, farbe2);
+    fb3(S, F2, -3.1, 3.1, yK + 6, yK + 6.6, -3.6, 1.6, farbe2);
+    fb3(S, F2, -1.9, 1.9, yK + 6.6, yK + 10, -3.4, 0.9, farbe2);
     fb3(S, F2, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS8);
     fb3(S, F2, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS8);
-    fb3(S, F2, -2, 2, yK + 10, yK + 10.3, -3.6, 1.1, dunkler(farbe, 0.12));
+    fb3(S, F2, -2, 2, yK + 10, yK + 10.3, -3.6, 1.1, dunkler(farbe2, 0.12));
     fb3(S, F2, -1.2, 1.2, yK + 8.6, yK + 10.8, -5.2, -3.4, "#3a3f44");
     const tipY = yK + 8.4 + Math.sin(winkel) * ausleger, tipT = 0.6 + Math.cos(winkel) * ausleger;
-    for (const s2 of [-0.5, 0.5]) balken4(S, P3(F2, s2, yK + 8.4, 0.6), P3(F2, s2 * 0.3, tipY, tipT), 0.28, 0.5, farbe);
-    balken4(S, P3(F2, 0, yK + 10.3, -1.2), P3(F2, 0, yK + 15.5, -0.4), 0.3, 0.3, farbe);
+    for (const s2 of [-0.5, 0.5]) balken4(S, P3(F2, s2, yK + 8.4, 0.6), P3(F2, s2 * 0.3, tipY, tipT), 0.28, 0.5, farbe2);
+    balken4(S, P3(F2, 0, yK + 10.3, -1.2), P3(F2, 0, yK + 15.5, -0.4), 0.3, 0.3, farbe2);
     balken4(S, P3(F2, 0, yK + 15.5, -0.4), P3(F2, 0, tipY + 0.3, tipT * 0.6), 0.12, 0.12, "#3a3f44");
     stab3(S, P3(F2, 0, tipY, tipT), P3(F2, 0, yK + 2.5, tipT), 0.04, "#2b2f33", 4);
     fb3(S, F2, -0.3, 0.3, yK + 2, yK + 2.6, tipT - 0.3, tipT + 0.3, "#e2b83b");
@@ -102125,13 +103642,13 @@
   function nordRathaus(S, scene2, p) {
     return gedreht2(S, scene2, p, rathausRoh, [30, 20]);
   }
-  function bude(S, scene2, F2, u, y0, farbe, text3) {
+  function bude(S, scene2, F2, u, y0, farbe2, text3) {
     fb3(S, F2, u - 2.2, u + 2.2, y0, y0 + 2.7, -3, 0, "#f3efe6");
     fb3(S, F2, u - 1.8, u + 1.8, y0 + 1.05, y0 + 2.15, 0, 0.05, GLAS_HELL5);
     fb3(S, F2, u - 1.95, u + 1.95, y0 + 0.95, y0 + 1.08, 0, 0.55, "#d8d3c6");
-    streifenMarkise(S, F2, u - 2.3, u + 2.3, y0 + 2.35, farbe, "#f4f1ea", 6, 1.4);
-    fb3(S, F2, u - 2.4, u + 2.4, y0 + 2.7, y0 + 2.9, -3.2, 0.15, farbe);
-    fb3(S, F2, u - 2.2, u + 2.2, y0 + 2.9, y0 + 3.75, -0.12, 0.06, farbe);
+    streifenMarkise(S, F2, u - 2.3, u + 2.3, y0 + 2.35, farbe2, "#f4f1ea", 6, 1.4);
+    fb3(S, F2, u - 2.4, u + 2.4, y0 + 2.7, y0 + 2.9, -3.2, 0.15, farbe2);
+    fb3(S, F2, u - 2.2, u + 2.2, y0 + 2.9, y0 + 3.75, -0.12, 0.06, farbe2);
     ftext3(scene2, F2, text3, u, y0 + 3.32, 0.08, 0.55, 4.2, "#ffffff");
     for (const s2 of [-1, 1]) {
       const [x, z2] = wp3(F2, u + s2 * 1.4, 2.4);
@@ -102338,10 +103855,10 @@
   function fluegel(S, F2, y, nab, laenge, phi, holz, gitter) {
     for (let k = 0; k < 4; k++) {
       const a = phi + k * PI9 / 2, ca = Math.cos(a), sa = Math.sin(a), qa = -sa, qb = ca;
-      const U = (s2, q2) => nab[0] + ca * s2 + qa * q2, Y = (s2, q2) => y + sa * s2 + qb * q2;
-      fbalken(S, F2, U(-0.4, 0), Y(-0.4, 0), U(laenge, 0), Y(laenge, 0), 0.28, -0.15, 0.15, holz);
-      for (const q2 of [0.25, 1.9]) fbalken(S, F2, U(laenge * 0.2, q2), Y(laenge * 0.2, q2), U(laenge, q2), Y(laenge, q2), 0.09, -0.06, 0.06, gitter);
-      for (let s2 = laenge * 0.2; s2 <= laenge + 0.01; s2 += laenge * 0.8 / 7) fbalken(S, F2, U(s2, 0), Y(s2, 0), U(s2, 1.9), Y(s2, 1.9), 0.08, -0.06, 0.06, gitter);
+      const U2 = (s2, q2) => nab[0] + ca * s2 + qa * q2, Y = (s2, q2) => y + sa * s2 + qb * q2;
+      fbalken(S, F2, U2(-0.4, 0), Y(-0.4, 0), U2(laenge, 0), Y(laenge, 0), 0.28, -0.15, 0.15, holz);
+      for (const q2 of [0.25, 1.9]) fbalken(S, F2, U2(laenge * 0.2, q2), Y(laenge * 0.2, q2), U2(laenge, q2), Y(laenge, q2), 0.09, -0.06, 0.06, gitter);
+      for (let s2 = laenge * 0.2; s2 <= laenge + 0.01; s2 += laenge * 0.8 / 7) fbalken(S, F2, U2(s2, 0), Y(s2, 0), U2(s2, 1.9), Y(s2, 1.9), 0.08, -0.06, 0.06, gitter);
     }
     fscheibe2(S, F2, nab[0], y, -0.4, 0.3, 0.55, holz, 10);
   }
@@ -102646,11 +104163,11 @@
     S.quader(x0 + L2 * 0.3, H + dh * 0.4, (z0 + z1) / 2, x0 + L2 * 0.3 + 0.7, H + dh + 0.8, (z0 + z1) / 2 + 0.7, "#c9c4b8");
     return top;
   }
-  function strandkorb(S, x, z2, y0, farbe, ry = 0) {
+  function strandkorb(S, x, z2, y0, farbe2, ry = 0) {
     const F2 = R6(x, z2, Math.cos(ry), -Math.sin(ry), 0);
     fb3(S, F2, -0.7, 0.7, y0, y0 + 0.75, -0.55, 0.55, "#e3d3a8");
     fb3(S, F2, -0.7, 0.7, y0 + 0.75, y0 + 1.6, -0.55, -0.25, "#e3d3a8");
-    fb3(S, F2, -0.75, 0.75, y0 + 1.2, y0 + 1.75, -0.6, 0.15, farbe);
+    fb3(S, F2, -0.75, 0.75, y0 + 1.2, y0 + 1.75, -0.6, 0.15, farbe2);
     for (const s2 of [-1, 1]) fb3(S, F2, s2 * 0.7 - 0.06, s2 * 0.7 + 0.06, y0 + 0.75, y0 + 1.25, -0.55, 0.3, "#e3d3a8");
     fb3(S, F2, -0.72, 0.72, y0 + 1.42, y0 + 1.55, -0.62, 0.17, "#f4f1ea");
   }
@@ -103179,7 +104696,7 @@
     if (a0 >= a1 - 0.01 || b0 >= b1 - 0.01) return [R9];
     return [[x0, z0, x1, b0], [x0, b1, x1, z1], [x0, b0, a0, b1], [a1, b0, x1, b1]].filter(([p, q2, s2, t]) => s2 - p > 0.01 && t - q2 > 0.01);
   }
-  function plattePlusWasser(ctx, b, wasser2, B2, farbe) {
+  function plattePlusWasser(ctx, b, wasser2, B2, farbe2) {
     const { S } = ctx;
     const g = { "-x": b.rand["-x"]?.gehweg ?? 2.5, "+x": b.rand["+x"]?.gehweg ?? 2.5, "-z": b.rand["-z"]?.gehweg ?? 2.5, "+z": b.rand["+z"]?.gehweg ?? 2.5 };
     const X0 = b.x, Z0 = b.z, X1 = b.x + b.w, Z1 = b.z + b.d;
@@ -103191,7 +104708,7 @@
     }
     let stuecke = [[X0, Z0, X1, Z1]];
     for (const w of wasser2) stuecke = stuecke.flatMap((R9) => ohne(R9, w));
-    for (const [a, c, e, h] of stuecke) S.quader(a, -0.6, c, e, 0.3, h, farbe);
+    for (const [a, c, e, h] of stuecke) S.quader(a, -0.6, c, e, 0.3, h, farbe2);
     return stuecke;
   }
   function parzSpeicher(ctx, E, b) {
@@ -103451,9 +104968,9 @@
     }
     fform3(S, F2, s2, t0, t1, c);
   }
-  function lochwand4(S, F2, u0, u1, y0, y1, farbe, loecher, o = {}) {
+  function lochwand4(S, F2, u0, u1, y0, y1, farbe2, loecher, o = {}) {
     fb4(S, F2, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o.glasT ?? 0.04, o.glas ?? GLAS9);
-    fwand2(S, F2, u0, u1, y0, y1, 0, o.dick ?? 0.35, farbe, loecher);
+    fwand2(S, F2, u0, u1, y0, y1, 0, o.dick ?? 0.35, farbe2, loecher);
   }
   function fpoly3(S, F2, pkt, t0, t1, c) {
     const s2 = new three_module_exports.Shape();
@@ -103475,8 +104992,8 @@
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
     fgeo4(S, F2, g, c);
   }
-  function ftext4(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
+  function ftext4(scene2, F2, text3, u, y, t, hMax, bMax, farbe2, bg = null) {
+    const { mat: mat2, seitenverhaeltnis: a } = textMaterial(text3, farbe2, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp4(F2, u, t);
@@ -103652,11 +105169,11 @@
     if (o.laeden) for (const s2 of [-1, 1]) fb4(S, F2, u + s2 * (fw / 2 + 0.14), u + s2 * (fw / 2 + 0.14 + fw * 0.48), y, y + fh, t, t + 0.09, o.laeden);
     if (o.sims) fb4(S, F2, u - fw / 2 - 0.25, u + fw / 2 + 0.25, y - 0.2, y - 0.04, t, t + 0.22, o.sims);
   }
-  function logo(S, scene2, F2, u, y, t, h, farbe, text3, schrift2 = "#ffffff", bg = null) {
-    const bank6 = BANKEN.find((b2) => b2[1] === farbe), form = bank6?.[2] ?? "saeulen";
+  function logo(S, scene2, F2, u, y, t, h, farbe2, text3, schrift2 = "#ffffff", bg = null) {
+    const bank6 = BANKEN.find((b2) => b2[1] === farbe2), form = bank6?.[2] ?? "saeulen";
     const q2 = h / 2, t1 = t + 0.2, t2 = t + 0.28, P2 = "#f3f1ec";
     fb4(S, F2, u - q2 * 1.15, u + q2 * 1.15, y - q2 * 0.85, y + q2 * 0.85, t, t1, P2);
-    const b = (u0, u1, y0, y1) => fb4(S, F2, u + u0 * q2, u + u1 * q2, y + y0 * q2, y + y1 * q2, t1, t2, farbe);
+    const b = (u0, u1, y0, y1) => fb4(S, F2, u + u0 * q2, u + u1 * q2, y + y0 * q2, y + y1 * q2, t1, t2, farbe2);
     if (form === "saeulen") {
       b(-0.85, 0.85, -0.65, -0.48);
       b(-0.85, 0.85, 0.42, 0.62);
@@ -103673,7 +105190,7 @@
       b(-0.95, 0.25, 0.3, 0.6);
       b(-0.6, 0.6, -0.15, 0.15);
       b(-0.25, 0.95, -0.6, -0.3);
-    } else ftext4(scene2, F2, (bank6?.[0] ?? "B").split(" ").pop()[0], u, y, t2, h * 0.75, h * 0.9, farbe, null);
+    } else ftext4(scene2, F2, (bank6?.[0] ?? "B").split(" ").pop()[0], u, y, t2, h * 0.75, h * 0.9, farbe2, null);
     if (text3) {
       const u0 = u + h * 0.75, bw = Math.min(text3.length * h * 0.45, F2.L - u0 - 0.6);
       if (bw > 2) ftext4(scene2, F2, text3, u0 + bw / 2, y, t + 0.12, h * 0.55, bw, schrift2, bg);
@@ -103693,12 +105210,12 @@
       const T = new Sammler(), innen = new three_module_exports.Group(), aussen = new three_module_exports.Group();
       const erg = bau2(T, innen, { ...p, x: 0, z: 0, w: nw, d: nd, variante: v, front: "+z", blick: [c - sn, sn + c], skala: s2 });
       const cx = p.x + p.w / 2, cz = p.z + p.d / 2;
-      for (const [farbe, gs] of T.teile) for (const g of gs) {
+      for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.translate(-nw / 2, -0.3, -nd / 2);
         g.scale(s2, s2, s2);
         g.rotateY(th);
         g.translate(cx, 0.3, cz);
-        S.add(g, farbe);
+        S.add(g, farbe2);
       }
       if (nw * s2 < LW - 0.5 || nd * s2 < LD - 0.5) S.quader(p.x, 0.3, p.z, p.x + p.w, 0.34, p.z + p.d, PFLASTER4);
       innen.position.set(-nw / 2, -0.3, -nd / 2);
@@ -103752,15 +105269,15 @@
     S.quader(cx - a * 0.3, H, cz - b * 0.3, cx + a * 0.3, H + 4.5, cz + b * 0.3, band);
     S.quader(cx - a * 0.32, H + 4.5, cz - b * 0.32, cx + a * 0.32, H + 4.9, cz + b * 0.32, dunkler(band, 0.1));
     zyl8(S, 0.3, 0.5, 16, cx + a * 0.15, H + 4.9, cz, "#d9dcdf", 6);
-    const [name2, farbe] = o.bank ?? waehle2(r, BANKEN);
-    for (const [k, F2] of seiten2(p, x0, z0, a, b)) logo(S, scene2, teil4(F2, f, F2.L - f), (F2.L - 2 * f) / 2, H - gh, 0.45, 4.2, farbe, null);
-    if (o.podium !== false) for (const [k, F2] of seiten2(p, x0 - 6, z0 - 4, a + 12, b + 10)) ftext4(scene2, F2, name2, F2.L / 2, pod - 1.9, 0.42, 1.6, F2.L * 0.7, "#ffffff", farbe);
+    const [name2, farbe2] = o.bank ?? waehle2(r, BANKEN);
+    for (const [k, F2] of seiten2(p, x0, z0, a, b)) logo(S, scene2, teil4(F2, f, F2.L - f), (F2.L - 2 * f) / 2, H - gh, 0.45, 4.2, farbe2, null);
+    if (o.podium !== false) for (const [k, F2] of seiten2(p, x0 - 6, z0 - 4, a + 12, b + 10)) ftext4(scene2, F2, name2, F2.L / 2, pod - 1.9, 0.42, 1.6, F2.L * 0.7, "#ffffff", farbe2);
     return H + 21;
   }
   function turmZwilling(S, scene2, p, r, cx, cz, o = {}) {
     const n = o.n ?? 40, gh = 3.75, pod = 9, H = pod + n * gh, a = o.a ?? 17, b = o.b ?? 26, sp = o.abstand ?? 6;
     const glas2 = ["#80928a", "#768a83"], linie2 = "#c3cbc4", stein = "#e2ded4";
-    const [name2, farbe] = o.bank ?? BANKEN[0];
+    const [name2, farbe2] = o.bank ?? BANKEN[0];
     if (o.podium !== false) podium(S, scene2, p, cx - a - sp / 2 - 4, cz - b / 2 - 4, 2 * a + sp + 8, b + 8, pod - 1, { stein: "#dcdcd8" });
     const turm4 = (x0, z0, ht, i) => {
       const st = 3 * gh, e = 1.6, Hs = ht - st;
@@ -103784,9 +105301,9 @@
     turm4(cx + sp / 2, cz - b / 2, H2, 1);
     S.quader(cx - sp / 2 - 0.1, pod, cz - b * 0.3, cx + sp / 2 + 0.1, pod + 3 * gh, cz + b * 0.3, GLAS_HELL6);
     for (let y = pod + gh; y <= pod + 3 * gh; y += gh) S.quader(cx - sp / 2, y - 0.3, cz - b * 0.3 - 0.05, cx + sp / 2, y, cz + b * 0.3 + 0.05, stein);
-    for (const [k, F2] of seiten2(p, cx - sp / 2 - a, cz - b / 2, a, b, ["+z", "-z"])) logo(S, scene2, F2, F2.L / 2, H - 3 * gh - 3, 0.36, 4, farbe, null);
-    for (const [k, F2] of seiten2(p, cx + sp / 2, cz - b / 2, a, b, ["+x", "-x"])) logo(S, scene2, F2, F2.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe, null);
-    for (const [k, F2] of seiten2(p, cx - a - sp / 2 - 4, cz - b / 2 - 4, 2 * a + sp + 8, b + 8, ["+z", "-z"])) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.6, 26, "#ffffff", farbe);
+    for (const [k, F2] of seiten2(p, cx - sp / 2 - a, cz - b / 2, a, b, ["+z", "-z"])) logo(S, scene2, F2, F2.L / 2, H - 3 * gh - 3, 0.36, 4, farbe2, null);
+    for (const [k, F2] of seiten2(p, cx + sp / 2, cz - b / 2, a, b, ["+x", "-x"])) logo(S, scene2, F2, F2.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe2, null);
+    for (const [k, F2] of seiten2(p, cx - a - sp / 2 - 4, cz - b / 2 - 4, 2 * a + sp + 8, b + 8, ["+z", "-z"])) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.6, 26, "#ffffff", farbe2);
     return H + 3;
   }
   function turmKrone(S, scene2, p, r, cx, cz, o = {}) {
@@ -103832,9 +105349,9 @@
     zyl8(S, rr * 0.5, rr * 0.54, 3, cx, Hk + 5.1, cz, glas2, 16);
     zyl8(S, rr * 0.56, rr * 0.56, 0.6, cx, Hk + 8.1, cz, stein, 16);
     zyl8(S, 0.12, 0.35, 9, cx, Hk + 8.7, cz, "#d9dcdf", 6);
-    const [name2, farbe] = o.bank ?? BANKEN[2];
-    for (const [k, F2] of seiten2(p, x0 - 5, z0 - 5, a + 10, a + 10)) if (k === "+z" || k === "+x" || k === "-z" || k === "-x") ftext4(scene2, F2, name2, F2.L / 2, pod - 3.5, 0.42, 1.5, 24, "#ffffff", farbe);
-    for (const [k, F2] of seiten2(p, x0, z0, a, a)) logo(S, scene2, teil4(F2, f, a - f, 0.9), (a - 2 * f) / 2, Hs - 4, 0, 3.6, farbe, null);
+    const [name2, farbe2] = o.bank ?? BANKEN[2];
+    for (const [k, F2] of seiten2(p, x0 - 5, z0 - 5, a + 10, a + 10)) if (k === "+z" || k === "+x" || k === "-z" || k === "-x") ftext4(scene2, F2, name2, F2.L / 2, pod - 3.5, 0.42, 1.5, 24, "#ffffff", farbe2);
+    for (const [k, F2] of seiten2(p, x0, z0, a, a)) logo(S, scene2, teil4(F2, f, a - f, 0.9), (a - 2 * f) / 2, Hs - 4, 0, 3.6, farbe2, null);
     return Hk + 18;
   }
   function turmRund(S, scene2, p, r, cx, cz, o = {}) {
@@ -103859,9 +105376,9 @@
     zyl8(S, rr * 0.55, rr * 0.55, 0.32, cx, H + 2.52, cz, "#e8e5dc", 24);
     zyl8(S, rr * 0.48, rr * 0.48, 0.34, cx, H + 2.54, cz, "#8d939a", 24);
     for (let i = 0; i < 6; i++) zyl8(S, 0.45 - i * 0.05, 0.5 - i * 0.05, 4, cx - rr * 0.5, H + 2.5 + i * 4, cz + rr * 0.3, i % 2 ? "#f2f1ec" : "#c8463c", 8);
-    const [name2, farbe] = o.bank ?? BANKEN[1];
-    for (const [k, F2] of seiten2(p, kx0, kz0, kb, kd, ["+z", "-z", "-x"])) logo(S, scene2, F2, F2.L / 2 - (k === "-x" ? 0 : 3), Hk - 1.5, 0.2, 2.4, farbe, null);
-    for (const [k, F2] of seiten2(p, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8)) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.4, 22, "#ffffff", farbe);
+    const [name2, farbe2] = o.bank ?? BANKEN[1];
+    for (const [k, F2] of seiten2(p, kx0, kz0, kb, kd, ["+z", "-z", "-x"])) logo(S, scene2, F2, F2.L / 2 - (k === "-x" ? 0 : 3), Hk - 1.5, 0.2, 2.4, farbe2, null);
+    for (const [k, F2] of seiten2(p, cx - rr - kb - 2, cz - rr - 4, 2 * rr + kb + 8, 2 * rr + 8)) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.4, 22, "#ffffff", farbe2);
     return H + 27;
   }
   function platzUmfeld(S, r, p, frei6) {
@@ -104235,10 +105752,10 @@
       const pp = { ...p, blick: [-(p.blick ?? [1, 1])[1], (p.blick ?? [1, 1])[0]] };
       const T = new Sammler(), grp = new three_module_exports.Group();
       const hz = fwHaus(T, grp, pp, r, 0, 0, bb, t, { giebel: r() < 0.7, frei: z2 + bb > z0 + d - 7 ? ["-x"] : [], laden: r() < 0.5 ? waehle2(r, LAEDEN2) : null, name: namen.pop() });
-      for (const [farbe, gs] of T.teile) for (const g of gs) {
+      for (const [farbe2, gs] of T.teile) for (const g of gs) {
         g.rotateY(PI10 / 2);
         g.translate(x0 + 1, 0, z2 + bb);
-        S.add(g, farbe);
+        S.add(g, farbe2);
       }
       grp.rotation.y = PI10 / 2;
       grp.position.set(x0 + 1, 0, z2 + bb);
@@ -104296,11 +105813,11 @@
     const erg = fn(T, grp, pp);
     const quer2 = front2 === "+x" || front2 === "-x", W3 = quer2 ? t : b, D = quer2 ? b : t;
     const cx = ox + W3 / 2, cz = oz + D / 2;
-    for (const [farbe, gs] of T.teile) for (const g of gs) {
+    for (const [farbe2, gs] of T.teile) for (const g of gs) {
       g.translate(-b / 2, 0, -t / 2);
       g.rotateY(th);
       g.translate(cx, 0, cz);
-      S.add(g, farbe);
+      S.add(g, farbe2);
     }
     const inner = new three_module_exports.Group();
     inner.position.set(-b / 2, 0, -t / 2);
@@ -104446,11 +105963,11 @@
     S.quader(vx0, 4, z0 + 2, vx0 + 3.6, 4.3, z0 + t - 3, WEISS2);
     return Ht + 7;
   }
-  function zaun3(S, p, x0, z0, x1, z1, farbe = "#3b3f44") {
+  function zaun3(S, p, x0, z0, x1, z1, farbe2 = "#3b3f44") {
     for (const [k, F2] of seiten2(p, x0, z0, x1 - x0, z1 - z0)) {
       fb4(S, F2, 0, F2.L, 0.3, 0.9, -0.3, 0, "#d8d0c0");
-      for (let u = 0.3; u < F2.L; u += 0.6) fb4(S, F2, u - 0.03, u + 0.03, 0.9, 2, -0.18, -0.12, farbe);
-      fb4(S, F2, 0, F2.L, 1.9, 2, -0.2, -0.1, farbe);
+      for (let u = 0.3; u < F2.L; u += 0.6) fb4(S, F2, u - 0.03, u + 0.03, 0.9, 2, -0.18, -0.12, farbe2);
+      fb4(S, F2, 0, F2.L, 1.9, 2, -0.2, -0.1, farbe2);
       for (const u of achsen5(0, F2.L, 6, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, 2.2, -0.45, 0.15, "#e2dccf");
     }
   }
@@ -104894,10 +106411,10 @@
     S.box(2, 0.1, 2, x, y0 + 0.72, z2, "#6f9f5c");
     if (baumJa) baum(S, x, z2, r, 0.75);
   }
-  function kioskPilz(S, x, z2, y0 = 0.3, farbe = "#e8c547") {
+  function kioskPilz(S, x, z2, y0 = 0.3, farbe2 = "#e8c547") {
     zyl8(S, 1.6, 1.6, 2.6, x, y0, z2, "#f2efe6", 12);
     zyl8(S, 1.5, 1.5, 1.2, x, y0 + 1, z2, GLAS_HELL6, 12);
-    zyl8(S, 3.4, 0.6, 0.9, x, y0 + 2.6, z2, farbe, 16);
+    zyl8(S, 3.4, 0.6, 0.9, x, y0 + 2.6, z2, farbe2, 16);
     zyl8(S, 3.45, 3.45, 0.2, x, y0 + 3.4, z2, "#f4f2ec", 16);
   }
   function wiederaufbauRoh2(S, scene2, p) {
@@ -105530,8 +107047,8 @@
     const stufen = 4, oR = [Math.min(w / 2 - 3, 31), Math.min(d / 2 - 3, 24)];
     for (let k = 0; k < stufen; k++) {
       const f = k / stufen, ri = [ar[0] + (oR[0] - ar[0]) * f, ar[1] + (oR[1] - ar[1]) * f];
-      const farbe = k === 0 ? stein : k % 2 ? "#9cbf7e" : "#a7c78a", h = 3.2 + k * 2.4;
-      for (const [a0, a1] of [[spalt, PI10 - spalt], [PI10 + spalt, 2 * PI10 - spalt]]) ringSektor(S, cx, cz, ri, oR, a0, a1, 0, h, farbe, 22);
+      const farbe2 = k === 0 ? stein : k % 2 ? "#9cbf7e" : "#a7c78a", h = 3.2 + k * 2.4;
+      for (const [a0, a1] of [[spalt, PI10 - spalt], [PI10 + spalt, 2 * PI10 - spalt]]) ringSektor(S, cx, cz, ri, oR, a0, a1, 0, h, farbe2, 22);
       if (k > 0) for (const [a0, a1] of [[spalt, PI10 - spalt], [PI10 + spalt, 2 * PI10 - spalt]]) ringSektor(S, cx, cz, ri, [ri[0] + 0.5, ri[1] + 0.5], a0, a1, h - 0.01, 0.2, stein, 22);
     }
     for (let i = 0; i < 12; i++) {
@@ -105669,9 +107186,9 @@
     zyl8(S, rO, rU, h, x, 0.3, z2, c, 12);
     for (const f of [0.7, 0.92]) zyl8(S, rU + (rO - rU) * f + 0.15, rU + (rO - rU) * f + 0.15, 1, x, h * f, z2, ringe, 12);
   }
-  function schiff(S, x, z2, L2, farbe = "#2f3a44") {
-    S.quader(x, 0.05, z2 - 5, x + L2, 2.6, z2 + 5, farbe);
-    S.quader(x + L2 - 0.1, 0.05, z2 - 3.5, x + L2 + 4, 2.6, z2 + 3.5, farbe);
+  function schiff(S, x, z2, L2, farbe2 = "#2f3a44") {
+    S.quader(x, 0.05, z2 - 5, x + L2, 2.6, z2 + 5, farbe2);
+    S.quader(x + L2 - 0.1, 0.05, z2 - 3.5, x + L2 + 4, 2.6, z2 + 3.5, farbe2);
     S.quader(x, 2.6, z2 - 5, x + L2, 2.9, z2 + 5, "#c8463c");
     S.quader(x + 1, 2.9, z2 - 4, x + 9, 9, z2 + 4, "#f2efe6");
     S.quader(x + 1.5, 7.2, z2 - 4.05, x + 8.5, 8, z2 + 4.05, GLAS9);
@@ -106197,9 +107714,9 @@
       fb4(S, F2, 0, B2, y0 + f * 0.55, y0 + f * 0.55 + 0.2, 0, 0.12, o.binderF);
     }
   }
-  function zug2(S, x, z0, wagen, art) {
+  function zug2(S, x, z0, wagen2, art) {
     const L2 = 25;
-    for (let i = 0; i < wagen; i++) {
+    for (let i = 0; i < wagen2; i++) {
       const zz = z0 + i * (L2 + 0.6);
       const f = art === "fern" ? "#f2f1ec" : "#c8463c";
       S.quader(x - 1.45, 1.1, zz, x + 1.45, 4.2, zz + L2, f);
@@ -107241,9 +108758,9 @@
   function mitteStil(p, nachbar) {
     const r = rng2((p.seed ?? 1) * 2654435761 + 1231 >>> 0);
     const key = p.mitteEinkauf ? "e_" + p.mitteEinkauf : STILE_M[p.viertel] ? p.viertel : "gruenderzeit";
-    const basis = STILE_M[key];
+    const basis2 = STILE_M[key];
     const L2 = p.seite === "+x" || p.seite === "-x" ? p.d : p.w;
-    const liste = Object.entries(basis).map(([st, g2]) => {
+    const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (st === "fachwerk") w *= p.mitteFw ?? 1;
       if (nachbar?.stil === st && st !== "fachwerk") w *= 0.3;
@@ -108073,8 +109590,8 @@
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
     fgeo5(S, F2, g, c);
   }
-  function ftext5(scene2, F2, text3, u, y, t, hMax, bMax, farbe, bg = null) {
-    const { seitenverhaeltnis: a, mat: mat2 } = textMaterial(text3, farbe, { groesse: 140, hintergrund: bg });
+  function ftext5(scene2, F2, text3, u, y, t, hMax, bMax, farbe2, bg = null) {
+    const { seitenverhaeltnis: a, mat: mat2 } = textMaterial(text3, farbe2, { groesse: 140, hintergrund: bg });
     const h = Math.min(hMax, bMax / a);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h * a, h), mat2);
     const [x, z2] = wp5(F2, u, t);
@@ -108205,8 +109722,8 @@
       const ecken = [[0, 0], [W3, 0], [0, D], [W3, D]].map(([x, z2]) => [x * c + z2 * sn, -x * sn + z2 * c]);
       const tx = p.x - Math.min(...ecken.map((e) => e[0])), tz = p.z - Math.min(...ecken.map((e) => e[1]));
       const verw = p.zustand === "verwittert";
-      for (const [farbe, gs] of T.teile) {
-        const f = verw ? ausgeblichen(farbe) : farbe;
+      for (const [farbe2, gs] of T.teile) {
+        const f = verw ? ausgeblichen(farbe2) : farbe2;
         for (const g of gs) {
           if (s2 < 0.999) g.scale(s2, s2, s2);
           g.translate(ox, 0, oz);
@@ -108230,9 +109747,9 @@
   function versetzt3(S, scene2, dx, dy, dz, fn) {
     const T = new Sammler(), g = new three_module_exports.Group();
     const erg = fn(T, g);
-    for (const [farbe, gs] of T.teile) for (const geo of gs) {
+    for (const [farbe2, gs] of T.teile) for (const geo of gs) {
       geo.translate(dx, dy, dz);
-      S.add(geo, farbe);
+      S.add(geo, farbe2);
     }
     g.position.set(dx, dy, dz);
     scene2.add(g);
@@ -108632,13 +110149,13 @@
     fpoly4(S, F2, [[u - b * 0.4, y], [u + b * 0.4, y], [u, y + b * 0.62]], -a + 0.01, -a + 0.04, rahmen2);
     fpoly4(S, F2, [[u - b * 0.26, y + 0.1], [u + b * 0.26, y + 0.1], [u, y + b * 0.46]], -a + 0.04, -a + 0.07, GLAS_DUNKEL);
   }
-  function marktstand2(S, r, x, z2, farbe) {
+  function marktstand2(S, r, x, z2, farbe2) {
     S.box(3.6, 0.9, 1.8, x, 0.75, z2, "#c99a63");
     for (const dx of [-1.7, 1.7]) S.box(0.1, 2.4, 0.1, x + dx, 1.5, z2 - 0.8, "#7a5638");
     const g = new three_module_exports.BoxGeometry(4, 0.12, 2.4);
     g.rotateX(0.18);
     g.translate(x, 2.7, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
     for (let k = 0; k < 4; k++) S.box(0.7, 0.3, 0.6, x - 1.2 + k * 0.8, 1.35, z2, waehle2(r, ["#d0453a", "#e8b53c", "#7fae5a", "#e07a3f", "#f4efe2"]));
   }
   function mariensaeule(S, x, z2, y0 = 0.3, c = "#d9d1c0") {
@@ -111027,10 +112544,10 @@
     return { hoehe: top };
   }
   var FLUSS_V = ["bruecke", "fischer", "kai"];
-  function boot2(S, x, z2, L2, farbe, y = 0.45) {
-    S.box(L2, 0.55, 1.5, x, y + 0.27, z2, farbe);
+  function boot2(S, x, z2, L2, farbe2, y = 0.45) {
+    S.box(L2, 0.55, 1.5, x, y + 0.27, z2, farbe2);
     S.box(L2 - 0.4, 0.1, 1.2, x, y + 0.56, z2, "#8a6a48");
-    huelle2(S, [[x + L2 / 2, y, z2 - 0.75], [x + L2 / 2, y, z2 + 0.75], [x + L2 / 2, y + 0.55, z2 - 0.75], [x + L2 / 2, y + 0.55, z2 + 0.75], [x + L2 / 2 + 1.2, y + 0.75, z2]], farbe);
+    huelle2(S, [[x + L2 / 2, y, z2 - 0.75], [x + L2 / 2, y, z2 + 0.75], [x + L2 / 2, y + 0.55, z2 - 0.75], [x + L2 / 2, y + 0.55, z2 + 0.75], [x + L2 / 2 + 1.2, y + 0.75, z2]], farbe2);
   }
   function flussRoh(S, scene2, p) {
     const r = rng2(`fl:${p.seed}`);
@@ -111733,14 +113250,14 @@
       if (q2) neueParzelle5(ctx, "slot:sued_pyramide", q2.x, q2.z, q2.w, q2.d, ["+z"], "frei", { klasse: 2, landmarke: false });
     }
   }
-  function marktstand3(S, x, z2, y, farbe, r) {
+  function marktstand3(S, x, z2, y, farbe2, r) {
     S.box(3.2, 0.9, 1.8, x, y + 0.45, z2, "#c99a63");
     for (let k = 0; k < 4; k++) S.box(0.6, 0.3, 0.6, x - 1.1 + k * 0.75, y + 1.05, z2, waehle2(r, ["#d0453a", "#e8b53c", "#7fae5a", "#e07a3f", "#f4efe2"]));
     for (const dx of [-1.5, 1.5]) S.box(0.1, 2.5, 0.1, x + dx, y + 1.25, z2 - 0.85, "#7a5638");
     const g = new three_module_exports.BoxGeometry(3.8, 0.12, 2.4);
     g.rotateX(0.2);
     g.translate(x, y + 2.6, z2);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function gotBrunnen(S, x, z2, y) {
     S.add(new three_module_exports.CylinderGeometry(4, 4.2, 0.9, 8).translate(x, y + 0.45, z2), "#b9ad98");
@@ -112547,8 +114064,8 @@
   function suedStil(p, nachbar) {
     const r = rng2((p.seed ?? 1) * 2654435761 + 4111 >>> 0);
     const tab = STILE2[p.suedTyp] ?? STILE2.altbayern;
-    const basis = tab[gruppe(p.viertel)] ?? tab.alt;
-    const liste = Object.entries(basis).map(([st, g2]) => {
+    const basis2 = tab[gruppe(p.viertel)] ?? tab.alt;
+    const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.35;
       if (st === "fachwerk" && p.w > 18 && p.d > 18) w *= 0.2;
@@ -113537,17 +115054,17 @@
       return { bau: (S, scene2, q2) => WEST_SLOTS["slot:berg_haus"](S, scene2, { ...q2, front: front2, variante: variante2, laden: laden4, sockelY: p.sockelY ?? 0, geschosse: geschosse2, traufe: p.w >= 10.5 ? void 0 : false }) };
     }
     const tab = STILE_WEST[t] ?? STILE_WEST.ruhr;
-    let basis = { ...tab[p.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
-    if (p.westBackstein) basis.backstein = (basis.backstein ?? 0) + 2.2;
+    let basis2 = { ...tab[p.viertel] ?? tab.nachkrieg ?? tab[Object.keys(tab)[0]] };
+    if (p.westBackstein) basis2.backstein = (basis2.backstein ?? 0) + 2.2;
     let dachRegime = null;
     if (t === "ruhr") {
       const rb = rng2(`dach:${p.block}`);
       dachRegime = rb() < (RUHR_FLACH[p.viertel] ?? 0.5) ? "flach" : "steil";
       const erlaubt = dachRegime === "flach" ? STILE_FLACH : STILE_STEIL;
-      const f = Object.fromEntries(Object.entries(basis).filter(([st]) => erlaubt.has(st)));
-      if (Object.keys(f).length) basis = f;
+      const f = Object.fromEntries(Object.entries(basis2).filter(([st]) => erlaubt.has(st)));
+      if (Object.keys(f).length) basis2 = f;
     }
-    const liste = Object.entries(basis).map(([st, g2]) => {
+    const liste = Object.entries(basis2).map(([st, g2]) => {
       let w = g2;
       if (nachbar?.stil === st) w *= 0.3;
       if (st === "fachwerk" && p.w > 16) w *= 0.2;
@@ -114412,14 +115929,14 @@
     }
     if (!k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto3(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
   }
-  function polyPlatte(S, P2, yTop, dicke, farbe) {
+  function polyPlatte(S, P2, yTop, dicke, farbe2) {
     const sh = new three_module_exports.Shape();
     P2.forEach(([x, z2], i) => i ? sh.lineTo(x, z2) : sh.moveTo(x, z2));
     sh.closePath();
     const g = new three_module_exports.ExtrudeGeometry(sh, { depth: dicke, bevelEnabled: false });
     g.rotateX(Math.PI / 2);
     g.translate(0, yTop, 0);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function baueDiagonalen(ctx) {
     const { S, I, plan: plan2 } = ctx;
@@ -114496,7 +116013,7 @@
       else if (fl > 8) I.setze("busch", cx, Y + 0.03, cz, 0, 0.8, [waehle2(r, KRONE.busch)]);
     }
   }
-  function platte3(S, x0, z0, x1, z1, rad2, yTop, dicke, farbe) {
+  function platte3(S, x0, z0, x1, z1, rad2, yTop, dicke, farbe2) {
     const s2 = new three_module_exports.Shape();
     const r = Math.min(rad2, (x1 - x0) / 2 - 0.01, (z1 - z0) / 2 - 0.01);
     s2.moveTo(x0 + r, z0);
@@ -114511,9 +116028,9 @@
     const g = new three_module_exports.ExtrudeGeometry(s2, { depth: dicke, bevelEnabled: false, curveSegments: 4 });
     g.rotateX(Math.PI / 2);
     g.translate(0, yTop, 0);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function ellipsenRing(S, cx, cz, rx, rz, breite, y0, y1, farbe) {
+  function ellipsenRing(S, cx, cz, rx, rz, breite, y0, y1, farbe2) {
     const s2 = new three_module_exports.Shape();
     s2.absellipse(0, 0, rx + breite, rz + breite, 0, Math.PI * 2, false);
     const h = new three_module_exports.Path();
@@ -114522,13 +116039,13 @@
     const g = new three_module_exports.ExtrudeGeometry(s2, { depth: y1 - y0, bevelEnabled: false, curveSegments: 20 });
     g.rotateX(Math.PI / 2);
     g.translate(cx, y1, cz);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
-  function ellipse2(S, cx, cz, rx, rz, y0, y1, farbe) {
+  function ellipse2(S, cx, cz, rx, rz, y0, y1, farbe2) {
     const g = new three_module_exports.CylinderGeometry(1, 1, y1 - y0, 24);
     g.scale(rx, 1, rz);
     g.translate(cx, (y0 + y1) / 2, cz);
-    S.add(g, farbe);
+    S.add(g, farbe2);
   }
   function gehwegPlatte(ctx, b) {
     const e = { "-x": b.rand["-x"].gehweg, "+x": b.rand["+x"].gehweg, "-z": b.rand["-z"].gehweg, "+z": b.rand["+z"].gehweg };
@@ -114652,8 +116169,8 @@
     const h = b.hof;
     if (!h || h.w <= 4 || h.d <= 4) return;
     const art = h.art ?? "gruen";
-    const farbe = { gruen: F.hof, kies: F.kies, parkplatz: "#a3a7ab", spielplatz: F.hof, pflaster: "#cbc4b7" }[art] ?? F.hof;
-    S.quader(h.x - 1, 0, h.z - 1, h.x + h.w + 1, 0.36, h.z + h.d + 1, farbe);
+    const farbe2 = { gruen: F.hof, kies: F.kies, parkplatz: "#a3a7ab", spielplatz: F.hof, pflaster: "#cbc4b7" }[art] ?? F.hof;
+    S.quader(h.x - 1, 0, h.z - 1, h.x + h.w + 1, 0.36, h.z + h.d + 1, farbe2);
     const hinder = teile.filter((p) => p.seite === "hof" || p.seite === "frei" || p.typ.startsWith("slot:"));
     const frei6 = (x, z2, rad2) => !hinder.some((p) => imRechteck(x, z2, p, rad2));
     const y = 0.36;
@@ -114711,9 +116228,9 @@
       }
     }
   }
-  function pflasterFlaeche(ctx, P2, y, farbe, raster4 = 4) {
+  function pflasterFlaeche(ctx, P2, y, farbe2, raster4 = 4) {
     const { S, I } = ctx;
-    S.quader(P2.x, 0, P2.z, P2.x + P2.w, y, P2.z + P2.d, farbe);
+    S.quader(P2.x, 0, P2.z, P2.x + P2.w, y, P2.z + P2.d, farbe2);
     for (let x = P2.x + raster4; x < P2.x + P2.w - 0.5; x += raster4) I.setze("fuge", x, y, P2.z + P2.d / 2, 0, [0.1, 1, P2.d - 0.4]);
     for (let z2 = P2.z + raster4; z2 < P2.z + P2.d - 0.5; z2 += raster4) I.setze("fuge", P2.x + P2.w / 2, y, z2, 0, [P2.w - 0.4, 1, 0.1]);
   }
@@ -115028,13 +116545,13 @@
     for (const [x0, z0, x1, z1, P2] of flaechen) {
       const alpen = /alpen/.test(P2.inhalt), reben = P2.inhalt === "wein" || P2.inhalt === "kessel";
       const baumgrenze = P2.H0 + P2.Hr * (alpen ? 0.45 : 2);
-      const farbe = (x, y, z2, steil) => {
+      const farbe2 = (x, y, z2, steil) => {
         if (alpen && y > P2.H0 + P2.Hr * 0.78) return "#eef2f6";
         if (alpen && (y > baumgrenze || steil > 0.62)) return y > baumgrenze + 20 ? "#9aa1ab" : "#8f978f";
         if (reben && y > 1 && y < P2.H0 + P2.Hr * 0.45) return y > P2.H0 + P2.Hr * 0.25 ? "#bdb384" : "#b3a978";
         return Math.sin(x * 0.011 + z2 * 7e-3) + Math.sin(z2 * 0.017 - x * 4e-3) > 1.25 ? "#93bd76" : "#6f9f5c";
       };
-      gelaende(S, x0, z0, x1, z1, h, farbe, { schritt: 6 });
+      gelaende(S, x0, z0, x1, z1, h, farbe2, { schritt: 6 });
       if (reben) rebzeilen(S, x0, z0, x1, z1, (x, z2) => h(x, z2) + 0.02, P2 === Sl, (x, y) => y > 1.2 && y < P2.H0 + P2.Hr * 0.45 - 1);
       for (let x = x0 + 4; x < x1 - 2; x += 8.5) for (let z2 = z0 + 4; z2 < z1 - 2; z2 += 8.5) {
         const tx = x + zw(r, -3, 3), tz = z2 + zw(r, -3, 3), y = h(tx, tz);
@@ -115474,13 +116991,13 @@
     const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
     const frei6 = [...gleisZ].sort(() => r() - 0.5).slice(0, zuege);
     for (const gz2 of frei6) {
-      const wagen = Math.floor(zw(r, 3, 6.9));
+      const wagen2 = Math.floor(zw(r, 3, 6.9));
       const [ga, gb] = abschnitte(gz2).sort((p, q2) => q2[1] - q2[0] - (p[1] - p[0]))[0] ?? [xa, xb];
       if (gb - ga < 40) continue;
-      let x = zw(r, ga + 6, Math.max(ga + 7, gb - wagen * 26.5 - 2));
+      let x = zw(r, ga + 6, Math.max(ga + 7, gb - wagen2 * 26.5 - 2));
       const xEnde = gb;
-      const farbe = waehle2(r, ["#f1f1ee", "#e9eef0", "#d8dde1"]);
-      for (let w = 0; w < wagen && x < xEnde - 13; w++, x += 26.5) I.setze("zugwagen", x + 13, y + 0.36, gz2, 0, 1, [farbe]);
+      const farbe2 = waehle2(r, ["#f1f1ee", "#e9eef0", "#d8dde1"]);
+      for (let w = 0; w < wagen2 && x < xEnde - 13; w++, x += 26.5) I.setze("zugwagen", x + 13, y + 0.36, gz2, 0, 1, [farbe2]);
     }
   }
   var MARKER = {
@@ -115568,15 +117085,15 @@
       for (const p of plan2.parzellen) if (p.leer) zuVermieten(scene2, p.x + p.w / 2, (ergebnis?.hoehen?.get(p.id) ?? 15) + 3, p.z + p.d / 2, o.groesse ?? 8);
     }
   }
-  function laden2(S, p, seite, eg, r, farbe) {
+  function laden2(S, p, seite, eg, r, farbe2) {
     const { x, z: z2, w, d } = p;
     if (seite === "+z") {
-      S.box(w - 1, eg - 1.3, 0.16, x + w / 2, (eg - 1.3) / 2 + 0.5, z2 + d + 0.04, farbe);
-      S.box(w - 0.6, 0.35, 0.3, x + w / 2, eg - 0.6, z2 + d + 0.1, heller(farbe, 0.4));
+      S.box(w - 1, eg - 1.3, 0.16, x + w / 2, (eg - 1.3) / 2 + 0.5, z2 + d + 0.04, farbe2);
+      S.box(w - 0.6, 0.35, 0.3, x + w / 2, eg - 0.6, z2 + d + 0.1, heller(farbe2, 0.4));
       if (r() < 0.5) markise(S, x, z2, w, d, "+z", eg - 1.1, x + 0.6, w - 1.2, waehle2(r, FARBEN3.markise));
     } else {
-      S.box(0.16, eg - 1.3, d - 1, x + w + 0.04, (eg - 1.3) / 2 + 0.5, z2 + d / 2, farbe);
-      S.box(0.3, 0.35, d - 0.6, x + w + 0.1, eg - 0.6, z2 + d / 2, heller(farbe, 0.4));
+      S.box(0.16, eg - 1.3, d - 1, x + w + 0.04, (eg - 1.3) / 2 + 0.5, z2 + d / 2, farbe2);
+      S.box(0.3, 0.35, d - 0.6, x + w + 0.1, eg - 0.6, z2 + d / 2, heller(farbe2, 0.4));
       if (r() < 0.5) markise(S, x, z2, w, d, "+x", eg - 1.1, z2 + 0.6, d - 1.2, waehle2(r, FARBEN3.markise));
     }
   }
@@ -115766,14 +117283,14 @@
     S.add(new three_module_exports.CylinderGeometry(1.4, 1.4, 0.2, 16).rotateX(Math.PI / 2).translate(x + w / 2, H + 10, z2 + d / 2 + 3.05), "#f4f1ea");
     return { hoehe: H + 23 };
   }
-  function korpus(S, p, H, farbe, rand = 0.4) {
-    S.quader(p.x + rand, 0, p.z + rand, p.x + p.w - rand, H, p.z + p.d - rand, farbe);
+  function korpus(S, p, H, farbe2, rand = 0.4) {
+    S.quader(p.x + rand, 0, p.z + rand, p.x + p.w - rand, H, p.z + p.d - rand, farbe2);
   }
-  function fensterBand(S, p, y0, n, gh, farbe = FARBEN3.glas, rand = 1.4) {
+  function fensterBand(S, p, y0, n, gh, farbe2 = FARBEN3.glas, rand = 1.4) {
     for (let k = 0; k < n; k++) {
       const y = y0 + k * gh + gh * 0.5;
-      S.box(p.w - 2 * rand, gh * 0.5, 0.12, p.x + p.w / 2, y, p.z + p.d - 0.35, farbe);
-      S.box(0.12, gh * 0.5, p.d - 2 * rand, p.x + p.w - 0.35, y, p.z + p.d / 2, farbe);
+      S.box(p.w - 2 * rand, gh * 0.5, 0.12, p.x + p.w / 2, y, p.z + p.d - 0.35, farbe2);
+      S.box(0.12, gh * 0.5, p.d - 2 * rand, p.x + p.w - 0.35, y, p.z + p.d / 2, farbe2);
     }
   }
   function phSchloss(S, scene2, p) {
@@ -116554,7 +118071,7 @@
     return { x: ecke.includes("+x") ? p.x + p.w - W3 : p.x, z: ecke.includes("+z") ? p.z + p.d - D : p.z };
   }
   function spielBauer(s2, o = {}) {
-    const basis = echterBauer(o.bauerOpt ?? {});
+    const basis2 = echterBauer(o.bauerOpt ?? {});
     const merk2 = o.merk;
     const famBenutzt = /* @__PURE__ */ new Set();
     const wahl3 = /* @__PURE__ */ new Map();
@@ -116651,7 +118168,7 @@
       setzeLod(o.hausLod ?? "nah");
       let e;
       try {
-        e = basis["slot:hq"](S, gruppe2, hqDaten(p));
+        e = basis2["slot:hq"](S, gruppe2, hqDaten(p));
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
@@ -116683,7 +118200,7 @@
       }
     }
     const wbBau = (S, scene2, p, w) => {
-      if (!w) return basis.stadthaus(S, scene2, { ...p, typ: "stadthaus", standort: void 0 });
+      if (!w) return basis2.stadthaus(S, scene2, { ...p, typ: "stadthaus", standort: void 0 });
       const breite = Math.max(20, Math.round(Math.sqrt(Math.max(400, w.grundflaecheQm) * 1.5) / 5) * 5);
       const tiefe = Math.max(16, Math.round(w.grundflaecheQm / breite / 5) * 5);
       const W3 = Math.min(p.w - 1, breite);
@@ -116736,25 +118253,25 @@
       return e;
     };
     const hqSlot = (S, scene2, p) => {
-      if (!basis["slot:hq"] || !p.standort) return { hoehe: 0 };
+      if (!basis2["slot:hq"] || !p.standort) return { hoehe: 0 };
       if (o.getrennt) return baueHq(p);
-      return basis["slot:hq"](S, scene2, hqDaten(p));
+      return basis2["slot:hq"](S, scene2, hqDaten(p));
     };
     const slot4 = (typ) => (S, scene2, p) => {
       if (p.standort?.rolle === "hq") return hqSlot(S, scene2, p);
       const h = p.standort?.id && hausVon(p.standort.id);
-      if (!h) return basis[typ](S, scene2, p);
+      if (!h) return basis2[typ](S, scene2, p);
       if (o.getrennt) return getrennt(p, h);
       const e = bau2(S, scene2, p, h);
       haeuser.set(h.id, { p, gruppe: null, e, schluessel: zustand(h).schluessel });
       return e;
     };
     const bauer = {
-      ...basis,
+      ...basis2,
       "slot:warenhaus": slot4("slot:warenhaus"),
       "slot:sport": slot4("slot:sport"),
       "slot:schwester": slot4("slot:schwester"),
-      "slot:outlet": basis["slot:outlet"],
+      "slot:outlet": basis2["slot:outlet"],
       "slot:premium": slot4("slot:premium"),
       "slot:hq": hqSlot,
       "slot:wettbewerber": wbSlot,
@@ -116867,7 +118384,7 @@
   var KATEGORIE2 = ["Bekleidung", "Schuhe", "W\xE4sche", "Accessoires", "Home", "Beauty"];
   var PREIS = [["einstieg", "Einstieg"], ["mitte", "Mitte"], ["gehoben", "Gehoben"]];
   var STIL2 = [["klassisch", "klassisch"], ["modern", "modern"], ["sportlich", "sportlich"], ["trendig", "trendig"]];
-  var FARBEN4 = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#c9483e", "#2f63b5", "#1f1f1f", "#d27aa0", "#3f8f8a", "#7a5a3a"];
+  var FARBEN5 = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#c9483e", "#2f63b5", "#1f1f1f", "#d27aa0", "#3f8f8a", "#7a5a3a"];
   var NAMEN2 = { damen: ["Linnea", "Mira Lenz", "Johanna B.", "Ella Sommer"], herren: ["Nordhaven", "Carl Ostwind", "Feldweg", "Henrik & Co."], unisex: ["Studio Hartwig", "Kleeblatt", "Hafenblau"], kinder: ["Hafenkind", "Kai & Kalle", "Pusteblume"] };
   var REGIONEN3 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var alterText = (a) => ALTER.find((x) => x[0] === a)?.[1] ?? a;
@@ -116875,8 +118392,8 @@
   var preisText = (p) => PREIS.find((x) => x[0] === p)?.[1] ?? p;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
   var punkte = (x) => `+${(x * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Punkte`;
-  function balken6(wert, farbe = "#2f63b5") {
-    return `<span class="mbalken"><span style="width:${Math.max(0, Math.min(100, wert)).toFixed(0)}%;background:${farbe}"></span></span>`;
+  function balken6(wert, farbe2 = "#2f63b5") {
+    return `<span class="mbalken"><span style="width:${Math.max(0, Math.min(100, wert)).toFixed(0)}%;background:${farbe2}"></span></span>`;
   }
   function passungZeile(p, p0) {
     return `<div class="passung">${REGIONEN3.filter((r) => p[r] !== void 0).map((r) => `<div><span class="psaeule"><span style="height:${p[r]}%"></span></span><b${p0 ? ` data-p="${p0}:${r}"` : ""}>${p[r]}</b><i>${r}</i></div>`).join("")}</div>`;
@@ -116914,7 +118431,7 @@
     return l[(s2.woche * 7 + (s2.eigenmarken?.zaehler ?? 0) * 3) % l.length];
   };
   function neuerEntwurf2(s2) {
-    return { name: nameFuer(s2, "herren"), farbe: FARBEN4[(s2.woche + 4) % FARBEN4.length], zielgruppe: { alter: "50+", geschlecht: "herren" }, kategorie: "Bekleidung", preislage: "mitte", stil: "modern", qualitaet: 3, beschaffung: "nahost", budgetWoche: 15e3, wgAnteile: {} };
+    return { name: nameFuer(s2, "herren"), farbe: FARBEN5[(s2.woche + 4) % FARBEN5.length], zielgruppe: { alter: "50+", geschlecht: "herren" }, kategorie: "Bekleidung", preislage: "mitte", stil: "modern", qualitaet: 3, beschaffung: "nahost", budgetWoche: 15e3, wgAnteile: {} };
   }
   function wgVorschlag(ctx, s2, e) {
     const p = ctx.q.vorschau(s2, { ...e, wgAnteile: {} }).passendeWgs;
@@ -116951,7 +118468,7 @@
       h += feld("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
     } else {
       h += feld("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc(m.name)}">`);
-      if (!A.id) h += feld("Farbe", `<div class="farben">${FARBEN4.map((f) => `<button class="${m.farbe === f ? "an" : ""}" style="background:${f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
+      if (!A.id) h += feld("Farbe", `<div class="farben">${FARBEN5.map((f) => `<button class="${m.farbe === f ? "an" : ""}" style="background:${f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
     }
     h += "</div>";
     const nWg = Object.values(m.wgAnteile).filter((a) => a > 0).length;
@@ -117186,7 +118703,7 @@
       h += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a, b) => a + b.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h };
     }
-    function kurve4(titel, wochen, werte, fmtW, p, farbe) {
+    function kurve4(titel, wochen, werte, fmtW, p, farbe2) {
       const W3 = 340, H = 64, n = werte.length;
       if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${n ? fmtW(werte[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
       const min = Math.min(...werte), max = Math.max(...werte);
@@ -117197,9 +118714,9 @@
       return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${fmtW(werte[n - 1])}</b><small class="khover"></small></div>
       <svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none" data-reihe="${daten}" data-x0="4" data-dx="${(W3 - 8) / (n - 1)}">
         <line x1="0" x2="${W3}" y1="${H - 4}" y2="${H - 4}" stroke="#e7e3dc" stroke-width="1"/>
-        <polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe}" opacity="0.10"/>
-        <polyline points="${pts}" fill="none" stroke="${farbe}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(werte[n - 1]).toFixed(1)}" r="4" fill="${farbe}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        <polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe2}" opacity="0.10"/>
+        <polyline points="${pts}" fill="none" stroke="${farbe2}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(werte[n - 1]).toFixed(1)}" r="4" fill="${farbe2}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
         <line class="kreuz" x1="0" x2="0" y1="0" y2="${H}" stroke="#7b8790" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0"/>
       </svg><div class="kfuss"><span>KW ${kwVon2(wochen[0])}</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>KW ${kwVon2(wochen[n - 1])}</span></div></div>`;
     }
@@ -117845,7 +119362,7 @@
       out.push(P(KOERPER, c), P(ARM_L, cL), P(ARM_R, cR));
       out.push(`<path d="M25.6 100 C24.4 87 24.6 72 26 62" stroke="${cR}" stroke-width="0.6" fill="none" opacity="0.5"/>`, `<path d="M72 100 C73 88 72.6 72 70.6 60" stroke="${cK}" stroke-width="0.6" fill="none" opacity="0.6"/>`);
     };
-    const vAusschnitt = (tief2, farbe) => out.push(P(`M44.2 56.2 L50.6 ${tief2} L57.2 55.8 C53.6 58.6 48 58.6 44.2 56.2 Z`, farbe));
+    const vAusschnitt = (tief2, farbe2) => out.push(P(`M44.2 56.2 L50.6 ${tief2} L57.2 55.8 C53.6 58.6 48 58.6 44.2 56.2 Z`, farbe2));
     const revers = (tief2, f) => {
       out.push(P(`M44.2 55.4 L37.6 60.4 L41.8 64.6 L39.8 66.6 L50.6 ${tief2} Z`, hell2(f, 0.1)));
       out.push(P(`M57.2 55 L62.4 59.4 L59.6 63.6 L61.6 65.4 L50.6 ${tief2} Z`, dunkel(f, 0.1)));
@@ -118440,7 +119957,7 @@
   var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
   var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
   var KANAL2 = [["mail", "Mail"], ["push", "Push"], ["brief", "Brief"]];
-  function kurve2(titel, werte, fmtW, p, P2, farbe) {
+  function kurve2(titel, werte, fmtW, p, P2, farbe2) {
     const W3 = 340, H = 56, n = werte.length;
     if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, n ? fmtW(werte[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
     let min = Math.min(...werte), max = Math.max(...werte);
@@ -118448,7 +119965,7 @@
     const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
     const X = (i) => 4 + i / (n - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
     const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
+    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P2(p, fmtW(werte[n - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe2}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe2}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
   }
   function marketingModul(ctx) {
     const E = ctx.E, s2 = () => ctx.s();
@@ -118922,11 +120439,11 @@
     const [r, g, b] = rgb2(c);
     return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   };
-  function produktFarbe(farbe) {
-    if (FARBEN_PRODUKT[farbe]) return FARBEN_PRODUKT[farbe];
-    const k = String(farbe ?? "").toLowerCase().replace("ue", "\xFC");
+  function produktFarbe(farbe2) {
+    if (FARBEN_PRODUKT[farbe2]) return FARBEN_PRODUKT[farbe2];
+    const k = String(farbe2 ?? "").toLowerCase().replace("ue", "\xFC");
     if (FARBEN_PRODUKT[k]) return FARBEN_PRODUKT[k];
-    return /^#[0-9a-f]{3,6}$/i.test(String(farbe ?? "")) ? farbe : null;
+    return /^#[0-9a-f]{3,6}$/i.test(String(farbe2 ?? "")) ? farbe2 : null;
   }
   var zaehler = 0;
   function kontext(c, material2, typ) {
@@ -119432,9 +120949,9 @@
     K3.form("M50 50 L80 38 L80 74 L50 88 Z", { farbe: K3.cD });
     K3.strich("M35 32 L65 44 L65 58", "#f1ebdc", 2.4);
   }
-  function produktbildSVG(artikeltyp, farbe, material2, groesse2 = 160, opt = {}) {
+  function produktbildSVG(artikeltyp, farbe2, material2, groesse2 = 160, opt = {}) {
     const typ = TYPEN2[artikeltyp] ? artikeltyp : null;
-    const c = produktFarbe(farbe) ?? produktFarbe(STANDARD_FARBE[typ]) ?? "#b8864e";
+    const c = produktFarbe(farbe2) ?? produktFarbe(STANDARD_FARBE[typ]) ?? "#b8864e";
     const mat2 = material2 ?? STANDARD_MATERIAL[typ] ?? "Baumwolle";
     const K3 = kontext(c, mat2, typ);
     if (typ) Z[typ](K3);
@@ -119453,7 +120970,7 @@
   // src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
   var euro = (x) => `${dez(x, 2)} \u20AC`;
-  var bild = (typ, farbe, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`;
+  var bild = (typ, farbe2, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe2, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`;
   var kachel = (typ, g = 76) => typeof typKachelSVG === "function" ? typKachelSVG(typ, g) : bild(typ, void 0, void 0, g);
   var sternNr = 0;
   function sterne(x, g = 18) {
@@ -120225,7 +121742,7 @@
       requestAnimationFrame(tick);
     }
     function vorfallWeiter(ansehen) {
-      const item = bericht2.vorgaenge[vorfall], t = token;
+      const item2 = bericht2.vorgaenge[vorfall], t = token;
       const feld = node.querySelector("#wb-vorfall");
       feld?.classList.remove("offen");
       setTimeout(() => {
@@ -120234,7 +121751,7 @@
         vorfall++;
         status = "bericht";
         if (ansehen) {
-          const id = item.id;
+          const id = item2.id;
           aufraeumen();
           ctx.oeffneVorgang(id);
           return;
@@ -120522,14 +122039,14 @@
       const c = document.createElement("canvas");
       c.width = 96;
       c.height = 96;
-      const g = c.getContext("2d"), farbe = WB_FARBEN[w.art] ?? "#67717b";
+      const g = c.getContext("2d"), farbe2 = WB_FARBEN[w.art] ?? "#67717b";
       g.beginPath();
       g.arc(48, 48, 34, 0, Math.PI * 2);
       g.fillStyle = "#ffffff";
       g.fill();
       g.beginPath();
       g.arc(48, 48, 29, 0, Math.PI * 2);
-      g.fillStyle = farbe;
+      g.fillStyle = farbe2;
       g.fill();
       if (w.rabatt > 0) {
         g.fillStyle = "#fff";
