@@ -1,7 +1,16 @@
 {
-  "cli": { "version": ">= 25.0.0", "appVersionSource": "remote" },
+  "cli": {
+    "version": ">= 25.0.0",
+    "appVersionSource": "remote"
+  },
   "build": {
-    "production": { "autoIncrement": true, "ios": { "resourceClass": "default" } }
+    "production": {
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "default"
+      },
+      "channel": "production"
+    }
   },
   "submit": {
     "production": {}

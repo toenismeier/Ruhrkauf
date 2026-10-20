@@ -1,0 +1,42 @@
+# Jeder Push auf main: Ist die native Hülle unverändert, geht das Spiel als Update raus (App lädt es beim nächsten Start).
+# Hat sich die Hülle geändert (neues natives Modul, app.json), wird neu gebaut und an TestFlight übermittelt.
+name: Ausliefern
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  fingerprint:
+    name: Fingerprint
+    type: fingerprint
+    environment: production
+  get_ios_build:
+    name: Vorhandenen iOS-Build suchen
+    needs: [fingerprint]
+    type: get-build
+    params:
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+      profile: production
+  build_ios:
+    name: iOS bauen
+    needs: [get_ios_build]
+    if: ${{ !needs.get_ios_build.outputs.build_id }}
+    type: build
+    params:
+      platform: ios
+      profile: production
+  submit_ios_build:
+    name: An TestFlight
+    needs: [build_ios]
+    type: submit
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+  publish_ios_update:
+    name: Update veröffentlichen
+    needs: [get_ios_build]
+    if: ${{ needs.get_ios_build.outputs.build_id }}
+    type: update
+    params:
+      branch: production
+      platform: ios
