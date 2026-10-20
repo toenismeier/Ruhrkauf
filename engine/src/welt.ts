@@ -3,6 +3,7 @@ import {
   BERATER, gruppenFuer,
 } from './daten';
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
+import { initialisierePlanung } from './planung';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
 import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
@@ -342,6 +343,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).
+  initialisierePlanung(s);
   return s;
 }
 
