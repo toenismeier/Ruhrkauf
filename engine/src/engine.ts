@@ -179,7 +179,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.beratung = s.berater.filter((b) => w >= b.start && w < b.ende).reduce((x, b) => x + b.wochenSatz, 0);
 
   // 6. Abschriften und Gewöhnung
-  k.abschriften = einkaufAltern(s);
+  k.abschriften = einkaufAltern(s) + (s.ware?.inventurAufwandWoche ?? 0);
   // O05 Ware
   verdichteWare(s);
   k.rohertrag -= k.abschriften;
