@@ -133,8 +133,7 @@ export function hausStatischHtml(haus, reiter = 'ueberblick') {
     : [['ueberblick','Überblick'],['sortiment','Sortiment'],['etagen','Etagen']];
   const auswahl = tabs.some(([id]) => id === reiter) ? reiter : 'ueberblick';
   const nav = '<nav class="haus-reiter">' + tabs.map(([id, titel]) =>
-    '<button class="' + (id === auswahl ? 'an' : '') +
-    '" onclick="hausReiterWahl(\\'' + id + '\\')">' + titel + '</button>').join('') + '</nav>';
+    `<button class="${id === auswahl ? 'an' : ''}" onclick="hausReiterWahl('${id}')">${esc(titel)}</button>`).join('') + '</nav>';
   const flaechen = haus.flaechen ?? [];
   let inhalt = '';
   if (auswahl === 'ueberblick') {
