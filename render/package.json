@@ -26,7 +26,9 @@
     "test:einstellungen": "node --test tests/einstellungen.test.cjs",
     "bedienung:pruefen": "node pruef-bedienung.js",
     "smoke:werkzeuge": "node spiel-render.js --nur-werkzeuge",
-    "jahreszeiten:pruefen": "node tests/jahreszeit.test.cjs"
+    "jahreszeiten:pruefen": "node tests/jahreszeit.test.cjs",
+    "symbol": "node symbol.js",
+    "smoke:app": "node tests/app-pwa-smoke.cjs"
   },
   "keywords": [],
   "author": "",

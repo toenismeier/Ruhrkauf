@@ -9,7 +9,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hartwig">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./app-icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="./app-icon-180.png" sizes="180x180">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="./startbilder/start-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1206x2622.png">
 <link rel="stylesheet" href="./src/ui/reise-woche.css">
 <link rel="stylesheet" href="./src/ui/zeitung.css">
 <link rel="stylesheet" href="./src/ui/einfuehrung.css">
@@ -20,8 +30,8 @@
   :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); --schrift: 1; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #4fb6c2; font-family: -apple-system, "SF Pro Text", "DejaVu Sans", Arial, sans-serif; color: var(--text); }
-  #karte { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
-  .oben { position: fixed; left: 10px; right: 10px; top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  #karte { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: block; touch-action: none; }
+  .oben { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
   .leiste { display: flex; gap: 8px; align-items: center; }
   .marke { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
   .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: calc(17px * var(--schrift)); flex: none; }
@@ -36,10 +46,10 @@
   .kz span { display: block; color: var(--leise); font-size: calc(10px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kz b { display: block; font-size: calc(13.5px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
-  .unten { position: fixed; left: 10px; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
   #postdirekt { min-width: 46px; position: relative; font-size: calc(21px * var(--schrift)); padding: 0 9px; }
   #postbadge.dringend, #postmenubadge.dringend { background: #a92120; }
-  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: 12px; right: 12px; z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
+  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
   #wochenstreifen.an { display: block; }
   body.panel-offen #wochenstreifen { display: none; }
   .postkarte .postkopf { padding: 12px 12px 6px; }
@@ -79,7 +89,7 @@
   .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: calc(14px * var(--schrift)); color: var(--text); }
   #weiter { background: var(--rot); color: #fff; }
   #weiter:disabled { opacity: 0.6; }
-  .botwahl { position: fixed; right: 12px; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: calc(11px * var(--schrift)); color: var(--leise); display: flex; gap: 5px; align-items: center; }
+  .botwahl { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: calc(11px * var(--schrift)); color: var(--leise); display: flex; gap: 5px; align-items: center; }
   #panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; background: var(--grund); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); transform: translateY(105%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
   #panel.offen { transform: none; }
   .pkopf { padding: 8px 16px 10px; background: var(--karte); border-radius: 22px 22px 0 0; border-bottom: 1px solid var(--linie); position: relative; }
@@ -87,7 +97,7 @@
   #ptitel { font-size: calc(17px * var(--schrift)); font-weight: 800; }
   #punter { color: var(--leise); font-size: calc(12px * var(--schrift)); margin-top: 2px; }
   #pzu { position: absolute; right: 12px; top: 16px; width: 30px; height: 30px; border-radius: 15px; background: #eeebe5; font-size: calc(17px * var(--schrift)); color: var(--leise); }
-  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 12px calc(18px + env(safe-area-inset-bottom)); }
+  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px calc(12px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
   .chip { background: #e4f2ea; color: var(--gruen); border-radius: 10px; padding: 4px 9px; font-size: calc(12px * var(--schrift)); font-weight: 700; }
   .chip.warn { background: #fbe3e1; color: var(--rot); } .chip.grau { background: #ebe8e2; color: var(--leise); }
@@ -118,7 +128,7 @@
   .wirk { color: var(--leise) !important; }
   .klickbar { cursor: pointer; } .zeile.gewaehlt { background: #fdf3e6; }
   .schnitt img { display: block; width: 100%; background: #26313a; }
-  #meldung { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
+  #meldung { position: fixed; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
   #meldung.an { opacity: 1; transform: none; } #meldung.rot { background: var(--rot); }
   #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: calc(16px * var(--schrift)); }
   #lade.an { display: grid; }
@@ -231,7 +241,7 @@
   .badge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: calc(11.5px * var(--schrift)); font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
   #menue { position: fixed; inset: 0; background: rgba(20, 30, 40, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 4; }
   #menue.offen { opacity: 1; pointer-events: auto; }
-  .menuekarte { position: absolute; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; max-height: calc(100dvh - 100px); overflow-y: auto; overscroll-behavior: contain; transform: translateY(12px); transition: transform 0.18s; }
+  .menuekarte { position: absolute; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; max-height: calc(100dvh - 100px); overflow-y: auto; overscroll-behavior: contain; transform: translateY(12px); transition: transform 0.18s; }
   #menue.offen .menuekarte { transform: none; }
   .menuetitel { font-weight: 800; font-size: calc(15px * var(--schrift)); margin: 2px 4px 10px; }
   .kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -327,7 +337,7 @@
   #startsetup[hidden], #startauswahl[hidden], #szenarioziel[hidden] { display:none!important; }
   @media (max-width:365px) { .sz-karte small {font-size: calc(10px * var(--schrift));} .sz-zielchip {min-width:44px;} }
   /* Startbildschirm */
-  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
+  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   #start.an { display: grid; place-items: center; }
   .startkarte { width: 100%; max-width: 420px; background: var(--grund); border-radius: 22px; box-shadow: 0 8px 32px rgba(20, 30, 40, 0.3); padding: 18px 16px 14px; }
   .startkopf { display: flex; align-items: center; gap: 12px; } .startkopf b { display: block; font-size: calc(24px * var(--schrift)); font-weight: 800; } .startkopf small { color: var(--leise); font-size: calc(12px * var(--schrift)); }
@@ -353,6 +363,28 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: calc(12px * var(--schrift)); color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+
+  /* N11: Speicherverwaltung und Aktualisierung */
+  .app-plaetze { display: grid; gap: 10px; margin: 8px 0 12px; }
+  .app-platz { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 11px; }
+  .app-platzkopf { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .app-platzkopf b { font-size: calc(14px * var(--schrift)); } .app-platzkopf span { font-size: calc(11px * var(--schrift)); color: var(--leise); }
+  .app-platzinhalt { display: flex; align-items: center; gap: 11px; margin: 9px 0; }
+  .app-vorschau { width: 106px; height: 62px; flex: none; object-fit: cover; border-radius: 9px; background: #4fb6c2; }
+  .app-vorschau.leer { background: var(--rot); color: #fff; display: grid; place-items: center; font-size: calc(28px * var(--schrift)); font-weight: 800; }
+  .app-daten { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .app-daten strong, .app-daten small { display: block; }
+  .app-daten strong { font-size: calc(13px * var(--schrift)); } .app-daten small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.4; }
+  .app-namenswahl { display: block; font-size: calc(11px * var(--schrift)); color: var(--leise); margin: 8px 0; }
+  .app-namenswahl input { width: 100%; min-height: 44px; border: 1px solid var(--linie); border-radius: 9px; font: inherit; font-size: calc(16px * var(--schrift)); padding: 8px; color: var(--text); }
+  .app-aktionen { display: flex; flex-wrap: wrap; gap: 6px; }
+  .app-aktionen button { background: #eeebe5; color: var(--text); min-height: 44px; padding: 6px 10px; border-radius: 9px; font-size: calc(12px * var(--schrift)); font-weight: 750; }
+  .app-aktionen button:first-child { background: #e4f2ea; color: var(--gruen); }
+  .app-aktionen button:disabled { opacity: 0.5; }
+  #app-plaetze-start { margin-top: 12px; max-height: 46dvh; overflow-y: auto; overscroll-behavior: contain; }
+  #app-plaetze-start .app-platz { padding: 9px; }
+  #app-update { position: fixed; z-index: 9; left: calc(14px + env(safe-area-inset-left)); right: calc(14px + env(safe-area-inset-right)); top: calc(12px + env(safe-area-inset-top)); border-radius: 14px; box-shadow: var(--schatten); background: var(--text); color: white; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: calc(13px * var(--schrift)); }
+  #app-update button { background: white; color: var(--text); padding: 10px 12px; border-radius: 8px; font-weight: 800; }
 /* O01 Organisation */
 .org-tabs{display:flex;gap:8px;margin-bottom:12px}.org-tabs button{flex:1;padding:12px;border:1px solid #c3cbd1;border-radius:9px;background:#f4f6f7;color:#2b4049}.org-tabs button.an{background:#243e50;color:#fff}.org-zeile{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #e5e8eb;padding:10px 0}.org-zeile>div:nth-child(2){flex:1;min-width:0}.org-zeile small,.org-profil small{display:block;color:#667781;font-size: calc(11px * var(--schrift))}.org-aktionen{display:grid;gap:4px;max-width:100px}.org-aktionen button{font-size: calc(10px * var(--schrift));padding:6px}.org-balken{display:block;height:6px;border-radius:6px;background:#e0e6e9;overflow:hidden;margin:6px 0}.org-balken i{display:block;height:100%;background:#498875}.org-ampel{color:#5b9b68}.org-ampel.warn,.org-profil .frei{color:#b43336}.org-profil .vkopf{display:flex;gap:10px;align-items:center}.org-profil .vkopf>div{flex:1}
   /* O02 Umsatztreiber */
@@ -507,6 +539,7 @@
       <!-- O04 Personal -->
       <button class="mkachel" id="personaleinsatz"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-2a6 6 0 0 1 12 0v2M14 13a5 5 0 0 1 8 4v4M3 11h10"/></svg><b>Personaleinsatz</b><small>Dienstplan, Aushilfen, Springer</small></button>
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>
+      <button class="mkachel" id="app-oeffnen" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8M8 12h8M8 17h4"/></svg><b>Spielstände</b><small>3 Plätze, Import, Export</small></button>
       <button class="mkachel" id="ton" type="button" aria-label="Klang und Haptik einstellen"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg><b>Klang</b><small>Geräusche, Stadt, Musik</small></button>
       <button class="mkachel" id="einfuehrung-neustart" type="button" aria-label="Einführung erneut starten"><span aria-hidden="true" style="font-size: calc(30px * var(--schrift));color:var(--rot)">?</span><b>Einführung</b><small>Neu starten</small></button>
       <button class="mkachel" id="spiel-bestenliste" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6 3h12v9a6 6 0 0 1-12 0zM6 6H3v2a4 4 0 0 0 4 4M18 6h3v2a4 4 0 0 1-4 4"/></svg><b>Bestenliste</b><small>Bilanz und Rekorde</small></button>
@@ -550,13 +583,11 @@
       <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
     </div>
     <div id="speicherhinweis" role="status"></div>
+    <div class="vtitel">Gespeicherte Partien</div>
+    <div id="app-plaetze-start" class="app-plaetze" aria-label="Gespeicherte Spielstände"></div>
   </div>
 </div>
 <script src="spiel-bundle.js"></script>
-<script>
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
-  }
-</script>
+
 </body>
 </html>

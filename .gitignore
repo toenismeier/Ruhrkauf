@@ -5,4 +5,8 @@ render/out/
 .DS_Store
 render/bilder/reise/
 render/bilder/wochenbericht/
+
+# Vom Kit erzeugte PWA-Assets (render/symbol.js)
+render/app-icon-*.png
+render/startbilder/
 .osm-roh/

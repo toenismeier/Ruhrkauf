@@ -35,6 +35,15 @@ const ersatzPlugin = { name: 'kit-ersatz', setup(b) {
 } };
 
 async function buendeln() {
+  // Das direkt aufgerufene Bundelskript erzeugt auch die für eine installierbare App
+  // erforderlichen PNG-Dateien. Bei unveränderten Quellen bleibt dieser Schritt aus.
+  const symbolQuelle = path.join(__dirname, 'src/kit/app-symbol.js');
+  const icon = path.join(__dirname, 'app-icon-512.png');
+  const startbild = path.join(__dirname, 'startbilder/start-1170x2532.png');
+  if (!fs.existsSync(icon) || !fs.existsSync(startbild) ||
+      fs.statSync(icon).mtimeMs < fs.statSync(symbolQuelle).mtimeMs) {
+    await require('./symbol.js').symboleErzeugen();
+  }
   await esbuild.build({
     entryPoints: [path.join(__dirname, 'src', 'spiel.js')], bundle: true, outfile: path.join(__dirname, 'spiel-bundle.js'),
     loader: { '.json': 'json' }, logLevel: 'error', format: 'iife', target: 'es2020', plugins: [ersatzPlugin],
