@@ -696,6 +696,69 @@ async function buendeln() {
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
   }
+
+  // N01: Seed 1, Bot C, 104 Wochen, Serien-Endwerte und Bildbelege.
+  async function statistikPruefen() {
+    const ziel = path.join(__dirname, '..', 'bilder', 'nice', 'statistik');
+    fs.mkdirSync(ziel, { recursive: true });
+    await p.evaluate(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); });
+    for (let i = 0; i < 104; i++) {
+      const ergebnis = await p.evaluate(() => window.spiel.woche(true));
+      if (!ergebnis) throw new Error('Bot C beendet vor Woche 104: ' + i);
+    }
+    const seiten = [['konzern','konzern'],['formate','formate'],['regionen','regionen'],['rangliste','haeuser']];
+    const bericht = { seed:1, woche:104, bilder:[], abweichungen:[], reihen:0, hausverlaeufe:0, spielstandBytes:0 };
+    const messung = await p.evaluate(() => {
+      const s = window.spiel.s;
+      const voller = JSON.stringify(s).length;
+      const verlaufBytes = s.haeuser.reduce((n,h)=>n+JSON.stringify(h.verlauf??[]).length,0);
+      return { hauser:s.haeuser.length, voller, verlaufBytes,
+        proHaus:Math.round(verlaufBytes/Math.max(1,s.haeuser.length)),
+        bei560:Math.round(verlaufBytes/Math.max(1,s.haeuser.length)*560),
+        punkteMax:Math.max(...s.haeuser.map(h=>h.verlauf?.length??0)),
+        sparsam: s.statistik?.sparsam ?? false };
+    });
+    bericht.hausverlaeufe = messung.hauser;
+    bericht.spielstandBytes = messung.voller;
+    bericht.groesse = messung;
+    for (const [seite,datei] of seiten) {
+      await p.evaluate(v => window.spiel.oeffneStatistik(v), seite);
+      await p.waitForTimeout(150);
+      const kontrolle = await p.evaluate(() => {
+        const s=window.spiel.s, E=window.spiel.E, k=E.cockpit(s), liste=[];
+        if (window.spiel.statistik.ui.seite === 'konzern') {
+          const graphen=[...document.querySelectorAll('.stat-diagramm')];
+          for (const [i,[name,soll]] of [['Umsatz',k.umsatzWoche],['EBITDA',k.ebitdaWoche],['Cash',k.cash]].entries()) {
+            const ist=Number(graphen[i]?.dataset.stEnde);
+            if (!Number.isFinite(ist)||ist!==soll) liste.push(name+': Endpunkt '+ist+' statt '+soll);
+          }
+        }
+        return { seite:window.spiel.statistik.ui.seite, diagramme:document.querySelectorAll('.stat-diagramm').length,
+          fehler:liste.concat(window.spiel.statistik.pruefe().fehler) };
+      });
+      bericht.reihen += kontrolle.diagramme;
+      bericht.abweichungen.push(...kontrolle.fehler.map(f => seite + ': ' + f));
+      await p.screenshot({ path:path.join(ziel,datei+'.png'), fullPage:false });
+      bericht.bilder.push(datei+'.png');
+    }
+    const hausId = await p.evaluate(() => window.spiel.s.haeuser.find(h=>h.verlauf?.length && h.status === 'offen')?.id);
+    if (hausId) {
+      await p.evaluate(id=>window.spiel.oeffneHaus(id),hausId);
+      const test = await p.evaluate(() => ({
+        diagramme:document.querySelectorAll('.stat-hausdetail .stat-diagramm').length,
+        letztes:window.spiel.E.verlauf(window.spiel.s,{ebene:'haus',id:window.spiel.s.haeuser.find(h=>h.status==='offen')?.id,kennzahl:'umsatz',wochen:52}).punkte.at(-1)?.wert
+      }));
+      if(test.diagramme!==2)bericht.abweichungen.push('Hausdetail: '+test.diagramme+' Diagramme statt 2');
+      await p.screenshot({ path:path.join(ziel,'hausdetail.png') });
+      bericht.bilder.push('hausdetail.png');
+    }
+    fs.writeFileSync(path.join(ziel,'pruefung.json'),JSON.stringify(bericht,null,2));
+    console.log('N01 Statistik:',bericht.reihen+' Diagramme, '+bericht.abweichungen.length+' Abweichungen, '+messung.voller+' Spielstand-Bytes');
+    if(bericht.abweichungen.length)throw new Error('Statistik: '+bericht.abweichungen.join('; '));
+    return bericht;
+  }
+
+  if (process.argv.includes('--nur-statistik')) { try { await statistikPruefen(); } finally { await b.close(); } return; }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
     return;
@@ -769,6 +832,7 @@ async function buendeln() {
   const pn = await panelsPruefen();
   await posteingangPruefen();
   const kt = await kartePruefen();
+  await statistikPruefen();
   const messung = await p.evaluate(() => window.spiel.messung);
   const teile = await p.evaluate(() => window.spiel.teileStand());
   const engine = wochen.map((m) => m.engineMs), neu = wochen.filter((m) => m.neu.length).map((m) => m.neuBauMs);
