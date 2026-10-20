@@ -46,3 +46,5 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+export { ERFOLGE, ERFOLGE_AKTIV, erfolgeWoche, erfolgeUebersicht,
+  type ErfolgEintrag, type ErfolgGruppe, type ErfolgStufe, type ErfolgStand } from './erfolge';
