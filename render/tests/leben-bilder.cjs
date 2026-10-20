@@ -24,8 +24,10 @@ async function main() {
     for (const [name, halb] of [['nah', 32], ['mittel', 76]]) {
       await page.evaluate((h) => {
         window.spiel.leben.pause(true);
+        const wahl = document.getElementById('leben-modus');
+        wahl.value = 'voll';
+        wahl.dispatchEvent(new Event('change', { bubbles: true }));
         window.spiel.kamera({ halb: h });
-        window.spiel.leben.setzen('voll');
       }, halb);
       await page.waitForTimeout(400);
       for (let i = 0; i < 10; i++) {
