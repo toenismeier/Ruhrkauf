@@ -15,6 +15,8 @@ export interface BauEtage {
   technik: { klima: 0|1|2; licht: 0|1|2; brandschutz: 0|1|2 };
   pflichten: { brandschutz: number; aufzug: number };
   gesperrt: boolean;
+  /** Technische Nachrüstung steuert zusätzliche Dachaufbauten im Renderer. */
+  klimaModernisiert?: boolean;
   /** Nur durch aktive Maßnahmen erzeugter, alternder Kaufquotenbonus. */
   modernisierungWirkung: number;
 }
@@ -138,8 +140,8 @@ export function umbauWoche(s:GameState):void {
       const e=h.etagenBau?.[nr]; if (!e) continue;
       if (p.stufe==='auffrischung') {e.substanz=clamp(e.substanz+10,0,100);e.technik.licht=Math.min(2,e.technik.licht+1) as 0|1|2;}
       if (p.stufe==='ladenbau') e.moebelGeneration=3;
-      if (p.stufe==='komplett') {e.substanz=90;e.moebelGeneration=3;e.technik={klima:2,licht:2,brandschutz:2};}
-      if (p.stufe==='technik') {e.technik={klima:2,licht:2,brandschutz:2};e.pflichten={brandschutz:s.woche+520,aufzug:s.woche+520};e.gesperrt=false;}
+      if (p.stufe==='komplett') {e.substanz=90;e.moebelGeneration=3;e.technik={klima:2,licht:2,brandschutz:2};e.klimaModernisiert=true;}
+      if (p.stufe==='technik') {e.technik={klima:2,licht:2,brandschutz:2};e.pflichten={brandschutz:s.woche+520,aufzug:s.woche+520};e.gesperrt=false;e.klimaModernisiert=true;}
       e.modernisierungWirkung=Math.max(e.modernisierungWirkung,
         p.stufe==='ladenbau'?0.08:p.stufe==='komplett'?0.10:p.stufe==='auffrischung'?0.02:0.01);
     }
