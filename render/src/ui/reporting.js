@@ -63,7 +63,7 @@ export function reportingModul(ctx) {
     const gruppen = daten.gruppen;
     let content = '<div class="o02-filter">' +
       auswahl('Ebene', 'ebene', [['region', 'Region'], ['hauscluster', 'Hauscluster'], ['haus', 'Haus']]) +
-      auswahl('Format', 'format', [['alle', 'Alle'], ...[...new Set(daten.zeilen.map((z) => z.format))].map((f) =>
+      auswahl('Format', 'format', [['alle', 'Alle'], ...[...new Set(ctx.s().haeuser.map((z) => z.format))].map((f) =>
         [f, f === 'warenhaus' ? 'Hartwig' : f === 'sport' ? 'Hartwig Sport' : f === 'fundus' ? 'FUNDUS' : f])]) +
       auswahl('Zeitraum', 'wochen', [[1, '1 Woche'], [4, '4 Wochen'], [13, '13 Wochen'], [52, '52 Wochen']]) +
       auswahl('Sortieren', 'sort', [['umsatz', 'Umsatz'], ['abweichung', 'Abweichung'], ['frequenz', 'Frequenz'],
