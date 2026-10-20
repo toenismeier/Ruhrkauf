@@ -16,6 +16,8 @@ export interface Jahresplan {
   knoten: Record<string, PlanKnoten>;
   phasing: Record<string, number[]>; // Häuser × 52 Wochen: Summe genau Jahresziel
   warengruppen: Partial<Record<GruppeId, number>>;
+  // Vergleichsbudget des ursprünglichen Controlling-Vorschlags; Normierungsbasis für O04/O05.
+  referenz: { knoten: Record<string, number>; warengruppen: Partial<Record<GruppeId, number>> };
   istUmsatz: number; istEbitda: number;
   istHaus: Record<string, { umsatz: number; db: number }>;
   geschlossen: boolean;
@@ -39,6 +41,18 @@ export interface PlanungStand {
 
 const aktiv = (h: Haus) => h.status !== 'geschlossen' && h.status !== 'verkauft';
 const clusterVon = (h: Haus): string => (h as Haus & { hauscluster?: string }).hauscluster || h.region;
+// Strukturkompatibel mit O01, ohne dessen noch nicht gemergten Branch zu importieren.
+interface OrgLeitung { gehalt: number; qualitaet: number; stimmung: number; wechselwille: number }
+interface OrgStelle { person?: OrgLeitung }
+interface OrgPlan { hauscluster: { id: string; stelle: OrgStelle }[]; bereiche: Record<string, OrgStelle> }
+const organisation = (s: GameState): OrgPlan | undefined =>
+  (s as GameState & { organisation?: OrgPlan }).organisation;
+const bereichsGüte = (s: GameState): number => {
+  const org = organisation(s);
+  const k = org?.bereiche.konzerncontrolling?.person?.qualitaet ?? (0.35 + 0.25 * s.controllingStufe);
+  const v = org?.bereiche.vertriebscontrolling?.person?.qualitaet ?? k;
+  return clamp((k + v) / 2, 0, 1);
+};
 const keys = (h: Haus): string[] => ['konzern', 'format:' + h.format, 'region:' + h.format + ':' + h.region,
   'hauscluster:' + h.format + ':' + h.region + ':' + clusterVon(h), 'haus:' + h.id];
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
@@ -110,11 +124,15 @@ function machKnoten(s: GameState, ziele: PlanZiele, overrides: Record<string, nu
   walk('konzern');
   // Sandbagging und Optimismus sind deterministische Leitungsmerkmale; besseres Controlling
   // erkennt einen höheren Anteil davon und markiert ihn explizit.
-  const qualitaet = clamp(0.35 + 0.25 * s.controllingStufe, 0, 1);
+  const qualitaet = bereichsGüte(s);
   for (const n of Object.values(knoten)) {
     if (n.ebene !== 'hauscluster' && n.ebene !== 'haus') { n.rueckmeldung = n.umsatz; continue; }
     const ro = stable(n.id);
-    const abweichung = ro < 0.72 ? -(0.015 + 0.065 * ro) : 0.01 + 0.045 * ro;
+    const bonus = s.planung?.bonusAnteil[n.ebene === 'haus' ? 'haus' : 'hauscluster'] ?? 0.10;
+    const leitung = n.ebene === 'hauscluster'
+      ? organisation(s)?.hauscluster.find((h) => n.id.endsWith(':' + h.id))?.stelle.person : undefined;
+    const tendenz = leitung ? clamp(1 - leitung.qualitaet, .1, .9) : ro;
+    const abweichung = ro < 0.72 ? -(0.015 + 0.045 * tendenz + 0.20 * bonus) : 0.01 + 0.045 * ro;
     n.rueckmeldung = eur(n.umsatz * (1 + abweichung));
     n.verdacht = abweichung < -0.035 && qualitaet > 0.45 + stable('pruefung:' + n.id) * 0.35;
     if (n.verdacht) n.rueckmeldung = eur(n.rueckmeldung + qualitaet * (n.umsatz - n.rueckmeldung) * 0.75);
@@ -158,17 +176,31 @@ function planWochen(s: GameState, planJahr: number, h: Haus, ziel: number): numb
   return roh.map((x, i) => { const v = i === 51 ? ziel - vergeben : eur(ziel * x / summe); vergeben += v; return v; });
 }
 
-function erstelleJahresplan(s: GameState, j: number, ziele: PlanZiele, override: Record<string, number>, quelle: Jahresplan['quelle']): Jahresplan {
-  const knoten = machKnoten(s, ziele, override);
-  const phasing: Record<string, number[]> = {};
-  for (const h of s.haeuser.filter(aktiv)) phasing[h.id] = planWochen(s, j, h, knoten['haus:' + h.id]?.umsatz ?? 0);
+function warengruppenZiel(s: GameState, knoten: Record<string, PlanKnoten>): Partial<Record<GruppeId, number>> {
   const wg: Partial<Record<GruppeId, number>> = {};
   for (const h of s.haeuser.filter(aktiv)) {
     const betrag = knoten['haus:' + h.id]?.umsatz ?? 0;
     const basis = basisHaus(h);
-    for (const [g, b] of Object.entries(h.potenzial) as [GruppeId, number][]) wg[g] = (wg[g] ?? 0) + eur(betrag * b / basis);
+    const eintraege = Object.entries(h.potenzial) as [GruppeId, number][];
+    let verteilt = 0;
+    for (let i = 0; i < eintraege.length; i++) {
+      const [g, b] = eintraege[i];
+      const wert = i === eintraege.length - 1 ? betrag - verteilt : eur(betrag * b / basis);
+      verteilt += wert;
+      wg[g] = (wg[g] ?? 0) + wert;
+    }
   }
+  return wg;
+}
+function erstelleJahresplan(s: GameState, j: number, ziele: PlanZiele, override: Record<string, number>, quelle: Jahresplan['quelle']): Jahresplan {
+  const knoten = machKnoten(s, ziele, override);
+  const referenzKnoten = quelle === 'vorgaenger' ? machKnoten(s, ziele) : machKnoten(s, jahresVorschlag(s, j));
+  const phasing: Record<string, number[]> = {};
+  for (const h of s.haeuser.filter(aktiv)) phasing[h.id] = planWochen(s, j, h, knoten['haus:' + h.id]?.umsatz ?? 0);
+  const wg = warengruppenZiel(s, knoten);
   return { jahr: j, ziele: { ...ziele }, quelle, knoten, phasing, warengruppen: wg,
+    referenz: { knoten: Object.fromEntries(Object.entries(referenzKnoten).map(([id, n]) => [id, n.umsatz])),
+      warengruppen: warengruppenZiel(s, referenzKnoten) },
     istUmsatz: 0, istEbitda: 0, istHaus: {}, geschlossen: false };
 }
 
@@ -182,13 +214,19 @@ export function planWoche(s: GameState, hausId: string, woche = s.woche): number
   return plan?.phasing[hausId]?.[woche % 52] ?? 0;
 }
 export function planBudgetFaktor(s: GameState, ebene: 'ware' | 'personal', id: string): number {
-  // O04/O05 koppeln hieran ihre Budgets. Basis ist der ursprüngliche Controlling-Vorschlag,
-  // so bleibt der Ausgangsplan strikt neutral.
+  // O04/O05 übernehmen den Faktor als Multiplikator für Stundenbudgets bzw. Open-to-Buy.
+  // Ein unmodifizierter Controlling-Vorschlag hat exakt Faktor 1.
   const p = planJahr(s); if (!p) return 1;
-  const ziel = ebene === 'ware' ? p.warengruppen[id as GruppeId] : p.knoten[id]?.umsatz;
-  if (ziel === undefined) return 1;
-  const start = p.quelle === 'vorgaenger' ? ziel : p.knoten[id]?.basis;
-  return clamp(anteil(ziel, Math.max(1, start ?? ziel)), 0.5, 1.5);
+  if (ebene === 'ware') {
+    const g = id.split('.')[0] as GruppeId; // NOS/Saison-WG auf Obergruppe abbilden
+    const ziel = p.warengruppen[g], ref = p.referenz?.warengruppen[g];
+    return ziel !== undefined && ref ? clamp(ziel / ref, 0.5, 1.5) : 1;
+  }
+  const ids = p.knoten[id] ? [id] : Object.keys(p.knoten).filter((key) =>
+    (key.startsWith('hauscluster:') || key.startsWith('haus:')) && key.endsWith(':' + id));
+  const ziel = sum(ids.map((k) => p.knoten[k]?.umsatz ?? 0));
+  const referenz = sum(ids.map((k) => p.referenz?.knoten[k] ?? 0));
+  return referenz > 0 ? clamp(ziel / referenz, 0.5, 1.5) : 1;
 }
 export function planungAktion(s: GameState, a: PlanungAktion): string | null {
   const p = s.planung; if (!p) return 'Planung nicht verfügbar.';
@@ -335,10 +373,12 @@ function bonusErmitteln(s: GameState, p: Jahresplan): void {
     const ziel = sum(hs.map((h) => hausZiele[h.id] ?? 0));
     if (!ziel) continue;
     const ist = sum(hs.map((h) => p.istHaus[h.id]?.umsatz ?? 0));
-    details.push({ id: c, ebene: 'hauscluster', betrag: eur(105_000 * quoten.hauscluster * (0.5 * score(ist, ziel) + 0.5 * ebitdaScore)) });
+    const gehalt = organisation(s)?.hauscluster.find((x) => x.id === c)?.stelle.person?.gehalt ?? 105_000;
+    details.push({ id: c, ebene: 'hauscluster', betrag: eur(gehalt * quoten.hauscluster * (0.5 * score(ist, ziel) + 0.5 * ebitdaScore)) });
   }
   for (const id of ['konzerncontrolling', 'vertriebscontrolling', 'merchandise_planning', 'store_operations']) {
-    details.push({ id, ebene: 'bereich', betrag: eur(115_000 * quoten.bereich * (0.5 * score(p.istUmsatz, p.ziele.umsatz) + 0.5 * ebitdaScore)) });
+    const gehalt = organisation(s)?.bereiche[id]?.person?.gehalt ?? 115_000;
+    details.push({ id, ebene: 'bereich', betrag: eur(gehalt * quoten.bereich * (0.5 * score(p.istUmsatz, p.ziele.umsatz) + 0.5 * ebitdaScore)) });
   }
   s.planung.boni.push({ jahr: p.jahr, faellig: (p.jahr - s.startJahr + 1) * 52 + 5, betrag: sum(details.map((x) => x.betrag)), bezahlt: false, details });
 }
