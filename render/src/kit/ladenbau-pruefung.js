@@ -145,6 +145,19 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
     if(ins.length>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+ins.length+' Inszenierungen');
     if(plan.profil==='outlet'&&ins.length)add('Format','FUNDUS ohne Inszenierung');
   }
+  // Phase 4: Kompositionsprüfung zusätzlich zu Dichte und Laufwegen.
+  if(plan.profil==='sport')for(const a of plan.abteilungen) {
+    const inventar=plan.moebel.filter(m=>m.abteilung===a.id);
+    const arten=new Map();
+    for(const m of inventar) {
+      const typ=m.moebelart??m.id;
+      arten.set(typ,(arten.get(typ)??0)+1);
+    }
+    if(arten.size<4)add('Sortimentsmix',a.id+': nur '+arten.size+' Möbelarten statt 4');
+    const groesste=Math.max(0,...arten.values());
+    if(inventar.length&&groesste>0.4*inventar.length+EPS)
+      add('Sortimentsmix',a.id+': ein Möbeltyp mit '+(100*groesste/inventar.length).toFixed(1)+' % statt höchstens 40 %');
+  }
   if(teile!==null&&teile>R.budgetEtage)add('Budget',teile+' Teile');
   if(teile===null)warnungen.push('Teilezahl nicht aus Geometrie gemessen');
   // Gangabstände zwischen parallelen, versetzten Gondelreihen.
