@@ -5,6 +5,8 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+// O04 Personal
+import type { PersonalHausStand, PersonalStand } from './personaleinsatz';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -155,6 +157,12 @@ export interface Haus {
   restmieteWoche?: Eur; // laufende Miete nach Schließung
   restmieteBis?: number;
   personal: Personal;
+  // O04 Personal: zusätzliche Dienstplanung, Basis-FTE bleiben in personal.
+  personaleinsatz?: PersonalHausStand;
+  // Vorgriff auf die O01/O02-Schnittstellen, solange diese separat entwickelt werden.
+  hauscluster?: string;
+  treiber?: { frequenz: number; kaufquote: number; bon: number };
+  treiberQuellen?: Record<string, Partial<{ frequenz: number; kaufquote: number; bon: number }>>;
   substanz: number; // 0..100
   substanzStart: number;
   status: HausStatus;
@@ -417,6 +425,8 @@ export interface GameState {
   kreditlinieBasis: Eur;
   zahlungsstockungSeit?: number;
   haeuser: Haus[];
+  // O04 Personal
+  personaleinsatz?: PersonalStand;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
