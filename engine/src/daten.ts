@@ -138,6 +138,12 @@ export const STAEDTE: StadtDef[] = [
   ['Detmold', 'West', 'mittelstadt', 0.97, 1, 0], ['Minden', 'West', 'mittelstadt', 0.95, 1, 0],
 ];
 
+// Geografische Vertriebsregion ist die feste Eigenschaft der Stadt, nicht der
+// dynamisch erzeugte Hauscluster (z. B. „Lausitz“ oder „Unterweser“).
+export const STADT_REGIONEN: Readonly<Record<string, Region>> =
+  Object.freeze(Object.fromEntries(STAEDTE.map(([name, region]) => [name, region])) as Record<string, Region>);
+export function stadtRegion(name: string): Region | undefined { return STADT_REGIONEN[name]; }
+
 // O01 Organisation: Namen nach geografischen Teilräumen je Region.
 export const HAUSCLUSTER_NAMEN: Record<Region, string[]> = {
   Nord: ['Elbe West','Unterweser','Ostholstein','Nordseeküste','Hannover Nord','Weserbergland','Schleswig'],
