@@ -39,6 +39,8 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     expect(s.cash).toBe(400_000_000);
     expect(s.kreditlinie).toBe(300_000_000);
     expect(s.kvLimitBasis).toBe(1_260_000_000);
+    expect(s.einkauf.grenze).toBeGreaterThan(150_000);
+    expect(s.einkauf.grenze).toBeLessThan(190_000);
   });
 
   test('FUNDUS-JSON entspricht dem Engine-Export für Seed 1', () => {
