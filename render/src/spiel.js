@@ -12,7 +12,7 @@ import { echterBauer } from './kit/bauer.js';
 import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
 import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
-import { stadtplan, baueStadt, setzeMarker, bauerFuer } from './kit/stadt.js';
+import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
@@ -327,17 +327,74 @@ function baueStadtAusSpiel(name) {
   $('stadtname').textContent = name;
   return ms;
 }
+// Für Bahnreisen wird derselbe Szenenaufbau in Animationsbilder aufgeteilt; Detailkacheln folgen bei Ankunft.
+async function baueStadtAusSpielReise(name) {
+  const t0 = performance.now();
+  KA.pause = true;
+  raeumeSzene();
+  stadtName = name;
+  const hqJson = hqGrafik();
+  const d = stadtEintragAusSpiel(s, name);
+  hqIdsStadt = hqIdsIn(hqJson, name);
+  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  if (hqJson) hqEinplanen(plan, hqJson, name);
+  await new Promise((r) => requestAnimationFrame(r));
+  scene = neueSzene('#4fb6c2');
+  scene.userData.sonne.shadow.mapSize.set(2048, 2048);
+  wurzel = new THREE.Group();
+  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik });
+  // Grundgerüst: Straßen, Blöcke, Wasser, Stadtrandgürtel, Sonderbauten und Hartwig; normale Stadthäuser kommen als Kacheln
+  const T = new KompaktSammler();
+  const offen = [];
+  const zahl = new Map();
+  for (const p of plan.parzellen) zahl.set(p.typ, (zahl.get(p.typ) ?? 0) + 1);
+  // In Kacheln: normale Stadthäuser und Hausreihen der Regionen (Slot-Typen, die mindestens fünfmal vorkommen), nicht
+  // aber Standorte, weit sichtbare Landmarken und Slots mit eigenem Wasser
+  const kachelTyp = (p) => !p.standort && !IMMER_GRUND.has(p.typ) && (HAUSTYPEN.has(p.typ) || (p.typ.startsWith('slot:') && zahl.get(p.typ) >= 5));
+  const grund = new Proxy(sb.bauer, { get(z, typ) {
+    const f = bauerFuer(z, typ);
+    return (S, sc, p) => { if (!kachelTyp(p)) return f(S, sc, p); if (!p.leer) offen.push(p); return { hoehe: klotzHoehe(p) }; };
+  } });
+  setzeLod('fern');
+  let e;
+  try { e = await baueStadtGestuft(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  scene.add(wurzel);
+  KA.teileGrund = T.anzahl;
+  kachelnAnlegen(offen, true);
+  await kachelnKloetzeBauen();
+  // Pins: Hartwig, Sport, Wettbewerber und Zentrale wie im Katalog; freie Bürogebäude mit Schlüssel-Pin
+  const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', hq: 'hartwig' };
+  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && pins[q.rolle]).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle], groesse: 9 })));
+  for (const q of plan.standorte.filter((x) => x.angebot)) { const pz = plan.parzellen.find((x) => x.id === q.parzelle); if (pz) angebotMarker(scene, pz.x + pz.w / 2, (e.hoehen.get(pz.id) ?? 30) + 2, pz.z + pz.d / 2, 9); }
+  angebotsPinsAktualisieren();
+  wettbewerbPinsAktualisieren();
+  bahnhofPinErstellen();
+  K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
+  const nm = nahMitte(plan, 'einkauf', 62);
+  K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
+  K._G = null;
+  kameraSetzen();
+  // Details werden erst nach dem ICE-Ankunftsbild über kachelnPlanen aufgebaut.
+  zeichnen();
+  const ms = Math.round(performance.now() - t0);
+  messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
+  $('stadtname').textContent = name;
+  return ms;
+}
+
 // ─────────────────────────────────────────── Kacheln (Detailstufen für das iPhone)
 // Normale Stadthäuser werden je Kachel (ganze Blöcke, KACHEL m Raster) gebaut. Sichtbare Kacheln in voller Stufe ('fern'
 // wie bisher), alle anderen als Klötzchen (Baukörper mit Dach in Fassaden- und Dachfarbe). Im Leerlauf werden Kacheln nahe
 // der Kamera nachgebaut, bis BUDGET Teile erreicht sind; ferne volle Kacheln fallen dann auf Klötzchen zurück.
 // Ganze Blöcke je Kachel und ein frischer Bauer je Kachel: Traufhöhe und Reihenstil je Block bleiben wie beim Bau der ganzen Stadt.
 const KACHEL = 110, BUDGET = 112000, VOLL_MAX_ZOOM = 340;
-const KA = { liste: [], teileGrund: 0, laeuft: false };
+const KA = { liste: [], teileGrund: 0, laeuft: false, generation: 0, pause: false };
 const HAUSTYPEN = new Set(['stadthaus', 'eck', 'hofhaus']);
 const IMMER_GRUND = new Set(['slot:warenhaus', 'slot:premium', 'slot:sport', 'slot:wettbewerber', 'slot:hq', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus', 'slot:nord_speicher', 'slot:nord_hafen', 'slot:center_passage']);
 function klotzHoehe(p) { const g = p.hofbau ? 2 : p.typ === 'hofhaus' ? Math.max(2, (p.geschosse ?? 4) - 1) : p.geschosse ?? 4; return 4.2 + g * 3.3; }
-function kachelnAnlegen(parzellen) {
+function kachelnAnlegen(parzellen, gestuft = false) {
+  ++KA.generation;
+  KA.laeuft = false;
   for (const k of KA.liste) entsorge(k);
   KA.liste = [];
   const bl = new Map(plan.bloecke.map((b) => [b.id, b]));
@@ -351,7 +408,17 @@ function kachelnAnlegen(parzellen) {
     k.box.expandByPoint(new THREE.Vector3(p.x, 0, p.z)).expandByPoint(new THREE.Vector3(p.x + p.w, klotzHoehe(p) + 4, p.z + p.d));
   }
   KA.liste = [...m.values()];
-  for (const k of KA.liste) klotzBauen(k);
+  if (!gestuft) for (const k of KA.liste) klotzBauen(k);
+}
+async function kachelnKloetzeBauen() {
+  let t = performance.now();
+  for (const k of KA.liste) {
+    klotzBauen(k);
+    if (performance.now() - t >= 9) {
+      await new Promise((r) => requestAnimationFrame(r));
+      t = performance.now();
+    }
+  }
 }
 function entsorge(k) { if (!k.gruppe) return; k.gruppe.parent?.remove(k.gruppe); k.gruppe.traverse((o) => o.geometry?.dispose()); k.gruppe = null; }
 function klotzBauen(k) {
@@ -427,7 +494,10 @@ function kachelnSichtbarBauen() {
 function kachelnPlanen() {
   if (KA.laeuft || KA.pause || !KA.liste.length) return;
   KA.laeuft = true;
+  const generation = KA.generation;
   const schritt = () => {
+    if (generation !== KA.generation) return; // veralteter Timer einer verlassenen Stadt
+    if (KA.pause) { KA.laeuft = false; return; }
     const k = naechsteKachel();
     if (!k) { KA.laeuft = false; window.kachelnRuhig = true; return; }
     window.kachelnRuhig = false;
@@ -500,8 +570,9 @@ function woche(mitBot = false) {
     neu.filter((x) => x.art === 'angebot').length + ' neue Angebote, ' +
     neu.filter((x) => x.art === 'entscheidung').length + ' Entscheidungen, ' + neueMeldungen + ' Meldungen';
   const streifen = $('wochenstreifen');
-  streifen.textContent = text;
+  streifen.textContent = mitBot ? text : '';
   streifen.classList.toggle('an', mitBot);
+  streifen.hidden = !mitBot;
   clearTimeout(streifenTimer);
   if (mitBot) streifenTimer = setTimeout(() => streifen.classList.remove('an'), 6000);
   zeichnen();
@@ -828,15 +899,27 @@ reise = reiseModul({
   pinPunkt: bahnhofBildpunkt,
   zuletzt: () => postUi.reiseZuletzt ?? [],
   besucht: (namen) => { postUi.reiseZuletzt = namen; },
-  bauen: (name) => { schliessePanel(); baueStadtAusSpiel(name); wahl.value = name; },
+  bauen: async (name) => { schliessePanel(); await baueStadtAusSpielReise(name); wahl.value = name; },
+  vorschau: () => {
+    if (!scene || !cam) return null;
+    jetztZeichnen();
+    const quelle = ren.domElement, c = document.createElement('canvas'); c.width = c.height = 96;
+    const a = Math.min(quelle.width, quelle.height) * 0.54;
+    try {
+      c.getContext('2d').drawImage(quelle, (quelle.width - a) / 2, (quelle.height - a) / 2, a, a, 0, 0, 96, 96);
+      return c.toDataURL('image/jpeg', .72);
+    } catch (_) { return null; }
+  },
   bahnhofFokussieren,
-  fertig: () => automatischSpeichern(),
-  fehler: (e) => { console.error('Bahnreise fehlgeschlagen:', e); meldung('Stadtwechsel fehlgeschlagen', false); },
+  fertig: () => { KA.pause = false; kachelnPlanen(); automatischSpeichern(); },
+  fehler: (e) => { KA.pause = false; console.error('Bahnreise fehlgeschlagen:', e); meldung('Stadtwechsel fehlgeschlagen', false); },
 });
 wochenbericht = wochenberichtModul({
   modus: () => postUi.wochenbericht ?? 'voll', warnen: () => postUi.warnen,
   cockpit: () => E.cockpit(s), posteingang: () => E.posteingang(s),
   historie: () => s.historie, wocheNr: () => s.woche,
+  kapitalfluss: () => E.kapitalfluss(s),
+  person: (ressort) => s?.vorstand?.ressorts?.[ressort]?.person,
   woche: () => woche(false), sperren: () => { $('weiter').disabled = true; },
   entsperren: () => { $('weiter').disabled = false; },
   oeffneVorgang: (id) => oeffneModul(po, 'handeln', id),
