@@ -98,7 +98,7 @@ function festSchmuck(S, plan) {
   }
   for (const p of plan.parzellen ?? []) {
     const rolle = p.standort?.rolle;
-    if (rolle !== 'warenhaus' && rolle !== 'premium') continue;
+    if (!['warenhaus', 'premium', 'sport'].includes(rolle)) continue;
     tanne(S, p.x + Math.min(p.w - 2, 3.5), p.z + Math.min(p.d - 2, 3.5));
   }
   weihnachtsmarkt(S, plan);
@@ -123,6 +123,19 @@ function sommerLeben(S, plan) {
       const geo = new THREE.ConeGeometry(2.0, .7, 8);
       geo.translate(x + (zAchse ? 2 : 0), 4.75, z + (zAchse ? 0 : 2));
       S.add(geo, '#eed8b3');
+    }
+  }
+  // Zusätzliche Passanten im Sommer: nur in den Einkaufsstraßen und außerhalb der Fahrbahn.
+  // Gedämpftes Teilebudget: vier Figuren je Einkaufssegment, alle Geometrien zusammengefasst.
+  for (const seg of fuss.slice(0, 3)) {
+    const zAchse = seg.achse === 'z';
+    for (let i = 0; i < 4; i++) {
+      const u = seg.von + (i + 1) * (seg.bis - seg.von) / 5;
+      const v = (i % 2 ? 1 : -1) * (seg.breite / 2 - 3.0);
+      const x = zAchse ? seg.mitte + v : u, z = zAchse ? u : seg.mitte + v;
+      addBox(S, x, 1.48, z, .42, .7, .36, OBERTEILE[i % OBERTEILE.length]);
+      addBox(S, x, .63, z, .3, .88, .3, '#677b8b');
+      addBox(S, x, 2.04, z, .29, .33, .3, '#e5b38f');
     }
   }
   const seg = fuss[0];
