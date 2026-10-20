@@ -52,7 +52,7 @@ async function buendeln() {
   p.on('pageerror', (e) => console.log('FEHLER', e.message));
   p.on('console', (m) => { if (m.type() === 'error') console.log('KONSOLE', m.text()); });
   const animationen = process.argv.includes('--mit-animation') && !process.argv.includes('--ohne-animation');
-  const url = 'file://' + path.join(__dirname, 'spiel.html') + `?stadt=${encodeURIComponent(stadt)}&seed=${seed}${animationen ? '' : '&ohne-animation=1'}`;
+  const url = 'file://' + path.join(__dirname, 'spiel.html') + `?stadt=${encodeURIComponent(stadt)}&seed=${seed}&leben=aus${animationen ? '' : '&ohne-animation=1'}`;
   await p.goto(url, { waitUntil: 'load', timeout: 0 });
   await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
   const bild = async (name) => {
@@ -480,7 +480,7 @@ async function buendeln() {
     const soll = (name, ok, info) => { erg.aktionen.push({ name, ok, info }); console.log(`${ok ? 'OK ' : 'FEHLER'} ${name}: ${info}`); };
     const q = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
     q.on('pageerror', (e) => console.log('FEHLER', e.message));
-    await q.goto('file://' + path.join(__dirname, 'spiel.html'), { waitUntil: 'load', timeout: 0 });
+    await q.goto('file://' + path.join(__dirname, 'spiel.html') + '?leben=aus', { waitUntil: 'load', timeout: 0 });
     await q.waitForSelector('#start.an', { timeout: 60000 });
     const karten = await q.evaluate(() => [...document.querySelectorAll('.stufe-karte')].map((k) => k.querySelector('b').textContent));
     soll('Startbildschirm mit drei Schwierigkeiten', karten.length === 3, karten.join(', '));
