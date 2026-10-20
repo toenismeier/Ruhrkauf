@@ -1,6 +1,6 @@
 # Verbindliche Ladenbau-Regeln
 
-Stand: 19.10.2026 · Workstream `auftraege/workstream-ladenbau.md` · Phase 2
+Stand: 20.10.2026 · Workstream `auftraege/workstream-ladenbau.md` · Phase 2
 
 **Geltungsbereich:** Hartwig Sport, FUNDUS (Off-Price), Volkskauf und als Prüfmaßstab die bestehenden Hartwig-Warenhäuser. Die Konstanten in `src/kit/ladenbau-regeln.js` sind die alleinige technische Quelle. Alle Maße in Metern, Flächen in m². Prüfung und Planer müssen identische Grenzen verwenden.
 
@@ -21,9 +21,9 @@ Stand: 19.10.2026 · Workstream `auftraege/workstream-ladenbau.md` · Phase 2
 - Möbel dürfen nur in **0°, 90°, 180°, 270°** ausgerichtet sein.
 
 ## Materialität und Dekoration
-- Höchstens **drei Bodenbeläge** je Etage (Gang, einheitliche Warenfläche, optional ein Akzent).
+- Höchstens **drei funktionale Bodenarten** je Etage (Gang, Warenfläche, optional ein Akzent). Im Sporthaus unterscheidet die Warenfläche ihre **Abteilungsfarben** aus `sportabteilung.js`; diese Farbvarianten zählen nicht als neue funktionale Bodenart.
 - Akzentbelag ausschließlich unmittelbar unter einer Inszenierung, Anteil höchstens **10 %** der Etage.
-- **Kunstrasen ausschließlich unter einer Torinsel**; keine wechselnden Böden je Sportart.
+- Für Sportflächen sind abteilungsspezifische Bestandsfarben zulässig. Kunstrasen-Akzentinseln bleiben dem Teamsport vorbehalten; keine flächendeckenden zusätzlichen Akzentbeläge.
 - Felsen, Bäume und Pflanzen höchstens **2 %** der Etagenfläche; nur im Eingangsbereich oder innerhalb einer Inszenierung. Banner/Bilder zählen als Dekoration, erhalten aber keinen eigenständigen Boden.
 
 ## Kassen, Flächendichte, Performance
@@ -35,15 +35,21 @@ Stand: 19.10.2026 · Workstream `auftraege/workstream-ladenbau.md` · Phase 2
 ## Formatprofile
 | Format | Raum- und Warenbild | Sonderregeln |
 |---|---|---|
-| **Hartwig Sport** | Heller Gang, ruhiger Flächenboden, bündige Markenwände, Gondeln in Reihen | Pro Abteilung maximal eine Erlebnisfläche (Laufanalyse/Fitness/Zelt/Rad); Sportarten-Farben nur in den Schildbändern; Außenfamilien bleiben in Phase 4 erhalten |
+| **Hartwig Sport** | Heller Hauptgang, je Sportabteilung erkennbarer Bodenfarbton und Hängeschild, bündige Markenwände, Warentische, Hänger, Rundständer, Puppen und Produktpräsentationen | Mindestens vier unterscheidbare Möbelvarianten je Abteilung; maximal 40 % je Variante; Gondeln vorrangig für Zubehör/Abverkauf. Pro Abteilung maximal eine Erlebnisinszenierung. Außenfamilien bleiben in Phase 4 erhalten |
 | **FUNDUS** | Helle, große Warenflächen mit langen, dicht bestückten parallelen Kleiderstangen; Größen XS–XL | Maximal zwei Beläge: Gang + Fläche; keine Erlebniselemente, kein Kunstrasen, keine Wühltische/Paletten; zentrale Kassenzeile mit Schlangenführung |
 | **Volkskauf** | Klassisches Kaufhaus: dunklere Holzregale, alte Kassen, schlichte Vitrinen, Rasterleuchten | Zentrale offene Treppe, **keine Rolltreppe**; keine doppelte Abteilung je Etage |
 
 ## Prüfsemantik
 - *Erschließung:* Hindernisse und Möbelfußabdrücke sperren Suchzellen; Ziele müssen aus dem freien Gang erreichbar und mit dem Gang verbunden sein.
 - *Wandbelegung:* Belegte Längen werden entlang −x und −z addiert (Überlappung nur einmal), Öffnungen als nachvollziehbare Ausnahmen dokumentiert.
+- *Sport-Sortimentsmix:* Mindestens vier Möbelarten/Präsentationsvarianten pro Abteilung; kein identischer Möbeltyp über 40 % der zugeordneten Möbel. Die technische Prüfung erfolgt in `src/kit/ladenbau-pruefung.js` und im Produktionsdaten-Smoketest.
 - *Dichte:* Vereinigungsfläche der Möbelpolygone / nutzbare Verkaufsfläche. Kassen zählen als Möbel; Dekoration als eigene Flächenkennzahl. Boden zählt nicht als Möbel.
 - *Bestehender Bestand:* Phase 3 prüft Datenpläne, **nicht** automatisch die bisherige Sport-Geometrie. Erst Phase 4 stellt die tatsächlichen Sportetagen um; eine grüne Planprüfung ist nicht mit einer grünen Alt-Etagenprüfung gleichzusetzen.
 - *Reporting:* `node pruef-ladenbau.js` zeigt je Haus/Etage Kennzahlen und Verstöße, beendet sich bei Verstößen mit Exitcode 1. PNG-Diagnose ist separat visuell abzunehmen.
 
 Änderungen an diesen Regeln erfordern gleichzeitige Aktualisierung der Konstanten und der Prüfungen.
+
+## Phase 4: Qualitätsmaßstab für die Sportumstellung
+- Der Datenplan reserviert Inszenierungen **vor** dem Befüllen der Warenreihen. Die Flächenfarben und Hängeschilder stammen aus der vorhandenen `sportabteilung.js`; feste Kletter-, Mall-, Portal- und Bühnenarchitekturen verbleiben bei `sportgrundriss.js`.
+- Die Bibliothek `moebel/sport-mix.js` bietet differenzierte, teilesparende Präsentationen in 2,50-/5,00-m-Breiten; bei kleinen Randabteilungen dürfen 2,50-m-Innenwandmodule ergänzt werden.
+- Die **visuelle** Vorher-/Nachher-Abnahme über alle acht Vergleichshäuser und ein **gemessenes** Teilebudget (Etage nachher ≤ Etage vorher) sind zusätzlich zur regelkonformen Datenplanung verpflichtend. Bis dahin keine Mergefreigabe.
