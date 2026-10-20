@@ -242,10 +242,13 @@ export function werkzeugeModul(ctx) {
   }
 
   inhalt.addEventListener('input', (e) => {
+    if (aktiv && e.target.id === 'test-bericht') berichteingabe = e.target.value;
+  });
+  inhalt.addEventListener('change', (e) => {
     if (!aktiv) return;
-    if (e.target.id === 'test-bericht') berichteingabe = e.target.value;
     const feld = e.target.dataset.testStake;
-    if (feld && e.target.validity.valid && e.target.value !== '') sende({ typ: 'testStakeholder', feld, wert: Number(e.target.value) });
+    if (feld && e.target.validity.valid && e.target.value !== '')
+      sende({ typ: 'testStakeholder', feld, wert: Number(e.target.value) });
   });
   inhalt.addEventListener('click', async (e) => {
     if (!aktiv || beschaeftigt) return;
