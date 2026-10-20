@@ -9,6 +9,8 @@ export {
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
 export { GRUPPEN, gruppenFuer } from './daten';
+// O05 Ware
+export { warenUebersicht, warenHaus, fundusFrequenzFaktor, clusterListe, hausclusterId, type WareAktion, type WareStand } from './merchandise';
 export { STANDARD_SZENARIO, type Szenario } from './welt';
 export {
   WG_DEF, WG, WG_JE_BEREICH, EK_PARAM, EINKAUF_SPALTEN, saisonId, saisonName,
