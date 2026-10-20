@@ -104,6 +104,7 @@
 // =====================================================================================================
 import { rng, waehle, zw } from './basis.js';
 import { stadtrandPlan } from './stadtrand.js';
+import { outletImAussenring } from './outlet-standorte.js';
 
 const klemm = (v, a, b) => Math.max(a, Math.min(b, v));
 const ganz = (r) => Math.floor(r() * 1e9);
@@ -624,7 +625,7 @@ export function standortMasse(st) {
   const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
   return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
 }
-export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester' };
+export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
 
 /**
  * Sucht ein Kreuz aus zwei Haupteinkaufsstraßen (z-Linie kF, x-Linie lF) nahe dem Zentrum und verteilt die
@@ -634,7 +635,7 @@ export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', we
 function einkaufslage(E, standorte) {
   const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? '1a', rolle: st.rolle ?? 'warenhaus' }));
   const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b');
-  E.randStandorte = liste.filter((e) => e.lage === 'center' || e.lage === 'rand');
+  E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') && e.rolle !== 'outlet');
   E.einkauf = [];
   E.einkaufZellen = new Set();
   // Geteilte Stadt (Berlin): Standorte abwechselnd je Rolle auf zwei Kerne verteilen
@@ -1396,6 +1397,7 @@ function baueRaster(seed, E) {
   };
   // Stadtrandgürtel (Vororte, Felder, Wald, fortgesetzte Flüsse) und Kameragrenze, siehe stadtrand.js
   Object.assign(plan, stadtrandPlan(plan, { kueste: E.o?.kueste, seeArt: E.o?.seeArt, berge: E.berge }));
+  if (E.o?.standorte) outletImAussenring(plan, E.o.standorte);
   return plan;
 }
 

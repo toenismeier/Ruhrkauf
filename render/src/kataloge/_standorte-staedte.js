@@ -27,7 +27,7 @@ import { stadtDaten } from '../kit/staedte.js';
 import { echterBauer } from '../kit/bauer.js';
 import { nahMitte } from '../kit/stadtrand.js';
 
-const ROLLE = { warenhaus: 'W', sport: 'S', wettbewerber: 'K' };
+const ROLLE = { warenhaus: 'W', sport: 'S', wettbewerber: 'K', outlet: 'O' };
 
 /** Querformat für ganze Städte (die isometrische Raute ist rund doppelt so breit wie hoch). */
 export const STADT_KACHEL = [1280, 720];

@@ -782,7 +782,7 @@ const BODEN_HILFE = {
   pflasterFlaeche: (...a) => pflasterFlaeche(...a), baueParkplatz: (...a) => baueParkplatz(...a), imRechteck: (...a) => imRechteck(...a),
 };
 
-const EINKAUF_SLOTS = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber']);
+const EINKAUF_SLOTS = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber', 'slot:outlet']);
 
 /** Einkaufszentrum / Fachmarktlage: Asphaltfläche, Vorplatz am Eingang, Parkplatz mit Baumreihen, Leute. */
 function baueCenterFlaeche(ctx, b, r, teile) {
@@ -1624,7 +1624,7 @@ function rundRechteck(k, x, y, w, h, r) {
 
 /** Marker-Liste für alle Standorte eines Plans: Hartwig rot (H), Hartwig Sport grün (S), Wettbewerber grau (W). */
 export function standortMarker(plan, groesse) {
-  const art = { warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber' };
+  const art = { warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', outlet: 'wettbewerber' };
   return (plan.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? 'hartwig', groesse: st.rolle === 'wettbewerber' ? (groesse ?? 10) * 0.8 : groesse }));
 }
 
@@ -1635,6 +1635,7 @@ export function standortMarker(plan, groesse) {
  */
 export function setzeMarker(scene, plan, ergebnis, liste = [], o = {}) {
   const pz = new Map(plan.parzellen.map((p) => [p.id, p]));
+  for (const p of plan.aussen?.bauten ?? []) if (p.typ === 'slot:outlet') pz.set(p.id, p);
   if (liste === 'standorte') liste = standortMarker(plan, o.markerGroesse);
   for (const e of liste) {
     if (e.parzelle) { const p = pz.get(e.parzelle); if (p) kartenMarker(scene, p, e.art, { hoehe: ergebnis?.hoehen?.get(p.id) ?? 20, groesse: e.groesse }); }
@@ -1987,6 +1988,7 @@ export const platzhalterBauer = {
   'slot:warenhaus': phWarenhaus,
   'slot:sport': phWarenhaus,
   'slot:wettbewerber': phKonkurrenz,
+  'slot:outlet': phKonkurrenz,
   'slot:mall': phMall,
   'slot:bahnhof': phBahnhof,
   'slot:kirche': phKirche,
@@ -2015,7 +2017,7 @@ export const platzhalterBauer = {
 /** Debug-Bauer: Parzellen als flache Farbfelder nach Typ (für Datenprüfung). */
 export const parzellenBauer = (() => {
   const farbe = { stadthaus: '#e8dfcf', eck: '#c9a98e', hofhaus: '#bfb6a6', luecke: '#a9bf8f', baustelle: '#b49a7a', parkplatz: '#a3a7ab', platz: '#f2ece0', durchgang: '#d6ccba',
-    'slot:warenhaus': '#d23c32', 'slot:sport': '#1d8a6b', 'slot:wettbewerber': '#7b858e', 'slot:mall': '#2f6f8f', 'slot:bahnhof': '#d39a2b', 'slot:kirche': '#6b4f8f', 'slot:sonder': '#3f7d56', 'slot:rathaus': '#3f7d56', 'slot:hochhaus': '#4a6f8f',
+    'slot:warenhaus': '#d23c32', 'slot:sport': '#1d8a6b', 'slot:wettbewerber': '#7b858e', 'slot:outlet': '#8c1d40', 'slot:mall': '#2f6f8f', 'slot:bahnhof': '#d39a2b', 'slot:kirche': '#6b4f8f', 'slot:sonder': '#3f7d56', 'slot:rathaus': '#3f7d56', 'slot:hochhaus': '#4a6f8f',
     'slot:schloss': '#e0b23c', 'slot:theater': '#8d3b5a', 'slot:museum': '#8d5fbf', 'slot:tor': '#7a4f36', 'slot:denkmal': '#6f9a7d', 'slot:markthalle': '#c4876a', 'slot:hotel': '#4aa3b5',
     'slot:parkhaus': '#6b7177', 'slot:konkurrenz': '#2f5f8f', 'slot:wasserturm': '#b9785e', 'slot:tankstelle': '#3fbf6a', 'slot:discounter': '#d36b2a' };
   const f = (S, scene, p) => {

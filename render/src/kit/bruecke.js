@@ -21,6 +21,7 @@ import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
+import { outlet } from './outlet.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
 import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
@@ -125,7 +126,7 @@ export function stadtEintragAusSpiel(s, name) {
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
-  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester');
+  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester' || q.rolle === 'outlet');
   const reserve = Array.from({ length: 2 }, (_, i) => ({
     id: 'KR-' + name + '-' + (i + 1), name: '', rolle: 'wettbewerber_reserve',
     lage: i === 0 ? '1a' : 'b', grundflaecheQm: 1800,
@@ -196,7 +197,12 @@ export function spielBauer(s, o = {}) {
     return nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
       : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
   };
-  const bau = (S, scene, p, h) => (h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
+  const baueOutlet = (S, scene, p, h) => {
+    const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
+    p.haus = h;
+    return outlet(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+  };
+  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 
   const getrennt = (p, h) => {
     const gruppe = new THREE.Group();
@@ -312,7 +318,7 @@ export function spielBauer(s, o = {}) {
   };
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
-    'slot:schwester': slot('slot:schwester'),
+    'slot:schwester': slot('slot:schwester'), 'slot:outlet': basis['slot:outlet'],
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };
 
