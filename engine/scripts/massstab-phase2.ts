@@ -29,7 +29,6 @@ for (const seed of seeds) {
   let laufe = 0;
   let maxFreigaben = 0;
   let freigabenSumme = 0;
-  let quartalVororderMax = 0;
   for (let i = 0; i < wochen && s.phase !== 'zerschlagen'; i++) {
     if (mitBot) botTief(s);
     else einkaufStandard(s);
@@ -43,7 +42,6 @@ for (const seed of seeds) {
     const freigaben = f?.neu ?? 0;
     maxFreigaben = Math.max(maxFreigaben, freigaben);
     freigabenSumme += freigaben;
-    quartalVororderMax = Math.max(quartalVororderMax, f?.neu ?? 0);
     if (i < 52) {
       jahrUmsatz += k.umsatz;
       jahrEbitda += k.ebitda;
