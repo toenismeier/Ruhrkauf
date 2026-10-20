@@ -652,6 +652,8 @@ window.hausTun = (art, id, key, wert) => {
     : art === 'gastro' ? { typ:'hausGastronomie', haus:id, modus:key }
     : art === 'massnahme' ? { typ:'hausMassnahme', haus:id, massnahme:key }
     : art === 'standard' ? { typ:'hausStandardSetzen', cluster:b.hauscluster, feld:key, wert:Math.max(1,Math.min(3,b.standard[key]+wert)) }
+    : art === 'stunden' ? { typ:'hausStandardSetzen', cluster:b.hauscluster, feld:key, wert:Math.max(7,Math.min(22,b.standard.oeffnung[key]+wert)) }
+    : art === 'clusterservice' ? { typ:'hausClusterServiceSetzen', cluster:b.hauscluster, service:key, an:wert }
     : null;
   if (!a) return;
   const ergebnis = E.fuehreAus(s, a);
