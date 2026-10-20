@@ -2,6 +2,7 @@ import { GRUPPEN, saisonFaktor } from './daten';
 import { statistikHaus, statistikWoche } from './statistik';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
+import { erfolgeWoche } from './erfolge';
 import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
@@ -278,6 +279,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
   s.woche += 1;
+  // Reine Beobachtung nach dem wirtschaftlichen Wochenabschluss; keine Prognosen verändern Erfolge.
+  erfolgeWoche(s);
   spielendePruefen(s);
   return k;
 }
