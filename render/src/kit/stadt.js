@@ -1650,7 +1650,7 @@ function baueBahnZ(ctx, b, r) {
   const gl = b.gleise;
   const vp = b.vorplatz;
   const b2 = { ...b, x: b.z, z: b.x, w: b.d, d: b.w, achse: 'x', gleise: gl && { z0: gl.x0, z1: gl.x1, achse: 'x' }, _bh: bh ? { x: bh.z, z: bh.x, w: bh.d, d: bh.w } : null, vorplatz: vp ? { x: vp.z, z: vp.x, w: vp.d, d: vp.w } : null, bahnParken: (b.bahnParken ?? []).map((q) => ({ x: q.z, z: q.x, w: q.d, d: q.w })) };
-  baueBahn({ ...ctx, S: SW, I: IW }, b2, r);
+  baueBahn({ ...ctx, S: SW, I: IW, spiegel: true }, b2, r);
 }
 function baueBahn(ctx, b, r) {
   if (b.achse === 'z') { baueBahnZ(ctx, b, r); return; }
@@ -1710,9 +1710,9 @@ function baueBahn(ctx, b, r) {
     for (const sp of [-0.72, 0.72]) S.quader(ga, y + 0.2, gz + sp - 0.06, gb, y + 0.36, gz + sp + 0.06, F.schiene);
     S.quader(ga, 6.3, gz - 0.04, gb, 6.38, gz + 0.04, F.dunkel);
     if (ctx.qualitaet) {
-      const spur = { achse: 'x', mitte: gz, von: ga, bis: gb, breite: 3 };
+      const spur = { achse: ctx.spiegel ? 'z' : 'x', mitte: gz, von: ga, bis: gb, breite: 3 };
       ctx.qualitaet.gleise.push(spur); ctx.qualitaet.draehte.push({ ...spur });
-      for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: 'x', mitte: gz, u, abschluss: 'prellbock' });
+      for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: ctx.spiegel ? 'z' : 'x', mitte: gz, u, abschluss: 'prellbock' });
     }
     for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz, '#c9b24c');
   }
@@ -1730,7 +1730,7 @@ function baueBahn(ctx, b, r) {
     for (let w = 0; w < wagen; w++) {
       const x = beginn + 13 + w * 26.5;
       I.setze('zugwagen', x, y + 0.36, gz, 0, 1, [farbe]);
-      if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'zug', x, z: gz, laenge: 26 });
+      if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'zug', x: ctx.spiegel ? gz : x, z: ctx.spiegel ? x : gz, laenge: 26 });
     }
   }
 }
