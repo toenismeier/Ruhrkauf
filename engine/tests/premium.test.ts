@@ -25,7 +25,28 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
    expect(p?.format).toBe('warenhaus');
    expect(p?.id).toMatch(/^(W|P)/);
    expect(p?.premiumImage).toBe(80);
+   const flaeche = { P001:30_000, P002:30_000, P003:18_000, P004:14_000 }[schluessel];
+   const geschosse = { P001:6, P002:6, P003:5, P004:5 }[schluessel];
+   expect(p?.flaechen.reduce((sum, f) => sum + f.qm, 0)).toBe(flaeche);
+   expect(p?.etagen).toHaveLength(geschosse);
+   expect(p!.grundflaecheQm * geschosse).toBe(flaeche);
+   expect(p?.flaechen.every(f => p.etagen.includes(f.etage) && f.qm > 0)).toBe(true);
   }
+ });
+ test.each([1,2,3])('Seed %d: der Anfangsumsatz folgt Fläche und Premiumrang, nicht dem Zufallshaus',seed=>{
+  const s=neuesSpiel(seed);
+  const ertrag=(id:string)=>{
+   const h=premium(s).find(h=>h.premiumSchluessel===id)!;
+   return Object.entries(h.potenzial).reduce((sum,[g,p])=>{
+    const qm=h.flaechen.filter(f=>f.gruppe===g&&f.konzept==='eigen').reduce((a,f)=>a+f.qm,0);
+    return sum+(p??0)*(1-Math.exp(-qm/Math.max(1,h.saettigungQm[g as keyof typeof h.saettigungQm]??1)));
+   },0);
+  };
+  // Durch Normierung definierte Referenz-Wochenleistung (keine Ergebnismanipulation).
+  expect(ertrag('P001')).toBeCloseTo(30_000*40*1.55,0);
+  expect(ertrag('P002')).toBeCloseTo(30_000*40*1.55,0);
+  expect(ertrag('P003')).toBeCloseTo(18_000*40*1.52,0);
+  expect(ertrag('P004')).toBeCloseTo(14_000*40*1.45,0);
  });
  test('Bot C schließt beim Sanierungsplan kein Premiumhaus',()=>{
   for(const seed of [1,2,3]){
@@ -128,5 +149,9 @@ describe('Ein-Jahres-Kalibrierung',()=>{
    expect(a.u).toBeGreaterThan(0);
    expect(Math.abs(a.db/a.u-ziel)).toBeLessThanOrEqual(0.02);
   }
+  // Nachfrage-/Umsatz-Rangfolge ist Teil der Abnahme, zusätzlich zur Margenrangfolge.
+  const u=(id:string)=>werte.get(id)!.u;
+  expect(Math.min(u('P001'),u('P002'))).toBeGreaterThan(u('P003'));
+  expect(u('P003')).toBeGreaterThan(u('P004'));
  });
 });
