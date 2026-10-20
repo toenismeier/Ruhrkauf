@@ -264,9 +264,17 @@ export function verbraucheCluster(
   if (!s.ware?.steuerungAktiv || !kohorten) return verbrauch(kohorten ?? [], wert, altMax);
   const soll = s.ware.bedarf[gruppe] ?? gewichte(s, gruppe);
   const ids = Object.keys(soll).sort();
+  // Einmal pro WG/Art/Pool indexieren statt für jeden Cluster alle Kohorten neu zu scannen.
+  const jeCluster = new Map<string, Kohorte[]>();
+  for (const k of kohorten) {
+    const id = k.hauscluster ?? '';
+    const x = jeCluster.get(id) ?? [];
+    x.push(k);
+    jeCluster.set(id, x);
+  }
   let voll = 0, gebucht = 0, alt = 0;
   for (const id of ids) {
-    const r = verbrauch(kohorten.filter(k => k.hauscluster === id), wert * soll[id], altMax * soll[id]);
+    const r = verbrauch(jeCluster.get(id) ?? [], wert * soll[id], altMax * soll[id]);
     voll += r.voll; gebucht += r.gebucht; alt += r.alt;
   }
   return { voll, gebucht, alt };
