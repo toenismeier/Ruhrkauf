@@ -86,7 +86,7 @@ export function tonModul(ctx = {}) {
   let gestartet = false, verfuegbar = true, freigabeLaeuft = false;
   let uiAktiv = false, letzteKassenzeit = -Infinity, berichtFertig = false;
   let reiseBeginn = null, reiseToken = 0, musikNaechste = 0, musikSchritt = 0;
-  let timer = null, zugRaf = 0;
+  let timer = null, zugRaf = 0, letztePhase = null;
   const jetzt = () => audio?.currentTime ?? 0;
   const aktiv = () => audio && audio.state === 'running' && typeof document !== 'undefined' && !document.hidden;
   const laut = (typ) => tonEinstellung('ton_' + typ) ? tonEinstellung('ton_' + typ + '_lautstaerke') / 100 : 0;
@@ -234,8 +234,8 @@ export function tonModul(ctx = {}) {
     const moll = insolvenz || ebitda < 0;
     // A-Moll-/C-Dur-Pentatonik, vier Akkorde, Tempo 70 BPM.
     const akkorde = moll
-      ? [[220, 261.63, 329.63], [174.61, 220, 261.63], [196, 246.94, 293.66], [164.81, 196, 246.94]]
-      : [[261.63, 329.63, 392], [196, 246.94, 293.66], [220, 261.63, 329.63], [174.61, 220, 261.63]];
+      ? [[220, 261.63, 329.63], [196, 220, 293.66], [261.63, 329.63, 392], [293.66, 329.63, 392]]
+      : [[261.63, 329.63, 392], [196, 293.66, 440], [220, 261.63, 329.63], [293.66, 392, 440]];
     if (!musikNaechste || musikNaechste < jetzt() - TAKT * 2) musikNaechste = jetzt() + .05;
     while (musikNaechste < jetzt() + .4) {
       const takt = Math.floor(musikSchritt / 4), schritt = musikSchritt % 4, akkord = akkorde[takt % 4];
@@ -247,6 +247,11 @@ export function tonModul(ctx = {}) {
     }
   }
   function aktualisieren() {
+    const phase = ctx.spiel?.()?.phase ?? null;
+    if (letztePhase !== null && phase !== letztePhase && (phase === 'insolvenz' || phase === 'zerschlagen')) {
+      abspielen('insolvenz'); haptik('insolvenz');
+    }
+    letztePhase = phase;
     if (!audio) return;
     const sichtbar = aktiv();
     const zv = sichtbar ? laut('stadt') : 0, mv = sichtbar ? laut('musik') : 0;
@@ -291,7 +296,6 @@ export function tonModul(ctx = {}) {
     haptik('tippen');
   }
   function oeffne() {
-    uiAktiv = true;
     const feld = (d) => {
       const v = tonEinstellung(d.schluessel), id = 'ton-' + d.schluessel;
       return '<label class="zeile" for="' + id + '" style="display:flex;align-items:center;gap:12px;min-height:48px">'
@@ -306,6 +310,7 @@ export function tonModul(ctx = {}) {
       + 'Der iPhone-Stummschalter schaltet Web Audio nicht zuverlässig stumm. Zum vollständigen Stummschalten '
       + 'die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Geräten zur Verfügung.</p>'
       + '<button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', 'gross');
+    uiAktiv = true;
   }
   function aendern(e) {
     if (!uiAktiv || !e.target.matches?.('[data-ton]')) return;
@@ -345,6 +350,9 @@ export function tonModul(ctx = {}) {
     });
     beobachter.observe(document.body, { subtree: true, childList: true, characterData: true,
       attributes: true, attributeFilter: ['class', 'hidden'] });
+    window.addEventListener('hartwig:erfolg-freigeschaltet', () => { abspielen('freigeschaltet'); haptik('erfolg'); });
+    window.addEventListener('hartwig:erfolg', () => { abspielen('erfolg'); haptik('erfolg'); });
+    window.addEventListener('hartwig:warnung', () => { abspielen('warnung'); haptik('warnung'); });
     document.addEventListener('visibilitychange', aktualisieren);
     window.addEventListener('pagehide', () => { if (audio) audio.suspend().catch(() => {}); });
     window.addEventListener('pageshow', () => { if (audio && gestartet) audio.resume().then(aktualisieren).catch(() => {}); });
