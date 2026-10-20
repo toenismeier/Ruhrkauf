@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -60,7 +61,8 @@ export type SpielerAktion =
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
-  | ProduktAktion;
+  | ProduktAktion
+  | TestAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -118,6 +120,7 @@ function letzterUmsatz(s: GameState): number {
 }
 
 export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+  if (a.typ.startsWith('test')) return testAktion(s, a as TestAktion);
   if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
