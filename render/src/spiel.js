@@ -35,7 +35,7 @@ const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
 let speicherWarnung = false;
-const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', warnen: true, wochenbericht: 'voll' });
+const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', warnen: true, wochenbericht: 'voll', reiseZuletzt: [] });
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
@@ -807,6 +807,8 @@ reise = reiseModul({
       formate: formate.filter((p) => p[1]).map((p) => p[0] + ' ' + p[1]).join(' · ') };
   }),
   pinPunkt: bahnhofBildpunkt,
+  zuletzt: () => postUi.reiseZuletzt ?? [],
+  besucht: (namen) => { postUi.reiseZuletzt = namen; },
   bauen: (name) => { schliessePanel(); baueStadtAusSpiel(name); wahl.value = name; },
   bahnhofFokussieren,
   fertig: () => automatischSpeichern(),
