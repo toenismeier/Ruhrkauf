@@ -367,6 +367,17 @@ export interface Insolvenz {
   grund: string;
 }
 
+/** Zahlungsstrom der abgeschlossenen Woche, auf den tatsächlichen Cash-Bestand abgestimmt. */
+export interface KapitalflussWoche {
+  operativ: Eur;
+  investitionen: Eur;
+  finanzierung: Eur;
+  sonstiges: Eur;
+  netto: Eur;
+  bestand: Eur;
+  woche: number;
+}
+
 export interface WochenKpi {
   woche: number;
   umsatz: Eur;
@@ -385,6 +396,7 @@ export interface WochenKpi {
   beratung: Eur;
   ebitda: Eur; // vor Sondereffekten
   sondereffekte: Eur;
+  kapitalfluss?: KapitalflussWoche; // optional für alte Spielstände
   cash: Eur;
   kreditFrei: Eur;
   bestand: Eur;
@@ -469,6 +481,8 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** Noch nicht in einem Wochenabschluss ausgewiesene Investitions-/Finanzierungszahlungen. */
+  kapitalflussOffen?: { investitionen: Eur; finanzierung: Eur };
   zaehler: number; // für IDs
   prognose?: boolean; // true in Vorschau-Klonen: keine Zufallsereignisse
   einmalkostenWoche: Eur; // Sondereffekte der laufenden Woche
