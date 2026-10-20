@@ -70,3 +70,22 @@ export async function loeschen() {
   await queue;
   return aktion('readwrite', (store) => store.delete(KEY));
 }
+
+ 
+// Wiederverwendbare, benannte Filter gehören zum Gerät, nicht zum Engine-Spielstand.
+const AUSWAHL_KEY = 'portfolio-filter';
+export async function auswahlFilterLaden() {
+  const daten = await aktion('readonly', (store) => store.get(AUSWAHL_KEY));
+  return Array.isArray(daten) ? daten : [];
+}
+export async function auswahlFilterSpeichern(name, filter) {
+  const titel = String(name ?? '').trim().slice(0, 60);
+  if (!titel) throw new Error('Bitte einen Namen für die Auswahl eingeben.');
+  await queue;
+  const alt = await auswahlFilterLaden();
+  const neu = [...alt.filter((eintrag) => eintrag.name !== titel), { name: titel, filter: structuredClone(filter) }].slice(-25);
+  const naechste = aktion('readwrite', (store) => store.put(neu, AUSWAHL_KEY));
+  queue = naechste.catch(() => {});
+  await naechste;
+  return neu;
+}
