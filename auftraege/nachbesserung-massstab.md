@@ -103,3 +103,25 @@ Geprüft wurde der Branch nach einem Probe-Merge von `main` (Stand nach FUNDUS u
   - Namen wie „FUNDUS Berlin Am Stadtrand“.
   - Der Export muss dieselben Felder liefern wie die bisherige Datei auf `main`: Flächen nach Gruppen, Baujahr passend zur Bauform (Box ab 1995, Innenstadthaus 1965 bis 1985), Name „FUNDUS <Stadt>“, bei zwei Häusern in einer Stadt mit Stadtteil.
   - Danach die Kataloge `outlets` und `outlet-lagen` rendern und prüfen, dass sie weiter funktionieren.
+
+## 10. Fünfte Prüfung (20.10. vormittags, Stand `2f26503`)
+- **Tests:** 99 grün, 14 übersprungen, 2 rot:
+  - `welt.test.ts` › „jedes Haus hat Etagen, Flächen und Potenzial je Sortiment“: `gruppenFuer(h.format)` liefert für Volkskauf bzw. FUNDUS eine leere Liste, die Häuser haben aber Flächen mit `gruppe: 'damen'` usw. Entweder `gruppenFuer` für `schwester` und `outlet` ergänzen (die Gruppen aus `grafik-outlet.md` bzw. Hartwig-Gruppen für Volkskauf) oder den Test auf `!h.nurDaten` beschränken. Richtig ist das Erste, weil `engine-formate.md` die Gruppen braucht.
+  - `engine.test.ts` › „Ausgangslage: Verlust im Jahr, Gewinn im Weihnachtsquartal“: Jahresquote +2,6 % statt unter −1 %.
+- **`massstab-phase2.ts 1`** (Ziel in Klammern):
+
+  | Kennzahl | Ist | Ziel |
+  |---|---|---|
+  | Umsatz Jahr 1 gesamt | 10.694 Mio. € (+3,7 %) | ±3 % |
+  | Hartwig | 9.280 Mio. € (+3,7 %) | 8.950 Mio. € ±3 % |
+  | Premium | 844 Mio. € (+3,0 %) | 820 Mio. € ±3 % |
+  | Sport | 570 Mio. € (+4,6 %) | 545 Mio. € ±3 % |
+  | EBITDA-Quote Jahr 1 | **+2,6 %** | rund −4 % |
+  | Freigaben je Woche im Mittel | 18,1 (max. 70) | rund 8 |
+  | Laufzeit je Woche | 163 ms im Mittel, Quartalswochen 1.198 ms | unter 60 ms |
+
+- **Bewertung:**
+  - Umsatz ist fast im Ziel. Dafür ist die Kette jetzt profitabel, das Spiel hätte keine Krise mehr. Die EBITDA-Quote muss zurück auf rund −4 %, über Kosten (Personal, Miete, Zentrale), nicht über Umsatz.
+  - Danach Bot C erneut auf Seeds 1 bis 3 prüfen, ebenso „ohne Eingriff folgt die Insolvenz binnen zwei Jahren“.
+  - Laufzeit: `laufzeitOhneQuartalsvorschauMs` 77 ms. Die Quartalsvorschau (Prognose) kostet 1,2 s und rechnet offenbar die ganze Welt für das Quartal vor. Vorschlag: Prognose nur alle 13 Wochen und nur auf Konzernebene mit Durchschnittswerten je Hauscluster statt Hausweise, oder inkrementell über die Wochen verteilt. Ziel: keine Woche über 250 ms.
+- Weiter auf diesem Branch, `main` vorher hineinmergen (dort sind inzwischen Premium, FUNDUS, Ladenbau 1–3 und Reise/Woche).
