@@ -143,7 +143,7 @@ export function portfolioModul(ctx) {
         : ui.sort === 'substanz' ? Math.round(h.substanz) + '/100'
         : ui.sort === 'restlaufzeitMiete' ? Math.round(h.restlaufzeitMiete) + ' Wochen'
         : ui.sort === 'status' ? statusName[h.status] ?? h.status : geld(h[ui.sort] ?? 0);
-      return '<div class="pp-haus" role="listitem" data-haus="' + esc(h.id) + '" style="top:' + pos + 'px;height:' + HOEHE + 'px">' +
+      return '<div class="pp-haus" role="listitem" data-haus="' + esc(h.id) + '" data-wert="' + esc(h[ui.sort] ?? '') + '" style="top:' + pos + 'px;height:' + HOEHE + 'px">' +
         '<input type="checkbox" data-pp-id="' + esc(h.id) + '" aria-label="' + esc(h.name) + ' auswählen"' +
         (ui.ausgewaehlt.has(h.id) ? ' checked' : '') + (!h.steuerbar ? ' disabled' : '') + ' />' +
         '<button data-pp="haus" data-id="' + esc(h.id) + '" class="pp-hausname"><b>' + esc(h.name) +
