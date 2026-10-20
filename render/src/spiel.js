@@ -743,7 +743,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   const u = E.hqUebersicht(s), j = hqGrafik();
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   const pz = (x) => `${Math.round((x ?? 0) * 100)} %`;
-  const knopf = (text, args, art = '') => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(',')})">${text}</button>`;
+  const knopf = (text, args, art = '') => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(',')})">${text}</button>`;
   let html = `<div class="raster">${zahl('Kosten Zentrale je Woche', geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? 'rot' : '')}${zahl('Beschäftigte', fmt.format(Math.round(u.fte)) + ' FTE')}${zahl('davon Büromiete', geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl('Restmiete alter Büros', geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? 'rot' : '')}</div>`;
   // 3D-Schnitt der gewählten Etage (Standard: erste belegte Etage des gewählten bzw. ersten Gebäudes)
   const gs = u.gebaeude ?? [];
