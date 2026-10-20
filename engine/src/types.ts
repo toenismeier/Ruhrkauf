@@ -477,6 +477,8 @@ export interface GameState {
   historie: WochenKpi[];
   zaehler: number; // für IDs
   prognose?: boolean; // true in Vorschau-Klonen: keine Zufallsereignisse
+  /** O02 Umsatztreiber: nur für den A/B-Laufzeitbenchmark, schaltet die neue Erfassung ab. */
+  treiberErfassungAus?: boolean;
   einmalkostenWoche: Eur; // Sondereffekte der laufenden Woche
   einmalErloeseWoche: Eur;
 }
