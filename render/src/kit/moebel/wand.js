@@ -1,0 +1,20 @@
+import { definition, wandModul } from './basis.js';
+
+export const ALT_HOLZ_REGAL = definition("alt_holz_regal", "Holzregal klassisch", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Holzregal klassisch","alt":true,"w":5}));
+export const ALT_HOLZ_WAND_10 = definition("alt_holz_wand_10", "Holzregal 10 m", "allgemein", "wand", 8, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Holzregal 10 m","alt":true,"w":10}));
+export const ALT_HOLZ_WAND_HALB = definition("alt_holz_wand_halb", "Holzregal halb", "allgemein", "wand", 2, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Holzregal halb","alt":true,"w":2.5}));
+export const ALT_DAMEN_HAENGUNG = definition("alt_damen_haengung", "Damenhängeware", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"textil","pal":"outlet","titel":"Damenhängeware","alt":true,"w":5}));
+export const ALT_HERREN_HAENGUNG = definition("alt_herren_haengung", "Herrenhängeware", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"textil","pal":"textil","titel":"Herrenhängeware","alt":true,"w":5}));
+export const ALT_KINDER_MODE = definition("alt_kinder_mode", "Kindermode alt", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"textil","pal":"kinder","titel":"Kindermode alt","alt":true,"w":5}));
+export const ALT_SCHUH_KLASSIK = definition("alt_schuh_klassik", "Schuhregal klassisch", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"schuhe","pal":"allgemein","titel":"Schuhregal klassisch","alt":true,"w":5}));
+export const ALT_TASCHEN_ALTHOLZ = definition("alt_taschen_altholz", "Lederwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"taschen","pal":"allgemein","titel":"Lederwarenwand","alt":true,"w":5}));
+export const ALT_UHREN_VITRINE = definition("alt_uhren_vitrine", "Uhrenvitrine", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Uhrenvitrine","alt":true,"w":5}));
+export const ALT_PARFUEM = definition("alt_parfuem", "Parfümregal", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"beauty","pal":"outlet","titel":"Parfümregal","alt":true,"w":5}));
+export const ALT_WAESCHE = definition("alt_waesche", "Wäschewand", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"textil","pal":"outlet","titel":"Wäschewand","alt":true,"w":5}));
+export const ALT_KLEINKUNST = definition("alt_kleinkunst", "Geschenkartikel", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Geschenkartikel","alt":true,"w":5}));
+export const ALT_HAUSHALT = definition("alt_haushalt", "Haushaltswaren", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Haushaltswaren","alt":true,"w":5}));
+export const ALT_SPIELWAREN = definition("alt_spielwaren", "Spielwaren", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"kinder","titel":"Spielwaren","alt":true,"w":5}));
+export const ALT_BUCH_REGAL = definition("alt_buch_regal", "Bücherwand", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"allgemein","titel":"Bücherwand","alt":true,"w":5}));
+export const ALT_FEINKOST = definition("alt_feinkost", "Feinkostregal", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"ware","pal":"outlet","titel":"Feinkostregal","alt":true,"w":5}));
+export const ALT_GESCHIRR = definition("alt_geschirr", "Geschirrwand", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"home","pal":"allgemein","titel":"Geschirrwand","alt":true,"w":5}));
+export const ALT_BETTWAREN = definition("alt_bettwaren", "Bettwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"textil","pal":"allgemein","titel":"Bettwarenwand","alt":true,"w":5}));

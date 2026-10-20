@@ -104,3 +104,8 @@ Als Nächstes: HQ-Logik (Punkt 2) und Engine anbinden (Punkt 4). Während der Ar
 
 ## Arbeitsweise mit Ummo
 Deutsch mit echten Umlauten, kurz. Entscheidungen über Auswahlfragen mit Empfehlung. Selbst gefundene Schwächen beheben statt auflisten. Bei laufender Arbeit alle 10 Minuten kurzes Update. Coffee Inc 2 ist die verbindliche Vorlage. Nie in C:\Users\Ummo\Desktop\Privat schauen, nie über den Bildschirm bedienen.
+
+## Ladenbau-Workstream (Branch `feat/ladenbau`, 19.10.2026)
+- Phase 1: zentraler Möbelbaukasten unter `render/src/kit/moebel/` mit **147 deterministischen Möbeln** (86 Sport, 15 Off-Price, 46 allgemein); einheitliche Raster-, Budget- und Höhenangaben. Unveränderte Bestandsaufrufer bleiben kompatibel.
+- Prüfung: `cd render && npm run moebel:pruefen` misst die echte Bounding Box, Maße, Bauteilbudget, Determinismus und Fernstufe; CI-Job „Ladenbau Möbelprüfung“. Vier Kataloge für Sport, Outlet, allgemein und Möbelreihen wurden in der Feature-Branch-CI gerendert (CI-Artefakt `ladenbau-kataloge`); die Versionierung unter `bilder/katalog-moebel-*.png` ist vorbereitet, aber wegen eines nachfolgenden Runner-Problems noch nicht bestätigt.
+- Phasenfortschritt, Abnahme und weitere Schritte verbindlich unter `auftraege/ladenbau-stand.md`; Spezifikation unter `auftraege/workstream-ladenbau.md`.
