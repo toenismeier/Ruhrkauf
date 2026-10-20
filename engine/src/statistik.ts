@@ -38,8 +38,14 @@ export function statistikWoche(s: GameState, k: WochenKpi): void {
   const lieferanten = (lief.reduce((sum, l) => sum + l.vertrauen, 0) + s.restLieferantenVertrauen) / (lief.length + 1);
   s.statistik.stimmung.push({ woche: k.woche, wert: Math.round((a.bank + a.kreditversicherer + lieferanten) / 3) });
   if (s.statistik.stimmung.length > 520) s.statistik.stimmung.splice(0, s.statistik.stimmung.length - 520);
-  if (k.woche === 52 && !s.statistik.sparsam) {
-    s.statistik.sparsam = JSON.stringify(s).length > GRENZE_BYTES;
+  // Nach einem Jahr alle vier Wochen auf das echte UTF-8-Spielstandvolumen prüfen.
+  // Bei Überschreiten werden ältere Nach-Jahr-1-Werte sofort verdichtet.
+  if (k.woche >= 52 && k.woche % 4 === 0 && !s.statistik.sparsam) {
+    s.statistik.sparsam = new TextEncoder().encode(JSON.stringify(s)).byteLength > GRENZE_BYTES;
+    if (s.statistik.sparsam) for (const h of s.haeuser) {
+      if (!h.verlauf) continue;
+      h.verlauf = h.verlauf.filter(p => p.woche <= 52 || p.woche % 4 === 0 || p.woche === k.woche);
+    }
   }
 }
 
