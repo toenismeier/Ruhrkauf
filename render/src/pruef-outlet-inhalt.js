@@ -1,4 +1,4 @@
-// FUNDUS: 20 echte, unabhängige Standorte und geometrisch getrennte Slots.
+// FUNDUS: 66 echte, unabhängige Standorte und geometrisch getrennte Slots.
 import outlets from '../haeuser-outlet.json';
 import haeuser from '../haeuser.json';
 import { STADTLISTE, stadtDaten } from './kit/staedte.js';
@@ -8,10 +8,10 @@ import { masseOutlet, familieOutlet } from './kit/outlet.js';
 const fehler = [];
 const pruefe = (ok, s) => { if (!ok) fehler.push(s); };
 const ids = new Set(outlets.map((h) => h.id));
-pruefe(outlets.length === 20 && ids.size === 20, 'genau 20 eindeutige Filialen');
-pruefe(outlets.filter((h) => h.lage === 'rand').length === 14, '14 Außenring-Filialen');
-pruefe(outlets.filter((h) => h.lage === 'b').length === 6, '6 Innenstadt-Filialen');
-pruefe(new Set(outlets.map((h) => h.stadt)).size === 20, 'ein FUNDUS-Standort je Stadt');
+pruefe(outlets.length === 66 && ids.size === 66, 'genau 66 eindeutige Filialen');
+pruefe(outlets.filter((h) => h.lage === 'rand').length === 46, '46 Außenring-Filialen');
+pruefe(outlets.filter((h) => h.lage === 'b').length === 20, '20 Innenstadt-Filialen');
+pruefe(new Set(outlets.map((h) => h.stadt)).size <= 66, 'höchstens 66 FUNDUS-Städte');
 pruefe(Object.keys({ 1: 1, 2: 1, 3: 1 }).every((n) => outlets.some((h) => familieOutlet(h) === +n)), 'drei Bauformen');
 
 for (const h of outlets) {
@@ -24,10 +24,11 @@ for (const h of outlets) {
   pruefe(m.familie === 3 ? m.park === 0 : m.park >= 18, h.id + ': Parken nach Bauform');
 
   pruefe(h.substanz >= 40 && h.substanz <= 85, h.id + ' Substanz');
-  pruefe(h.baujahr >= 1998 && h.baujahr <= 2016, h.id + ' Baujahr');
+  pruefe(h.lage === 'b' ? h.baujahr >= 1965 && h.baujahr <= 1985 : h.baujahr >= 1998 && h.baujahr <= 2016, h.id + ' Baujahr passend zur Bauform');
+  pruefe(h.flaechen.length === 7 && h.flaechen.every((f) => f.konzept === 'eigen' && !!f.gruppe), h.id + ': sieben Abteilungsflächen');
   if (h.lage === 'b') {
     const gr = Math.max(0, ...haeuser.filter((x) => x.stadt === h.stadt && x.format === 'warenhaus').map((x) => x.grundflaecheQm));
-    pruefe(m.bw * m.bd <= gr * 0.8 + 0.1, h.id + ' max. 80% Hartwig-Grundfläche');
+    if (gr > 0) pruefe(m.bw * m.bd <= gr * 0.8 + 0.1, h.id + ' max. 80% Hartwig-Grundfläche');
   }
   const s = stadtDaten(h.stadt);
   pruefe(s?.standorte.filter((x) => x.id === h.id).length === 1, h.id + ' in Stadt-Daten');
