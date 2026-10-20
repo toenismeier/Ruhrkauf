@@ -222,6 +222,10 @@ export function werkzeugeModul(ctx) {
   }
   async function berichtKopieren() {
     const bericht = await erstelleBericht();
+    // Auch bei verweigerter Zwischenablage bleibt der vollständige Text auswählbar.
+    berichteingabe = bericht;
+    const feld = document.getElementById('test-bericht');
+    if (feld) feld.value = bericht;
     await kopiereText(bericht);
     ctx.meldung('Fehlerbericht kopiert (' + bericht.length + ' Zeichen).');
     return bericht;
