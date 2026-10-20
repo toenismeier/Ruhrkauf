@@ -29,14 +29,72 @@ export interface Szenario {
   schwierigkeit?: SchwierigkeitId;
 }
 
+/** Phase 2: wirtschaftliche Soll-Größen der aktiven Formate (Euro p.a., Seed 1–3).
+ * Die Werte für A/B/C folgen 48/30/17 Mio. Euro je Haus und werden auf
+ * 8.950 Mio. Euro Gesamtnetz skaliert. Schwester und FUNDUS sind nur Daten.
+ */
+export const UMSATZZIELE_JAHR1 = {
+  A: 8_950_000_000 * (45 * 48) / (45 * 48 + 115 * 30 + 200 * 17),
+  B: 8_950_000_000 * (115 * 30) / (45 * 48 + 115 * 30 + 200 * 17),
+  C: 8_950_000_000 * (200 * 17) / (45 * 48 + 115 * 30 + 200 * 17),
+  premium: 820_000_000,
+  sport: 545_000_000,
+} as const;
+
+type AktiveKlasse = keyof typeof UMSATZZIELE_JAHR1;
+
+function umsatzklasse(h: Haus): AktiveKlasse | undefined {
+  if (h.nurDaten) return undefined;
+  if (h.format === 'sport') return 'sport';
+  if (h.klasse === 'premium') return 'premium';
+  if (h.hausklasse) return h.hausklasse;
+  throw new Error(`Aktivem Haus ${h.id} fehlt die Hausklasse`);
+}
+
+/** Die Hausgrößen bleiben unterschiedlich; nur die Nachfrage je Klasse wird
+ * auf die Konzernziele normiert. Miete und Startpersonal ziehen proportional
+ * zum Umsatzpotenzial nach. Keine Zuschüsse über die Spiel-GuV.
+ */
+function kalibriereStandortumsatz(haeuser: Haus[]): void {
+  const basis = new Map<Haus, number>();
+  const summen: Record<AktiveKlasse, number> = { A: 0, B: 0, C: 0, premium: 0, sport: 0 };
+  for (const haus of haeuser) {
+    const klasse = umsatzklasse(haus);
+    if (!klasse) continue;
+    let x = 0;
+    for (const [g, p] of Object.entries(haus.potenzial) as [GruppeId, number][]) {
+      const qm = haus.flaechen.filter((f) => f.gruppe === g).reduce((a, f) => a + f.qm, 0);
+      x += p * (1 - Math.exp(-qm / (haus.saettigungQm[g] ?? 1)));
+    }
+    basis.set(haus, x);
+    summen[klasse] += x;
+  }
+  for (const haus of haeuser) {
+    const klasse = umsatzklasse(haus);
+    if (!klasse) continue;
+    const faktor = UMSATZZIELE_JAHR1[klasse] / (52 * Math.max(1, summen[klasse]));
+    const alt = basis.get(haus) ?? 0;
+    const qm = haus.flaechen.filter((f) => f.konzept === 'eigen').reduce((a, f) => a + f.qm, 0);
+    const bedarfAlt = qm / PARAM.qmJeFte + alt / PARAM.umsatzJeFte;
+    const bedarfNeu = qm / PARAM.qmJeFte + (alt * faktor) / PARAM.umsatzJeFte;
+    const personalFaktor = bedarfNeu / Math.max(1, bedarfAlt);
+    for (const g of Object.keys(haus.potenzial) as GruppeId[]) haus.potenzial[g]! *= faktor;
+    haus.miete.mieteWoche = eur(haus.miete.mieteWoche * faktor);
+    haus.personal.vollzeit *= personalFaktor;
+    haus.personal.teilzeit *= personalFaktor;
+    haus.personal.aushilfen *= personalFaktor;
+  }
+}
+
 export const STANDARD_SZENARIO: Szenario = {
   warenhaeuser: 360,
   sporthaeuser: 44,
   premiumhaeuser: 4,
   schwesterhaeuser: 86,
   outlethaeuser: 66,
-  startCash: 120_000_000,
-  kreditlinie: 90_000_000,
+  // Liquidität analog zum 3,3-fachen Umsatz gegenüber dem alten 130er-Maßstab.
+  startCash: 400_000_000,
+  kreditlinie: 300_000_000,
   firma: 'Hartwig & Brehm Warenhaus AG',
   sportName: 'Hartwig Sport',
   startJahr: 2027,
@@ -59,7 +117,7 @@ export const PARAM = {
   konzessionsQuote: 0.22,
   kommissionsMarge: 0.25,
   bestandsReichweite: 11,
-  kvLimitBasis: 380_000_000,
+  kvLimitBasis: 1_260_000_000,
   abfindungRegulaer: 28_000,
   abfindungInsolvenz: 7_500,
 };
@@ -318,6 +376,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     for (let i = 1; i <= menge.fundus && oi < (sz.outlethaeuser ?? 0); i++)
       haeuser.push(bauHaus(fundusRng, ++oi, stadt, region, cluster, kk, 'outlet', sz, i, { outletLage: oi <= 46 ? 'rand' : 'b' }));
   }
+
+  kalibriereStandortumsatz(haeuser);
 
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
   const bestand: Kohorte[] = [];
