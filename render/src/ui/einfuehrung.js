@@ -154,6 +154,12 @@ export function einfuehrungModul() {
     if (!aktiv) return;
     const ziel = fokusElement();
     let b = ziel?.getBoundingClientRect();
+    // Die Karte selbst liegt bildschirmfüllend unter HUD und Menü. Nur die
+    // freie Kartenfläche freigeben; obere und untere Bedienleisten blockieren.
+    if (EINFUEHRUNG[index].ziel === 'karte' && b) {
+      const top = Math.min(155, innerHeight * .24), bottom = Math.max(top + 50, innerHeight - 113);
+      b = { left: 0, right: innerWidth, top, bottom, width: innerWidth, height: bottom - top };
+    }
     if (!b || b.width < 2 || b.height < 2) b = null;
     const w = innerWidth, h = innerHeight;
     const x0 = b ? Math.max(0, b.left - 7) : w * .5;
@@ -277,6 +283,9 @@ export function einfuehrungModul() {
     Vorstand: 'Hier besetzen Sie Ressorts und stellen Delegationen ein.',
     Zentrale: 'Hier steuern Sie Standorte und Kosten der Hauptverwaltung.',
     Posteingang: 'Hier finden Sie Entscheidungen und Fristen.',
+    Produkte: 'Hier entwickeln Sie neue Eigenmarkenprodukte und prüfen deren Marge.',
+    Hausdetail: 'Hier sehen Sie Kennzahlen, Flächen und Gebäudezustand eines Standorts.',
+    Wettbewerb: 'Hier bewerten Sie Wettbewerber und deren Auswirkungen auf Ihre Häuser.',
   };
   const hinweis = document.createElement('div');
   hinweis.id = 'ein-kontext'; hinweis.hidden = true; document.body.append(hinweis);
@@ -284,7 +293,8 @@ export function einfuehrungModul() {
     if (aktiv || frage || !tippsAn || zustand.modus !== 'fertig') return;
     if (!el('panel')?.classList.contains('offen')) return;
     const titel = el('ptitel')?.textContent ?? '';
-    const key = Object.keys(HINWEISE).find((k) => titel.includes(k));
+    const key = Object.keys(HINWEISE).find((k) => titel.includes(k)) ||
+      (getSpiel()?.s?.haeuser?.some((h) => h.name === titel) ? 'Hausdetail' : null);
     if (!key || gesehen.has(key)) return;
     gesehen.add(key);
     const bekannt = lesen(SCHLUESSEL + '.tipps', []);
