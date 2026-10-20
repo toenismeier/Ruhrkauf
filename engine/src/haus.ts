@@ -256,7 +256,7 @@ export function hausWoche(s: GameState): void {
     }
     // Stadtfrequenz driftet langfristig gering und deterministisch.
     if (s.woche % 52 === 0) u.trend = clamp(u.trend + (hash(s.seed+stadt+':trend:'+s.woche) - 0.5) * 0.01, 0.9, 1.1);
-    u.sonntage = u.sonntage.filter(w => w >= s.woche);
+    u.sonntage = u.sonntage.filter(w => Math.floor(w / 52) >= Math.floor(s.woche / 52));
   }
   for (const h of s.haeuser) {
     if (!istOffen(h) || !h.betrieb) continue;
@@ -334,11 +334,13 @@ export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: st
       h.personal.filialleiter.wechselwille = 0;
       return { ok: true, text: l.name + ' als Clusterleitungs-Kandidat vorgemerkt. Stellvertretung übernimmt das Haus.' };
     case 'hausStandardSetzen': {
-      const stand = h && a.begruendung?.trim() ? h.betrieb!.standardAusnahme ?? structuredStandard()
-        : s.hausbetrieb!.standards[a.cluster];
-      if (!stand) return { ok: false, text: 'Hauscluster nicht gefunden. Einzelabweichungen benötigen eine Begründung.' };
+      if (a.haus && !a.begruendung?.trim()) return { ok: false, text: 'Einzelabweichungen benötigen eine Begründung.' };
+      if (h && a.cluster !== hausclusterSchluessel(h)) return { ok: false, text: 'Haus gehört nicht zum angegebenen Hauscluster.' };
+      const basis = h ? hausStandard(s, h) : s.hausbetrieb!.standards[a.cluster];
+      if (!basis) return { ok: false, text: 'Hauscluster nicht gefunden.' };
       const n = Number(a.wert);
       if (!Number.isInteger(n)) break;
+      const stand: HausStandard = { ...basis, oeffnung: { ...basis.oeffnung } };
       if (a.feld === 'von' || a.feld === 'bis' || a.feld === 'samstagBis') {
         if (n < 7 || n > 22) break;
         stand.oeffnung[a.feld] = n;
@@ -347,7 +349,10 @@ export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: st
         if (n < 1 || n > 3) break;
         stand[a.feld] = n as 1 | 2 | 3;
       }
-      if (h && a.begruendung?.trim()) { h.betrieb!.standardAusnahme = stand; h.betrieb!.ausnahmeGrund = a.begruendung; }
+      if (h) {
+        h.betrieb!.standardAusnahme = stand;
+        h.betrieb!.ausnahmeGrund = a.begruendung!.trim();
+      } else s.hausbetrieb!.standards[a.cluster] = stand;
       return { ok: true, text: 'Hausstandard angepasst.' };
     }
     case 'hausKostenSetzen':
@@ -384,6 +389,7 @@ export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: st
       const u = s.hausbetrieb!.staedte[a.stadt];
       if (!u || !Number.isInteger(a.woche) || a.woche < s.woche + 2 || a.woche >= s.woche + 52) break;
       const jahr = Math.floor(a.woche / 52);
+      if (u.sonntage.includes(a.woche)) return { ok: false, text: 'Für diese Woche wurde bereits ein Sonntag genehmigt.' };
       if (u.sonntage.filter(w => Math.floor(w / 52) === jahr).length >= 4) return { ok: false, text: 'Höchstens vier Sonntage pro Jahr.' };
       const groesse = s.haeuser.find(x => x.stadt === a.stadt)?.cluster;
       const p = groesse === 'metropole' ? 0.65 : groesse === 'grossstadt' ? 0.78 : 0.86;
