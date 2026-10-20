@@ -5,6 +5,8 @@
 // Abfrage nach (0 Abweichungen erwartet).
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
 import { eigenmarkenSeite, eigenmarkenAktion, eigenmarkenErwartet } from './eigenmarken.js';
+// O05 Ware
+import { warenSeite, warenAktion, wareErwartet } from './ware.js';
 
 /** Kurze Spaltenköpfe; Name und Format der Spalten kommen aus EINKAUF_SPALTEN. */
 const KOPF = { umsatz: 'Umsatz 13 Wo.', rohertragsquote: 'Rohertrag', lagerumschlag: 'Umschlag', reichweite: 'Reichweite', abverkaufsquote: 'Abverkauf', altwarenanteil: 'Altware', nosVerfuegbarkeit: 'NOS', limitFrei: 'Limit frei', rohertrag: 'Rohertrag €', bestandEk: 'Bestand', abschriften: 'Abschriften', reduzierungsquote: 'Reduzierung', entgangenerUmsatz: 'Fehlmengen', offeneOrders: 'Orders', offeneFreigaben: 'Freigaben', eigenmarkenAnteil: 'Eigenmarke', eigenmarkenMarge: 'EM-Marge' };
@@ -39,7 +41,7 @@ export function einkaufModul(ctx) {
     const n = q.freigaben(s()).anzahl;
     const an = (id) => ui.seite === id || (id === 'uebersicht' && ui.seite === 'wg') || (id === 'eigenmarken' && ui.seite === 'gruenden');
     const t = (id, inhalt) => `<button class="tab ${an(id) ? 'an' : ''}" data-a="seite" data-v="${id}">${inhalt}</button>`;
-    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}</div>`;
+    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}${t('merchandise', 'Merchandise')}${t('allokation', 'Allokation')}${t('reduzierungKalender', 'Reduzierung')}</div>`;
   }
 
   // ─────────────────────────── Übersicht
@@ -160,7 +162,7 @@ export function einkaufModul(ctx) {
   // ─────────────────────────── Steuerung
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
-    const r = ui.seite === 'wg' ? wgSeite() : ui.seite === 'freigaben' ? freigabenSeite() : ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? eigenmarkenSeite(ctx, ui, tabs()) : uebersicht();
+    const r = ui.seite === 'wg' ? wgSeite() : ui.seite === 'freigaben' ? freigabenSeite() : ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? eigenmarkenSeite(ctx, ui, tabs()) : ['merchandise','allokation','reduzierungKalender'].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
     ctx.panel(r.titel, r.unter, r.html, 'gross');
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = sc;
@@ -180,6 +182,8 @@ export function einkaufModul(ctx) {
   function klick(el, ev) {
     const a = el.dataset.a, v = el.dataset.v;
     if (a.startsWith('em')) { const r = eigenmarkenAktion(ctx, ui, el, ev, tun); if (r !== 'nichts') zeigen(r !== 'oben'); return; }
+    // O05 Ware
+    if (a.startsWith('ware')) { warenAktion(ctx, ui, el, tun); return; }
     switch (a) {
       case 'seite': ui.seite = v; ui.kuerzen = null; if (el.dataset.bereich) ui.filter = { bereich: el.dataset.bereich, art: '', wert: '' }; zeigen(); document.getElementById('pinhalt').scrollTop = 0; return;
       case 'format': ui.format = v; zeigen(true); return;
@@ -206,6 +210,8 @@ export function einkaufModul(ctx) {
   function wechsel(el) {
     const a = el.dataset.a;
     if (a.startsWith('em')) { const r = eigenmarkenAktion(ctx, ui, el, null, tun); if (r !== 'nichts') zeigen(true); return; }
+    // O05 Ware
+    if (a.startsWith('ware')) { (ui.ware ??= {})[({ wareVon:'von', wareNach:'nach', wareGruppe:'gruppe', wareWert:'wert' })[a]] = a === 'wareWert' ? Number(el.value) : el.value; return; }
     if (a === 'filterBereich') { ui.filter.bereich = el.value; zeigen(true); return; }
     if (a === 'regel' && el.type === 'range') {
       const f = el.dataset.f, x = Number(el.value) / 100;
@@ -255,6 +261,7 @@ export function einkaufModul(ctx) {
         return ex.has(t[1]) ? formatiere(ex.get(t[1]), k[t[1]]) : text(t[1], k);
       }
       if (t[0] === 'k') { const r = d.verlauf[t[1]], l = r[r.length - 1]; return r.length === 0 ? 'noch keine Daten' : t[1] === 'reichweite' ? `${dez(l, 1)} Wo.` : geld(l); }
+      if (t[0] === 'ware') return wareErwartet(s(), ctx.E, t);
       return eigenmarkenErwartet(ctx, t, ui);
     };
     for (const el of document.querySelectorAll('#pinhalt [data-p]')) {
