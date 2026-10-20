@@ -17,6 +17,7 @@ import { itHausFaktor } from './it';
 // O07 Haus
 import { hausBetriebsFaktor, hausBetriebskosten } from './haus';
 import { umbauNachfrageFaktor, umbauFrequenzFaktor } from './umbau';
+import { szenarioFrequenz } from './szenarien';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -87,7 +88,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h) * umbauFrequenzFaktor(h);
+  return makro * image * mkt * substanz * szenarioFrequenz(s) * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h) * umbauFrequenzFaktor(h);
 }
 
 export function saettigung(qm: number, Q: number): number {

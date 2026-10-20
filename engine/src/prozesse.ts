@@ -137,7 +137,7 @@ export function prozesse(s: GameState): void {
 }
 
 export function eroeffneInsolvenz(s: GameState, grund: string): void {
-  if (s.phase !== 'regulaer') return;
+  if (s.phase !== 'regulaer' || s.szenario?.regeln.sandkasten) return;
   const w = s.woche;
   let alt = 0;
   for (const v of s.verbindlichkeiten) alt += v.wert;

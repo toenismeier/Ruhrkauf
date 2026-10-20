@@ -489,10 +489,17 @@ async function buendeln() {
     q.on('pageerror', (e) => console.log('FEHLER', e.message));
     await q.goto('file://' + path.join(__dirname, 'spiel.html') + '?leben=aus', { waitUntil: 'load', timeout: 0 });
     await q.waitForSelector('#start.an', { timeout: 60000 });
+    const szenarien = await q.evaluate(() => [...document.querySelectorAll('.sz-karte')].map((k) => k.querySelector('b').textContent));
+    soll('Sieben Szenarien auswählbar', szenarien.length === 7, szenarien.join(', '));
+    const niceBilder = path.join(__dirname, '..', 'bilder', 'nice', 'szenarien');
+    fs.mkdirSync(niceBilder, { recursive: true });
+    await q.screenshot({ path: path.join(niceBilder, 'szenarien-auswahl.png') });
+    await q.tap('.sz-karte[data-szenario=standard]');
     const karten = await q.evaluate(() => [...document.querySelectorAll('.stufe-karte')].map((k) => k.querySelector('b').textContent));
     soll('Startbildschirm mit drei Schwierigkeiten', karten.length === 3, karten.join(', '));
     await q.screenshot({ path: path.join(__dirname, 'out', 'start.png') });
     console.log('gespeichert:', path.join(__dirname, 'out', 'start.png'));
+    await q.screenshot({ path: path.join(niceBilder, 'szenarien-schwierigkeit.png') });
     await q.tap('.stufe-karte[data-v=schwer]');
     await q.selectOption('#startstadt', 'Karlsruhe');
     await q.tap('#startknopf');

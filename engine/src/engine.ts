@@ -26,6 +26,7 @@ import { produkteBuchen, produkteWoche } from './produkte';
 // O04 Personal
 import { personaleinsatzWoche } from './personaleinsatz';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+import { szenarioNachWoche, szenarioWoche } from './szenarien';
 // O02 Umsatztreiber
 import { erfasseTreiber } from './treiber';
 import { planungBonusWoche, planungWoche } from './planung';
@@ -52,6 +53,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   const w = s.woche;
   const cashVorher = s.historie[s.historie.length - 1]?.cash ?? s.kapitalflussStartCash ?? s.cash;
 
+  szenarioWoche(s);
   prozesse(s);
   premiumWoche(s);
   // O08 Umbau
@@ -281,6 +283,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.einmalErloeseWoche = 0;
   zeitungWoche(s);
   s.woche += 1;
+  szenarioNachWoche(s);
   // Reine Beobachtung nach dem wirtschaftlichen Wochenabschluss; keine Prognosen verändern Erfolge.
   erfolgeWoche(s);
   spielendePruefen(s);

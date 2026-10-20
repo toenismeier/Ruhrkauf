@@ -51,6 +51,7 @@ import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui
 import { werkzeugeModul } from './ui/werkzeuge.js';
 import { erfolgeModul } from './ui/erfolge.js';
 import { tonModul } from './ui/ton.js';
+import { szenarienModul } from './ui/szenarien.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -622,6 +623,7 @@ function woche(mitBot = false, test = false) {
   leben.woche(ankommendeOrders);
   const t2 = performance.now();
   cockpitZeigen();
+  szenarienUI.aktualisieren();
   if (offenesHaus) oeffneHaus(offenesHaus);
   else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
   else if (offenesHq) oeffneHq(offenesHq === true ? undefined : offenesHq);
@@ -677,6 +679,8 @@ function panel(titel, unter, html, klasse = '') {
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
 function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
+function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; }
+const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
 function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
@@ -1239,10 +1243,15 @@ function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) 
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
   postUi = neuerPostUi();
+function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard') {
+  schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
+  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId });
+  postUi = neuerPostUi(); $('postwarnung').checked = true; $('wochenbericht-modus').value = postUi.wochenbericht;
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
   EQ.freigaben(s);
   cockpitZeigen();
+  szenarienUI.aktualisieren();
   baueStadtAusSpiel(stadt);
   ek.badge(); menueBadge();
   window.spiel.s = s;
@@ -1276,6 +1285,7 @@ window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: s
     }
     hausReiter='ueberblick'; oeffneHaus(id);
     return { id, score:d.kundenScore, reiter:7, fehler }; },
+  reise, wochenbericht, szenarien: szenarienUI, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
@@ -1340,11 +1350,12 @@ window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: s
 const einfuehrung = einfuehrungModul();
 window.spiel.einfuehrung = einfuehrung;
 // ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
-const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', seed: Number(param.get('seed') ?? 1) };
+const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1) };
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
   $('startstufen').innerHTML = SCHWIERIGKEITEN.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(1 + SCHWIERIGKEITEN.indexOf(x))}${'○'.repeat(SCHWIERIGKEITEN.length - 1 - SCHWIERIGKEITEN.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join('');
   $('startseed').value = startWahl.seed;
+  szenarienUI.zeichneStart();
   $('start').classList.add('an');
   $('lade').classList.remove('an');
   laden().then((datensatz) => {
@@ -1362,7 +1373,7 @@ function spielStarten() {
   $('lade').classList.add('an');
   setTimeout(() => {
     wahl.value = startWahl.stadt;
-    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit);
+    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
     $('lade').classList.remove('an');
     window.bereit = true;
     einfuehrung.spielStart();
@@ -1393,6 +1404,7 @@ async function spielFortsetzen() {
     // Kartenaufbau erst nach dem Zeichnen des Ladebildschirms.
     await new Promise((resolve) => setTimeout(resolve, 30));
     cockpitZeigen();
+    szenarienUI.aktualisieren();
     baueStadtAusSpiel(wahl.value);
     ek.badge(); menueBadge();
     window.spiel.s = s;
@@ -1417,6 +1429,6 @@ window.spiel.startZeigen = startZeigen;
 window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN;
 Object.defineProperty(window.spiel, 'schwierigkeit', { get: () => schwierigkeitId });
 setTimeout(() => {
-  if (param.has('stadt') || param.has('schwierigkeit') || param.has('seed')) spielStarten();
+  if (param.has('stadt') || param.has('schwierigkeit') || param.has('seed') || param.has('szenario')) spielStarten();
   else startZeigen();
 }, 20);

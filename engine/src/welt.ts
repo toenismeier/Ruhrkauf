@@ -15,6 +15,7 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
 import { bildeHauscluster } from './organisation';
 // O03 IT
 import { initialisiereIt } from './it';
@@ -34,6 +35,9 @@ export interface Szenario {
   schwierigkeit?: SchwierigkeitId;
   /** A/B-Kalibrierung: normale Warenhäuser statt Premiumhäuser. */
   premiumDeaktiviert?: boolean;
+  /** Nur Nice-to-have: nicht gesetzt heißt unveränderte Standardpartie. */
+  szenarioId?: SzenarioId;
+  szenarioRegeln?: SzenarioRegeln;
 }
 
 export const STANDARD_SZENARIO: Szenario = {
@@ -259,6 +263,20 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
 
   if (!sz.premiumDeaktiviert) kennzeichnePremium(haeuser);
 
+  if (sz.szenarioRegeln?.fusionDoppelStaedte) {
+    const staedte = [...new Set(haeuser.filter((x) => x.format === 'warenhaus').map((x) => x.stadt))]
+      .slice(0, sz.szenarioRegeln.fusionDoppelStaedte);
+    for (const stadt of staedte) {
+      const eintrag = STAEDTE.find((x) => x[0] === stadt);
+      if (!eintrag) continue;
+      const [, region, cluster, kk] = eintrag;
+      const alt = bauHaus(h, ++wh, stadt, region, cluster, kk, 'warenhaus', sz, 2);
+      alt.name = 'Volkskauf ' + stadt;
+      alt.fusionUrsprung = 'volkskauf';
+      haeuser.push(alt);
+    }
+  }
+
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
   const bestand: Kohorte[] = [];
   const basisUmsatz: Partial<Record<GruppeId, number>> = {};
@@ -362,6 +380,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  szenarioStart(s, sz);
   bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
   // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
   initialisiereIt(s);

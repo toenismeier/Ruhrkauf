@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { immobilieVerkaufen } from './szenarien';
 import { zeitungEinstellen } from './zeitung';
 import { spielBeenden } from './spielende';
 // O05 Ware
@@ -36,6 +37,7 @@ import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
+  | { typ: 'immobilieVerkaufen'; haus: string }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
   | { typ: 'flaecheTeilen'; haus: string; flaeche: string; qm: number }
   | { typ: 'geschaeftsmodell'; haeuser: string[] | 'alle'; gruppe: GruppeId; modell: 'eigen' | 'kommission' | 'konzession' }
@@ -470,9 +472,23 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       return ok(`${an.titel}: abgelehnt.`);
     }
 
+    case 'immobilieVerkaufen': {
+      const grund = immobilieVerkaufen(s, a.haus);
+      return grund ? fehler(grund) : ok('Immobilie verkauft und langfristig zurückgemietet.');
+    }
+
     case 'angebotAnnehmen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
+      if (an.typ === 'staatshilfe') {
+        if (s.szenario?.id !== 'lockdown' || s.szenario.hilfeGenutzt) return fehler('Die Hilfe ist nicht mehr verfügbar.');
+        const hilfe = an.einmalzahlung ?? 0;
+        s.cash += hilfe;
+        s.einmalErloeseWoche += hilfe;
+        s.szenario.hilfeGenutzt = true;
+        an.status = 'angenommen'; an.erledigtWoche = s.woche;
+        return ok('Überbrückungshilfe erhalten: ' + mio(hilfe) + '.');
+      }
       if (an.typ === 'konzernVerkauf') {
         if (s.phase !== 'regulaer') return fehler('Konzernverkauf nur außerhalb der Insolvenz möglich.');
         if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
@@ -598,6 +614,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     }
 
     case 'insolvenzAntrag': {
+      if (s.szenario?.regeln.sandkasten) return fehler('Im Sandkasten gibt es keine Insolvenz.');
       if (inso) return fehler('Das Verfahren läuft bereits.');
       const frueh = runwayWochen(s) > 8;
       eroeffneInsolvenz(s, frueh ? 'Eigenantrag im Schutzschirmverfahren' : 'Eigenantrag');
