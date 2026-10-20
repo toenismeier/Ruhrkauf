@@ -200,11 +200,18 @@ export function planungAktion(s: GameState, a: PlanungAktion): string | null {
     const f = p.forecasts.find((x) => x.status === 'offen' && x.jahr === jahr(s));
     if (!f) return 'Aktuell ist kein Forecast offen.';
     if (!Number.isFinite(a.umsatz) || !Number.isFinite(a.ebitda)) return 'Ungültige Zielwerte.';
-    const faktor = f.ziele.umsatz ? a.umsatz / f.ziele.umsatz : 1;
-    if (faktor < 0 || faktor > 3) return 'Umsatz außerhalb des zulässigen Rahmens.';
-    f.ziele.umsatz = eur(a.umsatz); f.ziele.ebitda = eur(a.ebitda);
     const cutoff = f.quartal * 13;
-    for (let i = cutoff; i < 52; i++) f.wochenUmsatz[i] = eur(f.wochenUmsatz[i] * faktor);
+    const ist = sum(f.wochenUmsatz.slice(0, cutoff));
+    const restAlt = sum(f.wochenUmsatz.slice(cutoff));
+    const restNeu = eur(a.umsatz) - ist;
+    if (restNeu < 0 || restNeu > Math.max(1, restAlt) * 3) return 'Umsatzziel muss das gebuchte Ist decken und darf maximal das Dreifache des Restplans betragen.';
+    let verteilt = 0;
+    for (let i = cutoff; i < 52; i++) {
+      const wert = i === 51 ? restNeu - verteilt : eur(restNeu * (restAlt > 0 ? f.wochenUmsatz[i] / restAlt : 1 / (52 - cutoff)));
+      f.wochenUmsatz[i] = wert;
+      verteilt += wert;
+    }
+    f.ziele.umsatz = eur(a.umsatz); f.ziele.ebitda = eur(a.ebitda);
     f.korrigiert = true; return null;
   }
   const ent = p.entwurf;
@@ -234,7 +241,8 @@ export const PLANUNG_AKTIONEN = new Set<PlanungAktion['typ']>(['planungZiel', 'p
 
 function abschliessen(s: GameState, quelle: Jahresplan['quelle']): void {
   const e = s.planung!.entwurf; if (!e || e.stand !== 'offen') return;
-  const plan = erstelleJahresplan(s, e.jahr, e.ziele, e.overrides, quelle);
+  const ziele = quelle === 'controlling' ? jahresVorschlag(s, e.jahr) : e.ziele;
+  const plan = erstelleJahresplan(s, e.jahr, ziele, quelle === 'controlling' ? {} : e.overrides, quelle);
   s.planung!.jahre = s.planung!.jahre.filter((p) => p.jahr !== plan.jahr).concat(plan);
   e.stand = 'abgeschlossen';
   s.entscheidungen = s.entscheidungen.filter((x) => x.typ !== 'planung_jahr' || x.daten.jahr !== e.jahr);
