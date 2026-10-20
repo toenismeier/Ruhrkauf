@@ -88,6 +88,16 @@ export function delegationsAufgaben(bereich?: BereichId, hauscluster?: string): 
   if (!bereich || !BEREICHE.some((b) => b.id === bereich)) return [];
   return AUFGABEN_NACH_BEREICH[bereich] ?? ALLGEMEIN.slice();
 }
+/** Bestehende Ressort-KI auf die passende Einzelfreigabe synchronisieren. */
+const RESSORT_TASK: Record<string, string> = {
+  'cpo.freigaben':'freigaben', 'cpo.dispo':'disposition', 'cpo.produktentwicklung':'produkte',
+  'cmo.aktionskalender':'aktionen', 'cmo.crm':'mailings', 'cmo.kanalbudget':'budget',
+  'chro.personalplanung':'einsatz', 'chro.betriebsrat':'verhandlung',
+  'cdo.onlinesortiment':'planung', 'cso.filialbesetzung':'planung',
+  'coo.personalbedarf':'einsatz', 'coo.filialpersonal':'einsatz',
+  'cro.mietverhandlungen':'verhandlung', 'cro.schliessungen':'planung',
+  'cfo.zahlungsplanung':'planung', 'cfo.bank':'planung',
+};
 export interface OrgPerson {
   id: string; name: string; portraet: Portraet; qualitaet: number; gehalt: number;
   stimmung: number; wechselwille: number;
@@ -347,6 +357,14 @@ export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: b
         return { ok: false, text: 'Aufgabe in diesem Bereich nicht vorhanden.' };
       if (a.an && !st.person) return { ok: false, text: 'Ohne Leitung keine Delegation möglich.' };
       (st.aufgaben ??= {})[a.aufgabe] = a.an;
+      // Synchronisiert alte KI-Handler, damit ein einzelnes Nein nicht durch eine
+      // zuvor aktivierte Vorstandsdelegation übersteuert wird.
+      if (a.bereich) for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) {
+        if (neu !== a.bereich || RESSORT_TASK[alt] !== a.aufgabe) continue;
+        const [r, id] = alt.split('.') as [RessortId, string];
+        if (s.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d) => d.id === id))
+          s.vorstand.ressorts[r].delegation[id] = a.an;
+      }
       return { ok: true, text: 'Aufgabe ' + a.aufgabe + (a.an ? ' delegiert.' : ' zur Entscheidung vorgelegt.') };
     }
     // Altaktion: ja/nein setzt weiterhin ausnahmslos alle Aufgaben.
