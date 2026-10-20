@@ -313,6 +313,41 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+  /* O02 Umsatztreiber */
+  .o02-drei { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; padding: 10px; }
+  .o02-treib { min-width: 0; padding: 8px 5px; background: #f5f3ed; border-radius: 9px; text-align: center; }
+  .o02-treib span,.o02-treib small { display:block; font-size: 10px; color: var(--leise); }
+  .o02-treib b { display:block; font-size: 14px; margin:4px 0; font-variant-numeric:tabular-nums; }
+  .o02-fuss { text-align:center; color:var(--leise); font-size:11px; margin-bottom:9px; }
+  .o02-wasserfall { margin:8px 10px 12px; border-top:1px solid var(--linie); padding-top:8px; font-size:12px; }
+  .o02-bruecke { padding:10px; font-size:12px; }
+  .o02-end { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; padding:5px 0; }
+  .o02-end span { color:var(--leise); }
+  .o02-effekt { display:grid; grid-template-columns:70px 1fr 90px; align-items:center; gap:5px; margin:7px 0; }
+  .o02-effekt b { text-align:right; font-size:11px; }
+  .o02-steg { background:#ece8e1; height:9px; border-radius:6px; overflow:hidden; }
+  .o02-steg i { display:block; height:100%; border-radius:6px; }
+  .o02-steg .plus { background:#2f8f5b; } .o02-steg .minus { background:#d23c32; }
+  .o02-hinweis { color:var(--leise); padding:12px; }
+  .o02-filter { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+  .o02-filter label { color:var(--leise); font-size:11px; font-weight:700; }
+  .o02-filter select { margin-top:4px; min-height:38px; font-size:12px; }
+  .o02-scroll { max-width:100%; overflow-x:auto; background:var(--karte); border-radius:10px; }
+  .o02-tab { min-width:700px; }
+  .o02-daten { display:grid; grid-template-columns:145px 105px 145px 90px 90px 75px; align-items:center; gap:4px; border-bottom:1px solid var(--linie); padding:10px 7px; font-size:11px; font-variant-numeric:tabular-nums; }
+  .o02-daten>div:not(:first-child) { text-align:right; }
+  .o02-name { font-weight:700; display:flex; align-items:center; gap:5px; }
+  .o02-ampel { width:8px; height:8px; border-radius:50%; background:#9ca3af; flex:none; }
+  .o02-ampel.gruen { background:#2f8f5b; }.o02-ampel.gelb { background:#e0a333; }.o02-ampel.rot { background:#d23c32; }
+  .o02-klickbar,.o02-beobachtung { cursor:pointer; }
+  .o02-klickbar:active { background:#f4ede7; }
+  .o02-kopf { color:var(--leise); background:#f7f6f2; }
+  .o02-gruppe,.o02-unter { margin:6px 0; border:1px solid var(--linie); background:white; border-radius:10px; overflow:hidden; }
+  .o02-gruppe>summary,.o02-unter>summary { padding:12px; font-size:13px; font-weight:800; cursor:pointer; }
+  .o02-unter { margin:6px; }.o02-unter>summary { background:#f7f6f2; }
+  .o02-beobachtung { width:100%; text-align:left; background:white; }
+  .o02-beobachtung small { display:block; font-size:11px; color:var(--leise); margin-top:3px; }
+  .o02-beobachtung strong { color:var(--rot); font-size:11px; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -336,6 +371,8 @@
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
       <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
+      <!-- O02 Umsatztreiber -->
+      <button class="mkachel" id="reporting" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18M5 16V9M10 16V5M15 16v-7M20 16V3"/></svg><b>Reporting</b><small>Umsatztreiber und Hausvergleich</small></button>
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
