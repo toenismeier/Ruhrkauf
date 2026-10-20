@@ -1,5 +1,6 @@
 // Wochenabschluss ausschließlich aus Engine-Abfragen: auftraege/spiel-reise-und-wochenabschluss.md
 import { esc } from './format.js';
+import { effektiveAnimation } from './einstellungen.js';
 import { portraetSVG } from '../kit/portraet.js';
 const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 const BANK = portraetSVG({ geschlecht: 'm', alter: 56, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 'hell', kleidung: 'anzug', seed: 236 }, 110);
@@ -11,7 +12,7 @@ export const WOCHEN_ZEIT = Object.freeze({
 });
 const eur = (n) => new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)) + ' €';
 const kurve = (t) => 1 - (1 - t) ** 2;
-const reduziert = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduziert = () => effektiveAnimation() !== 'voll';
 const ohneAnimation = () => new URLSearchParams(location.search).has('ohne-animation');
 const warten = (ms) => new Promise((r) => setTimeout(r, ms));
 const KATEGORIE = ['Presse', 'Konkurrenz'];
