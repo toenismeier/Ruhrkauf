@@ -13,6 +13,7 @@ export interface HausStandard {
   sauberkeit: 1 | 2 | 3;
   praesentation: 1 | 2 | 3;
   kasse: 1 | 2 | 3;
+  services?: Record<HausService, boolean>;
 }
 export interface HausKommentar {
   woche: number; abweichung: number; vergleich: 'vorjahr' | 'plan';
@@ -26,6 +27,7 @@ export interface HausBetrieb {
   inventurdifferenz?: number;
   kosten: Record<KostenPosten, number>;
   services: Record<HausService, boolean>;
+  serviceAusnahme?: Partial<Record<HausService, boolean>>;
   standardAusnahme?: HausStandard;
   ausnahmeGrund?: string;
   kundenScore: number;
@@ -60,6 +62,7 @@ export type HausAktion =
   | { typ: 'hausStandardSetzen'; cluster: string; feld: 'sauberkeit' | 'praesentation' | 'kasse' | 'von' | 'bis' | 'samstagBis'; wert: number; haus?: string; begruendung?: string }
   | { typ: 'hausKostenSetzen'; haus: string; posten: KostenPosten; faktor: number }
   | { typ: 'hausServiceSetzen'; haus: string; service: HausService; an: boolean }
+  | { typ: 'hausClusterServiceSetzen'; cluster: string; service: HausService; an: boolean }
   | { typ: 'hausGastronomie'; haus: string; modus: 'selbst' | 'pacht' }
   | { typ: 'hausKonzession'; haus: string; flaeche: string; quote: number; laufzeit: number; exklusiv: boolean }
   | { typ: 'hausMassnahme'; haus: string; massnahme: HausMassnahme }
@@ -67,12 +70,13 @@ export type HausAktion =
 
 export const HAUS_AKTIONEN = new Set<HausAktion['typ']>([
   'hausLeitungErsetzen', 'hausLeitungFoerdern', 'hausHaltepraemie', 'hausLeitungBefordern',
-  'hausStandardSetzen', 'hausKostenSetzen', 'hausServiceSetzen', 'hausGastronomie',
+  'hausStandardSetzen', 'hausKostenSetzen', 'hausServiceSetzen', 'hausClusterServiceSetzen', 'hausGastronomie',
   'hausKonzession', 'hausMassnahme', 'hausSonntag',
 ]);
 const POSTEN: KostenPosten[] = ['energie', 'reinigung', 'sicherheit', 'instandhaltung', 'versicherung'];
 const ANTEILE: Record<KostenPosten, number> = { energie: 0.35, reinigung: 0.2, sicherheit: 0.15, instandhaltung: 0.2, versicherung: 0.1 };
-const STANDARD: HausStandard = { oeffnung: { von: 10, bis: 20, samstagBis: 20 }, sauberkeit: 2, praesentation: 2, kasse: 2 };
+const STANDARD: HausStandard = { oeffnung: { von: 10, bis: 20, samstagBis: 20 }, sauberkeit: 2, praesentation: 2, kasse: 2,
+  services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false } };
 const NAME = ['Mara Berg', 'Jonas Ritter', 'Elin Werner', 'Timo Falk', 'Nora Lind', 'Lea Böttcher'];
 const MASSNAHME: Record<HausGrund, HausMassnahme> = {
   wetter: 'oeffnungszeit', baustelle: 'aktion', ware: 'umlagerung', personal: 'springer',
@@ -103,6 +107,13 @@ function steuerungscluster(s: GameState, h: Haus): string {
 }
 export function hausStandard(s: GameState, h: Haus): HausStandard {
   return betrieb(h)?.standardAusnahme ?? s.hausbetrieb?.standards[steuerungscluster(s,h)] ?? STANDARD;
+}
+/** Servicevorgaben des Hausclusters plus ausdrücklich gesetzte Ausnahmen vor Ort. */
+export function hausServices(s: GameState, h: Haus): Record<HausService, boolean> {
+  const b = h.betrieb, standard = hausStandard(s,h);
+  return Object.fromEntries((['kundendienst','schneiderei','geschenkverpackung','abholstation'] as HausService[]).map(key =>
+    [key,b?.serviceAusnahme?.[key] ?? (b?.services[key] || standard.services?.[key] || false)]
+  )) as Record<HausService,boolean>;
 }
 export function hausKandidaten(s: GameState, hausId: string) {
   const h = s.haeuser.find(x => x.id === hausId);
@@ -144,7 +155,8 @@ export function initialisiereHausbetrieb(s: GameState): void {
   }
 }
 function structuredStandard(): HausStandard {
-  return { oeffnung: { ...STANDARD.oeffnung }, sauberkeit: 2, praesentation: 2, kasse: 2 };
+  return { oeffnung: { ...STANDARD.oeffnung }, sauberkeit: 2, praesentation: 2, kasse: 2,
+    services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false } };
 }
 function stadtFaktor(s: GameState, h: Haus): number {
   const u = s.hausbetrieb?.staedte[h.stadt];
@@ -161,10 +173,11 @@ export function hausBetriebsFaktor(s: GameState, h: Haus): number {
   if (s.hausbetriebAbnahmeAus || !b || !istOffen(h)) return 1;
   const l = leitung(h);
   const st = hausStandard(s, h);
-  const kundendienst = b.services.kundendienst ? 1.007 : 1;
-  const schneiderei = b.services.schneiderei ? 1.004 : 1;
-  const geschenk = b.services.geschenkverpackung && (s.woche % 52 >= 47) ? 1.014 : 1;
-  const abholung = b.services.abholstation ? 1.005 : 1;
+  const services = hausServices(s,h);
+  const kundendienst = services.kundendienst ? 1.007 : 1;
+  const schneiderei = services.schneiderei ? 1.004 : 1;
+  const geschenk = services.geschenkverpackung && (s.woche % 52 >= 47) ? 1.014 : 1;
+  const abholung = services.abholstation ? 1.005 : 1;
   const standard = 1 + 0.007 * (st.sauberkeit - 2) + 0.009 * (st.praesentation - 2) + 0.006 * (st.kasse - 2)
     + 0.003 * (st.oeffnung.bis - 20) + 0.002 * (st.oeffnung.samstagBis - 20);
   // Der alte skill-Faktor bleibt in wirtschaft.ts: nur Änderungen an den vier neuen Stärken wirken zusätzlich.
@@ -187,7 +200,7 @@ export function hausBetriebskosten(s: GameState, h: Haus, sonstige: number): num
   const etagenBau = (h as Haus & {etagenBau?: Record<string, {technik:{licht:number;klima:number}}>}).etagenBau;
   const modernisiert = etagenBau ? Object.values(etagenBau).reduce((sum,e)=>sum+Math.max(0,e.technik.licht-basisTechnik)+Math.max(0,e.technik.klima-basisTechnik),0) / Math.max(1,h.etagen.length) : 0;
   for (const p of POSTEN) faktor += ANTEILE[p] * b.kosten[p] * (p === 'energie' ? preis * (1 - 0.07 * modernisiert) : 1);
-  const service = Object.values(b.services).filter(Boolean).length * 180;
+  const service = Object.values(hausServices(s,h)).filter(Boolean).length * 180;
   const l = leitung(h);
   const kostenLeitung = 1 - 0.035 * ((l.staerken?.kosten ?? l.skill) - b.leitungStart);
   return Math.max(0, sonstige * faktor * kostenLeitung + service + eur(((l.gehalt ?? b.leitungGehaltStart) - b.leitungGehaltStart)/52));
@@ -216,7 +229,7 @@ export function hausKundenscore(s: GameState, h: Haus): number {
   const verfuegbarkeit = (leitung(h).staerken?.ware ?? leitung(h).skill) - b.leitungStart;
   const score = 64 + 7 * (st.sauberkeit - 2) + 5 * (st.praesentation - 2) + 4 * (st.kasse - 2)
     + 14 * (personal - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h.substanz - 60)
-    + Object.values(b.services).filter(Boolean).length * 2;
+    + Object.values(hausServices(s,h)).filter(Boolean).length * 2;
   return Math.round(clamp(score, 0, 100));
 }
 
@@ -452,8 +465,14 @@ export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: st
       return { ok: true, text: 'Betriebskosten ' + a.posten + ' angepasst.' };
     case 'hausServiceSetzen':
       if (!b || !(a.service in b.services)) break;
-      b.services[a.service] = a.an;
-      return { ok: true, text: 'Service ' + a.service + (a.an ? ' aktiviert.' : ' deaktiviert.') };
+      (b.serviceAusnahme ??= {})[a.service] = a.an;
+      return { ok: true, text: 'Hausausnahme für Service ' + a.service + (a.an ? ' aktiviert.' : ' deaktiviert.') };
+    case 'hausClusterServiceSetzen': {
+      const stand = s.hausbetrieb!.standards[a.cluster];
+      if (!stand || !['kundendienst','schneiderei','geschenkverpackung','abholstation'].includes(a.service)) break;
+      (stand.services ??= { kundendienst:false, schneiderei:false, geschenkverpackung:false, abholstation:false })[a.service] = a.an;
+      return { ok: true, text: 'Service-Standard des Hausclusters geändert.' };
+    }
     case 'hausGastronomie':
       if (!b || b.restaurantQm <= 0) return { ok: false, text: 'Keine Restaurantfläche vorhanden.' };
       if (b.gastro !== 'keine' && b.gastroVertragBis > s.woche) return { ok: false, text: 'Wechsel erst zum Vertragsende möglich.' };
@@ -506,7 +525,7 @@ export function hausUebersicht(s: GameState, id: string) {
     planWoche:(s as GameState & {planung?: {jahre:{jahr:number;phasing:Record<string,number[]>}[]}}).planung?.jahre.find(j=>j.jahr===s.startJahr+Math.floor(s.woche/52))?.phasing[h.id]?.[s.woche%52] ?? h.wochenPlan,
     treiberAktuell:(h as Haus & {treiberVerlauf?:{von:number;bis:number;frequenz:number;kaufquote:number;bon:number}[]}).treiberVerlauf?.slice().reverse().find(x=>x.bis===s.woche-1),
     kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
-    services: b?.services, gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, restaurantQm: b?.restaurantQm,
+    services: hausServices(s,h), gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, restaurantQm: b?.restaurantQm,
     konzessionen: b?.konzessionen, kommentar: b?.kommentare[0], kommentare: b?.kommentare ?? [],
     umfeld: s.hausbetrieb?.staedte[h.stadt], ausnahmeGrund: b?.ausnahmeGrund,
     flaechen: h.flaechen.filter(f => f.konzept === 'konzession' || f.konzept === 'untermiete'),
