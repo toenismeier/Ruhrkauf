@@ -5,6 +5,8 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+// O07 Haus
+import type { HausBetrieb, HausbetriebStand } from './haus';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -47,7 +49,7 @@ export type GruppeId =
 /** Was auf einer Fläche passiert. */
 export type Konzept = 'eigen' | 'kommission' | 'konzession' | 'untermiete' | 'offprice' | 'leer';
 
-export type MieterTyp = 'discounter' | 'fitness' | 'aerztehaus' | 'behoerde' | 'gastro' | 'coworking' | 'drogerie';
+export type MieterTyp = 'discounter' | 'fitness' | 'aerztehaus' | 'behoerde' | 'gastro' | 'coworking' | 'drogerie' | 'baeckerei' | 'paketshop' | 'bibliothek';
 
 export interface Untermieter {
   name: string;
@@ -88,6 +90,13 @@ export interface Filialleiter {
   skill: number; // 0..1
   moral: number; // 0..100
   interimBis?: number;
+  // O07 Haus
+  staerken?: { personal: number; ware: number; kunde: number; kosten: number };
+  ehrlichkeit?: number;
+  gehalt?: number;
+  bonusAnteil?: number;
+  wechselwille?: number;
+  stellvertretung?: { name: string; qualitaet: number };
 }
 
 export interface Personal {
@@ -127,6 +136,12 @@ export interface Haus {
   stadt: string;
   region: Region;
   cluster: Cluster;
+  // O07 Haus: Schnittstellen zu O01 (Hauscluster) und O06 (Wochenplan)
+  hauscluster?: string;
+  flagship?: boolean;
+  clusterleitungQualitaet?: number;
+  wochenPlan?: number;
+  betrieb?: HausBetrieb;
   lage: Lage;
   format: Format;
   klasse?: 'premium';
@@ -417,6 +432,8 @@ export interface GameState {
   kreditlinieBasis: Eur;
   zahlungsstockungSeit?: number;
   haeuser: Haus[];
+  // O07 Haus
+  hausbetrieb?: HausbetriebStand;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
