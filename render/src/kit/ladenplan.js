@@ -276,6 +276,15 @@ function verdichteOutlet(plan) {
             const m=item(id,x,z,0,raum.id,{ausgleich:true});
             if(!passeIn(m,raum)||!passe(m,plan,
               [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
+            if(m.typ==='gondel'&&plan.moebel.some(q=>{
+              if(q.typ!=='gondel'||q.abteilung!==m.abteilung||q.winkel!==m.winkel)return false;
+              const xO=m.x<q.x+q.w-1e-8&&m.x+m.w>q.x+1e-8;
+              const zO=m.z<q.z+q.d-1e-8&&m.z+m.d>q.z+1e-8;
+              const dist=m.winkel%180===0?
+                Math.max(q.z-m.z-m.d,m.z-q.z-q.d):
+                Math.max(q.x-m.x-m.w,m.x-q.x-q.w);
+              return (m.winkel%180===0?xO:zO)&&dist>=0&&dist<R.gondelGang-1e-8;
+            }))continue;
             plan.moebel.push(m);gesetzt=true;
           }
         if(gesetzt)break;
@@ -288,7 +297,8 @@ function verdichteOutlet(plan) {
 function schwerpunkte(plan) {
   const r=R.suchRaster,nx=Math.round(plan.breite/r),nz=Math.round(plan.tiefe/r);
   const block=new Uint8Array(nx*nz),prev=new Int16Array(nx+1),jetzt=new Int16Array(nx+1);
-  for(const m of [...plan.hindernisse,...plan.moebel]){
+  for(const m of [...plan.hindernisse,...plan.moebel,
+    ...(plan.profil==='outlet'?plan.gaenge:[])]) {
     const x0=Math.max(0,Math.floor((m.x+1e-8)/r)),x1=Math.min(nx,Math.ceil((m.x+m.w-1e-8)/r));
     const z0=Math.max(0,Math.floor((m.z+1e-8)/r)),z1=Math.min(nz,Math.ceil((m.z+m.d-1e-8)/r));
     for(let z=z0;z<z1;z++)for(let x=x0;x<x1;x++)block[z*nx+x]=1;
