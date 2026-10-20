@@ -143,7 +143,7 @@ export function zeitungWoche(s: GameState): void {
   const r: RngHalter = { rng: (Math.imul(s.seed >>> 0, 0x9e3779b1) ^ Math.imul(w + 1, 0x85ebca6b) ^ 0xa174e51d) >>> 0 };
   const artikel: ZeitungArtikel[] = [];
   const meldungen = s.meldungen.filter((m) => m.woche === w && (m.typ === 'presse' || m.typ === 'insolvenz' || m.typ === 'eigentuemer' || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
-  for (const m of meldungen.slice(0, 6)) {
+  for (const m of meldungen.slice().sort((a, b) => Number(b.typ === 'insolvenz' || /gläubigerversammlung|insolvenzplan/i.test(b.text)) - Number(a.typ === 'insolvenz' || /gläubigerversammlung|insolvenzplan/i.test(a.text))).slice(0, 4)) {
     const v = EREIGNISSE.find((x) => x.muster!.test(m.text))!;
     artikel.push(ausVorlage(v, w, m.text, artikel.length));
   }
