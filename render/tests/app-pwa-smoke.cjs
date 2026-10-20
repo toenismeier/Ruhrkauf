@@ -61,8 +61,12 @@ const server = http.createServer((req, res) => {
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.haeuser?.length > 0);
     const soll = await page.evaluate(() => {
       window.spiel.woche(false);
+      const roh = JSON.stringify(window.spiel.s);
+      let hash = 2166136261;
+      for (let i = 0; i < roh.length; i++) hash = Math.imul(hash ^ roh.charCodeAt(i), 16777619) >>> 0;
       return { woche: window.spiel.s.woche, cash: window.spiel.s.cash,
-        hauszahl: window.spiel.s.haeuser.length, historie: window.spiel.s.historie.length };
+        hauszahl: window.spiel.s.haeuser.length, historie: window.spiel.s.historie.length,
+        laenge: roh.length, hash };
     });
     await page.evaluate(() => window.spiel.speichern());
     await page.evaluate(() => window.spiel.app.oeffne());
@@ -92,20 +96,32 @@ const server = http.createServer((req, res) => {
     assert.equal(platz2.name, 'Essen Sanierung');
     await page.locator('[data-platz="platz-2"] [data-app-aktion="laden"]').click();
     await page.waitForFunction(() => window.spiel.s.woche === 1 && window.bereit);
-    let ist = await page.evaluate(() => ({ woche: window.spiel.s.woche, cash: window.spiel.s.cash,
-      hauszahl: window.spiel.s.haeuser.length, historie: window.spiel.s.historie.length }));
+    let ist = await page.evaluate(() => {
+      const roh = JSON.stringify(window.spiel.s);
+      let hash = 2166136261;
+      for (let i = 0; i < roh.length; i++) hash = Math.imul(hash ^ roh.charCodeAt(i), 16777619) >>> 0;
+      return { woche: window.spiel.s.woche, cash: window.spiel.s.cash,
+        hauszahl: window.spiel.s.haeuser.length, historie: window.spiel.s.historie.length,
+        laenge: roh.length, hash };
+    });
     assert.deepEqual(ist, soll, 'Importierter Stand und Ausgangszustand sind identisch');
 
     await page.reload({ waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
     await page.locator('[data-platz="platz-1"] [data-app-aktion="laden"]').click();
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.woche === 1);
-    ist = await page.evaluate(() => ({ woche: window.spiel.s.woche, cash: window.spiel.s.cash,
-      hauszahl: window.spiel.s.haeuser.length, historie: window.spiel.s.historie.length }));
+    ist = await page.evaluate(() => {
+      const roh = JSON.stringify(window.spiel.s);
+      let hash = 2166136261;
+      for (let i = 0; i < roh.length; i++) hash = Math.imul(hash ^ roh.charCodeAt(i), 16777619) >>> 0;
+      return { woche: window.spiel.s.woche, cash: window.spiel.s.cash,
+        hauszahl: window.spiel.s.haeuser.length, historie: window.spiel.s.historie.length,
+        laenge: roh.length, hash };
+    });
     assert.deepEqual(ist, soll, 'Laden nach Seitenneustart liefert denselben Stand');
 
     // SW muss die App-Shell übernehmen, erst danach Browser wirklich offline schalten.
-    await page.waitForFunction(() => navigator.serviceWorker?.controller !== null, null, { timeout: 60000 });
+    await page.waitForFunction(() => !!navigator.serviceWorker?.controller, null, { timeout: 60000 });
     await context.setOffline(true);
     await page.reload({ waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
