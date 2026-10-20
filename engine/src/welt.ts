@@ -13,11 +13,14 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { ALT_WARENHAUS_STAEDTE, ALT_SPORT_STAEDTE } from './massstab-alt';
+import { kennzeichnePremium } from './premium';
 
 export interface Szenario {
   warenhaeuser: number;
   sporthaeuser: number;
   premiumhaeuser?: number;
+  /** A/B-Vergleich: Premiumhäuser deaktivieren. */
+  premiumDeaktiviert?: boolean;
   schwesterhaeuser?: number;
   outlethaeuser?: number;
   startCash: number;
@@ -27,6 +30,8 @@ export interface Szenario {
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
+  /** A/B-Kalibrierung: normale Warenhäuser statt Premiumhäuser. */
+  premiumDeaktiviert?: boolean;
 }
 
 /** Phase 2: wirtschaftliche Soll-Größen der aktiven Formate (Euro p.a., Seed 1–3).
@@ -381,7 +386,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // Premium bildet vier eigenständige Warenhäuser außerhalb der 360 regulären.
   let p = 0;
   for (const premium of PREMIUM_HAEUSER) {
-    if (p >= (sz.premiumhaeuser ?? 0)) break;
+    if (sz.premiumDeaktiviert || p >= (sz.premiumhaeuser ?? 0)) break;
     const [stadt, region, cluster, kk] = stadtVon.get(premium.stadt)!;
     haeuser.push(bauHaus(h, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
   }
@@ -401,6 +406,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
       haeuser.push(bauHaus(fundusRng, ++oi, stadt, region, cluster, kk, 'outlet', sz, i, { outletLage: oi <= 46 ? 'rand' : 'b' }));
   }
 
+  // Premiumfelder initialisieren, ohne bereits existierende Premiumhäuser umzuwidmen.
+  if (!sz.premiumDeaktiviert && (sz.premiumhaeuser ?? 0) > 0) kennzeichnePremium(haeuser);
   kalibriereStandortumsatz(haeuser);
 
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
@@ -443,6 +450,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
+    premiumSchuetzen: true,
     wettbewerber: [],
     wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,
     wettbewerbNaechsteId: 0,

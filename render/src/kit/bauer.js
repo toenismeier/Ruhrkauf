@@ -20,6 +20,7 @@ import { outlet, masseOutlet } from './outlet.js';
 import { schwesterhaus, masseSchwester } from './schwesterhaus.js';
 import schwesterHauser from '../../haeuser-schwester.json';
 import haeuserOutlet from '../../haeuser-outlet.json';
+import { premiumhaus, premiumMasse } from './premium.js';
 import { wettbewerber as wettbewerberBau } from './wettbewerber.js';
 import haeuser from '../../haeuser.json';
 
@@ -37,6 +38,7 @@ const OUTLETS = new Map(haeuserOutlet.map((h) => [h.id, h]));
 export function fussabdruck(haus, familie = null) {
   if (haus.format === 'schwester') { const m = masseSchwester(haus); return { w: m.w, d: m.d, mall: 0 }; }
   if (haus.format === 'outlet') { const m = masseOutlet(haus); return { w: m.w, d: m.d, mall: 0 }; }
+  if (haus.klasse === 'premium') { const m = premiumMasse(haus); return { w: m.w, d: m.d, mall: 0 }; }
   if (haus.format === 'sport' && familie !== 7) { const ms = masseSport(haus); return { w: ms.w, d: ms.d, mall: 0 }; }
   const m = masse(haus);
   const fam = familie ?? (haus.format === 'sport' ? 7 : haus.lage === 'center' ? 6 : 0);
@@ -257,6 +259,7 @@ export function echterBauer(o = {}) {
       const h0 = (p.standort?.id && HAUS.get(p.standort.id)) || passendesHaus(p, o.warenhausId);
       const f = fussabdruck(h0);
       const { x, z } = imSlot(p, f.w, f.d);
+      if (h0.klasse === 'premium') { p.haus = h0; return premiumhaus(S, scene, h0, { x, z, ...zustandFuer(h0) }); }
       // B4: mehrere Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante (sonst stehen zwei identische Häuser
       // nebeneinander, Hamburg). Zweites Haus derselben Familie: Nachbarfamilie, sonst andere Fassadenvariante.
       let fam = familieVon(h0), h = h0;
@@ -268,6 +271,13 @@ export function echterBauer(o = {}) {
       const e = warenhaus(S, scene, h, { x, z, familie: fam, ...zustandFuer(h0) });
       p.haus = h;
       return e;
+    },
+    'slot:premium': (S, scene, p) => {
+      const h = HAUS.get(p.standort?.id) ?? haeuser.find((q) => q.klasse === 'premium' && q.stadt === p.standort?.stadt);
+      if (!h) return { hoehe: 0 };
+      const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
+      p.haus = h;
+      return premiumhaus(S, scene, h, { x, z, ...zustandFuer(h) });
     },
     'slot:sport': (S, scene, p) => {
       const h = HAUS.get(p.standort?.id) ?? haeuser.find((q) => q.format === 'sport');

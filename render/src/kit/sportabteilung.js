@@ -514,6 +514,8 @@ Object.assign(ABT, {
 });
 for (const g of SPORT_ARTEN) ABT[g].kante = ABT[g].kante ?? KANTE;
 export const SPORT_NAMEN = Object.fromEntries(SPORT_ARTEN.map((g) => [g, ABT[g].name]));
+export const SPORT_BOEDEN = Object.freeze(Object.fromEntries(SPORT_ARTEN.map(g=>[g,ABT[g].boden.a])));
+export const SPORT_SCHILDER = Object.freeze(Object.fromEntries(SPORT_ARTEN.map(g=>[g,ABT[g].schild.farbe])));
 export { kanu, radWerkstatt, skiService, kuppelzelt, torGross, paar, schuh, laufband, helm, fels, pflanze, bank, karton, bildschirm, VEREINE, WINTER, OUT, SCHUH, RADF };
 
 /** Die A-Haus-Erlebnisfläche benutzt dieselben Geräte wie die regulären Sportabteilungen. */

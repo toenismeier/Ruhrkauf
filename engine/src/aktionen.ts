@@ -17,6 +17,7 @@ import { VORSTAND_AKTIONEN, vorstandAktion, type VorstandAktion } from './vorsta
 import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte';
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
+import { premiumInvestieren, premiumVerkaufen } from './premium';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -31,6 +32,8 @@ export type SpielerAktion =
   | { typ: 'zentrale'; prozent: number }
   | { typ: 'marketingBudget'; quote: number }
   | { typ: 'aktion'; name?: string; rabatt: number; wochen: number; scope: AktionsScope; kontrollHaeuser?: string[]; start?: number }
+  | { typ: 'premiumSchuetzen'; an: boolean }
+  | { typ: 'premiumInvestition'; haus: string; betrag: number }
   | { typ: 'kundenkarte' }
   | { typ: 'orderLevel'; gruppe: GruppeId | 'alle'; level: number }
   | { typ: 'vorkasse'; erlaubt: boolean }
@@ -123,6 +126,13 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
   switch (a.typ) {
+    case 'premiumSchuetzen':
+      s.premiumSchuetzen = a.an;
+      return ok(a.an ? 'Premiumhäuser sind vor pauschalen Rabattaktionen geschützt.' : 'Premiumschutz deaktiviert.');
+    case 'premiumInvestition': {
+      const fehlerText = premiumInvestieren(s, a.haus, a.betrag);
+      return fehlerText ? fehler(fehlerText) : ok('Premium-Investition gestartet (26 Wochen).');
+    }
     case 'schliessen': {
       const h = haus(s, a.haus);
       if (!h) return fehler('Haus nicht gefunden.');
@@ -345,7 +355,14 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
 
     case 'angebotVerhandeln': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
-      if (!an || an.typ !== 'paket') return fehler('Nur Paketangebote lassen sich mit Standorttausch verhandeln.');
+      if (an?.typ === 'premiumVerkauf') {
+        if (s.phase !== 'insolvenz') return fehler('Premiumverkauf nur in Insolvenz.');
+        if (an.vorschlagHaeuser?.length) return fehler('Dieses Angebot wurde bereits verhandelt.');
+        an.kaufpreis = eur((an.kaufpreis ?? 0) * 1.04);
+        an.vorschlagHaeuser = [...(an.wunschHaeuser ?? [])];
+        return ok(`Nachverhandelt: ${mio(an.kaufpreis)} Kaufpreis.`);
+      }
+      if (!an || an.typ !== 'paket') return fehler('Nur Paket- und Premiumangebote lassen sich verhandeln.');
       const hs = a.haeuser.map((id) => haus(s, id)).filter((h): h is Haus => !!h && h.status === 'offen' && h.etagen.includes(an.etage ?? 0));
       if (hs.length < (an.minHaeuser ?? 1)) return ok(`${an.mieterName}: „Unter ${an.minHaeuser} Standorten lohnt sich das für uns nicht.“`);
       const wunsch = (an.wunschHaeuser ?? []).map((id) => haus(s, id)).filter((h): h is Haus => !!h);
@@ -383,6 +400,10 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     case 'angebotAnnehmen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
+      if (an.typ === 'premiumVerkauf') {
+        const grund = premiumVerkaufen(s, an);
+        return grund ? fehler(grund) : ok(`Premiumhaus verkauft: ${mio(an.kaufpreis ?? 0)} fließen zu.`);
+      }
       if (an.typ === 'uebernahme') {
         if (!an.wettbewerberId) return fehler('Wettbewerber fehlt.');
         const grund = uebernehmeWettbewerber(s, an.wettbewerberId, 'outlet', an.mieteQmMonat);

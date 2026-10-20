@@ -27,13 +27,15 @@ import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
 import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
+import { reiseModul } from './ui/reise.js';
+import { wochenberichtModul } from './ui/wochenbericht.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
 let speicherWarnung = false;
-const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', warnen: true });
+const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', warnen: true, wochenbericht: 'voll', reiseZuletzt: [] });
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
@@ -83,6 +85,7 @@ const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
 let scene = null, cam = null, wurzel = null, plan = null, sb = null, s = null, stadtName = null;
 let offenesHaus = null, offenesHq = null, offenerWettbewerber = null;
 let angebotPins = [], wettbewerbPins = [], wettbewerbPinTimer = null;
+let bahnhofPin = null, bahnhofOrt = null, reise = null, wochenbericht = null;
 const WB_FARBEN = { modehaus: '#795846', fastfashion: '#292b39', premium: '#9e773e',
   offprice: '#d62867', textildiscounter: '#2565b5', elektronik: '#d34532', leer_ehemals: '#777d80' };
 const WB_ART = { modehaus: 'Modehaus', fastfashion: 'Fast Fashion', premium: 'Premium',
@@ -125,6 +128,7 @@ function aufBoden(px, py) {
 function hausUnter(px, py) {
   const r = canvas.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2(((px - r.left) / r.width) * 2 - 1, -((py - r.top) / r.height) * 2 + 1), cam);
+  if (bahnhofPin && ray.intersectObject(bahnhofPin, false).length) return 'bahn:hauptbahnhof';
   const wp = wettbewerbPins.length ? ray.intersectObjects(wettbewerbPins, false)[0] : null;
   if (wp?.object.userData.wbId) return 'wb:' + wp.object.userData.wbId;
   const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
@@ -173,13 +177,13 @@ function tippPunkt(id) {
 }
 
 // Verschieben, Wischen mit Trägheit, Pinch-Zoom, Mausrad, Antippen (ui/karte.js)
-const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id?.startsWith('wb:')) oeffneWettbewerber(id.slice(3)); else if (id) oeffneHaus(id); } });
+const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id === 'bahn:hauptbahnhof') reise?.oeffne(); else if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id?.startsWith('wb:')) oeffneWettbewerber(id.slice(3)); else if (id) oeffneHaus(id); } });
 window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
 function raeumeSzene() {
   if (!scene) return;
-  angebotPins = [];
+  angebotPins = []; bahnhofPin = null; bahnhofOrt = null;
   clearInterval(wettbewerbPinTimer); wettbewerbPinTimer = null;
   for (const p of wettbewerbPins) { scene.remove(p); p.material?.map?.dispose(); p.material?.dispose(); }
   wettbewerbPins = [];
@@ -246,6 +250,34 @@ function wettbewerbPinsAktualisieren() {
     zeichnen();
   }, 260);
 }
+
+/** Eigener Bahnhofs-Pin auf dem vorhandenen Gleisband; keine Änderungen am Stadtplan-Generator. */
+function bahnhofPinErstellen() {
+  const p = plan.parzellen.find((q) => q.typ === 'slot:bahnhof') ??
+    plan.bloecke?.find((b) => b.art === 'bahn' && !b.ohneBahnhof);
+  if (!p) return;
+  const x = p.x + p.w / 2, z = p.z + p.d / 2;
+  bahnhofOrt = { x, z };
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#28465a'; g.beginPath(); g.arc(64, 61, 49, 0, Math.PI * 2); g.fill();
+  g.lineWidth = 6; g.strokeStyle = '#fff'; g.stroke();
+  g.fillStyle = '#fff'; g.font = 'bold 63px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('🚆', 64, 59);
+  bahnhofPin = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
+  bahnhofPin.position.set(x, 42, z); bahnhofPin.scale.set(15, 15, 1); bahnhofPin.renderOrder = 35;
+  scene.add(bahnhofPin);
+}
+function bahnhofBildpunkt() {
+  if (!bahnhofPin || !cam) return null;
+  const v = bahnhofPin.position.clone().project(cam), r = canvas.getBoundingClientRect();
+  return { x: r.left + (v.x + 1) * r.width / 2, y: r.top + (1 - v.y) * r.height / 2 };
+}
+function bahnhofFokussieren() {
+  if (!bahnhofOrt) return;
+  K.x = bahnhofOrt.x; K.z = bahnhofOrt.z; K.halb = 63; kameraSetzen();
+}
+
 function baueStadtAusSpiel(name) {
   const t0 = performance.now();
   raeumeSzene();
@@ -283,6 +315,7 @@ function baueStadtAusSpiel(name) {
   for (const q of plan.standorte.filter((x) => x.angebot)) { const pz = plan.parzellen.find((x) => x.id === q.parzelle); if (pz) angebotMarker(scene, pz.x + pz.w / 2, (e.hoehen.get(pz.id) ?? 30) + 2, pz.z + pz.d / 2, 9); }
   angebotsPinsAktualisieren();
   wettbewerbPinsAktualisieren();
+  bahnhofPinErstellen();
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
   const nm = nahMitte(plan, 'einkauf', 62);
   K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
@@ -302,7 +335,7 @@ function baueStadtAusSpiel(name) {
 const KACHEL = 110, BUDGET = 112000, VOLL_MAX_ZOOM = 340;
 const KA = { liste: [], teileGrund: 0, laeuft: false };
 const HAUSTYPEN = new Set(['stadthaus', 'eck', 'hofhaus']);
-const IMMER_GRUND = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber', 'slot:hq', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus', 'slot:nord_speicher', 'slot:nord_hafen', 'slot:center_passage']);
+const IMMER_GRUND = new Set(['slot:warenhaus', 'slot:premium', 'slot:sport', 'slot:wettbewerber', 'slot:hq', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus', 'slot:nord_speicher', 'slot:nord_hafen', 'slot:center_passage']);
 function klotzHoehe(p) { const g = p.hofbau ? 2 : p.typ === 'hofhaus' ? Math.max(2, (p.geschosse ?? 4) - 1) : p.geschosse ?? 4; return 4.2 + g * 3.3; }
 function kachelnAnlegen(parzellen) {
   for (const k of KA.liste) entsorge(k);
@@ -467,8 +500,10 @@ function woche(mitBot = false) {
     neu.filter((x) => x.art === 'angebot').length + ' neue Angebote, ' +
     neu.filter((x) => x.art === 'entscheidung').length + ' Entscheidungen, ' + neueMeldungen + ' Meldungen';
   const streifen = $('wochenstreifen');
-  streifen.textContent = text; streifen.classList.add('an');
-  clearTimeout(streifenTimer); streifenTimer = setTimeout(() => streifen.classList.remove('an'), 6000);
+  streifen.textContent = text;
+  streifen.classList.toggle('an', mitBot);
+  clearTimeout(streifenTimer);
+  if (mitBot) streifenTimer = setTimeout(() => streifen.classList.remove('an'), 6000);
   zeichnen();
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
@@ -525,6 +560,16 @@ window.hausKlick = (art, id, nr) => {
   hausEtageWahl = { id, nr: Number(nr) }; oeffneHaus(id); $('pinhalt').scrollTop = 0;
 };
 const AKTION_NAME = { sale: 'Sale', jubilaeum: 'Jubiläum', weihnachten: 'Weihnachten', blackfriday: 'Black Friday' };
+window.premiumTun = (was, id) => {
+  const a = was === 'schutz' ? { typ: 'premiumSchuetzen', an: s.premiumSchuetzen === false }
+    : was === 'investieren' ? { typ: 'premiumInvestition', haus: id, betrag: 10_000_000 }
+      : was === 'verhandeln' ? { typ: 'angebotVerhandeln', angebot: id, haeuser: [] }
+        : was === 'verkaufen' ? { typ: 'angebotAnnehmen', angebot: id } : null;
+  if (!a) return;
+  const r = E.fuehreAus(s, a);
+  meldung(r.text, r.ok);
+  if (r.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
+};
 function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
   if (!d) return;
@@ -537,6 +582,15 @@ function oeffneHaus(id) {
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
+  if (h.klasse === 'premium') {
+    const p = E.premiumUebersicht(s).find((q) => q.id === id);
+    html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
+    if (h.premiumEigentuemer) html += `<div class="zeile">Eigentümer: ${h.premiumEigentuemer}</div>`;
+    else if (h.status === 'offen') html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p?.schutz ? 'Rabatt-Schutz aufheben' : 'Rabatt-Schutz aktivieren'}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. € investieren</button></div>`;
+    const an = s.angebote.find((a) => a.status === 'offen' && a.typ === 'premiumVerkauf' && a.wunschHaeuser?.includes(id));
+    if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || 'Investor'} · ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
+    html += '</div>';
+  }
   const shops = EQ.shops(s, h);
   if (hausEtageWahl?.id === id) {
     const b = innenBild(h, hausEtageWahl.nr);
@@ -567,7 +621,7 @@ function oeffneHaus(id) {
       (wirkung ? '<small>' + wirkung + '</small>' : '') + '</span><span>→</span></button>';
   }
   html += '</div>';
-  panel(h.name, `${h.stadt} · ${h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
+  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
   if (neu) hausZeigen(id);
 }
 
@@ -760,6 +814,37 @@ po = posteingangModul({
     else schliessePanel();
   },
 });
+
+// ─────────────────────────────────────────── Reise & Wochenabschluss
+reise = reiseModul({
+  stadt: () => stadtName,
+  staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
+    const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
+    const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
+    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', zahl('schwester')], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', zahl('outlet')]];
+    return { name: d.name, region: d.region, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+      formate: formate.filter((p) => p[1]).map((p) => p[0] + ' ' + p[1]).join(' · ') };
+  }),
+  pinPunkt: bahnhofBildpunkt,
+  zuletzt: () => postUi.reiseZuletzt ?? [],
+  besucht: (namen) => { postUi.reiseZuletzt = namen; },
+  bauen: (name) => { schliessePanel(); baueStadtAusSpiel(name); wahl.value = name; },
+  bahnhofFokussieren,
+  fertig: () => automatischSpeichern(),
+  fehler: (e) => { console.error('Bahnreise fehlgeschlagen:', e); meldung('Stadtwechsel fehlgeschlagen', false); },
+});
+wochenbericht = wochenberichtModul({
+  modus: () => postUi.wochenbericht ?? 'voll', warnen: () => postUi.warnen,
+  cockpit: () => E.cockpit(s), posteingang: () => E.posteingang(s),
+  historie: () => s.historie, wocheNr: () => s.woche,
+  woche: () => woche(false), sperren: () => { $('weiter').disabled = true; },
+  entsperren: () => { $('weiter').disabled = false; },
+  oeffneVorgang: (id) => oeffneModul(po, 'handeln', id),
+  fehler: (e) => { console.error('Wochenabschluss fehlgeschlagen:', e); meldung('Woche konnte nicht abgeschlossen werden', false); },
+});
+$('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
+$('wochenbericht-modus').addEventListener('change', (e) => { postUi.wochenbericht = e.target.value; automatischSpeichern(); });
+
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
@@ -828,7 +913,7 @@ let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
-  postUi = neuerPostUi(); $('postwarnung').checked = true;
+  postUi = neuerPostUi(); $('postwarnung').checked = true; $('wochenbericht-modus').value = postUi.wochenbericht;
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
   EQ.freigaben(s);
@@ -842,20 +927,19 @@ function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) 
 
 const wahl = $('stadtwahl');
 wahl.innerHTML = STADTLISTE.map((q) => `<option${q.name === 'Essen' ? ' selected' : ''}>${q.name}</option>`).join('');
-wahl.addEventListener('change', () => { schliessePanel(); $('lade').classList.add('an'); setTimeout(() => { baueStadtAusSpiel(wahl.value); automatischSpeichern(); $('lade').classList.remove('an'); }, 30); });
+wahl.addEventListener('change', () => { reise?.zu(); schliessePanel(); menueZu(); $('lade').classList.add('an'); setTimeout(() => { baueStadtAusSpiel(wahl.value); automatischSpeichern(); $('lade').classList.remove('an'); }, 30); });
 $('weiter').addEventListener('click', () => {
-  const bot = $('bot').checked;
-  if (!bot && postUi.warnen) {
-    const ablauf = E.posteingang(s).handeln.filter((x) => x.restWochen === 0);
-    if (ablauf.length && !window.confirm(ablauf.length + ' Vorgang/Vorgänge laufen ab: Standard wird gewählt bzw. Angebot verfällt. Trotzdem weiter?')) return;
-  }
-  $('weiter').disabled = true;
-  setTimeout(() => { try { woche(bot); } finally { $('weiter').disabled = false; } }, 10);
+  if ($('weiter').disabled) return;
+  if ($('bot').checked) {
+    $('weiter').disabled = true;
+    setTimeout(() => { try { woche(true); } finally { $('weiter').disabled = false; } }, 10);
+  } else wochenbericht.oeffne();
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
 window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
+  reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
@@ -944,6 +1028,7 @@ async function spielFortsetzen() {
     postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
     $('postwarnung').checked = postUi.warnen;
+    $('wochenbericht-modus').value = ['voll', 'kurz', 'aus'].includes(postUi.wochenbericht) ? postUi.wochenbericht : 'voll';
     schwierigkeitId = s.schwierigkeit ?? 'mittel';
     $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();

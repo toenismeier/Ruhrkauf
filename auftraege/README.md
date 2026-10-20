@@ -9,17 +9,20 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `grafik-schwesterkette.md` + `nachbesserung-schwesterkette.md` | `feat/grafik-schwesterkette` | **gemergt 19.10.** | |
 | `grafik-sport.md` + `nachbesserung-sport.md` | `feat/grafik-sport` | **gemergt 19.10.** | |
 | `grafik-outlet.md` + `nachbesserung-outlet.md` | `feat/grafik-outlet` | **gemergt 20.10.** | |
-| `grafik-premium.md` + `nachbesserung-premium.md` | `feat/grafik-premium` | (Merge Schwesterkette, darf vorher starten) | Outlet, Posteingang, Wettbewerber-Engine |
+| `grafik-premium.md` + `nachbesserung-premium.md` | `feat/grafik-premium` | **gemergt 20.10.** | |
 | `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | **gemergt 19.10.** | |
 | `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | **gemergt 19.10.** | |
 | `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet, Engine-Maßstab Phase 1 | Posteingang, Städte, Oberfläche |
-| `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`), aktuell `nachbesserung-ladenbau-p3.md` | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | **Phase 1 bis 3 gemergt 20.10.** Weiter mit Phase 4 ff. von `main` | |
+| `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`), aktuell `nachbesserung-ladenbau-p3.md` | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | **Phase 1 bis 4 gemergt 20.10.** Weiter mit Phase 5 von `main`, Restpunkte aus `nachbesserung-ladenbau-p4.md` Abschnitt 4 | |
 | `engine-massstab.md` + `nachbesserung-massstab.md` (mehrere Chats, Stand in `massstab-stand.md`) | `feat/engine-massstab` | Phase 1 Daten fertig, jetzt Phase 2 auf demselben Branch; Merge erst nach Phase 2; Phase 3 nach `engine-formate.md` | allem außer `engine-formate.md` gleichzeitig |
 | `massstab-staedte.md` | `feat/massstab-staedte` | Engine-Maßstab Phase 1 | Oberfläche, Ladenbau, Engine-Aufträgen |
 | `massstab-oberflaeche.md` | `feat/massstab-oberflaeche` | Engine-Maßstab Phase 1 | allem |
 | `massstab-leistung.md` | `feat/massstab-leistung` | Städte Phase 2 | Oberfläche |
-| `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | | allem (nur `render/`, eigene Module) |
+| `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | **gemergt 20.10.** Weiter: `nachbesserung-reise-woche.md` auf `feat/spiel-reise-woche-2` | allem |
 | `spiel-posteingang.md` | `feat/spiel-posteingang` | **gemergt 19.10.** Folgeschritt: Wettbewerbsmeldungen in die Kategorie Konkurrenz (kleiner Commit) | |
+
+## Nice-to-have
+Eigene Aufträge in `auftraege/nice/` (Übersicht in `auftraege/nice/README.md`). N13 Einstellungen und N14 Testwerkzeuge zuerst, danach alles parallel.
 
 ## Ohne CI arbeiten (gilt, solange GitHub Actions blockiert ist)
 - GitHub Actions startet derzeit keine Jobs (Kontingent). Nicht auf die CI warten.

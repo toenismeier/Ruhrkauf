@@ -86,7 +86,9 @@ export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boole
     tu({ typ: 'marketingBudget', quote: 0.018 });
     tu({ typ: 'insolvenzAntrag' });
     if (zentralePauschal) tu({ typ: 'zentrale', prozent: 0.3 });
-    const p = aktivesPortfolio(s).sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
+    // Premium-Kronjuwelen bleiben von der automatischen Schließung ausgenommen.
+    const premiumIds = new Set(s.haeuser.filter((h) => h.klasse === 'premium').map((h) => h.id));
+    const p = aktivesPortfolio(s).filter((x) => !premiumIds.has(x.id)).sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
     const schliessungen = Math.round(p.length * TIEF_SCHLIESSUNGSQUOTE);
     for (const x of p.slice(0, schliessungen)) tu({ typ: 'schliessen', haus: x.id });
     for (const x of p.slice(schliessungen).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.2 });

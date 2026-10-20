@@ -2,9 +2,9 @@
 import { familieSport, masseSport } from './sporthaus.js';
 import { sportRaster } from './sportgrundriss.js';
 
-export function sportLadenEingabe(haus, etage) {
-  const fam=familieSport(haus),masse=masseSport(haus,fam),ra=sportRaster(haus,etage);
-  const istHindernis=t=>/^(treppe|treppe2|treppe_offen|treppe_holz|rt|rt2|aufzug|lager|wc|werkstatt|werkstatt2|luft|turm)/.test(String(t));
+export function sportLadenEingabe(haus, etage, o={}, raster=null) {
+  const fam=familieSport(haus),masse=masseSport(haus,fam),ra=raster??sportRaster(haus,etage,o);
+  const istHindernis=t=>/^(treppe|rt|aufzug|lager|wc|werkstatt|luft|turm|buehne|szene|radbuehne|lauf|erlebnis)/.test(String(t));
   const hindernisse=[];
   for(let i=0;i<ra.nx;i++)for(let j=0;j<ra.nz;j++){
     const typ=ra.typ[i][j];

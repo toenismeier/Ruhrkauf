@@ -625,7 +625,7 @@ export function standortMasse(st) {
   const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
   return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
 }
-export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
+export const SLOT_ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
 
 /**
  * Sucht ein Kreuz aus zwei Haupteinkaufsstraßen (z-Linie kF, x-Linie lF) nahe dem Zentrum und verteilt die
@@ -702,7 +702,7 @@ function einkaufsKreuz(E, innen, zc) {
     kand = kand.filter((x) => x !== q);
   };
   // Reihenfolge: Hartwig-Warenhäuser (groß zuerst) bekommen die besten Ecken, danach Wettbewerber und Sport nach Größe
-  const rang = (e) => (e.rolle === 'warenhaus' ? 0 : 1);
+  const rang = (e) => (e.rolle === 'premium' ? -1 : e.rolle === 'warenhaus' ? 0 : 1);
   const a1 = innen.filter((e) => e.lage === '1a').sort((a, b) => rang(a) - rang(b) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n);
   const zuB = [];
   for (const e of a1) { kand = kand.filter((q) => zelleFrei(E, q.i, q.j)); if (kand.length) nimmZelle(e, kand[0], '1a'); else zuB.push(e); }
@@ -1983,7 +1983,7 @@ function nachbarnSetzen(b, parzellen) {
   // GESTALTUNG.md: geschlossene Zeile. Ein Haus, dessen zweite sichtbare Seite (+x bei Straße +z, +z bei Straße +x) an
   // einen Nachbarbau stößt, bekommt dort eine Brandwand statt einer Seitenfassade (p.anbau → stadthaus seite 'nachbar').
   const BAU = (q) => q && !['luecke', 'baustelle', 'parkplatz', 'platz', 'durchgang'].includes(q.typ) && !q.leer;
-  const hartwig = meine.some((q) => q.typ === 'slot:warenhaus');
+  const hartwig = meine.some((q) => q.typ === 'slot:warenhaus' || q.typ === 'slot:premium');
   if (hartwig) for (const p of meine) if (p.typ === 'stadthaus' || p.typ === 'eck') p.hartwigBlock = true;
   for (const p of meine) {
     if (p.typ !== 'stadthaus' && p.typ !== 'hofhaus') continue;

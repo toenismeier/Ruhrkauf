@@ -1,7 +1,9 @@
 // Datenorientierter Ladenplaner. Geometrie entsteht erst in baueLadenplan().
 // Koordinaten in Metern, x/z links-hinten, Eingang in der +z-Fassade.
 import { rng } from './basis.js';
-import { lokal, vorbereiten } from './innen.js';
+import { lokal, vorbereiten, haengeschild } from './innen.js';
+import { SPORT_BOEDEN, SPORT_SCHILDER, SPORT_NAMEN } from './sportabteilung.js';
+import { SPORT_MIX_PROFILE, SPORT_MIX_WAENDE } from './moebel/sport-mix.js';
 import { moebel } from './moebel/index.js';
 import { LADENBAU as R, ladeProfil, gangZellen, rechteckFlaeche, schneidet } from './ladenbau-regeln.js';
 
@@ -11,7 +13,7 @@ const down = n => Math.floor(n/U+1e-8)*U;
 const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
 const num = (n,d=0) => Number.isFinite(Number(n)) ? Number(n) : d;
 const quadrat = (x,z,w,d) => ({x,z,w,d});
-const NORM = {sportschuhe:'sportschuhe',sporttextil:'sporttextil',outdoor:'outdoor',rad:'rad',wintersport:'wintersport',teamsport:'teamsport'};
+const NORM = {sportschuhe:'sportschuhe',sporttextil:'sporttextil',outdoor:'outdoor',rad:'rad',fahrrad:'rad',fitness:'fitness',wintersport:'wintersport',teamsport:'teamsport',ballsport:'teamsport'};
 
 function sortiment(a) {
   const m = new Map();
@@ -69,15 +71,16 @@ function teilung(teile,abteile,schacht) {
   // Alle Rechtecke besitzen ohnehin einen Anschluss zum Hauptgang.
   const gangIndex=teile.length>1?Math.floor((teile.length-1)/2):-1;
   const verfuegbar=schacht.d-(gangIndex>=0?2*U:0);
-  const mind=3*U;
-  if(verfuegbar<teile.length*mind)throw new Error('Zu viele Abteilungen für Etagentiefe');
+  // Auch kleine Sortimente benötigen zwei Möbelreihen für mindestens vier Präsentationsarten.
+  const minZellen=Math.max(3,Math.min(7,Math.floor(verfuegbar/U/teile.length)));
+  if(verfuegbar<teile.length*minZellen*U)throw new Error('Zu viele Abteilungen für Etagentiefe');
   const summe=teile.reduce((s,f)=>s+f.qm,0);
-  const laengen=teile.map(f=>Math.max(3,Math.floor(f.qm/summe*verfuegbar/U)));
+  const laengen=teile.map(f=>Math.max(minZellen,Math.floor(f.qm/summe*verfuegbar/U)));
   let rest=Math.round(verfuegbar/U)-laengen.reduce((a,b)=>a+b,0);
   const groesste=teile.reduce((a,f,i)=>f.qm>teile[a].qm?i:a,0);
   if(rest>=0)laengen[groesste]+=rest;
   else for(const i of [...laengen.keys()].sort((a,b)=>laengen[b]-laengen[a])){
-    const weg=Math.min(-rest,Math.max(0,laengen[i]-3));
+    const weg=Math.min(-rest,Math.max(0,laengen[i]-minZellen));
     laengen[i]-=weg;rest+=weg;if(rest>=0)break;
   }
   if(rest<0)throw new Error('Abteilungen nicht aufteilbar');
@@ -104,17 +107,23 @@ function passe(m,f,verbote,luft=0) {
 function passeIn(m,raum) {
   return m.x>=raum.x-1e-8&&m.z>=raum.z-1e-8&&m.x+m.w<=raum.x+raum.w+1e-8&&m.z+m.d<=raum.z+raum.d+1e-8;
 }
+// Der Sortimentsschlüssel bestimmt die Präsentation; Fremdformate bleiben unverändert.
+function sportMixId(plan,raum,breite) {
+  const pool=SPORT_MIX_PROFILE[raum.id]?.[breite]??SPORT_MIX_PROFILE.sporttextil[breite];
+  const index=plan.mixIndex[raum.id]??0;
+  return pool[index%pool.length];
+}
+function mixGebaut(plan,raum) {plan.mixIndex[raum.id]=(plan.mixIndex[raum.id]??0)+1;}
 function wandband(plan,profil) {
-  // Wandmodule dürfen weder Gänge noch Kassen oder deren Vorfelder schneiden.
   const ziel=plan.moebel,verbote=[...plan.hindernisse,...plan.gaenge,...plan.kassenVorfeld,...plan.moebel];
   const halb=profil.id==='sport'?'sport_schuh_halb':profil.id==='schwester'?'alt_holz_wand_halb':null;
-  const module=[profil.wand,halb].filter(Boolean);
-  // Erst Fünfmetersegmente versuchen, bei Kollision auf 2,5 m teilen:
-  // insbesondere Treppen-/Lagerraster dürfen nicht ganze freie Bänder löschen.
+  const moduleFuer=(raum)=>[profil.id==='sport'&&raum?profil.abteilungsMoebel[raum.id]?.wand:profil.wand,halb].filter(Boolean);
+  // Wandmodule werden dem angrenzenden Sortimentsrechteck zugeordnet.
   for(let x=0;x+2.5<=plan.breite+1e-8;) {
+    const raum=plan.abteilungen.find(a=>a.z<=U+1e-8&&x+1.25>=a.x&&x+1.25<=a.x+a.w);
     let gesetzt=false;
-    for(const id of module) {
-      const m=item(id,x,0,0,null,{band:'rueck',schildband:true});
+    for(const id of moduleFuer(raum)) {
+      const m=item(id,x,0,0,raum?.id??null,{band:'rueck',schildband:true});
       if(x+m.w<=plan.breite+1e-8&&passe(m,plan,verbote)) {
         ziel.push(m);x+=m.w;gesetzt=true;break;
       }
@@ -122,44 +131,52 @@ function wandband(plan,profil) {
     if(!gesetzt)x+=2.5;
   }
   for(let z=U;z+2.5<=plan.tiefe+1e-8;) {
+    const raum=plan.abteilungen.find(a=>a.x<=U+1e-8&&z+1.25>=a.z&&z+1.25<=a.z+a.d);
     let gesetzt=false;
-    for(const id of module) {
-      const m=item(id,0,z,90,null,{band:'west',schildband:true});
+    for(const id of moduleFuer(raum)) {
+      const m=item(id,0,z,90,raum?.id??null,{band:'west',schildband:true});
       if(z+m.d<=plan.tiefe+1e-8&&passe(m,plan,verbote)&&!ziel.some(w=>schneidet(w,m))) {
         ziel.push(m);z+=m.d;gesetzt=true;break;
       }
     }
-    if(!gesetzt)z+=U; // An 5-m-Hindernisgrenzen exakt wieder anschließen.
+    if(!gesetzt)z+=U;
   }
 }
 function warenReihen(plan,profil,raum) {
   const art=profil.abteilungsMoebel[raum.id]??{};
   const idHaupt=art.gondel??profil.gondel;
-  // Im Sortimentskontext verbleiben: kurze Restmodule füllen Gassenenden.
   const kurz=profil.id==='sport'?'gondel_schuhe':profil.id==='outlet'?'outlet_beauty':'gondel_spielzeug';
-  const module=[idHaupt,kurz].filter((id,i,a)=>a.indexOf(id)===i)
-    .sort((a,b)=>moebel(b).rasterB-moebel(a).rasterB);
+  const module=profil.id==='sport'
+    ? [{breite:4},{breite:2}]
+    : [idHaupt,kurz].filter((id,i,a)=>a.indexOf(id)===i)
+      .sort((a,b)=>moebel(b).rasterB-moebel(a).rasterB).map(id=>({id,breite:moebel(id).rasterB}));
   const startX=raum.x+0.625,endeX=raum.x+raum.w-0.625;
   const gang=Math.ceil(R.gondelGang/R.suchRaster)*R.suchRaster;
-  // Rücken an Rücken: 2 × 1,25 m Gondeln bilden eine funktionale Warenreihe.
-  // Dazwischen 1,875 m Kundengang; Blickachsen bleiben auf 1,4 m Höhe frei.
   const bankTiefe=2*U,schritt=bankTiefe+gang;
   for(let z=raum.z+0.625;z+bankTiefe+0.625<=raum.z+raum.d+1e-8;z+=schritt) {
     let x=startX;
     while(x+2.5<=endeX+1e-8) {
       let platziert=false;
-      for(const id of module) {
-        const w=moebel(id).rasterB*U;
+      for(const gruppe of module) {
+        const w=gruppe.breite*U;
         if(x+w>endeX+1e-8)continue;
-        const modelle=[0,1].map(j=>item(id,x,z+j*U,j?180:0,raum.id,{reihenGruppe:Math.round(z/U)}));
+        const modelle=[0,1].map(j=>{
+          const id=profil.id==='sport'
+            ? (SPORT_MIX_PROFILE[raum.id]??SPORT_MIX_PROFILE.sporttextil)[gruppe.breite][((plan.mixIndex[raum.id]??0)+j)%6]
+            : gruppe.id;
+          const m=item(id,x,z+j*U,j?180:0,raum.id,{reihenGruppe:Math.round(z/U)});
+          if(profil.id==='sport')m.moebelart=id.slice(0,id.lastIndexOf('_'));
+          return m;
+        });
         const frei=modelle.map(m=>passeIn(m,raum)&&passe(m,plan,
           [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]));
         if(!frei[0]&&!frei[1])continue;
-        for(let j=0;j<2;j++)if(frei[j])plan.moebel.push(modelle[j]);
+        for(let j=0;j<2;j++)if(frei[j]){
+          plan.moebel.push(modelle[j]);
+          if(profil.id==='sport')mixGebaut(plan,raum);
+        }
         x+=w;platziert=true;break;
       }
-      // Eine Stütze blockiert nicht die *ganze* 5-m-Gondelgasse:
-      // in Rastervierteln weitersuchen, statt ein komplettes Modul zu überspringen.
       if(!platziert)x+=U;
     }
   }
@@ -168,9 +185,12 @@ function kassenPlatz(plan,profil) {
   const id=profil.kasse,def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
   const main=plan.gaenge[0],vorfeld=gangZellen(R.kassenVorfeld)*U;
   const xs=[main.x+main.w+U,main.x-w-U,main.x+main.w+2*U,main.x-w-2*U];
-  // Positionen in Eingangsnähe, bei Treppen und Stützen ausweichend.
-  for(let z=plan.tiefe-d-3*U;z>=Math.max(U,plan.tiefe-d-9*U);z-=U)
-    for(const x of xs){
+  // Erst Eingangsnähe, danach sämtliche zulässigen Seitenspuren absuchen.
+  // Sonst kann bei fest eingebauter Sport-Inszenierung die einzige Kasse fehlen.
+  for(let x=U;x+w<=plan.breite-U;x+=U)xs.push(x);
+  const stellen=[...new Set(xs)].filter(x=>x>=U&&x+w<=plan.breite-U);
+  for(let z=plan.tiefe-d-3*U;z>=U;z-=U)
+    for(const x of stellen){
       const k=item(id,x,z,0,null,{amAusgang:true});
       const frei=quadrat(x,z+d,w,vorfeld);
       const verbote=[...plan.hindernisse,...plan.gaenge,...plan.moebel];
@@ -217,7 +237,7 @@ function schwerpunkte(plan) {
 // sie schließen verbliebene Freiflächen, ohne die Gondelachsen aufzulösen.
 function verdichteLadenplan(plan,profil){
   if(!profil.insel)return;
-  const kurz=profil.id==='sport'?'gondel_schuhe':'gondel_spielzeug';
+  const kurz=profil.id==='sport'?null:'gondel_spielzeug';
   const varianten=[{id:profil.insel,winkel:0,gruppe:'insel'},
     {id:kurz,winkel:90,gruppe:'kopf'},{id:kurz,winkel:0,gruppe:'kopf'}];
   const zaehler=new Map();
@@ -231,7 +251,8 @@ function verdichteLadenplan(plan,profil){
     for(const f of felder){
       if(f.size<(gross>R.leerflaecheMax?5:2.5))break;
       for(const art of varianten){
-        const def=moebel(art.id),gedreht=art.winkel===90;
+        const id=art.id??sportMixId(plan,plan.abteilungen.find(a=>f.x>=a.x&&f.z>=a.z&&f.x<a.x+a.w&&f.z<a.z+a.d)??plan.abteilungen[0],2);
+        const def=moebel(id),gedreht=art.winkel===90;
         const w=(gedreht?def.rasterT:def.rasterB)*U;
         const d=(gedreht?def.rasterB:def.rasterT)*U;
         if(besetzt+w*d>0.49*verfuegbar)continue;
@@ -242,7 +263,9 @@ function verdichteLadenplan(plan,profil){
             if(!raum)continue;
             const key=raum.id+':'+art.gruppe;
             if((zaehler.get(key)||0)>=(art.gruppe==='insel'?6:12))continue;
-            const m=item(art.id,x,z,art.winkel,raum.id,{ausgleich:true,kopf:art.gruppe==='kopf'});
+            const moebelId=profil.id==='sport'&&art.gruppe==='kopf'?sportMixId(plan,raum,2):id;
+            const m=item(moebelId,x,z,art.winkel,raum.id,{ausgleich:true,kopf:art.gruppe==='kopf'});
+            if(profil.id==='sport'&&art.gruppe==='kopf')m.moebelart=moebelId.slice(0,moebelId.lastIndexOf('_'));
             if(!passeIn(m,raum)||!passe(m,plan,
               [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
             const nah=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
@@ -259,7 +282,8 @@ function verdichteLadenplan(plan,profil){
                 Math.max(q.x-m.x-m.w,m.x-q.x-q.w);
               return (m.winkel%180===0?xO:zO)&&dist>=0&&dist<R.gondelGang-1e-8;
             }))continue;
-            plan.moebel.push(m);zaehler.set(key,(zaehler.get(key)||0)+1);
+            plan.moebel.push(m);if(profil.id==='sport'&&art.gruppe==='kopf')mixGebaut(plan,raum);
+            zaehler.set(key,(zaehler.get(key)||0)+1);
             besetzt+=w*d;eingefuegt=true;
           }
         if(eingefuegt)break;
@@ -271,12 +295,14 @@ function verdichteLadenplan(plan,profil){
   // Wenn die größte freie Prüffläche im breiten Hauptgang liegt,
   // verbleibende Möbeldichte an bestehenden Gondelreihen ergänzen.
   if(besetzt<R.moebelAnteilMin*verfuegbar){
-    const def=moebel(kurz);
+    const def=moebel(profil.id==='sport'?SPORT_MIX_PROFILE.sporttextil[2][0]:kurz);
     for(const raum of plan.abteilungen){
       for(let z=raum.z;z+def.rasterT*U<=raum.z+raum.d+1e-8;z+=U)
         for(let x=raum.x;x+def.rasterB*U<=raum.x+raum.w+1e-8;x+=U){
           if(besetzt>=R.moebelAnteilMin*verfuegbar)break;
-          const m=item(kurz,x,z,0,raum.id,{ausgleich:true,kopf:true});
+          const id=profil.id==='sport'?sportMixId(plan,raum,2):kurz;
+          const m=item(id,x,z,0,raum.id,{ausgleich:true,kopf:true});
+          if(profil.id==='sport')m.moebelart=id.slice(0,id.lastIndexOf('_'));
           if(!passeIn(m,raum)||!passe(m,plan,
             [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
           const nahe=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
@@ -290,9 +316,43 @@ function verdichteLadenplan(plan,profil){
             return xO&&dist>=0&&dist<R.gondelGang-1e-8;
           });
           if(zuEng)continue;
-          plan.moebel.push(m);besetzt+=m.w*m.d;
+          plan.moebel.push(m);if(profil.id==='sport')mixGebaut(plan,raum);
+          besetzt+=m.w*m.d;
         }
     }
+  }
+}
+
+// Randabteilungen erhalten Ergänzungswände nur, wenn die Stellreihen weniger
+// als vier Präsentationsarten bieten oder ein Typ mehr als 40 % ausmacht.
+function sichereSportMix(plan) {
+  if(plan.profil!=='sport')return;
+  const verbote=()=>[...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld];
+  for(const raum of plan.abteilungen){
+    const passend=()=>plan.moebel.filter(m=>m.abteilung===raum.id);
+    const gueltig=()=>{
+      const ms=passend(),t=new Map();
+      for(const m of ms){const art=m.moebelart??m.id;t.set(art,(t.get(art)??0)+1);}
+      return t.size>=4 && [...t.values()].every(n=>n<=0.4*ms.length+1e-8);
+    };
+    if(gueltig())continue;
+    const ids=SPORT_MIX_WAENDE[raum.id]??SPORT_MIX_WAENDE.sporttextil;
+    const kandidaten=[];
+    for(let z=raum.z;z+2.5<=raum.z+raum.d+1e-8;z+=U)
+      for(const x of [raum.x,raum.x+raum.w-R.wandTiefe])
+        kandidaten.push({x,z,winkel:90});
+    for(let x=raum.x;x+2.5<=raum.x+raum.w+1e-8;x+=U)
+      for(const z of [raum.z,raum.z+raum.d-R.wandTiefe])
+        kandidaten.push({x,z,winkel:0});
+    let gesetzt=0;
+    for(const k of kandidaten){
+      if(gueltig()||gesetzt>=8)break;
+      const id=ids[gesetzt%ids.length];
+      const m=item(id,k.x,k.z,k.winkel,raum.id,{innenwand:true,moebelart:id});
+      if(!passeIn(m,raum)||!passe(m,plan,verbote()))continue;
+      plan.moebel.push(m);gesetzt++;
+    }
+    if(!gueltig())plan.hinweise.push('Sortimentsmix nicht erreichbar: '+raum.id);
   }
 }
 
@@ -309,7 +369,7 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
   const plan={version:1,profil:p.id,seed,breite:f.breite,tiefe:f.tiefe,
     eingaenge:f.eingaenge,hindernisse:f.hindernisse,gaenge:[haupt],
     abteilungen:[],moebel:[],kassenVorfeld:[],boeden:[],
-    wandOeffnungen:[],hinweise:[]};
+    wandOeffnungen:[],hinweise:[],mixIndex:{}};
   // Vom Eingang zum Hauptgang ein rechtwinkliges, breit genuges Frontstück.
   for(const e of f.eingaenge)if(e.x<haupt.x||e.x>haupt.x+haupt.w) {
     const x=Math.min(e.x,haupt.x),x2=Math.max(e.x,haupt.x+haupt.w),d=haupt.w;
@@ -340,14 +400,19 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
   // nachträglich erzeugte Quergänge dürfen keine bereits gebauten Möbel überfahren.
   kassenPlatz(plan,p);
   wandband(plan,p);
-  for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
+  // Markeninszenierungen zuerst freihalten, bevor die Präsentationsreihen entstehen.
   for(const raum of plan.abteilungen)inszenierung(plan,p,raum);
+  for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
   verdichteLadenplan(plan,p);
-  // Die Bodentypen sind definitionsgemäß etagenweit, nie je Sortiment.
+  sichereSportMix(plan);
+  // Farbige Abteilungsrechtecke unter dem Gangbelag erhalten die Sporthaus-Identität.
   plan.boeden.push({...quadrat(0,0,plan.breite,plan.tiefe),typ:'flaeche',farbe:p.boden.flaeche});
+  if(p.id==='sport')for(const a of plan.abteilungen)
+    plan.boeden.push({...quadrat(a.x,a.z,a.w,a.d),typ:'flaeche',abteilung:a.id,farbe:SPORT_BOEDEN[a.id]??p.boden.flaeche});
   for(const g of plan.gaenge)plan.boeden.push({...g,typ:'gang',farbe:p.boden.gang});
   for(const i of plan.moebel.filter(m=>m.inszenierung).slice(0,Math.floor(plan.breite*plan.tiefe*R.akzentAnteilMax/(2.5*2.5))))
     if(p.boden.akzent)plan.boeden.push({...quadrat(i.x,i.z,i.w,i.d),typ:'akzent',farbe:p.boden.akzent,unter:i.id});
+  delete plan.mixIndex;
   return plan;
 }
 /** Umsetzung der Plan-Daten in die bestehende Three.js-Sammler-API. */
@@ -355,13 +420,47 @@ export function baueLadenplan(S,scene,plan,o={}) {
   const p=ladeProfil(plan.profil),y=o.y??0,dichte=o.dichte??1;
   if(o.vorbereiten!==false)vorbereiten(S,scene);
   const n0=S.anzahl;
-  // Flächen zuerst, die Gangflächen zuletzt darüber; keine neuen Bodenarten je Abteilung.
+  // Für Etagenkatalog-Ausschnitte nur Möbel und Bodenteile im sichtbaren Schnitt bauen.
+  const sicht=o.ausschnitt??null;
+  const beschraenke=(r)=>{
+    if(!sicht)return r;
+    const x0=Math.max(r.x,sicht.x0),z0=Math.max(r.z,sicht.z0);
+    const x1=Math.min(r.x+r.w,sicht.x1),z1=Math.min(r.z+r.d,sicht.z1);
+    return x1>x0&&z1>z0?{x:x0,z:z0,w:x1-x0,d:z1-z0}:null;
+  };
+  // Sortimentsspezifische Fläche, darüber die durchgängigen Laufwege.
+  // Geschossdecken aus dem Bestand besitzen Öffnungen für Treppen und Lufträume.
+  // Bodenauflagen dürfen diese Aussparungen nicht nachträglich wieder verschließen.
+  const ohneLoch=(b,h)=>{
+    const x0=Math.max(b.x,h.x),x1=Math.min(b.x+b.w,h.x+h.w);
+    const z0=Math.max(b.z,h.z),z1=Math.min(b.z+b.d,h.z+h.d);
+    if(x1<=x0||z1<=z0)return [b];
+    return [
+      {x:b.x,z:b.z,w:b.w,d:z0-b.z},
+      {x:b.x,z:z1,w:b.w,d:b.z+b.d-z1},
+      {x:b.x,z:z0,w:x0-b.x,d:z1-z0},
+      {x:x1,z:z0,w:b.x+b.w-x1,d:z1-z0},
+    ].filter(q=>q.w>0.001&&q.d>0.001);
+  };
   for(const b of plan.boeden) {
     const hoehe=b.typ==='gang'?0.038:b.typ==='akzent'?0.045:0.03;
-    S.box(b.w,hoehe,b.d,b.x+b.w/2,y-hoehe/2+(b.typ==='gang'?0.01:b.typ==='akzent'?0.016:0),b.z+b.d/2,b.farbe);
+    let stuecke=[beschraenke(b)].filter(Boolean);
+    for(const h of o.bodenAussparungen??[])stuecke=stuecke.flatMap(q=>ohneLoch(q,h));
+    for(const q of stuecke)S.box(q.w,hoehe,q.d,q.x+q.w/2,y-hoehe/2+(b.typ==='gang'?0.010:b.typ==='akzent'?0.016:b.abteilung?0.004:0),q.z+q.d/2,b.farbe);
+  }
+  if(plan.profil==='sport'&&scene)for(const a of plan.abteilungen) {
+    const raumbild=beschraenke(a);
+    if(!raumbild)continue;
+    const x=raumbild.x+(raumbild.w>6?Math.min(3,raumbild.w/2):raumbild.w/2);
+    const z=raumbild.z+raumbild.d/2;
+    haengeschild(S,scene,SPORT_NAMEN[a.id]??a.titel,x,y+3.35,z,
+      {farbe:SPORT_SCHILDER[a.id]??'#314754',hoehe:0.48});
   }
   for(let j=0;j<plan.moebel.length;j++){
-    const m=plan.moebel[j],def=moebel(m.id),w=def.rasterB*U;
+    const m=plan.moebel[j];
+    if(sicht&&(m.x<sicht.x0-1e-8||m.z<sicht.z0-1e-8||
+      m.x+m.w>sicht.x1+1e-8||m.z+m.d>sicht.z1+1e-8))continue;
+    const def=moebel(m.id),w=def.rasterB*U;
     const winkel=m.winkel*Math.PI/180;
     const ox=m.winkel===90?m.x:m.winkel===270?m.x+m.w:m.x+w/2;
     const oz=m.winkel===90?m.z+m.d/2:m.winkel===180?m.z+m.d:m.z;

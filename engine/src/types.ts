@@ -134,6 +134,9 @@ export interface Haus {
   /** Premium bleibt wirtschaftlich ein Warenhaus. */
   klasse?: 'premium';
   premiumSchluessel?: string;
+  premiumImage?: number;
+  premiumEigentuemer?: string;
+  premiumInvestition?: { bis: number; substanzProWoche: number; imageProWoche: number };
   /** Volkskauf und FUNDUS sind bis Engine-Formate reine Bestandsdaten. */
   nurDaten?: boolean;
   einzug: Einzugsgebiet;
@@ -280,7 +283,7 @@ export interface BeraterMandat {
   ergebnis?: { empfohleneSchliessungen: string[]; folien: number; fazit: string };
 }
 
-export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme';
+export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf';
 
 export interface Angebot {
   id: string;
@@ -306,6 +309,8 @@ export interface Angebot {
   wettbewerberId?: string;
   // sportverkauf
   kaufpreis?: Eur;
+  premiumKaeuferTyp?: 'Luxusgruppe' | 'Family Office' | 'Staatsfonds';
+  premiumKaeuferName?: string;
   // sonderposten
   gruppe?: GruppeId;
   wert?: Eur;
@@ -417,6 +422,8 @@ export interface GameState {
   kreditlinieBasis: Eur;
   zahlungsstockungSeit?: number;
   haeuser: Haus[];
+  /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
+  premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
   wettbewerbRng: number;
   wettbewerbNachnutzungen: { haus: string; woche: number }[];

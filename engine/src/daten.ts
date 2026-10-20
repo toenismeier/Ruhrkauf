@@ -298,10 +298,10 @@ export const STAEDTE: StadtDef[] = [
 
 /** Namen und Grafikschlüssel der vier Premium-Häuser. */
 export const PREMIUM_HAEUSER = [
-  { schluessel: 'P001', name: 'Palais Hartwig', stadt: 'Berlin' },
-  { schluessel: 'P002', name: 'Hartwig am Hofgarten', stadt: 'München' },
-  { schluessel: 'P003', name: 'Alsterhaus Hartwig', stadt: 'Hamburg' },
-  { schluessel: 'P004', name: 'Hartwig Königsallee', stadt: 'Düsseldorf' },
+  { id: 'P001', schluessel: 'P001', rang: 1, name: 'Palais Hartwig', stadt: 'Berlin' },
+  { id: 'P002', schluessel: 'P002', rang: 1, name: 'Hartwig am Hofgarten', stadt: 'München' },
+  { id: 'P003', schluessel: 'P003', rang: 2, name: 'Alsterhaus Hartwig', stadt: 'Hamburg' },
+  { id: 'P004', schluessel: 'P004', rang: 3, name: 'Hartwig Königsallee', stadt: 'Düsseldorf' },
 ] as const;
 
 export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
@@ -396,3 +396,4 @@ export const WETTBEWERB_UEBERSCHNEIDUNG: Record<WettbewerberArt, Partial<Record<
   premium: { beauty: 1, accessoires: 1, damen: 0.6, food: 0.5 },
   leer_ehemals: {},
 };
+

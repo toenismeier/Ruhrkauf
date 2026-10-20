@@ -51,7 +51,8 @@ async function buendeln() {
   const p = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
   p.on('pageerror', (e) => console.log('FEHLER', e.message));
   p.on('console', (m) => { if (m.type() === 'error') console.log('KONSOLE', m.text()); });
-  const url = 'file://' + path.join(__dirname, 'spiel.html') + `?stadt=${encodeURIComponent(stadt)}&seed=${seed}`;
+  const animationen = process.argv.includes('--mit-animation') && !process.argv.includes('--ohne-animation');
+  const url = 'file://' + path.join(__dirname, 'spiel.html') + `?stadt=${encodeURIComponent(stadt)}&seed=${seed}${animationen ? '' : '&ohne-animation=1'}`;
   await p.goto(url, { waitUntil: 'load', timeout: 0 });
   await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
   const bild = async (name) => {
@@ -558,6 +559,93 @@ async function buendeln() {
     }
     console.log('Posteingang: Karten, Zähler, Entscheidung, Annehmen, Ablehnen = 0 Abweichungen; Bilder: ' + bilder);
   }
+
+  // Optional: --mit-animation protokolliert 100-ms-Bildfolgen; Prüfmodus überspringt Wartezeiten.
+  async function reiseWochePruefen() {
+    const fehler = [], zeiten = {}, bilder = path.join(__dirname, 'bilder');
+    const ordnerReise = path.join(bilder, 'reise'), ordnerWoche = path.join(bilder, 'wochenbericht');
+    fs.mkdirSync(ordnerReise, { recursive: true }); fs.mkdirSync(ordnerWoche, { recursive: true });
+    const errors = []; p.on('pageerror', (err) => errors.push(err.message));
+    const pruefe = (ok, msg) => { if (!ok) fehler.push(msg); console.log((ok ? 'OK: ' : 'FEHLER: ') + msg); };
+    await p.evaluate(() => window.spiel.neuesSpiel(1, 'Essen'));
+    await p.locator('#stadt-reise').click();
+    await p.waitForSelector('#reise-overlay:not([hidden]) .reise-panel');
+    await p.screenshot({ path: path.join(ordnerReise, '00-hauptbahnhof.png') });
+    await p.locator('.reise-suche').fill('Düsseldorf');
+    const gefiltert = await p.locator('[data-reiseziel]').count();
+    pruefe(gefiltert === 1, 'Reisesuche filtert Düsseldorf');
+    await p.screenshot({ path: path.join(ordnerReise, '01-zielwahl.png') });
+    const ankunft = p.locator('[data-reiseziel="Düsseldorf"]');
+    await ankunft.click();
+    if (animationen) {
+      const rasterStart = Date.now();
+      for (let ms = 0; ms <= 4900; ms += 100) {
+        await p.waitForTimeout(Math.max(0, rasterStart + ms - Date.now()));
+        await p.screenshot({ path: path.join(ordnerReise, String(ms).padStart(5, '0') + '.png') });
+      }
+    }
+    await p.waitForFunction(() => window.spiel.reise.pruefe().stadt === 'Düsseldorf' && !window.spiel.reise.pruefe().aktiv, null, { timeout: 30000 });
+    const r = await p.evaluate(() => ({ ...window.spiel.reise.pruefe(), ort: window.spiel.bahnhofBildpunkt(),
+      stadt: document.getElementById('stadtname').textContent }));
+    zeiten.reise = r.schritte;
+    if (animationen) { const fertig = r.schritte.find((x) => x.schritt === 'Reise abgeschlossen');
+      pruefe(!!fertig && Math.abs(fertig.reiseMs - 4950) <= 495, 'Reisedauer 4.950 ms ±10 %'); }
+    pruefe(r.stadt === 'Düsseldorf', 'Reiseziel und Stadtchip sind Düsseldorf');
+    pruefe(!!r.ort && r.ort.x >= 0 && r.ort.x <= 390 && r.ort.y >= 0 && r.ort.y <= 844, 'Zielbahnhof im sichtbaren Kamerabereich');
+    await p.screenshot({ path: path.join(ordnerReise, '99-angekommen.png') });
+    // Eine tatsächliche Engine-Woche mit neuem Vorgang suchen; keine Testmeldung erfinden.
+    const testWoche = await p.evaluate(() => {
+      const spiel = window.spiel, E = spiel.E;
+      for (let i = 0; i < 44; i++) {
+        const davor = new Set(E.posteingang(spiel.s).handeln.map((m) => m.id));
+        const probe = structuredClone(spiel.s);
+        E.wocheAbspielen(probe);
+        const neu = E.posteingang(probe).handeln.filter((m) => !davor.has(m.id));
+        if (neu.length) return { woche: spiel.s.woche, vorgaenge: neu.length };
+        spiel.woche(true);
+      }
+      return null;
+    });
+    pruefe(!!testWoche, 'Engine-Testwoche mit mindestens einem neuen Vorgang gefunden');
+    await p.locator('#weiter').click();
+    await p.waitForSelector('#wochen-overlay:not([hidden]) .wochen-frage');
+    await p.screenshot({ path: path.join(ordnerWoche, '00-bestaetigung.png') });
+    await p.locator('[data-wa="ja"]').click();
+    if (animationen) {
+      const rasterStart = Date.now();
+      for (let ms = 0; ms <= 12900; ms += 100) {
+        await p.waitForTimeout(Math.max(0, rasterStart + ms - Date.now()));
+        await p.screenshot({ path: path.join(ordnerWoche, String(ms).padStart(5, '0') + '.png') });
+      }
+    }
+    await p.waitForFunction(() => ['bericht', 'vorfall'].includes(window.spiel.wochenbericht.status), null, { timeout: 30000 });
+    const w = await p.evaluate(() => ({ ...window.spiel.wochenbericht.pruefe(),
+      soll: window.spiel.E.cockpit(window.spiel.s),
+      aktuell: document.getElementById('wb-umsatz')?.dataset.wert,
+      ebitda: document.getElementById('wb-ebitda')?.dataset.wert,
+      zeitung: document.querySelector('.wb-zeitung')?.textContent }));
+    zeiten.wochenbericht = w.zeiten;
+    if (animationen) { const fertig = w.zeiten.find((x) => x.ereignis === 'Zählung beendet');
+      pruefe(!!fertig && Math.abs(fertig.jaMs - 11860) <= 1186, 'Wochenbericht bis Zählerende 11.860 ms ±10 %'); }
+    pruefe(w.bericht?.umsatz === w.soll.umsatzWoche && Number(w.aktuell) === w.soll.umsatzWoche, 'Umsatz entspricht Engine');
+    pruefe(w.bericht?.ebitda === w.soll.ebitdaWoche && Number(w.ebitda) === w.soll.ebitdaWoche, 'EBITDA entspricht Engine');
+    pruefe(!!w.zeitung?.includes('Der Handelsbote'), 'Zeitung vorhanden');
+    pruefe((w.bericht?.meldungstexte ?? []).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche');
+    await p.screenshot({ path: path.join(ordnerWoche, '99-wochenbericht.png') });
+    if (w.bericht?.vorgaenge > 0) {
+      await p.waitForSelector('#wb-vorfall.offen .wb-vorfall');
+      await p.screenshot({ path: path.join(ordnerWoche, '100-vorfall.png') });
+      pruefe(true, 'Neuer Engine-Vorgang als Bottom-Sheet');
+    } else {
+      console.warn('Kein neuer Vorgang in dieser Testwoche; Vorfall-Test nicht abgedeckt.');
+      fehler.push('Vorfalldialog nicht überprüft: keine neuen Vorgänge aus der Engine');
+    }
+    pruefe(errors.length === 0, 'Keine JavaScript-Konsolenfehler: ' + errors.join('; '));
+    fs.writeFileSync(path.join(ordnerWoche, 'pruefung.json'), JSON.stringify({ fehler, zeiten, engine: w.soll }, null, 2));
+    if (fehler.length) throw new Error('Reise/Wochenbericht: ' + fehler.length + ' Abweichungen: ' + fehler.join('; '));
+    console.log('Reise und Wochenbericht: 0 Abweichungen, ' + bilder);
+  }
+
   // Eigenständiger End-to-End-Lauf: 112 Städte, zwei Bot-Verläufe und
   // Abgleich zwischen Engine, sichtbaren Gruppen und Pins; keine CI-Aktivierung.
   async function wettbewerberPruefen() {
@@ -614,6 +702,7 @@ async function buendeln() {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
     return;
   }
+  if (process.argv.includes('--nur-reise-woche')) { try { await reiseWochePruefen(); } finally { await b.close(); } return; }
   if (process.argv.includes('--nur-posteingang')) { await posteingangPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-start')) {
     const ergebnis = await startPruefen();

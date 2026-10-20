@@ -1,5 +1,6 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { ereignisse } from './ereignisse';
+import { premiumWoche } from './premium';
 import { wettbewerbWoche } from './wettbewerb';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
@@ -33,6 +34,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   const w = s.woche;
 
   prozesse(s);
+  premiumWoche(s);
   hqWoche(s);
   quartalsStart(s);
   // Vorstand (Loyalität, Abwerbung, Sitzung, Ressort-KI) und Produktentwicklung (Einführungen)
@@ -101,7 +103,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
       umsatzEigen += u;
       umsatzEigenJe[g] = (umsatzEigenJe[g] ?? 0) + u;
       kpi.umsatz += u;
-      kpi.rohertrag += u - e;
+      kpi.rohertrag += u - e + (h.klasse === 'premium' && (g === 'beauty' || g === 'accessoires') ? u * 0.03 : 0);
       kpi.umsatzJeGruppe[g] = (kpi.umsatzJeGruppe[g] ?? 0) + u;
     }
     for (const [g, u] of Object.entries(r.kommission) as [GruppeId, number][]) {
