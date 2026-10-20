@@ -31,8 +31,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 ## Operatives Paket
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
-| O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
-| O05 Ware | `feat/op-ware` | in Arbeit | GPT fertigstellen, PR öffnen |
+| O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O05 Ware, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
 | O09 E-Commerce | `feat/op-ecommerce` | in Arbeit | GPT fertigstellen, PR öffnen |
 
 ## Nice-to-haves (Prüfung läuft im Nice-Chat)
