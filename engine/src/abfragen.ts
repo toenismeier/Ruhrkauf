@@ -206,7 +206,7 @@ export function portfolio(s: GameState): PortfolioZeile[] {
       const f = 1 + rausch * ((seed / 100) * 2 - 1);
       const umsatz = k?.umsatz ?? 0;
       const db = k ? k.db + Math.abs(umsatz) * (f - 1) * 0.5 : 0;
-      const formatKey: PortfolioZeile['formatKey'] = h.nurDaten ? (h.id.startsWith('O') ? 'fundus' : 'volkskauf') : h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'hartwig';
+      const formatKey: PortfolioZeile['formatKey'] = h.format === 'outlet' ? 'fundus' : h.format === 'schwester' ? 'volkskauf' : h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'hartwig';
       const klasse: PortfolioZeile['klasse'] = h.hausklasse ?? (h.klasse === 'premium' ? 'Premium' : null);
       const ampel: PortfolioZeile['ampel'] = h.nurDaten || !h.kpi || h.status !== 'offen' ? 'ohne' : db < 0 ? 'rot' : (umsatz > 0 && db / umsatz < 0.04 ? 'gelb' : 'gruen');
       return {
