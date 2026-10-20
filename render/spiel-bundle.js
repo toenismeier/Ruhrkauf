@@ -29,6 +29,7 @@
     HQ_PARAM: () => HQ_PARAM,
     HQ_TYPEN: () => HQ_TYPEN,
     HQ_WIRKUNG: () => HQ_WIRKUNG,
+    IT_IDS: () => IT_IDS,
     KANAELE: () => KANAELE,
     KANAL: () => KANAL,
     MATERIALIEN: () => MATERIALIEN,
@@ -43,6 +44,7 @@
     SCHWIERIGKEITEN: () => SCHWIERIGKEITEN,
     STANDARD_SZENARIO: () => STANDARD_SZENARIO,
     STARTKALENDER: () => STARTKALENDER,
+    SYSTEME: () => SYSTEME,
     TREND_GRUPPEN: () => TREND_GRUPPEN,
     VORSTAND_PARAM: () => VORSTAND_PARAM,
     WG: () => WG,
@@ -53,6 +55,7 @@
     aktionskalender: () => aktionskalender,
     angebotText: () => angebotText,
     angebotsChance: () => angebotsChance,
+    ausfallRisiko: () => ausfallRisiko,
     bereichsQualitaet: () => bereichsQualitaet,
     berichtetAn: () => berichtetAn,
     bildeHauscluster: () => bildeHauscluster,
@@ -66,6 +69,7 @@
     freigaben: () => freigaben,
     fuehreAus: () => fuehreAus,
     gehaltsforderung: () => gehaltsforderung,
+    generationInCluster: () => generationInCluster,
     gruppenFuer: () => gruppenFuer,
     hausDetail: () => hausDetail,
     hausTreiber: () => hausTreiber,
@@ -74,7 +78,12 @@
     hqFuerGrafik: () => hqFuerGrafik,
     hqUebersicht: () => hqUebersicht,
     istDelegiert: () => istDelegiert,
+    itAlter: () => itAlter,
+    itCluster: () => itCluster,
     itDeckel: () => itDeckel,
+    itDeckelGrund: () => itDeckelGrund,
+    itProjektPlan: () => itProjektPlan,
+    itUebersicht: () => itUebersicht,
     kanaele: () => kanaele,
     kandidaten: () => kandidaten,
     kreditversicherung: () => kreditversicherung,
@@ -735,8 +744,8 @@
     { titel: "Teens und Tweens", entwurf: { zielgruppe: { alter: "13-17", geschlecht: "unisex" }, kategorie: "Bekleidung", preislage: "einstieg", stil: "trendig", qualitaet: 2, beschaffung: "fernost" }, wgs: ["damen.young", "kinder.maedchen", "kinder.jungen"] },
     { titel: "Young Adults", entwurf: { zielgruppe: { alter: "18-29", geschlecht: "unisex" }, kategorie: "Bekleidung", preislage: "einstieg", stil: "trendig", qualitaet: 2, beschaffung: "fernost" }, wgs: ["damen.young", "damen.denim", "herren.casual", "sporttextil.freizeit"] }
   ];
-  function startMarke(id, name2, farbe2, z2, kategorie, preislage, stil, qualitaet, beschaffung, bekanntheit, stilAktualitaet, wg) {
-    return { id, name: name2, farbe: farbe2, zielgruppe: z2, kategorie, preislage, stil, qualitaet, beschaffung, budgetWoche: 0, bekanntheit, stilAktualitaet, status: "aktiv", seit: -1040, gewachsen: true, wgAnteile: { ...wg }, wgIst: { ...wg } };
+  function startMarke(id, name2, farbe2, z2, kategorie, preislage, stil, qualitaet2, beschaffung, bekanntheit, stilAktualitaet, wg) {
+    return { id, name: name2, farbe: farbe2, zielgruppe: z2, kategorie, preislage, stil, qualitaet: qualitaet2, beschaffung, budgetWoche: 0, bekanntheit, stilAktualitaet, status: "aktiv", seit: -1040, gewachsen: true, wgAnteile: { ...wg }, wgIst: { ...wg } };
   }
   function erzeugeEigenmarken() {
     return {
@@ -1298,8 +1307,8 @@
     return a === "50+" || a === "70+" ? "reif" : a === "30-49" ? "mitte" : "jung";
   }
   var PREIS_STUFE = { einstieg: 0, mitte: 1, gehoben: 2 };
-  function normpreis(typ, preislage, material2, qualitaet) {
-    const p = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet);
+  function normpreis(typ, preislage, material2, qualitaet2) {
+    const p = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet2);
     return Math.max(3, Math.round(p) - 0.01);
   }
   var produktStufe = (s2) => clamp(s2.hq?.wirkung.produkt ?? 1, 0, 3);
@@ -1388,9 +1397,9 @@
     const st = s2.einkauf?.wgs[wg];
     return (st?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
   }
-  function ekStueck(normp, me, material2, qualitaet) {
+  function ekStueck(normp, me, material2, qualitaet2) {
     const mat2 = MATERIALIEN[material2];
-    return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet - 3)) * 100) / 100;
+    return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet2 - 3)) * 100) / 100;
   }
   function produktName(typ, farbe2, material2) {
     const t = TYP[typ];
@@ -1597,9 +1606,9 @@
   function pruefe(s2, e) {
     const m = s2.eigenmarken.marken.find((x) => x.id === e.marke);
     const preislage = e.preislage ?? m?.preislage ?? "mitte";
-    const qualitaet = clamp(Math.round(e.qualitaet ?? m?.qualitaet ?? 3), 1, 5);
+    const qualitaet2 = clamp(Math.round(e.qualitaet ?? m?.qualitaet ?? 3), 1, 5);
     const stil = e.stil ?? m?.stil ?? "klassisch";
-    const leer3 = { preislage, qualitaet, stil, kapFrei: 0 };
+    const leer3 = { preislage, qualitaet: qualitaet2, stil, kapFrei: 0 };
     if (!m || m.status === "eingestellt") return { ...leer3, fehler: "Marke nicht gefunden." };
     const t = TYP[e.typ];
     if (!t) return { ...leer3, m, fehler: "Unbekannter Artikeltyp." };
@@ -1611,7 +1620,7 @@
     if (!wg) return { ...leer3, m, t, fehler: `${e.typ} passt nicht zu ${m.name} (Kategorie oder Zielgruppe).` };
     const kapFrei = kapazitaet(s2) - belegt(s2, m.id, t.kategorie);
     if (kapFrei <= 0) return { ...leer3, m, t, wg, kapFrei, fehler: `Kapazit\xE4t f\xFCr ${PRODUKT_KATEGORIEN[t.kategorie]} bei ${m.name} erreicht. Bitte erst Produkte auslisten.` };
-    return { m, t, wg, preislage, qualitaet, stil, kapFrei };
+    return { m, t, wg, preislage, qualitaet: qualitaet2, stil, kapFrei };
   }
   function produktAktion(s2, a) {
     const ok5 = (text3) => ({ ok: true, text: text3 });
@@ -5438,8 +5447,342 @@
   }
 
   // ../engine/src/it.ts
-  function itDeckel(_s, _bereich) {
-    return 1;
+  var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau"]);
+  var SYSTEME = {
+    kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
+    warenwirtschaft: { name: "Warenwirtschaft", start: 2, alter: 10, kosten: 62e3, bereiche: ["allokation", "logistik", "einkauf_damen", "einkauf_herren_kinder", "einkauf_beauty", "einkauf_wohnen", "einkauf_food", "preis_reduzierung"] },
+    planung: { name: "Planungssystem", start: 1, alter: 17, kosten: 42e3, bereiche: ["merchandise_planning", "konzerncontrolling", "vertriebscontrolling"] },
+    personaleinsatz: { name: "Personaleinsatz-Software", start: 1, alter: 12, kosten: 25e3, bereiche: ["personaleinsatz", "store_operations"] },
+    preisschilder: { name: "Elektronische Preisschilder", start: 0, alter: 0, kosten: 0, bereiche: ["preis_reduzierung", "store_operations", "allokation"] },
+    app: { name: "App & Kundenkarte", start: 2, alter: 6, kosten: 39e3, bereiche: ["crm", "marketing"] },
+    ecommerce: { name: "E-Commerce-Plattform", start: 2, alter: 8, kosten: 6e4, bereiche: ["ecommerce"] },
+    datenplattform: { name: "Datenplattform (BI)", start: 1, alter: 11, kosten: 47e3, bereiche: ["bi_daten"] }
+  };
+  var IT_IDS = Object.keys(SYSTEME);
+  function itCluster(s2) {
+    const mitOrg = s2;
+    const o = mitOrg.organisation?.hauscluster.filter((c) => !c.sonder && c.hausIds.length > 0);
+    if (o?.length) return o.map((c) => ({ id: c.id, name: c.name, hausIds: [...c.hausIds] }));
+    const gruppen = [];
+    const regionen = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
+    for (const region of regionen) {
+      const ids = s2.haeuser.filter((h) => h.region === region).map((h) => h.id).sort();
+      for (let i = 0; i < ids.length; i += 9) gruppen.push({ id: "it-" + region + "-" + (i / 9 + 1), name: region + " " + (i / 9 + 1), hausIds: ids.slice(i, i + 9) });
+    }
+    return gruppen;
+  }
+  function initialisiereIt(s2) {
+    if (s2.it) return;
+    const systeme = {};
+    for (const id of IT_IDS) {
+      const d = SYSTEME[id];
+      systeme[id] = {
+        id,
+        generation: d.start,
+        alter: d.alter,
+        basisAlter: d.alter,
+        kostenWoche: d.kosten,
+        basisKosten: d.kosten,
+        wartungGekuendigt: false,
+        installationen: {},
+        ...id === "kasse" ? { kasseAusbau: { selbstbedienung: 0, mobil: 0 } } : {}
+      };
+    }
+    s2.it = { systeme, projekte: [], naechsteId: 0, umsatzFaktoren: {}, hausCluster: {}, startprobleme: {}, meldungen: 0 };
+  }
+  var system = (s2, id) => s2.it?.systeme[id];
+  function generationInCluster(s2, id, clusterId) {
+    const x = system(s2, id);
+    return x?.installationen[clusterId]?.generation ?? x?.generation ?? SYSTEME[id].start;
+  }
+  function itAlter(s2, id, clusterId) {
+    const x = system(s2, id);
+    if (!x) return SYSTEME[id].alter + s2.woche / 52;
+    const i = clusterId ? x.installationen[clusterId] : void 0;
+    return i ? Math.max(0, (s2.woche - i.seitWoche) / 52) : x.alter + s2.woche / 52;
+  }
+  function ausfallRisiko(generation, alter) {
+    if (generation === 0) return 0;
+    return clamp(15e-5 + Math.pow(Math.max(0, alter - 4) / 20, 2) * (5 - generation) * 2e-3, 0, 0.065);
+  }
+  function benoetigteSysteme(bereich) {
+    const direkt = IT_IDS.filter((id) => SYSTEME[id].bereiche.includes(bereich));
+    if (!direkt.length) {
+      if (bereich.includes("einkauf")) return ["warenwirtschaft"];
+      if (bereich.includes("controlling")) return ["planung", "datenplattform"];
+      if (bereich.includes("personal")) return ["personaleinsatz"];
+    }
+    return direkt;
+  }
+  function deckelGeneration(g) {
+    return [0.72, 0.81, 0.88, 0.95, 1][g];
+  }
+  function itDeckel(s2, bereich) {
+    const benoetigt = benoetigteSysteme(bereich);
+    if (!benoetigt.length) return 1;
+    const clusters = itCluster(s2), n = clusters.reduce((a, c) => a + c.hausIds.length, 0) || 1;
+    let min = 1;
+    for (const id of benoetigt) {
+      const d = SYSTEME[id];
+      let kapazitaet2 = 0;
+      for (const c of clusters) kapazitaet2 += deckelGeneration(generationInCluster(s2, id, c.id)) * c.hausIds.length / n;
+      if (!clusters.length) kapazitaet2 = deckelGeneration(system(s2, id)?.generation ?? d.start);
+      min = Math.min(min, kapazitaet2);
+    }
+    const bi = ["merchandise_planning", "allokation", "konzerncontrolling", "vertriebscontrolling", "bi_daten"].includes(bereich);
+    if (bi) {
+      const g = clusters.length ? clusters.reduce((a, c) => a + generationInCluster(s2, "datenplattform", c.id) * c.hausIds.length / n, 0) : system(s2, "datenplattform")?.generation ?? 1;
+      min = Math.min(1, min * (1 + Math.max(0, g - 1) * 0.05));
+    }
+    return clamp(min, 0, 1);
+  }
+  function itDeckelGrund(s2, bereich) {
+    const ids = benoetigteSysteme(bereich);
+    if (!ids.length) return void 0;
+    const clusters = itCluster(s2), n = clusters.reduce((a, c) => a + c.hausIds.length, 0) || 1;
+    const wert = ids.map((id) => ({
+      id,
+      deckel: clusters.length ? clusters.reduce((a, c) => a + deckelGeneration(generationInCluster(s2, id, c.id)) * c.hausIds.length / n, 0) : deckelGeneration(system(s2, id)?.generation ?? SYSTEME[id].start)
+    })).sort((a, b2) => a.deckel - b2.deckel)[0];
+    return wert && wert.deckel < 0.995 ? SYSTEME[wert.id].name + " (Generation " + (system(s2, wert.id)?.generation ?? SYSTEME[wert.id].start) + ")" : void 0;
+  }
+  function projektKosten(art, ziel, clusterCount) {
+    const millionen = { kaufen: 1.8, entwickeln: 4.2, dienstleister: 0.8 }[art];
+    return eur((millionen + ziel * 0.65) * 1e6 * (0.35 + clusterCount * 0.65 / 18));
+  }
+  function itProjektPlan(s2, id, art, ziel, anzahl) {
+    const faktor = { kaufen: 1, entwickeln: 1.9, dienstleister: 0.75 }[art];
+    const konzept = Math.ceil(3 * faktor), umsetzung = Math.ceil((6 + ziel * 3) * faktor);
+    const rollout = Math.max(1, anzahl);
+    return { konzept, umsetzung, rollout, gesamt: konzept + umsetzung + rollout, kosten: projektKosten(art, ziel, anzahl) };
+  }
+  function qualitaet(s2) {
+    const o = s2.organisation;
+    const q2 = o?.bereiche?.it?.person?.qualitaet;
+    const cdo = s2.vorstand?.ressorts.cdo?.person;
+    return clamp((q2 ?? 0.58) * 0.7 + (cdo ? cdo.fachwissen / 100 : 0.5) * 0.3, 0, 1);
+  }
+  function vorlage(s2, titel, text3, frist = 3) {
+    if (s2.prognose) return;
+    s2.entscheidungen.push({
+      id: "it-v-" + ++s2.it.meldungen,
+      typ: "it_meilenstein",
+      woche: s2.woche,
+      frist: s2.woche + frist,
+      titel,
+      text: text3,
+      optionen: [{ id: "bestaetigen", label: "Bericht zur Kenntnis nehmen" }, { id: "delegieren", label: "IT-Leitung weiterarbeiten lassen" }],
+      standard: "delegieren",
+      daten: { modul: "it" }
+    });
+    melde(s2, "info", titel + ": " + text3, { modul: "it" });
+  }
+  function itAktion(s2, a) {
+    initialisiereIt(s2);
+    const it = s2.it;
+    if (a.typ === "itKasseAusbau") {
+      if (!Number.isInteger(a.stufe) || a.stufe < 0 || a.stufe > 2) return { ok: false, text: "Ung\xFCltige Ausbaustufe." };
+      const x = it.systeme.kasse;
+      if (x.generation < 2 || a.art === "mobil" && x.generation < 3) return { ok: false, text: "Kassensoftware muss zun\xE4chst modernisiert werden." };
+      if (!x.kasseAusbau) x.kasseAusbau = { selbstbedienung: 0, mobil: 0 };
+      if (a.stufe <= x.kasseAusbau[a.art]) return { ok: false, text: "Ausbaustufe muss steigen." };
+      einmalKosten(s2, eur((a.stufe - x.kasseAusbau[a.art]) * (a.art === "mobil" ? 18e5 : 31e5)));
+      x.kasseAusbau[a.art] = a.stufe;
+      return { ok: true, text: "Kassenausbau beauftragt." };
+    }
+    if (a.typ === "itRolloutPlan") {
+      const p2 = it.projekte.find((p3) => p3.id === a.projekt);
+      if (!p2 || p2.phase === "abgeschlossen" || p2.erledigteCluster.length) return { ok: false, text: "Rollout-Reihenfolge nicht mehr \xE4nderbar." };
+      const gueltig2 = new Set(itCluster(s2).map((c) => c.id));
+      if (!a.clusterIds.length || new Set(a.clusterIds).size !== a.clusterIds.length || a.clusterIds.some((id) => !gueltig2.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
+      if (a.clusterIds.some((id) => generationInCluster(s2, p2.system, id) >= p2.zielGeneration)) return { ok: false, text: "Im gew\xE4hlten Cluster ist diese Generation bereits vorhanden." };
+      if (a.clusterIds.length !== p2.clusterIds.length || a.clusterIds.some((id) => !p2.clusterIds.includes(id))) return { ok: false, text: "Nach Projektstart kann nur die Reihenfolge, nicht der Umfang ge\xE4ndert werden." };
+      p2.clusterIds = [...a.clusterIds];
+      p2.rolloutWochen = a.clusterIds.length;
+      return { ok: true, text: "Rollout-Auswahl und Reihenfolge gespeichert." };
+    }
+    if (!IT_IDS.includes(a.system)) return { ok: false, text: "Unbekanntes IT-System." };
+    if (!["kaufen", "entwickeln", "dienstleister"].includes(a.art)) return { ok: false, text: "Unbekannte Projektart." };
+    if (!Number.isInteger(a.zielGeneration) || a.zielGeneration < 1 || a.zielGeneration > 4) return { ok: false, text: "Ung\xFCltige Zielgeneration." };
+    if (a.art === "kaufen" && a.zielGeneration > 3 || a.art === "dienstleister" && a.zielGeneration !== 3) return { ok: false, text: "Diese Generation ist f\xFCr die gew\xE4hlte Projektart nicht verf\xFCgbar." };
+    if (it.projekte.some((p2) => p2.system === a.system && p2.phase !== "abgeschlossen")) return { ok: false, text: "F\xFCr das System l\xE4uft bereits ein Projekt." };
+    const gueltig = new Set(itCluster(s2).map((c) => c.id));
+    const clusterIds = a.clusterIds ? [...a.clusterIds] : [...gueltig];
+    if (!clusterIds.length || new Set(clusterIds).size !== clusterIds.length || clusterIds.some((id) => !gueltig.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
+    if (clusterIds.some((id) => generationInCluster(s2, a.system, id) >= a.zielGeneration)) return { ok: false, text: "Zielgeneration muss in jedem gew\xE4hlten Cluster h\xF6her sein." };
+    const plan2 = itProjektPlan(s2, a.system, a.art, a.zielGeneration, clusterIds.length);
+    const p = {
+      id: "it-p-" + ++it.naechsteId,
+      system: a.system,
+      art: a.art,
+      zielGeneration: a.zielGeneration,
+      phase: "konzept",
+      phaseSeit: s2.woche,
+      phaseRest: plan2.konzept,
+      konzeptWochen: plan2.konzept,
+      umsetzungWochen: plan2.umsetzung,
+      rolloutWochen: plan2.rollout,
+      clusterIds,
+      erledigteCluster: [],
+      kostenPlan: plan2.kosten,
+      kostenIst: 0,
+      wochenBudget: eur(plan2.kosten / plan2.gesamt),
+      verzug: 0,
+      stoerungen: 0,
+      gestartet: s2.woche
+    };
+    it.projekte.push(p);
+    vorlage(s2, "IT-Projekt beauftragt", SYSTEME[a.system].name + ": " + a.art + ", Generation " + a.zielGeneration + ", " + clusterIds.length + " Cluster, Planbudget " + plan2.kosten.toLocaleString("de-DE") + " \u20AC.");
+    return { ok: true, text: "Projekt " + p.id + " gestartet." };
+  }
+  function itZufall(s2, schluessel) {
+    return { rng: Math.imul(s2.seed ^ 1313820465, 1664525) + Math.imul(s2.woche + 1, 1013904223) + Math.imul(schluessel, 2246822519) >>> 0 };
+  }
+  function stoerung(s2, cluster, faktor) {
+    const verluste = s2.it.umsatzFaktoren;
+    for (const id of cluster.hausIds) verluste[id] = Math.min(verluste[id] ?? 1, faktor);
+  }
+  function upgrade(s2, p, cluster) {
+    const x = s2.it.systeme[p.system];
+    x.installationen[cluster.id] = { generation: p.zielGeneration, seitWoche: s2.woche };
+    s2.it.startprobleme[p.system + ":" + cluster.id] = s2.woche + 4;
+    const r = itZufall(s2, 311 + p.erledigteCluster.length);
+    const probs = 0.11 * (1 - qualitaet(s2) * 0.7);
+    const defekte = cluster.hausIds.length ? chance(r, probs) ? 1 + Math.floor(cluster.hausIds.length * 0.18) : 0 : 0;
+    p.stoerungen += defekte;
+    if (defekte) stoerung(s2, cluster, 0.97);
+    p.erledigteCluster.push(cluster.id);
+    vorlage(s2, "Rollout " + SYSTEME[p.system].name, cluster.name + " fertig, " + defekte + " St\xF6rungen, " + p.erledigteCluster.length + "/" + p.clusterIds.length + " Cluster umgestellt.");
+  }
+  function beende(s2, p) {
+    p.phase = "abgeschlossen";
+    p.phaseRest = 0;
+    p.beendet = s2.woche;
+    const x = s2.it.systeme[p.system];
+    if (itCluster(s2).every((c) => generationInCluster(s2, p.system, c.id) >= p.zielGeneration)) {
+      x.generation = p.zielGeneration;
+      x.alter = 0;
+      x.wartungGekuendigt = false;
+    }
+    const faktor = { kaufen: 1, entwickeln: 0.75, dienstleister: 2.1 }[p.art];
+    const betrieb = x.basisKosten || (p.system === "preisschilder" ? 22e3 : 0);
+    x.kostenWoche = eur(betrieb * (1 + 0.17 * (p.zielGeneration - SYSTEME[p.system].start)) * faktor);
+    vorlage(s2, "IT-Projekt abgeschlossen", SYSTEME[p.system].name + " Generation " + p.zielGeneration + ". Istkosten " + p.kostenIst.toLocaleString("de-DE") + " \u20AC, Plan " + p.kostenPlan.toLocaleString("de-DE") + " \u20AC.");
+  }
+  function itWoche(s2) {
+    initialisiereIt(s2);
+    const it = s2.it;
+    it.umsatzFaktoren = {};
+    const clusters = itCluster(s2);
+    it.hausCluster = {};
+    for (const cluster of clusters) for (const id of cluster.hausIds) it.hausCluster[id] = cluster.id;
+    const delta = IT_IDS.reduce((sum, id) => sum + it.systeme[id].kostenWoche - it.systeme[id].basisKosten, 0);
+    s2.zentrale.kostenWoche += delta;
+    const q2 = qualitaet(s2);
+    for (const p of it.projekte) {
+      if (p.phase === "abgeschlossen") continue;
+      const zuf = itZufall(s2, 100 + Number(p.id.slice(5)));
+      const risiko = clamp(0.1 * (1 - q2) + 0.025 * (p.art === "entwickeln" ? 2 : 1), 0, 0.16);
+      if (!s2.prognose && chance(zuf, risiko)) {
+        p.verzug++;
+        p.phaseRest++;
+        const mehr = eur(p.wochenBudget * 0.12);
+        p.kostenPlan += mehr;
+      }
+      const ausgabe = eur(p.wochenBudget * (1 + (p.verzug > 0 ? 0.09 : 0)));
+      einmalKosten(s2, ausgabe);
+      p.kostenIst += ausgabe;
+      p.phaseRest--;
+      if (p.phaseRest > 0) continue;
+      if (p.phase === "konzept") {
+        p.phase = "umsetzung";
+        p.phaseSeit = s2.woche + 1;
+        p.phaseRest = p.umsetzungWochen;
+        vorlage(s2, "IT-Konzept freigegeben", SYSTEME[p.system].name + " geht in die Umsetzung.");
+      } else if (p.phase === "umsetzung") {
+        p.phase = "rollout";
+        p.phaseSeit = s2.woche + 1;
+        p.phaseRest = 1;
+        vorlage(s2, "Rollout beginnt", SYSTEME[p.system].name + " wird Cluster f\xFCr Cluster umgestellt.");
+      } else if (p.phase === "rollout") {
+        const next = clusters.find((c) => c.id === p.clusterIds[p.erledigteCluster.length]);
+        if (next) upgrade(s2, p, next);
+        if (p.erledigteCluster.length === p.clusterIds.length) beende(s2, p);
+        else p.phaseRest = 1;
+      }
+    }
+    for (let i = 0; i < IT_IDS.length; i++) {
+      const id = IT_IDS[i], x = it.systeme[id];
+      if (x.generation === 0 && !Object.keys(x.installationen).length) continue;
+      for (let j = 0; j < clusters.length; j++) {
+        const c = clusters[j], g = generationInCluster(s2, id, c.id), alter = itAlter(s2, id, c.id);
+        if (g === 0) continue;
+        const risiko = ausfallRisiko(g, alter) * (1 - 0.45 * q2) * (x.wartungGekuendigt ? 2.5 : 1);
+        if (!s2.prognose && chance(itZufall(s2, 5e3 + i * 1e5 + j), risiko)) {
+          if (id === "kasse" || id === "warenwirtschaft" || id === "ecommerce") stoerung(s2, c, id === "kasse" ? 0.65 : 0.85);
+          melde(s2, "warnung", id === "kasse" ? "Kassenausfall am Samstag in Cluster " + c.name + ". Umsatzausf\xE4lle durch gest\xF6rte Kassensysteme." : SYSTEME[id].name + ": Ausfall in Cluster " + c.name + ". Der operative Betrieb ist eingeschr\xE4nkt.", { modul: "it" });
+        }
+        if (it.startprobleme[id + ":" + c.id] > s2.woche && !s2.prognose) {
+          if (chance(itZufall(s2, 9e3 + i * 1e5 + j), 0.22 * (1 - q2 * 0.5))) stoerung(s2, c, id === "kasse" ? 0.89 : 0.97);
+        }
+      }
+      if (x.alter + s2.woche / 52 > 21 && !x.wartungGekuendigt && !s2.prognose && chance(itZufall(s2, 19e3 + i), 1e-3)) {
+        x.wartungGekuendigt = true;
+        melde(s2, "warnung", "Wartung f\xFCr " + SYSTEME[id].name + " wurde vom Lieferanten abgek\xFCndigt.", { modul: "it" });
+      }
+    }
+    if (!s2.prognose && chance(itZufall(s2, 22001), 8e-4 * (1 - 0.7 * q2) * Math.max(0.4, 1 - 0.1 * generationInCluster(s2, "datenplattform", clusters[0]?.id ?? "")))) {
+      const f = 1 - 0.1 * (1 - q2 * 0.6);
+      for (const c of clusters) stoerung(s2, c, f);
+      melde(s2, "warnung", "Cyberangriff auf die Unternehmenssysteme. IT und Datenplattform begrenzen den Schaden.", { modul: "it" });
+    }
+  }
+  function itHausFaktor(s2, h) {
+    const it = s2.it;
+    if (!it) return 1;
+    const id = it.hausCluster?.[h.id];
+    if (!id) return it.umsatzFaktoren[h.id] ?? 1;
+    const kasse = Math.max(0, generationInCluster(s2, "kasse", id) - SYSTEME.kasse.start);
+    const app = Math.max(0, generationInCluster(s2, "app", id) - SYSTEME.app.start);
+    const ware3 = Math.max(0, generationInCluster(s2, "warenwirtschaft", id) - SYSTEME.warenwirtschaft.start);
+    const kAusbau = it.systeme.kasse.kasseAusbau;
+    const qualitaet2 = 1 + kasse * 5e-3 + app * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (kAusbau?.mobil ?? 0) * 1e-3;
+    return qualitaet2 * (it.umsatzFaktoren[h.id] ?? 1);
+  }
+  function itUebersicht(s2) {
+    const clusters = itCluster(s2), it = s2.it;
+    const systeme = IT_IDS.map((id) => {
+      const x = it?.systeme[id], g = x?.generation ?? SYSTEME[id].start, alter = itAlter(s2, id);
+      const verteilung = clusters.map((c) => ({
+        id: c.id,
+        name: c.name,
+        haeuser: c.hausIds.length,
+        generation: generationInCluster(s2, id, c.id),
+        startproblemeBis: it?.startprobleme[id + ":" + c.id]
+      }));
+      return {
+        id,
+        name: SYSTEME[id].name,
+        generation: g,
+        alter,
+        kostenWoche: x?.kostenWoche ?? SYSTEME[id].kosten,
+        risiko: ausfallRisiko(g, alter),
+        wartungGekuendigt: x?.wartungGekuendigt ?? false,
+        kasseAusbau: x?.kasseAusbau,
+        verteilung
+      };
+    });
+    return {
+      woche: s2.woche,
+      qualitaet: qualitaet(s2),
+      systeme,
+      projekte: (it?.projekte ?? []).map((p) => ({
+        ...p,
+        fortschritt: p.phase === "abgeschlossen" ? 1 : clamp((p.phase === "konzept" ? p.konzeptWochen - p.phaseRest : p.phase === "umsetzung" ? p.konzeptWochen + p.umsetzungWochen - p.phaseRest : p.konzeptWochen + p.umsetzungWochen + p.erledigteCluster.length) / (p.konzeptWochen + p.umsetzungWochen + p.rolloutWochen), 0, 1)
+      })),
+      cluster: clusters.map((c) => ({ id: c.id, name: c.name, haeuser: c.hausIds.length })),
+      betriebskostenWoche: systeme.reduce((a, x) => a + x.kostenWoche, 0)
+    };
   }
 
   // ../engine/src/organisation.ts
@@ -5500,8 +5843,8 @@
   var REGIONEN2 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var hash = (str) => [...str].reduce((v, c) => Math.imul(v, 31) + c.charCodeAt(0) >>> 0, 2166136261);
   var mix = (seed, text3) => hash(seed + ":" + text3);
-  function person(seed, key, n, qualitaet) {
-    const z2 = mix(seed, key + ":" + n), q2 = qualitaet ?? 0.48 + z2 % 430 / 1e3;
+  function person(seed, key, n, qualitaet2) {
+    const z2 = mix(seed, key + ":" + n), q2 = qualitaet2 ?? 0.48 + z2 % 430 / 1e3;
     const weiblich = z2 % 2 === 0;
     return {
       id: key + "-" + n,
@@ -5868,6 +6211,7 @@
     if (s2.phase === "zerschlagen") return fehler3("Die Kette ist zerschlagen.");
     const w = s2.woche;
     const inso = s2.phase === "insolvenz";
+    if (IT_AKTIONEN.has(a.typ)) return itAktion(s2, a);
     if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s2, a, (x) => einmalKosten(s2, x));
     if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s2, a);
     if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s2, a);
@@ -6652,7 +6996,7 @@
       const restWochen = Math.max(0, e.frist - s2.woche);
       const option = e.optionen.find((o) => o.id === e.standard);
       const hausId = typeof e.daten.haus === "string" ? e.daten.haus : void 0;
-      const modul = e.typ === "organisation_vorlage" ? "organisation" : e.typ.startsWith("vorstand_") ? "vorstand" : e.typ === "jahresgespraech" || e.typ === "nordline_dtc" ? "einkauf" : void 0;
+      const modul = e.typ === "organisation_vorlage" ? "organisation" : e.typ.startsWith("vorstand_") ? "vorstand" : e.typ.startsWith("it_") ? "it" : e.typ === "jahresgespraech" || e.typ === "nordline_dtc" ? "einkauf" : void 0;
       handeln.push({
         id: e.id,
         art: "entscheidung",
@@ -6704,7 +7048,7 @@
         woche: m.woche,
         typ: m.typ,
         text: m.text,
-        kategorie: konkurrenz2 ? "Konkurrenz" : meldungKategorie(m.typ, m.text),
+        kategorie: konkurrenz2 ? "Konkurrenz" : m.bezug?.modul === "it" ? "IT" : meldungKategorie(m.typ, m.text),
         bezug: { ...bezug, ...m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}, ...konkurrenz2 ? { stadt: konkurrenz2.stadt, wettbewerberId: konkurrenz2.id } : {} }
       };
     });
@@ -8855,6 +9199,7 @@
     initialisiereMarketing(s2);
     initialisiereWettbewerb(s2);
     bildeHauscluster(s2);
+    initialisiereIt(s2);
     return s2;
   }
   function initialeVerbindlichkeiten(s2) {
@@ -8910,7 +9255,7 @@
     const streik = h.streikBis !== void 0 && h.streikBis > w ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h);
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h);
   }
   function saettigung(qm, Q) {
     return Q > 0 ? 1 - Math.exp(-qm / Q) : 0;
@@ -8967,8 +9312,8 @@
     const tEJe = {};
     for (const g of alleGruppen) {
       const d = GRUPPEN[g];
-      const qualitaet = besetzung * (1 - d.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
-      basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet;
+      const qualitaet2 = besetzung * (1 - d.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
+      basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet2;
       const qe = qmEigen[g] ?? 0;
       const qk = qmKomm[g] ?? 0;
       tEJe[g] = qe + qk > 0 ? qe / (qe + qk) : 0;
@@ -9719,6 +10064,7 @@
     prozesse(s2);
     premiumWoche(s2);
     hqWoche(s2);
+    itWoche(s2);
     quartalsStart(s2);
     vorstandWoche(s2);
     organisationWoche(s2);
@@ -97179,7 +97525,7 @@
     const setze = (b2, eintrag2, ecke, extra = {}) => {
       const m = hqMasse(eintrag2.g);
       const R9 = { x: ecke.includes("+x") ? b2.x + b2.w - m.w : b2.x, z: b2.z + b2.d - m.d, w: m.w, d: m.d };
-      const vorlage = imBlock(b2)[0];
+      const vorlage2 = imBlock(b2)[0];
       for (const p2 of imBlock(b2)) {
         if (!(p2.x < R9.x + R9.w - 0.01 && p2.x + p2.w > R9.x + 0.01 && p2.z < R9.z + R9.d - 0.01 && p2.z + p2.d > R9.z + 0.01)) continue;
         const stuecke = [
@@ -97209,9 +97555,9 @@
         seite: "ecke",
         strasse: [],
         ecke,
-        region: vorlage?.region,
-        cluster: vorlage?.cluster,
-        viertel: vorlage?.viertel,
+        region: vorlage2?.region,
+        cluster: vorlage2?.cluster,
+        viertel: vorlage2?.viertel,
         sonder: "hq",
         standort: standort2,
         lage: "b",
@@ -120687,11 +121033,11 @@
     function meldungen(D) {
       const filter = ui.filter;
       const liste = D.meldungen.filter((m) => filter === "Alle" || m.kategorie === filter);
-      const kategorien = ["Alle", "Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer"];
+      const kategorien = ["Alle", "Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer", "IT"];
       let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => "<option " + (k === filter ? "selected " : "") + 'value="' + esc(k) + '">' + esc(k) + "</option>").join("") + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
       if (!liste.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
       const gelesen2 = new Set(einstellungen().gelesen ?? []);
-      const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6" };
+      const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6", IT: "\u2699" };
       return html + liste.map((m) => {
         const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
         const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc(m.kategorie) + " \xB7 KW " + kwVon2(m.woche) + (gelesen2.has(m.id) ? "" : " \xB7 Neu") + "</small><span>" + esc(m.text) + "</span></span>";
@@ -122774,6 +123120,230 @@
     };
   }
 
+  // src/ui/it.js
+  function itModul(ctx) {
+    const { E } = ctx, s2 = () => ctx.s();
+    const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null };
+    const optionen = ["kaufen", "entwickeln", "dienstleister"];
+    const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
+    const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
+    const prozent2 = (x) => Math.round(x * 100) + " %";
+    function daten() {
+      return E.itUebersicht(s2());
+    }
+    function zeile2(t, wert) {
+      return '<div class="zeile"><span class="was">' + esc(t) + '</span><b class="uq" style="min-width:90px">' + esc(String(wert)) + "</b></div>";
+    }
+    function balken7(w) {
+      return '<div class="it-fortschritt"><i style="width:' + Math.max(0, Math.min(100, Math.round(w * 100))) + '%"></i></div>';
+    }
+    function reiter() {
+      return '<div class="tabs">' + [["systeme", "Systeme"], ["projekte", "Projekte"], ["neu", "Neues Projekt"]].map((x) => '<button type="button" class="tab ' + (ui.reiter === x[0] ? "an" : "") + '" data-it="reiter" data-v="' + x[0] + '">' + x[1] + "</button>").join("") + "</div>";
+    }
+    function systemKarte(x) {
+      const ampel = x.risiko < 2e-3 ? "gruen" : x.risiko < 0.01 ? "gelb" : "rot";
+      let h = '<div class="karte"><div class="khead">' + esc(x.name) + "<small>Generation " + x.generation + " / 4</small></div>";
+      h += '<div class="it-werte"><span>Alter <b>' + Math.floor(x.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent2(x.risiko) + "/Woche</span></div>";
+      if (x.wartungGekuendigt) h += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
+      if (x.kasseAusbau) h += '<div class="zeile">SB-Kassen ' + x.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x.kasseAusbau.mobil + "/2</div>";
+      const akt = x.verteilung.filter((c) => c.generation > x.generation);
+      if (akt.length) h += '<div class="zeile">Bereits modernisierte Cluster: ' + akt.length + " / " + x.verteilung.length + "</div>";
+      const bereiche = E.SYSTEME[x.id].bereiche;
+      h += '<div class="it-meta">Begrenzt: ' + esc(bereiche.join(", ")) + "</div>";
+      h += '<div class="oknoepfe"><button data-it="neues" data-v="' + x.id + '">Modernisieren</button></div></div>';
+      return h;
+    }
+    function systeme(d) {
+      let h = '<div class="raster"><div class="kz"><span>Systeme</span><b>' + d.systeme.length + '</b></div><div class="kz"><span>IT-Betrieb pro Woche</span><b>' + geld(d.betriebskostenWoche) + "</b></div></div>";
+      h += '<div class="olief">CDO und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen. Die Anfangsgenerationen bleiben f\xFCr die Basiskalibrierung neutral.</div>';
+      h += d.systeme.map(systemKarte).join("");
+      const k = d.systeme.find((x) => x.id === "kasse");
+      if (k && k.generation >= 2) {
+        h += '<div class="karte"><div class="khead">Kassenausbau</div>';
+        for (const art of ["selbstbedienung", "mobil"]) {
+          const stufe2 = k.kasseAusbau?.[art] ?? 0;
+          h += zeile2(art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen", "Stufe " + stufe2);
+          if (stufe2 < 2) h += '<div class="oknoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></div>";
+        }
+        h += "</div>";
+      }
+      return h;
+    }
+    function projektKarte(p, d) {
+      let h = '<div class="karte"><div class="khead">' + esc(E.SYSTEME[p.system].name) + "<small>Generation " + p.zielGeneration + " \xB7 " + esc(artName[p.art]) + "</small></div>";
+      h += '<div class="it-werte"><b>' + esc(phasen[p.phase]) + "</b><b>" + prozent2(p.fortschritt) + "</b></div>" + balken7(p.fortschritt);
+      h += zeile2("Kosten Ist / Plan", geld(p.kostenIst) + " / " + geld(p.kostenPlan));
+      h += zeile2("Mehrwochen durch Verzug", p.verzug);
+      h += zeile2("Rollout", p.erledigteCluster.length + " / " + p.clusterIds.length + " Cluster");
+      const alle = new Map(d.cluster.map((c) => [c.id, c]));
+      if (p.phase === "rollout" || p.phase === "umsetzung" || p.phase === "konzept") {
+        const ausgabe = p.clusterIds.map((id, i) => {
+          const c = alle.get(id), fertig = p.erledigteCluster.includes(id);
+          return '<div class="it-cluster ' + (fertig ? "fertig" : "") + '"><span>' + (fertig ? "\u2713 " : "") + esc(c?.name ?? id) + "</span>" + (fertig ? "<b>Generation " + p.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig && p.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p.id + '" data-i="' + i + '" ' + (i === p.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
+        });
+        h += '<details class="it-details"><summary>Rollout-Reihenfolge und Clusterkarte</summary>' + ausgabe.join("") + "</details>";
+      }
+      return h + "</div>";
+    }
+    function projekte(d) {
+      let h = '<div class="olief">Projekte durchlaufen Konzept, Umsetzung und einen sequenziellen Rollout. Vier Wochen nach jedem Wechsel sind lokale Startprobleme m\xF6glich.</div>';
+      const aktiv = d.projekte.filter((x) => x.phase !== "abgeschlossen");
+      if (!aktiv.length) h += '<div class="karte"><div class="zeile">Keine laufenden Projekte.</div></div>';
+      h += aktiv.map((p) => projektKarte(p, d)).join("");
+      const alt = d.projekte.filter((x) => x.phase === "abgeschlossen").slice(-8).reverse();
+      if (alt.length) h += '<div class="vtitel">Abgeschlossene Projekte</div>' + alt.map((p) => projektKarte(p, d)).join("");
+      h += '<div class="oknoepfe"><button data-it="reiter" data-v="neu">Neues Projekt planen</button></div>';
+      return h;
+    }
+    function auswahl3(d) {
+      if (!ui.auswahl) {
+        const sys = d.systeme.find((x) => x.id === ui.system);
+        ui.auswahl = new Set(d.cluster.filter((c) => (sys?.verteilung.find((v) => v.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
+      }
+      return ui.auswahl;
+    }
+    function neu(d) {
+      const sys = d.systeme.find((x) => x.id === ui.system) ?? d.systeme[0];
+      const ids = auswahl3(d);
+      const verfuegbar2 = d.cluster.filter((c) => c.generation === void 0 || sys.verteilung.find((v) => v.id === c.id)?.generation < ui.generation);
+      const ausgew = d.cluster.filter((c) => ids.has(c.id));
+      const zulaessig = ui.art === "entwickeln" ? ui.generation >= 1 : ui.generation === 3 || ui.art === "kaufen" && ui.generation <= 3;
+      const plan2 = E.itProjektPlan(s2(), ui.system, ui.art, ui.generation, ausgew.length);
+      let h = '<div class="karte"><div class="khead">Projekt konfigurieren</div>';
+      h += '<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">' + d.systeme.map((x) => '<option value="' + x.id + '" ' + (x.id === ui.system ? "selected" : "") + ">" + esc(x.name) + "</option>").join("") + "</select></div>";
+      h += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen.map((a) => '<button data-it="art" data-v="' + a + '" class="' + (ui.art === a ? "an" : "") + '">' + artName[a] + "</button>").join("") + "</div></div>";
+      h += '<div class="regler"><b>Zielgeneration</b><div class="seg">' + [1, 2, 3, 4].map((g) => '<button data-it="generation" data-v="' + g + '" ' + (ui.generation === g ? 'class="an"' : "") + " " + (ui.art !== "entwickeln" && g === 4 || ui.art === "dienstleister" && g !== 3 ? "disabled" : "") + ">" + g + "</button>").join("") + "</div></div>";
+      h += '<div class="it-vergleich">' + optionen.map((art) => {
+        const g = art === "dienstleister" ? 3 : Math.min(ui.generation, art === "entwickeln" ? 4 : 3);
+        const x = E.itProjektPlan(s2(), ui.system, art, g, ausgew.length);
+        return '<div class="' + (ui.art === art ? "gewaehlt" : "") + '"><b>' + artName[art] + "</b><small>" + x.gesamt + " Wo.</small><small>" + geld(x.kosten) + "</small><small>" + (art === "entwickeln" ? "hohes" : art === "kaufen" ? "geringes" : "mittleres") + " Risiko</small></div>";
+      }).join("") + "</div>";
+      h += '<div class="vtitel">Rollout-Cluster (' + ausgew.length + " / " + d.cluster.length + ")</div>";
+      h += '<div class="oknoepfe"><button data-it="alle">Alle w\xE4hlen</button><button data-it="keine">Keine w\xE4hlen</button></div>';
+      h += '<div class="it-clusterauswahl">' + d.cluster.map((c) => {
+        const g = sys.verteilung.find((v) => v.id === c.id)?.generation ?? sys.generation;
+        return '<label class="it-wahl"><input type="checkbox" data-it-cluster="' + esc(c.id) + '" ' + (ids.has(c.id) ? "checked" : "") + " " + (g >= ui.generation ? "disabled" : "") + "><span>" + esc(c.name) + "</span><small>Generation " + g + "</small></label>";
+      }).join("") + "</div>";
+      h += zeile2("Geplante Laufzeit", plan2.gesamt + " Wochen");
+      h += zeile2("Planbudget", geld(plan2.kosten));
+      h += '<div class="oknoepfe"><button class="gruen" data-it="start" ' + (!ausgew.length || !zulaessig || ausgew.some((c) => (sys.verteilung.find((v) => v.id === c.id)?.generation ?? sys.generation) >= ui.generation) ? "disabled" : "") + ">Projekt beauftragen</button></div>";
+      h += "</div>";
+      return h;
+    }
+    function zeichnen2() {
+      if (!ui.aktiv) return;
+      const d = daten(), seiten4 = { systeme: "Systemlandkarte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
+      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d.projekte.filter((x) => x.phase !== "abgeschlossen").length + " aktive Projekte", reiter() + (ui.reiter === "systeme" ? systeme(d) : ui.reiter === "projekte" ? projekte(d) : neu(d)), "gross");
+      ui.aktiv = true;
+    }
+    function aktion2(a) {
+      const result = E.fuehreAus(s2(), a);
+      ctx.meldung(result.text, !result.ok);
+      if (result.ok) {
+        ctx.nachAktion?.();
+        zeichnen2();
+      }
+    }
+    function bearbeiten(el) {
+      const v = el.dataset.v, d = daten();
+      switch (el.dataset.it) {
+        case "reiter":
+          ui.reiter = v;
+          ui.auswahl = null;
+          break;
+        case "neues":
+          ui.reiter = "neu";
+          ui.system = v;
+          ui.auswahl = null;
+          ui.generation = 3;
+          break;
+        case "art":
+          ui.art = v;
+          if (v === "dienstleister") ui.generation = 3;
+          else if (v === "kaufen" && ui.generation > 3) ui.generation = 3;
+          break;
+        case "generation":
+          ui.generation = Number(v);
+          ui.auswahl = null;
+          break;
+        case "alle":
+          ui.auswahl = new Set(d.cluster.filter((c) => (d.systeme.find((x) => x.id === ui.system)?.verteilung.find((x) => x.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
+          break;
+        case "keine":
+          ui.auswahl = /* @__PURE__ */ new Set();
+          break;
+        case "start": {
+          const clusterIds = d.cluster.filter((c) => auswahl3(d).has(c.id)).map((c) => c.id);
+          const result = E.fuehreAus(s2(), { typ: "itProjekt", system: ui.system, art: ui.art, zielGeneration: ui.generation, clusterIds });
+          ctx.meldung(result.text, !result.ok);
+          if (result.ok) {
+            ctx.nachAktion?.();
+            ui.reiter = "projekte";
+          }
+          break;
+        }
+        case "hoch":
+        case "runter": {
+          const p = d.projekte.find((x) => x.id === el.dataset.p);
+          if (!p) return;
+          const i = Number(el.dataset.i), j = i + (el.dataset.it === "hoch" ? -1 : 1);
+          if (j < 0 || j >= p.clusterIds.length) return;
+          const ids = [...p.clusterIds];
+          [ids[i], ids[j]] = [ids[j], ids[i]];
+          const result = E.fuehreAus(s2(), { typ: "itRolloutPlan", projekt: p.id, clusterIds: ids });
+          ctx.meldung(result.text, !result.ok);
+          if (result.ok) ctx.nachAktion?.();
+          break;
+        }
+        case "kasseAusbau": {
+          const x = d.systeme.find((x2) => x2.id === "kasse"), stufe2 = (x.kasseAusbau?.[v] ?? 0) + 1;
+          const result = E.fuehreAus(s2(), { typ: "itKasseAusbau", art: v, stufe: stufe2 });
+          ctx.meldung(result.text, !result.ok);
+          if (result.ok) ctx.nachAktion?.();
+          break;
+        }
+        default:
+          return;
+      }
+      zeichnen2();
+    }
+    const inhalt = document.getElementById("pinhalt");
+    inhalt.addEventListener("click", (ev) => {
+      if (!ui.aktiv) return;
+      const el = ev.target.closest("[data-it]");
+      if (el && !el.disabled) bearbeiten(el);
+    });
+    inhalt.addEventListener("change", (ev) => {
+      if (!ui.aktiv) return;
+      const el = ev.target;
+      if (el.dataset.itChange === "system") {
+        ui.system = el.value;
+        ui.auswahl = null;
+        ui.generation = 3;
+        zeichnen2();
+      }
+      if (el.dataset.itCluster) {
+        const ids = auswahl3(daten());
+        if (el.checked) ids.add(el.dataset.itCluster);
+        else ids.delete(el.dataset.itCluster);
+        zeichnen2();
+      }
+    });
+    return {
+      oeffne: (seite = "systeme") => {
+        ui.aktiv = true;
+        ui.reiter = seite;
+        ui.auswahl = null;
+        zeichnen2();
+      },
+      zu: () => {
+        ui.aktiv = false;
+      },
+      aktiv: () => ui.aktiv,
+      pruefe: () => ({ seite: ui.reiter, systeme: daten().systeme.length, projekte: daten().projekte.length })
+    };
+  }
+
   // src/spiel.js
   var param = new URLSearchParams(location.search);
   var $ = (id) => document.getElementById(id);
@@ -123383,7 +123953,7 @@
     if (st.woche === 24) fuehreAus(st, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
     if (st.woche === 50) fuehreAus(st, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
-  var module2 = () => [ek, vs, mk, pr, po, org, rg].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -123682,6 +124252,7 @@
   var po = null;
   var org = null;
   var rg = null;
+  var itM = null;
   var nachAktion = () => {
     cockpitZeigen();
     ek.badge();
@@ -123692,6 +124263,7 @@
   };
   vs = vorstandModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   org = organisationModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
+  itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   po = posteingangModul({
@@ -123707,6 +124279,7 @@
         if (bezug.modul === "einkauf") return oeffneEinkauf();
         if (bezug.modul === "vorstand") return oeffneModul(vs);
         if (bezug.modul === "organisation") return oeffneModul(org);
+        if (bezug.modul === "it") return oeffneModul(itM);
         if (bezug.modul === "marketing") return oeffneModul(mk);
         if (bezug.modul === "produkte") return oeffneModul(pr);
         if (bezug.modul === "zentrale") return oeffneHq();
@@ -123721,6 +124294,7 @@
       else if (bezug.modul === "einkauf") oeffneEinkauf();
       else if (bezug.modul === "vorstand") oeffneModul(vs);
       else if (bezug.modul === "organisation") oeffneModul(org);
+      else if (bezug.modul === "it") oeffneModul(itM);
       else if (bezug.modul === "marketing") oeffneModul(mk);
       else if (bezug.modul === "produkte") oeffneModul(pr);
       else if (bezug.modul === "zentrale") oeffneHq();
@@ -123803,6 +124377,7 @@
   };
   $("vorstand").addEventListener("click", () => oeffneModul(vs));
   $("organisation").addEventListener("click", () => oeffneModul(org));
+  $("it").addEventListener("click", () => oeffneModul(itM));
   $("marketing").addEventListener("click", () => oeffneModul(mk));
   $("produkte").addEventListener("click", () => oeffneModul(pr));
   $("posteingang").addEventListener("click", () => oeffneModul(po));
@@ -123927,6 +124502,8 @@
   window.spiel = {
     neuesSpiel: neuesSpiel3,
     speichern: sofortSpeichern,
+    it: itM,
+    oeffneIt: (...a) => oeffneModul(itM, ...a),
     reporting: rg,
     oeffneReporting: () => oeffneModul(rg),
     posteingang: po,
