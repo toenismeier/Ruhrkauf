@@ -41,7 +41,7 @@ export function deutschlandKarte(zeilen, beiStadt) {
     const cx = x(lon), cy = y(lat);
     const radius = Math.min(9, Math.max(3.5, 3.5 + Math.sqrt(Math.max(0, stadt.umsatz) / 1000000) * 0.6));
     const g = element('g', { tabindex: '0', role: 'button', 'aria-label': stadt.stadt + ', ' + stadt.anzahl + ' Häuser', 'data-stadt': stadt.stadt });
-    g.append(element('circle', { cx, cy, r: Math.max(11, radius + 4), fill: 'transparent', stroke: 'none' }));
+    g.append(element('circle', { cx, cy, r: Math.max(22, radius + 4), fill: 'transparent', stroke: 'none' }));
     g.append(element('circle', { cx, cy, r: radius, fill: AMPEL_FARBE[stadt.amp], stroke: '#fff', 'stroke-width': '1.25', 'pointer-events': 'none' }));
     const title = element('title');
     title.textContent = stadt.stadt + ' · ' + stadt.anzahl + ' Häuser';
