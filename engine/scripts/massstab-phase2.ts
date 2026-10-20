@@ -4,6 +4,7 @@
 import { neuesSpiel, wocheAbspielen } from '../src';
 import { botTief, einkaufStandard } from './bot';
 import { UMSATZZIELE_JAHR1 } from '../src/welt';
+import { MASSSTAB_REALISIERUNG } from '../src/wirtschaft';
 import type { GameState, Haus, WochenKpi } from '../src/types';
 
 const seeds = (process.argv[2] ?? '1,2,3').split(',').map(Number);
@@ -26,6 +27,10 @@ for (const seed of seeds) {
   let q4Ebitda = 0;
   let summeMs = 0;
   let maximumMs = 0;
+  let summeMsOhneQuartal = 0;
+  let anzahlOhneQuartal = 0;
+  let summeMsQuartal = 0;
+  let anzahlQuartal = 0;
   let laufe = 0;
   let maxFreigaben = 0;
   let freigabenSumme = 0;
@@ -39,6 +44,9 @@ for (const seed of seeds) {
     const ms = Number(process.hrtime.bigint() - beginn) / 1e6;
     summeMs += ms;
     maximumMs = Math.max(maximumMs, ms);
+    // In Quartalswochen berechnet wocheAbspielen auch die 13-Wochen-Vorschau.
+    if (k.woche % 13 === 0) { summeMsQuartal += ms; anzahlQuartal++; }
+    else { summeMsOhneQuartal += ms; anzahlOhneQuartal++; }
     laufe++;
     const f = s.einkauf.protokoll.at(-1);
     // "neu" umfasst auch sofort automatisch gebuchte Klein-/NOS-Bestellungen.
@@ -64,6 +72,7 @@ for (const seed of seeds) {
   const p = (a: number, z: number) => `${(a / 1e6).toFixed(1)} Mio. € (${(100 * (a / z - 1)).toFixed(1)} %)`;
   const ergebnis = {
     seed, modus: mitBot ? 'Bot C' : 'Ausgangslage/Einkauf Standard',
+    nachfrageRealisierungsFaktor: MASSSTAB_REALISIERUNG,
     woche: s.woche, phase: s.phase, insolvenzen: s.insolvenzenGesamt,
     umsatzJahr1: p(jahrUmsatz, ziel.warenhaus + ziel.premium + ziel.sport),
     umsatzHartwig: p(proFormat.warenhaus, ziel.warenhaus),
@@ -77,6 +86,8 @@ for (const seed of seeds) {
     bestellvorschlaegeWocheMax: vorschlaegeMax,
     laufzeitWocheMittelMs: laufe ? (summeMs / laufe).toFixed(2) : '0',
     laufzeitWocheMaxMs: maximumMs.toFixed(2),
+    laufzeitOhneQuartalsvorschauMs: anzahlOhneQuartal ? (summeMsOhneQuartal / anzahlOhneQuartal).toFixed(2) : '0',
+    laufzeitQuartalswochenMs: anzahlQuartal ? (summeMsQuartal / anzahlQuartal).toFixed(2) : '0',
     botZiel260: mitBot ? s.woche >= 260 && s.phase !== 'zerschlagen' : undefined,
   };
   console.log(JSON.stringify(ergebnis, null, 2));
