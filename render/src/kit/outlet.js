@@ -106,7 +106,44 @@ export function innenOutlet(S, scene, haus, opt = {}) {
     const L = innenLokal(S, x + 7 + k * 4.7, 0.32, z + 4.7);
     innenPuppe(L, 0, 0, r, k === 2 ? 'kind' : k === 1 ? 'herren' : 'damen', WAREN);
   }
-  // Mitarbeiter beim Nachräumen und Rollwagen.
+  // Verdichtete, aber ordentlich präsentierte Markenware: Kleiderstangen, Schuh- und Taschenwände.
+  // Die 3-D-Einzelwaren entfallen bei Fern-LOD, die großen Gestelle bleiben erhalten.
+  const nah = LOD.stufe !== 'fern';
+  const gangBreite = Math.min(w - 10, 38);
+  for (let gang = 0; gang < 7; gang++) {
+    const zz = z + 3.7 + (gang % 4) * 3.05;
+    const xx = x + 4.2 + Math.floor(gang / 4) * 6.0;
+    if (zz > z + bd - 3.5 || xx > x + w - 8) continue;
+    const laenge = Math.min(gangBreite - (gang % 3) * 2, w - (xx - x) - 5);
+    S.box(laenge, 0.12, 0.15, xx + laenge / 2, 2.35, zz, '#7f8589');
+    for (const ex of [xx + 0.2, xx + laenge - 0.2])
+      S.box(0.13, 2.1, 0.13, ex, 1.32, zz, '#81878d');
+    if (nah) for (let i = 0; i < Math.floor(laenge / 0.85); i++) {
+      const bx = xx + 0.55 + i * 0.85;
+      if (Math.abs(bx - (x + w * 0.52)) < 2.25) continue;
+      S.box(0.53, 0.84, 0.34, bx, 1.65, zz, waehle(r, WAREN));
+      S.box(0.37, 0.25, 0.34, bx, 2.17, zz, waehle(r, WAREN));
+    }
+    const schild = ['DAMEN', 'HERREN', 'KINDER', 'SPORT', 'ACCESSOIRES', 'SCHUHE', 'HOME'][gang];
+    const seite = new Seite(S, xx, zz - 0.2, laenge, 0.2, '+z');
+    seite.q(laenge * 0.3, laenge * 0.7, 2.85, 3.4, 0.10, 0.23, '#f3f0e8');
+    text(scene, seite, schild, laenge / 2, 3.12, 0.27, laenge * 0.4 - 0.4, 0.40, FARBE_OUTLET);
+  }
+  // Schuhgrößenwand und Handtaschen: klar strukturierte Regale statt Wühltische.
+  for (let regal = 0; regal < 16; regal++) {
+    const rx = x + 3.5 + regal % 8 * Math.max(2.35, (w - 7) / 9);
+    const rz = z + Math.min(bd - 4.2, 3 + Math.floor(regal / 8) * 3.5);
+    S.box(1.9, 2.75, 0.23, rx, 1.67, rz, '#e7e6df');
+    for (let ebenen = 0; ebenen < 4; ebenen++) {
+      const yy = 0.65 + ebenen * 0.61;
+      S.box(1.9, 0.09, 0.95, rx, yy, rz + 0.35, '#d1d0ca');
+      if (nah) for (let st = 0; st < 3; st++) {
+        S.box(0.49, 0.34, 0.48, rx - 0.57 + st * 0.57, yy + 0.22, rz + 0.3, waehle(r, WAREN));
+        S.box(0.45, 0.07, 0.49, rx - 0.57 + st * 0.57, yy + 0.42, rz + 0.3, '#eeece6');
+      }
+    }
+  }
+    // Mitarbeiter beim Nachräumen und Rollwagen.
   const mx = x + w - 6, mz = z + bd - 8;
   mensch(S, r, mx, 0.34, mz);
   S.box(1.6, 1.05, 1.0, mx + 1.3, 0.85, mz + 0.5, '#8d969d');
