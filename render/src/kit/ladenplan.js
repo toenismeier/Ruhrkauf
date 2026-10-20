@@ -223,6 +223,19 @@ function inszenierung(plan,profil,raum) {
       }
     }
   }
+  // Familie 6: Die feste, bereits vom Bestandsgrundriss modellierte Rundbühne
+  // belegt in kleinen OGs den gesamten Outdoor-Quadranten. Sie selbst zählt
+  // als Erlebnisfläche; dort zusätzlich Möbel hineinzubauen wäre eine Kollision.
+  const buehne=plan.hindernisse.filter(h=>String(h.typ).startsWith('buehne')&&
+    schneidet(h,raum));
+  if(profil.id==='sport'&&buehne.length) {
+    plan.festeInszenierungen.push({
+      abteilung:raum.id, typ:'bestandsbuehne',
+      x:Math.min(...buehne.map(h=>h.x)),z:Math.min(...buehne.map(h=>h.z)),
+      hindernisIds:buehne.map(h=>h.id)
+    });
+    return;
+  }
 }
 
 // Sportbekleidung benötigt echte Rundständer und Puppengruppen, nicht nur
@@ -455,7 +468,7 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
   const haupt=hauptgangWaehlen(f.breite,f.tiefe,f.eingaenge,f.hindernisse);
   const plan={version:1,profil:p.id,seed,breite:f.breite,tiefe:f.tiefe,
     eingaenge:f.eingaenge,hindernisse:f.hindernisse,gaenge:[haupt],
-    abteilungen:[],moebel:[],kassenVorfeld:[],boeden:[],
+    abteilungen:[],moebel:[],festeInszenierungen:[],kassenVorfeld:[],boeden:[],
     wandOeffnungen:[],hinweise:[],mixIndex:{}};
   // Vom Eingang zum Hauptgang ein rechtwinkliges, breit genuges Frontstück.
   for(const e of f.eingaenge)if(e.x<haupt.x||e.x>haupt.x+haupt.w) {
