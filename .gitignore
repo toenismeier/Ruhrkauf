@@ -3,3 +3,5 @@ render/out/
 *.log
 *.tsbuildinfo
 .DS_Store
+render/bilder/reise/
+render/bilder/wochenbericht/
