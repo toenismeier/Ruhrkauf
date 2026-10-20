@@ -150,8 +150,16 @@ export function erfasseTreiber(s: GameState): void {
     verlauf.push(messung);
     // Nach dem ersten Jahr: die älteren 52 Wochen in 4-Wochen-Blöcken speichern.
     const grenze = s.woche - 51;
-    const alt = verlauf.filter((p) => p.bis < grenze && p.bis >= s.woche - 103);
-    const jung = verlauf.filter((p) => p.bis >= grenze);
+    const erste = s.woche - 103;
+    // Alte 4-Wochen-Blöcke am 104-Wochen-Rand proportional abschneiden.
+    const zuschneiden = (p: TreiberPeriode): TreiberPeriode => {
+      if (p.von >= erste) return p;
+      const anteil = (p.bis - erste + 1) / (p.bis - p.von + 1);
+      return komplett(erste, p.bis, p.umsatz * anteil, p.frequenz * anteil,
+        p.kaeufe * anteil, p.artikel * anteil);
+    };
+    const alt = verlauf.filter((p) => p.bis < grenze && p.bis >= erste).map(zuschneiden);
+    const jung = verlauf.filter((p) => p.bis >= grenze).map((p) => p.von < erste ? zuschneiden(p) : p);
     const bloecke = new Map<number, TreiberPeriode[]>();
     for (const p of alt) {
       const block = Math.floor(p.von / 4);
