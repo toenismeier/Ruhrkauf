@@ -195,3 +195,27 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 2. Diagnose-/Sport-Innenkatalog für mindestens sechs Häuser rendern und Vorher-/Nachher-Bilder in `bilder/` ablegen; PNGs ansehen. Der Diagnosekatalog wurde auf **sechs** Sporthäuser (S017, S041, S024, S011, S012, S032) erweitert; der tatsächliche PNG-Render und die visuelle Abnahme bleiben offen.
 3. PR #6, dann #8, dann #9 nach Rebase gegen den jeweils aktualisierten Hauptzweig und grüner lokaler Abnahme mergen. Keinen PR vorziehen.
 4. Ein vollständiger Checkout des privaten Repositories ist hier weiter blockiert (Netzwerkauflösung von `github.com` in der Shell); weder `npm ci` noch lokale Bilderzeugung war möglich. Der isolierte Test ist ein Teilnachweis, **keine Mergefreigabe**.
+
+## Fortsetzung 20.10.2026: Phase 4 Sport begonnen (`feat/ladenbau-p4`)
+
+### Ausgangslage und Stand
+- Phase 1 bis 3 sind auf `main` gemergt. Der neue Branch `feat/ladenbau-p4` wurde direkt aus `main` bei Commit `105beffbb4474deceedae6de920e525a8cb5957b` angelegt.
+- Phase 4 **in Arbeit, nicht abgenommen und nicht mergefrei**. Der gemeinsame Ladenplaner ist nun der **Standardpfad** in `sportEtage`; mit Option `altbestand: true` kann der bisherige Innenaufbau für den Vergleich ausdrücklich weiterhin aufgerufen werden.
+- Über `sportLadenEingabe` werden feste Einbauten einschließlich Kletter-/Radbühne, Portalszene, Laufstrecke und Rundbühne als Hindernisse reserviert. Außenfamilien-Stil, Fassade, Tragwerk, Mall-Passage, Parkplatzzone, Treppen, Lufträume sowie gebäudetypische Inszenierungen bleiben im alten Architekturaufbau erhalten.
+- Geplante Möbel, Kasse, Boden- und Gangflächen kommen aus der Bibliothek (`baueLadenplan`); der Gangfarbton bleibt je Familie aus `STIL`. Familie 3 ist als `plan.variante = 'halle'` gekennzeichnet; separate fachmarktspezifische Regal-/Serviceinszenierung ist noch in der Sichtprüfung nachzuweisen.
+- Auf Abverkaufsetagen werden passende 5-m-Gondeln durch zwei neue maßhaltige Bibliotheksmodule (`sport_abverkauf_tisch`, `sport_abverkauf_gitter`) ersetzt. Der ursprüngliche freie Abverkaufsaufbau bleibt allein im Altvergleich. Die Bibliothek umfasst damit **149 Definitionen** (vorher 147).
+- Kassenplatzierung wurde um systematische Ausweichpositionen ergänzt; feste Radbühnen an der Rückwand werden bei der nutzbaren Wandlänge korrekt als bauliche Ausnahme berücksichtigt.
+- `baueLadenplan` berücksichtigt jetzt optionale Decken-/Bodenaussparungen für Lufträume und Rolltreppen sowie Katalogausschnitte, ohne den vollständigen Plan abzuschneiden.
+- Neuer Katalog `render/src/kataloge/sport-etagen-vergleich.js`: acht ausgewählte Häuser vor/nach Umbau mit identischer Kamera, ausgewiesener Teilezahl und Bibliotheksmöbeln.
+
+### Ausgeführte Prüfungen
+- **Isolierte V8-Code-/Datenprüfung** der aktuellen Planer-, Raster-, Adapter- und Prüffunktionen mit tatsächlichem `render/haeuser.json`, realen Familien-/Maßfunktionen und Möbelmetadaten: **50 von 50 Sporthäusern, 101 von 101 Verkaufsetagen regelkonform**, **0 Verstöße**.
+- **14.600** eingeplante Möbel über 101 Etagen (inkl. zentral reservierter Familienspezifika), **Möbeldichte 35,12–45,46 %**. Drei in der ersten Auswertung erkannte Grenzfälle (S002 und S047: Wandbelegung, S026: Kasse) wurden vor der Wiederholung korrigiert.
+- Für die bearbeiteten Quellmodule wurde eine JavaScript-Syntaxprüfung nach Entfernen der ESM-Import-/Exportzeilen durchgeführt; **kein Syntaxfehler**.
+- **Prüfgrenze:** isolierter Logiklauf mit aus Quelldateien zusammengesetzter V8-Ausführung, **nicht** `npm ci`, `esbuild`, Three.js, `pruef-moebel`, Node-Smoke, `spiel-render.js` oder Chromium. Daher **keine Freigabe** anhand dieser Zahlen.
+
+### Noch offen / nächster Schritt
+1. In einem vollständigen lokalen Repository-Checkout `cd engine && npm ci && npm run typecheck && npx jest`; `cd render && npm ci && npm run build && npm run moebel:pruefen && npm run ladenbau:smoke && npm run ladenbau:pruefen:teile && node spiel-render.js` ausführen. Die Shell kann hier `github.com` nicht auflösen, ein lokaler Checkout liegt nicht vor.
+2. `node render-katalog.js sport-etagen-vergleich` sowie `sport-etagen`, `sport-abteilungen`, `sport-feeling` und `sport-feeling-nah` ausführen, finale Bilder nach `bilder/` übernehmen und wirklich ansehen. Die Vergleichs-PNG ist **noch nicht erzeugt**.
+3. Teile je tatsächlicher Sportetage **vorher/nachher messen**, als harte Regression (neu ≤ alt) prüfen. Teilebudgets und reale Geometrie einschließlich aller Ausschnitt-/Familienstile sind noch nicht validiert.
+4. Sichtprüfung der sechs Architekturfamilien sowie der oberen Abverkaufsflächen (ruhiger Boden, Wandband, klare Korridore, Inszenierung, Service-/Kassenvorfeld); entdeckte Kollisionen korrigieren. Erst bei vollständiger grüner Abnahme PR freigeben und mergen. Bis dahin `main` unverändert lassen.
