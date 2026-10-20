@@ -11,7 +11,7 @@ function ersterBetrieb(s: GameState): Haus {
 }
 function kommentiere(s: GameState, h: Haus): void {
   s.woche = 52;
-  s.controllingStufe = 2;
+  // Der aufrufende Test bestimmt die Prüfqualität.
   h.personal.filialleiter.ehrlichkeit = 0;
   h.betrieb!.umsatzHistorie.push({ woche: 0, umsatz: 100_000 });
   h.kpi = {
@@ -53,6 +53,7 @@ describe('O07 Haus als Betrieb', () => {
   });
   test('unehrliche Leitung mit internem Treiber meldet externen Grund', () => {
     const s=neuesSpiel(7), h=s.haeuser[0];
+    s.controllingStufe = 2;
     kommentiere(s,h);
     const c=h.betrieb!.kommentare[0];
     expect(c.wahrerGrund).toBe('personal');
@@ -61,19 +62,20 @@ describe('O07 Haus als Betrieb', () => {
     expect(c.vergleich).toBe('vorjahr');
   });
   test('gutes Vertriebscontrolling deckt falsche Kommentare häufiger auf', () => {
-    let niedrig=0, hoch=0;
-    for(let seed=1;seed<=32;seed++){
-      const a=neuesSpiel(seed), b=neuesSpiel(seed);
-      const ha=a.haeuser[0], hb=b.haeuser[0];
-      kommentiere(a,ha); kommentiere(b,hb);
-      // gleiche Grundwahrheit und Ausrede, aber unterschiedlich gutes Controlling
-      const ca=ha.betrieb!.kommentare[0], cb=hb.betrieb!.kommentare[0];
-      expect(ca.grund).toBe(cb.grund);
-      // Die Prüfung erfolgt in hausAbschluss und hängt nur von Controllingstufe ab.
-      // Nachträglich angepasste Stufe würde die Prüfung nicht rückwirkend verändern.
-      if (!ca.plausibel) hoch++;
-      if (!cb.plausibel) niedrig++; // wird in der folgenden separaten Stichprobe überschrieben
+    let niedrig = 0, hoch = 0;
+    for (let seed=1; seed<=40; seed++) {
+      const gut=neuesSpiel(seed), schwach=neuesSpiel(seed);
+      gut.controllingStufe=2;
+      schwach.controllingStufe=0;
+      kommentiere(gut,gut.haeuser[0]);
+      kommentiere(schwach,schwach.haeuser[0]);
+      const a=gut.haeuser[0].betrieb!.kommentare[0];
+      const b=schwach.haeuser[0].betrieb!.kommentare[0];
+      expect(a.grund).toBe(b.grund);
+      if(!a.plausibel) hoch++;
+      if(!b.plausibel) niedrig++;
     }
+    expect(hoch).toBeGreaterThan(niedrig);
     expect(hoch).toBeGreaterThan(0);
   });
   test('Kürzung Reinigung senkt den Mystery-Shopping-Kundenscore', () => {
@@ -101,7 +103,7 @@ describe('O07 Haus als Betrieb', () => {
     expect(pacht.personal).toBe(0);
   });
   test('Hausstandard gilt je Cluster und Einzelabweichung benötigt eine Begründung',()=>{
-    const s=neuesSpiel(8), h=s.haeuser[0], cluster=h.region;
+    const s=neuesSpiel(8), h=s.haeuser.find(x=>x.klasse!=='premium')!, cluster=h.region;
     const start=hausStandard(s,h).sauberkeit;
     expect(fuehreAus(s,{typ:'hausStandardSetzen',cluster,feld:'sauberkeit',wert:3}).ok).toBe(true);
     expect(hausStandard(s,h).sauberkeit).toBe(3);
