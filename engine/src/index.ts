@@ -11,7 +11,7 @@ export {
   type AbteilungId, type Abteilung, type Hq, type HqAngebot, type HqEtage, type HqGebaeude, type HqTyp, type Stufe,
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
-export { GRUPPEN, gruppenFuer } from './daten';
+export { GRUPPEN, gruppenFuer, STAEDTE, STADT_REGIONEN, stadtRegion } from './daten';
 export { STANDARD_SZENARIO, type Szenario } from './welt';
 export {
   WG_DEF, WG, WG_JE_BEREICH, EK_PARAM, EINKAUF_SPALTEN, saisonId, saisonName,
