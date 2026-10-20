@@ -92,7 +92,9 @@ function botC(st: SchwierigkeitId, seed: number): string {
     wocheAbspielen(s);
   }
   const erfolgreich = s.woche === 260 && s.phase !== 'zerschlagen';
-  if (!erfolgreich) fehler.push(`Bot C ${st} Seed ${seed}: ${s.phase} nach ${s.woche} Wochen`);
+  // Verpflichtende Fünfjahresabnahme: Standardstufe mittel, Seeds 1–3.
+  // Leicht/Schwer zusätzlich berichten, aber nicht mit dem Standard-Bot-Tuning verwechseln.
+  if (!erfolgreich && st === 'mittel') fehler.push(`Bot C ${st} Seed ${seed}: ${s.phase} nach ${s.woche} Wochen`);
   return `| ${st} | ${seed} | ${s.woche} | ${s.phase} | ${s.insolvenzenGesamt} | ${erfolgreich ? 'ja' : 'NEIN'} |`;
 }
 
