@@ -52,6 +52,48 @@ const server = http.createServer((req, res) => {
       woche: window.spiel.s.woche, cash: window.spiel.s.cash, umsatz: window.spiel.s.historie.at(-1).umsatz
     }));
     assert.deepEqual(nachher, vorher, 'Fortsetzen bewahrt exakt dieselbe Wochen-GuV und Liquidität');
+    // Maßstab: Einstieg über Deutschland, vollständige Kartenstädte, virtuelles Portfolio,
+    // Filter, Scrollen und Personal-Sammelaktion über die tatsächlichen Buttons.
+    await page.evaluate(() => window.spiel.oeffnePortfolio('karte'));
+    const mapStatus = await page.evaluate(() => {
+      const p = window.spiel.portfolio.pruefe(), hs = window.spiel.E.portfolio(window.spiel.s);
+      return { ...p, staedte: new Set(hs.map((h) => h.stadt)).size,
+        pins: document.querySelectorAll('.deutschland-svg g[data-stadt]').length };
+    });
+    assert.equal(mapStatus.pins, mapStatus.staedte, 'Karte besitzt einen Punkt je Engine-Stadt');
+    assert.deepEqual(mapStatus.fehler, [], 'Karte nutzt gültige Engine-Attribute');
+    await page.locator('.deutschland-svg g[data-stadt]').first().evaluate((element) => element.click());
+    assert.ok(await page.evaluate(() => document.getElementById('ptitel').textContent.length > 0), 'Stadt über Kartenpunkt geöffnet');
+    await page.evaluate(() => window.spiel.oeffnePortfolio('liste'));
+    const rowsBefore = await page.locator('#pp-scroll .pp-haus').count();
+    await page.locator('#pp-scroll').evaluate((el) => { el.scrollTop = 1800; el.dispatchEvent(new Event('scroll')); });
+    const rowsAfter = await page.locator('#pp-scroll .pp-haus').count();
+    assert.ok(rowsBefore > 0 && rowsBefore < 36 && rowsAfter > 0 && rowsAfter < 36, 'Portfolio listet nur sichtbare Häuser');
+    await page.locator('[data-pp-filter="format"]').selectOption('sport');
+    const sportAuswahl = await page.evaluate(() => {
+      const hs = window.spiel.E.portfolio(window.spiel.s).filter((h) => h.formatKey === 'sport' && h.steuerbar);
+      return hs.map((h) => h.id);
+    });
+    assert.ok(sportAuswahl.length > 0, 'Sporthäuser sind steuerbar');
+    await page.locator('[data-pp="alle"]').click();
+    const auswahl = await page.evaluate(() => window.spiel.portfolio.auswahl);
+    assert.deepEqual([...auswahl].sort(), [...sportAuswahl].sort(), 'Gefilterte Hausauswahl über Liste');
+    const personalSoll = await page.evaluate((ids) => {
+      const clone = structuredClone(window.spiel.s);
+      const ergebnis = window.spiel.E.fuehreAus(clone, { typ: 'personalabbau', haeuser: ids, prozent: 0.05 });
+      if (!ergebnis.ok) throw new Error(ergebnis.text);
+      return ids.map((id) => {
+        const h = clone.haeuser.find((x) => x.id === id);
+        return [id, h.personal.vollzeit, h.personal.teilzeit];
+      });
+    }, auswahl);
+    await page.locator('[data-pp="abbau"]').click();
+    const personalIst = await page.evaluate((ids) => ids.map((id) => {
+      const h = window.spiel.s.haeuser.find((x) => x.id === id);
+      return [id, h.personal.vollzeit, h.personal.teilzeit];
+    }), auswahl);
+    assert.deepEqual(personalIst, personalSoll, 'Sammelaktion identisch mit fuehreAus auf geklontem Spielstand');
+    await page.locator('#pzu').click();
     // Posteingang: Öffnen, Zähler und eine tatsächliche Engine-Entscheidung prüfen.
     await page.evaluate(() => {
       const s = window.spiel.s, h = s.haeuser[0];
