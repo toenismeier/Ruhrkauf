@@ -49,10 +49,12 @@ export interface ReportingZeile {
   umsatz: number; vorjahr?: number; abweichung?: number; abweichungProzent?: number;
   frequenz: number; kaufquote: number; bon: number; ampelfarbe: 'gruen' | 'gelb' | 'rot' | 'grau';
 }
+export interface ReportingGruppe extends Omit<ReportingZeile, 'format'> { ebene: 'region' | 'hauscluster'; format: 'alle' }
 export interface Reporting {
   wochen: number;
   bruecke: Umsatzbruecke;
   zeilen: ReportingZeile[];
+  gruppen: ReportingGruppe[];
   beobachtung: { hausId: string; name: string; abweichung: number; haupttreiber: string }[];
 }
 const NULL: TreiberFaktoren = { frequenz: 1, kaufquote: 1, bon: 1 };
@@ -273,6 +275,25 @@ export function reporting(s: GameState, wochen = 1): Reporting {
       ampelfarbe: anteil === undefined ? 'grau' : anteil < -0.05 ? 'rot' : anteil < 0 ? 'gelb' : 'gruen',
     });
   }
+  // O02: Aggregation im Engine-Modul, nicht in der Oberfläche.
+  const gruppen: ReportingGruppe[] = [];
+  for (const ebene of ['region', 'hauscluster'] as const) {
+    for (const id of new Set(zeilen.map((z) => z[ebene]))) {
+      const aus = zeilen.filter((z) => z[ebene] === id);
+      const umsatz = aus.reduce((a, z) => a + z.umsatz, 0);
+      const fre = aus.reduce((a, z) => a + z.frequenz, 0);
+      const kaeufe = aus.reduce((a, z) => a + z.frequenz * z.kaufquote, 0);
+      const mitVj = aus.filter((z) => z.vorjahr !== undefined);
+      const vorjahr = mitVj.length === aus.length ? aus.reduce((a, z) => a + (z.vorjahr ?? 0), 0) : undefined;
+      const abweichung = vorjahr !== undefined ? umsatz - vorjahr : undefined;
+      const abweichungProzent = vorjahr && abweichung !== undefined ? abweichung / Math.abs(vorjahr) : undefined;
+      gruppen.push({ id, name: id, region: ebene === 'region' ? id : aus[0].region,
+        hauscluster: ebene === 'hauscluster' ? id : '', ebene, format: 'alle',
+        umsatz, vorjahr, abweichung, abweichungProzent, frequenz: fre,
+        kaufquote: fre ? kaeufe / fre : 0, bon: kaeufe ? umsatz / kaeufe : 0,
+        ampelfarbe: abweichungProzent === undefined ? 'grau' : abweichungProzent < -0.05 ? 'rot' : abweichungProzent < 0 ? 'gelb' : 'gruen' });
+    }
+  }
   const beobachtung = zeilen.filter((z) => z.abweichung !== undefined && z.abweichung < 0)
     .sort((a, b) => (a.abweichung ?? 0) - (b.abweichung ?? 0)).slice(0, 10).map((z) => {
       const br = umsatzbruecke(s, { ebene: 'haus', id: z.id, vergleich: 'vorjahr', wochen });
@@ -286,5 +307,5 @@ export function reporting(s: GameState, wochen = 1): Reporting {
       const haupt = effekte[0];
       return { hausId: z.id, name: z.name, abweichung: z.abweichung!, haupttreiber: haupt.name + ' ' + haupt.text };
     });
-  return { wochen, bruecke: umsatzbruecke(s, { ebene: 'konzern', vergleich: 'vorjahr', wochen }), zeilen, beobachtung };
+  return { wochen, bruecke: umsatzbruecke(s, { ebene: 'konzern', vergleich: 'vorjahr', wochen }), zeilen, gruppen, beobachtung };
 }
