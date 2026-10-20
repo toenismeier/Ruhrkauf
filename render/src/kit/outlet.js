@@ -151,7 +151,7 @@ export function innenOutlet(S, scene, haus, opt = {}) {
   return { hoehe: H, w, d: bd };
 }
 
-function glasfront(S, scene, s, maxY, offen, r, oben = false) {
+function glasfront(S, scene, s, maxY, offen, r, oben = false, eingangU = 0.52) {
   // Nicht durch einen grauen Vollquader verdecken: Rahmen, Schaufenster und sichtbare Displays.
   const y0 = 0.48, y1 = Math.max(3.2, Math.min(maxY, oben ? 7.05 : 4.25));
   s.q(0.25, s.L - 0.25, 0.35, 0.60, 0.10, 0.27, '#bfc2c3');
@@ -170,7 +170,7 @@ function glasfront(S, scene, s, maxY, offen, r, oben = false) {
     }
   }
   if (!offen) s.q(0.55, s.L - 0.55, y0, y1 - 0.2, -0.01, 0.09, '#93999a');
-  const tuer = s.L * 0.52;
+  const tuer = s.L * eingangU;
   s.q(tuer - 1.9, tuer + 1.9, 0.4, 3.1, 0.15, 0.31, '#b1d1dc');
   s.q(tuer - 0.07, tuer + 0.07, 0.4, 3.1, 0.32, 0.39, '#d6dde1');
   if (oben) {
@@ -254,7 +254,7 @@ export function outlet(S, scene, haus, opt = {}) {
     innenOutlet(S, scene, haus, { x, z });
   }
   for (const [i, s] of seiten.entries()) {
-    glasfront(S, scene, s, stadt ? bandY - 0.07 : (zweigeschossig ? 7.65 : bandY + 0.4), !F.zu, r, zweigeschossig);
+    glasfront(S, scene, s, stadt ? bandY - 0.07 : (zweigeschossig ? 7.65 : bandY + 0.4), !F.zu, r, zweigeschossig, eingang);
     if (stadt) {
       // EG-Läden haben eine eigenständige, breite Schaufensterzone.
       s.q(0.1, s.L - 0.1, 4.6, 4.93, 0.33, 0.56, '#e5e0d5');
