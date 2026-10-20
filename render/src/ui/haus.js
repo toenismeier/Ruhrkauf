@@ -15,11 +15,13 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
   const id=esc(h.id), r = REITER.some(x => x[0] === reiter) ? reiter : 'ueberblick';
   let inhalt = '';
   if (r === 'ueberblick') {
+    const tr = b?.treiberAktuell;
     inhalt = '<div class="karte"><div class="khead">Kunden und Standort</div>' +
       line('Mystery Shopping', (b?.kundenScore ?? '–') + ' / 100') +
       line('Hauscluster', b?.hauscluster ?? h.region) +
       line('Stadtgröße', h.cluster === 'metropole' ? 'Metropole' : h.cluster === 'grossstadt' ? 'Großstadt' : 'Mittelstadt') +
-      line('Kaufquote, Frequenz und Bon', 'Im Umsatztreiber-Reporting') + '</div>' + ueberblick;
+      (Number.isFinite(b?.planWoche) ? line('Umsatzplan aktuelle Woche', geld(b.planWoche)) : '') +
+      (tr ? line('Frequenz Vorwoche',fmt.format(Math.round(tr.frequenz))) + line('Kaufquote Vorwoche',PROZENT(tr.kaufquote)) + line('Bon Vorwoche',geld(tr.bon)) : line('Umsatztreiber','Nach 1. Wochenabschluss verfügbar')) + '</div>' + ueberblick;
   }
   if (r === 'leitung') {
     inhalt = '<div class="karte"><div class="khead">Hausleitung</div>' +
