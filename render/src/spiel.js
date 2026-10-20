@@ -847,6 +847,32 @@ wochenbericht = wochenberichtModul({
   oeffneVorgang: (id) => oeffneModul(po, 'handeln', id),
   fehler: (e) => { console.error('Wochenabschluss fehlgeschlagen:', e); meldung('Woche konnte nicht abgeschlossen werden', false); },
 });
+// ─────────────────────────────────────────── N14: verborgene Testwerkzeuge
+async function testStandLaden(d) {
+  clearTimeout(speicherTimer);
+  s = structuredClone(d.spiel);
+  s.testGenutzt = true;
+  postUi = { ...neuerPostUi(), ...(d.ui ?? {}) };
+  if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
+  $('postwarnung').checked = !!postUi.warnen;
+  $('wochenbericht-modus').value = ['voll', 'kurz', 'aus'].includes(postUi.wochenbericht) ? postUi.wochenbericht : 'voll';
+  schwierigkeitId = s.schwierigkeit ?? 'mittel';
+  $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+  MERK.clear();
+  schliessePanel();
+  const ziel = STADTLISTE.some((x) => x.name === d.stadt) ? d.stadt : 'Essen';
+  wahl.value = ziel;
+  cockpitZeigen();
+  baueStadtAusSpiel(ziel);
+  ek.badge(); menueBadge();
+  window.spiel.s = s;
+  automatischSpeichern();
+  wk.oeffne();
+}
+wk = werkzeugeModul({
+  E, s: () => s, ui: () => postUi, stadt: () => stadtName, panel, meldung,
+  nachAktion, teileStand, messung, testWoche: (bot) => woche(bot, true), standLaden: testStandLaden,
+});
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
 $('wochenbericht-modus').addEventListener('change', (e) => { postUi.wochenbericht = e.target.value; automatischSpeichern(); });
 
