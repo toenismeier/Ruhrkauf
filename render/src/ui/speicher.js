@@ -121,13 +121,13 @@ export async function liste() {
   } catch (e) { throw fehlerText(e); }
 }
 
-export function speichern(spiel, stadt, ui = {}, platz = 'autosave', name = '', bild = null) {
+export function speichern(spiel, stadt, ui = {}, platz = 'autosave', name = '', bild = null, importDatum = null) {
   try {
     platzPruefen(platz);
     if (!spiel || spiel.version !== 1) throw new Error('Kein gültiges Spiel gestartet.');
     // Vor dem Warten auf die Schreibwarteschlange kopieren, da die Engine weiterläuft.
     const datensatz = {
-      format: FORMAT, datum: new Date().toISOString(), stadt,
+      format: FORMAT, datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : new Date().toISOString(), stadt,
       spiel: structuredClone(spiel), ui: structuredClone(ui),
       name: String(name || (platz === 'autosave' ? 'Automatisch' : 'Spielstand')).trim().slice(0, 60),
       bild: bildPruefen(bild)
@@ -200,7 +200,7 @@ export async function importieren(datei, platz = 'platz-1') {
     const text = await entpacken(datei);
     const d = pruefen(JSON.parse(text));
     // Erst nach vollständiger Prüfung schreiben. Keine laufende Partie überschreiben.
-    await speichern(d.spiel, d.stadt, d.ui ?? {}, platz, d.name ?? 'Importiert', d.bild);
+    await speichern(d.spiel, d.stadt, d.ui ?? {}, platz, d.name ?? 'Importiert', d.bild, d.datum);
     return infoVon(d, platz);
   } catch (e) { throw fehlerText(e); }
 }
