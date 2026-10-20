@@ -20,7 +20,9 @@
     "ladenbau:smoke": "node tests/ladenbau-smoke.cjs && node tests/outlet-ladenbau-smoke.cjs",
     "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose",
     "ladenbau:outlet:smoke": "node tests/outlet-ladenbau-smoke.cjs",
-    "smoke:haus": "node spiel-render.js --nur-haus"
+    "smoke:haus": "node spiel-render.js --nur-haus",
+    "fingerabdruck:pruefen": "node pruef-fingerabdruck.js",
+    "fingerabdruck:gegenprobe": "node tests/fingerabdruck-smoke.cjs"
   },
   "keywords": [],
   "author": "",
