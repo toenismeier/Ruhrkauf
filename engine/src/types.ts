@@ -199,6 +199,8 @@ export interface Haus {
   streikBis?: number;
   standortgarantie?: boolean;
   kpi?: HausKpi;
+  /** N01: Wochenhistorie des Hauses, höchstens 156 Wochen. */
+  verlauf?: { woche: number; umsatz: Eur; db: Eur; frequenz: number; personalFte: number }[];
   // O02 Umsatztreiber: Startfaktoren sind neutral, Quellen der späteren operativen Module.
   treiber?: TreiberFaktoren;
   treiberQuellen?: TreiberQuellen;
@@ -541,6 +543,9 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** N01: Statistik ist optional und ändert keine Berechnung. */
+  statistikDeaktiviert?: boolean;
+  statistik?: { sparsam: boolean; stimmung: { woche: number; wert: number }[] };
   /** Noch nicht in einem Wochenabschluss ausgewiesene Investitions-/Finanzierungszahlungen. */
   kapitalflussOffen?: { investitionen: Eur; finanzierung: Eur };
   /** Anfangsbestand vor Spielermaßnahmen in Woche 0 (wichtig bei noch leerer Historie). */

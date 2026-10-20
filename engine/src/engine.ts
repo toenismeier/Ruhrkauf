@@ -1,4 +1,5 @@
 import { GRUPPEN, saisonFaktor } from './daten';
+import { statistikHaus, statistikWoche } from './statistik';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
 import { umbauWoche } from './umbau';
@@ -162,6 +163,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     kpi.fteBedarf = r.fteBedarf;
     kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
     if (h.status !== 'geschlossen' && h.status !== 'verkauft') h.kpi = rundeKpi(kpi);
+    statistikHaus(s, h, rundeKpi(kpi));
 
     k.umsatz += kpi.umsatz;
     k.rohertrag += kpi.rohertrag;
@@ -259,6 +261,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // O06 Planung: Quartalsforecast, Vertrauensabgleich, Planungsfenster und Jahresabschluss.
   planungWoche(s);
   if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
+  statistikWoche(s, k);
   // Quartalsabschluss kann eine Eigentümereinzahlung erzeugen: sie gehört noch zu dieser Woche.
   // Zahlungsarten werden nur aus tatsächlich gebuchten Cash-Bewegungen abgeleitet.
   // Noch nicht nach Zahlart instrumentierte Effekte (insbesondere alte Sonderfälle) stehen in Sonstiges.

@@ -271,6 +271,9 @@ export { itUebersicht, itDeckelGrund } from './it';
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
 
+// N01: Verlauf je Ebene, Vorjahr und Eigentümer-Quartalsplan.
+export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './statistik';
+
 // O02 Umsatztreiber: ausschließlich lesende Projektionen, keine Berechnung in der UI.
 export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './treiber';
 // O06 Planung: Anzeigeabfragen ausschließlich aus der Engine.

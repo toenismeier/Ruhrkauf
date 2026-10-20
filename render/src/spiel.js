@@ -25,6 +25,7 @@ import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
 import { posteingangModul } from './ui/posteingang.js';
+import { statistikModul } from './ui/statistik.js';
 import { marketingModul } from './ui/marketing.js';
 import { umbauModul } from './ui/umbau.js';
 import { produkteModul } from './ui/produkte.js';
@@ -614,9 +615,10 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
+let st = null;
 let wk = null;
 let vorherigerFokus = null;
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -694,6 +696,7 @@ function oeffneHaus(id) {
   html += hausTreiberZeile(E, s, id);
   // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
   html += um?.hausKarte(id) ?? '';
+  html += st?.hausGrafik(id) ?? '';
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -1000,6 +1003,7 @@ rg = reportingModul({ E, s: () => s, panel, inhalt: $('pinhalt'), hausOeffnen: (
 } });
 $('reporting').addEventListener('click', () => oeffneModul(rg));
 
+st = statistikModul({ E, s: () => s, panel, oeffneHaus });
 // ─────────────────────────────────────────── Reise & Wochenabschluss
 reise = reiseModul({
   stadt: () => stadtName,
@@ -1087,6 +1091,7 @@ $('produkte').addEventListener('click', () => oeffneModul(pr));
 $('planung').addEventListener('click', () => oeffneModul(pl));
 // O04 Personal
 $('personaleinsatz').addEventListener('click', () => oeffneModul(pe));
+$('statistik').addEventListener('click', () => oeffneModul(st));
 $('posteingang').addEventListener('click', () => oeffneModul(po));
 // O07 Haus
 $('beobachtung').addEventListener('click', oeffneBeobachtung);
@@ -1180,7 +1185,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.

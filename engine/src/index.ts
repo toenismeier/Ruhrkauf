@@ -55,6 +55,8 @@ export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itPr
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
 
+export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './abfragen';
+
 // O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
 export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
   clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert,

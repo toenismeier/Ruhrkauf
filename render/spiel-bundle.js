@@ -148,6 +148,7 @@
     umbauUebersicht: () => umbauUebersicht,
     umsatzBezug: () => umsatzBezug,
     umsatzbruecke: () => umsatzbruecke,
+    verlauf: () => verlauf,
     vorschau: () => vorschau,
     vorstandProfil: () => vorstandProfil,
     vorstandUebersicht: () => vorstandUebersicht,
@@ -1007,6 +1008,93 @@
     };
   }
 
+  // ../engine/src/statistik.ts
+  var STATISTIK_AKTIV = true;
+  var GRENZE_BYTES = 2e6;
+  var HAUS_WOCHEN = 156;
+  function statistikHaus(s2, h, k) {
+    if (!STATISTIK_AKTIV || s2.statistikDeaktiviert || s2.prognose) return;
+    if (!h.verlauf) h.verlauf = [];
+    const w = k.woche;
+    if (s2.statistik?.sparsam && w > 52 && h.verlauf.length) {
+      const letzter = h.verlauf[h.verlauf.length - 1];
+      if (letzter.woche > 52 && letzter.woche % 4 !== 0) h.verlauf.pop();
+    }
+    h.verlauf.push({
+      woche: w,
+      umsatz: Math.round(k.umsatz),
+      db: Math.round(k.db),
+      frequenz: Math.round(Math.max(0, k.umsatz) / 45),
+      personalFte: Math.round(k.fteIst)
+    });
+    while (h.verlauf.length && w - h.verlauf[0].woche >= HAUS_WOCHEN) h.verlauf.shift();
+  }
+  function statistikWoche(s2, k) {
+    if (!STATISTIK_AKTIV || s2.statistikDeaktiviert || s2.prognose) return;
+    if (!s2.statistik) s2.statistik = { sparsam: false, stimmung: [] };
+    const a = s2.stakeholder;
+    const lief = s2.lieferanten.filter((x) => x.aktiv);
+    const lieferanten = (lief.reduce((sum2, l) => sum2 + l.vertrauen, 0) + s2.restLieferantenVertrauen) / (lief.length + 1);
+    s2.statistik.stimmung.push({ woche: k.woche, wert: Math.round((a.bank + a.kreditversicherer + lieferanten) / 3) });
+    if (s2.statistik.stimmung.length > 520) s2.statistik.stimmung.splice(0, s2.statistik.stimmung.length - 520);
+    if (k.woche >= 52 && k.woche % 4 === 0 && !s2.statistik.sparsam) {
+      s2.statistik.sparsam = new TextEncoder().encode(JSON.stringify(s2)).byteLength > GRENZE_BYTES;
+      if (s2.statistik.sparsam) for (const h of s2.haeuser) {
+        if (!h.verlauf) continue;
+        h.verlauf = h.verlauf.filter((p2) => p2.woche <= 52 || p2.woche % 4 === 0 || p2.woche === k.woche);
+      }
+    }
+  }
+  function passendeHaeuser(s2, ebene, id) {
+    if (ebene === "haus") return s2.haeuser.filter((h) => h.id === id);
+    if (ebene === "stadt") return s2.haeuser.filter((h) => h.stadt === id);
+    if (ebene === "region") return s2.haeuser.filter((h) => h.region === id);
+    if (ebene === "format") return s2.haeuser.filter((h) => {
+      const format = String(h.format);
+      if (id === "Hartwig") return format === "warenhaus" && h.klasse !== "premium";
+      if (id === "Sport") return format === "sport";
+      if (id === "Volkskauf") return format === "volkskauf";
+      if (id === "FUNDUS") return format === "fundus" || format === "outlet";
+      if (id === "Premium") return h.klasse === "premium";
+      return format === id;
+    });
+    return s2.haeuser;
+  }
+  function verlauf(s2, filter) {
+    const { ebene, id, kennzahl: kennzahl2 } = filter;
+    const einheit = ["umsatz", "ebitda", "cash", "db"].includes(kennzahl2) ? "euro" : kennzahl2 === "stimmung" ? "index" : "anzahl";
+    const ergebnis = { ebene, id, kennzahl: kennzahl2, punkte: [], einheit };
+    if (kennzahl2 === "frequenz") ergebnis.hinweis = "Kundenfrequenz gesch\xE4tzt aus Umsatz / 45 \u20AC; kein gemessener Besucherz\xE4hler.";
+    const letzteWoche = s2.historie.length ? s2.historie[s2.historie.length - 1].woche : s2.woche - 1;
+    const beginn = filter.wochen === "alle" ? -Infinity : letzteWoche - Math.max(1, Number(filter.wochen) || 52) + 1;
+    const werte2 = /* @__PURE__ */ new Map();
+    if (ebene === "konzern" && kennzahl2 === "stimmung") {
+      for (const p2 of s2.statistik?.stimmung ?? []) werte2.set(p2.woche, p2.wert);
+    } else if (ebene === "konzern" && ["umsatz", "ebitda", "cash", "personalFte"].includes(kennzahl2)) {
+      for (const k of s2.historie) {
+        const wert = kennzahl2 === "personalFte" ? k.fte : k[kennzahl2];
+        werte2.set(k.woche, wert);
+      }
+    } else if (!["cash", "ebitda", "stimmung"].includes(kennzahl2)) {
+      const haeuser = passendeHaeuser(s2, ebene, id);
+      for (const h of haeuser) for (const p2 of h.verlauf ?? []) {
+        werte2.set(p2.woche, (werte2.get(p2.woche) ?? 0) + p2[kennzahl2]);
+      }
+    }
+    const alle = [...werte2.keys()].sort((a, b2) => a - b2);
+    for (const w of alle) {
+      if (w < beginn) continue;
+      const punkt2 = { woche: w, wert: werte2.get(w) };
+      if (werte2.has(w - 52)) punkt2.vorjahr = werte2.get(w - 52);
+      if (ebene === "konzern" && kennzahl2 === "ebitda") {
+        const q2 = s2.quartale.find((x) => w >= x.start && w < x.start + 13);
+        if (q2) punkt2.plan = (q2.plan ?? q2.planStandard) / 13;
+      }
+      ergebnis.punkte.push(punkt2);
+    }
+    return ergebnis;
+  }
+
   // ../engine/src/eigenmarken.ts
   var BESCHAFFUNG = {
     fernost: { name: "Fernost", vorlauf: 22, mindestabnahme: 15e4, mehrmarge: 0.14, produzent: "Golden Thread" },
@@ -1704,7 +1792,7 @@
     return clamp(ist + (ziel - ist) * rate, 0, 100);
   }
   function aktualisiereStakeholder(s2) {
-    const st = s2.stakeholder;
+    const st2 = s2.stakeholder;
     const runway = runwayWochen(s2);
     const ueberfaellig = s2.verbindlichkeiten.some((v) => v.ueberfaelligSeit !== void 0);
     const h = s2.historie.slice(-8);
@@ -1715,24 +1803,24 @@
     const inso = s2.phase === "insolvenz";
     const beraterBonus = s2.berater.filter((b2) => b2.ende > s2.woche - 26).length > 0 ? 6 : 0;
     const reporting2 = (hqControllingExzellenz(s2) ? 3 : 0) - hqVerwaltungMalus(s2);
-    const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0) + schwierigkeit(s2).kvZiel;
-    st.kreditversicherer = annaehern(st.kreditversicherer, kvZiel, 0.05);
+    const kvZiel = 25 + 40 * clamp(runway / 26, 0, 1) + 6 * trend + ebitdaGut + 0.15 * (st2.image - 50) - (ueberfaellig ? 25 : 0) - (inso ? 10 : 0) + (hqControllingExzellenz(s2) ? 3 : 0) + schwierigkeit(s2).kvZiel;
+    st2.kreditversicherer = annaehern(st2.kreditversicherer, kvZiel, 0.05);
     const bankZiel = 25 + 35 * clamp(runway / 26, 0, 1) + 8 * trend + ebitdaGut + beraterBonus - (ueberfaellig ? 20 : 0) + reporting2;
-    st.bank = annaehern(st.bank, bankZiel, 0.03);
-    st.betriebsrat = annaehern(st.betriebsrat, (s2.tarif === "ohne" ? 25 : 50) + hqBetriebsratZiel(s2), 0.01);
-    st.image = annaehern(st.image, 50, 0.01);
-    st.vermieter = annaehern(st.vermieter, 50 - (ueberfaellig ? 15 : 0), 0.01);
+    st2.bank = annaehern(st2.bank, bankZiel, 0.03);
+    st2.betriebsrat = annaehern(st2.betriebsrat, (s2.tarif === "ohne" ? 25 : 50) + hqBetriebsratZiel(s2), 0.01);
+    st2.image = annaehern(st2.image, 50, 0.01);
+    st2.vermieter = annaehern(st2.vermieter, 50 - (ueberfaellig ? 15 : 0), 0.01);
     for (const l of s2.lieferanten) {
       if (!l.aktiv) continue;
       l.verspaetungen *= 0.97;
       const eigene = 72 - 14 * Math.min(4, l.verspaetungen) - (inso ? 15 : 0);
-      const ziel = (l.kvSensitivitaet * st.kreditversicherer + eigene) / (1 + l.kvSensitivitaet);
+      const ziel = (l.kvSensitivitaet * st2.kreditversicherer + eigene) / (1 + l.kvSensitivitaet);
       l.vertrauen = annaehern(l.vertrauen, ziel, 0.03 + 0.06 * (1 - l.geduld));
     }
-    const restZiel = (st.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
+    const restZiel = (st2.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
     s2.restLieferantenVertrauen = annaehern(s2.restLieferantenVertrauen, restZiel, 0.05);
     if (s2.phase === "regulaer") {
-      const ziel = s2.kreditlinieBasis * clamp((st.bank - 15) / 40, 0, 1.25);
+      const ziel = s2.kreditlinieBasis * clamp((st2.bank - 15) / 40, 0, 1.25);
       const alt = s2.kreditlinie;
       s2.kreditlinie = Math.round(alt + (ziel - alt) * 0.25);
       if (alt - s2.kreditlinie > 5e6) melde(s2, "warnung", `Die Hausbank reduziert die Kreditlinie auf ${(s2.kreditlinie / 1e6).toFixed(0)} Mio. \u20AC.`);
@@ -2101,23 +2189,23 @@
   function kanalRel(sc, k) {
     return sc.kanaele[k].adstock / KANAL[k].quote;
   }
-  function regionFaktor(st, def, r, anteil3) {
+  function regionFaktor(st2, def, r, anteil3) {
     if (!def.regional) return 1;
     let n = 0;
-    for (const x of REGIONEN) n += st.regionen[x] * anteil3[x];
-    return n > 0 ? st.regionen[r] / n : 1;
+    for (const x of REGIONEN) n += st2.regionen[x] * anteil3[x];
+    return n > 0 ? st2.regionen[r] / n : 1;
   }
   function kanalWirkung(s2, sc, h) {
     const al = altersAnteile(h);
     const anteil3 = s2.marketing.stand.woche.regionAnteil;
     let x = 0;
     for (const def of KANAELE) {
-      const st = sc.kanaele[def.id];
+      const st2 = sc.kanaele[def.id];
       let wirk = 0;
       for (const a of ALTERSGRUPPEN) wirk += al[a] * def.reichweite[a];
       if (def.id === "schaufenster") wirk *= LAGE_SCHAUFENSTER[h.lage];
-      const rel = kanalRel(sc, def.id) * regionFaktor(st, def, h.region, anteil3);
-      x += def.quote * wirk * Math.pow(Math.max(0, rel), def.e) * (1 - st.abnutzung);
+      const rel = kanalRel(sc, def.id) * regionFaktor(st2, def, h.region, anteil3);
+      x += def.quote * wirk * Math.pow(Math.max(0, rel), def.e) * (1 - st2.abnutzung);
     }
     return x;
   }
@@ -2390,10 +2478,10 @@
   }
   function kanalWoche(sc) {
     for (const def of KANAELE) {
-      const st = sc.kanaele[def.id];
-      st.adstock = def.adstock * st.adstock + (1 - def.adstock) * st.quote;
-      const rel = st.quote / def.quote;
-      st.abnutzung = clamp(st.abnutzung * 0.97 + 0.01 * Math.max(0, rel - 1.3), 0, 0.35);
+      const st2 = sc.kanaele[def.id];
+      st2.adstock = def.adstock * st2.adstock + (1 - def.adstock) * st2.quote;
+      const rel = st2.quote / def.quote;
+      st2.abnutzung = clamp(st2.abnutzung * 0.97 + 0.01 * Math.max(0, rel - 1.3), 0, 0.35);
     }
     sc.marke += MK.markeTempo * (markenZiel(sc) - sc.marke);
   }
@@ -2728,9 +2816,9 @@
     if (e.start !== void 0) return Math.round(e.start);
     if (e.kw !== void 0) {
       const j = e.jahr !== void 0 ? e.jahr - s2.startJahr : Math.floor(s2.woche / 52);
-      let st = j * 52 + clamp(Math.round(e.kw), 1, 52) - 1;
-      if (e.jahr === void 0 && st < s2.woche) st += 52;
-      return st;
+      let st2 = j * 52 + clamp(Math.round(e.kw), 1, 52) - 1;
+      if (e.jahr === void 0 && st2 < s2.woche) st2 += 52;
+      return st2;
     }
     return fallback;
   }
@@ -2826,14 +2914,14 @@
         if (a.kanal !== "alle" && !KANAL[a.kanal]) return fehler2("Unbekannter Kanal.");
         const bezug = umsatzBezug(s2);
         for (const id of ids) {
-          const st = I.kanaele[id];
+          const st2 = I.kanaele[id];
           const def = KANAL[id];
-          if (a.quote !== void 0) st.quote = a.quote;
-          else if (a.euroWoche !== void 0) st.quote = Math.max(0, a.euroWoche) / Math.max(1, bezug);
-          else if (a.faktor !== void 0) st.quote *= Math.max(0, a.faktor);
-          st.quote = clamp(st.quote, 0, def.quote * 4);
+          if (a.quote !== void 0) st2.quote = a.quote;
+          else if (a.euroWoche !== void 0) st2.quote = Math.max(0, a.euroWoche) / Math.max(1, bezug);
+          else if (a.faktor !== void 0) st2.quote *= Math.max(0, a.faktor);
+          st2.quote = clamp(st2.quote, 0, def.quote * 4);
           if (a.regionen) {
-            for (const [r, x] of Object.entries(a.regionen)) if (REGIONEN.includes(r)) st.regionen[r] = clamp(x, 0, 3);
+            for (const [r, x] of Object.entries(a.regionen)) if (REGIONEN.includes(r)) st2.regionen[r] = clamp(x, 0, 3);
           }
         }
         const netto = marketingKosten(s2, bezug).netto;
@@ -3073,24 +3161,24 @@
     const summe2 = KANAELE.reduce((x, d) => x + m.ist.kanaele[d.id].quote, 0);
     return {
       kanaele: KANAELE.map((d) => {
-        const st = m.ist.kanaele[d.id];
+        const st2 = m.ist.kanaele[d.id];
         return {
           id: d.id,
           name: d.name,
           text: d.text,
-          budgetWoche: eur(st.quote * U2),
-          budgetJahr: eur(st.quote * U2 * 52),
-          quote: st.quote,
+          budgetWoche: eur(st2.quote * U2),
+          budgetJahr: eur(st2.quote * U2 * 52),
+          quote: st2.quote,
           startBudgetWoche: eur(d.quote * U2),
-          anteil: summe2 > 0 ? st.quote / summe2 : 0,
-          wirkung: Math.pow(Math.max(0, kanalRel(m.ist, d.id)), d.e) * (1 - st.abnutzung),
+          anteil: summe2 > 0 ? st2.quote / summe2 : 0,
+          wirkung: Math.pow(Math.max(0, kanalRel(m.ist, d.id)), d.e) * (1 - st2.abnutzung),
           adstock: kanalRel(m.ist, d.id),
-          abnutzung: st.abnutzung,
+          abnutzung: st2.abnutzung,
           reichweite: { ...d.reichweite },
           marke: d.marke,
           aktion: d.aktion,
           regional: d.regional,
-          regionen: { ...st.regionen }
+          regionen: { ...st2.regionen }
         };
       }),
       summeWoche: eur(summe2 * U2),
@@ -3267,9 +3355,9 @@
   function aktionsAuswertung(s2, id) {
     const a = s2.marketing.aktionen.find((x) => x.id === id);
     if (!a) return void 0;
-    const st = statusVon(a, s2.woche);
+    const st2 = statusVon(a, s2.woche);
     const basis3 = eintrag(s2, a);
-    if (!a.ausgewertet) return { ...basis3, gemessen: false, text: st === "laufend" ? "Die Aktion l\xE4uft noch. Controlling wertet nach dem Ende aus." : st === "geplant" ? "Die Aktion ist geplant." : "Keine Auswertung vorhanden." };
+    if (!a.ausgewertet) return { ...basis3, gemessen: false, text: st2 === "laufend" ? "Die Aktion l\xE4uft noch. Controlling wertet nach dem Ende aus." : st2 === "geplant" ? "Die Aktion ist geplant." : "Keine Auswertung vorhanden." };
     const e = a.ausgewertet;
     const kontrolle = a.kontrollHaeuser.length >= 5;
     const b2 = breiteVon(s2, kontrolle);
@@ -4462,7 +4550,7 @@
   function clusterName(gruppe2, vergeben) {
     const zahl3 = /* @__PURE__ */ new Map();
     for (const h of gruppe2) zahl3.set(h.stadt, (zahl3.get(h.stadt) ?? 0) + 1);
-    const staedte = [...zahl3.entries()].sort((a, b2) => b2[1] - a[1] || a[0].localeCompare(b2[0], "de")).map(([st]) => st);
+    const staedte = [...zahl3.entries()].sort((a, b2) => b2[1] - a[1] || a[0].localeCompare(b2[0], "de")).map(([st2]) => st2);
     for (let i = 1; i < staedte.length; i++) {
       const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
       if (!vergeben.includes("Raum " + staedte[0])) break;
@@ -4539,9 +4627,9 @@
     });
   }
   function bereichsQualitaet(s2, id) {
-    const def = BEREICHE.find((x) => x.id === id), st = s2.organisation?.bereiche[id];
-    if (!def || !st) return 0;
-    const person2 = st.person?.qualitaet ?? 0.35;
+    const def = BEREICHE.find((x) => x.id === id), st2 = s2.organisation?.bereiche[id];
+    if (!def || !st2) return 0;
+    const person2 = st2.person?.qualitaet ?? 0.35;
     const hqStufe = clamp(s2.hq?.wirkung?.[def.abteilung] ?? 1, 0, 3) / 1;
     const chef = s2.vorstand?.ressorts[def.ressort]?.person;
     const vorstand = chef ? clamp(1 + (chef.fuehrung / 100 - 0.5) * 0.3, 0.85, 1.15) : 1;
@@ -4625,26 +4713,26 @@
       h.personal.filialleiter = { name: "Stellvertretung " + h.stadt, skill: Math.max(0.3, alt.skill - 0.16), moral: Math.max(30, alt.moral - 4), interimBis: s2.woche + 8 };
       return { ok: true, text: "Hausleitung zur Clusterleitung bef\xF6rdert. Stellvertretung \xFCbernimmt." };
     }
-    const st = stelleFuer(s2, a.ebene, a.id);
-    if (!st) return { ok: false, text: "Leitungsstelle nicht gefunden." };
+    const st2 = stelleFuer(s2, a.ebene, a.id);
+    if (!st2) return { ok: false, text: "Leitungsstelle nicht gefunden." };
     if (a.typ === "organisationEntlassen") {
-      if (!st.person) return { ok: false, text: "Stelle bereits vakant." };
-      einmalKosten(s2, eur(st.person.gehalt / 4));
-      st.person = void 0;
+      if (!st2.person) return { ok: false, text: "Stelle bereits vakant." };
+      einmalKosten(s2, eur(st2.person.gehalt / 4));
+      st2.person = void 0;
       return { ok: true, text: "Leitung entlassen. Stelle vakant." };
     }
     if (a.typ === "organisationHaltepraemie") {
-      if (!st.person || !Number.isFinite(a.betrag) || a.betrag < 0 || a.betrag > 15e4) return { ok: false, text: "Ung\xFCltige Haltepr\xE4mie." };
+      if (!st2.person || !Number.isFinite(a.betrag) || a.betrag < 0 || a.betrag > 15e4) return { ok: false, text: "Ung\xFCltige Haltepr\xE4mie." };
       einmalKosten(s2, eur(a.betrag));
-      st.person.stimmung = clamp(st.person.stimmung + a.betrag / 5e3, 0, 100);
-      st.person.wechselwille = clamp(st.person.wechselwille - a.betrag / 5e5, 0, 1);
+      st2.person.stimmung = clamp(st2.person.stimmung + a.betrag / 5e3, 0, 100);
+      st2.person.wechselwille = clamp(st2.person.wechselwille - a.betrag / 5e5, 0, 1);
       return { ok: true, text: "Haltepr\xE4mie ausgezahlt." };
     }
-    const k = st.kandidaten.find((p2) => p2.id === a.kandidat);
+    const k = st2.kandidaten.find((p2) => p2.id === a.kandidat);
     if (!k) return { ok: false, text: "Kandidat nicht gefunden." };
-    if (st.person) einmalKosten(s2, eur(st.person.gehalt / 4));
-    st.person = { ...k };
-    st.kandidaten = [1, 2, 3].map((n) => person(s2.seed, a.id + "-" + (s2.woche + 1), n));
+    if (st2.person) einmalKosten(s2, eur(st2.person.gehalt / 4));
+    st2.person = { ...k };
+    st2.kandidaten = [1, 2, 3].map((n) => person(s2.seed, a.id + "-" + (s2.woche + 1), n));
     return { ok: true, text: k.name + " \xFCbernimmt die Leitung." };
   }
   function organisationWoche(s2) {
@@ -4658,8 +4746,8 @@
       }
     }
     const stellen = [
-      ...Object.entries(o.bereiche).map(([id, st]) => ({ id, ebene: "bereich", st })),
-      ...Object.entries(o.regionalleitungen).map(([id, st]) => ({ id, ebene: "region", st })),
+      ...Object.entries(o.bereiche).map(([id, st2]) => ({ id, ebene: "bereich", st: st2 })),
+      ...Object.entries(o.regionalleitungen).map(([id, st2]) => ({ id, ebene: "region", st: st2 })),
       ...o.hauscluster.map((c) => ({ id: c.id, ebene: "cluster", st: c.stelle }))
     ];
     for (const x of stellen) {
@@ -4880,13 +4968,13 @@
     const b2 = betrieb(h);
     if (s2.hausbetriebAbnahmeAus || !b2 || !istOffen(h)) return 1;
     const l = leitung(h);
-    const st = hausStandard(s2, h);
+    const st2 = hausStandard(s2, h);
     const services = hausServices(s2, h);
     const kundendienst = services.kundendienst ? 1.007 : 1;
     const schneiderei = services.schneiderei ? 1.004 : 1;
     const geschenk = services.geschenkverpackung && s2.woche % 52 >= 47 ? 1.014 : 1;
     const abholung = services.abholstation ? 1.005 : 1;
-    const standard = 1 + 7e-3 * (st.sauberkeit - 2) + 9e-3 * (st.praesentation - 2) + 6e-3 * (st.kasse - 2) + 2e-3 * (10 - st.oeffnung.von) + 3e-3 * (st.oeffnung.bis - 20) + 2e-3 * (st.oeffnung.samstagBis - 20);
+    const standard = 1 + 7e-3 * (st2.sauberkeit - 2) + 9e-3 * (st2.praesentation - 2) + 6e-3 * (st2.kasse - 2) + 2e-3 * (10 - st2.oeffnung.von) + 3e-3 * (st2.oeffnung.bis - 20) + 2e-3 * (st2.oeffnung.samstagBis - 20);
     const delta = (l.staerken?.kunde ?? l.skill) - b2.leitungStart;
     const ware3 = (l.staerken?.ware ?? l.skill) - b2.leitungStart;
     return Math.max(0.5, stadtFaktor(s2, h) * standard * (1 + 0.06 * delta + 0.035 * ware3) * kundendienst * schneiderei * geschenk * abholung * (b2.massnahmeBis > s2.woche ? b2.massnahmeFaktor : 1) * (b2.ausfallBis !== void 0 && b2.ausfallBis > s2.woche ? 0.96 : 1) * (b2.gastro === "selbst" ? 1.015 : b2.gastro === "pacht" ? 1.006 : 1));
@@ -4929,11 +5017,11 @@
   function hausKundenscore(s2, h) {
     const b2 = betrieb(h);
     if (!b2) return 60;
-    const st = hausStandard(s2, h), k = h.kpi;
+    const st2 = hausStandard(s2, h), k = h.kpi;
     const personal = k && k.fteBedarf > 0 ? clamp(k.fteIst / k.fteBedarf, 0, 1.1) : 1;
     const reinigung = clamp(b2.kosten.reinigung, 0, 1.3);
     const verfuegbarkeit = (leitung(h).staerken?.ware ?? leitung(h).skill) - b2.leitungStart;
-    const score = 64 + 7 * (st.sauberkeit - 2) + 5 * (st.praesentation - 2) + 4 * (st.kasse - 2) + 14 * (personal - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h.substanz - 60) + Object.values(hausServices(s2, h)).filter(Boolean).length * 2;
+    const score = 64 + 7 * (st2.sauberkeit - 2) + 5 * (st2.praesentation - 2) + 4 * (st2.kasse - 2) + 14 * (personal - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h.substanz - 60) + Object.values(hausServices(s2, h)).filter(Boolean).length * 2;
     return Math.round(clamp(score, 0, 100));
   }
   function realerGrund(s2, h) {
@@ -5531,15 +5619,15 @@
   }
   function umbauUebersicht(s2) {
     initialisiereUmbau(s2);
-    const st = s2.umbau;
+    const st2 = s2.umbau;
     return {
-      budget: st.budget,
-      verbraucht: st.verbraucht,
-      rest: Math.max(0, st.budget - st.verbraucht),
+      budget: st2.budget,
+      verbraucht: st2.verbraucht,
+      rest: Math.max(0, st2.budget - st2.verbraucht),
       jahr: s2.startJahr + Math.floor(s2.woche / 52),
       programm: umbauProgramm(s2).slice(0, 30),
-      laufend: st.projekte.filter((x) => x.status === "laufend"),
-      abgeschlossen: st.projekte.filter((x) => x.status === "abgeschlossen").slice(-20),
+      laufend: st2.projekte.filter((x) => x.status === "laufend"),
+      abgeschlossen: st2.projekte.filter((x) => x.status === "abgeschlossen").slice(-20),
       premiumInvestitionen: s2.haeuser.filter((x) => x.premiumInvestition && x.premiumInvestition.bis > s2.woche).length
     };
   }
@@ -5670,8 +5758,8 @@
       const kaeufe = frequenz * q2;
       const artikel = artikelAusMix(h, umsatz);
       const messung2 = komplett(s2.woche, s2.woche, umsatz, frequenz, kaeufe, artikel);
-      const verlauf = h.treiberVerlauf ?? (h.treiberVerlauf = []);
-      verlauf.push(messung2);
+      const verlauf2 = h.treiberVerlauf ?? (h.treiberVerlauf = []);
+      verlauf2.push(messung2);
       const grenze = s2.woche - 51;
       const erste = s2.woche - 103;
       const zuschneiden = (p2) => {
@@ -5686,8 +5774,8 @@
           p2.artikel * anteil3
         );
       };
-      const alt = verlauf.filter((p2) => p2.bis < grenze && p2.bis >= erste).map(zuschneiden);
-      const jung = verlauf.filter((p2) => p2.bis >= grenze).map((p2) => p2.von < erste ? zuschneiden(p2) : p2);
+      const alt = verlauf2.filter((p2) => p2.bis < grenze && p2.bis >= erste).map(zuschneiden);
+      const jung = verlauf2.filter((p2) => p2.bis >= grenze).map((p2) => p2.von < erste ? zuschneiden(p2) : p2);
       const bloecke = /* @__PURE__ */ new Map();
       for (const p2 of alt) {
         const block = Math.floor(p2.von / 4);
@@ -5933,12 +6021,12 @@
   }
   function qualitaet2(s2) {
     const org2 = s2;
-    const st = org2.organisation?.bereiche?.personaleinsatz;
-    if (!st) return 0.7;
+    const st2 = org2.organisation?.bereiche?.personaleinsatz;
+    if (!st2) return 0.7;
     const hqWirkung = s2.hq.wirkung?.personal ?? 1;
     const chro = s2.vorstand?.ressorts?.chro?.person;
     const fuehrung = chro ? clamp(1 + (chro.fuehrung / 100 - 0.5) * 0.3, 0.85, 1.15) : 1;
-    return clamp((st.person?.qualitaet ?? 0.35) * hqWirkung * fuehrung, 0, 1);
+    return clamp((st2.person?.qualitaet ?? 0.35) * hqWirkung * fuehrung, 0, 1);
   }
   function clusterQualitaet(s2, id) {
     const org2 = s2;
@@ -5974,37 +6062,37 @@
     };
   }
   function dienstplan(s2, h, anlieferung, reduzierung) {
-    const st = h.personaleinsatz;
+    const st2 = h.personaleinsatz;
     const aus = ausfall(s2), q2 = qualitaet2(s2);
-    const neu = st.einarbeitungBis > s2.woche;
-    const relativ = fte(h) > 0 ? (fte(h) - (neu ? 0.5 * st.einarbeitungFte : 0)) / fte(h) : 1;
+    const neu = st2.einarbeitungBis > s2.woche;
+    const relativ = fte(h) > 0 ? (fte(h) - (neu ? 0.5 * st2.einarbeitungFte : 0)) / fte(h) : 1;
     const dezember = s2.woche % 52 >= 47 && s2.woche % 52 <= 51;
     const jahr2 = Math.floor(s2.woche / 52);
     const weihnachten = s2.personaleinsatz?.weihnachten[jahr2] ?? "basis";
     const saison2 = clamp(0.75 + 0.25 * saisonFaktor("damen", s2.woche), 0.7, 1.35);
-    const letzterUmsatz = h.kpi?.umsatz ?? st.basisUmsatz;
-    const umsatzFaktor = clamp(letzterUmsatz / Math.max(1, st.basisUmsatz), 0.65, 1.6);
+    const letzterUmsatz = h.kpi?.umsatz ?? st2.basisUmsatz;
+    const umsatzFaktor = clamp(letzterUmsatz / Math.max(1, st2.basisUmsatz), 0.65, 1.6);
     const messung2 = h.treiberVerlauf?.slice(-1)[0];
-    if (!st.basisFrequenz && messung2?.frequenz) st.basisFrequenz = messung2.frequenz;
-    const frequenzFaktor = st.basisFrequenz && messung2 ? clamp(messung2.frequenz / st.basisFrequenz, 0.65, 1.6) : umsatzFaktor;
+    if (!st2.basisFrequenz && messung2?.frequenz) st2.basisFrequenz = messung2.frequenz;
+    const frequenzFaktor = st2.basisFrequenz && messung2 ? clamp(messung2.frequenz / st2.basisFrequenz, 0.65, 1.6) : umsatzFaktor;
     const logistikFaktor = clamp(1 + (anlieferung - 1) * 0.1 + h.flaechen.filter((f) => f.konzept === "offprice").length * 0.03 + (reduzierung ? 0.08 : 0), 0.75, 1.4);
     const gruppen = {};
     let extra = 0;
     for (const g of PERSONAL_GRUPPEN) {
       const p2 = profil(s2, g);
       const last = g === "kasse" ? frequenzFaktor : g === "verkauf" ? 0.6 * frequenzFaktor + 0.4 * umsatzFaktor : g === "logistik" ? logistikFaktor : 1;
-      const basis3 = st.basisFte * 40 * PERSONAL_ANTEILE[g] * saison2 * last;
+      const basis3 = st2.basisFte * 40 * PERSONAL_ANTEILE[g] * saison2 * last;
       const tage = p2.map((anteil3, i) => {
         const bedarf2 = basis3 * anteil3 / (1 - aus.krank - aus.urlaub);
         const richtung2 = Math.sin((h.id.length * 13 + h.id.charCodeAt(1) * 7 + i * 11 + s2.woche % 52) * 0.41);
         const fehler6 = richtung2 * 0.19;
-        const bezug = 1 + fehler6 * (1 - st.basisQualitaet);
+        const bezug = 1 + fehler6 * (1 - st2.basisQualitaet);
         const genau = 1 + fehler6 * (1 - q2);
-        let plan4 = bedarf2 * relativ * st.faktor[g] * genau * (1 + st.training * 0.035);
-        if (g === "kasse" && i === 5) plan4 *= st.samstagKasse;
+        let plan4 = bedarf2 * relativ * st2.faktor[g] * genau * (1 + st2.training * 0.035);
+        if (g === "kasse" && i === 5) plan4 *= st2.samstagKasse;
         if (g === "kasse" && dezember && weihnachten === "sparsam") plan4 *= 0.88;
         const referenz = bedarf2 * bezug;
-        extra += Math.max(0, (st.faktor[g] - 1) * bedarf2) + (g === "kasse" && i === 5 ? Math.max(0, st.samstagKasse - 1) * bedarf2 : 0);
+        extra += Math.max(0, (st2.faktor[g] - 1) * bedarf2) + (g === "kasse" && i === 5 ? Math.max(0, st2.samstagKasse - 1) * bedarf2 : 0);
         return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf2), plan: rund(plan4), referenz: rund(referenz), springer: 0, deckung: bedarf2 ? plan4 / bedarf2 : 1 };
       });
       const bedarf = tage.reduce((a, t) => a + t.bedarf, 0);
@@ -6019,7 +6107,7 @@
         deckung: bedarf ? plan3 / bedarf : 1
       };
     }
-    const ahQuote = st.aushilfenQuote;
+    const ahQuote = st2.aushilfenQuote;
     const gesamt = Object.values(gruppen).reduce((a, g) => a + g.bedarf, 0);
     const weihnachtsReserve = dezember && weihnachten === "reserve" ? gesamt * 0.02 : 0;
     const gebuchteAushilfenStunden = gesamt * ahQuote;
@@ -6034,7 +6122,7 @@
       z2.tage[5].plan += rund(aushilfenStunden * anteil3 * 0.65);
       z2.plan = rund(z2.tage.reduce((a, t) => a + t.plan, 0));
     }
-    const basisStunden = Math.max(1, st.basisFte * 40);
+    const basisStunden = Math.max(1, st2.basisFte * 40);
     const normalLohn = (h.personal.vollzeit * 860 + h.personal.teilzeit * 690 + h.personal.aushilfen * 490) / basisStunden;
     const aufschlag = dezember && weihnachten === "spaet" ? 1.55 : 1;
     const zusatzkosten = eur(gebuchteAushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 + weihnachtsReserve * 490 / 40);
@@ -6183,15 +6271,15 @@
       });
     }
     for (const h of s2.haeuser) {
-      const st = h.personaleinsatz;
-      if (!aktiv2(h) || !st || s2.prognose) continue;
-      const ratio = st.basisFte ? fte(h) / st.basisFte : 1;
-      if (ratio < 0.75) st.stimmung = clamp(st.stimmung - 0.35, 0, 100);
-      else if (ratio > 0.98) st.stimmung = clamp(st.stimmung + 0.08, 0, 100);
-      if (st.stimmung < 32 && (s2.woche + h.id.length * 7) % 17 === 0) {
+      const st2 = h.personaleinsatz;
+      if (!aktiv2(h) || !st2 || s2.prognose) continue;
+      const ratio = st2.basisFte ? fte(h) / st2.basisFte : 1;
+      if (ratio < 0.75) st2.stimmung = clamp(st2.stimmung - 0.35, 0, 100);
+      else if (ratio > 0.98) st2.stimmung = clamp(st2.stimmung + 0.08, 0, 100);
+      if (st2.stimmung < 32 && (s2.woche + h.id.length * 7) % 17 === 0) {
         h.personal.teilzeit = Math.max(0, h.personal.teilzeit * 0.98);
-        st.einarbeitungBis = s2.woche + 4;
-        st.einarbeitungFte = Math.max(st.einarbeitungFte, fte(h) * 0.02);
+        st2.einarbeitungBis = s2.woche + 4;
+        st2.einarbeitungFte = Math.max(st2.einarbeitungFte, fte(h) * 0.02);
         melde(s2, "warnung", h.name + ": erh\xF6hte Fluktuation. Neue Kr\xE4fte sind vier Wochen nur halb produktiv.", { hausId: h.id, modul: "personal" });
       }
     }
@@ -6302,10 +6390,10 @@
     if (!Number.isFinite(wert) || wert < min || wert > max)
       return { ok: false, text: "Wert au\xDFerhalb des zul\xE4ssigen Bereichs." };
     for (const h of hs) {
-      const st = h.personaleinsatz;
-      if (a.typ === "personalSteuern") st.faktor[a.gruppe] = wert;
-      else if (a.typ === "personalSamstagKasse") st.samstagKasse = wert;
-      else st.aushilfenQuote = wert;
+      const st2 = h.personaleinsatz;
+      if (a.typ === "personalSteuern") st2.faktor[a.gruppe] = wert;
+      else if (a.typ === "personalSamstagKasse") st2.samstagKasse = wert;
+      else st2.aushilfenQuote = wert;
     }
     neuPlanen(s2);
     return { ok: true, text: "Personaleinsatz in " + hs.length + " H\xE4usern angepasst." };
@@ -7695,8 +7783,8 @@
     "chro.personalplanung": (s2, g, h) => {
       if (s2.woche % 26 !== 8) return;
       for (const a of s2.hq.abteilungen) {
-        const st = trifft2(h, g) ? Math.max(1, a.stufe) : waehle(h, [0, 1, 2]);
-        fuehreAus(s2, { typ: "abteilungStufe", abteilung: a.id, stufe: st });
+        const st2 = trifft2(h, g) ? Math.max(1, a.stufe) : waehle(h, [0, 1, 2]);
+        fuehreAus(s2, { typ: "abteilungStufe", abteilung: a.id, stufe: st2 });
       }
       protokolliere(s2, "chro", "Abteilungen der Zentrale auf Soll gebracht.");
     },
@@ -8191,12 +8279,12 @@
     }
   }
   function hqStaedte(s2) {
-    const st = /* @__PURE__ */ new Set();
+    const st2 = /* @__PURE__ */ new Set();
     for (const a of s2.hq.abteilungen) {
       const g = gebaeude(s2, a.gebaeudeId);
-      if (g && platzQm(s2, a) > 0) st.add(g.stadt);
+      if (g && platzQm(s2, a) > 0) st2.add(g.stadt);
     }
-    return [...st].sort();
+    return [...st2].sort();
   }
   function besetzungsStufe(s2, a) {
     const w = s2.woche;
@@ -8224,8 +8312,8 @@
     const platz = platzQm(s2, a);
     if (platz <= 0) return 0;
     const w = s2.woche;
-    const st = standort(s2, abteilungsStadt(s2, a));
-    L2 *= st.wirkungsFaktor * (a.id === "marketing" || a.id === "ecommerce" ? st.marketingEcommerceFaktor : 1);
+    const st2 = standort(s2, abteilungsStadt(s2, a));
+    L2 *= st2.wirkungsFaktor * (a.id === "marketing" || a.id === "ecommerce" ? st2.marketingEcommerceFaktor : 1);
     const bedarf = qmBedarf(a);
     if (bedarf > 0 && platz < bedarf) L2 *= platz / bedarf;
     if (a.umzugBis !== void 0 && a.umzugBis > w) L2 *= 0.5;
@@ -8243,13 +8331,13 @@
     const cache2 = /* @__PURE__ */ new Map();
     for (const a of hq.abteilungen) {
       const stadt = abteilungsStadt(s2, a);
-      let st = cache2.get(stadt);
-      if (!st) {
-        st = standort(s2, stadt);
-        cache2.set(stadt, st);
+      let st2 = cache2.get(stadt);
+      if (!st2) {
+        st2 = standort(s2, stadt);
+        cache2.set(stadt, st2);
       }
-      personal += a.fte * HQ_PARAM.lohn[a.id] * st.lohnFaktor;
-      reise2 += a.fte * st.reiseJeFte;
+      personal += a.fte * HQ_PARAM.lohn[a.id] * st2.lohnFaktor;
+      reise2 += a.fte * st2.reiseJeFte;
       fte2 += a.fte;
     }
     const sach = fte2 * hq.sachJeFte;
@@ -8421,8 +8509,8 @@
     const gewaehlt = [];
     if (staedte.has(hq.sitz) && zwischen(r, 0, 1) < 0.5) gewaehlt.push(hq.sitz);
     for (let i = 0; gewaehlt.length < anzahl && i < 20; i++) {
-      const st = waehle(r, liste);
-      if (!gewaehlt.includes(st)) gewaehlt.push(st);
+      const st2 = waehle(r, liste);
+      if (!gewaehlt.includes(st2)) gewaehlt.push(st2);
     }
     const typen = Object.keys(HQ_TYPEN);
     const immo = 1 + kurve(hq.wirkung.immobilien, HQ_WIRKUNG.immobilienBuero);
@@ -8601,9 +8689,9 @@
   }
   function abteilungStufe(s2, id, stufe2) {
     if (!ABTEILUNGEN.includes(id)) return fehler5("Unbekannte Abteilung.");
-    const st = clamp(Math.round(stufe2), 0, 3);
+    const st2 = clamp(Math.round(stufe2), 0, 3);
     const a = abteilung(s2, id);
-    const ziel = Math.round(sollFte(s2, id, st));
+    const ziel = Math.round(sollFte(s2, id, st2));
     const name2 = ABTEILUNG_NAME[id];
     const alteStufe = a.stufe;
     if (ziel < a.fte) {
@@ -8612,12 +8700,12 @@
       const abf = weg * abfindungJeFte(s2);
       einmal(s2, abf);
       a.fte = ziel;
-      a.stufe = st;
+      a.stufe = st2;
       if (a.neuFte !== void 0) a.neuFte = Math.min(a.neuFte, a.fte);
       schrumpfe(a, qmBedarf(a));
       s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - weg / Math.max(1, gesamt) * 30, 0, 100);
       hqAktualisiere(s2);
-      return ok5(`${name2} auf Stufe ${st}: ${weg} FTE abgebaut, Abfindungen ${mio(abf)}. Neue Kosten ${mio(a.fte * (HQ_PARAM.lohn[id] + s2.hq.sachJeFte) * 52)} im Jahr.`);
+      return ok5(`${name2} auf Stufe ${st2}: ${weg} FTE abgebaut, Abfindungen ${mio(abf)}. Neue Kosten ${mio(a.fte * (HQ_PARAM.lohn[id] + s2.hq.sachJeFte) * 52)} im Jahr.`);
     }
     if (ziel > a.fte) {
       const neu = ziel - a.fte;
@@ -8632,15 +8720,15 @@
       einmal(s2, kosten);
       if (zusatz.length) a.belegung = vereinige(a.belegung ?? [], zusatz);
       a.fte = ziel;
-      a.stufe = st;
+      a.stufe = st2;
       a.neuFte = (a.einarbeitungBis !== void 0 && a.einarbeitungBis > s2.woche ? a.neuFte ?? 0 : 0) + neu;
       a.einarbeitungBis = s2.woche + HQ_PARAM.einarbeitungWochen;
       hqAktualisiere(s2);
-      return ok5(`${name2} auf Stufe ${st}: ${neu} FTE eingestellt, Recruiting ${mio(kosten)}. Volle Wirkung nach ${HQ_PARAM.einarbeitungWochen} Wochen Einarbeitung.`);
+      return ok5(`${name2} auf Stufe ${st2}: ${neu} FTE eingestellt, Recruiting ${mio(kosten)}. Volle Wirkung nach ${HQ_PARAM.einarbeitungWochen} Wochen Einarbeitung.`);
     }
-    a.stufe = st;
+    a.stufe = st2;
     hqAktualisiere(s2);
-    return ok5(alteStufe === st ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st}.`);
+    return ok5(alteStufe === st2 ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st2}.`);
   }
   function zentraleKuerzen(s2, prozent2) {
     const p2 = clamp(prozent2, 0, 0.3);
@@ -8698,8 +8786,8 @@
       case "produkt":
         return Lx < 0.95 ? "Wenig Kapazit\xE4t und schw\xE4chere Produkte bei den Eigenmarken" : Lx > 1.5 ? "Mehr Sortimentspl\xE4tze und bessere Produkte bei den Eigenmarken" : "Marktstandard, Ausbau bringt mehr Sortimentspl\xE4tze und bessere Produkte";
       case "verwaltung": {
-        const st = Math.max(0, 1 - Lx);
-        return st > 5e-3 ? `Unter Mindeststufe: Strafen und S\xE4umnisse ${mio(st * HQ_PARAM.verwaltungStrafe * s2.zentrale.kostenStart * 52)} im Jahr, Bankvertrauen sinkt` : "Pflichtaufgaben erf\xFCllt (Buchhaltung, Zahlungsverkehr, Meldungen)";
+        const st2 = Math.max(0, 1 - Lx);
+        return st2 > 5e-3 ? `Unter Mindeststufe: Strafen und S\xE4umnisse ${mio(st2 * HQ_PARAM.verwaltungStrafe * s2.zentrale.kostenStart * 52)} im Jahr, Bankvertrauen sinkt` : "Pflichtaufgaben erf\xFCllt (Buchhaltung, Zahlungsverkehr, Meldungen)";
       }
     }
   }
@@ -9018,8 +9106,8 @@
   }
   var imSortiment = (p2) => p2.status === "sortiment";
   function gewicht(s2, p2) {
-    const st = sterneWirksam(s2, p2);
-    return (PRODUKT_PARAM.gewichtBasis + PRODUKT_PARAM.gewichtJeStern * st) * Math.pow(p2.normpreis / Math.max(0.5, p2.preis), PRODUKT_PARAM.preisElastizitaet);
+    const st2 = sterneWirksam(s2, p2);
+    return (PRODUKT_PARAM.gewichtBasis + PRODUKT_PARAM.gewichtJeStern * st2) * Math.pow(p2.normpreis / Math.max(0.5, p2.preis), PRODUKT_PARAM.preisElastizitaet);
   }
   function rohFaktor(s2, markeId, wg) {
     let sum2 = 0;
@@ -9054,8 +9142,8 @@
     return clamp(rohMarge(s2, markeId, wg) - (pr2.basisM[`${markeId}|${wg}`] ?? 0), -0.25, 0.25);
   }
   function margeErwartet(s2, m, wg) {
-    const st = s2.einkauf?.wgs[wg];
-    return (st?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
+    const st2 = s2.einkauf?.wgs[wg];
+    return (st2?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
   }
   function ekStueck(normp, me, material2, qualitaet3) {
     const mat2 = MATERIALIEN[material2];
@@ -9239,8 +9327,8 @@
     }
     for (const [k, liste] of jeKey) {
       const [m, wg] = k.split("|");
-      const st = s2.einkauf.wgs[wg];
-      const u = st?.v?.u?.length ? st.v.u[st.v.u.length - 1] * (st.pool[m] ?? 0) : 0;
+      const st2 = s2.einkauf.wgs[wg];
+      const u = st2?.v?.u?.length ? st2.v.u[st2.v.u.length - 1] * (st2.pool[m] ?? 0) : 0;
       const gw = liste.map((p2) => gewicht(s2, p2));
       const sum2 = gw.reduce((a, b2) => a + b2, 0) || 1;
       liste.forEach((p2, i) => {
@@ -9460,7 +9548,7 @@
     if (!c.m || !c.t || !c.wg) return leer3;
     const team = teamStaerke(s2);
     const teile2 = bewerte(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
-    const st = sterneAus(scoreAus(teile2));
+    const st2 = sterneAus(scoreAus(teile2));
     const cpo = s2.vorstand?.ressorts.cpo.person;
     const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
     const np = normpreis(c.t, c.preislage, e.material, c.qualitaet);
@@ -9485,9 +9573,9 @@
       kosten: eur(e.budgetWoche * e.dauer),
       fertigWoche: fertig,
       saisonEinfuehrung: saisonName(s2, sid),
-      sterneErwartet: st,
-      sterneVon: halbe(st - spanne / 2),
-      sterneBis: halbe(st + spanne / 2),
+      sterneErwartet: st2,
+      sterneVon: halbe(st2 - spanne / 2),
+      sterneBis: halbe(st2 + spanne / 2),
       teile: teile2,
       trendBekannt: bekannt,
       kapazitaetFrei: c.kapFrei,
@@ -9749,12 +9837,12 @@
   function markenInWg(s2, wg) {
     return s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && ((m.wgAnteile[wg] ?? 0) > 0 || (m.wgIst[wg] ?? 0) > 0));
   }
-  function poolAnteilPlan(s2, st, pool) {
-    const marken2 = markenInWg(s2, st.id);
+  function poolAnteilPlan(s2, st2, pool) {
+    const marken2 = markenInWg(s2, st2.id);
     const anteil3 = (m) => {
-      const ist = st.pool[m.id] ?? 0;
-      const eIst = m.wgIst[st.id] ?? 0;
-      const eZiel = istVerkaufsaktiv(m) || m.status === "aufbau" ? m.wgAnteile[st.id] ?? 0 : 0;
+      const ist = st2.pool[m.id] ?? 0;
+      const eIst = m.wgIst[st2.id] ?? 0;
+      const eZiel = istVerkaufsaktiv(m) || m.status === "aufbau" ? m.wgAnteile[st2.id] ?? 0 : 0;
       if (eIst > 1e-3) return ist * (eZiel / eIst);
       return eZiel * 0.9;
     };
@@ -9764,21 +9852,21 @@
     }
     return Math.max(0, 1 - marken2.reduce((a, m) => a + anteil3(m), 0));
   }
-  var artAnteil = (st, art) => art === "nos" ? st.nosAnteil : 1 - st.nosAnteil;
+  var artAnteil = (st2, art) => art === "nos" ? st2.nosAnteil : 1 - st2.nosAnteil;
   var brutto = (art) => art === "nos" ? 1 / EK_PARAM.verfRef : 1 / EK_PARAM.saisonRef;
-  function prognoseEk(s2, st, art, pool, t) {
-    const d = WG[st.id];
-    return st.basisVK * wgSaison(d, t) * poolAnteilPlan(s2, st, pool) * artAnteil(st, art) * brutto(art) * (1 - margeVon(s2, st, art, pool)) * (1 + st.fehler);
+  function prognoseEk(s2, st2, art, pool, t) {
+    const d = WG[st2.id];
+    return st2.basisVK * wgSaison(d, t) * poolAnteilPlan(s2, st2, pool) * artAnteil(st2, art) * brutto(art) * (1 - margeVon(s2, st2, art, pool)) * (1 + st2.fehler);
   }
-  function prognoseEkMittel(s2, st, art, pool) {
-    return st.basisVK * poolAnteilPlan(s2, st, pool) * artAnteil(st, art) * brutto(art) * (1 - margeVon(s2, st, art, pool));
+  function prognoseEkMittel(s2, st2, art, pool) {
+    return st2.basisVK * poolAnteilPlan(s2, st2, pool) * artAnteil(st2, art) * brutto(art) * (1 - margeVon(s2, st2, art, pool));
   }
-  var bezugsBedarf = (s2, st, art, pool, t) => 0.5 * (prognoseEk(s2, st, art, pool, t) / (1 + st.fehler) + prognoseEkMittel(s2, st, art, pool));
-  function prognoseVk(s2, st, art, pool, t) {
-    return prognoseEk(s2, st, art, pool, t) / Math.max(0.05, 1 - margeVon(s2, st, art, pool));
+  var bezugsBedarf = (s2, st2, art, pool, t) => 0.5 * (prognoseEk(s2, st2, art, pool, t) / (1 + st2.fehler) + prognoseEkMittel(s2, st2, art, pool));
+  function prognoseVk(s2, st2, art, pool, t) {
+    return prognoseEk(s2, st2, art, pool, t) / Math.max(0.05, 1 - margeVon(s2, st2, art, pool));
   }
-  function nosAttraktivitaet(d, st) {
-    const x = st.nosAnteil - d.nosAnteil;
+  function nosAttraktivitaet(d, st2) {
+    const x = st2.nosAnteil - d.nosAnteil;
     return 1 - 0.3 * Math.pow(Math.max(0, x), 1.3) - 0.2 * Math.pow(Math.max(0, -x), 1.3);
   }
   function erzeugeEinkauf(s2) {
@@ -9833,18 +9921,18 @@
       const ps = poolSum[d.id] ?? { [FREMD]: 1 };
       const X = g > 0 ? Object.values(ps).reduce((a, b2) => a + b2, 0) / g : 1;
       x[d.id] = X;
-      const st = e.wgs[d.id];
-      st.norm = X;
+      const st2 = e.wgs[d.id];
+      st2.norm = X;
       const sum2 = Object.values(ps).reduce((a, b2) => a + b2, 0) || 1;
-      st.pool = Object.fromEntries(Object.entries(ps).map(([k, v]) => [k, v / sum2]));
+      st2.pool = Object.fromEntries(Object.entries(ps).map(([k, v]) => [k, v / sum2]));
     }
     for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
       let m = 0;
       for (const d of liste) {
-        const st = e.wgs[d.id];
-        const n = st.nosAnteil;
+        const st2 = e.wgs[d.id];
+        const n = st2.nosAnteil;
         let mm = n * d.margeNos + (1 - n) * d.margeSaison;
-        for (const [pool, a] of Object.entries(st.pool)) if (pool !== FREMD) {
+        for (const [pool, a] of Object.entries(st2.pool)) if (pool !== FREMD) {
           const mk2 = s2.eigenmarken.marken.find((y) => y.id === pool);
           if (mk2) mm += a * mehrmarge(mk2);
         }
@@ -9871,13 +9959,13 @@
     const aktS = saisonId(0);
     const naechste = aktS + 1;
     for (const d of WG_DEF) {
-      const st = e.wgs[d.id];
-      st.basisVK = (s2.basisUmsatz[d.bereich] ?? 0) * d.anteil;
-      if (st.basisVK <= 0) continue;
+      const st2 = e.wgs[d.id];
+      st2.basisVK = (s2.basisUmsatz[d.bereich] ?? 0) * d.anteil;
+      if (st2.basisVK <= 0) continue;
       const ref = s2.basisUmsatz[d.bereich] ?? 0;
       for (const art of ["nos", "saison"]) {
-        for (const pool of Object.keys(st.pool)) {
-          const wochenEk = ref * d.anteil * st.pool[pool] * artAnteil(st, art) * (1 - margeVon(s2, st, art, pool));
+        for (const pool of Object.keys(st2.pool)) {
+          const wochenEk = ref * d.anteil * st2.pool[pool] * artAnteil(st2, art) * (1 - margeVon(s2, st2, art, pool));
           const rw = art === "nos" ? 11 : EK_PARAM.praesentation + 1;
           let vorne = 0;
           for (let t = 0; t < rw; t++) vorne += wochenEk * wgSaison(d, t);
@@ -9894,20 +9982,20 @@
             kostenFaktor: 1
           }));
           if (art === "saison") verteilung.forEach((v, i) => {
-            saisonTally(st, saisonVon(-alter[i])).eingang += gesamt * v;
+            saisonTally(st2, saisonVon(-alter[i])).eingang += gesamt * v;
           });
           if (art === "nos") {
             const L2 = vorlaufPool(s2, d, art, "nos", pool);
-            for (let t = 0; t < L2; t++) bestellungen.push({ id: `b0-${d.id}-${pool}-n${t}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(prognoseEk(s2, st, art, pool, t)), ankunft: t, vorkasse: false });
+            for (let t = 0; t < L2; t++) bestellungen.push({ id: `b0-${d.id}-${pool}-n${t}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(prognoseEk(s2, st2, art, pool, t)), ankunft: t, vorkasse: false });
           } else {
             const P2 = vororderWoche(s2, d, pool, naechste);
             if (P2 < 0) {
-              const f = vororderVorschlag(s2, d, st, pool, naechste);
+              const f = vororderVorschlag(s2, d, st2, pool, naechste);
               for (const l of f) if (l.woche >= 0 && l.wert > 0) bestellungen.push({ id: `b0-${d.id}-${pool}-v${l.woche}`, gruppe: d.bereich, wg: d.id, art, marke: pool === FREMD ? void 0 : pool, wert: eur(l.wert), ankunft: l.woche, vorkasse: false, saisonId: naechste });
-              st.vororder[pool] = naechste;
-              limitFuer(s2, st, naechste).verbraucht += f.reduce((a, l) => a + l.wert, 0);
+              st2.vororder[pool] = naechste;
+              limitFuer(s2, st2, naechste).verbraucht += f.reduce((a, l) => a + l.wert, 0);
             }
-            st.vororder[pool] = Math.max(st.vororder[pool] ?? aktS, aktS);
+            st2.vororder[pool] = Math.max(st2.vororder[pool] ?? aktS, aktS);
           }
         }
       }
@@ -9915,30 +10003,30 @@
     s2.bestand = bestand;
     s2.bestellungen = bestellungen;
   }
-  function limitFuer(s2, st, sid) {
+  function limitFuer(s2, st2, sid) {
     const key = String(sid);
-    let l = st.limits[key];
+    let l = st2.limits[key];
     if (!l) {
-      l = st.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
-      for (const k of Object.keys(st.limits)) if (Number(k) < sid - 2) delete st.limits[k];
+      l = st2.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
+      for (const k of Object.keys(st2.limits)) if (Number(k) < sid - 2) delete st2.limits[k];
     }
     if (l.stand !== s2.woche) {
       let plan2 = 0;
       const a = saisonStart(sid);
-      const pools = poolsDerWg(s2, st);
-      for (let t = a; t < a + 26; t++) for (const art of ["nos", "saison"]) for (const pool of pools) plan2 += prognoseEk(s2, st, art, pool, t) / (1 + st.fehler);
+      const pools = poolsDerWg(s2, st2);
+      for (let t = a; t < a + 26; t++) for (const art of ["nos", "saison"]) for (const pool of pools) plan2 += prognoseEk(s2, st2, art, pool, t) / (1 + st2.fehler);
       l.plan = eur(plan2);
       l.stand = s2.woche;
     }
     return l;
   }
-  var limitWert = (st, l) => eur(st.st.limitEuro ?? l.plan * st.st.limitFaktor);
-  function poolsDerWg(s2, st) {
-    return [FREMD, ...markenInWg(s2, st.id).map((m) => m.id)];
+  var limitWert = (st2, l) => eur(st2.st.limitEuro ?? l.plan * st2.st.limitFaktor);
+  function poolsDerWg(s2, st2) {
+    return [FREMD, ...markenInWg(s2, st2.id).map((m) => m.id)];
   }
-  function offenImLimit(s2, st, sid) {
+  function offenImLimit(s2, st2, sid) {
     let x = 0;
-    for (const f of s2.einkauf.freigaben) if (f.wg === st.id) {
+    for (const f of s2.einkauf.freigaben) if (f.wg === st2.id) {
       for (const l of f.lieferungen) if (saisonId(l.woche) === sid) x += l.wert;
     }
     return x;
@@ -9963,10 +10051,10 @@
         const teile2 = tilt ? [] : void 0;
         let F0 = 0;
         for (const d of liste) {
-          const st = s2.einkauf.wgs[d.id];
+          const st2 = s2.einkauf.wgs[d.id];
           const tl = tilt?.[d.id] ?? 1;
           const om = omega(d.id, w) * tl;
-          const nAttr = nosAttraktivitaet(d, st);
+          const nAttr = nosAttraktivitaet(d, st2);
           let rest = 1;
           const ziel = vk[_a2 = d.id] ?? (vk[_a2] = {});
           for (const x of markenJeWg[d.id]) {
@@ -9976,14 +10064,14 @@
               A = attraktivitaet(s2, x.m, h);
               attrCache.set(key, A);
             }
-            const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr / st.norm;
+            const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr / st2.norm;
             if (teile2) teile2.push([ziel, x.m.id, t2]);
             else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t2;
             F2 += t2;
             F0 += t2 / tl;
             rest -= x.e;
           }
-          const t = v.brutto * om * Math.max(0, rest) * nAttr / st.norm;
+          const t = v.brutto * om * Math.max(0, rest) * nAttr / st2.norm;
           if (teile2) teile2.push([ziel, FREMD, t]);
           else ziel[FREMD] = (ziel[FREMD] ?? 0) + t;
           F2 += t;
@@ -10003,15 +10091,15 @@
     const L2 = einkaufStufe(s2);
     const sd = interpol(EK_PARAM.prognoseSd, L2);
     for (const d of aktiveWg(s2)) {
-      const st = s2.einkauf.wgs[d.id];
+      const st2 = s2.einkauf.wgs[d.id];
       const p2 = vk[d.id] ?? {};
       const D = Object.values(p2).reduce((a, b2) => a + b2, 0);
       const S = Math.max(0.05, wgSaison(d, w));
-      st.basisVK = 0.85 * st.basisVK + 0.15 * (D / S);
-      if (D > 0) st.pool = Object.fromEntries(Object.entries(p2).map(([k, x]) => [k, x / D]));
-      if (!s2.prognose) st.fehler = clamp(0.9 * st.fehler + sd * Math.sqrt(0.19) * normal(rngHalter(s2)), -0.4, 0.4);
-      const z2 = st.st.nosZiel;
-      st.nosAnteil = st.nosAnteil < z2 ? Math.min(z2, st.nosAnteil + EK_PARAM.nosTempo) : Math.max(z2, st.nosAnteil - EK_PARAM.nosTempo);
+      st2.basisVK = 0.85 * st2.basisVK + 0.15 * (D / S);
+      if (D > 0) st2.pool = Object.fromEntries(Object.entries(p2).map(([k, x]) => [k, x / D]));
+      if (!s2.prognose) st2.fehler = clamp(0.9 * st2.fehler + sd * Math.sqrt(0.19) * normal(rngHalter(s2)), -0.4, 0.4);
+      const z2 = st2.st.nosZiel;
+      st2.nosAnteil = st2.nosAnteil < z2 ? Math.min(z2, st2.nosAnteil + EK_PARAM.nosTempo) : Math.max(z2, st2.nosAnteil - EK_PARAM.nosTempo);
     }
     return { vk, bruttoBereich };
   }
@@ -10039,16 +10127,16 @@
     k.art = k.saisonAnteil >= 0.5 || !d ? "saison" : "saison";
   }
   var istAlt = (k) => !!k.ladenhueter || (k.art === "nos" ? k.alter > EK_PARAM.altNos : k.alter > EK_PARAM.altSaison);
-  function saisonTally(st, sid) {
+  function saisonTally(st2, sid) {
     const key = String(sid);
-    let x = st.saisons[key];
+    let x = st2.saisons[key];
     if (!x) {
-      x = st.saisons[key] = { eingang: 0, abverkauf: 0 };
-      for (const k of Object.keys(st.saisons)) if (Number(k) < sid - 1) delete st.saisons[k];
+      x = st2.saisons[key] = { eingang: 0, abverkauf: 0 };
+      for (const k of Object.keys(st2.saisons)) if (Number(k) < sid - 1) delete st2.saisons[k];
     }
     return x;
   }
-  function nimm(topf, menge2, altMax, saisonAkt, st) {
+  function nimm(topf, menge2, altMax, saisonAkt, st2) {
     let voll2 = 0;
     let gebucht = 0;
     let altG = 0;
@@ -10068,7 +10156,7 @@
       k.wert -= x;
       voll2 += x;
       gebucht += x * k.kostenFaktor;
-      if (st && k.art === "saison" && k.saisonId !== void 0 && k.saisonId >= saisonAkt) saisonTally(st, k.saisonId).abverkauf += x;
+      if (st2 && k.art === "saison" && k.saisonId !== void 0 && k.saisonId >= saisonAkt) saisonTally(st2, k.saisonId).abverkauf += x;
     }
     return { voll: voll2, gebucht, alt: altG };
   }
@@ -10093,31 +10181,31 @@
     const sAkt = saisonId(w);
     WOCHE = {};
     for (const d of aktiveWg(s2)) {
-      const st = s2.einkauf.wgs[d.id];
+      const st2 = s2.einkauf.wgs[d.id];
       const p2 = n.vk[d.id] ?? {};
       const r = { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
-      const red = EK_PARAM.abschrift[st.st.reduzierung];
+      const red = EK_PARAM.abschrift[st2.st.reduzierung];
       const capM = Math.min(1, red.cap * marketingAltwareFaktor(s2, d.bereich, d.id));
-      const sg = EK_PARAM.servicegrad[st.st.servicegrad];
+      const sg = EK_PARAM.servicegrad[st2.st.servicegrad];
       for (const art of ["nos", "saison"]) {
         const pools = Object.keys(p2).sort((a, b2) => a === FREMD ? 1 : b2 === FREMD ? -1 : a.localeCompare(b2));
         let ausweichVk = 0;
         for (const pool of pools) {
-          const m = margeVon(s2, st, art, pool);
-          const vkBedarf = (p2[pool] ?? 0) * artAnteil(st, art) * brutto(art) * (art === "saison" ? red.nachfrage : 1);
+          const m = margeVon(s2, st2, art, pool);
+          const vkBedarf = (p2[pool] ?? 0) * artAnteil(st2, art) * brutto(art) * (art === "saison" ? red.nachfrage : 1);
           const ekBedarf = vkBedarf * (1 - m);
           const topf = toepfeMap.get(`${d.id}|${art}|${pool}`);
           const v = verfuegbar(topf);
           let quote;
           if (art === "nos") {
-            const bedarfW = Math.max(1, bezugsBedarf(s2, st, art, pool, w));
+            const bedarfW = Math.max(1, bezugsBedarf(s2, st2, art, pool, w));
             const x2 = (v.frisch + v.alt) / (bedarfW * sg.cover);
             const g = x2 >= 1 ? 1 : (1 - Math.exp(-3 * x2)) / (1 - Math.exp(-3));
             const rausch = s2.prognose ? 0 : zwischen(rngHalter(s2), -0.01, 0.01);
             quote = clamp((sg.basis + bonus + rausch) * g, 0, 1);
           } else {
             const nutzbar = v.frisch + Math.min(v.alt, ekBedarf * capM);
-            const rw = nutzbar / Math.max(1, bezugsBedarf(s2, st, art, pool, w));
+            const rw = nutzbar / Math.max(1, bezugsBedarf(s2, st2, art, pool, w));
             quote = Math.min(1, Math.sqrt(clamp(rw / EK_PARAM.praesentation, 0, 1)));
           }
           let ziel = ekBedarf * quote;
@@ -10132,7 +10220,7 @@
             ziel,
             ekBedarf * (art === "saison" ? capM : 1),
             d.bereich,
-            (ks, wert, alt) => nimm(ks, wert, alt, sAkt, st)
+            (ks, wert, alt) => nimm(ks, wert, alt, sAkt, st2)
           );
           if (art === "saison" && x.alt > 0) marketingAltVerkauf(s2, d.bereich, x.alt, d.id);
           const vkR = x.voll / Math.max(0.05, 1 - m);
@@ -10171,8 +10259,8 @@
       if (k.ladenhueter) q2 = 0.06;
       else if (k.art === "nos") q2 = k.alter > EK_PARAM.altNos ? 0.04 : 0;
       else {
-        const st = s2.einkauf.wgs[k.wg];
-        const r = EK_PARAM.abschrift[st?.st.reduzierung ?? "normal"];
+        const st2 = s2.einkauf.wgs[k.wg];
+        const r = EK_PARAM.abschrift[st2?.st.reduzierung ?? "normal"];
         if (k.alter > 39) q2 = 0.08;
         else if (k.alter > 26) q2 = r.spaet;
         else if (k.alter > EK_PARAM.altSaison) q2 = r.alt;
@@ -10218,13 +10306,13 @@
     const emBereich = {};
     let gesamt = 0;
     for (const d of aktiveWg(s2)) {
-      const st = e.wgs[d.id];
+      const st2 = e.wgs[d.id];
       const r = WOCHE[d.id] ?? { vkReal: 0, ekVoll: 0, ekGebucht: 0, nosBrutto: 0, nosReal: 0, brutto: 0, emVk: 0, emEk: 0, markenVk: {}, markenEk: {}, ab: 0 };
       const vb = vkBereich[d.bereich] ?? 0;
       const k = vb > 0 ? (umsatzEigen[d.bereich] ?? 0) / vb : 0;
       const u = r.vkReal * k;
       gesamt += u;
-      const v = st.v;
+      const v = st2.v;
       v.w.push(s2.woche);
       v.u.push(eur(u));
       v.e.push(eur(r.ekGebucht));
@@ -10275,8 +10363,8 @@
     const em = b2.marke ? s2.eigenmarken.marken.find((m) => m.id === b2.marke) : void 0;
     if (vorh) vorh.wert += eur(wert);
     else s2.bestand.push({ gruppe: b2.gruppe, wg, art, marke: b2.marke, saisonId: sid, wert: eur(wert), alter: 0, saisonAnteil: art === "saison" ? 1 : 0, kostenFaktor: kf, ladenhueter: em?.status === "eingestellt" ? true : void 0 });
-    const st = wg ? s2.einkauf.wgs[wg] : void 0;
-    if (st && art === "saison" && sid !== void 0) saisonTally(st, sid).eingang += wert;
+    const st2 = wg ? s2.einkauf.wgs[wg] : void 0;
+    if (st2 && art === "saison" && sid !== void 0) saisonTally(st2, sid).eingang += wert;
   }
   function bestandPool(s2, wg, art, pool, nurNutzbar) {
     let x = 0;
@@ -10324,18 +10412,18 @@
     const runde2 = saisonStart(sid) - EK_PARAM.orderrunde + WG_DEF.indexOf(d) % 4;
     return Math.min(runde2, spaetestens);
   }
-  function vororderVorschlag(s2, d, st, pool, sid) {
+  function vororderVorschlag(s2, d, st2, pool, sid) {
     const a = saisonStart(sid);
     const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
-    let vq = st.st.vororderquote;
+    let vq = st2.st.vororderquote;
     if (pool !== FREMD && lead > 12) vq = Math.max(vq, 0.95);
     const level = s2.orderLevel[d.bereich] ?? 1;
     let saisonBedarf = 0;
-    for (let t = a; t < a + 26; t++) saisonBedarf += prognoseEk(s2, st, "saison", pool, t);
+    for (let t = a; t < a + 26; t++) saisonBedarf += prognoseEk(s2, st2, "saison", pool, t);
     const gesamt = vq * saisonBedarf * level * (1 + interpol(EK_PARAM.optimismus, einkaufStufe(s2)));
     const [v0, v1] = EK_PARAM.vororderSpanne;
     const gew = [];
-    for (let t = a + v0; t <= a + v1; t++) gew.push(Math.max(0.01, prognoseEk(s2, st, "saison", pool, t + 2)));
+    for (let t = a + v0; t <= a + v1; t++) gew.push(Math.max(0.01, prognoseEk(s2, st2, "saison", pool, t + 2)));
     const sum2 = gew.reduce((x, y) => x + y, 0);
     return gew.map((g, i) => ({ woche: a + v0 + i, wert: gesamt * g / sum2 }));
   }
@@ -10345,56 +10433,56 @@
     const idx = new Map(WG_DEF.map((d, i) => [d.id, i]));
     const sAkt = saisonId(w);
     for (const d of aktiveWg(s2)) {
-      const st = s2.einkauf.wgs[d.id];
-      if (st.basisVK <= 1) continue;
+      const st2 = s2.einkauf.wgs[d.id];
+      if (st2.basisVK <= 1) continue;
       const level = s2.orderLevel[d.bereich] ?? 1;
-      const sg = EK_PARAM.servicegrad[st.st.servicegrad];
+      const sg = EK_PARAM.servicegrad[st2.st.servicegrad];
       const sdZusatz = interpol(EK_PARAM.prognoseSd, einkaufStufe(s2)) / 0.07 - 1;
-      for (const pool of poolsDerWg(s2, st)) {
+      for (const pool of poolsDerWg(s2, st2)) {
         const m = pool === FREMD ? void 0 : s2.eigenmarken.marken.find((x) => x.id === pool);
         const bereit = (L2) => !m || istVerkaufsaktiv(m) || m.status === "aufbau" && (m.bis ?? 0) <= w + L2;
         {
           const L2 = vorlaufPool(s2, d, "nos", "nos", pool);
-          if (bereit(L2) && artAnteil(st, "nos") > 5e-3) {
+          if (bereit(L2) && artAnteil(st2, "nos") > 5e-3) {
             let ziel = 0;
-            for (let t = w + 1; t <= w + L2; t++) ziel += prognoseEk(s2, st, "nos", pool, t);
-            const wb = prognoseEk(s2, st, "nos", pool, w + L2);
-            const bez = 0.5 * (wb + prognoseEkMittel(s2, st, "nos", pool) * (1 + st.fehler));
+            for (let t = w + 1; t <= w + L2; t++) ziel += prognoseEk(s2, st2, "nos", pool, t);
+            const wb = prognoseEk(s2, st2, "nos", pool, w + L2);
+            const bez = 0.5 * (wb + prognoseEkMittel(s2, st2, "nos", pool) * (1 + st2.fehler));
             ziel += wb + (sg.cover + Math.max(0, sdZusatz) * 0.5 + (L2 > 8 ? 0.08 * L2 : 0)) * bez;
             const order = ziel * (1 + (level - 1) * 0.3) - bestandPool(s2, d.id, "nos", pool, false) - pipelinePool(s2, d.id, "nos", pool);
             const min = mindestPool(s2, d, "nos", pool);
             if (order > Math.max(1e3, min) || order > 0 && order > 0.3 * min && bestandPool(s2, d.id, "nos", pool, false) < 0.7 * ziel) {
-              out.push({ d, st, art: "nos", typ: "nos", pool, lieferungen: [{ woche: w + L2, wert: Math.max(order, min) }], wochenBedarf: wb });
+              out.push({ d, st: st2, art: "nos", typ: "nos", pool, lieferungen: [{ woche: w + L2, wert: Math.max(order, min) }], wochenBedarf: wb });
             }
           }
         }
-        if (artAnteil(st, "saison") <= 5e-3) continue;
+        if (artAnteil(st2, "saison") <= 5e-3) continue;
         for (const sid of [sAkt + 2, sAkt + 1, sAkt]) {
-          if ((st.vororder[pool] ?? -99) >= sid) continue;
+          if ((st2.vororder[pool] ?? -99) >= sid) continue;
           const lead = vorlaufPool(s2, d, "saison", "vororder", pool);
           const P2 = vororderWoche(s2, d, pool, sid);
           const spaet = w > P2;
           if (w < P2) continue;
           if (spaet && w - saisonStart(sid) > 10) {
-            st.vororder[pool] = sid;
+            st2.vororder[pool] = sid;
             continue;
           }
           if (!bereit(lead)) continue;
-          let lief = vororderVorschlag(s2, d, st, pool, sid);
+          let lief = vororderVorschlag(s2, d, st2, pool, sid);
           if (spaet) lief = lief.filter((l) => l.woche >= w + lead).map((l) => l);
           if (spaet && lief.length === 0) {
-            st.vororder[pool] = sid;
+            st2.vororder[pool] = sid;
             continue;
           }
           const min = mindestPool(s2, d, "saison", pool);
           const sum2 = lief.reduce((a, l) => a + l.wert, 0);
           if (sum2 < min && sum2 > 0) lief = lief.map((l) => ({ ...l, wert: l.wert * min / sum2 }));
-          st.vororder[pool] = sid;
+          st2.vororder[pool] = sid;
           if (sum2 > 0) {
-            const wb = prognoseEk(s2, st, "saison", pool, saisonStart(sid));
+            const wb = prognoseEk(s2, st2, "saison", pool, saisonStart(sid));
             const hinweis = spaet ? "Erstausstattung" : `Orderrunde ${saisonName(s2, sid)}`;
             const split = pool === FREMD ? lieferantenSplit(d) : [[void 0, 1]];
-            for (const [lieferant, a] of split) out.push({ d, st, art: "saison", typ: "vororder", pool, lieferungen: lief.map((l) => ({ woche: l.woche, wert: l.wert * a })), wochenBedarf: wb * a, hinweis, lieferant });
+            for (const [lieferant, a] of split) out.push({ d, st: st2, art: "saison", typ: "vororder", pool, lieferungen: lief.map((l) => ({ woche: l.woche, wert: l.wert * a })), wochenBedarf: wb * a, hinweis, lieferant });
           }
         }
         if ((w + (idx.get(d.id) ?? 0)) % 4 === 0) {
@@ -10402,10 +10490,10 @@
           const a = w + L2;
           if (bereit(L2) && L2 <= 12) {
             let ziel = 0;
-            for (let t = w + 1; t <= a + 4; t++) ziel += prognoseEk(s2, st, "saison", pool, t);
-            for (let t = a + 5; t <= a + 4 + EK_PARAM.saisonCover; t++) ziel += prognoseEk(s2, st, "saison", pool, t);
+            for (let t = w + 1; t <= a + 4; t++) ziel += prognoseEk(s2, st2, "saison", pool, t);
+            for (let t = a + 5; t <= a + 4 + EK_PARAM.saisonCover; t++) ziel += prognoseEk(s2, st2, "saison", pool, t);
             const order = ziel * level * (1 + interpol(EK_PARAM.optimismus, einkaufStufe(s2))) - bestandPool(s2, d.id, "saison", pool, true) - pipelinePool(s2, d.id, "saison", pool, a + 4);
-            if (order > mindestPool(s2, d, "saison", pool)) out.push({ d, st, art: "saison", typ: "nachorder", pool, lieferungen: [{ woche: a, wert: order }], wochenBedarf: prognoseEk(s2, st, "saison", pool, a) });
+            if (order > mindestPool(s2, d, "saison", pool)) out.push({ d, st: st2, art: "saison", typ: "nachorder", pool, lieferungen: [{ woche: a, wert: order }], wochenBedarf: prognoseEk(s2, st2, "saison", pool, a) });
           }
         }
       }
@@ -10478,13 +10566,13 @@
     }
   }
   function gebeFrei(s2, f) {
-    const st = s2.einkauf.wgs[f.wg];
+    const st2 = s2.einkauf.wgs[f.wg];
     const d = WG[f.wg];
     const lid = LIEFERANTEN.find((l) => l.name === f.lieferant)?.id;
     for (const l of f.lieferungen) {
       const woche2 = Math.max(l.woche, s2.woche + 1);
       s2.bestellungen.push({ id: `b${f.id}-${woche2}`, gruppe: d.bereich, wg: f.wg, art: f.art, marke: f.marke, wert: l.wert, ankunft: woche2, vorkasse: false, lieferantId: lid, saisonId: saisonVon(woche2) });
-      limitFuer(s2, st, saisonId(woche2)).verbraucht += l.wert;
+      limitFuer(s2, st2, saisonId(woche2)).verbraucht += l.wert;
     }
   }
   function einkaufFristen(s2) {
@@ -10542,40 +10630,40 @@
       case "wgLimit": {
         if (a.euro !== void 0 && a.euro !== null && a.euro < 0) return fehler6("Limit kann nicht negativ sein.");
         const fk = a.faktor !== void 0 ? clamp(a.faktor, 0.3, 2) : void 0;
-        return wgOp(a.wg, (st) => {
-          if (fk !== void 0) st.st.limitFaktor = fk;
-          if (a.euro === null) st.st.limitEuro = void 0;
-          else if (a.euro !== void 0) st.st.limitEuro = eur(a.euro);
+        return wgOp(a.wg, (st2) => {
+          if (fk !== void 0) st2.st.limitFaktor = fk;
+          if (a.euro === null) st2.st.limitEuro = void 0;
+          else if (a.euro !== void 0) st2.st.limitEuro = eur(a.euro);
         }, a.euro !== void 0 && a.euro !== null ? `Limit ${mio(a.euro)} je Saison` : `Limit ${Math.round((fk ?? 1) * 100)} % vom Saisonplan`);
       }
       case "wgNosZiel": {
         const z2 = clamp(a.anteil, 0.02, 0.98);
-        return wgOp(a.wg, (st) => {
-          st.st.nosZiel = z2;
+        return wgOp(a.wg, (st2) => {
+          st2.st.nosZiel = z2;
         }, `NOS-Anteil Ziel ${Math.round(z2 * 100)} %`);
       }
       case "wgServicegrad": {
         if (![0.9, 0.95, 0.98].includes(a.ziel)) return fehler6("Servicegrad 90, 95 oder 98 %.");
-        return wgOp(a.wg, (st) => {
-          st.st.servicegrad = a.ziel;
+        return wgOp(a.wg, (st2) => {
+          st2.st.servicegrad = a.ziel;
         }, `NOS-Servicegrad ${Math.round(a.ziel * 100)} %`);
       }
       case "wgVororderquote": {
         const q2 = clamp(a.quote, 0.2, 1);
-        return wgOp(a.wg, (st) => {
-          st.st.vororderquote = q2;
+        return wgOp(a.wg, (st2) => {
+          st2.st.vororderquote = q2;
         }, `Vororderquote ${Math.round(q2 * 100)} %`);
       }
       case "wgReduzierung": {
         if (!EK_PARAM.abschrift[a.strategie]) return fehler6("Reduzierung fr\xFCh, normal oder sp\xE4t.");
-        return wgOp(a.wg, (st) => {
-          st.st.reduzierung = a.strategie;
+        return wgOp(a.wg, (st2) => {
+          st2.st.reduzierung = a.strategie;
         }, `Reduzierung ${a.strategie === "frueh" ? "fr\xFCh" : a.strategie === "spaet" ? "sp\xE4t" : "normal"}`);
       }
       case "wgFreigabeModus": {
         const arten = a.art === "beide" ? ["nos", "saison"] : [a.art];
-        return wgOp(a.wg, (st) => {
-          for (const x of arten) st.st.modus[x] = a.modus;
+        return wgOp(a.wg, (st2) => {
+          for (const x of arten) st2.st.modus[x] = a.modus;
         }, `Ohne Freigabe: ${a.modus === "auto" ? "automatisch bestellen" : "Order verf\xE4llt"} (${arten.map((x) => x === "nos" ? "NOS" : "Saison").join(", ")})`);
       }
       case "freigeben":
@@ -10672,8 +10760,8 @@
     return a;
   };
   function basisWg(s2, d, bestandJe) {
-    const st = s2.einkauf.wgs[d.id];
-    const v = st.v;
+    const st2 = s2.einkauf.wgs[d.id];
+    const v = st2.v;
     const R9 = (f) => rauschen(s2, d.id, f);
     const b2 = leer2();
     const n52 = Math.min(52, v.w.length);
@@ -10694,27 +10782,27 @@
     b2.fehl13 = summe(v.f, 13) * R9("f");
     const nN = Math.min(4, v.n.length);
     for (let i = v.n.length - nN; i < v.n.length; i++) {
-      const g = v.nd[i] * st.nosAnteil;
+      const g = v.nd[i] * st2.nosAnteil;
       b2.nosZ += v.n[i] * g;
       b2.nosN += g;
     }
     b2.nosZ *= 1 + (R9("n") - 1) * 0.25;
     b2.eu13 = summe(v.eu, 13) * R9("u");
     b2.er13 = summe(v.er, 13) * R9("u");
-    const sz = st.saisons[String(saisonId(s2.woche))] ?? { eingang: 0, abverkauf: 0 };
+    const sz = st2.saisons[String(saisonId(s2.woche))] ?? { eingang: 0, abverkauf: 0 };
     b2.sEin = sz.eingang;
     b2.sAb = sz.abverkauf * R9("s");
     const sid = saisonId(s2.woche);
-    const L2 = limitFuer(s2, st, sid);
-    b2.limit = limitWert(st, L2);
+    const L2 = limitFuer(s2, st2, sid);
+    b2.limit = limitWert(st2, L2);
     b2.limitV = L2.verbraucht;
     for (const x of s2.bestellungen) if (x.wg === d.id) b2.pipe += x.wert;
     for (const f of s2.einkauf.freigaben) if (f.wg === d.id) {
       b2.offenN++;
       b2.offenW += f.wert;
     }
-    for (let t = s2.woche; t < s2.woche + 4; t++) for (const art of ["nos", "saison"]) for (const pool of poolsDerWg(s2, st)) b2.bedarf4 += prognoseEk(s2, st, art, pool, t) / (1 + st.fehler);
-    b2.plMarge = (st.nosAnteil * st.margeNos + (1 - st.nosAnteil) * st.margeSaison) * b2.u13;
+    for (let t = s2.woche; t < s2.woche + 4; t++) for (const art of ["nos", "saison"]) for (const pool of poolsDerWg(s2, st2)) b2.bedarf4 += prognoseEk(s2, st2, art, pool, t) / (1 + st2.fehler);
+    b2.plMarge = (st2.nosAnteil * st2.margeNos + (1 - st2.nosAnteil) * st2.margeSaison) * b2.u13;
     const rel = s2.woche - saisonStart(sid);
     b2.sollAbverkauf = clamp(0.7 * (rel + 1) / 26, 0, 0.7) * b2.sEin;
     return b2;
@@ -10842,28 +10930,28 @@
   function wgDetail(s2, wgId) {
     const d = WG[wgId];
     if (!d) return void 0;
-    const st = s2.einkauf.wgs[wgId];
+    const st2 = s2.einkauf.wgs[wgId];
     const b2 = basisWg(s2, d, bestandJeWg(s2));
     const k = kennzahlen(b2);
-    const v = st.v;
+    const v = st2.v;
     const n = Math.min(26, v.w.length);
     const ab = v.w.length - n;
-    const verlauf = { woche: [], bestand: [], umsatz: [], reichweite: [], nosVerfuegbarkeit: [], abschriften: [] };
+    const verlauf2 = { woche: [], bestand: [], umsatz: [], reichweite: [], nosVerfuegbarkeit: [], abschriften: [] };
     for (let i = ab; i < v.w.length; i++) {
       const w = v.w[i];
       const best2 = v.b[i] * rauschen(s2, wgId, "b", w);
       const e4 = v.e.slice(Math.max(0, i - 3), i + 1).reduce((x, y) => x + y, 0) / Math.min(4, i + 1) || 1;
-      verlauf.woche.push(w);
-      verlauf.bestand.push(eur(best2));
-      verlauf.umsatz.push(eur(v.u[i] * rauschen(s2, wgId, "u", w)));
-      verlauf.reichweite.push(Math.round(best2 / e4 * 10) / 10);
-      verlauf.nosVerfuegbarkeit.push(v.n[i]);
-      verlauf.abschriften.push(eur(v.a[i] * rauschen(s2, wgId, "a", w)));
+      verlauf2.woche.push(w);
+      verlauf2.bestand.push(eur(best2));
+      verlauf2.umsatz.push(eur(v.u[i] * rauschen(s2, wgId, "u", w)));
+      verlauf2.reichweite.push(Math.round(best2 / e4 * 10) / 10);
+      verlauf2.nosVerfuegbarkeit.push(v.n[i]);
+      verlauf2.abschriften.push(eur(v.a[i] * rauschen(s2, wgId, "a", w)));
     }
     const sid = saisonId(s2.woche);
     const limits = [sid, sid + 1].map((x) => {
-      const L2 = limitFuer(s2, st, x);
-      const lw = limitWert(st, L2);
+      const L2 = limitFuer(s2, st2, x);
+      const lw = limitWert(st2, L2);
       return { saison: x, name: saisonName(s2, x), limit: lw, verbraucht: eur(L2.verbraucht), frei: eur(lw - L2.verbraucht) };
     });
     const best = /* @__PURE__ */ new Map();
@@ -10882,10 +10970,10 @@
       lieferant: d.lieferant,
       kennzahlen: k,
       ampeln: ampeln(k, b2),
-      steuerung: { ...st.st, modus: { ...st.st.modus }, nosAnteil: Math.round(st.nosAnteil * 1e3) / 1e3 },
-      stammdaten: { margeNos: st.margeNos, margeSaison: st.margeSaison, vorlaufVor: d.vorlaufVor, vorlaufNach: d.vorlaufNach, vorlaufNos: d.vorlaufNos, mindestabnahme: d.mindestabnahme, eigenmarkenfaehig: d.eigenmarkenfaehig, kategorie: d.kategorie, saison: d.saison.map((x) => Math.round(x * 100) / 100) },
+      steuerung: { ...st2.st, modus: { ...st2.st.modus }, nosAnteil: Math.round(st2.nosAnteil * 1e3) / 1e3 },
+      stammdaten: { margeNos: st2.margeNos, margeSaison: st2.margeSaison, vorlaufVor: d.vorlaufVor, vorlaufNach: d.vorlaufNach, vorlaufNos: d.vorlaufNos, mindestabnahme: d.mindestabnahme, eigenmarkenfaehig: d.eigenmarkenfaehig, kategorie: d.kategorie, saison: d.saison.map((x) => Math.round(x * 100) / 100) },
       eigenmarken: markenInWg(s2, wgId).map((m) => ({ marke: m.id, name: m.name, farbe: m.farbe, anteilZiel: m.wgAnteile[wgId] ?? 0, anteilIst: Math.round((m.wgIst[wgId] ?? 0) * 1e3) / 1e3, mehrmarge: mehrmarge(m) })),
-      verlauf,
+      verlauf: verlauf2,
       limits,
       bestellungen: [...best.values()].sort((a, c) => a.ankunft - c.ankunft).map((x) => ({ ...x, wert: eur(x.wert) })),
       freigaben: s2.einkauf.freigaben.filter((f) => f.wg === wgId).map((f) => freigabeZeile(s2, f))
@@ -11025,21 +11113,21 @@
         if (istDelegiert(s2, "merchandise_planning")) {
           const q2 = bereichsQualitaet(s2, "merchandise_planning");
           for (const d of WG_DEF) {
-            const st = s2.einkauf.wgs[d.id];
-            if (!st) continue;
-            const l = limitFuer(s2, st, sid);
+            const st2 = s2.einkauf.wgs[d.id];
+            if (!st2) continue;
+            const l = limitFuer(s2, st2, sid);
             const delta = (1 - q2) * 0.5 * (0.2 - d.anteil);
             const faktor = clamp(1 + delta, 0.8, 1.2);
-            const budget = eur(l.plan * st.st.limitFaktor * faktor);
-            st.st.limitEuro = budget;
+            const budget = eur(l.plan * st2.st.limitFaktor * faktor);
+            st2.st.limitEuro = budget;
             w.plaene[`${d.id}|${sid}`] = {
               wg: d.id,
               saison: sid,
               budget,
-              zielmarge: st.margeSaison,
+              zielmarge: st2.margeSaison,
               zielabverkauf: 0.75,
               breite: 0.5,
-              vororderquote: st.st.vororderquote
+              vororderquote: st2.st.vororderquote
             };
           }
         }
@@ -11145,13 +11233,13 @@
     const sid = saisonId(s2.woche);
     const q2 = bereichsQualitaet(s2, "preis_reduzierung");
     for (const d of WG_DEF) {
-      const st = s2.einkauf.wgs[d.id];
-      if (!st) continue;
-      const lauf = st.saisons[String(sid)];
+      const st2 = s2.einkauf.wgs[d.id];
+      if (!st2) continue;
+      const lauf = st2.saisons[String(sid)];
       const quote = lauf ? lauf.abverkauf / Math.max(1, lauf.eingang) : 0;
       const stufe2 = quote < 0.35 ? 0 : quote < 0.55 ? 0.2 : quote < 0.75 ? 0.3 : quote < 0.9 ? 0.5 : 0.7;
       const takt = clamp(0.75 + q2 * 0.25, 0.75, 1);
-      const altQuote = d.anteil * (1 - st.nosAnteil);
+      const altQuote = d.anteil * (1 - st2.nosAnteil);
       ergebnis[d.bereich] = (ergebnis[d.bereich] ?? 0) + stufe2 * altQuote * takt;
     }
     return ergebnis;
@@ -11190,27 +11278,27 @@
       };
     });
     const plaene = WG_DEF.filter((d) => !!s2.einkauf.wgs[d.id]).map((d) => {
-      const st = s2.einkauf.wgs[d.id];
+      const st2 = s2.einkauf.wgs[d.id];
       const sid = saisonId(s2.woche + 30);
-      const limit = limitFuer(s2, st, sid);
+      const limit = limitFuer(s2, st2, sid);
       const plan2 = w?.plaene[`${d.id}|${sid}`];
       return {
         wg: d.id,
         name: d.name,
         saison: sid,
         saisonName: saisonName(s2, sid),
-        budget: plan2?.budget ?? eur(limit.plan * st.st.limitFaktor),
+        budget: plan2?.budget ?? eur(limit.plan * st2.st.limitFaktor),
         verbraucht: eur(limit.verbraucht),
-        zielmarge: plan2?.zielmarge ?? st.nosAnteil * st.margeNos + (1 - st.nosAnteil) * st.margeSaison,
+        zielmarge: plan2?.zielmarge ?? st2.nosAnteil * st2.margeNos + (1 - st2.nosAnteil) * st2.margeSaison,
         zielabverkauf: plan2?.zielabverkauf ?? 0.75,
         breite: plan2?.breite ?? 0.5,
-        vororderquote: plan2?.vororderquote ?? st.st.vororderquote
+        vororderquote: plan2?.vororderquote ?? st2.st.vororderquote
       };
     });
     const kalender = WG_DEF.filter((d) => !!s2.einkauf.wgs[d.id]).map((d) => {
-      const st = s2.einkauf.wgs[d.id];
+      const st2 = s2.einkauf.wgs[d.id];
       const sid = saisonId(s2.woche);
-      const lauf = st.saisons[String(sid)];
+      const lauf = st2.saisons[String(sid)];
       const quote = lauf ? lauf.abverkauf / Math.max(1, lauf.eingang) : 0;
       const stufe2 = quote < 0.35 ? 0 : quote < 0.55 ? 0.2 : quote < 0.75 ? 0.3 : quote < 0.9 ? 0.5 : 1;
       return {
@@ -11219,7 +11307,7 @@
         saison: sid,
         abverkauf: quote,
         stufe: stufe2,
-        strategie: st.st.reduzierung,
+        strategie: st2.st.reduzierung,
         lokal: cluster.map((c) => ({
           cluster: c.id,
           punkte: w?.lokal[`${d.bereich}|${c.id}`] ?? 0,
@@ -11322,23 +11410,23 @@
         steuerungUebernehmen(s2);
         return ok6("Lokaler Reduzierungsspielraum aktualisiert.");
       case "merchandisePlan": {
-        const st = s2.einkauf.wgs[a.wg];
-        if (!st || !Number.isSafeInteger(a.saison) || a.saison < saisonId(s2.woche)) return fehler6("Saison oder Warengruppe nicht g\xFCltig.");
+        const st2 = s2.einkauf.wgs[a.wg];
+        if (!st2 || !Number.isSafeInteger(a.saison) || a.saison < saisonId(s2.woche)) return fehler6("Saison oder Warengruppe nicht g\xFCltig.");
         const alt = w.plaene[`${a.wg}|${a.saison}`];
-        const soll = limitFuer(s2, st, a.saison);
+        const soll = limitFuer(s2, st2, a.saison);
         const p2 = {
           wg: a.wg,
           saison: a.saison,
-          budget: a.budget ?? alt?.budget ?? eur(soll.plan * st.st.limitFaktor),
-          zielmarge: a.zielmarge ?? alt?.zielmarge ?? st.margeSaison,
+          budget: a.budget ?? alt?.budget ?? eur(soll.plan * st2.st.limitFaktor),
+          zielmarge: a.zielmarge ?? alt?.zielmarge ?? st2.margeSaison,
           zielabverkauf: a.zielabverkauf ?? alt?.zielabverkauf ?? 0.75,
           breite: a.breite ?? alt?.breite ?? 0.5,
-          vororderquote: a.vororderquote ?? alt?.vororderquote ?? st.st.vororderquote
+          vororderquote: a.vororderquote ?? alt?.vororderquote ?? st2.st.vororderquote
         };
         if (!Number.isSafeInteger(p2.budget) || p2.budget < 0 || p2.zielmarge < 0 || p2.zielmarge > 1 || p2.zielabverkauf < 0 || p2.zielabverkauf > 1 || p2.breite < 0 || p2.breite > 1 || p2.vororderquote < 0 || p2.vororderquote > 1) return fehler6("Ung\xFCltige Planparameter.");
         w.plaene[`${a.wg}|${a.saison}`] = p2;
-        st.st.limitEuro = p2.budget;
-        st.st.vororderquote = p2.vororderquote;
+        st2.st.limitEuro = p2.budget;
+        st2.st.vororderquote = p2.vororderquote;
         for (const v of w.vorlagen) if (v.wg === a.wg && v.saison === a.saison) v.erledigt = true;
         return ok6("Saisonbudget und Vororderquote \xFCbernommen.");
       }
@@ -11934,13 +12022,13 @@
     h.flaechen = h.flaechen.map((f) => ({ ...f, konzept: "leer", gruppe: void 0, mieter: void 0, lieferantId: void 0, umbauBis: void 0, umbauZiel: void 0 }));
     const nachbarn = s2.haeuser.filter((x) => x !== h && x.stadt === h.stadt && x.format === h.format && x.status === "offen");
     for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
-    const st = s2.stakeholder;
-    st.betriebsrat = clamp(st.betriebsrat - (s2.phase === "insolvenz" ? 15 : 30) * (fte2 / Math.max(1, gesamtFte(s2) + fte2)), 0, 100);
+    const st2 = s2.stakeholder;
+    st2.betriebsrat = clamp(st2.betriebsrat - (s2.phase === "insolvenz" ? 15 : 30) * (fte2 / Math.max(1, gesamtFte(s2) + fte2)), 0, 100);
     const sw = SCHLIESSUNGEN_WOCHE.get(s2);
     const k = sw && sw.woche === w ? sw.n : 0;
     SCHLIESSUNGEN_WOCHE.set(s2, { woche: w, n: k + 1 });
-    st.image = clamp(st.image - 1.5 * Math.pow(schwierigkeit(s2).imageDaempfung, k), 0, 100);
-    st.vermieter = clamp(st.vermieter - (h.miete.vermieter === "dritt" ? 2 : 0), 0, 100);
+    st2.image = clamp(st2.image - 1.5 * Math.pow(schwierigkeit(s2).imageDaempfung, k), 0, 100);
+    st2.vermieter = clamp(st2.vermieter - (h.miete.vermieter === "dritt" ? 2 : 0), 0, 100);
     if (h.lage === "1a" && h.format === "warenhaus") {
       const arvel = s2.lieferanten.find((l) => l.id === "arvel");
       if (arvel && arvel.aktiv) {
@@ -12016,11 +12104,11 @@
     s2.zahlungsstockungSeit = void 0;
     s2.insolvenz = { seit: w, versammlung: w + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w + 12, quote: 0.1, grund: grund2 };
     s2.kreditlinie = 25e6;
-    const st = s2.stakeholder;
-    st.kreditversicherer = clamp(st.kreditversicherer - 20, 0, 100);
-    st.bank = clamp(st.bank - 15, 0, 100);
-    st.image = clamp(st.image - 15, 0, 100);
-    st.betriebsrat = clamp(st.betriebsrat - 5, 0, 100);
+    const st2 = s2.stakeholder;
+    st2.kreditversicherer = clamp(st2.kreditversicherer - 20, 0, 100);
+    st2.bank = clamp(st2.bank - 15, 0, 100);
+    st2.image = clamp(st2.image - 15, 0, 100);
+    st2.betriebsrat = clamp(st2.betriebsrat - 5, 0, 100);
     for (const l of s2.lieferanten) {
       l.vertrauen = clamp(l.vertrauen - 15, 0, 100);
       if (l.id === "hallberg" && l.aktiv) l.verspaetungen += 2;
@@ -12046,14 +12134,14 @@
     const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s2).versammlungSchwelle ? 5 : -10;
     const quoteBonus = 60 * (ins.quote - 0.1);
     const zahlung = ins.quote * ins.altVerbindlichkeiten;
-    const st = s2.stakeholder;
+    const st2 = s2.stakeholder;
     const lieferanten = (s2.lieferanten.filter((l) => l.aktiv).reduce((a, l) => a + l.vertrauen, 0) + s2.restLieferantenVertrauen * 2) / (s2.lieferanten.filter((l) => l.aktiv).length + 2);
     const gruppen = [
-      ["Banken", st.bank],
-      ["Kreditversicherer", st.kreditversicherer],
+      ["Banken", st2.bank],
+      ["Kreditversicherer", st2.kreditversicherer],
       ["Lieferanten", lieferanten],
-      ["Vermieter", st.vermieter],
-      ["Arbeitnehmer", st.betriebsrat]
+      ["Vermieter", st2.vermieter],
+      ["Arbeitnehmer", st2.betriebsrat]
     ];
     const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus >= 42).map(([n]) => n);
     const nein = gruppen.filter(([n]) => !ja.includes(n)).map(([n]) => n);
@@ -12065,9 +12153,9 @@
       s2.verbindlichkeiten.push({ id: `q2-${s2.woche}`, art: "sonstiges", wert: eur(zahlung * 0.3), faellig: s2.woche + 52 });
       s2.phase = "regulaer";
       s2.insolvenz = void 0;
-      st.kreditversicherer = Math.max(st.kreditversicherer, 42);
-      st.bank = Math.max(st.bank, 38);
-      st.image = clamp(st.image + 6, 0, 100);
+      st2.kreditversicherer = Math.max(st2.kreditversicherer, 42);
+      st2.bank = Math.max(st2.bank, 38);
+      st2.image = clamp(st2.image + 6, 0, 100);
       for (const l of s2.lieferanten) l.vertrauen = Math.max(l.vertrauen, 42);
       s2.restLieferantenVertrauen = Math.max(s2.restLieferantenVertrauen, 45);
       s2.kreditlinieBasis = Math.round(s2.kreditlinieBasis * 0.6);
@@ -12098,17 +12186,17 @@
     q2.ebitdaIst = eur(ist);
     const plan2 = q2.plan ?? q2.planStandard;
     const tol = Math.max(2e6, 0.12 * Math.abs(plan2));
-    const st = s2.stakeholder;
+    const st2 = s2.stakeholder;
     const ambitioniert = plan2 >= q2.planStandard;
     if (ist >= plan2 - 0.25 * tol) {
-      st.eigentuemer = clamp(st.eigentuemer + 8 + (ambitioniert ? 4 : 0), 0, 100);
+      st2.eigentuemer = clamp(st2.eigentuemer + 8 + (ambitioniert ? 4 : 0), 0, 100);
       s2.eigentuemer.strikes = 0;
       let txt = `Quartal ${q2.nr + 1}: Plan erreicht (Ist ${mio(ist)}, Plan ${mio(plan2)}).`;
       const vorjahr2 = s2.quartale.find((x) => x.nr === q2.nr - 4);
       const besser = vorjahr2 ? ist > vorjahr2.ebitdaIst : ist > q2.planStandard + 0.1 * Math.abs(q2.planStandard);
       if (!besser) txt += " Ohne sichtbare Verbesserung gegen\xFCber dem Vorjahr gibt es kein frisches Geld.";
       if (s2.phase === "regulaer" && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7)) {
-        const kapital = eur(12e6 * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
+        const kapital = eur(12e6 * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
         s2.cash += kapital;
         s2.einmalErloeseWoche += kapital;
         s2.eigentuemer.kapitalZugefuehrt += kapital;
@@ -12118,10 +12206,10 @@
       }
       melde(s2, "eigentuemer", txt, { modul: "vorstand" });
     } else if (ist >= plan2 - tol) {
-      st.eigentuemer = clamp(st.eigentuemer - 2, 0, 100);
+      st2.eigentuemer = clamp(st2.eigentuemer - 2, 0, 100);
       melde(s2, "eigentuemer", `Quartal ${q2.nr + 1}: Plan knapp verfehlt (Ist ${mio(ist)}, Plan ${mio(plan2)}). Kein frisches Geld, neue Frist.`, { modul: "vorstand" });
     } else {
-      st.eigentuemer = clamp(st.eigentuemer - 12, 0, 100);
+      st2.eigentuemer = clamp(st2.eigentuemer - 12, 0, 100);
       s2.eigentuemer.strikes += 1;
       melde(s2, "eigentuemer", `Quartal ${q2.nr + 1}: Plan klar verfehlt (Ist ${mio(ist)}, Plan ${mio(plan2)}). Verwarnung ${s2.eigentuemer.strikes}/2.`, { modul: "vorstand" });
       if (s2.eigentuemer.strikes >= 2 && s2.phase === "regulaer") {
@@ -12846,6 +12934,7 @@
       kpi.fteBedarf = r.fteBedarf;
       kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
       if (h.status !== "geschlossen" && h.status !== "verkauft") h.kpi = rundeKpi(kpi);
+      statistikHaus(s2, h, rundeKpi(kpi));
       k.umsatz += kpi.umsatz;
       k.rohertrag += kpi.rohertrag;
       k.konzession += kpi.konzessionserloes;
@@ -12915,6 +13004,7 @@
     if (s2.historie.length > 520) s2.historie.splice(0, s2.historie.length - 520);
     planungWoche(s2);
     if (!s2.prognose && w % 13 === 12 && !beendet(s2)) quartalsBewertung(s2);
+    statistikWoche(s2, k);
     const offen = s2.kapitalflussOffen ?? { investitionen: 0, finanzierung: 0 };
     const netto = eur(s2.cash - cashVorher);
     const investitionen = eur(offen.investitionen), finanzierung = eur(offen.finanzierung);
@@ -13047,7 +13137,7 @@
     }
     einkauf(s2);
   }
-  var ALLE = (st) => Object.fromEntries(ABTEILUNGEN.map((id) => [id, st]));
+  var ALLE = (st2) => Object.fromEntries(ABTEILUNGEN.map((id) => [id, st2]));
   var HQ_GUT = { ...ALLE(1), controlling: 2, ecommerce: 2 };
   var HQ_AUSBAU = { ...HQ_GUT, einkauf: 3, immobilien: 3 };
   var HQ_KAHLSCHLAG = { ...ALLE(0), verwaltung: 1 };
@@ -46265,8 +46355,8 @@
         for (let i = 0; i < np; i++) F2.box(s0 + i * pw + 0.03, s0 + (i + 1) * pw - 0.03, yF - (kk || !arkade2 ? 0.4 : 0.6), yF + 1, 0, 0.3, platte4);
         const ya = yF + 1, yb = yF + gh - 0.4;
         F2.box(s0 + 0.1, s1 - 0.1, ya, yb, -0.02, 0.12, glas2);
-        const st = variante2 === "raster" ? 1.25 : 1.3;
-        for (let u = 0.6; u < F2.L - 0.3; u += st) {
+        const st2 = variante2 === "raster" ? 1.25 : 1.3;
+        for (let u = 0.6; u < F2.L - 0.3; u += st2) {
           if (variante2 === "raster") F2.box(u - 0.09, u + 0.09, ya, yb, 0, 0.45, platte4);
           else F2.box(u - 0.04, u + 0.04, ya, yb, 0.1, 0.15, profil2);
         }
@@ -46871,23 +46961,23 @@
     const basis3 = PROFIL[region] ?? PROFIL.Mitte, mod = CLUSTER[cluster] ?? {};
     const out = {};
     let s2 = 0;
-    for (const st of STILE) {
-      out[st] = (basis3[st] ?? 0) * (mod[st] ?? 1);
-      s2 += out[st];
+    for (const st2 of STILE) {
+      out[st2] = (basis3[st2] ?? 0) * (mod[st2] ?? 1);
+      s2 += out[st2];
     }
-    for (const st of STILE) out[st] = out[st] / s2;
+    for (const st2 of STILE) out[st2] = out[st2] / s2;
     return out;
   }
   function zufallsStadthaus(S, scene2, p2 = {}) {
     const r = rng2(mischHash(typeof p2.seed === "number" ? p2.seed : 1, 4711));
     const prof = stilProfil(p2.region ?? "Mitte", p2.cluster ?? "grossstadt");
-    const liste = Object.entries(prof).map(([st, g2]) => {
+    const liste = Object.entries(prof).map(([st2, g2]) => {
       let w = g2;
-      if (p2.nachbar?.stil === st) w *= 0.2;
-      if (st === "fachwerk" && (p2.w ?? 16) > 18) w *= 0.3;
-      if (st === "ddr_platte" && (p2.w ?? 16) < 14) w *= 0.3;
-      if (st === "barock" && (p2.w ?? 16) > 22) w *= 0.4;
-      return [st, w];
+      if (p2.nachbar?.stil === st2) w *= 0.2;
+      if (st2 === "fachwerk" && (p2.w ?? 16) > 18) w *= 0.3;
+      if (st2 === "ddr_platte" && (p2.w ?? 16) < 14) w *= 0.3;
+      if (st2 === "barock" && (p2.w ?? 16) > 22) w *= 0.4;
+      return [st2, w];
     });
     const stil0 = wz(r, liste);
     const stil = p2.stilWunsch && GESCHOSSE[p2.stilWunsch] && BAU[p2.stilWunsch] ? p2.stilWunsch : stil0;
@@ -46939,8 +47029,8 @@
     return h;
   }
   function gelaende(S, x0, z0, x1, z1, hoehe, farbe3, o = {}) {
-    const st = o.schritt ?? 6;
-    const nx = Math.max(1, Math.ceil((x1 - x0) / st)), nz = Math.max(1, Math.ceil((z1 - z0) / st));
+    const st2 = o.schritt ?? 6;
+    const nx = Math.max(1, Math.ceil((x1 - x0) / st2)), nz = Math.max(1, Math.ceil((z1 - z0) / st2));
     const dx = (x1 - x0) / nx, dz = (z1 - z0) / nz;
     const H = [];
     for (let i = 0; i <= nx; i++) {
@@ -47601,8 +47691,8 @@
   function nahMitte(plan2, ansicht = "einkauf", zoom = 62, o = {}) {
     let x, z2;
     if (ansicht === "center") {
-      const st = plan2.standorte.find((p2) => p2.lage === "center") ?? plan2.standorte.find((p2) => p2.lage === "rand");
-      const b2 = st && plan2.bloecke.find((q2) => q2.id === st.block);
+      const st2 = plan2.standorte.find((p2) => p2.lage === "center") ?? plan2.standorte.find((p2) => p2.lage === "rand");
+      const b2 = st2 && plan2.bloecke.find((q2) => q2.id === st2.block);
       [x, z2] = b2 ? [b2.x + b2.w / 2, b2.z + b2.d / 2] : [plan2.breite / 2, plan2.tiefe / 2];
     } else if (o.punkt) [x, z2] = [plan2.breite * o.punkt[0], plan2.tiefe * o.punkt[1]];
     else {
@@ -47623,12 +47713,12 @@
     if (!gesucht.length) return [];
     const platziert = [];
     const benutzt = /* @__PURE__ */ new Set();
-    for (const st of gesucht) {
+    for (const st2 of gesucht) {
       const bl = (plan2.aussen?.bloecke ?? []).filter(
-        (b3) => !benutzt.has(b3.id) && ["gewerbe", "sonder", "dicht", "siedlung"].includes(b3.zone) && b3.w >= st.w + 6 && b3.d >= st.d + 6 && Object.values(b3.rand ?? {}).some((r) => r.strasse)
+        (b3) => !benutzt.has(b3.id) && ["gewerbe", "sonder", "dicht", "siedlung"].includes(b3.zone) && b3.w >= st2.w + 6 && b3.d >= st2.d + 6 && Object.values(b3.rand ?? {}).some((r) => r.strasse)
       );
       bl.sort(
-        (a, b3) => (a.zone === "gewerbe" ? 0 : a.zone === "sonder" ? 1 : 2) - (b3.zone === "gewerbe" ? 0 : b3.zone === "sonder" ? 1 : 2) || a.w * a.d - st.w * st.d - (b3.w * b3.d - st.w * st.d) || a.id.localeCompare(b3.id)
+        (a, b3) => (a.zone === "gewerbe" ? 0 : a.zone === "sonder" ? 1 : 2) - (b3.zone === "gewerbe" ? 0 : b3.zone === "sonder" ? 1 : 2) || a.w * a.d - st2.w * st2.d - (b3.w * b3.d - st2.w * st2.d) || a.id.localeCompare(b3.id)
       );
       const b2 = bl[0];
       if (!b2) continue;
@@ -47639,23 +47729,23 @@
       b2.hecken = [];
       b2.baeume = [];
       const p2 = {
-        id: "aussen-" + st.id,
+        id: "aussen-" + st2.id,
         typ: "slot:outlet",
-        x: b2.x + (b2.w - st.w) / 2,
-        z: b2.z + (b2.d - st.d) / 2,
-        w: st.w,
-        d: st.d,
-        seed: plan2.seed + st.id.length * 103,
+        x: b2.x + (b2.w - st2.w) / 2,
+        z: b2.z + (b2.d - st2.d) / 2,
+        w: st2.w,
+        d: st2.d,
+        seed: plan2.seed + st2.id.length * 103,
         region: plan2.region,
         cluster: plan2.typ,
         ecke: "block",
         lage: "rand",
-        standort: st,
+        standort: st2,
         front: ["+z", "+x"],
         block: b2.id
       };
       plan2.aussen.bauten.push(p2);
-      plan2.standorte.push({ ...st, parzelle: p2.id, typ: p2.typ, block: b2.id, lage: "rand" });
+      plan2.standorte.push({ ...st2, parzelle: p2.id, typ: p2.typ, block: b2.id, lage: "rand" });
       platziert.push(p2.id);
     }
     plan2.aussen.outletStandorte = platziert;
@@ -48278,15 +48368,15 @@
     if (r() < 0.5) E.hoch.push({ i: zw(r, 0, nx()), j: zw(r, 0, nz()), s: 0.7 });
     E.fzAuto = !E.einkauf;
   }
-  function standortMasse(st) {
-    if (st.w && st.d) return { w: st.w, d: st.d };
-    const A = Math.max(400, st.grundflaecheQm ?? 2500);
+  function standortMasse(st2) {
+    if (st2.w && st2.d) return { w: st2.w, d: st2.d };
+    const A = Math.max(400, st2.grundflaecheQm ?? 2500);
     const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
     return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
   }
   var SLOT_ROLLE = { premium: "slot:premium", warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester", outlet: "slot:outlet" };
   function einkaufslage(E, standorte) {
-    const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? "1a", rolle: st.rolle ?? "warenhaus" }));
+    const liste = standorte.map((st2, n) => ({ st: st2, n, m: standortMasse(st2), lage: st2.lage ?? "1a", rolle: st2.rolle ?? "warenhaus" }));
     const innen = liste.filter((e) => e.lage === "1a" || e.lage === "b");
     E.randStandorte = liste.filter((e) => (e.lage === "center" || e.lage === "rand") && e.rolle !== "outlet");
     E.einkauf = [];
@@ -49037,11 +49127,11 @@
         if (liste.length) {
           let x = b2.x + 3, Dmax = 0;
           const frei6 = b2.w - 6 - (b2.art === "fachmarkt" ? 44 : 0);
-          const summe2 = liste.reduce((a, st) => a + st._w + 2, 0) + (liste.length - 1) * 10;
+          const summe2 = liste.reduce((a, st2) => a + st2._w + 2, 0) + (liste.length - 1) * 10;
           const k = Math.min(1, frei6 / summe2);
-          liste.forEach((st, n) => {
-            const W3 = Math.max(10, (st._w + 2) * k), D = Math.min(st._d + 2, b2.d - 40);
-            const { _typ, _w, _d, ...standort2 } = st;
+          liste.forEach((st2, n) => {
+            const W3 = Math.max(10, (st2._w + 2) * k), D = Math.min(st2._d + 2, b2.d - 40);
+            const { _typ, _w, _d, ...standort2 } = st2;
             if (n > 0) {
               neueParzelle(ctx, "slot:center_passage", x, b2.z + 3, 10 * k, Math.max(16, D * 0.7), ["+z", "+x"], "frei", { klasse: 3, landmarke: false });
               x += 10 * k;
@@ -49635,10 +49725,10 @@
     const liste = KIRCHEN_REGION[region] ?? KIRCHEN_REGION.mitte;
     const benutzt = /* @__PURE__ */ new Set();
     for (const p2 of parzellen.filter((q2) => q2.typ === "slot:kirche")) {
-      let st = p2.stil ?? liste[(p2.seed ?? 0) % liste.length];
-      if (benutzt.has(st)) st = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? st;
-      p2.stil = st;
-      benutzt.add(st);
+      let st2 = p2.stil ?? liste[(p2.seed ?? 0) % liste.length];
+      if (benutzt.has(st2)) st2 = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? st2;
+      p2.stil = st2;
+      benutzt.add(st2);
       if (benutzt.size > 1 && p2.turm === "doppel") p2.turm = "west";
     }
     const varianten = /* @__PURE__ */ new Set();
@@ -50405,11 +50495,11 @@
     Z2.belegt[s2.seite].push({ u0: Math.min(u0, u1), u1: Math.max(u0, u1), y0: Math.min(y0, y1), y1: Math.max(y0, y1), art });
   }
   function freieStuecke(Z2, s2, a, b2, y0, y1, m = 0.3) {
-    let st = [[a, b2]];
+    let st2 = [[a, b2]];
     for (const q2 of Z2.belegt[s2.seite]) {
       if (!(y0 < q2.y1 + m && y1 > q2.y0 - m)) continue;
       const neu = [];
-      for (const [p0, p1] of st) {
+      for (const [p0, p1] of st2) {
         if (q2.u1 + m <= p0 || q2.u0 - m >= p1) {
           neu.push([p0, p1]);
           continue;
@@ -50417,9 +50507,9 @@
         if (q2.u0 - m > p0) neu.push([p0, q2.u0 - m]);
         if (q2.u1 + m < p1) neu.push([q2.u1 + m, p1]);
       }
-      st = neu;
+      st2 = neu;
     }
-    return st;
+    return st2;
   }
   function freieHoehe(Z2, s2, u0, u1, y0, y1, m = 0.3) {
     const b2 = Z2.belegt[s2.seite].filter((q2) => u0 < q2.u1 + m && u1 > q2.u0 - m).map((q2) => [q2.y0 - m, q2.y1 + m]).sort((p2, q2) => p2[0] - q2[0]);
@@ -50658,8 +50748,8 @@
     const ROT4 = k.kettenFarbe ?? "#d23c32";
     const ROT_KAMPAGNE = k.kettenFarbe ?? "#c8102e";
     const Z2 = { S, scene: scene2, k, r: rng2(`${k.seed ?? "z"}/zustand`), ...opt, leute: opt.passanten !== false, belegt: { "+z": [], "+x": [] }, top: k.hoehe };
-    const st = zustandNormal(Zin);
-    const hat = st.hat;
+    const st2 = zustandNormal(Zin);
+    const hat = st2.hat;
     const start = S.anzahl;
     const seiten4 = { "+z": new Seite(S, k.x, k.z, k.w, k.d, "+z"), "+x": new Seite(S, k.x, k.z, k.w, k.d, "+x") };
     const sz = seiten4["+z"], sx = seiten4["+x"];
@@ -50743,7 +50833,7 @@
       Z2.top = Math.max(Z2.top, 8);
     }
     const haupt = () => eingaenge.find((x) => x.haupt) ?? eingaenge.find((x) => x.seite === "+z") ?? eingaenge[0] ?? { seite: rest["+z"] ? "+z" : "+x", u: (rest["+z"] ?? rest["+x"])[1] * 0.45, breite: 4 };
-    const geschl = st.status === "geschlossen";
+    const geschl = st2.status === "geschlossen";
     const tsAb = n >= 3 ? 2 : 1;
     for (const s2 of [sz, sx]) {
       const rs = rest[s2.seite];
@@ -50756,7 +50846,7 @@
         else if (hat("teilschliessung")) fensterZu(Z2, s2, e, e >= tsAb ? "dunkel" : "licht", rs[0], rs[1]);
       }
     }
-    const oben = st.untermieter.filter((m) => m.etage !== 0);
+    const oben = st2.untermieter.filter((m) => m.etage !== 0);
     const belegt2 = /* @__PURE__ */ new Map();
     for (const mi of oben) {
       if (mi.etage < 0) {
@@ -50789,8 +50879,8 @@
       mieterBand(Z2, best.s, mi, best.e, best.b0, best.b1);
       sperre(Z2, best.s, best.b0, best.b1, etagenY(k, best.e), etagenY(k, best.e) + GH3, "mieter");
     }
-    if (hat("offprice") && st.offpriceEtage > 0 && n >= 2) {
-      const e = Math.min(st.offpriceEtage, n - 1), L2 = Z2.nutz(sz);
+    if (hat("offprice") && st2.offpriceEtage > 0 && n >= 2) {
+      const e = Math.min(st2.offpriceEtage, n - 1), L2 = Z2.nutz(sz);
       const out = mieterInfo({ name: k.kettenName ? k.kettenName + " Restposten" : "HARTWIG OUTLET", etage: e });
       const y0 = etagenY(k, e) + 0.2, y1 = y0 + GH3 - 0.4, t = tFront(k) + 0.05;
       sz.q(L2 * 0.04, L2 * 0.8, y0, y1, t, t + 0.1, "#f5b400");
@@ -50802,7 +50892,7 @@
       plakat(Z2, sz, out.name, L2 * 0.18, (y0 + y1) / 2, t + 0.16, 2, out.fg, out.bg, L2 * 0.26);
       sperre(Z2, sz, L2 * 0.04, L2 * 0.8, y0, y1, "mieter");
     }
-    const alleMieter = [...mieterEG.filter((m) => m.typ !== "offprice"), ...st.untermieter.filter((m) => m.etage !== 0)];
+    const alleMieter = [...mieterEG.filter((m) => m.typ !== "offprice"), ...st2.untermieter.filter((m) => m.etage !== 0)];
     if (alleMieter.length >= 2 && opt.pylon !== false) {
       const he = haupt(), s2 = seiten4[he.seite];
       const u = Math.min(s2.L - 2, he.u + (he.breite ?? 4) / 2 + 3.2);
@@ -51035,18 +51125,18 @@
         fassadenBanner(Z2, sx, [{ text: "TEILFL\xC4CHE GESCHLOSSEN", h: 1.1, fg: "#ffffff" }], "#3b4248", { anteil: 0.6, zielH: 2.4, rahmen: ROT_KAMPAGNE, minSchrift: 0.5 });
       }
     }
-    if (st.aktion) {
-      const a = st.aktion;
-      const rb = st.rabatt, pr2 = (x) => `-${rb ?? x} %`;
+    if (st2.aktion) {
+      const a = st2.aktion;
+      const rb = st2.rabatt, pr2 = (x) => `-${rb ?? x} %`;
       const P2 = {
         sale: { bg: "#d8102e", fg: "#ffffff", z: [{ text: "SALE", h: 3.4, fg: "#ffffff" }, { text: rb ? `jetzt ${pr2(50)}` : "bis zu -50 %", h: 1.1, fg: "#ffe066" }], x: [{ text: pr2(50), h: 3, fg: "#ffffff" }], wimpel: ["#d8102e", "#ffffff"], ballon: ["#d8102e", "#ffffff"], fenster: rb ? [pr2(50), "SALE"] : ["-30 %", "-50 %", "SALE"], stopper: "SALE", bahn: "SALE %" },
         jubilaeum: { bg: "#1f3f6b", fg: "#e8c25a", z: [{ text: k.baujahr ? `${jahr2 - k.baujahr} JAHRE ${k.kettenName ? k.kettenName.toUpperCase() : "HARTWIG"}` : "JUBIL\xC4UM", h: 2.2, fg: "#e8c25a" }, { text: "Danke f\xFCr Ihre Treue", h: 0.9, fg: "#ffffff" }], x: [{ text: "JUBIL\xC4UM", h: 1.9, fg: "#e8c25a" }, { text: k.baujahr ? `seit ${k.baujahr}` : "seit jeher", h: 0.9, fg: "#ffffff" }], wimpel: ["#e8c25a", "#1f3f6b", ROT4], ballon: ["#e8c25a", ROT4, "#1f3f6b"], fenster: ["JUBIL\xC4UM", pr2(20)], stopper: "Jubelpreise", bahn: "JUBIL\xC4UM" },
         weihnachten: { bg: "#1f5a3a", fg: "#ffffff", z: [{ text: "WEIHNACHTSZAUBER", h: 2, fg: "#ffffff" }, { text: "Geschenke f\xFCr alle", h: 0.9, fg: "#f2d27a" }], x: [{ text: "FROHES FEST", h: 1.8, fg: "#f2d27a" }], wimpel: [ROT_KAMPAGNE, "#f2d27a", "#1f5a3a"], ballon: null, fenster: ["GESCHENKE", "\u2605"], stopper: "Geschenkideen" },
         blackfriday: { bg: "#121212", fg: "#ffd400", z: [{ text: "BLACK FRIDAY", h: 2.8, fg: "#ffffff" }, { text: rb ? `jetzt ${pr2(60)}` : "bis zu -60 %", h: 1.1, fg: "#ffd400" }], x: [{ text: pr2(60), h: 3, fg: "#ffd400" }], wimpel: ["#121212", "#ffd400"], ballon: ["#121212", "#ffd400"], fenster: [pr2(60), "BLACK FRIDAY"], stopper: pr2(60), bahn: "BLACK FRIDAY" }
-      }[a] ?? aktionStil(a, st, pr2);
-      if (st.mechanik === "punkte" && st.punkteFaktor && P2.z[1]) P2.z[1] = { ...P2.z[1], text: `${st.punkteFaktor}-fach Punkte mit der Karte` };
-      if (st.mechanik === "staffel" && P2.z[1]) P2.z[1] = { ...P2.z[1], text: "3 f\xFCr 2 auf ausgew\xE4hlte Artikel" };
-      if (st.mechanik === "coupon" && P2.z[1] && rb) P2.z[1] = { ...P2.z[1], text: `Coupon ${pr2(10)} ab Mindestbon` };
+      }[a] ?? aktionStil(a, st2, pr2);
+      if (st2.mechanik === "punkte" && st2.punkteFaktor && P2.z[1]) P2.z[1] = { ...P2.z[1], text: `${st2.punkteFaktor}-fach Punkte mit der Karte` };
+      if (st2.mechanik === "staffel" && P2.z[1]) P2.z[1] = { ...P2.z[1], text: "3 f\xFCr 2 auf ausgew\xE4hlte Artikel" };
+      if (st2.mechanik === "coupon" && P2.z[1] && rb) P2.z[1] = { ...P2.z[1], text: `Coupon ${pr2(10)} ab Mindestbon` };
       fassadenBanner(Z2, sz, P2.z, P2.bg, { anteil: 0.8, zielH: GROSS * 0.85, rahmen: "#ffffff" });
       fassadenBanner(Z2, sx, P2.x, P2.bg, { anteil: 0.5, zielH: GROSS * 0.75, rahmen: "#ffffff" });
       if (P2.bahn) for (const s22 of [sz, sx]) {
@@ -51057,10 +51147,10 @@
         if (!rest[s3.seite]) continue;
         const L2 = Z2.nutz(s3), t = tFront(k) + 0.6;
         const yW = Math.min(k.hoehe - 0.4, EG4 + (n >= 2 ? GH3 * 0.9 : 1.2));
-        const st2 = Math.max(2, Math.round(L2 / 11));
-        for (let i = 0; i < st2; i++) wimpel(Z2, s3, L2 * i / st2, L2 * (i + 1) / st2, EG4 + 0.2, t + 0.6, P2.wimpel, 0.9);
-        if (n >= 2) for (let i = 0; i < st2; i++) {
-          const ua = L2 * i / st2, ub = L2 * (i + 1) / st2;
+        const st22 = Math.max(2, Math.round(L2 / 11));
+        for (let i = 0; i < st22; i++) wimpel(Z2, s3, L2 * i / st22, L2 * (i + 1) / st22, EG4 + 0.2, t + 0.6, P2.wimpel, 0.9);
+        if (n >= 2) for (let i = 0; i < st22; i++) {
+          const ua = L2 * i / st22, ub = L2 * (i + 1) / st22;
           if (freieStuecke(Z2, s3, ua, ub, yW - 1.5, yW).some(([p2, q2]) => q2 - p2 > ub - ua - 0.1)) wimpel(Z2, s3, ua, ub, yW, t, P2.wimpel, 1.4);
         }
       }
@@ -51105,7 +51195,7 @@
       if (a === "blackfriday") menge(Z2, s2, he.u, 3, 24, 6, 2.6, { tMin: (he.t ?? 0) + 0.8 });
     }
     const imBetrieb = !hat("geschlossen") && !hat("leer") && !hat("verfall") && !hat("abriss");
-    if (imBetrieb && (st.marketing.karte || st.marketing.app || st.marketing.prospekt)) hausMarketing(Z2, st, seiten4, haupt(), fensterEG, rest);
+    if (imBetrieb && (st2.marketing.karte || st2.marketing.app || st2.marketing.prospekt)) hausMarketing(Z2, st2, seiten4, haupt(), fensterEG, rest);
     const belebt = !hat("geschlossen") && !hat("leer") && !hat("verfall") && !hat("abriss") && !hat("raeumung");
     if (belebt && Z2.leute) {
       for (const e of eingaenge) {
@@ -51119,8 +51209,8 @@
     }
     return { hoehe: Z2.top, teile: S.anzahl - start };
   }
-  function aktionStil(a, st, pr2) {
-    const rb = st.rabatt;
+  function aktionStil(a, st2, pr2) {
+    const rb = st2.rabatt;
     const bis = (x) => rb ? `jetzt ${pr2(x)}` : `bis zu -${x} %`;
     const D = {
       wsv: ["#1f4f8a", "WINTERSCHLUSSVERKAUF", bis(50), "#bfe3ff", ["#1f4f8a", "#ffffff", "#bfe3ff"], "WSV", "WSV %"],
@@ -51160,11 +51250,11 @@
     s2.q(u - b2 * 0.38, u - b2 * 0.2, y + h * 0.08, y + h * 0.3, t + 0.04, t + 0.055, "#d4a017");
     plakat(Z2, s2, "HARTWIG", u + b2 * 0.12, y + h * 0.22, t + 0.06, h * 0.2, "#ffffff", ROT, b2 * 0.5);
   }
-  function hausMarketing(Z2, st, seiten4, he, fensterEG, rest) {
+  function hausMarketing(Z2, st2, seiten4, he, fensterEG, rest) {
     const { k, S, r } = Z2, sz = seiten4["+z"], sx = seiten4["+x"];
     const s2 = seiten4[he.seite] ?? sz, bE = (he.breite ?? 4) / 2, tE = he.t ?? 0;
     const L2 = Z2.nutz(s2);
-    if (st.marketing.karte) {
+    if (st2.marketing.karte) {
       const sB = rest["+x"] ? sx : sz;
       fassadenBanner(Z2, sB, [{ text: "HARTWIG KARTE", h: 1.9, fg: "#ffffff" }, { text: "Punkte sammeln, Vorteile sichern", h: 0.75, fg: "#ffe2dc" }], ROT, { anteil: 0.5, zielH: Math.min(7, (k.hoehe - k.egHoehe) * 0.7), rahmen: "#ffffff", minSchrift: 0.55, u: Z2.nutz(sB) * 0.7, modus: "mitte" });
       const fe = fensterEG.filter((f) => f.b - f.a > 1.8);
@@ -51199,7 +51289,7 @@
       karteGrafik(Z2, s2, u, 1.15, t + 0.06, 0.8);
       plakat(Z2, s2, "Karte", u, 0.62, t + 0.08, 0.26, ROT, "#ffffff", 0.9);
     }
-    if (st.marketing.app) {
+    if (st2.marketing.app) {
       const sA = s2, u = Math.min(L2 - 1.5, he.u + bE + 5.2), t = tE + 3.4;
       sA.q(u - 0.1, u + 0.1, 0.3, 0.7, t - 0.1, t + 0.1, "#3a3f44");
       sA.q(u - 0.75, u + 0.75, 0.7, 3.1, t - 0.16, t + 0.16, "#2b3035");
@@ -51212,7 +51302,7 @@
       plakat(Z2, sA, "Jetzt laden", u, 0.95, t + 0.19, 0.2, "#ffffff", ROT, 1.1);
       Z2.top = Math.max(Z2.top, 3.2);
     }
-    if (st.marketing.prospekt) {
+    if (st2.marketing.prospekt) {
       const u = Math.min(L2 - 1, he.u + bE + 1.9), t = tE + 1.5;
       for (const du of [-0.5, 0.5]) s2.q(u + du - 0.04, u + du + 0.04, 0.3, 1.9, t - 0.2, t - 0.12, "#8f989f");
       s2.q(u - 0.55, u + 0.55, 0.3, 0.36, t - 0.35, t + 0.35, "#5f676e");
@@ -53116,8 +53206,8 @@
     K3.fensterBand = [1.5, 4.4];
     for (const s2 of K3.seiten) {
       const ax = erdgeschoss(K3, s2, { raster: 5, pfeiler: K3.c("#cfc6b4"), sockel: "#4e5257", sturz: rahmenF, pb: 0.6, tuer: v % 2 ? "schiebe" : "dreh" });
-      const st = ax.filter((a) => a.eingang).flatMap((a) => [a.a + 0.3, a.b - 0.3]);
-      vordach(K3, s2, { stil: "duenn", tiefe: 3, y: 4.7, farbe: "#f6f4ef", stuetzen: st });
+      const st2 = ax.filter((a) => a.eingang).flatMap((a) => [a.a + 0.3, a.b - 0.3]);
+      vordach(K3, s2, { stil: "duenn", tiefe: 3, y: 4.7, farbe: "#f6f4ef", stuetzen: st2 });
       const wu0 = 0, wu1 = wand2 && (s2.seite === "+z" || v % 4 === 0) ? Math.min(s2.L * 0.34, 26) : 0;
       if (wu1 > 0 && nOG > 0) {
         s2.q(wu0, wu1, EG2, Hb, 0, 0.3, heller(stein, 0.03));
@@ -53632,16 +53722,16 @@
     viertelzylinder2(S, cx, cz, R9 + aus - ein, y0, y1, f, 16);
   }
   function schriftGeruest(K3, s2, u, br, yFuss, yB, hb, t) {
-    const st = "#4f565c", yT = yB + hb * 1.55;
-    s2.q(u - br / 2 - 0.4, u + br / 2 + 0.4, yB, yB + 0.16, t - 0.2, t - 0.04, st);
-    s2.q(u - br / 2 - 0.4, u + br / 2 + 0.4, yT, yT + 0.16, t - 0.2, t - 0.04, st);
+    const st2 = "#4f565c", yT = yB + hb * 1.55;
+    s2.q(u - br / 2 - 0.4, u + br / 2 + 0.4, yB, yB + 0.16, t - 0.2, t - 0.04, st2);
+    s2.q(u - br / 2 - 0.4, u + br / 2 + 0.4, yT, yT + 0.16, t - 0.2, t - 0.04, st2);
     const nf = Math.max(3, Math.round((br + 0.8) / 2.2)), df = (br + 0.8) / nf;
     for (let k = 0; k <= nf; k++) {
       const uu = u - br / 2 - 0.4 + k * df;
-      s2.q(uu - 0.08, uu + 0.08, yFuss, yT + 0.16, t - 0.2, t - 0.04, st);
-      s2.q(uu - 0.07, uu + 0.07, yFuss, yB, t - 1.6, t - 1.45, st);
-      s2.kipp(0.07, Math.hypot(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st, 0, Math.atan2(1.5, yB - yFuss));
-      if (k < nf) s2.kipp(0.06, Math.hypot(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
+      s2.q(uu - 0.08, uu + 0.08, yFuss, yT + 0.16, t - 0.2, t - 0.04, st2);
+      s2.q(uu - 0.07, uu + 0.07, yFuss, yB, t - 1.6, t - 1.45, st2);
+      s2.kipp(0.07, Math.hypot(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st2, 0, Math.atan2(1.5, yB - yFuss));
+      if (k < nf) s2.kipp(0.06, Math.hypot(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st2, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
     }
   }
   function familie8(K3) {
@@ -54919,7 +55009,7 @@
   }
   function langhausKirche(S, scene2, p2, c) {
     const { x, z: z2 } = p2, w = p2.w, d = p2.d;
-    const st = c.stein, sH = c.hell, glas2 = c.glas ?? "#435666", dach3 = c.dach, bog = c.bogen;
+    const st2 = c.stein, sH = c.hell, glas2 = c.glas ?? "#435666", dach3 = c.dach, bog = c.bogen;
     let tB = 0;
     if (c.turm === "west" || c.turm === "seitlich") tB = clamp6(d * 0.45, 5, c.turmMax ?? 11);
     if (c.turm === "doppel") tB = clamp6(d * 0.32, 4.5, 10);
@@ -54951,7 +55041,7 @@
       return lo;
     };
     S.quader(nx0, 0, az0, nx1, Hs, az1 - 0.3, "#46525d");
-    lochwand(S, "+z", nx0, nx1, -0.3, Hs, az1, 0.6, st, fenster7(Hs * (c.fu ?? 0.22), Hs - (c.fo ?? Math.max(1.6, Hs * 0.14))));
+    lochwand(S, "+z", nx0, nx1, -0.3, Hs, az1, 0.6, st2, fenster7(Hs * (c.fu ?? 0.22), Hs - (c.fo ?? Math.max(1.6, Hs * 0.14))));
     gesims(S, nx0, az0, L2, az1 - az0, Hs, 0.45, 0.3, sH);
     for (let i = 0; i <= nJ; i++) {
       const u = nx0 + i * jb;
@@ -54970,7 +55060,7 @@
         S.add(g, dach3);
       }
       S.quader(nx0, Hs, nz0, nx1, Hn, nz1 - 0.3, "#46525d");
-      lochwand(S, "+z", nx0, nx1, Hs, Hn, nz1, 0.5, st, fenster7(Hs + (c.pult ?? 3.5) + 0.8, Hn - 1.2));
+      lochwand(S, "+z", nx0, nx1, Hs, Hn, nz1, 0.5, st2, fenster7(Hs + (c.pult ?? 3.5) + 0.8, Hn - 1.2));
       gesims(S, nx0, nz0, L2, nb, Hn, 0.5, 0.35, sH);
       if (c.strebe) for (let i = 0; i <= nJ; i++) {
         const u = nx0 + i * jb;
@@ -54982,51 +55072,51 @@
       }
     }
     satteldach2(S, nx0 - 0.3, nz0 - 0.8, L2 + (tT ? 0 : 0.6), nb + 1.6, Hn, dachH, dach3, "x", 0.2);
-    S.quader(nx1 - 0.6, 0, az0, nx1 + 0.06, Hs, az1, st);
-    if (c.schiff === "basilika") S.quader(nx1 - 0.6, Hs, nz0, nx1 + 0.06, Hn, nz1, st);
+    S.quader(nx1 - 0.6, 0, az0, nx1 + 0.06, Hs, az1, st2);
+    if (c.schiff === "basilika") S.quader(nx1 - 0.6, Hs, nz0, nx1 + 0.06, Hn, nz1, st2);
     if (c.turm === "doppel") {
       const fz0 = zA + tB, fz1 = zB - tB, fH = Hn + (c.giebel === "volute" ? 1 : 0);
-      S.quader(fx - 0.5, 0, fz0, x + w - 0.6, fH, fz1, st);
+      S.quader(fx - 0.5, 0, fz0, x + w - 0.6, fH, fz1, st2);
       const gh = c.giebel === "volute" ? (fz1 - fz0) * 0.75 : Math.min(dachH, (fz1 - fz0) * 0.7);
-      giebel2(S, "+x", fz0 + 0.1, fz1 - 0.1, fH, gh, x + w - 0.6, st, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
+      giebel2(S, "+x", fz0 + 0.1, fz1 - 0.1, fH, gh, x + w - 0.6, st2, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
       platte(S, "+x", cz - Math.min(2, (fz1 - fz0) * 0.22), 0.3, cz + Math.min(2, (fz1 - fz0) * 0.22), Math.min(7, Hn * 0.38), x + w - 0.6, "#4a3a2e", bog, 0.25);
       if (c.rose) rosette(S, "+x", cz, Hn * 0.66, x + w - 0.6, Math.min((fz1 - fz0) * 0.32, 4), sH, glas2);
       else platte(S, "+x", cz - 1.1, Hn * 0.5, cz + 1.1, Hn * 0.85, x + w - 0.6, glas2, bog);
       if (c.giebel === "volute") uhr(S, "+x", cz, fH + gh * 0.68, x + w - 0.5, 1.2);
     } else if (c.turm !== "west") {
-      giebel2(S, "+x", nz0 - 0.4, nz1 + 0.4, Hn, c.giebel === "volute" ? nb * 0.8 : dachH, nx1 + 0.3, st, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
+      giebel2(S, "+x", nz0 - 0.4, nz1 + 0.4, Hn, c.giebel === "volute" ? nb * 0.8 : dachH, nx1 + 0.3, st2, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
       platte(S, "+x", cz - Math.min(1.8, nb * 0.15), 0.3, cz + Math.min(1.8, nb * 0.15), Math.min(6, Hn * 0.4), nx1, "#4a3a2e", bog, 0.25);
       if (c.rose) rosette(S, "+x", cz, Hn * 0.68, nx1, Math.min(nb * 0.22, 3.6), sH, glas2);
       else if (c.rundfenster) {
         S.add(aufSeite(new three_module_exports.CylinderGeometry(nb * 0.12, nb * 0.12, 0.3, 16).rotateX(PI / 2), "+x", cz, Hn * 0.72, nx1 + 0.15), glas2);
       } else platte(S, "+x", cz - 1, Hn * 0.5, cz + 1, Hn * 0.86, nx1, glas2, bog);
     } else {
-      giebel2(S, "+x", nz0 - 0.4, nz1 + 0.4, Hn, dachH, nx1 - 0.1, st, "glatt", {});
+      giebel2(S, "+x", nz0 - 0.4, nz1 + 0.4, Hn, dachH, nx1 - 0.1, st2, "glatt", {});
     }
     if (c.chor !== "gerade") {
       const seg = c.chor === "rund" ? 14 : 6, hc = (c.schiff === "basilika" ? Hn : Hn) * 0.9;
-      halbrund(S, nx0, cz, rc, hc, st, seg);
+      halbrund(S, nx0, cz, rc, hc, st2, seg);
       halbkegel(S, nx0, cz, rc + 0.5, dachH * 0.72, hc, dach3, seg);
       if (c.schiff === "basilika" && c.umgang) {
-        halbrund(S, nx0, cz, rc + sb2 * 0.8, Hs, st, seg);
+        halbrund(S, nx0, cz, rc + sb2 * 0.8, Hs, st2, seg);
         halbkegel(S, nx0, cz, rc + sb2 * 0.8 + 0.5, 3, Hs, dach3, seg);
       }
     }
     let top = Hn + dachH;
     if (quer2) {
       const qz0 = z2 + 0.3, qz1 = c.turm === "seitlich" ? zB : z2 + d - 0.3;
-      S.quader(qx0, 0, qz0, qx1, Hn, qz1, st);
+      S.quader(qx0, 0, qz0, qx1, Hn, qz1, st2);
       gesims(S, qx0, qz0, qb, qz1 - qz0, Hn, 0.5, 0.3, sH);
       const hq = dachH * (qb + 0.8) / (nb + 1.6);
       satteldach2(S, qx0 - 0.4, qz0 - 0.3, qb + 0.8, qz1 - qz0 + 0.6, Hn, hq, dach3, "z", 0.2);
-      giebel2(S, "+z", qx0 - 0.1, qx1 + 0.1, Hn, c.giebel === "volute" ? qb * 0.75 : hq, qz1 + 0.35, st, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
+      giebel2(S, "+z", qx0 - 0.1, qx1 + 0.1, Hn, c.giebel === "volute" ? qb * 0.75 : hq, qz1 + 0.35, st2, c.giebel, { hell: sH, blenden: c.blenden, blendF: c.blendF });
       const qm = (qx0 + qx1) / 2;
       if (c.rose) rosette(S, "+z", qm, Hn * 0.62, qz1, Math.min(qb * 0.3, Hn * 0.2), sH, glas2);
       else platte(S, "+z", qm - qb * 0.15, Hn * 0.4, qm + qb * 0.15, Hn * 0.85, qz1, glas2, bog);
       platte(S, "+z", qm - 1.4, 0.3, qm + 1.4, Math.min(5.5, Hn * 0.3), qz1, "#4a3a2e", bog, 0.25);
       if (c.vierung) {
         const rv = Math.min(qb, nb) * 0.38, hv = dachH + Hn * 0.3;
-        zyl4(S, rv, rv, hv, qm, Hn, cz, st, 8);
+        zyl4(S, rv, rv, hv, qm, Hn, cz, st2, 8);
         for (let i = 0; i < 8; i++) {
           const a = i / 8 * 2 * PI + PI / 8;
           if (Math.cos(a) < -0.3 || Math.sin(a) < -0.3) continue;
@@ -55059,29 +55149,29 @@
     const tOpt = { bogen: bog, hell: sH, blenden: c.blenden, blendF: c.blendF, romanisch: c.romanischTurm, schall: c.schall, stufen: c.stufen };
     if (c.turm === "west") {
       const tx0 = x + w - tB, tz0 = cz - tB / 2;
-      turm(S, tx0, tz0, tB, c.Ht, st, { ...tOpt, portal: true });
+      turm(S, tx0, tz0, tB, c.Ht, st2, { ...tOpt, portal: true });
       top = Math.max(top, turmHelm(S, c.helm, tx0 + tB / 2, c.Ht + 0.4, tz0 + tB / 2, tB, c.helmF, sH));
     } else if (c.turm === "doppel") {
       for (const [tz0, mitUhr] of [[zA, false], [zB - tB, c.uhr !== false]]) {
-        turm(S, x + w - tB, tz0, tB, c.Ht, st, { ...tOpt, uhr: mitUhr, portal: false });
+        turm(S, x + w - tB, tz0, tB, c.Ht, st2, { ...tOpt, uhr: mitUhr, portal: false });
         top = Math.max(top, turmHelm(S, c.helm, x + w - tB / 2, c.Ht + 0.4, tz0 + tB / 2, tB, c.helmF, sH));
       }
     } else if (c.turm === "seitlich") {
       const tx0 = x + w - tB - (c.seitlichVersatz ?? 0), tz0 = z2 + d - tB;
-      turm(S, tx0, tz0, tB, c.Ht, st, { ...tOpt, portal: false });
+      turm(S, tx0, tz0, tB, c.Ht, st2, { ...tOpt, portal: false });
       platte(S, "+z", tx0 + tB / 2 - 1.3, 0.3, tx0 + tB / 2 + 1.3, 4.8, tz0 + tB, "#4a3a2e", bog, 0.2);
       top = Math.max(top, turmHelm(S, c.helm, tx0 + tB / 2, c.Ht + 0.4, tz0 + tB / 2, tB, c.helmF, sH));
     }
     return top;
   }
   function klassizistischeKirche(S, scene2, p2, c) {
-    const { x, z: z2, w, d } = p2, r = c.r, st = c.stein, sH = c.hell, kup = c.helmF;
+    const { x, z: z2, w, d } = p2, r = c.r, st2 = c.stein, sH = c.hell, kup = c.helmF;
     const pt = clamp6(d * 0.2, 3, 5.5), bz1 = z2 + d - pt;
     let top;
     if (c.form === "rotunde") {
       const R9 = Math.min((bz1 - z2) / 2 - 0.3, w * 0.3), cx = x + w / 2, cz = z2 + (bz1 - z2) / 2 + 0.3;
       const H = clamp6(R9 * 1.05, 9, 16);
-      zyl4(S, R9, R9, H, cx, 0, cz, st, 28);
+      zyl4(S, R9, R9, H, cx, 0, cz, st2, 28);
       for (let i = 0; i < 16; i++) {
         const a = i / 16 * 2 * PI;
         if (Math.cos(a) < -0.25 && Math.sin(a) < -0.25) continue;
@@ -55090,7 +55180,7 @@
       zyl4(S, R9 + 0.5, R9 + 0.5, 0.9, cx, H, cz, sH, 28);
       drehform(S, [[R9 + 0.3, 0], [R9 * 0.66, R9 * 0.22], [0, R9 * 0.22]], cx, H + 0.9, cz, c.dach, 28);
       const Rt = R9 * 0.62, Ht = R9 * 0.4, y0 = H + 0.9 + R9 * 0.18;
-      zyl4(S, Rt, Rt, Ht, cx, y0, cz, st, 20);
+      zyl4(S, Rt, Rt, Ht, cx, y0, cz, st2, 20);
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * 2 * PI;
         if (Math.cos(a) < -0.25 && Math.sin(a) < -0.25) continue;
@@ -55103,16 +55193,16 @@
       haube(S, 1.2, cx, yl + 1.9, cz, kup, 1.1, 8);
       kreuz(S, cx, yl + 3.2, cz, 0.7);
       top = yl + 5.5;
-      portikus(S, scene2, cx - R9 * 0.62, cx + R9 * 0.62, cz + R9 - 1.2, H, pt - 1.4, st, c.saeulen ?? 6, { dach: c.dach });
+      portikus(S, scene2, cx - R9 * 0.62, cx + R9 * 0.62, cz + R9 - 1.2, H, pt - 1.4, st2, c.saeulen ?? 6, { dach: c.dach });
     } else {
       const bx0 = x + 0.8, bx1 = x + w - 0.8, H = clamp6(d * 0.62, 10, 15), cx = (bx0 + bx1) / 2, cz = (z2 + 1 + bz1) / 2;
-      lochBlock(S, bx0, z2 + 1, bx1 - bx0, bz1 - z2 - 1, 0, H, st, { y0: 1.2, geschosse: 1, gh: H - 1.2, raster: 5, fw: 2, fh: H * 0.5, bruestung: H * 0.2, bogen: true, tiefe: 0.6 });
+      lochBlock(S, bx0, z2 + 1, bx1 - bx0, bz1 - z2 - 1, 0, H, st2, { y0: 1.2, geschosse: 1, gh: H - 1.2, raster: 5, fw: 2, fh: H * 0.5, bruestung: H * 0.2, bogen: true, tiefe: 0.6 });
       for (let u = bx0 + 0.2; u <= bx1; u += (bx1 - bx0) / 6) S.box(0.8, H, 0.3, u, H / 2, bz1 + 0.15, sH);
       gesims(S, bx0, z2 + 1, bx1 - bx0, bz1 - z2 - 1, H, 1, 0.5, sH);
       S.quader(bx0 + 0.2, H + 0.5, z2 + 1.2, bx1 - 0.2, H + 1.6, bz1 - 0.2, sH);
       satteldach2(S, bx0 + 0.6, z2 + 1.6, bx1 - bx0 - 1.2, bz1 - z2 - 2.2, H + 1.6, 2.4, c.dach, "x", (bz1 - z2) * 0.3);
       const R9 = clamp6(Math.min(d * 0.3, w * 0.17), 4, 9), y0 = H + 1.6;
-      zyl4(S, R9, R9, R9 * 0.7, cx, y0, cz, st, 20);
+      zyl4(S, R9, R9, R9 * 0.7, cx, y0, cz, st2, 20);
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * 2 * PI;
         if (Math.cos(a) < -0.25 && Math.sin(a) < -0.25) continue;
@@ -55127,10 +55217,10 @@
       kreuz(S, cx, yl + 2.9, cz, 0.7);
       top = yl + 5;
       const pb = clamp6(w * 0.42, 9, 22);
-      portikus(S, scene2, cx - pb / 2, cx + pb / 2, bz1, H, pt - 2.6, st, pb > 15 ? 6 : 4, { dach: c.dach });
+      portikus(S, scene2, cx - pb / 2, cx + pb / 2, bz1, H, pt - 2.6, st2, pb > 15 ? 6 : 4, { dach: c.dach });
       if (c.tuerme) for (const tz of [z2 + 1.2]) {
         const t = 4.5, tx0 = bx1 - t;
-        S.quader(tx0, 0, tz, bx1 + 0.3, H + 9, tz + t, st);
+        S.quader(tx0, 0, tz, bx1 + 0.3, H + 9, tz + t, st2);
         gesims(S, tx0, tz, t + 0.3, t, H + 9, 0.6, 0.4, sH);
         for (const seite of ["+z", "+x"]) {
           const f = seite === "+z" ? tz + t : bx1 + 0.3, uc = seite === "+z" ? tx0 + t / 2 : tz + t / 2;
@@ -55142,12 +55232,12 @@
     return top;
   }
   function nachkriegsKirche(S, scene2, p2, c) {
-    const { x, z: z2, w, d } = p2, r = c.r, st = c.stein, bunt4 = c.glasBunt;
+    const { x, z: z2, w, d } = p2, r = c.r, st2 = c.stein, bunt4 = c.glasBunt;
     const ct = clamp6(d * 0.18, 2.8, 4.2), Hc = clamp6(w * 0.62, 18, 34);
     const bx0 = x + 0.5, bx1 = x + w - ct - 3.5, bz0 = z2 + 0.8, bz1 = z2 + d - 0.8, bw = bx1 - bx0, bd = bz1 - bz0;
     let top;
     if (c.form === "zelt") {
-      S.quader(bx0, 0, bz0, bx1, 3.6, bz1, st);
+      S.quader(bx0, 0, bz0, bx1, 3.6, bz1, st2);
       S.quader(bx0 + 1, 0.4, bz1, bx1 - 1, 3, bz1 + 0.05, bunt4);
       const hz = Math.min(bw, bd) * 1.05;
       pyramide(S, bw + 1.4, bd + 1.4, hz, (bx0 + bx1) / 2, 3.6, (bz0 + bz1) / 2, c.dach);
@@ -55162,8 +55252,8 @@
       S.quader(bx0, 0, bz0, bx1 - 0.3, H, bz1 - 0.3, bunt4);
       const lo = [];
       for (let u = bx0 + 1.2; u < bx1 - 1; u += 1.5) lo.push({ u0: u, u1: u + 0.55, v0: 1.2, v1: H - 1 });
-      lochwand(S, "+z", bx0, bx1, -0.3, H, bz1, 0.5, st, lo);
-      lochwand(S, "+x", bz0, bz1, -0.3, H, bx1, 0.5, st, [{ u0: (bz0 + bz1) / 2 - 0.5, u1: (bz0 + bz1) / 2 + 0.5, v0: 1, v1: H - 1 }, { u0: (bz0 + bz1) / 2 - 2.4, u1: (bz0 + bz1) / 2 - 0.9, v0: H * 0.62, v1: H * 0.62 + 0.9 }, { u0: (bz0 + bz1) / 2 + 0.9, u1: (bz0 + bz1) / 2 + 2.4, v0: H * 0.62, v1: H * 0.62 + 0.9 }]);
+      lochwand(S, "+z", bx0, bx1, -0.3, H, bz1, 0.5, st2, lo);
+      lochwand(S, "+x", bz0, bz1, -0.3, H, bx1, 0.5, st2, [{ u0: (bz0 + bz1) / 2 - 0.5, u1: (bz0 + bz1) / 2 + 0.5, v0: 1, v1: H - 1 }, { u0: (bz0 + bz1) / 2 - 2.4, u1: (bz0 + bz1) / 2 - 0.9, v0: H * 0.62, v1: H * 0.62 + 0.9 }, { u0: (bz0 + bz1) / 2 + 0.9, u1: (bz0 + bz1) / 2 + 2.4, v0: H * 0.62, v1: H * 0.62 + 0.9 }]);
       const n = Math.max(3, Math.round(bw / 4)), fb6 = bw / n;
       for (let i = 0; i < n; i++) {
         const g = dachProfil(bd + 1.2, fb6, 2.6, 0, "z");
@@ -55173,8 +55263,8 @@
       top = H + 2.6;
     } else {
       const H = clamp6(d * 0.6, 9, 14);
-      S.quader(bx0, 0, bz0, bx1, H, bz1, st);
-      S.quader(bx0 - 0.2, H, bz0 - 0.2, bx1 + 0.2, H + 0.6, bz1 + 0.2, heller(st, 0.04));
+      S.quader(bx0, 0, bz0, bx1, H, bz1, st2);
+      S.quader(bx0 - 0.2, H, bz0 - 0.2, bx1 + 0.2, H + 0.6, bz1 + 0.2, heller(st2, 0.04));
       const mz = (bz0 + bz1) / 2;
       S.quader(bx1, 1.2, mz - 0.5, bx1 + 0.06, H - 1.2, mz + 0.5, bunt4);
       S.quader(bx1, H * 0.62, mz - 2.6, bx1 + 0.06, H * 0.62 + 1, mz + 2.6, bunt4);
@@ -55183,7 +55273,7 @@
       top = H + 0.6;
     }
     const tx = x + w - ct / 2 - 0.5, tz = z2 + d - ct / 2 - 1.5;
-    const turmF = c.turmF ?? st;
+    const turmF = c.turmF ?? st2;
     if (c.campanile === "scheibe") {
       S.quader(tx - ct / 2, 0, tz - 0.6, tx + ct / 2, Hc, tz + 0.6, turmF);
       for (let k = 0; k < 3; k++) S.quader(tx - ct * 0.32, Hc - 6 + k * 1.6, tz + 0.6, tx + ct * 0.32, Hc - 5 + k * 1.6, tz + 0.65, "#3a3f44");
@@ -55194,7 +55284,7 @@
       S.box(ct * 0.4, 1.4, ct * 0.4, tx, Hc - 3.4, tz, "#5a4a32");
     }
     kreuz(S, tx, Hc + 0.3, tz, 1.3, c.kreuzF ?? "#2f3338");
-    S.quader(bx1, 0.3, tz - 0.25, tx - ct / 2, 2, tz + 0.25, st);
+    S.quader(bx1, 0.3, tz - 0.25, tx - ct / 2, 2, tz + 0.25, st2);
     return Math.max(top, Hc + 3.2);
   }
   function domNeugotik(S, scene2, p2, c) {
@@ -56744,15 +56834,15 @@
     const stein = p2.stein ?? (back ? waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]) : waehle2(r, ["#cfc6b4", "#c9bfae", "#d9c4a8", "#bfae96"]));
     const hell4 = back ? "#e3d6c0" : heller(stein, 0.05), dachF = waehle2(r, ["#56636c", "#b4583f", "#6f9a7d"]), dunkel3 = "#3a3f44";
     if (art === "barock") {
-      const st = waehle2(r, ["#e3d3bd", "#ece5d7", "#d9c4a8"]), hl = heller(st, 0.05), H2 = clamp6(w * 0.75, 12, 18);
+      const st2 = waehle2(r, ["#e3d3bd", "#ece5d7", "#d9c4a8"]), hl = heller(st2, 0.05), H2 = clamp6(w * 0.75, 12, 18);
       const lo = [{ u0: x + w / 2 - w * 0.17, u1: x + w / 2 + w * 0.17, v0: 0.31, v1: H2 * 0.66, bogen: true }];
       for (const s2 of [-1, 1]) lo.push({ u0: x + w / 2 + s2 * w * 0.33 - w * 0.08, u1: x + w / 2 + s2 * w * 0.33 + w * 0.08, v0: 0.31, v1: H2 * 0.42, bogen: true });
       const sh = rechteck2(x, -0.3, x + w, H2);
       for (const l of lo) sh.holes.push(oeffnung(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
-      flaeche(S, "+z", sh, z2 + d * 0.7, d * 0.4, st);
+      flaeche(S, "+z", sh, z2 + d * 0.7, d * 0.4, st2);
       for (const s2 of [-1, -0.5, 0.5, 1]) saeule(S, x + w / 2 + s2 * w * 0.46, 0.3, z2 + d * 0.7 + 0.7, H2 - 0.3, 0.45, hl);
       S.quader(x - 0.3, H2, z2 + d * 0.3 - 0.3, x + w + 0.3, H2 + 1, z2 + d * 0.7 + 1.3, hl);
-      S.quader(x + 0.5, H2 + 1, z2 + d * 0.3, x + w - 0.5, H2 + 4.2, z2 + d * 0.7 + 0.4, st);
+      S.quader(x + 0.5, H2 + 1, z2 + d * 0.3, x + w - 0.5, H2 + 4.2, z2 + d * 0.7 + 0.4, st2);
       schildPasst(scene2, waehle2(r, ["Neues Tor", "Siegestor", "K\xF6nigstor", "Friedenstor"]), "+z", x + w / 2, H2 + 2.6, z2 + d * 0.7 + 0.4, 1.2, w * 0.7, "#3a2e24");
       const fy = H2 + 4.2, fz = z2 + d / 2, br = "#5f8a78";
       S.box(2.6, 1.2, 1.8, x + w / 2, fy + 0.8, fz, br);
@@ -56949,13 +57039,13 @@
       return { hoehe: H2 + R9 * 1.65 + 2.7, teile: S.anzahl };
     }
     if (art === "stein") {
-      const st = waehle2(r, ["#cfc6b4", "#d9c4a8", "#c9bfae"]), H2 = zw(r, 22, 28);
-      zyl4(S, R9 * 0.95, R9 * 1.1, H2, cx, 0, cz, st, 16);
+      const st2 = waehle2(r, ["#cfc6b4", "#d9c4a8", "#c9bfae"]), H2 = zw(r, 22, 28);
+      zyl4(S, R9 * 0.95, R9 * 1.1, H2, cx, 0, cz, st2, 16);
       for (const k of [0.25, 0.5, 0.75]) {
         S.box(0.9, 2, 0.3, cx, H2 * k, cz + R9, "#3f4c58");
-        zyl4(S, R9 * 1.06 - k * 0.15 + 0.15, R9 * 1.06 - k * 0.15 + 0.15, 0.4, cx, H2 * k - 1.6, cz, heller(st, 0.05), 16);
+        zyl4(S, R9 * 1.06 - k * 0.15 + 0.15, R9 * 1.06 - k * 0.15 + 0.15, 0.4, cx, H2 * k - 1.6, cz, heller(st2, 0.05), 16);
       }
-      zyl4(S, R9 * 1.5, R9 * 1, 2.5, cx, H2, cz, heller(st, 0.05), 16);
+      zyl4(S, R9 * 1.5, R9 * 1, 2.5, cx, H2, cz, heller(st2, 0.05), 16);
       zyl4(S, R9 * 1.5, R9 * 1.5, 6, cx, H2 + 2.5, cz, "#f1ece2", 16);
       for (let i = 0; i < 10; i++) {
         const a = i / 10 * 2 * PI;
@@ -58479,16 +58569,16 @@
     K3.hoeheDach = Math.max(K3.hoeheDach ?? 0, y + 7.3);
   }
   function statusSport(K3) {
-    const st = K3.Z;
+    const st2 = K3.Z;
     const zukleben = (g) => {
       g.s.q(g.a + 0.05, g.b - 0.05, g.y0 + 0.1, g.y1 - 0.1, g.t + 0.02, g.t + 0.07, g.tuer ? "#c9c2ae" : Math.round(g.a) % 2 ? "#ece3cc" : "#e2d6b8");
       if (!g.tuer && g.b - g.a > 1.5) g.s.kipp(Math.hypot(g.b - g.a, g.y1 - g.y0) * 0.8, 0.2, 0.03, (g.a + g.b) / 2, (g.y0 + g.y1) / 2, g.t + 0.09, "#cbbd98", 0.6);
     };
-    if (st.hat("leer") || st.hat("abriss")) {
+    if (st2.hat("leer") || st2.hat("abriss")) {
       for (const g of K3.glas) zukleben(g);
       return;
     }
-    if (st.hat("verfall")) {
+    if (st2.hat("verfall")) {
       for (const g of K3.glas) {
         if (K3.r() < 0.6) zukleben(g);
         else {
@@ -58512,7 +58602,7 @@
         g.s.q(g.a + 0.13, g.b - 0.13, g.y1 - 0.35, g.y1 - 0.25, front3 + 0.08, front3 + 0.1, "#737c79");
       }
     }
-    if (st.status === "geschlossen") {
+    if (st2.status === "geschlossen") {
       for (const g of K3.glas) if (!g.eg) {
         g.s.q(g.a, g.b, g.y0 + 0.2, g.y1 - 0.2, g.t + 0.02, g.t + 0.06, "#4a5057");
         for (let y = g.y0 + 0.5; y < g.y1 - 0.3; y += 0.45) g.s.q(g.a, g.b, y, y + 0.06, g.t + 0.06, g.t + 0.09, "#363b40");
@@ -61687,8 +61777,8 @@
     L2.zyl(0.4, 0.45, 0.45, lx, 0.9, lz, "#5bc0eb", 10);
     const n = d < 0.5 ? 6 : 12;
     for (let i = 0; i < n; i++) {
-      const st = i < 6 ? 0 : i < 10 ? 1 : 2, rr = [0.8, 0.55, 0.25][st], a = i / (st === 0 ? 6 : 4) * PI3 * 2 + st;
-      teddy(L2, lx + Math.cos(a) * rr, 0.45 + st * 0.45, lz + Math.sin(a) * rr, r, zw(r, 0.8, 1.15));
+      const st2 = i < 6 ? 0 : i < 10 ? 1 : 2, rr = [0.8, 0.55, 0.25][st2], a = i / (st2 === 0 ? 6 : 4) * PI3 * 2 + st2;
+      teddy(L2, lx + Math.cos(a) * rr, 0.45 + st2 * 0.45, lz + Math.sin(a) * rr, r, zw(r, 0.8, 1.15));
     }
     teddy(L2, lx, 1.35, lz, r, 1.7);
   }
@@ -93274,7 +93364,7 @@
       s2.lineTo(u1, vs2);
       s2.absarc((u0 + u1) / 2, vs2, b2 / 2, 0, PI5, false);
     } else if (art === "segment") {
-      const st = b2 * 0.18, vs2 = v1 - st, rad2 = (b2 * b2 / 4 + st * st) / (2 * st), cy = v1 - rad2, a0 = Math.asin(b2 / 2 / rad2);
+      const st2 = b2 * 0.18, vs2 = v1 - st2, rad2 = (b2 * b2 / 4 + st2 * st2) / (2 * st2), cy = v1 - rad2, a0 = Math.asin(b2 / 2 / rad2);
       s2.lineTo(u1, vs2);
       s2.absarc((u0 + u1) / 2, cy, rad2, PI5 / 2 - a0, PI5 / 2 + a0, false);
     } else if (art === "spitz") {
@@ -93724,19 +93814,19 @@
   function stahlfachwerkBau(S, scene2, p2, o) {
     const { x0, z0, w, d, H } = o, r = o.r;
     S.quader(x0, 0, z0, x0 + w, H, z0 + d, o.ausfachung);
-    const st = o.stahl, fr = o.feld ?? 3.6;
+    const st2 = o.stahl, fr = o.feld ?? 3.6;
     for (const F2 of sichtbar2(p2, x0, z0, w, d)) {
       const n = Math.max(1, Math.round(F2.L / fr)), du = F2.L / n;
-      for (let i = 0; i <= n; i++) fb(S, F2, i * du - 0.18, i * du + 0.18, 0, H, 0, 0.2, st);
+      for (let i = 0; i <= n; i++) fb(S, F2, i * du - 0.18, i * du + 0.18, 0, H, 0, 0.2, st2);
       const nz = Math.max(2, Math.round(H / fr)), dv = H / nz;
-      for (let k = 0; k <= nz; k++) fb(S, F2, -0.2, F2.L + 0.2, k * dv - 0.15, k * dv + 0.15, 0, 0.18, st);
+      for (let k = 0; k <= nz; k++) fb(S, F2, -0.2, F2.L + 0.2, k * dv - 0.15, k * dv + 0.15, 0, 0.18, st2);
       for (let i = 0; i < n; i++) for (let k = 1; k < nz; k++) {
         const q2 = hashR(i, k, o.salz ?? 0);
         if (q2 < (o.fensterAnteil ?? 0.35)) {
           let glas2 = o.glas ?? "#5d6c76";
           if (o.zustand === "stillgelegt" && q2 < 0.1) glas2 = "#2a2f33";
           fb(S, F2, i * du + 0.4, (i + 1) * du - 0.4, k * dv + 0.4, (k + 1) * dv - 0.4, 0, 0.08, glas2);
-          fb(S, F2, i * du + 0.4, (i + 1) * du - 0.4, k * dv + dv / 2 - 0.05, k * dv + dv / 2 + 0.05, 0, 0.12, st);
+          fb(S, F2, i * du + 0.4, (i + 1) * du - 0.4, k * dv + dv / 2 - 0.05, k * dv + dv / 2 + 0.05, 0, 0.12, st2);
         }
       }
       if (o.lichtband) {
@@ -93744,7 +93834,7 @@
         for (let i = 0; i <= n; i += 2) fb(S, F2, i * du - 0.06, i * du + 0.06, 0.3, H, 0.2, 0.28, o.lichtband);
       }
     }
-    flachdach2(S, x0, z0, w, d, H, st, null, "#7d7a74", 0.5);
+    flachdach2(S, x0, z0, w, d, H, st2, null, "#7d7a74", 0.5);
     return H;
   }
   function hashR(a, b2, c = 0) {
@@ -93834,8 +93924,8 @@
     }
     return out;
   }
-  function haldePunkt(st, cx, cz, rx, rz, k, a, q2) {
-    const s2 = st[Math.min(k, st.length - 1)], rr = (s2.rb + (s2.rt - s2.rb) * q2) * 0.92;
+  function haldePunkt(st2, cx, cz, rx, rz, k, a, q2) {
+    const s2 = st2[Math.min(k, st2.length - 1)], rr = (s2.rb + (s2.rt - s2.rb) * q2) * 0.92;
     return [cx + Math.cos(a) * rr * rx, s2.y0 + (s2.y1 - s2.y0) * q2, cz + Math.sin(a) * rr * rz];
   }
   var ZECHEN = ["Zeche Gl\xFCckstern", "Zeche Adolphine", "Zeche Hermine", "Zeche Graf Emscherberg", "Zeche Neue Mathilde", "Zeche Vereinigte Lerche"];
@@ -93862,25 +93952,25 @@
     stab(S, a, b2, 0.12, c, 4);
   }
   function foerdergeruest(S, p2, sx, sz, Hs, Hg, v, c, r) {
-    const st = c.stahl, st2 = c.stahl2;
+    const st2 = c.stahl, st22 = c.stahl2;
     const bx = 3.2, bz = 3.6;
     if (v === "doppelbock") {
-      gitterturm(S, sx - bx, sz - bz, sx + bx, sz + bz, Hs, Hg, st, 5, 0.7);
+      gitterturm(S, sx - bx, sz - bz, sx + bx, sz + bz, Hs, Hg, st2, 5, 0.7);
       for (const sg of [1, -1]) {
-        for (const dz of [-1, 1]) balken(S, [sx + sg * bx, Hg - 1, sz + dz * bz], [sx + sg * 14, 0.3, sz + dz * 5], 0.9, 0.9, st);
+        for (const dz of [-1, 1]) balken(S, [sx + sg * bx, Hg - 1, sz + dz * bz], [sx + sg * 14, 0.3, sz + dz * 5], 0.9, 0.9, st2);
         for (let k = 1; k < 5; k++) {
           const t = k / 5, xx = sx + sg * (bx + (14 - bx) * t), yy = Hg - 1 - (Hg - 1.3) * t;
-          S.box(0.4, 0.4, 2 * (bz + (5 - bz) * t), xx, yy, sz, st2);
+          S.box(0.4, 0.4, 2 * (bz + (5 - bz) * t), xx, yy, sz, st22);
           const t2 = (k + 1) / 5, xx2 = sx + sg * (bx + (14 - bx) * t2), yy2 = Hg - 1 - (Hg - 1.3) * t2;
-          if (k < 4) stab(S, [xx, yy, sz - (bz + (5 - bz) * t)], [xx2, yy2, sz + (bz + (5 - bz) * t2)], 0.13, st2, 4);
+          if (k < 4) stab(S, [xx, yy, sz - (bz + (5 - bz) * t)], [xx2, yy2, sz + (bz + (5 - bz) * t2)], 0.13, st22, 4);
         }
         if (c.licht) for (const dz of [-1, 1]) lichtlinie(S, [sx + sg * bx, Hg - 1, sz + dz * (bz + 0.5)], [sx + sg * 14, 0.6, sz + dz * 5.5], c.licht);
       }
-      S.quader(sx - bx - 1, Hg, sz - bz - 1, sx + bx + 1, Hg + 0.5, sz + bz + 1, st2);
-      S.quader(sx - bx - 0.6, Hg - 6.5, sz - bz - 0.6, sx + bx + 0.6, Hg - 6.1, sz + bz + 0.6, st2);
+      S.quader(sx - bx - 1, Hg, sz - bz - 1, sx + bx + 1, Hg + 0.5, sz + bz + 1, st22);
+      S.quader(sx - bx - 0.6, Hg - 6.5, sz - bz - 0.6, sx + bx + 0.6, Hg - 6.1, sz + bz + 0.6, st22);
       for (const dz of [-2.1, 2.1]) {
-        seilscheibe(S, sx, Hg + 3.6, sz + dz, 3, "z", st2);
-        seilscheibe(S, sx, Hg - 3.3, sz + dz * 0.95, 2.6, "z", st2);
+        seilscheibe(S, sx, Hg + 3.6, sz + dz, 3, "z", st22);
+        seilscheibe(S, sx, Hg - 3.3, sz + dz * 0.95, 2.6, "z", st22);
         S.box(1.2, 0.8, 0.5, sx, Hg + 0.9, sz + dz, "#2f3438");
       }
       return { seilA: [[sx + 2.6, Hg + 5.2], [sx + 3, Hg + 3.6]], seilB: [[sx - 2.3, Hg - 2], [sx - 2.6, Hg - 3.3]] };
@@ -93911,33 +94001,33 @@
       }
       flachdach2(S, sx - tw, sz - tw, 2 * tw, 2 * tw, H, null, null, "#6b6560");
       for (const dz of [-2.1, 2.1]) {
-        seilscheibe(S, sx, H + 4.2, sz + dz, 3, "z", st2);
-        for (const dx of [-1.6, 1.6]) balken(S, [sx + dx * 1.6, H, sz + dz], [sx, H + 4.2, sz + dz], 0.35, 0.35, st);
+        seilscheibe(S, sx, H + 4.2, sz + dz, 3, "z", st22);
+        for (const dx of [-1.6, 1.6]) balken(S, [sx + dx * 1.6, H, sz + dz], [sx, H + 4.2, sz + dz], 0.35, 0.35, st2);
       }
       return { seilA: [[sx + 2.2, H + 6.3], [sx + 3, H + 4.2]], seilB: null };
     }
-    gitterturm(S, sx - bx, sz - bz, sx + bx, sz + bz, Hs, Hg, st, 5, 0.7);
-    for (const dz of [-1, 1]) balken(S, [sx + bx, Hg - 1.2, sz + dz * bz], [sx + 13, 0.3, sz + dz * 4.8], 1.4, 1.4, st);
+    gitterturm(S, sx - bx, sz - bz, sx + bx, sz + bz, Hs, Hg, st2, 5, 0.7);
+    for (const dz of [-1, 1]) balken(S, [sx + bx, Hg - 1.2, sz + dz * bz], [sx + 13, 0.3, sz + dz * 4.8], 1.4, 1.4, st2);
     for (let k = 1; k < 6; k++) {
       const t = k / 6, xx = sx + bx + (13 - bx) * t, yy = Hg - 1.2 - (Hg - 1.5) * t, zb = bz + (4.8 - bz) * t;
-      S.box(0.45, 0.45, 2 * zb, xx, yy, sz, st2);
+      S.box(0.45, 0.45, 2 * zb, xx, yy, sz, st22);
       if (k < 5) {
         const t2 = (k + 1) / 6, zb2 = bz + (4.8 - bz) * t2;
-        stab(S, [xx, yy, sz - zb], [sx + bx + (13 - bx) * t2, Hg - 1.2 - (Hg - 1.5) * t2, sz + zb2], 0.14, st2, 4);
+        stab(S, [xx, yy, sz - zb], [sx + bx + (13 - bx) * t2, Hg - 1.2 - (Hg - 1.5) * t2, sz + zb2], 0.14, st22, 4);
       }
-      if (k % 2 === 0) balken(S, [sx + bx, yy + 1.5, sz], [xx, yy, sz], 0.35, 0.35, st2);
+      if (k % 2 === 0) balken(S, [sx + bx, yy + 1.5, sz], [xx, yy, sz], 0.35, 0.35, st22);
     }
     if (c.licht) for (const dz of [-1, 1]) {
       lichtlinie(S, [sx + bx + 0.5, Hg - 1.2, sz + dz * (bz + 0.6)], [sx + 13.5, 0.6, sz + dz * 5.4], c.licht);
       lichtlinie(S, [sx - bx - 0.45, Hs, sz + dz * (bz + 0.45)], [sx - bx - 0.45, Hg, sz + dz * (bz + 0.45)], c.licht);
     }
-    S.quader(sx - bx - 1, Hg, sz - bz - 1.2, sx + bx + 1.6, Hg + 0.5, sz + bz + 1.2, st2);
-    for (const [a, b2] of [[sz - bz - 1.2, sz - bz - 1.1], [sz + bz + 1.1, sz + bz + 1.2]]) S.quader(sx - bx - 1, Hg + 0.5, a, sx + bx + 1.6, Hg + 1.5, b2, st2);
-    S.quader(sx - 1.6, Hg + 0.5, sz - bz, sx + 1.6, Hg + 1.4, sz + bz, st2);
-    for (const dz of [-2.1, 2.1]) seilscheibe(S, sx, Hg + 4.4, sz + dz, 3.6, "z", st2);
-    balken(S, [sx - 3, Hg + 1.4, sz], [sx, Hg + 8.4, sz], 0.4, 0.4, st);
-    balken(S, [sx + 3, Hg + 1.4, sz], [sx, Hg + 8.4, sz], 0.4, 0.4, st);
-    S.box(1.4, 0.5, bz * 2 + 1, sx, Hg + 8.4, sz, st2);
+    S.quader(sx - bx - 1, Hg, sz - bz - 1.2, sx + bx + 1.6, Hg + 0.5, sz + bz + 1.2, st22);
+    for (const [a, b2] of [[sz - bz - 1.2, sz - bz - 1.1], [sz + bz + 1.1, sz + bz + 1.2]]) S.quader(sx - bx - 1, Hg + 0.5, a, sx + bx + 1.6, Hg + 1.5, b2, st22);
+    S.quader(sx - 1.6, Hg + 0.5, sz - bz, sx + 1.6, Hg + 1.4, sz + bz, st22);
+    for (const dz of [-2.1, 2.1]) seilscheibe(S, sx, Hg + 4.4, sz + dz, 3.6, "z", st22);
+    balken(S, [sx - 3, Hg + 1.4, sz], [sx, Hg + 8.4, sz], 0.4, 0.4, st2);
+    balken(S, [sx + 3, Hg + 1.4, sz], [sx, Hg + 8.4, sz], 0.4, 0.4, st2);
+    S.box(1.4, 0.5, bz * 2 + 1, sx, Hg + 8.4, sz, st22);
     return { seilA: [[sx + 2.4, Hg + 6.6], [sx + 3.2, Hg + 4.4]], seilB: null };
   }
   function zecheRoh(S, scene2, p2) {
@@ -94042,9 +94132,9 @@
       S.add(k2, c.halde[1]);
       balken(S, [hcx - 2, 15, hrz - 1], [hx - 4, 6, sz - 10], 1.4, 1.2, c.stahl2);
     } else {
-      const st = haldeStufen(S, hcx, hrz - 1, hrx, hrz, 13, 3, c.halde, "#cbbf9e", { seg: 9 });
+      const st2 = haldeStufen(S, hcx, hrz - 1, hrx, hrz, 13, 3, c.halde, "#cbbf9e", { seg: 9 });
       for (let i = 0; i < 9; i++) {
-        const k = i % 3, a = zw(r, 0, 2 * PI5), q2 = haldePunkt(st, hcx, hrz - 1, hrx, hrz, k, a, zw(r, 0.3, 0.9));
+        const k = i % 3, a = zw(r, 0, 2 * PI5), q2 = haldePunkt(st2, hcx, hrz - 1, hrx, hrz, k, a, zw(r, 0.3, 0.9));
         birke(S, q2[0], q2[2], r, 0.7, q2[1]);
       }
     }
@@ -94394,10 +94484,10 @@
     boden2(S, 0, 0, W3, D, "#a9c48c", 0.3, 0.05);
     const cx = W3 / 2, cz = D / 2 - 2, rx = W3 / 2 - 4, rz = D / 2 - 6, H = Math.min(32, Math.min(W3, D) * zw(r, 0.38, 0.46));
     const gruen = ["#8fb873", "#86ae6a", "#93bb78", "#7ea664"];
-    const st = haldeStufen(S, cx, cz, rx, rz, H, r() < 0.5 ? 3 : 4, gruen, "#d2c6a6", { seg: 11, top: 0.32, berme: 0.05, jitter: 0.08 });
-    const yTop = st[st.length - 1].y1, rt = st[st.length - 1].rt;
+    const st2 = haldeStufen(S, cx, cz, rx, rz, H, r() < 0.5 ? 3 : 4, gruen, "#d2c6a6", { seg: 11, top: 0.32, berme: 0.05, jitter: 0.08 });
+    const yTop = st2[st2.length - 1].y1, rt = st2[st2.length - 1].rt;
     for (let i = 0; i < 26; i++) {
-      const k = i % 3, a = zw(r, 0, 2 * PI5), q2 = haldePunkt(st, cx, cz, rx, rz, k, a, zw(r, 0.15, 0.7));
+      const k = i % 3, a = zw(r, 0, 2 * PI5), q2 = haldePunkt(st2, cx, cz, rx, rz, k, a, zw(r, 0.15, 0.7));
       (r() < 0.6 ? birke : baumRund)(S, q2[0], q2[2], r, zw(r, 0.6, 0.95), q2[1] - 0.3);
     }
     const pl2 = new three_module_exports.CylinderGeometry(rt * 0.95, rt * 0.95, 0.15, 11);
@@ -95941,13 +96031,13 @@
     }
   }
   function tribuene(S, F2, u0, u1, stufen, tiefe, hoehe, farben, o = {}) {
-    const st = tiefe / stufen, sh = hoehe / stufen;
+    const st2 = tiefe / stufen, sh = hoehe / stufen;
     for (let k = 0; k < stufen; k++) {
-      const t0 = k * st, y = (o.y0 ?? 0.38) + k * sh;
-      fb(S, F2, u0, u1, 0.3, y + sh, t0, t0 + st, o.beton ?? "#c9c6bf");
+      const t0 = k * st2, y = (o.y0 ?? 0.38) + k * sh;
+      fb(S, F2, u0, u1, 0.3, y + sh, t0, t0 + st2, o.beton ?? "#c9c6bf");
       if (farben) {
         const n = Math.max(1, Math.round((u1 - u0) / 8)), du = (u1 - u0) / n;
-        for (let i = 0; i < n; i++) fb(S, F2, u0 + i * du + 0.3, u0 + (i + 1) * du - 0.3, y + sh, y + sh + 0.35, t0 + st * 0.1, t0 + st * 0.7, farben[(i + k + (o.salz ?? 0)) % farben.length]);
+        for (let i = 0; i < n; i++) fb(S, F2, u0 + i * du + 0.3, u0 + (i + 1) * du - 0.3, y + sh, y + sh + 0.35, t0 + st2 * 0.1, t0 + st2 * 0.7, farben[(i + k + (o.salz ?? 0)) % farben.length]);
       }
     }
     return (o.y0 ?? 0.38) + hoehe;
@@ -96027,14 +96117,14 @@
       const hoch = 12, tief2 = 16;
       for (const s2 of ["+z", "+x", "-z", "-x"]) tribuene(S, F2[s2], s2[1] === "z" ? 0 : 0, F2[s2].L, 12, tief2, hoch, s2[1] === "z" ? [f1, f1, f2] : [f2, f1], { salz: s2 === "+z" ? 0 : 1 });
       {
-        const X0 = cx - L2 / 2 - 3, X1 = cx + L2 / 2 + 3, Z0 = cz - B2 / 2 - 3, Z1 = cz + B2 / 2 + 3, n = 12, st = tief2 / n, sh = hoch / n;
+        const X0 = cx - L2 / 2 - 3, X1 = cx + L2 / 2 + 3, Z0 = cz - B2 / 2 - 3, Z1 = cz + B2 / 2 + 3, n = 12, st2 = tief2 / n, sh = hoch / n;
         for (const [X, sx] of [[X0, -1], [X1, 1]]) for (const [Zc, sz] of [[Z0, -1], [Z1, 1]]) for (let k = 0; k < n; k++) {
-          const y = 0.38 + (k + 1) * sh, a0 = k * st, a1 = (k + 1) * st;
+          const y = 0.38 + (k + 1) * sh, a0 = k * st2, a1 = (k + 1) * st2;
           const q2 = (x0, x1, z0, z1, c, yy0 = 0.3, yy1 = y) => S.quader(Math.min(X + sx * x0, X + sx * x1), yy0, Math.min(Zc + sz * z0, Zc + sz * z1), Math.max(X + sx * x0, X + sx * x1), yy1, Math.max(Zc + sz * z0, Zc + sz * z1), c);
           q2(0, a1, a0, a1, "#c9c6bf");
           q2(a0, a1, 0, a0, "#c9c6bf");
-          q2(0.3, a1 - 0.1, a0 + st * 0.1, a0 + st * 0.7, k % 2 ? f2 : f1, y, y + 0.35);
-          q2(a0 + st * 0.1, a0 + st * 0.7, 0.3, a0, k % 2 ? f2 : f1, y, y + 0.35);
+          q2(0.3, a1 - 0.1, a0 + st2 * 0.1, a0 + st2 * 0.7, k % 2 ? f2 : f1, y, y + 0.35);
+          q2(a0 + st2 * 0.1, a0 + st2 * 0.7, 0.3, a0, k % 2 ? f2 : f1, y, y + 0.35);
           if (k === n - 1) {
             q2(0, tief2 + 0.6, tief2, tief2 + 0.6, "#d6d3cc", 0.3, hoch + 1.6);
             q2(tief2, tief2 + 0.6, 0, tief2, "#d6d3cc", 0.3, hoch + 1.6);
@@ -96485,22 +96575,22 @@
       }
       zo = zm - 0.5;
     } else if (v === "treppe") {
-      const tw = Math.min(W3 - 12, 44), tx = (W3 - tw) / 2, n = 12, st = 0.9, zt0 = zk - n * st;
+      const tw = Math.min(W3 - 12, 44), tx = (W3 - tw) / 2, n = 12, st2 = 0.9, zt0 = zk - n * st2;
       kaimauer(S, 0, zk, tx, zk + 1, WY, stein2);
       kaimauer(S, tx + tw, zk, W3, zk + 1, WY, stein2);
       boden2(S, 0, zt0, tx, zk, "#ddd5c4", 0.3, 0.08);
       boden2(S, tx + tw, zt0, W3, zk, "#ddd5c4", 0.3, 0.08);
       const h = (0.36 - WY - 0.4) / n;
       for (let k = 0; k < n; k++) {
-        const top = 0.36 - (k + 1) * h, z0 = zt0 + k * st;
-        S.quader(tx, WY - 1.4, z0, tx + tw, top, z0 + st, k % 2 ? stein : stein2);
-        S.quader(tx, top - 0.05, z0 + st - 0.12, tx + tw, top + 0.02, z0 + st, fuge);
+        const top = 0.36 - (k + 1) * h, z0 = zt0 + k * st2;
+        S.quader(tx, WY - 1.4, z0, tx + tw, top, z0 + st2, k % 2 ? stein : stein2);
+        S.quader(tx, top - 0.05, z0 + st2 - 0.12, tx + tw, top + 0.02, z0 + st2, fuge);
       }
       S.quader(tx, WY - 1.4, zk, tx + tw, WY + 0.2, zk + 1.6, stein2);
       for (const xx of [tx - 0.7, tx + tw]) S.quader(xx, WY - 1.4, zt0, xx + 0.7, 1.2, zk + 1, "#bfb39a");
       for (let i = 0; i < 34; i++) {
         const k = Math.floor(r() * n);
-        figur3(S, zw(r, tx + 1, tx + tw - 1), zt0 + (k + 0.4) * st, r, 0.36 - (k + 1) * h);
+        figur3(S, zw(r, tx + 1, tx + tw - 1), zt0 + (k + 0.4) * st2, r, 0.36 - (k + 1) * h);
       }
       zo = zt0;
     } else {
@@ -98769,17 +98859,17 @@
     }
   }
   function strasse(S, ax0, az0, ax1, az1, ra, r, d) {
-    const gw = 4.5, st = 9, yg = -0.15;
+    const gw = 4.5, st2 = 9, yg = -0.15;
     S.box(ax1 - ax0 + gw, 0.3, gw, (ax0 + ax1 + gw) / 2, yg, az1 + gw / 2, "#d8d4cb");
     S.box(gw, 0.3, az1 - az0, ax1 + gw / 2, yg, (az0 + az1) / 2, "#d8d4cb");
     for (let x = ax0 + 2; x < ax1 + gw; x += 2.5) S.box(0.04, 0.01, gw, x, yg + 0.15, az1 + gw / 2, "#c9c4ba");
     for (let z2 = az0 + 2; z2 < az1; z2 += 2.5) S.box(gw, 0.01, 0.04, ax1 + gw / 2, yg + 0.15, z2, "#c9c4ba");
     S.box(ax1 - ax0 + gw + 0.3, 0.32, 0.3, (ax0 + ax1 + gw) / 2, yg, az1 + gw + 0.15, "#bdb8ae");
     S.box(0.3, 0.32, az1 - az0 + gw, ax1 + gw + 0.15, yg, (az0 + az1 + gw) / 2, "#bdb8ae");
-    S.box(ax1 - ax0 + gw + st, 0.2, st, (ax0 + ax1 + gw + st) / 2, -0.35, az1 + gw + st / 2, "#8d939a");
-    S.box(st, 0.2, az1 - az0 + gw, ax1 + gw + st / 2, -0.35, (az0 + az1 + gw) / 2, "#8d939a");
-    for (let x = ax0 + 1; x < ax1 + gw - 2; x += 6) S.box(3, 0.02, 0.25, x, -0.24, az1 + gw + st / 2, "#f2f1ec");
-    for (let z2 = az0 + 1; z2 < az1 + gw - 2; z2 += 6) S.box(0.25, 0.02, 3, ax1 + gw + st / 2, -0.24, z2, "#f2f1ec");
+    S.box(ax1 - ax0 + gw + st2, 0.2, st2, (ax0 + ax1 + gw + st2) / 2, -0.35, az1 + gw + st2 / 2, "#8d939a");
+    S.box(st2, 0.2, az1 - az0 + gw, ax1 + gw + st2 / 2, -0.35, (az0 + az1 + gw) / 2, "#8d939a");
+    for (let x = ax0 + 1; x < ax1 + gw - 2; x += 6) S.box(3, 0.02, 0.25, x, -0.24, az1 + gw + st2 / 2, "#f2f1ec");
+    for (let z2 = az0 + 1; z2 < az1 + gw - 2; z2 += 6) S.box(0.25, 0.02, 3, ax1 + gw + st2 / 2, -0.24, z2, "#f2f1ec");
     for (let q2 = 0; q2 < 6; q2++) S.box(0.6, 0.02, 3.5, ax1 + gw + 1.2 + q2 * 1.2, -0.24, az1 + gw - 2.2, "#f6f5f0");
     const tuerX = ra.gx * R3 + 2.5;
     for (let x = ax0 + 4; x < ax1 - 2; x += 11) {
@@ -99690,7 +99780,7 @@
     return m;
   }
   function strasse2(S, ax0, az0, ax1, az1, r, d) {
-    const gw = 4.5, st = 9;
+    const gw = 4.5, st2 = 9;
     const yg = -0.15;
     S.box(ax1 - ax0 + gw, 0.3, gw, (ax0 + ax1 + gw) / 2, yg, az1 + gw / 2, "#d8d4cb");
     S.box(gw, 0.3, az1 - az0, ax1 + gw / 2, yg, (az0 + az1) / 2, "#d8d4cb");
@@ -99698,10 +99788,10 @@
     for (let z2 = az0 + 2; z2 < az1; z2 += 2.5) S.box(gw, 0.01, 0.04, ax1 + gw / 2, yg + 0.15, z2, "#c9c4ba");
     S.box(ax1 - ax0 + gw + 0.3, 0.32, 0.3, (ax0 + ax1 + gw) / 2, yg, az1 + gw + 0.15, "#bdb8ae");
     S.box(0.3, 0.32, az1 - az0 + gw, ax1 + gw + 0.15, yg, (az0 + az1 + gw) / 2, "#bdb8ae");
-    S.box(ax1 - ax0 + gw + st, 0.2, st, (ax0 + ax1 + gw + st) / 2, -0.35, az1 + gw + st / 2, "#8d939a");
-    S.box(st, 0.2, az1 - az0 + gw, ax1 + gw + st / 2, -0.35, (az0 + az1 + gw) / 2, "#8d939a");
-    for (let x = ax0 + 1; x < ax1 + gw - 2; x += 6) S.box(3, 0.02, 0.25, x, -0.24, az1 + gw + st / 2, "#f2f1ec");
-    for (let z2 = az0 + 1; z2 < az1 + gw - 2; z2 += 6) S.box(0.25, 0.02, 3, ax1 + gw + st / 2, -0.24, z2, "#f2f1ec");
+    S.box(ax1 - ax0 + gw + st2, 0.2, st2, (ax0 + ax1 + gw + st2) / 2, -0.35, az1 + gw + st2 / 2, "#8d939a");
+    S.box(st2, 0.2, az1 - az0 + gw, ax1 + gw + st2 / 2, -0.35, (az0 + az1 + gw) / 2, "#8d939a");
+    for (let x = ax0 + 1; x < ax1 + gw - 2; x += 6) S.box(3, 0.02, 0.25, x, -0.24, az1 + gw + st2 / 2, "#f2f1ec");
+    for (let z2 = az0 + 1; z2 < az1 + gw - 2; z2 += 6) S.box(0.25, 0.02, 3, ax1 + gw + st2 / 2, -0.24, z2, "#f2f1ec");
     for (let k = 0; k < 6; k++) S.box(0.6, 0.02, 3.5, ax1 + gw + 1.2 + k * 1.2, -0.24, az1 + gw - 2.2, "#f6f5f0");
     for (let x = ax0 + 4; x < ax1 - 2; x += 11) {
       baum(S, x, az1 + gw - 1, r, 0.85);
@@ -99957,18 +100047,18 @@
   };
   function flachbau(c, typ) {
     const { S, x, z: z2, w, d, m, E, r } = c;
-    const st = SOCKEL_STIL[typ] ?? SOCKEL_STIL.nachkrieg, H = m.H;
-    S.quader(x, 0, z2, x + w, H, z2 + d, st.wand);
+    const st2 = SOCKEL_STIL[typ] ?? SOCKEL_STIL.nachkrieg, H = m.H;
+    S.quader(x, 0, z2, x + w, H, z2 + d, st2.wand);
     for (const F2 of c.F) {
       const L2 = F2.len / 2;
       for (const e of E) {
         const y0 = e.y + (e.k === 0 ? 0.2 : 0.9), y1 = e.y + e.h - 0.35;
-        q(F2, -L2 + 0.6, L2 - 0.6, y0, y1, 0, 0.05, glasVon(e, r, st.glas));
-        for (const u2 of achsen2(-L2 + 0.6, L2 - 0.6, e.k === 0 ? 3 : 1.8)) q(F2, u2 - 0.05, u2 + 0.05, y0, y1, 0.05, 0.12, st.band);
-        q(F2, -L2, L2, e.y + e.h - 0.35, e.y + e.h, 0, 0.25, st.band);
+        q(F2, -L2 + 0.6, L2 - 0.6, y0, y1, 0, 0.05, glasVon(e, r, st2.glas));
+        for (const u2 of achsen2(-L2 + 0.6, L2 - 0.6, e.k === 0 ? 3 : 1.8)) q(F2, u2 - 0.05, u2 + 0.05, y0, y1, 0.05, 0.12, st2.band);
+        q(F2, -L2, L2, e.y + e.h - 0.35, e.y + e.h, 0, 0.25, st2.band);
       }
     }
-    gesims(S, x, z2, w, d, H + 0.35, 0.7, 0.15, st.band);
+    gesims(S, x, z2, w, d, H + 0.35, 0.7, 0.15, st2.band);
     S.box(w - 0.8, 0.1, d - 0.8, x + w / 2, H + 0.75, z2 + d / 2, "#a9a49b");
     for (let u2 = x + 4; u2 < x + w - 2; u2 += 5) {
       S.box(1, 0.55, 1, u2, H + 1.05, z2 + d - 1.4, "#8c8378");
@@ -99976,7 +100066,7 @@
     }
     S.box(0.08, 1, d - 3, x + w - 0.9, H + 1.3, z2 + d / 2 - 1, "#9fb7c2");
     const Fz = c.F[0], u = c.eingangU;
-    q(Fz, u - 4, u + 4, 3.8, 4.1, 0, 3.2, st.band);
+    q(Fz, u - 4, u + 4, 3.8, 4.1, 0, 3.2, st2.band);
     for (const s2 of [-3.6, 3.6]) q(Fz, u + s2 - 0.08, u + s2 + 0.08, 0, 3.8, 2.8, 2.95, "#c9cdd0");
     q(Fz, u - 1.6, u + 1.6, 0.1, 3, 0.05, 0.12, "#3d4b55");
     return { hoehe: H + 1, dachY: H + 0.8, vor: 0.3, eingang: { u, y: 4.8, t: 3.3, fahneT: 4.2 } };
@@ -100654,10 +100744,10 @@
     }
     inhalt(lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0), w, d);
   }
-  function buerostuhl(L2, lx, lz, ry, st, farbe3) {
+  function buerostuhl(L2, lx, lz, ry, st2, farbe3) {
     const P2 = L2.sub(lx, lz, ry);
-    const f = st === 0 ? "#7b5a40" : st === 1 ? "#4a525a" : st === 2 ? "#2a2d31" : farbe3;
-    if (st === 0) {
+    const f = st2 === 0 ? "#7b5a40" : st2 === 1 ? "#4a525a" : st2 === 2 ? "#2a2d31" : farbe3;
+    if (st2 === 0) {
       P2.box(0.42, 0.05, 0.42, 0, 0.42, 0, f);
       P2.box(0.42, 0.42, 0.05, 0, 0.47, -0.19, f);
       for (const s2 of [-0.18, 0.18]) for (const t of [-0.18, 0.18]) P2.box(0.04, 0.42, 0.04, s2, 0, t, "#3a3a3a");
@@ -100666,15 +100756,15 @@
     P2.box(0.5, 0.04, 0.5, 0, 0.02, 0, "#2a2d31");
     P2.box(0.06, 0.4, 0.06, 0, 0.02, 0, "#5a636b");
     P2.box(0.48, 0.08, 0.46, 0, 0.42, 0, f);
-    P2.box(0.46, st === 3 ? 0.7 : 0.55, 0.07, 0, 0.5, -0.22, f);
+    P2.box(0.46, st2 === 3 ? 0.7 : 0.55, 0.07, 0, 0.5, -0.22, f);
   }
-  function monitor(L2, lx, lz, st, r, inhalt = null) {
-    if (st === 0) {
+  function monitor(L2, lx, lz, st2, r, inhalt = null) {
+    if (st2 === 0) {
       L2.box(0.42, 0.38, 0.42, lx, 0.75, lz, "#d8d2c0");
       L2.box(0.32, 0.26, 0.02, lx, 0.81, lz + 0.21, "#3d5a52");
       return;
     }
-    const n = st >= 2 ? 2 : 1;
+    const n = st2 >= 2 ? 2 : 1;
     for (let k = 0; k < n; k++) {
       const u = lx + (n === 2 ? (k - 0.5) * 0.56 : 0);
       L2.box(0.06, 0.25, 0.06, u, 0.75, lz - 0.05, "#2a2d31");
@@ -100682,12 +100772,12 @@
       L2.box(0.48, 0.28, 0.01, u, 0.98, lz + 0.025, inhalt ?? waehle2(r, ["#9cc9e0", "#cfe3ec", "#b7d7c4", "#e6edf1"]));
     }
   }
-  function insel(S, x, z2, n, st, r, farbe3, chartBild) {
+  function insel(S, x, z2, n, st2, r, farbe3, chartBild) {
     const L2 = lokal2(S, x, 0.06, z2, 0);
-    const tisch3 = ["#b7b09d", "#d9d6cf", "#f2f0ea", "#efe4cf"][st], bein = st === 0 ? "#6b6f72" : "#9aa3aa";
+    const tisch3 = ["#b7b09d", "#d9d6cf", "#f2f0ea", "#efe4cf"][st2], bein = st2 === 0 ? "#6b6f72" : "#9aa3aa";
     const plaetze = [];
     const breit2 = 1.4;
-    const reihen = st === 0 ? [1] : [-1, 1];
+    const reihen = st2 === 0 ? [1] : [-1, 1];
     for (const s2 of reihen) {
       for (let i = 0; i < n; i++) {
         const u = (i - (n - 1) / 2) * breit2, tz = s2 * 0.4;
@@ -100695,19 +100785,19 @@
         L2.box(0.05, 0.72, 0.7, u - breit2 / 2 + 0.06, 0, tz, bein);
         if (i === n - 1) L2.box(0.05, 0.72, 0.7, u + breit2 / 2 - 0.06, 0, tz, bein);
         const ml = lokal2(S, x + u, 0.06, z2 + tz - s2 * 0.22, s2 > 0 ? 0 : PI7);
-        monitor(ml, 0, 0, st, r, chartBild ? chartBild(r) : null);
+        monitor(ml, 0, 0, st2, r, chartBild ? chartBild(r) : null);
         L2.box(0.45, 0.02, 0.15, u, 0.76, tz + s2 * 0.12, "#3a3f45");
-        if (st >= 1 && r() < 0.5) L2.box(0.22, 0.12, 0.3, u + 0.45, 0.76, tz, waehle2(r, ["#f4f2ee", "#e9c46a", "#cfd6dc"]));
-        if (st === 0 && r() < 0.6) L2.box(0.3, 0.25, 0.22, u + 0.45, 0.76, tz - 0.15, waehle2(r, ["#2f5f8a", "#8a2f3a", "#3f6b3a"]));
+        if (st2 >= 1 && r() < 0.5) L2.box(0.22, 0.12, 0.3, u + 0.45, 0.76, tz, waehle2(r, ["#f4f2ee", "#e9c46a", "#cfd6dc"]));
+        if (st2 === 0 && r() < 0.6) L2.box(0.3, 0.25, 0.22, u + 0.45, 0.76, tz - 0.15, waehle2(r, ["#2f5f8a", "#8a2f3a", "#3f6b3a"]));
         const sz = z2 + tz + s2 * 0.85;
-        buerostuhl(lokal2(S, x + u, 0.06, sz, 0), 0, 0, s2 > 0 ? PI7 : 0, st, farbe3);
+        buerostuhl(lokal2(S, x + u, 0.06, sz, 0), 0, 0, s2 > 0 ? PI7 : 0, st2, farbe3);
         plaetze.push([x + u, sz, s2 > 0 ? PI7 : 0]);
       }
     }
     const lang = n * breit2;
-    if (st === 1) L2.box(lang - 0.2, 0.42, 0.05, 0, 0.76, 0, "#7f8a92");
-    if (st >= 2) {
-      L2.box(lang - 0.2, 0.28, 0.3, 0, 0.76, 0, st === 3 ? farbe3 : "#6b5a48");
+    if (st2 === 1) L2.box(lang - 0.2, 0.42, 0.05, 0, 0.76, 0, "#7f8a92");
+    if (st2 >= 2) {
+      L2.box(lang - 0.2, 0.28, 0.3, 0, 0.76, 0, st2 === 3 ? farbe3 : "#6b5a48");
       for (let u = -lang / 2 + 0.35; u < lang / 2 - 0.2; u += 0.42) L2.kugel(0.2, u, 1.12, 0, waehle2(r, FARBEN3.baum));
     }
     return plaetze;
@@ -100761,7 +100851,7 @@
   }
   var SPEZIAL = {
     controlling: [
-      { art: "wand", w: 4.6, d: 0.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 4.6, d: 0.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.15, 0);
         L2.box(w, 2, 0.12, 0, 0.6, 0, "#22272c");
         for (let k = 0; k < 3; k++) {
@@ -100773,7 +100863,7 @@
         text2(L2, "KPI Woche", 0, 2.75, 0.08, 0.28, "#ffffff", "#2f6fb3");
         L2.box(0.5, 0.7, 0.4, -w / 2 + 0.4, 0, 0.3, "#3a3f45");
       } },
-      { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.9, 0);
         L2.box(w, 0.04, 0.9, 0, 0.72, 0, "#e9e6df");
         for (const s2 of [-1, 1]) L2.box(0.05, 0.72, 0.8, s2 * (w / 2 - 0.1), 0, 0, "#9aa3aa");
@@ -100783,9 +100873,9 @@
           balken2(L2, u, 0.99, -0.27, 0.4, 0.26, r);
           L2.box(0.06, 0.2, 0.06, u, 0.76, -0.33, "#2a2d31");
         }
-        for (let k = 0; k < 3; k++) buerostuhl(L2, -w / 3 + k * (w / 3), 0.85, PI7, Math.max(1, st), farbe3);
+        for (let k = 0; k < 3; k++) buerostuhl(L2, -w / 3 + k * (w / 3), 0.85, PI7, Math.max(1, st2), farbe3);
       } },
-      { art: "raum", w: 5, d: 4, name: "Forecast-Runde", bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 5, d: 4, name: "Forecast-Runde", bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.8, 0.05, 1.2, 0, 0.72, 0.2, "#f4f2ee");
           L2.box(0.2, 0.72, 0.8, 0, 0, 0.2, "#9aa3aa");
@@ -100796,7 +100886,7 @@
           linie(L2, 0.5, 1.2, -d / 2 + 0.22, 0.8, 0.8, r);
         }, { name: "Forecast-Runde", farbe: farbe3 });
       } },
-      { art: "frei", w: 1.4, d: 1.2, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 1.4, d: 1.2, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(0.6, 0.05, 0.5, 0, 0, 0, "#2a2d31");
         L2.box(0.1, 1.2, 0.1, 0, 0.05, 0, "#5a636b");
@@ -100806,14 +100896,14 @@
       } }
     ],
     einkauf: [
-      { art: "wand", w: 4.8, d: 0.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 4.8, d: 0.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.3, 0);
         regal(L2, 0, 0, w, 2.2, "#f2efe8", (lx, y, lz, ww, hh, k) => {
           for (let u = lx - ww / 2 + 0.2; u < lx + ww / 2 - 0.1; u += 0.38) L2.box(0.32, k === 3 ? 0.18 : 0.08 + r() * 0.12, 0.32, u, y, lz, k === 3 ? "#c9a26b" : waehle2(r, PAL.damen.concat(PAL.herren)));
         }, r);
         text2(L2, "Muster Herbst/Winter", 0, 2.5, 0.05, 0.24, "#ffffff", "#c0832f");
       } },
-      { art: "frei", w: 3.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "frei", w: 3.2, d: 2.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.8, 0.06, 1.3, 0, 0.84, 0, "#d8bf98");
         for (const s2 of [-1.2, 1.2]) L2.box(0.08, 0.84, 1.1, s2, 0, 0, "#7b5a40");
@@ -100821,9 +100911,9 @@
         for (let k = 0; k < 3; k++) {
           L2.box(0.3, 0.08, 0.4, -0.9 + k * 0.9, 0.9, -0.35, waehle2(r, ["#2b3a55", "#6b2737", "#3f6b3a"]));
         }
-        for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.7, 1.15, PI7, Math.max(1, st), farbe3);
+        for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.7, 1.15, PI7, Math.max(1, st2), farbe3);
       } },
-      { art: "frei", w: 3, d: 1.2, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3, d: 1.2, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         for (const s2 of [-1, 1]) {
           L2.box(0.06, 1.7, 0.06, s2 * 1.3, 0, 0, "#9aa3aa");
@@ -100832,7 +100922,7 @@
         L2.box(2.7, 0.04, 0.04, 0, 1.7, 0, "#9aa3aa");
         for (let u = -1.2; u < 1.2; u += 0.16) L2.box(0.05, zw(r, 0.7, 1), 0.42, u, 1.66 - 0.85, 0, waehle2(r, PAL.damen.concat(PAL.herren)));
       } },
-      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.4, 0.05, 1.1, 0, 0.72, 0.4, "#f4f2ee");
           L2.box(0.2, 0.72, 0.8, 0, 0, 0.4, "#9aa3aa");
@@ -100843,7 +100933,7 @@
       } }
     ],
     marketing: [
-      { art: "frei", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 5, d: 4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(3.4, 2.8, 0.06, 0, 0, -d / 2 + 0.2, "#f6f6f2");
         L2.box(3.4, 0.02, 1.8, 0, 0, -d / 2 + 1.1, "#f6f6f2");
@@ -100857,7 +100947,7 @@
         puppe3(L2, 0, -d / 2 + 1, r, "damen", PAL.damen, 0);
         figur2(L2.S, x + w / 2 + 0.6, z2 + d / 2 + 1.7, 101, "kunde", { ry: PI7, pose: "schauen" });
       } },
-      { art: "wand", w: 5, d: 0.4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 5, d: 0.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.1, 0);
         const motive = [["SALE", "#d23c32"], ["NEU", "#2f6fb3"], ["\u221230 %", "#e9b44c"], ["Herbst", "#3f7d56"]];
         motive.forEach(([t, f], k) => {
@@ -100868,7 +100958,7 @@
           text2(L2, t, u, 1.9, 0.05, 0.26, "#ffffff");
         });
       } },
-      { art: "frei", w: 3.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "frei", w: 3.4, d: 2.4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.6, 0.05, 1.2, 0, 0.9, 0, "#f4f2ee");
         for (const s2 of [-1.2, 1.2]) L2.box(0.06, 0.9, 1.1, s2, 0, 0, "#2a2d31");
@@ -100877,7 +100967,7 @@
         for (let k = 0; k < 9; k++) L2.box(0.3, 0.25, 0.02, -1 + k % 3 * 0.55, 0.95 + Math.floor(k / 3) * 0.35, -0.97, waehle2(r, PAL.damen));
         for (const s2 of [-1, 1]) L2.box(0.45, 0.75, 0.45, s2 * 0.7, 0, 0.85, farbe3);
       } },
-      { art: "raum", w: 4.6, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 4.6, d: 4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           for (let k = 0; k < 4; k++) L2.kugel(0.45, -1.2 + k * 0.8, 0.3, 0.3 + k % 2 * 0.6, waehle2(r, ["#e9b44c", "#d65a6f", "#5bc0eb", "#9bc53d"]));
           L2.box(1.8, 1.2, 0.05, 0, 0.8, -d / 2 + 0.3, "#ffffff");
@@ -100886,7 +100976,7 @@
       } }
     ],
     personal: [
-      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.zyl(0.5, 0.5, 0.04, 0, 0.72, 0, "#f4f2ee", 16);
           L2.zyl(0.06, 0.06, 0.72, 0, 0, 0, "#5a636b");
@@ -100898,7 +100988,7 @@
           pflanze4(L2, w / 2 - 0.5, -d / 2 + 0.5, r, true);
         }, { name: "Bewerbung", farbe: farbe3 });
       } },
-      { art: "wand", w: 4, d: 0.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 4, d: 0.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.3, 0);
         for (let k = 0; k < 4; k++) {
           const u = -w / 2 + 0.5 + k;
@@ -100908,7 +100998,7 @@
         }
         text2(L2, "Personalakten", 0, 2.15, 0.27, 0.22, "#ffffff", "#3f9a6a");
       } },
-      { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(0.04, 1.6, 0.04, -0.3, 0, -1.2, "#5a636b");
         L2.box(0.04, 1.6, 0.04, 0.3, 0, -1.2, "#5a636b");
@@ -100922,7 +101012,7 @@
           L2.box(0.04, 0.44, 0.04, u, 0, v, "#2a2d31");
         }
       } },
-      { art: "wand", w: 2.4, d: 0.3, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 2.4, d: 0.3, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.06, 0);
         L2.box(2.2, 1.2, 0.04, 0, 0.9, 0, "#c9a26b");
         for (let k = 0; k < 10; k++) L2.box(0.32, 0.22, 0.02, -0.85 + k % 5 * 0.42, 1 + Math.floor(k / 5) * 0.5, 0.03, waehle2(r, ["#ffffff", "#f2c14e", "#9bc53d", "#bcd3df"]));
@@ -100930,7 +101020,7 @@
       } }
     ],
     immobilien: [
-      { art: "wand", w: 4.6, d: 0.4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 4.6, d: 0.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.1, 0);
         for (let k = 0; k < 3; k++) {
           const u = -w / 2 + 0.8 + k * 1.5;
@@ -100941,7 +101031,7 @@
         }
         text2(L2, "Standortplanung", 0, 2.35, 0.04, 0.22, "#ffffff", "#8a6440");
       } },
-      { art: "frei", w: 3, d: 2.4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3, d: 2.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.2, 0.85, 1.5, 0, 0, 0, "#e9e4da");
         L2.box(2.1, 0.03, 1.4, 0, 0.85, 0, "#cfd6c9");
@@ -100952,13 +101042,13 @@
         L2.box(2.15, 0.6, 1.45, 0, 0.88, 0, GLAS3);
         figur2(S, x + w / 2 + 0.9, z2 + d / 2 + 1.1, 501, "leitung", { ry: PI7 + 0.5, pose: "schauen" });
       } },
-      { art: "frei", w: 2.2, d: 1.3, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 2.2, d: 1.3, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(1.8, 0.9, 1, 0, 0, 0, "#8c959b");
         for (let k = 0; k < 5; k++) L2.box(1.7, 0.02, 0.02, 0, 0.15 + k * 0.16, 0.51, "#5a636b");
         for (let k = 0; k < 5; k++) L2.geo(new three_module_exports.CylinderGeometry(0.05, 0.05, 0.8, 6).rotateZ(PI7 / 2), -0.5 + k * 0.05, 0.98 + k % 2 * 0.08, -0.2 + k * 0.1, waehle2(r, ["#ffffff", "#e8e4dc", "#bcd3df"]));
       } },
-      { art: "raum", w: 4.8, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 4.8, d: 4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.6, 0.05, 1.1, 0, 0.72, 0.2, "#7b5a40");
           L2.box(0.2, 0.72, 0.8, 0, 0, 0.2, "#2a2d31");
@@ -100968,7 +101058,7 @@
       } }
     ],
     logistik: [
-      { art: "wand", w: 5.2, d: 0.4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 5.2, d: 0.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.1, 0);
         L2.box(w, 2.2, 0.06, 0, 0.6, 0, "#22272c");
         L2.box(w - 0.2, 2, 0.02, 0, 0.7, 0.04, "#cfe0d2");
@@ -100983,7 +101073,7 @@
         }
         text2(L2, "Leitstand Filialbelieferung", 0, 2.95, 0.07, 0.22, "#ffffff", "#e07b2a");
       } },
-      { art: "frei", w: 4.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "frei", w: 4.6, d: 2.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 1, 0);
         for (let k = -2; k <= 2; k++) {
           const P2 = L2.sub(k * 0.95, Math.abs(k) * 0.25, -k * 0.22);
@@ -100995,17 +101085,17 @@
           }
           P2.box(0.85, 0.3, 0.04, 0, 1.3, -0.3, "#22272c");
           P2.box(0.8, 0.25, 0.01, 0, 1.32, -0.275, "#9cc9e0");
-          if (k % 2 === 0) buerostuhl(P2, 0, 0.75, PI7, Math.max(1, st), farbe3);
+          if (k % 2 === 0) buerostuhl(P2, 0, 0.75, PI7, Math.max(1, st2), farbe3);
         }
       } },
-      { art: "frei", w: 2.6, d: 1.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 2.6, d: 1.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(1.2, 0.14, 0.8, -0.6, 0, 0, "#c9a26b");
         for (let k = 0; k < 6; k++) L2.box(0.38, 0.32, 0.36, -0.95 + k % 3 * 0.4, 0.14 + Math.floor(k / 3) * 0.33, 0, waehle2(r, ["#c9a26b", "#b8925e", "#d6b27c"]));
         L2.box(0.7, 1.5, 0.7, 0.75, 0.1, 0, "#c9d2d8");
         for (let k = 0; k < 3; k++) L2.box(0.6, 0.3, 0.6, 0.75, 0.2 + k * 0.45, 0, waehle2(r, PAL.waren));
       } },
-      { art: "wand", w: 2.6, d: 0.3, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 2.6, d: 0.3, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.06, 0);
         L2.box(2.4, 1.3, 0.04, 0, 0.8, 0, "#ffffff");
         for (let i = 0; i < 5; i++) {
@@ -101016,7 +101106,7 @@
       } }
     ],
     ecommerce: [
-      { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3.6, d: 3, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(1.6, 0.8, 1, 0, 0, -0.5, "#e9e6df");
         L2.box(1.3, 1, 0.9, 0, 0.8, -0.5, "#ffffff");
@@ -101031,7 +101121,7 @@
         L2.box(0.25, 0.18, 0.3, 0, 1.2, 1.2, "#1e2328");
         text2(L2, "Produktfotos", 0, 2.2, -0.95, 0.2, "#ffffff", "#7a4fc0");
       } },
-      { art: "frei", w: 4, d: 2.4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 4, d: 2.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         for (const s2 of [-1, 1]) {
           const u = s2 * 1;
@@ -101046,7 +101136,7 @@
         }
         figur2(S, x + w / 2 - 1, z2 + d / 2 + 0.75, 601, "lager", { ry: PI7, pose: "stehen" });
       } },
-      { art: "wand", w: 3.2, d: 1, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 3.2, d: 1, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.5, 0);
         for (const s2 of [-1, 1]) {
           L2.box(0.7, 2.1, 0.9, s2 * 1, 0, 0, "#1e2328");
@@ -101057,7 +101147,7 @@
         linie(L2, 0, 1.3, -0.26, 0.8, 0.45, r, "#7a4fc0");
         text2(L2, "Bestellungen live", 0, 2.05, -0.27, 0.15, "#ffffff", "#7a4fc0");
       } },
-      { art: "wand", w: 3, d: 0.7, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 3, d: 0.7, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.35, 0);
         regal(L2, 0, 0, w, 2, "#9aa3aa", (lx, y, lz, ww) => {
           for (let u = lx - ww / 2 + 0.25; u < lx + ww / 2 - 0.15; u += 0.45) L2.box(0.4, zw(r, 0.2, 0.35), 0.4, u, y, lz, waehle2(r, ["#c9a26b", "#d6b27c", "#b8925e", "#f4f2ee"]));
@@ -101066,18 +101156,18 @@
       } }
     ],
     recht: [
-      { art: "wand", w: 5.4, d: 0.5, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 5.4, d: 0.5, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.25, 0);
         regal(L2, 0, 0, w, 2.6, "#7b5a40", ordner(L2, r, ["#8a2f3a", "#2b3a55", "#3a3f47", "#6b5a48", "#e8e4dc"]), r, 0.45, 6);
         text2(L2, "Vertr\xE4ge", 0, 2.85, 0.24, 0.22, "#ffffff", "#8a2f3a");
       } },
-      { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 4.2, d: 2.6, bau(S, sc, x, z2, w, d, st2, r) {
         for (let k = 0; k < 2; k++) {
           const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4 + k * 1.6, 0);
           regal(L2, 0, 0, w - 0.4, 2, "#c9cdd0", ordner(L2, r, ["#8a2f3a", "#2b3a55", "#c9b48f", "#e8e4dc"]), r, 0.5, 5);
         }
       } },
-      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 5, d: 4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.6, 0.06, 1.2, 0, 0.72, 0.3, "#5a3b22");
           L2.box(0.25, 0.72, 0.9, 0, 0, 0.3, "#3a2a20");
@@ -101089,7 +101179,7 @@
           regal(L2, 0, -d / 2 + 0.35, w - 0.8, 2.2, "#5a3b22", ordner(L2, r, ["#6b2737", "#2b3a55", "#3a2a20"]), r, 0.4, 5);
         }, { name: "Rechtsabteilung", farbe: farbe3 });
       } },
-      { art: "frei", w: 1.6, d: 1.2, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 1.6, d: 1.2, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(0.9, 1.2, 0.8, -0.2, 0, 0, "#5a636b");
         L2.zyl(0.15, 0.15, 0.05, -0.2, 0.7, 0.4, "#c9d2d8", 10);
@@ -101098,7 +101188,7 @@
       } }
     ],
     vm: [
-      { art: "frei", w: 3.6, d: 2.4, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3.6, d: 2.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.8, 0.08, 1, 0, 0.88, -0.3, "#b98d61");
         for (const s2 of [-1.3, 1.3]) L2.box(0.1, 0.88, 0.9, s2, 0, -0.3, "#7b5a40");
@@ -101109,12 +101199,12 @@
         L2.geo(new three_module_exports.CylinderGeometry(0.12, 0.12, 1.2, 8).rotateZ(PI7 / 2), 0, 0.15, 0.6, "#1f9aa8");
         figur2(S, x + w / 2 + 0.3, z2 + d / 2 + 0.6, 701, "handwerker", { ry: PI7, pose: "stehen" });
       } },
-      { art: "frei", w: 3.4, d: 1.8, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3.4, d: 1.8, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(3, 0.2, 1.2, 0, 0, 0, "#ffffff");
         for (let k = 0; k < 4; k++) puppe3(L2.hoch(0.2), -1.1 + k * 0.73, k % 2 * 0.2 - 0.1, r, k % 2 ? "herren" : "damen", k % 2 ? PAL.herren : PAL.damen, zw(r, -0.4, 0.4));
       } },
-      { art: "wand", w: 4, d: 0.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 4, d: 0.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.3, 0);
         regal(L2, 0, 0, w, 2.2, "#f2efe8", (lx, y, lz, ww, hh, k) => {
           for (let u = lx - ww / 2 + 0.25; u < lx + ww / 2 - 0.15; u += 0.45) if (k % 2) L2.kugel(0.15, u, y + 0.15, lz, waehle2(r, ["#d23c32", "#e9b44c", "#1f9aa8", "#ffffff"]));
@@ -101122,7 +101212,7 @@
         }, r);
         text2(L2, "Deko Saison", 0, 2.45, 0.32, 0.22, "#ffffff", "#1f9aa8");
       } },
-      { art: "frei", w: 3.6, d: 2.2, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3.6, d: 2.2, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(3.2, 0.25, 1.6, 0, 0, 0, "#e9e4da");
         L2.box(3.2, 2.4, 0.06, 0, 0, -0.8, "#1f9aa8");
@@ -101133,12 +101223,12 @@
       } }
     ],
     verwaltung: [
-      { art: "wand", w: 5, d: 0.5, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "wand", w: 5, d: 0.5, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.25, 0);
         regal(L2, 0, 0, w, 2.2, "#c9cdd0", ordner(L2, r, ["#2f5f8a", "#5f6b78", "#9aa3aa", "#2b3a55"]), r, 0.45, 5);
         text2(L2, "Buchhaltung", 0, 2.45, 0.24, 0.22, "#ffffff", "#5f6b78");
       } },
-      { art: "frei", w: 3, d: 1.8, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 3, d: 1.8, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4, 0);
         L2.box(2.4, 1.6, 0.45, 0, 0, 0, "#d8bf98");
         for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) {
@@ -101151,14 +101241,14 @@
         W3.box(0.8, 0.3, 0.5, 0, 0.8, 0, "#f2c14e");
         for (const s2 of [-0.35, 0.35]) W3.zyl(0.08, 0.08, 0.06, s2, 0, 0.25, "#2a2d31", 6);
       } },
-      { art: "frei", w: 2.4, d: 1.6, bau(S, sc, x, z2, w, d, st, r) {
+      { art: "frei", w: 2.4, d: 1.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(1.1, 1, 0.8, -0.4, 0, 0, "#e9e6df");
         L2.box(1.1, 0.12, 0.8, -0.4, 1, 0, "#9aa3aa");
         L2.box(0.3, 0.15, 0.04, -0.6, 0.95, 0.41, "#3a3f45");
         for (let k = 0; k < 4; k++) L2.box(0.32, 0.12, 0.45, 0.6, k * 0.13, 0, "#ffffff");
       } },
-      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { art: "raum", w: 4.4, d: 3.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(1.8, 0.05, 0.8, 0, 0.72, 0.1, "#f2f0ea");
           L2.box(1.7, 0.72, 0.05, 0, 0, -0.25, "#9aa3aa");
@@ -101171,32 +101261,32 @@
       } }
     ]
   };
-  function leitungsbuero(S, sc, x, z2, w, d, st, r, farbe3) {
+  function leitungsbuero(S, sc, x, z2, w, d, st2, r, farbe3) {
     glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
-      L2.box(1.8, 0.05, 0.85, 0, 0.72, -0.2, st === 3 ? "#7b5a40" : "#f2f0ea");
+      L2.box(1.8, 0.05, 0.85, 0, 0.72, -0.2, st2 === 3 ? "#7b5a40" : "#f2f0ea");
       L2.box(1.7, 0.72, 0.05, 0, 0, -0.6, "#9aa3aa");
-      monitor(L2.sub(0, -0.45), 0, 0, st, r);
-      buerostuhl(L2, 0, 0.4, PI7, st, farbe3);
+      monitor(L2.sub(0, -0.45), 0, 0, st2, r);
+      buerostuhl(L2, 0, 0.4, PI7, st2, farbe3);
       for (const s2 of [-0.5, 0.5]) buerostuhl(L2, s2, -1.25, 0, 1, farbe3);
       pflanze4(L2, w / 2 - 0.45, d / 2 - 0.45, r, true);
-      if (st === 3) {
+      if (st2 === 3) {
         L2.box(1.6, 0.4, 0.7, -w / 2 + 1, 0, d / 2 - 0.5, "#5f7f8c");
       }
       figur2(S, x + w / 2, z2 + d / 2 + 0.4, Math.floor(r() * 1e4), "leitung", { pose: "sitzen", ry: PI7 });
     }, { name: "Leitung", farbe: farbe3 });
   }
-  function besprechung(S, sc, x, z2, w, d, st, r, farbe3) {
+  function besprechung(S, sc, x, z2, w, d, st2, r, farbe3) {
     glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
       const n = Math.max(2, Math.floor((w - 1.2) / 0.85));
-      L2.box(n * 0.85, 0.05, 1.1, 0, 0.72, 0.1, st >= 2 ? "#d8bf98" : "#e9e6df");
+      L2.box(n * 0.85, 0.05, 1.1, 0, 0.72, 0.1, st2 >= 2 ? "#d8bf98" : "#e9e6df");
       L2.box(0.2, 0.72, 0.8, 0, 0, 0.1, "#9aa3aa");
-      for (const s2 of [-1, 1]) for (let k = 0; k < n; k++) buerostuhl(L2, (k - (n - 1) / 2) * 0.85, 0.1 + s2 * 0.9, s2 > 0 ? PI7 : 0, Math.max(1, st), farbe3);
+      for (const s2 of [-1, 1]) for (let k = 0; k < n; k++) buerostuhl(L2, (k - (n - 1) / 2) * 0.85, 0.1 + s2 * 0.9, s2 > 0 ? PI7 : 0, Math.max(1, st2), farbe3);
       L2.box(1.6, 0.95, 0.06, 0, 1, -d / 2 + 0.12, "#22272c");
       L2.box(1.5, 0.85, 0.01, 0, 1.05, -d / 2 + 0.16, "#cfe3ec");
       for (let k = 0; k < Math.min(3, n); k++) figur2(S, x + w / 2 + (k - 1) * 0.85, z2 + d / 2 + 0.1 + (k % 2 ? 0.9 : -0.9), Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: k % 2 ? PI7 : 0 });
     }, { name: "Besprechung", farbe: farbe3 });
   }
-  function telefonboxen(S, sc, x, z2, w, d, st, r, farbe3) {
+  function telefonboxen(S, sc, x, z2, w, d, st2, r, farbe3) {
     for (let k = 0; k < 2; k++) {
       const L2 = lokal2(S, x + 0.65 + k * 1.3, 0.06, z2 + d / 2, 0);
       L2.box(1.2, 2.3, 0.08, 0, 0, -0.55, farbe3);
@@ -101207,7 +101297,7 @@
       L2.box(0.5, 0.04, 0.3, 0, 0.75, 0.15, "#f2f0ea");
     }
   }
-  function lounge(S, sc, x, z2, w, d, st, r, farbe3) {
+  function lounge(S, sc, x, z2, w, d, st2, r, farbe3) {
     const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
     L2.box(w - 0.4, 0.02, d - 0.4, 0, 0, 0, "#e2c9b8");
     L2.box(2.4, 0.42, 0.9, 0, 0, -d / 2 + 0.7, "#5f7f8c");
@@ -101316,31 +101406,31 @@
     S.box(0.1, 0.12, T - 0.8, x, WH3 - 0.4, T / 2 + 0.2, "#3a4048");
     for (const z2 of [0.6, tuer0, tuer1, T - 0.2]) S.box(0.1, WH3 - 0.4, 0.1, x, (WH3 - 0.4) / 2, z2, "#3a4048");
   }
-  function teekueche(S, scene2, K3, tt, T, st, r, G2) {
+  function teekueche(S, scene2, K3, tt, T, st2, r, G2) {
     const L2 = lokal2(S, 0.6, 0.06, tt + 0.6, 0);
-    boden(S, 0, tt, K3, T - tt, 0, BELAG[Math.min(3, st)], 1);
+    boden(S, 0, tt, K3, T - tt, 0, BELAG[Math.min(3, st2)], 1);
     const lang = Math.min(4.2, T - tt - 1.6);
     const Z2 = lokal2(S, 0.6, 0.06, tt + 0.5 + lang / 2, PI7 / 2);
-    Z2.box(lang, 0.88, 0.62, 0, 0, 0, st >= 2 ? "#f2f0ea" : "#d9d6cf");
-    Z2.box(lang, 0.05, 0.66, 0, 0.88, 0, st >= 2 ? "#7b5a40" : "#9aa3aa");
+    Z2.box(lang, 0.88, 0.62, 0, 0, 0, st2 >= 2 ? "#f2f0ea" : "#d9d6cf");
+    Z2.box(lang, 0.05, 0.66, 0, 0.88, 0, st2 >= 2 ? "#7b5a40" : "#9aa3aa");
     Z2.box(0.6, 0.04, 0.4, -lang / 2 + 1, 0.9, 0, "#c9d2d8");
     Z2.box(0.4, 0.45, 0.35, lang / 2 - 0.8, 0.93, -0.05, "#2a2d31");
     Z2.box(0.15, 0.1, 0.05, lang / 2 - 0.8, 1.15, 0.13, "#d23c32");
     Z2.box(0.7, 2, 0.65, lang / 2 + 0.4, 0, 0, "#e9e6df");
-    Z2.box(lang, 0.6, 0.35, 0, 1.6, -0.15, st >= 2 ? "#f2f0ea" : "#c9cdd0");
+    Z2.box(lang, 0.6, 0.35, 0, 1.6, -0.15, st2 >= 2 ? "#f2f0ea" : "#c9cdd0");
     const tx = 4.6, tz = tt + 2.4;
     const P2 = lokal2(S, tx, 0.06, tz, 0);
     P2.zyl(0.55, 0.55, 0.04, 0, 0.74, 0, "#f4f2ee", 14);
     P2.zyl(0.06, 0.06, 0.74, 0, 0, 0, "#5a636b");
     for (let k = 0; k < 3; k++) {
       const a = k * 2.1;
-      P2.box(0.42, 0.05, 0.42, Math.sin(a) * 0.85, 0.44, Math.cos(a) * 0.85, st >= 2 ? "#d23c32" : "#6b7785");
+      P2.box(0.42, 0.05, 0.42, Math.sin(a) * 0.85, 0.44, Math.cos(a) * 0.85, st2 >= 2 ? "#d23c32" : "#6b7785");
       P2.box(0.04, 0.44, 0.04, Math.sin(a) * 0.85, 0, Math.cos(a) * 0.85, "#2a2d31");
     }
     figur2(S, tx + 0.8, tz + 0.9, Math.floor(r() * 1e4), "kunde", { ry: PI7 + 0.6, pose: "stehen" });
     figur2(S, 1.5, tt + 1.6, Math.floor(r() * 1e4), "kunde", { ry: -PI7 / 2, pose: "telefon" });
     if (scene2) wandschild(S, scene2, "Teek\xFCche", "z", tt + 0.5 + lang / 2, 2.6, 0.25, { farbe: "#3a4048", hoehe: 0.3 });
-    if (st >= 2) pflanze4(lokal2(S, K3 - 0.7, 0.06, T - 1.2, 0), 0, 0, r, true);
+    if (st2 >= 2) pflanze4(lokal2(S, K3 - 0.7, 0.06, T - 1.2, 0), 0, 0, r, true);
   }
   function empfang(S, scene2, K3, tt, T, r, G2) {
     boden(S, 0, tt, K3, T - tt, 0, { a: "#e8e1d4", b: "#d6cdbd", c: "#c4b8a4", m: "platten" }, 1);
@@ -101384,27 +101474,27 @@
     if (scene2 && Z2.x1 - Z2.x0 > 4) wandschild(S, scene2, "ZU VERMIETEN", "x", (Z2.x0 + Z2.x1) / 2, 2.2, 0.3, { farbe: ROT3, hoehe: 0.6 });
   }
   function abteilungsZone(S, scene2, Z2, T, G2, r, figuren2, g) {
-    const { a } = Z2, st = Math.max(0, Math.min(3, a.stufe ?? 1));
+    const { a } = Z2, st2 = Math.max(0, Math.min(3, a.stufe ?? 1));
     const info = ABTEILUNGEN2[a.id] ?? { name: a.id, farbe: "#5f6b78" }, farbe3 = info.farbe;
     const w = Z2.x1 - Z2.x0;
-    boden(S, Z2.x0, 0, w, T, 0, BELAG[st], 1);
-    if (st === 3) S.box(Math.min(w - 2, 6), 0.02, 3.2, Z2.x0 + w * 0.6, 0.08, T - 2.6, "#e2c9b8");
+    boden(S, Z2.x0, 0, w, T, 0, BELAG[st2], 1);
+    if (st2 === 3) S.box(Math.min(w - 2, 6), 0.02, 3.2, Z2.x0 + w * 0.6, 0.08, T - 2.6, "#e2c9b8");
     S.box(w - 0.4, 0.35, 0.06, Z2.x0 + w / 2, WH3 - 0.55, 0.28, farbe3);
     if (scene2) {
       wandschild(S, scene2, info.name, "x", Z2.x0 + w / 2, WH3 - 0.55, 0.31, { schrift: "#ffffff", hoehe: 0.32 });
       haengeschild(S, scene2, info.name, Z2.x0 + w / 2, WH3 - 0.8, T * 0.55, { farbe: farbe3, hoehe: 0.75 });
-      const sterne2 = "\u2605".repeat(st) + "\u2606".repeat(3 - st);
-      haengeschild(S, scene2, `Stufe ${st} ${sterne2}`, Z2.x0 + w / 2, WH3 - 1.55, T * 0.55, { farbe: "#2a3540", hoehe: 0.42, seile: false });
+      const sterne2 = "\u2605".repeat(st2) + "\u2606".repeat(3 - st2);
+      haengeschild(S, scene2, `Stufe ${st2} ${sterne2}`, Z2.x0 + w / 2, WH3 - 1.55, T * 0.55, { farbe: "#2a3540", hoehe: 0.42, seile: false });
     }
     const B2 = { x0: Z2.x0 + 0.5, x1: Z2.x1 - 0.4, z0: 0.6, z1: T - 1.6 };
     const sp = SPEZIAL[a.id] ?? [];
     const Rx0 = w < 12 ? B2.x0 : Z2.x0 + Math.round(w * 0.4 * 2) / 2, Rz0 = B2.z0 + Math.round((B2.z1 - B2.z0) * 0.3 * 2) / 2;
     const R9 = { x0: Rx0 + 0.3, x1: B2.x1, z0: Rz0 + 0.4, z1: B2.z1 };
-    S.box(R9.x1 - R9.x0 + 0.8, 0.02, R9.z1 - R9.z0 + 1.2, (R9.x0 + R9.x1) / 2, 0.08, (R9.z0 + R9.z1) / 2 + 0.2, "#" + new three_module_exports.Color(farbe3).lerp(new three_module_exports.Color("#e6e2da"), st === 0 ? 0.72 : 0.62).getHexString());
+    S.box(R9.x1 - R9.x0 + 0.8, 0.02, R9.z1 - R9.z0 + 1.2, (R9.x0 + R9.x1) / 2, 0.08, (R9.z0 + R9.z1) / 2 + 0.2, "#" + new three_module_exports.Color(farbe3).lerp(new three_module_exports.Color("#e6e2da"), st2 === 0 ? 0.72 : 0.62).getHexString());
     S.box(R9.x1 - R9.x0 + 0.8, 0.025, 0.15, (R9.x0 + R9.x1) / 2, 0.085, R9.z0 - 0.35, farbe3);
     S.box(0.15, 0.025, R9.z1 - R9.z0 + 1.2, R9.x0 - 0.4, 0.085, (R9.z0 + R9.z1) / 2 + 0.2, farbe3);
     const pool = [...SIGNATUR[a.id] ?? [], ...sp.filter((q2) => q2.art === "frei")];
-    const nTypen = Math.min(pool.length, [2, 3, 4, 99][st]);
+    const nTypen = Math.min(pool.length, [2, 3, 4, 99][st2]);
     const flR = (R9.x1 - R9.x0) * (R9.z1 - R9.z0);
     let belegtR = 0;
     for (let runde2 = 0, fehl = 0; fehl < nTypen && belegtR < flR * 0.85 && runde2 < 40; runde2++) {
@@ -101420,16 +101510,16 @@
       }
       fehl = 0;
       belegtR += s2.w * s2.d;
-      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st, r, farbe3);
+      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st2, r, farbe3);
       if (s2.einmal) s2._zone = Z2;
     }
     G2.setze(R9.x0 - 0.4, R9.z0 - 0.4, R9.x1, R9.z1);
     const liste = [];
-    const n = [1, 2, 3, 4][st];
-    if (st >= 2) liste.push({ art: "raum", w: 4, d: 3.6, bau: leitungsbuero });
-    if (st >= 1 && w >= 11) liste.push({ art: "raum", w: 5, d: 3.8, bau: besprechung });
+    const n = [1, 2, 3, 4][st2];
+    if (st2 >= 2) liste.push({ art: "raum", w: 4, d: 3.6, bau: leitungsbuero });
+    if (st2 >= 1 && w >= 11) liste.push({ art: "raum", w: 5, d: 3.8, bau: besprechung });
     for (const s2 of sp.filter((q2) => q2.art !== "frei").slice(0, Math.max(1, n - 1))) liste.push(s2);
-    if (st === 3) {
+    if (st2 === 3) {
       liste.push({ art: "frei", w: 2.6, d: 1.3, bau: telefonboxen });
       liste.push({ art: "frei", w: 4.2, d: 3, bau: lounge });
     }
@@ -101438,31 +101528,31 @@
     for (const s2 of liste) {
       const pos = G2.suche(B2, s2.w, s2.d, s2.art === "wand" ? 0.3 : 0.6, { nurHinten: s2.art === "wand" });
       if (!pos) continue;
-      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st, r, farbe3);
+      s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st2, r, farbe3);
     }
-    const proSeite = 3, iw = proSeite * 1.4, id = st === 0 ? 1.9 : 3.3;
+    const proSeite = 3, iw = proSeite * 1.4, id = st2 === 0 ? 1.9 : 3.3;
     let platz = [];
     const chart = a.id === "controlling" ? () => waehle2(r, ["#cfe3ec", "#e6edf1"]) : null;
-    const noetig = Math.ceil(a.fte / (st === 0 ? proSeite : proSeite * 2));
-    const gx = iw + (st === 0 ? 1 : 1.3), gz2 = id + (st === 0 ? 0.9 : 1.3);
+    const noetig = Math.ceil(a.fte / (st2 === 0 ? proSeite : proSeite * 2));
+    const gx = iw + (st2 === 0 ? 1 : 1.3), gz2 = id + (st2 === 0 ? 0.9 : 1.3);
     const kand = [];
     for (let z2 = B2.z0 + 0.3; z2 + id <= B2.z1; z2 += gz2) for (let x = B2.x0 + 0.2; x + iw <= B2.x1; x += gx) if (G2.frei(x - 0.3, z2 - 0.3, x + iw + 0.3, z2 + id + 0.3)) kand.push({ x, z: z2 });
     const schritt = Math.max(1, kand.length / Math.max(1, noetig));
     for (let k = 0; k < noetig && k * schritt < kand.length; k++) {
       const pos = kand[Math.floor(k * schritt)];
       G2.setze(pos.x - 0.3, pos.z - 0.3, pos.x + iw + 0.3, pos.z + id + 0.3);
-      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st === 0 ? 0.6 : id / 2), proSeite, st, r, farbe3, chart));
+      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st2 === 0 ? 0.6 : id / 2), proSeite, st2, r, farbe3, chart));
     }
     while (platz.length < a.fte) {
       const pos = G2.suche(B2, iw, id, 0.5);
       if (!pos) break;
-      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st === 0 ? 0.6 : id / 2), proSeite, st, r, farbe3, chart));
+      platz = platz.concat(insel(S, pos.x + iw / 2, pos.z + (st2 === 0 ? 0.6 : id / 2), proSeite, st2, r, farbe3, chart));
     }
     const dr = G2.suche(B2, 1.6, 0.8, 0.3);
     if (dr) druckerecke(lokal2(S, dr.x + 0.8, 0.06, dr.z + 0.4, 0), r);
-    for (let k = 0; k < [0, 1, 3, 5][st]; k++) {
+    for (let k = 0; k < [0, 1, 3, 5][st2]; k++) {
       const p2 = G2.suche(B2, 0.6, 0.6, 0.4);
-      if (p2) pflanze4(lokal2(S, p2.x + 0.3, 0.06, p2.z + 0.3, 0), 0, 0, r, st >= 2);
+      if (p2) pflanze4(lokal2(S, p2.x + 0.3, 0.06, p2.z + 0.3, 0), 0, 0, r, st2 >= 2);
     }
     const sitzend = Math.min(platz.length, Math.round(a.fte * 0.55));
     for (let k = 0; k < sitzend; k++) {
@@ -101494,7 +101584,7 @@
   }
   var SIGNATUR = {
     controlling: [
-      { w: 4.4, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { w: 4.4, d: 2.4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.5, 0);
         for (let k = -1; k <= 1; k++) {
           const P2 = L2.sub(k * 1.45, Math.abs(k) * 0.25, -k * 0.3);
@@ -101509,10 +101599,10 @@
         T2.box(3.2, 0.72, 0.05, 0, 0, -0.35, "#3a3f45");
         for (let k = -1; k <= 1; k++) {
           monitor(T2.sub(k * 1.1, -0.15), 0, 0, 2, r, "#f2d29a");
-          buerostuhl(T2, k * 1.1, 0.7, PI7, Math.max(1, st), farbe3);
+          buerostuhl(T2, k * 1.1, 0.7, PI7, Math.max(1, st2), farbe3);
         }
       } },
-      { w: 3.6, d: 1.4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { w: 3.6, d: 1.4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4, 0);
         tafel2(L2, 0, 0, 3.2, 1.6, "Monatsabschluss", farbe3, r, (lx, y, lz, ww, hh) => {
           for (let c = 0; c < 4; c++) {
@@ -101524,13 +101614,13 @@
       } }
     ],
     einkauf: [
-      { w: 3.4, d: 1.6, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 3.4, d: 1.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         for (const s2 of [-1, 1]) L2.box(0.08, 1.9, 1, s2 * 1.5, 0, 0, "#7b5a40");
         for (let k = 0; k < 4; k++) L2.box(3, 0.05, 1, 0, 0.1 + k * 0.48, 0, "#9c7650");
         for (let k = 0; k < 4; k++) for (let j = 0; j < 2; j++) rolle(L2, 0, 0.32 + k * 0.48, -0.25 + j * 0.5, 2.8, 0.2, waehle2(r, PAL.damen.concat(PAL.herren, PAL.waesche)));
       } },
-      { w: 3.8, d: 2.2, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 3.8, d: 2.2, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.2, 0.8, 1, -0.6, 0, 0.2, "#f4f2ee");
         for (let k = 0; k < 10; k++) L2.box(0.36, 0.06 + k % 3 * 0.05, 0.3, -1.5 + k % 5 * 0.45, 0.8, 0 + Math.floor(k / 5) * 0.4, waehle2(r, PAL.damen.concat(PAL.herren)));
@@ -101539,7 +101629,7 @@
       } }
     ],
     marketing: [
-      { w: 3.2, d: 1.4, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 3.2, d: 1.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         [["SALE", "#d23c32"], ["NEU", "#2f6fb3"], ["Herbst", "#3f7d56"]].forEach(([t, f], k) => {
           const P2 = L2.sub(-1.1 + k * 1.1, 0, (k - 1) * 0.3);
@@ -101550,7 +101640,7 @@
       } }
     ],
     personal: [
-      { w: 6, d: 4.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { w: 6, d: 4.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
           L2.box(2.6, 1.5, 0.04, 0, 0.8, -d / 2 + 0.2, "#ffffff");
           L2.box(2.4, 1.3, 0.01, 0, 0.9, -d / 2 + 0.23, "#cfe3ec");
@@ -101567,7 +101657,7 @@
           figur2(S, x + w / 2 + 1.6, z2 + 0.9, Math.floor(r() * 1e4), "leitung", { ry: 0.3, pose: "schauen" });
         }, { name: "Schulung", farbe: farbe3 });
       } },
-      { w: 3.8, d: 3.2, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { w: 3.8, d: 3.2, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(3.4, 0.02, 2.8, 0, 0, 0, heller(farbe3, 0.35));
         for (const s2 of [-1, 1]) {
@@ -101581,7 +101671,7 @@
       } }
     ],
     immobilien: [
-      { w: 5, d: 3.4, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 5, d: 3.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(4.2, 0.85, 2.6, 0, 0, 0, "#e9e4da");
         L2.box(4.1, 0.03, 2.5, 0, 0.85, 0, "#b9b4aa");
@@ -101596,7 +101686,7 @@
         }
         for (const s2 of [-1, 1]) figur2(S, x + w / 2 + s2 * 1.6, z2 + d / 2 + 1.7, Math.floor(r() * 1e4), s2 > 0 ? "leitung" : "kunde", { ry: PI7, pose: "schauen" });
       } },
-      { w: 3.6, d: 2, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 3.6, d: 2, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.geo(new three_module_exports.BoxGeometry(3, 0.05, 1.3).rotateX(0.15), 0, 0.95, 0, "#e9e6df");
         for (const s2 of [-1.3, 1.3]) L2.box(0.08, 0.92, 1, s2, 0, 0, "#5a636b");
@@ -101607,7 +101697,7 @@
       } }
     ],
     logistik: [
-      { w: 4.2, d: 1.6, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 4.2, d: 1.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.5, 0);
         for (const s2 of [-1, 0, 1]) L2.box(0.1, 2.4, 0.9, s2 * 1.9, 0, 0, "#e07b2a");
         for (let k = 0; k < 3; k++) L2.box(3.9, 0.1, 0.9, 0, 0.3 + k * 0.8, 0, "#2f5f8a");
@@ -101619,7 +101709,7 @@
       } }
     ],
     ecommerce: [
-      { w: 5, d: 2.6, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 5, d: 2.6, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         for (const s2 of [-1, 1]) {
           const P2 = L2.sub(s2 * 1.4, -0.3);
@@ -101636,7 +101726,7 @@
       } }
     ],
     recht: [
-      { w: 5.2, d: 3.6, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 5.2, d: 3.6, bau(S, sc, x, z2, w, d, st2, r) {
         for (let k = 0; k < 2; k++) {
           const L3 = lokal2(S, x + 1.4 + k * 2.4, 0.06, z2 + 1, 0);
           regal(L3, 0, 0, 2.2, 2.3, "#5a3b22", ordner(L3, r, ["#6b2737", "#2b3a55", "#3a2a20", "#c9b48f", "#2f6f4f"]), r, 0.5, 6);
@@ -101650,7 +101740,7 @@
         }
         figur2(S, x + w / 2 - 0.3, z2 + d - 0.2, Math.floor(r() * 1e4), "leitung", { pose: "sitzen", ry: PI7 });
       } },
-      { w: 3.6, d: 2.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { w: 3.6, d: 2.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.6, 0.05, 1.1, 0, 0.72, 0, "#7b5a40");
         L2.box(0.25, 0.72, 0.8, 0, 0, 0, "#3a2a20");
@@ -101659,7 +101749,7 @@
       } }
     ],
     vm: [
-      { w: 2.8, d: 1.8, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 2.8, d: 1.8, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         for (let k = 0; k < 3; k++) L2.kugel(0.35, -1 + k * 0.5, 0.35, -0.4 + k % 2 * 0.3, waehle2(r, ["#d23c32", "#e9b44c", "#ffffff"]), 1);
         for (let k = 0; k < 3; k++) {
@@ -101673,7 +101763,7 @@
       } }
     ],
     verwaltung: [
-      { w: 3.4, d: 2, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+      { w: 3.4, d: 2, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         L2.box(2.6, 1.1, 0.7, 0, 0, 0.2, "#f4f2ee");
         L2.box(2.7, 0.06, 0.8, 0, 1.1, 0.2, "#3a4048");
@@ -101682,7 +101772,7 @@
         monitor(L2.sub(-0.5, 0.1, PI7), 0, 0, 1, r);
         figur2(S, x + w / 2 - 0.4, z2 + d / 2 - 0.5, Math.floor(r() * 1e4), "info", { ry: 0, pose: "stehen" });
       } },
-      { w: 4.2, d: 1.4, bau(S, sc, x, z2, w, d, st, r) {
+      { w: 4.2, d: 1.4, bau(S, sc, x, z2, w, d, st2, r) {
         const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
         for (let k = 0; k < 4; k++) for (const s2 of [-1, 1]) {
           const u = -1.5 + k;
@@ -101851,13 +101941,13 @@
   }
   var STOFFE = ["#a8dcc4", "#26355e", "#76263a", "#d8c39c", "#cc9f2e", "#ec7a6a", "#9fb393", "#c4b0dc", "#b8864e", "#4a6f9e", "#f3f2ee", "#2c5a40"];
   SPEZIAL.produkt = [
-    { art: "wand", w: 4.8, d: 0.4, bau(S, sc, x, z2, w, d, st, r) {
+    { art: "wand", w: 4.8, d: 0.4, bau(S, sc, x, z2, w, d, st2, r) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.12, 0);
       L2.box(w, 1.9, 0.06, 0, 0.55, 0, "#d8c6a4");
       for (let i = 0; i < 9; i++) for (let j = 0; j < 4; j++) L2.box(0.42, 0.34, 0.02, -w / 2 + 0.38 + i * 0.5, 0.68 + j * 0.42, 0.04, waehle2(r, STOFFE));
       text2(L2, "Stoffmuster", 0, 2.6, 0.05, 0.24, "#ffffff", ABTEILUNGEN2.produkt.farbe);
     } },
-    { art: "frei", w: 3.8, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+    { art: "frei", w: 3.8, d: 2.4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2 - 0.2, 0);
       L2.box(3.4, 0.06, 1.4, 0, 0.88, 0, "#e9e6df");
       for (const s2 of [-1.55, 1.55]) L2.box(0.1, 0.88, 1.2, s2, 0, 0, "#5a636b");
@@ -101873,7 +101963,7 @@
       L2.zyl(0.03, 0.03, 0.62, -0.8, 0, 1.05, "#5a636b", 6);
       figur2(S, x + w / 2 + 0.2, z2 + d / 2 + 0.75, Math.floor(r() * 1e4), "kunde", { ry: PI7, pose: "schauen" });
     } },
-    { art: "raum", w: 4.2, d: 3.4, vorrang: true, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+    { art: "raum", w: 4.2, d: 3.4, vorrang: true, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
       glasraum(S, sc, x, z2, w, d, "#3a4048", (L2) => {
         L2.box(w - 0.6, 0.02, d - 0.6, 0, 0, 0, "#e6dccb");
         for (let k = 0; k < 3; k++) schneiderpuppe(L2, -1.2 + k * 0.95, -0.2, r, waehle2(r, STOFFE), 0.2);
@@ -101884,7 +101974,7 @@
         figur2(S, x + w / 2 + 0.8, z2 + d / 2 + 0.8, Math.floor(r() * 1e4), "kunde", { ry: PI7 + 0.4, pose: "schauen" });
       }, { name: "Anprobe", farbe: farbe3 });
     } },
-    { art: "wand", w: 3, d: 0.4, vorrang: true, bau(S, sc, x, z2, w, d, st, r) {
+    { art: "wand", w: 3, d: 0.4, vorrang: true, bau(S, sc, x, z2, w, d, st2, r) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.12, 0);
       L2.box(w, 1.8, 0.05, 0, 0.6, 0, "#f6f4ef");
       const basis3 = ["#a8dcc4", "#26355e", "#76263a", "#d8c39c", "#cc9f2e", "#ec7a6a", "#c4b0dc"];
@@ -101895,12 +101985,12 @@
     } }
   ];
   SIGNATUR.produkt = [
-    { w: 3.2, d: 1.6, bau(S, sc, x, z2, w, d, st, r) {
+    { w: 3.2, d: 1.6, bau(S, sc, x, z2, w, d, st2, r) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
       for (let k = 0; k < 3; k++) schneiderpuppe(L2, -1 + k * 1, k % 2 * 0.25, r, k === 1 ? null : waehle2(r, STOFFE), -0.3);
       figur2(S, x + w / 2 + 0.5, z2 + d / 2 + 0.6, Math.floor(r() * 1e4), "kunde", { ry: PI7 + 0.5, pose: "schauen" });
     } },
-    { w: 4.4, d: 1.6, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+    { w: 4.4, d: 1.6, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
       for (const s2 of [-1, 1]) {
         const P2 = L2.sub(s2 * 1.1, 0);
@@ -101918,17 +102008,17 @@
       }
       text2(L2, "Musterkollektion", 0, 2.15, 0.03, 0.2, "#ffffff", farbe3);
     } },
-    { w: 3.2, d: 2.4, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+    { w: 3.2, d: 2.4, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
       const L2 = lokal2(S, x + w / 2, 0.06, z2 + d / 2, 0);
       L2.box(2.6, 0.05, 1.2, 0, 0.74, 0, "#f2f0ea");
       for (const s2 of [-1.2, 1.2]) L2.box(0.06, 0.74, 1, s2, 0, 0, "#2a2d31");
       for (let k = 0; k < 7; k++) L2.geo(new three_module_exports.BoxGeometry(0.42, 0.01, 0.08).translate(0.2, 0, 0).rotateY(-0.9 + k * 0.3), -0.6, 0.8 + k * 4e-3, 0.1, STOFFE[k]);
       for (let k = 0; k < 6; k++) L2.box(0.22, 0.012, 0.22, 0.2 + k % 3 * 0.3, 0.8, -0.25 + Math.floor(k / 3) * 0.32, waehle2(r, STOFFE), zw(r, -0.3, 0.3));
-      for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.6, 0.95, PI7, Math.max(1, st), farbe3);
+      for (const s2 of [-1, 1]) buerostuhl(L2, s2 * 0.6, 0.95, PI7, Math.max(1, st2), farbe3);
       figur2(S, x + w / 2 - 0.6, z2 + d / 2 + 0.95, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: PI7 });
     } }
   ];
-  SIGNATUR.marketing.unshift({ w: 5, d: 2.8, einmal: true, bau(S, sc, x, z2, w, d, st, r, farbe3) {
+  SIGNATUR.marketing.unshift({ w: 5, d: 2.8, einmal: true, bau(S, sc, x, z2, w, d, st2, r, farbe3) {
     const L2 = lokal2(S, x + w / 2, 0.06, z2 + 0.4, 0);
     L2.box(4.8, 0.08, 0.3, 0, 0, 0, "#2a2d31");
     const kacheln = [["Hartwig Karte", "#d23c32"], ["\xD6ffnungen", "#2f6fb3"], ["Einl\xF6sungen", "#3ab27a"], ["Segmente", "#e9b44c"], ["App aktiv", "#7a4fc0"], ["Push", "#d0457a"]];
@@ -101949,7 +102039,7 @@
     T2.box(3.8, 0.72, 0.05, 0, 0, -0.35, "#3a3f45");
     for (let k = -1; k <= 1; k++) {
       monitor(T2.sub(k * 1.25, -0.15), 0, 0, 2, r, "#f2c6d2");
-      buerostuhl(T2, k * 1.25, 0.7, PI7, Math.max(1, st), farbe3);
+      buerostuhl(T2, k * 1.25, 0.7, PI7, Math.max(1, st2), farbe3);
     }
     for (let k = -1; k <= 1; k += 2) figur2(S, x + w / 2 + k * 1.25, z2 + 0.4 + 1.5 + 0.7, Math.floor(r() * 1e4), "kunde", { pose: "sitzen", ry: PI7 });
     L2.box(4.6, 0.36, 0.08, 0, 2.86, 0, farbe3);
@@ -102426,11 +102516,11 @@
     }
   }
   function formsteinwand(S, F2, u0, u1, y0, y1, t0, t1, farbe3, art = "kreis") {
-    const L2 = [], st = 0.8;
-    const nu = Math.floor((u1 - u0) / st), nv = Math.floor((y1 - y0) / st);
-    const ou = u0 + (u1 - u0 - nu * st) / 2, ov = y0 + (y1 - y0 - nv * st) / 2;
+    const L2 = [], st2 = 0.8;
+    const nu = Math.floor((u1 - u0) / st2), nv = Math.floor((y1 - y0) / st2);
+    const ou = u0 + (u1 - u0 - nu * st2) / 2, ov = y0 + (y1 - y0 - nv * st2) / 2;
     for (let i = 0; i < nu; i++) for (let k = 0; k < nv; k++) {
-      const cu = ou + (i + 0.5) * st, cv = ov + (k + 0.5) * st;
+      const cu = ou + (i + 0.5) * st2, cv = ov + (k + 0.5) * st2;
       if (art === "kreis") L2.push({ kreis: [cu, cv, 0.27] });
       else if (art === "raute") {
         L2.push({ u0: cu - 0.22, u1: cu + 0.22, v0: cv - 0.22, v1: cv + 0.22 });
@@ -103105,15 +103195,15 @@
     return y3 + 8.2;
   }
   function treppenGiebel(S, F2, u0, u1, y, h, wand2, orn, stufen = 4) {
-    const b2 = u1 - u0, st = h / (stufen + 1), dx = b2 / (2 * (stufen + 1));
+    const b2 = u1 - u0, st2 = h / (stufen + 1), dx = b2 / (2 * (stufen + 1));
     const pk = [[u0, y], [u1, y]];
     for (let s2 = 0; s2 <= stufen; s2++) {
-      pk.push([u1 - s2 * dx, y + (s2 + 1) * st]);
-      pk.push([u1 - (s2 + 1) * dx, y + (s2 + 1) * st]);
+      pk.push([u1 - s2 * dx, y + (s2 + 1) * st2]);
+      pk.push([u1 - (s2 + 1) * dx, y + (s2 + 1) * st2]);
     }
     for (let s2 = stufen; s2 >= 0; s2--) {
-      pk.push([u0 + (s2 + 1) * dx, y + (s2 + 1) * st]);
-      pk.push([u0 + s2 * dx, y + (s2 + 1) * st]);
+      pk.push([u0 + (s2 + 1) * dx, y + (s2 + 1) * st2]);
+      pk.push([u0 + s2 * dx, y + (s2 + 1) * st2]);
     }
     const sauber = pk.filter((q2, i) => i === 0 || Math.hypot(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
     fpoly2(S, F2, sauber, -0.5, 0.15, wand2);
@@ -103124,8 +103214,8 @@
     }
     fscheibe(S, F2, m, y + h * 0.78, 0.15, 0.22, 0.45, GLAS7, 12);
     for (let s2 = 0; s2 <= stufen; s2++) {
-      fb2(S, F2, u1 - s2 * dx - 0.4, u1 - s2 * dx + 0.05, y + (s2 + 1) * st, y + (s2 + 1) * st + 0.15, -0.5, 0.25, orn);
-      fb2(S, F2, u0 + s2 * dx - 0.05, u0 + s2 * dx + 0.4, y + (s2 + 1) * st, y + (s2 + 1) * st + 0.15, -0.5, 0.25, orn);
+      fb2(S, F2, u1 - s2 * dx - 0.4, u1 - s2 * dx + 0.05, y + (s2 + 1) * st2, y + (s2 + 1) * st2 + 0.15, -0.5, 0.25, orn);
+      fb2(S, F2, u0 + s2 * dx - 0.05, u0 + s2 * dx + 0.4, y + (s2 + 1) * st2, y + (s2 + 1) * st2 + 0.15, -0.5, 0.25, orn);
     }
   }
   function gauben(S, F2, u0, u1, H, T, dh, c, ra) {
@@ -103724,16 +103814,16 @@
     fb2(S, FPZ, pw * 0.15, pw * 0.45, 3.8, 4.2, 0, 6, "#f1efe9");
     for (const u of [pw * 0.16, pw * 0.44]) fb2(S, FPZ, u - 0.15, u + 0.15, 0.3, 3.8, 5.6, 5.9, STAHL3);
     ftext2(scene2, FPZ, name2, pw * 0.62, 6.2, 0.1, 2.2, pw * 0.6, "#b8322a");
-    const n = 18, gh = 2.9, sw = Math.min(pw - 8, 58), st = 14.5, sxx = px2 + 2, szz = pz4 + (pd - st) / 2 - 2;
-    S.quader(sxx, Hp, szz, sxx + sw - 1, Hp + n * gh, szz + st - 1, "#2f3a44");
-    const FS = RZ(sxx, szz, sw, st);
+    const n = 18, gh = 2.9, sw = Math.min(pw - 8, 58), st2 = 14.5, sxx = px2 + 2, szz = pz4 + (pd - st2) / 2 - 2;
+    S.quader(sxx, Hp, szz, sxx + sw - 1, Hp + n * gh, szz + st2 - 1, "#2f3a44");
+    const FS = RZ(sxx, szz, sw, st2);
     const Hs = bandFassade(S, FS, { n, gh, y0: Hp + 0.6, bruest: "#e9e2cf", bruest2: "#e9e2cf", rippe: "#d8cdb0", raster: 3, rb: 0.16, rt: 0.35, sims: "#b9a57a" });
-    const FG = endeRechts(FS, st);
-    fb2(S, FG, -0.3, st, Hp + 0.6, Hs + 0.8, -0.3, 0.25, "#ded6c2");
-    for (let u = 1.2; u < st - 0.5; u += 1.6) fb2(S, FG, u - 0.3, u + 0.3, Hp + 0.6, Hs + 0.8, 0.25, 0.4, "#e9e2cf");
-    for (let k = 0; k < n; k++) fb2(S, FG, st / 2 - 0.8, st / 2 + 0.8, Hp + 0.6 + k * gh + 1.1, Hp + 0.6 + k * gh + 2.3, 0.25, 0.45, GLAS7);
-    S.quader(sxx, Hs + 0.8, szz, sxx + sw, Hs + 0.95, szz + st, "#9a9893");
-    S.quader(sxx + sw * 0.84, Hs + 0.8, szz + 3, sxx + sw * 0.97, Hs + 4, szz + st - 3, "#e6dfcf");
+    const FG = endeRechts(FS, st2);
+    fb2(S, FG, -0.3, st2, Hp + 0.6, Hs + 0.8, -0.3, 0.25, "#ded6c2");
+    for (let u = 1.2; u < st2 - 0.5; u += 1.6) fb2(S, FG, u - 0.3, u + 0.3, Hp + 0.6, Hs + 0.8, 0.25, 0.4, "#e9e2cf");
+    for (let k = 0; k < n; k++) fb2(S, FG, st2 / 2 - 0.8, st2 / 2 + 0.8, Hp + 0.6 + k * gh + 1.1, Hp + 0.6 + k * gh + 2.3, 0.25, 0.45, GLAS7);
+    S.quader(sxx, Hs + 0.8, szz, sxx + sw, Hs + 0.95, szz + st2, "#9a9893");
+    S.quader(sxx + sw * 0.84, Hs + 0.8, szz + 3, sxx + sw * 0.97, Hs + 4, szz + st2 - 3, "#e6dfcf");
     const FT = teil2(FS, 0, sw, -1.4);
     const bt = ftext2(scene2, FT, name2.toUpperCase(), sw * 0.42, Hs + 4.6, 0.3, 3.2, sw * 0.72, "#ff6a50");
     for (let u = sw * 0.42 - bt / 2 + 1; u <= sw * 0.42 + bt / 2; u += 4) fb2(S, FT, u - 0.08, u + 0.08, Hs + 0.8, Hs + 6.4, -0.2, 0, STAHL3);
@@ -105564,13 +105654,13 @@
     }
     if (p2.ostFachwerk && v === "altstadt") basis3.fachwerk = 2.4;
     if (p2.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis3.barock = 2.5;
-    const liste = Object.entries(basis3).map(([st, g2]) => {
+    const liste = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
-      if (nachbar?.stil === st) w *= 0.25;
-      if (st === "fachwerk" && p2.w > 18) w *= 0.3;
-      if (st === "ddr_platte" && p2.w < 14 && v !== "ostzentrum") w *= 0.3;
-      if (st === "barock" && p2.w > 22) w *= 0.4;
-      return [st, w];
+      if (nachbar?.stil === st2) w *= 0.25;
+      if (st2 === "fachwerk" && p2.w > 18) w *= 0.3;
+      if (st2 === "ddr_platte" && p2.w < 14 && v !== "ostzentrum") w *= 0.3;
+      if (st2 === "barock" && p2.w > 22) w *= 0.4;
+      return [st2, w];
     });
     const stil = wahlGewichtet2(r, liste);
     let [a, b2] = OST_GESCHOSSE[stil];
@@ -106117,9 +106207,9 @@
   function giebelUmriss(typ, bw, H, G2, m) {
     const c = bw / 2, pk = [[bw, H]];
     if (typ === "treppe" || typ === "fialen" || typ === "rund") {
-      const n = 2 * m + 1, cw = bw / n, st = G2 / (m + 1);
+      const n = 2 * m + 1, cw = bw / n, st2 = G2 / (m + 1);
       for (let j = n - 1; j >= 0; j--) {
-        const y = H + (Math.min(j, n - 1 - j) + 1) * st;
+        const y = H + (Math.min(j, n - 1 - j) + 1) * st2;
         if (typ === "rund") {
           const rr = cw / 2;
           pk.push([(j + 1) * cw, y - rr]);
@@ -106182,9 +106272,9 @@
     for (let k = 0; k < n; k++) for (const u of ax) oe.push(fenster4(u, eg + k * gh + 0.65, fb_, fh, art));
     const nischen = [];
     if (typ === "treppe" || typ === "fialen" || typ === "rund") {
-      const nc = 2 * m + 1, cw = bw / nc, st = G2 / (m + 1);
+      const nc = 2 * m + 1, cw = bw / nc, st2 = G2 / (m + 1);
       for (let j = 0; j < nc; j++) {
-        const lv = Math.min(j, nc - 1 - j) + 1, top = H + lv * st - (typ === "rund" ? cw / 2 + 0.25 : 0.55), rand = Math.min(0.32, cw * 0.2);
+        const lv = Math.min(j, nc - 1 - j) + 1, top = H + lv * st2 - (typ === "rund" ? cw / 2 + 0.25 : 0.55), rand = Math.min(0.32, cw * 0.2);
         const u0 = j * cw + rand, u1 = (j + 1) * cw - rand;
         let y = H + 0.55;
         if (u1 - u0 < 0.35 || top - y < 1.2) continue;
@@ -106243,16 +106333,16 @@
       for (let k = 1; k <= n; k++) bd.push([0, eg + (k - 1) * gh + 0.25, bw, eg + (k - 1) * gh + 0.4]);
       platten(S, FF, bd, 0, 0.05, o.band);
       if (typ === "treppe" || typ === "fialen") {
-        const nc = 2 * m + 1, cw = bw / nc, st = G2 / (m + 1), deck = [];
+        const nc = 2 * m + 1, cw = bw / nc, st2 = G2 / (m + 1), deck = [];
         for (let j = 0; j < nc; j++) {
-          const y = H + (Math.min(j, nc - 1 - j) + 1) * st;
+          const y = H + (Math.min(j, nc - 1 - j) + 1) * st2;
           deck.push([j * cw - 0.06, y, (j + 1) * cw + 0.06, y + 0.16]);
         }
         platten(S, FF, deck, -0.45, 0.16, o.deck);
         if (typ === "fialen") {
           const fl = [];
           for (let j = 0; j <= nc; j++) {
-            const yl = j > 0 ? H + (Math.min(j - 1, nc - j) + 1) * st : H, yr = j < nc ? H + (Math.min(j, nc - 1 - j) + 1) * st : H;
+            const yl = j > 0 ? H + (Math.min(j - 1, nc - j) + 1) * st2 : H, yr = j < nc ? H + (Math.min(j, nc - 1 - j) + 1) * st2 : H;
             const top = Math.max(yl, yr) + 1.3, u = Math.min(bw - 0.25, Math.max(0.25, j * cw));
             fl.push([u - 0.24, H - 0.4, u + 0.24, top]);
             const g = new three_module_exports.ConeGeometry(0.36, 1, 4);
@@ -106264,9 +106354,9 @@
         }
       }
       if (typ === "rund") {
-        const nc = 2 * m + 1, cw = bw / nc, st = G2 / (m + 1), ts = [];
+        const nc = 2 * m + 1, cw = bw / nc, st2 = G2 / (m + 1), ts = [];
         for (let j = 1; j < nc; j++) {
-          const yt = H + Math.min(Math.min(j - 1, nc - j), Math.min(j, nc - 1 - j)) * st + st;
+          const yt = H + Math.min(Math.min(j - 1, nc - j), Math.min(j, nc - 1 - j)) * st2 + st2;
           ts.push([j * cw - 0.1, H + 0.2, j * cw + 0.1, yt - 0.05]);
         }
         platten(S, FF, ts, 0, 0.12, o.deck);
@@ -106450,9 +106540,9 @@
   }
   var dachUnterGiebel = (G2, m) => G2 * (2 * m + 1) / (2 * m + 2) * 0.93;
   function giebelNischen(u0, bw, H, G2, m, art, fuell, mitFenster = false) {
-    const nc = 2 * m + 1, cw = bw / nc, st = G2 / (m + 1), oe = [];
+    const nc = 2 * m + 1, cw = bw / nc, st2 = G2 / (m + 1), oe = [];
     for (let j = 0; j < nc; j++) {
-      const top = H + (Math.min(j, nc - 1 - j) + 1) * st - 0.6, rand = Math.min(0.32, cw * 0.2);
+      const top = H + (Math.min(j, nc - 1 - j) + 1) * st2 - 0.6, rand = Math.min(0.32, cw * 0.2);
       const a = u0 + j * cw + rand, b2 = u0 + (j + 1) * cw - rand;
       let y = H + 0.6;
       if (b2 - a < 0.35 || top - y < 1.2) continue;
@@ -106465,9 +106555,9 @@
     return oe;
   }
   function giebelDeckel(S, F2, u0, bw, H, G2, m, c) {
-    const nc = 2 * m + 1, cw = bw / nc, st = G2 / (m + 1), deck = [];
+    const nc = 2 * m + 1, cw = bw / nc, st2 = G2 / (m + 1), deck = [];
     for (let j = 0; j < nc; j++) {
-      const y = H + (Math.min(j, nc - 1 - j) + 1) * st;
+      const y = H + (Math.min(j, nc - 1 - j) + 1) * st2;
       deck.push([u0 + j * cw - 0.06, y, u0 + (j + 1) * cw + 0.06, y + 0.16]);
     }
     platten(S, F2, deck, -0.45, 0.16, c);
@@ -106714,7 +106804,7 @@
     const W3 = p2.w, D = p2.d, st0 = KONTOR_STIL[v];
     const stein = waehle2(r, st0.stein), gold = "#c9a24a", kupf = waehle2(r, NF.kupfer);
     const o = { ...st0, stein, pfeiler: heller(stein, 0.035), gold, ra: 1.85 };
-    const eg = 5.2, gh = 3.4, n = v === "turm" ? 6 : 6 + Math.floor(r() * 2), st = v === "turm" ? 1 : 3;
+    const eg = 5.2, gh = 3.4, n = v === "turm" ? 6 : 6 + Math.floor(r() * 2), st2 = v === "turm" ? 1 : 3;
     let poly;
     if (v === "spitz") {
       const k = Math.min(W3 * 0.4, D * 0.38), a = Math.min(D * 0.5, W3 * 0.32);
@@ -106727,11 +106817,11 @@
     const H0 = eg + n * gh;
     const name2 = KONTOR_NAMEN[p2.seed * 3 % KONTOR_NAMEN.length];
     let top = 0;
-    for (let s2 = 0; s2 <= st; s2++) {
+    for (let s2 = 0; s2 <= st2; s2++) {
       const pl2 = s2 === 0 ? poly : einruecken(poly, s2 * 2.4);
       const yb = s2 === 0 ? 0 : H0 + (s2 - 1) * gh, yt = s2 === 0 ? H0 : H0 + s2 * gh;
       prisma2(S, einruecken(pl2, 0.4), yb, yt, dunkler(stein, 0.06), s2 === 0 && hof2 ? [hof2] : []);
-      prisma2(S, einruecken(pl2, 0.4), yt, yt + 0.12, s2 === st ? "#5f666c" : "#9aa0a3", s2 === 0 && hof2 ? [hof2] : []);
+      prisma2(S, einruecken(pl2, 0.4), yt, yt + 0.12, s2 === st2 ? "#5f666c" : "#9aa0a3", s2 === 0 && hof2 ? [hof2] : []);
       kanten(pl2).forEach((F2, i) => {
         if (!sieht(p2, F2) || F2.L < 1) return;
         if (s2 === 0) {
@@ -106741,7 +106831,7 @@
         } else top = Math.max(top, pfeilerWand(S, scene2, F2, { ...o, y0: yb, n: 1, gh, attika: 0.9, akzentAlle: o.akzentAlle ? o.akzentAlle : 0 }));
       });
     }
-    const yTop = H0 + st * gh + 0.12;
+    const yTop = H0 + st2 * gh + 0.12;
     if (v === "spitz") {
       const [tx, tz] = poly[1], e0 = [poly[0][0] - tx, poly[0][1] - tz], e1 = [poly[2][0] - tx, poly[2][1] - tz];
       const n0 = Math.hypot(...e0), n1 = Math.hypot(...e1), lk = 3.2;
@@ -106752,7 +106842,7 @@
       const steven = [[tx, tz], [tx + e1[0] / n1 * 0.6, tz + e1[1] / n1 * 0.6], [tx + e0[0] / n0 * 0.6, tz + e0[1] / n0 * 0.6]];
       prisma2(S, steven, 0.3, yK + 2.2, o.akzent);
       for (let y = eg + gh; y < yK - 1; y += gh) prisma2(S, keil, y - 0.15, y + 0.1, gold);
-      const pl2 = einruecken(poly, st * 2.4 + 3), cx = pl2.reduce((a, q2) => a + q2[0], 0) / pl2.length, cz = pl2.reduce((a, q2) => a + q2[1], 0) / pl2.length;
+      const pl2 = einruecken(poly, st2 * 2.4 + 3), cx = pl2.reduce((a, q2) => a + q2[0], 0) / pl2.length, cz = pl2.reduce((a, q2) => a + q2[1], 0) / pl2.length;
       S.quader(cx - 3, yTop, cz - 2.5, cx + 3, yTop + 3.2, cz + 2.5, o.pfeiler);
       for (let i = 0; i < 4; i++) S.box(0.9, 1.8, 0.1, cx - 2.2 + i * 1.45, yTop + 1.8, cz + 2.52, GLAS8);
       const g = walmdach(7, 6, 2.6);
@@ -106761,7 +106851,7 @@
       fahne2(S, cx, cz, yTop + 5.8, 3, "#d23c32");
       top = Math.max(top, yK + 2.2, yTop + 9);
     } else if (v === "block") {
-      const pl2 = einruecken(poly, st * 2.4 + 3), cx = pl2.reduce((a, q2) => a + q2[0], 0) / pl2.length, cz = pl2.reduce((a, q2) => a + q2[1], 0) / pl2.length;
+      const pl2 = einruecken(poly, st2 * 2.4 + 3), cx = pl2.reduce((a, q2) => a + q2[0], 0) / pl2.length, cz = pl2.reduce((a, q2) => a + q2[1], 0) / pl2.length;
       zyl7(S, 3.4, 3.4, 0.6, cx, yTop, cz, o.akzent, 12);
       zyl7(S, 3, 3, 3.2, cx, yTop + 0.6, cz, GLAS_HELL5, 12);
       for (let i = 0; i < 12; i++) {
@@ -107026,9 +107116,9 @@
         for (let k = 1; k <= n; k++) {
           const y = eg + (k - 1) * gh;
           fb3(S, F2, -0.3, F2.L + 0.3, y - 0.2, y + 0.02, 0, 1.7, rast);
-          const FL = teil3(F2, -0.3, F2.L + 0.3, 1.62), st = [];
-          for (let u = 0.1; u < FL.L; u += 0.16) st.push([u - 0.025, y + 0.02, u + 0.025, y + 1]);
-          platten(S, FL, st, -0.04, 0.04, "#3a3f44");
+          const FL = teil3(F2, -0.3, F2.L + 0.3, 1.62), st2 = [];
+          for (let u = 0.1; u < FL.L; u += 0.16) st2.push([u - 0.025, y + 0.02, u + 0.025, y + 1]);
+          platten(S, FL, st2, -0.04, 0.04, "#3a3f44");
           fb3(S, F2, -0.3, F2.L + 0.3, y + 1, y + 1.08, 1.5, 1.72, "#3a3f44");
           for (let i = 0; i < Math.floor(F2.L / 3.6); i++) if (i % 3 === 1) fb3(S, F2, i * 3.6 + 0.3, i * 3.6 + 3.3, y + 0.3, y + 0.95, 1.6, 1.66, waehle2(rng2(k * 7 + i), ["#f2d27a", "#a9c3cf", "#e8a490"]));
         }
@@ -107084,9 +107174,9 @@
   function zaun2(S, F2, u0, u1, t, c = "#f2efe6", h = 1) {
     fb3(S, F2, u0, u1, 0.3 + h - 0.12, 0.3 + h, t - 0.05, t + 0.05, c);
     fb3(S, F2, u0, u1, 0.3 + h * 0.35, 0.3 + h * 0.35 + 0.1, t - 0.05, t + 0.05, c);
-    const st = [];
-    for (let u = u0 + 0.1; u < u1; u += 0.22) st.push([u - 0.04, 0.3, u + 0.04, 0.3 + h + 0.08]);
-    platten(S, teil3(F2, 0, F2.L, t), st, -0.03, 0.03, c);
+    const st2 = [];
+    for (let u = u0 + 0.1; u < u1; u += 0.22) st2.push([u - 0.04, 0.3, u + 0.04, 0.3 + h + 0.08]);
+    platten(S, teil3(F2, 0, F2.L, t), st2, -0.03, 0.03, c);
   }
   function schumacherRoh(S, scene2, p2, r) {
     const W3 = p2.w, D = p2.d, T = Math.min(D - 1, 12.5), vor = Math.min(3, D - T), zv = D - vor, z0 = zv - T;
@@ -107588,9 +107678,9 @@
         S.add(gz2, dach3);
         if (q2.typ === "fialen") {
           giebelDeckel(S, FF, q2.u0, gb, H, q2.G, 2, "#d9d3c8");
-          const nc = 5, cw = gb / nc, st = q2.G / 3;
+          const nc = 5, cw = gb / nc, st2 = q2.G / 3;
           for (let j = 0; j <= nc; j++) {
-            const yl = j > 0 ? H + (Math.min(j - 1, nc - j) + 1) * st : H, yr = j < nc ? H + (Math.min(j, nc - 1 - j) + 1) * st : H, uu = q2.u0 + Math.min(gb - 0.25, Math.max(0.25, j * cw));
+            const yl = j > 0 ? H + (Math.min(j - 1, nc - j) + 1) * st2 : H, yr = j < nc ? H + (Math.min(j, nc - 1 - j) + 1) * st2 : H, uu = q2.u0 + Math.min(gb - 0.25, Math.max(0.25, j * cw));
             fb3(S, FF, uu - 0.24, uu + 0.24, H - 0.4, Math.max(yl, yr) + 1.3, -0.3, 0.22, stein);
             kegel(S, 0.36, 1, ...(() => {
               const [x, z2] = wp3(FF, uu, 0);
@@ -107825,10 +107915,10 @@
       for (let i = 0; i < nh; i++) {
         const hx = 3 + i * 8.5, hz0 = 2, hz1 = Math.min(zK - 6, hz0 + 7), wf = waehle2(r, ["#c9483e", "#2f6f8f", "#e2b83b", "#3f7d56", "#f2efe6"]), hw = 5.5;
         koerper2(S, p2, hx, hz0, hx + hw, hz1, yK, yK + 3, dunkler(wf, 0.1), (F2, s2) => {
-          const st = [];
-          for (let u = 0.15; u < F2.L; u += 0.3) st.push([u - 0.03, yK + 0.1, u + 0.03, yK + 2.9]);
+          const st2 = [];
+          for (let u = 0.15; u < F2.L; u += 0.3) st2.push([u - 0.03, yK + 0.1, u + 0.03, yK + 2.9]);
           lochwand3(S, F2, s2[1] === "z" ? [[0, yK], [F2.L, yK], [F2.L, yK + 3], [F2.L / 2, yK + 5.2], [0, yK + 3]] : [0, yK, F2.L, yK + 3], [s2 === "+z" ? { u0: F2.L / 2 - 0.6, u1: F2.L / 2 + 0.6, v0: yK + 0.05, v1: yK + 2.2, typ: "tuer", fuell: "#3a3f44" } : fenster4(F2.L / 2, yK + 1, 0.9, 0.9)], wf, { rahmen: WEISS });
-          platten(S, F2, st, 0, 0.04, dunkler(wf, 0.06));
+          platten(S, F2, st2, 0, 0.04, dunkler(wf, 0.06));
         });
         const g = dachProfil(hz1 - hz0 + 0.6, hw + 0.6, 2.2, 0.1, "z");
         g.translate(hx + hw / 2, yK + 3, (hz0 + hz1) / 2);
@@ -107978,11 +108068,11 @@
     return gedreht2(S, scene2, p2, muehleRoh, [24, 24]);
   }
   function fachwerk2(S, F2, L2, y0, y1, holz, o = {}) {
-    const st = [], ri = [];
-    for (let u = 0; u <= L2 + 0.01; u += o.raster ?? 1.25) st.push([Math.min(L2 - 0.11, Math.max(0.11, u)) - 0.11, y0, Math.min(L2 - 0.11, Math.max(0.11, u)) + 0.11, y1]);
+    const st2 = [], ri = [];
+    for (let u = 0; u <= L2 + 0.01; u += o.raster ?? 1.25) st2.push([Math.min(L2 - 0.11, Math.max(0.11, u)) - 0.11, y0, Math.min(L2 - 0.11, Math.max(0.11, u)) + 0.11, y1]);
     for (const y of o.riegel ?? []) ri.push([0, y - 0.1, L2, y + 0.1]);
     ri.push([0, y0, L2, y0 + 0.22], [0, y1 - 0.22, L2, y1]);
-    platten(S, F2, [...st, ...ri], 0, 0.1, holz);
+    platten(S, F2, [...st2, ...ri], 0, 0.1, holz);
     if (o.streben) for (let u = 0; u + (o.raster ?? 1.25) <= L2; u += (o.raster ?? 1.25) * 3) fbalken(S, F2, u + 0.1, y0 + 0.2, u + (o.raster ?? 1.25) - 0.1, y1 - 0.2, 0.16, 0, 0.1, holz);
   }
   function bauernhausRoh(S, scene2, p2) {
@@ -108082,10 +108172,10 @@
         const sx0 = xh + B2 + 6, sx1 = W3 - 2, szb = 3, szf = Math.min(zf - 6, szb + 14);
         if (sx1 - sx0 > 6) {
           koerper2(S, p2, sx0, szb, sx1, szf, 0, 4.5, "#4a3a2c", (F2, s2) => {
-            const st = [];
-            for (let u = 0.2; u < F2.L; u += 0.45) st.push([u - 0.04, 0.3, u + 0.04, 4.4]);
+            const st2 = [];
+            for (let u = 0.2; u < F2.L; u += 0.45) st2.push([u - 0.04, 0.3, u + 0.04, 4.4]);
             lochwand3(S, F2, [0, 0, F2.L, 4.5], s2[1] === "z" ? [{ u0: F2.L / 2 - 1.8, u1: F2.L / 2 + 1.8, v0: 0.3, v1: 3.8, typ: "tuer", fuell: "#2e2620" }] : [], "#5b4636");
-            platten(S, F2, st, 0, 0.05, "#4a3a2c");
+            platten(S, F2, st2, 0, 0.05, "#4a3a2c");
           });
           const gs = dachProfil(szf - szb + 0.8, sx1 - sx0 + 0.8, (sx1 - sx0) * 0.55, 0.15, "z");
           gs.translate((sx0 + sx1) / 2, 4.5, (szb + szf) / 2);
@@ -109072,8 +109162,8 @@
   }
   function achsen5(u0, u1, ra, rand = 0.6) {
     const n = Math.max(1, Math.floor((u1 - u0 - 2 * rand) / ra));
-    const st = (u1 - u0 - 2 * rand) / n;
-    return Array.from({ length: n }, (_, i) => u0 + rand + st * (i + 0.5));
+    const st2 = (u1 - u0 - 2 * rand) / n;
+    return Array.from({ length: n }, (_, i) => u0 + rand + st2 * (i + 0.5));
   }
   function sieht2(p2, nx, nz) {
     const b2 = p2.blick ?? [1, 1];
@@ -109295,7 +109385,7 @@
     const [name2, farbe3] = o.bank ?? BANKEN[0];
     if (o.podium !== false) podium(S, scene2, p2, cx - a - sp / 2 - 4, cz - b2 / 2 - 4, 2 * a + sp + 8, b2 + 8, pod - 1, { stein: "#dcdcd8" });
     const turm4 = (x0, z0, ht, i) => {
-      const st = 3 * gh, e = 1.6, Hs = ht - st;
+      const st2 = 3 * gh, e = 1.6, Hs = ht - st2;
       S.quader(x0, 0, z0, x0 + a, Hs, z0 + b2, glas2[i]);
       S.quader(x0 + e, Hs, z0 + e, x0 + a - e, ht, z0 + b2 - e, glas2[i]);
       for (const [k, F2] of seiten2(p2, x0, z0, a, b2)) {
@@ -109607,12 +109697,12 @@
         fscheibe3(S, F2, F2.L / 2, H - 1.2, 0.2, 0.3, 0.75, "#f6f1e2");
         fscheibe3(S, F2, F2.L / 2, H - 1.2, 0.3, 0.34, 0.6, "#2b3036");
       }
-      const st = 5, hg2 = b2 * 0.95, sb2 = b2 / 2 / (st + 0.5);
-      for (let i = 0; i < st; i++) {
-        const u0 = i * sb2, u1 = F2.L - i * sb2, yy = H + i * (hg2 / st);
-        fb4(S, F2, u0, u1, yy, yy + hg2 / st, -t / 2 + 0.6 - 1e-3 * i, 0.15, wand2);
-        fb4(S, F2, u0 - 0.1, u0 + sb2 + 0.05, yy + hg2 / st - 0.2, yy + hg2 / st, -0.4, 0.3, orn);
-        fb4(S, F2, u1 - sb2 - 0.05, u1 + 0.1, yy + hg2 / st - 0.2, yy + hg2 / st, -0.4, 0.3, orn);
+      const st2 = 5, hg2 = b2 * 0.95, sb2 = b2 / 2 / (st2 + 0.5);
+      for (let i = 0; i < st2; i++) {
+        const u0 = i * sb2, u1 = F2.L - i * sb2, yy = H + i * (hg2 / st2);
+        fb4(S, F2, u0, u1, yy, yy + hg2 / st2, -t / 2 + 0.6 - 1e-3 * i, 0.15, wand2);
+        fb4(S, F2, u0 - 0.1, u0 + sb2 + 0.05, yy + hg2 / st2 - 0.2, yy + hg2 / st2, -0.4, 0.3, orn);
+        fb4(S, F2, u1 - sb2 - 0.05, u1 + 0.1, yy + hg2 / st2 - 0.2, yy + hg2 / st2, -0.4, 0.3, orn);
       }
       fb4(S, F2, F2.L / 2 - sb2 * 0.5, F2.L / 2 + sb2 * 0.5, H + hg2, H + hg2 + 1, -0.4, 0.3, orn);
       lochwand4(S, teil4(F2, 0, F2.L, 0.15), F2.L / 2 - 1.4, F2.L / 2 + 1.4, H + 1, H + 3.4, wand2, [{ u0: F2.L / 2 - 1, u1: F2.L / 2 - 0.15, v0: H + 1.2, v1: H + 3, bogen: true }, { u0: F2.L / 2 + 0.15, u1: F2.L / 2 + 1, v0: H + 1.2, v1: H + 3, bogen: true }], { dick: 0.12 });
@@ -111746,26 +111836,26 @@
     S.add(g, art === "fern" ? "#f2f1ec" : "#c8463c");
   }
   function empfangAlt(S, scene2, p2, r, x0, z0, b2, t, H, o) {
-    const st = o.stein, orn = o.orn, dach3 = o.dach, cx = x0 + b2 / 2;
-    S.quader(x0, 0, z0, x0 + b2, H, z0 + t, st);
+    const st2 = o.stein, orn = o.orn, dach3 = o.dach, cx = x0 + b2 / 2;
+    S.quader(x0, 0, z0, x0 + b2, H, z0 + t, st2);
     for (const [k, F2] of seiten2(p2, x0, z0, b2, t)) {
       const L2 = [];
       for (const u of achsen5(0, F2.L, 4.2, 1)) {
         if (k === "+z" && Math.abs(u - F2.L / 2) < 15) continue;
         L2.push({ u0: u - 1.3, u1: u + 1.3, v0: 1.4, v1: H * 0.5 - 0.6, bogen: true }, { u0: u - 1, u1: u + 1, v0: H * 0.5 + 0.8, v1: H - 2.4 });
       }
-      lochwand4(S, F2, 0, F2.L, 0.3, H - 1.4, st, L2, { dick: 0.3 });
-      fb4(S, F2, -0.1, F2.L + 0.1, 0.3, 1.2, 0, 0.45, dunkler(st, 0.08));
+      lochwand4(S, F2, 0, F2.L, 0.3, H - 1.4, st2, L2, { dick: 0.3 });
+      fb4(S, F2, -0.1, F2.L + 0.1, 0.3, 1.2, 0, 0.45, dunkler(st2, 0.08));
       fb4(S, F2, -0.1, F2.L + 0.1, H * 0.5 - 0.1, H * 0.5 + 0.3, 0, 0.45, orn);
       fb4(S, F2, -0.4, F2.L + 0.4, H - 1.4, H - 0.5, 0, 0.7, orn);
       for (const u of achsen5(0, F2.L, 4.2, 1)) fb4(S, F2, u + 1.8, u + 2.4, 1.2, H - 1.4, 0, 0.45, orn);
     }
     S.add(dachProfil(b2, t, 3.5, t * 0.45, "x").translate(cx, H, z0 + t / 2), dach3);
     const mb = 30, mz1 = z0 + t + 2, Hm = H + 9;
-    S.quader(cx - mb / 2, 0, z0 - 2, cx + mb / 2, Hm, mz1, st);
+    S.quader(cx - mb / 2, 0, z0 - 2, cx + mb / 2, Hm, mz1, st2);
     for (const [k, F2] of seiten2(p2, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
       if (k === "+z" || k === "-z") {
-        lochwand4(S, F2, 0, F2.L, 0.3, Hm - 2, st, [{ u0: 5.5, u1: F2.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL6, dick: 0.6 });
+        lochwand4(S, F2, 0, F2.L, 0.3, Hm - 2, st2, [{ u0: 5.5, u1: F2.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL6, dick: 0.6 });
         for (let u = 7.5; u < F2.L - 6; u += 2.4) fb4(S, F2, u - 0.08, u + 0.08, 6.5, Hm - 4, 0.02, 0.15, "#4a525a");
         fb4(S, F2, 5.5, F2.L - 5.5, 12, 12.2, 0.02, 0.15, "#4a525a");
         for (const u of [1.8, F2.L - 1.8]) fb4(S, F2, u - 1.5, u + 1.5, 0, Hm - 2, 0, 0.9, orn);
@@ -111775,7 +111865,7 @@
           fscheibe3(S, F2, F2.L / 2, Hm + 2.6, 0.4, 0.45, 1.5, "#2b3036", 16);
           ftext4(scene2, F2, o.name ?? "Hauptbahnhof", F2.L / 2, 5.9, 1, 0.95, 18, "#3a3a36");
         }
-        fpoly3(S, F2, [[2, Hm], [F2.L - 2, Hm], [F2.L - 6, Hm + 5], [6, Hm + 5]], -2, 0.3, st);
+        fpoly3(S, F2, [[2, Hm], [F2.L - 2, Hm], [F2.L - 6, Hm + 5], [6, Hm + 5]], -2, 0.3, st2);
       } else fb4(S, F2, 0, F2.L, Hm * 0.5, Hm * 0.5 + 0.4, 0, 0.3, orn);
     }
     const fz = mz1 - 1.5;
@@ -111787,9 +111877,9 @@
     }
     for (const s2 of [-1, 1]) {
       const px0 = s2 < 0 ? x0 - 2 : x0 + b2 - 10, pw = 12;
-      S.quader(px0, 0, z0 - 1, px0 + pw, H + 4, z0 + t + 1.5, st);
+      S.quader(px0, 0, z0 - 1, px0 + pw, H + 4, z0 + t + 1.5, st2);
       for (const [k, F2] of seiten2(p2, px0, z0 - 1, pw, t + 2.5)) {
-        lochwand4(S, F2, 0, F2.L, 0.3, H + 3, st, achsen5(0, F2.L, 4, 1.4).map((u) => ({ u0: u - 1, u1: u + 1, v0: 2, v1: H + 1, bogen: true })), { dick: 0.3 });
+        lochwand4(S, F2, 0, F2.L, 0.3, H + 3, st2, achsen5(0, F2.L, 4, 1.4).map((u) => ({ u0: u - 1, u1: u + 1, v0: 2, v1: H + 1, bogen: true })), { dick: 0.3 });
         for (const u of [0.6, F2.L - 0.6]) fb4(S, F2, u - 0.6, u + 0.6, 0, H + 3, 0, 0.6, orn);
         fb4(S, F2, -0.3, F2.L + 0.3, H + 3, H + 4, 0, 0.7, orn);
       }
@@ -111848,9 +111938,9 @@
     if (w > 120) zug2(S, gleisA + 3 + 5.2 * 13, z0 + 6, 3, "fern");
     let hmax = 0;
     for (const [f, B2] of hallen) {
-      const cx = x0 + 4 + f * (w - 8), y0 = v === "nachkrieg" ? 9 : 10, st = B2 * (v === "nachkrieg" ? 0.25 : 0.42);
-      halle(S, p2, cx, hz0, hz1, B2 - 0.6, y0, st, o);
-      hmax = Math.max(hmax, y0 + st);
+      const cx = x0 + 4 + f * (w - 8), y0 = v === "nachkrieg" ? 9 : 10, st2 = B2 * (v === "nachkrieg" ? 0.25 : 0.42);
+      halle(S, p2, cx, hz0, hz1, B2 - 0.6, y0, st2, o);
+      hmax = Math.max(hmax, y0 + st2);
     }
     for (const s2 of [-1, 1]) {
       const xa = s2 < 0 ? x0 + 2 : x0 + w - 3.4;
@@ -111886,21 +111976,21 @@
     for (let y = y0 + 0.6; y < y0 + h; y += ab) S.box(0.06, 0.06, 0.55, x, y, z2, c, ry);
   }
   function geruest3(S, F2, u0, u1, y0, y1, o = {}) {
-    const st = o.stahl ?? "#9aa1a7", holz = o.holz ?? "#c9a36a", t0 = o.t ?? 0.3, t1 = t0 + 1.2;
+    const st2 = o.stahl ?? "#9aa1a7", holz = o.holz ?? "#c9a36a", t0 = o.t ?? 0.3, t1 = t0 + 1.2;
     const n = Math.max(1, Math.round((u1 - u0) / 2.5)), fb22 = (u1 - u0) / n;
-    for (let i = 0; i <= n; i++) for (const t of [t0, t1]) fb4(S, F2, u0 + i * fb22 - 0.05, u0 + i * fb22 + 0.05, y0, y1, t, t + 0.1, st);
+    for (let i = 0; i <= n; i++) for (const t of [t0, t1]) fb4(S, F2, u0 + i * fb22 - 0.05, u0 + i * fb22 + 0.05, y0, y1, t, t + 0.1, st2);
     let k = 0;
     for (let y = y0 + 2; y <= y1 + 0.01; y += 2, k++) {
       fb4(S, F2, u0, u1, y - 0.06, y, t0, t1 + 0.1, holz);
-      fb4(S, F2, u0, u1, y + 1, y + 1.06, t1, t1 + 0.1, st);
-      for (let i = k % 2; i < n; i += 2) fstrebe(S, F2, u0 + i * fb22, y - 2, u0 + (i + 1) * fb22, y, 0.06, t1, t1 + 0.08, st);
+      fb4(S, F2, u0, u1, y + 1, y + 1.06, t1, t1 + 0.1, st2);
+      for (let i = k % 2; i < n; i += 2) fstrebe(S, F2, u0 + i * fb22, y - 2, u0 + (i + 1) * fb22, y, 0.06, t1, t1 + 0.08, st2);
     }
     if (o.netz) fb4(S, F2, u0, u1, y0 + 2, y1, t1 + 0.12, t1 + 0.14, o.netz);
   }
   function anlage(S, r, x0, z0, b2, t, ebenen = 3, o = {}) {
-    const st = "#5d656c", rost = "#8d939a", gel = o.gel ?? "#e8c547", gh = 6, H = ebenen * gh;
+    const st2 = "#5d656c", rost = "#8d939a", gel = o.gel ?? "#e8c547", gh = 6, H = ebenen * gh;
     const nx = Math.max(1, Math.round(b2 / 6)), nz = Math.max(1, Math.round(t / 6));
-    for (let i = 0; i <= nx; i++) for (let k = 0; k <= nz; k++) S.box(0.4, H, 0.4, x0 + i * b2 / nx, 0.3 + H / 2, z0 + k * t / nz, st);
+    for (let i = 0; i <= nx; i++) for (let k = 0; k <= nz; k++) S.box(0.4, H, 0.4, x0 + i * b2 / nx, 0.3 + H / 2, z0 + k * t / nz, st2);
     for (let e = 1; e <= ebenen; e++) {
       const y = 0.3 + e * gh, kurz = e === ebenen ? 0.55 : 1;
       S.quader(x0 - 0.3, y - 0.18, z0 - 0.3, x0 + b2 * kurz + 0.3, y, z0 + t + 0.3, rost);
@@ -111909,8 +111999,8 @@
         const ex = x0 + zw(r, 2.5, b2 * kurz - 2.5), ez = z0 + zw(r, 2.5, t - 2.5);
         if (r() < 0.5) {
           stab4(S, [ex - 2.5, y + 1.3, ez], [ex + 2.5, y + 1.3, ez], 1.1, waehle2(r, ["#e6e8e8", "#cfd3d6", "#c9cdd0"]), 12);
-          S.box(0.5, 0.8, 1.6, ex - 1.6, y + 0.4, ez, st);
-          S.box(0.5, 0.8, 1.6, ex + 1.6, y + 0.4, ez, st);
+          S.box(0.5, 0.8, 1.6, ex - 1.6, y + 0.4, ez, st2);
+          S.box(0.5, 0.8, 1.6, ex + 1.6, y + 0.4, ez, st2);
         } else zyl8(S, 1, 1, zw(r, 2.5, 4.5), ex, y, ez, waehle2(r, ["#e6e8e8", "#d9dcd8", "#b9c4cb"]), 10);
       }
       if (e < ebenen) {
@@ -112775,13 +112865,13 @@
     const key = p2.mitteEinkauf ? "e_" + p2.mitteEinkauf : STILE_M[p2.viertel] ? p2.viertel : "gruenderzeit";
     const basis3 = STILE_M[key];
     const L2 = p2.seite === "+x" || p2.seite === "-x" ? p2.d : p2.w;
-    const liste = Object.entries(basis3).map(([st, g2]) => {
+    const liste = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
-      if (st === "fachwerk") w *= p2.mitteFw ?? 1;
-      if (nachbar?.stil === st && st !== "fachwerk") w *= 0.3;
-      if (st === "fachwerk" && L2 > 16) w *= 0.25;
-      if ((st === "siebziger" || st === "neubau") && L2 < 10) w *= 0.4;
-      return [st, w];
+      if (st2 === "fachwerk") w *= p2.mitteFw ?? 1;
+      if (nachbar?.stil === st2 && st2 !== "fachwerk") w *= 0.3;
+      if (st2 === "fachwerk" && L2 > 16) w *= 0.25;
+      if ((st2 === "siebziger" || st2 === "neubau") && L2 < 10) w *= 0.4;
+      return [st2, w];
     });
     const stil = wahlGewichtet4(r, liste);
     let [a, b2] = GESCH_M[stil];
@@ -114077,7 +114167,7 @@
     S.box(1.5, 0.42, 0.4, x, y0 + 0.2, z2, "#4a4f55", ry);
   }
   function brunnen2(S, x, z2, rad2, o = {}) {
-    const y = o.y ?? 0.36, st = o.stein ?? "#d6cfc0";
+    const y = o.y ?? 0.36, st2 = o.stein ?? "#d6cfc0";
     if (o.art === "trog") {
       S.box(rad2 * 2, 0.8, rad2, x, y + 0.4, z2, HOLZ5[0]);
       S.box(rad2 * 2 - 0.3, 0.1, rad2 - 0.3, x, y + 0.72, z2, WASSER2);
@@ -114085,10 +114175,10 @@
       S.box(0.1, 0.1, 0.6, x - rad2 + 0.4, y + 1.6, z2 - rad2 / 2 + 0.1, "#7d8288");
       return;
     }
-    zyl9(S, rad2, rad2, 0.75, x, y, z2, st, 8);
+    zyl9(S, rad2, rad2, 0.75, x, y, z2, st2, 8);
     zyl9(S, rad2 - 0.35, rad2 - 0.35, 0.77, x, y + 0.01, z2, WASSER2, 8);
-    zyl9(S, 0.5, 0.65, 3.8, x, y, z2, st, 8);
-    zyl9(S, 0.9, 0.5, 0.4, x, y + 3.8, z2, st, 8);
+    zyl9(S, 0.5, 0.65, 3.8, x, y, z2, st2, 8);
+    zyl9(S, 0.9, 0.5, 0.4, x, y + 3.8, z2, st2, 8);
     if (o.figur !== false) {
       zyl9(S, 0.35, 0.4, 1.4, x, y + 4.2, z2, o.figurF ?? GOLD, 8);
       S.add(new three_module_exports.SphereGeometry(0.28, 8, 6).translate(x, y + 5.85, z2), o.figurF ?? GOLD);
@@ -114857,9 +114947,9 @@
     boden6(S, 0, 0, w, zf, PFLASTER22, 0.3, 0.05);
     if (v === "brauerei") {
       const klinker = waehle2(r, ["#a8583f", "#b06a52", "#9e5c47"]), putz2 = "#efe6d2", dach3 = waehle2(r, SCHIEFER4), kup = waehle2(r, KUPFER4);
-      const sx = 4, sb2 = 16, st = 14, sH = 17, sz = zf - st;
+      const sx = 4, sb2 = 16, st2 = 14, sH = 17, sz = zf - st2;
       S.quader(sx, 0, sz, sx + sb2, sH, zf, klinker);
-      const Fs = seiten3(sx, sz, sb2, st);
+      const Fs = seiten3(sx, sz, sb2, st2);
       for (const k of ["v", "r", "h", "l"]) {
         if (!sichtF2(p2, Fs[k])) continue;
         const L2 = Fs[k].L;
@@ -114872,9 +114962,9 @@
         fb5(S, Fs[k], -0.1, L2 + 0.1, 7.8, 8.2, 0, 0.2, putz2);
         fb5(S, Fs[k], -0.1, L2 + 0.1, sH - 0.6, sH, 0, 0.3, putz2);
       }
-      dachTrauf(S, Fs.v, 0, sb2, st, sH, 5.2, dach3, klinker, { ue: 0.4, us: 0.4 });
-      zyl9(S, 2, 2.4, 3.2, sx + sb2 / 2, sH + 2.2, sz + st / 2, kup, 8);
-      zwiebel(S, sx + sb2 / 2, sH + 5.4, sz + st / 2, 1.9, 3.6, kup, 10);
+      dachTrauf(S, Fs.v, 0, sb2, st2, sH, 5.2, dach3, klinker, { ue: 0.4, us: 0.4 });
+      zyl9(S, 2, 2.4, 3.2, sx + sb2 / 2, sH + 2.2, sz + st2 / 2, kup, 8);
+      zwiebel(S, sx + sb2 / 2, sH + 5.4, sz + st2 / 2, 1.9, 3.6, kup, 10);
       if (sichtF2(p2, Fs.v)) ftext5(scene2, Fs.v, waehle2(r, ["Brauerei Wei\xDFbr\xE4u", "Brauerei Moosbr\xE4u", "Brauerei Hollerer", "Klosterbrauerei"]), sb2 / 2, 13.6, 0.1, 1, sb2 * 0.86, "#f4efe2");
       const kx = sx + sb2 + 4, kz2 = sz + 3;
       zyl9(S, 1.9, 1.9, 4, kx, 0, kz2, klinker, 8);
@@ -115293,8 +115383,8 @@
   }
   function sandsteinHaus(S, scene2, r, p2, x0, z0, b2, T, o, erster, letzter) {
     const F2 = seiten3(x0, z0, b2, T), leer3 = p2.zustand === "leerstand";
-    const H = o.eg + o.n * o.gh, st = o.stein, hst = heller(st, 0.08);
-    S.quader(x0, 0, z0, x0 + b2, H, z0 + T, st);
+    const H = o.eg + o.n * o.gh, st2 = o.stein, hst = heller(st2, 0.08);
+    S.quader(x0, 0, z0, x0 + b2, H, z0 + T, st2);
     const fen = { rahmen: ORN2, glas: GLAS10, fasche: hst, simsF: hst };
     for (const [k, ok6] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
       if (!ok6 || !sichtF2(p2, F2[k])) continue;
@@ -115307,21 +115397,21 @@
         for (const u of achsen6(0, L2, 2.6, 0.5)) fenster6(S, Fk, u, o.eg + kk * o.gh + 0.8, 1.05, 1.6, fen);
         fb5(S, Fk, -0.03, L2 + 0.03, o.eg + kk * o.gh - 0.2, o.eg + kk * o.gh, 0, 0.14, hst);
       }
-      for (let i = 0; i < 6; i++) fb5(S, Fk, 0, L2, 0.3 + i * 0.6, 0.34 + i * 0.6, 0, 0.03, dunkler(st, 0.06));
+      for (let i = 0; i < 6; i++) fb5(S, Fk, 0, L2, 0.3 + i * 0.6, 0.34 + i * 0.6, 0, 0.03, dunkler(st2, 0.06));
     }
     const hd = T * 0.68;
-    dachTrauf(S, F2.v, 0, b2, T, H, hd, o.dach, st, { ue: 0.35, us: erster || letzter ? 0.35 : 0.02 });
+    dachTrauf(S, F2.v, 0, b2, T, H, hd, o.dach, st2, { ue: 0.35, us: erster || letzter ? 0.35 : 0.02 });
     let top = H + hd;
     const s2 = 2 * hd / T;
     if (sichtF2(p2, F2.v)) {
       const zb = Math.min(4.6, b2 * 0.5), zu = b2 / 2 - zb / 2, hz = 3.2;
-      fb5(S, F2.v, zu, zu + zb, H, H + hz, -3, 0, st);
-      fpoly4(S, F2.v, giebelUmriss2(zu, zu + zb, H + hz, 3.4, "treppe"), -3, 0.02, st);
+      fb5(S, F2.v, zu, zu + zb, H, H + hz, -3, 0, st2);
+      fpoly4(S, F2.v, giebelUmriss2(zu, zu + zb, H + hz, 3.4, "treppe"), -3, 0.02, st2);
       fb5(S, F2.v, b2 / 2 - 0.65, b2 / 2 + 0.65, H + 0.5, H + 2.6, -0.1, 0.04, "#5a4636");
       fb5(S, F2.v, b2 / 2 - 0.12, b2 / 2 + 0.12, H + hz + 1.4, H + hz + 1.65, 0, 1.4, HOLZ5[0]);
       dachGiebel(S, F2.v, zu + 0.2, zu + zb - 0.2, -3.6, -0.2, H + hz, 3, o.dach, null, { ue: 0, uf: 0, ub: 0 });
-      for (const u of [b2 * 0.15, b2 * 0.85]) if (b2 > 9) gaube2(S, F2.v, u, H, s2, 1.1, st, o.dach, GLAS10, 0.9);
-      for (const u of [b2 * 0.35, b2 * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st, o.dach, GLAS10, 3.3);
+      for (const u of [b2 * 0.15, b2 * 0.85]) if (b2 > 9) gaube2(S, F2.v, u, H, s2, 1.1, st2, o.dach, GLAS10, 0.9);
+      for (const u of [b2 * 0.35, b2 * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st2, o.dach, GLAS10, 3.3);
       top = Math.max(top, H + hz + 3.4);
       if (o.choerlein) {
         const cu = b2 * 0.3, y0 = o.eg + 0.4;
@@ -115771,8 +115861,8 @@
     }
   }
   function weinberghaeuschen(S, x, z2, y, r, s2 = 1) {
-    const st = waehle2(r, MAUER), b2 = 3.2 * s2;
-    S.quader(x - b2 / 2, y, z2 - b2 / 2, x + b2 / 2, y + 2.8 * s2, z2 + b2 / 2, st);
+    const st2 = waehle2(r, MAUER), b2 = 3.2 * s2;
+    S.quader(x - b2 / 2, y, z2 - b2 / 2, x + b2 / 2, y + 2.8 * s2, z2 + b2 / 2, st2);
     walm3(S, x - b2 / 2, z2 - b2 / 2, x + b2 / 2, z2 + b2 / 2, y + 2.8 * s2, 1.9 * s2, waehle2(r, BIBER), 0.3);
     S.quader(x - 0.45, y, z2 + b2 / 2, x + 0.45, y + 1.9 * s2, z2 + b2 / 2 + 0.06, HOLZ5[0]);
     S.quader(x + b2 / 2, y + 1.2, z2 - 0.35, x + b2 / 2 + 0.05, y + 1.9, z2 + 0.35, GLAS_DUNKEL);
@@ -116194,7 +116284,7 @@
     }
     return out;
   }
-  function maasswerkHelm(S, p2, cx, cz, y0, ri, h, st, dunkel3) {
+  function maasswerkHelm(S, p2, cx, cz, y0, ri, h, st2, dunkel3) {
     const Rv = ri / Math.cos(PI11 / 8);
     const g = new three_module_exports.ConeGeometry(Rv * 0.9, h, 8);
     g.rotateY(PI11 / 8);
@@ -116203,10 +116293,10 @@
     const spitze2 = [cx, y0 + h, cz];
     for (let i = 0; i < 8; i++) {
       const a = i * PI11 / 4 + PI11 / 8, vx = cx + Math.cos(a) * Rv, vz = cz + Math.sin(a) * Rv;
-      stab5(S, [vx, y0, vz], spitze2, 0.32, st, 4);
+      stab5(S, [vx, y0, vz], spitze2, 0.32, st2, 4);
       if (sicht2(p2, Math.cos(a), Math.sin(a))) for (let k = 1; k < 7; k++) {
         const t = k / 7;
-        S.box(0.55, 0.55, 0.55, vx + (cx - vx) * t + Math.cos(a) * 0.3, y0 + h * t, vz + (cz - vz) * t + Math.sin(a) * 0.3, st);
+        S.box(0.55, 0.55, 0.55, vx + (cx - vx) * t + Math.cos(a) * 0.3, y0 + h * t, vz + (cz - vz) * t + Math.sin(a) * 0.3, st2);
       }
     }
     for (let k = 1; k <= 4; k++) {
@@ -116214,24 +116304,24 @@
       const ring = new three_module_exports.CylinderGeometry(rr, rr, 0.4, 8, 1, true);
       ring.rotateY(PI11 / 8);
       ring.translate(cx, y0 + h * t, cz);
-      S.add(ring, st);
+      S.add(ring, st2);
     }
     for (const { F: F2, nx, nz, kante } of oktoRahmen(cx, cz, ri * 0.88)) {
       if (!sicht2(p2, nx, nz)) continue;
       for (let k = 0; k < 3; k++) {
         const t = 0.12 + k * 0.22, sc = 1 - t;
-        fscheibe4(S, teil5(F2, kante / 2 - 0.1, kante / 2 + 0.1, -ri * 0.88 * t), 0.1, y0 + h * t + 1.2, 0, 0.2, Math.max(0.3, kante * sc * 0.28), st, 8);
+        fscheibe4(S, teil5(F2, kante / 2 - 0.1, kante / 2 + 0.1, -ri * 0.88 * t), 0.1, y0 + h * t + 1.2, 0, 0.2, Math.max(0.3, kante * sc * 0.28), st2, 8);
       }
     }
-    S.add(new three_module_exports.OctahedronGeometry(1, 0).translate(cx, y0 + h + 0.6, cz), st);
-    S.box(0.3, 2.4, 0.3, cx, y0 + h + 1.6, cz, st);
-    S.box(1.6, 0.3, 0.3, cx, y0 + h + 2, cz, st);
+    S.add(new three_module_exports.OctahedronGeometry(1, 0).translate(cx, y0 + h + 0.6, cz), st2);
+    S.box(0.3, 2.4, 0.3, cx, y0 + h + 1.6, cz, st2);
+    S.box(1.6, 0.3, 0.3, cx, y0 + h + 2, cz, st2);
   }
   function muensterRoh(S, scene2, p2) {
     const r = rng2(`ms:${p2.seed}`);
     const v = p2.variante ?? waehle2(r, MUENSTER_V);
     const { w, d } = p2, xm = w / 2;
-    const st = v === "ulm" ? "#c48e78" : v === "freiburg" ? "#a9584a" : "#b5634f", st2 = dunkler(st, 0.07), hst = heller(st, 0.07);
+    const st2 = v === "ulm" ? "#c48e78" : v === "freiburg" ? "#a9584a" : "#b5634f", st22 = dunkler(st2, 0.07), hst = heller(st2, 0.07);
     const dach3 = v === "freiburg" ? "#6b5a52" : v === "ulm" ? "#5d6a72" : waehle2(r, BIBER), dunkel3 = "#3c3434";
     boden6(S, 0, 0, w, d, PFLASTER5, 0.3, 0.06);
     const halle2 = v === "stadtkirche";
@@ -116241,8 +116331,8 @@
     const zt0 = zf - tb, zn1 = zt0 + 1, zn0 = zn1 - L2;
     const xg0 = xm - Bg / 2;
     const Fv = R8(xg0, zn1, 1, 0, Bg);
-    S.quader(xg0, 0, zn0, xg0 + Bg, Ha, zn1, st);
-    if (!halle2) S.quader(xm - Bn / 2, Ha, zn0, xm + Bn / 2, Hn, zn1, st);
+    S.quader(xg0, 0, zn0, xg0 + Bg, Ha, zn1, st2);
+    if (!halle2) S.quader(xm - Bn / 2, Ha, zn0, xm + Bn / 2, Hn, zn1, st2);
     const joch = 6.2, nj = Math.max(3, Math.round(L2 / joch)), jl = L2 / nj;
     for (const sg of [1, -1]) {
       const Fa = sg > 0 ? R8(xg0 + Bg, zn1, 0, -1, L2) : R8(xg0, zn0, 0, 1, L2);
@@ -116258,21 +116348,21 @@
       }
       for (let i = 0; i <= nj; i++) {
         const u = Math.min(L2 - 0.6, Math.max(0.6, i * jl));
-        fb5(S, Fa, u - 0.65, u + 0.65, 0.3, Ha * 0.5, 0, 1.8, st2);
-        fb5(S, Fa, u - 0.6, u + 0.6, Ha * 0.5, Ha + 1.2, 0, 1.3, st2);
+        fb5(S, Fa, u - 0.65, u + 0.65, 0.3, Ha * 0.5, 0, 1.8, st22);
+        fb5(S, Fa, u - 0.6, u + 0.6, Ha * 0.5, Ha + 1.2, 0, 1.3, st22);
         fb5(S, Fa, u - 0.7, u + 0.7, Ha * 0.5 - 0.3, Ha * 0.5, 0, 1.95, hst);
         const [px2, pz4] = wp5(Fa, u, 0.7);
-        fiale(S, px2, Ha + 1.2, pz4, 5, st2);
+        fiale(S, px2, Ha + 1.2, pz4, 5, st22);
         if (!halle2) {
           const [qx, qz] = wp5(Fo, u, 0.2), [mx, mz] = wp5(Fo, u, 0.9);
-          stab5(S, [px2, Ha + 1.6, pz4], [qx, Hn - 4, qz], 0.4, st2, 4);
-          stab5(S, [px2, Ha - 0.6, pz4], [qx, Hn - 7.5, qz], 0.3, st2, 4);
-          fb5(S, Fo, u - 0.45, u + 0.45, Ha, Hn - 1.5, 0, 0.9, st2);
-          fiale(S, mx, Hn - 1.5, mz, 3.8, st2);
+          stab5(S, [px2, Ha + 1.6, pz4], [qx, Hn - 4, qz], 0.4, st22, 4);
+          stab5(S, [px2, Ha - 0.6, pz4], [qx, Hn - 7.5, qz], 0.3, st22, 4);
+          fb5(S, Fo, u - 0.45, u + 0.45, Ha, Hn - 1.5, 0, 0.9, st22);
+          fiale(S, mx, Hn - 1.5, mz, 3.8, st22);
         }
       }
       fb5(S, Fa, 0, L2, Ha - 0.5, Ha, 0, 0.4, hst);
-      fb5(S, Fa, 0, L2, 0.3, 1.2, 0, 0.2, st2);
+      fb5(S, Fa, 0, L2, 0.3, 1.2, 0, 0.2, st22);
       if (!halle2) {
         fb5(S, Fo, 0, L2, Hn - 0.5, Hn, 0, 0.4, hst);
         for (let u = 0.6; u < L2; u += 0.9) fb5(S, Fo, u - 0.12, u + 0.12, Hn, Hn + 0.8, 0.1, 0.35, hst);
@@ -116290,11 +116380,11 @@
         }
       }
     }
-    if (halle2) dachGiebel(S, Fv, 0, Bg, -L2, 0, Ha, Bg * 0.75, dach3, st, { ue: 0.4, uf: 0, ub: 0 });
+    if (halle2) dachGiebel(S, Fv, 0, Bg, -L2, 0, Ha, Bg * 0.75, dach3, st2, { ue: 0.4, uf: 0, ub: 0 });
     else {
       fdiag(S, Fv, Bg / 2 - Bn / 2 + 0.1, Ha + 3.4, -0.6, Ha - 0.3, 0.3, -L2, 0, dach3);
       fdiag(S, Fv, Bg / 2 + Bn / 2 - 0.1, Ha + 3.4, Bg + 0.6, Ha - 0.3, 0.3, -L2, 0, dach3);
-      dachGiebel(S, Fv, Bg / 2 - Bn / 2, Bg / 2 + Bn / 2, -L2, 0, Hn, Bn * 0.95, dach3, st, { ue: 0.4, uf: 0, ub: 0 });
+      dachGiebel(S, Fv, Bg / 2 - Bn / 2, Bg / 2 + Bn / 2, -L2, 0, Hn, Bn * 0.95, dach3, st2, { ue: 0.4, uf: 0, ub: 0 });
       if (v === "freiburg") {
         const u0 = Bg / 2 - Bn / 2 - 0.4, um3 = Bg / 2, hh = Bn * 0.95, y0 = Hn - 0.4 * (2 * hh / Bn);
         for (const [a, b2, f] of [[0.3, 0.36, "#b98a4a"], [0.58, 0.64, "#56705a"]]) {
@@ -116311,7 +116401,7 @@
     }
     const qz0 = zn0 + 2, qz1 = qz0 + 11, qb = halle2 ? 0 : 7;
     if (qb) {
-      S.quader(xg0 - qb, 0, qz0, xg0 + Bg + qb, Hn, qz1, st);
+      S.quader(xg0 - qb, 0, qz0, xg0 + Bg + qb, Hn, qz1, st2);
       for (const sg of [1, -1]) {
         const Fq = sg > 0 ? R8(xg0 + Bg + qb, qz1, 0, -1, 11) : R8(xg0 - qb, qz0, 0, 1, 11);
         if (!sichtF2(p2, Fq)) continue;
@@ -116325,15 +116415,15 @@
         fbogen(S, Fq, 5.5, 0.3, 4.2, 7.2, 0, 0.3, hst, "spitz");
         fbogen(S, Fq, 5.5, 0.3, 3, 6, -0.1, 0.35, "#5a3a32", "spitz");
         gotFenster(S, Fq, 5.5, 8.4, 3.4, Hn - 15.5, hst);
-        fpoly4(S, Fq, [[-0.2, Hn], [11.2, Hn], [5.5, Hn + 9]], -0.4, 0.15, st);
+        fpoly4(S, Fq, [[-0.2, Hn], [11.2, Hn], [5.5, Hn + 9]], -0.4, 0.15, st2);
         krabben(S, Fq, [[-0.2, Hn], [5.5, Hn + 9], [11.2, Hn]], 0.1, hst, 1.6);
         for (let k = 0; k < 3; k++) fbogen(S, Fq, 3.2 + k * 2.3, Hn + 1, 1.2, 4.2 - Math.abs(k - 1) * 0 + (k === 1 ? 2.2 : 0), -0.1, 0.2, GLAS_DUNKEL, "spitz");
         const [gx, gz2] = wp5(Fq, 5.5, 0);
         S.add(new three_module_exports.OctahedronGeometry(0.8, 0).translate(gx, Hn + 9.6, gz2), hst);
         for (const u of [0.5, 10.5]) {
-          fb5(S, Fq, u - 0.6, u + 0.6, 0.3, Hn + 1, 0, 1.2, st2);
+          fb5(S, Fq, u - 0.6, u + 0.6, 0.3, Hn + 1, 0, 1.2, st22);
           const [px2, pz4] = wp5(Fq, u, 0.6);
-          fiale(S, px2, Hn + 1, pz4, 6, st2);
+          fiale(S, px2, Hn + 1, pz4, 6, st22);
         }
       }
       dachTrauf(S, R8(xg0 - qb, qz1, 1, 0, Bg + 2 * qb), 0, Bg + 2 * qb, 11, Hn, 9, dach3, null, { ue: 0.4, us: 0.2 });
@@ -116343,19 +116433,19 @@
       S.add(g, dach3);
     }
     const zc = zn0;
-    S.quader(xg0, 0, zc - 8, xg0 + Bg, Ha, zc, st);
+    S.quader(xg0, 0, zc - 8, xg0 + Bg, Ha, zc, st2);
     const umd = new three_module_exports.ConeGeometry(Bg / 2 + 0.4, 4, 10, 1, false, PI11 / 2, PI11);
     umd.translate(xm, Ha + 2, zc - 8);
     S.add(umd, dach3);
     const um2 = new three_module_exports.CylinderGeometry(Bg / 2, Bg / 2, Ha, 10, 1, false, PI11 / 2, PI11);
     um2.translate(xm, Ha / 2, zc - 8);
-    S.add(um2, st);
+    S.add(um2, st2);
     if (!halle2) {
       const Bc = Bn + 2, Hc = Hn + 1;
-      S.quader(xm - Bc / 2, Ha, zc - 8, xm + Bc / 2, Hc, zc, st);
+      S.quader(xm - Bc / 2, Ha, zc - 8, xm + Bc / 2, Hc, zc, st2);
       const ch = new three_module_exports.CylinderGeometry(Bc / 2, Bc / 2, Hc - Ha, 8, 1, false, PI11 / 2, PI11);
       ch.translate(xm, Ha + (Hc - Ha) / 2, zc - 8);
-      S.add(ch, st);
+      S.add(ch, st2);
       const chd = new three_module_exports.ConeGeometry(Bc / 2 + 0.4, Bc * 0.8, 8, 1, false, PI11 / 2, PI11);
       chd.translate(xm, Hc + Bc * 0.4, zc - 8);
       S.add(chd, dach3);
@@ -116367,17 +116457,17 @@
         gotFenster(S, R8(ax - nz * 1.4, az + nx * 1.4, nz, -nx, 2.8), 1.4, Ha + 1.5, 1.8, Hc - Ha - 3, hst, 0.05);
         const bx = xm + nx * Bg / 2, bz = zc - 8 + nz * Bg / 2;
         gotFenster(S, R8(bx - nz * 1.6, bz + nx * 1.6, nz, -nx, 3.2), 1.6, 2.4, 2.4, Ha - 4.2, hst, 0.05);
-        fiale(S, xm + Math.cos(a - PI11 / 10) * (Bg / 2 + 0.6), Ha, zc - 8 + Math.sin(a - PI11 / 10) * (Bg / 2 + 0.6), 4, st2);
+        fiale(S, xm + Math.cos(a - PI11 / 10) * (Bg / 2 + 0.6), Ha, zc - 8 + Math.sin(a - PI11 / 10) * (Bg / 2 + 0.6), 4, st22);
       }
       if (v === "ulm" || v === "freiburg") for (const sg of [-1, 1]) {
         const cx = xm + sg * (Bn / 2 + 2.6), cz = zc - 2;
-        S.quader(cx - 2.6, 0, cz - 2.6, cx + 2.6, Hn + 8, cz + 2.6, st);
-        zyl9(S, 2.2, 2.2, 5, cx, Hn + 8, cz, st, 8);
+        S.quader(cx - 2.6, 0, cz - 2.6, cx + 2.6, Hn + 8, cz + 2.6, st2);
+        zyl9(S, 2.2, 2.2, 5, cx, Hn + 8, cz, st2, 8);
         const g = new three_module_exports.ConeGeometry(2.6, 11, 8);
         g.rotateY(PI11 / 8);
         g.translate(cx, Hn + 13 + 5.5, cz);
-        S.add(g, st2);
-        S.add(new three_module_exports.OctahedronGeometry(0.6, 0).translate(cx, Hn + 24.6, cz), st);
+        S.add(g, st22);
+        S.add(new three_module_exports.OctahedronGeometry(0.6, 0).translate(cx, Hn + 24.6, cz), st2);
       }
     } else {
       dachGiebel(S, R8(xg0, zc, 1, 0, Bg), 0, Bg, -8, 0, Ha, Bg * 0.75, dach3, null, { ue: 0.4, uf: 0, ub: 0 });
@@ -116388,17 +116478,17 @@
     const Ht = v === "ulm" ? 104 : v === "freiburg" ? 84 : 62;
     const Hq = Ht * (v === "ulm" ? 0.5 : 0.44), Ho = Hq + Ht * (v === "stadtkirche" ? 0.14 : 0.18);
     const tx0 = xm - tb / 2;
-    S.quader(tx0, 0, zt0, tx0 + tb, Hq, zf, st);
+    S.quader(tx0, 0, zt0, tx0 + tb, Hq, zf, st2);
     const Ft = seiten3(tx0, zt0, tb, tb);
     for (const k of ["v", "r", "l", "h"]) {
       if (!sichtF2(p2, Ft[k])) continue;
       const Fk = Ft[k];
-      for (const u of [0.6, tb - 0.6]) for (let s2 = 0; s2 < 3; s2++) fb5(S, Fk, u - 0.9 + s2 * 0.15 * (u < 1 ? 1 : -1) * 0, u + 0.9, 0.3, Hq * (0.45 + s2 * 0.27), 0, 1.6 - s2 * 0.45, st2);
+      for (const u of [0.6, tb - 0.6]) for (let s2 = 0; s2 < 3; s2++) fb5(S, Fk, u - 0.9 + s2 * 0.15 * (u < 1 ? 1 : -1) * 0, u + 0.9, 0.3, Hq * (0.45 + s2 * 0.27), 0, 1.6 - s2 * 0.45, st22);
       if (k === "v") {
-        for (let j = 0; j < 3; j++) fbogen(S, Fk, tb / 2, 0.3, 7.2 - j * 0.8, 11.2 - j * 0.7, 0, 0.9 - j * 0.15, j % 2 ? st2 : hst, "spitz");
+        for (let j = 0; j < 3; j++) fbogen(S, Fk, tb / 2, 0.3, 7.2 - j * 0.8, 11.2 - j * 0.7, 0, 0.9 - j * 0.15, j % 2 ? st22 : hst, "spitz");
         fbogen(S, Fk, tb / 2, 0.3, 4.6, 8.6, 0.1, 0.95, "#5a3a32", "spitz");
         fb5(S, Fk, tb / 2 - 0.15, tb / 2 + 0.15, 0.3, 5, 0.9, 1.1, hst);
-        fpoly4(S, Fk, [[tb / 2 - 2.3, 5], [tb / 2 + 2.3, 5], [tb / 2, 7.6]], 0.9, 1, st2);
+        fpoly4(S, Fk, [[tb / 2 - 2.3, 5], [tb / 2 + 2.3, 5], [tb / 2, 7.6]], 0.9, 1, st22);
         fpoly4(S, Fk, [[tb / 2 - 3.9, 10.8], [tb / 2 + 3.9, 10.8], [tb / 2, 15.6]], 0, 0.9, hst);
         krabben(S, Fk, [[tb / 2 - 3.9, 10.8], [tb / 2, 15.6], [tb / 2 + 3.9, 10.8]], 0.7, hst, 1.2);
         fscheibe4(S, Fk, tb / 2, Hq * 0.62, 0, 0.12, 2, hst);
@@ -116414,34 +116504,34 @@
         fb5(S, Fk, 0.4, tb - 0.4, y + 1.2, y + 1.35, 0, 0.4, hst);
       }
       for (let u = 2; u < tb - 1.6; u += 1.5) if (Math.abs(u - tb / 2) > 1.4 || k !== "v") {
-        fbogen(S, Fk, u, Hq * 0.82 + 1.6, 0.9, Hq * 0.14, -0.05, 0.08, st2, "spitz");
+        fbogen(S, Fk, u, Hq * 0.82 + 1.6, 0.9, Hq * 0.14, -0.05, 0.08, st22, "spitz");
       }
       fscheibe4(S, Fk, tb / 2, Hq - 3.2, 0, 0.12, 1.7, "#f2e6c8");
       fscheibe4(S, Fk, tb / 2, Hq - 3.2, 0.12, 0.17, 1.4, "#2f3a42");
       fb5(S, Fk, tb / 2 - 0.08, tb / 2 + 0.08, Hq - 3.2, Hq - 2, 0.17, 0.22, GOLD);
       fb5(S, Fk, -0.3, tb + 0.3, Hq - 0.8, Hq, 0, 0.5, hst);
     }
-    for (const [cx, cz] of [[tx0, zt0], [tx0 + tb, zt0], [tx0, zf], [tx0 + tb, zf]]) fiale(S, cx, Hq, cz, 6, st2);
+    for (const [cx, cz] of [[tx0, zt0], [tx0 + tb, zt0], [tx0, zf], [tx0 + tb, zf]]) fiale(S, cx, Hq, cz, 6, st22);
     const ri = tb * 0.42;
-    zyl9(S, ri / Math.cos(PI11 / 8), ri / Math.cos(PI11 / 8), Ho - Hq, xm, Hq, zt0 + tb / 2, st, 8);
+    zyl9(S, ri / Math.cos(PI11 / 8), ri / Math.cos(PI11 / 8), Ho - Hq, xm, Hq, zt0 + tb / 2, st2, 8);
     for (const { F: F2, nx, nz, kante } of oktoRahmen(xm, zt0 + tb / 2, ri)) {
       if (!sicht2(p2, nx, nz)) continue;
       gotFenster(S, F2, kante / 2, Hq + 2.5, kante * 0.5, Ho - Hq - 5, hst);
       for (let j = 1; j <= 3; j++) fb5(S, F2, kante * 0.27, kante * 0.73, Hq + 2.5 + j * (Ho - Hq - 7) / 4, Hq + 2.6 + j * (Ho - Hq - 7) / 4, -0.12, -0.04, "#5a4636");
-      fpoly4(S, F2, [[0, Ho - 0.5], [kante, Ho - 0.5], [kante / 2, Ho + 3.6]], -0.2, 0.25, st);
+      fpoly4(S, F2, [[0, Ho - 0.5], [kante, Ho - 0.5], [kante / 2, Ho + 3.6]], -0.2, 0.25, st2);
     }
     for (let i = 0; i < 8; i++) {
       const a = i * PI11 / 4 + PI11 / 8, Rv = ri / Math.cos(PI11 / 8);
-      fiale(S, xm + Math.cos(a) * Rv, Ho - 1, zt0 + tb / 2 + Math.sin(a) * Rv, 5, st2);
+      fiale(S, xm + Math.cos(a) * Rv, Ho - 1, zt0 + tb / 2 + Math.sin(a) * Rv, 5, st22);
     }
     if (v === "stadtkirche") {
       const g = new three_module_exports.ConeGeometry(ri / Math.cos(PI11 / 8), Ht - Ho, 8);
       g.rotateY(PI11 / 8);
       g.translate(xm, Ho + (Ht - Ho) / 2, zt0 + tb / 2);
-      S.add(g, st2);
+      S.add(g, st22);
       S.box(0.3, 2.2, 0.3, xm, Ht + 1.1, zt0 + tb / 2, GOLD);
       S.box(1.4, 0.3, 0.3, xm, Ht + 1.5, zt0 + tb / 2, GOLD);
-    } else maasswerkHelm(S, p2, xm, zt0 + tb / 2, Ho, ri, Ht - Ho, st, dunkel3);
+    } else maasswerkHelm(S, p2, xm, zt0 + tb / 2, Ho, ri, Ht - Ho, st2, dunkel3);
     if (sichtF2(p2, Fv)) {
       for (const [u0, u1] of [[0, Bg / 2 - tb / 2], [Bg / 2 + tb / 2, Bg]]) if (u1 - u0 > 2) {
         fbogen(S, Fv, (u0 + u1) / 2, 2.6, (u1 - u0) * 0.4, Ha - 4.5, -0.1, 0.06, GLAS_DUNKEL, "spitz");
@@ -117052,14 +117142,14 @@
   function baechle(S, p2) {
     const s2 = frontVon(p2.front);
     if (!SICHT2.includes(s2)) return;
-    const st = "#bdb3a0", wa = "#5aa9c0";
+    const st2 = "#bdb3a0", wa = "#5aa9c0";
     if (s2 === "+z") {
       const z2 = p2.z + p2.d - 0.95;
-      S.quader(p2.x + 0.4, 0.3, z2 - 0.35, p2.x + p2.w - 0.4, 0.4, z2 + 0.35, st);
+      S.quader(p2.x + 0.4, 0.3, z2 - 0.35, p2.x + p2.w - 0.4, 0.4, z2 + 0.35, st2);
       S.quader(p2.x + 0.5, 0.36, z2 - 0.2, p2.x + p2.w - 0.5, 0.42, z2 + 0.2, wa);
     } else {
       const x = p2.x + p2.w - 0.95;
-      S.quader(x - 0.35, 0.3, p2.z + 0.4, x + 0.35, 0.4, p2.z + p2.d - 0.4, st);
+      S.quader(x - 0.35, 0.3, p2.z + 0.4, x + 0.35, 0.4, p2.z + p2.d - 0.4, st2);
       S.quader(x - 0.2, 0.36, p2.z + 0.5, x + 0.2, 0.42, p2.z + p2.d - 0.5, wa);
     }
   }
@@ -117175,17 +117265,17 @@
     const { rb } = ctx;
     const oben = b2.lage !== "links";
     const L2 = oben ? b2.w : b2.d, T = oben ? b2.d : b2.w;
-    const st = [];
+    const st2 = [];
     for (let u = 0; L2 - u > 1; ) {
       let l = zw(rb, 46, 78);
       if (L2 - u - l < 42) l = L2 - u;
-      st.push([u, l]);
+      st2.push([u, l]);
       u += l;
     }
-    const nimmPos = (f) => f === void 0 ? -1 : st.findIndex(([u, l]) => u + l >= f * L2);
+    const nimmPos = (f) => f === void 0 ? -1 : st2.findIndex(([u, l]) => u + l >= f * L2);
     const iBurg = b2.burg ? nimmPos(b2.burgPos ?? 0.5) : -1, iTurm = b2.turm ? nimmPos(b2.turmPos ?? 0.7) : -1;
     const front2 = [oben ? "+z" : "+x"];
-    st.forEach(([u, l], k) => {
+    st2.forEach(([u, l], k) => {
       const R9 = oben ? { x: b2.x + u, z: b2.z, w: l, d: T } : { x: b2.x, z: b2.z + u, w: T, d: l };
       let typ, variante2;
       if (k === iBurg) {
@@ -117541,34 +117631,34 @@
   }
   function altbayern(E) {
     const { r } = E;
-    const st = E.o.stadt;
-    if (st === "passau") return passau(E);
+    const st2 = E.o.stadt;
+    if (st2 === "passau") return passau(E);
     raster3(E, 0.45);
     suedGrund(E, "altbayern", { wirts: 2 });
-    E.bv = { landshut: "landshut", regensburg: "wasserburg", ingolstadt: "rosenheim", augsburg: "landshut" }[st] ?? waehle2(r, BU_V);
+    E.bv = { landshut: "landshut", regensburg: "wasserburg", ingolstadt: "rosenheim", augsburg: "landshut" }[st2] ?? waehle2(r, BU_V);
     const nx = E.nx, nz = E.nz, c = klemm6(Math.floor(nx / 2) - 1, 1, nx - 3);
     let jM = klemm6(Math.floor(nz / 2) - 1, 2, nz - 3);
-    if (st === "landshut") {
+    if (st2 === "landshut") {
       kulisseOben(E, "wald", { burg: "kaiserburg", burgPos: 0.55 }, [96, 112]);
       flussQuer(E, nz - 1, { kies: true });
-    } else if (st === "regensburg") {
+    } else if (st2 === "regensburg") {
       flussQuer(E, 1, { brueckeP: 0.25 });
       jM = klemm6(jM + 1, 3, nz - 2);
-    } else if (st === "ingolstadt") flussQuer(E, nz - 1, { kies: true });
-    else if (st === "augsburg") flussSpalte(E, nx - 1, 0, { kies: true });
+    } else if (st2 === "ingolstadt") flussQuer(E, nz - 1, { kies: true });
+    else if (st2 === "augsburg") flussSpalte(E, nx - 1, 0, { kies: true });
     else kulisseOben(E, "wald", {}, [80, 96]);
     const i0 = klemm6(c - 1, 0, nx - 3);
-    if (st !== "regensburg") {
+    if (st2 !== "regensburg") {
       E.reihen[jM] = gerade(zw(r, 50, 58));
       for (let i = i0; i <= i0 + 2; i++) E.spalten[i] = Math.max(E.spalten[i], 58);
-      nimm6(E, { art: "suedmarkt", i0, i1: i0 + 2, j0: jM, j1: jM, form: "strasse", maibaum: true, saeule: st !== "augsburg", rathaus: st === "augsburg", seiten: ["-z", "-x"] });
+      nimm6(E, { art: "suedmarkt", i0, i1: i0 + 2, j0: jM, j1: jM, form: "strasse", maibaum: true, saeule: st2 !== "augsburg", rathaus: st2 === "augsburg", seiten: ["-z", "-x"] });
       for (let k = i0; k <= i0 + 3; k++) fixiere5(E, k, jM, jM);
     } else {
       gross(E, c, jM, 62, 58);
       nimm6(E, { art: "suedmarkt", i0: c, i1: c, j0: jM, j1: jM, form: "platz", seiten: ["-z", "-x"] });
     }
-    const kir = { landshut: { kirchArt: "backstein", turmHoehe: 96 }, regensburg: { kirchArt: "dom" }, ingolstadt: { kirchArt: "backstein", turm: "doppel" }, augsburg: { kirchArt: "zwiebel", variante: "stadtpfarr" } }[st] ?? { kirchArt: "zwiebel", variante: "stadtpfarr" };
-    const ki = st === "regensburg" ? c + 1 : klemm6(i0 + 1, 0, nx - 1), kj = jM - 1;
+    const kir = { landshut: { kirchArt: "backstein", turmHoehe: 96 }, regensburg: { kirchArt: "dom" }, ingolstadt: { kirchArt: "backstein", turm: "doppel" }, augsburg: { kirchArt: "zwiebel", variante: "stadtpfarr" } }[st2] ?? { kirchArt: "zwiebel", variante: "stadtpfarr" };
+    const ki = st2 === "regensburg" ? c + 1 : klemm6(i0 + 1, 0, nx - 1), kj = jM - 1;
     gross(E, ki, kj, kir.kirchArt === "dom" ? 110 : 76, kir.kirchArt === "zwiebel" ? 92 : 70);
     nimmWennFrei(E, { art: "suedkirche", i0: ki, i1: ki, j0: kj, j1: kj, seiten: ["-z", "-x"], ...kir });
     E.zentrum = { i: c + 0.5, j: jM + 0.7 };
@@ -117578,7 +117668,7 @@
     E.einschub = (i, j) => kern(i, j) ? 0.35 : 0.08;
     E.durchgang = 0.35;
     E.viertel = kernViertel(E, kern, 3.4);
-    if (st === "augsburg" || st === "regensburg") E.landmarken.push("slot:rathaus");
+    if (st2 === "augsburg" || st2 === "regensburg") E.landmarken.push("slot:rathaus");
   }
   function passau(E) {
     const { r } = E;
@@ -117601,24 +117691,24 @@
     E.einschub = (i, j) => j > jD && j < jI ? 0.3 : 0;
   }
   function franken(E) {
-    const st = E.o.stadt;
-    suedGrund(E, "franken", { wirts: st === "bamberg" ? 3 : 2 });
-    E.fv = st === "bamberg" || st === "erlangen" ? "bamberg" : "nuernberg";
-    E.barockStadt = ["wuerzburg", "bayreuth", "erlangen"].includes(st);
-    if (st === "nuernberg") return nuernberg(E);
-    if (st === "wuerzburg") return wuerzburg(E);
-    if (st === "bamberg") return bamberg(E);
+    const st2 = E.o.stadt;
+    suedGrund(E, "franken", { wirts: st2 === "bamberg" ? 3 : 2 });
+    E.fv = st2 === "bamberg" || st2 === "erlangen" ? "bamberg" : "nuernberg";
+    E.barockStadt = ["wuerzburg", "bayreuth", "erlangen"].includes(st2);
+    if (st2 === "nuernberg") return nuernberg(E);
+    if (st2 === "wuerzburg") return wuerzburg(E);
+    if (st2 === "bamberg") return bamberg(E);
     const { r } = E;
     const nx = E.nx, nz = E.nz, c = klemm6(Math.floor(nx / 2) - 1, 1, nx - 3);
-    raster3(E, st === "erlangen" ? 0 : st === "fuerth" ? 0.15 : 0.35);
-    if (st === "fuerth") {
+    raster3(E, st2 === "erlangen" ? 0 : st2 === "fuerth" ? 0.15 : 0.35);
+    if (st2 === "fuerth") {
       flussSpalte(E, 0, 0, {});
       gross(E, c, c - 1, 72, 70);
       nimm6(E, { art: "suedkirche", i0: c, i1: c, j0: c - 1, j1: c - 1, kirchArt: "sandstein", turm: "west", seiten: ["-z", "-x"] });
       nimm6(E, { art: "suedmarkt", i0: c + 1, i1: c + 1, j0: c, j1: c, form: "platz", seiten: ["-z", "-x"] });
       E.landmarken.push("slot:rathaus");
       E.zentrum = { i: c + 0.5, j: c + 0.6 };
-    } else if (st === "erlangen") {
+    } else if (st2 === "erlangen") {
       gross(E, c, 1, 100, 84);
       nimm6(E, { art: "residenz", i0: c, i1: c, j0: 1, j1: 1, variante: "lustschloss" });
       nimm6(E, { art: "park", i0: c + 1, i1: c + 1, j0: 0, j1: 1, garten: true });
@@ -117642,8 +117732,8 @@
     }
     const zc = { ...E.zentrum };
     const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 1.9;
-    E.versatz = (k, j) => kern(k - 0.5, j) && st !== "erlangen" ? 12 : 0;
-    E.einschub = (i, j) => kern(i, j) && st !== "erlangen" ? 0.3 : 0;
+    E.versatz = (k, j) => kern(k - 0.5, j) && st2 !== "erlangen" ? 12 : 0;
+    E.einschub = (i, j) => kern(i, j) && st2 !== "erlangen" ? 0.3 : 0;
     E.viertel = (i, j) => kern(i, j) ? E.barockStadt ? "barock" : "altstadt" : Math.hypot(i - zc.i, j - zc.j) < 3.6 ? "gruenderzeit" : "rand";
   }
   function nuernberg(E) {
@@ -117718,32 +117808,32 @@
   }
   function schwaben(E) {
     const { r } = E;
-    const st = E.o.stadt;
+    const st2 = E.o.stadt;
     suedGrund(E, "schwaben");
-    E.sv = st === "esslingen" || st === "ulm" ? "esslingen" : "tuebingen";
-    E.barockStadt = st === "ludwigsburg";
-    E.nachkrieg = ["heilbronn", "pforzheim", "ulm", "reutlingen"].includes(st);
+    E.sv = st2 === "esslingen" || st2 === "ulm" ? "esslingen" : "tuebingen";
+    E.barockStadt = st2 === "ludwigsburg";
+    E.nachkrieg = ["heilbronn", "pforzheim", "ulm", "reutlingen"].includes(st2);
     const nx = E.nx, nz = E.nz, c = klemm6(Math.floor(nx / 2) - 1, 1, nx - 3);
-    raster3(E, st === "ludwigsburg" ? 0 : st === "pforzheim" || st === "heilbronn" ? 0.25 : 0.55);
+    raster3(E, st2 === "ludwigsburg" ? 0 : st2 === "pforzheim" || st2 === "heilbronn" ? 0.25 : 0.55);
     let kirche3 = { kirchArt: "gotik" }, ki = c + 1, kj = 2, mi = c, mj = 3;
-    if (st === "tuebingen") {
+    if (st2 === "tuebingen") {
       kulisseOben(E, "wald", { burg: "festung", burgPos: 0.35 }, [96, 110]);
       flussQuer(E, nz - 1, { faktor: 0.8 });
-    } else if (st === "esslingen") {
+    } else if (st2 === "esslingen") {
       kulisseOben(E, "wein", { burg: "kaiserburg", burgPos: 0.62 }, [96, 110]);
       flussSpalte(E, nx - 1, 1, { kanal: true });
       kirche3 = { kirchArt: "gotik", turm: "doppel" };
-    } else if (st === "reutlingen") {
+    } else if (st2 === "reutlingen") {
       kulisseOben(E, "wald", {}, [96, 110]);
       kirche3 = { kirchArt: "gotik", turmHoehe: 72 };
-    } else if (st === "ulm") {
+    } else if (st2 === "ulm") {
       flussQuer(E, nz - 1, {});
       kirche3 = { kirchArt: "muenster", variante: "ulm" };
       ki = c;
       kj = 2;
       mi = c + 1;
       mj = 3;
-    } else if (st === "heilbronn") {
+    } else if (st2 === "heilbronn") {
       kulisseOben(E, "wein", {}, [96, 110]);
       flussSpalte(E, 1, 1, {});
       kirche3 = { kirchArt: "gotik", turm: "west" };
@@ -117751,10 +117841,10 @@
       kj = 3;
       mi = c + 1;
       mj = 4;
-    } else if (st === "pforzheim") {
+    } else if (st2 === "pforzheim") {
       kulisseOben(E, "wald", {}, [96, 112]);
       flussQuer(E, nz - 1, { faktor: 0.75 });
-    } else if (st === "ludwigsburg") {
+    } else if (st2 === "ludwigsburg") {
       gross(E, c, 0, 100, 100);
       gross(E, c + 1, 0, 80, 100);
       nimm6(E, { art: "residenz", i0: c, i1: c + 1, j0: 0, j1: 0, variante: "residenz" });
@@ -117771,11 +117861,11 @@
     gross(E, ki, kj, muenster ? 96 : 74, muenster ? 136 : 70);
     nimmWennFrei(E, { art: "suedkirche", i0: ki, i1: ki, j0: kj, j1: kj, seiten: muenster ? ["-z", "-x", "+x"] : ["-z", "-x"], ...kirche3 });
     gross(E, mi, mj, 60, 56);
-    nimmWennFrei(E, { art: "suedmarkt", i0: mi, i1: mi, j0: mj, j1: mj, form: st === "ludwigsburg" ? "platz" : "bw", seiten: ["-z", "-x"] });
+    nimmWennFrei(E, { art: "suedmarkt", i0: mi, i1: mi, j0: mj, j1: mj, form: st2 === "ludwigsburg" ? "platz" : "bw", seiten: ["-z", "-x"] });
     E.zentrum = { i: mi + 0.4, j: mj + 0.6 };
     const zc = { ...E.zentrum };
     const kern = (i, j) => Math.hypot(i - zc.i, (j - zc.j) * 0.9) < (E.T.idx === 2 ? 1.9 : 2.3);
-    const regel = st === "ludwigsburg";
+    const regel = st2 === "ludwigsburg";
     E.versatz = (k, j) => regel ? 0 : kern(k - 0.5, j) ? 16 : 6;
     E.einschub = (i, j) => regel ? 0 : kern(i, j) ? 0.4 : 0.1;
     E.durchgang = 0.4;
@@ -117807,12 +117897,12 @@
     E.versatz = (k, j) => j >= 2 ? 6 : 0;
   }
   function faecherQuadrate(E) {
-    const st = E.o.stadt;
+    const st2 = E.o.stadt;
     suedGrund(E, "faecher_quadrate");
-    E.nachkrieg = st === "mannheim";
+    E.nachkrieg = st2 === "mannheim";
     const nx = E.nx, nz = E.nz;
     raster3(E, 0);
-    if (st === "mannheim") {
+    if (st2 === "mannheim") {
       const w = gerade(zw(E.r, 64, 70));
       E.spalten = E.spalten.map(() => w);
       E.reihen = E.reihen.map(() => w);
@@ -117866,10 +117956,10 @@
     };
   }
   function oberrheinBodensee(E) {
-    const st = E.o.stadt;
-    suedGrund(E, "oberrhein_bodensee", { umriss: st === "konstanz" ? "diagonal" : "voll" });
+    const st2 = E.o.stadt;
+    suedGrund(E, "oberrhein_bodensee", { umriss: st2 === "konstanz" ? "diagonal" : "voll" });
     const nx = E.nx, nz = E.nz, c = klemm6(Math.floor(nx / 2) - 1, 1, nx - 3);
-    if (st === "heidelberg") {
+    if (st2 === "heidelberg") {
       raster3(E, 0.3);
       E.barockStadt = true;
       kulisseOben(E, "wald", { burg: "ruine", burgPos: 0.58 }, [104, 120]);
@@ -117885,7 +117975,7 @@
       E.einschub = (i, j) => j === 1 || j === 2 ? 0.35 : 0;
       return;
     }
-    if (st === "konstanz") {
+    if (st2 === "konstanz") {
       raster3(E, 0.45);
       flussQuer(E, 0, { brueckeP: 0.4 });
       nimm6(E, { art: "wasser", form: "see", i0: nx - 1, i1: nx - 1, j0: 1, j1: nz - 1 });
@@ -117918,17 +118008,17 @@
   }
   function alpenrand(E) {
     const { r } = E;
-    const st = E.o.stadt;
+    const st2 = E.o.stadt;
     raster3(E, 0.4);
     suedGrund(E, "alpenrand", { wirts: 2 });
-    E.bv = st === "rosenheim" ? "rosenheim" : "wasserburg";
+    E.bv = st2 === "rosenheim" ? "rosenheim" : "wasserburg";
     E.voralpenRand = true;
     const nx = E.nx, nz = E.nz;
     kulisseOben(E, "alpen", {}, [120, 136]);
     kulisseLinks(E, "voralpen", {}, [78, 92], 1);
     flussSpalte(E, nx - 2, 1, { kies: true });
     const c = 2;
-    if (st === "rosenheim") {
+    if (st2 === "rosenheim") {
       const jM = 3;
       E.reihen[jM] = gerade(zw(r, 50, 56));
       nimm6(E, { art: "suedmarkt", i0: 1, i1: 3, j0: jM, j1: jM, form: "strasse", maibaum: true, saeule: true, seiten: ["-z", "-x"] });
@@ -118080,12 +118170,12 @@
     const r = rng2((p2.seed ?? 1) * 2654435761 + 4111 >>> 0);
     const tab = STILE2[p2.suedTyp] ?? STILE2.altbayern;
     const basis3 = tab[gruppe(p2.viertel)] ?? tab.alt;
-    const liste = Object.entries(basis3).map(([st, g2]) => {
+    const liste = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
-      if (nachbar?.stil === st) w *= 0.35;
-      if (st === "fachwerk" && p2.w > 18 && p2.d > 18) w *= 0.2;
-      if (p2.typ === "hofhaus" && st !== "fachwerk") w *= 0.6;
-      return [st, w];
+      if (nachbar?.stil === st2) w *= 0.35;
+      if (st2 === "fachwerk" && p2.w > 18 && p2.d > 18) w *= 0.2;
+      if (p2.typ === "hofhaus" && st2 !== "fachwerk") w *= 0.6;
+      return [st2, w];
     });
     const stil = wahlGewichtet5(r, liste);
     let [a, b2] = GESCHOSSE2[stil] ?? [3, 5];
@@ -118224,13 +118314,13 @@
       for (let k = 0; k <= nx; k++) fixiere6(E, k, jK, jK);
       jI = jK - 1;
     } else jI = klein ? nz - 1 : Math.min(nz - 1, cj + 3);
-    let st = null;
+    let st2 = null;
     if (!senk) {
       const jB = Math.max(0, cj - (klein ? 3 : 4));
       E.reihen[jB] = BAND;
       nimm7(E, { art: "bahn", i0: 0, i1: nx - 1, j0: jB, j1: jB, oben: true, trasse: true, ohneBahnhof: true });
       for (let k = 0; k <= nx; k++) fixiere6(E, k, jB, jB);
-      st = { i: ci - 2, j: jB + 1, front: "+z" };
+      st2 = { i: ci - 2, j: jB + 1, front: "+z" };
       E.zTyp[ci - 1] = "haupt";
       fixiere6(E, ci - 1);
       if (E.T.tram) E.tram.push("z" + (ci - 1));
@@ -118240,19 +118330,19 @@
       E.spalten[iB] = BAND;
       nimm7(E, { art: "bahn", i0: iB, i1: iB, j0: 0, j1: jEnde, achse: "z", seite: lage === "links" ? "+x" : "-x", trasse: true, ohneBahnhof: true });
       for (let k = iB; k <= iB + 1; k++) fixiere6(E, k);
-      st = lage === "links" ? { i: iB + 1, j: cj - 2, front: "+x" } : { i: iB - 1, j: cj + 1, front: "-x" };
-      E.xTyp[st.j + 1] = "haupt";
+      st2 = lage === "links" ? { i: iB + 1, j: cj - 2, front: "+x" } : { i: iB - 1, j: cj + 1, front: "-x" };
+      E.xTyp[st2.j + 1] = "haupt";
     }
     if (!E.zTyp.some((t) => t === "haupt")) {
       E.zTyp[ci - 1] = "haupt";
       if (E.T.tram) E.tram.push("z" + (ci - 1));
     }
     if (!E.xTyp.some((t) => t === "haupt")) E.xTyp[cj - 1] = "haupt";
-    if (st && istFrei(E, st.i, st.i, st.j, st.j)) {
-      setzeSpalte(E, st.i, 80);
-      setzeReihe(E, st.j, 62);
-      nimm7(E, { art: "west_bahnhof", i0: st.i, i1: st.i, j0: st.j, j1: st.j, variante: westBahnhof, front: st.front });
-      for (let k = st.i; k <= st.i + 1; k++) fixiere6(E, k, st.j, st.j);
+    if (st2 && istFrei(E, st2.i, st2.i, st2.j, st2.j)) {
+      setzeSpalte(E, st2.i, 80);
+      setzeReihe(E, st2.j, 62);
+      nimm7(E, { art: "west_bahnhof", i0: st2.i, i1: st2.i, j0: st2.j, j1: st2.j, variante: westBahnhof, front: st2.front });
+      for (let k = st2.i; k <= st2.i + 1; k++) fixiere6(E, k, st2.j, st2.j);
     }
     E.landmarken.push("slot:bahnhof");
     if (o.fluss) {
@@ -118918,9 +119008,9 @@
   function nachBauHafenkai(ctx, b2, wasser2, B2) {
     const { S } = ctx;
     gehwegRing(ctx, b2, B2);
-    let st = [[b2.x, b2.z, b2.x + b2.w, b2.z + b2.d]];
-    for (const w of wasser2) st = st.flatMap((R9) => rechteckOhne(R9, w));
-    for (const [a, c, e, h] of st) S.quader(a, -0.6, c, e, 0.33, h, "#bdb8ad");
+    let st2 = [[b2.x, b2.z, b2.x + b2.w, b2.z + b2.d]];
+    for (const w of wasser2) st2 = st2.flatMap((R9) => rechteckOhne(R9, w));
+    for (const [a, c, e, h] of st2) S.quader(a, -0.6, c, e, 0.33, h, "#bdb8ad");
     const P2 = b2.lager, r = rng2(b2.seed + 41);
     if (!P2 || P2.w < 10 || P2.d < 8) return;
     for (let a = 3; a < P2.w - 6; a += 7.5) {
@@ -118976,19 +119066,19 @@
       b2.stufen.push({ z0, z1, y });
     }
     if (b2.schloss && b2.w > 60) {
-      const st = b2.stufen[n - 1];
-      neueParzelle6(ctx, "slot:schloss", b2.x + 6, st.z0 + 1, Math.min(b2.w - 12, 70), Math.max(20, sd - 4), ["+z"], "frei", { klasse: 5, landmarke: true, sockelY: st.y });
+      const st2 = b2.stufen[n - 1];
+      neueParzelle6(ctx, "slot:schloss", b2.x + 6, st2.z0 + 1, Math.min(b2.w - 12, 70), Math.max(20, sd - 4), ["+z"], "frei", { klasse: 5, landmarke: true, sockelY: st2.y });
       return;
     }
     const belegt2 = [];
-    for (const st of b2.stufen) {
+    for (const st2 of b2.stufen) {
       const anz3 = b2.ohneHaeuser ? 0 : b2.wald ? rb() < 0.5 ? 1 : 0 : 1 + Math.floor(rb() * 2.4);
       for (let q2 = 0; q2 < anz3; q2++) {
-        const w = zw(rb, 9, 13), d = Math.min(13, st.z1 - st.z0 - 4);
+        const w = zw(rb, 9, 13), d = Math.min(13, st2.z1 - st2.z0 - 4);
         if (d < 8) continue;
-        const P2 = freiePosition4({ x: b2.x + 2, z: st.z0 + 1, w: b2.w - 4, d: st.z1 - st.z0 - 2.5 }, belegt2, w, d, 4, rb, true);
+        const P2 = freiePosition4({ x: b2.x + 2, z: st2.z0 + 1, w: b2.w - 4, d: st2.z1 - st2.z0 - 2.5 }, belegt2, w, d, 4, rb, true);
         if (!P2) continue;
-        belegt2.push(neueParzelle6(ctx, "slot:berg_haus", P2.x, P2.z, P2.w, P2.d, ["+z"], "frei", { klasse: 2, landmarke: false, variante: wahlGewichtet6(rb, [["schiefer", 3], ["putz", 1.4], ["fachwerk", 1.2]]), sockelY: st.y, geschosse: 2 + (rb() < 0.4 ? 1 : 0) }));
+        belegt2.push(neueParzelle6(ctx, "slot:berg_haus", P2.x, P2.z, P2.w, P2.d, ["+z"], "frei", { klasse: 2, landmarke: false, variante: wahlGewichtet6(rb, [["schiefer", 3], ["putz", 1.4], ["fachwerk", 1.2]]), sockelY: st2.y, geschosse: 2 + (rb() < 0.4 ? 1 : 0) }));
       }
     }
     b2.treppeX = b2.x + zw(rb, 8, Math.max(9, b2.w - 8));
@@ -118996,23 +119086,23 @@
   function bodenHang(ctx, b2, r, teile2, B2) {
     const { S, I } = ctx;
     const steinF = ["#8f8a80", "#99938a", "#878178"];
-    for (const st of b2.stufen ?? []) {
-      S.quader(b2.x, 0, st.z0, b2.x + b2.w, st.y, st.z1, waehle2(r, steinF));
-      S.quader(b2.x + 0.2, st.y, st.z0, b2.x + b2.w - 0.2, st.y + 0.07, st.z1 - 0.5, b2.wald ? "#7fae68" : B2.F.rasen);
-      S.quader(b2.x, st.y, st.z1 - 0.5, b2.x + b2.w, st.y + 0.5, st.z1, "#a39d92");
+    for (const st2 of b2.stufen ?? []) {
+      S.quader(b2.x, 0, st2.z0, b2.x + b2.w, st2.y, st2.z1, waehle2(r, steinF));
+      S.quader(b2.x + 0.2, st2.y, st2.z0, b2.x + b2.w - 0.2, st2.y + 0.07, st2.z1 - 0.5, b2.wald ? "#7fae68" : B2.F.rasen);
+      S.quader(b2.x, st2.y, st2.z1 - 0.5, b2.x + b2.w, st2.y + 0.5, st2.z1, "#a39d92");
       const dichte = b2.wald ? 1 / 55 : 1 / 170;
-      for (let k = 0, n = Math.round(b2.w * (st.z1 - st.z0) * dichte); k < n; k++) {
-        const x = B2.zw(r, b2.x + 2, b2.x + b2.w - 2), z2 = B2.zw(r, st.z0 + 2, st.z1 - 2);
+      for (let k = 0, n = Math.round(b2.w * (st2.z1 - st2.z0) * dichte); k < n; k++) {
+        const x = B2.zw(r, b2.x + 2, b2.x + b2.w - 2), z2 = B2.zw(r, st2.z0 + 2, st2.z1 - 2);
         if (teile2.some((p2) => B2.imRechteck(x, z2, p2, 3)) || b2.treppeX && Math.abs(x - b2.treppeX) < 3) continue;
-        B2.baumSetzen(I, waehle2(r, b2.wald ? ["nadel", "nadel", "linde", "birke", "kastanie"] : ["linde", "kastanie", "birke", "kugel"]), x, st.y + 0.07, z2, r, B2.zw(r, 0.75, 1.1));
+        B2.baumSetzen(I, waehle2(r, b2.wald ? ["nadel", "nadel", "linde", "birke", "kastanie"] : ["linde", "kastanie", "birke", "kugel"]), x, st2.y + 0.07, z2, r, B2.zw(r, 0.75, 1.1));
       }
     }
     if (b2.treppeX && b2.stufen?.length) {
       let yv = 0;
-      for (const st of b2.stufen) {
-        const n = Math.max(2, Math.round((st.y - yv) / 0.3)), z1 = st.z1;
-        for (let k = 0; k < n; k++) S.quader(b2.treppeX - 1.4, 0, z1 - (k + 1) * 0.45, b2.treppeX + 1.4, yv + (k + 1) * ((st.y - yv) / n) + 0.08, z1 - k * 0.45, "#cfc8b8");
-        yv = st.y;
+      for (const st2 of b2.stufen) {
+        const n = Math.max(2, Math.round((st2.y - yv) / 0.3)), z1 = st2.z1;
+        for (let k = 0; k < n; k++) S.quader(b2.treppeX - 1.4, 0, z1 - (k + 1) * 0.45, b2.treppeX + 1.4, yv + (k + 1) * ((st2.y - yv) / n) + 0.08, z1 - k * 0.45, "#cfc8b8");
+        yv = st2.y;
       }
     }
   }
@@ -119076,15 +119166,15 @@
       const rb = rng2(`dach:${p2.block}`);
       dachRegime = rb() < (RUHR_FLACH[p2.viertel] ?? 0.5) ? "flach" : "steil";
       const erlaubt = dachRegime === "flach" ? STILE_FLACH : STILE_STEIL;
-      const f = Object.fromEntries(Object.entries(basis3).filter(([st]) => erlaubt.has(st)));
+      const f = Object.fromEntries(Object.entries(basis3).filter(([st2]) => erlaubt.has(st2)));
       if (Object.keys(f).length) basis3 = f;
     }
-    const liste = Object.entries(basis3).map(([st, g2]) => {
+    const liste = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
-      if (nachbar?.stil === st) w *= 0.3;
-      if (st === "fachwerk" && p2.w > 16) w *= 0.2;
-      if (st === "barock" && p2.w > 20) w *= 0.4;
-      return [st, w];
+      if (nachbar?.stil === st2) w *= 0.3;
+      if (st2 === "fachwerk" && p2.w > 16) w *= 0.2;
+      if (st2 === "barock" && p2.w > 20) w *= 0.4;
+      return [st2, w];
     });
     const stil = wahlGewichtet6(r, liste);
     let [a, b2] = GESCHOSSE_W[stil] ?? [3, 5];
@@ -119328,14 +119418,14 @@
     I.def("tatra", tat);
     I.def("zugwagen", [[B(26, 3, 2.9, 0, 2.2, 0), 0], [B(26.06, 0.5, 2.96, 0, 1.3, 0), "#c8322b"], [B(24, 0.85, 2.96, 0, 2.75, 0), glas2], [B(25, 0.3, 2.3, 0, 3.85, 0), "#9aa0a6"], [B(3, 0.8, 2.4, 9, 0.45, 0), F.dunkel], [B(3, 0.8, 2.4, -9, 0.45, 0), F.dunkel]]);
     I.def("schiff", [[B(16, 1.4, 4.4, 0, 0, 0), "#f3f1ea"], [B(3.1, 1.4, 3.1, 8, 0, 0, Math.PI / 4), "#f3f1ea"], [B(16.1, 0.3, 4.46, 0, 0.35, 0), 0], [B(10, 1.5, 3.6, -1, 1.45, 0), glas2], [B(11, 0.15, 4, -1, 2.25, 0), "#f3f1ea"], [B(1.2, 0.8, 1.2, -4, 2.7, 0), 0]]);
-    const st = F.stamm;
-    I.def("linde", [[B(0.42, 3, 0.42, 0, 1.5, 0), st], [K(2.3, 0, 4.9, 0, 1, 1.05, 1), 0], [K(1.6, 0.9, 5.9, -0.6, 1, 1, 1, 0), 0]]);
-    I.def("kastanie", [[B(0.55, 3, 0.55, 0, 1.5, 0), st], [K(2.9, 0, 5.4, 0, 1.15, 0.92, 1.15), 0], [K(1.9, -0.8, 6.6, 0.6, 1, 1, 1, 0), 0]]);
+    const st2 = F.stamm;
+    I.def("linde", [[B(0.42, 3, 0.42, 0, 1.5, 0), st2], [K(2.3, 0, 4.9, 0, 1, 1.05, 1), 0], [K(1.6, 0.9, 5.9, -0.6, 1, 1, 1, 0), 0]]);
+    I.def("kastanie", [[B(0.55, 3, 0.55, 0, 1.5, 0), st2], [K(2.9, 0, 5.4, 0, 1.15, 0.92, 1.15), 0], [K(1.9, -0.8, 6.6, 0.6, 1, 1, 1, 0), 0]]);
     I.def("platane", [[B(0.5, 3.8, 0.5, 0, 1.9, 0), "#a39a83"], [K(3, 0, 6.3, 0, 1.3, 0.72, 1.3), 0], [K(2, 1.3, 6.9, 0.8, 1.1, 0.8, 1.1, 0), 0]]);
     I.def("birke", [[B(0.28, 3.4, 0.28, 0, 1.7, 0), "#ece9e2"], [B(0.3, 0.12, 0.3, 0, 1.5, 0), "#3a3a3a"], [B(0.3, 0.12, 0.3, 0, 2.6, 0), "#3a3a3a"], [K(1.5, 0, 4.9, 0, 1, 1.6, 1), 0], [K(1, 0.5, 6.1, -0.3, 1, 1.3, 1, 0), 0]]);
-    I.def("pappel", [[B(0.4, 2.2, 0.4, 0, 1.1, 0), st], [K(1.5, 0, 6, 0, 1, 3, 1), 0]]);
-    I.def("nadel", [[B(0.4, 1.6, 0.4, 0, 0.8, 0), st], [C(0, 2.5, 3.8, 7, 0, 3.3, 0), 0], [C(0, 1.9, 3.2, 7, 0, 5.3, 0), 0], [C(0, 1.2, 2.6, 7, 0, 7.1, 0), 0]]);
-    I.def("kugel", [[B(0.3, 2.4, 0.3, 0, 1.2, 0), st], [K(1.35, 0, 3.25, 0), 0]]);
+    I.def("pappel", [[B(0.4, 2.2, 0.4, 0, 1.1, 0), st2], [K(1.5, 0, 6, 0, 1, 3, 1), 0]]);
+    I.def("nadel", [[B(0.4, 1.6, 0.4, 0, 0.8, 0), st2], [C(0, 2.5, 3.8, 7, 0, 3.3, 0), 0], [C(0, 1.9, 3.2, 7, 0, 5.3, 0), 0], [C(0, 1.2, 2.6, 7, 0, 7.1, 0), 0]]);
+    I.def("kugel", [[B(0.3, 2.4, 0.3, 0, 1.2, 0), st2], [K(1.35, 0, 3.25, 0), 0]]);
     I.def("busch", [[K(1, 0, 0.6, 0, 1.5, 0.75, 1.5), 0]]);
     I.def("baumscheibe", [[B(1.8, 0.05, 1.8, 0, 0.025, 0), "#8a7a62"], [B(1.4, 0.06, 1.4, 0, 0.03, 0), "#6f6150"]], false);
     const m = "#5d646b";
@@ -121156,7 +121246,7 @@
   }
   function standortMarker(plan2, groesse2) {
     const art = { premium: "premium", warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber", outlet: "wettbewerber" };
-    return (plan2.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? "hartwig", groesse: st.rolle === "wettbewerber" ? (groesse2 ?? 10) * 0.8 : groesse2 }));
+    return (plan2.standorte ?? []).map((st2) => ({ parzelle: st2.parzelle, art: art[st2.rolle] ?? "hartwig", groesse: st2.rolle === "wettbewerber" ? (groesse2 ?? 10) * 0.8 : groesse2 }));
   }
   function setzeMarker(scene2, plan2, ergebnis, liste = [], o = {}) {
     const pz4 = new Map(plan2.parzellen.map((p2) => [p2.id, p2]));
@@ -121186,25 +121276,25 @@
   }
   function platzhalterHaus(S, scene2, p2, eck = false) {
     const r = rng2(p2.seed);
-    const st = p2.stil ?? "gruenderzeit";
-    const fw = st === "fachwerk";
+    const st2 = p2.stil ?? "gruenderzeit";
+    const fw = st2 === "fachwerk";
     const g = p2.geschosse, gh = fw ? 2.9 : 3.35, eg = fw ? 3.4 : 4.2;
     const H = eg + g * gh;
     const { x, z: z2, w, d } = p2;
-    const f = st === "nachkrieg" ? waehle2(r, [...FARBEN3.fassadeKuehl, ...FARBEN3.fassadeWarm, ...FARBEN3.putzBunt]) : st === "modern" ? waehle2(r, ["#d9dde0", "#c9cfd4", "#e6e3dc", "#bfc7cc"]) : fw ? waehle2(r, ["#f1ebdf", "#efe3cf", "#f3eee4"]) : waehle2(r, [...FARBEN3.fassadeHell, ...FARBEN3.fassadeHell, ...FARBEN3.backstein.slice(0, 2), ...FARBEN3.fassadeWarm]);
+    const f = st2 === "nachkrieg" ? waehle2(r, [...FARBEN3.fassadeKuehl, ...FARBEN3.fassadeWarm, ...FARBEN3.putzBunt]) : st2 === "modern" ? waehle2(r, ["#d9dde0", "#c9cfd4", "#e6e3dc", "#bfc7cc"]) : fw ? waehle2(r, ["#f1ebdf", "#efe3cf", "#f3eee4"]) : waehle2(r, [...FARBEN3.fassadeHell, ...FARBEN3.fassadeHell, ...FARBEN3.backstein.slice(0, 2), ...FARBEN3.fassadeWarm]);
     const hell4 = heller(f, 0.06);
     S.quader(x, 0, z2, x + w, H, z2 + d, f);
     const sicht3 = ["+z", "+x"];
-    for (const s2 of sicht3) if (p2.front.includes(s2)) laden2(S, p2, s2, eg, r, st === "modern" ? F.glas : FARBEN3.laden);
+    for (const s2 of sicht3) if (p2.front.includes(s2)) laden2(S, p2, s2, eg, r, st2 === "modern" ? F.glas : FARBEN3.laden);
     gesims(S, x, z2, w, d, eg, 0.3, 0.12, hell4);
-    if (st === "modern") {
+    if (st2 === "modern") {
       for (let k = 0; k < g; k++) {
         const y = eg + k * gh + gh * 0.55;
         S.box(w - 0.8, gh * 0.55, 0.12, x + w / 2, y, z2 + d + 0.03, FARBEN3.glas);
         S.box(0.12, gh * 0.55, d - 0.8, x + w + 0.03, y, z2 + d / 2, FARBEN3.glas);
       }
     } else {
-      const o = fw ? { raster: 2.3, fw: 1, fh: 1.4 } : st === "nachkrieg" ? { raster: 2.6, fw: 1.5, fh: 1.4 } : { raster: 3.1, sims: hell4, rahmen: g > 3 ? hell4 : null };
+      const o = fw ? { raster: 2.3, fw: 1, fh: 1.4 } : st2 === "nachkrieg" ? { raster: 2.6, fw: 1.5, fh: 1.4 } : { raster: 3.1, sims: hell4, rahmen: g > 3 ? hell4 : null };
       fensterRaster(S, x, z2, w, d, "+z", { y0: eg, geschosse: g, gh, ...o });
       fensterRaster(S, x, z2, w, d, "+x", { y0: eg, geschosse: g, gh, ...o });
     }
@@ -121235,7 +121325,7 @@
       const dg = dachProfil(len + 0.3, tief2 + 0.6, dh, 0.15, achse);
       dg.translate(x + w / 2, H, z2 + d / 2);
       S.add(dg, waehle2(r, FARBEN3.ziegel));
-    } else if (st === "gruenderzeit") {
+    } else if (st2 === "gruenderzeit") {
       gesims(S, x, z2, w, d, H, 0.45, 0.32, hell4);
       if (r() < 0.6) {
         const len = achse0 === "x" ? w : d, tief2 = achse0 === "x" ? d : w;
@@ -121261,7 +121351,7 @@
       }
       if (r() < 0.6) S.box(1.8, 1.2, 1.8, x + zw(r, 2, w - 2), H + 0.9, z2 + zw(r, 2, d - 2), "#bdb8ae");
     }
-    if (eck && p2.front.includes("+z") && p2.front.includes("+x") && st === "gruenderzeit") {
+    if (eck && p2.front.includes("+z") && p2.front.includes("+x") && st2 === "gruenderzeit") {
       S.quader(x + w - 3.2, eg + 0.6, z2 + d - 3.2, x + w + 0.7, H, z2 + d + 0.7, hell4);
       fensterRaster(S, x + w - 3.2, z2 + d - 3.2, 3.9, 3.9, "+z", { y0: eg, geschosse: g, gh, raster: 3 });
       fensterRaster(S, x + w - 3.2, z2 + d - 3.2, 3.9, 3.9, "+x", { y0: eg, geschosse: g, gh, raster: 3 });
@@ -122072,17 +122162,17 @@
     const fl = haus2.flaechen ?? [];
     const qm = fl.reduce((a, f) => a + (f.qm || 0), 0) || 1;
     const z2 = { status: "offen", zusatz: [], aktion: null, untermieter: [], offpriceEtage: 0 };
-    const st = haus2.status ?? "offen";
+    const st2 = haus2.status ?? "offen";
     const substanz = haus2.substanz ?? 100;
-    if (st === "geschlossen") {
+    if (st2 === "geschlossen") {
       const frisch = haus2.restmieteBis !== void 0 ? w < haus2.restmieteBis : true;
       z2.status = frisch ? "geschlossen" : substanz < 35 ? "verfall" : "leer";
       if (frisch && substanz < 35) z2.zusatz.push("verfall");
-    } else if (st === "verkauft") {
+    } else if (st2 === "verkauft") {
       z2.status = "offen";
       z2.hartwig = false;
       z2.kaeufer = haus2.premiumEigentuemer;
-    } else if (st === "raeumung") {
+    } else if (st2 === "raeumung") {
       z2.status = "raeumung";
     } else {
       const unter = /* @__PURE__ */ new Map();
@@ -122527,7 +122617,7 @@
   for (const d of einstellungen) meldeSchalter(d);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "d53247d" : "Entwicklung";
+  var version = () => true ? "a2ac432" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv3 = false;
     function feld(d) {
@@ -123095,7 +123185,7 @@
         ui.seite = "uebersicht";
         return uebersicht();
       }
-      const k = d.kennzahlen, st = d.steuerung, a = d.ampeln;
+      const k = d.kennzahlen, st2 = d.steuerung, a = d.ampeln;
       let h = tabs();
       h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc2(d.bereichName)}</button>`;
       h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl3(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl3(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
@@ -123108,12 +123198,12 @@
       h += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
       const genutzt = k.limit > 0 ? Math.min(1, k.limitVerbraucht / k.limit) : 0;
       const naechste = d.limits[1];
-      h += regler2("Limit je Saison (Open to Buy)", `<div class="stepper"><button data-a="limit" data-v="-0.05">\u2212</button><span><b data-p="d:limitFaktor">${pz3(st.limitFaktor)}</b> \xB7 <i data-p="d:limit">${geld(k.limit)}</i></span><button data-a="limit" data-v="0.05">+</button></div><div class="balken"><span style="width:${(genutzt * 100).toFixed(1)}%"></span></div><small class="rfuss">${esc2(d.limits[0]?.name ?? "")}: verbraucht <i data-p="d:limitVerbraucht">${geld(k.limitVerbraucht)}</i>, frei <i data-p="d:limitFrei2">${geld(k.limitFrei)}</i>${naechste ? `<br>${esc2(naechste.name)}: Limit ${geld(naechste.limit)}, verbraucht ${geld(naechste.verbraucht)}` : ""}</small>`, "Faktor auf den Saisonplan");
-      h += regler2("NOS-Anteil Ziel", schieber("nosZiel", Math.round(st.nosZiel * 100), 0, 95, 1), `heute ${pz3(st.nosAnteil)}, Rest Saisonware`);
-      h += regler2("NOS-Servicegrad", seg("servicegrad", st.servicegrad, [[0.9, "90 %"], [0.95, "95 %"], [0.98, "98 %"]]), "mehr Sicherheitsbestand");
-      h += regler2("Vororderquote", schieber("vororderquote", Math.round(st.vororderquote * 100), 20, 100, 5), "Rest als Nachorder alle 4 Wochen");
-      h += regler2("Reduzierung", seg("reduzierung", st.reduzierung, [["frueh", "fr\xFCh"], ["normal", "normal"], ["spaet", "sp\xE4t"]]), "fr\xFCh: weniger Altware, mehr Abschrift");
-      h += regler2("Ohne Freigabe nach Frist", `<div class="zweier"><span>NOS</span>${seg("modus", st.modus.nos, [["auto", "automatisch"], ["verfall", "verf\xE4llt"]], ' data-f="nos"')}</div><div class="zweier"><span>Saison</span>${seg("modus", st.modus.saison, [["auto", "automatisch"], ["verfall", "verf\xE4llt"]], ' data-f="saison"')}</div>`);
+      h += regler2("Limit je Saison (Open to Buy)", `<div class="stepper"><button data-a="limit" data-v="-0.05">\u2212</button><span><b data-p="d:limitFaktor">${pz3(st2.limitFaktor)}</b> \xB7 <i data-p="d:limit">${geld(k.limit)}</i></span><button data-a="limit" data-v="0.05">+</button></div><div class="balken"><span style="width:${(genutzt * 100).toFixed(1)}%"></span></div><small class="rfuss">${esc2(d.limits[0]?.name ?? "")}: verbraucht <i data-p="d:limitVerbraucht">${geld(k.limitVerbraucht)}</i>, frei <i data-p="d:limitFrei2">${geld(k.limitFrei)}</i>${naechste ? `<br>${esc2(naechste.name)}: Limit ${geld(naechste.limit)}, verbraucht ${geld(naechste.verbraucht)}` : ""}</small>`, "Faktor auf den Saisonplan");
+      h += regler2("NOS-Anteil Ziel", schieber("nosZiel", Math.round(st2.nosZiel * 100), 0, 95, 1), `heute ${pz3(st2.nosAnteil)}, Rest Saisonware`);
+      h += regler2("NOS-Servicegrad", seg("servicegrad", st2.servicegrad, [[0.9, "90 %"], [0.95, "95 %"], [0.98, "98 %"]]), "mehr Sicherheitsbestand");
+      h += regler2("Vororderquote", schieber("vororderquote", Math.round(st2.vororderquote * 100), 20, 100, 5), "Rest als Nachorder alle 4 Wochen");
+      h += regler2("Reduzierung", seg("reduzierung", st2.reduzierung, [["frueh", "fr\xFCh"], ["normal", "normal"], ["spaet", "sp\xE4t"]]), "fr\xFCh: weniger Altware, mehr Abschrift");
+      h += regler2("Ohne Freigabe nach Frist", `<div class="zweier"><span>NOS</span>${seg("modus", st2.modus.nos, [["auto", "automatisch"], ["verfall", "verf\xE4llt"]], ' data-f="nos"')}</div><div class="zweier"><span>Saison</span>${seg("modus", st2.modus.saison, [["auto", "automatisch"], ["verfall", "verf\xE4llt"]], ' data-f="saison"')}</div>`);
       if (d.stammdaten.eigenmarkenfaehig) {
         const alle = q2.marken(s2()).marken;
         const drin = d.eigenmarken, ids = new Set(drin.map((m) => m.marke));
@@ -123935,11 +124025,11 @@
     const da = typeof E.vorstandUebersicht === "function";
     const ui = { aktiv: false, seite: "uebersicht", ressort: null, k: 0, angebot: null, entlassen: false };
     function uebersicht(P2) {
-      const st = s2(), u = E.vorstandUebersicht(st);
-      let h = `<div class="raster">${kz("Vorstand besetzt", P2("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`))}${kz("Geh\xE4lter im Jahr", P2("u:kostenJahr", geld(u.kostenJahr)))}${kz("Kosten je Woche", P2("u:kostenWoche", geld(u.kostenWoche)))}${kz("N\xE4chste Sitzung", P2("u:sitzung", wocheText(st, u.naechsteSitzung)))}</div>`;
+      const st2 = s2(), u = E.vorstandUebersicht(st2);
+      let h = `<div class="raster">${kz("Vorstand besetzt", P2("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`))}${kz("Geh\xE4lter im Jahr", P2("u:kostenJahr", geld(u.kostenJahr)))}${kz("Kosten je Woche", P2("u:kostenWoche", geld(u.kostenWoche)))}${kz("N\xE4chste Sitzung", P2("u:sitzung", wocheText(st2, u.naechsteSitzung)))}</div>`;
       for (const e of u.offeneEntscheidungen) {
-        const roh2 = st.entscheidungen.find((x) => x.id === e.id);
-        h += `<div class="karte order entscheid"><div class="ohead"><b>${esc2(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc2(roh2?.text ?? "")}</div><div class="oknoepfe">${(roh2?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc2(o.label)}</button>`).join("")}</div></div>`;
+        const roh2 = st2.entscheidungen.find((x) => x.id === e.id);
+        h += `<div class="karte order entscheid"><div class="ohead"><b>${esc2(e.titel)}</b><i>Frist ${wocheText(st2, e.frist)}</i></div><div class="olief">${esc2(roh2?.text ?? "")}</div><div class="oknoepfe">${(roh2?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc2(o.label)}</button>`).join("")}</div></div>`;
       }
       h += '<div class="vgitter">';
       for (const r of u.ressorts) {
@@ -123952,16 +124042,16 @@
       h += '</div><div class="legende">Balken: F\xFChrung, Fachwissen, Loyalit\xE4t \xB7 Punkt: Abwerberisiko</div>';
       const ls = u.letzteSitzung;
       if (ls) {
-        h += `<div class="karte"><div class="khead">Letzte Vorstandssitzung<small>${wocheText(st, ls.woche)}</small></div>`;
+        h += `<div class="karte"><div class="khead">Letzte Vorstandssitzung<small>${wocheText(st2, ls.woche)}</small></div>`;
         for (const b2 of ls.berichte) h += `<div class="zeile"><span class="was"><b>${E.RESSORT_INFO?.[b2.ressort]?.kurz ?? b2.ressort}</b>${b2.name ? ` <i>${esc2(b2.name)}</i>` : ""}<em class="wirk">${esc2(b2.text)}</em></span></div>`;
         if (ls.thema) h += `<div class="zeile"><span class="was"><b>Beschluss</b> <i>${esc2(ls.thema.titel)}</i><em>${esc2(ls.thema.ergebnis ?? "offen")}</em></span></div>`;
         h += "</div>";
       }
-      for (const b2 of u.boosts) h += `<div class="olief">${esc2(b2.text)} wirkt bis ${wocheText(st, b2.bis)}</div>`;
-      return { titel: "Vorstand", unter: `Du bist CEO \xB7 ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt \xB7 KW ${kwVon2(st.woche)}`, html: h };
+      for (const b2 of u.boosts) h += `<div class="olief">${esc2(b2.text)} wirkt bis ${wocheText(st2, b2.bis)}</div>`;
+      return { titel: "Vorstand", unter: `Du bist CEO \xB7 ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt \xB7 KW ${kwVon2(st2.woche)}`, html: h };
     }
     function profil2(P2) {
-      const st = s2(), r = E.vorstandProfil(st, ui.ressort);
+      const st2 = s2(), r = E.vorstandProfil(st2, ui.ressort);
       if (!r) {
         ui.seite = "uebersicht";
         return uebersicht(P2);
@@ -123969,13 +124059,13 @@
       const p2 = r.person, id = r.id;
       let h = '<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 Vorstand</button>';
       if (!p2) {
-        h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(null, 120)}</span><div><b class="vname">${r.kurz} unbesetzt</b><small>${esc2(r.titel)}</small><div class="olief">${esc2(r.zustaendig)}</div>${r.vakantSeit !== void 0 ? `<div class="olief warnung">vakant seit ${wocheText(st, r.vakantSeit)}</div>` : ""}</div></div>`;
+        h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(null, 120)}</span><div><b class="vname">${r.kurz} unbesetzt</b><small>${esc2(r.titel)}</small><div class="olief">${esc2(r.zustaendig)}</div>${r.vakantSeit !== void 0 ? `<div class="olief warnung">vakant seit ${wocheText(st2, r.vakantSeit)}</div>` : ""}</div></div>`;
         h += `<div class="olief">Ohne ${r.kurz} wirken die Abteilungen schw\xE4cher: ${r.abteilungen.map((a) => `${esc2(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")}. Keine Delegation m\xF6glich.</div></div>`;
         h += `<button class="breit gruen" data-a="einstellen" data-v="${id}">${P2(`p:${id}:kandidaten`, `${r.kandidatenAnzahl} Kandidaten ansehen`, "span")}</button>`;
         return { titel: `${r.kurz} einstellen`, unter: esc2(r.zustaendig), html: h };
       }
       h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(p2.portraet, 120)}</span><div><b class="vname">${P2(`p:${id}:name`, p2.name, "span")}</b><small>${esc2(r.titel)}</small>`;
-      h += `<div class="vseit"><span>${r.kurz} seit</span>${P2(`p:${id}:seit`, wocheText(st, p2.seitWoche))}</div>${p2.gewachsen ? '<span class="chip grau">aus dem Haus gewachsen</span>' : ""}${p2.gehtWoche !== void 0 ? `<span class="chip warn">geht ${wocheText(st, p2.gehtWoche)}</span>` : ""}</div></div>`;
+      h += `<div class="vseit"><span>${r.kurz} seit</span>${P2(`p:${id}:seit`, wocheText(st2, p2.seitWoche))}</div>${p2.gewachsen ? '<span class="chip grau">aus dem Haus gewachsen</span>' : ""}${p2.gehtWoche !== void 0 ? `<span class="chip warn">geht ${wocheText(st2, p2.gehtWoche)}</span>` : ""}</div></div>`;
       h += `<div class="faehigkeiten"><div class="vtitel">F\xE4higkeiten</div>${faehigkeit("F\xFChrung", p2.fuehrung, P2(`p:${id}:fuehrung`, String(p2.fuehrung)))}${faehigkeit("Fachwissen", p2.fachwissen, P2(`p:${id}:fachwissen`, String(p2.fachwissen)))}${faehigkeit("Loyalit\xE4t", p2.loyalitaet, P2(`p:${id}:loyalitaet`, String(p2.loyalitaet)))}</div>`;
       if (r.vorgeschichte) h += `<div class="olief">${esc2(r.vorgeschichte)}</div>`;
       h += `<div class="olief">Wirkung auf ${r.abteilungen.map((a) => `${esc2(a.name)} ${P2(`p:${id}:abt:${a.id}`, pz3(a.faktor), "b")}`).join(" \xB7 ")} \xB7 Abwerberisiko im Jahr ${P2(`p:${id}:risiko`, pz3(r.risiko), "b")}<span class="ampel a-${r.risikoAmpel}"></span></div></div>`;
@@ -123985,7 +124075,7 @@
       h += '<div class="karte steuerung"><div class="khead">Verg\xFCtung</div>';
       h += regler("Jahresgehalt", stepper("gehalt", P2(`p:${id}:gehalt`, geld(p2.gehalt)), P2(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p2.gehaltsforderung)}`, "i")), `Schritt ${geld(r.gehaltsSchritt)}`);
       const halteAnteil = p2.haltebonus > 0 ? Math.round(p2.haltebonus / Math.max(1, p2.gehalt) * 4) / 4 : 0;
-      h += regler("Haltebonus \xFCber 52 Wochen", segment("haltebonus", halteAnteil, HALTE) + `<small class="rfuss">${p2.haltebonus > 0 ? `${P2(`p:${id}:haltebonus`, geld(p2.haltebonus), "i")} bis ${p2.halteBis !== void 0 ? wocheText(st, p2.halteBis) : "offen"}, senkt das Abwerberisiko` : "Anteil vom Jahresgehalt, in Raten ausgezahlt"}</small>`, "vom Jahresgehalt");
+      h += regler("Haltebonus \xFCber 52 Wochen", segment("haltebonus", halteAnteil, HALTE) + `<small class="rfuss">${p2.haltebonus > 0 ? `${P2(`p:${id}:haltebonus`, geld(p2.haltebonus), "i")} bis ${p2.halteBis !== void 0 ? wocheText(st2, p2.halteBis) : "offen"}, senkt das Abwerberisiko` : "Anteil vom Jahresgehalt, in Raten ausgezahlt"}</small>`, "vom Jahresgehalt");
       h += regler("Erfolgsbonus bei Planerf\xFCllung", segment("erfolgsbonus", Math.round(p2.erfolgsbonus * 10) / 10, ERFOLG), "vom Jahresgehalt je Jahr");
       h += "</div>";
       if (r.protokoll.length) {
@@ -123998,7 +124088,7 @@
       return { titel: `${r.kurz} Profil`, unter: `${esc2(r.titel)} \xB7 ${esc2(r.zustaendig)}`, html: h };
     }
     function einstellen(P2) {
-      const st = s2(), L2 = E.kandidaten(st, ui.ressort);
+      const st2 = s2(), L2 = E.kandidaten(st2, ui.ressort);
       if (!L2) {
         ui.seite = "uebersicht";
         return uebersicht(P2);
@@ -124017,7 +124107,7 @@
       h += karussell("kandidaten", karten, ui.k, "kandidat");
       const k = L2.kandidaten[ui.k];
       if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
-      const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st, L2.ressort, k.id, A.gehalt, hb, A.erfolg);
+      const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st2, L2.ressort, k.id, A.gehalt, hb, A.erfolg);
       h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc2(k.name) + "</div>";
       h += regler("Jahresgehalt", stepper("angebotGehalt", P2("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
       h += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb ? geld(hb) : "vom Jahresgehalt");
@@ -124161,7 +124251,7 @@
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "zentrale", ebene: null, id: null };
     const bar = (q2) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0, Math.min(1, q2)) * 100) + '%"></i></span>';
-    const name2 = (st) => st?.person ? esc2(st.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
+    const name2 = (st2) => st2?.person ? esc2(st2.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
     const profil2 = (stelle2, titel, ebene, id) => {
       if (!stelle2) return "";
       const p2 = stelle2.person;
@@ -124181,7 +124271,7 @@
       return h;
     };
     function zeichnen2() {
-      const st = s2(), x = E.organisationUebersicht(st);
+      const st2 = s2(), x = E.organisationUebersicht(st2);
       let h = '<div class="org-tabs"><button data-org="reiter" data-reiter="zentrale" class="' + (ui.reiter === "zentrale" ? "an" : "") + '">Zentrale</button><button data-org="reiter" data-reiter="vertrieb" class="' + (ui.reiter === "vertrieb" ? "an" : "") + '">Vertrieb</button></div>';
       if (ui.ebene) {
         const stelle2 = ui.ebene === "bereich" ? x.bereiche.find((b2) => b2.id === ui.id)?.stelle : ui.ebene === "region" ? x.regionen.find((r) => r.id === ui.id)?.stelle : [...x.regionen.flatMap((r) => r.cluster), x.sonder].find((c) => c?.id === ui.id)?.stelle;
@@ -124206,7 +124296,7 @@
         if (x.sonder) {
           const c = x.sonder;
           h += '<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + name2(c.stelle) + "</button></div><p>" + c.hausIds.length + " H\xE4user \xB7 " + x.flagships.length + " gew\xE4hlte Flagships</p>";
-          for (const haus2 of st.haeuser.filter((v) => v.format === "warenhaus" && v.status === "offen").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12)) {
+          for (const haus2 of st2.haeuser.filter((v) => v.format === "warenhaus" && v.status === "offen").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12)) {
             const an = x.flagships.includes(haus2.id), premium2 = haus2.klasse === "premium";
             h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
           }
@@ -124432,6 +124522,273 @@
     };
   }
 
+  // src/ui/statistik.js
+  var FARBE = {
+    Hartwig: "#d23c32",
+    Volkskauf: "#9b63b0",
+    Sport: "#2f8f5b",
+    FUNDUS: "#b5651d",
+    Nord: "#3e7eae",
+    Ost: "#9b63b0",
+    West: "#d23c32",
+    Mitte: "#b5651d",
+    S\u00FCd: "#2f8f5b",
+    Ist: "#d23c32",
+    Vorjahr: "#8296a3",
+    Plan: "#2f8f5b"
+  };
+  var KENNZAHL = {
+    umsatz: "Umsatz",
+    ebitda: "EBITDA",
+    cash: "Cash",
+    db: "Deckungsbeitrag",
+    frequenz: "Kundenfrequenz (Sch\xE4tzung)",
+    personalFte: "Personal (FTE)",
+    stimmung: "Stakeholder-Stimmung"
+  };
+  var GELD = /* @__PURE__ */ new Set(["umsatz", "ebitda", "cash", "db"]);
+  var xAchse = (w) => "KW " + (w % 52 + 1);
+  function statistikModul(ctx) {
+    const { E } = ctx, s2 = ctx.s;
+    const ui = { aktiv: false, seite: "konzern", kennzahl: "umsatz", wochen: 52, typ: "linie", zeilen: 25 };
+    const charts = /* @__PURE__ */ new Map();
+    let naechsteId = 0, ausstehend = false, zeiger = null;
+    const daten = (ebene, id, kennzahl2 = ui.kennzahl, wochen = ui.wochen) => E.verlauf(s2(), { ebene, id, kennzahl: kennzahl2, wochen });
+    const wert = (n, k) => GELD.has(k) ? geld(n) : fmt.format(Math.round(n));
+    const knopf2 = (a, v, label, an) => '<button type="button" class="stat-wahl' + (an ? " an" : "") + '" data-st-a="' + a + '" data-v="' + esc2(v) + '">' + esc2(label) + "</button>";
+    const tabs = () => '<nav class="stat-auswahl" aria-label="Statistikseiten">' + [["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]].map(([id, t]) => knopf2("seite", id, t, ui.seite === id)).join("") + "</nav>";
+    const zeiten = () => '<div class="stat-auswahl" aria-label="Zeitraum">' + [[13, "13 Wochen"], [52, "52 Wochen"], ["alle", "Alle"]].map(([id, t]) => knopf2("wochen", id, t, String(ui.wochen) === String(id))).join("") + "</div>";
+    const typen = () => '<div class="stat-auswahl" aria-label="Darstellung">' + [["linie", "Verlauf"], ["balken", "Wochen"], ["quartal", "Quartale"]].map(([id, t]) => knopf2("typ", id, t, ui.typ === id)).join("") + "</div>";
+    const zahl3 = (t, n, k) => '<div class="kz"><span>' + esc2(t) + "</span><b>" + esc2(wert(n, k)) + "</b></div>";
+    function gruppieren(punkte2, kennzahl2) {
+      if (ui.typ !== "quartal") return ui.typ === "balken" ? punkte2.slice(-13) : punkte2;
+      const summen = /* @__PURE__ */ new Map();
+      for (const p2 of punkte2) {
+        const start = Math.floor(p2.woche / 13) * 13;
+        let a = summen.get(start);
+        if (!a) {
+          a = { woche: start, wert: 0 };
+          summen.set(start, a);
+        }
+        if (kennzahl2 === "cash" || kennzahl2 === "stimmung" || kennzahl2 === "personalFte") a.wert = p2.wert;
+        else a.wert += p2.wert;
+      }
+      return [...summen.values()];
+    }
+    function diagramm(titel, reihen, kennzahl2, opt = {}) {
+      const listen = reihen.filter((r3) => r3?.punkte?.length).map((r3) => ({ name: r3.name, punkte: gruppieren(r3.punkte, kennzahl2), farbe: r3.farbe ?? FARBE[r3.name] ?? "#d23c32" })).filter((r3) => r3.punkte.length);
+      if (!listen.length) return '<article class="karte stat-karte"><div class="stat-titel">' + esc2(titel) + '</div><p class="stat-leer">F\xFCr diese Auswahl sind noch keine Verlaufsdaten verf\xFCgbar.</p></article>';
+      if (opt.vorjahr && ui.typ === "linie" && reihen.length === 1) {
+        const a = reihen[0].punkte.filter((p3) => p3.vorjahr !== void 0).map((p3) => ({ woche: p3.woche, wert: p3.vorjahr }));
+        if (a.length) listen.push({ name: "Vorjahr", punkte: a, farbe: FARBE.Vorjahr });
+        const p2 = reihen[0].punkte.filter((x) => x.plan !== void 0).map((x) => ({ woche: x.woche, wert: x.plan }));
+        if (p2.length) listen.push({ name: "Plan", punkte: p2, farbe: FARBE.Plan });
+      }
+      const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = 42, r = 10, t = 10, u = opt.klein ? 14 : 29;
+      const alle = listen.flatMap((x) => x.punkte), xs = alle.map((p2) => p2.woche), ys = alle.map((p2) => p2.wert);
+      if (Number.isFinite(opt.grenze)) ys.push(opt.grenze);
+      const minW = Math.min(...xs), maxW = Math.max(...xs), breite = Math.max(1, maxW - minW);
+      let minY = Math.min(...ys), maxY = Math.max(...ys);
+      if (ui.typ !== "linie" && !opt.klein) {
+        minY = Math.min(minY, 0);
+        maxY = Math.max(maxY, 0);
+      }
+      if (minY === maxY) {
+        minY -= Math.max(1, Math.abs(minY) * 0.1);
+        maxY += Math.max(1, Math.abs(maxY) * 0.1);
+      }
+      const px2 = (woche2) => l + (woche2 - minW) / breite * (w - r - l);
+      const py2 = (v) => t + (maxY - v) / (maxY - minY) * (h - u - t);
+      const grenzlinie = Number.isFinite(opt.grenze) ? '<line x1="' + l + '" x2="' + (w - r) + '" y1="' + py2(opt.grenze).toFixed(2) + '" y2="' + py2(opt.grenze).toFixed(2) + '" stroke="#d23c32" stroke-width="1.5" stroke-dasharray="4 4"/><title>Insolvenzgrenze: ' + esc2(geld(opt.grenze)) + "</title>" : "";
+      const kurven = listen.map((r3, ri) => {
+        if (ui.typ === "linie" || opt.klein) {
+          const punkte2 = r3.punkte.map((p2, i) => (i ? "L" : "M") + px2(p2.woche).toFixed(2) + "," + py2(p2.wert).toFixed(2)).join(" ");
+          return '<path d="' + punkte2 + '" fill="none" stroke="' + r3.farbe + '" stroke-width="' + (opt.klein ? 1.7 : 2.6) + '" stroke-linecap="round" stroke-linejoin="round"' + (r3.name === "Vorjahr" || r3.name === "Plan" ? ' stroke-dasharray="5 4"' : "") + "/>";
+        }
+        const bw = Math.max(2, Math.min(24, (w - r3 - l) / Math.max(1, r3.punkte.length) / (listen.length + 0.5)));
+        return r3.punkte.map((p2) => '<rect x="' + (px2(p2.woche) + (ri - listen.length / 2) * bw).toFixed(1) + '" y="' + py2(Math.max(0, p2.wert)).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(py2(p2.wert) - py2(0))).toFixed(1) + '" fill="' + r3.farbe + '"/>').join("");
+      }).join("");
+      const id = ++naechsteId;
+      charts.set(id, { reihen: listen, minW, maxW, x: l, breite: w - r - l, kennzahl: kennzahl2 });
+      const achsen7 = opt.klein ? "" : '<line x1="' + l + '" x2="' + (w - r) + '" y1="' + (h - u) + '" y2="' + (h - u) + '" stroke="#cdd4d8"/>' + [0, 0.5, 1].map((f) => '<text x="2" y="' + (py2(maxY - (maxY - minY) * f) + 3).toFixed(1) + '" class="stat-achse">' + esc2(wert(maxY - (maxY - minY) * f, kennzahl2)) + "</text>").join("") + '<text x="' + l + '" y="' + (h - 4) + '" class="stat-achse">' + xAchse(minW) + '</text><text x="' + (w - r) + '" y="' + (h - 4) + '" text-anchor="end" class="stat-achse">' + xAchse(maxW) + "</text>";
+      const legende = listen.length > 1 ? '<div class="stat-legende">' + listen.map((x) => '<span><i style="background:' + x.farbe + '"></i>' + esc2(x.name) + "</span>").join("") + "</div>" : "";
+      return '<article class="karte stat-karte"><div class="stat-titel">' + esc2(titel) + "</div>" + legende + '<svg role="img" aria-label="' + esc2(titel) + ': Werte durch Antippen oder Ziehen anzeigen" class="stat-diagramm" data-st-chart="' + id + '" data-st-ende="' + esc2(String(reihen[0]?.punkte?.at(-1)?.wert ?? 0)) + '" viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none">' + achsen7 + grenzlinie + kurven + '<line class="stat-cross" x1="' + l + '" x2="' + l + '" y1="' + t + '" y2="' + (h - u) + '" stroke="#1f2a33" stroke-dasharray="3 3" visibility="hidden"/></svg>' + (opt.klein ? "" : '<div class="stat-wert" aria-live="polite">Punkt antippen oder \xFCber den Verlauf ziehen</div>') + "</article>";
+    }
+    function konzern() {
+      const kennzahlen2 = [["umsatz", "Umsatz"], ["ebitda", "EBITDA"], ["cash", "Cash und Insolvenzgrenze"], ["stimmung", "Stakeholder-Stimmung"]];
+      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k, t]) => zahl3(t, daten("konzern", void 0, k).punkte.at(-1)?.wert ?? 0, k)).join("") + "</div>";
+      for (const [k, t] of kennzahlen2) {
+        const d = daten("konzern", void 0, k);
+        html += diagramm(t, [{ name: "Ist", punkte: d.punkte }], k, { vorjahr: true, grenze: k === "cash" ? -s2().kreditlinie : void 0 });
+        if (k === "cash") html += '<p class="stat-hinweis">Aktuelle Insolvenzgrenze: ' + esc2(geld(-s2().kreditlinie)) + " (verf\xFCgbarer Kreditrahmen). \xC4nderungen der Kreditlinie sind historisch nicht rekonstruierbar.</p>";
+      }
+      html += wasserfall();
+      return html;
+    }
+    function formate() {
+      const ids = ["Hartwig", "Volkskauf", "Sport", "FUNDUS"];
+      return '<p class="stat-hinweis">Vier Formate im Vergleich. Noch nicht simulierte Formate bleiben ohne Werte.</p>' + ["umsatz", "db"].map((k) => diagramm(KENNZAHL[k] + " nach Format", ids.map((name2) => ({ name: name2, punkte: daten("format", name2, k).punkte })), k)).join("");
+    }
+    function regionen() {
+      const ids = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
+      return ["umsatz", "db"].map((k) => diagramm(KENNZAHL[k] + " nach Region", ids.map((name2) => ({ name: name2, punkte: daten("region", name2, k).punkte })), k)).join("");
+    }
+    function rangliste() {
+      const hauser = s2().haeuser.filter((h) => h.verlauf?.length).map((h) => {
+        const p2 = h.verlauf.at(-1), wk2 = s2().historie.at(-1);
+        const zentral = wk2 ? wk2.wkz - wk2.abschriften - wk2.zentrale - wk2.marketing - wk2.beratung : 0;
+        const marge = p2.umsatz > 0 ? (p2.db + zentral * p2.umsatz / Math.max(1, wk2?.umsatz ?? 1)) / p2.umsatz : -Infinity;
+        return { h, p: p2, marge };
+      }).sort((a, b2) => b2.marge - a.marge || a.h.name.localeCompare(b2.h.name));
+      if (!hauser.length) return '<div class="karte stat-leer">Nach der ersten Woche erscheinen die Ranglisten.</div>';
+      let html = '<p class="stat-hinweis">EBITDA-Marge je Haus: Deckungsbeitrag mit proportional zum Umsatz verteilten Zusch\xFCssen, Abschriften und Zentralkosten. Unternehmensweit identische Verteilungsschl\xFCssel, gesch\xE4tzte Hauszuordnung. H\xE4user ohne Umsatz am Ende.</p>';
+      for (const [i, x] of hauser.slice(0, ui.zeilen).entries()) {
+        const d = daten("haus", x.h.id, "db", 52);
+        html += '<div class="karte stat-haus"><button data-st-a="haus" data-v="' + esc2(x.h.id) + '" class="stat-hauskopf"><b>' + (i + 1) + ". " + esc2(x.h.name) + "</b><span>" + (Number.isFinite(x.marge) ? (x.marge * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %" : "ohne Umsatz") + "</span></button><small>" + esc2(x.h.stadt + " \xB7 " + x.h.region) + "</small>" + diagramm("52 Wochen", [{ name: "Ist", punkte: d.punkte }], "db", { klein: true }) + "</div>";
+      }
+      if (ui.zeilen < hauser.length) html += '<button class="stat-mehr" data-st-a="mehr">Weitere H\xE4user (' + (hauser.length - ui.zeilen) + ")</button>";
+      return html;
+    }
+    function wasserfall() {
+      const k = s2().historie.at(-1);
+      if (!k) return "";
+      const daten2 = [
+        ["Rohertrag", k.rohertrag],
+        ["Konzession, Mieten, WKZ", k.konzession + k.untermiete + k.wkz],
+        ["Personal", -k.personal],
+        ["Miete", -k.miete],
+        ["Nebenkosten", -k.nebenkosten],
+        ["Sonstiges + Logistik", -k.sonstige - k.logistik],
+        ["Zentrale", -k.zentrale],
+        ["Marketing", -k.marketing],
+        ["Beratung", -k.beratung]
+      ];
+      const positionen = [0];
+      let summe2 = 0;
+      for (const [, v] of daten2) {
+        summe2 += v;
+        positionen.push(summe2);
+      }
+      positionen.push(k.ebitda);
+      const minimum = Math.min(0, ...positionen), maximum = Math.max(1, ...positionen), spanne = Math.max(1, maximum - minimum);
+      const y = (v) => 124 - (v - minimum) / spanne * 106;
+      const bars = daten2.map(([name2, v], i) => {
+        const oben = Math.min(y(positionen[i]), y(positionen[i + 1])), hoehe = Math.max(1, Math.abs(y(positionen[i]) - y(positionen[i + 1])));
+        return '<rect data-st-wf="' + i + '" x="' + (10 + i * 33) + '" y="' + oben.toFixed(1) + '" width="23" height="' + hoehe.toFixed(1) + '" fill="' + (v < 0 ? "#d23c32" : "#2f8f5b") + '"><title>' + esc2(name2 + ": " + geld(v)) + "</title></rect>";
+      }).join("");
+      const endOben = Math.min(y(k.ebitda), y(0)), endHoehe = Math.max(1, Math.abs(y(k.ebitda) - y(0)));
+      const ende = '<rect data-st-wf="9" x="307" y="' + endOben.toFixed(1) + '" width="25" height="' + endHoehe.toFixed(1) + '" fill="#1f2a33"><title>EBITDA: ' + esc2(geld(k.ebitda)) + "</title></rect>";
+      return '<article class="karte stat-karte"><div class="stat-titel">EBITDA-Br\xFCcke \xB7 letzte Woche</div><svg role="img" aria-label="EBITDA-Wasserfall" viewBox="0 0 342 140">' + bars + ende + '<line x1="6" y1="' + y(0).toFixed(1) + '" x2="338" y2="' + y(0).toFixed(1) + '" stroke="#8296a3"/></svg><div class="stat-wert">Rohertrag bis EBITDA: Balken antippen \xB7 ' + esc2(geld(k.ebitda)) + "</div></article>";
+    }
+    function zeigen(halten = false) {
+      const vorher = document.getElementById("pinhalt").scrollTop;
+      charts.clear();
+      const steuer2 = ui.seite === "konzern" ? konzern() : ui.seite === "formate" ? formate() : ui.seite === "regionen" ? regionen() : rangliste();
+      const html = tabs() + zeiten() + (ui.seite !== "rangliste" ? typen() : "") + steuer2;
+      ctx.panel("Zahlen", "Verl\xE4ufe und Vergleich \xB7 KW " + (s2().woche % 52 + 1), html, "gross");
+      ui.aktiv = true;
+      if (halten) document.getElementById("pinhalt").scrollTop = vorher;
+    }
+    function hausGrafik(id) {
+      const d = daten("haus", id, "umsatz", 52), b2 = daten("haus", id, "db", 52);
+      return '<div class="stat-hausdetail">' + diagramm("Letzte 52 Wochen \xB7 Umsatz", [{ name: "Ist", punkte: d.punkte }], "umsatz", { vorjahr: true }) + diagramm("Letzte 52 Wochen \xB7 Deckungsbeitrag", [{ name: "Ist", punkte: b2.punkte }], "db") + "</div>";
+    }
+    const inhalt = document.getElementById("pinhalt");
+    inhalt.addEventListener("click", (e) => {
+      const wf = e.target.closest?.("[data-st-wf]");
+      if (wf && ui.aktiv) {
+        const t = wf.querySelector("title")?.textContent;
+        const info = wf.closest(".stat-karte")?.querySelector(".stat-wert");
+        if (t && info) info.textContent = t;
+        return;
+      }
+      const b2 = e.target.closest("[data-st-a]");
+      if (!b2 || !ui.aktiv) return;
+      const a = b2.dataset.stA, v = b2.dataset.v;
+      if (a === "seite") {
+        ui.seite = v;
+        ui.zeilen = 25;
+      } else if (a === "wochen") ui.wochen = v === "alle" ? "alle" : Number(v);
+      else if (a === "typ") ui.typ = v;
+      else if (a === "mehr") ui.zeilen += 25;
+      else if (a === "haus") {
+        ctx.oeffneHaus(v);
+        return;
+      } else return;
+      zeigen();
+    });
+    function tip(e) {
+      const svg = e.target.closest?.("[data-st-chart]");
+      if (!svg) return;
+      const info = charts.get(Number(svg.dataset.stChart));
+      if (!info) return;
+      const box = svg.getBoundingClientRect();
+      const xpos = (e.clientX - box.left) / box.width * svg.viewBox.baseVal.width;
+      const week = info.minW + Math.min(1, Math.max(0, (xpos - info.x) / info.breite)) * (info.maxW - info.minW);
+      let best = null, dist2 = Infinity;
+      for (const r of info.reihen) for (const p2 of r.punkte) {
+        const d = Math.abs(p2.woche - week);
+        if (d < dist2) {
+          dist2 = d;
+          best = p2;
+        }
+      }
+      if (!best) return;
+      const xx = info.x + (best.woche - info.minW) / Math.max(1, info.maxW - info.minW) * info.breite;
+      const cross = svg.querySelector(".stat-cross");
+      if (cross) {
+        cross.setAttribute("x1", xx);
+        cross.setAttribute("x2", xx);
+        cross.setAttribute("visibility", "visible");
+      }
+      const boxwert = svg.parentElement.querySelector(".stat-wert");
+      if (boxwert) boxwert.textContent = xAchse(best.woche) + " \xB7 " + info.reihen.map((r) => {
+        const p2 = r.punkte.reduce((a, b2) => Math.abs(b2.woche - best.woche) < Math.abs(a.woche - best.woche) ? b2 : a, r.punkte[0]);
+        return r.name + ": " + wert(p2.wert, info.kennzahl);
+      }).join(" \xB7 ");
+    }
+    inhalt.addEventListener("pointerdown", (e) => {
+      if (e.target.closest?.("[data-st-chart]")) {
+        e.target.setPointerCapture?.(e.pointerId);
+        tip(e);
+      }
+    });
+    inhalt.addEventListener("pointermove", (e) => {
+      if (!e.target.closest?.("[data-st-chart]")) return;
+      zeiger = { target: e.target, clientX: e.clientX };
+      if (ausstehend) return;
+      ausstehend = true;
+      requestAnimationFrame(() => {
+        ausstehend = false;
+        if (zeiger) tip(zeiger);
+      });
+    });
+    return {
+      ui,
+      oeffne: (seite = "konzern") => {
+        ui.seite = seite;
+        zeigen();
+      },
+      hausGrafik,
+      aktiv: () => ui.aktiv,
+      zu: () => {
+        ui.aktiv = false;
+      },
+      neuZeichnen: () => {
+        if (ui.aktiv) zeigen(true);
+      },
+      pruefe: () => {
+        const fehler6 = [];
+        for (const k of ["umsatz", "ebitda", "cash", "stimmung"]) {
+          const d = daten("konzern", void 0, k), p2 = d.punkte.at(-1), c = E.cockpit(s2());
+          const soll = k === "umsatz" ? c.umsatzWoche : k === "ebitda" ? c.ebitdaWoche : k === "stimmung" ? c.vertrauen : c.cash;
+          if (p2 && p2.wert !== soll) fehler6.push(k + ": " + p2.wert + " statt " + soll);
+        }
+        return { fehler: fehler6, diagramme: inhalt.querySelectorAll(".stat-diagramm").length };
+      }
+    };
+  }
+
   // src/ui/marketing.js
   var ALTER2 = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
@@ -124464,7 +124821,7 @@
     };
     const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div>`;
     function uebersicht(P2) {
-      const st = s2(), u = E.marketingUebersicht(st);
+      const st2 = s2(), u = E.marketingUebersicht(st2);
       let h = tabs();
       h += `<div class="raster">${kz("Werbung je Woche netto", P2("u:netto", geld(u.wocheNetto)))}${kz("Werbequote netto", P2("u:quote", pz3(u.werbequoteNetto, 1)))}${kz("Markenst\xE4rke", P2("u:marke", `${Math.round(u.markenstaerke)} / 100`))}${kz("Image", P2("u:image", `${Math.round(u.image)} / 100`))}${kz("Kundschaft je Woche", P2("u:frequenz", fmt.format(Math.round(u.frequenzWoche))))}${kz("Durchschnittsbon", P2("u:bon", geld(u.bon)))}${kz("Umsatz mit Karte", P2("u:karte", pz3(u.kartenanteil, 1)))}${kz("Rabattquote 13 Wochen", P2("u:rabatt", pz3(u.rabattquote13, 1)), u.rabattquote13 > 0.08 ? "rot" : "")}</div>`;
       h += `<div class="karte"><div class="khead">Budget je Woche<small>brutto ${geld(u.wocheBrutto)}, Lieferantenbeteiligung ${geld(u.wocheBeteiligung)}</small></div>`;
@@ -124576,9 +124933,9 @@
       return g + "</svg>";
     }
     function kalender(P2) {
-      const st = s2(), jahr0 = st.startJahr + Math.floor(st.woche / 52);
+      const st2 = s2(), jahr0 = st2.startJahr + Math.floor(st2.woche / 52);
       ui.jahr ?? (ui.jahr = jahr0);
-      const K3 = E.aktionskalender(st, ui.jahr);
+      const K3 = E.aktionskalender(st2, ui.jahr);
       let h = tabs();
       h += segment("jahr", ui.jahr, [[jahr0, String(jahr0)], [jahr0 + 1, String(jahr0 + 1)]]);
       h += `<div class="karte schnittk">${zeitleiste(K3, P2)}<div class="legende"><span class="ampel" style="background:#2f63b5"></span> geplant <span class="ampel" style="background:#2f8f5b"></span> l\xE4uft <span class="ampel" style="background:#9aa3ab"></span> beendet \xB7 Balken antippen</div></div>`;
@@ -124606,7 +124963,7 @@
       return h;
     }
     function aktion2(P2) {
-      const st = s2(), a = E.aktionsAuswertung(st, ui.aktion);
+      const st2 = s2(), a = E.aktionsAuswertung(st2, ui.aktion);
       if (!a) {
         ui.seite = "kalender";
         return kalender(P2);
@@ -124651,7 +125008,7 @@
       return [...new Set(out)];
     };
     function klick(el) {
-      const a = el.dataset.a, v = el.dataset.v, st = s2(), B2 = ui.crm;
+      const a = el.dataset.a, v = el.dataset.v, st2 = s2(), B2 = ui.crm;
       switch (a) {
         case "seite":
           ui.seite = v;
@@ -124671,21 +125028,21 @@
         case "punkte":
           return tun({ typ: "kundenkarteSetzen", punkteSatz: Number(v) });
         case "stufen":
-          return tun({ typ: "kundenkarteSetzen", stufen: !E.kundenkarte(st).stufen });
+          return tun({ typ: "kundenkarteSetzen", stufen: !E.kundenkarte(st2).stufen });
         case "kartenrabatt":
           return tun({ typ: "kundenkarteSetzen", kartenrabatt: Number(v) });
         case "praemie":
           return tun({ typ: "kundenkarteSetzen", anmeldepraemie: Number(v), anmeldeWochen: Number(v) ? 8 : 0 });
         case "daten": {
-          const k = E.kundenkarte(st);
+          const k = E.kundenkarte(st2);
           return tun({ typ: "kundenkarteSetzen", datenBudgetWoche: Math.max(0, k.datenBudgetWoche + Number(v) * 1e4) });
         }
         case "appBudget": {
-          const k = E.kundenkarte(st);
+          const k = E.kundenkarte(st2);
           return tun({ typ: "appSetzen", budgetWoche: Math.max(0, k.app.budgetWoche + Number(v) * 1e4) });
         }
         case "appCoupons":
-          return tun({ typ: "appSetzen", appCoupons: !E.kundenkarte(st).app.appCoupons });
+          return tun({ typ: "appSetzen", appCoupons: !E.kundenkarte(st2).app.appCoupons });
         case "relaunch":
           return tun({ typ: "appSetzen", relaunch: true });
         case "crmKanal":
@@ -124716,7 +125073,7 @@
           B2.kontrolle = !B2.kontrolle;
           return zeigen(true);
         case "crmStart": {
-          const seg = E.crmKampagnen(st).segmente[B2.seg]?.segment ?? { typ: "alle" };
+          const seg = E.crmKampagnen(st2).segmente[B2.seg]?.segment ?? { typ: "alle" };
           const angebot = B2.angebot === "coupon" ? { typ: "coupon", prozent: B2.prozent, mindestbon: B2.mindestbon } : B2.angebot === "punkte" ? { typ: "punkte", faktor: B2.faktor } : B2.angebot === "zugabe" ? { typ: "zugabe", wert: B2.wert } : { typ: "info" };
           return tun({ typ: "crmKampagneAnlegen", segment: seg, kanal: B2.kanal, angebot, frequenz: B2.frequenz, ...B2.frequenz === "einmalig" ? {} : { wochen: B2.wochen }, kontrollgruppe: B2.kontrolle });
         }
@@ -124726,8 +125083,8 @@
           ui.jahr = Number(v);
           return zeigen(true);
         case "planen": {
-          const jahr2 = ui.jahr ?? st.startJahr + Math.floor(st.woche / 52), an = E.aktionskalender(st, jahr2).anlaesse.find((x) => x.id === "sonder");
-          const kwJetzt = jahr2 === st.startJahr + Math.floor(st.woche / 52) ? kwVon2(st.woche) + 2 : 1;
+          const jahr2 = ui.jahr ?? st2.startJahr + Math.floor(st2.woche / 52), an = E.aktionskalender(st2, jahr2).anlaesse.find((x) => x.id === "sonder");
+          const kwJetzt = jahr2 === st2.startJahr + Math.floor(st2.woche / 52) ? kwVon2(st2.woche) + 2 : 1;
           ui.planen = ui.planen ? null : { anlass: "sonder", mechanik: an.mechanik, rabatt: an.rabatt || 0.2, punkteFaktor: 5, kw: Math.min(52, kwJetzt), jahr: jahr2, wochen: 1, sonderwerbung: 0, kontrolle: true };
           return zeigen(true);
         }
@@ -124765,7 +125122,7 @@
           return zeigen(true);
         }
         case "planFertig": {
-          const p2 = ui.planen, an = E.aktionskalender(st, p2.jahr).anlaesse.find((x) => x.id === p2.anlass);
+          const p2 = ui.planen, an = E.aktionskalender(st2, p2.jahr).anlaesse.find((x) => x.id === p2.anlass);
           const r = tun({ typ: "aktionPlanen", anlass: p2.anlass, name: an?.name, mechanik: p2.mechanik, ...p2.mechanik === "punkte" ? { punkteFaktor: p2.punkteFaktor } : { rabatt: p2.rabatt }, ...an?.bereiche ? { bereiche: an.bereiche } : {}, kw: p2.kw, jahr: p2.jahr, wochen: p2.wochen, sonderwerbung: p2.sonderwerbung, ...p2.kontrolle ? { kontrollHaeuser: kontrollHaeuser() } : {} });
           if (r?.ok) {
             ui.jahr = p2.jahr;
@@ -124777,7 +125134,7 @@
         case "aktionAbsagen":
           return tun({ typ: "aktionAbsagen", id: v });
         case "aktionLaenger": {
-          const x = E.aktionsAuswertung(st, v);
+          const x = E.aktionsAuswertung(st2, v);
           return tun({ typ: "aktionAendern", id: v, wochen: x.wochen + 1 });
         }
         default:
@@ -125573,7 +125930,7 @@
       return L2.marken.find((m) => m.marke === ui.marke);
     }
     function liste(P2) {
-      const st = s2(), L2 = E.produkte(st), M2 = aktuelleMarke(L2);
+      const st2 = s2(), L2 = E.produkte(st2), M2 = aktuelleMarke(L2);
       let h = "";
       if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
       h += markenwahl(L2);
@@ -125592,7 +125949,7 @@
           if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
           c += `<div class="pname">${P2(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
           if (ent) {
-            c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P2(`p:${p2.id}:fertig`, `fertig ${wocheText(st, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P2(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
+            c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P2(`p:${p2.id}:fertig`, `fertig ${wocheText(st2, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P2(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
           } else {
             c += `<div class="mitte" title="${dez(p2.sterne, 1)} Sterne">${sterne(p2.sterne, 24)}<span class="sternzahl">${P2(`p:${p2.id}:sterne`, dez(p2.sterne, 1), "span")}</span></div>`;
             const ver = `${p2.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p2.veraenderung))} (${p2.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p2.veraenderungProzent))})`;
@@ -125608,10 +125965,10 @@
       const voll2 = k && k.belegt >= k.kapazitaet;
       h += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
       if (voll2 && !M2.hinweis) h += `<div class="olief warnung">Kapazit\xE4t in ${esc2(k.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
-      return { titel: "Produktentwicklung", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st.woche)}`, html: h };
+      return { titel: "Produktentwicklung", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st2.woche)}`, html: h };
     }
     function neu(P2) {
-      const st = s2(), K3 = E.produktKatalog(st), L2 = E.produkte(st), M2 = aktuelleMarke(L2), e = ui.neu;
+      const st2 = s2(), K3 = E.produktKatalog(st2), L2 = E.produkte(st2), M2 = aktuelleMarke(L2), e = ui.neu;
       const markeKats = new Set(M2.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
       const voll2 = new Set(M2.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
       const typen = K3.typen.filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M2.trendGruppe] ?? 0) > 0.15).sort((a, b2) => voll2.has(a.kategorie) - voll2.has(b2.kategorie));
@@ -125622,7 +125979,7 @@
       if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
       let h = `<button class="zurueck" data-a="liste">\u2039 ${esc2(M2.name)}</button>`;
       h += markenwahl(L2);
-      const v = E.produktVorschau(st, { marke: M2.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
+      const v = E.produktVorschau(st2, { marke: M2.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
       if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc2(M2.name)} kein Platz mehr. F\xFCr Neues bitte erst ein Produkt auslisten.</div>`;
       h += '<div class="vtitel">Artikeltyp</div><div class="typkacheln">';
       for (const t of typen) h += `<button class="${t.typ === e.typ ? "an" : ""} ${voll2.has(t.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc2(t.typ)}">${kachel(t.typ, 64)}<span>${esc2(t.typ)}</span>${voll2.has(t.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
@@ -125636,7 +125993,7 @@
       h += "</div>";
       h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}</div><div class="pname">${P2("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc2(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc2(v.saisonEinfuehrung)}</small></div>`;
       h += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P2("n:sterne", `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, "span")}</span></div>`;
-      h += `<div class="owerte"><div><span>Normpreis</span>${P2("n:preis", euro(v.normpreis))}</div><div><span>EK je St\xFCck</span>${P2("n:ek", euro(v.ekStueck))}</div><div><span>Marge</span>${P2("n:marge", pz3(v.marge))}</div><div><span>Entwicklung</span>${P2("n:kosten", geld(v.kosten))}</div><div><span>Fertig</span>${P2("n:fertig", wocheText(st, v.fertigWoche))}</div><div><span>Platz frei</span>${P2("n:frei", String(v.kapazitaetFrei))}</div></div>`;
+      h += `<div class="owerte"><div><span>Normpreis</span>${P2("n:preis", euro(v.normpreis))}</div><div><span>EK je St\xFCck</span>${P2("n:ek", euro(v.ekStueck))}</div><div><span>Marge</span>${P2("n:marge", pz3(v.marge))}</div><div><span>Entwicklung</span>${P2("n:kosten", geld(v.kosten))}</div><div><span>Fertig</span>${P2("n:fertig", wocheText(st2, v.fertigWoche))}</div><div><span>Platz frei</span>${P2("n:frei", String(v.kapazitaetFrei))}</div></div>`;
       if (v.teile) h += `<div class="passung">${[["zielgruppe", "Zielgruppe"], ["trend", "Trend"], ["preisQualitaet", "Preis"], ["entwicklung", "Aufwand"], ["team", "Team"]].map(([k, t]) => `<div><span class="psaeule"><span style="height:${(v.teile[k] * 100).toFixed(0)}%"></span></span><b>${Math.round(v.teile[k] * 100)}</b><i>${t}</i></div>`).join("")}</div>`;
       for (const x of v.hinweise) h += `<div class="olief">${esc2(x)}</div>`;
       if (v.fehler) h += `<div class="olief warnung">${esc2(v.fehler)}</div>`;
@@ -125644,7 +126001,7 @@
       return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)}`, html: h };
     }
     function trend(P2) {
-      const st = s2(), T = E.trendbericht(st), K3 = E.produktKatalog(st), hex3 = new Map(K3.farben.map((f) => [f.name, f.hex]));
+      const st2 = s2(), T = E.trendbericht(st2), K3 = E.produktKatalog(st2), hex3 = new Map(K3.farben.map((f) => [f.name, f.hex]));
       let h = '<button class="zurueck" data-a="liste">\u2039 Produkte</button>';
       h += `<div class="olief">${esc2(T.hinweis)}</div>`;
       for (const [titel, S, pre] of [["Laufende Saison", T.aktuell, "a"], ["N\xE4chste Saison", T.naechste, "n"]]) {
@@ -125685,9 +126042,9 @@
       return r;
     }
     const neuerEntwurf3 = () => {
-      const st = s2(), T = E.trendbericht(st), L2 = E.produkte(st), M2 = aktuelleMarke(L2);
+      const st2 = s2(), T = E.trendbericht(st2), L2 = E.produkte(st2), M2 = aktuelleMarke(L2);
       const g = T.naechste.gruppen[M2?.trendGruppe] ?? T.aktuell.gruppen[M2?.trendGruppe];
-      const K3 = E.produktKatalog(st), voll2 = new Set((M2?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+      const K3 = E.produktKatalog(st2), voll2 = new Set((M2?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
       const frei6 = (typ) => {
         const t = K3.typen.find((x) => x.typ === typ);
         return t && !voll2.has(t.kategorie) && M2.kategorien.some((k) => k.id === t.kategorie && k.kapazitaet > 0);
@@ -125695,8 +126052,8 @@
       return { typ: g?.artikel?.find(frei6) ?? g?.artikel?.[0], farbe: g?.farben?.[0] ?? "marine", material: g?.materialien?.[0] ?? "Baumwolle", preislage: "mitte", qualitaet: 3, dauer: 12, budgetWoche: 2e4 };
     };
     function klick(el) {
-      const a = el.dataset.a, v = el.dataset.v, st = s2();
-      const karte = (id) => E.produkte(st).marken.flatMap((m) => m.produkte).find((p2) => p2.id === id);
+      const a = el.dataset.a, v = el.dataset.v, st2 = s2();
+      const karte = (id) => E.produkte(st2).marken.flatMap((m) => m.produkte).find((p2) => p2.id === id);
       switch (a) {
         case "marke":
           ui.marke = v;
@@ -125762,7 +126119,7 @@
           ui.neu.dauer = Number(v);
           return zeigen(true);
         case "budget": {
-          const K3 = E.produktKatalog(st);
+          const K3 = E.produktKatalog(st2);
           ui.neu.budgetWoche = Math.max(K3.budgetSchritt, ui.neu.budgetWoche + Number(v) * K3.budgetSchritt);
           return zeigen(true);
         }
@@ -126968,7 +127325,7 @@
       const h = ctx.s().haeuser.find((x) => x.id === id);
       const p2 = E.personalHaus(ctx.s(), id);
       if (!h || !p2) return '<div class="karte">Kein Personaleinsatzplan vorhanden.</div>';
-      const st = h.personaleinsatz;
+      const st2 = h.personaleinsatz;
       const slider = (name2, art, g, min, max, val, hint) => '<div class="pe-slider"><label><b>' + esc2(name2) + "</b><span>" + pct2(val) + '</span></label><input type="range" min="' + min + '" max="' + max + '" step="5" value="' + Math.round(val * 100) + '"' + steuer(art, { "data-haus": id, "data-gruppe": g || "" }) + ' aria-label="' + esc2(name2) + '"><small>' + esc2(hint) + "</small></div>";
       let out = '<div class="karte"><div class="khead">Woche ' + (p2.woche % 52 + 1) + ' \xB7 Personaleinsatz</div><div class="raster"><div class="kz"><span>Krankenstand</span><b>' + pct2(p2.krank) + '</b></div><div class="kz"><span>Urlaub</span><b>' + pct2(p2.urlaub) + '</b></div><div class="kz"><span>Aushilfen</span><b>' + fmt.format(p2.aushilfenStunden) + ' Std.</b></div><div class="kz"><span>Zusatzkosten</span><b>' + geld(p2.zusatzkosten) + '</b></div></div><div class="zeile"><span>Warenverf\xFCgbarkeit (Personalfaktor)</span><b>' + pct2(p2.verfuegbarkeit) + '</b></div><div class="zeile"><span>Kaufquotenfaktor</span><b>' + pct2(p2.kaufquote) + '</b></div><div class="zeile"><span>Springerbewegungen</span><b>' + fmt.format(p2.springerSaldo) + " Std.</b></div></div>";
       out += '<div class="karte"><div class="khead">Bedarf und Plan \xB7 Montag bis Samstag</div>' + titelGruppen(p2) + "</div>";
@@ -126978,7 +127335,7 @@
         g,
         40,
         160,
-        st.faktor[g],
+        st2.faktor[g],
         "100 % = Vorschlag der Personaleinsatzplanung"
       )).join("") + slider(
         "Kasse Samstag",
@@ -126986,7 +127343,7 @@
         "",
         40,
         160,
-        st.samstagKasse,
+        st2.samstagKasse,
         "Reduzierung f\xFChrt zu Wartezeiten und Kaufabbr\xFCchen"
       ) + slider(
         "Zus\xE4tzliche Aushilfen",
@@ -126994,7 +127351,7 @@
         "",
         0,
         30,
-        st.aushilfenQuote,
+        st2.aushilfenQuote,
         "Zus\xE4tzliche Stunden f\xFCr Freitag und Samstag, kostenpflichtig"
       ) + "</div>";
       return out;
@@ -127947,12 +128304,12 @@
   }
   function naechsteKachel() {
     if (K2.halb > VOLL_MAX_ZOOM) return null;
-    const st = teileStand();
+    const st2 = teileStand();
     const kand = KA.liste.filter((k) => k.stufe !== "voll").map((k) => ({ k, s: sichtbar3(k), d: abstand(k) })).sort((a, b2) => b2.s - a.s || a.d - b2.d);
     const n = kand[0];
     if (!n) return null;
     const schaetzung = n.k.parz.length * 380;
-    if (st.teile + schaetzung <= BUDGET) return n.k;
+    if (st2.teile + schaetzung <= BUDGET) return n.k;
     if (!n.s) return null;
     const weg = KA.liste.filter((k) => k.stufe === "voll" && !sichtbar3(k, 1.4)).sort((a, b2) => abstand(b2) - abstand(a))[0];
     if (!weg) return null;
@@ -128068,14 +128425,15 @@
     automatischSpeichern();
     return m;
   }
-  function botSchritt(st) {
-    botTief(st);
-    if (st.woche === 24) fuehreAus(st, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
-    if (st.woche === 50) fuehreAus(st, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
+  function botSchritt(st2) {
+    botTief(st2);
+    if (st2.woche === 24) fuehreAus(st2, { typ: "aktion", name: "Sommer-Sale", rabatt: 0.2, wochen: 3, scope: { typ: "alle" } });
+    if (st2.woche === 50) fuehreAus(st2, { typ: "aktion", name: "Winterschlussverkauf", rabatt: 0.3, wochen: 3, scope: { typ: "alle" } });
   }
+  var st = null;
   var wk = null;
   var vorherigerFokus = null;
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -128170,6 +128528,7 @@
     html += `<div class="raster">${zahl3("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl3("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl3("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl3("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
     html += hausTreiberZeile(src_exports, s, id);
     html += um?.hausKarte(id) ?? "";
+    html += st?.hausGrafik(id) ?? "";
     if (h.klasse === "premium") {
       const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
       html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl3("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl3("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl3("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl3("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
@@ -128506,6 +128865,7 @@
     oeffneHaus(id);
   } });
   $("reporting").addEventListener("click", () => oeffneModul(rg));
+  st = statistikModul({ E: src_exports, s: () => s, panel, oeffneHaus });
   reise = reiseModul({
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
@@ -128640,6 +129000,7 @@
   $("produkte").addEventListener("click", () => oeffneModul(pr));
   $("planung").addEventListener("click", () => oeffneModul(pl));
   $("personaleinsatz").addEventListener("click", () => oeffneModul(pe));
+  $("statistik").addEventListener("click", () => oeffneModul(st));
   $("posteingang").addEventListener("click", () => oeffneModul(po));
   $("beobachtung").addEventListener("click", oeffneBeobachtung);
   $("haus-reporting").addEventListener("click", oeffneHausReporting);
@@ -128761,6 +129122,8 @@
   if (typeof hqUebersicht === "function") $("hq").addEventListener("click", () => oeffneHq());
   else $("hq").style.display = "none";
   window.spiel = {
+    statistik: st,
+    oeffneStatistik: (...a) => oeffneModul(st, ...a),
     werkzeuge: wk,
     oeffneWerkzeuge: () => wk.oeffne(),
     einstellungen: es,
