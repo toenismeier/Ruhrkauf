@@ -119,6 +119,9 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
     if(!R.winkel.includes(m.winkel))add('Drehung',m.id+' '+m.winkel);
     if(m.x<-EPS||m.z<-EPS||m.x+m.w>plan.breite+EPS||m.z+m.d>plan.tiefe+EPS)add('Geometrie',m.id+' außerhalb Fläche');
     if(plan.hindernisse.some(h=>schneidet(h,m)))add('Geometrie',m.id+' kollidiert mit Hindernis');
+    // Möbel in Gangrechtecken entwerten die nominelle Mindestbreite.
+    // Das muss zusätzlich zur punktweisen 0,625-m-Erreichbarkeit geprüft werden.
+    if(plan.gaenge.some(gang=>schneidet(gang,m)))add('Wege',m.id+' blockiert einen Gang');
   }
   for(let i=0;i<plan.abteilungen.length;i++)for(let j=i+1;j<plan.abteilungen.length;j++)
     if(schneidet(plan.abteilungen[i],plan.abteilungen[j]))add('Fläche','Abteilungen überlappen');
