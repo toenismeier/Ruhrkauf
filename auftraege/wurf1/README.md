@@ -10,6 +10,7 @@ Grundlage: Ummos Test auf dem iPhone und die Screenshots in `testflight/wurf-1/`
 | `q04-spiel-befunde.md` | `feat/q04-spiel-befunde` | nichts | allem |
 | `q05-eigenmarken-delegation.md` | `feat/q05-eigenmarken-delegation` | nichts | allem |
 | `q06-marktbeobachtung.md` | `feat/q06-marktbeobachtung` | Merge N08 Zeitung | allem außer N08 |
+| `q07-vertriebssteuerung.md` | `feat/q07-vertrieb` | Merge `feat/massstab-oberflaeche` | allem außer Oberfläche |
 
 Reihenfolge der Merges: Q03 zuerst (danach prüft das Merge-Gate jede Stadt), dann Q04 und Q05, dann Q02, dann Q01 Stadt für Stadt.
 
