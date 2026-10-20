@@ -1,4 +1,5 @@
 import { neuesSpiel, SCHWIERIGKEIT, SCHWIERIGKEITEN, wocheAbspielen } from '../src';
+import { STANDARD_SZENARIO } from '../src/welt';
 import type { SchwierigkeitId } from '../src';
 import { schliesseEndgueltig } from '../src/prozesse';
 
@@ -8,8 +9,9 @@ describe('Schwierigkeit', () => {
     for (const x of SCHWIERIGKEITEN) { expect(x.name.length).toBeGreaterThan(2); expect(x.beschreibung.length).toBeGreaterThan(20); }
     const s = neuesSpiel(1);
     expect(s.schwierigkeit).toBe('mittel');
-    expect(s.cash).toBe(120_000_000);
-    expect(s.kreditlinie).toBe(90_000_000);
+    // Maßstab Phase 2: 400/300 Mio. € sind die neuen Konzern-Startwerte.
+    expect(s.cash).toBe(STANDARD_SZENARIO.startCash);
+    expect(s.kreditlinie).toBe(STANDARD_SZENARIO.kreditlinie);
   });
 
   test('Startbedingungen: leicht mehr Kasse und geduldigere Lieferanten, schwer weniger', () => {
