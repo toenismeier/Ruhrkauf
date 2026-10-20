@@ -46,12 +46,14 @@ export function statistikModul(ctx) {
     }
     const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = 42, r = 10, t = 10, u = opt.klein ? 14 : 29;
     const alle = listen.flatMap(x => x.punkte), xs = alle.map(p => p.woche), ys = alle.map(p => p.wert);
+    if (Number.isFinite(opt.grenze)) ys.push(opt.grenze);
     const minW = Math.min(...xs), maxW = Math.max(...xs), breite = Math.max(1,maxW-minW);
     let minY = Math.min(...ys), maxY = Math.max(...ys);
     if (ui.typ !== 'linie' && !opt.klein) { minY = Math.min(minY,0); maxY = Math.max(maxY,0); }
     if (minY === maxY) { minY -= Math.max(1,Math.abs(minY)*.1); maxY += Math.max(1,Math.abs(maxY)*.1); }
     const px = (woche) => l + (woche-minW)/breite*(w-r-l);
     const py = (v) => t+(maxY-v)/(maxY-minY)*(h-u-t);
+    const grenzlinie = Number.isFinite(opt.grenze) ? '<line x1="' + l + '" x2="' + (w-r) + '" y1="' + py(opt.grenze).toFixed(2) + '" y2="' + py(opt.grenze).toFixed(2) + '" stroke="#d23c32" stroke-width="1.5" stroke-dasharray="4 4"/><title>Insolvenzgrenze: ' + esc(geld(opt.grenze)) + '</title>' : '';
     const kurven = listen.map((r,ri) => {
       if (ui.typ === 'linie' || opt.klein) {
         const punkte = r.punkte.map((p,i)=>(i?'L':'M') + px(p.woche).toFixed(2) + ',' + py(p.wert).toFixed(2)).join(' ');
@@ -69,7 +71,7 @@ export function statistikModul(ctx) {
     const legende = listen.length > 1 ? '<div class="stat-legende">' + listen.map(x => '<span><i style="background:' + x.farbe + '"></i>' + esc(x.name) + '</span>').join('') + '</div>' : '';
     return '<article class="karte stat-karte"><div class="stat-titel">' + esc(titel) + '</div>' + legende +
       '<svg role="img" aria-label="' + esc(titel) + ': Werte durch Antippen oder Ziehen anzeigen" class="stat-diagramm" data-st-chart="' + id + '" data-st-ende="' + esc(String(reihen[0]?.punkte?.at(-1)?.wert ?? 0)) +
-      '" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' + achsen + kurven +
+      '" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' + achsen + grenzlinie + kurven +
       '<line class="stat-cross" x1="' + l + '" x2="' + l + '" y1="' + t + '" y2="' + (h-u) + '" stroke="#1f2a33" stroke-dasharray="3 3" visibility="hidden"/></svg>' +
       (opt.klein ? '' : '<div class="stat-wert" aria-live="polite">Punkt antippen oder über den Verlauf ziehen</div>') +
       '</article>';
@@ -79,7 +81,7 @@ export function statistikModul(ctx) {
     let html = '<div class="stat-raster">' + kennzahlen.slice(0,3).map(([k,t]) => zahl(t, daten('konzern',undefined,k).punkte.at(-1)?.wert ?? 0,k)).join('') + '</div>';
     for (const [k,t] of kennzahlen) {
       const d = daten('konzern',undefined,k);
-      html += diagramm(t, [{ name:'Ist', punkte:d.punkte }], k, { vorjahr:true });
+      html += diagramm(t, [{ name:'Ist', punkte:d.punkte }], k, { vorjahr:true, grenze:k==='cash' ? -s().kreditlinie : undefined });
       if (k === 'cash') html += '<p class="stat-hinweis">Aktuelle Insolvenzgrenze: ' + esc(geld(-s().kreditlinie)) + ' (verfügbarer Kreditrahmen). Änderungen der Kreditlinie sind historisch nicht rekonstruierbar.</p>';
     }
     html += wasserfall();
@@ -96,11 +98,13 @@ export function statistikModul(ctx) {
   }
   function rangliste() {
     const hauser=s().haeuser.filter(h=>h.verlauf?.length).map(h=>{
-      const p=h.verlauf.at(-1), marge=p.umsatz > 0 ? p.db/p.umsatz : -Infinity;
+      const p=h.verlauf.at(-1), wk=s().historie.at(-1);
+      const zentral=wk ? wk.wkz-wk.abschriften-wk.zentrale-wk.marketing-wk.beratung : 0;
+      const marge=p.umsatz > 0 ? (p.db + zentral*p.umsatz/Math.max(1,wk?.umsatz??1))/p.umsatz : -Infinity;
       return {h,p,marge};
     }).sort((a,b)=>b.marge-a.marge || a.h.name.localeCompare(b.h.name));
     if (!hauser.length) return '<div class="karte stat-leer">Nach der ersten Woche erscheinen die Ranglisten.</div>';
-    let html='<p class="stat-hinweis">Deckungsbeitragsmarge als Haus-Näherung für EBITDA-Marge (ohne Zentralkosten). Geschlossene Häuser ohne Umsatz am Ende.</p>';
+    let html='<p class="stat-hinweis">EBITDA-Marge je Haus: Deckungsbeitrag mit proportional zum Umsatz verteilten Zuschüssen, Abschriften und Zentralkosten. Unternehmensweit identische Verteilungsschlüssel, geschätzte Hauszuordnung. Häuser ohne Umsatz am Ende.</p>';
     for (const [i,x] of hauser.slice(0,ui.zeilen).entries()) {
       const d=daten('haus',x.h.id,'db',52);
       html += '<div class="karte stat-haus"><button data-st-a="haus" data-v="' + esc(x.h.id) + '" class="stat-hauskopf"><b>' + (i+1) + '. ' + esc(x.h.name) + '</b><span>' + (Number.isFinite(x.marge) ? (x.marge*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %' : 'ohne Umsatz') + '</span></button><small>' + esc(x.h.stadt + ' · ' + x.h.region) + '</small>' +
@@ -112,18 +116,27 @@ export function statistikModul(ctx) {
   function wasserfall() {
     const k=s().historie.at(-1);
     if (!k) return '';
-    const daten = [['Rohertrag',k.rohertrag],['Konzession + Mieten + WKZ',k.konzession+k.untermiete+k.wkz],
+    const daten = [['Rohertrag',k.rohertrag],['Konzession, Mieten, WKZ',k.konzession+k.untermiete+k.wkz],
       ['Personal',-k.personal],['Miete',-k.miete],['Nebenkosten',-k.nebenkosten],['Sonstiges + Logistik',-k.sonstige-k.logistik],
       ['Zentrale',-k.zentrale],['Marketing',-k.marketing],['Beratung',-k.beratung]];
-    const max=Math.max(1,...daten.map(x=>Math.abs(x[1])),Math.abs(k.ebitda));
-    let basis=0;
+    const positionen=[0];let summe=0;
+    for(const [,v] of daten){summe+=v;positionen.push(summe);}
+    positionen.push(k.ebitda);
+    const minimum=Math.min(0,...positionen), maximum=Math.max(1,...positionen), spanne=Math.max(1,maximum-minimum);
+    const y=v=>124-(v-minimum)/spanne*106;
     const bars=daten.map(([name,v],i)=>{
-      const vor=basis;basis+=v;
-      const ab=120-105*Math.max(vor,basis)/max, hoehe=Math.max(1,Math.abs(v)*105/max);
-      return '<rect x="' + (12+i*33) + '" y="' + Math.min(120,ab) + '" width="24" height="' + hoehe + '" fill="' + (v<0?'#d23c32':'#2f8f5b') + '"><title>' + esc(name+': '+geld(v)) + '</title></rect>';
+      const oben=Math.min(y(positionen[i]),y(positionen[i+1])), hoehe=Math.max(1,Math.abs(y(positionen[i])-y(positionen[i+1])));
+      return '<rect data-st-wf="' + i + '" x="' + (10+i*33) + '" y="' + oben.toFixed(1) +
+        '" width="23" height="' + hoehe.toFixed(1) + '" fill="' + (v<0?'#d23c32':'#2f8f5b') + '"><title>' +
+        esc(name+': '+geld(v)) + '</title></rect>';
     }).join('');
-    bars+='<rect x="309" y="' + (120-105*Math.max(0,k.ebitda)/max) + '" width="24" height="' + Math.max(1,Math.abs(k.ebitda)*105/max) + '" fill="#1f2a33"><title>EBITDA '+esc(geld(k.ebitda))+'</title></rect>';
-    return '<article class="karte stat-karte"><div class="stat-titel">EBITDA-Brücke · letzte Woche</div><div class="stat-hinweis">Rohertrag → Zuschüsse → Kosten → EBITDA (je Balken Details antippen)</div><svg role="img" aria-label="EBITDA-Wasserfall" viewBox="0 0 342 140">' + bars + '<line x1="6" y1="120" x2="338" y2="120" stroke="#8296a3"/></svg><small>EBITDA: ' + esc(geld(k.ebitda)) + '</small></article>';
+    const endOben=Math.min(y(k.ebitda),y(0)), endHoehe=Math.max(1,Math.abs(y(k.ebitda)-y(0)));
+    const ende='<rect data-st-wf="9" x="307" y="' + endOben.toFixed(1) + '" width="25" height="' + endHoehe.toFixed(1) +
+      '" fill="#1f2a33"><title>EBITDA: ' + esc(geld(k.ebitda)) + '</title></rect>';
+    return '<article class="karte stat-karte"><div class="stat-titel">EBITDA-Brücke · letzte Woche</div>' +
+      '<svg role="img" aria-label="EBITDA-Wasserfall" viewBox="0 0 342 140">' + bars + ende +
+      '<line x1="6" y1="' + y(0).toFixed(1) + '" x2="338" y2="' + y(0).toFixed(1) + '" stroke="#8296a3"/></svg>' +
+      '<div class="stat-wert">Rohertrag bis EBITDA: Balken antippen · ' + esc(geld(k.ebitda)) + '</div></article>';
   }
   function zeigen(halten=false) {
     const vorher=document.getElementById('pinhalt').scrollTop;
@@ -141,6 +154,13 @@ export function statistikModul(ctx) {
   }
   const inhalt=document.getElementById('pinhalt');
   inhalt.addEventListener('click',e=>{
+    const wf=e.target.closest?.('[data-st-wf]');
+    if(wf && ui.aktiv){
+      const t=wf.querySelector('title')?.textContent;
+      const info=wf.closest('.stat-karte')?.querySelector('.stat-wert');
+      if(t && info)info.textContent=t;
+      return;
+    }
     const b=e.target.closest('[data-st-a]');if(!b || !ui.aktiv)return;
     const a=b.dataset.stA,v=b.dataset.v;
     if(a==='seite'){ui.seite=v;ui.zeilen=25;}
