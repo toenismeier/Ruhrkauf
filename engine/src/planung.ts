@@ -472,6 +472,14 @@ export function planungBericht(s: GameState) {
   const ist = sum(s.historie.filter((k) => jahr(s, k.woche) === p.jahr).map((k) => k.umsatz));
   const soll = sum(Object.values(p.phasing).flatMap((xs) => xs.slice(0, abgelaufene)));
   const f = vor?.ziele.umsatz;
+  const historie = s.historie.filter((k) => jahr(s, k.woche) === p.jahr);
+  const wochen = historie.slice(-26).map((k) => {
+    const i = k.woche % 52;
+    const plan = sum(Object.values(p.phasing).map((xs) => xs[i] ?? 0));
+    const forecast = vor?.wochenUmsatz[i] ?? null;
+    return { woche: k.woche, ist: k.umsatz, plan, forecast, abweichung: k.umsatz - plan,
+      abweichungQuote: plan > 0 ? k.umsatz / plan - 1 : 0 };
+  });
   // Kumuliertes Ist der Häuser auch auf Formate, Regionen und Hauscluster hochrollen.
   const istJeEbene: Record<string, number> = {};
   for (const h of s.haeuser) for (const key of keys(h)) istJeEbene[key] = (istJeEbene[key] ?? 0) + (p.istHaus[h.id]?.umsatz ?? 0);
@@ -481,7 +489,8 @@ export function planungBericht(s: GameState) {
   return { jahr: p.jahr, ziele: p.ziele, entwurf: s.planung?.entwurf,
     knoten: Object.values(p.knoten).map((n) => ({ ...n, ist: istJeEbene[n.id] ?? 0,
       abweichung: bisHeute[n.id] ? ((istJeEbene[n.id] ?? 0) - bisHeute[n.id]) / bisHeute[n.id] : 0 })),
-    ist, planBisHeute: soll, abweichung: ist - soll, forecasting: f ?? null, forecasts: s.planung?.forecasts.filter((x) => x.jahr === p.jahr) ?? [],
+    ist, planBisHeute: soll, abweichung: ist - soll, wochen, warengruppen: p.warengruppen,
+    forecasting: f ?? null, forecasts: s.planung?.forecasts.filter((x) => x.jahr === p.jahr) ?? [],
     quoten: s.planung?.bonusAnteil, boni: s.planung?.boni ?? [], vertrauen: s.planung?.vertrauenVerlauf ?? [] };
 }
 
