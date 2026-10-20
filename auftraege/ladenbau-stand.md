@@ -120,3 +120,78 @@ Letzte geprüfte Katalogfassung: GitHub Actions Run [39233091971](https://github
 - Letzte Codekorrekturen: `render/src/kit/ladenplan.js`, `render/src/kit/ladenbau-pruefung.js`, `render/tests/ladenbau-smoke.cjs` auf Branch `feat/ladenbau-p3`.
 - Die älteren Zeilen im Abschnitt „Fortsetzung ... Phasen 2 und 3 vorgezogen“ beschreiben den **damaligen Zwischenstand**; die Werte „rot“ werden durch die obigen 101/101-Prüfwerte ersetzt.
 - **Priorität:** Phase 1 auf aktuellen `main` bringen und lokal abnehmen, Bilddateien versionieren, PR #6 mergen; danach Phase 2 und Phase 3 mit echtem Node/Three.js/Browsertest abnehmen und mergen. `main` bis dahin unverändert lassen.
+
+
+## Fortsetzung 20.10.2026: Gangüberlappungen beseitigt (Branch `feat/ladenbau-p3`)
+
+### Befund und Codeänderung
+- Zusätzliche Überlappungsanalyse auf den echten 101 Sport-Verkaufsetagen fand **131 durch die bisherige Prüfung übersehene Möbel/Gang-Kollisionen**: 121 Wandmodule und zehn Kassentresen. Die Aussage „0 Gangverstöße“ im isolierten Prüflauf vom 19.10. bezog sich nur auf die damaligen Prüffunktionen und war insoweit unvollständig.
+- `ladenplan.js`: hinter der Rückwand 2,5 m Tiefe bis zum Beginn des Hauptgangs reservieren; die vollständigen Quergänge **vor** den Kassen und Wandbändern generieren; Wandbänder gegen Hindernisse, sämtliche Gänge, Kassen und Kassenvorfelder prüfen.
+- `ladenbau-pruefung.js`: jede Möbelüberschneidung mit einem Gang als **harten Wege-Verstoß** werten.
+- `tests/ladenbau-smoke.cjs`: positive Gangfreiheit plus absichtlich in den Gang versetztes Möbel (Negativfall) prüfen.
+
+### Isolierte Code-/Datenprüfung, keine Node-/Build-Abnahme
+- **50/50 Sporthäuser**, **101/101 Verkaufsetagen** aus dem tatsächlichen `render/haeuser.json`.
+- **0 Prüffehler**, **0 Möbel-Gang-Kollisionen**, künstlich erzeugte Gangblockade wird erkannt.
+- **14.972** platzierte Möbel; Dichte **35,12–46,03 %**; größte freie quadratische Prüffläche **5,625 m** (zulässig ≤ 6,0 m).
+- Erzeugt durch Ausführung der unveränderten Plan- und Prüffunktionen mit den echten Eingabedaten, Sport-Rasterfunktionen und allen 147 tatsächlichen Möbelmetadaten in einer isolierten JS-Laufzeit. **Es wurden keine Node-Imports, esbuild-, Three.js-/Sammler-, Chromium- oder npm-Prüfungen ausgeführt.**
+
+### Übersicht je Sporthaus (isolierte Plan-/Prüflogik)
+| Haus | Etagen | Möbel gesamt | Dichte min–max | Größte Leere | Verstöße |
+|---|---:|---:|---:|---:|---:|
+| S001 | 2 | 451 | 40.4–42.6 % | 5.625 m | 0 |
+| S002 | 1 | 215 | 43.1–43.1 % | 5.625 m | 0 |
+| S003 | 3 | 132 | 36.1–36.9 % | 5.625 m | 0 |
+| S004 | 1 | 138 | 38.1–38.1 % | 5.625 m | 0 |
+| S005 | 1 | 261 | 44.1–44.1 % | 5.000 m | 0 |
+| S006 | 2 | 479 | 43.0–43.6 % | 5.625 m | 0 |
+| S007 | 3 | 131 | 35.2–36.4 % | 5.625 m | 0 |
+| S008 | 3 | 374 | 40.1–41.0 % | 5.625 m | 0 |
+| S009 | 3 | 187 | 35.1–36.6 % | 5.625 m | 0 |
+| S010 | 3 | 108 | 35.4–35.4 % | 5.000 m | 0 |
+| S011 | 2 | 344 | 40.8–41.4 % | 5.625 m | 0 |
+| S012 | 1 | 338 | 45.0–45.0 % | 5.000 m | 0 |
+| S013 | 2 | 335 | 39.6–42.4 % | 5.625 m | 0 |
+| S014 | 1 | 202 | 42.5–42.5 % | 5.625 m | 0 |
+| S015 | 1 | 239 | 40.0–40.0 % | 5.625 m | 0 |
+| S016 | 3 | 328 | 39.8–40.1 % | 5.625 m | 0 |
+| S017 | 1 | 488 | 46.0–46.0 % | 5.625 m | 0 |
+| S018 | 2 | 238 | 35.4–41.0 % | 5.625 m | 0 |
+| S019 | 2 | 266 | 39.9–40.1 % | 5.625 m | 0 |
+| S020 | 1 | 295 | 43.4–43.4 % | 5.625 m | 0 |
+| S021 | 2 | 463 | 41.8–42.2 % | 5.625 m | 0 |
+| S022 | 2 | 347 | 41.4–42.4 % | 5.625 m | 0 |
+| S023 | 2 | 222 | 38.7–40.1 % | 5.625 m | 0 |
+| S024 | 1 | 457 | 43.8–43.8 % | 5.625 m | 0 |
+| S025 | 2 | 404 | 40.6–43.8 % | 5.625 m | 0 |
+| S026 | 1 | 182 | 40.5–40.5 % | 5.625 m | 0 |
+| S027 | 3 | 140 | 35.2–36.4 % | 5.625 m | 0 |
+| S028 | 2 | 349 | 38.7–42.7 % | 5.625 m | 0 |
+| S029 | 3 | 387 | 38.6–40.2 % | 5.625 m | 0 |
+| S030 | 1 | 460 | 44.2–44.2 % | 5.625 m | 0 |
+| S031 | 3 | 323 | 35.3–40.1 % | 5.625 m | 0 |
+| S032 | 2 | 239 | 35.4–41.5 % | 5.625 m | 0 |
+| S033 | 2 | 461 | 42.6–43.5 % | 5.625 m | 0 |
+| S034 | 1 | 271 | 42.4–42.4 % | 5.625 m | 0 |
+| S035 | 3 | 249 | 35.1–36.8 % | 5.625 m | 0 |
+| S036 | 3 | 247 | 36.8–36.8 % | 5.625 m | 0 |
+| S037 | 2 | 218 | 39.1–40.1 % | 5.625 m | 0 |
+| S038 | 2 | 102 | 35.4–35.9 % | 5.000 m | 0 |
+| S039 | 3 | 109 | 35.4–35.4 % | 5.000 m | 0 |
+| S040 | 3 | 258 | 35.1–39.0 % | 5.625 m | 0 |
+| S041 | 2 | 312 | 40.6–40.9 % | 5.625 m | 0 |
+| S042 | 3 | 377 | 38.5–40.2 % | 5.625 m | 0 |
+| S043 | 1 | 519 | 45.5–45.5 % | 5.625 m | 0 |
+| S044 | 2 | 486 | 42.7–43.2 % | 5.625 m | 0 |
+| S045 | 3 | 403 | 41.3–41.5 % | 5.625 m | 0 |
+| S046 | 2 | 241 | 35.5–41.0 % | 5.625 m | 0 |
+| S047 | 1 | 178 | 42.4–42.4 % | 5.625 m | 0 |
+| S048 | 2 | 471 | 43.8–44.5 % | 5.625 m | 0 |
+| S049 | 3 | 382 | 37.1–40.2 % | 5.625 m | 0 |
+| S050 | 1 | 166 | 41.0–41.0 % | 5.625 m | 0 |
+
+### Offene Freigabebedingungen
+1. In echtem Repository-Checkout ausführen: `cd engine && npm ci && npm run typecheck && npx jest`, `cd render && npm ci && npm run build && npm run ladenbau:smoke && npm run ladenbau:pruefen:teile && node spiel-render.js`.
+2. Diagnose-/Sport-Innenkatalog für mindestens sechs Häuser rendern und Vorher-/Nachher-Bilder in `bilder/` ablegen; PNGs ansehen. Das bisherige Diagnosekatalog-Modul enthält nur **fünf** Haus/Etagen-Paare und ist daher noch zu erweitern.
+3. PR #6, dann #8, dann #9 nach Rebase gegen den jeweils aktualisierten Hauptzweig und grüner lokaler Abnahme mergen. Keinen PR vorziehen.
+4. Ein vollständiger Checkout des privaten Repositories ist hier weiter blockiert (Netzwerkauflösung von `github.com` in der Shell); weder `npm ci` noch lokale Bilderzeugung war möglich. Der isolierte Test ist ein Teilnachweis, **keine Mergefreigabe**.
