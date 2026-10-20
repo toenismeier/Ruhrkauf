@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hartwig · Klangprobe N05</title>
+<style>
+  :root { color-scheme: light; font: 16px system-ui,-apple-system,sans-serif; background: #f5f1e9; color: #253543; }
+  body { margin: 0 auto; max-width: 800px; padding: 24px 16px 60px; }
+  h1 { font-size: 1.7rem; } h2 { font-size: 1.1rem; margin-top: 26px; }
+  p { line-height: 1.5; }
+  .tasten { display: grid; grid-template-columns: repeat(auto-fit,minmax(155px,1fr)); gap: 10px; }
+  button { font: inherit; cursor: pointer; background: white; border: 1px solid #b4bdc2; color: #253543;
+    border-radius: 12px; min-height: 50px; padding: 12px; text-align: left; }
+  button:focus-visible, input:focus-visible { outline: 3px solid #d23c32; outline-offset: 2px; }
+  button:active { background: #f6dbd8; } button strong { display: block; } button span { font-size: .8rem; color: #53646c; }
+  label { display: flex; gap: 15px; align-items: center; min-height: 48px; }
+  label span { flex: 1; } input[type=range] { width: 170px; } input[type=checkbox] { width: 24px; height: 24px; }
+  #status { display: block; font-size: .9rem; padding: 10px 0; min-height: 20px; }
+  .hinweis { background: #fff; border-left: 4px solid #d23c32; padding: 12px 16px; border-radius: 6px; }
+  #reise-overlay { min-height: 8px; }
+</style>
+</head>
+<body>
+<h1>Hartwig · Klangprobe</h1>
+<p>Alle Klänge entstehen mit Web Audio aus Oszillatoren, Rauschen und Hüllkurven. Zum ersten Abspielen eine Taste berühren.</p>
+<p class="hinweis">Die iPhone-Stummschaltereinstellung gilt nicht verlässlich für Web Audio.
+Schalten Sie Klänge, Stadtklang und Musik hier aus, wenn keine Wiedergabe gewünscht ist. Musik ist ab Werk aus.</p>
+<h2>Effekte</h2>
+<div class="tasten" id="proben">
+  <button data-klang="tippen"><strong>Tippen</strong><span>20 ms · Klick</span></button>
+  <button data-klang="panelAuf"><strong>Panel öffnen</strong><span>120 ms · Wischen</span></button>
+  <button data-klang="panelZu"><strong>Panel schließen</strong><span>120 ms · Tiefer Ausklang</span></button>
+  <button data-klang="erfolg"><strong>Erfolg</strong><span>300 ms · Aufsteigender Zweiklang</span></button>
+  <button data-klang="warnung"><strong>Warnung</strong><span>310 ms · Tiefer Doppelton</span></button>
+  <button data-klang="kasse"><strong>Kassenticken</strong><span>25 ms · Impuls</span></button>
+  <button data-klang="kassenklingeln"><strong>Kassenklingeln</strong><span>360 ms · Abschluss</span></button>
+  <button data-klang="reise"><strong>Zugfahrt</strong><span>4,4 s · Gefiltertes Rauschen</span></button>
+  <button data-klang="insolvenz"><strong>Insolvenz</strong><span>450 ms · Dumpfer Schlag</span></button>
+  <button data-klang="freigeschaltet"><strong>Erfolg freigeschaltet</strong><span>650 ms · Glöckchen</span></button>
+  <button data-klang="haptik"><strong>Haptik</strong><span>Falls vom Gerät unterstützt</span></button>
+</div>
+<h2>Lautstärken & Umgebung</h2>
+<div id="einstellungen"></div>
+<label><span>Zoom: Fußgängerzone ↔ Verkehr</span><input id="zoom" type="range" min="22" max="240" step="1" value="110"></label>
+<label><span>EBITDA 13 Wochen positiv (Dur)</span><input id="ebitda" type="checkbox" checked></label>
+<label><span>Insolvenz (Moll)</span><input id="insolvenz" type="checkbox"></label>
+<div id="status" role="status" aria-live="polite">Audiogerät noch nicht angesprochen.</div>
+<div id="reise-overlay"></div>
+<div id="pinhalt" hidden></div>
+<script type="module">
+  import { tonModul, TON_SCHALTER, tonEinstellung, setzeTonEinstellung } from './src/ui/ton.js';
+  let halb = 110;
+  const spiel = { phase: 'regulaer' };
+  const ton = tonModul({ zoom: () => halb, spiel: () => spiel,
+    ebitda13: () => document.getElementById('ebitda').checked ? 2000000 : -2000000 });
+  const status = document.getElementById('status');
+  document.getElementById('einstellungen').innerHTML = TON_SCHALTER.map((d) => {
+    const v = tonEinstellung(d.schluessel);
+    return '<label><span>' + d.titel + '</span><input data-einstellung="' + d.schluessel + '" aria-label="' + d.titel + '"'
+      + (d.art === 'schalter' ? ' type="checkbox" ' + (v ? 'checked' : '') + '>' :
+        ' type="range" min="0" max="100" step="5" value="' + v + '">');
+  }).join('');
+  // Der Klick liegt in der Benutzergeste; die Schnittstelle fängt fehlende Audio-Geräte ab.
+  document.getElementById('proben').addEventListener('click', async (e) => {
+    const knopf = e.target.closest('[data-klang]');
+    if (!knopf) return;
+    const art = knopf.dataset.klang;
+    if (art === 'haptik') { ton.haptik('erfolg'); status.textContent = 'Haptik angefordert (falls vorhanden).'; return; }
+    await ton.freischalten();
+    if (art === 'reise') {
+      const overlay = document.getElementById('reise-overlay');
+      overlay.innerHTML = '<div class="reise-flug bewegt" role="status">Zugfahrt läuft …</div>';
+      window.setTimeout(() => { overlay.innerHTML = ''; }, 4400);
+    }
+    const ok = ton.abspielen(art);
+    status.textContent = art + ': ' + (ok ? 'Klang ausgelöst' : 'stumm / Web Audio nicht verfügbar');
+  });
+  document.getElementById('einstellungen').addEventListener('input', (e) => {
+    if (!e.target.matches('[data-einstellung]')) return;
+    setzeTonEinstellung(e.target.dataset.einstellung, e.target.type === 'checkbox' ? e.target.checked : Number(e.target.value));
+    ton.aktualisieren();
+  });
+  document.getElementById('einstellungen').addEventListener('change', (e) => {
+    if (!e.target.matches('input[type=checkbox][data-einstellung]')) return;
+    setzeTonEinstellung(e.target.dataset.einstellung, e.target.checked);
+    ton.aktualisieren();
+  });
+  document.getElementById('zoom').addEventListener('input', (e) => { halb = Number(e.target.value); ton.aktualisieren(); });
+  document.getElementById('insolvenz').addEventListener('change', (e) => { spiel.phase = e.target.checked ? 'insolvenz' : 'regulaer'; ton.aktualisieren(); });
+</script>
+</body>
+</html>

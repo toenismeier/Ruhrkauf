@@ -47,6 +47,7 @@ import { personalModul } from './ui/personaleinsatz.js';
 import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
 import { werkzeugeModul } from './ui/werkzeuge.js';
 import { erfolgeModul } from './ui/erfolge.js';
+import { tonModul } from './ui/ton.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -626,7 +627,7 @@ function botSchritt(st) {
 let st = null;
 let wk = null;
 let vorherigerFokus = null;
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -1173,6 +1174,9 @@ async function diagnoseZeigen() {
   }
 }
 $('performance').addEventListener('click', diagnoseZeigen);
+
+const ton = tonModul({ panel, spiel: () => s, ebitda13: () => s ? E.cockpit(s).ebitda13 : 0, zoom: () => K.halb });
+$('ton').addEventListener('click', () => oeffneModul(ton));
 
 // ─────────────────────────────────────────── Start
 // Schwierigkeit: Engine-Konstante SCHWIERIGKEITEN, sonst Ersatz mit denselben Ids
