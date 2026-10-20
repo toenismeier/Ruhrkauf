@@ -309,11 +309,14 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     haeuser.push(bauHaus(h, ++si, stadt, region, cluster, kk, 'sport', sz, r.nr));
   }
   let ki = 0; let oi = 0;
+  // FUNDUS hat einen eigenen deterministischen RNG-Strom: Export und Standorte
+  // bleiben stabil, auch wenn sich Hartwig/Volkskauf-Bauparameter ändern.
+  const fundusRng: RngHalter = { rng: (seed ^ 0xf00d5eed) >>> 0 };
   for (const [stadt, region, cluster, kk, menge] of STAEDTE) {
     for (let i = 1; i <= menge.volkskauf && ki < (sz.schwesterhaeuser ?? 0); i++)
       haeuser.push(bauHaus(h, ++ki, stadt, region, cluster, kk, 'schwester', sz, i));
     for (let i = 1; i <= menge.fundus && oi < (sz.outlethaeuser ?? 0); i++)
-      haeuser.push(bauHaus(h, ++oi, stadt, region, cluster, kk, 'outlet', sz, i, { outletLage: oi <= 46 ? 'rand' : 'b' }));
+      haeuser.push(bauHaus(fundusRng, ++oi, stadt, region, cluster, kk, 'outlet', sz, i, { outletLage: oi <= 46 ? 'rand' : 'b' }));
   }
 
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
