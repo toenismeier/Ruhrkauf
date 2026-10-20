@@ -171,7 +171,8 @@ function warenReihen(plan,profil,raum) {
         const frei=modelle.map(m=>passeIn(m,raum)&&passe(m,plan,
           [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]));
         if(!frei[0]&&!frei[1])continue;
-        for(let j=0;j<2;j++)if(frei[j]){
+        for(let j=0;j<2;j++)if(frei[j] &&
+          !plan.moebel.some(q=>schneidet(q,modelle[j]))){
           plan.moebel.push(modelle[j]);
           if(profil.id==='sport')mixGebaut(plan,raum);
         }
