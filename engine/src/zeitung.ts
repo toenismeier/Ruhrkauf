@@ -1,6 +1,6 @@
 // Der Handelsbote: redaktioneller Zufallsstrom ohne Eingriff in die Simulation.
 // Nur Interviews verändern Stakeholder. Alte Spielstände benötigen keine Migration.
-import type { Entscheidung, GameState, Meldung } from './types';
+import type { Entscheidung, GameState } from './types';
 import { clamp, jahr, kw, waehle, type RngHalter } from './util';
 
 export type ZeitungReiter = 'Top' | 'Handel' | 'Konzern' | 'Markt' | 'Politik';
