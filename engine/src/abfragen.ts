@@ -206,12 +206,14 @@ export function portfolio(s: GameState): PortfolioZeile[] {
       const f = 1 + rausch * ((seed / 100) * 2 - 1);
       const umsatz = k?.umsatz ?? 0;
       const db = k ? k.db + Math.abs(umsatz) * (f - 1) * 0.5 : 0;
+      const formatKey: PortfolioZeile['formatKey'] = h.nurDaten ? (h.id.startsWith('O') ? 'fundus' : 'volkskauf') : h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'hartwig';
+      const klasse: PortfolioZeile['klasse'] = h.hausklasse ?? (h.klasse === 'premium' ? 'Premium' : null);
+      const ampel: PortfolioZeile['ampel'] = h.nurDaten || !h.kpi || h.status !== 'offen' ? 'ohne' : db < 0 ? 'rot' : (umsatz > 0 && db / umsatz < 0.04 ? 'gelb' : 'gruen');
       return {
         id: h.id, name: h.name, stadt: h.stadt, format: h.format,
-        formatKey: h.nurDaten ? (h.id.startsWith('O') ? 'fundus' : 'volkskauf') : h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'hartwig',
-        klasse: h.hausklasse ?? (h.klasse === 'premium' ? 'Premium' : null),
+        formatKey, klasse,
         steuerbar: !h.nurDaten && h.status === 'offen',
-        ampel: h.nurDaten || !h.kpi || h.status !== 'offen' ? 'ohne' : db < 0 ? 'rot' : (umsatz > 0 && db / umsatz < 0.04 ? 'gelb' : 'gruen'),
+        ampel,
         ebitda: eur(db), marge: umsatz > 0 ? db / umsatz : 0,
         substanz: h.substanz,
         restlaufzeitMiete: Math.max(0, h.miete.bisWoche - s.woche),
