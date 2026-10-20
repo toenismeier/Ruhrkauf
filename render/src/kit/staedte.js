@@ -96,7 +96,8 @@ function baueEintrag(name, liste) {
   const extra = { ...(bild?.[1] ?? {}), ...(ddr ? { ddr: true } : {}) };
   const standorte = liste.map((h) => {
     const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage,
+      hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Eine Schwesterfiliale pro ausgewaehlter Stadt. Hartwig behält die zentrale Einkaufslage.
   // Die Daten sind rein grafisch und gehoeren nicht zum Engine-Portfolio.
