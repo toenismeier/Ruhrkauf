@@ -4,7 +4,7 @@
 // (einkaufUebersicht, wgDetail, freigaben). Jeder angezeigte Wert trägt data-p; pruefe() rechnet ihn aus einer frischen
 // Abfrage nach (0 Abweichungen erwartet).
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
-import { eigenmarkenSeite, eigenmarkenAktion, eigenmarkenErwartet } from './eigenmarken.js';
+import { eigenmarkenSeite, eigenmarkenAktion, eigenmarkenErwartet, neuerEntwurf } from './eigenmarken.js';
 
 /** Kurze Spaltenköpfe; Name und Format der Spalten kommen aus EINKAUF_SPALTEN. */
 const KOPF = { umsatz: 'Umsatz 13 Wo.', rohertragsquote: 'Rohertrag', lagerumschlag: 'Umschlag', reichweite: 'Reichweite', abverkaufsquote: 'Abverkauf', altwarenanteil: 'Altware', nosVerfuegbarkeit: 'NOS', limitFrei: 'Limit frei', rohertrag: 'Rohertrag €', bestandEk: 'Bestand', abschriften: 'Abschriften', reduzierungsquote: 'Reduzierung', entgangenerUmsatz: 'Fehlmengen', offeneOrders: 'Orders', offeneFreigaben: 'Freigaben', eigenmarkenAnteil: 'Eigenmarke', eigenmarkenMarge: 'EM-Marge' };
@@ -39,7 +39,7 @@ export function einkaufModul(ctx) {
     const n = q.freigaben(s()).anzahl;
     const an = (id) => ui.seite === id || (id === 'uebersicht' && ui.seite === 'wg') || (id === 'eigenmarken' && ui.seite === 'gruenden');
     const t = (id, inhalt) => `<button class="tab ${an(id) ? 'an' : ''}" data-a="seite" data-v="${id}">${inhalt}</button>`;
-    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}</div>`;
+    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}</div><button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>`;
   }
 
   // ─────────────────────────── Übersicht
@@ -267,7 +267,7 @@ export function einkaufModul(ctx) {
   }
 
   return {
-    ui, oeffne: (seite = 'uebersicht', arg) => { ui.seite = seite; if (seite === 'wg') ui.wg = arg; ui.kuerzen = null; zeigen(); document.getElementById('pinhalt').scrollTop = 0; },
+    ui, oeffne: (seite = 'uebersicht', arg) => { ui.seite = seite; if (seite === 'gruenden') ui.em.assistent = { schritt: 0, daten: neuerEntwurf(s()) }; if (seite === 'wg') ui.wg = arg; ui.kuerzen = null; zeigen(); document.getElementById('pinhalt').scrollTop = 0; },
     neuZeichnen: () => zeigen(true), aktiv: () => ui.aktiv, zu: () => { ui.aktiv = false; }, badge, pruefe, tun,
   };
 }
