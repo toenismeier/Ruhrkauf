@@ -55,9 +55,9 @@ export { premiumUebersicht } from './abfragen';
 
 // O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
 export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
-  clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert,
+  clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert, istAufgabeDelegiert, delegationsAufgaben, delegationsGrenze, CLUSTER_AUFGABEN,
   neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor, organisationLeitungKostenWoche,
-  type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion,
+  type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion, type DelegationsAufgabe,
 } from './organisation';
 // O02 Umsatztreiber
 export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './abfragen';
