@@ -5,3 +5,4 @@ render/out/
 .DS_Store
 render/bilder/reise/
 render/bilder/wochenbericht/
+.osm-roh/
