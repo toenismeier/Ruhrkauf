@@ -141,7 +141,7 @@ export function erfasseTreiber(s: GameState): void {
   for (const h of s.haeuser) {
     const umsatz = h.kpi?.woche === s.woche ? h.kpi.umsatz : 0;
     const f = treiberFaktor(h);
-    const frequenz = umsatz > 0 ? Math.max(1, Math.round(frequenzBasis(s, h) * f.frequenz)) : 0;
+    const frequenz = h.status !== 'geschlossen' && h.status !== 'verkauft' ? Math.max(1, Math.round(frequenzBasis(s, h) * f.frequenz)) : 0;
     const q = umsatz > 0 ? clamp(kaufquoteBasis(h) * f.kaufquote, 0.01, 0.95) : 0;
     const kaeufe = frequenz * q;
     const artikel = artikelAusMix(h, umsatz);
@@ -202,13 +202,13 @@ export function hausTreiber(s: GameState, hausId: string, wochen = 1): TreiberVe
     vorjahrGeschaetzt: vorjahr.geschaetzt,
     abweichung: vorjahr.wert ? aktuell.wert.umsatz - vorjahr.wert.umsatz : undefined };
 }
-function auswahl(s: GameState, ebene: Ebene, id?: string): Haus[] {
-  return s.haeuser.filter((h) => h.status !== 'verkauft' &&
+function auswahl(s: GameState, ebene: Ebene, id?: string, format?: string): Haus[] {
+  return s.haeuser.filter((h) => h.status !== 'verkauft' && (!format || format === 'alle' || h.format === format) &&
     (ebene === 'konzern' || (ebene === 'haus' && h.id === id) ||
       (ebene === 'region' && h.region === id) ||
       (ebene === 'hauscluster' && hauscluster(h) === id)));
 }
-export function umsatzbruecke(s: GameState, o: { ebene: Ebene; id?: string; vergleich: 'vorjahr' | 'plan'; wochen: number }): Umsatzbruecke {
+export function umsatzbruecke(s: GameState, o: { ebene: Ebene; id?: string; vergleich: 'vorjahr' | 'plan'; wochen: number; format?: string }): Umsatzbruecke {
   const fehlend = (status: Umsatzbruecke['status']): Umsatzbruecke => ({
     status, vorher: 0, aktuell: 0, differenz: 0, frequenz: 0, kaufquote: 0, teile: 0, preis: 0, bon: 0, vorjahrGeschaetzt: false,
   });
@@ -216,7 +216,7 @@ export function umsatzbruecke(s: GameState, o: { ebene: Ebene; id?: string; verg
   const ende = s.woche - 1, anzahl = Math.max(1, Math.floor(o.wochen));
   const alt: TreiberPeriode[] = [], neu: TreiberPeriode[] = [];
   let geschaetzt = false;
-  for (const h of auswahl(s, o.ebene, o.id)) {
+  for (const h of auswahl(s, o.ebene, o.id, o.format)) {
     const jetzt = zeitraum(h, ende - anzahl + 1, ende);
     const frueher = zeitraum(h, ende - anzahl + 1 - 52, ende - 52);
     if (!jetzt.wert || !frueher.wert) continue;
@@ -257,13 +257,14 @@ export function ranking(s: GameState, o: {
     gesamt.filter((e) => vergleich(e.h) === o.innerhalb));
   return gruppe.map((e, index) => ({
     hausId: e.h.id, name: e.h.name, region: e.h.region, hauscluster: hauscluster(e.h), format: e.h.format,
-    wert: e.wert, rangGesamt: gesamt.indexOf(e) + 1, rangVergleich: index + 1,
+    wert: e.wert, rangGesamt: gesamt.indexOf(e) + 1,
+    rangVergleich: o.innerhalb ? index + 1 : gesamt.filter((x) => vergleich(x.h) === vergleich(e.h)).indexOf(e) + 1,
   }));
 }
-export function reporting(s: GameState, wochen = 1): Reporting {
+export function reporting(s: GameState, wochen = 1, format = 'alle'): Reporting {
   const zeilen: ReportingZeile[] = [];
   for (const h of s.haeuser) {
-    if (h.status === 'verkauft') continue;
+    if (h.status === 'verkauft' || (format !== 'alle' && h.format !== format)) continue;
     const d = hausTreiber(s, h.id, wochen);
     if (!d) continue;
     const v = d.vorjahr?.umsatz;
@@ -307,5 +308,5 @@ export function reporting(s: GameState, wochen = 1): Reporting {
       const haupt = effekte[0];
       return { hausId: z.id, name: z.name, abweichung: z.abweichung!, haupttreiber: haupt.name + ' ' + haupt.text };
     });
-  return { wochen, bruecke: umsatzbruecke(s, { ebene: 'konzern', vergleich: 'vorjahr', wochen }), zeilen, gruppen, beobachtung };
+  return { wochen, bruecke: umsatzbruecke(s, { ebene: 'konzern', vergleich: 'vorjahr', wochen, format }), zeilen, gruppen, beobachtung };
 }
