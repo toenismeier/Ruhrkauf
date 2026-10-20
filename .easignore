@@ -1,7 +1,12 @@
-# EAS lädt nur die App hoch (ohne diese Datei wären es rund 400 MB).
-/*
-!/app/
-/app/node_modules/
+# EAS lädt nur app/ hoch. Ausdrückliche Liste statt Negation (/* + !/app/ wird von EAS nicht unterstützt).
+/render/
+/engine/
+/bilder/
+/auftraege/
+/.github/
+/*.md
+node_modules/
 /app/ios/
 /app/android/
 /app/.expo/
+/app/spiel/smoke.png
