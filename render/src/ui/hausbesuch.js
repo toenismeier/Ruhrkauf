@@ -313,6 +313,8 @@ export function hausbesuchModul(ctx) {
     sceneLeeren(); renderer?.dispose(); renderer?.forceContextLoss(); renderer = null; cam = null;
     haus = null; letzte = 0; if (host) host.hidden = true;
   }
+  document.getElementById('pinhalt')?.addEventListener('click', (e) => { const t = e.target.closest('[data-hausbesuch]'); if (t) oeffne(t.dataset.hausbesuch); });
+  document.getElementById('hausbesuch')?.addEventListener('click', () => { ctx.menueZu(); const id = ctx.erstHaus(); if (id) oeffne(id); });
   return { oeffne, schliesse, etage: etageWaehlen, status, messung, get aktiv() { return aktiv; },
     setzenAktiv: (an) => { aktiv = !!an; if (!aktiv) schliesse(); } };
 }
