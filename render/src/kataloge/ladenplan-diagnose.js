@@ -8,7 +8,8 @@ import { sportLadenEingabe } from '../kit/ladenbau-sport.js';
 import { pruefeLadenplan } from '../kit/ladenbau-pruefung.js';
 import haeuser from '../../haeuser.json';
 
-const faelle=[['S017',0],['S041',0],['S024',0],['S011',1],['S012',0]];
+// Sechs unterschiedliche Häuser, einschließlich mehrgeschossiger Verkaufsfläche und Fachmarkt-Box.
+const faelle=[['S017',0],['S041',0],['S024',0],['S011',1],['S012',0],['S032',0]];
 const farben=['#b9d7e2','#c7dcb9','#e4cea8','#e6b3be','#d6c5df','#b8d2ca','#e5dbad'];
 const geb=(S,r,farbe,y=0,h=0.07)=>S.box(r.w,h,r.d,r.x+r.w/2,y+h/2,r.z+r.d/2,farbe);
 const top=({breite,hoehe,mitte,THREE})=>{
