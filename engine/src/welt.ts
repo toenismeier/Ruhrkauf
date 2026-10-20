@@ -30,8 +30,6 @@ export interface Szenario {
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
-  /** A/B-Kalibrierung: normale Warenhäuser statt Premiumhäuser. */
-  premiumDeaktiviert?: boolean;
 }
 
 /** Phase 2: wirtschaftliche Soll-Größen der aktiven Formate (Euro p.a., Seed 1–3).
