@@ -531,6 +531,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     }
 
     case 'insolvenzAntrag': {
+      if (s.szenario?.regeln.sandkasten) return fehler('Im Sandkasten gibt es keine Insolvenz.');
       if (inso) return fehler('Das Verfahren läuft bereits.');
       const frueh = runwayWochen(s) > 8;
       eroeffneInsolvenz(s, frueh ? 'Eigenantrag im Schutzschirmverfahren' : 'Eigenantrag');

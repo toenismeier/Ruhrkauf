@@ -4,6 +4,9 @@ import type { Szenario } from './welt';
 import { eroeffneInsolvenz } from './prozesse';
 import { eur, melde } from './util';
 
+/** Vor Einbau von N13: zentraler Schalter für das Nice-to-have. */
+export const SZENARIEN_AKTIV = true;
+
 export type SzenarioId = 'standard' | 'schutzschirm' | 'lockdown' | 'fusion' | 'investor' | 'aufbruch' | 'sandkasten';
 
 export interface SzenarioRegeln {
@@ -51,7 +54,7 @@ export const SZENARIEN: readonly SzenarioKarte[] = [
 
 export function szenarioKonfiguration(id: string): Partial<Szenario> {
   const karte = SZENARIEN.find((x) => x.id === id);
-  if (!karte || karte.id === 'standard') return {};
+  if (!SZENARIEN_AKTIV || !karte || karte.id === 'standard') return {};
   return { ...karte.start, szenarioId: karte.id };
 }
 
