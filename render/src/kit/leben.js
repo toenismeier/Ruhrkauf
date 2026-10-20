@@ -261,6 +261,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
         else if (f.phase === 'drinnen' && f.lauf >= 1 + r() * .4) {
           f.phase = 'heraus'; f.lauf = 0;
           f.tuete = r() < clamp(.24 + f.haus.gewicht * .15, .2, .83);
+          f.tuetenFarbe = farbe(formatFarbe(f.haus.h));
         } else if (f.phase === 'heraus' && f.lauf >= .9) { f.phase = 'weg'; f.lauf = 0; f.haus = null; }
       }
     }
@@ -296,7 +297,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       matrix(meshes.rumpf, n, { ...p, y: 1.05 + huepfen }, winkel, [1, 1, 1], f.farbe);
       matrix(meshes.kopf, n, { ...p, y: 1.93 + huepfen }, 0, [1, 1, 1], f.haut);
       const bag = f.tuete ? [1, 1, 1] : [.0001, .0001, .0001];
-      matrix(meshes.tuete, n, { x: p.x + .55, y: .67, z: p.z + .15 }, winkel, bag, farbe(formatFarbe(f.haus?.h)));
+      matrix(meshes.tuete, n, { x: p.x + .55, y: .67, z: p.z + .15 }, winkel, bag, f.tuetenFarbe ?? farbe(formatFarbe(f.haus?.h)));
       n++;
     }
     fertig(meshes.rumpf, n); fertig(meshes.kopf, n); fertig(meshes.tuete, n);
