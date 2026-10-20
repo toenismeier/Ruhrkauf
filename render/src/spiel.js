@@ -993,7 +993,7 @@ window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffne
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
   oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { hausReiter = reiter; oeffneHaus(id); },
-  pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];
+  pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];
     if (!text.includes(String(d.kundenScore))) fehler.push('Kundenscore fehlt');
     for (const [reiter,wort] of [['leitung',d.leitungsdaten.name],['kosten','Betriebskosten'],['kommentare','Wochenkommentierung']]) {
       hausReiter=reiter; oeffneHaus(id); if (!$('pinhalt').textContent.includes(wort)) fehler.push(reiter+' nicht korrekt');
