@@ -1,6 +1,6 @@
 // Sortimentsspezifische, teilesparende Präsentation im 1,25-m-Gangraster.
 // Gleiche Stellflächen wie die Gondeln, aber keine gleichförmigen Supermarktregale.
-import { definition, palette, detail } from './basis.js';
+import { definition, palette, detail, wandModul } from './basis.js';
 import { LOD } from '../basis.js';
 
 const THEMEN = Object.freeze({
@@ -103,4 +103,25 @@ export const SPORT_MIX_PROFILE=Object.freeze(Object.fromEntries(
   Object.entries(THEMEN).map(([art,stile])=>[art,Object.freeze(Object.fromEntries(
     [2,4].map(b=>[b,Object.freeze(stile.map(stil=>'sport_mix_'+art+'_'+stil+'_'+b))])
   ))])
+));
+
+// Schmale, sortimentsbezogene Innenwandpräsentationen für Randabteilungen:
+// Stellfläche 2,50 × 0,60 m, nicht als Ersatz für die Außenwanddeckung.
+const WANDWARE=Object.freeze({
+  sportschuhe:['schuhe','stollen','ware','schuhe'],
+  sporttextil:['textil','jacken','trikot','ware'],
+  outdoor:['rucksack','jacken','ware','schuhe'],
+  rad:['rad','helm','ware','rad'],
+  fitness:['ware','textil','ware','schuhe'],
+  wintersport:['ski','board','jacken','ware'],
+  teamsport:['trikot','ball','stollen','ware'],
+});
+export const SPORT_MIX_WAENDE=Object.freeze(Object.fromEntries(
+  Object.entries(WANDWARE).map(([art,arten])=>[art,Object.freeze(arten.map((ware,i)=>{
+    const id='sport_mix_wand_'+art+'_'+i;
+    const titel=(THEMEN[art]?.[i]??art)+' · Wand';
+    definitionen.push(definition(id,titel,'sport','wand',2,1,3,220,
+      (L,r,d,ctx)=>wandModul(L,r,d,ctx,{art:ware,pal:FARBEN[art],titel,w:2.5})));
+    return id;
+  }))])
 ));
