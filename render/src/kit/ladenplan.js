@@ -238,38 +238,48 @@ function sichereSportBekleidung(plan) {
     }
   }
 }
+function belegteOutletFlaeche(plan) {
+  const r=R.suchRaster,nx=Math.round(plan.breite/r),nz=Math.round(plan.tiefe/r);
+  const raster=new Uint8Array(nx*nz);
+  for(const m of plan.moebel) {
+    const x0=Math.max(0,Math.floor((m.x+1e-8)/r)),x1=Math.min(nx,Math.ceil((m.x+m.w-1e-8)/r));
+    const z0=Math.max(0,Math.floor((m.z+1e-8)/r)),z1=Math.min(nz,Math.ceil((m.z+m.d-1e-8)/r));
+    for(let z=z0;z<z1;z++)for(let x=x0;x<x1;x++)raster[z*nx+x]=1;
+  }
+  return raster.reduce((n,v)=>n+v,0)*r*r;
+}
 function verdichteOutlet(plan) {
   if(plan.profil!=='outlet')return;
   const flaeche=plan.breite*plan.tiefe-
     plan.hindernisse.reduce((s,h)=>s+rechteckFlaeche(h),0);
-  let belegt=plan.moebel.reduce((s,m)=>s+rechteckFlaeche(m),0);
-  // Bei sehr großen Doppelstangenreihen etwas ausdünnen, ohne das Wandband
-  // und die Kasse zu beeinträchtigen.
-  for(let i=plan.moebel.length-1;i>=0&&belegt>0.485*flaeche;i--) {
-    const m=plan.moebel[i];
-    if(m.id!=='outlet_doppelstange')continue;
-    plan.moebel.splice(i,1);belegt-=rechteckFlaeche(m);
+  // Dichte auf dem Suchraster (Flächenunion), nicht die aufsummierten
+  // Möbel-Footprints. An Stoßkanten kann es Überdeckungen geben.
+  for(let i=plan.moebel.length-1;i>=0&&belegteOutletFlaeche(plan)>0.485*flaeche;i--) {
+    if(plan.moebel[i].id==='outlet_doppelstange')plan.moebel.splice(i,1);
   }
-  const id='outlet_rundstaender',def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
-  for(let n=0;n<40;n++) {
+  const varianten=['outlet_rundstaender','outlet_beauty'];
+  for(let n=0;n<85;n++) {
     const frei=schwerpunkte(plan),gross=frei[0]?.size??0;
-    if(gross<=R.leerflaecheMax&&belegt>=0.36*flaeche)break;
-    if(belegt+w*d>0.485*flaeche)break;
+    if(gross<=R.leerflaecheMax&&belegteOutletFlaeche(plan)>=0.36*flaeche)break;
     let gesetzt=false;
     for(const f of frei) {
-      if(f.size<Math.min(gross,3.75))break;
-      const z0=Math.ceil((f.z-1e-8)/U)*U;
-      const x0=Math.ceil((f.x-1e-8)/U)*U;
-      for(let z=z0;z+d<=f.z+f.size+1e-8&&!gesetzt;z+=U)
-        for(let x=x0;x+w<=f.x+f.size+1e-8&&!gesetzt;x+=U) {
-          const raum=plan.abteilungen.find(a=>x>=a.x-1e-8&&z>=a.z-1e-8&&
-            x+w<=a.x+a.w+1e-8&&z+d<=a.z+a.d+1e-8);
-          if(!raum)continue;
-          const m=item(id,x,z,0,raum.id,{ausgleich:true});
-          if(!passeIn(m,raum)||!passe(m,plan,
-            [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
-          plan.moebel.push(m);belegt+=w*d;gesetzt=true;
-        }
+      if(f.size<Math.min(gross,3.125))break;
+      for(const id of varianten) {
+        const def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
+        if(belegteOutletFlaeche(plan)+w*d>0.49*flaeche)continue;
+        const z0=Math.ceil((f.z-1e-8)/U)*U,x0=Math.ceil((f.x-1e-8)/U)*U;
+        for(let z=z0;z+d<=f.z+f.size+1e-8&&!gesetzt;z+=U)
+          for(let x=x0;x+w<=f.x+f.size+1e-8&&!gesetzt;x+=U) {
+            const raum=plan.abteilungen.find(a=>x>=a.x-1e-8&&z>=a.z-1e-8&&
+              x+w<=a.x+a.w+1e-8&&z+d<=a.z+a.d+1e-8);
+            if(!raum)continue;
+            const m=item(id,x,z,0,raum.id,{ausgleich:true});
+            if(!passeIn(m,raum)||!passe(m,plan,
+              [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
+            plan.moebel.push(m);gesetzt=true;
+          }
+        if(gesetzt)break;
+      }
       if(gesetzt)break;
     }
     if(!gesetzt)break;
