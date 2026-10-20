@@ -183,6 +183,7 @@ export function itAktion(s: GameState, a: ItAktion): {ok:boolean;text:string} {
     const gueltig = new Set(itCluster(s).map(c=>c.id));
     if (!a.clusterIds.length || new Set(a.clusterIds).size!==a.clusterIds.length || a.clusterIds.some(id=>!gueltig.has(id))) return {ok:false,text:'Ungültige Cluster-Auswahl.'};
     if (a.clusterIds.some(id=>generationInCluster(s,p.system,id)>=p.zielGeneration)) return {ok:false,text:'Im gewählten Cluster ist diese Generation bereits vorhanden.'};
+    if(a.clusterIds.length!==p.clusterIds.length || a.clusterIds.some(id=>!p.clusterIds.includes(id))) return {ok:false,text:'Nach Projektstart kann nur die Reihenfolge, nicht der Umfang geändert werden.'};
     p.clusterIds=[...a.clusterIds];p.rolloutWochen=a.clusterIds.length;
     return {ok:true,text:'Rollout-Auswahl und Reihenfolge gespeichert.'};
   }
@@ -230,11 +231,13 @@ function beende(s: GameState, p: ItProjekt): void {
   p.phase='abgeschlossen';p.phaseRest=0;p.beendet=s.woche;
   const x=s.it!.systeme[p.system];
   if (itCluster(s).every(c=>generationInCluster(s,p.system,c.id)>=p.zielGeneration)) {
-    x.generation=p.zielGeneration;x.alter=0;
+    x.generation=p.zielGeneration;x.alter=0;x.wartungGekuendigt=false;
     // Installationen halten weiterhin den Einführungstermin je Cluster fest.
   }
   const faktor={kaufen:1,entwickeln:0.75,dienstleister:2.1}[p.art];
-  x.kostenWoche=eur(x.basisKosten * (1+0.17*(p.zielGeneration-SYSTEME[p.system].start))*faktor);
+  // Preisschilder haben erst nach der Einführung laufende Betriebskosten.
+  const betrieb=x.basisKosten || (p.system==='preisschilder'?22000:0);
+  x.kostenWoche=eur(betrieb * (1+0.17*(p.zielGeneration-SYSTEME[p.system].start))*faktor);
   vorlage(s,'IT-Projekt abgeschlossen',SYSTEME[p.system].name+' Generation '+p.zielGeneration+'. Istkosten '+p.kostenIst.toLocaleString('de-DE')+' €, Plan '+p.kostenPlan.toLocaleString('de-DE')+' €.');
 }
 /** Ein Aufruf pro Spielwoche (engine.ts). Wirtschaftlich neutral vor Spielermaßnahmen. */
