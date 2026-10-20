@@ -735,9 +735,17 @@ async function buendeln() {
     if (wieder.woche !== snapshot.woche || wieder.cash !== snapshot.cash || wieder.seed !== 1)
       throw new Error('Fehlerbericht verändert Spielstand: ' + JSON.stringify({ snapshot, wieder }));
     await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge-geladen.png') });
-    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, berichtZeichen: bericht.length }, null, 2));
-    console.log('N14 Testwerkzeuge: 13 Wochen, gzip-Bericht und Wiederherstellung identisch.');
-    return { sprung, snapshot, wieder };
+    await p.goto(url + '&werkzeuge=1', { waitUntil: 'load', timeout: 0 });
+    await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
+    const urlFreischaltung = await p.evaluate(() => ({
+      entsperrt: window.spiel.werkzeuge.freigeschaltet,
+      geoeffnet: !!document.querySelector('.testwerkzeuge'),
+    }));
+    if (!urlFreischaltung.entsperrt || !urlFreischaltung.geoeffnet)
+      throw new Error('URL-Freischaltung fehlgeschlagen: ' + JSON.stringify(urlFreischaltung));
+    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, urlFreischaltung, berichtZeichen: bericht.length }, null, 2));
+    console.log('N14 Testwerkzeuge: beide Freischaltungen, 13 Wochen, gzip-Bericht und Wiederherstellung identisch.');
+    return { sprung, snapshot, wieder, urlFreischaltung };
   }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
