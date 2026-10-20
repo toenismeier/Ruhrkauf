@@ -79,7 +79,7 @@ export function testAktion(s: GameState, a: TestAktion): Ergebnis {
     case 'testEreignis': {
       const [quelle, art] = a.ereignis.split(':');
       const erzeugt = quelle === 'angebot'
-        ? testAngebotErzeugen(s, art as AngebotTyp)
+        ? (art === 'uebernahme' ? testWettbewerbEreignis(s, 'raeumung') : testAngebotErzeugen(s, art as AngebotTyp))
         : quelle === 'ereignis'
           ? testZufallsereignis(s, art)
           : testWettbewerbEreignis(s, art);
