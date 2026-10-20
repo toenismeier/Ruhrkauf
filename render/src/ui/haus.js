@@ -119,3 +119,43 @@ export function hausReportingHtml(kommentare, ranking) {
     '</div><div class="karte"><div class="khead">Mystery Shopping · Top 20</div>'+
     ranking.slice(0,20).map((x,i)=>'<button class="zeile haus-sprung" onclick="hausSpringen(\''+esc(x.id)+'\')"><span class="was">'+(i+1)+'. '+esc(x.name)+'</span><b>'+x.score+'/100</b></button>').join('')+'</div>';
 }
+
+
+/** Q04: Anzeigen für die statischen Schwester- und Outlet-Standorte.
+ *  Diese Hauskataloge besitzen noch keine wirtschaftliche Engine-Anbindung.
+ *  Deshalb werden keine erfundenen Umsätze, Personal- oder Steuerungswerte ausgegeben.
+ */
+export function hausStatischHtml(haus, reiter = 'ueberblick') {
+  const istOutlet = haus.format === 'outlet';
+  const name = istOutlet ? 'FUNDUS' : 'Volkskauf';
+  const tabs = istOutlet
+    ? [['ueberblick','Überblick'],['sortiment','Sortiment'],['etagen','Verkaufsflächen']]
+    : [['ueberblick','Überblick'],['sortiment','Sortiment'],['etagen','Etagen']];
+  const auswahl = tabs.some(([id]) => id === reiter) ? reiter : 'ueberblick';
+  const nav = '<nav class="haus-reiter">' + tabs.map(([id, titel]) =>
+    '<button class="' + (id === auswahl ? 'an' : '') +
+    '" onclick="hausReiterWahl(\\'' + id + '\\')">' + titel + '</button>').join('') + '</nav>';
+  const flaechen = haus.flaechen ?? [];
+  let inhalt = '';
+  if (auswahl === 'ueberblick') {
+    inhalt = '<div class="karte"><div class="khead">' + name + ' · Standort</div>'
+      + line('Haus', haus.name) + line('Stadt', haus.stadt)
+      + line('Baujahr', haus.baujahr)
+      + line('Verkaufsfläche', fmt.format(flaechen.reduce((sum, f) => sum + (f.qm ?? 0), 0)) + ' qm')
+      + line('Substanz', Math.round(haus.substanz ?? 0) + ' / 100')
+      + line('Status', haus.status === 'offen' ? 'Geöffnet' : (haus.status ?? 'Unbekannt'))
+      + '<div class="zeile grau">Betriebskennzahlen und Entscheidungen folgen mit der Engine-Anbindung dieses Formats.</div></div>';
+  } else if (auswahl === 'sortiment') {
+    const gruppen = new Map();
+    for (const f of flaechen) gruppen.set(f.gruppe ?? 'Sonstiges', (gruppen.get(f.gruppe ?? 'Sonstiges') ?? 0) + (f.qm ?? 0));
+    inhalt = '<div class="karte"><div class="khead">' + name + ' · Sortimentsflächen</div>' +
+      [...gruppen].map(([gruppe, qm]) => line(gruppe, fmt.format(qm) + ' qm')).join('') + '</div>';
+  } else {
+    const etagen = [...new Set(flaechen.map(f => f.etage))].sort((a, b) => b - a);
+    inhalt = etagen.map(nr => '<div class="karte"><div class="khead">' +
+      (nr === 0 ? 'Erdgeschoss' : nr === -1 ? 'Untergeschoss' : nr + '. Obergeschoss') + '</div>' +
+      flaechen.filter(f => f.etage === nr).map(f => line(f.gruppe ?? f.konzept, fmt.format(f.qm) + ' qm')).join('') +
+      '</div>').join('');
+  }
+  return nav + inhalt;
+}
