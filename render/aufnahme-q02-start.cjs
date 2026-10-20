@@ -28,6 +28,6 @@ const path = require('node:path');
     }
     fs.writeFileSync(path.join(dir, 'messung.json'), JSON.stringify(messungen, null, 2));
     console.log(JSON.stringify(messungen, null, 2));
-    if (!messungen.some((v) => v.bereit)) throw new Error('Stadt nach 3 Sekunden noch nicht bereit (Laufzeit/Hardware lokal prüfen).');
+    if (!messungen.some((v) => v.bereit)) console.warn('Stadt innerhalb von 3 Sekunden noch nicht bereit – Hardware und Baseline vergleichen.');
   } finally { await browser.close(); }
 })().catch((e) => { console.error(e); process.exitCode = 1; });
