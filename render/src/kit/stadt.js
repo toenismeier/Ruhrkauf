@@ -87,12 +87,17 @@ export class Instanzer {
   bauen(scene) {
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), achse = new THREE.Vector3(0, 1, 0), col = new THREE.Color();
     let calls = 0;
-    for (const p of this.protos.values()) {
+    for (const [art, p] of this.protos) {
       if (!p.inst.length) continue;
       for (const t of p.teile) {
         const variabel = t.k[0] === '§';
         const slot = variabel ? +t.k.slice(1) : -1;
         const im = new THREE.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), p.inst.length);
+        // N06: Nur Metadaten für den Wechsel von Laub und Kleidung; keine zusätzliche Geometrie.
+        if (['linde', 'kastanie', 'platane', 'birke', 'pappel', 'kugel'].includes(art) || art.startsWith('figur')) {
+          im.userData.jahreszeitArt = art;
+          im.userData.jahreszeitSlot = slot;
+        }
         p.inst.forEach(([x, y, z, ry, s, f], i) => {
           q.setFromAxisAngle(achse, ry); v.set(x, y, z);
           if (Array.isArray(s)) sc.set(s[0], s[1], s[2]); else sc.set(s, s, s);
