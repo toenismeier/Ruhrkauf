@@ -33,3 +33,7 @@
   #erfolge-toast, .erfolge-balken i { transition: none; }
   #erfolge-toast.sichtbar .erfolge-bild { animation: none; }
 }
+
+/* Freischaltungen innerhalb des Wochenberichts sichtbar lassen. */
+.wb-erfolge { margin: 12px 0 0; border-top: 1px solid #d9cfb8; padding: 10px 2px; font-size: 12px; line-height: 1.4; color: #276745; }
+.wb-erfolge strong { font-weight: 800; }
