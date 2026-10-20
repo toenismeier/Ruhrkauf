@@ -75,7 +75,7 @@ export function haptik(art = 'tippen') {
 }
 
 const ZEIT = { tippen: .020, panelAuf: .120, panelZu: .120, erfolg: .300, warnung: .310,
-  kasse: .190, kassenklingeln: .360, reise: 4.400, insolvenz: .450, freigeschaltet: .650 };
+  kasse: .025, kassenklingeln: .360, reise: 4.400, insolvenz: .450, freigeschaltet: .650 };
 export const TON_DAUER = Object.freeze(ZEIT);
 const BPM = 70;
 const TAKT = 60 / BPM;
