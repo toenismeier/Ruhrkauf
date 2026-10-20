@@ -58,9 +58,9 @@ Schalten Sie Klänge, Stadtklang und Musik hier aus, wenn keine Wiedergabe gewü
   document.getElementById('einstellungen').innerHTML = TON_SCHALTER.map((d) => {
     const v = tonEinstellung(d.schluessel);
     return '<label><span>' + d.titel + '</span><input data-einstellung="' + d.schluessel + '" aria-label="' + d.titel + '"'
-      + (d.art === 'schalter' ? ' type="checkbox" ' + (v ? 'checked' : '') :
+      + (d.art === 'schalter' ? ' type="checkbox" ' + (v ? 'checked' : '') + '>' :
         ' type="range" min="0" max="100" step="5" value="' + v + '">');
-  }).join('').replace(/checked">/g, 'checked>');
+  }).join('');
   // Der Klick liegt in der Benutzergeste; die Schnittstelle fängt fehlende Audio-Geräte ab.
   document.getElementById('proben').addEventListener('click', async (e) => {
     const knopf = e.target.closest('[data-klang]');
