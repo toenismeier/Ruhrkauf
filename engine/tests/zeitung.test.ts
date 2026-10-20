@@ -1,4 +1,5 @@
 import { neuesSpiel, wocheAbspielen, fuehreAus } from '../src';
+import { botTief } from '../scripts/bot';
 import { zeitungArchiv, zeitungWoche, ZEITUNG_ARTIKELARTEN } from '../src/zeitung';
 
 describe('Der Handelsbote', () => {
@@ -63,6 +64,27 @@ describe('Der Handelsbote', () => {
     expect(s.stakeholder.bank).toBe(vor.bank + 1);
     zeitungWoche(s);
     expect([zeitungArchiv(s).at(-1)!.aufmacher, ...zeitungArchiv(s).at(-1)!.meldungen].some((x) => x.art === 'interview' && x.text.includes('„'))).toBe(true);
+  });
+
+  test('Bot C beantwortet eine offene Interviewanfrage sachlich', () => {
+    const s = neuesSpiel(19);
+    s.woche = 9;
+    zeitungWoche(s);
+    s.woche = 10;
+    botTief(s);
+    const protokoll = (s.entscheidungsprotokoll ?? []).find((x) => x.typ === 'interview');
+    expect(protokoll?.option).toBe('sachlich');
+    expect(s.entscheidungen.some((x) => x.typ === 'interview')).toBe(false);
+  });
+
+  test('Abschalten entfernt offene Interviews ohne Stakeholder-Wirkung', () => {
+    const s = neuesSpiel(20);
+    s.woche = 9;
+    zeitungWoche(s);
+    const vorher = { ...s.stakeholder };
+    fuehreAus(s, { typ: 'zeitungAktiv', an: false });
+    expect(s.entscheidungen.some((x) => x.typ === 'interview')).toBe(false);
+    expect(s.stakeholder).toEqual(vorher);
   });
 
   test('Archiv hält nur die jüngsten 104 Ausgaben, auch nach dem Umschalten', () => {
