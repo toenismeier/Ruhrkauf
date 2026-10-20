@@ -15,6 +15,7 @@ import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './ki
 import { stadtplan, baueStadt, setzeMarker, bauerFuer } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
+import { lebenModul } from './kit/leben.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
 import { geld, fmt, esc } from './ui/format.js';
@@ -106,6 +107,7 @@ function kameraSetzen() {
   sonne.target.position.set(K.x, 0, K.z);
   Object.assign(sonne.shadow.camera, { left: -r, right: r, top: r, bottom: -r });
   sonne.shadow.camera.updateProjectionMatrix();
+  leben.kamera();
   zeichnen();
   kachelnPlanen();
 }
@@ -116,6 +118,17 @@ function zeichnen() {
   requestAnimationFrame(() => { geplant = false; const t = performance.now(); ren.render(scene, cam); messung.renderMs.push(Math.round(performance.now() - t)); });
 }
 function jetztZeichnen() { const t = performance.now(); ren.render(scene, cam); return Math.round(performance.now() - t); }
+
+// N07: eigenes Animationsmodul, keine Engine-Mutation. Einstellungen via N13 nachrüstbar.
+const leben = lebenModul({ canvas, scene: () => scene, camera: () => cam, K: () => K, spiel: () => s,
+  zeichnen, sparsam });
+const lebenEinstellung = param.get('leben') ?? (() => { try { return localStorage.getItem('ruhrkauf.leben'); } catch { return null; } })();
+if (['aus', 'wenig', 'voll'].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
+$('leben-modus').value = leben.modus;
+$('leben-modus').addEventListener('change', (e) => {
+  leben.setzen(e.target.value);
+  try { localStorage.setItem('ruhrkauf.leben', leben.modus); } catch { /* Privater Browsermodus */ }
+});
 
 // Bodenpunkt unter einem Bildschirmpunkt (orthografisch: Strahl parallel zur Blickrichtung)
 const ray = new THREE.Raycaster(), boden = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -182,6 +195,7 @@ window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
 function raeumeSzene() {
+  leben.zu();
   if (!scene) return;
   angebotPins = []; bahnhofPin = null; bahnhofOrt = null;
   clearInterval(wettbewerbPinTimer); wettbewerbPinTimer = null;
@@ -321,6 +335,7 @@ function baueStadtAusSpiel(name) {
   K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
   K._G = null;
   kameraSetzen();
+  leben.stadt(plan);
   kachelnSichtbarBauen();
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
@@ -482,9 +497,11 @@ function woche(mitBot = false) {
   const davor = E.posteingang(s);
   const t0 = performance.now();
   if (mitBot) botSchritt(s);
+  const ankommendeOrders = (s.bestellungen ?? []).filter((b) => b.ankunft === s.woche + 1).length;
   E.wocheAbspielen(s);
   const t1 = performance.now();
   const geaendert = grafikNachziehen();
+  leben.woche(ankommendeOrders);
   const t2 = performance.now();
   cockpitZeigen();
   if (offenesHaus) oeffneHaus(offenesHaus);
@@ -939,6 +956,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
+  leben,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
