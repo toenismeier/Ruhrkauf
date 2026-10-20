@@ -24,6 +24,9 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 ## Operatives Paket
 Eigene Aufträge in `auftraege/operativ/` (Übersicht und Schnittstellen in `auftraege/operativ/README.md`). O01 und O02 zuerst, O03 nach O01, danach O04 bis O09 parallel.
 
+## TestFlight-Wurf 1
+Aufträge Q01 bis Q05 in `auftraege/wurf1/` (Übersicht und Reihenfolge in `auftraege/wurf1/README.md`).
+
 ## Nice-to-have
 Eigene Aufträge in `auftraege/nice/` (Übersicht in `auftraege/nice/README.md`). N13 Einstellungen und N14 Testwerkzeuge zuerst, danach alles parallel.
 
