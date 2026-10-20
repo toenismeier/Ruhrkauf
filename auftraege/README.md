@@ -1,5 +1,7 @@
 # Aufträge
 
+**Gesamtstatus aller Workstreams: `auftraege/STATUS.md`.**
+
 Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem Auftrag lesen: `README.md`, `engine/README.md`, `render/KIT.md`, `render/GESTALTUNG.md`, `HQ-VERTRAG.md`, `EINKAUF-VERTRAG.md`, `VORSTAND-MARKETING-VERTRAG.md`.
 
 ## Reihenfolge und Abhängigkeiten
