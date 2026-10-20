@@ -57,10 +57,13 @@ export function wochenberichtModul(ctx) {
     const c = ctx.cockpit(), ver = ctx.historie();
     const vergangen = ver.length > 1 ? ver[ver.length - 2] : null;
     const jetzt = ver[ver.length - 1];
-    const meldungen = nach.meldungen.filter((m) => !gemeldet.has(m.id) && m.woche === ctx.wocheNr() && KATEGORIE.includes(m.kategorie));
+    // Die Engine verbucht Ereignisse für die gerade beendete Woche, bevor sie s.woche erhöht.
+    const meldungen = nach.meldungen.filter((m) => !gemeldet.has(m.id) && m.woche === jetzt?.woche && KATEGORIE.includes(m.kategorie));
+    const kwEnde = c.kw === 1 ? 52 : c.kw - 1;
+    const jahrEnde = c.kw === 1 ? c.jahr - 1 : c.jahr;
     const vorgaenge = nach.handeln.filter((h) => !neu.has(h.id)).sort((a, b) => Number(b.dringend) - Number(a.dringend) || a.frist - b.frist);
     bericht = {
-      kw: c.kw, jahr: c.jahr, umsatz: c.umsatzWoche, ebitda: c.ebitdaWoche, umsatzVor: vergangen?.umsatz ?? null,
+      kw: kwEnde, jahr: jahrEnde, umsatz: c.umsatzWoche, ebitda: c.ebitdaWoche, umsatzVor: vergangen?.umsatz ?? null,
       ebitdaVor: vergangen?.ebitda ?? null, cashNetto: c.cash - davorCash, cash: c.cash,
       phase: c.phase, kredite: c.kreditFrei, runway: c.runwayWochen,
       meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt,
