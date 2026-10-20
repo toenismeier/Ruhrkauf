@@ -151,6 +151,13 @@ function ostern(j: number): number {
 }
 function planWochen(s: GameState, planJahr: number, h: Haus, ziel: number): number[] {
   const e = ostern(planJahr);
+  const bisher = (h as Haus & { treiberVerlauf?: { von: number; bis: number; umsatz: number }[] }).treiberVerlauf ?? [];
+  const vorjahresWoche = (planJahr - s.startJahr - 1) * 52;
+  const archiv = new Map<number, number>();
+  for (const p of bisher) for (let w = Math.max(p.von, vorjahresWoche); w <= Math.min(p.bis, vorjahresWoche + 51); w++)
+    archiv.set(w - vorjahresWoche, (archiv.get(w - vorjahresWoche) ?? 0) + p.umsatz / (p.bis - p.von + 1));
+  const referenzSumme = sum([...archiv.values()]);
+  const referenzDurchschnitt = archiv.size ? referenzSumme / archiv.size : 0;
   const roh: number[] = Array.from({ length: 52 }, (_, w) => {
     let f = 0;
     let sgew = 0;
@@ -162,7 +169,14 @@ function planWochen(s: GameState, planJahr: number, h: Haus, ziel: number): numb
     if (Math.abs(w - e) <= 1) kal *= w === e ? 0.94 : 1.04;
     if (w === 0 || w === 51 || w === 17 || w === 39) kal *= 0.96;
     if ((w + planJahr) % 13 === 0) kal *= 1.025;
+    // Die O02-Haushistorie hat Vorrang, sobald 13+ Wochen Vorjahr vorliegen.
+    if (archiv.size >= 13 && referenzDurchschnitt > 0 && archiv.has(w))
+      kal *= clamp((archiv.get(w) ?? 0) / referenzDurchschnitt / Math.max(.1, sgew ? f / sgew : 1), .4, 2.5);
     const globalW = (planJahr - s.startJahr) * 52 + w;
+    // Bereits bekannte Räumungen und laufende Umbauten ändern die Wochengewichte.
+    if (h.status === 'raeumung' && globalW >= (h.statusBis ?? s.woche + 6)) kal *= .02;
+    if (h.status === 'schliessung_verhandlung' && globalW >= (h.statusBis ?? s.woche + 12) + 6) kal *= .02;
+    if (h.flaechen.some((fl) => fl.umbauBis !== undefined && fl.umbauBis > globalW)) kal *= .97;
     for (const a of s.marketing.aktionen) if (a.status !== 'abgesagt' && a.start <= globalW && globalW < a.ende) {
       if (a.scope.typ === 'alle' || a.scope.typ === 'format' && a.scope.format === h.format ||
           a.scope.typ === 'region' && a.scope.region === h.region ||
@@ -281,6 +295,21 @@ function abschliessen(s: GameState, quelle: Jahresplan['quelle']): void {
   const e = s.planung!.entwurf; if (!e || e.stand !== 'offen') return;
   const ziele = quelle === 'controlling' ? jahresVorschlag(s, e.jahr) : e.ziele;
   const plan = erstelleJahresplan(s, e.jahr, ziele, quelle === 'controlling' ? {} : e.overrides, quelle);
+  if (quelle === 'spieler') {
+    // Ein bewusst überzogener Plan erzeugt Führungsdruck. Die Ausgangslage bleibt neutral.
+    for (const h of s.haeuser) {
+      const id = 'haus:' + h.id;
+      const wert = plan.knoten[id]?.umsatz ?? 0, referenz = plan.referenz.knoten[id] ?? 0;
+      if (referenz <= 0 || wert <= referenz * 1.07) continue;
+      const malus = clamp((wert / referenz - 1.07) * 35, 0, 10);
+      h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral - malus, 0, 100);
+      const leitung = organisation(s)?.hauscluster.find((c) => c.id === clusterVon(h))?.stelle.person;
+      if (leitung) {
+        leitung.stimmung = clamp(leitung.stimmung - malus / 4, 0, 100);
+        leitung.wechselwille = clamp(leitung.wechselwille + malus / 400, 0, 1);
+      }
+    }
+  }
   s.planung!.jahre = s.planung!.jahre.filter((p) => p.jahr !== plan.jahr).concat(plan);
   e.stand = 'abgeschlossen';
   s.entscheidungen = s.entscheidungen.filter((x) => x.typ !== 'planung_jahr' || x.daten.jahr !== e.jahr);
@@ -312,7 +341,7 @@ function forecastErstellen(s: GameState, q: 1 | 2 | 3): void {
   // Ist bis einschließlich Quartalsende, danach Prognose auf Basis der Planwochen und Ist-Trend.
   const ytdPlan = sum(wochen.slice(0, n));
   const ytdIst = sum(bisher.map((x) => x.umsatz));
-  const qualitaet = clamp(0.35 + s.controllingStufe * 0.25, 0, 1);
+  const qualitaet = clamp(.25 + .35 * bereichsGüte(s) + .1 * s.controllingStufe, 0, 1);
   const trend = clamp(anteil(ytdIst, Math.max(1, ytdPlan)) - 1, -0.2, 0.2);
   for (let i = 0; i < n; i++) wochen[i] = bisher[i]?.umsatz ?? 0;
   for (let i = n; i < 52; i++) wochen[i] = eur(wochen[i] * (1 + trend * (0.5 + 0.5 * qualitaet)));
