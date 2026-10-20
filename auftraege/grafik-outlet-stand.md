@@ -1,37 +1,56 @@
 # FUNDUS – Grafik-Auftrag: Arbeits- und Abnahmestand
 
-Stand: 19.10.2026 · Branch: `feat/grafik-outlet` · Basis: `main`
+Stand: 20.10.2026 · Branch: `feat/grafik-outlet` · PR [#11](https://github.com/toenismeier/Ruhrkauf/pull/11) (Draft)
 
-## Implementiert
-- `render/haeuser-outlet.json`: 20 Filialen (O001–O020), 14 Außenring / 6 Innenstadt, 20 Städte mit NRW-Schwerpunkt.
-- `render/src/kit/outlet.js`: drei Bauformen, weinrote eigene Marke und Claim, durchscheinende Schaufenster, Innenplatzhalter mit Größen- und Warenabteilungen sowie Kassen-/Wagenzone, Zustandsdekoration und Neueröffnungs-Schlange.
-- `render/src/kit/outlet-standorte.js`: Platzierung eigener `slot:outlet`-Parzellen in Gewerbeblöcken von `plan.aussen`.
-- Additive Anbindung in `bauer.js`, `bruecke.js`, `stadtplan.js`, `stadt.js` und `staedte.js`; Engine und `basis.js` unangetastet.
-- Kataloge: `outlets`, `outlet-lagen`, `outlet-vergleich`; alle 20 im Hauskatalog ergänzt.
-- Regeln in `render/GESTALTUNG.md` und zusätzliche Kennzahlen im bestehenden Gestaltungsprüfskript; dedizierte Prüfung `node pruef-outlet.js`.
+## Rebase / Integration
 
-## Verifiziert (statisch, ohne Checkout)
-- Syntaxprüfung der neu angelegten Grafik-, Katalog- und Prüfmodule über JavaScript-Parser bestanden.
-- JSON valide, 20 einzigartige Städte und IDs, 14 rand + 6 b, Baujahre 1998–2016, Substanz 40–84.
-- Keine Innenstadtfiliale überschreitet 80 % der größten Hartwig-Grundfläche ihrer Stadt.
-- `main...feat/grafik-outlet`: am 19.10. keine Commits hinter `main`.
+- Ausgangsstand des bisherigen Feature-Branches: `e4e3817dbddab5d99d92348a5013d3207f41f791`, 31 Commits vor und 23 hinter `main`.
+- Auf `main` `242279b3c9784be25c164723690bfbc1c08d318c` als konsolidierter (squashed) Rebase neu aufgesetzt: `062dbcfca71a03e4e2e05eb7c143984b66d00b3b`. Die 19 ursprünglichen Outlet-Dateiänderungen wurden übernommen.
+- Sieben gemeinsam bearbeitete Dateien konfliktbereinigt: `GESTALTUNG.md`, `alle-haeuser.js`, `bauer.js`, `bruecke.js`, `stadtplan.js`, `staedte.js`, `pruef-gestaltung-inhalt.js`.
+- Einbindungen der gemergten Volkskauf-Kette sowie der Wettbewerber erhalten. Letzter Commitvergleich während der Bearbeitung: Feature-Branch hinter `main` **0** Commits.
+- Keine Änderungen an `engine/` oder `render/src/kit/basis.js`. Keine Änderungen an `main` oder Merge.
 
+## Nachbesserung implementiert
 
-## GitHub Actions (Draft-PR #11)
-- Run: https://github.com/toenismeier/Ruhrkauf/actions/runs/39266640123
-- Ergebnis: zwei Jobs (`Mobiler Browser-Smoketest`, `Engine und TypeScript`) mit `failure` nach rund 3–4 Sekunden; weder Runnername noch ausgeführte Steps vorhanden. Job-Logs über die GitHub-API nicht verfügbar.
-- **Kein valides Build- oder Testergebnis.** Den Run nicht als bestandene Prüfung interpretieren; Ursache (Runner/Billing/Actions) außerhalb dieser Sitzung klären und lokale Tests ausführen.
+1. **Markenauftritt:** durchgehendes 3,5-m-Fassadenband in `#8c1d40` über +x/+z; weißer, erheblich vergrößerter Schriftzug FUNDUS an beiden sichtbaren Seiten; cremefarbenes Claim-Band (normal: „Marken. Bis zu 60 % unter dem empfohlenen Preis.“, Aktion/Offprice: „Neue Ware jede Woche“); vorspringendes 8 × 4 m Eingangsportal, Zufahrtspylon über 9 m.
+2. **Drei Silhouetten:** eingeschossige Box mit 6,65–6,85 m Höhe, zweigeschossiger Fachmarkt mit 10,35–10,71 m Höhe, Glasoberzone/Rolltreppe und umlaufender Geschossfuge, Innenstadt-Geschäftshaus mit zwei bis drei Verkaufsebenen und zusätzlich ein bis zwei Bürogeschossen samt Raster-/Lochfenstern.
+3. **Variation:** Grundflächenproportionen, drei Paneelgrautöne, Eingangsposition, Dachoberlichter, Lüftungsaufbauten, Parkplatzlänge und -belegung aus Seed/Fassadenvariante.
+4. **Handelsbetrieb:** Schaufenster mit Puppen, Taschen, Schuhen und Home-Auslagen; dichte, aber geordnete Kleiderstangen und Regale mit Größen- und Abteilungsschildern; zusätzliche Wareninseln nur im Nah-LOD; Passanten mit weinroten Tragetaschen und Neueröffnungsschlange.
+5. **Dokumentation und Checks:** `render/KIT.md` ergänzt (Ziel 900–1.800 / Obergrenze 3.000 Teile); Höhen, Geschosse und Parkplatzzuordnung in `pruef-outlet-inhalt.js` ergänzt; Vergleichskatalog einheitlich auf `640 × 520` px pro Kachel erhöht.
 
-## Abnahme offen – vor Merge zwingend
-1. Lokal im Repo: `cd render && npm ci && npm run build && node spiel-render.js && node pruef-outlet.js && node pruef-staedte.js`.
-2. Gestaltung in allen 112 Städten: `cd render && node pruef-gestaltung.js "$(node -p "require('./haeuser.json').map(h=>h.stadt).filter((v,i,a)=>a.indexOf(v)===i).join(',')")"` (alternativ je Stadt/Prüfbatch). Bestehende Gestaltungsgrenzwerte müssen weiterhin 0 Verstöße erreichen.
-3. Kataloge rendern und **visuell prüfen**, besonders transparente Fronten/Lesbarkeit, Familienvariation, Format-Abgrenzung und Teilebudget:
-   `node render-katalog.js outlets`
-   `node render-katalog.js outlet-lagen`
-   `node render-katalog.js outlet-vergleich`
-   `node render-katalog.js alle-haeuser`.
-   Ergebnisse nach `bilder/` übernehmen. Mindestens drei visuelle Korrekturdurchläufe nach Renderbefund.
-4. Fern-LOD (`setzeLod('fern')`) und 3.000-Teile-Limit anhand real gebauter Geometrie messen.
-5. `cd engine && npm ci && npm run typecheck && npx jest`; GitHub-CI grün bestätigen.
+## Statische Verifikation (20.10.2026)
 
-**Wichtig:** Browser-Renderings, PNG-Dateien, vollständige Runtime-Tests und CI-Grünstatus sind in dieser Sitzung **nicht** nachgewiesen. Deshalb weder Merge noch Abnahmefreigabe. Nach Merge der Schwesterkette Branch gegen `main` abgleichen, bei Konflikten Änderungen in gemeinsamen Dateien ausschließlich ergänzend zusammenführen.
+- GitHub-Vergleich `main...feat/grafik-outlet`: Branch zuletzt 0 Commits hinter `main`; die Änderungen betreffen ausschließlich 20 Outlet-/Grafik-/Doku-/Prüfdateien.
+- 11 relevante Dateien einschließlich der zusammengeführten Bau-/Stadt-Dateien auf Einbaupunkte und ausgeglichene Trennzeichen geprüft: keine Abweichung im statischen Scan (ersetzt keinen JavaScript-/TypeScript-Parser).
+- `haeuser-outlet.json`: 20 Filialen in 20 verschiedenen Städten, darunter 14 Randlagen und 6 b-Lagen. Bei den sechs Innenstadtfilialen bleibt die Grundfläche nach der neuen Maßformel unter 80 % der größten Hartwig-Grundfläche.
+- Die drei Höhenklassen und Büro-/Parkplatzzuordnungen rechnerisch stichprobenfrei für alle 20 Standortdatensätze nachvollzogen.
+
+## Abnahme noch **nicht** erfolgt
+
+In dieser Ausführungsumgebung ist der GitHub-Zugriff nur über den Connector möglich. Ein lokaler Repository-Checkout, `npm ci`, Chromium-Renderlauf und die Ausgabe von PNGs in das Repository waren **nicht möglich**. Deshalb keine erfundenen Testergebnisse oder Bildabnahmen.
+
+Verbindlicher nächster Abnahmelauf auf dem Feature-Branch:
+
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest
+cd ../render
+npm ci
+npm run build
+node spiel-render.js
+node pruef-outlet.js
+node pruef-staedte.js
+node pruef-gestaltung.js
+node render-katalog.js outlets
+node render-katalog.js outlet-vergleich
+node render-katalog.js outlet-lagen
+```
+
+Vor einem Merge zusätzlich:
+- Alle 20 Häuser und alle drei Bauformen in **mindestens drei Bildrunden** in den erzeugten Kontaktbögen prüfen und gegebenenfalls korrigieren; fertige PNGs mit Protokoll nach `bilder/`.
+- `outlets`-Katalogstatistik: Ziel **900–1.800 Teile pro Normalhaus**, maximal 3.000; Fern-LOD separat prüfen. Diese Teilestückzahlen wurden **noch nicht gemessen**.
+- Sichtprüfung der mindestens 2,4 m hohen Schrift an Boxen / 2,0 m City ohne Zoom, Claim auf beiden Seiten, Dreifamilienkontrast, Abstand zu Billig-Wettbewerbern.
+- `pruef-gestaltung.js` über die gesamte Stadtliste ausführen und 0 Verstöße bestätigen, `spiel-render.js` 0 Abweichungen.
+- Vor Merge gegen den dann aktuellen `main` abgleichen. **PR #11 bis zu diesen Nachweisen als Draft belassen.**
