@@ -152,7 +152,13 @@ function dienstplan(s: GameState, h: Haus): PersonalPlan {
   }
   const ahQuote = st.aushilfenQuote;
   const gesamt = Object.values(gruppen).reduce((a, g) => a + g.bedarf, 0);
+  const weihnachtsReserve = dezember && weihnachten === 'reserve' ? gesamt * 0.02 : 0;
   const aushilfenStunden = gesamt * ahQuote;
+  // Bei früh gebuchter Weihnachtsreserve sind zusätzliche Schichten tatsächlich besetzt.
+  if (weihnachtsReserve > 0) {
+    gruppen.verkauf.tage[5].plan += rund(weihnachtsReserve * 0.6);
+    gruppen.kasse.tage[5].plan += rund(weihnachtsReserve * 0.4);
+  }
   // Zusatzkräfte überwiegend freitags und samstags im Verkauf und an der Kasse.
   for (const g of ['verkauf', 'kasse'] as PersonalGruppe[]) {
     const z = gruppen[g], anteil = g === 'kasse' ? 0.45 : 0.55;
@@ -165,7 +171,7 @@ function dienstplan(s: GameState, h: Haus): PersonalPlan {
   const normalLohn = (h.personal.vollzeit * 860 + h.personal.teilzeit * 690 + h.personal.aushilfen * 490) / basisStunden;
   const aufschlag = dezember && weihnachten === 'spaet' ? 1.55 : 1;
   const zusatzkosten = eur(aushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 +
-    (dezember && weihnachten === 'reserve' ? gesamt * 0.02 * 490 / 40 : 0));
+    weihnachtsReserve * 490 / 40);
   const plan: PersonalPlan = { woche: s.woche, gruppen, krank: aus.krank, urlaub: aus.urlaub,
     aushilfenStunden: rund(aushilfenStunden), zusatzkosten, verfuegbarkeit: 1,
     kaufquote: 1, fehlerkosten: 0, springerSaldo: 0, springerBewegungen: 0,
