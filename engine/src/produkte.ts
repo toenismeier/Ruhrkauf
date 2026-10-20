@@ -12,7 +12,20 @@ import { hqAktualisiere } from './hq';
 // Katalog (abgestimmt mit der Grafik: render/src/kit/produktbild.js zeichnet genau diese Typen und Farben)
 // ---------------------------------------------------------------------------------------------
 
+/** Zusätzliche Schnitt- und Sortimentsvarianten für acht Eigenmarken-Sparten. */
+export const ZUSATZ_ARTIKEL = {
+  damen: ['A-Linien-Kleid', 'Wickelkleid', 'Tunikabluse', 'Oversize-Bluse', 'Bootcut-Jeans', 'Culotte', 'Plisseerock', 'Bleistiftrock', 'Feinstrickpullover', 'Longcardigan', 'Trenchcoat', 'Bouclé-Jacke'],
+  herren: ['Slim-Fit-Hemd', 'Regular-Fit-Hemd', 'Oxford-Hemd', 'Henley-Shirt', 'Rundhalspullover', 'Rollkragenpullover', 'Cargo-Hose', 'Anzughose', 'Bermuda-Shorts', 'Stricksakko', 'Wollmantel', 'Leinen-Sakko'],
+  kinder: ['Kinder-Jeansshorts', 'Latzhose', 'Kinder-Sweatshirt', 'Kinder-Regenjacke', 'Kinder-Leggings', 'Kinder-Softshelljacke', 'Kinder-Polo', 'Kinder-Pyjama', 'Kinder-Strickpullover', 'Kinder-Tüllrock', 'Kinder-Sonnenhut', 'Kinder-Jogginghose'],
+  schuhe: ['Loafer', 'Ballerina', 'Chelsea-Boot', 'Stiefelette', 'Sandale', 'Espadrille', 'Slipper', 'Schnürschuh', 'Business-Schuh', 'Wanderschuh', 'Plateau-Sneaker', 'Winterstiefel'],
+  accessoires: ['Umhängetasche', 'Crossbody-Tasche', 'Shopper', 'Clutch', 'Portemonnaie', 'Rucksack', 'Weekender', 'Kartenetui', 'Seidentuch', 'Krawatte', 'Handschuhe', 'Reisetasche'],
+  heimtextil: ['Spannbettlaken', 'Bettbezug', 'Kopfkissenbezug', 'Wohndecke', 'Tagesdecke', 'Badetuch', 'Gästehandtuch', 'Waschlappen', 'Duschvorleger', 'Tischläufer', 'Tischdecke', 'Dekokissen'],
+  haushalt: ['Geschirrtuch', 'Schürze', 'Topflappen', 'Tischset', 'Serviette', 'Vorratsdose', 'Trinkbecher', 'Servierschale', 'Salatschüssel', 'Kerzenhalter', 'Aufbewahrungskorb', 'Dekotablett'],
+  beauty: ['Mascara', 'Foundation', 'Concealer', 'Rouge', 'Lidschatten', 'Nagellack', 'Handcreme', 'Gesichtsserum', 'Reinigungsgel', 'Duschgel', 'Körperlotion', 'Eau de Toilette'],
+} as const;
+export type Produktsparte = keyof typeof ZUSATZ_ARTIKEL;
 export type ArtikelTyp =
+  | (typeof ZUSATZ_ARTIKEL)[Produktsparte][number]
   | 'Jeans-Shorts' | 'Kaschmirpullover' | 'Strickjacke' | 'Bluse' | 'Hemd' | 'T-Shirt' | 'Poloshirt' | 'Kleid' | 'Rock' | 'Chino' | 'Jeans'
   | 'Mantel' | 'Steppjacke' | 'Blazer' | 'Sneaker' | 'Pumps' | 'Stiefel' | 'Pyjama' | 'Unterwäsche' | 'BH' | 'Socken' | 'Schal' | 'Mütze'
   | 'Handtasche' | 'Gürtel' | 'Bettwäsche' | 'Handtuch' | 'Kissen' | 'Tasse' | 'Vase' | 'Lippenstift' | 'Creme' | 'Parfum'
@@ -68,6 +81,7 @@ export interface TypDef {
   gruppe: Record<TrendGruppe, number>;
   /** Entwicklungsaufwand (1 einfach, 3 aufwendig). */
   aufwand: number;
+  sparte?: Produktsparte;
 }
 
 const G = (kinder: number, jung: number, mitte: number, reif: number): Record<TrendGruppe, number> => ({ kinder, jung, mitte, reif });
@@ -110,6 +124,55 @@ export const ARTIKELTYPEN: TypDef[] = [
   { typ: 'Kinderkleid', kategorie: 'kinder', wgs: ['kinder.maedchen', 'kinder.baby'], saison: 'sommer', preis: 25, materialien: ['Baumwolle', 'Bio-Baumwolle', 'Viskose', 'Leinen'], gruppe: G(1, 0, 0, 0), aufwand: 1 },
   { typ: 'Plüschtier', kategorie: 'kinder', wgs: ['kinder.baby'], saison: 'ganz', preis: 19, materialien: ['Polyester', 'Bio-Baumwolle', 'Baumwolle'], gruppe: G(1, 0, 0, 0), aufwand: 1 },
 ];
+/** Zwölf eigenständige Modelle je Sparte, zusätzliche Farbe-, Material- und Preisvarianten
+ * ergeben sich aus den vorhandenen Assistent-Reglern. Alte Artikel und Startsortimente bleiben unverändert. */
+const ZUSATZ_WG: Record<Produktsparte, WgId[]> = {
+  damen: ['damen.kleider', 'damen.blusen', 'damen.denim', 'damen.strick', 'damen.hosen', 'damen.jacken', 'damen.gg'],
+  herren: ['herren.hemden', 'herren.casual', 'herren.hosen', 'herren.strick', 'herren.business', 'herren.jacken'],
+  kinder: ['kinder.maedchen', 'kinder.jungen', 'kinder.baby'],
+  schuhe: ['accessoires.damenschuhe', 'accessoires.herrenschuhe', 'kinder.schuhe'],
+  accessoires: ['accessoires.lederwaren'],
+  heimtextil: ['wohnen.heimtextil', 'wohnen.bett'],
+  haushalt: ['wohnen.tisch', 'wohnen.deko'],
+  beauty: ['beauty.pflege', 'beauty.drogerie'],
+};
+const ZUSATZ_MATERIAL: Record<Produktsparte, Material[]> = {
+  damen: ['Baumwolle', 'Viskose', 'Leinen', 'Merino', 'Kaschmir', 'Seide'],
+  herren: ['Baumwolle', 'Bio-Baumwolle', 'Leinen', 'Merino', 'Kaschmir'],
+  kinder: ['Bio-Baumwolle', 'Baumwolle', 'Denim', 'Merino'],
+  schuhe: ['Leder', 'Baumwolle', 'Polyester'],
+  accessoires: ['Leder', 'Baumwolle', 'Leinen', 'Seide', 'Polyester'],
+  heimtextil: ['Baumwolle', 'Bio-Baumwolle', 'Leinen', 'Viskose'],
+  haushalt: ['Baumwolle', 'Leinen', 'Polyester'],
+  beauty: ['Polyester'],
+};
+const SPARTEN_KATEGORIE: Record<Produktsparte, ProduktKategorie> = {
+  damen:'oberteile', herren:'oberteile', kinder:'kinder', schuhe:'schuhe',
+  accessoires:'accessoires', heimtextil:'home', haushalt:'home', beauty:'beauty',
+};
+const SPARTEN_PREIS: Record<Produktsparte, number> = {
+  damen: 49, herren: 49, kinder: 25, schuhe: 79, accessoires: 39, heimtextil: 35, haushalt: 18, beauty: 19,
+};
+export const ZUSATZ_ARTIKELTYPEN: TypDef[] = (Object.keys(ZUSATZ_ARTIKEL) as Produktsparte[]).flatMap((sparte) =>
+  ZUSATZ_ARTIKEL[sparte].map((typ, index) => {
+    const wgs = ZUSATZ_WG[sparte];
+    const kategorie = sparte === 'damen' || sparte === 'herren'
+      ? index >= 10 ? 'jacken' : index >= 4 && index <= 7 ? 'unterteile' : 'oberteile'
+      : SPARTEN_KATEGORIE[sparte];
+    const wg = sparte === 'damen' || sparte === 'herren'
+      ? [wgs[Math.min(index < 4 ? index % 2 : index < 8 ? 2 + (index % 2) : index < 10 ? 3 : wgs.length - 1, wgs.length - 1)]]
+      : sparte === 'schuhe' ? wgs : [wgs[index % wgs.length]];
+    return {
+      typ, sparte, kategorie, wgs: wg,
+      saison: index % 3 === 0 ? 'sommer' : index % 3 === 1 ? 'winter' : 'ganz',
+      preis: SPARTEN_PREIS[sparte] + index * 2,
+      materialien: [...ZUSATZ_MATERIAL[sparte]],
+      gruppe: sparte === 'kinder' ? G(1, 0.1, 0.1, 0.1) : G(0.2, 0.75, 0.85, 0.85),
+      aufwand: 1 + (index % 3),
+    } satisfies TypDef;
+  })
+);
+ARTIKELTYPEN.push(...ZUSATZ_ARTIKELTYPEN);
 export const TYP: Record<string, TypDef> = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
 
 /** Grundfarben je Zielgruppe (unabhängig vom Trend). */
@@ -686,7 +749,9 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
   const kap = kapazitaet(s);
   const marken = s.eigenmarken.marken.filter((m) => m.status !== 'eingestellt' && (!marke || m.id === marke)).map((m): MarkenProdukte => {
     const liste = s.produkte.liste.filter((p) => p.marke === m.id && p.status !== 'ausgelistet');
-    const kats = [...new Set(liste.map((p) => p.kategorie))];
+    // Keine Kategorie durch ein anfangs leeres Sortiment künstlich sperren.
+    const moegliche = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s,m,t)).map((t) => t.kategorie);
+    const kats = [...new Set([...liste.map((p) => p.kategorie), ...moegliche])];
     const ent = liste.filter((p) => p.status === 'entwicklung').length;
     const voll = kats.filter((k) => belegt(s, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
     return {
@@ -700,6 +765,7 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
 }
 
 export interface ProduktKatalog {
+  sparten: { id: Produktsparte; name: string; typen: ArtikelTyp[] }[];
   kategorien: { id: ProduktKategorie; name: string }[];
   typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number> }[];
   farben: { name: Farbe; hex: string }[];
@@ -711,6 +777,11 @@ export interface ProduktKatalog {
 
 export function produktKatalog(_s: GameState): ProduktKatalog {
   return {
+    sparten: (Object.keys(ZUSATZ_ARTIKEL) as Produktsparte[]).map((id) => ({
+      id, name: ({ damen:'Bekleidung Damen', herren:'Bekleidung Herren', kinder:'Bekleidung Kinder',
+        schuhe:'Schuhe', accessoires:'Accessoires', heimtextil:'Heimtextil', haushalt:'Haushalt', beauty:'Beauty' })[id],
+      typen: [...ZUSATZ_ARTIKEL[id]],
+    })),
     kategorien: (Object.keys(PRODUKT_KATEGORIEN) as ProduktKategorie[]).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
     typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
     farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN[f] })),
