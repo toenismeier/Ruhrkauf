@@ -2,6 +2,7 @@ import { GRUPPEN, saisonFaktor, TREND_LAGE } from './daten';
 import type { Aktion, GameState, GruppeId, Haus, HausKpi } from './types';
 import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
+import { premiumImageFaktor, premiumServiceQuote } from './premium';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
@@ -75,7 +76,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale;
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h);
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -125,7 +126,7 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   // Personal
   const p = h.personal;
   const fteIst = p.vollzeit + p.teilzeit + p.aushilfen;
-  roh.fteBedarf = qmVerkauf / PARAM.qmJeFte + summeBedarf / PARAM.umsatzJeFte;
+  roh.fteBedarf = (qmVerkauf / PARAM.qmJeFte) * (h.klasse === 'premium' ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
   // Besetzungsnorm: eine gute Personalabteilung plant Einsätze effizienter
   const besetzung = roh.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh.fteBedarf / hqBesetzungsNorm(s), 0, 1), 0.5) : 1;
   const ahQuote = fteIst > 0 ? p.aushilfen / fteIst : 0;
@@ -197,7 +198,7 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     qmBetrieb += f.konzept === 'leer' ? f.qm * 0.25 : f.qm;
   }
   k.nebenkosten = h.miete.netTyp === 'net' ? 0 : qmNk * h.miete.nebenkostenQmWoche;
-  k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb;
+  k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt;
   k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s);
   return k;
 }

@@ -230,3 +230,11 @@ export const WETTBEWERB_UEBERSCHNEIDUNG: Record<WettbewerberArt, Partial<Record<
   premium: { beauty: 1, accessoires: 1, damen: 0.6, food: 0.5 },
   leer_ehemals: {},
 };
+
+/** Namen der Hartwig-Premiumhäuser; unabhängig von Premium-Mitbewerbern. */
+export const PREMIUM_HAEUSER = [
+  { id: 'P001', name: 'Palais Hartwig', stadt: 'Berlin', rang: 1 },
+  { id: 'P002', name: 'Hartwig am Hofgarten', stadt: 'München', rang: 1 },
+  { id: 'P003', name: 'Alsterhaus Hartwig', stadt: 'Hamburg', rang: 2 },
+  { id: 'P004', name: 'Hartwig Königsallee', stadt: 'Düsseldorf', rang: 3 },
+] as const;

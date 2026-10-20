@@ -782,7 +782,7 @@ const BODEN_HILFE = {
   pflasterFlaeche: (...a) => pflasterFlaeche(...a), baueParkplatz: (...a) => baueParkplatz(...a), imRechteck: (...a) => imRechteck(...a),
 };
 
-const EINKAUF_SLOTS = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber', 'slot:outlet']);
+const EINKAUF_SLOTS = new Set(['slot:warenhaus', 'slot:premium', 'slot:sport', 'slot:wettbewerber', 'slot:outlet']);
 
 /** Einkaufszentrum / Fachmarktlage: Asphaltfläche, Vorplatz am Eingang, Parkplatz mit Baumreihen, Leute. */
 function baueCenterFlaeche(ctx, b, r, teile) {
@@ -1578,6 +1578,7 @@ function baueBahn(ctx, b, r) {
 export const MARKER = {
   hartwig: { farbe: '#d23c32', zeichen: 'H' },
   hartwigSport: { farbe: '#1d8a6b', zeichen: 'S' },
+  premium: { farbe: '#b8955a', zeichen: '♛' },
   wettbewerber: { farbe: '#7b858e', zeichen: 'W' },
   modehaus: { farbe: '#6b4f8f', zeichen: 'M' },
   outlet: { farbe: '#d39a2b', zeichen: 'O' },
@@ -1624,7 +1625,7 @@ function rundRechteck(k, x, y, w, h, r) {
 
 /** Marker-Liste für alle Standorte eines Plans: Hartwig rot (H), Hartwig Sport grün (S), Wettbewerber grau (W). */
 export function standortMarker(plan, groesse) {
-  const art = { warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', outlet: 'wettbewerber' };
+  const art = { premium: 'premium', warenhaus: 'hartwig', sport: 'hartwigSport', wettbewerber: 'wettbewerber', outlet: 'wettbewerber' };
   return (plan.standorte ?? []).map((st) => ({ parzelle: st.parzelle, art: art[st.rolle] ?? 'hartwig', groesse: st.rolle === 'wettbewerber' ? (groesse ?? 10) * 0.8 : groesse }));
 }
 

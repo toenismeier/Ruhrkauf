@@ -302,7 +302,7 @@ function baueStadtAusSpiel(name) {
 const KACHEL = 110, BUDGET = 112000, VOLL_MAX_ZOOM = 340;
 const KA = { liste: [], teileGrund: 0, laeuft: false };
 const HAUSTYPEN = new Set(['stadthaus', 'eck', 'hofhaus']);
-const IMMER_GRUND = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber', 'slot:hq', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus', 'slot:nord_speicher', 'slot:nord_hafen', 'slot:center_passage']);
+const IMMER_GRUND = new Set(['slot:warenhaus', 'slot:premium', 'slot:sport', 'slot:wettbewerber', 'slot:hq', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus', 'slot:nord_speicher', 'slot:nord_hafen', 'slot:center_passage']);
 function klotzHoehe(p) { const g = p.hofbau ? 2 : p.typ === 'hofhaus' ? Math.max(2, (p.geschosse ?? 4) - 1) : p.geschosse ?? 4; return 4.2 + g * 3.3; }
 function kachelnAnlegen(parzellen) {
   for (const k of KA.liste) entsorge(k);
@@ -525,6 +525,16 @@ window.hausKlick = (art, id, nr) => {
   hausEtageWahl = { id, nr: Number(nr) }; oeffneHaus(id); $('pinhalt').scrollTop = 0;
 };
 const AKTION_NAME = { sale: 'Sale', jubilaeum: 'Jubiläum', weihnachten: 'Weihnachten', blackfriday: 'Black Friday' };
+window.premiumTun = (was, id) => {
+  const a = was === 'schutz' ? { typ: 'premiumSchuetzen', an: s.premiumSchuetzen === false }
+    : was === 'investieren' ? { typ: 'premiumInvestition', haus: id, betrag: 10_000_000 }
+      : was === 'verhandeln' ? { typ: 'angebotVerhandeln', angebot: id, haeuser: [] }
+        : was === 'verkaufen' ? { typ: 'angebotAnnehmen', angebot: id } : null;
+  if (!a) return;
+  const r = E.fuehreAus(s, a);
+  meldung(r.text, r.ok);
+  if (r.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
+};
 function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
   if (!d) return;
@@ -537,6 +547,15 @@ function oeffneHaus(id) {
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
+  if (h.klasse === 'premium') {
+    const p = E.premiumUebersicht(s).find((q) => q.id === id);
+    html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
+    if (h.premiumEigentuemer) html += `<div class="zeile">Eigentümer: ${h.premiumEigentuemer}</div>`;
+    else if (h.status === 'offen') html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p?.schutz ? 'Rabatt-Schutz aufheben' : 'Rabatt-Schutz aktivieren'}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. € investieren</button></div>`;
+    const an = s.angebote.find((a) => a.status === 'offen' && a.typ === 'premiumVerkauf' && a.wunschHaeuser?.includes(id));
+    if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || 'Investor'} · ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
+    html += '</div>';
+  }
   const shops = EQ.shops(s, h);
   if (hausEtageWahl?.id === id) {
     const b = innenBild(h, hausEtageWahl.nr);
@@ -567,7 +586,7 @@ function oeffneHaus(id) {
       (wirkung ? '<small>' + wirkung + '</small>' : '') + '</span><span>→</span></button>';
   }
   html += '</div>';
-  panel(h.name, `${h.stadt} · ${h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
+  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
   if (neu) hausZeigen(id);
 }
 
