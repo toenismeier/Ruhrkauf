@@ -698,9 +698,10 @@ export function hqArchivSetzen(s: GameState, gebaeudeId: string, nr: number, akt
   const e = g?.etagen.find((x) => x.nr === nr);
   if (!g || !e || !e.gemietet) return fehler('Für das Archiv ist eine gemietete HQ-Etage erforderlich.');
   if (!!e.archiv === aktiv) return fehler(aktiv ? 'Auf dieser Etage befindet sich bereits ein Archiv.' : 'Hier ist kein Archiv eingerichtet.');
+  if (aktiv && s.hq.gebaeude.some((bau) => bau.etagen.some((et) => et.archiv))) return fehler('Es gibt bereits eine Archiv-Etage. Bitte zuerst das bestehende Archiv auflösen.');
   e.archiv = aktiv;
   hqAktualisiere(s);
-  return ok(aktiv ? `Archiv auf Etage ${etageText(nr)} eingerichtet, zusätzliche Miete ${mio(wochenMiete(ARCHIV_QM, g.mieteQmMonat))} pro Woche.` : `Archiv auf Etage ${etageText(nr)} aufgelöst. Die Zusatzmiete entfällt.`);
+  return ok(aktiv ? `Archiv auf Etage ${etageText(nr)} eingerichtet, zusätzliche Miete ${eur(wochenMiete(ARCHIV_QM, g.mieteQmMonat)).toLocaleString('de-DE')} € je Woche.` : `Archiv auf Etage ${etageText(nr)} aufgelöst. Die Zusatzmiete entfällt.`);
 }
 
 export function hqEtageKuendigen(s: GameState, gebaeudeId: string, nr: number): HqErgebnis {
@@ -909,7 +910,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
       return {
         id: g.id, name: g.name, stadt: g.stadt, typ: g.typ, vermieter: g.vermieter, mieteQmMonat: g.mieteQmMonat, nebenkostenQmMonat: g.nebenkostenQmMonat,
         bisWoche: g.bisWoche, qmGemietet, qmBelegt, auslastung: qmGemietet > 0 ? qmBelegt / qmGemietet : 0,
-        kostenWoche: eur(wochenMiete(qmGemietet, g.mieteQmMonat + g.nebenkostenQmMonat)), etagen,
+        kostenWoche: eur(wochenMiete(qmGemietet, g.mieteQmMonat + g.nebenkostenQmMonat) + wochenMiete(g.etagen.filter((e) => e.gemietet && e.archiv).length * ARCHIV_QM, g.mieteQmMonat)), etagen,
       };
     }),
     abteilungen: hq.abteilungen.map((a) => {
