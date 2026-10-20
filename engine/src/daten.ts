@@ -15,7 +15,9 @@ export interface GruppeDef {
   saison: number[]; // 12 Monatsfaktoren, wird normalisiert
 }
 
-const WH: number[] = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1.0, 1.2, 1.75];
+// M7: Januar/Februar weniger stark als nachgelagerte Verlustmonate gewichten.
+// Warengruppe Spielwaren behält ihren eigenständigen Abverkauf nach Weihnachten.
+const WH: number[] = [0.98, 0.96, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1.0, 1.2, 1.75];
 
 function mit(basis: number[], over: Record<number, number>): number[] {
   return basis.map((x, i) => (over[i] !== undefined ? over[i] : x));
@@ -60,7 +62,10 @@ export const gruppenFuer = (f: Format): GruppeId[] =>
 /** Saisonfaktor einer Gruppe in einer Woche (linear zwischen Monaten interpoliert). */
 export function saisonFaktor(g: GruppeId, woche: number): number {
   const s = GRUPPEN[g].saison;
-  const pos = ((woche % 52) / 52) * 12 - 0.5;
+  // KW 1–3 dürfen nicht anteilig Dezember/Weihnachten enthalten:
+  // Der bisherige Wert -0,5 blendete KW 1 künstlich in den Dezember zurück.
+  // Ab KW 4 bleibt die bisherige Interpolation und damit die Q4-Kurve unverändert.
+  const pos = Math.max(0, ((woche % 52) / 52) * 12 - 0.5);
   const i = Math.floor(pos);
   const t = pos - i;
   const a = s[(i + 12) % 12];
