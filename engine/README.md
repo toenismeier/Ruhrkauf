@@ -230,3 +230,21 @@ Bot C nimmt Premiumhäuser bei der Schließungsauswahl in Woche 3 ausdrücklich 
 Der bestehende Test verlangt für die vier Häuser 11 / 11 / 9 / 6 % EBITDA-Marge mit unveränderter Toleranz von ±2 Prozentpunkten. Die A/B-Umsatzgrenze bleibt ±1,5 % im ersten Jahr. `npm run check:premium` liefert je Seed eine **Vorher-/Nachher-Tabelle pro Haus** (Umsatz, Marge), den A/B-Konzernumsatz und den vollständigen Bot-C-Vergleich inklusive W12-EBITDA, BR-Zustimmungssituation, Planentscheidung W23 sowie Laufzeit bis W260. Die Gläubigerversammlung und ihre Schwelle wurden bewusst **nicht** verändert.
 
 **Abnahmestatus:** Noch keine ausführbaren lokalen Jest-/Typecheck-/Bot-/Render-Läufe in dieser Umgebung. Die veränderten Faktoren sind vorläufig, die Zielwerte und Bot-C-Überleben erst nach gemessenen Seeds 1–3 zu bestätigen. Bei roten Margen: zunächst Rangfaktoren, danach Konzessionen, zuletzt FTE prüfen; die Toleranz nicht aufweichen.
+
+
+### Premium-Engine – Abschnitt 6 (20.10.2026; nur Engine)
+
+Die operative Kalibrierung ist von der zufälligen Größe des umgewidmeten 1a-Hauses entkoppelt. Die vier Häuser behalten ihre regulären Warenhaus-IDs, erhalten jedoch **fixe Flächen, Etagen und Sortimentsanteile**. Das Hauspotenzial wird aus der echten Verkaufsfläche, einem gemeinsamen Referenzwert von 40 €/m²/Woche und rangabhängiger Produktivität berechnet. Die Nachfrage läuft weiter durch Sättigung, Einkauf, Warenverfügbarkeit, Wettbewerb, Marketing und Hauskosten; weder Umsatz noch DB werden direkt in die KPI geschrieben. Ein gesonderter Premium-RNG wird nicht benötigt, die Initialisierung zieht keine Zufallszahlen.
+
+| Haus | Verkaufsfläche | Grundfläche | Etagen | Produktivitätsfaktor | Servicequote | kalkulatorische Miete am Sollumsatz |
+|---|---:|---:|---:|---:|---:|---:|
+| P001 Berlin | 30.000 m² | 5.000 m² | 6 | 1,55 | 6,0 % | 5,7 % |
+| P002 München | 30.000 m² | 5.000 m² | 6 | 1,55 | 6,0 % | 5,7 % |
+| P003 Hamburg | 18.000 m² | 3.600 m² | 5 | 1,52 | 7,0 % | 6,0 % |
+| P004 Düsseldorf | 14.000 m² | 2.800 m² | 5 | 1,45 | 9,2 % | 6,5 % |
+
+Die Personalbemessung basiert auf Referenzflächenleistung zuzüglich 15 % Beratungsaufwand; eine höhere Premium-Produktivität löst keine gleich hohe Lohnkostensteigerung aus. Eigengenutzte Immobilien haben stabile kalkulatorische Mietansätze. Für den Konzern wird die **modellierte Start-Nachfragebasis** wie bisher durch gegenläufige Normierung der übrigen Warenhäuser erhalten; die tatsächliche Jahresumsatzabweichung ist gesondert zu messen.
+
+Ergänzte Regressionen in `tests/premium.test.ts` prüfen je Seed 1–3 die Flächen, Stockwerke, seedunabhängige Anfangsnachfrage, 52-Wochen-Umsatzrangfolge sowie weiterhin **unverändert** 11 / 11 / 9 / 6 % mit ±2 Prozentpunkten. `scripts/premium-kalibrierung.ts` berichtet nun zusätzlich Flächen und Umsatzrangfolge. Auch die bisherigen Prüfungen für A/B-Umsatz (±1,5 %), Bot C (260 Wochen), Insolvenz und RNG bleiben bestehen.
+
+**Validierungsstatus:** Der vorliegende Branch wurde über die GitHub-Dateischnittstelle bearbeitet. Der private Checkout ist in dieser Ausführungsumgebung wegen fehlender DNS-Auflösung von `github.com` nicht verfügbar. Daher **keine neuen Messwerte** und **keine Behauptung grüner Tests**. Nach lokalem Checkout ausführen: `cd engine && npm ci && npm run typecheck && npx jest --runInBand && npm run check:premium`; zusätzlich `npx tsx scripts/bot.ts <seed> 260 --tief` für Seed 1, 2 und 3. Bei Abweichungen die Rangparameter anhand der 52-Wochen-Messungen iterieren. Grafik und Renderer wurden in diesem Arbeitsschritt nicht bearbeitet.
