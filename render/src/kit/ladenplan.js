@@ -257,11 +257,13 @@ function verdichteOutlet(plan) {
     let gesetzt=false;
     for(const f of frei) {
       if(f.size<Math.min(gross,3.75))break;
-      const raum=plan.abteilungen.find(a=>f.x>=a.x&&f.z>=a.z&&
-        f.x+w<=a.x+a.w&&f.z+d<=a.z+a.d);
-      if(!raum)continue;
-      for(let z=f.z;z+d<=f.z+f.size+1e-8&&!gesetzt;z+=U)
-        for(let x=f.x;x+w<=f.x+f.size+1e-8&&!gesetzt;x+=U) {
+      const z0=Math.ceil((f.z-1e-8)/U)*U;
+      const x0=Math.ceil((f.x-1e-8)/U)*U;
+      for(let z=z0;z+d<=f.z+f.size+1e-8&&!gesetzt;z+=U)
+        for(let x=x0;x+w<=f.x+f.size+1e-8&&!gesetzt;x+=U) {
+          const raum=plan.abteilungen.find(a=>x>=a.x-1e-8&&z>=a.z-1e-8&&
+            x+w<=a.x+a.w+1e-8&&z+d<=a.z+a.d+1e-8);
+          if(!raum)continue;
           const m=item(id,x,z,0,raum.id,{ausgleich:true});
           if(!passeIn(m,raum)||!passe(m,plan,
             [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
