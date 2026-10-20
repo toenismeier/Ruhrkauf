@@ -21,7 +21,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 |---|---|---|---|
 | Q04 Spiel-Befunde Wurf 1 | `feat/q04-spiel-befunde` #40 | abnahmefähig | prüfen, mergen |
 | Q05 Eigenmarken und Delegation je Aufgabe | `feat/q05-eigenmarken-delegation` #42 | abnahmefähig | prüfen, mergen |
-| Maßstab Engine Phase 1/2 (#7, 560 Häuser) | `feat/engine-massstab` #7 | abnahmefähig (Phase 1), Phase 2 offen | Abnahme, dazu EBITDA-Verlauf Januar/Februar klären (Frage an Ummo) |
+| Maßstab Engine Phase 1/2 (#7, 560 Häuser) | `feat/engine-massstab` #7 | abnahmefähig (Phase 1), Phase 2 offen | Abnahme; neu Abschnitt 11 in `nachbesserung-massstab.md`: Q1-Verlauf abschwächen (Ummo 20.10.) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | `feat/massstab-oberflaeche` #23 | abnahmefähig | Prüfung; Voraussetzung für Q07 |
 | Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | – | offen | Start nach #7 Phase 2 |
 | Q06 Marktbeobachtung (Meldungen filtern) | – | offen | Start nach Merge N08 |
