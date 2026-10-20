@@ -582,6 +582,8 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** Persistiertes Archiv des Handelsboten (maximal 104 Wochen). */
+  zeitung?: import('./zeitung').ZeitungStand;
   /** N01: Statistik ist optional und ändert keine Berechnung. */
   statistikDeaktiviert?: boolean;
   statistik?: { sparsam: boolean; stimmung: { woche: number; wert: number }[] };

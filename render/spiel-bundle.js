@@ -57,6 +57,8 @@
     WG: () => WG,
     WG_DEF: () => WG_DEF,
     WG_JE_BEREICH: () => WG_JE_BEREICH,
+    ZEITUNG_ARTIKELARTEN: () => ZEITUNG_ARTIKELARTEN,
+    ZEITUNG_REITER: () => ZEITUNG_REITER,
     ZIELGRUPPEN_TEXT: () => ZIELGRUPPEN_TEXT,
     aktionsAuswertung: () => aktionsAuswertung,
     aktionskalender: () => aktionskalender,
@@ -172,7 +174,10 @@
     wettbewerbFuerGrafik: () => wettbewerbFuerGrafik,
     wettbewerbUebersicht: () => wettbewerbUebersicht,
     wgDetail: () => wgDetail,
-    wocheAbspielen: () => wocheAbspielen
+    wocheAbspielen: () => wocheAbspielen,
+    zeitungAktiv: () => zeitungAktiv,
+    zeitungAktuelle: () => zeitungAktuelle,
+    zeitungArchiv: () => zeitungArchiv
   });
 
   // ../engine/src/daten.ts
@@ -4112,6 +4117,169 @@
     return null;
   }
 
+  // ../engine/src/zeitung.ts
+  var ZEITUNG_REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
+  var EREIGNISSE = [
+    ["konkurrenz_neu", "Handel", "konkurrenz", "Neue Konkurrenz in der Innenstadt", "Ein Anbieter investiert in Verkaufsfl\xE4che.", "Der lokale Handel stellt sich auf einen ver\xE4nderten Wettbewerb ein.", "Die kommenden Wochen d\xFCrften zeigen, wie stark sich die Kundschaft neu verteilt.", /wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
+    ["konkurrenz_zu", "Handel", "konkurrenz", "Wettbewerber gibt Standort auf", "Die Einkaufslandschaft ver\xE4ndert sich erneut.", "Ein frei werdendes Gesch\xE4ft ver\xE4ndert die Lage in der Innenstadt.", "Die Nachnutzung d\xFCrfte von Kaufkraft und Immobilienangebot abh\xE4ngen.", /wettbewerb.*schließ|konkurrenz.*schließ|konkurrent.*schließ|wettbewerb.*aufgegeben/i],
+    ["konkurrenz_aktion", "Handel", "konkurrenz", "Preiskampf auf der Einkaufsstra\xDFe", "Aktionen erh\xF6hen den Druck auf den Handel.", "Preisnachl\xE4sse k\xF6nnen kurzfristig Frequenz anziehen.", "F\xFCr die langfristige Profitabilit\xE4t bleibt die Handelsspanne entscheidend.", /wettbewerb.*(aktion|rabatt)|konkurrenz.*(aktion|rabatt)|preiskampf/i],
+    ["konkurrenz_uebernahme", "Handel", "konkurrenz", "Kaufhausfl\xE4che wechselt den Betreiber", "Ein Wettbewerber sichert sich neue Pr\xE4senz.", "Leerst\xE4nde werden zunehmend als strategische Chance behandelt.", "Beobachter erwarten neue Konzepte an den bisherigen Standorten.", /wettbewerb.*übernehm|konkurrenz.*übernehm|nachnutzung.*wettbewerb/i],
+    ["konkurrenz_preise", "Handel", "konkurrenz", "Der Preis entscheidet nicht allein", "Der Wettbewerb sucht neue Kundengruppen.", "Standortqualit\xE4t und Sortiment bleiben zentrale Erfolgsfaktoren.", "Ein hoher Werbedruck ersetzt keine tragf\xE4hige Kalkulation.", /wettbewerb.*preis|preisdruck|konkurrenz.*preise/i],
+    ["haus_schliessung", "Konzern", "haus", "Hartwig bereitet Schlie\xDFung vor", "Besch\xE4ftigte und Eigent\xFCmer warten auf Klarheit.", "Das Unternehmen muss wirtschaftliche und soziale Folgen abw\xE4gen.", "Vor Ort beginnt die Suche nach einer tragf\xE4higen Perspektive.", /hartwig.*schließ|haus.*schließ|soll schließen|schließung.*haus/i],
+    ["haus_raeumung", "Konzern", "haus", "R\xE4umungsverkauf am Standort", "Ein Kaufhaus geht in die letzte Verkaufsphase.", "Die Restbest\xE4nde werden schrittweise abgebaut.", "F\xFCr den Standort gewinnt die k\xFCnftige Nutzung an Bedeutung.", /räumungsverkauf|räumung/i],
+    ["haus_umbau", "Konzern", "haus", "Hartwig investiert in die Fl\xE4che", "Umbauten ver\xE4ndern das Erscheinungsbild.", "Die Gesch\xE4ftsf\xFChrung setzt auf eine bessere Fl\xE4chenleistung.", "Ob die Ma\xDFnahme tr\xE4gt, zeigen erst die kommenden Wochen.", /umbau|modernisier|renovier/i],
+    ["haus_miete", "Konzern", "haus", "Mieten im Fokus der Sanierung", "Immobilienkosten werden neu bewertet.", "Hohe Fixkosten schr\xE4nken die Gestaltungsspielr\xE4ume ein.", "Verhandlungen mit Vermietern bleiben ein Schl\xFCssel der Restrukturierung.", /vermieter|mietvertrag|miete.*verhandel/i],
+    ["haus_personal", "Konzern", "haus", "Personaleinsatz auf dem Pr\xFCfstand", "Filialen reagieren auf die Ertragslage.", "Eine tragf\xE4hige Besetzung bleibt f\xFCr Beratung und Verkauf erforderlich.", "Die Interessen der Besch\xE4ftigten m\xFCssen in die Planung einflie\xDFen.", /personalabbau|personalaufbau|beschäftigte.*abbau/i],
+    ["glaeubiger", "Politik", "politik", "Gl\xE4ubiger entscheiden \xFCber Zukunft", "Im Verfahren r\xFCckt der Insolvenzplan in den Mittelpunkt.", "Die Beteiligten bewerten Finanzierung und operative Aussichten.", "Eine Einigung w\xFCrde neue Handlungsspielr\xE4ume schaffen.", /gläubigerversammlung|insolvenzplan|gläubiger.*versammlung/i],
+    ["insolvenzantrag", "Politik", "politik", "Hartwig unter Insolvenzschutz", "Die Sanierung tritt in eine kritische Phase.", "Das Verfahren soll den Gesch\xE4ftsbetrieb stabilisieren.", "F\xFCr Lieferanten und Besch\xE4ftigte kommt es auf belastbare Zusagen an.", /insolvenzantrag|schutzschirm|insolvenzverfahren/i],
+    ["insolvenz_gescheitert", "Politik", "politik", "Sanierung steht vor dem Aus", "Die Gl\xE4ubigerlage versch\xE4rft sich.", "Die Gesch\xE4ftsf\xFChrung muss die n\xE4chsten Schritte sorgf\xE4ltig pr\xFCfen.", "F\xFCr die betroffenen Standorte ist die Unsicherheit gro\xDF.", /zerschlag|masseunzulänglichkeit|insolvenz.*gescheitert/i],
+    ["betriebsrat", "Politik", "politik", "Betriebsrat verlangt Perspektiven", "Arbeitnehmervertretung und Vorstand verhandeln.", "Die Besch\xE4ftigten erwarten konkrete Antworten auf offene Fragen.", "Ein belastbarer Sozialdialog kann weitere Konflikte vermeiden.", /betriebsrat|interessenausgleich/i],
+    ["sozialplan", "Politik", "politik", "Sozialplan wird verhandelt", "Die Gespr\xE4che \xFCber Ausgleichsma\xDFnahmen laufen.", "Die Finanzierung der Regelungen bleibt ein zentraler Punkt.", "Die Parteien stehen unter erheblichem Zeitdruck.", /sozialplan|abfindung/i],
+    ["streik", "Politik", "politik", "Arbeitskampf belastet den Handel", "Besch\xE4ftigte fordern eine Einigung.", "Ausf\xE4lle treffen den Betrieb unmittelbar.", "Die Konfliktparteien m\xFCssen an den Verhandlungstisch zur\xFCckfinden.", /streik|arbeitskampf/i],
+    ["tarif", "Politik", "politik", "Tarifrunde vor neuer Entscheidung", "Die Personalpolitik steht im Blickpunkt.", "Tarifliche Vereinbarungen wirken \xFCber Jahre nach.", "Die wirtschaftliche Belastbarkeit bestimmt den Verhandlungsspielraum.", /tarif/i],
+    ["quartal", "Konzern", "haus", "Quartalszahlen pr\xE4gen die Debatte", "Umsatz und Ergebnis r\xFCcken in den Mittelpunkt.", "Die Investoren achten auf Kosten, Marge und Liquidit\xE4t.", "Ein einzelnes Quartal entscheidet jedoch noch nicht \xFCber den Trend.", /quartal|ebitda|ergebnis.*umsatz/i],
+    ["liquiditaet", "Konzern", "markt", "Liquidit\xE4t bleibt entscheidend", "Kasse und Kreditlinie bestimmen das Tempo.", "Kurzfristige Zahlungsmittel sind Voraussetzung f\xFCr jede Sanierung.", "Auch die Lieferanten verfolgen die Entwicklung aufmerksam.", /liquidität|kreditlinie|kassenbestand|zahlungsunfähig/i],
+    ["bank", "Markt", "markt", "Banken verlangen Verl\xE4sslichkeit", "Finanzierung wird zum Pr\xFCfstein.", "Kreditgeber erwarten einen nachvollziehbaren Gesch\xE4ftsplan.", "Entscheidend ist die F\xE4higkeit, Verpflichtungen fristgerecht zu bedienen.", /bank|kreditgeber/i],
+    ["lieferanten", "Markt", "markt", "Lieferanten achten auf Zahlungsziele", "Die Beschaffung bleibt unter Beobachtung.", "Vertrauen und Warenverf\xFCgbarkeit h\xE4ngen eng zusammen.", "Eine stabile Lieferkette st\xE4rkt die Verkaufsf\xE4higkeit der H\xE4user.", /lieferant|warenkredit|vorkasse/i],
+    ["vorstand", "Konzern", "haus", "Bewegung in der Konzernspitze", "Neue Aufgaben f\xFCr das Management.", "An der Unternehmensspitze werden Zust\xE4ndigkeiten neu geordnet.", "Der Handel erwartet klare Entscheidungen und nachvollziehbare Priorit\xE4ten.", /vorstand|ressort|geschäftsführung|berufen|abberufen/i],
+    ["eigenmarken", "Handel", "haus", "Eigenmarken sollen Profil sch\xE4rfen", "Der Konzern arbeitet am Sortiment.", "Eigene Marken versprechen mehr Differenzierung im Wettbewerb.", "Entscheidend bleibt die Akzeptanz bei den Kundinnen und Kunden.", /eigenmarke|marke gegründet|markenstrategie/i],
+    ["sortiment", "Handel", "haus", "Sortiment wird neu gewichtet", "Fl\xE4chen m\xFCssen wirtschaftlicher werden.", "Die Mischung aus Mode, Wohnen und Service wird regelm\xE4\xDFig \xFCberpr\xFCft.", "Die Nachfrage vor Ort liefert die wichtigsten Hinweise.", /sortiment|warengruppe|sortimentsmix/i],
+    ["marketing", "Handel", "haus", "Werbung als Hebel der Wende", "Der Handel wirbt um neue Frequenz.", "Aktionen k\xF6nnen kurzfristig die Ums\xE4tze st\xFCtzen.", "Eine nachhaltige Bindung der Kundschaft ist wichtiger als reine Rabattsignale.", /marketing|kampagne|kundenkarte|coupon/i],
+    ["verkauf", "Handel", "haus", "Kaufkraft entscheidet \xFCber Standorte", "Verkaufsfl\xE4chen geraten unter Druck.", "Die Umsatzentwicklung f\xE4llt regional unterschiedlich aus.", "Eine flexible Fl\xE4chenplanung gewinnt an Bedeutung.", /umsatzrückgang|umsatzplus|absatz|verkauf/i],
+    ["immobilie", "Markt", "markt", "Handelsimmobilien im Wandel", "In den Innenst\xE4dten entstehen neue Konzepte.", "Die Nutzung gro\xDFer Fl\xE4chen wird vielerorts \xFCberpr\xFCft.", "Mischformen aus Handel und Dienstleistung gewinnen an Gewicht.", /immobilie|leerstand|innenstadt/i],
+    ["kosten", "Konzern", "haus", "Kostendisziplin bleibt Schl\xFCssel", "Fixkosten m\xFCssen zur Nachfrage passen.", "Sanierung erfordert mehr als kurzfristige Einsparungen.", "Die Wirkung einer Ma\xDFnahme zeigt sich in der Ergebnisrechnung.", /kosten|einspar|sparprogramm/i],
+    ["ecommerce", "Handel", "markt", "Online und Fl\xE4che r\xFCcken zusammen", "Der Handel sucht neue Vertriebskan\xE4le.", "Digitale Services sollen den station\xE4ren Einkauf erg\xE4nzen.", "Die Wirtschaftlichkeit h\xE4ngt vom Kundennutzen ab.", /online|e-commerce|ecommerce|app/i],
+    ["presse", "Top", "haus", "Hartwig bleibt Gespr\xE4chsthema", "Die Entwicklungen bewegen die Branche.", "Die Marktteilnehmer verfolgen die Restrukturierung aufmerksam.", "Die n\xE4chste Bilanz wird zeigen, ob die Strategie tr\xE4gt.", /./i]
+  ].map(([id, reiter, bild3, titel, unter, kommentar, perspektive, muster]) => ({
+    id,
+    reiter,
+    bild: bild3,
+    titel,
+    unter,
+    kommentar,
+    perspektive,
+    muster
+  }));
+  var HINTERGRUND = [
+    ["textil", "Markt", "markt", "Textilums\xE4tze bleiben umk\xE4mpft", "Die Branche sucht nach Wachstum.", "Der Verkauf von Bekleidung bleibt konjunkturabh\xE4ngig.", "Das Kaufverhalten hat sich dauerhaft ver\xE4ndert."],
+    ["frequenz", "Markt", "markt", "Innenstadtfrequenz im Wandel", "Der Handel z\xE4hlt seine Besucher.", "Die Zahl der Passanten allein erkl\xE4rt noch keine Ums\xE4tze.", "Angebot und Aufenthaltsqualit\xE4t beeinflussen den Standort."],
+    ["kaufkraft", "Markt", "markt", "Kaufkraft wird neu verteilt", "Haushalte w\xE4gen ihre Ausgaben ab.", "Waren des t\xE4glichen Bedarfs konkurrieren mit gr\xF6\xDFeren Anschaffungen.", "Der station\xE4re Handel muss auf ver\xE4nderte Priorit\xE4ten reagieren."],
+    ["mieten", "Markt", "markt", "Mietniveau unter Beobachtung", "Eigent\xFCmer und H\xE4ndler verhandeln.", "Gro\xDFe Handelsfl\xE4chen stellen die Immobilienm\xE4rkte vor Aufgaben.", "Langfristige Vertr\xE4ge brauchen tragf\xE4hige Gesch\xE4ftsmodelle."],
+    ["stadt", "Handel", "haus", "Innenstadt sucht ihren Mittelpunkt", "Warenh\xE4user bleiben wichtige Frequenzbringer.", "Die Wirkung eines gro\xDFen Gesch\xE4fts reicht \xFCber dessen eigene Fl\xE4che hinaus.", "Nachbarschaft und Gastronomie profitieren von lebendigen Stra\xDFen."],
+    ["kunden", "Handel", "haus", "Kunden w\xFCnschen Orientierung", "Service wird zum Unterscheidungsmerkmal.", "Pers\xF6nliche Beratung und eine klare Sortimentsf\xFChrung bleiben gefragt.", "Wer die W\xFCnsche vor Ort kennt, kann zielgerichteter investieren."],
+    ["logistik", "Handel", "markt", "Lieferketten werden belastbarer", "Planung soll Engp\xE4sse vermeiden.", "Best\xE4nde binden Kapital und k\xF6nnen zugleich den Umsatz absichern.", "Verl\xE4ssliche Nachlieferungen sind ein Wettbewerbsvorteil."],
+    ["saison", "Handel", "haus", "Saisonware steht im Fokus", "Eink\xE4ufer \xFCberpr\xFCfen die Planung.", "Die Bestellung von Mode erfordert lange Vorlaufzeiten.", "Ein ausgewogenes Lager verringert das Risiko von Abschriften."],
+    ["personal", "Politik", "politik", "Besch\xE4ftigung im Handel im Blick", "Fachkr\xE4fte bleiben eine Schl\xFCsselressource.", "Der Strukturwandel ver\xE4ndert die Anforderungen an die Belegschaften.", "Weiterbildung und verl\xE4ssliche Planung gewinnen an Bedeutung."],
+    ["kommunen", "Politik", "politik", "Kommunen sprechen \xFCber Innenstadt", "Stadtentwicklung und Handel sind eng verkn\xFCpft.", "Gro\xDFimmobilien pr\xE4gen das Gesicht ihrer Umgebung.", "Eine nachhaltige Nutzung ben\xF6tigt Partner aus Wirtschaft und Verwaltung."],
+    ["kredit", "Markt", "markt", "Finanzm\xE4rkte pr\xFCfen die Risiken", "Kredite sind nicht unbegrenzt verf\xFCgbar.", "Liquidit\xE4tsplanung geh\xF6rt zum Kerngesch\xE4ft einer Handelsgruppe.", "Transparenz kann das Vertrauen der Geldgeber erh\xF6hen."],
+    ["digital", "Handel", "markt", "Digitale Dienste im Gesch\xE4ft", "Kaufhaus und Smartphone wachsen zusammen.", "Digitale Informationen k\xF6nnen die Beratung erg\xE4nzen.", "Der Mehrwert muss f\xFCr Kundinnen und Kunden unmittelbar erkennbar sein."],
+    ["quartalsblick", "Konzern", "haus", "Hartwig legt Quartal hinter sich", "Die Ergebnisrechnung dient als Gradmesser.", "Umsatz und Rentabilit\xE4t m\xFCssen gemeinsam bewertet werden.", "Der Vorstand wird die Ma\xDFnahmen daran messen lassen."],
+    ["weihnachten", "Handel", "haus", "Weihnachtsgesch\xE4ft erreicht die H\xE4user", "Die letzten Wochen des Jahres z\xE4hlen besonders.", "Geschenke und Wintermode erh\xF6hen die Bedeutung der Warenverf\xFCgbarkeit.", "Gut vorbereitete Teams k\xF6nnen jetzt den Unterschied machen."],
+    ["winter", "Markt", "markt", "Winterwetter ver\xE4ndert Einkaufswege", "Saisonale Schwankungen geh\xF6ren zum Gesch\xE4ft.", "Kalte Tage beeinflussen die Nachfrage nach Bekleidung und Wohnen.", "Die Warendisposition muss sich fr\xFChzeitig darauf einstellen."],
+    ["sommer", "Handel", "haus", "Sommersaison fordert den Einzelhandel", "Sortimente werden leichter und saisonaler.", "Aktionen und Freizeitangebote ver\xE4ndern die Kundenfrequenz.", "Eine gute Planung h\xE4lt die Best\xE4nde im Gleichgewicht."]
+  ].map(([id, reiter, bild3, titel, unter, kommentar, perspektive]) => ({
+    id,
+    reiter,
+    bild: bild3,
+    titel,
+    unter,
+    kommentar,
+    perspektive
+  }));
+  var ZEITUNG_ARTIKELARTEN = [...EREIGNISSE, ...HINTERGRUND].map((x) => x.id);
+  function stand(s2) {
+    return s2.zeitung ?? (s2.zeitung = { aktiv: true, ausgaben: [] });
+  }
+  var zeitungAktiv = (s2) => s2.zeitung?.aktiv !== false;
+  var zeitungArchiv = (s2) => s2.zeitung?.ausgaben ?? [];
+  var zeitungAktuelle = (s2) => {
+    const aus = zeitungArchiv(s2);
+    return aus.length ? aus[aus.length - 1] : null;
+  };
+  function zeitungEinstellen(s2, aktiv5) {
+    stand(s2).aktiv = aktiv5;
+    if (!aktiv5) s2.entscheidungen = s2.entscheidungen.filter((e) => e.typ !== "interview");
+  }
+  function ausVorlage2(v, woche2, zusatz, nummer) {
+    return {
+      id: `z-${woche2}-${nummer}`,
+      art: v.id,
+      reiter: v.reiter,
+      titel: v.titel,
+      unterzeile: v.unter,
+      text: [zusatz, v.kommentar, v.perspektive].filter(Boolean).join(" "),
+      bild: v.bild
+    };
+  }
+  function zeitungInterviewAntwort(s2, e, option2) {
+    if (!zeitungAktiv(s2) || e.typ !== "interview") return;
+    const wirkung = {
+      offensiv: { image: 2, betriebsrat: -2, bank: -1, kreditversicherer: -1, zitat: "Wir treiben den Umbau konsequent voran und werden unsere Ziele erreichen." },
+      sachlich: { image: 1, betriebsrat: 1, bank: 1, kreditversicherer: 1, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
+      ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
+    }[option2];
+    if (!wirkung) return;
+    for (const feld of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
+      s2.stakeholder[feld] = clamp(s2.stakeholder[feld] + wirkung[feld], 0, 100);
+    }
+    stand(s2).naechstesZitat = { abWoche: s2.woche, text: `Im Interview sagt die Hartwig-Gesch\xE4ftsf\xFChrung: \u201E${wirkung.zitat}\u201C` };
+  }
+  function zeitungWoche(s2) {
+    if (s2.prognose || !zeitungAktiv(s2)) return;
+    const w = s2.woche;
+    const z2 = stand(s2);
+    if (z2.ausgaben.some((a) => a.woche === w)) return;
+    const r = { rng: (Math.imul(s2.seed >>> 0, 2654435761) ^ Math.imul(w + 1, 2246822507) ^ 2708792605) >>> 0 };
+    const artikel = [];
+    const meldungen = s2.meldungen.filter((m) => m.woche === w && (m.typ === "presse" || m.typ === "insolvenz" || m.typ === "eigentuemer" || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
+    for (const m of meldungen.slice().sort((a, b2) => Number(b2.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(b2.text)) - Number(a.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(a.text))).slice(0, 4)) {
+      const v = EREIGNISSE.find((x) => x.muster.test(m.text));
+      artikel.push(ausVorlage2(v, w, m.text, artikel.length));
+    }
+    if (z2.naechstesZitat && z2.naechstesZitat.abWoche <= w) {
+      const vorlage2 = { id: "interview", reiter: "Konzern", bild: "haus", titel: "Hartwig-Vorstand im Gespr\xE4ch", unter: "Die Gesch\xE4ftsf\xFChrung bezieht Stellung.", kommentar: "Das Interview st\xF6\xDFt in der Branche auf Aufmerksamkeit.", perspektive: "Wie die angek\xFCndigten Ma\xDFnahmen greifen, wird sich in den n\xE4chsten Wochen zeigen." };
+      artikel.unshift(ausVorlage2(vorlage2, w, z2.naechstesZitat.text, 50));
+      delete z2.naechstesZitat;
+    }
+    const pflicht = w % 13 === 12 ? "quartalsblick" : w % 52 >= 45 ? "weihnachten" : w % 52 < 8 ? "winter" : w % 52 >= 22 && w % 52 <= 34 ? "sommer" : "";
+    if (pflicht) artikel.push(ausVorlage2(HINTERGRUND.find((x) => x.id === pflicht), w, "", 60));
+    const pool = HINTERGRUND.filter((x) => x.id !== pflicht);
+    while (artikel.length < 5 && pool.length) {
+      const v = waehle(r, pool);
+      pool.splice(pool.indexOf(v), 1);
+      artikel.push(ausVorlage2(v, w, "", 100 + artikel.length));
+    }
+    artikel.sort((a, b2) => Number(b2.art === "glaeubiger" || b2.art.startsWith("insolvenz")) - Number(a.art === "glaeubiger" || a.art.startsWith("insolvenz")));
+    const ausgabe = {
+      woche: w,
+      kw: kw(w),
+      jahr: jahr(s2, w),
+      nummer: w + 1,
+      aufmacher: artikel[0],
+      meldungen: artikel.slice(1, 7),
+      reiter: ZEITUNG_REITER
+    };
+    z2.ausgaben.push(ausgabe);
+    if (z2.ausgaben.length > 104) z2.ausgaben.splice(0, z2.ausgaben.length - 104);
+    if (w >= 8 && (w + 1) % 10 === 0 && !s2.entscheidungen.some((e) => e.typ === "interview")) {
+      s2.entscheidungen.push({
+        id: `zeitung-interview-${w}`,
+        typ: "interview",
+        woche: w,
+        frist: w + 2,
+        titel: "Interviewanfrage des Handelsboten",
+        text: "Die Redaktion bittet die Hartwig-Gesch\xE4ftsf\xFChrung um eine Aussage zur Entwicklung des Unternehmens. Welchen Ton w\xE4hlen Sie?",
+        optionen: [
+          { id: "offensiv", label: "Offensiv: Wir gestalten die Zukunft" },
+          { id: "sachlich", label: "Sachlich: Ma\xDFnahmen und Zahlen erkl\xE4ren" },
+          { id: "ausweichend", label: "Ausweichend: Kein Kommentar" }
+        ],
+        standard: "sachlich",
+        daten: { ausgabe: w + 1 }
+      });
+    }
+  }
+
   // ../engine/src/spielende.ts
   var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
   var SPIELENDE_AKTIV = true;
@@ -5182,12 +5350,12 @@
     if (s2.prognose || s2.hausbetriebAbnahmeAus) return;
     if ((s2.hausbetrieb.energieBis ?? 0) <= s2.woche) s2.hausbetrieb.energiePreis = 1;
     if (s2.woche >= 52 && s2.woche % 13 === 0) {
-      const stand = s2.hausbetrieb;
-      if ((stand.energieBis ?? 0) <= s2.woche) stand.energiePreis = 1;
+      const stand2 = s2.hausbetrieb;
+      if ((stand2.energieBis ?? 0) <= s2.woche) stand2.energiePreis = 1;
       if (hash2(s2.seed + ":energie:" + s2.woche) < 0.12) {
-        stand.energiePreis = hash2(s2.seed + ":energiehoehe:" + s2.woche) < 0.5 ? 0.8 : 1.2;
-        stand.energieBis = s2.woche + 8;
-        melde(s2, "ereignis", "Energiepreis\xE4nderung im Filialnetz: " + Math.round((stand.energiePreis - 1) * 100) + " % f\xFCr acht Wochen.", { modul: "haus" });
+        stand2.energiePreis = hash2(s2.seed + ":energiehoehe:" + s2.woche) < 0.5 ? 0.8 : 1.2;
+        stand2.energieBis = s2.woche + 8;
+        melde(s2, "ereignis", "Energiepreis\xE4nderung im Filialnetz: " + Math.round((stand2.energiePreis - 1) * 100) + " % f\xFCr acht Wochen.", { modul: "haus" });
       }
     }
     if (s2.woche >= 52) for (const [stadt, u] of Object.entries(s2.hausbetrieb.staedte)) {
@@ -5381,19 +5549,19 @@
         if (!basis3) return { ok: false, text: "Hauscluster nicht gefunden." };
         const n = Number(a.wert);
         if (!Number.isInteger(n)) break;
-        const stand = { ...basis3, oeffnung: { ...basis3.oeffnung } };
+        const stand2 = { ...basis3, oeffnung: { ...basis3.oeffnung } };
         if (a.feld === "von" || a.feld === "bis" || a.feld === "samstagBis") {
           if (n < 7 || n > 22) break;
-          stand.oeffnung[a.feld] = n;
-          if (stand.oeffnung.von >= stand.oeffnung.bis || stand.oeffnung.von >= stand.oeffnung.samstagBis) break;
+          stand2.oeffnung[a.feld] = n;
+          if (stand2.oeffnung.von >= stand2.oeffnung.bis || stand2.oeffnung.von >= stand2.oeffnung.samstagBis) break;
         } else {
           if (n < 1 || n > 3) break;
-          stand[a.feld] = n;
+          stand2[a.feld] = n;
         }
         if (h) {
-          h.betrieb.standardAusnahme = stand;
+          h.betrieb.standardAusnahme = stand2;
           h.betrieb.ausnahmeGrund = a.begruendung.trim();
-        } else s2.hausbetrieb.standards[a.cluster] = stand;
+        } else s2.hausbetrieb.standards[a.cluster] = stand2;
         return { ok: true, text: "Hausstandard angepasst." };
       }
       case "hausKostenSetzen":
@@ -5405,9 +5573,9 @@
         (b2.serviceAusnahme ?? (b2.serviceAusnahme = {}))[a.service] = a.an;
         return { ok: true, text: "Hausausnahme f\xFCr Service " + a.service + (a.an ? " aktiviert." : " deaktiviert.") };
       case "hausClusterServiceSetzen": {
-        const stand = s2.hausbetrieb.standards[a.cluster];
-        if (!stand || !["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].includes(a.service)) break;
-        (stand.services ?? (stand.services = { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }))[a.service] = a.an;
+        const stand2 = s2.hausbetrieb.standards[a.cluster];
+        if (!stand2 || !["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].includes(a.service)) break;
+        (stand2.services ?? (stand2.services = { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }))[a.service] = a.an;
         return { ok: true, text: "Service-Standard des Hausclusters ge\xE4ndert." };
       }
       case "hausGastronomie":
@@ -5611,11 +5779,11 @@
   }
   function umbauWoche(s2) {
     initialisiereUmbau(s2);
-    const stand = s2.umbau;
+    const stand2 = s2.umbau;
     const jahr2 = Math.floor(s2.woche / 52);
-    if (jahr2 !== stand.jahr) {
-      stand.jahr = jahr2;
-      stand.verbraucht = 0;
+    if (jahr2 !== stand2.jahr) {
+      stand2.jahr = jahr2;
+      stand2.verbraucht = 0;
     }
     for (const h of s2.haeuser) {
       if (!h.etagenBau) continue;
@@ -5644,7 +5812,7 @@
       }
       if (h.umbauFrequenz) h.umbauFrequenz = Math.max(0, h.umbauFrequenz - 1e-4);
     }
-    for (const p2 of stand.projekte) if (p2.status === "laufend" && s2.woche >= p2.ende) {
+    for (const p2 of stand2.projekte) if (p2.status === "laufend" && s2.woche >= p2.ende) {
       const h = s2.haeuser.find((x) => x.id === p2.haus);
       if (!h) continue;
       for (const nr of p2.etagen) {
@@ -5687,12 +5855,12 @@
         { hausId: h.id, stadt: h.stadt, modul: "umbau" }
       );
     }
-    if (!s2.prognose && s2.woche % 52 === 0 && stand.vorlageJahr !== jahr2) {
-      stand.vorlageJahr = jahr2;
+    if (!s2.prognose && s2.woche % 52 === 0 && stand2.vorlageJahr !== jahr2) {
+      stand2.vorlageJahr = jahr2;
       const budget = s2.planung;
-      stand.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
+      stand2.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
       const v = umbauProgramm(s2).slice(0, 5), auswahl4 = [];
-      let rest = stand.budget;
+      let rest = stand2.budget;
       for (const x of v) if (x.kosten > 0 && x.kosten <= rest) {
         auswahl4.push(x);
         rest -= x.kosten;
@@ -5700,7 +5868,7 @@
       neueVorlage(s2, {
         bereich: "ladenbau",
         titel: "Modernisierungsprogramm " + (s2.startJahr + jahr2),
-        text: "Bau & Ladenbau priorisiert nach j\xE4hrlicher Rendite: " + v.map((x) => x.name + " " + x.etage + " (" + x.rendite + " %)").join(", ") + ". Budget: " + stand.budget.toLocaleString("de-DE") + " \u20AC.",
+        text: "Bau & Ladenbau priorisiert nach j\xE4hrlicher Rendite: " + v.map((x) => x.name + " " + x.etage + " (" + x.rendite + " %)").join(", ") + ". Budget: " + stand2.budget.toLocaleString("de-DE") + " \u20AC.",
         frist: 4,
         optionen: [{ id: "annehmen", label: "Modernisierungsprogramm freigeben" }, { id: "zurueckstellen", label: "Zur\xFCckstellen" }],
         standard: "annehmen"
@@ -6667,6 +6835,9 @@
     }
     if (HAUS_AKTIONEN.has(a.typ)) return hausAktion(s2, a);
     switch (a.typ) {
+      case "zeitungAktiv":
+        zeitungEinstellen(s2, a.an);
+        return ok4(a.an ? "Der Handelsbote ist aktiviert." : "Der Handelsbote ist deaktiviert.");
       case "ruhestand":
         if (s2.woche < 260) return fehler4("Der Ruhestand ist erst nach f\xFCnf Jahren m\xF6glich.");
         if (s2.phase !== "regulaer" || s2.insolvenz) return fehler4("Ein laufendes Insolvenzverfahren muss zuerst beendet sein.");
@@ -8442,9 +8613,9 @@
   }
   function wirksameStufe(s2, a, verteilung) {
     const ziel = besetzungsStufe(s2, a);
-    const stand = s2.hq.stand[a.id] ?? ziel;
-    if (ziel >= stand) s2.hq.stand[a.id] = ziel;
-    let L2 = Math.max(ziel, stand);
+    const stand2 = s2.hq.stand[a.id] ?? ziel;
+    if (ziel >= stand2) s2.hq.stand[a.id] = ziel;
+    let L2 = Math.max(ziel, stand2);
     const platz = platzQm(s2, a);
     if (platz <= 0) return 0;
     const w = s2.woche;
@@ -8680,8 +8851,8 @@
     if (w > 0 && w % 13 === 0) neueHqAngebote(s2);
     for (const a of hq.abteilungen) {
       const ziel = besetzungsStufe(s2, a);
-      const stand = hq.stand[a.id] ?? ziel;
-      hq.stand[a.id] = ziel >= stand ? ziel : stand + (ziel - stand) * HQ_PARAM.traegheit;
+      const stand2 = hq.stand[a.id] ?? ziel;
+      hq.stand[a.id] = ziel >= stand2 ? ziel : stand2 + (ziel - stand2) * HQ_PARAM.traegheit;
     }
     hq.angebote = hq.angebote.filter((a) => a.frist > w);
     for (const a of hq.abteilungen) {
@@ -11273,12 +11444,12 @@
     w.vorlagen = w.vorlagen.filter((v) => !v.erledigt || v.frist > s2.woche - 26);
     if (s2.woche % 52 === 5 && !s2.prognose) {
       const rang = [];
-      const stand = /* @__PURE__ */ new Map();
+      const stand2 = /* @__PURE__ */ new Map();
       const basisCluster = /* @__PURE__ */ new Map();
       const schadenCluster = /* @__PURE__ */ new Map();
       for (const k of clusterSicht(s2)) {
         const key = `${k.hauscluster}|${k.gruppe}`;
-        stand.set(key, (stand.get(key) ?? 0) + k.wert);
+        stand2.set(key, (stand2.get(key) ?? 0) + k.wert);
       }
       const offene = s2.haeuser.filter((h) => h.status === "offen");
       for (const h of offene) for (const g of Object.keys(h.potenzial)) {
@@ -11295,7 +11466,7 @@
           const anteil3 = basis(h, g) / Math.max(1, basisCluster.get(key) ?? 0);
           const verwaltung = clamp((h.personal.vollzeit + h.personal.teilzeit) / Math.max(1, h.grundflaecheQm / 80), 0.5, 1.4);
           const rate = h.warensicherung ? 3e-3 : 6e-3;
-          differenz += (stand.get(key) ?? 0) * anteil3 * rate / verwaltung;
+          differenz += (stand2.get(key) ?? 0) * anteil3 * rate / verwaltung;
         }
         const wert = eur(differenz);
         h.letzteInventur = wert;
@@ -12720,6 +12891,10 @@
       loeseVorstandEntscheidung(s2, e, option2);
       return null;
     }
+    if (e.typ === "interview") {
+      zeitungInterviewAntwort(s2, e, option2);
+      return null;
+    }
     if (e.typ === "organisation_vorlage") {
       organisationVorlageEntscheidung(s2, e, option2);
       return null;
@@ -13283,6 +13458,7 @@
     k.kreditFrei = eur(s2.cash + s2.kreditlinie);
     s2.einmalkostenWoche = 0;
     s2.einmalErloeseWoche = 0;
+    zeitungWoche(s2);
     s2.woche += 1;
     erfolgeWoche(s2);
     spielendePruefen(s2);
@@ -13372,6 +13548,7 @@
       if (log) console.log(`  W${w} ${r.ok ? "\u2713" : "\u2717"} ${r.text}`);
       return r;
     };
+    for (const e of s2.entscheidungen.filter((x) => x.typ === "interview")) tu2({ typ: "entscheiden", id: e.id, option: "sachlich" });
     if (w === 3) {
       tu2({ typ: "orderLevel", gruppe: "alle", level: 0.88 });
       tu2({ typ: "marketingBudget", quote: 0.018 });
@@ -45954,10 +46131,10 @@
           gaubenAuf(hz, spanDach / 2, F2, zw0);
         }
       }
-      const zt = achse === "z" ? 0 : zwerche(hz, spanDach / 2);
+      const zt2 = achse === "z" ? 0 : zwerche(hz, spanDach / 2);
       const first = achse === "x" ? [[ctx.x + 1.5, ctx.z + ctx.d / 2], [ctx.x + ctx.w - 1.5, ctx.z + ctx.d / 2]] : [[ctx.x + ctx.w / 2, ctx.z + 1.5], [ctx.x + ctx.w / 2, ctx.z + ctx.d - 1.5]];
       dachkram(ctx, first, y + hz * 0.3, y + hz, o.kram);
-      return Math.max(y + hz, zt);
+      return Math.max(y + hz, zt2);
     }
     if (typ === "walm" || typ === "zelt") {
       const ov = o.ueberstand ?? 0.4;
@@ -45975,9 +46152,9 @@
       }
       S.add(prismoid(Pov, y + 0.12, hz, ins), farbe3);
       for (const F2 of ctx.fassaden) if (F2.art === "haupt") gaubenAuf(hz, ins[K3.indexOf(F2.label)] ?? tiefe / 2, F2, (u) => u > 2.6 && u < F2.L - 2.6);
-      const zt = zwerche(hz, tiefe / 2);
+      const zt2 = zwerche(hz, tiefe / 2);
       dachkram(ctx, versetzt(Pov, ins.map((v) => v * 0.85)), y, y + hz, o.kram);
-      return Math.max(y + hz, zt);
+      return Math.max(y + hz, zt2);
     }
     if (typ === "staffel") {
       const P22 = versetzt(P2, K3.map((k) => sichtbar(ctx, k) ? 2.2 : 0));
@@ -110055,7 +110232,7 @@
     let hmax = 0;
     const namen = mischen2(LADEN_ALT, r);
     if (v === "zeile" || v === "roemer") {
-      const t2 = Math.min(13, d2 - 9), zt = z0 + 2;
+      const t2 = Math.min(13, d2 - 9), zt2 = z0 + 2;
       const breiten = [];
       let rest = w;
       while (rest > 0.5) {
@@ -110067,18 +110244,18 @@
       if (v === "roemer") {
         const sb2 = Math.min(9.5, (w - 18) / 3), mitte = x0 + (w - 3 * sb2) / 2;
         const steinFarben = ["#c98d7a", "#e3c2a2", "#d4a48a"];
-        for (let i = 0; i < 3; i++) hmax = Math.max(hmax, steinGiebelHaus(S, scene2, p2, r, mitte + i * sb2, zt, sb2, t2, { wand: steinFarben[i], n: 3, balkon: i === 1, uhr: i === 1, frei: i === 0 ? ["-x"] : i === 2 ? ["+x"] : [] }));
+        for (let i = 0; i < 3; i++) hmax = Math.max(hmax, steinGiebelHaus(S, scene2, p2, r, mitte + i * sb2, zt2, sb2, t2, { wand: steinFarben[i], n: 3, balkon: i === 1, uhr: i === 1, frei: i === 0 ? ["-x"] : i === 2 ? ["+x"] : [] }));
         let xl = mitte, xr = mitte + 3 * sb2;
         while (xl - x0 > 6) {
           const bb = Math.min(xl - x0, zw(r, 6.5, 8.5));
           const b2 = xl - x0 - bb < 5 ? xl - x0 : bb;
-          hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xl - b2, zt + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : null, laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xl - b2 - x0 < 0.5 ? ["-x"] : [] }));
+          hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xl - b2, zt2 + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : null, laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xl - b2 - x0 < 0.5 ? ["-x"] : [] }));
           xl -= b2;
         }
         while (x0 + w - xr > 6) {
           const bb = Math.min(x0 + w - xr, zw(r, 6.5, 8.5));
           const b2 = x0 + w - xr - bb < 5 ? x0 + w - xr : bb;
-          hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xr, zt + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : "ganz", laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xr + b2 > x0 + w - 0.5 ? ["+x"] : [] }));
+          hmax = Math.max(hmax, fwHaus(S, scene2, p2, r, xr, zt2 + 0.5, b2, t2 - 1, { n: 3, vk: 0.5, schiefer: r() < 0.5 ? "giebel" : "ganz", laden: waehle2(r, LAEDEN2), name: namen.pop(), giebel: true, frei: xr + b2 > x0 + w - 0.5 ? ["+x"] : [] }));
           xr += b2;
         }
         marktbrunnen(S, x0 + w / 2, z0 + d2 - 4.5, r);
@@ -110091,7 +110268,7 @@
         const frei6 = [];
         if (i === 0) frei6.push("-x");
         if (i === breiten.length - 1) frei6.push("+x");
-        const hz = fwHaus(S, scene2, p2, r, x2, zt, bb, t2, { giebel: giebel3, frei: frei6, laden: r() < 0.6 ? waehle2(r, LAEDEN2) : null, name: namen.pop(), markise: r() < 0.3 ? waehle2(r, ["#c9483e", "#3f7d56", "#2f6f8f"]) : null });
+        const hz = fwHaus(S, scene2, p2, r, x2, zt2, bb, t2, { giebel: giebel3, frei: frei6, laden: r() < 0.6 ? waehle2(r, LAEDEN2) : null, name: namen.pop(), markise: r() < 0.3 ? waehle2(r, ["#c9483e", "#3f7d56", "#2f6f8f"]) : null });
         hmax = Math.max(hmax, hz);
         x2 += bb;
       });
@@ -115011,11 +115188,11 @@
       mauer(1, 1, w - 1, 1.6);
       S.quader(xm - 1.8, 0.3, d2 - 1.7, xm - 1.4, 2.8, d2 - 0.9, WEISS3);
       S.quader(xm + 1.4, 0.3, d2 - 1.7, xm + 1.8, 2.8, d2 - 0.9, WEISS3);
-      const zt = zf2 - tb2 - 1, zn = zt - L3;
-      langhaus(S, scene2, p2, c, xm - B3 / 2, xm + B3 / 2, zn, zt, Hn2, { joch: 4.6, ovale: false });
+      const zt2 = zf2 - tb2 - 1, zn = zt2 - L3;
+      langhaus(S, scene2, p2, c, xm - B3 / 2, xm + B3 / 2, zn, zt2, Hn2, { joch: 4.6, ovale: false });
       chorApsis(S, p2, c, xm, zn + 0.01, B3 * 0.72, 4, Hn2 * 0.85);
-      top = kirchturm(S, scene2, p2, xm - tb2 / 2, zt, tb2, 19 + r() * 4, { ...c, hoch: 1.25 });
-      const FT = seiten3(xm - tb2 / 2, zt, tb2, tb2);
+      top = kirchturm(S, scene2, p2, xm - tb2 / 2, zt2, tb2, 19 + r() * 4, { ...c, hoch: 1.25 });
+      const FT = seiten3(xm - tb2 / 2, zt2, tb2, tb2);
       if (sichtF2(p2, FT.v)) haustuer2(S, FT.v, tb2 / 2, 0.3, 1.6, 2.6, HOLZ5[0], c.orn, true);
       friedhof(S, r, 1.8, 1.8, w - 1.8, zf2 - 1, (gx, gz2) => !(Math.abs(gx - xm) < B3 / 2 + 2.2 && gz2 > zn - 7) && !(gx > w - 9 && gz2 < 9));
       const lx = w - 8.5, lz = 2.2;
@@ -123722,7 +123899,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "675926e" : "Entwicklung";
+  var version = () => true ? "e6e62b4" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -125627,8 +125804,145 @@
     };
   }
 
-  // src/ui/statistik.js
+  // src/kit/zeitung.js
   var FARBE = {
+    haus: { fassade: "#d6c3a4", dach: "#796552", seite: "#a99272", akzent: "#b43e32" },
+    konkurrenz: { fassade: "#bfced8", dach: "#344f66", seite: "#7897ab", akzent: "#b87837" },
+    markt: { fassade: "#d1d7cf", dach: "#506556", seite: "#92a294", akzent: "#6b7f56" },
+    politik: { fassade: "#dbcdbd", dach: "#54515b", seite: "#a6a0a5", akzent: "#8a3740" }
+  };
+  function zeitungsBild(bild3 = "haus", nummer = 0) {
+    const c = FARBE[bild3] || FARBE.haus;
+    const fenster8 = [];
+    for (let stock = 0; stock < 4; stock++) for (let n = 0; n < 5; n++) {
+      const x = 90 + n * 35, y = 103 + stock * 24;
+      fenster8.push('<path d="M' + x + " " + y + 'v-13l20-6v13z" fill="' + (stock % 2 ? "#6b8791" : "#abc1c4") + '" stroke="#556b71" stroke-width="1.5"/>');
+    }
+    const muster = nummer % 2 ? '<path d="M75 209h215l53-43" stroke="#756f64" stroke-width="4" fill="none"/>' : "";
+    return '<svg class="zb-isobild" viewBox="0 0 420 260" role="img" aria-label="Isometrische Zeichnung eines Warenhauses"><rect width="420" height="260" fill="#e1e5df"/><path d="M10 222 260 135 412 180 173 260Z" fill="#cbc8bf"/><path d="M72 78 260 22 340 60 153 119Z" fill="' + c.dach + '"/><path d="M72 78 153 119 153 229 72 185Z" fill="' + c.seite + '"/><path d="M153 119 340 60 340 171 153 229Z" fill="' + c.fassade + '"/><path d="M151 188 342 130v18l-191 58Z" fill="' + c.akzent + '"/><path d="M151 208 342 150v5l-191 58Z" fill="#eee8db"/>' + fenster8.join("") + '<path d="M194 210v-34l52-16v34" fill="#597784" stroke="#485e63" stroke-width="3"/><path d="M98 147v22l24 13v-22z" fill="#55717c"/>' + muster + '<path d="M50 204 215 254M260 238l108-36" stroke="#f3eee3" stroke-width="2"/></svg>';
+  }
+
+  // src/ui/zeitung.js
+  var REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
+  function zeitungModul(ctx) {
+    const ui = { aktiv: false, index: -1, reiter: "Top", archiv: false };
+    const ausgaben = () => ctx.E.zeitungArchiv(ctx.s());
+    const aktiv5 = () => ctx.E.zeitungAktiv(ctx.s());
+    const sortiert = () => [...ausgaben()].reverse();
+    const ausgabe = () => ausgaben()[ui.index] ?? null;
+    function leer3() {
+      return '<div class="zb-leer"><h3>Das Archiv ist noch leer.</h3><p>Die erste Ausgabe erscheint nach dem n\xE4chsten Wochenabschluss.</p></div>';
+    }
+    function kopf(a) {
+      return '<header class="zb-kopf"><div class="zb-ausgabenzeile"><span>HANDEL \xB7 WIRTSCHAFT \xB7 GESELLSCHAFT</span><span>NR. ' + a.nummer + '</span></div><h2>Der Handelsbote</h2><div class="zb-datum"><span>KW ' + a.kw + " / " + a.jahr + "</span><span>Wochenzeitung f\xFCr den Handel</span></div></header>";
+    }
+    function artikel(a, aufmacher = false) {
+      return '<article class="zb-artikel ' + (aufmacher ? "zb-aufmacher" : "") + '"><div class="zb-rubrik">' + esc2(a.reiter) + "</div><h3>" + esc2(a.titel) + '</h3><p class="zb-unter">' + esc2(a.unterzeile) + "</p>" + (aufmacher ? '<figure class="zb-bild">' + zeitungsBild(a.bild, ui.index) + "<figcaption>Illustration: Redaktion Der Handelsbote</figcaption></figure>" : "") + '<p class="zb-text">' + esc2(a.text) + "</p></article>";
+    }
+    function ausgabeZeigen(a) {
+      const alle = [a.aufmacher, ...a.meldungen];
+      const gewaehlt = ui.reiter === "Top" ? alle : alle.filter((x) => x.reiter === ui.reiter);
+      const inhalt = gewaehlt.length ? gewaehlt.map((x, i) => artikel(x, i === 0 && ui.reiter === "Top")).join("") : '<p class="zb-keine">In dieser Rubrik liegen in dieser Woche keine Artikel vor.</p>';
+      return kopf(a) + '<nav class="zb-tabs" aria-label="Zeitungsrubriken">' + REITER.map((v) => '<button role="tab" aria-selected="' + (ui.reiter === v) + '" data-z-a="tab" data-v="' + v + '" class="' + (ui.reiter === v ? "aktiv" : "") + '">' + v + "</button>").join("") + '</nav><div class="zb-spalten">' + inhalt + "</div>";
+    }
+    function archivZeigen() {
+      const aus = sortiert();
+      return '<h3 class="zb-archivtitel">Alle Ausgaben</h3><p class="zb-hinweis">Die letzten 104 Wochen bleiben im Spielstand erhalten.</p><div class="zb-archivliste">' + aus.map((a) => '<button data-z-a="ausgabe" data-v="' + a.woche + '"><small>NR. ' + a.nummer + " \xB7 KW " + a.kw + " / " + a.jahr + "</small><strong>" + esc2(a.aufmacher.titel) + "</strong><span>" + (a.meldungen.length + 1) + " Artikel</span></button>").join("") + "</div>";
+    }
+    function anzeigen(halten = false) {
+      const vorher = halten ? document.getElementById("pinhalt")?.scrollTop ?? 0 : 0;
+      const aus = ausgaben();
+      if (ui.index < 0 || ui.index >= aus.length) ui.index = aus.length - 1;
+      const a = ausgabe();
+      const n = ui.index + 1;
+      const navigation = '<div class="zb-navigation"><button data-z-a="vor" ' + (ui.index <= 0 || ui.archiv ? "disabled" : "") + ' aria-label="\xC4ltere Ausgabe">\u2039 \xC4lter</button><button data-z-a="archiv" aria-pressed="' + ui.archiv + '">' + (ui.archiv ? "Zur Zeitung" : "Archiv (" + aus.length + ")") + '</button><button data-z-a="naechste" ' + (ui.index >= aus.length - 1 || ui.archiv ? "disabled" : "") + ' aria-label="Neuere Ausgabe">Neuer \u203A</button></div><div class="zb-zahl">Ausgabe ' + (aus.length ? n : 0) + " von " + aus.length + "</div>";
+      const einstellungen2 = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv5() ? "checked" : "") + "> Neue Zeitungsausgaben und Interviews aktivieren</label>" + (!aktiv5() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : "");
+      ctx.panel("Der Handelsbote", "Unabh\xE4ngige Wochenzeitung \xB7 Archiv", '<div class="zb-root">' + einstellungen2 + navigation + (ui.archiv ? archivZeigen() : a ? ausgabeZeigen(a) : leer3()) + (!ui.archiv ? '<div class="zb-wischhinweis">Nach links oder rechts wischen, um eine andere Ausgabe zu lesen.</div>' : "") + "</div>", "gross");
+      ui.aktiv = true;
+      document.getElementById("pinhalt").scrollTop = vorher;
+    }
+    function oeffne(woche2) {
+      ui.archiv = false;
+      ui.reiter = "Top";
+      const a = ausgaben();
+      ui.index = typeof woche2 === "number" ? a.findIndex((x) => x.woche === woche2) : a.length - 1;
+      anzeigen();
+    }
+    function klicken(el2) {
+      const aktion2 = el2.dataset.zA;
+      if (aktion2 === "tab") {
+        ui.reiter = el2.dataset.v;
+        return anzeigen();
+      }
+      if (aktion2 === "vor") {
+        ui.index = Math.max(0, ui.index - 1);
+        ui.reiter = "Top";
+        return anzeigen();
+      }
+      if (aktion2 === "naechste") {
+        ui.index = Math.min(ausgaben().length - 1, ui.index + 1);
+        ui.reiter = "Top";
+        return anzeigen();
+      }
+      if (aktion2 === "archiv") {
+        ui.archiv = !ui.archiv;
+        return anzeigen();
+      }
+      if (aktion2 === "ausgabe") {
+        ui.index = ausgaben().findIndex((x) => x.woche === Number(el2.dataset.v));
+        ui.archiv = false;
+        ui.reiter = "Top";
+        return anzeigen();
+      }
+    }
+    const ziel = document.getElementById("pinhalt");
+    ziel.addEventListener("click", (e) => {
+      if (!ui.aktiv) return;
+      const el2 = e.target.closest("[data-z-a]");
+      if (el2 && el2.tagName !== "INPUT" && !el2.disabled) klicken(el2);
+    });
+    ziel.addEventListener("change", (e) => {
+      if (!ui.aktiv || e.target.dataset.zA !== "schalter") return;
+      const ergebnis = ctx.E.fuehreAus(ctx.s(), { typ: "zeitungAktiv", an: e.target.checked });
+      ctx.meldung(ergebnis.text, ergebnis.ok);
+      ctx.nachAktion();
+      anzeigen(true);
+    });
+    let start = null;
+    ziel.addEventListener("touchstart", (e) => {
+      if (!ui.aktiv || ui.archiv || e.touches.length !== 1) return;
+      start = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+    ziel.addEventListener("touchend", (e) => {
+      if (!start || !ui.aktiv || ui.archiv || !e.changedTouches.length) {
+        start = null;
+        return;
+      }
+      const dx = e.changedTouches[0].clientX - start.x;
+      const dy = e.changedTouches[0].clientY - start.y;
+      start = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > 1.4 * Math.abs(dy)) {
+        if (dx > 0 && ui.index > 0) klicken({ dataset: { zA: "vor" } });
+        else if (dx < 0 && ui.index < ausgaben().length - 1) klicken({ dataset: { zA: "naechste" } });
+      }
+    }, { passive: true });
+    return {
+      ui,
+      oeffne,
+      aktiv: () => ui.aktiv,
+      zu: () => {
+        ui.aktiv = false;
+        start = null;
+      },
+      neuZeichnen: () => {
+        if (ui.aktiv) anzeigen(true);
+      },
+      pruefe: () => ({ archiv: ausgaben().length, sichtbar: ausgabe()?.woche ?? null, reiter: ui.reiter, aktiv: aktiv5() })
+    };
+  }
+
+  // src/ui/statistik.js
+  var FARBE2 = {
     Hartwig: "#d23c32",
     Volkskauf: "#9b63b0",
     Sport: "#2f8f5b",
@@ -125681,13 +125995,13 @@
       return [...summen.values()];
     }
     function diagramm(titel, reihen, kennzahl2, opt = {}) {
-      const listen = reihen.filter((r3) => r3?.punkte?.length).map((r3) => ({ name: r3.name, punkte: gruppieren(r3.punkte, kennzahl2), farbe: r3.farbe ?? FARBE[r3.name] ?? "#d23c32" })).filter((r3) => r3.punkte.length);
+      const listen = reihen.filter((r3) => r3?.punkte?.length).map((r3) => ({ name: r3.name, punkte: gruppieren(r3.punkte, kennzahl2), farbe: r3.farbe ?? FARBE2[r3.name] ?? "#d23c32" })).filter((r3) => r3.punkte.length);
       if (!listen.length) return '<article class="karte stat-karte"><div class="stat-titel">' + esc2(titel) + '</div><p class="stat-leer">F\xFCr diese Auswahl sind noch keine Verlaufsdaten verf\xFCgbar.</p></article>';
       if (opt.vorjahr && ui.typ === "linie" && reihen.length === 1) {
         const a = reihen[0].punkte.filter((p3) => p3.vorjahr !== void 0).map((p3) => ({ woche: p3.woche, wert: p3.vorjahr }));
-        if (a.length) listen.push({ name: "Vorjahr", punkte: a, farbe: FARBE.Vorjahr });
+        if (a.length) listen.push({ name: "Vorjahr", punkte: a, farbe: FARBE2.Vorjahr });
         const p2 = reihen[0].punkte.filter((x) => x.plan !== void 0).map((x) => ({ woche: x.woche, wert: x.plan }));
-        if (p2.length) listen.push({ name: "Plan", punkte: p2, farbe: FARBE.Plan });
+        if (p2.length) listen.push({ name: "Plan", punkte: p2, farbe: FARBE2.Plan });
       }
       const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = 42, r = 10, t = 10, u = opt.klein ? 14 : 29;
       const alle = listen.flatMap((x) => x.punkte), xs = alle.map((p2) => p2.woche), ys = alle.map((p2) => p2.wert);
@@ -127760,12 +128074,12 @@
       if (meins !== token) return;
       status = "zaehlen";
       vorfall = 0;
-      const m = bericht2.meldungen, titel = m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
+      const m = bericht2.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
       const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur2(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
       const uDelta = delta(bericht2.umsatz, bericht2.umsatzVor);
       const eDelta = delta(bericht2.ebitda, bericht2.ebitdaVor);
       const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.jpg)"></div><span>' + esc2(a.text) + "</span></div>" : "";
-      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc2(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc2(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile2("Cash operativ", eur2(bericht2.kapitalfluss.operativ)) + zeile2("Investitionen", eur2(bericht2.kapitalfluss.investitionen)) + zeile2("Finanzierung", eur2(bericht2.kapitalfluss.finanzierung)) + zeile2("Sonstiges", eur2(bericht2.kapitalfluss.sonstiges)) + zeile2("Cash netto", eur2(bericht2.kapitalfluss.netto)) + zeile2("Cash-Bestand", eur2(bericht2.kapitalfluss.bestand), "wb-summe") + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc2(titel) + "</h4>" + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + (bericht2.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht2.erfolge.map((e) => esc2(e.titel)).join(", ") + "</strong></div>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
+      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc2(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc2(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile2("Cash operativ", eur2(bericht2.kapitalfluss.operativ)) + zeile2("Investitionen", eur2(bericht2.kapitalfluss.investitionen)) + zeile2("Finanzierung", eur2(bericht2.kapitalfluss.finanzierung)) + zeile2("Sonstiges", eur2(bericht2.kapitalfluss.sonstiges)) + zeile2("Cash netto", eur2(bericht2.kapitalfluss.netto)) + zeile2("Cash-Bestand", eur2(bericht2.kapitalfluss.bestand), "wb-summe") + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : "") + "</div><h4>" + esc2(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv \xF6ffnen \u2192</button>' + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + (bericht2.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht2.erfolge.map((e) => esc2(e.titel)).join(", ") + "</strong></div>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
       node.hidden = false;
       node.className = "bericht-ein";
       document.body.classList.add("wochen-aktiv");
@@ -127858,6 +128172,12 @@
           else if (status === "zaehlen") {
             cancelAnimationFrame(zaehlRaf);
             node.querySelector(".wb-kennzahlen")?.click();
+          }
+          break;
+        case "zeitung":
+          if (status === "bericht" || status === "zaehlen") {
+            abbruch();
+            ctx.oeffneZeitung?.();
           }
           break;
         case "spaeter":
@@ -128396,7 +128716,7 @@
     node.setAttribute("aria-label", "Spielende und Bilanz");
     document.body.append(node);
     let ansicht = "zu", gespeicherterSchluessel = "", zaehlRaf = 0, bilanziert = false;
-    const stand = () => ctx.s();
+    const stand2 = () => ctx.s();
     function zahlenAnimieren() {
       cancelAnimationFrame(zaehlRaf);
       const felder = [...node.querySelectorAll("[data-se-wert]")];
@@ -128425,7 +128745,7 @@
       document.body.classList.add("spielende-aktiv");
     }
     function bilanz() {
-      const s2 = stand(), e = s2?.ende;
+      const s2 = stand2(), e = s2?.ende;
       if (!e) return;
       const a = ART2[e.art] || ART2.zerschlagen, w = e.wertung, k = e.kennzahlen;
       const teile2 = w.teile.map((t) => '<div class="se-zeile"><span>' + esc2(t.name) + '</span><strong class="' + (t.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t.punkte + '">' + zahl2(t.punkte) + "</strong></div>").join("");
@@ -128441,7 +128761,7 @@
       zahlenAnimieren();
     }
     function anzeigen() {
-      const s2 = stand();
+      const s2 = stand2();
       if (!s2) return false;
       if (!s2.ende && s2.phase === "zerschlagen") ctx.E.spielendePruefen(s2);
       const e = s2.ende;
@@ -128459,7 +128779,7 @@
       return true;
     }
     function bestenliste() {
-      if (!stand()) return;
+      if (!stand2()) return;
       rahmen2("Bestenliste", '<div class="se-bilanz"><h1>Bestenliste</h1><p class="se-unter">Die zehn besten Ergebnisse je Schwierigkeitsstufe bleiben auf diesem Ger\xE4t gespeichert.</p>' + ["leicht", "mittel", "schwer"].map((id) => "<h2>" + esc2(SCHWIERIGKEIT2[id]) + '</h2><div class="se-karte">' + rangliste(id) + "</div>").join("") + '<button class="se-knopf se-sek" data-se="schliessen">Zur\xFCck zum Spiel</button></div>');
       ansicht = "rangliste";
     }
@@ -128478,7 +128798,7 @@
           ctx.neuesSpiel();
           break;
         case "weiter": {
-          const ergebnis = ctx.E.fuehreAus(stand(), { typ: "spielFortsetzen" });
+          const ergebnis = ctx.E.fuehreAus(stand2(), { typ: "spielFortsetzen" });
           if (!ergebnis.ok) {
             ctx.fehler?.(ergebnis.text);
             return;
@@ -128494,7 +128814,7 @@
       bilanz,
       bestenliste,
       zu: schliessen,
-      pruefe: () => ({ ansicht, sichtbar: !node.hidden, art: stand()?.ende?.art ?? null, bilanziert })
+      pruefe: () => ({ ansicht, sichtbar: !node.hidden, art: stand2()?.ende?.art ?? null, bilanziert })
     };
   }
 
@@ -128977,7 +129297,7 @@
 
   // src/ui/haus.js
   var PROZENT = (x) => (Number(x) * 100).toFixed(1).replace(".", ",") + " %";
-  var REITER = [["ueberblick", "\xDCberblick"], ["leitung", "Leitung"], ["personal", "Personal"], ["ware", "Ware"], ["partner", "Fl\xE4che & Partner"], ["kosten", "Kosten"], ["kommentare", "Kommentare"]];
+  var REITER2 = [["ueberblick", "\xDCberblick"], ["leitung", "Leitung"], ["personal", "Personal"], ["ware", "Ware"], ["partner", "Fl\xE4che & Partner"], ["kosten", "Kosten"], ["kommentare", "Kommentare"]];
   var SCHWERPUNKT = { personal: "Personal", ware: "Ware", kunde: "Kunde", kosten: "Kosten" };
   var SERVICE = { kundendienst: "Kundendienst", schneiderei: "\xC4nderungsschneiderei", geschenkverpackung: "Geschenkverpackung", abholstation: "Abholstation" };
   var POSTEN2 = { energie: "Energie", reinigung: "Reinigung", sicherheit: "Sicherheit", instandhaltung: "Instandhaltung", versicherung: "Versicherung" };
@@ -128988,7 +129308,7 @@
   var button = (label, action, disabled = false) => '<button class="mini" ' + (disabled ? "disabled" : 'onclick="' + action + '"') + ">" + esc2(label) + "</button>";
   function hausSteckbrief(d2, ueberblick, reiter, woche2) {
     const h = d2.haus, b2 = d2.betrieb, l = b2?.leitungsdaten, k = h.kpi;
-    const id = esc2(h.id), r = REITER.some((x) => x[0] === reiter) ? reiter : "ueberblick";
+    const id = esc2(h.id), r = REITER2.some((x) => x[0] === reiter) ? reiter : "ueberblick";
     let inhalt = "";
     if (r === "ueberblick") {
       const tr = b2?.treiberAktuell;
@@ -129032,7 +129352,7 @@
     if (r === "kommentare") {
       inhalt = '<div class="karte"><div class="khead">Wochenkommentierung</div>' + (b2?.kommentare?.length ? b2.kommentare.map((c) => '<div class="zeile"><span class="was"><b>KW ' + (c.woche % 52 + 1) + " \xB7 " + PROZENT(c.abweichung) + "</b><i>" + esc2(GRUENDE[c.grund] ?? c.grund) + " \xB7 " + esc2(MASS[c.massnahme] ?? c.massnahme) + "</i><small>" + esc2(c.pruefung) + "</small></span></div>").join("") : '<div class="zeile">Noch keine Abweichung unter \u22125 % mit Vorjahres- oder Planvergleich.</div>') + '<div class="zeile">' + Object.entries(MASS).map(([key, name2]) => button(name2, "hausTun('massnahme','" + id + "','" + key + "')")).join(" ") + "</div></div>";
     }
-    return '<nav class="haus-reiter">' + REITER.map(([key, name2]) => '<button class="' + (key === r ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
+    return '<nav class="haus-reiter">' + REITER2.map(([key, name2]) => '<button class="' + (key === r ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
   }
   function hausBeobachtungHtml(liste) {
     return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste.length ? liste.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + "</b><i>" + esc2(x.stadt) + " \xB7 " + esc2(x.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
@@ -129050,7 +129370,7 @@
   function personalModul(ctx) {
     const { E } = ctx;
     const ui = { aktiv: false, cluster: null, haus: null };
-    const stand = () => E.personalUebersicht(ctx.s());
+    const stand2 = () => E.personalUebersicht(ctx.s());
     const actions = (a) => {
       const r = E.fuehreAus(ctx.s(), a);
       ctx.meldung(r.text, r.ok);
@@ -129108,7 +129428,7 @@
     }
     function anzeigen(scrollHalten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop;
-      const liste = stand();
+      const liste = stand2();
       if (ui.cluster && !liste.some((c) => c.id === ui.cluster)) ui.cluster = null;
       const gewaehlt = liste.find((c) => c.id === ui.cluster) ?? liste[0];
       if (gewaehlt) ui.cluster = gewaehlt.id;
@@ -130906,7 +131226,7 @@
   var st = null;
   var wk = null;
   var vorherigerFokus = null;
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -131271,6 +131591,7 @@
   var pe = null;
   var spielende = null;
   var er = null;
+  var zt = null;
   vs = vorstandModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   org = organisationModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
@@ -131324,6 +131645,8 @@
       else schliessePanel();
     }
   });
+  zt = zeitungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
+  $("zeitung").addEventListener("click", () => oeffneModul(zt));
   spielende = spielendeModul({
     E: src_exports,
     s: () => s,
@@ -131419,6 +131742,8 @@
     posteingang: () => posteingang(s),
     historie: () => s.historie,
     wocheNr: () => s.woche,
+    zeitung: () => zeitungAktuelle(s),
+    oeffneZeitung: () => oeffneModul(zt),
     kapitalfluss: () => kapitalfluss(s),
     person: (ressort) => s?.vorstand?.ressorts?.[ressort]?.person,
     erfolge: () => erfolgeUebersicht(s).filter((x) => Object.prototype.hasOwnProperty.call(x, "freigeschaltet") && x.freigeschaltet === s.woche),
@@ -131680,6 +132005,8 @@
     leben,
     reise,
     wochenbericht,
+    zeitung: zt,
+    oeffneZeitung: (...a) => oeffneModul(zt, ...a),
     spielende,
     zeigeSpielende: () => spielende.anzeigen(),
     bahnhofFokussieren,

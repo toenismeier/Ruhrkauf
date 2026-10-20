@@ -2,6 +2,7 @@
 import { esc } from './format.js';
 import { effektiveAnimation } from './einstellungen.js';
 import { portraetSVG } from '../kit/portraet.js';
+import { zeitungsBild } from '../kit/zeitung.js';
 const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 const BANK = portraetSVG({ geschlecht: 'm', alter: 56, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 'hell', kleidung: 'anzug', seed: 236 }, 110);
 const BETRIEBSRAT = portraetSVG({ geschlecht: 'w', alter: 49, haar: 'halblang', haarfarbe: 'dunkelbraun', kleidung: 'bluse', seed: 922 }, 110);
@@ -102,7 +103,7 @@ export function wochenberichtModul(ctx) {
   function berichtZeigen(meins) {
     if (meins !== token) return;
     status = 'zaehlen'; vorfall = 0;
-    const m = bericht.meldungen, titel = m[0]?.text ?? 'Hartwig startet in eine neue Geschäftswoche';
+    const m = bericht.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? 'Hartwig startet in eine neue Geschäftswoche';
     const delta = (wert, vorher) => vorher == null ? 'Noch keine Vergleichswoche'
       : eur(wert - vorher) + ' (' + (vorher === 0 ? '–' : new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + ' %') + ')';
     const uDelta = delta(bericht.umsatz, bericht.umsatzVor);
@@ -116,7 +117,7 @@ export function wochenberichtModul(ctx) {
       zeile('Cash netto', eur(bericht.kapitalfluss.netto)) +
       zeile('Cash-Bestand', eur(bericht.kapitalfluss.bestand), 'wb-summe') + '</div>' +
       (bericht.phase === 'insolvenz' ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur(bericht.kredite) + ' · Liquiditätsreichweite: ' + bericht.runway + ' Wochen</span></div>' : '') +
-      '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + '</h4>' +
+      '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : '') + '</div><h4>' + esc(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv öffnen →</button>' +
       nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') +
       (bericht.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht.erfolge.map(e => esc(e.titel)).join(', ') + '</strong></div>' : '') +
       '</div></div><div id="wb-vorfall"></div></section>';
@@ -175,6 +176,7 @@ export function wochenberichtModul(ctx) {
       case 'nein': abbruch(); break;
       case 'ja': berechnen(true); break;
       case 'schliessen': if (status === 'bericht') abbruch(); else if (status === 'zaehlen') { cancelAnimationFrame(zaehlRaf); node.querySelector('.wb-kennzahlen')?.click(); } break;
+      case 'zeitung': if (status === 'bericht' || status === 'zaehlen') { abbruch(); ctx.oeffneZeitung?.(); } break;
       case 'spaeter': vorfallWeiter(false); break;
       case 'ansehen': vorfallWeiter(true); break;
     }

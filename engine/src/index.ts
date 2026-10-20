@@ -49,6 +49,8 @@ export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, Po
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
 export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
+export { zeitungArchiv, zeitungAktuelle, zeitungAktiv, ZEITUNG_ARTIKELARTEN, ZEITUNG_REITER, type ZeitungAusgabe, type ZeitungArtikel, type ZeitungStand, type ZeitungReiter } from './zeitung';
+
 export {
   endwertung, ebitdaJahr, immobilienWert, unternehmenswert, endKennzahlen, spielBeenden, spielendePruefen,
 } from './spielende';

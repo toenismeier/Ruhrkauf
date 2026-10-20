@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { zeitungEinstellen } from './zeitung';
 import { spielBeenden } from './spielende';
 // O05 Ware
 import { WARE_AKTIONEN, wareAktion, type WareAktion } from './merchandise';
@@ -64,6 +65,7 @@ export type SpielerAktion =
   | { typ: 'ruhestand' }
   | { typ: 'spielFortsetzen' }
   | { typ: 'entscheiden'; id: string; option: string }
+  | { typ: 'zeitungAktiv'; an: boolean }
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
@@ -180,6 +182,9 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   // O07 Haus
   if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
+    case 'zeitungAktiv':
+      zeitungEinstellen(s, a.an);
+      return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');
     case 'ruhestand':
       if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
       if (s.phase !== 'regulaer' || s.insolvenz) return fehler('Ein laufendes Insolvenzverfahren muss zuerst beendet sein.');

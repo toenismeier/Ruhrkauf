@@ -27,6 +27,7 @@ import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
 import { posteingangModul } from './ui/posteingang.js';
+import { zeitungModul } from './ui/zeitung.js';
 import { statistikModul } from './ui/statistik.js';
 import { marketingModul } from './ui/marketing.js';
 import { umbauModul } from './ui/umbau.js';
@@ -659,7 +660,7 @@ function botSchritt(st) {
 let st = null;
 let wk = null;
 let vorherigerFokus = null;
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -987,7 +988,7 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null;
+let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null;
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 // O03 IT
@@ -1035,6 +1036,10 @@ po = posteingangModul({
     else schliessePanel();
   },
 });
+
+// ─────────────────────────────────────────── Handelsbote
+zt = zeitungModul({ E, s: () => s, panel, meldung, nachAktion });
+$('zeitung').addEventListener('click', () => oeffneModul(zt));
 
 // ─────────────────────────────────────────── Spielende
 spielende = spielendeModul({
@@ -1092,6 +1097,7 @@ wochenbericht = wochenberichtModul({
   modus: () => einstellung('wochenbericht'), warnen: () => einstellung('warnung'),
   cockpit: () => E.cockpit(s), posteingang: () => E.posteingang(s),
   historie: () => s.historie, wocheNr: () => s.woche,
+  zeitung: () => E.zeitungAktuelle(s), oeffneZeitung: () => oeffneModul(zt),
   kapitalfluss: () => E.kapitalfluss(s),
   person: (ressort) => s?.vorstand?.ressorts?.[ressort]?.person,
   erfolge: () => E.erfolgeUebersicht(s).filter(x => Object.prototype.hasOwnProperty.call(x, 'freigeschaltet') && x.freigeschaltet === s.woche),
@@ -1260,7 +1266,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   leben,
-  reise, wochenbericht, spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
   oeffneBeobachtung, oeffneHausReporting, oeffneHausReiter: (id, reiter) => { oeffneHaus(id); hausReiter = reiter; oeffneHaus(id); },
   pruefeHaus: (id) => { const d=E.hausUebersicht(s,id); hausReiter='ueberblick'; oeffneHaus(id); const text=$('pinhalt').textContent; const fehler=[];

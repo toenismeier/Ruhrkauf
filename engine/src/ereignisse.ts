@@ -8,6 +8,7 @@ import { planungEntscheidung } from './planung';
 import { hqAnfrageFaktor, hqMietendeFaktor, hqUntermietFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
 import { premiumAngebote } from './premium';
+import { zeitungInterviewAntwort } from './zeitung';
 import { konzernVerkaufAnbieten } from './spielende';
 // O01 Organisation
 import { organisationVorlageEntscheidung } from './organisation';
@@ -351,6 +352,7 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
   // O04 Personal: derselbe Fristenmechanismus gilt für die Personalvorlagen.
   if (e.typ.startsWith('personal_')) { loesePersonalEntscheidung(s, e.typ, e.daten, option); return null; }
   if (e.typ.startsWith('vorstand_')) { loeseVorstandEntscheidung(s, e, option); return null; }
+  if (e.typ === 'interview') { zeitungInterviewAntwort(s, e, option); return null; }
   if (e.typ === 'organisation_vorlage') { organisationVorlageEntscheidung(s,e,option); return null; }
   // O06 Planung: automatische Fristentscheidung entspricht Freigabe des Controllings.
   if (e.typ.startsWith('planung_')) { planungEntscheidung(s, e, option); return null; }
