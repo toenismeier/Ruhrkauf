@@ -32,6 +32,7 @@ function quartalsStart(s: GameState): void {
 
 export function wocheAbspielen(s: GameState): WochenKpi {
   if (s.phase === 'zerschlagen') throw new Error('Spiel beendet: Die Kette ist zerschlagen.');
+  chronikInitialisieren(s); // Migrationsstand vor den Ereignissen der Woche
   const w = s.woche;
 
   prozesse(s);
