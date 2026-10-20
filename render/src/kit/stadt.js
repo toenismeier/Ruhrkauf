@@ -1148,28 +1148,66 @@ function baueGarten(ctx, b, r, hinder) {
   for (let i = 0, n = Math.round((b.w + b.d) / 8 * ctx.dichte); i < n; i++) { const t = r(); const x = t < 0.5 ? cx + zw(r, -1.5, 1.5) : zw(r, b.x + 3, b.x + b.w - 3), z = t < 0.5 ? zw(r, b.z + 3, b.z + b.d - 3) : cz + zw(r, -1.5, 1.5); figur(I, x, y + 0.05, z, r); }
 }
 
-function baueKleingarten(ctx, b, r, hinder) {
-  const { S, I } = ctx;
-  const y = 0.36;
-  S.quader(b.x, 0, b.z, b.x + b.w, y, b.z + b.d, '#a3c98f');
-  const pw = zw(r, 9, 12), pd = zw(r, 12, 15);
-  const weg = 2.4;
-  for (let z = b.z + 2; z + pd < b.z + b.d - 1; z += 2 * pd + weg) {
-    S.quader(b.x + 1, y, z + pd, b.x + b.w - 1, y + 0.04, z + pd + weg, F.weg);
-    for (const zz of [z, z + pd + weg]) for (let x = b.x + 2; x + pw < b.x + b.w - 1; x += pw) {
-      if (zz + pd > b.z + b.d - 1) continue;
-      const cx = x + pw / 2, cz = zz + pd / 2;
-      if (hinder.some((p) => imRechteck(cx, cz, p, 3))) continue;
-      S.quader(x + 0.4, y, zz + 0.4, x + pw - 0.4, y + 0.05, zz + pd - 0.4, waehle(r, ['#9cc58a', '#b2d39b', '#93bd7f']));
-      for (let k = 0; k < 3; k++) S.quader(x + 1, y + 0.05, zz + 1.5 + k * 1.6, x + pw * 0.45, y + 0.12, zz + 2.3 + k * 1.6, waehle(r, ['#8a6a4a', '#7a9f55', '#c5a36a']));
-      const hf = waehle(r, ['#c9a77c', '#8fa9b5', '#d9c49a', '#b56b4f', '#e8e4dc', '#7c9a6a']);
-      S.quader(x + pw - 3.6, y, zz + pd - 4.4, x + pw - 0.9, y + 2.1, zz + pd - 1.6, hf);
-      S.add(dachProfil(3.1, 3.2, 0.9, 0.1, 'x').translate(x + pw - 2.25, y + 2.1, zz + pd - 3.0), waehle(r, ['#b4583f', '#56636c', '#6f6a5c']));
-      if (r() < 0.6) baumSetzen(I, waehle(r, ['kugel', 'busch', 'linde']), x + 2, y, zz + pd - 2, r, 0.6);
-      for (let u = 0; u < pw; u += 2.4) I.setze('busch', x + u, y, zz + 0.3, 0, [0.55, 0.5, 0.55], ['#5f9a56']);
-    }
+// Sechs Laubenformen, eigene Proportionen und Farbpaletten; keine fremden Modelle oder Texturen.
+function q02Laube(S, x, z, y, art, farbe, dachfarbe) {
+  const w = [3.2, 3.5, 2.8, 3.8, 3.1, 3.4][art], d = [2.8, 2.6, 3.1, 2.9, 2.7, 3.1][art], h = art === 2 ? 1.85 : 2.25;
+  S.quader(x, y, z, x + w, y + h, z + d, farbe);
+  if (art === 1 || art === 3 || art === 4) {
+    const dach = dachProfil(w + 0.5, d + 0.5, art === 3 ? 0.8 : 1.1, 0.18, art === 4 ? 'z' : 'x');
+    dach.translate(x + w / 2, y + h, z + d / 2); S.add(dach, dachfarbe);
+  } else {
+    S.quader(x - 0.2, y + h, z - 0.2, x + w + 0.2, y + h + 0.19, z + d + 0.2, dachfarbe);
+    if (art === 2) S.quader(x + 0.4, y + h + 0.19, z + 0.3, x + w - 0.4, y + h + 0.26, z + d - 0.3, '#869da1');
   }
-  for (let i = 0; i < 6 * ctx.dichte; i++) figur(I, zw(r, b.x + 2, b.x + b.w - 2), y, zw(r, b.z + 2, b.z + b.d - 2), r);
+  S.quader(x + w * 0.3, y + 0.35, z + d, x + w * 0.68, y + 1.65, z + d + 0.06, '#6f9094');
+  S.quader(x + w - 0.8, y + 0.02, z + d + 0.02, x + w - 0.1, y + 1.65, z + d + 0.1, '#6a5541');
+  if (art === 5) {
+    S.quader(x - 0.2, y + 1.8, z + d, x + w + 0.2, y + 2.0, z + d + 1.6, dachfarbe);
+    for (const dx of [0, w]) S.box(0.12, 1.8, 0.12, x + dx, y + 0.9, z + d + 1.4, '#bcb0a1');
+  }
+}
+function baueKleingarten(ctx, b, r, hinder) {
+  const { S, I } = ctx, y = 0.36, endeX = b.x + b.w - 2, endeZ = b.z + b.d - 2;
+  S.quader(b.x, 0, b.z, b.x + b.w, y, b.z + b.d, '#9abf85');
+  const laubenFarben = ['#c9a77c', '#8fa9b5', '#d9c49a', '#b56b4f', '#e8e4dc', '#7c9a6a', '#d2c3aa'];
+  const daech = ['#b4583f', '#56636c', '#6f6a5c', '#7c8c7a', '#8a6960'];
+  let zeile = 0;
+  for (let z = b.z + 2; z + 11 < endeZ; zeile++) {
+    const tiefe = zw(r, 12.5, 18.5), nZ = Math.min(tiefe, endeZ - z), wegB = zw(r, 2, 3.1);
+    const wegZ = z + nZ;
+    if (wegZ + wegB < b.z + b.d - 1) S.quader(b.x + 1, y, wegZ, endeX + 1, y + 0.05, wegZ + wegB, '#d6c8aa');
+    let x = b.x + 2 + r() * 1.2;
+    while (x + 8 < endeX) {
+      const breite = Math.min(zw(r, 9.2, 14.6), endeX - x);
+      if (breite < 8) break;
+      const cx = x + breite / 2, cz = z + nZ / 2;
+      if (!hinder.some((p) => imRechteck(cx, cz, p, 3))) {
+        const wild = r() < 0.16, typ = Math.floor(r() * 6), laube = r() > 0.08;
+        const gras = waehle(r, wild ? ['#779c67', '#88a973', '#9eb488'] : ['#9cc58a', '#b2d39b', '#93bd7f']);
+        S.quader(x + 0.25, y, z + 0.25, x + breite - 0.25, y + 0.04, z + nZ - 0.25, gras);
+        // Nutzbeete, Obstgehölze und unregelmäßige Gartenwege statt duplizierter Streifen.
+        const beetAnzahl = wild ? 1 : Math.floor(2 + r() * 3);
+        for (let k = 0; k < beetAnzahl; k++) {
+          const bw = zw(r, 1.1, Math.min(2.6, breite * 0.32));
+          const bx = x + 0.7 + r() * Math.max(0.1, breite * 0.55 - bw);
+          const bz = z + 1.2 + k * (nZ - 4) / Math.max(2, beetAnzahl);
+          S.quader(bx, y + 0.04, bz, bx + bw, y + 0.14, Math.min(bz + zw(r, 1.1, 2.6), z + nZ - 1), wild ? '#728d5b' : waehle(r, ['#8a6a4a', '#7a9f55', '#c5a36a']));
+        }
+        if (laube && breite > 8.8 && nZ > 11.5) {
+          const lx = x + breite - 4.9, lz = z + nZ - 4.6;
+          q02Laube(S, lx, lz, y + 0.05, typ, laubenFarben[(typ + Math.floor(r() * laubenFarben.length)) % laubenFarben.length], waehle(r, daech));
+        }
+        const obst = wild ? 2 : r() < 0.7 ? 1 : 0;
+        for (let k = 0; k < obst; k++) baumSetzen(I, waehle(r, ['kugel', 'linde', 'birke']), x + 2.2 + r() * Math.min(2, breite * 0.2), y + 0.04, z + nZ - 2.6 - k * 3, r, zw(r, 0.5, 0.7));
+        if (wild) for (let k = 0; k < 3; k++) I.setze('busch', x + zw(r, 1, breite - 1), y + 0.04, z + zw(r, 1, nZ - 1), 0, [0.6, 0.6, 0.6], [waehle(r, KRONE.busch)]);
+        for (let u = 0; u < breite - 0.8; u += zw(r, 2.6, 4.6)) I.setze('busch', x + u, y, z + 0.15, 0, [0.38, 0.4, 0.38], ['#628b54']);
+        if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: cx, z: cz, muster: 'garten/' + typ + '/' + Math.round(breite) + '/' + beetAnzahl + '/' + Number(wild) + '/' + zeile % 3 });
+      }
+      x += breite + zw(r, 0.5, 1.6);
+    }
+    z += nZ + wegB;
+  }
+  for (let i = 0; i < 4 * ctx.dichte; i++) figur(I, zw(r, b.x + 2, b.x + b.w - 2), y, zw(r, b.z + 2, b.z + b.d - 2), r);
 }
 
 // ====================================================================================
