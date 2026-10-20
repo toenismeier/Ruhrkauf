@@ -710,8 +710,9 @@ async function buendeln() {
     const bericht = { seed:1, woche:104, bilder:[], abweichungen:[], reihen:0, hausverlaeufe:0, spielstandBytes:0 };
     const messung = await p.evaluate(() => {
       const s = window.spiel.s;
-      const voller = JSON.stringify(s).length;
-      const verlaufBytes = s.haeuser.reduce((n,h)=>n+JSON.stringify(h.verlauf??[]).length,0);
+      const textBytes = x => new TextEncoder().encode(JSON.stringify(x)).length;
+      const voller = textBytes(s);
+      const verlaufBytes = s.haeuser.reduce((n,h)=>n+textBytes(h.verlauf??[]),0);
       return { hauser:s.haeuser.length, voller, verlaufBytes,
         proHaus:Math.round(verlaufBytes/Math.max(1,s.haeuser.length)),
         bei560:Math.round(verlaufBytes/Math.max(1,s.haeuser.length)*560),
