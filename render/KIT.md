@@ -66,9 +66,15 @@ in allen Stufen gleich, es entfallen nur Teile.
   Zeit je Slot-Bauer und Aufruf im Browser über alle Städte (`out/zeit-bauer.txt`, Ziel: unter 0,5 s).
 
 ## Möbelbibliothek (Workstream Ladenbau, Phase 1)
-- `src/kit/moebel/index.js`: `ALLE_MOEBEL` (147 Definitionen), `MOEBEL[id]` und `moebel(id)`. Bereiche Sport (86), Off-Price (15), allgemein / Schwesterkette (46). Neue Möbel gehören in `moebel/{wand,gondel,insel,kasse,deko,sport,outlet,service}.js`, gemeinsame Hilfen in `moebel/basis.js`.
+- `src/kit/moebel/index.js`: `ALLE_MOEBEL`, `MOEBEL[id]` und `moebel(id)`. Sport hat zusätzliche sortimentsspezifische Kompaktmöbel aus `moebel/sport-mix.js`; FUNDUS erhält mit `outlet_schuhe` ein eigenständiges, maßhaltiges Schuhkarton-Modul. Möbelzahlen nicht statisch aus älteren Projektständen übernehmen. Neue Möbel gehören in `moebel/{wand,gondel,insel,kasse,deko,sport,outlet,service}.js`, gemeinsame Hilfen in `moebel/basis.js`.
 - Schnittstelle pro Stück: `{id,titel,bereich,rasterB,rasterT,hoehe,typ,budget,bau(L,r,d,ctx)}`; `L` aus `innen.js lokal()`, Vorderseite lokal +z. Breiten/Tiefen als Vielfache von 1,25 m; Wandtiefe stets 0,6 m, Wandkorpus 2,4 m mit 0,6-m-Schildband. Gondeln 1,25 m tief, 1,4 m hoch; Inseln maximal 1,5 m.
 - `rng(seed)` aus `basis.js` verwenden und an `bau` übergeben; `setzeLod('fern')` reduziert auf Korpus und Flächenfarben; keine Schrift außerhalb `basis.js`.
 - Prüfen: `cd render && node pruef-moebel.js` (oder `npm run moebel:pruefen`). Testet tatsächliche Geometrie-Abmessungen, Rückkanten, Höhen, Bauteilbudgets, reproduzierbare Farbe/Geometrie und Fernstufe. Erwartung: 0 Fehler.
 - Kataloge: `node render-katalog.js moebel-sport`, `moebel-outlet`, `moebel-allgemein`, `moebel-reihen` und optional `moebel-sport-fern`. Ergebnisse unter `render/out/katalog-moebel-*.png`; der Grafik-CI-Workflow stellt die vier Kernkataloge zusätzlich als Artifact `ladenbau-kataloge` bereit.
 - Alte Aufrufer (`innen.js`, `sportabteilung.js`) bleiben unverändert. Der gemeinsame Ladenplaner aus Phase 3 wird die IDs verwenden.
+
+## Ladenbau Phase 5 – FUNDUS innen
+- `src/kit/ladenbau-outlet.js`: Geschoss- und Sortimentsadapter (aktuell 20 FUNDUS-Filialen, insgesamt 35 Verkaufsetagen); `src/kit/outlet.js` verwendet `ladenplan` und `baueLadenplan` auch für zweigeschossige Fachmärkte und Innenstadt-Geschäftshäuser.
+- `baueLadenplan` kann `{x,z,y,bestueckung}` entgegennehmen, damit derselbe Plan ohne geometrische Duplikate in gestapelte Etagen eingebaut wird. Bei schwacher Bestückung bzw. Räumung werden Warenkörper auf Gestellen reduziert, Größenschilder und Korpusse bleiben.
+- Lokale Prüfungen: `npm run ladenbau:smoke`, `npm run ladenbau:pruefen`, `npm run ladenbau:pruefen:teile`; Render: `node render-katalog.js outlet-innen` und `node render-katalog.js outlet-innen-zustaende`, visuelle Abnahme und Budgetprüfung **vor** dem Merge.
+- Phase-4-Restpunkte im gemeinsamen Planer: Sport-Hängeschilder über den Abteilungsmitten, garantierte Rundständer-/Puppentypen soweit die Sortimentsgeometrie passt und verbreiterte Positionssuche für genau eine Erlebnispräsentation je Sportabteilung.
