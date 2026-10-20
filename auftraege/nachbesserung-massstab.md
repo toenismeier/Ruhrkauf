@@ -131,4 +131,5 @@ Befund aus TestFlight-Wurf 1 und Claudes Nachrechnung (Seed 1, Leicht, ohne Eing
 - Januar und Februar dürfen negativ sein, aber im Mittel höchstens etwa −4 % EBITDA-Quote (Zielwert aus Abschnitt 10), keine Woche unter −6 % auf Mittel, −8 % auf Schwer; auf Leicht entsprechend milder.
 - KW 1 nicht künstlich positiv: kein Sprung von + auf − zwischen KW 1 und KW 2 (Ursache suchen, z. B. fehlende Kosten oder Vorlauf in der ersten Woche).
 - Ursachenanalyse in die PR: Saisonkurve Januar/Februar, Personal- und Mietkosten je Woche, Wareneinsatz/Abschriften nach Weihnachten.
+- Ausrichtung (Ummo, 20.10.2026): Turnaround und Management stehen im Fokus, die Insolvenz steht ganz am Ende. Der Standardverlauf ohne Eingriffe darf im ersten Jahr nicht in die Insolvenz zwingen.
 - Prüfung: Wochenverlauf 13 und 52 Wochen je Schwierigkeit als Tabelle in `massstab-stand.md`; Bot C überlebt weiter 5 Jahre.

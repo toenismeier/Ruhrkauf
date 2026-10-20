@@ -1,10 +1,12 @@
-# Jeder Push auf main: Ist die native Hülle unverändert, geht das Spiel als Update raus (App lädt es beim nächsten Start).
+# Build-Zug Dienstag und Freitag 18 Uhr (Winterzeit; Cron in UTC), kein Lauf bei jedem Push.
+# Ist die native Hülle unverändert, geht das Spiel als Update raus (App lädt es beim nächsten Start).
 # Hat sich die Hülle geändert (neues natives Modul, app.json), wird neu gebaut und an TestFlight übermittelt.
+# Außer der Reihe nur von Hand: npx eas-cli@latest workflow:run .eas/workflows/ausliefern.yml
 name: Ausliefern
 
 on:
-  push:
-    branches: ['main']
+  schedule:
+    - cron: '0 17 * * 2,5'
 
 jobs:
   fingerprint:
