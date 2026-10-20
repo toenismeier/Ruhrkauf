@@ -8,6 +8,7 @@ import { HAUSCLUSTER_NAMEN, VORNAMEN, NACHNAMEN } from './daten';
 import { clamp, eur } from './util';
 import { einmalKosten } from './prozesse';
 import { itDeckel } from './it';
+import { fuehreAus, type SpielerAktion } from './aktionen';
 
 export type BereichId = string;
 export interface Bereich { id: BereichId; name: string; ressort: RessortId; abteilung: AbteilungId; beschreibung: string }
@@ -117,7 +118,7 @@ export interface OrganisationsStand {
 export interface VorlageEingabe {
   titel: string; text: string; bereich?: BereichId; hauscluster?: string; frist?: number;
   optionen?: { id: string; label: string }[]; standard?: string; grundsaetzlich?: boolean;
-  aktion?: OrganisationAktion; aufgabe?: string; betrag?: number;
+  aktion?: SpielerAktion; fehlerAktion?: SpielerAktion; aufgabe?: string; betrag?: number;
 }
 export type OrganisationAktion =
   | { typ: 'flagship'; haus: string; an: boolean }
@@ -286,7 +287,10 @@ export function neueVorlage(s: GameState, v: VorlageEingabe): void {
     if (v.aktion) {
       const guete = bereich ? bereichsQualitaet(s, bereich.id) : clusterleitungQualitaet(s, cluster!.id);
       const schwelle = (mix(s.seed, (v.aufgabe ?? v.titel) + ':' + s.woche) % 1000) / 1000;
-      if (schwelle < 0.3 + 0.65 * guete) organisationAktion(s, v.aktion);
+      const richtig = schwelle < 0.3 + 0.65 * guete;
+      // Schlecht besetzte Leitungen treffen gelegentlich ausdrücklich falsche Entscheidungen.
+      const aktion = richtig ? v.aktion : (v.fehlerAktion ?? v.aktion);
+      fuehreAus(s, aktion);
     }
     return;
   }
@@ -302,8 +306,8 @@ export function neueVorlage(s: GameState, v: VorlageEingabe): void {
 export function organisationVorlageEntscheidung(s: GameState, e: Entscheidung, option: string): void {
   // Fristablauf nutzt denselben Leitungsvorschlag wie die manuelle Freigabe.
   if (option !== 'vorschlag' || typeof e.daten.aktion !== 'string' || !e.daten.aktion) return;
-  const a = JSON.parse(e.daten.aktion) as OrganisationAktion;
-  organisationAktion(s,a);
+  const a = JSON.parse(e.daten.aktion) as SpielerAktion;
+  fuehreAus(s,a);
 }
 function stelleFuer(s: GameState, ebene: 'bereich'|'cluster'|'region', id: string): Stelle | undefined {
   if (ebene === 'bereich') return s.organisation?.bereiche[id];
@@ -385,6 +389,42 @@ export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: b
   st.kandidaten = [1,2,3].map((n) => person(s.seed,a.id + '-' + (s.woche+1),n));
   return { ok:true,text:k.name + ' übernimmt die Leitung.' };
 }
+/** Wirksame Routinevorschläge. Ohne angepasste Delegation bleibt das Startspiel identisch.
+ * Bereichsleitungen verwenden reale Engine-Aktionen und die bestehende Freigabelogik. */
+function routineVorschlag(bereich: string | undefined, aufgabe: string): { gut: SpielerAktion; schlecht: SpielerAktion } | undefined {
+  const wg: Record<string, string> = {
+    einkauf_damen:'damen', einkauf_herren_kinder:'herren', einkauf_beauty:'beauty',
+    einkauf_wohnen:'wohnen', einkauf_food:'nug', merchandise_planning:'alle',
+    allokation:'alle', preis_reduzierung:'alle',
+  };
+  const gruppe = bereich && wg[bereich];
+  if (gruppe) {
+    if (aufgabe === 'limits') return {
+      gut:{typ:'wgLimit',wg:gruppe,faktor:1.05}, schlecht:{typ:'wgLimit',wg:gruppe,faktor:0.8},
+    };
+    if (aufgabe === 'reduzierung') return {
+      gut:{typ:'wgReduzierung',wg:gruppe,strategie:'normal'},
+      schlecht:{typ:'wgReduzierung',wg:gruppe,strategie:'spaet'},
+    };
+    if (aufgabe === 'nachorder' || aufgabe === 'disposition') return {
+      gut:{typ:'wgServicegrad',wg:gruppe,ziel:0.98},
+      schlecht:{typ:'wgServicegrad',wg:gruppe,ziel:0.9},
+    };
+    if (aufgabe === 'vororder') return {
+      gut:{typ:'wgVororderquote',wg:gruppe,quote:0.6},
+      schlecht:{typ:'wgVororderquote',wg:gruppe,quote:0.25},
+    };
+    if (aufgabe === 'freigaben') return {
+      gut:{typ:'sammelfreigabe'},
+      schlecht:{typ:'freigabeGrenze',euro:0},
+    };
+  }
+  if (bereich === 'marketing' && aufgabe === 'budget') return {
+    gut:{typ:'kanalBudget',kanal:'alle',faktor:1.02},
+    schlecht:{typ:'kanalBudget',kanal:'alle',faktor:0.8},
+  };
+  return undefined;
+}
 /** Nur auf explizite Wechsel reagieren: kein neuer Posteingang und kein Kostenimpuls im Standard. */
 export function organisationWoche(s: GameState): void {
   const o = s.organisation;
@@ -406,7 +446,9 @@ export function organisationWoche(s: GameState): void {
     for (const x of einheiten) for (const aufgabe of Object.keys(x.st.aufgaben ?? {})) {
       const def = delegationsAufgaben(x.bereich, x.hauscluster).find((d) => d.id === aufgabe);
       if (!def) continue;
+      const vorschlag = routineVorschlag(x.bereich, aufgabe);
       neueVorlage(s, { bereich: x.bereich, hauscluster: x.hauscluster, aufgabe,
+        aktion:vorschlag?.gut, fehlerAktion:vorschlag?.schlecht,
         betrag: def.grenze ? Math.min(def.grenze, delegationsGrenze(s, aufgabe, x.bereich, x.hauscluster) ?? def.grenze) : undefined,
         titel: def.name + ': Routineentscheidung KW ' + (s.woche + 1),
         text: 'Die zuständige Leitung legt ihre Entscheidung zu ' + def.name + ' vor.',
