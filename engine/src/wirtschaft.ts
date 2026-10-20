@@ -180,7 +180,9 @@ export interface HausKosten {
 export function lohnKosten(s: GameState, h: Haus): number {
   const p = h.personal;
   const tarifF = s.tarif === 'sanierung' ? 0.93 : s.tarif === 'ohne' ? 0.89 : 1;
-  return (p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF + p.aushilfen * PARAM.lohnAushilfe;
+  // O07: Differenz zum eingepreisten Startgehalt der Hausleitung als Personalaufwand.
+  const leitungDelta = h.betrieb && !s.hausbetriebAbnahmeAus ? ((p.filialleiter.gehalt ?? h.betrieb.leitungGehaltStart) - h.betrieb.leitungGehaltStart) / 52 : 0;
+  return (p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF + p.aushilfen * PARAM.lohnAushilfe + leitungDelta;
 }
 
 export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGesamt: number): HausKosten {
@@ -191,6 +193,8 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     return k;
   }
   k.personal = lohnKosten(s, h);
+  // O07: genehmigter Verkaufs-Sonntag benötigt zusätzliche Besetzung.
+  if (!s.hausbetriebAbnahmeAus && s.hausbetrieb?.staedte[h.stadt]?.sonntage.includes(s.woche)) k.personal *= 1.18;
   k.miete = h.miete.mieteWoche;
   let qmNk = 0;
   let qmBetrieb = 0;
