@@ -468,6 +468,8 @@ export interface GameState {
   quartale: Quartal[];
   // O06 Planung: Jahresbudget, Forecast, Boni (optional für alte Spielstände).
   planung?: PlanungStand;
+  /** Nur für Kalibrierung: schaltet die operativen Planungseffekte ab. */
+  planungDeaktiviert?: boolean;
   eigentuemer: { strikes: number; kapitalZugefuehrt: Eur; forderung?: string };
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
