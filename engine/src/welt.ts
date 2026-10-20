@@ -342,6 +342,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  s.kapitalflussStartCash = s.cash;
   return s;
 }
 
