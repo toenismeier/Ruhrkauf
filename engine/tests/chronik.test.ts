@@ -43,6 +43,21 @@ describe('N12 Konzernchronik', () => {
     expect(s.chronik?.filter(e => e.bezug === h.id)).toHaveLength(1);
   });
 
+  test('verkauftes Haus und Migrieren eines alten Spielstands erfassen nur neue Ereignisse', () => {
+    const s = neuesSpiel(3);
+    delete s.chronik;
+    delete s.chronikStand;
+    const alt = s.haeuser[0];
+    alt.status = 'geschlossen'; // Bestand vor dem Upgrade
+    chronikAktualisieren(s);
+    expect(s.chronik).toEqual([]);
+    expect(s.chronikStand?.haeuser[alt.id]).toBe('geschlossen');
+    const neu = s.haeuser[1];
+    neu.status = 'verkauft';
+    chronikAktualisieren(s);
+    expect(s.chronik).toEqual([expect.objectContaining({ art: 'haus', bezug: neu.id, woche: 0 })]);
+  });
+
   test('Insolvenzantrag und Planannahme werden als zwei Meilensteine gespeichert', () => {
     const s = neuesSpiel(5);
     eroeffneInsolvenz(s, 'Testfall');
