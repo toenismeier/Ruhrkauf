@@ -1,6 +1,6 @@
 // O07 Haus als Betrieb: eigene Zustände, Aktionen und Abfragen ohne Abhängigkeit von O01/O02.
 import type { GameState, Haus, HausKpi, Filialleiter } from './types';
-import { clamp, eur, melde, neueId } from './util';
+import { clamp, eur, melde, neueId, zufall } from './util';
 
 export type HausStaerke = 'personal' | 'ware' | 'kunde' | 'kosten';
 export type KostenPosten = 'energie' | 'reinigung' | 'sicherheit' | 'instandhaltung' | 'versicherung';
@@ -92,7 +92,8 @@ export { GRUND_TEXT };
 function hash(t: string): number {
   let n = 2166136261;
   for (let i = 0; i < t.length; i++) n = Math.imul(n ^ t.charCodeAt(i), 16777619);
-  return (n >>> 0) / 4294967296;
+  // Eigenständiger, reproduzierbarer RNG-Halter: der Hauptzufallsstrom wird nicht verändert.
+  return zufall({ rng: n >>> 0 });
 }
 const leitung = (h: Haus): Filialleiter => h.personal.filialleiter;
 const betrieb = (h: Haus): HausBetrieb | undefined => h.betrieb;
