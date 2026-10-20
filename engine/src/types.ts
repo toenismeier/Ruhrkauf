@@ -483,6 +483,8 @@ export interface GameState {
   historie: WochenKpi[];
   /** Noch nicht in einem Wochenabschluss ausgewiesene Investitions-/Finanzierungszahlungen. */
   kapitalflussOffen?: { investitionen: Eur; finanzierung: Eur };
+  /** Anfangsbestand vor Spielermaßnahmen in Woche 0 (wichtig bei noch leerer Historie). */
+  kapitalflussStartCash?: Eur;
   zaehler: number; // für IDs
   prognose?: boolean; // true in Vorschau-Klonen: keine Zufallsereignisse
   einmalkostenWoche: Eur; // Sondereffekte der laufenden Woche
