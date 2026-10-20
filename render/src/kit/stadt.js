@@ -10,6 +10,7 @@
 import { THREE, rng, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { bergHoehe, gelaende, rebzeilen } from './gelaende.js';
+import { tramArme } from './q02-qualitaet.js';
 
 // ====================================================================================
 // Konstanten
@@ -285,7 +286,7 @@ export const richtung = (dx, dz) => Math.atan2(-dz, dx);
  */
 export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   const I = o.instanzer ?? new Instanzer();
-  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr, qualitaet: o.qualitaet ?? null };
   ostVerkehr = !!plan.ddr;
   for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
   const t0 = S.anzahl;
@@ -337,7 +338,7 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
     }
   };
   const I = o.instanzer ?? new Instanzer();
-  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr, qualitaet: o.qualitaet ?? null };
   ostVerkehr = !!plan.ddr;
   for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
   const t0 = S.anzahl;
@@ -390,6 +391,7 @@ export function bauerFuer(bauer, typ) {
 function rahmen(s) {
   const z = s.achse === 'z';
   return {
+    achse: s.achse, mitte: s.mitte,
     w: (u, v) => (z ? [s.mitte + v, u] : [u, s.mitte + v]),
     quader: (S, u0, u1, v0, v1, y0, y1, f) => (z ? S.quader(s.mitte + v0, y0, u0, s.mitte + v1, y1, u1, f) : S.quader(u0, y0, s.mitte + v0, u1, y1, s.mitte + v1, f)),
     ru: z ? -Math.PI / 2 : 0,      // Drehung, damit Prop-x entlang +u zeigt
@@ -445,6 +447,21 @@ function baueSegment(ctx, s) {
       R.quader(S, m0, m1, -h, -h + 0.25, 0, 0.22, F.bord);
       R.quader(S, m0, m1, h - 0.25, h, 0, 0.22, F.bord);
       gleise(ctx, R, s.von, s.bis);
+      // Freies Gleisende mit Prellbock; Anschlüsse nur bei durchgehend vorhandenen Gleisarmen.
+      for (const [u, arm] of [[s.von, '-'], [s.bis, '+']]) {
+        const anKreuzung = ctx.plan.kreuzungen.some((k) => {
+          if (s.achse === 'z') return Math.abs(k.x - s.mitte) < 0.6
+            && Math.abs((arm === '-' ? k.z + k.bz / 2 : k.z - k.bz / 2) - u) < 0.6
+            && !!k.arme[arm === '-' ? '+z' : '-z']?.tram;
+          return Math.abs(k.z - s.mitte) < 0.6
+            && Math.abs((arm === '-' ? k.x + k.bx / 2 : k.x - k.bx / 2) - u) < 0.6
+            && !!k.arme[arm === '-' ? '+x' : '-x']?.tram;
+        });
+        const grenzen = s.achse === 'z' ? [0, ctx.plan.tiefe] : [0, ctx.plan.breite];
+        const abschluss = anKreuzung ? 'anschluss' : grenzen.some((gr) => Math.abs(u - gr) < 0.6) ? 'kartenrand' : 'prellbock';
+        if (abschluss === 'prellbock') gleisPrellbock(ctx, R, u);
+        if (ctx.qualitaet) for (const t of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: s.achse, mitte: s.mitte + t, u, abschluss });
+      }
       for (let u = s.von + 9; u < s.bis - 7; u += 30) { const [x, z] = R.w(u, 0); I.setze('olmast', x, 0.12, z, R.ru + Math.PI / 2); }
       if (h >= 4) for (const sg of [-1, 1]) for (let u = m0 + 5; u < m1 - 2; u += 11) { const [x, z] = R.w(u, sg * (h - 1.1)); baumSetzen(I, s.baumart, x, 0.12, z, r, 0.85); }
     } else {
@@ -514,8 +531,22 @@ function baueSegment(ctx, s) {
 }
 
 function gleise(ctx, R, u0, u1, y = 0) {
-  for (const t of [-1.6, 1.6]) for (const sp of [-0.72, 0.72]) R.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
-  for (const t of [-1.6, 1.6]) R.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
+  if (u1 - u0 < 0.2) return;
+  for (const t of [-1.6, 1.6]) {
+    for (const sp of [-0.72, 0.72]) R.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
+    R.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
+    if (ctx.qualitaet) {
+      const s = { achse: R.achse, mitte: R.mitte + t, von: u0, bis: u1, breite: 2.0 };
+      ctx.qualitaet.gleise.push(s);
+      ctx.qualitaet.draehte.push({ ...s });
+    }
+  }
+}
+function gleisPrellbock(ctx, R, u) {
+  for (const t of [-1.6, 1.6]) {
+    const [x, z] = R.w(u, t);
+    ctx.S.box(R.achse === 'x' ? 0.42 : 2.2, 0.8, R.achse === 'x' ? 2.2 : 0.42, x, 0.52, z, '#c9b24c');
+  }
 }
 
 /** Fahrende und parkende Autos, Straßenbahn auf einem Abschnitt. */
@@ -542,7 +573,9 @@ function verkehrAufSegment(ctx, s, R, u0, u1, y) {
     const t = (k === 0 ? r() < 0.5 : true) ? -1.6 : 1.6;
     const tt = k === 1 ? 1.6 : t;
     const plus = (s.achse === 'z' ? -1 : 1) * Math.sign(tt) > 0;
-    const [x, z] = R.w(zw(r, u0 + 16, u1 - 16), tt);
+    const u = zw(r, u0 + 16, u1 - 16);
+    const [x, z] = R.w(u, tt);
+    if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'tram', x, z, laenge: ctx.ost ? 28.6 : 30 });
     if (ctx.ost) I.setze('tatra', x, 0.06, z, R.ru + (plus ? 0 : Math.PI), 1, [waehle(r, ['#e2b33a', '#d8642f', '#c8322b', '#e9d9a0'])]);
     else I.setze('strassenbahn', x, 0.06, z, R.ru + (plus ? 0 : Math.PI), 1, [waehle(r, ['#c8322b', '#2f6f8f', '#3f7d56'])]);
   }
@@ -655,9 +688,15 @@ function baueKreuzung(ctx, k) {
     for (let i = 0; i < (k.bx * k.bz) / 30 * ctx.dichte; i++) { const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1); if (Math.hypot(x - k.x, z - k.z) > 6) figur(I, x, 0.29, z, r); }
     return;
   }
-  // Gleise und Fahrdraht durch die Kreuzung
-  if ((k.arme['-z']?.tram || k.arme['+z']?.tram)) gleise(ctx, rahmen({ achse: 'z', mitte: k.x }), z0, z1);
-  if ((k.arme['-x']?.tram || k.arme['+x']?.tram)) gleise(ctx, rahmen({ achse: 'x', mitte: k.z }), x0, x1);
+  // Fahrdraht und Schienen enden exakt mit den tatsächlich angeschlossenen Gleisarmen.
+  for (const t of tramArme(k)) {
+    const R = rahmen({ achse: t.achse, mitte: t.mitte });
+    gleise(ctx, R, t.von, t.bis);
+    for (const ende of t.ende) {
+      gleisPrellbock(ctx, R, ende);
+      if (ctx.qualitaet) for (const quer of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: t.achse, mitte: t.mitte + quer, u: ende, abschluss: 'prellbock' });
+    }
+  }
   // Zebrastreifen, Haltelinien, Poller an Fußgängerzonen
   for (const [seite, arm] of Object.entries(k.arme)) {
     if (!arm) continue;
@@ -1584,7 +1623,7 @@ function baueBahn(ctx, b, r) {
   // Gleisband ohne Empfangsgebäude (b.ohneBahnhof): nur Gleise, kein Bahnsteig über die ganze Kartenbreite
   const muster = b.ohneBahnhof ? ['g'] : ['g', 's', 'g', 'g', 's', 'g', 'g', 'g'];
   let z = gl.z0, i = 0;
-  const gleisZ = [];
+  const gleisZ = [], bahnsteigZ = [];
   while (z < gl.z1 - 4) {
     const m = muster[i % muster.length];
     if (m === 'g') { gleisZ.push(z + 2.25); z += 4.5; }
@@ -1592,6 +1631,7 @@ function baueBahn(ctx, b, r) {
       if (z + 6 > gl.z1 - 4) break;
       if (bh && b.oben && z + 6 > bh.z - 3) { z += 6; i++; continue; }   // Bahnsteige nur hinter dem Empfangsgebäude
       const bx0 = bh ? bh.x - 10 : b.x + 10, bx1 = bh ? bh.x + bh.w + 10 : b.x + b.w - 10;
+      bahnsteigZ.push(z + 3);
       S.quader(bx0, 0, z + 0.2, bx1, 1.0, z + 5.8, '#cfc8bb');
       S.quader(bx0, 1.0, z + 0.2, bx1, 1.04, z + 0.6, '#f2f1ec');
       S.quader(bx0, 1.0, z + 5.4, bx1, 1.04, z + 5.8, '#f2f1ec');
@@ -1610,19 +1650,29 @@ function baueBahn(ctx, b, r) {
     for (let x = ga + 0.5; x < gb; x += 1.1) I.setze('schwelle', x, y + 0.15, gz, 0);
     for (const sp of [-0.72, 0.72]) S.quader(ga, y + 0.2, gz + sp - 0.06, gb, y + 0.36, gz + sp + 0.06, F.schiene);
     S.quader(ga, 6.3, gz - 0.04, gb, 6.38, gz + 0.04, F.dunkel);
+    if (ctx.qualitaet) {
+      const spur = { achse: 'x', mitte: gz, von: ga, bis: gb, breite: 3 };
+      ctx.qualitaet.gleise.push(spur); ctx.qualitaet.draehte.push({ ...spur });
+      for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: 'x', mitte: gz, u, abschluss: 'prellbock' });
+    }
+    for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz, '#c9b24c');
   }
   if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze('olmastSeite', x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
-  // Züge
-  const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
-  const frei = [...gleisZ].sort(() => r() - 0.5).slice(0, zuege);
-  for (const gz of frei) {
-    const wagen = Math.floor(zw(r, 3, 6.9));
-    const [ga, gb] = abschnitte(gz).sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0] ?? [xa, xb];
-    if (gb - ga < 40) continue;
-    let x = zw(r, ga + 6, Math.max(ga + 7, gb - wagen * 26.5 - 2));
-    const xEnde = gb;
+  // Züge ausschließlich an Bahnsteigen, Wagenlänge und Gleisende werden respektiert.
+  const gleiseMitBahnsteig = bh ? gleisZ.filter((gz) => bahnsteigZ.some((pz) => Math.abs(gz - pz) <= 8.5)) : [];
+  const zuege = Math.min(gleiseMitBahnsteig.length, 2 + (r() < 0.5 ? 1 : 0));
+  const frei = gleiseMitBahnsteig.map((gz) => ({ gz, los: r() })).sort((a, b) => a.los - b.los).slice(0, zuege);
+  for (const { gz } of frei) {
+    const [ga, gb] = abschnitte(gz).sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0] ?? [xa, xb];
+    const wagen = Math.min(Math.floor(zw(r, 3, 6.9)), Math.floor((gb - ga - 6) / 26.5));
+    if (wagen < 1) continue;
+    const beginn = Math.max(ga + 3, Math.min(bh.x + bh.w / 2 - wagen * 13.25, gb - wagen * 26.5 - 3));
     const farbe = waehle(r, ['#f1f1ee', '#e9eef0', '#d8dde1']);
-    for (let w = 0; w < wagen && x < xEnde - 13; w++, x += 26.5) I.setze('zugwagen', x + 13, y + 0.36, gz, 0, 1, [farbe]);
+    for (let w = 0; w < wagen; w++) {
+      const x = beginn + 13 + w * 26.5;
+      I.setze('zugwagen', x, y + 0.36, gz, 0, 1, [farbe]);
+      if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'zug', x, z: gz, laenge: 26 });
+    }
   }
 }
 
