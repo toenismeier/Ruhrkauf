@@ -6,10 +6,10 @@ import { clamp, eur, melde, mio } from './util';
 // Festes Raum- und Betriebsprofil je Kronjuwel. Keine Seed-/Hausgrößenabhängigkeit.
 // Die Produktivitätsfaktoren wirken auf die Flächenleistung, nicht direkt auf die KPI.
 const PREMIUM_PROFIL = {
-  P001: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.060, mietQuote: 0.057 },
-  P002: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.060, mietQuote: 0.057 },
-  P003: { qm: 18_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.070, mietQuote: 0.060 },
-  P004: { qm: 14_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.092, mietQuote: 0.065 },
+  P001: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
+  P002: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
+  P003: { qm: 18_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.060 },
+  P004: { qm: 14_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
 } as const;
 type PremiumId = keyof typeof PREMIUM_PROFIL;
 const premiumProfil = (id?: string) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id)
