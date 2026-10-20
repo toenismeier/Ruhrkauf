@@ -137,6 +137,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   switch (a.typ) {
     case 'ruhestand':
       if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
+      if (s.phase !== 'regulaer' || s.insolvenz) return fehler('Ein laufendes Insolvenzverfahren muss zuerst beendet sein.');
       if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
       spielBeenden(s, 'ruhestand');
       return ok('Der Ruhestand beginnt.');
