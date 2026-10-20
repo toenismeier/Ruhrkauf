@@ -447,6 +447,24 @@ export function testZufallsereignis(s: GameState, art: string): boolean {
       });
       return true;
     }
+    case 'nordline_dtc':
+      neueEntscheidung(s, {
+        typ: 'nordline_dtc', frist: s.woche + 4, titel: 'Nordline stellt auf Direktvertrieb um',
+        text: 'Nordline kürzt die Zuteilung für den Handel. Gegen eine Investition in Markenflächen bleibt Hartwig A-Partner.',
+        optionen: [
+          { id: 'akzeptieren', label: 'Kürzung akzeptieren' },
+          { id: 'investieren', label: 'Markenflächen finanzieren (3,5 Mio. €)' },
+        ],
+        standard: 'akzeptieren', daten: {},
+      });
+      return true;
+    case 'arvel_rueckkehr': {
+      const l = s.lieferanten.find((x) => x.id === 'arvel');
+      if (!l) return false;
+      l.aktiv = true; l.rueckzug = false;
+      melde(s, 'info', 'Test: Maison Arvel kehrt in die B-Lagen zurück.');
+      return true;
+    }
     case 'lieferantenausfall': {
       const l = s.lieferanten.find((x) => x.aktiv);
       if (!l) return false;
