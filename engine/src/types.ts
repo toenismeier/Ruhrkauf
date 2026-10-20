@@ -5,6 +5,8 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+// O02 Umsatztreiber
+import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -167,6 +169,10 @@ export interface Haus {
   streikBis?: number;
   standortgarantie?: boolean;
   kpi?: HausKpi;
+  // O02 Umsatztreiber: Startfaktoren sind neutral, Quellen der späteren operativen Module.
+  treiber?: TreiberFaktoren;
+  treiberQuellen?: TreiberQuellen;
+  treiberVerlauf?: TreiberPeriode[];
 }
 
 export interface Kohorte {
