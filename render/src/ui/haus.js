@@ -50,23 +50,36 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
       '</div>';
   }
   if (r === 'partner') {
-    inhalt = '<div class="karte"><div class="khead">Hausstandards und Services</div>' +
-      line('Öffnungszeiten Mo–Fr',p(b?.standard?.oeffnung?.von)+'–'+p(b?.standard?.oeffnung?.bis)+' Uhr') +
-      line('Samstag bis',p(b?.standard?.oeffnung?.samstagBis)+' Uhr')+
-      ['sauberkeit','praesentation','kasse'].map(key => '<div class="zeile"><span class="was">'+esc({sauberkeit:'Sauberkeit',praesentation:'Warenpräsentation',kasse:'Kassenstandard'}[key])+' · '+p(b?.standard?.[key])+'/3</span>'+
-      button('−',"hausTun('standard','"+id+"','"+key+"',-1)")+
-      button('+',"hausTun('standard','"+id+"','"+key+"',1)")+'</div>').join('') +
-      (b?.ausnahmeGrund ? line('Haus-Ausnahme',b.ausnahmeGrund):'')+
-      Object.entries(b?.services ?? {}).map(([key,an]) => '<div class="zeile"><span class="was">'+esc(SERVICE[key]??key)+'</span>'+
-      button(an?'Abschalten':'Aktivieren', "hausTun('service','"+id+"','"+key+"',"+(!an)+")") + '</div>').join('')+
-      '</div><div class="karte"><div class="khead">Gastronomie</div>' +
-      line('Restaurantfläche',p(b?.restaurantQm)+' qm') +
-      line('Betriebsform',b?.gastro==='selbst'?'Eigenbetrieb':b?.gastro==='pacht'?'Verpachtet':'Noch keine') +
-      line('Vertrag bis Woche',b?.gastroVertragBis??'–')+
-      '<div class="zeile">' + button('Selbst betreiben',"hausTun('gastro','"+id+"','selbst')")+
-      button('Verpachten',"hausTun('gastro','"+id+"','pacht')") + '</div></div>';
-    inhalt += '<div class="karte"><div class="khead">Fläche, Konzessionäre und Untermieter</div>' +
-      (b?.flaechen?.length ? b.flaechen.map(f => line((f.konzept==='konzession'?'Konzession: ':'Untermiete: ')+(f.gruppe ?? f.mieter?.name ?? f.id),p(f.qm)+' qm'+(b.konzessionen?.[f.id]?' · '+PROZENT(b.konzessionen[f.id].quote)+' Umsatzmiete':'')).join('') : '<div class="zeile">Keine Verträge hinterlegt</div>') + '</div>';
+    const std = b?.standard;
+    const standardZeilen = ['sauberkeit','praesentation','kasse'].map(key =>
+      '<div class="zeile"><span class="was">' + esc({ sauberkeit: 'Sauberkeit', praesentation: 'Warenpräsentation', kasse: 'Kassenstandard' }[key])
+      + ' · ' + p(std?.[key]) + '/3</span>'
+      + button('−', "hausTun('standard','"+id+"','"+key+"',-1)")
+      + button('+', "hausTun('standard','"+id+"','"+key+"',1)") + '</div>'
+    ).join('');
+    const serviceZeilen = Object.entries(b?.services ?? {}).map(([key, an]) =>
+      '<div class="zeile"><span class="was">' + esc(SERVICE[key] ?? key) + '</span>'
+      + button(an ? 'Abschalten' : 'Aktivieren', "hausTun('service','"+id+"','"+key+"',"+(!an)+")") + '</div>'
+    ).join('');
+    const partnerZeilen = (b?.flaechen ?? []).map(f => {
+      const bezeichnung = f.konzept === 'konzession' ? 'Konzession: ' : 'Untermiete: ';
+      const info = b?.konzessionen?.[f.id];
+      return line(bezeichnung + (f.gruppe ?? f.mieter?.name ?? f.id),
+        p(f.qm) + ' qm' + (info ? ' · ' + PROZENT(info.quote) + ' Umsatzmiete' : ''));
+    }).join('');
+    inhalt = '<div class="karte"><div class="khead">Hausstandards und Services</div>'
+      + line('Öffnungszeiten Mo–Fr', p(std?.oeffnung?.von) + '–' + p(std?.oeffnung?.bis) + ' Uhr')
+      + line('Samstag bis', p(std?.oeffnung?.samstagBis) + ' Uhr')
+      + standardZeilen + serviceZeilen
+      + (b?.ausnahmeGrund ? line('Haus-Ausnahme', b.ausnahmeGrund) : '') + '</div>'
+      + '<div class="karte"><div class="khead">Gastronomie</div>'
+      + line('Restaurantfläche', p(b?.restaurantQm) + ' qm')
+      + line('Betriebsform', b?.gastro === 'selbst' ? 'Eigenbetrieb' : b?.gastro === 'pacht' ? 'Verpachtet' : 'Noch keine')
+      + line('Vertrag bis Woche', b?.gastroVertragBis ?? '–')
+      + '<div class="zeile">' + button('Selbst betreiben', "hausTun('gastro','"+id+"','selbst')")
+      + button('Verpachten', "hausTun('gastro','"+id+"','pacht')") + '</div></div>'
+      + '<div class="karte"><div class="khead">Fläche, Konzessionäre und Untermieter</div>'
+      + (partnerZeilen || '<div class="zeile">Keine Verträge hinterlegt</div>') + '</div>';
   }
   if (r==='kosten') {
     inhalt = '<div class="karte"><div class="khead">Betriebskosten je Woche</div>' +
