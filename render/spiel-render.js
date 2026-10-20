@@ -598,6 +598,8 @@ async function buendeln() {
     // Nach der ersten Reise muss der Cache einen echten Stadtbildausschnitt statt generischem Motiv enthalten.
     await p.locator('#stadt-reise').click();
     await p.waitForSelector('#reise-overlay:not([hidden]) .reise-panel');
+    const erstesZiel = await p.locator('[data-reiseziel]').first().getAttribute('data-reiseziel');
+    pruefe(erstesZiel === 'Essen', 'Zuletzt besuchte Stadt steht vor umsatzsortierten Reisezielen');
     const cached = await p.locator('[data-reiseziel="Essen"] .reise-vorschaurahmen img').getAttribute('src');
     pruefe(cached?.startsWith('data:image/jpeg;base64,'), 'Bereiste Stadt nutzt gecachten 96x96-Kartenausschnitt');
     await p.screenshot({ path: path.join(abnahme, '05-stadtvorschau.png') });
