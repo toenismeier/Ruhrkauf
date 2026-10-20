@@ -259,7 +259,10 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       let fte = 0;
       for (const h of hs) { const add = (h.personal.vollzeit + h.personal.teilzeit) * p; h.personal.teilzeit += add; fte += add;
         // O04 Personal: Neue Kräfte müssen vier Wochen eingearbeitet werden.
-        if (h.personaleinsatz && add > 0) h.personaleinsatz.einarbeitungBis = w + 4;
+        if (h.personaleinsatz && add > 0) {
+          h.personaleinsatz.einarbeitungBis = w + 4;
+          h.personaleinsatz.einarbeitungFte += add;
+        }
       }
       einmalKosten(s, fte * 1500);
       return ok(`${Math.round(fte)} FTE Teilzeit eingestellt.`);
