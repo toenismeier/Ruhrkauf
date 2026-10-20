@@ -1,4 +1,5 @@
 import type { Hq } from './hq';
+import type { PlanungStand } from './planung';
 import type { Art, Einkauf, WgId } from './einkauf';
 import type { EigenmarkenStand } from './eigenmarken';
 import type { VorstandStand } from './vorstand';
@@ -465,6 +466,8 @@ export interface GameState {
   /** Gefallene Entscheidungen, maximal 52 Wochen. Für alte Spielstände optional. */
   entscheidungsprotokoll?: Entscheidungsprotokoll[];
   quartale: Quartal[];
+  // O06 Planung: Jahresbudget, Forecast, Boni (optional für alte Spielstände).
+  planung?: PlanungStand;
   eigentuemer: { strikes: number; kapitalZugefuehrt: Eur; forderung?: string };
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
