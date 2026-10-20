@@ -26,6 +26,7 @@ import { posteingangModul } from './ui/posteingang.js';
 import { marketingModul } from './ui/marketing.js';
 import { produkteModul } from './ui/produkte.js';
 import { laden, speichern } from './ui/speicher.js';
+import { appModul } from './ui/app.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
@@ -43,24 +44,34 @@ function speicherFehler(e) {
   if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
   speicherWarnung = true;
 }
+// Kleiner JPEG-Kartenausschnitt als Vorschau (kein PNG im IndexedDB-Spielstand).
+function speicherVorschau() {
+  try {
+    if (!scene || !canvas.width || !canvas.height) return null;
+    const c = document.createElement('canvas');
+    c.width = 240; c.height = 136;
+    c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.62);
+  } catch (e) { console.warn('Kartenvorschau nicht verfügbar:', e); return null; }
+}
 function automatischSpeichern() {
   if (!s) return;
   clearTimeout(speicherTimer);
   speicherTimer = setTimeout(() => {
-    speichern(s, stadtName, postUi).then(() => { speicherWarnung = false; }).catch(speicherFehler);
+    speichern(s, stadtName, postUi, 'autosave', '', speicherVorschau()).then(() => { speicherWarnung = false; }).catch(speicherFehler);
   }, 350);
 }
 async function sofortSpeichern() {
   if (!s) throw new Error('Noch kein Spiel gestartet.');
   clearTimeout(speicherTimer);
-  await speichern(s, stadtName, postUi);
+  await speichern(s, stadtName, postUi, 'autosave', '', speicherVorschau());
   speicherWarnung = false;
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && s) {
     // iOS kann Hintergrund-Tabs beenden: ausstehende Aenderungen sofort schreiben.
     clearTimeout(speicherTimer);
-    speichern(s, stadtName, postUi).catch((e) => console.error('Autosave bei App-Wechsel:', e));
+    speichern(s, stadtName, postUi, 'autosave', '', speicherVorschau()).catch(speicherFehler);
   }
 });
 
@@ -868,6 +879,14 @@ $('spiel-speichern').addEventListener('click', async () => {
   try { await sofortSpeichern(); meldung('Spielstand auf diesem Gerät gespeichert.'); }
   catch (e) { speicherFehler(e); }
 });
+const app = appModul({
+  panel, meldung,
+  aktuell: () => s ? { spiel: s, stadt: stadtName, ui: postUi, bild: speicherVorschau } : null,
+  ladenInSpiel: (platz) => spielFortsetzen(platz),
+  vorNeuladen: () => s ? sofortSpeichern() : Promise.resolve()
+});
+$('app-oeffnen').addEventListener('click', () => { menueZu(); app.oeffne(); });
+app.updatesAktivieren();
 async function diagnoseZeigen() {
   if (!s || !scene) return;
   menueZu();
@@ -996,6 +1015,7 @@ function startZeigen() {
   $('startseed').value = startWahl.seed;
   $('start').classList.add('an');
   $('lade').classList.remove('an');
+  app.startAktualisieren();
   laden().then((datensatz) => {
     const b = $('fortsetzen');
     b.hidden = !datensatz;
@@ -1017,11 +1037,11 @@ function spielStarten() {
   }, 30);
 }
 $('startknopf').addEventListener('click', spielStarten);
-async function spielFortsetzen() {
+async function spielFortsetzen(platz = 'autosave') {
   const b = $('fortsetzen');
   b.disabled = true;
   try {
-    const d = await laden();
+    const d = await laden(platz);
     if (!d) throw new Error('Kein Spielstand vorhanden.');
     clearTimeout(speicherTimer);
     s = d.spiel;
@@ -1045,16 +1065,20 @@ async function spielFortsetzen() {
     window.bereit = true;
     $('lade').classList.remove('an');
     meldung('Spielstand fortgesetzt.');
+    return true;
   } catch (e) {
     $('lade').classList.remove('an');
     $('start').classList.add('an');
     $('speicherhinweis').textContent = e.message;
+    meldung('Laden fehlgeschlagen: ' + e.message, false);
+    return false;
   } finally {
     b.disabled = false;
   }
 }
-$('fortsetzen').addEventListener('click', spielFortsetzen);
+$('fortsetzen').addEventListener('click', () => spielFortsetzen());
 window.spiel.fortsetzen = spielFortsetzen;
+window.spiel.app = app;
 window.spiel.startZeigen = startZeigen;
 window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN;
 Object.defineProperty(window.spiel, 'schwierigkeit', { get: () => schwierigkeitId });
