@@ -26,10 +26,18 @@ for(const [breite,tiefe] of [[30,30],[45,40],[55,40],[75,55]]){
  assert.equal(a.abteilungen.length,abteilungen.length,'jede Abteilung genau einmal');
  assert.equal(new Set(a.abteilungen.map(x=>x.id)).size,abteilungen.length);
  assert.ok(a.moebel.some(x=>x.typ==='kasse'),'Kasse vorhanden');
+ assert.equal(a.moebel.filter(m=>a.gaenge.some(g=>m.x<g.x+g.w&&m.x+m.w>g.x&&m.z<g.z+g.d&&m.z+m.d>g.z)).length,0,
+   'kein Möbel darf in den Gang hineinragen');
  const q=pruefeLadenplan(a);
  assert.equal(q.fehler.filter(x=>/^(Drehung|Geometrie|Anschluss)/.test(x)).length,0,q.fehler.join('\n'));
  const mut=structuredClone(a);mut.moebel[0].winkel=45;
  assert.ok(pruefeLadenplan(mut).fehler.some(x=>x.startsWith('Drehung')),'Drehungsschutz');
+ const block=structuredClone(a);
+ const gang=block.gaenge[0];
+ block.moebel[0].x=gang.x;
+ block.moebel[0].z=gang.z+gang.d/2;
+ assert.ok(pruefeLadenplan(block).fehler.some(x=>x.includes('blockiert einen Gang')),
+   'Gangflächen müssen von allen Möbeltypen frei bleiben');
  assert.deepEqual(q.fehler,[],breite+'×'+tiefe+' m: '+q.fehler.join(' | '));
  console.log(breite+'×'+tiefe+' m: '+a.moebel.length+' Möbel, Dichte '+(100*q.messwerte.dichte).toFixed(1)+' %, größte Leerfläche '+q.messwerte.groessteLeerflaecheM+' m');
 }
