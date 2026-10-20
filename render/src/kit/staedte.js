@@ -1,4 +1,4 @@
-// Alle Städte aus haeuser.json mit Stadtbild-Daten: Archetyp, Seed, Region, Umland/Umriss-Extras und Standortliste.
+// Alle Städte aus den drei exportierten Hauskatalogen mit Stadtbild-Daten: Archetyp, Seed, Region, Umland/Umriss-Extras und Standortliste.
 //
 // export STADTLISTE: [{ name, seed, typ, archetyp, region, ddr, extra, standorte }] (alphabetisch)
 // ddr: true für Städte der ehemaligen DDR (eigene Ost-Archetypen, Ost-Stilmischung im Bauer, Tatra-Bahnen)
@@ -81,7 +81,7 @@ const WETTBEWERBER = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1
 const WB_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
 
 function baueEintrag(name, liste) {
-  const typ = liste[0].cluster;
+  const typ = liste[0]?.cluster ?? schwesterHauser.find((h) => h.stadt === name)?.cluster ?? haeuserOutlet.find((h) => h.stadt === name)?.cluster ?? 'mittelstadt';
   const seed = stadtSeed(name);
   const r = rng(seed * 13 + 5);
   const region = REGION.get(name) ?? 'mitte';
@@ -207,6 +207,8 @@ function nachbarnVon(name, region) {
 }
 const nachStadt = new Map();
 for (const h of haeuser) { if (!nachStadt.has(h.stadt)) nachStadt.set(h.stadt, []); nachStadt.get(h.stadt).push(h); }
+// Auch Städte mit ausschließlich Volkskauf/FUNDUS benötigen eigenständige Stadtpläne.
+for (const h of [...schwesterHauser, ...haeuserOutlet]) if (!nachStadt.has(h.stadt)) nachStadt.set(h.stadt, []);
 export const STADTLISTE = [...nachStadt.entries()].map(([name, l]) => baueEintrag(name, l)).sort((a, b) => a.name.localeCompare(b.name, 'de'));
 const INDEX = new Map(STADTLISTE.map((s) => [s.name, s]));
 
