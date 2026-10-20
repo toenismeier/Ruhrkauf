@@ -14,6 +14,7 @@ import { wirkeTreiber } from './treiber';
 import { itHausFaktor } from './it';
 // O07 Haus
 import { hausBetriebsFaktor, hausBetriebskosten } from './haus';
+import { umbauNachfrageFaktor, umbauFrequenzFaktor } from './umbau';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -37,7 +38,7 @@ export function istAktiv(h: Haus): boolean {
 }
 
 export function aktiveFlaeche(h: Haus, w: number) {
-  return h.flaechen.filter((f) => f.umbauBis === undefined || f.umbauBis <= w);
+  return h.flaechen.filter((f) => (f.umbauBis === undefined || f.umbauBis <= w) && !h.etagenBau?.[f.etage]?.gesperrt);
 }
 
 /** Echter Mengeneffekt einer Rabattaktion. */
@@ -84,7 +85,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h);
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h) * umbauFrequenzFaktor(h);
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -122,12 +123,12 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     const Q = h.saettigungQm[g] ?? 1;
     const qm = (qmEigen[g] ?? 0) + (qmKomm[g] ?? 0);
     const sf = saisonFaktor(g, w);
-    const b = P * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g);
+    const b = P * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g) * umbauNachfrageFaktor(s, h, g);
     bruttoBasis[g] = b;
     summeBasis += b;
     summeBedarf += (b / Math.max(0.05, sf)) * Math.sqrt(sf);
   }
-  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbOffpriceFaktor(s, h);
+  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbOffpriceFaktor(s, h) * umbauNachfrageFaktor(s, h, null);
   summeBasis += offBasis;
   summeBedarf += offBasis;
 

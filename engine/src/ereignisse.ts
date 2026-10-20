@@ -12,6 +12,7 @@ import { premiumAngebote } from './premium';
 import { organisationVorlageEntscheidung } from './organisation';
 // O07 Haus
 import { loeseHausVorlage } from './haus';
+import { umbauProgrammEntscheiden } from './umbau';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
   return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
@@ -350,6 +351,11 @@ export function loeseEntscheidung(s: GameState, id: string, option: string, stan
   // O07 Haus: Konzessionsverträge laufen als Vorlagen im Posteingang.
   if (e.typ.startsWith('haus_')) { loeseHausVorlage(s, e.typ, e.daten, option); return null; }
   const d = e.daten;
+  // O08 Umbau: die genehmigte Vorlage des Bereichs Bau & Ladenbau setzt das Programm um.
+  if (e.typ === 'organisation_vorlage' && typeof d.umbauProgramm === 'string') {
+    if (option === 'annehmen' || option === 'vorschlag') umbauProgrammEntscheiden(s, d.umbauProgramm);
+    return null;
+  }
   const haus = typeof d.haus === 'string' ? s.haeuser.find((h) => h.id === d.haus) : undefined;
   switch (e.typ) {
     case 'wettbewerb_eroeffnung': {

@@ -263,3 +263,5 @@ export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFa
 export { planungBericht, planWoche };
 // O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
 export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';
+// O08 Umbau
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';

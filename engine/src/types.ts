@@ -1,6 +1,7 @@
 import type { Hq } from './hq';
 import type { OrganisationsStand } from './organisation';
 import type { PlanungStand } from './planung';
+import type { BauEtage, UmbauStand } from './umbau';
 import type { Art, Einkauf, WgId } from './einkauf';
 import type { EigenmarkenStand } from './eigenmarken';
 import type { VorstandStand } from './vorstand';
@@ -179,6 +180,9 @@ export interface Haus {
   personal: Personal;
   substanz: number; // 0..100
   substanzStart: number;
+  // O08 Umbau
+  etagenBau?: Record<number, BauEtage>;
+  umbauFrequenz?: number;
   status: HausStatus;
   statusBis?: number;
   /** Umsatzpotenzial je Gruppe bei Sättigung (€/Woche, saisonbereinigt). */
@@ -447,6 +451,8 @@ export interface GameState {
   hausbetrieb?: HausbetriebStand;
   /** O07 Haus: nur für A/B-Performance und Baseline-Kalibrierung. */
   hausbetriebAbnahmeAus?: boolean;
+  // O08 Umbau
+  umbau?: UmbauStand;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];

@@ -1,3 +1,4 @@
+import { baueMoebelGeneration } from './moebel/generationen.js';
 // Datenorientierter Ladenplaner. Geometrie entsteht erst in baueLadenplan().
 // Koordinaten in Metern, x/z links-hinten, Eingang in der +z-Fassade.
 import { rng } from './basis.js';
@@ -464,8 +465,8 @@ export function baueLadenplan(S,scene,plan,o={}) {
     const winkel=m.winkel*Math.PI/180;
     const ox=m.winkel===90?m.x:m.winkel===270?m.x+m.w:m.x+w/2;
     const oz=m.winkel===90?m.z+m.d/2:m.winkel===180?m.z+m.d:m.z;
-    def.bau(lokal(S,ox,y,oz,winkel),rng(String(plan.seed)+':'+j+':'+m.id),dichte,
-      {seed:String(plan.seed)+':'+j,bestueckung:o.bestueckung??1,profil:p.id});
+    baueMoebelGeneration(def,lokal(S,ox,y,oz,winkel),rng(String(plan.seed)+':'+j+':'+m.id),dichte,
+      {seed:String(plan.seed)+':'+j,bestueckung:o.bestueckung??1,profil:p.id},o.moebelGeneration??3);
   }
   return {teile:S.anzahl-n0,moebel:plan.moebel.length,abteilungen:plan.abteilungen.length};
 }

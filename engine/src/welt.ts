@@ -19,6 +19,7 @@ import { bildeHauscluster } from './organisation';
 import { initialisiereIt } from './it';
 // O07 Haus
 import { initialisiereHausbetrieb } from './haus';
+import { initialisiereUmbau } from './umbau';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -359,6 +360,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisierePlanung(s);
   // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
   initialisiereHausbetrieb(s);
+  // O08 Umbau
+  initialisiereUmbau(s);
   return s;
 }
 

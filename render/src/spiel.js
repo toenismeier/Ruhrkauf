@@ -26,6 +26,7 @@ import { vorstandModul } from './ui/vorstand.js';
 import { organisationModul } from './ui/organisation.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { marketingModul } from './ui/marketing.js';
+import { umbauModul } from './ui/umbau.js';
 import { produkteModul } from './ui/produkte.js';
 import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
@@ -506,7 +507,7 @@ function woche(mitBot = false) {
   if (offenesHaus) oeffneHaus(offenesHaus);
   else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
   else if (offenesHq) oeffneHq(offenesHq === true ? undefined : offenesHq);
-  else for (const m of module()) if (m.aktiv()) m.neuZeichnen();
+  else for (const m of module()) if (m.aktiv?.()) (m.neuZeichnen ?? m.oeffne)?.();
   ek.badge(); menueBadge();
   angebotsPinsAktualisieren();
   const danach = E.posteingang(s), alte = new Set(davor.handeln.map((x) => x.id)), meldungenVorher = new Set(davor.meldungen.map((x) => x.id));
@@ -535,7 +536,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -605,6 +606,8 @@ function oeffneHaus(id) {
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
   // O02: ausschließlich Engine-Werte, auch bei geschlossenen Häusern oder fehlendem Vorjahr.
   html += hausTreiberZeile(E, s, id);
+  // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
+  html += um?.hausKarte(id) ?? '';
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -847,7 +850,7 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null;
+let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -857,6 +860,7 @@ mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
+um = umbauModul({ E, s:()=>s, panel, meldung, nachAktion:()=>{ grafikNachziehen(); nachAktion(); }, hausOeffnen: oeffneHaus });
 po = posteingangModul({
   E, s: () => s, panel, meldung, nachAktion, zustand: () => postUi, nachZustand: automatischSpeichern,
   springe: (bezug) => {
@@ -869,6 +873,7 @@ po = posteingangModul({
       if (bezug.modul === 'produkte') return oeffneModul(pr);
       if (bezug.modul === 'planung') return oeffneModul(pl);
       if (bezug.modul === 'zentrale') return oeffneHq();
+      if (bezug.modul === 'umbau') return oeffneModul(um);
     }
     if (bezug.stadt && bezug.stadt !== stadtName) {
       wahl.value = bezug.stadt;
@@ -885,6 +890,7 @@ po = posteingangModul({
     else if (bezug.modul === 'produkte') oeffneModul(pr);
     else if (bezug.modul === 'planung') oeffneModul(pl);
     else if (bezug.modul === 'zentrale') oeffneHq();
+    else if (bezug.modul === 'umbau') oeffneModul(um);
     else schliessePanel();
   },
 });
@@ -933,6 +939,7 @@ $('organisation').addEventListener('click', () => oeffneModul(org));
 // O03 IT
 $('it').addEventListener('click', () => oeffneModul(itM));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
+$('modernisierung').addEventListener('click', () => oeffneModul(um));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
 $('planung').addEventListener('click', () => oeffneModul(pl));
 $('posteingang').addEventListener('click', () => oeffneModul(po));

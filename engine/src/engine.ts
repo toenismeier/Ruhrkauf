@@ -1,6 +1,7 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
+import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
@@ -44,6 +45,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   prozesse(s);
   premiumWoche(s);
+  // O08 Umbau
+  umbauWoche(s);
   hqWoche(s);
   // O03 IT: Projekte, Betriebskosten und Störungen vor der Hausnachfrage.
   itWoche(s);

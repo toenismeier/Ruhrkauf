@@ -25,6 +25,7 @@ import { IT_AKTIONEN, itAktion, type ItAktion } from './it';
 import { PLANUNG_AKTIONEN, planungAktion, type PlanungAktion } from './planung';
 // O07 Haus
 import { HAUS_AKTIONEN, hausAktion, type HausAktion } from './haus';
+import { UMBAU_AKTIONEN, umbauAktion, type UmbauAktion } from './umbau';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -75,7 +76,9 @@ export type SpielerAktion =
   // O06 Planung
   | PlanungAktion
   // O07 Haus
-  | HausAktion;
+  | HausAktion
+  // O08 Umbau
+  | UmbauAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -138,6 +141,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   const inso = s.phase === 'insolvenz';
   // O03 IT
   if (IT_AKTIONEN.has(a.typ)) return itAktion(s, a as ItAktion);
+  // O08 Umbau
+  if (UMBAU_AKTIONEN.has(a.typ)) return umbauAktion(s, a as UmbauAktion);
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
   // O01 Organisation

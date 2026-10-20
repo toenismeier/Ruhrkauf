@@ -65,3 +65,6 @@ export type { TreiberId, TreiberFaktoren, TreiberQuellen, TreiberPeriode, Treibe
 // O07 Haus
 export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './abfragen';
 export type { HausStaerke, HausStandard, HausKommentar, HausMassnahme, HausAktion, HausBetrieb, HausbetriebStand, StadtUmfeld } from './haus';
+// O08 Umbau – zentraler Export für Spiel und Tests.
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
+export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from './umbau';
