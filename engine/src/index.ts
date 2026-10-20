@@ -46,3 +46,5 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+export { TEST_EREIGNISSE, type TestAktion, type TestEreignisId } from './testwerkzeuge';
