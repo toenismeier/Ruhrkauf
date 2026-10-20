@@ -187,7 +187,6 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   einkaufDispo(s);
 
   // 8. Zahlungen: erst Pflichtzahlungen, dann Lieferanten
-  const cashVorPflicht = s.cash;
   const zinsen = Math.max(0, -s.cash) * (PARAM.zinsSatz / 52);
   const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz;
   const pflicht = kommissionAuszahlung + personalCash + k.miete + restmieten + k.nebenkosten + k.sonstige + k.logistik + k.zentrale + k.marketing + k.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf;
@@ -198,8 +197,9 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     if (s.phase === 'regulaer') eroeffneInsolvenz(s, 'Zahlungsunfähigkeit: Löhne und Mieten nicht gedeckt');
     else if (s.phase === 'insolvenz') zerschlagungDurchMasseunzulaenglichkeit(s);
   }
+  const vorLieferanten = s.cash;
   if (!beendet(s)) lieferantenZahlungen(s);
-  const cashOperativ = eur(warenVorkasse + s.cash - cashVorPflicht);
+  const cashOperativ = eur(warenVorkasse + eur(einzahlung - pflicht) + s.cash - vorLieferanten);
 
   // 9. Stakeholder, Ereignisse, Aktionsauswertung
   aktualisiereStakeholder(s);
@@ -211,6 +211,14 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   for (const key of Object.keys(k) as (keyof WochenKpi)[]) if (typeof k[key] === 'number') (k[key] as number) = eur(k[key] as number);
   k.fte = Math.round(k.fte);
+  k.cash = eur(s.cash);
+  k.kreditFrei = eur(s.cash + s.kreditlinie);
+  k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
+  s.historie.push(k);
+  if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
+
+  if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
+  // Quartalsabschluss kann eine Eigentümereinzahlung erzeugen: sie gehört noch zu dieser Woche.
   // Zahlungsarten werden nur aus tatsächlich gebuchten Cash-Bewegungen abgeleitet.
   // Noch nicht nach Zahlart instrumentierte Effekte (insbesondere alte Sonderfälle) stehen in Sonstiges.
   const offen = s.kapitalflussOffen ?? { investitionen: 0, finanzierung: 0 };
@@ -221,11 +229,6 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.kapitalflussOffen = { investitionen: 0, finanzierung: 0 };
   k.cash = eur(s.cash);
   k.kreditFrei = eur(s.cash + s.kreditlinie);
-  k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
-  s.historie.push(k);
-  if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
-
-  if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
   // Einmaleffekte, die ab jetzt anfallen (Aktionen des Spielers), zählen zur nächsten Woche
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
