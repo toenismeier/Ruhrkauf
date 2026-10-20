@@ -1,6 +1,7 @@
 import { fuehreAus, neuesSpiel, premiumUebersicht, wocheAbspielen } from '../src';
 import type { GameState } from '../src';
 import { eroeffneInsolvenz } from '../src/prozesse';
+import { premiumAngebote } from '../src/premium';
 import { botTief } from '../scripts/bot';
 
 const HAUS=[
@@ -64,6 +65,21 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
   for(let i=0;i<26;i++)wocheAbspielen(s);
   expect(h.substanz).toBeGreaterThan(60);
   expect(h.premiumImage).toBeGreaterThan(65);
+ });
+ test.each([1,2,3])('Seed %d: Premium-Angebote isolieren Zufallsstrom und Spiel-ID-Zähler',seed=>{
+  const s=neuesSpiel(seed);
+  eroeffneInsolvenz(s,'Angebots-ID-Prüfung');
+  const rng=s.rng, zaehler=s.zaehler;
+  premiumAngebote(s);
+  expect(s.rng).toBe(rng);
+  expect(s.zaehler).toBe(zaehler);
+  const angebote=s.angebote.filter(a=>a.typ==='premiumVerkauf');
+  expect(angebote).toHaveLength(4);
+  expect(new Set(angebote.map(a=>a.id)).size).toBe(4);
+  premiumAngebote(s);
+  expect(s.angebote.filter(a=>a.typ==='premiumVerkauf')).toHaveLength(4);
+  expect(s.rng).toBe(rng);
+  expect(s.zaehler).toBe(zaehler);
  });
  test('Premium-Verkauf nur in Insolvenz, Verhandlung einmal, cashwirksam und aus Portfolio entfernt',()=>{
   const s=neuesSpiel(1);
