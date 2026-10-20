@@ -248,5 +248,8 @@ export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalende
 /** Wettbewerbsübersicht und Übergabeobjekte für das spätere Stadtbild. */
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
+// O03 IT: Datenmodell und Systemlandkarte liegen ausschließlich in der Engine.
+export { itUebersicht, itDeckelGrund } from './it';
+
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
