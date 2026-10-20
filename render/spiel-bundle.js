@@ -34,6 +34,7 @@
     IT_IDS: () => IT_IDS,
     KANAELE: () => KANAELE,
     KANAL: () => KANAL,
+    KONZERN_GESCHICHTE: () => KONZERN_GESCHICHTE,
     MATERIALIEN: () => MATERIALIEN,
     MECHANIK_TEXT: () => MECHANIK_TEXT,
     MK: () => MK,
@@ -69,6 +70,8 @@
     bereichsQualitaet: () => bereichsQualitaet,
     berichtetAn: () => berichtetAn,
     bildeHauscluster: () => bildeHauscluster,
+    chronikErfolg: () => chronikErfolg,
+    chronikUebersicht: () => chronikUebersicht,
     clusterBerichtetAn: () => clusterBerichtetAn,
     clusterListe: () => clusterListe,
     clusterleitungQualitaet: () => clusterleitungQualitaet,
@@ -1510,8 +1513,8 @@
     const gesamt13 = s2.einkauf.eigenUmsatz.slice(-13).reduce((a, b2) => a + b2, 0);
     const em13 = marken2.reduce((a, m) => a + m.umsatz13, 0);
     const jeBereich = {};
-    for (const [g, liste] of Object.entries(s2.einkauf.emJeBereich)) {
-      const out = Object.entries(liste).map(([id, anteil3]) => {
+    for (const [g, liste2] of Object.entries(s2.einkauf.emJeBereich)) {
+      const out = Object.entries(liste2).map(([id, anteil3]) => {
         const m = marke(s2, id);
         return m ? { marke: id, name: m.name, farbe: m.farbe, anteil: Math.round(anteil3 * 1e3) / 1e3 } : void 0;
       }).filter((x) => !!x && x.anteil > 0).sort((a, b2) => b2.anteil - a.anteil);
@@ -2331,9 +2334,9 @@
     }
     return v;
   }
-  function gruppenEffekt(s2, liste, h, g, sc, sigma, komm) {
+  function gruppenEffekt(s2, liste2, h, g, sc, sigma, komm) {
     const ws = [];
-    for (const a of liste) {
+    for (const a of liste2) {
       const v = promoWert(s2, a, h, g, sc, sigma[a.id] ?? 0, komm);
       if (v) ws.push(v);
     }
@@ -2443,13 +2446,13 @@
     return out;
   }
   function wgTilt(g, ws) {
-    const liste = Object.values(WG).filter((d2) => d2.bereich === g);
-    const t = Object.fromEntries(liste.map((d2) => [d2.id, 1]));
+    const liste2 = Object.values(WG).filter((d2) => d2.bereich === g);
+    const t = Object.fromEntries(liste2.map((d2) => [d2.id, 1]));
     for (const v of ws) {
       if (v.uWg === void 0 || !v.a.wg) continue;
       const an = WG[v.a.wg]?.anteil ?? 0.2;
       const nachbar = an < 1 ? MK.kannibalisierungWg * an * v.uWg / (1 - an) : 0;
-      for (const d2 of liste) t[d2.id] = (t[d2.id] ?? 1) * (d2.id === v.a.wg ? 1 + v.uWg : Math.max(0.2, 1 - nachbar));
+      for (const d2 of liste2) t[d2.id] = (t[d2.id] ?? 1) * (d2.id === v.a.wg ? 1 + v.uWg : Math.max(0.2, 1 - nachbar));
     }
     return t;
   }
@@ -2473,29 +2476,29 @@
   }
   function kartenWoche(s2, k, netzRatio, netzRel) {
     const w = s2.woche;
-    const app = k.app;
-    if (app.relaunchBis !== void 0 && w >= app.relaunchBis) {
-      app.qualitaet = Math.min(0.95, app.qualitaet + 0.35);
-      app.relaunchBis = void 0;
+    const app2 = k.app;
+    if (app2.relaunchBis !== void 0 && w >= app2.relaunchBis) {
+      app2.qualitaet = Math.min(0.95, app2.qualitaet + 0.35);
+      app2.relaunchBis = void 0;
     }
-    const qZiel = 0.2 + 0.15 * Math.sqrt(app.budgetWoche / MK.appBudget);
-    app.qualitaet += 0.01 * (Math.min(0.95, qZiel) - app.qualitaet) * (app.qualitaet > qZiel ? 1 : 0.5);
+    const qZiel = 0.2 + 0.15 * Math.sqrt(app2.budgetWoche / MK.appBudget);
+    app2.qualitaet += 0.01 * (Math.min(0.95, qZiel) - app2.qualitaet) * (app2.qualitaet > qZiel ? 1 : 0.5);
     const anmeldung = k.anmeldeBis !== void 0 && w < k.anmeldeBis && k.anmeldepraemie > 0;
-    app.downloads += 2500 * ((0.6 + app.qualitaet) / 0.95) * (app.appCoupons ? 1.3 : 1) * netzRel * (anmeldung ? 1.4 : 1);
-    app.downloads *= Math.pow(netzRatio, 0.8);
-    const aZiel = app.downloads * (0.12 + 0.4 * app.qualitaet);
-    app.aktiveNutzer += 0.03 * (aZiel - app.aktiveNutzer);
-    app.pushQuote += 0.02 * (clamp(0.34 + 0.2 * (app.qualitaet - MK.appQualitaet), 0.05, 0.7) - app.pushQuote);
+    app2.downloads += 2500 * ((0.6 + app2.qualitaet) / 0.95) * (app2.appCoupons ? 1.3 : 1) * netzRel * (anmeldung ? 1.4 : 1);
+    app2.downloads *= Math.pow(netzRatio, 0.8);
+    const aZiel = app2.downloads * (0.12 + 0.4 * app2.qualitaet);
+    app2.aktiveNutzer += 0.03 * (aZiel - app2.aktiveNutzer);
+    app2.pushQuote += 0.02 * (clamp(0.34 + 0.2 * (app2.qualitaet - MK.appQualitaet), 0.05, 0.7) - app2.pushQuote);
     k.mitglieder *= Math.pow(netzRatio, 0.8);
     k.optInMail *= Math.pow(netzRatio, 0.8);
-    const A = 1 + 30 * (k.punkteSatz - 5e-3) + (k.stufen ? 0.15 : 0) + 5 * k.kartenrabatt + 0.15 * (app.qualitaet - MK.appQualitaet);
+    const A = 1 + 30 * (k.punkteSatz - 5e-3) + (k.stufen ? 0.15 : 0) + 5 * k.kartenrabatt + 0.15 * (app2.qualitaet - MK.appQualitaet);
     const neu = MK.neuBasis * Math.max(0.2, A) * netzRel + (anmeldung ? 7e3 * Math.pow(k.anmeldepraemie / 10, 0.6) * netzRel : 0);
     const abgang = MK.abgangBasis * k.mitglieder * (1 + Math.max(0, 1 - A));
     k.optInMail += neu * 0.5 - abgang * (k.optInMail / Math.max(1, k.mitglieder));
     k.mitglieder += neu - abgang;
     k.neuWoche = neu;
     k.abgangWoche = abgang;
-    const appQuote = app.aktiveNutzer / Math.max(1, k.mitglieder);
+    const appQuote = app2.aktiveNutzer / Math.max(1, k.mitglieder);
     const aktivZiel = MK.karteAktiv * Math.sqrt(Math.max(0.2, A)) * (1 + 0.25 * (appQuote - MK.appAktiv / MK.karteMitglieder) / 0.1);
     k.aktivQuote = clamp(k.aktivQuote + 0.02 * (aktivZiel - k.aktivQuote) + k.reaktiviert / Math.max(1, k.mitglieder), 0.05, 0.85);
     k.reaktiviert = 0;
@@ -2678,8 +2681,8 @@
       kartenWoche(s2, sc.karte, ratio, netzRel);
       A.crmKosten[key] = crmWoche(s2, sc, A.crm[key], A.uLetzt);
       A.komm[key] = kommunikation(sc);
-      const liste = key === "ist" ? s2.marketing.aktionen : m.referenz;
-      for (const a of liste) {
+      const liste2 = key === "ist" ? s2.marketing.aktionen : m.referenz;
+      for (const a of liste2) {
         if (!laeuft(a, w)) continue;
         if (mech(a) === "coupon") A.sigma[key][a.id] = couponSigma(s2, sc, a, A.uLetzt);
         const fl = scopeAnteil(s2, a);
@@ -2711,9 +2714,9 @@
       summe: 0
     };
     karte.summe = karte.punkte + karte.stufen + karte.betrieb + karte.daten + karte.anmeldung;
-    const app = k.app.budgetWoche;
+    const app2 = k.app.budgetWoche;
     const pa = sc.kanaele.prospekt.quote + sc.kanaele.anzeigen.quote;
-    return { kanaele: kanaele2, ks, karte, app, brutto: ks + karte.summe + app + crmVersand2, pa };
+    return { kanaele: kanaele2, ks, karte, app: app2, brutto: ks + karte.summe + app2 + crmVersand2, pa };
   }
   function marketingKosten(s2, U2) {
     const m = s2.marketing.stand;
@@ -2989,21 +2992,21 @@
         return teile2.length ? ok2(`Hartwig Karte: ${teile2.join(", ")}.`) : fehler2("Keine \xC4nderung angegeben.");
       }
       case "appSetzen": {
-        const app = I.karte.app;
+        const app2 = I.karte.app;
         const teile2 = [];
         if (a.budgetWoche !== void 0) {
-          app.budgetWoche = clamp(a.budgetWoche, 0, 3e5);
-          teile2.push(`Weiterentwicklung ${mio(app.budgetWoche * 52)} im Jahr`);
+          app2.budgetWoche = clamp(a.budgetWoche, 0, 3e5);
+          teile2.push(`Weiterentwicklung ${mio(app2.budgetWoche * 52)} im Jahr`);
         }
         if (a.appCoupons !== void 0) {
-          app.appCoupons = a.appCoupons;
+          app2.appCoupons = a.appCoupons;
           teile2.push(a.appCoupons ? "Aktionscoupons in der App" : "keine Coupons in der App");
         }
         if (a.relaunch) {
-          if (app.relaunchBis !== void 0) return fehler2("Der Relaunch der App l\xE4uft schon.");
+          if (app2.relaunchBis !== void 0) return fehler2("Der Relaunch der App l\xE4uft schon.");
           einmalKosten2(MK.appRelaunch);
-          app.relaunchBis = w + 16;
-          teile2.push(`Relaunch beauftragt (${mio(MK.appRelaunch)}, fertig KW ${kw(app.relaunchBis)})`);
+          app2.relaunchBis = w + 16;
+          teile2.push(`Relaunch beauftragt (${mio(MK.appRelaunch)}, fertig KW ${kw(app2.relaunchBis)})`);
         }
         return teile2.length ? ok2(`Hartwig App: ${teile2.join(", ")}.`) : fehler2("Keine \xC4nderung angegeben.");
       }
@@ -3505,8 +3508,8 @@
     if (!u) return 0;
     const sev = schwierigkeit(s2).ereignisse;
     const eroeffnung = w.status === "eroeffnung" ? 1 + 0.5 * sev : 1;
-    const aktion2 = (w.aktionVon ?? Infinity) <= s2.woche && (w.aktionBis ?? -1) > s2.woche;
-    const druck = w.status === "raeumung" ? 0.6 : aktion2 ? w.preisdruck : 0;
+    const aktion = (w.aktionVon ?? Infinity) <= s2.woche && (w.aktionBis ?? -1) > s2.woche;
+    const druck = w.status === "raeumung" ? 0.6 : aktion ? w.preisdruck : 0;
     const abwehr = (w.abwehrBis ?? 0) > s2.woche ? w.abwehrFaktor ?? 1 : 1;
     return w.staerke * (w.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
   }
@@ -3733,7 +3736,7 @@
         const faktor2 = gesamtkm > 0 && zu / gesamtkm > 0.5 && kuerzlich ? 3 : 1;
         const p2 = clamp(2e-3 * (hs.reduce((a, h) => a + h.einzug.kaufkraft, 0) / hs.length) * (1 + zu / Math.max(1, gesamtkm)) * faktor2, 0, 0.05);
         if (chance2(s2, p2)) neuEroeffnet(s2, stadt, eroeffnungsArt(s2, stadt));
-        const aktion2 = istStadtAktion(s2, stadt);
+        const aktion = istStadtAktion(s2, stadt);
         const wachstum = stadtWachstum(s2, stadt);
         for (const wb of s2.wettbewerber.filter((x) => x.stadt === stadt && x.status === "offen" && x.art !== "leer_ehemals")) {
           if (w > 10 && chance2(s2, 6e-4)) {
@@ -3749,7 +3752,7 @@
             raeumung(s2, wb);
             continue;
           }
-          if (aktion2 && chance2(s2, 0.4)) {
+          if (aktion && chance2(s2, 0.4)) {
             const action = s2.marketing.aktionen.find((a) => a.status !== "abgesagt" && a.start === w);
             const ueberschnitt = !action?.bereiche?.length || action.bereiche.some((g) => (WETTBEWERB_UEBERSCHNEIDUNG[wb.art][g] ?? 0) > 0);
             if (ueberschnitt) {
@@ -4120,6 +4123,90 @@
     an.erledigtWoche = s2.woche;
     melde(s2, "presse", `${h.name} ist an ${h.premiumEigentuemer} verkauft worden.`, { stadt: h.stadt, hausId: h.id });
     return null;
+  }
+
+  // ../engine/src/chronik.ts
+  var CHRONIK_AKTIV = true;
+  var KONZERN_GESCHICHTE = [
+    { jahr: 1886, titel: "Eine Tuchhandlung in Essen", text: "In einer kleinen Essener Ladenzeile beginnt die Familie Hartwig mit Tuchen, Kurzwaren und Ma\xDFstoffen. Ein rotes Schild \xFCber der T\xFCr wird zum Erkennungszeichen.", motiv: "Tuchballen und Schaufenster", familie: 1 },
+    { jahr: 1898, titel: "Das erste feste Kaufhaus", text: "Hartwig b\xFCndelt mehrere Warenabteilungen unter einem Dach. Die Kundschaft findet nun neben Stoffen auch Haushaltswaren und Spielzeug.", motiv: "Gr\xFCnderzeitfassade", familie: 1 },
+    { jahr: 1912, titel: "\xDCber das Ruhrgebiet hinaus", text: "Ein zweites Haus er\xF6ffnet in Bochum, weitere Standorte werden geplant. Ein eigener Fuhrpark verbindet Lager und Verkaufsh\xE4user.", motiv: "Lieferwagen vor Warenhaus", familie: 1 },
+    { jahr: 1926, titel: "Neue Sachlichkeit", text: "Klare Schaufenster und helle Verkaufsfl\xE4chen ersetzen das alte Ladendekor. Die neu gegr\xFCndete Hartwig Warenhausgesellschaft modernisiert auch den Einkauf.", motiv: "Schaufensterband", familie: 2 },
+    { jahr: 1937, titel: "Ein schwieriges Jahrzehnt", text: "Materialknappheit und staatliche Eingriffe begrenzen das Sortiment. Das Unternehmen konzentriert sich auf die Versorgung seiner bestehenden H\xE4user.", motiv: "Leere Auslagen", familie: 2 },
+    { jahr: 1945, titel: "Zerst\xF6rung und Neubeginn", text: "Mehrere H\xE4user sind durch den Krieg schwer besch\xE4digt. Besch\xE4ftigte r\xE4umen Tr\xFCmmer beiseite und richten provisorische Verkaufsr\xE4ume ein.", motiv: "Besch\xE4digte Fassade", familie: 2 },
+    { jahr: 1953, titel: "Wiederaufbau", text: "In Essen \xF6ffnet ein neues Haus mit breiten Fensterfronten und Rolltreppen. Hartwig investiert erneut in zentrale Lager und Ausbildung.", motiv: "Nachkriegsfassade", familie: 3 },
+    { jahr: 1964, titel: "Das Wirtschaftswunder im Schaufenster", text: "Haushaltsger\xE4te, Mode und M\xF6bel werden zum Schwerpunkt. Die Hauptverwaltung zieht in einen deutlich gr\xF6\xDFeren B\xFCrokomplex.", motiv: "Leuchtendes Kaufhaus", familie: 3 },
+    { jahr: 1976, titel: "Expansion in die Fl\xE4che", text: "Hartwig er\xF6ffnet H\xE4user in Mittelst\xE4dten und neuen Einkaufszentren. Immer mehr Verkaufsfl\xE4che erh\xF6ht aber auch die Fixkosten.", motiv: "Kachelfassade und Passage", familie: 4 },
+    { jahr: 1988, titel: "Die gl\xE4serne Modernisierung", text: "Neue Fassaden und Ladenkonzepte sollen ein j\xFCngeres Publikum gewinnen. Erste Versuche mit spezialisierten Sportabteilungen folgen.", motiv: "Glasfassade", familie: 5 },
+    { jahr: 1996, titel: "Fusion mit Volkskauf", text: "Hartwig \xFCbernimmt die fiktive Warenhauskette Volkskauf und f\xFChrt Einkauf und Logistik zusammen. Unterschiedliche Hausgr\xF6\xDFen und Konzepte bleiben eine Herausforderung.", motiv: "Zwei historische Schilder", familie: 5 },
+    { jahr: 2006, titel: "Neue Konkurrenz", text: "Spezialisierte Anbieter und wachsende Onlineangebote versch\xE4rfen den Wettbewerb. Die gro\xDFen Innenstadtimmobilien lassen sich nur langsam anpassen.", motiv: "Leere Ladenpassage", familie: 5 },
+    { jahr: 2015, titel: "Versuch eines Kurswechsels", text: "Eigenmarken, modernisierte Filialen und digitale Angebote sollen die Ertragslage stabilisieren. Gleichzeitig beginnt die \xDCberpr\xFCfung des \xFCbergro\xDFen Standortnetzes.", motiv: "Modernisiertes Schaufenster", familie: 5 },
+    { jahr: 2022, titel: "Sanierung auf Raten", text: "Hohe Energiekosten und ver\xE4ndertes Kaufverhalten belasten viele Standorte. Einzelne H\xE4user werden verkleinert, doch die Verschuldung bleibt hoch.", motiv: "Fassade mit Bauger\xFCst", familie: 5 },
+    { jahr: 2027, titel: "Am Wendepunkt", text: "Die Hartwig-Gruppe steht vor der Insolvenzreife und braucht eine grundlegende Neuordnung. Wie diese Geschichte weitergeht, entscheidet der Spieler.", motiv: "Blick auf die Hauptverwaltung", familie: 5 }
+  ];
+  function standVon(s2, alt) {
+    return {
+      phase: s2.phase,
+      insolvenzen: s2.insolvenzenGesamt,
+      haeuser: Object.fromEntries(s2.haeuser.map((h) => [h.id, h.status])),
+      vorstand: Object.fromEntries(Object.entries(s2.vorstand?.ressorts ?? {}).map(([id, r]) => [id, r.person?.id ?? ""])),
+      bestesQuartal: alt?.bestesQuartal ?? null,
+      letztesQuartal: alt?.letztesQuartal ?? -1
+    };
+  }
+  function chronikInitialisieren(s2) {
+    if (!CHRONIK_AKTIV || s2.prognose) return;
+    s2.chronik ?? (s2.chronik = []);
+    s2.chronikStand ?? (s2.chronikStand = standVon(s2));
+  }
+  function eintragen(s2, art, text3, bezug, woche2) {
+    const chronik = s2.chronik ?? (s2.chronik = []);
+    chronik.push({ id: `chronik-${chronik.length + 1}`, woche: woche2, art, text: text3, bezug });
+  }
+  function chronikAktualisieren(s2, ereignisWoche = s2.woche) {
+    if (!CHRONIK_AKTIV || s2.prognose) return;
+    if (!s2.chronikStand) {
+      chronikInitialisieren(s2);
+      return;
+    }
+    const alt = s2.chronikStand;
+    if (s2.insolvenzenGesamt > alt.insolvenzen) {
+      eintragen(s2, "insolvenz", `Insolvenzantrag: ${s2.insolvenz?.grund ?? "Das Verfahren wurde er\xF6ffnet."}`, "insolvenz", ereignisWoche);
+    }
+    if (alt.phase === "insolvenz" && s2.phase === "regulaer") {
+      eintragen(s2, "plan", "Die Gl\xE4ubiger haben den Insolvenzplan angenommen. Die Sanierung wird fortgesetzt.", "insolvenz", ereignisWoche);
+    }
+    for (const h of s2.haeuser) {
+      if ((h.status === "geschlossen" || h.status === "verkauft") && alt.haeuser[h.id] !== h.status) {
+        eintragen(s2, "haus", `${h.name} (${h.stadt}) wurde ${h.status === "verkauft" ? "verkauft" : "geschlossen"}.`, h.id, ereignisWoche);
+      }
+    }
+    for (const [id, ressort] of Object.entries(s2.vorstand?.ressorts ?? {})) {
+      const person3 = ressort.person;
+      if (person3 && person3.id !== (alt.vorstand[id] ?? "")) {
+        eintragen(s2, "vorstand", `${person3.name} \xFCbernimmt das Ressort ${id.toUpperCase()}.`, id, ereignisWoche);
+      }
+    }
+    const q2 = s2.quartale.find((q3) => q3.start + 12 === ereignisWoche && q3.nr > alt.letztesQuartal);
+    let bestesQuartal = alt.bestesQuartal;
+    let letztesQuartal = alt.letztesQuartal;
+    if (q2) {
+      if (bestesQuartal === null || q2.ebitdaIst > bestesQuartal) {
+        eintragen(s2, "quartal", `Neues bestes Quartal: Quartal ${q2.nr + 1} mit ${q2.ebitdaIst.toLocaleString("de-DE")} \u20AC EBITDA.`, `quartal-${q2.nr}`, ereignisWoche);
+        bestesQuartal = q2.ebitdaIst;
+      }
+      letztesQuartal = q2.nr;
+    }
+    s2.chronikStand = { ...standVon(s2, alt), bestesQuartal, letztesQuartal };
+  }
+  function chronikErfolg(s2, id, titel) {
+    if (!CHRONIK_AKTIV || s2.prognose || !id) return;
+    chronikInitialisieren(s2);
+    if ((s2.chronik ?? []).some((e) => e.art === "erfolg" && e.bezug === id)) return;
+    eintragen(s2, "erfolg", `Erfolg freigeschaltet: ${titel}.`, id, s2.woche);
+  }
+  function chronikUebersicht(s2) {
+    return { geschichte: KONZERN_GESCHICHTE, spiel: [...s2.chronik ?? []].reverse() };
   }
 
   // ../engine/src/szenarien.ts
@@ -4851,10 +4938,10 @@
     const id = it.hausCluster?.[h.id];
     if (!id) return it.umsatzFaktoren[h.id] ?? 1;
     const kasse = Math.max(0, generationInCluster(s2, "kasse", id) - SYSTEME.kasse.start);
-    const app = Math.max(0, generationInCluster(s2, "app", id) - SYSTEME.app.start);
+    const app2 = Math.max(0, generationInCluster(s2, "app", id) - SYSTEME.app.start);
     const ware3 = Math.max(0, generationInCluster(s2, "warenwirtschaft", id) - SYSTEME.warenwirtschaft.start);
     const kAusbau = it.systeme.kasse.kasseAusbau;
-    const qualitaet3 = 1 + kasse * 5e-3 + app * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (kAusbau?.mobil ?? 0) * 1e-3;
+    const qualitaet3 = 1 + kasse * 5e-3 + app2 * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (kAusbau?.mobil ?? 0) * 1e-3;
     return qualitaet3 * (it.umsatzFaktoren[h.id] ?? 1);
   }
   function itUebersicht(s2) {
@@ -6069,13 +6156,13 @@
     return v.sort((a, b2) => b2.rendite - a.rendite || a.haus.localeCompare(b2.haus) || a.etage - b2.etage);
   }
   function umbauProgrammEntscheiden(s2, programm) {
-    let liste = [];
+    let liste2 = [];
     try {
-      liste = JSON.parse(programm);
+      liste2 = JSON.parse(programm);
     } catch {
       return;
     }
-    for (const a of liste) umbauAktion(s2, { typ: "umbauPlanen", ...a });
+    for (const a of liste2) umbauAktion(s2, { typ: "umbauPlanen", ...a });
   }
   function umbauUebersicht(s2) {
     initialisiereUmbau(s2);
@@ -6986,7 +7073,7 @@
     }
     return out;
   }
-  function fuehreAus(s2, a) {
+  function fuehreAusKern(s2, a) {
     if (a.typ.startsWith("test")) return testAktion(s2, a);
     if (a.typ === "spielFortsetzen") {
       if (!s2.ende || !["saniert", "ruhestand"].includes(s2.ende.art)) return fehler4("Weiterspielen ist nur nach Sanierung oder Ruhestand m\xF6glich.");
@@ -7007,8 +7094,8 @@
     if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s2, a);
     if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s2, a, (x) => einmalKosten(s2, x));
     if (PLANUNG_AKTIONEN.has(a.typ)) {
-      const fehlerText = planungAktion(s2, a);
-      return fehlerText ? fehler4(fehlerText) : ok4("Planung aktualisiert.");
+      const fehlerText2 = planungAktion(s2, a);
+      return fehlerText2 ? fehler4(fehlerText2) : ok4("Planung aktualisiert.");
     }
     if (HAUS_AKTIONEN.has(a.typ)) return hausAktion(s2, a);
     switch (a.typ) {
@@ -7025,8 +7112,8 @@
         s2.premiumSchuetzen = a.an;
         return ok4(a.an ? "Premiumh\xE4user sind vor pauschalen Rabattaktionen gesch\xFCtzt." : "Premiumschutz deaktiviert.");
       case "premiumInvestition": {
-        const fehlerText = premiumInvestieren(s2, a.haus, a.betrag);
-        return fehlerText ? fehler4(fehlerText) : ok4("Premium-Investition gestartet (26 Wochen).");
+        const fehlerText2 = premiumInvestieren(s2, a.haus, a.betrag);
+        return fehlerText2 ? fehler4(fehlerText2) : ok4("Premium-Investition gestartet (26 Wochen).");
       }
       case "schliessen": {
         const h = haus(s2, a.haus);
@@ -7201,6 +7288,8 @@
         return hqMieten(s2, a.angebot, a.etagen);
       case "hqEtageKuendigen":
         return hqEtageKuendigen(s2, a.gebaeude, a.etage);
+      case "hqArchivSetzen":
+        return hqArchivSetzen(s2, a.gebaeude, a.etage, a.aktiv);
       case "hqGebaeudeKuendigen":
         return hqGebaeudeKuendigen(s2, a.gebaeude);
       case "abteilungSetzen":
@@ -7470,6 +7559,12 @@
       }
     }
     return fehler4("Unbekannte Aktion.");
+  }
+  function fuehreAus(s2, a) {
+    chronikInitialisieren(s2);
+    const result = fuehreAusKern(s2, a);
+    if (result.ok) chronikAktualisieren(s2);
+    return result;
   }
 
   // ../engine/src/abfragen.ts
@@ -8517,6 +8612,8 @@
   }
 
   // ../engine/src/hq.ts
+  var ARCHIV_QM = 90;
+  var ARCHIV_AKTIV = true;
   var ABTEILUNGEN = ["controlling", "einkauf", "marketing", "personal", "immobilien", "logistik", "ecommerce", "recht", "vm", "verwaltung", "produkt"];
   var ABTEILUNG_NAME = {
     controlling: "Controlling",
@@ -8844,6 +8941,7 @@
     let nebenkosten = 0;
     for (const g of hq.gebaeude) for (const e of g.etagen) if (e.gemietet) {
       miete += wochenMiete(e.qm, g.mieteQmMonat);
+      if (ARCHIV_AKTIV && e.archiv) miete += wochenMiete(ARCHIV_QM, g.mieteQmMonat);
       nebenkosten += wochenMiete(e.qm, g.nebenkostenQmMonat);
     }
     const Lv = hq.wirkung.verwaltung;
@@ -9002,13 +9100,13 @@
     const r = hq;
     const staedte = /* @__PURE__ */ new Map();
     for (const h of s2.haeuser) if (h.status === "offen" && !staedte.has(h.stadt)) staedte.set(h.stadt, h.cluster);
-    const liste = [...staedte.keys()];
-    if (!liste.length) return;
+    const liste2 = [...staedte.keys()];
+    if (!liste2.length) return;
     const anzahl = ganzZwischen(r, 2, 4);
     const gewaehlt = [];
     if (staedte.has(hq.sitz) && zwischen(r, 0, 1) < 0.5) gewaehlt.push(hq.sitz);
     for (let i = 0; gewaehlt.length < anzahl && i < 20; i++) {
-      const st2 = waehle(r, liste);
+      const st2 = waehle(r, liste2);
       if (!gewaehlt.includes(st2)) gewaehlt.push(st2);
     }
     const typen = Object.keys(HQ_TYPEN);
@@ -9136,8 +9234,20 @@
     for (const e of es2) {
       for (const id of raeumeEtage(s2, g, e)) if (!ohnePlatz.includes(id)) ohnePlatz.push(id);
       e.gemietet = false;
+      e.archiv = false;
     }
     return { rest, wochen, ohnePlatz };
+  }
+  function hqArchivSetzen(s2, gebaeudeId, nr, aktiv5) {
+    if (!ARCHIV_AKTIV) return fehler5("Das Archiv ist in den Einstellungen deaktiviert.");
+    const g = gebaeude(s2, gebaeudeId);
+    const e = g?.etagen.find((x) => x.nr === nr);
+    if (!g || !e || !e.gemietet) return fehler5("F\xFCr das Archiv ist eine gemietete HQ-Etage erforderlich.");
+    if (!!e.archiv === aktiv5) return fehler5(aktiv5 ? "Auf dieser Etage befindet sich bereits ein Archiv." : "Hier ist kein Archiv eingerichtet.");
+    if (aktiv5 && s2.hq.gebaeude.some((bau2) => bau2.etagen.some((et) => et.archiv))) return fehler5("Es gibt bereits eine Archiv-Etage. Bitte zuerst das bestehende Archiv aufl\xF6sen.");
+    e.archiv = aktiv5;
+    hqAktualisiere(s2);
+    return ok5(aktiv5 ? `Archiv auf Etage ${etageText(nr)} eingerichtet, zus\xE4tzliche Miete ${eur(wochenMiete(ARCHIV_QM, g.mieteQmMonat)).toLocaleString("de-DE")} \u20AC je Woche.` : `Archiv auf Etage ${etageText(nr)} aufgel\xF6st. Die Zusatzmiete entf\xE4llt.`);
   }
   function hqEtageKuendigen(s2, gebaeudeId, nr) {
     const g = gebaeude(s2, gebaeudeId);
@@ -9310,6 +9420,7 @@
             nr: e.nr,
             qm: e.qm,
             gemietet: e.gemietet,
+            archiv: !!e.archiv,
             belegtQm: Math.round(belegt2),
             auslastung: e.qm > 0 ? belegt2 / e.qm : 0,
             abteilungen: e.abteilungen.map((id) => ({ id, name: ABTEILUNG_NAME[id], qm: Math.round(qmAufEtage(abteilung(s2, id), e.nr)) }))
@@ -9329,7 +9440,7 @@
           qmGemietet,
           qmBelegt,
           auslastung: qmGemietet > 0 ? qmBelegt / qmGemietet : 0,
-          kostenWoche: eur(wochenMiete(qmGemietet, g.mieteQmMonat + g.nebenkostenQmMonat)),
+          kostenWoche: eur(wochenMiete(qmGemietet, g.mieteQmMonat + g.nebenkostenQmMonat) + wochenMiete(g.etagen.filter((e) => e.gemietet && e.archiv).length * ARCHIV_QM, g.mieteQmMonat)),
           etagen
         };
       }),
@@ -9384,6 +9495,7 @@
           nr: e.nr,
           qm: e.qm,
           gemietet: e.gemietet,
+          archiv: !!e.archiv,
           // FTE je Etage: Anteil der Abteilung, der auf dieser Etage sitzt
           abteilungen: e.abteilungen.map((id) => {
             const a = abteilung(s2, id);
@@ -9527,8 +9639,8 @@
   function hashRng(seed, sid, g) {
     return { rng: (Math.imul(seed + 40503, 2654435761) ^ Math.imul(sid + 1013, 40503) ^ Math.imul(g + 7, 668265261)) >>> 0 };
   }
-  function ziehe(r, liste, n) {
-    const pool = [...liste];
+  function ziehe(r, liste2, n) {
+    const pool = [...liste2];
     const out = [];
     while (out.length < n && pool.length) out.push(pool.splice(Math.floor(zufall(r) * pool.length), 1)[0]);
     return out;
@@ -9824,13 +9936,13 @@
       if (l) l.push(p2);
       else jeKey.set(k, [p2]);
     }
-    for (const [k, liste] of jeKey) {
+    for (const [k, liste2] of jeKey) {
       const [m, wg] = k.split("|");
       const st2 = s2.einkauf.wgs[wg];
       const u = st2?.v?.u?.length ? st2.v.u[st2.v.u.length - 1] * (st2.pool[m] ?? 0) : 0;
-      const gw = liste.map((p2) => gewicht(s2, p2));
+      const gw = liste2.map((p2) => gewicht(s2, p2));
       const sum2 = gw.reduce((a, b2) => a + b2, 0) || 1;
-      liste.forEach((p2, i) => {
+      liste2.forEach((p2, i) => {
         const x = u * gw[i] / sum2;
         p2.umsatz.push(eur(x));
         p2.verkauf.push(Math.round(x / Math.max(0.5, p2.preis)));
@@ -9924,8 +10036,8 @@
       const gut = trifft3();
       for (const k of kats) {
         if (belegt(s2, m.id, k) < kap) continue;
-        const liste = eigene.filter((p2) => p2.kategorie === k).sort((a, b2) => sterneWirksam(s2, a) - sterneWirksam(s2, b2));
-        const weg = gut ? liste[0] : waehle(r, liste);
+        const liste2 = eigene.filter((p2) => p2.kategorie === k).sort((a, b2) => sterneWirksam(s2, a) - sterneWirksam(s2, b2));
+        const weg = gut ? liste2[0] : waehle(r, liste2);
         if (weg && (!gut || sterneWirksam(s2, weg) <= 3)) {
           produktAktion(s2, { typ: "produktAuslisten", produkt: weg.id });
           texte.push(`${m.name}: ${weg.name} ausgelistet`);
@@ -9999,9 +10111,9 @@
   function produkte(s2, marke4) {
     const kap = kapazitaet(s2);
     const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
-      const liste = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
-      const kats = [...new Set(liste.map((p2) => p2.kategorie))];
-      const ent = liste.filter((p2) => p2.status === "entwicklung").length;
+      const liste2 = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
+      const kats = [...new Set(liste2.map((p2) => p2.kategorie))];
+      const ent = liste2.filter((p2) => p2.status === "entwicklung").length;
       const voll2 = kats.filter((k) => belegt(s2, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
       return {
         marke: m.id,
@@ -10010,7 +10122,7 @@
         zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`,
         trendGruppe: trendGruppe(m),
         kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s2, m.id, k) })),
-        produkte: liste.map((p2) => produktKarte(s2, p2)),
+        produkte: liste2.map((p2) => produktKarte(s2, p2)),
         inEntwicklung: ent,
         hinweis: ent ? `Wir entwickeln gerade ${ent === 1 ? "ein neues Produkt" : `${ent} neue Produkte`}.` : voll2.length ? `Kapazit\xE4t erreicht bei ${voll2.join(", ")}. F\xFCr Neues bitte erst auslisten.` : "Wir entwickeln gerade keine neuen Produkte. Zeit zu investieren."
       };
@@ -10179,12 +10291,12 @@
   var GESCHLECHT_BEREICH = { damen: "damen", herren: "herren", kinder: "kinder" };
   function baueWgDef() {
     const out = [];
-    for (const [g, liste] of Object.entries(ROH2)) {
+    for (const [g, liste2] of Object.entries(ROH2)) {
       const G2 = GRUPPEN[g];
-      const saisonRoh = liste.reduce((a, r) => a + r[2] * (1 - r[3]), 0);
+      const saisonRoh = liste2.reduce((a, r) => a + r[2] * (1 - r[3]), 0);
       const k = G2.saisonAnteil / Math.max(1e-3, saisonRoh);
-      const sum2 = liste.reduce((a, r) => a + r[2], 0);
-      for (const r of liste) {
+      const sum2 = liste2.reduce((a, r) => a + r[2], 0);
+      for (const r of liste2) {
         const [kurz, name2, anteil3, nos, md, vv, vn, vnos, mk2, em, lief, sai, extra] = r;
         const m = G2.marge + md;
         const kurve4 = G2.saison.map((x, i) => x * (sai?.[i] ?? 1));
@@ -10227,11 +10339,11 @@
     return a + (b2 - a) * t;
   }
   var OMEGA = {};
-  for (const [, liste] of Object.entries(WG_JE_BEREICH)) {
+  for (const [, liste2] of Object.entries(WG_JE_BEREICH)) {
     for (let t = 0; t < 52; t++) {
-      const roh2 = liste.map((d2) => d2.anteil * wgKurve(d2, t));
+      const roh2 = liste2.map((d2) => d2.anteil * wgKurve(d2, t));
       const sum2 = roh2.reduce((a, b2) => a + b2, 0);
-      liste.forEach((d2, i) => {
+      liste2.forEach((d2, i) => {
         var _a2;
         (OMEGA[_a2 = d2.id] ?? (OMEGA[_a2] = []))[t] = roh2[i] / sum2;
       });
@@ -10425,9 +10537,9 @@
       const sum2 = Object.values(ps).reduce((a, b2) => a + b2, 0) || 1;
       st2.pool = Object.fromEntries(Object.entries(ps).map(([k, v]) => [k, v / sum2]));
     }
-    for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
+    for (const [g, liste2] of Object.entries(WG_JE_BEREICH)) {
       let m = 0;
-      for (const d2 of liste) {
+      for (const d2 of liste2) {
         const st2 = e.wgs[d2.id];
         const n = st2.nosAnteil;
         let mm = n * d2.margeNos + (1 - n) * d2.margeSaison;
@@ -10438,13 +10550,13 @@
         m += d2.anteil * mm;
       }
       const c = GRUPPEN[g].marge - m;
-      for (const d2 of liste) {
+      for (const d2 of liste2) {
         e.wgs[d2.id].margeNos = d2.margeNos + c;
         e.wgs[d2.id].margeSaison = d2.margeSaison + c;
       }
       let em = 0;
       const je = {};
-      for (const d2 of liste) for (const [pool, a] of Object.entries(e.wgs[d2.id].pool)) if (pool !== FREMD) {
+      for (const d2 of liste2) for (const [pool, a] of Object.entries(e.wgs[d2.id].pool)) if (pool !== FREMD) {
         em += d2.anteil * a;
         je[pool] = (je[pool] ?? 0) + d2.anteil * a;
       }
@@ -10543,13 +10655,13 @@
     for (const r of roh2) {
       const h = r.haus;
       for (const [g, v] of Object.entries(r.eigen)) {
-        const liste = WG_JE_BEREICH[g];
-        if (!liste) continue;
+        const liste2 = WG_JE_BEREICH[g];
+        if (!liste2) continue;
         let F2 = 0;
         const tilt = marketingWgTilt(s2, h.id, g);
         const teile2 = tilt ? [] : void 0;
         let F0 = 0;
-        for (const d2 of liste) {
+        for (const d2 of liste2) {
           const st2 = s2.einkauf.wgs[d2.id];
           const tl = tilt?.[d2.id] ?? 1;
           const om = omega(d2.id, w) * tl;
@@ -10620,8 +10732,8 @@
   }
   function normalisiereKohorte(k) {
     if (k.wg && k.art) return;
-    const liste = WG_JE_BEREICH[k.gruppe] ?? [];
-    const d2 = liste.reduce((a, b2) => b2.anteil > a.anteil ? b2 : a, liste[0]);
+    const liste2 = WG_JE_BEREICH[k.gruppe] ?? [];
+    const d2 = liste2.reduce((a, b2) => b2.anteil > a.anteil ? b2 : a, liste2[0]);
     k.wg = d2?.id ?? `${k.gruppe}.?`;
     k.art = k.saisonAnteil >= 0.5 || !d2 ? "saison" : "saison";
   }
@@ -11377,13 +11489,13 @@
     const bj = bestandJeWg(s2);
     const bereiche = [];
     let gesamt = leer2();
-    for (const [g, liste] of Object.entries(WG_JE_BEREICH)) {
+    for (const [g, liste2] of Object.entries(WG_JE_BEREICH)) {
       if (s2.basisUmsatz[g] === void 0) continue;
       if (filter.bereich && filter.bereich !== g) continue;
       if (filter.format && GRUPPEN[g].format !== filter.format) continue;
       let sum2 = leer2();
       const wgs = [];
-      for (const d2 of liste) {
+      for (const d2 of liste2) {
         const b2 = basisWg(s2, d2, bj);
         sum2 = addiere2(sum2, b2);
         const k2 = kennzahlen(b2);
@@ -11423,8 +11535,8 @@
     };
   }
   function freigaben(s2, filter) {
-    const liste = s2.einkauf.freigaben.filter((f) => passtFilter(f, filter)).map((f) => freigabeZeile(s2, f)).sort((a, b2) => a.frist - b2.frist || b2.wert - a.wert);
-    return { woche: s2.woche, grenze: s2.einkauf.grenze, anzahl: liste.length, wert: eur(liste.reduce((a, f) => a + f.wert, 0)), liste, protokoll: s2.einkauf.protokoll.map((p2) => ({ ...p2 })) };
+    const liste2 = s2.einkauf.freigaben.filter((f) => passtFilter(f, filter)).map((f) => freigabeZeile(s2, f)).sort((a, b2) => a.frist - b2.frist || b2.wert - a.wert);
+    return { woche: s2.woche, grenze: s2.einkauf.grenze, anzahl: liste2.length, wert: eur(liste2.reduce((a, f) => a + f.wert, 0)), liste: liste2, protokoll: s2.einkauf.protokoll.map((p2) => ({ ...p2 })) };
   }
   function wgDetail(s2, wgId) {
     const d2 = WG[wgId];
@@ -12306,6 +12418,7 @@
     s2.marketing.stand = erzeugeMarketing(s2);
     initialisiereMarketing(s2);
     initialisiereWettbewerb(s2);
+    chronikInitialisieren(s2);
     szenarioStart(s2, sz);
     bildeHauscluster(s2);
     initialisiereIt(s2);
@@ -13058,16 +13171,16 @@
     const offen = offeneHaeuser(s2).filter((h) => h.kpi);
     const nachDb = [...offen].sort((a, c) => (a.kpi?.db ?? 0) - (c.kpi?.db ?? 0));
     const anzahl = Math.max(5, Math.round(offen.length * 0.15));
-    const liste = [];
+    const liste2 = [];
     for (let i = 0; i < anzahl && i < nachDb.length; i++) {
       const treffer = zufall(s2) < b2._qualitaet;
       const h = treffer ? nachDb[i] : waehle(s2, offen);
-      if (!liste.includes(h.id)) liste.push(h.id);
+      if (!liste2.includes(h.id)) liste2.push(h.id);
     }
     const folien = ganzZwischen(s2, 60, 220);
     const fazit = b2._qualitaet > 0.7 ? "Die Empfehlungen sind konkret und mit Zahlen hinterlegt." : b2._qualitaet > 0.4 ? "Solide Analyse, an einigen Stellen erkennbar aus anderen Projekten \xFCbernommen." : "Kernaussage auf Folie 3: \u201EKosten senken, Umsatz steigern.\u201C Der Rest ist Anhang.";
-    b2.ergebnis = { empfohleneSchliessungen: liste, folien, fazit };
-    melde(s2, "ereignis", `${b2.haus} legt das Abschlussdeck zu Projekt ${b2.projektname} vor: ${folien} Folien, ${liste.length} Schlie\xDFungsempfehlungen. ${fazit}`);
+    b2.ergebnis = { empfohleneSchliessungen: liste2, folien, fazit };
+    melde(s2, "ereignis", `${b2.haus} legt das Abschlussdeck zu Projekt ${b2.projektname} vor: ${folien} Folien, ${liste2.length} Schlie\xDFungsempfehlungen. ${fazit}`);
   }
   function zufallsProjektname(s2) {
     return waehle(s2, PROJEKTNAMEN);
@@ -13459,6 +13572,7 @@
   }
   function wocheAbspielen(s2) {
     if (s2.phase === "zerschlagen" || s2.ende && !s2.spielendeFortgesetzt && !s2.prognose) throw new Error("Spiel beendet. Bitte ein neues Spiel beginnen oder zul\xE4ssig weiterspielen.");
+    chronikInitialisieren(s2);
     const w = s2.woche;
     const cashVorher = s2.historie[s2.historie.length - 1]?.cash ?? s2.kapitalflussStartCash ?? s2.cash;
     szenarioWoche(s2);
@@ -13666,6 +13780,7 @@
     s2.einmalErloeseWoche = 0;
     zeitungWoche(s2);
     s2.woche += 1;
+    chronikAktualisieren(s2, w);
     szenarioNachWoche(s2);
     erfolgeWoche(s2);
     spielendePruefen(s2);
@@ -45954,35 +46069,35 @@
     Mitte: { schiefer: 1.3, ziegel: 1.2 },
     S\u00FCd: { ziegel: 1.8, braun: 1.5, schiefer: 0.6 }
   };
-  function dachWahl(ctx, r, liste) {
+  function dachWahl(ctx, r, liste2) {
     if (ctx.dachRegime) {
-      const f = liste.filter(([k]) => ctx.dachRegime === "flach" === (k === "flach"));
-      if (f.length) liste = f;
+      const f = liste2.filter(([k]) => ctx.dachRegime === "flach" === (k === "flach"));
+      if (f.length) liste2 = f;
     }
-    const dt0 = wz(r, liste);
-    const dt = ctx.dachWunsch && liste.some(([k]) => k === ctx.dachWunsch) ? ctx.dachWunsch : dt0;
+    const dt0 = wz(r, liste2);
+    const dt = ctx.dachWunsch && liste2.some(([k]) => k === ctx.dachWunsch) ? ctx.dachWunsch : dt0;
     ctx.dachGewaehlt = dt;
     return dt;
   }
-  function wz(r, liste) {
+  function wz(r, liste2) {
     let s2 = 0;
-    for (const [, g] of liste) s2 += g;
+    for (const [, g] of liste2) s2 += g;
     let t = r() * s2;
-    for (const [v, g] of liste) {
+    for (const [v, g] of liste2) {
       t -= g;
       if (t <= 0) return v;
     }
-    return liste[liste.length - 1][0];
+    return liste2[liste2.length - 1][0];
   }
   function farbAbstand(a, b2) {
     const A = new three_module_exports.Color(a), B2 = new three_module_exports.Color(b2);
     return Math.hypot(A.r - B2.r, A.g - B2.g, A.b - B2.b);
   }
   function ausPalette(ctx, pal, gruppen, ton2 = {}) {
-    const liste = Object.entries(gruppen).filter(([g]) => pal[g]).map(([g, w]) => [g, w * (ton2[g] ?? 1)]);
+    const liste2 = Object.entries(gruppen).filter(([g]) => pal[g]).map(([g, w]) => [g, w * (ton2[g] ?? 1)]);
     let f;
     for (let i = 0; i < 10; i++) {
-      f = waehle2(ctx.r, pal[wz(ctx.r, liste)]);
+      f = waehle2(ctx.r, pal[wz(ctx.r, liste2)]);
       if (!ctx.vermeide || farbAbstand(f, ctx.vermeide) > 0.12) break;
     }
     return f;
@@ -47615,7 +47730,7 @@
     const x = p2.x ?? 0, z2 = p2.z ?? 0, w = p2.w ?? 16, d2 = p2.d ?? 13;
     const n = clamp3(Math.round(p2.geschosse ?? 4), 1, 8);
     const seed = p2.seed ?? 1;
-    const sz = typeof seed === "string" ? [...seed].reduce((a, ch) => a * 31 + ch.charCodeAt(0) >>> 0, 7) : seed;
+    const sz = typeof seed === "string" ? [...seed].reduce((a, ch2) => a * 31 + ch2.charCodeAt(0) >>> 0, 7) : seed;
     const r = rng2(mischHash(sz, STILE.indexOf(stil)));
     for (let i = 0; i < 3; i++) r();
     let eck = !!p2.eck, form = "gerade", turm4 = false;
@@ -47674,7 +47789,7 @@
   function zufallsStadthaus(S, scene2, p2 = {}) {
     const r = rng2(mischHash(typeof p2.seed === "number" ? p2.seed : 1, 4711));
     const prof = stilProfil(p2.region ?? "Mitte", p2.cluster ?? "grossstadt");
-    const liste = Object.entries(prof).map(([st2, g2]) => {
+    const liste2 = Object.entries(prof).map(([st2, g2]) => {
       let w = g2;
       if (p2.nachbar?.stil === st2) w *= 0.2;
       if (st2 === "fachwerk" && (p2.w ?? 16) > 18) w *= 0.3;
@@ -47682,7 +47797,7 @@
       if (st2 === "barock" && (p2.w ?? 16) > 22) w *= 0.4;
       return [st2, w];
     });
-    const stil0 = wz(r, liste);
+    const stil0 = wz(r, liste2);
     const stil = p2.stilWunsch && GESCHOSSE[p2.stilWunsch] && BAU[p2.stilWunsch] ? p2.stilWunsch : stil0;
     let [a, b2] = GESCHOSSE[stil];
     if (p2.cluster === "metropole") {
@@ -47923,15 +48038,15 @@
     const ringLinien = {};
     for (const s2 of SEITEN) {
       const dir = s2[0] === "-" ? -1 : 1, rand = s2 === "-x" || s2 === "-z" ? 0 : s2 === "+x" ? B2 : T;
-      const liste = [{ c: rand + dir * RS.breite / 2, ...RS, kante: true, seite: s2, n: 0 }];
+      const liste2 = [{ c: rand + dir * RS.breite / 2, ...RS, kante: true, seite: s2, n: 0 }];
       let p2 = RS.breite, n = 1;
       for (; ; ) {
         p2 += Math.round(zw(r, 64, 90));
         if (p2 + RS.breite > R10 - 30) break;
-        liste.push({ c: rand + dir * (p2 + RS.breite / 2), ...RS, seite: s2, n: n++ });
+        liste2.push({ c: rand + dir * (p2 + RS.breite / 2), ...RS, seite: s2, n: n++ });
         p2 += RS.breite;
       }
-      ringLinien[s2] = liste;
+      ringLinien[s2] = liste2;
     }
     if (kueste && !binnen) {
       const dir = kueste[0] === "-" ? -1 : 1, rand = kueste === "-x" || kueste === "-z" ? 0 : kueste === "+x" ? B2 : T;
@@ -48115,8 +48230,8 @@
         for (const lz of g.Z) {
           if (lz.c <= g.z0 || lz.c >= g.z1) continue;
           const arme = { "-z": amEnde(lx, "z", lz.c - lz.breite / 2, "-"), "+z": amEnde(lx, "z", lz.c + lz.breite / 2, "+"), "-x": amEnde(lz, "x", lx.c - lx.breite / 2, "-"), "+x": amEnde(lz, "x", lx.c + lx.breite / 2, "+") };
-          const liste = Object.values(arme).filter(Boolean);
-          if (!liste.length) continue;
+          const liste2 = Object.values(arme).filter(Boolean);
+          if (!liste2.length) continue;
           if (imWasser(lx.c - lx.breite / 2, lz.c - lz.breite / 2, lx.c + lx.breite / 2, lz.c + lz.breite / 2)) continue;
           kreuzungen.push({
             id: "ak" + kreuzungen.length,
@@ -48128,9 +48243,9 @@
             gz: lz.gehweg,
             arme,
             ampel: false,
-            zebra: liste.length >= 3 && liste.some((s2) => s2.typ === "haupt"),
+            zebra: liste2.length >= 3 && liste2.some((s2) => s2.typ === "haupt"),
             gepflastert: false,
-            sackgasse: liste.length === 1,
+            sackgasse: liste2.length === 1,
             rand: true
           });
         }
@@ -48459,14 +48574,14 @@
   var klemm = (v, a, b2) => Math.max(a, Math.min(b2, v));
   var ganz = (r) => Math.floor(r() * 1e9);
   var ordne = (a) => a.sort((p2, q2) => "zx".indexOf(p2[1]) - "zx".indexOf(q2[1]));
-  function wahlGewichtet(r, liste) {
-    const summe2 = liste.reduce((a, [, w]) => a + w, 0);
+  function wahlGewichtet(r, liste2) {
+    const summe2 = liste2.reduce((a, [, w]) => a + w, 0);
     let x = r() * summe2;
-    for (const [v, w] of liste) {
+    for (const [v, w] of liste2) {
       x -= w;
       if (x <= 0) return v;
     }
-    return liste[0][0];
+    return liste2[0][0];
   }
   var LINIEN = {
     haupt: { breite: 20, gehweg: 3.5, mittel: 0 },
@@ -49079,9 +49194,9 @@
   }
   var SLOT_ROLLE = { premium: "slot:premium", warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester", outlet: "slot:outlet" };
   function einkaufslage(E, standorte) {
-    const liste = standorte.map((st2, n) => ({ st: st2, n, m: standortMasse(st2), lage: st2.lage ?? "1a", rolle: st2.rolle ?? "warenhaus" }));
-    const innen = liste.filter((e) => e.lage === "1a" || e.lage === "b");
-    E.randStandorte = liste.filter((e) => (e.lage === "center" || e.lage === "rand") && e.rolle !== "outlet");
+    const liste2 = standorte.map((st2, n) => ({ st: st2, n, m: standortMasse(st2), lage: st2.lage ?? "1a", rolle: st2.rolle ?? "warenhaus" }));
+    const innen = liste2.filter((e) => e.lage === "1a" || e.lage === "b");
+    E.randStandorte = liste2.filter((e) => (e.lage === "center" || e.lage === "rand") && e.rolle !== "outlet");
     E.einkauf = [];
     E.einkaufZellen = /* @__PURE__ */ new Set();
     const kerne = E.zweiKerne ?? [E.zentrum];
@@ -49504,11 +49619,11 @@
       knoten.forEach((n, q2) => {
         if (n.virt) return;
         const arme = { "-z": n.oben, "+z": n.unten, "-x": q2 > 0 ? stuecke[q2 - 1] : null, "+x": q2 < stuecke.length ? stuecke[q2] : null };
-        const liste = Object.values(arme).filter(Boolean);
-        if (!liste.length) return;
-        const haupt = liste.some((s2) => s2.typ === "haupt");
-        const fahr = liste.filter((s2) => s2.typ !== "fussgaenger");
-        const ampel = liste.length >= 3 && haupt && fahr.length >= 3;
+        const liste2 = Object.values(arme).filter(Boolean);
+        if (!liste2.length) return;
+        const haupt = liste2.some((s2) => s2.typ === "haupt");
+        const fahr = liste2.filter((s2) => s2.typ !== "fussgaenger");
+        const ampel = liste2.length >= 3 && haupt && fahr.length >= 3;
         kreuzungen.push({
           id: "k" + kreuzungen.length,
           k: n.oben?.linie ?? n.unten?.linie ?? null,
@@ -49523,7 +49638,7 @@
           ampel,
           zebra: fahr.length >= 3 && (ampel || typ !== "mittelstadt" || r() < 0.6),
           gepflastert: fahr.length === 0,
-          sackgasse: liste.length === 1
+          sackgasse: liste2.length === 1
         });
       });
     }
@@ -49714,7 +49829,7 @@
       }
     }
     for (const k of kreuzungen) {
-      const liste = Object.values(k.arme).filter(Boolean), fahr = liste.filter((s2) => s2.typ !== "fussgaenger");
+      const liste2 = Object.values(k.arme).filter(Boolean), fahr = liste2.filter((s2) => s2.typ !== "fussgaenger");
       k.gepflastert = fahr.length === 0;
       k.zebra = k.zebra && fahr.length >= 3;
       k.ampel = k.ampel && fahr.length >= 3;
@@ -49826,13 +49941,13 @@
         neueParzelle(ctx, "slot:schloss", b2.x + (b2.w - W3) / 2, b2.z + 4, W3, D, ["+z", "+x"], "frei", { klasse: 5 });
         b2.ehrenhof = { x: b2.x + b2.w * 0.2, z: b2.z + 4 + D, w: b2.w * 0.6, d: b2.d - D - 6 };
       } else if (b2.art === "center" || b2.art === "fachmarkt") {
-        const liste = b2.standorte ?? [];
-        if (liste.length) {
+        const liste2 = b2.standorte ?? [];
+        if (liste2.length) {
           let x = b2.x + 3, Dmax = 0;
           const frei6 = b2.w - 6 - (b2.art === "fachmarkt" ? 44 : 0);
-          const summe2 = liste.reduce((a, st2) => a + st2._w + 2, 0) + (liste.length - 1) * 10;
+          const summe2 = liste2.reduce((a, st2) => a + st2._w + 2, 0) + (liste2.length - 1) * 10;
           const k = Math.min(1, frei6 / summe2);
-          liste.forEach((st2, n) => {
+          liste2.forEach((st2, n) => {
             const W3 = Math.max(10, (st2._w + 2) * k), D = Math.min(st2._d + 2, b2.d - 40);
             const { _typ, _w, _d, ...standort2 } = st2;
             if (n > 0) {
@@ -50013,10 +50128,10 @@
     }
   }
   function intervalleMinus(a, b2, weg) {
-    let liste = [[a, b2]];
+    let liste2 = [[a, b2]];
     for (const [c, d2] of weg) {
       const neu = [];
-      for (const [u, v] of liste) {
+      for (const [u, v] of liste2) {
         if (d2 <= u || c >= v) {
           neu.push([u, v]);
           continue;
@@ -50024,9 +50139,9 @@
         if (c > u) neu.push([u, c]);
         if (d2 < v) neu.push([d2, v]);
       }
-      liste = neu;
+      liste2 = neu;
     }
-    return liste;
+    return liste2;
   }
   function teileLaenge(L2, mn, mx, r) {
     if (L2 <= mx) return [L2];
@@ -50112,25 +50227,25 @@
   function mergeRand(ctx, typ, [bmin, bmax], tiefe, seiten4, extra = {}) {
     const { b: b2, rb } = ctx;
     for (const seite of seiten4) {
-      const liste = b2.parzellen.map((id) => parzelleVon(ctx, id)).filter((p2) => p2 && p2.seite === seite && p2.typ === "stadthaus");
+      const liste2 = b2.parzellen.map((id) => parzelleVon(ctx, id)).filter((p2) => p2 && p2.seite === seite && p2.typ === "stadthaus");
       const entlangX = seite[1] === "z";
-      liste.sort((a, c) => entlangX ? a.x - c.x : a.z - c.z);
-      const start = Math.floor(rb() * Math.max(1, liste.length));
-      for (let o = 0; o < liste.length; o++) {
-        const n0 = (start + o) % liste.length;
+      liste2.sort((a, c) => entlangX ? a.x - c.x : a.z - c.z);
+      const start = Math.floor(rb() * Math.max(1, liste2.length));
+      for (let o = 0; o < liste2.length; o++) {
+        const n0 = (start + o) % liste2.length;
         let summe2 = 0, n1 = n0;
-        while (n1 < liste.length && summe2 < bmin) {
-          summe2 += entlangX ? liste[n1].w : liste[n1].d;
+        while (n1 < liste2.length && summe2 < bmin) {
+          summe2 += entlangX ? liste2[n1].w : liste2[n1].d;
           n1++;
         }
         if (summe2 < bmin || summe2 > bmax * 1.4) continue;
         let ok6 = true;
         for (let q2 = n0 + 1; q2 < n1; q2++) {
-          const a = liste[q2 - 1], c = liste[q2];
+          const a = liste2[q2 - 1], c = liste2[q2];
           if (entlangX ? Math.abs(a.x + a.w - c.x) > 0.1 : Math.abs(a.z + a.d - c.z) > 0.1) ok6 = false;
         }
         if (!ok6) continue;
-        const erste = liste[n0], letzte = liste[n1 - 1];
+        const erste = liste2[n0], letzte = liste2[n1 - 1];
         const maxT = (entlangX ? b2.d - (b2.tiefen?.[seite === "+z" ? "-z" : "+z"] ?? 0) : b2.w - (b2.tiefen?.[seite === "+x" ? "-x" : "+x"] ?? 0)) - 6;
         const T_ = Math.max(entlangX ? erste.d : erste.w, Math.min(tiefe, maxT));
         let rect;
@@ -50138,7 +50253,7 @@
         else if (seite === "-z") rect = { x: erste.x, z: b2.z, w: letzte.x + letzte.w - erste.x, d: T_ };
         else if (seite === "+x") rect = { x: b2.x + b2.w - T_, z: erste.z, w: T_, d: letzte.z + letzte.d - erste.z };
         else rect = { x: b2.x, z: erste.z, w: T_, d: letzte.z + letzte.d - erste.z };
-        const weg = new Set(liste.slice(n0, n1));
+        const weg = new Set(liste2.slice(n0, n1));
         const andere = b2.parzellen.map((id) => parzelleVon(ctx, id)).filter((q2) => q2 && !weg.has(q2));
         const stoesst = (R10) => andere.some((q2) => R10.x < q2.x + q2.w - 0.05 && R10.x + R10.w > q2.x + 0.05 && R10.z < q2.z + q2.d - 0.05 && R10.z + R10.d > q2.z + 0.05);
         if (stoesst(rect)) {
@@ -50150,7 +50265,7 @@
           if (stoesst(rect)) continue;
         }
         const p2 = erste;
-        for (let q2 = n0 + 1; q2 < n1; q2++) entferneParzelle(ctx, liste[q2]);
+        for (let q2 = n0 + 1; q2 < n1; q2++) entferneParzelle(ctx, liste2[q2]);
         Object.assign(p2, rect, { typ, sonder: typ.slice(5), stil: null, leer: false, hoehenklasse: 5, landmarke: true, ...extra });
         return p2;
       }
@@ -50425,11 +50540,11 @@
   };
   var NORD_KIRCHE_MIN = { marien: [38, 72], doppelturm: [38, 72], hallen: [32, 62], dorf: [18, 32] };
   function kirchenEindeutig(parzellen, region) {
-    const liste = KIRCHEN_REGION[region] ?? KIRCHEN_REGION.mitte;
+    const liste2 = KIRCHEN_REGION[region] ?? KIRCHEN_REGION.mitte;
     const benutzt = /* @__PURE__ */ new Set();
     for (const p2 of parzellen.filter((q2) => q2.typ === "slot:kirche")) {
-      let st2 = p2.stil ?? liste[(p2.seed ?? 0) % liste.length];
-      if (benutzt.has(st2)) st2 = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? st2;
+      let st2 = p2.stil ?? liste2[(p2.seed ?? 0) % liste2.length];
+      if (benutzt.has(st2)) st2 = liste2.find((x) => !benutzt.has(x) && x !== "neugotik") ?? st2;
       p2.stil = st2;
       benutzt.add(st2);
       if (benutzt.size > 1 && p2.turm === "doppel") p2.turm = "west";
@@ -50443,7 +50558,7 @@
         else {
           p2.typ = "slot:kirche";
           p2.sonder = "kirche";
-          p2.stil = liste.find((x) => !benutzt.has(x) && x !== "neugotik") ?? "klassizismus";
+          p2.stil = liste2.find((x) => !benutzt.has(x) && x !== "neugotik") ?? "klassizismus";
           benutzt.add(p2.stil);
           continue;
         }
@@ -50721,15 +50836,15 @@
       const r = rng2(`${opt.seed ?? "z"}/mieter`);
       unter = [mieterInfo({ typ: waehle2(r, ["discounter", "drogerie"]), etage: 0 }), mieterInfo({ typ: waehle2(r, ["aerztehaus", "behoerde"]), etage: 2 }), mieterInfo({ typ: "fitness", etage: 3 })];
     }
-    let aktion2 = AKTION_ALIAS[opt.aktion] ?? opt.aktion ?? null;
-    if (aktion2 && !AKTIONEN.includes(aktion2)) aktion2 = "sale";
-    if (!aktion2 && hat("aktion")) aktion2 = "sale";
-    if (aktion2 && !hat("aktion")) zusatz.push("aktion");
+    let aktion = AKTION_ALIAS[opt.aktion] ?? opt.aktion ?? null;
+    if (aktion && !AKTIONEN.includes(aktion)) aktion = "sale";
+    if (!aktion && hat("aktion")) aktion = "sale";
+    if (aktion && !hat("aktion")) zusatz.push("aktion");
     const rabatt = Number.isFinite(opt.rabatt) && opt.rabatt > 0 ? Math.round(opt.rabatt * 100) : null;
     const mk2 = opt.marketing ?? {};
     const marketing = { karte: !!(mk2.karte ?? opt.karte), app: !!(mk2.app ?? opt.app), prospekt: !!(mk2.prospekt ?? opt.prospekt) };
     const mechanik = opt.mechanik ?? null, punkteFaktor = Number.isFinite(opt.punkteFaktor) ? opt.punkteFaktor : null;
-    return { __zustand: true, status, zusatz, aktion: aktion2, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
+    return { __zustand: true, status, zusatz, aktion, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
   }
   function zustandFlags(Z2) {
     const h = Z2.hat;
@@ -51411,12 +51526,12 @@
     s2.q(u - b2.b / 2 - 0.15, u + b2.b / 2 + 0.15, 3.55, 4.45, t + 1.6, t + 1.7, mi.bg);
     plakat(Z2, s2, "UG \u2193", u, 3.15, t + 1.75, 0.5, "#ffffff", "#3a3f44");
   }
-  function pylon(Z2, s2, liste, u, t) {
-    const n = liste.length, ph = 0.7, H = 1.6 + n * (ph + 0.18) + 0.8;
+  function pylon(Z2, s2, liste2, u, t) {
+    const n = liste2.length, ph = 0.7, H = 1.6 + n * (ph + 0.18) + 0.8;
     s2.q(u - 1, u + 1, 0.3, H, t - 0.35, t + 0.35, "#2b3a4a");
     s2.q(u - 1.1, u + 1.1, H, H + 0.15, t - 0.4, t + 0.4, "#1f2a36");
     plakat(Z2, s2, "HIER FINDEN SIE", u, H - 0.45, t + 0.37, 0.32, "#ffffff", "#2b3a4a", 1.8);
-    liste.forEach((mi, i) => {
+    liste2.forEach((mi, i) => {
       const y = H - 1 - i * (ph + 0.18) - ph / 2;
       s2.q(u - 0.9, u + 0.9, y - ph / 2, y + ph / 2, t + 0.35, t + 0.38, mi.bg);
       plakat(Z2, s2, mi.name, u, y, t + 0.4, ph * 0.62, mi.fg, mi.bg, 1.7);
@@ -58061,7 +58176,7 @@
       return skaliert(S, scene2, p2, nw, nd, (S2, sc2, pp) => fn(S2, sc2, pp));
     };
   }
-  var nachSeed = (p2, liste) => waehle2(rng2(`slot:${p2.seed}:${p2.id ?? ""}`), liste);
+  var nachSeed = (p2, liste2) => waehle2(rng2(`slot:${p2.seed}:${p2.id ?? ""}`), liste2);
   var SLOTS = {
     "slot:kirche": (S, scene2, p2) => kirche(S, scene2, { ...p2, typ: p2.typ ?? (p2.w * p2.d > 3e3 ? "dom" : "stadt") }),
     "slot:rathaus": (S, scene2, p2) => rathaus(S, scene2, p2),
@@ -63654,9 +63769,9 @@
     var _a2;
     return (_a2 = scene2.userData).hartwigSchilder ?? (_a2.hartwigSchilder = []);
   }
-  function ueberdeckung(b2, liste) {
+  function ueberdeckung(b2, liste2) {
     let f = 0;
-    for (const q2 of liste) {
+    for (const q2 of liste2) {
       const du = Math.min(b2[2], q2[2]) - Math.max(b2[0], q2[0]) + SCHILD_RAND, dv = Math.min(b2[3], q2[3]) - Math.max(b2[1], q2[1]) + SCHILD_RAND;
       if (du > 0 && dv > 0) f += du * dv;
     }
@@ -63666,13 +63781,13 @@
     if (scene2) schilderVon(scene2).push(schildBox(xa, xb, za, zb, y0, y1));
   }
   function schildPlatz(scene2, kand, breite, hoehe) {
-    const liste = schilderVon(scene2);
+    const liste2 = schilderVon(scene2);
     let best = null, bf = Infinity;
     for (const k of [1, 0.85, 0.72, 0.6]) {
       const bb = breite * k, hh = hoehe * k;
       for (const c of kand) {
         const b2 = schildBox(c.x - bb / 2 - 0.06, c.x + bb / 2 + 0.06, c.z, c.z, c.y - hh / 2 - 0.06, c.y + hh / 2 + 0.06);
-        const f = ueberdeckung(b2, liste);
+        const f = ueberdeckung(b2, liste2);
         if (f < bf - 1e-6) {
           bf = f;
           best = { ...c, k, box: b2 };
@@ -63681,7 +63796,7 @@
       }
       if (bf === 0) break;
     }
-    liste.push(best.box);
+    liste2.push(best.box);
     return best;
   }
   function schildKandidaten(x, y, z2, xa, xb, za, zb, breite) {
@@ -99823,7 +99938,7 @@
     for (const f of fl) {
       const art = abteilungsArt(f);
       const fremd = f.konzept && !["eigen", "kommission"].includes(f.konzept);
-      const teil6 = (liste) => liste.forEach(([a, w], k) => out.push({ ...f, id: `${f.id ?? "f"}-${k}`, qm: f.qm * w, art: a }));
+      const teil6 = (liste2) => liste2.forEach(([a, w], k) => out.push({ ...f, id: `${f.id ?? "f"}-${k}`, qm: f.qm * w, art: a }));
       if (!fremd && art === "accessoires" && f.qm >= 1e3) teil6([["accessoires", 0.45], ["lederwaren", 0.22], ["schmuck", 0.2], ["strumpf", 0.13]]);
       else if (!fremd && art === "accessoires" && f.qm >= 600) teil6([["accessoires", 0.5], ["lederwaren", 0.25], ["schmuck", 0.25]]);
       else if (!fremd && art === "wohnen" && f.qm >= 900) teil6([["wohnen", 0.42], ["haushalt", 0.38], ["elektro", 0.2]]);
@@ -101271,9 +101386,9 @@
       gesetzt.push({ id: eintrag2.g.id, parzelle: id, angebot: eintrag2.angebot });
       return p2;
     };
-    for (const [, liste] of gruppen) {
-      if (liste.length >= 2) {
-        const [eA, eB] = liste, mA = hqMasse(eA.g), mB = hqMasse(eB.g);
+    for (const [, liste2] of gruppen) {
+      if (liste2.length >= 2) {
+        const [eA, eB] = liste2, mA = hqMasse(eA.g), mB = hqMasse(eB.g);
         let best = null;
         for (const a of frei6) {
           const sA = punkte2(a, mA.w, mA.d);
@@ -101289,14 +101404,14 @@
           const zz = best.a.z + best.a.d, tief2 = Math.min(mA.d, mB.d);
           setze(best.a, eA, "+x+z", { bruecke: { x0: best.a.x + best.a.w, x1: best.b.x, z0: zz - tief2 + 4, z1: zz - 4, y0: Math.min(mA.eg, mB.eg) + 3.4 } });
           setze(best.b, eB, "-x+z");
-          for (const e of liste.slice(2)) {
+          for (const e of liste2.slice(2)) {
             const b2 = frei6.map((q2) => [q2, punkte2(q2, hqMasse(e.g).w, hqMasse(e.g).d)]).filter((q2) => q2[1] < Infinity).sort((p1, p2) => p1[1] - p2[1])[0]?.[0];
             if (b2) setze(b2, e, "+x+z");
           }
           continue;
         }
       }
-      for (const e of liste) {
+      for (const e of liste2) {
         const m = hqMasse(e.g);
         const b2 = frei6.map((q2) => [q2, punkte2(q2, m.w, m.d)]).filter((q2) => q2[1] < Infinity).sort((p1, p2) => p1[1] - p2[1])[0]?.[0];
         if (b2) setze(b2, e, "+x+z");
@@ -102082,12 +102197,17 @@
       x0 += vorstandB;
       nutz -= vorstandB;
     }
+    const archivStart = x0;
+    const archivBreite = miet && et.archiv ? Math.min(10, Math.max(5, 90 / T)) : 0;
+    x0 += archivBreite;
+    nutz -= archivBreite;
     let breiten = abt.map((a) => a.fte * 14 / T);
     const summe2 = breiten.reduce((a, b2) => a + b2, 0);
     if (summe2 > nutz) breiten = breiten.map((b2) => b2 * nutz / summe2);
     breiten = breiten.map((b2) => Math.max(5, Math.round(b2 * 2) / 2));
     const zonen2 = [];
-    if (vorstandHier) zonen2.push({ art: "vorstand", x0: K3 + 0.3, x1: x0 });
+    if (vorstandHier) zonen2.push({ art: "vorstand", x0: K3 + 0.3, x1: archivStart });
+    if (archivBreite) zonen2.push({ art: "archiv", x0: archivStart, x1: x0 });
     let xa = x0;
     abt.forEach((a, i) => {
       const xb = i === abt.length - 1 && nutz - (xa - x0) - breiten[i] < 3 ? B2 : Math.min(B2, xa + breiten[i]);
@@ -102098,6 +102218,7 @@
     for (const [k, Z2] of zonen2.entries()) {
       if (k > 0) trennwand(S, Z2.x0, T);
       if (Z2.art === "vorstand") vorstandZone(S, scene2, Z2, T, G2, r, figuren2, vs2.ressorts ?? []);
+      else if (Z2.art === "archiv") archivZone(S, scene2, Z2, T);
       else if (Z2.art === "abt") abteilungsZone(S, scene2, Z2, T, G2, r, figuren2, g);
       else if (Z2.art === "leer") leerZone(S, scene2, Z2, T, r);
       else rohZone(S, scene2, Z2, T, r);
@@ -102110,6 +102231,29 @@
     const zz = opt.zone && zonen2.find((q2) => opt.zone === "vorstand" ? q2.art === "vorstand" : q2.art === "abt" && (opt.zone === true || q2.a.id === opt.zone));
     if (zz) box = new three_module_exports.Box3(new three_module_exports.Vector3(zz.x0 - 1, -1.8, -0.6), new three_module_exports.Vector3(zz.x1 + 0.4, WH3, T + 0.4));
     return { box, anzahl: S.anzahl - n0, figuren: figuren2.n, zonen: zonen2.map((z2) => ({ art: z2.art, id: z2.a?.id, breite: z2.x1 - z2.x0 })), breite: B2, tiefe: T };
+  }
+  function archivZone(S, scene2, Z2, T) {
+    const x = Z2.x0, w = Z2.x1 - Z2.x0;
+    boden(S, x, 0, w, T, 0, "#9d8062", 1);
+    const X = x + w / 2;
+    if (scene2) wandschild(S, scene2, "ARCHIV", "z", X, 2.65, 0.35, { farbe: "#783b31", hoehe: 0.48 });
+    for (let i = 0; i < 3; i++) {
+      const z2 = 2.4 + i * Math.max(2.4, (T - 6) / 3);
+      S.box(w - 1.5, 2.4, 0.42, X, 1.25, z2, "#68472f");
+      for (let k = 0; k < 11; k++) {
+        const px2 = x + 1.1 + (k + 0.5) * (w - 2.2) / 11;
+        S.box((w - 2.2) / 14, 0.55 + k % 3 * 0.14, 0.06, px2, 0.68, z2 + 0.26, ["#a66d46", "#5b6575", "#c8b78b"][k % 3]);
+      }
+    }
+    for (const z2 of [T * 0.38, T * 0.67]) {
+      const p2 = lokal2(S, X, 0.07, z2, 0);
+      p2.box(Math.min(3.6, w - 1), 1.45, 1.25, 0, 0.74, 0, "#c5d5d8");
+      p2.box(Math.min(3.8, w - 0.8), 0.12, 1.35, 0, 1.51, 0, "#765e45");
+      for (let k = -1; k <= 1; k++) {
+        p2.box(0.58, 0.7, 0.18, k * 0.85, 0.75, 0.15, k ? "#f1e8d6" : "#b63d35");
+        p2.box(0.4, 0.05, 0.03, k * 0.85, 1.05, 0.26, "#7d352f");
+      }
+    }
   }
   function trennwand(S, x, T) {
     const tuer0 = T * 0.62, tuer1 = tuer0 + 1.6;
@@ -102225,18 +102369,18 @@
       if (s2.einmal) s2._zone = Z2;
     }
     G2.setze(R10.x0 - 0.4, R10.z0 - 0.4, R10.x1, R10.z1);
-    const liste = [];
+    const liste2 = [];
     const n = [1, 2, 3, 4][st2];
-    if (st2 >= 2) liste.push({ art: "raum", w: 4, d: 3.6, bau: leitungsbuero });
-    if (st2 >= 1 && w >= 11) liste.push({ art: "raum", w: 5, d: 3.8, bau: besprechung });
-    for (const s2 of sp.filter((q2) => q2.art !== "frei").slice(0, Math.max(1, n - 1))) liste.push(s2);
+    if (st2 >= 2) liste2.push({ art: "raum", w: 4, d: 3.6, bau: leitungsbuero });
+    if (st2 >= 1 && w >= 11) liste2.push({ art: "raum", w: 5, d: 3.8, bau: besprechung });
+    for (const s2 of sp.filter((q2) => q2.art !== "frei").slice(0, Math.max(1, n - 1))) liste2.push(s2);
     if (st2 === 3) {
-      liste.push({ art: "frei", w: 2.6, d: 1.3, bau: telefonboxen });
-      liste.push({ art: "frei", w: 4.2, d: 3, bau: lounge });
+      liste2.push({ art: "frei", w: 2.6, d: 1.3, bau: telefonboxen });
+      liste2.push({ art: "frei", w: 4.2, d: 3, bau: lounge });
     }
     const rang = { raum: 0, wand: 1, frei: 2 };
-    liste.sort((p2, q2) => rang[p2.art] - rang[q2.art] || (q2.vorrang ? 1 : 0) - (p2.vorrang ? 1 : 0));
-    for (const s2 of liste) {
+    liste2.sort((p2, q2) => rang[p2.art] - rang[q2.art] || (q2.vorrang ? 1 : 0) - (p2.vorrang ? 1 : 0));
+    for (const s2 of liste2) {
       const pos = G2.suche(B2, s2.w, s2.d, s2.art === "wand" ? 0.3 : 0.6, { nurHinten: s2.art === "wand" });
       if (!pos) continue;
       s2.bau(S, scene2, pos.x, pos.z, s2.w, s2.d, st2, r, farbe3);
@@ -102613,12 +102757,12 @@
       wandschild(S, scene2, "Vorstand", "x", Z2.x0 + W3 / 2, WH3 - 0.55, 0.31, { schrift: "#ffffff", hoehe: 0.32 });
       haengeschild(S, scene2, "Vorstandsetage", Z2.x0 + W3 / 2, WH3 - 0.8, T * 0.62, { farbe: VORSTAND_FARBE, hoehe: 0.75 });
     }
-    const liste = ressorts.length ? ressorts : RESSORTS_STANDARD;
+    const liste2 = ressorts.length ? ressorts : RESSORTS_STANDARD;
     const ceoW = 5.4, od = 4.2;
-    const proReihe = Math.max(3, Math.min(liste.length, Math.floor((W3 - ceoW - 0.8) / 3.6)));
-    const reihen = Math.ceil(liste.length / proReihe);
+    const proReihe = Math.max(3, Math.min(liste2.length, Math.floor((W3 - ceoW - 0.8) / 3.6)));
+    const reihen = Math.ceil(liste2.length / proReihe);
     const ow = (W3 - ceoW - 0.8) / proReihe;
-    liste.forEach((R10, i) => {
+    liste2.forEach((R10, i) => {
       const reihe = Math.floor(i / proReihe), k = i % proReihe;
       vorstandsBuero(S, scene2, Z2.x0 + 0.4 + k * ow, 0.6 + reihe * (od + 1.6), ow - 0.15, od, r, R10);
       if (R10.name) figuren2.n++;
@@ -102629,7 +102773,7 @@
     const zv = 0.6 + reihen * (od + 1.6);
     const rest = T - zv - 1;
     const sw = Math.min(W3 - 9, 12), sd = Math.max(4.4, Math.min(6.2, rest));
-    if (rest >= 4.4) sitzungssaal(S, scene2, Z2.x0 + W3 - sw - 0.4, zv, sw, sd, r, liste.length + 1);
+    if (rest >= 4.4) sitzungssaal(S, scene2, Z2.x0 + W3 - sw - 0.4, zv, sw, sd, r, liste2.length + 1);
     const ew = Math.min(7, W3 - sw - 1.2);
     if (ew >= 4.5 && rest >= 3.6) vorstandEmpfang(S, scene2, Z2.x0 + 0.4, zv + 0.4, ew, Math.min(rest, 5), r);
     figuren2.n += 2;
@@ -105576,7 +105720,7 @@
   var NAT_WENDEBAU = { bullauge: [40, 30], passage: [58, 36], sparkasse: [36, 28] };
   var NAT_DOMINANTE = { fernsehturm: [48, 48], kanzel: [36, 34], uni: [62, 46], rund: [56, 46], interhotel: [72, 46] };
   var NAT_KULTUR = { palast: [88, 64], stadthalle: [74, 58], kulturhaus50: [78, 52] };
-  var varVon = (praefix, liste) => (p2) => p2.variante ?? waehle2(rng2(`${praefix}:${p2.seed}`), liste);
+  var varVon = (praefix, liste2) => (p2) => p2.variante ?? waehle2(rng2(`${praefix}:${p2.seed}`), liste2);
   var pavillonE = eingefasst(pavillon, (p2) => NAT_PAVILLON[varVon("pv", ["hp", "faltdach", "eisbar", "brunnen"])(p2)] ?? [34, 30]);
   var wendebauE = eingefasst(wendebau, (p2) => NAT_WENDEBAU[varVon("wb", ["bullauge", "passage", "sparkasse"])(p2)] ?? [40, 30]);
   var dominanteE = eingefasst(dominante, (p2) => NAT_DOMINANTE[varVon("dm", ["fernsehturm", "kanzel", "uni", "interhotel"])(p2)] ?? [56, 46]);
@@ -106365,7 +106509,7 @@
     }
     if (p2.ostFachwerk && v === "altstadt") basis3.fachwerk = 2.4;
     if (p2.ostTyp === "barock_wiederaufbau" && v === "altstadt") basis3.barock = 2.5;
-    const liste = Object.entries(basis3).map(([st2, g2]) => {
+    const liste2 = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
       if (nachbar?.stil === st2) w *= 0.25;
       if (st2 === "fachwerk" && p2.w > 18) w *= 0.3;
@@ -106373,7 +106517,7 @@
       if (st2 === "barock" && p2.w > 22) w *= 0.4;
       return [st2, w];
     });
-    const stil = wahlGewichtet2(r, liste);
+    const stil = wahlGewichtet2(r, liste2);
     let [a, b2] = OST_GESCHOSSE[stil];
     if (v === "messe") {
       a += 1;
@@ -106655,8 +106799,8 @@
   var rform = (u0, v0, u1, v1) => umrissForm([u0, v0, u1, v1]);
   function wandStreifen(umr, oeff) {
     const ausd = (l, ach) => l.kreis ? [l.kreis[ach] - l.kreis[2], l.kreis[ach] + l.kreis[2]] : ach === 0 ? [l.u0, l.u1] : [l.v0, l.v1];
-    const schnitte = (liste, a, b2, ach) => {
-      const iv = liste.map((l) => ausd(l, ach)).sort((p2, q2) => p2[0] - q2[0]);
+    const schnitte = (liste2, a, b2, ach) => {
+      const iv = liste2.map((l) => ausd(l, ach)).sort((p2, q2) => p2[0] - q2[0]);
       const cut = [];
       let ende = -Infinity;
       for (const [c, d2] of iv) {
@@ -106761,8 +106905,8 @@
     for (const { c, tief: tief2, s: sh } of gr.values()) formen(S, F2, sh, -tief2, -tief2 + 0.07, c, Math.min(4, o.seg ?? 6));
     if (baenke2.length) formen(S, F2, baenke2, -0.05, 0.14, o.bank);
   }
-  function platten(S, F2, liste, t0, t1, c) {
-    formen(S, F2, liste.map((q2) => q2.length === 4 && typeof q2[0] === "number" ? rform(...q2) : umrissForm(q2)), t0, t1, c);
+  function platten(S, F2, liste2, t0, t1, c) {
+    formen(S, F2, liste2.map((q2) => q2.length === 4 && typeof q2[0] === "number" ? rform(...q2) : umrissForm(q2)), t0, t1, c);
   }
   var fenster4 = (u, v, b2, h, art = null, x = {}) => ({ u0: u - b2 / 2, u1: u + b2 / 2, v0: v, v1: v + h, art, typ: "fenster", ...x });
   var GLAS8 = "#4b5a66";
@@ -109566,12 +109710,12 @@
     const f = b2.front ?? "+z", quer2 = f[1] === "x";
     const L2 = quer2 ? b2.d : b2.w, T = quer2 ? b2.w : b2.d;
     const tief2 = Math.min(T - 2, 52);
-    const liste = b2.varianten ?? ["kai"];
+    const liste2 = b2.varianten ?? ["kai"];
     const n = L2 >= 150 ? 2 : 1;
     const l = (L2 - 2 - (n - 1) * 4) / n;
     for (let k = 0; k < n; k++) {
       const u = 1 + k * (l + 4);
-      const variante2 = liste[k % liste.length];
+      const variante2 = liste2[k % liste2.length];
       const x = quer2 ? f === "+x" ? b2.x + b2.w - tief2 : b2.x : b2.x + u, z2 = quer2 ? b2.z + u : f === "+z" ? b2.z + b2.d - tief2 : b2.z;
       neueParzelle3(ctx, "slot:nord_hafen", x, z2, quer2 ? tief2 : l, quer2 ? l : tief2, [f], "frei", { klasse: 4, variante: variante2, landmarke: false });
     }
@@ -113576,7 +113720,7 @@
     const key = p2.mitteEinkauf ? "e_" + p2.mitteEinkauf : STILE_M[p2.viertel] ? p2.viertel : "gruenderzeit";
     const basis3 = STILE_M[key];
     const L2 = p2.seite === "+x" || p2.seite === "-x" ? p2.d : p2.w;
-    const liste = Object.entries(basis3).map(([st2, g2]) => {
+    const liste2 = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
       if (st2 === "fachwerk") w *= p2.mitteFw ?? 1;
       if (nachbar?.stil === st2 && st2 !== "fachwerk") w *= 0.3;
@@ -113584,7 +113728,7 @@
       if ((st2 === "siebziger" || st2 === "neubau") && L2 < 10) w *= 0.4;
       return [st2, w];
     });
-    const stil = wahlGewichtet4(r, liste);
+    const stil = wahlGewichtet4(r, liste2);
     let [a, b2] = GESCH_M[stil];
     if (p2.cluster === "metropole") {
       a += 1;
@@ -117154,9 +117298,9 @@
     if (!halle2) {
       const Bc = Bn + 2, Hc = Hn + 1;
       S.quader(xm - Bc / 2, Ha, zc - 8, xm + Bc / 2, Hc, zc, st2);
-      const ch = new three_module_exports.CylinderGeometry(Bc / 2, Bc / 2, Hc - Ha, 8, 1, false, PI11 / 2, PI11);
-      ch.translate(xm, Ha + (Hc - Ha) / 2, zc - 8);
-      S.add(ch, st2);
+      const ch2 = new three_module_exports.CylinderGeometry(Bc / 2, Bc / 2, Hc - Ha, 8, 1, false, PI11 / 2, PI11);
+      ch2.translate(xm, Ha + (Hc - Ha) / 2, zc - 8);
+      S.add(ch2, st2);
       const chd = new three_module_exports.ConeGeometry(Bc / 2 + 0.4, Bc * 0.8, 8, 1, false, PI11 / 2, PI11);
       chd.translate(xm, Hc + Bc * 0.4, zc - 8);
       S.add(chd, dach3);
@@ -118881,14 +119025,14 @@
     const r = rng2((p2.seed ?? 1) * 2654435761 + 4111 >>> 0);
     const tab = STILE2[p2.suedTyp] ?? STILE2.altbayern;
     const basis3 = tab[gruppe(p2.viertel)] ?? tab.alt;
-    const liste = Object.entries(basis3).map(([st2, g2]) => {
+    const liste2 = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
       if (nachbar?.stil === st2) w *= 0.35;
       if (st2 === "fachwerk" && p2.w > 18 && p2.d > 18) w *= 0.2;
       if (p2.typ === "hofhaus" && st2 !== "fachwerk") w *= 0.6;
       return [st2, w];
     });
-    const stil = wahlGewichtet5(r, liste);
+    const stil = wahlGewichtet5(r, liste2);
     let [a, b2] = GESCHOSSE2[stil] ?? [3, 5];
     if (p2.cluster === "metropole") {
       a += 1;
@@ -119538,7 +119682,7 @@
     const L2 = E.einkaufslage;
     if (!L2) return;
     const { bloecke, parzellen, T, typ } = g;
-    const liste = (E.o.nah ?? []).filter((f) => NAH_ART[f.split(":")[0]]);
+    const liste2 = (E.o.nah ?? []).filter((f) => NAH_ART[f.split(":")[0]]);
     const kand = [];
     for (const b2 of bloecke) {
       if (b2.art !== "bebaut" || E.einkaufKern?.(b2.i0, b2.j0)) continue;
@@ -119549,7 +119693,7 @@
       kand.push({ b: b2, u, v });
     }
     const genutzt = [];
-    liste.forEach((f, k) => {
+    liste2.forEach((f, k) => {
       const [art, variante2] = f.split(":");
       const minW = { konzern: 50 }[art] ?? 44;
       const l = kand.filter((c2) => !genutzt.includes(c2) && c2.b.w >= minW && c2.b.d >= 44).map((c2) => [c2, -Math.abs(c2.u - c2.v) - genutzt.filter((q2) => Math.abs(q2.b.i0 - c2.b.i0) + Math.abs(q2.b.j0 - c2.b.j0) < 3).length * 3 + (k % 2 === 0 === c2.u + c2.v < 0 ? 0.5 : 0)]).sort((a, b3) => b3[1] - a[1]);
@@ -119880,14 +120024,14 @@
       const f = Object.fromEntries(Object.entries(basis3).filter(([st2]) => erlaubt.has(st2)));
       if (Object.keys(f).length) basis3 = f;
     }
-    const liste = Object.entries(basis3).map(([st2, g2]) => {
+    const liste2 = Object.entries(basis3).map(([st2, g2]) => {
       let w = g2;
       if (nachbar?.stil === st2) w *= 0.3;
       if (st2 === "fachwerk" && p2.w > 16) w *= 0.2;
       if (st2 === "barock" && p2.w > 20) w *= 0.4;
       return [st2, w];
     });
-    const stil = wahlGewichtet6(r, liste);
+    const stil = wahlGewichtet6(r, liste2);
     let [a, b2] = GESCHOSSE_W[stil] ?? [3, 5];
     if (p2.cluster === "metropole") {
       a += 1;
@@ -121623,12 +121767,12 @@
       } else for (let k = 0; k < w / 9; k++) baumSetzen(I, "pappel", x + k * 9, -0.05, z2 + d2 / 2, r, 0.9);
     }
   }
-  function baueWasserAlle(ctx, liste) {
+  function baueWasserAlle(ctx, liste2) {
     const { S, I, plan: plan2 } = ctx;
     const RR = plan2.aussen ? plan2.aussen.R : 0;
     const randX0 = 0.5 - RR, randX1 = plan2.breite + RR - 0.5, randZ0 = 0.5 - RR, randZ1 = plan2.tiefe + RR - 0.5;
     const alleStrassen = plan2.aussen ? [...plan2.strassen, ...plan2.aussen.strassen] : plan2.strassen;
-    for (const b2 of liste) {
+    for (const b2 of liste2) {
       const r = rng2(b2.seed + 7);
       const X0 = b2.x, X1 = b2.x + b2.w, Z0 = b2.z, Z1 = b2.z + b2.d;
       S.quader(X0, WASSER_Y - 1.2, Z0, X1, WASSER_Y, Z1, F.wasser);
@@ -121645,7 +121789,7 @@
           continue;
         }
         const weg = [];
-        for (const q2 of liste) {
+        for (const q2 of liste2) {
           if (q2 === b2) continue;
           const enthaelt = sd.entlang === "z" ? q2.x < sd.aussen && q2.x + q2.w > sd.aussen : q2.z < sd.aussen && q2.z + q2.d > sd.aussen;
           if (enthaelt) weg.push(sd.entlang === "z" ? [q2.z, q2.z + q2.d] : [q2.x, q2.x + q2.w]);
@@ -121963,11 +122107,11 @@
     const art = { premium: "premium", warenhaus: "hartwig", sport: "hartwigSport", wettbewerber: "wettbewerber", outlet: "wettbewerber" };
     return (plan2.standorte ?? []).map((st2) => ({ parzelle: st2.parzelle, art: art[st2.rolle] ?? "hartwig", groesse: st2.rolle === "wettbewerber" ? (groesse2 ?? 10) * 0.8 : groesse2 }));
   }
-  function setzeMarker(scene2, plan2, ergebnis, liste = [], o = {}) {
+  function setzeMarker(scene2, plan2, ergebnis, liste2 = [], o = {}) {
     const pz4 = new Map(plan2.parzellen.map((p2) => [p2.id, p2]));
     for (const p2 of plan2.aussen?.bauten ?? []) if (p2.typ === "slot:outlet") pz4.set(p2.id, p2);
-    if (liste === "standorte") liste = standortMarker(plan2, o.markerGroesse);
-    for (const e of liste) {
+    if (liste2 === "standorte") liste2 = standortMarker(plan2, o.markerGroesse);
+    for (const e of liste2) {
       if (e.parzelle) {
         const p2 = pz4.get(e.parzelle);
         if (p2) kartenMarker(scene2, p2, e.art, { hoehe: ergebnis?.hoehen?.get(p2.id) ?? 20, groesse: e.groesse });
@@ -122633,8 +122777,8 @@
   }
   var WETTBEWERBER = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
   var WB_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
-  function baueEintrag(name2, liste) {
-    const typ = liste[0].cluster;
+  function baueEintrag(name2, liste2) {
+    const typ = liste2[0].cluster;
     const seed = stadtSeed(name2);
     const r = rng2(seed * 13 + 5);
     const region = REGION3.get(name2) ?? "mitte";
@@ -122643,7 +122787,7 @@
     const bild3 = plug ?? BILD[name2];
     const archetyp = bild3?.[0] ?? wahlGewichtet(r, Object.entries(ARCHETYPEN).map(([k, v]) => [k, v.gewicht[TYPEN[typ].idx]]));
     const extra = { ...bild3?.[1] ?? {}, ...ddr ? { ddr: true } : {} };
-    const standorte = liste.map((h) => {
+    const standorte = liste2.map((h) => {
       const f = fussabdruck(h);
       return { id: h.id, name: h.name, rolle: h.klasse === "premium" ? "premium" : h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
     });
@@ -122701,11 +122845,11 @@
       return a2;
     };
     const nameVon = (art) => {
-      const liste2 = NAMEN[art] ?? [null];
+      const liste3 = NAMEN[art] ?? [null];
       let k = zaehl.get(art) ?? 0;
-      for (let q2 = 0; q2 < liste2.length && nbWb.some((e) => e.art === art && e.name === liste2[k % liste2.length]); q2++) k++;
+      for (let q2 = 0; q2 < liste3.length && nbWb.some((e) => e.art === art && e.name === liste3[k % liste3.length]); q2++) k++;
       zaehl.set(art, k + 1);
-      return liste2[k % liste2.length];
+      return liste3[k % liste3.length];
     };
     const FORMEN = 5;
     const formenStadt = [];
@@ -122720,7 +122864,7 @@
       }
       return Math.floor(x * FORMEN);
     };
-    const hartwigQm = Math.max(0, ...liste.filter((h) => h.format !== "sport" && h.lage !== "center" && h.lage !== "rand").map((h) => h.grundflaecheQm ?? 0));
+    const hartwigQm = Math.max(0, ...liste2.filter((h) => h.format !== "sport" && h.lage !== "center" && h.lage !== "rand").map((h) => h.grundflaecheQm ?? 0));
     for (let k = 0; k < n; k++) {
       let qm = Math.round(zw(r, ...WB_FLAECHE[typ]) / 100) * 100;
       if (hartwigQm > 0) qm = Math.min(qm, Math.max(600, Math.round(0.8 * hartwigQm / 100) * 100));
@@ -122866,13 +123010,13 @@
         fusswege.push({ s: s2, dir: 1, v, id: s2.id + ":f:" + seite });
       }
     }
-    const verbinde = (liste) => {
+    const verbinde = (liste2) => {
       const proSegment = /* @__PURE__ */ new Map();
-      for (const l of liste) {
+      for (const l of liste2) {
         if (!proSegment.has(l.s.id)) proSegment.set(l.s.id, []);
         proSegment.get(l.s.id).push(l);
       }
-      for (const l of liste) {
+      for (const l of liste2) {
         const end = punkt(l, laenge(l));
         const knoten = (plan2.kreuzungen ?? []).filter((k) => Object.values(k.arme ?? {}).some((a) => a?.id === l.s.id)).sort((a, b2) => abstand(a, end) - abstand(b2, end))[0];
         if (!knoten || abstand(knoten, end) > Math.max(33, l.s.breite)) continue;
@@ -122946,8 +123090,8 @@
       const v = projektion.set(p2.x, 0.5, p2.z).project(c);
       return Math.abs(v.x) < rand && Math.abs(v.y) < rand;
     };
-    function waehle3(liste) {
-      return liste[Math.floor(r() * liste.length)];
+    function waehle3(liste2) {
+      return liste2[Math.floor(r() * liste2.length)];
     }
     function meshBauen() {
       meshes = {
@@ -122961,7 +123105,7 @@
         lkw: instanzen(scene2, new three_module_exports.BoxGeometry(8.1, 3.1, 2.7), MAX_LKW, "lieferwagen")
       };
     }
-    function loeschen() {
+    function loeschen2() {
       anhalten();
       if (scene2) for (const m of Object.values(meshes)) {
         m.parent?.remove(m);
@@ -123057,10 +123201,10 @@
       const dichte = (modus === "wenig" ? 0.5 : 1) * limitFaktor;
       const sollAuto = lanes.length ? Math.min(MAX_AUTO, Math.max(1, Math.round((20 + 40 * clamp8((110 - k.halb) / 88, 0, 1)) * dichte))) : 0;
       const sollFuss = wege.length ? Math.round(100 * dichte) : 0;
-      const anpassen = (arr, n, liste, art, sonstige = []) => {
-        const weiter = arr.filter((a) => a?.lane && liste.includes(a.lane)).slice(0, n);
+      const anpassen = (arr, n, liste2, art, sonstige = []) => {
+        const weiter = arr.filter((a) => a?.lane && liste2.includes(a.lane)).slice(0, n);
         for (let i = 0; i < n * 18 && weiter.length < n; i++) {
-          const a = neuerWagen(liste, art);
+          const a = neuerWagen(liste2, art);
           if (!a) break;
           if ([...weiter, ...sonstige].some((b2) => b2.lane === a.lane && Math.abs(b2.m - a.m) < (a.art === "tram" || b2.art === "tram" ? 22 : a.art === "bus" || b2.art === "bus" ? 14 : KLEINSTE_LUECKE))) continue;
           weiter.push(a);
@@ -123077,16 +123221,16 @@
         fuss.push(f);
       }
     }
-    function bewegungWagen(liste, dt) {
+    function bewegungWagen(liste2, dt) {
       const belegung = /* @__PURE__ */ new Map();
-      const sortiert = [...liste].sort((a, b2) => b2.m - a.m);
+      const sortiert = [...liste2].sort((a, b2) => b2.m - a.m);
       for (const a of sortiert) {
         const key = a.lane.id;
         const voraus = belegung.get(key);
         let ziel = a.m + a.geschw * dt;
         if (voraus) ziel = Math.min(ziel, voraus.m - (a.art === "tram" || voraus.art === "tram" ? 22 : a.art === "bus" || voraus.art === "bus" ? 14 : KLEINSTE_LUECKE));
         if (ziel >= laenge(a.lane)) {
-          const moeglich = a.lane.naechste.filter((n) => !liste.some((b2) => b2 !== a && b2.lane === n && b2.m < KLEINSTE_LUECKE * 2));
+          const moeglich = a.lane.naechste.filter((n) => !liste2.some((b2) => b2 !== a && b2.lane === n && b2.m < KLEINSTE_LUECKE * 2));
           const nach = moeglich.length ? waehle3(moeglich) : null;
           if (nach) {
             a.sprung = { von: punkt(a.lane, laenge(a.lane)), nach: punkt(nach, 0), fort: 0 };
@@ -123163,9 +123307,9 @@
       }
       fertig(meshes.auto, n);
       fertig(meshes.glas, n);
-      const grosse = (liste, key, palette2) => {
+      const grosse = (liste2, key, palette2) => {
         let m = 0;
-        for (const a of liste) {
+        for (const a of liste2) {
           const p2 = positionWagen(a);
           if (!sichtbar4(p2)) continue;
           matrix(meshes[key], m++, { ...p2, y: 1.65 }, p2.winkel, [1, 1, 1], palette2);
@@ -123258,7 +123402,7 @@
       raf = 0;
     }
     function stadtSetzen(neu) {
-      loeschen();
+      loeschen2();
       scene2 = szene();
       plan2 = neu;
       if (!scene2 || !plan2) return;
@@ -123343,7 +123487,7 @@
         else starten();
       },
       kontakt,
-      zu: loeschen,
+      zu: loeschen2,
       /** Debug-API und Abnahme: 10 Zeitpunkte im 100-ms-Abstand mit externen Canvas-Screenshots. */
       schritt: (dt = 0.1, bild3 = true) => {
         const ms = schritt(dt);
@@ -123395,8 +123539,8 @@
     }
     return best;
   }
-  function aktionsArt(aktion2, kw2) {
-    const anlass = aktion2?.anlass;
+  function aktionsArt(aktion, kw2) {
+    const anlass = aktion?.anlass;
     const bekannt = /* @__PURE__ */ new Set([
       "wsv",
       "ssv",
@@ -123416,7 +123560,7 @@
       "sonder"
     ]);
     if (bekannt.has(anlass)) return anlass;
-    const n = (aktion2?.name ?? "").toLowerCase();
+    const n = (aktion?.name ?? "").toLowerCase();
     if (n.includes("winterschluss")) return "wsv";
     if (n.includes("sommerschluss")) return "ssv";
     if (n.includes("schulanfang")) return "schulanfang";
@@ -123490,10 +123634,10 @@
           z2.aktion = aktionsbild;
           if (a && haus2.format !== "outlet") z2.rabatt = a.rabatt;
         }
-        const liste = VORRANG.filter((q2) => zus.has(q2));
-        if (liste.length) {
-          z2.status = liste[0];
-          z2.zusatz = liste.slice(1);
+        const liste2 = VORRANG.filter((q2) => zus.has(q2));
+        if (liste2.length) {
+          z2.status = liste2[0];
+          z2.zusatz = liste2.slice(1);
         }
       }
     }
@@ -124162,7 +124306,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "a6dc867" : "Entwicklung";
+  var version = () => true ? "7b3dc52" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -124268,8 +124412,8 @@
        */
       shops: (s2, haus2, jeBereich = E.eigenmarkenUebersicht(s2).jeBereich) => {
         const out = {};
-        for (const [g, liste] of Object.entries(jeBereich ?? {})) {
-          for (const x of liste) {
+        for (const [g, liste2] of Object.entries(jeBereich ?? {})) {
+          for (const x of liste2) {
             const m = s2.eigenmarken.marken.find((q2) => q2.id === x.marke);
             if (!m || x.anteil < 0.12 || E.passungHaus(m, haus2) < 0.5) continue;
             out[g] = { name: x.name, farbe: x.farbe, anteil: Math.min(0.5, Math.max(0.2, x.anteil * 1.5)), marke: x.marke };
@@ -124355,8 +124499,8 @@
       h += feld("Geschlecht", seg("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
     } else if (A.schritt === 1) {
       h += feld("Kategorie", seg("emKategorie", m.kategorie, KATEGORIE2.map((k) => [k, k]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
-      const liste = [...v.passendeWgs].sort((a, b2) => b2.passung - a.passung);
-      const inh = liste.length ? liste.map((w) => {
+      const liste2 = [...v.passendeWgs].sort((a, b2) => b2.passung - a.passung);
+      const inh = liste2.length ? liste2.map((w) => {
         const a = m.wgAnteile[w.wg];
         return `<button class="wgwahl ${a ? "an" : ""}" data-a="emWg" data-v="${w.wg}"><span>${esc2(w.name)} <i>${esc2(ctx.E.GRUPPEN[w.bereich]?.name ?? w.bereich)} \xB7 ${w.passung >= 1 ? "passt sehr gut" : w.passung >= 0.7 ? "passt gut" : "passt bedingt"}</i></span><b>${a ? pz3(a) : "+"}</b></button>`;
       }).join("") : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
@@ -124680,9 +124824,9 @@
       const t = (id, inhalt2) => `<button class="tab ${an(id) ? "an" : ""}" data-a="seite" data-v="${id}">${inhalt2}</button>`;
       return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}${t("merchandise", "Merchandise")}${t("allokation", "Allokation")}${t("reduzierungKalender", "Reduzierung")}</div>`;
     }
-    function sortiere(liste) {
+    function sortiere(liste2) {
       const { key, dir } = ui.sort;
-      return [...liste].sort((a, b2) => key === "name" ? a.name.localeCompare(b2.name, "de") * dir : ((a.kennzahlen[key] ?? 0) - (b2.kennzahlen[key] ?? 0)) * dir);
+      return [...liste2].sort((a, b2) => key === "name" ? a.name.localeCompare(b2.name, "de") * dir : ((a.kennzahlen[key] ?? 0) - (b2.kennzahlen[key] ?? 0)) * dir);
     }
     function uebersicht() {
       const u = q2.uebersicht(s2(), { format: ui.format }), g = u.summe.kennzahlen, ga = u.summe.ampeln;
@@ -124809,8 +124953,8 @@
         b2.style.display = n ? "" : "none";
       }
     }
-    function tun(aktion2, scroll = true) {
-      const r = q2.tun(s2(), aktion2);
+    function tun(aktion, scroll = true) {
+      const r = q2.tun(s2(), aktion);
       if (r) ctx.meldung(r.text, r.ok);
       ctx.nachAktion?.();
       zeigen(scroll);
@@ -125681,12 +125825,12 @@
       h += karussell("kandidaten", karten, ui.k, "kandidat");
       const k = L2.kandidaten[ui.k];
       if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
-      const A = ui.angebot, hb2 = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st2, L2.ressort, k.id, A.gehalt, hb2, A.erfolg);
+      const A = ui.angebot, hb2 = Math.round(A.gehalt * A.halte), ch2 = E.angebotsChance(st2, L2.ressort, k.id, A.gehalt, hb2, A.erfolg);
       h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc2(k.name) + "</div>";
       h += regler("Jahresgehalt", stepper("angebotGehalt", P2("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
       h += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb2 ? geld(hb2) : "vom Jahresgehalt");
       h += regler("Erfolgsbonus", segment("angebotErfolg", A.erfolg, ERFOLG), "vom Jahresgehalt");
-      h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P2("a:chance", pz3(ch))}</div><div class="balken"><span style="width:${(ch * 100).toFixed(0)}%;background:${ch >= 0.6 ? "var(--gruen)" : ch >= 0.35 ? "#e3a90d" : "var(--rot)"}"></span></div><small class="rfuss">h\xE4ngt von Angebot, Lage der Firma und Image ab</small></div>`;
+      h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P2("a:chance", pz3(ch2))}</div><div class="balken"><span style="width:${(ch2 * 100).toFixed(0)}%;background:${ch2 >= 0.6 ? "var(--gruen)" : ch2 >= 0.35 ? "#e3a90d" : "var(--rot)"}"></span></div><small class="rfuss">h\xE4ngt von Angebot, Lage der Firma und Image ab</small></div>`;
       h += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="anbieten"${L2.besetzt ? " disabled" : ""}>Angebot machen</button></div>`;
       return { titel: `${L2.kurz} einstellen`, unter: `${esc2(L2.titel)} \xB7 ${L2.kandidaten.length} Kandidaten`, html: h };
     }
@@ -125708,8 +125852,8 @@
         zeigen(true);
       });
     }
-    function tun(aktion2) {
-      const r = E.fuehreAus(s2(), aktion2);
+    function tun(aktion) {
+      const r = E.fuehreAus(s2(), aktion);
       if (r) ctx.meldung(r.text, r.ok);
       ctx.nachAktion?.();
       return r;
@@ -125880,8 +126024,8 @@
       ctx.panel("Organisation", ui.reiter === "zentrale" ? "Vorstand \u2192 Bereiche" : "Haus \u2192 Hauscluster \u2192 Region \u2192 CSO", h, "gross");
       ui.aktiv = true;
     }
-    function tun(aktion2) {
-      const r = E.fuehreAus(s2(), aktion2);
+    function tun(aktion) {
+      const r = E.fuehreAus(s2(), aktion);
       ctx.meldung(r.text, r.ok);
       ctx.nachAktion?.();
       if (r.ok) zeichnen2();
@@ -125961,13 +126105,13 @@
     }
     function meldungen(D) {
       const filter = ui.filter;
-      const liste = D.meldungen.filter((m) => filter === "Alle" || m.kategorie === filter);
+      const liste2 = D.meldungen.filter((m) => filter === "Alle" || m.kategorie === filter);
       const kategorien = ["Alle", "Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer", "IT"];
       let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => "<option " + (k === filter ? "selected " : "") + 'value="' + esc2(k) + '">' + esc2(k) + "</option>").join("") + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
-      if (!liste.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
+      if (!liste2.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
       const gelesen2 = new Set(einstellungen2().gelesen ?? []);
       const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6", IT: "\u2699" };
-      return html + liste.map((m) => {
+      return html + liste2.map((m) => {
         const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
         const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc2(m.kategorie) + " \xB7 KW " + kwVon2(m.woche) + (gelesen2.has(m.id) ? "" : " \xB7 Neu") + "</small><span>" + esc2(m.text) + "</span></span>";
         return '<div class="karte postmeldung ' + (gelesen2.has(m.id) ? "" : "ungelesen") + '" data-post-id="' + esc2(m.id) + '"><button data-po-a="lesen" data-id="' + esc2(m.id) + '">' + info + "</button>" + (bezug ? '<button class="postort" data-po-a="sprung" data-id="' + esc2(m.id) + '">Zum Ort \u2192</button>' : "") + "</div>";
@@ -126047,11 +126191,11 @@
         if (an?.typ === "paket") ui.verhandlung = { id, haeuser: new Set(an.vorschlagHaeuser ?? an.wunschHaeuser ?? []) };
         return zeigen();
       }
-      let aktion2;
-      if (a === "option") aktion2 = id && v ? daten().handeln.some((p2) => p2.id === id && p2.art === "entscheidung") ? { typ: "entscheiden", id, option: v } : { typ: v === "annehmen" ? "angebotAnnehmen" : "angebotAblehnen", angebot: id } : null;
-      if (a === "verhandeln" && ui.verhandlung) aktion2 = { typ: "angebotVerhandeln", angebot: ui.verhandlung.id, haeuser: [...ui.verhandlung.haeuser] };
-      if (!aktion2) return;
-      const r = E.fuehreAus(s2(), aktion2);
+      let aktion;
+      if (a === "option") aktion = id && v ? daten().handeln.some((p2) => p2.id === id && p2.art === "entscheidung") ? { typ: "entscheiden", id, option: v } : { typ: v === "annehmen" ? "angebotAnnehmen" : "angebotAblehnen", angebot: id } : null;
+      if (a === "verhandeln" && ui.verhandlung) aktion = { typ: "angebotVerhandeln", angebot: ui.verhandlung.id, haeuser: [...ui.verhandlung.haeuser] };
+      if (!aktion) return;
+      const r = E.fuehreAus(s2(), aktion);
       ctx.meldung(r.text, r.ok);
       if (a === "verhandeln" && r.ok) ui.verhandlung = null;
       ctx.nachAktion?.();
@@ -126161,26 +126305,26 @@
       anzeigen();
     }
     function klicken(el2) {
-      const aktion2 = el2.dataset.zA;
-      if (aktion2 === "tab") {
+      const aktion = el2.dataset.zA;
+      if (aktion === "tab") {
         ui.reiter = el2.dataset.v;
         return anzeigen();
       }
-      if (aktion2 === "vor") {
+      if (aktion === "vor") {
         ui.index = Math.max(0, ui.index - 1);
         ui.reiter = "Top";
         return anzeigen();
       }
-      if (aktion2 === "naechste") {
+      if (aktion === "naechste") {
         ui.index = Math.min(ausgaben().length - 1, ui.index + 1);
         ui.reiter = "Top";
         return anzeigen();
       }
-      if (aktion2 === "archiv") {
+      if (aktion === "archiv") {
         ui.archiv = !ui.archiv;
         return anzeigen();
       }
-      if (aktion2 === "ausgabe") {
+      if (aktion === "ausgabe") {
         ui.index = ausgaben().findIndex((x) => x.woche === Number(el2.dataset.v));
         ui.archiv = false;
         ui.reiter = "Top";
@@ -126601,8 +126745,8 @@
       if (B2.frequenz !== "einmalig") h += regler("Laufzeit", segment("crmWochen", B2.wochen, [[4, "4 Wo."], [8, "8 Wo."], [13, "13 Wo."], [26, "26 Wo."]]));
       h += schalter(B2.kontrolle, 'data-a="crmKontrolle"', "Kontrollgruppe (10 % ohne Versand)", "macht die Auswertung genauer");
       h += '<div class="oknoepfe"><button class="gruen" data-a="crmStart">Kampagne starten</button></div></div>';
-      const liste = [...c.kampagnen].sort((a, b2) => (a.status === "aktiv" ? -1 : 0) - (b2.status === "aktiv" ? -1 : 0) || b2.start - a.start);
-      for (const k of liste) {
+      const liste2 = [...c.kampagnen].sort((a, b2) => (a.status === "aktiv" ? -1 : 0) - (b2.status === "aktiv" ? -1 : 0) || b2.start - a.start);
+      for (const k of liste2) {
         h += `<div class="karte order"><div class="ohead"><b>${esc2(k.name)}</b><i>${esc2(k.segmentText)} \xB7 ${k.kanalText} \xB7 ${esc2(k.angebotText)} \xB7 ${esc2(k.frequenzText)}</i></div>`;
         h += `<div class="ochips"><span class="chip ${k.status === "aktiv" ? "" : "grau"}">${STATUS2[k.status] ?? k.status}</span>${k.standard ? '<span class="chip grau">Grundprogramm</span>' : ""}${k.kontrollgruppe ? '<span class="chip blau">mit Kontrollgruppe</span>' : ""}${k.naechsterVersand !== void 0 ? `<span class="chip grau">n\xE4chster Versand KW ${kwVon2(k.naechsterVersand)}</span>` : ""}</div>`;
         const z2 = k.summe;
@@ -126673,7 +126817,7 @@
       h += '<div class="oknoepfe"><button class="gruen" data-a="planFertig">Aktion einplanen</button><button class="leise" data-a="planZu">Abbrechen</button></div></div>';
       return h;
     }
-    function aktion2(P2) {
+    function aktion(P2) {
       const st2 = s2(), a = E.aktionsAuswertung(st2, ui.aktion);
       if (!a) {
         ui.seite = "kalender";
@@ -126695,7 +126839,7 @@
     function rendern() {
       const S = werteSammler();
       if (!da) return { S, r: { titel: "Marketing", unter: "", html: '<div class="leise">Die Engine liefert noch kein Marketing.</div>' } };
-      const f = { kanaele: kanaele2, karte, crm, kalender, aktion: aktion2 }[ui.seite] ?? uebersicht;
+      const f = { kanaele: kanaele2, karte, crm, kalender, aktion }[ui.seite] ?? uebersicht;
       return { S, r: f(S.P) };
     }
     function zeigen(scrollHalten = false) {
@@ -126705,8 +126849,8 @@
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
     }
-    function tun(aktion3, halten = true) {
-      const r = E.fuehreAus(s2(), aktion3);
+    function tun(aktion2, halten = true) {
+      const r = E.fuehreAus(s2(), aktion2);
       if (r) ctx.meldung(r.text, r.ok);
       ctx.nachAktion?.();
       zeigen(halten);
@@ -127640,7 +127784,7 @@
       if (!L2.marken.some((m) => m.marke === ui.marke)) ui.marke = L2.marken[0].marke;
       return L2.marken.find((m) => m.marke === ui.marke);
     }
-    function liste(P2) {
+    function liste2(P2) {
       const st2 = s2(), L2 = E.produkte(st2), M2 = aktuelleMarke(L2);
       let h = "";
       if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
@@ -127730,7 +127874,7 @@
       const S = werteSammler();
       sternNr = 0;
       if (!da) return { S, r: { titel: "Produkte", unter: "", html: '<div class="leise">Die Engine liefert noch keine Produkte.</div>' } };
-      const r = ui.seite === "neu" && ui.neu ? neu(S.P) : ui.seite === "trend" ? trend(S.P) : liste(S.P);
+      const r = ui.seite === "neu" && ui.neu ? neu(S.P) : ui.seite === "trend" ? trend(S.P) : liste2(S.P);
       return { S, r };
     }
     function zeigen(scrollHalten = false) {
@@ -127746,8 +127890,8 @@
         zeigen(true);
       });
     }
-    function tun(aktion2) {
-      const r = E.fuehreAus(s2(), aktion2);
+    function tun(aktion) {
+      const r = E.fuehreAus(s2(), aktion);
       if (r) ctx.meldung(r.text, r.ok);
       ctx.nachAktion?.();
       return r;
@@ -127879,74 +128023,373 @@
   // src/ui/speicher.js
   var NAME2 = "hartwig-spielstand";
   var STORE = "staende";
-  var KEY = "autosave";
+  var INFOS = "informationen";
   var FORMAT = 1;
+  var PLAETZE = ["autosave", "platz-1", "platz-2", "platz-3"];
+  var MAX_DATEI = 40 * 1024 * 1024;
+  var MAX_INHALT = 160 * 1024 * 1024;
   var queue = Promise.resolve();
+  function platzPruefen(platz) {
+    if (!PLAETZE.includes(platz)) throw new Error("Unbekannter Speicherplatz.");
+    return platz;
+  }
+  function fehlerText(e) {
+    if (e?.name === "QuotaExceededError" || e?.name === "NS_ERROR_DOM_QUOTA_REACHED")
+      return new Error("Der Ger\xE4tespeicher ist voll. Bitte Spielst\xE4nde exportieren und Speicherplatz freigeben.");
+    return e instanceof Error ? e : new Error("Der Spielstand konnte nicht verarbeitet werden.");
+  }
   function oeffneDb() {
     return new Promise((resolve, reject) => {
-      if (!("indexedDB" in window)) {
-        reject(new Error("IndexedDB ist auf diesem Geraet nicht verfuegbar."));
-        return;
-      }
-      const r = indexedDB.open(NAME2, 1);
-      r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-      r.onerror = () => reject(r.error ?? new Error("Datenbank konnte nicht geoeffnet werden."));
-      r.onsuccess = () => {
-        const db = r.result;
-        db.onversionchange = () => db.close();
-        resolve(db);
-      };
-    });
-  }
-  async function aktion(modus, ausfuehren) {
-    const db = await oeffneDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, modus);
-      let wert;
-      tx.oncomplete = () => {
-        db.close();
-        resolve(wert);
-      };
-      tx.onerror = () => {
-        db.close();
-        reject(tx.error ?? new Error("Speicherfehler."));
-      };
-      tx.onabort = () => {
-        db.close();
-        reject(tx.error ?? new Error("Speichervorgang abgebrochen."));
-      };
       try {
-        const req = ausfuehren(tx.objectStore(STORE));
-        if (req) req.onsuccess = () => {
-          wert = req.result;
+        if (typeof indexedDB === "undefined") throw new Error("IndexedDB ist auf diesem Ger\xE4t nicht verf\xFCgbar.");
+        const r = indexedDB.open(NAME2, 2);
+        r.onupgradeneeded = () => {
+          if (!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE);
+          if (!r.result.objectStoreNames.contains(INFOS)) r.result.createObjectStore(INFOS);
+        };
+        r.onerror = () => reject(fehlerText(r.error));
+        r.onblocked = () => reject(new Error("Bitte andere ge\xF6ffnete Hartwig-Fenster schlie\xDFen."));
+        r.onsuccess = () => {
+          const db = r.result;
+          db.onversionchange = () => db.close();
+          resolve(db);
         };
       } catch (e) {
-        tx.abort();
+        reject(fehlerText(e));
+      }
+    });
+  }
+  async function transaktion(namen, modus, arbeit) {
+    const db = await oeffneDb();
+    return new Promise((resolve, reject) => {
+      let tx, wert;
+      let fertig2 = false;
+      const ablehnen = (e) => {
+        if (fertig2) return;
+        fertig2 = true;
+        db.close();
+        reject(fehlerText(e));
+      };
+      try {
+        tx = db.transaction(namen, modus);
+        tx.oncomplete = () => {
+          if (!fertig2) {
+            fertig2 = true;
+            db.close();
+            resolve(wert);
+          }
+        };
+        tx.onerror = () => ablehnen(tx.error);
+        tx.onabort = () => ablehnen(tx.error ?? new Error("Speichervorgang abgebrochen."));
+        arbeit(tx, (v) => {
+          wert = v;
+        });
+      } catch (e) {
+        try {
+          tx?.abort();
+        } catch {
+        }
+        ablehnen(e);
       }
     });
   }
   function pruefen(datensatz) {
     if (!datensatz) return null;
-    if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 1) {
-      throw new Error("Dieser Spielstand stammt aus einer nicht unterstuetzten Version. Er wurde nicht geaendert.");
-    }
+    if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 1)
+      throw new Error("Dieser Spielstand stammt aus einer nicht unterst\xFCtzten Version. Er wurde nicht ge\xE4ndert.");
     const s2 = datensatz.spiel;
-    if (!Number.isInteger(s2.woche) || s2.woche < 0 || !Array.isArray(s2.haeuser) || !Array.isArray(s2.historie) || !s2.hq || !s2.einkauf || !s2.eigenmarken || !s2.vorstand || !s2.produkte || !s2.marketing?.stand) {
-      throw new Error("Der gespeicherte Spielstand ist unvollstaendig. Er wurde nicht geaendert.");
-    }
+    if (!Number.isInteger(s2.woche) || s2.woche < 0 || !Number.isFinite(s2.cash) || !Array.isArray(s2.haeuser) || !Array.isArray(s2.historie) || !s2.hq || !s2.einkauf || !s2.eigenmarken || !s2.vorstand || !s2.produkte || !s2.marketing?.stand)
+      throw new Error("Der Spielstand ist unvollst\xE4ndig. Er wurde nicht ge\xE4ndert.");
+    if (typeof datensatz.stadt !== "string" || !datensatz.stadt.length)
+      throw new Error("Die Startstadt im Spielstand ist ung\xFCltig.");
     return datensatz;
   }
-  async function laden3() {
-    await queue;
-    return pruefen(await aktion("readonly", (store) => store.get(KEY)));
+  function bildPruefen(bild3) {
+    return typeof bild3 === "string" && bild3.length <= 15e4 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(bild3) ? bild3 : null;
   }
-  function speichern(spiel, stadt, ui = {}) {
-    if (!spiel || spiel.version !== 1) return Promise.reject(new Error("Kein gueltiges Spiel gestartet."));
-    const datensatz = { format: FORMAT, datum: (/* @__PURE__ */ new Date()).toISOString(), stadt, spiel: structuredClone(spiel), ui: structuredClone(ui) };
-    const naechste = queue.then(() => aktion("readwrite", (store) => store.put(datensatz, KEY)));
-    queue = naechste.catch(() => {
-    });
-    return naechste;
+  function infoVon(d2, platz) {
+    if (!d2) return null;
+    const s2 = d2.spiel;
+    const n = String(d2.name ?? (platz === "autosave" ? "Automatisch" : "Spielstand")).trim().slice(0, 60);
+    return {
+      platz,
+      name: n || "Spielstand",
+      datum: d2.datum,
+      woche: s2.woche,
+      szenario: String(s2.szenario?.name ?? s2.szenario?.id ?? s2.szenario ?? s2.schwierigkeit ?? "Standard").slice(0, 80),
+      cash: s2.cash,
+      bild: bildPruefen(d2.bild),
+      stadt: d2.stadt
+    };
+  }
+  async function laden3(platz = "autosave") {
+    try {
+      platzPruefen(platz);
+      await queue;
+      const d2 = await transaktion([STORE], "readonly", (tx, set) => {
+        const r = tx.objectStore(STORE).get(platz);
+        r.onsuccess = () => set(r.result ?? null);
+      });
+      return pruefen(d2);
+    } catch (e) {
+      throw fehlerText(e);
+    }
+  }
+  async function liste() {
+    try {
+      await queue;
+      const infos = await transaktion([INFOS], "readonly", (tx, set) => {
+        const r = tx.objectStore(INFOS).getAll();
+        r.onsuccess = () => set(r.result);
+      });
+      const ergebnis = Object.fromEntries(infos.filter((i) => PLAETZE.includes(i.platz)).map((i) => [i.platz, i]));
+      if (!ergebnis.autosave) {
+        const alt = await laden3("autosave");
+        if (alt) ergebnis.autosave = infoVon(alt, "autosave");
+      }
+      return PLAETZE.map((platz) => ergebnis[platz] ?? null);
+    } catch (e) {
+      throw fehlerText(e);
+    }
+  }
+  function speichern(spiel, stadt, ui = {}, platz = "autosave", name2 = "", bild3 = null, importDatum = null) {
+    try {
+      platzPruefen(platz);
+      if (!spiel || spiel.version !== 1) throw new Error("Kein g\xFCltiges Spiel gestartet.");
+      const datensatz = {
+        format: FORMAT,
+        datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
+        stadt,
+        spiel: structuredClone(spiel),
+        ui: structuredClone(ui),
+        name: String(name2 || (platz === "autosave" ? "Automatisch" : "Spielstand")).trim().slice(0, 60),
+        bild: bildPruefen(bild3)
+      };
+      pruefen(datensatz);
+      const info = infoVon(datensatz, platz);
+      const naechste = queue.then(() => transaktion([STORE, INFOS], "readwrite", (tx) => {
+        tx.objectStore(STORE).put(datensatz, platz);
+        tx.objectStore(INFOS).put(info, platz);
+      }));
+      queue = naechste.catch(() => {
+      });
+      return naechste;
+    } catch (e) {
+      return Promise.reject(fehlerText(e));
+    }
+  }
+  async function loeschen(platz = "autosave") {
+    try {
+      platzPruefen(platz);
+      const naechste = queue.then(() => transaktion([STORE, INFOS], "readwrite", (tx) => {
+        tx.objectStore(STORE).delete(platz);
+        tx.objectStore(INFOS).delete(platz);
+      }));
+      queue = naechste.catch(() => {
+      });
+      return await naechste;
+    } catch (e) {
+      throw fehlerText(e);
+    }
+  }
+  async function gzip(bytes) {
+    if (typeof CompressionStream === "undefined")
+      throw new Error("Gzip-Export ben\xF6tigt eine aktuelle Safari-Version.");
+    return new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip"));
+  }
+  async function entpacken(datei) {
+    if (typeof DecompressionStream === "undefined")
+      throw new Error("Gzip-Import ben\xF6tigt eine aktuelle Safari-Version.");
+    const reader = datei.stream().pipeThrough(new DecompressionStream("gzip")).getReader();
+    const teile2 = [];
+    let laenge2 = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        laenge2 += value.byteLength;
+        if (laenge2 > MAX_INHALT) throw new Error("Die entpackte Datei ist zu gro\xDF.");
+        teile2.push(value);
+      }
+    } finally {
+      await reader.cancel().catch(() => {
+      });
+    }
+    const roh2 = new Uint8Array(laenge2);
+    let p2 = 0;
+    for (const teil6 of teile2) {
+      roh2.set(teil6, p2);
+      p2 += teil6.byteLength;
+    }
+    return new TextDecoder("utf-8", { fatal: true }).decode(roh2);
+  }
+  async function exportieren(platz = "autosave") {
+    try {
+      const d2 = await laden3(platz);
+      if (!d2) throw new Error("Der Speicherplatz ist leer.");
+      const bytes = new TextEncoder().encode(JSON.stringify(d2));
+      const strom = await gzip(bytes);
+      return new Response(strom).blob();
+    } catch (e) {
+      throw fehlerText(e);
+    }
+  }
+  async function importieren(datei, platz = "platz-1") {
+    try {
+      platzPruefen(platz);
+      if (!datei || !Number.isFinite(datei.size) || datei.size < 2 || datei.size > MAX_DATEI)
+        throw new Error("Die Datei ist leer oder zu gro\xDF (maximal 40 MB).");
+      const text3 = await entpacken(datei);
+      const d2 = pruefen(JSON.parse(text3));
+      await speichern(d2.spiel, d2.stadt, d2.ui ?? {}, platz, d2.name ?? "Importiert", d2.bild, d2.datum);
+      return infoVon(d2, platz);
+    } catch (e) {
+      throw fehlerText(e);
+    }
+  }
+
+  // src/ui/app.js
+  var APP_AKTIV = true;
+  var $ = (id) => document.getElementById(id);
+  var bezeichnung = (platz) => platz === "autosave" ? "Autospeichern" : "Platz " + platz.slice(-1);
+  function datumFormatieren(datum) {
+    const d2 = new Date(datum);
+    return Number.isFinite(d2.getTime()) ? d2.toLocaleString("de-DE") : "Datum unbekannt";
+  }
+  function dateiname(name2) {
+    return (name2 || "Hartwig").normalize("NFKD").replace(/[^a-zA-Z0-9_-]+/g, "_").slice(0, 40) || "Hartwig";
+  }
+  function appModul({ panel: panel2, meldung: meldung2, aktuell, ladenInSpiel, vorNeuladen }) {
+    async function zeichne(root, start = false) {
+      if (!APP_AKTIV || !root) return;
+      try {
+        const infos = await liste();
+        const vorhanden = Object.fromEntries(infos.map((i, n) => [PLAETZE[n], i]));
+        root.innerHTML = PLAETZE.map((platz) => {
+          const info = vorhanden[platz];
+          const name2 = info?.name ?? (platz === "autosave" ? "Automatisch" : "");
+          const vorschau2 = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer" aria-hidden="true">H</div>';
+          return '<article class="app-platz" data-platz="' + platz + '"><div class="app-platzkopf"><b>' + bezeichnung(platz) + "</b><span>" + (info ? datumFormatieren(info.datum) : "Leer") + '</span></div><div class="app-platzinhalt">' + vorschau2 + '<div class="app-daten">' + (info ? "<strong>" + esc2(info.name) + "</strong><small>" + esc2(info.stadt) + " \xB7 Woche " + (info.woche + 1) + "</small><small>" + esc2(info.szenario) + " \xB7 Cash " + geld(info.cash) + "</small>" : "<small>Hier ist noch kein Spielstand gespeichert.</small>") + "</div></div>" + (start || platz === "autosave" ? "" : '<label class="app-namenswahl">Name <input data-name maxlength="60" aria-label="Name f\xFCr ' + bezeichnung(platz) + '" value="' + esc2(name2) + '" placeholder="Spielstand benennen"></label>') + '<div class="app-aktionen">' + (!start && platz !== "autosave" ? '<button type="button" data-app-aktion="speichern">Speichern</button>' : "") + (info ? '<button type="button" data-app-aktion="laden">Laden</button><button type="button" data-app-aktion="export">Export</button>' : "") + (platz !== "autosave" ? '<button type="button" data-app-aktion="import">Import</button>' : "") + (info && platz !== "autosave" ? '<button type="button" data-app-aktion="loeschen">L\xF6schen</button>' : "") + '<input type="file" data-app-datei accept=".hartwig,application/gzip" aria-label="Spielstand importieren" hidden></div></article>';
+        }).join("");
+        root.dataset.start = start ? "1" : "0";
+        root.onclick = async (event) => {
+          const button2 = event.target.closest("[data-app-aktion]");
+          if (!button2 || !root.contains(button2)) return;
+          const karte = button2.closest("[data-platz]"), platz = karte?.dataset.platz;
+          if (!platz) return;
+          const aktion = button2.dataset.appAktion;
+          if (aktion === "import") {
+            karte.querySelector("[data-app-datei]").click();
+            return;
+          }
+          if (aktion === "loeschen" && !confirm(bezeichnung(platz) + " endg\xFCltig l\xF6schen?")) return;
+          button2.disabled = true;
+          try {
+            if (aktion === "speichern") {
+              const a = aktuell();
+              if (!a?.spiel) throw new Error("Bitte zun\xE4chst ein Spiel starten.");
+              await speichern(a.spiel, a.stadt, a.ui, platz, karte.querySelector("[data-name]")?.value ?? "", a.bild?.());
+              meldung2(bezeichnung(platz) + " gespeichert.");
+            } else if (aktion === "laden") {
+              const d2 = await laden3(platz);
+              if (!d2) throw new Error("Speicherplatz ist leer.");
+              await ladenInSpiel(platz);
+              return;
+            } else if (aktion === "export") {
+              const blob = await exportieren(platz);
+              const url = URL.createObjectURL(blob), a = document.createElement("a");
+              a.href = url;
+              a.download = dateiname(vorhanden[platz]?.name) + ".hartwig";
+              document.body.append(a);
+              a.click();
+              a.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 3e4);
+              meldung2("Spielstand als .hartwig exportiert.");
+            } else if (aktion === "loeschen") {
+              await loeschen(platz);
+              meldung2("Speicherplatz gel\xF6scht.");
+            }
+            if (root.isConnected) await zeichne(root, start);
+          } catch (e) {
+            meldung2(e.message ?? "Speicherfehler", false);
+            if (root.isConnected) button2.disabled = false;
+          }
+        };
+        root.onchange = async (event) => {
+          const input = event.target.closest("[data-app-datei]");
+          if (!input || !input.files?.[0]) return;
+          const platz = input.closest("[data-platz]")?.dataset.platz;
+          try {
+            if (vorhanden[platz] && !confirm(bezeichnung(platz) + " durch die importierte Datei ersetzen?")) return;
+            await importieren(input.files[0], platz);
+            meldung2("Spielstand importiert. Er kann jetzt geladen werden.");
+            if (root.isConnected) await zeichne(root, start);
+          } catch (e) {
+            meldung2("Import fehlgeschlagen: " + e.message, false);
+          } finally {
+            input.value = "";
+          }
+        };
+      } catch (e) {
+        root.textContent = "Spielst\xE4nde nicht verf\xFCgbar: " + e.message;
+        meldung2(e.message, false);
+      }
+    }
+    function oeffne() {
+      if (!APP_AKTIV) return;
+      panel2("Spielst\xE4nde", "Drei benannte Pl\xE4tze und ein automatischer Spielstand", '<div id="app-plaetze" class="app-plaetze">Lade Spielst\xE4nde \u2026</div>', "gross");
+      return zeichne($("app-plaetze"));
+    }
+    function startAktualisieren() {
+      return zeichne($("app-plaetze-start"), true);
+    }
+    function updatesAktivieren() {
+      if (!APP_AKTIV || !("serviceWorker" in navigator) || !(location.protocol === "https:" || ["localhost", "127.0.0.1"].includes(location.hostname))) return;
+      window.addEventListener("load", async () => {
+        try {
+          const registrierung = await navigator.serviceWorker.register("./sw.js");
+          let wechsel = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (wechsel) location.reload();
+          });
+          const hinweis = () => {
+            if (!navigator.serviceWorker.controller || !registrierung.waiting) return;
+            if ($("app-update")) return;
+            const n = document.createElement("div");
+            n.id = "app-update";
+            n.setAttribute("role", "status");
+            n.innerHTML = '<span>Neue Version verf\xFCgbar</span><button type="button">Neu laden</button>';
+            n.querySelector("button").addEventListener("click", async () => {
+              n.querySelector("button").disabled = true;
+              try {
+                await vorNeuladen();
+                wechsel = true;
+                registrierung.waiting?.postMessage({ typ: "AKTIVIEREN" });
+              } catch (e) {
+                wechsel = false;
+                n.querySelector("button").disabled = false;
+                meldung2("Bitte erst speichern: " + e.message, false);
+              }
+            });
+            document.body.append(n);
+          };
+          if (registrierung.waiting) hinweis();
+          registrierung.addEventListener("updatefound", () => {
+            const w = registrierung.installing;
+            w?.addEventListener("statechange", () => {
+              if (w.state === "installed") hinweis();
+            });
+          });
+          document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") registrierung.update().catch(console.warn);
+          });
+          await registrierung.update();
+        } catch (e) {
+          console.warn("Offline-Funktion konnte nicht gestartet werden:", e);
+        }
+      });
+    }
+    return { oeffne, startAktualisieren, updatesAktivieren };
   }
 
   // src/ui/diagnose.js
@@ -128097,10 +128540,10 @@
         if (ia !== -1 || ib !== -1) return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
         return (b2.umsatz ?? 0) - (a.umsatz ?? 0) || a.name.localeCompare(b2.name, "de");
       });
-      const liste = z2.querySelector(".reise-zielraster");
-      if (!liste) return;
-      liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + "</strong><small>" + esc2(c.formate ?? "") + "</small></span></button>").join("");
-      if (!sortiert.length) liste.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
+      const liste2 = z2.querySelector(".reise-zielraster");
+      if (!liste2) return;
+      liste2.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + "</strong><small>" + esc2(c.formate ?? "") + "</small></span></button>").join("");
+      if (!sortiert.length) liste2.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
     }
     function schreibe(el2, text3, dauer, meins) {
       if (!el2) return;
@@ -128481,6 +128924,49 @@
     } };
   }
 
+  // src/ui/chronik.js
+  function chronikModul({ E, s: s2, panel: panel2, bild: bild3 }) {
+    const jahreswoche = (w) => `${s2().startJahr + Math.floor(w / 52)} \xB7 KW ${String(w % 52 + 1).padStart(2, "0")}`;
+    const bilder = /* @__PURE__ */ new Map();
+    function fassade3(familie) {
+      if (!bilder.has(familie)) {
+        try {
+          bilder.set(familie, bild3(familie));
+        } catch (err) {
+          console.warn("Chronikfassade konnte nicht dargestellt werden", err);
+          bilder.set(familie, "");
+        }
+      }
+      return bilder.get(familie);
+    }
+    function oeffne() {
+      const d2 = E.chronikUebersicht(s2());
+      const stationen = d2.geschichte.map((x, i) => {
+        const url = fassade3(x.familie);
+        return `<article class="chronik-station">
+        <div class="chronik-jahr">${x.jahr}</div>
+        <div class="chronik-inhalt">
+          <h3>${esc2(x.titel)}</h3>
+          ${url ? `<img class="chronik-motiv" loading="lazy" src="${url}" alt="Historische Hartwig-Fassade, Bautyp ${x.familie}">` : ""}
+          <p>${esc2(x.text)}</p><small>Motiv: ${esc2(x.motiv)}</small>
+        </div>
+      </article>`;
+      }).join("");
+      const spiel = d2.spiel.map((x) => `<article class="chronik-spiel"><small>${jahreswoche(x.woche)} \xB7 ${esc2(x.art)}</small><p>${esc2(x.text)}</p><span>Bezug: ${esc2(x.bezug)}</span></article>`).join("");
+      panel2(
+        "Konzernchronik",
+        `${d2.geschichte.length} Stationen \xB7 ${d2.spiel.length} Spielereignisse`,
+        `<div class="chronik"><div class="karte"><b>Hartwig im Wandel der Zeit</b><p>Die Gr\xFCndungsgeschichte der fiktiven Warenhausgruppe. Die Chronik ist jederzeit abrufbar, auch ohne gemietete Archiv-Etage.</p></div>
+      <h2>Unternehmensgeschichte</h2><div class="chronik-linie">${stationen}</div>
+      <h2>Ihre Spielchronik</h2>${spiel || '<div class="karte">Noch keine Meilensteine. Entscheidungen und Quartalsrekorde erscheinen im Spielverlauf.</div>'}
+      </div>`,
+        "gross"
+      );
+    }
+    return { oeffne, zu() {
+    }, pruefe: () => E.chronikUebersicht(s2()) };
+  }
+
   // src/ui/hausbesuch.js
   var HAUSBESUCH_AKTIV = true;
   var PHRASE = Object.freeze({
@@ -128717,9 +129203,9 @@
     function menschenSetzen(t) {
       const obj = new three_module_exports.Object3D();
       for (const personal of [false, true]) {
-        const liste = figuren2.filter((p2) => p2.personal === personal);
+        const liste2 = figuren2.filter((p2) => p2.personal === personal);
         const ms = personal ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
-        liste.forEach((p2, i) => {
+        liste2.forEach((p2, i) => {
           const weg = p2.personal ? 0 : (1 - Math.cos(t * p2.tempo + p2.phase)) / 2;
           const x = begrenze(p2.startX + (p2.zielX - p2.startX) * weg, 0.5, buehne.breite - 0.5);
           const z2 = begrenze(p2.startZ + (p2.zielZ - p2.startZ) * weg, 0.5, buehne.tiefe - 0.5);
@@ -130042,11 +130528,11 @@
     document.body.append(toast);
     const schlange2 = [];
     let toastTimer = null, zeigt = false;
-    const liste = () => E.erfolgeUebersicht(spielstand());
+    const liste2 = () => E.erfolgeUebersicht(spielstand());
     const freigeschaltet = (e) => Object.prototype.hasOwnProperty.call(e, "freigeschaltet");
     const bild3 = (e) => '<img class="erfolge-bild" src="' + abzeichen(e.gruppe, e.stufe) + '" alt="">';
     function karten() {
-      const alle = liste();
+      const alle = liste2();
       const offen = alle.filter(freigeschaltet).length;
       const gruppen = ["Alle", "Sanierung", "Handel", "Menschen", "Formate", "Kurios"];
       const ausw = zustand.filter === "Alle" ? alle : alle.filter((e) => e.gruppe === zustand.filter);
@@ -130091,7 +130577,7 @@
     }
     function nachWoche(vorher) {
       if (!spielstand() || spielstand().erfolgeAktiv === false) return [];
-      const neu = liste().filter((e) => freigeschaltet(e) && !vorher.has(e.id));
+      const neu = liste2().filter((e) => freigeschaltet(e) && !vorher.has(e.id));
       schlange2.push(...neu);
       naechstes();
       if (zustand.offen) neuZeichnen();
@@ -130103,7 +130589,7 @@
       aktiv: () => zustand.offen,
       neuZeichnen,
       nachWoche,
-      pruefe: () => ({ gesamt: liste().length, frei: liste().filter(freigeschaltet).length, toast: !toast.hidden })
+      pruefe: () => ({ gesamt: liste2().length, frei: liste2().filter(freigeschaltet).length, toast: !toast.hidden })
     };
   }
 
@@ -130176,12 +130662,12 @@
     }
   };
   var SCHWIERIGKEIT2 = { leicht: "Leicht", mittel: "Mittel", schwer: "Schwer" };
-  var KEY2 = "ruhrkauf-n02-bestenliste-v1-";
+  var KEY = "ruhrkauf-n02-bestenliste-v1-";
   var animationAus = () => typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var schonen = (n) => Number.isFinite(n) ? n : 0;
   function lesen2(id) {
     try {
-      const daten = JSON.parse(localStorage.getItem(KEY2 + id) || "[]");
+      const daten = JSON.parse(localStorage.getItem(KEY + id) || "[]");
       return Array.isArray(daten) ? daten.filter((x) => x && Number.isFinite(x.punkte)).slice(0, 10) : [];
     } catch {
       return [];
@@ -130203,14 +130689,14 @@
       testspiel
     };
     try {
-      localStorage.setItem(KEY2 + schwierig, JSON.stringify([...alt, zeile2].sort((a, b2) => b2.punkte - a.punkte || a.datum.localeCompare(b2.datum) || a.seed - b2.seed).slice(0, 10)));
+      localStorage.setItem(KEY + schwierig, JSON.stringify([...alt, zeile2].sort((a, b2) => b2.punkte - a.punkte || a.datum.localeCompare(b2.datum) || a.seed - b2.seed).slice(0, 10)));
     } catch {
     }
   }
   function rangliste(schwierigkeit2) {
-    const liste = lesen2(schwierigkeit2);
-    if (!liste.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
-    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste.map((x, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x.datum) + "<small> \xB7 " + zahl2(x.seed) + "</small></td><td>" + esc2(ART2[x.art]?.titel || x.art) + (x.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl2(x.punkte) + "</td></tr>").join("") + "</tbody></table>";
+    const liste2 = lesen2(schwierigkeit2);
+    if (!liste2.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
+    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x.datum) + "<small> \xB7 " + zahl2(x.seed) + "</small></td><td>" + esc2(ART2[x.art]?.titel || x.art) + (x.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl2(x.punkte) + "</td></tr>").join("") + "</tbody></table>";
   }
   function verlauf2(historie) {
     if (!Array.isArray(historie) || historie.length < 2) return "";
@@ -130365,7 +130851,7 @@
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
     return arr;
   }
-  async function gzip(text3) {
+  async function gzip2(text3) {
     if (typeof CompressionStream !== "function") throw new Error("Dieser Browser unterst\xFCtzt CompressionStream nicht.");
     const rohr = new Blob([new TextEncoder().encode(text3)]).stream().pipeThrough(new CompressionStream("gzip"));
     return base64(new Uint8Array(await new Response(rohr).arrayBuffer()));
@@ -130552,7 +131038,7 @@
         spiel: structuredClone(s2),
         ui: structuredClone(ctx.ui())
       };
-      letzterBericht = BERICHT_FORMAT + await gzip(JSON.stringify(daten));
+      letzterBericht = BERICHT_FORMAT + await gzip2(JSON.stringify(daten));
       return letzterBericht;
     }
     async function berichtKopieren() {
@@ -130853,7 +131339,7 @@
       ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d2.projekte.filter((x) => x.phase !== "abgeschlossen").length + " aktive Projekte", reiter() + (ui.reiter === "systeme" ? systeme(d2) : ui.reiter === "projekte" ? projekte(d2) : neu(d2)), "gross");
       ui.aktiv = true;
     }
-    function aktion2(a) {
+    function aktion(a) {
       const result = E.fuehreAus(s2(), a);
       ctx.meldung(result.text, !result.ok);
       if (result.ok) {
@@ -131147,25 +131633,25 @@
         ([feld, titel]) => '<div class="zeile"><span class="was">' + titel + ": " + p(std?.oeffnung?.[feld]) + " Uhr</span>" + button("\u2212 1h", "hausTun('stunden','" + id + "','" + feld + "',-1)") + button("+ 1h", "hausTun('stunden','" + id + "','" + feld + "',1)") + "</div>"
       ).join("");
       const partnerZeilen = (b2?.flaechen ?? []).map((f) => {
-        const bezeichnung = f.konzept === "konzession" ? "Konzession: " : "Untermiete: ";
+        const bezeichnung2 = f.konzept === "konzession" ? "Konzession: " : "Untermiete: ";
         const info = b2?.konzessionen?.[f.id];
         return line(
-          bezeichnung + (f.gruppe ?? f.mieter?.name ?? f.id),
+          bezeichnung2 + (f.gruppe ?? f.mieter?.name ?? f.id),
           p(f.qm) + " qm" + (info ? " \xB7 " + PROZENT(info.quote) + " Umsatzmiete" : "")
         );
       }).join("");
       inhalt = '<div class="karte"><div class="khead">Hausstandards und Services</div>' + line("\xD6ffnungszeiten Mo\u2013Fr", p(std?.oeffnung?.von) + "\u2013" + p(std?.oeffnung?.bis) + " Uhr") + line("Samstag bis", p(std?.oeffnung?.samstagBis) + " Uhr") + standardZeilen + stundenZeilen + serviceZeilen + (b2?.ausnahmeGrund ? line("Haus-Ausnahme", b2.ausnahmeGrund) : "") + '</div><div class="karte"><div class="khead">Gastronomie</div>' + line("Restaurantfl\xE4che", p(b2?.restaurantQm) + " qm") + line("Betriebsform", b2?.gastro === "selbst" ? "Eigenbetrieb" : b2?.gastro === "pacht" ? "Verpachtet" : "Noch keine") + line("Vertrag bis Woche", b2?.gastroVertragBis ?? "\u2013") + '<div class="zeile">' + button("Selbst betreiben", "hausTun('gastro','" + id + "','selbst')") + button("Verpachten", "hausTun('gastro','" + id + "','pacht')") + '</div></div><div class="karte"><div class="khead">Stadt und Sonntagsverkauf</div>' + line("Umfeld", b2?.umfeld?.ereignis ?? "Regul\xE4r") + line("Innenstadtfrequenz", PROZENT(b2?.umfeld?.trend ?? 1)) + '<div class="zeile">' + button("Verkaufsoffenen Sonntag beantragen (in 2 Wochen)", "hausTun('sonntag','" + id + "')") + '</div></div><div class="karte"><div class="khead">Fl\xE4che, Konzession\xE4re und Untermieter</div>' + (partnerZeilen || '<div class="zeile">Keine Vertr\xE4ge hinterlegt</div>') + "</div>";
     }
     if (r === "kosten") {
-      inhalt = '<div class="karte"><div class="khead">Betriebskosten je Woche</div>' + line("Sonstige Hauskosten gesamt", geld(k?.sonstige ?? 0)) + Object.entries(POSTEN2).map(([key, bezeichnung]) => '<div class="zeile"><span class="was">' + esc2(bezeichnung) + " \xB7 " + PROZENT(b2?.kosten?.[key] ?? 1) + " Budget</span>" + button("\u2212 10 %", "hausTun('kosten','" + id + "','" + key + "',-0.1)") + button("+ 10 %", "hausTun('kosten','" + id + "','" + key + "',0.1)") + "</div>").join("") + '<div class="zeile grau">Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.</div></div>';
+      inhalt = '<div class="karte"><div class="khead">Betriebskosten je Woche</div>' + line("Sonstige Hauskosten gesamt", geld(k?.sonstige ?? 0)) + Object.entries(POSTEN2).map(([key, bezeichnung2]) => '<div class="zeile"><span class="was">' + esc2(bezeichnung2) + " \xB7 " + PROZENT(b2?.kosten?.[key] ?? 1) + " Budget</span>" + button("\u2212 10 %", "hausTun('kosten','" + id + "','" + key + "',-0.1)") + button("+ 10 %", "hausTun('kosten','" + id + "','" + key + "',0.1)") + "</div>").join("") + '<div class="zeile grau">Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.</div></div>';
     }
     if (r === "kommentare") {
       inhalt = '<div class="karte"><div class="khead">Wochenkommentierung</div>' + (b2?.kommentare?.length ? b2.kommentare.map((c) => '<div class="zeile"><span class="was"><b>KW ' + (c.woche % 52 + 1) + " \xB7 " + PROZENT(c.abweichung) + "</b><i>" + esc2(GRUENDE[c.grund] ?? c.grund) + " \xB7 " + esc2(MASS[c.massnahme] ?? c.massnahme) + "</i><small>" + esc2(c.pruefung) + "</small></span></div>").join("") : '<div class="zeile">Noch keine Abweichung unter \u22125 % mit Vorjahres- oder Planvergleich.</div>') + '<div class="zeile">' + Object.entries(MASS).map(([key, name2]) => button(name2, "hausTun('massnahme','" + id + "','" + key + "')")).join(" ") + "</div></div>";
     }
     return '<nav class="haus-reiter">' + REITER2.map(([key, name2]) => '<button class="' + (key === r ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
   }
-  function hausBeobachtungHtml(liste) {
-    return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste.length ? liste.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + "</b><i>" + esc2(x.stadt) + " \xB7 " + esc2(x.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
+  function hausBeobachtungHtml(liste2) {
+    return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste2.length ? liste2.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + "</b><i>" + esc2(x.stadt) + " \xB7 " + esc2(x.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
   }
   function hausReportingHtml(kommentare, ranking2) {
     return '<div class="karte"><div class="khead">Kommentare der Woche</div>' + (kommentare.length ? kommentare.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + " \xB7 " + PROZENT(x.abweichung) + "</b><i>" + esc2(GRUENDE[x.grund] ?? x.grund) + " / " + esc2(MASS[x.massnahme] ?? x.massnahme) + "</i><small>" + esc2(x.pruefung) + "</small></span><span>\u2192</span></button>").join("") : '<div class="zeile">Noch keine kommentierungspflichtigen Abweichungen.</div>') + '</div><div class="karte"><div class="khead">Mystery Shopping \xB7 Top 20</div>' + ranking2.slice(0, 20).map((x, i) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was">` + (i + 1) + ". " + esc2(x.name) + "</span><b>" + x.score + "/100</b></button>").join("") + "</div>";
@@ -131238,11 +131724,11 @@
     }
     function anzeigen(scrollHalten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop;
-      const liste = stand2();
-      if (ui.cluster && !liste.some((c) => c.id === ui.cluster)) ui.cluster = null;
-      const gewaehlt = liste.find((c) => c.id === ui.cluster) ?? liste[0];
+      const liste2 = stand2();
+      if (ui.cluster && !liste2.some((c) => c.id === ui.cluster)) ui.cluster = null;
+      const gewaehlt = liste2.find((c) => c.id === ui.cluster) ?? liste2[0];
       if (gewaehlt) ui.cluster = gewaehlt.id;
-      const selector = '<div class="karte"><div class="khead">Hauscluster</div><select class="ort" data-pe="cluster" aria-label="Hauscluster w\xE4hlen">' + liste.map((c) => '<option value="' + esc2(c.id) + '"' + (c.id === ui.cluster ? " selected" : "") + ">" + esc2(c.name) + " (" + c.haeuser.length + ")</option>").join("") + "</select></div>";
+      const selector = '<div class="karte"><div class="khead">Hauscluster</div><select class="ort" data-pe="cluster" aria-label="Hauscluster w\xE4hlen">' + liste2.map((c) => '<option value="' + esc2(c.id) + '"' + (c.id === ui.cluster ? " selected" : "") + ">" + esc2(c.name) + " (" + c.haeuser.length + ")</option>").join("") + "</select></div>";
       ctx.panel(
         "Personaleinsatz",
         "Wochentagsplanung \xB7 vier Personalgruppen",
@@ -131284,8 +131770,8 @@
         return;
       }
       const faktor2 = Number(wert) / 100;
-      const aktion2 = a === "gruppe" ? { typ: "personalSteuern", haus: id, gruppe: gruppe2, faktor: faktor2 } : a === "samstag" ? { typ: "personalSamstagKasse", haus: id, faktor: faktor2 } : { typ: "personalAushilfen", haus: id, quote: faktor2 };
-      if (!actions(aktion2)) return;
+      const aktion = a === "gruppe" ? { typ: "personalSteuern", haus: id, gruppe: gruppe2, faktor: faktor2 } : a === "samstag" ? { typ: "personalSamstagKasse", haus: id, faktor: faktor2 } : { typ: "personalAushilfen", haus: id, quote: faktor2 };
+      if (!actions(aktion)) return;
       if (ui.aktiv) anzeigen(true);
       else ctx.oeffneHaus(id);
     }
@@ -131323,7 +131809,7 @@
 
   // src/spiel.js
   var param = new URLSearchParams(location.search);
-  var $ = (id) => document.getElementById(id);
+  var $2 = (id) => document.getElementById(id);
   var messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
   var speicherTimer = null;
   var speicherWarnung = false;
@@ -131335,11 +131821,24 @@
     if (!speicherWarnung) meldung("Speichern fehlgeschlagen: " + e.message, false);
     speicherWarnung = true;
   }
+  function speicherVorschau() {
+    try {
+      if (!scene || !canvas.width || !canvas.height) return null;
+      const c = document.createElement("canvas");
+      c.width = 240;
+      c.height = 136;
+      c.getContext("2d").drawImage(canvas, 0, 0, c.width, c.height);
+      return c.toDataURL("image/jpeg", 0.62);
+    } catch (e) {
+      console.warn("Kartenvorschau nicht verf\xFCgbar:", e);
+      return null;
+    }
+  }
   function automatischSpeichern() {
     clearTimeout(speicherTimer);
     if (!s || !einstellung("autospeichern")) return;
     speicherTimer = setTimeout(() => {
-      speichern(s, stadtName, postUi).then(() => {
+      speichern(s, stadtName, postUi, "autosave", "", speicherVorschau()).then(() => {
         speicherWarnung = false;
       }).catch(speicherFehler);
     }, 350);
@@ -131347,19 +131846,19 @@
   async function sofortSpeichern() {
     if (!s) throw new Error("Noch kein Spiel gestartet.");
     clearTimeout(speicherTimer);
-    await speichern(s, stadtName, postUi);
+    await speichern(s, stadtName, postUi, "autosave", "", speicherVorschau());
     speicherWarnung = false;
   }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden" && s && einstellung("autospeichern")) {
       clearTimeout(speicherTimer);
-      speichern(s, stadtName, postUi).catch((e) => console.error("Autosave bei App-Wechsel:", e));
+      speichern(s, stadtName, postUi, "autosave", "", speicherVorschau()).catch(speicherFehler);
     }
   });
   var etageName3 = (e) => e === -1 ? "Untergeschoss" : e === 0 ? "Erdgeschoss" : `${e}. Obergeschoss`;
   var KONZEPT = { eigen: "Eigenfl\xE4che", kommission: "Kommission", konzession: "Konzession", untermiete: "Untermiete", offprice: "Outlet", leer: "Leerfl\xE4che" };
   var STATUS_HAUS = { offen: "Offen", schliessung_verhandlung: "Schlie\xDFung in Verhandlung", raeumung: "R\xE4umungsverkauf", geschlossen: "Geschlossen", verkauft: "Verkauft" };
-  var canvas = $("karte");
+  var canvas = $2("karte");
   var touchMobil = navigator.maxTouchPoints > 0 && window.innerWidth <= 650 || /iPhone|iPod|Android/i.test(navigator.userAgent);
   var sparsam = param.get("grafik") === "sparsam" || touchMobil && param.get("grafik") !== "hoch";
   var ren = new three_module_exports.WebGLRenderer({ canvas, antialias: !sparsam, preserveDrawingBuffer: true });
@@ -131457,8 +131956,8 @@
     }
   })();
   if (["aus", "wenig", "voll"].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
-  $("leben-modus").value = leben.modus;
-  $("leben-modus").addEventListener("change", (e) => {
+  $2("leben-modus").value = leben.modus;
+  $2("leben-modus").addEventListener("change", (e) => {
     const vorher = leben.modus;
     leben.setzen(e.target.value);
     try {
@@ -131599,8 +132098,8 @@
       p2.material?.dispose();
     }
     wettbewerbPins = [];
-    const liste = wettbewerbFuerGrafik(s, stadtName);
-    for (const w of liste) {
+    const liste2 = wettbewerbFuerGrafik(s, stadtName);
+    for (const w of liste2) {
       let x = sb.wettbewerber.get(w.id);
       if (!x && w.inHartwigGebaeude && w.status !== "geschlossen") x = sb.haeuser.get(w.inHartwigGebaeude);
       if (!x?.p) continue;
@@ -131754,10 +132253,10 @@
     kachelnSichtbarBauen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-    $("stadtname").textContent = name2;
+    $2("stadtname").textContent = name2;
     const hausHier = s.haeuser.find((h) => h.stadt === name2 && h.hauscluster);
     const geoCluster = s.organisation?.hauscluster.find((c) => c.id === hausHier?.hauscluster);
-    const chipCluster = $("stadtcluster");
+    const chipCluster = $2("stadtcluster");
     if (chipCluster) chipCluster.textContent = geoCluster?.name ?? "";
     return ms;
   }
@@ -131821,7 +132320,7 @@
     zeichnen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-    $("stadtname").textContent = name2;
+    $2("stadtname").textContent = name2;
     return ms;
   }
   var KACHEL = 110;
@@ -132002,7 +132501,7 @@
   function cockpitZeigen() {
     const c = cockpit(s);
     const kachel2 = (titel, wert, ton2 = "") => `<div class="kz ${ton2}"><span>${titel}</span><b>${wert}</b></div>`;
-    $("cockpit").innerHTML = [
+    $2("cockpit").innerHTML = [
       kachel2("Cash", geld(c.cash), c.cash < 0 ? "rot" : ""),
       kachel2("Kreditrahmen frei", geld(c.kreditFrei), c.kreditFrei < 2e7 ? "rot" : ""),
       kachel2("EBITDA 13 Wochen", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
@@ -132011,10 +132510,10 @@
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
     const ausnahmen = hausBeobachtung(s, 30).length;
-    $("hausbeobachtung").textContent = ausnahmen ? ausnahmen + " H\xE4user beobachten \u2192" : "Hausbetrieb: keine Ausnahmen";
-    $("kw").textContent = `KW ${c.kw} / ${c.jahr}`;
-    $("phase").textContent = [c.phase === "insolvenz" ? "Insolvenzverfahren" : c.phase === "zerschlagen" ? "Zerschlagen" : "", s.testGenutzt ? "Testspiel" : ""].filter(Boolean).join(" \xB7 ");
-    $("phase").style.display = c.phase === "regulaer" && !s.testGenutzt ? "none" : "";
+    $2("hausbeobachtung").textContent = ausnahmen ? ausnahmen + " H\xE4user beobachten \u2192" : "Hausbetrieb: keine Ausnahmen";
+    $2("kw").textContent = `KW ${c.kw} / ${c.jahr}`;
+    $2("phase").textContent = [c.phase === "insolvenz" ? "Insolvenzverfahren" : c.phase === "zerschlagen" ? "Zerschlagen" : "", s.testGenutzt ? "Testspiel" : ""].filter(Boolean).join(" \xB7 ");
+    $2("phase").style.display = c.phase === "regulaer" && !s.testGenutzt ? "none" : "";
   }
   function woche(mitBot = false, test = false) {
     if (s.ende || s.phase === "zerschlagen") {
@@ -132051,7 +132550,7 @@
     const neu = danach.handeln.filter((x) => !alte.has(x.id));
     const neueMeldungen = danach.meldungen.filter((x) => !meldungenVorher.has(x.id)).length;
     const text3 = "KW " + (s.woche % 52 + 1) + ": " + neu.filter((x) => x.art === "angebot").length + " neue Angebote, " + neu.filter((x) => x.art === "entscheidung").length + " Entscheidungen, " + neueMeldungen + " Meldungen";
-    const streifen = $("wochenstreifen");
+    const streifen = $2("wochenstreifen");
     streifen.textContent = mitBot ? text3 : "";
     streifen.classList.toggle("an", mitBot);
     streifen.hidden = !mitBot;
@@ -132061,7 +132560,7 @@
     const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
     messung.wocheMs.push(m);
     automatischSpeichern();
-    if ($("spiel-ruhestand")) $("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
+    if ($2("spiel-ruhestand")) $2("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
     if (s.ende) setTimeout(() => {
       wochenbericht?.zu();
       spielende?.anzeigen();
@@ -132076,27 +132575,28 @@
   var vorherigerFokus = null;
   var wk = null;
   var st = null;
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt].filter(Boolean);
+  var ch = null;
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
-    $("panel").classList.toggle("gross", klasse === "gross");
-    $("ptitel").textContent = titel;
-    $("punter").textContent = unter;
-    $("pinhalt").innerHTML = html;
-    const neu = !$("panel").classList.contains("offen");
+    $2("panel").classList.toggle("gross", klasse === "gross");
+    $2("ptitel").textContent = titel;
+    $2("punter").textContent = unter;
+    $2("pinhalt").innerHTML = html;
+    const neu = !$2("panel").classList.contains("offen");
     if (neu) vorherigerFokus = document.activeElement;
-    $("panel").inert = false;
-    $("panel").removeAttribute("aria-hidden");
-    $("panel").classList.add("offen");
+    $2("panel").inert = false;
+    $2("panel").removeAttribute("aria-hidden");
+    $2("panel").classList.add("offen");
     document.body.classList.add("panel-offen");
-    if (neu) $("ptitel").focus({ preventScroll: true });
+    if (neu) $2("ptitel").focus({ preventScroll: true });
   }
   function schliessePanel() {
     for (const m of module2()) m.zu();
-    $("panel").classList.remove("offen");
-    $("panel").inert = true;
-    $("panel").setAttribute("aria-hidden", "true");
+    $2("panel").classList.remove("offen");
+    $2("panel").inert = true;
+    $2("panel").setAttribute("aria-hidden", "true");
     document.body.classList.remove("panel-offen");
     offenesHaus = null;
     offenesHq = null;
@@ -132129,9 +132629,9 @@
     K2.z += a.z - c.z;
     kameraSetzen();
   }
-  $("pzu").addEventListener("click", schliessePanel);
+  $2("pzu").addEventListener("click", schliessePanel);
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && $("panel").classList.contains("offen")) schliessePanel();
+    if (e.key === "Escape" && $2("panel").classList.contains("offen")) schliessePanel();
   });
   var hausReiter = "ueberblick";
   var hausEtageWahl = null;
@@ -132144,7 +132644,7 @@
     }
     hausEtageWahl = { id, nr: Number(nr) };
     oeffneHaus(id);
-    $("pinhalt").scrollTop = 0;
+    $2("pinhalt").scrollTop = 0;
   };
   var AKTION_NAME = { sale: "Sale", jubilaeum: "Jubil\xE4um", weihnachten: "Weihnachten", blackfriday: "Black Friday" };
   window.premiumTun = (was, id) => {
@@ -132280,7 +132780,7 @@
       }
     }
   }
-  $("pinhalt").addEventListener("click", (e) => {
+  $2("pinhalt").addEventListener("click", (e) => {
     const el2 = e.target.closest("[data-wb-id]");
     if (el2) oeffneWettbewerber(el2.dataset.wbId);
   });
@@ -132315,6 +132815,15 @@
   function etagenBild(g, nr) {
     return schnittBild((S, sc) => hqEtage(S, sc, g, nr, {})).url;
   }
+  var fassadenChronik = /* @__PURE__ */ new Map();
+  function fassadeChronik(familie) {
+    if (!fassadenChronik.has(familie)) {
+      const haus2 = { id: `chronik-${familie}`, baujahr: [0, 1902, 1930, 1954, 1974, 1995][familie], lage: "1a", grundflaecheQm: 850, etagen: [0, 1, 2, 3], fassade: familie, status: "offen", substanz: 90 };
+      const bild3 = schnittBild((S, sc) => warenhaus(S, sc, haus2, { familie, passanten: false, vorplatz: false }), 400, 240).url;
+      fassadenChronik.set(familie, bild3);
+    }
+    return fassadenChronik.get(familie);
+  }
   function innenBild(h, nr) {
     const shops = EQ.shops(s, h);
     const haus2 = { ...h, flaechen: h.flaechen.map((f) => shops[f.gruppe] && ["eigen", "kommission"].includes(f.konzept) && !(f.umbauBis > s.woche) ? { ...f, marke: { eigenmarke: true, ...shops[f.gruppe] } } : f) };
@@ -132330,8 +132839,8 @@
     }
     return voll2;
   }
-  function hqTun(aktion2) {
-    const r = fuehreAus(s, aktion2);
+  function hqTun(aktion) {
+    const r = fuehreAus(s, aktion);
     meldung(r.text, r.ok);
     grafikNachziehen();
     cockpitZeigen();
@@ -132340,7 +132849,7 @@
   }
   var meldungTimer = null;
   function meldung(text3, ok6 = true) {
-    const m = $("meldung");
+    const m = $2("meldung");
     m.textContent = text3;
     m.className = ok6 ? "an" : "an rot";
     clearTimeout(meldungTimer);
@@ -132354,6 +132863,8 @@
       hqTun({ typ: "hqMieten", angebot: a, etagen: an.etagen.map((e) => e.nr) });
     }
     if (art === "kuendigenE") hqTun({ typ: "hqEtageKuendigen", gebaeude: a, etage: Number(b2) });
+    if (art === "archiv") hqTun({ typ: "hqArchivSetzen", gebaeude: a, etage: Number(b2), aktiv: c === "true" });
+    if (art === "archivOeffnen") oeffneModul(ch);
     if (art === "kuendigenG") hqTun({ typ: "hqGebaeudeKuendigen", gebaeude: a });
     if (art === "stufe") hqTun({ typ: "abteilungStufe", abteilung: a, stufe: Number(b2) });
     if (art === "setzen") {
@@ -132372,7 +132883,7 @@
     const u = hqUebersicht(s), j = hqGrafik();
     const zahl4 = (t, w, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w}</b></div>`;
     const pz4 = (x) => `${Math.round((x ?? 0) * 100)} %`;
-    const knopf2 = (text3, args, art = "") => `<button class="mini ${art}" onclick="hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
+    const knopf2 = (text3, args, art = "") => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
     let html = `<div class="raster">${zahl4("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl4("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl4("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl4("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
@@ -132391,7 +132902,7 @@
       for (const e of [...g.etagen ?? []].sort((x, y) => y.nr - x.nr)) {
         const ab = (e.abteilungen ?? []).map((a) => a.name).join(", ");
         const gewaehlt = gWahl?.id === g.id && (hqEtageWahl?.g === g.id ? hqEtageWahl.nr === e.nr : false);
-        html += `<div class="zeile klickbar ${e.gemietet ? "" : "grau"} ${gewaehlt ? "gewaehlt" : ""}" onclick="hqKlick('etage','${g.id}','${e.nr}')"><span class="dot ${e.gemietet ? ab ? "k-eigen" : "k-untermiete" : "k-leer"}"></span><span class="was">${e.nr === 0 ? "Erdgeschoss" : `${e.nr}. Etage`}${ab ? ` <i>${ab}</i>` : e.gemietet ? " <i>gemietet, frei</i>" : " <i>nicht gemietet</i>"}</span><span class="qm">${fmt.format(e.qm)} qm</span><span class="uq">${e.gemietet ? pz4(e.auslastung) : ""}</span>${e.gemietet && !ab ? knopf2("K\xFCndigen", ["kuendigenE", g.id, e.nr], "rot") : ""}</div>`;
+        html += `<div class="zeile klickbar ${e.gemietet ? "" : "grau"} ${gewaehlt ? "gewaehlt" : ""}" onclick="hqKlick('${e.archiv ? "archivOeffnen" : "etage"}','${g.id}','${e.nr}')"><span class="dot ${e.archiv ? "k-eigen" : e.gemietet ? ab ? "k-eigen" : "k-untermiete" : "k-leer"}"></span><span class="was">${e.nr === 0 ? "Erdgeschoss" : `${e.nr}. Etage`}${ab ? ` <i>${ab}</i>` : e.gemietet ? " <i>gemietet, frei</i>" : " <i>nicht gemietet</i>"}${e.archiv ? " <b>Archiv</b>" : ""}</span><span class="qm">${fmt.format(e.qm)} qm</span><span class="uq">${e.gemietet ? pz4(e.auslastung) : ""}</span>${e.gemietet ? knopf2(e.archiv ? "Aufl\xF6sen" : "Archiv einrichten", ["archiv", g.id, e.nr, !e.archiv], e.archiv ? "rot" : "gruen") : ""}${e.archiv ? knopf2("Chronik ansehen", ["archivOeffnen"]) : ""}${e.gemietet && !ab && !e.archiv ? knopf2("K\xFCndigen", ["kuendigenE", g.id, e.nr], "rot") : ""}</div>`;
       }
       html += "</div>";
     }
@@ -132414,9 +132925,9 @@
       html += "</div>";
     }
     const weitere = (u.staedte ?? []).filter((q2) => q2 !== u.sitz);
-    const sc = $("pinhalt").scrollTop;
+    const sc = $2("pinhalt").scrollTop;
     panel("Zentrale", `Sitz ${u.sitz}${weitere.length ? ` \xB7 auch in ${weitere.join(", ")}` : ""} \xB7 ${gs.length} Geb\xE4ude`, html);
-    if (bleiben) $("pinhalt").scrollTop = sc;
+    if (bleiben) $2("pinhalt").scrollTop = sc;
   }
   var EQ = quelle(src_exports);
   var es = null;
@@ -132434,7 +132945,7 @@
     offenesHq = null;
     ek.oeffne(seite, arg);
   }
-  $("einkauf").addEventListener("click", () => oeffneEinkauf());
+  $2("einkauf").addEventListener("click", () => oeffneEinkauf());
   var hb = hausbesuchModul({ E: src_exports, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === "offen")?.id, menueZu });
   var vs = null;
   var mk = null;
@@ -132512,7 +133023,7 @@
     }
   });
   zt = zeitungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
-  $("zeitung").addEventListener("click", () => oeffneModul(zt));
+  $2("zeitung").addEventListener("click", () => oeffneModul(zt));
   spielende = spielendeModul({
     E: src_exports,
     s: () => s,
@@ -132523,16 +133034,16 @@
     },
     fortgesetzt: () => {
       cockpitZeigen();
-      $("spiel-ruhestand").hidden = s.woche < 260;
+      $2("spiel-ruhestand").hidden = s.woche < 260;
       automatischSpeichern();
     },
     fehler: (text3) => meldung(text3, false)
   });
-  $("spiel-bestenliste").addEventListener("click", () => {
+  $2("spiel-bestenliste").addEventListener("click", () => {
     menueZu();
     spielende.bestenliste();
   });
-  $("spiel-ruhestand").addEventListener("click", () => {
+  $2("spiel-ruhestand").addEventListener("click", () => {
     menueZu();
     const r = fuehreAus(s, { typ: "ruhestand" });
     if (!r.ok) meldung(r.text, false);
@@ -132542,7 +133053,7 @@
     }
   });
   st = statistikModul({ E: src_exports, s: () => s, panel, oeffneHaus });
-  rg = reportingModul({ E: src_exports, s: () => s, panel, inhalt: $("pinhalt"), hausOeffnen: (id) => {
+  rg = reportingModul({ E: src_exports, s: () => s, panel, inhalt: $2("pinhalt"), hausOeffnen: (id) => {
     const h = s.haeuser.find((x) => x.id === id);
     if (h && h.stadt !== stadtName) {
       wahl2.value = h.stadt;
@@ -132550,7 +133061,7 @@
     }
     oeffneHaus(id);
   } });
-  $("reporting").addEventListener("click", () => oeffneModul(rg));
+  $2("reporting").addEventListener("click", () => oeffneModul(rg));
   reise = reiseModul({
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d2) => s?.haeuser.some((h) => h.stadt === d2.name)).map((d2) => {
@@ -132615,10 +133126,10 @@
     person: (ressort) => s?.vorstand?.ressorts?.[ressort]?.person,
     woche: () => woche(false),
     sperren: () => {
-      $("weiter").disabled = true;
+      $2("weiter").disabled = true;
     },
     entsperren: () => {
-      $("weiter").disabled = false;
+      $2("weiter").disabled = false;
     },
     oeffneVorgang: (id) => oeffneModul(po, "handeln", id),
     fehler: (e) => {
@@ -132632,10 +133143,10 @@
     s.testGenutzt = true;
     postUi = { ...neuerPostUi(), ...d2.ui ?? {} };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
-    $("postwarnung").checked = !!postUi.warnen;
-    $("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
+    $2("postwarnung").checked = !!postUi.warnen;
+    $2("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
     schwierigkeitId = s.schwierigkeit ?? "mittel";
-    $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+    $2("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
     schliessePanel();
     const ziel = STADTLISTE.some((x) => x.name === d2.stadt) ? d2.stadt : "Essen";
@@ -132657,7 +133168,7 @@
     meldung,
     nachAktion: () => {
       schwierigkeitId = s.schwierigkeit ?? "mittel";
-      $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+      $2("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
       nachAktion();
     },
     teileStand,
@@ -132666,7 +133177,7 @@
     testWoche: (bot) => woche(bot, true),
     standLaden: testStandLaden
   });
-  $("stadt-reise").addEventListener("click", () => {
+  $2("stadt-reise").addEventListener("click", () => {
     schliessePanel();
     menueZu();
     reise.oeffne();
@@ -132680,53 +133191,55 @@
     offenesHq = null;
     m.oeffne(...a);
   };
-  $("vorstand").addEventListener("click", () => oeffneModul(vs));
-  $("organisation").addEventListener("click", () => oeffneModul(org));
-  $("it").addEventListener("click", () => oeffneModul(itM));
-  $("marketing").addEventListener("click", () => oeffneModul(mk));
-  $("modernisierung").addEventListener("click", () => oeffneModul(um));
-  $("produkte").addEventListener("click", () => oeffneModul(pr));
-  $("statistik").addEventListener("click", () => oeffneModul(st));
-  $("planung").addEventListener("click", () => oeffneModul(pl));
-  $("personaleinsatz").addEventListener("click", () => oeffneModul(pe));
-  $("posteingang").addEventListener("click", () => oeffneModul(po));
-  $("erfolge").addEventListener("click", () => oeffneModul(er));
-  $("beobachtung").addEventListener("click", oeffneBeobachtung);
-  $("haus-reporting").addEventListener("click", oeffneHausReporting);
-  $("hausbeobachtung").addEventListener("click", oeffneBeobachtung);
-  $("postdirekt").addEventListener("click", () => oeffneModul(po));
-  $("wochenstreifen").addEventListener("click", () => {
-    $("wochenstreifen").classList.remove("an");
+  $2("vorstand").addEventListener("click", () => oeffneModul(vs));
+  $2("organisation").addEventListener("click", () => oeffneModul(org));
+  $2("it").addEventListener("click", () => oeffneModul(itM));
+  $2("marketing").addEventListener("click", () => oeffneModul(mk));
+  $2("modernisierung").addEventListener("click", () => oeffneModul(um));
+  $2("produkte").addEventListener("click", () => oeffneModul(pr));
+  ch = chronikModul({ E: src_exports, s: () => s, panel, bild: fassadeChronik });
+  $2("chronik").addEventListener("click", () => oeffneModul(ch));
+  $2("statistik").addEventListener("click", () => oeffneModul(st));
+  $2("planung").addEventListener("click", () => oeffneModul(pl));
+  $2("personaleinsatz").addEventListener("click", () => oeffneModul(pe));
+  $2("posteingang").addEventListener("click", () => oeffneModul(po));
+  $2("erfolge").addEventListener("click", () => oeffneModul(er));
+  $2("beobachtung").addEventListener("click", oeffneBeobachtung);
+  $2("haus-reporting").addEventListener("click", oeffneHausReporting);
+  $2("hausbeobachtung").addEventListener("click", oeffneBeobachtung);
+  $2("postdirekt").addEventListener("click", () => oeffneModul(po));
+  $2("wochenstreifen").addEventListener("click", () => {
+    $2("wochenstreifen").classList.remove("an");
     oeffneModul(po);
   });
-  $("einstellungen").addEventListener("click", () => oeffneModul(es));
+  $2("einstellungen").addEventListener("click", () => oeffneModul(es));
   function menueZu() {
-    $("menue").classList.remove("offen");
-    $("menue").inert = true;
-    $("menueknopf").classList.remove("an");
+    $2("menue").classList.remove("offen");
+    $2("menue").inert = true;
+    $2("menueknopf").classList.remove("an");
   }
-  $("menueknopf").addEventListener("click", () => {
-    const o = !$("menue").classList.contains("offen");
+  $2("menueknopf").addEventListener("click", () => {
+    const o = !$2("menue").classList.contains("offen");
     if (o) {
       schliessePanel();
     }
-    $("menue").classList.toggle("offen", o);
-    $("menue").inert = !o;
-    $("menueknopf").classList.toggle("an", o);
+    $2("menue").classList.toggle("offen", o);
+    $2("menue").inert = !o;
+    $2("menueknopf").classList.toggle("an", o);
   });
-  $("menue").addEventListener("click", (e) => {
-    if (e.target === $("menue")) menueZu();
+  $2("menue").addEventListener("click", (e) => {
+    if (e.target === $2("menue")) menueZu();
   });
   function menueBadge() {
-    const n = s ? freigaben(s).anzahl : 0, v = vs?.badge() ?? 0, b2 = $("menuebadge");
+    const n = s ? freigaben(s).anzahl : 0, v = vs?.badge() ?? 0, b2 = $2("menuebadge");
     const p2 = po?.badge() ?? 0;
     b2.textContent = n + p2;
     b2.style.display = n + p2 ? "" : "none";
-    const vb = $("vsbadge");
+    const vb = $2("vsbadge");
     vb.textContent = v;
     vb.style.display = v ? "" : "none";
   }
-  $("spiel-speichern").addEventListener("click", async () => {
+  $2("spiel-speichern").addEventListener("click", async () => {
     menueZu();
     try {
       await sofortSpeichern();
@@ -132735,6 +133248,18 @@
       speicherFehler(e);
     }
   });
+  var app = appModul({
+    panel,
+    meldung,
+    aktuell: () => s ? { spiel: s, stadt: stadtName, ui: postUi, bild: speicherVorschau } : null,
+    ladenInSpiel: (platz) => spielFortsetzen(platz),
+    vorNeuladen: () => s ? sofortSpeichern() : Promise.resolve()
+  });
+  $2("app-oeffnen").addEventListener("click", () => {
+    menueZu();
+    app.oeffne();
+  });
+  app.updatesAktivieren();
   async function diagnoseZeigen() {
     if (!s || !scene) return;
     menueZu();
@@ -132768,9 +133293,9 @@
       if (!KA.pause) kachelnPlanen();
     }
   }
-  $("performance").addEventListener("click", diagnoseZeigen);
+  $2("performance").addEventListener("click", diagnoseZeigen);
   var ton = tonModul({ panel, spiel: () => s, ebitda13: () => s ? cockpit(s).ebitda13 : 0, zoom: () => K2.halb });
-  $("ton").addEventListener("click", () => oeffneModul(ton));
+  $2("ton").addEventListener("click", () => oeffneModul(ton));
   var SCHWIERIGKEITEN2 = Array.isArray(SCHWIERIGKEITEN) && SCHWIERIGKEITEN.length ? SCHWIERIGKEITEN : [
     { id: "leicht", name: "Leicht", beschreibung: "Mehr Liquidit\xE4t, geduldige Banken und Lieferanten." },
     { id: "mittel", name: "Mittel", beschreibung: "Die Ausgangslage wie kalibriert." },
@@ -132779,11 +133304,11 @@
   var schwierigkeitId = "mittel";
   function neuesSpiel3(seed = 1, stadt = "Essen", schwierigkeit2 = schwierigkeitId, szenario = "standard") {
     spielende?.zu();
-    $("spiel-ruhestand").hidden = true;
+    $2("spiel-ruhestand").hidden = true;
     schwierigkeitId = SCHWIERIGKEITEN2.some((x) => x.id === schwierigkeit2) ? schwierigkeit2 : "mittel";
     s = neuesSpiel(seed, { ...szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId });
     postUi = neuerPostUi();
-    $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+    $2("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
     EQ.freigaben(s);
     cockpitZeigen();
@@ -132796,35 +133321,37 @@
     automatischSpeichern();
     return s;
   }
-  var wahl2 = $("stadtwahl");
+  var wahl2 = $2("stadtwahl");
   wahl2.innerHTML = STADTLISTE.map((q2) => `<option${q2.name === "Essen" ? " selected" : ""}>${q2.name}</option>`).join("");
   wahl2.addEventListener("change", () => {
     reise?.zu();
     schliessePanel();
     menueZu();
-    $("lade").classList.add("an");
+    $2("lade").classList.add("an");
     setTimeout(() => {
       baueStadtAusSpiel(wahl2.value);
       automatischSpeichern();
-      $("lade").classList.remove("an");
+      $2("lade").classList.remove("an");
     }, 30);
   });
-  $("weiter").addEventListener("click", () => {
-    if ($("weiter").disabled) return;
-    if ($("bot").checked) {
-      $("weiter").disabled = true;
+  $2("weiter").addEventListener("click", () => {
+    if ($2("weiter").disabled) return;
+    if ($2("bot").checked) {
+      $2("weiter").disabled = true;
       setTimeout(() => {
         try {
           woche(true);
         } finally {
-          $("weiter").disabled = false;
+          $2("weiter").disabled = false;
         }
       }, 10);
     } else wochenbericht.oeffne();
   });
-  if (typeof hqUebersicht === "function") $("hq").addEventListener("click", () => oeffneHq());
-  else $("hq").style.display = "none";
+  if (typeof hqUebersicht === "function") $2("hq").addEventListener("click", () => oeffneHq());
+  else $2("hq").style.display = "none";
   window.spiel = {
+    chronik: () => chronikUebersicht(s),
+    oeffneChronik: () => oeffneModul(ch),
     personaleinsatz: pe,
     oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a),
     neuesSpiel: neuesSpiel3,
@@ -132894,13 +133421,13 @@
       const d2 = hausUebersicht(s, id);
       hausReiter = "ueberblick";
       oeffneHaus(id);
-      const text3 = $("pinhalt").textContent;
+      const text3 = $2("pinhalt").textContent;
       const fehler6 = [];
       if (!text3.includes(String(d2.kundenScore))) fehler6.push("Kundenscore fehlt");
       for (const [reiter, wort] of [["leitung", d2.leitungsdaten.name], ["kosten", "Betriebskosten"], ["kommentare", "Wochenkommentierung"]]) {
         hausReiter = reiter;
         oeffneHaus(id);
-        if (!$("pinhalt").textContent.includes(wort)) fehler6.push(reiter + " nicht korrekt");
+        if (!$2("pinhalt").textContent.includes(wort)) fehler6.push(reiter + " nicht korrekt");
       }
       hausReiter = "ueberblick";
       oeffneHaus(id);
@@ -132930,14 +133457,14 @@
     pruefeAnzeigen: () => {
       const fehler6 = [], c = cockpit(s);
       const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k) => [k.querySelector("span").textContent, k.querySelector("b").textContent]));
-      const ck = kz2($("cockpit"));
+      const ck = kz2($2("cockpit"));
       const soll = { Cash: geld(c.cash), "Kreditrahmen frei": geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
       if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), "Umsatz Woche": geld(c.umsatzWoche) });
       for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler6.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
-      if ($("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$("kw").textContent}`);
+      if ($2("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$2("kw").textContent}`);
       if (offenesHaus) {
         const d2 = hausTreiber(s, offenesHaus);
-        const el2 = $("pinhalt").querySelector(".o02-haus");
+        const el2 = $2("pinhalt").querySelector(".o02-haus");
         if (d2 && el2) {
           for (const [schluessel, sollWert] of Object.entries({ umsatz: d2.aktuell.umsatz, frequenz: d2.aktuell.frequenz, kaufquote: d2.aktuell.kaufquote, bon: d2.aktuell.bon }))
             if (Number(el2.dataset["o02" + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler6.push("O02 " + schluessel + ": Hausanzeige ungleich Engine");
@@ -132947,7 +133474,7 @@
       }
       if (rg?.aktiv?.() && !rg.pruefe()) fehler6.push("O02 Reporting-Br\xFCcke summiert nicht exakt");
       if (offenesHq && typeof hqUebersicht === "function") {
-        const u = hqUebersicht(s), hk = kz2($("pinhalt"));
+        const u = hqUebersicht(s), hk = kz2($2("pinhalt"));
         const sollHq = { "Kosten Zentrale je Woche": geld(u.kostenWoche), "Besch\xE4ftigte": fmt.format(Math.round(u.fte)) + " FTE" };
         for (const [k, v] of Object.entries(sollHq)) if (hk.get(k) !== v) fehler6.push(`HQ ${k}: ${hk.get(k)} statt ${v}`);
       }
@@ -133007,51 +133534,52 @@
   window.spiel.einfuehrung = einfuehrung;
   var startWahl = { stadt: param.get("stadt") ?? "Essen", schwierigkeit: param.get("schwierigkeit") ?? "mittel", szenario: param.get("szenario") ?? "standard", seed: Number(param.get("seed") ?? 1) };
   function startZeigen() {
-    $("startstadt").innerHTML = STADTLISTE.map((q2) => `<option${q2.name === startWahl.stadt ? " selected" : ""}>${q2.name}</option>`).join("");
-    $("startstufen").innerHTML = SCHWIERIGKEITEN2.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? "an" : ""}" data-v="${x.id}"><span class="sterne-stufe">${"\u25CF".repeat(1 + SCHWIERIGKEITEN2.indexOf(x))}${"\u25CB".repeat(SCHWIERIGKEITEN2.length - 1 - SCHWIERIGKEITEN2.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join("");
-    $("startseed").value = startWahl.seed;
+    $2("startstadt").innerHTML = STADTLISTE.map((q2) => `<option${q2.name === startWahl.stadt ? " selected" : ""}>${q2.name}</option>`).join("");
+    $2("startstufen").innerHTML = SCHWIERIGKEITEN2.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? "an" : ""}" data-v="${x.id}"><span class="sterne-stufe">${"\u25CF".repeat(1 + SCHWIERIGKEITEN2.indexOf(x))}${"\u25CB".repeat(SCHWIERIGKEITEN2.length - 1 - SCHWIERIGKEITEN2.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join("");
+    $2("startseed").value = startWahl.seed;
     szenarienUI.zeichneStart();
-    $("start").classList.add("an");
-    $("lade").classList.remove("an");
+    $2("start").classList.add("an");
+    $2("lade").classList.remove("an");
+    app.startAktualisieren();
     laden3().then((datensatz) => {
-      const b2 = $("fortsetzen");
+      const b2 = $2("fortsetzen");
       b2.hidden = !datensatz;
       if (datensatz) b2.textContent = `Fortsetzen \xB7 KW ${datensatz.spiel.woche % 52 + 1} / ${datensatz.spiel.startJahr + Math.floor(datensatz.spiel.woche / 52)}`;
-      $("speicherhinweis").textContent = "";
+      $2("speicherhinweis").textContent = "";
     }).catch((e) => {
-      $("fortsetzen").hidden = true;
-      $("speicherhinweis").textContent = e.message;
+      $2("fortsetzen").hidden = true;
+      $2("speicherhinweis").textContent = e.message;
     });
   }
-  $("startstufen").addEventListener("click", (e) => {
+  $2("startstufen").addEventListener("click", (e) => {
     const b2 = e.target.closest("[data-v]");
     if (!b2) return;
     startWahl.schwierigkeit = b2.dataset.v;
     startZeigen();
   });
-  $("startstadt").addEventListener("change", (e) => {
+  $2("startstadt").addEventListener("change", (e) => {
     startWahl.stadt = e.target.value;
   });
-  $("startseed").addEventListener("change", (e) => {
+  $2("startseed").addEventListener("change", (e) => {
     startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1));
   });
   function spielStarten() {
-    $("start").classList.remove("an");
-    $("lade").classList.add("an");
+    $2("start").classList.remove("an");
+    $2("lade").classList.add("an");
     setTimeout(() => {
       wahl2.value = startWahl.stadt;
       neuesSpiel3(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
-      $("lade").classList.remove("an");
+      $2("lade").classList.remove("an");
       window.bereit = true;
       einfuehrung.spielStart();
     }, 30);
   }
-  $("startknopf").addEventListener("click", spielStarten);
-  async function spielFortsetzen() {
-    const b2 = $("fortsetzen");
+  $2("startknopf").addEventListener("click", spielStarten);
+  async function spielFortsetzen(platz = "autosave") {
+    const b2 = $2("fortsetzen");
     b2.disabled = true;
     try {
-      const d2 = await laden3();
+      const d2 = await laden3(platz);
       if (!d2) throw new Error("Kein Spielstand vorhanden.");
       clearTimeout(speicherTimer);
       s = d2.spiel;
@@ -133060,12 +133588,12 @@
       postUi = { gelesen: d2.ui?.gelesen ?? [], reiter: d2.ui?.reiter ?? "handeln", reiseZuletzt: d2.ui?.reiseZuletzt ?? [] };
       if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
       schwierigkeitId = s.schwierigkeit ?? "mittel";
-      $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+      $2("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
       MERK.clear();
       schliessePanel();
       wahl2.value = STADTLISTE.some((x) => x.name === d2.stadt) ? d2.stadt : "Essen";
-      $("start").classList.remove("an");
-      $("lade").classList.add("an");
+      $2("start").classList.remove("an");
+      $2("lade").classList.add("an");
       await new Promise((resolve) => setTimeout(resolve, 30));
       cockpitZeigen();
       szenarienUI.aktualisieren();
@@ -133075,21 +133603,25 @@
       window.spiel.s = s;
       wk?.nachStart();
       window.bereit = true;
-      $("lade").classList.remove("an");
+      $2("lade").classList.remove("an");
       einfuehrung.spielStart(true);
-      $("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
+      $2("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
       if (s.ende || s.phase === "zerschlagen") spielende.anzeigen();
       else meldung("Spielstand fortgesetzt.");
+      return true;
     } catch (e) {
-      $("lade").classList.remove("an");
-      $("start").classList.add("an");
-      $("speicherhinweis").textContent = e.message;
+      $2("lade").classList.remove("an");
+      $2("start").classList.add("an");
+      $2("speicherhinweis").textContent = e.message;
+      meldung("Laden fehlgeschlagen: " + e.message, false);
+      return false;
     } finally {
       b2.disabled = false;
     }
   }
-  $("fortsetzen").addEventListener("click", spielFortsetzen);
+  $2("fortsetzen").addEventListener("click", () => spielFortsetzen());
   window.spiel.fortsetzen = spielFortsetzen;
+  window.spiel.app = app;
   window.spiel.startZeigen = startZeigen;
   window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN2;
   Object.defineProperty(window.spiel, "schwierigkeit", { get: () => schwierigkeitId });

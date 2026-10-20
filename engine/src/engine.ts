@@ -2,6 +2,7 @@ import { GRUPPEN, saisonFaktor } from './daten';
 import { statistikHaus, statistikWoche } from './statistik';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
+import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { erfolgeWoche } from './erfolge';
 import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
@@ -50,6 +51,7 @@ function quartalsStart(s: GameState): void {
 
 export function wocheAbspielen(s: GameState): WochenKpi {
   if (s.phase === 'zerschlagen' || (s.ende && !s.spielendeFortgesetzt && !s.prognose)) throw new Error('Spiel beendet. Bitte ein neues Spiel beginnen oder zulässig weiterspielen.');
+  chronikInitialisieren(s); // Migrationsstand vor den Ereignissen der Woche
   const w = s.woche;
   const cashVorher = s.historie[s.historie.length - 1]?.cash ?? s.kapitalflussStartCash ?? s.cash;
 
@@ -283,6 +285,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.einmalErloeseWoche = 0;
   zeitungWoche(s);
   s.woche += 1;
+  chronikAktualisieren(s, w);
   szenarioNachWoche(s);
   // Reine Beobachtung nach dem wirtschaftlichen Wochenabschluss; keine Prognosen verändern Erfolge.
   erfolgeWoche(s);

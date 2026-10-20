@@ -1,4 +1,5 @@
 import type { Hq } from './hq';
+import type { ChronikEintrag, ChronikStand } from './chronik';
 import type { OrganisationsStand } from './organisation';
 import type { PlanungStand } from './planung';
 import type { BauEtage, UmbauStand } from './umbau';
@@ -579,6 +580,9 @@ export interface GameState {
   /** Gefallene Entscheidungen, maximal 52 Wochen. Für alte Spielstände optional. */
   entscheidungsprotokoll?: Entscheidungsprotokoll[];
   quartale: Quartal[];
+  /** Freiwillige, deterministische Chronik des Spielverlaufs (N12). */
+  chronik?: ChronikEintrag[];
+  chronikStand?: ChronikStand;
   // O06 Planung: Jahresbudget, Forecast, Boni (optional für alte Spielstände).
   planung?: PlanungStand;
   /** Nur für Kalibrierung: schaltet die operativen Planungseffekte ab. */

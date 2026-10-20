@@ -15,6 +15,7 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+import { chronikInitialisieren } from './chronik';
 import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
 import { bildeHauscluster } from './organisation';
 // O03 IT
@@ -380,6 +381,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  chronikInitialisieren(s);
   szenarioStart(s, sz);
   bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
   // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.

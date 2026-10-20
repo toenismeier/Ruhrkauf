@@ -270,6 +270,7 @@ export { itUebersicht, itDeckelGrund } from './it';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+export { chronikUebersicht } from './chronik';
 
 // N01: Verlauf je Ebene, Vorjahr und Eigentümer-Quartalsplan.
 export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './statistik';
