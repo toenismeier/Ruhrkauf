@@ -31,8 +31,9 @@ export function wochenberichtModul(ctx) {
   function abbruch() { if (status !== 'rechnen') aufraeumen(); }
   function fragDialog() {
     const warnungen = ctx.posteingang().handeln.filter((x) => x.restWochen === 0);
-    node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschließen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schließen">×</button><h2>Woche abschließen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN + '</span></div>' + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + ' Vorgänge laufen ab. Der Standard wird gewählt beziehungsweise das Angebot verfällt.</p>' : '') + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
+    node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschließen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schließen">×</button><h2 tabindex="-1">Woche abschließen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN + '</span></div>' + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + ' Vorgänge laufen ab. Der Standard wird gewählt beziehungsweise das Angebot verfällt.</p>' : '') + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
     node.hidden = false; node.className = 'frage-ein'; document.body.classList.add('wochen-aktiv'); status = 'frage';
+    node.querySelector('.wochen-frage h2')?.focus({ preventScroll: true });
     requestAnimationFrame(() => node.classList.add('sichtbar'));
   }
   function oeffne() {
@@ -84,7 +85,7 @@ export function wochenberichtModul(ctx) {
     const uDelta = delta(bericht.umsatz, bericht.umsatzVor);
     const eDelta = delta(bericht.ebitda, bericht.ebitdaVor);
     const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? 'hafen' : 'altstadt') + '.png)"></div><span>' + esc(a.text) + '</span></div>' : '';
-    node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht.kw + ' · Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schließen">×</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht.umsatz + '">0 €</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht.ebitda + '">0 €</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' +
+    node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht.kw + ' · Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schließen">×</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht.umsatz + '">0 €</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht.ebitda + '">0 €</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' +
       zeile('Cash operativ', 'nicht separat erfasst') + zeile('Investitionen', 'nicht separat erfasst') + zeile('Finanzierung', 'nicht separat erfasst') +
       zeile('Cash netto', eur(bericht.cashNetto)) + zeile('Cash-Bestand', eur(bericht.cash), 'wb-summe') +
       '<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>' +
@@ -93,6 +94,7 @@ export function wochenberichtModul(ctx) {
       nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') + '</div></div><div id="wb-vorfall"></div></section>';
     node.hidden = false; node.className = 'bericht-ein'; document.body.classList.add('wochen-aktiv');
     requestAnimationFrame(() => node.classList.add('sichtbar'));
+    node.querySelector('.wb-bericht h2')?.focus({ preventScroll: true });
     const originalDauer = dauer();
     const zaehlBeginn = performance.now() + (originalDauer ? WOCHEN_ZEIT.berichtEin : 0);
     let abgeschlossen = false;
@@ -113,7 +115,8 @@ export function wochenberichtModul(ctx) {
     if (!m || !node.querySelector('#wb-vorfall')) return;
     status = 'vorfall'; markieren('Vorfall ' + (vorfall + 1));
     const feld = node.querySelector('#wb-vorfall'), meins = token;
-    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>HARTWIG</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + (m.typ.includes('bank') ? '€' : m.typ.includes('betriebsrat') ? 'BR' : 'H') + '</div></div><h4>' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
+    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>HARTWIG</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + (m.typ.includes('bank') ? '€' : m.typ.includes('betriebsrat') ? 'BR' : 'H') + '</div></div><h4 tabindex="-1">' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
+    feld.querySelector('.wb-vorfall h4')?.focus({ preventScroll: true });
     requestAnimationFrame(() => feld.classList.add('offen'));
     const text = m.text ?? '', el = feld.querySelector('.wb-tippt'), beginn = performance.now();
     function tick(t) {
