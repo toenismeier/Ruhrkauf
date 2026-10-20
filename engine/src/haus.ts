@@ -339,7 +339,10 @@ export function hausAbschluss(s: GameState): void {
   for (const h of s.haeuser) {
     if (!istOffen(h) || !h.kpi || !h.betrieb) continue;
     const b = h.betrieb, vorher = b.umsatzHistorie.find(x => x.woche === s.woche - 52);
-    const plan = h.wochenPlan;
+    // O06: Jahresphasing ist die führende Quelle; das optionale Feld ist ein Fallback.
+    const geplant = (s as GameState & { planung?: { jahre: { jahr:number; phasing: Record<string,number[]> }[] } }).planung;
+    const jahr=s.startJahr+Math.floor(s.woche/52);
+    const plan = geplant?.jahre.find(j=>j.jahr===jahr)?.phasing[h.id]?.[s.woche%52] ?? h.wochenPlan;
     const vergleich = vorher ? 'vorjahr' : plan !== undefined ? 'plan' : undefined;
     const referenz = vorher?.umsatz ?? plan;
     if (vergleich && referenz && referenz > 0 && h.kpi.umsatz / referenz < 0.95) stelleKommentar(s, h, vergleich, h.kpi.umsatz / referenz - 1);
@@ -499,7 +502,10 @@ export function hausUebersicht(s: GameState, id: string) {
     id: h.id, name: h.name, hauscluster: steuerungscluster(s,h), stadtgroesse: h.cluster,
     standard: hausStandard(s, h), leitungsdaten: l, kandidaten: hausKandidaten(s, id),
     kundenScore: hausKundenscore(s, h), letzteMessung: b?.scoreWoche,
-    kosten: b?.kosten, ausfallBis:b?.ausfallBis, inventurdifferenz:b?.inventurdifferenz ?? 0, energiePreis:s.hausbetrieb?.energiePreis ?? 1, kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
+    kosten: b?.kosten, ausfallBis:b?.ausfallBis, inventurdifferenz:b?.inventurdifferenz ?? 0, energiePreis:s.hausbetrieb?.energiePreis ?? 1,
+    planWoche:(s as GameState & {planung?: {jahre:{jahr:number;phasing:Record<string,number[]>}[]}}).planung?.jahre.find(j=>j.jahr===s.startJahr+Math.floor(s.woche/52))?.phasing[h.id]?.[s.woche%52] ?? h.wochenPlan,
+    treiberAktuell:(h as Haus & {treiberVerlauf?:{von:number;bis:number;frequenz:number;kaufquote:number;bon:number}[]}).treiberVerlauf?.findLast(x=>x.bis===s.woche-1),
+    kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
     services: b?.services, gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, restaurantQm: b?.restaurantQm,
     konzessionen: b?.konzessionen, kommentar: b?.kommentare[0], kommentare: b?.kommentare ?? [],
     umfeld: s.hausbetrieb?.staedte[h.stadt], ausnahmeGrund: b?.ausnahmeGrund,
