@@ -13,6 +13,7 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+import { initialisiereUmbau } from './umbau';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -342,6 +343,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  // O08 Umbau
+  initialisiereUmbau(s);
   return s;
 }
 
