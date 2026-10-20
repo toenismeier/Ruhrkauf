@@ -785,7 +785,7 @@ let ek = null;
 ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { cockpitZeigen(); ek.badge(); menueBadge(); automatischSpeichern(); } });
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
-const hb = hausbesuchModul({ E, s: () => s, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
+const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
