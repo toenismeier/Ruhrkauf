@@ -18,6 +18,8 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { chronikAktualisieren } from './chronik';
+import { hqArchivSetzen } from './hq';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -51,6 +53,7 @@ export type SpielerAktion =
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
+  | { typ: 'hqArchivSetzen'; gebaeude: string; etage: number; aktiv: boolean }
   | { typ: 'hqGebaeudeKuendigen'; gebaeude: string }
   | { typ: 'abteilungSetzen'; abteilung: AbteilungId; gebaeude: string; etage: number }
   | { typ: 'abteilungStufe'; abteilung: AbteilungId; stufe: Stufe }
@@ -117,7 +120,7 @@ function letzterUmsatz(s: GameState): number {
   return s.historie.length ? s.historie[s.historie.length - 1].umsatz : offeneHaeuser(s).reduce((a, h) => a + basisUmsatzHaus(h), 0);
 }
 
-export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
@@ -300,6 +303,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
 
     case 'hqMieten': return hqMieten(s, a.angebot, a.etagen);
     case 'hqEtageKuendigen': return hqEtageKuendigen(s, a.gebaeude, a.etage);
+    case 'hqArchivSetzen': return hqArchivSetzen(s, a.gebaeude, a.etage, a.aktiv);
     case 'hqGebaeudeKuendigen': return hqGebaeudeKuendigen(s, a.gebaeude);
     case 'abteilungSetzen': return abteilungSetzen(s, a.abteilung, a.gebaeude, a.etage);
     case 'abteilungStufe': return abteilungStufe(s, a.abteilung, a.stufe);
@@ -538,3 +542,10 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
 
 export { beraterErgebnis };
 export type { Cluster, Format };
+
+/** Auch direkte Spieleraktionen erscheinen ohne Wartewoche in der Chronik. */
+export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+  const result = fuehreAusKern(s, a);
+  if (result.ok) chronikAktualisieren(s);
+  return result;
+}
