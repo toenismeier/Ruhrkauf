@@ -871,7 +871,12 @@ async function testStandLaden(d) {
 }
 wk = werkzeugeModul({
   E, s: () => s, ui: () => postUi, stadt: () => stadtName, panel, meldung,
-  nachAktion, teileStand, messung, renderFrame: jetztZeichnen, testWoche: (bot) => woche(bot, true), standLaden: testStandLaden,
+  nachAktion: () => {
+    schwierigkeitId = s.schwierigkeit ?? 'mittel';
+    $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
+    nachAktion();
+  },
+  teileStand, messung, renderFrame: jetztZeichnen, testWoche: (bot) => woche(bot, true), standLaden: testStandLaden,
 });
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
 $('wochenbericht-modus').addEventListener('change', (e) => { postUi.wochenbericht = e.target.value; automatischSpeichern(); });
