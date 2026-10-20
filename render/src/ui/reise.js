@@ -28,10 +28,10 @@ function deutschlandPunkte(staedte, hier) {
     const hash = [...stadt.name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
     const [x, y] = MAP_FELDER[String(stadt.region ?? 'mitte').toLocaleLowerCase('de')] ?? MAP_FELDER.mitte;
     const dx = (hash % 29) - 14, dy = (Math.floor(hash / 37) % 35) - 17;
-    return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier };
+    return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier, hauscluster: stadt.hauscluster };
   });
   return punkte.sort((a, b) => Number(a.aktuell) - Number(b.aktuell))
-    .map((p) => '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (p.aktuell ? 4 : 1.4) + '" fill="' + (p.aktuell ? '#d23c32' : '#8295a0') + '"><title>' + esc(p.name) + '</title></circle>').join('');
+    .map((p) => { const farben=['#597fa2','#9b7954','#638d70','#8875a7','#ac705e','#718b9b']; const gruppe = p.hauscluster ? [...p.hauscluster].reduce((a,c)=>a+c.charCodeAt(0),0) : 0; return '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (p.aktuell ? 4 : 1.8) + '" fill="' + (p.aktuell ? '#d23c32' : farben[gruppe % farben.length]) + '"><title>' + esc(p.name) + '</title></circle>'; }).join('');
 }
 
 export function reiseModul(ctx) {

@@ -1,4 +1,6 @@
 import { GRUPPEN } from './daten';
+// O01 Organisation: reine Datenprojektion für die Oberfläche.
+export { organisationUebersicht } from './organisation';
 import { runwayWochen } from './stakeholder';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
@@ -75,7 +77,7 @@ export function posteingang(s: GameState): Posteingang {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
-    const modul = e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
+    const modul = e.typ === 'organisation_vorlage' ? 'organisation' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
     handeln.push({
       id: e.id, art: 'entscheidung', typ: e.typ, titel: e.titel, text: e.text,
       woche: e.woche, frist: e.frist, restWochen, optionen: e.optionen,
