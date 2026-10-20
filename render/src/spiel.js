@@ -126,8 +126,16 @@ const lebenEinstellung = param.get('leben') ?? (() => { try { return localStorag
 if (['aus', 'wenig', 'voll'].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
 $('leben-modus').value = leben.modus;
 $('leben-modus').addEventListener('change', (e) => {
+  const vorher = leben.modus;
   leben.setzen(e.target.value);
   try { localStorage.setItem('ruhrkauf.leben', leben.modus); } catch { /* Privater Browsermodus */ }
+  // Beim Abschalten bleibt der statische Verkehr aus dem ursprünglichen Stadtplan sichtbar.
+  if ((vorher === 'aus') !== (leben.modus === 'aus') && s && scene) {
+    const kameraAlt = { x: K.x, z: K.z, halb: K.halb };
+    baueStadtAusSpiel(stadtName);
+    Object.assign(K, kameraAlt);
+    kameraSetzen();
+  }
 });
 
 // Bodenpunkt unter einem Bildschirmpunkt (orthografisch: Strahl parallel zur Blickrichtung)
@@ -319,7 +327,7 @@ function baueStadtAusSpiel(name) {
   } });
   setzeLod('fern');
   let e;
-  try { e = baueStadt(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
