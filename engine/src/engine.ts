@@ -1,6 +1,7 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
+import { spielendePruefen } from './spielende';
 import { wettbewerbWoche } from './wettbewerb';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
@@ -30,7 +31,7 @@ function quartalsStart(s: GameState): void {
 }
 
 export function wocheAbspielen(s: GameState): WochenKpi {
-  if (s.phase === 'zerschlagen') throw new Error('Spiel beendet: Die Kette ist zerschlagen.');
+  if (s.phase === 'zerschlagen' || (s.ende && !s.spielendeFortgesetzt && !s.prognose)) throw new Error('Spiel beendet. Bitte ein neues Spiel beginnen oder zulässig weiterspielen.');
   const w = s.woche;
 
   prozesse(s);
@@ -217,6 +218,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
   s.woche += 1;
+  spielendePruefen(s);
   return k;
 }
 
