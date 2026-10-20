@@ -24,4 +24,4 @@ const eintraege = [
     },
   })),
 ];
-window.addEventListener('load', () => setTimeout(() => zeigeKatalog(eintraege, { titel: 'FUNDUS – Abgrenzung zu Kaufkiste, Wühlwerk, Resteparadies', spalten: 3, kachel: [560, 470] }), 20));
+window.addEventListener('load', () => setTimeout(() => zeigeKatalog(eintraege, { titel: 'FUNDUS – Abgrenzung zu Kaufkiste, Wühlwerk, Resteparadies', spalten: 3, kachel: [640, 520] }), 20));
