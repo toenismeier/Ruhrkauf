@@ -395,8 +395,26 @@ export function planungBericht(s: GameState) {
   const ist = sum(s.historie.filter((k) => jahr(s, k.woche) === p.jahr).map((k) => k.umsatz));
   const soll = sum(Object.values(p.phasing).flatMap((xs) => xs.slice(0, abgelaufene)));
   const f = vor?.ziele.umsatz;
+  // Kumuliertes Ist der Häuser auch auf Formate, Regionen und Hauscluster hochrollen.
+  const istJeEbene: Record<string, number> = {};
+  for (const h of s.haeuser) for (const key of keys(h)) istJeEbene[key] = (istJeEbene[key] ?? 0) + (p.istHaus[h.id]?.umsatz ?? 0);
+  const bisHeute: Record<string, number> = {};
+  for (const h of s.haeuser) for (const key of keys(h)) bisHeute[key] = (bisHeute[key] ?? 0) +
+    sum((p.phasing[h.id] ?? []).slice(0, abgelaufene));
   return { jahr: p.jahr, ziele: p.ziele, entwurf: s.planung?.entwurf,
-    knoten: Object.values(p.knoten).map((n) => ({ ...n, abweichung: n.umsatz ? (n.ist - n.umsatz * abgelaufene / 52) / n.umsatz : 0 })),
+    knoten: Object.values(p.knoten).map((n) => ({ ...n, ist: istJeEbene[n.id] ?? 0,
+      abweichung: bisHeute[n.id] ? ((istJeEbene[n.id] ?? 0) - bisHeute[n.id]) / bisHeute[n.id] : 0 })),
     ist, planBisHeute: soll, abweichung: ist - soll, forecasting: f ?? null, forecasts: s.planung?.forecasts.filter((x) => x.jahr === p.jahr) ?? [],
     quoten: s.planung?.bonusAnteil, boni: s.planung?.boni ?? [], vertrauen: s.planung?.vertrauenVerlauf ?? [] };
+}
+
+/** O06 Planungsassistent: Entwurf inkl. bereinigter Top-down-Verteilung und EBITDA-Sensitivität. */
+export function planungAssistent(s: GameState) {
+  if (!s.planung) initialisierePlanung(s);
+  const e = s.planung!.entwurf;
+  const vorschlag = e ? jahresVorschlag(s, e.jahr) : jahresVorschlag(s, jahr(s) + 1);
+  const knoten = e ? Object.values(machKnoten(s, e.ziele, e.overrides)) : [];
+  return { entwurf: e, vorschlag, knoten,
+    ebitdaSensitivitaet: e ? eur(vorschlag.ebitda + (e.ziele.umsatz - vorschlag.umsatz) * 0.25) : vorschlag.ebitda,
+    bericht: planungBericht(s) };
 }
