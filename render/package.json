@@ -18,7 +18,11 @@
     "ladenbau:pruefen": "node pruef-ladenbau.js",
     "ladenbau:pruefen:teile": "node pruef-ladenbau.js --teile",
     "ladenbau:smoke": "node tests/ladenbau-smoke.cjs",
-    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose"
+    "ladenbau:diagnose": "node render-katalog.js ladenplan-diagnose",
+    "massstab:geografie": "node pruef-stadt-geografie.js",
+    "massstab:standorte": "node pruef-standorte-massstab.js",
+    "massstab:kopien": "node pruef-kopien.js",
+    "massstab:gestaltung": "node pruef-alle-gestaltung.js"
   },
   "keywords": [],
   "author": "",
