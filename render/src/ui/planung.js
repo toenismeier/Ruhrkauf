@@ -66,6 +66,13 @@ export function planungModul(ctx) {
       '<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' +
       nodes.map((n) => '<tr><td>' + esc(n.name) + '</td><td>' + mio(n.umsatz) + '</td><td>' + mio(n.ist) + '</td><td>' + pct(n.abweichung) + '</td></tr>').join('') +
       '</tbody></table></div></div>';
+    html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div>' +
+      '<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' +
+      (b.wochen || []).slice().reverse().map((w) => '<tr><td>' + ((w.woche % 52) + 1) + '</td><td>' + mio(w.ist) +
+        '</td><td>' + mio(w.plan) + '</td><td>' + pct(w.abweichungQuote) + '</td><td>' + (w.forecast == null ? '–' : mio(w.forecast)) + '</td></tr>').join('') +
+      '</tbody></table></div></div>';
+    if (b.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' +
+      Object.entries(b.warengruppen).map(([g, v]) => zeile(g, mio(v))).join('') + '</details>';
     return html;
   }
 
