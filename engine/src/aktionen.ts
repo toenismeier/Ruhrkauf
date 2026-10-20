@@ -18,7 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
-import { chronikAktualisieren } from './chronik';
+import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { hqArchivSetzen } from './hq';
 
 export type SpielerAktion =
