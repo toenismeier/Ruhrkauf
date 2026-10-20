@@ -163,100 +163,149 @@ export function outlet(S, scene, haus, opt = {}) {
   const m = masseOutlet(haus), x = opt.x ?? 0, z = opt.z ?? 0;
   const r = rng(String(haus.id) + '/outlet/' + String(haus.fassade ?? 0));
   const Z = zustandNormal({ ...opt, status: opt.status ?? haus.status ?? 'offen', seed: haus.id });
-  const F = zustandFlags(Z), H = m.H;
-  const farbe = haus.lage === 'b' ? '#d6d1cd' : '#e0e1df';
-  const { bw, bd } = m;
-  // Kein massiver Vollquader: EG-Verkaufsfläche muss hinter der Glasfront sichtbar sein.
-  // Hinten und links bleiben geschlossene Wandkörper, rechts und vorn nur Brüstungen/Stützen.
-  const fensterOberkante = m.familie === 2 ? 8.05 : 4.95;
-  S.quader(x, 0.30, z, x + bw, H, z + 0.35, farbe);
-  S.quader(x, 0.30, z, x + 0.35, H, z + bd, farbe);
-  S.quader(x, fensterOberkante, z + bd - 0.38, x + bw, H, z + bd, farbe);
-  S.quader(x + bw - 0.38, fensterOberkante, z, x + bw, H, z + bd, farbe);
-  for (const xx of [x, x + bw - 0.55])
-    S.quader(xx, 0.30, z + bd - 0.45, xx + 0.55, fensterOberkante, z + bd, farbe);
-  for (const zz of [z, z + bd - 0.55])
-    S.quader(x + bw - 0.45, 0.30, zz, x + bw, fensterOberkante, zz + 0.55, farbe);
-  S.quader(x + 0.35, H - 0.28, z + 0.35, x + bw - 0.35, H + 0.05, z + bd - 0.35, '#f1f0e9');
-  S.quader(x - 0.25, H, z - 0.25, x + bw + 0.25, H + 0.35, z + bd + 0.25, '#a5a7a6');
-  // Vier erkennbare Material-/Fensterrastervarianten innerhalb der drei Bauformen.
-  const v = (haus.fassade ?? 0) % 4;
-  for (let u = x + 3; u < x + bw - 2; u += 5.5 - v * 0.3)
-    S.box(0.09, H - 0.9, 0.15, u, (H + 0.3) / 2, z + bd + 0.07, v % 2 ? '#b2b5b6' : FUGE);
-  const seiten = seitenVon(S, x, z, bw, bd);
-  const deckor = [];
+  const F = zustandFlags(Z), H = m.H, { bw, bd } = m;
+  const stadt = m.familie === 3, zweigeschossig = m.familie === 2;
+  const paneele = ['#d9dbdd', '#c4cbd0', '#e2dfd8'];
+  const farbe = stadt ? (m.variante % 2 ? '#c3bdb5' : '#cbd0ce') : paneele[m.variante % paneele.length];
+  const egTop = 5, ladenTop = stadt ? 5 + (m.n - 1) * 3.9 : H;
+  const bandY = stadt ? ladenTop - 3.5 : H - 3.5;
+  const eingang = 0.38 + (m.variante % 4) * 0.075;
+  const werbung = Z.hat('aktion') || Z.hat('offprice');
+  const seiten = seitenVon(S, x, z, bw, bd), logos = [];
+  // Tragende Rückseite und Schmalseite; der offene Erdgeschosskörper lässt Waren erkennen.
+  S.quader(x, 0.30, z, x + bw, H, z + 0.38, farbe);
+  S.quader(x, 0.30, z, x + 0.38, H, z + bd, farbe);
+  S.quader(x, 0.28, z, x + bw, 0.46, z + bd, '#ece9e2');
+  S.quader(x, H - 0.22, z, x + bw, H + 0.17, z + bd, '#c5c7c4');
+  if (stadt) {
+    // Ehemaliger Warenhaus-/Geschäftshauskörper: alte Büros mit Lochfassade über den Verkaufsflächen.
+    S.quader(x + 0.1, ladenTop, z + bd - 0.42, x + bw, H, z + bd, farbe);
+    S.quader(x + bw - 0.42, ladenTop, z + 0.1, x + bw, H, z + bd, farbe);
+    for (const s of seiten) for (let et = 0; et < m.buero; et++) {
+      const y0 = ladenTop + 0.78 + et * 3.5, y1 = Math.min(H - 0.45, y0 + 1.74);
+      for (let u = 1.8; u < s.L - 1.5; u += 3.7) {
+        s.q(u, u + 2.0, y0, y1, 0.24, 0.52, '#7d99a6');
+        s.q(u + 0.90, u + 1.02, y0, y1, 0.53, 0.59, '#e8e5dc');
+        s.q(u - 0.17, u + 2.17, y0 - 0.19, y0, 0.43, 0.62, '#d9d6ce');
+      }
+      s.q(0.35, s.L - 0.35, ladenTop + et * 3.5, ladenTop + et * 3.5 + 0.27, 0.53, 0.69, '#aca9a3');
+    }
+    if (m.variante % 2 === 0) { // umgenutzte Warenhausfront mit Lisenen
+      for (const s of seiten) for (let u = 2.2; u < s.L - 1.8; u += 7.5)
+        s.q(u, u + 0.54, ladenTop, H, 0.67, 0.91, '#b2b0ab');
+    }
+    // Eine Geschossfuge trennt den aufgefrischten Markenladen vom alten Bürooberbau.
+    for (const s of seiten) s.q(0, s.L, ladenTop - 0.14, ladenTop + 0.19, 0.61, 0.95, '#9f9d9a');
+  } else if (zweigeschossig) {
+    // Zweigeschossiger Fachmarkt: geschlossener OG-Körper aus grauen Paneelen, EG durchgehend Glas.
+    S.quader(x + 0.35, 7.65, z + bd - 0.36, x + bw, H, z + bd, farbe);
+    S.quader(x + bw - 0.36, 7.65, z + 0.35, x + bw, H, z + bd, farbe);
+    S.quader(x + 0.35, 4.72, z + 0.4, x + bw, 4.98, z + bd, '#929ca4');
+    S.quader(x + bw - 0.5, 0.45, z + bd - 7.6, x + bw, 7.8, z + bd, '#bbcbd1');
+    for (let et = 0; et < 4; et++) {
+      const y = 1.2 + et * 1.45;
+      S.box(1.15, 0.16, 2.3, x + bw - 2.65 - et * 0.43, y, z + bd - 3.4 - et * 0.3, '#adb9bf');
+      S.box(0.15, 1.0, 2.5, x + bw - 2.0 - et * 0.43, y + 0.5, z + bd - 3.4 - et * 0.3, '#727e87');
+    }
+  } else {
+    // Eingeschossige Box mit flacher, nach außen ablesbarer Dachattika.
+    S.quader(x + 0.3, H - 0.55, z + bd - 0.45, x + bw, H, z + bd, farbe);
+    S.quader(x + bw - 0.45, H - 0.55, z + 0.3, x + bw, H, z + bd, farbe);
+  }
   if (!F.zu) {
-    innenVorbereiten(S, scene); // transparentes Schaufensterglas aus dem gemeinsamen Innenbau-Material
+    innenVorbereiten(S, scene);
     innenOutlet(S, scene, haus, { x, z });
   }
-  seiten.forEach((s, i) => {
-    glasfront(S, scene, s, H, !F.zu, r, m.familie === 2);
-    if (m.familie === 3 && H > 9) {
-      for (let et = 1; et < m.n; et++) {
-        const y = 5.2 + (et - 1) * 4.25;
-        s.q(0.5, s.L - 0.5, y + 0.65, y + 2.2, 0.03, 0.15, v % 2 ? '#c5c9cb' : '#d8d7d2');
-        for (let u = 1; u < s.L - 1; u += 4.5) s.q(u, u + 0.12, y + 0.65, y + 2.2, 0.16, 0.2, '#abb1b3');
-      }
+  for (const [i, s] of seiten.entries()) {
+    glasfront(S, scene, s, stadt ? bandY - 0.07 : (zweigeschossig ? 7.65 : bandY + 0.4), !F.zu, r, zweigeschossig);
+    if (stadt) {
+      // EG-Läden haben eine eigenständige, breite Schaufensterzone.
+      s.q(0.1, s.L - 0.1, 4.6, 4.93, 0.33, 0.56, '#e5e0d5');
+      for (let u = 3; u < s.L - 2; u += 4.0)
+        s.q(u, u + 0.13, 0.42, 4.65, 0.16, 0.32, '#b5b9b9');
     }
-    // Leuchtband ist formatprägend, selbst im 70er/80er Geschäftshaus.
-    deckor.push(marke(scene, s, H, i === 0));
-    if (m.familie !== 3 && i === 0) {
-      s.q(0, s.L, 4.7, 4.98, 0.22, 2.3, '#d6d6d5'); // Vordach
-      for (let u = 3; u < s.L; u += 10) s.q(u - 0.1, u + 0.1, 0.4, 4.8, 2.06, 2.2, '#aeb6bb');
-    }
-  });
+    logos.push(marke(scene, s, H, bandY, werbung));
+  }
+  if (!stadt) {
+    // Über die volle Front durchlaufendes Glasvordach mit Stützen.
+    const vordach = zweigeschossig ? 4.45 : 3.18;
+    S.box(bw + 1.2, 0.23, 3.25, x + bw / 2, vordach, z + bd + 1.55, '#aac4d0');
+    S.box(bw + 1.1, 0.12, 0.18, x + bw / 2, vordach + 0.06, z + bd + 3.12, '#efeee9');
+    for (let xx = x + 2.5; xx < x + bw - 1.5; xx += 7.4)
+      S.box(0.18, vordach - 0.55, 0.18, xx, (vordach + 0.55) / 2, z + bd + 2.95, '#b2bac1');
+  }
+  // 8 × 4 m großer vorspringender Eingangs-Windfang in der Markenfarbe.
+  const ex = x + bw * eingang, portalH = stadt ? 5.85 : 5.95;
+  const pz = z + bd + (stadt ? 1.25 : 1.8);
+  for (const dx of [-4.05, 4.05])
+    S.box(0.7, portalH - 0.3, 3.9, ex + dx, portalH / 2, pz, FARBE_OUTLET);
+  S.box(8.8, 0.95, 4.15, ex, portalH - 0.45, pz, FARBE_OUTLET);
+  S.box(7.1, 3.55, 0.24, ex, 2.35, pz + 2.0, '#aacbd7');
+  const portalSeite = new Seite(S, ex - 4.4, pz - 2.1, 8.8, 4.2, '+z');
+  text(scene, portalSeite, NAME_OUTLET, 4.4, portalH - 0.46, 0.69, 7.6, 0.78);
+  // Dachlandschaft: unterschiedliche Technikfelder und erkennbare Oberlichter.
+  technik(S, r, x + 2.5, z + 3, x + bw - 2, z + bd - 3, H + 0.18, { max: stadt ? 5 : 10, farbe: '#b9bfc2' });
+  for (let i = 0; i < (stadt ? 2 : 5 + m.variante % 3); i++) {
+    const xx = x + 4 + i * Math.max(4.0, (bw - 8) / 7);
+    if (xx > x + bw - 3) continue;
+    S.box(2.25, 0.28, Math.min(8, bd * 0.35), xx, H + 0.22, z + bd * 0.47, '#8fb7c7');
+    S.box(2.47, 0.13, Math.min(8, bd * 0.35) + 0.18, xx, H + 0.08, z + bd * 0.47, '#e9ece9');
+  }
   if (m.park) {
-    const pz = z + bd + 1.4;
-    S.quader(x + 1, 0.31, pz, x + bw - 1, 0.36, z + m.d - 1, '#92969a');
-    parkreihe(S, r, x + 2, x + bw - 3, pz + 2, 5.5, 0.36, 0.85);
-    // Einkaufswagenhäuschen in Markenfarbe, klare Retail-Park-Ausprägung.
-    S.box(5, 0.22, 3.2, x + bw - 5, 2.45, z + m.d - 3.4, FARBE_OUTLET);
-    for (let k = 0; k < 3; k++) S.box(0.08, 2.0, 0.08, x + bw - 7 + k * 2, 1.38, z + m.d - 3.4, '#d7dee3');
-    if (opt.pylon !== false) pylon(S, scene, x + 4, z + m.d - 2.3);
+    const parkz = z + bd + 1.2, parkTiefe = m.park - 2.2;
+    S.quader(x + 1, 0.30, parkz, x + bw - 1, 0.36, z + m.d - 0.8, '#8d9399');
+    parkreihe(S, r, x + 2, x + bw - 2, parkz + 3.2, 5.3, 0.36, 0.94);
+    if (parkTiefe >= 17) parkreihe(S, r, x + 2, x + bw - 2, parkz + 10.1, 4.8, 0.36, 0.88);
+    for (let i = 0; i < 8; i++) {
+      const xx = x + 2.5 + i * (bw - 5) / 8;
+      S.box(0.55, 0.27, 1.9, xx, 0.45, parkz + 9, '#c7cbba');
+    }
+    S.box(5.8, 0.25, 3.5, x + bw - 5.4, 2.52, z + m.d - 3.1, FARBE_OUTLET);
+    for (let i = 0; i < 5; i++) {
+      S.box(0.11, 2.0, 0.11, x + bw - 8.1 + i * 1.25, 1.38, z + m.d - 3.1, '#d7dee3');
+      S.box(0.7, 0.56, 0.70, x + bw - 8 + i * 1.25, 0.6, z + m.d - 3.0, '#a4b2bb');
+    }
+    if (opt.pylon !== false) pylon(S, scene, x + 6.6, z + m.d - 2.4);
+  } else {
+    S.box(bw + 3.5, 0.20, 5.3, x + bw / 2, 0.31, z + bd + 2.4, '#c9c9c5');
+    for (let i = 0; i < 10; i++) S.box(0.15, 0.04, 1.6, x + 2 + i * (bw - 3) / 10, 0.44, z + bd + 3.2, '#ededed');
   }
   if (!F.zu && opt.passanten !== false) {
-    const anz = Z.status === 'neueroeffnung' ? 18 : 10;
+    const anz = Z.status === 'neueroeffnung' ? 22 : 14;
     for (let i = 0; i < anz; i++) {
-      const xx = x + 3 + r() * (bw - 6), zz = z + bd + 2.0 + r() * (m.park ? 5.0 : 2.2);
+      const xx = x + 3 + r() * (bw - 6), zz = z + bd + 2.4 + r() * (m.park ? 6 : 2.1);
       mensch(S, r, xx, 0.32, zz);
-      S.box(0.53, 0.75, 0.23, xx + 0.45, 0.73, zz + 0.1, FARBE_OUTLET);
+      S.box(0.62, 0.78, 0.27, xx + 0.45, 0.73, zz + 0.08, FARBE_OUTLET);
+      S.box(0.58, 0.08, 0.04, xx + 0.45, 1.17, zz + 0.22, '#e0d7cb');
     }
   }
-  // Neueröffnung: eigene Ballonfarben direkt am Eingang, zusätzlich zum allgemeinen Overlay.
   if (Z.status === 'neueroeffnung') {
-    const bx = x + bw * 0.52, bz = z + bd + 0.7;
-    // Schlange mit geordneten Wartepunkten und burgunderroten Absperrbändern.
-    for (let i = 0; i < 9; i++) mensch(S, r, bx - 4.5 + i * 1.05, 0.32, bz + 2.6);
+    const bz = z + bd + 3.1;
+    for (let i = 0; i < 10; i++) mensch(S, r, ex - 4.1 + i * 0.85, 0.32, bz + 2.6);
     for (const dz of [1.5, 3.7]) {
-      S.box(9.5, 0.06, 0.07, bx, 1.02, bz + dz, FARBE_OUTLET);
-      for (let j = -2; j <= 2; j++) S.box(0.08, 1.05, 0.08, bx + j * 2.25, 0.63, bz + dz, '#6a6f73');
+      S.box(9.5, 0.07, 0.07, ex, 1.02, bz + dz, FARBE_OUTLET);
+      for (let j = -2; j <= 2; j++) S.box(0.08, 1.05, 0.08, ex + j * 2.25, 0.63, bz + dz, '#666f76');
     }
-    for (let i = 0; i < 14; i++) {
-      const xx = bx - 3 + (i / 13) * 6, yy = 2.4 + Math.sin((i / 13) * Math.PI) * 2.6;
-      const g = new THREE.IcosahedronGeometry(0.47, 1); g.translate(xx, yy, bz);
+    for (let i = 0; i < 16; i++) {
+      const xx = ex - 3 + i / 15 * 6, yy = 3.0 + Math.sin(i / 15 * Math.PI) * 2.5;
+      const g = new THREE.IcosahedronGeometry(0.45, 1); g.translate(xx, yy, bz);
       S.add(g, i % 3 ? FARBE_OUTLET : '#f8ede4');
     }
   }
   const koerper = {
-    x, z, w: bw, d: bd, hoehe: H, egHoehe: 5.2, geschossHoehe: 4.25, n: m.n,
-    tRelief: 0.5, raster: 4.5, fensterBand: false,
+    x, z, w: bw, d: bd, hoehe: H, egHoehe: 5, geschossHoehe: 3.9, n: m.n,
+    tRelief: 1.15, raster: 4.1, fensterBand: false,
     seiten: {
-      '+z': { u1: bw, sperren: [deckor[0]], abbau: { u: bw * 0.53, y: H - 1.6, t: 0.6 } },
-      '+x': { u1: bd, sperren: [deckor[1]], abbau: { u: bd * 0.53, y: H - 1.6, t: 0.6 } },
+      '+z': { u1: bw, sperren: [logos[0]], abbau: { u: bw * 0.53, y: bandY + 1.6, t: 1.15 } },
+      '+x': { u1: bd, sperren: [logos[1]], abbau: { u: bd * 0.53, y: bandY + 1.6, t: 1.15 } },
     },
-    eingaenge: [{ seite: '+z', u: bw * 0.52, breite: 3.8, t: 0.3, haupt: true }],
-    fensterEG: [{ seite: '+z', a: 0.6, b: bw - 0.6, y0: 0.5, y1: 3.2, t: 0.3 }],
+    eingaenge: [{ seite: '+z', u: bw * eingang, breite: 7.4, t: 2.2, haupt: true }],
+    fensterEG: [{ seite: '+z', a: 0.6, b: bw - 0.6, y0: 0.5, y1: 3.2, t: 0.30 }],
     farbe, baujahr: haus.baujahr, jahr: opt.jahr, flaecheQm: haus.grundflaecheQm * m.n,
     marke: mark, seed: String(haus.id) + '/outlet', planeText: 'HIER ENTSTEHT ' + NAME_OUTLET,
   };
-  // Der universelle Offprice-Zustand benennt sonst das Hartwig-interne Outlet.
-  // Für FUNDUS bleibt ausschließlich die eigene Marke sichtbar.
-  if (Z.hat('offprice')) {
-    const sz = new Seite(S, x, z, bw, bd, '+z');
-    sz.q(1, Math.min(bw - 1, 15), 1.15, 2.45, 0.35, 0.48, FARBE_OUTLET);
-    text(scene, sz, NAME_OUTLET + ' MARKEN', Math.min(bw - 1, 15) / 2 + 0.5, 1.8, 0.56, Math.min(bw - 2, 13), 0.8);
-  }
-  const dekZ = Z.hat('offprice') ? zustandNormal({ status: 'offen', seed: haus.id }) : Z;
+  // Off-Price und Aktion verwenden ausschließlich den Markenclaim statt Rabatt-Plakatflächen.
+  const dekZ = werbung ? zustandNormal({ status: 'offen', seed: haus.id }) : Z;
   const dekor = zustandsDekor(S, scene, koerper, dekZ, { pylon: false, passanten: false, logosAbdecken: true, abrissSeite: opt.abrissSeite });
-  return { hoehe: Math.max(H + 0.8, dekor.hoehe, m.park ? 9 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z.status };
+  return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z.status };
 }
