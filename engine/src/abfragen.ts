@@ -31,7 +31,7 @@ export interface PostHandeln {
   wert?: { betrag: number; einheit: string };
   dringend: boolean;
 }
-export type PostKategorie = 'Presse' | 'Häuser' | 'Finanzen' | 'Personal' | 'Konkurrenz' | 'Eigentümer';
+export type PostKategorie = 'Presse' | 'Häuser' | 'Finanzen' | 'Personal' | 'Konkurrenz' | 'Eigentümer' | 'IT';
 export interface PostMeldung {
   id: string;
   woche: number;
@@ -77,7 +77,7 @@ export function posteingang(s: GameState): Posteingang {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
-    const modul = e.typ === 'organisation_vorlage' ? 'organisation' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
+    const modul = e.typ === 'organisation_vorlage' ? 'organisation' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ.startsWith('it_') ? 'it' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
     handeln.push({
       id: e.id, art: 'entscheidung', typ: e.typ, titel: e.titel, text: e.text,
       woche: e.woche, frist: e.frist, restWochen, optionen: e.optionen,
@@ -111,7 +111,7 @@ export function posteingang(s: GameState): Posteingang {
     const konkurrenz = s.wettbewerber.find((w) => m.text.includes(w.name));
     return {
       id: m.id ?? `alt-${m.woche}-${i}`, woche: m.woche, typ: m.typ, text: m.text,
-      kategorie: konkurrenz ? 'Konkurrenz' : meldungKategorie(m.typ, m.text),
+      kategorie: konkurrenz ? 'Konkurrenz' : m.bezug?.modul === 'it' ? 'IT' : meldungKategorie(m.typ, m.text),
       bezug: { ...bezug, ...(m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}), ...(konkurrenz ? { stadt: konkurrenz.stadt, wettbewerberId: konkurrenz.id } : {}) },
     };
   });
@@ -249,6 +249,9 @@ export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalende
 
 /** Wettbewerbsübersicht und Übergabeobjekte für das spätere Stadtbild. */
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
+
+// O03 IT: Datenmodell und Systemlandkarte liegen ausschließlich in der Engine.
+export { itUebersicht, itDeckelGrund } from './it';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';

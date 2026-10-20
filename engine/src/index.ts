@@ -44,6 +44,9 @@ export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, Po
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
 export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
+// O03 IT
+export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itProjektPlan, generationInCluster, itAlter, ausfallRisiko, type ItStand, type ItSystemId, type ItProjekt, type ItAktion, type ItPhase, type ProjektArt, type Generation } from './it';
+
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
 
@@ -53,7 +56,6 @@ export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, beric
   neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor, organisationLeitungKostenWoche,
   type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion,
 } from './organisation';
-export { itDeckel } from './it';
 // O02 Umsatztreiber
 export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './abfragen';
 export type { TreiberId, TreiberFaktoren, TreiberQuellen, TreiberPeriode, TreiberVergleich, Umsatzbruecke, Ebene, RankingKennzahl, RankingZeile, Reporting, ReportingZeile } from './treiber';

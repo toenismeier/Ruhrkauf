@@ -15,6 +15,8 @@ import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './w
 import { vorstandWoche } from './vorstand';
 // O01 Organisation
 import { organisationWoche } from './organisation';
+// O03 IT
+import { itWoche } from './it';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 // O02 Umsatztreiber
@@ -40,6 +42,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   prozesse(s);
   premiumWoche(s);
   hqWoche(s);
+  // O03 IT: Projekte, Betriebskosten und Störungen vor der Hausnachfrage.
+  itWoche(s);
   quartalsStart(s);
   // Vorstand (Loyalität, Abwerbung, Sitzung, Ressort-KI) und Produktentwicklung (Einführungen)
   vorstandWoche(s);

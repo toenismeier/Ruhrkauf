@@ -14,6 +14,8 @@ import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
 import { bildeHauscluster } from './organisation';
+// O03 IT
+import { initialisiereIt } from './it';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -348,6 +350,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
   bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
+  // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
+  initialisiereIt(s);
   return s;
 }
 

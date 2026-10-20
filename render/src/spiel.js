@@ -33,6 +33,8 @@ import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
 // O02 Umsatztreiber
 import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
+// O03 IT
+import { itModul } from './ui/it.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -527,7 +529,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po, org, rg].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -794,10 +796,12 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null, rg = null;
+let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
+// O03 IT
+itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
 po = posteingangModul({
@@ -807,6 +811,7 @@ po = posteingangModul({
       if (bezug.modul === 'einkauf') return oeffneEinkauf();
       if (bezug.modul === 'vorstand') return oeffneModul(vs);
       if (bezug.modul === 'organisation') return oeffneModul(org);
+      if (bezug.modul === 'it') return oeffneModul(itM);
       if (bezug.modul === 'marketing') return oeffneModul(mk);
       if (bezug.modul === 'produkte') return oeffneModul(pr);
       if (bezug.modul === 'zentrale') return oeffneHq();
@@ -821,6 +826,7 @@ po = posteingangModul({
     else if (bezug.modul === 'einkauf') oeffneEinkauf();
     else if (bezug.modul === 'vorstand') oeffneModul(vs);
     else if (bezug.modul === 'organisation') oeffneModul(org);
+    else if (bezug.modul === 'it') oeffneModul(itM);
     else if (bezug.modul === 'marketing') oeffneModul(mk);
     else if (bezug.modul === 'produkte') oeffneModul(pr);
     else if (bezug.modul === 'zentrale') oeffneHq();
@@ -869,6 +875,8 @@ $('wochenbericht-modus').addEventListener('change', (e) => { postUi.wochenberich
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
 $('organisation').addEventListener('click', () => oeffneModul(org));
+// O03 IT
+$('it').addEventListener('click', () => oeffneModul(itM));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
 $('posteingang').addEventListener('click', () => oeffneModul(po));
@@ -959,7 +967,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
