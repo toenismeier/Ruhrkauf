@@ -30,7 +30,7 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
    expect(p?.flaechen.reduce((sum, f) => sum + f.qm, 0)).toBe(flaeche);
    expect(p?.etagen).toHaveLength(geschosse);
    expect(p!.grundflaecheQm * geschosse).toBe(flaeche);
-   expect(p?.flaechen.every(f => p.etagen.includes(f.etage) && f.qm > 0)).toBe(true);
+   expect(p?.flaechen.every(f => p!.etagen.includes(f.etage) && f.qm > 0)).toBe(true);
   }
  });
  test.each([1,2,3])('Seed %d: der Anfangsumsatz folgt Fläche und Premiumrang, nicht dem Zufallshaus',seed=>{
