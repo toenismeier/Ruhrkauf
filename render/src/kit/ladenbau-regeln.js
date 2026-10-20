@@ -38,7 +38,7 @@ export const FORMAT_PROFILE = Object.freeze({
       rad: Object.freeze({wand:'sport_rad',gondel:'gondel_rad',insel:'sport_insel_ebike'}),
       wintersport: Object.freeze({wand:'sport_ski',gondel:'gondel_ski',insel:'sport_insel_winterpod'}),
       teamsport: Object.freeze({wand:'sport_trikot_verein',gondel:'gondel_baelle',insel:'sport_insel_tor'}),
-      fitness: Object.freeze({wand:'sport_fitness_wand',gondel:'gondel_fitness',insel:'sport_insel_fitness'}),
+      fitness: Object.freeze({wand:'sport_fitness_zubehoer',gondel:'gondel_textil',insel:'sport_insel_fitness'}),
     }),
   }),
   outlet: Object.freeze({
