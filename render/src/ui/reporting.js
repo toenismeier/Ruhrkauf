@@ -58,8 +58,8 @@ export function reportingModul(ctx) {
     optionen.map(([wert, titel]) => '<option value="' + esc(wert) + '" ' + (String(ui[key]) === String(wert) ? 'selected' : '') +
       '>' + esc(titel) + '</option>').join('') + '</select></label>';
   function anzeigen() {
-    const daten = E.reporting(ctx.s(), ui.wochen);
-    const hs = daten.zeilen.filter((z) => ui.format === 'alle' || z.format === ui.format);
+    const daten = E.reporting(ctx.s(), ui.wochen, ui.format);
+    const hs = daten.zeilen;
     const gruppen = daten.gruppen;
     let content = '<div class="o02-filter">' +
       auswahl('Ebene', 'ebene', [['region', 'Region'], ['hauscluster', 'Hauscluster'], ['haus', 'Haus']]) +
@@ -88,7 +88,7 @@ export function reportingModul(ctx) {
           }).join('');
         } else innen = karten(treff);
         return '<details class="o02-gruppe"><summary>' + esc(id) + ' (' + treff.length + ' Häuser)</summary>' +
-          (gruppe && ui.format === 'alle' ? zeile(gruppe) : '') + tabelle(innen) + '</details>';
+          (gruppe ? zeile(gruppe) : '') + tabelle(innen) + '</details>';
       }).join('');
       content += abschnitte || leere;
     }
