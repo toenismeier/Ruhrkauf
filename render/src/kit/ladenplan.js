@@ -206,7 +206,11 @@ function inszenierung(plan,profil,raum) {
   if(!a.insel)return;
   const m=moebel(a.insel),w=m.rasterB*U,d=m.rasterT*U;
   const xs=[raum.x+U,raum.x+raum.w-w-U],zs=[raum.z+U,raum.z+raum.d-d-U];
-  for(const z of zs)for(const x of xs) {
+  // Erst die bevorzugten Eckpositionen, danach bei kleinen/verbauten Bereichen
+  // auch freie 1,25-m-Positionen prüfen. Pro Abteilung höchstens eine Bühne.
+  for(let z=raum.z;z+d<=raum.z+raum.d+1e-8;z+=U)zs.push(z);
+  for(let x=raum.x;x+w<=raum.x+raum.w+1e-8;x+=U)xs.push(x);
+  for(const z of new Set(zs))for(const x of new Set(xs)) {
     const i=item(a.insel,x,z,0,raum.id,{inszenierung:true});
     if(passeIn(i,raum)&&passe(i,plan,[...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld],0)) {
       plan.moebel.push(i);return;
@@ -214,6 +218,60 @@ function inszenierung(plan,profil,raum) {
   }
 }
 
+// Sportbekleidung benötigt echte Rundständer und Puppengruppen, nicht nur
+// generisch durchrotierte Tische. Die Stellflächen bleiben unverändert.
+function sichereSportBekleidung(plan) {
+  if(plan.profil!=='sport')return;
+  for(const raum of plan.abteilungen.filter(a=>a.id==='sporttextil')) {
+    const ms=plan.moebel.filter(m=>m.abteilung===raum.id &&
+      m.id.startsWith('sport_mix_sporttextil_')&&!m.inszenierung);
+    for(const art of ['rundstaender','puppen']) {
+      if(ms.some(m=>m.id.includes('_'+art+'_')))continue;
+      const platz=ms.find(m=>!/_(rundstaender|puppen)_/.test(m.id));
+      if(!platz)continue;
+      const rasterB=Math.round(platz.w/U);
+      const id='sport_mix_sporttextil_'+art+'_'+rasterB;
+      // Gleicher Footprint und gleiche Höhe wie das ersetzte Möbel.
+      moebel(id);
+      platz.id=id;platz.moebelart=id.slice(0,id.lastIndexOf('_'));
+    }
+  }
+}
+function verdichteOutlet(plan) {
+  if(plan.profil!=='outlet')return;
+  const flaeche=plan.breite*plan.tiefe-
+    plan.hindernisse.reduce((s,h)=>s+rechteckFlaeche(h),0);
+  let belegt=plan.moebel.reduce((s,m)=>s+rechteckFlaeche(m),0);
+  // Bei sehr großen Doppelstangenreihen etwas ausdünnen, ohne das Wandband
+  // und die Kasse zu beeinträchtigen.
+  for(let i=plan.moebel.length-1;i>=0&&belegt>0.485*flaeche;i--) {
+    const m=plan.moebel[i];
+    if(m.id!=='outlet_doppelstange')continue;
+    plan.moebel.splice(i,1);belegt-=rechteckFlaeche(m);
+  }
+  const id='outlet_rundstaender',def=moebel(id),w=def.rasterB*U,d=def.rasterT*U;
+  for(let n=0;n<40;n++) {
+    const frei=schwerpunkte(plan),gross=frei[0]?.size??0;
+    if(gross<=R.leerflaecheMax&&belegt>=0.36*flaeche)break;
+    if(belegt+w*d>0.485*flaeche)break;
+    let gesetzt=false;
+    for(const f of frei) {
+      if(f.size<Math.min(gross,3.75))break;
+      const raum=plan.abteilungen.find(a=>f.x>=a.x&&f.z>=a.z&&
+        f.x+w<=a.x+a.w&&f.z+d<=a.z+a.d);
+      if(!raum)continue;
+      for(let z=f.z;z+d<=f.z+f.size+1e-8&&!gesetzt;z+=U)
+        for(let x=f.x;x+w<=f.x+f.size+1e-8&&!gesetzt;x+=U) {
+          const m=item(id,x,z,0,raum.id,{ausgleich:true});
+          if(!passeIn(m,raum)||!passe(m,plan,
+            [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
+          plan.moebel.push(m);belegt+=w*d;gesetzt=true;
+        }
+      if(gesetzt)break;
+    }
+    if(!gesetzt)break;
+  }
+}
 function schwerpunkte(plan) {
   const r=R.suchRaster,nx=Math.round(plan.breite/r),nz=Math.round(plan.tiefe/r);
   const block=new Uint8Array(nx*nz),prev=new Int16Array(nx+1),jetzt=new Int16Array(nx+1);
@@ -405,6 +463,8 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
   for(const raum of plan.abteilungen)warenReihen(plan,p,raum);
   verdichteLadenplan(plan,p);
   sichereSportMix(plan);
+  sichereSportBekleidung(plan);
+  verdichteOutlet(plan);
   // Farbige Abteilungsrechtecke unter dem Gangbelag erhalten die Sporthaus-Identität.
   plan.boeden.push({...quadrat(0,0,plan.breite,plan.tiefe),typ:'flaeche',farbe:p.boden.flaeche});
   if(p.id==='sport')for(const a of plan.abteilungen)
@@ -418,6 +478,7 @@ export function ladenplan(flaeche, profil, abteilungen, seed=1) {
 /** Umsetzung der Plan-Daten in die bestehende Three.js-Sammler-API. */
 export function baueLadenplan(S,scene,plan,o={}) {
   const p=ladeProfil(plan.profil),y=o.y??0,dichte=o.dichte??1;
+  const versatzX=o.x??0,versatzZ=o.z??0;
   if(o.vorbereiten!==false)vorbereiten(S,scene);
   const n0=S.anzahl;
   // Für Etagenkatalog-Ausschnitte nur Möbel und Bodenteile im sichtbaren Schnitt bauen.
@@ -446,15 +507,20 @@ export function baueLadenplan(S,scene,plan,o={}) {
     const hoehe=b.typ==='gang'?0.038:b.typ==='akzent'?0.045:0.03;
     let stuecke=[beschraenke(b)].filter(Boolean);
     for(const h of o.bodenAussparungen??[])stuecke=stuecke.flatMap(q=>ohneLoch(q,h));
-    for(const q of stuecke)S.box(q.w,hoehe,q.d,q.x+q.w/2,y-hoehe/2+(b.typ==='gang'?0.010:b.typ==='akzent'?0.016:b.abteilung?0.004:0),q.z+q.d/2,b.farbe);
+    for(const q of stuecke)S.box(q.w,hoehe,q.d,q.x+q.w/2+versatzX,y-hoehe/2+(b.typ==='gang'?0.010:b.typ==='akzent'?0.016:b.abteilung?0.004:0),q.z+q.d/2+versatzZ,b.farbe);
   }
   if(plan.profil==='sport'&&scene)for(const a of plan.abteilungen) {
     const raumbild=beschraenke(a);
     if(!raumbild)continue;
-    const x=raumbild.x+(raumbild.w>6?Math.min(3,raumbild.w/2):raumbild.w/2);
-    const z=raumbild.z+raumbild.d/2;
+    const x=a.x+a.w/2+versatzX;
+    const z=a.z+a.d/2+versatzZ;
     haengeschild(S,scene,SPORT_NAMEN[a.id]??a.titel,x,y+3.35,z,
       {farbe:SPORT_SCHILDER[a.id]??'#314754',hoehe:0.48});
+  }
+  if(plan.profil==='outlet'&&scene)for(const a of plan.abteilungen) {
+    if(!beschraenke(a))continue;
+    haengeschild(S,scene,a.titel,a.x+a.w/2+versatzX,y+3.18,
+      a.z+a.d/2+versatzZ,{farbe:'#8c1d40',hoehe:0.43});
   }
   for(let j=0;j<plan.moebel.length;j++){
     const m=plan.moebel[j];
@@ -464,7 +530,7 @@ export function baueLadenplan(S,scene,plan,o={}) {
     const winkel=m.winkel*Math.PI/180;
     const ox=m.winkel===90?m.x:m.winkel===270?m.x+m.w:m.x+w/2;
     const oz=m.winkel===90?m.z+m.d/2:m.winkel===180?m.z+m.d:m.z;
-    def.bau(lokal(S,ox,y,oz,winkel),rng(String(plan.seed)+':'+j+':'+m.id),dichte,
+    def.bau(lokal(S,ox+versatzX,y,oz+versatzZ,winkel),rng(String(plan.seed)+':'+j+':'+m.id),dichte,
       {seed:String(plan.seed)+':'+j,bestueckung:o.bestueckung??1,profil:p.id});
   }
   return {teile:S.anzahl-n0,moebel:plan.moebel.length,abteilungen:plan.abteilungen.length};
