@@ -55,8 +55,11 @@ function erreichbar(reach,g,r,puffer=0) {
   for(let z=c;z<d;z++)for(let x=a;x<b;x++)if(seen[z*nx+x]&&!block[z*nx+x])return true;
   return false;
 }
-function groessteLeere(g) {
-  const {nx,nz,block}=g;let max=0;
+function groessteLeere(g, gaenge=[]) {
+  const {nx,nz}=g,block=g.block.slice();let max=0;
+  // Haupt- und Nebengänge sind bewusst freigehaltene Verkehrsflächen,
+  // keine fehlbestückten Restflächen. Nur echte Verkaufsraumlücken messen.
+  for(const weg of gaenge)g.set(weg,block);
   const vorher=new Int32Array(nx+1),jetzt=new Int32Array(nx+1);
   for(let z=1;z<=nz;z++) {
     for(let x=1;x<=nx;x++){
@@ -99,7 +102,7 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
   const flaeche=plan.breite*plan.tiefe,verfuegbar=flaeche-zaehle(g.ob,1)*S*S;
   const belegt=zaehle(g.mob,1)*S*S;
   const dichte=verfuegbar>0?belegt/verfuegbar:0;
-  const wand=wanddeckung(plan),leer=groessteLeere(g);
+  const wand=wanddeckung(plan),leer=groessteLeere(g,plan.gaenge);
   const boeden=unique(plan.boeden.map(b=>b.typ)),akzent=plan.boeden.filter(b=>b.typ==='akzent').reduce((n,b)=>n+rechteckFlaeche(b),0)/flaeche;
   const dekoflaeche=plan.moebel.filter(m=>m.typ==='deko').reduce((n,m)=>n+rechteckFlaeche(m),0)/flaeche;
   if(!reach.start)add('Wege','Eingang blockiert');
@@ -142,8 +145,11 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
   if(leer>R.leerflaecheMax+EPS)add('Leerfläche',leer.toFixed(2)+' m statt 6 m');
   for(const a of plan.abteilungen){
     const ins=plan.moebel.filter(m=>m.abteilung===a.id&&m.inszenierung);
-    if(ins.length>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+ins.length+' Inszenierungen');
-    if(plan.profil==='outlet'&&ins.length)add('Format','FUNDUS ohne Inszenierung');
+    const fest=(plan.festeInszenierungen??[]).filter(m=>m.abteilung===a.id);
+    const anzahl=ins.length+fest.length;
+    if(anzahl>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+anzahl+' Inszenierungen');
+    if(plan.profil==='sport'&&anzahl!==1)add('Insel',a.id+': genau eine Erlebnisinszenierung erforderlich, '+anzahl+' gefunden');
+    if(plan.profil==='outlet'&&anzahl)add('Format','FUNDUS ohne Inszenierung');
   }
   // Phase 4: Kompositionsprüfung zusätzlich zu Dichte und Laufwegen.
   if(plan.profil==='sport')for(const a of plan.abteilungen) {

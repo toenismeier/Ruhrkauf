@@ -77,6 +77,18 @@ for(const haus of sport)for(const etage of haus.etagen.filter(e=>e>=0)){
    haus.id+' Etage '+etage+': Dichte außerhalb 35–50 %');
  assert.equal(plan.boeden.filter(b=>b.abteilung).length,plan.abteilungen.length,
    haus.id+' Etage '+etage+': Sortimentsböden fehlen');
+ for(const raum of plan.abteilungen) {
+   const ins=plan.moebel.filter(m=>m.abteilung===raum.id&&m.inszenierung).length+
+     (plan.festeInszenierungen??[]).filter(m=>m.abteilung===raum.id).length;
+   assert.equal(ins,1,haus.id+' Etage '+etage+' '+raum.id+': genau eine Themenbühne');
+   if(raum.id==='sporttextil') {
+     const bestand=plan.moebel.filter(m=>m.abteilung===raum.id);
+     assert.ok(bestand.some(m=>m.id.includes('_rundstaender_')),
+       haus.id+' Etage '+etage+': Rundständer fehlen');
+     assert.ok(bestand.some(m=>m.id.includes('_puppen_')),
+       haus.id+' Etage '+etage+': Puppengruppen fehlen');
+   }
+ }
 
  etagen++;
 }
