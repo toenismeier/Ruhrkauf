@@ -282,7 +282,7 @@ export function itWoche(s: GameState): void {
       const risiko=ausfallRisiko(g,alter)*(1-0.45*q)*(x.wartungGekuendigt?2.5:1);
       if(!s.prognose && chance(itZufall(s,5000+i*100000+j),risiko)){
         if(id==='kasse'||id==='warenwirtschaft'||id==='ecommerce') stoerung(s,c,id==='kasse'?0.65:0.85);
-        melde(s,'warnung',SYSTEME[id].name+': Ausfall in Cluster '+c.name+'. Der operative Betrieb ist eingeschränkt.',{modul:'it'});
+        melde(s,'warnung',id==='kasse' ? 'Kassenausfall am Samstag in Cluster '+c.name+'. Umsatzausfälle durch gestörte Kassensysteme.' : SYSTEME[id].name+': Ausfall in Cluster '+c.name+'. Der operative Betrieb ist eingeschränkt.',{modul:'it'});
       }
       if(it.startprobleme[id+':'+c.id]>s.woche && !s.prognose) {
         if(chance(itZufall(s,9000+i*100000+j),0.22*(1-q*0.5))) stoerung(s,c,id==='kasse'?0.89:0.97);
