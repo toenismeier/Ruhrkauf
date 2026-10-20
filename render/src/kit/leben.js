@@ -226,14 +226,14 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const key = a.lane.id;
       const voraus = belegung.get(key);
       let ziel = a.m + a.geschw * dt;
-      if (voraus !== undefined) ziel = Math.min(ziel, voraus - (a.art === 'tram' ? 22 : a.art === 'bus' || liste.some((b) => b !== a && b.lane === a.lane && b.art === 'bus' && b.m >= a.m) ? 14 : KLEINSTE_LUECKE));
+      if (voraus) ziel = Math.min(ziel, voraus.m - (a.art === 'tram' || voraus.art === 'tram' ? 22 : a.art === 'bus' || voraus.art === 'bus' ? 14 : KLEINSTE_LUECKE));
       if (ziel >= laenge(a.lane)) {
         const moeglich = a.lane.naechste.filter((n) => !liste.some((b) => b !== a && b.lane === n && b.m < KLEINSTE_LUECKE * 2));
         const nach = moeglich.length ? waehle(moeglich) : null;
         if (nach) { a.sprung = { von: punkt(a.lane, laenge(a.lane)), nach: punkt(nach, 0), fort: 0 }; a.lane = nach; a.m = 0; }
         else a.m = Math.max(0, laenge(a.lane) - 1);
       } else a.m = Math.max(0, ziel);
-      belegung.set(a.lane.id, a.m);
+      belegung.set(a.lane.id, a);
       if (a.sprung) { a.sprung.fort += a.geschw * dt; if (a.sprung.fort >= abstand(a.sprung.von, a.sprung.nach)) a.sprung = null; }
     }
   }
