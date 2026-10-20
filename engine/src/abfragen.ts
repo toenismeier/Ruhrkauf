@@ -4,6 +4,7 @@ import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
 import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
+import { planungBericht, planWoche } from './planung';
 
 
 /** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */
@@ -75,7 +76,7 @@ export function posteingang(s: GameState): Posteingang {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
-    const modul = e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
+    const modul = e.typ.startsWith('planung_') ? 'planung' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
     handeln.push({
       id: e.id, art: 'entscheidung', typ: e.typ, titel: e.titel, text: e.text,
       woche: e.woche, frist: e.frist, restWochen, optionen: e.optionen,
@@ -250,3 +251,5 @@ export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+// O06 Planung: Anzeigeabfragen ausschließlich aus der Engine.
+export { planungBericht, planWoche };
