@@ -118,7 +118,7 @@ export function reportingModul(ctx) {
     const el = e.target.closest('[data-o02-open]');
     if (el) { e.preventDefault(); ui.aktiv = false; ctx.hausOeffnen(el.dataset.o02Open); }
   });
-  return { oeffne: anzeigen, zu: () => { ui.aktiv = false; }, get aktiv() { return ui.aktiv; },
+  return { oeffne: anzeigen, zu: () => { ui.aktiv = false; }, aktiv: () => ui.aktiv,
     pruefe: () => { const b = ctx.inhalt.querySelector('.o02-bruecke');
       return !b || Number(b.dataset.o02Diff) === Number(b.dataset.o02Summe); } };
 }

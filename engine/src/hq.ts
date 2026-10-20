@@ -878,7 +878,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
     kostenWoche: s.zentrale.kostenWoche,
     kostenStart: s.zentrale.kostenStart,
     standort: standort(s, hq.sitz),
-    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), gesamt: eur(kosten.gesamt) },
+    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), gesamt: eur(kosten.gesamt) },
     restmieteWoche: eur(hqRestmieteWoche(s)),
     fte: s.zentrale.fte,
     gebaeude: hq.gebaeude.map((g) => {
