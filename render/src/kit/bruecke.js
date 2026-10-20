@@ -166,9 +166,9 @@ export function spielBauer(s, o = {}) {
   const wahl = new Map();      // hausId → { fam, fassade } (bleibt beim Neubau gleich)
   const haeuser = new Map();   // Engine-Häuser
   // Volkskauf und FUNDUS liegen bis zur Engine-Maßstab-Integration nur im Grafikkatalog.
-  // Sie bekommen eigene auswählbare Gruppen, bleiben wirtschaftlich jedoch reine Lesedaten.
+  // Unsichtbare Ray-Boxen (keine Zusatzmeshes) machen sie anklickbar.
   const statischeDaten = new Map([...schwesterHaeuser, ...outletHaeuser].map((h) => [h.id, h]));
-  const statischeHaeuser = new Map(); // hausId → { haus, p, gruppe, e }
+  const statischeHaeuser = new Map(); // hausId → { haus, p, bounds, e }
   const wettbewerber = new Map(); // Wettbewerber-Id → eigene Gruppe
   const wbSlots = new Map();      // Parzellen-Id → { p, wbId, gruppe, ... }
   let wbCache = null;
@@ -329,19 +329,19 @@ export function spielBauer(s, o = {}) {
     return e;
   };
   const statischerSlot = (typ) => (S, scene, p) => {
+    // Grafikkatalog unverändert in den gemeinsamen Sammler zeichnen:
+    // keine zusätzlichen Draw Calls oder Geometrie für die Klickfunktion.
+    const e = basis[typ](S, scene, p);
     const haus = statischeDaten.get(p.standort?.id);
-    if (!haus || !o.getrennt) return basis[typ](S, scene, p);
-    const gruppe = new THREE.Group(), sammler = new Sammler(), alt = LOD.stufe;
-    gruppe.userData.hausId = haus.id;
-    let e;
-    try {
-      setzeLod(o.hausLod ?? 'nah');
-      e = basis[typ](sammler, gruppe, p);
-      sammler.bauen(gruppe);
-    } finally { setzeLod(alt); }
-    gruppe.traverse((obj) => { obj.userData.hausId = haus.id; });
-    o.wurzel?.add(gruppe);
-    statischeHaeuser.set(haus.id, { haus, p, gruppe, e });
+    if (haus && o.getrennt) {
+      const f = fussabdruck(haus), { x, z } = imSlot(p, f.w, f.d);
+      const hoehe = Math.max(8, e?.hoehe ?? 18);
+      const bounds = new THREE.Box3(
+        new THREE.Vector3(x, 0, z),
+        new THREE.Vector3(x + f.w, hoehe, z + f.d)
+      );
+      statischeHaeuser.set(haus.id, { haus, p, bounds, e });
+    }
     return e;
   };
   const hqSlot = (S, scene, p) => {
