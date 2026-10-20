@@ -199,21 +199,21 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     const dichte = (modus === 'wenig' ? .5 : 1) * limitFaktor;
     const sollAuto = lanes.length ? Math.min(MAX_AUTO, Math.max(1, Math.round((20 + 40 * clamp((110 - k.halb) / 88, 0, 1)) * dichte))) : 0;
     const sollFuss = wege.length ? Math.round(100 * dichte) : 0;
-    const anpassen = (arr, n, liste, art) => {
+    const anpassen = (arr, n, liste, art, sonstige = []) => {
       const weiter = arr.filter((a) => a?.lane && liste.includes(a.lane)).slice(0, n);
-      while (weiter.length < n) {
+      for (let i = 0; i < n * 18 && weiter.length < n; i++) {
         const a = neuerWagen(liste, art);
         if (!a) break;
-        // Mindestabstand gilt auch bei neu eingesetzten Fahrzeugen.
-        if (weiter.some((b) => b.lane === a.lane && Math.abs(b.m - a.m) < KLEINSTE_LUECKE)) {
-          a.m = (a.m + 11 * (weiter.length + 1)) % Math.max(12, laenge(a.lane));
-        }
+        // Bei knappen Straßen lieber weniger Wagen, statt zwei in dieselbe Spur zu setzen.
+        if ([...weiter, ...sonstige].some((b) => b.lane === a.lane &&
+            Math.abs(b.m - a.m) < (a.art === 'tram' || b.art === 'tram' ? 22 :
+              a.art === 'bus' || b.art === 'bus' ? 14 : KLEINSTE_LUECKE))) continue;
         weiter.push(a);
       }
       return weiter;
     };
     autos = anpassen(autos, sollAuto, lanes, 'auto');
-    busse = anpassen(busse, Math.min(MAX_BUS, Math.round(busLanes.length / 5 * dichte)), busLanes, 'bus');
+    busse = anpassen(busse, Math.min(MAX_BUS, Math.round(busLanes.length / 5 * dichte)), busLanes, 'bus', autos);
     bahnen = anpassen(bahnen, Math.min(MAX_BAHN, Math.round(tramLanes.length / 3 * dichte)), tramLanes, 'tram');
     fuss = fuss.filter((a) => wege.includes(a.weg)).slice(0, sollFuss);
     while (fuss.length < sollFuss) { const f = neueFussgaenger(wege); if (!f) break; fuss.push(f); }
@@ -226,7 +226,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const key = a.lane.id;
       const voraus = belegung.get(key);
       let ziel = a.m + a.geschw * dt;
-      if (voraus !== undefined) ziel = Math.min(ziel, voraus - (a.art === 'tram' ? 21 : a.art === 'bus' ? 14 : KLEINSTE_LUECKE));
+      if (voraus !== undefined) ziel = Math.min(ziel, voraus - (a.art === 'tram' ? 22 : a.art === 'bus' || liste.some((b) => b !== a && b.lane === a.lane && b.art === 'bus' && b.m >= a.m) ? 14 : KLEINSTE_LUECKE));
       if (ziel >= laenge(a.lane)) {
         const moeglich = a.lane.naechste.filter((n) => !liste.some((b) => b !== a && b.lane === n && b.m < KLEINSTE_LUECKE * 2));
         const nach = moeglich.length ? waehle(moeglich) : null;
@@ -315,7 +315,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
   function schritt(dt) {
     const t0 = performance.now();
     aktualisiereAuswahl();
-    bewegungWagen(autos, dt); bewegungWagen(busse, dt); bewegungWagen(bahnen, dt);
+    bewegungWagen([...autos, ...busse], dt); bewegungWagen(bahnen, dt);
     fussBewegen(dt);
     for (const a of lkw) a.fort += dt;
     zeichneInstanzen();
