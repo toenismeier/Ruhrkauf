@@ -18,6 +18,8 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+// O03 IT
+import { IT_AKTIONEN, itAktion, type ItAktion } from './it';
 
 export type SpielerAktion =
   | { typ: 'schliessen'; haus: string }
@@ -60,7 +62,9 @@ export type SpielerAktion =
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
-  | ProduktAktion;
+  | ProduktAktion
+  // O03 IT
+  | ItAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -121,6 +125,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
+  // O03 IT
+  if (IT_AKTIONEN.has(a.typ)) return itAktion(s, a as ItAktion);
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
