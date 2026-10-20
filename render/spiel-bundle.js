@@ -3433,8 +3433,8 @@
       for (const r of liste) {
         const [kurz, name2, anteil2, nos, md, vv, vn, vnos, mk2, em, lief, sai, extra] = r;
         const m = G2.marge + md;
-        const kurve3 = G2.saison.map((x, i) => x * (sai?.[i] ?? 1));
-        const mittel = kurve3.reduce((a, b) => a + b, 0) / 12;
+        const kurve4 = G2.saison.map((x, i) => x * (sai?.[i] ?? 1));
+        const mittel = kurve4.reduce((a, b) => a + b, 0) / 12;
         out.push({
           id: `${g}.${kurz}`,
           name: name2,
@@ -3446,7 +3446,7 @@
           vorlaufVor: vv,
           vorlaufNach: vn,
           vorlaufNos: vnos,
-          saison: kurve3.map((x) => x / mittel),
+          saison: kurve4.map((x) => x / mittel),
           mindestabnahme: mk2 * 1e3,
           eigenmarkenfaehig: em !== "",
           kategorie: em || void 0,
@@ -7214,7 +7214,7 @@
     const hq = s2.hq;
     let personal = 0;
     let fte = 0;
-    let reise = 0;
+    let reise2 = 0;
     const cache2 = /* @__PURE__ */ new Map();
     for (const a of hq.abteilungen) {
       const stadt = abteilungsStadt(s2, a);
@@ -7224,7 +7224,7 @@
         cache2.set(stadt, st);
       }
       personal += a.fte * HQ_PARAM.lohn[a.id] * st.lohnFaktor;
-      reise += a.fte * st.reiseJeFte;
+      reise2 += a.fte * st.reiseJeFte;
       fte += a.fte;
     }
     const sach = fte * hq.sachJeFte;
@@ -7238,7 +7238,7 @@
     const strafen = Math.max(0, 1 - Lv) * HQ_PARAM.verwaltungStrafe * s2.zentrale.kostenStart;
     const vorstand = vorstandKostenWoche(s2);
     const entwicklung = produktKostenWoche(s2);
-    return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung };
+    return { personal, sach, reise: reise2, miete, nebenkosten, strafen, vorstand, entwicklung, gesamt: personal + sach + reise2 + miete + nebenkosten + strafen + vorstand + entwicklung };
   }
   function hqAktualisiere(s2) {
     const hq = s2.hq;
@@ -7370,11 +7370,11 @@
     };
     s2.hq = hq;
     hq.reiseBasis = reiseIndex(s2, "Essen");
-    const reise = abteilungen.reduce((x, a) => x + a.fte, 0) * P2.reiseJeFte * hq.reiseBasis;
+    const reise2 = abteilungen.reduce((x, a) => x + a.fte, 0) * P2.reiseJeFte * hq.reiseBasis;
     const fte = abteilungen.reduce((x, a) => x + a.fte, 0);
     const personal = abteilungen.reduce((x, a) => x + a.fte * P2.lohn[a.id], 0);
     const raum = haeuser.reduce((x, g) => x + g.etagen.reduce((y, e) => y + wochenMiete(e.qm, miete) + wochenMiete(e.qm, nk), 0), 0);
-    hq.sachJeFte = (zielKostenWoche - personal - raum - reise) / fte;
+    hq.sachJeFte = (zielKostenWoche - personal - raum - reise2) / fte;
     return hq;
   }
   function neueHqId(hq, prefix) {
@@ -9246,7 +9246,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // ../../../../home/claude/ruhrkauf/render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -39887,7 +39887,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // ../../../../home/claude/ruhrkauf/render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -48093,7 +48093,7 @@
     const { S, scene: scene2, x0, z0, w, d, r, v } = K3;
     const n = geschosse(K3, 3, 4, 0.9);
     const H = EG + (n - 1) * OG + 0.5, D = 1.8;
-    const bild2 = [["#e8336d", "#f6d32d"], ["#1f1f1f", "#e8e4dc"], ["#4fb6c2", "#ffffff"], ["#f28c1c", "#1f1f1f"]][v % 4];
+    const bild3 = [["#e8336d", "#f6d32d"], ["#1f1f1f", "#e8e4dc"], ["#4fb6c2", "#ffffff"], ["#f28c1c", "#1f1f1f"]][v % 4];
     S.quader(x0, 0, z0, x0 + w - D, H, z0 + d - D, "#3a4148");
     const [sz, sx] = K3.seiten;
     for (const s2 of K3.seiten) {
@@ -48115,15 +48115,15 @@
     {
       const s2 = sz, u0 = s2.L * 0.08, u1 = Math.min(s2.L * 0.08 + Math.max(10, s2.L * 0.45), s2.L - 4), y0 = EG + 0.3, y1 = H + 0.8;
       s2.q(u0 - 0.2, u1 + 0.2, y0 - 0.2, y1 + 0.2, 0.5, 0.7, "#d9dcde");
-      s2.q(u0, u1, y0, y1, 0.7, 0.8, K3.leer ? "#cfcac0" : bild2[0]);
+      s2.q(u0, u1, y0, y1, 0.7, 0.8, K3.leer ? "#cfcac0" : bild3[0]);
       if (!K3.leer) {
         const fu = u0 + (u1 - u0) * 0.7, hh = y1 - y0, sk = hh / 6.5;
         s2.q(fu - 0.5 * sk, fu + 0.5 * sk, y0 + 0.2, y0 + 3 * sk, 0.82, 0.86, "#1f1f1f");
-        s2.q(fu - 0.9 * sk, fu + 0.9 * sk, y0 + 3 * sk, y0 + 5 * sk, 0.82, 0.86, bild2[1]);
+        s2.q(fu - 0.9 * sk, fu + 0.9 * sk, y0 + 3 * sk, y0 + 5 * sk, 0.82, 0.86, bild3[1]);
         s2.q(fu - 0.35 * sk, fu + 0.35 * sk, y0 + 5.05 * sk, y0 + 5.9 * sk, 0.82, 0.86, "#e8cfb4");
         s2.q(fu - 0.45 * sk, fu + 0.45 * sk, y0 + 5.6 * sk, y0 + 6.2 * sk, 0.86, 0.88, "#3a2a20");
         const t = "JETZT NEU", ta = u0 + 0.5, tb = fu - 0.9 * sk - 0.6, tm = (ta + tb) / 2, tw = Math.max(1, tb - ta);
-        plakat2(scene2, s2, t, tm, y0 + hh * 0.55, 0.88, passend(t, tw * 0.92, hh * 0.25), bild2[1] === "#1f1f1f" ? "#ffffff" : bild2[1]);
+        plakat2(scene2, s2, t, tm, y0 + hh * 0.55, 0.88, passend(t, tw * 0.92, hh * 0.25), bild3[1] === "#1f1f1f" ? "#ffffff" : bild3[1]);
         plakat2(scene2, s2, K3.name, tm, y0 + hh * 0.3, 0.88, passend(K3.name, tw * 0.8, hh * 0.14), "#ffffff");
       }
     }
@@ -107357,7 +107357,7 @@
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // ../../../../home/claude/ruhrkauf/render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -107953,7 +107953,7 @@
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // ../../../../home/claude/ruhrkauf/render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -116231,9 +116231,9 @@
     const region = REGION3.get(name2) ?? "mitte";
     const plug = PLUGIN_BILD.get(name2);
     const ddr = !!(plug && ARCHETYP_DEFS[plug[0]]?.ddr);
-    const bild2 = plug ?? BILD[name2];
-    const archetyp = bild2?.[0] ?? wahlGewichtet(r, Object.entries(ARCHETYPEN).map(([k, v]) => [k, v.gewicht[TYPEN[typ].idx]]));
-    const extra = { ...bild2?.[1] ?? {}, ...ddr ? { ddr: true } : {} };
+    const bild3 = plug ?? BILD[name2];
+    const archetyp = bild3?.[0] ?? wahlGewichtet(r, Object.entries(ARCHETYPEN).map(([k, v]) => [k, v.gewicht[TYPEN[typ].idx]]));
+    const extra = { ...bild3?.[1] ?? {}, ...ddr ? { ddr: true } : {} };
     const standorte = liste.map((h) => {
       const f = fussabdruck(h);
       return { id: h.id, name: h.name, rolle: h.klasse === "premium" ? "premium" : h.format === "sport" ? "sport" : "warenhaus", lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
@@ -117186,7 +117186,7 @@
       h += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a, b) => a + b.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h };
     }
-    function kurve3(titel, wochen, werte, fmtW, p, farbe) {
+    function kurve4(titel, wochen, werte, fmtW, p, farbe) {
       const W3 = 340, H = 64, n = werte.length;
       if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${n ? fmtW(werte[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
       const min = Math.min(...werte), max = Math.max(...werte);
@@ -117214,9 +117214,9 @@
       h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc(d.bereichName)}</button>`;
       h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl2(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl2(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
       const v = d.verlauf;
-      h += kurve3("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
-      h += kurve3("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
-      h += kurve3("Reichweite in Wochen", v.woche, v.reichweite, (x) => `${dez(x, 1)} Wo.`, "k:reichweite", "#c27b0e");
+      h += kurve4("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
+      h += kurve4("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
+      h += kurve4("Reichweite in Wochen", v.woche, v.reichweite, (x) => `${dez(x, 1)} Wo.`, "k:reichweite", "#c27b0e");
       const regler2 = (titel, inhalt2, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt2}</div>`;
       const schieber = (feld, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld}"><output>${wert} %</output></div>`;
       h += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
@@ -119827,13 +119827,458 @@
     };
   }
 
+  // src/ui/reise.js
+  var ASSISTENTIN = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
+  var REISE_ZEIT = Object.freeze({
+    kreisAuf: 240,
+    panelSteht: 260,
+    text: 1500,
+    zieleAb: 1e3,
+    wechsel: 150,
+    fahrt: 4400,
+    zugStart: 700,
+    zugEnde: 3500,
+    kreisZu: 400,
+    reduziert: 150
+  });
+  var bewegungReduziert = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var ohneAnimation = () => new URLSearchParams(location.search).has("ohne-animation");
+  var warten = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  var kuerzel = {
+    Essen: "E",
+    D\u00FCsseldorf: "D",
+    Dortmund: "DO",
+    Duisburg: "DU",
+    K\u00F6ln: "K",
+    Bochum: "BO",
+    Berlin: "B",
+    Hamburg: "HH",
+    M\u00FCnchen: "M",
+    Frankfurt: "F",
+    Bremen: "HB",
+    Hannover: "H",
+    Stuttgart: "S",
+    Leipzig: "L",
+    Bonn: "BN",
+    Wuppertal: "W",
+    Dresden: "DD"
+  };
+  var kode = (name2) => kuerzel[name2] ?? (name2.replace(/[^A-ZÄÖÜ]/g, "").slice(0, 3) || name2.slice(0, 2).toUpperCase());
+  var typBild = (name2) => /Hamburg|Bremen|Kiel|Lübeck|Rostock|Bremerhaven|Wismar|Wilhelmshaven/i.test(name2) ? "hafen" : /Köln|Dresden|Heidelberg|Bamberg|Erfurt|Münster|Aachen/i.test(name2) ? "altstadt" : "ruhr";
+  var bild2 = (name2) => "./bilder/reise-" + typBild(name2) + ".jpg";
+  var zug3 = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
+  var MAP_FELDER = {
+    nord: [70, 35],
+    ost: [103, 79],
+    west: [42, 78],
+    mitte: [72, 82],
+    sued: [75, 125]
+  };
+  function deutschlandPunkte(staedte, hier) {
+    const punkte2 = staedte.map((stadt) => {
+      const hash4 = [...stadt.name].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7);
+      const [x, y] = MAP_FELDER[String(stadt.region ?? "mitte").toLocaleLowerCase("de")] ?? MAP_FELDER.mitte;
+      const dx = hash4 % 29 - 14, dy = Math.floor(hash4 / 37) % 35 - 17;
+      return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier };
+    });
+    return punkte2.sort((a, b) => Number(a.aktuell) - Number(b.aktuell)).map((p) => '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (p.aktuell ? 4 : 1.4) + '" fill="' + (p.aktuell ? "#d23c32" : "#8295a0") + '"><title>' + esc(p.name) + "</title></circle>").join("");
+  }
+  function reiseModul(ctx) {
+    const z2 = document.createElement("div");
+    z2.id = "reise-overlay";
+    z2.hidden = true;
+    document.body.append(z2);
+    const protokoll2 = [];
+    let aktiv = false, token = 0, gestartet = 0, zielStart = null, letzte = [];
+    const messen2 = (schritt) => {
+      const t = performance.now();
+      protokoll2.push({ schritt, ms: Math.round(t - gestartet), ...zielStart === null ? {} : { reiseMs: Math.round(t - zielStart) } });
+    };
+    function schliessen() {
+      ++token;
+      aktiv = false;
+      z2.hidden = true;
+      z2.innerHTML = "";
+      z2.className = "";
+      document.body.classList.remove("reise-aktiv");
+    }
+    function ortPunkt() {
+      const p = ctx.pinPunkt(), w = innerWidth, h = innerHeight;
+      if (p && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h) return { x: Math.round(p.x), y: Math.round(p.y) };
+      const chip = document.getElementById("stadt-reise")?.getBoundingClientRect();
+      return chip ? { x: Math.round(chip.left + chip.width / 2), y: Math.round(chip.top + chip.height / 2) } : { x: Math.round(w * 0.5), y: Math.round(h * 0.65) };
+    }
+    function kreis(p) {
+      const w = innerWidth, h = innerHeight, r = Math.ceil(Math.hypot(Math.max(p.x, w - p.x), Math.max(p.y, h - p.y))) + 2;
+      z2.style.setProperty("--rx", p.x + "px");
+      z2.style.setProperty("--ry", p.y + "px");
+      z2.style.setProperty("--rr", r + "px");
+    }
+    function ziele(gesucht = "") {
+      const hier = ctx.stadt();
+      const sortiert = ctx.staedte().filter((c) => c.name !== hier && c.name.toLocaleLowerCase("de").includes(gesucht.toLocaleLowerCase("de"))).sort((a, b) => {
+        const ia = letzte.indexOf(a.name), ib = letzte.indexOf(b.name);
+        if (ia !== -1 || ib !== -1) return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+        return (b.umsatz ?? 0) - (a.umsatz ?? 0) || a.name.localeCompare(b.name, "de");
+      });
+      const liste = z2.querySelector(".reise-zielraster");
+      if (!liste) return;
+      liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '"><img src="' + bild2(c.name) + '" alt="" loading="lazy"><span><strong>' + esc(c.name) + "</strong><small>" + esc(c.formate ?? "") + "</small></span></button>").join("");
+      if (!sortiert.length) liste.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
+    }
+    function schreibe(el, text3, dauer, meins) {
+      if (!el) return;
+      if (ohneAnimation() || bewegungReduziert()) {
+        el.textContent = text3;
+        return;
+      }
+      const beginn = performance.now();
+      function tick(t) {
+        if (token !== meins) return;
+        el.textContent = text3.slice(0, Math.min(text3.length, Math.floor((t - beginn) / 1e3 * 60)));
+        if (t - beginn < dauer && el.textContent.length < text3.length) requestAnimationFrame(tick);
+        else el.textContent = text3;
+      }
+      requestAnimationFrame(tick);
+    }
+    function oeffne() {
+      if (aktiv) return;
+      ++token;
+      const meins = token;
+      letzte = [...ctx.zuletzt?.() ?? letzte];
+      aktiv = true;
+      gestartet = performance.now();
+      zielStart = null;
+      protokoll2.length = 0;
+      messen2("Pin angetippt");
+      const hier = ctx.stadt(), p = ortPunkt();
+      kreis(p);
+      z2.hidden = false;
+      z2.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug3 + '</div><button class="reise-zu" aria-label="Schlie\xDFen" data-reisezu>\xD7</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + "</span><strong>" + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen \u2026" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
+      document.body.classList.add("reise-aktiv");
+      z2.querySelector(".reise-suche").addEventListener("input", (e) => ziele(e.target.value));
+      ziele();
+      requestAnimationFrame(() => {
+        if (meins === token) z2.classList.add("offen");
+      });
+      const animate = !(ohneAnimation() || bewegungReduziert());
+      setTimeout(() => {
+        if (meins !== token) return;
+        messen2("Panel offen");
+        schreibe(z2.querySelector(".reise-text"), "Willkommen am Hauptbahnhof " + hier + ". Wohin soll es gehen?", REISE_ZEIT.text, meins);
+      }, animate ? REISE_ZEIT.kreisAuf + REISE_ZEIT.panelSteht : 0);
+      setTimeout(() => {
+        if (meins === token) {
+          z2.classList.add("ziele-offen");
+          messen2("Ziele sichtbar");
+        }
+      }, animate ? REISE_ZEIT.zieleAb : 0);
+    }
+    async function fahren(ziel) {
+      if (!aktiv || !ctx.staedte().some((c) => c.name === ziel) || ziel === ctx.stadt()) return;
+      const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert2 = bewegungReduziert() || ohneAnimation();
+      zielStart = start;
+      messen2("Reiseziel gew\xE4hlt");
+      const p = ortPunkt();
+      kreis(p);
+      z2.classList.remove("offen", "ziele-offen");
+      z2.classList.add("faehrt");
+      z2.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild2(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc(kode(von)) + " <span>\u{1F686}</span> " + esc(kode(ziel)) + "</div><small>" + esc(von) + " \u2192 " + esc(ziel) + "</small></div></section>";
+      const flug = z2.querySelector(".reise-flug");
+      flug.classList.add("start");
+      const vorbereitung = new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (meins !== token) return resolve(false);
+          try {
+            ctx.bauen(ziel);
+            resolve(true);
+          } catch (e) {
+            reject(e);
+          }
+        }, reduziert2 ? 0 : REISE_ZEIT.wechsel);
+      });
+      try {
+        if (!reduziert2) {
+          await warten(REISE_ZEIT.wechsel);
+          if (meins === token) {
+            flug.classList.add("bewegt");
+            messen2("Flug beginnt");
+          }
+        } else flug.classList.add("bewegt");
+        const fertig = await vorbereitung;
+        if (!fertig || meins !== token) return;
+        await warten(reduziert2 ? 0 : Math.max(0, REISE_ZEIT.wechsel + REISE_ZEIT.fahrt - (performance.now() - start)));
+        if (meins !== token) return;
+        ctx.bahnhofFokussieren();
+        const zielPin = ortPunkt();
+        kreis(zielPin);
+        flug.classList.add("ankunft");
+        messen2("Kreis-Schlie\xDFen");
+        await warten(reduziert2 ? REISE_ZEIT.reduziert : REISE_ZEIT.kreisZu);
+        if (meins !== token) return;
+        letzte = [von, ...letzte.filter((c) => c !== von && c !== ziel)].slice(0, 12);
+        ctx.besucht?.(letzte);
+        ctx.fertig(ziel);
+        messen2("Reise abgeschlossen");
+        schliessen();
+      } catch (e) {
+        schliessen();
+        ctx.fehler?.(e);
+      }
+    }
+    z2.addEventListener("click", (e) => {
+      if (e.target.closest("[data-reisezu]")) return schliessen();
+      const b = e.target.closest("[data-reiseziel]");
+      if (b) fahren(b.dataset.reiseziel);
+    });
+    return { oeffne, zu: schliessen, aktiv: () => aktiv, pruefe: () => ({ stadt: ctx.stadt(), aktiv, schritte: [...protokoll2], zielAnzahl: z2.querySelectorAll("[data-reiseziel]").length }), fahren };
+  }
+
+  // src/ui/wochenbericht.js
+  var ASSISTENTIN2 = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
+  var BANK = portraetSVG({ geschlecht: "m", alter: 56, haar: "seitenscheitel", haarfarbe: "grau", hautton: "hell", kleidung: "anzug", seed: 236 }, 110);
+  var BETRIEBSRAT = portraetSVG({ geschlecht: "w", alter: 49, haar: "halblang", haarfarbe: "dunkelbraun", kleidung: "bluse", seed: 922 }, 110);
+  var WOCHEN_ZEIT = Object.freeze({
+    frageEin: 200,
+    frageAus: 300,
+    stillstand: 180,
+    berichtEin: 380,
+    zaehlStart: 900,
+    zaehlen: 11e3,
+    vorfallEin: 150,
+    vorfallText: 1500,
+    vorfallAus: 200,
+    reduziert: 150
+  });
+  var eur2 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)) + " \u20AC";
+  var kurve3 = (t) => 1 - (1 - t) ** 2;
+  var reduziert = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var ohneAnimation2 = () => new URLSearchParams(location.search).has("ohne-animation");
+  var warten2 = (ms) => new Promise((r) => setTimeout(r, ms));
+  var KATEGORIE3 = ["Presse", "Konkurrenz"];
+  function wochenberichtModul(ctx) {
+    const node = document.createElement("div");
+    node.id = "wochen-overlay";
+    node.hidden = true;
+    document.body.append(node);
+    let status = "zu", token = 0, bericht2 = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
+    const zeiten = [];
+    const markieren = (ereignis) => {
+      const t = performance.now();
+      zeiten.push({ ereignis, ms: Math.round(t - start), ...bestaetigt === null ? {} : { jaMs: Math.round(t - bestaetigt) } });
+    };
+    const modus = () => ctx.modus?.() ?? "voll";
+    const schnell = () => reduziert() || ohneAnimation2() || modus() === "aus";
+    const dauer = () => schnell() ? 0 : modus() === "kurz" ? 2e3 : WOCHEN_ZEIT.zaehlen;
+    function aufraeumen() {
+      ++token;
+      cancelAnimationFrame(zaehlRaf);
+      node.hidden = true;
+      node.innerHTML = "";
+      node.className = "";
+      status = "zu";
+      document.body.classList.remove("wochen-aktiv");
+      ctx.entsperren?.();
+    }
+    function abbruch() {
+      if (status !== "rechnen") aufraeumen();
+    }
+    function fragDialog() {
+      const warnungen = ctx.posteingang().handeln.filter((x) => x.restWochen === 0);
+      node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschlie\xDFen"><div class="wochen-frage"><button class="wochen-x" data-wa="nein" aria-label="Schlie\xDFen">\xD7</button><h2>Woche abschlie\xDFen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN2 + "</span></div>" + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + " Vorg\xE4nge laufen ab. Der Standard wird gew\xE4hlt beziehungsweise das Angebot verf\xE4llt.</p>" : "") + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
+      node.hidden = false;
+      node.className = "frage-ein";
+      document.body.classList.add("wochen-aktiv");
+      status = "frage";
+      requestAnimationFrame(() => node.classList.add("sichtbar"));
+    }
+    function oeffne() {
+      if (status !== "zu") return;
+      ++token;
+      start = performance.now();
+      bestaetigt = null;
+      zeiten.length = 0;
+      markieren("Wochenknopf");
+      if (modus() === "aus") return berechnen(false);
+      fragDialog();
+    }
+    async function berechnen(mitDialog = true) {
+      if (status === "rechnen") return;
+      const meins = ++token, istReduziert = schnell();
+      if (mitDialog) {
+        bestaetigt = performance.now();
+        markieren("Ja gew\xE4hlt");
+      }
+      status = "rechnen";
+      ctx.sperren?.();
+      node.classList.remove("sichtbar");
+      if (mitDialog) await warten2(istReduziert ? 0 : WOCHEN_ZEIT.frageAus + WOCHEN_ZEIT.stillstand);
+      if (meins !== token) return;
+      markieren("Wochenberechnung");
+      const vor = ctx.posteingang(), alt = ctx.cockpit(), davorCash = alt.cash;
+      try {
+        ctx.woche();
+      } catch (e) {
+        aufraeumen();
+        ctx.fehler?.(e);
+        return;
+      }
+      const nach = ctx.posteingang(), neu = new Set(vor.handeln.map((x) => x.id)), gemeldet = new Set(vor.meldungen.map((x) => x.id));
+      const c = ctx.cockpit(), ver = ctx.historie();
+      const vergangen = ver.length > 1 ? ver[ver.length - 2] : null;
+      const jetzt = ver[ver.length - 1];
+      const meldungen = nach.meldungen.filter((m) => !gemeldet.has(m.id) && m.woche === jetzt?.woche && KATEGORIE3.includes(m.kategorie));
+      const kwEnde = c.kw === 1 ? 52 : c.kw - 1;
+      const jahrEnde = c.kw === 1 ? c.jahr - 1 : c.jahr;
+      const vorgaenge = nach.handeln.filter((h) => !neu.has(h.id)).sort((a, b) => Number(b.dringend) - Number(a.dringend) || a.frist - b.frist);
+      bericht2 = {
+        kw: kwEnde,
+        jahr: jahrEnde,
+        umsatz: c.umsatzWoche,
+        ebitda: c.ebitdaWoche,
+        umsatzVor: vergangen?.umsatz ?? null,
+        ebitdaVor: vergangen?.ebitda ?? null,
+        cashNetto: c.cash - davorCash,
+        cash: c.cash,
+        phase: c.phase,
+        kredite: c.kreditFrei,
+        runway: c.runwayWochen,
+        meldungen,
+        vorgaenge,
+        woche: ctx.wocheNr(),
+        letzte: jetzt
+      };
+      markieren("Engine abgeschlossen");
+      if (modus() === "aus") {
+        aufraeumen();
+        return;
+      }
+      berichtZeigen(meins);
+    }
+    function zeile(name2, wert, k = "") {
+      return '<div class="wb-zeile ' + k + '"><span>' + esc(name2) + "</span><strong>" + esc(wert) + "</strong></div>";
+    }
+    function berichtZeigen(meins) {
+      if (meins !== token) return;
+      status = "zaehlen";
+      vorfall = 0;
+      const m = bericht2.meldungen, titel = m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
+      const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur2(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
+      const uDelta = delta(bericht2.umsatz, bericht2.umsatzVor);
+      const eDelta = delta(bericht2.ebitda, bericht2.ebitdaVor);
+      const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.png)"></div><span>' + esc(a.text) + "</span></div>" : "";
+      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile("Cash operativ", "nicht separat erfasst") + zeile("Investitionen", "nicht separat erfasst") + zeile("Finanzierung", "nicht separat erfasst") + zeile("Cash netto", eur2(bericht2.cashNetto)) + zeile("Cash-Bestand", eur2(bericht2.cash), "wb-summe") + "<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + "</h4>" + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
+      node.hidden = false;
+      node.className = "bericht-ein";
+      document.body.classList.add("wochen-aktiv");
+      requestAnimationFrame(() => node.classList.add("sichtbar"));
+      const originalDauer = dauer();
+      const zaehlBeginn = performance.now() + (originalDauer ? WOCHEN_ZEIT.berichtEin : 0);
+      let abgeschlossen = false;
+      function zahlen(t = performance.now(), sprung = false) {
+        const f = sprung || !originalDauer ? 1 : kurve3(Math.max(0, Math.min(1, (t - zaehlBeginn) / originalDauer)));
+        const u = node.querySelector("#wb-umsatz"), e = node.querySelector("#wb-ebitda");
+        if (!u || !e || meins !== token) return;
+        u.textContent = eur2(bericht2.umsatz * f);
+        e.textContent = eur2(bericht2.ebitda * f);
+        e.classList.toggle("negativ", bericht2.ebitda < 0);
+        if (f < 1) zaehlRaf = requestAnimationFrame(zahlen);
+        else if (!abgeschlossen) {
+          abgeschlossen = true;
+          node.classList.add("gezaehlt");
+          status = "bericht";
+          markieren("Z\xE4hlung beendet");
+          if (bericht2.vorgaenge.length) setTimeout(() => {
+            if (meins === token) vorfallZeigen();
+          }, schnell() ? 0 : 200);
+        }
+      }
+      node.querySelector(".wb-bericht").addEventListener("click", (e) => {
+        if (status === "zaehlen" && !e.target.closest("[data-wa]")) {
+          cancelAnimationFrame(zaehlRaf);
+          zahlen(performance.now(), true);
+        }
+      });
+      if (originalDauer) zaehlRaf = requestAnimationFrame(zahlen);
+      else zahlen(performance.now(), true);
+    }
+    function vorfallZeigen() {
+      const alle = bericht2?.vorgaenge ?? [], lauf = alle.slice(0, 3), m = lauf[vorfall];
+      if (!m || !node.querySelector("#wb-vorfall")) return;
+      status = "vorfall";
+      markieren("Vorfall " + (vorfall + 1));
+      const feld = node.querySelector("#wb-vorfall"), meins = token;
+      feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>HARTWIG</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + (m.typ.includes("bank") ? "\u20AC" : m.typ.includes("betriebsrat") ? "BR" : "H") + "</div></div><h4>" + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
+      requestAnimationFrame(() => feld.classList.add("offen"));
+      const text3 = m.text ?? "", el = feld.querySelector(".wb-tippt"), beginn = performance.now();
+      function tick(t) {
+        if (meins !== token || status !== "vorfall") return;
+        const n = schnell() ? text3.length : Math.floor((t - beginn) / 1e3 * 70);
+        el.textContent = text3.slice(0, n);
+        if (el.textContent.length !== text3.length && t - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
+        else {
+          el.textContent = text3;
+          feld.querySelector(".wb-vorfallfuss small").hidden = true;
+          for (const b of feld.querySelectorAll(".wb-vorfallfuss button")) b.hidden = false;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    function vorfallWeiter(ansehen) {
+      const item = bericht2.vorgaenge[vorfall], t = token;
+      const feld = node.querySelector("#wb-vorfall");
+      feld?.classList.remove("offen");
+      setTimeout(() => {
+        if (t !== token) return;
+        feld.innerHTML = "";
+        vorfall++;
+        status = "bericht";
+        if (ansehen) {
+          const id = item.id;
+          aufraeumen();
+          ctx.oeffneVorgang(id);
+          return;
+        }
+        if (vorfall < Math.min(3, bericht2.vorgaenge.length)) vorfallZeigen();
+      }, schnell() ? 0 : WOCHEN_ZEIT.vorfallAus);
+    }
+    node.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-wa]");
+      if (!b) return;
+      switch (b.dataset.wa) {
+        case "nein":
+          abbruch();
+          break;
+        case "ja":
+          berechnen(true);
+          break;
+        case "schliessen":
+          if (status === "bericht") abbruch();
+          else if (status === "zaehlen") {
+            cancelAnimationFrame(zaehlRaf);
+            node.querySelector(".wb-kennzahlen")?.click();
+          }
+          break;
+        case "spaeter":
+          vorfallWeiter(false);
+          break;
+        case "ansehen":
+          vorfallWeiter(true);
+          break;
+      }
+    });
+    return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht2 && { ...bericht2, vorgaenge: bericht2.vorgaenge.length, meldungen: bericht2.meldungen.length, meldungstexte: bericht2.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() {
+      return status;
+    } };
+  }
+
   // src/spiel.js
   var param = new URLSearchParams(location.search);
   var $ = (id) => document.getElementById(id);
   var messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
   var speicherTimer = null;
   var speicherWarnung = false;
-  var neuerPostUi = () => ({ gelesen: [], reiter: "handeln", warnen: true });
+  var neuerPostUi = () => ({ gelesen: [], reiter: "handeln", warnen: true, wochenbericht: "voll", reiseZuletzt: [] });
   var postUi = neuerPostUi();
   var streifenTimer = null;
   function speicherFehler(e) {
@@ -119887,6 +120332,10 @@
   var angebotPins = [];
   var wettbewerbPins = [];
   var wettbewerbPinTimer = null;
+  var bahnhofPin = null;
+  var bahnhofOrt = null;
+  var reise = null;
+  var wochenbericht = null;
   var WB_FARBEN = {
     modehaus: "#795846",
     fastfashion: "#292b39",
@@ -119951,6 +120400,7 @@
   function hausUnter(px2, py2) {
     const r = canvas.getBoundingClientRect();
     ray.setFromCamera(new three_module_exports.Vector2((px2 - r.left) / r.width * 2 - 1, -((py2 - r.top) / r.height) * 2 + 1), cam);
+    if (bahnhofPin && ray.intersectObject(bahnhofPin, false).length) return "bahn:hauptbahnhof";
     const wp6 = wettbewerbPins.length ? ray.intersectObjects(wettbewerbPins, false)[0] : null;
     if (wp6?.object.userData.wbId) return "wb:" + wp6.object.userData.wbId;
     const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
@@ -120001,7 +120451,8 @@
   }
   var steuerung = karteSteuerung({ canvas, K: K2, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => {
     const id = hausUnter(e.clientX, e.clientY);
-    if (id?.startsWith("angebot:")) oeffneModul(po, "handeln", id.slice(8));
+    if (id === "bahn:hauptbahnhof") reise?.oeffne();
+    else if (id?.startsWith("angebot:")) oeffneModul(po, "handeln", id.slice(8));
     else if (id?.startsWith("hq:")) oeffneHq(id.slice(3));
     else if (id?.startsWith("wb:")) oeffneWettbewerber(id.slice(3));
     else if (id) oeffneHaus(id);
@@ -120010,6 +120461,8 @@
   function raeumeSzene() {
     if (!scene) return;
     angebotPins = [];
+    bahnhofPin = null;
+    bahnhofOrt = null;
     clearInterval(wettbewerbPinTimer);
     wettbewerbPinTimer = null;
     for (const p of wettbewerbPins) {
@@ -120117,6 +120570,45 @@
       zeichnen();
     }, 260);
   }
+  function bahnhofPinErstellen() {
+    const p = plan.parzellen.find((q2) => q2.typ === "slot:bahnhof") ?? plan.bloecke?.find((b) => b.art === "bahn" && !b.ohneBahnhof);
+    if (!p) return;
+    const x = p.x + p.w / 2, z2 = p.z + p.d / 2;
+    bahnhofOrt = { x, z: z2 };
+    const c = document.createElement("canvas");
+    c.width = 128;
+    c.height = 128;
+    const g = c.getContext("2d");
+    g.fillStyle = "#28465a";
+    g.beginPath();
+    g.arc(64, 61, 49, 0, Math.PI * 2);
+    g.fill();
+    g.lineWidth = 6;
+    g.strokeStyle = "#fff";
+    g.stroke();
+    g.fillStyle = "#fff";
+    g.font = "bold 63px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText("\u{1F686}", 64, 59);
+    bahnhofPin = new three_module_exports.Sprite(new three_module_exports.SpriteMaterial({ map: new three_module_exports.CanvasTexture(c), transparent: true, depthTest: false }));
+    bahnhofPin.position.set(x, 42, z2);
+    bahnhofPin.scale.set(15, 15, 1);
+    bahnhofPin.renderOrder = 35;
+    scene.add(bahnhofPin);
+  }
+  function bahnhofBildpunkt() {
+    if (!bahnhofPin || !cam) return null;
+    const v = bahnhofPin.position.clone().project(cam), r = canvas.getBoundingClientRect();
+    return { x: r.left + (v.x + 1) * r.width / 2, y: r.top + (1 - v.y) * r.height / 2 };
+  }
+  function bahnhofFokussieren() {
+    if (!bahnhofOrt) return;
+    K2.x = bahnhofOrt.x;
+    K2.z = bahnhofOrt.z;
+    K2.halb = 63;
+    kameraSetzen();
+  }
   function baueStadtAusSpiel(name2) {
     const t0 = performance.now();
     raeumeSzene();
@@ -120163,6 +120655,7 @@
     }
     angebotsPinsAktualisieren();
     wettbewerbPinsAktualisieren();
+    bahnhofPinErstellen();
     K2.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
     const nm = nahMitte(plan, "einkauf", 62);
     K2.x = nm.x;
@@ -120370,9 +120863,9 @@
     const text3 = "KW " + (s.woche % 52 + 1) + ": " + neu.filter((x) => x.art === "angebot").length + " neue Angebote, " + neu.filter((x) => x.art === "entscheidung").length + " Entscheidungen, " + neueMeldungen + " Meldungen";
     const streifen = $("wochenstreifen");
     streifen.textContent = text3;
-    streifen.classList.add("an");
+    streifen.classList.toggle("an", mitBot);
     clearTimeout(streifenTimer);
-    streifenTimer = setTimeout(() => streifen.classList.remove("an"), 6e3);
+    if (mitBot) streifenTimer = setTimeout(() => streifen.classList.remove("an"), 6e3);
     zeichnen();
     const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
     messung.wocheMs.push(m);
@@ -120457,10 +120950,10 @@
     offenerWettbewerber = null;
     const h = d.haus, k = h.kpi;
     const z2 = sb.zustand(id);
-    const bild2 = z2 ? [z2.status, ...z2.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z2.aktion ? `Aktion ${AKTION_NAME[z2.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
+    const bild3 = z2 ? [z2.status, ...z2.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z2.aktion ? `Aktion ${AKTION_NAME[z2.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
     const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
     const zahl2 = (t, w, ton = "") => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
-    let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild2 ? `<span class="chip">${bild2}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
+    let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
     html += `<div class="raster">${zahl2("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl2("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl2("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl2("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
     if (h.klasse === "premium") {
       const p = premiumUebersicht(s).find((q2) => q2.id === id);
@@ -120722,6 +121215,65 @@
       else schliessePanel();
     }
   });
+  reise = reiseModul({
+    stadt: () => stadtName,
+    staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
+      const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== "geschlossen");
+      const zahl2 = (rolle2) => d.standorte.filter((p) => p.rolle === rolle2).length;
+      const formate = [["Hartwig", hs.filter((h) => h.format === "warenhaus").length], ["Volkskauf", zahl2("schwester")], ["Sport", hs.filter((h) => h.format === "sport").length], ["FUNDUS", zahl2("outlet")]];
+      return {
+        name: d.name,
+        region: d.region,
+        umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+        formate: formate.filter((p) => p[1]).map((p) => p[0] + " " + p[1]).join(" \xB7 ")
+      };
+    }),
+    pinPunkt: bahnhofBildpunkt,
+    zuletzt: () => postUi.reiseZuletzt ?? [],
+    besucht: (namen) => {
+      postUi.reiseZuletzt = namen;
+    },
+    bauen: (name2) => {
+      schliessePanel();
+      baueStadtAusSpiel(name2);
+      wahl2.value = name2;
+    },
+    bahnhofFokussieren,
+    fertig: () => automatischSpeichern(),
+    fehler: (e) => {
+      console.error("Bahnreise fehlgeschlagen:", e);
+      meldung("Stadtwechsel fehlgeschlagen", false);
+    }
+  });
+  wochenbericht = wochenberichtModul({
+    modus: () => postUi.wochenbericht ?? "voll",
+    warnen: () => postUi.warnen,
+    cockpit: () => cockpit(s),
+    posteingang: () => posteingang(s),
+    historie: () => s.historie,
+    wocheNr: () => s.woche,
+    woche: () => woche(false),
+    sperren: () => {
+      $("weiter").disabled = true;
+    },
+    entsperren: () => {
+      $("weiter").disabled = false;
+    },
+    oeffneVorgang: (id) => oeffneModul(po, "handeln", id),
+    fehler: (e) => {
+      console.error("Wochenabschluss fehlgeschlagen:", e);
+      meldung("Woche konnte nicht abgeschlossen werden", false);
+    }
+  });
+  $("stadt-reise").addEventListener("click", () => {
+    schliessePanel();
+    menueZu();
+    reise.oeffne();
+  });
+  $("wochenbericht-modus").addEventListener("change", (e) => {
+    postUi.wochenbericht = e.target.value;
+    automatischSpeichern();
+  });
   var oeffneModul = (m, ...a) => {
     offenesHaus = null;
     offenesHq = null;
@@ -120809,6 +121361,7 @@
     s = neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
     postUi = neuerPostUi();
     $("postwarnung").checked = true;
+    $("wochenbericht-modus").value = postUi.wochenbericht;
     $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
     EQ.freigaben(s);
@@ -120823,7 +121376,9 @@
   var wahl2 = $("stadtwahl");
   wahl2.innerHTML = STADTLISTE.map((q2) => `<option${q2.name === "Essen" ? " selected" : ""}>${q2.name}</option>`).join("");
   wahl2.addEventListener("change", () => {
+    reise?.zu();
     schliessePanel();
+    menueZu();
     $("lade").classList.add("an");
     setTimeout(() => {
       baueStadtAusSpiel(wahl2.value);
@@ -120832,19 +121387,17 @@
     }, 30);
   });
   $("weiter").addEventListener("click", () => {
-    const bot = $("bot").checked;
-    if (!bot && postUi.warnen) {
-      const ablauf = posteingang(s).handeln.filter((x) => x.restWochen === 0);
-      if (ablauf.length && !window.confirm(ablauf.length + " Vorgang/Vorg\xE4nge laufen ab: Standard wird gew\xE4hlt bzw. Angebot verf\xE4llt. Trotzdem weiter?")) return;
-    }
-    $("weiter").disabled = true;
-    setTimeout(() => {
-      try {
-        woche(bot);
-      } finally {
-        $("weiter").disabled = false;
-      }
-    }, 10);
+    if ($("weiter").disabled) return;
+    if ($("bot").checked) {
+      $("weiter").disabled = true;
+      setTimeout(() => {
+        try {
+          woche(true);
+        } finally {
+          $("weiter").disabled = false;
+        }
+      }, 10);
+    } else wochenbericht.oeffne();
   });
   if (typeof hqUebersicht === "function") $("hq").addEventListener("click", () => oeffneHq());
   else $("hq").style.display = "none";
@@ -120875,6 +121428,10 @@
     EQ,
     pruefeEinkauf: () => ek.pruefe(),
     oeffneWettbewerber,
+    reise,
+    wochenbericht,
+    bahnhofFokussieren,
+    bahnhofBildpunkt,
     pruefeWettbewerber: () => {
       const soll = wettbewerbFuerGrafik(s, stadtName);
       const gezeigt = /* @__PURE__ */ new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== "geschlossen" && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
@@ -121011,6 +121568,7 @@
       postUi = { ...neuerPostUi(), ...d.ui ?? {} };
       if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
       $("postwarnung").checked = postUi.warnen;
+      $("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
       schwierigkeitId = s.schwierigkeit ?? "mittel";
       $("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
       MERK.clear();
