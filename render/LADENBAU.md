@@ -29,7 +29,7 @@ Stand: 20.10.2026 · Workstream `auftraege/workstream-ladenbau.md` · Phase 2
 ## Kassen, Flächendichte, Performance
 - Kassen in Eingangsnähe bzw. am Auslauf des Hauptgangs; davor mindestens **2,00 m** unmöblierter Warte-/Bewegungsraum. Warteschlangen dürfen keine notwendige Flucht- oder Erschließungsachse blockieren.
 - Möbelfußabdrücke belegen **35–50 % der tatsächlich nutzbaren Verkaufsfläche**, ohne Lager/Treppenkern. Keine Mehrfachzählung sich überlappender Fußabdrücke.
-- Größte zusammenhängende freie quadratische Prüffläche höchstens **6,00 m Seitenlänge**; Hauptgänge werden als unvermeidbare Freiflächen mitgeprüft.
+- Größte unbestückte quadratische **Verkaufsraum**-Prüffläche höchstens **6,00 m Seitenlänge**. Ausgewiesene, absichtlich freigehaltene Haupt- und Nebengänge werden nicht als Verkaufsraumleere gewertet; ihre durchgängige Freihaltung und Breite wird separat geprüft.
 - Teilebudget entsprechend `KIT.md`, je normale Etage **≤ 8.000 Sammler-Teile**; frühere Messwerte bleiben Vergleichsbasis beim Wechsel bestehender Formate.
 
 ## Formatprofile
@@ -53,3 +53,10 @@ Stand: 20.10.2026 · Workstream `auftraege/workstream-ladenbau.md` · Phase 2
 - Der Datenplan reserviert Inszenierungen **vor** dem Befüllen der Warenreihen. Die Flächenfarben und Hängeschilder stammen aus der vorhandenen `sportabteilung.js`; feste Kletter-, Mall-, Portal- und Bühnenarchitekturen verbleiben bei `sportgrundriss.js`.
 - Die Bibliothek `moebel/sport-mix.js` bietet differenzierte, teilesparende Präsentationen in 2,50-/5,00-m-Breiten; bei kleinen Randabteilungen dürfen 2,50-m-Innenwandmodule ergänzt werden.
 - Die **visuelle** Vorher-/Nachher-Abnahme über alle acht Vergleichshäuser und ein **gemessenes** Teilebudget (Etage nachher ≤ Etage vorher) sind zusätzlich zur regelkonformen Datenplanung verpflichtend. Bis dahin keine Mergefreigabe.
+
+## Phase 5: FUNDUS innen
+- Der Innenraum aller 20 im aktuellen Render-Stamm vorhandenen FUNDUS-Filialen basiert auf `ladenplan(..., 'outlet', ...)`; der Geschossadapter `kit/ladenbau-outlet.js` verteilt sieben Sortimente auf ein bis drei Verkaufsetagen. Der Außenbau bleibt unangetastet.
+- Damen bleibt auf jeder Etage als größte Sortimentsfläche erhalten; auf zweigeschossigen und City-Häusern sind weitere Sortimente nach Etage verteilt. Pro Geschoss existieren eine Kassenzeile am Ausgang sowie geordnete Doppelstangen, Schuh-, Taschen-, Home- und Beauty-Präsentationen. Schilder hängen über der jeweiligen Abteilungsmitte.
+- Die vier Innenzustände `normal`, `schwach`, `ansturm` und `raeumung` ändern den Befüllungsgrad bzw. temporäre Kunden- und Nachräumszenen. Die normale Plangeometrie bleibt gleich; Kundenansammlungen im Ansturm sind eine ausdrücklich beabsichtigte, nur im Zustand sichtbare Verkehrsbelegung, keine Dauerplatzierung des Grundrisses.
+- Prüfpfad: `npm run ladenbau:smoke` (Sport + FUNDUS), `npm run ladenbau:pruefen` (Sport + FUNDUS), optional `npm run ladenbau:pruefen:teile`. Kataloge: `node render-katalog.js outlet-innen` und `node render-katalog.js outlet-innen-zustaende`.
+- Datenpläne und regelbasierte Prüfungen ersetzen weder reale Teilemessungen noch die Sichtprüfung der gerenderten PNGs. Diese bleiben für die Freigabe verbindlich.
