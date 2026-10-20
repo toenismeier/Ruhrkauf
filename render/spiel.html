@@ -313,6 +313,21 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+
+  /* N12 Chronik: lesbare, mobile Zeitleiste und historische Fassadenmotive */
+  .chronik { display: grid; gap: 12px; padding-bottom: 24px; }
+  .chronik h2 { font-size: 17px; margin: 12px 4px 4px; }
+  .chronik .karte p { line-height: 1.45; font-size: 13px; }
+  .chronik-linie { border-left: 3px solid #a65a4e; margin-left: 54px; }
+  .chronik-station { display: grid; grid-template-columns: 52px minmax(0,1fr); position: relative; margin-left: -54px; margin-bottom: 12px; gap: 10px; }
+  .chronik-jahr { font-size: 12px; font-weight: 800; color: #813b31; text-align: right; padding-top: 14px; }
+  .chronik-inhalt { border: 1px solid var(--linie); border-radius: 12px; padding: 10px; background: var(--karte); min-width: 0; }
+  .chronik-inhalt h3 { font-size: 14px; margin: 0 0 9px; }
+  .chronik-inhalt p { font-size: 12px; line-height: 1.5; margin: 8px 0; }
+  .chronik-inhalt small, .chronik-spiel small, .chronik-spiel span { color: var(--leise); font-size: 11px; }
+  .chronik-motiv { width: 100%; max-height: 210px; object-fit: contain; border-radius: 8px; background: #3b444d; filter: saturate(.55) sepia(.14); }
+  .chronik-spiel { padding: 12px; background: var(--karte); border: 1px solid var(--linie); border-left: 4px solid #a65a4e; border-radius: 10px; }
+  .chronik-spiel p { font-size: 13px; line-height: 1.5; margin: 5px 0; }
 </style>
 </head>
 <body>
@@ -337,6 +352,7 @@
     <div class="kacheln">
       <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
+      <button class="mkachel" id="chronik" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M7 4v16M10 9h7M10 13h7"/></svg><b>Chronik</b><small>Geschichte und Archiv</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel" id="marketing"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l7 4V6L6 10zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg><b>Marketing</b><small>Kanäle, Karte, CRM, Aktionen</small></button>
