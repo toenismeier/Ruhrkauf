@@ -72,7 +72,7 @@ export function hausbesuchBesatz(haus, etageNr) {
 
 function zonenNormalisieren(zonen, haus) {
   return (zonen ?? []).map((z, i) => {
-    const f = z.flaeche ?? haus.flaechen.find((f) => f.id === z.id) ?? z;
+    const f = z.flaeche ?? haus.flaechen.find((f) => f.id === z.id || f.gruppe === z.id) ?? z;
     const punkte = z.zellen?.map((c) => ({ x: (c.i + 0.5) * 5, z: (c.j + 0.5) * 5 })) ??
       (Number.isFinite(z.x) ? [{ x: z.x + z.w / 2, z: z.z + z.d / 2 }] : []);
     return { id: f.id ?? z.id ?? String(i), gruppe: f.gruppe ?? z.gruppe ?? z.art, name: f.name ?? z.name, punkte };
@@ -171,10 +171,13 @@ export function hausbesuchModul(ctx) {
     for (let i = 0; i < besatz.kunden + besatz.verkauf; i++) {
       const personal = i >= besatz.kunden, zone = zn[Math.floor(r() * zn.length)];
       const pos = zone.punkte[Math.floor(r() * zone.punkte.length)];
+      const zielZone = personal ? zone : zn[Math.floor(r() * zn.length)];
+      const ziel = zielZone.punkte[Math.floor(r() * zielZone.punkte.length)];
       const x = begrenze(pos.x + (r() - 0.5) * 2, 1, buehne.breite - 1);
       const z = begrenze(pos.z + (r() - 0.5) * 2, 1, buehne.tiefe - 1);
-      personen.push({ x, z, startX: x, startZ: z, phase: r() * Math.PI * 2, tempo: personal ? 0 : 0.13 + r() * 0.23,
-        richtung: r() * Math.PI * 2, zone, personal, index: i });
+      personen.push({ x, z, startX: x, startZ: z, zielX: begrenze(ziel.x, 1, buehne.breite - 1), zielZ: begrenze(ziel.z, 1, buehne.tiefe - 1),
+        phase: r() * Math.PI * 2, tempo: personal ? 0 : 0.13 + r() * 0.23,
+        richtung: r() * Math.PI * 2, zone, zielZone, personal, index: i });
     }
     figuren = personen;
     const koerper = new THREE.BoxGeometry(0.66, 1.15, 0.42), kopf = new THREE.SphereGeometry(0.37, 6, 5);
@@ -190,10 +193,10 @@ export function hausbesuchModul(ctx) {
       const liste = figuren.filter((p) => p.personal === personal);
       const ms = personal ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
       liste.forEach((p, i) => {
-        const lauf = p.personal ? 0 : Math.sin(t * p.tempo + p.phase) * 1.55;
-        const x = begrenze(p.startX + Math.sin(p.richtung) * lauf, 0.5, buehne.breite - 0.5);
-        const z = begrenze(p.startZ + Math.cos(p.richtung) * lauf, 0.5, buehne.tiefe - 0.5);
-        p.x = x; p.z = z;
+        const weg = p.personal ? 0 : (1 - Math.cos(t * p.tempo + p.phase)) / 2;
+        const x = begrenze(p.startX + (p.zielX - p.startX) * weg, 0.5, buehne.breite - 0.5);
+        const z = begrenze(p.startZ + (p.zielZ - p.startZ) * weg, 0.5, buehne.tiefe - 0.5);
+        p.x = x; p.z = z; p.zoneJetzt = weg > 0.5 ? p.zielZone : p.zone;
         obj.position.set(x, 0.82, z); obj.rotation.set(0, p.richtung, 0); obj.updateMatrix();
         ms[0].setMatrixAt(i, obj.matrix);
         obj.position.y = 1.6; obj.updateMatrix(); ms[1].setMatrixAt(i, obj.matrix);
@@ -274,13 +277,20 @@ export function hausbesuchModul(ctx) {
       const d = Math.hypot(px - x, py - y);
       if (d < dist) { nah = p; dist = d; }
     }
-    if (nah) return abteilungSprechen(nah.zone, nah);
+    if (nah) return abteilungSprechen(nah.zoneJetzt ?? nah.zone, nah);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(new THREE.Vector2(x / r.width * 2 - 1, 1 - y / r.height * 2), cam);
     const p = ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3());
     if (!p) return;
     const z = treffer.find((q) => q.punkte.some((v) => Math.hypot(v.x - p.x, v.z - p.z) < 4.2));
-    if (z) return abteilungSprechen(z, null);
+    if (z) {
+      const bereich = ctx.E.einkaufUebersicht(ctx.s()).bereiche.find((b) => b.bereich === z.gruppe);
+      if (haus.format !== 'outlet' && bereich?.wgs?.length) {
+        const wg = bereich.wgs.find((g) => g.id.endsWith('.' + z.id)) ?? bereich.wgs[0];
+        schliesse(); ctx.oeffneEinkauf('wg', wg.id); return;
+      }
+      return abteilungSprechen(z, null);
+    }
     if (Math.hypot(p.x - buehne.breite / 2, p.z - buehne.tiefe / 2) < 6) leitung();
     else host.querySelector('.hb-blase').hidden = true;
   }
