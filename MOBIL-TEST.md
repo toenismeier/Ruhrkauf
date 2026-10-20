@@ -60,7 +60,7 @@ npm run smoke:panels        # erweitertes UI-Szenario
 npm run smoke:karte         # Gesten und Zoom
 ```
 
-Die N11-App-Prüfung ist in `npm test` enthalten und kann separat mit `npm run smoke:app` gestartet werden. Sie prüft Manifest und PNG-Icons, vier IndexedDB-Plätze mit JPEG-Vorschau, identischen Spielzustand nach Laden, gzip-Export und -Import sowie einen echten Offline-Neustart nach Service-Worker-Installation. Der Test schreibt einen Screenshot nach `render/bilder/nice/app/offline.png`.
+Die N11-App-Prüfung ist in `npm test` enthalten und kann separat mit `npm run smoke:app` gestartet werden. Sie prüft Manifest und PNG-Icons, vier IndexedDB-Plätze mit JPEG-Vorschau, identischen Spielzustand nach Laden, gzip-Export und -Import sowie einen echten Offline-Neustart nach Service-Worker-Installation. Der Test schreibt einen Screenshot nach `bilder/nice/app/offline.png`.
 
 Für die App-Bilder erzeugt `npm run symbol` die Icons (`render/app-icon-180.png`, `render/app-icon-512.png`) und Startbilder unter `render/startbilder/` aus dem bestehenden isometrischen Hartwig-Kit. `npm run build` erzeugt fehlende oder veraltete App-Grafiken automatisch.
 
