@@ -17,9 +17,9 @@ const warten = (ms) => new Promise((r) => setTimeout(r, ms));
 const KATEGORIE = ['Presse', 'Konkurrenz'];
 export function wochenberichtModul(ctx) {
   const node = document.createElement('div'); node.id = 'wochen-overlay'; node.hidden = true; document.body.append(node);
-  let status = 'zu', token = 0, bericht = null, vorfall = 0, start = 0, zaehlRaf = 0;
+  let status = 'zu', token = 0, bericht = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
   const zeiten = [];
-  const markieren = (ereignis) => zeiten.push({ ereignis, ms: Math.round(performance.now() - start) });
+  const markieren = (ereignis) => { const t = performance.now(); zeiten.push({ ereignis, ms: Math.round(t - start), ...(bestaetigt === null ? {} : { jaMs: Math.round(t - bestaetigt) }) }); };
   const modus = () => ctx.modus?.() ?? 'voll';
   const schnell = () => reduziert() || ohneAnimation() || modus() === 'aus';
   const dauer = () => schnell() ? 0 : modus() === 'kurz' ? 2000 : WOCHEN_ZEIT.zaehlen;
@@ -36,13 +36,14 @@ export function wochenberichtModul(ctx) {
   }
   function oeffne() {
     if (status !== 'zu') return;
-    ++token; start = performance.now(); zeiten.length = 0; markieren('Wochenknopf');
+    ++token; start = performance.now(); bestaetigt = null; zeiten.length = 0; markieren('Wochenknopf');
     if (modus() === 'aus') return berechnen(false);
     fragDialog();
   }
   async function berechnen(mitDialog = true) {
     if (status === 'rechnen') return;
     const meins = ++token, istReduziert = schnell();
+    if (mitDialog) { bestaetigt = performance.now(); markieren('Ja gewählt'); }
     status = 'rechnen';
     ctx.sperren?.();
     node.classList.remove('sichtbar');
