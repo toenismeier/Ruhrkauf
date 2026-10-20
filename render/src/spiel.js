@@ -38,9 +38,11 @@ import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 import { itModul } from './ui/it.js';
 import { planungModul } from './ui/planung.js';
 // O07 Haus
-import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml } from './ui/haus.js';
+import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml, hausStatischHtml } from './ui/haus.js';
 
 const param = new URLSearchParams(location.search);
+// Test- und Entwicklungssteuerung ist außerhalb von ?dev=1 unsichtbar.
+if (param.get('dev') === '1') document.querySelector('.botwahl')?.style.setProperty('display', 'flex');
 const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
@@ -288,6 +290,11 @@ function bahnhofFokussieren() {
   K.x = bahnhofOrt.x; K.z = bahnhofOrt.z; K.halb = 63; kameraSetzen();
 }
 
+function stadtchipSetzen(name) {
+  $('stadtname').textContent = name;
+  const region = E.stadtRegion(name) ?? s.haeuser.find((h) => h.stadt === name)?.region;
+  $('stadtcluster').textContent = region ? 'Region ' + region : '';
+}
 function baueStadtAusSpiel(name) {
   const t0 = performance.now();
   raeumeSzene();
@@ -334,11 +341,7 @@ function baueStadtAusSpiel(name) {
   kachelnSichtbarBauen();
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-  $('stadtname').textContent = name;
-  // O01: geografische Zuordnung im Stadtchip anzeigen.
-  const hausHier = s.haeuser.find((h) => h.stadt === name && h.hauscluster);
-  const geoCluster = s.organisation?.hauscluster.find((c) => c.id === hausHier?.hauscluster);
-  const chipCluster = $('stadtcluster'); if (chipCluster) chipCluster.textContent = geoCluster?.name ?? '';
+  stadtchipSetzen(name);
   return ms;
 }
 // Für Bahnreisen wird derselbe Szenenaufbau in Animationsbilder aufgeteilt; Detailkacheln folgen bei Ankunft.
@@ -392,7 +395,7 @@ async function baueStadtAusSpielReise(name) {
   zeichnen();
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-  $('stadtname').textContent = name;
+  stadtchipSetzen(name);
   return ms;
 }
 
@@ -662,7 +665,21 @@ window.premiumTun = (was, id) => {
 };
 function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
-  if (!d) return;
+  if (!d) {
+    // Bis zur Integration in die Engine sind FUNDUS und Volkskauf Kataloghäuser.
+    // Ihre anklickbaren Gruppen öffnen dieselbe Sheet-Hülle mit passenden Reitern,
+    // ohne nicht vorhandene Kennzahlen oder Entscheidungen vorzutäuschen.
+    const statisch = sb?.statischeHaeuser.get(id);
+    if (!statisch) return;
+    const neu = offenesHaus !== id;
+    if (neu) hausReiter = 'ueberblick';
+    offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
+    const h = statisch.haus;
+    panel(h.name, h.stadt + ' · ' + (h.format === 'outlet' ? 'FUNDUS' : 'Volkskauf') +
+      ' · Baujahr ' + h.baujahr, hausStatischHtml(h, hausReiter));
+    if (neu) hausZeigen(id);
+    return;
+  }
   const neu = offenesHaus !== id;
   if (neu) hausReiter = 'ueberblick';
   // O07 Haus
@@ -982,7 +999,7 @@ reise = reiseModul({
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
     const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', zahl('schwester')], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', zahl('outlet')]];
     return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length + zahl('schwester') + zahl('outlet'), umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
-      formate: formate.filter((p) => p[1]).map((p) => p[0] + ' ' + p[1]).join(' · ') };
+      formate: formate.filter((p) => p[1]).map(([name, anzahl]) => ({ name, anzahl })) };
   }),
   pinPunkt: bahnhofBildpunkt,
   zuletzt: () => postUi.reiseZuletzt ?? [],
