@@ -1,0 +1,7 @@
+# EAS lädt nur die App hoch (ohne diese Datei wären es rund 400 MB).
+/*
+!/app/
+/app/node_modules/
+/app/ios/
+/app/android/
+/app/.expo/
