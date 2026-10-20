@@ -29,6 +29,7 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { werkzeugeModul } from './ui/werkzeuge.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -472,17 +473,20 @@ function cockpitZeigen() {
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
   $('kw').textContent = `KW ${c.kw} / ${c.jahr}`;
-  $('phase').textContent = c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '';
-  $('phase').style.display = c.phase === 'regulaer' ? 'none' : '';
+  $('phase').textContent = [c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '', s.testGenutzt ? 'Testspiel' : ''].filter(Boolean).join(' · ');
+  $('phase').style.display = c.phase === 'regulaer' && !s.testGenutzt ? 'none' : '';
 }
 
 // ─────────────────────────────────────────── Woche weiter
-function woche(mitBot = false) {
+function woche(mitBot = false, test = false) {
   if (s.phase === 'zerschlagen') return null;
   const davor = E.posteingang(s);
   const t0 = performance.now();
   if (mitBot) botSchritt(s);
-  E.wocheAbspielen(s);
+  if (test) {
+    const ergebnis = E.fuehreAus(s, { typ: 'testWoche' });
+    if (!ergebnis.ok) { meldung(ergebnis.text, false); return null; }
+  } else E.wocheAbspielen(s);
   const t1 = performance.now();
   const geaendert = grafikNachziehen();
   const t2 = performance.now();
@@ -519,7 +523,8 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po].filter(Boolean);
+let wk = null;
+const module = () => [ek, vs, mk, pr, po, wk].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -921,6 +926,7 @@ function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) 
   baueStadtAusSpiel(stadt);
   ek.badge(); menueBadge();
   window.spiel.s = s;
+  wk?.nachStart();
   automatischSpeichern();
   return s;
 }
@@ -937,7 +943,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { neuesSpiel, speichern: sofortSpeichern, werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
@@ -1042,6 +1048,7 @@ async function spielFortsetzen() {
     baueStadtAusSpiel(wahl.value);
     ek.badge(); menueBadge();
     window.spiel.s = s;
+    wk?.nachStart();
     window.bereit = true;
     $('lade').classList.remove('an');
     meldung('Spielstand fortgesetzt.');
