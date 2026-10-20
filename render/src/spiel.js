@@ -29,6 +29,8 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+// O04 Personal
+import { personalModul } from './ui/personaleinsatz.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -519,7 +521,7 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
-const module = () => [ek, vs, mk, pr, po].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, pe].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -555,6 +557,14 @@ function hausZeigen(id) {
 $('pzu').addEventListener('click', schliessePanel);
 
 let hausEtageWahl = null, letztesInnenbild = null;
+// O04 Personal: Hausdetail-Reiter, eigenständiger Zustand der Oberfläche.
+let hausPersonalAnsicht = 'haus';
+$('pinhalt').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-pehaus]');
+  if (!el || !offenesHaus) return;
+  hausPersonalAnsicht = el.dataset.pehaus;
+  oeffneHaus(offenesHaus);
+});
 window.hausKlick = (art, id, nr) => {
   if (art === 'zu') { hausEtageWahl = null; oeffneHaus(offenesHaus); return; }
   hausEtageWahl = { id, nr: Number(nr) }; oeffneHaus(id); $('pinhalt').scrollTop = 0;
@@ -574,6 +584,7 @@ function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
   if (!d) return;
   const neu = offenesHaus !== id;
+  if (neu) hausPersonalAnsicht = 'haus';
   offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
   const h = d.haus, k = h.kpi;
   const z = sb.zustand(id);
@@ -582,6 +593,14 @@ function oeffneHaus(id) {
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
+  // O04 Personal: Bedarf/Plan je Wochentag und direkte Übersteuerung im Haus.
+  html += `<div class="seg"><button data-pehaus="haus" class="${hausPersonalAnsicht === 'haus' ? 'an' : ''}">Haus & Flächen</button><button data-pehaus="personal" class="${hausPersonalAnsicht === 'personal' ? 'an' : ''}">Personal</button></div>`;
+  if (hausPersonalAnsicht === 'personal') {
+    html += pe.hausBlock(id);
+    panel(h.name, `${h.stadt} · Personaleinsatz`, html, 'gross');
+    if (neu) hausZeigen(id);
+    return;
+  }
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -784,11 +803,13 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null;
+let vs = null, mk = null, pr = null, po = null, pe = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
+// O04 Personal
+pe = personalModul({ E, s: () => s, panel, meldung, nachAktion, oeffneHaus });
 po = posteingangModul({
   E, s: () => s, panel, meldung, nachAktion, zustand: () => postUi, nachZustand: automatischSpeichern,
   springe: (bezug) => {
@@ -797,6 +818,7 @@ po = posteingangModul({
       if (bezug.modul === 'vorstand') return oeffneModul(vs);
       if (bezug.modul === 'marketing') return oeffneModul(mk);
       if (bezug.modul === 'produkte') return oeffneModul(pr);
+      if (bezug.modul === 'personal') return oeffneModul(pe);
       if (bezug.modul === 'zentrale') return oeffneHq();
     }
     if (bezug.stadt && bezug.stadt !== stadtName) {
@@ -810,6 +832,7 @@ po = posteingangModul({
     else if (bezug.modul === 'vorstand') oeffneModul(vs);
     else if (bezug.modul === 'marketing') oeffneModul(mk);
     else if (bezug.modul === 'produkte') oeffneModul(pr);
+    else if (bezug.modul === 'personal') oeffneModul(pe);
     else if (bezug.modul === 'zentrale') oeffneHq();
     else schliessePanel();
   },
@@ -849,6 +872,8 @@ const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffn
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
+// O04 Personal
+$('personaleinsatz').addEventListener('click', () => oeffneModul(pe));
 $('posteingang').addEventListener('click', () => oeffneModul(po));
 $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
@@ -937,7 +962,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
