@@ -1,5 +1,7 @@
 // Reise zwischen Hartwig-Städten. Messwerte: auftraege/spiel-reise-und-wochenabschluss.md.
 import { esc } from './format.js';
+import { portraetSVG } from '../kit/portraet.js';
+const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 export const REISE_ZEIT = Object.freeze({
   kreisAuf: 240, panelSteht: 260, text: 1500, zieleAb: 1000, wechsel: 150,
   fahrt: 4400, zugStart: 700, zugEnde: 3500, kreisZu: 400, reduziert: 150,
@@ -59,7 +61,7 @@ export function reiseModul(ctx) {
     ++token; const meins = token;
     aktiv = true; gestartet = performance.now(); protokoll.length = 0; messen('Pin angetippt');
     const hier = ctx.stadt(), p = ortPunkt(); kreis(p);
-    z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">H</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/><circle cx="50" cy="70" r="5" fill="#d23c32"/><circle cx="85" cy="46" r="3" fill="#8295a0"/><circle cx="67" cy="113" r="3" fill="#8295a0"/></svg></div><div class="reise-zielraster"></div></div></section>';
+    z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/><circle cx="50" cy="70" r="5" fill="#d23c32"/><circle cx="85" cy="46" r="3" fill="#8295a0"/><circle cx="67" cy="113" r="3" fill="#8295a0"/></svg></div><div class="reise-zielraster"></div></div></section>';
     document.body.classList.add('reise-aktiv');
     z.querySelector('.reise-suche').addEventListener('input', (e) => ziele(e.target.value));
     ziele();
