@@ -132,7 +132,7 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.evaluate(() => window.spiel.s.cash), soll.cash);
 
     assert.deepEqual(fehler, [], 'Keine ungefangenen JavaScript-Fehler');
-    const ziel = path.join(root, 'bilder', 'nice', 'app');
+    const ziel = path.join(root, '..', 'bilder', 'nice', 'app');
     fs.mkdirSync(ziel, { recursive: true });
     await page.screenshot({ path: path.join(ziel, 'offline.png') });
     console.log('N11 OK: Manifest, Icons, 4 Plätze, JPEG, gzip-Export/Import, Reload, Offline-Neustart');
