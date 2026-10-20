@@ -106,7 +106,7 @@ function stand(s: GameState): ZeitungStand {
 }
 export const zeitungAktiv = (s: GameState): boolean => s.zeitung?.aktiv !== false;
 export const zeitungArchiv = (s: GameState): ZeitungAusgabe[] => s.zeitung?.ausgaben ?? [];
-export const zeitungAktuelle = (s: GameState): ZeitungAusgabe | null => zeitungArchiv(s).at(-1) ?? null;
+export const zeitungAktuelle = (s: GameState): ZeitungAusgabe | null => { const aus = zeitungArchiv(s); return aus.length ? aus[aus.length - 1] : null; };
 export function zeitungEinstellen(s: GameState, aktiv: boolean): void {
   stand(s).aktiv = aktiv;
   if (!aktiv) s.entscheidungen = s.entscheidungen.filter((e) => e.typ !== 'interview');
