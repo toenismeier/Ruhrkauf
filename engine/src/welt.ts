@@ -263,8 +263,9 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   for (const g of gruppenFuer(f)) {
     const qmG = flaechen.filter((x) => x.gruppe === g).reduce((a, b) => a + b.qm, 0);
     if (qmG <= 0) continue;
-    const sQm = GRUPPEN[g].qmUmsatz * fit(g, einzug.kaufkraft, einzug.alter, einzug.wettbewerb) * LAGE_FAKTOR[lage] * CLUSTER_FAKTOR[cluster] * zwischen(h, 0.82, 1.15);
-    const satF = zwischen(h, 0.45, 1.1); // < 1 = Fläche überdimensioniert
+    const sQm = GRUPPEN[g].qmUmsatz * fit(g, einzug.kaufkraft, einzug.alter, einzug.wettbewerb) * LAGE_FAKTOR[lage] * CLUSTER_FAKTOR[cluster] * (nurDaten ? 1 : zwischen(h, 0.82, 1.15));
+    // Neue Sortimentspotenziale dürfen den historischen RNG-Strom der Grafik-Exporte nicht verschieben.
+    const satF = nurDaten ? 0.75 : zwischen(h, 0.45, 1.1); // < 1 = Fläche überdimensioniert
     const Q = qmG * satF;
     const sat = 1 - Math.exp(-qmG / Q);
     potenzial[g] = (sQm * qmG) / sat;
