@@ -18,6 +18,7 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `massstab-staedte.md` | `feat/massstab-staedte` | Engine-Maßstab Phase 1 | Oberfläche, Ladenbau, Engine-Aufträgen |
 | `massstab-oberflaeche.md` | `feat/massstab-oberflaeche` | Engine-Maßstab Phase 1 | allem |
 | `massstab-leistung.md` | `feat/massstab-leistung` | Städte Phase 2 | Oberfläche |
+| `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | | allem (nur `render/`, eigene Module) |
 | `spiel-posteingang.md` | `feat/spiel-posteingang` | **gemergt 19.10.** Folgeschritt: Wettbewerbsmeldungen in die Kategorie Konkurrenz (kleiner Commit) | |
 
 ## Ohne CI arbeiten (gilt, solange GitHub Actions blockiert ist)
