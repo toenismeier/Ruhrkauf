@@ -74,8 +74,10 @@ export function wochenberichtModul(ctx) {
     if (meins !== token) return;
     status = 'zaehlen'; vorfall = 0;
     const m = bericht.meldungen, titel = m[0]?.text ?? 'Hartwig startet in eine neue Geschäftswoche';
-    const uDelta = bericht.umsatzVor == null ? 'Noch keine Vergleichswoche' : eur(bericht.umsatz - bericht.umsatzVor);
-    const eDelta = bericht.ebitdaVor == null ? 'Noch keine Vergleichswoche' : eur(bericht.ebitda - bericht.ebitdaVor);
+    const delta = (wert, vorher) => vorher == null ? 'Noch keine Vergleichswoche'
+      : eur(wert - vorher) + ' (' + (vorher === 0 ? '–' : new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + ' %') + ')';
+    const uDelta = delta(bericht.umsatz, bericht.umsatzVor);
+    const eDelta = delta(bericht.ebitda, bericht.ebitdaVor);
     const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? 'hafen' : 'altstadt') + '.png)"></div><span>' + esc(a.text) + '</span></div>' : '';
     node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2>KW ' + bericht.kw + ' · Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schließen">×</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht.umsatz + '">0 €</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht.ebitda + '">0 €</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' +
       zeile('Cash operativ', 'nicht separat erfasst') + zeile('Investitionen', 'nicht separat erfasst') + zeile('Finanzierung', 'nicht separat erfasst') +
