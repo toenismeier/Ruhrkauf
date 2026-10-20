@@ -27,7 +27,7 @@ import { stadtDaten } from '../kit/staedte.js';
 import { echterBauer } from '../kit/bauer.js';
 import { nahMitte } from '../kit/stadtrand.js';
 
-const ROLLE = { warenhaus: 'W', sport: 'S', wettbewerber: 'K', outlet: 'O' };
+const ROLLE = { premium: 'P', warenhaus: 'W', sport: 'S', wettbewerber: 'K', outlet: 'O' };
 
 /** Querformat für ganze Städte (die isometrische Raute ist rund doppelt so breit wie hoch). */
 export const STADT_KACHEL = [1280, 720];
@@ -62,7 +62,7 @@ export function sichtFilter(box, o = {}) {
 }
 
 // Immer bauen: Standorte (Marker, Leerstand) und Bauten, die weit über ihre Parzelle hinaus sichtbar sind
-const IMMER = new Set(['slot:warenhaus', 'slot:sport', 'slot:wettbewerber', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus']);
+const IMMER = new Set(['slot:warenhaus', 'slot:premium', 'slot:sport', 'slot:wettbewerber', 'slot:dominante', 'slot:kirche', 'slot:hochhaus', 'slot:rathaus', 'slot:heizwerk', 'slot:dom', 'slot:fernsehturm', 'slot:wasserturm', 'slot:nord_kirche', 'slot:nord_kontorhaus']);
 const HAEUSER = new Set(['stadthaus', 'eck', 'hofhaus']);
 const HOEHE = 70;   // vorsichtige Höchsthöhe normaler Bauten (Punkthochhaus 16 Geschosse rund 50 m)
 class LeerSammler { constructor() { this.teile = new Map(); this.anzahl = 0; } box() { this.anzahl++; } quader() { this.anzahl++; } add() { this.anzahl++; } bauen() {} }
