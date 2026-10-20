@@ -67,7 +67,7 @@ export function wochenberichtModul(ctx) {
       kw: kwEnde, jahr: jahrEnde, umsatz: c.umsatzWoche, ebitda: c.ebitdaWoche, umsatzVor: vergangen?.umsatz ?? null,
       ebitdaVor: vergangen?.ebitda ?? null, cashNetto: c.cash - davorCash, cash: c.cash,
       phase: c.phase, kredite: c.kreditFrei, runway: c.runwayWochen,
-      meldungen, vorgaenge, woche: ctx.wocheNr(), letzte: jetzt,
+      meldungen, vorgaenge, erfolge: ctx.erfolge?.() ?? [], woche: ctx.wocheNr(), letzte: jetzt,
     };
     markieren('Engine abgeschlossen');
     if (modus() === 'aus') { aufraeumen(); return; }
@@ -89,7 +89,9 @@ export function wochenberichtModul(ctx) {
       '<p>Die Engine stellt keinen nach Zahlungsarten getrennten Cashflow bereit.</p></div>' +
       (bericht.phase === 'insolvenz' ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur(bericht.kredite) + ' · Liquiditätsreichweite: ' + bericht.runway + ' Wochen</span></div>' : '') +
       '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild" style="background-image:url(./bilder/reise-ruhr.jpg)"></div><h4>' + esc(titel) + '</h4>' +
-      nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') + '</div></div><div id="wb-vorfall"></div></section>';
+      nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') +
+      (bericht.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht.erfolge.map(e => esc(e.titel)).join(', ') + '</strong></div>' : '') +
+      '</div></div><div id="wb-vorfall"></div></section>';
     node.hidden = false; node.className = 'bericht-ein'; document.body.classList.add('wochen-aktiv');
     requestAnimationFrame(() => node.classList.add('sichtbar'));
     const originalDauer = dauer();
