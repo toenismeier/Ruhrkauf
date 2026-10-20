@@ -340,7 +340,7 @@ function pruefe(name) {
       'Freie Rasenfläche Rand m': Math.max(0, ...rasen.filter((q) => q.rand).map((q) => q.m)),
     },
     gross: gross.map((g) => g.art + (g.innen > 0.25 * g.n ? '*' : '')),
-    niveauListe, nacktNah: [...nacktNah],
+    niveauListe, nacktNah: [...nacktNah], q02Fehler: q02?.fehler ?? null,
   };
 }
 
@@ -366,7 +366,12 @@ console.log(''.padEnd(br) + erg.map((e) => (' ' + e.name.slice(0, 15)).padStart(
 const verstoss = new Map(erg.map((e) => [e.name, 0]));
 for (const z of zeilen) console.log(z.padEnd(br) + erg.map((e) => { const v = e.werte[z], g = GRENZE[z]; const x = g !== undefined && Number(v) > g + 1e-9; if (x) verstoss.set(e.name, verstoss.get(e.name) + 1); return ((x ? '!' : '') + v).padStart(17); }).join(''));
 console.log('Verstöße (Grenzwerte GESTALTUNG.md)'.padEnd(br) + erg.map((e) => String(verstoss.get(e.name)).padStart(17)).join(''));
-if (Q02 && [...verstoss.values()].some((v) => v > 0)) process.exitCode = 1;
+if (Q02) for (const e of erg) for (const [regel, liste] of Object.entries(e.q02Fehler ?? {})) {
+  if (liste.length) console.error('Q02-Verstoß', e.name, regel, JSON.stringify(liste.slice(0, 8)));
+}
+const q02Regeln = ['Offene Gleisenden ohne Abschluss', 'Oberleitung ohne Gleis',
+  'Fahrzeuge außerhalb Fahrbahn/Gleis', 'Dachaufbauten außerhalb Dachfläche', 'Wiederholung über 15 %'];
+if (Q02 && erg.some((e) => q02Regeln.some((k) => Number(e.werte[k]) > 0))) process.exitCode = 1;
 for (const e of erg) console.log(`${e.name}: Großbauten nah [${e.gross.join(', ')}] (* = innen); nicht ebenerdig nah [${e.niveauListe.join(', ')}]; nackte Wasserkante nah an [${e.nacktNah.join(', ')}]`);
 
 // ---- Vielfalt zwischen Nachbarstädten: gleiche Wettbewerber-Bauform (Art + Form), gleiche Art, gleicher Kirchenstil, gleicher Konzernbau ----
