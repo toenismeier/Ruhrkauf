@@ -33,6 +33,7 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { einfuehrungModul } from './ui/einfuehrung.js';
 import { spielendeModul } from './ui/spielende.js';
 // O02 Umsatztreiber
 import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
@@ -1282,6 +1283,9 @@ window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: s
     get laeuft() { return steuerung.laeuft; }, get info() { return steuerung.info; },
   },
   kamera: (o) => { Object.assign(K, o); kameraSetzen(); }, tippPunkt, fokusHaeuser, THREE, get K() { return K; }, get sb() { return sb; }, E };
+// N04: eigenständige UI-Registrierung. Kein Eingriff in die Engine oder andere Module.
+const einfuehrung = einfuehrungModul();
+window.spiel.einfuehrung = einfuehrung;
 // ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
 const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', seed: Number(param.get('seed') ?? 1) };
 function startZeigen() {
@@ -1308,6 +1312,7 @@ function spielStarten() {
     neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit);
     $('lade').classList.remove('an');
     window.bereit = true;
+    einfuehrung.spielStart();
   }, 30);
 }
 $('startknopf').addEventListener('click', spielStarten);
@@ -1341,6 +1346,7 @@ async function spielFortsetzen() {
     wk?.nachStart();
     window.bereit = true;
     $('lade').classList.remove('an');
+    einfuehrung.spielStart(true);
     $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
     if (s.ende || s.phase === 'zerschlagen') spielende.anzeigen();
     else meldung('Spielstand fortgesetzt.');

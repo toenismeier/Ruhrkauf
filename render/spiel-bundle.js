@@ -44582,8 +44582,8 @@
   function isoKamera(breite, hoehe, halbeHoehe, ziel) {
     const a = breite / hoehe;
     const c = new OrthographicCamera(-halbeHoehe * a, halbeHoehe * a, halbeHoehe, -halbeHoehe, -3e3, 3e3);
-    const el = 30 * Math.PI / 180, dist2 = 800;
-    c.position.set(ziel.x + dist2 * Math.cos(el) * Math.SQRT1_2, ziel.y + dist2 * Math.sin(el), ziel.z + dist2 * Math.cos(el) * Math.SQRT1_2);
+    const el2 = 30 * Math.PI / 180, dist2 = 800;
+    c.position.set(ziel.x + dist2 * Math.cos(el2) * Math.SQRT1_2, ziel.y + dist2 * Math.sin(el2), ziel.z + dist2 * Math.cos(el2) * Math.SQRT1_2);
     c.lookAt(ziel);
     c.updateProjectionMatrix();
     return c;
@@ -122880,7 +122880,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "b6d615c" : "Entwicklung";
+  var version = () => true ? "077d5d5" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -123106,8 +123106,8 @@
     h += `<div class="oknoepfe unten2">${A.schritt > 0 ? '<button data-a="emZurueck">Zur\xFCck</button>' : ""}${letzte ? `<button class="gruen" data-a="emFertig"${gesperrt2 ? " disabled" : ""}>${A.id ? "Neu positionieren" : "Marke gr\xFCnden"}</button>` : '<button class="gruen" data-a="emWeiter">Weiter</button>'}</div>`;
     return { titel: A.id ? "Neu positionieren" : "Marke gr\xFCnden", unter: `Schritt ${A.schritt + 1} von ${SCHRITTE.length}: ${SCHRITTE[A.schritt]}`, html: h };
   }
-  function eigenmarkenAktion(ctx, ui, el, ev, tun) {
-    const a = el.dataset.a, v = el.dataset.v, s2 = ctx.s();
+  function eigenmarkenAktion(ctx, ui, el2, ev, tun) {
+    const a = el2.dataset.a, v = el2.dataset.v, s2 = ctx.s();
     const A = ui.em.assistent, m = A?.daten;
     const oben = () => {
       const p2 = document.getElementById("pinhalt");
@@ -123193,7 +123193,7 @@
         m.farbe = v;
         return "";
       case "emName":
-        m.name = el.value.trim() || m.name;
+        m.name = el2.value.trim() || m.name;
         A.nameGesetzt = true;
         return "";
       case "emFertig": {
@@ -123225,11 +123225,11 @@
         return "";
       case "emBudget": {
         const x = karte(v);
-        tun({ typ: "eigenmarkeSetzen", marke: v, budgetWoche: Math.max(0, x.budgetWoche + Number(el.dataset.d)) });
+        tun({ typ: "eigenmarkeSetzen", marke: v, budgetWoche: Math.max(0, x.budgetWoche + Number(el2.dataset.d)) });
         return "";
       }
       case "emNeu":
-        if (el.value) tun({ typ: "eigenmarkeAnteil", marke: el.value, wg: ui.wg, anteil: 0.15 });
+        if (el2.value) tun({ typ: "eigenmarkeAnteil", marke: el2.value, wg: ui.wg, anteil: 0.15 });
         return "nichts";
       default:
         return "nichts";
@@ -123322,8 +123322,8 @@
     html += "</div>";
     return { titel: "Reduzierungskalender", unter: `${d2.kalender.length} Warengruppen \xB7 lokale Abweichungen je Hauscluster`, html };
   }
-  function warenAktion(ctx, ui, el, tun) {
-    const typ = el.dataset.a, v = el.dataset.v;
+  function warenAktion(ctx, ui, el2, tun) {
+    const typ = el2.dataset.a, v = el2.dataset.v;
     const w = ui.ware ?? (ui.ware = {});
     const d2 = ctx.E.warenUebersicht(ctx.s());
     const gruppen = Object.keys(ctx.E.GRUPPEN);
@@ -123534,22 +123534,22 @@
       zeigen(scroll);
       return r;
     }
-    function klick(el, ev) {
-      const a = el.dataset.a, v = el.dataset.v;
+    function klick(el2, ev) {
+      const a = el2.dataset.a, v = el2.dataset.v;
       if (a.startsWith("em")) {
-        const r = eigenmarkenAktion(ctx, ui, el, ev, tun);
+        const r = eigenmarkenAktion(ctx, ui, el2, ev, tun);
         if (r !== "nichts") zeigen(r !== "oben");
         return;
       }
       if (a.startsWith("ware")) {
-        warenAktion(ctx, ui, el, tun);
+        warenAktion(ctx, ui, el2, tun);
         return;
       }
       switch (a) {
         case "seite":
           ui.seite = v;
           ui.kuerzen = null;
-          if (el.dataset.bereich) ui.filter = { bereich: el.dataset.bereich, art: "", wert: "" };
+          if (el2.dataset.bereich) ui.filter = { bereich: el2.dataset.bereich, art: "", wert: "" };
           zeigen();
           document.getElementById("pinhalt").scrollTop = 0;
           return;
@@ -123588,7 +123588,7 @@
           tun({ typ: "wgReduzierung", wg: ui.wg, strategie: v });
           return;
         case "modus":
-          tun({ typ: "wgFreigabeModus", wg: ui.wg, art: el.dataset.f, modus: v });
+          tun({ typ: "wgFreigabeModus", wg: ui.wg, art: el2.dataset.f, modus: v });
           return;
         case "grenze":
           tun({ typ: "freigabeGrenze", euro: Math.max(0, q2.freigaben(s2()).grenze + Number(v)) });
@@ -123620,29 +123620,29 @@
           return;
         case "kuerzen":
           ui.kuerzen = null;
-          tun({ typ: "freigabeKuerzen", id: v, prozent: Number(el.dataset.p2) / 100, freigeben: true });
+          tun({ typ: "freigabeKuerzen", id: v, prozent: Number(el2.dataset.p2) / 100, freigeben: true });
           return;
         default:
       }
     }
-    function wechsel(el) {
-      const a = el.dataset.a;
+    function wechsel(el2) {
+      const a = el2.dataset.a;
       if (a.startsWith("em")) {
-        const r = eigenmarkenAktion(ctx, ui, el, null, tun);
+        const r = eigenmarkenAktion(ctx, ui, el2, null, tun);
         if (r !== "nichts") zeigen(true);
         return;
       }
       if (a.startsWith("ware")) {
-        (ui.ware ?? (ui.ware = {}))[{ wareVon: "von", wareNach: "nach", wareGruppe: "gruppe", wareWert: "wert" }[a]] = a === "wareWert" ? Number(el.value) : el.value;
+        (ui.ware ?? (ui.ware = {}))[{ wareVon: "von", wareNach: "nach", wareGruppe: "gruppe", wareWert: "wert" }[a]] = a === "wareWert" ? Number(el2.value) : el2.value;
         return;
       }
       if (a === "filterBereich") {
-        ui.filter.bereich = el.value;
+        ui.filter.bereich = el2.value;
         zeigen(true);
         return;
       }
-      if (a === "regel" && el.type === "range") {
-        const f = el.dataset.f, x = Number(el.value) / 100;
+      if (a === "regel" && el2.type === "range") {
+        const f = el2.dataset.f, x = Number(el2.value) / 100;
         if (f.startsWith("em:")) tun({ typ: "eigenmarkeAnteil", marke: f.slice(3), wg: ui.wg, anteil: x });
         else if (f === "nosZiel") tun({ typ: "wgNosZiel", wg: ui.wg, anteil: x });
         else if (f === "vororderquote") tun({ typ: "wgVororderquote", wg: ui.wg, quote: x });
@@ -123651,21 +123651,21 @@
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-a]");
-      if (!el || el.tagName === "SELECT" || el.tagName === "INPUT") return;
-      klick(el, ev);
+      const el2 = ev.target.closest("[data-a]");
+      if (!el2 || el2.tagName === "SELECT" || el2.tagName === "INPUT") return;
+      klick(el2, ev);
     });
     inhalt.addEventListener("change", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-a]");
-      if (el) wechsel(el);
+      const el2 = ev.target.closest("[data-a]");
+      if (el2) wechsel(el2);
     });
     inhalt.addEventListener("input", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target;
-      if (el.type === "range") {
-        const o = el.parentElement.querySelector("output");
-        if (o) o.textContent = `${el.value} %`;
+      const el2 = ev.target;
+      if (el2.type === "range") {
+        const o = el2.parentElement.querySelector("output");
+        if (o) o.textContent = `${el2.value} %`;
       }
     });
     inhalt.addEventListener("pointermove", (ev) => {
@@ -123714,15 +123714,15 @@
         if (t[0] === "ware") return wareErwartet(s2(), ctx.E, t);
         return eigenmarkenErwartet(ctx, t, ui);
       };
-      for (const el of document.querySelectorAll("#pinhalt [data-p]")) {
+      for (const el2 of document.querySelectorAll("#pinhalt [data-p]")) {
         n++;
         let e;
         try {
-          e = soll(el.dataset.p);
+          e = soll(el2.dataset.p);
         } catch (x) {
           e = `Fehler ${x.message}`;
         }
-        if (e !== el.textContent) fehler6.push(`${el.dataset.p}: ${el.textContent} statt ${e}`);
+        if (e !== el2.textContent) fehler6.push(`${el2.dataset.p}: ${el2.textContent} statt ${e}`);
       }
       return { seite: ui.seite, werte: n, fehler: fehler6 };
     }
@@ -124245,14 +124245,14 @@
   function vergleiche(W3) {
     const fehler6 = [];
     let n = 0;
-    for (const el of document.querySelectorAll("#pinhalt [data-p]")) {
+    for (const el2 of document.querySelectorAll("#pinhalt [data-p]")) {
       n++;
-      const k = el.dataset.p;
+      const k = el2.dataset.p;
       if (!W3.has(k)) {
-        fehler6.push(`${k}: angezeigt ${el.textContent}, Engine kennt den Wert nicht mehr`);
+        fehler6.push(`${k}: angezeigt ${el2.textContent}, Engine kennt den Wert nicht mehr`);
         continue;
       }
-      if (W3.get(k) !== el.textContent) fehler6.push(`${k}: ${el.textContent} statt ${W3.get(k)}`);
+      if (W3.get(k) !== el2.textContent) fehler6.push(`${k}: ${el2.textContent} statt ${W3.get(k)}`);
     }
     return { werte: n, fehler: fehler6 };
   }
@@ -124403,8 +124403,8 @@
       ctx.nachAktion?.();
       return r;
     }
-    function klick(el) {
-      const a = el.dataset.a, v = el.dataset.v;
+    function klick(el2) {
+      const a = el2.dataset.a, v = el2.dataset.v;
       const prof = () => E.vorstandProfil(s2(), ui.ressort);
       switch (a) {
         case "seite":
@@ -124423,7 +124423,7 @@
           ui.angebot = null;
           return zeigen();
         case "entscheiden":
-          tun({ typ: "entscheiden", id: v, option: el.dataset.o });
+          tun({ typ: "entscheiden", id: v, option: el2.dataset.o });
           return zeigen(true);
         case "delegation": {
           const d2 = prof().delegationen.find((x) => x.id === v);
@@ -124485,8 +124485,8 @@
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-a]");
-      if (el && !el.disabled) klick(el);
+      const el2 = ev.target.closest("[data-a]");
+      if (el2 && !el2.disabled) klick(el2);
     });
     return {
       ui,
@@ -124577,11 +124577,11 @@
     }
     document.getElementById("pinhalt").addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-org]");
-      if (!el) return;
-      const a = el.dataset.org;
+      const el2 = ev.target.closest("[data-org]");
+      if (!el2) return;
+      const a = el2.dataset.org;
       if (a === "reiter") {
-        ui.reiter = el.dataset.reiter;
+        ui.reiter = el2.dataset.reiter;
         ui.ebene = null;
         zeichnen2();
       }
@@ -124590,18 +124590,18 @@
         zeichnen2();
       }
       if (a === "profil") {
-        ui.ebene = el.dataset.ebene;
-        ui.id = el.dataset.id;
+        ui.ebene = el2.dataset.ebene;
+        ui.id = el2.dataset.id;
         zeichnen2();
       }
       if (a === "delegation") {
-        tun({ typ: "delegation", ...el.dataset.cluster ? { hauscluster: el.dataset.id } : { bereich: el.dataset.id }, an: el.getAttribute("aria-pressed") !== "true" });
+        tun({ typ: "delegation", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, an: el2.getAttribute("aria-pressed") !== "true" });
       }
-      if (a === "flagship") tun({ typ: "flagship", haus: el.dataset.haus, an: el.dataset.an === "true" });
-      if (a === "besetzen") tun({ typ: "organisationBesetzen", ebene: ui.ebene, id: ui.id, kandidat: el.dataset.kandidat });
+      if (a === "flagship") tun({ typ: "flagship", haus: el2.dataset.haus, an: el2.dataset.an === "true" });
+      if (a === "besetzen") tun({ typ: "organisationBesetzen", ebene: ui.ebene, id: ui.id, kandidat: el2.dataset.kandidat });
       if (a === "entlassen") tun({ typ: "organisationEntlassen", ebene: ui.ebene, id: ui.id });
       if (a === "praemie") tun({ typ: "organisationHaltepraemie", ebene: ui.ebene, id: ui.id, betrag: 1e4 });
-      if (a === "befoerdern") tun({ typ: "organisationBefoerdern", haus: el.dataset.haus, hauscluster: ui.id });
+      if (a === "befoerdern") tun({ typ: "organisationBefoerdern", haus: el2.dataset.haus, hauscluster: ui.id });
     });
     return { oeffne: (reiter = "zentrale") => {
       ui.reiter = reiter;
@@ -124673,8 +124673,8 @@
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? vorher : 0;
       if (ui.ziel) {
-        const el = [...document.querySelectorAll("[data-post-id]")].find((x) => x.dataset.postId === ui.ziel);
-        if (el) el.scrollIntoView({ block: "nearest" });
+        const el2 = [...document.querySelectorAll("[data-post-id]")].find((x) => x.dataset.postId === ui.ziel);
+        if (el2) el2.scrollIntoView({ block: "nearest" });
         ui.ziel = null;
       }
       badge();
@@ -124700,8 +124700,8 @@
       }
       return n;
     }
-    function klicken(el) {
-      const a = el.dataset.poA, id = el.dataset.id, v = el.dataset.v;
+    function klicken(el2) {
+      const a = el2.dataset.poA, id = el2.dataset.id, v = el2.dataset.v;
       if (a === "tab") {
         einstellungen2().reiter = v;
         ui.verhandlung = null;
@@ -124749,8 +124749,8 @@
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (event) => {
       if (!ui.aktiv) return;
-      const el = event.target.closest("[data-po-a]");
-      if (el && !el.disabled) klicken(el);
+      const el2 = event.target.closest("[data-po-a]");
+      if (el2 && !el2.disabled) klicken(el2);
     });
     inhalt.addEventListener("change", (event) => {
       if (!ui.aktiv) return;
@@ -125270,8 +125270,8 @@
       for (let i = 0; i < n && l.length; i++) out.push(l[Math.floor((i + 0.5) * l.length / n)].id);
       return [...new Set(out)];
     };
-    function klick(el) {
-      const a = el.dataset.a, v = el.dataset.v, st2 = s2(), B2 = ui.crm;
+    function klick(el2) {
+      const a = el2.dataset.a, v = el2.dataset.v, st2 = s2(), B2 = ui.crm;
       switch (a) {
         case "seite":
           ui.seite = v;
@@ -125285,7 +125285,7 @@
           ui.kanal = ui.kanal === v ? null : v;
           return zeigen(true);
         case "kanalBudget":
-          return tun({ typ: "kanalBudget", kanal: el.dataset.k, faktor: Number(v) > 0 ? 1.1 : 1 / 1.1 });
+          return tun({ typ: "kanalBudget", kanal: el2.dataset.k, faktor: Number(v) > 0 ? 1.1 : 1 / 1.1 });
         case "kanalAlle":
           return tun({ typ: "kanalBudget", kanal: "alle", faktor: Number(v) });
         case "punkte":
@@ -125403,33 +125403,33 @@
         default:
       }
     }
-    function wechsel(el) {
-      const a = el.dataset.a;
+    function wechsel(el2) {
+      const a = el2.dataset.a;
       if (a === "crmSeg") {
-        ui.crm.seg = Number(el.value);
+        ui.crm.seg = Number(el2.value);
         zeigen(true);
       }
       if (a === "planAnlass") {
-        const K3 = E.aktionskalender(s2(), ui.planen.jahr), an = K3.anlaesse.find((x) => x.id === el.value);
-        Object.assign(ui.planen, { anlass: el.value, mechanik: an.mechanik, rabatt: an.rabatt || ui.planen.rabatt, kw: an.kw, wochen: Math.min(4, an.wochen) });
+        const K3 = E.aktionskalender(s2(), ui.planen.jahr), an = K3.anlaesse.find((x) => x.id === el2.value);
+        Object.assign(ui.planen, { anlass: el2.value, mechanik: an.mechanik, rabatt: an.rabatt || ui.planen.rabatt, kw: an.kw, wochen: Math.min(4, an.wochen) });
         zeigen(true);
       }
       if (a === "planMechanik") {
-        ui.planen.mechanik = el.value;
+        ui.planen.mechanik = el2.value;
         zeigen(true);
       }
     }
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-a]");
-      if (!el || el.disabled || el.tagName === "SELECT") return;
-      klick(el);
+      const el2 = ev.target.closest("[data-a]");
+      if (!el2 || el2.disabled || el2.tagName === "SELECT") return;
+      klick(el2);
     });
     inhalt.addEventListener("change", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-a]");
-      if (el) wechsel(el);
+      const el2 = ev.target.closest("[data-a]");
+      if (el2) wechsel(el2);
     });
     return {
       ui,
@@ -125499,9 +125499,9 @@
       anzeigen();
     }
     document.getElementById("pinhalt").addEventListener("click", (ev) => {
-      const el = ev.target.closest("button[data-umbau]");
-      if (!el) return;
-      const art = el.dataset.umbau;
+      const el2 = ev.target.closest("button[data-umbau]");
+      if (!el2) return;
+      const art = el2.dataset.umbau;
       if (art === "modernisierung") {
         ui.haus = null;
         anzeigen();
@@ -125509,12 +125509,12 @@
       }
       if (art === "haus") {
         ui.haus = null;
-        ctx.hausOeffnen(el.dataset.id);
+        ctx.hausOeffnen(el2.dataset.id);
         return;
       }
       if (art === "planen") {
-        ui.haus = el.dataset.id;
-        ui.etage = Number(el.dataset.etage);
+        ui.haus = el2.dataset.id;
+        ui.etage = Number(el2.dataset.etage);
         ui.stufe = "auffrischung";
         anzeigen();
         return;
@@ -126314,8 +126314,8 @@
       };
       return { typ: g?.artikel?.find(frei6) ?? g?.artikel?.[0], farbe: g?.farben?.[0] ?? "marine", material: g?.materialien?.[0] ?? "Baumwolle", preislage: "mitte", qualitaet: 3, dauer: 12, budgetWoche: 2e4 };
     };
-    function klick(el) {
-      const a = el.dataset.a, v = el.dataset.v, st2 = s2();
+    function klick(el2) {
+      const a = el2.dataset.a, v = el2.dataset.v, st2 = s2();
       const karte = (id) => E.produkte(st2).marken.flatMap((m) => m.produkte).find((p2) => p2.id === id);
       switch (a) {
         case "marke":
@@ -126349,7 +126349,7 @@
           return zeigen(true);
         }
         case "preis": {
-          const id = el.dataset.p2, p2 = karte(id), d2 = preisSchritt(p2.preis);
+          const id = el2.dataset.p2, p2 = karte(id), d2 = preisSchritt(p2.preis);
           tun({ typ: "produktPreis", produkt: id, preis: Math.max(1, Math.round((p2.preis + Number(v) * d2) / d2) * d2 - (d2 >= 5 ? 0.01 : 0)) });
           return zeigen(true);
         }
@@ -126405,8 +126405,8 @@
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-a]");
-      if (el && !el.disabled) klick(el);
+      const el2 = ev.target.closest("[data-a]");
+      if (el2 && !el2.disabled) klick(el2);
     });
     return {
       ui,
@@ -126650,18 +126650,18 @@
       liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + "</strong><small>" + esc2(c.formate ?? "") + "</small></span></button>").join("");
       if (!sortiert.length) liste.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
     }
-    function schreibe(el, text3, dauer, meins) {
-      if (!el) return;
+    function schreibe(el2, text3, dauer, meins) {
+      if (!el2) return;
       if (ohneAnimation() || bewegungReduziert()) {
-        el.textContent = text3;
+        el2.textContent = text3;
         return;
       }
       const beginn = performance.now();
       function tick(t) {
         if (token !== meins) return;
-        el.textContent = text3.slice(0, Math.min(text3.length, Math.floor((t - beginn) / 1e3 * 60)));
-        if (t - beginn < dauer && el.textContent.length < text3.length) requestAnimationFrame(tick);
-        else el.textContent = text3;
+        el2.textContent = text3.slice(0, Math.min(text3.length, Math.floor((t - beginn) / 1e3 * 60)));
+        if (t - beginn < dauer && el2.textContent.length < text3.length) requestAnimationFrame(tick);
+        else el2.textContent = text3;
       }
       requestAnimationFrame(tick);
     }
@@ -126702,7 +126702,7 @@
     }
     async function fahren(ziel) {
       if (!aktiv5 || !ctx.staedte().some((c) => c.name === ziel) || ziel === ctx.stadt()) return;
-      const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert2 = bewegungReduziert() || ohneAnimation();
+      const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert3 = bewegungReduziert() || ohneAnimation();
       zielStart = start;
       messen2("Reiseziel gew\xE4hlt");
       const p2 = ortPunkt();
@@ -126721,10 +126721,10 @@
           } catch (e) {
             reject(e);
           }
-        }, reduziert2 ? 0 : REISE_ZEIT.wechsel);
+        }, reduziert3 ? 0 : REISE_ZEIT.wechsel);
       });
       try {
-        if (!reduziert2) {
+        if (!reduziert3) {
           await warten(REISE_ZEIT.wechsel);
           if (meins === token) {
             flug.classList.add("bewegt");
@@ -126733,7 +126733,7 @@
         } else flug.classList.add("bewegt");
         const fertig = await vorbereitung;
         if (!fertig || meins !== token) return;
-        await warten(reduziert2 ? 0 : Math.max(0, REISE_ZEIT.wechsel + REISE_ZEIT.fahrt - (performance.now() - start)));
+        await warten(reduziert3 ? 0 : Math.max(0, REISE_ZEIT.wechsel + REISE_ZEIT.fahrt - (performance.now() - start)));
         if (meins !== token) return;
         ctx.bahnhofFokussieren();
         const ausschnitt = ctx.vorschau?.();
@@ -126742,7 +126742,7 @@
         kreis(zielPin);
         flug.classList.add("ankunft");
         messen2("Kreis-Schlie\xDFen");
-        await warten(reduziert2 ? REISE_ZEIT.reduziert : REISE_ZEIT.kreisZu);
+        await warten(reduziert3 ? REISE_ZEIT.reduziert : REISE_ZEIT.kreisZu);
         if (meins !== token) return;
         letzte = [von, ...letzte.filter((c) => c !== von && c !== ziel)].slice(0, 12);
         ctx.besucht?.(letzte);
@@ -126965,14 +126965,14 @@
       feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + "</div></div><h4>" + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
       feld.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
       requestAnimationFrame(() => feld.classList.add("offen"));
-      const text3 = m.text ?? "", el = feld.querySelector(".wb-tippt"), beginn = performance.now();
+      const text3 = m.text ?? "", el2 = feld.querySelector(".wb-tippt"), beginn = performance.now();
       function tick(t) {
         if (meins !== token || status !== "vorfall") return;
         const n = schnell() ? text3.length : Math.floor((t - beginn) / 1e3 * 70);
-        el.textContent = text3.slice(0, n);
-        if (el.textContent.length !== text3.length && t - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
+        el2.textContent = text3.slice(0, n);
+        if (el2.textContent.length !== text3.length && t - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
         else {
-          el.textContent = text3;
+          el2.textContent = text3;
           feld.querySelector(".wb-vorfallfuss small").hidden = true;
           for (const b2 of feld.querySelectorAll(".wb-vorfallfuss button")) b2.hidden = false;
         }
@@ -127025,6 +127025,389 @@
     return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht2 && { ...bericht2, vorgaenge: bericht2.vorgaenge.length, meldungen: bericht2.meldungen.length, meldungstexte: bericht2.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() {
       return status;
     } };
+  }
+
+  // src/ui/einfuehrung.js
+  var EINFUEHRUNG_AKTIV = true;
+  var SCHLUESSEL = "hartwig.einfuehrung.v1";
+  var TIPPS = "hartwig.einfuehrung.tipps.v1";
+  var TEMPO = 60;
+  var ASSISTENTIN3 = portraetSVG({
+    geschlecht: "w",
+    alter: 36,
+    haar: "bob",
+    haarfarbe: "braun",
+    hautton: "rosig",
+    kleidung: "blazer",
+    kleidungFarbe: "marine",
+    seed: 821
+  }, 110);
+  var EINFUEHRUNG = Object.freeze([
+    { id: "lage", text: "Willkommen bei Hartwig. Ich bin Ihre Vorstandsassistentin. Die Warenhauskette ist insolvenzreif: Die Liquidit\xE4t schwindet, Lieferanten sind nerv\xF6s und zahlreiche H\xE4user verlieren Geld. Ihre Entscheidungen bestimmen, ob die Sanierung gelingt.", ziel: "mitte", warte: "weiter" },
+    { id: "karte", text: "Verschieben Sie die Stadtkarte mit dem Finger oder der Maus. Zoomen Sie danach mit zwei Fingern oder dem Mausrad. So behalten Sie die Standorte im Blick.", ziel: "karte", warte: "karte" },
+    { id: "haus", text: "Tippen Sie ein Hartwig-Haus auf der Karte an, um seinen Zustand und seine Wirtschaftlichkeit zu pr\xFCfen.", ziel: "karte", warte: "haus" },
+    { id: "kennzahlen", text: "Im Hausdetail sehen Sie Fl\xE4chen, Umsatz, Ergebnis und den Zustand des Geb\xE4udes. Achten Sie auf Verlustbringer. Sp\xE4tere Ma\xDFnahmen setzen genau hier an.", ziel: "panel", warte: "weiter" },
+    { id: "cockpit", text: "Oben liegt Ihr Cockpit: Cash, freier Kreditrahmen, EBITDA, Umsatz, Vertrauen und Image. Ohne Liquidit\xE4t l\xE4sst sich die Sanierung nicht fortsetzen.", ziel: "cockpit", warte: "weiter" },
+    { id: "posteingang", text: "Im Posteingang landen Entscheidungen, Angebote und Meldungen. \xD6ffnen Sie ihn \xFCber das Briefsymbol. Beachten Sie die Fristen.", ziel: "post", warte: "posteingang" },
+    { id: "einkauf", text: "Im Einkauf warten Bestellungen auf Ihre Freigabe. \xD6ffnen Sie Einkauf, wechseln Sie zu Freigaben und geben Sie eine Order frei. Eine fehlende Freigabe kann die Warenversorgung gef\xE4hrden.", ziel: "einkauf", warte: "freigabe" },
+    { id: "marketing", text: "Im Marketing legen Sie Werbung und Aktionen fest. \xD6ffnen Sie dort den Aktionskalender, um k\xFCnftige Verkaufswochen zu planen.", ziel: "marketing", warte: "kalender" },
+    { id: "vorstand", text: "Im Vorstand besetzen Sie Ressorts und delegieren Aufgaben. \xD6ffnen Sie die \xDCbersicht und pr\xFCfen Sie, welche Positionen noch unbesetzt sind.", ziel: "vorstand", warte: "vorstand" },
+    { id: "hq", text: "In der Zentrale steuern Sie Geb\xE4ude, Kosten und die Leistungsf\xE4higkeit der Abteilungen. \xD6ffnen Sie die Hauptverwaltung.", ziel: "hq", warte: "hq" },
+    { id: "insolvenz", text: "Der Insolvenzantrag ist eine tiefgreifende Entscheidung, keine Schaltfl\xE4che f\xFCr den Einstieg. Ein Schutzschirm kann eine Sanierung erm\xF6glichen, aber Fristen, Gl\xE4ubiger und Liquidit\xE4t bleiben kritisch. Stellen Sie den Antrag erst nach sorgf\xE4ltiger Pr\xFCfung.", ziel: "panel", warte: "weiter" },
+    { id: "woche", text: "Sind Ihre Entscheidungen f\xFCr diese Woche getroffen, schlie\xDFen Sie die Woche ab. Best\xE4tigen Sie den Wochenwechsel im Dialog.", ziel: "woche", warte: "woche" },
+    { id: "bericht", text: "Der Wochenbericht zeigt Umsatz, EBITDA, Liquidit\xE4tsbewegung und aktuelle Meldungen. Sehen Sie sich die Zahlen an, bevor Sie fortfahren.", ziel: "bericht", warte: "weiter" },
+    { id: "reise", text: "Mit dem Stadtchip unten links \xF6ffnen Sie die Bahnreise. W\xE4hlen Sie eine andere Stadt, um die \xFCbrigen H\xE4user Ihres Konzerns zu erkunden.", ziel: "reise", warte: "reise" }
+  ]);
+  var lesen = (key, fallback) => {
+    try {
+      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  var sichern = (key, data) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch {
+    }
+  };
+  var reduziert2 = () => matchMedia("(prefers-reduced-motion: reduce)").matches || new URLSearchParams(location.search).has("ohne-animation");
+  var el = (id) => document.getElementById(id);
+  function einfuehrungModul() {
+    if (!EINFUEHRUNG_AKTIV) return { spielStart: () => {
+    }, starten: () => {
+    }, zustand: () => ({ aktiv: false }) };
+    const root = document.createElement("div");
+    root.id = "einfuehrung-root";
+    root.hidden = true;
+    document.body.append(root);
+    const zustand = lesen(SCHLUESSEL, { modus: "neu", index: 0 });
+    let index2 = Math.max(0, Math.min(EINFUEHRUNG.length - 1, Number(zustand.index) || 0));
+    let aktiv5 = false, frage = false, tick = 0, rAF = 0, startZeit = 0, kompletterText = false;
+    let kartenStart = null, kartenZeiger = /* @__PURE__ */ new Map(), geschoben = false, gezoomt = false;
+    let wocheVor = 0, stadtVor = "", gesehen = /* @__PURE__ */ new Set(), freigabenVor = 0;
+    let tippsAn = lesen(TIPPS, true);
+    const getSpiel = () => window.spiel;
+    const speichern2 = () => {
+      zustand.index = index2;
+      sichern(SCHLUESSEL, zustand);
+    };
+    function beenden(fertig = false) {
+      aktiv5 = false;
+      frage = false;
+      clearInterval(tick);
+      tick = 0;
+      cancelAnimationFrame(rAF);
+      rAF = 0;
+      root.hidden = true;
+      root.innerHTML = "";
+      document.body.classList.remove("einfuehrung-aktiv");
+      if (fertig) {
+        zustand.modus = "fertig";
+        index2 = 0;
+        speichern2();
+      }
+    }
+    function ganzenText() {
+      if (!aktiv5 || kompletterText) return;
+      kompletterText = true;
+      cancelAnimationFrame(rAF);
+      rAF = 0;
+      const p2 = root.querySelector(".ein-text");
+      if (p2) p2.textContent = EINFUEHRUNG[index2].text;
+    }
+    function textTippen() {
+      const p2 = root.querySelector(".ein-text");
+      if (!p2) return;
+      kompletterText = reduziert2();
+      if (kompletterText) {
+        p2.textContent = EINFUEHRUNG[index2].text;
+        return;
+      }
+      startZeit = performance.now();
+      function frame(t) {
+        if (!aktiv5 || !p2.isConnected || kompletterText) return;
+        const text3 = EINFUEHRUNG[index2].text;
+        const zeichen = Math.min(text3.length, Math.floor((t - startZeit) * TEMPO / 1e3));
+        p2.textContent = text3.slice(0, zeichen);
+        if (zeichen < text3.length) rAF = requestAnimationFrame(frame);
+        else {
+          kompletterText = true;
+          rAF = 0;
+        }
+      }
+      rAF = requestAnimationFrame(frame);
+    }
+    function schritt() {
+      if (!aktiv5) return;
+      cancelAnimationFrame(rAF);
+      rAF = 0;
+      const d2 = EINFUEHRUNG[index2];
+      if (d2.warte === "woche") wocheVor = getSpiel()?.s?.woche ?? 0;
+      if (d2.warte === "reise") stadtVor = getSpiel()?.reise?.pruefe()?.stadt ?? "";
+      const keineFreigaben = d2.warte === "freigabe" && (getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0) === 0;
+      root.hidden = false;
+      root.innerHTML = '<div class="ein-maske"></div><div class="ein-ring" aria-hidden="true"></div><section class="ein-sheet" role="region" aria-label="Einf\xFChrung: Schritt ' + (index2 + 1) + '"><div class="ein-kopf"><span class="ein-logo">H</span><div><b>Ihre Vorstandsassistentin</b><small>Schritt ' + (index2 + 1) + " von " + EINFUEHRUNG.length + '</small></div><button type="button" data-ein="beenden" aria-label="Einf\xFChrung beenden">\xD7</button></div><div class="ein-inhalt"><p class="ein-text" data-ein="text"></p><div class="ein-portraet">' + ASSISTENTIN3 + '</div></div><div class="ein-fuss"><span>' + (d2.warte === "weiter" ? "Information" : d2.warte === "karte" ? "Karte bewegen und zoomen" : "Handlung auf der Karte oder im Panel ausf\xFChren") + "</span>" + (d2.warte === "weiter" || keineFreigaben ? '<button type="button" data-ein="weiter">' + (keineFreigaben ? "Ohne Freigabe weiter" : index2 === EINFUEHRUNG.length - 1 ? "Fertig" : "Weiter") + "</button>" : '<button type="button" class="ein-ueberspringen" data-ein="weiter" title="Schritt ohne Handlung \xFCberspringen">\xDCberspringen</button>') + "</div></section>";
+      textTippen();
+      positionieren();
+    }
+    function weiter() {
+      if (!aktiv5) return;
+      if (index2 + 1 === EINFUEHRUNG.length) return beenden(true);
+      index2++;
+      speichern2();
+      schritt();
+    }
+    function fokusElement() {
+      const d2 = EINFUEHRUNG[index2], panel2 = el("panel")?.classList.contains("offen");
+      const menue = el("menue")?.classList.contains("offen");
+      const q2 = (selector) => document.querySelector(selector);
+      const panelIm = (titel) => panel2 && (el("ptitel")?.textContent || "").toLowerCase().includes(titel);
+      switch (d2.ziel) {
+        case "mitte":
+          return null;
+        case "karte":
+          return el("karte");
+        case "panel":
+          return panel2 ? el("pinhalt") : el("cockpit");
+        case "cockpit":
+          return el("cockpit");
+        case "post":
+          return panel2 ? el("pzu") : el("postdirekt");
+        case "einkauf":
+          if (panel2) {
+            if (!getSpiel()?.einkauf?.aktiv()) return el("pzu");
+            if (getSpiel().einkauf.ui?.seite !== "freigaben") return q2('#pinhalt [data-a="seite"][data-v="freigaben"]') || el("pinhalt");
+            return q2('#pinhalt [data-a="frei"]') || q2('#pinhalt [data-a="sammel"]') || el("pinhalt");
+          }
+          return menue ? el("einkauf") : el("menueknopf");
+        case "marketing":
+          if (panel2) {
+            if (!getSpiel()?.marketing?.aktiv()) return el("pzu");
+            return q2('#pinhalt [data-a="seite"][data-v="kalender"]') || el("pinhalt");
+          }
+          return menue ? el("marketing") : el("menueknopf");
+        case "vorstand":
+          return panel2 ? el("pzu") : menue ? el("vorstand") : el("menueknopf");
+        case "hq":
+          return panel2 ? el("pzu") : menue ? el("hq") : el("menueknopf");
+        case "woche":
+          if (panel2) return el("pzu");
+          return q2('#wochen-overlay .wochen-knopfreihe [data-wa="ja"]') || el("weiter");
+        case "bericht":
+          return q2("#wochen-overlay .wb-scroll") || el("cockpit");
+        case "reise":
+          if (q2("#wochen-overlay .wb-vorfallmaske")) return q2('#wochen-overlay [data-wa="spaeter"]');
+          if (q2("#wochen-overlay .wb-bericht")) return q2('#wochen-overlay [data-wa="schliessen"]');
+          if (panel2) return el("pzu");
+          return q2("#reise-overlay:not([hidden]) .reise-zielraster") || el("stadt-reise");
+        default:
+          return null;
+      }
+    }
+    function positionieren() {
+      if (!aktiv5) return;
+      const ziel = fokusElement();
+      let b2 = ziel?.getBoundingClientRect();
+      if (EINFUEHRUNG[index2].ziel === "karte" && b2) {
+        const top = Math.min(155, innerHeight * 0.24), bottom = Math.max(top + 50, innerHeight - 113);
+        b2 = { left: 0, right: innerWidth, top, bottom, width: innerWidth, height: bottom - top };
+      }
+      if (!b2 || b2.width < 2 || b2.height < 2) b2 = null;
+      const w = innerWidth, h = innerHeight;
+      const x0 = b2 ? Math.max(0, b2.left - 7) : w * 0.5;
+      const x1 = b2 ? Math.min(w, b2.right + 7) : w * 0.5;
+      const y0 = b2 ? Math.max(0, b2.top - 7) : h * 0.47;
+      const y1 = b2 ? Math.min(h, b2.bottom + 7) : h * 0.47;
+      const maske = root.querySelector(".ein-maske"), ring = root.querySelector(".ein-ring");
+      if (!maske || !ring) return;
+      maske.style.clipPath = b2 ? "polygon(evenodd, 0px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 0px, " + x0 + "px " + y0 + "px, " + x0 + "px " + y1 + "px, " + x1 + "px " + y1 + "px, " + x1 + "px " + y0 + "px, " + x0 + "px " + y0 + "px)" : "";
+      ring.hidden = !b2;
+      if (b2) Object.assign(ring.style, {
+        left: x0 + "px",
+        top: y0 + "px",
+        width: Math.max(1, x1 - x0) + "px",
+        height: Math.max(1, y1 - y0) + "px"
+      });
+      const sheet = root.querySelector(".ein-sheet");
+      sheet?.classList.toggle("ein-oben", Boolean(b2 && y1 > h * 0.54));
+    }
+    function starten(neustart = false) {
+      if (!getSpiel()?.s || !EINFUEHRUNG_AKTIV) return;
+      beenden();
+      if (neustart) index2 = 0;
+      zustand.modus = "aktiv";
+      speichern2();
+      aktiv5 = true;
+      frage = false;
+      document.body.classList.add("einfuehrung-aktiv");
+      geschoben = false;
+      gezoomt = false;
+      kartenStart = null;
+      kartenZeiger = /* @__PURE__ */ new Map();
+      wocheVor = getSpiel().s.woche;
+      stadtVor = getSpiel().reise?.pruefe()?.stadt ?? "";
+      schritt();
+      tick = setInterval(() => {
+        if (!aktiv5) return;
+        const d2 = EINFUEHRUNG[index2];
+        if (d2.warte === "woche" && getSpiel()?.s?.woche > wocheVor) weiter();
+        else if (d2.warte === "reise" && (getSpiel()?.reise?.pruefe()?.stadt ?? "") !== stadtVor && !getSpiel()?.reise?.aktiv()) weiter();
+        else positionieren();
+      }, 160);
+    }
+    function abfrage() {
+      if (aktiv5 || frage) return;
+      frage = true;
+      root.hidden = false;
+      root.innerHTML = '<div class="ein-fragemaske"></div><section class="ein-frage" role="dialog" aria-modal="true" aria-label="Einf\xFChrung starten"><div class="ein-inhalt"><p><b>Einf\xFChrung starten?</b><span>Die Vorstandsassistentin erkl\xE4rt in 14 Schritten die wichtigsten Funktionen.</span></p><div class="ein-portraet">' + ASSISTENTIN3 + '</div></div><div class="ein-antworten"><button type="button" data-ein="ja">Ja</button><button type="button" data-ein="spaeter">Sp\xE4ter</button><button type="button" data-ein="nie">Nie</button></div></section>';
+    }
+    function spielStart(fortsetzen = false) {
+      if (new URLSearchParams(location.search).has("ohne-animation")) return;
+      if (zustand.modus === "aktiv") starten();
+      else if (!fortsetzen && (zustand.modus === "neu" || zustand.modus === "spaeter")) abfrage();
+    }
+    root.addEventListener("click", (e) => {
+      const b2 = e.target.closest("[data-ein]");
+      if (!b2) return;
+      switch (b2.dataset.ein) {
+        case "text":
+          ganzenText();
+          break;
+        case "ja":
+          frage = false;
+          starten(true);
+          break;
+        case "spaeter":
+          zustand.modus = "spaeter";
+          speichern2();
+          beenden();
+          break;
+        case "nie":
+          zustand.modus = "nie";
+          speichern2();
+          beenden();
+          break;
+        case "beenden":
+          beenden();
+          zustand.modus = "spaeter";
+          speichern2();
+          break;
+        case "weiter":
+          ganzenText();
+          weiter();
+          break;
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (aktiv5 && EINFUEHRUNG[index2].warte === "freigabe" && ["frei", "sammel", "kuerzen"].includes(e.target.closest("[data-a]")?.dataset.a)) {
+        freigabenVor = getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0;
+      }
+    }, true);
+    document.addEventListener("click", (e) => {
+      if (!aktiv5) return;
+      const d2 = EINFUEHRUNG[index2], ziel = e.target.closest("button, [data-a]");
+      if (d2.warte === "posteingang" && (ziel?.id === "postdirekt" || ziel?.id === "posteingang") && getSpiel()?.posteingang?.aktiv()) return weiter();
+      if (d2.warte === "freigabe" && ["frei", "sammel", "kuerzen"].includes(ziel?.dataset.a)) {
+        const danach = getSpiel()?.E?.freigaben(getSpiel().s);
+        if (freigabenVor > 0 && danach?.anzahl < freigabenVor) return weiter();
+      }
+      if (d2.warte === "kalender" && getSpiel()?.marketing?.aktiv() && getSpiel().marketing.ui?.seite === "kalender") return weiter();
+      if (d2.warte === "vorstand" && ziel?.id === "vorstand" && getSpiel()?.vorstand?.aktiv()) return weiter();
+      if (d2.warte === "hq" && ziel?.id === "hq" && el("ptitel")?.textContent === "Zentrale") return weiter();
+      requestAnimationFrame(positionieren);
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (!aktiv5 || EINFUEHRUNG[index2].warte !== "karte" || e.target !== el("karte")) return;
+      kartenZeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (kartenZeiger.size === 1) kartenStart = { x: e.clientX, y: e.clientY };
+    }, true);
+    document.addEventListener("pointermove", (e) => {
+      if (!aktiv5 || EINFUEHRUNG[index2].warte !== "karte" || !kartenZeiger.has(e.pointerId)) return;
+      const p2 = kartenZeiger.get(e.pointerId);
+      if (kartenZeiger.size > 1 && Math.hypot(p2.x - e.clientX, p2.y - e.clientY) > 12) gezoomt = true;
+      if (kartenStart && Math.hypot(kartenStart.x - e.clientX, kartenStart.y - e.clientY) > 18) geschoben = true;
+      kartenZeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (geschoben && gezoomt) weiter();
+    }, true);
+    document.addEventListener("pointerup", (e) => {
+      if (!aktiv5) return;
+      if (EINFUEHRUNG[index2].warte === "karte") {
+        kartenZeiger.delete(e.pointerId);
+        if (geschoben && gezoomt) weiter();
+      } else if (EINFUEHRUNG[index2].warte === "haus" && e.target === el("karte")) {
+        requestAnimationFrame(() => {
+          if (aktiv5 && EINFUEHRUNG[index2].warte === "haus" && el("panel")?.classList.contains("offen") && !["Zentrale", "Wettbewerber"].includes(el("ptitel")?.textContent)) weiter();
+        });
+      }
+    });
+    document.addEventListener("wheel", (e) => {
+      if (aktiv5 && EINFUEHRUNG[index2].warte === "karte" && e.target === el("karte")) {
+        gezoomt = true;
+        if (geschoben) weiter();
+      }
+    }, { passive: true });
+    window.addEventListener("resize", positionieren);
+    document.addEventListener("scroll", positionieren, true);
+    const HINWEISE = {
+      Einkauf: "Hier steuern Sie Bestellungen, Warenbest\xE4nde und Freigaben.",
+      Marketing: "Hier planen Sie Aktionen, Werbung und Kundenansprache.",
+      Vorstand: "Hier besetzen Sie Ressorts und stellen Delegationen ein.",
+      Zentrale: "Hier steuern Sie Standorte und Kosten der Hauptverwaltung.",
+      Posteingang: "Hier finden Sie Entscheidungen und Fristen.",
+      Produkte: "Hier entwickeln Sie neue Eigenmarkenprodukte und pr\xFCfen deren Marge.",
+      Hausdetail: "Hier sehen Sie Kennzahlen, Fl\xE4chen und Geb\xE4udezustand eines Standorts.",
+      Wettbewerb: "Hier bewerten Sie Wettbewerber und deren Auswirkungen auf Ihre H\xE4user."
+    };
+    const hinweis = document.createElement("div");
+    hinweis.id = "ein-kontext";
+    hinweis.hidden = true;
+    document.body.append(hinweis);
+    function panelTipp() {
+      if (aktiv5 || frage || !tippsAn || zustand.modus !== "fertig") return;
+      if (!el("panel")?.classList.contains("offen")) return;
+      const titel = el("ptitel")?.textContent ?? "";
+      const key = Object.keys(HINWEISE).find((k) => titel.includes(k)) || (getSpiel()?.s?.haeuser?.some((h) => h.name === titel) ? "Hausdetail" : null);
+      if (!key || gesehen.has(key)) return;
+      gesehen.add(key);
+      const bekannt = lesen(SCHLUESSEL + ".tipps", []);
+      if (bekannt.includes(key)) return;
+      sichern(SCHLUESSEL + ".tipps", [...bekannt, key]);
+      hinweis.textContent = HINWEISE[key];
+      hinweis.hidden = false;
+      setTimeout(() => {
+        hinweis.hidden = true;
+      }, 4600);
+    }
+    const beobachter = new MutationObserver(panelTipp);
+    beobachter.observe(el("ptitel"), { childList: true, characterData: true, subtree: true });
+    beobachter.observe(el("panel"), { attributes: true, attributeFilter: ["class"] });
+    const restart = el("einfuehrung-neustart");
+    restart?.addEventListener("click", () => {
+      if (el("menue")?.classList.contains("offen")) el("menueknopf")?.click();
+      getSpiel()?.wochenbericht?.zu();
+      getSpiel()?.reise?.zu();
+      getSpiel()?.schliessePanel?.();
+      starten(true);
+    });
+    const tipps = el("einfuehrung-tipps");
+    if (tipps) {
+      tipps.checked = tippsAn;
+      tipps.addEventListener("change", () => {
+        tippsAn = tipps.checked;
+        sichern(TIPPS, tippsAn);
+      });
+    }
+    return { spielStart, starten, beenden, zustand: () => ({
+      aktiv: aktiv5,
+      frage,
+      index: index2,
+      schritt: EINFUEHRUNG[index2].id,
+      anzahl: EINFUEHRUNG.length,
+      modus: zustand.modus,
+      geschoben,
+      gezoomt
+    }) };
   }
 
   // src/kit/spielende.js
@@ -127099,7 +127482,7 @@
   var KEY2 = "ruhrkauf-n02-bestenliste-v1-";
   var animationAus = () => typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var schonen = (n) => Number.isFinite(n) ? n : 0;
-  function lesen(id) {
+  function lesen2(id) {
     try {
       const daten = JSON.parse(localStorage.getItem(KEY2 + id) || "[]");
       return Array.isArray(daten) ? daten.filter((x) => x && Number.isFinite(x.punkte)).slice(0, 10) : [];
@@ -127111,7 +127494,7 @@
     if (!e || !e.wertung) return;
     const schwierig = e.wertung.schwierigkeit || s2.schwierigkeit || "mittel";
     const id = [s2.seed, e.woche, e.art, e.wertung.punkte].join(":");
-    const alt = lesen(schwierig);
+    const alt = lesen2(schwierig);
     if (alt.some((x) => x.id === id)) return;
     const testspiel = Boolean(s2.testspiel || new URLSearchParams(location.search).has("testspiel"));
     const zeile2 = {
@@ -127128,7 +127511,7 @@
     }
   }
   function rangliste(schwierigkeit2) {
-    const liste = lesen(schwierigkeit2);
+    const liste = lesen2(schwierigkeit2);
     if (!liste.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
     return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste.map((x, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x.datum) + "<small> \xB7 " + zahl2(x.seed) + "</small></td><td>" + esc2(ART2[x.art]?.titel || x.art) + (x.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl2(x.punkte) + "</td></tr>").join("") + "</tbody></table>";
   }
@@ -127175,9 +127558,9 @@
       function tick(jetzt) {
         const p2 = dauer ? Math.min(1, (jetzt - start) / dauer) : 1;
         const f = 1 - (1 - p2) ** 3;
-        for (const el of felder) {
-          const v = Number(el.dataset.seWert) || 0;
-          el.textContent = zahl2(Math.round(v * f)) + (el.dataset.seEinheit || "");
+        for (const el2 of felder) {
+          const v = Number(el2.dataset.seWert) || 0;
+          el2.textContent = zahl2(Math.round(v * f)) + (el2.dataset.seEinheit || "");
         }
         if (p2 < 1) zaehlRaf = requestAnimationFrame(tick);
       }
@@ -127350,19 +127733,19 @@
     });
     ctx.inhalt.addEventListener("click", (e) => {
       if (!ui.aktiv) return;
-      const el = e.target.closest("[data-o02-open]");
-      if (el) {
+      const el2 = e.target.closest("[data-o02-open]");
+      if (el2) {
         ui.aktiv = false;
-        ctx.hausOeffnen(el.dataset.o02Open);
+        ctx.hausOeffnen(el2.dataset.o02Open);
       }
     });
     ctx.inhalt.addEventListener("keydown", (e) => {
       if (!ui.aktiv || e.key !== "Enter" && e.key !== " ") return;
-      const el = e.target.closest("[data-o02-open]");
-      if (el) {
+      const el2 = e.target.closest("[data-o02-open]");
+      if (el2) {
         e.preventDefault();
         ui.aktiv = false;
-        ctx.hausOeffnen(el.dataset.o02Open);
+        ctx.hausOeffnen(el2.dataset.o02Open);
       }
     });
     return {
@@ -127502,9 +127885,9 @@
         zeichnen2();
       }
     }
-    function bearbeiten(el) {
-      const v = el.dataset.v, d2 = daten();
-      switch (el.dataset.it) {
+    function bearbeiten(el2) {
+      const v = el2.dataset.v, d2 = daten();
+      switch (el2.dataset.it) {
         case "reiter":
           ui.reiter = v;
           ui.auswahl = null;
@@ -127542,9 +127925,9 @@
         }
         case "hoch":
         case "runter": {
-          const p2 = d2.projekte.find((x) => x.id === el.dataset.p);
+          const p2 = d2.projekte.find((x) => x.id === el2.dataset.p);
           if (!p2) return;
-          const i = Number(el.dataset.i), j = i + (el.dataset.it === "hoch" ? -1 : 1);
+          const i = Number(el2.dataset.i), j = i + (el2.dataset.it === "hoch" ? -1 : 1);
           if (j < 0 || j >= p2.clusterIds.length) return;
           const ids = [...p2.clusterIds];
           [ids[i], ids[j]] = [ids[j], ids[i]];
@@ -127568,22 +127951,22 @@
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-it]");
-      if (el && !el.disabled) bearbeiten(el);
+      const el2 = ev.target.closest("[data-it]");
+      if (el2 && !el2.disabled) bearbeiten(el2);
     });
     inhalt.addEventListener("change", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target;
-      if (el.dataset.itChange === "system") {
-        ui.system = el.value;
+      const el2 = ev.target;
+      if (el2.dataset.itChange === "system") {
+        ui.system = el2.value;
         ui.auswahl = null;
         ui.generation = 3;
         zeichnen2();
       }
-      if (el.dataset.itCluster) {
+      if (el2.dataset.itCluster) {
         const ids = auswahl4(daten());
-        if (el.checked) ids.add(el.dataset.itCluster);
-        else ids.delete(el.dataset.itCluster);
+        if (el2.checked) ids.add(el2.dataset.itCluster);
+        else ids.delete(el2.dataset.itCluster);
         zeichnen2();
       }
     });
@@ -127689,20 +128072,20 @@
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target.closest("[data-pl-tab],[data-pl-schritt],[data-pl-abschluss],[data-pl-forecast-abgabe]");
-      if (!el) return;
-      if (el.dataset.plTab) {
-        ui.tab = el.dataset.plTab;
+      const el2 = ev.target.closest("[data-pl-tab],[data-pl-schritt],[data-pl-abschluss],[data-pl-forecast-abgabe]");
+      if (!el2) return;
+      if (el2.dataset.plTab) {
+        ui.tab = el2.dataset.plTab;
         return zeigen();
       }
-      if (el.dataset.plSchritt) {
-        ui.schritt = Number(el.dataset.plSchritt);
+      if (el2.dataset.plSchritt) {
+        ui.schritt = Number(el2.dataset.plSchritt);
         return zeigen();
       }
-      if (el.dataset.plAbschluss) {
-        if (tun({ typ: "planungAbschliessen", quelle: el.dataset.plAbschluss })) return zeigen();
+      if (el2.dataset.plAbschluss) {
+        if (tun({ typ: "planungAbschliessen", quelle: el2.dataset.plAbschluss })) return zeigen();
       }
-      if (el.dataset.plForecastAbgabe) {
+      if (el2.dataset.plForecastAbgabe) {
         const u = Number(inhalt.querySelector('[data-pl-forecast="umsatz"]')?.value) * 1e6;
         const e = Number(inhalt.querySelector('[data-pl-forecast="ebitda"]')?.value) * 1e6;
         if (!tun({ typ: "planungForecast", umsatz: u, ebitda: e })) return;
@@ -127713,21 +128096,21 @@
     });
     inhalt.addEventListener("change", (ev) => {
       if (!ui.aktiv) return;
-      const el = ev.target;
-      if (el.dataset.plRegler) {
-        tun({ typ: "planungZiel", kennzahl: el.dataset.plRegler, wert: Number(el.value) });
+      const el2 = ev.target;
+      if (el2.dataset.plRegler) {
+        tun({ typ: "planungZiel", kennzahl: el2.dataset.plRegler, wert: Number(el2.value) });
         return zeigen(true);
       }
-      if (el.dataset.plKnoten) {
-        tun({ typ: "planungVerteilen", id: el.dataset.plKnoten, umsatz: Math.round(Number(el.value) * 1e6) });
+      if (el2.dataset.plKnoten) {
+        tun({ typ: "planungVerteilen", id: el2.dataset.plKnoten, umsatz: Math.round(Number(el2.value) * 1e6) });
         return zeigen(true);
       }
-      if (el.dataset.plWg) {
-        tun({ typ: "planungWarengruppe", gruppe: el.dataset.plWg, umsatz: Math.round(Number(el.value) * 1e6) });
+      if (el2.dataset.plWg) {
+        tun({ typ: "planungWarengruppe", gruppe: el2.dataset.plWg, umsatz: Math.round(Number(el2.value) * 1e6) });
         return zeigen(true);
       }
-      if (el.dataset.plBonus) {
-        tun({ typ: "planungBonus", ebene: el.dataset.plBonus, anteil: Number(el.value) });
+      if (el2.dataset.plBonus) {
+        tun({ typ: "planungBonus", ebene: el2.dataset.plBonus, anteil: Number(el2.value) });
         return zeigen(true);
       }
     });
@@ -127893,9 +128276,9 @@
       ui.aktiv = true;
       if (scrollHalten) document.getElementById("pinhalt").scrollTop = vorher;
     }
-    function tun(el, wert) {
-      const a = el.dataset.pe, cluster = el.dataset.cluster || ui.cluster;
-      const id = el.dataset.haus, gruppe2 = el.dataset.gruppe;
+    function tun(el2, wert) {
+      const a = el2.dataset.pe, cluster = el2.dataset.cluster || ui.cluster;
+      const id = el2.dataset.haus, gruppe2 = el2.dataset.gruppe;
       if (a === "cluster") {
         ui.cluster = wert;
         ui.haus = null;
@@ -127908,7 +128291,7 @@
         return;
       }
       if (a === "springer") {
-        actions({ typ: "personalSpringer", hauscluster: cluster, an: el.dataset.an === "1" });
+        actions({ typ: "personalSpringer", hauscluster: cluster, an: el2.dataset.an === "1" });
         anzeigen(true);
         return;
       }
@@ -127932,14 +128315,14 @@
     }
     const pin = document.getElementById("pinhalt");
     pin.addEventListener("click", (event) => {
-      const el = event.target.closest("[data-pe]");
-      if (!el || el.tagName === "INPUT" || el.tagName === "SELECT") return;
-      if (ui.aktiv || el.dataset.haus) tun(el);
+      const el2 = event.target.closest("[data-pe]");
+      if (!el2 || el2.tagName === "INPUT" || el2.tagName === "SELECT") return;
+      if (ui.aktiv || el2.dataset.haus) tun(el2);
     });
     pin.addEventListener("change", (event) => {
-      const el = event.target.closest("[data-pe]");
-      if (!el) return;
-      if (el.tagName === "INPUT" || el.tagName === "SELECT") tun(el, el.value);
+      const el2 = event.target.closest("[data-pe]");
+      if (!el2) return;
+      if (el2.tagName === "INPUT" || el2.tagName === "SELECT") tun(el2, el2.value);
     });
     return {
       ui,
@@ -128077,8 +128460,8 @@
       if (!aktiv5) return;
       const m = metriken();
       for (const [id, wert] of Object.entries(m)) {
-        const el = document.getElementById("test-" + id);
-        if (el) el.textContent = wert === null ? "Nicht verf\xFCgbar" : String(wert);
+        const el2 = document.getElementById("test-" + id);
+        if (el2) el2.textContent = wert === null ? "Nicht verf\xFCgbar" : String(wert);
       }
     }
     function zeigeMetrik(name2, id, einheit) {
@@ -129344,8 +129727,8 @@
     }
   }
   $("pinhalt").addEventListener("click", (e) => {
-    const el = e.target.closest("[data-wb-id]");
-    if (el) oeffneWettbewerber(el.dataset.wbId);
+    const el2 = e.target.closest("[data-wb-id]");
+    if (el2) oeffneWettbewerber(el2.dataset.wbId);
   });
   var STUFE_FARBE = ["#c9c4bb", "#e0b23c", "#2f8f5b", "#2f63b5"];
   var hqEtageWahl = null;
@@ -129965,11 +130348,11 @@
       if ($("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$("kw").textContent}`);
       if (offenesHaus) {
         const d2 = hausTreiber(s, offenesHaus);
-        const el = $("pinhalt").querySelector(".o02-haus");
-        if (d2 && el) {
+        const el2 = $("pinhalt").querySelector(".o02-haus");
+        if (d2 && el2) {
           for (const [schluessel, sollWert] of Object.entries({ umsatz: d2.aktuell.umsatz, frequenz: d2.aktuell.frequenz, kaufquote: d2.aktuell.kaufquote, bon: d2.aktuell.bon }))
-            if (Number(el.dataset["o02" + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler6.push("O02 " + schluessel + ": Hausanzeige ungleich Engine");
-          const br = el.querySelector(".o02-bruecke");
+            if (Number(el2.dataset["o02" + schluessel.charAt(0).toUpperCase() + schluessel.slice(1)]) !== sollWert) fehler6.push("O02 " + schluessel + ": Hausanzeige ungleich Engine");
+          const br = el2.querySelector(".o02-bruecke");
           if (br && Number(br.dataset.o02Summe) !== Number(br.dataset.o02Diff)) fehler6.push("O02 Br\xFCcke summiert nicht exakt");
         } else if (d2) fehler6.push("O02 Haus-Treiberzeile fehlt");
       }
@@ -130031,6 +130414,8 @@
     },
     E: src_exports
   };
+  var einfuehrung = einfuehrungModul();
+  window.spiel.einfuehrung = einfuehrung;
   var startWahl = { stadt: param.get("stadt") ?? "Essen", schwierigkeit: param.get("schwierigkeit") ?? "mittel", seed: Number(param.get("seed") ?? 1) };
   function startZeigen() {
     $("startstadt").innerHTML = STADTLISTE.map((q2) => `<option${q2.name === startWahl.stadt ? " selected" : ""}>${q2.name}</option>`).join("");
@@ -130068,6 +130453,7 @@
       neuesSpiel3(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit);
       $("lade").classList.remove("an");
       window.bereit = true;
+      einfuehrung.spielStart();
     }, 30);
   }
   $("startknopf").addEventListener("click", spielStarten);
@@ -130099,6 +130485,7 @@
       wk?.nachStart();
       window.bereit = true;
       $("lade").classList.remove("an");
+      einfuehrung.spielStart(true);
       $("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
       if (s.ende || s.phase === "zerschlagen") spielende.anzeigen();
       else meldung("Spielstand fortgesetzt.");
