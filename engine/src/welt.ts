@@ -153,7 +153,18 @@ function fit(g: GruppeId, kaufkraft: number, alter: number, wettbewerb: number):
 export const gruppenFit = fit;
 
 function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: number[]): Flaeche[] {
-  if (f === 'schwester' || f === 'outlet') return [{ id: `${id}-f1`, etage: 0, qm: vkQm, konzept: 'leer' }];
+  if (f === 'schwester') return [{ id: `${id}-f1`, etage: 0, qm: vkQm, konzept: 'leer' }];
+  if (f === 'outlet') {
+    // FUNDUS ist bis Phase 3 nur Stammdatensatz, benötigt aber bereits reale
+    // Abteilungsflächen für den Grafik-/Ladenbau. "schuhe" ist ein reines
+    // Render-Sortiment und noch keine simulierte Warengruppe.
+    const sortimente = ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty'] as const;
+    return sortimente.map((gruppe, i) => ({
+      id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length],
+      qm: Math.round(vkQm / sortimente.length), konzept: 'eigen' as const,
+      gruppe: gruppe as GruppeId,
+    }));
+  }
   const gruppen = gruppenFuer(f);
   // Anteile leicht variieren
   const roh = gruppen.map((g) => GRUPPEN[g].anteilFlaeche * zwischen(h, 0.75, 1.25));
@@ -220,9 +231,14 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   const lage = option.lage ?? option.outletLage ?? lageFuer(h, cluster, f);
   const vkQm = grossFuerCluster(h, cluster, f, option.premiumSchluessel ? 'premium' : option.hausklasse);
   // Etagenzahl nach Stadtgröße; die Grundfläche folgt daraus (Warenhäuser haben 3 bis 7 Ebenen)
-  const nEtagen = f === 'sport' || f === 'outlet' ? ganzZwischen(h, 1, 3)
+  const nEtagenZufall = f === 'sport' || f === 'outlet' ? ganzZwischen(h, 1, 3)
     : option.hausklasse === 'C' ? ganzZwischen(h, 3, 5)
     : cluster === 'metropole' ? ganzZwischen(h, 5, 7) : cluster === 'grossstadt' ? ganzZwischen(h, 4, 6) : ganzZwischen(h, 3, 5);
+  // Zufallsaufruf oben absichtlich erhalten: FUNDUS besitzt einen unabhängigen
+  // RNG-Strom; die übrigen Stammdaten bleiben bei geänderter Bauform stabil.
+  const nEtagen = f === 'outlet'
+    ? (lage === 'b' ? 2 + (idx % 2) : idx % 2 === 0 ? 2 : 1)
+    : nEtagenZufall;
   const grundflaeche = Math.max(f === 'sport' || f === 'outlet' ? 600 : 1000, Math.round(vkQm / nEtagen / 100) * 100);
   const hatUG = f === 'warenhaus' && nEtagen >= 3 && chance(h, 0.7);
   const etagen: number[] = [];
@@ -259,19 +275,27 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   const fteIst = nurDaten ? 0 : fteBedarf * zwischen(h, 1.0, 1.22);
   const vz = fteIst * zwischen(h, 0.42, 0.58);
   const ah = fteIst * zwischen(h, 0.06, 0.14);
-  const substanz = Math.round(zwischen(h, 30, 90));
+  const substanzBasis = Math.round(zwischen(h, 30, 90));
+  const substanz = f === 'outlet' ? clamp(substanzBasis, 40, 85) : substanzBasis;
   const zusatz = waehle(h, STANDORT_ZUSATZ[lage]);
   const premiumName = PREMIUM_HAEUSER.find((p) => p.schluessel === option.premiumSchluessel)?.name;
   const formatName = f === 'schwester' ? 'Volkskauf' : f === 'outlet' ? 'FUNDUS' : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
   return {
     id,
-    name: premiumName ?? `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`,
+    name: premiumName ?? (f === 'outlet' ? `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : ''}` : `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`),
     stadt, region, cluster, lage, format: f, einzug, wettbewerbStart: einzug.wettbewerb, etagen,
     ...(option.hausklasse ? { hausklasse: option.hausklasse } : {}),
     ...(option.premiumSchluessel ? { klasse: 'premium' as const, premiumSchluessel: option.premiumSchluessel } : {}),
     ...(nurDaten ? { nurDaten: true } : {}),
     grundflaecheQm: grundflaeche,
-    baujahr: (() => { const r = zwischen(h, 0, 1); return f === 'sport' ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008); })(),
+    baujahr: (() => {
+      const r = zwischen(h, 0, 1);
+      const basis = f === 'sport' ? ganzZwischen(h, 1975, 2015)
+        : r < 0.2 ? ganzZwischen(h, 1895, 1930)
+        : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008);
+      // Handelsboxen sind Neubauten; innerstädtische Geschäftshäuser umgenutzt.
+      return f === 'outlet' ? (lage === 'b' ? 1965 + basis % 21 : 1998 + basis % 19) : basis;
+    })(),
     fassade: ganzZwischen(h, 0, 7),
     flaechen,
     miete: {
