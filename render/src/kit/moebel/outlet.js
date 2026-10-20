@@ -6,13 +6,13 @@ function aufhaengung(L, r, d, ctx, doppelt = false, anWand = false) {
   const w = 5, hoehe = anWand ? 2.4 : 1.48, nr = anWand ? 1 : doppelt ? 2 : 1;
   if (anWand) { wandModul(L,r,d,ctx,{w,art:'textil',pal:'outlet',titel:'Mode und Größen'}); return; }
   const pal = palette('outlet');
+  const f=Math.max(0,Math.min(1,ctx?.bestueckung ?? 1));
   for(let j=0;j<nr;j++) {
     const z = doppelt ? 0.52+j*1.36 : 1.20;
     L.box(0.07,hoehe,0.08,-w/2+0.1,0,z,'#999fa6');
     L.box(0.07,hoehe,0.08,w/2-0.1,0,z,'#999fa6');
     L.box(w-0.22,0.055,0.07,0,hoehe-0.10,z,'#8a959d');
-    if(LOD.stufe==='fern') { L.box(w-0.28,0.8,0.65,0,0.48,z,pal[j]);continue; }
-    const f= Math.max(0.10,Math.min(1,ctx?.bestueckung ?? 1));
+    if(LOD.stufe==='fern') { if(f>0)L.box((w-0.28)*f,0.8,0.65,-(w-0.28)*(1-f)/2,0.48,z,pal[j]);continue; }
     const n=Math.floor(36*f);
     for(let i=0;i<n;i++) {
       const x=-w/2+0.2+(i+0.5)*(w-0.4)/36;
@@ -82,6 +82,7 @@ export const OUTLET_WANDSTANGE = definition('outlet_wandstange',"Wandkleiderstan
 export const OUTLET_RUNDSTAENDER = definition('outlet_rundstaender',"Rundständer",'outlet','insel',2,2,1.5,260,(L,r,d,ctx)=>rundstaender(L,r,d,ctx));
 export const OUTLET_HOME = definition('outlet_home',"Home-Gondel",'outlet','gondel',4,1,1.4,120,(L,r,d,ctx)=>gondelModul(L,r,d,ctx,{w:5,pal:'outlet',art:'pakete'}));
 export const OUTLET_ACCESSOIRES = definition('outlet_accessoires',"Accessoires-Gondel",'outlet','gondel',4,1,1.4,120,(L,r,d,ctx)=>gondelModul(L,r,d,ctx,{w:5,pal:'outlet',art:'pakete'}));
+export const OUTLET_SCHUHE = definition('outlet_schuhe',"Schuhkarton-Gondel nach Größen",'outlet','gondel',4,1,1.4,120,(L,r,d,ctx)=>gondelModul(L,r,d,ctx,{w:5,pal:'outlet',art:'kartons'}));
 export const OUTLET_BEAUTY = definition('outlet_beauty',"Beauty-Gondel",'outlet','gondel',2,1,1.4,120,(L,r,d,ctx)=>gondelModul(L,r,d,ctx,{w:2.5,pal:'outlet',art:'pakete'}));
 export const OUTLET_SCHUH_KARTONS = definition('outlet_schuh_kartons',"Schuhe nach Größen",'outlet','wand',4,1,3,220,(L,r,d,ctx)=>wandModul(L,r,d,ctx,{w:5,art:'kartons',pal:'outlet',titel:'Schuhe und Größen'}));
 export const OUTLET_TASCHENWAND = definition('outlet_taschenwand',"Taschenwand",'outlet','wand',4,1,3,220,(L,r,d,ctx)=>wandModul(L,r,d,ctx,{w:5,art:'taschen',pal:'outlet',titel:'Taschen'}));
