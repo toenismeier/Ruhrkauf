@@ -146,6 +146,17 @@ function hausUnter(px, py) {
   const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
   if (ap?.object.userData.angebotId) return 'angebot:' + ap.object.userData.angebotId;
   const t = ray.intersectObject(wurzel, true)[0];
+  // FUNDUS und Volkskauf behalten die gemeinsame, leistungsfähige Stadtgeometrie.
+  // Per Ray-Box-Schnitt sind ihre eigentlichen Hausvolumen trotzdem antippbar.
+  let statisch = null, distanz = t?.distance ?? Infinity;
+  for (const [id, eintrag] of sb?.statischeHaeuser ?? []) {
+    const treffer = ray.ray.intersectBox(eintrag.bounds, new THREE.Vector3());
+    if (treffer) {
+      const d = treffer.distanceTo(ray.ray.origin);
+      if (d < distanz) { distanz = d; statisch = id; }
+    }
+  }
+  if (statisch) return statisch;
   const u = t?.object.userData;
   return u?.hausId ?? (u?.wbId ? 'wb:' + u.wbId : (u?.hqId ? 'hq:' + u.hqId : null));
 }
