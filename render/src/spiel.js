@@ -980,7 +980,7 @@ window.spiel = { neuesSpiel, speichern: sofortSpeichern, reporting: rg, oeffneRe
         if (br && Number(br.dataset.o02Summe) !== Number(br.dataset.o02Diff)) fehler.push('O02 Brücke summiert nicht exakt');
       } else if (d) fehler.push('O02 Haus-Treiberzeile fehlt');
     }
-    if (rg?.aktiv && !rg.pruefe()) fehler.push('O02 Reporting-Brücke summiert nicht exakt');
+    if (rg?.aktiv?.() && !rg.pruefe()) fehler.push('O02 Reporting-Brücke summiert nicht exakt');
     if (offenesHq && typeof E.hqUebersicht === 'function') {
       const u = E.hqUebersicht(s), hk = kz($('pinhalt'));
       const sollHq = { 'Kosten Zentrale je Woche': geld(u.kostenWoche), 'Beschäftigte': fmt.format(Math.round(u.fte)) + ' FTE' };
