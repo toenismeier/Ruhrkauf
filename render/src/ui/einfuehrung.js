@@ -49,7 +49,7 @@ export function einfuehrungModul() {
   let index = Math.max(0, Math.min(EINFUEHRUNG.length - 1, Number(zustand.index) || 0));
   let aktiv = false, frage = false, tick = 0, rAF = 0, startZeit = 0, kompletterText = false;
   let kartenStart = null, kartenZeiger = new Map(), geschoben = false, gezoomt = false;
-  let wocheVor = 0, stadtVor = '', gesehen = new Set();
+  let wocheVor = 0, stadtVor = '', gesehen = new Set(), freigabenVor = 0;
   let tippsAn = lesen(TIPPS, true);
   const getSpiel = () => window.spiel;
   const speichern = () => { zustand.index = index; sichern(SCHLUESSEL, zustand); };
@@ -230,14 +230,19 @@ export function einfuehrungModul() {
   // Echte, erfolgreiche Aktionen werden im Bubble-Phase erkannt, nachdem die Module
   // ihre synchronen Handler ausgeführt haben. Keine simulierten Engine-Aktionen.
   document.addEventListener('click', (e) => {
+    if (aktiv && EINFUEHRUNG[index].warte === 'freigabe' &&
+        ['frei', 'sammel', 'kuerzen'].includes(e.target.closest('[data-a]')?.dataset.a)) {
+      freigabenVor = getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0;
+    }
+  }, true);
+  document.addEventListener('click', (e) => {
     if (!aktiv) return;
     const d = EINFUEHRUNG[index], ziel = e.target.closest('button, [data-a]');
     if (d.warte === 'posteingang' && (ziel?.id === 'postdirekt' || ziel?.id === 'posteingang') &&
         getSpiel()?.posteingang?.aktiv()) return weiter();
     if (d.warte === 'freigabe' && ['frei', 'sammel', 'kuerzen'].includes(ziel?.dataset.a)) {
-      const id = ziel.dataset.v;
-      if (ziel.dataset.a === 'sammel' || (id &&
-        !getSpiel()?.E?.freigaben(getSpiel().s)?.liste.some((o) => o.id === id))) return weiter();
+      const danach = getSpiel()?.E?.freigaben(getSpiel().s);
+      if (freigabenVor > 0 && danach?.anzahl < freigabenVor) return weiter();
     }
     if (d.warte === 'kalender' && getSpiel()?.marketing?.aktiv() &&
         getSpiel().marketing.ui?.seite === 'kalender') return weiter();
