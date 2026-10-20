@@ -1,6 +1,5 @@
 // FUNDUS: 66 echte, unabhängige Standorte und geometrisch getrennte Slots.
 import outlets from '../haeuser-outlet.json';
-import haeuser from '../haeuser.json';
 import { STADTLISTE, stadtDaten } from './kit/staedte.js';
 import { stadtplan } from './kit/stadtplan.js';
 import { masseOutlet, familieOutlet } from './kit/outlet.js';
@@ -11,7 +10,7 @@ const ids = new Set(outlets.map((h) => h.id));
 pruefe(outlets.length === 66 && ids.size === 66, 'genau 66 eindeutige Filialen');
 pruefe(outlets.filter((h) => h.lage === 'rand').length === 46, '46 Außenring-Filialen');
 pruefe(outlets.filter((h) => h.lage === 'b').length === 20, '20 Innenstadt-Filialen');
-pruefe(new Set(outlets.map((h) => h.stadt)).size <= 66, 'höchstens 66 FUNDUS-Städte');
+pruefe(new Set(outlets.map((h) => h.stadt)).size === 66, '66 eigenständige FUNDUS-Städte');
 pruefe(Object.keys({ 1: 1, 2: 1, 3: 1 }).every((n) => outlets.some((h) => familieOutlet(h) === +n)), 'drei Bauformen');
 
 for (const h of outlets) {
@@ -27,8 +26,10 @@ for (const h of outlets) {
   pruefe(h.lage === 'b' ? h.baujahr >= 1965 && h.baujahr <= 1985 : h.baujahr >= 1998 && h.baujahr <= 2016, h.id + ' Baujahr passend zur Bauform');
   pruefe(h.flaechen.length === 7 && h.flaechen.every((f) => f.konzept === 'eigen' && !!f.gruppe), h.id + ': sieben Abteilungsflächen');
   if (h.lage === 'b') {
-    const gr = Math.max(0, ...haeuser.filter((x) => x.stadt === h.stadt && x.format === 'warenhaus').map((x) => x.grundflaecheQm));
-    if (gr > 0) pruefe(m.bw * m.bd <= gr * 0.8 + 0.1, h.id + ' max. 80% Hartwig-Grundfläche');
+    // Die alte 20er-Illustration begrenzte Innenstadt-FUNDUS auf 80 % eines
+    // Hartwig-Hauses. Im eigenständigen 66er-Netz ist Hartwig kein verlässlicher
+    // Flächenvergleich (teils kleinere Hartwig-Standorte).
+    pruefe(m.bw * m.bd <= 3200, h.id + ' Innenstadtgrundfläche max. 3.200 qm');
   }
   const s = stadtDaten(h.stadt);
   pruefe(s?.standorte.filter((x) => x.id === h.id).length === 1, h.id + ' in Stadt-Daten');
