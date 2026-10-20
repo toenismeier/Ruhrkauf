@@ -230,7 +230,7 @@ function sichereSportBekleidung(plan) {
       if(ms.some(m=>m.id.includes('_'+art+'_')))continue;
       const platz=ms.find(m=>!/_(rundstaender|puppen)_/.test(m.id));
       if(!platz)continue;
-      const rasterB=Math.round(platz.w/U);
+      const rasterB=moebel(platz.id).rasterB;
       const id='sport_mix_sporttextil_'+art+'_'+rasterB;
       // Gleicher Footprint und gleiche Höhe wie das ersetzte Möbel.
       moebel(id);
