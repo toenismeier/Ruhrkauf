@@ -121,9 +121,11 @@ async function buendeln() {
     await tippe(`[data-a=ablehnen][data-v="${c.id}"]`);
     const wegC = await ev((id) => !window.spiel.E.freigaben(window.spiel.s).liste.some((o) => o.id === id), c.id);
     pruefSoll('Ablehnen', wegC, c.id);
+    const grenzeVorher = await ev(() => window.spiel.E.freigaben(window.spiel.s).grenze);
     await tippe('[data-a=grenze][data-v="10000"]');
     const gr = await ev(() => window.spiel.E.freigaben(window.spiel.s).grenze);
-    pruefSoll('Freigabegrenze +10.000 €', gr === 60000, `${gr} €`);
+    const grenzeSoll = grenzeVorher + 10000;
+    pruefSoll('Freigabegrenze +10.000 €', gr === grenzeSoll, `${gr} € (Start ${grenzeVorher} €)`);
     await tippe('[data-a=filterArt][data-v=nos]');
     const nos = await ev(() => window.spiel.E.freigaben(window.spiel.s, { art: 'nos' }).anzahl);
     await pruef('Freigaben Filter NOS');
@@ -162,7 +164,7 @@ async function buendeln() {
       return { woche: s.woche, offenAbc: [a, bb, c].filter((id) => ids.has(id)), servicegrad: window.spiel.E.wgDetail(s, 'damen.kleider').steuerung.servicegrad, marke: m && { status: m.status, bis: m.bis }, grenze: s.einkauf.grenze, karte: window.spiel.E.eigenmarkenUebersicht(s).marken.some((x) => x.name === 'Kiez & Co.'), protokoll: pr };
     }, { a: a.id, bb: bb.id, c: c.id });
     pruefSoll('Folgewoche: entschiedene Orders bleiben erledigt', nach.offenAbc.length === 0, `Woche ${vorWoche.woche} → ${nach.woche}`);
-    pruefSoll('Folgewoche: Regler und Grenze wirken weiter', nach.servicegrad === 0.98 && nach.grenze === 60000, `Servicegrad ${nach.servicegrad}, Grenze ${nach.grenze}`);
+    pruefSoll('Folgewoche: Regler und Grenze wirken weiter', nach.servicegrad === 0.98 && nach.grenze === grenzeSoll, `Servicegrad ${nach.servicegrad}, Grenze ${nach.grenze}`);
     pruefSoll('Folgewoche: neue Marke im Aufbau mit Karte', !!nach.marke && nach.karte, `${JSON.stringify(nach.marke)}`);
     console.log('Protokoll Folgewoche:', JSON.stringify(nach.protokoll));
     await pruef('Eigenmarken Folgewoche');
