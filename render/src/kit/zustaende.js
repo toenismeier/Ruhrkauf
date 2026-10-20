@@ -1181,7 +1181,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     const P = {
       sale: { bg: '#d8102e', fg: '#ffffff', z: [{ text: 'SALE', h: 3.4, fg: '#ffffff' }, { text: rb ? `jetzt ${pr(50)}` : 'bis zu -50 %', h: 1.1, fg: '#ffe066' }], x: [{ text: pr(50), h: 3.0, fg: '#ffffff' }], wimpel: ['#d8102e', '#ffffff'], ballon: ['#d8102e', '#ffffff'], fenster: rb ? [pr(50), 'SALE'] : ['-30 %', '-50 %', 'SALE'], stopper: 'SALE', bahn: 'SALE %' },
       jubilaeum: { bg: '#1f3f6b', fg: '#e8c25a', z: [{ text: k.baujahr ? `${jahr - k.baujahr} JAHRE ${k.kettenName ? k.kettenName.toUpperCase() : 'HARTWIG'}` : 'JUBILÄUM', h: 2.2, fg: '#e8c25a' }, { text: 'Danke für Ihre Treue', h: 0.9, fg: '#ffffff' }], x: [{ text: 'JUBILÄUM', h: 1.9, fg: '#e8c25a' }, { text: k.baujahr ? `seit ${k.baujahr}` : 'seit jeher', h: 0.9, fg: '#ffffff' }], wimpel: ['#e8c25a', '#1f3f6b', ROT], ballon: ['#e8c25a', ROT, '#1f3f6b'], fenster: ['JUBILÄUM', pr(20)], stopper: 'Jubelpreise', bahn: 'JUBILÄUM' },
-      weihnachten: { bg: '#1f5a3a', fg: '#ffffff', z: [{ text: 'WEIHNACHTSZAUBER', h: 2.0, fg: '#ffffff' }, { text: 'Geschenke für alle', h: 0.9, fg: '#f2d27a' }], x: [{ text: 'FROHES FEST', h: 1.8, fg: '#f2d27a' }], wimpel: [ROT_KAMPAGNE, '#f2d27a', '#1f5a3a'], ballon: null, fenster: ['GESCHENKE', '★'], stopper: 'Geschenkideen' },
+      weihnachten: { bg: '#a82f34', fg: '#f5d47c', z: [{ text: 'WEIHNACHTSZAUBER', h: 2.0, fg: '#f8e8ba' }, { text: 'Geschenke für alle', h: 0.9, fg: '#f2d27a' }], x: [{ text: 'FROHES FEST', h: 1.8, fg: '#f2d27a' }], wimpel: ['#a82f34', '#f2d27a', '#f8e8ba'], ballon: null, fenster: ['GESCHENKE', '★'], stopper: 'Geschenkideen' },
       blackfriday: { bg: '#121212', fg: '#ffd400', z: [{ text: 'BLACK FRIDAY', h: 2.8, fg: '#ffffff' }, { text: rb ? `jetzt ${pr(60)}` : 'bis zu -60 %', h: 1.1, fg: '#ffd400' }], x: [{ text: pr(60), h: 3.0, fg: '#ffd400' }], wimpel: ['#121212', '#ffd400'], ballon: ['#121212', '#ffd400'], fenster: [pr(60), 'BLACK FRIDAY'], stopper: pr(60), bahn: 'BLACK FRIDAY' },
     }[a] ?? aktionStil(a, st, pr);
     if (st.mechanik === 'punkte' && st.punkteFaktor && P.z[1]) P.z[1] = { ...P.z[1], text: `${st.punkteFaktor}-fach Punkte mit der Karte` };
@@ -1201,6 +1201,15 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     for (const f of fensterEG) {
       const s = seiten[f.seite], txt = waehle(r, P.fenster);
       plakat(Z, s, txt, (f.a + f.b) / 2, f.y1 - 0.9, f.t + 0.12, 0.85, P.bg === '#121212' ? '#ffd400' : '#ffffff', P.bg, f.b - f.a - 0.4);
+    }
+    // Schulanfang: kleine Ranzen als geometrische Schaufenster-Auslage, zusätzlich zu den Aktionsplakaten.
+    if (a === 'schulanfang') for (const f of fensterEG.slice(0, 4)) {
+      if (f.b - f.a < 2.2 || f.y1 - f.y0 < 2.0) continue;
+      const fenster = seiten[f.seite], u = (f.a + f.b) / 2, y = f.y0 + 0.25, t = f.t + 0.22;
+      const farbe = f.seite === '+z' ? '#3869ad' : '#c94e5d';
+      fenster.q(u - 0.55, u + 0.55, y + 0.3, y + 1.55, t, t + 0.12, farbe);
+      fenster.q(u - 0.43, u + 0.43, y + 0.12, y + 0.46, t + 0.13, t + 0.2, '#f3c24e');
+      fenster.q(u - 0.3, u + 0.3, y + 1.55, y + 1.75, t, t + 0.12, '#e7e1d5');
     }
     const he = haupt(), s = seiten[he.seite];
     aufsteller(Z, s, he.u - (he.breite ?? 4) / 2 - 1.4, 2.6, P.stopper, '#ffffff', P.bg);

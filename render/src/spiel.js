@@ -16,6 +16,7 @@ import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer } from '
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
+import { jahreszeitenStadt, jahreszeit } from './kit/jahreszeit.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
 import { geld, fmt, esc } from './ui/format.js';
 import { quelle } from './ui/quelle.js';
@@ -102,6 +103,7 @@ ren.shadowMap.type = THREE.PCFShadowMap;
 
 const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
 let scene = null, cam = null, wurzel = null, plan = null, sb = null, s = null, stadtName = null;
+let jahreszeiten = null;
 let offenesHaus = null, offenesHq = null, offenerWettbewerber = null;
 let angebotPins = [], wettbewerbPins = [], wettbewerbPinTimer = null;
 let bahnhofPin = null, bahnhofOrt = null, reise = null, wochenbericht = null;
@@ -202,6 +204,8 @@ window.addEventListener('resize', kameraSetzen);
 // ─────────────────────────────────────────── Stadt bauen
 function raeumeSzene() {
   if (!scene) return;
+  jahreszeiten?.aufraeumen();
+  jahreszeiten = null;
   angebotPins = []; bahnhofPin = null; bahnhofOrt = null;
   clearInterval(wettbewerbPinTimer); wettbewerbPinTimer = null;
   for (const p of wettbewerbPins) { scene.remove(p); p.material?.map?.dispose(); p.material?.dispose(); }
@@ -325,6 +329,7 @@ function baueStadtAusSpiel(name) {
   setzeLod('fern');
   let e;
   try { e = baueStadt(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s);
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
@@ -545,6 +550,8 @@ function grafikNachziehen() {
   }
   const geaendert = sb.aktualisiere();
   for (const id of geaendert) sb.neuBauen(id);
+  // Keine Kacheln oder Stadtteile neu bauen: Farben und saisonale Gruppen umschalten.
+  jahreszeiten?.aktualisiere(s);
   wettbewerbPinsAktualisieren();
   if (geaendert.length) zeichnen();
   return geaendert;
@@ -1234,7 +1241,7 @@ window.spiel = { erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: s
     const fehler = soll.filter((w) => w.status !== 'geschlossen' && !gezeigt.has(w.id)).map((w) => 'Fehlt: ' + w.id);
     for (const id of gezeigt) if (!pinIds.has(id)) fehler.push('Pin fehlt: ' + id);
     return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler };
-  }, stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
