@@ -151,7 +151,11 @@ export function eroeffneInsolvenz(s: GameState, grund: string): void {
   s.insolvenzenGesamt += 1;
   s.zahlungsstockungSeit = undefined;
   s.insolvenz = { seit: w, versammlung: w + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w + 12, quote: 0.1, grund };
-  s.kreditlinie = 25_000_000; // Massekredit
+  // Der Massekredit muss mit dem Umsatzvolumen wachsen; feste 25 Mio. Euro
+  // waren für 560 Häuser nicht ausreichend (vorheriger Maßstab 3,1 Mrd. Euro).
+  const nettoUmsatzJahr = Object.values(s.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52;
+  const volumen = Math.max(1, nettoUmsatzJahr / 3_100_000_000);
+  s.kreditlinie = eur(25_000_000 * volumen); // Massekredit proportional zur Kette
   const st = s.stakeholder;
   st.kreditversicherer = clamp(st.kreditversicherer - 20, 0, 100);
   st.bank = clamp(st.bank - 15, 0, 100);
@@ -240,7 +244,8 @@ export function quartalsBewertung(s: GameState): void {
   const ist = s.historie.filter((k) => k.woche >= q.start && k.woche < q.start + 13).reduce((a, b) => a + b.ebitda, 0);
   q.ebitdaIst = eur(ist);
   const plan = q.plan ?? q.planStandard;
-  const tol = Math.max(2_000_000, 0.12 * Math.abs(plan));
+  const volumen = Math.max(1, Object.values(s.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52 / 3_100_000_000);
+  const tol = Math.max(2_000_000 * volumen, 0.12 * Math.abs(plan));
   const st = s.stakeholder;
   const ambitioniert = plan >= q.planStandard;
   if (ist >= plan - 0.25 * tol) {
@@ -251,8 +256,8 @@ export function quartalsBewertung(s: GameState): void {
     const vorjahr = s.quartale.find((x) => x.nr === q.nr - 4);
     const besser = vorjahr ? ist > vorjahr.ebitdaIst : ist > q.planStandard + 0.1 * Math.abs(q.planStandard);
     if (!besser) txt += ' Ohne sichtbare Verbesserung gegenüber dem Vorjahr gibt es kein frisches Geld.';
-    if (s.phase === 'regulaer' && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000)) {
-      const kapital = eur(12_000_000 * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
+    if (s.phase === 'regulaer' && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000 * volumen)) {
+      const kapital = eur(12_000_000 * volumen * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;
       s.eigentuemer.kapitalZugefuehrt += kapital;
