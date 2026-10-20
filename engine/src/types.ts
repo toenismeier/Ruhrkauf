@@ -462,6 +462,14 @@ export interface GameState {
   beraterQualitaet: Record<string, number>; // verdeckt, je Beratungshaus
   angebote: Angebot[];
   entscheidungen: Entscheidung[];
+  /** N03: freigeschaltete Erfolgs-IDs auf die Woche der Freischaltung abbilden. */
+  erfolge?: Record<string, number>;
+  /** Opt-out für das Nice-to-have, künftig über N13. Standard: eingeschaltet. */
+  erfolgeAktiv?: boolean;
+  /** Ausschließlich für Fortschritt und Streaks, ohne Einfluss auf das Balancing. */
+  erfolgeVerlauf?: import('./erfolge').ErfolgStand;
+  /** Reserviert für echte Format-KPIs aus der späteren Formate-Engine. */
+  formatErfolge?: { fundusDb?: number; volkskaufSaniert?: boolean };
   /** Gefallene Entscheidungen, maximal 52 Wochen. Für alte Spielstände optional. */
   entscheidungsprotokoll?: Entscheidungsprotokoll[];
   quartale: Quartal[];
