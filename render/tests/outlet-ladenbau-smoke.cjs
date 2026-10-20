@@ -8,10 +8,10 @@ const ziel=path.join(__dirname,'..','out','.outlet-ladenbau-smoke-bundle.cjs');
 fs.mkdirSync(path.dirname(ziel),{recursive:true});
 esbuild.buildSync({
   stdin:{
-    contents:`export { ladenplan } from '../src/kit/ladenplan.js';
-export { pruefeLadenplan } from '../src/kit/ladenbau-pruefung.js';
-export { outletLadenEingabe, fundusInnenZustand, FUNDUS_INNEN_ZUSTAENDE } from '../src/kit/ladenbau-outlet.js';
-export { masseOutlet } from '../src/kit/outlet.js';`,
+    contents:`export { ladenplan } from './src/kit/ladenplan.js';
+export { pruefeLadenplan } from './src/kit/ladenbau-pruefung.js';
+export { outletLadenEingabe, fundusInnenZustand, FUNDUS_INNEN_ZUSTAENDE } from './src/kit/ladenbau-outlet.js';
+export { masseOutlet } from './src/kit/outlet.js';`,
     resolveDir:path.join(__dirname,'..'),sourcefile:'outlet-ladenbau-smoke-entry.js',
     loader:'js',
   },
