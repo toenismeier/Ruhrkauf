@@ -46,7 +46,7 @@ export interface KanalDef {
 }
 
 export const KANAELE: KanalDef[] = [
-  { id: 'prospekt', name: 'Prospekt und Beilage', text: 'Wochenprospekt als Beilage und Haushaltsverteilung, größter Block, trägt die Aktionen.', quote: 0.01297, e: 0.55, adstock: 0.35, reichweite: { jung: 0.18, mitte: 0.4, aelter: 0.62, senioren: 0.75 }, marke: 0.1, aktion: 0.5, regional: true },
+  { id: 'prospekt', name: 'Prospekt und Beilage', text: 'Wochenprospekt als Beilage und Haushaltsverteilung, größter Block, trägt die Aktionen.', quote: 0.01317, e: 0.55, adstock: 0.35, reichweite: { jung: 0.18, mitte: 0.4, aelter: 0.62, senioren: 0.75 }, marke: 0.1, aktion: 0.5, regional: true },
   { id: 'anzeigen', name: 'Anzeigen', text: 'Tageszeitung und Magazine.', quote: 0.00162, e: 0.45, adstock: 0.4, reichweite: { jung: 0.05, mitte: 0.18, aelter: 0.42, senioren: 0.6 }, marke: 0.2, aktion: 0.1, regional: true },
   { id: 'plakat', name: 'Plakat', text: 'Großflächen und City-Light-Poster in den Innenstädten.', quote: 0.00195, e: 0.5, adstock: 0.75, reichweite: { jung: 0.5, mitte: 0.5, aelter: 0.45, senioren: 0.4 }, marke: 0.6, aktion: 0.1, regional: true },
   { id: 'radio', name: 'Radio', text: 'Regionale Sender, Spots zu Aktionen.', quote: 0.0013, e: 0.5, adstock: 0.6, reichweite: { jung: 0.3, mitte: 0.55, aelter: 0.6, senioren: 0.5 }, marke: 0.4, aktion: 0.15, regional: true },
