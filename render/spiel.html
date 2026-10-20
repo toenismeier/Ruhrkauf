@@ -312,6 +312,62 @@
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+
+  /* Maßstab: formatbezogenes Cockpit und direkt erreichbare 220-Städte-Karte */
+  #deutschland-direkt { min-width: 46px; height: 46px; padding: 0 8px; pointer-events: auto; background: var(--karte); box-shadow: var(--schatten); border-radius: 14px; font-size: 12px; font-weight: 800; }
+  .formatkopfe { display: flex; gap: 5px; overflow-x: auto; grid-column: 1 / -1; padding-bottom: 3px; scrollbar-width: none; }
+  .formatkopfe button { flex: 0 0 118px; background: var(--karte); border-radius: 9px; padding: 6px; color: var(--text); min-height: 48px; text-align: left; }
+  .formatkopfe button strong, .formatkopfe button small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .formatkopfe button strong { font-size: 11px; }
+  .formatkopfe button small { color: var(--leise); font-size: 10px; margin-top: 3px; }
+  .formatsumme { grid-column: 1 / -1; padding: 4px 8px; background: rgba(255,255,255,.94); border-radius: 8px; font-size: 11px; display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
+  #stadt-chips { pointer-events: auto; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+  #stadt-chips button { flex: none; min-height: 44px; padding: 5px 10px; border-radius: 10px; background: var(--karte); color: var(--text); box-shadow: var(--schatten); font-size: 11px; font-weight: 700; }
+  #stadt-chips .volkskauf { border-bottom: 3px solid #2363b0; } #stadt-chips .fundus { border-bottom: 3px solid #d69b24; }
+  #stadt-chips .sport { border-bottom: 3px solid #35895b; } #stadt-chips .premium { border-bottom: 3px solid #a47a34; }
+  #stadt-chips .hartwig { border-bottom: 3px solid var(--rot); }
+  .pp-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .pp-tab { flex: 1; border-radius: 12px; background: #e3dfd7; min-height: 44px; font-weight: 800; font-size: 13px; }
+  .pp-tab.an { background: var(--text); color: white; }
+  .pp-filter { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; }
+  .pp-filter label, .pp-suchlabel, .pp-sort label { font-size: 11px; font-weight: 700; color: #52616a; }
+  .pp-filter select, .pp-suchlabel input, .pp-sort select, .pp-speichern select { display: block; width: 100%; min-height: 44px; background: #fff; color: var(--text); border: 1px solid #c7cdd1; border-radius: 10px; font: inherit; font-size: 13px; padding: 4px 9px; }
+  .pp-suchlabel { display: block; margin-top: 9px; }
+  .pp-speichern { display: flex; gap: 6px; margin: 9px 0; }
+  .pp-speichern button, .pp-sort button, .pp-auswahl button { background: #e7e5e1; color: var(--text); min-height: 44px; border-radius: 10px; padding: 6px 10px; font-size: 12px; font-weight: 700; }
+  .pp-speichern select { flex: 1; width: 0; min-width: 0; }
+  .pp-info { background: #fff; border-radius: 9px; padding: 9px; color: #52616a; font-size: 12px; }
+  .pp-karte { border: 1px solid #c7d0d6; background: #f7f8f8; border-radius: 12px; display: grid; place-items: center; margin-top: 8px; min-height: 320px; }
+  .deutschland-svg { display: block; height: min(45vh, 435px); max-width: 100%; }
+  .deutschland-svg g { cursor: pointer; outline-offset: -2px; }
+  .deutschland-svg g:focus-visible circle:last-of-type { stroke: #1c2a33; stroke-width: 3; }
+  .pp-hinweis { font-size: 11px; line-height: 1.4; color: #60717a; }
+  .pp-legende { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; }
+  .pp-legende span:nth-child(1) { color: #248453; } .pp-legende span:nth-child(2) { color: #b17a09; }
+  .pp-legende span:nth-child(3) { color: #c43e36; } .pp-legende span:nth-child(4) { color: #88929a; }
+  .pp-sort, .pp-auswahl { display: flex; align-items: end; gap: 6px; margin: 7px 0; }
+  .pp-sort label { flex: 1; }
+  .pp-auswahl button { flex: 1; }
+  .pp-scroll { height: min(39vh, 370px); overflow: auto; overscroll-behavior: contain; background: #fff; border-radius: 12px; border: 1px solid var(--linie); }
+  .pp-haus, .pp-gruppe { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid #eae6e1; }
+  .pp-gruppe { font-weight: 800; background: #e7eff0; font-size: 12px; }
+  .pp-haus input { flex: none; width: 22px; height: 22px; accent-color: var(--gruen); }
+  .pp-hausname { min-width: 0; flex: 1; background: transparent; text-align: left; }
+  .pp-hausname b, .pp-hausname small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pp-hausname b { font-size: 12px; } .pp-hausname small { font-size: 10px; color: var(--leise); }
+  .pp-zahl { display: flex; align-items: center; gap: 4px; font-size: 11px; flex: none; }
+  .pp-zahl strong { font-variant-numeric: tabular-nums; } .pp-zahl .ampel { margin: 0; }
+  .pp-aktionen { margin-top: 12px; padding: 12px 0; }
+  .pp-aktionen > b { display: block; font-size: 13px; margin-bottom: 8px; }
+  .pp-aktionraster { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pp-aktionraster button, .pp-vorschau button { min-height: 44px; padding: 8px; border-radius: 11px; background: #e3e7ea; font-size: 12px; font-weight: 700; color: var(--text); }
+  .pp-aktionraster button:disabled { opacity: .45; cursor: default; }
+  .pp-aktionraster button:first-child, .pp-vorschau button:first-of-type { background: #ffe1dd; color: #9b322b; }
+  .pp-vorschau { margin-top: 12px; padding: 11px; border: 1px solid #d7c49e; background: #fff8e8; border-radius: 10px; font-size: 12px; }
+  .pp-vorschau p { line-height: 1.4; }
+  #pzu { width: 44px; height: 44px; top: 8px; border-radius: 22px; }
+  #panel .pkopf { padding-right: 64px; }
+
 </style>
 </head>
 <body>
@@ -319,9 +375,10 @@
 <div class="oben">
   <div class="leiste">
     <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
-    <div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
+    <button id="deutschland-direkt" aria-label="Deutschlandkarte öffnen" title="Deutschlandkarte">DE</button><div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
+  <div id="stadt-chips" aria-label="Häuser und Wettbewerber der Stadt"></div>
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
 <div class="unten">
@@ -334,6 +391,8 @@
   <div class="menuekarte">
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
+      <button class="mkachel" id="deutschland"><b>Deutschland</b><small>Städte und Ergebnisampeln</small></button>
+      <button class="mkachel" id="haeuser"><b>Häuser</b><small>Portfolio, Filter, Sammelaktionen</small></button>
       <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
