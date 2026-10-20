@@ -50,7 +50,6 @@ async function pruefen() {
     await page.locator('#menueknopf').click();
     await pruefe(page, 'Menü');
     for (const id of ['posteingang', 'hq', 'einkauf', 'vorstand', 'marketing', 'produkte', 'einstellungen']) {
-      await page.locator('#menueknopf').click().catch(() => {}); // offene Menüs bleiben offen
       if (!(await page.locator('#menue').evaluate((m) => m.classList.contains('offen')))) await page.locator('#menueknopf').click();
       await page.locator('#' + id).click();
       await pruefe(page, 'Panel ' + id);
