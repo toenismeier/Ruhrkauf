@@ -16,6 +16,20 @@ const kode = (name) => kuerzel[name] ?? (name.replace(/[^A-ZÄÖÜ]/g, '').slice
 const typBild = (name) => /Hamburg|Bremen|Kiel|Lübeck|Rostock|Bremerhaven|Wismar|Wilhelmshaven/i.test(name)
   ? 'hafen' : /Köln|Dresden|Heidelberg|Bamberg|Erfurt|Münster|Aachen/i.test(name) ? 'altstadt' : 'ruhr';
 const bild = (name) => './bilder/reise-' + typBild(name) + '.jpg';
+// Ein echter, 96 x 96 Pixel großer Stadtplanausschnitt wird je besuchter Stadt im RAM gehalten.
+// Für noch nicht besuchte Städte: regionsabhängiges Motiv + Stadtgröße + eigene Kennfarbe.
+const vorschauen = new Map();
+const stadtHash = (name) => [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 17);
+const stadtfarbe = (name) => 'hsl(' + (stadtHash(name) % 360) + ' 38% 53%)';
+const fallbackBild = (c) => /Nord/i.test(c.region) ? './bilder/reise-hafen.jpg'
+  : /Süd|Ost/i.test(c.region) ? './bilder/reise-altstadt.jpg' : bild(c.name);
+function stadtVorschau(c) {
+  const data = vorschauen.get(c.name), src = data ?? fallbackBild(c);
+  const groesse = Math.min(1.38, 0.95 + Math.log2(1 + (c.groesse ?? 1)) * 0.11);
+  return '<span class="reise-vorschaurahmen" style="--stadtfarbe:' + stadtfarbe(c.name) +
+    '"><img src="' + src + '" alt="" loading="lazy" style="transform:scale(' +
+    (data ? 1 : groesse.toFixed(2)) + ')"></span>';
+}
 const zug = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
 
 // Schematische Deutschlandkarte: jedes Reiseziel als Punkt, die eigene Stadt rot.
@@ -63,7 +77,7 @@ export function reiseModul(ctx) {
       });
     const liste = z.querySelector('.reise-zielraster');
     if (!liste) return;
-    liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '"><img src="' + bild(c.name) + '" alt="" loading="lazy"><span><strong>' + esc(c.name) + '</strong><small>' + esc(c.formate ?? '') + '</small></span></button>').join('');
+    liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '">' + stadtVorschau(c) + '<span><strong>' + esc(c.name) + '</strong><small>' + esc(c.formate ?? '') + '</small></span></button>').join('');
     if (!sortiert.length) liste.innerHTML = '<p>Keine Reiseziele gefunden.</p>';
   }
   function schreibe(el, text, dauer, meins) {
@@ -84,6 +98,8 @@ export function reiseModul(ctx) {
     letzte = [...(ctx.zuletzt?.() ?? letzte)];
     aktiv = true; gestartet = performance.now(); zielStart = null; protokoll.length = 0; messen('Pin angetippt');
     const hier = ctx.stadt(), p = ortPunkt(); kreis(p);
+    const ausschnitt = ctx.vorschau?.();
+    if (ausschnitt) vorschauen.set(hier, ausschnitt);
     z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
     document.body.classList.add('reise-aktiv');
     z.querySelector('.reise-suche').addEventListener('input', (e) => ziele(e.target.value));
@@ -101,9 +117,9 @@ export function reiseModul(ctx) {
     z.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + '"><div class="reise-panorama" style="background-image:url(\'' + bild(ziel) + '\')"></div><div class="reise-dunst"></div>' + zug + '<div class="reise-strecke"><div>' + esc(kode(von)) + ' <span>🚆</span> ' + esc(kode(ziel)) + '</div><small>' + esc(von) + ' → ' + esc(ziel) + '</small></div></section>';
     const flug = z.querySelector('.reise-flug'); flug.classList.add('start');
     const vorbereitung = new Promise((resolve, reject) => {
-      setTimeout(() => {
+      setTimeout(async () => {
         if (meins !== token) return resolve(false);
-        try { ctx.bauen(ziel); resolve(true); } catch (e) { reject(e); }
+        try { await ctx.bauen(ziel); resolve(true); } catch (e) { reject(e); }
       }, reduziert ? 0 : REISE_ZEIT.wechsel);
     });
     try {
@@ -114,6 +130,8 @@ export function reiseModul(ctx) {
       await warten(reduziert ? 0 : Math.max(0, REISE_ZEIT.wechsel + REISE_ZEIT.fahrt - (performance.now() - start)));
       if (meins !== token) return;
       ctx.bahnhofFokussieren();
+      const ausschnitt = ctx.vorschau?.();
+      if (ausschnitt) vorschauen.set(ziel, ausschnitt);
       const zielPin = ortPunkt(); kreis(zielPin);
       flug.classList.add('ankunft'); messen('Kreis-Schließen');
       await warten(reduziert ? REISE_ZEIT.reduziert : REISE_ZEIT.kreisZu);
