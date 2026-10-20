@@ -16,6 +16,11 @@ const { chromium } = require('playwright');
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
+function gitVersion() {
+  try { return execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { cwd: path.join(__dirname, '..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
+  catch { return (process.env.GITHUB_SHA || '').slice(0, 7) || 'Entwicklung'; }
+}
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : d; };
 
 // Porträts und Produktbilder (src/kit/portraet.js, src/kit/produktbild.js) baut ein anderer Agent; solange eine Datei fehlt,
@@ -34,7 +39,7 @@ async function buendeln() {
     entryPoints: [path.join(__dirname, 'src', 'spiel.js')], bundle: true, outfile: path.join(__dirname, 'spiel-bundle.js'),
     loader: { '.json': 'json' }, logLevel: 'error', format: 'iife', target: 'es2020', plugins: [ersatzPlugin],
     // scripts/bot.ts prüft require.main === module (nur für den Aufruf in Node)
-    define: { 'require.main': 'null', module: 'undefined' },
+    define: { 'require.main': 'null', module: 'undefined', __HARTWIG_VERSION__: JSON.stringify(gitVersion()) },
   });
 }
 
