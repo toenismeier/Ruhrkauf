@@ -17,7 +17,7 @@ jobs:
   engine:
     name: Engine und TypeScript
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +29,8 @@ jobs:
         working-directory: engine
       - run: npm run typecheck
         working-directory: engine
-      - run: npm test -- --runInBand --silent
+      # Mehrere Worker: die Langläufe (Bot über 260 Wochen) sprengen sonst das Zeitlimit.
+      - run: npm test -- --maxWorkers=4 --silent
         working-directory: engine
 
   moebel:
