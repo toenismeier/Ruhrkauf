@@ -358,6 +358,14 @@ export function baueLadenplan(S,scene,plan,o={}) {
   const p=ladeProfil(plan.profil),y=o.y??0,dichte=o.dichte??1;
   if(o.vorbereiten!==false)vorbereiten(S,scene);
   const n0=S.anzahl;
+  // Für Etagenkatalog-Ausschnitte nur Möbel und Bodenteile im sichtbaren Schnitt bauen.
+  const sicht=o.ausschnitt??null;
+  const beschraenke=(r)=>{
+    if(!sicht)return r;
+    const x0=Math.max(r.x,sicht.x0),z0=Math.max(r.z,sicht.z0);
+    const x1=Math.min(r.x+r.w,sicht.x1),z1=Math.min(r.z+r.d,sicht.z1);
+    return x1>x0&&z1>z0?{x:x0,z:z0,w:x1-x0,d:z1-z0}:null;
+  };
   // Flächen zuerst, die Gangflächen zuletzt darüber; keine neuen Bodenarten je Abteilung.
   // Geschossdecken aus dem Bestand besitzen Öffnungen für Treppen und Lufträume.
   // Bodenauflagen dürfen diese Aussparungen nicht nachträglich wieder verschließen.
@@ -374,12 +382,15 @@ export function baueLadenplan(S,scene,plan,o={}) {
   };
   for(const b of plan.boeden) {
     const hoehe=b.typ==='gang'?0.038:b.typ==='akzent'?0.045:0.03;
-    let stuecke=[b];
+    let stuecke=[beschraenke(b)].filter(Boolean);
     for(const h of o.bodenAussparungen??[])stuecke=stuecke.flatMap(q=>ohneLoch(q,h));
     for(const q of stuecke)S.box(q.w,hoehe,q.d,q.x+q.w/2,y-hoehe/2+(b.typ==='gang'?0.01:b.typ==='akzent'?0.016:0),q.z+q.d/2,b.farbe);
   }
   for(let j=0;j<plan.moebel.length;j++){
-    const m=plan.moebel[j],def=moebel(m.id),w=def.rasterB*U;
+    const m=plan.moebel[j];
+    if(sicht&&(m.x<sicht.x0-1e-8||m.z<sicht.z0-1e-8||
+      m.x+m.w>sicht.x1+1e-8||m.z+m.d>sicht.z1+1e-8))continue;
+    const def=moebel(m.id),w=def.rasterB*U;
     const winkel=m.winkel*Math.PI/180;
     const ox=m.winkel===90?m.x:m.winkel===270?m.x+m.w:m.x+w/2;
     const oz=m.winkel===90?m.z+m.d/2:m.winkel===180?m.z+m.d:m.z;
