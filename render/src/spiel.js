@@ -29,6 +29,7 @@ import { laden, speichern } from './ui/speicher.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { spielendeModul } from './ui/spielende.js';
 
 const param = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
@@ -478,7 +479,7 @@ function cockpitZeigen() {
 
 // ─────────────────────────────────────────── Woche weiter
 function woche(mitBot = false) {
-  if (s.phase === 'zerschlagen') return null;
+  if (s.ende || s.phase === 'zerschlagen') { spielende?.anzeigen(); return null; }
   const davor = E.posteingang(s);
   const t0 = performance.now();
   if (mitBot) botSchritt(s);
@@ -508,6 +509,8 @@ function woche(mitBot = false) {
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
   automatischSpeichern();
+  if ($('spiel-ruhestand')) $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+  if (s.ende) setTimeout(() => { wochenbericht?.zu(); spielende?.anzeigen(); }, 0);
   return m;
 }
 
@@ -784,8 +787,8 @@ ek = einkaufModul({ E, q: EQ, s: () => s, panel, meldung, nachAktion: () => { co
 function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesHq = null; ek.oeffne(seite, arg); }
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); };
+let vs = null, mk = null, pr = null, po = null, spielende = null;
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -813,6 +816,21 @@ po = posteingangModul({
     else if (bezug.modul === 'zentrale') oeffneHq();
     else schliessePanel();
   },
+});
+
+// ─────────────────────────────────────────── Spielende
+spielende = spielendeModul({
+  E, s: () => s,
+  neuesSpiel: () => { schliessePanel(); menueZu(); startZeigen(); },
+  fortgesetzt: () => { cockpitZeigen(); $('spiel-ruhestand').hidden = s.woche < 260; automatischSpeichern(); },
+  fehler: (text) => meldung(text, false),
+});
+$('spiel-bestenliste').addEventListener('click', () => { menueZu(); spielende.bestenliste(); });
+$('spiel-ruhestand').addEventListener('click', () => {
+  menueZu();
+  const r = E.fuehreAus(s, { typ: 'ruhestand' });
+  if (!r.ok) meldung(r.text, false);
+  else { automatischSpeichern(); spielende.anzeigen(); }
 });
 
 // ─────────────────────────────────────────── Reise & Wochenabschluss
@@ -911,6 +929,7 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
 ];
 let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId) {
+  spielende?.zu(); $('spiel-ruhestand').hidden = true;
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
   s = E.neuesSpiel(seed, { schwierigkeit: schwierigkeitId });
   postUi = neuerPostUi(); $('postwarnung').checked = true; $('wochenbericht-modus').value = postUi.wochenbericht;
@@ -939,7 +958,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { neuesSpiel, speichern: sofortSpeichern, posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, oeffneEinkauf, vorstand: vs, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  reise, wochenbericht, bahnhofFokussieren, bahnhofBildpunkt,
+  reise, wochenbericht, spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
@@ -1044,7 +1063,9 @@ async function spielFortsetzen() {
     window.spiel.s = s;
     window.bereit = true;
     $('lade').classList.remove('an');
-    meldung('Spielstand fortgesetzt.');
+    $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+    if (s.ende || s.phase === 'zerschlagen') spielende.anzeigen();
+    else meldung('Spielstand fortgesetzt.');
   } catch (e) {
     $('lade').classList.remove('an');
     $('start').classList.add('an');
