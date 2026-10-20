@@ -286,6 +286,22 @@
   .typkacheln button.voll { opacity: 0.55; } .typkacheln button small { font-size: 9.5px; color: var(--rot); font-weight: 700; }
   .farben.klein { gap: 8px; } .farben.klein button { width: 34px; height: 34px; border-radius: 17px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
   .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: 13px; } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: 11.5px; margin-right: 6px; } .trend .olief { padding: 0; }
+  /* Szenarioauswahl und Zielanzeige: selbst erzeugte Kit-Grafik. */
+  .sz-karten { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px; }
+  .sz-karte { text-align:left; display:flex; flex-direction:column;gap:4px; padding:7px;background:var(--karte);color:var(--text);border:1px solid var(--linie);border-radius:12px;min-width:0; }
+  .sz-karte.ausgewaehlt,.sz-karte:focus-visible { outline:2px solid #337d89; }
+  .sz-karte b { font-size:12px; } .sz-karte small { font-size:10.5px;line-height:1.28;color:var(--leise); }
+  .sz-level { font-size:10px; font-weight:700; color:#477983; } .sz-best { font-size:10px;color:var(--leise);margin-top:auto; }
+  .sz-bild { display:block;width:100%;aspect-ratio:2 / 1;overflow:hidden;border-radius:7px; }
+  .sz-bild svg { width:100%;height:100%;display:block; }
+  .sz-zielchip { background:#eef4ed;color:#294e56;border:1px solid #abc7c7;border-radius:10px;padding:5px;min-width:53px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:800; }
+  .sz-zielchip .sz-mini { width:44px;height:4px;border-radius:3px;background:#c6d9d6;overflow:hidden; }
+  .sz-zielchip .sz-mini i { display:block;height:100%;background:#4e968e; }
+  .sz-balken { height:10px;border-radius:10px;background:#d5dedb;overflow:hidden; }
+  .sz-balken span { display:block;height:100%;background:#4d918d; }
+  .sz-zieltitel { font-size:19px;font-weight:800; }
+  #startsetup[hidden], #startauswahl[hidden], #szenarioziel[hidden] { display:none!important; }
+  @media (max-width:365px) { .sz-karte small {font-size:10px;} .sz-zielchip {min-width:44px;} }
   /* Startbildschirm */
   #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
   #start.an { display: grid; place-items: center; }
@@ -320,6 +336,7 @@
 <div class="oben">
   <div class="leiste">
     <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
+    <button id="szenarioziel" class="sz-zielchip" type="button" aria-label="Szenarioziel öffnen" hidden><span aria-hidden="true">◎</span><span id="szenarioprozent">0 %</span><span class="sz-mini"><i id="szenariofortschritt"></i></span></button>
     <div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
@@ -362,15 +379,23 @@
 <div id="start">
   <div class="startkarte">
     <div class="startkopf"><div class="logo gross">H</div><div><b>Hartwig</b><small>Warenhaus und Hartwig Sport · Turnaround</small></div></div>
-    <p class="startintro">Die Kette steht mit dem Rücken zur Wand. Du übernimmst als CEO: Häuser, Zentrale, Einkauf, Vorstand und Marketing liegen jetzt bei dir.</p>
-    <div class="vtitel">Startstadt</div>
-    <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
-    <div class="vtitel">Schwierigkeit</div>
-    <div id="startstufen" class="stufen"></div>
-    <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
-    <button id="fortsetzen" class="breit" type="button" hidden>Fortsetzen</button>
+    <p class="startintro">Übernimm die Warenhausgruppe und wähle eine Ausgangslage. Danach legst du Schwierigkeit und Startstadt fest.</p>
+    <div id="startauswahl">
+      <div class="vtitel">Szenario wählen</div>
+      <div id="startszenarien" class="sz-karten" aria-label="Szenarien"></div>
+      <button id="fortsetzen" class="breit" type="button" hidden>Fortsetzen</button>
+    </div>
+    <div id="startsetup" hidden>
+      <button id="szenario-zurueck" type="button" class="breit">← Szenario wechseln</button>
+      <p id="szenario-gewaehlt" class="startintro"></p>
+      <div class="vtitel">Schwierigkeit</div>
+      <div id="startstufen" class="stufen"></div>
+      <div class="vtitel">Startstadt</div>
+      <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
+      <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
+      <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
+    </div>
     <div id="speicherhinweis" role="status"></div>
-    <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
   </div>
 </div>
 <script src="spiel-bundle.js"></script>
