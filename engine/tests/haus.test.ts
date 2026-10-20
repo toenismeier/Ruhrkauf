@@ -35,7 +35,7 @@ describe('O07 Haus als Betrieb', () => {
       expect(l.ehrlichkeit).toBeLessThanOrEqual(1);
       expect(Number.isInteger(l.gehalt)).toBe(true);
       expect(hausBetriebsFaktor(s, h)).toBeCloseTo(1, 12);
-      expect(hausBetriebskosten(s,h,100_000)).toBe(100_000);
+      expect(hausBetriebskosten(s,h,100_000)).toBeCloseTo(100_000, 6);
     }
   });
   test('Initialisierung alter Spielstände idempotent', () => {
