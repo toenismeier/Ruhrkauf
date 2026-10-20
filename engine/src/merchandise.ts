@@ -39,6 +39,7 @@ export interface WareStand {
   fundusFremd: number;
   inventur: Record<string, { woche: number; differenz: number; quote: number }>;
   letzterInventurverlust: number;
+  inventurAufwandWoche?: number;
   /** O01-Leitungsqualität auf den Startwert normiert. */
   allokationStart?: number;
 }
@@ -142,6 +143,7 @@ export function initialisiereWare(s: GameState): void {
     zentral: {}, lokal: {}, plaene: {}, vorlagen: [], fundusEigen: 0,
     fundusFremd: 60_000_000, inventur: {}, letzterInventurverlust: 0,
     allokationStart: bereichsQualitaet(s, 'allokation'),
+    inventurAufwandWoche: 0,
   };
   verteileZugang(s);
 }
@@ -149,6 +151,7 @@ export function initialisiereWare(s: GameState): void {
 export function wareWoche(s: GameState): void {
   if (!s.ware) initialisiereWare(s); // alte Speicherstände
   const w = s.ware!;
+  w.inventurAufwandWoche = 0;
   for (const t of w.umlagerungen.filter(t => t.ankunft <= s.woche)) {
     s.bestand.push(...t.kohorten.map(k => ({ ...k, hauscluster: t.nach })));
   }
@@ -228,7 +231,9 @@ export function wareWoche(s: GameState): void {
     if (w.steuerungAktiv) for (const k of s.bestand) {
       const key = `${k.hauscluster}|${k.gruppe}`, volumen = basisCluster.get(key) ?? 0;
       const rate = volumen > 0 ? (schadenCluster.get(key) ?? 0) / volumen : 0;
+      const alt = k.wert;
       k.wert = eur(k.wert * (1 - rate));
+      w.inventurAufwandWoche = (w.inventurAufwandWoche ?? 0) + eur((alt - k.wert) * k.kostenFaktor);
     }
   }
 }
