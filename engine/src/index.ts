@@ -46,3 +46,7 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+// O07 Haus
+export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './abfragen';
+export type { HausStaerke, HausStandard, HausKommentar, HausMassnahme, HausAktion, HausBetrieb, HausbetriebStand, StadtUmfeld } from './haus';
