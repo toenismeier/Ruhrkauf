@@ -430,7 +430,8 @@ function bonusErmitteln(s: GameState, p: Jahresplan): void {
   s.planung.boni.push({ jahr: p.jahr, faellig: (p.jahr - s.startJahr + 1) * 52 + 5, betrag: sum(details.map((x) => x.betrag)), bezahlt: false, details });
 }
 export function planungBonusWoche(s: GameState, k: WochenKpi): number {
-  if (!s.planung || s.prognose || s.planungDeaktiviert) return 0;
+  // Auch der 13-Wochen-Vorschauklon muss fällige Boni im Cashflow sehen.
+  if (!s.planung || s.planungDeaktiviert) return 0;
   let betrag = 0;
   for (const b of s.planung.boni) if (!b.bezahlt && s.woche >= b.faellig) {
     // Wird vor EBITDA und den Pflichtzahlungen gebucht, kein doppelter Cash-Abzug.
