@@ -71,15 +71,16 @@ function teilung(teile,abteile,schacht) {
   // Alle Rechtecke besitzen ohnehin einen Anschluss zum Hauptgang.
   const gangIndex=teile.length>1?Math.floor((teile.length-1)/2):-1;
   const verfuegbar=schacht.d-(gangIndex>=0?2*U:0);
-  const mind=3*U;
-  if(verfuegbar<teile.length*mind)throw new Error('Zu viele Abteilungen für Etagentiefe');
+  // Auch kleine Sortimente benötigen zwei Möbelreihen für mindestens vier Präsentationsarten.
+  const minZellen=Math.max(3,Math.min(7,Math.floor(verfuegbar/U/teile.length)));
+  if(verfuegbar<teile.length*minZellen*U)throw new Error('Zu viele Abteilungen für Etagentiefe');
   const summe=teile.reduce((s,f)=>s+f.qm,0);
-  const laengen=teile.map(f=>Math.max(3,Math.floor(f.qm/summe*verfuegbar/U)));
+  const laengen=teile.map(f=>Math.max(minZellen,Math.floor(f.qm/summe*verfuegbar/U)));
   let rest=Math.round(verfuegbar/U)-laengen.reduce((a,b)=>a+b,0);
   const groesste=teile.reduce((a,f,i)=>f.qm>teile[a].qm?i:a,0);
   if(rest>=0)laengen[groesste]+=rest;
   else for(const i of [...laengen.keys()].sort((a,b)=>laengen[b]-laengen[a])){
-    const weg=Math.min(-rest,Math.max(0,laengen[i]-3));
+    const weg=Math.min(-rest,Math.max(0,laengen[i]-minZellen));
     laengen[i]-=weg;rest+=weg;if(rest>=0)break;
   }
   if(rest<0)throw new Error('Abteilungen nicht aufteilbar');
