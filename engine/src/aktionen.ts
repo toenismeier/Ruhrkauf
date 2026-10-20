@@ -545,6 +545,7 @@ export type { Cluster, Format };
 
 /** Auch direkte Spieleraktionen erscheinen ohne Wartewoche in der Chronik. */
 export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+  chronikInitialisieren(s); // Auch alte Spielstände vor der Aktion sauber übernehmen
   const result = fuehreAusKern(s, a);
   if (result.ok) chronikAktualisieren(s);
   return result;
