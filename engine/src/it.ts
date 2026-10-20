@@ -260,7 +260,7 @@ export function itWoche(s: GameState): void {
       p.phase='umsetzung';p.phaseSeit=s.woche+1;p.phaseRest=p.umsetzungWochen;
       vorlage(s,'IT-Konzept freigegeben',SYSTEME[p.system].name+' geht in die Umsetzung.');
     } else if(p.phase==='umsetzung') {
-      p.phase='rollout';p.phaseSeit=s.woche+1;p.phaseRest=p.clusterIds.length;
+      p.phase='rollout';p.phaseSeit=s.woche+1;p.phaseRest=1;
       vorlage(s,'Rollout beginnt',SYSTEME[p.system].name+' wird Cluster für Cluster umgestellt.');
     } else if(p.phase==='rollout') {
       const next=clusters.find(c=>c.id===p.clusterIds[p.erledigteCluster.length]);
