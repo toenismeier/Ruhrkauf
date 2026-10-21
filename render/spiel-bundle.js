@@ -129964,7 +129964,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "3f51d57" : "Entwicklung";
+  var version = () => true ? "568931a" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -139893,10 +139893,11 @@
     /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
     pruefeAnzeigen: () => {
       const fehler6 = [], c = cockpit(s);
-      const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k) => [k.querySelector("span").textContent, k.querySelector("b").textContent]));
+      const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").replace(/\s*·\s*$/, "").trim();
+      const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k) => [titel(k.querySelector("span")), k.querySelector("b").textContent]));
       const ck = kz2($2("cockpit"));
       const soll = { Cash: geld(c.cash), "Kreditrahmen frei": geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
-      if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), "Umsatz Woche": geld(c.umsatzWoche) });
+      if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
       for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler6.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
       if ($2("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$2("kw").textContent}`);
       if (offenesHaus) {
