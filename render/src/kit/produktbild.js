@@ -6,6 +6,8 @@
 // typKachelSVG(artikeltyp, groesse = 120) → Bild in Standardfarbe auf heller Kachel (Typ-Kacheln im Assistenten)
 // ARTIKELTYPEN_BILD, FARBEN_PRODUKT, MATERIALIEN_BILD, STANDARD_MATERIAL, STANDARD_FARBE, KATEGORIE_BILD
 
+import { produktSVG, bildFuer, modelFuerProdukt } from './mode/produkt.js';
+
 export const FARBEN_PRODUKT = {
   'weiß': '#f3f2ee', creme: '#efe4cc', sand: '#d8c39c', beige: '#cdb592', camel: '#b8864e', cognac: '#9a5a2e', braun: '#6a4630',
   grau: '#9a9ea3', anthrazit: '#474c53', schwarz: '#26282c', marine: '#26355e', hellblau: '#a9c8e8', jeansblau: '#4a6f9e',
@@ -467,7 +469,19 @@ const bildVorlage = (t) => {
 };
 
 // ─────────────────────────────────────────── Öffentliche Funktionen
+// Q25: Produktbilder kommen aus der Silhouetten-Bibliothek (kit/mode). opt.bild überschreibt die Zuordnung über den Namen.
 export function produktbildSVG(artikeltyp, farbe, material, groesse = 160, opt = {}) {
+  return produktSVG(opt.bild ?? bildFuer(artikeltyp), farbe ?? undefined, material ?? undefined, groesse, opt);
+}
+
+// Q25: Model, das den Artikel trägt (Detailansicht). null bei Artikeln ohne Platz am Model (Home, Beauty, Spielwaren).
+// opt: { geschlecht: 'damen'|'herren', zielgruppe: 'kinder'|'teens'|'young'|'adults'|'bestager', groesse, bild, hintergrund }
+export function modelbildSVG(artikeltyp, farbe, material, opt = {}) {
+  return modelFuerProdukt(opt.bild ?? bildFuer(artikeltyp), farbe ?? undefined, material ?? undefined, opt);
+}
+
+// Bisherige Zeichner, weiter genutzt für Schuhe, Taschen, Wäsche, Beauty und Spielwaren (zeichner 'alt:' in silhouetten.js)
+export function altbildSVG(artikeltyp, farbe, material, groesse = 160, opt = {}) {
   const typ = bildVorlage(artikeltyp);
   const c = produktFarbe(farbe) ?? produktFarbe(STANDARD_FARBE[typ]) ?? '#b8864e';
   const mat = material ?? STANDARD_MATERIAL[typ] ?? 'Baumwolle';

@@ -1925,7 +1925,7 @@ const RATHAUS_NENN = { backstein: [44, 24], sandstein: [44, 24], renaissance: [3
 /** Rathaus. p: { x, z, w, d, seed, stil?, region? }; stil siehe RATHAUS_STILE. */
 export function rathaus(S, scene, p) {
   const r = rng(`rathaus:${p.seed ?? 1}`);
-  const stil = p.stil ?? waehle(r, REGION_RATHAUS[p.region] ?? RATHAUS_STILE);
+  const stil = p.rathausStil ?? p.stil ?? waehle(r, REGION_RATHAUS[p.region] ?? RATHAUS_STILE);
   const [nw, nd] = RATHAUS_NENN[stil] ?? [44, 24];
   const q = { ...p, w: p.w ?? nw, d: p.d ?? nd };
   const bau = { backstein: rathausHistorisch, sandstein: rathausHistorisch, renaissance: rathausRenaissance, neugotik: rathausNeugotik, barock: rathausBarock, hochhaus: rathausHochhaus }[stil];
@@ -2078,7 +2078,7 @@ function rathausBarock(S, scene, p) {
 function rathausHochhaus(S, scene, p) {
   const { x, z, w, d } = p, r = rng(`rh:${p.seed}`);
   const beton = waehle(r, ['#d4d1ca', '#c9c6be', '#dcd6c8', '#b9785e']), alu = waehle(r, ['#c9d1d6', '#d8b45a', '#3a3f44']), glas = waehle(r, ['#56707f', '#4f6676', '#6a7f8c']);
-  const G = Math.round(zw(r, 9, 14)), gh = 3.4;
+  const G0 = Math.round(zw(r, 9, 14)), G = p.rathausGeschosse ?? G0, gh = 3.4;
   const tw = clamp(w * zw(r, 0.38, 0.55), 12, 24), td = clamp(d * 0.42, 10, 14), tx0 = r() < 0.5 ? x + 1 : x + w - tw - 1, tz0 = z + 0.5, Ht = 4 + G * gh;
   // Turm
   lochBlock(S, tx0, tz0, tw, td, 0, Ht, beton, { y0: 4, geschosse: G, gh, raster: 1.8, fw: 1.2, fh: 1.9, tiefe: 0.4, innen: glas });

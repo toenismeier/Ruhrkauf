@@ -9,7 +9,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q03 Stadt-Fingerabdruck | – | gemergt (#41) | Gate aktiv: 112 Referenzen (Chrome 130 wie CI); Städte jetzt über JS-Engines deterministisch (Mischen, `wurzelSumme`) |
 | Q02 Grafikqualität (Gleise, Oberleitung, Züge, Dächer, Startbild, Flächenvielfalt, Prüfregeln) | – | gemergt (#43) | Prüfregeln 112/112 Städte 0; Dreiecke in allen Städten weniger, Draw Calls 109 Städte weniger/gleich, 3 Städte +1/+2; Fingerabdrücke aller Städte neu (Dachaufbauten Warenhaus); Essen ohne Bahnsteige im Plan, Hbf mit Zügen kommt mit Q01 |
 | Maßstab Städte (220 Städte, Standortverteilung) | `feat/massstab-staedte` #31 | in Arbeit (WIP) | fertigstellen; Q01 Essen läuft entkoppelt (Ummo 21.10.) |
-| Q01 Städte aus Kartendaten (Essen zuerst) | `feat/q01-essen` | **startet 21.10. (entkoppelt)** | Phase 1 Essen; Ummo beurteilt Essen auf dem iPhone vor Phase 2 |
+| Q01 Städte aus Kartendaten (Essen zuerst) | – | **Phase 1 gemergt 21.10.** (#48, 238c8df) | GPT-Stand (OSM-Klötze) von Claude ersetzt: Lage nach OSM, Bebauung im Kit-Raster (Hbf mit Gleisharfe, Kettwiger Straße, Markt, Limbecker Platz, Münster, Rathaus-Hochhaus, Start am Hbf); nur Essen-Fingerabdruck neu. **Wartet: Ummo beurteilt Essen auf dem iPhone, dann Phase 2** |
 | Maßstab Leistung (iPhone-Ziele, Ausgangswert Berlin, Spielstand 7,5 MB) | – | offen | Start nach Städte Phase 2 |
 | N07 Belebte Stadt (fließender Verkehr, Passanten) | – | gemergt | Bildrate mit/ohne Leben auf dem iPhone messen |
 | N06 Jahreszeiten (Weihnachtsdeko, Fassaden) | – | gemergt | – |
@@ -39,8 +39,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; Bildschnittstelle steht: `render/src/kit/mode/silhouetten.json` (aus PR #67)** | `auftraege/wurf2/` |
-| Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **Model-Stil von Ummo abgenommen (21.10.), ausgerollt: 106 Silhouetten, Model je Produkt, Einbau Produktentwicklung; CI läuft** | `auftraege/wurf2/` |
+| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; Bildschnittstelle in main: `render/src/kit/mode/silhouetten.json`** | `auftraege/wurf2/` |
+| Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
