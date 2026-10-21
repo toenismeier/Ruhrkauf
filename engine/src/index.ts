@@ -44,7 +44,7 @@ export {
   type CrmFrequenz, type CrmKampagne, type CrmErgebnis, type Mechanik, type Anlass, type AktionEntwurf, type MarketingAktion, type MarketingStand, type MarketingSzenario,
   type MarketingUebersicht, type MarketingVerlauf, type MarketingKosten, type KanalZeile, type KalenderVorlage,
 } from './marketing';
-export { SCHWIERIGKEIT, SCHWIERIGKEITEN, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
+export { SCHWIERIGKEIT, SCHWIERIGKEITEN, SZENARIO_STUFENTEXTE, schwierigkeitenFuerSzenario, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
 
 export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, PostKategorie } from './abfragen';
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
