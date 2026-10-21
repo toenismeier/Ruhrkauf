@@ -377,11 +377,13 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   }
   if (plan.diagonalen?.length || plan.zwickel?.length) baueDiagonalen(ctx);
   const t1 = S.anzahl;
-  const hoehen = new Map();
+  const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {
     const f = bauerFuer(bauer, p.typ);
-    const e = f(S, scene, p) ?? {};
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => f(S, scene, p));
+    const e = ergebnis ?? {};
+    dachFlaechen.push(...dach);
     // Slots mit eigenem Wasser (erg.wasser = [x0, z0, x1, z1]) je Block merken, für FLAECHEN[art].nachBau
     if (e.wasser) { if (!ctx.slotWasser) ctx.slotWasser = new Map(); if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []); ctx.slotWasser.get(p.block).push(e.wasser); }
     const h = e.hoehe ?? 12;
@@ -396,7 +398,7 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   const calls = o.instanzer ? 0 : I.bauen(scene);
   return {
     box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
-    hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
+    hoehen, dachFlaechen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
   };
 }
 
@@ -429,11 +431,13 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
   }
   if (plan.diagonalen?.length || plan.zwickel?.length) baueDiagonalen(ctx);
   const t1 = S.anzahl;
-  const hoehen = new Map();
+  const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {
     const f = bauerFuer(bauer, p.typ);
-    const e = f(S, scene, p) ?? {};
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => f(S, scene, p));
+    const e = ergebnis ?? {};
+    dachFlaechen.push(...dach);
     // Slots mit eigenem Wasser (erg.wasser = [x0, z0, x1, z1]) je Block merken, für FLAECHEN[art].nachBau
     if (e.wasser) { if (!ctx.slotWasser) ctx.slotWasser = new Map(); if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []); ctx.slotWasser.get(p.block).push(e.wasser); }
     const h = e.hoehe ?? 12;
@@ -449,7 +453,7 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
   const calls = o.instanzer ? 0 : I.bauen(scene);
   return {
     box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
-    hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
+    hoehen, dachFlaechen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
   };
 }
 
