@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "node spiel-render.js --bundle",
-    "test": "node --test tests/einstellungen.test.cjs && node spiel-render.js --bundle && node tests/mobil-smoke.js",
+    "test": "node --test tests/einstellungen.test.cjs tests/silhouetten.test.mjs && node spiel-render.js --bundle && node tests/mobil-smoke.js && node tests/kamera-haus-mobil-smoke.cjs",
+    "smoke:kamera-haus": "node spiel-render.js --bundle && node tests/kamera-haus-mobil-smoke.cjs",
     "smoke:panels": "node spiel-render.js --nur-panels",
     "smoke:karte": "node spiel-render.js --nur-karte",
     "smoke:voll": "node spiel-render.js",
@@ -35,7 +36,9 @@
     "massstab:geografie": "node pruef-stadt-geografie.js",
     "massstab:standorte": "node pruef-standorte-massstab.js",
     "massstab:kopien": "node pruef-kopien.js",
-    "massstab:gestaltung": "node pruef-alle-gestaltung.js"
+    "massstab:gestaltung": "node pruef-alle-gestaltung.js",
+    "hausbesuch:laufwege:unit": "node tests/hausbesuch-navigation.cjs",
+    "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs"
   },
   "keywords": [],
   "author": "",

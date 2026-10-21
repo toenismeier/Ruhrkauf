@@ -22,11 +22,29 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q04 Spiel-Befunde Wurf 1 | – | gemergt (#40) | – |
 | Q05 Eigenmarken und Delegation je Aufgabe | – | gemergt (#42) | – |
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | main | **gemergt 21.10.** (b5534a0) | Abnahme `nachbesserung-massstab.md` Abschnitt 20; Premium klar über Schnitt (E28) |
-| Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | `feat/massstab-oberflaeche` #23 | abnahmefähig | Prüfung; Voraussetzung für Q07 |
+| Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | main | **gemergt 21.10.** (bf215bc) | – |
 | Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | `feat/engine-formate` | **startet 21.10.** | Auftrag mit Stand 21.10. (TK-Maxx-Prinzip, Referenz-GuV, Bot T/D) |
+| Q09 Schnee (schwebende Platten) | – | **gemergt 21.10.** (#54, 390b69d) | Schnee liegt auf echten Dachflächen, je Dachebene eingerückt (Claude-Fix: kein Kreuzmuster auf Satteldächern); Winter-Dreiecke unter main, Draw Calls gleich; Fingerabdrücke 112/112 unverändert |
+| Q10 Kamera bleibt über Haus | – | **gemergt 21.10.** (#53, 7af4959) | Hausdetail lässt oben Kartenstreifen frei (62 dvh), Kamera bleibt am Haus bei Kachelnachladen, Woche, Scroll, Resize; Mobil-Smoke Berlin 3 Häuser ≤ 40 px; Fingerabdrücke 112/112 unverändert |
+| Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | `feat/q11-eigenmarken-sortiment` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q12 Hausbesuch Laufwege | – | **gemergt 21.10.** (#56) | Wegsuche auf Ladenbau-Belegung, 9 Etagen (Warenhaus, Sport, FUNDUS) je 60 s: 0 Kollisionen, 1,17–1,21 m/s, bildratenunabhängig; Claude-Fixes: zweiter Hausbesuch/Hauswechsel scheiterte (Kontext zerstört), Sporthaus-Etagen mit Etagenbau warfen Fehler (`etageNr`); Fingerabdrücke 112/112 unverändert |
+| Q13 Sandkasten unbegrenzt | `feat/q13-sandkasten` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q14 Oberfläche gesamt (Gestaltungssystem) | `feat/q14-oberflaeche-design` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q16 Marketing-Kanäle und Marktanteil | `feat/q16-marketing-kanaele` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q17 Eigenmarken-Produktkarten (nach Q11) | `feat/q17-eigenmarken-karten` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q18 Handelsbote Gestaltung | `feat/q18-handelsbote` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q19 IT-Produkte als Karten | `feat/q19-it-produkte` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; Bildschnittstelle in main: `render/src/kit/mode/silhouetten.json`** | `auftraege/wurf2/` |
+| Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
+| Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
-| Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | – | offen | Start nach Merge Maßstab Oberfläche |
+| Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | `feat/q07-vertriebssteuerung` | **startet 21.10.** | – |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |
 
 ## Operatives Paket
@@ -53,7 +71,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 2. Q04 und Q05 prüfen und mergen.
 3. Q02 prüfen (Rendern, Leistung, Fingerabdrücke nur für geänderte Städte neu).
 4. ~~O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47)~~ gemergt 21.10.
-5. ~~#7 Maßstab Engine~~ gemergt 21.10. Offen: Maßstab Oberfläche (#23) abnehmen, danach Q07. Neu: fünf Premiumhäuser (E29, eigener Auftrag).
+5. ~~#7 Maßstab Engine~~ gemergt 21.10. #23 Oberfläche gemergt 21.10., Q07 gestartet. Neu: fünf Premiumhäuser (E29, eigener Auftrag).
 5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
 6. Engine-Formate jetzt startklar.
 7. Danach Build-Zug: Spiel einpacken, Update aufs iPhone, Messung.
