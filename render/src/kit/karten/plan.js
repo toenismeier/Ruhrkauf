@@ -1,6 +1,5 @@
 // Q01: alternativer Stadtplan aus der OSM-Datei. Keine synthetischen Straßen.
 // Nur Essen wird über diesen Weg gebaut; die übrigen Städte behalten stadtplan().
-import { stadtSeed } from '../staedte.js';
 import { viertelEssen, kartenStandort } from './essen.js';
 
 const grenzen = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -22,7 +21,7 @@ export function planAusKarte(karte, o = {}) {
   if (!karte || karte.stadt !== 'essen') throw new Error('Q01 Phase 1: ausschließlich Essen hat einen Kartenplan.');
   const radius = Math.ceil(karte.radius_m);
   const breite = radius * 2, tiefe = radius * 2;
-  const seed = o.seed ?? stadtSeed('Essen');
+  const seed = o.seed ?? 28215; // stabiler Essen-Seed, nicht vom Importzyklus mit staedte.js abhängig
   const punkt = ([x, z]) => [x + radius, z + radius];
   const pz = (x, z) => ({ x: x + radius, z: z + radius });
   const obj = (e) => ({ ...e, punkte: e.punkte?.map(punkt), umriss: e.umriss?.map(punkt) });
