@@ -31,19 +31,47 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'spiel', 'spiel.html'), 
   const t1 = Date.now();
   await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length > 0);
   const tSpielbar = Date.now() - t1;
-  const vorher = await page.evaluate(() => { for (let i = 0; i < 20; i++) window.spiel.woche(false); return { woche: window.spiel.s.woche, cash: window.spiel.s.cash }; });
-  assert.equal(vorher.woche, 20, '20 Wochen gespielt');
+  const vorher = await page.evaluate(() => { for (let i = 0; i < 52; i++) window.spiel.woche(false); return { woche: window.spiel.s.woche, cash: window.spiel.s.cash }; });
+  assert.equal(vorher.woche, 52, '52 Wochen gespielt');
+  const speicherStart = Date.now();
   await page.evaluate(() => window.spiel.speichern());
+  const speicherMs = Date.now() - speicherStart;
+  const groesse = await page.evaluate(async () => {
+    const db = await new Promise((resolve, reject) => {
+      const r = indexedDB.open('hartwig-spielstand', 2);
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    });
+    try {
+      const datensatz = await new Promise((resolve, reject) => {
+        const tx = db.transaction('staende', 'readonly');
+        const req = tx.objectStore('staende').get('autosave');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      return { bytes: new Blob([JSON.stringify(datensatz)]).size, hauser: datensatz.spiel.haeuser.length };
+    } finally { db.close(); }
+  });
+  assert.ok(groesse.hauser >= 560, '560 Häuser im gespeicherten Stand');
   await page.reload({ waitUntil: 'load' });
   await page.locator('#fortsetzen').waitFor({ state: 'visible' });
   await page.locator('#fortsetzen').click();
-  await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.woche === 20);
+  await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.woche === 52);
   const nachher = await page.evaluate(() => ({ woche: window.spiel.s.woche, cash: window.spiel.s.cash }));
   assert.deepEqual(nachher, vorher, 'Spielstand über IndexedDB am festen Ursprung erhalten');
+  await page.evaluate(() => window.spiel.oeffneHq());
+  await page.evaluate(() => {
+    const b = document.querySelector('#meldung');
+    b.textContent = 'Q26 Testmeldung'; b.className = 'an';
+  });
+  await page.locator('#meldung').click({ force: true });
+  assert.equal(await page.locator('#meldung').evaluate((el) => el.classList.contains('an')), false,
+    'Meldung nach Antippen geschlossen');
   await page.screenshot({ path: path.join(__dirname, '..', 'spiel', 'smoke.png') });
   await browser.close();
   assert.deepEqual(fehler, [], 'Keine Seitenfehler');
   const extern = nachgeladen.filter((u) => !u.endsWith('/sw.js'));
   assert.deepEqual(extern, [], 'Keine nachgeladenen Dateien');
-  console.log(`OK: Startbildschirm ${tStart} ms, Stadt spielbar ${tSpielbar} ms (Desktop-Chromium), 20 Wochen, Speichern/Fortsetzen`);
+  console.log(`Speichern: ${speicherMs} ms, ${groesse.bytes} Bytes, ${groesse.hauser} Häuser`);
+  console.log(`OK: Startbildschirm ${tStart} ms, Stadt spielbar ${tSpielbar} ms (Desktop-Chromium), 52 Wochen, Speichern/Fortsetzen`);
 })().catch((e) => { console.error(e); process.exit(1); });
