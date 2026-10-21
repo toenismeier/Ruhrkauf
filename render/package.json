@@ -28,7 +28,8 @@
     "smoke:werkzeuge": "node spiel-render.js --nur-werkzeuge",
     "jahreszeiten:pruefen": "node tests/jahreszeit.test.cjs",
     "symbol": "node symbol.js",
-    "smoke:app": "node tests/app-pwa-smoke.cjs"
+    "smoke:app": "node tests/app-pwa-smoke.cjs",
+    "marktbeobachtung:bilder": "node tests/marktbeobachtung-bilder.cjs"
   },
   "keywords": [],
   "author": "",

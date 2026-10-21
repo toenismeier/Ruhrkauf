@@ -22,6 +22,8 @@ import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { hqArchivSetzen } from './hq';
 import { immobilieVerkaufen } from './szenarien';
 import { zeitungEinstellen } from './zeitung';
+import { marktbeobachtungStufe } from './marktbeobachtung';
+import { hqAktualisiere } from './hq';
 import { spielBeenden } from './spielende';
 // O05 Ware
 import { WARE_AKTIONEN, wareAktion, type WareAktion } from './merchandise';
@@ -70,6 +72,7 @@ export type SpielerAktion =
   | { typ: 'spielFortsetzen' }
   | { typ: 'entscheiden'; id: string; option: string }
   | { typ: 'zeitungAktiv'; an: boolean }
+  | { typ: 'marktbeobachtungStufe'; stufe: 0 | 1 | 2 | 3 }
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
@@ -187,6 +190,11 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   // O07 Haus
   if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
+    case 'marktbeobachtungStufe': {
+      const ergebnis = marktbeobachtungStufe(s, a.stufe);
+      if (ergebnis.ok) hqAktualisiere(s);
+      return ergebnis;
+    }
     case 'zeitungAktiv':
       zeitungEinstellen(s, a.an);
       return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');

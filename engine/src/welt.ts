@@ -18,6 +18,7 @@ import { kennzeichnePremium } from './premium';
 import { chronikInitialisieren } from './chronik';
 import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
 import { bildeHauscluster } from './organisation';
+import { marktbeobachtungStart } from './marktbeobachtung';
 // O03 IT
 import { initialisiereIt } from './it';
 // O07 Haus
@@ -384,6 +385,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   chronikInitialisieren(s);
   szenarioStart(s, sz);
   bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
+  marktbeobachtungStart(s); // Q06: im Standard inaktiv, keine Zusatzkosten.
   // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
   initialisiereIt(s);
   // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).

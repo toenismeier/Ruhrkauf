@@ -27,6 +27,7 @@ export const BEREICHE: Bereich[] = [
   b('preis_reduzierung','Preis- & Reduzierungsmanagement','cpo','einkauf','Preise und Abschriften'),
   b('eigenmarken','Eigenmarken','cpo','produkt','Entwicklung und Pflege eigener Marken'),
   b('vertriebssteuerung','Vertriebssteuerung','cso','controlling','Steuerung der Regionen'),
+  b('marktbeobachtung','Marktbeobachtung','cso','controlling','Lokale Wettbewerbsanalyse, Relevanzfilter und Wochenüberblick'),
   b('store_operations','Store Operations','cso','verwaltung','Standards im operativen Hausbetrieb'),
   b('flagship_management','Flagship-Management','cso','vm','Premiumhäuser und Flaggschiffe'),
   b('logistik','Logistik','coo','logistik','Lager und Warenverkehr'),
@@ -374,7 +375,7 @@ export function organisationUebersicht(s: GameState) {
   return {
     bereiche:BEREICHE.map((b) => ({ ...b, stelle:o?.bereiche[b.id], qualitaet:bereichsQualitaet(s,b.id),
       berichtetAn:berichtetAn(s,b.id), delegiert:istDelegiert(s,b.id),
-      hqStufe:s.hq.abteilungen.find((a)=>a.id===b.abteilung)?.stufe??0,
+      hqStufe:b.id==='marktbeobachtung'?(s.marktbeobachtung?.stufe??0):(s.hq.abteilungen.find((a)=>a.id===b.abteilung)?.stufe??0),
       offen:s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.daten.bereich===b.id).length })),
     ressorts:Object.keys(RESSORT_INFO).filter((r)=>r!=='cro').map((r)=>({ id:r,
       name:RESSORT_INFO[r as RessortId].titel, person:s.vorstand.ressorts[r as RessortId].person })),

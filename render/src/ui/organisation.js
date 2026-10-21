@@ -38,7 +38,19 @@ export function organisationModul(ctx) {
       for (const ressort of x.ressorts) {
         const bs=x.bereiche.filter((b)=>b.ressort===ressort.id);
         h+='<div class="karte"><div class="khead"><b>' + esc(ressort.id.toUpperCase()) + ' · ' + esc(ressort.name) + '</b><small>' + (ressort.person?esc(ressort.person.name):'<span class="frei">unbesetzt</span>') + '</small></div>';
-        for (const b of bs) h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>';
+        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>';
+          // Q06: Marktbeobachtung als eigene steuerbare Fachabteilung unter dem CSO.
+          if (b.id === 'marktbeobachtung') {
+            const markt = E.marktbeobachtungUebersicht(st);
+            h += '<div class="org-markt"><small>Marktbeobachtung: ' + markt.fte + ' FTE · ' +
+              esc(geld(markt.kostenWoche)) + ' / Woche · Leitung ' + esc(markt.leitung) +
+              ' · ' + markt.erfasst + ' Rohmeldungen, ' + markt.gemeldet + ' veröffentlicht</small>' +
+              '<div class="org-aktionen">' + [0, 1, 2, 3].map((stufe) =>
+                '<button data-org="marktStufe" data-stufe="' + stufe + '" ' +
+                (markt.stufe === stufe ? 'disabled ' : '') +
+                'aria-pressed="' + (markt.stufe === stufe) + '">Stufe ' + stufe + '</button>').join('') + '</div></div>';
+          }
+        }
         h+='</div>';
       }
     } else {
@@ -69,6 +81,7 @@ export function organisationModul(ctx) {
     const el=ev.target.closest('[data-org]');if(!el)return;
     const a=el.dataset.org;
     if(a==='reiter'){ui.reiter=el.dataset.reiter;ui.ebene=null;zeichnen();}
+    if(a==='marktStufe')tun({typ:'marktbeobachtungStufe',stufe:Number(el.dataset.stufe)});
     if(a==='zurueck'){ui.ebene=null;zeichnen();}
     if(a==='profil'){ui.ebene=el.dataset.ebene;ui.id=el.dataset.id;zeichnen();}
     if(a==='delegation'){tun({typ:'delegation',...(el.dataset.cluster?{hauscluster:el.dataset.id}:{bereich:el.dataset.id}),an:el.getAttribute('aria-pressed')!=='true'});}
