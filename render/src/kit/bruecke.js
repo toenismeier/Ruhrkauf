@@ -156,13 +156,16 @@ function bauZustand(z) { const { schluessel, ...rest } = z; return rest; }
 export function stadtEintragAusSpiel(s, name) {
   const d = stadtDaten(name);
   if (!d) return undefined;
-  const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
+  // Hartwig, Premium und Sport aus der Engine; Volkskauf und FUNDUS kommen mit ihren Grafikdaten aus staedte.js
+  // (gleiche IDs wie in der Engine). Früher landeten Engine-Volkskauf-Häuser als Hartwig-Warenhaus im Plan.
+  const eigene = s.haeuser.filter((h) => h.stadt === name && (h.format === 'warenhaus' || h.format === 'sport')).map((h) => {
     const f = fussabdruck(h);
     return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
-  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester' || q.rolle === 'outlet');
+  const ids = new Set(eigene.map((q) => q.id));
+  const alt = d.standorte.filter((q) => (q.rolle === 'wettbewerber' || q.rolle === 'schwester' || q.rolle === 'outlet') && !ids.has(q.id));
   const reserve = Array.from({ length: 2 }, (_, i) => ({
     id: 'KR-' + name + '-' + (i + 1), name: '', rolle: 'wettbewerber_reserve',
     lage: i === 0 ? '1a' : 'b', grundflaecheQm: 1800,
