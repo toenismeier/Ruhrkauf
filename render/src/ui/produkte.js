@@ -33,7 +33,7 @@ const preisSchritt = (p) => (p < 20 ? 1 : p < 100 ? 5 : 10);
 export function produkteModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.produkte === 'function';
-  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null };
+  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null };
 
   function markenwahl(L) {
     return `<div class="spaltenwahl">${L.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? 'an' : ''}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join('')}</div>`;
@@ -64,7 +64,7 @@ export function produkteModul(ctx) {
         const ent = p.status === 'entwicklung';
         let c = `<div class="karte produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(p.typ, p.farbe, p.material, 150)}</div>`;
         if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
-        c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
+        c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
         if (ent) {
           c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P(`p:${p.id}:fertig`, `fertig ${wocheText(st, p.fertigWoche)}`, 'small')}</div><div class="balken"><span style="width:${(p.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P(`p:${p.id}:fortschritt`, pz(p.fortschritt), 'i')} · ${geld(p.budgetWoche)} je Woche über ${p.dauer} Wochen</small></div>`;
         } else {
@@ -96,11 +96,52 @@ export function produkteModul(ctx) {
     if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
     let h = `<button class="zurueck" data-a="liste">‹ ${esc(M.name)}</button>`;
     h += markenwahl(L);
-    const v = E.produktVorschau(st, { marke: M.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
+    if (!typen.length) return { titel: 'Neues Produkt', unter: esc(M.name), html: h + '<div class="leise">Für diese Marke sind keine Artikeltypen verfügbar.</div>' };
+    const typenIds = new Set(typen.map((t) => t.typ));
+    const baum = (K.baum ?? []).map((kat) => ({
+      ...kat, unterkategorien: kat.unterkategorien.map((ast) => ({
+        ...ast, typen: ast.typen.filter((typ) => typenIds.has(typ)),
+      })).filter((ast) => ast.typen.length),
+    })).filter((kat) => kat.unterkategorien.length);
+    const pfad = baum.flatMap((k) => k.unterkategorien.map((a) => ({ k, a }))).find((x) => x.a.typen.includes(e.typ));
+    h += '<div class="q11fortschritt"><span class="' + (ui.neuSchritt === 0 ? 'an' : 'fertig') + '">1 Kategorie und Artikel</span><span class="' + (ui.neuSchritt === 1 ? 'an' : ui.neuSchritt > 1 ? 'fertig' : '') + '">2 Zielgruppe</span><span class="' + (ui.neuSchritt === 2 ? 'an' : '') + '">3 Entwicklung</span></div>';
+    if (ui.neuSchritt === 0) {
+      h += '<div class="vtitel">Sortiment wählen</div><p class="leise">Kategorie antippen, Unterkategorie öffnen und einen Artikeltyp auswählen.</p>';
+      h += '<div class="q11baum">';
+      for (const kat of baum) {
+        const offen = ui.baumOffen === kat.id;
+        const zahl = kat.unterkategorien.reduce((sum, a) => sum + a.typen.length, 0);
+        h += `<button class="q11kategorie ${offen ? 'an' : ''}" data-a="baumKat" data-v="${kat.id}" aria-expanded="${offen}"><span>${esc(kat.name)}</span><small>${zahl} Artikel</small><b aria-hidden="true">${offen ? '−' : '+'}</b></button>`;
+        if (offen) for (const ast of kat.unterkategorien) {
+          const astOffen = ui.astOffen === ast.id;
+          h += `<button class="q11ast ${astOffen ? 'an' : ''}" data-a="baumAst" data-v="${esc(ast.id)}" aria-expanded="${astOffen}"><span>${esc(ast.name)}</span><small>${ast.typen.length}</small><b aria-hidden="true">${astOffen ? '−' : '+'}</b></button>`;
+          if (astOffen) {
+            h += '<div class="typkacheln q11typen">';
+            for (const typ of ast.typen) {
+              const t = typen.find((x) => x.typ === typ);
+              h += `<button class="${typ === e.typ ? 'an' : ''} ${voll.has(t.kategorie) ? 'voll' : ''}" data-a="typ" data-v="${esc(typ)}">${kachel(typ, 64)}<span>${esc(typ)}</span>${voll.has(t.kategorie) ? '<small>Kapazität erreicht</small>' : ''}</button>`;
+            }
+            h += '</div>';
+          }
+        }
+      }
+      h += '</div>';
+      return { titel: 'Neues Produkt', unter: `${esc(M.name)} · Kategorie → Artikeltyp`, html: h };
+    }
+    if (ui.neuSchritt === 1) {
+      h += '<button class="zurueck" data-a="neuZurTyp">‹ Artikeltyp ändern</button>';
+      h += `<div class="q11auswahl"><b>${esc(e.typ)}</b><small>${esc(pfad?.k.name ?? '')} / ${esc(pfad?.a.name ?? '')}</small>${bild(e.typ, e.farbe, e.material, 96)}</div>`;
+      h += '<div class="vtitel">Zielgruppe wählen</div><p class="leise">Die Altersgruppe beeinflusst Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unverändert.</p>';
+      h += '<div class="q11zielgruppen">';
+      for (const z of K.zielgruppen) h += `<button class="${e.zielgruppe === z.id ? 'an' : ''}" data-a="zielgruppe" data-v="${z.id}"><b>${esc(z.name)}</b><span>${z.id === 'kinder' ? 'Kinderbekleidung' : z.id === 'teens' ? 'Junge Mode' : z.id === 'young' ? 'Trendorientiert' : z.id === 'adults' ? 'Beruf und Alltag' : 'Klassik und Komfort'}</span></button>`;
+      h += '</div>';
+      return { titel: 'Neues Produkt', unter: `${esc(M.name)} · Zielgruppe`, html: h };
+    }
+    h += '<button class="zurueck" data-a="neuZurZiel">‹ Zielgruppe ändern</button>';
+    h += `<div class="q11gewaehlt"><b>${esc(e.typ)}</b><span>${esc(K.zielgruppen.find((z) => z.id === e.zielgruppe)?.name ?? '')} · ${esc(pfad?.k.name ?? '')}</span></div>`;
+    const v = E.produktVorschau(st, { marke: M.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
     if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazität erreicht: in dieser Kategorie ist bei ${esc(M.name)} kein Platz mehr. Für Neues bitte erst ein Produkt auslisten.</div>`;
-    h += '<div class="vtitel">Artikeltyp</div><div class="typkacheln">';
-    for (const t of typen) h += `<button class="${t.typ === e.typ ? 'an' : ''} ${voll.has(t.kategorie) ? 'voll' : ''}" data-a="typ" data-v="${esc(t.typ)}">${kachel(t.typ, 64)}<span>${esc(t.typ)}</span>${voll.has(t.kategorie) ? '<small>Kapazität erreicht</small>' : ''}</button>`;
-    h += '</div><div class="karte steuerung">';
+    h += '<div class="vtitel">Produkt konfigurieren</div><div class="karte steuerung">';
     h += regler('Farbe', `<div class="farben klein">${K.farben.map((f) => `<button class="${f.name === e.farbe ? 'an' : ''}" style="background:${f.hex}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}"></button>`).join('')}</div>`, esc(e.farbe));
     h += regler('Material', segment('material', e.material, (T?.materialien ?? []).map((m) => [m, m])));
     h += regler('Preislage', segment('preislage', e.preislage, K.preislagen.map((p) => [p.id, PREISLAGE[p.id] ?? p.id])));
@@ -168,18 +209,23 @@ export function produkteModul(ctx) {
     const karte = (id) => E.produkte(st).marken.flatMap((m) => m.produkte).find((p) => p.id === id);
     switch (a) {
       case 'eigenmarkeGruenden': return ctx.neueEigenmarke?.();
-      case 'marke': ui.marke = v; ui.k = 0; ui.kategorie = null; if (ui.neu) ui.neu = neuerEntwurf(); return zeigen(true);
+      case 'marke': ui.marke = v; ui.k = 0; ui.kategorie = null; if (ui.neu) { ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; } return zeigen(true);
       case 'kategorie': ui.kategorie = v; ui.k = 0; ui.auslisten = null; return zeigen(true);
       case 'pkarte': ui.k = Number(v); ui.auslisten = null; return zeigen(true);
       case 'liste': ui.seite = 'liste'; return zeigen();
       case 'trend': ui.seite = 'trend'; return zeigen();
-      case 'neu': ui.seite = 'neu'; ui.neu = neuerEntwurf(); return zeigen();
+      case 'neu': ui.seite = 'neu'; ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; return zeigen();
+      case 'baumKat': ui.baumOffen = ui.baumOffen === v ? null : v; ui.astOffen = null; return zeigen(true);
+      case 'baumAst': ui.astOffen = ui.astOffen === v ? null : v; return zeigen(true);
+      case 'neuZurTyp': ui.neuSchritt = 0; return zeigen(true);
+      case 'neuZurZiel': ui.neuSchritt = 1; return zeigen(true);
+      case 'zielgruppe': ui.neu.zielgruppe = v; ui.neuSchritt = 2; return zeigen();
       case 'sortiment': { const p = karte(v); tun({ typ: 'produktSortiment', produkt: v, an: p.status !== 'sortiment' }); return zeigen(true); }
       case 'preis': { const id = el.dataset.p2, p = karte(id), d = preisSchritt(p.preis); tun({ typ: 'produktPreis', produkt: id, preis: Math.max(1, Math.round((p.preis + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) }); return zeigen(true); }
       case 'auslisten': ui.auslisten = v; return zeigen(true);
       case 'auslistenNein': ui.auslisten = null; return zeigen(true);
       case 'auslistenJa': ui.auslisten = null; tun({ typ: 'produktAuslisten', produkt: v }); return zeigen(true);
-      case 'typ': ui.neu.typ = v; return zeigen(true);
+      case 'typ': ui.neu.typ = v; ui.neu.zielgruppe = undefined; ui.neuSchritt = 1; return zeigen();
       case 'farbe': ui.neu.farbe = v; return zeigen(true);
       case 'material': ui.neu.material = v; return zeigen(true);
       case 'preislage': ui.neu.preislage = v; return zeigen(true);
@@ -187,7 +233,7 @@ export function produkteModul(ctx) {
       case 'dauer': ui.neu.dauer = Number(v); return zeigen(true);
       case 'budget': { const K = E.produktKatalog(st); ui.neu.budgetWoche = Math.max(K.budgetSchritt, ui.neu.budgetWoche + Number(v) * K.budgetSchritt); return zeigen(true); }
       case 'entwickeln': {
-        const e = ui.neu, r = tun({ typ: 'produktEntwickeln', entwurf: { marke: ui.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
+        const e = ui.neu, r = tun({ typ: 'produktEntwickeln', entwurf: { marke: ui.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
         if (r?.ok) { ui.seite = 'liste'; const p = E.produkte(s()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === 'entwicklung').pop(); if (p) { ui.kategorie = p.kategorie; const l = E.produkte(s()).marken.find((m) => m.marke === ui.marke).produkte.filter((x) => x.kategorie === p.kategorie && x.status !== 'ausgelistet'); ui.k = l.findIndex((x) => x.id === p.id); } }
         return zeigen(!r?.ok);
       }
@@ -199,7 +245,7 @@ export function produkteModul(ctx) {
 
   return {
     ui, da,
-    oeffne: (seite = 'liste', marke) => { ui.seite = seite; if (marke) ui.marke = marke; ui.k = 0; ui.auslisten = null; if (seite === 'neu') ui.neu = neuerEntwurf(); zeigen(); },
+    oeffne: (seite = 'liste', marke) => { ui.seite = seite; if (marke) ui.marke = marke; ui.k = 0; ui.auslisten = null; if (seite === 'neu') { ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; } zeigen(); },
     neuZeichnen: () => zeigen(true), aktiv: () => ui.aktiv, zu: () => { ui.aktiv = false; },
     pruefe: () => ({ seite: ui.seite, ...vergleiche(rendern().S.W) }),
   };
