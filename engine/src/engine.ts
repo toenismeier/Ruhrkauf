@@ -312,7 +312,9 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     guv.bruttogewinn -= guv.abschriften;
     guv.wareneinsatz = guv.umsatz - guv.bruttogewinn;
     guvAbschluss(guv); kpi.guv = guv; kpi.db = guv.ebitda;
-    kpi.rohertrag -= guv.abschriften; haus.kpi = kpi;
+    kpi.rohertrag -= guv.abschriften; haus.kpi = rundeKpi(kpi);
+    // N01 Hausstatistik muss auch Volkskauf und FUNDUS sehen.
+    statistikHaus(s, haus, rundeKpi(kpi));
     guvAddiere(gesamtFilialGuV, guv);
     k.umsatz += kpi.umsatz; k.rohertrag += kpi.rohertrag;
     k.werbeflaechen += neben.werbeflaechen; k.dienstleistungen += neben.dienstleistungen;

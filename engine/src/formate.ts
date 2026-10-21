@@ -171,6 +171,12 @@ export function formateWoche(s:GameState):FormateWoche{
       f.abverkaufWoche+=ek;
     }
     const kpi=leereKpi(s.woche);kpi.umsatz=eur(umsatz);kpi.rohertrag=eur(umsatz-ek);
+    // Allokation nur tatsächlich realisierter Verkäufe auf bespielte Flächen.
+    const fl=haus.flaechen.filter(f=>f.konzept==='eigen'||f.konzept==='offprice');
+    const qmGesamt=fl.reduce((n,f)=>n+f.qm,0);
+    for(const f of fl)if(f.gruppe){
+      kpi.umsatzJeGruppe[f.gruppe]=eur((kpi.umsatzJeGruppe[f.gruppe]??0)+kpi.umsatz*f.qm/Math.max(1,qmGesamt));
+    }
     const kosten=hausKosten(s,haus,umsatz,umsatz);
     const neben=nebenvertragsErtraege(haus,umsatz,s.woche);
     kpi.personal=eur(kosten.personal);kpi.miete=eur(kosten.miete);

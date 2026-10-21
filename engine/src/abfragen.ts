@@ -235,7 +235,7 @@ export function hausDetail(s: GameState, id: string) {
   const etagen = h.etagen.map((e) => ({
     etage: e,
     flaechen: h.flaechen.filter((f) => f.etage === e).map((f) => ({
-      id: f.id, qm: f.qm, konzept: f.konzept, gruppe: f.gruppe ? GRUPPEN[f.gruppe].name : undefined,
+      id: f.id, qm: f.qm, konzept: f.konzept, gruppe: f.gruppe ? (GRUPPEN[f.gruppe]?.name ?? (f.gruppe === 'schuhe' ? 'Schuhe' : String(f.gruppe))) : undefined,
       mieter: f.mieter?.name, umbauBis: f.umbauBis,
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),

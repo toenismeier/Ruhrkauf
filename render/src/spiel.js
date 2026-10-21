@@ -612,6 +612,7 @@ function grafikNachziehen() {
   if (geaendert.length) zeichnen();
   return geaendert;
 }
+let cockpitFormat = 'alle';
 const MERK = new Map();
 function merk() { return MERK; }
 
@@ -619,15 +620,16 @@ function merk() { return MERK; }
 function cockpitZeigen() {
   const c = E.cockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
-  $('cockpit').innerHTML = [
+  $('cockpit').innerHTML = '<div class="seg">'+[['alle','Alle'],['warenhaus','Hartwig'],['sport','Sport'],['schwester','Volkskauf'],['outlet','FUNDUS']].map(([id,name])=>'<button class="'+(cockpitFormat===id?'an':'')+'" data-cockpit-format="'+id+'">'+name+'</button>').join('')+'</div>' + [
     kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
     kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
     kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
     kachel('Umsatz Woche', s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
-    ...c.formate.filter(x=>x.haeuser).map(x=>kachel(({warenhaus:'Hartwig',sport:'Sport',schwester:'Volkskauf',outlet:'FUNDUS'})[x.format]+' · Häuser / Umsatz / EBITDA',x.haeuser+' · '+geld(x.umsatz)+' · '+geld(x.ebitda),x.ebitda<0?'rot':'')),
+    ...c.formate.filter(x=>x.haeuser&&(cockpitFormat==='alle'||cockpitFormat===x.format)).map(x=>kachel(({warenhaus:'Hartwig',sport:'Sport',schwester:'Volkskauf',outlet:'FUNDUS'})[x.format]+' · Häuser / Umsatz / EBITDA',x.haeuser+' · '+geld(x.umsatz)+' · '+geld(x.ebitda),x.ebitda<0?'rot':'')),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
+  $('cockpit').querySelectorAll('[data-cockpit-format]').forEach(b=>b.addEventListener('click',()=>{cockpitFormat=b.dataset.cockpitFormat;cockpitZeigen();}));
   // O07 Haus: Ausnahme-Kachel im Cockpit.
   const ausnahmen = E.hausBeobachtung(s, 30).length;
   $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
@@ -885,7 +887,7 @@ function oeffneHaus(id) {
   if (hausReiter === 'personal' && pe) html += pe.hausBlock(id);
   // O05 Ware
   if (hausReiter === 'ware' && d.waren) html += `<div class="karte"><div class="khead">Ware · ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl('Warenverfügbarkeit', (d.waren.verfuegbarkeit * 100).toFixed(1) + ' %')}${zahl('Altwareanteil', (d.waren.altwareanteil * 100).toFixed(1) + ' %')}${zahl('Inventurdifferenz', d.waren.inventur ? geld(d.waren.inventur.differenz) : 'Noch offen')}${zahl('Flächenproduktivität', geld(d.waren.flaechenproduktivitaet) + '/qm')}</div></div>`;
-  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
+  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : h.format === 'schwester' ? 'Volkskauf' : h.format === 'outlet' ? 'FUNDUS' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
   if (neu) hausZeigen(id);
 }
 
