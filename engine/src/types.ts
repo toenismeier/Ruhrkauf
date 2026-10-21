@@ -5,6 +5,7 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+import type { FilialGuV, FilialProgrammeStand } from './filialguv';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -106,6 +107,8 @@ export interface Einzugsgebiet {
 }
 
 export interface HausKpi {
+  /** Vollständige Filial-GuV, ohne die Hauptverwaltung. */
+  guv?: FilialGuV;
   woche: number;
   umsatz: Eur; // eigener Umsatz inkl. Kommission und Offprice
   rohertrag: Eur;
@@ -373,6 +376,8 @@ export interface Insolvenz {
 }
 
 export interface WochenKpi {
+  /** Addition aller aktiven Filialkostenstellen; bei alten Savegames optional. */
+  filialGuV?: FilialGuV;
   woche: number;
   umsatz: Eur;
   rohertrag: Eur;
@@ -474,6 +479,8 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** Laufende Sanierungsprogramme: Kosten, Vorlauf und Wirkungsbeginn werden separat gebucht. */
+  filialProgramme?: FilialProgrammeStand;
   zaehler: number; // für IDs
   prognose?: boolean; // true in Vorschau-Klonen: keine Zufallsereignisse
   einmalkostenWoche: Eur; // Sondereffekte der laufenden Woche

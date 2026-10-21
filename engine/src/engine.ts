@@ -15,6 +15,7 @@ import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './w
 import { vorstandWoche } from './vorstand';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+import { guvAbschluss, guvAddiere, leereFilialGuV, programmErsparnis } from './filialguv';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -118,6 +119,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     woche: w, umsatz: 0, rohertrag: 0, abschriften: 0, konzession: 0, untermiete: 0, wkz: 0, personal: 0, miete: 0, nebenkosten: 0,
     sonstige: 0, logistik: 0, zentrale: 0, marketing: 0, beratung: 0, ebitda: 0, sondereffekte: 0, cash: 0, kreditFrei: 0, bestand: 0, offeneHaeuser: 0, fte: 0,
   };
+  const hausBuchungen: { haus: GameState['haeuser'][number]; kpi: HausKpi; kosten: ReturnType<typeof hausKosten> }[] = [];
   const umsatzEigenJe: Partial<Record<GruppeId, number>> = {};
   let kommissionAuszahlung = 0;
   let restmieten = 0;
@@ -129,7 +131,9 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     let umsatzEigen = 0;
     for (const [g, v] of Object.entries(r.eigen) as [GruppeId, { brutto: number; umsatz: number }][]) {
       const f = verfuegbar[g] ?? 1;
-      const u = v.umsatz * f;
+      // Sortiment: höher realisierter Verkaufspreis, nicht Wareneinsatz-Gutschrift.
+      // Nachfrageelastizität wird in wirtschaft.ts abgezogen.
+      const u = v.umsatz * f * (1 + programmErsparnis(s, 'sortiment'));
       const anteil = (bruttoSumme[g] ?? 0) > 0 ? v.brutto / (bruttoSumme[g] ?? 1) : 0;
       const e = (einsatz[g] ?? 0) * anteil;
       umsatzEigen += u;
@@ -159,6 +163,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     if (h.status === 'geschlossen') restmieten += kosten.miete;
     kpi.nebenkosten = kosten.nebenkosten;
     kpi.sonstige = kosten.sonstige + kosten.logistik;
+    hausBuchungen.push({ haus: h, kpi, kosten });
     kpi.db = kpi.rohertrag + kpi.konzessionserloes + kpi.untermiete - kpi.personal - kpi.miete - kpi.nebenkosten - kpi.sonstige;
     kpi.fteBedarf = r.fteBedarf;
     kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
@@ -201,12 +206,33 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   const markenBudget = s.eigenmarken.marken.reduce((x, m) => x + (istVerkaufsaktiv(m) || m.status === 'aufbau' ? m.budgetWoche : 0), 0);
   // Werbung netto (Kanäle, Karte, App, CRM, Sonderwerbung abzüglich Lieferantenbeteiligung) plus Markenbudgets der Eigenmarken
   const mk = marketingKosten(s, k.umsatz);
-  k.marketing = mk.netto + markenBudget;
+  k.marketing = (mk.netto + markenBudget) * (1 - programmErsparnis(s, 'werbung'));
   k.beratung = s.berater.filter((b) => w >= b.start && w < b.ende).reduce((x, b) => x + b.wochenSatz, 0);
 
   // 6. Abschriften und Gewöhnung
   k.abschriften = einkaufAltern(s);
   k.rohertrag -= k.abschriften;
+  // Vorhandene GuV-Gesamterträge (WKZ, Konzession, Untermiete) und
+  // zentral gebuchte Werbung/Abschriften werden verursachungsgerecht auf
+  // aktive Häuser im Verhältnis ihres Umsatzes verteilt. Kein Doppelansatz.
+  const gesamtFilialGuV = leereFilialGuV();
+  for (const { haus, kpi, kosten } of hausBuchungen) {
+    const anteil = k.umsatz > 0 ? kpi.umsatz / k.umsatz : 0;
+    const g = kosten.guv;
+    g.umsatz = kpi.umsatz;
+    g.abschriften = k.abschriften * anteil;
+    g.bruttogewinn = kpi.rohertrag - g.abschriften;
+    g.wareneinsatz = g.umsatz - g.bruttogewinn;
+    g.uebrigeErtraege = kpi.konzessionserloes + kpi.untermiete + k.wkz * anteil;
+    g.werbung = k.marketing * anteil;
+    guvAbschluss(g);
+    kpi.guv = g;
+    // Haus-DB umfasst alle tatsächlich angefallenen operativen Filialkosten.
+    kpi.db = g.ebitda;
+    if (haus.status !== 'geschlossen' && haus.status !== 'verkauft') haus.kpi = rundeKpi(kpi);
+    guvAddiere(gesamtFilialGuV, g);
+  }
+  k.filialGuV = gesamtFilialGuV;
   eigenmarkenWoche(s, einkaufBuchen(s, umsatzEigenJe));
   produkteBuchen(s);
   s.marketing.gewoehnung = Math.max(0, s.marketing.gewoehnung * 0.99);

@@ -18,8 +18,10 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { FILIAL_PROGRAMME, type FilialProgrammId } from './filialguv';
 
 export type SpielerAktion =
+  | { typ: 'filialProgramm'; programm: FilialProgrammId }
   | { typ: 'schliessen'; haus: string }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
   | { typ: 'flaecheTeilen'; haus: string; flaeche: string; qm: number }
@@ -126,6 +128,22 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
   switch (a.typ) {
+    case 'filialProgramm': {
+      const p = FILIAL_PROGRAMME[a.programm];
+      if (!p) return fehler('Unbekanntes Filialprogramm.');
+      if (!s.filialProgramme) s.filialProgramme = {};
+      if (s.filialProgramme[a.programm]) return fehler('Das Programm läuft bereits.');
+      // Prozentuale Investition auf der operativen Umsatzbasis, nicht als
+      // pauschale EBITDA-Position. Einmalige Auszahlung über einmalKosten.
+      const basis = s.historie.length
+        ? s.historie.slice(-13).reduce((x, k) => x + k.umsatz, 0) * 4
+        : Object.values(s.basisUmsatz).reduce((x, u) => x + (u ?? 0), 0) * 52;
+      const investition = Math.round(basis * p.investitionsQuote);
+      einmalKosten(s, investition);
+      s.filialProgramme[a.programm] = { start: w, wirksamAb: w + p.vorlauf };
+      if (a.programm === 'miete') s.stakeholder.vermieter = clamp(s.stakeholder.vermieter - 2, 0, 100);
+      return ok(`${p.name}: Investition ${mio(investition)}, Wirkung ab Woche ${w + p.vorlauf + 1}. ${p.nebenwirkung}`);
+    }
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
       return ok(a.an ? 'Premiumhäuser sind vor pauschalen Rabattaktionen geschützt.' : 'Premiumschutz deaktiviert.');

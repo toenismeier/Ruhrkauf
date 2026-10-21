@@ -86,6 +86,28 @@ function kalibriereStandortumsatz(haeuser: Haus[]): void {
     haus.personal.vollzeit *= personalFaktor;
     haus.personal.teilzeit *= personalFaktor;
     haus.personal.aushilfen *= personalFaktor;
+    // M7: Hartwig folgt der realen Referenz für Personal und Miete. Die
+    // Hausgröße (und damit die Kostenbasis) bleibt individuell. Statt einer
+    // GuV-Gutschrift werden reale FTE und Mietverträge umgerechnet.
+    const jahresBasis = (alt * faktor) * 52;
+    const realisierung = haus.klasse === 'premium' ? 1.06 : haus.format === 'sport' ? 0.95 : 1;
+    // Näherung an realisierten Umsatz; als Kalibrierannahme explizit dokumentiert.
+    const wocheBasis = jahresBasis / 52 * 1.02 * realisierung;
+    const zielPersonal = wocheBasis * 0.16 * (haus.klasse === 'premium' ? 1.08 : haus.format === 'sport' ? 0.94 : 1);
+    const istPersonal = haus.personal.vollzeit * PARAM.lohnVollzeit
+      + haus.personal.teilzeit * PARAM.lohnTeilzeit + haus.personal.aushilfen * PARAM.lohnAushilfe;
+    const besetzung = Math.max(0.4, Math.min(1.4, zielPersonal / Math.max(1, istPersonal)));
+    haus.personal.vollzeit *= besetzung;
+    haus.personal.teilzeit *= besetzung;
+    haus.personal.aushilfen *= besetzung;
+    haus.miete.mieteWoche = eur(wocheBasis * 0.112
+      * (haus.klasse === 'premium' ? 1.12 : haus.format === 'sport' ? 0.96 : 1));
+    // Verträge vom Typ net enthalten NK; bei anderen Verträgen werden
+    // tatsächlich abgerechnete €/qm umgestellt, keine simulierte Ertragsposition.
+    if (haus.miete.netTyp !== 'net') {
+      const qm = haus.flaechen.filter((f) => f.konzept !== 'untermiete').reduce((a, f) => a + f.qm, 0);
+      haus.miete.nebenkostenQmWoche = wocheBasis * 0.019 / Math.max(1, qm);
+    }
   }
 }
 
@@ -114,11 +136,12 @@ export const PARAM = {
   umsatzJeFte: 6_300,
   sonstigeQuote: 0.016,
   sonstigeQm: 0.45,
-  logistikQuote: 0.025,
+  // Filial-GuV Referenz: Distribution/Transport/Filiallogistik 6,3 %.
+  logistikQuote: 0.063,
   nebenkostenQm: [1.0, 1.5] as [number, number],
   // Die Zentrale nutzt bei 408 aktiven Häusern Größenvorteile.
   zentraleQuote: 0.030,
-  marketingQuote: 0.025,
+  marketingQuote: 0.018, // IST Werbung Filialebene 1,8 % statt historisch 2,5 %
   zinsSatz: 0.08,
   konzessionsQuote: 0.22,
   kommissionsMarge: 0.25,
@@ -498,6 +521,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     makro: { konjunktur: 1, schockStaerke: 0, phase: zwischen(h, 0, Math.PI * 2) },
     meldungen: [],
     historie: [],
+    filialProgramme: {},
     zaehler: 0,
     einmalkostenWoche: 0,
     einmalErloeseWoche: 0,

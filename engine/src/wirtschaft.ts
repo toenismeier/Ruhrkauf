@@ -4,6 +4,7 @@ import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
 import { premiumImageFaktor, premiumServiceQuote } from './premium';
 import { schwierigkeit } from './schwierigkeit';
+import { leereFilialGuV, programmErsparnis, programmNachfrageFaktor, type FilialGuV } from './filialguv';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
@@ -84,7 +85,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s).kaufneigung * premiumImageFaktor(h);
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s).kaufneigung * premiumImageFaktor(h) * programmNachfrageFaktor(s);
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -181,23 +182,35 @@ export interface HausKosten {
   sonstige: number;
   logistik: number;
   personalCash: number;
+  /** Aufgelöste Kostenarten vor Umsatz-/WKZ- und Werbeallokation. */
+  guv: FilialGuV;
 }
 
 export function lohnKosten(s: GameState, h: Haus): number {
   const p = h.personal;
   const tarifF = s.tarif === 'sanierung' ? 0.93 : s.tarif === 'ohne' ? 0.89 : 1;
-  return (p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF + p.aushilfen * PARAM.lohnAushilfe;
+  return ((p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF
+    + p.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s, 'personal'));
 }
 
 export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGesamt: number): HausKosten {
-  const k: HausKosten = { personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, logistik: 0, personalCash: 0 };
+  const k: HausKosten = {
+    personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, logistik: 0,
+    personalCash: 0, guv: leereFilialGuV(),
+  };
   if (h.status === 'verkauft') return k;
   if (h.status === 'geschlossen') {
     if (h.restmieteBis !== undefined && h.restmieteBis > s.woche) k.miete = h.restmieteWoche ?? 0;
     return k;
   }
-  k.personal = lohnKosten(s, h);
-  k.miete = h.miete.mieteWoche;
+  const guv = k.guv;
+  const form = h.klasse === 'premium' ? 1.16
+    : h.format === 'outlet' ? 0.77
+    : h.format === 'sport' ? 0.93
+    : h.format === 'schwester' ? 0.94 : 1;
+  // Personal und Miete stammen aus dem tatsächlichen Personalbestand/Mietvertrag.
+  k.personal = guv.personal = lohnKosten(s, h);
+  k.miete = guv.miete = h.miete.mieteWoche * (1 - programmErsparnis(s, 'miete'));
   let qmNk = 0;
   let qmBetrieb = 0;
   for (const f of h.flaechen) {
@@ -205,9 +218,27 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     qmNk += f.qm;
     qmBetrieb += f.konzept === 'leer' ? f.qm * 0.25 : f.qm;
   }
-  k.nebenkosten = h.miete.netTyp === 'net' ? 0 : qmNk * h.miete.nebenkostenQmWoche;
-  k.sonstige = PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt;
-  k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s);
+  guv.mietnebenkosten = k.nebenkosten =
+    (h.miete.netTyp === 'net' ? 0 : qmNk * h.miete.nebenkostenQmWoche)
+    * (1 - programmErsparnis(s, 'mietnebenkosten'));
+  guv.logistik = k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s)
+    * (1 - programmErsparnis(s, 'logistik'))
+    * (h.format === 'outlet' ? 0.9 : 1);
+  // Fremdkräfte, Zahlungsverkehr und Betriebsführung werden getrennt gebucht.
+  // Diese Positionen fließen vollständig in k.sonstige und damit in den Cashflow.
+  guv.fremdkraefte = umsatzGesamt * 0.007 * form * (1 - programmErsparnis(s, 'fremdkraefte'));
+  guv.unterhalt = umsatzGesamt * 0.019 * form
+    * (1 + Math.max(0, 55 - h.substanz) / 400) * (1 - programmErsparnis(s, 'unterhalt'));
+  guv.zahlungsverkehr = umsatzGesamt * 0.002 * (1 - programmErsparnis(s, 'zahlungsverkehr'));
+  guv.facilityManagement = umsatzGesamt * 0.017 * form * (1 - programmErsparnis(s, 'facilityManagement'));
+  guv.energie = umsatzGesamt * 0.024 * form * (1 - programmErsparnis(s, 'energie'));
+  guv.it = umsatzGesamt * 0.003 * (1 - programmErsparnis(s, 'it'));
+  guv.administration = umsatzGesamt * 0.002 * (1 - programmErsparnis(s, 'administration'));
+  guv.uebrigeAufwendungen = (umsatzGesamt * 0.004 + premiumServiceQuote(h) * umsatzGesamt)
+    * (1 - programmErsparnis(s, 'uebrigeAufwendungen'));
+  k.sonstige = guv.fremdkraefte + guv.unterhalt + guv.zahlungsverkehr
+    + guv.facilityManagement + guv.energie + guv.it + guv.administration
+    + guv.uebrigeAufwendungen;
   return k;
 }
 

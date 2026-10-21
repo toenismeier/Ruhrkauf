@@ -46,3 +46,5 @@ export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+export { REFERENZ_FILIAL_GUV, FILIAL_PROGRAMME, GUV_KOSTEN, guvAbschluss, leereFilialGuV, type FilialGuV, type FilialProgrammId } from './filialguv';
