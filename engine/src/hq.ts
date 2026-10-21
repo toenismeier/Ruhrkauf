@@ -619,6 +619,7 @@ export function hqWoche(s: GameState): void {
     if (abgang > 0) {
       a.fte -= abgang;
       a.abgangRest -= abgang;
+      if (a.neuFte !== undefined) a.neuFte = Math.min(a.neuFte, a.fte);
       schrumpfe(a, qmBedarf(a));
     }
   }
@@ -849,6 +850,7 @@ export function abteilungFteSetzen(s: GameState, id: AbteilungId, ziel: number):
     const abf = weg * abfindungJeFte(s);
     einmal(s, abf);
     a.fte = ziel;
+    if (a.neuFte !== undefined) a.neuFte = Math.min(a.neuFte, a.fte);
     schrumpfe(a, qmBedarf(a));
     const gesamt = Math.max(1, s.hq.abteilungen.reduce((x, x0) => x + x0.fte, 0));
     s.stakeholder.betriebsrat = clamp(s.stakeholder.betriebsrat - weg / gesamt * 30, 0, 100);
