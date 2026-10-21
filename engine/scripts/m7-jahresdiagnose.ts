@@ -4,6 +4,7 @@
  * cd engine
  * npx tsx scripts/m7-jahresdiagnose.ts
  * npx tsx scripts/m7-jahresdiagnose.ts --bot --seed=1
+ * npx tsx scripts/m7-jahresdiagnose.ts --verfall   # Kontrolllauf: alte Saison-Freigabevoreinstellung
  * npx tsx scripts/m7-jahresdiagnose.ts --write-stand
  *
  * --write-stand setzt ausschließlich den M7-Jahresdiagnoseblock in
@@ -33,6 +34,11 @@ interface Zeile {
   verfallWert: number; verfallAnzahl: number; freigaben: number;
 }
 const s = neuesSpiel(seed, { schwierigkeit: stufe });
+// A/B-Isolation des Fehlers aus Stand 37d446a: saisonale Orders verfallen
+// ohne Eingriff. Wirtschaft und Portfolio bleiben ansonsten identisch.
+if (args.includes('--verfall')) {
+  for (const wg of Object.values(s.einkauf.wgs)) wg.st.modus.saison = 'verfall';
+}
 const zeilen: Zeile[] = [];
 for (let i = 0; i < 52; i++) {
   if (s.phase === 'zerschlagen') break;
@@ -50,7 +56,7 @@ for (let i = 0; i < 52; i++) {
   });
 }
 
-const titel = `M7 Jahresdiagnose – ${bot ? 'Bot D ohne Insolvenzantrag' : 'ohne Eingriffe'}, ${stufe}, Seed ${seed}`;
+const titel = `M7 Jahresdiagnose – ${bot ? 'Bot D ohne Insolvenzantrag' : 'ohne Eingriffe'}, ${stufe}, Seed ${seed}${args.includes('--verfall') ? ', Kontrolllauf: Saisonorders verfallen' : ''}`;
 const bericht: string[] = [
   `### ${titel}`,
   '',
