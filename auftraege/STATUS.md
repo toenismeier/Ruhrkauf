@@ -30,6 +30,15 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q12 Hausbesuch Laufwege | `feat/q12-hausbesuch-laufwege` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q13 Sandkasten unbegrenzt | `feat/q13-sandkasten` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q14 Oberfläche gesamt (Gestaltungssystem) | `feat/q14-oberflaeche-design` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q16 Marketing-Kanäle und Marktanteil | `feat/q16-marketing-kanaele` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q17 Eigenmarken-Produktkarten (nach Q11) | `feat/q17-eigenmarken-karten` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q18 Handelsbote Gestaltung | `feat/q18-handelsbote` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q19 IT-Produkte als Karten | `feat/q19-it-produkte` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | `feat/q07-vertriebssteuerung` | **startet 21.10.** | – |
