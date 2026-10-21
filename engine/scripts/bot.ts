@@ -202,7 +202,11 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
   const tu = (a: Parameters<typeof fuehreAus>[1]) => { const r = fuehreAus(s, a); if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`); return r; };
   if (w === 0) {
     tu({ typ: 'berater', beraterTyp: 'sanierung' });
-    if (zentralePauschal > 0) tu({ typ: 'zentrale', prozent: zentralePauschal });
+    // Zusätzlicher HQ-Abbau nur, wenn die Barliquidität samt Linie
+    // mindestens fünf Wochenumsätze deckt; Bot T hat bereits 12 % reduziert.
+    const wochenUmsatz = Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
+    if (zentralePauschal > 0 && freieLiquiditaet(s) >= 5 * wochenUmsatz)
+      tu({ typ: 'zentrale', prozent: zentralePauschal });
     // Die Warensteuerung von Bot T bleibt erhalten: pauschale Kürzungen
     // von 15 % erzeugten Fehlmengen und machten die Schließungen unprofitabel.
     tu({ typ: 'marketingBudget', quote: 0.018 });
@@ -214,8 +218,9 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium');
     const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
     const inArbeit = pool.filter((h) => h.status !== 'offen').length;
+    const verlustIds = new Set(pool.filter((h) => (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
     const p = aktivesPortfolio(s)
-      .filter((x) => pool.some((h) => h.id === x.id) && x.db < 0 && x.umsatz > 0)
+      .filter((x) => verlustIds.has(x.id) && x.db < 0 && x.umsatz > 0)
       .sort((a, b) => a.db / a.umsatz - b.db / b.umsatz);
     let budget = schliessungsBudgetBotD(s).budget;
     let beauftragt = 0;
