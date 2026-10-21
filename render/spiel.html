@@ -357,6 +357,8 @@
   #fortsetzen { margin-top: 9px; border-color: #2f8f5b; color: #2f8f5b; }
   #speicherhinweis { color: var(--rot); font-size: calc(12px * var(--schrift)); line-height: 1.4; margin-top: 8px; }
   #panel, #panel.gross { max-height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
+  /* Q10: Hausdetail lässt einen sichtbaren Streifen für das fokussierte Gebäude frei. */
+  #panel.hausdetail { max-height: 62dvh; }
   .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: calc(11px * var(--schrift)); color: var(--leise); }
   .startseed input { width: 64px; font: inherit; font-size: calc(12px * var(--schrift)); border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
   .wbdirekt { display: flex; width: 100%; align-items: center; justify-content: space-between;
