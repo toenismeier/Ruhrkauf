@@ -62,15 +62,15 @@ const VORLAGE = {
 
 // Umrechnung je Zielgruppe: Höhe (ohne Kopf), Kopfgröße, Breiten je Zone
 const ALTER = {
-  kinder: { h: 0.6, kopf: 1.0, breit: { schulter: 0.66, taille: 0.92, huefte: 0.78, bein: 0.78, arm: 0.78 } },
-  teens: { h: 0.9, kopf: 1.0, breit: { schulter: 0.93, taille: 0.98, huefte: 0.94, bein: 0.92, arm: 0.92 } },
+  kinder: { h: 0.62, kopf: 0.92, breit: { schulter: 0.6, taille: 0.66, huefte: 0.64, bein: 0.62, arm: 0.62 } },
+  teens: { h: 0.92, kopf: 1.0, breit: { schulter: 0.9, taille: 0.9, huefte: 0.9, bein: 0.88, arm: 0.88 } },
   young: { h: 1, kopf: 1, breit: { schulter: 1, taille: 1, huefte: 1, bein: 1, arm: 1 } },
-  adults: { h: 1, kopf: 1, breit: { schulter: 1.02, taille: 1.1, huefte: 1.05, bein: 1.04, arm: 1.06 } },
-  bestager: { h: 0.97, kopf: 1, breit: { schulter: 1.0, taille: 1.24, huefte: 1.1, bein: 1.08, arm: 1.1 } },
+  adults: { h: 1, kopf: 1, breit: { schulter: 1.0, taille: 1.04, huefte: 1.02, bein: 1.0, arm: 1.02 } },
+  bestager: { h: 0.97, kopf: 1, breit: { schulter: 0.98, taille: 1.12, huefte: 1.05, bein: 1.0, arm: 1.02 } },
 };
 
 // Alltagsproportionen (Ummo 21.10.: „sehen aus wie Slender“): breiter, Beine kürzer, Kopf größer, ca. 7,5 Kopflängen
-const BREITE = 1.2, BEINE = 0.86, KOPF = 1.4, BODEN = 404;
+const BREITE = 1.12, BEINE = 0.86, KOPF = 1.4, BODEN = 404;
 function alltag(V) {
   const s = V.marken.schritt, sNeu = BODEN - (BODEN - s) * BEINE, shift = sNeu - s;
   const Y = (y) => (y <= s ? y + shift : BODEN - (BODEN - y) * BEINE);
