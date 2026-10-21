@@ -45,6 +45,7 @@
   #cockpit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: auto; }
   .kz { background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 6px 9px; min-width: 0; }
   .kz span { display: block; color: var(--leise); font-size: calc(10px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kz .kzwahl { font: inherit; font-size: calc(10px * var(--schrift)); color: var(--leise); background: transparent; border: 0; padding: 0; margin: 0 0 0 2px; height: 1.3em; line-height: 1; -webkit-appearance: none; appearance: none; text-decoration: underline dotted; }
   .kz b { display: block; font-size: calc(13.5px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
   .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }

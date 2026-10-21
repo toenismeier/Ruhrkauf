@@ -704,16 +704,23 @@ function merk() { return MERK; }
 function cockpitZeigen() {
   const c = E.cockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
-  $('cockpit').innerHTML = '<div class="seg">'+[['alle','Alle'],['warenhaus','Hartwig'],['sport','Sport'],['schwester','Volkskauf'],['outlet','FUNDUS']].map(([id,name])=>'<button class="'+(cockpitFormat===id?'an':'')+'" data-cockpit-format="'+id+'">'+name+'</button>').join('')+'</div>' + [
+  // Formatfilter ohne zusätzliche Zeilen: das Cockpit darf auf dem iPhone nicht wachsen
+  // (es überdeckt sonst die Karte). Auswahl im Titel der Umsatz-Kachel.
+  const FORMATNAME = { alle: 'Alle', warenhaus: 'Hartwig', sport: 'Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
+  const fx = cockpitFormat === 'alle' ? null : c.formate.find((x) => x.format === cockpitFormat);
+  const auswahl = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
+    .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
+    .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
+  $('cockpit').innerHTML = [
     kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
     kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
     kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz Woche', s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
-    ...c.formate.filter(x=>x.haeuser&&(cockpitFormat==='alle'||cockpitFormat===x.format)).map(x=>kachel(({warenhaus:'Hartwig',sport:'Sport',schwester:'Volkskauf',outlet:'FUNDUS'})[x.format]+' · Häuser / Umsatz / EBITDA',x.haeuser+' · '+geld(x.umsatz)+' · '+geld(x.ebitda),x.ebitda<0?'rot':'')),
+    fx ? kachel('Umsatz Woche ' + auswahl, s.historie.length ? geld(fx.umsatz) + ' · EBITDA ' + geld(fx.ebitda) : 'noch offen', s.historie.length && fx.ebitda < 0 ? 'rot' : '')
+      : kachel('Umsatz Woche ' + auswahl, s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
-  $('cockpit').querySelectorAll('[data-cockpit-format]').forEach(b=>b.addEventListener('click',()=>{cockpitFormat=b.dataset.cockpitFormat;cockpitZeigen();}));
+  $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
   // O07 Haus: Ausnahme-Kachel im Cockpit.
   const ausnahmen = E.hausBeobachtung(s, 30).length;
   $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
