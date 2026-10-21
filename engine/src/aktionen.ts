@@ -19,10 +19,13 @@ import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingA
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
 import { FILIAL_PROGRAMME, type FilialProgrammId } from './filialguv';
+import { ECOMMERCE_AKTIONEN, ecommerceAktion, type EcommerceAktion } from './ecommerce';
 import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { hqArchivSetzen } from './hq';
 import { immobilieVerkaufen } from './szenarien';
 import { zeitungEinstellen } from './zeitung';
+import { marktbeobachtungStufe } from './marktbeobachtung';
+import { hqAktualisiere } from './hq';
 import { spielBeenden } from './spielende';
 // O05 Ware
 import { WARE_AKTIONEN, wareAktion, type WareAktion } from './merchandise';
@@ -72,6 +75,7 @@ export type SpielerAktion =
   | { typ: 'spielFortsetzen' }
   | { typ: 'entscheiden'; id: string; option: string }
   | { typ: 'zeitungAktiv'; an: boolean }
+  | { typ: 'marktbeobachtungStufe'; stufe: 0 | 1 | 2 | 3 }
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
@@ -87,6 +91,8 @@ export type SpielerAktion =
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
+  // O09 E-Commerce
+  | EcommerceAktion
   | ProduktAktion
   // O01 Organisation
   | OrganisationAktion
@@ -181,6 +187,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s, a as OrganisationAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
+  if (ECOMMERCE_AKTIONEN.has(a.typ as EcommerceAktion['typ'])) return ecommerceAktion(s, a as EcommerceAktion);
   // O06 Planung: alle Mutationen laufen über fuehreAus.
   if (PLANUNG_AKTIONEN.has(a.typ as PlanungAktion['typ'])) {
     const fehlerText = planungAktion(s, a as PlanungAktion);
@@ -204,6 +211,11 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       s.filialProgramme[a.programm] = { start: w, wirksamAb: w + p.vorlauf };
       if (a.programm === 'miete') s.stakeholder.vermieter = clamp(s.stakeholder.vermieter - 2, 0, 100);
       return ok(`${p.name}: Investition ${mio(investition)}, Wirkung ab Woche ${w + p.vorlauf + 1}. ${p.nebenwirkung}`);
+    }
+    case 'marktbeobachtungStufe': {
+      const ergebnis = marktbeobachtungStufe(s, a.stufe);
+      if (ergebnis.ok) hqAktualisiere(s);
+      return ergebnis;
     }
     case 'zeitungAktiv':
       zeitungEinstellen(s, a.an);

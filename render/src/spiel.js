@@ -38,6 +38,7 @@ import { appModul } from './ui/app.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
 import { wochenberichtModul } from './ui/wochenbericht.js';
+import { ecommerceModul } from './ui/ecommerce.js';
 import { chronikModul } from './ui/chronik.js';
 import { hausbesuchModul } from './ui/hausbesuch.js';
 import { szenarienModul } from './ui/szenarien.js';
@@ -692,7 +693,7 @@ let vorherigerFokus = null;
 let wk = null;
 let st = null;
 let ch = null;
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -821,6 +822,15 @@ function oeffneHaus(id) {
     html += `<div class="zeile"><span class="was"><b>${def.name}</b> <i>${status || def.vorlauf + ' Wochen Vorlauf'} · ${def.nebenwirkung}</i></span>${stand ? '' : `<button class="mini" onclick="filialProgramm('${programm}')">Starten</button>`}</div>`;
   }
   html += '</div>';
+  // O09: zusätzliche Logistik im Haussteckbrief.
+  if (d.ecommerce && h.format === 'warenhaus') {
+    const x = d.ecommerce;
+    html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' +
+      zahl('Abholungen', fmt.format(x.abholungen)) + zahl('Versand aus dem Haus', fmt.format(x.versand)) +
+      zahl('Retouren im Haus', fmt.format(x.retouren)) + zahl('Instore-Logistik', x.instoreStunden.toFixed(1).replace('.', ',') + ' Std.') +
+      '</div><div class="zeile">Abholstation: ' + (x.station ? 'vorhanden' : 'nicht vorhanden') +
+      ' · Ship-from-Store: ' + (x.versandAn ? 'aktiv' : 'aus') + '</div></div>';
+  }
   const shops = EQ.shops(s, h);
   if (hausEtageWahl?.id === id) {
     const b = innenBild(h, hausEtageWahl.nr);
@@ -1074,7 +1084,7 @@ function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesH
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null;
+let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -1082,6 +1092,8 @@ org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
+// O09 E-Commerce
+ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAktion(); grafikNachziehen(); } });
 er = erfolgeModul({ E, s: () => s, panel });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -1097,6 +1109,7 @@ po = posteingangModul({
       if (bezug.modul === 'organisation') return oeffneModul(org);
       if (bezug.modul === 'it') return oeffneModul(itM);
       if (bezug.modul === 'marketing') return oeffneModul(mk);
+      if (bezug.modul === 'ecommerce') return oeffneModul(ec);
       if (bezug.modul === 'produkte') return oeffneModul(pr);
       if (bezug.modul === 'planung') return oeffneModul(pl);
       if (bezug.modul === 'personal') return oeffneModul(pe);
@@ -1115,6 +1128,7 @@ po = posteingangModul({
     else if (bezug.modul === 'organisation') oeffneModul(org);
     else if (bezug.modul === 'it') oeffneModul(itM);
     else if (bezug.modul === 'marketing') oeffneModul(mk);
+    else if (bezug.modul === 'ecommerce') oeffneModul(ec);
     else if (bezug.modul === 'produkte') oeffneModul(pr);
     else if (bezug.modul === 'planung') oeffneModul(pl);
     else if (bezug.modul === 'personal') oeffneModul(pe);
@@ -1235,6 +1249,7 @@ $('organisation').addEventListener('click', () => oeffneModul(org));
 // O03 IT
 $('it').addEventListener('click', () => oeffneModul(itM));
 $('marketing').addEventListener('click', () => oeffneModul(mk));
+$('online').addEventListener('click', () => oeffneModul(ec));
 $('modernisierung').addEventListener('click', () => oeffneModul(um));
 $('produkte').addEventListener('click', () => oeffneModul(pr));
 ch = chronikModul({ E, s: () => s, panel, bild: fassadeChronik });
@@ -1360,7 +1375,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   leben,
   reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,

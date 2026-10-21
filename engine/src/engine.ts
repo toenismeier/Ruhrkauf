@@ -8,6 +8,7 @@ import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
 import { zeitungWoche } from './zeitung';
+import { marktbeobachtungWoche } from './marktbeobachtung';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
 import type { Format, GameState, GruppeId, HausKpi, WochenKpi } from './types';
@@ -28,6 +29,7 @@ import { produkteBuchen, produkteWoche } from './produkte';
 import { personaleinsatzWoche } from './personaleinsatz';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
 import { guvAbschluss, guvAddiere, leereFilialGuV, programmErsparnis } from './filialguv';
+import { ecommerceWoche } from './ecommerce';
 import { szenarioNachWoche, szenarioWoche } from './szenarien';
 // O02 Umsatztreiber
 import { erfasseTreiber } from './treiber';
@@ -250,6 +252,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // Einkauf in der Zentrale: Zuschüsse und Konditionen auf den Wareneinsatz
   const einsatzSumme = Object.values(einsatz).reduce((a, b) => a + (b ?? 0), 0);
   k.wkz = k.wkz * hqWkzFaktor(s) + einsatzSumme * hqEinkaufKonditionen(s);
+  // O09: Baseline bereits im stationären Umsatz, nur Abweichungen buchen.
+  ecommerceWoche(s, k);
 
   // 5. Zentrale Kosten (aus der Hauptverwaltung, inkl. Controlling) und Restmieten gekündigter Büros
   k.zentrale = s.zentrale.kostenWoche;
@@ -360,6 +364,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // Einmaleffekte, die ab jetzt anfallen (Aktionen des Spielers), zählen zur nächsten Woche
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
+  marktbeobachtungWoche(s); // Q06: Meldungen konsolidieren, bevor der Handelsbote erscheint.
   zeitungWoche(s);
   s.woche += 1;
   chronikAktualisieren(s, w);

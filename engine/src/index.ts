@@ -60,6 +60,8 @@ export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itPr
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+export { ecommerceUebersicht, ecommerceHaus, ecommerceBruecke } from './abfragen';
+export { ecommerceCluster, hatAbholstation, retourenQuote, type EcommerceStand, type EcommerceAktion, type FulfillmentModell } from './ecommerce';
 
 export { REFERENZ_FILIAL_GUV, FILIAL_PROGRAMME, GUV_KOSTEN, guvAbschluss, leereFilialGuV, type FilialGuV, type FilialProgrammId } from './filialguv';
 
@@ -88,3 +90,6 @@ export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from
 export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
 export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';
 export { TEST_EREIGNISSE, type TestAktion, type TestEreignisId } from './testwerkzeuge';
+
+// Q06 Fachbereich Marktbeobachtung.
+export { marktbeobachtungUebersicht, marktbeobachtungKostenWoche, marktbeobachtungWoche, marktbeobachtungStufe, MARKT_FTE, type MarktbeobachtungStand, type MarktbeobachtungWoche } from './marktbeobachtung';

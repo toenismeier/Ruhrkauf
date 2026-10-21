@@ -41,11 +41,21 @@ export function posteingangModul(ctx) {
     if (!liste.length) return html + leer('Keine Meldungen in dieser Kategorie.');
     const gelesen = new Set(einstellungen().gelesen ?? []);
     const symbole = { Presse: '📰', Häuser: '🏬', Finanzen: '€', Personal: '👥', Konkurrenz: '↗', Eigentümer: '◆', IT: '⚙' };
-    return html + liste.map((m) => {
+    // Q06: Wettbewerb ist eine eigene, im Standard geschlossene Sammelrubrik.
+    const wettbewerb = liste.filter((m) => m.kategorie === 'Konkurrenz');
+    const andere = liste.filter((m) => m.kategorie !== 'Konkurrenz');
+    const eintrag = (m) => {
       const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
       const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc(m.kategorie) + ' · KW ' + kwVon(m.woche) + (gelesen.has(m.id) ? '' : ' · Neu') + '</small><span>' + esc(m.text) + '</span></span>';
       return '<div class="karte postmeldung ' + (gelesen.has(m.id) ? '' : 'ungelesen') + '" data-post-id="' + esc(m.id) + '"><button data-po-a="lesen" data-id="' + esc(m.id) + '">' + info + '</button>' + (bezug ? '<button class="postort" data-po-a="sprung" data-id="' + esc(m.id) + '">Zum Ort →</button>' : '') + '</div>';
-    }).join('');
+    };
+    const regulär = andere.map(eintrag).join('');
+    const rubrik = wettbewerb.length
+      ? '<details class="karte post-konkurrenz" ' + (filter === 'Konkurrenz' ? 'open' : '') +
+        '><summary>Konkurrenz · ' + wettbewerb.length + ' Meldung' + (wettbewerb.length === 1 ? '' : 'en') +
+        ' (anzeigen)</summary><div class="post-konkurrenz-inhalt">' + wettbewerb.map(eintrag).join('') + '</div></details>'
+      : '';
+    return html + regulär + rubrik;
   }
   function erledigt(D) {
     if (!D.erledigt.length) return leer('In den letzten 13 Wochen wurde noch nichts erledigt.');

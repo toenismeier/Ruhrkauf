@@ -44,6 +44,9 @@ type Vorlage = {
 // Redaktionelle Vorlagen: 30 ereignisgebundene und 16 regelmäßige Artikelarten.
 // Die Quelle wird als Tatsachensatz übernommen, der Kommentar bleibt stets fiktiv.
 const EREIGNISSE: Vorlage[] = [
+  // Q06: Die Fachabteilung liefert ausschließlich relevante, verdichtete Marktbewegungen.
+  ['markt_ueberblick','Handel','konkurrenz','Wettbewerb: die Woche im Überblick','Drei wichtige Entwicklungen und ihre Wirkung auf Hartwig.','Die Fachabteilung ordnet die lokalen Bewegungen nach ihrer wirtschaftlichen Bedeutung ein.','Nicht jede Rabattaktion verändert die Wettbewerbslage des Konzerns.',/^Wochenüberblick Wettbewerb/i],
+  ['markt_einzel','Handel','konkurrenz','Eine Marktbewegung verdient Aufmerksamkeit','Der lokale Markt verändert sich spürbar.','Betroffene Häuser passen die Planung an die neue Wettbewerbslage an.','Die mittelfristige Wirkung hängt von Lage, Sortiment und Nachfrage ab.',/^Wettbewerbsbeobachtung:/i],
   ['konkurrenz_neu','Handel','konkurrenz','Neue Konkurrenz in der Innenstadt','Ein Anbieter investiert in Verkaufsfläche.','Der lokale Handel stellt sich auf einen veränderten Wettbewerb ein.','Die kommenden Wochen dürften zeigen, wie stark sich die Kundschaft neu verteilt.',/wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
   ['konkurrenz_zu','Handel','konkurrenz','Wettbewerber gibt Standort auf','Die Einkaufslandschaft verändert sich erneut.','Ein frei werdendes Geschäft verändert die Lage in der Innenstadt.','Die Nachnutzung dürfte von Kaufkraft und Immobilienangebot abhängen.',/wettbewerb.*schließ|konkurrenz.*schließ|konkurrent.*schließ|wettbewerb.*aufgegeben/i],
   ['konkurrenz_aktion','Handel','konkurrenz','Preiskampf auf der Einkaufsstraße','Aktionen erhöhen den Druck auf den Handel.','Preisnachlässe können kurzfristig Frequenz anziehen.','Für die langfristige Profitabilität bleibt die Handelsspanne entscheidend.',/wettbewerb.*(aktion|rabatt)|konkurrenz.*(aktion|rabatt)|preiskampf/i],
@@ -142,10 +145,20 @@ export function zeitungWoche(s: GameState): void {
   // Unabhängig von s.rng, s.wettbewerbRng und dem globalen ID-Zähler.
   const r: RngHalter = { rng: (Math.imul(s.seed >>> 0, 0x9e3779b1) ^ Math.imul(w + 1, 0x85ebca6b) ^ 0xa174e51d) >>> 0 };
   const artikel: ZeitungArtikel[] = [];
-  const meldungen = s.meldungen.filter((m) => m.woche === w && (m.typ === 'presse' || m.typ === 'insolvenz' || m.typ === 'eigentuemer' || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
-  for (const m of meldungen.slice().sort((a, b) => Number(b.typ === 'insolvenz' || /gläubigerversammlung|insolvenzplan/i.test(b.text)) - Number(a.typ === 'insolvenz' || /gläubigerversammlung|insolvenzplan/i.test(a.text))).slice(0, 4)) {
+  const meldungen = s.meldungen.filter((m) => m.woche === w && !/rund\s+0(?:[.,]0+)?\s*%/i.test(m.text) &&
+    (m.typ === 'presse' || m.typ === 'insolvenz' || m.typ === 'eigentuemer' ||
+      /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
+  for (const m of meldungen.slice().sort((a, b) => (Number(b.typ === 'insolvenz' || /gläubigerversammlung|insolvenzplan/i.test(b.text)) * 10 +
+    Number(b.text.startsWith('Wochenüberblick Wettbewerb')) * 5) -
+    (Number(a.typ === 'insolvenz' || /gläubigerversammlung|insolvenzplan/i.test(a.text)) * 10 +
+    Number(a.text.startsWith('Wochenüberblick Wettbewerb')) * 5)).slice(0, 4)) {
     const v = EREIGNISSE.find((x) => x.muster!.test(m.text))!;
-    artikel.push(ausVorlage(v, w, m.text, artikel.length));
+    // Auch bei migrierten Alt-Meldungen niemals interne Formatcodes abdrucken.
+    const klartext = m.text.replace(/\((premium|modehaus|fastfashion|offprice|textildiscounter|elektronik)\)/gi,
+      (_, art: string) => ({ premium: '(Premium-Warenhaus)', modehaus: '(Modehaus)', fastfashion: '(Modekette)',
+        offprice: '(Off-Price-Anbieter)', textildiscounter: '(Textildiscounter)', elektronik: '(Elektronikmarkt)' }
+        [art.toLowerCase()] ?? ''));
+    artikel.push(ausVorlage(v, w, klartext, artikel.length));
   }
   if (z.naechstesZitat && z.naechstesZitat.abWoche <= w) {
     const vorlage: Vorlage = { id: 'interview', reiter: 'Konzern', bild: 'haus', titel: 'Hartwig-Vorstand im Gespräch', unter: 'Die Geschäftsführung bezieht Stellung.', kommentar: 'Das Interview stößt in der Branche auf Aufmerksamkeit.', perspektive: 'Wie die angekündigten Maßnahmen greifen, wird sich in den nächsten Wochen zeigen.' };
@@ -155,7 +168,9 @@ export function zeitungWoche(s: GameState): void {
   const pflicht = w % 13 === 12 ? 'quartalsblick' : w % 52 >= 45 ? 'weihnachten' : w % 52 < 8 ? 'winter' : w % 52 >= 22 && w % 52 <= 34 ? 'sommer' : '';
   if (pflicht) artikel.push(ausVorlage(HINTERGRUND.find((x) => x.id === pflicht)!, w, '', 60));
   const pool = HINTERGRUND.filter((x) => x.id !== pflicht);
-  while (artikel.length < 5 && pool.length) {
+  // Q06: keine Füllmeldungen, sondern höchstens ein thematisch passender Hintergrund je Ausgabe.
+  const zielArtikel = Math.min(5, Math.max(1, artikel.length + 1));
+  while (artikel.length < zielArtikel && pool.length) {
     const v = waehle(r, pool);
     pool.splice(pool.indexOf(v), 1);
     artikel.push(ausVorlage(v, w, '', 100 + artikel.length));

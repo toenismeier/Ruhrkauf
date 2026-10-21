@@ -177,7 +177,7 @@ function neuEroeffnet(s: GameState, stadt: string, art: WettbewerberArt, inHaus?
   const h = betroffeneHaeuser(s, stadt)[0];
   const gruppe = h ? gruppenFuer(h.format).sort((a, b) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a] ?? 0))[0] : 'damen';
   const prozent = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s, h, gruppe)) * 100) : 0;
-  melde(s, 'presse', wb.name + ' (' + art + ') eröffnet in ' + stadt + (inHaus ? ' im ehemaligen ' + inHaus : '') + '. Erwarteter Nachfragerückgang ' + GRUPPEN[gruppe].name + ': rund ' + prozent + ' %.');
+  melde(s, 'presse', wb.name + ' (' + art + ') eröffnet in ' + stadt + (inHaus ? ' im ehemaligen ' + inHaus : '') + '. Erwarteter Nachfragerückgang ' + GRUPPEN[gruppe].name + ': rund ' + prozent + ' %.', { stadt: stadt, modul: 'wettbewerb' });
   if ((art === 'modehaus' || art === 'premium') && qm >= 2300) {
     neueEntscheidung(s, {
       typ: 'wettbewerb_eroeffnung', frist: s.woche + 3,
@@ -195,7 +195,7 @@ function neuEroeffnet(s: GameState, stadt: string, art: WettbewerberArt, inHaus?
 }
 function raeumung(s: GameState, w: Wettbewerber): void {
   w.status = 'raeumung'; w.seit = s.woche; w.bis = s.woche + 6; w.preisdruck = 0.6;
-  melde(s, 'presse', w.name + ' schließt in ' + w.stadt + '. Sechs Wochen Räumungsverkauf; danach droht Leerstand.');
+  melde(s, 'presse', w.name + ' schließt in ' + w.stadt + '. Sechs Wochen Räumungsverkauf; danach droht Leerstand.', { stadt: w.stadt, modul: 'wettbewerb' });
   const hs = betroffeneHaeuser(s, w.stadt).filter((h) => h.format === 'warenhaus');
   if (hs.length) {
     const angebot = neuesAngebot(s, {
@@ -238,12 +238,12 @@ export function wettbewerbWoche(s: GameState): void {
       wb.status = 'offen'; wb.art = 'leer_ehemals'; wb.preisdruck = 0; wb.seit = w; wb.bis = undefined;
       const hs = betroffeneHaeuser(s, wb.stadt);
       for (const h of hs) h.transferBonus += 0.02 / hs.length;
-      melde(s, 'info', 'Ehemaliger Standort ' + wb.name + ' in ' + wb.stadt + ' steht leer; Kunden wechseln zu Hartwig.');
+      melde(s, 'info', 'Ehemaliger Standort ' + wb.name + ' in ' + wb.stadt + ' steht leer; Kunden wechseln zu Hartwig.', { stadt: wb.stadt, modul: 'wettbewerb' });
     }
     if ((wb.aktionBis ?? 0) <= w) { wb.preisdruck = 0; wb.aktionVon = undefined; wb.aktionBis = undefined; }
     if (wb.konterVon === w && wb.konterBis && wb.konterBis > w) {
       wb.preisdruck = wb.konterDruck ?? 0.4; wb.aktionVon = w; wb.aktionBis = wb.konterBis;
-      melde(s, 'ereignis', wb.name + ' kontert in ' + wb.stadt + ' eine Hartwig-Aktion mit ' + Math.round(wb.preisdruck * 100) + ' % zusätzlichem Preisdruck.');
+      melde(s, 'ereignis', wb.name + ' kontert in ' + wb.stadt + ' eine Hartwig-Aktion mit ' + Math.round(wb.preisdruck * 100) + ' % zusätzlichem Preisdruck.', { stadt: wb.stadt, modul: 'wettbewerb' });
       wb.konterVon = undefined; wb.konterBis = undefined; wb.konterDruck = undefined;
     }
   }
@@ -274,7 +274,7 @@ export function wettbewerbWoche(s: GameState): void {
         if (w > 10 && chance(s, 0.0006)) {
           wb.lage = wb.lage === '1a' ? 'center' : '1a';
           wb.status = 'eroeffnung'; wb.seit = w; wb.bis = w + 4;
-          melde(s, 'presse', wb.name + ' verlegt seinen Standort innerhalb von ' + stadt + ' nach ' + wb.lage + '.');
+          melde(s, 'presse', wb.name + ' verlegt seinen Standort innerhalb von ' + stadt + ' nach ' + wb.lage + '.', { stadt: stadt, modul: 'wettbewerb' });
           continue;
         }
         if (hs[0].einzug.kaufkraft < 0.9) wb.staerke *= 0.998;
@@ -372,18 +372,18 @@ export function testWettbewerbEreignis(s: GameState, art: string): boolean {
     case 'aktion':
       if (!w) return false;
       w.aktionVon = s.woche; w.aktionBis = s.woche + 3; w.preisdruck = 0.3;
-      melde(s, 'ereignis', 'Test: Rabattaktion von ' + w.name + ' in ' + w.stadt + '.');
+      melde(s, 'ereignis', 'Test: Rabattaktion von ' + w.name + ' in ' + w.stadt + '.', { stadt: w.stadt, modul: 'wettbewerb' });
       return true;
     case 'konter':
       if (!w) return false;
       w.konterVon = s.woche + 1; w.konterBis = s.woche + 4; w.konterDruck = 0.45;
-      melde(s, 'ereignis', 'Test: Konteraktion von ' + w.name + ' ab kommender Woche.');
+      melde(s, 'ereignis', 'Test: Konteraktion von ' + w.name + ' ab kommender Woche.', { stadt: w.stadt, modul: 'wettbewerb' });
       return true;
     case 'standortwechsel':
       if (!w) return false;
       w.lage = w.lage === '1a' ? 'center' : '1a';
       w.status = 'eroeffnung'; w.seit = s.woche; w.bis = s.woche + 4;
-      melde(s, 'presse', 'Test: ' + w.name + ' verlegt den Standort in ' + w.stadt + '.');
+      melde(s, 'presse', 'Test: ' + w.name + ' verlegt den Standort in ' + w.stadt + '.', { stadt: w.stadt, modul: 'wettbewerb' });
       return true;
     case 'nachnutzung': {
       const geschlossen = s.haeuser.find((x) => x.status === 'geschlossen');

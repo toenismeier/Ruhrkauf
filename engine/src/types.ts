@@ -1,6 +1,7 @@
 import type { Hq } from './hq';
 import type { ChronikEintrag, ChronikStand } from './chronik';
 import type { OrganisationsStand } from './organisation';
+import type { MarktbeobachtungStand } from './marktbeobachtung';
 import type { PlanungStand } from './planung';
 import type { BauEtage, UmbauStand } from './umbau';
 import type { Art, Einkauf, WgId } from './einkauf';
@@ -10,6 +11,7 @@ import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
 import type { FilialGuV, FilialProgrammeStand } from './filialguv';
+import type { EcommerceStand } from './ecommerce';
 // O02 Umsatztreiber
 import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber';
 // O03 IT
@@ -450,6 +452,9 @@ export interface KapitalflussWoche {
 export interface WochenKpi {
   /** Addition aller aktiven Filialkostenstellen; bei alten Savegames optional. */
   filialGuV?: FilialGuV;
+  onlineUmsatz?: Eur;
+  onlineKannibalisierung?: Eur;
+  onlineEffekt?: Eur;
   woche: number;
   umsatz: Eur;
   rohertrag: Eur;
@@ -508,6 +513,9 @@ export interface SpielEnde {
 }
 
 export interface GameState {
+  ecommerce?: EcommerceStand;
+  /** O09 A/B-Referenz ohne Online-Kanal. */
+  ecommerceDeaktiviert?: boolean;
   /** Optional, damit historische Spielstände und das Standardszenario identisch bleiben. */
   szenario?: SzenarioStand;
   version: 2;
@@ -579,6 +587,8 @@ export interface GameState {
   hq: Hq;
   // O01 Organisation (optional für ältere Spielstände).
   organisation?: OrganisationsStand;
+  /** Q06: lokale Marktbeobachtung und archivierte Meldungszahlen. */
+  marktbeobachtung?: MarktbeobachtungStand;
   /** Einkauf: Warengruppen, Steuerung, Freigabe-Eingang, Kennzahlenverlauf. */
   einkauf: Einkauf;
   // O05 Ware
