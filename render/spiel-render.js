@@ -409,10 +409,21 @@ async function buendeln() {
     await bild('marketing.png');
     await tippe('.tab', 'Kanäle');
     const kb0 = await ev(() => window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche);
-    await tippe('[data-a=kanalBudget][data-k=online][data-v="1"]');
+    // Q16: exakt derselbe Kanalbudget-Aktionspfad wie zuvor, jetzt über den Wochenbudget-Regler.
+    await ev(() => {
+      const el = document.querySelector('[data-a="kanalBudgetSlider"][data-k="online"]');
+      const budget = window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche;
+      el.value = String(Math.round(budget * 1.1 / 100) * 100);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
     const kb1 = await ev(() => window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche);
     soll('Kanal Online +10 %', Math.abs(kb1 / kb0 - 1.1) < 0.01, `${kb0} → ${kb1} € je Woche`);
     await pruef('marketing', 'Kanäle');
+    await tippe('.tab', 'Städte');
+    const markt = await ev(() => window.spiel.E.marketingStaedte(window.spiel.s));
+    soll('Q16 Marktanteile 100 %', markt.staedte.every((x) => Math.abs(Object.values(x.marktanteile).reduce((a, b) => a + b, 0) - 1) < 0.000001), markt.staedte.length + ' Städte');
+    await pruef('marketing', 'Städte und Marktanteil');
     await tippe('.tab', 'Karte');
     await tippe('[data-a=kartenrabatt][data-v="0.02"]');
     const kr = await ev(() => window.spiel.E.kundenkarte(window.spiel.s).kartenrabatt);

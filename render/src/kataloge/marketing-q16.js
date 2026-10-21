@@ -69,9 +69,20 @@ async function szene(e, index) {
     text(e.name, 32, 417, 'bold 19px Arial');
     const desc = MARKETING_KANAL_INFO[e.id] ?? ['Werbung über den ausgewählten Kanal. Wirksam über das vorhandene Budget.', 'Inhouse'];
     // Der erste Satz wird als Vorschau gezeigt; die App zeigt stets beide Sätze.
-    const saetze = desc[0].split('. ');
-    text(saetze[0] + '.', 32, 451, '13px Arial', '#62666a');
-    text((saetze[1] ?? '').replace(/\.$/, '') + '.', 32, 473, '13px Arial', '#62666a');
+    const saetze = desc[0].split('. ').map((s) => s.endsWith('.') ? s : s + '.');
+    for (let i = 0; i < Math.min(2, saetze.length); i++) {
+      const woerter = saetze[i].split(' ');
+      let zeile = '', y = 451 + i * 42;
+      for (const wort of woerter) {
+        const probe = zeile ? zeile + ' ' + wort : wort;
+        schrift('13px Arial');
+        if (g.measureText(probe).width > 320 && zeile) {
+          text(zeile, 32, y, '13px Arial', '#62666a');
+          zeile = wort; y += 19;
+        } else zeile = probe;
+      }
+      if (zeile) text(zeile, 32, y, '13px Arial', '#62666a');
+    }
     linie(32, 505, 326);
     text('Betreut von ' + desc[1], 32, 535, '14px Arial');
     rect(284, 512, 75, 44, '#fff', 6); g.strokeStyle = '#e2e1dd'; g.strokeRect(284, 512, 75, 44);
