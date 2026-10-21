@@ -889,7 +889,7 @@ export function produktVorschau(s: GameState, e: ProduktEntwurf): ProduktVorscha
   const leer: ProduktVorschau = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
   if (!c.m || !c.t || !c.wg) return leer;
   const team = teamStaerke(s);
-  const teile = bewerte(s, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s, sid) : undefined);
+  const teile = bewerte(s, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, zielgruppe: e.zielgruppe }, team, bekannt ? trendFuer(s, sid) : undefined);
   const st = sterneAus(scoreAus(teile));
   const cpo = s.vorstand?.ressorts.cpo.person;
   const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
