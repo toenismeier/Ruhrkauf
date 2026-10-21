@@ -78,6 +78,7 @@ const AUFGABEN_NACH_BEREICH: Record<string, DelegationsAufgabe[]> = {
   crm: [task('mailings', 'CRM-Mailings', 50000), task('segment', 'Kundensegmente'), task('karte', 'Kundenkarte und App', 50000)],
   store_operations: [task('oeffnungszeiten', 'Öffnungszeiten'), task('sofortmassnahmen', 'Ad-hoc-Maßnahmen', 20000), task('reparaturen', 'Reparaturen', 10000)],
   facility: [task('reparaturen', 'Reparaturen', 10000), task('wartung', 'Wartung', 50000), task('energie', 'Energieplanung')],
+  immobilien: [task('mietvertraege', 'Mietvertragsverlängerungen', 100000), task('verhandlung', 'Mietverhandlungen', 50000), task('planung', 'Portfolioplanung')],
 };
 export const CLUSTER_AUFGABEN: DelegationsAufgabe[] = [
   task('oeffnungszeiten', 'Öffnungszeiten'), task('sofortmassnahmen', 'Ad-hoc-Maßnahmen', 20000),

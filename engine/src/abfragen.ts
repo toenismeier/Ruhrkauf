@@ -12,6 +12,8 @@ import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
 import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 import { ecommerceHaus } from './ecommerce';
 import { planungBericht, planWoche } from './planung';
+export { vertriebUebersicht } from './vertrieb';
+import { mietvertragEmpfehlung } from './vertrieb';
 
 
 /** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */

@@ -3,6 +3,7 @@ export * from './types';
 export { planungBericht, planungAssistent, planJahr, planWoche, planBudgetFaktor, forecastVertrauensDelta } from './planung';
 export type { PlanungStand, Jahresplan, PlanZiele, PlanKnoten, PlanungAktion, Quartalsforecast } from './planung';
 export { neuesSpiel, wocheAbspielen, vorschau, type VorschauWoche } from './engine';
+export { vertriebUebersicht, mietvertragEmpfehlung, type VertriebsUebersicht, type VertriebsZeile, type VertriebsKennzahlen, type VorjahrWoche, type VertriebsFormat, type VertriebsZeitraum } from './vertrieb';
 export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
 export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, formatCockpit, schliessungVorschau, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
 export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau } from './abfragen';

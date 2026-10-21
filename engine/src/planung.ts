@@ -152,7 +152,8 @@ function ostern(j: number): number {
 }
 function planWochen(s: GameState, planJahr: number, h: Haus, ziel: number): number[] {
   const e = ostern(planJahr);
-  const bisher = (h as Haus & { treiberVerlauf?: { von: number; bis: number; umsatz: number }[] }).treiberVerlauf ?? [];
+  const bisher = [ ...(s.vorjahrHistorie?.[h.id] ?? []).map((p) => ({ von: p.woche, bis: p.woche, umsatz: p.umsatz })),
+    ...((h as Haus & { treiberVerlauf?: { von: number; bis: number; umsatz: number }[] }).treiberVerlauf ?? []) ];
   const vorjahresWoche = (planJahr - s.startJahr - 1) * 52;
   const archiv = new Map<number, number>();
   for (const p of bisher) for (let w = Math.max(p.von, vorjahresWoche); w <= Math.min(p.bis, vorjahresWoche + 51); w++)
