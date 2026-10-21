@@ -61,6 +61,12 @@ export function einkaufModul(ctx) {
       zahl('Markenposten',geld(o.markenposten),'format:markenposten')+'</div>'+
       '<label>Altwarequote <input type="range" data-a="formatQuote" min="0" max="100" step="5" value="'+Math.round(o.altwareQuote*100)+'"></label>'+
       '<label>Markenposten-Zukauf pro Woche (€) <input type="number" data-a="formatBudget" min="0" step="100000" value="'+o.zukaufBudget+'"></label></div>';
+    const kandidaten=ctx.E.outletKandidaten(s()).slice(0,8);
+    if(kandidaten.length){
+      h += '<div class="karte"><div class="khead">Neue FUNDUS-Standorte · 12 Wochen Vorlauf</div>';
+      for(const k of kandidaten)h+='<div class="zeile"><span class="was">'+esc(k.stadt)+' · '+k.qm+' qm · Miete '+geld(k.mieteWoche)+'/Wo. · Investition '+geld(k.investition)+'</span><button class="mini" onclick="formateTun(\'outletEroeffnen\',\''+esc(k.stadt)+'\')">Eröffnen</button></div>';
+      h+='</div>';
+    }
     h += `<div class="raster">${zahl('Umsatz letzte Woche', geld(g.umsatzWoche), 'g:umsatzWoche')}${zahl('Rohertragsquote 13 Wochen', pz(g.rohertragsquote, 1), 'g:rohertragsquote', '', ga.rohertragsquote)}${zahl('Bestand EK', geld(g.bestandEk), 'g:bestandEk')}${zahl('Limit frei', geld(g.limitFrei), 'g:limitFrei', g.limitFrei < 0 ? 'rot' : '', ga.limitFrei)}</div>`;
     const spalten = [...q.spalten()].sort((a, b) => b.standard - a.standard);
     h += `<div class="spaltenwahl"><span>Spalten</span>${spalten.map((c) => { const i = ui.spalten.indexOf(c.id); return `<button class="chipk ${i >= 0 ? 'an' : ''}" data-a="spalte" data-v="${c.id}">${i >= 0 ? `<b>${i + 1}</b>` : ''}${c.name}</button>`; }).join('')}</div>`;
