@@ -10,3 +10,6 @@ node_modules/
 /app/android/
 /app/.expo/
 /app/spiel/smoke.png
+/testflight/
+/.osm-roh/
+/karten-roh/
