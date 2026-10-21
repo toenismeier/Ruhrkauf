@@ -19,8 +19,8 @@ const bilder = ZEITUNGS_ARTEN.map((art, i) => {
   if (!svg.includes('viewBox="0 0 420 260"') ||
     !svg.includes('<title>') || !svg.includes('aria-label="Isometrische Illustration zu ') ||
     !svg.endsWith('</svg>')) throw new Error('Ungültige SVG-Illustration: ' + art);
-  if (svg.includes('<image') || svg.includes('<script') || svg.includes('http://') ||
-    svg.includes('https://')) throw new Error('Fremdinhalt im Motiv: ' + art);
+  if (svg.includes('<image') || svg.includes('<script') || svg.includes('href=') ||
+    svg.replace('http://www.w3.org/2000/svg', '').includes('http')) throw new Error('Fremdinhalt im Motiv: ' + art);
   return svg;
 });
 if (new Set(bilder).size !== bilder.length) {
