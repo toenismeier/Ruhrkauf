@@ -39,6 +39,11 @@ for(const [key,name] of Object.entries(PREMIUM_NAMEN)){
    if(geb.teile<4000 || geb.teile>9000 || !Number.isFinite(geb.hoehe) || geb.w<=0 || geb.d<=0) {
     console.error('Premium-Geometrie ungültig',h.id,status,geb);fehler++;
    }
+   // Gezählt werden die tatsächlichen Dreiecke der nicht indizierten Geometrien.
+   const dreiecke=[...S.teile.values()].reduce((sum,gruppe)=>
+     sum+gruppe.reduce((teil,g)=>teil+(g.index?.count??g.getAttribute('position').count)/3,0),0);
+   if(!dreieckeNachStatus.has(status))dreieckeNachStatus.set(status,new Map());
+   dreieckeNachStatus.get(status).set(key,dreiecke);
   } catch(err) {console.error('Premium-Generator fehlgeschlagen',h.id,status,err);fehler++;}
   for(const gs of S.teile.values()) for(const g of gs) g.dispose();
  }
@@ -48,7 +53,9 @@ for(const [key,name] of Object.entries(PREMIUM_NAMEN)){
  const stat={stadt:h.stadt,id:h.id,name,slot:p.typ,lage:q.lage,nachbarn:nachbarn.length,breite:m.w,tiefe:m.d};
  protokoll.push(stat);
 }
+if(dreieckeNachStatus.size!==STATI.length+2){console.error('Dreiecksprüfung nicht für alle Zustände durchgeführt');fehler++;}
 for(const [status,werte] of dreieckeNachStatus){
+ if(werte.size!==5){console.error('Dreiecksprüfung unvollständig',status,werte.size);fehler++;}
  const referenz=werte.get('P001');
  if(!referenz){console.error('P001-Dreiecksreferenz fehlt',status);fehler++;continue;}
  for(const [key,zahl] of werte){

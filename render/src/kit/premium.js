@@ -268,7 +268,7 @@ function kostbareFassade(S,typ,x,z,w,d,n,H,start) {
   }
   // Verzahnte Kalksteinquader/Klinkerscharen; keine glatte Quaderwand.
   // Dichte wird an der Sammler-Teilezahl gedeckelt, damit alle Häuser zwischen 4k und 9k liegen.
-  const ziel=typ==='P001'?6400:typ==='P002'?5900:typ==='P003'?5600:5100;
+  const ziel=typ==='P001'?6400:typ==='P002'?5900:typ==='P003'?5600:typ==='P005'?5350:5100;
   const a=Math.max(8,Math.floor(w/1.55)),b=Math.max(8,Math.floor(d/1.55));
   let t=0;
   while(S.anzahl-start<ziel&&t<12000){

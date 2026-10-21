@@ -52,6 +52,18 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
   expect(ertrag('P004')/(14_000*1.45)/basis).toBeCloseTo(1,6);
   expect(ertrag('P005')/(20_000*1.52)/basis).toBeCloseTo(1,6);
  });
+ test('P005 behält die anderen Standorte und deren Zufallsstammdaten unverändert',()=>{
+  for (const seed of [1,2,3]){
+   const ohneFuenftes=neuesSpiel(seed,{premiumhaeuser:4});
+   const mitFuenftem=neuesSpiel(seed);
+   expect(premium(ohneFuenftes).map(h=>h.premiumSchluessel)).toEqual(['P001','P002','P003','P004']);
+   expect(premium(mitFuenftem).filter(h=>h.stadt==='Berlin').map(h=>h.premiumSchluessel))
+    .toEqual(['P001','P005']);
+   const signatur=(s:GameState)=>s.haeuser.filter(h=>h.klasse!=='premium')
+    .map(h=>[h.id,h.stadt,h.baujahr,h.fassade,h.grundflaecheQm,h.flaechen.length]);
+   expect(signatur(mitFuenftem)).toEqual(signatur(ohneFuenftes));
+  }
+ });
  test('Bot C schließt beim Sanierungsplan kein Premiumhaus',()=>{
   for(const seed of [1,2,3]){
    const s=neuesSpiel(seed);
