@@ -32,7 +32,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
 | O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O05 Ware, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
-| O09 E-Commerce | `feat/op-ecommerce` | in Arbeit | GPT fertigstellen, PR öffnen |
+| O09 E-Commerce | `feat/op-ecommerce` #46 | abnahmefähig, Konflikte mit main | GPT rebased auf main, dann Prüfung |
 
 ## Nice-to-haves
 | N | PR | Status |
