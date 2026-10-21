@@ -19,7 +19,8 @@
 //   'slot:hq' aus hq.js (eigene Gruppe, Map hqs; aktualisiere() meldet 'hq:<id>', wenn sich Etagen ändern).
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
-import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
+import { warenhaus, nachnutzung } from './warenhaus.js';
+import { warenhausVielfalt } from './warenhaus-vielfalt.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
 import { premiumhaus } from './premium.js';
@@ -152,9 +153,13 @@ function bauZustand(z) { const { schluessel, ...rest } = z; return rest; }
 export function stadtEintragAusSpiel(s, name) {
   const d = stadtDaten(name);
   if (!d) return undefined;
+  const verteilung = warenhausVielfalt(s.haeuser.filter((h) => h.stadt === name));
   const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
-    const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    const v = verteilung.get(h.id);
+    const f = fussabdruck(h, v?.familie);
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus',
+      lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d,
+      ...(v ? { familie: v.familie, variante: v.fassade } : {}) };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
@@ -177,8 +182,7 @@ function imSlot(p, W, D) {
 export function spielBauer(s, o = {}) {
   const basis = echterBauer(o.bauerOpt ?? {});
   const merk = o.merk;
-  const famBenutzt = new Set();
-  const wahl = new Map();      // hausId → { fam, fassade } (bleibt beim Neubau gleich)
+  const wahl = warenhausVielfalt(s.haeuser); // Q21: stabil bei Kamerawechsel und Neubau
   const haeuser = new Map();   // Engine-Häuser
   // Volkskauf und FUNDUS liegen bis zur Engine-Maßstab-Integration nur im Grafikkatalog.
   // Unsichtbare Ray-Boxen (keine Zusatzmeshes) machen sie anklickbar.
@@ -207,20 +211,11 @@ export function spielBauer(s, o = {}) {
   };
 
   const baueWarenhaus = (S, scene, p, h) => {
-    const f = fussabdruck(h);
+    const variant = wahl.get(h.id);
+    const f = fussabdruck(h, variant?.familie);
     const { x, z } = imSlot(p, f.w, f.d);
     if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
-    // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
-    if (!wahl.has(h.id)) {
-      let fam = familieVon(h), fassade = h.fassade;
-      if (famBenutzt.has(fam)) {
-        const alt = fam <= 5 ? [fam + 1, fam - 1, fam + 2, fam - 2].find((q) => q >= 1 && q <= 5 && !famBenutzt.has(q)) : null;
-        if (alt) fam = alt; else fassade = ((h.fassade ?? 0) + 3) % 8;
-      }
-      famBenutzt.add(fam);
-      wahl.set(h.id, { fam, fassade });
-    }
-    const { fam, fassade } = wahl.get(h.id);
+    const fam = variant?.familie, fassade = variant?.fassade ?? h.fassade;
     p.haus = h;
     const roh = fassade === h.fassade ? h : { ...h, fassade };
     const nutzer = nachnutzer(h);
