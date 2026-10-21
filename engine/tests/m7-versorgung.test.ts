@@ -7,8 +7,12 @@ describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
     const s = neuesSpiel(1);
     expect(Object.values(s.einkauf.wgs).every((x) => x.st.modus.saison === 'auto')).toBe(true);
     expect(fuehreAus(s, { typ: 'freigabeGrenze', euro: 0 }).ok).toBe(true);
-    wocheAbspielen(s);
-    const ids = s.einkauf.freigaben.filter((f) => f.art === 'saison').map((f) => f.id);
+    // Die Herbst-/Winter-Orderrunde beginnt frühestens nach KW 2.
+    let ids: string[] = [];
+    for (let i = 0; i < 8 && ids.length === 0; i++) {
+      wocheAbspielen(s);
+      ids = s.einkauf.freigaben.filter((f) => f.art === 'saison').map((f) => f.id);
+    }
     expect(ids.length).toBeGreaterThan(0);
     for (let i = 0; i < 4 && s.phase !== 'zerschlagen'; i++) wocheAbspielen(s);
     const imEinkauf = s.bestellungen.some((b) => ids.some((id) => b.id.startsWith(`b${id}-`)));
