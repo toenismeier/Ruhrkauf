@@ -13,7 +13,7 @@ export function pruefeStadtQualitaet(plan) {
     box() { this.anzahl++; },
     add(g) { this.anzahl++; g?.dispose?.(); },
   };
-  const I = { n: 0, setze() { this.n++; }, bauen() { return 0; } };
+  const I = { n: 0, protos: new Map(), setze() { this.n++; }, bauen() { return 0; } };
   baueStadt(S, { add() {} }, plan, undefined, { ohneHaeuser: true, instanzer: I, qualitaet: protokoll });
   // Dieselbe Installationsfunktion wie der Warenhausbauer wird auf sämtlichen geeigneten
   // Dachrechtecken der Stadt mit stabilen Seedwerten auf Geometriefehler geprüft.
