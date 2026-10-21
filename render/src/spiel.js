@@ -360,6 +360,14 @@ function stadtchipSetzen(name) {
   const region = E.stadtRegion(name) ?? s.haeuser.find((h) => h.stadt === name)?.region;
   $('stadtcluster').textContent = region ? 'Region ' + region : '';
 }
+/** Die separat gerenderten Häuser liegen nicht im Stadt-Sammler. */
+function getrennteSchneedachFlaechen() {
+  return [
+    ...[...sb.haeuser.entries()].map(([id, x]) => ['haus:' + id, x.dachFlaechen]),
+    ...[...sb.hqs.entries()].map(([id, x]) => ['hq:' + id, x.dachFlaechen]),
+    ...[...sb.wbSlots.values()].map((x) => ['wb:' + (x.p.standort?.id ?? x.p.id), x.dachFlaechen]),
+  ];
+}
 function baueStadtAusSpiel(name) {
   const t0 = performance.now();
   raeumeSzene();
@@ -372,7 +380,8 @@ function baueStadtAusSpiel(name) {
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
-  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik });
+  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik,
+    dachFlaechenAktualisieren: (id, dach) => jahreszeiten?.registriereDachflaechen(id, dach) });
   // Grundgerüst: Straßen, Blöcke, Wasser, Stadtrandgürtel, Sonderbauten und Hartwig; normale Stadthäuser kommen als Kacheln
   const T = new KompaktSammler();
   const offen = [];
@@ -389,6 +398,7 @@ function baueStadtAusSpiel(name) {
   let e;
   try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
+  jahreszeiten.registriereDachflaechenMehrfach(getrennteSchneedachFlaechen());
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
@@ -426,7 +436,8 @@ async function baueStadtAusSpielReise(name) {
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
-  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik });
+  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik,
+    dachFlaechenAktualisieren: (id, dach) => jahreszeiten?.registriereDachflaechen(id, dach) });
   // Grundgerüst: Straßen, Blöcke, Wasser, Stadtrandgürtel, Sonderbauten und Hartwig; normale Stadthäuser kommen als Kacheln
   const T = new KompaktSammler();
   const offen = [];
@@ -447,7 +458,7 @@ async function baueStadtAusSpielReise(name) {
   kachelnAnlegen(offen, true);
   await kachelnKloetzeBauen();
   jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
-  jahreszeiten.registriereDachflaechenMehrfach(KA.liste.map((k) => [k.key, k.dachFlaechen]));
+  jahreszeiten.registriereDachflaechenMehrfach([...getrennteSchneedachFlaechen(), ...KA.liste.map((k) => [k.key, k.dachFlaechen])]);
   // Pins: Hartwig, Sport, Wettbewerber und Zentrale wie im Katalog; freie Bürogebäude mit Schlüssel-Pin
   const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', hq: 'hartwig' };
   setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && pins[q.rolle]).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle], groesse: 9 })));
