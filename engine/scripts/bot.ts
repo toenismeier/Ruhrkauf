@@ -4,6 +4,8 @@ import type { AbteilungId, Stufe } from '../src';
 import type { GameState } from '../src';
 import { mio } from '../src/util';
 import { FILIAL_PROGRAMME, type FilialProgrammId } from '../src/filialguv';
+import { schliessungsFolgekosten } from '../src/prozesse';
+import { freieLiquiditaet, runwayWochen } from '../src/stakeholder';
 
 /** Standard-Einkauf: alle offenen Orders der Woche freigeben (wie bisher ohne Freigabe-Eingang). */
 export function einkaufStandard(s: GameState): void {
@@ -76,15 +78,34 @@ export function botSchutzschirm(s: GameState, log = false): void {
   einkaufStandard(s);
 }
 
-/** Bot C: Schutzschirm, tiefe Restrukturierung im Verfahren. */
+/** Bot C: Sanierung zuerst; Schutzschirm erst, wenn die operative Rettung
+ * trotz ausgeschöpfter Maßnahmen an der Liquidität zu scheitern droht.
+ * Ein Insolvenzantrag in KW 4 bei ausreichender Zahlungsfähigkeit war
+ * gerade KEINE "letzte Option", sondern führte zur Ablehnung in KW 24.
+ */
 export function botTief(s: GameState, log = false): void {
-  botTiefBasis(s, log, true);
+  botTurnaround(s, log);
+  const umsatzWoche = s.historie.at(-1)?.umsatz
+    ?? Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
+  const ueberfaellig = s.verbindlichkeiten.some((v) => v.ueberfaelligSeit !== undefined);
+  const notlage = s.woche >= 3 && s.phase === 'regulaer'
+    && s.insolvenzenGesamt === 0
+    && runwayWochen(s) < 8
+    && (freieLiquiditaet(s) < 2 * umsatzWoche || ueberfaellig);
+  if (notlage) {
+    // Nur im Liquiditätsnotfall; derselbe echte Schutzschirm mit Planquote,
+    // Sozialplan, Lieferantenrisiko und Gläubigerversammlung bleibt erhalten.
+    botTiefBasis(s, log, true, einkaufStandard, s.woche);
+  } else if (s.phase === 'insolvenz') {
+    botTiefBasis(s, log, true, einkaufStandard, -1);
+  }
 }
 
-export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boolean, einkauf: (s: GameState) => void = einkaufStandard): void {
+export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boolean,
+  einkauf: (s: GameState) => void = einkaufStandard, antragWoche = 3): void {
   const w = s.woche;
   const tu = (a: Parameters<typeof fuehreAus>[1]) => { const r = fuehreAus(s, a); if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`); return r; };
-  if (w === 3) {
+  if (w === antragWoche) {
     tu({ typ: 'orderLevel', gruppe: 'alle', level: 0.88 });
     tu({ typ: 'marketingBudget', quote: 0.018 });
     tu({ typ: 'insolvenzAntrag' });
@@ -143,6 +164,32 @@ export function botTurnaround(s: GameState, log = false): void {
   einkaufStandard(s);
 }
 
+/** Liquiditätsgestaffelte Schließungsstrategie: keine gebündelten Sozialpläne
+ * ohne Deckung für Abfindungen und (absehbare) Restmieten.
+ * Die Prüfung ist eine Managementregel des Bots, keine Insolvenz-Sperre.
+ */
+export function schliessungsBudgetBotD(s: GameState): {
+  freieMittel: number; reserve: number; bereitsGebunden: number; budget: number;
+} {
+  const freieMittel = freieLiquiditaet(s);
+  const wochenUmsatz = s.historie.at(-1)?.umsatz
+    ?? Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
+  const faellig = s.verbindlichkeiten.filter((v) => v.faellig <= s.woche + 4)
+    .reduce((sum, v) => sum + v.wert, 0);
+  // Die nächsten Wochen müssen unabhängig vom Sozialplan finanzierbar bleiben.
+  // Der Zufluss aus künftigen Umsätzen wird vorsichtig NICHT vorweggenommen.
+  const reserve = Math.max(2 * wochenUmsatz, 0.35 * faellig);
+  const bereitsGebunden = s.haeuser.filter((h) =>
+    h.status === 'schliessung_verhandlung' || h.status === 'raeumung')
+    .reduce((sum, h) => {
+      const bis = Math.max(0, (h.statusBis ?? s.woche) - s.woche)
+        + (h.status === 'schliessung_verhandlung' ? 6 : 0);
+      return sum + schliessungsFolgekosten(s, h, bis).gesamt;
+    }, 0);
+  const budget = Math.max(0, (freieMittel - reserve) * 0.35 - bereitsGebunden);
+  return { freieMittel, reserve, bereitsGebunden, budget };
+}
+
 /** Bot D: außergerichtlich, aber konsequent. */
 export function botRegulaer(s: GameState, log = false): void {
   botRegulaerBasis(s, log, 0.25);
@@ -156,20 +203,38 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
   if (w === 0) {
     tu({ typ: 'berater', beraterTyp: 'sanierung' });
     if (zentralePauschal > 0) tu({ typ: 'zentrale', prozent: zentralePauschal });
-    tu({ typ: 'orderLevel', gruppe: 'alle', level: 0.85 });
+    // Die Warensteuerung von Bot T bleibt erhalten: pauschale Kürzungen
+    // von 15 % erzeugten Fehlmengen und machten die Schließungen unprofitabel.
     tu({ typ: 'marketingBudget', quote: 0.018 });
   }
-  if (w === 4) {
-    // Zielanteil statt historischer fixer 35 Häuser; reine Datenhäuser und
-    // Premium-Kronjuwelen bleiben von der automatischen Schließung ausgenommen.
-    const p = aktivesPortfolio(s).filter((x) => !s.haeuser.some((h) => h.id === x.id && h.klasse === 'premium'))
-      .sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
-    const schliessungen = Math.round(p.length * REGULAER_SCHLIESSUNGSQUOTE);
-    for (const x of p.slice(0, schliessungen)) tu({ typ: 'schliessen', haus: x.id });
-    for (const x of p.slice(schliessungen).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
-    for (const h of s.haeuser.filter((x) => x.status === 'offen' && x.kpi)) {
-      const ist = h.kpi!.fteIst, bedarf = h.kpi!.fteBedarf;
-      if (ist > bedarf * 1.02) tu({ typ: 'personalabbau', haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
+  if (w >= 4 && w < 104 && w % 4 === 0) {
+    // Maximal der ursprüngliche Portfolioanteil, aber verteilt über Zeit.
+    // Geschlossen wird nur bei negativem FILIAL-EBITDA: auch ein schwacher
+    // Standort mit positivem operativem Beitrag darf nicht Umsatz vernichten.
+    const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium');
+    const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
+    const inArbeit = pool.filter((h) => h.status !== 'offen').length;
+    const p = aktivesPortfolio(s)
+      .filter((x) => pool.some((h) => h.id === x.id) && x.db < 0 && x.umsatz > 0)
+      .sort((a, b) => a.db / a.umsatz - b.db / b.umsatz);
+    let budget = schliessungsBudgetBotD(s).budget;
+    let beauftragt = 0;
+    for (const x of p) {
+      if (inArbeit + beauftragt >= ziel || beauftragt >= 6) break;
+      const h = s.haeuser.find((h) => h.id === x.id)!;
+      const dauer = Math.round(16 - (10 * s.stakeholder.betriebsrat) / 100) + 6;
+      const kosten = schliessungsFolgekosten(s, h, dauer).gesamt;
+      if (kosten > budget) continue;
+      if (tu({ typ: 'schliessen', haus: x.id }).ok) {
+        budget -= kosten;
+        beauftragt++;
+      }
+    }
+    if (w === 4) {
+      for (const x of aktivesPortfolio(s).filter((x) => x.mietquote > 0.12))
+        tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
+      // Zusätzliche Abfindungen für Filialpersonal erst bei gesicherter
+      // Liquidität; Bot T erreicht die Personaleinsparung bereits über O04.
     }
   }
   if (w === 4) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.16 });

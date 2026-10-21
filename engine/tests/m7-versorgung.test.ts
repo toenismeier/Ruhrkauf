@@ -1,6 +1,8 @@
 import { neuesSpiel, wocheAbspielen, fuehreAus, WG_DEF } from '../src';
 import { einkaufDispo } from '../src/einkauf';
-import { botRegulaer, REGULAER_SCHLIESSUNGSQUOTE } from '../scripts/bot';
+import { botRegulaer, botTief, botTurnaround, REGULAER_SCHLIESSUNGSQUOTE, schliessungsBudgetBotD } from '../scripts/bot';
+import { schliessungsFolgekosten, schliesseEndgueltig } from '../src/prozesse';
+import { aktualisiereStakeholder } from '../src/stakeholder';
 
 describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
   test('Saison-Vororders sind nach Frist regulär automatisch freigegeben', () => {
@@ -42,17 +44,74 @@ describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
     expect(s.einkauf.wgs[d.id].basisVK).toBeLessThan(vorher);
   });
 
-  test('Bot D skaliert Schließungen proportional, lässt Datenhäuser und Premium unangetastet', () => {
+  test('Bot D staffelt ausschließlich verlustbringende Häuser innerhalb des Schließungsbudgets', () => {
     const s = neuesSpiel(1);
     for (let i = 0; i < 4; i++) {
       botRegulaer(s);
       wocheAbspielen(s);
     }
-    const portfolio = s.haeuser.filter((h) => h.status === 'offen' && !h.nurDaten && h.klasse !== 'premium');
-    const erwartet = Math.round(portfolio.length * REGULAER_SCHLIESSUNGSQUOTE);
+    const vorher = new Map(s.haeuser.map((h) => [h.id, h.kpi?.guv?.ebitda]));
+    const budget = schliessungsBudgetBotD(s);
+    expect(budget.budget).toBeGreaterThanOrEqual(0);
     botRegulaer(s);
-    const schliessungen = s.haeuser.filter((h) => h.status === 'schliessung_verhandlung' || h.status === 'raeumung');
-    expect(schliessungen).toHaveLength(erwartet);
+    const geschlossen = s.haeuser.filter((h) => h.status === 'schliessung_verhandlung');
+    const ziel = Math.round(s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium').length * REGULAER_SCHLIESSUNGSQUOTE);
+    expect(geschlossen.length).toBeLessThanOrEqual(Math.min(6, ziel));
+    expect(geschlossen.every((h) => (vorher.get(h.id) ?? 0) < 0)).toBe(true);
     expect(s.haeuser.filter((h) => h.nurDaten || h.klasse === 'premium').every((h) => h.status === 'offen')).toBe(true);
+    const gebunden = geschlossen.reduce((sum, h) =>
+      sum + schliessungsFolgekosten(s, h, Math.max(0, (h.statusBis ?? s.woche) - s.woche) + 6).gesamt, 0);
+    expect(gebunden).toBeLessThanOrEqual(budget.budget + 1);
+  });
+
+  test('Sozialplan und Restmieten sind echte Zahlungen und entsprechen dem Vorab-Budget', () => {
+    const s = neuesSpiel(2);
+    const h = s.haeuser.find((x) => !x.nurDaten && x.klasse !== 'premium')!;
+    const vorher = schliessungsFolgekosten(s, h);
+    const kasse = s.cash;
+    schliesseEndgueltig(s, h);
+    expect(kasse - s.cash).toBe(vorher.sozialplan);
+    expect(h.restmieteWoche).toBe(vorher.restmieteWoche);
+    expect(h.restmieteBis).toBe(s.woche + vorher.restmieteWochen);
+    expect(vorher.gesamt).toBe(vorher.sozialplan + vorher.restmieteWoche * vorher.restmieteWochen);
+  });
+
+  test('Bot C nutzt erst operative Sanierung und löst den Schutzschirm nur in der Notlage aus', () => {
+    const s = neuesSpiel(2, { schwierigkeit: 'mittel' });
+    botTief(s);
+    expect(Object.keys(s.filialProgramme ?? {})).toHaveLength(14);
+    expect(s.phase).toBe('regulaer');
+    for (let i = 0; i < 3; i++) wocheAbspielen(s);
+    // Kasse unter der verfügbaren Kreditlinie und nachgewiesen negative
+    // EBITDA-Run-Rate führen zu einer wirtschaftlichen Notlage.
+    s.cash = -s.kreditlinie - 20_000_000;
+    botTief(s);
+    expect(s.insolvenzenGesamt).toBe(1);
+    expect(s.phase).toBe('insolvenz');
+  });
+
+  test('Warenbesicherte Finanzierung erhöht nur bei Engpass die Kreditlinie', () => {
+    const s = neuesSpiel(1, { schwierigkeit: 'mittel' });
+    const gut = structuredClone(s);
+    gut.stakeholder.bank = 60;
+    gut.bestand.forEach((b) => { b.wert *= 2; });
+    const basis = gut.kreditlinie;
+    aktualisiereStakeholder(gut);
+    expect(gut.kreditlinie).toBeLessThanOrEqual(basis * 1.1);
+    const knapp = structuredClone(s);
+    knapp.stakeholder.bank = 60;
+    knapp.cash = 0;
+    knapp.bestand.forEach((b) => { b.wert *= 2; });
+    aktualisiereStakeholder(knapp);
+    expect(knapp.kreditlinie).toBeGreaterThan(gut.kreditlinie);
+    expect(knapp.cash).toBe(0); // Kreditrahmen statt Geldgutschrift
+  });
+
+  test('Bot T aktiviert weiterhin dieselben Programme und keine Schließung', () => {
+    const s = neuesSpiel(1);
+    botTurnaround(s);
+    expect(Object.keys(s.filialProgramme ?? {})).toHaveLength(14);
+    expect(s.haeuser.filter((h) => h.status !== 'offen')).toHaveLength(0);
+    expect(s.insolvenzenGesamt).toBe(0);
   });
 });

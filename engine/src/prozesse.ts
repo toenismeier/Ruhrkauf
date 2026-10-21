@@ -39,20 +39,33 @@ export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEnde
   return null;
 }
 
+/** Kalkulierter Liquiditätsbedarf einer Schließung, einschließlich der nachlaufenden Restmiete.
+ * Die Prüfung erzeugt keine Buchungen; die tatsächliche Zahlung erfolgt erst bei Schließung.
+ * `bisSchliessung` berücksichtigt Verhandlung und Räumungsverkauf (O04/O07).
+ */
+export function schliessungsFolgekosten(s: GameState, h: Haus, bisSchliessung = 0): {
+  sozialplan: number; restmieteWoche: number; restmieteWochen: number; gesamt: number;
+} {
+  const schliessWoche = s.woche + Math.max(0, bisSchliessung);
+  const fte = h.personal.vollzeit + h.personal.teilzeit;
+  const sozialplan = eur(fte * abfindungJeFte(s) * hqRechtFaktor(s));
+  const untermiete = h.flaechen.reduce((a, f) =>
+    a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
+  const vertragWochen = s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52;
+  const restmieteWochen = Math.max(0, Math.min(vertragWochen, h.miete.bisWoche - schliessWoche));
+  const restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s));
+  return { sozialplan, restmieteWoche, restmieteWochen,
+    gesamt: sozialplan + restmieteWoche * restmieteWochen };
+}
+
 export function schliesseEndgueltig(s: GameState, h: Haus): void {
   const w = s.woche;
   const fte = h.personal.vollzeit + h.personal.teilzeit;
-  // Die Rechtsabteilung verhandelt Sozialplan und Restmieten
-  const sozialplan = fte * abfindungJeFte(s) * hqRechtFaktor(s);
+  // Die vorab budgetierten Kosten werden bei Wirksamwerden real gezahlt.
+  const { sozialplan, restmieteWoche, restmieteWochen } = schliessungsFolgekosten(s, h);
   einmalKosten(s, sozialplan);
-  const untermiete = h.flaechen.reduce((a, f) => a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
-  let wochen: number;
-  if (s.phase === 'insolvenz') wochen = 13;
-  else if (h.miete.vermieter === 'eigentuemer') wochen = 26;
-  else wochen = 52;
-  wochen = Math.max(0, Math.min(wochen, h.miete.bisWoche - w));
-  h.restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s));
-  h.restmieteBis = w + wochen;
+  h.restmieteWoche = restmieteWoche;
+  h.restmieteBis = w + restmieteWochen;
   h.status = 'geschlossen';
   h.statusBis = undefined;
   h.personal.vollzeit = 0;

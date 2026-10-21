@@ -302,3 +302,32 @@ node spiel-render.js
 **Abnahmekriterium:** Filialebene um **−1,2 %**, Gruppe mit Zentrale um **−4 %** und Bot T auf mittel bei Seeds 1, 2, 3 ohne Insolvenz/Schließung 260 Wochen mit positivem EBITDA der letzten 52 Wochen. Erst Claudes Simulation kann das bestätigen. Hier **kein Typecheck, keine Jest-Ausführung, kein Fünfjahreslauf und kein Rendering**; der PR bleibt Draft, es erfolgt kein Merge.
 
 **Zusätzliche statische Korrekturen:** Die Personalbedarfsnorm wurde gemeinsam mit der Start-FTE-Kalibrierung von 430 auf 620 qm je FTE und von 6.300 auf 9.000 € Wochenumsatz je FTE angepasst. Ohne diese Synchronisierung hätte die Kostensenkung umgekehrt einen Nachfrageeinbruch durch Unterbesetzung erzeugt. **Erwarteter Effekt:** Nachfrageerhalt gegenüber der zuvor inkonsistenten Besetzungsnorm; eine EBITDA-Verbesserung in PP ist ohne Umsatz-/Servicegradmessung nicht seriös zu quantifizieren. Die Filial-GuV rechnet jede Position in ganzen Euro und schließt danach Wareneinsatz, OPEX und EBITDA rechnerisch. Tests berücksichtigen ausschließlich die durch 408 einzeln gerundete Häuser mögliche Konsolidierungsdifferenz; das ist keine buchhalterische Ausgleichsposition.
+
+
+## M7 · Abschnitt 19 – Liquiditätsorientierte Restarbeiten (21.10.2026)
+
+**Ausgangslage (Claudes letzte Messung, Commit `91b4489`):** Bot T leicht 3/3, mittel 3/3 und schwer 2/3, Filial-GuV KW 1 −1,55 %; ohne Eingriffe auf mittel Insolvenz im ersten Jahr; Bot D bei mehreren Seeds zahlungsunfähig; Bot C nach 23 Wochen zerschlagen.
+
+**Korrektur ohne Änderung der Filial-Kostenparameter, Margen, Nachfrage oder GuV-Referenz:**
+
+1. **Reguläre Liquidität / besicherte Warenfinanzierung (`src/stakeholder.ts`):** Die bestehende Banklinie erhält ausschließlich bei knapper freier Liquidität (unter 2,5 Wochenumsätzen, Bankvertrauen ab 35) eine zusätzliche, inventargestützte Ziehungsmöglichkeit. Berechnung: 55 % des noch vorhandenen Warenbestands abzüglich 20 % der noch offenen Lieferantenforderungen, höchstens +50 % der ursprünglichen Kreditbasis; weiterhin Anpassung an das Bankvertrauen. Sie ist **kein Umsatz, kein EBITDA und kein Cash-Zuschuss**; gezogene Beträge bleiben negativ verzinst. Ex ante: maximal +150 Mio. € Finanzierungsspielraum auf mittlerer Stufe mit 300 Mio. € Kreditbasis, nur sofern echte Sicherheiten bestehen. Das soll eine vorübergehende Waren-/Lieferanten-Liquiditätslücke im ersten Jahr schließen, ohne die Referenz-GuV zu verschieben. Keine Wirkung, solange die Liquidität gesund ist.
+2. **Bot D (`scripts/bot.ts`, `src/prozesse.ts`):** Statt einer sofortigen Welle von bis zu rund 79 Häusern bei 408 aktiven Standorten höchstens sechs neue Prüf-/Schließungsfälle alle vier Wochen, maximal 35/180 des nicht geschützten Portfolios, nur Häuser mit **negativem EBITDA**. Vor dem Auftrag werden reale Sozialplanabfindungen (28.000 €/FTE × Rechtsfaktor) plus die erwarteten 26 bzw. 52 Wochen Restmieten, Vertragsrestlaufzeit und vertragliche Untermieten kalkuliert. Von der freien Liquidität bleibt eine Reserve von mindestens zwei Wochenumsätzen bzw. 35 % der nächsten vier Wochen Warenverbindlichkeiten. Nur 35 % des darüber hinausgehenden Betrags dürfen nach Abzug bereits zugesagter Schließungen gebunden werden. Die tatsächlichen Kosten werden unverändert bei Schließung fällig und weiter im Cashflow gebucht. Zusätzlich entfällt die bisherige pauschale 15-%-Bestellkürzung; die funktionierende Warensteuerung von Bot T bleibt aktiv. Ex ante: geringere Spitzenlast, weniger Fehlumsatz und keine Schließung operativ positiver Häuser. Die eingesparten Wochenkosten fallen erst nach Räumung an; bei schwacher Liquidität schließen entsprechend weniger Häuser.
+3. **Bot C (`scripts/bot.ts`):** Bot T-Maßnahmen werden zunächst ohne Antrag und ohne Schließung umgesetzt. Eine **echte** Schutzschirmmaßnahme wird erst ausgelöst, wenn mindestens drei Wochen vergangen sind, die EBITDA-basierte Reichweite unter acht Wochen liegt und zusätzlich freie Liquidität unter zwei Wochenumsätze sinkt oder überfällige Lieferanten bestehen. Erst dann werden die bisherigen kostenträchtigen tiefen Sanierungsmaßnahmen, Gläubigerabstimmung und Quoten ausgelöst. Ex ante: kein automatisches Scheitern der Gläubigerversammlung bereits in KW 24, solange die außergerichtliche Sanierung tatsächlich finanzierbar ist. In echter Zahlungsunfähigkeit bleiben sämtliche Insolvenzmechanismen wirksam.
+
+**Erhaltung der Referenz:** `botTurnaround` selbst ist unverändert; keine der 19 GuV-Positionen oder der KW-1-Basisparameter wurde angepasst. Auswirkungen der längeren Finanzierungsdauer auf das Einkaufsvolumen, mögliche Liquiditätseffekte und der 260-Wochen-Verlauf sind trotzdem **offen und von Claude zu messen**. Änderungen an den Jest-Tests prüfen Kostenkonsistenz, Bot-D-Budget und Bot-C-Notfall.
+
+**Offene Abnahme durch Claude (hier weder Typecheck noch Simulationslauf möglich):**
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest --runInBand
+npx tsx scripts/m7-jahresdiagnose.ts --seed=1 --schwierigkeit=mittel
+npx tsx scripts/m7-wochenverlauf.ts --write-stand
+for seed in 1 2 3; do
+  npx tsx scripts/bot.ts "$seed" 260 --turnaround
+  npx tsx scripts/bot.ts "$seed" 260 --regulaer
+  npx tsx scripts/bot.ts "$seed" 104 --tief
+done
+```
+**Kriterien:** ohne Eingriffe leicht/mittel 52 Wochen ohne Insolvenz; Bot D mittel drei Seeds 260 Wochen ohne Insolvenz mit positivem EBITDA; Bot C mittel drei Seeds mindestens 104 Wochen; Bot T mindestens leicht 3/3, mittel 3/3, schwer 2/3; Filial-GuV unverändert nahe der Referenz. **Keine Behauptung einer bestandenen Messung.**
