@@ -136,3 +136,11 @@ Befund aus TestFlight-Wurf 1 und Claudes Nachrechnung (Seed 1, Leicht, ohne Eing
 
 ## 12. Spielende-Kriterium Seed 3 (Claude, 20.10. abends)
 Mit N02 Spielende gilt „saniert“ nur bei positivem EBITDA der letzten 52 Wochen. Bot C erreicht auf `main` Seed 1 und 2, Seed 3 endet in W260 mit rund −15 Mio. € EBITDA-52 (schon vor der Integration der Nice-to-haves). Der Test `tests/spielende.test.ts` prüft deshalb vorerst nur Seeds 1 und 2. Mit der Kalibrierung aus Abschnitt 11 Seed 3 wieder aufnehmen: Bot C muss auf Seeds 1 bis 3 saniert enden.
+
+## 13. Prüfung Abschnitt 11 (Claude, 21.10.2026 früh, Stand `4511dd4`)
+`npx tsx scripts/m7-wochenverlauf.ts` auf `feat/engine-massstab` lokal ausgeführt. Ergebnis: **nicht erfüllt.**
+- Januar/Februar −7,33 % EBITDA-Quote auf allen drei Stufen (Ziel leicht −3 %, mittel −4 %, schwer −6 %). KW 1 −8,38 %, KW 13 −9,04 %; der Verlauf wird bis KW 13 schlechter statt besser.
+- **Die Schwierigkeit wirkt nicht:** leicht, mittel und schwer liefern bis auf Rundung dieselben Wochenwerte. Ursache zuerst klären (wird die Stufe im Skript übergeben, greift sie im Maßstab-Szenario mit 560 Häusern?).
+- Auf jeder Stufe eine Insolvenz im ersten Jahr (Vorgabe: keine).
+- Bot C (mittel, Seeds 1 bis 3) wird nach 23 Wochen zerschlagen. Auf `main` überlebt er 5 Jahre; der Maßstab-Branch macht das Spiel damit unspielbar.
+Auftrag: erst die Schwierigkeitsstufen wirksam machen, dann Ursachen der Verluste im großen Maßstab (Kosten je Haus der neuen Formate, Zentrale-Skalierung, Wareneinsatz nach Weihnachten) beheben, bis das Skript ohne Verstöße durchläuft. Das Skript ist die Abnahme; sein vollständiges Protokoll gehört in `massstab-stand.md`. GPT kann es nicht ausführen: jede Änderung mit erwarteter Wirkung begründen, Claude misst.
