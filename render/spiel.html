@@ -578,6 +578,31 @@
   /* O09 E-Commerce */
   .online-verlauf { display:flex; align-items:flex-end; gap:3px; height:100px; padding:8px 0; border-bottom:1px solid var(--linie); }
   .online-balken { background:#597baa; flex:1; min-width:2px; border-radius:2px 2px 0 0; }
+  /* Q07: kompakte, responsive Vertriebsansicht; 44-px-Steuerziele. */
+  .vtr-filter {display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  .vtr-filter label {display:flex;align-items:center;flex:1 1 110px;gap:5px;font-size:calc(12px * var(--schrift));}
+  .vtr-filter select {min-height:44px;max-width:100%;flex:1;border:1px solid var(--linie);border-radius:7px;padding:6px;background:#fff;}
+  .vtr-pfad {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;}
+  .vtr-pfad button {min-height:44px;text-decoration:underline;background:transparent;}
+  .vtr-kennzahlen {display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:8px;margin:12px 0;}
+  .vtr-kpi {display:flex;flex-direction:column;gap:5px;padding:11px;border:1px solid var(--linie);border-radius:8px;}
+  .vtr-kpi strong {font-size:calc(15px * var(--schrift));overflow-wrap:anywhere;}
+  .vtr-kpi small,.vtr-zeile small,.vtr-hinweis {color:var(--leise);font-size:calc(11px * var(--schrift));}
+  .vtr-liste {display:flex;flex-direction:column;gap:6px;margin:8px 0 14px;}
+  .vtr-zeile {display:grid;grid-template-columns:minmax(120px,1fr) minmax(180px,2fr);gap:8px;align-items:center;border:1px solid var(--linie);border-radius:8px;padding:8px;}
+  .vtr-zeile button,.vtr-zeile>div:first-child {display:flex;flex-direction:column;gap:4px;text-align:left;background:transparent;color:inherit;}
+  .vtr-zeile button {min-height:44px;}
+  .vtr-zahlen {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+  .vtr-zahlen span {display:flex;flex-direction:column;overflow-wrap:anywhere;min-width:0;}
+  .vtr-zahlen b {font-size:calc(12px * var(--schrift));}
+  .vtr-ampel {font-weight:700;}.vtr-ampel.rot{color:var(--rot);}.vtr-ampel.gruen{color:var(--gruen);}.vtr-ampel.gelb{color:#986800;}.vtr-ampel.ohne{color:var(--leise);}
+  .vtr-portfolio {width:100%;padding:12px;border:1px solid var(--linie);border-radius:8px;background:transparent;}
+  .vtr-leitungen {margin-top:15px;}
+  .startmonat {display:flex;justify-content:center;align-items:center;gap:8px;margin:12px 0;}
+  .post-miete-zeile {border-top:1px solid var(--linie);display:grid;grid-template-columns:minmax(80px,2fr) minmax(85px,1fr);gap:8px;padding:12px 0;}
+  .post-miete-zeile select {min-height:44px;width:100%;}
+  .post-miete-fuss {display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;}
+  @media(max-width:480px) {.vtr-zeile {grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -672,6 +697,7 @@
       <div id="startstufen" class="stufen"></div>
       <div class="vtitel">Startstadt</div>
       <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
+       <label class="startmonat">Startmonat <select id="startmonat" class="ort gross" aria-label="Startmonat"><option value="1">Januar</option><option value="4">April</option><option value="7">Juli</option><option value="10">Oktober</option></select></label>
       <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
       <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
     </div>

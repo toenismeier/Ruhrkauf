@@ -1133,7 +1133,8 @@ const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEi
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
 const nachAktion = () => { cockpitZeigen(); stadtChipsZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
-org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
+org = organisationModul({ E, s: () => s, panel, meldung, nachAktion,
+  oeffneHaus: (id) => oeffneHaus(id), oeffnePortfolio: () => oeffneModul(pp, 'liste') });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
@@ -1405,10 +1406,10 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
   { id: 'schwer', name: 'Schwer', beschreibung: 'Knappe Kasse, nervöse Gläubiger, wenig Zeit.' },
 ];
 let schwierigkeitId = 'mittel';
-function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard') {
+function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard', startMonat = 1) {
   spielende?.zu(); $('spiel-ruhestand').hidden = true;
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
-  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId });
+  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
   postUi = neuerPostUi();
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
@@ -1512,11 +1513,12 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
 const einfuehrung = einfuehrungModul();
 window.spiel.einfuehrung = einfuehrung;
 // ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
-const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1) };
+const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1), startMonat: [1,4,7,10].includes(Number(param.get('monat'))) ? Number(param.get('monat')) : 1 };
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
   $('startstufen').innerHTML = SCHWIERIGKEITEN.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(1 + SCHWIERIGKEITEN.indexOf(x))}${'○'.repeat(SCHWIERIGKEITEN.length - 1 - SCHWIERIGKEITEN.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join('');
   $('startseed').value = startWahl.seed;
+  $('startmonat').value = startWahl.startMonat;
   szenarienUI.zeichneStart();
   $('start').classList.add('an');
   $('lade').classList.remove('an');
@@ -1530,6 +1532,7 @@ function startZeigen() {
 }
 $('startstufen').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; startWahl.schwierigkeit = b.dataset.v; startZeigen(); });
 $('startstadt').addEventListener('change', (e) => { startWahl.stadt = e.target.value; });
+$('startmonat').addEventListener('change', (e) => { startWahl.startMonat = Number(e.target.value); });
 $('startseed').addEventListener('change', (e) => { startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1)); });
 // Q02: Das Ladebild muss tatsächlich gezeichnet sein, bevor die synchrone Stadterzeugung beginnt.
 const q02Bildwechsel = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -1543,7 +1546,7 @@ async function spielStarten() {
     await q02Bildwechsel();
     q02Start.phase = 'grundaufbau';
     wahl.value = startWahl.stadt;
-    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
+    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario, startWahl.startMonat);
     q02Start.phase = 'grundkacheln'; q02Start.grundkacheln = KA.liste.filter((k) => k.gruppe).length;
     // Das erste sichtbare Bild zeigt Plan, Grundkacheln und alle bereits gebauten mittigen Details.
     await q02Bildwechsel();
