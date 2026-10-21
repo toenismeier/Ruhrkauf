@@ -802,6 +802,7 @@ function einkaufsKreuz(E, innen, zc) {
 function randLagen(E, randZelle, zellenNach) {
   const { r } = E;
   const belegt = [];
+  const platziert = [];
   const center = E.randStandorte.filter((e) => e.lage === 'center');
   const rand = E.randStandorte.filter((e) => e.lage !== 'center');
   // Kein gemeinsamer Center-Block für zwei Konzernhäuser.
@@ -819,8 +820,23 @@ function randLagen(E, randZelle, zellenNach) {
     if (!l.length) l = zellenNach((i, j) => randZelle(i, j) && dist(i, j) > 2.4 && abstand(i, j) > 1, (i, j) => (anHaupt(i, j) ? (L.art === 'center' ? 4 : 1.5) : 1) * dist(i, j));
     if (!l.length) l = zellenNach((i, j) => dist(i, j) > 1.8 && abstand(i, j) > 0, (i, j) => dist(i, j));
     if (!l.length) continue;
-    const [i, j] = wahlGewichtet(r, l);
+    let [i, j] = wahlGewichtet(r, l);
+    // Maßstab-Regeln (GESTALTUNG.md 3b): Hartwig zu Hartwig mindestens drei Blöcke, Volkskauf zu Hartwig mindestens zwei.
+    // Nur wenn die Wahl dagegen verstößt, unter den regelkonformen Zellen neu wählen (übrige Pläne bleiben gleich).
+    const hw = (ro) => ro === 'warenhaus' || ro === 'premium';
+    const regel = (ii, jj) => L.liste.every((e) => [...E.einkauf.map((q) => ({ i: q.i, j: q.j, ro: q.standort?.rolle })), ...platziert].every((q) => {
+      const d = Math.abs(q.i - ii) + Math.abs(q.j - jj);
+      if (hw(e.rolle) && hw(q.ro)) return d >= 3;
+      if ((e.rolle === 'schwester' && hw(q.ro)) || (hw(e.rolle) && q.ro === 'schwester')) return d >= 2;
+      return true;
+    }));
+    if (!regel(i, j)) {
+      const gut = l.filter(([[ii, jj]]) => regel(ii, jj));
+      const weit = gut.length ? gut : zellenNach((ii, jj) => abstand(ii, jj) > 0 && regel(ii, jj), (ii, jj) => 1 / (1 + dist(ii, jj)));
+      if (weit.length) [i, j] = wahlGewichtet(r, weit);
+    }
     belegt.push([i, j]);
+    for (const e of L.liste) platziert.push({ i, j, ro: e.rolle });
     const standorte = L.liste.map((e) => ({ ...e.st, _typ: SLOT_ROLLE[e.rolle] ?? 'slot:warenhaus', _w: e.m.w, _d: e.m.d }));
     nimm(E, { art: L.art, i0: i, i1: i, j0: j, j1: j, standorte });
     // Center: Mieter nebeneinander unter einem Dach, Mall-Verbinder zwischen den Häusern

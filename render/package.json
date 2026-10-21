@@ -38,7 +38,8 @@
     "massstab:kopien": "node pruef-kopien.js",
     "massstab:gestaltung": "node pruef-alle-gestaltung.js",
     "hausbesuch:laufwege:unit": "node tests/hausbesuch-navigation.cjs",
-    "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs"
+    "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs",
+    "massstab:export": "cd ../engine && npx tsx scripts/haeuser-export.ts && cd ../render && node fassaden-verteilen.js"
   },
   "keywords": [],
   "author": "",

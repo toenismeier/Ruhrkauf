@@ -31,6 +31,9 @@ import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
 import { abholstation } from './abholstation.js';
 import { technikAufDach } from './umbau-aussen.js';
 import schwesterHaeuser from '../../haeuser-schwester.json';
+import exportHaeuser from '../../haeuser.json';
+// Maßstab: Fassadenvariante aus dem Export (fassaden-verteilen.js, keine Kopien unter 50 km), für alle Spielstände gleich
+const FASSADE = new Map(exportHaeuser.map((h) => [h.id, h.fassade]));
 import outletHaeuser from '../../haeuser-outlet.json';
 import './hq.js';   // meldet 'slot:hq' an
 
@@ -213,10 +216,10 @@ export function spielBauer(s, o = {}) {
     if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
     // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
     if (!wahl.has(h.id)) {
-      let fam = familieVon(h), fassade = h.fassade;
+      let fam = familieVon(h), fassade = FASSADE.get(h.id) ?? h.fassade;
       if (famBenutzt.has(fam)) {
         const alt = fam <= 5 ? [fam + 1, fam - 1, fam + 2, fam - 2].find((q) => q >= 1 && q <= 5 && !famBenutzt.has(q)) : null;
-        if (alt) fam = alt; else fassade = ((h.fassade ?? 0) + 3) % 8;
+        if (alt) fam = alt; else fassade = ((fassade ?? 0) + 3) % 8;
       }
       famBenutzt.add(fam);
       wahl.set(h.id, { fam, fassade });
@@ -237,7 +240,7 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     const nutzer = nachnutzer(h);
     const res=nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
-      : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+      : sporthaus(S, scene, FASSADE.has(h.id) && FASSADE.get(h.id) !== h.fassade ? { ...h, fassade: FASSADE.get(h.id) } : h, { x, z, ...bauZustand(zustand(h)) });
     if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
     return res;
   };
