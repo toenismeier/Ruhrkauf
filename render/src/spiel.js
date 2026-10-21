@@ -13,8 +13,7 @@ import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
 import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
-import { stadtplan, planAusKarte, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
-import essenKarte from '../karten/essen.json';
+import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
@@ -376,7 +375,7 @@ function baueStadtAusSpiel(name) {
   const hqJson = hqGrafik();
   const d = stadtEintragAusSpiel(s, name);
   hqIdsStadt = hqIdsIn(hqJson, name);
-  plan = name === 'Essen' ? planAusKarte(essenKarte, { seed: d.seed, typ: d.typ, standorte: d.standorte }) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
   if (hqJson) hqEinplanen(plan, hqJson, name);
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
@@ -411,8 +410,8 @@ function baueStadtAusSpiel(name) {
   wettbewerbPinsAktualisieren();
   bahnhofPinErstellen();
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
-  const nm = name === 'Essen' ? { x: essenKarte.radius_m + 145, z: essenKarte.radius_m + 205 } : nahMitte(plan, 'einkauf', 62);
-  K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : name === 'Essen' ? 235 : 60;
+  const nm = nahMitte(plan, 'einkauf', 62);
+  K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
   K._G = null;
   kameraSetzen();
   leben.stadt(plan);
@@ -431,7 +430,7 @@ async function baueStadtAusSpielReise(name) {
   const hqJson = hqGrafik();
   const d = stadtEintragAusSpiel(s, name);
   hqIdsStadt = hqIdsIn(hqJson, name);
-  plan = name === 'Essen' ? planAusKarte(essenKarte, { seed: d.seed, typ: d.typ, standorte: d.standorte }) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
   if (hqJson) hqEinplanen(plan, hqJson, name);
   await new Promise((r) => requestAnimationFrame(r));
   scene = neueSzene('#4fb6c2');
@@ -468,8 +467,8 @@ async function baueStadtAusSpielReise(name) {
   wettbewerbPinsAktualisieren();
   bahnhofPinErstellen();
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
-  const nm = name === 'Essen' ? { x: essenKarte.radius_m + 145, z: essenKarte.radius_m + 205 } : nahMitte(plan, 'einkauf', 62);
-  K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : name === 'Essen' ? 235 : 60;
+  const nm = nahMitte(plan, 'einkauf', 62);
+  K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
   K._G = null;
   kameraSetzen();
   // Details werden erst nach dem ICE-Ankunftsbild über kachelnPlanen aufgebaut.

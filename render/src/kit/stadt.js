@@ -13,7 +13,6 @@ import { THREE, rng, mische, waehle, zw, FARBEN, mat, heller, dunkler, fensterRa
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { bergHoehe, gelaende, rebzeilen } from './gelaende.js';
 import { tramArme } from './q02-qualitaet.js';
-import { baueKartenStadt } from './karten/bauer.js';
 
 // ====================================================================================
 // Konstanten
@@ -42,7 +41,7 @@ const ganz = (r) => Math.floor(r() * 1e9);
 // ====================================================================================
 // 1. STADTPLAN (reine Daten, siehe stadtplan.js)
 // ====================================================================================
-export { stadtplan, planAusKarte, rasterPlan, LINIEN, TYPEN, REGIONEN, VIERTEL, ARCHETYPEN, LANDMARKEN, registriereArchetyp } from './stadtplan.js';
+export { stadtplan, rasterPlan, LINIEN, TYPEN, REGIONEN, VIERTEL, ARCHETYPEN, LANDMARKEN, registriereArchetyp } from './stadtplan.js';
 import { TYPEN, intervalleMinus, wahlGewichtet, FLAECHEN } from './stadtplan.js';
 import './archetypen/index.js';   // registrierte Archetypen (Ost u. a.) und ihre Slot-Bauer
 
@@ -389,7 +388,6 @@ export function dachEinruecken(dreiecke, faktor = .86) {
  * o: { dichte (Faktor Fußgänger/Verkehr), instanzer (eigener Instanzer, dann baut der Aufrufer), ohneHaeuser }
  */
 export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
-  if (plan.kartenstadt === 'essen') return baueKartenStadt(S, scene, plan, bauer, o);
   const I = o.instanzer ?? new Instanzer();
   const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr, keineStandAutos: !!o.keineStandAutos };
   ostVerkehr = !!plan.ddr;
@@ -440,7 +438,6 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
 
 // In Etappen aufgebaute Szene für ICE-Reise. Sonstige Aufrufer nutzen unverändert baueStadt().
 export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer, o = {}) {
-  if (plan.kartenstadt === 'essen') return baueKartenStadt(S, scene, plan, bauer, o);
   // Maximal rund 9 ms JS-Arbeit am Stück: Übergang bleibt auch beim Stadtaufbau animiert.
   let letzterFrame = performance.now();
   const bildFreigeben = async () => {

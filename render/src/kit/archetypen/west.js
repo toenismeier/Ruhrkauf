@@ -79,6 +79,47 @@ function rasterGroesse(E, nx, nz) {
  *   Rhein (Duisburg): breiter Strom (104 m) zwei Zellen unterhalb der Innenstadt, Uferstraßen beidseits, Brücken im Abstand
  *         von rund 240 m, Hafenkai außerhalb des Ausschnitts, gegenüber Stadt und die Hütte am Ufer.
  */
+/**
+ * Q01 Essen (Kartenstadt, stilisiert nach OpenStreetMap, © OpenStreetMap-Mitwirkende, ODbL): Lage der Innenstadt wie im
+ * Original, um 180° gedreht wie alle Ruhrstädte des Kits (Gleise oben, Kanal unten). Hauptbahnhof mit Gleisharfe im
+ * Gleisband, davor die Kettwiger Straße als Fußgängerzone bis zum Markt mit der Marktkirche, dort quer die Limbecker
+ * Straße bis zum Einkaufszentrum am Limbecker Platz. Münster an der Kettwiger Straße, Rathaus (Hochhaus) östlich des Markts.
+ */
+const ESSEN = { kettwiger: -1, ring: [-3, 3], gleisharfe: 64, bandReihe: 104 };
+function essenBahnUndAchsen(E, ci, cj) {
+  const kK = ci + ESSEN.kettwiger, jB = 0;
+  E.reihen[jB] = ESSEN.bandReihe;
+  nimm(E, { art: 'bahn', i0: 0, i1: E.nx - 1, j0: jB, j1: jB, oben: true, trasse: true, gross: true, bahnhofLinie: kK, band: ESSEN.gleisharfe, essenHbf: true });
+  for (let k = 0; k <= E.nx; k++) fixiere(E, k, jB, jB);
+  // Innenstadtring: Schützenbahn (im Bild links) mit Straßenbahn, Hindenburgstraße (rechts), Querachse zum Kanal
+  E.zTyp[ci + ESSEN.ring[0]] = 'haupt'; fixiere(E, ci + ESSEN.ring[0]); if (E.T.tram) E.tram.push('z' + (ci + ESSEN.ring[0]));
+  E.zTyp[ci + ESSEN.ring[1]] = 'haupt'; fixiere(E, ci + ESSEN.ring[1]);
+  E.xTyp[cj + 2] = 'haupt';
+  // Kettwiger Straße vom Bahnhof bis zum Markt, Limbecker Straße vom Markt bis zum Limbecker Platz
+  E.kreuzWunsch = { kF: kK, lF: cj + 1, j0: jB + 1, i1: kK + 3 };
+  E.centerWunsch = [[kK + 4, cj + 1], [kK + 4, cj]];
+  E.zentrum = { i: kK - 1, j: cj };
+  E.startBlick = 'hbf';
+}
+function essenInnenstadt(E, ci, cj) {
+  const kK = ci + ESSEN.kettwiger, lL = cj + 1;
+  E.zentrum = { i: kK - 1, j: cj };
+  // Münster am Burgplatz, östlich der Kettwiger Straße (im Bild links davon), zwischen Bahnhof und Markt
+  if (istFrei(E, kK - 1, kK - 1, lL - 2, lL - 2)) { nimm(E, { art: 'kirche', i0: kK - 1, i1: kK - 1, j0: lL - 2, j1: lL - 2, seiten: ['-z', '-x'], kirchStil: 'romanisch' }); E.landmarken.push('slot:kirche'); }
+  // Markt mit Marktkirche am Ende der Kettwiger Straße, an der Ecke zur Limbecker Straße
+  if (istFrei(E, kK, kK, lL, lL)) nimm(E, { art: 'kirche', i0: kK, i1: kK, j0: lL, j1: lL, seiten: ['+x', '+z'], kirchStil: 'nachkrieg' });
+  // Rathaus (Hochhaus, 106 m) östlich des Markts
+  if (istFrei(E, kK - 2, kK - 2, lL, lL)) { setzeSpalte(E, kK - 2, 70); nimm(E, { art: 'west_essen_rathaus', i0: kK - 2, i1: kK - 2, j0: lL, j1: lL }); }
+}
+function essenRathausParzelle(ctx, E, b) {
+  // Rathaus hinten im Block, davor der Porscheplatz (Pflaster, Baumreihen, Leute wie ein Konzernvorplatz)
+  const W = Math.min(56, b.w - 8), D = Math.min(40, b.d - 8);
+  neueParzelle(ctx, 'slot:rathaus', b.x + (b.w - W) / 2, b.z + 4, W, D, ['+z', '+x'], 'frei', { klasse: 5, landmarke: true, rathausStil: 'hochhaus', geschosse: 29 });
+  // Seitlich am Platz eine Zeile Geschäftshäuser (Porscheplatz ist von Bauten gefasst)
+  const x0 = b.x + (b.w + W) / 2 + 4, w = b.x + b.w - 1 - x0;
+  if (w >= 12) for (let k = 0, n = Math.max(1, Math.round((b.d - 2) / 16)); k < n; k++) neueParzelle(ctx, 'stadthaus', x0, b.z + 1 + ((b.d - 2) * k) / n, w, (b.d - 2) / n, ['+x'], '+x');
+}
+
 function ruhrstadt(E) {
   const { r, o } = E;
   const klein = E.typ === 'mittelstadt';
@@ -117,7 +158,8 @@ function ruhrstadt(E) {
   } else jI = klein ? nz - 1 : Math.min(nz - 1, cj + 3);   // Industriezeile in Mittelstädten in der Randreihe
   // Bahn: Gleisband und Bahnhofsblock
   let st = null;
-  if (!senk) {
+  if (o.essen) essenBahnUndAchsen(E, ci, cj);
+  else if (!senk) {
     const jB = Math.max(0, cj - (klein ? 3 : 4));   // Gleisband am oberen Kartenrand, im Nahausschnitt höchstens angeschnitten
     E.reihen[jB] = BAND;
     nimm(E, { art: 'bahn', i0: 0, i1: nx - 1, j0: jB, j1: jB, oben: true, trasse: true, ohneBahnhof: true });
@@ -200,7 +242,8 @@ function ruhrstadt(E) {
   }
   // Hauptkirche: Stil aus staedte.js (je Stadt anders als bei den Nachbarn), Lage je Stadt aus dem Seed
   const ksZufall = waehle(r, ['romanisch', 'hallenkirche']);
-  if (!o.kern60) for (const [qi, qj] of mische(r, [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]])) if (istFrei(E, qi, qi, qj, qj)) { nimm(E, { art: 'kirche', i0: qi, i1: qi, j0: qj, j1: qj, seiten: ['-z', '-x', '+x'], kirchStil: o.kirchStil ?? ksZufall }); E.landmarken.push('slot:kirche'); break; }
+  if (o.essen) essenInnenstadt(E, ci, cj);
+  else if (!o.kern60) for (const [qi, qj] of mische(r, [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]])) if (istFrei(E, qi, qi, qj, qj)) { nimm(E, { art: 'kirche', i0: qi, i1: qi, j0: qj, j1: qj, seiten: ['-z', '-x', '+x'], kirchStil: o.kirchStil ?? ksZufall }); E.landmarken.push('slot:kirche'); break; }
   // Polyzentrisch: Stadtteilzentrum mit Platz und Kirche der 50er, weit außerhalb des Nahausschnitts
   const nb = { i: 0, j: Math.min(nz - 2, cj + 2) };
   if (!klein && istFrei(E, nb.i, nb.i, nb.j, nb.j)) {
@@ -220,7 +263,8 @@ function ruhrstadt(E) {
     return dd < 3.1 ? 'gruenderzeit' : 'nachkrieg';
   };
   E.landmarkVerbot = new Set(['slot:mall', 'slot:schloss', 'slot:tor', 'slot:konkurrenz', 'slot:hochhaus']);
-  E.marktVariante = o.markt ?? (o.kern60 ? 'keiner' : 'einer');
+  if (o.essen) E.landmarkVerbot.add('slot:rathaus');   // Rathaus steht als Hochhaus östlich des Markts (essenInnenstadt)
+  E.marktVariante = o.essen ? 'keiner' : o.markt ?? (o.kern60 ? 'keiner' : 'einer');
   // Rheinhafen (Duisburg): Kai mit Speichern direkt am Wasser, außerhalb des Nahausschnitts
   if (o.rhein) { const zellen = []; for (let q = 0; q < nx; q++) if (Math.abs(q - zc.i) >= 2.5) zellen.push(q); hafenkai(E, jR - 1, zellen); }
   E.umriss = 'voll';
@@ -963,12 +1007,13 @@ const GEMEINSAM = {
     west_brauturm: { boden: bodenPflaster },
     west_promenade: { boden: bodenPromenade },
     west_hang: { parzelliere: hangParzellen, boden: bodenHang },
+    west_essen_rathaus: { parzelliere: essenRathausParzelle, boden: bodenKonzern },
   },
 };
 
 registriereArchetyp('ruhrstadt', { ...GEMEINSAM, name: 'Ruhrgebietsstadt', entwurf: ruhrstadt,
   staedte: {
-    Essen: { bahnLage: 'mitte', zeche: 'doppelbock', zechenZustand: 'museum', konzern: 1, konzernVarianten: ['glas60'], bahnhof: '50er', halde: 'kreuz', nah: ['konzern:turm70', 'ekz:90er', 'zeche:doppelbock', 'halde', 'kanal'], markt: 'einer' },
+    Essen: { essen: true, bahnLage: 'mitte', zeche: 'doppelbock', zechenZustand: 'museum', konzern: 0, bahnhof: '50er', halde: 'kreuz', ekz: false, nah: ['konzern:turm70', 'ekz:90er', 'zeche:doppelbock', 'halde', 'kanal'], markt: 'keiner' },
     Dortmund: { bahnLage: 'oben', huette: true, huettenZustand: 'museum', zeche: 'malakow', zechenZustand: 'museum', konzern: 1, konzernVarianten: ['backstein20'], bahnhof: 'altbau', stadion: 'stadion70', halde: false, nah: ['brauturm', 'turm', 'zeche:malakow', 'kanal'], markt: 'laenglich' },
     Duisburg: { bahnLage: 'rechts', rhein: true, huette: true, zeche: false, halde: false, bahnhof: '70er', ekz: '80er', konzern: 1, konzernVarianten: ['backstein20'], nah: [], markt: 'keiner' },
     Gelsenkirchen: { bahnLage: 'links', zeche: 'strebe', zechenZustand: 'stillgelegt', halde: 'treppe', stadion: 'arena', bahnhof: '70er', kokerei: false, konzern: 1, konzernVarianten: ['turm70'], nah: [], markt: 'einer' },
