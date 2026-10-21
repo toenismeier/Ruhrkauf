@@ -339,7 +339,10 @@ export const EK_PARAM = {
 
 export const STANDARD_STEUERUNG = (d: WgDef): WgSteuerung => ({
   limitFaktor: 1.2, nosZiel: d.nosAnteil, servicegrad: 0.95, vororderquote: 0.6, reduzierung: 'normal',
-  modus: { nos: 'auto', saison: 'verfall' },
+  // Für die Grundversorgung gilt eine Freigabefrist mit automatischer Freigabe.
+  // Der Spieler kann vor Fristablauf weiterhin kürzen oder ablehnen und
+  // über wgFreigabeModus ausdrücklich auf 'verfall' umstellen.
+  modus: { nos: 'auto', saison: 'auto' },
 });
 
 const leererVerlauf = (): WgVerlauf => ({ w: [], u: [], r: [], e: [], b: [], a: [], f: [], n: [], eu: [], er: [], nd: [] });
@@ -1106,6 +1109,14 @@ function protokoll(s: GameState): FreigabeProtokoll {
 /** Disposition der Woche: Vorschläge, Open to Buy, Freigabegrenze. */
 export function einkaufDispo(s: GameState): void {
   const w = s.woche;
+  // Die Beschaffungsbasis muss der tatsächlichen Nachfrageentwicklung folgen.
+  // Vorher blieb sie auf dem Startportfolio stehen; nach Schließungen entstanden
+  // überdimensionierte Orders, Bestandsüberhänge und zusätzliche Liquiditätslast.
+  // s.basisUmsatz wird in engine.ts vor der Disposition aus der Bruttonachfrage
+  // fortgeschrieben und ist bewusst unabhängig vom aktuellen Warenfehlbestand.
+  for (const d of aktiveWg(s)) {
+    s.einkauf.wgs[d.id].basisVK = Math.max(0, (s.basisUmsatz[d.bereich] ?? 0) * d.anteil);
+  }
   const pr = protokoll(s);
   for (const v of vorschlaege(s)) {
     let lief = v.lieferungen.filter((l) => l.wert > 0);
