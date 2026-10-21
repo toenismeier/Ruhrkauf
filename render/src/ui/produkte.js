@@ -12,6 +12,10 @@ const PREISLAGE = { einstieg: 'Einstieg', mitte: 'Mitte', gehoben: 'Gehoben' };
 const STATUS = { entwicklung: 'in Entwicklung', sortiment: 'im Sortiment', pausiert: 'pausiert', ausgelistet: 'ausgelistet' };
 const euro = (x) => `${dez(x, 2)} €`;
 const bild = (typ, farbe, material, g = 150) => (typeof PB.produktbildSVG === 'function' ? PB.produktbildSVG(typ, farbe, material, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`);
+// Q25: Model-Ansicht (Antippen des Bildes wechselt Produkt ↔ Model)
+const ZG_MODEL = { kinder: 'kinder', jung: 'young', mitte: 'adults', reif: 'bestager' };
+const geschlechtVon = (wg) => (/^herren|kinder\.jungen/.test(String(wg ?? '')) ? 'herren' : 'damen');
+const modelBild = (typ, farbe, material, wg, trendGruppe, g = 150) => (typeof PB.modelbildSVG === 'function' ? PB.modelbildSVG(typ, farbe, material, { geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe] ?? 'young', groesse: g, hintergrund: null }) : null);
 const kachel = (typ, g = 76) => (typeof PB.typKachelSVG === 'function' ? PB.typKachelSVG(typ, g) : bild(typ, undefined, undefined, g));
 let sternNr = 0;
 /** Fünf Sterne mit halben Schritten. */
@@ -33,7 +37,7 @@ const preisSchritt = (p) => (p < 20 ? 1 : p < 100 ? 5 : 10);
 export function produkteModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.produkte === 'function';
-  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null };
+  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, model: new Set() };
 
   function markenwahl(L) {
     return `<div class="spaltenwahl">${L.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? 'an' : ''}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join('')}</div>`;
@@ -62,7 +66,8 @@ export function produkteModul(ctx) {
     else {
       const karten = prod.map((p) => {
         const ent = p.status === 'entwicklung';
-        let c = `<div class="karte produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(p.typ, p.farbe, p.material, 150)}</div>`;
+        const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190) : null;
+        let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p.typ, p.farbe, p.material, 150)}</div>`;
         if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
         c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
         if (ent) {
@@ -108,7 +113,9 @@ export function produkteModul(ctx) {
     h += regler('Entwicklungsdauer', segment('dauer', e.dauer, K.dauer.map((d) => [d, String(d)])), 'Wochen');
     h += regler('Budget je Woche', stepper('budget', P('n:budget', geld(e.budgetWoche))), `Schritt ${geld(K.budgetSchritt)}`);
     h += '</div>';
-    h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}</div><div class="pname">${P('n:name', v.name ?? e.typ, 'b')}<small>${v.wgName ? `${esc(v.wgName)} · ` : ''}Einführung ${esc(v.saisonEinfuehrung)}</small></div>`;
+    const wgV = K.typen.find((t) => t.typ === e.typ)?.wgs?.find((w) => !/^kinder/.test(w) || M.trendGruppe === 'kinder');
+    const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M.trendGruppe, 150);
+    h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ''}</div><div class="pname">${P('n:name', v.name ?? e.typ, 'b')}<small>${v.wgName ? `${esc(v.wgName)} · ` : ''}Einführung ${esc(v.saisonEinfuehrung)}</small></div>`;
     h += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P('n:sterne', `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, 'span')}</span></div>`;
     h += `<div class="owerte"><div><span>Normpreis</span>${P('n:preis', euro(v.normpreis))}</div><div><span>EK je Stück</span>${P('n:ek', euro(v.ekStueck))}</div><div><span>Marge</span>${P('n:marge', pz(v.marge))}</div><div><span>Entwicklung</span>${P('n:kosten', geld(v.kosten))}</div><div><span>Fertig</span>${P('n:fertig', wocheText(st, v.fertigWoche))}</div><div><span>Platz frei</span>${P('n:frei', String(v.kapazitaetFrei))}</div></div>`;
     if (v.teile) h += `<div class="passung">${[['zielgruppe', 'Zielgruppe'], ['trend', 'Trend'], ['preisQualitaet', 'Preis'], ['entwicklung', 'Aufwand'], ['team', 'Team']].map(([k, t]) => `<div><span class="psaeule"><span style="height:${(v.teile[k] * 100).toFixed(0)}%"></span></span><b>${Math.round(v.teile[k] * 100)}</b><i>${t}</i></div>`).join('')}</div>`;
@@ -176,6 +183,7 @@ export function produkteModul(ctx) {
       case 'neu': ui.seite = 'neu'; ui.neu = neuerEntwurf(); return zeigen();
       case 'sortiment': { const p = karte(v); tun({ typ: 'produktSortiment', produkt: v, an: p.status !== 'sortiment' }); return zeigen(true); }
       case 'preis': { const id = el.dataset.p2, p = karte(id), d = preisSchritt(p.preis); tun({ typ: 'produktPreis', produkt: id, preis: Math.max(1, Math.round((p.preis + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) }); return zeigen(true); }
+      case 'bildwechsel': if (ui.model.has(v)) ui.model.delete(v); else ui.model.add(v); return zeigen(true);
       case 'auslisten': ui.auslisten = v; return zeigen(true);
       case 'auslistenNein': ui.auslisten = null; return zeigen(true);
       case 'auslistenJa': ui.auslisten = null; tun({ typ: 'produktAuslisten', produkt: v }); return zeigen(true);
