@@ -68,7 +68,7 @@ describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
       material: 'Denim' as const, dauer: 8, budgetWoche: 20_000, zielgruppe: 'bestager' as const };
     const r = fuehreAus(s, { typ: 'produktEntwickeln', entwurf });
     expect(r.ok).toBe(true);
-    const p = s.produkte.liste.at(-1)!;
+    const p = s.produkte.liste[s.produkte.liste.length - 1]!;
     expect(p.zielgruppe).toBe('bestager');
     expect(produkte(s).marken.find((m) => m.marke === 'em4')!.produkte.some((x) => x.zielgruppeName === 'Best Ager')).toBe(true);
     // Produktionsfreigabe: bestehende Artikel bleiben ohne Kennzeichnung; neuer Artikel wirkt ab Einführung.
