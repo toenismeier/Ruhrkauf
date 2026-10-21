@@ -4,8 +4,9 @@
  * cd engine && npx tsx scripts/m7-wochenverlauf.ts
  * cd engine && npx tsx scripts/m7-wochenverlauf.ts --write-stand
  *
- * Kein Eingriff, kein künstlicher Cash-Zuschuss und keine automatische
- * Einkaufsfreigabe: ausschließlich die Engine-Standardmechanik.
+ * Standardlauf ohne Eingriff und ohne künstlichen Cash-Zuschuss.
+ * Die automatische Freigabe regulärer Bestellungen ist Teil der
+ * kaufmännischen Engine-Standardmechanik; Bot D ist die Turnaround-Abnahme.
  * --write-stand ersetzt die gekennzeichneten Tabellen in massstab-stand.md.
  * Bei verletzten Zielwerten wird process.exitCode = 1 gesetzt.
  */
@@ -13,7 +14,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { neuesSpiel, wocheAbspielen } from '../src';
 import type { GameState, WochenKpi, SchwierigkeitId } from '../src';
-import { botTief } from './bot';
+import { botTief, botRegulaer } from './bot';
 import { GRUPPEN, saisonFaktor } from '../src/daten';
 
 type Messung = {
@@ -63,7 +64,9 @@ function ohneEingriffe(st: SchwierigkeitId): Messung[] {
     daten.push({ k, saison, phase: s.phase, insolvenzen: s.insolvenzenGesamt });
   }
   if (daten.length !== 52) fehler.push(`${st}: nur ${daten.length} von 52 Wochen simuliert`);
-  if (s.insolvenzenGesamt > 0) fehler.push(`${st}: im ersten Jahr ${s.insolvenzenGesamt} Insolvenzen`);
+  // Abschnitt 14: keine Insolvenz im ersten Jahr für leicht und mittel.
+  // Schwer bleibt diagnostisch sichtbar, ist aber keine harte Normalspiel-Abnahme.
+  if (s.insolvenzenGesamt > 0 && st !== 'schwer') fehler.push(`${st}: im ersten Jahr ${s.insolvenzenGesamt} Insolvenzen`);
   const winter = daten.slice(0, 9); // KW 1–9: Januar und Februar
   const q = quotenMittel(winter);
   if (q < ziel[st].mittel - 0.005)
@@ -81,11 +84,11 @@ function tabelle(st: SchwierigkeitId, mess: Messung[], laenge: number): string {
   const rows = [
     `### ${st}: KW 1–${laenge} (Seed 1, ohne Eingriffe)`,
     '',
-    '| KW | Saisonfaktor | Umsatz Mio. € | Rohertrag Mio. € | Abschriften Mio. € | Personal Mio. € | Miete Mio. € | EBITDA Mio. € | EBITDA-Quote | Liquide Mittel Mio. € | Status |',
-    '|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|',
+    '| KW | Saisonfaktor | Umsatz Mio. € | Rohertrag vor Abschr. Mio. € | Abschriften Mio. € | Rohertrag GuV Mio. € | Personal Mio. € | Miete Mio. € | Zentrale Mio. € | EBITDA Mio. € | EBITDA-Quote | Liquide Mittel Mio. € | Status |',
+    '|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|',
   ];
   for (const { k, saison, phase, insolvenzen } of mess.slice(0, laenge)) {
-    rows.push(`| ${k.woche + 1} | ${saison.toFixed(3).replace('.', ',')} | ${fmt(k.umsatz)} | ${fmt(k.rohertrag)} | ${fmt(k.abschriften)} | ${fmt(k.personal)} | ${fmt(k.miete)} | ${fmt(k.ebitda)} | ${pct(quote(k))} | ${fmt(k.cash)} | ${status({ k, saison, phase, insolvenzen })} |`);
+    rows.push(`| ${k.woche + 1} | ${saison.toFixed(3).replace('.', ',')} | ${fmt(k.umsatz)} | ${fmt(k.rohertrag + k.abschriften)} | ${fmt(k.abschriften)} | ${fmt(k.rohertrag)} | ${fmt(k.personal)} | ${fmt(k.miete)} | ${fmt(k.zentrale)} | ${fmt(k.ebitda)} | ${pct(quote(k))} | ${fmt(k.cash)} | ${status({ k, saison, phase, insolvenzen })} |`);
   }
   rows.push('');
   const e = mess.slice(0, laenge);
@@ -100,10 +103,29 @@ function botC(st: SchwierigkeitId, seed: number): string {
     wocheAbspielen(s);
   }
   const erfolgreich = s.woche === 260 && s.phase !== 'zerschlagen';
-  // Verpflichtende Fünfjahresabnahme: Standardstufe mittel, Seeds 1–3.
-  // Leicht/Schwer zusätzlich berichten, aber nicht mit dem Standard-Bot-Tuning verwechseln.
-  if (!erfolgreich && st === 'mittel') fehler.push(`Bot C ${st} Seed ${seed}: ${s.phase} nach ${s.woche} Wochen`);
+  // Abschnitt 14: Bot C ist Nebenprüfung. Mindestens 104 Wochen auf mittel.
+  if (s.woche < 104 && st === 'mittel') fehler.push(`Bot C ${st} Seed ${seed}: ${s.phase} bereits nach ${s.woche} Wochen`);
   return `| ${st} | ${seed} | ${s.woche} | ${s.phase} | ${s.insolvenzenGesamt} | ${erfolgreich ? 'ja' : 'NEIN'} |`;
+}
+
+/** Abschnitt 14: Referenz ist der außergerichtliche Turnaround über fünf Jahre. */
+function botD(st: SchwierigkeitId, seed: number): { zeile: string; ok: boolean; quote: number } {
+  const s = neuesSpiel(seed, { schwierigkeit: st });
+  for (let i = 0; i < 260 && s.phase !== 'zerschlagen'; i++) {
+    botRegulaer(s);
+    wocheAbspielen(s);
+  }
+  const letzte = s.historie.slice(-52);
+  const ebitda = letzte.reduce((a, k) => a + k.ebitda, 0);
+  const umsatz = letzte.reduce((a, k) => a + k.umsatz, 0);
+  const quote = umsatz > 0 ? ebitda / umsatz : -Infinity;
+  const ok = s.woche === 260 && s.phase === 'regulaer' && s.insolvenzenGesamt === 0 && ebitda > 0;
+  if (!ok && st !== 'schwer')
+    fehler.push(`Bot D ${st} Seed ${seed}: Phase ${s.phase} nach ${s.woche} Wochen, ${s.insolvenzenGesamt} Insolvenzen, EBITDA 52 Wochen ${fmt(ebitda)} Mio. €`);
+  return {
+    zeile: `| ${st} | ${seed} | ${s.woche} | ${s.phase} | ${s.insolvenzenGesamt} | ${fmt(ebitda)} | ${pct(quote)} | ${ok ? 'ja' : 'NEIN'} |`,
+    ok, quote,
+  };
 }
 
 const bericht: string[] = [
@@ -116,7 +138,22 @@ for (const st of stufen) {
   const winter = mess.slice(0, 9);
   bericht.push(`Januar/Februar ${st}: gewichtete EBITDA-Quote ${pct(quotenMittel(winter))}; schlechteste Q1-Einzelwoche ${pct(Math.min(...mess.slice(0, 13).map((x) => quote(x.k))))}.`, '');
 }
-bericht.push('### Bot C: 260 Wochen', '', '| Schwierigkeit | Seed | Wochen | Schlussphase | Insolvenzen | 260 Wochen überlebt |', '|---|---:|---:|---|---:|---|');
+bericht.push('### Bot D: außergerichtlicher Turnaround, 260 Wochen', '',
+  '| Schwierigkeit | Seed | Wochen | Schlussphase | Insolvenzen | EBITDA letzte 52 Wo. Mio. € | EBITDA-Quote | Abnahme |',
+  '|---|---:|---:|---|---:|---:|---:|---|');
+const ergebnisseD: Record<SchwierigkeitId, ReturnType<typeof botD>[]> = { leicht: [], mittel: [], schwer: [] };
+for (const st of stufen) for (const seed of [1, 2, 3]) {
+  const ergebnis = botD(st, seed);
+  ergebnisseD[st].push(ergebnis);
+  bericht.push(ergebnis.zeile);
+}
+if (ergebnisseD.schwer.filter((x) => x.ok).length < 2)
+  fehler.push('Bot D schwer: weniger als zwei von drei Seeds erfolgreich');
+if (ergebnisseD.leicht.some((x) => !x.ok))
+  fehler.push('Bot D leicht: nicht alle drei Seeds bestehen den Turnaround');
+bericht.push('', '### Bot C: Insolvenz nur als letzte Option (mindestens 104 Wochen auf mittel)',
+  '', '| Schwierigkeit | Seed | Wochen | Schlussphase | Insolvenzen | 260 Wochen überlebt |',
+  '|---|---:|---:|---|---:|---|');
 for (const st of stufen) for (const seed of [1, 2, 3]) bericht.push(botC(st, seed));
 bericht.push('', `**Abnahme:** ${fehler.length ? 'NICHT bestanden' : 'Alle M7-Grenzwerte bestanden'}.`);
 if (fehler.length) bericht.push(...fehler.map((x) => '- ' + x));
