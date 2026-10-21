@@ -3,6 +3,7 @@ import { standort } from '../src/hq';
 import type { AbteilungId, Stufe } from '../src';
 import type { GameState } from '../src';
 import { mio } from '../src/util';
+import { FILIAL_PROGRAMME, type FilialProgrammId } from '../src/filialguv';
 
 /** Standard-Einkauf: alle offenen Orders der Woche freigeben (wie bisher ohne Freigabe-Eingang). */
 export function einkaufStandard(s: GameState): void {
@@ -111,6 +112,37 @@ export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boole
   einkauf(s);
 }
 
+/** Bot T: Turnaround ausschließlich mit operativen Hebeln, ohne Schließung und Insolvenz. */
+export function botTurnaround(s: GameState, log = false): void {
+  const w = s.woche;
+  const tu = (a: Parameters<typeof fuehreAus>[1]) => {
+    const r = fuehreAus(s, a);
+    if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`);
+    return r;
+  };
+  if (w === 0) {
+    tu({ typ: 'berater', beraterTyp: 'sanierung' });
+    // Reale HQ-FTE werden gegen Abfindung reduziert, keine Gutschrift.
+    tu({ typ: 'zentrale', prozent: 0.12 });
+    tu({ typ: 'marketingBudget', quote: 0.018 });
+    for (const programm of Object.keys(FILIAL_PROGRAMME) as FilialProgrammId[]) {
+      tu({ typ: 'filialProgramm', programm });
+    }
+    tu({ typ: 'wgServicegrad', wg: 'alle', ziel: 0.98 });
+    tu({ typ: 'wgLimit', wg: 'alle', faktor: 1.00 });
+  }
+  if (w === 8) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.10 });
+  if (w % 13 === 0) {
+    const q = s.quartale.at(-1);
+    if (q) tu({ typ: 'plan', ebitda: q.planStandard });
+  }
+  // Echte Drittumsätze durch bestehende Mietangebote, keine Buchung ohne Vertrag.
+  for (const a of s.angebote.filter((x) => x.status === 'offen')) {
+    if (a.typ === 'untermiete' || a.typ === 'paket') tu({ typ: 'angebotAnnehmen', angebot: a.id });
+  }
+  einkaufStandard(s);
+}
+
 /** Bot D: außergerichtlich, aber konsequent. */
 export function botRegulaer(s: GameState, log = false): void {
   botRegulaerBasis(s, log, 0.25);
@@ -118,6 +150,7 @@ export function botRegulaer(s: GameState, log = false): void {
 
 /** Bot D mit wählbarer Pauschalkürzung der Zentrale (0 = keine). */
 export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: number): void {
+  botTurnaround(s, log);
   const w = s.woche;
   const tu = (a: Parameters<typeof fuehreAus>[1]) => { const r = fuehreAus(s, a); if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`); return r; };
   if (w === 0) {
@@ -300,7 +333,7 @@ export function botEinkaufKahlschlag(s: GameState, log = false, ab = 26): void {
 if (require.main === module) {
   const s = neuesSpiel(Number(process.argv[2] ?? 1), { schwierigkeit: process.argv.includes('--leicht') ? 'leicht' : process.argv.includes('--schwer') ? 'schwer' : 'mittel' });
   const n = Number(process.argv[3] ?? 260);
-  const b = process.argv.includes('--ek-nos') ? botEinkaufNos : process.argv.includes('--ek-em') ? botEinkaufEigenmarken : process.argv.includes('--ek-kahlschlag-frueh') ? (x: GameState, l?: boolean) => botEinkaufKahlschlag(x, l, 3) : process.argv.includes('--ek-kahlschlag') ? botEinkaufKahlschlag : process.argv.includes('--hq') ? botHq : process.argv.includes('--hq-ausbau') ? botHqAusbau : process.argv.includes('--hq-kahlschlag') ? botHqKahlschlag : process.argv.includes('--hq-keine') ? botHqKeine : process.argv.includes('--regulaer') ? botRegulaer : process.argv.includes('--tief') ? botTief : process.argv.includes('--schirm') ? botSchutzschirm : botWoche;
+  const b = process.argv.includes('--ek-nos') ? botEinkaufNos : process.argv.includes('--ek-em') ? botEinkaufEigenmarken : process.argv.includes('--ek-kahlschlag-frueh') ? (x: GameState, l?: boolean) => botEinkaufKahlschlag(x, l, 3) : process.argv.includes('--ek-kahlschlag') ? botEinkaufKahlschlag : process.argv.includes('--hq') ? botHq : process.argv.includes('--hq-ausbau') ? botHqAusbau : process.argv.includes('--hq-kahlschlag') ? botHqKahlschlag : process.argv.includes('--hq-keine') ? botHqKeine : process.argv.includes('--regulaer') ? botRegulaer : process.argv.includes('--turnaround') ? botTurnaround : process.argv.includes('--tief') ? botTief : process.argv.includes('--schirm') ? botSchutzschirm : botWoche;
   for (let i = 0; i < n && s.phase !== 'zerschlagen'; i++) {
     b(s, process.argv.includes('-v'));
     const k = wocheAbspielen(s);
