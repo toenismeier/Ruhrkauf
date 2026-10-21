@@ -3,7 +3,7 @@ import type { GameState } from './types';
 
 /** Auch alte Sandkasten-Spielstände anhand ihrer Szenario-ID erkennen. */
 export function istSandkasten(s: GameState): boolean {
-  return s.szenario?.id === 'sandkasten' || s.szenario?.regeln.sandkasten === true;
+  return s.szenario?.id === 'sandkasten' || s.szenario?.regeln?.sandkasten === true;
 }
 
 /** Nur Freigaben von Zahlungen umgehen; Cash und Kapitalfluss bleiben endlich und rechnerisch echt. */

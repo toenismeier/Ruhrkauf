@@ -2,7 +2,7 @@ import { BERATER, GRUPPEN, MIETER } from './daten';
 import { basisUmsatzHaus, beraterErgebnis, hausAttraktivitaet, loeseEntscheidung, offeneHaeuser, zufallsProjektname } from './ereignisse';
 import { einmalKosten, eroeffneInsolvenz, starteSchliessung } from './prozesse';
 import { runwayWochen } from './stakeholder';
-import { liquiditaetReicht } from './sandkasten';
+import { istSandkasten, liquiditaetReicht } from './sandkasten';
 import type {
   AktionsScope, BeraterTyp, Cluster, Flaeche, Format, GameState, GruppeId, Haus, Konzept, Untermieter,
 } from './types';
@@ -222,7 +222,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       zeitungEinstellen(s, a.an);
       return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');
     case 'ruhestand':
-      if (s.szenario?.id === 'sandkasten') return fehler('Im Sandkasten gibt es keine Wertung und kein Spielende.');
+      if (istSandkasten(s)) return fehler('Im Sandkasten gibt es keine Wertung und kein Spielende.');
       if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
       if (s.phase !== 'regulaer' || s.insolvenz) return fehler('Ein laufendes Insolvenzverfahren muss zuerst beendet sein.');
       if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
