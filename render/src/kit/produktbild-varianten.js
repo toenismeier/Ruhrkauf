@@ -676,7 +676,11 @@ export function zeichneProduktVariante(K, typ) {
   else if(/schuh|stiefel|stiefelette|sneaker|boot|loafer|ballerina|sandale|espadrille|slipper/i.test(t))schuh(K,t,code);
   else if(/tasche|shopper|clutch|portemonnaie|rucksack|weekender|kartenetui|krawatte|handschuh|tuch|hut|etui/i.test(t))accessoire(K,t,code);
   else if(/mascara|foundation|concealer|rouge|lidschatten|nagellack|creme|serum|gel|lotion|toilette/i.test(t))beauty(K,t,code);
-  else if(/bett|laken|decke|handtuch|waschlappen|vorleger|tisch|geschirr|schürze|topflappen|serviette|dose|becher|schale|schüssel|kerzenhalter|korb|tablett|kissen|pyjama/i.test(t))heim(K,t,code);
+  else if(/pyjama/i.test(t)) {
+    K.gruppe('translate(-4 2) scale(0.7)', () => oberteil(K, t, code));
+    K.gruppe('translate(40 22) scale(0.52)', () => hose(K, t, code));
+  }
+  else if(/bett|laken|decke|handtuch|waschlappen|vorleger|tisch|geschirr|schürze|topflappen|serviette|dose|becher|schale|schüssel|kerzenhalter|korb|tablett|kissen/i.test(t))heim(K,t,code);
   else oberteil(K,t,code);
   return true;
 }
