@@ -20,7 +20,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
 | Q04 Spiel-Befunde Wurf 1 | – | gemergt (#40) | – |
-| Q05 Eigenmarken und Delegation je Aufgabe | `feat/q05-eigenmarken-delegation` #42 | abnahmefähig | prüfen, mergen |
+| Q05 Eigenmarken und Delegation je Aufgabe | – | gemergt (#42) | – |
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | `feat/engine-massstab` #7 | abnahmefähig (Phase 1), Phase 2 offen | Abnahme; neu Abschnitt 11 in `nachbesserung-massstab.md`: Q1-Verlauf abschwächen (Ummo 20.10.) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | `feat/massstab-oberflaeche` #23 | abnahmefähig | Prüfung; Voraussetzung für Q07 |
 | Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | – | offen | Start nach #7 Phase 2 |
