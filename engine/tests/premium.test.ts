@@ -8,16 +8,17 @@ const HAUS=[
  // #7 (Ummo 21.10.2026): Premium klar besser als der Schnitt (Filialebene −1,2 %), Ziel etwa +4 bis +6 %.
  ['P001','Palais Hartwig','Berlin',0.05],
  ['P002','Hartwig am Hofgarten','München',0.05],
- ['P003','Alsterhaus Hartwig','Hamburg',0.045],
- ['P004','Hartwig Königsallee','Düsseldorf',0.035],
+ ['P003','Hartwig am Jungfernstieg','Hamburg',0.045],
+ ['P004','Hartwig am Heine-Platz','Düsseldorf',0.035],
+ ['P005','Hartwig Leipziger Platz','Berlin',0.045],
 ] as const;
 const premium=(s:GameState)=>s.haeuser.filter(h=>h.klasse==='premium');
 
 describe('Kronjuwelen: Struktur und Zustände',()=>{
- test.each([1,2,3])('Seed %d hat genau vier Trophy Stores ohne neue Formate oder IDs',seed=>{
+ test.each([1,2,3])('Seed %d hat genau fünf Trophy Stores ohne neue Formate oder IDs',seed=>{
   const s=neuesSpiel(seed);
   expect(s.haeuser.length).toBeGreaterThanOrEqual(180);
-  expect(premium(s)).toHaveLength(4);
+  expect(premium(s)).toHaveLength(5);
   for(const [schluessel,name,stadt] of HAUS){
    const p=premium(s).find(h=>h.premiumSchluessel===schluessel);
    expect(p).toBeDefined();
@@ -26,8 +27,8 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
    expect(p?.format).toBe('warenhaus');
    expect(p?.id).toMatch(/^(W|P)/);
    expect(p?.premiumImage).toBe(80);
-   const flaeche = { P001:30_000, P002:30_000, P003:18_000, P004:14_000 }[schluessel];
-   const geschosse = { P001:6, P002:6, P003:5, P004:5 }[schluessel];
+   const flaeche = { P001:30_000, P002:30_000, P003:18_000, P004:14_000, P005:20_000 }[schluessel];
+   const geschosse = { P001:6, P002:6, P003:5, P004:5, P005:5 }[schluessel];
    expect(p?.flaechen.reduce((sum, f) => sum + f.qm, 0)).toBe(flaeche);
    expect(p?.etagen).toHaveLength(geschosse);
    expect(p!.grundflaecheQm * geschosse).toBe(flaeche);
@@ -44,17 +45,18 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
    },0);
   };
   // #7: Die Premiumklasse wird gemeinsam auf das Konzernziel normiert (ein Faktor
-  // für alle vier Häuser); das Verhältnis folgt weiter Fläche und Premiumrang.
+  // für alle fünf Häuser); das Verhältnis folgt weiter Fläche und Premiumrang.
   const basis=ertrag('P001')/(30_000*1.55);
   expect(ertrag('P002')/(30_000*1.55)/basis).toBeCloseTo(1,6);
   expect(ertrag('P003')/(18_000*1.52)/basis).toBeCloseTo(1,6);
   expect(ertrag('P004')/(14_000*1.45)/basis).toBeCloseTo(1,6);
+  expect(ertrag('P005')/(20_000*1.52)/basis).toBeCloseTo(1,6);
  });
  test('Bot C schließt beim Sanierungsplan kein Premiumhaus',()=>{
   for(const seed of [1,2,3]){
    const s=neuesSpiel(seed);
    for(let w=0;w<5;w++){botTief(s);wocheAbspielen(s);}
-   expect(premium(s)).toHaveLength(4);
+   expect(premium(s)).toHaveLength(5);
    expect(premium(s).every(h=>h.status==='offen')).toBe(true);
   }
  });
@@ -63,7 +65,9 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
   if (s.haeuser.length === 180) expect(Object.fromEntries(premium(s).map(h=>[h.premiumSchluessel,h.id]))).toEqual({
    P001:'W003',P002:'W009',P003:'W006',P004:'W016',
   });
-  else expect(premium(s).map(h=>h.id).length).toBe(4);
+  else expect(Object.fromEntries(premium(s).map(h=>[h.premiumSchluessel,h.id]))).toEqual({
+   P001:'W361',P002:'W362',P003:'W363',P004:'W364',P005:'W365',
+  });
  });
  test('Globale Rabattaktion schützt Premium, ein explizit gewähltes Haus nicht',()=>{
   const s=neuesSpiel(1),h=premium(s)[0];
@@ -97,10 +101,10 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
   expect(s.rng).toBe(rng);
   expect(s.zaehler).toBe(zaehler);
   const angebote=s.angebote.filter(a=>a.typ==='premiumVerkauf');
-  expect(angebote).toHaveLength(4);
+  expect(angebote).toHaveLength(5);
   expect(new Set(angebote.map(a=>a.id)).size).toBe(4);
   premiumAngebote(s);
-  expect(s.angebote.filter(a=>a.typ==='premiumVerkauf')).toHaveLength(4);
+  expect(s.angebote.filter(a=>a.typ==='premiumVerkauf')).toHaveLength(5);
   expect(s.rng).toBe(rng);
   expect(s.zaehler).toBe(zaehler);
  });
@@ -152,5 +156,7 @@ describe('Ein-Jahres-Kalibrierung',()=>{
   const u=(id:string)=>werte.get(id)!.u;
   expect(Math.min(u('P001'),u('P002'))).toBeGreaterThan(u('P003'));
   expect(u('P003')).toBeGreaterThan(u('P004'));
+  expect(u('P005')).toBeGreaterThan(u('P003'));
+  expect(Math.min(u('P001'),u('P002'))).toBeGreaterThan(u('P005'));
  });
 });
