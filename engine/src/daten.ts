@@ -17,7 +17,9 @@ export interface GruppeDef {
 
 // M7: Januar/Februar weniger stark als nachgelagerte Verlustmonate gewichten.
 // Warengruppe Spielwaren behält ihren eigenständigen Abverkauf nach Weihnachten.
-const WH: number[] = [0.98, 0.96, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1.0, 1.2, 1.75];
+// Nach Weihnachten: stärkeres Basisgeschäft im Q1, ohne isolierte EBITDA-Gutschriften.
+// Spielwaren und Wintersport behalten ihre eigenen saisonalen Abweichungen.
+const WH: number[] = [1.06, 1.045, 1.03, 0.94, 0.95, 0.88, 0.95, 0.85, 0.9, 1.0, 1.2, 1.75];
 
 function mit(basis: number[], over: Record<number, number>): number[] {
   return basis.map((x, i) => (over[i] !== undefined ? over[i] : x));
