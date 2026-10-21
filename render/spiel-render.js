@@ -2,7 +2,7 @@
 // Bündelt src/spiel.js (Engine-TS direkt aus /home/claude/turnaround/src) nach spiel-bundle.js. Mit --bundle nur bündeln.
 // Sonst headless im Hochformat 390 × 844: Woche 0, 26 und 52 mit Bot-Strategie C, dazu ein Bild mit offenem Hauspanel
 // (out/spiel-w00.png, out/spiel-w26.png, out/spiel-w52.png, out/spiel-haus.png, out/spiel-hq-w00.png, out/spiel-hq.png, out/spiel-essen.png, out/spiel-essen-hq.png, out/spiel-hq-abteilungen.png), Messwerte nach out/spiel-messung.json.
-// Einkauf (EINKAUF-VERTRAG.md, Prototyp): neues Spiel in Essen, 8 Wochen, dann Panels per Antippen mit Abgleich gegen die
+// Q05 Abnahme: out/q05-produkte-gruendung.png, q05-marketing-gruendung.png, q05-erster-markenumsatz.png.\n// Einkauf (EINKAUF-VERTRAG.md, Prototyp): neues Spiel in Essen, 8 Wochen, dann Panels per Antippen mit Abgleich gegen die
 // Engine-Abfragen und Aktionen (Freigabe, Kürzen, Ablehnen, Sammelfreigabe, Regler, Marke gründen) samt Wirkung in der
 // Folgewoche: out/einkauf-uebersicht.png, einkauf-wg.png, einkauf-freigaben.png, eigenmarken.png, eigenmarke-gruenden.png,
 // haus-eigenmarke.png, Ergebnis nach out/einkauf-pruefung.json. --nur-einkauf überspringt den Rest.
@@ -207,6 +207,36 @@ async function buendeln() {
     } else pruefSoll('Eigenmarken-Shop im Innenraum', false, 'kein Haus mit Shop in Essen');
     await ev(() => window.spiel.schliessePanel());
     erg.abweichungen = erg.pruefungen.reduce((x, q) => x + q.fehler.length, 0);
+    // Q05: iPhone-Abnahme über Produktentwicklung und Marketing direkt zum Gründungsassistenten,
+    // anschließend echte Wochen bis zur ersten in der Engine gebuchten Markenumsatz-Kennzahl.
+    await ev(() => window.spiel.oeffneProdukte());
+    const neuImProdukt = await tippe('[data-a=eigenmarkeGruenden]');
+    pruefSoll('Q05: Gründung aus Produktentwicklung erreichbar',
+      neuImProdukt && (await ev(() => window.spiel.einkauf.ui.seite)) === 'gruenden', 'Assistent über Produkte');
+    await bild('q05-produkte-gruendung.png');
+    await ev(() => window.spiel.oeffneMarketing());
+    const neuImMarketing = await tippe('[data-a=eigenmarkeGruenden]');
+    pruefSoll('Q05: Gründung aus Marketing erreichbar',
+      neuImMarketing && (await ev(() => window.spiel.einkauf.ui.seite)) === 'gruenden', 'Assistent über Marketing');
+    await bild('q05-marketing-gruendung.png');
+    await ev(() => window.spiel.oeffneEinkauf('eigenmarken'));
+    // Für den Markenumsatz benötigt die neue Ware einen realen Beschaffungsvorlauf;
+    // die wöchentlichen Sammelfreigaben stellen die Warenverfügbarkeit her.
+    const ersteUmsatzWoche = await ev(() => {
+      const S = window.spiel.s, E = window.spiel.E;
+      for (let i = 0; i < 52 && S.phase !== 'zerschlagen'; i++) {
+        const m = E.eigenmarkenUebersicht(S).marken.find((x) => x.name === 'Kiez & Co.');
+        if (m?.umsatz13 > 0) return { woche: S.woche, umsatz: m.umsatz13, status: m.status };
+        E.fuehreAus(S, { typ: 'sammelfreigabe' });
+        E.wocheAbspielen(S);
+      }
+      const m = E.eigenmarkenUebersicht(S).marken.find((x) => x.name === 'Kiez & Co.');
+      return { woche: S.woche, umsatz: m?.umsatz13 ?? 0, status: m?.status ?? 'fehlt' };
+    });
+    pruefSoll('Q05: Erste Eigenmarkenumsätze real gebucht', ersteUmsatzWoche.umsatz > 0,
+      JSON.stringify(ersteUmsatzWoche));
+    await ev(() => window.spiel.oeffneEinkauf('eigenmarken'));
+    await bild('q05-erster-markenumsatz.png');
     fs.writeFileSync(path.join(__dirname, 'out', 'einkauf-pruefung.json'), JSON.stringify(erg, null, 1));
     console.log(`Einkauf: ${erg.pruefungen.reduce((x, q) => x + q.werte, 0)} Werte geprüft, ${erg.abweichungen} Abweichungen, ${erg.aktionen.filter((x) => x.ok).length}/${erg.aktionen.length} Aktionen ok`);
     return erg;
@@ -810,6 +840,13 @@ async function buendeln() {
       const punkt = await p.evaluate(() => {
         const spiel = window.spiel;
         spiel.fokusHaeuser();
+        // Liegt kein Haus frei antippbar im Bild, Kamera auf das erste offene Essener Haus setzen.
+        const frei = (q) => q && q.y < 620 && q.x > 30 && q.x < innerWidth - 30 && document.elementFromPoint(q.x, q.y)?.id === 'karte';
+        const offen = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen');
+        if (!offen.some((h) => frei(spiel.tippPunkt(h.id)))) {
+          const g = spiel.sb.haeuser.get(offen[0].id)?.gruppe;
+          if (g) { const m = new spiel.THREE.Box3().setFromObject(g).getCenter(new spiel.THREE.Vector3()); spiel.kamera({ x: m.x, z: m.z }); }
+        }
         const haus = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen')
           .map((h) => spiel.tippPunkt(h.id)).filter((q) => q && q.y < 620 && q.x > 30 && q.x < innerWidth - 30 && document.elementFromPoint(q.x, q.y)?.id === 'karte')
           .sort((a, b) => Math.abs(a.x - innerWidth / 2) - Math.abs(b.x - innerWidth / 2))[0];

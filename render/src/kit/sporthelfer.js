@@ -1,6 +1,8 @@
 // Gemeinsame Helfer für sporthaus.js und wettbewerber.js (eigene Kopien, warenhaus.js bleibt unberührt).
 // Seite: lokales Fassadensystem. u = Lauf entlang der Fassade (u = L ist immer die sichtbare Hausecke),
 // y = Höhe, t = Abstand nach außen (t < 0 liegt hinter der Fassadenebene).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
 
 export const GLAS = '#4d6677', GLAS_D = '#2f3d48', GLAS_HELL = '#7d9fb2', LICHT = '#f7e9c8', RAHMEN = '#3a4148', STAHL = '#8f989f';
@@ -216,7 +218,7 @@ export function geruest(s, u0, u1, yTop, plane = '#eef1f2') {
   for (let y = 2.1; y < yTop; y += 2.0, k++) {
     s.q(u0, u1, y - 0.05, y + 0.05, t1 - 0.05, t2 + 0.05, brett);
     s.q(u0, u1, y + 1.0, y + 1.08, t2 - 0.05, t2 + 0.05, rohr);
-    if (k % 2 === 0) s.kipp(Math.hypot(du, 2.0), 0.08, 0.08, u0 + du * (0.5 + (k % nU)), y - 1.0, t2 + 0.08, rohr, Math.atan2(2.0, du));
+    if (k % 2 === 0) s.kipp(wurzelSumme(du, 2.0), 0.08, 0.08, u0 + du * (0.5 + (k % nU)), y - 1.0, t2 + 0.08, rohr, Math.atan2(2.0, du));
   }
   const p0 = Math.min(yTop - 2, 4.2);
   const bahnen = Math.max(1, Math.round((u1 - u0) / 3.2));

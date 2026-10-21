@@ -4,6 +4,8 @@
 // ddr: true für Städte der ehemaligen DDR (eigene Ost-Archetypen, Ost-Stilmischung im Bauer, Tatra-Bahnen)
 // export stadtDaten(name) → derselbe Eintrag (oder undefined)
 // Die Einträge passen direkt zu stadtplan(seed, { typ, archetyp, region, ...extra, standorte }).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { rng, zw } from './basis.js';
 import { ARCHETYPEN, ARCHETYP_DEFS, TYPEN, wahlGewichtet } from './stadtplan.js';
 import './archetypen/index.js';   // registrierte Archetypen bringen über def.staedte eigene Städte mit
@@ -199,10 +201,10 @@ const KOORD = {
   Bielefeld: [52.02, 8.53], Siegen: [50.88, 8.02], Bottrop: [51.52, 6.93], Neuss: [51.20, 6.69], Wesel: [51.66, 6.62], Iserlohn: [51.38, 7.70], 'Lüdenscheid': [51.22, 7.63],
   Witten: [51.44, 7.34], Krefeld: [51.33, 6.56], Hamm: [51.68, 7.82], Leverkusen: [51.03, 6.98], 'Gütersloh': [51.91, 8.38], Recklinghausen: [51.61, 7.20], 'Düren': [50.80, 6.48],
 };
-function nachbarStaedteRoh(name) { const a = KOORD[name]; return a ? Object.keys(KOORD).filter((n) => n !== name && Math.hypot((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : []; }
+function nachbarStaedteRoh(name) { const a = KOORD[name]; return a ? Object.keys(KOORD).filter((n) => n !== name && wurzelSumme((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : []; }
 function nachbarnVon(name, region) {
   const a = KOORD[name];
-  if (a) return VIELFALT.filter((e) => { const b = KOORD[e.name]; return b && Math.hypot((a[0] - b[0]) * 111, (a[1] - b[1]) * 70) < NACHBAR_KM; });
+  if (a) return VIELFALT.filter((e) => { const b = KOORD[e.name]; return b && wurzelSumme((a[0] - b[0]) * 111, (a[1] - b[1]) * 70) < NACHBAR_KM; });
   return VIELFALT.filter((e) => e.region === region).slice(-3);
 }
 const nachStadt = new Map();
@@ -216,5 +218,5 @@ export function stadtDaten(name) { return INDEX.get(name); }
 export function nachbarStaedte(name) {
   const a = KOORD[name];
   if (!a) return [];
-  return STADTLISTE.filter((s) => s.name !== name && KOORD[s.name] && Math.hypot((a[0] - KOORD[s.name][0]) * 111, (a[1] - KOORD[s.name][1]) * 70) < NACHBAR_KM).map((s) => s.name);
+  return STADTLISTE.filter((s) => s.name !== name && KOORD[s.name] && wurzelSumme((a[0] - KOORD[s.name][0]) * 111, (a[1] - KOORD[s.name][1]) * 70) < NACHBAR_KM).map((s) => s.name);
 }

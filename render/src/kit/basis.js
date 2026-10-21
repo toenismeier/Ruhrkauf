@@ -13,6 +13,16 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 
 export { THREE };
 
+/**
+ * Deterministisches Mischen (Fisher-Yates). Ersetzt `sort(() => r() - 0.5)`: dort hängt die Zahl der
+ * Zufallszüge vom Sortieralgorithmus der JS-Engine ab, sodass dieselbe Stadt in Chrome-Versionen
+ * oder Safari (iPhone) anders aussah.
+ */
+export function mische(r, liste) {
+  const a = [...liste];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
 export function rng(seed) {
   let s = (typeof seed === 'string' ? [...seed].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) : seed) >>> 0;
   return () => {

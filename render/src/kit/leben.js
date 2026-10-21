@@ -1,5 +1,7 @@
 // N07: Belebte Stadt. Reines Render-Modul ohne Einfluss auf die Engine.
 // Geometrie und Pfade stammen aus dem Stadtplan; Zufallsentscheidungen ausschließlich aus rng(seed).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng } from './basis.js';
 
 export const STANDARD_LEBEN = 'voll'; // Bis N13 eingebunden ist: voll | wenig | aus.
@@ -13,7 +15,7 @@ const wegStart = (l) => l.dir > 0 ? l.s.von + 2 : l.s.bis - 2;
 const wegEnde = (l) => l.dir > 0 ? l.s.bis - 2 : l.s.von + 2;
 const punkt = (l, meter) => koordinate(l.s, wegStart(l) + l.dir * meter, l.v);
 const laenge = (l) => Math.max(0, l.s.bis - l.s.von - 4);
-const abstand = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+const abstand = (a, b) => wurzelSumme(a.x - b.x, a.z - b.z);
 
 export function verkehrsnetz(plan) {
   const spuren = [], fusswege = [], trams = [], haupt = [];

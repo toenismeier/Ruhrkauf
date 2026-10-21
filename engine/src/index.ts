@@ -11,7 +11,7 @@ export {
   type AbteilungId, type Abteilung, type Hq, type HqAngebot, type HqEtage, type HqGebaeude, type HqTyp, type Stufe,
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
-export { GRUPPEN, gruppenFuer } from './daten';
+export { GRUPPEN, gruppenFuer, STAEDTE, STADT_REGIONEN, stadtRegion } from './daten';
 // O05 Ware
 export { warenUebersicht, warenHaus, fundusFrequenzFaktor, clusterListe, hausclusterId, type WareAktion, type WareStand } from './merchandise';
 export { STANDARD_SZENARIO, type Szenario } from './welt';
@@ -33,8 +33,8 @@ export {
   type VorstandUebersicht, type VorstandProfil, type RessortKarte, type PersonKarte, type KandidatenListe, type KandidatKarte, type VorstandSitzung,
 } from './vorstand';
 export {
-  ARTIKELTYPEN, FARBEN, MATERIALIEN, PRODUKT_KATEGORIEN, PRODUKT_PARAM, DAUER_STUFEN, TREND_GRUPPEN, trendFuer, produktNachfrageFaktor, produktMargeDelta,
-  type ArtikelTyp, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
+  ARTIKELTYPEN, ZUSATZ_ARTIKEL, ZUSATZ_ARTIKELTYPEN, FARBEN, MATERIALIEN, PRODUKT_KATEGORIEN, PRODUKT_PARAM, DAUER_STUFEN, TREND_GRUPPEN, trendFuer, produktNachfrageFaktor, produktMargeDelta,
+  type ArtikelTyp, type Produktsparte, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
   type ProduktKarte, type ProdukteListe, type MarkenProdukte, type ProduktKatalog, type Trendbericht, type TrendSaison, type ProduktVorschau, type SterneTeile,
 } from './produkte';
 export {
@@ -71,9 +71,9 @@ export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt
 
 // O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
 export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
-  clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert,
+  clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert, istAufgabeDelegiert, delegationsAufgaben, delegationsGrenze, CLUSTER_AUFGABEN,
   neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor, organisationLeitungKostenWoche,
-  type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion,
+  type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion, type DelegationsAufgabe,
 } from './organisation';
 // O02 Umsatztreiber
 export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './abfragen';

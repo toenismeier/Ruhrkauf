@@ -28,7 +28,11 @@ const path = require('node:path');
       await page.evaluate(() => window.spiel.woche(true));
     }
     await page.evaluate(() => window.spiel.wochenbericht.oeffne());
+    // Der Toast erscheint direkt beim Wochenabschluss und bleibt 2,5 s: parallel abwarten.
+    const toastSichtbar = page.waitForSelector('#erfolge-toast.sichtbar', { timeout: 60000 });
     await page.locator('[data-wa="ja"]').click();
+    await toastSichtbar;
+    await page.screenshot({ path: path.join(bilder, 'erfolge-toast.png') });
     await page.waitForSelector('.wb-bericht');
     const bericht = await page.locator('.wb-erfolge').innerText();
     if (!bericht.includes('Halbes Jahr')) throw new Error('Wochenergebnis ohne neuen Erfolg: ' + bericht);
@@ -36,8 +40,6 @@ const path = require('node:path');
 
     // Toast der echten Freischaltung fotografieren; keine fiktiven Format-Daten injizieren.
     await page.evaluate(() => document.querySelector('#wochen-overlay .wb-schliessen')?.click());
-    await page.waitForSelector('#erfolge-toast.sichtbar', { timeout: 10000 });
-    await page.screenshot({ path: path.join(bilder, 'erfolge-toast.png') });
     if (fehler.length) throw new Error('Browserfehler: ' + fehler.join('; '));
     console.log('N03 Erfolge: 30 Einträge, Freischaltbericht und Toast geprüft. Bilder in ' + bilder);
   } finally {

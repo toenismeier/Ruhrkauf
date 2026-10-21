@@ -13,6 +13,8 @@
 //   (Bürgerhäuser, Münchner Geschäftshäuser, fränkisches und schwäbisches Fachwerk), auch rund um die Hartwig-Häuser.
 //   Eigene Flächen: kulisse, burgberg, suedmarkt, suedkirche, residenz, faecher; eigene Slots: sued_kiesbank,
 //   sued_berg, sued_burg, sued_turm, sued_pyramide.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { bergHoehe, gelaende, rebzeilen } from '../gelaende.js';
@@ -96,7 +98,7 @@ function huegel(S, r, x0, z0, x1, z1, o = {}) {
     const px1 = x0 + (x1 - x0) * pa, pz1 = z0 + (z1 - z0) * pa;
     const cx = (x0 + px1) / 2, cz = (z0 + pz1) / 2, hx = (px1 - x0) / 2, hz = (pz1 - z0) / 2;
     const ramp = Math.max(8, Math.min(x1 - px1, z1 - pz1));
-    h = (x, z) => { const e = Math.hypot(Math.max(0, Math.abs(x - cx) - hx), Math.max(0, Math.abs(z - cz) - hz)); return 0.3 + Hm * glatt(1 - e / ramp); };
+    h = (x, z) => { const e = wurzelSumme(Math.max(0, Math.abs(x - cx) - hx), Math.max(0, Math.abs(z - cz) - hz)); return 0.3 + Hm * glatt(1 - e / ramp); };
     P = { x0, z0, x1: px1, z1: pz1, y: 0.3 + Hm };
   }
   const wiese = o.wiese ?? waehle(r, WIESE);
@@ -277,7 +279,7 @@ function turm(S, scene, p) {
   for (let k = 0; k < 3; k++) { const ring = new THREE.CylinderGeometry(5.7, 5.7, 0.9, 16); ring.translate(cx, y + H - 1.6 + k * 2.6, cz); S.add(ring, '#3f4850'); }
   const ant = new THREE.CylinderGeometry(0.7, 1.2, 38, 8); ant.translate(cx, y + H + 24, cz); S.add(ant, '#e9e7e2');
   for (let k = 0; k < 3; k++) S.box(1.6, 3, 1.6, cx, y + H + 12 + k * 9, cz, k % 2 ? '#d23c32' : '#f1f1ee');
-  for (let q = 0; q < 10; q++) { const tx = zw(r, P.x0 + 1, P.x1 - 1), tz = zw(r, P.z0 + 1, P.z1 - 1); if (Math.hypot(tx - cx, tz - cz) > 7) nadelbaum(S, tx, P.hoehe(tx, tz) - 0.1, tz, r, 1.0); }
+  for (let q = 0; q < 10; q++) { const tx = zw(r, P.x0 + 1, P.x1 - 1), tz = zw(r, P.z0 + 1, P.z1 - 1); if (wurzelSumme(tx - cx, tz - cz) > 7) nadelbaum(S, tx, P.hoehe(tx, tz) - 0.1, tz, r, 1.0); }
   void scene;
   return { hoehe: y + H + 44 };
 }
@@ -507,12 +509,12 @@ function marktBoden(ctx, b, r, teile, B) {
   const farben = ['#f2efe6', '#2f6f8f', '#d0453a', '#3f7d56', '#e8b53c'];
   for (let k = 0, v = 0; k < n * 3 && v < n; k++) {
     const x = B.zw(r, P.x + 4, P.x + P.w - 4), z = b.form === 'strasse' ? (k % 2 ? P.z + P.d * 0.3 : P.z + P.d * 0.72) : B.zw(r, P.z + 4, P.z + P.d - 4);
-    if (!frei(x, z, 3) || Math.hypot(x - cx, z - cz) < 7) continue;
+    if (!frei(x, z, 3) || wurzelSumme(x - cx, z - cz) < 7) continue;
     marktstand(S, x, z, y, waehle(r, farben), r); v++;
   }
   // GESTALTUNG.md: große Plätze nie leer: Baumraster um den Mittelpunkt
   if (b.form !== 'viktualien' && P.w * P.d > 1200) for (let x = P.x + 5; x < P.x + P.w - 4; x += 8) for (let z = P.z + 5; z < P.z + P.d - 4; z += 8) {
-    if (Math.hypot(x - cx, z - cz) < 11 || !frei(x, z, 3)) continue;
+    if (wurzelSumme(x - cx, z - cz) < 11 || !frei(x, z, 3)) continue;
     B.baumSetzen(I, 'kugel', x, y, z, r, 0.75);
   }
   // Bäume am offenen Rand, Bänke, viele Leute
@@ -686,7 +688,7 @@ function nimmWennFrei(E, f) { return frei(E, f.i0, f.i1, f.j0, f.j1) ? nimm(E, f
 function kernViertel(E, kern, rad) {
   return (i, j) => {
     if (kern(i, j)) return 'altstadt';
-    const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+    const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j);
     return dd < rad ? 'gruenderzeit' : 'rand';
   };
 }
@@ -712,13 +714,13 @@ function muenchen(E) {
   nimm(E, { art: 'suedkirche', i0: c - 1, i1: c - 1, j0: ja, j1: ja, kirchArt: 'zwiebel', variante: 'doppelturm', seiten: ['-z', '-x'] });
   nimm(E, { art: 'suedmarkt', i0: c + 1, i1: c + 1, j0: ja + 1, j1: ja + 1, form: 'viktualien', maibaum: true, biergarten: true, seiten: ['-x', '-z'] });
   E.zentrum = { i: c + 0.3, j: ja + 0.2 };
-  const kern = (i, j) => i < iI && Math.hypot(i - c, (j - ja - 0.3) * 1.1) < 2.0;
+  const kern = (i, j) => i < iI && wurzelSumme(i - c, (j - ja - 0.3) * 1.1) < 2.0;
   E.versatz = (k, j) => (kern(k - 0.5, j) ? 10 : 0);
   E.einschub = (i, j) => (kern(i, j) ? 0.3 : 0);
   E.durchgang = 0.3;
   E.viertel = (i, j) => {
     if (kern(i, j)) return 'altstadt';
-    const dd = Math.hypot(i - c, j - ja);
+    const dd = wurzelSumme(i - c, j - ja);
     return dd < (i > iI ? 4.6 : 3.9) ? 'gruenderzeit' : 'nachkrieg';
   };
   E.landmarken.push('slot:bahnhof');
@@ -753,7 +755,7 @@ function altbayern(E) {
   nimmWennFrei(E, { art: 'suedkirche', i0: ki, i1: ki, j0: kj, j1: kj, seiten: ['-z', '-x'], ...kir });
   E.zentrum = { i: c + 0.5, j: jM + 0.7 };
   const zc = { ...E.zentrum };
-  const kern = (i, j) => Math.hypot(i - zc.i, (j - zc.j) * 0.95) < 2.1;
+  const kern = (i, j) => wurzelSumme(i - zc.i, (j - zc.j) * 0.95) < 2.1;
   E.versatz = (k, j) => (kern(k - 0.5, j) ? 14 : 5);
   E.einschub = (i, j) => (kern(i, j) ? 0.35 : 0.08);
   E.durchgang = 0.35;
@@ -824,10 +826,10 @@ function franken(E) {
     E.zentrum = { i: c + 0.5, j: jM + 0.7 };
   }
   const zc = { ...E.zentrum };
-  const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 1.9;
+  const kern = (i, j) => wurzelSumme(i - zc.i, j - zc.j) < 1.9;
   E.versatz = (k, j) => (kern(k - 0.5, j) && st !== 'erlangen' ? 12 : 0);
   E.einschub = (i, j) => (kern(i, j) && st !== 'erlangen' ? 0.3 : 0);
-  E.viertel = (i, j) => (kern(i, j) ? (E.barockStadt ? 'barock' : 'altstadt') : Math.hypot(i - zc.i, j - zc.j) < 3.6 ? 'gruenderzeit' : 'rand');
+  E.viertel = (i, j) => (kern(i, j) ? (E.barockStadt ? 'barock' : 'altstadt') : wurzelSumme(i - zc.i, j - zc.j) < 3.6 ? 'gruenderzeit' : 'rand');
 }
 function nuernberg(E) {
   raster(E, 0.4);
@@ -853,7 +855,7 @@ function nuernberg(E) {
   E.versatz = (k, j) => (imK(k - 0.5, j) && k > K.i0 && k <= K.i1 ? 12 : 0);
   E.einschub = (i, j) => (imK(i, j) ? 0.3 : 0);
   E.durchgang = 0.35;
-  E.viertel = (i, j) => (imK(i, j) ? 'altstadt' : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 4.6 ? 'gruenderzeit' : 'rand');
+  E.viertel = (i, j) => (imK(i, j) ? 'altstadt' : wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 4.6 ? 'gruenderzeit' : 'rand');
   E.landmarken.push('slot:bahnhof');
 }
 function wuerzburg(E) {
@@ -872,10 +874,10 @@ function wuerzburg(E) {
   nimm(E, { art: 'suedkirche', i0: iM + 2, i1: iM + 2, j0: 3, j1: 3, kirchArt: 'romanisch', seiten: ['-z', '-x'] });
   nimmWennFrei(E, { art: 'suedmarkt', i0: iM + 1, i1: iM + 1, j0: 4, j1: 4, form: 'platz', seiten: ['-z', '-x'] });
   E.zentrum = { i: iM + 2, j: 4.4 };
-  const kern = (i, j) => i > iM && Math.hypot(i - iM - 2, j - 3.8) < 2.0;
+  const kern = (i, j) => i > iM && wurzelSumme(i - iM - 2, j - 3.8) < 2.0;
   E.versatz = (k, j) => (kern(k - 0.5, j) ? 10 : 0);
   E.einschub = (i, j) => (kern(i, j) ? 0.25 : 0);
-  E.viertel = (i, j) => (kern(i, j) ? 'barock' : i < iM ? 'altstadt' : Math.hypot(i - iM - 2, j - 4) < 3.8 ? 'gruenderzeit' : 'rand');
+  E.viertel = (i, j) => (kern(i, j) ? 'barock' : i < iM ? 'altstadt' : wurzelSumme(i - iM - 2, j - 4) < 3.8 ? 'gruenderzeit' : 'rand');
   void nz;
 }
 function bamberg(E) {
@@ -892,7 +894,7 @@ function bamberg(E) {
   gross(E, iA + 1, 2, 66, 60);
   nimm(E, { art: 'suedmarkt', i0: iA + 1, i1: iA + 1, j0: 2, j1: 2, form: 'platz', seiten: ['-z', '-x'] });
   E.zentrum = { i: iA + 1, j: 3 };
-  E.viertel = (i, j) => (i < iA ? 'barock' : i === iA + 1 ? 'altstadt' : Math.hypot(i - iA - 1, j - 3) < 3 ? 'gruenderzeit' : 'rand');
+  E.viertel = (i, j) => (i < iA ? 'barock' : i === iA + 1 ? 'altstadt' : wurzelSumme(i - iA - 1, j - 3) < 3 ? 'gruenderzeit' : 'rand');
   E.versatz = (k, j) => 6 * (j > 0 ? 1 : 0);
   void nz;
 }
@@ -929,12 +931,12 @@ function schwaben(E) {
   nimmWennFrei(E, { art: 'suedmarkt', i0: mi, i1: mi, j0: mj, j1: mj, form: st === 'ludwigsburg' ? 'platz' : 'bw', seiten: ['-z', '-x'] });
   E.zentrum = { i: mi + 0.4, j: mj + 0.6 };
   const zc = { ...E.zentrum };
-  const kern = (i, j) => Math.hypot(i - zc.i, (j - zc.j) * 0.9) < (E.T.idx === 2 ? 1.9 : 2.3);
+  const kern = (i, j) => wurzelSumme(i - zc.i, (j - zc.j) * 0.9) < (E.T.idx === 2 ? 1.9 : 2.3);
   const regel = st === 'ludwigsburg';
   E.versatz = (k, j) => (regel ? 0 : kern(k - 0.5, j) ? 16 : 6);
   E.einschub = (i, j) => (regel ? 0 : kern(i, j) ? 0.4 : 0.1);
   E.durchgang = 0.4;
-  E.viertel = (i, j) => (kern(i, j) ? (regel ? 'barock' : E.nachkrieg && Math.hypot(i - zc.i, j - zc.j) > 1.2 ? 'zentrum' : 'altstadt') : Math.hypot(i - zc.i, j - zc.j) < 3.4 ? 'gruenderzeit' : 'rand');
+  E.viertel = (i, j) => (kern(i, j) ? (regel ? 'barock' : E.nachkrieg && wurzelSumme(i - zc.i, j - zc.j) > 1.2 ? 'zentrum' : 'altstadt') : wurzelSumme(i - zc.i, j - zc.j) < 3.4 ? 'gruenderzeit' : 'rand');
   void r;
 }
 
@@ -959,7 +961,7 @@ function stuttgart(E) {
   flussSpalte(E, nx - 1, 1, {});
   E.landmarken.push('slot:bahnhof');
   E.zentrum = { i: c - 1, j: 5 };
-  E.viertel = (i, j) => { const dd = Math.hypot(i - c + 1, j - 5); return dd < 1.6 ? 'zentrum' : dd < 2.2 ? 'altstadt' : dd < 4.4 ? 'gruenderzeit' : 'nachkrieg'; };
+  E.viertel = (i, j) => { const dd = wurzelSumme(i - c + 1, j - 5); return dd < 1.6 ? 'zentrum' : dd < 2.2 ? 'altstadt' : dd < 4.4 ? 'gruenderzeit' : 'nachkrieg'; };
   E.versatz = (k, j) => (j >= 2 ? 6 : 0);
 }
 
@@ -985,7 +987,7 @@ function faecherQuadrate(E) {
     nimmWennFrei(E, { art: 'park', i0: nx - 2, i1: nx - 2, j0: Math.floor(nz / 2), j1: Math.floor(nz / 2), garten: true });
     E.landmarken.push('slot:wasserturm');
     E.zentrum = { i: (nx - 1) / 2 + 0.3, j: (nz - 1) / 2 };
-    E.viertel = (i, j) => (j === 1 && i >= iS && i <= iS + 2 ? 'barock' : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 1.6 ? 'zentrum' : 'gruenderzeit');
+    E.viertel = (i, j) => (j === 1 && i >= iS && i <= iS + 2 ? 'barock' : wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 1.6 ? 'zentrum' : 'gruenderzeit');
     E.quadrate = true;
     return;
   }
@@ -1009,7 +1011,7 @@ function faecherQuadrate(E) {
   nimmWennFrei(E, { art: 'suedkirche', i0: c + 1, i1: c + 1, j0: 4, j1: 4, kirchArt: 'barock', seiten: ['-z', '+x'] });
   // Einkaufslage (Kaiserstraße) zwei Reihen unter dem Schlossplatz: dazwischen liegt der Fächer
   E.zentrum = { i: c + 0.5, j: 4.4 };
-  E.viertel = (i, j) => (j <= 4 && Math.abs(i - c - 0.5) < 2.2 ? 'barock' : Math.hypot(i - c - 0.5, j - 4) < 3.8 ? 'gruenderzeit' : 'rand');
+  E.viertel = (i, j) => (j <= 4 && Math.abs(i - c - 0.5) < 2.2 ? 'barock' : wurzelSumme(i - c - 0.5, j - 4) < 3.8 ? 'gruenderzeit' : 'rand');
   // Fächerstraßen: acht der 32 Strahlen vom Schlossturm (gleiche Winkel wie im Schlossgarten) laufen durch die Innenstadt
   E.diagonalen = ({ bloecke }) => {
     const res = bloecke.find((q) => q.art === 'residenz');
@@ -1053,7 +1055,7 @@ function oberrheinBodensee(E) {
     E.landmarken.push('slot:markthalle');
     E.zentrum = { i: c + 0.6, j: 3.1 };
     const zc = { ...E.zentrum };
-    const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 1.9;
+    const kern = (i, j) => wurzelSumme(i - zc.i, j - zc.j) < 1.9;
     E.versatz = (k, j) => (kern(k - 0.5, j) ? 14 : 4);
     E.einschub = (i, j) => (kern(i, j) ? 0.35 : 0);
     E.viertel = kernViertel(E, kern, 3.2);
@@ -1070,7 +1072,7 @@ function oberrheinBodensee(E) {
   E.baechle = true;
   E.zentrum = { i: c + 0.5, j: jm + 0.7 };
   const zc = { ...E.zentrum };
-  const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 2.0;
+  const kern = (i, j) => wurzelSumme(i - zc.i, j - zc.j) < 2.0;
   E.versatz = (k, j) => (kern(k - 0.5, j) ? 12 : 4);
   E.einschub = (i, j) => (kern(i, j) ? 0.3 : 0);
   E.viertel = kernViertel(E, kern, 3.8);
@@ -1104,7 +1106,7 @@ function alpenrand(E) {
     E.zentrum = { i: c + 0.4, j: 3.6 };
   }
   const zc = { ...E.zentrum };
-  const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 1.8;
+  const kern = (i, j) => wurzelSumme(i - zc.i, j - zc.j) < 1.8;
   E.versatz = (k, j) => (kern(k - 0.5, j) ? 12 : 4);
   E.einschub = (i, j) => (kern(i, j) ? 0.3 : 0);
   E.viertel = kernViertel(E, kern, 2.7);
@@ -1118,7 +1120,7 @@ function parzellierung(ctx, E, b) {
   const { rb } = ctx;
   const v = b.viertel, slots = ctx.einkaufSlots.length;
   const einkauf = slots > 0 || !!E.einkaufKern?.(b.i0, b.j0);
-  if (E.voralpenRand && !einkauf && (v === 'rand' || v === 'nachkrieg') && b.w >= 62 && b.d >= 58 && Math.hypot(b.i0 - E.zentrum.i, b.j0 - E.zentrum.j) > 3.2) { voralpenBlock(ctx, E, b); return true; }   // frei stehende Häuser nur am Ortsrand, nicht im Zentrumsbild
+  if (E.voralpenRand && !einkauf && (v === 'rand' || v === 'nachkrieg') && b.w >= 62 && b.d >= 58 && wurzelSumme(b.i0 - E.zentrum.i, b.j0 - E.zentrum.j) > 3.2) { voralpenBlock(ctx, E, b); return true; }   // frei stehende Häuser nur am Ortsrand, nicht im Zentrumsbild
   b.zeilen = einkauf || rb() < ZEILEN_P[gruppe(v)];
   if (b.zeilen) {
     ctx.T = { ...ctx.T, tiefe: tiefeVon(E) };

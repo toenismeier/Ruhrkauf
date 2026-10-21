@@ -82,15 +82,16 @@
   .posthinweis { font-size: calc(12px * var(--schrift)); line-height: 1.4; }
   #postwarnungswahl { margin: 12px 16px 2px; display: flex; gap: 8px; align-items: center; font-size: calc(12px * var(--schrift)); color: var(--text); }
   #postwarnungswahl input { width: 20px; height: 20px; }
-  .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 0 12px; height: 46px; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; position: relative; }
-  .chipstadt span { font-weight: 700; font-size: calc(15px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .chipstadt i { color: var(--leise); font-style: normal; font-size: calc(12px * var(--schrift)); }
+  .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 4px 10px; min-height: 46px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-content: center; gap: 1px 5px; flex: 1; min-width: 0; position: relative; }
+  .chipstadt #stadtname { grid-column: 1; grid-row: 1; display: block; font-weight: 700; font-size: clamp(10px, 2.8vw, 14px); line-height: 1.1; white-space: nowrap; overflow: visible; text-align: left; }
+  .chipstadt #stadtcluster { grid-column: 1; grid-row: 2; font-size: calc(9px * var(--schrift)); font-weight: normal; text-align: left; }
+  .chipstadt i { grid-column: 2; grid-row: 1 / span 2; color: var(--leise); font-style: normal; font-size: calc(12px * var(--schrift)); }
   .chipstadt select { position: absolute; inset: 0; opacity: 0; font-size: calc(16px * var(--schrift)); }
   button { font: inherit; border: 0; cursor: pointer; }
   .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: calc(14px * var(--schrift)); color: var(--text); }
   #weiter { background: var(--rot); color: #fff; }
   #weiter:disabled { opacity: 0.6; }
-  .botwahl { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: calc(11px * var(--schrift)); color: var(--leise); display: flex; gap: 5px; align-items: center; }
+  .botwahl { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: calc(11px * var(--schrift)); color: var(--leise); display: none; gap: 5px; align-items: center; }
   #panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; background: var(--grund); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); transform: translateY(105%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
   #panel.offen { transform: none; }
   .pkopf { padding: 8px 16px 10px; background: var(--karte); border-radius: 22px 22px 0 0; border-bottom: 1px solid var(--linie); position: relative; }
@@ -444,6 +445,16 @@
   .haus-reiter button.an { background:var(--text); color:white; }
   .haus-sprung { width:100%; background:transparent; border:0; border-bottom:1px solid var(--linie); text-align:left; color:inherit; cursor:pointer; }
   #hausbeobachtung { align-self:flex-start; margin:4px 10px; font-size: calc(12px * var(--schrift)); border:1px solid var(--linie); padding:5px 9px; border-radius:10px; background:var(--karte); color:var(--text); }
+/* Q05: Aufgabensteuerung für die hochformatige iPhone-Ansicht. */
+.org-aufgaben { margin: 0 0 14px 56px; border-left: 2px solid #e5e8eb; padding: 2px 0 2px 10px; }
+.org-aufgaben > small { display: block; color: #65747a; margin: 6px 0 9px; }
+.org-aufgabe { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; border-top: 1px solid #edf0f1; padding: 7px 0; }
+.org-aufgabe > span:first-child { flex: 1 1 110px; font-size: calc(12px * var(--schrift)); }
+.org-aufgabe button { min-height: 32px; padding: 5px 8px; border: 1px solid #b9c8cf; background: #fff; border-radius: 6px; font-size: calc(11px * var(--schrift)); }
+.org-aufgabe button[aria-pressed="true"] { background: #e2f3eb; color: #226545; border-color: #73b998; }
+.org-grenze { display: inline-flex; align-items: center; gap: 3px; font-size: calc(11px * var(--schrift)); }
+.org-grenze b { font-weight: 600; white-space: nowrap; }
+@media (max-width: 430px) { .org-aufgaben { margin-left: 14px; } .org-aufgabe > span:first-child { flex-basis: 100px; } }
   /* O04 Personal: Wochentagsbalken und clusterweite Einsatzübersicht */
   .pe-gruppe { border-bottom: 1px solid var(--linie); padding: 10px 2px; }
   .pe-gruppe:last-child { border-bottom: 0; }
@@ -467,6 +478,8 @@
   button { min-width: 44px !important; min-height: 44px !important; }
   #pzu { width: 44px; height: 44px; top: 9px; right: 8px; border-radius: 22px; }
   #ptitel { margin: 0; padding-right: 50px; outline-offset: 2px; }
+  /* Programmatischer Fokus für Screenreader (tabindex -1) ohne sichtbaren Rahmen */
+  [tabindex="-1"]:focus { outline: none; }
   .punkte button::after { left: calc(50% - 4px); top: calc(50% - 4px); }
   .einst-gruppe .khead { margin: 0; }
   .einst-zeile { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 12px; min-height: 60px; border-top: 1px solid var(--linie); font-size: calc(13px * var(--schrift)); line-height: 1.35; }
@@ -525,7 +538,7 @@
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
 <div class="unten">
-  <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster" style="display:block;font-size: calc(9px * var(--schrift));font-weight:normal"></small><i>🚆</i></button>
+  <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster"></small><i>🚆</i></button>
   <button class="knopf" id="weiter">Woche weiter</button>
   <button class="knopf mitbadge" id="postdirekt" aria-label="Posteingang öffnen" title="Posteingang">✉<span id="postbadge" class="badge" style="display:none">0</span></button>
   <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>

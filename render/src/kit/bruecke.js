@@ -29,6 +29,8 @@ import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
 import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
 import { abholstation } from './abholstation.js';
 import { technikAufDach } from './umbau-aussen.js';
+import schwesterHaeuser from '../../haeuser-schwester.json';
+import outletHaeuser from '../../haeuser-outlet.json';
 import './hq.js';   // meldet 'slot:hq' an
 
 const kwVon = (woche) => (woche % 52) + 1;
@@ -177,7 +179,11 @@ export function spielBauer(s, o = {}) {
   const merk = o.merk;
   const famBenutzt = new Set();
   const wahl = new Map();      // hausId → { fam, fassade } (bleibt beim Neubau gleich)
-  const haeuser = new Map();   // hausId → { p, gruppe, e, schluessel }
+  const haeuser = new Map();   // Engine-Häuser
+  // Volkskauf und FUNDUS liegen bis zur Engine-Maßstab-Integration nur im Grafikkatalog.
+  // Unsichtbare Ray-Boxen (keine Zusatzmeshes) machen sie anklickbar.
+  const statischeDaten = new Map([...schwesterHaeuser, ...outletHaeuser].map((h) => [h.id, h]));
+  const statischeHaeuser = new Map(); // hausId → { haus, p, bounds, e }
   const wettbewerber = new Map(); // Wettbewerber-Id → eigene Gruppe
   const wbSlots = new Map();      // Parzellen-Id → { p, wbId, gruppe, ... }
   let wbCache = null;
@@ -339,6 +345,22 @@ export function spielBauer(s, o = {}) {
     if (x.wbId) wettbewerber.set(x.wbId, x);
     return e;
   };
+  const statischerSlot = (typ) => (S, scene, p) => {
+    // Grafikkatalog unverändert in den gemeinsamen Sammler zeichnen:
+    // keine zusätzlichen Draw Calls oder Geometrie für die Klickfunktion.
+    const e = basis[typ](S, scene, p);
+    const haus = statischeDaten.get(p.standort?.id);
+    if (haus && o.getrennt) {
+      const f = fussabdruck(haus), { x, z } = imSlot(p, f.w, f.d);
+      const hoehe = Math.max(8, e?.hoehe ?? 18);
+      const bounds = new THREE.Box3(
+        new THREE.Vector3(x, 0, z),
+        new THREE.Vector3(x + f.w, hoehe, z + f.d)
+      );
+      statischeHaeuser.set(haus.id, { haus, p, bounds, e });
+    }
+    return e;
+  };
   const hqSlot = (S, scene, p) => {
     if (!basis['slot:hq'] || !p.standort) return { hoehe: 0 };
     if (o.getrennt) return baueHq(p);
@@ -355,7 +377,7 @@ export function spielBauer(s, o = {}) {
   };
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
-    'slot:schwester': slot('slot:schwester'), 'slot:outlet': basis['slot:outlet'],
+    'slot:schwester': statischerSlot('slot:schwester'), 'slot:outlet': statischerSlot('slot:outlet'),
     'slot:premium': slot('slot:premium'),
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };
@@ -401,5 +423,5 @@ export function spielBauer(s, o = {}) {
     if (vater && !o.wurzel) vater.add(neu.gruppe);
     return e;
   }
-  return { bauer, haeuser, hqs, wettbewerber, wbSlots, aktualisiere, neuBauen, zustand: (id) => { const h = hausVon(id); return h ? zustand(h) : null; } };
+  return { bauer, haeuser, statischeHaeuser, hqs, wettbewerber, wbSlots, aktualisiere, neuBauen, zustand: (id) => { const h = hausVon(id); return h ? zustand(h) : null; } };
 }

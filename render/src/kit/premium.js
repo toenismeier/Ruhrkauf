@@ -1,5 +1,7 @@
 // Eigenständige Trophy-Store-Architektur. Kein Warenhaus-Familiengenerator.
 // Vier historische Einzelbauten. Maße und Seed stammen aus der Engine, Farben aus dem Luxussegment.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, zw, schild } from './basis.js';
 import { masse } from './warenhaus.js';
 import { zustandNormal } from './zustaende.js';
@@ -138,7 +140,7 @@ function variante(S,typ,x,z,w,d,y,r) {
     for (const [ax,bw] of [[x+w*0.21,w*0.42],[x+w*0.88,w*0.24]]) {
       const steigung=8.2, half=d*0.5;
       for (const sign of [-1,1]) {
-        const dach=new THREE.BoxGeometry(bw,0.5,Math.hypot(steigung,half));
+        const dach=new THREE.BoxGeometry(bw,0.5,wurzelSumme(steigung,half));
         dach.rotateX(sign*Math.atan2(steigung,half));
         dach.translate(ax,y+steigung/2+1,z+d/2+sign*d/4);
         S.add(dach,KUPFER);

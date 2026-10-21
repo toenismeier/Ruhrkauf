@@ -5,6 +5,8 @@
 // Rahmen-Konzept: Eine Fassade ist ein Rahmen F mit Ursprung (ox, oz), Laufrichtung (dx, dz), Normale (nx, nz) und Länge L.
 // Koordinaten auf dem Rahmen: u entlang der Fassade, y Höhe, t nach außen (t < 0 = im Gebäude).
 // +z-Seite eines Rechtecks: RZ(), +x-Seite: RX(). Gedrehte Rahmen erlauben abgewinkelte und gekrümmte Zeilen.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, Sammler, rng, waehle, zw, FARBEN, heller, dunkler, baum, textTextur, textMaterial, dachProfil, walmdach } from './basis.js';
 import { skaliert } from './sonderbauten.js';
 
@@ -191,7 +193,7 @@ function stab(S, a, b, rad, c, seg = 6) {
 /** Geneigter Balken von a nach b (Breite quer, Höhe senkrecht). */
 function balken(S, a, b, br, ho, c) {
   const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-  const hl = Math.hypot(dx, dz), L = Math.hypot(hl, dy);
+  const hl = wurzelSumme(dx, dz), L = wurzelSumme(hl, dy);
   const g = new THREE.BoxGeometry(L, ho, br);
   g.rotateZ(Math.atan2(dy, hl)); g.rotateY(Math.atan2(-dz, dx));
   g.translate((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
@@ -322,7 +324,7 @@ function hofGruen(S, r, x0, z0, x1, z1, o = {}) {
   if (x1 - x0 < 3 || z1 - z0 < 3) return;
   boden(S, x0, z0, x1, z1, o.rasen ?? RASEN, 0.3, 0.07);
   const A = (x1 - x0) * (z1 - z0), belegt = [...(o.belegt ?? [])], y = 0.37;
-  const frei = (x, z, rad) => belegt.every(([bx, bz, br]) => Math.hypot(bx - x, bz - z) > br + rad);
+  const frei = (x, z, rad) => belegt.every(([bx, bz, br]) => wurzelSumme(bx - x, bz - z) > br + rad);
   const platz = (rad) => { for (let i = 0; i < 30; i++) { const x = zw(r, x0 + rad + 1, x1 - rad - 1), z = zw(r, z0 + rad + 1, z1 - rad - 1); if (frei(x, z, rad)) { belegt.push([x, z, rad]); return [x, z]; } } return null; };
   // Wege
   if (o.weg !== false && z1 - z0 > 10) { const wz = zw(r, z0 + 4, z1 - 4); boden(S, x0, wz - 0.9, x1, wz + 0.9, WEG, 0.3, 0.09); belegt.push(...Array.from({ length: Math.ceil((x1 - x0) / 4) }, (_, i) => [x0 + i * 4, wz, 1.2])); }
@@ -392,7 +394,7 @@ function mosaik(S, F, u0, u1, y0, y1, t, r, o = {}) {
   const su = zw(r, 0.25, 0.75) * nu, sv = zw(r, 0.55, 0.8) * nv, sr = Math.min(nu, nv) * zw(r, 0.22, 0.32);
   const wf = zw(r, 0.5, 1.1), ph = r() * 6, motiv = o.motiv ?? waehle(r, ['sonne', 'bänder', 'figur']);
   for (let i = 0; i < nu; i++) for (let k = 0; k < nv; k++) {
-    const dx = i + 0.5 - su, dy = k + 0.5 - sv, dist = Math.hypot(dx, dy);
+    const dx = i + 0.5 - su, dy = k + 0.5 - sv, dist = wurzelSumme(dx, dy);
     let ci;
     if (motiv === 'sonne' && dist < sr) ci = dist < sr * 0.55 ? 1 : 0;
     else if (motiv === 'sonne' && dist < sr * 1.5 && Math.floor(Math.atan2(dy, dx) * 4 / PI + 8) % 2 === 0) ci = 1;
@@ -782,7 +784,7 @@ function platteWohnRoh(S, scene, p) {
     for (let i = 0; i < m; i++) {
       const a = -Phi / 2 + i * dphi, b = a + dphi;
       const Pa = [cx + Rr * Math.sin(a), cz - Rr * Math.cos(a)], Pb = [cx + Rr * Math.sin(b), cz - Rr * Math.cos(b)];
-      const Ls = Math.hypot(Pb[0] - Pa[0], Pb[1] - Pa[1]);
+      const Ls = wurzelSumme(Pb[0] - Pa[0], Pb[1] - Pa[1]);
       const F = R(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
       const cols = spalten(Ls, MUSTER.wbs70, 0);
       H = plattenBlock(S, F, T, { ...o, cols, ext, salz: i, vorn: sk.vorn, rueck: sk.hinten, giebel: { rechts: i === m - 1 && sk.rechts, links: i === 0 && sk.links } });
@@ -991,7 +993,7 @@ function treppenGiebel(S, F, u0, u1, y, h, wand, orn, stufen = 4) {
   for (let s = 0; s <= stufen; s++) { pk.push([u1 - s * dx, y + (s + 1) * st]); pk.push([u1 - (s + 1) * dx, y + (s + 1) * st]); }
   for (let s = stufen; s >= 0; s--) { pk.push([u0 + (s + 1) * dx, y + (s + 1) * st]); pk.push([u0 + s * dx, y + (s + 1) * st]); }
   // doppelte Punkte am First entfernen
-  const sauber = pk.filter((q, i) => i === 0 || Math.hypot(q[0] - pk[i - 1][0], q[1] - pk[i - 1][1]) > 0.01);
+  const sauber = pk.filter((q, i) => i === 0 || wurzelSumme(q[0] - pk[i - 1][0], q[1] - pk[i - 1][1]) > 0.01);
   fpoly(S, F, sauber, -0.5, 0.15, wand);
   const m = (u0 + u1) / 2;
   for (const f of [-0.28, 0, 0.28]) { const hh = h * (f === 0 ? 0.62 : 0.42); fb(S, F, m + f * b - 0.32, m + f * b + 0.32, y + 0.6, y + 0.6 + hh, 0.15, 0.2, orn); }
@@ -1597,7 +1599,7 @@ function pavillonRoh(S, scene, p) {
     const wand = (pa, pb, farbe) => {
       for (const [q0, q1] of [[0, 0.5], [0.5, 1]]) {
         const A = [pa[0] + (pb[0] - pa[0]) * q0, pa[1] + (pb[1] - pa[1]) * q0], B = [pa[0] + (pb[0] - pa[0]) * q1, pa[1] + (pb[1] - pa[1]) * q1];
-        const L = Math.hypot(B[0] - A[0], B[1] - A[1]), F = R(A[0], A[1], (B[0] - A[0]) / L, (B[1] - A[1]) / L, L);
+        const L = wurzelSumme(B[0] - A[0], B[1] - A[1]), F = R(A[0], A[1], (B[0] - A[0]) / L, (B[1] - A[1]) / L, L);
         const ya = h(A[0], A[1]) - 0.35, yb = h(B[0], B[1]) - 0.35;
         fpoly(S, F, [[0, 0.5], [L, 0.5], [L, yb], [0, ya]], -0.08, 0, farbe);
         const n = Math.max(1, Math.round(L / 1.8));
@@ -1789,7 +1791,7 @@ function fernwaerme(S, punkte, y, o = {}) {
   const farbe = o.farbe ?? '#c9cdd0', rr = o.r ?? 0.45;
   for (let i = 0; i < punkte.length - 1; i++) {
     const [ax, az] = punkte[i], [bx, bz] = punkte[i + 1];
-    const L = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / L, nz = (bx - ax) / L;
+    const L = wurzelSumme(bx - ax, bz - az), nx = -(bz - az) / L, nz = (bx - ax) / L;
     for (const s of [-0.6, 0.6]) stab(S, [ax + nx * s, y, az + nz * s], [bx + nx * s, y, bz + nz * s], rr, farbe, 8);
     const n = Math.max(1, Math.round(L / 7));
     for (let k = 0; k <= n; k++) {
@@ -2307,7 +2309,7 @@ function bracheRoh(S, scene, p) {
   // Trampelpfade
   for (let i = 0; i < 2; i++) {
     const a = [xi + r() * 3, z0 + d - 0.5], b = [x0 + w - 0.5, zi + 3 + r() * (d - 8)];
-    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ang = Math.atan2(-(b[1] - a[1]), b[0] - a[0]);
+    const L = wurzelSumme(b[0] - a[0], b[1] - a[1]), ang = Math.atan2(-(b[1] - a[1]), b[0] - a[0]);
     S.box(L, 0.05, 1.0, (a[0] + b[0]) / 2, 0.39, (a[1] + b[1]) / 2, TRAMPEL, ang);
   }
   for (let i = 0; i < 14; i++) busch(S, zw(r, xi + 1, x0 + w - 1), zw(r, zi + 1, z0 + d - 1), r, zw(r, 0.5, 1.1));

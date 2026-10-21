@@ -64,8 +64,7 @@ export function ecommerceStand(s: GameState): EcommerceStand {
 }
 export function ecommerceCluster(h: Haus): string {
   // O01 setzt haus.hauscluster. Bis dahin wird die Region als stabiler Ersatz verwendet.
-  const hc = (h as Haus & { hauscluster?: string | { id: string } }).hauscluster;
-  return typeof hc === 'string' ? hc : hc?.id ?? h.region;
+  return h.hauscluster ?? h.region;
 }
 const startStation = (s: GameState, h: Haus): boolean => {
   const x = h as Haus & { services?: { abholstation?: boolean } | string[]; abholstation?: boolean;

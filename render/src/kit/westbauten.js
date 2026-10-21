@@ -17,6 +17,8 @@
 // - Wasserseite: rhein_promenade (alle Varianten) und ruhr_kanal 'hafen' drehen ihre Wasserseite unabhängig von p.front
 //   immer zur Kamera (Welt +x oder +z); die Rückgabe enthält dann wasserSeite. Front +z gibt Wasser an +x, Front +x Wasser an +z,
 //   Front -z Wasser an +z, Front -x Wasser an +x. ruhr_kanal 'strecke' und 'schleuse' führen das Wasser quer durch die Mitte.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, Sammler, rng, waehle, zw, FARBEN, heller, dunkler, textTextur, textMaterial, dachProfil, walmdach } from './basis.js';
 
 const PI = Math.PI;
@@ -104,7 +106,7 @@ function stab(S, a, b, rad, c, seg = 6) {
 /** Kantiger Balken von a nach b (quadratischer Querschnitt, eine Kante senkrecht). */
 function balken(S, a, b, br, ho, c) {
   const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-  const hl = Math.hypot(dx, dz), L = Math.hypot(hl, dy);
+  const hl = wurzelSumme(dx, dz), L = wurzelSumme(hl, dy);
   if (L < 1e-4) return;
   const g = new THREE.BoxGeometry(L, ho, br);
   g.rotateZ(Math.atan2(dy, hl)); g.rotateY(Math.atan2(-dz, dx));
@@ -541,7 +543,7 @@ function schlot(S, x, z, h, rU, rO, c, o = {}) {
   if (o.licht) for (let i = 0; i < 2; i++) zyl(S, rO + 0.36 + i * 0.02, rO + 0.36, 0.25, x, h - 3 - i * 6, z, o.licht, 14, true);
 }
 function zaun(S, x0, z0, x1, z1, y0 = 0.3, h = 1.8, c = '#5a6168') {
-  const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.round(L / 2.5));
+  const L = wurzelSumme(x1 - x0, z1 - z0), n = Math.max(1, Math.round(L / 2.5));
   balken(S, [x0, y0 + h, z0], [x1, y0 + h, z1], 0.06, 0.08, c);
   balken(S, [x0, y0 + 0.3, z0], [x1, y0 + 0.3, z1], 0.06, 0.08, c);
   for (let i = 0; i <= n; i++) { const t = i / n; S.box(0.1, h, 0.1, x0 + (x1 - x0) * t, y0 + h / 2, z0 + (z1 - z0) * t, c); }
@@ -782,7 +784,7 @@ function rohrtrasse(S, pkt, y, rad, c, stuetze) {
   for (let i = 0; i < pkt.length - 1; i++) {
     const [ax, az] = pkt[i], [bx, bz] = pkt[i + 1];
     stab(S, [ax, y, az], [bx, y, bz], rad, c, 8);
-    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / 8));
+    const L = wurzelSumme(bx - ax, bz - az), n = Math.max(1, Math.round(L / 8));
     for (let k = 0; k <= n; k++) { const px = ax + ((bx - ax) * k) / n, pz = az + ((bz - az) * k) / n; S.box(0.4, y - rad - 0.3, 0.4, px, 0.3 + (y - rad - 0.3) / 2, pz, stuetze); }
   }
 }
@@ -1057,7 +1059,7 @@ function fachwerkGiebel(S, F, u0, u1, y, h, holz, gefach) {
   const ym = y + h * 0.45, bm = b * 0.55;
   fb(S, F, um - bm / 2, um + bm / 2, ym - 0.09, ym + 0.09, 0.06, 0.15, holz);
   // Streben (Andreaskreuz-Andeutung) und Ortgang
-  const g = (a, c) => { const dx = c[0] - a[0], dy = c[1] - a[1], L = Math.hypot(dx, dy); const gg = new THREE.BoxGeometry(L, 0.16, 0.1); gg.rotateZ(Math.atan2(dy, dx)); gg.translate((a[0] + c[0]) / 2, (a[1] + c[1]) / 2, 0.12); fgeo(S, F, gg, holz); };
+  const g = (a, c) => { const dx = c[0] - a[0], dy = c[1] - a[1], L = wurzelSumme(dx, dy); const gg = new THREE.BoxGeometry(L, 0.16, 0.1); gg.rotateZ(Math.atan2(dy, dx)); gg.translate((a[0] + c[0]) / 2, (a[1] + c[1]) / 2, 0.12); fgeo(S, F, gg, holz); };
   g([u0 + b * 0.18, y], [u0 + b * 0.36, ym]); g([u1 - b * 0.18, y], [u1 - b * 0.36, ym]);
   g([u0, y], [um, y + h]); g([u1, y], [um, y + h]);
   fb(S, F, um - 0.45, um + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS);
@@ -1803,7 +1805,7 @@ function kaimauer(S, x0, z0, x1, z1, WY, c = KAI, oben = 0.36) {
 }
 /** Geneigte Uferböschung entlang x: von zLand (y 0.3) nach zWasser (y WY). */
 function boeschung(S, x0, x1, zLand, zWasser, WY, c = '#9a958a') {
-  const dz = zWasser - zLand, dy = WY - 0.3, L = Math.hypot(dz, dy);
+  const dz = zWasser - zLand, dy = WY - 0.3, L = wurzelSumme(dz, dy);
   const g = new THREE.BoxGeometry(x1 - x0, 0.6, L);
   g.rotateX(-Math.atan2(dy, Math.abs(dz)) * Math.sign(dz));
   g.translate((x0 + x1) / 2, (0.3 + WY) / 2 - 0.3, (zLand + zWasser) / 2);
@@ -1925,7 +1927,7 @@ function kanalRoh(S, scene, p) {
     S.quader(bx - bb / 2, dy - 0.6, zw0 - bo - 2, bx + bb / 2, dy, zw1 + bo + 2, '#9aa1a7');
     S.quader(bx - bb / 2 + 1, dy, zw0 - bo - 2, bx + bb / 2 - 1, dy + 0.06, zw1 + bo + 2, ASPHALT);
     for (const [a, b] of [[zw0 - bo - 2, 0], [zw1 + bo + 2, D]]) {
-      const L = Math.abs(b - a); const g = new THREE.BoxGeometry(bb, 0.6, Math.hypot(L, dy)); g.rotateX(Math.atan2(dy, L) * Math.sign(a - b) * -1); g.translate(bx, dy / 2, (a + b) / 2); S.add(g, '#9aa1a7');
+      const L = Math.abs(b - a); const g = new THREE.BoxGeometry(bb, 0.6, wurzelSumme(L, dy)); g.rotateX(Math.atan2(dy, L) * Math.sign(a - b) * -1); g.translate(bx, dy / 2, (a + b) / 2); S.add(g, '#9aa1a7');
     }
     const bogenF = waehle(r, ['#2f6f8f', '#3f7d56', '#c9483e']);
     for (const dx of [-bb / 2 + 0.3, bb / 2 - 0.3]) {
@@ -2671,7 +2673,7 @@ function rheinPromenadeRoh(S, scene, p) {
     S.quader(px - 4, WY + 1, pz - 1.5, px + 4, WY + 3.6, pz + 1.5, '#f4f2ec'); S.quader(px - 4.3, WY + 3.6, pz - 1.8, px + 4.3, WY + 3.9, pz + 1.8, '#1f4f8f');
     for (const F of sichtbar(p, px - 4, pz - 1.5, 8, 3)) if (F.L > 6) { fb(S, F, 0.6, F.L - 0.6, WY + 1.8, WY + 3.0, 0, 0.06, '#6f8696'); ftext(scene, F, 'Rheinschifffahrt', F.L / 2, WY + 4.3, 0.1, 0.55, F.L * 0.9, '#1f4f8f'); }
     const Lb = pz - 2.6 - (zk + 1), dy = 0.36 - (WY + 1);
-    const g = new THREE.BoxGeometry(2.6, 0.25, Math.hypot(Lb, dy)); g.rotateX(Math.atan2(dy, Lb)); g.translate(px, (WY + 1 + 0.36) / 2, (pz - 2.6 + zk + 1) / 2); S.add(g, '#9aa1a7');
+    const g = new THREE.BoxGeometry(2.6, 0.25, wurzelSumme(Lb, dy)); g.rotateX(Math.atan2(dy, Lb)); g.translate(px, (WY + 1 + 0.36) / 2, (pz - 2.6 + zk + 1) / 2); S.add(g, '#9aa1a7');
     for (const dx of [-1.3, 1.3]) balken(S, [px + dx, 1.4, zk + 1], [px + dx, WY + 2.0, pz - 2.6], 0.08, 0.08, '#2f3438');
     for (const xx of [px - 13, px + 13]) zyl(S, 0.5, 0.5, 8, xx, WY - 1, pz + 3.2, '#5a6168', 8);
     westSchiff(S, scene, px + 1, pz + 7.5, WY, 0, 'ausflug', { name: waehle(r, schiffe), laenge: 36 });
@@ -2818,7 +2820,7 @@ const BERG_LAEDEN = ['Bäckerei Mühlinghaus', 'Metzgerei Halbach', 'Kaffeehaus 
   'Buchhandlung Ibach', 'Weinstube Zur Wupper', 'Optik Schniewind', 'Messerschmiede Kretzer', 'Uhren Platzhoff', 'Blumen Wülfing'];
 /** Diagonaler Balken in der Fassadenebene (Fachwerkstrebe). */
 function strebe(S, F, u0, y0, u1, y1, t, c, b = 0.22) {
-  const L = Math.hypot(u1 - u0, y1 - y0), g = new THREE.BoxGeometry(L, b, 0.12);
+  const L = wurzelSumme(u1 - u0, y1 - y0), g = new THREE.BoxGeometry(L, b, 0.12);
   g.rotateZ(Math.atan2(y1 - y0, u1 - u0)); g.translate((u0 + u1) / 2, (y0 + y1) / 2, t + 0.06);
   fgeo(S, F, g, c);
 }

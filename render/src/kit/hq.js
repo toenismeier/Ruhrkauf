@@ -21,6 +21,8 @@
 //   ABTEILUNGEN                     Name und Farbe je Abteilung (inkl. 'produkt' Produktentwicklung).
 //   hqEtage opt.vorstand            Vorstandsetage, siehe Ergänzung am Dateiende.
 // Slot-Bauer 'slot:hq' wird über registriereSlots (bauer.js) angemeldet: p.standort.hq = Gebäude bzw. Angebot.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, FARBEN, heller, dunkler, gesims, dachProfil, schild, textMaterial } from './basis.js';
 import { lokal, vorbereiten, boden, rueckwand, stuetze, treppenhaus, aufzug, figur, wandschild, haengeschild, GLAS, puppe, PAL } from './innen.js';
 import { registriereSlots } from './bauer.js';
@@ -671,7 +673,7 @@ export function hqEinplanen(plan, hq, stadt) {
   const L = plan.einkaufslage, mx = L ? L.xF : plan.breite / 2, mz = L ? L.zF : plan.tiefe / 2;
   const benutzt = new Set();
   const frei = plan.bloecke.filter((b) => b.art === 'bebaut' && imBlock(b).length > 4 && imBlock(b).every((p) => ERSETZBAR.has(p.typ) && !p.standort && !p.leer));
-  const punkte = (b, W, D) => { if (benutzt.has(b.id) || b.w < W + 12 || b.d < D + 10) return Infinity; const dd = Math.hypot(b.x + b.w / 2 - mx, b.z + b.d / 2 - mz); return Math.abs(dd - 150) + r() * 60; };
+  const punkte = (b, W, D) => { if (benutzt.has(b.id) || b.w < W + 12 || b.d < D + 10) return Infinity; const dd = wurzelSumme(b.x + b.w / 2 - mx, b.z + b.d / 2 - mz); return Math.abs(dd - 150) + r() * 60; };
   // Gruppen: Gebäude gleicher Adresse zusammen, Angebote einzeln
   const gruppen = new Map();
   for (const g of hq.gebaeude ?? []) if (g.stadt === stadt) { const k = adresse(g); if (!gruppen.has(k)) gruppen.set(k, []); gruppen.get(k).push({ g, angebot: false }); }
@@ -917,7 +919,7 @@ function linie(L, lx, ly, lz, w, h, r, farbe = '#d23c32') {
   let y0 = ly + h * zw(r, 0.2, 0.5);
   const n = 5, s = w / n;
   for (let i = 0; i < n; i++) {
-    const y1 = ly + h * zw(r, 0.15, 0.95), dx = s, dy = y1 - y0, l = Math.hypot(dx, dy);
+    const y1 = ly + h * zw(r, 0.15, 0.95), dx = s, dy = y1 - y0, l = wurzelSumme(dx, dy);
     L.geo(new THREE.BoxGeometry(l, 0.04, 0.02).rotateZ(Math.atan2(dy, dx)), lx - w / 2 + s * (i + 0.5), (y0 + y1) / 2 - 0.02, lz, farbe);
     y0 = y1;
   }
@@ -1106,7 +1108,7 @@ const SPEZIAL = {
       for (const [a, b] of umriss) L.box(0.7, 0.55, 0.01, a, 1.7 + b * 0.8, 0.055, '#b5d1b9');
       const pkt = Array.from({ length: 14 }, () => [zw(r, -1.8, 1.8), zw(r, 0.9, 2.5)]);
       for (const [a, b] of pkt) L.box(0.08, 0.08, 0.01, a, b, 0.065, '#d23c32');
-      for (let k = 0; k < 6; k++) { const [a1, b1] = pkt[k], [a2, b2] = pkt[k + 6]; const l = Math.hypot(a2 - a1, b2 - b1); L.geo(new THREE.BoxGeometry(l, 0.025, 0.01).rotateZ(Math.atan2(b2 - b1, a2 - a1)), (a1 + a2) / 2, (b1 + b2) / 2, 0.06, '#e07b2a'); }
+      for (let k = 0; k < 6; k++) { const [a1, b1] = pkt[k], [a2, b2] = pkt[k + 6]; const l = wurzelSumme(a2 - a1, b2 - b1); L.geo(new THREE.BoxGeometry(l, 0.025, 0.01).rotateZ(Math.atan2(b2 - b1, a2 - a1)), (a1 + a2) / 2, (b1 + b2) / 2, 0.06, '#e07b2a'); }
       text(L, 'Leitstand Filialbelieferung', 0, 2.95, 0.07, 0.22, '#ffffff', '#e07b2a');
     } },
     { art: 'frei', w: 4.6, d: 2.6, bau(S, sc, x, z, w, d, st, r, farbe) {
