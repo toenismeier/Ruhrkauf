@@ -26,6 +26,8 @@ import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
 import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
+import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
+import { abholstation } from './abholstation.js';
 import { technikAufDach } from './umbau-aussen.js';
 import './hq.js';   // meldet 'slot:hq' an
 
@@ -190,6 +192,7 @@ export function spielBauer(s, o = {}) {
   const zustand = (h) => {
     if (!zust.has(h.id)) {
       const z = zustandAusHaus(h, s, merk);
+      z.schluessel += '|abholstation:' + (hatAbholstation(s, h) ? 1 : 0);
       const w = nachnutzer(h);
       if (w) z.schluessel += '|nachnutzung:' + wbSchluessel(w);
       zust.set(h.id, z);
@@ -200,7 +203,7 @@ export function spielBauer(s, o = {}) {
   const baueWarenhaus = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
-    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); return res; }
+    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
     // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
     if (!wahl.has(h.id)) {
       let fam = familieVon(h), fassade = h.fassade;
@@ -218,6 +221,7 @@ export function spielBauer(s, o = {}) {
     const res=nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
       : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
     if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    if (!nutzer && hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d });
     return res;
   };
   const baueSport = (S, scene, p, h) => {

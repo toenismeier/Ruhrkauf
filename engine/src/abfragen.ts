@@ -7,6 +7,7 @@ import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
 import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
+import { ecommerceHaus } from './ecommerce';
 import { planungBericht, planWoche } from './planung';
 
 
@@ -230,7 +231,7 @@ export function hausDetail(s: GameState, id: string) {
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),
   }));
-  return { haus: h, etagen, waren: warenHaus(s, h), wettbewerber: wettbewerbUebersicht(s, h.stadt) };
+  return { haus: h, etagen, waren: warenHaus(s, h), wettbewerber: wettbewerbUebersicht(s, h.stadt), ecommerce: ecommerceHaus(s, id) };
 }
 
 export function warenwirtschaft(s: GameState) {
@@ -264,6 +265,8 @@ export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalende
 
 /** Wettbewerbsübersicht und Übergabeobjekte für das spätere Stadtbild. */
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
+// O09 E-Commerce
+export { ecommerceUebersicht, ecommerceHaus, ecommerceBruecke } from './ecommerce';
 
 // O03 IT: Datenmodell und Systemlandkarte liegen ausschließlich in der Engine.
 export { itUebersicht, itDeckelGrund } from './it';

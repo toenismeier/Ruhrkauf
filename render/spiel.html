@@ -506,6 +506,9 @@
   .testwerkzeuge #test-bericht { display: block; width: 100%; min-height: 95px; margin-top: 10px; padding: 8px; border: 1px solid #c7cbd0; border-radius: 9px; font-size: calc(11px * var(--schrift)); }
   #werkzeuge[hidden] { display: none !important; }
 
+  /* O09 E-Commerce */
+  .online-verlauf { display:flex; align-items:flex-end; gap:3px; height:100px; padding:8px 0; border-bottom:1px solid var(--linie); }
+  .online-balken { background:#597baa; flex:1; min-width:2px; border-radius:2px 2px 0 0; }
 </style>
 </head>
 <body>
@@ -542,6 +545,7 @@
       <button class="mkachel" id="chronik" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M7 4v16M10 9h7M10 13h7"/></svg><b>Chronik</b><small>Geschichte und Archiv</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
+      <button class="mkachel" id="online"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M3 11h18M8 4h8M9 16h6"/></svg><b>Online</b><small>hartwig.de, Fulfillment, Abholung</small></button>
       <!-- O01 Organisation -->
       <button class="mkachel" id="organisation"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="1" y="17" width="6" height="5" rx="1"/><rect x="9" y="17" width="6" height="5" rx="1"/><rect x="17" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M4 17v-5h16v5M12 12v5"/></svg><b>Organisation</b><small>Bereiche, Regionen, Hauscluster</small></button>
       <button class="mkachel" id="it" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="2"/><path d="M7 7V4M12 7V4M17 7V4M7 21v-3M12 21v-3M17 21v-3M7 11h2M12 11h2M17 11h2"/></svg><b>IT</b><small>CDO, Systeme, Projekte</small></button>
