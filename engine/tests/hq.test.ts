@@ -33,8 +33,7 @@ describe('HQ Startzustand und Flächenregel', () => {
   test('Bedarf je Abteilung = FTE × 14 qm, voll belegt auf gemieteten Etagen, keine Etage überbelegt', () => {
     for (const a of s.hq.abteilungen) expect(platzQm(s, a)).toBe(a.fte * HQ_PARAM.qmJeFte);
     for (const g of s.hq.gebaeude) for (const e of g.etagen) expect(belegtQm(s, g, e)).toBeLessThanOrEqual(e.qm);
-    // Volkskauf/FUNDUS verbessern Essens Standortwirkung zum Netz um 0,4 % (standorte.ts).
-    for (const id of ABTEILUNGEN) expect(s.hq.wirkung[id]).toBeCloseTo(1, 2);
+    for (const id of ABTEILUNGEN) expect(s.hq.wirkung[id]).toBe(1);
   });
   test('Abteilung ohne Platz wirkt mit Stufe 0, Umzug ohne Platz wird abgelehnt', () => {
     const t = neuesSpiel(1);
@@ -100,7 +99,7 @@ describe('HQ Kosten', () => {
     expect(hqKosten(s).personal).toBeLessThan(vorher);
     expect(s.cash).toBeLessThan(cash);
     expect(s.stakeholder.betriebsrat).toBeLessThan(br);
-    expect(s.hq.wirkung.verwaltung).toBeCloseTo(1, 2); // Überbesetzung abgebaut, Wirkung bleibt (Standortwirkung Essen +0,4 % durch Volkskauf/FUNDUS)
+    expect(s.hq.wirkung.verwaltung).toBe(1); // Überbesetzung abgebaut, Wirkung bleibt
     expect(platzQm(s, v)).toBe(v.fte * 14); // Fläche wird mit frei
   });
   test('Gekündigte Etage spart Miete', () => {

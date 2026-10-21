@@ -6,7 +6,7 @@ import {
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
 import { initialisierePlanung } from './planung';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
-import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
+import { erzeugeHq, hqAktualisiere, neueHqAngebote, reiseIndex } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
 import { erzeugeEigenmarken } from './eigenmarken';
 import { erzeugeVorstand, vorstandKostenWoche } from './vorstand';
@@ -646,7 +646,9 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereWare(s);
   // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
   initialisiereFormate(s);
-  // Volkskauf/FUNDUS sind jetzt aktiv: HQ-Wirkung und Zentralkosten auf das ganze Netz beziehen.
+  // Volkskauf/FUNDUS sind jetzt aktiv: Erreichbarkeit der Zentrale auf das ganze Netz
+  // neu beziehen (Startwirkung bleibt exakt 1), Zentralkosten neu rechnen.
+  s.hq.reiseBasis = reiseIndex(s, s.hq.sitz);
   hqAktualisiere(s);
   return s;
 }
