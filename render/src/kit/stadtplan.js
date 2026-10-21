@@ -637,7 +637,7 @@ export const SLOT_ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus'
 function einkaufslage(E, standorte) {
   const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? '1a', rolle: st.rolle ?? 'warenhaus' }));
   const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b');
-  E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') );
+  E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') && !(e.rolle === 'outlet' && e.lage === 'rand'));
   E.einkauf = [];
   E.einkaufZellen = new Set();
   // Maßstab: Metropolen mit vielen eigenen Innenstadthäusern erhalten ein bis zwei
@@ -796,8 +796,8 @@ function einkaufsKreuz(E, innen, zc) {
 
 /**
  * Standorte 'center' (Einkaufszentrum an der Ausfallstraße) und 'rand' (Fachmarktlage) auf Randzellen legen.
- * Center-Standorte derselben Stadt teilen sich Zentren: bis 2 Standorte ein Center, mehr zwei. Hartwig-Warenhäuser
- * werden zuerst verteilt, Hartwig Sport und weitere Mieter danach, so dass Warenhaus und Sport im selben Center liegen.
+ * Die Center-Standorte erhalten jeweils ein eigenes Gebäude. Hartwig-Warenhäuser
+ * werden zuerst verteilt, Hartwig Sport und weitere Mieter danach. FUNDUS-Randlagen werden im Außenring platziert.
  */
 function randLagen(E, randZelle, zellenNach) {
   const { r } = E;

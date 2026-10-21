@@ -7,7 +7,9 @@ const root = __dirname, out = path.join(root, 'out');
 fs.mkdirSync(out, { recursive: true });
 const hauskataloge = ['./haeuser.json', './haeuser-schwester.json', './haeuser-outlet.json'].flatMap((datei) => require(datei));
 const staedte = [...new Set(hauskataloge.map((h) => h.stadt))].sort((a,b)=>a.localeCompare(b,'de'));
-if (staedte.length !== 220) throw new Error('Unvollständige Engine-Hausexporte: ' + staedte.length + ' statt 220 Städte. Seed 1 neu exportieren.');
+if (hauskataloge.length !== 560 || staedte.length !== 220 || require('./haeuser.json').length !== 408 ||
+    require('./haeuser-schwester.json').length !== 86 || require('./haeuser-outlet.json').length !== 66)
+  throw new Error('Unvollständige Seed-1-Exporte: ' + hauskataloge.length + '/560 Häuser, ' + staedte.length + '/220 Städte. Engine-Export erneut durchführen.');
 const protokoll = [], fehler = [];
 for (let i = 0; i < staedte.length; i += 5) {
   const gruppe = staedte.slice(i, i + 5);

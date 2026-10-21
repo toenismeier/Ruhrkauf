@@ -20,6 +20,12 @@ const formatHaeuser = {
   volkskauf,
   fundus,
 };
+// Kein grüner Kopienbericht anhand des veralteten Teilbestands.
+for (const [format, anzahl] of Object.entries({ hartwig: 360, premium: 4, sport: 44, volkskauf: 86, fundus: 66 }))
+  if (formatHaeuser[format].length !== anzahl)
+    throw new Error('Unvollständiger Seed-1-Export: ' + format + ' ' + formatHaeuser[format].length + '/' + anzahl);
+const ids = [...haupt, ...volkskauf, ...fundus].map((h) => h.id);
+if (new Set(ids).size !== 560) throw new Error('Doppelte Haus-IDs im Engine-Export');
 const familie = (k, h) => k === 'sport' ? familieSport(h) : k === 'volkskauf' ? familieSchwester(h)
   : k === 'fundus' ? familieOutlet(h) : familieVon(h);
 const signatur = (k, h) => {

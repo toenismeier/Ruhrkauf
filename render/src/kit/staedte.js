@@ -196,7 +196,7 @@ function baueEintrag(name, liste) {
 const PLUGIN_BILD = pluginBild();
 const WB_GENUTZT = new Map();   // Region → Map(Art → Anzahl), siehe baueEintrag
 const VIELFALT = [];            // bereits gebaute Einträge: { name, region, wb, kirche, konzern } für die Nachbarprüfung
-/** Ungefähre Lage (Breite, Länge) der West-Städte; Nachbarn liegen näher als NACHBAR_KM (direkte Nachbarstädte im Ballungsraum). */
+/** Geografie aller 220 Engine-Städte für die bundesweite 28-km-Nachbarprüfung. */
 const NACHBAR_KM = 28;
 const KOORD = Object.fromEntries(Object.entries(STADT_GEOGRAFIE).map(([n, meta]) => [n, meta.koord]));
 function nachbarStaedteRoh(name) { const a = KOORD[name]; return a ? Object.keys(KOORD).filter((n) => n !== name && wurzelSumme((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : []; }
