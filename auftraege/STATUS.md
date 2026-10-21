@@ -25,9 +25,9 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | main | **gemergt 21.10.** (bf215bc) | – |
 | Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | `feat/engine-formate` | **startet 21.10.** | Auftrag mit Stand 21.10. (TK-Maxx-Prinzip, Referenz-GuV, Bot T/D) |
 | Q09 Schnee (schwebende Platten) | – | **gemergt 21.10.** (#54, 390b69d) | Schnee liegt auf echten Dachflächen, je Dachebene eingerückt (Claude-Fix: kein Kreuzmuster auf Satteldächern); Winter-Dreiecke unter main, Draw Calls gleich; Fingerabdrücke 112/112 unverändert |
-| Q10 Kamera bleibt über Haus | `feat/q10-kamera-haus` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q10 Kamera bleibt über Haus | – | **gemergt 21.10.** (#53, 7af4959) | Hausdetail lässt oben Kartenstreifen frei (62 dvh), Kamera bleibt am Haus bei Kachelnachladen, Woche, Scroll, Resize; Mobil-Smoke Berlin 3 Häuser ≤ 40 px; Fingerabdrücke 112/112 unverändert |
 | Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | `feat/q11-eigenmarken-sortiment` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q12 Hausbesuch Laufwege | `feat/q12-hausbesuch-laufwege` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q12 Hausbesuch Laufwege | – | **gemergt 21.10.** (#56) | Wegsuche auf Ladenbau-Belegung, 9 Etagen (Warenhaus, Sport, FUNDUS) je 60 s: 0 Kollisionen, 1,17–1,21 m/s, bildratenunabhängig; Claude-Fixes: zweiter Hausbesuch/Hauswechsel scheiterte (Kontext zerstört), Sporthaus-Etagen mit Etagenbau warfen Fehler (`etageNr`); Fingerabdrücke 112/112 unverändert |
 | Q13 Sandkasten unbegrenzt | `feat/q13-sandkasten` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q14 Oberfläche gesamt (Gestaltungssystem) | `feat/q14-oberflaeche-design` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` | **startet 21.10.** | `auftraege/wurf2/` |
@@ -39,8 +39,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11** | `auftraege/wurf2/` |
-| Q25 Produktbilder und Model (Claude) | `feat/q25-produktbilder` | **in Arbeit (Claude)** | `auftraege/wurf2/` |
+| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; Bildschnittstelle steht: `render/src/kit/mode/silhouetten.json` (aus PR #67)** | `auftraege/wurf2/` |
+| Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **Model-Stil von Ummo abgenommen (21.10.), ausgerollt: 106 Silhouetten, Model je Produkt, Einbau Produktentwicklung; CI läuft** | `auftraege/wurf2/` |
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
