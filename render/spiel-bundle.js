@@ -130039,7 +130039,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o2) => typeof o2 === "object" ? { wert: o2.wert ?? o2.value, titel: o2.titel ?? o2.label ?? o2.wert } : { wert: o2, titel: o2 };
-  var version = () => true ? "02a19d8" : "Entwicklung";
+  var version = () => true ? "80e9806" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
