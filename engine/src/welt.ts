@@ -130,10 +130,12 @@ export const PARAM = {
   lohnVollzeit: 1_050, // € je FTE und Woche inkl. Nebenkosten
   lohnTeilzeit: 990,
   lohnAushilfe: 600,
-  // Maßstab 560: Filialbesetzung pro Fläche dichter (Fixkosten der Ausgangskrise).
-  qmJeFte: 430,
-  // Umsatzbasierter Personalbedarf; verschiebt EBITDA ohne Eingriff Richtung -4 %.
-  umsatzJeFte: 6_300,
+  // M7 Referenz: Produktivität zum Start dem Ziel 16 % Personalquote
+  // anpassen. Die früheren 430 qm / 6.300 € je FTE führten bei
+  // 16 % Lohnkosten zu Unterbesetzung und künstlich fehlendem Umsatz.
+  // Personalbedarf UND Anfangs-FTE werden mit derselben Norm ermittelt.
+  qmJeFte: 620,
+  umsatzJeFte: 9_000,
   sonstigeQuote: 0.016,
   sonstigeQm: 0.45,
   // Filial-GuV Referenz: Distribution/Transport/Filiallogistik 6,3 %.
