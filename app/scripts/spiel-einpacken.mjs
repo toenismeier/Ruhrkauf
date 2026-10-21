@@ -10,7 +10,6 @@ const ziel = join(hier, '..', 'spiel', 'spiel.html');
 
 let html = readFileSync(join(render, 'spiel.html'), 'utf8');
 const bundle = readFileSync(join(render, 'spiel-bundle.js'), 'utf8').replace(/<\/script/gi, '<\\/script');
-const css = readFileSync(join(render, 'src', 'ui', 'reise-woche.css'), 'utf8');
 const icon = 'data:image/svg+xml;base64,' + readFileSync(join(render, 'icon.svg')).toString('base64');
 
 const ersetze = (muster, neu, name) => {
@@ -18,7 +17,10 @@ const ersetze = (muster, neu, name) => {
   html = html.replace(muster, () => neu);
 };
 ersetze(/<script[^>]*src="\.?\/?spiel-bundle\.js"[^>]*><\/script>/, '<script>window.HARTWIG_APP = true;</script>\n<script>' + bundle + '</script>', 'Bundle');
-ersetze(/<link[^>]*href="\.\/src\/ui\/reise-woche\.css"[^>]*>/, '<style>' + css + '</style>', 'CSS');
+// Alle Stylesheets aus src/ui einbetten (Reise/Woche und die Module aus N01–N09).
+const cssMuster = /<link[^>]*rel="stylesheet"[^>]*href="\.\/(src\/ui\/[\w-]+\.css)"[^>]*>/g;
+if (!cssMuster.test(html)) throw new Error('Nicht gefunden: CSS');
+html = html.replace(cssMuster, (_, datei) => '<style>' + readFileSync(join(render, datei), 'utf8') + '</style>');
 ersetze(/<link[^>]*rel="manifest"[^>]*>/, '', 'Manifest');
 html = html.replace(/\.\/icon\.svg/g, icon);
 

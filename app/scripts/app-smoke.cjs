@@ -26,6 +26,7 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'spiel', 'spiel.html'), 
   await page.goto(URSPRUNG, { waitUntil: 'load' });
   await page.locator('#start.an').waitFor();
   const tStart = Date.now() - t0;
+  await page.locator('.sz-karte[data-szenario=standard]').click(); // N09: Szenarioauswahl
   await page.locator('#startknopf').click();
   const t1 = Date.now();
   await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length > 0);
