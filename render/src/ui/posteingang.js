@@ -8,7 +8,7 @@ export function posteingangModul(ctx) {
   const einstellungen = () => ctx.zustand();
   const daten = () => E.posteingang(s());
   const wochen = (n) => n === 0 ? 'läuft diese Woche ab' : n === 1 ? 'noch 1 Woche' : 'noch ' + n + ' Wochen';
-  const leer = (t) => '<div class="karte"><div class="zeile postleer">' + esc(t) + '</div></div>';
+  const leer = (t) => '<div class="postleer" role="status" style="padding:24px 16px;color:var(--ui-muted,#62666a);text-align:center">' + esc(t) + '</div>';
 
   function tabs(D) {
     const aktiv = einstellungen().reiter;
@@ -40,7 +40,7 @@ export function posteingangModul(ctx) {
     let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => '<option ' + (k === filter ? 'selected ' : '') + 'value="' + esc(k) + '">' + esc(k) + '</option>').join('') + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
     if (!liste.length) return html + leer('Keine Meldungen in dieser Kategorie.');
     const gelesen = new Set(einstellungen().gelesen ?? []);
-    const symbole = { Presse: '📰', Häuser: '🏬', Finanzen: '€', Personal: '👥', Konkurrenz: '↗', Eigentümer: '◆', IT: '⚙' };
+    const symbole = { Presse: 'P', Häuser: 'H', Finanzen: '€', Personal: 'M', Konkurrenz: 'K', Eigentümer: 'E', IT: 'IT' };
     // Q06: Wettbewerb ist eine eigene, im Standard geschlossene Sammelrubrik.
     const wettbewerb = liste.filter((m) => m.kategorie === 'Konkurrenz');
     const andere = liste.filter((m) => m.kategorie !== 'Konkurrenz');
