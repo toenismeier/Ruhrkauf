@@ -1013,7 +1013,7 @@ const GEMEINSAM = {
 
 registriereArchetyp('ruhrstadt', { ...GEMEINSAM, name: 'Ruhrgebietsstadt', entwurf: ruhrstadt,
   staedte: {
-    Essen: { essen: true, bahnLage: 'mitte', zeche: 'doppelbock', zechenZustand: 'museum', konzern: 0, bahnhof: '50er', halde: 'kreuz', ekz: false, nah: ['konzern:turm70', 'ekz:90er', 'zeche:doppelbock', 'halde', 'kanal'], markt: 'keiner' },
+    Essen: { essen: true, bahnLage: 'mitte', zeche: 'doppelbock', zechenZustand: 'museum', konzern: 1, konzernVarianten: ['glas60'], bahnhof: '50er', halde: 'kreuz', ekz: false, nah: ['konzern:turm70', 'ekz:90er', 'zeche:doppelbock', 'halde', 'kanal'], markt: 'keiner' },
     Dortmund: { bahnLage: 'oben', huette: true, huettenZustand: 'museum', zeche: 'malakow', zechenZustand: 'museum', konzern: 1, konzernVarianten: ['backstein20'], bahnhof: 'altbau', stadion: 'stadion70', halde: false, nah: ['brauturm', 'turm', 'zeche:malakow', 'kanal'], markt: 'laenglich' },
     Duisburg: { bahnLage: 'rechts', rhein: true, huette: true, zeche: false, halde: false, bahnhof: '70er', ekz: '80er', konzern: 1, konzernVarianten: ['backstein20'], nah: [], markt: 'keiner' },
     Gelsenkirchen: { bahnLage: 'links', zeche: 'strebe', zechenZustand: 'stillgelegt', halde: 'treppe', stadion: 'arena', bahnhof: '70er', kokerei: false, konzern: 1, konzernVarianten: ['turm70'], nah: [], markt: 'einer' },
