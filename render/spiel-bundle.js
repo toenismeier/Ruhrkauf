@@ -50126,7 +50126,10 @@
       const b2 = st2 && plan2.bloecke.find((q2) => q2.id === st2.block);
       [x, z2] = b2 ? [b2.x + b2.w / 2, b2.z + b2.d / 2] : [plan2.breite / 2, plan2.tiefe / 2];
     } else if (o2.punkt) [x, z2] = [plan2.breite * o2.punkt[0], plan2.tiefe * o2.punkt[1]];
-    else {
+    else if (plan2.startBlick === "hbf" && plan2.einkaufslage) {
+      const L2 = plan2.einkaufslage, bh = plan2.parzellen.find((p2) => p2.typ === "slot:bahnhof");
+      [x, z2] = bh ? [L2.xF + 6, Math.min(L2.zF - 8, bh.z + bh.d + 30)] : [L2.xF - 8, L2.zF - 8];
+    } else {
       const L2 = plan2.einkaufslage;
       [x, z2] = L2 ? [L2.xF - 8, L2.zF - 8] : [plan2.breite / 2, plan2.tiefe / 2];
     }
@@ -50858,7 +50861,8 @@
     const n1a = innen.filter((e) => e.lage === "1a").length;
     const schon = E4.einkaufslagen ?? [];
     let best = null;
-    for (let kF2 = 1; kF2 < nx; kF2++) for (let lF2 = 1; lF2 < nz; lF2++) {
+    if (E4.kreuzWunsch) best = { s: 0, kF: E4.kreuzWunsch.kF, lF: E4.kreuzWunsch.lF, k: kandidatenAm(E4.kreuzWunsch.kF, E4.kreuzWunsch.lF) };
+    else for (let kF2 = 1; kF2 < nx; kF2++) for (let lF2 = 1; lF2 < nz; lF2++) {
       if (istHaupt(E4.zTyp[kF2]) || istHaupt(E4.xTyp[lF2]) || E4.tram.includes("z" + kF2)) continue;
       if (E4.zTyp[kF2] === "einkauf" && E4.xTyp[lF2] === "einkauf") continue;
       const k2 = kandidatenAm(kF2, lF2);
@@ -50919,8 +50923,9 @@
     fixiere(E4, kF);
     const amZ = meine.filter((e) => e.lage === "1a" && (e.i === kF - 1 || e.i === kF)).map((e) => e.j);
     const amX = meine.filter((e) => e.lage === "1a" && (e.j === lF - 1 || e.j === lF)).map((e) => e.i);
-    const j0 = klemm(Math.min(lF - 2, ...amZ), 0, nz - 1), j1 = klemm(Math.max(lF + 1, ...amZ), 0, nz - 1);
-    const i0 = klemm(Math.min(kF - 2, ...amX), 0, nx - 1), i1 = klemm(Math.max(kF + 1, ...amX), 0, nx - 1);
+    const W3 = E4.kreuzWunsch ?? {};
+    const j0 = klemm(Math.min(lF - 2, ...amZ, W3.j0 ?? 99), 0, nz - 1), j1 = klemm(Math.max(lF + 1, ...amZ, W3.j1 ?? -1), 0, nz - 1);
+    const i0 = klemm(Math.min(kF - 2, ...amX, W3.i0 ?? 99), 0, nx - 1), i1 = klemm(Math.max(kF + 1, ...amX, W3.i1 ?? -1), 0, nx - 1);
     for (let j2 = j0; j2 <= j1; j2++) E4.fz.push(`z${kF}:${j2}`);
     for (let i = i0; i <= i1; i++) E4.fz.push(`x${lF}:${i}`);
     const L2 = { kF, lF, i0, i1, j0, j1 };
@@ -50942,7 +50947,8 @@
       const anHaupt = (i2, j3) => HAUPTLICH.has(E4.zTyp[i2 + 1]) || HAUPTLICH.has(E4.xTyp[j3 + 1]) || HAUPTLICH.has(E4.zTyp[i2]) || HAUPTLICH.has(E4.xTyp[j3]);
       const abstand3 = (i2, j3) => belegt2.reduce((a2, [p2, q2]) => Math.min(a2, Math.abs(p2 - i2) + Math.abs(q2 - j3)), 99);
       const zweiteReihe = (i2, j3) => E4.aktiv(i2, j3) && Math.min(i2, j3, E4.spalten.length - 1 - i2, E4.reihen.length - 1 - j3) === 1;
-      let l = L2.art === "center" ? zellenNach((i2, j3) => zweiteReihe(i2, j3) && dist2(i2, j3) > 3.4 && abstand3(i2, j3) > 1, (i2, j3) => (anHaupt(i2, j3) ? 4 : 1) * dist2(i2, j3)) : [];
+      const wunsch = L2.art === "center" ? (E4.centerWunsch ?? []).find(([i2, j3]) => zelleFrei(E4, i2, j3) && abstand3(i2, j3) > 0) : null;
+      let l = wunsch ? [[wunsch, 1]] : L2.art === "center" ? zellenNach((i2, j3) => zweiteReihe(i2, j3) && dist2(i2, j3) > 3.4 && abstand3(i2, j3) > 1, (i2, j3) => (anHaupt(i2, j3) ? 4 : 1) * dist2(i2, j3)) : [];
       if (!l.length) l = zellenNach((i2, j3) => randZelle(i2, j3) && dist2(i2, j3) > 2.4 && abstand3(i2, j3) > 1, (i2, j3) => (anHaupt(i2, j3) ? L2.art === "center" ? 4 : 1.5 : 1) * dist2(i2, j3));
       if (!l.length) l = zellenNach((i2, j3) => dist2(i2, j3) > 1.8 && abstand3(i2, j3) > 0, (i2, j3) => dist2(i2, j3));
       if (!l.length) continue;
@@ -51523,13 +51529,13 @@
           vorplatzKuerzen(ctx, b2, "z", bh.z, bh.d, plus ? "+x" : "-x");
         }
       } else if (b2.art === "bahn") {
-        const gross2 = b2.gross && E4.typ === "metropole" && b2.w >= 140;
+        const gross2 = b2.gross && (E4.typ === "metropole" || b2.essenHbf) && b2.w >= 140;
         const W3 = gross2 ? Math.min(b2.w - 24, zw(rb, 130, 150)) : Math.min(b2.w - 24, zw(rb, 64, 92)), D0 = gross2 ? 34 : zw(rb, 22, 28);
-        const band = Math.min(E4.typ === "mittelstadt" ? 16 : 26, Math.max(12, b2.d - D0 - 8)), D = Math.min(D0, b2.d - band - 4);
+        const band = b2.band ?? Math.min(E4.typ === "mittelstadt" ? 16 : 26, Math.max(12, b2.d - D0 - 8)), D = Math.min(D0, b2.d - band - 4);
         const cx = b2.bahnhofLinie !== void 0 ? zL[b2.bahnhofLinie].x : b2.x + b2.w / 2;
         const zB = b2.oben ? b2.z + 2 + band + 1 : b2.z + b2.d - 2 - band - 1 - D;
         const bahnhofX = klemm(cx - W3 / 2, b2.x + 4, b2.x + b2.w - W3 - 4), bahnhofW = W3;
-        neueParzelle(ctx, "slot:bahnhof", bahnhofX, zB, W3, D, b2.oben ? ["+z", "-z"] : ["-z", "+z"], "frei", { klasse: 4 });
+        neueParzelle(ctx, "slot:bahnhof", bahnhofX, zB, W3, D, b2.oben ? ["+z", "-z"] : ["-z", "+z"], "frei", { klasse: 4, ...b2.bahnhofExtra ?? {} });
         b2.gleise = b2.oben ? { z0: b2.z + 2, z1: b2.z + 2 + band, achse: "x" } : { z0: b2.z + b2.d - 2 - band, z1: b2.z + b2.d - 2, achse: "x" };
         const rest = b2.oben ? b2.z + b2.d - zB - D : zB - b2.z;
         const haus2 = rest > 36 ? Math.min(18, rest - 24) : 0;
@@ -51659,7 +51665,8 @@
       einkaufslagen: (E4.einkaufslagen ?? []).map((L2) => ({ ...L2, x0: sx[L2.i0], x1: sx[L2.i1] + E4.spalten[L2.i1], z0: sz[L2.j0], z1: sz[L2.j1] + E4.reihen[L2.j1], xF: zL[L2.kF].x, zF: xL[L2.lF].z })),
       kern: { i: E4.warenhaus?.i ?? E4.zentrum.i, j: E4.warenhaus?.j ?? E4.zentrum.j },
       zentrum: E4.zentrum,
-      marktVariante: E4.marktVariante ?? null
+      marktVariante: E4.marktVariante ?? null,
+      ...E4.startBlick ? { startBlick: E4.startBlick } : {}
     };
     Object.assign(plan2, stadtrandPlan(plan2, { kueste: E4.o?.kueste, seeArt: E4.o?.seeArt, berge: E4.berge }));
     if (E4.o?.standorte) outletImAussenring(plan2, E4.o.standorte);
@@ -59000,7 +59007,7 @@
   var RATHAUS_NENN = { backstein: [44, 24], sandstein: [44, 24], renaissance: [38, 20], neugotik: [44, 24], barock: [40, 22], hochhaus: [44, 30] };
   function rathaus(S, scene2, p2) {
     const r3 = rng2(`rathaus:${p2.seed ?? 1}`);
-    const stil = p2.stil ?? waehle2(r3, REGION_RATHAUS[p2.region] ?? RATHAUS_STILE);
+    const stil = p2.rathausStil ?? p2.stil ?? waehle2(r3, REGION_RATHAUS[p2.region] ?? RATHAUS_STILE);
     const [nw, nd] = RATHAUS_NENN[stil] ?? [44, 24];
     const q2 = { ...p2, w: p2.w ?? nw, d: p2.d ?? nd };
     const bau2 = { backstein: rathausHistorisch, sandstein: rathausHistorisch, renaissance: rathausRenaissance, neugotik: rathausNeugotik, barock: rathausBarock, hochhaus: rathausHochhaus }[stil];
@@ -59204,7 +59211,7 @@
   function rathausHochhaus(S, scene2, p2) {
     const { x, z: z2, w, d: d3 } = p2, r3 = rng2(`rh:${p2.seed}`);
     const beton = waehle2(r3, ["#d4d1ca", "#c9c6be", "#dcd6c8", "#b9785e"]), alu = waehle2(r3, ["#c9d1d6", "#d8b45a", "#3a3f44"]), glas2 = waehle2(r3, ["#56707f", "#4f6676", "#6a7f8c"]);
-    const G2 = Math.round(zw(r3, 9, 14)), gh = 3.4;
+    const G0 = Math.round(zw(r3, 9, 14)), G2 = p2.rathausGeschosse ?? G0, gh = 3.4;
     const tw = clamp6(w * zw(r3, 0.38, 0.55), 12, 24), td = clamp6(d3 * 0.42, 10, 14), tx0 = r3() < 0.5 ? x + 1 : x + w - tw - 1, tz0 = z2 + 0.5, Ht = 4 + G2 * gh;
     lochBlock(S, tx0, tz0, tw, td, 0, Ht, beton, { y0: 4, geschosse: G2, gh, raster: 1.8, fw: 1.2, fh: 1.9, tiefe: 0.4, innen: glas2 });
     for (let u = tx0 + 0.9; u < tx0 + tw; u += 3.6) S.box(0.25, Ht - 4, 0.6, u, 4 + (Ht - 4) / 2, tz0 + td + 0.3, alu);
@@ -124093,6 +124100,42 @@
     E4.zTyp = Array(nx + 1).fill("neben");
     E4.xTyp = Array(nz + 1).fill("neben");
   }
+  var ESSEN = { kettwiger: -1, ring: [-3, 3], gleisharfe: 64, bandReihe: 104 };
+  function essenBahnUndAchsen(E4, ci, cj) {
+    const kK = ci + ESSEN.kettwiger, jB = 0;
+    E4.reihen[jB] = ESSEN.bandReihe;
+    nimm7(E4, { art: "bahn", i0: 0, i1: E4.nx - 1, j0: jB, j1: jB, oben: true, trasse: true, gross: true, bahnhofLinie: kK, band: ESSEN.gleisharfe, essenHbf: true });
+    for (let k2 = 0; k2 <= E4.nx; k2++) fixiere6(E4, k2, jB, jB);
+    E4.zTyp[ci + ESSEN.ring[0]] = "haupt";
+    fixiere6(E4, ci + ESSEN.ring[0]);
+    if (E4.T.tram) E4.tram.push("z" + (ci + ESSEN.ring[0]));
+    E4.zTyp[ci + ESSEN.ring[1]] = "haupt";
+    fixiere6(E4, ci + ESSEN.ring[1]);
+    E4.xTyp[cj + 2] = "haupt";
+    E4.kreuzWunsch = { kF: kK, lF: cj + 1, j0: jB + 1, i1: kK + 3 };
+    E4.centerWunsch = [[kK + 4, cj + 1], [kK + 4, cj]];
+    E4.zentrum = { i: kK - 1, j: cj };
+    E4.startBlick = "hbf";
+  }
+  function essenInnenstadt(E4, ci, cj) {
+    const kK = ci + ESSEN.kettwiger, lL = cj + 1;
+    E4.zentrum = { i: kK - 1, j: cj };
+    if (istFrei(E4, kK - 1, kK - 1, lL - 2, lL - 2)) {
+      nimm7(E4, { art: "kirche", i0: kK - 1, i1: kK - 1, j0: lL - 2, j1: lL - 2, seiten: ["-z", "-x"], kirchStil: "romanisch" });
+      E4.landmarken.push("slot:kirche");
+    }
+    if (istFrei(E4, kK, kK, lL, lL)) nimm7(E4, { art: "kirche", i0: kK, i1: kK, j0: lL, j1: lL, seiten: ["+x", "+z"], kirchStil: "nachkrieg" });
+    if (istFrei(E4, kK - 2, kK - 2, lL, lL)) {
+      setzeSpalte(E4, kK - 2, 70);
+      nimm7(E4, { art: "west_essen_rathaus", i0: kK - 2, i1: kK - 2, j0: lL, j1: lL });
+    }
+  }
+  function essenRathausParzelle(ctx, E4, b2) {
+    const W3 = Math.min(56, b2.w - 8), D = Math.min(40, b2.d - 8);
+    neueParzelle6(ctx, "slot:rathaus", b2.x + (b2.w - W3) / 2, b2.z + 4, W3, D, ["+z", "+x"], "frei", { klasse: 5, landmarke: true, rathausStil: "hochhaus", rathausGeschosse: 26 });
+    const x0 = b2.x + (b2.w + W3) / 2 + 4, w = b2.x + b2.w - 1 - x0;
+    if (w >= 12) for (let k2 = 0, n = Math.max(1, Math.round((b2.d - 2) / 16)); k2 < n; k2++) neueParzelle6(ctx, "stadthaus", x0, b2.z + 1 + (b2.d - 2) * k2 / n, w, (b2.d - 2) / n, ["+x"], "+x");
+  }
   function ruhrstadt(E4) {
     const { r: r3, o: o2 } = E4;
     const klein = E4.typ === "mittelstadt";
@@ -124124,7 +124167,8 @@
       jI = jK - 1;
     } else jI = klein ? nz - 1 : Math.min(nz - 1, cj + 3);
     let st2 = null;
-    if (!senk) {
+    if (o2.essen) essenBahnUndAchsen(E4, ci, cj);
+    else if (!senk) {
       const jB = Math.max(0, cj - (klein ? 3 : 4));
       E4.reihen[jB] = BAND;
       nimm7(E4, { art: "bahn", i0: 0, i1: nx - 1, j0: jB, j1: jB, oben: true, trasse: true, ohneBahnhof: true });
@@ -124204,7 +124248,8 @@
       n++;
     }
     const ksZufall = waehle2(r3, ["romanisch", "hallenkirche"]);
-    if (!o2.kern60) {
+    if (o2.essen) essenInnenstadt(E4, ci, cj);
+    else if (!o2.kern60) {
       for (const [qi, qj] of mische(r3, [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]])) if (istFrei(E4, qi, qi, qj, qj)) {
         nimm7(E4, { art: "kirche", i0: qi, i1: qi, j0: qj, j1: qj, seiten: ["-z", "-x", "+x"], kirchStil: o2.kirchStil ?? ksZufall });
         E4.landmarken.push("slot:kirche");
@@ -124229,7 +124274,8 @@
       return dd < 3.1 ? "gruenderzeit" : "nachkrieg";
     };
     E4.landmarkVerbot = /* @__PURE__ */ new Set(["slot:mall", "slot:schloss", "slot:tor", "slot:konkurrenz", "slot:hochhaus"]);
-    E4.marktVariante = o2.markt ?? (o2.kern60 ? "keiner" : "einer");
+    if (o2.essen) E4.landmarkVerbot.add("slot:rathaus");
+    E4.marktVariante = o2.essen ? "keiner" : o2.markt ?? (o2.kern60 ? "keiner" : "einer");
     if (o2.rhein) {
       const zellen = [];
       for (let q2 = 0; q2 < nx; q2++) if (Math.abs(q2 - zc.i) >= 2.5) zellen.push(q2);
@@ -125033,7 +125079,8 @@
       west_pfalz: { parzelliere: voll("slot:west_pfalzdom", 4), boden: bodenPflaster },
       west_brauturm: { boden: bodenPflaster },
       west_promenade: { boden: bodenPromenade },
-      west_hang: { parzelliere: hangParzellen, boden: bodenHang }
+      west_hang: { parzelliere: hangParzellen, boden: bodenHang },
+      west_essen_rathaus: { parzelliere: essenRathausParzelle, boden: bodenKonzern }
     }
   };
   registriereArchetyp("ruhrstadt", {
@@ -125041,7 +125088,7 @@
     name: "Ruhrgebietsstadt",
     entwurf: ruhrstadt,
     staedte: {
-      Essen: { bahnLage: "mitte", zeche: "doppelbock", zechenZustand: "museum", konzern: 1, konzernVarianten: ["glas60"], bahnhof: "50er", halde: "kreuz", nah: ["konzern:turm70", "ekz:90er", "zeche:doppelbock", "halde", "kanal"], markt: "einer" },
+      Essen: { essen: true, bahnLage: "mitte", zeche: "doppelbock", zechenZustand: "museum", konzern: 1, konzernVarianten: ["glas60"], bahnhof: "50er", halde: "kreuz", ekz: false, nah: ["konzern:turm70", "ekz:90er", "zeche:doppelbock", "halde", "kanal"], markt: "keiner" },
       Dortmund: { bahnLage: "oben", huette: true, huettenZustand: "museum", zeche: "malakow", zechenZustand: "museum", konzern: 1, konzernVarianten: ["backstein20"], bahnhof: "altbau", stadion: "stadion70", halde: false, nah: ["brauturm", "turm", "zeche:malakow", "kanal"], markt: "laenglich" },
       Duisburg: { bahnLage: "rechts", rhein: true, huette: true, zeche: false, halde: false, bahnhof: "70er", ekz: "80er", konzern: 1, konzernVarianten: ["backstein20"], nah: [], markt: "keiner" },
       Gelsenkirchen: { bahnLage: "links", zeche: "strebe", zechenZustand: "stillgelegt", halde: "treppe", stadion: "arena", bahnhof: "70er", kokerei: false, konzern: 1, konzernVarianten: ["turm70"], nah: [], markt: "einer" },
@@ -129518,7 +129565,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o2) => typeof o2 === "object" ? { wert: o2.wert ?? o2.value, titel: o2.titel ?? o2.label ?? o2.wert } : { wert: o2, titel: o2 };
-  var version = () => true ? "b835a8b" : "Entwicklung";
+  var version = () => true ? "15f2fb9" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -129538,7 +129585,7 @@
         if (!gruppen.has(d3.gruppe)) gruppen.set(d3.gruppe, []);
         gruppen.get(d3.gruppe).push(feld(d3));
       }
-      const html = [...gruppen.entries()].map(([name2, zeilen]) => '<section class="karte einst-gruppe"><h3 class="khead">' + esc(name2) + "</h3>" + zeilen.join("") + "</section>").join("") + '<section class="karte einst-gruppe"><h3 class="khead">\xDCber</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Die Einstellungen gelten ger\xE4teweit und geh\xF6ren nicht zum Spielstand.</p></section>';
+      const html = [...gruppen.entries()].map(([name2, zeilen]) => '<section class="karte einst-gruppe"><h3 class="khead">' + esc(name2) + "</h3>" + zeilen.join("") + "</section>").join("") + '<section class="karte einst-gruppe"><h3 class="khead">\xDCber</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten \xA9 OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten ger\xE4teweit und geh\xF6ren nicht zum Spielstand.</p></section>';
       ctx.panel("Einstellungen", "Darstellung, Bedienung und Spiel", html, "gross");
       aktiv5 = true;
       document.getElementById("pinhalt").scrollTop = scroll;

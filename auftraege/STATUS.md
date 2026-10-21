@@ -9,7 +9,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q03 Stadt-Fingerabdruck | – | gemergt (#41) | Gate aktiv: 112 Referenzen (Chrome 130 wie CI); Städte jetzt über JS-Engines deterministisch (Mischen, `wurzelSumme`) |
 | Q02 Grafikqualität (Gleise, Oberleitung, Züge, Dächer, Startbild, Flächenvielfalt, Prüfregeln) | – | gemergt (#43) | Prüfregeln 112/112 Städte 0; Dreiecke in allen Städten weniger, Draw Calls 109 Städte weniger/gleich, 3 Städte +1/+2; Fingerabdrücke aller Städte neu (Dachaufbauten Warenhaus); Essen ohne Bahnsteige im Plan, Hbf mit Zügen kommt mit Q01 |
 | Maßstab Städte (220 Städte, Standortverteilung) | `feat/massstab-staedte` #31 | in Arbeit (WIP) | fertigstellen; Q01 Essen läuft entkoppelt (Ummo 21.10.) |
-| Q01 Städte aus Kartendaten (Essen zuerst) | `feat/q01-essen` | **startet 21.10. (entkoppelt)** | Phase 1 Essen; Ummo beurteilt Essen auf dem iPhone vor Phase 2 |
+| Q01 Städte aus Kartendaten (Essen zuerst) | – | **Phase 1 gemergt 21.10.** (#48, 238c8df) | GPT-Stand (OSM-Klötze) von Claude ersetzt: Lage nach OSM, Bebauung im Kit-Raster (Hbf mit Gleisharfe, Kettwiger Straße, Markt, Limbecker Platz, Münster, Rathaus-Hochhaus, Start am Hbf); nur Essen-Fingerabdruck neu. **Wartet: Ummo beurteilt Essen auf dem iPhone, dann Phase 2** |
 | Maßstab Leistung (iPhone-Ziele, Ausgangswert Berlin, Spielstand 7,5 MB) | – | offen | Start nach Städte Phase 2 |
 | N07 Belebte Stadt (fließender Verkehr, Passanten) | – | gemergt | Bildrate mit/ohne Leben auf dem iPhone messen |
 | N06 Jahreszeiten (Weihnachtsdeko, Fassaden) | – | gemergt | – |
