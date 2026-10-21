@@ -32,7 +32,9 @@
     "jahreszeiten:pruefen": "node tests/jahreszeit.test.cjs",
     "symbol": "node symbol.js",
     "smoke:app": "node tests/app-pwa-smoke.cjs",
-    "marktbeobachtung:bilder": "node tests/marktbeobachtung-bilder.cjs"
+    "marktbeobachtung:bilder": "node tests/marktbeobachtung-bilder.cjs",
+    "hausbesuch:laufwege:unit": "node tests/hausbesuch-navigation.cjs",
+    "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs"
   },
   "keywords": [],
   "author": "",
