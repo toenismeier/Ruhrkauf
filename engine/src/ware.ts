@@ -63,7 +63,7 @@ export function wareneingang(s: GameState, liquiditaetsReserve: number): { vorka
       if (rest > 0) {
         const liquide = s.cash + s.kreditlinie - liquiditaetsReserve;
         if (s.vorkasseAkzeptieren && liquide > 0) {
-          const zahlbar = Math.min(rest, liquide);
+          const zahlbar = eur(Math.min(rest, liquide)); // ganze Euro (Cash bleibt ganzzahlig)
           s.cash -= zahlbar;
           vorkasse += zahlbar;
           rest -= zahlbar;

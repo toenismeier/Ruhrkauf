@@ -6,6 +6,8 @@
 // export masseSport(haus) → { w, d, n, H, familie, bw, bd }   (w × d = belegte Fläche inkl. Parkplatz bzw. Mall-Rahmen,
 //                                                               bw × bd = reiner Baukörper des Ladens)
 // export familieSport(haus), FAMILIEN_SPORT, HS_ROT, HS_BLAU
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, heller, dunkler } from './basis.js';
 import {
   Seite, seitenVon, zyl, viertelzylinder, prismaX, pult, plakat, plakatBreite, passend, bodenText, puppe, mensch, rad, auto,
@@ -1140,7 +1142,7 @@ export function statusSport(K) {
   const st = K.Z;
   const zukleben = (g) => {
     g.s.q(g.a + 0.05, g.b - 0.05, g.y0 + 0.1, g.y1 - 0.1, g.t + 0.02, g.t + 0.07, g.tuer ? '#c9c2ae' : (Math.round(g.a) % 2 ? '#ece3cc' : '#e2d6b8'));
-    if (!g.tuer && g.b - g.a > 1.5) g.s.kipp(Math.hypot(g.b - g.a, g.y1 - g.y0) * 0.8, 0.2, 0.03, (g.a + g.b) / 2, (g.y0 + g.y1) / 2, g.t + 0.09, '#cbbd98', 0.6);
+    if (!g.tuer && g.b - g.a > 1.5) g.s.kipp(wurzelSumme(g.b - g.a, g.y1 - g.y0) * 0.8, 0.2, 0.03, (g.a + g.b) / 2, (g.y0 + g.y1) / 2, g.t + 0.09, '#cbbd98', 0.6);
   };
   if (st.hat('leer') || st.hat('abriss')) { for (const g of K.glas) zukleben(g); return; }
   if (st.hat('verfall')) {

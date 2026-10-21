@@ -49,7 +49,7 @@ describe('Simulation', () => {
 
   test('keine NaN-Werte in 104 Wochen', () => {
     const s = neuesSpiel(3);
-    for (const k of spiele(s, 104)) for (const v of Object.values(k)) expect(Number.isFinite(v)).toBe(true);
+    for (const k of spiele(s, 104)) for (const v of Object.values(k)) if (typeof v === "number") expect(Number.isFinite(v)).toBe(true);
   });
 
   test('Ausgangslage: Verlust im Jahr, Gewinn im Weihnachtsquartal', () => {

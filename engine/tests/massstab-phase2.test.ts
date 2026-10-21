@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { neueWelt, UMSATZZIELE_JAHR1, STANDARD_SZENARIO } from '../src/welt';
+import { gruppenFuer } from '../src/daten';
 import { TIEF_SCHLIESSUNGSQUOTE } from '../scripts/bot';
 import type { Haus, GruppeId } from '../src/types';
 
@@ -39,8 +40,30 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     expect(s.cash).toBe(400_000_000);
     expect(s.kreditlinie).toBe(300_000_000);
     expect(s.kvLimitBasis).toBe(1_260_000_000);
-    expect(s.einkauf.grenze).toBeGreaterThan(150_000);
-    expect(s.einkauf.grenze).toBeLessThan(190_000);
+    const basisJahr = Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0) * 52;
+    const grenzeSoll = Math.round(50_000 * Math.max(1, basisJahr / 3_100_000_000) * 2 / 5_000) * 5_000;
+    expect(s.einkauf.grenze).toBe(grenzeSoll);
+  });
+
+  test('Volkskauf und FUNDUS besitzen Warengruppen, bleiben aber wirtschaftlich inaktiv', () => {
+    const s = neueWelt(1);
+    const schwester = s.haeuser.filter((h) => h.format === 'schwester');
+    const fundus = s.haeuser.filter((h) => h.format === 'outlet');
+    expect(schwester).toHaveLength(86);
+    expect(fundus).toHaveLength(66);
+    expect(gruppenFuer('schwester')).toEqual(gruppenFuer('warenhaus'));
+    expect(gruppenFuer('outlet')).toEqual(['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']);
+    for (const h of [...schwester, ...fundus]) {
+      expect(h.nurDaten).toBe(true);
+      expect(h.miete.mieteWoche).toBe(0);
+      expect(h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen).toBe(0);
+      expect(h.flaechen.length).toBeGreaterThan(1);
+      for (const g of gruppenFuer(h.format)) {
+        expect(h.flaechen.some((f) => f.gruppe === g && f.qm > 0)).toBe(true);
+        expect(h.potenzial[g]).toBeGreaterThan(0);
+      }
+    }
+    expect(s.basisUmsatz.schuhe).toBeUndefined();
   });
 
   test('FUNDUS-JSON entspricht dem Engine-Export für Seed 1', () => {

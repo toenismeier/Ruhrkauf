@@ -1,0 +1,94 @@
+{
+  "fehler": [],
+  "zeiten": {
+    "reise": [
+      {
+        "schritt": "Pin angetippt",
+        "ms": 0
+      },
+      {
+        "schritt": "Panel offen",
+        "ms": 3924
+      },
+      {
+        "schritt": "Ziele sichtbar",
+        "ms": 3924
+      },
+      {
+        "schritt": "Reiseziel gewählt",
+        "ms": 5747,
+        "reiseMs": 0
+      },
+      {
+        "schritt": "Kreis-Schließen",
+        "ms": 8484,
+        "reiseMs": 2736
+      },
+      {
+        "schritt": "Reise abgeschlossen",
+        "ms": 8635,
+        "reiseMs": 2887
+      }
+    ],
+    "wochenbericht": [
+      {
+        "ereignis": "Wochenknopf",
+        "ms": 0
+      },
+      {
+        "ereignis": "Ja gewählt",
+        "ms": 801,
+        "jaMs": 0
+      },
+      {
+        "ereignis": "Wochenberechnung",
+        "ms": 814,
+        "jaMs": 14
+      },
+      {
+        "ereignis": "Engine abgeschlossen",
+        "ms": 1266,
+        "jaMs": 465
+      },
+      {
+        "ereignis": "Zählung beendet",
+        "ms": 1268,
+        "jaMs": 468
+      },
+      {
+        "ereignis": "Vorfall 1",
+        "ms": 1285,
+        "jaMs": 484
+      }
+    ]
+  },
+  "kapitalfluss": {
+    "woche": 0,
+    "operativ": -609498,
+    "investitionen": 0,
+    "finanzierung": 0,
+    "sonstiges": 0,
+    "netto": -609498,
+    "bestand": 119390502
+  },
+  "dialog": {
+    "maske": "rgba(12, 20, 28, 0.6)",
+    "karte": "rgb(248, 247, 244)",
+    "opacity": 1
+  },
+  "engine": {
+    "kw": 2,
+    "jahr": 2027,
+    "phase": "regulaer",
+    "cash": 119390501.8888889,
+    "kreditFrei": 206746751.8888889,
+    "runwayWochen": 52,
+    "ebitdaWoche": 2364445,
+    "ebitda13": 2364445,
+    "umsatzWoche": 73246974,
+    "vertrauen": 56,
+    "image": 45,
+    "offeneEntscheidungen": 2,
+    "offeneAngebote": 0
+  }
+}

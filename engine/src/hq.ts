@@ -8,6 +8,9 @@ import { abstand100, BALLUNGSRAUM, KNOTEN } from './standorte';
 import { clamp, eur, ganzZwischen, melde, mio, waehle, zwischen, type RngHalter } from './util';
 import { vorstandFuerGrafik, vorstandKostenWoche, vorstandWirkung } from './vorstand';
 import { produktKostenWoche } from './produkte';
+// O01 Organisation: Differenz der Leitungsgehälter, Start = 0.
+import { organisationLeitungKostenWoche } from './organisation';
+import { marktbeobachtungKostenWoche } from './marktbeobachtung';
 
 // ---------------------------------------------------------------------------------------------
 // Datenmodell (Vertrag)
@@ -19,7 +22,7 @@ export type AbteilungId = 'controlling' | 'einkauf' | 'marketing' | 'personal' |
 export type HqTyp = 'altbau' | 'nachkrieg' | 'buero70' | 'glas' | 'loft' | 'campus';
 export type Stufe = 0 | 1 | 2 | 3;
 
-export interface HqEtage { nr: number; qm: number; gemietet: boolean; abteilungen: AbteilungId[] }
+export interface HqEtage { nr: number; qm: number; gemietet: boolean; abteilungen: AbteilungId[]; archiv?: boolean }
 
 export interface HqGebaeude {
   id: string; name: string; stadt: string;
@@ -72,6 +75,10 @@ export interface Hq {
 // ---------------------------------------------------------------------------------------------
 // Parameter
 // ---------------------------------------------------------------------------------------------
+
+/** Archiv ist freiwillig und hat keine Personal- oder Wirkungswerte. */
+export const ARCHIV_QM = 90;
+export const ARCHIV_AKTIV = true; // Übergang bis N13 Einstellungen verfügbar ist.
 
 export const ABTEILUNGEN: AbteilungId[] = ['controlling', 'einkauf', 'marketing', 'personal', 'immobilien', 'logistik', 'ecommerce', 'recht', 'vm', 'verwaltung', 'produkt'];
 
@@ -368,7 +375,7 @@ export function verteilungsFaktor(s: GameState): number {
   return Math.max(HQ_PARAM.verteilungMin, 1 - HQ_PARAM.verteilungJeStadt * Math.max(0, n - 1));
 }
 
-export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; gesamt: number }
+export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; leitung: number; marktbeobachtung: number; gesamt: number }
 
 export function hqKosten(s: GameState): HqKosten {
   const hq = s.hq;
@@ -389,13 +396,17 @@ export function hqKosten(s: GameState): HqKosten {
   let nebenkosten = 0;
   for (const g of hq.gebaeude) for (const e of g.etagen) if (e.gemietet) {
     miete += wochenMiete(e.qm, g.mieteQmMonat);
+    // Separater kleiner Archiv-Zuschlag; alle anderen Simulationsgrößen bleiben unberührt.
+    if (ARCHIV_AKTIV && e.archiv) miete += wochenMiete(ARCHIV_QM, g.mieteQmMonat);
     nebenkosten += wochenMiete(e.qm, g.nebenkostenQmMonat);
   }
   const Lv = hq.wirkung.verwaltung;
   const strafen = Math.max(0, 1 - Lv) * HQ_PARAM.verwaltungStrafe * s.zentrale.kostenStart;
   const vorstand = vorstandKostenWoche(s);
   const entwicklung = produktKostenWoche(s);
-  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung };
+  const leitung = organisationLeitungKostenWoche(s);
+  const marktbeobachtung = marktbeobachtungKostenWoche(s);
+  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, leitung, marktbeobachtung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung + leitung + marktbeobachtung };
 }
 
 /** Rechnet wirksame Stufen, Zentralkosten und Controllingstufe neu. Nach jeder HQ-Änderung aufrufen. */
@@ -407,7 +418,7 @@ export function hqAktualisiere(s: GameState): void {
   for (const a of hq.abteilungen) hq.wirkung[a.id] = Math.min(3, wirksameStufe(s, a, v) * vorstandWirkung(s, a.id));
   const k = hqKosten(s);
   s.zentrale.kostenWoche = eur(k.gesamt);
-  s.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0));
+  s.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0) + (s.marktbeobachtung?.fte ?? 0));
   const c = Math.round(hq.wirkung.controlling);
   s.controllingStufe = c <= 0 ? 0 : c === 1 ? 1 : 2;
 }
@@ -681,8 +692,21 @@ function kuendigeEtagen(s: GameState, g: HqGebaeude, es: HqEtage[]): { rest: num
   const rest = eur(wochenMiete(qm, g.mieteQmMonat) * hqRechtFaktor(s));
   if (wochen > 0 && rest > 0) s.hq.restmieten.push({ text: `${g.name} (${g.stadt})`, mieteWoche: rest, bis: s.woche + wochen });
   const ohnePlatz: AbteilungId[] = [];
-  for (const e of es) { for (const id of raeumeEtage(s, g, e)) if (!ohnePlatz.includes(id)) ohnePlatz.push(id); e.gemietet = false; }
+  for (const e of es) { for (const id of raeumeEtage(s, g, e)) if (!ohnePlatz.includes(id)) ohnePlatz.push(id); e.gemietet = false; e.archiv = false; }
   return { rest, wochen, ohnePlatz };
+}
+
+/** Freiwillige historische Sammlung auf einer bereits gemieteten Etage. Nur Zusatzmiete. */
+export function hqArchivSetzen(s: GameState, gebaeudeId: string, nr: number, aktiv: boolean): HqErgebnis {
+  if (!ARCHIV_AKTIV) return fehler('Das Archiv ist in den Einstellungen deaktiviert.');
+  const g = gebaeude(s, gebaeudeId);
+  const e = g?.etagen.find((x) => x.nr === nr);
+  if (!g || !e || !e.gemietet) return fehler('Für das Archiv ist eine gemietete HQ-Etage erforderlich.');
+  if (!!e.archiv === aktiv) return fehler(aktiv ? 'Auf dieser Etage befindet sich bereits ein Archiv.' : 'Hier ist kein Archiv eingerichtet.');
+  if (aktiv && s.hq.gebaeude.some((bau) => bau.etagen.some((et) => et.archiv))) return fehler('Es gibt bereits eine Archiv-Etage. Bitte zuerst das bestehende Archiv auflösen.');
+  e.archiv = aktiv;
+  hqAktualisiere(s);
+  return ok(aktiv ? `Archiv auf Etage ${etageText(nr)} eingerichtet, zusätzliche Miete ${eur(wochenMiete(ARCHIV_QM, g.mieteQmMonat)).toLocaleString('de-DE')} € je Woche.` : `Archiv auf Etage ${etageText(nr)} aufgelöst. Die Zusatzmiete entfällt.`);
 }
 
 export function hqEtageKuendigen(s: GameState, gebaeudeId: string, nr: number): HqErgebnis {
@@ -851,7 +875,7 @@ export interface HqUebersicht {
   gebaeude: {
     id: string; name: string; stadt: string; typ: HqTyp; vermieter: string; mieteQmMonat: number; nebenkostenQmMonat: number;
     bisWoche: number; qmGemietet: number; qmBelegt: number; auslastung: number; kostenWoche: number;
-    etagen: { nr: number; qm: number; gemietet: boolean; belegtQm: number; auslastung: number; abteilungen: { id: AbteilungId; name: string; qm: number }[] }[];
+    etagen: { nr: number; qm: number; gemietet: boolean; archiv: boolean; belegtQm: number; auslastung: number; abteilungen: { id: AbteilungId; name: string; qm: number }[] }[];
   }[];
   abteilungen: {
     id: AbteilungId; name: string; stufe: Stufe; wirksameStufe: number; fte: number; sollFte: number; qmBedarf: number;
@@ -875,14 +899,14 @@ export function hqUebersicht(s: GameState): HqUebersicht {
     kostenWoche: s.zentrale.kostenWoche,
     kostenStart: s.zentrale.kostenStart,
     standort: standort(s, hq.sitz),
-    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), gesamt: eur(kosten.gesamt) },
+    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), marktbeobachtung: eur(kosten.marktbeobachtung), gesamt: eur(kosten.gesamt) },
     restmieteWoche: eur(hqRestmieteWoche(s)),
     fte: s.zentrale.fte,
     gebaeude: hq.gebaeude.map((g) => {
       const etagen = g.etagen.map((e) => {
         const belegt = belegtQm(s, g, e);
         return {
-          nr: e.nr, qm: e.qm, gemietet: e.gemietet, belegtQm: Math.round(belegt), auslastung: e.qm > 0 ? belegt / e.qm : 0,
+          nr: e.nr, qm: e.qm, gemietet: e.gemietet, archiv: !!e.archiv, belegtQm: Math.round(belegt), auslastung: e.qm > 0 ? belegt / e.qm : 0,
           abteilungen: e.abteilungen.map((id) => ({ id, name: ABTEILUNG_NAME[id], qm: Math.round(qmAufEtage(abteilung(s, id), e.nr)) })),
         };
       });
@@ -891,7 +915,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
       return {
         id: g.id, name: g.name, stadt: g.stadt, typ: g.typ, vermieter: g.vermieter, mieteQmMonat: g.mieteQmMonat, nebenkostenQmMonat: g.nebenkostenQmMonat,
         bisWoche: g.bisWoche, qmGemietet, qmBelegt, auslastung: qmGemietet > 0 ? qmBelegt / qmGemietet : 0,
-        kostenWoche: eur(wochenMiete(qmGemietet, g.mieteQmMonat + g.nebenkostenQmMonat)), etagen,
+        kostenWoche: eur(wochenMiete(qmGemietet, g.mieteQmMonat + g.nebenkostenQmMonat) + wochenMiete(g.etagen.filter((e) => e.gemietet && e.archiv).length * ARCHIV_QM, g.mieteQmMonat)), etagen,
       };
     }),
     abteilungen: hq.abteilungen.map((a) => {
@@ -915,7 +939,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
 
 export interface HqGrafik {
   sitz: string;
-  gebaeude: { id: string; name: string; stadt: string; typ: HqTyp; etagen: { nr: number; qm: number; gemietet: boolean; abteilungen: { id: AbteilungId; fte: number; stufe: Stufe }[] }[] }[];
+  gebaeude: { id: string; name: string; stadt: string; typ: HqTyp; etagen: { nr: number; qm: number; gemietet: boolean; archiv: boolean; abteilungen: { id: AbteilungId; fte: number; stufe: Stufe }[] }[] }[];
   angebote: { id: string; stadt: string; typ: HqTyp; etagen: { nr: number; qm: number }[] }[];
   /** Vorstandsetage (oberste gemietete Etage am Sitz) mit Namensschildern je Ressort. */
   vorstand?: { etage?: { gebaeudeId: string; nr: number }; ressorts: ReturnType<typeof vorstandFuerGrafik> };
@@ -929,7 +953,7 @@ export function hqFuerGrafik(s: GameState): HqGrafik {
     gebaeude: hq.gebaeude.map((g) => ({
       id: g.id, name: g.name, stadt: g.stadt, typ: g.typ,
       etagen: g.etagen.map((e) => ({
-        nr: e.nr, qm: e.qm, gemietet: e.gemietet,
+        nr: e.nr, qm: e.qm, gemietet: e.gemietet, archiv: !!e.archiv,
         // FTE je Etage: Anteil der Abteilung, der auf dieser Etage sitzt
         abteilungen: e.abteilungen.map((id) => { const a = abteilung(s, id); return { id, fte: Math.round(qmAufEtage(a, e.nr) / HQ_PARAM.qmJeFte), stufe: a.stufe }; }),
       })),

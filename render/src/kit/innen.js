@@ -5,6 +5,8 @@
 // - Möbel werden in einem lokalen Rahmen gebaut: Vorderseite zeigt nach lokal +z (siehe lokal()).
 // - Glas: eigene Farbe GLAS, wird über vorbereiten(S, scene) durchsichtig und wirft keinen Schatten.
 // - Schrift (Hängeschilder, Preisschilder, Markenschilder) braucht die Szene: vorbereiten(S, scene) setzt S.szene.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, mat, textTextur, textMaterial, dunkler, heller, FARBEN } from './basis.js';
 
 export const RASTER = 5;
@@ -1272,7 +1274,7 @@ export function stuetze(S, x, z, y = 0, h = WANDHOEHE, farbe = '#e6e0d6') {
 /** Rolltreppe entlang x: Fuß bei (x0, z), steigt nach -x um hub über laenge. richtung +1 = auf, -1 = ab (in die Tiefe). */
 export function rolltreppe(S, x0, z, laenge, hub, y = 0, d = 1, t0 = 0) {
   const neig = Math.atan2(hub, laenge);
-  const lang = Math.hypot(laenge, hub) * (1 - t0);
+  const lang = wurzelSumme(laenge, hub) * (1 - t0);
   const breit = 1.15;
   const cx = x0 - laenge * (1 + t0) / 2, cy = y + hub * (1 + t0) / 2;
   const schraeg = (w, h, t, dy, dz, f) => { const g = new THREE.BoxGeometry(lang, h, t); g.rotateZ(-neig); g.translate(cx, cy + dy, z + dz); S.add(g, f); };

@@ -39,29 +39,59 @@ export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEnde
   return null;
 }
 
+/** Kalkulierter Liquiditätsbedarf einer Schließung, einschließlich der nachlaufenden Restmiete.
+ * Die Prüfung erzeugt keine Buchungen; die tatsächliche Zahlung erfolgt erst bei Schließung.
+ * `bisSchliessung` berücksichtigt Verhandlung und Räumungsverkauf (O04/O07).
+ */
+export function schliessungsFolgekosten(s: GameState, h: Haus, bisSchliessung = 0): {
+  sozialplan: number; restmieteWoche: number; restmieteWochen: number; gesamt: number;
+} {
+  const schliessWoche = s.woche + Math.max(0, bisSchliessung);
+  const fte = h.personal.vollzeit + h.personal.teilzeit;
+  const sozialplan = eur(fte * abfindungJeFte(s) * hqRechtFaktor(s));
+  const untermiete = h.flaechen.reduce((a, f) =>
+    a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
+  const vertragWochen = s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52;
+  const restmieteWochen = Math.max(0, Math.min(vertragWochen, h.miete.bisWoche - schliessWoche));
+  const restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s));
+  return { sozialplan, restmieteWoche, restmieteWochen,
+    gesamt: sozialplan + restmieteWoche * restmieteWochen };
+}
+
 export function schliesseEndgueltig(s: GameState, h: Haus): void {
   const w = s.woche;
   const fte = h.personal.vollzeit + h.personal.teilzeit;
-  // Die Rechtsabteilung verhandelt Sozialplan und Restmieten
-  const sozialplan = fte * abfindungJeFte(s) * hqRechtFaktor(s);
+  // Die vorab budgetierten Kosten werden bei Wirksamwerden real gezahlt.
+  const { sozialplan, restmieteWoche, restmieteWochen } = schliessungsFolgekosten(s, h);
   einmalKosten(s, sozialplan);
-  const untermiete = h.flaechen.reduce((a, f) => a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
-  let wochen: number;
-  if (s.phase === 'insolvenz') wochen = 13;
-  else if (h.miete.vermieter === 'eigentuemer') wochen = 26;
-  else wochen = 52;
-  wochen = Math.max(0, Math.min(wochen, h.miete.bisWoche - w));
-  h.restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s));
-  h.restmieteBis = w + wochen;
+  h.restmieteWoche = restmieteWoche;
+  h.restmieteBis = w + restmieteWochen;
   h.status = 'geschlossen';
   h.statusBis = undefined;
   h.personal.vollzeit = 0;
   h.personal.teilzeit = 0;
   h.personal.aushilfen = 0;
   h.flaechen = h.flaechen.map((f) => ({ ...f, konzept: 'leer', gruppe: undefined, mieter: undefined, lieferantId: undefined, umbauBis: undefined, umbauZiel: undefined }));
-  // Kunden wandern teilweise zu Nachbarhäusern
-  const nachbarn = s.haeuser.filter((x) => x !== h && x.stadt === h.stadt && x.format === h.format && x.status === 'offen');
-  for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
+  // 30 % des Umsatzes des geschlossenen Hauses werden als echte Nachfrage
+  // an andere, noch geöffnete Häuser desselben Formats verlagert.
+  // Stadt vor Region; keine Erlös-/Cash-Gutschrift und kein Umsatzansatz
+  // ohne passende aufnahmefähige Häuser.
+  const lokal = s.haeuser.filter((x) => x !== h && !x.nurDaten
+    && x.stadt === h.stadt && x.format === h.format && x.status === 'offen');
+  const regional = s.haeuser.filter((x) => x !== h && !x.nurDaten
+    && x.region === h.region && x.format === h.format && x.status === 'offen');
+  const nachbarn = lokal.length ? lokal : regional;
+  const abgang = h.kpi?.umsatz ?? 0;
+  const umsatzNachbarn = nachbarn.reduce((a, x) => a + (x.kpi?.umsatz ?? 0), 0);
+  if (abgang > 0 && umsatzNachbarn > 0) {
+    for (const n of nachbarn) {
+      // Kundentransfer ist ein Nachfrageeffekt; der Warenvorrat begrenzt
+      // den späteren tatsächlich realisierten Mehrumsatz weiterhin.
+      const basis = Math.max(1, n.kpi?.umsatz ?? 0);
+      const anteil = (n.kpi?.umsatz ?? 0) / umsatzNachbarn;
+      n.transferBonus += 0.30 * abgang * anteil / basis;
+    }
+  }
   const st = s.stakeholder;
   st.betriebsrat = clamp(st.betriebsrat - (s.phase === 'insolvenz' ? 15 : 30) * (fte / Math.max(1, gesamtFte(s) + fte)), 0, 100);
   // Image: jede Schließung kostet, eine Schließungswelle in derselben Woche je nach Schwierigkeit abnehmend
@@ -138,7 +168,7 @@ export function prozesse(s: GameState): void {
 }
 
 export function eroeffneInsolvenz(s: GameState, grund: string): void {
-  if (s.phase !== 'regulaer') return;
+  if (s.phase !== 'regulaer' || s.szenario?.regeln.sandkasten) return;
   const w = s.woche;
   let alt = 0;
   for (const v of s.verbindlichkeiten) alt += v.wert;
@@ -187,7 +217,12 @@ export function glaeubigerversammlung(s: GameState): void {
     planEbitda = 0;
     for (let i = 0; i < 52 && klon.phase === 'regulaer'; i++) planEbitda += planWoche(klon);
   }
-  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s).versammlungSchwelle ? 5 : -10;
+  // Die Gläubigerschwellen wurden in der 130er-Welt auf absolute Euro kalibriert.
+  // Im 560er-Maßstab muss dieselbe wirtschaftliche Verlustquote zählen;
+  // das Startvolumen bleibt nach Filialschließungen als Referenz konstant.
+  const konzernJahresumsatzStart = (s.zentrale.kostenStart / PARAM.zentraleQuote) * 52;
+  const schwelle = schwierigkeit(s).versammlungSchwelle * Math.max(1, konzernJahresumsatzStart / 3_300_000_000);
+  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwelle ? 5 : -10;
   const quoteBonus = 60 * (ins.quote - 0.1);
   const zahlung = ins.quote * ins.altVerbindlichkeiten;
   const st = s.stakeholder;
@@ -261,6 +296,8 @@ export function quartalsBewertung(s: GameState): void {
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;
       s.eigentuemer.kapitalZugefuehrt += kapital;
+      s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+      s.kapitalflussOffen.finanzierung += kapital;
       txt += ` Der Eigentümer schießt ${mio(kapital)} nach.`;
     }
     melde(s, 'eigentuemer', txt, { modul: 'vorstand' });

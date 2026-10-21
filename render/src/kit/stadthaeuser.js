@@ -9,6 +9,8 @@
 //
 // Fassadenkoordinaten: jede sichtbare Fassade ist ein Rahmen F mit u (von links nach rechts, wie im Bild),
 // y (oben) und t (nach außen, 0 = Wandflucht). Damit funktionieren +z, +x und schräge/runde Ecken gleich.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, FARBEN, heller, dunkler, textMaterial } from './basis.js';
 
 export const STILE = ['gruenderzeit', 'jugendstil', 'backstein', 'fachwerk', 'fuenfziger', 'siebziger', 'neubau'];
@@ -79,7 +81,7 @@ function versetztRoh(poly, ins) {
   const lin = [];
   for (let i = 0; i < n; i++) {
     const a = poly[i], b = poly[(i + 1) % n];
-    let dx = b[0] - a[0], dz = b[1] - a[1]; const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L;
+    let dx = b[0] - a[0], dz = b[1] - a[1]; const L = wurzelSumme(dx, dz) || 1; dx /= L; dz /= L;
     let nx = -dz, nz = dx;
     if (nx * (cx - a[0]) + nz * (cz - a[1]) > 0) { nx = -nx; nz = -nz; }
     lin.push([nx, nz, nx * a[0] + nz * a[1] - (ins[i] ?? 0)]);
@@ -147,7 +149,7 @@ class Fassade {
     this.ctx = ctx; this.a = a; this.b = b;
     this.art = info.art; this.label = info.label; this.extL = info.extL; this.extR = info.extR;
     this.eckIndex = info.eckIndex ?? -1; this.eckAnzahl = info.eckAnzahl ?? 0;
-    const dx = b[0] - a[0], dz = b[1] - a[1]; this.L = Math.hypot(dx, dz);
+    const dx = b[0] - a[0], dz = b[1] - a[1]; this.L = wurzelSumme(dx, dz);
     this.dx = dx / this.L; this.dz = dz / this.L; this.nx = -this.dz; this.nz = this.dx;
     this.m = new THREE.Matrix4().makeRotationY(Math.atan2(-this.dz, this.dx)).setPosition(a[0], 0, a[1]);
   }
@@ -168,7 +170,7 @@ class Fassade {
   geo(g, f) { g.applyMatrix4(this.m); this.ctx.S.add(g, f); }
   /** Balken von (ua,ya) nach (ub,yb) in der Fassadenebene. */
   strebe(ua, ya, ub, yb, dick, t1, f) {
-    const len = Math.hypot(ub - ua, yb - ya); if (len < 0.05) return;
+    const len = wurzelSumme(ub - ua, yb - ya); if (len < 0.05) return;
     const g = new THREE.BoxGeometry(len, dick, t1);
     g.rotateZ(Math.atan2(yb - ya, ub - ua));
     g.translate((ua + ub) / 2, (ya + yb) / 2, t1 / 2);
@@ -647,13 +649,13 @@ function helm(ctx, poly, y, h, farbe, spitze = true) {
   const ap = poly.map(() => 0);
   let cx = 0, cz = 0; poly.forEach((p) => { cx += p[0]; cz += p[1]; }); cx /= poly.length; cz /= poly.length;
   const big = poly.map((p) => [cx + (p[0] - cx) * 1.08, cz + (p[1] - cz) * 1.08]);
-  const R = Math.hypot(big[0][0] - cx, big[0][1] - cz) * Math.cos(Math.PI / poly.length);
+  const R = wurzelSumme(big[0][0] - cx, big[0][1] - cz) * Math.cos(Math.PI / poly.length);
   ctx.S.add(prismoid(big, y, h, ap.map(() => R - 0.002)), farbe);
   if (spitze) { ctx.S.box(0.1, 1.2, 0.1, cx, y + h + 0.5, cz, '#5f646b'); ctx.S.box(0.22, 0.22, 0.22, cx, y + h + 0.25, cz, '#c9a64a'); }
 }
 function kuppel(ctx, poly, y, h, farbe) {
   let cx = 0, cz = 0; poly.forEach((p) => { cx += p[0]; cz += p[1]; }); cx /= poly.length; cz /= poly.length;
-  const ap = Math.hypot(poly[0][0] - cx, poly[0][1] - cz) * Math.cos(Math.PI / poly.length);
+  const ap = wurzelSumme(poly[0][0] - cx, poly[0][1] - cz) * Math.cos(Math.PI / poly.length);
   const p1 = versetzt(poly, poly.map(() => ap * 0.12));
   ctx.S.add(prismoid(poly, y, h * 0.42, poly.map(() => ap * 0.12)), farbe);
   ctx.S.add(prismoid(p1, y + h * 0.42, h * 0.33, poly.map(() => ap * 0.33)), farbe);
@@ -717,7 +719,7 @@ function wz(r, liste) {
   for (const [v, g] of liste) { t -= g; if (t <= 0) return v; }
   return liste[liste.length - 1][0];
 }
-function farbAbstand(a, b) { const A = new THREE.Color(a), B = new THREE.Color(b); return Math.hypot(A.r - B.r, A.g - B.g, A.b - B.b); }
+function farbAbstand(a, b) { const A = new THREE.Color(a), B = new THREE.Color(b); return wurzelSumme(A.r - B.r, A.g - B.g, A.b - B.b); }
 function ausPalette(ctx, pal, gruppen, ton = {}) {
   const liste = Object.entries(gruppen).filter(([g]) => pal[g]).map(([g, w]) => [g, w * (ton[g] ?? 1)]);
   let f;

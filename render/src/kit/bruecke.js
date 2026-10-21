@@ -22,9 +22,15 @@ import { echterBauer, fussabdruck } from './bauer.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
+import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
 import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
+import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
+import { abholstation } from './abholstation.js';
+import { technikAufDach } from './umbau-aussen.js';
+import schwesterHaeuser from '../../haeuser-schwester.json';
+import outletHaeuser from '../../haeuser-outlet.json';
 import './hq.js';   // meldet 'slot:hq' an
 
 const kwVon = (woche) => (woche % 52) + 1;
@@ -36,6 +42,7 @@ export function aktionFuer(s, h) {
     if (s.woche < a.start || s.woche >= a.ende) continue;
     if (a.kontrollHaeuser?.includes(h.id)) continue;
     const sc = a.scope ?? { typ: 'alle' };
+    if (h.klasse === 'premium' && sc.typ === 'alle' && s?.premiumSchuetzen !== false) continue;
     const trifft = sc.typ === 'alle' || (sc.typ === 'format' && sc.format === h.format) || (sc.typ === 'region' && sc.region === h.region)
       || (sc.typ === 'cluster' && sc.cluster === h.cluster) || (sc.typ === 'haeuser' && sc.ids.includes(h.id));
     if (trifft && (!best || a.rabatt > best.rabatt)) best = a;
@@ -44,8 +51,19 @@ export function aktionFuer(s, h) {
 }
 
 /** Art der Aktionsdekoration: aus dem Namen der Engine-Aktion, sonst nach Kalenderwoche. */
-function aktionsArt(name, kw) {
-  const n = (name ?? '').toLowerCase();
+function aktionsArt(aktion, kw) {
+  // Der Aktionskalender trägt den kanonischen Anlass bereits als 'anlass'.
+  // Nur Altspielstände ohne Anlass werden über den Namen ausgewertet.
+  const anlass = aktion?.anlass;
+  const bekannt = new Set(['wsv', 'ssv', 'blackfriday', 'weihnachten', 'ostern', 'schulanfang',
+    'midseason', 'muttertag', 'beauty', 'waesche', 'jubilaeum', 'mwst', 'friends',
+    'personalkauf', 'raeumung', 'sonder']);
+  if (bekannt.has(anlass)) return anlass;
+  const n = (aktion?.name ?? '').toLowerCase();
+  if (n.includes('winterschluss')) return 'wsv';
+  if (n.includes('sommerschluss')) return 'ssv';
+  if (n.includes('schulanfang')) return 'schulanfang';
+  if (n.includes('oster')) return 'ostern';
   if (n.includes('jubil')) return 'jubilaeum';
   if (n.includes('black') || n.includes('friday')) return 'blackfriday';
   if (n.includes('weihnacht') || n.includes('advent')) return 'weihnachten';
@@ -71,7 +89,7 @@ export function zustandAusHaus(haus, s, merk) {
     z.status = frisch ? 'geschlossen' : substanz < 35 ? 'verfall' : 'leer';
     if (frisch && substanz < 35) z.zusatz.push('verfall');
   } else if (st === 'verkauft') {
-    z.status = 'offen'; z.hartwig = false;   // Betrieb läuft unter dem Käufer weiter, Hartwig-Logo ab
+    z.status = 'offen'; z.hartwig = false; z.kaeufer = haus.premiumEigentuemer;   // Käuferlogo statt Hartwig
   } else if (st === 'raeumung') {
     z.status = 'raeumung';
   } else {
@@ -88,6 +106,8 @@ export function zustandAusHaus(haus, s, merk) {
       if (f.konzept === 'leer' && !(f.umbauBis > w)) leerQm += f.qm || 0;
     }
     const zus = new Set();
+    // O08 Umbau: Haus-/Etagenmodernisierung nutzt den vorhandenen Gerüst-/Kran-Zustand.
+    if ((s?.umbau?.projekte??[]).some(p=>p.haus===haus.id && p.status==='laufend' && p.ende>w)) umbau=true;
     if (umbau) zus.add('umbau');
     if (unter.size) { zus.add('untermiete'); z.untermieter = [...unter.values()].sort((a, b) => a.etage - b.etage); }
     if (offEtage !== null) { zus.add('offprice'); z.offpriceEtage = Math.max(0, offEtage); }
@@ -103,14 +123,26 @@ export function zustandAusHaus(haus, s, merk) {
     }
     if (z.status !== 'leer') {
       const a = aktionFuer(s, haus);
-      const art = a ? aktionsArt(a.name, kw) : saison(kw);
-      if (art) { zus.add('aktion'); z.aktion = art; if (a) z.rabatt = a.rabatt; }
+      const art = a ? aktionsArt(a, kw) : saison(kw);
+      // FUNDUS bleibt auch während WSV/SSV beim eigenen Claim, ohne Rabattplakate.
+      const aktionsbild = haus.format === 'outlet' && (art === 'wsv' || art === 'ssv') ? null : art;
+      if (aktionsbild) { zus.add('aktion'); z.aktion = aktionsbild; if (a && haus.format !== 'outlet') z.rabatt = a.rabatt; }
       const liste = VORRANG.filter((q) => zus.has(q));
       if (liste.length) { z.status = liste[0]; z.zusatz = liste.slice(1); }
     }
   }
+  if (haus.klasse === 'premium') {
+    // Die 26-wöchige Premiuminvestition ist ein optischer Umbau, keine Filialschließung.
+    // Sichtbaren Status direkt aus Engine-Daten ableiten, nicht nur aus Katalog-Optionen.
+    if (haus.premiumInvestition && w < haus.premiumInvestition.bis) {
+      if (z.status === 'offen') z.status = 'umbau';
+      else if (!z.zusatz.includes('umbau')) z.zusatz.push('umbau');
+    }
+    const angebot = s?.angebote?.find((a) => a.typ === 'premiumVerkauf' && a.status === 'offen' && a.wunschHaeuser?.includes(haus.id));
+    if (angebot) { z.verkaufsprozess = true; z.investor = angebot.premiumKaeuferName; }
+  }
   const u = z.untermieter.map((m) => `${m.name}@${m.etage}`).join(',');
-  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : ''].join('|');
+  z.schluessel = [z.status, ...z.zusatz, z.aktion ?? '', z.rabatt ?? '', u, z.offpriceEtage, z.hartwig === false ? 'ohne' : '', z.kaeufer ?? '', z.verkaufsprozess ? 'investor' : '', Object.values(haus.etagenBau??{}).map(e=>String(e.technik?.klima)+String(!!e.klimaModernisiert)).join(',')].join('|');
   return z;
 }
 
@@ -122,7 +154,7 @@ export function stadtEintragAusSpiel(s, name) {
   if (!d) return undefined;
   const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
     const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
@@ -147,7 +179,11 @@ export function spielBauer(s, o = {}) {
   const merk = o.merk;
   const famBenutzt = new Set();
   const wahl = new Map();      // hausId → { fam, fassade } (bleibt beim Neubau gleich)
-  const haeuser = new Map();   // hausId → { p, gruppe, e, schluessel }
+  const haeuser = new Map();   // Engine-Häuser
+  // Volkskauf und FUNDUS liegen bis zur Engine-Maßstab-Integration nur im Grafikkatalog.
+  // Unsichtbare Ray-Boxen (keine Zusatzmeshes) machen sie anklickbar.
+  const statischeDaten = new Map([...schwesterHaeuser, ...outletHaeuser].map((h) => [h.id, h]));
+  const statischeHaeuser = new Map(); // hausId → { haus, p, bounds, e }
   const wettbewerber = new Map(); // Wettbewerber-Id → eigene Gruppe
   const wbSlots = new Map();      // Parzellen-Id → { p, wbId, gruppe, ... }
   let wbCache = null;
@@ -162,6 +198,7 @@ export function spielBauer(s, o = {}) {
   const zustand = (h) => {
     if (!zust.has(h.id)) {
       const z = zustandAusHaus(h, s, merk);
+      z.schluessel += '|abholstation:' + (hatAbholstation(s, h) ? 1 : 0);
       const w = nachnutzer(h);
       if (w) z.schluessel += '|nachnutzung:' + wbSchluessel(w);
       zust.set(h.id, z);
@@ -172,6 +209,7 @@ export function spielBauer(s, o = {}) {
   const baueWarenhaus = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
+    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
     // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
     if (!wahl.has(h.id)) {
       let fam = familieVon(h), fassade = h.fassade;
@@ -186,16 +224,21 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     const roh = fassade === h.fassade ? h : { ...h, fassade };
     const nutzer = nachnutzer(h);
-    return nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
+    const res=nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
       : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    if (!nutzer && hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d });
+    return res;
   };
   const baueSport = (S, scene, p, h) => {
     const f = fussabdruck(h);
     const { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
     const nutzer = nachnutzer(h);
-    return nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
+    const res=nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
       : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    return res;
   };
   const baueOutlet = (S, scene, p, h) => {
     const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
@@ -302,6 +345,22 @@ export function spielBauer(s, o = {}) {
     if (x.wbId) wettbewerber.set(x.wbId, x);
     return e;
   };
+  const statischerSlot = (typ) => (S, scene, p) => {
+    // Grafikkatalog unverändert in den gemeinsamen Sammler zeichnen:
+    // keine zusätzlichen Draw Calls oder Geometrie für die Klickfunktion.
+    const e = basis[typ](S, scene, p);
+    const haus = statischeDaten.get(p.standort?.id);
+    if (haus && o.getrennt) {
+      const f = fussabdruck(haus), { x, z } = imSlot(p, f.w, f.d);
+      const hoehe = Math.max(8, e?.hoehe ?? 18);
+      const bounds = new THREE.Box3(
+        new THREE.Vector3(x, 0, z),
+        new THREE.Vector3(x + f.w, hoehe, z + f.d)
+      );
+      statischeHaeuser.set(haus.id, { haus, p, bounds, e });
+    }
+    return e;
+  };
   const hqSlot = (S, scene, p) => {
     if (!basis['slot:hq'] || !p.standort) return { hoehe: 0 };
     if (o.getrennt) return baueHq(p);
@@ -318,7 +377,8 @@ export function spielBauer(s, o = {}) {
   };
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
-    'slot:schwester': slot('slot:schwester'), 'slot:outlet': basis['slot:outlet'],
+    'slot:schwester': statischerSlot('slot:schwester'), 'slot:outlet': statischerSlot('slot:outlet'),
+    'slot:premium': slot('slot:premium'),
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };
 
@@ -363,5 +423,5 @@ export function spielBauer(s, o = {}) {
     if (vater && !o.wurzel) vater.add(neu.gruppe);
     return e;
   }
-  return { bauer, haeuser, hqs, wettbewerber, wbSlots, aktualisiere, neuBauen, zustand: (id) => { const h = hausVon(id); return h ? zustand(h) : null; } };
+  return { bauer, haeuser, statischeHaeuser, hqs, wettbewerber, wbSlots, aktualisiere, neuBauen, zustand: (id) => { const h = hausVon(id); return h ? zustand(h) : null; } };
 }

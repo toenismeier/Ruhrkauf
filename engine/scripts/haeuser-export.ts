@@ -12,7 +12,7 @@ function grafikDaten(h: Haus) {
   return {
     id: h.id, name: h.name, stadt: h.stadt, format: h.format,
     ...(h.hausklasse ? { hausklasse: h.hausklasse } : {}),
-    ...(h.klasse ? { klasse: h.klasse, premiumSchluessel: h.premiumSchluessel } : {}),
+    ...(h.klasse ? { klasse: h.klasse, premiumSchluessel: h.premiumSchluessel, premiumImage: h.premiumImage } : {}),
     ...(h.nurDaten ? { nurDaten: true } : {}),
     lage: h.lage, cluster: h.cluster, region: h.region,
     grundflaecheQm: h.grundflaecheQm, etagen: h.etagen,

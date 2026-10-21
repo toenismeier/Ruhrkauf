@@ -3,7 +3,10 @@
 import { THREE, rng, waehle, zw, LOD } from './basis.js';
 import { Seite, seitenVon, plakat, passend, parkreihe, mensch, puppe, clamp, technik, KLEID } from './sporthelfer.js';
 import { zustandNormal, zustandFlags, zustandsDekor, merke } from './zustaende.js';
-import { lokal as innenLokal, puppe as innenPuppe, vorbereiten as innenVorbereiten } from './innen.js';
+import { lokal as innenLokal, vorbereiten as innenVorbereiten } from './innen.js';
+import { ladenplan, baueLadenplan } from './ladenplan.js';
+import { outletLadenEingabe, outletGeschossHoehe, fundusInnenZustand } from './ladenbau-outlet.js';
+import { moebel } from './moebel/index.js';
 
 export const NAME_OUTLET = 'FUNDUS';
 export const FARBE_OUTLET = '#8c1d40';
@@ -49,106 +52,55 @@ function marke(scene, s, H, bandUnterkante, zusatz = false) {
   return { u0: 0, u1: s.L, y0: y - 1.16, y1: y + 3.56, art: 'logo' };
 }
 
-// Lange Bekleidungsreihen statt Wühltischen; durch die beiden großen Glasfronten lesbar.
-function wareHinterGlas(S, scene, x, z, w, d, r, n) {
-  const breite = Math.min(28, w - 7);
-  for (let reihe = 0; reihe < (n > 1 ? 3 : 4); reihe++) {
-    const z0 = z + d - 4.5 - reihe * 2.5;
-    if (z0 < z + 2) break;
-    const links = x + 3;
-    const rw = breite;
-    S.box(rw, 0.09, 0.10, links + rw / 2, 2.55, z0, '#8d979d');
-    for (let u = links; u < links + rw; u += 1.15) {
-      if (Math.abs(u - (x + w * 0.52)) < 2) continue; // breiter Hauptgang
-      S.box(0.6, 0.74, 0.29, u, 1.95, z0, waehle(r, WAREN));
-    }
-    for (const u of [links, links + rw]) S.box(0.08, 2.25, 0.08, u, 1.4, z0, '#889299');
-    const schild = ['XS', 'S', 'M', 'L', 'XL'][reihe % 5];
-    const schildSeite = new Seite(S, links, z0 - 0.05, rw, 0.12, '+z');
-    for (const pos of [rw * 0.25, rw * 0.75]) {
-      schildSeite.q(pos - 0.7, pos + 0.7, 3.13, 3.67, 0.1, 0.22, '#f5f5f2');
-      text(scene, schildSeite, schild, pos, 3.42, 0.27, 1.3, 0.48, FARBE_OUTLET);
-    }
-  }
-  // Schuhe nach Größen, Home-Gondeln, zentrale Kassenzeile und Impulsware.
-  for (let k = 0; k < 5; k++) {
-    const xx = x + w - 4, zz = z + 5 + 2.2 * k;
-    S.box(3.4, 0.07, 1.4, xx, 0.8 + k * 0.22, zz, '#e5e1d9');
-    for (let b = 0; b < 3; b++) S.box(0.8, 0.44, 0.55, xx - 1 + b, 1.1 + k * 0.22, zz, waehle(r, WAREN));
-  }
-  for (let k = 0; k < 3; k++) {
-    const xx = x + 3 + k * 2.1, zz = z + 5;
-    S.box(1.65, 1.05, 2.5, xx, 0.85, zz, '#e2dfd6');
-    for (let j = 0; j < 3; j++) S.box(0.48, 0.38, 0.53, xx + (j - 1) * 0.52, 1.60, zz, waehle(r, WAREN));
-  }
-  S.box(7, 1.1, 1.45, x + w * 0.53, 0.85, z + d - 6, '#e2e1de');
-  for (let k = 0; k < 4; k++) S.box(0.8, 0.32, 0.5, x + w * 0.53 - 2.4 + k * 1.6, 1.55, z + d - 6, '#3d4246');
-  for (let k = 0; k < 4; k++) S.box(0.05, 0.95, 0.05, x + w * 0.53 - 3 + k * 1.8, 0.78, z + d - 2.6, '#8c1d40');
-}
-
-// Innen-Platzhalter: Rasterbeleuchtung, klare Hauptachse, Größenhinweise und hohe Warendichte.
+// Alle Verkaufsflächen stammen aus dem gemeinsamen Ladenplaner statt aus
+// überlagernden Freihand-Reihen. Auch City- und zweigeschossige FUNDUS-Häuser
+// werden geschossweise ausgestattet.
 export function innenOutlet(S, scene, haus, opt = {}) {
-  const { w, bd, H } = masseOutlet(haus);
-  const x = opt.x ?? 0, z = opt.z ?? 0, r = rng(String(haus.id) + '/innen');
-  S.quader(x, 0, z, x + w, 0.30, z + bd, '#e7e6e1');
-  for (let ix = x + 2.5; ix < x + w - 2; ix += 5) for (let iz = z + 2.5; iz < z + bd - 2; iz += 5)
-    S.box(2.5, 0.08, 0.50, ix, H - 0.4, iz, '#fff6dc');
-  wareHinterGlas(S, scene, x, z, w, bd, r, 1);
-  // Recycelte Innenbau-Primitive: eigene Gondeln und Markenpuppen in den Abteilungszonen.
-  const zStart = z + bd * 0.35;
-  for (let k = 0; k < 4; k++) {
-    const L = innenLokal(S, x + w - 5.5, 0.32, zStart + k * 3.2);
-    L.box(2.8, 1.35, 0.9, 0, 0, 0, '#eeece6');
-    L.box(3.0, 0.12, 1.1, 0, 1.25, 0, '#bfc2c0');
-    for (let j = 0; j < 4; j++) L.box(0.53, 0.42, 0.6, -1 + j * 0.68, 1.38, 0, waehle(r, WAREN));
-  }
-  for (let k = 0; k < 3; k++) {
-    const L = innenLokal(S, x + 7 + k * 4.7, 0.32, z + 4.7);
-    innenPuppe(L, 0, 0, r, k === 2 ? 'kind' : k === 1 ? 'herren' : 'damen', WAREN);
-  }
-  // Verdichtete, aber ordentlich präsentierte Markenware: Kleiderstangen, Schuh- und Taschenwände.
-  // Die 3-D-Einzelwaren entfallen bei Fern-LOD, die großen Gestelle bleiben erhalten.
-  const nah = LOD.stufe !== 'fern';
-  const gangBreite = Math.min(w - 10, 38);
-  for (let gang = 0; gang < 7; gang++) {
-    const zz = z + 3.7 + (gang % 4) * 3.05;
-    const xx = x + 4.2 + Math.floor(gang / 4) * 6.0;
-    if (zz > z + bd - 3.5 || xx > x + w - 8) continue;
-    const laenge = Math.min(gangBreite - (gang % 3) * 2, w - (xx - x) - 5);
-    S.box(laenge, 0.12, 0.15, xx + laenge / 2, 2.35, zz, '#7f8589');
-    for (const ex of [xx + 0.2, xx + laenge - 0.2])
-      S.box(0.13, 2.1, 0.13, ex, 1.32, zz, '#81878d');
-    if (nah) for (let i = 0; i < Math.floor(laenge / 0.85); i++) {
-      const bx = xx + 0.55 + i * 0.85;
-      if (Math.abs(bx - (x + w * 0.52)) < 2.25) continue;
-      S.box(0.53, 0.84, 0.34, bx, 1.65, zz, waehle(r, WAREN));
-      S.box(0.37, 0.25, 0.34, bx, 2.17, zz, waehle(r, WAREN));
-    }
-    const schild = ['DAMEN', 'HERREN', 'KINDER', 'SPORT', 'ACCESSOIRES', 'SCHUHE', 'HOME'][gang];
-    const seite = new Seite(S, xx, zz - 0.2, laenge, 0.2, '+z');
-    seite.q(laenge * 0.3, laenge * 0.7, 2.85, 3.4, 0.10, 0.23, '#f3f0e8');
-    text(scene, seite, schild, laenge / 2, 3.12, 0.27, laenge * 0.4 - 0.4, 0.40, FARBE_OUTLET);
-  }
-  // Schuhgrößenwand und Handtaschen: klar strukturierte Regale statt Wühltische.
-  for (let regal = 0; regal < 16; regal++) {
-    const rx = x + 3.5 + regal % 8 * Math.max(2.35, (w - 7) / 9);
-    const rz = z + Math.min(bd - 4.2, 3 + Math.floor(regal / 8) * 3.5);
-    S.box(1.9, 2.75, 0.23, rx, 1.67, rz, '#e7e6df');
-    for (let ebenen = 0; ebenen < 4; ebenen++) {
-      const yy = 0.65 + ebenen * 0.61;
-      S.box(1.9, 0.09, 0.95, rx, yy, rz + 0.35, '#d1d0ca');
-      if (nah) for (let st = 0; st < 3; st++) {
-        S.box(0.49, 0.34, 0.48, rx - 0.57 + st * 0.57, yy + 0.22, rz + 0.3, waehle(r, WAREN));
-        S.box(0.45, 0.07, 0.49, rx - 0.57 + st * 0.57, yy + 0.42, rz + 0.3, '#eeece6');
+  const m=masseOutlet(haus),x=opt.x??0,z=opt.z??0;
+  const status=fundusInnenZustand(opt.innenZustand??opt.status);
+  const bestueckung={normal:1,schwach:0.32,ansturm:0.82,raeumung:0.06}[status];
+  const geschosse=opt.geschosse??Array.from({length:m.n},(_,i)=>i);
+  const ergebnisse=[];
+  innenVorbereiten(S,scene);
+  for(const geschoss of geschosse) {
+    const eing=outletLadenEingabe(haus,m,geschoss);
+    const plan=ladenplan(eing.flaeche,'outlet',eing.abteilungen,
+      String(haus.id)+'/fundus/'+geschoss);
+    const y=outletGeschossHoehe(m,geschoss);
+    if(geschoss>0)S.box(m.bw-0.6,0.19,m.bd-0.6,
+      x+m.bw/2,y-0.14,z+m.bd/2,'#d5d8d7');
+    const gebaut=baueLadenplan(S,scene,plan,{x,z,y,bestueckung,
+      vorbereiten:false,dichte:opt.dichte??1});
+    // Waren in Belegungslücken und die Kassenzeile bleiben planbasiert.
+    // Temporäre Kundenschlangen blockieren bewusst im Zustand Ansturm den Gang.
+    if(geschoss===0&&(status==='ansturm'||status==='raeumung')) {
+      const r=rng(String(haus.id)+'/fundus/publikum/'+status);
+      const g=plan.gaenge.find(g=>g.typ==='haupt');
+      if(g)for(let i=0;i<(status==='ansturm'?12:3);i++) {
+        const rz=Math.max(g.z+0.9,g.z+g.d-1.6-i*1.05);
+        mensch(S,r,x+g.x+g.w/2+(i%2?0.4:-0.4),y+0.1,z+rz);
+      }
+      // Nachschub/Räumung: klar erkennbarer Rollwagen im Randbereich,
+      // nicht als dauerhaftes Möbel im Kundenlauf eingeplant.
+      const a=plan.moebel.find(q=>q.abteilung==='damen'&&q.id==='outlet_doppelstange');
+      if(a) {
+        const rw=moebel('outlet_rollwagen');
+        rw.bau(innenLokal(S,x+a.x+a.w/2,y,z+a.z+a.d+0.28),
+          rng(String(haus.id)+'/rollwagen'),1,{bestueckung});
       }
     }
+    if(geschoss===0&&status==='raeumung') {
+      const k=plan.moebel.find(q=>q.typ==='kasse');
+      if(k) {
+        S.box(Math.min(4.3,k.w),0.62,0.12,x+k.x+k.w/2,y+2.9,z+k.z+0.16,FARBE_OUTLET);
+        const seite=new Seite(S,x+k.x,z+k.z,Math.min(4.3,k.w),0.2,'+z');
+        text(scene,seite,'RÄUMUNG',Math.min(4.3,k.w)/2,y+3.15,0.25,
+          Math.min(3.8,k.w-0.5),0.4);
+      }
+    }
+    ergebnisse.push({geschoss,plan,teile:gebaut.teile,bestueckung});
   }
-    // Mitarbeiter beim Nachräumen und Rollwagen.
-  const mx = x + w - 6, mz = z + bd - 8;
-  mensch(S, r, mx, 0.34, mz);
-  S.box(1.6, 1.05, 1.0, mx + 1.3, 0.85, mz + 0.5, '#8d969d');
-  for (let k = 0; k < 3; k++) S.box(1.4, 0.2, 0.9, mx + 1.3, 0.5 + k * 0.4, mz + 0.5, '#e3ddd2');
-  return { hoehe: H, w, d: bd };
+  return {hoehe:m.H,w:m.bw,d:m.bd,status,geschosse:ergebnisse};
 }
 
 function glasfront(S, scene, s, maxY, offen, r, oben = false, eingangU = 0.52) {
@@ -251,7 +203,7 @@ export function outlet(S, scene, haus, opt = {}) {
   }
   if (!F.zu) {
     innenVorbereiten(S, scene);
-    innenOutlet(S, scene, haus, { x, z });
+    innenOutlet(S, scene, haus, { x, z, status: Z.status, innenZustand:opt.innenZustand });
   }
   for (const [i, s] of seiten.entries()) {
     glasfront(S, scene, s, stadt ? bandY - 0.07 : (zweigeschossig ? 7.65 : bandY + 0.4), !F.zu, r, zweigeschossig, eingang);

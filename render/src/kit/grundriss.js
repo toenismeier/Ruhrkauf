@@ -15,6 +15,7 @@ import {
 import * as I from './innen.js';
 import { flaeche, fremdflaeche, abteilungsArt, ABT, schirmTisch, pflanzentrog } from './abteilung.js';
 import { sportEtage } from './sportgrundriss.js';
+import { farbeGeneration } from './moebel/generationen.js';
 import { NAME_SCHWESTER, FARBE_SCHWESTER } from './schwesterhaus.js';
 
 const R = RASTER;
@@ -185,6 +186,7 @@ export function etage(S, scene, haus, etageNr, o = {}) {
     ax1 = ax0 + w; az1 = az0 + d;
   }
   const drin = (i, j) => i * R >= ax0 && (i + 1) * R <= ax1 && j * R >= az0 && (j + 1) * R <= az1;
+  const premium = haus.klasse === 'premium';
   const budget = o.budget ?? (o.ausschnitt ? 8000 : 25000);
   let umsatz = 0;
   for (const z of zn) umsatz += zonenUmsatz(haus, z.flaeche);
@@ -203,6 +205,7 @@ export function etage(S, scene, haus, etageNr, o = {}) {
     vorbereiten(tmp, gruppe);
     var kk = { ax0, az0, ax1, az1, drin, d, kunden, o };
     bauen(tmp, gruppe, haus, etageNr, ra, zn, kk);
+    if (premium) premiumInnen(tmp, gruppe, haus, etageNr, { ax0, az0, ax1, az1, d });
     if (tmp.anzahl <= budget || versuch > 8) break;
     versuch++;
     const f = Math.max(0.5, Math.min(0.92, (budget * 0.97) / tmp.anzahl));
@@ -210,8 +213,11 @@ export function etage(S, scene, haus, etageNr, o = {}) {
     gruppe.traverse((m) => { if (m.geometry) m.geometry.dispose(); });
   }
   // Branding im gemeinsamen Sortiment-Modul: Rot der Hartwig-Infrastruktur nur fuer Schwester umfaerben.
+  // O08 Umbau: gleiche Geometrie, Materialpalette gemäß Generation der Etage.
+  const moebelGeneration=haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3;
   for (const [k, gs] of tmp.teile) {
-    const farbe = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
+    const farbeAlt = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
+    const farbe = farbeGeneration(farbeAlt,moebelGeneration);
     if (!S.teile.has(farbe)) S.teile.set(farbe, []);
     S.teile.get(farbe).push(...gs);
   }
@@ -778,5 +784,37 @@ function strasse(S, ax0, az0, ax1, az1, r, d) {
     const vorne = r() < (ax1 - ax0) / ((ax1 - ax0) + (az1 - az0));
     if (vorne) figur(S, zw(r, ax0 + 1, ax1 + gw - 1), az1 + zw(r, 0.8, gw - 1.6), q + 500, 'kunde', { y: yg + 0.15, ry: r() < 0.5 ? Math.PI / 2 : -Math.PI / 2, pose: r() < 0.7 ? 'gehen' : 'tasche' });
     else figur(S, ax1 + zw(r, 0.8, gw - 1.6), zw(r, az0 + 1, az1), q + 700, 'kunde', { y: yg + 0.15, ry: r() < 0.5 ? 0 : Math.PI, pose: r() < 0.7 ? 'gehen' : 'tasche' });
+  }
+}
+
+/** Zusatzinszenierung auf dem normalen Etagenschnitt; Infrastruktur und Raster bleiben identisch. */
+function premiumInnen(S, scene, haus, nr, k) {
+  const { ax0, az0, ax1, az1, d } = k;
+  const B=ax1-ax0,T=az1-az0,cx=(ax0+ax1)/2,cz=(az0+az1)/2;
+  const gold='#b8955a', dunkel='#284139', stein='#eee3d1';
+  // Der zentrale Lichthof wird über alle Etagen als offene Galerie markiert.
+  const ring = Math.min(B,T)>18;
+  if (ring) {
+    for (const dx of [-1,1]) for(const dz of [-1,1]) S.box(0.55,3.8,0.55,cx+dx*5.2,1.9,cz+dz*5.2,gold);
+    for(const dz of [-1,1]) S.box(10.5,0.22,0.3,cx,3.65,cz+dz*5.2,gold);
+    for(const dx of [-1,1]) S.box(0.3,0.22,10.5,cx+dx*5.2,3.65,cz,gold);
+  }
+  // Warenwelt: Feinkosttheken, Austernbar und Weinwand im UG; Galerie und Glaskuben im EG.
+  if (nr===-1 || (nr===0 && !haus.etagen.includes(-1))) {
+    S.box(Math.min(B*0.3,9),1.15,1.7,cx,0.7,cz+T*0.23,stein);
+    for(let u=0;u<7;u++) S.box(0.28,0.7,0.28,cx-3+u,1.5,cz+T*0.23,'#e0cba8');
+    for(let u=0;u<8;u++) S.box(0.5,2.3,0.4,ax0+2+u*0.7,1.4,az0+1.0,dunkel);
+  } else if(nr===0 || nr===1) {
+    for(let u=0;u<4;u++) {
+      const x=ax0+3+u*3.6;
+      S.box(2.1,1.9,1.0,x,1.1,az0+2,stein);
+      S.box(2.15,1.6,0.1,x,2.0,az0+2.52,'#8db0b8');
+      S.box(2.2,0.18,1.2,x,2.16,az0+2,gold);
+    }
+  } else if(nr===Math.max(...haus.etagen)) {
+    for(let u=0;u<5;u++) {
+      const x=ax0+3+u*3;
+      if(x<ax1-2) S.box(1.1,0.8,1.1,x,0.6,az0+2,'#ede8dc');
+    }
   }
 }

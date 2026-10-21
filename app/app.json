@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Hartwig",
+    "slug": "hartwig",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#d23c32",
+    "assetBundlePatterns": [
+      "spiel/*",
+      "assets/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "de.ruhrkauf.hartwig",
+      "supportsTablet": false,
+      "requireFullScreen": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIStatusBarHidden": true,
+        "UIViewControllerBasedStatusBarAppearance": false
+      }
+    },
+    "plugins": [
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#d23c32",
+          "image": "./assets/icon.png",
+          "imageWidth": 160
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a493c3db-ffe6-4ff9-a832-5879298004ba"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a493c3db-ffe6-4ff9-a832-5879298004ba",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 5000
+    }
+  }
+}
