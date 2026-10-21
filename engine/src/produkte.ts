@@ -2,10 +2,13 @@
 // Dauer und Budget, Sterne-Bewertung, Trendbericht je Saison, Sortimentskapazität. Produkte bestimmen Nachfrage
 // und Marge der Marke in ihren Warengruppen (relativ zum Start, damit die Ausgangslage unverändert bleibt).
 // Vertrag: ../VORSTAND-MARKETING-VERTRAG.md, Abschnitt 3.
-import type { GameState, GruppeId } from './types';
+import type { GameState, GruppeId, Haus } from './types';
+import { PRODUKT_ZIELGRUPPEN, ZIELGRUPPE_PRODUKT, sortimentsBaum, type ProduktZielgruppe, type BaumAst } from './produkt-sortiment';
+export { PRODUKT_ZIELGRUPPEN, sortimentsBaum } from './produkt-sortiment';
+export type { ProduktZielgruppe } from './produkt-sortiment';
 import { clamp, eur, melde, mio, normal, waehle, zufall, type RngHalter } from './util';
 import { WG, saisonId, saisonName, type WgId } from './einkauf';
-import { eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
+import { eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, passungHaus, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
 import { hqAktualisiere } from './hq';
 
 // ---------------------------------------------------------------------------------------------
@@ -29,7 +32,7 @@ export type ArtikelTyp =
   | 'Jeans-Shorts' | 'Kaschmirpullover' | 'Strickjacke' | 'Bluse' | 'Hemd' | 'T-Shirt' | 'Poloshirt' | 'Kleid' | 'Rock' | 'Chino' | 'Jeans'
   | 'Mantel' | 'Steppjacke' | 'Blazer' | 'Sneaker' | 'Pumps' | 'Stiefel' | 'Pyjama' | 'Unterwäsche' | 'BH' | 'Socken' | 'Schal' | 'Mütze'
   | 'Handtasche' | 'Gürtel' | 'Bettwäsche' | 'Handtuch' | 'Kissen' | 'Tasse' | 'Vase' | 'Lippenstift' | 'Creme' | 'Parfum'
-  | 'Kinderbody' | 'Kinderkleid' | 'Plüschtier';
+  | 'Kinderbody' | 'Kinderkleid' | 'Plüschtier' | 'Top' | 'Crop-Top' | 'Stoffhose' | 'Leinenhose' | 'Cargohose' | 'Minirock' | 'A-Linien-Rock';
 
 export type Farbe =
   | 'weiß' | 'creme' | 'sand' | 'beige' | 'camel' | 'cognac' | 'braun' | 'grau' | 'anthrazit' | 'schwarz' | 'marine' | 'hellblau' | 'jeansblau'
@@ -191,6 +194,17 @@ export const ZUSATZ_ARTIKELTYPEN: TypDef[] = (Object.keys(ZUSATZ_ARTIKEL) as Pro
 );
 const BASIS_ARTIKELTYPEN = [...ARTIKELTYPEN];
 ARTIKELTYPEN.push(...ZUSATZ_ARTIKELTYPEN);
+// Q11 ergänzt ausschließlich neue Artikeltypen. Die Reihenfolge und Parameter alter Typen bleiben gleich.
+export const Q11_ARTIKELTYPEN: TypDef[] = [
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'T-Shirt')!, typ: 'Top', preis: 24, wgs: ['damen.blusen', 'damen.young'] },
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'T-Shirt')!, typ: 'Crop-Top', preis: 22, wgs: ['damen.young', 'damen.blusen'], gruppe: G(0.2, 1, 0.5, 0.1) },
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'Chino')!, typ: 'Stoffhose', preis: 65, wgs: ['damen.hosen', 'herren.hosen'] },
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'Chino')!, typ: 'Leinenhose', preis: 69, materialien: ['Leinen'], saison: 'sommer' },
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'Chino')!, typ: 'Cargohose', preis: 59, wgs: ['damen.young', 'herren.casual'] },
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'Rock')!, typ: 'Minirock', preis: 39, wgs: ['damen.young', 'damen.hosen'] },
+  { ...ARTIKELTYPEN.find((t) => t.typ === 'Rock')!, typ: 'A-Linien-Rock', preis: 49, wgs: ['damen.hosen', 'damen.young'] },
+];
+ARTIKELTYPEN.push(...Q11_ARTIKELTYPEN);
 export const TYP: Record<string, TypDef> = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
 
 /** Grundfarben je Zielgruppe (unabhängig vom Trend). */
@@ -231,6 +245,7 @@ export interface SterneTeile { zielgruppe: number; trend: number; preisQualitaet
 
 export interface Produkt {
   id: string; marke: string; typ: ArtikelTyp; name: string; farbe: Farbe; material: Material; stil: Stil;
+  zielgruppe?: ProduktZielgruppe; // Q11; alte Produkte bleiben ohne eigene Zielgruppe wirtschaftlich unverändert.
   preislage: Preislage; qualitaet: number; wg: WgId; kategorie: ProduktKategorie;
   /** Normpreis (aus Typ, Preislage, Material, Qualität) und aktueller Preis in €. */
   normpreis: number; preis: number; ekStueck: number;
@@ -260,7 +275,7 @@ export interface ProdukteStand {
 
 export interface ProduktEntwurf {
   marke: string; typ: ArtikelTyp; farbe: Farbe; material: Material; preislage?: Preislage; qualitaet?: number; stil?: Stil;
-  dauer: number; budgetWoche: number; name?: string; wg?: WgId;
+  dauer: number; budgetWoche: number; name?: string; wg?: WgId; zielgruppe?: ProduktZielgruppe;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -315,8 +330,8 @@ export function trendGruppe(m: Pick<Eigenmarke, 'zielgruppe'>): TrendGruppe {
 
 const PREIS_STUFE: Record<Preislage, number> = { einstieg: 0, mitte: 1, gehoben: 2 };
 
-export function normpreis(typ: TypDef, preislage: Preislage, material: Material, qualitaet: number): number {
-  const p = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material].preis * (0.85 + 0.05 * qualitaet);
+export function normpreis(typ: TypDef, preislage: Preislage, material: Material, qualitaet: number, zielgruppe?: ProduktZielgruppe): number {
+  const p = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material].preis * (0.85 + 0.05 * qualitaet) * (zielgruppe ? ZIELGRUPPE_PRODUKT[zielgruppe].preis : 1);
   return Math.max(3, Math.round(p) - 0.01);
 }
 
@@ -336,9 +351,9 @@ function wgFuer(s: GameState, m: Eigenmarke, t: TypDef, wunsch?: WgId): WgId | u
 }
 
 /** Teile der Bewertung 0..1. trend = undefined: Trend der Einführungssaison noch unbekannt (neutral). */
-export function bewerte(s: GameState, m: Eigenmarke, e: { typ: ArtikelTyp; farbe: Farbe; material: Material; preislage: Preislage; qualitaet: number; dauer: number; budgetWoche: number }, team: number, trend: TrendSaison | undefined, trendOhne = 0.4): SterneTeile {
+export function bewerte(s: GameState, m: Eigenmarke, e: { typ: ArtikelTyp; farbe: Farbe; material: Material; preislage: Preislage; qualitaet: number; dauer: number; budgetWoche: number; zielgruppe?: ProduktZielgruppe }, team: number, trend: TrendSaison | undefined, trendOhne = 0.4): SterneTeile {
   const t = TYP[e.typ];
-  const g = trendGruppe(m);
+  const g = e.zielgruppe ? ZIELGRUPPE_PRODUKT[e.zielgruppe].trend : trendGruppe(m);
   const mat = MATERIALIEN[e.material];
   // Zielgruppe: Artikeltyp, Grundfarbe, Wertigkeit des Materials (Reife schätzt Wertiges, Junge sind preisbewusst)
   const farbBasis = FARB_BASIS[g].includes(e.farbe) ? 1 : 0.35;
@@ -418,6 +433,26 @@ export function produktNachfrageFaktor(s: GameState, markeId: string, wg: WgId):
   return clamp(f, PRODUKT_PARAM.faktorMin, PRODUKT_PARAM.faktorMax);
 }
 
+/** Altersstruktur des Einzugsgebiets beeinflusst neue, gezielt entwickelte Produkte je Haus.
+ * Ohne explizite Produktzielgruppe: exakt 1 (Bestand/Spielstände Version 2 bleiben neutral).
+ * Die Hauspassung wird über dieselben Engine-Parameter wie bei den Eigenmarken berechnet. */
+export function produktHausFaktor(s: GameState, m: Eigenmarke, wg: WgId, h: Pick<Haus, 'einzug' | 'cluster' | 'region'>): number {
+  if (!s.produkte) return 1;
+  const liste = s.produkte.liste.filter((p) => p.marke === m.id && p.wg === wg && imSortiment(p) && p.zielgruppe);
+  if (!liste.length) return 1;
+  const alt = passungHaus(m, h);
+  let gewichtet = 0, sum = 0;
+  for (const p of liste) {
+    const z = ZIELGRUPPE_PRODUKT[p.zielgruppe!];
+    const alter = p.zielgruppe === 'bestager' && m.zielgruppe.alter === '70+' ? '70+' : z.alter;
+    const ziel = passungHaus({ zielgruppe: { ...m.zielgruppe, alter }, preislage: p.preislage }, h);
+    const w = gewicht(s, p);
+    gewichtet += w * (ziel - alt);
+    sum += w;
+  }
+  return clamp(1 + 0.8 * gewichtet / Math.max(sum, 0.01), 0.75, 1.25);
+}
+
 /** Margenverschiebung der Marke in der WG gegenüber dem Start (Preis, Material, Qualität der Produkte). */
 export function produktMargeDelta(s: GameState, markeId: string, wg: WgId): number {
   const pr = s.produkte;
@@ -434,9 +469,9 @@ function margeErwartet(s: GameState, m: Eigenmarke, wg: WgId): number {
   return (st?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
 }
 
-function ekStueck(normp: number, me: number, material: Material, qualitaet: number): number {
+function ekStueck(normp: number, me: number, material: Material, qualitaet: number, zielgruppe?: ProduktZielgruppe): number {
   const mat = MATERIALIEN[material];
-  return Math.round(normp * (1 - me) * (mat.kosten / mat.preis) * (1 + 0.03 * (qualitaet - 3)) * 100) / 100;
+  return Math.round(normp * (1 - me) * (mat.kosten / mat.preis) * (1 + 0.03 * (qualitaet - 3)) * (zielgruppe ? ZIELGRUPPE_PRODUKT[zielgruppe].kosten / ZIELGRUPPE_PRODUKT[zielgruppe].preis : 1) * 100) / 100;
 }
 
 function produktName(typ: ArtikelTyp, farbe: Farbe, material: Material): string {
@@ -445,14 +480,14 @@ function produktName(typ: ArtikelTyp, farbe: Farbe, material: Material): string 
   return `${typ} ${farbe}${matWort}`;
 }
 
-function neuesProdukt(s: GameState, m: Eigenmarke, e: Required<Pick<ProduktEntwurf, 'typ' | 'farbe' | 'material' | 'dauer' | 'budgetWoche'>> & { preislage: Preislage; qualitaet: number; stil: Stil; name?: string }, wg: WgId, team: number): Produkt {
+function neuesProdukt(s: GameState, m: Eigenmarke, e: Required<Pick<ProduktEntwurf, 'typ' | 'farbe' | 'material' | 'dauer' | 'budgetWoche'>> & { preislage: Preislage; qualitaet: number; stil: Stil; name?: string; zielgruppe?: ProduktZielgruppe }, wg: WgId, team: number): Produkt {
   const t = TYP[e.typ];
-  const np = normpreis(t, e.preislage, e.material, e.qualitaet);
+  const np = normpreis(t, e.preislage, e.material, e.qualitaet, e.zielgruppe);
   const me = margeErwartet(s, m, wg);
   s.produkte.zaehler += 1;
   return {
     id: `pr${s.produkte.zaehler}`, marke: m.id, typ: e.typ, name: e.name?.trim() || produktName(e.typ, e.farbe, e.material), farbe: e.farbe, material: e.material,
-    stil: e.stil, preislage: e.preislage, qualitaet: e.qualitaet, wg, kategorie: t.kategorie, normpreis: np, preis: np, ekStueck: ekStueck(np, me, e.material, e.qualitaet),
+    stil: e.stil, preislage: e.preislage, qualitaet: e.qualitaet, zielgruppe: e.zielgruppe, wg, kategorie: t.kategorie, normpreis: np, preis: np, ekStueck: ekStueck(np, me, e.material, e.qualitaet, e.zielgruppe),
     margeErwartet: me, status: 'entwicklung', start: s.woche, dauer: e.dauer, budgetWoche: e.budgetWoche, fertig: s.woche + e.dauer, team,
     verkauf: [], umsatz: [], saison: saisonId(s.woche + e.dauer),
   };
@@ -630,6 +665,7 @@ function pruefe(s: GameState, e: ProduktEntwurf): Pruefung {
   if (!m || m.status === 'eingestellt') return { ...leer, fehler: 'Marke nicht gefunden.' };
   const t = TYP[e.typ];
   if (!t) return { ...leer, m, fehler: 'Unbekannter Artikeltyp.' };
+  if (e.zielgruppe && !ZIELGRUPPE_PRODUKT[e.zielgruppe]) return { ...leer, m, t, fehler: 'Unbekannte Zielgruppe.' };
   if (!FARBEN[e.farbe]) return { ...leer, m, t, fehler: 'Unbekannte Farbe.' };
   if (!t.materialien.includes(e.material)) return { ...leer, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. Möglich: ${t.materialien.join(', ')}.` };
   if (!DAUER_STUFEN.includes(e.dauer as (typeof DAUER_STUFEN)[number])) return { ...leer, m, t, fehler: 'Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen.' };
@@ -735,7 +771,7 @@ export function produktKi(s: GameState, guete: number, r: RngHalter): string | u
 // ---------------------------------------------------------------------------------------------
 
 export interface ProduktKarte {
-  id: string; marke: string; markeName: string; typ: ArtikelTyp; name: string; farbe: Farbe; farbeHex: string; material: Material; stil: Stil;
+  id: string; marke: string; markeName: string; typ: ArtikelTyp; name: string; farbe: Farbe; farbeHex: string; material: Material; stil: Stil; zielgruppe?: ProduktZielgruppe; zielgruppeName: string;
   preislage: Preislage; qualitaet: number; wg: WgId; wgName: string; bereich: GruppeId; kategorie: ProduktKategorie; kategorieName: string;
   status: ProduktStatus; normpreis: number; preis: number; ekStueck: number; marge: number;
   sterne: number; sterneEinfuehrung?: number; sterneTeile?: SterneTeile;
@@ -758,7 +794,7 @@ export function produktKarte(s: GameState, p: Produkt): ProduktKarte {
   const b = n > 1 ? p.verkauf[n - 2] : a;
   const ent = p.status === 'entwicklung';
   return {
-    id: p.id, marke: p.marke, markeName: m?.name ?? p.marke, typ: p.typ, name: p.name, farbe: p.farbe, farbeHex: FARBEN[p.farbe], material: p.material, stil: p.stil,
+    id: p.id, marke: p.marke, markeName: m?.name ?? p.marke, typ: p.typ, name: p.name, farbe: p.farbe, farbeHex: FARBEN[p.farbe], material: p.material, stil: p.stil, zielgruppe: p.zielgruppe, zielgruppeName: p.zielgruppe ? ZIELGRUPPE_PRODUKT[p.zielgruppe].name : 'Markenzielgruppe',
     preislage: p.preislage, qualitaet: p.qualitaet, wg: p.wg, wgName: WG[p.wg]?.name ?? p.wg, bereich: WG[p.wg]?.bereich, kategorie: p.kategorie, kategorieName: PRODUKT_KATEGORIEN[p.kategorie],
     status: p.status, normpreis: p.normpreis, preis: p.preis, ekStueck: p.ekStueck, marge: Math.round((1 - p.ekStueck / Math.max(0.5, p.preis)) * 1000) / 1000,
     sterne: ent ? 0 : halbe(sterneWirksam(s, p)), sterneEinfuehrung: p.sterne, sterneTeile: p.teile,
@@ -789,6 +825,9 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
 }
 
 export interface ProduktKatalog {
+  version: 2;
+  baum: BaumAst[];
+  zielgruppen: typeof PRODUKT_ZIELGRUPPEN;
   sparten: { id: Produktsparte; name: string; typen: ArtikelTyp[] }[];
   kategorien: { id: ProduktKategorie; name: string }[];
   typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number> }[];
@@ -801,6 +840,7 @@ export interface ProduktKatalog {
 
 export function produktKatalog(_s: GameState): ProduktKatalog {
   return {
+    version: 2, baum: sortimentsBaum(ARTIKELTYPEN), zielgruppen: PRODUKT_ZIELGRUPPEN,
     sparten: (Object.keys(ZUSATZ_ARTIKEL) as Produktsparte[]).map((id) => ({
       id, name: ({ damen:'Bekleidung Damen', herren:'Bekleidung Herren', kinder:'Bekleidung Kinder',
         schuhe:'Schuhe', accessoires:'Accessoires', heimtextil:'Heimtextil', haushalt:'Haushalt', beauty:'Beauty' })[id],
@@ -853,14 +893,15 @@ export function produktVorschau(s: GameState, e: ProduktEntwurf): ProduktVorscha
   const st = sterneAus(scoreAus(teile));
   const cpo = s.vorstand?.ressorts.cpo.person;
   const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
-  const np = normpreis(c.t, c.preislage, e.material, c.qualitaet);
+  const np = normpreis(c.t, c.preislage, e.material, c.qualitaet, e.zielgruppe);
   const me = margeErwartet(s, c.m, c.wg);
-  const ek = ekStueck(np, me, e.material, c.qualitaet);
+  const ek = ekStueck(np, me, e.material, c.qualitaet, e.zielgruppe);
   const hinweise: string[] = [];
   if (teile.trend < 0.3 && bekannt) hinweise.push('Trifft den Trend der Einführungssaison kaum');
-  if (teile.zielgruppe < 0.5) hinweise.push(`Passt wenig zur Zielgruppe von ${c.m.name}`);
+  if (teile.zielgruppe < 0.5) hinweise.push(`Passt wenig zur gewählten Zielgruppe`);
   if (teile.entwicklung < 0.5) hinweise.push('Budget oder Dauer knapp für diesen Artikel');
   if (!bekannt) hinweise.push('Trend der Einführungssaison noch unbekannt');
+  if (e.zielgruppe) hinweise.push(`Zielgruppe ${ZIELGRUPPE_PRODUKT[e.zielgruppe].name}: Preis, Marge und Nachfrage nach Standort werden berücksichtigt`);
   if ((c.m.wgAnteile[c.wg] ?? 0) <= 0) hinweise.push(`${c.m.name} bekommt dafür einen Anteil von ${Math.round(PRODUKT_PARAM.anteilNeu * 100)} % in ${WG[c.wg].name}`);
   return {
     ok: !c.fehler, fehler: c.fehler, wg: c.wg, wgName: WG[c.wg].name, kategorie: c.t.kategorie, name: e.name?.trim() || produktName(e.typ, e.farbe, e.material),
