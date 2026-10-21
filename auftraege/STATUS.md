@@ -23,7 +23,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q05 Eigenmarken und Delegation je Aufgabe | – | gemergt (#42) | – |
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | main | **gemergt 21.10.** (b5534a0) | Abnahme `nachbesserung-massstab.md` Abschnitt 20; Premium klar über Schnitt (E28) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | `feat/massstab-oberflaeche` #23 | abnahmefähig | Prüfung; Voraussetzung für Q07 |
-| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | – | offen | **startklar** (#7 gemergt) |
+| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | `feat/engine-formate` | **startet 21.10.** | Auftrag mit Stand 21.10. (TK-Maxx-Prinzip, Referenz-GuV, Bot T/D) |
+| Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | – | offen | Start nach Merge Maßstab Oberfläche |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |
