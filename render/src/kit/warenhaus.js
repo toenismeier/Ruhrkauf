@@ -10,6 +10,7 @@ import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } fro
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
+import { dachInstallationen } from './dach-qualitaet.js';
 
 export const ROT = '#d23c32';
 export const EG = 5.5, GH = 4.5;
@@ -478,39 +479,18 @@ function lichtkuppeln(K, x0, z0, x1, z1, y, ax = 6.5, az = 9) {
     S.box(1.5, 0.35, 1.5, ox + i * ax, y + 0.45, oz + j * az, K.alt ? '#c9cfd1' : '#e8eef0');
   }
 }
-/** Haustechnik auf einem Dachbereich. */
+/** Q02: Aufbauten bündig auf der Dachoberfläche, maximal drei Bauarten pro Dachbereich. */
 function technik(K, x0, z0, x1, z1, y, o = {}) {
-  const S = K.S, r = K.r;
-  const fl = (x1 - x0) * (z1 - z0);
-  if (x1 - x0 < 6 || z1 - z0 < 6) return;
-  const anz = Math.min(o.max ?? 9, Math.max(2, Math.round(fl / 320)));
-  const belegt = [];
-  const f = o.farbe ?? '#c9c6bf';
-  for (let v = 0; v < anz * 5 && belegt.length < anz; v++) {
-    const typ = belegt.length === 0 ? 'lueftung' : waehle(r, ['lueftung', 'kuehler', 'kuehler', 'aufzug', 'rohr', 'kasten']);
-    const [bw, bd, bh] = { lueftung: [zw(r, 7, 13), zw(r, 4, 7), zw(r, 2.6, 3.6)], kuehler: [zw(r, 4, 6), 2.2, 1.3], aufzug: [3.2, 3.2, 3.2], rohr: [zw(r, 6, 10), 0.8, 0.8], kasten: [zw(r, 2, 3.5), zw(r, 2, 3.5), zw(r, 1.4, 2.2)] }[typ];
-    if (bw > x1 - x0 - 2 || bd > z1 - z0 - 2) continue;
-    const cx = zw(r, x0 + bw / 2 + 1, x1 - bw / 2 - 1), cz = zw(r, z0 + bd / 2 + 1, z1 - bd / 2 - 1);
-    if (reserviert(K, cx, cz, Math.max(bw, bd) / 2 + 0.5)) continue;
-    if (belegt.some((b) => Math.abs(b[0] - cx) < (b[2] + bw) / 2 + 0.8 && Math.abs(b[1] - cz) < (b[3] + bd) / 2 + 0.8)) continue;
-    belegt.push([cx, cz, bw, bd]);
-    if (typ === 'rohr') {
-      const g = new THREE.CylinderGeometry(0.4, 0.4, bw, 8); g.rotateZ(Math.PI / 2); g.translate(cx, y + 0.9, cz); S.add(g, '#d6d8da');
-      S.box(0.3, 0.6, 0.3, cx - bw / 3, y + 0.3, cz, '#9aa0a5'); S.box(0.3, 0.6, 0.3, cx + bw / 3, y + 0.3, cz, '#9aa0a5');
-      continue;
-    }
-    S.box(bw, bh, bd, cx, y + bh / 2, cz, typ === 'aufzug' ? (o.aufzug ?? f) : f);
-    S.box(bw + 0.2, 0.15, bd + 0.2, cx, y + bh + 0.07, cz, heller(f, 0.05));
-    if (typ === 'lueftung') {
-      for (let k = 0; k < 4; k++) {
-        const yy = y + 0.5 + k * (bh - 0.9) / 3;
-        S.box(bw * 0.8, 0.12, 0.08, cx, yy, cz + bd / 2 + 0.04, dunkler(f, 0.14));
-        S.box(0.08, 0.12, bd * 0.75, cx + bw / 2 + 0.04, yy, cz, dunkler(f, 0.14));
-      }
-    }
-    if (typ === 'kuehler') for (let k = 0; k < Math.floor(bw / 1.8); k++) zyl(S, cx - bw / 2 + 0.9 + k * 1.8, y + bh, cz, 0.7, 0.18, '#5d646a', 10);
+  const dach = { x0, z0, x1, z1, y, steil: false };
+  if (K.dach && Math.abs(K.dach.y - y) < 1.1) {
+    dach.x0 = Math.max(x0, K.dach.x0);
+    dach.z0 = Math.max(z0, K.dach.z0);
+    dach.x1 = Math.min(x1, K.dach.x1);
+    dach.z1 = Math.min(z1, K.dach.z1);
+    dach.y = K.dach.y;
   }
-  if (o.antenne !== false && r() < 0.6) { zyl(S, x0 + 2.5, y, z0 + 2.5, 0.08, 7, '#8a9096', 5); S.box(1.6, 0.08, 0.08, x0 + 2.5, y + 6, z0 + 2.5, '#8a9096'); }
+  dachInstallationen(K.S, dach, K.r, { max: o.max, farbe: o.farbe,
+    reserviert: (x, z, rad) => reserviert(K, x, z, rad), protokoll: K.qualitaet?.daecher });
 }
 /** Parkdeck (Dach): Asphalt, Markierungen, Autos, Treppenhaus, P-Schild. */
 function parkdeck(K, x0, z0, x1, z1, y, mitSchild = true) {

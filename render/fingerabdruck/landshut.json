@@ -610,7 +610,7 @@
       {"id":"p182","teile":129,"dreiecke":1772,"boundingBox":[66.5,0,414.6,86.5,22.37,433.39]},
       {"id":"p183","teile":104,"dreiecke":1574,"boundingBox":[22.5,0,417.7,41.91,29.9,434.92]},
       {"id":"p184","teile":367,"dreiecke":5728,"boundingBox":[46.5,0,418.6,63.05,21.24,430.52]},
-      {"id":"p185","teile":660,"dreiecke":7846,"boundingBox":[138.8,0,422.8,193.33,21.34,457.11]},
+      {"id":"p185","teile":646,"dreiecke":7668,"boundingBox":[138.8,0,422.8,193.33,21.34,457.11]},
       {"id":"p186","teile":108,"dreiecke":1488,"boundingBox":[108.92,0,395,127.6,16.29,416.5]},
       {"id":"p187","teile":105,"dreiecke":1556,"boundingBox":[108.6,0,434.5,127.89,19.56,453]},
       {"id":"p188","teile":119,"dreiecke":1912,"boundingBox":[170.5,0,394.61,189,21.25,413.89]},
@@ -833,21 +833,21 @@
       {"id":"p99","teile":91,"dreiecke":1244,"boundingBox":[22.11,0,247.5,43.9,24.07,267.5]}
     ],
     "umgebung": {
-      "teile": 2097,
-      "dreiecke": 93571,
+      "teile": 2172,
+      "dreiecke": 94471,
       "boundingBox": [-480,-6.2,-480,1154,124.04,1088.5]
     },
     "gesamt": {
-      "teile": 62117,
-      "strasse": 1998,
-      "haeuser": 60119,
-      "instanzen": 29541,
+      "teile": 62179,
+      "strasse": 2073,
+      "haeuser": 60106,
+      "instanzen": 29162,
       "drawCallsInstanzen": 99
     }
   },
   "pruefsummen": {
     "stadtplan": "a77a13ee2cf8e6482a3e05d9cfcca418a9ea160c79b4f730a6c898022c163f53",
-    "geometrie": "b99efc7927a8a45e6b10da90ad611cbf64d19af7772acd272784b844839e5b06",
+    "geometrie": "6ae848354ea2e7a0f04f168a314c55c8d852e3bb529401df52e361e287aad3e7",
     "bildReferenz": "5c96004e348caa97b1deb77d5f7cc7fb49f757c66e13b59a0e09f898b3245c04"
   }
 }

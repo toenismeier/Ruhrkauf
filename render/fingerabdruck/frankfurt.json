@@ -14,7 +14,7 @@
   },
   "stadtplan": {
     "liste": [
-      {"id":"aussen/bauten/aussen-O002","bauer":"slot:outlet","lage":[1471.5,1175,50,54],"drehung":0,"variante":null,"standort":"O002","pruefsumme":"838451d7ce5fe537"},
+      {"id":"aussen/bauten/aussen-O013","bauer":"slot:outlet","lage":[1467.5,1172,58,60],"drehung":0,"variante":null,"standort":"O013","pruefsumme":"40a9d0af7354eb5d"},
       {"id":"aussen/wasser/0","bauer":"aussen/wasser","lage":[-480,863.5,480,76],"drehung":0,"variante":null,"standort":null,"pruefsumme":"ce02f7d55a2dbe89"},
       {"id":"aussen/wasser/1","bauer":"aussen/wasser","lage":[1343.5,863.5,480,76],"drehung":0,"variante":null,"standort":null,"pruefsumme":"f7ff401db1006fe3"},
       {"id":"bloecke/b0","bauer":"wasser","lage":[0,863.5,1343.5,76],"drehung":0,"variante":null,"standort":null,"pruefsumme":"2c2c8777b7e60c75"},
@@ -2260,11 +2260,11 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"b11721fc632002fe"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"510a8cc371479237"}
     ],
-    "gesamt": "b7e8be29da29537b"
+    "gesamt": "d2c6314277ca4a14"
   },
   "geometrie": {
     "kacheln": [
-      {"id":"aussen-O002","teile":1516,"dreiecke":18276,"boundingBox":[1470.9,0.15,1175,1522.6,13.18,1228.2]},
+      {"id":"aussen-O013","teile":1325,"dreiecke":15986,"boundingBox":[1466.9,0.15,1172,1526.6,11.27,1231.2]},
       {"id":"p1","teile":541,"dreiecke":21212,"boundingBox":[24.5,0.05,521.5,166.5,31.96,708]},
       {"id":"p10","teile":207,"dreiecke":2492,"boundingBox":[902.05,0,760.46,915,22.25,780.12]},
       {"id":"p100","teile":149,"dreiecke":1768,"boundingBox":[411.5,0,41.48,430.1,25.17,52.93]},
@@ -3886,7 +3886,7 @@
       {"id":"p803","teile":85,"dreiecke":1000,"boundingBox":[609.77,0,352.45,620.24,18.89,369.55]},
       {"id":"p804","teile":279,"dreiecke":4336,"boundingBox":[620.2,0,352.6,634.9,24.65,370.26]},
       {"id":"p805","teile":554,"dreiecke":7762,"boundingBox":[634.81,0,353,653.55,21.8,370.26]},
-      {"id":"p806","teile":751,"dreiecke":8984,"boundingBox":[741.8,0,339.8,811.34,37.4,394.58]},
+      {"id":"p806","teile":736,"dreiecke":8728,"boundingBox":[741.8,0,339.8,811.34,37.4,394.58]},
       {"id":"p807","teile":338,"dreiecke":4064,"boundingBox":[697,0,312,715.62,22.85,330.62]},
       {"id":"p808","teile":287,"dreiecke":3394,"boundingBox":[696.98,0,372.98,717.01,19.25,391.01]},
       {"id":"p809","teile":278,"dreiecke":3294,"boundingBox":[787.98,0,311.98,807.45,20.3,329.45]},
@@ -4083,7 +4083,7 @@
       {"id":"p985","teile":378,"dreiecke":4526,"boundingBox":[657.42,0,429.42,676.12,24.6,438.58]},
       {"id":"p986","teile":595,"dreiecke":7130,"boundingBox":[574.2,0,430.81,591.83,32.22,445.8]},
       {"id":"p987","teile":1149,"dreiecke":13768,"boundingBox":[574.2,0,443.63,591.83,30.86,475.02]},
-      {"id":"p988","teile":3627,"dreiecke":43598,"boundingBox":[726.4,0,439.9,811.33,32.8,495.12]},
+      {"id":"p988","teile":3620,"dreiecke":43410,"boundingBox":[726.4,0,439.9,811.33,32.8,495.12]},
       {"id":"p989","teile":515,"dreiecke":6188,"boundingBox":[697,0,412.5,717.62,23.07,433.12]},
       {"id":"p99","teile":345,"dreiecke":4110,"boundingBox":[392.22,0,21.96,411.54,33.48,41.55]},
       {"id":"p990","teile":705,"dreiecke":12058,"boundingBox":[696.95,0,471.45,720.9,31.61,492.02]},
@@ -4098,21 +4098,21 @@
       {"id":"p999","teile":612,"dreiecke":7314,"boundingBox":[696.92,0,445.88,716.33,19.5,473.12]}
     ],
     "umgebung": {
-      "teile": 6172,
-      "dreiecke": 134523,
+      "teile": 6189,
+      "dreiecke": 134727,
       "boundingBox": [-480,-6.2,-480,1823.5,29,1536.5]
     },
     "gesamt": {
-      "teile": 666325,
-      "strasse": 6056,
-      "haeuser": 660269,
-      "instanzen": 65736,
+      "teile": 666130,
+      "strasse": 6073,
+      "haeuser": 660057,
+      "instanzen": 64822,
       "drawCallsInstanzen": 116
     }
   },
   "pruefsummen": {
-    "stadtplan": "18c9389043d064124d0efc6179b8ff1c93a8081f85d67fe181a939f02f7ec68c",
-    "geometrie": "df80dbc2c7b6529983bc0932350c28ede6355a63eb3841d268f0344f4ca38d3d",
-    "bildReferenz": "2643bb0309de6ea2e888c139f309406f832e6e323fc14eaf3419bf64bf3f50ef"
+    "stadtplan": "3f2ed20d4ffde27357c9207e5d1ffa5753e3c115d4edde4128abb7fc22a12555",
+    "geometrie": "26fb3eabf0e46adf07f98619ccfb1e5c26f780ceb1307f3add6cb2c9d67ee0b6",
+    "bildReferenz": "8b6878e6376618f2857d4dbceefab327192d01aca85ff5abe0a0b2fef8793050"
   }
 }
