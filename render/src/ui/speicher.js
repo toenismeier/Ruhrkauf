@@ -8,6 +8,15 @@ export const PLAETZE = ['autosave', 'platz-1', 'platz-2', 'platz-3'];
 const MAX_DATEI = 40 * 1024 * 1024;
 const MAX_INHALT = 160 * 1024 * 1024;
 let queue = Promise.resolve();
+let letzteSpeicherDiagnose = null;
+export function speicherDiagnose() { return letzteSpeicherDiagnose ? { ...letzteSpeicherDiagnose } : null; }
+function diagnoseFehler(e, phase, bytes = 0) {
+  letzteSpeicherDiagnose = { zeit: new Date().toISOString(), phase, bytes, name: e?.name ?? 'Error', grund: e?.message ?? String(e) };
+}
+function fehlermeldung(e) {
+  const f = fehlerText(e);
+  return new Error(f.message + ' (' + (e?.name ?? 'Fehler') + ': ' + (e?.message ?? String(e)) + ')');
+}
 
 function platzPruefen(platz) {
   if (!PLAETZE.includes(platz)) throw new Error('Unbekannter Speicherplatz.');
@@ -134,13 +143,23 @@ export function speichern(spiel, stadt, ui = {}, platz = 'autosave', name = '', 
     };
     pruefen(datensatz);
     const info = infoVon(datensatz, platz);
+    const start = performance.now();
     const naechste = queue.then(() => transaktion([STORE, INFOS], 'readwrite', (tx) => {
       tx.objectStore(STORE).put(datensatz, platz);
       tx.objectStore(INFOS).put(info, platz);
-    }));
+    })).then(() => {
+      letzteSpeicherDiagnose = { zeit: new Date().toISOString(), phase: 'gespeichert',
+        dauerMs: Math.round(performance.now() - start), platz };
+    }).catch((e) => {
+      diagnoseFehler(e, 'IndexedDB-Schreiben');
+      throw fehlermeldung(e);
+    });
     queue = naechste.catch(() => {});
     return naechste;
-  } catch (e) { return Promise.reject(fehlerText(e)); }
+  } catch (e) {
+    diagnoseFehler(e, 'structuredClone/Validierung');
+    return Promise.reject(fehlermeldung(e));
+  }
 }
 
 export async function loeschen(platz = 'autosave') {
