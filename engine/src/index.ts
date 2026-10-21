@@ -60,6 +60,8 @@ export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itPr
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+export { ecommerceUebersicht, ecommerceHaus, ecommerceBruecke } from './abfragen';
+export { ecommerceCluster, hatAbholstation, retourenQuote, type EcommerceStand, type EcommerceAktion, type FulfillmentModell } from './ecommerce';
 
 export { chronikUebersicht, KONZERN_GESCHICHTE, chronikErfolg } from './chronik';
 export { ERFOLGE, ERFOLGE_AKTIV, erfolgeWoche, erfolgeUebersicht,

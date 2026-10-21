@@ -15,6 +15,7 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { kennzeichnePremium } from './premium';
+import { erzeugeEcommerce } from './ecommerce';
 import { chronikInitialisieren } from './chronik';
 import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
 import { bildeHauscluster } from './organisation';
@@ -381,6 +382,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Startkalender (Standardplan = Ausgangslage)
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
+  // O09: Marketing-Referenz zu Beginn speichern.
+  s.ecommerce = erzeugeEcommerce(s);
   initialisiereWettbewerb(s);
   chronikInitialisieren(s);
   szenarioStart(s, sz);

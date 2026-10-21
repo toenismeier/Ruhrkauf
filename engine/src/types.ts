@@ -10,6 +10,7 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+import type { EcommerceStand } from './ecommerce';
 // O02 Umsatztreiber
 import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber';
 // O03 IT
@@ -426,6 +427,9 @@ export interface KapitalflussWoche {
 }
 
 export interface WochenKpi {
+  onlineUmsatz?: Eur;
+  onlineKannibalisierung?: Eur;
+  onlineEffekt?: Eur;
   woche: number;
   umsatz: Eur;
   rohertrag: Eur;
@@ -482,6 +486,9 @@ export interface SpielEnde {
 }
 
 export interface GameState {
+  ecommerce?: EcommerceStand;
+  /** O09 A/B-Referenz ohne Online-Kanal. */
+  ecommerceDeaktiviert?: boolean;
   /** Optional, damit historische Spielstände und das Standardszenario identisch bleiben. */
   szenario?: SzenarioStand;
   version: 1;

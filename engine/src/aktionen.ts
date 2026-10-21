@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { ECOMMERCE_AKTIONEN, ecommerceAktion, type EcommerceAktion } from './ecommerce';
 import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { hqArchivSetzen } from './hq';
 import { immobilieVerkaufen } from './szenarien';
@@ -88,6 +89,8 @@ export type SpielerAktion =
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
+  // O09 E-Commerce
+  | EcommerceAktion
   | ProduktAktion
   // O01 Organisation
   | OrganisationAktion
@@ -182,6 +185,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s, a as OrganisationAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
+  if (ECOMMERCE_AKTIONEN.has(a.typ as EcommerceAktion['typ'])) return ecommerceAktion(s, a as EcommerceAktion);
   // O06 Planung: alle Mutationen laufen über fuehreAus.
   if (PLANUNG_AKTIONEN.has(a.typ as PlanungAktion['typ'])) {
     const fehlerText = planungAktion(s, a as PlanungAktion);

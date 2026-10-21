@@ -28,6 +28,7 @@ import { produkteBuchen, produkteWoche } from './produkte';
 // O04 Personal
 import { personaleinsatzWoche } from './personaleinsatz';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+import { ecommerceWoche } from './ecommerce';
 import { szenarioNachWoche, szenarioWoche } from './szenarien';
 // O02 Umsatztreiber
 import { erfasseTreiber } from './treiber';
@@ -203,6 +204,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // Einkauf in der Zentrale: Zuschüsse und Konditionen auf den Wareneinsatz
   const einsatzSumme = Object.values(einsatz).reduce((a, b) => a + (b ?? 0), 0);
   k.wkz = k.wkz * hqWkzFaktor(s) + einsatzSumme * hqEinkaufKonditionen(s);
+  // O09: Baseline bereits im stationären Umsatz, nur Abweichungen buchen.
+  ecommerceWoche(s, k);
 
   // 5. Zentrale Kosten (aus der Hauptverwaltung, inkl. Controlling) und Restmieten gekündigter Büros
   k.zentrale = s.zentrale.kostenWoche;
