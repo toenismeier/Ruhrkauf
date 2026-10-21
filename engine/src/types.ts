@@ -186,8 +186,9 @@ export interface Haus {
   premiumImage?: number;
   premiumEigentuemer?: string;
   premiumInvestition?: { bis: number; substanzProWoche: number; imageProWoche: number };
-  /** Volkskauf und FUNDUS sind bis Engine-Formate reine Bestandsdaten. */
+  /** Nur während der Eröffnung eines neuen FUNDUS-Standorts. */
   nurDaten?: boolean;
+  formatIntegrationBis?: number;
   einzug: Einzugsgebiet;
   wettbewerbStart: number;
   /** Unveränderliche historische Nachfragebasis je Warengruppe. */
@@ -347,7 +348,7 @@ export interface BeraterMandat {
   ergebnis?: { empfohleneSchliessungen: string[]; folien: number; fazit: string };
 }
 
-export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf' | 'konzernVerkauf' | 'staatshilfe';
+export type AngebotTyp = 'kettenverkauf' | 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf' | 'konzernVerkauf' | 'staatshilfe';
 
 export interface Angebot {
   id: string;
@@ -373,6 +374,7 @@ export interface Angebot {
   wettbewerberId?: string;
   // sportverkauf
   kaufpreis?: Eur;
+  formatZiel?: 'outlet';
   premiumKaeuferTyp?: 'Luxusgruppe' | 'Family Office' | 'Staatsfonds';
   premiumKaeuferName?: string;
   konzernKaeuferTyp?: 'Finanzinvestor' | 'Handelskonzern' | 'Immobilienfonds';
@@ -534,7 +536,7 @@ export interface GameState {
   rng: number;
   woche: number; // 0-basiert, Woche 0 = KW 1 im Startjahr
   startJahr: number;
-  firma: { name: string; sportName: string };
+  firma: { name: string; sportName: string; schwesterName?: string; outletName?: string };
   phase: Phase;
   insolvenz?: Insolvenz;
   insolvenzenGesamt: number;
@@ -557,6 +559,8 @@ export interface GameState {
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
   wettbewerbRng: number;
+  formateRng?: number;
+  formate?: import('./formate').FormateStand;
   wettbewerbNachnutzungen: { haus: string; woche: number }[];
   wettbewerbGeseheneSchliessungen: string[];
   /** Testschalter: reproduziert die alte Simulation ohne Wettbewerbsdynamik. */

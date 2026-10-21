@@ -48,7 +48,9 @@ describe('Aggregation und Kennzahlen', () => {
   test('WG-Umsätze summieren sich exakt zum eigenen Umsatz der Häuser je Bereich', () => {
     for (const [g, liste] of Object.entries(WG_JE_BEREICH) as [GruppeId, typeof WG_DEF][]) {
       const wg = liste.reduce((a, d) => a + (s.einkauf.wgs[d.id].v.u.at(-1) ?? 0), 0);
-      const haus = s.haeuser.reduce((a, h) => a + (h.kpi?.umsatzJeGruppe[g] ?? 0), 0);
+      // Volkskauf und FUNDUS führen eigene Warenwirtschaft (engine-formate.md), nicht die Hartwig-WG.
+      const haus = s.haeuser.filter((h) => h.format !== 'schwester' && h.format !== 'outlet')
+        .reduce((a, h) => a + (h.kpi?.umsatzJeGruppe[g] ?? 0), 0);
       expect(Math.abs(wg - haus)).toBeLessThanOrEqual(liste.length + s.haeuser.length);
     }
   });

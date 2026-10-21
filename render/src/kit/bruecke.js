@@ -23,6 +23,7 @@ import { dachFlaechenBeimBau } from './stadt.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
+import { schwesterhaus } from './schwesterhaus.js';
 import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
@@ -155,11 +156,11 @@ export function stadtEintragAusSpiel(s, name) {
   if (!d) return undefined;
   const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
     const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : h.format === 'schwester' ? 'schwester' : h.format === 'outlet' ? 'outlet' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
-  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester' || q.rolle === 'outlet');
+  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber');
   const reserve = Array.from({ length: 2 }, (_, i) => ({
     id: 'KR-' + name + '-' + (i + 1), name: '', rolle: 'wettbewerber_reserve',
     lage: i === 0 ? '1a' : 'b', grundflaecheQm: 1800,
@@ -246,7 +247,11 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     return outlet(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
   };
-  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
+  const baueSchwester=(S,scene,p,h)=>{
+    const fl=fussabdruck(h),{x,z}=imSlot(p,fl.w,fl.d);p.haus=h;
+    return schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+  };
+  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'schwester' ? baueSchwester : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 
   const getrennt = (p, h) => {
     const gruppe = new THREE.Group();
@@ -390,7 +395,7 @@ export function spielBauer(s, o = {}) {
   };
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
-    'slot:schwester': statischerSlot('slot:schwester'), 'slot:outlet': statischerSlot('slot:outlet'),
+    'slot:schwester': slot('slot:schwester'), 'slot:outlet': slot('slot:outlet'),
     'slot:premium': slot('slot:premium'),
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };

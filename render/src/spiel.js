@@ -696,6 +696,7 @@ function grafikNachziehen() {
   if (geaendert.length) zeichnen();
   return geaendert;
 }
+let cockpitFormat = 'alle';
 const MERK = new Map();
 function merk() { return MERK; }
 
@@ -703,14 +704,23 @@ function merk() { return MERK; }
 function cockpitZeigen() {
   const c = E.cockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
+  // Formatfilter ohne zusätzliche Zeilen: das Cockpit darf auf dem iPhone nicht wachsen
+  // (es überdeckt sonst die Karte). Auswahl im Titel der Umsatz-Kachel.
+  const FORMATNAME = { alle: 'Alle', warenhaus: 'Hartwig', sport: 'Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
+  const fx = cockpitFormat === 'alle' ? null : c.formate.find((x) => x.format === cockpitFormat);
+  const auswahl = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
+    .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
+    .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
   $('cockpit').innerHTML = [
     kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
     kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
-    kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz Woche', s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
+    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
+      : kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
+    kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
+  $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
   // O07 Haus: Ausnahme-Kachel im Cockpit.
   const ausnahmen = E.hausBeobachtung(s, 30).length;
   $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
@@ -839,6 +849,11 @@ window.premiumTun = (was, id) => {
   meldung(r.text, r.ok);
   if (r.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
 };
+window.formateTun=(typ,wert)=>{
+  const aktion=typ==='schwesterUmflaggen'?{typ,haus:wert}:typ==='altwareOutlet'?{typ,quote:Number(wert)/100}:typ==='offpriceZukauf'?{typ,budget:Math.round(Number(wert))}:{typ:'outletEroeffnen',stadt:wert};
+  const r=E.fuehreAus(s,aktion);meldung(r.text,r.ok);
+  if(r.ok){grafikNachziehen();nachAktion();if(offenesHaus)oeffneHaus(offenesHaus);}
+};
 window.filialProgramm = (programm) => {
   const r = E.fuehreAus(s, { typ: 'filialProgramm', programm });
   meldung(r.text, r.ok);
@@ -878,6 +893,17 @@ function oeffneHaus(id) {
   html += hausTreiberZeile(E, s, id);
   // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
   html += um?.hausKarte(id) ?? '';
+  if(h.format==='schwester'){
+    const f=E.schwesterUebersicht(s);
+    html += '<div class="karte"><div class="khead">Volkskauf · Regionalführung</div><div class="raster">'+zahl('Häuser',fmt.format(f.haeuser))+zahl('EBITDA',geld(f.ebitda))+zahl('Umbauten',fmt.format(f.umbauten))+'</div>';
+    if(h.status==='offen')html += '<button class="mini" onclick="formateTun(\'schwesterUmflaggen\',\''+id+'\')">Zu Hartwig umflaggen</button>';
+    html+='</div>';
+  }
+  if(h.format==='outlet'){
+    const f=E.outletUebersicht(s);
+    html += '<div class="karte"><div class="khead">FUNDUS · Off-Price-Markenposten</div><div class="raster">'+zahl('Bestand EK',geld(f.poolWert))+zahl('Markenposten',geld(f.markenposten))+zahl('Konzern-Altware',geld(f.altware))+zahl('Reichweite',f.reichweite.toFixed(1).replace('.',',')+' Wo.')+'</div>';
+    html += '<button class="mini" onclick="formateTun(\'altwareOutlet\',80)">Altwarequote 80 %</button></div>';
+  }
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -954,7 +980,7 @@ function oeffneHaus(id) {
   if (hausReiter === 'personal' && pe) html += pe.hausBlock(id);
   // O05 Ware
   if (hausReiter === 'ware' && d.waren) html += `<div class="karte"><div class="khead">Ware · ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl('Warenverfügbarkeit', (d.waren.verfuegbarkeit * 100).toFixed(1) + ' %')}${zahl('Altwareanteil', (d.waren.altwareanteil * 100).toFixed(1) + ' %')}${zahl('Inventurdifferenz', d.waren.inventur ? geld(d.waren.inventur.differenz) : 'Noch offen')}${zahl('Flächenproduktivität', geld(d.waren.flaechenproduktivitaet) + '/qm')}</div></div>`;
-  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html, 'hausdetail');
+  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : h.format === 'schwester' ? 'Volkskauf' : h.format === 'outlet' ? 'FUNDUS' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html, 'hausdetail');
   if (neu) hausZeigen(id);
 }
 
@@ -1258,8 +1284,8 @@ reise = reiseModul({
   staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
     const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
-    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', zahl('schwester')], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', zahl('outlet')]];
-    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length + zahl('schwester') + zahl('outlet'), umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', hs.filter((h) => h.format === 'schwester').length], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', hs.filter((h) => h.format === 'outlet').length]];
+    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
       formate: formate.filter((p) => p[1]).map(([name, anzahl]) => ({ name, anzahl })) };
   }),
   pinPunkt: bahnhofBildpunkt,
@@ -1486,10 +1512,12 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
-    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [k.querySelector('span').textContent, k.querySelector('b').textContent]));
+    // Titel ohne eingebettete Auswahl (Formatfilter im Cockpit).
+    const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s*·\s*$/, '').trim();
+    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
     const soll = { Cash: geld(c.cash), 'Kreditrahmen frei': geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
-    if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), 'Umsatz Woche': geld(c.umsatzWoche) });
+    if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
     // O02 Umsatztreiber: Browseranzeige gegen Engine und Brückensumme.
