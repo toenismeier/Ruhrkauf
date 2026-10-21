@@ -98,13 +98,15 @@ function tabelle(st: SchwierigkeitId, mess: Messung[], laenge: number): string {
 
 function botC(st: SchwierigkeitId, seed: number): string {
   const s = neuesSpiel(seed, { schwierigkeit: st });
-  for (let i = 0; i < 260 && s.phase !== 'zerschlagen'; i++) {
+  // Nur die 104-Wochen-Mindestprüfung nach Abschnitt 14; die vollständige
+  // fünfjährige Kapazität gehört zur Bot-D-Referenz und wird dort gemessen.
+  for (let i = 0; i < 104 && s.phase !== 'zerschlagen'; i++) {
     botTief(s);
     wocheAbspielen(s);
   }
-  const erfolgreich = s.woche === 260 && s.phase !== 'zerschlagen';
+  const erfolgreich = s.woche >= 104 && s.phase !== 'zerschlagen';
   // Abschnitt 14: Bot C ist Nebenprüfung. Mindestens 104 Wochen auf mittel.
-  if (s.woche < 104 && st === 'mittel') fehler.push(`Bot C ${st} Seed ${seed}: ${s.phase} bereits nach ${s.woche} Wochen`);
+  if (!erfolgreich && st === 'mittel') fehler.push(`Bot C ${st} Seed ${seed}: ${s.phase} bereits nach ${s.woche} Wochen`);
   return `| ${st} | ${seed} | ${s.woche} | ${s.phase} | ${s.insolvenzenGesamt} | ${erfolgreich ? 'ja' : 'NEIN'} |`;
 }
 
@@ -152,9 +154,9 @@ if (ergebnisseD.schwer.filter((x) => x.ok).length < 2)
 if (ergebnisseD.leicht.some((x) => !x.ok))
   fehler.push('Bot D leicht: nicht alle drei Seeds bestehen den Turnaround');
 bericht.push('', '### Bot C: Insolvenz nur als letzte Option (mindestens 104 Wochen auf mittel)',
-  '', '| Schwierigkeit | Seed | Wochen | Schlussphase | Insolvenzen | 260 Wochen überlebt |',
+  '', '| Schwierigkeit | Seed | Wochen | Schlussphase | Insolvenzen | 104 Wochen erreicht |',
   '|---|---:|---:|---|---:|---|');
-for (const st of stufen) for (const seed of [1, 2, 3]) bericht.push(botC(st, seed));
+for (const seed of [1, 2, 3]) bericht.push(botC('mittel', seed));
 bericht.push('', `**Abnahme:** ${fehler.length ? 'NICHT bestanden' : 'Alle M7-Grenzwerte bestanden'}.`);
 if (fehler.length) bericht.push(...fehler.map((x) => '- ' + x));
 
