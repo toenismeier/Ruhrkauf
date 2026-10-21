@@ -100,7 +100,7 @@ export function einstellungenModul(ctx) {
       gruppen.get(d.gruppe).push(feld(d));
     }
     const html = [...gruppen.entries()].map(([name, zeilen]) => '<section class="karte einst-gruppe"><h3 class="khead">' + esc(name) + '</h3>' + zeilen.join('') + '</section>').join('') +
-      '<section class="karte einst-gruppe"><h3 class="khead">Über</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Die Einstellungen gelten geräteweit und gehören nicht zum Spielstand.</p></section>';
+      '<section class="karte einst-gruppe"><h3 class="khead">Über</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten © OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten geräteweit und gehören nicht zum Spielstand.</p></section>';
     ctx.panel('Einstellungen', 'Darstellung, Bedienung und Spiel', html, 'gross');
     aktiv = true;
     document.getElementById('pinhalt').scrollTop = scroll;
