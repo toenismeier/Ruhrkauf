@@ -3,6 +3,7 @@ import type { Aktion, GameState, GruppeId, Haus, HausKpi } from './types';
 import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
 import { premiumImageFaktor, premiumServiceQuote } from './premium';
+import { schwierigkeit } from './schwierigkeit';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
@@ -83,7 +84,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG * premiumImageFaktor(h);
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s).kaufneigung * premiumImageFaktor(h);
 }
 
 export function saettigung(qm: number, Q: number): number {
