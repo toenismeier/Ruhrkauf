@@ -13,7 +13,8 @@
 import { rng, waehle, zw, FARBEN, heller, dunkler, fensterRaster, gesims, dachProfil } from './basis.js';
 import { zufallsStadthaus, stadthaus } from './stadthaeuser.js';
 import { wahlGewichtet } from './stadtplan.js';
-import { warenhaus, masse, familieVon } from './warenhaus.js';
+import { warenhaus, masse } from './warenhaus.js';
+import { warenhausVielfalt } from './warenhaus-vielfalt.js';
 import { SLOTS } from './sonderbauten.js';
 import { sporthaus, masseSport } from './sporthaus.js';
 import { outlet, masseOutlet } from './outlet.js';
@@ -28,6 +29,8 @@ const REGION = { nord: 'Nord', ost: 'Ost', west: 'West', mitte: 'Mitte', sued: '
 const regionVon = (p) => REGION[p.region] ?? p.region ?? 'Mitte';
 const regionLang = { Nord: 'nord', Ost: 'ost', West: 'west', Mitte: 'mitte', 'Süd': 'sued' };
 const HAUS = new Map(haeuser.map((h) => [h.id, h]));
+/** Gleiche Zuordnung für Stadtplan, Bauer und Einzelhauskatalog. */
+export const WARENHAUS_VARIANTEN = warenhausVielfalt(haeuser);
 const SCHWESTER = new Map(schwesterHauser.map((h) => [h.id, h]));
 const OUTLETS = new Map(haeuserOutlet.map((h) => [h.id, h]));
 
@@ -198,7 +201,6 @@ export function echterBauer(o = {}) {
   const sport = o.sport ?? ERSATZ.sport, wettbewerber = o.wettbewerber ?? ERSATZ.wettbewerber;
   const zustandFuer = (h) => (typeof o.zustand === 'function' ? o.zustand(h) : o.zustand?.[h?.id]) ?? (o.status ? { status: o.status } : {});
   const gebaut = new Map(); // Parzellen-Id → { stil, farbe, geschosse } für die Nachbarlogik
-  const famBenutzt = new Set();   // Warenhaus-Familien dieser Stadt (B4)
   // GESTALTUNG.md: gleichmäßige Traufhöhe je Block. Das erste Haus eines Blocks setzt die Geschosszahl, die übrigen
   // übernehmen sie meist genau (70 %), sonst um ein Geschoss abweichend; Eckhäuser dürfen ein Geschoss höher sein.
   const traufe = new Map();   // Block-Id → Geschosse
@@ -257,18 +259,13 @@ export function echterBauer(o = {}) {
     'slot:warenhaus': (S, scene, p) => {
       // Mit Standort: genau dieses Haus aus haeuser.json, sonst ein passendes per Seed
       const h0 = (p.standort?.id && HAUS.get(p.standort.id)) || passendesHaus(p, o.warenhausId);
-      const f = fussabdruck(h0);
+      const variant = WARENHAUS_VARIANTEN.get(h0.id);
+      const f = fussabdruck(h0, variant?.familie);
       const { x, z } = imSlot(p, f.w, f.d);
       if (h0.klasse === 'premium') { p.haus = h0; return premiumhaus(S, scene, h0, { x, z, ...zustandFuer(h0) }); }
-      // B4: mehrere Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante (sonst stehen zwei identische Häuser
-      // nebeneinander, Hamburg). Zweites Haus derselben Familie: Nachbarfamilie, sonst andere Fassadenvariante.
-      let fam = familieVon(h0), h = h0;
-      if (famBenutzt.has(fam)) {
-        const alt = fam <= 5 ? [fam + 1, fam - 1, fam + 2, fam - 2].find((q) => q >= 1 && q <= 5 && !famBenutzt.has(q)) : null;
-        if (alt) fam = alt; else h = { ...h0, fassade: ((h0.fassade ?? 0) + 3) % 8 };
-      }
-      famBenutzt.add(fam);
-      const e = warenhaus(S, scene, h, { x, z, familie: fam, ...zustandFuer(h0) });
+      // Q21: Der gleiche Bau wie im Stadtplan, unabhängig von Zeichenreihenfolge.
+      const h = variant ? { ...h0, fassade: variant.fassade } : h0;
+      const e = warenhaus(S, scene, h, { x, z, familie: variant?.familie, ...zustandFuer(h0) });
       p.haus = h;
       return e;
     },
