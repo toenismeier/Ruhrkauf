@@ -7,7 +7,7 @@
 //
 // bauer: { stadthaus(S, scene, p), eck(...), 'slot:warenhaus'(...), 'slot:kirche'(...), ... } → { hoehe }
 // Fehlt ein Eintrag, greift: exakter Typ → 'slot' (für slot:*) → stadthaus → Platzhalter.
-import { THREE, rng, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
+import { THREE, rng, mische, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { bergHoehe, gelaende, rebzeilen } from './gelaende.js';
 
@@ -1619,7 +1619,7 @@ function baueBahn(ctx, b, r) {
   if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze('olmastSeite', x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
   // Züge
   const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
-  const frei = [...gleisZ].sort(() => r() - 0.5).slice(0, zuege);
+  const frei = mische(r, gleisZ).slice(0, zuege);
   for (const gz of frei) {
     const wagen = Math.floor(zw(r, 3, 6.9));
     const [ga, gb] = abschnitte(gz).sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0] ?? [xa, xb];

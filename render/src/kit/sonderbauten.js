@@ -2,7 +2,7 @@
 // Discounter/Drogerie, Fachmarktzentrum, Konkurrenz-Warenhäuser, Theater/Oper/Museum, Markthalle, Tankstelle, Hotel.
 // Alle Funktionen: name(S, scene, { x, z, w, d, seed, ... }) -> { hoehe, teile }
 // Sichtbar: +z (links im Bild) und +x (rechts im Bild). Eingänge, Schilder und Uhren sitzen dort.
-import { THREE, Sammler, rng, waehle, zw, FARBEN, heller, dunkler, fensterRaster, gesims, markise, baum, schild, textTextur, dachProfil, walmdach } from './basis.js';
+import { THREE, Sammler, rng, mische, waehle, zw, FARBEN, heller, dunkler, fensterRaster, gesims, markise, baum, schild, textTextur, dachProfil, walmdach } from './basis.js';
 
 const PI = Math.PI;
 
@@ -216,7 +216,7 @@ export function einkaufszentrum(S, scene, p) {
   const haut = p.farbe ?? waehle(r, ['#ebe6dc', '#e1e5e8', '#e9dfcf']);
   const akzent = p.akzent ?? waehle(r, ['#c98a3a', '#4f7fa8', '#6f8f4f', '#a8574a', '#5b6f86']);
   const glas = '#8fb2c4';
-  const mieter = [...MIETER].sort(() => r() - 0.5);
+  const mieter = mische(r, MIETER);
   let mi = 0;
   const R = 10, ecke = 2 * R - 2;
   // Körper (bei Rotunde L-Form, damit die Ecke frei bleibt)
@@ -1369,7 +1369,7 @@ export function fachmarktzentrum(S, scene, p) {
   const r = rng(seed);
   const w = p.w ?? 120, d = p.d ?? 84;
   const n = p.anzahl ?? Math.round(zw(r, 3, 5.4));
-  const mieter = p.mieter ?? [...FACHMAERKTE].sort(() => r() - 0.5).slice(0, n);
+  const mieter = p.mieter ?? mische(r, FACHMAERKTE).slice(0, n);
   const name = p.name ?? waehle(r, ['Fachmarktzentrum Am Kreuz', 'Gewerbepark Süd', 'Einkaufspark Ost', 'Handelshof West']);
   const bt = 30;
   const gewichte = mieter.map((mm) => (mm.garten ? 1.6 : 0.8 + r() * 0.6));

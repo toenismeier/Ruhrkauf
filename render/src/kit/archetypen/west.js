@@ -16,7 +16,7 @@
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { WEST_SLOTS, fahrrad } from '../westbauten.js';
-import { rng, waehle, zw } from '../basis.js';
+import { rng, mische, waehle, zw } from '../basis.js';
 import { SLOTS } from '../sonderbauten.js';
 
 const { nimm, fixiere, zelleFrei, klemm, wahlGewichtet, neueParzelle, mergeRand, parzellenVon, freiePosition, intervalleMinus, LINIEN, HAUPTLICH } = H;
@@ -186,7 +186,7 @@ function ruhrstadt(E) {
   E.zentrum = { i: ci, j: cj };
   const nKonzern = o.konzern ?? (klein ? 0 : 1);
   // Lage je Stadt aus dem Seed (keine Kopie von Stadt zu Stadt)
-  const konzernZellen = [[ci - 1, cj - 1], [ci + 2, cj], [ci - 1, cj + 2], [ci + 2, cj - 1], [ci + 1, cj + 2]].sort(() => r() - 0.5);
+  const konzernZellen = mische(r, [[ci - 1, cj - 1], [ci + 2, cj], [ci - 1, cj + 2], [ci + 2, cj - 1], [ci + 1, cj + 2]]);
   // Konzernverwaltung eingebettet: Slot an der Straßenseite eines normalen Blocks, übrige Seiten Blockrand (nachbearbeitung)
   E.ruhrKonzern = [];
   for (let k = 0, n = 0; k < konzernZellen.length && n < nKonzern; k++) {
@@ -198,7 +198,7 @@ function ruhrstadt(E) {
   }
   // Hauptkirche: Stil aus staedte.js (je Stadt anders als bei den Nachbarn), Lage je Stadt aus dem Seed
   const ksZufall = waehle(r, ['romanisch', 'hallenkirche']);
-  if (!o.kern60) for (const [qi, qj] of [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]].sort(() => r() - 0.5)) if (istFrei(E, qi, qi, qj, qj)) { nimm(E, { art: 'kirche', i0: qi, i1: qi, j0: qj, j1: qj, seiten: ['-z', '-x', '+x'], kirchStil: o.kirchStil ?? ksZufall }); E.landmarken.push('slot:kirche'); break; }
+  if (!o.kern60) for (const [qi, qj] of mische(r, [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]])) if (istFrei(E, qi, qi, qj, qj)) { nimm(E, { art: 'kirche', i0: qi, i1: qi, j0: qj, j1: qj, seiten: ['-z', '-x', '+x'], kirchStil: o.kirchStil ?? ksZufall }); E.landmarken.push('slot:kirche'); break; }
   // Polyzentrisch: Stadtteilzentrum mit Platz und Kirche der 50er, weit außerhalb des Nahausschnitts
   const nb = { i: 0, j: Math.min(nz - 2, cj + 2) };
   if (!klein && istFrei(E, nb.i, nb.i, nb.j, nb.j)) {
