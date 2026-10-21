@@ -15,7 +15,7 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { ALT_WARENHAUS_STAEDTE, ALT_SPORT_STAEDTE } from './massstab-alt';
-import { kennzeichnePremium } from './premium';
+import { kennzeichnePremium, premiumProfil } from './premium';
 import { erzeugeEcommerce } from './ecommerce';
 import { chronikInitialisieren } from './chronik';
 import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
@@ -60,6 +60,10 @@ export const UMSATZZIELE_JAHR1 = {
 } as const;
 
 type AktiveKlasse = keyof typeof UMSATZZIELE_JAHR1;
+
+/** Premium-Kalibrierung (Ummo 21.10.2026: „klar besser als Schnitt“, Ziel etwa +4 bis +6 % Haus-EBITDA). */
+const PREMIUM_PERSONALQUOTE = 0.13;
+const PREMIUM_MIETFAKTOR = 1.3;
 
 function umsatzklasse(h: Haus): AktiveKlasse | undefined {
   if (h.nurDaten) return undefined;
@@ -111,12 +115,17 @@ function kalibriereStandortumsatz(haeuser: Haus[]): void {
     const zielPersonal = wocheBasis * 0.16 * (haus.klasse === 'premium' ? 1.08 : haus.format === 'sport' ? 0.94 : 1);
     const istPersonal = haus.personal.vollzeit * PARAM.lohnVollzeit
       + haus.personal.teilzeit * PARAM.lohnTeilzeit + haus.personal.aushilfen * PARAM.lohnAushilfe;
-    const besetzung = Math.max(0.4, Math.min(1.4, zielPersonal / Math.max(1, istPersonal)));
+    const profil = haus.klasse === 'premium' ? premiumProfil(haus.premiumSchluessel) : undefined;
+    // Premium (Ummo 21.10.): klar besser als der Schnitt. Höhere Flächenproduktivität
+    // senkt die Personalquote; die eigene Immobilie trägt einen kalkulatorischen Mietansatz.
+    const premiumPersonal = profil ? PREMIUM_PERSONALQUOTE / 0.16 / 1.08 * (1.55 / profil.produktivitaet) : 1;
+    const besetzung = profil ? (zielPersonal * premiumPersonal) / Math.max(1, istPersonal)
+      : Math.max(0.4, Math.min(1.4, zielPersonal / Math.max(1, istPersonal)));
     haus.personal.vollzeit *= besetzung;
     haus.personal.teilzeit *= besetzung;
     haus.personal.aushilfen *= besetzung;
-    haus.miete.mieteWoche = eur(wocheBasis * 0.112
-      * (haus.klasse === 'premium' ? 1.12 : haus.format === 'sport' ? 0.96 : 1));
+    haus.miete.mieteWoche = eur(profil ? wocheBasis * profil.mietQuote * PREMIUM_MIETFAKTOR
+      : wocheBasis * 0.112 * (haus.format === 'sport' ? 0.96 : 1));
     // Bestehende Entgeltverträge: Verkaufspartner buchen Werbeträger auf
     // bespielter Eigen-/Kommissionsfläche, Dienstleister vergüten die
     // tatsächlich am POS abgewickelten Servicevorgänge. WKZ und die aus

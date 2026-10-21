@@ -82,7 +82,8 @@ export function spielendePruefen(s: GameState): void {
   if (!aktiv(s) || s.prognose || s.ende) return;
   if (s.phase === 'zerschlagen') { spielBeenden(s, 'zerschlagen'); return; }
   if (!s.spielendeFortgesetzt && s.woche >= 260 && s.phase === 'regulaer' &&
-    !s.insolvenz && s.insolvenzenGesamt > 0 && s.historie.length >= 52 && ebitdaJahr(s) > 0) {
+    // E22/E26: Sanierung gelingt auch außergerichtlich, eine Insolvenz ist keine Voraussetzung.
+    !s.insolvenz && s.historie.length >= 52 && ebitdaJahr(s) > 0) {
     spielBeenden(s, 'saniert');
   }
 }

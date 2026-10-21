@@ -14,7 +14,7 @@
   },
   "stadtplan": {
     "liste": [
-      {"id":"aussen/bauten/aussen-O003","bauer":"slot:outlet","lage":[458.75,-77.5,54,54],"drehung":0,"variante":null,"standort":"O003","pruefsumme":"dc58a696c8fa498c"},
+      {"id":"aussen/bauten/aussen-O005","bauer":"slot:outlet","lage":[877.14,-180,68,68],"drehung":0,"variante":null,"standort":"O005","pruefsumme":"1fafeb15bbdba62d"},
       {"id":"aussen/wasser/0","bauer":"aussen/wasser","lage":[-480,859,480,46],"drehung":0,"variante":null,"standort":null,"pruefsumme":"6cdc113904f4eea3"},
       {"id":"aussen/wasser/1","bauer":"aussen/wasser","lage":[971.5,859,480,46],"drehung":0,"variante":null,"standort":null,"pruefsumme":"47ba9001cca26971"},
       {"id":"bloecke/b0","bauer":"wasser","lage":[0,859,971.5,46],"drehung":0,"variante":null,"standort":null,"pruefsumme":"1b56dcb2eea8f634"},
@@ -1169,11 +1169,11 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"46e75a3036d02d5a"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"e632966aedcf0050"}
     ],
-    "gesamt": "d6b9c393e510385d"
+    "gesamt": "518aa1a332dbe60b"
   },
   "geometrie": {
     "kacheln": [
-      {"id":"aussen-O003","teile":996,"dreiecke":11954,"boundingBox":[458.15,0.15,-77.5,513.85,11.27,-24.3]},
+      {"id":"aussen-O005","teile":1656,"dreiecke":19990,"boundingBox":[876.54,0.15,-180,946.24,11.27,-112.8]},
       {"id":"p1","teile":341,"dreiecke":6642,"boundingBox":[200.5,0,72,278.5,36,134.5]},
       {"id":"p10","teile":781,"dreiecke":9392,"boundingBox":[313.5,0,744.5,393.5,13.63,824.5]},
       {"id":"p100","teile":305,"dreiecke":3620,"boundingBox":[554.48,0,128.96,579.54,25.03,148.62]},
@@ -2004,21 +2004,21 @@
       {"id":"p99","teile":570,"dreiecke":6770,"boundingBox":[579.5,0,129.5,600.62,27.12,148.62]}
     ],
     "umgebung": {
-      "teile": 3785,
-      "dreiecke": 88411,
+      "teile": 3784,
+      "dreiecke": 88399,
       "boundingBox": [-480,-6.2,-480,1451.5,29,1407.5]
     },
     "gesamt": {
-      "teile": 272684,
-      "strasse": 3675,
-      "haeuser": 269009,
-      "instanzen": 46860,
+      "teile": 273343,
+      "strasse": 3674,
+      "haeuser": 269669,
+      "instanzen": 46749,
       "drawCallsInstanzen": 110
     }
   },
   "pruefsummen": {
-    "stadtplan": "4f880eae9164f7b2bc9a319ed1be385ea0d30098e92acbe3d0d6dcbbd5833d55",
-    "geometrie": "64b2d428814d371776fa7e3da7755e3d82bbf563a0467ca031fc71b5c0159603",
+    "stadtplan": "f7d25ccfcebeacaf71263fb61bd430bec9b699873cebb400136e7245d8a13fd9",
+    "geometrie": "387cb6d4362fe52cbf8481c3adf54bc71b015aa653a9a5abb650e4919cc70eab",
     "bildReferenz": "7646bd12050454377cb976687593dc6d820fafc930a0ae3c3cb8b98f99a034b7"
   }
 }

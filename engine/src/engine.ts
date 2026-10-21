@@ -220,7 +220,6 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     kpi.fteBedarf = r.fteBedarf;
     kpi.fteIst = r.fteIst;
     if (h.status !== 'geschlossen' && h.status !== 'verkauft') h.kpi = rundeKpi(kpi);
-    statistikHaus(s, h, rundeKpi(kpi));
 
     k.umsatz += kpi.umsatz;
     k.rohertrag += kpi.rohertrag;
@@ -295,6 +294,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     // Haus-DB umfasst alle tatsächlich angefallenen operativen Filialkosten.
     kpi.db = g.ebitda;
     if (haus.status !== 'geschlossen' && haus.status !== 'verkauft') haus.kpi = rundeKpi(kpi);
+    // N01: Statistik erst nach dem Abschluss der Kostenstellen-GuV (Haus-DB = Filial-EBITDA).
+    statistikHaus(s, haus, rundeKpi(kpi));
     guvAddiere(gesamtFilialGuV, g);
   }
   k.filialGuV = gesamtFilialGuV;

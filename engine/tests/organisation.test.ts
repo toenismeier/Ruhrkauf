@@ -97,7 +97,7 @@ describe('O01 Organisation', () => {
   });
 
   test('Auch die Maßstab-Welt mit 560 Häusern bildet Cluster ohne harte Stadtgrenzen',()=>{
-    const s=neuesSpiel(1,{warenhaeuser:500,sporthaeuser:60});
+    const s=neuesSpiel(1); // #7: Standardwelt ist der Ruhrkauf-Maßstab mit 560 Häusern.
     const geo=s.organisation!.hauscluster.filter((c)=>!c.sonder);
     const ids=geo.flatMap((c)=>c.hausIds);
     expect(ids.length).toBe(560);

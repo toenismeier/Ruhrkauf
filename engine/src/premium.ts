@@ -12,7 +12,7 @@ const PREMIUM_PROFIL = {
   P004: { qm: 14_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
 } as const;
 type PremiumId = keyof typeof PREMIUM_PROFIL;
-const premiumProfil = (id?: string) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id)
+export const premiumProfil = (id?: string) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id)
   ? PREMIUM_PROFIL[id as PremiumId] : undefined;
 // Wochenleistung eines normalen Referenzquadratmeters; individuelle Standort-RNGs
 // sollen die Kronjuwelen nicht um zig Millionen Euro pro Jahr auseinanderziehen.
@@ -94,6 +94,16 @@ export function kennzeichnePremium(haeuser: Haus[]): void {
       if (!h) continue;
       h.klasse = 'premium'; h.premiumSchluessel = p.id; h.name = p.name;
       h.premiumImage ??= 80;
+      // Feste Premium-Grundrisse (Fläche, Geschosse) wie im Premium-Workstream;
+      // Umsatz, Miete und Personal normiert anschließend kalibriereStandortumsatz.
+      const profil = premiumProfil(p.id)!;
+      normierePremiumFlaechen(h, profil);
+      // Flächenproduktivität des Premiumrangs; die Klassensumme normiert kalibriereStandortumsatz.
+      for (const g of Object.keys(h.potenzial) as GruppeId[]) h.potenzial[g] = (h.potenzial[g] ?? 0) * profil.produktivitaet;
+      h.lage = '1a';
+      h.miete.vermieter = 'eigentuemer';
+      h.miete.vermieterName = 'Hartwig Immobilien';
+      h.substanz = Math.max(78, h.substanz);
     }
     return;
   }

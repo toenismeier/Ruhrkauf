@@ -60,13 +60,15 @@ describe('N02 Spielende', () => {
     expect(() => wocheAbspielen(s)).toThrow('Spiel beendet');
   });
 
-  test('Sanierung erfordert fünf Jahre, aufgehobenes Verfahren und positives Jahres-EBITDA', () => {
+  // E22/E26 (Ummo): Sanierung gelingt auch außergerichtlich, ohne vorherige Insolvenz.
+  test('Sanierung erfordert fünf Jahre und positives Jahres-EBITDA, keine Insolvenz', () => {
     const s = neuesSpiel(3);
     mitJahresgewinn(s);
-    s.woche = 260;
+    s.woche = 259;
     spielendePruefen(s);
     expect(s.ende).toBeUndefined();
-    s.insolvenzenGesamt = 1;
+    s.woche = 260;
+    expect(s.insolvenzenGesamt).toBe(0);
     spielendePruefen(s);
     expect(s.ende?.art).toBe('saniert');
     expect(s.ende?.kennzahlen.ebitda52).toBe(52_000_000);

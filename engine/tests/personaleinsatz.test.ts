@@ -29,7 +29,8 @@ describe('O04 Personaleinsatz', () => {
       expect(personalZusatzkosten(h)).toBe(0);
       expect(personalVerfuegbarkeit(h)).toBe(1);
       expect(personalVerkaufsFaktor(h, h.format === 'sport' ? 'sportschuhe' : 'beauty')).toBeCloseTo(1, 8);
-      expect(lohnKosten(s, h)).toBeGreaterThan(0);
+      // Volkskauf/FUNDUS sind bis Engine-Formate reine Datenhäuser ohne Personal (#7).
+      if (!h.nurDaten) expect(lohnKosten(s, h)).toBeGreaterThan(0);
     }
   });
 

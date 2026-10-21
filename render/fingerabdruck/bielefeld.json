@@ -14,7 +14,7 @@
   },
   "stadtplan": {
     "liste": [
-      {"id":"aussen/bauten/aussen-O008","bauer":"slot:outlet","lage":[1143,283.5,50,52],"drehung":0,"variante":null,"standort":"O008","pruefsumme":"db5d75630b461343"},
+      {"id":"aussen/bauten/aussen-O014","bauer":"slot:outlet","lage":[1143,283.5,50,52],"drehung":0,"variante":null,"standort":"O014","pruefsumme":"fa2574687be3094a"},
       {"id":"bloecke/b0","bauer":"west_promenade","lage":[264,220,39,38],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"65100e5e66500374"},
       {"id":"bloecke/b1","bauer":"west_promenade","lage":[325.5,220,283,38],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"98d5bb5b269f4977"},
       {"id":"bloecke/b10","bauer":"west_promenade","lage":[733,280.5,39,148.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"14d7543967c68fdf"},
@@ -1417,11 +1417,11 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d2040be46f4cd47e"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"75ffed8f777bcf97"}
     ],
-    "gesamt": "004a42ec71709f5a"
+    "gesamt": "033469f30c9dde17"
   },
   "geometrie": {
     "kacheln": [
-      {"id":"aussen-O008","teile":1503,"dreiecke":17972,"boundingBox":[1142.4,0.15,283.5,1194.1,13.62,334.7]},
+      {"id":"aussen-O014","teile":1507,"dreiecke":18132,"boundingBox":[1142.4,0.15,283.5,1194.1,13.57,334.7]},
       {"id":"p1","teile":358,"dreiecke":4230,"boundingBox":[410,0,361,429.02,18.51,379.4]},
       {"id":"p10","teile":54,"dreiecke":2494,"boundingBox":[434.81,-0.3,388.27,485.32,81.86,412.73]},
       {"id":"p100","teile":127,"dreiecke":1586,"boundingBox":[543.09,0,107,551.85,20.29,124.4]},
@@ -2399,16 +2399,16 @@
       "boundingBox": [-480,-0.6,-480,1512.28,29,1377]
     },
     "gesamt": {
-      "teile": 335919,
+      "teile": 335923,
       "strasse": 6117,
-      "haeuser": 329802,
+      "haeuser": 329806,
       "instanzen": 51985,
       "drawCallsInstanzen": 102
     }
   },
   "pruefsummen": {
-    "stadtplan": "e3b01c0211a1d8d8bd3c3fd8996dc08c7ef29233028fa91c3ca7e60ee2eb7cdc",
-    "geometrie": "706bdba295cbe83e8fe31b922ccfd2340b71c3972633c69939f5abd3a6bcc74e",
+    "stadtplan": "b45d09a2b27c0c91c9eb0e394af3e2e87680bc47de96540913b3a1b9f8c72c8a",
+    "geometrie": "2263652f6381fd8389549896458cf41927294c30d3c90f033e78dc18540861fa",
     "bildReferenz": "42653786094625b884530458d26f5fa3d5028a6abfdff201fc67ada2f9ad6d53"
   }
 }

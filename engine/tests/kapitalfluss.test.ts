@@ -9,7 +9,8 @@ describe('Kapitalfluss im Wochenabschluss', () => {
     const s = neuesSpiel(seed);
     for (let i = 0; i < 104; i++) {
       botTief(s);
-      const vor = s.historie[s.historie.length - 1]?.cash ?? s.cash;
+      // Woche 0 zählt ab Anfangsbestand vor Spielermaßnahmen (Bot T investiert bereits in Woche 0).
+      const vor = s.historie[s.historie.length - 1]?.cash ?? s.kapitalflussStartCash ?? s.cash;
       const k = wocheAbspielen(s);
       const f = kapitalfluss(s);
       expect(f.woche).toBe(i);

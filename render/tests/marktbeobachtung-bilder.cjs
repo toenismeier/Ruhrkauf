@@ -36,8 +36,12 @@ const { chromium } = require('playwright');
     await spieleBis(3);
     await page.evaluate(() => window.spiel.oeffneZeitung());
     await bild('01-normale-woche.png');
+    // #7: Bot C stellt die Insolvenz nur noch als letzte Option. Für das Bild der
+    // Gläubigerversammlung wird der Antrag hier bewusst in Woche 3 gestellt.
+    const antrag = await page.evaluate(() => window.spiel.aktion({ typ: 'insolvenzAntrag' }));
+    if (!antrag.ok) throw new Error('Insolvenzantrag abgelehnt: ' + antrag.text);
     const versammlung = await spieleBis(23);
-    if (versammlung !== 23) throw new Error('Bot C hat die Gläubigerversammlung nicht erreicht.');
+    if (versammlung !== 23) throw new Error('Die Gläubigerversammlung wurde nicht erreicht.');
     const ereignisAusgabe = await page.evaluate(() => {
       const ausgaben = window.spiel.s.zeitung?.ausgaben ?? [];
       return [...ausgaben].reverse().find((x) => [x.aufmacher, ...x.meldungen].some((a) => a.art === 'glaeubiger'));

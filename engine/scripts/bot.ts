@@ -84,6 +84,8 @@ export function botSchutzschirm(s: GameState, log = false): void {
  * gerade KEINE "letzte Option", sondern führte zur Ablehnung in KW 24.
  */
 export function botTief(s: GameState, log = false): void {
+  // N08: Presseinterviews sachlich beantworten (neutral, kein RNG-Verbrauch).
+  for (const e of s.entscheidungen.filter((x) => x.typ === 'interview')) fuehreAus(s, { typ: 'entscheiden', id: e.id, option: 'sachlich' });
   if (s.szenario?.id === 'investor' || s.szenario?.id === 'aufbruch') botRegulaer(s, log);
   else botTurnaround(s, log);
   const umsatzWoche = s.historie.at(-1)?.umsatz

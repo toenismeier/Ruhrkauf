@@ -15,8 +15,10 @@ describe('Marketing', () => {
     for (const h of s.haeuser.slice(0, 20)) expect(marketingHausFaktor(s, h)).toBe(1);
     const k = s.historie[s.historie.length - 1];
     const mk = marketingKosten(s, k.umsatz);
-    expect(mk.netto / k.umsatz).toBeCloseTo(0.025, 9);
-    expect(mk.brutto / k.umsatz).toBeGreaterThan(0.03);
+    // #7: Werbequote nach Referenz-GuV (Werbung −1,8 % v. U.).
+    expect(mk.netto / k.umsatz).toBeCloseTo(0.018, 9);
+    // Brutto = netto 1,8 % plus WKZ der Lieferanten.
+    expect(mk.brutto / k.umsatz).toBeGreaterThan(0.025);
     expect(mk.brutto / k.umsatz).toBeLessThan(0.04);
     expect(s.marketing.stand.ist).toEqual(s.marketing.stand.plan);
   });
@@ -114,11 +116,13 @@ describe('Marketing', () => {
     const r = fuehreAus(s, { typ: 'aktionPlanen', name: 'Parfüm Days', mechanik: 'rabatt_wg', wg: 'beauty.parfuem', rabatt: 0.2, wochen: 1 });
     expect(r.ok).toBe(true);
     spiele(s, 1); spiele(o, 1);
-    const w = (x: GameState, id: string) => (x.einkauf.wgs as Record<string, { basisVK: number }>)[id].basisVK;
+    // #7: basisVK folgt seit dem Maßstab wöchentlich der Bereichsnachfrage. Die gezielte
+    // Wirkung je WG zeigt sich daher im tatsächlichen WG-Umsatz der Aktionswoche.
+    const w = (x: GameState, id: string) => (x.einkauf.wgs as unknown as Record<string, { v: { u: number[] } }>)[id].v.u.at(-1)!;
     expect(w(s, 'beauty.parfuem')).toBeGreaterThan(w(o, 'beauty.parfuem') * 1.03);
     expect(w(s, 'beauty.pflege')).toBeLessThan(w(o, 'beauty.pflege'));
     expect(w(s, 'beauty.drogerie')).toBeLessThan(w(o, 'beauty.drogerie'));
-    expect(w(s, 'damen.kleider')).toBeCloseTo(w(o, 'damen.kleider'), -4);
+    expect(Math.abs(w(s, 'damen.kleider') / w(o, 'damen.kleider') - 1)).toBeLessThan(0.01);
     expect(s.historie[s.historie.length - 1].umsatz).toBeGreaterThan(o.historie[o.historie.length - 1].umsatz);
     const t = structuredClone(s);
     fuehreAus(t, { typ: 'aktionPlanen', mechanik: 'rabatt_wg', wg: 'waesche.tag', rabatt: 0.3, wochen: 1, start: t.woche });
@@ -180,12 +184,13 @@ describe('Marketing', () => {
 
   test('Kompatibel: Werbebudget, Kundenkarte, Delegation', () => {
     const s = neuesSpiel(1);
-    expect(fuehreAus(s, { typ: 'marketingBudget', quote: 0.018 }).ok).toBe(true);
+    // #7: Standard ist jetzt 1,8 %; Kürzung auf 1,3 % entspricht wie bisher Faktor 0,72.
+    expect(fuehreAus(s, { typ: 'marketingBudget', quote: 0.013 }).ok).toBe(true);
     const f = s.marketing.stand.ist.kanaele.tv.quote / KANAELE.find((d) => d.id === 'tv')!.quote;
-    expect(f).toBeLessThan(0.72);
+    expect(f).toBeLessThan(0.73);
     for (const d of KANAELE) expect(s.marketing.stand.ist.kanaele[d.id].quote / d.quote).toBeCloseTo(f, 10);
     const U = umsatzBezug(s);
-    expect(marketingKosten(s, U).netto / U).toBeCloseTo(0.018, 9);
+    expect(marketingKosten(s, U).netto / U).toBeCloseTo(0.013, 9);
     expect(fuehreAus(s, { typ: 'kundenkarte' }).ok).toBe(true);
     expect(s.marketing.stand.ist.karte.stufen).toBe(true);
     expect(fuehreAus(s, { typ: 'kundenkarte' }).ok).toBe(false);

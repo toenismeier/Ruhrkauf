@@ -585,7 +585,9 @@ export function initialisiereEinkauf(s: GameState): void {
 export function limitFuer(s: GameState, st: WgStand, sid: number, nurLesen = false): { plan: number; verbraucht: number } {
   const key = String(sid);
   let l = st.limits[key];
-  if (!l && nurLesen) l = { plan: 0, verbraucht: 0, stand: -1 }; // Abfragen legen keinen Spielstand an
+  // Abfragen verändern keinen Spielstand: veralteten Plan nur in einer Kopie fortschreiben,
+  // sonst übernimmt die nächste Disposition einen zu einem anderen Zeitpunkt berechneten Plan.
+  if (nurLesen) l = l ? { ...l } : { plan: 0, verbraucht: 0, stand: -1 };
   else if (!l) {
     l = st.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
     for (const k of Object.keys(st.limits)) if (Number(k) < sid - 2) delete st.limits[k];
@@ -1596,7 +1598,7 @@ export function wgDetail(s: GameState, wgId: WgId): WgDetail | undefined {
     verlauf.reichweite.push(Math.round((best / e4) * 10) / 10); verlauf.nosVerfuegbarkeit.push(v.n[i]); verlauf.abschriften.push(eur(v.a[i] * rauschen(s, wgId, 'a', w)));
   }
   const sid = saisonId(s.woche);
-  const limits = [sid, sid + 1].map((x) => { const L = limitFuer(s, st, x); const lw = limitWert(st, L); return { saison: x, name: saisonName(s, x), limit: lw, verbraucht: eur(L.verbraucht), frei: eur(lw - L.verbraucht) }; });
+  const limits = [sid, sid + 1].map((x) => { const L = limitFuer(s, st, x, true); const lw = limitWert(st, L); return { saison: x, name: saisonName(s, x), limit: lw, verbraucht: eur(L.verbraucht), frei: eur(lw - L.verbraucht) }; });
   const best: Map<string, { ankunft: number; art: Art; marke?: string; wert: number }> = new Map();
   for (const x of s.bestellungen) if (x.wg === wgId) {
     const key = `${x.ankunft}|${x.art}|${x.marke ?? ''}`;

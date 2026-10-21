@@ -359,7 +359,7 @@ export function warenUebersicht(s: GameState) {
   const plaene = WG_DEF.filter(d => !!s.einkauf.wgs[d.id]).map(d => {
     const st = s.einkauf.wgs[d.id];
     const sid = saisonId(s.woche + 30);
-    const limit = limitFuer(s, st, sid);
+    const limit = limitFuer(s, st, sid, true);
     const plan = w?.plaene[`${d.id}|${sid}`];
     return { wg: d.id, name: d.name, saison: sid, saisonName: saisonName(s, sid),
       budget: plan?.budget ?? eur(limit.plan * st.st.limitFaktor), verbraucht: eur(limit.verbraucht),
