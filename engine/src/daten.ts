@@ -75,12 +75,12 @@ export function saisonFaktor(g: GruppeId, woche: number): number {
   return a + (b - a) * t;
 }
 
-export const LAGE_FAKTOR: Record<Lage, number> = { '1a': 1.15, b: 0.9, center: 1.0, rand: 0.8 };
+export const LAGE_FAKTOR: Record<Lage, number> = { '1a': 1.15, b: 0.9, stadtteil: 0.94, center: 1.0, rand: 0.8 };
 export const CLUSTER_FAKTOR: Record<Cluster, number> = { metropole: 1.1, grossstadt: 1.0, mittelstadt: 0.85 };
 /** Struktureller Frequenzverlust je Jahr nach Lage. */
-export const TREND_LAGE: Record<Lage, number> = { '1a': 0.02, b: 0.035, center: 0.01, rand: 0.015 };
+export const TREND_LAGE: Record<Lage, number> = { '1a': 0.02, b: 0.035, stadtteil: 0.025, center: 0.01, rand: 0.015 };
 /** Marktübliche Mietquote am Umsatz bei Neuverhandlung. */
-export const MARKTMIETE: Record<Lage, number> = { '1a': 0.1, b: 0.075, center: 0.11, rand: 0.065 };
+export const MARKTMIETE: Record<Lage, number> = { '1a': 0.1, b: 0.075, stadtteil: 0.08, center: 0.11, rand: 0.065 };
 
 // [Stadt, Region, Stadtgrößenklasse, Kaufkraft, Standortzahlen je Format]; Metropolen exakt die sieben definierten Zentren.
 export interface StadtFormate { hartwig: number; premium: number; volkskauf: number; sport: number; fundus: number }
