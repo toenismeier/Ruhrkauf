@@ -19,6 +19,7 @@
 //   'slot:hq' aus hq.js (eigene Gruppe, Map hqs; aktualisiere() meldet 'hq:<id>', wenn sich Etagen ändern).
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
+import { dachFlaechenBeimBau } from './stadt.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
@@ -258,11 +259,15 @@ export function spielBauer(s, o = {}) {
     const S = new Sammler();
     const alt = LOD.stufe;
     setzeLod(o.hausLod ?? 'nah');
-    let e;
-    try { e = bau(S, gruppe, p, h); S.bauen(gruppe); } finally { setzeLod(alt); }
+    let e, dachFlaechen;
+    try {
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => bau(S, gruppe, p, h)));
+      S.bauen(gruppe);
+    } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hausId = h.id; });
     (o.wurzel ?? null)?.add(gruppe);
-    haeuser.set(h.id, { p, gruppe, e, schluessel: zustand(h).schluessel });
+    haeuser.set(h.id, { p, gruppe, e, dachFlaechen, schluessel: zustand(h).schluessel });
+    o.dachFlaechenAktualisieren?.('haus:' + h.id, dachFlaechen);
     return e;
   };
   // Zentrale und freie Bürogebäude (rolle 'hq'): Slot-Bauer 'slot:hq' aus hq.js, Daten immer frisch aus o.hq()
@@ -278,11 +283,15 @@ export function spielBauer(s, o = {}) {
     gruppe.userData.hqId = p.standort.id;
     const S = new Sammler(), alt = LOD.stufe;
     setzeLod(o.hausLod ?? 'nah');
-    let e;
-    try { e = basis['slot:hq'](S, gruppe, hqDaten(p)); S.bauen(gruppe); } finally { setzeLod(alt); }
+    let e, dachFlaechen;
+    try {
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => basis['slot:hq'](S, gruppe, hqDaten(p))));
+      S.bauen(gruppe);
+    } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hqId = p.standort.id; });
     (o.wurzel ?? null)?.add(gruppe);
-    hqs.set(p.standort.id, { p, gruppe, e, teile: S.anzahl, schluessel: hqSchluessel(p) });
+    hqs.set(p.standort.id, { p, gruppe, e, dachFlaechen, teile: S.anzahl, schluessel: hqSchluessel(p) });
+    o.dachFlaechenAktualisieren?.('hq:' + p.standort.id, dachFlaechen);
     return e;
   };
   const hqs = new Map();
@@ -323,12 +332,16 @@ export function spielBauer(s, o = {}) {
     const gruppe = new THREE.Group(), S = new Sammler(), alt = LOD.stufe;
     if (x.wbId) gruppe.userData.wbId = x.wbId;
     setzeLod(o.hausLod ?? 'nah');
-    let e;
-    try { e = wbBau(S, gruppe, x.p, wbVon(x.wbId)); S.bauen(gruppe); }
+    let e, dachFlaechen;
+    try {
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => wbBau(S, gruppe, x.p, wbVon(x.wbId))));
+      S.bauen(gruppe);
+    }
     finally { setzeLod(alt); }
     if (x.wbId) gruppe.traverse((m) => { m.userData.wbId = x.wbId; });
     o.wurzel?.add(gruppe);
-    Object.assign(x, { gruppe, e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+    Object.assign(x, { gruppe, e, dachFlaechen, schluessel: wbSchluessel(wbVon(x.wbId)) });
+    o.dachFlaechenAktualisieren?.('wb:' + (x.p.standort?.id ?? x.p.id), dachFlaechen);
     if (x.wbId) wettbewerber.set(x.wbId, x);
     return e;
   }
