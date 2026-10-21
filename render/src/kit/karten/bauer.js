@@ -75,7 +75,7 @@ function baueFlaechen(S, k, r) {
   // Der OSM-Ausschnitt enthält keine Ackerschläge; wenige Handflächen am Rand
   // bilden einen gestalteten Übergang, ausdrücklich nicht als echte OSM-Daten ausgewiesen.
   for (let i = 0; i < 7; i++) {
-    const x = 200 + i * (28 + r() * 9), z = 110 + r() * 20;
+    const x = 480 + i * (28 + r() * 9), z = 500 + r() * 20;
     S.box(17 + r() * 13, .06, 38 + r() * 28, x, .01, z, ['#b6b46d','#bea86a','#91a66d','#a7bb80'][i % 4], .03 * (i % 3));
   }
 }
@@ -181,17 +181,35 @@ function baueBebauung(S, plan, r) {
 /** Zweiter, OSM-gestützter Grafikweg. Form des Ergebnisses wie baueStadt(). */
 export function baueKartenStadt(S, scene, plan, bauer, o = {}) {
   const k = plan.karte, r = rng(plan.seed + 7141);
+  // Beim Katalog werden ausschließlich OSM-Objekte im sichtbaren Ausschnitt
+  // verarbeitet. Der vollständige Kartenplan und seine Koordinaten bleiben gleich.
+  const sicht = o.sicht;
+  const relevant = e => {
+    if (!sicht) return true;
+    const q = rect(e.umriss ?? e.punkte);
+    if (!q) return false;
+    const d = sicht.radius + 100;
+    return q.x <= sicht.x + d && q.x + q.w >= sicht.x - d &&
+      q.z <= sicht.z + d && q.z + q.d >= sicht.z - d;
+  };
+  const kSicht = sicht ? {
+    ...k,
+    strassen: k.strassen.filter(relevant), gleise: k.gleise.filter(relevant),
+    bahnsteige: k.bahnsteige.filter(relevant), flaechen: k.flaechen.filter(relevant),
+    wasser: k.wasser.filter(relevant), bebauung: k.bebauung.filter(relevant),
+    wahrzeichen: k.wahrzeichen.filter(w => Math.hypot(w.pos[0] - sicht.x, w.pos[1] - sicht.z) <= sicht.radius + 125),
+  } : k;
   const t0 = S.anzahl;
-  baueFlaechen(S, k, r);
-  baueStrassen(S, k);
-  const gleise = baueGleise(S, k, r);
+  baueFlaechen(S, kSicht, r);
+  baueStrassen(S, kSicht);
+  const gleise = baueGleise(S, kSicht, r);
   const vorHaeusern = S.anzahl;
-  const anzahlBebauung = baueBebauung(S, plan, r);
-  wahrzeichenEssen(S, scene, k);
+  const anzahlBebauung = baueBebauung(S, { ...plan, karte: kSicht }, r);
+  wahrzeichenEssen(S, scene, kSicht);
   const hoehen = new Map();
   let maxH = 110;
   if (!o.ohneHaeuser && bauer) for (const p of plan.parzellen) {
-    if (p.typ === 'slot:bahnhof') continue; // Empfangsgebäude ist das OSM-Wahrzeichen
+    if (p.typ === 'slot:bahnhof' || (sicht && (p.x > sicht.x + sicht.radius + 100 || p.x + p.w < sicht.x - sicht.radius - 100 || p.z > sicht.z + sicht.radius + 100 || p.z + p.d < sicht.z - sicht.radius - 100))) continue; // außerhalb des Bildes bzw. Empfangsgebäude aus OSM
     const f = bauer[p.typ] ?? (p.typ.startsWith('slot:') ? bauer.slot : bauer.stadthaus);
     const e = f ? f(S, scene, p) ?? {} : {};
     const h = e.hoehe ?? 14;
