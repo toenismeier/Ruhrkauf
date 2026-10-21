@@ -36,7 +36,8 @@ export function szenarienModul(ctx) {
     document.getElementById('startsetup').hidden = seite !== 'setup';
     document.getElementById('startauswahl').hidden = seite !== 'karten';
     const auswahl = ctx.E.SZENARIEN.find((k) => k.id === id) ?? ctx.E.SZENARIEN[0];
-    document.getElementById('szenario-gewaehlt').textContent = auswahl.name + ' · ' + auswahl.ziel;
+    document.getElementById('szenario-gewaehlt').textContent = auswahl.name + ' · ' + auswahl.ziel + (id === 'sandkasten' ? ' · ohne Schwierigkeitsstufen' : '');
+    ctx.stufenAktualisieren?.();
   }
   document.getElementById('startszenarien').addEventListener('click', (event) => {
     const karte = event.target.closest('[data-szenario]');
