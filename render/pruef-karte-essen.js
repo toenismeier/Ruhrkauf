@@ -1,9 +1,10 @@
 // Q01: rein datenbasierte Prüfungen. Aufrufer: cd render && node pruef-karte-essen.js
 // Vollständige Bild-, Dreiecks- und Draw-Call-Abnahme führt Claude lokal aus.
-import { readFileSync } from 'node:fs';
-import assert from 'node:assert/strict';
+const { readFileSync } = require('node:fs');
+const assert = require('node:assert/strict');
+const path = require('node:path');
 
-const osm = JSON.parse(readFileSync(new URL('./karten/essen.json', import.meta.url), 'utf8'));
+const osm = JSON.parse(readFileSync(path.join(__dirname, 'karten/essen.json'), 'utf8'));
 assert.equal(osm.stadt, 'essen');
 assert.match(osm.lizenz, /OpenStreetMap.*ODbL/);
 assert.equal(osm.radius_m, 1700);
@@ -34,7 +35,7 @@ for (const g of osm.gleise.filter(q => q.art === 'fern' && !q.tunnel)) {
   }
 }
 assert.ok(bahnsteiggleise >= 2, 'Mindestens zwei wirkliche Hbf-Gleise mit Zugraum');
-const q = readFileSync(new URL('./src/kit/karten/essen.js', import.meta.url), 'utf8');
+const q = readFileSync(path.join(__dirname, 'src/kit/karten/essen.js'), 'utf8');
 const ansichten = ['hbf','kettwiger','rathaus','limbecker','muenster','ruettenscheid','norden','rand'];
 for (const id of ansichten) assert.ok(q.includes("id: '" + id + "'"), 'Katalogstandort ' + id);
 assert.equal((q.match(/id: '/g) ?? []).length, 8, 'Genau acht Katalogansichten');
