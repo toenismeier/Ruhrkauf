@@ -2,6 +2,7 @@ import { BERATER, GRUPPEN, MIETER } from './daten';
 import { basisUmsatzHaus, beraterErgebnis, hausAttraktivitaet, loeseEntscheidung, offeneHaeuser, zufallsProjektname } from './ereignisse';
 import { einmalKosten, eroeffneInsolvenz, starteSchliessung } from './prozesse';
 import { runwayWochen } from './stakeholder';
+import { liquiditaetReicht } from './sandkasten';
 import type {
   AktionsScope, BeraterTyp, Cluster, Flaeche, Format, GameState, GruppeId, Haus, Konzept, Untermieter,
 } from './types';
@@ -610,7 +611,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       }
       if (an.typ === 'sonderposten') {
         const wert = an.wert ?? 0;
-        if (s.cash + s.kreditlinie < wert) return fehler('Nicht genug Liquidität für die Vorkasse.');
+        if (!liquiditaetReicht(s, wert)) return fehler('Nicht genug Liquidität für die Vorkasse.');
         s.cash -= wert;
         const g = an.gruppe as GruppeId;
         s.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });

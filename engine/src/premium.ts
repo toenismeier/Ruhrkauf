@@ -2,6 +2,7 @@
 import { GRUPPEN, PREMIUM_HAEUSER } from './daten';
 import type { Angebot, GameState, GruppeId, Haus } from './types';
 import { clamp, eur, melde, mio } from './util';
+import { liquiditaetReicht } from './sandkasten';
 
 // Festes Raum- und Betriebsprofil je Kronjuwel. Keine Seed-/Hausgrößenabhängigkeit.
 // Die Produktivitätsfaktoren wirken auf die Flächenleistung, nicht direkt auf die KPI.
@@ -219,7 +220,7 @@ export function premiumInvestieren(s: GameState, id: string, betrag: number): st
   if (!h) return 'Premium-Haus nicht verfügbar.';
   if (!Number.isSafeInteger(betrag) || betrag < 500_000 || betrag > 100_000_000) return 'Investition von 0,5 bis 100 Mio. € wählen.';
   if (h.premiumInvestition && s.woche < h.premiumInvestition.bis) return 'Eine Premium-Investition läuft bereits. Bitte zunächst die 26 Wochen abwarten.';
-  if (s.cash + s.kreditlinie < betrag) return 'Nicht genügend Liquidität.';
+  if (!liquiditaetReicht(s, betrag)) return 'Nicht genügend Liquidität.';
   s.cash -= betrag;
   s.einmalkostenWoche += betrag;
   s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
