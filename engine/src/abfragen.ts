@@ -146,6 +146,7 @@ export function kapitalfluss(s: GameState) {
 }
 
 export interface Cockpit {
+  formate: {format: Haus['format']; haeuser: number; umsatz: number; ebitda: number; fte: number}[];
   kw: number;
   jahr: number;
   phase: GameState['phase'];
@@ -167,7 +168,14 @@ export function cockpit(s: GameState): Cockpit {
   const h13 = s.historie.slice(-13);
   const lief = s.lieferanten.filter((l) => l.aktiv);
   const lv = (lief.reduce((a, l) => a + l.vertrauen, 0) + s.restLieferantenVertrauen) / (lief.length + 1);
+  const formate=(['warenhaus','sport','schwester','outlet'] as Haus['format'][]).map(format=>{
+    const hs=s.haeuser.filter(h=>h.format===format&&h.status==='offen'&&!h.nurDaten);
+    return {format,haeuser:hs.length,umsatz:eur(hs.reduce((n,h)=>n+(h.kpi?.umsatz??0),0)),
+      ebitda:eur(hs.reduce((n,h)=>n+(h.kpi?.guv?.ebitda??0),0)),
+      fte:eur(hs.reduce((n,h)=>n+h.personal.vollzeit+h.personal.teilzeit+h.personal.aushilfen,0))};
+  });
   return {
+    formate,
     kw: kw(s.woche),
     jahr: jahr(s),
     phase: s.phase,
@@ -230,7 +238,7 @@ export function hausDetail(s: GameState, id: string) {
   const etagen = h.etagen.map((e) => ({
     etage: e,
     flaechen: h.flaechen.filter((f) => f.etage === e).map((f) => ({
-      id: f.id, qm: f.qm, konzept: f.konzept, gruppe: f.gruppe ? GRUPPEN[f.gruppe].name : undefined,
+      id: f.id, qm: f.qm, konzept: f.konzept, gruppe: f.gruppe ? (GRUPPEN[f.gruppe]?.name ?? (String(f.gruppe) === 'schuhe' ? 'Schuhe' : String(f.gruppe))) : undefined,
       mieter: f.mieter?.name, umbauBis: f.umbauBis,
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),

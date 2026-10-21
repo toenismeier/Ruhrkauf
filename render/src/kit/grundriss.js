@@ -225,7 +225,7 @@ export function etage(S, scene, haus, etageNr, o = {}) {
   while (gruppe.children.length) scene.add(gruppe.children[0]);
   const eg = etageNr === 0;
   const box = new THREE.Box3(new THREE.Vector3(ax0 - 0.6, eg ? -0.3 : -2.2, az0 - 0.6), new THREE.Vector3(ax1 + (eg ? 7 : 0.4), WANDHOEHE, az1 + (eg ? 7 : 0.4)));
-  return { box, breite: B, tiefe: T, zonen: zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer };
+  return { box, breite: B, tiefe: T, zonen: zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer, navigation: kk.navigation };
 }
 
 function bauen(S, scene, haus, etageNr, ra, zn, k) {
@@ -342,6 +342,7 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
     if (um.some((t) => t === 'kern' || t === 'lager' || (t || '').startsWith('treppe') || t === 'aufzug' || t === 'wc')) continue;
     if (belegt.some((b) => x > b[0] - 0.45 && x < b[2] + 0.45 && z > b[1] - 0.45 && z < b[3] + 0.45)) continue;
     stuetze(S, x, z, 0, WANDHOEHE, '#e9e3d8');
+    belegt.push([x - 0.35, z - 0.35, x + 0.35, z + 0.35]);
   }
 
   // ---- Rückwände (echte oder Schnittwand des Ausschnitts)
@@ -394,6 +395,11 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
     S.box(0.8, 0.25, 0.42, kx - 0.6, 1.19, kz, '#48565b');
     S.box(0.3, 0.18, 0.35, kx + 0.55, 1.2, kz, '#d9d0bd');
   }
+
+  // Navigationshindernisse sind genau die im finalen Etagenbau belegten Grundflächen.
+  const kassen = ra.schwester ? [{ x: B - 5, z: T - 3.4 }] :
+    !eg && ring ? [{ x: (kx + 2.5) * R, z: (kz - 1) * R + 4.7 }] : [];
+  k.navigation = { hindernisse: belegt.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 })), kassen };
 
   // ---- Kundschaft
   const pool = freiZone.concat(freiGang);

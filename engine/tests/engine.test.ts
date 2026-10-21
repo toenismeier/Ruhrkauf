@@ -206,6 +206,8 @@ describe('Mechaniken', () => {
 
   test('Sonderposten, der nicht passt, verkauft sich nur über Offprice', () => {
     const s = neuesSpiel(12);
+    // Ohne Altwarefluss ins FUNDUS (engine-formate.md 3); mit Fluss wandert der Ladenhüter dorthin.
+    s.einkauf.altwareOutlet = 0;
     s.angebote.push({ id: 'sp', typ: 'sonderposten', woche: 0, frist: 5, titel: 'x', text: 'x', gruppe: 'damen', wert: 4_000_000, _passt: false, status: 'offen' });
     expect(fuehreAus(s, { typ: 'angebotAnnehmen', angebot: 'sp' }).ok).toBe(true);
     const k = s.bestand.find((x) => x.ladenhueter)!;

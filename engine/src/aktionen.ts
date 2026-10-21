@@ -26,6 +26,7 @@ import { hqArchivSetzen } from './hq';
 import { immobilieVerkaufen } from './szenarien';
 import { zeitungEinstellen } from './zeitung';
 import { marktbeobachtungStufe } from './marktbeobachtung';
+import { schwesterUmflaggen, outletEroeffnen } from './formate';
 import { hqAktualisiere } from './hq';
 import { spielBeenden } from './spielende';
 // O05 Ware
@@ -45,6 +46,10 @@ import { testAktion, type TestAktion } from './testwerkzeuge';
 export type SpielerAktion =
   | { typ: 'filialProgramm'; programm: FilialProgrammId }
   | { typ: 'schliessen'; haus: string }
+  | { typ: 'altwareOutlet'; quote: number }
+  | { typ: 'offpriceZukauf'; budget: number }
+  | { typ: 'schwesterUmflaggen'; haus: string }
+  | { typ: 'outletEroeffnen'; stadt: string }
   | { typ: 'immobilieVerkaufen'; haus: string }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
   | { typ: 'flaecheTeilen'; haus: string; flaeche: string; qm: number }
@@ -197,6 +202,20 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   // O07 Haus
   if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
+    case 'altwareOutlet':
+      if (!Number.isFinite(a.quote) || a.quote < 0 || a.quote > 1) return fehler('Altwarequote muss zwischen 0 und 100 % liegen.');
+      s.einkauf.altwareOutlet=a.quote;return ok('Altwarequote für FUNDUS aktualisiert.');
+    case 'offpriceZukauf':
+      if (!Number.isSafeInteger(a.budget) || a.budget < 0) return fehler('Wochenbudget muss ein nicht negativer ganzer Eurobetrag sein.');
+      s.einkauf.offpriceZukauf=a.budget;return ok('Markenposten-Zukaufbudget aktualisiert.');
+    case 'schwesterUmflaggen': {
+      const grund=schwesterUmflaggen(s,a.haus);
+      return grund?fehler(grund):ok('Volkskauf-Umflaggen gestartet.');
+    }
+    case 'outletEroeffnen': {
+      const grund=outletEroeffnen(s,a.stadt);
+      return grund?fehler(grund):ok('FUNDUS-Eröffnung beauftragt: 12 Wochen Vorlauf.');
+    }
     case 'filialProgramm': {
       const p = FILIAL_PROGRAMME[a.programm];
       if (!p) return fehler('Unbekanntes Filialprogramm.');
@@ -593,6 +612,17 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
         melde(s, 'presse', `Neues Leben für ${h.name}: Die Stadt übernimmt das Haus.`);
         return ok(`Die Stadt übernimmt ${h.name}. Keine Restmiete, Ablöse ${mio(an.einmalzahlung ?? 0)}.`);
       }
+      if (an.typ === 'kettenverkauf') {
+        const preis=eur(an.kaufpreis??0);
+        for(const h of s.haeuser.filter(h=>h.format==='schwester')){
+          h.status='verkauft';h.personal.vollzeit=0;h.personal.teilzeit=0;h.personal.aushilfen=0;
+        }
+        if(s.formate){s.formate.volkskaufBestand=0;s.formate.schwesterZentraleWoche=0;}
+        s.cash+=preis;s.einmalErloeseWoche+=preis;
+        an.status='angenommen';an.erledigtWoche=s.woche;
+        melde(s,'presse','Volkskauf-Kette mit Ware, Personal und Mietverträgen verkauft.');
+        return ok('Kettenverkauf abgeschlossen: '+mio(preis));
+      }
       if (an.typ === 'sportverkauf') {
         const preis = an.kaufpreis ?? 0;
         for (const h of s.haeuser.filter((x) => x.format === 'sport' && x.status !== 'geschlossen')) {
@@ -615,7 +645,8 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
         if (!liquiditaetReicht(s, wert)) return fehler('Nicht genug Liquidität für die Vorkasse.');
         s.cash -= wert;
         const g = an.gruppe as GruppeId;
-        s.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });
+        if(an.formatZiel==='outlet'&&s.formate) s.formate.pool.push({quelle:'markenposten',wert,preisFaktor:an._passt?1.8:1.32,alter:an._passt?2:20,ladenhueter:!an._passt});
+        else s.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });
         an.status = 'angenommen'; an.erledigtWoche = w;
         return ok(`Sonderposten ${GRUPPEN[g].name} für ${mio(wert)} gekauft.`);
       }
