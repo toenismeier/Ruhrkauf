@@ -1,5 +1,7 @@
 # Aufträge
 
+**Gesamtstatus aller Workstreams: `auftraege/STATUS.md`.**
+
 Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem Auftrag lesen: `README.md`, `engine/README.md`, `render/KIT.md`, `render/GESTALTUNG.md`, `HQ-VERTRAG.md`, `EINKAUF-VERTRAG.md`, `VORSTAND-MARKETING-VERTRAG.md`.
 
 ## Reihenfolge und Abhängigkeiten
@@ -58,6 +60,7 @@ Merge in `main` nur mit grüner CI bzw., solange die CI blockiert ist, mit grün
 
 ## Regeln für alle Aufträge
 - **Stadt-Fingerabdrücke (Q03):** Vor jedem Merge `cd render && node pruef-fingerabdruck.js` lokal ausführen. Jeder PR, der eine Stadt verändert, nennt **alle betroffenen Städte und den Grund** in seiner Beschreibung; ohne diese Angabe und ohne bewusst freigegebene neue Referenzen **kein Merge**. Änderungen an Stadtplan, Geometrie oder Startbild müssen nachvollziehbar sein. Referenzen ausschließlich mit `node pruef-fingerabdruck.js --neu <stadt-id …>` aktualisieren und die geänderten `render/fingerabdruck/<stadt-id>.json` sowie `render/fingerabdruck/bilder/<stadt-id>.png` einchecken. Es gibt keine automatische Referenz-Aktualisierung bei der Prüfung. Bei CI-Kontingentsperre dokumentiert die PR den grünen lokalen Lauf und das Ergebnis der Gegenprobe.
+- **Workflows:** Keine neuen GitHub-Workflows mit `push`-Trigger anlegen. `quality.yml` läuft nur beim Öffnen eines PR gegen `main` und von Hand.
 - **Actions-Minuten sparen:** Kataloge nicht bei jedem Push in der CI rendern. Render-Workflows nur über `workflow_dispatch` oder einmal vor dem PR. Kein `push`-Trigger für Render-Jobs, keine Bild-Commits durch den Bot bei jedem Lauf. Prüfungen und Renderings, wo möglich, lokal ausführen und das Protokoll in die Stand-Datei schreiben.
 - Deutsch mit echten Umlauten in Code-Texten, Oberfläche und Doku. Keine echten Marken, Firmen oder Personen.
 - Engine deterministisch über den Seed, Zufall nur über die vorhandenen RNG-Helfer (`engine/src/util.ts`), Geld in ganzen Euro.

@@ -12,7 +12,10 @@ export {
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
 export { GRUPPEN, gruppenFuer } from './daten';
+// O05 Ware
+export { warenUebersicht, warenHaus, fundusFrequenzFaktor, clusterListe, hausclusterId, type WareAktion, type WareStand } from './merchandise';
 export { STANDARD_SZENARIO, type Szenario } from './welt';
+export { SZENARIEN, szenarioKonfiguration, szenarioZiel, szenarioName, unternehmensWert, type SzenarioId, type SzenarioRegeln, type SzenarioStand, type SzenarioZiel } from './szenarien';
 export {
   WG_DEF, WG, WG_JE_BEREICH, EK_PARAM, EINKAUF_SPALTEN, saisonId, saisonName,
   type WgId, type WgDef, type Art, type FreigabeModus, type Reduzierung, type Servicegrad, type OrderTyp, type Ampel, type WgAuswahl,
@@ -47,11 +50,22 @@ export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, Po
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
 export { wettbewerbAus, wettbewerbAusGruppe } from './wettbewerb';
 
+export { zeitungArchiv, zeitungAktuelle, zeitungAktiv, ZEITUNG_ARTIKELARTEN, ZEITUNG_REITER, type ZeitungAusgabe, type ZeitungArtikel, type ZeitungStand, type ZeitungReiter } from './zeitung';
+
+export {
+  endwertung, ebitdaJahr, immobilienWert, unternehmenswert, endKennzahlen, spielBeenden, spielendePruefen,
+} from './spielende';
 // O03 IT
 export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itProjektPlan, generationInCluster, itAlter, ausfallRisiko, type ItStand, type ItSystemId, type ItProjekt, type ItAktion, type ItPhase, type ProjektArt, type Generation } from './it';
 
 export { PREMIUM_HAEUSER } from './daten';
 export { premiumUebersicht } from './abfragen';
+
+export { chronikUebersicht, KONZERN_GESCHICHTE, chronikErfolg } from './chronik';
+export { ERFOLGE, ERFOLGE_AKTIV, erfolgeWoche, erfolgeUebersicht,
+  type ErfolgEintrag, type ErfolgGruppe, type ErfolgStufe, type ErfolgStand } from './erfolge';
+
+export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './abfragen';
 
 // O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
 export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
@@ -68,3 +82,7 @@ export type { HausStaerke, HausStandard, HausKommentar, HausMassnahme, HausAktio
 // O08 Umbau – zentraler Export für Spiel und Tests.
 export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
 export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from './umbau';
+// O04 Personal
+export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
+export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';
+export { TEST_EREIGNISSE, type TestAktion, type TestEreignisId } from './testwerkzeuge';

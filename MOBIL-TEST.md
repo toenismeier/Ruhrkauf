@@ -25,23 +25,29 @@ Bei WSL2 mit NAT kann die angezeigte WSL-Adresse vom iPhone aus unerreichbar sei
 
 Das Spiel ist sofort im mobilen Browser testbar. Eine signierte iOS-App oder ein App-Store-Release entsteht dabei noch nicht.
 
-## 3. Spielstand und Messung
+## 3. Vier Spielstände und Performance
 
-Auf kleinen Touch-Geraeten wird das ressourcenschonende Grafikprofil automatisch aktiviert (geringere Renderaufloesung, kein Schattenpass). Fuer einen A/B-Test kann `?grafik=hoch` oder `?grafik=sparsam` an die Spiel-URL angehaengt werden. Die gewaehlte Stufe steht auch im Performance-Bericht.
+Hartwig speichert ausschließlich lokal im Browser mit **IndexedDB**. Es gibt **Autospeichern** und **drei benannte Speicherplätze**. Im Menü **Spielstände** können die Plätze beschrieben, geladen, exportiert, importiert oder gelöscht werden. Beim Start werden alle vier Plätze mit Datum, gespielter Woche, Szenario, Liquidität und einer JPEG-Vorschau angezeigt. **Fortsetzen** lädt weiterhin den letzten Autosave.
 
-- Im Spiel über **Menü → Speichern** den Spielstand ablegen. Nach einem Neuladen im Startbildschirm **Fortsetzen** wählen. Nach Entscheidungen und jeder Spielwoche wird automatisch gespeichert.
-- Im Menü **Performance** öffnen. Der auf 90 Frames beziehungsweise rund 8 Sekunden begrenzte Test misst auf dem tatsächlich verwendeten iPhone Framerate, 95. Perzentil der Framezeit und Draw Calls.
-- Eine Testsequenz durchspielen: neues Spiel starten, 52 Wochen simulieren, Einkauf/HQ/Marketing verändern, speichern, Safari schließen, wieder öffnen, fortsetzen und weitere 52 Wochen simulieren.
-- Auf einem echten Gerät insbesondere Ruckler beim Zoomen, Wärmentwicklung, Speichern nach einem App-Wechsel und die Ladezeit einer neuen Stadt kontrollieren.
+- Nach Entscheidungen, Ortswechseln und jeder Woche wird automatisch gespeichert; beim Verlassen der App wird zusätzlich ein Speichervorgang angestoßen.
+- Im Menü **Spielstände** einen der Plätze 1 bis 3 benennen und mit **Speichern** eine Momentaufnahme anlegen. Laden ersetzt die aktuell laufende Partie im Browser; die anderen Plätze bleiben unberührt.
+- Unter **Export** wird eine gzip-komprimierte Datei mit der Endung **`.hartwig`** heruntergeladen. Sie enthält den vollständigen Spielstand samt Metadaten, also vertraulich behandeln.
+- Für einen Gerätewechsel die Datei per AirDrop, Dateien-App oder einem eigenen sicheren Transferweg aufs andere iPhone bringen. Dort Hartwig öffnen, bei einem freien Platz **Import** wählen, die `.hartwig`-Datei auswählen und anschließend **Laden**. Beim Import auf einen belegten Platz ist die Überschreibung zu bestätigen. Vor dem Wechsel empfiehlt sich ein Export als Sicherung.
+- Bei knappem Gerätespeicher meldet Hartwig einen Speicherfehler und fordert zum Export beziehungsweise Freigeben von Speicherplatz auf. Keine Speicherdateien löschen, bevor sie gesichert wurden.
+- Safari-Websitedaten zu löschen kann **sämtliche lokalen Spielstände** entfernen. Zwischen verschiedenen Origins (HTTP, HTTPS, anderer Hostname) werden Spielstände nicht automatisch übertragen.
 
-Der Spielstand liegt ausschließlich im Browser des Geräts (IndexedDB). Das Löschen von Safari-Websitedaten kann ihn entfernen. Der Speicherbereich ist je Origin getrennt, ein Spielstand aus einer anderen URL wird nicht automatisch übernommen.
+Im Menü **Performance** den 90-Frame-Test ausführen. Ein realistischer iPhone-Test umfasst 52 Wochen, Einkaufs-/HQ-/Marketing-Aktionen, manuelles Speichern, App schließen und wieder öffnen, Fortsetzen und weitere 52 Wochen. Ruckler beim Zoomen, Temperatur, Speichern nach dem App-Wechsel und Wechsel zwischen Städten dokumentieren.
 
-## 4. Installation auf dem Home-Bildschirm und Offline-Modus
+## 4. Installation auf dem iPhone und Offline-Modus
 
-Safari: **Teilen → Zum Home-Bildschirm**. Web-App-Metadaten und Icon sind hinterlegt.
-Die Service-Worker-Offline-Funktion erfordert **HTTPS** (oder localhost auf demselben Gerät). Über eine gewöhnliche HTTP-Adresse im WLAN lässt sich der Browser-Prototyp testen, aber kein zuverlässiger Offline-Modus aktivieren.
+1. Hartwig in **Safari** über eine **HTTPS-Adresse** öffnen.
+2. In Safari **Teilen → Zum Home-Bildschirm** auswählen. Die installierte Web-App zeigt das Hartwig-App-Symbol und startet im Hochformat ohne Safari-Adressleiste.
+3. Solange das Gerät online ist, die Web-App **einmal vollständig laden**, damit der Service Worker Spieloberfläche, Bundle, Manifest, Symbole und Stylesheet vorhält.
+4. Anschließend Flugmodus aktivieren und die installierte App erneut starten: Das Spiel sollte offline öffnen und vorhandene IndexedDB-Spielstände laden. Die PWA besitzt keinen externen API-Server.
 
-Da das Repository privat ist, wird **keine öffentliche GitHub-Pages-Seite** eingerichtet. Ein HTTPS-Deployment ist vor einem externen Test separat mit Zugriffsschutz zu konfigurieren.
+Bei einer neuen veröffentlichten Version erscheint nach der Service-Worker-Aktualisierung der Hinweis **„Neue Version verfügbar“ → „Neu laden“**. Hartwig speichert die aktuelle Partie vor dem Versionswechsel. Die bestehenden lokalen Spielstände bleiben erhalten. Falls kein Hinweis erscheint, die App bei bestehender Verbindung neu öffnen. Die Service-Worker-Cache-Version in `render/sw.js` bei Änderungen der Offline-Shell erhöhen.
+
+**Wichtig:** Service Worker funktionieren unter **HTTPS** oder lokal auf `localhost` beziehungsweise `127.0.0.1`. Die HTTP-LAN-Vorschau aus Abschnitt 2 ist zum Spielen geeignet, auf dem iPhone aber **nicht** für einen zuverlässigen Offline-Test. Für einen externen Test wird ein geschützter HTTPS-Host benötigt; das private Repository wird nicht automatisch öffentlich bereitgestellt. Auf echten iPhones müssen Standalone-Modus, Startbilder, Safe Areas, Download-/Dateiauswahl und verfügbarer Gerätespeicher zusätzlich manuell überprüft werden.
 
 ## 5. Automatisierte Qualitätssicherung
 
@@ -53,6 +59,12 @@ npm test                    # Startbildschirm + Spielstart im mobilen Chromium
 npm run smoke:panels        # erweitertes UI-Szenario
 npm run smoke:karte         # Gesten und Zoom
 ```
+
+Die N11-App-Prüfung ist in `npm test` enthalten und kann separat mit `npm run smoke:app` gestartet werden. Sie prüft Manifest und PNG-Icons, vier IndexedDB-Plätze mit JPEG-Vorschau, identischen Spielzustand nach Laden, gzip-Export und -Import sowie einen echten Offline-Neustart nach Service-Worker-Installation. Der Test schreibt einen Screenshot nach `bilder/nice/app/offline.png`.
+
+Für die App-Bilder erzeugt `npm run symbol` die Icons (`render/app-icon-180.png`, `render/app-icon-512.png`) und Startbilder unter `render/startbilder/` aus dem bestehenden isometrischen Hartwig-Kit. `npm run build` erzeugt fehlende oder veraltete App-Grafiken automatisch.
+
+Für eine ergänzende Lighthouse-Installierbarkeitsprüfung nach dem Build den lokalen Server mit `node dev-server.js` starten, die localhost-Seite in Chromium öffnen und in DevTools/Lighthouse prüfen, ob ein korrektes Web-App-Manifest, ein 512er PNG-Icon, ein Service Worker und eine offline ladbare Startseite vorhanden sind. Ein automatisierter Chromium-Smoke-Test ersetzt nicht die Prüfung mit einem echten iPhone.
 
 Der lokale Browser-Test verwendet Playwright-Chromium; bei Bedarf `npx playwright install chromium`. `CHROMIUM_PATH` kann auf eine eigene ausführbare Chromium-Datei zeigen.
 

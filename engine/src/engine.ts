@@ -1,8 +1,13 @@
 import { GRUPPEN, saisonFaktor } from './daten';
+import { statistikHaus, statistikWoche } from './statistik';
 import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
+import { chronikAktualisieren, chronikInitialisieren } from './chronik';
+import { erfolgeWoche } from './erfolge';
+import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
+import { zeitungWoche } from './zeitung';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
 import type { Format, GameState, GruppeId, HausKpi, WochenKpi } from './types';
@@ -19,12 +24,17 @@ import { organisationWoche } from './organisation';
 // O03 IT
 import { itWoche } from './it';
 import { produkteBuchen, produkteWoche } from './produkte';
+// O04 Personal
+import { personaleinsatzWoche } from './personaleinsatz';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
+import { szenarioNachWoche, szenarioWoche } from './szenarien';
 // O02 Umsatztreiber
 import { erfasseTreiber } from './treiber';
 import { planungBonusWoche, planungWoche } from './planung';
 // O07 Haus
 import { hausGastroErgebnis, hausKonzessionserloes, hausWoche } from './haus';
+// O05 Ware
+import { wareWoche, wareBedarf, preisFaktorHaus, verdichteWare } from './merchandise';
 
 /** Neues Spiel; `szenario` kann auch nur Teile setzen, z. B. { schwierigkeit: 'schwer' }. */
 export function neuesSpiel(seed = 1, szenario: Partial<Szenario> = STANDARD_SZENARIO): GameState {
@@ -40,10 +50,12 @@ function quartalsStart(s: GameState): void {
 }
 
 export function wocheAbspielen(s: GameState): WochenKpi {
-  if (s.phase === 'zerschlagen') throw new Error('Spiel beendet: Die Kette ist zerschlagen.');
+  if (s.phase === 'zerschlagen' || (s.ende && !s.spielendeFortgesetzt && !s.prognose)) throw new Error('Spiel beendet. Bitte ein neues Spiel beginnen oder zulässig weiterspielen.');
+  chronikInitialisieren(s); // Migrationsstand vor den Ereignissen der Woche
   const w = s.woche;
   const cashVorher = s.historie[s.historie.length - 1]?.cash ?? s.kapitalflussStartCash ?? s.cash;
 
+  szenarioWoche(s);
   prozesse(s);
   premiumWoche(s);
   // O08 Umbau
@@ -58,15 +70,21 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   produkteWoche(s);
   // Marketing: Kanäle, Karte, CRM-Versand, laufende Aktionen der Woche (vor der Nachfrage)
   marketingVorbereiten(s);
+  // O04 Personal: ein Plan je Woche, vor Ermittlung der Hausnachfrage.
+  if (!s.personaleinsatzDeaktiviert) personaleinsatzWoche(s);
 
   const lohn = lohnSumme(s);
   einkaufFristen(s);
   const vorWareneingang = s.cash;
   wareneingang(s, lohn * 2);
   const warenVorkasse = s.cash - vorWareneingang;
+  // O05 Ware
+  wareWoche(s);
 
   // 1. Nachfrage aller Häuser; Eigenmarken und Sortimentsmix je Warengruppe wirken auf die Bruttonachfrage
   const roh: HausRoh[] = s.haeuser.map((h) => simuliereHaus(s, h));
+  // O05 Ware
+  wareBedarf(s, roh);
   const nachfrage = einkaufNachfrage(s, roh);
 
   // 2. Bestand begrenzt den Abverkauf eigener Ware
@@ -112,7 +130,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     let umsatzEigen = 0;
     for (const [g, v] of Object.entries(r.eigen) as [GruppeId, { brutto: number; umsatz: number }][]) {
       const f = verfuegbar[g] ?? 1;
-      const u = v.umsatz * f;
+      const u = v.umsatz * f * preisFaktorHaus(s, h, g);
       const anteil = (bruttoSumme[g] ?? 0) > 0 ? v.brutto / (bruttoSumme[g] ?? 1) : 0;
       const e = (einsatz[g] ?? 0) * anteil;
       umsatzEigen += u;
@@ -152,6 +170,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     kpi.fteBedarf = r.fteBedarf;
     kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
     if (h.status !== 'geschlossen' && h.status !== 'verkauft') h.kpi = rundeKpi(kpi);
+    statistikHaus(s, h, rundeKpi(kpi));
 
     k.umsatz += kpi.umsatz;
     k.rohertrag += kpi.rohertrag;
@@ -194,7 +213,9 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.beratung = s.berater.filter((b) => w >= b.start && w < b.ende).reduce((x, b) => x + b.wochenSatz, 0);
 
   // 6. Abschriften und Gewöhnung
-  k.abschriften = einkaufAltern(s);
+  k.abschriften = einkaufAltern(s) + (s.ware?.inventurAufwandWoche ?? 0);
+  // O05 Ware
+  verdichteWare(s);
   k.rohertrag -= k.abschriften;
   eigenmarkenWoche(s, einkaufBuchen(s, umsatzEigenJe));
   produkteBuchen(s);
@@ -247,6 +268,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // O06 Planung: Quartalsforecast, Vertrauensabgleich, Planungsfenster und Jahresabschluss.
   planungWoche(s);
   if (!s.prognose && w % 13 === 12 && !beendet(s)) quartalsBewertung(s);
+  statistikWoche(s, k);
   // Quartalsabschluss kann eine Eigentümereinzahlung erzeugen: sie gehört noch zu dieser Woche.
   // Zahlungsarten werden nur aus tatsächlich gebuchten Cash-Bewegungen abgeleitet.
   // Noch nicht nach Zahlart instrumentierte Effekte (insbesondere alte Sonderfälle) stehen in Sonstiges.
@@ -261,7 +283,13 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // Einmaleffekte, die ab jetzt anfallen (Aktionen des Spielers), zählen zur nächsten Woche
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
+  zeitungWoche(s);
   s.woche += 1;
+  chronikAktualisieren(s, w);
+  szenarioNachWoche(s);
+  // Reine Beobachtung nach dem wirtschaftlichen Wochenabschluss; keine Prognosen verändern Erfolge.
+  erfolgeWoche(s);
+  spielendePruefen(s);
   return k;
 }
 

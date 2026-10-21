@@ -6,6 +6,7 @@ import { THREE, kameraFuer } from './kit/basis.js';
 import { stadtplan, streifenSchneidet } from './kit/stadtplan.js';
 import { stadtDaten, nachbarStaedte } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
+import { jahreszeit } from './kit/jahreszeit.js';
 import outletHaeuser from '../haeuser-outlet.json';
 import hartwigHaeuser from '../haeuser.json';
 import { familieOutlet, masseOutlet } from './kit/outlet.js';
@@ -16,6 +17,12 @@ const namen = (arg[0] && !arg[0].startsWith('--') ? arg[0] : 'Essen,Duisburg,Gel
 const zoom = Number(opt('--zoom', 62));
 const [KW, KH] = opt('--kachel', '720x1280').split('x').map(Number);
 const RAND = Number(opt('--rand', 1.1));
+// Saisonale Stadt-Dekoration ist ein Overlay. Die planerischen Gestaltungsgrenzen bleiben identisch.
+const JAHRESZEIT_WOCHEN = { winter: 1, fruehling: 13, sommer: 27, herbst: 40, weihnachten: 48, schnee: 4 };
+const pruefJahreszeit = opt('--jahreszeit', null);
+const saisonListe = pruefJahreszeit === 'alle' ? Object.keys(JAHRESZEIT_WOCHEN) : pruefJahreszeit ? [pruefJahreszeit] : [];
+for (const id of saisonListe) if (!(id in JAHRESZEIT_WOCHEN)) throw new Error('Unbekannte Jahreszeit ' + id);
+
 
 // Parzellen ohne Gebäude (Lücken im Blockrand)
 const OFFEN = new Set(['luecke', 'baustelle', 'parkplatz', 'platz', 'durchgang']);
@@ -355,6 +362,13 @@ const erg = namen.map(pruefe);
 const zeilen = Object.keys(erg[0].werte);
 const br = Math.max(...zeilen.map((z) => z.length)) + 2;
 console.log(`Prüfung Gestaltung (Nahausschnitt: zoom ${zoom}, Kachel ${KW}×${KH}, rand ${RAND})`);
+for (const id of saisonListe) {
+  const kw = JAHRESZEIT_WOCHEN[id];
+  const s = jahreszeit({ woche: kw - 1, seed: 19, startJahr: 2026, marketing: { aktionen: [] } });
+  if (id !== 'weihnachten' && id !== 'schnee' && s.name !== id) throw new Error('Jahreszeit inkonsistent: ' + id);
+  if (id === 'weihnachten' && !s.anlaesse.has('weihnachten')) throw new Error('Advent nicht aktiv');
+  console.log(`Saisonkontrolle ${id}: KW ${s.kw}, ${s.name} (Plan unverändert, saisonale Props separat)`);
+}
 console.log(''.padEnd(br) + erg.map((e) => (' ' + e.name.slice(0, 15)).padStart(17)).join(''));
 const verstoss = new Map(erg.map((e) => [e.name, 0]));
 for (const z of zeilen) console.log(z.padEnd(br) + erg.map((e) => { const v = e.werte[z], g = GRENZE[z]; const x = g !== undefined && Number(v) > g + 1e-9; if (x) verstoss.set(e.name, verstoss.get(e.name) + 1); return ((x ? '!' : '') + v).padStart(17); }).join(''));

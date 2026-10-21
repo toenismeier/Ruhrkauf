@@ -1,3 +1,4 @@
+import { verbraucheCluster } from './merchandise';
 // Einkauf: 57 Warengruppen (WG) unter den 16 Bereichen, Bestand und Orders je WG und Art (NOS, Saison),
 // Orderrhythmus (Vororder, Nachorder, NOS-Dispo), Open to Buy, Freigabe-Eingang und Kennzahlen.
 // Vertrag: ../EINKAUF-VERTRAG.md. Die Bereichswerte (GameState.bestand je gruppe, basisUmsatz, Wareneinsatz)
@@ -570,10 +571,11 @@ export function initialisiereEinkauf(s: GameState): void {
  * Open to Buy einer Saison: Planbasis = Bedarf aller Pools über die 26 Saisonwochen nach der aktuellen Nachfragebasis
  * (wird wöchentlich fortgeschrieben, damit Schließungen und Nachfragerückgang das Limit senken).
  */
-export function limitFuer(s: GameState, st: WgStand, sid: number): { plan: number; verbraucht: number } {
+export function limitFuer(s: GameState, st: WgStand, sid: number, nurLesen = false): { plan: number; verbraucht: number } {
   const key = String(sid);
   let l = st.limits[key];
-  if (!l) {
+  if (!l && nurLesen) l = { plan: 0, verbraucht: 0, stand: -1 }; // Abfragen legen keinen Spielstand an
+  else if (!l) {
     l = st.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
     for (const k of Object.keys(st.limits)) if (Number(k) < sid - 2) delete st.limits[k];
   }
@@ -799,7 +801,8 @@ export function einkaufVerbrauch(s: GameState, n: EinkaufNachfrage): { verfuegba
         let ziel = ekBedarf * quote;
         let extraVk = 0;
         if (pool === FREMD && ausweichVk > 0) { extraVk = ausweichVk; ziel += ausweichVk * (1 - m) * quote; }
-        const x = nimm(topf, ziel, ekBedarf * (art === 'saison' ? capM : 1), sAkt, st);
+        const x = verbraucheCluster(s, topf, ziel, ekBedarf * (art === 'saison' ? capM : 1), d.bereich,
+          (ks, wert, alt) => nimm(ks, wert, alt, sAkt, st));
         if (art === 'saison' && x.alt > 0) marketingAltVerkauf(s, d.bereich, x.alt, d.id);
         const vkR = x.voll / Math.max(0.05, 1 - m);
         if (pool !== FREMD) {
@@ -930,7 +933,7 @@ export function einbuchen(s: GameState, b: Bestellung, wert: number): void {
   const art: Art = b.art ?? 'saison';
   const sid = art === 'saison' ? saisonVon(s.woche) : undefined;
   const kf = b.kostenFaktor ?? 1;
-  const vorh = s.bestand.find((k) => k.alter === 0 && k.wg === wg && k.art === art && k.marke === b.marke && k.kostenFaktor === kf && !k.ladenhueter && k.saisonId === sid);
+  const vorh = s.bestand.find((k) => k.alter === 0 && !k.hauscluster && k.wg === wg && k.art === art && k.marke === b.marke && k.kostenFaktor === kf && !k.ladenhueter && k.saisonId === sid);
   const em = b.marke ? s.eigenmarken.marken.find((m) => m.id === b.marke) : undefined;
   if (vorh) vorh.wert += eur(wert);
   else s.bestand.push({ gruppe: b.gruppe, wg, art, marke: b.marke, saisonId: sid, wert: eur(wert), alter: 0, saisonAnteil: art === 'saison' ? 1 : 0, kostenFaktor: kf, ladenhueter: em?.status === 'eingestellt' ? true : undefined });
@@ -1400,7 +1403,7 @@ function basisWg(s: GameState, d: WgDef, bestandJe: Map<WgId, { best: number; al
   const sz = st.saisons[String(saisonId(s.woche))] ?? { eingang: 0, abverkauf: 0 };
   b.sEin = sz.eingang; b.sAb = sz.abverkauf * R('s');
   const sid = saisonId(s.woche);
-  const L = limitFuer(s, st, sid);
+  const L = limitFuer(s, st, sid, true);
   b.limit = limitWert(st, L); b.limitV = L.verbraucht;
   for (const x of s.bestellungen) if (x.wg === d.id) b.pipe += x.wert;
   for (const f of s.einkauf.freigaben) if (f.wg === d.id) { b.offenN++; b.offenW += f.wert; }

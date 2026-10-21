@@ -47,8 +47,19 @@ export function aktionFuer(s, h) {
 }
 
 /** Art der Aktionsdekoration: aus dem Namen der Engine-Aktion, sonst nach Kalenderwoche. */
-function aktionsArt(name, kw) {
-  const n = (name ?? '').toLowerCase();
+function aktionsArt(aktion, kw) {
+  // Der Aktionskalender trägt den kanonischen Anlass bereits als 'anlass'.
+  // Nur Altspielstände ohne Anlass werden über den Namen ausgewertet.
+  const anlass = aktion?.anlass;
+  const bekannt = new Set(['wsv', 'ssv', 'blackfriday', 'weihnachten', 'ostern', 'schulanfang',
+    'midseason', 'muttertag', 'beauty', 'waesche', 'jubilaeum', 'mwst', 'friends',
+    'personalkauf', 'raeumung', 'sonder']);
+  if (bekannt.has(anlass)) return anlass;
+  const n = (aktion?.name ?? '').toLowerCase();
+  if (n.includes('winterschluss')) return 'wsv';
+  if (n.includes('sommerschluss')) return 'ssv';
+  if (n.includes('schulanfang')) return 'schulanfang';
+  if (n.includes('oster')) return 'ostern';
   if (n.includes('jubil')) return 'jubilaeum';
   if (n.includes('black') || n.includes('friday')) return 'blackfriday';
   if (n.includes('weihnacht') || n.includes('advent')) return 'weihnachten';
@@ -108,8 +119,10 @@ export function zustandAusHaus(haus, s, merk) {
     }
     if (z.status !== 'leer') {
       const a = aktionFuer(s, haus);
-      const art = a ? aktionsArt(a.name, kw) : saison(kw);
-      if (art) { zus.add('aktion'); z.aktion = art; if (a) z.rabatt = a.rabatt; }
+      const art = a ? aktionsArt(a, kw) : saison(kw);
+      // FUNDUS bleibt auch während WSV/SSV beim eigenen Claim, ohne Rabattplakate.
+      const aktionsbild = haus.format === 'outlet' && (art === 'wsv' || art === 'ssv') ? null : art;
+      if (aktionsbild) { zus.add('aktion'); z.aktion = aktionsbild; if (a && haus.format !== 'outlet') z.rabatt = a.rabatt; }
       const liste = VORRANG.filter((q) => zus.has(q));
       if (liste.length) { z.status = liste[0]; z.zusatz = liste.slice(1); }
     }

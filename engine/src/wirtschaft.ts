@@ -5,6 +5,8 @@ import { PARAM } from './welt';
 import { premiumImageFaktor, premiumServiceQuote } from './premium';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
+import { personalVerkaufsFaktor, personalOffpriceFaktor, personalZusatzkosten, personalFehlerkosten, personalVerfuegbarkeit } from './personaleinsatz';
+// O04 Personal
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
 // O01 Organisation: normierte Wirkung der Vertriebsleitungen.
 import { hausclusterFaktor } from './organisation';
@@ -15,6 +17,7 @@ import { itHausFaktor } from './it';
 // O07 Haus
 import { hausBetriebsFaktor, hausBetriebskosten } from './haus';
 import { umbauNachfrageFaktor, umbauFrequenzFaktor } from './umbau';
+import { szenarioFrequenz } from './szenarien';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -85,7 +88,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h) * umbauFrequenzFaktor(h);
+  return makro * image * mkt * substanz * szenarioFrequenz(s) * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h) * umbauFrequenzFaktor(h);
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -146,7 +149,8 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   for (const g of alleGruppen) {
     const d = GRUPPEN[g];
     const qualitaet = besetzung * (1 - d.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
-    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet;
+    // O04: Kaufquote durch Beratungsbesetzung und Kassenschlangen; nach Warengruppe gewichtet.
+    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet * personalVerkaufsFaktor(h, g) * personalVerfuegbarkeit(h);
     const qe = qmEigen[g] ?? 0;
     const qk = qmKomm[g] ?? 0;
     tEJe[g] = qe + qk > 0 ? qe / (qe + qk) : 0;
@@ -165,7 +169,7 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     if (qe > 0) roh.eigen[g] = { brutto: brutto * tE, umsatz: umsatz * tE };
     if (qk > 0) roh.kommission[g] = umsatz * (1 - tE);
   }
-  roh.offprice = offBasis * besetzung;
+  roh.offprice = offBasis * besetzung * personalOffpriceFaktor(h) * personalVerfuegbarkeit(h);
 
   for (const [g, qm] of Object.entries(qmKonz) as [GruppeId, number][]) {
     const P = h.potenzial[g] ?? 0;
@@ -200,7 +204,7 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     if (h.restmieteBis !== undefined && h.restmieteBis > s.woche) k.miete = h.restmieteWoche ?? 0;
     return k;
   }
-  k.personal = lohnKosten(s, h);
+  k.personal = lohnKosten(s, h) + personalZusatzkosten(h);
   // O07: genehmigter Verkaufs-Sonntag benötigt zusätzliche Besetzung.
   if (!s.hausbetriebAbnahmeAus && s.hausbetrieb?.staedte[h.stadt]?.sonntage.includes(s.woche)) k.personal *= 1.18;
   k.miete = h.miete.mieteWoche;
@@ -213,7 +217,7 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
   }
   k.nebenkosten = h.miete.netTyp === 'net' ? 0 : qmNk * h.miete.nebenkostenQmWoche;
   // O07 Haus: identische Kosten im neutralen Standard, Aufteilung in fünf Posten.
-  k.sonstige = hausBetriebskosten(s, h, PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt);
+  k.sonstige = hausBetriebskosten(s, h, PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt) + personalFehlerkosten(h);
   k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s);
   return k;
 }

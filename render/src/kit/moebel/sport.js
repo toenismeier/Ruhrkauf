@@ -1,4 +1,4 @@
-import { definition, wandModul, inselModul } from './basis.js';
+import { definition, wandModul, inselModul, detail } from './basis.js';
 export const SPORT_SCHUH_MARKEN = definition("sport_schuh_marken", "Markenschuhe", 'sport', 'wand', 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"schuhe","pal":"laufen","titel":"Markenschuhe","alt":false,"akzent":"#bd393a","variante":"marken","w":5}));
 export const SPORT_SCHUH_LAUFEN = definition("sport_schuh_laufen", "Laufschuhe", 'sport', 'wand', 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"schuhe","pal":"laufen","titel":"Laufschuhe","alt":false,"akzent":"#2b79b8","variante":"laufen","w":5}));
 export const SPORT_SCHUH_KINDER = definition("sport_schuh_kinder", "Kindersportschuhe", 'sport', 'wand', 4, 1, 3, 220, (L,r,d,ctx) => wandModul(L,r,d,ctx, {"art":"schuhe","pal":"kinder","titel":"Kindersportschuhe","alt":false,"akzent":"#ef9a32","variante":"kinder","w":5}));
@@ -64,7 +64,7 @@ export const SPORT_INSEL_WINTERPOD = definition("sport_insel_winterpod", "Winter
 export const SPORT_ABVERKAUF_TISCH = definition("sport_abverkauf_tisch", "Sport-Abverkaufstisch", 'sport', 'gondel', 4, 1, 1.4, 120, (L,r,d) => {
   L.box(4.8, 0.16, 1.1, 0, 0.82, 0.625, '#cdd3d7');
   for (const x of [-2.2, 2.2]) for (const z of [0.15, 1.1]) L.box(0.09, 0.82, 0.09, x, 0, z, '#727b83');
-  if (d < 0.3) return;
+  if (!detail(d)) return;
   for (let i = 0; i < 12; i++) {
     const x = -2.05 + (i % 6) * 0.82, z = i < 6 ? 0.34 : 0.84;
     L.box(0.65, 0.20, 0.35, x, 1.0, z, ['#b7474d','#d5b86b','#497b9f','#7c8e62'][Math.floor(r()*4)]);
@@ -73,7 +73,7 @@ export const SPORT_ABVERKAUF_TISCH = definition("sport_abverkauf_tisch", "Sport-
 export const SPORT_ABVERKAUF_GITTER = definition("sport_abverkauf_gitter", "Sport-Abverkaufskorb", 'sport', 'gondel', 4, 1, 1.4, 120, (L,r,d) => {
   L.box(4.8, 0.12, 1.0, 0, 0.25, 0.625, '#737f89');
   for (const x of [-2.3, 2.3]) for (const z of [0.18, 1.07]) L.box(0.06, 0.92, 0.06, x, 0.25, z, '#a7b4bd');
-  if (d < 0.3) return;
+  if (!detail(d)) return;
   for (let i = 0; i < 9; i++) L.box(0.42, 0.20, 0.55, -1.9 + i*0.47, 0.37, 0.625,
     ['#c44743','#4b83a4','#dfbb67','#566b53'][Math.floor(r()*4)]);
 });

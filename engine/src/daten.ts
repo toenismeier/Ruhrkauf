@@ -157,6 +157,15 @@ export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
 export const VORNAMEN = ['Sabine', 'Thomas', 'Petra', 'Michael', 'Andrea', 'Frank', 'Claudia', 'Jörg', 'Kerstin', 'Ralf', 'Nicole', 'Stefan', 'Anja', 'Markus', 'Birgit', 'Holger', 'Silke', 'Dirk', 'Heike', 'Uwe', 'Melanie', 'Jens', 'Tanja', 'Sven'];
 export const NACHNAMEN = ['Krämer', 'Weber', 'Schulte', 'Hoffmann', 'Brandt', 'Wagner', 'Kaiser', 'Lorenz', 'Peters', 'Böhm', 'Seidel', 'Fuchs', 'Graf', 'Vogel', 'Hartmann', 'Busch', 'Wolff', 'Engel', 'Lange', 'Möller'];
 
+/** Fiktive Käufer für den jährlichen Konzernverkauf ab Jahr vier. */
+export const KONZERN_KAEUFER: { typ: 'Finanzinvestor' | 'Handelskonzern' | 'Immobilienfonds'; name: string }[] = [
+  { typ: 'Finanzinvestor', name: 'Rheingold Beteiligungen' },
+  { typ: 'Handelskonzern', name: 'Nordstern Handelsholding' },
+  { typ: 'Immobilienfonds', name: 'Mosaik Immobilienfonds' },
+  { typ: 'Finanzinvestor', name: 'Südwest Kapitalpartner' },
+  { typ: 'Handelskonzern', name: 'Wesergrund Handelspartner' },
+];
+
 export const VERMIETER = ['Rheinkontor Immobilien', 'Nordwert Real Estate', 'Prisma Asset Management', 'Familie von Haller', 'Stadtwerk Grundbesitz', 'Atlas Retail Properties', 'Merian Fonds IV', 'Kontinental Immobilien KG'];
 
 export interface LieferantDef {

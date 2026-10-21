@@ -41,13 +41,13 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
   }
   if (r === 'personal') {
     const v=h.personal;
-    inhalt = '<div class="karte"><div class="khead">Personaleinsatz · Grundlage O04</div>' +
+    inhalt = '<div class="karte"><div class="khead">Besetzung</div>' +
       line('Vollzeit',p(v.vollzeit,1)+' FTE')+line('Teilzeit',p(v.teilzeit,1)+' FTE')+
       line('Aushilfen',p(v.aushilfen,1)+' FTE')+line('Bedarf',p(k?.fteBedarf,1)+' FTE')+
       line('Ist',p(k?.fteIst,1)+' FTE')+line('Personalkosten',geld(k?.personal??0))+'</div>';
   }
   if (r === 'ware') {
-    inhalt = '<div class="karte"><div class="khead">Ware · Grundlage O05</div>' +
+    inhalt = '<div class="karte"><div class="khead">Umsatz je Warengruppe</div>' +
       Object.entries(k?.umsatzJeGruppe ?? {}).sort((a,b)=>b[1]-a[1]).map(([key, wert])=>line(key, geld(wert))).join('') +
       '</div>';
   }

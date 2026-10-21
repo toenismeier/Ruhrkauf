@@ -1,4 +1,5 @@
 import type { Hq } from './hq';
+import type { ChronikEintrag, ChronikStand } from './chronik';
 import type { OrganisationsStand } from './organisation';
 import type { PlanungStand } from './planung';
 import type { BauEtage, UmbauStand } from './umbau';
@@ -14,6 +15,11 @@ import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber'
 import type { ItStand } from './it';
 // O07 Haus
 import type { HausBetrieb, HausbetriebStand } from './haus';
+// O04 Personal
+import type { PersonalHausStand, PersonalStand } from './personaleinsatz';
+// O05 Ware
+import type { WareStand } from './merchandise';
+import type { SzenarioStand } from './szenarien';
 
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
@@ -138,6 +144,8 @@ export interface HausKpi {
 }
 
 export interface Haus {
+  /** Nur zusätzliche Altstandorte des Fusionsszenarios. */
+  fusionUrsprung?: 'volkskauf';
   id: string;
   name: string;
   stadt: string;
@@ -178,6 +186,8 @@ export interface Haus {
   restmieteWoche?: Eur; // laufende Miete nach Schließung
   restmieteBis?: number;
   personal: Personal;
+  // O04 Personal: zusätzliche Dienstplanung, Basis-FTE bleiben in personal.
+  personaleinsatz?: PersonalHausStand;
   substanz: number; // 0..100
   substanzStart: number;
   // O08 Umbau
@@ -193,6 +203,8 @@ export interface Haus {
   streikBis?: number;
   standortgarantie?: boolean;
   kpi?: HausKpi;
+  /** N01: Wochenhistorie des Hauses, höchstens 156 Wochen. */
+  verlauf?: { woche: number; umsatz: Eur; db: Eur; frequenz: number; personalFte: number }[];
   // O02 Umsatztreiber: Startfaktoren sind neutral, Quellen der späteren operativen Module.
   treiber?: TreiberFaktoren;
   treiberQuellen?: TreiberQuellen;
@@ -211,6 +223,8 @@ export interface Kohorte {
   art?: Art;
   marke?: string;
   saisonId?: number;
+  // O05 Ware: physischer Warenbestand je Hauscluster
+  hauscluster?: string;
 }
 
 export interface Bestellung {
@@ -308,7 +322,7 @@ export interface BeraterMandat {
   ergebnis?: { empfohleneSchliessungen: string[]; folien: number; fazit: string };
 }
 
-export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf';
+export type AngebotTyp = 'untermiete' | 'paket' | 'stadt' | 'sportverkauf' | 'sonderposten' | 'uebernahme' | 'premiumVerkauf' | 'konzernVerkauf' | 'staatshilfe';
 
 export interface Angebot {
   id: string;
@@ -336,6 +350,8 @@ export interface Angebot {
   kaufpreis?: Eur;
   premiumKaeuferTyp?: 'Luxusgruppe' | 'Family Office' | 'Staatsfonds';
   premiumKaeuferName?: string;
+  konzernKaeuferTyp?: 'Finanzinvestor' | 'Handelskonzern' | 'Immobilienfonds';
+  konzernKaeuferName?: string;
   // sonderposten
   gruppe?: GruppeId;
   wert?: Eur;
@@ -442,8 +458,41 @@ export interface Quartal {
   ebitdaIst: Eur;
 }
 
+export type EndArt = 'zerschlagen' | 'saniert' | 'investor' | 'ruhestand';
+export interface WertungTeil { id: string; name: string; wert: number; punkte: number }
+export interface Endwertung {
+  teile: WertungTeil[];
+  grundpunkte: number;
+  multiplikator: number;
+  punkte: number;
+  schwierigkeit: SchwierigkeitId;
+}
+export interface SpielendeKennzahlen {
+  geretteteHaeuser: number; startHaeuser: number;
+  fte: number; startFte: number;
+  ebitda52: Eur; umsatz52: Eur; unternehmenswert: Eur; image: number;
+}
+export interface SpielEnde {
+  art: EndArt;
+  woche: number;
+  kennzahlen: SpielendeKennzahlen;
+  wertung: Endwertung;
+  kaeufer?: string;
+}
+
 export interface GameState {
+  /** Optional, damit historische Spielstände und das Standardszenario identisch bleiben. */
+  szenario?: SzenarioStand;
   version: 1;
+  /** Anfangsbasis der Endwertung; bei alten Spielständen optional. */
+  spielendeStart?: { haeuser: number; fte: number };
+  /** N02 abschaltbar (künftig über Einstellungen). */
+  spielendeDeaktiviert?: boolean;
+  spielendeFortgesetzt?: boolean;
+  testspiel?: boolean;
+  ende?: SpielEnde;
+  /** N14: Testwerkzeuge wurden in diesem Spielstand genutzt. */
+  testGenutzt?: boolean;
   /** Schwierigkeit beim Spielstart (src/schwierigkeit.ts), fehlt = mittel. */
   schwierigkeit?: SchwierigkeitId;
   seed: number;
@@ -465,6 +514,10 @@ export interface GameState {
   hausbetriebAbnahmeAus?: boolean;
   // O08 Umbau
   umbau?: UmbauStand;
+  // O04 Personal
+  personaleinsatz?: PersonalStand;
+  /** O04 ausschließlich A/B-Laufzeitmessung: überspringt die wöchentliche Neuplanung. */
+  personaleinsatzDeaktiviert?: boolean;
   /** Globale Rabattaktionen erreichen Kronjuwelen nur bei ausdrücklich deaktiviertem Schutz. */
   premiumSchuetzen?: boolean;
   wettbewerber: Wettbewerber[];
@@ -501,6 +554,8 @@ export interface GameState {
   organisation?: OrganisationsStand;
   /** Einkauf: Warengruppen, Steuerung, Freigabe-Eingang, Kennzahlenverlauf. */
   einkauf: Einkauf;
+  // O05 Ware
+  ware?: WareStand;
   /** Eigenmarken. */
   eigenmarken: EigenmarkenStand;
   /** Vorstand (C-Level): Ressorts, Personen, Delegation, Kandidaten, Sitzungen. */
@@ -514,9 +569,20 @@ export interface GameState {
   beraterQualitaet: Record<string, number>; // verdeckt, je Beratungshaus
   angebote: Angebot[];
   entscheidungen: Entscheidung[];
+  /** N03: freigeschaltete Erfolgs-IDs auf die Woche der Freischaltung abbilden. */
+  erfolge?: Record<string, number>;
+  /** Opt-out für das Nice-to-have, künftig über N13. Standard: eingeschaltet. */
+  erfolgeAktiv?: boolean;
+  /** Ausschließlich für Fortschritt und Streaks, ohne Einfluss auf das Balancing. */
+  erfolgeVerlauf?: import('./erfolge').ErfolgStand;
+  /** Reserviert für echte Format-KPIs aus der späteren Formate-Engine. */
+  formatErfolge?: { fundusDb?: number; volkskaufSaniert?: boolean };
   /** Gefallene Entscheidungen, maximal 52 Wochen. Für alte Spielstände optional. */
   entscheidungsprotokoll?: Entscheidungsprotokoll[];
   quartale: Quartal[];
+  /** Freiwillige, deterministische Chronik des Spielverlaufs (N12). */
+  chronik?: ChronikEintrag[];
+  chronikStand?: ChronikStand;
   // O06 Planung: Jahresbudget, Forecast, Boni (optional für alte Spielstände).
   planung?: PlanungStand;
   /** Nur für Kalibrierung: schaltet die operativen Planungseffekte ab. */
@@ -525,6 +591,11 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** Persistiertes Archiv des Handelsboten (maximal 104 Wochen). */
+  zeitung?: import('./zeitung').ZeitungStand;
+  /** N01: Statistik ist optional und ändert keine Berechnung. */
+  statistikDeaktiviert?: boolean;
+  statistik?: { sparsam: boolean; stimmung: { woche: number; wert: number }[] };
   /** Noch nicht in einem Wochenabschluss ausgewiesene Investitions-/Finanzierungszahlungen. */
   kapitalflussOffen?: { investitionen: Eur; finanzierung: Eur };
   /** Anfangsbestand vor Spielermaßnahmen in Woche 0 (wichtig bei noch leerer Historie). */

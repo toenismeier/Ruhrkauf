@@ -2,18 +2,21 @@
 // Messung erfolgt auf dem Geraet, auf dem das Spiel gerade laeuft. Keine Telemetrie.
 const runde = (x) => Math.round(x * 10) / 10;
 const perzentil = (a, p) => a[Math.min(a.length - 1, Math.ceil(a.length * p) - 1)];
-export async function messen({ renderer, scene, camera, info }) {
+export async function messen({ renderer, scene, camera, info, vorBild, anzahl = 90 }) {
   if (!scene || !camera) throw new Error('Bitte zuerst ein Spiel starten.');
-  const renderMs = [], frameMs = [];
+  const renderMs = [], frameMs = [], updateMs = [];
   let vorher = 0;
   const startGesamt = performance.now();
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < anzahl; i++) {
     // SwiftShader in CI oder aeltere iPhones koennen extrem langsam sein.
     // Mindestens 5 Frames, maximal ca. 8 Sekunden Gesamtmessung.
     if (i >= 5 && performance.now() - startGesamt > 8000) break;
     const zeit = await new Promise((resolve) => requestAnimationFrame(resolve));
     if (vorher) frameMs.push(zeit - vorher);
     vorher = zeit;
+    const vor = performance.now();
+    if (vorBild) vorBild();
+    updateMs.push(performance.now() - vor);
     const start = performance.now();
     renderer.render(scene(), camera());
     renderMs.push(performance.now() - start);
@@ -28,6 +31,7 @@ export async function messen({ renderer, scene, camera, info }) {
     frameP95Ms: runde(perzentil(f, 0.95)),
     renderMittelMs: runde(renderMs.reduce((a, b) => a + b, 0) / renderMs.length),
     renderP95Ms: runde(perzentil(r, 0.95)),
+    updateMittelMs: runde(updateMs.reduce((a, b) => a + b, 0) / updateMs.length),
     frameUeber33ms: frameMs.filter((x) => x > 33.4).length,
     drawCalls: renderer.info.render.calls,
     dreiecke: renderer.info.render.triangles,

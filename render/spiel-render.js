@@ -1,4 +1,4 @@
-// Aufruf: node spiel-render.js [--bundle] [--nur-haus] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
+// Aufruf: node spiel-render.js [--bundle] [--nur-haus] [--nur-werkzeuge] [--nur-einkauf] [--nur-panels] [--nur-karte] [--stadt Karlsruhe] [--seed 1]
 // Bündelt src/spiel.js (Engine-TS direkt aus /home/claude/turnaround/src) nach spiel-bundle.js. Mit --bundle nur bündeln.
 // Sonst headless im Hochformat 390 × 844: Woche 0, 26 und 52 mit Bot-Strategie C, dazu ein Bild mit offenem Hauspanel
 // (out/spiel-w00.png, out/spiel-w26.png, out/spiel-w52.png, out/spiel-haus.png, out/spiel-hq-w00.png, out/spiel-hq.png, out/spiel-essen.png, out/spiel-essen-hq.png, out/spiel-hq-abteilungen.png), Messwerte nach out/spiel-messung.json.
@@ -16,6 +16,11 @@ const { chromium } = require('playwright');
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
+function gitVersion() {
+  try { return execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { cwd: path.join(__dirname, '..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
+  catch { return (process.env.GITHUB_SHA || '').slice(0, 7) || 'Entwicklung'; }
+}
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : d; };
 
 // Porträts und Produktbilder (src/kit/portraet.js, src/kit/produktbild.js) baut ein anderer Agent; solange eine Datei fehlt,
@@ -30,11 +35,20 @@ const ersatzPlugin = { name: 'kit-ersatz', setup(b) {
 } };
 
 async function buendeln() {
+  // Das direkt aufgerufene Bundelskript erzeugt auch die für eine installierbare App
+  // erforderlichen PNG-Dateien. Bei unveränderten Quellen bleibt dieser Schritt aus.
+  const symbolQuelle = path.join(__dirname, 'src/kit/app-symbol.js');
+  const icon = path.join(__dirname, 'app-icon-512.png');
+  const startbild = path.join(__dirname, 'startbilder/start-1170x2532.png');
+  if (!fs.existsSync(icon) || !fs.existsSync(startbild) ||
+      fs.statSync(icon).mtimeMs < fs.statSync(symbolQuelle).mtimeMs) {
+    await require('./symbol.js').symboleErzeugen();
+  }
   await esbuild.build({
     entryPoints: [path.join(__dirname, 'src', 'spiel.js')], bundle: true, outfile: path.join(__dirname, 'spiel-bundle.js'),
     loader: { '.json': 'json' }, logLevel: 'error', format: 'iife', target: 'es2020', plugins: [ersatzPlugin],
     // scripts/bot.ts prüft require.main === module (nur für den Aufruf in Node)
-    define: { 'require.main': 'null', module: 'undefined' },
+    define: { 'require.main': 'null', module: 'undefined', __HARTWIG_VERSION__: JSON.stringify(gitVersion()) },
   });
 }
 
@@ -52,7 +66,7 @@ async function buendeln() {
   p.on('pageerror', (e) => console.log('FEHLER', e.message));
   p.on('console', (m) => { if (m.type() === 'error') console.log('KONSOLE', m.text()); });
   const animationen = process.argv.includes('--mit-animation') && !process.argv.includes('--ohne-animation');
-  const url = 'file://' + path.join(__dirname, 'spiel.html') + `?stadt=${encodeURIComponent(stadt)}&seed=${seed}${animationen ? '' : '&ohne-animation=1'}`;
+  const url = 'file://' + path.join(__dirname, 'spiel.html') + `?stadt=${encodeURIComponent(stadt)}&seed=${seed}&leben=aus${animationen ? '' : '&ohne-animation=1'}`;
   await p.goto(url, { waitUntil: 'load', timeout: 0 });
   await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
   const bild = async (name) => {
@@ -132,6 +146,8 @@ async function buendeln() {
     const nosDanach = await ev(() => window.spiel.E.freigaben(window.spiel.s, { art: 'nos' }).anzahl);
     pruefSoll('Sammelfreigabe NOS', nosDanach === 0, `${nos} NOS-Orders freigegeben, offen ${nosDanach}`);
     await pruef('Freigaben nach Aktionen');
+    // O05 Ware: Merchandise, Allokation und Reduzierung öffnen sich und zeigen Engine-Werte.
+    for (const reiter of ['Merchandise', 'Allokation', 'Reduzierung']) { await tippe('.tab', reiter); await pruef(reiter); }
     // Eigenmarken und Gründen über den Assistenten (Vorlage Young Adults)
     await tippe('.tab', 'Eigenmarken');
     await pruef('Eigenmarken');
@@ -480,12 +496,19 @@ async function buendeln() {
     const soll = (name, ok, info) => { erg.aktionen.push({ name, ok, info }); console.log(`${ok ? 'OK ' : 'FEHLER'} ${name}: ${info}`); };
     const q = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
     q.on('pageerror', (e) => console.log('FEHLER', e.message));
-    await q.goto('file://' + path.join(__dirname, 'spiel.html'), { waitUntil: 'load', timeout: 0 });
+    await q.goto('file://' + path.join(__dirname, 'spiel.html') + '?leben=aus', { waitUntil: 'load', timeout: 0 });
     await q.waitForSelector('#start.an', { timeout: 60000 });
+    const szenarien = await q.evaluate(() => [...document.querySelectorAll('.sz-karte')].map((k) => k.querySelector('b').textContent));
+    soll('Sieben Szenarien auswählbar', szenarien.length === 7, szenarien.join(', '));
+    const niceBilder = path.join(__dirname, '..', 'bilder', 'nice', 'szenarien');
+    fs.mkdirSync(niceBilder, { recursive: true });
+    await q.screenshot({ path: path.join(niceBilder, 'szenarien-auswahl.png') });
+    await q.tap('.sz-karte[data-szenario=standard]');
     const karten = await q.evaluate(() => [...document.querySelectorAll('.stufe-karte')].map((k) => k.querySelector('b').textContent));
     soll('Startbildschirm mit drei Schwierigkeiten', karten.length === 3, karten.join(', '));
     await q.screenshot({ path: path.join(__dirname, 'out', 'start.png') });
     console.log('gespeichert:', path.join(__dirname, 'out', 'start.png'));
+    await q.screenshot({ path: path.join(niceBilder, 'szenarien-schwierigkeit.png') });
     await q.tap('.stufe-karte[data-v=schwer]');
     await q.selectOption('#startstadt', 'Karlsruhe');
     await q.tap('#startknopf');
@@ -662,7 +685,7 @@ async function buendeln() {
     pruefe(!!w.kapitalflussText && !w.kapitalflussText.includes('nicht separat erfasst') &&
       ['Cash operativ', 'Investitionen', 'Finanzierung', 'Sonstiges', 'Cash netto', 'Cash-Bestand']
         .every((x) => w.kapitalflussText.includes(x)), 'Kapitalfluss wird vollständig angezeigt');
-    pruefe((w.bericht?.meldungstexte ?? []).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche');
+    pruefe((w.bericht?.meldungstexte ?? []).slice(1).every((text) => w.zeitung?.includes(text)), 'Zeitung enthält neue Presse- und Konkurrenzmeldungen der abgeschlossenen Woche (Aufmacher aus N08)');
     await p.screenshot({ path: path.join(ordnerWoche, '99-wochenbericht.png') });
     await p.screenshot({ path: path.join(abnahme, '02-kapitalfluss.png') });
     if (w.bericht?.vorgaenge > 0) {
@@ -747,6 +770,177 @@ async function buendeln() {
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
   }
+  // N04: Browser-Abnahme mit echten UI-Handlungen. Bilder aller 14 Schritte.
+  async function einfuehrungPruefen() {
+    const ordner = path.join(__dirname, '..', 'bilder', 'nice', 'einfuehrung');
+    fs.mkdirSync(ordner, { recursive: true });
+    const fehler = [], durchlauf = [], javascriptFehler = [];
+    p.on('pageerror', (e) => javascriptFehler.push(e.message));
+    await p.evaluate(() => {
+      const spiel = window.spiel;
+      spiel.neuesSpiel(1, 'Essen');
+      // Reale Freigaben für die Abnahme aufbauen; keine Test-Orders erzeugen.
+      for (let n = 0; n < 8; n++) spiel.woche(false);
+      spiel.fokusHaeuser();
+      spiel.einfuehrung.starten(true);
+    });
+    async function schritt(n) {
+      const id = ['lage', 'karte', 'haus', 'kennzahlen', 'cockpit', 'posteingang',
+        'einkauf', 'marketing', 'vorstand', 'hq', 'insolvenz', 'woche', 'bericht', 'reise'][n - 1];
+      await p.waitForFunction((v) => window.spiel.einfuehrung.zustand().schritt === v, id, { timeout: 12000 });
+      await p.waitForTimeout(120);
+      const z = await p.evaluate(() => window.spiel.einfuehrung.zustand());
+      const name = String(n).padStart(2, '0') + '-' + id + '.png';
+      await p.screenshot({ path: path.join(ordner, name) });
+      durchlauf.push({ n, id, datei: name, index: z.index });
+    }
+    async function klick(selector) {
+      const q = p.locator(selector).first();
+      await q.waitFor({ state: 'visible', timeout: 12000 });
+      await q.click();
+      await p.waitForTimeout(100);
+    }
+    try {
+      await schritt(1); await klick('[data-ein="weiter"]');
+      await schritt(2);
+      await p.mouse.move(190, 355); await p.mouse.down();
+      await p.mouse.move(230, 385, { steps: 6 }); await p.mouse.up();
+      await p.mouse.move(190, 355); await p.mouse.wheel(0, -170);
+      await schritt(3);
+      const punkt = await p.evaluate(() => {
+        const spiel = window.spiel;
+        spiel.fokusHaeuser();
+        const haus = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen')
+          .map((h) => spiel.tippPunkt(h.id)).filter((q) => q && q.y < 620 && q.x > 30 && q.x < innerWidth - 30 && document.elementFromPoint(q.x, q.y)?.id === 'karte')
+          .sort((a, b) => Math.abs(a.x - innerWidth / 2) - Math.abs(b.x - innerWidth / 2))[0];
+        return haus;
+      });
+      if (!punkt) throw new Error('Kein antippbares Haus für Schritt 3');
+      await p.touchscreen.tap(punkt.x, punkt.y);
+      await schritt(4); await klick('[data-ein="weiter"]');
+      await schritt(5); await klick('[data-ein="weiter"]');
+      await schritt(6);
+      await klick('#pzu'); await klick('#postdirekt');
+      await schritt(7);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#einkauf');
+      await klick('#pinhalt [data-a="seite"][data-v="freigaben"]');
+      const freigaben = await p.evaluate(() => window.spiel.E.freigaben(window.spiel.s).anzahl);
+      if (freigaben) {
+        await klick('#pinhalt [data-a="frei"]');
+      } else {
+        // Keine Engine-Freigabe verfügbar: explizite UI-Alternative benutzen.
+        await klick('[data-ein="weiter"]');
+      }
+      await schritt(8);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#marketing');
+      await klick('#pinhalt [data-a="seite"][data-v="kalender"]');
+      await schritt(9);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#vorstand');
+      await schritt(10);
+      await klick('#pzu'); await klick('#menueknopf'); await klick('#hq');
+      await schritt(11); await klick('[data-ein="weiter"]');
+      await schritt(12);
+      await klick('#pzu'); await klick('#weiter'); await klick('[data-wa="ja"]');
+      await schritt(13);
+      await p.waitForSelector('#wochen-overlay .wb-bericht');
+      await klick('[data-ein="weiter"]');
+      await schritt(14);
+      for (let i = 0; i < 4 && await p.locator('#wb-vorfall .wb-vorfall').count(); i++) {
+        await p.locator('#wb-vorfall [data-wa="spaeter"]').click();
+        await p.waitForTimeout(30);
+      }
+      if (await p.locator('#wochen-overlay .wb-bericht').count()) await klick('#wochen-overlay [data-wa="schliessen"]');
+      await klick('#stadt-reise');
+      await p.waitForSelector('[data-reiseziel="Düsseldorf"]');
+      await klick('[data-reiseziel="Düsseldorf"]');
+      await p.waitForFunction(() => window.spiel.einfuehrung.zustand().modus === 'fertig', null, { timeout: 40000 });
+      const ergebnis = await p.evaluate(() => ({
+        tutorial: window.spiel.einfuehrung.zustand(),
+        stadt: window.spiel.reise.pruefe().stadt,
+        woche: window.spiel.s.woche,
+        freigaben: window.spiel.E.freigaben(window.spiel.s).anzahl,
+      }));
+      if (ergebnis.stadt !== 'Düsseldorf') fehler.push('Stadtwechsel nicht ausgeführt');
+      if (ergebnis.tutorial.modus !== 'fertig') fehler.push('Einführung nicht abgeschlossen');
+    } catch (e) {
+      fehler.push(e.message);
+    }
+    fehler.push(...javascriptFehler);
+    if (durchlauf.length !== 14) fehler.push('Bildnachweis nur ' + durchlauf.length + '/14 Schritte');
+    const protokoll = { durchlauf, fehler, aufruf: 'node spiel-render.js --nur-einfuehrung',
+      stand: 'Bilder und Protokoll nur nach tatsächlich ausgeführtem Browser-Test belastbar' };
+    fs.writeFileSync(path.join(ordner, 'pruefung.json'), JSON.stringify(protokoll, null, 2));
+    console.log('Einführung: ' + durchlauf.length + '/14 Schritte, ' + fehler.length + ' Fehler');
+    if (fehler.length) throw new Error('Einführung: ' + fehler.join('; '));
+  }
+  if (process.argv.includes('--nur-einfuehrung')) {
+    try { await einfuehrungPruefen(); } finally { await b.close(); }
+    return;
+  }
+
+  // N01: Seed 1, Bot C, 104 Wochen, Serien-Endwerte und Bildbelege.
+  async function statistikPruefen() {
+    const ziel = path.join(__dirname, '..', 'bilder', 'nice', 'statistik');
+    fs.mkdirSync(ziel, { recursive: true });
+    await p.evaluate(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); });
+    for (let i = 0; i < 104; i++) {
+      const ergebnis = await p.evaluate(() => window.spiel.woche(true));
+      if (!ergebnis) throw new Error('Bot C beendet vor Woche 104: ' + i);
+    }
+    const seiten = [['konzern','konzern'],['formate','formate'],['regionen','regionen'],['rangliste','haeuser']];
+    const bericht = { seed:1, woche:104, bilder:[], abweichungen:[], reihen:0, hausverlaeufe:0, spielstandBytes:0 };
+    const messung = await p.evaluate(() => {
+      const s = window.spiel.s;
+      const textBytes = x => new TextEncoder().encode(JSON.stringify(x)).length;
+      const voller = textBytes(s);
+      const verlaufBytes = s.haeuser.reduce((n,h)=>n+textBytes(h.verlauf??[]),0);
+      return { hauser:s.haeuser.length, voller, verlaufBytes,
+        proHaus:Math.round(verlaufBytes/Math.max(1,s.haeuser.length)),
+        bei560:Math.round(verlaufBytes/Math.max(1,s.haeuser.length)*560),
+        punkteMax:Math.max(...s.haeuser.map(h=>h.verlauf?.length??0)),
+        sparsam: s.statistik?.sparsam ?? false };
+    });
+    bericht.hausverlaeufe = messung.hauser;
+    bericht.spielstandBytes = messung.voller;
+    bericht.groesse = messung;
+    for (const [seite,datei] of seiten) {
+      await p.evaluate(v => window.spiel.oeffneStatistik(v), seite);
+      await p.waitForTimeout(150);
+      const kontrolle = await p.evaluate(() => {
+        const s=window.spiel.s, E=window.spiel.E, k=E.cockpit(s), liste=[];
+        if (window.spiel.statistik.ui.seite === 'konzern') {
+          const graphen=[...document.querySelectorAll('.stat-diagramm')];
+          for (const [i,[name,soll]] of [['Umsatz',k.umsatzWoche],['EBITDA',k.ebitdaWoche],['Cash',k.cash]].entries()) {
+            const ist=Number(graphen[i]?.dataset.stEnde);
+            if (!Number.isFinite(ist)||ist!==soll) liste.push(name+': Endpunkt '+ist+' statt '+soll);
+          }
+        }
+        return { seite:window.spiel.statistik.ui.seite, diagramme:document.querySelectorAll('.stat-diagramm').length,
+          fehler:liste.concat(window.spiel.statistik.pruefe().fehler) };
+      });
+      bericht.reihen += kontrolle.diagramme;
+      bericht.abweichungen.push(...kontrolle.fehler.map(f => seite + ': ' + f));
+      await p.screenshot({ path:path.join(ziel,datei+'.png'), fullPage:false });
+      bericht.bilder.push(datei+'.png');
+    }
+    const hausId = await p.evaluate(() => window.spiel.s.haeuser.find(h=>h.verlauf?.length && h.status === 'offen')?.id);
+    if (hausId) {
+      await p.evaluate(id=>window.spiel.oeffneHaus(id),hausId);
+      const test = await p.evaluate(() => ({
+        diagramme:document.querySelectorAll('.stat-hausdetail .stat-diagramm').length,
+        letztes:window.spiel.E.verlauf(window.spiel.s,{ebene:'haus',id:window.spiel.s.haeuser.find(h=>h.status==='offen')?.id,kennzahl:'umsatz',wochen:52}).punkte.at(-1)?.wert
+      }));
+      if(test.diagramme!==2)bericht.abweichungen.push('Hausdetail: '+test.diagramme+' Diagramme statt 2');
+      await p.screenshot({ path:path.join(ziel,'hausdetail.png') });
+      bericht.bilder.push('hausdetail.png');
+    }
+    fs.writeFileSync(path.join(ziel,'pruefung.json'),JSON.stringify(bericht,null,2));
+    console.log('N01 Statistik:',bericht.reihen+' Diagramme, '+bericht.abweichungen.length+' Abweichungen, '+messung.voller+' Spielstand-Bytes');
+    if(bericht.abweichungen.length)throw new Error('Statistik: '+bericht.abweichungen.join('; '));
+    return bericht;
+  }
+
+  if (process.argv.includes('--nur-statistik')) { try { await statistikPruefen(); } finally { await b.close(); } return; }
   // O07 Haus: Oberfläche gegen echte Engine-Abfragen prüfen und alle sieben Reiter fotografieren.
   async function hausPruefen() {
     const fehler = [];
@@ -793,6 +987,74 @@ async function buendeln() {
     try { await hausPruefen(); } finally { await b.close(); }
     return;
   }
+  // N14: Testpanel im iPhone-Viewport, 13 Wochen und Fehlerbericht-Roundtrip.
+  async function werkzeugePruefen() {
+    const ausgabe = path.join(__dirname, '..', 'bilder', 'nice', 'werkzeuge');
+    fs.mkdirSync(ausgabe, { recursive: true });
+    await p.evaluate(() => window.spiel.neuesSpiel(1, 'Essen'));
+    const zuerst = await p.evaluate(() => ({
+      verborgen: document.getElementById('werkzeuge').hidden,
+      menue: getComputedStyle(document.getElementById('werkzeuge')).display,
+      sichtbar: document.querySelector('.testwerkzeuge') !== null,
+      markiert: !!window.spiel.s.testGenutzt,
+    }));
+    if (!zuerst.verborgen || zuerst.menue !== 'none' || zuerst.sichtbar || zuerst.markiert)
+      throw new Error('Testwerkzeuge sind vor Freischaltung sichtbar: ' + JSON.stringify(zuerst));
+    await p.evaluate(() => {
+      const datum = document.querySelector('.datum');
+      for (let i = 0; i < 5; i++) datum.click();
+    });
+    const offen = await p.evaluate(() => ({
+      entsperrt: window.spiel.werkzeuge.freigeschaltet,
+      kachel: !document.getElementById('werkzeuge').hidden,
+      panel: !!document.querySelector('.testwerkzeuge'),
+    }));
+    if (!offen.entsperrt || !offen.kachel || !offen.panel)
+      throw new Error('Fünffach-Tipp hat Werkzeuge nicht geöffnet: ' + JSON.stringify(offen));
+    await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge.png') });
+    const sprung = await p.evaluate(() => window.spiel.werkzeuge.springen(13, true));
+    const snapshot = await p.evaluate(() => ({
+      woche: window.spiel.s.woche, cash: window.spiel.s.cash,
+      test: window.spiel.s.testGenutzt, label: document.getElementById('phase').textContent,
+    }));
+    if (sprung.fertig !== 13 || snapshot.woche !== 13 || !snapshot.test || !snapshot.label.includes('Testspiel'))
+      throw new Error('Zeitsprung nicht korrekt: ' + JSON.stringify({ sprung, snapshot }));
+    await p.evaluate(() => console.error('N14 Fehlerprobe'));
+    const fehlerpunkt = await p.evaluate(() => document.querySelector('.datum').classList.contains('testfehler'));
+    if (!fehlerpunkt) throw new Error('Fehlerpunkt nach Konsolenfehler fehlt.');
+    const bericht = await p.evaluate(() => window.spiel.werkzeuge.erstelleBericht());
+    if (!bericht.startsWith('RUHRKAUF-TEST-1:gzip:')) throw new Error('Fehlerbericht nicht gzip/Base64.');
+    const archiv = await p.evaluate(async (b) => {
+      const roh = atob(b.slice('RUHRKAUF-TEST-1:gzip:'.length));
+      const bytes = Uint8Array.from(roh, (c) => c.charCodeAt(0));
+      const text = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+      const daten = JSON.parse(text);
+      return {
+        woche: daten.woche, cash: daten.spiel.cash, seed: daten.seed,
+        fehler: daten.fehler.some((e) => e.text.includes('N14 Fehlerprobe')),
+        userAgent: !!daten.userAgent, version: daten.version,
+      };
+    }, bericht);
+    if (!archiv.fehler || !archiv.userAgent || archiv.version !== 1 || archiv.woche !== 13 || archiv.cash !== snapshot.cash)
+      throw new Error('Komprimierter Fehlerbericht unvollständig: ' + JSON.stringify(archiv));
+    await p.evaluate(() => window.spiel.neuesSpiel(3, 'Essen'));
+    const wieder = await p.evaluate((b) => window.spiel.werkzeuge.berichtLaden(b), bericht);
+    if (wieder.woche !== snapshot.woche || wieder.cash !== snapshot.cash || wieder.seed !== 1)
+      throw new Error('Fehlerbericht verändert Spielstand: ' + JSON.stringify({ snapshot, wieder }));
+    await p.screenshot({ path: path.join(ausgabe, 'testwerkzeuge-geladen.png') });
+    await p.goto(url + '&werkzeuge=1', { waitUntil: 'load', timeout: 0 });
+    await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
+    const urlFreischaltung = await p.evaluate(() => ({
+      entsperrt: window.spiel.werkzeuge.freigeschaltet,
+      geoeffnet: !!document.querySelector('.testwerkzeuge'),
+    }));
+    if (!urlFreischaltung.entsperrt || !urlFreischaltung.geoeffnet)
+      throw new Error('URL-Freischaltung fehlgeschlagen: ' + JSON.stringify(urlFreischaltung));
+    fs.writeFileSync(path.join(ausgabe, 'pruefung.json'), JSON.stringify({ zuerst, offen, sprung, snapshot, wieder, archiv, urlFreischaltung, berichtZeichen: bericht.length }, null, 2));
+    console.log('N14 Testwerkzeuge: beide Freischaltungen, 13 Wochen, gzip-Bericht und Wiederherstellung identisch.');
+    return { sprung, snapshot, wieder, urlFreischaltung };
+  }
+  if (process.argv.includes('--nur-werkzeuge')) { try { await werkzeugePruefen(); } finally { await b.close(); } return; }
   if (process.argv.includes('--nur-wettbewerber')) {
     try { await wettbewerberPruefen(); } finally { await b.close(); }
     return;
@@ -873,6 +1135,7 @@ async function buendeln() {
   const pn = await panelsPruefen();
   await posteingangPruefen();
   const kt = await kartePruefen();
+  await statistikPruefen();
   const messung = await p.evaluate(() => window.spiel.messung);
   const teile = await p.evaluate(() => window.spiel.teileStand());
   const engine = wochen.map((m) => m.engineMs), neu = wochen.filter((m) => m.neu.length).map((m) => m.neuBauMs);
