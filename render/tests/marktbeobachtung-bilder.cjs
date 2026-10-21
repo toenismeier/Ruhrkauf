@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { chromium } = require('playwright');
+require('./handelsbote-motive.cjs'); // Alle in der Engine bekannten Artikelarten haben eigene Illustrationen.
 
 (async () => {
   const root = path.resolve(__dirname, '..');
@@ -29,6 +30,18 @@ const { chromium } = require('playwright');
       return window.spiel.s.woche;
     }, woche);
     const bild = async (datei) => {
+      if (!datei.includes('archiv')) {
+        const status = await page.evaluate(() => ({
+          artikel: document.querySelectorAll('.zb-artikel').length,
+          illustrationen: document.querySelectorAll('.zb-artikel .zb-isobild[role="img"]').length,
+          ohneTitel: [...document.querySelectorAll('.zb-artikel .zb-isobild')].filter((x) => !x.getAttribute('aria-label') || !x.querySelector('title')).length,
+          reiter: [...document.querySelectorAll('.zb-tabs [role="tab"]')].map((x) => x.textContent.trim()),
+        }));
+        if (!status.artikel || status.artikel !== status.illustrationen || status.ohneTitel ||
+          status.reiter.join('/') !== 'Top/Handel/Wirtschaft/Markt/Politik/Region') {
+          throw new Error('Q18-Bilderprüfung ' + datei + ': ' + JSON.stringify(status));
+        }
+      }
       await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
       // CI-Runner rendern die Stadt nach 49 Wochen langsamer; Bildschirmfoto mit großzügigem Zeitlimit.
       await page.screenshot({ path: path.join(bilder, datei), timeout: 120000 });
@@ -58,6 +71,7 @@ const { chromium } = require('playwright');
     await page.locator('[data-z-a="archiv"]').click();
     await bild('04-archiv.png');
     if (fehler.length) throw new Error('Browserfehler: ' + fehler.join('; '));
+    console.log('marktbeobachtung:bilder grün – drei Ausgaben und Archiv, alle sichtbaren Artikel bebildert.');
   } finally {
     await browser.close();
   }
