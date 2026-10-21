@@ -13,7 +13,7 @@ describe('Q20 Schwierigkeit je Startszenario', () => {
     for (const s of gewertet) {
       expect(schwierigkeitenFuerSzenario(s.id).map((x) => x.id)).toEqual(SCHWIERIGKEITEN.map((x) => x.id));
       for (const stufe of SCHWIERIGKEITEN) {
-        expect(SZENARIO_STUFENTEXTE[s.id][stufe.id].length).toBeGreaterThan(55);
+        expect(SZENARIO_STUFENTEXTE[s.id as keyof typeof SZENARIO_STUFENTEXTE][stufe.id].length).toBeGreaterThan(55);
       }
     }
     expect(schwierigkeitenFuerSzenario('sandkasten')).toEqual([]);
@@ -36,7 +36,7 @@ describe('Q20 Schwierigkeit je Startszenario', () => {
       expect(s.insolvenz?.versammlung).toBe(12);
       // Gleiche Planbasis für alle Stufen: nur der Sonderbonus kippt das Votum.
       s.prognose = true;
-      s.cash = 1_000_000_000;
+      s.cash = 1_000_000_000_000;
       s.stakeholder.bank = 32;
       s.stakeholder.kreditversicherer = 32;
       s.stakeholder.vermieter = 32;
