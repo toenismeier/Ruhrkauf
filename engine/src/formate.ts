@@ -19,6 +19,8 @@ export interface FormatBuchung {
 }
 export interface FormateWoche { buchungen: FormatBuchung[]; warenZukauf: number; abschriften: number; marketing: number; zentrale: number }
 
+/** Wareneinsatzquote Volkskauf (Kalibrierung Abschnitt 6: EBITDA rund −3 %). */
+const VK_EK=0.563;
 const qm = (h: Haus) => h.flaechen.filter(f=>f.konzept!=='leer'&&f.konzept!=='untermiete').reduce((n,f)=>n+f.qm,0);
 const basis = (h: Haus):number => Object.entries(h.potenzial).reduce((n,[g,p])=>{
   const fl=h.flaechen.filter(f=>f.gruppe===g).reduce((a,f)=>a+f.qm,0);
@@ -60,7 +62,7 @@ export function initialisiereFormate(s:GameState):void{
   const budget=eur(outletUmsatz*0.65/1.7);
   s.einkauf.offpriceZukauf??=budget;s.einkauf.altwareOutlet??=0.5;
   s.formate={pool:[{quelle:'markenposten',wert:budget*7,preisFaktor:1.7,alter:1}],
-    volkskaufBestand:eur(volksUmsatz*0.55*8),projekte:[],
+    volkskaufBestand:eur(volksUmsatz*VK_EK*8),projekte:[],
     naechsteOutletId:1+Math.max(66,...out.map(h=>Number(h.id.slice(1))||0)),
     altwareEingang:0,zukaufWoche:0,umsatzWoche:0,abverkaufWoche:0,abschriftenWoche:0,
     schwesterZentraleWoche:eur(volksUmsatz*0.004)};
@@ -142,7 +144,7 @@ export function formateWoche(s:GameState):FormateWoche{
   const volks=aktive.filter(h=>h.format==='schwester');
   const budget=out.length?Math.max(0,eur(s.einkauf.offpriceZukauf??0)):0;
   const stufe=s.hq.abteilungen.find(a=>a.id==='einkauf')?.stufe??0;
-  const preisFaktor=clamp(0.58+stufe*0.02,0.5,0.7)/clamp(0.37-stufe*0.013,0.3,0.4);
+  const preisFaktor=clamp(0.56+stufe*0.02,0.5,0.7)/clamp(0.378-stufe*0.013,0.3,0.4);
   if(budget)f.pool.push({quelle:'markenposten',wert:budget,preisFaktor,alter:0});
   f.zukaufWoche=budget;
   let abschriften=0;
@@ -157,14 +159,14 @@ export function formateWoche(s:GameState):FormateWoche{
     return {haus,nachfrage:normal*(bau?0.55:1)};
   });
   const volksNachfrage=nachfrage.filter(x=>x.haus.format==='schwester').reduce((n,x)=>n+x.nachfrage,0);
-  const warenVerfuegbar=Math.min(1,f.volkskaufBestand/Math.max(1,volksNachfrage*0.55));
+  const warenVerfuegbar=Math.min(1,f.volkskaufBestand/Math.max(1,volksNachfrage*VK_EK));
   let warenZukauf=budget;
   const buchungen:FormatBuchung[]=[];
   f.abverkaufWoche=0;
   for(const {haus,nachfrage:n} of nachfrage){
     let umsatz=0,ek=0;
     if(haus.format==='schwester'){
-      umsatz=n*warenVerfuegbar;ek=umsatz*0.55;f.volkskaufBestand-=ek;
+      umsatz=n*warenVerfuegbar;ek=umsatz*VK_EK;f.volkskaufBestand-=ek;
     }else{
       const marke=verkauf(f.pool,'markenposten',n*0.79);
       const alt=verkauf(f.pool,'altware',n*0.21);
@@ -193,7 +195,7 @@ export function formateWoche(s:GameState):FormateWoche{
     guvAbschluss(guv);kpi.guv=guv;kpi.db=guv.ebitda;haus.kpi=kpi;
     buchungen.push({haus,kpi,guv,kosten,neben});
   }
-  const vkZukauf=eur(Math.max(0,volksNachfrage*0.55*6-f.volkskaufBestand));
+  const vkZukauf=eur(Math.max(0,volksNachfrage*VK_EK*6-f.volkskaufBestand));
   f.volkskaufBestand+=vkZukauf;warenZukauf+=vkZukauf;
   f.pool=f.pool.filter(p=>p.wert>1);f.abschriftenWoche=eur(abschriften);
   f.umsatzWoche=eur(buchungen.filter(b=>b.haus.format==='outlet').reduce((n,b)=>n+b.kpi.umsatz,0));
