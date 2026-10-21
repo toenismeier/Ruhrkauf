@@ -49,6 +49,7 @@ export function produkteModul(ctx) {
     const st = s(), L = E.produkte(st), M = aktuelleMarke(L);
     let h = '';
     if (!M) return { titel: 'Produktentwicklung', unter: '', html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gründest du im Einkauf.</div>' };
+    h += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
     h += markenwahl(L);
     h += `<div class="raster">${kz('Team Produktentwicklung', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
     const kats = M.kategorien.filter((k) => k.kapazitaet > 0 || k.belegt > 0);
@@ -166,6 +167,7 @@ export function produkteModul(ctx) {
     const a = el.dataset.a, v = el.dataset.v, st = s();
     const karte = (id) => E.produkte(st).marken.flatMap((m) => m.produkte).find((p) => p.id === id);
     switch (a) {
+      case 'eigenmarkeGruenden': return ctx.neueEigenmarke?.();
       case 'marke': ui.marke = v; ui.k = 0; ui.kategorie = null; if (ui.neu) ui.neu = neuerEntwurf(); return zeigen(true);
       case 'kategorie': ui.kategorie = v; ui.k = 0; ui.auslisten = null; return zeigen(true);
       case 'pkarte': ui.k = Number(v); ui.auslisten = null; return zeigen(true);

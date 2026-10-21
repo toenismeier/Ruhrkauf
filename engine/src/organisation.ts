@@ -8,6 +8,7 @@ import { VORNAMEN, NACHNAMEN } from './daten';
 import { clamp, eur } from './util';
 import { einmalKosten } from './prozesse';
 import { itDeckel } from './it';
+import { fuehreAus, type SpielerAktion } from './aktionen';
 
 export type BereichId = string;
 export interface Bereich { id: BereichId; name: string; ressort: RessortId; abteilung: AbteilungId; beschreibung: string }
@@ -55,11 +56,58 @@ export const ALTE_DELEGATIONEN: Record<string, BereichId> = {
   'cro.schliessungen':'immobilien', 'cro.mietverhandlungen':'immobilien',
   'cdo.onlinesortiment':'ecommerce',
 };
+/** Aufgabenbezogene Delegation. Legacy-Schalter gelten für alle Aufgaben ohne eigenen Override. */
+export interface DelegationsAufgabe { id: string; name: string; grenze?: number }
+const task = (id: string, name: string, grenze?: number): DelegationsAufgabe => ({ id, name, ...(grenze ? { grenze } : {}) });
+const ALLGEMEIN = [task('planung', 'Planung und Prioritäten'), task('freigaben', 'Routinefreigaben', 50000)] as const;
+const AUFGABEN_NACH_BEREICH: Record<string, DelegationsAufgabe[]> = {
+  einkauf_damen: [task('nachorder', 'Nachorder'), task('limits', 'Sortimentslimits', 50000), task('reduzierung', 'Reduzierungen'), task('altware', 'Altwarenabgabe an FUNDUS', 20000)],
+  einkauf_herren_kinder: [task('nachorder', 'Nachorder'), task('limits', 'Sortimentslimits', 50000), task('reduzierung', 'Reduzierungen'), task('altware', 'Altwarenabgabe an FUNDUS', 20000)],
+  einkauf_beauty: [task('nachorder', 'Nachorder'), task('limits', 'Sortimentslimits', 50000), task('reduzierung', 'Reduzierungen'), task('altware', 'Altwarenabgabe an FUNDUS', 20000)],
+  einkauf_wohnen: [task('nachorder', 'Nachorder'), task('limits', 'Sortimentslimits', 50000), task('reduzierung', 'Reduzierungen'), task('altware', 'Altwarenabgabe an FUNDUS', 20000)],
+  einkauf_food: [task('nachorder', 'Nachorder'), task('limits', 'Sortimentslimits', 50000), task('reduzierung', 'Reduzierungen'), task('altware', 'Altwarenabgabe an FUNDUS', 20000)],
+  merchandise_planning: [task('limits', 'Open-to-Buy-Limits', 50000), task('vororder', 'Saison-Vororder', 50000), task('freigaben', 'Bestellfreigaben', 50000)],
+  allokation: [task('nachorder', 'Nachorder'), task('disposition', 'NOS-Disposition'), task('umlagerung', 'Warenumlagerungen', 20000)],
+  preis_reduzierung: [task('reduzierung', 'Reduzierungen'), task('altware', 'Altwarenabgabe an FUNDUS', 20000), task('preise', 'Preispflege')],
+  eigenmarken: [task('produkte', 'Produktentwicklung', 50000), task('positionierung', 'Markenpositionierung', 100000), task('sortiment', 'Sortiment und Auslistung')],
+  personaleinsatz: [task('einsatz', 'Einsatzplanung'), task('aushilfen', 'Aushilfen', 10000), task('schicht', 'Schichtänderungen')],
+  recruiting: [task('einstellung', 'Einstellungen', 50000), task('angebote', 'Kandidatenangebote', 10000)],
+  arbeitsbeziehungen: [task('verhandlung', 'Betriebsratsverhandlungen'), task('vereinbarung', 'Betriebsvereinbarungen', 100000)],
+  marketing: [task('aktionen', 'Aktionen', 100000), task('mailings', 'Mailings', 50000), task('budget', 'Kanalbudget', 50000)],
+  crm: [task('mailings', 'CRM-Mailings', 50000), task('segment', 'Kundensegmente'), task('karte', 'Kundenkarte und App', 50000)],
+  store_operations: [task('oeffnungszeiten', 'Öffnungszeiten'), task('sofortmassnahmen', 'Ad-hoc-Maßnahmen', 20000), task('reparaturen', 'Reparaturen', 10000)],
+  facility: [task('reparaturen', 'Reparaturen', 10000), task('wartung', 'Wartung', 50000), task('energie', 'Energieplanung')],
+};
+export const CLUSTER_AUFGABEN: DelegationsAufgabe[] = [
+  task('oeffnungszeiten', 'Öffnungszeiten'), task('sofortmassnahmen', 'Ad-hoc-Maßnahmen', 20000),
+  task('reparaturen', 'Reparaturen', 10000), task('aushilfen', 'Aushilfen', 10000),
+  task('einsatz', 'Personaleinsatzplanung'),
+];
+export function delegationsAufgaben(bereich?: BereichId, hauscluster?: string): DelegationsAufgabe[] {
+  if (hauscluster) return CLUSTER_AUFGABEN;
+  if (!bereich || !BEREICHE.some((b) => b.id === bereich)) return [];
+  return AUFGABEN_NACH_BEREICH[bereich] ?? ALLGEMEIN.slice();
+}
+/** Bestehende Ressort-KI auf die passende Einzelfreigabe synchronisieren. */
+const RESSORT_TASK: Record<string, string> = {
+  'cpo.freigaben':'freigaben', 'cpo.dispo':'disposition', 'cpo.produktentwicklung':'produkte',
+  'cmo.aktionskalender':'aktionen', 'cmo.crm':'mailings', 'cmo.kanalbudget':'budget',
+  'chro.personalplanung':'einsatz', 'chro.betriebsrat':'verhandlung',
+  'cdo.onlinesortiment':'planung', 'cso.filialbesetzung':'planung',
+  'coo.personalbedarf':'einsatz', 'coo.filialpersonal':'einsatz',
+  'cro.mietverhandlungen':'verhandlung', 'cro.schliessungen':'planung',
+  'cfo.zahlungsplanung':'planung', 'cfo.bank':'planung',
+};
 export interface OrgPerson {
   id: string; name: string; portraet: Portraet; qualitaet: number; gehalt: number;
   stimmung: number; wechselwille: number;
 }
-export interface Stelle { person?: OrgPerson; kandidaten: OrgPerson[]; delegiert: boolean; basis: number }
+export interface Stelle {
+  person?: OrgPerson; kandidaten: OrgPerson[]; delegiert: boolean; basis: number;
+  /** Optional, damit ältere Spielstände und Sammeldelegation kompatibel bleiben. */
+  aufgaben?: Record<string, boolean>;
+  grenzen?: Record<string, number>;
+}
 export interface Hauscluster {
   id: string; name: string; region?: Region; hausIds: string[]; sonder: boolean;
   stelle: Stelle;
@@ -80,16 +128,17 @@ export interface OrganisationsStand {
 export interface VorlageEingabe {
   titel: string; text: string; bereich?: BereichId; hauscluster?: string; frist?: number;
   optionen?: { id: string; label: string }[]; standard?: string; grundsaetzlich?: boolean;
-  aktion?: OrganisationAktion;
+  aktion?: SpielerAktion; fehlerAktion?: SpielerAktion; aufgabe?: string; betrag?: number;
 }
 export type OrganisationAktion =
   | { typ: 'flagship'; haus: string; an: boolean }
-  | { typ: 'delegation'; bereich?: BereichId; hauscluster?: string; an: boolean }
+  | { typ: 'delegation'; bereich?: BereichId; hauscluster?: string; aufgabe?: string; an: boolean }
+  | { typ: 'delegationGrenze'; bereich?: BereichId; hauscluster?: string; aufgabe: string; betrag: number }
   | { typ: 'organisationBesetzen'; ebene: 'bereich' | 'cluster' | 'region'; id: string; kandidat: string }
   | { typ: 'organisationEntlassen'; ebene: 'bereich' | 'cluster' | 'region'; id: string }
   | { typ: 'organisationHaltepraemie'; ebene: 'bereich' | 'cluster' | 'region'; id: string; betrag: number }
   | { typ: 'organisationBefoerdern'; haus: string; hauscluster: string };
-export const ORGANISATION_AKTIONEN = new Set<string>(['flagship','delegation','organisationBesetzen','organisationEntlassen','organisationHaltepraemie','organisationBefoerdern']);
+export const ORGANISATION_AKTIONEN = new Set<string>(['flagship','delegation','delegationGrenze','organisationBesetzen','organisationEntlassen','organisationHaltepraemie','organisationBefoerdern']);
 const REGIONEN: Region[] = ['Nord','Ost','West','Mitte','Süd'];
 const hash = (str: string): number => [...str].reduce((v, c) => Math.imul(v, 31) + c.charCodeAt(0) >>> 0, 2166136261);
 const mix = (seed: number, text: string) => hash(seed + ':' + text);
@@ -214,6 +263,17 @@ export function istDelegiert(s: GameState, id: BereichId): boolean {
       return neu === id && !!s.vorstand?.ressorts[ressort]?.delegation[delegationsId];
     });
 }
+/** Aufgabenoverride vor Sammeldelegation; vakante Leitung kann nicht selbst entscheiden. */
+export function istAufgabeDelegiert(s: GameState, aufgabe: string, bereich?: BereichId, hauscluster?: string): boolean {
+  const st = bereich ? s.organisation?.bereiche[bereich] : s.organisation?.hauscluster.find((c) => c.id === hauscluster)?.stelle;
+  if (!st || !st.person || !delegationsAufgaben(bereich, hauscluster).some((a) => a.id === aufgabe)) return false;
+  return st.aufgaben?.[aufgabe] ?? (bereich ? istDelegiert(s, bereich) : !!st.delegiert);
+}
+export function delegationsGrenze(s: GameState, aufgabe: string, bereich?: BereichId, hauscluster?: string): number | undefined {
+  const def = delegationsAufgaben(bereich, hauscluster).find((x) => x.id === aufgabe);
+  const st = bereich ? s.organisation?.bereiche[bereich] : s.organisation?.hauscluster.find((x) => x.id === hauscluster)?.stelle;
+  return def?.grenze ? (st?.grenzen?.[aufgabe] ?? def.grenze) : undefined;
+}
 export function bereichsQualitaet(s: GameState, id: BereichId): number {
   const def = BEREICHE.find((x) => x.id === id), st = s.organisation?.bereiche[id];
   if (!def || !st) return 0;
@@ -236,23 +296,38 @@ export function neueVorlage(s: GameState, v: VorlageEingabe): void {
   const bereich = v.bereich ? BEREICHE.find((b) => b.id === v.bereich) : undefined;
   const cluster = v.hauscluster ? s.organisation.hauscluster.find((c) => c.id === v.hauscluster) : undefined;
   const chef = bereich ? berichtetAn(s, bereich.id) : cluster ? clusterBerichtetAn(s, cluster.id) : 'spieler';
-  const delegiert = bereich ? istDelegiert(s, bereich.id) : !!cluster?.stelle.delegiert;
-  // Routine entscheidet die delegierte Führung. Grundsätzliches und unbesetzte Linien gehen an den CEO.
-  if (chef !== 'spieler' && delegiert && !v.grundsaetzlich) return;
+  const delegiert = v.aufgabe
+    ? istAufgabeDelegiert(s, v.aufgabe, bereich?.id, cluster?.id)
+    : bereich ? istDelegiert(s, bereich.id) : !!cluster?.stelle.delegiert;
+  const grenze = v.aufgabe ? delegationsGrenze(s, v.aufgabe, bereich?.id, cluster?.id) : undefined;
+  const innerhalbGrenze = grenze === undefined || (v.betrag !== undefined && v.betrag <= grenze);
+  // Die Leitung entscheidet innerhalb ihrer Befugnis. Ihr Qualitätswert bestimmt,
+  // ob sie einen sinnvollen Vorschlag übernimmt; keine Änderung am globalen RNG.
+  if (chef !== 'spieler' && delegiert && !v.grundsaetzlich && innerhalbGrenze) {
+    if (v.aktion) {
+      const guete = bereich ? bereichsQualitaet(s, bereich.id) : clusterleitungQualitaet(s, cluster!.id);
+      const schwelle = (mix(s.seed, (v.aufgabe ?? v.titel) + ':' + s.woche) % 1000) / 1000;
+      const richtig = schwelle < 0.3 + 0.65 * guete;
+      // Schlecht besetzte Leitungen treffen gelegentlich ausdrücklich falsche Entscheidungen.
+      const aktion = richtig ? v.aktion : (v.fehlerAktion ?? v.aktion);
+      fuehreAus(s, aktion);
+    }
+    return;
+  }
   const prefix = bereich?.name ?? cluster?.name ?? 'Organisation';
   s.entscheidungen.push({
     id: 'org-v-' + (++s.organisation.zaehler), typ: 'organisation_vorlage', woche: s.woche,
     frist: s.woche + (v.frist ?? 3), titel: v.titel, text: prefix + ': ' + v.text,
     optionen: v.optionen ?? [{ id:'vorschlag', label:'Vorschlag der Leitung übernehmen' },{ id:'ablehnen',label:'Ablehnen' }],
     standard: v.standard ?? 'vorschlag',
-    daten: { bereich: bereich?.id ?? '', hauscluster: cluster?.id ?? '', absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : '' },
+    daten: { bereich: bereich?.id ?? '', hauscluster: cluster?.id ?? '', aufgabe: v.aufgabe ?? '', absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : '' },
   });
 }
 export function organisationVorlageEntscheidung(s: GameState, e: Entscheidung, option: string): void {
   // Fristablauf nutzt denselben Leitungsvorschlag wie die manuelle Freigabe.
   if (option !== 'vorschlag' || typeof e.daten.aktion !== 'string' || !e.daten.aktion) return;
-  const a = JSON.parse(e.daten.aktion) as OrganisationAktion;
-  organisationAktion(s,a);
+  const a = JSON.parse(e.daten.aktion) as SpielerAktion;
+  fuehreAus(s,a);
 }
 function stelleFuer(s: GameState, ebene: 'bereich'|'cluster'|'region', id: string): Stelle | undefined {
   if (ebene === 'bereich') return s.organisation?.bereiche[id];
@@ -277,17 +352,40 @@ export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: b
     o.unruhe[h.id] = { bis:s.woche+8, moral:10 };
     return { ok:true,text:a.an ? 'Flagship zugeordnet: acht Wochen Unruhe.' : 'Flagship wieder regional zugeordnet: acht Wochen Unruhe.' };
   }
-  if (a.typ === 'delegation') {
-    if (a.bereich && o.bereiche[a.bereich]) {
-      o.bereiche[a.bereich].delegiert = a.an;
-      for(const [alt,neu] of Object.entries(ALTE_DELEGATIONEN)) if(neu===a.bereich){
-        const [r,id]=alt.split('.') as [RessortId,string];
-        if(s.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d)=>d.id===id)) s.vorstand.ressorts[r].delegation[id]=a.an;
+  if (a.typ === 'delegation' || a.typ === 'delegationGrenze') {
+    const st = a.bereich ? o.bereiche[a.bereich] : o.hauscluster.find((c) => c.id === a.hauscluster)?.stelle;
+    if (!st) return { ok: false, text: 'Bereich oder Hauscluster nicht gefunden.' };
+    if (a.typ === 'delegationGrenze') {
+      const def = delegationsAufgaben(a.bereich, a.hauscluster).find((t) => t.id === a.aufgabe);
+      if (!def?.grenze || !Number.isFinite(a.betrag) || a.betrag < 0 || a.betrag > 100_000_000)
+        return { ok: false, text: 'Ungültige Betragsgrenze oder Aufgabe.' };
+      (st.grenzen ??= {})[a.aufgabe] = eur(a.betrag);
+      return { ok: true, text: 'Betragsgrenze geändert.' };
+    }
+    if (a.aufgabe !== undefined) {
+      if (!delegationsAufgaben(a.bereich, a.hauscluster).some((t) => t.id === a.aufgabe))
+        return { ok: false, text: 'Aufgabe in diesem Bereich nicht vorhanden.' };
+      if (a.an && !st.person) return { ok: false, text: 'Ohne Leitung keine Delegation möglich.' };
+      (st.aufgaben ??= {})[a.aufgabe] = a.an;
+      // Synchronisiert alte KI-Handler, damit ein einzelnes Nein nicht durch eine
+      // zuvor aktivierte Vorstandsdelegation übersteuert wird.
+      if (a.bereich) for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) {
+        if (neu !== a.bereich || RESSORT_TASK[alt] !== a.aufgabe) continue;
+        const [r, id] = alt.split('.') as [RessortId, string];
+        if (s.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d) => d.id === id))
+          s.vorstand.ressorts[r].delegation[id] = a.an;
       }
-      return { ok:true,text:'Bereichsdelegation geändert.' }; }
-    const cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
-    if (cluster) { cluster.stelle.delegiert = a.an; return { ok:true,text:'Clusterdelegation geändert.' }; }
-    return { ok:false,text:'Bereich oder Hauscluster nicht gefunden.' };
+      return { ok: true, text: 'Aufgabe ' + a.aufgabe + (a.an ? ' delegiert.' : ' zur Entscheidung vorgelegt.') };
+    }
+    // Altaktion: ja/nein setzt weiterhin ausnahmslos alle Aufgaben.
+    st.delegiert = a.an;
+    st.aufgaben = {};
+    if (a.bereich) for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) if (neu === a.bereich) {
+      const [r, id] = alt.split('.') as [RessortId, string];
+      if (s.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d) => d.id === id))
+        s.vorstand.ressorts[r].delegation[id] = a.an;
+    }
+    return { ok: true, text: a.bereich ? 'Bereichsdelegation geändert.' : 'Clusterdelegation geändert.' };
   }
   if (a.typ === 'organisationBefoerdern') {
     const h = s.haeuser.find((x) => x.id === a.haus), cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
@@ -319,6 +417,42 @@ export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: b
   st.kandidaten = [1,2,3].map((n) => person(s.seed,a.id + '-' + (s.woche+1),n));
   return { ok:true,text:k.name + ' übernimmt die Leitung.' };
 }
+/** Wirksame Routinevorschläge. Ohne angepasste Delegation bleibt das Startspiel identisch.
+ * Bereichsleitungen verwenden reale Engine-Aktionen und die bestehende Freigabelogik. */
+function routineVorschlag(bereich: string | undefined, aufgabe: string): { gut: SpielerAktion; schlecht: SpielerAktion } | undefined {
+  const wg: Record<string, string> = {
+    einkauf_damen:'damen', einkauf_herren_kinder:'herren', einkauf_beauty:'beauty',
+    einkauf_wohnen:'wohnen', einkauf_food:'nug', merchandise_planning:'alle',
+    allokation:'alle', preis_reduzierung:'alle',
+  };
+  const gruppe = bereich && wg[bereich];
+  if (gruppe) {
+    if (aufgabe === 'limits') return {
+      gut:{typ:'wgLimit',wg:gruppe,faktor:1.05}, schlecht:{typ:'wgLimit',wg:gruppe,faktor:0.8},
+    };
+    if (aufgabe === 'reduzierung') return {
+      gut:{typ:'wgReduzierung',wg:gruppe,strategie:'normal'},
+      schlecht:{typ:'wgReduzierung',wg:gruppe,strategie:'spaet'},
+    };
+    if (aufgabe === 'nachorder' || aufgabe === 'disposition') return {
+      gut:{typ:'wgServicegrad',wg:gruppe,ziel:0.98},
+      schlecht:{typ:'wgServicegrad',wg:gruppe,ziel:0.9},
+    };
+    if (aufgabe === 'vororder') return {
+      gut:{typ:'wgVororderquote',wg:gruppe,quote:0.6},
+      schlecht:{typ:'wgVororderquote',wg:gruppe,quote:0.25},
+    };
+    if (aufgabe === 'freigaben') return {
+      gut:{typ:'sammelfreigabe'},
+      schlecht:{typ:'freigabeGrenze',euro:0},
+    };
+  }
+  if (bereich === 'marketing' && aufgabe === 'budget') return {
+    gut:{typ:'kanalBudget',kanal:'alle',faktor:1.02},
+    schlecht:{typ:'kanalBudget',kanal:'alle',faktor:0.8},
+  };
+  return undefined;
+}
 /** Nur auf explizite Wechsel reagieren: kein neuer Posteingang und kein Kostenimpuls im Standard. */
 export function organisationWoche(s: GameState): void {
   const o = s.organisation;
@@ -328,6 +462,25 @@ export function organisationWoche(s: GameState): void {
       const h = s.haeuser.find((x) => x.id === hausId);
       if (h) h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral + unruhe.moral,0,100);
       delete o.unruhe[hausId];
+    }
+  }
+  // Aktiv konfigurierte Aufgaben bringen alle vier Wochen eine Routineentscheidung.
+  // Unberührte ältere Spielstände erzeugen keine zusätzlichen Vorlagen (Kalibrierung).
+  if (s.woche > 0 && s.woche % 4 === 0) {
+    const einheiten = [
+      ...Object.entries(o.bereiche).map(([id, st]) => ({ st, bereich: id, hauscluster: undefined as string | undefined })),
+      ...o.hauscluster.map((c) => ({ st: c.stelle, bereich: undefined as string | undefined, hauscluster: c.id })),
+    ];
+    for (const x of einheiten) for (const aufgabe of Object.keys(x.st.aufgaben ?? {})) {
+      const def = delegationsAufgaben(x.bereich, x.hauscluster).find((d) => d.id === aufgabe);
+      if (!def) continue;
+      const vorschlag = routineVorschlag(x.bereich, aufgabe);
+      neueVorlage(s, { bereich: x.bereich, hauscluster: x.hauscluster, aufgabe,
+        aktion:vorschlag?.gut, fehlerAktion:vorschlag?.schlecht,
+        betrag: def.grenze ? Math.min(def.grenze, delegationsGrenze(s, aufgabe, x.bereich, x.hauscluster) ?? def.grenze) : undefined,
+        titel: def.name + ': Routineentscheidung KW ' + (s.woche + 1),
+        text: 'Die zuständige Leitung legt ihre Entscheidung zu ' + def.name + ' vor.',
+        frist: 3 });
     }
   }
   // Neue freie Leitungsstellen erzeugen genau einmal einen befristeten Kandidatenvorschlag.
@@ -374,6 +527,7 @@ export function organisationUebersicht(s: GameState) {
   return {
     bereiche:BEREICHE.map((b) => ({ ...b, stelle:o?.bereiche[b.id], qualitaet:bereichsQualitaet(s,b.id),
       berichtetAn:berichtetAn(s,b.id), delegiert:istDelegiert(s,b.id),
+      aufgaben: delegationsAufgaben(b.id).map((d) => ({ ...d, an: istAufgabeDelegiert(s,d.id,b.id), grenze: delegationsGrenze(s,d.id,b.id) })),
       hqStufe:s.hq.abteilungen.find((a)=>a.id===b.abteilung)?.stufe??0,
       offen:s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.daten.bereich===b.id).length })),
     ressorts:Object.keys(RESSORT_INFO).filter((r)=>r!=='cro').map((r)=>({ id:r,
@@ -382,8 +536,9 @@ export function organisationUebersicht(s: GameState) {
       cluster:(o?.hauscluster.filter((c)=>c.region===r)??[]).map((c)=>({ ...c,
         anzahl:c.hausIds.length, umsatz:c.hausIds.reduce((a,id)=>a+(s.haeuser.find((h)=>h.id===id)?.kpi?.umsatz??0),0),
         qualitaet:clusterleitungQualitaet(s,c.id), berichtetAn:clusterBerichtetAn(s,c.id),
+        aufgaben: delegationsAufgaben(undefined,c.id).map((d)=>({ ...d, an:istAufgabeDelegiert(s,d.id,undefined,c.id), grenze:delegationsGrenze(s,d.id,undefined,c.id) })),
         offen:s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.daten.hauscluster===c.id).length })) })),
-    sonder:o?.hauscluster.find((c)=>c.sonder),
+    sonder:(()=>{const c=o?.hauscluster.find((c)=>c.sonder);return c ? { ...c, aufgaben:delegationsAufgaben(undefined,c.id).map((d)=>({ ...d,an:istAufgabeDelegiert(s,d.id,undefined,c.id),grenze:delegationsGrenze(s,d.id,undefined,c.id) })) } : undefined})(),
     flagships:o?.flagships??[],
   };
 }
