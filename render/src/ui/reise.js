@@ -114,7 +114,7 @@ export function reiseModul(ctx) {
     const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert = bewegungReduziert() || ohneAnimation();
     zielStart = start; messen('Reiseziel gewählt');
     const p = ortPunkt(); kreis(p); z.classList.remove('offen', 'ziele-offen'); z.classList.add('faehrt');
-    z.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + '"><div class="reise-panorama" style="background-image:url(\'' + bild(ziel) + '\')"></div><div class="reise-dunst"></div>' + zug + '<div class="reise-strecke"><div>' + esc(kode(von)) + ' <span>🚆</span> ' + esc(kode(ziel)) + '</div><small>' + esc(von) + ' → ' + esc(ziel) + '</small></div></section>';
+    z.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc(ziel) + '"><div class="reise-panorama" style="background-image:url(\'' + bild(ziel) + '\')"></div><div class="reise-dunst"></div>' + zug + '<div class="reise-strecke"><div>' + esc(kode(von)) + ' <span aria-hidden="true">→</span> ' + esc(kode(ziel)) + '</div><small>' + esc(von) + ' → ' + esc(ziel) + '</small></div></section>';
     const flug = z.querySelector('.reise-flug'); flug.classList.add('start');
     const vorbereitung = new Promise((resolve, reject) => {
       setTimeout(async () => {
