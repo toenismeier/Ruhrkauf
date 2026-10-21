@@ -1,6 +1,7 @@
 // Fester Messaufbau für Q03. Läuft ausschließlich im Playwright-Prüfbrowser.
 import { THREE, KompaktSammler, setzeLod, neueSzene, isoKamera, renderer, entferneKleineSchilder } from './kit/basis.js';
-import { stadtplan, baueStadt, bauerFuer } from './kit/stadt.js';
+import { stadtplan, planAusKarte, baueStadt, bauerFuer } from './kit/stadt.js';
+import essenKarte from '../karten/essen.json';
 import { echterBauer } from './kit/bauer.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
@@ -93,7 +94,7 @@ function fertig(z) {
 async function messen(name, optionen = {}) {
   const d = STADTLISTE.find((s) => s.name === name);
   if (!d) throw new Error('Unbekannte Stadt: ' + name);
-  const plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  const plan = name === 'Essen' ? planAusKarte(essenKarte, { seed: d.seed, typ: d.typ, standorte: d.standorte }) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
   const planDaten = kacheln(plan);
   const szene = neueSzene('#4fb6c2');
   szene.userData.sonne.shadow.mapSize.set(2048, 2048);
@@ -135,7 +136,7 @@ async function messen(name, optionen = {}) {
     szene.add = originalSceneAdd;
     S.bauen(szene);
     entferneKleineSchilder(szene);
-    const nm = nahMitte(plan, 'einkauf', 62);
+    const nm = name === 'Essen' ? { x: essenKarte.radius_m + 145, z: essenKarte.radius_m + 205 } : nahMitte(plan, 'einkauf', 62);
     const cam = isoKamera(BREITE, HOEHE, 60, new THREE.Vector3(nm.x, 0, nm.z));
     const sonne = szene.userData.sonne;
     const r = 60 * 2.4;
