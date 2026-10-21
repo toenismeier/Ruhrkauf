@@ -27,6 +27,7 @@ import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
+import { zentraleAbteilungHtml } from './ui/zentrale-abteilungen.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { zeitungModul } from './ui/zeitung.js';
 import { statistikModul } from './ui/statistik.js';
@@ -945,6 +946,7 @@ $('pinhalt').addEventListener('click', (e) => {
 
 // ─────────────────────────────────────────── Zentrale (HQ)
 const STUFE_FARBE = ['#c9c4bb', '#e0b23c', '#2f8f5b', '#2f63b5'];
+let hqAbteilung = null; // Q15: gewählte Seite der Fachabteilung
 let hqEtageWahl = null;   // { g: Gebäude-Id, nr } für den 3D-Schnitt
 let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
@@ -1009,7 +1011,23 @@ function meldung(text, ok = true) {
   m.textContent = text; m.className = ok ? 'an' : 'an rot';
   clearTimeout(meldungTimer); meldungTimer = setTimeout(() => { m.className = ''; }, 3500);
 }
+function oeffneHqAbteilung(id) {
+  hqAbteilung = id;
+  hqEtageWahl = null;
+  oeffneHq();
+}
 window.hqKlick = (art, a, b, c) => {
+  if (art === 'uebersicht') { hqAbteilung = null; hqEtageWahl = null; return oeffneHq(); }
+  if (art === 'abteilung') return oeffneHqAbteilung(a);
+  if (art === 'abteilungEtage') {
+    hqAbteilung = a;
+    hqEtageWahl = { g: b, nr: Number(c) };
+    return oeffneHq(undefined, true);
+  }
+  if (art === 'fte') return hqTun({ typ: 'abteilungFte', abteilung: a, fte: Number(b) });
+  if (art === 'gehalt') return hqTun({ typ: 'abteilungGehalt', abteilung: a, faktor: Number(b) / 100 });
+  if (art === 'aufgabe') return hqTun({ typ: 'delegation', bereich: a, aufgabe: b, an: c === 'true' });
+  if (art === 'organisation') { offenesHq = null; return oeffneModul(org); }
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
   if (art === 'kuendigenE') hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) });
   if (art === 'archiv') hqTun({ typ: 'hqArchivSetzen', gebaeude: a, etage: Number(b), aktiv: c === 'true' });
@@ -1023,6 +1041,13 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   if (typeof E.hqUebersicht !== 'function') return;
   offenesHaus = null; offenesHq = gebaeudeId ?? true;
   const u = E.hqUebersicht(s), j = hqGrafik();
+  if (hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)) {
+    const r = zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl);
+    const sc = $('pinhalt').scrollTop;
+    panel(r.titel, r.unter, r.html, 'gross');
+    if (bleiben) $('pinhalt').scrollTop = sc;
+    return;
+  }
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   const pz = (x) => `${Math.round((x ?? 0) * 100)} %`;
   const knopf = (text, args, art = '') => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(',')})">${text}</button>`;
@@ -1055,7 +1080,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
       const um = a.umzugBis !== undefined && a.umzugBis > s.woche ? ` · Umzug bis KW ${(a.umzugBis % 52) + 1}` : '';
       const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : '';
       const wahl = `<select class="ort" onchange="hqKlick('setzen','${a.id}',this.value)">${ort ? '' : '<option selected>ohne Platz</option>'}${ziele.map((z) => `<option value="${z.v}"${z.v === ort ? ' selected' : ''}>${z.t}</option>`).join('')}</select>`;
-      html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${HQ_ABT[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ''}</em></span><span class="stufe">${knopf('−', ['stufe', a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf('+', ['stufe', a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl}</div></div>`;
+      html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${HQ_ABT[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ''}</em></span><span class="stufe">${knopf('Öffnen', ['abteilung', a.id])}${knopf('−', ['stufe', a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf('+', ['stufe', a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl}</div></div>`;
     }
     html += '</div>';
   }
@@ -1087,7 +1112,7 @@ const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEi
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
 const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
-org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
+org = organisationModul({ E, s: () => s, panel, meldung, nachAktion, oeffneAbteilung: oeffneHqAbteilung });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
@@ -1395,7 +1420,7 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     const fehler = soll.filter((w) => w.status !== 'geschlossen' && !gezeigt.has(w.id)).map((w) => 'Fehlt: ' + w.id);
     for (const id of gezeigt) if (!pinIds.has(id)) fehler.push('Pin fehlt: ' + id);
     return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler };
-  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, aktion: (a) => { const r = E.fuehreAus(s, a); nachAktion(); return r; }, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, aktion: (a) => { const r = E.fuehreAus(s, a); nachAktion(); return r; }, oeffneHaus, schliessePanel, oeffneHq, oeffneHqAbteilung, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
@@ -1417,7 +1442,12 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
       } else if (d) fehler.push('O02 Haus-Treiberzeile fehlt');
     }
     if (rg?.aktiv?.() && !rg.pruefe()) fehler.push('O02 Reporting-Brücke summiert nicht exakt');
-    if (offenesHq && typeof E.hqUebersicht === 'function') {
+    if (offenesHq && hqAbteilung && typeof E.hqUebersicht === 'function') {
+      const a = E.hqUebersicht(s).abteilungen.find((x) => x.id === hqAbteilung);
+      const fte = $('pinhalt').querySelector('[data-q15-fte]'), gehalt = $('pinhalt').querySelector('[data-q15-gehalt]');
+      if (!a || Number(fte?.dataset.q15Fte) !== a.fte || Number(gehalt?.dataset.q15Gehalt) !== a.gehaltFaktor)
+        fehler.push('Q15: Abteilungswerte nicht identisch mit der Engine');
+    } else if (offenesHq && typeof E.hqUebersicht === 'function') {
       const u = E.hqUebersicht(s), hk = kz($('pinhalt'));
       const sollHq = { 'Kosten Zentrale je Woche': geld(u.kostenWoche), 'Beschäftigte': fmt.format(Math.round(u.fte)) + ' FTE' };
       for (const [k, v] of Object.entries(sollHq)) if (hk.get(k) !== v) fehler.push(`HQ ${k}: ${hk.get(k)} statt ${v}`);
