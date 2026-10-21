@@ -553,7 +553,7 @@ function gleise(ctx, R, u0, u1, y = 0) {
 function gleisPrellbock(ctx, R, u) {
   for (const t of [-1.6, 1.6]) {
     const [x, z] = R.w(u, t);
-    ctx.S.box(R.achse === 'x' ? 0.42 : 2.2, 0.8, R.achse === 'x' ? 2.2 : 0.42, x, 0.52, z, '#c9b24c');
+    ctx.S.box(R.achse === 'x' ? 0.42 : 2.2, 0.8, R.achse === 'x' ? 2.2 : 0.42, x, 0.52, z, '#d8b25a');
   }
 }
 
@@ -1166,25 +1166,25 @@ function q02Laube(S, x, z, y, art, farbe, dachfarbe) {
     dach.translate(x + w / 2, y + h, z + d / 2); S.add(dach, dachfarbe);
   } else {
     S.quader(x - 0.2, y + h, z - 0.2, x + w + 0.2, y + h + 0.19, z + d + 0.2, dachfarbe);
-    if (art === 2) S.quader(x + 0.4, y + h + 0.19, z + 0.3, x + w - 0.4, y + h + 0.26, z + d - 0.3, '#869da1');
+    if (art === 2) S.quader(x + 0.4, y + h + 0.19, z + 0.3, x + w - 0.4, y + h + 0.26, z + d - 0.3, '#8c959e');
   }
-  S.quader(x + w * 0.3, y + 0.35, z + d, x + w * 0.68, y + 1.65, z + d + 0.06, '#6f9094');
-  S.quader(x + w - 0.8, y + 0.02, z + d + 0.02, x + w - 0.1, y + 1.65, z + d + 0.1, '#6a5541');
+  S.quader(x + w * 0.3, y + 0.35, z + d, x + w * 0.68, y + 1.65, z + d + 0.06, '#6f8696');
+  S.quader(x + w - 0.8, y + 0.02, z + d + 0.02, x + w - 0.1, y + 1.65, z + d + 0.1, '#6b5a48');
   if (art === 5) {
     S.quader(x - 0.2, y + 1.8, z + d, x + w + 0.2, y + 2.0, z + d + 1.6, dachfarbe);
-    for (const dx of [0, w]) S.box(0.12, 1.8, 0.12, x + dx, y + 0.9, z + d + 1.4, '#bcb0a1');
+    for (const dx of [0, w]) S.box(0.12, 1.8, 0.12, x + dx, y + 0.9, z + d + 1.4, '#bfb3a3');
   }
 }
 function baueKleingarten(ctx, b, r, hinder) {
   const { S, I } = ctx, y = 0.36, endeX = b.x + b.w - 2, endeZ = b.z + b.d - 2;
-  S.quader(b.x, 0, b.z, b.x + b.w, y, b.z + b.d, '#9abf85');
-  const laubenFarben = ['#c9a77c', '#8fa9b5', '#d9c49a', '#b56b4f', '#e8e4dc', '#7c9a6a', '#d2c3aa'];
-  const daech = ['#b4583f', '#56636c', '#6f6a5c', '#7c8c7a', '#8a6960'];
+  S.quader(b.x, 0, b.z, b.x + b.w, y, b.z + b.d, '#94c486');
+  const laubenFarben = ['#c9a77c', '#8fa9b5', '#d9c49a', '#b56b4f', '#e8e4dc', '#7c9a6a', '#cfc4ae'];
+  const daech = ['#b4583f', '#56636c', '#6f6a5c', '#807d78', '#8a6a4a'];
   let zeile = 0;
   for (let z = b.z + 2; z + 11 < endeZ; zeile++) {
     const tiefe = zw(r, 12.5, 18.5), nZ = Math.min(tiefe, endeZ - z), wegB = zw(r, 2, 3.1);
     const wegZ = z + nZ;
-    if (wegZ + wegB < b.z + b.d - 1) S.quader(b.x + 1, y, wegZ, endeX + 1, y + 0.05, wegZ + wegB, '#d6c8aa');
+    if (wegZ + wegB < b.z + b.d - 1) S.quader(b.x + 1, y, wegZ, endeX + 1, y + 0.05, wegZ + wegB, '#d9c4a8');
     let x = b.x + 2 + r() * 1.2;
     while (x + 8 < endeX) {
       const breite = Math.min(zw(r, 9.2, 14.6), endeX - x);
@@ -1192,7 +1192,7 @@ function baueKleingarten(ctx, b, r, hinder) {
       const cx = x + breite / 2, cz = z + nZ / 2;
       if (!hinder.some((p) => imRechteck(cx, cz, p, 3))) {
         const wild = r() < 0.16, typ = Math.floor(r() * 6), laube = r() > 0.08;
-        const gras = waehle(r, wild ? ['#779c67', '#88a973', '#9eb488'] : ['#9cc58a', '#b2d39b', '#93bd7f']);
+        const gras = waehle(r, wild ? ['#7c9a6a', '#7fae6c', '#93bd7f'] : ['#9cc58a', '#b2d39b', '#93bd7f']);
         S.quader(x + 0.25, y, z + 0.25, x + breite - 0.25, y + 0.04, z + nZ - 0.25, gras);
         // Nutzbeete, Obstgehölze und unregelmäßige Gartenwege statt duplizierter Streifen.
         const beetAnzahl = wild ? 1 : Math.floor(2 + r() * 3);
@@ -1200,7 +1200,7 @@ function baueKleingarten(ctx, b, r, hinder) {
           const bw = zw(r, 1.1, Math.min(2.6, breite * 0.32));
           const bx = x + 0.7 + r() * Math.max(0.1, breite * 0.55 - bw);
           const bz = z + 1.2 + k * (nZ - 4) / Math.max(2, beetAnzahl);
-          S.quader(bx, y + 0.04, bz, bx + bw, y + 0.14, Math.min(bz + zw(r, 1.1, 2.6), z + nZ - 1), wild ? '#728d5b' : waehle(r, ['#8a6a4a', '#7a9f55', '#c5a36a']));
+          S.quader(bx, y + 0.04, bz, bx + bw, y + 0.14, Math.min(bz + zw(r, 1.1, 2.6), z + nZ - 1), wild ? '#7a9f55' : waehle(r, ['#8a6a4a', '#7a9f55', '#c5a36a']));
         }
         if (laube && breite > 8.8 && nZ > 11.5) {
           const lx = x + breite - 4.9, lz = z + nZ - 4.6;
@@ -1209,7 +1209,7 @@ function baueKleingarten(ctx, b, r, hinder) {
         const obst = wild ? 2 : r() < 0.7 ? 1 : 0;
         for (let k = 0; k < obst; k++) baumSetzen(I, waehle(r, ['kugel', 'linde', 'birke']), x + 2.2 + r() * Math.min(2, breite * 0.2), y + 0.04, z + nZ - 2.6 - k * 3, r, zw(r, 0.5, 0.7));
         if (wild) for (let k = 0; k < 3; k++) I.setze('busch', x + zw(r, 1, breite - 1), y + 0.04, z + zw(r, 1, nZ - 1), 0, [0.6, 0.6, 0.6], [waehle(r, KRONE.busch)]);
-        for (let u = 0; u < breite - 0.8; u += zw(r, 2.6, 4.6)) I.setze('busch', x + u, y, z + 0.15, 0, [0.38, 0.4, 0.38], ['#628b54']);
+        for (let u = 0; u < breite - 0.8; u += zw(r, 2.6, 4.6)) I.setze('busch', x + u, y, z + 0.15, 0, [0.38, 0.4, 0.38], ['#5b8f5a']);
         if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: cx, z: cz, muster: 'garten/' + typ + '/' + Math.round(breite) + '/' + beetAnzahl + '/' + Number(wild) + '/' + zeile % 3 });
       }
       x += breite + zw(r, 0.5, 1.6);
@@ -1366,10 +1366,10 @@ function baueVorortBlock(ctx, b, r) {
 
 /** Unterschiedliche Fruchtstreifen pro Jahreszeit statt identischer Ackertexturen. */
 export const Q02_FELDFARBEN = {
-  fruehling: ['#86ae67', '#aac67a', '#8eaf73', '#b2b47b', '#7caa67', '#9aa76d'],
+  fruehling: ['#7fae6c', '#a9c47e', '#7fae6c', '#a9c47e', '#7fae6c', '#9fc078'],
   sommer: ['#d4c27c', '#c9b26a', '#b8c97a', '#e0cf8f', '#9fc078', '#c7a66a'],
-  herbst: ['#bb915d', '#d3b46d', '#bd9e74', '#8c9d5c', '#d8c48b', '#a88954'],
-  winter: ['#9ca28d', '#b0ad9b', '#a8aa95', '#c5c0b0', '#929d8a', '#b5af9b'],
+  herbst: ['#b59a72', '#c9b26a', '#b59a72', '#7a9f55', '#d9c98c', '#b9785e'],
+  winter: ['#9a9690', '#b1aea6', '#b1aea6', '#c4bcae', '#9a9690', '#b1aea6'],
 };
 function baueFeld(ctx, b, r) {
   const { S, I } = ctx;
@@ -1397,8 +1397,8 @@ function baueFeld(ctx, b, r) {
     if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: x0 + w / 2, z: z0 + d / 2, muster: 'feld/' + farbe + '/' + Math.round(len) + '/' + Number(wiese) + '/' + k % 3 });
     if (k > 0 && len > 6 && r() < 0.5) {
       // Feldweg zwischen Nutzflächen, kein großflächiger Parkplatz.
-      if (quer) S.quader(b.x + 0.3, 0, z0 - 0.9, b.x + b.w - 0.3, 0.04, z0 + 0.9, '#c6b89b');
-      else S.quader(x0 - 0.9, 0, b.z + 0.3, x0 + 0.9, 0.04, b.z + b.d - 0.3, '#c6b89b');
+      if (quer) S.quader(b.x + 0.3, 0, z0 - 0.9, b.x + b.w - 0.3, 0.04, z0 + 0.9, '#c9b79c');
+      else S.quader(x0 - 0.9, 0, b.z + 0.3, x0 + 0.9, 0.04, b.z + b.d - 0.3, '#c9b79c');
     }
   }
   // Baumreihe oder Hecke als Grenze. Die Felder werden durch echte Höfe aus stadtrand.js ergänzt.
@@ -1725,7 +1725,7 @@ function baueBahn(ctx, b, r) {
       ctx.qualitaet.gleise.push(spur); ctx.qualitaet.draehte.push({ ...spur });
       for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: ctx.spiegel ? 'z' : 'x', mitte: gz, u, abschluss: 'prellbock' });
     }
-    for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz, '#c9b24c');
+    for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz, '#d8b25a');
   }
   if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze('olmastSeite', x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
   // Züge ausschließlich an Bahnsteigen, Wagenlänge und Gleisende werden respektiert.

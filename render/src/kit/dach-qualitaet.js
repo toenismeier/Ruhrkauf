@@ -2,8 +2,9 @@
 // Geometrie ausschließlich über S; Zufall stammt ausschließlich vom übergebenen rng(seed).
 import { dachPasst } from './q02-qualitaet.js';
 
-const FARBEN = { lueftung: '#b8bec1', aufzug: '#c9c6bf', oberlicht: '#a4c4d0',
-  solar: '#304e74', dachgarten: '#65885e' };
+// Nur Farben, die in jeder Stadt ohnehin vorkommen: jede neue Farbe wäre ein zusätzlicher Draw Call.
+const FARBEN = { lueftung: '#c9cdd0', aufzug: '#c9cdd0', oberlicht: '#5f666e',
+  solar: '#3b4046', dachgarten: '#c9cdd0' };
 
 export function dachInstallationen(S, dach, r, o = {}) {
   if (!dach || dach.steil) return [];
@@ -39,24 +40,24 @@ export function dachInstallationen(S, dach, r, o = {}) {
     const y = dach.y, f = o.farbe ?? FARBEN[art];
     if (art === 'lueftung') {
       S.box(bw, h, bd, x, y + h / 2, z, f);
-      for (const v of [-0.8, -0.35, 0.1, 0.55]) S.box(bw - 0.4, 0.06, 0.06, x, y + h / 2 + v * h / 2, z + bd / 2 + 0.02, '#626b72');
+      for (const v of [-0.8, -0.35, 0.1, 0.55]) S.box(bw - 0.4, 0.06, 0.06, x, y + h / 2 + v * h / 2, z + bd / 2 + 0.02, '#5f666e');
     } else if (art === 'aufzug') {
       S.box(bw, h, bd, x, y + h / 2, z, f);
-      S.box(bw + 0.08, 0.12, bd + 0.08, x, y + h + 0.06, z, '#92999a');
+      S.box(bw + 0.08, 0.12, bd + 0.08, x, y + h + 0.06, z, '#5d646a');
     } else if (art === 'oberlicht') {
-      S.box(bw, 0.23, bd, x, y + 0.115, z, '#8c989b');
-      S.box(bw - 0.4, 0.29, bd - 0.4, x, y + 0.38, z, '#8eafb9');
+      S.box(bw, 0.23, bd, x, y + 0.115, z, '#5f666e');
+      S.box(bw - 0.4, 0.29, bd - 0.4, x, y + 0.38, z, '#5f7787');
     } else if (art === 'solar') {
       // Flaches Solarfeld, vollständig aufgeständert. Kein schwebender schräger Körper.
-      S.box(bw, 0.15, bd, x, y + 0.43, z, '#304e74');
-      for (const v of [-1, 1]) S.box(0.16, 0.4, bd - 0.4, x + v * (bw / 2 - 0.3), y + 0.2, z, '#868e94');
-      S.box(0.05, 0.04, bd - 0.18, x, y + 0.53, z, '#9bb1c4');
+      S.box(bw, 0.15, bd, x, y + 0.43, z, '#3b4046');
+      for (const v of [-1, 1]) S.box(0.16, 0.4, bd - 0.4, x + v * (bw / 2 - 0.3), y + 0.2, z, '#5f666e');
+      S.box(0.05, 0.04, bd - 0.18, x, y + 0.53, z, '#5f7787');
     } else {
-      S.box(bw, 0.17, bd, x, y + 0.085, z, '#b9b3a2');
+      S.box(bw, 0.17, bd, x, y + 0.085, z, '#c9cdd0');
       for (const v of [-1, 0, 1]) {
         const xx = x + v * 1.3;
-        S.box(1.05, 0.43, 1.4, xx, y + 0.38, z, '#b49f88');
-        S.box(0.8, 0.4, 1.1, xx, y + 0.74, z, '#5c8b5a');
+        S.box(1.05, 0.43, 1.4, xx, y + 0.38, z, '#8a6a4a');
+        S.box(0.8, 0.4, 1.1, xx, y + 0.74, z, '#5a8f3c');
       }
     }
     const daten = { art, x, z, w: bw, d: bd, h, unten: y, dach };
