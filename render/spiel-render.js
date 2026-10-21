@@ -810,6 +810,13 @@ async function buendeln() {
       const punkt = await p.evaluate(() => {
         const spiel = window.spiel;
         spiel.fokusHaeuser();
+        // Liegt kein Haus frei antippbar im Bild, Kamera auf das erste offene Essener Haus setzen.
+        const frei = (q) => q && q.y < 620 && q.x > 30 && q.x < innerWidth - 30 && document.elementFromPoint(q.x, q.y)?.id === 'karte';
+        const offen = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen');
+        if (!offen.some((h) => frei(spiel.tippPunkt(h.id)))) {
+          const g = spiel.sb.haeuser.get(offen[0].id)?.gruppe;
+          if (g) { const m = new spiel.THREE.Box3().setFromObject(g).getCenter(new spiel.THREE.Vector3()); spiel.kamera({ x: m.x, z: m.z }); }
+        }
         const haus = spiel.s.haeuser.filter((h) => h.stadt === 'Essen' && h.status === 'offen')
           .map((h) => spiel.tippPunkt(h.id)).filter((q) => q && q.y < 620 && q.x > 30 && q.x < innerWidth - 30 && document.elementFromPoint(q.x, q.y)?.id === 'karte')
           .sort((a, b) => Math.abs(a.x - innerWidth / 2) - Math.abs(b.x - innerWidth / 2))[0];
