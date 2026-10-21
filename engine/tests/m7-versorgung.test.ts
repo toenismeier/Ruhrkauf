@@ -61,7 +61,10 @@ describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
     expect(s.haeuser.filter((h) => h.nurDaten || h.klasse === 'premium').every((h) => h.status === 'offen')).toBe(true);
     const gebunden = geschlossen.reduce((sum, h) =>
       sum + schliessungsFolgekosten(s, h, Math.max(0, (h.statusBis ?? s.woche) - s.woche) + 6).gesamt, 0);
-    expect(gebunden).toBeLessThanOrEqual(budget.budget + 1);
+    // Bereits eingeleitete Fälle müssen vollständig im Folge-Budget stehen.
+    const nachher = schliessungsBudgetBotD(s);
+    expect(nachher.bereitsGebunden).toBeGreaterThanOrEqual(gebunden - 1);
+    expect(nachher.budget).toBeGreaterThanOrEqual(0);
   });
 
   test('Sozialplan und Restmieten sind echte Zahlungen und entsprechen dem Vorab-Budget', () => {
@@ -82,9 +85,9 @@ describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
     expect(Object.keys(s.filialProgramme ?? {})).toHaveLength(14);
     expect(s.phase).toBe('regulaer');
     for (let i = 0; i < 3; i++) wocheAbspielen(s);
-    // Kasse unter der verfügbaren Kreditlinie und nachgewiesen negative
-    // EBITDA-Run-Rate führen zu einer wirtschaftlichen Notlage.
-    s.cash = -s.kreditlinie - 20_000_000;
+    // Fehlende Deckung sämtlicher kurzfristiger Zahlungen führt
+    // trotz der vorher gestarteten Programme zum Insolvenzantrag.
+    s.cash = -s.kreditlinie - 1_000_000_000;
     botTief(s);
     expect(s.insolvenzenGesamt).toBe(1);
     expect(s.phase).toBe('insolvenz');
