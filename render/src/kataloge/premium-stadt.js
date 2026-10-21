@@ -7,8 +7,8 @@ import { stadtDaten } from '../kit/staedte.js';
 import { echterBauer } from '../kit/bauer.js';
 import { PREMIUM_NAMEN } from '../kit/premium.js';
 import { ausschnittBauer } from './_standorte-staedte.js';
-const eintraege=['Berlin','München','Hamburg','Düsseldorf'].map(name=>({
- titel:`${name}: Premium-1a-Lage`,
+const eintraege=[['Berlin','P001'],['Berlin','P005'],['München','P002'],['Hamburg','P003'],['Düsseldorf','P004']].map(([name,id])=>({
+ titel:`${name}: ${id} · Premium-1a-Lage`,
  bau(S,scene){
   const st=stadtDaten(name);
   const plan=stadtplan(st.seed,{typ:st.typ,archetyp:st.archetyp,region:st.region,...st.extra,standorte:st.standorte});
