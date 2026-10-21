@@ -1,0 +1,1074 @@
+{
+  "hinweis": "Q25-Bildschnittstelle. Artikeltyp: bild: { silhouette, …Parameter }. Erzeugt aus render/src/kit/mode/silhouetten.js, nicht von Hand ändern.",
+  "parameter": {
+    "aermel": [
+      "ohne",
+      "traeger",
+      "kurz",
+      "halb",
+      "lang",
+      "puff"
+    ],
+    "laenge": [
+      "crop",
+      "normal",
+      "lang",
+      "tunika",
+      "kurz",
+      "bermuda",
+      "cropped",
+      "mini",
+      "knie",
+      "midi",
+      "maxi",
+      "mantel"
+    ],
+    "kragen": [
+      "rund",
+      "v",
+      "carree",
+      "hemd",
+      "polo",
+      "stehkragen",
+      "rollkragen",
+      "kapuze",
+      "wickel"
+    ],
+    "passform": [
+      "tailliert",
+      "gerade",
+      "oversize",
+      "boxy",
+      "skinny",
+      "schmal",
+      "weit",
+      "baggy",
+      "flare",
+      "jogger",
+      "leggings"
+    ],
+    "form": [
+      "a-linie",
+      "plissee",
+      "bleistift",
+      "wickel",
+      "glocke",
+      "stufen",
+      "gerade",
+      "slip",
+      "etui"
+    ],
+    "muster": [
+      "uni",
+      "streifen",
+      "karo",
+      "blumen"
+    ]
+  },
+  "silhouetten": {
+    "tshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz",
+        "kragen": "rund"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "babytee": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "oberteil"
+    },
+    "boxytee": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil"
+    },
+    "vshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz",
+        "kragen": "v"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "longsleeve": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "rund"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil"
+    },
+    "top": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "ohne",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "rippe",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "traegertop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "traeger",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "seide",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "croptop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "ohne",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "kragen": "carree"
+      },
+      "material": "rippe",
+      "farbe": "schwarz",
+      "model": "oberteil"
+    },
+    "bluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "hemd",
+        "passform": "tailliert",
+        "knopfleiste": true
+      },
+      "material": "viskose",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "schluppenbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "gerade",
+        "schleife": true,
+        "knopfleiste": true
+      },
+      "material": "seide",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "hemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "hemd",
+        "brusttasche": true
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "oberteil"
+    },
+    "kurzarmhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz",
+        "kragen": "hemd",
+        "passform": "boxy"
+      },
+      "material": "leinen",
+      "farbe": "salbei",
+      "model": "oberteil"
+    },
+    "polo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz",
+        "kragen": "polo"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "pullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "rund",
+        "rippbund": true,
+        "strick": true
+      },
+      "material": "strick",
+      "farbe": "camel",
+      "model": "oberteil"
+    },
+    "vpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "v",
+        "rippbund": true,
+        "strick": true
+      },
+      "material": "merino",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "rollkragen": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "rollkragen",
+        "rippbund": true,
+        "strick": true
+      },
+      "material": "kaschmir",
+      "farbe": "ecru",
+      "model": "oberteil"
+    },
+    "sweatshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "rund",
+        "rippbund": true,
+        "passform": "oversize"
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "oberteil"
+    },
+    "hoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "kaenguru": true,
+        "rippbund": true,
+        "passform": "oversize"
+      },
+      "material": "baumwolle",
+      "farbe": "salbei",
+      "model": "oberteil"
+    },
+    "tunika": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "halb",
+        "kragen": "v",
+        "laenge": "tunika"
+      },
+      "material": "leinen",
+      "farbe": "terrakotta",
+      "model": "oberteil"
+    },
+    "wickelshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "wickel",
+        "passform": "tailliert"
+      },
+      "material": "viskose",
+      "farbe": "bordeaux",
+      "model": "oberteil"
+    },
+    "kinderbody": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "kurz"
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": "oberteil"
+    },
+    "jeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "gerade"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose"
+    },
+    "skinnyjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "skinny"
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "model": "hose"
+    },
+    "momjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "gerade",
+        "saum": "umschlag",
+        "laenge": "cropped"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose"
+    },
+    "widelegjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "weit"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose"
+    },
+    "baggyjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "baggy",
+        "ripped": true
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose"
+    },
+    "flarejeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "flare"
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "model": "hose"
+    },
+    "chino": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "schmal"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "hose"
+    },
+    "stoffhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "gerade",
+        "bundfalte": true
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "hose"
+    },
+    "marlenehose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "weit",
+        "bundfalte": true
+      },
+      "material": "wolle",
+      "farbe": "camel",
+      "model": "hose"
+    },
+    "leinenhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "weit",
+        "komfortbund": true
+      },
+      "material": "leinen",
+      "farbe": "ecru",
+      "model": "hose"
+    },
+    "cargohose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "baggy",
+        "cargo": true
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "hose"
+    },
+    "jogginghose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "jogger",
+        "taschen": false
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "hose"
+    },
+    "leggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "leggings",
+        "taschen": false
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "komforthose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "gerade",
+        "komfortbund": true
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "hose"
+    },
+    "cordhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "gerade"
+      },
+      "material": "cord",
+      "farbe": "braun",
+      "model": "hose"
+    },
+    "shorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "laenge": "kurz",
+        "passform": "weit"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "hose"
+    },
+    "bermuda": {
+      "gruppe": "unterteil",
+      "standard": {
+        "laenge": "bermuda",
+        "passform": "gerade",
+        "saum": "umschlag"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "hose"
+    },
+    "culotte": {
+      "gruppe": "unterteil",
+      "standard": {
+        "laenge": "cropped",
+        "passform": "weit",
+        "bundfalte": true
+      },
+      "material": "viskose",
+      "farbe": "olive",
+      "model": "hose"
+    },
+    "latzhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "passform": "gerade",
+        "latz": true
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose"
+    },
+    "jeansshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "laenge": "kurz",
+        "passform": "gerade",
+        "saum": "offen"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose"
+    },
+    "rock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "knie",
+        "form": "a-linie"
+      },
+      "material": "viskose",
+      "farbe": "marine",
+      "model": "rock"
+    },
+    "minirock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "mini",
+        "form": "a-linie"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "rock"
+    },
+    "plisseerock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "midi",
+        "form": "plissee"
+      },
+      "material": "polyester",
+      "farbe": "salbei",
+      "model": "rock"
+    },
+    "plisseeminirock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "mini",
+        "form": "plissee",
+        "muster": "karo"
+      },
+      "material": "polyester",
+      "farbe": "bordeaux",
+      "model": "rock"
+    },
+    "bleistiftrock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "knie",
+        "form": "bleistift"
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "rock"
+    },
+    "midirock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "midi",
+        "form": "a-linie"
+      },
+      "material": "satin",
+      "farbe": "senf",
+      "model": "rock"
+    },
+    "wickelrock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "midi",
+        "form": "wickel"
+      },
+      "material": "viskose",
+      "farbe": "terrakotta",
+      "model": "rock"
+    },
+    "stufenrock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "maxi",
+        "form": "stufen"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "rock"
+    },
+    "kleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "knie",
+        "form": "a-linie",
+        "aermel": "ohne"
+      },
+      "material": "viskose",
+      "farbe": "bordeaux",
+      "model": "kleid"
+    },
+    "etuikleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "knie",
+        "form": "etui",
+        "aermel": "ohne",
+        "kragen": "rund"
+      },
+      "material": "wolle",
+      "farbe": "marine",
+      "model": "kleid"
+    },
+    "slipdress": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "midi",
+        "form": "slip",
+        "aermel": "traeger"
+      },
+      "material": "satin",
+      "farbe": "flieder",
+      "model": "kleid"
+    },
+    "hemdblusenkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "midi",
+        "form": "a-linie",
+        "aermel": "halb",
+        "kragen": "hemd",
+        "guertel": true
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "kleid"
+    },
+    "maxikleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "maxi",
+        "form": "stufen",
+        "aermel": "traeger"
+      },
+      "material": "viskose",
+      "farbe": "terrakotta",
+      "model": "kleid"
+    },
+    "wickelkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "midi",
+        "form": "wickel",
+        "aermel": "kurz",
+        "kragen": "v"
+      },
+      "material": "viskose",
+      "farbe": "flaschengruen",
+      "model": "kleid"
+    },
+    "sommerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "knie",
+        "form": "glocke",
+        "aermel": "puff",
+        "kragen": "carree"
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": "kleid"
+    },
+    "strickkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "midi",
+        "form": "gerade",
+        "aermel": "lang",
+        "kragen": "rund"
+      },
+      "material": "strick",
+      "farbe": "camel",
+      "model": "kleid"
+    },
+    "kinderkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "knie",
+        "form": "glocke",
+        "aermel": "puff",
+        "kragen": "rund"
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": "kleid"
+    },
+    "blazer": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "blazer"
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "mantel": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "mantel"
+      },
+      "material": "wolle",
+      "farbe": "camel",
+      "model": "jacke"
+    },
+    "trenchcoat": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "trench"
+      },
+      "material": "baumwolle",
+      "farbe": "beige",
+      "model": "jacke"
+    },
+    "steppjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "steppjacke"
+      },
+      "material": "polyester",
+      "farbe": "marine",
+      "model": "jacke"
+    },
+    "steppweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "steppweste"
+      },
+      "material": "polyester",
+      "farbe": "olive",
+      "model": "jacke"
+    },
+    "jeansjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "jeansjacke"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "jacke"
+    },
+    "regenjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "regenjacke"
+      },
+      "material": "polyester",
+      "farbe": "gelb",
+      "model": "jacke"
+    },
+    "parka": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "parka"
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "jacke"
+    },
+    "varsityjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "varsity"
+      },
+      "material": "wolle",
+      "farbe": "flaschengruen",
+      "model": "jacke"
+    },
+    "bomberjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "bomber"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "lederjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "lederjacke"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "overshirt": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "overshirt"
+      },
+      "material": "cord",
+      "farbe": "cognac",
+      "model": "jacke"
+    },
+    "strickjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "strickjacke",
+        "laenge": "normal"
+      },
+      "material": "strick",
+      "farbe": "grau",
+      "model": "jacke"
+    },
+    "sneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "weiß",
+      "model": "schuhe"
+    },
+    "pumps": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "pumps"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "stiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "schuhe"
+    },
+    "loafer": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "sandale": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "schuhe"
+    },
+    "handtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "umhaenge"
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "tasche"
+    },
+    "tote": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "tote"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "tasche"
+    },
+    "rucksack": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "olive",
+      "model": null
+    },
+    "cap": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "cap"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "muetze"
+    },
+    "buckethat": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "bucket"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "muetze"
+    },
+    "muetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "beanie"
+      },
+      "material": "merino",
+      "farbe": "senf",
+      "model": "muetze"
+    },
+    "schal": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "kaschmir",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "guertel": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "leder",
+      "farbe": "cognac",
+      "model": null
+    },
+    "socken": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "merino",
+      "farbe": "anthrazit",
+      "model": null
+    },
+    "pyjama": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "unterwaesche": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "bh": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "seide",
+      "farbe": "altrosa",
+      "model": null
+    },
+    "bettwaesche": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "leinen",
+      "farbe": "salbei",
+      "model": null
+    },
+    "handtuch": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "frottee",
+      "farbe": "petrol",
+      "model": null
+    },
+    "plaid": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "strick",
+      "farbe": "senf",
+      "model": null
+    },
+    "kissen": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "boucle",
+      "farbe": "ecru",
+      "model": null
+    },
+    "duftkerze": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "wachs",
+      "farbe": "terrakotta",
+      "model": null
+    },
+    "vase": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "flaschengruen",
+      "model": null
+    },
+    "becher": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "salbei",
+      "model": null
+    },
+    "teller": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "creme",
+      "model": null
+    },
+    "glas": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "glas",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "karaffe": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "glas",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "korb": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "rattan",
+      "farbe": "camel",
+      "model": null
+    },
+    "serviette": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "leinen",
+      "farbe": "altrosa",
+      "model": null
+    },
+    "bilderrahmen": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "holz",
+      "farbe": "camel",
+      "model": null
+    },
+    "teppich": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "wolle",
+      "farbe": "terrakotta",
+      "model": null
+    },
+    "lippenstift": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "rot",
+      "model": null
+    },
+    "creme": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "rosa",
+      "model": null
+    },
+    "parfum": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "glas",
+      "farbe": "flieder",
+      "model": null
+    },
+    "plueschtier": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "camel",
+      "model": null
+    }
+  }
+}
