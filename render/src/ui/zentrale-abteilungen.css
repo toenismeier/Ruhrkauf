@@ -1,0 +1,67 @@
+/* Q15 · Zentrale. Isolierter Layer auf den zentralen Q14-Tokens (auch vor Q14-Merge lesbar). */
+.q15-seite { --q15-ink:var(--ui-text,#242424); --q15-muted:var(--ui-muted,#62666A); --q15-border:var(--ui-border,#E2E1DD); --q15-brand:var(--ui-brand,#B32632); color:var(--q15-ink); min-width:0; padding-bottom:12px; font-size:14px; line-height:1.45; }
+.q15-seite * { box-sizing:border-box; }
+.q15-seite button { min-height:44px; font:inherit; touch-action:manipulation; cursor:pointer; }
+.q15-seite button:focus-visible,.q15-seite input:focus-visible,.q15-seite summary:focus-visible { outline:3px solid var(--q15-brand); outline-offset:2px; }
+.q15-zurueck { background:none!important; color:var(--q15-muted)!important; border:0!important; padding:0 4px!important; text-align:left; font-weight:600!important; }
+.q15-kopf { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin:4px 0 12px; }
+.q15-kopf h2 { margin:0; font-size:24px; line-height:30px; font-weight:720; letter-spacing:-.03em; }
+.q15-kopf .q15-meta { display:block; font-size:12px; line-height:16px; color:var(--q15-muted); margin-bottom:4px; }
+.q15-zaehler { font-size:22px; line-height:26px; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.q15-zaehler small { display:block; font-size:12px; font-weight:400; line-height:18px; color:var(--q15-muted); }
+.q15-seite section { background:var(--ui-surface,#fff); border:1px solid var(--q15-border); border-radius:var(--ui-radius,10px); padding:12px; margin:0 0 10px; box-shadow:none; min-width:0; }
+.q15-seite h3 { margin:0 0 12px; font-size:16px; line-height:24px; font-weight:700; }
+.q15-seite small { color:var(--q15-muted); }
+.q15-szenekopf { display:flex; gap:6px; justify-content:space-between; flex-wrap:wrap; align-items:baseline; }
+.q15-szenekopf b { font-size:14px; line-height:20px; font-weight:650; overflow-wrap:anywhere; }
+.q15-szenekopf small { font-size:12px; }
+.q15-szene { padding:10px 10px 4px!important; overflow:hidden; }
+.q15-etagenbild { display:block; width:100%; max-height:212px; background:#F5F4F1; border-radius:6px; overflow:visible; }
+.q15-leer { min-height:130px; padding:32px 12px; text-align:center; color:var(--q15-muted); }
+.q15-etagenwahl { display:flex; gap:8px; overflow-x:auto; scrollbar-width:thin; padding:0 0 8px; margin-bottom:8px; }
+.q15-etagenwahl button { flex-shrink:0; border:1px solid var(--q15-border); background:#fff; color:var(--q15-ink); border-radius:8px; padding:0 12px; }
+.q15-etagenwahl button.an { border-color:var(--q15-brand); font-weight:700; }
+.q15-leitung { display:flex; align-items:flex-start; gap:12px; }
+.q15-portrait { width:56px; height:56px; min-width:56px; background:#F0EBE4; color:#595F63; display:grid; place-items:center; border-radius:8px; font-size:21px; font-weight:600; letter-spacing:-.04em; }
+.q15-leitung>div:last-child { min-width:0; }
+.q15-leitung b,.q15-leitung small { display:block; overflow-wrap:anywhere; }
+.q15-leitung p { margin:4px 0 0; font-size:14px; }
+.q15-steuerung .q15-reglerkopf { display:flex; gap:12px; align-items:baseline; justify-content:space-between; margin:16px 0 6px; font-variant-numeric:tabular-nums; }
+.q15-steuerung .q15-reglerkopf:first-of-type { margin-top:0; }
+.q15-steuerung input[type="range"] { width:100%; display:block; min-height:44px; margin:0; accent-color:var(--q15-brand); }
+.q15-steuerung>small { display:block; margin-top:0; line-height:18px; }
+.q15-werte { display:grid; grid-template-columns:1fr; margin:12px 0; }
+.q15-werte span { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--q15-border); }
+.q15-werte span b { font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:650; }
+.q15-stufe { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:12px; }
+.q15-stufe span { margin-right:auto; }
+.q15-stufe button { border:1px solid var(--q15-border); background:#fff; color:var(--q15-ink); min-width:44px; border-radius:8px; }
+.q15-stufe button.an { background:var(--q15-brand); color:#fff; border-color:var(--q15-brand); }
+.q15-hinweis { display:flex; gap:8px; justify-content:space-between; border-top:1px solid var(--q15-border); margin-top:12px; padding-top:10px; font-variant-numeric:tabular-nums; }
+.q15-stimmen { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.q15-stimme { min-width:0; }
+.q15-avatar { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:#E7E9E8; color:#60666A; font-weight:700; margin-bottom:5px; font-size:12px; }
+.q15-stimme p { padding:9px; margin:0; border:1px solid var(--q15-border); border-radius:8px; background:#FAF9F7; font-size:12px; line-height:17px; overflow-wrap:anywhere; min-height:62px; }
+.q15-balken { margin:12px 0; }
+.q15-balken>div:first-child { display:flex; justify-content:space-between; gap:10px; font-size:13px; }
+.q15-balken b { font-variant-numeric:tabular-nums; }
+.q15-balken-bahn { height:7px; margin-top:5px; background:#E9E9E6; border-radius:4px; overflow:hidden; }
+.q15-balken-bahn i { display:block; height:100%; background:var(--ui-positive,#247153); }
+.q15-sekundaer { width:100%; padding:9px 12px; border:1px solid var(--q15-border); border-radius:8px; background:#fff; color:var(--q15-ink); text-align:center; }
+.q15-delegation>small { display:block; margin-top:-8px; margin-bottom:8px; }
+.q15-delegation details { border-top:1px solid var(--q15-border); }
+.q15-delegation summary { min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:8px; cursor:pointer; }
+.q15-delegation summary b { overflow-wrap:anywhere; }
+.q15-delegation summary span { color:var(--q15-muted); white-space:nowrap; font-size:12px; }
+.q15-aufgabe { border-top:1px solid var(--q15-border); display:flex; justify-content:space-between; gap:10px; align-items:center; padding:8px 0; }
+.q15-aufgabe>span { min-width:0; overflow-wrap:anywhere; }
+.q15-aufgabe small { display:block; }
+.q15-aufgabe button { flex-shrink:0; border:1px solid var(--q15-border); color:var(--q15-ink); background:#fff; border-radius:8px; padding:0 10px; min-width:90px; }
+.q15-aufgabe button[aria-pressed="true"] { color:var(--ui-positive,#247153); border-color:var(--ui-positive,#247153); }
+.q15-navigation { position:relative; display:flex; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; padding:8px 0 12px; margin-top:2px; border-top:1px solid var(--q15-border); }
+.q15-navigation button { flex:0 0 auto; background:#fff; color:var(--q15-ink); border:1px solid var(--q15-border); border-radius:8px; padding:0 12px; white-space:nowrap; }
+.q15-navigation button.an { border-color:var(--q15-brand); box-shadow:inset 0 -3px var(--q15-brand); font-weight:700; }
+@media(max-width:370px) {
+  .q15-stimmen { grid-template-columns:1fr; }
+  .q15-hinweis { flex-wrap:wrap; }
+}
