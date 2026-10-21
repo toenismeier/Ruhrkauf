@@ -39,8 +39,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11** | `auftraege/wurf2/` |
-| Q25 Produktbilder und Model (Claude) | `feat/q25-produktbilder` | **in Arbeit (Claude)** | `auftraege/wurf2/` |
+| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; Bildschnittstelle steht: `render/src/kit/mode/silhouetten.json` (aus PR #67)** | `auftraege/wurf2/` |
+| Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **Model-Stil von Ummo abgenommen (21.10.), ausgerollt: 106 Silhouetten, Model je Produkt, Einbau Produktentwicklung; CI läuft** | `auftraege/wurf2/` |
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
