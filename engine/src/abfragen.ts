@@ -37,6 +37,7 @@ export interface PostMietvertrag {
   angebotMiete: number;
   mietquoteIst?: number;
   mietquoteNeu?: number;
+  ebitdaHaus?: number;
   empfehlung: 'verlaengern' | 'nachverhandeln' | 'auslaufen';
   frist: number;
 }
@@ -133,6 +134,7 @@ export function posteingang(s: GameState): Posteingang {
         istMiete: h.miete.mieteWoche * 52, angebotMiete: markt * 52,
         mietquoteIst: umsatz ? h.miete.mieteWoche / umsatz : undefined,
         mietquoteNeu: umsatz ? markt / umsatz : undefined,
+        ebitdaHaus: h.kpi?.guv?.ebitda ?? h.kpi?.db,
         empfehlung: mietvertragEmpfehlung(h, markt), frist: e.frist,
       }];
     });

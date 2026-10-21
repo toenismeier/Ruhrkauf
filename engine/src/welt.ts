@@ -635,7 +635,16 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.startMonat = startMonat;
   s.spielStartWoche = startOffset;
   s.woche = startOffset;
-  if (startOffset) for (const h of s.haeuser) h.miete.bisWoche += startOffset;
+  if (startOffset) {
+    // Geschützte Einlaufkohorten, Verbindlichkeiten und noch nicht gestartete Verträge
+    // ebenfalls verschieben: sonst wären sie bei Apr/Jul/Okt schon abgelaufen.
+    for (const h of s.haeuser) h.miete.bisWoche += startOffset;
+    for (const b of s.bestellungen) b.ankunft += startOffset;
+    for (const v of s.verbindlichkeiten) v.faellig += startOffset;
+    for (const a of s.angebote) { a.woche += startOffset; a.frist += startOffset; }
+    for (const e of s.entscheidungen) { e.woche += startOffset; e.frist += startOffset; }
+    for (const m of s.meldungen) m.woche += startOffset;
+  }
   // O07: vor dem Vorjahr, damit Betriebskosten und Vergleichswerte konsistent sind.
   initialisiereHausbetrieb(s);
   erzeugeVorjahrHistorie(s);

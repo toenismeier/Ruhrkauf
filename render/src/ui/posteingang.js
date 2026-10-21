@@ -34,6 +34,7 @@ export function posteingangModul(ctx) {
         '<small>Vermieter: ' + esc(m.vermieter) + '</small>' +
         '<small>Miete p.a. ' + esc(geld(m.istMiete)) + ' → ' + esc(geld(m.angebotMiete)) +
         ' · Quote ' + qual(m.mietquoteIst) + ' → ' + qual(m.mietquoteNeu) + '</small>' +
+        '<small>Haus-DB: ' + (m.ebitdaHaus === undefined ? 'Keine Buchung' : esc(geld(m.ebitdaHaus))) + '</small>' +
         '<small>Empfehlung Immobilien: ' + esc(mietenOptionen.find((x) => x[0] === m.empfehlung)?.[1] || m.empfehlung) + '</small></div>' +
         '<div><label>Entscheidung<select data-po-miet-option="' + esc(m.entscheidungId) + '">' +
           mietenOptionen.map(([value, text]) => '<option value="' + value + '"' +

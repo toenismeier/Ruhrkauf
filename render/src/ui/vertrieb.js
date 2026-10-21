@@ -26,7 +26,14 @@ export function vertriebModul(ctx) {
       '<span><b>' + esc(vj) + '</b><small>Vorjahr</small></span>' +
       '<span class="vtr-ampel ' + z.ampel + '">' +
       (z.ampel === 'rot' ? 'Schwach' : z.ampel === 'gruen' ? 'Gut' : z.ampel === 'gelb' ? 'Beobachten' : 'Ohne Daten') +
-      '</span></div></div>';
+      '</span></div><details class="vtr-details"><summary>Weitere Kennzahlen</summary>' +
+      '<div>Umsatz YTD: ' + geld(z.umsatzYtd) +
+      ' · Haus-DB: ' + geld(z.ebitda) + ' (VJ ' + (z.vorjahrEbitda === undefined ? '—' : geld(z.vorjahrEbitda)) + ')' +
+      ' · Marge VJ: ' + pz(z.vorjahrEbitdaQuote) +
+      ' · Planabweichung: ' + pz(z.planAbweichung) +
+      ' · Frequenz: ' + n(z.frequenz) + ' · Kaufquote: ' + pz(z.kaufquote) +
+      ' · Bon: ' + geld(z.bon) + ' · Personalquote: ' + pz(z.personalquote) +
+      ' · Mietquote: ' + pz(z.mietquote) + '</div></details></div>';
   }
   function darstellen() {
     const d = ctx.E.vertriebUebersicht(ctx.s(), ui);
@@ -43,6 +50,10 @@ export function vertriebModul(ctx) {
     }
     h += '</div><h3>' + esc(d.titel) + '</h3>' +
       '<p class="vtr-hinweis">Haus-DB als EBITDA-Näherung · Vorjahr: 52 simulierte Wochen, anschließend Ist-Werte. Ohne Wirtschaft keine fingierten Ergebnisse.</p>';
+    const typ = ui.ebene === 'hauscluster' ? 'Cluster' : ui.ebene === 'region' ? 'Region' : 'Vergleichsgruppe';
+    const mittel = d.gesamt.anzahl ? geld(d.gesamt.umsatz / d.gesamt.anzahl) : '—';
+    h += '<p class="vtr-hinweis">' + typ + '-Durchschnitt je Haus: ' + mittel +
+      ' Umsatz im gewählten Zeitraum.</p>';
     h += '<div class="vtr-kennzahlen">' +
       kpi('Umsatz', geld(d.gesamt.umsatz), 'YTD ' + geld(d.gesamt.umsatzYtd)) +
       kpi('Vorjahr', d.gesamt.vorjahr === undefined ? 'Noch nicht verfügbar' : geld(d.gesamt.vorjahr),
