@@ -200,3 +200,46 @@ npx tsx scripts/bot.ts 2 260 --tief
 npx tsx scripts/bot.ts 3 260 --tief
 ```
 Das `m7-wochenverlauf.ts`-Skript bleibt die verbindliche Abnahme für **alle drei Stufen**, 13 und 52 Wochen sowie Bot C (mittel, Seeds 1–3). Besonderes Augenmerk: Ausreißer KW 1/13, Cash und Lieferantenzahlungen, Plan-EBITDA/Gläubigerabstimmung in KW 23, Q4- und Jahresumsatz. **In der vorliegenden Laufzeit nicht ausgeführt**: kein Checkout mit GitHub-DNS und installierten Abhängigkeiten. Daher keine behaupteten neuen Q1-Werte, kein als bestanden gemeldeter Test, keine Freigabe zum Merge. Die Platzhalter zwischen den M7-Wochentabellenmarkern bleiben bis zu Claudes echter Messung unverändert.
+
+
+### M7 – Abschnitt 15: Halbjahreseinbruch, Einkaufsursache und Turnaround-Abnahme (21.10.2026)
+
+**Ausgangsmessung Claude auf `37d446a` (Abschnitt 15 auf main):** Januar/Februar leicht −1,54 % und mittel −2,69 % EBITDA-Quote. Ab ungefähr KW 39 ohne Eingriffe wöchentliche EBITDA-Quoten zwischen −24 und −33 %, Insolvenz im ersten Jahr. Bot D (außergerichtlicher Turnaround) ging in KW 36–47 insolvent und wurde in KW 55–66 zerschlagen; EBITDA der letzten 52 Wochen −375 bis −476 Mio. €. Dies sind **Vorher-Werte** – keine Messergebnisse der nachfolgenden Änderung.
+
+**Zentrale Ursache des Einbruchs aus der Quelltextanalyse:**
+1. **Abgeschnittene Herbst-/Winterversorgung:** `einkauf.ts` erzeugt die Vororder der Herbst-/Wintersaison für `saisonStart(1)=32` schon um KW 3–6 (nullbasierte Orderwoche `2 + WG-Offset`). Im Standardstand war `STANDARD_STEUERUNG.modus.saison='verfall'`: Nicht freigegebene Orders wurden nach `EK_PARAM.frist.vororder=3` Wochen endgültig gestrichen. Nach Auslaufen der anfänglichen saisonalen Bestände fehlt neue Ware ausgerechnet vor dem wichtigen vierten Quartal. Im `einkaufVerbrauch` senken geringe frische Bestände über `rw/EK_PARAM.praesentation` die Verkäufe zusätzlich; gealterte Saisonware wird nur begrenzt verkauft und trotzdem fortlaufend abgeschrieben. Fixkosten der Filialen und Zentrale fallen weiterhin an. Dieser Mechanismus erklärt den ab KW 39 stark fallenden Rohertrag **strukturell**. Die tatsächlichen Euroanteile der Bestands-/Fehlmengenwirkung werden erst durch das Jahresdiagnoseskript ermittelt.
+2. **Nicht dynamische Disposition:** Die Einkaufsbasis `st.basisVK` wurde zuvor nur bei `initialisiereEinkauf` gesetzt. Die Engine schreibt `s.basisUmsatz` wöchentlich aus saisonbereinigter Bruttonachfrage fort, aber `einkaufDispo` verwendete weiterhin den alten Umsatzanker. Vor allem Bot D ordnete nach Filialschließungen saisonale Vororders/Nachorders für das ursprüngliche Netz an: Überbestände, Liquiditätsbindung und Abschriften statt Sanierungseffekten.
+3. **Bot D nicht größenneutral:** In `botRegulaerBasis` blieben 35 Schließungen als feste Zahl statt des ursprünglichen Anteils `35 / 180`. Im großen Maßstab wurden so nur ungefähr 9 % statt rund 19 % des operativen Portfolios restrukturiert. Der tatsächliche EBITDA- und Liquiditätseffekt ist wegen Schließungsdauer, Sozialplan und Restmieten zeitverzögert zu messen.
+
+**Behebung (ohne direkte Änderung von EBITDA, Startkasse oder Insolvenzauslösern):**
+
+| Änderung | Funktionswirkung und erwartete Richtung | Kontrollrisiko |
+|---|---|---|
+| `STANDARD_STEUERUNG.modus.saison = 'auto'` | Freigabepflichtige Standard-Saisonorders bleiben während der Frist im Management-Posteingang und werden bei Untätigkeit rechtzeitig automatisch bestellt. Spieler können weiterhin kürzen, ablehnen oder `wgFreigabeModus='verfall'` wählen. Erwartet: Herbstware kommt an, Q4-Fehlmengen sinken und Rohertrag stabilisiert sich. | Größere Warenbestellungen verursachen zunächst Beschaffungszahlungen; OTB und Kreditversicherung bleiben unverändert. |
+| `einkaufDispo`: `st.basisVK` an `s.basisUmsatz[g] * WG-Anteil` gekoppelt | Absatz-/Portfolioveränderungen einschließlich Schließungen fließen in zukünftige NOS-, Saison- und Limitrechnungen ein; vermeidet strukturelle Überbestellung durch veralteten Eröffnungsstand. Keine Koppelung an kurzfristige Warenfehlbestände (keine negative Angebots-/Nachfragespirale). | Bestehende rechtsverbindliche Vororders werden nicht rückwirkend storniert; Umsatz-/Bestands-/Cash-Betrachtung nötig. |
+| `botRegulaerBasis`: 35/180 statt fix 35 Schließungen, Premium und `nurDaten` geschützt | Portfoliosanierung im gleichen relativen Ausmaß wie im alten Maßstab; mehr verlustbringende Häuser verlassen das Netz, mit nachgelagerter Einsparung von Personal, Miete und Nebenkosten. | Mehr Abfindungen und Restmietbelastung beim tatsächlichen Schließungstermin; anfängliche Liquidität unbedingt gegenchecken. |
+
+**Wochentabelle für das vollständige erste Jahr, inklusive GuV und Warenversorgung:** `engine/scripts/m7-jahresdiagnose.ts` erzeugt **genau 52 KW-Zeilen** mit Umsatz, Rohertrag vor Abschriften, Abschriften, GuV-Rohertrag, Personal, Miete, Zentrale, EBITDA-Quote, Fehlumsatz, Bestand, Bestellpipeline, Freigaben, Orderverfall, Cash und Insolvenzphase. Bei Zerschlagung sind spätere KW ausdrücklich „Nicht simuliert“, nicht Nullwerte. Zusätzlich enthalten: Vergleich KW 26–38 versus KW 39–52. Das Skript hat als A/B-Kontrolle `--verfall`, um den früheren Saisonorder-Verfall im aktuellen Code gezielt wieder einzuschalten. Die vorherige Messung aus Abschnitt 15 enthält **keine** 52 Einzelwochen-GuV; ohne tatsächliche Engine-Ausführung sind Euro-Werte nicht seriös einzutragen.
+
+<!-- M7-JAHRESDIAGNOSE:START -->
+
+**Noch nicht ausgeführt.** Die 52-Wochen-Werte werden durch den lokalen Befehl `npx tsx scripts/m7-jahresdiagnose.ts --write-stand` unmittelbar hier ausgegeben. Bis dahin keine erfundenen Einzelwochenzahlen.
+
+<!-- M7-JAHRESDIAGNOSE:ENDE -->
+
+**Abnahme gemäß Abschnitt 14 (Bot D statt Bot C):** `engine/scripts/m7-wochenverlauf.ts` wertet jetzt **mittel Seeds 1–3 / 260 Wochen ohne jede Insolvenz / positives EBITDA letzte 52 Wochen**, leicht komfortabler und schwer mindestens 2/3 erfolgreiche Seeds aus. Ohne Eingriffe muss auf leicht/mittel das erste Jahr ohne Insolvenz bleiben. Bot C wird ergänzend auf mindestens 104 Wochen auf mittel geprüft. Alle Q1-Wochengrenzen bleiben aktiv. Die GuV-Tabellen enthalten jetzt auch die Zentrale und explizit den Rohertrag vor Abschriften. Regressionsfälle in `engine/tests/m7-versorgung.test.ts`.
+
+**Von Claude auszuführen:**
+
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest --runInBand
+npx tsx scripts/m7-jahresdiagnose.ts --verfall       # A/B-Kontrolle: vorheriger Orderverfall
+npx tsx scripts/m7-jahresdiagnose.ts --write-stand   # tatsächliche 52-Wochen-Tabelle
+npx tsx scripts/m7-jahresdiagnose.ts --bot --seed=1  # operative Diagnose Bot D
+npx tsx scripts/m7-wochenverlauf.ts --write-stand    # verbindliche Abnahme Abschnitt 14
+```
+
+**Messstatus:** Quelltexte und Remote-Commits über den GitHub-Connector geschrieben, aber kein ausführbares lokales Repo mit Node-Abhängigkeiten und kein GitHub-DNS im Container. **Weder Typecheck/Jest noch das 52-Wochen- und 260-Wochen-Protokoll wurden hier ausgeführt.** Bis Claudes Zahlen die Kriterien erfüllen, keine Mergefreigabe.
