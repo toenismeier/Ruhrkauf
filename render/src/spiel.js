@@ -139,11 +139,16 @@ const WB_STATUS = { offen: 'Geöffnet', eroeffnung: 'Neueröffnung', raeumung: '
 function groesse() { return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight]; }
 /** Geometrischer Bezug des gewählten Hauses, unabhängig vom Kachelnachladen. */
 function hausKameraPunkt(id) {
-  const gruppe = sb?.haeuser.get(id)?.gruppe;
+  const haus = sb?.haeuser.get(id), gruppe = haus?.gruppe;
   if (gruppe) {
     gruppe.updateWorldMatrix(true, true);
     const box = new THREE.Box3().setFromObject(gruppe);
-    if (!box.isEmpty()) return box.getCenter(new THREE.Vector3());
+    if (!box.isEmpty()) {
+      // setzeMarker/kartenMarker: Parzellenmitte, Bauhöhe + 4 m (Mitte des Hauspins).
+      const p = haus.p;
+      if (p) return new THREE.Vector3(p.x + p.w / 2, (haus.e?.hoehe ?? box.max.y) + 4, p.z + p.d / 2);
+      return box.getCenter(new THREE.Vector3());
+    }
   }
   const box = sb?.statischeHaeuser.get(id)?.bounds;
   return box && !box.isEmpty() ? box.getCenter(new THREE.Vector3()) : null;
