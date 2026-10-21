@@ -52,6 +52,14 @@ function ohneEingriffe(st: SchwierigkeitId): Messung[] {
   for (let i = 0; i < 52 && s.phase !== 'zerschlagen'; i++) {
     const saison = saisonMix(s);
     const k = wocheAbspielen(s);
+    // Auch nicht endliche KPI-Werte und fehlender Umsatz müssen die Abnahme
+    // scheitern lassen: NaN würde numerische Grenzwertvergleiche sonst umgehen.
+    for (const [feld, wert] of Object.entries(k)) {
+      if (typeof wert === 'number' && !Number.isFinite(wert))
+        fehler.push(`${st}: KW ${k.woche + 1} hat ungültigen Wert in ${feld}`);
+    }
+    if (!(k.umsatz > 0))
+      fehler.push(`${st}: KW ${k.woche + 1} hat keinen positiven Umsatz`);
     daten.push({ k, saison, phase: s.phase, insolvenzen: s.insolvenzenGesamt });
   }
   if (daten.length !== 52) fehler.push(`${st}: nur ${daten.length} von 52 Wochen simuliert`);
