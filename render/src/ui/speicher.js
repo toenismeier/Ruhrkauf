@@ -137,7 +137,12 @@ export function speichern(spiel, stadt, ui = {}, platz = 'autosave', name = '', 
     // Vor dem Warten auf die Schreibwarteschlange kopieren, da die Engine weiterläuft.
     const datensatz = {
       format: FORMAT, datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : new Date().toISOString(), stadt,
-      spiel: structuredClone(spiel), ui: structuredClone(ui),
+      // IndexedDB führt beim put() bereits den Structured-Clone-Algorithmus aus.
+      // Vorheriges structuredClone des vollständigen 560-Häuser-Spielstands
+      // verdoppelte den Peak-Speicherbedarf und verursachte auf iOS WebViews
+      // vermeidbaren Speicherdruck. Snapshot stattdessen unmittelbar in der
+      // synchronen Transaktion kopieren; keine Mutation vor dem put().
+      spiel, ui,
       name: String(name || (platz === 'autosave' ? 'Automatisch' : 'Spielstand')).trim().slice(0, 60),
       bild: bildPruefen(bild)
     };
