@@ -53,7 +53,7 @@ export interface Wettbewerber {
   abwehrBis?: number;
   abwehrFaktor?: number;
 }
-export type Lage = '1a' | 'b' | 'center' | 'rand';
+export type Lage = '1a' | 'b' | 'stadtteil' | 'center' | 'rand';
 export type Cluster = 'metropole' | 'grossstadt' | 'mittelstadt';
 export type Region = 'Nord' | 'Ost' | 'West' | 'Mitte' | 'Süd';
 
