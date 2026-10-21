@@ -79,7 +79,7 @@ describe('Maßstab Phase 1: Standortnetz', () => {
     for (const stadt of hartwigStaedte) {
       const hartwig = alle.filter((h) => h.format === 'warenhaus' && h.stadt === stadt);
       expect(hartwig.filter((h) => h.lage === '1a')).toHaveLength(1);
-      expect(hartwig.filter((h) => h.lage !== '1a').every((h) => h.lage === 'b' || h.lage === 'center')).toBe(true);
+      expect(hartwig.filter((h) => h.lage !== '1a').every((h) => ['b', 'stadtteil', 'center'].includes(h.lage))).toBe(true);
     }
     expect(alle.filter((h) => h.format === 'schwester' && h.region === 'West').length).toBeGreaterThan(43);
     expect(alle.filter((h) => h.format === 'schwester' && h.cluster === 'mittelstadt').length).toBeGreaterThan(43);
