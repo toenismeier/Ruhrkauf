@@ -30,10 +30,10 @@ jobs:
       - run: npm run typecheck
         working-directory: engine
       # Mehrere Worker: die Langläufe (Bot über 260 Wochen) sprengen sonst das Zeitlimit.
-      - run: npm test -- --maxWorkers=4 --silent
-        working-directory: engine
       - name: Q06 Marktbeobachtung – 52 Wochen und Meldungszahlen
         run: npx tsx scripts/marktbeobachtung-abnahme.ts
+        working-directory: engine
+      - run: npm test -- --maxWorkers=4 --silent
         working-directory: engine
 
   moebel:
