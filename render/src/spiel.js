@@ -354,6 +354,8 @@ function bahnhofFokussieren() {
 
 function stadtchipSetzen(name) {
   $('stadtname').textContent = name;
+  // Lange Namen (Mönchengladbach) ohne Umbruch: Schrift stufenweise verkleinern.
+  $('stadtname').style.fontSize = name.length > 13 ? '11px' : name.length > 10 ? '12.5px' : '';
   const region = E.stadtRegion(name) ?? s.haeuser.find((h) => h.stadt === name)?.region;
   $('stadtcluster').textContent = region ? 'Region ' + region : '';
 }

@@ -43,8 +43,13 @@ const server = http.createServer((req, res) => {
     seite.on('pageerror', e => fehler.push(e.message));
     await seite.goto(start, { waitUntil: 'load' });
     await seite.locator('#start.an').waitFor();
+    // N09: zuerst Szenario wählen, danach Start; N04-Einführungsfrage schließen.
+    await seite.locator('.sz-karte[data-szenario=standard]').click();
     await seite.locator('#startknopf').click();
     await seite.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length);
+    await seite.waitForTimeout(800);
+    const nie = seite.locator('[data-ein="nie"]');
+    if (await nie.isVisible().catch(() => false)) await nie.click();
     const bild = async (name) => seite.screenshot({ path: path.join(ausgabe, name + '.png') });
 
     await bild('02-bot-stadtchip-essen');
@@ -64,14 +69,14 @@ const server = http.createServer((req, res) => {
       assert.match(await seite.locator('.haus-reiter').innerText(), /Etagen/);
     }
 
-    await seite.evaluate(() => { window.spiel.schliessePanel(); window.spiel.stadt('Frankfurt (Oder)'); });
+    await seite.evaluate(() => { window.spiel.schliessePanel(); window.spiel.stadt('Mönchengladbach'); });
     await bild('03-langer-stadtname');
     if (nachher) {
       const chip = await seite.evaluate(() => {
         const s = document.getElementById('stadtname'), stil = getComputedStyle(s);
         return { text: s.textContent, ellipsis: stil.textOverflow, overflow: stil.overflow, w: s.getBoundingClientRect().width };
       });
-      assert.equal(chip.text, 'Frankfurt (Oder)');
+      assert.equal(chip.text, 'Mönchengladbach');
       assert.equal(chip.overflow, 'visible', 'Langer Stadtname muss vollständig sichtbar sein');
       assert.ok(chip.w > 0);
     }
