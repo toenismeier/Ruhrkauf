@@ -30,7 +30,8 @@ const { chromium } = require('playwright');
     }, woche);
     const bild = async (datei) => {
       await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
-      await page.screenshot({ path: path.join(bilder, datei) });
+      // CI-Runner rendern die Stadt nach 49 Wochen langsamer; Bildschirmfoto mit großzügigem Zeitlimit.
+      await page.screenshot({ path: path.join(bilder, datei), timeout: 120000 });
       console.log('Q06-Zeitungsbild:', path.join(bilder, datei));
     };
     await spieleBis(3);
