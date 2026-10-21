@@ -631,12 +631,12 @@ export const SLOT_ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus'
 
 /**
  * Sucht ein Kreuz aus zwei Haupteinkaufsstraßen (z-Linie kF, x-Linie lF) nahe dem Zentrum und verteilt die
- * 1a- und b-Standorte auf Blöcke daran. Die Blöcke werden so vergrößert, dass die Slots hineinpassen.
+ * 1a-, b- und Stadtteilstandorte auf Blöcke daran. Die Blöcke werden so vergrößert, dass die Slots hineinpassen.
  * Ergebnis: E.einkauf (Slots in bebauten Blöcken), E.randStandorte (center/rand, später), E.fz, E.einkaufslage.
  */
 function einkaufslage(E, standorte) {
   const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? '1a', rolle: st.rolle ?? 'warenhaus' }));
-  const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b');
+  const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b' || e.lage === 'stadtteil');
   E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') && e.rolle !== 'outlet');
   E.einkauf = [];
   E.einkaufZellen = new Set();
@@ -710,19 +710,19 @@ function einkaufsKreuz(E, innen, zc) {
   for (const e of a1) { kand = kand.filter((q) => zelleFrei(E, q.i, q.j)); if (kand.length) nimmZelle(e, kand[0], '1a'); else zuB.push(e); }
   // Nebenlagen: frei, nicht an der Einkaufsstraße, 1,5 bis 3,5 Zellen vom Kreuz, gern an einer Hauptstraße
   const kx = kF - 0.5, kz = lF - 0.5;
-  for (const e of [...innen.filter((x) => x.lage === 'b'), ...zuB]) {
+  for (const e of [...innen.filter((x) => x.lage === 'b'), ...zuB, ...innen.filter((x) => x.lage === 'stadtteil')]) {
     const l = [];
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       if (!zelleFrei(E, i, j) || i === kF - 1 || i === kF || j === lF - 1 || j === lF) continue;
       const dd = wurzelSumme(i + 0.5 - kx, j + 0.5 - kz);
-      if (dd < 1.2 || dd > 4) continue;
+      if (dd < (e.lage === 'stadtteil' ? 2.5 : 1.2) || dd > (e.lage === 'stadtteil' ? 6.5 : 4)) continue;
       const anHaupt = istHaupt(E.zTyp[i + 1]) || istHaupt(E.xTyp[j + 1]) || istHaupt(E.zTyp[i]) || istHaupt(E.xTyp[j]);
       const nachbar = [...E.einkaufZellen].some((s) => { const [a, b] = s.split(',').map(Number); return Math.abs(a - i) + Math.abs(b - j) <= 1; });
-      l.push([{ i, j, ecke: '+x+z' }, (anHaupt ? 2.5 : 1) / (0.5 + Math.abs(dd - 2.2)) * (nachbar ? 0.3 : 1)]);
+      l.push([{ i, j, ecke: '+x+z' }, (anHaupt ? 2.5 : 1) / (0.5 + Math.abs(dd - (e.lage === 'stadtteil' ? 4.5 : 2.2))) * (nachbar ? 0.3 : 1)]);
     }
     kand = kand.filter((q) => zelleFrei(E, q.i, q.j));
-    if (l.length) nimmZelle(e, wahlGewichtet(r, l), 'b');
-    else if (kand.length) nimmZelle(e, kand[0], 'b');
+    if (l.length) nimmZelle(e, wahlGewichtet(r, l), e.lage === 'stadtteil' ? 'stadtteil' : 'b');
+    else if (kand.length) nimmZelle(e, kand[0], e.lage === 'stadtteil' ? 'stadtteil' : 'b');
   }
   // Blöcke vergrößern, damit die Slots passen (Restbebauung bleibt dahinter)
   for (const e of meine) {
