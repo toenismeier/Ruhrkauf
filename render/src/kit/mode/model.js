@@ -140,7 +140,7 @@ function koerperSVG(K, haut) {
     return glatt(sp([[hx - 3.2, hy - 1], [hx + 3, hy - 1], [hx + 3.4, hy + 6], [hx + 1.4, hy + 12], [hx - 1.6, hy + 11.4], [hx - 3.4, hy + 6]]));
   };
   // hinten liegende (rechte) Gliedmaßen dunkler
-  t.push(`<path d="${bein(1)}" fill="${hd}"/>`, `<path d="${arm(1)}" fill="${hd}"/>`, `<path d="${hand(1)}" fill="${hd}"/>`);
+  t.push(`<path d="${bein(1)}" fill="${haut}"/>`, `<path d="${arm(1)}" fill="${haut}"/>`, `<path d="${hand(1)}" fill="${haut}"/>`);
   t.push(`<path d="${bein(-1)}" fill="${haut}"/>`);
   const torso = glatt([...spiegelX([...K.torso].reverse()), ...K.torso.slice(1), [100, K.schritt[1] - 1]].filter((p, i, a) => i === 0 || p[0] !== a[i - 1][0] || p[1] !== a[i - 1][1]));
   t.push(`<path d="${torso}" fill="${haut}"/>`);
@@ -213,7 +213,7 @@ function oberteil(K, S, o) {
     const innen = K.armI.filter((p) => p[1] < yEnde).map(([x, y]) => [x - weit * 0.6, y]).reverse();
     const ax = K.armAX(yEnde) + weit, ix = K.armIX(yEnde) - weit * 0.6;
     const pts = [[sw[0] - 2, sw[1] - 2], ...aussen.slice(1), [ax + (o.aermel === 'kurz' ? 1.5 : 0.5), yEnde, E], [ix - (o.aermel === 'kurz' ? 1 : 0), yEnde + 1, E], ...innen, [K.armI[0][0] - 6, K.armI[0][1] - 6]];
-    t.push(flaeche(S, glatt(sp(pts)), { schatten: s > 0 }));
+    t.push(flaeche(S, glatt(sp(pts))));
     if (o.aermel === 'lang' && (o.rippbund || o.buendchen)) t.push(flaeche(S, glatt(sp([[ix, yEnde - 6, E], [ax, yEnde - 6, E], [ax, yEnde + 0.5, E], [ix, yEnde + 1, E]])), { ton: -0.1 }));
   }
   // Rumpf
@@ -267,7 +267,7 @@ function hose(K, S, o) {
     }
     aussen[aussen.length - 1][2] = E; innen[innen.length - 1][2] = E;
     const pts = [[100, bund, E], ...aussen, ...innen.reverse(), [100.5, K.schritt[1] - 3]];
-    t.push(flaeche(S, glatt(sp(pts), true, 0.35), { schatten: s > 0 }));
+    t.push(flaeche(S, glatt(sp(pts), true, 0.35)));
     const xa = aussen.at(-1)[0], xi = innen[0][0];
     if (o.saum === 'offen') {
       t.push(`<path d="M${f(sp([[xi, 0]])[0][0])} ${f(ende - 1.5)} L${f(sp([[xa, 0]])[0][0])} ${f(ende - 1.5)}" stroke="${hell(S.c, 0.4)}" stroke-width="1.3" opacity="0.8"/>`);
@@ -321,13 +321,13 @@ function jacke(K, S, o) {
     const weit = 3;
     const aussen = K.armA.map(([x, y]) => [x + weit, y]);
     const innen = K.armI.map(([x, y]) => [x - weit * 0.6, y]).reverse();
-    t.push(flaeche(S, glatt(sp([[K.schulter.at(-1)[0] - 1, K.schulter.at(-1)[1] - 3], ...aussen.slice(1, -1), [aussen.at(-1)[0] + 0.5, K.m.handgelenk + 1, E], [innen[0][0] - 0.5, K.m.handgelenk + 1.5, E], ...innen.slice(1), [K.armI[0][0] - 6, K.armI[0][1] - 6]])), { schatten: s > 0 }));
+    t.push(flaeche(S, glatt(sp([[K.schulter.at(-1)[0] - 1, K.schulter.at(-1)[1] - 3], ...aussen.slice(1, -1), [aussen.at(-1)[0] + 0.5, K.m.handgelenk + 1, E], [innen[0][0] - 0.5, K.m.handgelenk + 1.5, E], ...innen.slice(1), [K.armI[0][0] - 6, K.armI[0][1] - 6]]))));
     // Vorderteil je Seite (offen in der Mitte bis zur Knopfung)
     const plus = 5;
     const seite = [[100 + K.hals.b + 1, K.hals.y1 - 4, E], [K.schulter.at(-1)[0] + 2, K.schulter.at(-1)[1] - 2], [100 + K.breite(K.m.brust) + plus, K.m.brust], [100 + K.breite(K.m.taille) + plus - (o.guertel ? 2 : 0), K.m.taille], [100 + K.breite(K.m.huefte) + plus, K.m.huefte]];
     if (unten > K.m.huefte) seite.push([100 + K.breite(K.m.huefte) + plus + (unten - K.m.huefte) * 0.06, unten, E]); else seite[seite.length - 1][2] = E;
     const mitteUnten = [100 - 1.5, unten + 1, E], mitteOben = [100 - 1.5, K.m.brust - 2, E];
-    t.push(flaeche(S, glatt(sp([...seite, mitteUnten, mitteOben]), true, 0.35), { schatten: s > 0 }));
+    t.push(flaeche(S, glatt(sp([...seite, mitteUnten, mitteOben]), true, 0.35)));
     if (o.revers) t.push(flaeche(S, glatt(sp([[100 + K.hals.b + 1, K.hals.y1 - 4, E], [100 + K.hals.b + 9, K.m.schulterY + 4, E], [100 + 6, K.m.brust + 2, E], [100 - 1.5, K.m.brust - 2, E]])), { ton: s < 0 ? 0.1 : -0.04 }));
     if (o.steppung) for (let y = K.m.schulterY + 10; y < unten - 3; y += 8.5) t.push(`<path d="M${f(sp([[100 - 1, 0]])[0][0])} ${f(y)} Q${f(sp([[100 + K.breite(y) / 2, 0]])[0][0])} ${f(y + 1.6)} ${f(sp([[100 + K.breite(y) + 4, 0]])[0][0])} ${f(y)}" stroke="${S.cD}" stroke-width="0.8" fill="none"/>`);
     // Tasche
