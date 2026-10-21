@@ -24,4 +24,7 @@ const eintraege = STAEDTE.flatMap((stadt) => haeuser
         new THREE.Vector3(gebaeude.w + 4, gebaeude.hoehe, gebaeude.d + 4));
     },
   })));
-zeigeKatalog(eintraege, { titel: 'Q21 · Warenhausvielfalt – Berlin, Hamburg, München, Essen', spalten: 4, kachel: [330, 330] });
+// Katalog erst nach dem load-Ereignis bauen (wie beim Gesamtatlas).
+setTimeout(() => {
+  zeigeKatalog(eintraege, { titel: 'Q21 · Warenhausvielfalt – Berlin, Hamburg, München, Essen', spalten: 4, kachel: [330, 330] });
+}, 50);
