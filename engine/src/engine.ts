@@ -229,6 +229,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     // dann Summen und EBITDA daraus neu abschließen: keine stille
     // Rundungsdifferenz innerhalb einer Haus-GuV.
     for (const key of Object.keys(g) as (keyof typeof g)[]) g[key] = eur(g[key]);
+    g.wareneinsatz = g.umsatz - g.bruttogewinn;
     guvAbschluss(g);
     kpi.guv = g;
     // Haus-DB umfasst alle tatsächlich angefallenen operativen Filialkosten.
