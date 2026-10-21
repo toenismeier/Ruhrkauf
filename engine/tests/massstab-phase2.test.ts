@@ -20,7 +20,8 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     const s = neueWelt(seed);
     const summen = { A: 0, B: 0, C: 0, premium: 0, sport: 0 };
     for (const h of s.haeuser) {
-      if (h.nurDaten) continue;
+      // Volkskauf und FUNDUS haben eigene Wirtschaft (engine-formate.md), nicht die Hartwig-Klassenanker.
+      if (h.nurDaten || h.format === 'schwester' || h.format === 'outlet') continue;
       const k = h.format === 'sport' ? 'sport' : h.klasse === 'premium' ? 'premium' : h.hausklasse;
       if (!k) throw new Error(`Haus ${h.id} ohne Klasse`);
       summen[k] += umsatzbasis(h);
@@ -29,8 +30,8 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
       const abweichung = Math.abs(summen[k] / UMSATZZIELE_JAHR1[k] - 1);
       expect(abweichung).toBeLessThan(0.0001);
     }
-    expect(s.haeuser.filter((h) => !h.nurDaten)).toHaveLength(409);
-    expect(s.haeuser.filter((h) => h.nurDaten)).toHaveLength(152);
+    expect(s.haeuser.filter((h) => !h.nurDaten)).toHaveLength(561);
+    expect(s.haeuser.filter((h) => h.nurDaten)).toHaveLength(0);
   });
 
   test('Startfinanzierung wächst mit dem Konzernmaßstab', () => {
@@ -45,24 +46,26 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     expect(s.einkauf.grenze).toBe(grenzeSoll);
   });
 
-  test('Volkskauf und FUNDUS besitzen Warengruppen, bleiben aber wirtschaftlich inaktiv', () => {
+  test('Volkskauf und FUNDUS besitzen Warengruppen und sind wirtschaftlich aktiv', () => {
     const s = neueWelt(1);
     const schwester = s.haeuser.filter((h) => h.format === 'schwester');
     const fundus = s.haeuser.filter((h) => h.format === 'outlet');
     expect(schwester).toHaveLength(86);
     expect(fundus).toHaveLength(66);
-    expect(gruppenFuer('schwester')).toEqual(gruppenFuer('warenhaus'));
+    // Volkskauf: Warenhaussortiment ohne Food, Untergeschoss nur Lager (engine-formate.md 2).
+    expect(gruppenFuer('schwester')).toEqual(gruppenFuer('warenhaus').filter((g) => g !== 'food'));
     expect(gruppenFuer('outlet')).toEqual(['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']);
     for (const h of [...schwester, ...fundus]) {
-      expect(h.nurDaten).toBe(true);
-      expect(h.miete.mieteWoche).toBe(0);
-      expect(h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen).toBe(0);
+      expect(h.nurDaten).toBe(false);
+      expect(h.miete.mieteWoche).toBeGreaterThan(0);
+      expect(h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen).toBeGreaterThan(0);
       expect(h.flaechen.length).toBeGreaterThan(1);
       for (const g of gruppenFuer(h.format)) {
         expect(h.flaechen.some((f) => f.gruppe === g && f.qm > 0)).toBe(true);
         expect(h.potenzial[g]).toBeGreaterThan(0);
       }
     }
+    for (const h of fundus) for (const f of h.flaechen) expect(f.konzept).toBe('offprice');
     expect(s.basisUmsatz.schuhe).toBeUndefined();
   });
 
@@ -81,7 +84,7 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     for (const h of exportiert) {
       const f = h.flaechen as { gruppe?: string; konzept: string }[];
       expect(f.map((x) => x.gruppe)).toEqual(['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']);
-      expect(f.every((x) => x.konzept === 'eigen')).toBe(true);
+      expect(f.every((x) => x.konzept === 'offprice')).toBe(true);
       expect((h.name as string).startsWith('FUNDUS ' + h.stadt)).toBe(true);
       expect(h.lage === 'rand' ? (h.baujahr as number) >= 1998 : (h.baujahr as number) >= 1965).toBe(true);
     }

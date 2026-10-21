@@ -37,9 +37,9 @@ describe('M7 – großer Maßstab: Ursachen und Schwierigkeit', () => {
     expect(mittel.quote).toBeGreaterThan(schwer.quote);
   });
 
-  test('nur die 409 wirtschaftlich aktiven Häuser tragen Q1-Kosten', () => {
+  test('alle 561 Häuser sind seit engine-formate wirtschaftlich aktiv und tragen Q1-Kosten', () => {
     const s = neuesSpiel(1);
-    expect(s.haeuser.filter((h) => !h.nurDaten)).toHaveLength(409);
+    expect(s.haeuser.filter((h) => !h.nurDaten)).toHaveLength(561);
     for (const h of s.haeuser.filter((x) => x.nurDaten)) {
       expect(h.miete.mieteWoche).toBe(0);
     }

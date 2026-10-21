@@ -173,6 +173,8 @@ export function botTurnaround(s: GameState, log = false): void {
     for (const programm of Object.keys(FILIAL_PROGRAMME) as FilialProgrammId[]) {
       tu({ typ: 'filialProgramm', programm });
     }
+    // Bot T saniert ohne Schließungen und nutzt den echten FUNDUS-Warenfluss.
+    tu({ typ: 'altwareOutlet', quote: 0.8 });
     tu({ typ: 'wgServicegrad', wg: 'alle', ziel: 0.98 });
     tu({ typ: 'wgLimit', wg: 'alle', faktor: 1.00 });
   }
@@ -239,7 +241,9 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     // Maximal der ursprüngliche Portfolioanteil, aber verteilt über Zeit.
     // Geschlossen wird nur bei negativem FILIAL-EBITDA: auch ein schwacher
     // Standort mit positivem operativem Beitrag darf nicht Umsatz vernichten.
-    const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium');
+    // FUNDUS ist der Altwarekanal des Konzerns (Bot T steuert ihn); Bot D schließt
+    // nur Hartwig, Sport und die schwächsten Volkskauf-Häuser (engine-formate.md 6).
+    const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium' && h.format !== 'outlet');
     const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
     const inArbeit = pool.filter((h) => h.status !== 'offen').length;
     const verlustIds = new Set(pool.filter((h) => (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
