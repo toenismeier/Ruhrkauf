@@ -3,6 +3,7 @@
 // Daten: marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalender, aktionsAuswertung; Aktionen über fuehreAus.
 // Prüfung wie im Vorstand: data-p-Werte gegen eine frische Darstellung aus den Abfragen.
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
+import { ortDaten, stadtAnsicht, kanaeleAnsicht } from './marketing-q16.js';
 import { werteSammler, vergleiche, schalter, segment, regler, stepper, kz, wocheText } from './vorstand.js';
 
 const ALTER = { jung: 'unter 30', mitte: '30 bis 49', aelter: '50 bis 64', senioren: '65 plus' };
@@ -29,10 +30,10 @@ export function marketingModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.marketingUebersicht === 'function';
   const ui = {
-    aktiv: false, seite: 'uebersicht', jahr: null, aktion: null, planen: null, kanal: null,
+    aktiv: false, seite: 'uebersicht', jahr: null, aktion: null, planen: null, kanal: null, stadt: null, region: 'alle', kanalScroll: 0,
     crm: { seg: 0, kanal: 'mail', angebot: 'coupon', prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: 'monatlich', wochen: 13, kontrolle: true },
   };
-  const tabs = () => `<div class="tabs">${[['uebersicht', 'Übersicht'], ['kanaele', 'Kanäle'], ['karte', 'Karte'], ['crm', 'CRM'], ['kalender', 'Kalender']].map(([id, t]) => `<button class="tab ${ui.seite === id || (id === 'kalender' && ui.seite === 'aktion') ? 'an' : ''}" data-a="seite" data-v="${id}">${t}</button>`).join('')}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
+  const tabs = () => `<div class="tabs">${[['uebersicht', 'Übersicht'], ['kanaele', 'Kanäle'], ['stadt', 'Städte'], ['karte', 'Karte'], ['crm', 'CRM'], ['kalender', 'Kalender']].map(([id, t]) => `<button class="tab ${ui.seite === id || (id === 'kalender' && ui.seite === 'aktion') ? 'an' : ''}" data-a="seite" data-v="${id}">${t}</button>`).join('')}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
 
   // ─────────────────────────── Übersicht
   function uebersicht(P) {
@@ -53,24 +54,9 @@ export function marketingModul(ctx) {
     return { titel: 'Marketing', unter: `Werbequote ${pz(u.werbequoteNetto, 1)} · ${u.kampagnenAktiv} CRM-Kampagnen aktiv · KW ${u.kw} / ${u.jahr}`, html: h };
   }
 
-  // ─────────────────────────── Kanäle
-  function kanaele(P) {
-    const k = E.kanaele(s());
-    let h = tabs();
-    h += `<div class="raster">${kz('Kanäle je Woche', P('kn:summe', geld(k.summeWoche)))}${kz('Anteil am Umsatz', P('kn:quote', pz(k.quote, 2)))}</div>`;
-    h += `<div class="oknoepfe unten2"><button data-a="kanalAlle" data-v="0.9">Alle −10 %</button><button data-a="kanalAlle" data-v="1.1">Alle +10 %</button></div>`;
-    for (const c of k.kanaele) {
-      const auf = ui.kanal === c.id;
-      h += `<div class="karte kanal"><div class="ohead klickbar" data-a="kanalAuf" data-v="${c.id}"><b>${esc(c.name)}</b><i>${esc(c.text)}</i></div>`;
-      h += `<div class="regler">${stepper('kanalBudget', P(`kn:${c.id}:woche`, geld(c.budgetWoche)), `${P(`kn:${c.id}:jahr`, geld(c.budgetJahr), 'span')} im Jahr · Start ${geld(c.startBudgetWoche)}`, ` data-k="${c.id}"`)}</div>`;
-      h += `<div class="mzeile"><span>Anteil am Budget</span><span class="mbalken"><span style="width:${(c.anteil * 100).toFixed(0)}%;background:#2f63b5"></span></span>${P(`kn:${c.id}:anteil`, pz(c.anteil))}</div>`;
-      h += `<div class="mzeile"><span>Wirkung</span><span class="mbalken"><span style="width:${Math.min(100, c.wirkung * 50).toFixed(0)}%;background:#2f8f5b"></span></span>${P(`kn:${c.id}:wirkung`, dez(c.wirkung, 2))}</div>`;
-      if (c.abnutzung > 0.02) h += `<div class="mzeile"><span>Abnutzung</span><span class="mbalken"><span style="width:${Math.min(100, c.abnutzung * 300).toFixed(0)}%;background:#d23c32"></span></span>${P(`kn:${c.id}:abnutzung`, pz(c.abnutzung))}</div>`;
-      if (auf) h += `<div class="passung">${Object.entries(c.reichweite).map(([g, x]) => `<div><span class="psaeule"><span style="height:${(x * 100).toFixed(0)}%"></span></span><b>${pz(x)}</b><i>${ALTER[g]}</i></div>`).join('')}</div><div class="olief">Reichweite je Altersgruppe · Marke ${dez(c.marke, 1)} · Aktion ${dez(c.aktion, 1)}${c.regional ? ' · regional steuerbar' : ''}</div>`;
-      h += '<div class="zeile unter"></div></div>';
-    }
-    return { titel: 'Kanäle', unter: `${k.kanaele.length} Kanäle · ${geld(k.summeWoche)} je Woche`, html: h };
-  }
+  // ─────────────────────────── Q16, bestehende Engine-Abfragen und Aktionen
+  function kanaele(P) { return kanaeleAnsicht(E, s, ui, P); }
+  function staedte(P) { return stadtAnsicht(E, s, ui, P); }
 
   // ─────────────────────────── Karte und App
   function karte(P) {
@@ -196,15 +182,19 @@ export function marketingModul(ctx) {
   function rendern() {
     const S = werteSammler();
     if (!da) return { S, r: { titel: 'Marketing', unter: '', html: '<div class="leise">Die Engine liefert noch kein Marketing.</div>' } };
-    const f = { kanaele, karte, crm, kalender, aktion }[ui.seite] ?? uebersicht;
+    const f = { kanaele, stadt: staedte, karte, crm, kalender, aktion }[ui.seite] ?? uebersicht;
     return { S, r: f(S.P) };
   }
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
+    const altKar = document.querySelector('#pinhalt .mk-kanalreihe');
+    if (altKar) ui.kanalScroll = altKar.scrollLeft;
     const { r } = rendern();
     ctx.panel(r.titel, r.unter, r.html, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
+    const neuKar = document.querySelector('#pinhalt .mk-kanalreihe');
+    if (neuKar) neuKar.scrollLeft = ui.kanalScroll;
   }
   function tun(aktion, halten = true) {
     const r = E.fuehreAus(s(), aktion);
@@ -219,7 +209,10 @@ export function marketingModul(ctx) {
     const a = el.dataset.a, v = el.dataset.v, st = s(), B = ui.crm;
     switch (a) {
       case 'eigenmarkeGruenden': return ctx.neueEigenmarke?.();
-      case 'seite': ui.seite = v; ui.planen = null; return zeigen();
+      case 'seite': ui.seite = v; ui.planen = null; ui.kanalScroll = 0; return zeigen();
+      case 'stadtShift': { const d = ortDaten(E, s, ui); if (!d.auswahl.length) return; ui.stadt = d.auswahl[(d.index + Number(v) + d.auswahl.length) % d.auswahl.length].stadt; return zeigen(true); }
+      case 'stadtSymbol': ui.stadt = v; return zeigen(true);
+      case 'teamAendern': return tun({ typ: 'kanalTeam', kanal: el.dataset.k, delta: Number(v) > 0 ? 1 : -1 });
       case 'aktion': ui.seite = 'aktion'; ui.aktion = v; return zeigen();
       case 'kanalAuf': ui.kanal = ui.kanal === v ? null : v; return zeigen(true);
       case 'kanalBudget': return tun({ typ: 'kanalBudget', kanal: el.dataset.k, faktor: Number(v) > 0 ? 1.1 : 1 / 1.1 });
@@ -274,6 +267,18 @@ export function marketingModul(ctx) {
   }
   function wechsel(el) {
     const a = el.dataset.a;
+    if (a === 'stadtRegionChoose') { ui.region = el.value; ui.stadt = null; ui.kanalScroll = 0; return zeigen(true); }
+    if (a === 'stadtChoose') { ui.stadt = el.value; return zeigen(true); }
+    if (a === 'kanalBudgetSlider') {
+      const v = Number(el.value);
+      if (Number.isFinite(v)) return tun({ typ: 'kanalBudget', kanal: el.dataset.k, euroWoche: v });
+      return;
+    }
+    if (a === 'kanalRegionSlider') {
+      const v = Number(el.value);
+      if (Number.isFinite(v)) return tun({ typ: 'kanalBudget', kanal: el.dataset.k, regionen: { [el.dataset.region]: v } });
+      return;
+    }
     if (a === 'crmSeg') { ui.crm.seg = Number(el.value); zeigen(true); }
     if (a === 'planAnlass') {
       const K = E.aktionskalender(s(), ui.planen.jahr), an = K.anlaesse.find((x) => x.id === el.value);
@@ -284,6 +289,13 @@ export function marketingModul(ctx) {
   }
   const inhalt = document.getElementById('pinhalt');
   inhalt.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (!el || el.disabled || el.tagName === 'SELECT') return; klick(el); });
+  inhalt.addEventListener('input', (ev) => {
+    if (!ui.aktiv) return;
+    const el = ev.target.closest('input[data-a="kanalBudgetSlider"], input[data-a="kanalRegionSlider"]');
+    if (!el) return;
+    const out = el.closest('.mk-budgetbox')?.querySelector('output');
+    if (out) out.textContent = el.dataset.a === 'kanalBudgetSlider' ? geld(Number(el.value)) : Number(el.value).toFixed(1).replace('.', ',') + ' ×';
+  });
   inhalt.addEventListener('change', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (el) wechsel(el); });
 
   return {
