@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node spiel-render.js --bundle",
-    "test": "node --test tests/einstellungen.test.cjs && node spiel-render.js --bundle && node tests/mobil-smoke.js && node tests/kamera-haus-mobil-smoke.cjs",
+    "test": "node --test tests/einstellungen.test.cjs tests/silhouetten.test.mjs && node spiel-render.js --bundle && node tests/mobil-smoke.js && node tests/kamera-haus-mobil-smoke.cjs",
     "smoke:kamera-haus": "node spiel-render.js --bundle && node tests/kamera-haus-mobil-smoke.cjs",
     "smoke:panels": "node spiel-render.js --nur-panels",
     "smoke:karte": "node spiel-render.js --nur-karte",
