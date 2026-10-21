@@ -1864,13 +1864,13 @@
       "teile": 268870,
       "strasse": 3272,
       "haeuser": 265598,
-      "instanzen": 45591,
+      "instanzen": 45592,
       "drawCallsInstanzen": 101
     }
   },
   "pruefsummen": {
     "stadtplan": "8263a1c9ce578c7143422ec60b5f32c25bc28651f27a1c03c39509c3b5b4d0de",
-    "geometrie": "fa0e74493351ed6328deef0b3223ff40282934c01d19bd3b2b9df4167ee07734",
-    "bildReferenz": "d8dd5ed076e5511d2fe6a5a2c125882cd582d39bc6ed91dc56e763a6902dfdb1"
+    "geometrie": "8bddd589dd6ef5e48c507bb605ac0d2a04d4d6e38330b2e97b90af682f9536c2",
+    "bildReferenz": "dfa5725abd37852257d7a03cbce7853014359c01ecb41ad5c841eecd3c7bcfc6"
   }
 }

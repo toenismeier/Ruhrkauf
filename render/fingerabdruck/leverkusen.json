@@ -2370,13 +2370,13 @@
       "teile": 333554,
       "strasse": 3816,
       "haeuser": 329738,
-      "instanzen": 44916,
+      "instanzen": 44915,
       "drawCallsInstanzen": 110
     }
   },
   "pruefsummen": {
     "stadtplan": "b93e3ea921fdaf6b3009ebc81c0b04d1fd6b8cc2bd57d29da59c13a8290ad1f5",
-    "geometrie": "ddcf25321590ca68cfcdf555e50894ba5071c7a2d7b6319e6addeab2b8a3979a",
-    "bildReferenz": "250156d0f9c59e79774c52c8a7ddf7245efd21fb07f86cb6fb4cc0ba65f67727"
+    "geometrie": "247696ed0b1856d61c8a18c2d9500982d33a37a5c3ab02bc54f4a1a118931cd9",
+    "bildReferenz": "6c8cf6aee6fc5b03f05c2435cc52dda7255d88d68912e0ead9bc90e91557bb7b"
   }
 }

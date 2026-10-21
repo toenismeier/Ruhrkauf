@@ -39,7 +39,7 @@
       {"id":"bloecke/b29","bauer":"bebaut","lage":[609.5,350,70,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"3405cd56a42a59ca"},
       {"id":"bloecke/b3","bauer":"schloss","lage":[123,350,170.5,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"a06d1be8c5b09fcc"},
       {"id":"bloecke/b30","bauer":"bebaut","lage":[702,350,66,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"6647695000cc97ea"},
-      {"id":"bloecke/b31","bauer":"bebaut","lage":[123,464,70,84],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"41d32706c3fa9588"},
+      {"id":"bloecke/b31","bauer":"bebaut","lage":[123,464,70,84],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"0c6fdf3189287cad"},
       {"id":"bloecke/b32","bauer":"bebaut","lage":[215.5,464,78,84],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"8b9663aea20be1e4"},
       {"id":"bloecke/b33","bauer":"bebaut","lage":[316,464,90,84],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"ff3a1d6e508153de"},
       {"id":"bloecke/b34","bauer":"bebaut","lage":[438,464,64,84],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"be2e64be5d9670ca"},
@@ -550,11 +550,8 @@
       {"id":"parzellen/p455","bauer":"stadthaus","lage":[139,464,13.07,16],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"7c6b2a7a743ad19a"},
       {"id":"parzellen/p456","bauer":"stadthaus","lage":[152.07,464,12.05,16],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"b27be83ec27df264"},
       {"id":"parzellen/p457","bauer":"stadthaus","lage":[164.11,464,12.89,16],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"35633f789025671a"},
-      {"id":"parzellen/p458","bauer":"stadthaus","lage":[177,480,16,10.4],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"eae476437999dd0d"},
-      {"id":"parzellen/p459","bauer":"stadthaus","lage":[177,490.4,16,16.82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"cb42cdc8476bf4fe"},
+      {"id":"parzellen/p458","bauer":"slot:mitte_wiederaufbau","lage":[177,480,16,52],"drehung":0,"variante":"geschaeftshaus","standort":null,"pruefsumme":"de57653fbc49ebbb"},
       {"id":"parzellen/p46","bauer":"eck","lage":[123,100,16.5,16.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"5396bcabbb4c048d"},
-      {"id":"parzellen/p460","bauer":"stadthaus","lage":[177,507.22,16,12.91],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"8cd45f9f85f8f059"},
-      {"id":"parzellen/p461","bauer":"stadthaus","lage":[177,520.13,16,11.87],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"f77dbf64b1ec9b5c"},
       {"id":"parzellen/p462","bauer":"stadthaus","lage":[123,482,16,20.58],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"918437b0b9386412"},
       {"id":"parzellen/p463","bauer":"stadthaus","lage":[123,502.58,16,14.38],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"ef3c698af984de1c"},
       {"id":"parzellen/p464","bauer":"stadthaus","lage":[123,516.96,16,15.04],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"fa806f82afa4a490"},
@@ -1249,7 +1246,7 @@
       {"id":"strassen/s98","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"98d656ff427c0613"},
       {"id":"strassen/s99","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"a534478b2c2a17d7"}
     ],
-    "gesamt": "82503bbec39596b8"
+    "gesamt": "18485432081f910e"
   },
   "geometrie": {
     "kacheln": [
@@ -1651,11 +1648,8 @@
       {"id":"p455","teile":429,"dreiecke":6260,"boundingBox":[138.98,0,463.41,152.11,32.99,481.52]},
       {"id":"p456","teile":130,"dreiecke":1540,"boundingBox":[152.05,0,463.45,164.15,27.98,481.62]},
       {"id":"p457","teile":341,"dreiecke":5416,"boundingBox":[164.09,0,463.4,177.04,32.88,481.23]},
-      {"id":"p458","teile":125,"dreiecke":1490,"boundingBox":[177,0,479.98,193.6,21.79,490.44]},
-      {"id":"p459","teile":173,"dreiecke":2066,"boundingBox":[177,0,490.38,193.36,23.69,507.26]},
+      {"id":"p458","teile":216,"dreiecke":3534,"boundingBox":[177,0.21,480,193,6.84,532]},
       {"id":"p46","teile":402,"dreiecke":4842,"boundingBox":[123,0,100,141.12,23.52,118.12]},
-      {"id":"p460","teile":134,"dreiecke":1598,"boundingBox":[177,0,507.2,194.01,23.23,520.17]},
-      {"id":"p461","teile":149,"dreiecke":1768,"boundingBox":[177,0,520.11,193.6,22.82,532.04]},
       {"id":"p462","teile":496,"dreiecke":5932,"boundingBox":[122.92,0,481.92,139.32,21.98,504.2]},
       {"id":"p463","teile":573,"dreiecke":6992,"boundingBox":[122.95,0,502.58,139.37,28.59,518.48]},
       {"id":"p464","teile":466,"dreiecke":5562,"boundingBox":[122.92,0,516.88,139.32,22.07,533.62]},
@@ -2219,16 +2213,16 @@
       "boundingBox": [-480,-0.6,-480,1270.5,29,1354.5]
     },
     "gesamt": {
-      "teile": 303124,
+      "teile": 302761,
       "strasse": 3749,
-      "haeuser": 299375,
+      "haeuser": 299012,
       "instanzen": 43875,
       "drawCallsInstanzen": 107
     }
   },
   "pruefsummen": {
-    "stadtplan": "7195e80d06f904b4592b5d3f7104785a8cd25325b15af92e1d25680b14586a1c",
-    "geometrie": "8aa5fb0bee2b087365eb4a200aa42cbf350bcb045af2da546a7f6fea58f5738b",
-    "bildReferenz": "4034697a43d9bef1ffec7f1d47f638404939c4881ee0ba5af4138dce08e92b66"
+    "stadtplan": "afdf868e5273a193b8238f62415a537767e38dce4e5de149f935eaec1b49bbe1",
+    "geometrie": "157cb5a328129c22f7b275d57483bb9a49273f463fb719fea463db9f8b6bca03",
+    "bildReferenz": "f593367010aad089682728d07ebda6532c3f594538deeadf10bea213f7c6689a"
   }
 }

@@ -1504,13 +1504,13 @@
       "teile": 185263,
       "strasse": 4684,
       "haeuser": 180579,
-      "instanzen": 61137,
+      "instanzen": 61138,
       "drawCallsInstanzen": 114
     }
   },
   "pruefsummen": {
     "stadtplan": "1d9245b089503d8dbff9cb578500f0ffa8082e0fc14f3b2bb2821e494d748049",
-    "geometrie": "71ccb8521d032d66675cfcb609f92df36bd3ebb20017d3eb84b415a6d3ce970f",
-    "bildReferenz": "a3020c078a088cdf0e31ad51a9ffb0b8582f36c3644771fe081d5a8978804c63"
+    "geometrie": "e531d5187ec676a62a9a449b417f5d6855c96964c4245c662442721cc6946a89",
+    "bildReferenz": "428cb4aaf1c3286ebaf336618bdc48594c66519cb277a4aa3436d032280ba2c7"
   }
 }

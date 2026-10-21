@@ -922,7 +922,7 @@
       {"id":"p187","teile":100,"dreiecke":1550,"boundingBox":[557.45,0,348,582.76,25.1,368.4]},
       {"id":"p188","teile":113,"dreiecke":1706,"boundingBox":[582.16,0,348,613.05,25.1,368.4]},
       {"id":"p189","teile":168,"dreiecke":2520,"boundingBox":[615.5,0,368.92,636.5,16.3,390.1]},
-      {"id":"p19","teile":189,"dreiecke":3018,"boundingBox":[442.47,0,348,473.21,16.3,369]},
+      {"id":"p19","teile":189,"dreiecke":3022,"boundingBox":[442.47,0,348,473.21,16.3,369]},
       {"id":"p190","teile":312,"dreiecke":3796,"boundingBox":[536.5,0,373.6,557.5,27.61,405.41]},
       {"id":"p191","teile":478,"dreiecke":6774,"boundingBox":[561.5,0,372.6,578.52,23.06,389.52]},
       {"id":"p192","teile":332,"dreiecke":4044,"boundingBox":[578.03,0,372.28,591.99,23.19,389.72]},
@@ -1132,7 +1132,7 @@
       {"id":"p377","teile":200,"dreiecke":3060,"boundingBox":[767.7,0,639.09,789.55,27.56,659.5]},
       {"id":"p378","teile":203,"dreiecke":3116,"boundingBox":[813,0,573.2,840,27.64,595.05]},
       {"id":"p379","teile":188,"dreiecke":3300,"boundingBox":[816.85,0,639.1,840.55,25.1,659.5]},
-      {"id":"p38","teile":337,"dreiecke":5450,"boundingBox":[116.85,0,347.85,214,34.53,438.28]},
+      {"id":"p38","teile":331,"dreiecke":5378,"boundingBox":[116.85,0,347.85,214,34.53,438.21]},
       {"id":"p380","teile":262,"dreiecke":4118,"boundingBox":[788.7,0,639.09,818.92,29.9,659.5]},
       {"id":"p381","teile":99,"dreiecke":1538,"boundingBox":[788.95,0,573.5,813.55,25.1,593.9]},
       {"id":"p382","teile":201,"dreiecke":3048,"boundingBox":[819.59,0,594.2,840,27.56,617.05]},
@@ -1397,16 +1397,16 @@
       "boundingBox": [-480,-6.2,-480,1342.5,88.35,1376.5]
     },
     "gesamt": {
-      "teile": 144816,
+      "teile": 144810,
       "strasse": 2182,
-      "haeuser": 142634,
+      "haeuser": 142628,
       "instanzen": 36642,
       "drawCallsInstanzen": 105
     }
   },
   "pruefsummen": {
     "stadtplan": "c5c39183c898d229f3fe8472540259ca8f76536ef01e1d03673075e211f16919",
-    "geometrie": "586eafcda5fa149f62919a8036e8cd50d1264a2431bd22f6bf85b785e7c8f175",
-    "bildReferenz": "9e1bf990b09e699a0497631320073bd997e940f63bee445f5e98055d2959296b"
+    "geometrie": "1c6807910531af36d7e831089d41f0e1a7675bc8dc07738455aa8e95c67377ee",
+    "bildReferenz": "c9089f1563304ff99f5bb495b245d810fd0ef71dac8062fd67b40ce0ae4be57d"
   }
 }

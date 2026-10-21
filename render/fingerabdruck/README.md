@@ -41,6 +41,10 @@ node pruef-fingerabdruck.js
 
 Kein implizites Erzeugen oder Aktualisieren in `--pruefen`. Fehlende, beschädigte oder veraltete Referenzen lassen die Prüfung mit Exit-Code 1 scheitern. Abweichungen werden getrennt als Stadtplan, Geometrie (mit bis zu vier betroffenen Parzellen) und Bild gemeldet.
 
+## Browserversion
+
+Referenzen und Prüfung laufen mit dem Chromium, das Playwright 1.48 installiert (Build 1140, Chrome 130), also derselben Version wie in der CI. Neuere Chromium-Versionen liefern dieselben Stadtpläne (seit dem deterministischen Mischen und `wurzelSumme` statt `Math.hypot`), weichen aber in zehn Städten (Bremen, Flensburg, Hannover, Lübeck, Lüneburg, Neumünster, Oldenburg, Osnabrück, Wolfsburg, Würzburg) bei einzelnen Parzellen um wenige Dreiecke ab (Gleitkomma der JS-Engine in der Triangulierung). Lokal deshalb mit `CHROMIUM_PATH=<Pfad zu chromium-1140>` prüfen.
+
 ## Bildtoleranz und Zeitbudget
 
 Ein Pixel zählt als verändert, wenn mindestens ein RGB-Kanal um **mehr als 18** abweicht. Der Bildvergleich erlaubt höchstens **2,0 %** veränderte Pixel bei einem durchschnittlichen Kanalfehler von höchstens **1,5**. Bilder unterschiedlicher Größe sind immer fehlerhaft. Das Bild selbst wird **nicht** als exakter PNG-Bytevergleich geprüft; die referenzierte PNG-Datei wird durch SHA-256 gegen die JSON-Datei abgesichert.

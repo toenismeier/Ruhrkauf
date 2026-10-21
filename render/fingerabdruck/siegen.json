@@ -2067,13 +2067,13 @@
       "teile": 240222,
       "strasse": 3909,
       "haeuser": 236313,
-      "instanzen": 40492,
+      "instanzen": 40489,
       "drawCallsInstanzen": 111
     }
   },
   "pruefsummen": {
     "stadtplan": "ecff0e48408bac3d293eb1f184e76f09361206aa368ce27c78e9fa3b2482e4f8",
-    "geometrie": "92f7ea7b31678aa8c6a20fddf6b9d95e65e0d4c6bd19d6c13a7e6517edc79469",
-    "bildReferenz": "40ebab9fe40013ffe7f728c0d6004a7e74bd7d76737821b4f4f61a0861d4606c"
+    "geometrie": "b9ea08b2b407b22d375b76a224bb58ec68981a54e05ed355ad658fb9121b7121",
+    "bildReferenz": "d911c6583d0b663e5cd55c43e07f43bed89d295ce6ecda13aec5e2237edeb8f4"
   }
 }

@@ -1408,7 +1408,7 @@
       {"id":"p187","teile":48,"dreiecke":1200,"boundingBox":[22.5,0,240.8,38.59,11.5,264.2]},
       {"id":"p188","teile":207,"dreiecke":2482,"boundingBox":[42.48,0,241.61,58.35,21.54,261.54]},
       {"id":"p189","teile":75,"dreiecke":926,"boundingBox":[58.31,0,241.7,69.78,19.75,260.52]},
-      {"id":"p19","teile":75,"dreiecke":3280,"boundingBox":[339.2,0,421.7,381.55,20,487.2]},
+      {"id":"p19","teile":75,"dreiecke":3282,"boundingBox":[339.2,0,421.7,381.55,20,487.2]},
       {"id":"p190","teile":304,"dreiecke":3628,"boundingBox":[69.66,0,241.92,84.95,14.61,261.07]},
       {"id":"p191","teile":642,"dreiecke":7712,"boundingBox":[126.92,0,221.92,144.02,22.07,240.04]},
       {"id":"p192","teile":538,"dreiecke":6432,"boundingBox":[126.92,0,262.42,144.1,25.8,281.07]},
@@ -1473,7 +1473,7 @@
       {"id":"p248","teile":18,"dreiecke":1460,"boundingBox":[466.7,0,221.1,474.3,18.2,240.5]},
       {"id":"p249","teile":27,"dreiecke":1862,"boundingBox":[473.8,0,221.1,482.83,22.67,240.5]},
       {"id":"p25","teile":24,"dreiecke":1148,"boundingBox":[514.66,0,302.5,522.8,16.37,322.3]},
-      {"id":"p250","teile":38,"dreiecke":3534,"boundingBox":[482.57,0,221.1,494.17,22.77,240.5]},
+      {"id":"p250","teile":38,"dreiecke":3528,"boundingBox":[482.57,0,221.1,494.17,22.77,240.5]},
       {"id":"p251","teile":27,"dreiecke":1368,"boundingBox":[493.96,0,220.4,504.05,16.86,240.5]},
       {"id":"p252","teile":25,"dreiecke":2162,"boundingBox":[504,0,240.44,522.77,19.81,247.93]},
       {"id":"p253","teile":17,"dreiecke":2318,"boundingBox":[504,0,247.81,524.1,26.23,257.56]},
@@ -2292,7 +2292,7 @@
   },
   "pruefsummen": {
     "stadtplan": "d45280f002fac48b7f4306477bef3faa1055ce89a2675533ec366001bd0e1ae6",
-    "geometrie": "fd2255e7731721ca95461674908a1a21b8b05391693f0714a77302343fea69ce",
-    "bildReferenz": "c192c686d0b5b01d34df5d4ae94216dc73748fe36cffbb6281883a2a11c112d1"
+    "geometrie": "ba4eff1372832cb98fe86c38dd8e96dcb01688a7189f6316da42137ff0600e90",
+    "bildReferenz": "d0f94ccad25d7e251c285c20a60914c214e813bf2379babab63ad014fecbf484"
   }
 }

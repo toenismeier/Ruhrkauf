@@ -2400,13 +2400,13 @@
       "teile": 296923,
       "strasse": 3887,
       "haeuser": 293036,
-      "instanzen": 42020,
+      "instanzen": 42024,
       "drawCallsInstanzen": 113
     }
   },
   "pruefsummen": {
     "stadtplan": "e597aec3ec6113ce162223a639c0169533e5f7ba6b08c32218b6a4fee0697baa",
-    "geometrie": "284959f36a2ef5dbcf57d7d8314890e540cefb74710a0124bec03c4a8bb597d1",
-    "bildReferenz": "a51d00fbf51256fdc211f1db3da3f67323fdd9ab88052989d62e445dfdee50c5"
+    "geometrie": "8b5d768a20484c443d9a9cd4f8b58952040ac32d8b3f348160eae37740ad89d0",
+    "bildReferenz": "92d47f041cae3cb1ff04a8fb9c337ca2ad7e0c246284e912b278a96f6658927c"
   }
 }
