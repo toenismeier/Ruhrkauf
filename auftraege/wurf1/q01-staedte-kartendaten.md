@@ -41,7 +41,7 @@ Die 20 Städte mit dem meisten eigenen Umsatz bekommen dasselbe wie Essen: Karte
 Kartendaten plus Viertelzuordnung aus der Region, je Stadt mindestens ein Wahrzeichen (Rathaus, Kirche oder Bahnhof in der echten Lage).
 
 ## Verhältnis zu laufenden Aufträgen
-- `massstab-staedte.md` (`feat/massstab-staedte`, läuft) baut Städte über Archetypen. Q01 ersetzt für Städte mit Kartendatei den Planweg; die Standortlogik und die Prüfungen aus `massstab-staedte.md` bleiben. Q01 startet auf `main` nach dessen Merge.
+- `massstab-staedte.md` (`feat/massstab-staedte`, läuft) baut Städte über Archetypen. Q01 ersetzt für Städte mit Kartendatei den Planweg; die Standortlogik und die Prüfungen aus `massstab-staedte.md` bleiben. ~~Q01 startet auf `main` nach dessen Merge.~~ **Ummo 21.10.2026: entkoppelt.** Phase 1 (Essen) startet sofort auf `main`, Branch `feat/q01-essen`, ohne auf `feat/massstab-staedte` (#31) zu warten. Nur Essen nutzt den Kartenweg (`render/karten/essen.json`); alle anderen Städte bleiben unverändert auf dem heutigen Planweg, ihre Fingerabdrücke dürfen sich nicht ändern. Die Standorte der eigenen Häuser kommen aus der Engine auf `main` (seit #7: 560 Häuser), nicht aus #31. #31 zieht später nach und übernimmt den Kartenweg für Essen.
 - Fingerabdruck (Q03): Jede Stadt, die Q01 umstellt, bekommt im selben PR einen neuen Fingerabdruck. Andere Städte dürfen sich nicht ändern.
 
 ## Leistung und Prüfung
