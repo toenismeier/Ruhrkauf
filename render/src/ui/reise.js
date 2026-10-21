@@ -1,6 +1,8 @@
 // Reise zwischen Hartwig-Städten. Messwerte: auftraege/spiel-reise-und-wochenabschluss.md.
 import { esc } from './format.js';
 import { portraetSVG } from '../kit/portraet.js';
+import { stadtSymbolSVG } from '../kit/stadtwahrzeichen.js';
+import { reiseDeutschlandKarte } from './deutschland.js';
 const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 export const REISE_ZEIT = Object.freeze({
   kreisAuf: 240, panelSteht: 260, text: 1500, zieleAb: 1000, wechsel: 150,
@@ -19,34 +21,13 @@ const bild = (name) => './bilder/reise-' + typBild(name) + '.jpg';
 // Ein echter, 96 x 96 Pixel großer Stadtplanausschnitt wird je besuchter Stadt im RAM gehalten.
 // Für noch nicht besuchte Städte: regionsabhängiges Motiv + Stadtgröße + eigene Kennfarbe.
 const vorschauen = new Map();
-const stadtHash = (name) => [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 17);
-const stadtfarbe = (name) => 'hsl(' + (stadtHash(name) % 360) + ' 38% 53%)';
-const fallbackBild = (c) => /Nord/i.test(c.region) ? './bilder/reise-hafen.jpg'
-  : /Süd|Ost/i.test(c.region) ? './bilder/reise-altstadt.jpg' : bild(c.name);
 function stadtVorschau(c) {
-  const data = vorschauen.get(c.name), src = data ?? fallbackBild(c);
-  const groesse = Math.min(1.38, 0.95 + Math.log2(1 + (c.groesse ?? 1)) * 0.11);
-  return '<span class="reise-vorschaurahmen" style="--stadtfarbe:' + stadtfarbe(c.name) +
-    '"><img src="' + src + '" alt="" loading="lazy" style="transform:scale(' +
-    (data ? 1 : groesse.toFixed(2)) + ')"></span>';
+  const data = vorschauen.get(c.name);
+  // Echte Stadtansicht nach einem Besuch, andernfalls Katalog-Wahrzeichen.
+  return '<span class="reise-vorschaurahmen">' +
+    (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG(c)) + '</span>';
 }
 const zug = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
-
-// Schematische Deutschlandkarte: jedes Reiseziel als Punkt, die eigene Stadt rot.
-// Die Stadtliste liefert Regionen statt Koordinaten, daher bewusst keine geographische Präzision suggerieren.
-const MAP_FELDER = {
-  nord: [70, 35], ost: [103, 79], west: [42, 78], mitte: [72, 82], sued: [75, 125],
-};
-function deutschlandPunkte(staedte, hier) {
-  const punkte = staedte.map((stadt) => {
-    const hash = [...stadt.name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-    const [x, y] = MAP_FELDER[String(stadt.region ?? 'mitte').toLocaleLowerCase('de')] ?? MAP_FELDER.mitte;
-    const dx = (hash % 29) - 14, dy = (Math.floor(hash / 37) % 35) - 17;
-    return { name: stadt.name, x: x + dx, y: y + dy, aktuell: stadt.name === hier, hauscluster: stadt.hauscluster };
-  });
-  return punkte.sort((a, b) => Number(a.aktuell) - Number(b.aktuell))
-    .map((p) => { const farben=['#597fa2','#9b7954','#638d70','#8875a7','#ac705e','#718b9b']; const gruppe = p.hauscluster ? [...p.hauscluster].reduce((a,c)=>a+c.charCodeAt(0),0) : 0; return '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (p.aktuell ? 4 : 1.8) + '" fill="' + (p.aktuell ? '#d23c32' : farben[gruppe % farben.length]) + '"><title>' + esc(p.name) + '</title></circle>'; }).join('');
-}
 
 export function reiseModul(ctx) {
   const z = document.createElement('div');
@@ -77,8 +58,24 @@ export function reiseModul(ctx) {
       });
     const liste = z.querySelector('.reise-zielraster');
     if (!liste) return;
-    liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '">' + stadtVorschau(c) + '<span><strong>' + esc(c.name) + '</strong><small class="reise-formate">' + (Array.isArray(c.formate) ? c.formate.map((f) => '<span class="reise-format">' + esc(f.name) + '&nbsp;' + esc(String(f.anzahl)) + '</span>').join('') : esc(c.formate ?? '')) + '</small></span></button>').join('');
-    if (!sortiert.length) liste.innerHTML = '<p>Keine Reiseziele gefunden.</p>';
+    liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) +
+      '" aria-label="Nach ' + esc(c.name) + ' reisen">' + stadtVorschau(c) +
+      '<span class="reise-zieltext"><strong>' + esc(c.name) + '</strong><small class="reise-formate">' +
+      (Array.isArray(c.formate) ? c.formate.map((f) => '<span class="reise-format">' +
+        esc(f.name) + '&nbsp;' + esc(String(f.anzahl)) + '</span>').join('') : esc(c.formate ?? '')) +
+      '</small></span></button>').join('');
+    if (!sortiert.length) liste.innerHTML = '<p class="reise-leer">Keine Reiseziele gefunden.</p>';
+    const treffer = z.querySelector('.reise-treffer');
+    if (treffer) treffer.textContent = sortiert.length + ' ' + (sortiert.length === 1 ? 'Reiseziel' : 'Reiseziele');
+  }
+  function ansichtSetzen(name) {
+    if (!aktiv || !['karte', 'liste'].includes(name)) return;
+    for (const art of ['karte', 'liste']) {
+      const an = art === name;
+      z.querySelector('#reise-blatt-' + art)?.toggleAttribute('hidden', !an);
+      z.querySelector('#reise-tab-' + art)?.setAttribute('aria-selected', String(an));
+    }
+    z.dataset.ansicht = name;
   }
   function schreibe(el, text, dauer, meins) {
     if (!el) return;
@@ -100,9 +97,35 @@ export function reiseModul(ctx) {
     const hier = ctx.stadt(), p = ortPunkt(); kreis(p);
     const ausschnitt = ctx.vorschau?.();
     if (ausschnitt) vorschauen.set(hier, ausschnitt);
-    z.hidden = false; z.innerHTML = '<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele"><header class="reise-kopf"><div class="reise-kopfbild">' + zug + '</div><button class="reise-zu" aria-label="Schließen" data-reisezu>×</button><span class="reise-bahnhof">Hauptbahnhof ' + esc(hier) + '</span><strong>' + esc(hier) + '</strong></header><div class="reise-assistent"><div class="reise-text" aria-live="polite"></div><div class="reise-portraet" aria-hidden="true">' + ASSISTENTIN + '</div></div><div class="reise-ziele"><h2>REISEZIELE</h2><input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen"><div class="reise-deutschland" aria-hidden="true"><svg viewBox="0 0 150 155"><path d="M45 8L86 14L102 32L94 52L123 76L112 104L130 127L97 150L65 132L36 140L17 112L31 85L17 58L38 39Z" fill="none" stroke="#aebbc3" stroke-dasharray="2 5" stroke-width="3"/>' + deutschlandPunkte(ctx.staedte(), hier) + '</svg></div><div class="reise-zielraster"></div></div></section>';
+    z.hidden = false;
+    z.innerHTML = `<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele">
+      <header class="reise-kopf"><div class="reise-kopfbild">${zug}</div>
+        <button class="reise-zu" aria-label="Schließen" data-reisezu>×</button>
+        <span class="reise-bahnhof">Hauptbahnhof ${esc(hier)}</span><strong>${esc(hier)}</strong></header>
+      <div class="reise-assistent"><div class="reise-text" aria-live="polite"></div>
+        <div class="reise-portraet" aria-hidden="true">${ASSISTENTIN}</div></div>
+      <div class="reise-ziele"><div class="reise-zielkopf"><h2>REISEZIELE</h2><small class="reise-treffer"></small></div>
+        <input class="reise-suche" type="search" placeholder="Stadt suchen …" aria-label="Reiseziel suchen">
+        <div class="reise-wechsel" role="tablist" aria-label="Reiseziele anzeigen">
+          <button type="button" role="tab" id="reise-tab-karte" aria-controls="reise-blatt-karte" aria-selected="true" data-reiseansicht="karte">Deutschlandkarte</button>
+          <button type="button" role="tab" id="reise-tab-liste" aria-controls="reise-blatt-liste" aria-selected="false" data-reiseansicht="liste">Städteliste</button>
+        </div>
+        <div class="reise-blatt reise-karteblatt" id="reise-blatt-karte" role="tabpanel" aria-labelledby="reise-tab-karte">
+          <div class="reise-deutschland"></div>
+          <p class="reise-kartenhinweis">Rot: aktueller Standort. Die Punktgröße zeigt die Zahl der Häuser. Stadt antippen, um zu reisen.</p>
+        </div>
+        <div class="reise-blatt reise-listenblatt" id="reise-blatt-liste" role="tabpanel" aria-labelledby="reise-tab-liste" hidden>
+          <div class="reise-zielraster"></div>
+        </div>
+      </div></section>`;
+    z.querySelector('.reise-deutschland').append(
+      reiseDeutschlandKarte(ctx.staedte(), hier, (stadt) => { if (stadt !== hier) fahren(stadt); })
+    );
     document.body.classList.add('reise-aktiv');
-    z.querySelector('.reise-suche').addEventListener('input', (e) => ziele(e.target.value));
+    z.querySelector('.reise-suche').addEventListener('input', (e) => {
+      ziele(e.target.value);
+      if (e.target.value) ansichtSetzen('liste');
+    });
     ziele();
     requestAnimationFrame(() => { if (meins === token) z.classList.add('offen'); });
     const animate = !(ohneAnimation() || bewegungReduziert());
@@ -143,8 +166,13 @@ export function reiseModul(ctx) {
   }
   z.addEventListener('click', (e) => {
     if (e.target.closest('[data-reisezu]')) return schliessen();
+    const tab = e.target.closest('[data-reiseansicht]');
+    if (tab) { ansichtSetzen(tab.dataset.reiseansicht); return; }
     const b = e.target.closest('[data-reiseziel]');
     if (b) fahren(b.dataset.reiseziel);
   });
-  return { oeffne, zu: schliessen, aktiv: () => aktiv, pruefe: () => ({ stadt: ctx.stadt(), aktiv, schritte: [...protokoll], zielAnzahl: z.querySelectorAll('[data-reiseziel]').length }), fahren };
+  return { oeffne, zu: schliessen, aktiv: () => aktiv, pruefe: () => ({ stadt: ctx.stadt(), aktiv, schritte: [...protokoll],
+    zielAnzahl: z.querySelectorAll('[data-reiseziel]').length,
+    kartenPunkte: z.querySelectorAll('.deutschland-stadt').length,
+    ansicht: z.dataset.ansicht ?? 'karte' }), fahren };
 }
