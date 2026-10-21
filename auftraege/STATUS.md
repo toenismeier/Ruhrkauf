@@ -24,7 +24,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | main | **gemergt 21.10.** (b5534a0) | Abnahme `nachbesserung-massstab.md` Abschnitt 20; Premium klar über Schnitt (E28) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | main | **gemergt 21.10.** (bf215bc) | – |
 | Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | `feat/engine-formate` | **startet 21.10.** | Auftrag mit Stand 21.10. (TK-Maxx-Prinzip, Referenz-GuV, Bot T/D) |
-| Q09 Schnee (schwebende Platten) | `feat/q09-schnee` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q09 Schnee (schwebende Platten) | – | **gemergt 21.10.** (#54, 390b69d) | Schnee liegt auf echten Dachflächen, je Dachebene eingerückt (Claude-Fix: kein Kreuzmuster auf Satteldächern); Winter-Dreiecke unter main, Draw Calls gleich; Fingerabdrücke 112/112 unverändert |
 | Q10 Kamera bleibt über Haus | `feat/q10-kamera-haus` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | `feat/q11-eigenmarken-sortiment` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q12 Hausbesuch Laufwege | `feat/q12-hausbesuch-laufwege` | **startet 21.10.** | `auftraege/wurf2/` |
@@ -39,6 +39,9 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11** | `auftraege/wurf2/` |
+| Q25 Produktbilder und Model (Claude) | `feat/q25-produktbilder` | **in Arbeit (Claude)** | `auftraege/wurf2/` |
+| Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | `feat/q07-vertriebssteuerung` | **startet 21.10.** | – |

@@ -21,3 +21,6 @@ Bilder: `testflight/wurf-2/` (16 Screenshots, Bildfolge aus Ummos Bildschirmvide
 | Q23 | Reise: Deutschlandkarte und Liste | `feat/q23-reise-karte` | `q23-reise-karte.md` |
 
 Vorlagebilder Coffee Inc 2 (nur Referenz, keine Übernahme von Grafik oder Texten): `testflight/vorlage-coffee/01–14.png`. Q15–Q19, Q23 bauen auf dem Gestaltungssystem aus Q14 (`render/GESTALTUNG-UI.md`) auf; wenn Q14 noch nicht gemergt ist, dessen Branch als Grundlage lesen.
+| Q24 | Eigenmarken Deep Dive: Sortiment ≥ 300 Typen, Damen/Herren, Zielgruppen, Teamleistung (nach Q11) | `feat/q24-eigenmarken-deep-dive` | `q24-eigenmarken-deep-dive.md` |
+| Q25 | Produktbilder und Model (**macht Claude**) | `feat/q25-produktbilder` | `q25-produktbilder-model.md` |
+| Q26 | Meldungsleiste und „Speichern fehlgeschlagen“ | `feat/q26-meldungen-speichern` | `q26-meldungen-speichern.md` |
