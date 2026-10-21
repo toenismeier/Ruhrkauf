@@ -32,6 +32,9 @@ jobs:
       # Mehrere Worker: die Langläufe (Bot über 260 Wochen) sprengen sonst das Zeitlimit.
       - run: npm test -- --maxWorkers=4 --silent
         working-directory: engine
+      - name: Q06 Marktbeobachtung – 52 Wochen und Meldungszahlen
+        run: npx tsx scripts/marktbeobachtung-abnahme.ts
+        working-directory: engine
 
   moebel:
     name: Ladenbau Möbelprüfung
@@ -122,6 +125,9 @@ jobs:
         working-directory: render
       - run: node spiel-render.js --nur-posteingang
         working-directory: render
+      - name: Q06 Handelsbote – drei Zeitungsausgaben und Archiv
+        run: npm run marktbeobachtung:bilder
+        working-directory: render
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -129,4 +135,5 @@ jobs:
           path: |
             render/out/
             render/bilder/
+            bilder/wurf1/marktbeobachtung/
           if-no-files-found: ignore
