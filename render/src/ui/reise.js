@@ -77,7 +77,7 @@ export function reiseModul(ctx) {
       });
     const liste = z.querySelector('.reise-zielraster');
     if (!liste) return;
-    liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '">' + stadtVorschau(c) + '<span><strong>' + esc(c.name) + '</strong><small>' + esc(c.formate ?? '') + '</small></span></button>').join('');
+    liste.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc(c.name) + '">' + stadtVorschau(c) + '<span><strong>' + esc(c.name) + '</strong><small class="reise-formate">' + (Array.isArray(c.formate) ? c.formate.map((f) => '<span class="reise-format">' + esc(f.name) + '&nbsp;' + esc(String(f.anzahl)) + '</span>').join('') : esc(c.formate ?? '')) + '</small></span></button>').join('');
     if (!sortiert.length) liste.innerHTML = '<p>Keine Reiseziele gefunden.</p>';
   }
   function schreibe(el, text, dauer, meins) {
