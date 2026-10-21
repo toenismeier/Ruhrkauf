@@ -97,7 +97,11 @@ export function botTief(s: GameState, log = false): void {
     // Sozialplan, Lieferantenrisiko und Gläubigerversammlung bleibt erhalten.
     botTiefBasis(s, log, true, einkaufStandard, s.woche);
   } else if (s.phase === 'insolvenz') {
-    botTiefBasis(s, log, true, einkaufStandard, -1);
+    // Wurde das Verfahren durch die Engine (Zahlungsunfähigkeit) statt
+    // durch den Bot eröffnet, muss Bot C die Sanierungsmaßnahmen nachholen.
+    const frisch = !!s.insolvenz && s.woche <= s.insolvenz.seit + 1
+      && !s.haeuser.some((h) => h.status === 'schliessung_verhandlung' || h.status === 'raeumung');
+    botTiefBasis(s, log, true, einkaufStandard, frisch ? s.woche : -1);
   }
 }
 
@@ -108,7 +112,7 @@ export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boole
   if (w === antragWoche) {
     tu({ typ: 'orderLevel', gruppe: 'alle', level: 0.88 });
     tu({ typ: 'marketingBudget', quote: 0.018 });
-    tu({ typ: 'insolvenzAntrag' });
+    if (s.phase === 'regulaer') tu({ typ: 'insolvenzAntrag' });
     if (zentralePauschal) tu({ typ: 'zentrale', prozent: 0.3 });
     // Premium-Kronjuwelen bleiben von der automatischen Schließung ausgenommen.
     const premiumIds = new Set(s.haeuser.filter((h) => h.klasse === 'premium').map((h) => h.id));
