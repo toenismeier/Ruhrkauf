@@ -8,7 +8,7 @@ import { hell, dunkel, materialDefs, flaeche } from './stoff.js';
 
 export const ZIELGRUPPEN = ['kinder', 'teens', 'young', 'adults', 'bestager'];
 export const HAUT = ['#f3d6c1', '#e6b994', '#c98f68', '#9a6546', '#6b4330'];
-export const HAAR = { blond: '#d8b46e', hellbraun: '#9a6a3e', braun: '#5a3b26', schwarz: '#26211e', rot: '#a8522d', grau: '#b7b4ae', weiss: '#e6e4de' };
+export const HAAR = { blond: '#d8b46e', dunkelblond: '#a8844f', aschblond: '#b9a27a', hellbraun: '#9a6a3e', braun: '#5a3b26', schwarz: '#26211e', rot: '#a8522d', grau: '#b7b4ae', weiss: '#e6e4de' };
 
 const f = (n) => Math.round(n * 10) / 10;
 
@@ -62,15 +62,31 @@ const VORLAGE = {
 
 // Umrechnung je Zielgruppe: Höhe (ohne Kopf), Kopfgröße, Breiten je Zone
 const ALTER = {
-  kinder: { h: 0.58, kopf: 1.18, breit: { schulter: 0.66, taille: 0.92, huefte: 0.78, bein: 0.78, arm: 0.78 } },
+  kinder: { h: 0.6, kopf: 1.0, breit: { schulter: 0.66, taille: 0.92, huefte: 0.78, bein: 0.78, arm: 0.78 } },
   teens: { h: 0.9, kopf: 1.0, breit: { schulter: 0.93, taille: 0.98, huefte: 0.94, bein: 0.92, arm: 0.92 } },
   young: { h: 1, kopf: 1, breit: { schulter: 1, taille: 1, huefte: 1, bein: 1, arm: 1 } },
   adults: { h: 1, kopf: 1, breit: { schulter: 1.02, taille: 1.1, huefte: 1.05, bein: 1.04, arm: 1.06 } },
   bestager: { h: 0.97, kopf: 1, breit: { schulter: 1.0, taille: 1.24, huefte: 1.1, bein: 1.08, arm: 1.1 } },
 };
 
+// Alltagsproportionen (Ummo 21.10.: „sehen aus wie Slender“): breiter, Beine kürzer, Kopf größer, ca. 7,5 Kopflängen
+const BREITE = 1.2, BEINE = 0.86, KOPF = 1.4, BODEN = 404;
+function alltag(V) {
+  const s = V.marken.schritt, sNeu = BODEN - (BODEN - s) * BEINE, shift = sNeu - s;
+  const Y = (y) => (y <= s ? y + shift : BODEN - (BODEN - y) * BEINE);
+  const P = (pts) => pts.map(([x, y, e]) => [100 + (x - 100) * BREITE, Y(y), e]);
+  return {
+    kopf: { y: V.kopf.y + shift, rx: V.kopf.rx * KOPF, ry: V.kopf.ry * KOPF }, kinn: V.kinn + shift,
+    hals: { b: V.hals.b * 1.18, y0: V.hals.y0 + shift, y1: V.hals.y1 + shift },
+    schulter: P(V.schulter), torso: P(V.torso), schritt: [100, Y(V.schritt[1])], beinA: P(V.beinA), beinI: P(V.beinI).map(([x, y]) => [Math.max(100.6, x), y]),
+    armA: P(V.armA), armI: P(V.armI), hand: P([V.hand])[0], fuss: Y(V.fuss),
+    marken: Object.fromEntries(Object.entries(V.marken).map(([k, v]) => [k, Y(v)])),
+  };
+}
+const ALLTAG = { damen: alltag(VORLAGE.damen), herren: alltag(VORLAGE.herren) };
+
 function koerper(geschlecht, zielgruppe) {
-  const V = VORLAGE[geschlecht === 'herren' ? 'herren' : 'damen'];
+  const V = ALLTAG[geschlecht === 'herren' ? 'herren' : 'damen'];
   const A = ALTER[zielgruppe] ?? ALTER.young;
   const boden = 404;
   const yT = (y) => boden - (boden - y) * A.h;
@@ -85,7 +101,7 @@ function koerper(geschlecht, zielgruppe) {
     kopf: { x: 100, y: kinn - ry * 0.98, rx: V.kopf.rx * ry / V.kopf.ry, ry },
     kinn, hals: { b: V.hals.b * A.breit.schulter, y0: kinn - 4, y1: yT(V.hals.y1) },
     schulter: T(V.schulter, 'schulter'), torso: T(V.torso), schritt: [100, yT(V.schritt[1])],
-    beinA: T(V.beinA.map(([x, y], i) => [x + [0, 1.4, 1.9, 1.5, 1.6, 1.3, 0.9][i], y]), 'bein'), beinI: T(V.beinI, 'bein'), armA: T(V.armA, 'arm'), armI: T(V.armI, 'arm'),
+    beinA: T(V.beinA.map(([x, y], i) => [x + [0, 1.0, 1.4, 1.1, 1.2, 1.0, 0.7][i], y]), 'bein'), beinI: T(V.beinI, 'bein'), armA: T(V.armA, 'arm'), armI: T(V.armI, 'arm'),
     hand: [xT(V.hand[0], 0, 'arm'), yT(V.hand[1])], fuss: yT(V.fuss),
   };
   K.m = Object.fromEntries(Object.entries(V.marken).map(([k, v]) => [k, yT(v)]));
