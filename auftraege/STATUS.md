@@ -10,7 +10,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q02 Grafikqualität (Gleise, Oberleitung, Züge, Dächer, Startbild, Flächenvielfalt, Prüfregeln) | `feat/q02-grafik-qualitaet` #43 | abnahmefähig | Claude rendert Vorher/Nachher, misst Leistung, prüft Regeln über alle Städte |
 | Maßstab Städte (220 Städte, Standortverteilung) | `feat/massstab-staedte` #31 | in Arbeit (WIP) | fertigstellen; Voraussetzung für Q01 |
 | Q01 Städte aus Kartendaten (Essen zuerst) | – | offen | Kartendaten Essen liegen in `render/karten/` (Phase 0 erledigt); Start nach Merge Maßstab Städte |
-| Maßstab Leistung (iPhone-Ziele, Ausgangswert Berlin) | – | offen | Start nach Städte Phase 2 |
+| Maßstab Leistung (iPhone-Ziele, Ausgangswert Berlin, Spielstand 7,5 MB) | – | offen | Start nach Städte Phase 2 |
 | N07 Belebte Stadt (fließender Verkehr, Passanten) | – | gemergt | Bildrate mit/ohne Leben auf dem iPhone messen |
 | N06 Jahreszeiten (Weihnachtsdeko, Fassaden) | – | gemergt | – |
 | N10 Hausbesuch (Innenraum) | – | gemergt | – |
