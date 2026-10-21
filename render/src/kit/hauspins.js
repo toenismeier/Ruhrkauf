@@ -38,7 +38,7 @@ export function pinZustand(haus, zustand) {
   const stati = [zustand?.status, ...(zustand?.zusatz ?? [])];
   if (['geschlossen', 'raeumung', 'leer', 'verfall'].some((s) => stati.includes(s)) ||
       (haus?.substanz ?? 100) < 35) return 'warnung';
-  if (stati.includes('umbau') || haus?.premiumInvestition) return 'umbau';
+  if (stati.includes('umbau')) return 'umbau';
   if (stati.includes('aktion')) return 'aktion';
   return null;
 }
