@@ -1054,8 +1054,8 @@ vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
-mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion });
-pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion });
+mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
+pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
 er = erfolgeModul({ E, s: () => s, panel });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
