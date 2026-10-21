@@ -218,6 +218,8 @@ export const LANDMARKEN = {
  *   Einträge mit Parzellen-Id; plan.einkaufslage enthält das Rechteck der Einkaufslage.
  *   Ohne standorte bleibt alles wie bisher (ein Warenhaus).
  */
+export { planAusKarte } from './karten/plan.js';
+
 export function stadtplan(seed, o = {}) {
   const typ = o.typ ?? 'grossstadt';
   const T = TYPEN[typ];
