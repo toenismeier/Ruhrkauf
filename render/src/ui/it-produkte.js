@@ -43,10 +43,10 @@ function kurve(p) {
     punkte.map(({px,py})=>'<circle cx="'+px+'" cy="'+py+'" r="3.5" class="itp-punkt"/>').join('') + '</svg>' +
     '<div class="itp-achse" aria-label="Wochenwerte">' + labels + '</div></div>';
 }
-export function itProdukteKarten(produkte) {
+export function itProdukteKarten(produkte, quelle='it') {
   return '<div class="itp-intro">Vier digitale Produkte von Hartwig. Die Kennzahlen stammen aus Marketing, Filialumsatz und E-Commerce.</div>' +
     '<div class="itp-karten">' + produkte.map(p =>
-      '<button type="button" class="itp-karte" data-it="produkt" data-v="' + esc(p.id) +
+      '<button type="button" class="itp-karte" data-' + quelle + '="produkt" data-' + (quelle==='it'?'v':'id') + '="' + esc(p.id) +
       '" aria-label="' + esc(p.name) + ' öffnen">' +
       '<span class="itp-visual">' + itIllustration(p.id) + '</span>' +
       '<span class="itp-karteinhalt"><span class="itp-kartenkopf"><b>' + esc(p.name) + '</b>' + status(p) + '</span>' +
