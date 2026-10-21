@@ -1,4 +1,4 @@
-// Zusätzliche, maßstabsunabhängige Abnahme der vier Kronjuwelen.
+// Zusätzliche, maßstabsunabhängige Abnahme der fünf Kronjuwelen.
 // Aufruf: cd render && node pruef-premium.js
 import { stadtDaten } from './kit/staedte.js';
 import { stadtplan, SLOT_ROLLE } from './kit/stadtplan.js';
@@ -9,6 +9,13 @@ import haeuser from '../haeuser.json';
 
 let fehler=0;
 const protokoll=[];
+const dreieckeNachStatus=new Map();
+const premiumAlle=haeuser.filter(h=>h.klasse==='premium');
+if(premiumAlle.length!==5){console.error('Fünf Premiumhäuser erforderlich: Engine-Export fehlt');fehler++;}
+const berlin=premiumAlle.filter(h=>h.stadt==='Berlin');
+if(berlin.length!==2||new Set(berlin.map(h=>h.premiumSchluessel)).size!==2){
+ console.error('Zwei verschiedene Premiumhäuser in Berlin fehlen');fehler++;
+}
 if(SLOT_ROLLE.premium!=='slot:premium'){console.error('Premium-Slot fehlt');fehler++;}
 for(const [key,name] of Object.entries(PREMIUM_NAMEN)){
  const hs=haeuser.filter(h=>h.klasse==='premium'&&h.premiumSchluessel===key);
@@ -41,5 +48,14 @@ for(const [key,name] of Object.entries(PREMIUM_NAMEN)){
  const stat={stadt:h.stadt,id:h.id,name,slot:p.typ,lage:q.lage,nachbarn:nachbarn.length,breite:m.w,tiefe:m.d};
  protokoll.push(stat);
 }
-console.log('Premium-Gestaltungsprüfung:',JSON.stringify(protokoll,null,2));
-if(fehler){console.error(fehler,'Verstöße');process.exitCode=1;} else console.log('0 Verstöße (Premium-Slot/Traufhöhenregel).');
+for(const [status,werte] of dreieckeNachStatus){
+ const referenz=werte.get('P001');
+ if(!referenz){console.error('P001-Dreiecksreferenz fehlt',status);fehler++;continue;}
+ for(const [key,zahl] of werte){
+  if(zahl>referenz){console.error('Dreiecksbudget überschritten',key,status,zahl,'gegen P001',referenz);fehler++;}
+ }
+}
+console.log('Premium-Gestaltungsprüfung:',JSON.stringify({
+ standorte:protokoll,dreiecke:[...dreieckeNachStatus].map(([status,m])=>({status,haeuser:Object.fromEntries(m)}))
+},null,2));
+if(fehler){console.error(fehler,'Verstöße');process.exitCode=1;} else console.log('0 Verstöße (fünf Premium-Slots, Traufhöhen und Dreiecksbudgets).');

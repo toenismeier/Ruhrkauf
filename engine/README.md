@@ -11,11 +11,11 @@ Spiellogik ohne Grafik für den Warenhaus-Turnaround-Tycoon. Reines TypeScript (
 | Hartwig A | 45 | 2.145,6 Mio. € |
 | Hartwig B | 115 | 3.427,0 Mio. € |
 | Hartwig C | 200 | 3.377,4 Mio. € |
-| Premium | 4 | 820,0 Mio. € |
+| Premium | 5 | 997,2 Mio. € (P005 nach Fläche × Produktivität) |
 | Hartwig Sport | 44 | 545,0 Mio. € |
 | Volkskauf | 86 | Noch ohne Simulation (`nurDaten`) |
 | FUNDUS | 66 | Noch ohne Simulation (`nurDaten`) |
-| **Gesamt** | **560** | **10.315,0 Mio. € aktive Formate** |
+| **Gesamt** | **561** | **10.492,2 Mio. € aktive Formate** |
 
 - 220 Städte: 7 Metropolen, 73 Groß- und 140 Mittelstädte.
 - `UMSATZZIELE_JAHR1` und `kalibriereStandortumsatz` normieren die **jährliche Start-Nachfragebasis**, nicht automatisch den tatsächlichen Umsatz nach 52 simulierten Wochen. Der vorliegende historische Lauf lag 9–11 % unter Ziel; `MASSSTAB_REALISIERUNG = 1.115` in `wirtschaft.ts` kalibriert den realisierten Nachfragefaktor vorläufig. **IST-Umsatz ±3 % und EBITDA ca. −4 % sind nach dieser Änderung noch nicht erneut gemessen.**
