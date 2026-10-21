@@ -109,14 +109,15 @@ export const PARAM = {
   lohnTeilzeit: 990,
   lohnAushilfe: 600,
   // Maßstab 560: Filialbesetzung pro Fläche dichter (Fixkosten der Ausgangskrise).
-  qmJeFte: 400,
+  qmJeFte: 430,
   // Umsatzbasierter Personalbedarf; verschiebt EBITDA ohne Eingriff Richtung -4 %.
-  umsatzJeFte: 5_750,
+  umsatzJeFte: 6_300,
   sonstigeQuote: 0.016,
   sonstigeQm: 0.45,
   logistikQuote: 0.025,
   nebenkostenQm: [1.0, 1.5] as [number, number],
-  zentraleQuote: 0.034,
+  // Die Zentrale nutzt bei 408 aktiven Häusern Größenvorteile.
+  zentraleQuote: 0.030,
   marketingQuote: 0.025,
   zinsSatz: 0.08,
   konzessionsQuote: 0.22,
