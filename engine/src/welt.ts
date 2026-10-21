@@ -233,6 +233,8 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
     // Vollständiger, flächengewichteter Warenhausmix als Stammdaten.
     // Keine RNG-Aufrufe: Volkskauf verändert nicht die übrigen Standortparameter.
     const gruppen = gruppenFuer(f);
+    // Im Volkskauf bleibt das Untergeschoss Lager; kein Food-Verkauf.
+    const verkaufsEtagen = etagen.filter(e=>e>=0);
     const summeAnteile = gruppen.reduce((sum, g) => sum + GRUPPEN[g].anteilFlaeche, 0);
     let verbleibend = vkQm;
     return gruppen.map((g, i) => {
@@ -240,7 +242,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
         ? verbleibend
         : Math.max(1, Math.round(vkQm * GRUPPEN[g].anteilFlaeche / summeAnteile));
       verbleibend -= qm;
-      return { id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length], qm, konzept: 'eigen' as const, gruppe: g };
+      return { id: `${id}-f${i + 1}`, etage: verkaufsEtagen[i % verkaufsEtagen.length] ?? 0, qm, konzept: 'eigen' as const, gruppe: g };
     });
   }
   if (f === 'outlet') {

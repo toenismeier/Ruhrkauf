@@ -46,6 +46,7 @@ export function initialisiereFormate(s:GameState):void{
     if(h.format==='schwester'){
       volksUmsatz+=umsatz;
       h.einzug.alter*=1.1;
+      h.substanz=clamp(h.substanz-18,15,60);h.substanzStart=h.substanz;
       h.personal.filialleiter.skill=Math.min(0.6,h.personal.filialleiter.skill);
       for(const g of Object.keys(h.potenzial) as (keyof Haus['potenzial'])[])h.potenzial[g]!*=0.72;
     }
@@ -150,7 +151,7 @@ export function formateWoche(s:GameState):FormateWoche{
   }}
   const nachfrage=aktive.map(haus=>{
     const roh=simuliereHaus(s,haus);
-    const normal=haus.format==='outlet'?roh.offprice*3.65:
+    const normal=haus.format==='outlet'?roh.offprice*3.65*clamp(2-haus.einzug.kaufkraft,0.8,1.2)/Math.max(0.1,1.6-0.6*haus.einzug.kaufkraft):
       Object.values(roh.eigen).reduce((n,x)=>n+(x?.umsatz??0),0);
     const bau=f.projekte.some(p=>p.haus===haus.id&&p.typ==='umflaggen');
     return {haus,nachfrage:normal*(bau?0.55:1)};
@@ -196,6 +197,9 @@ export function formateWoche(s:GameState):FormateWoche{
   f.volkskaufBestand+=vkZukauf;warenZukauf+=vkZukauf;
   f.pool=f.pool.filter(p=>p.wert>1);f.abschriftenWoche=eur(abschriften);
   f.umsatzWoche=eur(buchungen.filter(b=>b.haus.format==='outlet').reduce((n,b)=>n+b.kpi.umsatz,0));
+  const outletBedarf=nachfrage.filter(x=>x.haus.format==='outlet').reduce((n,x)=>n+x.nachfrage,0);
+  if(out.length&&f.umsatzWoche<outletBedarf*0.72&&s.woche%4===0)
+    melde(s,'warnung','FUNDUS: Leere Flächen, es fehlen passende Markenposten oder Altware.');
   if(out.length&&f.pool.reduce((n,p)=>n+p.wert,0)>Math.max(1,f.abverkaufWoche)*15&&s.woche%4===0)
     melde(s,'warnung','FUNDUS: Warenüberhang und Abschriftenrisiko.');
   return {buchungen,warenZukauf:eur(warenZukauf),abschriften:eur(abschriften),
