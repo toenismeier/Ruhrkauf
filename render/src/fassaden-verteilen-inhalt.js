@@ -8,7 +8,7 @@ import { STADT_GEOGRAFIE } from './kit/stadt-geografie.js';
 import { familieVon, VARIANTEN } from './kit/warenhaus.js';
 import { familieSport } from './kit/sporthaus.js';
 import { familieSchwester } from './kit/schwesterhaus.js';
-import { familieOutlet } from './kit/outlet.js';
+import { familieOutlet, masseOutlet } from './kit/outlet.js';
 
 const dir = process.argv[2];
 const datei = (n) => path.join(dir, n);
@@ -55,6 +55,23 @@ for (const [name, liste, familie, anzahl] of gruppen) {
   }
   console.log('Fassaden', name, liste.length, 'Häuser, höchstens', Math.max(...fertig.map((x) => nb.get(x).length)), 'gleichfamilige Nachbarn');
 }
+// Grafikfläche: Hartwig bleibt das prägnanteste Haus der Stadt (GESTALTUNG.md 3 und 3b). Volkskauf höchstens 80 % der
+// größten Hartwig-Grundfläche der Stadt, FUNDUS in b-Lage mit Baukörper höchstens 80 %. Nur die Grafikdateien,
+// die Wirtschaft der Engine rechnet mit ihren eigenen Flächen.
+let gekappt = 0;
+const maxHartwig = (stadt) => Math.max(0, ...haupt.filter((h) => h.stadt === stadt && h.format === 'warenhaus').map((h) => h.grundflaecheQm));
+for (const h of volkskauf) {
+  const m = maxHartwig(h.stadt);
+  if (m && h.grundflaecheQm > m * 0.8) { h.grundflaecheQm = Math.floor(m * 0.8); gekappt++; }
+}
+for (const h of fundus.filter((q) => q.lage === 'b')) {
+  const m = maxHartwig(h.stadt);
+  if (!m) continue;
+  let n = 0;
+  while (masseOutlet(h).bw * masseOutlet(h).bd > m * 0.8 && h.grundflaecheQm > 650 && n++ < 200) h.grundflaecheQm = Math.max(650, h.grundflaecheQm - 25);
+  if (n) gekappt++;
+}
+console.log('Grafikflächen gekappt:', gekappt);
 const schreib = (n, d) => fs.writeFileSync(datei(n), JSON.stringify(d, null, 2) + '\n');
 schreib('haeuser.json', haupt); schreib('haeuser-schwester.json', volkskauf); schreib('haeuser-outlet.json', fundus);
 console.log('Fassadenverteilung:', geaendert, 'Varianten im ersten Durchlauf verschoben');

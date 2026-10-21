@@ -2463,7 +2463,7 @@
     "lage": "1a",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1300,
+    "grundflaecheQm": 1280,
     "etagen": [
       0,
       1,
@@ -2743,7 +2743,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1300,
+    "grundflaecheQm": 1120,
     "etagen": [
       0,
       1,
@@ -3405,7 +3405,7 @@
     "lage": "1a",
     "cluster": "mittelstadt",
     "region": "Süd",
-    "grundflaecheQm": 1600,
+    "grundflaecheQm": 1280,
     "etagen": [
       0,
       1,
@@ -3591,7 +3591,7 @@
     "lage": "1a",
     "cluster": "mittelstadt",
     "region": "Süd",
-    "grundflaecheQm": 2400,
+    "grundflaecheQm": 1280,
     "etagen": [
       0,
       1,
@@ -3683,7 +3683,7 @@
     "lage": "1a",
     "cluster": "mittelstadt",
     "region": "Süd",
-    "grundflaecheQm": 2400,
+    "grundflaecheQm": 1040,
     "etagen": [
       0,
       1,
@@ -3870,7 +3870,7 @@
     "lage": "b",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 1100,
+    "grundflaecheQm": 1040,
     "etagen": [
       0,
       1,
@@ -3963,7 +3963,7 @@
     "lage": "1a",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 1900,
+    "grundflaecheQm": 1280,
     "etagen": [
       0,
       1,
@@ -4056,7 +4056,7 @@
     "lage": "b",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 1100,
+    "grundflaecheQm": 800,
     "etagen": [
       0,
       1,
@@ -4150,7 +4150,7 @@
     "lage": "1a",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 1700,
+    "grundflaecheQm": 1200,
     "etagen": [
       0,
       1,
@@ -4242,7 +4242,7 @@
     "lage": "b",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 1700,
+    "grundflaecheQm": 960,
     "etagen": [
       0,
       1,
@@ -4335,7 +4335,7 @@
     "lage": "b",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 2000,
+    "grundflaecheQm": 1680,
     "etagen": [
       0,
       1,
@@ -4523,7 +4523,7 @@
     "lage": "1a",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 2200,
+    "grundflaecheQm": 800,
     "etagen": [
       0,
       1,
@@ -4616,7 +4616,7 @@
     "lage": "b",
     "cluster": "mittelstadt",
     "region": "West",
-    "grundflaecheQm": 2400,
+    "grundflaecheQm": 800,
     "etagen": [
       0,
       1,
@@ -7403,7 +7403,7 @@
     "lage": "center",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1600,
+    "grundflaecheQm": 1520,
     "etagen": [
       0,
       1,
