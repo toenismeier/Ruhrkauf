@@ -45,6 +45,8 @@
 //
 // Zustände: offen · aktion (sale|jubilaeum|weihnachten|blackfriday) · untermiete · offprice · teilschliessung · umbau ·
 //           raeumung · geschlossen · leer · verfall · neueroeffnung · abriss
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
 
 export const STATI = ['offen', 'aktion', 'untermiete', 'offprice', 'teilschliessung', 'umbau', 'raeumung', 'geschlossen', 'leer', 'verfall', 'neueroeffnung', 'abriss'];
@@ -276,7 +278,7 @@ function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
     const a = r() * Math.PI * 2, rr = Math.sqrt(r());
     const uu = u + Math.cos(a) * ru * rr, tt = t + Math.sin(a) * rt * rr;
     if (tt < tMin || tt > tMax || uu < uMin || uu > uMax) continue;
-    if (pos.some(([pu, pt]) => Math.hypot(pu - uu, pt - tt) < 0.62)) continue;
+    if (pos.some(([pu, pt]) => wurzelSumme(pu - uu, pt - tt) < 0.62)) continue;
     pos.push([uu, tt]); i++;
     const [x, z] = s.welt(uu, tt);
     figur(Z.S, x, z, r, 1.1, (o.farben ?? Z.sportPalette) ? waehle(r, o.farben ?? Z.sportPalette) : null);
@@ -338,7 +340,7 @@ function wimpel(Z, s, u0, u1, y, t, farben, durch = 1.2) {
   for (let k = 0; k < 4; k++) {
     const fa = k / 4, fb = (k + 1) / 4;
     const ua = u0 + (u1 - u0) * fa, ub = u0 + (u1 - u0) * fb, ya = y - durch * 4 * fa * (1 - fa), yb = y - durch * 4 * fb * (1 - fb);
-    s.kipp(Math.hypot(ub - ua, yb - ya), 0.05, 0.05, (ua + ub) / 2, (ya + yb) / 2, t + 0.02, '#4a4f55', Math.atan2(yb - ya, ub - ua));
+    s.kipp(wurzelSumme(ub - ua, yb - ya), 0.05, 0.05, (ua + ub) / 2, (ya + yb) / 2, t + 0.02, '#4a4f55', Math.atan2(yb - ya, ub - ua));
   }
 }
 /** Kundenstopper/Aufsteller mit Schrift. */
@@ -370,7 +372,7 @@ function kran(Z, x, z, H, L, ry) {
   const S = Z.S, m = 1.6, y0 = 0.9;
   S.box(4, 0.6, 4, x, 0.6, z, '#9aa0a4');
   for (const [dx, dz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) S.box(0.16, H, 0.16, x + dx * m / 2, y0 + H / 2, z + dz * m / 2, GELB);
-  const hh = 2.4, dl = Math.hypot(m, hh), wink = Math.atan2(m, hh);
+  const hh = 2.4, dl = wurzelSumme(m, hh), wink = Math.atan2(m, hh);
   for (let y = y0; y < y0 + H - 0.5; y += hh) {
     S.box(m, 0.1, 0.1, x, y, z + m / 2, GELB); S.box(0.1, 0.1, m, x + m / 2, y, z, GELB);
     const g = new THREE.BoxGeometry(0.08, dl, 0.08); g.rotateZ(wink); g.translate(x, y + hh / 2, z + m / 2); S.add(g, GELB);
@@ -388,7 +390,7 @@ function kran(Z, x, z, H, L, ry) {
   lbox(S, 2.4, 2.2, 1.6, -LG + 1.3, yt + 2.0, 0, x, z, ry, '#a7a39b');
   lbox(S, 0.3, 5.0, 0.3, 0, yt + 3.1, 0, x, z, ry, GELB);
   for (const [lx, l] of [[L * 0.4, L * 0.8], [-LG * 0.5, LG]]) {
-    const a = Math.atan2(4.5, Math.abs(l)), lang = Math.hypot(l, 4.5);
+    const a = Math.atan2(4.5, Math.abs(l)), lang = wurzelSumme(l, 4.5);
     lbox(S, lang, 0.06, 0.06, lx / 2 + (lx > 0 ? l * 0.0 : 0), yt + 3.3, 0, x, z, ry, '#6c7277', lx > 0 ? -a : a);
   }
   lbox(S, 1.4, 1.5, 1.3, 0.6, yt - 0.4, 1.25, x, z, ry, '#e8e4dc');
@@ -653,7 +655,7 @@ function hebebuehne(Z, s, u, yZiel, tZiel, buchstaben = ['R', 'T', 'W']) {
   for (const du of [-2.6, 2.6]) for (const dt of [-1.6, 1.6]) s.q(ub + du - 0.15, ub + du + 0.15, 0.3, 0.9, tb + dt - 0.2, tb + dt + 0.2, '#5f676e'); // Stützen
   s.q(ub - 0.9, ub + 0.9, 1.6, 2.4, tb - 0.8, tb + 0.8, '#4a4f55');    // Drehkranz
   const yK = Math.max(4, yZiel - 1.6), tK = tZiel + 1.1;
-  const dy = yK - 2.2, dt = tK - tb, l = Math.hypot(dy, dt), a = Math.atan2(dt, dy);
+  const dy = yK - 2.2, dt = tK - tb, l = wurzelSumme(dy, dt), a = Math.atan2(dt, dy);
   s.kipp(0.55, l, 0.55, ub, 2.2 + dy / 2, tb + dt / 2, GE, 0, a);
   s.kipp(0.35, l * 0.55, 0.35, ub, 2.2 + dy * 0.75, tb + dt * 0.75, '#e0e0dc', 0, a);
   s.q(ub - 1.1, ub + 1.1, yK - 0.1, yK + 0.15, tK - 0.7, tK + 0.7, '#4a4f55'); // Korb
@@ -1165,7 +1167,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       for (const f of fensterEG) {
         const s = seiten[f.seite];
         if (!(f.seite === '+x' ? (f.a + f.b) / 2 < Z.nutz(s) * 0.6 : (f.a + f.b) / 2 < Z.nutz(s) * 0.5)) continue;
-        const m = (f.a + f.b) / 2, ym = (f.y0 + f.y1) / 2, l = Math.hypot(f.b - f.a, f.y1 - f.y0) * 0.92, w = Math.atan2(f.y1 - f.y0, f.b - f.a);
+        const m = (f.a + f.b) / 2, ym = (f.y0 + f.y1) / 2, l = wurzelSumme(f.b - f.a, f.y1 - f.y0) * 0.92, w = Math.atan2(f.y1 - f.y0, f.b - f.a);
         s.q(f.a, f.b, f.y0, f.y1, f.t + 0.1, f.t + 0.14, '#f2f0ea');
         s.kipp(l, 0.35, 0.03, m, ym, f.t + 0.16, ROT_KAMPAGNE, w); s.kipp(l, 0.35, 0.03, m, ym, f.t + 0.19, ROT_KAMPAGNE, -w);
       }

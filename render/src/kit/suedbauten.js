@@ -8,6 +8,8 @@
 //
 // Rahmen-Konzept wie in ostbauten.js: Fassade F mit Ursprung, Laufrichtung u (im Bild von links nach rechts),
 // Höhe y und t nach außen (t < 0 im Gebäude).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, Sammler, rng, waehle, zw, FARBEN, heller, dunkler, textTextur, textMaterial } from './basis.js';
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js';
 import { gelaende, rebzeilen as glatteReben } from './gelaende.js';
@@ -81,7 +83,7 @@ function fscheibe(S, F, u, y, t0, t1, rad, c, seg = 16) {
 }
 /** Schräger Balken im Rahmen von (u0, y0) nach (u1, y1), Stärke b, Tiefe t0..t1. */
 function fdiag(S, F, u0, y0, u1, y1, b, t0, t1, c) {
-  const L = Math.hypot(u1 - u0, y1 - y0);
+  const L = wurzelSumme(u1 - u0, y1 - y0);
   const g = new THREE.BoxGeometry(L, b, t1 - t0);
   g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
   g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
@@ -527,7 +529,7 @@ function fiale(S, x, y, z, h, c) {
 /** Krabben entlang einer Giebelkante (Punkte im Rahmen) und Kreuzblume am First. */
 function krabben(S, F, pkt, t, c, abst = 1.8) {
   for (let i = 0; i < pkt.length - 1; i++) {
-    const [a0, a1] = pkt[i], [b0, b1] = pkt[i + 1], L = Math.hypot(b0 - a0, b1 - a1), n = Math.floor(L / abst);
+    const [a0, a1] = pkt[i], [b0, b1] = pkt[i + 1], L = wurzelSumme(b0 - a0, b1 - a1), n = Math.floor(L / abst);
     for (let k = 1; k <= n; k++) { const q = k / (n + 1); fb(S, F, a0 + (b0 - a0) * q - 0.22, a0 + (b0 - a0) * q + 0.22, a1 + (b1 - a1) * q, a1 + (b1 - a1) * q + 0.4, t - 0.2, t + 0.25, c); }
   }
 }
@@ -2233,7 +2235,7 @@ function schlossRoh(S, scene, p) {
     for (let i = 0; i < 5; i++) {
       const a = -PI / 2 + ((i + 0.5) * PI) / 5, nx = Math.sin(a), nz = Math.cos(a) / 0.75;
       if (!sicht(p, nx, nz)) continue;
-      const px = cx + Math.sin(a) * rr, pz = cz + Math.cos(a) * rr * 0.75, L = Math.hypot(nx, nz);
+      const px = cx + Math.sin(a) * rr, pz = cz + Math.cos(a) * rr * 0.75, L = wurzelSumme(nx, nz);
       const Fo = R(px - (nz / L) * 1.2, pz + (nx / L) * 1.2, nz / L, -nx / L, 2.4);
       fbogen(S, Fo, 1.2, 1.0, 1.6, 4.0, -0.2, 0.1, GLAS); fenster(S, Fo, 1.2, 6.6, 1.4, 2.4, { rahmen: c.orn, glas: GLAS, fasche: c.orn, sims: false });
     }
@@ -2253,7 +2255,7 @@ function schlossRoh(S, scene, p) {
     for (let i = 0; i < m; i++) {
       const a = -Phi / 2 + i * dphi, b2 = a + dphi;
       const Pa = [cx + Rr * Math.sin(a), cz - Rr * Math.cos(a)], Pb = [cx + Rr * Math.sin(b2), cz - Rr * Math.cos(b2)];
-      const Ls = Math.hypot(Pb[0] - Pa[0], Pb[1] - Pa[1]);
+      const Ls = wurzelSumme(Pb[0] - Pa[0], Pb[1] - Pa[1]);
       const F = R(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
       const wand = i % 2 ? c.wand : heller(c.wand, 0.02);
       fb(S, F, -ext, Ls + ext, 0, H, -T, 0, wand);

@@ -4,6 +4,8 @@
 //   bergHoehe(B, x, z) → Höhe in m aus dem Bergprofil plan.berge (stadtrand.js bergProfil), 0 außerhalb
 //   gelaende(S, x0, z0, x1, z1, hoehe(x, z), farbe(x, y, z, steigung), o?) baut die Fläche aus Dreiecken, gruppiert nach
 //     Farbe (ein Sammler-Teil je Farbe). o: { schritt = 6 (m), y0 = Sockel bis zu dieser Höhe hinab }
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE } from './basis.js';
 
 const glatt = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
@@ -39,7 +41,7 @@ export function bergHoehe(B, x, z) {
   }
   // ebene Plateaus (Burg am Hang): innen genau y, am Rand 18 m weicher Übergang
   for (const Q of B.plateaus ?? []) {
-    const e = Math.hypot(Math.max(0, Q.x0 - x, x - Q.x1), Math.max(0, Q.z0 - z, z - Q.z1));
+    const e = wurzelSumme(Math.max(0, Q.x0 - x, x - Q.x1), Math.max(0, Q.z0 - z, z - Q.z1));
     if (e < 18) { const w = glatt(1 - e / 18); h = h * (1 - w) + Q.y * w; }
   }
   return h;
@@ -55,14 +57,14 @@ export function gelaende(S, x0, z0, x1, z1, hoehe, farbe, o = {}) {
   // Weiche Normalen aus dem Höhenfeld (zentrale Differenzen je Gitterpunkt): keine sichtbaren Dreiecksfacetten
   const N = (i, j) => {
     const ia = Math.max(0, i - 1), ib = Math.min(nx, i + 1), ja = Math.max(0, j - 1), jb = Math.min(nz, j + 1);
-    const gx = (H[ib][j] - H[ia][j]) / ((ib - ia) * dx), gz = (H[i][jb] - H[i][ja]) / ((jb - ja) * dz), L = Math.hypot(gx, 1, gz);
+    const gx = (H[ib][j] - H[ia][j]) / ((ib - ia) * dx), gz = (H[i][jb] - H[i][ja]) / ((jb - ja) * dz), L = wurzelSumme(gx, 1, gz);
     return [-gx / L, 1 / L, -gz / L];
   };
   const gruppen = new Map();
   const tri = (a, b, c) => {
     const yc = (a[1] + b[1] + c[1]) / 3;
     const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
-    const nxx = uy * vz - uz * vy, nyy = uz * vx - ux * vz, nzz = ux * vy - uy * vx, L = Math.hypot(nxx, nyy, nzz) || 1;
+    const nxx = uy * vz - uz * vy, nyy = uz * vx - ux * vz, nzz = ux * vy - uy * vx, L = wurzelSumme(nxx, nyy, nzz) || 1;
     const f = farbe((a[0] + b[0] + c[0]) / 3, yc, (a[2] + b[2] + c[2]) / 3, 1 - Math.abs(nyy) / L);
     if (!gruppen.has(f)) gruppen.set(f, { p: [], n: [] });
     const G = gruppen.get(f);

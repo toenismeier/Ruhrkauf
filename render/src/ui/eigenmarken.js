@@ -29,7 +29,7 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
   const s = ctx.s(), u = ctx.q.marken(s);
   let h = tabs;
   h += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken geführt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a, m) => a + m.umsatz13, 0))}</b></div></div>`;
-  h += '<button class="breit gruen" data-a="emGruenden">+ Marke gründen</button>';
+  h += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
   for (const m of u.marken) {
     const veraltet = m.stilAktualitaet < 45;
     const status = m.status !== 'aktiv' ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
@@ -53,7 +53,7 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
 
 const SCHRITTE = ['Zielgruppe', 'Sortiment', 'Profil', 'Beschaffung', 'Name'];
 const nameFuer = (s, g) => { const l = NAMEN[g] ?? NAMEN.unisex; return l[(s.woche * 7 + (s.eigenmarken?.zaehler ?? 0) * 3) % l.length]; };
-function neuerEntwurf(s) {
+export function neuerEntwurf(s) {
   return { name: nameFuer(s, 'herren'), farbe: FARBEN[(s.woche + 4) % FARBEN.length], zielgruppe: { alter: '50+', geschlecht: 'herren' }, kategorie: 'Bekleidung', preislage: 'mitte', stil: 'modern', qualitaet: 3, beschaffung: 'nahost', budgetWoche: 15000, wgAnteile: {} };
 }
 /** Vorschlag: bis zu vier Warengruppen mit der besten Passung, je 25 %. */

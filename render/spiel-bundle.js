@@ -5,7 +5,7 @@
       __defProp(target, name2, { get: all[name2], enumerable: true });
   };
 
-  // ../engine/src/index.ts
+  // engine/src/index.ts
   var src_exports = {};
   __export(src_exports, {
     ABTEILUNGEN: () => ABTEILUNGEN,
@@ -17,6 +17,7 @@
     ARTIKELTYPEN: () => ARTIKELTYPEN,
     BEREICHE: () => BEREICHE,
     BESCHAFFUNG: () => BESCHAFFUNG,
+    CLUSTER_AUFGABEN: () => CLUSTER_AUFGABEN,
     DAUER_STUFEN: () => DAUER_STUFEN,
     DELEGATIONEN: () => DELEGATIONEN,
     EINKAUF_SPALTEN: () => EINKAUF_SPALTEN,
@@ -48,6 +49,8 @@
     RESSORT_INFO: () => RESSORT_INFO,
     SCHWIERIGKEIT: () => SCHWIERIGKEIT,
     SCHWIERIGKEITEN: () => SCHWIERIGKEITEN,
+    STADT_REGIONEN: () => STADT_REGIONEN,
+    STAEDTE: () => STAEDTE,
     STANDARD_SZENARIO: () => STANDARD_SZENARIO,
     STARTKALENDER: () => STARTKALENDER,
     SYSTEME: () => SYSTEME,
@@ -62,6 +65,8 @@
     ZEITUNG_ARTIKELARTEN: () => ZEITUNG_ARTIKELARTEN,
     ZEITUNG_REITER: () => ZEITUNG_REITER,
     ZIELGRUPPEN_TEXT: () => ZIELGRUPPEN_TEXT,
+    ZUSATZ_ARTIKEL: () => ZUSATZ_ARTIKEL,
+    ZUSATZ_ARTIKELTYPEN: () => ZUSATZ_ARTIKELTYPEN,
     aktionsAuswertung: () => aktionsAuswertung,
     aktionskalender: () => aktionskalender,
     angebotText: () => angebotText,
@@ -77,6 +82,8 @@
     clusterleitungQualitaet: () => clusterleitungQualitaet,
     cockpit: () => cockpit,
     crmKampagnen: () => crmKampagnen,
+    delegationsAufgaben: () => delegationsAufgaben,
+    delegationsGrenze: () => delegationsGrenze,
     ebitdaJahr: () => ebitdaJahr,
     eigenmarkeVorschau: () => eigenmarkeVorschau,
     eigenmarkenUebersicht: () => eigenmarkenUebersicht,
@@ -107,6 +114,7 @@
     hqUebersicht: () => hqUebersicht,
     immobilienWert: () => immobilienWert,
     initialisierePersonaleinsatz: () => initialisierePersonaleinsatz,
+    istAufgabeDelegiert: () => istAufgabeDelegiert,
     istDelegiert: () => istDelegiert,
     itAlter: () => itAlter,
     itCluster: () => itCluster,
@@ -156,6 +164,7 @@
     sollFte: () => sollFte,
     spielBeenden: () => spielBeenden,
     spielendePruefen: () => spielendePruefen,
+    stadtRegion: () => stadtRegion,
     szenarioKonfiguration: () => szenarioKonfiguration,
     szenarioName: () => szenarioName,
     szenarioZiel: () => szenarioZiel,
@@ -188,7 +197,7 @@
     zeitungArchiv: () => zeitungArchiv
   });
 
-  // ../engine/src/daten.ts
+  // engine/src/daten.ts
   var WH = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
   function mit(basis3, over) {
     return basis3.map((x, i) => over[i] !== void 0 ? over[i] : x);
@@ -361,6 +370,10 @@
     ["Detmold", "West", "mittelstadt", 0.97, 1, 0],
     ["Minden", "West", "mittelstadt", 0.95, 1, 0]
   ];
+  var STADT_REGIONEN = Object.freeze(Object.fromEntries(STAEDTE.map(([name2, region]) => [name2, region])));
+  function stadtRegion(name2) {
+    return STADT_REGIONEN[name2];
+  }
   var STANDORT_ZUSATZ = {
     "1a": ["Marktplatz", "Hauptstra\xDFe", "Innenstadt", "Am Markt", "K\xF6nigstra\xDFe", "Altstadt"],
     b: ["Bahnhofstra\xDFe", "Am Wall", "Neustadt", "Ring", "Lindenstra\xDFe"],
@@ -445,7 +458,7 @@
     { id: "P004", name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf", rang: 3 }
   ];
 
-  // ../engine/src/util.ts
+  // engine/src/util.ts
   function zufall(h) {
     let t = h.rng = h.rng + 1831565813 >>> 0;
     t = Math.imul(t ^ t >>> 15, t | 1);
@@ -481,7 +494,7 @@
     return `${(x / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Mio. \u20AC`;
   }
 
-  // ../engine/src/planung.ts
+  // engine/src/planung.ts
   var aktiv = (h) => h.status !== "geschlossen" && h.status !== "verkauft";
   var clusterVon = (h) => h.hauscluster || h.region;
   var organisation = (s2) => s2.organisation;
@@ -1039,7 +1052,7 @@
     };
   }
 
-  // ../engine/src/statistik.ts
+  // engine/src/statistik.ts
   var STATISTIK_AKTIV = true;
   var GRENZE_BYTES = 2e6;
   var HAUS_WOCHEN = 156;
@@ -1126,7 +1139,7 @@
     return ergebnis;
   }
 
-  // ../engine/src/eigenmarken.ts
+  // engine/src/eigenmarken.ts
   var BESCHAFFUNG = {
     fernost: { name: "Fernost", vorlauf: 22, mindestabnahme: 15e4, mehrmarge: 0.14, produzent: "Golden Thread" },
     nahost: { name: "Nahost und Osteuropa", vorlauf: 10, mindestabnahme: 6e4, mehrmarge: 0.105, produzent: "Adria Konfektion" },
@@ -1573,7 +1586,7 @@
     };
   }
 
-  // ../engine/src/standorte.ts
+  // engine/src/standorte.ts
   var KOORDINATEN = {
     Berlin: [52.52, 13.4],
     Hamburg: [53.55, 10],
@@ -1768,7 +1781,7 @@
     return Math.sqrt(dx * dx + dy * dy) / 100;
   }
 
-  // ../engine/src/schwierigkeit.ts
+  // engine/src/schwierigkeit.ts
   var SCHWIERIGKEIT = {
     leicht: {
       name: "Leicht",
@@ -1807,7 +1820,7 @@
   var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
   var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
 
-  // ../engine/src/stakeholder.ts
+  // engine/src/stakeholder.ts
   function freieLiquiditaet(s2) {
     return s2.cash + s2.kreditlinie;
   }
@@ -1858,7 +1871,7 @@
     }
   }
 
-  // ../engine/src/ware.ts
+  // engine/src/ware.ts
   function bestandWert(s2, g) {
     let x = 0;
     for (const k of s2.bestand) if (!g || k.gruppe === g) x += k.wert;
@@ -1905,7 +1918,7 @@
         if (rest > 0) {
           const liquide = s2.cash + s2.kreditlinie - liquiditaetsReserve;
           if (s2.vorkasseAkzeptieren && liquide > 0) {
-            const zahlbar = Math.min(rest, liquide);
+            const zahlbar = eur(Math.min(rest, liquide));
             s2.cash -= zahlbar;
             vorkasse += zahlbar;
             rest -= zahlbar;
@@ -1940,7 +1953,7 @@
     return gebucht;
   }
 
-  // ../engine/src/marketing.ts
+  // engine/src/marketing.ts
   var ALTERSGRUPPEN = ["jung", "mitte", "aelter", "senioren"];
   var ALTERSGRUPPE_TEXT = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var REGIONEN = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
@@ -3471,7 +3484,7 @@
     };
   }
 
-  // ../engine/src/wettbewerb.ts
+  // engine/src/wettbewerb.ts
   var WIRKUNGSFAKTOR = 0.035;
   var ARTEN = ["modehaus", "fastfashion", "premium", "offprice", "textildiscounter", "elektronik", "leer_ehemals"];
   var START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
@@ -3898,7 +3911,7 @@
     }
   }
 
-  // ../engine/src/premium.ts
+  // engine/src/premium.ts
   var PREMIUM_PROFIL = {
     P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
     P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
@@ -4125,7 +4138,7 @@
     return null;
   }
 
-  // ../engine/src/chronik.ts
+  // engine/src/chronik.ts
   var CHRONIK_AKTIV = true;
   var KONZERN_GESCHICHTE = [
     { jahr: 1886, titel: "Eine Tuchhandlung in Essen", text: "In einer kleinen Essener Ladenzeile beginnt die Familie Hartwig mit Tuchen, Kurzwaren und Ma\xDFstoffen. Ein rotes Schild \xFCber der T\xFCr wird zum Erkennungszeichen.", motiv: "Tuchballen und Schaufenster", familie: 1 },
@@ -4187,7 +4200,7 @@
         eintragen(s2, "vorstand", `${person3.name} \xFCbernimmt das Ressort ${id.toUpperCase()}.`, id, ereignisWoche);
       }
     }
-    const q2 = s2.quartale.find((q3) => q3.start + 12 === ereignisWoche && q3.nr > alt.letztesQuartal);
+    const q2 = s2.quartale.find((q3) => q3.start + 12 === ereignisWoche && q3.start + 13 <= s2.woche && q3.nr > alt.letztesQuartal);
     let bestesQuartal = alt.bestesQuartal;
     let letztesQuartal = alt.letztesQuartal;
     if (q2) {
@@ -4209,7 +4222,7 @@
     return { geschichte: KONZERN_GESCHICHTE, spiel: [...s2.chronik ?? []].reverse() };
   }
 
-  // ../engine/src/szenarien.ts
+  // engine/src/szenarien.ts
   var SZENARIEN_AKTIV = true;
   var SZENARIEN = [
     { id: "standard", name: "Die Sanierung", beschreibung: "Hartwig steckt in der Krise. Das bekannte Ausgangsszenario.", schwierigkeit: "Mittel", ziel: "260 Wochen \xFCberleben", bild: "sanierung", start: {} },
@@ -4381,7 +4394,7 @@
     if (ziel.gescheitert) melde(s2, "warnung", "Szenarioziel verfehlt: " + ziel.text);
   }
 
-  // ../engine/src/zeitung.ts
+  // engine/src/zeitung.ts
   var ZEITUNG_REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
   var EREIGNISSE = [
     ["konkurrenz_neu", "Handel", "konkurrenz", "Neue Konkurrenz in der Innenstadt", "Ein Anbieter investiert in Verkaufsfl\xE4che.", "Der lokale Handel stellt sich auf einen ver\xE4nderten Wettbewerb ein.", "Die kommenden Wochen d\xFCrften zeigen, wie stark sich die Kundschaft neu verteilt.", /wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
@@ -4479,7 +4492,7 @@
     if (!zeitungAktiv(s2) || e.typ !== "interview") return;
     const wirkung = {
       offensiv: { image: 2, betriebsrat: -2, bank: -1, kreditversicherer: -1, zitat: "Wir treiben den Umbau konsequent voran und werden unsere Ziele erreichen." },
-      sachlich: { image: 1, betriebsrat: 1, bank: 1, kreditversicherer: 1, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
+      sachlich: { image: 0, betriebsrat: 0, bank: 0, kreditversicherer: 0, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
       ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
     }[option2];
     if (!wirkung) return;
@@ -4544,7 +4557,7 @@
     }
   }
 
-  // ../engine/src/spielende.ts
+  // engine/src/spielende.ts
   var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
   var SPIELENDE_AKTIV = true;
   var aktiv2 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert;
@@ -4641,7 +4654,7 @@
     melde(s2, "eigentuemer", "Ein \xDCbernahmeangebot f\xFCr den gesamten Konzern liegt vor.", { modul: "vorstand" });
   }
 
-  // ../engine/src/it.ts
+  // engine/src/it.ts
   var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau"]);
   var SYSTEME = {
     kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
@@ -4980,7 +4993,7 @@
     };
   }
 
-  // ../engine/src/organisation.ts
+  // engine/src/organisation.ts
   var b = (id, name2, ressort, abteilung2, beschreibung) => ({ id, name: name2, ressort, abteilung: abteilung2, beschreibung });
   var BEREICHE = [
     b("konzerncontrolling", "Konzerncontrolling", "cfo", "controlling", "GuV, Bilanz und Liquidit\xE4t"),
@@ -5034,7 +5047,57 @@
     "cro.mietverhandlungen": "immobilien",
     "cdo.onlinesortiment": "ecommerce"
   };
-  var ORGANISATION_AKTIONEN = /* @__PURE__ */ new Set(["flagship", "delegation", "organisationBesetzen", "organisationEntlassen", "organisationHaltepraemie", "organisationBefoerdern"]);
+  var task = (id, name2, grenze) => ({ id, name: name2, ...grenze ? { grenze } : {} });
+  var ALLGEMEIN = [task("planung", "Planung und Priorit\xE4ten"), task("freigaben", "Routinefreigaben", 5e4)];
+  var AUFGABEN_NACH_BEREICH = {
+    einkauf_damen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_herren_kinder: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_beauty: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_wohnen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_food: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    merchandise_planning: [task("limits", "Open-to-Buy-Limits", 5e4), task("vororder", "Saison-Vororder", 5e4), task("freigaben", "Bestellfreigaben", 5e4)],
+    allokation: [task("nachorder", "Nachorder"), task("disposition", "NOS-Disposition"), task("umlagerung", "Warenumlagerungen", 2e4)],
+    preis_reduzierung: [task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4), task("preise", "Preispflege")],
+    eigenmarken: [task("produkte", "Produktentwicklung", 5e4), task("positionierung", "Markenpositionierung", 1e5), task("sortiment", "Sortiment und Auslistung")],
+    personaleinsatz: [task("einsatz", "Einsatzplanung"), task("aushilfen", "Aushilfen", 1e4), task("schicht", "Schicht\xE4nderungen")],
+    recruiting: [task("einstellung", "Einstellungen", 5e4), task("angebote", "Kandidatenangebote", 1e4)],
+    arbeitsbeziehungen: [task("verhandlung", "Betriebsratsverhandlungen"), task("vereinbarung", "Betriebsvereinbarungen", 1e5)],
+    marketing: [task("aktionen", "Aktionen", 1e5), task("mailings", "Mailings", 5e4), task("budget", "Kanalbudget", 5e4)],
+    crm: [task("mailings", "CRM-Mailings", 5e4), task("segment", "Kundensegmente"), task("karte", "Kundenkarte und App", 5e4)],
+    store_operations: [task("oeffnungszeiten", "\xD6ffnungszeiten"), task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4), task("reparaturen", "Reparaturen", 1e4)],
+    facility: [task("reparaturen", "Reparaturen", 1e4), task("wartung", "Wartung", 5e4), task("energie", "Energieplanung")]
+  };
+  var CLUSTER_AUFGABEN = [
+    task("oeffnungszeiten", "\xD6ffnungszeiten"),
+    task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4),
+    task("reparaturen", "Reparaturen", 1e4),
+    task("aushilfen", "Aushilfen", 1e4),
+    task("einsatz", "Personaleinsatzplanung")
+  ];
+  function delegationsAufgaben(bereich, hauscluster2) {
+    if (hauscluster2) return CLUSTER_AUFGABEN;
+    if (!bereich || !BEREICHE.some((b2) => b2.id === bereich)) return [];
+    return AUFGABEN_NACH_BEREICH[bereich] ?? ALLGEMEIN.slice();
+  }
+  var RESSORT_TASK = {
+    "cpo.freigaben": "freigaben",
+    "cpo.dispo": "disposition",
+    "cpo.produktentwicklung": "produkte",
+    "cmo.aktionskalender": "aktionen",
+    "cmo.crm": "mailings",
+    "cmo.kanalbudget": "budget",
+    "chro.personalplanung": "einsatz",
+    "chro.betriebsrat": "verhandlung",
+    "cdo.onlinesortiment": "planung",
+    "cso.filialbesetzung": "planung",
+    "coo.personalbedarf": "einsatz",
+    "coo.filialpersonal": "einsatz",
+    "cro.mietverhandlungen": "verhandlung",
+    "cro.schliessungen": "planung",
+    "cfo.zahlungsplanung": "planung",
+    "cfo.bank": "planung"
+  };
+  var ORGANISATION_AKTIONEN = /* @__PURE__ */ new Set(["flagship", "delegation", "delegationGrenze", "organisationBesetzen", "organisationEntlassen", "organisationHaltepraemie", "organisationBefoerdern"]);
   var REGIONEN2 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var hash = (str) => [...str].reduce((v, c) => Math.imul(v, 31) + c.charCodeAt(0) >>> 0, 2166136261);
   var mix = (seed, text3) => hash(seed + ":" + text3);
@@ -5173,6 +5236,16 @@
       return neu === id && !!s2.vorstand?.ressorts[ressort]?.delegation[delegationsId];
     });
   }
+  function istAufgabeDelegiert(s2, aufgabe, bereich, hauscluster2) {
+    const st2 = bereich ? s2.organisation?.bereiche[bereich] : s2.organisation?.hauscluster.find((c) => c.id === hauscluster2)?.stelle;
+    if (!st2 || !st2.person || !delegationsAufgaben(bereich, hauscluster2).some((a) => a.id === aufgabe)) return false;
+    return st2.aufgaben?.[aufgabe] ?? (bereich ? istDelegiert(s2, bereich) : !!st2.delegiert);
+  }
+  function delegationsGrenze(s2, aufgabe, bereich, hauscluster2) {
+    const def = delegationsAufgaben(bereich, hauscluster2).find((x) => x.id === aufgabe);
+    const st2 = bereich ? s2.organisation?.bereiche[bereich] : s2.organisation?.hauscluster.find((x) => x.id === hauscluster2)?.stelle;
+    return def?.grenze ? st2?.grenzen?.[aufgabe] ?? def.grenze : void 0;
+  }
   function bereichsQualitaet(s2, id) {
     const def = BEREICHE.find((x) => x.id === id), st2 = s2.organisation?.bereiche[id];
     if (!def || !st2) return 0;
@@ -5194,8 +5267,19 @@
     const bereich = v.bereich ? BEREICHE.find((b2) => b2.id === v.bereich) : void 0;
     const cluster = v.hauscluster ? s2.organisation.hauscluster.find((c) => c.id === v.hauscluster) : void 0;
     const chef = bereich ? berichtetAn(s2, bereich.id) : cluster ? clusterBerichtetAn(s2, cluster.id) : "spieler";
-    const delegiert = bereich ? istDelegiert(s2, bereich.id) : !!cluster?.stelle.delegiert;
-    if (chef !== "spieler" && delegiert && !v.grundsaetzlich) return;
+    const delegiert = v.aufgabe ? istAufgabeDelegiert(s2, v.aufgabe, bereich?.id, cluster?.id) : bereich ? istDelegiert(s2, bereich.id) : !!cluster?.stelle.delegiert;
+    const grenze = v.aufgabe ? delegationsGrenze(s2, v.aufgabe, bereich?.id, cluster?.id) : void 0;
+    const innerhalbGrenze = grenze === void 0 || v.betrag !== void 0 && v.betrag <= grenze;
+    if (chef !== "spieler" && delegiert && !v.grundsaetzlich && innerhalbGrenze) {
+      if (v.aktion) {
+        const guete = bereich ? bereichsQualitaet(s2, bereich.id) : clusterleitungQualitaet(s2, cluster.id);
+        const schwelle = mix(s2.seed, (v.aufgabe ?? v.titel) + ":" + s2.woche) % 1e3 / 1e3;
+        const richtig = schwelle < 0.3 + 0.65 * guete;
+        const aktion = richtig ? v.aktion : v.fehlerAktion ?? v.aktion;
+        fuehreAus(s2, aktion);
+      }
+      return;
+    }
     const prefix = bereich?.name ?? cluster?.name ?? "Organisation";
     s2.entscheidungen.push({
       id: "org-v-" + ++s2.organisation.zaehler,
@@ -5206,13 +5290,13 @@
       text: prefix + ": " + v.text,
       optionen: v.optionen ?? [{ id: "vorschlag", label: "Vorschlag der Leitung \xFCbernehmen" }, { id: "ablehnen", label: "Ablehnen" }],
       standard: v.standard ?? "vorschlag",
-      daten: { bereich: bereich?.id ?? "", hauscluster: cluster?.id ?? "", absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : "" }
+      daten: { bereich: bereich?.id ?? "", hauscluster: cluster?.id ?? "", aufgabe: v.aufgabe ?? "", absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : "" }
     });
   }
   function organisationVorlageEntscheidung(s2, e, option2) {
     if (option2 !== "vorschlag" || typeof e.daten.aktion !== "string" || !e.daten.aktion) return;
     const a = JSON.parse(e.daten.aktion);
-    organisationAktion(s2, a);
+    fuehreAus(s2, a);
   }
   function stelleFuer(s2, ebene, id) {
     if (ebene === "bereich") return s2.organisation?.bereiche[id];
@@ -5236,21 +5320,39 @@
       o.unruhe[h.id] = { bis: s2.woche + 8, moral: 10 };
       return { ok: true, text: a.an ? "Flagship zugeordnet: acht Wochen Unruhe." : "Flagship wieder regional zugeordnet: acht Wochen Unruhe." };
     }
-    if (a.typ === "delegation") {
-      if (a.bereich && o.bereiche[a.bereich]) {
-        o.bereiche[a.bereich].delegiert = a.an;
+    if (a.typ === "delegation" || a.typ === "delegationGrenze") {
+      const st3 = a.bereich ? o.bereiche[a.bereich] : o.hauscluster.find((c) => c.id === a.hauscluster)?.stelle;
+      if (!st3) return { ok: false, text: "Bereich oder Hauscluster nicht gefunden." };
+      if (a.typ === "delegationGrenze") {
+        const def = delegationsAufgaben(a.bereich, a.hauscluster).find((t) => t.id === a.aufgabe);
+        if (!def?.grenze || !Number.isFinite(a.betrag) || a.betrag < 0 || a.betrag > 1e8)
+          return { ok: false, text: "Ung\xFCltige Betragsgrenze oder Aufgabe." };
+        (st3.grenzen ?? (st3.grenzen = {}))[a.aufgabe] = eur(a.betrag);
+        return { ok: true, text: "Betragsgrenze ge\xE4ndert." };
+      }
+      if (a.aufgabe !== void 0) {
+        if (!delegationsAufgaben(a.bereich, a.hauscluster).some((t) => t.id === a.aufgabe))
+          return { ok: false, text: "Aufgabe in diesem Bereich nicht vorhanden." };
+        if (a.an && !st3.person) return { ok: false, text: "Ohne Leitung keine Delegation m\xF6glich." };
+        (st3.aufgaben ?? (st3.aufgaben = {}))[a.aufgabe] = a.an;
+        if (a.bereich) for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) {
+          if (neu !== a.bereich || RESSORT_TASK[alt] !== a.aufgabe) continue;
+          const [r, id] = alt.split(".");
+          if (s2.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d2) => d2.id === id))
+            s2.vorstand.ressorts[r].delegation[id] = a.an;
+        }
+        return { ok: true, text: "Aufgabe " + a.aufgabe + (a.an ? " delegiert." : " zur Entscheidung vorgelegt.") };
+      }
+      st3.delegiert = a.an;
+      st3.aufgaben = {};
+      if (a.bereich) {
         for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) if (neu === a.bereich) {
           const [r, id] = alt.split(".");
-          if (s2.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d2) => d2.id === id)) s2.vorstand.ressorts[r].delegation[id] = a.an;
+          if (s2.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d2) => d2.id === id))
+            s2.vorstand.ressorts[r].delegation[id] = a.an;
         }
-        return { ok: true, text: "Bereichsdelegation ge\xE4ndert." };
       }
-      const cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
-      if (cluster) {
-        cluster.stelle.delegiert = a.an;
-        return { ok: true, text: "Clusterdelegation ge\xE4ndert." };
-      }
-      return { ok: false, text: "Bereich oder Hauscluster nicht gefunden." };
+      return { ok: true, text: a.bereich ? "Bereichsdelegation ge\xE4ndert." : "Clusterdelegation ge\xE4ndert." };
     }
     if (a.typ === "organisationBefoerdern") {
       const h = s2.haeuser.find((x) => x.id === a.haus), cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
@@ -5282,6 +5384,46 @@
     st2.kandidaten = [1, 2, 3].map((n) => person(s2.seed, a.id + "-" + (s2.woche + 1), n));
     return { ok: true, text: k.name + " \xFCbernimmt die Leitung." };
   }
+  function routineVorschlag(bereich, aufgabe) {
+    const wg = {
+      einkauf_damen: "damen",
+      einkauf_herren_kinder: "herren",
+      einkauf_beauty: "beauty",
+      einkauf_wohnen: "wohnen",
+      einkauf_food: "nug",
+      merchandise_planning: "alle",
+      allokation: "alle",
+      preis_reduzierung: "alle"
+    };
+    const gruppe2 = bereich && wg[bereich];
+    if (gruppe2) {
+      if (aufgabe === "limits") return {
+        gut: { typ: "wgLimit", wg: gruppe2, faktor: 1.05 },
+        schlecht: { typ: "wgLimit", wg: gruppe2, faktor: 0.8 }
+      };
+      if (aufgabe === "reduzierung") return {
+        gut: { typ: "wgReduzierung", wg: gruppe2, strategie: "normal" },
+        schlecht: { typ: "wgReduzierung", wg: gruppe2, strategie: "spaet" }
+      };
+      if (aufgabe === "nachorder" || aufgabe === "disposition") return {
+        gut: { typ: "wgServicegrad", wg: gruppe2, ziel: 0.98 },
+        schlecht: { typ: "wgServicegrad", wg: gruppe2, ziel: 0.9 }
+      };
+      if (aufgabe === "vororder") return {
+        gut: { typ: "wgVororderquote", wg: gruppe2, quote: 0.6 },
+        schlecht: { typ: "wgVororderquote", wg: gruppe2, quote: 0.25 }
+      };
+      if (aufgabe === "freigaben") return {
+        gut: { typ: "sammelfreigabe" },
+        schlecht: { typ: "freigabeGrenze", euro: 0 }
+      };
+    }
+    if (bereich === "marketing" && aufgabe === "budget") return {
+      gut: { typ: "kanalBudget", kanal: "alle", faktor: 1.02 },
+      schlecht: { typ: "kanalBudget", kanal: "alle", faktor: 0.8 }
+    };
+    return void 0;
+  }
   function organisationWoche(s2) {
     const o = s2.organisation;
     if (!o || s2.prognose) return;
@@ -5290,6 +5432,28 @@
         const h = s2.haeuser.find((x) => x.id === hausId);
         if (h) h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral + unruhe.moral, 0, 100);
         delete o.unruhe[hausId];
+      }
+    }
+    if (s2.woche > 0 && s2.woche % 4 === 0) {
+      const einheiten = [
+        ...Object.entries(o.bereiche).map(([id, st2]) => ({ st: st2, bereich: id, hauscluster: void 0 })),
+        ...o.hauscluster.map((c) => ({ st: c.stelle, bereich: void 0, hauscluster: c.id }))
+      ];
+      for (const x of einheiten) for (const aufgabe of Object.keys(x.st.aufgaben ?? {})) {
+        const def = delegationsAufgaben(x.bereich, x.hauscluster).find((d2) => d2.id === aufgabe);
+        if (!def) continue;
+        const vorschlag = routineVorschlag(x.bereich, aufgabe);
+        neueVorlage(s2, {
+          bereich: x.bereich,
+          hauscluster: x.hauscluster,
+          aufgabe,
+          aktion: vorschlag?.gut,
+          fehlerAktion: vorschlag?.schlecht,
+          betrag: def.grenze ? Math.min(def.grenze, delegationsGrenze(s2, aufgabe, x.bereich, x.hauscluster) ?? def.grenze) : void 0,
+          titel: def.name + ": Routineentscheidung KW " + (s2.woche + 1),
+          text: "Die zust\xE4ndige Leitung legt ihre Entscheidung zu " + def.name + " vor.",
+          frist: 3
+        });
       }
     }
     const stellen = [
@@ -5347,6 +5511,7 @@
         qualitaet: bereichsQualitaet(s2, b2.id),
         berichtetAn: berichtetAn(s2, b2.id),
         delegiert: istDelegiert(s2, b2.id),
+        aufgaben: delegationsAufgaben(b2.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, b2.id), grenze: delegationsGrenze(s2, d2.id, b2.id) })),
         hqStufe: s2.hq.abteilungen.find((a) => a.id === b2.abteilung)?.stufe ?? 0,
         offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.bereich === b2.id).length
       })),
@@ -5364,15 +5529,19 @@
           umsatz: c.hausIds.reduce((a, id) => a + (s2.haeuser.find((h) => h.id === id)?.kpi?.umsatz ?? 0), 0),
           qualitaet: clusterleitungQualitaet(s2, c.id),
           berichtetAn: clusterBerichtetAn(s2, c.id),
+          aufgaben: delegationsAufgaben(void 0, c.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, void 0, c.id), grenze: delegationsGrenze(s2, d2.id, void 0, c.id) })),
           offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.hauscluster === c.id).length
         }))
       })),
-      sonder: o?.hauscluster.find((c) => c.sonder),
+      sonder: (() => {
+        const c = o?.hauscluster.find((c2) => c2.sonder);
+        return c ? { ...c, aufgaben: delegationsAufgaben(void 0, c.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, void 0, c.id), grenze: delegationsGrenze(s2, d2.id, void 0, c.id) })) } : void 0;
+      })(),
       flagships: o?.flagships ?? []
     };
   }
 
-  // ../engine/src/haus.ts
+  // engine/src/haus.ts
   var HAUS_AKTIONEN = /* @__PURE__ */ new Set([
     "hausLeitungErsetzen",
     "hausLeitungFoerdern",
@@ -5943,7 +6112,7 @@
     return s2.haeuser.filter(istOffen).map((h) => ({ id: h.id, name: h.name, score: hausKundenscore(s2, h) })).sort((a, b2) => b2.score - a.score || a.id.localeCompare(b2.id));
   }
 
-  // ../engine/src/umbau.ts
+  // engine/src/umbau.ts
   var UMBAU_STUFEN = {
     auffrischung: { name: "Auffrischung", qm: 60, min: 2, max: 2 },
     ladenbau: { name: "Ladenbau neu", qm: 250, min: 4, max: 6 },
@@ -6191,7 +6360,7 @@
     }));
   }
 
-  // ../engine/src/treiber.ts
+  // engine/src/treiber.ts
   var NULL = { frequenz: 1, kaufquote: 1, bon: 1 };
   var PREIS = {
     damen: 43,
@@ -6530,7 +6699,7 @@
     return { wochen, bruecke: umsatzbruecke(s2, { ebene: "konzern", vergleich: "vorjahr", wochen, format }), zeilen, gruppen, beobachtung };
   }
 
-  // ../engine/src/personaleinsatz.ts
+  // engine/src/personaleinsatz.ts
   var PERSONAL_GRUPPEN = ["logistik", "verkauf", "kasse", "verwaltung"];
   var PERSONAL_NAMEN = {
     logistik: "Instore-Logistik",
@@ -6968,7 +7137,7 @@
     }));
   }
 
-  // ../engine/src/testwerkzeuge.ts
+  // engine/src/testwerkzeuge.ts
   var TEST_EREIGNISSE = [
     { id: "angebot:untermiete", name: "Angebot: Untermiete" },
     { id: "angebot:paket", name: "Angebot: Mietpaket" },
@@ -7034,7 +7203,7 @@
     }
   }
 
-  // ../engine/src/aktionen.ts
+  // engine/src/aktionen.ts
   var ok4 = (text3) => ({ ok: true, text: text3 });
   var fehler4 = (text3) => ({ ok: false, text: text3 });
   function haus(s2, id) {
@@ -7567,7 +7736,7 @@
     return result;
   }
 
-  // ../engine/src/abfragen.ts
+  // engine/src/abfragen.ts
   function hausBezug(s2, ids = [], modul) {
     const hs = [...new Set(ids)].map((id) => s2.haeuser.find((h) => h.id === id)).filter((h) => !!h);
     return hs.length ? { stadt: hs[0].stadt, hausIds: hs.map((h) => h.id), ...modul ? { modul } : {} } : modul ? { modul } : void 0;
@@ -7756,7 +7925,7 @@
     return { limit: eur(kvLimit(s2)), genutzt: eur(offeneWarenverbindlichkeiten(s2)) };
   }
 
-  // ../engine/src/vorstand.ts
+  // engine/src/vorstand.ts
   var RESSORTS = ["cfo", "coo", "cso", "cpo", "cmo", "chro", "cro", "cdo"];
   var RESSORT_INFO = {
     cfo: { kurz: "CFO", titel: "Finanzvorstand", zustaendig: "Finanzen, Controlling, Bank und Kreditversicherer", markt: 52e4, abteilungen: { controlling: 1, verwaltung: 1 } },
@@ -8611,7 +8780,7 @@
     });
   }
 
-  // ../engine/src/hq.ts
+  // engine/src/hq.ts
   var ARCHIV_QM = 90;
   var ARCHIV_AKTIV = true;
   var ABTEILUNGEN = ["controlling", "einkauf", "marketing", "personal", "immobilien", "logistik", "ecommerce", "recht", "vm", "verwaltung", "produkt"];
@@ -9513,7 +9682,17 @@
     return g && e ? { gebaeudeId: g.id, nr: e.nr } : void 0;
   }
 
-  // ../engine/src/produkte.ts
+  // engine/src/produkte.ts
+  var ZUSATZ_ARTIKEL = {
+    damen: ["A-Linien-Kleid", "Wickelkleid", "Tunikabluse", "Oversize-Bluse", "Bootcut-Jeans", "Culotte", "Plisseerock", "Bleistiftrock", "Feinstrickpullover", "Longcardigan", "Trenchcoat", "Boucl\xE9-Jacke"],
+    herren: ["Slim-Fit-Hemd", "Regular-Fit-Hemd", "Oxford-Hemd", "Henley-Shirt", "Rundhalspullover", "Rollkragenpullover", "Cargo-Hose", "Anzughose", "Bermuda-Shorts", "Stricksakko", "Wollmantel", "Leinen-Sakko"],
+    kinder: ["Kinder-Jeansshorts", "Latzhose", "Kinder-Sweatshirt", "Kinder-Regenjacke", "Kinder-Leggings", "Kinder-Softshelljacke", "Kinder-Polo", "Kinder-Pyjama", "Kinder-Strickpullover", "Kinder-T\xFCllrock", "Kinder-Sonnenhut", "Kinder-Jogginghose"],
+    schuhe: ["Loafer", "Ballerina", "Chelsea-Boot", "Stiefelette", "Sandale", "Espadrille", "Slipper", "Schn\xFCrschuh", "Business-Schuh", "Wanderschuh", "Plateau-Sneaker", "Winterstiefel"],
+    accessoires: ["Umh\xE4ngetasche", "Crossbody-Tasche", "Shopper", "Clutch", "Portemonnaie", "Rucksack", "Weekender", "Kartenetui", "Seidentuch", "Krawatte", "Handschuhe", "Reisetasche"],
+    heimtextil: ["Spannbettlaken", "Bettbezug", "Kopfkissenbezug", "Wohndecke", "Tagesdecke", "Badetuch", "G\xE4stehandtuch", "Waschlappen", "Duschvorleger", "Tischl\xE4ufer", "Tischdecke", "Dekokissen"],
+    haushalt: ["Geschirrtuch", "Sch\xFCrze", "Topflappen", "Tischset", "Serviette", "Vorratsdose", "Trinkbecher", "Servierschale", "Salatsch\xFCssel", "Kerzenhalter", "Aufbewahrungskorb", "Dekotablett"],
+    beauty: ["Mascara", "Foundation", "Concealer", "Rouge", "Lidschatten", "Nagellack", "Handcreme", "Gesichtsserum", "Reinigungsgel", "Duschgel", "K\xF6rperlotion", "Eau de Toilette"]
+  };
   var PRODUKT_KATEGORIEN = {
     oberteile: "Oberteile",
     unterteile: "Hosen, R\xF6cke, Kleider",
@@ -9609,6 +9788,97 @@
     { typ: "Kinderkleid", kategorie: "kinder", wgs: ["kinder.maedchen", "kinder.baby"], saison: "sommer", preis: 25, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Leinen"], gruppe: G(1, 0, 0, 0), aufwand: 1 },
     { typ: "Pl\xFCschtier", kategorie: "kinder", wgs: ["kinder.baby"], saison: "ganz", preis: 19, materialien: ["Polyester", "Bio-Baumwolle", "Baumwolle"], gruppe: G(1, 0, 0, 0), aufwand: 1 }
   ];
+  var ZUSATZ_WG = {
+    damen: ["damen.kleider", "damen.blusen", "damen.denim", "damen.strick", "damen.hosen", "damen.jacken", "damen.gg"],
+    herren: ["herren.hemden", "herren.casual", "herren.hosen", "herren.strick", "herren.business", "herren.jacken"],
+    kinder: ["kinder.maedchen", "kinder.jungen", "kinder.baby"],
+    schuhe: ["accessoires.damenschuhe", "accessoires.herrenschuhe", "kinder.schuhe"],
+    accessoires: ["accessoires.lederwaren"],
+    heimtextil: ["wohnen.heimtextil", "wohnen.bett"],
+    haushalt: ["wohnen.tisch", "wohnen.deko"],
+    beauty: ["beauty.pflege", "beauty.drogerie"]
+  };
+  var ZUSATZ_MATERIAL = {
+    damen: ["Baumwolle", "Viskose", "Leinen", "Merino", "Kaschmir", "Seide"],
+    herren: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Merino", "Kaschmir"],
+    kinder: ["Bio-Baumwolle", "Baumwolle", "Denim", "Merino"],
+    schuhe: ["Leder", "Baumwolle", "Polyester"],
+    accessoires: ["Leder", "Baumwolle", "Leinen", "Seide", "Polyester"],
+    heimtextil: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Viskose"],
+    haushalt: ["Baumwolle", "Leinen", "Polyester"],
+    beauty: ["Polyester"]
+  };
+  var SPARTEN_KATEGORIE = {
+    damen: "oberteile",
+    herren: "oberteile",
+    kinder: "kinder",
+    schuhe: "schuhe",
+    accessoires: "accessoires",
+    heimtextil: "home",
+    haushalt: "home",
+    beauty: "beauty"
+  };
+  var SPARTEN_PREIS = {
+    damen: 49,
+    herren: 49,
+    kinder: 25,
+    schuhe: 79,
+    accessoires: 39,
+    heimtextil: 35,
+    haushalt: 18,
+    beauty: 19
+  };
+  var BEKLEIDUNG_DEF = {
+    damen: [
+      { kategorie: "unterteile", wg: "damen.kleider" },
+      { kategorie: "unterteile", wg: "damen.kleider" },
+      { kategorie: "oberteile", wg: "damen.blusen" },
+      { kategorie: "oberteile", wg: "damen.blusen" },
+      { kategorie: "unterteile", wg: "damen.denim" },
+      { kategorie: "unterteile", wg: "damen.hosen" },
+      { kategorie: "unterteile", wg: "damen.hosen" },
+      { kategorie: "unterteile", wg: "damen.hosen" },
+      { kategorie: "oberteile", wg: "damen.strick" },
+      { kategorie: "oberteile", wg: "damen.strick" },
+      { kategorie: "jacken", wg: "damen.jacken" },
+      { kategorie: "jacken", wg: "damen.jacken" }
+    ],
+    herren: [
+      { kategorie: "oberteile", wg: "herren.hemden" },
+      { kategorie: "oberteile", wg: "herren.hemden" },
+      { kategorie: "oberteile", wg: "herren.hemden" },
+      { kategorie: "oberteile", wg: "herren.casual" },
+      { kategorie: "oberteile", wg: "herren.strick" },
+      { kategorie: "oberteile", wg: "herren.strick" },
+      { kategorie: "unterteile", wg: "herren.hosen" },
+      { kategorie: "unterteile", wg: "herren.hosen" },
+      { kategorie: "unterteile", wg: "herren.casual" },
+      { kategorie: "jacken", wg: "herren.business" },
+      { kategorie: "jacken", wg: "herren.jacken" },
+      { kategorie: "jacken", wg: "herren.business" }
+    ]
+  };
+  var ZUSATZ_ARTIKELTYPEN = Object.keys(ZUSATZ_ARTIKEL).flatMap(
+    (sparte) => ZUSATZ_ARTIKEL[sparte].map((typ, index2) => {
+      const wgs = ZUSATZ_WG[sparte];
+      const bekleidung = sparte === "damen" || sparte === "herren" ? BEKLEIDUNG_DEF[sparte][index2] : void 0;
+      const kategorie = bekleidung?.kategorie ?? SPARTEN_KATEGORIE[sparte];
+      const wg = bekleidung ? [bekleidung.wg] : sparte === "schuhe" ? wgs : [wgs[index2 % wgs.length]];
+      return {
+        typ,
+        sparte,
+        kategorie,
+        wgs: wg,
+        saison: index2 % 3 === 0 ? "sommer" : index2 % 3 === 1 ? "winter" : "ganz",
+        preis: SPARTEN_PREIS[sparte] + index2 * 2,
+        materialien: [...ZUSATZ_MATERIAL[sparte]],
+        gruppe: sparte === "kinder" ? G(1, 0.1, 0.1, 0.1) : G(0.2, 0.75, 0.85, 0.85),
+        aufwand: 1 + index2 % 3
+      };
+    })
+  );
+  var BASIS_ARTIKELTYPEN = [...ARTIKELTYPEN];
+  ARTIKELTYPEN.push(...ZUSATZ_ARTIKELTYPEN);
   var TYP = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
   var FARB_BASIS = {
     kinder: ["gelb", "rot", "hellblau", "rosa", "mintgr\xFCn", "orange", "jeansblau", "wei\xDF", "koralle"],
@@ -9650,8 +9920,11 @@
     const gruppen = {};
     Object.keys(TREND_GRUPPEN).forEach((g, i) => {
       const r = hashRng(s2.seed, sid, i);
-      const typen = ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
-      const artikel = ziehe(r, typen.map((t) => t.typ), 5);
+      const typen = BASIS_ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
+      const basisArtikel = ziehe(r, typen.map((t) => t.typ), 5);
+      const z2 = hashRng(s2.seed, sid, 100 + i);
+      const neu = ZUSATZ_ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
+      const artikel = [...basisArtikel, ...ziehe(z2, neu.map((t) => t.typ), 4)];
       const basis3 = FARB_BASIS[g];
       const farben = [...ziehe(r, basis3, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis3.includes(f)), 2)];
       const out = ziehe(r, FARBLISTE.filter((f) => !farben.includes(f)), 3);
@@ -10112,7 +10385,8 @@
     const kap = kapazitaet(s2);
     const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
       const liste2 = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
-      const kats = [...new Set(liste2.map((p2) => p2.kategorie))];
+      const moegliche = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s2, m, t)).map((t) => t.kategorie);
+      const kats = [.../* @__PURE__ */ new Set([...liste2.map((p2) => p2.kategorie), ...moegliche])];
       const ent = liste2.filter((p2) => p2.status === "entwicklung").length;
       const voll2 = kats.filter((k) => belegt(s2, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
       return {
@@ -10131,6 +10405,20 @@
   }
   function produktKatalog(_s) {
     return {
+      sparten: Object.keys(ZUSATZ_ARTIKEL).map((id) => ({
+        id,
+        name: {
+          damen: "Bekleidung Damen",
+          herren: "Bekleidung Herren",
+          kinder: "Bekleidung Kinder",
+          schuhe: "Schuhe",
+          accessoires: "Accessoires",
+          heimtextil: "Heimtextil",
+          haushalt: "Haushalt",
+          beauty: "Beauty"
+        }[id],
+        typen: [...ZUSATZ_ARTIKEL[id]]
+      })),
       kategorien: Object.keys(PRODUKT_KATEGORIEN).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
       typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
       farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN2[f] })),
@@ -10194,7 +10482,7 @@
     };
   }
 
-  // ../engine/src/einkauf.ts
+  // engine/src/einkauf.ts
   var JACKE = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
   var STRICK = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
   var ROH2 = {
@@ -10614,10 +10902,11 @@
     s2.bestand = bestand;
     s2.bestellungen = bestellungen;
   }
-  function limitFuer(s2, st2, sid) {
+  function limitFuer(s2, st2, sid, nurLesen = false) {
     const key = String(sid);
     let l = st2.limits[key];
-    if (!l) {
+    if (!l && nurLesen) l = { plan: 0, verbraucht: 0, stand: -1 };
+    else if (!l) {
       l = st2.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
       for (const k of Object.keys(st2.limits)) if (Number(k) < sid - 2) delete st2.limits[k];
     }
@@ -11404,7 +11693,7 @@
     b2.sEin = sz.eingang;
     b2.sAb = sz.abverkauf * R10("s");
     const sid = saisonId(s2.woche);
-    const L2 = limitFuer(s2, st2, sid);
+    const L2 = limitFuer(s2, st2, sid, true);
     b2.limit = limitWert(st2, L2);
     b2.limitV = L2.verbraucht;
     for (const x of s2.bestellungen) if (x.wg === d2.id) b2.pipe += x.wert;
@@ -11591,7 +11880,7 @@
     };
   }
 
-  // ../engine/src/merchandise.ts
+  // engine/src/merchandise.ts
   var WARE_AKTIONEN = /* @__PURE__ */ new Set(["allokationQualitaet", "umlagerung", "reduzierungZentral", "reduzierungLokal", "merchandisePlan", "fundusAbfluss", "flaechenZuteilung", "warensicherung"]);
   var hausclusterId = (h) => h.hauscluster || h.region;
   function ersatzHauscluster(s2) {
@@ -12093,7 +12382,7 @@
     return fehler6("Unbekannte Warenaktion.");
   }
 
-  // ../engine/src/welt.ts
+  // engine/src/welt.ts
   var STANDARD_SZENARIO = {
     warenhaeuser: 130,
     sporthaeuser: 50,
@@ -12443,7 +12732,7 @@
     }
   }
 
-  // ../engine/src/wirtschaft.ts
+  // engine/src/wirtschaft.ts
   function istAktiv(h) {
     return h.status === "offen" || h.status === "schliessung_verhandlung" || h.status === "raeumung";
   }
@@ -12606,7 +12895,7 @@
     return r;
   }
 
-  // ../engine/src/prozesse.ts
+  // engine/src/prozesse.ts
   var SCHLIESSUNGEN_WOCHE = /* @__PURE__ */ new WeakMap();
   var abfindungJeFte2 = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
   function einmalKosten(s2, betrag) {
@@ -12857,7 +13146,7 @@
     return s2.haeuser.reduce((a, h) => a + (h.status === "geschlossen" ? 0 : lohnKosten(s2, h)), 0);
   }
 
-  // ../engine/src/ereignisse.ts
+  // engine/src/ereignisse.ts
   function offeneHaeuser(s2, format) {
     return s2.haeuser.filter((h) => h.status === "offen" && (!format || h.format === format));
   }
@@ -13441,7 +13730,7 @@
     }
   }
 
-  // ../engine/src/erfolge.ts
+  // engine/src/erfolge.ts
   var ERFOLGE_AKTIV = true;
   var d = (id, titel, gruppe2, stufe2, hinweis, ziel, wert, geheim = false) => ({ id, titel, gruppe: gruppe2, stufe: stufe2, hinweis, ziel, wert, ...geheim ? { geheim: true } : {} });
   var bool = (test) => (s2, k) => Number(test(s2, k));
@@ -13560,7 +13849,7 @@
     };
   }
 
-  // ../engine/src/engine.ts
+  // engine/src/engine.ts
   function neuesSpiel(seed = 1, szenario = STANDARD_SZENARIO) {
     return neueWelt(seed, { ...STANDARD_SZENARIO, ...szenario });
   }
@@ -13846,7 +14135,7 @@
     return out;
   }
 
-  // ../engine/scripts/bot.ts
+  // engine/scripts/bot.ts
   function einkaufStandard(s2) {
     if (!s2.einkauf.freigaben.length) return;
     let offen = 0;
@@ -13972,7 +14261,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -44613,7 +44902,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -44756,7 +45045,15 @@
     return result;
   }
 
-  // src/kit/basis.js
+  // render/src/kit/basis.js
+  function mische(r, liste2) {
+    const a = [...liste2];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(r() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
   function rng2(seed) {
     let s2 = (typeof seed === "string" ? [...seed].reduce((a, c) => a * 31 + c.charCodeAt(0) >>> 0, 7) : seed) >>> 0;
     return () => {
@@ -45163,7 +45460,8 @@
     return kam;
   }
 
-  // src/kit/stadthaeuser.js
+  // render/src/kit/stadthaeuser.js
+  var wurzelSumme = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STILE = ["gruenderzeit", "jugendstil", "backstein", "fachwerk", "fuenfziger", "siebziger", "neubau"];
   var RAHMEN = "#f6f3ec";
   var ORN = "#f8f5ee";
@@ -45293,7 +45591,7 @@
     for (let i = 0; i < n; i++) {
       const a = poly[i], b2 = poly[(i + 1) % n];
       let dx = b2[0] - a[0], dz = b2[1] - a[1];
-      const L2 = Math.hypot(dx, dz) || 1;
+      const L2 = wurzelSumme(dx, dz) || 1;
       dx /= L2;
       dz /= L2;
       let nx = -dz, nz = dx;
@@ -45376,7 +45674,7 @@
       this.eckIndex = info.eckIndex ?? -1;
       this.eckAnzahl = info.eckAnzahl ?? 0;
       const dx = b2[0] - a[0], dz = b2[1] - a[1];
-      this.L = Math.hypot(dx, dz);
+      this.L = wurzelSumme(dx, dz);
       this.dx = dx / this.L;
       this.dz = dz / this.L;
       this.nx = -this.dz;
@@ -45410,7 +45708,7 @@
     }
     /** Balken von (ua,ya) nach (ub,yb) in der Fassadenebene. */
     strebe(ua, ya, ub, yb, dick, t1, f) {
-      const len = Math.hypot(ub - ua, yb - ya);
+      const len = wurzelSumme(ub - ua, yb - ya);
       if (len < 0.05) return;
       const g = new three_module_exports.BoxGeometry(len, dick, t1);
       g.rotateZ(Math.atan2(yb - ya, ub - ua));
@@ -45999,7 +46297,7 @@
     cx /= poly.length;
     cz /= poly.length;
     const big = poly.map((p2) => [cx + (p2[0] - cx) * 1.08, cz + (p2[1] - cz) * 1.08]);
-    const R10 = Math.hypot(big[0][0] - cx, big[0][1] - cz) * Math.cos(Math.PI / poly.length);
+    const R10 = wurzelSumme(big[0][0] - cx, big[0][1] - cz) * Math.cos(Math.PI / poly.length);
     ctx.S.add(prismoid(big, y, h, ap.map(() => R10 - 2e-3)), farbe3);
     if (spitze2) {
       ctx.S.box(0.1, 1.2, 0.1, cx, y + h + 0.5, cz, "#5f646b");
@@ -46014,7 +46312,7 @@
     });
     cx /= poly.length;
     cz /= poly.length;
-    const ap = Math.hypot(poly[0][0] - cx, poly[0][1] - cz) * Math.cos(Math.PI / poly.length);
+    const ap = wurzelSumme(poly[0][0] - cx, poly[0][1] - cz) * Math.cos(Math.PI / poly.length);
     const p1 = versetzt(poly, poly.map(() => ap * 0.12));
     ctx.S.add(prismoid(poly, y, h * 0.42, poly.map(() => ap * 0.12)), farbe3);
     ctx.S.add(prismoid(p1, y + h * 0.42, h * 0.33, poly.map(() => ap * 0.33)), farbe3);
@@ -46091,7 +46389,7 @@
   }
   function farbAbstand(a, b2) {
     const A = new three_module_exports.Color(a), B2 = new three_module_exports.Color(b2);
-    return Math.hypot(A.r - B2.r, A.g - B2.g, A.b - B2.b);
+    return wurzelSumme(A.r - B2.r, A.g - B2.g, A.b - B2.b);
   }
   function ausPalette(ctx, pal, gruppen, ton2 = {}) {
     const liste2 = Object.entries(gruppen).filter(([g]) => pal[g]).map(([g, w]) => [g, w * (ton2[g] ?? 1)]);
@@ -47813,7 +48111,8 @@
     return stadthaus(S, scene2, { ...p2, stil, geschosse: clamp3(g, 2, 7), vermeideFarbe: p2.nachbar?.farbe ?? p2.vermeideFarbe });
   }
 
-  // src/kit/gelaende.js
+  // render/src/kit/gelaende.js
+  var wurzelSumme2 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var glatt = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
   function welle(seed, u) {
     const a = seed % 97 * 0.13, b2 = seed % 53 * 0.21;
@@ -47838,7 +48137,7 @@
       h = Math.max(h, y);
     }
     for (const Q of B2.plateaus ?? []) {
-      const e = Math.hypot(Math.max(0, Q.x0 - x, x - Q.x1), Math.max(0, Q.z0 - z2, z2 - Q.z1));
+      const e = wurzelSumme2(Math.max(0, Q.x0 - x, x - Q.x1), Math.max(0, Q.z0 - z2, z2 - Q.z1));
       if (e < 18) {
         const w = glatt(1 - e / 18);
         h = h * (1 - w) + Q.y * w;
@@ -47857,14 +48156,14 @@
     }
     const N = (i, j) => {
       const ia = Math.max(0, i - 1), ib = Math.min(nx, i + 1), ja = Math.max(0, j - 1), jb = Math.min(nz, j + 1);
-      const gx = (H[ib][j] - H[ia][j]) / ((ib - ia) * dx), gz2 = (H[i][jb] - H[i][ja]) / ((jb - ja) * dz), L2 = Math.hypot(gx, 1, gz2);
+      const gx = (H[ib][j] - H[ia][j]) / ((ib - ia) * dx), gz2 = (H[i][jb] - H[i][ja]) / ((jb - ja) * dz), L2 = wurzelSumme2(gx, 1, gz2);
       return [-gx / L2, 1 / L2, -gz2 / L2];
     };
     const gruppen = /* @__PURE__ */ new Map();
     const tri = (a, b2, c) => {
       const yc = (a[1] + b2[1] + c[1]) / 3;
       const ux = b2[0] - a[0], uy = b2[1] - a[1], uz = b2[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
-      const nxx = uy * vz - uz * vy, nyy = uz * vx - ux * vz, nzz = ux * vy - uy * vx, L2 = Math.hypot(nxx, nyy, nzz) || 1;
+      const nxx = uy * vz - uz * vy, nyy = uz * vx - ux * vz, nzz = ux * vy - uy * vx, L2 = wurzelSumme2(nxx, nyy, nzz) || 1;
       const f = farbe3((a[0] + b2[0] + c[0]) / 3, yc, (a[2] + b2[2] + c[2]) / 3, 1 - Math.abs(nyy) / L2);
       if (!gruppen.has(f)) gruppen.set(f, { p: [], n: [] });
       const G2 = gruppen.get(f);
@@ -47942,7 +48241,7 @@
     }
   }
 
-  // src/kit/stadtrand.js
+  // render/src/kit/stadtrand.js
   var RING = 480;
   var RS = { breite: 17, gehweg: 3 };
   var ZONEN = { mittelstadt: [110, 220, 330], grossstadt: [150, 270, 380], metropole: [200, 330, 420] };
@@ -48525,7 +48824,7 @@
     return { x, z: z2, zoom: Math.min(zoom, Math.min(plan2.breite, plan2.tiefe) / 6.5) };
   }
 
-  // src/kit/outlet-standorte.js
+  // render/src/kit/outlet-standorte.js
   function outletImAussenring(plan2, standorte = []) {
     const gesucht = standorte.filter((s2) => s2.rolle === "outlet" && s2.lage === "rand");
     if (!gesucht.length) return [];
@@ -48570,7 +48869,8 @@
     return platziert;
   }
 
-  // src/kit/stadtplan.js
+  // render/src/kit/stadtplan.js
+  var wurzelSumme3 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var klemm = (v, a, b2) => Math.max(a, Math.min(b2, v));
   var ganz = (r) => Math.floor(r() * 1e9);
   var ordne = (a) => a.sort((p2, q2) => "zx".indexOf(p2[1]) - "zx".indexOf(q2[1]));
@@ -48797,7 +49097,7 @@
         wasserSpalte(E, iw, 0, E.nz - 1, r() < 0.5 ? "kanal" : "fluss");
       }
       E.viertel = (i, j) => {
-        const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+        const dd = wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j);
         return dd < 1.3 ? "zentrum" : dd < 3 ? "gruenderzeit" : "nachkrieg";
       };
       E.umriss = waehle2(r, ["voll", "voll", "oval"]);
@@ -48807,11 +49107,11 @@
       E.spalten = E.spalten.map((w) => Math.round(w * zw(r, 0.55, 1.25) / 2) * 2);
       E.reihen = E.reihen.map((d2) => Math.round(d2 * zw(r, 0.6, 1.2) / 2) * 2);
       E.zentrum = { i: (E.nx - 1) / 2 + zw(r, -0.6, 0.6), j: (E.nz - 1) / 2 + zw(r, -0.6, 0.6) };
-      const kern = (i, j) => Math.hypot(i - E.zentrum.i, (j - E.zentrum.j) * 0.9) < 2.4;
+      const kern = (i, j) => wurzelSumme3(i - E.zentrum.i, (j - E.zentrum.j) * 0.9) < 2.4;
       E.versatz = (k, j) => kern(k - 0.5, j) ? 18 : 6;
       E.einschub = (i, j) => kern(i, j) ? 0.4 : 0.1;
       E.durchgang = 0.35;
-      E.viertel = (i, j) => kern(i, j) ? "altstadt" : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 3.6 ? "gruenderzeit" : "rand";
+      E.viertel = (i, j) => kern(i, j) ? "altstadt" : wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 3.6 ? "gruenderzeit" : "rand";
       E.umriss = waehle2(r, ["oval", "oval", "diagonal"]);
       if (r() < 0.4) {
         const iw = r() < 0.5 ? 0 : E.nx - 1;
@@ -48884,7 +49184,7 @@
       for (let k = 0; k <= E.nx; k++) fixiere(E, k, jk, jk);
       E.versatz = (k, j) => Math.abs(j - jk) > 1 ? 8 : 0;
       E.viertel = (i, j) => {
-        const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+        const dd = wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j);
         return dd < 1.4 ? "zentrum" : dd < 2.6 ? "altstadt" : dd < 3.6 ? "gruenderzeit" : "nachkrieg";
       };
       E.einschub = (i, j) => E.viertel(i, j) === "altstadt" ? 0.25 : 0;
@@ -48901,7 +49201,7 @@
       E.bruecken = "zufall";
       E.zentrum = { i: iA + 1, j: (E.nz - 1) / 2 + zw(r, -1, 1) };
       for (let k = 0; k <= E.nx; k++) fixiere(E, k);
-      E.viertel = (i, j) => i === E.insel ? "altstadt" : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 2.6 ? "gruenderzeit" : "nachkrieg";
+      E.viertel = (i, j) => i === E.insel ? "altstadt" : wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 2.6 ? "gruenderzeit" : "nachkrieg";
       E.umriss = waehle2(r, ["voll", "diagonal"]);
     },
     bahnhof(E) {
@@ -48918,7 +49218,7 @@
       E.zentrum = { i: kAx - 0.5, j: E.nz - 3 - Math.floor(zw(r, 0, 1.99)) };
       for (let k = 0; k <= E.nx; k++) fixiere(E, k);
       E.versatz = (k, j) => j < E.zentrum.j - 1 ? 10 : 0;
-      E.viertel = (i, j) => j >= E.nz - 3 && Math.abs(i - kAx + 0.5) < 2.5 ? "bahnhofsviertel" : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 1.5 ? "zentrum" : j < E.zentrum.j - 1 ? "altstadt" : "gruenderzeit";
+      E.viertel = (i, j) => j >= E.nz - 3 && Math.abs(i - kAx + 0.5) < 2.5 ? "bahnhofsviertel" : wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 1.5 ? "zentrum" : j < E.zentrum.j - 1 ? "altstadt" : "gruenderzeit";
       E.einschub = (i, j) => E.viertel(i, j) === "altstadt" ? 0.25 : 0;
       E.warenhausWunsch = { i: kAx - 1, j: Math.round(E.zentrum.j), ecke: "+x+z" };
       E.umriss = waehle2(r, ["voll", "oval"]);
@@ -48938,10 +49238,10 @@
         if (frei(E, iw, iw, 0, E.nz - 1)) wasserSpalte(E, iw, 0, E.nz - 1);
       }
       for (let k = 0; k <= E.nx; k++) fixiere(E, k, jd, jd);
-      E.versatz = (k, j) => Math.hypot(k - 0.5 - E.zentrum.i, j - E.zentrum.j) < 2.2 ? 12 : 0;
-      E.einschub = (i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 2 ? 0.3 : 0;
+      E.versatz = (k, j) => wurzelSumme3(k - 0.5 - E.zentrum.i, j - E.zentrum.j) < 2.2 ? 12 : 0;
+      E.einschub = (i, j) => wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 2 ? 0.3 : 0;
       E.viertel = (i, j) => {
-        const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+        const dd = wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j);
         return dd < 2 ? "altstadt" : dd < 3.2 ? "zentrum" : "gruenderzeit";
       };
       E.umriss = waehle2(r, ["voll", "oval"]);
@@ -48962,7 +49262,7 @@
       for (let k = 0; k <= E.nx; k++) fixiere(E, k);
       E.achse = kS;
       E.zentrum = { i: kS - 0.5, j: tief2 + 1.5 + zw(r, 0, 1.5) };
-      E.viertel = (i, j) => Math.abs(i - kS + 0.5) < 1.6 && j <= tief2 + 3 ? "barock" : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 2.2 ? "zentrum" : "gruenderzeit";
+      E.viertel = (i, j) => Math.abs(i - kS + 0.5) < 1.6 && j <= tief2 + 3 ? "barock" : wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 2.2 ? "zentrum" : "gruenderzeit";
       E.warenhausWunsch = { i: kS - 1, j: tief2 + 1, ecke: "+x+z" };
       E.umriss = waehle2(r, ["voll", "oval"]);
       if (E.T.tram) E.tram.push("z" + kS);
@@ -49011,7 +49311,7 @@
       const kandidaten2 = [];
       for (let i = 0; i < nx(); i++) for (let j = 0; j < nz(); j++) {
         if (!zelleFrei(E, i, j)) continue;
-        const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+        const dd = wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j);
         if (dd > 2.2) continue;
         const anHaupt = HAUPTLICH.has(E.zTyp[i + 1]) || HAUPTLICH.has(E.xTyp[j + 1]) || HAUPTLICH.has(E.zTyp[i]) || HAUPTLICH.has(E.xTyp[j]);
         kandidaten2.push([[i, j], (anHaupt ? 3 : 1) / (0.6 + dd)]);
@@ -49049,7 +49349,7 @@
       if (variante2 === "zwei") {
         const l = [];
         for (let i = 0; i < nx(); i++) for (let j = 0; j < nz(); j++) {
-          const dd = Math.hypot(i - mi, j - mj);
+          const dd = wurzelSumme3(i - mi, j - mj);
           if (zelleFrei(E, i, j) && dd >= 2 && dd < 3.5) l.push([i, j]);
         }
         if (l.length) {
@@ -49072,7 +49372,7 @@
       return l;
     };
     if (gewaehlt("slot:kirche") && !E.flaechen.some((f) => f.art === "domplatz" || f.art === "kirche")) {
-      const l = zellenNach((i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 3, (i, j) => 1 / (0.5 + Math.abs(Math.hypot(i - E.zentrum.i, j - E.zentrum.j) - 1.5)));
+      const l = zellenNach((i, j) => wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 3, (i, j) => 1 / (0.5 + Math.abs(wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) - 1.5)));
       if (l.length) {
         const [i, j] = wahlGewichtet(r, l);
         nimm2(E, { art: "kirche", i0: i, i1: i, j0: j, j1: j, seiten: kirchSeiten() });
@@ -49090,7 +49390,7 @@
       } else E.landmarken.splice(E.landmarken.indexOf("slot:bahnhof"), 1);
     }
     if (gewaehlt("slot:schloss") && !E.flaechen.some((f) => f.art === "schloss")) {
-      const l = zellenNach((i, j) => zelleFrei(E, i + 1, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 1.5, () => 1);
+      const l = zellenNach((i, j) => zelleFrei(E, i + 1, j) && wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) > 1.5, () => 1);
       if (l.length) {
         const [i, j] = wahlGewichtet(r, l);
         nimm2(E, { art: "schloss", i0: i, i1: i + 1, j0: j, j1: j });
@@ -49099,7 +49399,7 @@
       } else E.landmarken.splice(E.landmarken.indexOf("slot:schloss"), 1);
     }
     if (gewaehlt("slot:mall")) {
-      const l = zellenNach((i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 5 && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 3.3, () => 1);
+      const l = zellenNach((i, j) => wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 5 && wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) > 3.3, () => 1);
       if (l.length) {
         const [i, j] = wahlGewichtet(r, l);
         nimm2(E, { art: "mall", i0: i, i1: i, j0: j, j1: j });
@@ -49109,7 +49409,7 @@
     for (let k = 0; k < Math.min(E.brachen ?? 0, 1); k++) {
       if (E.brachenGezaehlt >= (BRACHEN_MAX[E.typ] ?? 1)) break;
       const l = zellenNach((i, j) => {
-        const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+        const dd = wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j);
         return dd > 1.4 && dd < 3.8 && (E.bracheErlaubt ? E.bracheErlaubt(i, j) : true) && !E.einkaufKern?.(i, j);
       }, () => 1);
       if (l.length) {
@@ -49138,39 +49438,39 @@
       if (f && f.art !== "wasser") return true;
       if (E.warenhaus.i === i && E.warenhaus.j === j) return true;
       if (E.einkaufZellen?.has(`${i},${j}`) || E.einkaufKern?.(i, j)) return true;
-      return Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 1.6 || aktivRoh(i, j);
+      return wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) < 1.6 || aktivRoh(i, j);
     };
     const randZelle = (i, j) => E.aktiv(i, j) && [[-1, 0], [1, 0], [0, -1], [0, 1]].some(([a, b2]) => i + a < 0 || j + b2 < 0 || i + a >= nx() || j + b2 >= nz() || !E.aktiv(i + a, j + b2));
     if (E.randStandorte?.length) randLagen(E, randZelle, zellenNach);
     if (gewaehlt("slot:discounter")) {
-      const l = zellenNach((i, j) => randZelle(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 3.2, () => 1);
+      const l = zellenNach((i, j) => randZelle(i, j) && wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) > 3.2, () => 1);
       if (l.length) {
         const [i, j] = wahlGewichtet(r, l);
         nimm2(E, { art: "gewerbe", i0: i, i1: i, j0: j, j1: j });
       }
     }
     for (let k = 0; k < T.park + (r() < 0.4 ? 1 : 0); k++) {
-      const l = zellenNach((i2, j2) => E.aktiv(i2, j2) && Math.hypot(i2 - E.zentrum.i, j2 - E.zentrum.j) > 1.6, (i2, j2) => 1 + (randZelle(i2, j2) ? 1 : 0));
+      const l = zellenNach((i2, j2) => E.aktiv(i2, j2) && wurzelSumme3(i2 - E.zentrum.i, j2 - E.zentrum.j) > 1.6, (i2, j2) => 1 + (randZelle(i2, j2) ? 1 : 0));
       if (!l.length) break;
       const [i, j] = wahlGewichtet(r, l);
       if (E.typ === "metropole" && zelleFrei(E, i, j + 1) && r() < 0.6) nimm2(E, { art: "park", i0: i, i1: i, j0: j, j1: j + 1 });
       else nimm2(E, { art: "park", i0: i, i1: i, j0: j, j1: j });
     }
     if (E.typ !== "metropole" || E.kleingaertenExtra) for (let k = 0, m = Math.floor(zw(r, 0, 2.6)) + (E.kleingaertenExtra ?? 0); k < m; k++) {
-      const l = zellenNach((i, j) => randZelle(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 2.4, () => 1);
+      const l = zellenNach((i, j) => randZelle(i, j) && wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) > 2.4, () => 1);
       if (l.length) {
         const [i, j] = wahlGewichtet(r, l);
         nimm2(E, { art: "kleingarten", i0: i, i1: i, j0: j, j1: j });
       }
     }
     if (r() < 0.45) {
-      const l = zellenNach((i, j) => randZelle(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 2.6, () => 1);
+      const l = zellenNach((i, j) => randZelle(i, j) && wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) > 2.6, () => 1);
       if (l.length) {
         wahlGewichtet(r, l);
       }
     }
     if (r() < 0.3) {
-      const l = zellenNach((i, j) => E.aktiv(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 2, () => 1);
+      const l = zellenNach((i, j) => E.aktiv(i, j) && wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j) > 2, () => 1);
       if (l.length) {
         const [i, j] = wahlGewichtet(r, l);
         nimm2(E, { art: "park", i0: i, i1: i, j0: j, j1: j, spielplatz: true });
@@ -49254,7 +49554,7 @@
         const f = E.belegt.get(`${i},${j}`);
         if (f && (f.art === "wasser" || f.art === "bahn")) nass += Math.max(i - kF2 + 1, kF2 - i, j - lF2 + 1, lF2 - j) <= 1 ? 1.6 : 0.7;
       }
-      const s2 = Math.min(gut, n1a + 2) * 3 + Math.min(k.length, n1a + 4) - 2.2 * Math.hypot(kF2 - 1 - zc.i, lF2 - 1 - zc.j) + r() * 0.5 - (kF2 < 2 || lF2 < 2 || kF2 > nx - 2 || lF2 > nz - 2 ? 4 : 0) - nass;
+      const s2 = Math.min(gut, n1a + 2) * 3 + Math.min(k.length, n1a + 4) - 2.2 * wurzelSumme3(kF2 - 1 - zc.i, lF2 - 1 - zc.j) + r() * 0.5 - (kF2 < 2 || lF2 < 2 || kF2 > nx - 2 || lF2 > nz - 2 ? 4 : 0) - nass;
       if (!best || s2 > best.s) best = { s: s2, kF: kF2, lF: lF2, k };
     }
     if (!best) return null;
@@ -49281,7 +49581,7 @@
       const l = [];
       for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
         if (!zelleFrei(E, i, j) || i === kF - 1 || i === kF || j === lF - 1 || j === lF) continue;
-        const dd = Math.hypot(i + 0.5 - kx, j + 0.5 - kz2);
+        const dd = wurzelSumme3(i + 0.5 - kx, j + 0.5 - kz2);
         if (dd < 1.2 || dd > 4) continue;
         const anHaupt = istHaupt(E.zTyp[i + 1]) || istHaupt(E.xTyp[j + 1]) || istHaupt(E.zTyp[i]) || istHaupt(E.xTyp[j]);
         const nachbar = [...E.einkaufZellen].some((s2) => {
@@ -49324,7 +49624,7 @@
     sortiert.forEach((e, k) => gruppen[k % Math.max(1, nC)].push(e));
     const lagen = [...gruppen.map((g) => ({ art: "center", liste: g })), ...rand.map((e) => ({ art: "fachmarkt", liste: [e] }))];
     for (const L2 of lagen) {
-      const dist2 = (i2, j2) => Math.hypot(i2 - E.zentrum.i, j2 - E.zentrum.j);
+      const dist2 = (i2, j2) => wurzelSumme3(i2 - E.zentrum.i, j2 - E.zentrum.j);
       const anHaupt = (i2, j2) => HAUPTLICH.has(E.zTyp[i2 + 1]) || HAUPTLICH.has(E.xTyp[j2 + 1]) || HAUPTLICH.has(E.zTyp[i2]) || HAUPTLICH.has(E.xTyp[j2]);
       const abstand3 = (i2, j2) => belegt2.reduce((a, [p2, q2]) => Math.min(a, Math.abs(p2 - i2) + Math.abs(q2 - j2)), 99);
       const zweiteReihe = (i2, j2) => E.aktiv(i2, j2) && Math.min(i2, j2, E.spalten.length - 1 - i2, E.reihen.length - 1 - j2) === 1;
@@ -49404,7 +49704,7 @@
     const istWasser = (c) => !!(c.f && c.f.art === "wasser");
     const land = (c) => c.akt && !istWasser(c);
     const viertelVon = (i, j) => E.viertel ? E.viertel(i, j) : (() => {
-      const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+      const dd = wurzelSumme3(i - E.zentrum.i, j - E.zentrum.j);
       return dd < 1.3 ? "zentrum" : dd < 2.8 ? "gruenderzeit" : "nachkrieg";
     })();
     const brueckeP = E.bruecken === "alle" ? 1 : E.bruecken === "viele" ? 0.9 : T.bruecke;
@@ -50238,7 +50538,7 @@
           summe2 += entlangX ? liste2[n1].w : liste2[n1].d;
           n1++;
         }
-        if (summe2 < bmin || summe2 > bmax * 1.4) continue;
+        if (summe2 < bmin - 1e-6 || summe2 > bmax * 1.4 + 1e-6) continue;
         let ok6 = true;
         for (let q2 = n0 + 1; q2 < n1; q2++) {
           const a = liste2[q2 - 1], c = liste2[q2];
@@ -50301,7 +50601,7 @@
     const { b: b2, rb, parzellen } = ctx;
     const alt = ctx.viertel === "altstadt";
     const meine = () => b2.parzellen.map((id) => parzelleVon(ctx, id)).filter(Boolean);
-    const kernNah = Math.hypot((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j) < 3.2;
+    const kernNah = wurzelSumme3((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j) < 3.2;
     for (const p2 of meine()) {
       if (p2.typ !== "stadthaus") continue;
       const x = rb();
@@ -50339,7 +50639,7 @@
   }
   function setzeLandmarke(typL, def, g) {
     const { E, r, bloecke, parzellen, T } = g;
-    const dist2 = (b2) => Math.hypot((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j);
+    const dist2 = (b2) => wurzelSumme3((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j);
     const ctxVon = (b2) => ({ T, rb: rng2(b2.seed + typL.length * 7), b: b2, parzellen, region: g.region, typ: g.typ, klasse: b2.klasse, viertel: b2.viertel, stile: [["gruenderzeit", 1]] });
     const tiefe = zw(r, ...def.tiefe ?? [20, 30]), br = def.breite ?? [20, 40];
     if (def.art === "rand") {
@@ -50347,8 +50647,8 @@
       const wh = bloecke.find((b2) => b2.art === "warenhaus");
       const gewicht2 = (b2) => {
         const d3 = dist2(b2);
-        if (typL === "slot:hotel" && bahn) return 1 / (1 + Math.hypot(b2.i0 - bahn.i0, b2.j0 - bahn.j0));
-        if (typL === "slot:parkhaus" && wh) return 1 / (0.5 + Math.hypot(b2.i0 - wh.i0, b2.j0 - wh.j0));
+        if (typL === "slot:hotel" && bahn) return 1 / (1 + wurzelSumme3(b2.i0 - bahn.i0, b2.j0 - bahn.j0));
+        if (typL === "slot:parkhaus" && wh) return 1 / (0.5 + wurzelSumme3(b2.i0 - wh.i0, b2.j0 - wh.j0));
         if (typL === "slot:hochhaus") return E.typ === "metropole" ? 1 / (0.6 + d3) : 1 / (1 + Math.abs(d3 - 2.5));
         return 1 / (0.5 + d3);
       };
@@ -50573,7 +50873,7 @@
     const V = VIERTEL[b2.viertel] ?? VIERTEL.gruenderzeit;
     const ctx = { T, rb: rng2((b2.seed ?? 1) + 4711), b: b2, parzellen, klasse: b2.klasse ?? 3, var: 0.5, stile: V.stile, stil: b2.stil, region: E.region, typ: g.typ, viertel: b2.viertel, material: g.R?.material };
     const tiefe = Math.max(T.tiefe[0], Math.min(16, Math.min(b2.w, b2.d) * 0.22));
-    const kern = Math.hypot((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j) < 3.2;
+    const kern = wurzelSumme3((b2.i0 + b2.i1) / 2 - E.zentrum.i, (b2.j0 + b2.j1) / 2 - E.zentrum.j) < 3.2;
     const ost = !!E.ddr;
     let neu = 0;
     for (const sd of ["+z", "-z", "+x", "-x"]) {
@@ -50742,7 +51042,8 @@
     ganz
   };
 
-  // src/kit/zustaende.js
+  // render/src/kit/zustaende.js
+  var wurzelSumme4 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STATI = ["offen", "aktion", "untermiete", "offprice", "teilschliessung", "umbau", "raeumung", "geschlossen", "leer", "verfall", "neueroeffnung", "abriss"];
   var AKTIONEN = [
     "sale",
@@ -50993,7 +51294,7 @@
       const a = r() * Math.PI * 2, rr = Math.sqrt(r());
       const uu = u + Math.cos(a) * ru * rr, tt = t + Math.sin(a) * rt * rr;
       if (tt < tMin || tt > tMax || uu < uMin || uu > uMax) continue;
-      if (pos.some(([pu, pt]) => Math.hypot(pu - uu, pt - tt) < 0.62)) continue;
+      if (pos.some(([pu, pt]) => wurzelSumme4(pu - uu, pt - tt) < 0.62)) continue;
       pos.push([uu, tt]);
       i++;
       const [x, z2] = s2.welt(uu, tt);
@@ -51062,7 +51363,7 @@
     for (let k = 0; k < 4; k++) {
       const fa = k / 4, fb6 = (k + 1) / 4;
       const ua = u0 + (u1 - u0) * fa, ub = u0 + (u1 - u0) * fb6, ya = y - durch * 4 * fa * (1 - fa), yb = y - durch * 4 * fb6 * (1 - fb6);
-      s2.kipp(Math.hypot(ub - ua, yb - ya), 0.05, 0.05, (ua + ub) / 2, (ya + yb) / 2, t + 0.02, "#4a4f55", Math.atan2(yb - ya, ub - ua));
+      s2.kipp(wurzelSumme4(ub - ua, yb - ya), 0.05, 0.05, (ua + ub) / 2, (ya + yb) / 2, t + 0.02, "#4a4f55", Math.atan2(yb - ya, ub - ua));
     }
   }
   function aufsteller(Z2, s2, u, t, text3, fg, bg) {
@@ -51096,7 +51397,7 @@
     const S = Z2.S, m = 1.6, y0 = 0.9;
     S.box(4, 0.6, 4, x, 0.6, z2, "#9aa0a4");
     for (const [dx, dz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) S.box(0.16, H, 0.16, x + dx * m / 2, y0 + H / 2, z2 + dz * m / 2, GELB);
-    const hh = 2.4, dl = Math.hypot(m, hh), wink = Math.atan2(m, hh);
+    const hh = 2.4, dl = wurzelSumme4(m, hh), wink = Math.atan2(m, hh);
     for (let y = y0; y < y0 + H - 0.5; y += hh) {
       S.box(m, 0.1, 0.1, x, y, z2 + m / 2, GELB);
       S.box(0.1, 0.1, m, x + m / 2, y, z2, GELB);
@@ -51120,7 +51421,7 @@
     lbox(S, 2.4, 2.2, 1.6, -LG + 1.3, yt + 2, 0, x, z2, ry, "#a7a39b");
     lbox(S, 0.3, 5, 0.3, 0, yt + 3.1, 0, x, z2, ry, GELB);
     for (const [lx, l] of [[L2 * 0.4, L2 * 0.8], [-LG * 0.5, LG]]) {
-      const a = Math.atan2(4.5, Math.abs(l)), lang = Math.hypot(l, 4.5);
+      const a = Math.atan2(4.5, Math.abs(l)), lang = wurzelSumme4(l, 4.5);
       lbox(S, lang, 0.06, 0.06, lx / 2 + (lx > 0 ? l * 0 : 0), yt + 3.3, 0, x, z2, ry, "#6c7277", lx > 0 ? -a : a);
     }
     lbox(S, 1.4, 1.5, 1.3, 0.6, yt - 0.4, 1.25, x, z2, ry, "#e8e4dc");
@@ -51413,7 +51714,7 @@
     for (const du of [-2.6, 2.6]) for (const dt2 of [-1.6, 1.6]) s2.q(ub + du - 0.15, ub + du + 0.15, 0.3, 0.9, tb + dt2 - 0.2, tb + dt2 + 0.2, "#5f676e");
     s2.q(ub - 0.9, ub + 0.9, 1.6, 2.4, tb - 0.8, tb + 0.8, "#4a4f55");
     const yK = Math.max(4, yZiel - 1.6), tK = tZiel + 1.1;
-    const dy = yK - 2.2, dt = tK - tb, l = Math.hypot(dy, dt), a = Math.atan2(dt, dy);
+    const dy = yK - 2.2, dt = tK - tb, l = wurzelSumme4(dy, dt), a = Math.atan2(dt, dy);
     s2.kipp(0.55, l, 0.55, ub, 2.2 + dy / 2, tb + dt / 2, GE, 0, a);
     s2.kipp(0.35, l * 0.55, 0.35, ub, 2.2 + dy * 0.75, tb + dt * 0.75, "#e0e0dc", 0, a);
     s2.q(ub - 1.1, ub + 1.1, yK - 0.1, yK + 0.15, tK - 0.7, tK + 0.7, "#4a4f55");
@@ -51935,7 +52236,7 @@
         for (const f of fensterEG) {
           const s2 = seiten4[f.seite];
           if (!(f.seite === "+x" ? (f.a + f.b) / 2 < Z2.nutz(s2) * 0.6 : (f.a + f.b) / 2 < Z2.nutz(s2) * 0.5)) continue;
-          const m = (f.a + f.b) / 2, ym = (f.y0 + f.y1) / 2, l = Math.hypot(f.b - f.a, f.y1 - f.y0) * 0.92, w = Math.atan2(f.y1 - f.y0, f.b - f.a);
+          const m = (f.a + f.b) / 2, ym = (f.y0 + f.y1) / 2, l = wurzelSumme4(f.b - f.a, f.y1 - f.y0) * 0.92, w = Math.atan2(f.y1 - f.y0, f.b - f.a);
           s2.q(f.a, f.b, f.y0, f.y1, f.t + 0.1, f.t + 0.14, "#f2f0ea");
           s2.kipp(l, 0.35, 0.03, m, ym, f.t + 0.16, ROT_KAMPAGNE, w);
           s2.kipp(l, 0.35, 0.03, m, ym, f.t + 0.19, ROT_KAMPAGNE, -w);
@@ -52142,7 +52443,7 @@
     }
   }
 
-  // src/kit/sporthelfer.js
+  // render/src/kit/sporthelfer.js
   var GLAS = "#4d6677";
   var GLAS_D = "#2f3d48";
   var GLAS_HELL = "#7d9fb2";
@@ -52382,7 +52683,7 @@
     if (c < u1) s2.q(c, u1, y0, y1, t0, t1, f);
   }
 
-  // src/kit/wettbewerber.js
+  // render/src/kit/wettbewerber.js
   var ARTEN2 = ["modehaus", "offprice", "textildiscounter", "elektronik", "premium", "fastfashion", "leer_ehemals"];
   var NAMEN = {
     // je Art sechs Namen; die ersten drei sind die Zufallsauswahl ohne Vorgabe, staedte.js rotiert durch alle sechs
@@ -53099,7 +53400,8 @@
     return Math.max(h1, H + 1.6);
   }
 
-  // src/kit/warenhaus.js
+  // render/src/kit/warenhaus.js
+  var wurzelSumme5 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var ROT2 = "#d23c32";
   var EG2 = 5.5;
   var GH = 4.5;
@@ -53528,7 +53830,7 @@
       if (stil === "glas") {
         s2.q(a, b2, y, y + 0.1, tF, tF + tief2, "#a9c6d3");
         s2.q(a, b2, y - 0.2, y + 0.15, tF + tief2 - 0.15, tF + tief2, STAHL);
-        const l = Math.hypot(tief2, 2.4), th = Math.atan2(-tief2, 2.4);
+        const l = wurzelSumme5(tief2, 2.4), th = Math.atan2(-tief2, 2.4);
         for (let u = a + 1; u < b2; u += 3) {
           s2.q(u - 0.07, u + 0.07, y - 0.22, y, tF, tF + tief2, STAHL);
           s2.kipp(0.07, l, 0.07, u, y + 1.2, tF + tief2 / 2, "#6f777e", 0, th);
@@ -54431,7 +54733,7 @@
       sz.q(wu - wb / 2 - 0.25, wu + wb / 2 + 0.25, wy - wh / 2 - 0.25, wy + wh / 2 + 0.25, 0.3, 0.45, "#d9dcde");
       sz.q(wu - wb / 2, wu + wb / 2, wy - wh / 2, wy + wh / 2, 0.45, 0.55, bg);
       for (let i = 0; i < 3; i++) {
-        const len = Math.hypot(wh, wh) * 0.9;
+        const len = wurzelSumme5(wh, wh) * 0.9;
         const uc = wu + wb * (0.12 + i * 0.12);
         if (uc + wh * 0.35 > wu + wb / 2) continue;
         sz.kipp(1, len * 0.8, 0.05, uc, wy, 0.58, ["#ffffff", ROT2, "#f2b705"][i], -0.55);
@@ -54556,8 +54858,8 @@
       const uu = u - br / 2 - 0.4 + k * df;
       s2.q(uu - 0.08, uu + 0.08, yFuss, yT + 0.16, t - 0.2, t - 0.04, st2);
       s2.q(uu - 0.07, uu + 0.07, yFuss, yB, t - 1.6, t - 1.45, st2);
-      s2.kipp(0.07, Math.hypot(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st2, 0, Math.atan2(1.5, yB - yFuss));
-      if (k < nf) s2.kipp(0.06, Math.hypot(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st2, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
+      s2.kipp(0.07, wurzelSumme5(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st2, 0, Math.atan2(1.5, yB - yFuss));
+      if (k < nf) s2.kipp(0.06, wurzelSumme5(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st2, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
     }
   }
   function familie8(K3) {
@@ -54748,9 +55050,9 @@
   }
   function mosaikMotiv(motiv, W3, H, P2) {
     const m = Math.min(W3, H);
-    const kreis = (X, Y, cx, cy, r) => Math.hypot(X - cx, Y - cy) < r;
+    const kreis = (X, Y, cx, cy, r) => wurzelSumme5(X - cx, Y - cy) < r;
     if (motiv === 0) return (X, Y) => {
-      const sx = 0.7 * W3, sy = 0.72 * H, sr = 0.17 * m, dS = Math.hypot(X - sx, Y - sy);
+      const sx = 0.7 * W3, sy = 0.72 * H, sr = 0.17 * m, dS = wurzelSumme5(X - sx, Y - sy);
       if (dS < sr * 0.62) return P2.gelb;
       if (dS < sr) return P2.orange;
       if (dS < sr * 1.75 && Math.floor((Math.atan2(Y - sy, X - sx) + Math.PI) / (Math.PI / 10)) % 2 === 0) return P2.hellgelb;
@@ -54783,7 +55085,7 @@
       return Y > 0.5 * H ? P2.blauD : P2.nacht;
     };
     return (X, Y) => {
-      const cx = 0.66 * W3, cy = 0.52 * H, r = 0.26 * m, dz = Math.hypot(X - cx, Y - cy), wz2 = Math.atan2(Y - cy, X - cx);
+      const cx = 0.66 * W3, cy = 0.52 * H, r = 0.26 * m, dz = wurzelSumme5(X - cx, Y - cy), wz2 = Math.atan2(Y - cy, X - cx);
       if (dz < r * 0.42) return P2.gelb;
       if (dz < r * 0.62) return P2.sand;
       if (dz < r) return P2.grau;
@@ -54857,7 +55159,7 @@
       g.computeVertexNormals();
       s2.geo(g, f);
       for (const [i0, j0, i1, j1] of [[0, 0, N, 0], [0, N, N, N], [0, 0, 0, N], [N, 0, N, N]]) {
-        const A = P2(i0, j0, 0), Bq = P2(i1, j1, 0), len = Math.hypot(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]);
+        const A = P2(i0, j0, 0), Bq = P2(i1, j1, 0), len = wurzelSumme5(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]);
         const gg = new three_module_exports.BoxGeometry(len, 0.28, 0.28);
         const dir = new three_module_exports.Vector3(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]).normalize();
         gg.applyQuaternion(new three_module_exports.Quaternion().setFromUnitVectors(new three_module_exports.Vector3(1, 0, 0), dir));
@@ -55278,7 +55580,8 @@
     return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/sonderbauten.js
+  // render/src/kit/sonderbauten.js
+  var wurzelSumme6 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI = Math.PI;
   function zyl4(S, rO, rU, h, x, y0, z2, farbe3, seg = 16, offen = false) {
     const g = new three_module_exports.CylinderGeometry(rO, rU, h, seg, 1, offen);
@@ -55502,7 +55805,7 @@
     const haut = p2.farbe ?? waehle2(r, ["#ebe6dc", "#e1e5e8", "#e9dfcf"]);
     const akzent = p2.akzent ?? waehle2(r, ["#c98a3a", "#4f7fa8", "#6f8f4f", "#a8574a", "#5b6f86"]);
     const glas2 = "#8fb2c4";
-    const mieter = [...MIETER2].sort(() => r() - 0.5);
+    const mieter = mische(r, MIETER2);
     let mi = 0;
     const R10 = 10, ecke = 2 * R10 - 2;
     const koerper3 = variante2 === "rotunde" ? [[x, z2, w - ecke, d2], [x + w - ecke, z2, ecke, d2 - ecke]] : [[x, z2, w, d2]];
@@ -55878,7 +56181,7 @@
       } else if (c.lisenen) S.box(0.7, Hs, 0.3, u, Hs / 2, az1 + 0.12, sH);
     }
     if (c.schiff === "basilika") {
-      const ang = Math.atan((c.pult ?? 3.5) / sb2), hyp = Math.hypot(sb2, c.pult ?? 3.5) + 1;
+      const ang = Math.atan((c.pult ?? 3.5) / sb2), hyp = wurzelSumme6(sb2, c.pult ?? 3.5) + 1;
       for (const s2 of [1, -1]) {
         const g = new three_module_exports.BoxGeometry(L2, 0.45, hyp);
         g.rotateX(ang * s2);
@@ -56132,7 +56435,7 @@
     }
     lochwand(S, "+z", nx0, nx1, -0.3, Hs, sz1, 0.6, stein, loS);
     gesims(S, nx0, sz0, L2, sz1 - sz0, Hs, 0.5, 0.3, sH);
-    const sb2 = sz1 - nz1, ang = Math.atan(4 / sb2), hyp = Math.hypot(sb2, 4) + 1;
+    const sb2 = sz1 - nz1, ang = Math.atan(4 / sb2), hyp = wurzelSumme6(sb2, 4) + 1;
     for (const s2 of [1, -1]) {
       const g = new three_module_exports.BoxGeometry(L2, 0.5, hyp);
       g.rotateX(ang * s2);
@@ -58225,7 +58528,8 @@
     return hauptbahnhof(S, scene2, { ...p2, nurEmpfang: true, w: p2.w ?? 96, d: p2.d ?? 24 });
   }
 
-  // src/kit/sporthaus.js
+  // render/src/kit/sporthaus.js
+  var wurzelSumme7 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var HS_ROT = "#d23c32";
   var HS_BLAU = "#1d2f4f";
   var HS_WEISS = "#f4f3ef";
@@ -59398,7 +59702,7 @@
     const st2 = K3.Z;
     const zukleben = (g) => {
       g.s.q(g.a + 0.05, g.b - 0.05, g.y0 + 0.1, g.y1 - 0.1, g.t + 0.02, g.t + 0.07, g.tuer ? "#c9c2ae" : Math.round(g.a) % 2 ? "#ece3cc" : "#e2d6b8");
-      if (!g.tuer && g.b - g.a > 1.5) g.s.kipp(Math.hypot(g.b - g.a, g.y1 - g.y0) * 0.8, 0.2, 0.03, (g.a + g.b) / 2, (g.y0 + g.y1) / 2, g.t + 0.09, "#cbbd98", 0.6);
+      if (!g.tuer && g.b - g.a > 1.5) g.s.kipp(wurzelSumme7(g.b - g.a, g.y1 - g.y0) * 0.8, 0.2, 0.03, (g.a + g.b) / 2, (g.y0 + g.y1) / 2, g.t + 0.09, "#cbbd98", 0.6);
     };
     if (st2.hat("leer") || st2.hat("abriss")) {
       for (const g of K3.glas) zukleben(g);
@@ -59711,7 +60015,7 @@
     return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/innen.js
+  // render/src/kit/innen.js
   var innen_exports = {};
   __export(innen_exports, {
     BODEN: () => BODEN2,
@@ -59820,6 +60124,7 @@
     zelle: () => zelle,
     zelt: () => zelt
   });
+  var wurzelSumme8 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var RASTER = 5;
   var WANDHOEHE = 4.6;
   var GLAS3 = "#cfe8f1";
@@ -61412,7 +61717,7 @@
   }
   function rolltreppe(S, x0, z2, laenge2, hub, y = 0, d2 = 1, t0 = 0) {
     const neig = Math.atan2(hub, laenge2);
-    const lang = Math.hypot(laenge2, hub) * (1 - t0);
+    const lang = wurzelSumme8(laenge2, hub) * (1 - t0);
     const breit2 = 1.15;
     const cx = x0 - laenge2 * (1 + t0) / 2, cy = y + hub * (1 + t0) / 2;
     const schraeg = (w, h, t, dy, dz, f) => {
@@ -61795,7 +62100,7 @@
     return new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.5, -0.6), new three_module_exports.Vector3(W3, WANDHOEHE, T));
   }
 
-  // src/kit/moebel/generationen.js
+  // render/src/kit/moebel/generationen.js
   var MATERIAL = {
     "#737e85": ["#77573a", "#7b8791"],
     "#444c55": ["#6c4c32", "#737a81"],
@@ -61830,7 +62135,7 @@
     return def.bau(zeichnet, r, d2, ctx);
   }
 
-  // src/kit/abteilung.js
+  // render/src/kit/abteilung.js
   var R = RASTER;
   var PI3 = Math.PI;
   var { PAL: PAL2, HOLZ: HOLZ2, MODUL: MODUL2, UNTERMIETE: UNTERMIETE2, MARKEN: MARKEN3, PREISE: PREISE2, anz: anz2, bunt: bunt2 } = innen_exports;
@@ -63966,7 +64271,8 @@
     return res;
   }
 
-  // src/kit/sportabteilung.js
+  // render/src/kit/sportabteilung.js
+  var wurzelSumme9 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI4 = Math.PI;
   var { PAL: PAL3, HOLZ: HOLZ3 } = innen_exports;
   var bunt3 = (r, p2) => p2[Math.floor(r() * p2.length)];
@@ -64283,7 +64589,7 @@
     L2.box(0.05, 0.05, 1.9 * s2, lx, 0.05 + 0.95 * s2, lz, heller(f, 0.12));
     L2.box(2.4 * s2, 0.04, 0.05, lx, 0.05 + 0.93 * s2, lz, heller(f, 0.12));
     for (const [dx, dz] of [[-1.9, -1.1], [1.9, -1.1], [-1.9, 1.1], [1.9, 1.1]]) {
-      const len = Math.hypot(dx * 0.45, 0.9 * s2), lg = new three_module_exports.BoxGeometry(0.02, len, 0.02);
+      const len = wurzelSumme9(dx * 0.45, 0.9 * s2), lg = new three_module_exports.BoxGeometry(0.02, len, 0.02);
       lg.rotateZ(Math.atan2(dx * 0.45, 0.9 * s2) * (dx > 0 ? -1 : -1) * -1);
       lg.rotateX(dz > 0 ? 0.5 : -0.5);
       L2.geo(lg, lx + dx * 0.78 * s2, 0.05 + 0.45 * s2, lz + dz * 0.78 * s2, "#f2f1ec");
@@ -64554,13 +64860,13 @@
     for (const s2 of [-1, 1]) L2.box(0.1, h, 0.1, lx + s2 * (w / 2 - 0.05), 0, lz, "#ffffff");
     L2.box(w, 0.04, 0.04, lx, 0, lz - 0.9, "#dfe5e8");
     for (const s2 of [-1, 1]) {
-      const g = new three_module_exports.BoxGeometry(0.04, 0.04, Math.hypot(0.9, h));
+      const g = new three_module_exports.BoxGeometry(0.04, 0.04, wurzelSumme9(0.9, h));
       g.rotateX(-Math.atan2(h, 0.9) + PI4 / 2);
       L2.geo(g, lx + s2 * (w / 2 - 0.05), h / 2, lz - 0.45, "#dfe5e8");
     }
     for (let q2 = 1; q2 < 8; q2++) {
       const u = lx - w / 2 + q2 * (w / 8);
-      const g = new three_module_exports.BoxGeometry(0.015, Math.hypot(0.9, h), 0.015);
+      const g = new three_module_exports.BoxGeometry(0.015, wurzelSumme9(0.9, h), 0.015);
       g.rotateX(Math.atan2(0.9, h));
       L2.geo(g, u, h / 2, lz - 0.45, "#eef2f4");
     }
@@ -64759,7 +65065,7 @@
     }
   }
 
-  // src/kit/moebel/basis.js
+  // render/src/kit/moebel/basis.js
   var PALETTEN = Object.freeze({
     laufen: ["#e8403a", "#1f6fd1", "#f4f4f0", "#26292e", "#ffcb30"],
     kinder: ["#ff9e43", "#1e9ed0", "#f5dd67", "#e75067", "#58b66a"],
@@ -64971,7 +65277,7 @@
     }
   }
 
-  // src/kit/moebel/sport-mix.js
+  // render/src/kit/moebel/sport-mix.js
   var THEMEN2 = Object.freeze({
     sportschuhe: ["sitzbank", "probiertisch", "spiegel", "schuhregal", "anprobebank", "schuhtisch"],
     sporttextil: ["kleiderstange", "rundstaender", "puppen", "falttisch", "haengung", "saison"],
@@ -65115,7 +65421,7 @@
   ));
   Object.freeze(SPORT_MIX_MOEBEL);
 
-  // src/kit/moebel/wand.js
+  // render/src/kit/moebel/wand.js
   var wand_exports = {};
   __export(wand_exports, {
     ALT_BETTWAREN: () => ALT_BETTWAREN,
@@ -65156,7 +65462,7 @@
   var ALT_GESCHIRR = definition("alt_geschirr", "Geschirrwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { "art": "home", "pal": "allgemein", "titel": "Geschirrwand", "alt": true, "w": 5 }));
   var ALT_BETTWAREN = definition("alt_bettwaren", "Bettwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { "art": "textil", "pal": "allgemein", "titel": "Bettwarenwand", "alt": true, "w": 5 }));
 
-  // src/kit/moebel/gondel.js
+  // render/src/kit/moebel/gondel.js
   var gondel_exports = {};
   __export(gondel_exports, {
     GONDEL_BAELLE: () => GONDEL_BAELLE,
@@ -65195,7 +65501,7 @@
   var GONDEL_WAESCHE = definition("gondel_waesche", "W\xE4schegondel", "allgemein", "gondel", 4, 1, 1.4, 120, (L2, r, d2, ctx) => gondelModul(L2, r, d2, ctx, { "art": "textil", "pal": "outlet", "w": 5 }));
   var GONDEL_SPIELZEUG = definition("gondel_spielzeug", "Spielwarengondel", "allgemein", "gondel", 2, 1, 1.4, 120, (L2, r, d2, ctx) => gondelModul(L2, r, d2, ctx, { "art": "pakete", "pal": "kinder", "w": 2.5 }));
 
-  // src/kit/moebel/insel.js
+  // render/src/kit/moebel/insel.js
   var insel_exports = {};
   __export(insel_exports, {
     INSEL_ALT_BETTW: () => INSEL_ALT_BETTW,
@@ -65226,7 +65532,7 @@
     for (let i = 0; i < 5; i++) L2.box(0.3, 0.19, 0.2, (i - 2) * 0.4, 0.85, 1.25, "#b89a66");
   });
 
-  // src/kit/moebel/kasse.js
+  // render/src/kit/moebel/kasse.js
   var kasse_exports = {};
   __export(kasse_exports, {
     KASSE_ALT_INFO: () => KASSE_ALT_INFO,
@@ -65245,7 +65551,7 @@
   var KASSE_ALT_INFO = definition("kasse_alt_info", "Information alt", "allgemein", "kasse", 2, 2, 1.5, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { "art": "info", "w": 2.5 }));
   var KASSE_ALT_VITRINE = definition("kasse_alt_vitrine", "Kassenvitrine", "allgemein", "kasse", 4, 2, 1.5, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { "art": "info", "w": 5 }));
 
-  // src/kit/moebel/deko.js
+  // render/src/kit/moebel/deko.js
   var deko_exports = {};
   __export(deko_exports, {
     DEKO_ALT_RASTERDECKE: () => DEKO_ALT_RASTERDECKE,
@@ -65273,7 +65579,7 @@
     }
   });
 
-  // src/kit/moebel/sport.js
+  // render/src/kit/moebel/sport.js
   var sport_exports = {};
   __export(sport_exports, {
     SPORT_ABVERKAUF_GITTER: () => SPORT_ABVERKAUF_GITTER,
@@ -65427,7 +65733,7 @@
     );
   });
 
-  // src/kit/moebel/outlet.js
+  // render/src/kit/moebel/outlet.js
   var outlet_exports = {};
   __export(outlet_exports, {
     OUTLET_ACCESSOIRES: () => OUTLET_ACCESSOIRES,
@@ -65555,7 +65861,7 @@
   var OUTLET_UMKLEIDE = definition("outlet_umkleide", "Umkleidereihe", "outlet", "service", 4, 2, 2.4, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { w: 5, art: "umkleide", kabinen: 4 }));
   var OUTLET_ROLLWAGEN = definition("outlet_rollwagen", "Nachr\xE4um-Rollwagen", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d2, ctx) => rollwagen(L2, r, d2));
 
-  // src/kit/moebel/service.js
+  // render/src/kit/moebel/service.js
   var service_exports = {};
   __export(service_exports, {
     ALT_FAHRSTUHL: () => ALT_FAHRSTUHL,
@@ -65625,7 +65931,7 @@
     L2.box(0.07, 2.1, 0.08, 0.33, 0.6, 1.63, "#786651");
   });
 
-  // src/kit/moebel/index.js
+  // render/src/kit/moebel/index.js
   var ALLE_MOEBEL = Object.freeze(
     [wand_exports, gondel_exports, insel_exports, kasse_exports, deko_exports, sport_exports, outlet_exports, service_exports].flatMap((m) => Object.values(m).filter((v) => v && typeof v === "object" && typeof v.bau === "function" && typeof v.id === "string")).concat(SPORT_MIX_MOEBEL).sort((a, b2) => a.id.localeCompare(b2.id, "de"))
   );
@@ -65639,7 +65945,7 @@
     return eintrag2;
   }
 
-  // src/kit/ladenbau-regeln.js
+  // render/src/kit/ladenbau-regeln.js
   var LADENBAU = Object.freeze({
     raster: 1.25,
     suchRaster: 0.625,
@@ -65745,7 +66051,8 @@
     return a.x < b2.x + b2.w + abstand3 - 1e-8 && a.x + a.w + abstand3 > b2.x + 1e-8 && a.z < b2.z + b2.d + abstand3 - 1e-8 && a.z + a.d + abstand3 > b2.z + 1e-8;
   }
 
-  // src/kit/ladenplan.js
+  // render/src/kit/ladenplan.js
+  var wurzelSumme10 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var U = LADENBAU.raster;
   var snap = (n) => Math.round(n / U) * U;
   var down = (n) => Math.floor(n / U + 1e-8) * U;
@@ -66110,7 +66417,7 @@
                 plan2,
                 [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld]
               )) continue;
-              const nah = plan2.moebel.some((q2) => q2.typ === "gondel" && q2.abteilung === raum.id && Math.hypot(
+              const nah = plan2.moebel.some((q2) => q2.typ === "gondel" && q2.abteilung === raum.id && wurzelSumme10(
                 Math.max(0, q2.x - x - w, x - q2.x - q2.w),
                 Math.max(0, q2.z - z2 - d2, z2 - q2.z - q2.d)
               ) <= 3 * U);
@@ -66149,7 +66456,7 @@
               plan2,
               [...plan2.hindernisse, ...plan2.gaenge, ...plan2.moebel, ...plan2.kassenVorfeld]
             )) continue;
-            const nahe = plan2.moebel.some((q2) => q2.typ === "gondel" && q2.abteilung === raum.id && Math.hypot(
+            const nahe = plan2.moebel.some((q2) => q2.typ === "gondel" && q2.abteilung === raum.id && wurzelSumme10(
               Math.max(0, q2.x - x - m.w, x - q2.x - q2.w),
               Math.max(0, q2.z - z2 - m.d, z2 - q2.z - q2.d)
             ) <= 3 * U);
@@ -66345,7 +66652,7 @@
     return { teile: S.anzahl - n0, moebel: plan2.moebel.length, abteilungen: plan2.abteilungen.length };
   }
 
-  // src/kit/ladenbau-outlet.js
+  // render/src/kit/ladenbau-outlet.js
   var FUNDUS_INNEN_ZUSTAENDE = Object.freeze(["normal", "schwach", "ansturm", "raeumung"]);
   var SORTIMENTE = Object.freeze({
     damen: { titel: "Damen", anteil: 0.34 },
@@ -66394,7 +66701,7 @@
     return geschoss === 0 ? 0.48 : 5.02 + (geschoss - 1) * 3.9;
   }
 
-  // src/kit/outlet.js
+  // render/src/kit/outlet.js
   var NAME_OUTLET = "FUNDUS";
   var FARBE_OUTLET = "#8c1d40";
   var WAREN = ["#263b53", "#c67e73", "#e0c7a3", "#748d74", "#d8dce0", "#b88b56", "#a7a0ba"];
@@ -66697,7 +67004,7 @@
     return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/schwesterhaus.js
+  // render/src/kit/schwesterhaus.js
   var NAME_SCHWESTER = "Volkskauf";
   var FARBE_SCHWESTER = "#2f6f73";
   var EG3 = 4.9;
@@ -67141,7 +67448,7 @@
     return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status };
   }
 
-  // haeuser-schwester.json
+  // render/haeuser-schwester.json
   var haeuser_schwester_default = [
     {
       id: "K001",
@@ -69221,7 +69528,7 @@
     }
   ];
 
-  // haeuser-outlet.json
+  // render/haeuser-outlet.json
   var haeuser_outlet_default = [
     {
       id: "O001",
@@ -70580,7 +70887,8 @@
     }
   ];
 
-  // src/kit/premium.js
+  // render/src/kit/premium.js
+  var wurzelSumme11 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PREMIUM_NAMEN = Object.freeze({
     P001: "Palais Hartwig",
     P002: "Hartwig am Hofgarten",
@@ -70705,7 +71013,7 @@
       for (const [ax, bw] of [[x + w * 0.21, w * 0.42], [x + w * 0.88, w * 0.24]]) {
         const steigung = 8.2, half = d2 * 0.5;
         for (const sign3 of [-1, 1]) {
-          const dach3 = new three_module_exports.BoxGeometry(bw, 0.5, Math.hypot(steigung, half));
+          const dach3 = new three_module_exports.BoxGeometry(bw, 0.5, wurzelSumme11(steigung, half));
           dach3.rotateX(sign3 * Math.atan2(steigung, half));
           dach3.translate(ax, y + steigung / 2 + 1, z2 + d2 / 2 + sign3 * d2 / 4);
           S.add(dach3, KUPFER2);
@@ -70914,7 +71222,7 @@
     return { hoehe, w, d: d2, familie: "premium", teile: S.anzahl - start, status: zust.status };
   }
 
-  // haeuser.json
+  // render/haeuser.json
   var haeuser_default = [
     {
       id: "W001",
@@ -93936,7 +94244,7 @@
     }
   ];
 
-  // src/kit/bauer.js
+  // render/src/kit/bauer.js
   var REGION2 = { nord: "Nord", ost: "Ost", west: "West", mitte: "Mitte", sued: "S\xFCd" };
   var regionVon2 = (p2) => REGION2[p2.region] ?? p2.region ?? "Mitte";
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
@@ -94134,7 +94442,8 @@
     };
   }
 
-  // src/kit/westbauten.js
+  // render/src/kit/westbauten.js
+  var wurzelSumme12 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI5 = Math.PI;
   var WEST_WASSER_Y = -2.2;
   function R2(ox, oz, dx, dz, L2, s2 = "") {
@@ -94232,7 +94541,7 @@
   }
   function balken(S, a, b2, br, ho, c) {
     const dx = b2[0] - a[0], dy = b2[1] - a[1], dz = b2[2] - a[2];
-    const hl = Math.hypot(dx, dz), L2 = Math.hypot(hl, dy);
+    const hl = wurzelSumme12(dx, dz), L2 = wurzelSumme12(hl, dy);
     if (L2 < 1e-4) return;
     const g = new three_module_exports.BoxGeometry(L2, ho, br);
     g.rotateZ(Math.atan2(dy, hl));
@@ -94712,7 +95021,7 @@
     if (o.licht) for (let i = 0; i < 2; i++) zyl5(S, rO + 0.36 + i * 0.02, rO + 0.36, 0.25, x, h - 3 - i * 6, z2, o.licht, 14, true);
   }
   function zaun(S, x0, z0, x1, z1, y0 = 0.3, h = 1.8, c = "#5a6168") {
-    const L2 = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.round(L2 / 2.5));
+    const L2 = wurzelSumme12(x1 - x0, z1 - z0), n = Math.max(1, Math.round(L2 / 2.5));
     balken(S, [x0, y0 + h, z0], [x1, y0 + h, z1], 0.06, 0.08, c);
     balken(S, [x0, y0 + 0.3, z0], [x1, y0 + 0.3, z1], 0.06, 0.08, c);
     for (let i = 0; i <= n; i++) {
@@ -95045,7 +95354,7 @@
     for (let i = 0; i < pkt.length - 1; i++) {
       const [ax, az] = pkt[i], [bx, bz] = pkt[i + 1];
       stab(S, [ax, y, az], [bx, y, bz], rad2, c, 8);
-      const L2 = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L2 / 8));
+      const L2 = wurzelSumme12(bx - ax, bz - az), n = Math.max(1, Math.round(L2 / 8));
       for (let k = 0; k <= n; k++) {
         const px2 = ax + (bx - ax) * k / n, pz4 = az + (bz - az) * k / n;
         S.box(0.4, y - rad2 - 0.3, 0.4, px2, 0.3 + (y - rad2 - 0.3) / 2, pz4, stuetze2);
@@ -95409,7 +95718,7 @@
     const ym = y + h * 0.45, bm = b2 * 0.55;
     fb(S, F2, um2 - bm / 2, um2 + bm / 2, ym - 0.09, ym + 0.09, 0.06, 0.15, holz);
     const g = (a, c) => {
-      const dx = c[0] - a[0], dy = c[1] - a[1], L2 = Math.hypot(dx, dy);
+      const dx = c[0] - a[0], dy = c[1] - a[1], L2 = wurzelSumme12(dx, dy);
       const gg = new three_module_exports.BoxGeometry(L2, 0.16, 0.1);
       gg.rotateZ(Math.atan2(dy, dx));
       gg.translate((a[0] + c[0]) / 2, (a[1] + c[1]) / 2, 0.12);
@@ -96361,7 +96670,7 @@
     S.quader(Math.min(x0, x1), oben, Math.min(z0, z1), Math.max(x0, x1), oben + 0.12, Math.max(z0, z1), KAI_DUNKEL);
   }
   function boeschung(S, x0, x1, zLand, zWasser, WY, c = "#9a958a") {
-    const dz = zWasser - zLand, dy = WY - 0.3, L2 = Math.hypot(dz, dy);
+    const dz = zWasser - zLand, dy = WY - 0.3, L2 = wurzelSumme12(dz, dy);
     const g = new three_module_exports.BoxGeometry(x1 - x0, 0.6, L2);
     g.rotateX(-Math.atan2(dy, Math.abs(dz)) * Math.sign(dz));
     g.translate((x0 + x1) / 2, (0.3 + WY) / 2 - 0.3, (zLand + zWasser) / 2);
@@ -96521,7 +96830,7 @@
       S.quader(bx - bb / 2 + 1, dy, zw0 - bo - 2, bx + bb / 2 - 1, dy + 0.06, zw1 + bo + 2, ASPHALT);
       for (const [a, b2] of [[zw0 - bo - 2, 0], [zw1 + bo + 2, D]]) {
         const L2 = Math.abs(b2 - a);
-        const g = new three_module_exports.BoxGeometry(bb, 0.6, Math.hypot(L2, dy));
+        const g = new three_module_exports.BoxGeometry(bb, 0.6, wurzelSumme12(L2, dy));
         g.rotateX(Math.atan2(dy, L2) * Math.sign(a - b2) * -1);
         g.translate(bx, dy / 2, (a + b2) / 2);
         S.add(g, "#9aa1a7");
@@ -97431,7 +97740,7 @@
         ftext(scene2, F2, "Rheinschifffahrt", F2.L / 2, WY + 4.3, 0.1, 0.55, F2.L * 0.9, "#1f4f8f");
       }
       const Lb = pz4 - 2.6 - (zk + 1), dy = 0.36 - (WY + 1);
-      const g = new three_module_exports.BoxGeometry(2.6, 0.25, Math.hypot(Lb, dy));
+      const g = new three_module_exports.BoxGeometry(2.6, 0.25, wurzelSumme12(Lb, dy));
       g.rotateX(Math.atan2(dy, Lb));
       g.translate(px2, (WY + 1 + 0.36) / 2, (pz4 - 2.6 + zk + 1) / 2);
       S.add(g, "#9aa1a7");
@@ -97665,7 +97974,7 @@
     "Blumen W\xFClfing"
   ];
   function strebe(S, F2, u0, y0, u1, y1, t, c, b2 = 0.22) {
-    const L2 = Math.hypot(u1 - u0, y1 - y0), g = new three_module_exports.BoxGeometry(L2, b2, 0.12);
+    const L2 = wurzelSumme12(u1 - u0, y1 - y0), g = new three_module_exports.BoxGeometry(L2, b2, 0.12);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, t + 0.06);
     fgeo(S, F2, g, c);
@@ -98172,7 +98481,7 @@
     "slot:ruhr_brauturm": ruhrBrauturm
   };
 
-  // src/kit/ladenbau-sport.js
+  // render/src/kit/ladenbau-sport.js
   function sportLadenEingabe(haus2, etage2, o = {}, raster4 = null) {
     const fam = familieSport(haus2), masse3 = masseSport(haus2, fam), ra = raster4 ?? sportRaster(haus2, etage2, o);
     const istHindernis = (t) => /^(treppe|rt|aufzug|lager|wc|werkstatt|luft|turm|buehne|szene|radbuehne|lauf|erlebnis)/.test(String(t));
@@ -98199,7 +98508,8 @@
     };
   }
 
-  // src/kit/sportgrundriss.js
+  // render/src/kit/sportgrundriss.js
+  var wurzelSumme13 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var R3 = RASTER;
   var WH2 = WANDHOEHE;
   var PI6 = Math.PI;
@@ -98991,11 +99301,11 @@
         const hh = von + hoch * (q2 + 1) / nSt;
         S.box(lauf / nSt + 0.02, 0.18, 1.4, x + 9.2 - tt * lauf, y0 + hh - 0.09, zz, stufeF);
       }
-      const g = new three_module_exports.BoxGeometry(Math.hypot(lauf, hoch), 0.35, 0.08);
+      const g = new three_module_exports.BoxGeometry(wurzelSumme13(lauf, hoch), 0.35, 0.08);
       g.rotateZ(Math.atan2(hoch, lauf));
       g.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.2, zz - 0.74);
       S.add(g, wangeF);
-      const g2 = new three_module_exports.BoxGeometry(Math.hypot(lauf, hoch), 0.9, 0.04);
+      const g2 = new three_module_exports.BoxGeometry(wurzelSumme13(lauf, hoch), 0.9, 0.04);
       g2.rotateZ(Math.atan2(hoch, lauf));
       g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74);
       S.add(g2, GLAS3);
@@ -99883,7 +100193,7 @@
     }
   }
 
-  // src/kit/grundriss.js
+  // render/src/kit/grundriss.js
   var R4 = RASTER;
   var FASSADE = ["#efe4c9", "#e3d3bd", "#ece5d7", "#d3d9de", "#b9785e", "#e8dfcf", "#c9b8a0", "#dde1e4"];
   var GANG = { a: "#f2f1ee", b: "#dedcd7", m: "fliese" };
@@ -100679,7 +100989,8 @@
     }
   }
 
-  // src/kit/hq.js
+  // render/src/kit/hq.js
+  var wurzelSumme14 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI7 = Math.PI;
   var ROT3 = FARBEN3.marke;
   var LICHT4 = ["#f4dc98", "#f1d58a", "#f6e2a8"];
@@ -101327,7 +101638,7 @@
     const frei6 = plan2.bloecke.filter((b2) => b2.art === "bebaut" && imBlock(b2).length > 4 && imBlock(b2).every((p2) => ERSETZBAR.has(p2.typ) && !p2.standort && !p2.leer));
     const punkte2 = (b2, W3, D) => {
       if (benutzt.has(b2.id) || b2.w < W3 + 12 || b2.d < D + 10) return Infinity;
-      const dd = Math.hypot(b2.x + b2.w / 2 - mx, b2.z + b2.d / 2 - mz);
+      const dd = wurzelSumme14(b2.x + b2.w / 2 - mx, b2.z + b2.d / 2 - mz);
       return Math.abs(dd - 150) + r() * 60;
     };
     const gruppen = /* @__PURE__ */ new Map();
@@ -101654,7 +101965,7 @@
     let y0 = ly + h * zw(r, 0.2, 0.5);
     const n = 5, s2 = w / n;
     for (let i = 0; i < n; i++) {
-      const y1 = ly + h * zw(r, 0.15, 0.95), dx = s2, dy = y1 - y0, l = Math.hypot(dx, dy);
+      const y1 = ly + h * zw(r, 0.15, 0.95), dx = s2, dy = y1 - y0, l = wurzelSumme14(dx, dy);
       L2.geo(new three_module_exports.BoxGeometry(l, 0.04, 0.02).rotateZ(Math.atan2(dy, dx)), lx - w / 2 + s2 * (i + 0.5), (y0 + y1) / 2 - 0.02, lz, farbe3);
       y0 = y1;
     }
@@ -101894,7 +102205,7 @@
         for (const [a, b2] of pkt) L2.box(0.08, 0.08, 0.01, a, b2, 0.065, "#d23c32");
         for (let k = 0; k < 6; k++) {
           const [a1, b1] = pkt[k], [a2, b2] = pkt[k + 6];
-          const l = Math.hypot(a2 - a1, b2 - b1);
+          const l = wurzelSumme14(a2 - a1, b2 - b1);
           L2.geo(new three_module_exports.BoxGeometry(l, 0.025, 0.01).rotateZ(Math.atan2(b2 - b1, a2 - a1)), (a1 + a2) / 2, (b1 + b2) / 2, 0.06, "#e07b2a");
         }
         text2(L2, "Leitstand Filialbelieferung", 0, 2.95, 0.07, 0.22, "#ffffff", "#e07b2a");
@@ -102901,7 +103212,8 @@
     text2(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe3);
   } });
 
-  // src/kit/ostbauten.js
+  // render/src/kit/ostbauten.js
+  var wurzelSumme15 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI8 = Math.PI;
   function R5(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
@@ -103125,7 +103437,7 @@
   }
   function balken3(S, a, b2, br, ho, c) {
     const dx = b2[0] - a[0], dy = b2[1] - a[1], dz = b2[2] - a[2];
-    const hl = Math.hypot(dx, dz), L2 = Math.hypot(hl, dy);
+    const hl = wurzelSumme15(dx, dz), L2 = wurzelSumme15(hl, dy);
     const g = new three_module_exports.BoxGeometry(L2, ho, br);
     g.rotateZ(Math.atan2(dy, hl));
     g.rotateY(Math.atan2(-dz, dx));
@@ -103270,7 +103582,7 @@
     if (x1 - x0 < 3 || z1 - z0 < 3) return;
     boden3(S, x0, z0, x1, z1, o.rasen ?? RASEN3, 0.3, 0.07);
     const A = (x1 - x0) * (z1 - z0), belegt2 = [...o.belegt ?? []], y = 0.37;
-    const frei6 = (x, z2, rad2) => belegt2.every(([bx, bz, br]) => Math.hypot(bx - x, bz - z2) > br + rad2);
+    const frei6 = (x, z2, rad2) => belegt2.every(([bx, bz, br]) => wurzelSumme15(bx - x, bz - z2) > br + rad2);
     const platz = (rad2) => {
       for (let i = 0; i < 30; i++) {
         const x = zw(r, x0 + rad2 + 1, x1 - rad2 - 1), z2 = zw(r, z0 + rad2 + 1, z1 - rad2 - 1);
@@ -103356,7 +103668,7 @@
     const su = zw(r, 0.25, 0.75) * nu, sv = zw(r, 0.55, 0.8) * nv, sr = Math.min(nu, nv) * zw(r, 0.22, 0.32);
     const wf = zw(r, 0.5, 1.1), ph = r() * 6, motiv = o.motiv ?? waehle2(r, ["sonne", "b\xE4nder", "figur"]);
     for (let i = 0; i < nu; i++) for (let k = 0; k < nv; k++) {
-      const dx = i + 0.5 - su, dy = k + 0.5 - sv, dist2 = Math.hypot(dx, dy);
+      const dx = i + 0.5 - su, dy = k + 0.5 - sv, dist2 = wurzelSumme15(dx, dy);
       let ci;
       if (motiv === "sonne" && dist2 < sr) ci = dist2 < sr * 0.55 ? 1 : 0;
       else if (motiv === "sonne" && dist2 < sr * 1.5 && Math.floor(Math.atan2(dy, dx) * 4 / PI8 + 8) % 2 === 0) ci = 1;
@@ -103824,7 +104136,7 @@
       for (let i = 0; i < m; i++) {
         const a = -Phi / 2 + i * dphi, b2 = a + dphi;
         const Pa = [cx + Rr * Math.sin(a), cz - Rr * Math.cos(a)], Pb = [cx + Rr * Math.sin(b2), cz - Rr * Math.cos(b2)];
-        const Ls = Math.hypot(Pb[0] - Pa[0], Pb[1] - Pa[1]);
+        const Ls = wurzelSumme15(Pb[0] - Pa[0], Pb[1] - Pa[1]);
         const F2 = R5(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
         const cols = spalten(Ls, MUSTER.wbs70, 0);
         H = plattenBlock(S, F2, T, { ...o, cols, ext, salz: i, vorn: sk2.vorn, rueck: sk2.hinten, giebel: { rechts: i === m - 1 && sk2.rechts, links: i === 0 && sk2.links } });
@@ -104060,7 +104372,7 @@
       pk.push([u0 + (s2 + 1) * dx, y + (s2 + 1) * st2]);
       pk.push([u0 + s2 * dx, y + (s2 + 1) * st2]);
     }
-    const sauber = pk.filter((q2, i) => i === 0 || Math.hypot(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
+    const sauber = pk.filter((q2, i) => i === 0 || wurzelSumme15(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
     fpoly2(S, F2, sauber, -0.5, 0.15, wand2);
     const m = (u0 + u1) / 2;
     for (const f of [-0.28, 0, 0.28]) {
@@ -104740,7 +105052,7 @@
       const wand2 = (pa, pb, farbe3) => {
         for (const [q0, q1] of [[0, 0.5], [0.5, 1]]) {
           const A = [pa[0] + (pb[0] - pa[0]) * q0, pa[1] + (pb[1] - pa[1]) * q0], B2 = [pa[0] + (pb[0] - pa[0]) * q1, pa[1] + (pb[1] - pa[1]) * q1];
-          const L2 = Math.hypot(B2[0] - A[0], B2[1] - A[1]), F2 = R5(A[0], A[1], (B2[0] - A[0]) / L2, (B2[1] - A[1]) / L2, L2);
+          const L2 = wurzelSumme15(B2[0] - A[0], B2[1] - A[1]), F2 = R5(A[0], A[1], (B2[0] - A[0]) / L2, (B2[1] - A[1]) / L2, L2);
           const ya = h(A[0], A[1]) - 0.35, yb = h(B2[0], B2[1]) - 0.35;
           fpoly2(S, F2, [[0, 0.5], [L2, 0.5], [L2, yb], [0, ya]], -0.08, 0, farbe3);
           const n = Math.max(1, Math.round(L2 / 1.8));
@@ -104944,7 +105256,7 @@
     const farbe3 = o.farbe ?? "#c9cdd0", rr = o.r ?? 0.45;
     for (let i = 0; i < punkte2.length - 1; i++) {
       const [ax, az] = punkte2[i], [bx, bz] = punkte2[i + 1];
-      const L2 = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / L2, nz = (bx - ax) / L2;
+      const L2 = wurzelSumme15(bx - ax, bz - az), nx = -(bz - az) / L2, nz = (bx - ax) / L2;
       for (const s2 of [-0.6, 0.6]) stab2(S, [ax + nx * s2, y, az + nz * s2], [bx + nx * s2, y, bz + nz * s2], rr, farbe3, 8);
       const n = Math.max(1, Math.round(L2 / 7));
       for (let k = 0; k <= n; k++) {
@@ -105522,7 +105834,7 @@
     boden3(S, xi, zi, x0 + w, z0 + d2, "#a8b98a", 0.3, 0.06);
     for (let i = 0; i < 2; i++) {
       const a = [xi + r() * 3, z0 + d2 - 0.5], b2 = [x0 + w - 0.5, zi + 3 + r() * (d2 - 8)];
-      const L2 = Math.hypot(b2[0] - a[0], b2[1] - a[1]), ang = Math.atan2(-(b2[1] - a[1]), b2[0] - a[0]);
+      const L2 = wurzelSumme15(b2[0] - a[0], b2[1] - a[1]), ang = Math.atan2(-(b2[1] - a[1]), b2[0] - a[0]);
       S.box(L2, 0.05, 1, (a[0] + b2[0]) / 2, 0.39, (a[1] + b2[1]) / 2, TRAMPEL, ang);
     }
     for (let i = 0; i < 14; i++) busch3(S, zw(r, xi + 1, x0 + w - 1), zw(r, zi + 1, z0 + d2 - 1), r, zw(r, 0.5, 1.1));
@@ -105741,7 +106053,8 @@
     "slot:brache": brache
   };
 
-  // src/kit/archetypen/ost.js
+  // render/src/kit/archetypen/ost.js
+  var wurzelSumme16 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm3, fixiere: fixiere2, frei: frei2, zelleFrei: zelleFrei2, wasserSpalte: wasserSpalte2, klemm: klemm3, wahlGewichtet: wahlGewichtet2, neueParzelle: neueParzelle2, mergeRand: mergeRand2, freiePosition: freiePosition2, parzellenVon } = PLAN_HILFE;
   var OST_VIERTEL = { magistrale: "zentrum", zentrum: "zentrum", altstadt: "altstadt", barock: "barock", messe: "messe", gruenderzeit: "gruenderzeit", platte: "rand" };
   var OST_VERBOT = /* @__PURE__ */ new Set(["slot:mall", "slot:konkurrenz", "slot:hochhaus", "slot:parkhaus", "slot:tankstelle"]);
@@ -105776,7 +106089,7 @@
     E.ostArt = (i, j) => {
       if ((i === kM - 1 || i === kM) && Math.abs(j - jc) <= 2) return "magistrale";
       if (altKern(i, j)) return "altstadt";
-      const dd = Math.hypot(i - kM - 0.8, (j - jc) * 1.1);
+      const dd = wurzelSumme16(i - kM - 0.8, (j - jc) * 1.1);
       return dd < 2.2 ? "zentrum" : dd < 3.3 ? "gruenderzeit" : "platte";
     };
     ostGrund(E, "sozialistisch");
@@ -105813,7 +106126,7 @@
     E.ostArt = (i, j) => {
       if (i <= kS) return null;
       if ((i === kM - 1 || i === kM) && Math.abs(j - lA) <= 3) return "magistrale";
-      const dd = Math.hypot(i - ostKern.i, j - ostKern.j);
+      const dd = wurzelSumme16(i - ostKern.i, j - ostKern.j);
       if (dd < 2.1 || j === lA - 1 && i >= iT && i < kM) return "zentrum";
       return dd < 3.4 ? "gruenderzeit" : "platte";
     };
@@ -105823,7 +106136,7 @@
     const ostViertel = E.viertel;
     E.viertel = (i, j) => {
       if (i > kS) return ostViertel(i, j);
-      const dd = Math.hypot(i - westKern.i, j - westKern.j);
+      const dd = wurzelSumme16(i - westKern.i, j - westKern.j);
       return dd < 1.5 ? "zentrum" : dd < 3 ? "gruenderzeit" : "nachkrieg";
     };
     E.landmarkVerbot = /* @__PURE__ */ new Set(["slot:mall", "slot:tankstelle"]);
@@ -105897,7 +106210,7 @@
     E.ostArt = (i, j) => {
       if (kern(i, j)) return j === gt + 1 ? "zentrum" : "messe";
       if ((j === gb + 1 || j === gt - 1) && i > gl && i < gr) return "zentrum";
-      const dd = Math.hypot(i - zc.i, j - zc.j);
+      const dd = wurzelSumme16(i - zc.i, j - zc.j);
       return dd < 4.3 ? "gruenderzeit" : "platte";
     };
     ostGrund(E, "messestadt", { gruenderzeit: 0.32 });
@@ -105912,7 +106225,7 @@
     PLAN_HILFE.entwurf(basis3, E);
     const v0 = E.viertel, zc = { ...E.zentrum };
     E.ostArt = (i, j) => {
-      const dd = Math.hypot(i - zc.i, j - zc.j);
+      const dd = wurzelSumme16(i - zc.i, j - zc.j);
       if (dd > (E.T.idx === 2 ? 2.3 : 3)) return "platte";
       const v = v0(i, j);
       return v === "altstadt" || v === "barock" || v === "zentrum" ? "altstadt" : "gruenderzeit";
@@ -105935,7 +106248,7 @@
     E.reihen[jW] = 48;
     nimm3(E, { art: "wasser", form: "fluss", i0: 0, i1: nx - 1, j0: jW, j1: jW, quer: true, keineBruecke: true });
     const zc = { i: (nx - 1) / 2 + zw(r, -0.4, 0.4), j: jW - 3 };
-    const kern = (i, j) => j < jW && Math.hypot(i - zc.i, (j - zc.j) * 1.15) < 2.3;
+    const kern = (i, j) => j < jW && wurzelSumme16(i - zc.i, (j - zc.j) * 1.15) < 2.3;
     const iH = r() < 0.5 ? 0 : nx - 2;
     nimm3(E, { art: "hafen", i0: iH, i1: iH + 1, j0: jW - 1, j1: jW - 1 });
     E.landmarken.push("slot:kirche");
@@ -105951,7 +106264,7 @@
     E.ostArt = (i, j) => {
       if ((j === lM - 1 || j === lM) && Math.abs(i - zc.i) <= 2.6) return "magistrale";
       if (kern(i, j)) return "altstadt";
-      return Math.hypot(i - zc.i, j - zc.j) < (E.T.idx === 2 ? 2.6 : 3.4) ? "gruenderzeit" : "platte";
+      return wurzelSumme16(i - zc.i, j - zc.j) < (E.T.idx === 2 ? 2.6 : 3.4) ? "gruenderzeit" : "platte";
     };
     ostGrund(E, "ostsee_hanse", { altstadt: 0.15, gruenderzeit: 0.3 });
     E.ostEinkauf = "altstadt";
@@ -106333,7 +106646,7 @@
   }
   function nachPlan(E, _H, g) {
     const { bloecke, parzellen, T, typ } = g;
-    const dist2 = (b3) => Math.hypot((b3.i0 + b3.i1) / 2 - E.zentrum.i, (b3.j0 + b3.j1) / 2 - E.zentrum.j);
+    const dist2 = (b3) => wurzelSumme16((b3.i0 + b3.i1) / 2 - E.zentrum.i, (b3.j0 + b3.j1) / 2 - E.zentrum.j);
     const pl2 = bloecke.filter((b3) => b3.art === "platte").sort((a, c) => dist2(c) - dist2(a));
     for (const b3 of pl2.slice(0, 6)) {
       const rects = b3.parzellen.map((id) => parzellen.find((p3) => p3.id === id)).filter(Boolean);
@@ -106435,7 +106748,7 @@
     const n = Math.round(P2.w * P2.d / 34 * ctx.dichte);
     for (let i = 0; i < n; i++) {
       const x = B2.zw(r, P2.x + 1, P2.x + P2.w - 1), z2 = B2.zw(r, P2.z + 1, P2.z + P2.d - 1);
-      if (frei6(x, z2, 0.5) && (!b2.brunnen || Math.hypot(x - b2.brunnen.x, z2 - b2.brunnen.z) > 7)) B2.figur(I, x, y, z2, r);
+      if (frei6(x, z2, 0.5) && (!b2.brunnen || wurzelSumme16(x - b2.brunnen.x, z2 - b2.brunnen.z) > 7)) B2.figur(I, x, y, z2, r);
     }
   }
   function bodenHafen(ctx, b2, r, teile2, B2) {
@@ -106589,7 +106902,8 @@
   });
   registriereArchetyp("ostsee_hanse", { ...GEMEINSAM, name: "Hansestadt Ost", entwurf: ostseeHanse, staedte: { Rostock: { umland: "see" }, Stralsund: { umland: "see" } } });
 
-  // src/kit/nordbauten.js
+  // render/src/kit/nordbauten.js
+  var wurzelSumme17 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI9 = Math.PI;
   function R6(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
@@ -106615,7 +106929,7 @@
   }
   function kanten(poly) {
     return poly.map((a, i) => {
-      const b2 = poly[(i + 1) % poly.length], L2 = Math.hypot(b2[0] - a[0], b2[1] - a[1]);
+      const b2 = poly[(i + 1) % poly.length], L2 = wurzelSumme17(b2[0] - a[0], b2[1] - a[1]);
       return R6(a[0], a[1], (b2[0] - a[0]) / L2, (b2[1] - a[1]) / L2, L2);
     });
   }
@@ -106623,7 +106937,7 @@
   function einruecken(poly, s2) {
     const n = poly.length, L2 = [];
     for (let i = 0; i < n; i++) {
-      const a = poly[i], b2 = poly[(i + 1) % n], l = Math.hypot(b2[0] - a[0], b2[1] - a[1]);
+      const a = poly[i], b2 = poly[(i + 1) % n], l = wurzelSumme17(b2[0] - a[0], b2[1] - a[1]);
       const dx = (b2[0] - a[0]) / l, dz = (b2[1] - a[1]) / l;
       L2.push([a[0] + dz * s2, a[1] - dx * s2, dx, dz]);
     }
@@ -106701,7 +107015,7 @@
   }
   function balken4(S, a, b2, br, ho, c) {
     const dx = b2[0] - a[0], dy = b2[1] - a[1], dz = b2[2] - a[2];
-    const hl = Math.hypot(dx, dz), L2 = Math.hypot(hl, dy);
+    const hl = wurzelSumme17(dx, dz), L2 = wurzelSumme17(hl, dy);
     const g = new three_module_exports.BoxGeometry(L2, ho, br);
     g.rotateZ(Math.atan2(dy, hl));
     g.rotateY(Math.atan2(-dz, dx));
@@ -106709,7 +107023,7 @@
     S.add(g, c);
   }
   function fbalken(S, F2, u0, y0, u1, y1, br, t0, t1, c) {
-    const L2 = Math.hypot(u1 - u0, y1 - y0);
+    const L2 = wurzelSumme17(u1 - u0, y1 - y0);
     const g = new three_module_exports.BoxGeometry(L2, br, t1 - t0);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
@@ -107093,7 +107407,7 @@
       pk.push(...halb, [c, H + G2], ...halb.slice().reverse().map(([u, v]) => [bw - u, v]));
     } else if (typ === "dreieck") pk.push([c, H + G2]);
     pk.push([0, H]);
-    return pk.filter((q2, i) => i === 0 || Math.hypot(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
+    return pk.filter((q2, i) => i === 0 || wurzelSumme17(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
   }
   function giebelHaus(S, scene2, p2, r, o) {
     const { a, b: b2, T, D, typ, wand: wand2, orn, dach: dach3, n, eg, gh } = o;
@@ -107111,7 +107425,7 @@
       const zb = Math.min(bw * 0.5, 4.2);
       o.zwerch = zb;
       return [[bw, H], [c + zb / 2, H], [c + zb / 2, H + 2.7], [c, H + 4.3], [c - zb / 2, H + 2.7], [c - zb / 2, H]];
-    })() : giebelUmriss(typ, bw, H, G2, m), [0, H]].filter((q2, i, arr) => i === 0 || Math.hypot(q2[0] - arr[i - 1][0], q2[1] - arr[i - 1][1]) > 0.01);
+    })() : giebelUmriss(typ, bw, H, G2, m), [0, H]].filter((q2, i, arr) => i === 0 || wurzelSumme17(q2[0] - arr[i - 1][0], q2[1] - arr[i - 1][1]) > 0.01);
     const oe = [];
     const na = Math.max(2, Math.min(4, Math.floor((bw - 0.6) / 2.05))), ax = achsen4(0, bw, (bw - 0.8) / na, 0.4);
     const fb_ = putz2 ? 1.15 : 1.05, fh = 1.85;
@@ -107391,7 +107705,7 @@
       for (const [u, v] of gp) pk.push([g.u0 + u, v]);
     }
     pk.push([0, H]);
-    return pk.filter((q2, i) => i === 0 || Math.hypot(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
+    return pk.filter((q2, i) => i === 0 || wurzelSumme17(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
   }
   var dachUnterGiebel = (G2, m) => G2 * (2 * m + 1) / (2 * m + 2) * 0.93;
   function giebelNischen(u0, bw, H, G2, m, art, fuell, mitFenster = false) {
@@ -107689,7 +108003,7 @@
     const yTop = H0 + st2 * gh + 0.12;
     if (v === "spitz") {
       const [tx, tz] = poly[1], e0 = [poly[0][0] - tx, poly[0][1] - tz], e1 = [poly[2][0] - tx, poly[2][1] - tz];
-      const n0 = Math.hypot(...e0), n1 = Math.hypot(...e1), lk = 3.2;
+      const n0 = wurzelSumme17(...e0), n1 = wurzelSumme17(...e1), lk = 3.2;
       const keil = [[tx, tz], [tx + e1[0] / n1 * lk, tz + e1[1] / n1 * lk], [tx + e0[0] / n0 * lk, tz + e0[1] / n0 * lk]];
       const yK = yTop + 4.5;
       prisma2(S, keil, 0, yK, o.pfeiler);
@@ -108379,7 +108693,7 @@
     } else prisma2(S, [[cx - ra, zC + 0.5], ...chor.slice().reverse().map(([x, z2]) => [x, z2]), [cx + ra, zC + 0.5]].map(([x, z2]) => [x + (cx - x) * 0.04, z2 + (zC - z2) * 0.04]), 0, Hm, dunkler(stein, 0.06));
     const tris = [];
     for (let k = 0; k < 4; k++) {
-      const [ax, az] = chor[k], [bx, bz] = chor[k + 1], L2 = Math.hypot(bx - ax, bz - az);
+      const [ax, az] = chor[k], [bx, bz] = chor[k + 1], L2 = wurzelSumme17(bx - ax, bz - az);
       const F2 = R6(ax, az, (bx - ax) / L2, (bz - az) / L2, L2);
       if (sieht(p2, F2)) kirchWand(S, F2, L2, Hm, { ...o, joch: L2 + 1, pfeiler: false, fb: Math.min(2.6, L2 - 1.4), fries: true });
       tris.push([[ax + (ax - cx) * 0.06, Hm, az + (az - zC) * 0.06], [bx + (bx - cx) * 0.06, Hm, bz + (bz - zC) * 0.06], [cx, Hm + hR, zC]]);
@@ -109273,7 +109587,8 @@
     varianten: NORD_VARIANTEN[k]
   }]));
 
-  // src/kit/archetypen/nord.js
+  // render/src/kit/archetypen/nord.js
+  var wurzelSumme18 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm4, fixiere: fixiere3, frei: frei3, zelleFrei: zelleFrei3, wasserSpalte: wasserSpalte3, klemm: klemm4, wahlGewichtet: wahlGewichtet3, neueParzelle: neueParzelle3, mergeRand: mergeRand3, parzellenVon: parzellenVon2 } = PLAN_HILFE;
   var NORD_VIERTEL = { giebel: "altstadt", fachwerk: "altstadt", kontor: "zentrum", wiederaufbau: "nord_wa", klinker: "gruenderzeit", rand: "rand" };
   function nordGrund(E, typ, o = {}) {
@@ -109288,7 +109603,7 @@
     E.brachen = 0;
     if (!E.landmarken.includes("slot:rathaus")) E.landmarken.push("slot:rathaus");
   }
-  var dist = (i, j, c) => Math.hypot(i - c.i, j - c.j);
+  var dist = (i, j, c) => wurzelSumme18(i - c.i, j - c.j);
   function kirche2(E, i, j, ex = {}) {
     if (!zelleFrei3(E, i, j)) return false;
     const gross2 = ex.variante === "marien" || ex.variante === "doppelturm" || !ex.variante && E.typ !== "mittelstadt";
@@ -109862,7 +110177,8 @@
     }
   });
 
-  // src/kit/mittebauten.js
+  // render/src/kit/mittebauten.js
+  var wurzelSumme19 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI10 = Math.PI;
   function R7(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
@@ -109946,7 +110262,7 @@
     fgeo4(S, F2, g, c);
   }
   function fstrebe(S, F2, u0, y0, u1, y1, br, t0, t1, c) {
-    const L2 = Math.hypot(u1 - u0, y1 - y0);
+    const L2 = wurzelSumme19(u1 - u0, y1 - y0);
     const g = new three_module_exports.BoxGeometry(L2, br, t1 - t0);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
@@ -109977,7 +110293,7 @@
   }
   function balken5(S, a, b2, br, ho, c) {
     const dx = b2[0] - a[0], dy = b2[1] - a[1], dz = b2[2] - a[2];
-    const hl = Math.hypot(dx, dz), L2 = Math.hypot(hl, dy);
+    const hl = wurzelSumme19(dx, dz), L2 = wurzelSumme19(hl, dy);
     const g = new three_module_exports.BoxGeometry(L2, ho, br);
     g.rotateZ(Math.atan2(dy, hl));
     g.rotateY(Math.atan2(-dz, dx));
@@ -110011,7 +110327,7 @@
   function kanten2(pts) {
     return pts.map((a, i) => {
       const b2 = pts[(i + 1) % pts.length];
-      const L2 = Math.hypot(b2[0] - a[0], b2[1] - a[1]);
+      const L2 = wurzelSumme19(b2[0] - a[0], b2[1] - a[1]);
       return R7(a[0], a[1], (b2[0] - a[0]) / L2, (b2[1] - a[1]) / L2, L2);
     });
   }
@@ -110042,7 +110358,7 @@
     const g = dachProfil(lang, quer2, hg, 0.02, achse);
     g.translate(cx, y, cz);
     S.add(g, wandF);
-    const a = Math.atan2(hg, quer2 / 2), sl = Math.hypot(quer2 / 2, hg) + ue;
+    const a = Math.atan2(hg, quer2 / 2), sl = wurzelSumme19(quer2 / 2, hg) + ue;
     for (const s2 of [-1, 1]) {
       const pl2 = new three_module_exports.BoxGeometry(lang + 2 * ue * 0.6, 0.24, sl);
       pl2.rotateX(s2 * a);
@@ -111049,7 +111365,7 @@
       boden5(S, x0 + 3, pz0, x0 + w - 3, pz0 + 2, KIES4, 0.3, 0.11);
       for (const xs of [x0 + 3, x0 + w - 5]) boden5(S, xs, pz0, xs + 2, pz1, KIES4, 0.3, 0.11);
       for (const fx of [(x0 + 5 + cx - 2) / 2, (cx + 2 + x0 + w - 5) / 2]) for (const fz of [(pz0 + 2 + pzm - 1.4) / 2, (pzm + 1.4 + pz1) / 2]) {
-        if (Math.hypot(fx - tx, fz - tz) < 9 || Math.hypot(fx - mx, fz - mz) < 11) {
+        if (wurzelSumme19(fx - tx, fz - tz) < 9 || wurzelSumme19(fx - mx, fz - mz) < 11) {
           blumenbeet(S, r, fx - 5, fz - 0.8, fx + 5, fz + 0.8);
           continue;
         }
@@ -111060,7 +111376,7 @@
       for (const xs of [x0 + 6, cx - 7, cx + 7, x0 + w - 6]) bank4(S, xs, pzm + 2);
       for (let i = 0; i < 10; i++) {
         const bx = zw(r, x0 + 5, x0 + w - 5), bz = zw(r, hz0 + ht + 8, z0 + d2 - 5);
-        if (Math.hypot(bx - tx, bz - tz) > 8 && Math.hypot(bx - mx, bz - mz) > 10 && Math.abs(bx - cx) > 4) baum(S, bx, bz, r, zw(r, 1, 1.35));
+        if (wurzelSumme19(bx - tx, bz - tz) > 8 && wurzelSumme19(bx - mx, bz - mz) > 10 && Math.abs(bx - cx) > 4) baum(S, bx, bz, r, zw(r, 1, 1.35));
       }
       for (let i = 0; i < 4; i++) bank4(S, cx + (i % 2 ? 3 : -3), hz0 + ht + 5 + i * 4, true);
       return { hoehe: hk };
@@ -111886,7 +112202,7 @@
       for (let i = 0; i < n; i++) {
         const a0 = PI10 - i * PI10 / n, a1 = PI10 - (i + 1) * PI10 / n;
         const p0 = [cx2 + Math.cos(a0) * ra, wz2 + Math.sin(a0) * ra], p1 = [cx2 + Math.cos(a1) * ra, wz2 + Math.sin(a1) * ra];
-        const L22 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), F3 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
+        const L22 = wurzelSumme19(p1[0] - p0[0], p1[1] - p0[1]), F3 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
         const Hi = H - (i > 6 ? 4 + (i - 6) * 3 : 0);
         const loch = [{ u0: L22 / 2 - 1.2, u1: L22 / 2 + 1.2, v0: 2.5, v1: 10, bogen: true }];
         if (Hi > 17) loch.push({ u0: L22 / 2 - 1, u1: L22 / 2 + 1, v0: 12.5, v1: 18, bogen: true });
@@ -111900,7 +112216,7 @@
         for (let i = 0; i < 5; i++) {
           const a0 = PI10 - i * PI10 / 5, a1 = PI10 - (i + 1) * PI10 / 5;
           const p0 = [ax + Math.cos(a0) * rs, wz2 + Math.sin(a0) * rs], p1 = [ax + Math.cos(a1) * rs, wz2 + Math.sin(a1) * rs];
-          const L22 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), F3 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
+          const L22 = wurzelSumme19(p1[0] - p0[0], p1[1] - p0[1]), F3 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
           fwand2(S, F3, -0.05, L22 + 0.05, 0, 9, -1, 0, c, [{ u0: L22 / 2 - 0.7, u1: L22 / 2 + 0.7, v0: 2.5, v1: 6.5, bogen: true }]);
           fb4(S, F3, -0.05, L22 + 0.05, 7.2, 7.8, -1.1, 0.1, ziegel);
           ruinenKrone(S, F3, 0, L22, 9, r, c, -1, 0, 1.5);
@@ -112811,7 +113127,7 @@
     return { hoehe: hmax };
   }
   function gelaender(S, a, b2, y, c = "#e8c547", ab = 1.6) {
-    const L2 = Math.hypot(b2[0] - a[0], b2[1] - a[1]), n = Math.max(1, Math.round(L2 / ab));
+    const L2 = wurzelSumme19(b2[0] - a[0], b2[1] - a[1]), n = Math.max(1, Math.round(L2 / ab));
     for (let i = 0; i <= n; i++) {
       const t = i / n;
       S.box(0.08, 1.1, 0.08, a[0] + (b2[0] - a[0]) * t, y + 0.55, a[1] + (b2[1] - a[1]) * t, c);
@@ -113100,7 +113416,8 @@
     }, oberstadtRoh))
   };
 
-  // src/kit/archetypen/mitte.js
+  // render/src/kit/archetypen/mitte.js
+  var wurzelSumme20 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm5, fixiere: fixiere4, frei: frei4, wasserSpalte: wasserSpalte4, klemm: klemm5, wahlGewichtet: wahlGewichtet4, neueParzelle: neueParzelle4, mergeRand: mergeRand4, parzellenVon: parzellenVon3 } = PLAN_HILFE;
   var breit = (E, i, w) => {
     if (i >= 0 && i < E.spalten.length) E.spalten[i] = Math.max(E.spalten[i], Math.ceil(w / 2) * 2);
@@ -113119,7 +113436,7 @@
     E.fwAnteil = E.o.fw ?? 1;
     E.landmarkVerbot = /* @__PURE__ */ new Set([...E.landmarkVerbot ?? [], "slot:mall"]);
   }
-  var abst = (zc) => (i, j) => Math.hypot(i - zc.i, j - zc.j);
+  var abst = (zc) => (i, j) => wurzelSumme20(i - zc.i, j - zc.j);
   var SLOT_MAX = {
     "slot:mitte_skyline": { ensemble: [110, 90], alle: [60, 56] },
     "slot:mitte_fachwerk": { platz: [60, 54], roemer: [64, 32], zeile: [60, 30], rathaus: [50, 36] },
@@ -113624,7 +113941,7 @@
     const n = Math.round(b2.w * b2.d / 70);
     for (let i = 0; i < n; i++) {
       const x = B2.zw(r, b2.x + 2.5, b2.x + b2.w - 2.5), z2 = B2.zw(r, b2.z + 2.5, b2.z + b2.d - 2.5);
-      if (belegt2(x, z2) || aufWeg(x, z2) || Math.hypot(x - cx, z2 - cz) < 9) continue;
+      if (belegt2(x, z2) || aufWeg(x, z2) || wurzelSumme20(x - cx, z2 - cz) < 9) continue;
       B2.baumSetzen(I, waehle2(r, ["linde", "kastanie", "kugel", "platane"]), x, y, z2, r, B2.zw(r, 0.8, 1.05));
     }
     for (let u = b2.x + 6; u < b2.x + b2.w - 4; u += 12) I.setze("bank", u, y + 0.04, cz + 2.4, Math.PI);
@@ -113834,7 +114151,7 @@
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -114430,7 +114747,7 @@
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -114453,7 +114770,8 @@
     }
   };
 
-  // src/kit/suedbauten.js
+  // render/src/kit/suedbauten.js
+  var wurzelSumme21 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI11 = Math.PI;
   function R8(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
@@ -114544,7 +114862,7 @@
     fgeo5(S, F2, g, c);
   }
   function fdiag(S, F2, u0, y0, u1, y1, b2, t0, t1, c) {
-    const L2 = Math.hypot(u1 - u0, y1 - y0);
+    const L2 = wurzelSumme21(u1 - u0, y1 - y0);
     const g = new three_module_exports.BoxGeometry(L2, b2, t1 - t0);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
@@ -115096,7 +115414,7 @@
   }
   function krabben(S, F2, pkt, t, c, abst2 = 1.8) {
     for (let i = 0; i < pkt.length - 1; i++) {
-      const [a0, a1] = pkt[i], [b0, b1] = pkt[i + 1], L2 = Math.hypot(b0 - a0, b1 - a1), n = Math.floor(L2 / abst2);
+      const [a0, a1] = pkt[i], [b0, b1] = pkt[i + 1], L2 = wurzelSumme21(b0 - a0, b1 - a1), n = Math.floor(L2 / abst2);
       for (let k = 1; k <= n; k++) {
         const q2 = k / (n + 1);
         fb5(S, F2, a0 + (b0 - a0) * q2 - 0.22, a0 + (b0 - a0) * q2 + 0.22, a1 + (b1 - a1) * q2, a1 + (b1 - a1) * q2 + 0.4, t - 0.2, t + 0.25, c);
@@ -117036,7 +117354,7 @@
       for (let i = 0; i < 5; i++) {
         const a = -PI11 / 2 + (i + 0.5) * PI11 / 5, nx = Math.sin(a), nz = Math.cos(a) / 0.75;
         if (!sicht2(p2, nx, nz)) continue;
-        const px2 = cx + Math.sin(a) * rr, pz4 = cz + Math.cos(a) * rr * 0.75, L2 = Math.hypot(nx, nz);
+        const px2 = cx + Math.sin(a) * rr, pz4 = cz + Math.cos(a) * rr * 0.75, L2 = wurzelSumme21(nx, nz);
         const Fo = R8(px2 - nz / L2 * 1.2, pz4 + nx / L2 * 1.2, nz / L2, -nx / L2, 2.4);
         fbogen(S, Fo, 1.2, 1, 1.6, 4, -0.2, 0.1, GLAS10);
         fenster6(S, Fo, 1.2, 6.6, 1.4, 2.4, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, sims: false });
@@ -117060,7 +117378,7 @@
       for (let i = 0; i < m; i++) {
         const a = -Phi / 2 + i * dphi, b2 = a + dphi;
         const Pa = [cx + Rr * Math.sin(a), cz - Rr * Math.cos(a)], Pb = [cx + Rr * Math.sin(b2), cz - Rr * Math.cos(b2)];
-        const Ls = Math.hypot(Pb[0] - Pa[0], Pb[1] - Pa[1]);
+        const Ls = wurzelSumme21(Pb[0] - Pa[0], Pb[1] - Pa[1]);
         const F2 = R8(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
         const wand2 = i % 2 ? c.wand : heller(c.wand, 0.02);
         fb5(S, F2, -ext, Ls + ext, 0, H2, -T2, 0, wand2);
@@ -117667,7 +117985,8 @@
     "slot:sued_fluss": slot3(flussRoh, [40, 34], null, { hang: () => true })
   };
 
-  // src/kit/archetypen/sued.js
+  // render/src/kit/archetypen/sued.js
+  var wurzelSumme22 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm6, fixiere: fixiere5, frei: frei5, zelleFrei: zelleFrei4, wasserSpalte: wasserSpalte5, klemm: klemm6, wahlGewichtet: wahlGewichtet5, neueParzelle: neueParzelle5, mergeRand: mergeRand5, parzellenVon: parzellenVon4, freiePosition: freiePosition3, ueberlappt: ueberlappt2 } = PLAN_HILFE;
   var PI12 = Math.PI;
   var KIES6 = "#ddd3bc";
@@ -117744,7 +118063,7 @@
       const cx = (x0 + px1) / 2, cz = (z0 + pz1) / 2, hx = (px1 - x0) / 2, hz = (pz1 - z0) / 2;
       const ramp = Math.max(8, Math.min(x1 - px1, z1 - pz1));
       h = (x, z2) => {
-        const e = Math.hypot(Math.max(0, Math.abs(x - cx) - hx), Math.max(0, Math.abs(z2 - cz) - hz));
+        const e = wurzelSumme22(Math.max(0, Math.abs(x - cx) - hx), Math.max(0, Math.abs(z2 - cz) - hz));
         return 0.3 + Hm * glatt2(1 - e / ramp);
       };
       P2 = { x0, z0, x1: px1, z1: pz1, y: 0.3 + Hm };
@@ -117957,7 +118276,7 @@
     for (let k = 0; k < 3; k++) S.box(1.6, 3, 1.6, cx, y + H + 12 + k * 9, cz, k % 2 ? "#d23c32" : "#f1f1ee");
     for (let q2 = 0; q2 < 10; q2++) {
       const tx = zw(r, P2.x0 + 1, P2.x1 - 1), tz = zw(r, P2.z0 + 1, P2.z1 - 1);
-      if (Math.hypot(tx - cx, tz - cz) > 7) nadelbaum2(S, tx, P2.hoehe(tx, tz) - 0.1, tz, r, 1);
+      if (wurzelSumme22(tx - cx, tz - cz) > 7) nadelbaum2(S, tx, P2.hoehe(tx, tz) - 0.1, tz, r, 1);
     }
     return { hoehe: y + H + 44 };
   }
@@ -118250,12 +118569,12 @@
     const farben = ["#f2efe6", "#2f6f8f", "#d0453a", "#3f7d56", "#e8b53c"];
     for (let k = 0, v = 0; k < n * 3 && v < n; k++) {
       const x = B2.zw(r, P2.x + 4, P2.x + P2.w - 4), z2 = b2.form === "strasse" ? k % 2 ? P2.z + P2.d * 0.3 : P2.z + P2.d * 0.72 : B2.zw(r, P2.z + 4, P2.z + P2.d - 4);
-      if (!frei6(x, z2, 3) || Math.hypot(x - cx, z2 - cz) < 7) continue;
+      if (!frei6(x, z2, 3) || wurzelSumme22(x - cx, z2 - cz) < 7) continue;
       marktstand3(S, x, z2, y, waehle2(r, farben), r);
       v++;
     }
     if (b2.form !== "viktualien" && P2.w * P2.d > 1200) for (let x = P2.x + 5; x < P2.x + P2.w - 4; x += 8) for (let z2 = P2.z + 5; z2 < P2.z + P2.d - 4; z2 += 8) {
-      if (Math.hypot(x - cx, z2 - cz) < 11 || !frei6(x, z2, 3)) continue;
+      if (wurzelSumme22(x - cx, z2 - cz) < 11 || !frei6(x, z2, 3)) continue;
       B2.baumSetzen(I, "kugel", x, y, z2, r, 0.75);
     }
     for (let x = P2.x + 5; x < P2.x + P2.w - 4; x += 10) if (frei6(x, P2.z + P2.d - 3, 2.5)) B2.baumSetzen(I, b2.form === "strasse" ? "linde" : "kastanie", x, y, P2.z + P2.d - 3, r, 0.8);
@@ -118447,7 +118766,7 @@
   function kernViertel(E, kern, rad2) {
     return (i, j) => {
       if (kern(i, j)) return "altstadt";
-      const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+      const dd = wurzelSumme22(i - E.zentrum.i, j - E.zentrum.j);
       return dd < rad2 ? "gruenderzeit" : "rand";
     };
   }
@@ -118473,13 +118792,13 @@
     nimm6(E, { art: "suedkirche", i0: c - 1, i1: c - 1, j0: ja, j1: ja, kirchArt: "zwiebel", variante: "doppelturm", seiten: ["-z", "-x"] });
     nimm6(E, { art: "suedmarkt", i0: c + 1, i1: c + 1, j0: ja + 1, j1: ja + 1, form: "viktualien", maibaum: true, biergarten: true, seiten: ["-x", "-z"] });
     E.zentrum = { i: c + 0.3, j: ja + 0.2 };
-    const kern = (i, j) => i < iI && Math.hypot(i - c, (j - ja - 0.3) * 1.1) < 2;
+    const kern = (i, j) => i < iI && wurzelSumme22(i - c, (j - ja - 0.3) * 1.1) < 2;
     E.versatz = (k, j) => kern(k - 0.5, j) ? 10 : 0;
     E.einschub = (i, j) => kern(i, j) ? 0.3 : 0;
     E.durchgang = 0.3;
     E.viertel = (i, j) => {
       if (kern(i, j)) return "altstadt";
-      const dd = Math.hypot(i - c, j - ja);
+      const dd = wurzelSumme22(i - c, j - ja);
       return dd < (i > iI ? 4.6 : 3.9) ? "gruenderzeit" : "nachkrieg";
     };
     E.landmarken.push("slot:bahnhof");
@@ -118518,7 +118837,7 @@
     nimmWennFrei(E, { art: "suedkirche", i0: ki, i1: ki, j0: kj, j1: kj, seiten: ["-z", "-x"], ...kir });
     E.zentrum = { i: c + 0.5, j: jM + 0.7 };
     const zc = { ...E.zentrum };
-    const kern = (i, j) => Math.hypot(i - zc.i, (j - zc.j) * 0.95) < 2.1;
+    const kern = (i, j) => wurzelSumme22(i - zc.i, (j - zc.j) * 0.95) < 2.1;
     E.versatz = (k, j) => kern(k - 0.5, j) ? 14 : 5;
     E.einschub = (i, j) => kern(i, j) ? 0.35 : 0.08;
     E.durchgang = 0.35;
@@ -118586,10 +118905,10 @@
       E.zentrum = { i: c + 0.5, j: jM + 0.7 };
     }
     const zc = { ...E.zentrum };
-    const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 1.9;
+    const kern = (i, j) => wurzelSumme22(i - zc.i, j - zc.j) < 1.9;
     E.versatz = (k, j) => kern(k - 0.5, j) && st2 !== "erlangen" ? 12 : 0;
     E.einschub = (i, j) => kern(i, j) && st2 !== "erlangen" ? 0.3 : 0;
-    E.viertel = (i, j) => kern(i, j) ? E.barockStadt ? "barock" : "altstadt" : Math.hypot(i - zc.i, j - zc.j) < 3.6 ? "gruenderzeit" : "rand";
+    E.viertel = (i, j) => kern(i, j) ? E.barockStadt ? "barock" : "altstadt" : wurzelSumme22(i - zc.i, j - zc.j) < 3.6 ? "gruenderzeit" : "rand";
   }
   function nuernberg(E) {
     raster3(E, 0.4);
@@ -118618,7 +118937,7 @@
     E.versatz = (k, j) => imK(k - 0.5, j) && k > K3.i0 && k <= K3.i1 ? 12 : 0;
     E.einschub = (i, j) => imK(i, j) ? 0.3 : 0;
     E.durchgang = 0.35;
-    E.viertel = (i, j) => imK(i, j) ? "altstadt" : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 4.6 ? "gruenderzeit" : "rand";
+    E.viertel = (i, j) => imK(i, j) ? "altstadt" : wurzelSumme22(i - E.zentrum.i, j - E.zentrum.j) < 4.6 ? "gruenderzeit" : "rand";
     E.landmarken.push("slot:bahnhof");
   }
   function wuerzburg(E) {
@@ -118639,10 +118958,10 @@
     nimm6(E, { art: "suedkirche", i0: iM + 2, i1: iM + 2, j0: 3, j1: 3, kirchArt: "romanisch", seiten: ["-z", "-x"] });
     nimmWennFrei(E, { art: "suedmarkt", i0: iM + 1, i1: iM + 1, j0: 4, j1: 4, form: "platz", seiten: ["-z", "-x"] });
     E.zentrum = { i: iM + 2, j: 4.4 };
-    const kern = (i, j) => i > iM && Math.hypot(i - iM - 2, j - 3.8) < 2;
+    const kern = (i, j) => i > iM && wurzelSumme22(i - iM - 2, j - 3.8) < 2;
     E.versatz = (k, j) => kern(k - 0.5, j) ? 10 : 0;
     E.einschub = (i, j) => kern(i, j) ? 0.25 : 0;
-    E.viertel = (i, j) => kern(i, j) ? "barock" : i < iM ? "altstadt" : Math.hypot(i - iM - 2, j - 4) < 3.8 ? "gruenderzeit" : "rand";
+    E.viertel = (i, j) => kern(i, j) ? "barock" : i < iM ? "altstadt" : wurzelSumme22(i - iM - 2, j - 4) < 3.8 ? "gruenderzeit" : "rand";
   }
   function bamberg(E) {
     raster3(E, 0.45);
@@ -118658,7 +118977,7 @@
     gross(E, iA + 1, 2, 66, 60);
     nimm6(E, { art: "suedmarkt", i0: iA + 1, i1: iA + 1, j0: 2, j1: 2, form: "platz", seiten: ["-z", "-x"] });
     E.zentrum = { i: iA + 1, j: 3 };
-    E.viertel = (i, j) => i < iA ? "barock" : i === iA + 1 ? "altstadt" : Math.hypot(i - iA - 1, j - 3) < 3 ? "gruenderzeit" : "rand";
+    E.viertel = (i, j) => i < iA ? "barock" : i === iA + 1 ? "altstadt" : wurzelSumme22(i - iA - 1, j - 3) < 3 ? "gruenderzeit" : "rand";
     E.versatz = (k, j) => 6 * (j > 0 ? 1 : 0);
   }
   function schwaben(E) {
@@ -118719,12 +119038,12 @@
     nimmWennFrei(E, { art: "suedmarkt", i0: mi, i1: mi, j0: mj, j1: mj, form: st2 === "ludwigsburg" ? "platz" : "bw", seiten: ["-z", "-x"] });
     E.zentrum = { i: mi + 0.4, j: mj + 0.6 };
     const zc = { ...E.zentrum };
-    const kern = (i, j) => Math.hypot(i - zc.i, (j - zc.j) * 0.9) < (E.T.idx === 2 ? 1.9 : 2.3);
+    const kern = (i, j) => wurzelSumme22(i - zc.i, (j - zc.j) * 0.9) < (E.T.idx === 2 ? 1.9 : 2.3);
     const regel = st2 === "ludwigsburg";
     E.versatz = (k, j) => regel ? 0 : kern(k - 0.5, j) ? 16 : 6;
     E.einschub = (i, j) => regel ? 0 : kern(i, j) ? 0.4 : 0.1;
     E.durchgang = 0.4;
-    E.viertel = (i, j) => kern(i, j) ? regel ? "barock" : E.nachkrieg && Math.hypot(i - zc.i, j - zc.j) > 1.2 ? "zentrum" : "altstadt" : Math.hypot(i - zc.i, j - zc.j) < 3.4 ? "gruenderzeit" : "rand";
+    E.viertel = (i, j) => kern(i, j) ? regel ? "barock" : E.nachkrieg && wurzelSumme22(i - zc.i, j - zc.j) > 1.2 ? "zentrum" : "altstadt" : wurzelSumme22(i - zc.i, j - zc.j) < 3.4 ? "gruenderzeit" : "rand";
   }
   function stuttgart(E) {
     raster3(E, 0.2);
@@ -118746,7 +119065,7 @@
     E.landmarken.push("slot:bahnhof");
     E.zentrum = { i: c - 1, j: 5 };
     E.viertel = (i, j) => {
-      const dd = Math.hypot(i - c + 1, j - 5);
+      const dd = wurzelSumme22(i - c + 1, j - 5);
       return dd < 1.6 ? "zentrum" : dd < 2.2 ? "altstadt" : dd < 4.4 ? "gruenderzeit" : "nachkrieg";
     };
     E.versatz = (k, j) => j >= 2 ? 6 : 0;
@@ -118775,7 +119094,7 @@
       nimmWennFrei(E, { art: "park", i0: nx - 2, i1: nx - 2, j0: Math.floor(nz / 2), j1: Math.floor(nz / 2), garten: true });
       E.landmarken.push("slot:wasserturm");
       E.zentrum = { i: (nx - 1) / 2 + 0.3, j: (nz - 1) / 2 };
-      E.viertel = (i, j) => j === 1 && i >= iS && i <= iS + 2 ? "barock" : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 1.6 ? "zentrum" : "gruenderzeit";
+      E.viertel = (i, j) => j === 1 && i >= iS && i <= iS + 2 ? "barock" : wurzelSumme22(i - E.zentrum.i, j - E.zentrum.j) < 1.6 ? "zentrum" : "gruenderzeit";
       E.quadrate = true;
       return;
     }
@@ -118798,7 +119117,7 @@
     gross(E, c + 1, 4, 70, 60);
     nimmWennFrei(E, { art: "suedkirche", i0: c + 1, i1: c + 1, j0: 4, j1: 4, kirchArt: "barock", seiten: ["-z", "+x"] });
     E.zentrum = { i: c + 0.5, j: 4.4 };
-    E.viertel = (i, j) => j <= 4 && Math.abs(i - c - 0.5) < 2.2 ? "barock" : Math.hypot(i - c - 0.5, j - 4) < 3.8 ? "gruenderzeit" : "rand";
+    E.viertel = (i, j) => j <= 4 && Math.abs(i - c - 0.5) < 2.2 ? "barock" : wurzelSumme22(i - c - 0.5, j - 4) < 3.8 ? "gruenderzeit" : "rand";
     E.diagonalen = ({ bloecke }) => {
       const res = bloecke.find((q2) => q2.art === "residenz");
       if (!res) return [];
@@ -118840,7 +119159,7 @@
       E.landmarken.push("slot:markthalle");
       E.zentrum = { i: c + 0.6, j: 3.1 };
       const zc2 = { ...E.zentrum };
-      const kern2 = (i, j) => Math.hypot(i - zc2.i, j - zc2.j) < 1.9;
+      const kern2 = (i, j) => wurzelSumme22(i - zc2.i, j - zc2.j) < 1.9;
       E.versatz = (k, j) => kern2(k - 0.5, j) ? 14 : 4;
       E.einschub = (i, j) => kern2(i, j) ? 0.35 : 0;
       E.viertel = kernViertel(E, kern2, 3.2);
@@ -118856,7 +119175,7 @@
     E.baechle = true;
     E.zentrum = { i: c + 0.5, j: jm + 0.7 };
     const zc = { ...E.zentrum };
-    const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 2;
+    const kern = (i, j) => wurzelSumme22(i - zc.i, j - zc.j) < 2;
     E.versatz = (k, j) => kern(k - 0.5, j) ? 12 : 4;
     E.einschub = (i, j) => kern(i, j) ? 0.3 : 0;
     E.viertel = kernViertel(E, kern, 3.8);
@@ -118889,7 +119208,7 @@
       E.zentrum = { i: c + 0.4, j: 3.6 };
     }
     const zc = { ...E.zentrum };
-    const kern = (i, j) => Math.hypot(i - zc.i, j - zc.j) < 1.8;
+    const kern = (i, j) => wurzelSumme22(i - zc.i, j - zc.j) < 1.8;
     E.versatz = (k, j) => kern(k - 0.5, j) ? 12 : 4;
     E.einschub = (i, j) => kern(i, j) ? 0.3 : 0;
     E.viertel = kernViertel(E, kern, 2.7);
@@ -118899,7 +119218,7 @@
     const { rb } = ctx;
     const v = b2.viertel, slots = ctx.einkaufSlots.length;
     const einkauf = slots > 0 || !!E.einkaufKern?.(b2.i0, b2.j0);
-    if (E.voralpenRand && !einkauf && (v === "rand" || v === "nachkrieg") && b2.w >= 62 && b2.d >= 58 && Math.hypot(b2.i0 - E.zentrum.i, b2.j0 - E.zentrum.j) > 3.2) {
+    if (E.voralpenRand && !einkauf && (v === "rand" || v === "nachkrieg") && b2.w >= 62 && b2.d >= 58 && wurzelSumme22(b2.i0 - E.zentrum.i, b2.j0 - E.zentrum.j) > 3.2) {
       voralpenBlock(ctx, E, b2);
       return true;
     }
@@ -119093,7 +119412,8 @@
   });
   registriereArchetyp("alpenrand", { ...GEMEINSAM4, name: "Alpenrand", entwurf: alpenrand, staedte: { Kempten: { stadt: "kempten" }, Rosenheim: { stadt: "rosenheim" } } });
 
-  // src/kit/archetypen/west.js
+  // render/src/kit/archetypen/west.js
+  var wurzelSumme23 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm7, fixiere: fixiere6, zelleFrei: zelleFrei5, klemm: klemm7, wahlGewichtet: wahlGewichtet6, neueParzelle: neueParzelle6, mergeRand: mergeRand6, parzellenVon: parzellenVon5, freiePosition: freiePosition4, intervalleMinus: intervalleMinus2, LINIEN: LINIEN2, HAUPTLICH: HAUPTLICH2 } = PLAN_HILFE;
   LINIEN2.schnellweg = { breite: 27, gehweg: 1.5, mittel: 1.2 };
   HAUPTLICH2.add("schnellweg");
@@ -119239,7 +119559,7 @@
     if (!klein && o.schnellweg !== false && jR === null) E.xTyp[jI] = "schnellweg";
     E.zentrum = { i: ci, j: cj };
     const nKonzern = o.konzern ?? (klein ? 0 : 1);
-    const konzernZellen = [[ci - 1, cj - 1], [ci + 2, cj], [ci - 1, cj + 2], [ci + 2, cj - 1], [ci + 1, cj + 2]].sort(() => r() - 0.5);
+    const konzernZellen = mische(r, [[ci - 1, cj - 1], [ci + 2, cj], [ci - 1, cj + 2], [ci + 2, cj - 1], [ci + 1, cj + 2]]);
     E.ruhrKonzern = [];
     for (let k = 0, n = 0; k < konzernZellen.length && n < nKonzern; k++) {
       const [qi, qj] = konzernZellen[k];
@@ -119251,7 +119571,7 @@
     }
     const ksZufall = waehle2(r, ["romanisch", "hallenkirche"]);
     if (!o.kern60) {
-      for (const [qi, qj] of [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]].sort(() => r() - 0.5)) if (istFrei(E, qi, qi, qj, qj)) {
+      for (const [qi, qj] of mische(r, [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]])) if (istFrei(E, qi, qi, qj, qj)) {
         nimm7(E, { art: "kirche", i0: qi, i1: qi, j0: qj, j1: qj, seiten: ["-z", "-x", "+x"], kirchStil: o.kirchStil ?? ksZufall });
         E.landmarken.push("slot:kirche");
         break;
@@ -119267,10 +119587,10 @@
     E.versatz = () => 0;
     const zc = { i: ci + 0.5, j: cj + 0.5 };
     E.viertel = (ii, jj) => {
-      const dd = Math.hypot(ii - zc.i, (jj - zc.j) * 1.1);
+      const dd = wurzelSumme23(ii - zc.i, (jj - zc.j) * 1.1);
       if (o.altstadtRest && dd < 0.9) return "altstadt";
       if (dd < (o.kern60 ? 2.4 : 1.7)) return "ruhr60";
-      if (!klein && Math.hypot(ii - nb.i - 0.5, jj - nb.j) < 1.4) return "stadtteil";
+      if (!klein && wurzelSumme23(ii - nb.i - 0.5, jj - nb.j) < 1.4) return "stadtteil";
       if (o.kern60) return "nachkrieg";
       return dd < 3.1 ? "gruenderzeit" : "nachkrieg";
     };
@@ -119398,7 +119718,7 @@
     E.viertel = (i, j) => {
       if (jR !== null && j > jR) return "rheingruender";
       if (alt(i, j)) return "rheinalt";
-      const dd = Math.hypot(i - zc.i, j - zc.j);
+      const dd = wurzelSumme23(i - zc.i, j - zc.j);
       if (dd < (o.fuenfziger ? 2.2 : 1.4)) return o.fuenfziger ? "rhein50" : "zentrum";
       return dd < (metro ? 3.4 : 3) ? "rheingruender" : "nachkrieg";
     };
@@ -119498,7 +119818,7 @@
     E.durchgang = 0.3;
     const zc = E.zentrum;
     E.viertel = (i, j) => {
-      const dd = Math.hypot(i - zc.i, (j - zc.j) * 1.3);
+      const dd = wurzelSumme23(i - zc.i, (j - zc.j) * 1.3);
       if (dd < 1.4) return "bergkern";
       if (Math.abs(j - jW) <= 1) return "bergtal";
       return "berghang";
@@ -120144,7 +120464,8 @@
     }
   });
 
-  // src/kit/stadt.js
+  // render/src/kit/stadt.js
+  var wurzelSumme24 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var YG = 0.32;
   var WASSER_Y = -2.2;
   var F = {
@@ -120920,7 +121241,7 @@
       for (const [dx, dz, ry] of [[-7.5, 0, Math.PI / 2], [7.5, 0, -Math.PI / 2], [0, 7.5, Math.PI], [0, -7.5, 0]]) I.setze("bank", k.x + dx, 0.29, k.z + dz, ry);
       for (let i = 0; i < k.bx * k.bz / 30 * ctx.dichte; i++) {
         const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z2 = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1);
-        if (Math.hypot(x - k.x, z2 - k.z) > 6) figur4(I, x, 0.29, z2, r);
+        if (wurzelSumme24(x - k.x, z2 - k.z) > 6) figur4(I, x, 0.29, z2, r);
       }
       return;
     }
@@ -121296,7 +121617,7 @@
   function baumraster(ctx, P2, y, r, hinder, cx, cz, frei0 = 9, ab = 8) {
     if (P2.w * P2.d < 1200) return;
     for (let x = P2.x + 5; x < P2.x + P2.w - 4; x += ab) for (let z2 = P2.z + 5; z2 < P2.z + P2.d - 4; z2 += ab) {
-      if (Math.hypot(x - cx, z2 - cz) < frei0 || hinder.some((p2) => imRechteck(x, z2, p2, 3.5))) continue;
+      if (wurzelSumme24(x - cx, z2 - cz) < frei0 || hinder.some((p2) => imRechteck(x, z2, p2, 3.5))) continue;
       baumSetzen(ctx.I, "kugel", x, y, z2, r, 0.75, true);
     }
   }
@@ -121308,7 +121629,7 @@
     const cx = P2.x + P2.w * 0.5, cz = P2.z + P2.d * 0.5;
     const denkmalMitte = hinder.some((p2) => imRechteck(cx, cz, p2, 6));
     if (!denkmalMitte) brunnen3(S, cx, cz, y, P2.w < 40 ? 0.8 : 1);
-    const frei6 = (x, z2, rad2) => !hinder.some((p2) => imRechteck(x, z2, p2, rad2)) && Math.hypot(x - cx, z2 - cz) > 7;
+    const frei6 = (x, z2, rad2) => !hinder.some((p2) => imRechteck(x, z2, p2, rad2)) && wurzelSumme24(x - cx, z2 - cz) > 7;
     const quer2 = P2.w >= P2.d;
     const lang = quer2 ? P2.w : P2.d, kurz = quer2 ? P2.d : P2.w;
     const reihen = kurz > 34 ? [5, kurz - 9] : [5];
@@ -121326,7 +121647,7 @@
     const n = Math.round(P2.w * P2.d / 60 * ctx.dichte);
     for (let i = 0; i < n; i++) {
       const x = zw(r, P2.x + 1, P2.x + P2.w - 1), z2 = zw(r, P2.z + 1, P2.z + P2.d - 1);
-      if (!denkmalMitte && Math.hypot(x - cx, z2 - cz) < 4.6) continue;
+      if (!denkmalMitte && wurzelSumme24(x - cx, z2 - cz) < 4.6) continue;
       if (hinder.some((p2) => imRechteck(x, z2, p2, 0.4))) continue;
       figur4(I, x, y, z2, r);
     }
@@ -121876,7 +122197,7 @@
     S.add(rg2, F.weg);
     const diagonalen = [[x0, z0], [x1, z0], [x0, z1], [x1, z1]];
     for (const [ex, ez] of diagonalen) {
-      const len = Math.hypot(cx - ex, cz - ez) - 3;
+      const len = wurzelSumme24(cx - ex, cz - ez) - 3;
       S.box(len, 0.05, 3, (ex + cx) / 2, y + 0.025, (ez + cz) / 2, F.weg, Math.atan2(-(cz - ez), cx - ex));
     }
     ellipse2(S, cx, cz, 7, 7, y, y + 0.06, F.weg);
@@ -121903,9 +122224,9 @@
       for (const [ex, ez] of diagonalen) {
         const dx = cx - ex, dz = cz - ez, l2 = dx * dx + dz * dz;
         const t = klemm8(((x - ex) * dx + (z2 - ez) * dz) / l2, 0, 1);
-        if (Math.hypot(x - ex - t * dx, z2 - ez - t * dz) < 3.2) return true;
+        if (wurzelSumme24(x - ex - t * dx, z2 - ez - t * dz) < 3.2) return true;
       }
-      if (Math.hypot(x - cx, z2 - cz) < 9) return true;
+      if (wurzelSumme24(x - cx, z2 - cz) < 9) return true;
       if (((x - tx) / (trx + 3)) ** 2 + ((z2 - tz) / (trz + 3)) ** 2 < 1) return true;
       if (Math.abs(x - sx) < 7 && Math.abs(z2 - sz) < 6) return true;
       if (hinder.some((p2) => imRechteck(x, z2, p2, 3))) return true;
@@ -122025,7 +122346,7 @@
     }
     if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze("olmastSeite", x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
     const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
-    const frei6 = [...gleisZ].sort(() => r() - 0.5).slice(0, zuege);
+    const frei6 = mische(r, gleisZ).slice(0, zuege);
     for (const gz2 of frei6) {
       const wagen2 = Math.floor(zw(r, 3, 6.9));
       const [ga, gb] = abschnitte(gz2).sort((p2, q2) => q2[1] - q2[0] - (p2[1] - p2[0]))[0] ?? [xa, xb];
@@ -122536,7 +122857,8 @@
     durchgang: phDurchgang
   };
 
-  // src/kit/staedte.js
+  // render/src/kit/staedte.js
+  var wurzelSumme25 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var REGION_VON = {
     nord: [
       "Hamburg",
@@ -122952,13 +123274,13 @@
   };
   function nachbarStaedteRoh(name2) {
     const a = KOORD[name2];
-    return a ? Object.keys(KOORD).filter((n) => n !== name2 && Math.hypot((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : [];
+    return a ? Object.keys(KOORD).filter((n) => n !== name2 && wurzelSumme25((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : [];
   }
   function nachbarnVon(name2, region) {
     const a = KOORD[name2];
     if (a) return VIELFALT.filter((e) => {
       const b2 = KOORD[e.name];
-      return b2 && Math.hypot((a[0] - b2[0]) * 111, (a[1] - b2[1]) * 70) < NACHBAR_KM;
+      return b2 && wurzelSumme25((a[0] - b2[0]) * 111, (a[1] - b2[1]) * 70) < NACHBAR_KM;
     });
     return VIELFALT.filter((e) => e.region === region).slice(-3);
   }
@@ -122973,7 +123295,8 @@
     return INDEX.get(name2);
   }
 
-  // src/kit/leben.js
+  // render/src/kit/leben.js
+  var wurzelSumme26 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STANDARD_LEBEN = "voll";
   var MODI = ["voll", "wenig", "aus"];
   var MAX_AUTO = 60;
@@ -122988,7 +123311,7 @@
   var wegStart = (l) => l.dir > 0 ? l.s.von + 2 : l.s.bis - 2;
   var punkt = (l, meter) => koordinate(l.s, wegStart(l) + l.dir * meter, l.v);
   var laenge = (l) => Math.max(0, l.s.bis - l.s.von - 4);
-  var abstand = (a, b2) => Math.hypot(a.x - b2.x, a.z - b2.z);
+  var abstand = (a, b2) => wurzelSumme26(a.x - b2.x, a.z - b2.z);
   function verkehrsnetz(plan2) {
     const spuren = [], fusswege = [], trams = [], haupt = [];
     for (const s2 of plan2?.strassen ?? []) {
@@ -123509,7 +123832,7 @@
     };
   }
 
-  // src/kit/umbau-aussen.js
+  // render/src/kit/umbau-aussen.js
   function technikAufDach(S, h, m) {
     if (!h.etagenBau || !m || !(m.hoehe > 0)) return;
     const etagen = Object.values(h.etagenBau);
@@ -123525,7 +123848,7 @@
     }
   }
 
-  // src/kit/bruecke.js
+  // render/src/kit/bruecke.js
   var kwVon = (woche2) => woche2 % 52 + 1;
   function aktionFuer(s2, h) {
     let best = null;
@@ -123690,6 +124013,8 @@
     const famBenutzt = /* @__PURE__ */ new Set();
     const wahl3 = /* @__PURE__ */ new Map();
     const haeuser = /* @__PURE__ */ new Map();
+    const statischeDaten = new Map([...haeuser_schwester_default, ...haeuser_outlet_default].map((h) => [h.id, h]));
+    const statischeHaeuser = /* @__PURE__ */ new Map();
     const wettbewerber2 = /* @__PURE__ */ new Map();
     const wbSlots = /* @__PURE__ */ new Map();
     let wbCache = null;
@@ -123872,6 +124197,20 @@
       if (x.wbId) wettbewerber2.set(x.wbId, x);
       return e;
     };
+    const statischerSlot = (typ) => (S, scene2, p2) => {
+      const e = basis3[typ](S, scene2, p2);
+      const haus2 = statischeDaten.get(p2.standort?.id);
+      if (haus2 && o.getrennt) {
+        const f = fussabdruck(haus2), { x, z: z2 } = imSlot2(p2, f.w, f.d);
+        const hoehe = Math.max(8, e?.hoehe ?? 18);
+        const bounds = new three_module_exports.Box3(
+          new three_module_exports.Vector3(x, 0, z2),
+          new three_module_exports.Vector3(x + f.w, hoehe, z2 + f.d)
+        );
+        statischeHaeuser.set(haus2.id, { haus: haus2, p: p2, bounds, e });
+      }
+      return e;
+    };
     const hqSlot = (S, scene2, p2) => {
       if (!basis3["slot:hq"] || !p2.standort) return { hoehe: 0 };
       if (o.getrennt) return baueHq(p2);
@@ -123890,8 +124229,8 @@
       ...basis3,
       "slot:warenhaus": slot4("slot:warenhaus"),
       "slot:sport": slot4("slot:sport"),
-      "slot:schwester": slot4("slot:schwester"),
-      "slot:outlet": basis3["slot:outlet"],
+      "slot:schwester": statischerSlot("slot:schwester"),
+      "slot:outlet": statischerSlot("slot:outlet"),
       "slot:premium": slot4("slot:premium"),
       "slot:hq": hqSlot,
       "slot:wettbewerber": wbSlot,
@@ -123944,13 +124283,13 @@
       if (vater && !o.wurzel) vater.add(neu.gruppe);
       return e;
     }
-    return { bauer, haeuser, hqs, wettbewerber: wettbewerber2, wbSlots, aktualisiere, neuBauen, zustand: (id) => {
+    return { bauer, haeuser, statischeHaeuser, hqs, wettbewerber: wettbewerber2, wbSlots, aktualisiere, neuBauen, zustand: (id) => {
       const h = hausVon(id);
       return h ? zustand(h) : null;
     } };
   }
 
-  // src/kit/jahreszeit.js
+  // render/src/kit/jahreszeit.js
   var JAHRESZEITEN_AN = true;
   var LAUB2 = /* @__PURE__ */ new Set(["linde", "kastanie", "platane", "birke", "pappel", "kugel"]);
   var PALETTEN3 = {
@@ -124219,7 +124558,7 @@
     };
   }
 
-  // src/ui/einstellungen.js
+  // render/src/ui/einstellungen.js
   var SPEICHER = "hartwig.einstellungen.v1";
   var definitionen2 = /* @__PURE__ */ new Map();
   var werte = null;
@@ -124306,7 +124645,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "7b3dc52" : "Entwicklung";
+  var version = () => true ? "a33aa05" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -124376,7 +124715,7 @@
     }).observe(document.body, { childList: true, subtree: true });
   }
 
-  // src/ui/format.js
+  // render/src/ui/format.js
   var fmt = new Intl.NumberFormat("de-DE");
   function geld(x) {
     const a = Math.abs(x), v = x < 0 ? "\u2212" : "";
@@ -124391,7 +124730,7 @@
   var kwVon2 = (w) => (w % 52 + 52) % 52 + 1;
   var esc2 = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-  // src/ui/quelle.js
+  // render/src/ui/quelle.js
   function quelle(E) {
     const da = typeof E.einkaufUebersicht === "function";
     return {
@@ -124425,7 +124764,7 @@
     };
   }
 
-  // src/ui/eigenmarken.js
+  // render/src/ui/eigenmarken.js
   var ALTER = [["10-13", "Tweens"], ["13-17", "Teens"], ["18-29", "Young Adults"], ["30-49", "30 bis 49"], ["50+", "50 plus"], ["70+", "70 plus"]];
   var GESCHLECHT = [["damen", "Damen"], ["herren", "Herren"], ["unisex", "Unisex"], ["kinder", "Kinder"]];
   var KATEGORIE2 = ["Bekleidung", "Schuhe", "W\xE4sche", "Accessoires", "Home", "Beauty"];
@@ -124451,7 +124790,7 @@
     const s2 = ctx.s(), u = ctx.q.marken(s2);
     let h = tabs;
     h += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken gef\xFChrt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a, m) => a + m.umsatz13, 0))}</b></div></div>`;
-    h += '<button class="breit gruen" data-a="emGruenden">+ Marke gr\xFCnden</button>';
+    h += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
     for (const m of u.marken) {
       const veraltet = m.stilAktualitaet < 45;
       const status = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
@@ -124684,7 +125023,7 @@
     return "?";
   }
 
-  // src/ui/ware.js
+  // render/src/ui/ware.js
   var reichweite = (r) => r == null ? "\u2013" : (r > 99 ? "> 99" : r.toFixed(1).replace(".", ",")) + (r == null ? "" : " Wo.");
   var proz = (x) => pz3(Number.isFinite(x) ? x : 0, 1);
   var knopf = (a, v, text3, extra = "") => `<button class="mini" data-a="${a}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
@@ -124785,7 +125124,7 @@
     return void 0;
   }
 
-  // src/ui/einkauf.js
+  // render/src/ui/einkauf.js
   var KOPF = { umsatz: "Umsatz 13 Wo.", rohertragsquote: "Rohertrag", lagerumschlag: "Umschlag", reichweite: "Reichweite", abverkaufsquote: "Abverkauf", altwarenanteil: "Altware", nosVerfuegbarkeit: "NOS", limitFrei: "Limit frei", rohertrag: "Rohertrag \u20AC", bestandEk: "Bestand", abschriften: "Abschriften", reduzierungsquote: "Reduzierung", entgangenerUmsatz: "Fehlmengen", offeneOrders: "Orders", offeneFreigaben: "Freigaben", eigenmarkenAnteil: "Eigenmarke", eigenmarkenMarge: "EM-Marge" };
   function formatiere(format, x) {
     if (format === "eur") return geld(x);
@@ -124822,7 +125161,7 @@
       const n = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
       const t = (id, inhalt2) => `<button class="tab ${an(id) ? "an" : ""}" data-a="seite" data-v="${id}">${inhalt2}</button>`;
-      return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}${t("merchandise", "Merchandise")}${t("allokation", "Allokation")}${t("reduzierungKalender", "Reduzierung")}</div>`;
+      return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}${t("merchandise", "Merchandise")}${t("allokation", "Allokation")}${t("reduzierungKalender", "Reduzierung")}</div>${["eigenmarken", "gruenden"].includes(ui.seite) ? "" : '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>'}`;
     }
     function sortiere(liste2) {
       const { key, dir } = ui.sort;
@@ -125156,6 +125495,7 @@
       ui,
       oeffne: (seite = "uebersicht", arg) => {
         ui.seite = seite;
+        if (seite === "gruenden") ui.em.assistent = { schritt: 0, daten: neuerEntwurf2(s2()) };
         if (seite === "wg") ui.wg = arg;
         ui.kuerzen = null;
         zeigen();
@@ -125172,7 +125512,7 @@
     };
   }
 
-  // src/ui/karte.js
+  // render/src/ui/karte.js
   var W2 = Math.SQRT2;
   var ausdehnung2 = (halb, a) => halb * (a / W2 + W2);
   function erweitert(G2) {
@@ -125342,7 +125682,7 @@
     } };
   }
 
-  // src/kit/portraet.js
+  // render/src/kit/portraet.js
   var HAUTTOENE = {
     hell: ["#f8d6c8", "#e9bcab"],
     rosig: ["#f3c6a6", "#e0aa88"],
@@ -125427,12 +125767,12 @@
   function hex([r, g, b2]) {
     return "#" + [r, g, b2].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
   }
-  function mische(a, b2, t) {
+  function mische2(a, b2, t) {
     const A = rgb(a), B2 = rgb(b2);
     return hex(A.map((v, i) => v + (B2[i] - v) * t));
   }
-  var hell2 = (c, t) => mische(c, "#ffffff", t);
-  var dunkel = (c, t) => mische(c, "#000000", t);
+  var hell2 = (c, t) => mische2(c, "#ffffff", t);
+  var dunkel = (c, t) => mische2(c, "#000000", t);
   var helligkeit = (c) => {
     const [r, g, b2] = rgb(c);
     return (0.299 * r + 0.587 * g + 0.114 * b2) / 255;
@@ -125658,7 +125998,7 @@
     if (H.ohrVorn) ohr();
     if (H.scheitel) teile2.push(`<path d="${H.scheitel}" stroke="${hfS}" stroke-width="0.6" fill="none"/>`);
     if (H.glanz) teile2.push(`<path d="M46 19 C49 16.4 53.4 15.6 57 16.4" stroke="${hell2(haut, 0.45)}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.8"/>`);
-    if (m.alter >= 50 && !["grau", "wei\xDF"].includes(m.haarfarbe) && ["kurz", "seitenscheitel", "halbglatze", "locken", "zopf", "dutt"].includes(m.haar)) teile2.push(P("M56.6 31 C58.4 29.6 60.8 30.4 61.4 33.2 L62.6 39.4 C64 36.6 64.8 33.6 65 30.4 C62.4 26 58.6 26.6 56.6 31 Z", mische(hf, "#c9c7c2", 0.65), ' opacity="0.85"'));
+    if (m.alter >= 50 && !["grau", "wei\xDF"].includes(m.haarfarbe) && ["kurz", "seitenscheitel", "halbglatze", "locken", "zopf", "dutt"].includes(m.haar)) teile2.push(P("M56.6 31 C58.4 29.6 60.8 30.4 61.4 33.2 L62.6 39.4 C64 36.6 64.8 33.6 65 30.4 C62.4 26 58.6 26.6 56.6 31 Z", mische2(hf, "#c9c7c2", 0.65), ' opacity="0.85"'));
     if (m.brille !== "keine") {
       const fr = m.brille === "horn" ? "#3b2418" : m.brille === "rund" ? "#9a7a3a" : "#2e3440";
       const sw = m.brille === "horn" ? 1.3 : 0.7;
@@ -125684,7 +126024,7 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}">${teile2.join("")}</svg>`;
   }
 
-  // src/ui/vorstand.js
+  // render/src/ui/vorstand.js
   function portraet(m, groesse2 = 96, hintergrund) {
     if (typeof portraetSVG === "function" && m) return portraetSVG(m, groesse2, hintergrund ? { hintergrund } : {});
     return `<svg viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect width="100" height="100" fill="${hintergrund ?? "none"}"/><circle cx="50" cy="36" r="17" fill="#cfc9bf"/><path d="M18 100c2-24 15-36 32-36s30 12 32 36z" fill="#b9b2a6"/></svg>`;
@@ -125964,12 +126304,21 @@
     };
   }
 
-  // src/ui/organisation.js
+  // render/src/ui/organisation.js
   function organisationModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "zentrale", ebene: null, id: null };
     const bar = (q2) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0, Math.min(1, q2)) * 100) + '%"></i></span>';
     const name2 = (st2) => st2?.person ? esc2(st2.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
+    const aufgabenListe = (aufgaben, id, cluster = false) => {
+      if (!aufgaben?.length) return "";
+      return '<div class="org-aufgaben"><small>Delegation je Aufgabe, \xC4nderungen wirken ab der n\xE4chsten Woche</small>' + aufgaben.map((a) => {
+        const ziel = ' data-id="' + esc2(id) + '" data-task="' + esc2(a.id) + '"' + (cluster ? ' data-cluster="1"' : "");
+        const schalter2 = '<button data-org="aufgabe"' + ziel + ' aria-pressed="' + a.an + '">' + (a.an ? "Delegiert" : "Beim CEO") + "</button>";
+        const grenze = a.grenze === void 0 ? "" : '<span class="org-grenze"><button data-org="grenze"' + ziel + ' data-grenze="' + a.grenze + '" data-delta="-10000" aria-label="Grenze senken">\u2212</button><b>' + geld(a.grenze) + '</b><button data-org="grenze"' + ziel + ' data-grenze="' + a.grenze + '" data-delta="10000" aria-label="Grenze erh\xF6hen">+</button></span>';
+        return '<div class="org-aufgabe"><span>' + esc2(a.name) + "</span>" + grenze + schalter2 + "</div>";
+      }).join("") + "</div>";
+    };
     const profil2 = (stelle2, titel, ebene, id) => {
       if (!stelle2) return "";
       const p2 = stelle2.person;
@@ -125999,25 +126348,33 @@
         for (const ressort of x.ressorts) {
           const bs = x.bereiche.filter((b2) => b2.ressort === ressort.id);
           h += '<div class="karte"><div class="khead"><b>' + esc2(ressort.id.toUpperCase()) + " \xB7 " + esc2(ressort.name) + "</b><small>" + (ressort.person ? esc2(ressort.person.name) : '<span class="frei">unbesetzt</span>') + "</small></div>";
-          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>";
+          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(b2.aufgaben, b2.id);
           h += "</div>";
         }
       } else {
         for (const r of x.regionen) {
           h += '<div class="karte"><div class="khead"><b>Region ' + esc2(r.id) + '</b><button data-org="profil" data-ebene="region" data-id="' + esc2(r.id) + '">' + name2(r.stelle) + "</button></div>";
           for (const c of r.cluster) {
-            const rot = !c.stelle.person, ampel = c.umsatz > 0 ? "\u25CF" : "\u25CB";
-            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + geld(c.umsatz) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>";
+            const rot = !c.stelle.person, ampel = st2.woche > 0 && c.umsatz > 0 ? "\u25CF" : "\u25CB";
+            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + (st2.woche === 0 ? "noch offen" : geld(c.umsatz)) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(c.aufgaben, c.id, true);
           }
           h += "</div>";
         }
         if (x.sonder) {
           const c = x.sonder;
           h += '<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + name2(c.stelle) + "</button></div><p>" + c.hausIds.length + " H\xE4user \xB7 " + x.flagships.length + " gew\xE4hlte Flagships</p>";
-          for (const haus2 of st2.haeuser.filter((v) => v.format === "warenhaus" && v.status === "offen").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12)) {
+          const premiumHaeuser = st2.haeuser.filter((haus2) => haus2.klasse === "premium");
+          const gewaehlte = st2.haeuser.filter((haus2) => x.flagships.includes(haus2.id));
+          const kandidaten2 = st2.haeuser.filter((haus2) => haus2.format === "warenhaus" && haus2.status === "offen" && haus2.klasse !== "premium").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12);
+          const liste2 = [...new Map([...premiumHaeuser, ...gewaehlte, ...kandidaten2].map((haus2) => [haus2.id, haus2])).values()];
+          const namen = /* @__PURE__ */ new Map();
+          for (const haus2 of liste2) namen.set(haus2.name, (namen.get(haus2.name) ?? 0) + 1);
+          for (const haus2 of liste2) {
             const an = x.flagships.includes(haus2.id), premium2 = haus2.klasse === "premium";
-            h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
+            const zusatz = namen.get(haus2.name) > 1 ? " \xB7 " + esc2(haus2.stadt) + " (" + esc2(haus2.id) + ")" : "";
+            h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + zusatz + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
           }
+          h += aufgabenListe(c.aufgaben, c.id, true);
           h += "</div>";
         }
       }
@@ -126052,6 +126409,8 @@
       if (a === "delegation") {
         tun({ typ: "delegation", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, an: el2.getAttribute("aria-pressed") !== "true" });
       }
+      if (a === "aufgabe") tun({ typ: "delegation", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, aufgabe: el2.dataset.task, an: el2.getAttribute("aria-pressed") !== "true" });
+      if (a === "grenze") tun({ typ: "delegationGrenze", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, aufgabe: el2.dataset.task, betrag: Math.max(0, Number(el2.dataset.grenze) + Number(el2.dataset.delta)) });
       if (a === "flagship") tun({ typ: "flagship", haus: el2.dataset.haus, an: el2.dataset.an === "true" });
       if (a === "besetzen") tun({ typ: "organisationBesetzen", ebene: ui.ebene, id: ui.id, kandidat: el2.dataset.kandidat });
       if (a === "entlassen") tun({ typ: "organisationEntlassen", ebene: ui.ebene, id: ui.id });
@@ -126067,7 +126426,7 @@
     }, aktiv: () => ui.aktiv, pruefe: () => ({ reiter: ui.reiter, bereiche: E.organisationUebersicht(s2()).bereiche.length, cluster: E.organisationUebersicht(s2()).regionen.reduce((n, r) => n + r.cluster.length, 0) }) };
   }
 
-  // src/ui/posteingang.js
+  // render/src/ui/posteingang.js
   function posteingangModul(ctx) {
     const E = ctx.E, s2 = ctx.s;
     const ui = { aktiv: false, filter: "Alle", verhandlung: null, ziel: null };
@@ -126240,7 +126599,7 @@
     };
   }
 
-  // src/kit/zeitung.js
+  // render/src/kit/zeitung.js
   var FARBE = {
     haus: { fassade: "#d6c3a4", dach: "#796552", seite: "#a99272", akzent: "#b43e32" },
     konkurrenz: { fassade: "#bfced8", dach: "#344f66", seite: "#7897ab", akzent: "#b87837" },
@@ -126258,7 +126617,7 @@
     return '<svg class="zb-isobild" viewBox="0 0 420 260" role="img" aria-label="Isometrische Zeichnung eines Warenhauses"><rect width="420" height="260" fill="#e1e5df"/><path d="M10 222 260 135 412 180 173 260Z" fill="#cbc8bf"/><path d="M72 78 260 22 340 60 153 119Z" fill="' + c.dach + '"/><path d="M72 78 153 119 153 229 72 185Z" fill="' + c.seite + '"/><path d="M153 119 340 60 340 171 153 229Z" fill="' + c.fassade + '"/><path d="M151 188 342 130v18l-191 58Z" fill="' + c.akzent + '"/><path d="M151 208 342 150v5l-191 58Z" fill="#eee8db"/>' + fenster8.join("") + '<path d="M194 210v-34l52-16v34" fill="#597784" stroke="#485e63" stroke-width="3"/><path d="M98 147v22l24 13v-22z" fill="#55717c"/>' + muster + '<path d="M50 204 215 254M260 238l108-36" stroke="#f3eee3" stroke-width="2"/></svg>';
   }
 
-  // src/ui/zeitung.js
+  // render/src/ui/zeitung.js
   var REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
   function zeitungModul(ctx) {
     const ui = { aktiv: false, index: -1, reiter: "Top", archiv: false };
@@ -126377,7 +126736,7 @@
     };
   }
 
-  // src/ui/statistik.js
+  // render/src/ui/statistik.js
   var FARBE2 = {
     Hartwig: "#d23c32",
     Volkskauf: "#9b63b0",
@@ -126644,7 +127003,7 @@
     };
   }
 
-  // src/ui/marketing.js
+  // render/src/ui/marketing.js
   var ALTER2 = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
   var STATUS_FARBE = { geplant: "#2f63b5", laufend: "#2f8f5b", beendet: "#9aa3ab", abgesagt: "#d6d2ca" };
@@ -126674,7 +127033,7 @@
       kanal: null,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div>`;
+    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
     function uebersicht(P2) {
       const st2 = s2(), u = E.marketingUebersicht(st2);
       let h = tabs();
@@ -126865,6 +127224,8 @@
     function klick(el2) {
       const a = el2.dataset.a, v = el2.dataset.v, st2 = s2(), B2 = ui.crm;
       switch (a) {
+        case "eigenmarkeGruenden":
+          return ctx.neueEigenmarke?.();
         case "seite":
           ui.seite = v;
           ui.planen = null;
@@ -127041,7 +127402,7 @@
     };
   }
 
-  // src/ui/umbau.js
+  // render/src/ui/umbau.js
   var ETAGE = (nr) => nr === -1 ? "UG" : nr === 0 ? "EG" : nr + ". OG";
   var BEZEICHNUNG = { auffrischung: "Auffrischung", ladenbau: "Ladenbau neu", komplett: "Komplettumbau", technik: "Technik" };
   function umbauModul(ctx) {
@@ -127132,7 +127493,7 @@
     } };
   }
 
-  // src/kit/produktbild.js
+  // render/src/kit/produktbild.js
   var FARBEN_PRODUKT = {
     "wei\xDF": "#f3f2ee",
     creme: "#efe4cc",
@@ -127215,12 +127576,12 @@
   function hex2([r, g, b2]) {
     return "#" + [r, g, b2].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
   }
-  var mische2 = (a, b2, t) => {
+  var mische3 = (a, b2, t) => {
     const A = rgb2(a), B2 = rgb2(b2);
     return hex2(A.map((v, i) => v + (B2[i] - v) * t));
   };
-  var hell3 = (c, t) => mische2(c, "#ffffff", t);
-  var dunkel2 = (c, t) => mische2(c, "#000000", t);
+  var hell3 = (c, t) => mische3(c, "#ffffff", t);
+  var dunkel2 = (c, t) => mische3(c, "#000000", t);
   var helligkeit2 = (c) => {
     const [r, g, b2] = rgb2(c);
     return (0.299 * r + 0.587 * g + 0.114 * b2) / 255;
@@ -127735,8 +128096,28 @@
     K3.form("M50 50 L80 38 L80 74 L50 88 Z", { farbe: K3.cD });
     K3.strich("M35 32 L65 44 L65 58", "#f1ebdc", 2.4);
   }
+  var bildVorlage = (t) => {
+    if (TYPEN2[t]) return t;
+    if (/Kleid|Tüllrock|Plisseerock|Bleistiftrock/.test(t)) return /rock/i.test(t) ? "Rock" : "Kleid";
+    if (/Jeans|Leggings|Hose|Culotte|Bermuda|Shorts/.test(t)) return /Jeans/.test(t) ? "Jeans" : "Chino";
+    if (/Hemd|Bluse|Tunika/.test(t)) return /Hemd/.test(t) ? "Hemd" : "Bluse";
+    if (/Jacke|Mantel|Trenchcoat|Regenjacke|Blazer|Sakko/.test(t)) return /Blazer|Sakko/.test(t) ? "Blazer" : "Steppjacke";
+    if (/Pullover|Cardigan|Sweatshirt|Rollkragen/.test(t)) return "Strickjacke";
+    if (/Shirt|Polo/.test(t)) return "T-Shirt";
+    if (/Schuh|Boot|Stiefel|Loafer|Ballerina|Sandale|Slipper|Espadrille|Sneaker/.test(t)) return "Sneaker";
+    if (/Tasche|Rucksack|Shopper|Clutch|Weekender|Portemonnaie|Kartenetui/.test(t)) return "Handtasche";
+    if (/Handschuh|Krawatte|Tuch|Hut/.test(t)) return "Schal";
+    if (/Bett|Decke|Laken|Kopfkissen|Tischdecke/.test(t)) return "Bettw\xE4sche";
+    if (/Tuch|Serviette|Vorleger|Lappen|Schürze|Tischläufer|Tischset/.test(t)) return "Handtuch";
+    if (/Schale|Schüssel|Becher|Dose|Topf/.test(t)) return "Tasse";
+    if (/Korb|Tablett|Kerzenhalter/.test(t)) return "Vase";
+    if (/Lippen|Mascara|Concealer|Rouge|Lidschatten|Nagellack/.test(t)) return "Lippenstift";
+    if (/Creme|Serum|Gel|Lotion/.test(t)) return "Creme";
+    if (/Parfum|Toilette/.test(t)) return "Parfum";
+    return "T-Shirt";
+  };
   function produktbildSVG(artikeltyp, farbe3, material2, groesse2 = 160, opt = {}) {
-    const typ = TYPEN2[artikeltyp] ? artikeltyp : null;
+    const typ = bildVorlage(artikeltyp);
     const c = produktFarbe(farbe3) ?? produktFarbe(STANDARD_FARBE[typ]) ?? "#b8864e";
     const mat2 = material2 ?? STANDARD_MATERIAL[typ] ?? "Baumwolle";
     const K3 = kontext2(c, mat2, typ);
@@ -127753,7 +128134,7 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect x="1" y="1" width="98" height="98" rx="9" fill="#5a8396" stroke="#a9c7d4" stroke-width="1.6"/><g transform="translate(14 8) scale(0.72)">${innen}</g></svg>`;
   }
 
-  // src/ui/produkte.js
+  // render/src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
   var euro = (x) => `${dez(x, 2)} \u20AC`;
   var bild = (typ, farbe3, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe3, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc2(typ)}</text></svg>`;
@@ -127788,6 +128169,7 @@
       const st2 = s2(), L2 = E.produkte(st2), M2 = aktuelleMarke(L2);
       let h = "";
       if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
+      h += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
       h += markenwahl(L2);
       h += `<div class="raster">${kz("Team Produktentwicklung", P2("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P2("l:kosten", geld(L2.kostenWoche)))}</div>`;
       const kats = M2.kategorien.filter((k2) => k2.kapazitaet > 0 || k2.belegt > 0);
@@ -127910,6 +128292,8 @@
       const a = el2.dataset.a, v = el2.dataset.v, st2 = s2();
       const karte = (id) => E.produkte(st2).marken.flatMap((m) => m.produkte).find((p2) => p2.id === id);
       switch (a) {
+        case "eigenmarkeGruenden":
+          return ctx.neueEigenmarke?.();
         case "marke":
           ui.marke = v;
           ui.k = 0;
@@ -128020,7 +128404,7 @@
     };
   }
 
-  // src/ui/speicher.js
+  // render/src/ui/speicher.js
   var NAME2 = "hartwig-spielstand";
   var STORE = "staende";
   var INFOS = "informationen";
@@ -128248,7 +128632,7 @@
     }
   }
 
-  // src/ui/app.js
+  // render/src/ui/app.js
   var APP_AKTIV = true;
   var $ = (id) => document.getElementById(id);
   var bezeichnung = (platz) => platz === "autosave" ? "Autospeichern" : "Platz " + platz.slice(-1);
@@ -128392,7 +128776,7 @@
     return { oeffne, startAktualisieren, updatesAktivieren };
   }
 
-  // src/ui/diagnose.js
+  // render/src/ui/diagnose.js
   var runde = (x) => Math.round(x * 10) / 10;
   var perzentil = (a, p2) => a[Math.min(a.length - 1, Math.ceil(a.length * p2) - 1)];
   async function messen({ renderer, scene: scene2, camera, info, vorBild, anzahl = 90 }) {
@@ -128433,7 +128817,7 @@
     };
   }
 
-  // src/ui/reise.js
+  // render/src/ui/reise.js
   var ASSISTENTIN = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
   var REISE_ZEIT = Object.freeze({
     kreisAuf: 240,
@@ -128542,7 +128926,7 @@
       });
       const liste2 = z2.querySelector(".reise-zielraster");
       if (!liste2) return;
-      liste2.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + "</strong><small>" + esc2(c.formate ?? "") + "</small></span></button>").join("");
+      liste2.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + '</strong><small class="reise-formate">' + (Array.isArray(c.formate) ? c.formate.map((f) => '<span class="reise-format">' + esc2(f.name) + "&nbsp;" + esc2(String(f.anzahl)) + "</span>").join("") : esc2(c.formate ?? "")) + "</small></span></button>").join("");
       if (!sortiert.length) liste2.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
     }
     function schreibe(el2, text3, dauer, meins) {
@@ -128657,7 +129041,7 @@
     return { oeffne, zu: schliessen, aktiv: () => aktiv5, pruefe: () => ({ stadt: ctx.stadt(), aktiv: aktiv5, schritte: [...protokoll2], zielAnzahl: z2.querySelectorAll("[data-reiseziel]").length }), fahren };
   }
 
-  // src/ui/wochenbericht.js
+  // render/src/ui/wochenbericht.js
   var ASSISTENTIN2 = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
   var BANK = portraetSVG({ geschlecht: "m", alter: 56, haar: "seitenscheitel", haarfarbe: "grau", hautton: "hell", kleidung: "anzug", seed: 236 }, 110);
   var BETRIEBSRAT = portraetSVG({ geschlecht: "w", alter: 49, haar: "halblang", haarfarbe: "dunkelbraun", kleidung: "bluse", seed: 922 }, 110);
@@ -128924,7 +129308,7 @@
     } };
   }
 
-  // src/ui/chronik.js
+  // render/src/ui/chronik.js
   function chronikModul({ E, s: s2, panel: panel2, bild: bild3 }) {
     const jahreswoche = (w) => `${s2().startJahr + Math.floor(w / 52)} \xB7 KW ${String(w % 52 + 1).padStart(2, "0")}`;
     const bilder = /* @__PURE__ */ new Map();
@@ -128967,7 +129351,7 @@
     }, pruefe: () => E.chronikUebersicht(s2()) };
   }
 
-  // src/ui/hausbesuch.js
+  // render/src/ui/hausbesuch.js
   var HAUSBESUCH_AKTIV = true;
   var PHRASE = Object.freeze({
     altware: [
@@ -129422,7 +129806,7 @@
     };
   }
 
-  // src/kit/szenarien.js
+  // render/src/kit/szenarien.js
   var BILDER = {
     standard: ["#477d8c", "#f5ca85", "M0 80L30 56L58 74L96 43L126 65L165 31L220 65V110H0Z"],
     schutzschirm: ["#355d78", "#add1cf", "M0 89L35 58L77 87L120 34L166 72L220 47V110H0Z"],
@@ -129439,7 +129823,7 @@
     return '<svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration einer fiktiven Innenstadt"><rect width="220" height="110" fill="' + himmel + '"/><circle cx="175" cy="29" r="21" fill="' + licht + '"/><path d="' + berge + '" fill="#537b80"/><rect x="10" y="65" width="60" height="45" fill="#e9dcc3"/><rect x="18" y="57" width="48" height="8" fill="#a94f43"/>' + fenster8 + '<rect x="95" y="48" width="45" height="62" fill="#d9d1bc"/><path d="M91 48L118 30L144 48" fill="#895e50"/><rect x="109" y="70" width="14" height="40" fill="#426477"/><rect x="152" y="73" width="60" height="37" fill="#c9d7cf"/><path d="M148 73H216" stroke="#a9524a" stroke-width="8"/><path d="M0 109H220" stroke="#555d62" stroke-width="4"/>' + sonder + "</svg>";
   }
 
-  // src/ui/szenarien.js
+  // render/src/ui/szenarien.js
   var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
   var prozent = (w) => Math.max(0, Math.min(100, Math.round(100 * w)));
   var leseBestwerte = () => {
@@ -129529,7 +129913,7 @@
     } };
   }
 
-  // src/ui/ton.js
+  // render/src/ui/ton.js
   var SPEICHER2 = "hartwig.einstellungen.v1";
   var TON_SCHALTER = [
     { schluessel: "ton_klaenge", titel: "Kl\xE4nge", gruppe: "Klang", art: "schalter", standard: true },
@@ -130019,7 +130403,7 @@
     };
   }
 
-  // src/ui/einfuehrung.js
+  // render/src/ui/einfuehrung.js
   var EINFUEHRUNG_AKTIV = true;
   var SCHLUESSEL = "hartwig.einfuehrung.v1";
   var TIPPS = "hartwig.einfuehrung.tipps.v1";
@@ -130402,7 +130786,7 @@
     }) };
   }
 
-  // src/kit/abzeichen.js
+  // render/src/kit/abzeichen.js
   var cache2 = /* @__PURE__ */ new Map();
   var metalle = {
     bronze: ["#6d3f28", "#dba26f", "#a5673e"],
@@ -130516,7 +130900,7 @@
     return png;
   }
 
-  // src/ui/erfolge.js
+  // render/src/ui/erfolge.js
   function erfolgeModul(ctx) {
     const E = ctx.E, spielstand = ctx.s;
     const zustand = { offen: false, filter: "Alle" };
@@ -130593,7 +130977,7 @@
     };
   }
 
-  // src/kit/spielende.js
+  // render/src/kit/spielende.js
   var fenster7 = (x, y, hell4, art) => '<rect x="' + x + '" y="' + y + '" width="19" height="28" rx="2" fill="' + hell4 + '"/>' + (art === "zerschlagen" ? '<path d="M' + x + " " + (y + 15) + 'h19" stroke="#868b8a" stroke-width="3"/>' : "");
   function gebaeude2(x, breite, hoehe, art, i) {
     const grau = art === "zerschlagen";
@@ -130636,7 +131020,7 @@
     return '<svg class="se-illustration" viewBox="0 0 680 400" role="img" aria-label="' + (grau ? "Verlassene Warenh\xE4user" : winter ? "Weihnachtlich beleuchtete, belebte Innenstadt" : art === "investor" ? "Schl\xFCssel\xFCbergabe an den K\xE4ufer" : "F\xFCnf Jahre Unternehmensf\xFChrung") + '" xmlns="http://www.w3.org/2000/svg">' + himmel + stadt + zusatz + "</svg>";
   }
 
-  // src/ui/spielende.js
+  // render/src/ui/spielende.js
   var zahl2 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0));
   var geld2 = (n) => zahl2(n) + " \u20AC";
   var ART2 = {
@@ -130835,7 +131219,7 @@
     };
   }
 
-  // src/ui/werkzeuge.js
+  // render/src/ui/werkzeuge.js
   var WERKZEUGE_AKTIV = true;
   var BERICHT_FORMAT = "RUHRKAUF-TEST-1:gzip:";
   var MAX_FEHLER = 50;
@@ -131114,7 +131498,7 @@
     };
   }
 
-  // src/ui/reporting.js
+  // render/src/ui/reporting.js
   var prozent2 = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl3 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
   var euro2 = (x) => zahl3(x, 2) + " \u20AC";
@@ -131223,7 +131607,7 @@
     };
   }
 
-  // src/ui/it.js
+  // render/src/ui/it.js
   function itModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null };
@@ -131447,7 +131831,7 @@
     };
   }
 
-  // src/ui/planung.js
+  // render/src/ui/planung.js
   var pct = (v) => (100 * v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
   var mio3 = (v) => (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
@@ -131591,7 +131975,7 @@
     };
   }
 
-  // src/ui/haus.js
+  // render/src/ui/haus.js
   var PROZENT = (x) => (Number(x) * 100).toFixed(1).replace(".", ",") + " %";
   var REITER2 = [["ueberblick", "\xDCberblick"], ["leitung", "Leitung"], ["personal", "Personal"], ["ware", "Ware"], ["partner", "Fl\xE4che & Partner"], ["kosten", "Kosten"], ["kommentare", "Kommentare"]];
   var SCHWERPUNKT = { personal: "Personal", ware: "Ware", kunde: "Kunde", kosten: "Kosten" };
@@ -131656,8 +132040,28 @@
   function hausReportingHtml(kommentare, ranking2) {
     return '<div class="karte"><div class="khead">Kommentare der Woche</div>' + (kommentare.length ? kommentare.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + " \xB7 " + PROZENT(x.abweichung) + "</b><i>" + esc2(GRUENDE[x.grund] ?? x.grund) + " / " + esc2(MASS[x.massnahme] ?? x.massnahme) + "</i><small>" + esc2(x.pruefung) + "</small></span><span>\u2192</span></button>").join("") : '<div class="zeile">Noch keine kommentierungspflichtigen Abweichungen.</div>') + '</div><div class="karte"><div class="khead">Mystery Shopping \xB7 Top 20</div>' + ranking2.slice(0, 20).map((x, i) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was">` + (i + 1) + ". " + esc2(x.name) + "</span><b>" + x.score + "/100</b></button>").join("") + "</div>";
   }
+  function hausStatischHtml(haus2, reiter = "ueberblick") {
+    const istOutlet = haus2.format === "outlet";
+    const name2 = istOutlet ? "FUNDUS" : "Volkskauf";
+    const tabs = istOutlet ? [["ueberblick", "\xDCberblick"], ["sortiment", "Sortiment"], ["etagen", "Verkaufsfl\xE4chen"]] : [["ueberblick", "\xDCberblick"], ["sortiment", "Sortiment"], ["etagen", "Etagen"]];
+    const auswahl4 = tabs.some(([id]) => id === reiter) ? reiter : "ueberblick";
+    const nav = '<nav class="haus-reiter">' + tabs.map(([id, titel]) => `<button class="${id === auswahl4 ? "an" : ""}" onclick="hausReiterWahl('${id}')">${esc2(titel)}</button>`).join("") + "</nav>";
+    const flaechen = haus2.flaechen ?? [];
+    let inhalt = "";
+    if (auswahl4 === "ueberblick") {
+      inhalt = '<div class="karte"><div class="khead">' + name2 + " \xB7 Standort</div>" + line("Haus", haus2.name) + line("Stadt", haus2.stadt) + line("Baujahr", haus2.baujahr) + line("Verkaufsfl\xE4che", fmt.format(flaechen.reduce((sum2, f) => sum2 + (f.qm ?? 0), 0)) + " qm") + line("Substanz", Math.round(haus2.substanz ?? 0) + " / 100") + line("Status", haus2.status === "offen" ? "Ge\xF6ffnet" : haus2.status ?? "Unbekannt") + '<div class="zeile grau">Betriebskennzahlen und Entscheidungen folgen mit der Engine-Anbindung dieses Formats.</div></div>';
+    } else if (auswahl4 === "sortiment") {
+      const gruppen = /* @__PURE__ */ new Map();
+      for (const f of flaechen) gruppen.set(f.gruppe ?? "Sonstiges", (gruppen.get(f.gruppe ?? "Sonstiges") ?? 0) + (f.qm ?? 0));
+      inhalt = '<div class="karte"><div class="khead">' + name2 + " \xB7 Sortimentsfl\xE4chen</div>" + [...gruppen].map(([gruppe2, qm]) => line(gruppe2, fmt.format(qm) + " qm")).join("") + "</div>";
+    } else {
+      const etagen = [...new Set(flaechen.map((f) => f.etage))].sort((a, b2) => b2 - a);
+      inhalt = etagen.map((nr) => '<div class="karte"><div class="khead">' + (nr === 0 ? "Erdgeschoss" : nr === -1 ? "Untergeschoss" : nr + ". Obergeschoss") + "</div>" + flaechen.filter((f) => f.etage === nr).map((f) => line(f.gruppe ?? f.konzept, fmt.format(f.qm) + " qm")).join("") + "</div>").join("");
+    }
+    return nav + inhalt;
+  }
 
-  // src/ui/personaleinsatz.js
+  // render/src/ui/personaleinsatz.js
   var GRUPPEN2 = ["logistik", "verkauf", "kasse", "verwaltung"];
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n) => Math.round(n * 100) + " %";
@@ -131807,8 +132211,9 @@
     };
   }
 
-  // src/spiel.js
+  // render/src/spiel.js
   var param = new URLSearchParams(location.search);
+  if (param.get("dev") === "1") document.querySelector(".botwahl")?.style.setProperty("display", "flex");
   var $2 = (id) => document.getElementById(id);
   var messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
   var speicherTimer = null;
@@ -131988,6 +132393,18 @@
     const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
     if (ap?.object.userData.angebotId) return "angebot:" + ap.object.userData.angebotId;
     const t = ray.intersectObject(wurzel, true)[0];
+    let statisch = null, distanz2 = t?.distance ?? Infinity;
+    for (const [id, eintrag2] of sb?.statischeHaeuser ?? []) {
+      const treffer = ray.ray.intersectBox(eintrag2.bounds, new three_module_exports.Vector3());
+      if (treffer) {
+        const d2 = treffer.distanceTo(ray.ray.origin);
+        if (d2 < distanz2) {
+          distanz2 = d2;
+          statisch = id;
+        }
+      }
+    }
+    if (statisch) return statisch;
     const u = t?.object.userData;
     return u?.hausId ?? (u?.wbId ? "wb:" + u.wbId : u?.hqId ? "hq:" + u.hqId : null);
   }
@@ -132194,6 +132611,12 @@
     K2.halb = 63;
     kameraSetzen();
   }
+  function stadtchipSetzen(name2) {
+    $2("stadtname").textContent = name2;
+    $2("stadtname").style.fontSize = name2.length > 13 ? "11px" : name2.length > 10 ? "12.5px" : "";
+    const region = stadtRegion(name2) ?? s.haeuser.find((h) => h.stadt === name2)?.region;
+    $2("stadtcluster").textContent = region ? "Region " + region : "";
+  }
   function baueStadtAusSpiel(name2) {
     const t0 = performance.now();
     raeumeSzene();
@@ -132253,11 +132676,7 @@
     kachelnSichtbarBauen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-    $2("stadtname").textContent = name2;
-    const hausHier = s.haeuser.find((h) => h.stadt === name2 && h.hauscluster);
-    const geoCluster = s.organisation?.hauscluster.find((c) => c.id === hausHier?.hauscluster);
-    const chipCluster = $2("stadtcluster");
-    if (chipCluster) chipCluster.textContent = geoCluster?.name ?? "";
+    stadtchipSetzen(name2);
     return ms;
   }
   async function baueStadtAusSpielReise(name2) {
@@ -132320,7 +132739,7 @@
     zeichnen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-    $2("stadtname").textContent = name2;
+    stadtchipSetzen(name2);
     return ms;
   }
   var KACHEL = 110;
@@ -132660,7 +133079,19 @@
   };
   function oeffneHaus(id) {
     const d2 = hausDetail(s, id);
-    if (!d2) return;
+    if (!d2) {
+      const statisch = sb?.statischeHaeuser.get(id);
+      if (!statisch) return;
+      const neu2 = offenesHaus !== id;
+      if (neu2) hausReiter = "ueberblick";
+      offenesHaus = id;
+      offenesHq = null;
+      offenerWettbewerber = null;
+      const h2 = statisch.haus;
+      panel(h2.name, h2.stadt + " \xB7 " + (h2.format === "outlet" ? "FUNDUS" : "Volkskauf") + " \xB7 Baujahr " + h2.baujahr, hausStatischHtml(h2, hausReiter));
+      if (neu2) hausZeigen(id);
+      return;
+    }
     const neu = offenesHaus !== id;
     if (neu) hausReiter = "ueberblick";
     d2.betrieb = hausUebersicht(s, id);
@@ -132972,8 +133403,8 @@
   vs = vorstandModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   org = organisationModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
-  mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
-  pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
+  mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
+  pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
   er = erfolgeModul({ E: src_exports, s: () => s, panel });
   pl = planungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
@@ -133074,7 +133505,7 @@
         hauscluster: hs[0]?.hauscluster,
         groesse: hs.length + zahl4("schwester") + zahl4("outlet"),
         umsatz: hs.reduce((sum2, h) => sum2 + (h.kpi?.umsatz ?? 0), 0),
-        formate: formate.filter((p2) => p2[1]).map((p2) => p2[0] + " " + p2[1]).join(" \xB7 ")
+        formate: formate.filter((p2) => p2[1]).map(([name2, anzahl]) => ({ name: name2, anzahl }))
       };
     }),
     pinPunkt: bahnhofBildpunkt,
@@ -133143,8 +133574,6 @@
     s.testGenutzt = true;
     postUi = { ...neuerPostUi(), ...d2.ui ?? {} };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
-    $2("postwarnung").checked = !!postUi.warnen;
-    $2("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
     schwierigkeitId = s.schwierigkeit ?? "mittel";
     $2("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();

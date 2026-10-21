@@ -1,4 +1,6 @@
 // Nahansicht der Plattenbaugebiete (WBS 70): Zeilen in beiden Richtungen, Höfe, Winkel, Kaufhalle, Schule, Kita.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE } from '../kit/basis.js';
 import { zeigeKatalog } from '../kit/katalog.js';
 import { stadtplan, baueStadt } from '../kit/stadt.js';
@@ -13,7 +15,7 @@ function eintrag(name, nr = 0, zoom = 90) {
       baueStadt(S, scene, plan, echterBauer());
       const pl = plan.bloecke.filter((b) => b.art === 'platte');
       // Gebiet mit den meisten Plattenblöcken in der Nähe
-      const wert = (b) => pl.filter((q) => Math.hypot(q.x - b.x, q.z - b.z) < 260).length;
+      const wert = (b) => pl.filter((q) => wurzelSumme(q.x - b.x, q.z - b.z) < 260).length;
       pl.sort((a, b) => wert(b) - wert(a) || a.x - b.x);
       const b = pl[Math.min(nr * 7, pl.length - 1)];
       this.unter = `${pl.length} Plattenblöcke · Layouts ${[...new Set(pl.map((q) => q.layout))].join(', ')}`;

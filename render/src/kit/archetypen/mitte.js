@@ -8,6 +8,8 @@
 // Jeder Entwurf setzt E.mitte (Typ), E.mitteEinkauf (Bebauung der Einkaufslage um die Hartwig-Häuser:
 // 'zeil' | 'kur' | 'dom' | 'fachwerk' | 'fuenfziger' | 'mosel' | 'sechziger') und E.fwAnteil (Faktor für Fachwerk).
 // Große Bauten aus mittebauten.js liegen auf der Fläche 'mitte_bau' (Feld slot, variante, front, boden, lage).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { MITTE_SLOTS, MITTE_HAUS } from '../mittebauten.js';
@@ -32,7 +34,7 @@ function grund(E, art, einkauf) {
   E.fwAnteil = E.o.fw ?? 1;
   E.landmarkVerbot = new Set([...(E.landmarkVerbot ?? []), 'slot:mall']);
 }
-const abst = (zc) => (i, j) => Math.hypot(i - zc.i, j - zc.j);
+const abst = (zc) => (i, j) => wurzelSumme(i - zc.i, j - zc.j);
 
 /** Größte sinnvolle Slotmaße (lokal: Breite entlang der Front, Tiefe) je Slot und Variante, aus mittebauten.js. */
 const SLOT_MAX = {
@@ -520,7 +522,7 @@ function gruenFuellen(ctx, b, r, belegt, y, B) {
   const n = Math.round((b.w * b.d) / 70);
   for (let i = 0; i < n; i++) {
     const x = B.zw(r, b.x + 2.5, b.x + b.w - 2.5), z = B.zw(r, b.z + 2.5, b.z + b.d - 2.5);
-    if (belegt(x, z) || aufWeg(x, z) || Math.hypot(x - cx, z - cz) < 9) continue;
+    if (belegt(x, z) || aufWeg(x, z) || wurzelSumme(x - cx, z - cz) < 9) continue;
     B.baumSetzen(I, waehle(r, ['linde', 'kastanie', 'kugel', 'platane']), x, y, z, r, B.zw(r, 0.8, 1.05));
   }
   for (let u = b.x + 6; u < b.x + b.w - 4; u += 12) I.setze('bank', u, y + 0.04, cz + 2.4, Math.PI);

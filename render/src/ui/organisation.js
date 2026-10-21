@@ -6,6 +6,20 @@ export function organisationModul(ctx) {
   const ui = { aktiv:false, reiter:'zentrale', ebene:null, id:null };
   const bar = (q) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0,Math.min(1,q))*100) + '%"></i></span>';
   const name = (st) => st?.person ? esc(st.person.name) : '<span class="frei">unbesetzt – besetzen</span>';
+  const aufgabenListe = (aufgaben, id, cluster = false) => {
+    if (!aufgaben?.length) return '';
+    return '<div class="org-aufgaben"><small>Delegation je Aufgabe, Änderungen wirken ab der nächsten Woche</small>' +
+      aufgaben.map((a) => {
+        const ziel = ' data-id="' + esc(id) + '" data-task="' + esc(a.id) + '"' + (cluster ? ' data-cluster="1"' : '');
+        const schalter = '<button data-org="aufgabe"' + ziel + ' aria-pressed="' + a.an + '">' +
+          (a.an ? 'Delegiert' : 'Beim CEO') + '</button>';
+        const grenze = a.grenze === undefined ? '' : '<span class="org-grenze"><button data-org="grenze"' + ziel +
+          ' data-grenze="' + a.grenze + '" data-delta="-10000" aria-label="Grenze senken">−</button>' +
+          '<b>' + geld(a.grenze) + '</b><button data-org="grenze"' + ziel + ' data-grenze="' +
+          a.grenze + '" data-delta="10000" aria-label="Grenze erhöhen">+</button></span>';
+        return '<div class="org-aufgabe"><span>' + esc(a.name) + '</span>' + grenze + schalter + '</div>';
+      }).join('') + '</div>';
+  };
   const profil = (stelle, titel, ebene, id) => {
     if (!stelle) return '';
     const p = stelle.person;
@@ -38,7 +52,7 @@ export function organisationModul(ctx) {
       for (const ressort of x.ressorts) {
         const bs=x.bereiche.filter((b)=>b.ressort===ressort.id);
         h+='<div class="karte"><div class="khead"><b>' + esc(ressort.id.toUpperCase()) + ' · ' + esc(ressort.name) + '</b><small>' + (ressort.person?esc(ressort.person.name):'<span class="frei">unbesetzt</span>') + '</small></div>';
-        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>';
+        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(b.aufgaben, b.id);
           // Q06: Marktbeobachtung als eigene steuerbare Fachabteilung unter dem CSO.
           if (b.id === 'marktbeobachtung') {
             const markt = E.marktbeobachtungUebersicht(st);
@@ -57,18 +71,28 @@ export function organisationModul(ctx) {
       for (const r of x.regionen) {
         h+='<div class="karte"><div class="khead"><b>Region '+esc(r.id)+'</b><button data-org="profil" data-ebene="region" data-id="'+esc(r.id)+'">'+name(r.stelle)+'</button></div>';
         for (const c of r.cluster) {
-          const rot = !c.stelle.person, ampel=c.umsatz>0?'●':'○';
-          h+='<div class="org-zeile"><span class="org-ampel '+(rot?'warn':'')+'">'+ampel+'</span><div><b>'+esc(c.name)+'</b><small>'+c.anzahl+' Häuser · Umsatz/Woche '+geld(c.umsatz)+'</small>'+bar(c.qualitaet)+'</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+(rot?'besetzen':'Leitung')+'</button><button data-org="delegation" data-id="'+esc(c.id)+'" data-cluster="1" aria-pressed="'+c.stelle.delegiert+'">Delegiert '+(c.stelle.delegiert?'ja':'nein')+'</button></div></div>';
+          const rot = !c.stelle.person, ampel=st.woche>0&&c.umsatz>0?'●':'○';
+          h+='<div class="org-zeile"><span class="org-ampel '+(rot?'warn':'')+'">'+ampel+'</span><div><b>'+esc(c.name)+'</b><small>'+c.anzahl+' Häuser · Umsatz/Woche '+(st.woche===0?'noch offen':geld(c.umsatz))+'</small>'+bar(c.qualitaet)+'</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+(rot?'besetzen':'Leitung')+'</button><button data-org="delegation" data-id="'+esc(c.id)+'" data-cluster="1" aria-pressed="'+c.stelle.delegiert+'">Delegiert '+(c.stelle.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(c.aufgaben, c.id, true);
         }
         h+='</div>';
       }
       if (x.sonder) {
         const c=x.sonder;
         h+='<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+name(c.stelle)+'</button></div><p>'+c.hausIds.length+' Häuser · '+x.flagships.length+' gewählte Flagships</p>';
-        for (const haus of st.haeuser.filter((v)=>v.format==='warenhaus'&&v.status==='offen').sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length).slice(0,12)) {
+        // Premium ist immer sichtbar, auch außerhalb des Rankings der größten zwölf Häuser.
+        const premiumHaeuser = st.haeuser.filter((haus)=>haus.klasse==='premium');
+        const gewaehlte = st.haeuser.filter((haus)=>x.flagships.includes(haus.id));
+        const kandidaten = st.haeuser.filter((haus)=>haus.format==='warenhaus'&&haus.status==='offen'&&haus.klasse!=='premium')
+          .sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length).slice(0,12);
+        const liste = [...new Map([...premiumHaeuser,...gewaehlte,...kandidaten].map((haus)=>[haus.id,haus])).values()];
+        const namen = new Map();
+        for (const haus of liste) namen.set(haus.name, (namen.get(haus.name)??0)+1);
+        for (const haus of liste) {
           const an=x.flagships.includes(haus.id), premium=haus.klasse==='premium';
-          h+='<div class="zeile"><span class="was">'+esc(haus.name)+(premium?' · Premium':'')+'</span><button '+(premium?'disabled':'')+' data-org="flagship" data-haus="'+esc(haus.id)+'" data-an="'+(!an)+'">'+(premium?'fest':an?'Flagship abwählen':'Flagship wählen')+'</button></div>';
+          const zusatz = namen.get(haus.name)>1 ? ' · '+esc(haus.stadt)+' ('+esc(haus.id)+')' : '';
+          h+='<div class="zeile"><span class="was">'+esc(haus.name)+zusatz+(premium?' · Premium':'')+'</span><button '+(premium?'disabled':'')+' data-org="flagship" data-haus="'+esc(haus.id)+'" data-an="'+(!an)+'">'+(premium?'fest':an?'Flagship abwählen':'Flagship wählen')+'</button></div>';
         }
+        h+=aufgabenListe(c.aufgaben,c.id,true);
         h+='</div>';
       }
     }
@@ -85,6 +109,8 @@ export function organisationModul(ctx) {
     if(a==='zurueck'){ui.ebene=null;zeichnen();}
     if(a==='profil'){ui.ebene=el.dataset.ebene;ui.id=el.dataset.id;zeichnen();}
     if(a==='delegation'){tun({typ:'delegation',...(el.dataset.cluster?{hauscluster:el.dataset.id}:{bereich:el.dataset.id}),an:el.getAttribute('aria-pressed')!=='true'});}
+    if(a==='aufgabe')tun({typ:'delegation',...(el.dataset.cluster?{hauscluster:el.dataset.id}:{bereich:el.dataset.id}),aufgabe:el.dataset.task,an:el.getAttribute('aria-pressed')!=='true'});
+    if(a==='grenze')tun({typ:'delegationGrenze',...(el.dataset.cluster?{hauscluster:el.dataset.id}:{bereich:el.dataset.id}),aufgabe:el.dataset.task,betrag:Math.max(0,Number(el.dataset.grenze)+Number(el.dataset.delta))});
     if(a==='flagship')tun({typ:'flagship',haus:el.dataset.haus,an:el.dataset.an==='true'});
     if(a==='besetzen')tun({typ:'organisationBesetzen',ebene:ui.ebene,id:ui.id,kandidat:el.dataset.kandidat});
     if(a==='entlassen')tun({typ:'organisationEntlassen',ebene:ui.ebene,id:ui.id});

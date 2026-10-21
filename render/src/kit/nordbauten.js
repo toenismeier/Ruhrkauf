@@ -8,6 +8,8 @@
 //
 // Rahmen-Konzept wie in ostbauten.js: Fassade = Rahmen F mit Ursprung, Laufrichtung, Normale und Länge L.
 // Koordinaten auf dem Rahmen: u entlang der Fassade, y Höhe, t nach außen (t < 0 = im Gebäude).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, FARBEN, Sammler, rng, waehle, zw, heller, dunkler, textTextur, textMaterial, dachProfil, walmdach, LOD } from './basis.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
@@ -30,13 +32,13 @@ function seiten(x0, z0, x1, z1) {
 }
 /** Rahmen der Kanten eines Polygons (Reihenfolge wie rechteck(): Normale (-dz, dx) zeigt nach außen). */
 function kanten(poly) {
-  return poly.map((a, i) => { const b = poly[(i + 1) % poly.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]); return R(a[0], a[1], (b[0] - a[0]) / L, (b[1] - a[1]) / L, L); });
+  return poly.map((a, i) => { const b = poly[(i + 1) % poly.length], L = wurzelSumme(b[0] - a[0], b[1] - a[1]); return R(a[0], a[1], (b[0] - a[0]) / L, (b[1] - a[1]) / L, L); });
 }
 const rechteck = (x0, z0, x1, z1) => [[x0, z1], [x1, z1], [x1, z0], [x0, z0]];
 function einruecken(poly, s) {
   const n = poly.length, L = [];
   for (let i = 0; i < n; i++) {
-    const a = poly[i], b = poly[(i + 1) % n], l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const a = poly[i], b = poly[(i + 1) % n], l = wurzelSumme(b[0] - a[0], b[1] - a[1]);
     const dx = (b[0] - a[0]) / l, dz = (b[1] - a[1]) / l;
     L.push([a[0] + dz * s, a[1] - dx * s, dx, dz]);
   }
@@ -108,7 +110,7 @@ function stab(S, a, b, rad, c, seg = 6) {
 }
 function balken(S, a, b, br, ho, c) {
   const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-  const hl = Math.hypot(dx, dz), L = Math.hypot(hl, dy);
+  const hl = wurzelSumme(dx, dz), L = wurzelSumme(hl, dy);
   const g = new THREE.BoxGeometry(L, ho, br);
   g.rotateZ(Math.atan2(dy, hl)); g.rotateY(Math.atan2(-dz, dx));
   g.translate((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
@@ -116,7 +118,7 @@ function balken(S, a, b, br, ho, c) {
 }
 /** Balken im Rahmen von (u0,y0) nach (u1,y1), Tiefe t0..t1. */
 function fbalken(S, F, u0, y0, u1, y1, br, t0, t1, c) {
-  const L = Math.hypot(u1 - u0, y1 - y0);
+  const L = wurzelSumme(u1 - u0, y1 - y0);
   const g = new THREE.BoxGeometry(L, br, t1 - t0);
   g.rotateZ(Math.atan2(y1 - y0, u1 - u0)); g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
   fgeo(S, F, g, c);
@@ -411,7 +413,7 @@ function giebelUmriss(typ, bw, H, G, m) {
     pk.push(...halb, [c, H + G], ...halb.slice().reverse().map(([u, v]) => [bw - u, v]));
   } else if (typ === 'dreieck') pk.push([c, H + G]);
   pk.push([0, H]);
-  return pk.filter((q, i) => i === 0 || Math.hypot(q[0] - pk[i - 1][0], q[1] - pk[i - 1][1]) > 0.01);
+  return pk.filter((q, i) => i === 0 || wurzelSumme(q[0] - pk[i - 1][0], q[1] - pk[i - 1][1]) > 0.01);
 }
 function giebelHaus(S, scene, p, r, o) {
   const { a, b, T, D, typ, wand, orn, dach, n, eg, gh } = o;
@@ -427,7 +429,7 @@ function giebelHaus(S, scene, p, r, o) {
   // Kern
   S.quader(a + (links ? 0.4 : 0), 0, zH, b - (rechts ? 0.4 : 0), H, D - 0.4, wand);
   // ---- Front ----
-  const umr = [[0, 0], [bw, 0], ...(traufe ? (() => { const zb = Math.min(bw * 0.5, 4.2); o.zwerch = zb; return [[bw, H], [c + zb / 2, H], [c + zb / 2, H + 2.7], [c, H + 4.3], [c - zb / 2, H + 2.7], [c - zb / 2, H]]; })() : giebelUmriss(typ, bw, H, G, m)), [0, H]].filter((q, i, arr) => i === 0 || Math.hypot(q[0] - arr[i - 1][0], q[1] - arr[i - 1][1]) > 0.01);
+  const umr = [[0, 0], [bw, 0], ...(traufe ? (() => { const zb = Math.min(bw * 0.5, 4.2); o.zwerch = zb; return [[bw, H], [c + zb / 2, H], [c + zb / 2, H + 2.7], [c, H + 4.3], [c - zb / 2, H + 2.7], [c - zb / 2, H]]; })() : giebelUmriss(typ, bw, H, G, m)), [0, H]].filter((q, i, arr) => i === 0 || wurzelSumme(q[0] - arr[i - 1][0], q[1] - arr[i - 1][1]) > 0.01);
   const oe = [];
   const na = Math.max(2, Math.min(4, Math.floor((bw - 0.6) / 2.05))), ax = achsen(0, bw, (bw - 0.8) / na, 0.4);
   const fb_ = putz ? 1.15 : 1.05, fh = 1.85;
@@ -614,7 +616,7 @@ function frontUmriss(L, H, giebel = []) {
     for (const [u, v] of gp) pk.push([g.u0 + u, v]);
   }
   pk.push([0, H]);
-  return pk.filter((q, i) => i === 0 || Math.hypot(q[0] - pk[i - 1][0], q[1] - pk[i - 1][1]) > 0.01);
+  return pk.filter((q, i) => i === 0 || wurzelSumme(q[0] - pk[i - 1][0], q[1] - pk[i - 1][1]) > 0.01);
 }
 /** Dachhöhe, die sicher hinter einem Treppengiebel der Höhe G mit m Stufen bleibt. */
 const dachUnterGiebel = (G, m) => ((G * (2 * m + 1)) / (2 * m + 2)) * 0.93;
@@ -866,7 +868,7 @@ function kontorRoh(S, scene, p) {
   if (v === 'spitz') {
     // Schiffsbug: Keil an der spitzen Ecke, über alle Staffeln hochgezogen
     const [tx, tz] = poly[1], e0 = [poly[0][0] - tx, poly[0][1] - tz], e1 = [poly[2][0] - tx, poly[2][1] - tz];
-    const n0 = Math.hypot(...e0), n1 = Math.hypot(...e1), lk = 3.2;
+    const n0 = wurzelSumme(...e0), n1 = wurzelSumme(...e1), lk = 3.2;
     const keil = [[tx, tz], [tx + (e1[0] / n1) * lk, tz + (e1[1] / n1) * lk], [tx + (e0[0] / n0) * lk, tz + (e0[1] / n0) * lk]];
     const yK = yTop + 4.5;
     prisma(S, keil, 0, yK, o.pfeiler);
@@ -1383,7 +1385,7 @@ function kircheRoh(S, scene, p) {
   } else prisma(S, [[cx - ra, zC + 0.5], ...chor.slice().reverse().map(([x, z]) => [x, z]), [cx + ra, zC + 0.5]].map(([x, z]) => [x + (cx - x) * 0.04, z + (zC - z) * 0.04]), 0, Hm, dunkler(stein, 0.06));
   const tris = [];
   for (let k = 0; k < 4; k++) {
-    const [ax, az] = chor[k], [bx, bz] = chor[k + 1], L = Math.hypot(bx - ax, bz - az);
+    const [ax, az] = chor[k], [bx, bz] = chor[k + 1], L = wurzelSumme(bx - ax, bz - az);
     const F = R(ax, az, (bx - ax) / L, (bz - az) / L, L);
     if (sieht(p, F)) kirchWand(S, F, L, Hm, { ...o, joch: L + 1, pfeiler: false, fb: Math.min(2.6, L - 1.4), fries: true });
     tris.push([[ax + (ax - cx) * 0.06, Hm, az + (az - zC) * 0.06], [bx + (bx - cx) * 0.06, Hm, bz + (bz - zC) * 0.06], [cx, Hm + hR, zC]]);
