@@ -187,7 +187,12 @@ export function glaeubigerversammlung(s: GameState): void {
     planEbitda = 0;
     for (let i = 0; i < 52 && klon.phase === 'regulaer'; i++) planEbitda += planWoche(klon);
   }
-  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s).versammlungSchwelle ? 5 : -10;
+  // Die Gläubigerschwellen wurden in der 130er-Welt auf absolute Euro kalibriert.
+  // Im 560er-Maßstab muss dieselbe wirtschaftliche Verlustquote zählen;
+  // das Startvolumen bleibt nach Filialschließungen als Referenz konstant.
+  const konzernJahresumsatzStart = (s.zentrale.kostenStart / PARAM.zentraleQuote) * 52;
+  const schwelle = schwierigkeit(s).versammlungSchwelle * Math.max(1, konzernJahresumsatzStart / 3_300_000_000);
+  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwelle ? 5 : -10;
   const quoteBonus = 60 * (ins.quote - 0.1);
   const zahlung = ins.quote * ins.altVerbindlichkeiten;
   const st = s.stakeholder;
