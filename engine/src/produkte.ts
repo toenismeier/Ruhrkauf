@@ -438,17 +438,19 @@ export function produktNachfrageFaktor(s: GameState, markeId: string, wg: WgId):
  * Die Hauspassung wird über dieselben Engine-Parameter wie bei den Eigenmarken berechnet. */
 export function produktHausFaktor(s: GameState, m: Eigenmarke, wg: WgId, h: Pick<Haus, 'einzug' | 'cluster' | 'region'>): number {
   if (!s.produkte) return 1;
-  const liste = s.produkte.liste.filter((p) => p.marke === m.id && p.wg === wg && imSortiment(p) && p.zielgruppe);
-  if (!liste.length) return 1;
+  const liste = s.produkte.liste.filter((p) => p.marke === m.id && p.wg === wg && imSortiment(p));
+  if (!liste.some((p) => p.zielgruppe)) return 1;
   const alt = passungHaus(m, h);
   let gewichtet = 0, sum = 0;
   for (const p of liste) {
-    const z = ZIELGRUPPE_PRODUKT[p.zielgruppe!];
+    const w = gewicht(s, p);
+    sum += w;
+    // Altprodukte ohne Kennzeichnung übernehmen neutral die Zielgruppe der Marke.
+    if (!p.zielgruppe) continue;
+    const z = ZIELGRUPPE_PRODUKT[p.zielgruppe];
     const alter = p.zielgruppe === 'bestager' && m.zielgruppe.alter === '70+' ? '70+' : z.alter;
     const ziel = passungHaus({ zielgruppe: { ...m.zielgruppe, alter }, preislage: p.preislage }, h);
-    const w = gewicht(s, p);
     gewichtet += w * (ziel - alt);
-    sum += w;
   }
   return clamp(1 + 0.8 * gewichtet / Math.max(sum, 0.01), 0.75, 1.25);
 }
