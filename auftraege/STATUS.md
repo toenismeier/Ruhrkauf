@@ -21,10 +21,10 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 |---|---|---|---|
 | Q04 Spiel-Befunde Wurf 1 | – | gemergt (#40) | – |
 | Q05 Eigenmarken und Delegation je Aufgabe | – | gemergt (#42) | – |
-| Maßstab Engine Phase 1/2 (#7, 560 Häuser) | `feat/engine-massstab` #7 | abnahmefähig (Phase 1), Phase 2 offen | Abnahme; neu Abschnitt 11 in `nachbesserung-massstab.md`: Q1-Verlauf abschwächen (Ummo 20.10.) |
+| Maßstab Engine Phase 1/2 (#7, 560 Häuser) | main | **gemergt 21.10.** (b5534a0) | Abnahme `nachbesserung-massstab.md` Abschnitt 20; Premium klar über Schnitt (E28) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | `feat/massstab-oberflaeche` #23 | abnahmefähig | Prüfung; Voraussetzung für Q07 |
-| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | – | offen | Start nach #7 Phase 2 |
-| Q06 Marktbeobachtung (Meldungen filtern) | – | offen | startklar (N08 gemergt) |
+| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | – | offen | **startklar** (#7 gemergt) |
+| Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | – | offen | Start nach Merge Maßstab Oberfläche |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |
 
@@ -32,7 +32,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
 | O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O05 Ware, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
-| O09 E-Commerce | `feat/op-ecommerce` #46 | abnahmefähig (rebased, konfliktfrei) | prüfen, mergen |
+| O09 E-Commerce | main | **gemergt 21.10.** (#46) | – |
 
 ## Nice-to-haves
 | N | PR | Status |
@@ -51,8 +51,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 1. Q03 Fingerabdruck mergen (Gate scharf).
 2. Q04 und Q05 prüfen und mergen.
 3. Q02 prüfen (Rendern, Leistung, Fingerabdrücke nur für geänderte Städte neu).
-4. O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47) prüfen und mergen.
-5. #7 Maßstab Engine (Abnahme nach `nachbesserung-massstab.md` Abschnitt 14, Messung durch Claude) und Maßstab Oberfläche abnehmen; danach Q07 starten.
+4. ~~O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47)~~ gemergt 21.10.
+5. ~~#7 Maßstab Engine~~ gemergt 21.10. Offen: Maßstab Oberfläche (#23) abnehmen, danach Q07. Neu: fünf Premiumhäuser (E29, eigener Auftrag).
 5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
-6. Nach N08: Q06 starten. Nach #7 Phase 2: Engine-Formate.
+6. Engine-Formate jetzt startklar.
 7. Danach Build-Zug: Spiel einpacken, Update aufs iPhone, Messung.
