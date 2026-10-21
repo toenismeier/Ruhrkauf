@@ -878,7 +878,7 @@ export function trendbericht(s: GameState): Trendbericht {
 export interface ProduktVorschau {
   ok: boolean; fehler?: string; wg?: WgId; wgName?: string; kategorie?: ProduktKategorie; name?: string;
   normpreis: number; ekStueck: number; marge: number; kosten: number; fertigWoche: number; saisonEinfuehrung: string;
-  sterneErwartet: number; sterneVon: number; sterneBis: number; teile?: SterneTeile; trendBekannt: boolean; kapazitaetFrei: number;
+  sterneErwartet: number; sterneVon: number; sterneBis: number; teile?: SterneTeile; trendBekannt: boolean; kapazitaetFrei: number; passform: number;
   hinweise: string[];
 }
 
@@ -888,7 +888,7 @@ export function produktVorschau(s: GameState, e: ProduktEntwurf): ProduktVorscha
   const fertig = s.woche + (e.dauer || 0);
   const sid = saisonId(fertig);
   const bekannt = sid <= saisonId(s.woche) + 1;
-  const leer: ProduktVorschau = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
+  const leer: ProduktVorschau = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig, saisonEinfuehrung: saisonName(s, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, passform: 0, hinweise: [] };
   if (!c.m || !c.t || !c.wg) return leer;
   const team = teamStaerke(s);
   const teile = bewerte(s, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, zielgruppe: e.zielgruppe }, team, bekannt ? trendFuer(s, sid) : undefined);
@@ -908,6 +908,7 @@ export function produktVorschau(s: GameState, e: ProduktEntwurf): ProduktVorscha
   return {
     ok: !c.fehler, fehler: c.fehler, wg: c.wg, wgName: WG[c.wg].name, kategorie: c.t.kategorie, name: e.name?.trim() || produktName(e.typ, e.farbe, e.material),
     normpreis: np, ekStueck: ek, marge: Math.round((1 - ek / np) * 1000) / 1000, kosten: eur(e.budgetWoche * e.dauer), fertigWoche: fertig, saisonEinfuehrung: saisonName(s, sid),
-    sterneErwartet: st, sterneVon: halbe(st - spanne / 2), sterneBis: halbe(st + spanne / 2), teile, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise,
+    sterneErwartet: st, sterneVon: halbe(st - spanne / 2), sterneBis: halbe(st + spanne / 2), teile, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei,
+    passform: c.t.gruppe[e.zielgruppe ? ZIELGRUPPE_PRODUKT[e.zielgruppe].trend : trendGruppe(c.m)], hinweise,
   };
 }
