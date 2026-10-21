@@ -218,6 +218,7 @@ export const LANDMARKEN = {
  *   Einträge mit Parzellen-Id; plan.einkaufslage enthält das Rechteck der Einkaufslage.
  *   Ohne standorte bleibt alles wie bisher (ein Warenhaus).
  */
+
 export function stadtplan(seed, o = {}) {
   const typ = o.typ ?? 'grossstadt';
   const T = TYPEN[typ];
@@ -680,7 +681,9 @@ function einkaufsKreuz(E, innen, zc) {
   const n1a = innen.filter((e) => e.lage === '1a').length;
   const schon = E.einkaufslagen ?? [];
   let best = null;
-  for (let kF = 1; kF < nx; kF++) for (let lF = 1; lF < nz; lF++) {
+  // Fest vorgegebenes Kreuz (Kartenstädte wie Essen: Kettwiger × Limbecker Straße); alle übrigen Städte suchen wie bisher
+  if (E.kreuzWunsch) best = { s: 0, kF: E.kreuzWunsch.kF, lF: E.kreuzWunsch.lF, k: kandidatenAm(E.kreuzWunsch.kF, E.kreuzWunsch.lF) };
+  else for (let kF = 1; kF < nx; kF++) for (let lF = 1; lF < nz; lF++) {
     if (istHaupt(E.zTyp[kF]) || istHaupt(E.xTyp[lF]) || E.tram.includes('z' + kF)) continue;
     if (E.zTyp[kF] === 'einkauf' && E.xTyp[lF] === 'einkauf') continue;
     const k = kandidatenAm(kF, lF);
@@ -735,8 +738,9 @@ function einkaufsKreuz(E, innen, zc) {
   fixiere(E, kF);
   const amZ = meine.filter((e) => e.lage === '1a' && (e.i === kF - 1 || e.i === kF)).map((e) => e.j);
   const amX = meine.filter((e) => e.lage === '1a' && (e.j === lF - 1 || e.j === lF)).map((e) => e.i);
-  const j0 = klemm(Math.min(lF - 2, ...amZ), 0, nz - 1), j1 = klemm(Math.max(lF + 1, ...amZ), 0, nz - 1);
-  const i0 = klemm(Math.min(kF - 2, ...amX), 0, nx - 1), i1 = klemm(Math.max(kF + 1, ...amX), 0, nx - 1);
+  const W = E.kreuzWunsch ?? {};
+  const j0 = klemm(Math.min(lF - 2, ...amZ, W.j0 ?? 99), 0, nz - 1), j1 = klemm(Math.max(lF + 1, ...amZ, W.j1 ?? -1), 0, nz - 1);
+  const i0 = klemm(Math.min(kF - 2, ...amX, W.i0 ?? 99), 0, nx - 1), i1 = klemm(Math.max(kF + 1, ...amX, W.i1 ?? -1), 0, nx - 1);
   for (let j = j0; j <= j1; j++) E.fz.push(`z${kF}:${j}`);
   for (let i = i0; i <= i1; i++) E.fz.push(`x${lF}:${i}`);
   const L = { kF, lF, i0, i1, j0, j1 };
@@ -766,7 +770,9 @@ function randLagen(E, randZelle, zellenNach) {
     // Center innerhalb der Karte mit Abstand zum Rand (zweite Zellreihe), damit sein Ausschnitt mittig in der Stadt liegt;
     // Fachmarktlagen bleiben an der Randzeile
     const zweiteReihe = (i, j) => E.aktiv(i, j) && Math.min(i, j, E.spalten.length - 1 - i, E.reihen.length - 1 - j) === 1;
-    let l = L.art === 'center' ? zellenNach((i, j) => zweiteReihe(i, j) && dist(i, j) > 3.4 && abstand(i, j) > 1, (i, j) => (anHaupt(i, j) ? 4 : 1) * dist(i, j)) : [];
+    // Fest vorgegebene Centerlage (Kartenstädte, z. B. Limbecker Platz in Essen), sonst Suche wie bisher
+    const wunsch = L.art === 'center' ? (E.centerWunsch ?? []).find(([i, j]) => zelleFrei(E, i, j) && abstand(i, j) > 0) : null;
+    let l = wunsch ? [[wunsch, 1]] : L.art === 'center' ? zellenNach((i, j) => zweiteReihe(i, j) && dist(i, j) > 3.4 && abstand(i, j) > 1, (i, j) => (anHaupt(i, j) ? 4 : 1) * dist(i, j)) : [];
     if (!l.length) l = zellenNach((i, j) => randZelle(i, j) && dist(i, j) > 2.4 && abstand(i, j) > 1, (i, j) => (anHaupt(i, j) ? (L.art === 'center' ? 4 : 1.5) : 1) * dist(i, j));
     if (!l.length) l = zellenNach((i, j) => dist(i, j) > 1.8 && abstand(i, j) > 0, (i, j) => dist(i, j));
     if (!l.length) continue;
@@ -1276,13 +1282,13 @@ function baueRaster(seed, E) {
     } else if (b.art === 'bahn') {
       // GESTALTUNG.md 3: Gleisband 26 m an der Kartenseite, Empfangsgebäude direkt davor, Vorplatz zur Stadt (Taxis,
       // Bussteige, Baumreihe); Gleishalle nur bei Metropolen und schmal
-      const gross = b.gross && E.typ === 'metropole' && b.w >= 140;
+      const gross = b.gross && (E.typ === 'metropole' || b.essenHbf) && b.w >= 140;
       const W = gross ? Math.min(b.w - 24, zw(rb, 130, 150)) : Math.min(b.w - 24, zw(rb, 64, 92)), D0 = gross ? 34 : zw(rb, 22, 28);
-      const band = Math.min(E.typ === 'mittelstadt' ? 16 : 26, Math.max(12, b.d - D0 - 8)), D = Math.min(D0, b.d - band - 4);   // Mittelstadt: zwei Gleise mit Mittelbahnsteig
+      const band = b.band ?? Math.min(E.typ === 'mittelstadt' ? 16 : 26, Math.max(12, b.d - D0 - 8)), D = Math.min(D0, b.d - band - 4);   // Mittelstadt: zwei Gleise mit Mittelbahnsteig; b.band: Gleisharfe (Essen)
       const cx = b.bahnhofLinie !== undefined ? zL[b.bahnhofLinie].x : b.x + b.w / 2;
       const zB = b.oben ? b.z + 2 + band + 1 : b.z + b.d - 2 - band - 1 - D;
       const bahnhofX = klemm(cx - W / 2, b.x + 4, b.x + b.w - W - 4), bahnhofW = W;
-      neueParzelle(ctx, 'slot:bahnhof', bahnhofX, zB, W, D, b.oben ? ['+z', '-z'] : ['-z', '+z'], 'frei', { klasse: 4 });
+      neueParzelle(ctx, 'slot:bahnhof', bahnhofX, zB, W, D, b.oben ? ['+z', '-z'] : ['-z', '+z'], 'frei', { klasse: 4, ...(b.bahnhofExtra ?? {}) });
       b.gleise = b.oben ? { z0: b.z + 2, z1: b.z + 2 + band, achse: 'x' } : { z0: b.z + b.d - 2 - band, z1: b.z + b.d - 2, achse: 'x' };
       // Vorplatz höchstens 24 m tief; ein tieferer Block bekommt zur Straße hin eine Häuserzeile (kein leeres Vorfeld)
       const rest = b.oben ? b.z + b.d - zB - D : zB - b.z;
@@ -1396,6 +1402,7 @@ function baueRaster(seed, E) {
     einkaufslagen: (E.einkaufslagen ?? []).map((L) => ({ ...L, x0: sx[L.i0], x1: sx[L.i1] + E.spalten[L.i1], z0: sz[L.j0], z1: sz[L.j1] + E.reihen[L.j1], xF: zL[L.kF].x, zF: xL[L.lF].z })),
     kern: { i: E.warenhaus?.i ?? E.zentrum.i, j: E.warenhaus?.j ?? E.zentrum.j },
     zentrum: E.zentrum, marktVariante: E.marktVariante ?? null,
+    ...(E.startBlick ? { startBlick: E.startBlick } : {}),
   };
   // Stadtrandgürtel (Vororte, Felder, Wald, fortgesetzte Flüsse) und Kameragrenze, siehe stadtrand.js
   Object.assign(plan, stadtrandPlan(plan, { kueste: E.o?.kueste, seeArt: E.o?.seeArt, berge: E.berge }));

@@ -12,7 +12,8 @@ export {
   type AbteilungId, type Abteilung, type Hq, type HqAngebot, type HqEtage, type HqGebaeude, type HqTyp, type Stufe,
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
-export { GRUPPEN, gruppenFuer, STAEDTE, STADT_REGIONEN, stadtRegion } from './daten';
+export { GRUPPEN, gruppenFuer, sortimentVon, STAEDTE, STADT_REGIONEN, stadtRegion } from './daten';
+export { outletUebersicht, schwesterUebersicht, outletKandidaten, type FormateStand, type FormatPosten } from './formate';
 // O05 Ware
 export { warenUebersicht, warenHaus, fundusFrequenzFaktor, clusterListe, hausclusterId, type WareAktion, type WareStand } from './merchandise';
 export { STANDARD_SZENARIO, type Szenario } from './welt';

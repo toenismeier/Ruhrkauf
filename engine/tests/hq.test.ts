@@ -84,7 +84,8 @@ describe('HQ Kosten', () => {
     const s = neuesSpiel(1);
     const z = s.zentrale.kostenWoche;
     wocheAbspielen(s);
-    expect(s.historie[0].zentrale).toBe(z);
+    // Volkskauf-Regionalführung (engine-formate.md 2) läuft als eigener Zentralblock mit.
+    expect(s.historie[0].zentrale).toBe(z + (s.formate?.schwesterZentraleWoche ?? 0));
   });
   test('Abbau auf Soll senkt Personalkosten, kostet Abfindung und Betriebsrat', () => {
     const s = neuesSpiel(1);

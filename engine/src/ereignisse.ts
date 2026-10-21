@@ -10,6 +10,7 @@ import { schwierigkeit } from './schwierigkeit';
 import { premiumAngebote } from './premium';
 import { zeitungInterviewAntwort } from './zeitung';
 import { konzernVerkaufAnbieten } from './spielende';
+import { formateZufall, formateZahl } from './formate';
 // O01 Organisation
 import { organisationVorlageEntscheidung, istAufgabeDelegiert, delegationsGrenze } from './organisation';
 import { mietvertragEmpfehlung } from './vertrieb';
@@ -170,8 +171,8 @@ function mietende(s: GameState, h: Haus): void {
       Math.abs(markt - h.miete.mieteWoche) * 52 <= (delegationsGrenze(s, 'mietvertraege', 'immobilien') ?? Infinity)) {
     const offen = s.entscheidungen[s.entscheidungen.length - 1];
     if (offen?.typ === 'mietende' && offen.daten.haus === h.id) {
-      loeseEntscheidung(s, offen, mietvertragEmpfehlung(h, markt));
-      s.entscheidungen.pop();
+      // loeseEntscheidung nimmt die Vorlage selbst aus der Liste.
+      loeseEntscheidung(s, offen.id, mietvertragEmpfehlung(h, markt));
     }
   }
 }
@@ -244,6 +245,26 @@ const SATIRE = [
 export function ereignisse(s: GameState): void {
   if (s.prognose) return;
   const w = s.woche;
+  // Der Format-RNG verändert die bestehende Ereignisfolge nicht.
+  if(s.formate && offeneHaeuser(s,'schwester').length && !s.angebote.some(a=>a.status==='offen'&&a.typ==='kettenverkauf') && formateZufall(s,s.phase==='insolvenz'?0.01:0.004)){
+    const hs=offeneHaeuser(s,'schwester');
+    const jahresumsatz=hs.reduce((n,h)=>n+(h.kpi?.umsatz??0),0)*52;
+    const marge=hs.reduce((n,h)=>n+(h.kpi?.guv?.ebitda??0),0)/Math.max(1,jahresumsatz/52);
+    const substanz=hs.reduce((n,h)=>n+h.substanz,0)/hs.length;
+    const preis=eur(Math.max(1,jahresumsatz)*formateZahl(s,0.3,0.6)*clamp(1+marge,0.8,1.15)*(0.9+substanz/500));
+    neuesAngebot(s,{typ:'kettenverkauf',frist:w+8,kaufpreis:preis,titel:'Investor bietet für Volkskauf',text:'Übernahme aller Häuser inklusive Warenbestand, Personal und Mietverträge für '+mio(preis)+'.'});
+  }
+  if(s.formate&&offeneHaeuser(s,'outlet').length&&formateZufall(s,0.006)){
+    const sortimente=['damen','herren','kinder','accessoires','wohnen','beauty'] as GruppeId[];
+    const gruppe=sortimente[Math.floor(formateZahl(s,0,sortimente.length))];
+    const wert=eur(formateZahl(s,500_000,3_000_000));
+    neuesAngebot(s,{typ:'sonderposten',formatZiel:'outlet',frist:w+2,gruppe,wert,_passt:formateZufall(s,0.7),titel:'Markenposten für FUNDUS',text:'Markenposten für '+mio(wert)+' Einstand zur sofortigen Übernahme.'});
+  }
+  for(const h of offeneHaeuser(s,'schwester').filter(h=>h.substanz<20)){
+    if(!s.entscheidungen.some(e=>e.typ==='instandhaltung'&&e.daten?.haus===h.id)&&formateZufall(s,0.04)){
+      neueEntscheidung(s,{typ:'instandhaltung',frist:w+3,titel:'Substanzmangel in '+h.name,text:'Zwingende Instandhaltung oder weitere Substanzschäden.',optionen:[{id:'zahlen',label:'Sanieren'},{id:'verschieben',label:'Verschieben'}],standard:'zahlen',daten:{haus:h.id,kosten:eur(150_000+formateZahl(s,100_000,450_000))}});
+    }
+  }
   premiumAngebote(s);
   konzernVerkaufAnbieten(s);
   // Makro

@@ -17,7 +17,7 @@ for (let n = 0; n < 52; n++) {
   if (aktuelle.length) wochen.push({ woche: n+1, vorher: aktuelle.length, nachher: gruppen.length });
 }
 console.log(JSON.stringify({
-  seed: 1, schwierigkeit: 'mittel', wochen: 52, haeuser: s.haeuser.length,
+  seed: 1, schwierigkeit: 'mittel', laufzeitWochen: 52, haeuser: s.haeuser.length,
   alteEinzelvorlagen: vorher, neueSammelvorlagen: nachher,
   reduktion: vorher - nachher, wochen, phase: s.phase, cash: s.cash,
 }, null, 2));
