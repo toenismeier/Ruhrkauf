@@ -753,6 +753,11 @@ window.premiumTun = (was, id) => {
   meldung(r.text, r.ok);
   if (r.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
 };
+window.filialProgramm = (programm) => {
+  const r = E.fuehreAus(s, { typ: 'filialProgramm', programm });
+  meldung(r.text, r.ok);
+  if (r.ok) { nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
+};
 function oeffneHaus(id) {
   const d = E.hausDetail(s, id);
   if (!d) {
@@ -796,6 +801,27 @@ function oeffneHaus(id) {
     if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || 'Investor'} · ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
     html += '</div>';
   }
+  // Tatsächlich gebuchte GuV, ohne Zentrale, als eigener Block im Haus-Reiter.
+  if (d.guv) {
+    const g = d.guv;
+    const kosten = new Set(E.GUV_KOSTEN);
+    html += '<div class="karte"><div class="khead">Filial-GuV · aktuelle Woche (ohne Zentrale)</div>';
+    for (const p of E.REFERENZ_FILIAL_GUV) {
+      const betrag = g[p.id] ?? 0;
+      const sign = kosten.has(p.id) || p.id === 'wareneinsatz' || p.id === 'opex' ? -1 : 1;
+      const wert = sign * betrag;
+      const quote = g.umsatz ? (100 * wert / g.umsatz).toFixed(1).replace('.', ',') + ' %' : '–';
+      html += `<div class="zeile"><span class="was">${p.name} <i>Referenz ${String(p.ist).replace('.', ',')} %</i></span><span class="qm">${geld(wert)}</span><span class="uq">${quote}</span></div>`;
+    }
+    html += '<div class="zeile grau">Referenzdifferenz: Einzel-OPEX −44,6 %, Total OPEX laut Vorgabe −42,4 %. Keine Ausgleichsbuchung.</div></div>';
+  }
+  html += '<div class="karte"><div class="khead">Sanierungsprogramme · gesamtes Filialnetz</div>';
+  for (const [programm, def] of Object.entries(E.FILIAL_PROGRAMME)) {
+    const stand = d.programme?.[programm];
+    const status = stand ? s.woche < stand.wirksamAb ? 'Anlaufphase bis Woche ' + (stand.wirksamAb + 1) : 'Wirksam' : '';
+    html += `<div class="zeile"><span class="was"><b>${def.name}</b> <i>${status || def.vorlauf + ' Wochen Vorlauf'} · ${def.nebenwirkung}</i></span>${stand ? '' : `<button class="mini" onclick="filialProgramm('${programm}')">Starten</button>`}</div>`;
+  }
+  html += '</div>';
   // O09: zusätzliche Logistik im Haussteckbrief.
   if (d.ecommerce && h.format === 'warenhaus') {
     const x = d.ecommerce;
@@ -1369,7 +1395,7 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     const fehler = soll.filter((w) => w.status !== 'geschlossen' && !gezeigt.has(w.id)).map((w) => 'Fehlt: ' + w.id);
     for (const id of gezeigt) if (!pinIds.has(id)) fehler.push('Pin fehlt: ' + id);
     return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler };
-  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, aktion: (a) => { const r = E.fuehreAus(s, a); nachAktion(); return r; }, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);

@@ -3,7 +3,7 @@
 const NAME = 'hartwig-spielstand';
 const STORE = 'staende';
 const INFOS = 'informationen';
-export const FORMAT = 1;
+export const FORMAT = 2;
 export const PLAETZE = ['autosave', 'platz-1', 'platz-2', 'platz-3'];
 const MAX_DATEI = 40 * 1024 * 1024;
 const MAX_INHALT = 160 * 1024 * 1024;
@@ -64,8 +64,8 @@ async function transaktion(namen, modus, arbeit) {
 
 function pruefen(datensatz) {
   if (!datensatz) return null;
-  if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 1)
-    throw new Error('Dieser Spielstand stammt aus einer nicht unterstützten Version. Er wurde nicht geändert.');
+  if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 2)
+    throw new Error('Dieser Spielstand hat ein altes, nicht mehr unterstütztes Format (Maßstab-Version 2 erforderlich). Der alte Stand wurde nicht verändert. Bitte ein neues Spiel starten oder den Stand löschen.');
   const s = datensatz.spiel;
   if (!Number.isInteger(s.woche) || s.woche < 0 ||
       !Number.isFinite(s.cash) || !Array.isArray(s.haeuser) || !Array.isArray(s.historie) ||
@@ -124,7 +124,7 @@ export async function liste() {
 export function speichern(spiel, stadt, ui = {}, platz = 'autosave', name = '', bild = null, importDatum = null) {
   try {
     platzPruefen(platz);
-    if (!spiel || spiel.version !== 1) throw new Error('Kein gültiges Spiel gestartet.');
+    if (!spiel || spiel.version !== 2) throw new Error('Kein gültiges Spiel gestartet.');
     // Vor dem Warten auf die Schreibwarteschlange kopieren, da die Engine weiterläuft.
     const datensatz = {
       format: FORMAT, datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : new Date().toISOString(), stadt,

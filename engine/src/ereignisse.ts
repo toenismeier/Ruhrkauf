@@ -19,7 +19,7 @@ import { umbauProgrammEntscheiden } from './umbau';
 import { loesePersonalEntscheidung } from './personaleinsatz';
 
 export function offeneHaeuser(s: GameState, format?: Haus['format']): Haus[] {
-  return s.haeuser.filter((h) => h.status === 'offen' && (!format || h.format === format));
+  return s.haeuser.filter((h) => !h.nurDaten && h.status === 'offen' && (!format || h.format === format));
 }
 
 export function neueEntscheidung(s: GameState, e: Omit<Entscheidung, 'id' | 'woche'>): void {

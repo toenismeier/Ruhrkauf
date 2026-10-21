@@ -124,9 +124,9 @@ function anlegen(s: GameState, stadt: string, art: WettbewerberArt, lage: Lage, 
 
 /** Nur eigener RNG: der Hausgenerator und alle anderen Startdaten bleiben bitgenau erhalten. */
 export function initialisiereWettbewerb(s: GameState): void {
-  const staedte = [...new Set(s.haeuser.map((h) => h.stadt))];
+  const staedte = [...new Set(aktive(s).map((h) => h.stadt))];
   for (const stadt of staedte) {
-    const hs = s.haeuser.filter((h) => h.stadt === stadt);
+    const hs = aktive(s).filter((h) => h.stadt === stadt);
     const c = hs[0].cluster, [min, max] = START_ANZAHL[c], [qmMin, qmMax] = START_FLAECHE[c];
     const n = gz(s, min, max);
     for (let i = 0; i < n; i++) {
@@ -143,7 +143,7 @@ export function initialisiereWettbewerb(s: GameState): void {
       anlegen(s, stadt, art, lage, qm, 0);
     }
   }
-  for (const h of s.haeuser) {
+  for (const h of aktive(s)) {
     // Historische Nachfragebasen je Haus und Gruppe einfrieren.
     // Rohwerte der Konkurrenten liefern später ausschließlich die Differenz zum Start.
     h.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, h.wettbewerbStart]));
@@ -155,8 +155,10 @@ export function initialisiereWettbewerb(s: GameState): void {
   }
 }
 
+/** Häuser mit eigener Wirtschaft; Formate mit nurDaten (Volkskauf, FUNDUS bis engine-formate) bleiben außen vor. */
+function aktive(s: GameState): Haus[] { return s.haeuser.filter((h) => !h.nurDaten); }
 function betroffeneHaeuser(s: GameState, stadt: string): Haus[] {
-  return s.haeuser.filter((h) => h.stadt === stadt && (h.status === 'offen' || h.status === 'schliessung_verhandlung'));
+  return aktive(s).filter((h) => h.stadt === stadt && (h.status === 'offen' || h.status === 'schliessung_verhandlung'));
 }
 function eroeffnungsArt(s: GameState, stadt: string): WettbewerberArt {
   const hs = betroffeneHaeuser(s, stadt);
@@ -168,9 +170,9 @@ function eroeffnungsArt(s: GameState, stadt: string): WettbewerberArt {
   return [...kandidaten].sort((a, b) => score(b) - score(a))[0];
 }
 function neuEroeffnet(s: GameState, stadt: string, art: WettbewerberArt, inHaus?: string): Wettbewerber {
-  const hs = s.haeuser.filter((h) => h.stadt === stadt), c = hs[0].cluster;
+  const hs = aktive(s).filter((h) => h.stadt === stadt), c = hs[0].cluster;
   const [qmMin, qmMax] = START_FLAECHE[c];
-  const qm = inHaus ? (s.haeuser.find((h) => h.id === inHaus)?.grundflaecheQm ?? qmMin) : Math.round(z(s, qmMin, qmMax) / 100) * 100;
+  const qm = inHaus ? (aktive(s).find((h) => h.id === inHaus)?.grundflaecheQm ?? qmMin) : Math.round(z(s, qmMin, qmMax) / 100) * 100;
   const wb = anlegen(s, stadt, art, chance(s, 0.7) ? '1a' : 'b', qm, s.woche, inHaus);
   const h = betroffeneHaeuser(s, stadt)[0];
   const gruppe = h ? gruppenFuer(h.format).sort((a, b) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a] ?? 0))[0] : 'damen';
@@ -206,7 +208,7 @@ function raeumung(s: GameState, w: Wettbewerber): void {
   }
 }
 function istStadtAktion(s: GameState, stadt: string): boolean {
-  return s.marketing.aktionen.some((a) => a.status !== 'abgesagt' && a.start === s.woche && s.haeuser.some((h) => h.stadt === stadt &&
+  return s.marketing.aktionen.some((a) => a.status !== 'abgesagt' && a.start === s.woche && aktive(s).some((h) => h.stadt === stadt &&
     (a.scope.typ === 'alle' || (a.scope.typ === 'region' && a.scope.region === h.region) ||
       (a.scope.typ === 'cluster' && a.scope.cluster === h.cluster) || (a.scope.typ === 'format' && a.scope.format === h.format) ||
       (a.scope.typ === 'haeuser' && a.scope.ids.includes(h.id)))));
@@ -223,8 +225,8 @@ function stadtWachstum(s: GameState, stadt: string): boolean {
 export function wettbewerbWoche(s: GameState): void {
   if (s.wettbewerbDeaktiviert) return;
   const w = s.woche;
-  if (!s.prognose) for (const stadt of new Set(s.haeuser.map((h) => h.stadt))) {
-    const umsatz = s.haeuser.filter((h) => h.stadt === stadt && h.kpi?.woche === w && h.status !== 'geschlossen' && h.status !== 'verkauft')
+  if (!s.prognose) for (const stadt of new Set(aktive(s).map((h) => h.stadt))) {
+    const umsatz = aktive(s).filter((h) => h.stadt === stadt && h.kpi?.woche === w && h.status !== 'geschlossen' && h.status !== 'verkauft')
       .reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0);
     const hist = s.wettbewerbStadtUmsatz[stadt] ?? (s.wettbewerbStadtUmsatz[stadt] = []);
     hist.push(umsatz);
@@ -246,19 +248,19 @@ export function wettbewerbWoche(s: GameState): void {
     }
   }
   if (!s.prognose && !s.wettbewerbEreignisseDeaktiviert) {
-    for (const h of s.haeuser.filter((h) => h.status === 'geschlossen' && !s.wettbewerbGeseheneSchliessungen.includes(h.id))) {
+    for (const h of aktive(s).filter((h) => h.status === 'geschlossen' && !s.wettbewerbGeseheneSchliessungen.includes(h.id))) {
       s.wettbewerbGeseheneSchliessungen.push(h.id);
       h.wettbewerbSchliessungWoche = w;
       if (chance(s, 0.35)) s.wettbewerbNachnutzungen.push({ haus: h.id, woche: w + gz(s, 26, 78) });
     }
     for (const n of s.wettbewerbNachnutzungen.filter((n) => n.woche <= w)) {
-      const h = s.haeuser.find((x) => x.id === n.haus);
+      const h = aktive(s).find((x) => x.id === n.haus);
       if (h && h.status === 'geschlossen') neuEroeffnet(s, h.stadt, wahl(s, ['offprice', 'textildiscounter', 'elektronik'] as const), h.id);
     }
     s.wettbewerbNachnutzungen = s.wettbewerbNachnutzungen.filter((n) => n.woche > w);
-    const staedte = [...new Set(s.haeuser.map((h) => h.stadt))];
+    const staedte = [...new Set(aktive(s).map((h) => h.stadt))];
     for (const stadt of staedte) {
-      const hs = s.haeuser.filter((h) => h.stadt === stadt);
+      const hs = aktive(s).filter((h) => h.stadt === stadt);
       const gesamtkm = hs.reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
       const zu = hs.filter((h) => h.status === 'geschlossen').reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
       const kuerzlich = hs.some((h) => h.wettbewerbSchliessungWoche !== undefined && w - h.wettbewerbSchliessungWoche < 52);
@@ -291,7 +293,7 @@ export function wettbewerbWoche(s: GameState): void {
       }
     }
   }
-  for (const h of s.haeuser) h.einzug.wettbewerb = wettbewerbAus(s, h);
+  for (const h of aktive(s)) h.einzug.wettbewerb = wettbewerbAus(s, h);
 }
 
 export function wettbewerbUebersicht(s: GameState, stadt?: string) {
@@ -300,7 +302,7 @@ export function wettbewerbUebersicht(s: GameState, stadt?: string) {
     status: w.status, preisdruck: w.preisdruck, seit: w.seit, inHartwigGebaeude: w.inHartwigGebaeude,
     rabatt: (w.aktionVon ?? Infinity) <= s.woche && (w.aktionBis ?? -1) > s.woche ? w.preisdruck : 0,
     wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w.art]).map((g) => {
-      const h = s.haeuser.find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g as GruppeId));
+      const h = aktive(s).find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g as GruppeId));
       const faktor = h ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w, g as GruppeId, s) * lageFaktor(h, w) / (1 - 0.25 * h.wettbewerbStart) : 0;
       return [g, -Math.round(faktor * 10_000) / 100];
     })),
@@ -318,7 +320,7 @@ export function wettbewerbFuerGrafik(s: GameState, stadt: string) {
 export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet' | 'erweiterung', mieteQmMonat = 11): string | null {
   const wb = s.wettbewerber.find((w) => w.id === id);
   if (!wb || wb.status === 'geschlossen') return 'Wettbewerber-Standort nicht verfügbar.';
-  const basis = s.haeuser.find((h) => h.stadt === wb.stadt && h.format === 'warenhaus' && h.status === 'offen');
+  const basis = aktive(s).find((h) => h.stadt === wb.stadt && h.format === 'warenhaus' && h.status === 'offen');
   if (!basis) return 'Kein offenes Hartwig-Warenhaus am Standort.';
   const qm = wb.grundflaecheQm;
   const kosten = eur(qm * (modus === 'erweiterung' ? 250 : 200));

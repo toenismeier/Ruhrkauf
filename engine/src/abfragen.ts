@@ -232,7 +232,7 @@ export function hausDetail(s: GameState, id: string) {
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),
   }));
-  return { haus: h, etagen, waren: warenHaus(s, h), wettbewerber: wettbewerbUebersicht(s, h.stadt), ecommerce: ecommerceHaus(s, id) };
+  return { haus: h, etagen, guv: h.kpi?.guv, programme: s.filialProgramme ?? {}, waren: warenHaus(s, h), wettbewerber: wettbewerbUebersicht(s, h.stadt), ecommerce: ecommerceHaus(s, id) };
 }
 
 export function warenwirtschaft(s: GameState) {

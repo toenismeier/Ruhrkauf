@@ -18,6 +18,7 @@ import { PRODUKT_AKTIONEN, produktAktion, type ProduktAktion } from './produkte'
 import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingAktion, marketingBudgetKompatibel, type MarketingAktion } from './marketing';
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
+import { FILIAL_PROGRAMME, type FilialProgrammId } from './filialguv';
 import { ECOMMERCE_AKTIONEN, ecommerceAktion, type EcommerceAktion } from './ecommerce';
 import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { hqArchivSetzen } from './hq';
@@ -41,6 +42,7 @@ import { PERSONAL_AKTIONEN, personalAktion, type PersonalAktion } from './person
 import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
+  | { typ: 'filialProgramm'; programm: FilialProgrammId }
   | { typ: 'schliessen'; haus: string }
   | { typ: 'immobilieVerkaufen'; haus: string }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
@@ -111,12 +113,12 @@ const ok = (text: string): Ergebnis => ({ ok: true, text });
 const fehler = (text: string): Ergebnis => ({ ok: false, text });
 
 function haus(s: GameState, id: string): Haus | undefined {
-  return s.haeuser.find((h) => h.id === id);
+  return s.haeuser.find((h) => h.id === id && !h.nurDaten);
 }
 
 function auswahl(s: GameState, ids: string[] | 'alle'): Haus[] {
   if (ids === 'alle') return offeneHaeuser(s);
-  return ids.map((id) => haus(s, id)).filter((h): h is Haus => !!h && h.status === 'offen');
+  return ids.map((id) => haus(s, id)).filter((h): h is Haus => !!h && !h.nurDaten && h.status === 'offen');
 }
 
 const etageName = (e: number) => (e === -1 ? 'UG' : e === 0 ? 'EG' : `${e}. OG`);
@@ -194,6 +196,22 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   // O07 Haus
   if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
+    case 'filialProgramm': {
+      const p = FILIAL_PROGRAMME[a.programm];
+      if (!p) return fehler('Unbekanntes Filialprogramm.');
+      if (!s.filialProgramme) s.filialProgramme = {};
+      if (s.filialProgramme[a.programm]) return fehler('Das Programm läuft bereits.');
+      // Prozentuale Investition auf der operativen Umsatzbasis, nicht als
+      // pauschale EBITDA-Position. Einmalige Auszahlung über einmalKosten.
+      const basis = s.historie.length
+        ? s.historie.slice(-13).reduce((x, k) => x + k.umsatz, 0) * 4
+        : Object.values(s.basisUmsatz).reduce((x, u) => x + (u ?? 0), 0) * 52;
+      const investition = Math.round(basis * p.investitionsQuote);
+      einmalKosten(s, investition);
+      s.filialProgramme[a.programm] = { start: w, wirksamAb: w + p.vorlauf };
+      if (a.programm === 'miete') s.stakeholder.vermieter = clamp(s.stakeholder.vermieter - 2, 0, 100);
+      return ok(`${p.name}: Investition ${mio(investition)}, Wirkung ab Woche ${w + p.vorlauf + 1}. ${p.nebenwirkung}`);
+    }
     case 'marktbeobachtungStufe': {
       const ergebnis = marktbeobachtungStufe(s, a.stufe);
       if (ergebnis.ok) hqAktualisiere(s);

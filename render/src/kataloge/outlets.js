@@ -1,4 +1,4 @@
-// Kontaktbogen: 20 FUNDUS-Filialen, drei Bauformen und typische Statuswechsel.
+// Kontaktbogen: alle FUNDUS-Filialen, drei Bauformen und typische Statuswechsel.
 import { sockel, THREE } from '../kit/basis.js';
 import { zeigeKatalog } from '../kit/katalog.js';
 import { outlet, FAMILIEN_OUTLET, NAME_OUTLET } from '../kit/outlet.js';
@@ -26,7 +26,7 @@ const eintraege = liste.map(({ h, zustand, titel }) => ({
   },
 }));
 setTimeout(() => {
-  zeigeKatalog(eintraege, { titel: 'FUNDUS – alle 20 Filialen und Statusvarianten', spalten: 6, kachel: [430, 380] });
+  zeigeKatalog(eintraege, { titel: 'FUNDUS – alle ' + haeuser.length + ' Filialen und Statusvarianten', spalten: 6, kachel: [430, 380] });
   const melde = () => window.fertig ? console.log('FUNDUS_STAT ' + JSON.stringify(stat)) : setTimeout(melde, 300);
   melde();
 }, 50);

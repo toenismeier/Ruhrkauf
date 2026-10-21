@@ -10,6 +10,7 @@ import type { VorstandStand } from './vorstand';
 import type { ProdukteStand } from './produkte';
 import type { AktionWahr, MarketingStand } from './marketing';
 import type { SchwierigkeitId } from './schwierigkeit';
+import type { FilialGuV, FilialProgrammeStand } from './filialguv';
 import type { EcommerceStand } from './ecommerce';
 // O02 Umsatztreiber
 import type { TreiberFaktoren, TreiberQuellen, TreiberPeriode } from './treiber';
@@ -26,7 +27,7 @@ import type { SzenarioStand } from './szenarien';
 // Geldbeträge sind immer ganze Euro (Integer). Alle Rundungen laufen über util.eur().
 export type Eur = number;
 
-export type Format = 'warenhaus' | 'sport';
+export type Format = 'warenhaus' | 'sport' | 'schwester' | 'outlet';
 export type WettbewerberArt = 'modehaus' | 'offprice' | 'textildiscounter' | 'elektronik' | 'premium' | 'fastfashion' | 'leer_ehemals';
 
 export interface Wettbewerber {
@@ -57,7 +58,7 @@ export type Cluster = 'metropole' | 'grossstadt' | 'mittelstadt';
 export type Region = 'Nord' | 'Ost' | 'West' | 'Mitte' | 'Süd';
 
 export type GruppeId =
-  | 'damen' | 'herren' | 'kinder' | 'beauty' | 'accessoires' | 'waesche'
+  | 'damen' | 'herren' | 'kinder' | 'beauty' | 'accessoires' | 'waesche' | 'schuhe'
   | 'wohnen' | 'spielwaren' | 'food' | 'sport'
   | 'sportschuhe' | 'sporttextil' | 'outdoor' | 'rad' | 'wintersport' | 'teamsport';
 
@@ -115,10 +116,23 @@ export interface Filialleiter {
 }
 
 export interface Personal {
-  vollzeit: number; // FTE
-  teilzeit: number; // FTE
-  aushilfen: number; // FTE
+  vollzeit: number; // Vertrags-FTE
+  teilzeit: number; // Vertrags-FTE
+  aushilfen: number; // Vertrags-FTE
+  /** Realisierter Ausgangsumsatz als Bezug für die flexible Wochen-Einsatzplanung. */
+  umsatzReferenzWoche?: number;
   filialleiter: Filialleiter;
+}
+
+/** Entgeltliche, bereits bei Spielstart vertraglich belegte Filialleistungen.
+ * Die Werbeflächen sind Vermarktungsplätze IM Verkaufsraum (keine Umwandlung der Fläche).
+ * O07-Konzessionäre/Untervermieter bleiben eigenständige, zusätzliche Vertragsquellen.
+ */
+export interface FilialNebenvertrag {
+  werbeflaecheQm: number;
+  werbeEuroJeQmWoche: number;
+  dienstleistungEuroJeBon: number;
+  durchschnittsBonEuro: number;
 }
 
 export type HausStatus = 'offen' | 'schliessung_verhandlung' | 'raeumung' | 'geschlossen' | 'verkauft';
@@ -130,6 +144,8 @@ export interface Einzugsgebiet {
 }
 
 export interface HausKpi {
+  /** Vollständige Filial-GuV, ohne die Hauptverwaltung. */
+  guv?: FilialGuV;
   woche: number;
   umsatz: Eur; // eigener Umsatz inkl. Kommission und Offprice
   rohertrag: Eur;
@@ -162,11 +178,16 @@ export interface Haus {
   betrieb?: HausBetrieb;
   lage: Lage;
   format: Format;
+  /** A/B/C ist nur für reguläre Hartwig-Häuser definiert. */
+  hausklasse?: 'A' | 'B' | 'C';
+  /** Premium bleibt wirtschaftlich ein Warenhaus. */
   klasse?: 'premium';
   premiumSchluessel?: string;
   premiumImage?: number;
   premiumEigentuemer?: string;
   premiumInvestition?: { bis: number; substanzProWoche: number; imageProWoche: number };
+  /** Volkskauf und FUNDUS sind bis Engine-Formate reine Bestandsdaten. */
+  nurDaten?: boolean;
   einzug: Einzugsgebiet;
   wettbewerbStart: number;
   /** Unveränderliche historische Nachfragebasis je Warengruppe. */
@@ -188,6 +209,8 @@ export interface Haus {
   restmieteWoche?: Eur; // laufende Miete nach Schließung
   restmieteBis?: number;
   personal: Personal;
+  /** Werbeplatz- und Dienstleistungsverträge, ohne Filialumsatz-Gutschrift. */
+  nebenvertrag?: FilialNebenvertrag;
   // O04 Personal: zusätzliche Dienstplanung, Basis-FTE bleiben in personal.
   personaleinsatz?: PersonalHausStand;
   substanz: number; // 0..100
@@ -427,6 +450,8 @@ export interface KapitalflussWoche {
 }
 
 export interface WochenKpi {
+  /** Addition aller aktiven Filialkostenstellen; bei alten Savegames optional. */
+  filialGuV?: FilialGuV;
   onlineUmsatz?: Eur;
   onlineKannibalisierung?: Eur;
   onlineEffekt?: Eur;
@@ -437,6 +462,8 @@ export interface WochenKpi {
   konzession: Eur;
   untermiete: Eur;
   wkz: Eur;
+  werbeflaechen: Eur;
+  dienstleistungen: Eur;
   personal: Eur;
   miete: Eur;
   nebenkosten: Eur;
@@ -491,7 +518,7 @@ export interface GameState {
   ecommerceDeaktiviert?: boolean;
   /** Optional, damit historische Spielstände und das Standardszenario identisch bleiben. */
   szenario?: SzenarioStand;
-  version: 1;
+  version: 2;
   /** Anfangsbasis der Endwertung; bei alten Spielständen optional. */
   spielendeStart?: { haeuser: number; fte: number };
   /** N02 abschaltbar (künftig über Einstellungen). */
@@ -601,6 +628,8 @@ export interface GameState {
   makro: { konjunktur: number; schockBis?: number; schockStaerke: number; phase: number };
   meldungen: Meldung[];
   historie: WochenKpi[];
+  /** Laufende Sanierungsprogramme: Kosten, Vorlauf und Wirkungsbeginn werden separat gebucht. */
+  filialProgramme?: FilialProgrammeStand;
   /** Persistiertes Archiv des Handelsboten (maximal 104 Wochen). */
   zeitung?: import('./zeitung').ZeitungStand;
   /** N01: Statistik ist optional und ändert keine Berechnung. */

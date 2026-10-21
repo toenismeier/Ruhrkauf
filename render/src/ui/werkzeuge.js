@@ -235,7 +235,7 @@ export function werkzeugeModul(ctx) {
     const input = String(text || '').trim();
     if (!input.startsWith(BERICHT_FORMAT)) throw new Error('Unbekanntes Berichtsformat.');
     const datensatz = JSON.parse(await ungzip(input.slice(BERICHT_FORMAT.length)));
-    if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 1 ||
+    if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 2 ||
         !Number.isInteger(datensatz.spiel.woche) || !Number.isInteger(datensatz.spiel.seed) ||
         !Array.isArray(datensatz.spiel.haeuser) || !Array.isArray(datensatz.spiel.historie) ||
         !datensatz.spiel.hq || !datensatz.spiel.einkauf || !datensatz.spiel.vorstand ||

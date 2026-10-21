@@ -63,6 +63,8 @@ export { premiumUebersicht } from './abfragen';
 export { ecommerceUebersicht, ecommerceHaus, ecommerceBruecke } from './abfragen';
 export { ecommerceCluster, hatAbholstation, retourenQuote, type EcommerceStand, type EcommerceAktion, type FulfillmentModell } from './ecommerce';
 
+export { REFERENZ_FILIAL_GUV, FILIAL_PROGRAMME, GUV_KOSTEN, guvAbschluss, leereFilialGuV, type FilialGuV, type FilialProgrammId } from './filialguv';
+
 export { chronikUebersicht, KONZERN_GESCHICHTE, chronikErfolg } from './chronik';
 export { ERFOLGE, ERFOLGE_AKTIV, erfolgeWoche, erfolgeUebersicht,
   type ErfolgEintrag, type ErfolgGruppe, type ErfolgStufe, type ErfolgStand } from './erfolge';

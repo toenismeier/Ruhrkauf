@@ -59,9 +59,23 @@ export function aktualisiereStakeholder(s: GameState): void {
   const restZiel = (st.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
   s.restLieferantenVertrauen = annaehern(s.restLieferantenVertrauen, restZiel, 0.05);
 
-  // Kreditlinie folgt dem Bankvertrauen
+  // Kreditlinie folgt dem Bankvertrauen. Bei akutem Engpass kann die Bank
+  // zusätzlich vorhandenen Warenbestand beleihen (Borrowing Base): maximal
+  // 55 % Inventarwert minus 20 % Lieferanten-Eigentumsvorbehalt, gedeckelt
+  // auf weitere 50 % des bestehenden Rahmens. Keine Kassen-/GuV-Gutschrift:
+  // Ziehungen bleiben verzinsliche Schulden; ohne echte Ware keine Sicherheit.
   if (s.phase === 'regulaer') {
-    const ziel = s.kreditlinieBasis * clamp((st.bank - 15) / 40, 0, 1.25);
+    const umsatzWoche = s.historie.at(-1)?.umsatz
+      ?? Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
+    const kritisch = freieLiquiditaet(s) < 2.5 * umsatzWoche && st.bank >= 35;
+    const warenwert = s.bestand.reduce((sum, k) => sum + k.wert, 0);
+    const lieferantenSchulden = s.verbindlichkeiten.filter((v) => v.art === 'ware')
+      .reduce((sum, v) => sum + v.wert, 0);
+    const beleihbar = Math.max(0, 0.55 * warenwert - 0.20 * lieferantenSchulden);
+    const zusatz = kritisch
+      ? Math.min(0.5 * s.kreditlinieBasis, Math.max(0, beleihbar - s.kreditlinieBasis))
+      : 0;
+    const ziel = (s.kreditlinieBasis + zusatz) * clamp((st.bank - 15) / 40, 0, 1.25);
     const alt = s.kreditlinie;
     s.kreditlinie = Math.round(alt + (ziel - alt) * 0.25);
     if (alt - s.kreditlinie > 5_000_000) melde(s, 'warnung', `Die Hausbank reduziert die Kreditlinie auf ${(s.kreditlinie / 1e6).toFixed(0)} Mio. €.`);

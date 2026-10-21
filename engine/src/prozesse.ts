@@ -26,6 +26,7 @@ function fteAnteil(s: GameState, h: Haus): number {
 
 /** Startet Interessenausgleich und Sozialplanverhandlung, danach Räumungsverkauf und Schließung. */
 export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEndetMit?: boolean } = {}): string | null {
+  if (h.nurDaten) return `${h.name} wird erst mit Aktivierung seines Formats steuerbar.`;
   if (h.status !== 'offen') return `${h.name} ist nicht offen.`;
   if (h.standortgarantie) return `${h.name} steht unter Standortgarantie aus dem Sanierungstarifvertrag.`;
   const br = s.stakeholder.betriebsrat;
@@ -38,29 +39,59 @@ export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEnde
   return null;
 }
 
+/** Kalkulierter Liquiditätsbedarf einer Schließung, einschließlich der nachlaufenden Restmiete.
+ * Die Prüfung erzeugt keine Buchungen; die tatsächliche Zahlung erfolgt erst bei Schließung.
+ * `bisSchliessung` berücksichtigt Verhandlung und Räumungsverkauf (O04/O07).
+ */
+export function schliessungsFolgekosten(s: GameState, h: Haus, bisSchliessung = 0): {
+  sozialplan: number; restmieteWoche: number; restmieteWochen: number; gesamt: number;
+} {
+  const schliessWoche = s.woche + Math.max(0, bisSchliessung);
+  const fte = h.personal.vollzeit + h.personal.teilzeit;
+  const sozialplan = eur(fte * abfindungJeFte(s) * hqRechtFaktor(s));
+  const untermiete = h.flaechen.reduce((a, f) =>
+    a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
+  const vertragWochen = s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52;
+  const restmieteWochen = Math.max(0, Math.min(vertragWochen, h.miete.bisWoche - schliessWoche));
+  const restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s));
+  return { sozialplan, restmieteWoche, restmieteWochen,
+    gesamt: sozialplan + restmieteWoche * restmieteWochen };
+}
+
 export function schliesseEndgueltig(s: GameState, h: Haus): void {
   const w = s.woche;
   const fte = h.personal.vollzeit + h.personal.teilzeit;
-  // Die Rechtsabteilung verhandelt Sozialplan und Restmieten
-  const sozialplan = fte * abfindungJeFte(s) * hqRechtFaktor(s);
+  // Die vorab budgetierten Kosten werden bei Wirksamwerden real gezahlt.
+  const { sozialplan, restmieteWoche, restmieteWochen } = schliessungsFolgekosten(s, h);
   einmalKosten(s, sozialplan);
-  const untermiete = h.flaechen.reduce((a, f) => a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
-  let wochen: number;
-  if (s.phase === 'insolvenz') wochen = 13;
-  else if (h.miete.vermieter === 'eigentuemer') wochen = 26;
-  else wochen = 52;
-  wochen = Math.max(0, Math.min(wochen, h.miete.bisWoche - w));
-  h.restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s));
-  h.restmieteBis = w + wochen;
+  h.restmieteWoche = restmieteWoche;
+  h.restmieteBis = w + restmieteWochen;
   h.status = 'geschlossen';
   h.statusBis = undefined;
   h.personal.vollzeit = 0;
   h.personal.teilzeit = 0;
   h.personal.aushilfen = 0;
   h.flaechen = h.flaechen.map((f) => ({ ...f, konzept: 'leer', gruppe: undefined, mieter: undefined, lieferantId: undefined, umbauBis: undefined, umbauZiel: undefined }));
-  // Kunden wandern teilweise zu Nachbarhäusern
-  const nachbarn = s.haeuser.filter((x) => x !== h && x.stadt === h.stadt && x.format === h.format && x.status === 'offen');
-  for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
+  // 30 % des Umsatzes des geschlossenen Hauses werden als echte Nachfrage
+  // an andere, noch geöffnete Häuser desselben Formats verlagert.
+  // Stadt vor Region; keine Erlös-/Cash-Gutschrift und kein Umsatzansatz
+  // ohne passende aufnahmefähige Häuser.
+  const lokal = s.haeuser.filter((x) => x !== h && !x.nurDaten
+    && x.stadt === h.stadt && x.format === h.format && x.status === 'offen');
+  const regional = s.haeuser.filter((x) => x !== h && !x.nurDaten
+    && x.region === h.region && x.format === h.format && x.status === 'offen');
+  const nachbarn = lokal.length ? lokal : regional;
+  const abgang = h.kpi?.umsatz ?? 0;
+  const umsatzNachbarn = nachbarn.reduce((a, x) => a + (x.kpi?.umsatz ?? 0), 0);
+  if (abgang > 0 && umsatzNachbarn > 0) {
+    for (const n of nachbarn) {
+      // Kundentransfer ist ein Nachfrageeffekt; der Warenvorrat begrenzt
+      // den späteren tatsächlich realisierten Mehrumsatz weiterhin.
+      const basis = Math.max(1, n.kpi?.umsatz ?? 0);
+      const anteil = (n.kpi?.umsatz ?? 0) / umsatzNachbarn;
+      n.transferBonus += 0.30 * abgang * anteil / basis;
+    }
+  }
   const st = s.stakeholder;
   st.betriebsrat = clamp(st.betriebsrat - (s.phase === 'insolvenz' ? 15 : 30) * (fte / Math.max(1, gesamtFte(s) + fte)), 0, 100);
   // Image: jede Schließung kostet, eine Schließungswelle in derselben Woche je nach Schwierigkeit abnehmend
@@ -150,7 +181,11 @@ export function eroeffneInsolvenz(s: GameState, grund: string): void {
   s.insolvenzenGesamt += 1;
   s.zahlungsstockungSeit = undefined;
   s.insolvenz = { seit: w, versammlung: w + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w + 12, quote: 0.1, grund };
-  s.kreditlinie = 25_000_000; // Massekredit
+  // Der Massekredit muss mit dem Umsatzvolumen wachsen; feste 25 Mio. Euro
+  // waren für 560 Häuser nicht ausreichend (vorheriger Maßstab 3,1 Mrd. Euro).
+  const nettoUmsatzJahr = Object.values(s.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52;
+  const volumen = Math.max(1, nettoUmsatzJahr / 3_100_000_000);
+  s.kreditlinie = eur(25_000_000 * volumen); // Massekredit proportional zur Kette
   const st = s.stakeholder;
   st.kreditversicherer = clamp(st.kreditversicherer - 20, 0, 100);
   st.bank = clamp(st.bank - 15, 0, 100);
@@ -182,7 +217,12 @@ export function glaeubigerversammlung(s: GameState): void {
     planEbitda = 0;
     for (let i = 0; i < 52 && klon.phase === 'regulaer'; i++) planEbitda += planWoche(klon);
   }
-  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s).versammlungSchwelle ? 5 : -10;
+  // Die Gläubigerschwellen wurden in der 130er-Welt auf absolute Euro kalibriert.
+  // Im 560er-Maßstab muss dieselbe wirtschaftliche Verlustquote zählen;
+  // das Startvolumen bleibt nach Filialschließungen als Referenz konstant.
+  const konzernJahresumsatzStart = (s.zentrale.kostenStart / PARAM.zentraleQuote) * 52;
+  const schwelle = schwierigkeit(s).versammlungSchwelle * Math.max(1, konzernJahresumsatzStart / 3_300_000_000);
+  const planBonus = planEbitda > 0 ? 15 : planEbitda > schwelle ? 5 : -10;
   const quoteBonus = 60 * (ins.quote - 0.1);
   const zahlung = ins.quote * ins.altVerbindlichkeiten;
   const st = s.stakeholder;
@@ -239,7 +279,8 @@ export function quartalsBewertung(s: GameState): void {
   const ist = s.historie.filter((k) => k.woche >= q.start && k.woche < q.start + 13).reduce((a, b) => a + b.ebitda, 0);
   q.ebitdaIst = eur(ist);
   const plan = q.plan ?? q.planStandard;
-  const tol = Math.max(2_000_000, 0.12 * Math.abs(plan));
+  const volumen = Math.max(1, Object.values(s.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52 / 3_100_000_000);
+  const tol = Math.max(2_000_000 * volumen, 0.12 * Math.abs(plan));
   const st = s.stakeholder;
   const ambitioniert = plan >= q.planStandard;
   if (ist >= plan - 0.25 * tol) {
@@ -250,8 +291,8 @@ export function quartalsBewertung(s: GameState): void {
     const vorjahr = s.quartale.find((x) => x.nr === q.nr - 4);
     const besser = vorjahr ? ist > vorjahr.ebitdaIst : ist > q.planStandard + 0.1 * Math.abs(q.planStandard);
     if (!besser) txt += ' Ohne sichtbare Verbesserung gegenüber dem Vorjahr gibt es kein frisches Geld.';
-    if (s.phase === 'regulaer' && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000)) {
-      const kapital = eur(12_000_000 * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
+    if (s.phase === 'regulaer' && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000 * volumen)) {
+      const kapital = eur(12_000_000 * volumen * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;
       s.eigentuemer.kapitalZugefuehrt += kapital;

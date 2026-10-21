@@ -6,7 +6,7 @@ import { botTief } from '../scripts/bot';
 function mitJahresgewinn(s: GameState) {
   const muster = {
     woche: 0, umsatz: 30_000_000, rohertrag: 12_000_000, abschriften: 0,
-    konzession: 0, untermiete: 0, wkz: 0, personal: 0, miete: 0,
+    konzession: 0, untermiete: 0, wkz: 0, werbeflaechen: 0, dienstleistungen: 0, personal: 0, miete: 0,
     nebenkosten: 0, sonstige: 0, logistik: 0, zentrale: 0, marketing: 0, beratung: 0,
     ebitda: 1_000_000, sondereffekte: 0, cash: 0, kreditFrei: 0, bestand: 0,
     offeneHaeuser: 1, fte: 1,
@@ -60,13 +60,15 @@ describe('N02 Spielende', () => {
     expect(() => wocheAbspielen(s)).toThrow('Spiel beendet');
   });
 
-  test('Sanierung erfordert fünf Jahre, aufgehobenes Verfahren und positives Jahres-EBITDA', () => {
+  // E22/E26 (Ummo): Sanierung gelingt auch außergerichtlich, ohne vorherige Insolvenz.
+  test('Sanierung erfordert fünf Jahre und positives Jahres-EBITDA, keine Insolvenz', () => {
     const s = neuesSpiel(3);
     mitJahresgewinn(s);
-    s.woche = 260;
+    s.woche = 259;
     spielendePruefen(s);
     expect(s.ende).toBeUndefined();
-    s.insolvenzenGesamt = 1;
+    s.woche = 260;
+    expect(s.insolvenzenGesamt).toBe(0);
     spielendePruefen(s);
     expect(s.ende?.art).toBe('saniert');
     expect(s.ende?.kennzahlen.ebitda52).toBe(52_000_000);
