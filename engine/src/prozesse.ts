@@ -59,9 +59,26 @@ export function schliesseEndgueltig(s: GameState, h: Haus): void {
   h.personal.teilzeit = 0;
   h.personal.aushilfen = 0;
   h.flaechen = h.flaechen.map((f) => ({ ...f, konzept: 'leer', gruppe: undefined, mieter: undefined, lieferantId: undefined, umbauBis: undefined, umbauZiel: undefined }));
-  // Kunden wandern teilweise zu Nachbarhäusern
-  const nachbarn = s.haeuser.filter((x) => x !== h && x.stadt === h.stadt && x.format === h.format && x.status === 'offen');
-  for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
+  // 30 % des Umsatzes des geschlossenen Hauses werden als echte Nachfrage
+  // an andere, noch geöffnete Häuser desselben Formats verlagert.
+  // Stadt vor Region; keine Erlös-/Cash-Gutschrift und kein Umsatzansatz
+  // ohne passende aufnahmefähige Häuser.
+  const lokal = s.haeuser.filter((x) => x !== h && !x.nurDaten
+    && x.stadt === h.stadt && x.format === h.format && x.status === 'offen');
+  const regional = s.haeuser.filter((x) => x !== h && !x.nurDaten
+    && x.region === h.region && x.format === h.format && x.status === 'offen');
+  const nachbarn = lokal.length ? lokal : regional;
+  const abgang = h.kpi?.umsatz ?? 0;
+  const umsatzNachbarn = nachbarn.reduce((a, x) => a + (x.kpi?.umsatz ?? 0), 0);
+  if (abgang > 0 && umsatzNachbarn > 0) {
+    for (const n of nachbarn) {
+      // Kundentransfer ist ein Nachfrageeffekt; der Warenvorrat begrenzt
+      // den späteren tatsächlich realisierten Mehrumsatz weiterhin.
+      const basis = Math.max(1, n.kpi?.umsatz ?? 0);
+      const anteil = (n.kpi?.umsatz ?? 0) / umsatzNachbarn;
+      n.transferBonus += 0.30 * abgang * anteil / basis;
+    }
+  }
   const st = s.stakeholder;
   st.betriebsrat = clamp(st.betriebsrat - (s.phase === 'insolvenz' ? 15 : 30) * (fte / Math.max(1, gesamtFte(s) + fte)), 0, 100);
   // Image: jede Schließung kostet, eine Schließungswelle in derselben Woche je nach Schwierigkeit abnehmend
