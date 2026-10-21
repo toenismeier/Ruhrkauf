@@ -1,4 +1,4 @@
-# Status aller Workstreams (Stand 20.10.2026, 19:45)
+# Status aller Workstreams (Stand 21.10.2026, 06:30)
 
 Legende: **abnahmefähig** = PR offen, GPT fertig, wartet auf Claudes lokale Prüfung und Merge · **in Arbeit** = Branch ohne PR, GPT arbeitet · **offen** = nicht gestartet · **gemergt** = in `main`.
 Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
@@ -32,7 +32,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
 | O01 Organisation, O02 Umsatztreiber, O03 IT, O04 Personal, O05 Ware, O06 Planung, O07 Haus, O08 Umbau | – | gemergt | – |
-| O09 E-Commerce | `feat/op-ecommerce` #46 | abnahmefähig, Konflikte mit main | GPT rebased auf main, dann Prüfung |
+| O09 E-Commerce | `feat/op-ecommerce` #46 | abnahmefähig (rebased, konfliktfrei) | prüfen, mergen |
 
 ## Nice-to-haves
 | N | PR | Status |
@@ -51,7 +51,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 1. Q03 Fingerabdruck mergen (Gate scharf).
 2. Q04 und Q05 prüfen und mergen.
 3. Q02 prüfen (Rendern, Leistung, Fingerabdrücke nur für geänderte Städte neu).
-4. #7 Maßstab Engine und Maßstab Oberfläche abnehmen; danach Q07 starten.
+4. O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47) prüfen und mergen.
+5. #7 Maßstab Engine (Abnahme nach `nachbesserung-massstab.md` Abschnitt 14, Messung durch Claude) und Maßstab Oberfläche abnehmen; danach Q07 starten.
 5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
 6. Nach N08: Q06 starten. Nach #7 Phase 2: Engine-Formate.
 7. Danach Build-Zug: Spiel einpacken, Update aufs iPhone, Messung.
