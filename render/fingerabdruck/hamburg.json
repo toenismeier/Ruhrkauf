@@ -3462,7 +3462,7 @@
       {"id":"p845","teile":128,"dreiecke":1512,"boundingBox":[565.51,0,465.09,577.23,20.44,481.57]},
       {"id":"p846","teile":217,"dreiecke":2610,"boundingBox":[576.88,0,465.45,594.39,22.51,482.04]},
       {"id":"p847","teile":293,"dreiecke":3496,"boundingBox":[594.08,0,465.2,612.95,20.48,481.02]},
-      {"id":"p848","teile":3366,"dreiecke":40416,"boundingBox":[696.4,0,451.9,770.53,35.5,507.37]},
+      {"id":"p848","teile":3362,"dreiecke":40304,"boundingBox":[696.4,0,451.9,770.53,32.8,507.37]},
       {"id":"p849","teile":448,"dreiecke":5324,"boundingBox":[656.92,0,424.42,677.1,20.63,444.54]},
       {"id":"p85","teile":342,"dreiecke":4086,"boundingBox":[1144.48,0,22.48,1162.48,22.82,42.48]},
       {"id":"p850","teile":616,"dreiecke":7426,"boundingBox":[657,0,479,676.02,27.34,504.04]},
@@ -3620,26 +3620,26 @@
       {"id":"p994","teile":611,"dreiecke":7302,"boundingBox":[410,0,544.7,428.45,33.62,562.14]},
       {"id":"p995","teile":719,"dreiecke":8590,"boundingBox":[409.7,0,560.23,428.45,34.3,586.54]},
       {"id":"p996","teile":244,"dreiecke":2908,"boundingBox":[431.92,0,565.92,442.59,15.03,582.54]},
-      {"id":"p997","teile":932,"dreiecke":11312,"boundingBox":[569.3,0,562.8,639.58,31.62,607.71]},
+      {"id":"p997","teile":917,"dreiecke":10964,"boundingBox":[569.3,0,562.8,639.58,31.62,607.71]},
       {"id":"p998","teile":490,"dreiecke":5852,"boundingBox":[532.42,0,524.92,552.6,20.74,546.57]},
       {"id":"p999","teile":659,"dreiecke":7896,"boundingBox":[532.42,0,583.42,555.52,21.67,603.52]}
     ],
     "umgebung": {
-      "teile": 6251,
-      "dreiecke": 137859,
-      "boundingBox": [-480,-6.2,-480,1924.73,29,1549.5]
+      "teile": 6413,
+      "dreiecke": 139803,
+      "boundingBox": [-480,-6.2,-480,1923.5,29,1549.5]
     },
     "gesamt": {
-      "teile": 497219,
-      "strasse": 4790,
-      "haeuser": 492429,
-      "instanzen": 61141,
+      "teile": 497362,
+      "strasse": 4952,
+      "haeuser": 492410,
+      "instanzen": 60507,
       "drawCallsInstanzen": 104
     }
   },
   "pruefsummen": {
     "stadtplan": "da9850c32bb57f59b906b908265d2bb19a3a90f917d27595646395fc3a5f0855",
-    "geometrie": "634514f336a2df780f794defab9a80bcd4e3b57c2aab2eb27744c1bc3b6f53b4",
+    "geometrie": "4524a41cab83f90fabc73329187853378e8363e84ffd65ff9300c128cafb500b",
     "bildReferenz": "86cd509e814d1ddfaa396ab703bf89f5fcfd4ff3ea998ccb01b2341d0f51b8f6"
   }
 }

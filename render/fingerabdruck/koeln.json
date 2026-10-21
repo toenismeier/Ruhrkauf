@@ -3629,7 +3629,7 @@
       {"id":"p727","teile":204,"dreiecke":3092,"boundingBox":[78.4,0,523.5,99.3,32.6,546.5]},
       {"id":"p728","teile":189,"dreiecke":3048,"boundingBox":[42.4,0,526.5,61.14,24,546.5]},
       {"id":"p729","teile":235,"dreiecke":2790,"boundingBox":[60.72,0,526.1,78.54,28.24,548.02]},
-      {"id":"p73","teile":1141,"dreiecke":14802,"boundingBox":[727.7,0,175.3,897.72,25.5,230.54]},
+      {"id":"p73","teile":1141,"dreiecke":14622,"boundingBox":[727.7,0,175.3,897.72,25.5,230.54]},
       {"id":"p730","teile":279,"dreiecke":5710,"boundingBox":[46.48,0,431.92,61.28,33.95,454.02]},
       {"id":"p731","teile":365,"dreiecke":4420,"boundingBox":[61.22,0,431.92,78.54,31.31,453.4]},
       {"id":"p732","teile":629,"dreiecke":7592,"boundingBox":[78.1,0,457.5,99.4,31.28,485.09]},
@@ -3681,7 +3681,7 @@
       {"id":"p776","teile":58,"dreiecke":696,"boundingBox":[426,0,432.5,450.63,20.5,454.5]},
       {"id":"p778","teile":567,"dreiecke":6794,"boundingBox":[450.55,0,432.42,480.08,27.66,455.12]},
       {"id":"p779","teile":192,"dreiecke":2904,"boundingBox":[480,0,453.4,520.85,20.5,474.92]},
-      {"id":"p78","teile":971,"dreiecke":12486,"boundingBox":[1094.2,0,579.3,1238.46,30,634.54]},
+      {"id":"p78","teile":959,"dreiecke":12246,"boundingBox":[1094.2,0,579.3,1238.46,30,634.54]},
       {"id":"p781","teile":214,"dreiecke":2586,"boundingBox":[480,0,494.3,501.9,37.28,504.55]},
       {"id":"p782","teile":477,"dreiecke":5684,"boundingBox":[404.98,0,453.48,426.3,30.77,468.1]},
       {"id":"p783","teile":153,"dreiecke":2364,"boundingBox":[405,0,467.66,423.75,22.5,487.84]},
@@ -3912,21 +3912,21 @@
       {"id":"p999","teile":135,"dreiecke":1600,"boundingBox":[179.21,0,655.5,217.5,20.5,677.5]}
     ],
     "umgebung": {
-      "teile": 5554,
-      "dreiecke": 127047,
+      "teile": 5745,
+      "dreiecke": 129339,
       "boundingBox": [-480,-6.2,-480,1934,29,1674]
     },
     "gesamt": {
-      "teile": 716759,
-      "strasse": 5450,
-      "haeuser": 711309,
-      "instanzen": 72887,
+      "teile": 716938,
+      "strasse": 5641,
+      "haeuser": 711297,
+      "instanzen": 72082,
       "drawCallsInstanzen": 104
     }
   },
   "pruefsummen": {
     "stadtplan": "a58dbd1cb7d4e7d6c371aa18655af6d0e042b6d024763c6716ed4b6bd043fd7d",
-    "geometrie": "e2fbfc5697a828ff8a21b3061510c3ac077d190f666cf6bd47b86e161a768160",
+    "geometrie": "21102c73c7faf3b3d58a6ba0557858de7ea91f72b23b025c8398ef7d558be379",
     "bildReferenz": "8ad213b0e7b52cbee11ac1134c98c2887fdebd96309ec98dd1c48d81c4395e0b"
   }
 }
