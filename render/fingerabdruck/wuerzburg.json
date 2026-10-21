@@ -14,6 +14,7 @@
   },
   "stadtplan": {
     "liste": [
+      {"id":"aussen/bauten/aussen-O043","bauer":"slot:outlet","lage":[673.25,916.5,62,62],"drehung":0,"variante":null,"standort":"O043","pruefsumme":"984a1bba75eb4294"},
       {"id":"aussen/wasser/0","bauer":"aussen/wasser","lage":[231.5,-480,38,480],"drehung":0,"variante":null,"standort":null,"pruefsumme":"41d88d6367efcd73"},
       {"id":"aussen/wasser/1","bauer":"aussen/wasser","lage":[231.5,896.5,38,480],"drehung":0,"variante":null,"standort":null,"pruefsumme":"8887bb9759a41a0b"},
       {"id":"bloecke/b0","bauer":"kulisse","lage":[22.5,22.5,72,851.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"fc252d874c09b459"},
@@ -819,10 +820,11 @@
       {"id":"strassen/s98","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"7ded54c68d4ab24e"},
       {"id":"strassen/s99","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"8101bfcd89ad159d"}
     ],
-    "gesamt": "60c5a881f3384bab"
+    "gesamt": "a97533ddcad6e86b"
   },
   "geometrie": {
     "kacheln": [
+      {"id":"aussen-O043","teile":1345,"dreiecke":16126,"boundingBox":[672.65,0.15,916.5,736.35,11.27,977.7]},
       {"id":"p1","teile":93,"dreiecke":2315,"boundingBox":[22.38,0,22.5,94.5,29.98,79.34]},
       {"id":"p10","teile":101,"dreiecke":5046,"boundingBox":[22.5,-0.2,540.39,94.5,26.01,609.55]},
       {"id":"p100","teile":198,"dreiecke":2340,"boundingBox":[425.48,0,139.4,437.74,25.61,155.9]},
@@ -1392,21 +1394,21 @@
       {"id":"p99","teile":116,"dreiecke":1742,"boundingBox":[400.5,0,141.95,420.9,25.1,175.55]}
     ],
     "umgebung": {
-      "teile": 2402,
-      "dreiecke": 194207,
+      "teile": 2400,
+      "dreiecke": 194183,
       "boundingBox": [-480,-6.2,-480,1342.5,88.35,1376.5]
     },
     "gesamt": {
-      "teile": 144915,
-      "strasse": 2297,
-      "haeuser": 142618,
-      "instanzen": 36491,
+      "teile": 146245,
+      "strasse": 2295,
+      "haeuser": 143950,
+      "instanzen": 36487,
       "drawCallsInstanzen": 105
     }
   },
   "pruefsummen": {
-    "stadtplan": "c5c39183c898d229f3fe8472540259ca8f76536ef01e1d03673075e211f16919",
-    "geometrie": "fe55125a76b1ea33dbf1be491fe38c13ff13fdaaa0e09cfb9630c66114372a32",
+    "stadtplan": "0370ab74e20e55101d9789d20baad8b0f35a4ad18a49061d2fa3c31227b8371b",
+    "geometrie": "0eb6fb8c7d3f19a8e035c74ad5b21ead80bf412e1dc6c6cc73b1856d1b8a03f4",
     "bildReferenz": "0116eb9b7abef524e67437797039e05d280a6ae7d0b8fb843292d122ccdeba8f"
   }
 }

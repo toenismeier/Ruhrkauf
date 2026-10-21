@@ -14,7 +14,7 @@
   },
   "stadtplan": {
     "liste": [
-      {"id":"aussen/bauten/aussen-O009","bauer":"slot:outlet","lage":[-171.5,25.5,50,52],"drehung":0,"variante":null,"standort":"O009","pruefsumme":"dc0084d556754aa9"},
+      {"id":"aussen/bauten/aussen-O021","bauer":"slot:outlet","lage":[-86.5,106.25,60,60],"drehung":0,"variante":null,"standort":"O021","pruefsumme":"58adc6d3d3c75057"},
       {"id":"aussen/wasser/0","bauer":"aussen/wasser","lage":[663,-480,32,480],"drehung":0,"variante":null,"standort":null,"pruefsumme":"c26698535824fe99"},
       {"id":"aussen/wasser/1","bauer":"aussen/wasser","lage":[663,648.5,32,480],"drehung":0,"variante":null,"standort":null,"pruefsumme":"4f2c7564a31fac2c"},
       {"id":"bloecke/b0","bauer":"kirche","lage":[536.5,276,104,44],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"8c0018ceddf0cdd0"},
@@ -1112,11 +1112,11 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"4f60182ff6853149"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d47c6d712283f169"}
     ],
-    "gesamt": "0e4e43ab8b583c33"
+    "gesamt": "2efd15f9c934c96d"
   },
   "geometrie": {
     "kacheln": [
-      {"id":"aussen-O009","teile":915,"dreiecke":11418,"boundingBox":[-172.1,0.15,25.5,-120.4,11.27,76.7]},
+      {"id":"aussen-O021","teile":1302,"dreiecke":15646,"boundingBox":[-87.1,0.15,106.25,-25.4,11.27,165.45]},
       {"id":"p1","teile":224,"dreiecke":2638,"boundingBox":[536.5,0,276,553.52,18.03,294.02]},
       {"id":"p10","teile":848,"dreiecke":18410,"boundingBox":[150.95,0,195.95,170.64,30.84,215.72]},
       {"id":"p100","teile":438,"dreiecke":7848,"boundingBox":[882.61,0,22.5,903.44,28.26,39.02]},
@@ -1917,16 +1917,16 @@
       "boundingBox": [-480,-6.2,-480,1430.5,29,1128.5]
     },
     "gesamt": {
-      "teile": 236764,
+      "teile": 237151,
       "strasse": 3657,
-      "haeuser": 233107,
-      "instanzen": 38837,
+      "haeuser": 233494,
+      "instanzen": 38902,
       "drawCallsInstanzen": 107
     }
   },
   "pruefsummen": {
-    "stadtplan": "ac281b7ca9d24c2efad0467d3ca1701921d9ee12d96ba327c136055b53bcdab2",
-    "geometrie": "a71bdcccb250e18d3432b34caedc571836c73130386dd858917ba124e35371b4",
+    "stadtplan": "1d19a9bc79d39511c930d26bcdae300ea429f4c6db7051e2575b041cdc0d9954",
+    "geometrie": "d6c83c4f08e97a86214376b74aefb9f5e544ed3f8ecbace0eca297c510939ba5",
     "bildReferenz": "e940b96da827609fe11455d47e86ca2dc10e4754e598b3a716f541db4f2df3ac"
   }
 }
