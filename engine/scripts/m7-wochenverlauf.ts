@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { neuesSpiel, wocheAbspielen } from '../src';
 import type { GameState, WochenKpi, SchwierigkeitId } from '../src';
-import { botTief, botRegulaer } from './bot';
+import { botTief, botRegulaer, botTurnaround } from './bot';
 import { GRUPPEN, saisonFaktor } from '../src/daten';
 
 type Messung = {
@@ -130,6 +130,27 @@ function botD(st: SchwierigkeitId, seed: number): { zeile: string; ok: boolean; 
   };
 }
 
+/** 260 Wochen ohne Filialschließungen, Insolvenz oder Sonderliquidität. */
+function botT(st: SchwierigkeitId, seed: number): { zeile: string; ok: boolean; quote: number } {
+  const s = neuesSpiel(seed, { schwierigkeit: st });
+  const start = s.haeuser.filter((h) => !h.nurDaten && h.status === 'offen').length;
+  for (let i = 0; i < 260 && s.phase !== 'zerschlagen'; i++) {
+    botTurnaround(s);
+    wocheAbspielen(s);
+  }
+  const letzte = s.historie.slice(-52);
+  const ebitda = letzte.reduce((a, k) => a + k.ebitda, 0);
+  const umsatz = letzte.reduce((a, k) => a + k.umsatz, 0);
+  const quote = umsatz > 0 ? ebitda / umsatz : -Infinity;
+  const ende = s.haeuser.filter((h) => !h.nurDaten && h.status === 'offen').length;
+  const ok = s.woche === 260 && s.phase === 'regulaer' && s.insolvenzenGesamt === 0
+    && ende === start && ebitda > 0;
+  if (!ok && st !== 'schwer') fehler.push(`Bot T ${st}/${seed}: ${s.woche} Wochen, ${s.phase}, Insolvenzen ${s.insolvenzenGesamt}, Häuser ${start}→${ende}, EBITDA letzte 52 ${fmt(ebitda)} Mio. €`);
+  return {
+    zeile: `| ${st} | ${seed} | ${s.woche} | ${s.phase} | ${s.insolvenzenGesamt} | ${start}→${ende} | ${fmt(ebitda)} | ${pct(quote)} | ${ok ? 'ja' : 'NEIN'} |`,
+    ok, quote,
+  };
+}
 const bericht: string[] = [
   '**Messung:** Seed 1, unveränderte Startwelt, kein Spielereingriff. Alle Geldbeträge sind Mio. €, Umsatz und EBITDA aus den tatsächlichen Wochen-KPIs; Abschriften sind bereits im Rohertrag enthalten. Die Saisonfaktoren sind mit der Nachfragebasis gewichtete Werte. Die 52-Wochen-Tabelle enthält nicht die aufsummierten 13-Wochen-Werte, sondern alle Einzelwochen.',
   '',
@@ -140,7 +161,18 @@ for (const st of stufen) {
   const winter = mess.slice(0, 9);
   bericht.push(`Januar/Februar ${st}: gewichtete EBITDA-Quote ${pct(quotenMittel(winter))}; schlechteste Q1-Einzelwoche ${pct(Math.min(...mess.slice(0, 13).map((x) => quote(x.k))))}.`, '');
 }
-bericht.push('### Bot D: außergerichtlicher Turnaround, 260 Wochen', '',
+bericht.push('### Bot T: kein Insolvenzantrag, keine Filialschließungen, 260 Wochen', '',
+  '| Schwierigkeit | Seed | Wochen | Phase | Insolvenzen | Häuser Anfang→Ende | EBITDA letzte 52 Wochen Mio. € | EBITDA-Quote | Abnahme |',
+  '|---|---:|---:|---|---:|---|---:|---:|---|');
+const ergebnisseT: Record<SchwierigkeitId, ReturnType<typeof botT>[]> = { leicht: [], mittel: [], schwer: [] };
+for (const st of stufen) for (const seed of [1, 2, 3]) {
+  const ergebnis = botT(st, seed);
+  ergebnisseT[st].push(ergebnis);
+  bericht.push(ergebnis.zeile);
+}
+if (ergebnisseT.schwer.filter((x) => x.ok).length < 2)
+  fehler.push('Bot T schwer: weniger als zwei von drei Seeds bestehen');
+bericht.push('', '### Bot D: außergerichtlicher Turnaround mit Schließungen, 260 Wochen', '',
   '| Schwierigkeit | Seed | Wochen | Schlussphase | Insolvenzen | EBITDA letzte 52 Wo. Mio. € | EBITDA-Quote | Abnahme |',
   '|---|---:|---:|---|---:|---:|---:|---|');
 const ergebnisseD: Record<SchwierigkeitId, ReturnType<typeof botD>[]> = { leicht: [], mittel: [], schwer: [] };
@@ -149,6 +181,8 @@ for (const st of stufen) for (const seed of [1, 2, 3]) {
   ergebnisseD[st].push(ergebnis);
   bericht.push(ergebnis.zeile);
 }
+if (ergebnisseD.mittel.some((d, i) => d.quote < ergebnisseT.mittel[i].quote))
+  fehler.push('Bot D mittel: EBITDA-Quote schlechter als Bot T');
 if (ergebnisseD.schwer.filter((x) => x.ok).length < 2)
   fehler.push('Bot D schwer: weniger als zwei von drei Seeds erfolgreich');
 if (ergebnisseD.leicht.some((x) => !x.ok))
