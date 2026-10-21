@@ -283,6 +283,72 @@ export function auto(I, x, y, z, ry, r, art = null) {
 /** Drehwinkel, damit die lokale +x-Achse in Weltrichtung (dx, dz) zeigt. */
 export const richtung = (dx, dz) => Math.atan2(-dz, dx);
 
+/**
+ * Q09: Die Schneeauflage folgt echten, bereits vom Bauer erzeugten Dach-Dreiecken.
+ * Die Rückgabehöhe eines Gebäudes kann auch den Turm, Technikaufbau oder First
+ * bezeichnen und darf deshalb niemals als horizontale Schneehöhe dienen.
+ *
+ * Abtasten geschieht während des normalen Hausbaus, bevor der KompaktSammler
+ * Geometrien zusammenführt. Kein zweiter Stadtbau, kein Raycasting auf iPhones
+ * und keine Änderung am Gebäude oder an dessen Material.
+ */
+export function dachFlaechenBeimBau(S, p, bauen) {
+  if (p.leer) return { ergebnis: bauen(), dachFlaechen: [] };
+  const alt = S.add;
+  const kandidaten = [];
+  const mindestFlaeche = Math.max(3, Math.min(32, (p.w ?? 10) * (p.d ?? 10) * .012));
+  S.add = function (g, farbe) {
+    const pos = g?.attributes?.position, index = g?.index;
+    if (pos && pos.count >= 3) {
+      const a = pos.array, ia = index?.array;
+      const n = ia ? index.count : pos.count;
+      const punkt = (i) => {
+        const k = (ia ? ia[i] : i) * pos.itemSize;
+        return [a[k], a[k + 1], a[k + 2]];
+      };
+      for (let i = 0; i + 2 < n; i += 3) {
+        const A = punkt(i), B = punkt(i + 1), C = punkt(i + 2);
+        const ux = B[0] - A[0], uy = B[1] - A[1], uz = B[2] - A[2];
+        const vx = C[0] - A[0], vy = C[1] - A[1], vz = C[2] - A[2];
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        const norm = Math.hypot(nx, ny, nz), flaeche = ny / 2;
+        const y = (A[1] + B[1] + C[1]) / 3;
+        // Aufwärts gerichtete, ausreichend große Dachstücke statt Fassade,
+        // Schildern, Fensterbänken und Gehwegen. Schrägdächer eingeschlossen.
+        if (norm < 1e-6 || ny / norm < .3 || flaeche < mindestFlaeche || y < 6) continue;
+        kandidaten.push({ ecken: [A, B, C], x: (A[0] + B[0] + C[0]) / 3,
+          z: (A[2] + B[2] + C[2]) / 3, y, flaeche });
+      }
+    }
+    return alt.call(this, g, farbe);
+  };
+  let ergebnis;
+  try { ergebnis = bauen(); }
+  finally { S.add = alt; }
+  const mindestHoehe = Math.max(6, (ergebnis?.hoehe ?? 0) * .28);
+  // Flächen unter darüberliegenden Steil-/Walmdächern nicht als Schnee zeigen.
+  // Damit verschwinden die massiven Deckflächen der Baukörper hinter dem Dach.
+  const dachHoeheBei = (t, x, z) => {
+    const [a, b, c] = t.ecken;
+    const den = (b[2] - c[2]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[2] - c[2]);
+    if (Math.abs(den) < 1e-7) return null;
+    const u = ((b[2] - c[2]) * (x - c[0]) + (c[0] - b[0]) * (z - c[2])) / den;
+    const v = ((c[2] - a[2]) * (x - c[0]) + (a[0] - c[0]) * (z - c[2])) / den;
+    const w = 1 - u - v;
+    return u > 1e-5 && v > 1e-5 && w > 1e-5 ? u * a[1] + v * b[1] + w * c[1] : null;
+  };
+  const auswahl = kandidaten
+    .filter((t) => t.y >= mindestHoehe)
+    .filter((t) => !kandidaten.some((anderes) => {
+      if (t === anderes || anderes.y <= t.y + .25) return false;
+      const h = dachHoeheBei(anderes, t.x, t.z);
+      return h != null && h > t.y + .25;
+    }))
+    .sort((a, b) => b.flaeche - a.flaeche || b.y - a.y)
+    .slice(0, p.typ?.startsWith('slot:') ? 14 : 8);
+  return { ergebnis, dachFlaechen: auswahl.map((t) => t.ecken) };
+}
+
 // ====================================================================================
 // 3. STADT BAUEN
 // ====================================================================================
