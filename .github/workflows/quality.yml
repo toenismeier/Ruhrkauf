@@ -134,7 +134,7 @@ jobs:
   fingerabdruck:
     name: Stadt-Fingerabdruck (112 Städte)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -149,3 +149,5 @@ jobs:
       - name: Plan, Geometrie und Referenzbilder prüfen
         run: npm run fingerabdruck:pruefen
         working-directory: render
+        env:
+          FINGERABDRUCK_ZEITLIMIT_S: '1500'

@@ -16,13 +16,25 @@ const BILDER = path.join(REFERENZEN, 'bilder');
 const OUT = path.join(ROOT, 'out');
 const GROESSE = { breite: 512, hoehe: 1024 };
 const GRENZEN = { kanal: 18, anteilProzent: 2, mittelwert: 1.5 };
-const STADTZAHL = 112, GRUPPEN_GROESSE = 5, PARALLEL = 2, ZEITLIMIT_MS = 300000;
+// Zeitlimit lokal 5 Minuten; auf schwächeren Rechnern (CI, 2 Kerne ohne GPU) per Umgebung anheben.
+const STADTZAHL = 112, GRUPPEN_GROESSE = 5, PARALLEL = 2, ZEITLIMIT_MS = 1000 * Number(process.env.FINGERABDRUCK_ZEITLIMIT_S || 300);
 
 function kennung(name) {
   return name.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe')
     .replace(/ü/g, 'ue').replace(/ß/g, 'ss')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+/** Kompakt, aber diff-freundlich: Listeneinträge je eine Zeile. */
+function jsonZeilen(wert, tiefe = 0) {
+  const ein = '  '.repeat(tiefe + 1), aus = '  '.repeat(tiefe);
+  if (Array.isArray(wert)) {
+    if (!wert.length || wert.every((x) => x === null || typeof x !== 'object')) return JSON.stringify(wert) + (tiefe ? '' : '\n');
+    return '[\n' + wert.map((x) => ein + JSON.stringify(x)).join(',\n') + '\n' + aus + ']' + (tiefe ? '' : '\n');
+  }
+  if (wert && typeof wert === 'object')
+    return '{\n' + Object.entries(wert).map(([k, v]) => ein + JSON.stringify(k) + ': ' + jsonZeilen(v, tiefe + 1)).join(',\n') + '\n' + aus + '}' + (tiefe ? '' : '\n');
+  return JSON.stringify(wert);
 }
 function hash(wert) {
   return crypto.createHash('sha256').update(typeof wert === 'string' || Buffer.isBuffer(wert) ? wert : JSON.stringify(wert)).digest('hex');
@@ -131,7 +143,7 @@ async function arbeiter(ids, neu, gegenprobe = false) {
         const daten = vorbereiten(messung.daten, id, bild);
         if (neu) {
           fs.mkdirSync(BILDER, { recursive: true });
-          fs.writeFileSync(pfad.json, JSON.stringify(daten, null, 2) + '\n');
+          fs.writeFileSync(pfad.json, jsonZeilen(daten));
           fs.writeFileSync(pfad.bild, bild);
           console.log('NEU ' + name + ' (' + id + '): Plan ' + daten.stadtplan.liste.length
             + ' Kacheln, Geometrie ' + daten.geometrie.gesamt.teile + ' Teile, ' + messung.leistung.dreiecke + ' Render-Dreiecke, ' + messung.leistung.drawCalls + ' Draw Calls, ' + messung.dauerMs + ' ms');
