@@ -117,6 +117,8 @@ export interface FreigabeProtokoll { woche: number; neu: number; direkt: number;
 
 export interface Einkauf {
   grenze: number;
+  altwareOutlet?: number;
+  offpriceZukauf?: number;
   wgs: Record<WgId, WgStand>;
   freigaben: Freigabe[];
   rng: number;
@@ -882,6 +884,24 @@ export function verbraucheAltwareWg(s: GameState, f: Format, wertVoll: number): 
   }
   s.bestand = s.bestand.filter((k) => k.wert > 0.5);
   return { gebucht, zukauf: rest };
+}
+
+/** Konzerninterner Bestandsübertrag an FUNDUS, 3 % reale Transportkosten. */
+export function outletVersorgung(s: GameState): number {
+  if (!s.formate) return 0;
+  const quote = clamp(s.einkauf.altwareOutlet ?? 0.5, 0, 1);
+  let transport = 0, eingang = 0;
+  for (const k of s.bestand) {
+    const alt = !!k.ladenhueter || (k.art === 'nos' ? k.alter > EK_PARAM.altNos : k.alter > EK_PARAM.altSaison);
+    if (!alt || k.wert <= 0) continue;
+    const ek = eur(k.wert * quote * 0.12);
+    if (!ek) continue;
+    k.wert -= ek; eingang += ek; transport += ek * 0.03;
+    s.formate.pool.push({quelle:'altware',wert:ek,preisFaktor:k.ladenhueter?0.65:0.88,alter:k.alter,ladenhueter:k.ladenhueter});
+  }
+  s.bestand = s.bestand.filter(k => k.wert > 0.5);
+  s.formate.altwareEingang = eur(eingang);
+  return eur(transport);
 }
 
 /** Bucht die Wochenwerte je WG (Umsatz nach Aktionen auf die WG verteilt) und je Marke. */

@@ -26,6 +26,7 @@ import { initialisiereIt } from './it';
 // O07 Haus
 import { initialisiereHausbetrieb } from './haus';
 import { initialisiereUmbau } from './umbau';
+import { initialisiereFormate } from './formate';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -39,6 +40,8 @@ export interface Szenario {
   kreditlinie: number;
   firma: string;
   sportName: string;
+  schwesterName?: string;
+  outletName?: string;
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
@@ -162,6 +165,8 @@ export const STANDARD_SZENARIO: Szenario = {
   kreditlinie: 300_000_000,
   firma: 'Hartwig & Brehm Warenhaus AG',
   sportName: 'Hartwig Sport',
+  schwesterName: 'Volkskauf',
+  outletName: 'FUNDUS',
   startJahr: 2027,
 };
 
@@ -245,7 +250,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
     const sortimente = ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty'] as const;
     return sortimente.map((gruppe, i) => ({
       id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length],
-      qm: Math.round(vkQm / sortimente.length), konzept: 'eigen' as const,
+      qm: Math.round(vkQm / sortimente.length), konzept: 'offprice' as const,
       gruppe: gruppe as GruppeId,
     }));
   }
@@ -546,7 +551,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     rng: h.rng,
     woche: 0,
     startJahr: sz.startJahr,
-    firma: { name: sz.firma, sportName: sz.sportName },
+    firma: { name: sz.firma, sportName: sz.sportName, schwesterName: sz.schwesterName ?? 'Volkskauf', outletName: sz.outletName ?? 'FUNDUS' },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
     erfolge: {},
@@ -637,6 +642,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisierePersonaleinsatz(s);
   // O05 Ware
   initialisiereWare(s);
+  // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
+  initialisiereFormate(s);
   return s;
 }
 
