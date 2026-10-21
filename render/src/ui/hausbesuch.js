@@ -324,10 +324,14 @@ export function hausbesuchModul(ctx) {
     host.querySelector('.hb-etagen').innerHTML = [...h.etagen].sort((a, b) => a - b).map((n) =>
       '<button type="button" data-hb="etage" data-nr="' + n + '" aria-pressed="' + (n === nr) + '">' + etageName(n) + '</button>').join('');
     host.hidden = false;
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = false;
+    // Ein Renderer für die ganze Sitzung: Nach forceContextLoss() bekäme dieselbe Canvas keinen
+    // neuen Kontext mehr, ein zweiter Hausbesuch oder ein Hauswechsel scheiterte dann.
+    if (!renderer) {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = false;
+    }
     rahmenzeiten = []; letzte = 0;
     try { bauen(nr); animation = requestAnimationFrame(frame); }
     catch (e) { console.error('Hausbesuch konnte nicht aufgebaut werden:', e); schliesse(); return false; }
@@ -336,7 +340,7 @@ export function hausbesuchModul(ctx) {
   function schliesse() {
     if (!haus) return;
     cancelAnimationFrame(animation); animation = 0; steuerung?.stopp(); 
-    sceneLeeren(); renderer?.dispose(); renderer?.forceContextLoss(); renderer = null; cam = null;
+    sceneLeeren(); renderer?.renderLists?.dispose(); cam = null;
     haus = null; letzte = 0; if (host) host.hidden = true;
   }
   document.getElementById('pinhalt')?.addEventListener('click', (e) => { const t = e.target.closest('[data-hausbesuch]'); if (t) oeffne(t.dataset.hausbesuch); });

@@ -301,7 +301,7 @@ function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
   const egFront = eg && [2, 3, 5, 6].includes(fam) && !ra.mall;
   if (plan) {
     baueLadenplan(S, scene, plan, { vorbereiten: false, dichte: d,
-      moebelGeneration: haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3,
+      moebelGeneration: haus.etagenBau?.[e]?.moebelGeneration ?? 3,
       ausschnitt: {x0:ax0,z0:az0,x1:ax1,z1:az1},
       bodenAussparungen: loecher.map(([x0,z0,x1,z1])=>({x:x0,z:z0,w:x1-x0,d:z1-z0})) });
     // Die vorhandene Leerflächenmessung und Kundenverteilung berücksichtigen die neuen Möbel.
