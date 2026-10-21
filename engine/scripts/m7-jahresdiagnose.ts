@@ -15,10 +15,12 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { neuesSpiel, wocheAbspielen } from '../src';
 import type { GameState, SchwierigkeitId, WochenKpi } from '../src';
-import { botRegulaer } from './bot';
+import { botRegulaer, botTurnaround } from './bot';
+import { REFERENZ_FILIAL_GUV, type FilialGuV, type GuVPosition } from '../src/filialguv';
 
 const args = process.argv.slice(2);
-const bot = args.includes('--bot');
+const bot = args.includes('--bot') || args.includes('--turnaround');
+const turnaround = args.includes('--turnaround');
 const seed = Number(args.find((x) => x.startsWith('--seed='))?.slice('--seed='.length) ?? 1);
 const stufe = (args.find((x) => x.startsWith('--schwierigkeit='))?.slice('--schwierigkeit='.length) ?? 'mittel') as SchwierigkeitId;
 if (!Number.isInteger(seed) || seed < 0 || !['leicht', 'mittel', 'schwer'].includes(stufe)) throw new Error('Ungültiger Seed oder Schwierigkeitsgrad');
@@ -42,7 +44,7 @@ if (args.includes('--verfall')) {
 const zeilen: Zeile[] = [];
 for (let i = 0; i < 52; i++) {
   if (s.phase === 'zerschlagen') break;
-  if (bot) botRegulaer(s);
+  if (bot) (turnaround ? botTurnaround : botRegulaer)(s);
   const k = wocheAbspielen(s);
   const p = s.einkauf.protokoll.at(-1);
   zeilen.push({
@@ -56,7 +58,7 @@ for (let i = 0; i < 52; i++) {
   });
 }
 
-const titel = `M7 Jahresdiagnose – ${bot ? 'Bot D ohne Insolvenzantrag' : 'ohne Eingriffe'}, ${stufe}, Seed ${seed}${args.includes('--verfall') ? ', Kontrolllauf: Saisonorders verfallen' : ''}`;
+const titel = `M7 Jahresdiagnose – ${turnaround ? 'Bot T ohne Schließung' : bot ? 'Bot D ohne Insolvenzantrag' : 'ohne Eingriffe'}, ${stufe}, Seed ${seed}${args.includes('--verfall') ? ', Kontrolllauf: Saisonorders verfallen' : ''}`;
 const bericht: string[] = [
   `### ${titel}`,
   '',
@@ -96,6 +98,36 @@ bericht.push('', '#### Vorher/Nachher-Vergleich', '',
   '',
   '**Diagnoseregel:** Sinkt der Rohertrag bei weitgehend konstanten Fixkosten, müssen Wareneingang, Orderverfall, Bestand und Fehlumsatz gemeinsam bewertet werden. Ein Saisonfaktorrückgang allein darf nicht als Ursache einer Versorgungslücke interpretiert werden.',
 );
+// Beträge stammen aus echten Filial-Kostenstellen, nicht aus der EBITDA-Quote
+// zurückgerechnet. Der Ausweis enthält beide Referenzdifferenzen unverändert.
+const guvBetrag = (g: FilialGuV, id: GuVPosition): number =>
+  id === 'umsatz' || id === 'bruttogewinn' || id === 'uebrigeErtraege' || id === 'ebitda'
+    ? g[id] : -g[id];
+const betrag = (x: Zeile, id: GuVPosition): number =>
+  x.k.filialGuV ? guvBetrag(x.k.filialGuV, id) : 0;
+const jahresUmsatz = zeilen.reduce((a, z) => a + (z.k.filialGuV?.umsatz ?? 0), 0);
+bericht.push('', '#### Filial-GuV: Referenz und simuliertes Jahr', '',
+  'Geldbeträge in Mio. €, Aufwendungen negativ. Zentrale und Beratung werden getrennt geführt. OPEX-Einzelzeilen summieren sich in der gelieferten Referenz auf −44,6 %, das ausgewiesene Total lautet −42,4 %. Es wird **keine** Ausgleichsbuchung erzeugt.',
+  '', '| Position | IST Referenz | Vorjahr | Plan | Simulation Mio. € | Simulation % Umsatz | Abweichung PP |',
+  '|---|---:|---:|---:|---:|---:|---:|');
+for (const ref of REFERENZ_FILIAL_GUV) {
+  const ist = zeilen.reduce((a, z) => a + betrag(z, ref.id), 0);
+  const quote = jahresUmsatz > 0 ? 100 * ist / jahresUmsatz : NaN;
+  const vj = 'vorjahr' in ref ? String(ref.vorjahr).replace('.', ',') + ' %' : '–';
+  const plan = 'plan' in ref ? String(ref.plan).replace('.', ',') + ' %' : '–';
+  bericht.push(`| ${ref.name} | ${ref.ist.toFixed(1).replace('.', ',')} % | ${vj} | ${plan} | ${geld(ist)} | ${Number.isFinite(quote) ? quote.toFixed(2).replace('.', ',') + ' %' : '–'} | ${Number.isFinite(quote) ? (quote - ref.ist).toFixed(2).replace('.', ',') : '–'} |`);
+}
+bericht.push('', '#### Filial-GuV je Woche', '',
+  'Jede Zeile enthält die tatsächlich gebuchte Position in Mio. € beziehungsweise in Prozent des jeweiligen Wochenumsatzes.',
+  '', '| Position | ' + zeilen.map((z) => String(z.kw)).join(' | ') + ' |',
+  '|---|' + zeilen.map(() => '---:|').join(''));
+for (const ref of REFERENZ_FILIAL_GUV) {
+  bericht.push('| ' + ref.name + ' (Mio. €) | '
+    + zeilen.map((z) => geld(betrag(z, ref.id))).join(' | ') + ' |');
+  bericht.push('| ' + ref.name + ' (% U.) | '
+    + zeilen.map((z) => prozent(betrag(z, ref.id) / Math.max(1, z.k.umsatz))).join(' | ') + ' |');
+}
+bericht.push('', `**Filial-GuV:** ${zeilen.length}/52 Wochen gebucht; unvollständige Jahre sind nicht als Volljahres-IST zu interpretieren.`, '');
 const out = bericht.join('\n') + '\n';
 console.log(out);
 if (args.includes('--write-stand')) {
