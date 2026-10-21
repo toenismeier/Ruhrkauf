@@ -173,9 +173,9 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl) {
     for (const id0 of gruppe.ids) {
       h += '<button type="button" class="' + (id0 === id ? 'an' : '') +
         '" aria-current="' + (id0 === id ? 'page' : 'false') +
-        '" onclick="hqKlick(\\'abteilung\\',\\'' + id0 + '\\')">' + TITEL[id0] + '</button>';
+        '" onclick="hqKlick(\'abteilung\',\'' + id0 + '\')">' + TITEL[id0] + '</button>';
     }
-    h += '<button type="button" onclick="hqKlick(\\'uebersicht\\')">Etage hinzufügen</button></nav>';
+    h += '<button type="button" onclick="hqKlick(\'uebersicht\')">Etage hinzufügen</button></nav>';
   }
   h += '</div></div>';
   return { titel: a.name, unter: (a.stadt ?? u.sitz) + ' · ' + (wahl ? etageName(wahl.etage.nr) : 'ohne Etage'), html: h };
