@@ -1445,16 +1445,33 @@ function startZeigen() {
 $('startstufen').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; startWahl.schwierigkeit = b.dataset.v; startZeigen(); });
 $('startstadt').addEventListener('change', (e) => { startWahl.stadt = e.target.value; });
 $('startseed').addEventListener('change', (e) => { startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1)); });
-function spielStarten() {
+// Q02: Das Ladebild muss tatsächlich gezeichnet sein, bevor die synchrone Stadterzeugung beginnt.
+const q02Bildwechsel = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+const q02Start = { phase: 'bereit', zeit: 0, grundkacheln: 0 };
+async function spielStarten() {
   $('start').classList.remove('an');
   $('lade').classList.add('an');
-  setTimeout(() => {
+  window.bereit = false;
+  q02Start.phase = 'ladebild'; q02Start.zeit = performance.now();
+  try {
+    await q02Bildwechsel();
+    q02Start.phase = 'grundaufbau';
     wahl.value = startWahl.stadt;
     neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
+    q02Start.phase = 'grundkacheln'; q02Start.grundkacheln = KA.liste.filter((k) => k.gruppe).length;
+    // Das erste sichtbare Bild zeigt Plan, Grundkacheln und alle bereits gebauten mittigen Details.
+    await q02Bildwechsel();
+    q02Start.phase = 'sichtbar';
     $('lade').classList.remove('an');
     window.bereit = true;
     einfuehrung.spielStart();
-  }, 30);
+    kachelnPlanen();
+  } catch (e) {
+    $('lade').classList.remove('an');
+    $('start').classList.add('an');
+    q02Start.phase = 'fehler';
+    throw e;
+  }
 }
 $('startknopf').addEventListener('click', spielStarten);
 async function spielFortsetzen(platz = 'autosave') {
@@ -1507,6 +1524,7 @@ $('fortsetzen').addEventListener('click', () => spielFortsetzen());
 window.spiel.fortsetzen = spielFortsetzen;
 window.spiel.app = app;
 window.spiel.startZeigen = startZeigen;
+window.spiel.q02Start = q02Start;
 window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN;
 Object.defineProperty(window.spiel, 'schwierigkeit', { get: () => schwierigkeitId });
 setTimeout(() => {
