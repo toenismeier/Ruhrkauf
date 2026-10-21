@@ -165,3 +165,38 @@ node spiel-render.js
 Die 13- und 52-Wochentabellen sind noch **nicht gemessen**. `npx tsx scripts/m7-wochenverlauf.ts --write-stand` ersetzt genau diesen Bereich nach dem tatsächlichen Simulationslauf mit den je Schwierigkeit vollständigen Zahlen. Keine geschätzten oder erfundenen Wochendaten.
 
 <!-- M7-WOCHENTABELLEN:ENDE -->
+
+
+### M7 – Nachbesserung nach Claudes Messung vom 21.10.2026 (Abschnitt 13)
+
+**Ausgangsbefund (externe Messung auf `4511dd4`, nicht nach den folgenden Änderungen):** Januar/Februar auf allen Stufen −7,33 % EBITDA-Quote, KW 1 −8,38 %, KW 13 −9,04 %; Insolvenz innerhalb der ersten 52 Wochen und Bot C (mittel) nach 23 Wochen zerschlagen. Das Skript übergibt die Schwierigkeit korrekt: `neuesSpiel(1, { schwierigkeit: st })`. Die alte Engine beeinflusste im Normalbetrieb primär Kasse, Kredit und Ereignisse, nicht den Absatz; identische EBITDA-Quoten waren daher eine **Modelllücke**, kein Aufruffehler.
+
+**Änderungen und ex ante erwartete Wirkung (nicht simuliert):**
+
+| Bereich | Änderung | Erwartete kausale Wirkung und Risiko |
+|---|---|---|
+| Schwierigkeitsgrad | `SCHWIERIGKEIT.kaufneigung` leicht 1,035 / mittel 1,000 / schwer 0,945; in `wirtschaft.hausFaktor` bei allen Nachfragearten berücksichtigt | Nachfrage, Verkauf und margenabhängiger Rohertrag unterscheiden sich bereits in KW 1 bei identischem Standort und Seed. Erwartete Rangfolge der EBITDA-Quoten leicht > mittel > schwer; keine pauschale EBITDA-Gutschrift. Die Bestandsgrenze kann den Unterschied später abschwächen. |
+| Filialpersonal | `PARAM.umsatzJeFte` 5.750 → 6.300 € je Woche, `qmJeFte` 400 → 430 qm | Umsatzabhängiger Personalbedarf sinkt rechnerisch um 8,7 %, flächenabhängiger um 7,0 %. Das reduziert laufende Personalkosten **und** den Startpersonalbestand; der tatsächliche Konzern-Effekt hängt vom FTE-Mix und den Besetzungsquoten ab. Vorläufige Annahme, durch Format- und Bedarfsmessung zu validieren. |
+| Hauptverwaltung | `PARAM.zentraleQuote` 3,4 → 3,0 % des unveränderten Wochen-Umsatzankers | Zentralkostenbasis inklusive HQ-FTE/Büroflächen sinkt bei der Weltgenerierung um nominal 0,4 Prozentpunkte der Nachfragebasis. `hqAktualisiere`, Vorstandskosten und reale Gebäudeabrechnung bleiben aktiv; keine Buchungsumgehung. |
+| Wintersaison | Warenhaus-Basiskurve Januar 0,98 → 1,06, Februar 0,96 → 1,045, März 0,88 → 1,03 (vor 12-Monats-Normalisierung) | Glättung der schwachen KW 1–13 bei unveränderter Fixkostenbuchung und dauerhaft normalisierter Jahreskurve. Reale Wochennachfrage und Rohertrag steigen im Q1; spätere Wochenanteile sinken durch die Normalisierung. Eigenständige Spielwaren-/Wintersport-Saisonprofile bleiben erhalten. Wichtig: Q4-Umsatz und Jahresumsatz erneut kontrollieren. |
+| Abschriften | `EK_PARAM.abschriftK` 0,457 → 0,395 (−13,6 %) | Wöchentliche Abschreibung vorhandener gealterter Kohorten sinkt, nicht der gebuchte Wareneinsatz. Der Abschluss weist die verbleibenden Abschriften weiterhin getrennt aus; Bilanz-/Bestandswerte und Folgewochen ändern sich mit. |
+| Datennetze | `initialisiereEinkauf` ignoriert `nurDaten` bei WG-Gewichtung/Marken-Pool-Zuordnung | Volkskauf/FUNDUS verzerren nicht mehr Nachfrage-/Markenmix der aktiven 408 Geschäfte. Stammdaten und Grafik der 152 Schwester-/Outlet-Filialen bleiben unberührt; ein bisher zu hoch gewichteter Pool kann die Anfangsverfügbarkeit und Marge verändern. |
+| Gläubigerversammlung | Negative Plan-EBITDA-Grenze wird mit dem bei Spielstart festgelegten Jahresnachfragevolumen statt mit einem 130er-Festbetrag verglichen (Referenz 3,3 Mrd. € p.a.) | Ein identischer relativer operativer Sanierungsplan gilt für 408 statt ~130 aktive Läden nicht als schlechter, bloß weil seine Euro-Verluste größer sind. Die Plan-EBITDA-Prognose selbst, Gläubigerstimmen, Mindestquote und 40-%-Sofortzahlung bleiben unverändert. Erwarteter Effekt für Bot C: geringeres Risiko einer rein größenbedingten Ablehnung in KW 23; **keine Garantie**, dass die Planliquidität ausreicht. |
+
+**Regressionstests:** `engine/tests/m7-massstab.test.ts` prüft die Nachfragefaktoren deterministisch und die unterschiedliche Wochen-GuV, die Trennung aktiver Häuser von `nurDaten` sowie die Saisonkorrektur. Bestehende `m7-winter.test.ts` bleibt erhalten.
+
+**Erforderliche externe Abnahme (Claude):**
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest --runInBand
+npx tsx scripts/m7-wochenverlauf.ts --write-stand
+npx tsx scripts/massstab-phase2.ts 1
+npx tsx scripts/massstab-phase2.ts 2
+npx tsx scripts/massstab-phase2.ts 3
+npx tsx scripts/bot.ts 1 260 --tief
+npx tsx scripts/bot.ts 2 260 --tief
+npx tsx scripts/bot.ts 3 260 --tief
+```
+Das `m7-wochenverlauf.ts`-Skript bleibt die verbindliche Abnahme für **alle drei Stufen**, 13 und 52 Wochen sowie Bot C (mittel, Seeds 1–3). Besonderes Augenmerk: Ausreißer KW 1/13, Cash und Lieferantenzahlungen, Plan-EBITDA/Gläubigerabstimmung in KW 23, Q4- und Jahresumsatz. **In der vorliegenden Laufzeit nicht ausgeführt**: kein Checkout mit GitHub-DNS und installierten Abhängigkeiten. Daher keine behaupteten neuen Q1-Werte, kein als bestanden gemeldeter Test, keine Freigabe zum Merge. Die Platzhalter zwischen den M7-Wochentabellenmarkern bleiben bis zu Claudes echter Messung unverändert.
