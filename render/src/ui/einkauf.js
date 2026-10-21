@@ -41,7 +41,7 @@ export function einkaufModul(ctx) {
     const n = q.freigaben(s()).anzahl;
     const an = (id) => ui.seite === id || (id === 'uebersicht' && ui.seite === 'wg') || (id === 'eigenmarken' && ui.seite === 'gruenden');
     const t = (id, inhalt) => `<button class="tab ${an(id) ? 'an' : ''}" data-a="seite" data-v="${id}">${inhalt}</button>`;
-    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}${t('merchandise', 'Merchandise')}${t('allokation', 'Allokation')}${t('reduzierungKalender', 'Reduzierung')}</div><button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>`;
+    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}${t('merchandise', 'Merchandise')}${t('allokation', 'Allokation')}${t('reduzierungKalender', 'Reduzierung')}</div>${['eigenmarken', 'gruenden'].includes(ui.seite) ? '' : '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>'}`;
   }
 
   // ─────────────────────────── Übersicht

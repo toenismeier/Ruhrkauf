@@ -5,7 +5,7 @@
       __defProp(target, name2, { get: all[name2], enumerable: true });
   };
 
-  // ../engine/src/index.ts
+  // engine/src/index.ts
   var src_exports = {};
   __export(src_exports, {
     ABTEILUNGEN: () => ABTEILUNGEN,
@@ -17,6 +17,7 @@
     ARTIKELTYPEN: () => ARTIKELTYPEN,
     BEREICHE: () => BEREICHE,
     BESCHAFFUNG: () => BESCHAFFUNG,
+    CLUSTER_AUFGABEN: () => CLUSTER_AUFGABEN,
     DAUER_STUFEN: () => DAUER_STUFEN,
     DELEGATIONEN: () => DELEGATIONEN,
     EINKAUF_SPALTEN: () => EINKAUF_SPALTEN,
@@ -64,6 +65,8 @@
     ZEITUNG_ARTIKELARTEN: () => ZEITUNG_ARTIKELARTEN,
     ZEITUNG_REITER: () => ZEITUNG_REITER,
     ZIELGRUPPEN_TEXT: () => ZIELGRUPPEN_TEXT,
+    ZUSATZ_ARTIKEL: () => ZUSATZ_ARTIKEL,
+    ZUSATZ_ARTIKELTYPEN: () => ZUSATZ_ARTIKELTYPEN,
     aktionsAuswertung: () => aktionsAuswertung,
     aktionskalender: () => aktionskalender,
     angebotText: () => angebotText,
@@ -79,6 +82,8 @@
     clusterleitungQualitaet: () => clusterleitungQualitaet,
     cockpit: () => cockpit,
     crmKampagnen: () => crmKampagnen,
+    delegationsAufgaben: () => delegationsAufgaben,
+    delegationsGrenze: () => delegationsGrenze,
     ebitdaJahr: () => ebitdaJahr,
     eigenmarkeVorschau: () => eigenmarkeVorschau,
     eigenmarkenUebersicht: () => eigenmarkenUebersicht,
@@ -109,6 +114,7 @@
     hqUebersicht: () => hqUebersicht,
     immobilienWert: () => immobilienWert,
     initialisierePersonaleinsatz: () => initialisierePersonaleinsatz,
+    istAufgabeDelegiert: () => istAufgabeDelegiert,
     istDelegiert: () => istDelegiert,
     itAlter: () => itAlter,
     itCluster: () => itCluster,
@@ -191,7 +197,7 @@
     zeitungArchiv: () => zeitungArchiv
   });
 
-  // ../engine/src/daten.ts
+  // engine/src/daten.ts
   var WH = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
   function mit(basis3, over) {
     return basis3.map((x, i) => over[i] !== void 0 ? over[i] : x);
@@ -452,7 +458,7 @@
     { id: "P004", name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf", rang: 3 }
   ];
 
-  // ../engine/src/util.ts
+  // engine/src/util.ts
   function zufall(h) {
     let t = h.rng = h.rng + 1831565813 >>> 0;
     t = Math.imul(t ^ t >>> 15, t | 1);
@@ -488,7 +494,7 @@
     return `${(x / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Mio. \u20AC`;
   }
 
-  // ../engine/src/planung.ts
+  // engine/src/planung.ts
   var aktiv = (h) => h.status !== "geschlossen" && h.status !== "verkauft";
   var clusterVon = (h) => h.hauscluster || h.region;
   var organisation = (s2) => s2.organisation;
@@ -1046,7 +1052,7 @@
     };
   }
 
-  // ../engine/src/statistik.ts
+  // engine/src/statistik.ts
   var STATISTIK_AKTIV = true;
   var GRENZE_BYTES = 2e6;
   var HAUS_WOCHEN = 156;
@@ -1133,7 +1139,7 @@
     return ergebnis;
   }
 
-  // ../engine/src/eigenmarken.ts
+  // engine/src/eigenmarken.ts
   var BESCHAFFUNG = {
     fernost: { name: "Fernost", vorlauf: 22, mindestabnahme: 15e4, mehrmarge: 0.14, produzent: "Golden Thread" },
     nahost: { name: "Nahost und Osteuropa", vorlauf: 10, mindestabnahme: 6e4, mehrmarge: 0.105, produzent: "Adria Konfektion" },
@@ -1580,7 +1586,7 @@
     };
   }
 
-  // ../engine/src/standorte.ts
+  // engine/src/standorte.ts
   var KOORDINATEN = {
     Berlin: [52.52, 13.4],
     Hamburg: [53.55, 10],
@@ -1775,7 +1781,7 @@
     return Math.sqrt(dx * dx + dy * dy) / 100;
   }
 
-  // ../engine/src/schwierigkeit.ts
+  // engine/src/schwierigkeit.ts
   var SCHWIERIGKEIT = {
     leicht: {
       name: "Leicht",
@@ -1814,7 +1820,7 @@
   var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
   var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
 
-  // ../engine/src/stakeholder.ts
+  // engine/src/stakeholder.ts
   function freieLiquiditaet(s2) {
     return s2.cash + s2.kreditlinie;
   }
@@ -1865,7 +1871,7 @@
     }
   }
 
-  // ../engine/src/ware.ts
+  // engine/src/ware.ts
   function bestandWert(s2, g) {
     let x = 0;
     for (const k of s2.bestand) if (!g || k.gruppe === g) x += k.wert;
@@ -1947,7 +1953,7 @@
     return gebucht;
   }
 
-  // ../engine/src/marketing.ts
+  // engine/src/marketing.ts
   var ALTERSGRUPPEN = ["jung", "mitte", "aelter", "senioren"];
   var ALTERSGRUPPE_TEXT = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var REGIONEN = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
@@ -3478,7 +3484,7 @@
     };
   }
 
-  // ../engine/src/wettbewerb.ts
+  // engine/src/wettbewerb.ts
   var WIRKUNGSFAKTOR = 0.035;
   var ARTEN = ["modehaus", "fastfashion", "premium", "offprice", "textildiscounter", "elektronik", "leer_ehemals"];
   var START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
@@ -3905,7 +3911,7 @@
     }
   }
 
-  // ../engine/src/premium.ts
+  // engine/src/premium.ts
   var PREMIUM_PROFIL = {
     P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
     P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
@@ -4132,7 +4138,7 @@
     return null;
   }
 
-  // ../engine/src/chronik.ts
+  // engine/src/chronik.ts
   var CHRONIK_AKTIV = true;
   var KONZERN_GESCHICHTE = [
     { jahr: 1886, titel: "Eine Tuchhandlung in Essen", text: "In einer kleinen Essener Ladenzeile beginnt die Familie Hartwig mit Tuchen, Kurzwaren und Ma\xDFstoffen. Ein rotes Schild \xFCber der T\xFCr wird zum Erkennungszeichen.", motiv: "Tuchballen und Schaufenster", familie: 1 },
@@ -4216,7 +4222,7 @@
     return { geschichte: KONZERN_GESCHICHTE, spiel: [...s2.chronik ?? []].reverse() };
   }
 
-  // ../engine/src/szenarien.ts
+  // engine/src/szenarien.ts
   var SZENARIEN_AKTIV = true;
   var SZENARIEN = [
     { id: "standard", name: "Die Sanierung", beschreibung: "Hartwig steckt in der Krise. Das bekannte Ausgangsszenario.", schwierigkeit: "Mittel", ziel: "260 Wochen \xFCberleben", bild: "sanierung", start: {} },
@@ -4388,7 +4394,7 @@
     if (ziel.gescheitert) melde(s2, "warnung", "Szenarioziel verfehlt: " + ziel.text);
   }
 
-  // ../engine/src/zeitung.ts
+  // engine/src/zeitung.ts
   var ZEITUNG_REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
   var EREIGNISSE = [
     ["konkurrenz_neu", "Handel", "konkurrenz", "Neue Konkurrenz in der Innenstadt", "Ein Anbieter investiert in Verkaufsfl\xE4che.", "Der lokale Handel stellt sich auf einen ver\xE4nderten Wettbewerb ein.", "Die kommenden Wochen d\xFCrften zeigen, wie stark sich die Kundschaft neu verteilt.", /wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
@@ -4551,7 +4557,7 @@
     }
   }
 
-  // ../engine/src/spielende.ts
+  // engine/src/spielende.ts
   var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
   var SPIELENDE_AKTIV = true;
   var aktiv2 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert;
@@ -4648,7 +4654,7 @@
     melde(s2, "eigentuemer", "Ein \xDCbernahmeangebot f\xFCr den gesamten Konzern liegt vor.", { modul: "vorstand" });
   }
 
-  // ../engine/src/it.ts
+  // engine/src/it.ts
   var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau"]);
   var SYSTEME = {
     kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
@@ -4987,7 +4993,7 @@
     };
   }
 
-  // ../engine/src/organisation.ts
+  // engine/src/organisation.ts
   var b = (id, name2, ressort, abteilung2, beschreibung) => ({ id, name: name2, ressort, abteilung: abteilung2, beschreibung });
   var BEREICHE = [
     b("konzerncontrolling", "Konzerncontrolling", "cfo", "controlling", "GuV, Bilanz und Liquidit\xE4t"),
@@ -5041,7 +5047,57 @@
     "cro.mietverhandlungen": "immobilien",
     "cdo.onlinesortiment": "ecommerce"
   };
-  var ORGANISATION_AKTIONEN = /* @__PURE__ */ new Set(["flagship", "delegation", "organisationBesetzen", "organisationEntlassen", "organisationHaltepraemie", "organisationBefoerdern"]);
+  var task = (id, name2, grenze) => ({ id, name: name2, ...grenze ? { grenze } : {} });
+  var ALLGEMEIN = [task("planung", "Planung und Priorit\xE4ten"), task("freigaben", "Routinefreigaben", 5e4)];
+  var AUFGABEN_NACH_BEREICH = {
+    einkauf_damen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_herren_kinder: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_beauty: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_wohnen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_food: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    merchandise_planning: [task("limits", "Open-to-Buy-Limits", 5e4), task("vororder", "Saison-Vororder", 5e4), task("freigaben", "Bestellfreigaben", 5e4)],
+    allokation: [task("nachorder", "Nachorder"), task("disposition", "NOS-Disposition"), task("umlagerung", "Warenumlagerungen", 2e4)],
+    preis_reduzierung: [task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4), task("preise", "Preispflege")],
+    eigenmarken: [task("produkte", "Produktentwicklung", 5e4), task("positionierung", "Markenpositionierung", 1e5), task("sortiment", "Sortiment und Auslistung")],
+    personaleinsatz: [task("einsatz", "Einsatzplanung"), task("aushilfen", "Aushilfen", 1e4), task("schicht", "Schicht\xE4nderungen")],
+    recruiting: [task("einstellung", "Einstellungen", 5e4), task("angebote", "Kandidatenangebote", 1e4)],
+    arbeitsbeziehungen: [task("verhandlung", "Betriebsratsverhandlungen"), task("vereinbarung", "Betriebsvereinbarungen", 1e5)],
+    marketing: [task("aktionen", "Aktionen", 1e5), task("mailings", "Mailings", 5e4), task("budget", "Kanalbudget", 5e4)],
+    crm: [task("mailings", "CRM-Mailings", 5e4), task("segment", "Kundensegmente"), task("karte", "Kundenkarte und App", 5e4)],
+    store_operations: [task("oeffnungszeiten", "\xD6ffnungszeiten"), task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4), task("reparaturen", "Reparaturen", 1e4)],
+    facility: [task("reparaturen", "Reparaturen", 1e4), task("wartung", "Wartung", 5e4), task("energie", "Energieplanung")]
+  };
+  var CLUSTER_AUFGABEN = [
+    task("oeffnungszeiten", "\xD6ffnungszeiten"),
+    task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4),
+    task("reparaturen", "Reparaturen", 1e4),
+    task("aushilfen", "Aushilfen", 1e4),
+    task("einsatz", "Personaleinsatzplanung")
+  ];
+  function delegationsAufgaben(bereich, hauscluster2) {
+    if (hauscluster2) return CLUSTER_AUFGABEN;
+    if (!bereich || !BEREICHE.some((b2) => b2.id === bereich)) return [];
+    return AUFGABEN_NACH_BEREICH[bereich] ?? ALLGEMEIN.slice();
+  }
+  var RESSORT_TASK = {
+    "cpo.freigaben": "freigaben",
+    "cpo.dispo": "disposition",
+    "cpo.produktentwicklung": "produkte",
+    "cmo.aktionskalender": "aktionen",
+    "cmo.crm": "mailings",
+    "cmo.kanalbudget": "budget",
+    "chro.personalplanung": "einsatz",
+    "chro.betriebsrat": "verhandlung",
+    "cdo.onlinesortiment": "planung",
+    "cso.filialbesetzung": "planung",
+    "coo.personalbedarf": "einsatz",
+    "coo.filialpersonal": "einsatz",
+    "cro.mietverhandlungen": "verhandlung",
+    "cro.schliessungen": "planung",
+    "cfo.zahlungsplanung": "planung",
+    "cfo.bank": "planung"
+  };
+  var ORGANISATION_AKTIONEN = /* @__PURE__ */ new Set(["flagship", "delegation", "delegationGrenze", "organisationBesetzen", "organisationEntlassen", "organisationHaltepraemie", "organisationBefoerdern"]);
   var REGIONEN2 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var hash = (str) => [...str].reduce((v, c) => Math.imul(v, 31) + c.charCodeAt(0) >>> 0, 2166136261);
   var mix = (seed, text3) => hash(seed + ":" + text3);
@@ -5180,6 +5236,16 @@
       return neu === id && !!s2.vorstand?.ressorts[ressort]?.delegation[delegationsId];
     });
   }
+  function istAufgabeDelegiert(s2, aufgabe, bereich, hauscluster2) {
+    const st2 = bereich ? s2.organisation?.bereiche[bereich] : s2.organisation?.hauscluster.find((c) => c.id === hauscluster2)?.stelle;
+    if (!st2 || !st2.person || !delegationsAufgaben(bereich, hauscluster2).some((a) => a.id === aufgabe)) return false;
+    return st2.aufgaben?.[aufgabe] ?? (bereich ? istDelegiert(s2, bereich) : !!st2.delegiert);
+  }
+  function delegationsGrenze(s2, aufgabe, bereich, hauscluster2) {
+    const def = delegationsAufgaben(bereich, hauscluster2).find((x) => x.id === aufgabe);
+    const st2 = bereich ? s2.organisation?.bereiche[bereich] : s2.organisation?.hauscluster.find((x) => x.id === hauscluster2)?.stelle;
+    return def?.grenze ? st2?.grenzen?.[aufgabe] ?? def.grenze : void 0;
+  }
   function bereichsQualitaet(s2, id) {
     const def = BEREICHE.find((x) => x.id === id), st2 = s2.organisation?.bereiche[id];
     if (!def || !st2) return 0;
@@ -5201,8 +5267,19 @@
     const bereich = v.bereich ? BEREICHE.find((b2) => b2.id === v.bereich) : void 0;
     const cluster = v.hauscluster ? s2.organisation.hauscluster.find((c) => c.id === v.hauscluster) : void 0;
     const chef = bereich ? berichtetAn(s2, bereich.id) : cluster ? clusterBerichtetAn(s2, cluster.id) : "spieler";
-    const delegiert = bereich ? istDelegiert(s2, bereich.id) : !!cluster?.stelle.delegiert;
-    if (chef !== "spieler" && delegiert && !v.grundsaetzlich) return;
+    const delegiert = v.aufgabe ? istAufgabeDelegiert(s2, v.aufgabe, bereich?.id, cluster?.id) : bereich ? istDelegiert(s2, bereich.id) : !!cluster?.stelle.delegiert;
+    const grenze = v.aufgabe ? delegationsGrenze(s2, v.aufgabe, bereich?.id, cluster?.id) : void 0;
+    const innerhalbGrenze = grenze === void 0 || v.betrag !== void 0 && v.betrag <= grenze;
+    if (chef !== "spieler" && delegiert && !v.grundsaetzlich && innerhalbGrenze) {
+      if (v.aktion) {
+        const guete = bereich ? bereichsQualitaet(s2, bereich.id) : clusterleitungQualitaet(s2, cluster.id);
+        const schwelle = mix(s2.seed, (v.aufgabe ?? v.titel) + ":" + s2.woche) % 1e3 / 1e3;
+        const richtig = schwelle < 0.3 + 0.65 * guete;
+        const aktion = richtig ? v.aktion : v.fehlerAktion ?? v.aktion;
+        fuehreAus(s2, aktion);
+      }
+      return;
+    }
     const prefix = bereich?.name ?? cluster?.name ?? "Organisation";
     s2.entscheidungen.push({
       id: "org-v-" + ++s2.organisation.zaehler,
@@ -5213,13 +5290,13 @@
       text: prefix + ": " + v.text,
       optionen: v.optionen ?? [{ id: "vorschlag", label: "Vorschlag der Leitung \xFCbernehmen" }, { id: "ablehnen", label: "Ablehnen" }],
       standard: v.standard ?? "vorschlag",
-      daten: { bereich: bereich?.id ?? "", hauscluster: cluster?.id ?? "", absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : "" }
+      daten: { bereich: bereich?.id ?? "", hauscluster: cluster?.id ?? "", aufgabe: v.aufgabe ?? "", absender: prefix, aktion: v.aktion ? JSON.stringify(v.aktion) : "" }
     });
   }
   function organisationVorlageEntscheidung(s2, e, option2) {
     if (option2 !== "vorschlag" || typeof e.daten.aktion !== "string" || !e.daten.aktion) return;
     const a = JSON.parse(e.daten.aktion);
-    organisationAktion(s2, a);
+    fuehreAus(s2, a);
   }
   function stelleFuer(s2, ebene, id) {
     if (ebene === "bereich") return s2.organisation?.bereiche[id];
@@ -5243,21 +5320,39 @@
       o.unruhe[h.id] = { bis: s2.woche + 8, moral: 10 };
       return { ok: true, text: a.an ? "Flagship zugeordnet: acht Wochen Unruhe." : "Flagship wieder regional zugeordnet: acht Wochen Unruhe." };
     }
-    if (a.typ === "delegation") {
-      if (a.bereich && o.bereiche[a.bereich]) {
-        o.bereiche[a.bereich].delegiert = a.an;
+    if (a.typ === "delegation" || a.typ === "delegationGrenze") {
+      const st3 = a.bereich ? o.bereiche[a.bereich] : o.hauscluster.find((c) => c.id === a.hauscluster)?.stelle;
+      if (!st3) return { ok: false, text: "Bereich oder Hauscluster nicht gefunden." };
+      if (a.typ === "delegationGrenze") {
+        const def = delegationsAufgaben(a.bereich, a.hauscluster).find((t) => t.id === a.aufgabe);
+        if (!def?.grenze || !Number.isFinite(a.betrag) || a.betrag < 0 || a.betrag > 1e8)
+          return { ok: false, text: "Ung\xFCltige Betragsgrenze oder Aufgabe." };
+        (st3.grenzen ?? (st3.grenzen = {}))[a.aufgabe] = eur(a.betrag);
+        return { ok: true, text: "Betragsgrenze ge\xE4ndert." };
+      }
+      if (a.aufgabe !== void 0) {
+        if (!delegationsAufgaben(a.bereich, a.hauscluster).some((t) => t.id === a.aufgabe))
+          return { ok: false, text: "Aufgabe in diesem Bereich nicht vorhanden." };
+        if (a.an && !st3.person) return { ok: false, text: "Ohne Leitung keine Delegation m\xF6glich." };
+        (st3.aufgaben ?? (st3.aufgaben = {}))[a.aufgabe] = a.an;
+        if (a.bereich) for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) {
+          if (neu !== a.bereich || RESSORT_TASK[alt] !== a.aufgabe) continue;
+          const [r, id] = alt.split(".");
+          if (s2.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d2) => d2.id === id))
+            s2.vorstand.ressorts[r].delegation[id] = a.an;
+        }
+        return { ok: true, text: "Aufgabe " + a.aufgabe + (a.an ? " delegiert." : " zur Entscheidung vorgelegt.") };
+      }
+      st3.delegiert = a.an;
+      st3.aufgaben = {};
+      if (a.bereich) {
         for (const [alt, neu] of Object.entries(ALTE_DELEGATIONEN)) if (neu === a.bereich) {
           const [r, id] = alt.split(".");
-          if (s2.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d2) => d2.id === id)) s2.vorstand.ressorts[r].delegation[id] = a.an;
+          if (s2.vorstand?.ressorts[r]?.delegation && DELEGATIONEN[r].some((d2) => d2.id === id))
+            s2.vorstand.ressorts[r].delegation[id] = a.an;
         }
-        return { ok: true, text: "Bereichsdelegation ge\xE4ndert." };
       }
-      const cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
-      if (cluster) {
-        cluster.stelle.delegiert = a.an;
-        return { ok: true, text: "Clusterdelegation ge\xE4ndert." };
-      }
-      return { ok: false, text: "Bereich oder Hauscluster nicht gefunden." };
+      return { ok: true, text: a.bereich ? "Bereichsdelegation ge\xE4ndert." : "Clusterdelegation ge\xE4ndert." };
     }
     if (a.typ === "organisationBefoerdern") {
       const h = s2.haeuser.find((x) => x.id === a.haus), cluster = o.hauscluster.find((x) => x.id === a.hauscluster);
@@ -5289,6 +5384,46 @@
     st2.kandidaten = [1, 2, 3].map((n) => person(s2.seed, a.id + "-" + (s2.woche + 1), n));
     return { ok: true, text: k.name + " \xFCbernimmt die Leitung." };
   }
+  function routineVorschlag(bereich, aufgabe) {
+    const wg = {
+      einkauf_damen: "damen",
+      einkauf_herren_kinder: "herren",
+      einkauf_beauty: "beauty",
+      einkauf_wohnen: "wohnen",
+      einkauf_food: "nug",
+      merchandise_planning: "alle",
+      allokation: "alle",
+      preis_reduzierung: "alle"
+    };
+    const gruppe2 = bereich && wg[bereich];
+    if (gruppe2) {
+      if (aufgabe === "limits") return {
+        gut: { typ: "wgLimit", wg: gruppe2, faktor: 1.05 },
+        schlecht: { typ: "wgLimit", wg: gruppe2, faktor: 0.8 }
+      };
+      if (aufgabe === "reduzierung") return {
+        gut: { typ: "wgReduzierung", wg: gruppe2, strategie: "normal" },
+        schlecht: { typ: "wgReduzierung", wg: gruppe2, strategie: "spaet" }
+      };
+      if (aufgabe === "nachorder" || aufgabe === "disposition") return {
+        gut: { typ: "wgServicegrad", wg: gruppe2, ziel: 0.98 },
+        schlecht: { typ: "wgServicegrad", wg: gruppe2, ziel: 0.9 }
+      };
+      if (aufgabe === "vororder") return {
+        gut: { typ: "wgVororderquote", wg: gruppe2, quote: 0.6 },
+        schlecht: { typ: "wgVororderquote", wg: gruppe2, quote: 0.25 }
+      };
+      if (aufgabe === "freigaben") return {
+        gut: { typ: "sammelfreigabe" },
+        schlecht: { typ: "freigabeGrenze", euro: 0 }
+      };
+    }
+    if (bereich === "marketing" && aufgabe === "budget") return {
+      gut: { typ: "kanalBudget", kanal: "alle", faktor: 1.02 },
+      schlecht: { typ: "kanalBudget", kanal: "alle", faktor: 0.8 }
+    };
+    return void 0;
+  }
   function organisationWoche(s2) {
     const o = s2.organisation;
     if (!o || s2.prognose) return;
@@ -5297,6 +5432,28 @@
         const h = s2.haeuser.find((x) => x.id === hausId);
         if (h) h.personal.filialleiter.moral = clamp(h.personal.filialleiter.moral + unruhe.moral, 0, 100);
         delete o.unruhe[hausId];
+      }
+    }
+    if (s2.woche > 0 && s2.woche % 4 === 0) {
+      const einheiten = [
+        ...Object.entries(o.bereiche).map(([id, st2]) => ({ st: st2, bereich: id, hauscluster: void 0 })),
+        ...o.hauscluster.map((c) => ({ st: c.stelle, bereich: void 0, hauscluster: c.id }))
+      ];
+      for (const x of einheiten) for (const aufgabe of Object.keys(x.st.aufgaben ?? {})) {
+        const def = delegationsAufgaben(x.bereich, x.hauscluster).find((d2) => d2.id === aufgabe);
+        if (!def) continue;
+        const vorschlag = routineVorschlag(x.bereich, aufgabe);
+        neueVorlage(s2, {
+          bereich: x.bereich,
+          hauscluster: x.hauscluster,
+          aufgabe,
+          aktion: vorschlag?.gut,
+          fehlerAktion: vorschlag?.schlecht,
+          betrag: def.grenze ? Math.min(def.grenze, delegationsGrenze(s2, aufgabe, x.bereich, x.hauscluster) ?? def.grenze) : void 0,
+          titel: def.name + ": Routineentscheidung KW " + (s2.woche + 1),
+          text: "Die zust\xE4ndige Leitung legt ihre Entscheidung zu " + def.name + " vor.",
+          frist: 3
+        });
       }
     }
     const stellen = [
@@ -5354,6 +5511,7 @@
         qualitaet: bereichsQualitaet(s2, b2.id),
         berichtetAn: berichtetAn(s2, b2.id),
         delegiert: istDelegiert(s2, b2.id),
+        aufgaben: delegationsAufgaben(b2.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, b2.id), grenze: delegationsGrenze(s2, d2.id, b2.id) })),
         hqStufe: s2.hq.abteilungen.find((a) => a.id === b2.abteilung)?.stufe ?? 0,
         offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.bereich === b2.id).length
       })),
@@ -5371,15 +5529,19 @@
           umsatz: c.hausIds.reduce((a, id) => a + (s2.haeuser.find((h) => h.id === id)?.kpi?.umsatz ?? 0), 0),
           qualitaet: clusterleitungQualitaet(s2, c.id),
           berichtetAn: clusterBerichtetAn(s2, c.id),
+          aufgaben: delegationsAufgaben(void 0, c.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, void 0, c.id), grenze: delegationsGrenze(s2, d2.id, void 0, c.id) })),
           offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.hauscluster === c.id).length
         }))
       })),
-      sonder: o?.hauscluster.find((c) => c.sonder),
+      sonder: (() => {
+        const c = o?.hauscluster.find((c2) => c2.sonder);
+        return c ? { ...c, aufgaben: delegationsAufgaben(void 0, c.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, void 0, c.id), grenze: delegationsGrenze(s2, d2.id, void 0, c.id) })) } : void 0;
+      })(),
       flagships: o?.flagships ?? []
     };
   }
 
-  // ../engine/src/haus.ts
+  // engine/src/haus.ts
   var HAUS_AKTIONEN = /* @__PURE__ */ new Set([
     "hausLeitungErsetzen",
     "hausLeitungFoerdern",
@@ -5950,7 +6112,7 @@
     return s2.haeuser.filter(istOffen).map((h) => ({ id: h.id, name: h.name, score: hausKundenscore(s2, h) })).sort((a, b2) => b2.score - a.score || a.id.localeCompare(b2.id));
   }
 
-  // ../engine/src/umbau.ts
+  // engine/src/umbau.ts
   var UMBAU_STUFEN = {
     auffrischung: { name: "Auffrischung", qm: 60, min: 2, max: 2 },
     ladenbau: { name: "Ladenbau neu", qm: 250, min: 4, max: 6 },
@@ -6198,7 +6360,7 @@
     }));
   }
 
-  // ../engine/src/treiber.ts
+  // engine/src/treiber.ts
   var NULL = { frequenz: 1, kaufquote: 1, bon: 1 };
   var PREIS = {
     damen: 43,
@@ -6537,7 +6699,7 @@
     return { wochen, bruecke: umsatzbruecke(s2, { ebene: "konzern", vergleich: "vorjahr", wochen, format }), zeilen, gruppen, beobachtung };
   }
 
-  // ../engine/src/personaleinsatz.ts
+  // engine/src/personaleinsatz.ts
   var PERSONAL_GRUPPEN = ["logistik", "verkauf", "kasse", "verwaltung"];
   var PERSONAL_NAMEN = {
     logistik: "Instore-Logistik",
@@ -6975,7 +7137,7 @@
     }));
   }
 
-  // ../engine/src/testwerkzeuge.ts
+  // engine/src/testwerkzeuge.ts
   var TEST_EREIGNISSE = [
     { id: "angebot:untermiete", name: "Angebot: Untermiete" },
     { id: "angebot:paket", name: "Angebot: Mietpaket" },
@@ -7041,7 +7203,7 @@
     }
   }
 
-  // ../engine/src/aktionen.ts
+  // engine/src/aktionen.ts
   var ok4 = (text3) => ({ ok: true, text: text3 });
   var fehler4 = (text3) => ({ ok: false, text: text3 });
   function haus(s2, id) {
@@ -7574,7 +7736,7 @@
     return result;
   }
 
-  // ../engine/src/abfragen.ts
+  // engine/src/abfragen.ts
   function hausBezug(s2, ids = [], modul) {
     const hs = [...new Set(ids)].map((id) => s2.haeuser.find((h) => h.id === id)).filter((h) => !!h);
     return hs.length ? { stadt: hs[0].stadt, hausIds: hs.map((h) => h.id), ...modul ? { modul } : {} } : modul ? { modul } : void 0;
@@ -7763,7 +7925,7 @@
     return { limit: eur(kvLimit(s2)), genutzt: eur(offeneWarenverbindlichkeiten(s2)) };
   }
 
-  // ../engine/src/vorstand.ts
+  // engine/src/vorstand.ts
   var RESSORTS = ["cfo", "coo", "cso", "cpo", "cmo", "chro", "cro", "cdo"];
   var RESSORT_INFO = {
     cfo: { kurz: "CFO", titel: "Finanzvorstand", zustaendig: "Finanzen, Controlling, Bank und Kreditversicherer", markt: 52e4, abteilungen: { controlling: 1, verwaltung: 1 } },
@@ -8618,7 +8780,7 @@
     });
   }
 
-  // ../engine/src/hq.ts
+  // engine/src/hq.ts
   var ARCHIV_QM = 90;
   var ARCHIV_AKTIV = true;
   var ABTEILUNGEN = ["controlling", "einkauf", "marketing", "personal", "immobilien", "logistik", "ecommerce", "recht", "vm", "verwaltung", "produkt"];
@@ -9520,7 +9682,17 @@
     return g && e ? { gebaeudeId: g.id, nr: e.nr } : void 0;
   }
 
-  // ../engine/src/produkte.ts
+  // engine/src/produkte.ts
+  var ZUSATZ_ARTIKEL = {
+    damen: ["A-Linien-Kleid", "Wickelkleid", "Tunikabluse", "Oversize-Bluse", "Bootcut-Jeans", "Culotte", "Plisseerock", "Bleistiftrock", "Feinstrickpullover", "Longcardigan", "Trenchcoat", "Boucl\xE9-Jacke"],
+    herren: ["Slim-Fit-Hemd", "Regular-Fit-Hemd", "Oxford-Hemd", "Henley-Shirt", "Rundhalspullover", "Rollkragenpullover", "Cargo-Hose", "Anzughose", "Bermuda-Shorts", "Stricksakko", "Wollmantel", "Leinen-Sakko"],
+    kinder: ["Kinder-Jeansshorts", "Latzhose", "Kinder-Sweatshirt", "Kinder-Regenjacke", "Kinder-Leggings", "Kinder-Softshelljacke", "Kinder-Polo", "Kinder-Pyjama", "Kinder-Strickpullover", "Kinder-T\xFCllrock", "Kinder-Sonnenhut", "Kinder-Jogginghose"],
+    schuhe: ["Loafer", "Ballerina", "Chelsea-Boot", "Stiefelette", "Sandale", "Espadrille", "Slipper", "Schn\xFCrschuh", "Business-Schuh", "Wanderschuh", "Plateau-Sneaker", "Winterstiefel"],
+    accessoires: ["Umh\xE4ngetasche", "Crossbody-Tasche", "Shopper", "Clutch", "Portemonnaie", "Rucksack", "Weekender", "Kartenetui", "Seidentuch", "Krawatte", "Handschuhe", "Reisetasche"],
+    heimtextil: ["Spannbettlaken", "Bettbezug", "Kopfkissenbezug", "Wohndecke", "Tagesdecke", "Badetuch", "G\xE4stehandtuch", "Waschlappen", "Duschvorleger", "Tischl\xE4ufer", "Tischdecke", "Dekokissen"],
+    haushalt: ["Geschirrtuch", "Sch\xFCrze", "Topflappen", "Tischset", "Serviette", "Vorratsdose", "Trinkbecher", "Servierschale", "Salatsch\xFCssel", "Kerzenhalter", "Aufbewahrungskorb", "Dekotablett"],
+    beauty: ["Mascara", "Foundation", "Concealer", "Rouge", "Lidschatten", "Nagellack", "Handcreme", "Gesichtsserum", "Reinigungsgel", "Duschgel", "K\xF6rperlotion", "Eau de Toilette"]
+  };
   var PRODUKT_KATEGORIEN = {
     oberteile: "Oberteile",
     unterteile: "Hosen, R\xF6cke, Kleider",
@@ -9616,6 +9788,97 @@
     { typ: "Kinderkleid", kategorie: "kinder", wgs: ["kinder.maedchen", "kinder.baby"], saison: "sommer", preis: 25, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose", "Leinen"], gruppe: G(1, 0, 0, 0), aufwand: 1 },
     { typ: "Pl\xFCschtier", kategorie: "kinder", wgs: ["kinder.baby"], saison: "ganz", preis: 19, materialien: ["Polyester", "Bio-Baumwolle", "Baumwolle"], gruppe: G(1, 0, 0, 0), aufwand: 1 }
   ];
+  var ZUSATZ_WG = {
+    damen: ["damen.kleider", "damen.blusen", "damen.denim", "damen.strick", "damen.hosen", "damen.jacken", "damen.gg"],
+    herren: ["herren.hemden", "herren.casual", "herren.hosen", "herren.strick", "herren.business", "herren.jacken"],
+    kinder: ["kinder.maedchen", "kinder.jungen", "kinder.baby"],
+    schuhe: ["accessoires.damenschuhe", "accessoires.herrenschuhe", "kinder.schuhe"],
+    accessoires: ["accessoires.lederwaren"],
+    heimtextil: ["wohnen.heimtextil", "wohnen.bett"],
+    haushalt: ["wohnen.tisch", "wohnen.deko"],
+    beauty: ["beauty.pflege", "beauty.drogerie"]
+  };
+  var ZUSATZ_MATERIAL = {
+    damen: ["Baumwolle", "Viskose", "Leinen", "Merino", "Kaschmir", "Seide"],
+    herren: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Merino", "Kaschmir"],
+    kinder: ["Bio-Baumwolle", "Baumwolle", "Denim", "Merino"],
+    schuhe: ["Leder", "Baumwolle", "Polyester"],
+    accessoires: ["Leder", "Baumwolle", "Leinen", "Seide", "Polyester"],
+    heimtextil: ["Baumwolle", "Bio-Baumwolle", "Leinen", "Viskose"],
+    haushalt: ["Baumwolle", "Leinen", "Polyester"],
+    beauty: ["Polyester"]
+  };
+  var SPARTEN_KATEGORIE = {
+    damen: "oberteile",
+    herren: "oberteile",
+    kinder: "kinder",
+    schuhe: "schuhe",
+    accessoires: "accessoires",
+    heimtextil: "home",
+    haushalt: "home",
+    beauty: "beauty"
+  };
+  var SPARTEN_PREIS = {
+    damen: 49,
+    herren: 49,
+    kinder: 25,
+    schuhe: 79,
+    accessoires: 39,
+    heimtextil: 35,
+    haushalt: 18,
+    beauty: 19
+  };
+  var BEKLEIDUNG_DEF = {
+    damen: [
+      { kategorie: "unterteile", wg: "damen.kleider" },
+      { kategorie: "unterteile", wg: "damen.kleider" },
+      { kategorie: "oberteile", wg: "damen.blusen" },
+      { kategorie: "oberteile", wg: "damen.blusen" },
+      { kategorie: "unterteile", wg: "damen.denim" },
+      { kategorie: "unterteile", wg: "damen.hosen" },
+      { kategorie: "unterteile", wg: "damen.hosen" },
+      { kategorie: "unterteile", wg: "damen.hosen" },
+      { kategorie: "oberteile", wg: "damen.strick" },
+      { kategorie: "oberteile", wg: "damen.strick" },
+      { kategorie: "jacken", wg: "damen.jacken" },
+      { kategorie: "jacken", wg: "damen.jacken" }
+    ],
+    herren: [
+      { kategorie: "oberteile", wg: "herren.hemden" },
+      { kategorie: "oberteile", wg: "herren.hemden" },
+      { kategorie: "oberteile", wg: "herren.hemden" },
+      { kategorie: "oberteile", wg: "herren.casual" },
+      { kategorie: "oberteile", wg: "herren.strick" },
+      { kategorie: "oberteile", wg: "herren.strick" },
+      { kategorie: "unterteile", wg: "herren.hosen" },
+      { kategorie: "unterteile", wg: "herren.hosen" },
+      { kategorie: "unterteile", wg: "herren.casual" },
+      { kategorie: "jacken", wg: "herren.business" },
+      { kategorie: "jacken", wg: "herren.jacken" },
+      { kategorie: "jacken", wg: "herren.business" }
+    ]
+  };
+  var ZUSATZ_ARTIKELTYPEN = Object.keys(ZUSATZ_ARTIKEL).flatMap(
+    (sparte) => ZUSATZ_ARTIKEL[sparte].map((typ, index2) => {
+      const wgs = ZUSATZ_WG[sparte];
+      const bekleidung = sparte === "damen" || sparte === "herren" ? BEKLEIDUNG_DEF[sparte][index2] : void 0;
+      const kategorie = bekleidung?.kategorie ?? SPARTEN_KATEGORIE[sparte];
+      const wg = bekleidung ? [bekleidung.wg] : sparte === "schuhe" ? wgs : [wgs[index2 % wgs.length]];
+      return {
+        typ,
+        sparte,
+        kategorie,
+        wgs: wg,
+        saison: index2 % 3 === 0 ? "sommer" : index2 % 3 === 1 ? "winter" : "ganz",
+        preis: SPARTEN_PREIS[sparte] + index2 * 2,
+        materialien: [...ZUSATZ_MATERIAL[sparte]],
+        gruppe: sparte === "kinder" ? G(1, 0.1, 0.1, 0.1) : G(0.2, 0.75, 0.85, 0.85),
+        aufwand: 1 + index2 % 3
+      };
+    })
+  );
+  var BASIS_ARTIKELTYPEN = [...ARTIKELTYPEN];
+  ARTIKELTYPEN.push(...ZUSATZ_ARTIKELTYPEN);
   var TYP = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
   var FARB_BASIS = {
     kinder: ["gelb", "rot", "hellblau", "rosa", "mintgr\xFCn", "orange", "jeansblau", "wei\xDF", "koralle"],
@@ -9657,8 +9920,11 @@
     const gruppen = {};
     Object.keys(TREND_GRUPPEN).forEach((g, i) => {
       const r = hashRng(s2.seed, sid, i);
-      const typen = ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
-      const artikel = ziehe(r, typen.map((t) => t.typ), 5);
+      const typen = BASIS_ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
+      const basisArtikel = ziehe(r, typen.map((t) => t.typ), 5);
+      const z2 = hashRng(s2.seed, sid, 100 + i);
+      const neu = ZUSATZ_ARTIKELTYPEN.filter((t) => t.gruppe[g] >= 0.5 && (t.saison === "ganz" || t.saison === "sommer" === sommer));
+      const artikel = [...basisArtikel, ...ziehe(z2, neu.map((t) => t.typ), 4)];
       const basis3 = FARB_BASIS[g];
       const farben = [...ziehe(r, basis3, 2), ...ziehe(r, FARBLISTE.filter((f) => !basis3.includes(f)), 2)];
       const out = ziehe(r, FARBLISTE.filter((f) => !farben.includes(f)), 3);
@@ -10119,7 +10385,8 @@
     const kap = kapazitaet(s2);
     const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt" && (!marke4 || m.id === marke4)).map((m) => {
       const liste2 = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
-      const kats = [...new Set(liste2.map((p2) => p2.kategorie))];
+      const moegliche = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s2, m, t)).map((t) => t.kategorie);
+      const kats = [.../* @__PURE__ */ new Set([...liste2.map((p2) => p2.kategorie), ...moegliche])];
       const ent = liste2.filter((p2) => p2.status === "entwicklung").length;
       const voll2 = kats.filter((k) => belegt(s2, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
       return {
@@ -10138,6 +10405,20 @@
   }
   function produktKatalog(_s) {
     return {
+      sparten: Object.keys(ZUSATZ_ARTIKEL).map((id) => ({
+        id,
+        name: {
+          damen: "Bekleidung Damen",
+          herren: "Bekleidung Herren",
+          kinder: "Bekleidung Kinder",
+          schuhe: "Schuhe",
+          accessoires: "Accessoires",
+          heimtextil: "Heimtextil",
+          haushalt: "Haushalt",
+          beauty: "Beauty"
+        }[id],
+        typen: [...ZUSATZ_ARTIKEL[id]]
+      })),
       kategorien: Object.keys(PRODUKT_KATEGORIEN).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
       typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
       farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN2[f] })),
@@ -10201,7 +10482,7 @@
     };
   }
 
-  // ../engine/src/einkauf.ts
+  // engine/src/einkauf.ts
   var JACKE = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
   var STRICK = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
   var ROH2 = {
@@ -11599,7 +11880,7 @@
     };
   }
 
-  // ../engine/src/merchandise.ts
+  // engine/src/merchandise.ts
   var WARE_AKTIONEN = /* @__PURE__ */ new Set(["allokationQualitaet", "umlagerung", "reduzierungZentral", "reduzierungLokal", "merchandisePlan", "fundusAbfluss", "flaechenZuteilung", "warensicherung"]);
   var hausclusterId = (h) => h.hauscluster || h.region;
   function ersatzHauscluster(s2) {
@@ -12101,7 +12382,7 @@
     return fehler6("Unbekannte Warenaktion.");
   }
 
-  // ../engine/src/welt.ts
+  // engine/src/welt.ts
   var STANDARD_SZENARIO = {
     warenhaeuser: 130,
     sporthaeuser: 50,
@@ -12451,7 +12732,7 @@
     }
   }
 
-  // ../engine/src/wirtschaft.ts
+  // engine/src/wirtschaft.ts
   function istAktiv(h) {
     return h.status === "offen" || h.status === "schliessung_verhandlung" || h.status === "raeumung";
   }
@@ -12614,7 +12895,7 @@
     return r;
   }
 
-  // ../engine/src/prozesse.ts
+  // engine/src/prozesse.ts
   var SCHLIESSUNGEN_WOCHE = /* @__PURE__ */ new WeakMap();
   var abfindungJeFte2 = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
   function einmalKosten(s2, betrag) {
@@ -12865,7 +13146,7 @@
     return s2.haeuser.reduce((a, h) => a + (h.status === "geschlossen" ? 0 : lohnKosten(s2, h)), 0);
   }
 
-  // ../engine/src/ereignisse.ts
+  // engine/src/ereignisse.ts
   function offeneHaeuser(s2, format) {
     return s2.haeuser.filter((h) => h.status === "offen" && (!format || h.format === format));
   }
@@ -13449,7 +13730,7 @@
     }
   }
 
-  // ../engine/src/erfolge.ts
+  // engine/src/erfolge.ts
   var ERFOLGE_AKTIV = true;
   var d = (id, titel, gruppe2, stufe2, hinweis, ziel, wert, geheim = false) => ({ id, titel, gruppe: gruppe2, stufe: stufe2, hinweis, ziel, wert, ...geheim ? { geheim: true } : {} });
   var bool = (test) => (s2, k) => Number(test(s2, k));
@@ -13568,7 +13849,7 @@
     };
   }
 
-  // ../engine/src/engine.ts
+  // engine/src/engine.ts
   function neuesSpiel(seed = 1, szenario = STANDARD_SZENARIO) {
     return neueWelt(seed, { ...STANDARD_SZENARIO, ...szenario });
   }
@@ -13854,7 +14135,7 @@
     return out;
   }
 
-  // ../engine/scripts/bot.ts
+  // engine/scripts/bot.ts
   function einkaufStandard(s2) {
     if (!s2.einkauf.freigaben.length) return;
     let offen = 0;
@@ -13980,7 +14261,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -44621,7 +44902,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -44764,7 +45045,7 @@
     return result;
   }
 
-  // src/kit/basis.js
+  // render/src/kit/basis.js
   function mische(r, liste2) {
     const a = [...liste2];
     for (let i = a.length - 1; i > 0; i--) {
@@ -45179,7 +45460,7 @@
     return kam;
   }
 
-  // src/kit/stadthaeuser.js
+  // render/src/kit/stadthaeuser.js
   var wurzelSumme = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STILE = ["gruenderzeit", "jugendstil", "backstein", "fachwerk", "fuenfziger", "siebziger", "neubau"];
   var RAHMEN = "#f6f3ec";
@@ -47830,7 +48111,7 @@
     return stadthaus(S, scene2, { ...p2, stil, geschosse: clamp3(g, 2, 7), vermeideFarbe: p2.nachbar?.farbe ?? p2.vermeideFarbe });
   }
 
-  // src/kit/gelaende.js
+  // render/src/kit/gelaende.js
   var wurzelSumme2 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var glatt = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
   function welle(seed, u) {
@@ -47960,7 +48241,7 @@
     }
   }
 
-  // src/kit/stadtrand.js
+  // render/src/kit/stadtrand.js
   var RING = 480;
   var RS = { breite: 17, gehweg: 3 };
   var ZONEN = { mittelstadt: [110, 220, 330], grossstadt: [150, 270, 380], metropole: [200, 330, 420] };
@@ -48543,7 +48824,7 @@
     return { x, z: z2, zoom: Math.min(zoom, Math.min(plan2.breite, plan2.tiefe) / 6.5) };
   }
 
-  // src/kit/outlet-standorte.js
+  // render/src/kit/outlet-standorte.js
   function outletImAussenring(plan2, standorte = []) {
     const gesucht = standorte.filter((s2) => s2.rolle === "outlet" && s2.lage === "rand");
     if (!gesucht.length) return [];
@@ -48588,7 +48869,7 @@
     return platziert;
   }
 
-  // src/kit/stadtplan.js
+  // render/src/kit/stadtplan.js
   var wurzelSumme3 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var klemm = (v, a, b2) => Math.max(a, Math.min(b2, v));
   var ganz = (r) => Math.floor(r() * 1e9);
@@ -50761,7 +51042,7 @@
     ganz
   };
 
-  // src/kit/zustaende.js
+  // render/src/kit/zustaende.js
   var wurzelSumme4 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STATI = ["offen", "aktion", "untermiete", "offprice", "teilschliessung", "umbau", "raeumung", "geschlossen", "leer", "verfall", "neueroeffnung", "abriss"];
   var AKTIONEN = [
@@ -52162,7 +52443,7 @@
     }
   }
 
-  // src/kit/sporthelfer.js
+  // render/src/kit/sporthelfer.js
   var GLAS = "#4d6677";
   var GLAS_D = "#2f3d48";
   var GLAS_HELL = "#7d9fb2";
@@ -52402,7 +52683,7 @@
     if (c < u1) s2.q(c, u1, y0, y1, t0, t1, f);
   }
 
-  // src/kit/wettbewerber.js
+  // render/src/kit/wettbewerber.js
   var ARTEN2 = ["modehaus", "offprice", "textildiscounter", "elektronik", "premium", "fastfashion", "leer_ehemals"];
   var NAMEN = {
     // je Art sechs Namen; die ersten drei sind die Zufallsauswahl ohne Vorgabe, staedte.js rotiert durch alle sechs
@@ -53119,7 +53400,7 @@
     return Math.max(h1, H + 1.6);
   }
 
-  // src/kit/warenhaus.js
+  // render/src/kit/warenhaus.js
   var wurzelSumme5 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var ROT2 = "#d23c32";
   var EG2 = 5.5;
@@ -55299,7 +55580,7 @@
     return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/sonderbauten.js
+  // render/src/kit/sonderbauten.js
   var wurzelSumme6 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI = Math.PI;
   function zyl4(S, rO, rU, h, x, y0, z2, farbe3, seg = 16, offen = false) {
@@ -58247,7 +58528,7 @@
     return hauptbahnhof(S, scene2, { ...p2, nurEmpfang: true, w: p2.w ?? 96, d: p2.d ?? 24 });
   }
 
-  // src/kit/sporthaus.js
+  // render/src/kit/sporthaus.js
   var wurzelSumme7 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var HS_ROT = "#d23c32";
   var HS_BLAU = "#1d2f4f";
@@ -59734,7 +60015,7 @@
     return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/innen.js
+  // render/src/kit/innen.js
   var innen_exports = {};
   __export(innen_exports, {
     BODEN: () => BODEN2,
@@ -61819,7 +62100,7 @@
     return new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.5, -0.6), new three_module_exports.Vector3(W3, WANDHOEHE, T));
   }
 
-  // src/kit/moebel/generationen.js
+  // render/src/kit/moebel/generationen.js
   var MATERIAL = {
     "#737e85": ["#77573a", "#7b8791"],
     "#444c55": ["#6c4c32", "#737a81"],
@@ -61854,7 +62135,7 @@
     return def.bau(zeichnet, r, d2, ctx);
   }
 
-  // src/kit/abteilung.js
+  // render/src/kit/abteilung.js
   var R = RASTER;
   var PI3 = Math.PI;
   var { PAL: PAL2, HOLZ: HOLZ2, MODUL: MODUL2, UNTERMIETE: UNTERMIETE2, MARKEN: MARKEN3, PREISE: PREISE2, anz: anz2, bunt: bunt2 } = innen_exports;
@@ -63990,7 +64271,7 @@
     return res;
   }
 
-  // src/kit/sportabteilung.js
+  // render/src/kit/sportabteilung.js
   var wurzelSumme9 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI4 = Math.PI;
   var { PAL: PAL3, HOLZ: HOLZ3 } = innen_exports;
@@ -64784,7 +65065,7 @@
     }
   }
 
-  // src/kit/moebel/basis.js
+  // render/src/kit/moebel/basis.js
   var PALETTEN = Object.freeze({
     laufen: ["#e8403a", "#1f6fd1", "#f4f4f0", "#26292e", "#ffcb30"],
     kinder: ["#ff9e43", "#1e9ed0", "#f5dd67", "#e75067", "#58b66a"],
@@ -64996,7 +65277,7 @@
     }
   }
 
-  // src/kit/moebel/sport-mix.js
+  // render/src/kit/moebel/sport-mix.js
   var THEMEN2 = Object.freeze({
     sportschuhe: ["sitzbank", "probiertisch", "spiegel", "schuhregal", "anprobebank", "schuhtisch"],
     sporttextil: ["kleiderstange", "rundstaender", "puppen", "falttisch", "haengung", "saison"],
@@ -65140,7 +65421,7 @@
   ));
   Object.freeze(SPORT_MIX_MOEBEL);
 
-  // src/kit/moebel/wand.js
+  // render/src/kit/moebel/wand.js
   var wand_exports = {};
   __export(wand_exports, {
     ALT_BETTWAREN: () => ALT_BETTWAREN,
@@ -65181,7 +65462,7 @@
   var ALT_GESCHIRR = definition("alt_geschirr", "Geschirrwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { "art": "home", "pal": "allgemein", "titel": "Geschirrwand", "alt": true, "w": 5 }));
   var ALT_BETTWAREN = definition("alt_bettwaren", "Bettwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { "art": "textil", "pal": "allgemein", "titel": "Bettwarenwand", "alt": true, "w": 5 }));
 
-  // src/kit/moebel/gondel.js
+  // render/src/kit/moebel/gondel.js
   var gondel_exports = {};
   __export(gondel_exports, {
     GONDEL_BAELLE: () => GONDEL_BAELLE,
@@ -65220,7 +65501,7 @@
   var GONDEL_WAESCHE = definition("gondel_waesche", "W\xE4schegondel", "allgemein", "gondel", 4, 1, 1.4, 120, (L2, r, d2, ctx) => gondelModul(L2, r, d2, ctx, { "art": "textil", "pal": "outlet", "w": 5 }));
   var GONDEL_SPIELZEUG = definition("gondel_spielzeug", "Spielwarengondel", "allgemein", "gondel", 2, 1, 1.4, 120, (L2, r, d2, ctx) => gondelModul(L2, r, d2, ctx, { "art": "pakete", "pal": "kinder", "w": 2.5 }));
 
-  // src/kit/moebel/insel.js
+  // render/src/kit/moebel/insel.js
   var insel_exports = {};
   __export(insel_exports, {
     INSEL_ALT_BETTW: () => INSEL_ALT_BETTW,
@@ -65251,7 +65532,7 @@
     for (let i = 0; i < 5; i++) L2.box(0.3, 0.19, 0.2, (i - 2) * 0.4, 0.85, 1.25, "#b89a66");
   });
 
-  // src/kit/moebel/kasse.js
+  // render/src/kit/moebel/kasse.js
   var kasse_exports = {};
   __export(kasse_exports, {
     KASSE_ALT_INFO: () => KASSE_ALT_INFO,
@@ -65270,7 +65551,7 @@
   var KASSE_ALT_INFO = definition("kasse_alt_info", "Information alt", "allgemein", "kasse", 2, 2, 1.5, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { "art": "info", "w": 2.5 }));
   var KASSE_ALT_VITRINE = definition("kasse_alt_vitrine", "Kassenvitrine", "allgemein", "kasse", 4, 2, 1.5, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { "art": "info", "w": 5 }));
 
-  // src/kit/moebel/deko.js
+  // render/src/kit/moebel/deko.js
   var deko_exports = {};
   __export(deko_exports, {
     DEKO_ALT_RASTERDECKE: () => DEKO_ALT_RASTERDECKE,
@@ -65298,7 +65579,7 @@
     }
   });
 
-  // src/kit/moebel/sport.js
+  // render/src/kit/moebel/sport.js
   var sport_exports = {};
   __export(sport_exports, {
     SPORT_ABVERKAUF_GITTER: () => SPORT_ABVERKAUF_GITTER,
@@ -65452,7 +65733,7 @@
     );
   });
 
-  // src/kit/moebel/outlet.js
+  // render/src/kit/moebel/outlet.js
   var outlet_exports = {};
   __export(outlet_exports, {
     OUTLET_ACCESSOIRES: () => OUTLET_ACCESSOIRES,
@@ -65580,7 +65861,7 @@
   var OUTLET_UMKLEIDE = definition("outlet_umkleide", "Umkleidereihe", "outlet", "service", 4, 2, 2.4, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { w: 5, art: "umkleide", kabinen: 4 }));
   var OUTLET_ROLLWAGEN = definition("outlet_rollwagen", "Nachr\xE4um-Rollwagen", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d2, ctx) => rollwagen(L2, r, d2));
 
-  // src/kit/moebel/service.js
+  // render/src/kit/moebel/service.js
   var service_exports = {};
   __export(service_exports, {
     ALT_FAHRSTUHL: () => ALT_FAHRSTUHL,
@@ -65650,7 +65931,7 @@
     L2.box(0.07, 2.1, 0.08, 0.33, 0.6, 1.63, "#786651");
   });
 
-  // src/kit/moebel/index.js
+  // render/src/kit/moebel/index.js
   var ALLE_MOEBEL = Object.freeze(
     [wand_exports, gondel_exports, insel_exports, kasse_exports, deko_exports, sport_exports, outlet_exports, service_exports].flatMap((m) => Object.values(m).filter((v) => v && typeof v === "object" && typeof v.bau === "function" && typeof v.id === "string")).concat(SPORT_MIX_MOEBEL).sort((a, b2) => a.id.localeCompare(b2.id, "de"))
   );
@@ -65664,7 +65945,7 @@
     return eintrag2;
   }
 
-  // src/kit/ladenbau-regeln.js
+  // render/src/kit/ladenbau-regeln.js
   var LADENBAU = Object.freeze({
     raster: 1.25,
     suchRaster: 0.625,
@@ -65770,7 +66051,7 @@
     return a.x < b2.x + b2.w + abstand3 - 1e-8 && a.x + a.w + abstand3 > b2.x + 1e-8 && a.z < b2.z + b2.d + abstand3 - 1e-8 && a.z + a.d + abstand3 > b2.z + 1e-8;
   }
 
-  // src/kit/ladenplan.js
+  // render/src/kit/ladenplan.js
   var wurzelSumme10 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var U = LADENBAU.raster;
   var snap = (n) => Math.round(n / U) * U;
@@ -66371,7 +66652,7 @@
     return { teile: S.anzahl - n0, moebel: plan2.moebel.length, abteilungen: plan2.abteilungen.length };
   }
 
-  // src/kit/ladenbau-outlet.js
+  // render/src/kit/ladenbau-outlet.js
   var FUNDUS_INNEN_ZUSTAENDE = Object.freeze(["normal", "schwach", "ansturm", "raeumung"]);
   var SORTIMENTE = Object.freeze({
     damen: { titel: "Damen", anteil: 0.34 },
@@ -66420,7 +66701,7 @@
     return geschoss === 0 ? 0.48 : 5.02 + (geschoss - 1) * 3.9;
   }
 
-  // src/kit/outlet.js
+  // render/src/kit/outlet.js
   var NAME_OUTLET = "FUNDUS";
   var FARBE_OUTLET = "#8c1d40";
   var WAREN = ["#263b53", "#c67e73", "#e0c7a3", "#748d74", "#d8dce0", "#b88b56", "#a7a0ba"];
@@ -66723,7 +67004,7 @@
     return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // src/kit/schwesterhaus.js
+  // render/src/kit/schwesterhaus.js
   var NAME_SCHWESTER = "Volkskauf";
   var FARBE_SCHWESTER = "#2f6f73";
   var EG3 = 4.9;
@@ -67167,7 +67448,7 @@
     return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status };
   }
 
-  // haeuser-schwester.json
+  // render/haeuser-schwester.json
   var haeuser_schwester_default = [
     {
       id: "K001",
@@ -69247,7 +69528,7 @@
     }
   ];
 
-  // haeuser-outlet.json
+  // render/haeuser-outlet.json
   var haeuser_outlet_default = [
     {
       id: "O001",
@@ -70606,7 +70887,7 @@
     }
   ];
 
-  // src/kit/premium.js
+  // render/src/kit/premium.js
   var wurzelSumme11 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PREMIUM_NAMEN = Object.freeze({
     P001: "Palais Hartwig",
@@ -70941,7 +71222,7 @@
     return { hoehe, w, d: d2, familie: "premium", teile: S.anzahl - start, status: zust.status };
   }
 
-  // haeuser.json
+  // render/haeuser.json
   var haeuser_default = [
     {
       id: "W001",
@@ -93963,7 +94244,7 @@
     }
   ];
 
-  // src/kit/bauer.js
+  // render/src/kit/bauer.js
   var REGION2 = { nord: "Nord", ost: "Ost", west: "West", mitte: "Mitte", sued: "S\xFCd" };
   var regionVon2 = (p2) => REGION2[p2.region] ?? p2.region ?? "Mitte";
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
@@ -94161,7 +94442,7 @@
     };
   }
 
-  // src/kit/westbauten.js
+  // render/src/kit/westbauten.js
   var wurzelSumme12 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI5 = Math.PI;
   var WEST_WASSER_Y = -2.2;
@@ -98200,7 +98481,7 @@
     "slot:ruhr_brauturm": ruhrBrauturm
   };
 
-  // src/kit/ladenbau-sport.js
+  // render/src/kit/ladenbau-sport.js
   function sportLadenEingabe(haus2, etage2, o = {}, raster4 = null) {
     const fam = familieSport(haus2), masse3 = masseSport(haus2, fam), ra = raster4 ?? sportRaster(haus2, etage2, o);
     const istHindernis = (t) => /^(treppe|rt|aufzug|lager|wc|werkstatt|luft|turm|buehne|szene|radbuehne|lauf|erlebnis)/.test(String(t));
@@ -98227,7 +98508,7 @@
     };
   }
 
-  // src/kit/sportgrundriss.js
+  // render/src/kit/sportgrundriss.js
   var wurzelSumme13 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var R3 = RASTER;
   var WH2 = WANDHOEHE;
@@ -99912,7 +100193,7 @@
     }
   }
 
-  // src/kit/grundriss.js
+  // render/src/kit/grundriss.js
   var R4 = RASTER;
   var FASSADE = ["#efe4c9", "#e3d3bd", "#ece5d7", "#d3d9de", "#b9785e", "#e8dfcf", "#c9b8a0", "#dde1e4"];
   var GANG = { a: "#f2f1ee", b: "#dedcd7", m: "fliese" };
@@ -100708,7 +100989,7 @@
     }
   }
 
-  // src/kit/hq.js
+  // render/src/kit/hq.js
   var wurzelSumme14 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI7 = Math.PI;
   var ROT3 = FARBEN3.marke;
@@ -102931,7 +103212,7 @@
     text2(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe3);
   } });
 
-  // src/kit/ostbauten.js
+  // render/src/kit/ostbauten.js
   var wurzelSumme15 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI8 = Math.PI;
   function R5(ox, oz, dx, dz, L2) {
@@ -105772,7 +106053,7 @@
     "slot:brache": brache
   };
 
-  // src/kit/archetypen/ost.js
+  // render/src/kit/archetypen/ost.js
   var wurzelSumme16 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm3, fixiere: fixiere2, frei: frei2, zelleFrei: zelleFrei2, wasserSpalte: wasserSpalte2, klemm: klemm3, wahlGewichtet: wahlGewichtet2, neueParzelle: neueParzelle2, mergeRand: mergeRand2, freiePosition: freiePosition2, parzellenVon } = PLAN_HILFE;
   var OST_VIERTEL = { magistrale: "zentrum", zentrum: "zentrum", altstadt: "altstadt", barock: "barock", messe: "messe", gruenderzeit: "gruenderzeit", platte: "rand" };
@@ -106621,7 +106902,7 @@
   });
   registriereArchetyp("ostsee_hanse", { ...GEMEINSAM, name: "Hansestadt Ost", entwurf: ostseeHanse, staedte: { Rostock: { umland: "see" }, Stralsund: { umland: "see" } } });
 
-  // src/kit/nordbauten.js
+  // render/src/kit/nordbauten.js
   var wurzelSumme17 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI9 = Math.PI;
   function R6(ox, oz, dx, dz, L2) {
@@ -109306,7 +109587,7 @@
     varianten: NORD_VARIANTEN[k]
   }]));
 
-  // src/kit/archetypen/nord.js
+  // render/src/kit/archetypen/nord.js
   var wurzelSumme18 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm4, fixiere: fixiere3, frei: frei3, zelleFrei: zelleFrei3, wasserSpalte: wasserSpalte3, klemm: klemm4, wahlGewichtet: wahlGewichtet3, neueParzelle: neueParzelle3, mergeRand: mergeRand3, parzellenVon: parzellenVon2 } = PLAN_HILFE;
   var NORD_VIERTEL = { giebel: "altstadt", fachwerk: "altstadt", kontor: "zentrum", wiederaufbau: "nord_wa", klinker: "gruenderzeit", rand: "rand" };
@@ -109896,7 +110177,7 @@
     }
   });
 
-  // src/kit/mittebauten.js
+  // render/src/kit/mittebauten.js
   var wurzelSumme19 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI10 = Math.PI;
   function R7(ox, oz, dx, dz, L2) {
@@ -113135,7 +113416,7 @@
     }, oberstadtRoh))
   };
 
-  // src/kit/archetypen/mitte.js
+  // render/src/kit/archetypen/mitte.js
   var wurzelSumme20 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm5, fixiere: fixiere4, frei: frei4, wasserSpalte: wasserSpalte4, klemm: klemm5, wahlGewichtet: wahlGewichtet4, neueParzelle: neueParzelle4, mergeRand: mergeRand4, parzellenVon: parzellenVon3 } = PLAN_HILFE;
   var breit = (E, i, w) => {
@@ -113870,7 +114151,7 @@
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -114466,7 +114747,7 @@
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -114489,7 +114770,7 @@
     }
   };
 
-  // src/kit/suedbauten.js
+  // render/src/kit/suedbauten.js
   var wurzelSumme21 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI11 = Math.PI;
   function R8(ox, oz, dx, dz, L2) {
@@ -117704,7 +117985,7 @@
     "slot:sued_fluss": slot3(flussRoh, [40, 34], null, { hang: () => true })
   };
 
-  // src/kit/archetypen/sued.js
+  // render/src/kit/archetypen/sued.js
   var wurzelSumme22 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm6, fixiere: fixiere5, frei: frei5, zelleFrei: zelleFrei4, wasserSpalte: wasserSpalte5, klemm: klemm6, wahlGewichtet: wahlGewichtet5, neueParzelle: neueParzelle5, mergeRand: mergeRand5, parzellenVon: parzellenVon4, freiePosition: freiePosition3, ueberlappt: ueberlappt2 } = PLAN_HILFE;
   var PI12 = Math.PI;
@@ -119131,7 +119412,7 @@
   });
   registriereArchetyp("alpenrand", { ...GEMEINSAM4, name: "Alpenrand", entwurf: alpenrand, staedte: { Kempten: { stadt: "kempten" }, Rosenheim: { stadt: "rosenheim" } } });
 
-  // src/kit/archetypen/west.js
+  // render/src/kit/archetypen/west.js
   var wurzelSumme23 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm7, fixiere: fixiere6, zelleFrei: zelleFrei5, klemm: klemm7, wahlGewichtet: wahlGewichtet6, neueParzelle: neueParzelle6, mergeRand: mergeRand6, parzellenVon: parzellenVon5, freiePosition: freiePosition4, intervalleMinus: intervalleMinus2, LINIEN: LINIEN2, HAUPTLICH: HAUPTLICH2 } = PLAN_HILFE;
   LINIEN2.schnellweg = { breite: 27, gehweg: 1.5, mittel: 1.2 };
@@ -120183,7 +120464,7 @@
     }
   });
 
-  // src/kit/stadt.js
+  // render/src/kit/stadt.js
   var wurzelSumme24 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var YG = 0.32;
   var WASSER_Y = -2.2;
@@ -122576,7 +122857,7 @@
     durchgang: phDurchgang
   };
 
-  // src/kit/staedte.js
+  // render/src/kit/staedte.js
   var wurzelSumme25 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var REGION_VON = {
     nord: [
@@ -123014,7 +123295,7 @@
     return INDEX.get(name2);
   }
 
-  // src/kit/leben.js
+  // render/src/kit/leben.js
   var wurzelSumme26 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STANDARD_LEBEN = "voll";
   var MODI = ["voll", "wenig", "aus"];
@@ -123551,7 +123832,7 @@
     };
   }
 
-  // src/kit/umbau-aussen.js
+  // render/src/kit/umbau-aussen.js
   function technikAufDach(S, h, m) {
     if (!h.etagenBau || !m || !(m.hoehe > 0)) return;
     const etagen = Object.values(h.etagenBau);
@@ -123567,7 +123848,7 @@
     }
   }
 
-  // src/kit/bruecke.js
+  // render/src/kit/bruecke.js
   var kwVon = (woche2) => woche2 % 52 + 1;
   function aktionFuer(s2, h) {
     let best = null;
@@ -124008,7 +124289,7 @@
     } };
   }
 
-  // src/kit/jahreszeit.js
+  // render/src/kit/jahreszeit.js
   var JAHRESZEITEN_AN = true;
   var LAUB2 = /* @__PURE__ */ new Set(["linde", "kastanie", "platane", "birke", "pappel", "kugel"]);
   var PALETTEN3 = {
@@ -124277,7 +124558,7 @@
     };
   }
 
-  // src/ui/einstellungen.js
+  // render/src/ui/einstellungen.js
   var SPEICHER = "hartwig.einstellungen.v1";
   var definitionen2 = /* @__PURE__ */ new Map();
   var werte = null;
@@ -124364,7 +124645,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "710378e" : "Entwicklung";
+  var version = () => true ? "a33aa05" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -124434,7 +124715,7 @@
     }).observe(document.body, { childList: true, subtree: true });
   }
 
-  // src/ui/format.js
+  // render/src/ui/format.js
   var fmt = new Intl.NumberFormat("de-DE");
   function geld(x) {
     const a = Math.abs(x), v = x < 0 ? "\u2212" : "";
@@ -124449,7 +124730,7 @@
   var kwVon2 = (w) => (w % 52 + 52) % 52 + 1;
   var esc2 = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-  // src/ui/quelle.js
+  // render/src/ui/quelle.js
   function quelle(E) {
     const da = typeof E.einkaufUebersicht === "function";
     return {
@@ -124483,7 +124764,7 @@
     };
   }
 
-  // src/ui/eigenmarken.js
+  // render/src/ui/eigenmarken.js
   var ALTER = [["10-13", "Tweens"], ["13-17", "Teens"], ["18-29", "Young Adults"], ["30-49", "30 bis 49"], ["50+", "50 plus"], ["70+", "70 plus"]];
   var GESCHLECHT = [["damen", "Damen"], ["herren", "Herren"], ["unisex", "Unisex"], ["kinder", "Kinder"]];
   var KATEGORIE2 = ["Bekleidung", "Schuhe", "W\xE4sche", "Accessoires", "Home", "Beauty"];
@@ -124509,7 +124790,7 @@
     const s2 = ctx.s(), u = ctx.q.marken(s2);
     let h = tabs;
     h += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken gef\xFChrt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a, m) => a + m.umsatz13, 0))}</b></div></div>`;
-    h += '<button class="breit gruen" data-a="emGruenden">+ Marke gr\xFCnden</button>';
+    h += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
     for (const m of u.marken) {
       const veraltet = m.stilAktualitaet < 45;
       const status = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
@@ -124742,7 +125023,7 @@
     return "?";
   }
 
-  // src/ui/ware.js
+  // render/src/ui/ware.js
   var reichweite = (r) => r == null ? "\u2013" : (r > 99 ? "> 99" : r.toFixed(1).replace(".", ",")) + (r == null ? "" : " Wo.");
   var proz = (x) => pz3(Number.isFinite(x) ? x : 0, 1);
   var knopf = (a, v, text3, extra = "") => `<button class="mini" data-a="${a}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
@@ -124843,7 +125124,7 @@
     return void 0;
   }
 
-  // src/ui/einkauf.js
+  // render/src/ui/einkauf.js
   var KOPF = { umsatz: "Umsatz 13 Wo.", rohertragsquote: "Rohertrag", lagerumschlag: "Umschlag", reichweite: "Reichweite", abverkaufsquote: "Abverkauf", altwarenanteil: "Altware", nosVerfuegbarkeit: "NOS", limitFrei: "Limit frei", rohertrag: "Rohertrag \u20AC", bestandEk: "Bestand", abschriften: "Abschriften", reduzierungsquote: "Reduzierung", entgangenerUmsatz: "Fehlmengen", offeneOrders: "Orders", offeneFreigaben: "Freigaben", eigenmarkenAnteil: "Eigenmarke", eigenmarkenMarge: "EM-Marge" };
   function formatiere(format, x) {
     if (format === "eur") return geld(x);
@@ -124880,7 +125161,7 @@
       const n = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
       const t = (id, inhalt2) => `<button class="tab ${an(id) ? "an" : ""}" data-a="seite" data-v="${id}">${inhalt2}</button>`;
-      return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}${t("merchandise", "Merchandise")}${t("allokation", "Allokation")}${t("reduzierungKalender", "Reduzierung")}</div>`;
+      return `<div class="tabs">${t("uebersicht", "\xDCbersicht")}${t("freigaben", `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ""}`)}${t("eigenmarken", "Eigenmarken")}${t("merchandise", "Merchandise")}${t("allokation", "Allokation")}${t("reduzierungKalender", "Reduzierung")}</div>${["eigenmarken", "gruenden"].includes(ui.seite) ? "" : '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>'}`;
     }
     function sortiere(liste2) {
       const { key, dir } = ui.sort;
@@ -125214,6 +125495,7 @@
       ui,
       oeffne: (seite = "uebersicht", arg) => {
         ui.seite = seite;
+        if (seite === "gruenden") ui.em.assistent = { schritt: 0, daten: neuerEntwurf2(s2()) };
         if (seite === "wg") ui.wg = arg;
         ui.kuerzen = null;
         zeigen();
@@ -125230,7 +125512,7 @@
     };
   }
 
-  // src/ui/karte.js
+  // render/src/ui/karte.js
   var W2 = Math.SQRT2;
   var ausdehnung2 = (halb, a) => halb * (a / W2 + W2);
   function erweitert(G2) {
@@ -125400,7 +125682,7 @@
     } };
   }
 
-  // src/kit/portraet.js
+  // render/src/kit/portraet.js
   var HAUTTOENE = {
     hell: ["#f8d6c8", "#e9bcab"],
     rosig: ["#f3c6a6", "#e0aa88"],
@@ -125742,7 +126024,7 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}">${teile2.join("")}</svg>`;
   }
 
-  // src/ui/vorstand.js
+  // render/src/ui/vorstand.js
   function portraet(m, groesse2 = 96, hintergrund) {
     if (typeof portraetSVG === "function" && m) return portraetSVG(m, groesse2, hintergrund ? { hintergrund } : {});
     return `<svg viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect width="100" height="100" fill="${hintergrund ?? "none"}"/><circle cx="50" cy="36" r="17" fill="#cfc9bf"/><path d="M18 100c2-24 15-36 32-36s30 12 32 36z" fill="#b9b2a6"/></svg>`;
@@ -126022,12 +126304,21 @@
     };
   }
 
-  // src/ui/organisation.js
+  // render/src/ui/organisation.js
   function organisationModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "zentrale", ebene: null, id: null };
     const bar = (q2) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0, Math.min(1, q2)) * 100) + '%"></i></span>';
     const name2 = (st2) => st2?.person ? esc2(st2.person.name) : '<span class="frei">unbesetzt \u2013 besetzen</span>';
+    const aufgabenListe = (aufgaben, id, cluster = false) => {
+      if (!aufgaben?.length) return "";
+      return '<div class="org-aufgaben"><small>Delegation je Aufgabe, \xC4nderungen wirken ab der n\xE4chsten Woche</small>' + aufgaben.map((a) => {
+        const ziel = ' data-id="' + esc2(id) + '" data-task="' + esc2(a.id) + '"' + (cluster ? ' data-cluster="1"' : "");
+        const schalter2 = '<button data-org="aufgabe"' + ziel + ' aria-pressed="' + a.an + '">' + (a.an ? "Delegiert" : "Beim CEO") + "</button>";
+        const grenze = a.grenze === void 0 ? "" : '<span class="org-grenze"><button data-org="grenze"' + ziel + ' data-grenze="' + a.grenze + '" data-delta="-10000" aria-label="Grenze senken">\u2212</button><b>' + geld(a.grenze) + '</b><button data-org="grenze"' + ziel + ' data-grenze="' + a.grenze + '" data-delta="10000" aria-label="Grenze erh\xF6hen">+</button></span>';
+        return '<div class="org-aufgabe"><span>' + esc2(a.name) + "</span>" + grenze + schalter2 + "</div>";
+      }).join("") + "</div>";
+    };
     const profil2 = (stelle2, titel, ebene, id) => {
       if (!stelle2) return "";
       const p2 = stelle2.person;
@@ -126057,7 +126348,7 @@
         for (const ressort of x.ressorts) {
           const bs = x.bereiche.filter((b2) => b2.ressort === ressort.id);
           h += '<div class="karte"><div class="khead"><b>' + esc2(ressort.id.toUpperCase()) + " \xB7 " + esc2(ressort.name) + "</b><small>" + (ressort.person ? esc2(ressort.person.name) : '<span class="frei">unbesetzt</span>') + "</small></div>";
-          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>";
+          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(b2.aufgaben, b2.id);
           h += "</div>";
         }
       } else {
@@ -126065,7 +126356,7 @@
           h += '<div class="karte"><div class="khead"><b>Region ' + esc2(r.id) + '</b><button data-org="profil" data-ebene="region" data-id="' + esc2(r.id) + '">' + name2(r.stelle) + "</button></div>";
           for (const c of r.cluster) {
             const rot = !c.stelle.person, ampel = st2.woche > 0 && c.umsatz > 0 ? "\u25CF" : "\u25CB";
-            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + (st2.woche === 0 ? "noch offen" : geld(c.umsatz)) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>";
+            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + (st2.woche === 0 ? "noch offen" : geld(c.umsatz)) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(c.aufgaben, c.id, true);
           }
           h += "</div>";
         }
@@ -126083,6 +126374,7 @@
             const zusatz = namen.get(haus2.name) > 1 ? " \xB7 " + esc2(haus2.stadt) + " (" + esc2(haus2.id) + ")" : "";
             h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + zusatz + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
           }
+          h += aufgabenListe(c.aufgaben, c.id, true);
           h += "</div>";
         }
       }
@@ -126117,6 +126409,8 @@
       if (a === "delegation") {
         tun({ typ: "delegation", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, an: el2.getAttribute("aria-pressed") !== "true" });
       }
+      if (a === "aufgabe") tun({ typ: "delegation", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, aufgabe: el2.dataset.task, an: el2.getAttribute("aria-pressed") !== "true" });
+      if (a === "grenze") tun({ typ: "delegationGrenze", ...el2.dataset.cluster ? { hauscluster: el2.dataset.id } : { bereich: el2.dataset.id }, aufgabe: el2.dataset.task, betrag: Math.max(0, Number(el2.dataset.grenze) + Number(el2.dataset.delta)) });
       if (a === "flagship") tun({ typ: "flagship", haus: el2.dataset.haus, an: el2.dataset.an === "true" });
       if (a === "besetzen") tun({ typ: "organisationBesetzen", ebene: ui.ebene, id: ui.id, kandidat: el2.dataset.kandidat });
       if (a === "entlassen") tun({ typ: "organisationEntlassen", ebene: ui.ebene, id: ui.id });
@@ -126132,7 +126426,7 @@
     }, aktiv: () => ui.aktiv, pruefe: () => ({ reiter: ui.reiter, bereiche: E.organisationUebersicht(s2()).bereiche.length, cluster: E.organisationUebersicht(s2()).regionen.reduce((n, r) => n + r.cluster.length, 0) }) };
   }
 
-  // src/ui/posteingang.js
+  // render/src/ui/posteingang.js
   function posteingangModul(ctx) {
     const E = ctx.E, s2 = ctx.s;
     const ui = { aktiv: false, filter: "Alle", verhandlung: null, ziel: null };
@@ -126305,7 +126599,7 @@
     };
   }
 
-  // src/kit/zeitung.js
+  // render/src/kit/zeitung.js
   var FARBE = {
     haus: { fassade: "#d6c3a4", dach: "#796552", seite: "#a99272", akzent: "#b43e32" },
     konkurrenz: { fassade: "#bfced8", dach: "#344f66", seite: "#7897ab", akzent: "#b87837" },
@@ -126323,7 +126617,7 @@
     return '<svg class="zb-isobild" viewBox="0 0 420 260" role="img" aria-label="Isometrische Zeichnung eines Warenhauses"><rect width="420" height="260" fill="#e1e5df"/><path d="M10 222 260 135 412 180 173 260Z" fill="#cbc8bf"/><path d="M72 78 260 22 340 60 153 119Z" fill="' + c.dach + '"/><path d="M72 78 153 119 153 229 72 185Z" fill="' + c.seite + '"/><path d="M153 119 340 60 340 171 153 229Z" fill="' + c.fassade + '"/><path d="M151 188 342 130v18l-191 58Z" fill="' + c.akzent + '"/><path d="M151 208 342 150v5l-191 58Z" fill="#eee8db"/>' + fenster8.join("") + '<path d="M194 210v-34l52-16v34" fill="#597784" stroke="#485e63" stroke-width="3"/><path d="M98 147v22l24 13v-22z" fill="#55717c"/>' + muster + '<path d="M50 204 215 254M260 238l108-36" stroke="#f3eee3" stroke-width="2"/></svg>';
   }
 
-  // src/ui/zeitung.js
+  // render/src/ui/zeitung.js
   var REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
   function zeitungModul(ctx) {
     const ui = { aktiv: false, index: -1, reiter: "Top", archiv: false };
@@ -126442,7 +126736,7 @@
     };
   }
 
-  // src/ui/statistik.js
+  // render/src/ui/statistik.js
   var FARBE2 = {
     Hartwig: "#d23c32",
     Volkskauf: "#9b63b0",
@@ -126709,7 +127003,7 @@
     };
   }
 
-  // src/ui/marketing.js
+  // render/src/ui/marketing.js
   var ALTER2 = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
   var STATUS_FARBE = { geplant: "#2f63b5", laufend: "#2f8f5b", beendet: "#9aa3ab", abgesagt: "#d6d2ca" };
@@ -126739,7 +127033,7 @@
       kanal: null,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div>`;
+    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
     function uebersicht(P2) {
       const st2 = s2(), u = E.marketingUebersicht(st2);
       let h = tabs();
@@ -126930,6 +127224,8 @@
     function klick(el2) {
       const a = el2.dataset.a, v = el2.dataset.v, st2 = s2(), B2 = ui.crm;
       switch (a) {
+        case "eigenmarkeGruenden":
+          return ctx.neueEigenmarke?.();
         case "seite":
           ui.seite = v;
           ui.planen = null;
@@ -127106,7 +127402,7 @@
     };
   }
 
-  // src/ui/umbau.js
+  // render/src/ui/umbau.js
   var ETAGE = (nr) => nr === -1 ? "UG" : nr === 0 ? "EG" : nr + ". OG";
   var BEZEICHNUNG = { auffrischung: "Auffrischung", ladenbau: "Ladenbau neu", komplett: "Komplettumbau", technik: "Technik" };
   function umbauModul(ctx) {
@@ -127197,7 +127493,7 @@
     } };
   }
 
-  // src/kit/produktbild.js
+  // render/src/kit/produktbild.js
   var FARBEN_PRODUKT = {
     "wei\xDF": "#f3f2ee",
     creme: "#efe4cc",
@@ -127800,8 +128096,28 @@
     K3.form("M50 50 L80 38 L80 74 L50 88 Z", { farbe: K3.cD });
     K3.strich("M35 32 L65 44 L65 58", "#f1ebdc", 2.4);
   }
+  var bildVorlage = (t) => {
+    if (TYPEN2[t]) return t;
+    if (/Kleid|Tüllrock|Plisseerock|Bleistiftrock/.test(t)) return /rock/i.test(t) ? "Rock" : "Kleid";
+    if (/Jeans|Leggings|Hose|Culotte|Bermuda|Shorts/.test(t)) return /Jeans/.test(t) ? "Jeans" : "Chino";
+    if (/Hemd|Bluse|Tunika/.test(t)) return /Hemd/.test(t) ? "Hemd" : "Bluse";
+    if (/Jacke|Mantel|Trenchcoat|Regenjacke|Blazer|Sakko/.test(t)) return /Blazer|Sakko/.test(t) ? "Blazer" : "Steppjacke";
+    if (/Pullover|Cardigan|Sweatshirt|Rollkragen/.test(t)) return "Strickjacke";
+    if (/Shirt|Polo/.test(t)) return "T-Shirt";
+    if (/Schuh|Boot|Stiefel|Loafer|Ballerina|Sandale|Slipper|Espadrille|Sneaker/.test(t)) return "Sneaker";
+    if (/Tasche|Rucksack|Shopper|Clutch|Weekender|Portemonnaie|Kartenetui/.test(t)) return "Handtasche";
+    if (/Handschuh|Krawatte|Tuch|Hut/.test(t)) return "Schal";
+    if (/Bett|Decke|Laken|Kopfkissen|Tischdecke/.test(t)) return "Bettw\xE4sche";
+    if (/Tuch|Serviette|Vorleger|Lappen|Schürze|Tischläufer|Tischset/.test(t)) return "Handtuch";
+    if (/Schale|Schüssel|Becher|Dose|Topf/.test(t)) return "Tasse";
+    if (/Korb|Tablett|Kerzenhalter/.test(t)) return "Vase";
+    if (/Lippen|Mascara|Concealer|Rouge|Lidschatten|Nagellack/.test(t)) return "Lippenstift";
+    if (/Creme|Serum|Gel|Lotion/.test(t)) return "Creme";
+    if (/Parfum|Toilette/.test(t)) return "Parfum";
+    return "T-Shirt";
+  };
   function produktbildSVG(artikeltyp, farbe3, material2, groesse2 = 160, opt = {}) {
-    const typ = TYPEN2[artikeltyp] ? artikeltyp : null;
+    const typ = bildVorlage(artikeltyp);
     const c = produktFarbe(farbe3) ?? produktFarbe(STANDARD_FARBE[typ]) ?? "#b8864e";
     const mat2 = material2 ?? STANDARD_MATERIAL[typ] ?? "Baumwolle";
     const K3 = kontext2(c, mat2, typ);
@@ -127818,7 +128134,7 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect x="1" y="1" width="98" height="98" rx="9" fill="#5a8396" stroke="#a9c7d4" stroke-width="1.6"/><g transform="translate(14 8) scale(0.72)">${innen}</g></svg>`;
   }
 
-  // src/ui/produkte.js
+  // render/src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
   var euro = (x) => `${dez(x, 2)} \u20AC`;
   var bild = (typ, farbe3, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe3, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc2(typ)}</text></svg>`;
@@ -127853,6 +128169,7 @@
       const st2 = s2(), L2 = E.produkte(st2), M2 = aktuelleMarke(L2);
       let h = "";
       if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
+      h += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
       h += markenwahl(L2);
       h += `<div class="raster">${kz("Team Produktentwicklung", P2("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P2("l:kosten", geld(L2.kostenWoche)))}</div>`;
       const kats = M2.kategorien.filter((k2) => k2.kapazitaet > 0 || k2.belegt > 0);
@@ -127975,6 +128292,8 @@
       const a = el2.dataset.a, v = el2.dataset.v, st2 = s2();
       const karte = (id) => E.produkte(st2).marken.flatMap((m) => m.produkte).find((p2) => p2.id === id);
       switch (a) {
+        case "eigenmarkeGruenden":
+          return ctx.neueEigenmarke?.();
         case "marke":
           ui.marke = v;
           ui.k = 0;
@@ -128085,7 +128404,7 @@
     };
   }
 
-  // src/ui/speicher.js
+  // render/src/ui/speicher.js
   var NAME2 = "hartwig-spielstand";
   var STORE = "staende";
   var INFOS = "informationen";
@@ -128313,7 +128632,7 @@
     }
   }
 
-  // src/ui/app.js
+  // render/src/ui/app.js
   var APP_AKTIV = true;
   var $ = (id) => document.getElementById(id);
   var bezeichnung = (platz) => platz === "autosave" ? "Autospeichern" : "Platz " + platz.slice(-1);
@@ -128457,7 +128776,7 @@
     return { oeffne, startAktualisieren, updatesAktivieren };
   }
 
-  // src/ui/diagnose.js
+  // render/src/ui/diagnose.js
   var runde = (x) => Math.round(x * 10) / 10;
   var perzentil = (a, p2) => a[Math.min(a.length - 1, Math.ceil(a.length * p2) - 1)];
   async function messen({ renderer, scene: scene2, camera, info, vorBild, anzahl = 90 }) {
@@ -128498,7 +128817,7 @@
     };
   }
 
-  // src/ui/reise.js
+  // render/src/ui/reise.js
   var ASSISTENTIN = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
   var REISE_ZEIT = Object.freeze({
     kreisAuf: 240,
@@ -128722,7 +129041,7 @@
     return { oeffne, zu: schliessen, aktiv: () => aktiv5, pruefe: () => ({ stadt: ctx.stadt(), aktiv: aktiv5, schritte: [...protokoll2], zielAnzahl: z2.querySelectorAll("[data-reiseziel]").length }), fahren };
   }
 
-  // src/ui/wochenbericht.js
+  // render/src/ui/wochenbericht.js
   var ASSISTENTIN2 = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
   var BANK = portraetSVG({ geschlecht: "m", alter: 56, haar: "seitenscheitel", haarfarbe: "grau", hautton: "hell", kleidung: "anzug", seed: 236 }, 110);
   var BETRIEBSRAT = portraetSVG({ geschlecht: "w", alter: 49, haar: "halblang", haarfarbe: "dunkelbraun", kleidung: "bluse", seed: 922 }, 110);
@@ -128989,7 +129308,7 @@
     } };
   }
 
-  // src/ui/chronik.js
+  // render/src/ui/chronik.js
   function chronikModul({ E, s: s2, panel: panel2, bild: bild3 }) {
     const jahreswoche = (w) => `${s2().startJahr + Math.floor(w / 52)} \xB7 KW ${String(w % 52 + 1).padStart(2, "0")}`;
     const bilder = /* @__PURE__ */ new Map();
@@ -129032,7 +129351,7 @@
     }, pruefe: () => E.chronikUebersicht(s2()) };
   }
 
-  // src/ui/hausbesuch.js
+  // render/src/ui/hausbesuch.js
   var HAUSBESUCH_AKTIV = true;
   var PHRASE = Object.freeze({
     altware: [
@@ -129487,7 +129806,7 @@
     };
   }
 
-  // src/kit/szenarien.js
+  // render/src/kit/szenarien.js
   var BILDER = {
     standard: ["#477d8c", "#f5ca85", "M0 80L30 56L58 74L96 43L126 65L165 31L220 65V110H0Z"],
     schutzschirm: ["#355d78", "#add1cf", "M0 89L35 58L77 87L120 34L166 72L220 47V110H0Z"],
@@ -129504,7 +129823,7 @@
     return '<svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration einer fiktiven Innenstadt"><rect width="220" height="110" fill="' + himmel + '"/><circle cx="175" cy="29" r="21" fill="' + licht + '"/><path d="' + berge + '" fill="#537b80"/><rect x="10" y="65" width="60" height="45" fill="#e9dcc3"/><rect x="18" y="57" width="48" height="8" fill="#a94f43"/>' + fenster8 + '<rect x="95" y="48" width="45" height="62" fill="#d9d1bc"/><path d="M91 48L118 30L144 48" fill="#895e50"/><rect x="109" y="70" width="14" height="40" fill="#426477"/><rect x="152" y="73" width="60" height="37" fill="#c9d7cf"/><path d="M148 73H216" stroke="#a9524a" stroke-width="8"/><path d="M0 109H220" stroke="#555d62" stroke-width="4"/>' + sonder + "</svg>";
   }
 
-  // src/ui/szenarien.js
+  // render/src/ui/szenarien.js
   var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
   var prozent = (w) => Math.max(0, Math.min(100, Math.round(100 * w)));
   var leseBestwerte = () => {
@@ -129594,7 +129913,7 @@
     } };
   }
 
-  // src/ui/ton.js
+  // render/src/ui/ton.js
   var SPEICHER2 = "hartwig.einstellungen.v1";
   var TON_SCHALTER = [
     { schluessel: "ton_klaenge", titel: "Kl\xE4nge", gruppe: "Klang", art: "schalter", standard: true },
@@ -130084,7 +130403,7 @@
     };
   }
 
-  // src/ui/einfuehrung.js
+  // render/src/ui/einfuehrung.js
   var EINFUEHRUNG_AKTIV = true;
   var SCHLUESSEL = "hartwig.einfuehrung.v1";
   var TIPPS = "hartwig.einfuehrung.tipps.v1";
@@ -130467,7 +130786,7 @@
     }) };
   }
 
-  // src/kit/abzeichen.js
+  // render/src/kit/abzeichen.js
   var cache2 = /* @__PURE__ */ new Map();
   var metalle = {
     bronze: ["#6d3f28", "#dba26f", "#a5673e"],
@@ -130581,7 +130900,7 @@
     return png;
   }
 
-  // src/ui/erfolge.js
+  // render/src/ui/erfolge.js
   function erfolgeModul(ctx) {
     const E = ctx.E, spielstand = ctx.s;
     const zustand = { offen: false, filter: "Alle" };
@@ -130658,7 +130977,7 @@
     };
   }
 
-  // src/kit/spielende.js
+  // render/src/kit/spielende.js
   var fenster7 = (x, y, hell4, art) => '<rect x="' + x + '" y="' + y + '" width="19" height="28" rx="2" fill="' + hell4 + '"/>' + (art === "zerschlagen" ? '<path d="M' + x + " " + (y + 15) + 'h19" stroke="#868b8a" stroke-width="3"/>' : "");
   function gebaeude2(x, breite, hoehe, art, i) {
     const grau = art === "zerschlagen";
@@ -130701,7 +131020,7 @@
     return '<svg class="se-illustration" viewBox="0 0 680 400" role="img" aria-label="' + (grau ? "Verlassene Warenh\xE4user" : winter ? "Weihnachtlich beleuchtete, belebte Innenstadt" : art === "investor" ? "Schl\xFCssel\xFCbergabe an den K\xE4ufer" : "F\xFCnf Jahre Unternehmensf\xFChrung") + '" xmlns="http://www.w3.org/2000/svg">' + himmel + stadt + zusatz + "</svg>";
   }
 
-  // src/ui/spielende.js
+  // render/src/ui/spielende.js
   var zahl2 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0));
   var geld2 = (n) => zahl2(n) + " \u20AC";
   var ART2 = {
@@ -130900,7 +131219,7 @@
     };
   }
 
-  // src/ui/werkzeuge.js
+  // render/src/ui/werkzeuge.js
   var WERKZEUGE_AKTIV = true;
   var BERICHT_FORMAT = "RUHRKAUF-TEST-1:gzip:";
   var MAX_FEHLER = 50;
@@ -131179,7 +131498,7 @@
     };
   }
 
-  // src/ui/reporting.js
+  // render/src/ui/reporting.js
   var prozent2 = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl3 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
   var euro2 = (x) => zahl3(x, 2) + " \u20AC";
@@ -131288,7 +131607,7 @@
     };
   }
 
-  // src/ui/it.js
+  // render/src/ui/it.js
   function itModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null };
@@ -131512,7 +131831,7 @@
     };
   }
 
-  // src/ui/planung.js
+  // render/src/ui/planung.js
   var pct = (v) => (100 * v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
   var mio3 = (v) => (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
@@ -131656,7 +131975,7 @@
     };
   }
 
-  // src/ui/haus.js
+  // render/src/ui/haus.js
   var PROZENT = (x) => (Number(x) * 100).toFixed(1).replace(".", ",") + " %";
   var REITER2 = [["ueberblick", "\xDCberblick"], ["leitung", "Leitung"], ["personal", "Personal"], ["ware", "Ware"], ["partner", "Fl\xE4che & Partner"], ["kosten", "Kosten"], ["kommentare", "Kommentare"]];
   var SCHWERPUNKT = { personal: "Personal", ware: "Ware", kunde: "Kunde", kosten: "Kosten" };
@@ -131742,7 +132061,7 @@
     return nav + inhalt;
   }
 
-  // src/ui/personaleinsatz.js
+  // render/src/ui/personaleinsatz.js
   var GRUPPEN2 = ["logistik", "verkauf", "kasse", "verwaltung"];
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n) => Math.round(n * 100) + " %";
@@ -131892,7 +132211,7 @@
     };
   }
 
-  // src/spiel.js
+  // render/src/spiel.js
   var param = new URLSearchParams(location.search);
   if (param.get("dev") === "1") document.querySelector(".botwahl")?.style.setProperty("display", "flex");
   var $2 = (id) => document.getElementById(id);
@@ -133084,8 +133403,8 @@
   vs = vorstandModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   org = organisationModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
-  mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
-  pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
+  mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
+  pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
   er = erfolgeModul({ E: src_exports, s: () => s, panel });
   pl = planungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {

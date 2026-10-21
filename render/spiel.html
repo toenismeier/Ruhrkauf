@@ -478,6 +478,8 @@
   button { min-width: 44px !important; min-height: 44px !important; }
   #pzu { width: 44px; height: 44px; top: 9px; right: 8px; border-radius: 22px; }
   #ptitel { margin: 0; padding-right: 50px; outline-offset: 2px; }
+  /* Programmatischer Fokus für Screenreader (tabindex -1) ohne sichtbaren Rahmen */
+  [tabindex="-1"]:focus { outline: none; }
   .punkte button::after { left: calc(50% - 4px); top: calc(50% - 4px); }
   .einst-gruppe .khead { margin: 0; }
   .einst-zeile { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 12px; min-height: 60px; border-top: 1px solid var(--linie); font-size: calc(13px * var(--schrift)); line-height: 1.35; }
