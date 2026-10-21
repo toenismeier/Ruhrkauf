@@ -200,6 +200,8 @@ Ummo hat eine reale Filial-GuV eines Warenhauskonzerns geliefert (IST, Filialebe
 
 Die Zentrale kommt im Spiel zusätzlich obendrauf (eigene Kostenstelle).
 
+Lesart (Claude, 21.10.): „Total OPEX −42,4 %“ ist **netto nach übrigen betrieblichen Erträgen**: Einzelaufwände −44,6 % + übrige Erträge +2,3 % ≈ −42,4 % (Rundung). Damit gilt Bruttogewinn 41,2 % − OPEX netto 42,4 % = EBITDA −1,2 %. Die Tabelle ist in sich stimmig; keine Ausgleichsbuchung und keine Abweichungsanzeige nötig.
+
 **Entscheidung Ummo:** Turnaround und Sanierung müssen **auch ohne Schließungen** möglich sein.
 
 Umsetzung:
