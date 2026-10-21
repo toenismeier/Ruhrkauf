@@ -114,7 +114,7 @@ function essenInnenstadt(E, ci, cj) {
 function essenRathausParzelle(ctx, E, b) {
   // Rathaus hinten im Block, davor der Porscheplatz (Pflaster, Baumreihen, Leute wie ein Konzernvorplatz)
   const W = Math.min(56, b.w - 8), D = Math.min(40, b.d - 8);
-  neueParzelle(ctx, 'slot:rathaus', b.x + (b.w - W) / 2, b.z + 4, W, D, ['+z', '+x'], 'frei', { klasse: 5, landmarke: true, rathausStil: 'hochhaus', geschosse: 29 });
+  neueParzelle(ctx, 'slot:rathaus', b.x + (b.w - W) / 2, b.z + 4, W, D, ['+z', '+x'], 'frei', { klasse: 5, landmarke: true, rathausStil: 'hochhaus', rathausGeschosse: 26 });
   // Seitlich am Platz eine Zeile Geschäftshäuser (Porscheplatz ist von Bauten gefasst)
   const x0 = b.x + (b.w + W) / 2 + 4, w = b.x + b.w - 1 - x0;
   if (w >= 12) for (let k = 0, n = Math.max(1, Math.round((b.d - 2) / 16)); k < n; k++) neueParzelle(ctx, 'stadthaus', x0, b.z + 1 + ((b.d - 2) * k) / n, w, (b.d - 2) / n, ['+x'], '+x');
