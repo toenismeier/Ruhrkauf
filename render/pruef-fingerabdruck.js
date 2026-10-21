@@ -193,7 +193,7 @@ function gruppeStarten(ids, neu, gegenprobe = false) {
   return new Promise((resolve) => {
     const kind = spawn(process.execPath, [__filename, '--intern', neu ? '--neu' : gegenprobe ? '--gegenprobe' : '--pruefen', ...ids], { cwd: ROOT, env: process.env });
     let aus = '', err = '', abgebrochen = false;
-    const timeout = setTimeout(() => { abgebrochen = true; kind.kill('SIGKILL'); }, 160000);
+    const timeout = setTimeout(() => { abgebrochen = true; kind.kill('SIGKILL'); }, Math.max(160000, ZEITLIMIT_MS / 4)); // Gruppen-Zeitlimit wächst mit dem Gesamtlimit (langsame CI)
     kind.stdout.on('data', (d) => { aus += d; });
     kind.stderr.on('data', (d) => { err += d; });
     kind.on('error', (e) => { err += e.message; });
