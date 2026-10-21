@@ -307,3 +307,20 @@ Für die Phase-2-Nachkalibrierung gelten folgende **vorläufige, noch nicht nume
 **Reproduzieren:** `cd engine && npm ci && npm run typecheck && npx jest --runInBand`, danach `npx tsx scripts/massstab-phase2.ts 1` (auch 2 und 3 sowie jeweils `--bot`) und `npx tsx scripts/haeuser-export.ts` zweimal mit Diffkontrolle. Abschließend `cd render && npm ci && npm run build && node pruef-staedte.js && node spiel-render.js`. Die nach der Integration alten JSON-Exporte für Hartwig und Volkskauf müssen erst erzeugt werden.
 
 **Abnahmestatus:** Noch offen; in diesem GitHub-Connector-Lauf kein lokaler Testlauf, kein Benchmark und kein Export ausgeführt. Keine Freigabe für Merge in `main`.
+
+
+## Engine-Formate: Volkskauf und FUNDUS (21.10.2026)
+
+Die bestehenden 86 Volkskauf- und 66 FUNDUS-Standorte werden nach der unveränderten Initialisierung von Hartwig-Hauptwareneinkauf und HQ-Basis als aktive Kostenstellen freigegeben. Volkskauf hat ein eigenes Bestandssystem und eine eigene regionale Zentralkostenbasis. FUNDUS ist ein Marken-Off-Price-Laden: Markenposten-Zukauf ist Hauptkanal (Ziel 65 % des Wareneinsatzes), Konzern-Altware ist Nebenkanal (Ziel 35 %). Keine pauschalen Erlösgutschriften. Stockouts begrenzen Umsatz, Überhang führt zu Abschriften. Die Verkäufe werden in die M7-Kostenstellen-GuV der einzelnen Häuser gebucht; Käufe sind liquiditätswirksam.
+
+Volkskauf-Umflaggen erfordert Immobilien-HQ Stufe 1, 180 Euro je qm Investition und 20 bis 30 Wochen Umbau. FUNDUS-Neueröffnung hat zwölf Wochen Vorlauf und kostet 120 Euro je qm. Änderungen der Hausgeometrie oder Rollen in den Städten erfordern neue Fingerabdrücke mit Begründung.
+
+ABNAHME OFFEN. Claude führt lokal aus:
+1. cd engine && npm run typecheck && npm test
+2. cd engine && npx tsx scripts/m7-wochenverlauf.ts (Bot T und Bot D, alle Seeds)
+3. cd engine && npx tsx scripts/schwierigkeit-vergleich.ts leicht,mittel,schwer 1,2,3 260
+4. cd engine && npx tsx scripts/haeuser-export.ts (Diff gegen bestehende Grafikdateien prüfen)
+5. cd render && npm run build && node spiel-render.js && node pruef-staedte.js
+6. Stadt-Fingerabdrücke durch Claude erneuern und bewerten.
+
+Abnahmeziele: Keine Insolvenz im ersten Jahr ohne Eingriffe auf leicht/mittel; Konzern-EBITDA-Ausgangsquote circa -4 % (mittel), Hartwig-Filialreferenz -1,2 %, Volkskauf-Umsatz circa 11 % der Hartwig-Umsätze bei EBITDA circa -3 %, FUNDUS-Umsatz circa 9 % bei EBITDA circa -1 % und mit Steuerung bis +4 %. Bot T muss ohne Schließungen und Insolvenz bestehen, Bot D ebenso. M7-Ergebnisse, Exporte, Grafikprüfungen und wirtschaftliche Quoten sind noch nicht gemessen. Testergebnisse vor Merge nachtragen.
