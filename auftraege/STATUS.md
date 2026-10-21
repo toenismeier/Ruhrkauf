@@ -23,7 +23,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q05 Eigenmarken und Delegation je Aufgabe | – | gemergt (#42) | – |
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | main | **gemergt 21.10.** (b5534a0) | Abnahme `nachbesserung-massstab.md` Abschnitt 20; Premium klar über Schnitt (E28) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | main | **gemergt 21.10.** (bf215bc) | – |
-| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | `feat/engine-formate` | **startet 21.10.** | Auftrag mit Stand 21.10. (TK-Maxx-Prinzip, Referenz-GuV, Bot T/D) |
+| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | main | **gemergt 21.10.** (#50, 74a5704) | Mittel, 52 Wochen: Volkskauf −2,7 bis −3,6 %, FUNDUS −1,0 bis −1,5 % EBITDA (Claude nachkalibriert); FUNDUS-Zukauf und Altwarefluss folgen der offenen Fläche; Umsatzanteile (je rund 7 % statt 11/9 %) folgen in Maßstab Phase 3. Offen: M7-Kriterium „Bot D ≥ Bot T“ scheitert schon auf main (Bot D mittel 3,39 % vs. Bot T 4,11 %), Bot D wird als nächster Schritt nachgezogen |
 | Q09 Schnee (schwebende Platten) | – | **gemergt 21.10.** (#54, 390b69d) | Schnee liegt auf echten Dachflächen, je Dachebene eingerückt (Claude-Fix: kein Kreuzmuster auf Satteldächern); Winter-Dreiecke unter main, Draw Calls gleich; Fingerabdrücke 112/112 unverändert |
 | Q10 Kamera bleibt über Haus | – | **gemergt 21.10.** (#53, 7af4959) | Hausdetail lässt oben Kartenstreifen frei (62 dvh), Kamera bleibt am Haus bei Kachelnachladen, Woche, Scroll, Resize; Mobil-Smoke Berlin 3 Häuser ≤ 40 px; Fingerabdrücke 112/112 unverändert |
 | Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | `feat/q11-eigenmarken-sortiment` | **startet 21.10.** | `auftraege/wurf2/` |
@@ -73,5 +73,5 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 4. ~~O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47)~~ gemergt 21.10.
 5. ~~#7 Maßstab Engine~~ gemergt 21.10. #23 Oberfläche gemergt 21.10., Q07 gestartet. Neu: fünf Premiumhäuser (E29, eigener Auftrag).
 5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
-6. Engine-Formate jetzt startklar.
+6. ~~Engine-Formate~~ gemergt 21.10. (#50); danach Bot D (Schließungslogik) nachziehen.
 7. Danach Build-Zug: Spiel einpacken, Update aufs iPhone, Messung.
