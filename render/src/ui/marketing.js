@@ -288,6 +288,20 @@ export function marketingModul(ctx) {
     if (a === 'planMechanik') { ui.planen.mechanik = el.value; zeigen(true); }
   }
   const inhalt = document.getElementById('pinhalt');
+  // Stadtwechsel per horizontaler Wischgeste auf dem Marktanteilsring.
+  let ringStart = null;
+  inhalt.addEventListener('pointerdown', (ev) => {
+    ringStart = ui.aktiv && ui.seite === 'stadt' && ev.target.closest('.mk-ringwrap') ? { x: ev.clientX, y: ev.clientY } : null;
+  }, { passive: true });
+  inhalt.addEventListener('pointerup', (ev) => {
+    if (!ringStart) return;
+    const dx = ev.clientX - ringStart.x, dy = ev.clientY - ringStart.y;
+    ringStart = null;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+      const d = ortDaten(E, s, ui);
+      if (d.auswahl.length > 1) { ui.stadt = d.auswahl[(d.index + (dx < 0 ? 1 : -1) + d.auswahl.length) % d.auswahl.length].stadt; zeigen(true); }
+    }
+  }, { passive: true });
   inhalt.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (!el || el.disabled || el.tagName === 'SELECT') return; klick(el); });
   inhalt.addEventListener('input', (ev) => {
     if (!ui.aktiv) return;
