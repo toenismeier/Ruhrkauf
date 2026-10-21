@@ -65,3 +65,6 @@
   .q15-stimmen { grid-template-columns:1fr; }
   .q15-hinweis { flex-wrap:wrap; }
 }
+
+.q15-navgebaeude { margin-bottom:12px; }
+.q15-navtitel { color:var(--q15-muted); font-size:12px; line-height:16px; font-weight:700; padding-top:8px; overflow-wrap:anywhere; }
