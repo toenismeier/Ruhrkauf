@@ -391,7 +391,11 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
     maxH = Math.max(maxH, h);
   }
   // Bauten im Stadtrandgürtel (Burg am Berg, plan.aussen.bauten)
-  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) { const e = bauerFuer(bauer, q.typ)(S, scene, q) ?? {}; hoehen.set(q.id, e.hoehe ?? 12); }
+  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) {
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, q, () => bauerFuer(bauer, q.typ)(S, scene, q));
+    hoehen.set(q.id, ergebnis?.hoehe ?? 12);
+    dachFlaechen.push(...dach);
+  }
   // Flächen, die ihren Boden erst nach den Slots bauen (Aussparungen unter abgesenktem Slot-Wasser)
   for (const b of plan.bloecke) FLAECHEN[b.art]?.nachBau?.(ctx, b, ctx.slotWasser?.get(b.id) ?? [], BODEN_HILFE);
   ostVerkehr = false;
@@ -446,7 +450,12 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
     await bildFreigeben();
   }
   // Bauten im Stadtrandgürtel (Burg am Berg, plan.aussen.bauten)
-  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) { const e = bauerFuer(bauer, q.typ)(S, scene, q) ?? {}; hoehen.set(q.id, e.hoehe ?? 12); await bildFreigeben(); }
+  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) {
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, q, () => bauerFuer(bauer, q.typ)(S, scene, q));
+    hoehen.set(q.id, ergebnis?.hoehe ?? 12);
+    dachFlaechen.push(...dach);
+    await bildFreigeben();
+  }
   // Flächen, die ihren Boden erst nach den Slots bauen (Aussparungen unter abgesenktem Slot-Wasser)
   for (const b of plan.bloecke) { FLAECHEN[b.art]?.nachBau?.(ctx, b, ctx.slotWasser?.get(b.id) ?? [], BODEN_HILFE); await bildFreigeben(); }
   ostVerkehr = false;
