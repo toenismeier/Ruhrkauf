@@ -1,6 +1,7 @@
 import type { Hq } from './hq';
 import type { ChronikEintrag, ChronikStand } from './chronik';
 import type { OrganisationsStand } from './organisation';
+import type { MarktbeobachtungStand } from './marktbeobachtung';
 import type { PlanungStand } from './planung';
 import type { BauEtage, UmbauStand } from './umbau';
 import type { Art, Einkauf, WgId } from './einkauf';
@@ -552,6 +553,8 @@ export interface GameState {
   hq: Hq;
   // O01 Organisation (optional für ältere Spielstände).
   organisation?: OrganisationsStand;
+  /** Q06: lokale Marktbeobachtung und archivierte Meldungszahlen. */
+  marktbeobachtung?: MarktbeobachtungStand;
   /** Einkauf: Warengruppen, Steuerung, Freigabe-Eingang, Kennzahlenverlauf. */
   einkauf: Einkauf;
   // O05 Ware

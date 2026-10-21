@@ -8,6 +8,7 @@ import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
 import { zeitungWoche } from './zeitung';
+import { marktbeobachtungWoche } from './marktbeobachtung';
 import { eroeffneInsolvenz, glaeubigerversammlung, lohnSumme, prozesse, quartalsBewertung, setzePlanWoche, zerschlagungDurchMasseunzulaenglichkeit } from './prozesse';
 import { aktualisiereStakeholder } from './stakeholder';
 import type { Format, GameState, GruppeId, HausKpi, WochenKpi } from './types';
@@ -283,6 +284,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // Einmaleffekte, die ab jetzt anfallen (Aktionen des Spielers), zählen zur nächsten Woche
   s.einmalkostenWoche = 0;
   s.einmalErloeseWoche = 0;
+  marktbeobachtungWoche(s); // Q06: Meldungen konsolidieren, bevor der Handelsbote erscheint.
   zeitungWoche(s);
   s.woche += 1;
   chronikAktualisieren(s, w);

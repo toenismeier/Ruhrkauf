@@ -86,3 +86,6 @@ export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from
 export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
 export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';
 export { TEST_EREIGNISSE, type TestAktion, type TestEreignisId } from './testwerkzeuge';
+
+// Q06 Fachbereich Marktbeobachtung.
+export { marktbeobachtungUebersicht, marktbeobachtungKostenWoche, marktbeobachtungWoche, marktbeobachtungStufe, MARKT_FTE, type MarktbeobachtungStand, type MarktbeobachtungWoche } from './marktbeobachtung';

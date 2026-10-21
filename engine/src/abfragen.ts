@@ -2,6 +2,7 @@ import { warenHaus } from './merchandise';
 import { GRUPPEN } from './daten';
 // O01 Organisation: reine Datenprojektion für die Oberfläche.
 export { organisationUebersicht } from './organisation';
+export { marktbeobachtungUebersicht } from './marktbeobachtung';
 import { runwayWochen } from './stakeholder';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
@@ -113,7 +114,7 @@ export function posteingang(s: GameState): Posteingang {
     const konkurrenz = s.wettbewerber.find((w) => m.text.includes(w.name));
     return {
       id: m.id ?? `alt-${m.woche}-${i}`, woche: m.woche, typ: m.typ, text: m.text,
-      kategorie: konkurrenz ? 'Konkurrenz' : m.bezug?.modul === 'it' ? 'IT' : meldungKategorie(m.typ, m.text),
+      kategorie: m.bezug?.modul === 'wettbewerb' || konkurrenz ? 'Konkurrenz' : m.bezug?.modul === 'it' ? 'IT' : meldungKategorie(m.typ, m.text),
       bezug: { ...bezug, ...(m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}), ...(konkurrenz ? { stadt: konkurrenz.stadt, wettbewerberId: konkurrenz.id } : {}) },
     };
   });

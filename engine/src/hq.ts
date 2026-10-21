@@ -10,6 +10,7 @@ import { vorstandFuerGrafik, vorstandKostenWoche, vorstandWirkung } from './vors
 import { produktKostenWoche } from './produkte';
 // O01 Organisation: Differenz der Leitungsgehälter, Start = 0.
 import { organisationLeitungKostenWoche } from './organisation';
+import { marktbeobachtungKostenWoche } from './marktbeobachtung';
 
 // ---------------------------------------------------------------------------------------------
 // Datenmodell (Vertrag)
@@ -374,7 +375,7 @@ export function verteilungsFaktor(s: GameState): number {
   return Math.max(HQ_PARAM.verteilungMin, 1 - HQ_PARAM.verteilungJeStadt * Math.max(0, n - 1));
 }
 
-export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; leitung: number; gesamt: number }
+export interface HqKosten { personal: number; sach: number; reise: number; miete: number; nebenkosten: number; strafen: number; vorstand: number; entwicklung: number; leitung: number; marktbeobachtung: number; gesamt: number }
 
 export function hqKosten(s: GameState): HqKosten {
   const hq = s.hq;
@@ -404,7 +405,8 @@ export function hqKosten(s: GameState): HqKosten {
   const vorstand = vorstandKostenWoche(s);
   const entwicklung = produktKostenWoche(s);
   const leitung = organisationLeitungKostenWoche(s);
-  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, leitung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung + leitung };
+  const marktbeobachtung = marktbeobachtungKostenWoche(s);
+  return { personal, sach, reise, miete, nebenkosten, strafen, vorstand, entwicklung, leitung, marktbeobachtung, gesamt: personal + sach + reise + miete + nebenkosten + strafen + vorstand + entwicklung + leitung + marktbeobachtung };
 }
 
 /** Rechnet wirksame Stufen, Zentralkosten und Controllingstufe neu. Nach jeder HQ-Änderung aufrufen. */
@@ -416,7 +418,7 @@ export function hqAktualisiere(s: GameState): void {
   for (const a of hq.abteilungen) hq.wirkung[a.id] = Math.min(3, wirksameStufe(s, a, v) * vorstandWirkung(s, a.id));
   const k = hqKosten(s);
   s.zentrale.kostenWoche = eur(k.gesamt);
-  s.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0));
+  s.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0) + (s.marktbeobachtung?.fte ?? 0));
   const c = Math.round(hq.wirkung.controlling);
   s.controllingStufe = c <= 0 ? 0 : c === 1 ? 1 : 2;
 }
@@ -897,7 +899,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
     kostenWoche: s.zentrale.kostenWoche,
     kostenStart: s.zentrale.kostenStart,
     standort: standort(s, hq.sitz),
-    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), gesamt: eur(kosten.gesamt) },
+    kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), marktbeobachtung: eur(kosten.marktbeobachtung), gesamt: eur(kosten.gesamt) },
     restmieteWoche: eur(hqRestmieteWoche(s)),
     fte: s.zentrale.fte,
     gebaeude: hq.gebaeude.map((g) => {
