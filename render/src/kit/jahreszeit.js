@@ -152,28 +152,37 @@ function sommerLeben(S, plan) {
   }
 }
 
-function schneeDaten(plan, hoehen) {
-  const haeuser = [];
-  for (const p of plan.parzellen ?? []) {
-    if (p.leer || !(['stadthaus', 'eck', 'hofhaus'].includes(p.typ) || p.typ?.startsWith('slot:'))) continue;
-    const h = hoehen?.get(p.id);
-    if (!Number.isFinite(h) || h < 4 || p.w < 6 || p.d < 6) continue;
-    // Keine vollständigen weißen Blockflächen, sondern dünner Belag auf den Dachflächen.
-    haeuser.push({ x: p.x + p.w / 2, y: h + .055, z: p.z + p.d / 2, w: p.w - .8, d: p.d - .8 });
+/**
+ * Q09: Keine horizontalen Schneetafeln mehr. Jede weiße Fläche ist ein echtes
+ * Dach-Dreieck aus stadt.js, um maximal 0,065 m entlang seiner Normale versetzt.
+ * Der reduzierte Ausschnitt lässt Dachfenster, Technik und Dachschrift sichtbar.
+ * Ein gemeinsames Mesh für die ganze Stadt begrenzt die Draw Calls.
+ */
+function schneeMesh(dachFlaechen, material) {
+  const punkte = [];
+  for (const ecken of dachFlaechen ?? []) {
+    if (!Array.isArray(ecken) || ecken.length !== 3) continue;
+    const [a, b, c] = ecken;
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+    const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const norm = Math.hypot(nx, ny, nz);
+    if (!Number.isFinite(norm) || norm < 1e-6 || ny <= 0) continue;
+    const cx = (a[0] + b[0] + c[0]) / 3;
+    const cy = (a[1] + b[1] + c[1]) / 3;
+    const cz = (a[2] + b[2] + c[2]) / 3;
+    // Knapp die Hälfte der Dachfläche, direkt auf derselben Dachneigung.
+    for (const v of ecken) punkte.push(
+      cx + (v[0] - cx) * .68 + nx / norm * .065,
+      cy + (v[1] - cy) * .68 + ny / norm * .065,
+      cz + (v[2] - cz) * .68 + nz / norm * .065
+    );
   }
-  return haeuser;
-}
-function schneeMesh(plan, hoehen) {
-  const dach = schneeDaten(plan, hoehen);
-  const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, .09, 1),
-    new THREE.MeshLambertMaterial({ color: '#f3f5f3', depthWrite: true }), dach.length || 1);
-  mesh.count = dach.length;
-  const matrix = new THREE.Matrix4(), pos = new THREE.Vector3(), scl = new THREE.Vector3(), rot = new THREE.Quaternion();
-  dach.forEach((p, i) => {
-    matrix.compose(pos.set(p.x, p.y, p.z), rot, scl.set(p.w, 1, p.d));
-    mesh.setMatrixAt(i, matrix);
-  });
-  mesh.instanceMatrix.needsUpdate = true;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(punkte, 3));
+  if (punkte.length) geo.computeVertexNormals();
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.name = 'Schnee auf Dachflächen';
   mesh.castShadow = false;
   mesh.receiveShadow = true;
   return mesh;
@@ -200,7 +209,7 @@ function regenOverlay(S, plan) {
   }
 }
 
-export function jahreszeitenStadt(scene, plan, hoehen, spielstand, aktiv = JAHRESZEITEN_AN) {
+export function jahreszeitenStadt(scene, plan, hoehen, spielstand, aktiv = JAHRESZEITEN_AN, dachFlaechen = []) {
   // Die Instanzen sind im Grundgerüst bereits vollständig gebaut; sie werden nie erneut instanziiert.
   const { baeume, figuren } = maschen(scene);
   const wurzel = new THREE.Group(); wurzel.name = 'Jahreszeiten';
@@ -214,7 +223,20 @@ export function jahreszeitenStadt(scene, plan, hoehen, spielstand, aktiv = JAHRE
   bauen(fest, (S) => festSchmuck(S, plan));
   bauen(sommer, (S) => sommerLeben(S, plan));
   bauen(schnee, (S) => randSchnee(S, plan));
-  schnee.add(schneeMesh(plan, hoehen));
+  const dachMaterial = new THREE.MeshLambertMaterial({ color: '#ebefec', side: THREE.DoubleSide, depthWrite: true });
+  const kachelDaecher = new Map();
+  let dachMesh = schneeMesh(dachFlaechen, dachMaterial);
+  schnee.add(dachMesh);
+  const setzeDachKacheln = (eintraege) => {
+    for (const [id, flaechen] of eintraege) {
+      if (flaechen?.length) kachelDaecher.set(id, flaechen);
+      else kachelDaecher.delete(id);
+    }
+    schnee.remove(dachMesh);
+    dachMesh.geometry.dispose();
+    dachMesh = schneeMesh([...dachFlaechen, ...[...kachelDaecher.values()].flat()], dachMaterial);
+    schnee.add(dachMesh);
+  };
   bauen(regen, (S) => regenOverlay(S, plan));
   const geo = zweigGeometrie(), mat = new THREE.MeshLambertMaterial({ color: '#806b50' });
   const matrix = new THREE.Matrix4();
@@ -270,10 +292,12 @@ export function jahreszeitenStadt(scene, plan, hoehen, spielstand, aktiv = JAHRE
   return {
     aktualisiere: setze,
     abschalten: () => setze(spielstand, false),
+    registriereDachflaechen: (id, flaechen) => setzeDachKacheln([[id, flaechen]]),
+    registriereDachflaechenMehrfach: (eintraege) => setzeDachKacheln(eintraege),
     aufraeumen() {
       wurzel.parent?.remove(wurzel);
       wurzel.traverse((m) => { if (m.geometry && m.geometry !== geo) m.geometry.dispose(); });
-      geo.dispose(); mat.dispose();
+      geo.dispose(); mat.dispose(); dachMaterial.dispose();
     },
   };
 }
