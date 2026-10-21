@@ -475,7 +475,11 @@ async function buendeln() {
       const s = window.spiel.s, E = window.spiel.E, K = E.produktKatalog(s), u = window.spiel.produkte.ui;
       const M = E.produkte(s).marken.find((m) => m.marke === u.marke);
       const freie = new Set(M.kategorien.filter((k) => k.belegt < k.kapazitaet).map((k) => k.id));
-      const t = K.typen.find((t) => freie.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15 && t.typ !== u.neu.typ);
+      const kandidaten = K.typen.filter((t) => freie.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15);
+      const t = kandidaten.find((t) => {
+        const e = { ...u.neu, marke: M.marke, typ: t.typ, material: t.materialien[0], zielgruppe: 'bestager' };
+        return E.produktVorschau(s, e).ok;
+      }) ?? kandidaten[0];
       const ast = K.baum.flatMap((k) => k.unterkategorien.map((a) => ({ k: k.id, a: a.id, typen: a.typen }))).find((x) => x.typen.includes(t?.typ));
       return ast ? { kategorie: ast.k, unterkategorie: ast.a, typ: t.typ } : null;
     });
