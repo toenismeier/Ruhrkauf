@@ -714,9 +714,9 @@ function cockpitZeigen() {
   $('cockpit').innerHTML = [
     kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
     kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
-    kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    fx ? kachel('Umsatz Woche ' + auswahl, s.historie.length ? geld(fx.umsatz) + ' · EBITDA ' + geld(fx.ebitda) : 'noch offen', s.historie.length && fx.ebitda < 0 ? 'rot' : '')
-      : kachel('Umsatz Woche ' + auswahl, s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
+    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
+      : kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
+    kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');

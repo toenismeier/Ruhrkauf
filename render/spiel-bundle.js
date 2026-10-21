@@ -129964,7 +129964,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "2c5d5f3" : "Entwicklung";
+  var version = () => true ? "3f51d57" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -138852,8 +138852,8 @@
     $2("cockpit").innerHTML = [
       kachel2("Cash", geld(c.cash), c.cash < 0 ? "rot" : ""),
       kachel2("Kreditrahmen frei", geld(c.kreditFrei), c.kreditFrei < 2e7 ? "rot" : ""),
-      kachel2("EBITDA 13 Wochen", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
-      fx ? kachel2("Umsatz Woche " + auswahl4, s.historie.length ? geld(fx.umsatz) + " \xB7 EBITDA " + geld(fx.ebitda) : "noch offen", s.historie.length && fx.ebitda < 0 ? "rot" : "") : kachel2("Umsatz Woche " + auswahl4, s.historie.length ? geld(c.umsatzWoche) : "noch offen"),
+      fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wochen", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
+      kachel2("Umsatz \xB7 " + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen"),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
