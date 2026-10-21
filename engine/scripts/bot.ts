@@ -173,6 +173,8 @@ export function botTurnaround(s: GameState, log = false): void {
     for (const programm of Object.keys(FILIAL_PROGRAMME) as FilialProgrammId[]) {
       tu({ typ: 'filialProgramm', programm });
     }
+    // Bot T saniert ohne Schließungen und nutzt den echten FUNDUS-Warenfluss.
+    tu({ typ: 'altwareOutlet', quote: 0.8 });
     tu({ typ: 'wgServicegrad', wg: 'alle', ziel: 0.98 });
     tu({ typ: 'wgLimit', wg: 'alle', faktor: 1.00 });
   }

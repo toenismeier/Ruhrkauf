@@ -624,6 +624,7 @@ function cockpitZeigen() {
     kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
     kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
     kachel('Umsatz Woche', s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
+    ...c.formate.filter(x=>x.haeuser).map(x=>kachel(({warenhaus:'Hartwig',sport:'Sport',schwester:'Volkskauf',outlet:'FUNDUS'})[x.format]+' · Häuser / Umsatz / EBITDA',x.haeuser+' · '+geld(x.umsatz)+' · '+geld(x.ebitda),x.ebitda<0?'rot':'')),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
@@ -753,6 +754,11 @@ window.premiumTun = (was, id) => {
   meldung(r.text, r.ok);
   if (r.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
 };
+window.formateTun=(typ,wert)=>{
+  const aktion=typ==='schwesterUmflaggen'?{typ,haus:wert}:typ==='altwareOutlet'?{typ,quote:Number(wert)/100}:typ==='offpriceZukauf'?{typ,budget:Math.round(Number(wert))}:{typ:'outletEroeffnen',stadt:wert};
+  const r=E.fuehreAus(s,aktion);meldung(r.text,r.ok);
+  if(r.ok){grafikNachziehen();nachAktion();if(offenesHaus)oeffneHaus(offenesHaus);}
+};
 window.filialProgramm = (programm) => {
   const r = E.fuehreAus(s, { typ: 'filialProgramm', programm });
   meldung(r.text, r.ok);
@@ -792,6 +798,17 @@ function oeffneHaus(id) {
   html += hausTreiberZeile(E, s, id);
   // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
   html += um?.hausKarte(id) ?? '';
+  if(h.format==='schwester'){
+    const f=E.schwesterUebersicht(s);
+    html += '<div class="karte"><div class="khead">Volkskauf · Regionalführung</div><div class="raster">'+zahl('Häuser',fmt.format(f.haeuser))+zahl('EBITDA',geld(f.ebitda))+zahl('Umbauten',fmt.format(f.umbauten))+'</div>';
+    if(h.status==='offen')html += '<button class="mini" onclick="formateTun(\'schwesterUmflaggen\',\''+id+'\')">Zu Hartwig umflaggen</button>';
+    html+='</div>';
+  }
+  if(h.format==='outlet'){
+    const f=E.outletUebersicht(s);
+    html += '<div class="karte"><div class="khead">FUNDUS · Off-Price-Markenposten</div><div class="raster">'+zahl('Bestand EK',geld(f.poolWert))+zahl('Markenposten',geld(f.markenposten))+zahl('Konzern-Altware',geld(f.altware))+zahl('Reichweite',f.reichweite.toFixed(1).replace('.',',')+' Wo.')+'</div>';
+    html += '<button class="mini" onclick="formateTun(\'altwareOutlet\',80)">Altwarequote 80 %</button></div>';
+  }
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -1172,8 +1189,8 @@ reise = reiseModul({
   staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
     const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
-    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', zahl('schwester')], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', zahl('outlet')]];
-    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length + zahl('schwester') + zahl('outlet'), umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', hs.filter((h) => h.format === 'schwester').length], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', hs.filter((h) => h.format === 'outlet').length]];
+    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
       formate: formate.filter((p) => p[1]).map(([name, anzahl]) => ({ name, anzahl })) };
   }),
   pinPunkt: bahnhofBildpunkt,

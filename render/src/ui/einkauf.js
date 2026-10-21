@@ -53,6 +53,14 @@ export function einkaufModul(ctx) {
     const u = q.uebersicht(s(), { format: ui.format }), g = u.summe.kennzahlen, ga = u.summe.ampeln;
     let h = tabs();
     h += seg('format', ui.format, [['warenhaus', 'Hartwig'], ['sport', 'Hartwig Sport']]);
+    const o=ctx.E.outletUebersicht(s());
+    h += '<div class="karte"><div class="khead">Altware ins Outlet · FUNDUS</div><div class="raster">'+
+      zahl('Poolbestand EK',geld(o.poolWert),'format:poolWert')+
+      zahl('Reichweite',dez(o.reichweite,1)+' Wo.','format:reichweite')+
+      zahl('Abschriften',geld(o.abschriften),'format:abschriften')+
+      zahl('Markenposten',geld(o.markenposten),'format:markenposten')+'</div>'+
+      '<label>Altwarequote <input type="range" data-a="formatQuote" min="0" max="100" step="5" value="'+Math.round(o.altwareQuote*100)+'"></label>'+
+      '<label>Markenposten-Zukauf pro Woche (€) <input type="number" data-a="formatBudget" min="0" step="100000" value="'+o.zukaufBudget+'"></label></div>';
     h += `<div class="raster">${zahl('Umsatz letzte Woche', geld(g.umsatzWoche), 'g:umsatzWoche')}${zahl('Rohertragsquote 13 Wochen', pz(g.rohertragsquote, 1), 'g:rohertragsquote', '', ga.rohertragsquote)}${zahl('Bestand EK', geld(g.bestandEk), 'g:bestandEk')}${zahl('Limit frei', geld(g.limitFrei), 'g:limitFrei', g.limitFrei < 0 ? 'rot' : '', ga.limitFrei)}</div>`;
     const spalten = [...q.spalten()].sort((a, b) => b.standard - a.standard);
     h += `<div class="spaltenwahl"><span>Spalten</span>${spalten.map((c) => { const i = ui.spalten.indexOf(c.id); return `<button class="chipk ${i >= 0 ? 'an' : ''}" data-a="spalte" data-v="${c.id}">${i >= 0 ? `<b>${i + 1}</b>` : ''}${c.name}</button>`; }).join('')}</div>`;
@@ -216,6 +224,8 @@ export function einkaufModul(ctx) {
     // O05 Ware
     if (a.startsWith('ware')) { (ui.ware ??= {})[({ wareVon:'von', wareNach:'nach', wareGruppe:'gruppe', wareWert:'wert' })[a]] = a === 'wareWert' ? Number(el.value) : el.value; return; }
     if (a === 'filterBereich') { ui.filter.bereich = el.value; zeigen(true); return; }
+    if(a==='formatQuote'){tun({typ:'altwareOutlet',quote:Number(el.value)/100});return;}
+    if(a==='formatBudget'){tun({typ:'offpriceZukauf',budget:Math.round(Number(el.value))});return;}
     if (a === 'regel' && el.type === 'range') {
       const f = el.dataset.f, x = Number(el.value) / 100;
       if (f.startsWith('em:')) tun({ typ: 'eigenmarkeAnteil', marke: f.slice(3), wg: ui.wg, anteil: x });
@@ -248,6 +258,10 @@ export function einkaufModul(ctx) {
     const ex = new Map(DETAIL_EXTRA.map(([id, , f]) => [id, f]));
     const soll = (p) => {
       const t = p.split(':');
+      if(t[0]==='format'){
+        const x=ctx.E.outletUebersicht(s());
+        return t[1]==='reichweite'?dez(x.reichweite,1)+' Wo.':geld(x[t[1]]);
+      }
       if (t[0] === 'g') return text(t[1], u.summe.kennzahlen);
       if (t[0] === 'b') return text(t[2], bs.get(t[1]).kennzahlen);
       if (t[0] === 'w') return text(t[2], ws.get(t[1]).kennzahlen);
