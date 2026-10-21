@@ -321,7 +321,7 @@ export const EK_PARAM = {
     spaet: { ab: 12, frisch: 0.008, alt: 0.022, spaet: 0.04, cap: 0.2, nachfrage: 0.98 },
   } as Record<Reduzierung, { ab: number; frisch: number; alt: number; spaet: number; cap: number; nachfrage: number }>,
   optimismus: [0.14, 0.07, 0.035, 0.015] as const, // Mehrmenge der Saisondisposition nach Einkauf-Stufe 0..3 (Planoptimismus der Einkäufer)
-  abschriftK: 0.457, // Kalibrierfaktor auf alle Abschriftsätze
+  abschriftK: 0.395, // M7: realistische Abschriften auf Altware ohne überhöhte Dauerbelastung
   praesentation: 12, // Wochen Saisonbestand, ab denen das Sortiment voll verkauft (Größen, Farben, Fläche)
   saisonCover: 14, // Zielreichweite der Nachorder in Wochen
   altSaison: 16,
@@ -470,6 +470,8 @@ export function initialisiereEinkauf(s: GameState): void {
   const x: Record<WgId, number> = {};
   const poolSum: Record<WgId, Record<string, number>> = {};
   for (const h of s.haeuser) {
+    // Schwester- und FUNDUS-Häuser sind nur Stammdaten und nicht Teil der Einkaufsbasis.
+    if (h.nurDaten) continue;
     for (const [g, P] of Object.entries(h.potenzial) as [GruppeId, number][]) {
       const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === 'eigen').reduce((a, b) => a + b.qm, 0);
       if (qm <= 0) continue;
