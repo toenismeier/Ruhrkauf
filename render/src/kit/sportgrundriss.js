@@ -254,7 +254,7 @@ export function sportEtage(S, scene, haus, etageNr, o = {}) {
   const eg = etageNr === 0;
   const aussen = eg ? (ra.mall ? 9.5 : ra.box ? 19 : 7) : ra.mall ? 9.5 : 0.4;
   const box = new THREE.Box3(new THREE.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new THREE.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH + (ra.hochpunkt ?? 0), az1 + aussen));
-  return { box, breite: B, tiefe: T, zonen: plan?.abteilungen ?? zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan };
+  return { box, breite: B, tiefe: T, zonen: plan?.abteilungen ?? zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan, navigation: kk.navigation };
 }
 
 function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
@@ -388,6 +388,7 @@ function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
     if (um.some((t) => ohne.has(t))) continue;
     if (belegt.some((b) => x > b[0] - 0.45 && x < b[2] + 0.45 && z > b[1] - 0.45 && z < b[3] + 0.45)) continue;
     stuetze(S, x, z, 0, WH, stil.stuetze);
+    belegt.push([x - 0.35, z - 0.35, x + 0.35, z + 0.35]);
   }
 
   // ---- Rückwände und Firmenschild
@@ -437,6 +438,8 @@ function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
     lf = quadrat();
   }
   k.leer = lf;
+  // Sportplan plus Sonderzonen, Säulen und Infrastruktur der sichtbaren Etage.
+  k.navigation = { hindernisse: belegt.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 })) };
 
   // ---- Kundschaft
   const n = Math.min(k.kunden, frei.length);
