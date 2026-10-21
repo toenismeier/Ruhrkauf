@@ -666,6 +666,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereWare(s);
   // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
   initialisiereFormate(s);
+  // Q07: Vorjahr auch für die jetzt aktiven Volkskauf- und FUNDUS-Häuser.
+  erzeugeVorjahrHistorie(s, true);
   // Volkskauf/FUNDUS sind jetzt aktiv: Erreichbarkeit der Zentrale auf das ganze Netz
   // neu beziehen (Startwirkung bleibt exakt 1), Zentralkosten neu rechnen.
   s.hq.reiseBasis = reiseIndex(s, s.hq.sitz);

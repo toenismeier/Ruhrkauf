@@ -1,5 +1,5 @@
 // Q07: deterministischer Vorjahresvorlauf und Vertriebssteuerung. Reine Abfragen, keine Spielaktionen.
-import { GRUPPEN } from './daten';
+import { GRUPPEN, saisonFaktor } from './daten';
 import { planWoche } from './planung';
 import type { GameState, Haus, Region, GruppeId } from './types';
 import { eur } from './util';
@@ -66,31 +66,44 @@ export interface VertriebsUebersicht {
  * aus dem Spielstand. Weder Buchungslogik noch Liquidität werden fortgeschrieben.
  * Dies sind simulierte Vergleichswerte vor dem Amtsantritt, keine späteren IST-Werte.
  */
-export function erzeugeVorjahrHistorie(s: GameState): void {
+export function erzeugeVorjahrHistorie(s: GameState, nurFehlende = false): void {
   const start = s.spielStartWoche ?? 0;
   const vorherRng = s.rng;
-  const historien: Record<string, VorjahrWoche[]> = {};
+  const historien: Record<string, VorjahrWoche[]> = nurFehlende ? { ...(s.vorjahrHistorie ?? {}) } : {};
   const simulation: GameState = { ...s, prognose: true, rng: vorherRng };
   for (const h of s.haeuser) {
+    if (nurFehlende && historien[h.id]?.length) continue;
     const wochen: VorjahrWoche[] = [];
     if (h.nurDaten || h.status === 'verkauft') { historien[h.id] = wochen; continue; }
     const qm = h.flaechen.filter((f) => f.konzept === 'eigen' || f.konzept === 'kommission' || f.konzept === 'offprice').reduce((v, f) => v + f.qm, 0);
+    // Leistung: simuliereHaus nur an vier Stützwochen (je Quartal), dazwischen je
+    // Warengruppe über den Saisonfaktor skaliert. Spart rund 90 % der Startzeit.
+    const stuetzen = [6, 19, 32, 45].map((i) => {
+      simulation.woche = start - 52 + i + 52;
+      return { i, roh: simuliereHaus(simulation, h) };
+    });
     for (let i = 0; i < 52; i++) {
       const woche = start - 52 + i;
       // +52: gleiches Saisonprofil wie in der Folgesaison, niemals negative Laufzeiten.
       simulation.woche = woche + 52;
-      const roh = simuliereHaus(simulation, h);
-      let umsatz = roh.offprice, rohertrag = roh.offprice * 0.30;
-      let eigen = roh.offprice;
-      let artikel = roh.offprice / 24;
+      const st = stuetzen.reduce((a, b) => Math.abs(b.i - i) < Math.abs(a.i - i) ? b : a);
+      const roh = st.roh, wSt = start - 52 + st.i + 52;
+      const f = (g: GruppeId) => saisonFaktor(g, woche + 52) / Math.max(1e-6, saisonFaktor(g, wSt));
+      let eigenSt = 0, eigenJetzt = 0;
+      let umsatz = 0, rohertrag = 0, eigen = 0, artikel = 0;
       for (const [g, v] of Object.entries(roh.eigen) as [GruppeId, { umsatz: number }][]) {
-        umsatz += v.umsatz; eigen += v.umsatz;
-        rohertrag += v.umsatz * GRUPPEN[g].marge;
-        artikel += v.umsatz / 40;
+        const u = v.umsatz * f(g);
+        eigenSt += v.umsatz; eigenJetzt += u;
+        umsatz += u; eigen += u;
+        rohertrag += u * GRUPPEN[g].marge;
+        artikel += u / 40;
       }
+      const off = roh.offprice * (eigenSt > 0 ? eigenJetzt / eigenSt : 1);
+      umsatz += off; eigen += off; rohertrag += off * 0.30; artikel += off / 24;
       for (const [g, wert] of Object.entries(roh.kommission) as [GruppeId, number][]) {
-        umsatz += wert; rohertrag += wert * 0.25;
-        artikel += wert / 40;
+        const u = wert * f(g);
+        umsatz += u; rohertrag += u * 0.25;
+        artikel += u / 40;
       }
       const kosten = hausKosten(simulation, h, eigen, umsatz);
       const konzession = roh.konzessionUmsatz * 0.17;

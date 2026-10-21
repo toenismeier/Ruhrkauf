@@ -12,8 +12,8 @@ describe('Maßstab-Oberfläche: Engine als einzige Kennzahlen- und Aktionsquelle
     const formate = formatCockpit(s);
     expect(formate.map((f) => f.anzahl)).toEqual([360, 4, 44, 86, 66]);
     expect(formate.reduce((sum, f) => sum + f.anzahl, 0)).toBe(560);
-    expect(hs.filter((h) => h.steuerbar)).toHaveLength(408);
-    expect(hs.filter((h) => !h.steuerbar && h.ampel === 'ohne')).toHaveLength(152);
+    // Seit engine-formate sind auch Volkskauf und FUNDUS wirtschaftlich aktiv.
+    expect(hs.filter((h) => h.steuerbar)).toHaveLength(560);
     for (const h of hs) {
       expect(h.stadt).toBeTruthy();
       expect(h.substanz).toBeGreaterThanOrEqual(0);
@@ -56,7 +56,9 @@ describe('Maßstab-Oberfläche: Engine als einzige Kennzahlen- und Aktionsquelle
 
   test('Nicht simulierte Häuser können nicht per Sammelschließung gesteuert werden', () => {
     const s = neueWelt(1);
-    const id = s.haeuser.find((h) => h.nurDaten)!.id;
+    // Reine Datenhäuser gibt es im Standard nicht mehr; Regel an einem markierten Haus prüfen.
+    s.haeuser[0].nurDaten = true;
+    const id = s.haeuser[0].id;
     const vorher = structuredClone(s.haeuser.find((h) => h.id === id));
     expect(fuehreAus(s, { typ: 'schliessen', haeuser: [id] }).ok).toBe(false);
     expect(s.haeuser.find((h) => h.id === id)).toEqual(vorher);
