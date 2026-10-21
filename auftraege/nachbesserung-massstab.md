@@ -219,3 +219,14 @@ Abweichungen:
 - Saisonverlauf: Filial-EBITDA fällt von −2,2 % (KW 10–12) auf rund −4,8 % (KW 17) und weiter, weil Personal und Miete bei sinkendem Umsatz fix bleiben. Personal muss stärker mit dem Umsatz atmen (Einsatzplanung O04, Aushilfen, Stundenkonten), wie in der Realität.
 - Q1-Quoten: Januar/Februar leicht −4,73 %, mittel −5,74 %, schwer −7,50 % (Ziel −3/−4/−6 %); auf leicht und mittel je eine Insolvenz im ersten Jahr ohne Eingriffe.
 Nächster Schritt: übrige Erträge auf 2,3 % (Konzessionäre/Untervermietung, Werbekostenzuschüsse, Dienstleistungserlöse; O07 Konzessionäre nutzen), übrige Aufwendungen auf 0,4 %, Personal saisonal atmend. Danach erneut messen; Ziel bleibt Abschnitt 14/17 (Bot T mittel Seeds 1–3).
+
+## 19. Messung `91b4489` (Claude, 21.10.2026 mittags) – Durchbruch
+Typecheck grün. Filial-GuV KW 1 (mittel): übrige Erträge 2,32 %, übrige Aufwendungen −0,40 %, **Filial-EBITDA −1,55 %** (Referenz −1,2 %), Q1-Wochen danach −1,0 bis −0,1 %.
+Q1 ohne Eingriffe: leicht −2,59 %, mittel −3,58 %, schwer −5,31 % – alle im Ziel.
+**Bot T (ohne Schließung, ohne Insolvenz) besteht:** leicht 3/3 (EBITDA letzte 52 Wochen +4,04 bis +4,29 %), mittel 3/3 (+3,02 bis +3,43 %), schwer 2/3 (+1,32/+1,33 %; Seed 3 nach 41 Wochen zerschlagen – zulässig).
+Noch offen:
+1. Ohne Eingriffe auf mittel eine Insolvenz im ersten Jahr (Vorgabe: keine auf leicht und mittel).
+2. Bot D (mit Schließungen) mittel Seeds 2 und 3 und schwer: je eine Insolvenz bzw. Zerschlagung. Bot D soll mindestens wie Bot T bestehen; Schließungen dürfen nicht in die Insolvenz führen (Schließungskosten/Sozialplan über Liquidität prüfen).
+3. Bot C (Insolvenz als letzte Option) wird auf mittel nach 23 Wochen zerschlagen; Vorgabe: nicht vor Woche 104.
+4. Jest-Gesamtlauf steht aus (läuft per CI beim nächsten Stand).
+Bot T bleibt die Referenz; seine Ergebnisse dürfen sich bei den Punkten 1 bis 3 nicht verschlechtern.
